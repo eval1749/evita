@@ -12,6 +12,7 @@ if not %ERRORLEVEL% == 0 (
 : Download modules
 set git_url=https://chromium.googlesource.com
 
+cmd /c git submodule add %git_url%/chromium/deps/cygwin.git third_party/cygwin
 cmd /c git submodule add %git_url%/chromium/tools/deps2git.git  tools/deps2git
 cmd /c git submodule add %git_url%/chromium/testing/gtest  testing/gtest
 cmd /c git submodule add %git_url%/external/gyp tools/gyp

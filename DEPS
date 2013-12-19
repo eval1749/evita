@@ -6,6 +6,9 @@ vars = {
 }
 
 deps = {
+  "src/third_party/cygwin":
+      "/trunk/deps/third_party/cygwin@231940",
+
   "src/tools/deps2git":
     "/trunk/tools/deps2git@236839",
 
@@ -21,3 +24,11 @@ deps = {
   "src/third_party/v8":
     (Var("googlecode_url") % "v8") + "/trunk@" + Var("v8_revision"),
 }
+
+
+hooks = [
+  {
+    'pattern': '.',
+    'action': ['cmd.exe', '/C', 'src\build\setup_ninja.cmd']
+  },
+]

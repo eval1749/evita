@@ -13,3 +13,6 @@
 [submodule "testing/gtest"]
 	path = testing/gtest
 	url = https://chromium.googlesource.com/chromium/testing/gtest
+[submodule "third_party/cygwin"]
+	path = third_party/cygwin
+	url = https://chromium.googlesource.com/chromium/deps/cygwin.git

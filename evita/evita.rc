@@ -1,0 +1,192 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+#include "../../build.h"
+#include "./version.h"
+#include "../../platform/win/VerEXE.rc"
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""winres.h""\r\n"
+    "#include ""../../build.h""\r\n"
+    "#include ""./version.h""\r\n"
+    "#include ""../../platform/win/VerEXE.rc""\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+32512                   ICON                    "res/evcl.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_HSPLIT              CURSOR                  "res/hsplit.cur"
+IDC_VSPLIT              CURSOR                  "res/vsplit.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_FIND DIALOGEX 0, 0, 262, 140
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Find and Replace"
+FONT 8, "MS Shell Dlg 2", 0, 0, 0x0
+BEGIN
+    LTEXT           "Fi&nd what:",IDC_STATIC,7,7,40,15
+    COMBOBOX        IDC_FIND_WHAT,56,7,139,74,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Re&place with:",IDC_STATIC,7,28,45,11
+    COMBOBOX        IDC_FIND_WITH,56,25,139,74,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Use",IDC_STATIC,5,47,108,49
+    CONTROL         "E&xact match",IDC_FIND_EXACT,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,12,58,95,10
+    CONTROL         "Exact &word match",IDC_FIND_WORD,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,12,70,87,10
+    CONTROL         "Regular &expression",IDC_FIND_REGEX,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,12,82,93,10
+    CONTROL         "Match &case",IDC_FIND_CASE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,98,95,14
+    CONTROL         "Search a&ll open documents",IDC_FIND_ALLDOCS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,126,95,14
+    CONTROL         "Case preseve replace&ment",IDC_FIND_PRESERVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,112,95,14
+    GROUPBOX        "Direction",IDC_FIND_DIRECTION,122,50,71,35
+    CONTROL         "&Up",IDC_FIND_UP,"Button",BS_AUTORADIOBUTTON,133,60,35,11
+    CONTROL         "&Down",IDC_FIND_DOWN,"Button",BS_AUTORADIOBUTTON,133,71,35,12
+    GROUPBOX        "Replace In",IDC_FIND_REPLACE_IN,122,93,71,35
+    CONTROL         "&Selection",IDC_FIND_SELECTION,"Button",BS_AUTORADIOBUTTON,133,102,49,11
+    CONTROL         "Wh&ole file",IDC_FIND_WHOLE_FILE,"Button",BS_AUTORADIOBUTTON,133,113,49,11
+    PUSHBUTTON      "&Find Next",IDC_FIND_NEXT,205,7,50,14
+    PUSHBUTTON      "F&ind Previous",IDC_FIND_PREVIOUS,205,25,50,14
+    PUSHBUTTON      "&Replace",IDC_FIND_REPLACE,205,47,50,14
+    PUSHBUTTON      "Replace &All",IDC_FIND_REPLACE_ALL,205,67,50,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_FIND, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 132
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ASK_REFRESH         "%s\nThis file has been modified outside of the editor.\nDo you want to reload it?"
+    IDS_ASK_RELOAD          "Do you really want to discard the changes you made to and revert to saved %s?"
+    IDS_ASK_SAVE            "Do you want to save the changes to %s?"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_BAD_REGEX           "Bad regex at %d (err=%d)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CAN_NOT_SPLIT       "Can't split window"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_DA_CONTINUE         "Passed the start of the document"
+    IDS_DA_NOT_FOUND        "No word starts with '%s'"
+    IDS_DA_NO_MORE          "No more abbreviation starts with '%s'"
+    IDS_DA_TOO_LONG         "Too long abbreviation"
+    IDS_DA_TOO_SHORT        "Too short abbreviation"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_NOT_COMMAND         "%s is not a command"
+    IDS_NOT_FOUND           "Not found"
+    IDS_NO_MATCHING_PAREN   "No matching parenthesis."
+    IDS_NO_MORE_REDO        "No more redo"
+    IDS_NO_MORE_UNDO        "No more undo"
+    IDS_NO_OTHER_WINDOWS    "No other windows"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PASSED_END          "Passed the end of the document"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_REPLACED            "Replace %d occurences"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_STATUS_BUSY         "Busy"
+    IDS_STATUS_READY        "Ready"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

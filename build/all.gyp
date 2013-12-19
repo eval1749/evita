@@ -8,7 +8,7 @@
       'target_name': 'All',
       'type': 'none',
       'dependencies': [
-        '../evita/evita_console.gyp:*',
+        '../evita/evita.gyp:*',
         #'../third_party/v8/tools/gyp/v8.gyp:*',
       ], # dependencies
     } # ALl

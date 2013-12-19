@@ -1,0 +1,284 @@
+;;;; -*- Mode: Lisp; Package: System; -*-
+;;; Regex Smoke Test
+;;; regex/smoke.retst
+;;;
+;;  Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+;;; Copyright (C) 2007-2008 by Project Vogue. All rights reserved.
+;;;
+;;; @(#)$Id$
+;;;
+;
+(test-case "smoke/0001" "" "" nil '(""))
+(test-case "smoke/0002" "" "a" nil '(""))
+
+(test-case "smoke/0003" "a" "a"     nil '("a"))
+(test-case "smoke/0004" "a" "bcd"   nil nil)
+(test-case "smoke/0006" "a" "--a"   nil '("a"))
+(test-case "smoke/0007" "a" ""      nil nil)
+
+(test-case "smoke/0008" "ab" "ab" nil '("ab"))
+(test-case "smoke/0009" "ab" "--ab--" nil '("ab"))
+(test-case "smoke/0010" "ab" "--ab" nil '("ab"))
+(test-case "smoke/0011" "ab" "" nil nil)
+(test-case "smoke/0012" "ab" "bcd" nil nil)
+
+;;; Character Shorthands
+(test-case "smoke/0021" "\\a" (string (code-char 7)) nil
+    (list (string (code-char 7))) )
+
+(test-case "smoke/0022" "[\\b]" (string (code-char 8)) nil
+    (list (string (code-char 8))) )
+
+(test-case "smoke/0023" "\\e" (string (code-char 27)) nil
+    (list (string (code-char 27))) )
+
+(test-case "smoke/0024" "\\f" (string (code-char 12)) nil
+    (list (string (code-char 12))) )
+
+(test-case "smoke/0025" "\\n" (string (code-char 10)) nil
+    (list (string (code-char 10))) )
+
+(test-case "smoke/0026" "\\r" (string (code-char 13)) nil
+    (list (string (code-char 13))) )
+
+(test-case "smoke/0027" "\\t" (string (code-char 9)) nil
+    (list (string (code-char 9))) )
+
+(test-case "smoke/0028" "\\v" (string (code-char 11)) nil
+    (list (string (code-char 11))) )
+
+(test-case "smoke/0029" "\\075" (string (code-char #o75)) nil
+    (list (string (code-char #o75))) )
+
+(test-case "smoke/0030" "\\u0061" (string (code-char 97)) nil
+    (list (string (code-char 97))) )
+
+(test-case "smoke/0031" "\\cX" (string (code-char 24)) nil
+    (list (string (code-char 24))) )
+
+;;; Anchors and other Zero-Width Tests
+(test-case "smoke/0040" "^"     "abc"   nil '(""))
+(test-case "smoke/0041" "^a"    "abc"   nil '("a"))
+(test-case "smoke/0042" "^a"    "bc"    nil nil)
+
+(test-case "smoke/0043"
+    "^b"
+    (backslash "a\\nbc")
+    '(:multiple-line t)
+    '("b") )
+
+(test-case "smoke/0044"
+    "\\A"
+    (backslash "a\\nbc")
+    '(:multiple-line t)
+    '("") )
+
+(test-case "smoke/0045"
+    "\\Aa"
+    (backslash "a\\nbc")
+    '(:multiple-line t)
+    '("a") )
+
+(test-case "smoke/0045"
+    "\\Ab"
+    (backslash "a\\nbc")
+    '(:multiple-line t)
+    nil )
+
+;; (?-m) $ matches string end and before newline
+(test-case "smoke/0046" "$"    (backslash "")     nil '(""))
+(test-case "smoke/0047" "abc$" (backslash "abc")  nil '("abc"))
+(test-case "smoke/0048" "abc$" (backslash "abcd") nil nil)
+
+(test-case "smoke/0049"
+    "$"
+    (backslash "")
+    '(:multiple-line t)
+    '("") )
+
+(test-case "smoke/0050"
+    "abc$"
+    (backslash "abc")
+    '(:multiple-line t)
+    '("abc") )
+
+;; (?:m) $ matches string end and any newline
+(test-case "smoke/0051" "abc$" (backslash "abc\\n")
+    '(:multiple-line t) '("abc") )
+
+(test-case "smoke/0052" "abc$" (backslash "abcd")
+    '(:multiple-line t) nil )
+
+(test-case "smoke/0053" "abc$" (backslash "abc\\n")
+    '(:multiple-line t) '("abc"))
+
+(test-case "smoke/0055" "abc$" (backslash "abc\\ndef")
+    '(:multiple-line t) '("abc"))
+
+;; \Z matches string end and string-ending newline
+(test-case "smoke/0056" "abc\\Z" (backslash "abc\\n")
+    '(:multiple-line t) '("abc") )
+
+(test-case "smoke/0057" "abc\\Z" (backslash "abcd")
+    '(:multiple-line t) nil )
+
+(test-case "smoke/0058" "abc\\Z" (backslash "abc\\n")
+    '(:multiple-line t) '("abc"))
+
+(test-case "smoke/0059" "abc\\Z" (backslash "abc\\ndef")
+    '(:multiple-line t) nil)
+
+;;; \z matches end of string
+(test-case "smoke/0060" "\\z"    (backslash "abc") nil '(""))
+(test-case "smoke/0061" "abc\\z" (backslash "abc") nil '("abc"))
+(test-case "smoke/0062" "abc\\z" (backslash "abc\n") nil nil)
+
+;;; \G matches end of previous match
+(test-case "smoke/0063" "\\G" (backslash "abc") nil '(""))
+
+;;; \b matches word boundary
+(test-case "smoke/0064" "\\b" "abc" nil '(""))
+(test-case "smoke/0065" "\\babc" "Aabc+abc" nil '("abc"))
+
+;;; \B matches not word boundary
+(test-case "smoke/0066" "\\B" "abc " nil '(""))
+(test-case "smoke/0067" "\\Babc" "Aabc+abc" nil '("abc"))
+
+;;; Comments: (?# ...)
+(test-case "smoke/0068" "(?#comment1)abc(?#comment2)" "abc" nil '("abc"))
+
+
+(test-case "smoke/0070" "\\d" "1" nil '("1"))
+(test-case "smoke/0071" "\\d" "x" nil nil)
+(test-case "smoke/0072" "[\\d]" "1" nil '("1"))
+(test-case "smoke/0073" "[\\d]" "x" nil nil)
+
+(test-case "smoke/0080" "\\D" "1" nil nil)
+(test-case "smoke/0081" "\\D" "x" nil '("x"))
+(test-case "smoke/0082" "[\\D]" "1" nil nil)
+(test-case "smoke/0083" "[\\D]" "x" nil '("x"))
+
+
+;;; Character Class
+(test-case "smoke/0100" "[abc]" "a" nil '("a"))
+(test-case "smoke/0101" "[abc]" "x" nil nil)
+(test-case "smoke/0102" "[^abc]" "a" nil 'nil)
+(test-case "smoke/0103" "[^abc]" "x" nil '("x"))
+(test-case "smoke/0104" "[a-f]" "a" nil '("a"))
+(test-case "smoke/0105" "[a-f]" "x" nil nil)
+(test-case "smoke/0106" "[^a-f]" "a" nil 'nil)
+(test-case "smoke/0107" "[^a-f]" "x" nil '("x"))
+
+;; Corner cases
+(test-case "smoke/0110" "[-]" "-" nil '("-"))
+(test-case "smoke/0111" "[-a]" "a" nil '("a"))
+(test-case "smoke/0112" "[--A]" "=" nil '("="))
+;(test-case "smoke/0113" "[---]" "-" nil '("-"))    regex-invalid-char-class
+(test-case "smoke/0114" "[*-\\-]" "-" nil '("-"))
+
+;; escape characters
+(test-case "smoke/0115" "[\\a\\cH\\e\\f\\n\\r\\t\\v]" "-" nil nil)
+
+(test-case "smoke/0200" "abc*foo" "abccfoo" nil '("abccfoo"))
+(test-case "smoke/0201" "abc*foo" "abcfoo"  nil '("abcfoo"))
+(test-case "smoke/0202" "abc*foo" "abfoo"   nil '("abfoo"))
+
+;;; zero-width reperation
+;(test-case "smoke/0203" "\\b*" "abfoo"   nil nil)
+
+(test-case "smoke/0204" "[abc]+" "abcfoo"   nil '("abc"))
+
+(test-case "smoke/0210" "abc+foo" "abccfoo" nil '("abccfoo"))
+(test-case "smoke/0211" "abc+foo" "abcfoo"  nil '("abcfoo"))
+(test-case "smoke/0212" "abc+foo" "abfoo"   nil nil)
+
+(test-case "smoke/0220" "abc?foo" "abccfoo" nil nil)
+(test-case "smoke/0221" "abc?foo" "abcfoo"  nil '("abcfoo"))
+(test-case "smoke/0222" "abc?foo" "abfoo"   nil '("abfoo"))
+
+(test-case "smoke/0230" "abc{1,3}foo" "abccfoo" nil '("abccfoo"))
+(test-case "smoke/0231" "abc{1,3}foo" "abcfoo"  nil '("abcfoo"))
+(test-case "smoke/0232" "abc{1,3}foo" "abfoox"   nil nil)
+(test-case "smoke/0233" "abc{1,3}foo" "abcccfoo" nil '("abcccfoo"))
+(test-case "smoke/0234" "abc{1,3}foo" "abccccfoo" nil nil)
+
+(test-case "smoke/0235" "(\\d*)+" "0123456789" nil '("0123456789" ""))
+(test-case "smoke/0236" "(d*)+" "0123456789" nil '("" ""))
+(test-case "smoke/0237" "a{2,}" "aaaaaaa" nil   '("aaaaaaa"))
+(test-case "smoke/0238" "ab{2,}xyz" "abbxyz" nil '("abbxyz"))
+(test-case "smoke/0239" "ab{2}xyz" "abbxyz" nil '("abbxyz"))
+
+
+
+(test-case "smoke/0240" "(?i)foo" "FoO" nil '("FoO"))
+(test-case "smoke/0241" "(?i:foo)bar" "FoObar" nil '("FoObar"))
+
+(test-case "smoke/0250" "[$](?<foo>\\d+)" "$100" nil '("$100" "100"))
+(test-case "smoke/0251" "(?<foo>\\d+)\\k<foo>" "123123" nil '("123123" "123"))
+
+(test-case "smoke/0260" "(?<=foo)bar" "foobar" nil '("bar"))
+(test-case "smoke/0261" "(?<=foo)bar" "fxxbar" nil nil)
+
+;; Matches newline in TEXTAREA tag using lookbehing and lookahead
+;; Note: second match is faield. Since, [^\\n<*] is faield at the first
+;; newline.
+(test-case "smoke/0262"
+    "(?<=<textarea[^>]*>[^\\n<]*)[\\n](?=[^<]*</textarea>)"
+    (backslash "<textarea>\\nfoo\\nbar\\n</textarea>")
+    nil
+    (list (backslash "\\n")) )
+
+; (compile-regex "(?<=<textarea[^>]*>[^\\n<]*)[\\n](?=[^<]*</textarea>)")
+
+(test-case "smoke/0270" "(?(?<=foo)bar|baz)" "foobar" nil '("bar"))
+(test-case "smoke/0271" "(?(?<=foo)bar|baz)" "bar" nil nil)
+(test-case "smoke/0272" "(?(?<=foo)bar|baz)" "baz" nil '("baz"))
+
+(test-case "smoke/0280" "(?:(foo)|(FOO))(?(1)bar|baz)" "foobar" nil
+    '("foobar" "foo" nil) )
+
+(test-case "smoke/0281" "(?:(foo)|(FOO))(?(1)bar|baz)" "FOObaz" nil
+    '("FOObaz" nil "FOO") )
+
+;;; Lazy quantifiers
+(test-case "smoke/0300" "<small.*?>" "<small>" nil '("<small>"))
+
+(test-case "smoke/0301" "<small.*?>" "<small color='red'>" nil
+    '("<small color='red'>"))
+
+(test-case "smoke/0302" "<small\\s*(.*?)>" "<small color='red'>" nil
+    '("<small color='red'>" "color='red'"))
+
+
+(test-case "smoke/0310" "<small.+?>" "<small>" nil nil)
+
+(test-case "smoke/0311" "<small.+?>" "<small color='red'>" nil
+    '("<small color='red'>"))
+
+(test-case "smoke/0312" "<small\\s*(.+?)>" "<small color='red'>" nil
+    '("<small color='red'>" "color='red'"))
+
+;;; Word boundary
+(test-case "smoke/0320" "\\bfoo\\b" "foobar" nil nil)
+(test-case "smoke/0321" "\\bfoo\\b" "foo+bar" nil '("foo"))
+(test-case "smoke/0322" "\\bfoo\\b" "this is foo." nil '("foo"))
+(test-case "smoke/0323" "\\bfoo\\b" "this is foobar." nil nil)
+
+;;; Alternative
+(test-case "smoke/0400" "(foo|bar)baz" "foobaz" nil '("foobaz" "foo"))
+(test-case "smoke/0401" "(foo|bar)baz" "barbaz" nil '("barbaz" "bar"))
+(test-case "smoke/0402" "(foo)|(bar)baz" "foobaz" nil '("foo" "foo" nil))
+(test-case "smoke/0403" "(foo)|(bar)baz" "barbaz" nil '("barbaz" nil "bar"))
+
+;;; Backward search
+(test-case "smoke/1000" "foo" "foo" '(:from-end t) '("foo"))
+(test-case "smoke/1001" "foo" "foo bar" '(:from-end t) '("foo"))
+(test-case "smoke/1002" "foo\\S+" "foobar foobaz" '(:from-end t) '("foobaz"))
+
+(test-case "smoke/1003" "foo(\\S+)" "foobar foobaz"
+  '(:from-end t)
+  '("foobaz" "baz") )
+
+(test-case "smoke/1004" "<small.*?>" "<small><b>foo</b></small>"
+  '(:from-end t)
+  '("<small><b>foo</b></small>") )

@@ -85,17 +85,18 @@
     ['OS=="win" and evita_code==1', {
       'target_defaults': {
         'defines': [
-          '_WIN32_WINNT=0x0602',
-          'WINVER=0x0602',
+          # See SDK version in include/shared/sdkddkver.h
+          '_WIN32_WINNT=0x0602', # _WIN32_WINNT_WIN8
+          'WINVER=0x0602', # _WIN32_WINNT_WIN8
           'WIN32',
           '_WINDOWS',
         ], # defines
 
         # Precompiled header
         # See gyp/pylib/gyp/msvs_settings.py for details
-        'msvs_precompiled_header': '<(DEPTH)/build/precomp.h',
-        'msvs_precompiled_source': '<(DEPTH)/build/precomp.cc',
-        'sources': ['<(DEPTH)/build/precomp.cc'],
+        #'msvs_precompiled_header': '<(DEPTH)/build/precomp.h',
+        #'msvs_precompiled_source': '<(DEPTH)/build/precomp.cc',
+        #'sources': ['<(DEPTH)/build/precomp.cc'],
 
         'msvs_settings': {
           'VCCLCompilerTool': {
@@ -104,7 +105,7 @@
             'WarnAsError': 'true', # /WX
             'AdditionalOptions': [
               '/GR-', # Enables run-time type information (RTTI).
-              '/Gr', # Uses the __fastcall calling convention (x86 only).
+              #'/Gr', # Uses the __fastcall calling convention (x86 only).
               '/Zc:forScope',
               '/Zc:wchar_t',
               '/analyze-',
@@ -117,6 +118,8 @@
           'VCLinkerTool': {
             'AdditionalDependencies': [
               'kernel32.lib',
+              'advapi32.lib',
+              'user32.lib',
             ],
            }, # VCLinkerTool
         }, # msvs_settings

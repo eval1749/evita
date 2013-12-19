@@ -11,6 +11,8 @@ vars = {
 }
 
 deps = {
+    'src/testing/gtest':
+        Var('git_url') + '/external/googletest.git@74de57c951aedebc5dfe26a27604353432392b98',
     'src/third_party/icu':
         Var('git_url') + '/chromium/deps/icu46.git@8e2b4e6b9dff62135b585649ba45f76e58b9b1a7',
     'src/third_party/v8':

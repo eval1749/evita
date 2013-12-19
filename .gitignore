@@ -1,3 +1,7 @@
-third_party/
+# We should not add pattern |third_party/|. When we do so, |git submodule add|
+# fails.
+testing/gtest
+third_party/icu
+third_party/v8
 tools/deps2git/
 tools/gyp/

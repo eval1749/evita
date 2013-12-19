@@ -1,0 +1,37 @@
+# DO NOT EDIT EXCEPT FOR LOCAL TESTING.
+# THIS IS A GENERATED FILE.
+# ALL MANUAL CHANGES WILL BE OVERWRITTEN.
+# SEE http://code.google.com/p/chromium/wiki/UsingGit
+# FOR HOW TO ROLL DEPS
+vars = {
+    'webkit_url':
+         'https://chromium.googlesource.com/chromium/blink.git',
+    'git_url':
+         'https://chromium.googlesource.com'
+}
+
+deps = {
+    'src/third_party/icu':
+        Var('git_url') + '/chromium/deps/icu46.git@8e2b4e6b9dff62135b585649ba45f76e58b9b1a7',
+    'src/third_party/v8':
+        Var('git_url') + '/external/v8.git@ddf3811f8018dfe9e8ec7d1b8f4a8be1122fd767',
+    'src/tools/deps2git':
+        Var('git_url') + '/chromium/tools/deps2git.git@964661a329348f3a97dd468b7b35d46a9265f7b6',
+    'src/tools/gyp':
+        Var('git_url') + '/external/gyp.git@27c626e0515f845338cb60b1d8405f40150a791d',
+}
+
+deps_os = {
+}
+
+include_rules = [
+    
+]
+
+skip_child_includes = [
+    
+]
+
+hooks = [
+    
+]

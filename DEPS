@@ -6,6 +6,12 @@ vars = {
 }
 
 deps = {
+  "src/tools/deps2git":
+    "/trunk/tools/deps2git@236839",
+
+  "src/tools/gyp":
+    (Var("googlecode_url") % "gyp") + "/trunk@1806",
+
   "src/third_party/icu":
     "/trunk/deps/third_party/icu46@239289",
 

@@ -1,0 +1,12 @@
+[submodule "tools/deps2git"]
+	path = tools/deps2git
+	url = https://chromium.googlesource.com/chromium/tools/deps2git.git
+[submodule "tools/gyp"]
+	path = tools/gyp
+	url = https://chromium.googlesource.com/external/gyp
+[submodule "third_party/icu"]
+	path = third_party/icu
+	url = https://chromium.googlesource.com/chromium/deps/icu46
+[submodule "third_party/v8"]
+	path = third_party/v8
+	url = https://chromium.googlesource.com/external/v8

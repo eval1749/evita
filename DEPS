@@ -29,6 +29,6 @@ deps = {
 hooks = [
   {
     'pattern': '.',
-    'action': ['cmd.exe', '/C', 'src\build\setup_ninja.cmd']
+    'action': ['cmd.exe', '/C', 'src\\build\\setup_ninja.cmd']
   },
 ]

@@ -42,7 +42,7 @@ hooks = [
          [
     'cmd.exe',
     '/C',
-    'src\x08uild\\setup_ninja.cmd'
+    'src\\build\\setup_ninja.cmd'
 ],
     'pattern':
          '.'

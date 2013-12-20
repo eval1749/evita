@@ -17,10 +17,10 @@
 
 #if USE_LISTENER
     #include "./ap_listener_buffer.h"
-    #define SINGLE_INSTANCE_NAME    L"3C9C7EC2-0DE7-461e-8F09-14F3B830413F" 
+    #define SINGLE_INSTANCE_NAME    L"3C9C7EC2-0DE7-461e-8F09-14F3B830413E" 
 #else // USE_LISTENER
     #include "./vi_buffer.h"
-    #define SINGLE_INSTANCE_NAME    L"D47A7677-9F8E-467c-BABE-8ABDE8D58475" 
+    #define SINGLE_INSTANCE_NAME    L"D47A7677-9F8E-467c-BABE-8ABDE8D58476" 
 #endif // USE_LISTENER
 
 #include "./ctrl_TabBand.h"

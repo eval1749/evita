@@ -101,7 +101,7 @@
         'msvs_settings': {
           'VCCLCompilerTool': {
             'ExceptionHandling': '0',
-            'WarningLevel': 'all', # /Wall
+            'WarningLevel': '4', # /Wall
             'WarnAsError': 'true', # /WX
             'AdditionalOptions': [
               '/GR-', # Enables run-time type information (RTTI).
@@ -122,6 +122,13 @@
               'user32.lib',
             ],
            }, # VCLinkerTool
+           'target_conditions': [
+              ['_type=="executable"', {
+                'VCManifestTool': {
+                  'EmbedManifest': 'true',
+                 },
+              }],
+        ], # target_conditions
         }, # msvs_settings
        } # target_defaults
     }], # OS=="win" and evita_code==1
@@ -154,6 +161,11 @@
             'abstract': 1,
             'msvs_settings': {
               'VCLinkerTool': {
+                'AdditionalOptions': [
+                  '/safeseh',
+                  #'/dynamicbase',
+                  #'/nxcompat',
+                ], # AdditionalOptions
                 'TargetMachine': '1',
               },
             }, # msvs_settings
@@ -176,11 +188,9 @@
                 ],
                 'conditions': [
                   ['evita_code==1', {
-                    'VCCLCompilerTool': {
-                      'AdditionalOptions': [
-                        '/RTCcsu', # Enables run-time error checking.
-                       ],
-                     } # VCCLCompilerTool
+                    'AdditionalOptions': [
+                      '/RTC1', # Enables run-time error checking.
+                    ],
                   }],
                 ], # conditions
               }, # VCCLCompilerTool

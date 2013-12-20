@@ -8,9 +8,9 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "winres.h"
-#include "../../build.h"
 #include "./version.h"
-#include "../../platform/win/VerEXE.rc"
+#include "./res/build.h"
+#include "./res/VerEXE.rc"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -37,9 +37,9 @@ END
 2 TEXTINCLUDE 
 BEGIN
     "#include ""winres.h""\r\n"
-    "#include ""../../build.h""\r\n"
     "#include ""./version.h""\r\n"
-    "#include ""../../platform/win/VerEXE.rc""\0"
+    "#include ""./res/build.h""\r\n"
+    "#include ""./res/VerEXE.rc""\0"
 END
 
 3 TEXTINCLUDE 

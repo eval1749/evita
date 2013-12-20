@@ -11,7 +11,7 @@
       'target_name': 'evita',
       'type': 'executable',
       'dependencies': [
-        '<(DEPTH)/regex/regex.gyp:*',
+        '<(DEPTH)/regex/regex.gyp:regex_lib',
       ], # dependencies
       'include_dirs+' : [
         '<(DEPTH)/evita',
@@ -56,7 +56,7 @@
         'ed_Mode.cpp',
         'ed_Range.cpp',
         'ed_Undo.cpp',
-        #'evita.rc',
+        'evita.rc',
         'ExactStringMatch.cpp',
         'gfx_base.cpp',
         'li_util.cpp',

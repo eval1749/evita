@@ -28,7 +28,7 @@
     'icu_gyp_path%': '<(DEPTH)/third_party/icu/icu.gyp',
     'os_posix': 0,
     'target_arch%': '<(target_arch)',
-    'v8_enable_i18n_support': 0,
+    'v8_enable_i18n_support': 1,
     'v8_optimized_debug%': '(<v8_optimized_debug)',
   }, # variables
 

@@ -11,6 +11,8 @@
 //
 #include "./ed_Mode.h"
 
+#include "base/logging.h"
+#include "base/strings/string16.h"
 #include "./mode_Config.h"
 #include "./mode_Cxx.h"
 #include "./mode_Haskell.h"
@@ -307,16 +309,14 @@ HICON LoadIconFromRegistry(const char16* pwszExt)
     return hIcon;
 } // LoadIconFromRegistry
 
-typedef std::basic_string<char16> string16;
-
 class IconCache {
-  private: std::unordered_map<string16, int> map_;
+  private: std::unordered_map<base::string16, int> map_;
 
-  public: void Add(const string16& name, int index) {
+  public: void Add(const base::string16& name, int index) {
     map_[name] = index;
   }
 
-  public: int Intern(const string16& name) {
+  public: int Intern(const base::string16& name) {
     auto const it = map_.find(name);
     if (it != map_.end())
       return it->second + 1;
@@ -331,10 +331,11 @@ class IconCache {
   }
 };
 
-string16 GetExtension(const string16& name,
-                             const string16& default_extension) {
+base::string16 GetExtension(const base::string16& name,
+                             const base::string16& default_extension) {
   auto const index = name.find_last_of('.');
-  return index == string16::npos ? default_extension : name.substr(index);
+  return index == base::string16::npos ? default_extension :
+                                         name.substr(index);
 }
 
 } // namespace
@@ -348,9 +349,9 @@ string16 GetExtension(const string16& name,
 /// </summary>
 int Mode::GetIcon() const {
   DEFINE_STATIC_LOCAL(IconCache, s_icon_cache);
-  DEFINE_STATIC_LOCAL(const string16, default_ext, (L".txt"));
+  DEFINE_STATIC_LOCAL(const base::string16, default_ext, (L".txt"));
 
-  const string16 ext = GetExtension(GetBuffer()->GetName(), default_ext);
+  const base::string16 ext = GetExtension(GetBuffer()->GetName(), default_ext);
   if (auto const icon_index = s_icon_cache.Intern(ext))
     return icon_index - 1;
 
@@ -599,7 +600,7 @@ static ModeFactory* s_pPlainTextModeFactory;
 /// </summary>
 ModeFactory* ModeFactory::Get(Buffer* pBuffer)
 {
-    ASSERT(NULL != pBuffer);
+    DCHECK(pBuffer);
 
     if (g_oModeFactoryes.IsEmpty())
     {

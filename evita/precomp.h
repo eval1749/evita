@@ -100,13 +100,12 @@ typedef _IMAGELIST* HIMAGELIST;
     __pragma(warning(suppress:4355)) \
     expr
 
-typedef char int8;
-typedef short int16;
-typedef unsigned char uint8;
-typedef unsigned short uint16;
-typedef unsigned int uint;
-typedef unsigned int uint32;
-typedef wchar_t char16;
+#include "base/basictypes.h"
+
+// TODO(yosi): We should not include string16.h in precomp.h. This is for
+// |char16|.
+#include "base/strings/string16.h"
+typedef base::char16 char16;
 
 #define unless(mp_exp)  if (! (mp_exp))
 #define when(mp_exp)    if (mp_exp)
@@ -119,10 +118,6 @@ typedef wchar_t char16;
     for (mp_ty mp_enum(mp_init); ! mp_enum.AtEnd(); mp_enum.Next())
 
 #define lengthof(a) ( sizeof(a) / sizeof(*(a)) )
-
-#define DISALLOW_COPY_AND_ASSIGN(mp_type) \
-  public: mp_type(const mp_type&) = delete; \
-  public: void operator=(const mp_type&) = delete
 
 // warning C6400: Using 'lstrcmpiW' to perform a case-insensitive compare to
 // constant string 

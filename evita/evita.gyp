@@ -11,6 +11,7 @@
       'target_name': 'evita',
       'type': 'executable',
       'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/regex/regex.gyp:regex_lib',
       ], # dependencies
       'include_dirs+' : [

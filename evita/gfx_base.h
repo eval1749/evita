@@ -6,7 +6,7 @@
 #if !defined(INCLUDE_gfx_base_h)
 #define INCLUDE_gfx_base_h
 
-#include "base/com_ptr.h"
+#include "base/win/scoped_comptr.h"
 #include "gfx/rect.h"
 #include "gfx/rect_f.h"
 #include "./li_util.h"

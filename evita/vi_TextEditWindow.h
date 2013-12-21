@@ -11,7 +11,6 @@
 #if !defined(INCLUDE_listener_winapp_visual_text_pane_h)
 #define INCLUDE_listener_winapp_visual_text_pane_h
 
-#include "base/ref_counted.h"
 #include "./li_util.h"
 #include "./gfx_base.h"
 #include "./vi_CommandWindow.h"

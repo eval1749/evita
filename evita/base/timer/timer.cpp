@@ -2,7 +2,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "base/singleton.h"
+#include "base/memory/singleton.h"
 #include "base/timer/timer.h"
 #include "widgets/naitive_window.h"
 #include <memory>

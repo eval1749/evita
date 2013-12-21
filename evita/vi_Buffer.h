@@ -15,6 +15,11 @@
 
 #include "./vi_TextEditWindow.h"
 
+namespace Command
+{
+    class KeyBindEntry;
+} // Command
+
 class Buffer : 
     public Edit::Buffer,
     public DoubleLinkedNode_<Buffer>
@@ -44,6 +49,9 @@ class Buffer :
 
     // [L]
     public: bool Load(const char16*);
+
+    // [M]
+    public: virtual Command::KeyBindEntry* MapKey(uint) const;
 
     // [O]
     public: bool OnIdle(uint);

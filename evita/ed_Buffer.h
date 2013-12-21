@@ -18,11 +18,6 @@
 #include "./ed_BufferCore.h"
 #include "./ed_Style.h"
 
-namespace Command
-{
-    class KeyBindEntry;
-} // Command
-
 namespace Edit
 {
 
@@ -141,8 +136,6 @@ class Buffer :
 
     protected: typedef DoubleLinkedList_<Interval> Intervals;
     protected: typedef BinaryTree<Interval>        IntervalTree;
-
-    public: virtual Command::KeyBindEntry* MapKey(uint) const;
 
     private: HANDLE         m_hObjHeap;
     private: Range*         m_pFirstRange;

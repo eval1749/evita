@@ -1821,12 +1821,7 @@ KeyBindEntry* KeyBinds::MapKey(uint nKey) const
 } // Command
 
 
-namespace Edit
-{
-
 Command::KeyBindEntry* Buffer::MapKey(uint nKey) const
 {
     return Command::g_pGlobalBinds->MapKey(nKey);
 } // Buffer::MapKey
-
-} // Edit

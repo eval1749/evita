@@ -181,6 +181,22 @@ class Buffer :
     public: Buffer(const char16*, Mode* = NULL);
     public: virtual ~Buffer();
 
+    public: bool operator==(const Buffer& other) const {
+      return this == &other;
+    }
+
+    public: bool operator==(const Buffer* other) const {
+      return this == other;
+    }
+
+    public: bool operator!=(const Buffer& other) const {
+      return this != &other;
+    }
+
+    public: bool operator!=(const Buffer* other) const {
+      return this != other;
+    }
+
     // [C]
     public: bool      CanRedo() const;
     public: bool      CanUndo() const;

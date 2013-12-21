@@ -11,6 +11,7 @@
 //
 #include "./vi_Application.h"
 
+#include "evita/ed_Mode.h"
 #include "./vi_Buffer.h"
 #include "./vi_EditPane.h"
 #include "./vi_FileDialogBox.h"
@@ -32,7 +33,6 @@ static const char16 Evita__DropTarget[] = L"Evita.DropTarget";
 //
 Application::Application() :
     m_eNewline(NewlineMode_CrLf),
-    m_hIconList(::ImageList_Create(16, 16, ILC_COLOR32, 10, 10)),
     m_nCodePage(932),
     m_pActiveFrame(NULL),
     m_pIoManager(NULL)
@@ -46,20 +46,7 @@ Application::Application() :
 //
 Application::~Application()
 {
-    if (NULL == m_hIconList)
-    {
-        ::ImageList_Destroy(m_hIconList);
-    }
 } // Application::~Application
-
-//////////////////////////////////////////////////////////////////////
-//
-// Application::AddIcon
-//
-int Application::AddIcon(HICON hIcon)
-{
-    return ::ImageList_ReplaceIcon(m_hIconList, -1, hIcon);
-} // Application::AddIcon
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -195,6 +182,10 @@ Pane* Application::FindPane(HWND hwndMouse, POINT pt) const
 
     return NULL;
 } // Application::FindPane
+
+HIMAGELIST Application::GetIconList() const {
+  return Edit::ModeFactory::icon_image_list();
+}
 
 //////////////////////////////////////////////////////////////////////
 //

@@ -31,8 +31,6 @@ bool IsCachableString(const char16* pwch, size_t cwch) {
 
 }
 
-StyleValues g_DefaultStyle;
-
 // FontSet::Add
 void FontSet::Add(Font* pFont)
 {

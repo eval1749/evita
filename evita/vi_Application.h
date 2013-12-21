@@ -28,7 +28,6 @@ class Application : public Command::Processor
     protected: typedef DoubleLinkedList_<Buffer> Buffers;
 
     private: NewlineMode    m_eNewline;
-    private: HIMAGELIST     m_hIconList;
     private: uint           m_nCodePage;
     private: Buffers        m_oBuffers;
     private: Frames   m_oFrames;
@@ -51,7 +50,6 @@ class Application : public Command::Processor
     public: void InternalAddBuffer(Buffer*);
 
     // [A]
-    public: int AddIcon(HICON);
     public: int Ask(uint, uint, ...);
 
     // [C]
@@ -78,8 +76,7 @@ class Application : public Command::Processor
     public: Frame* GetFirstFrame() const
         { return m_oFrames.GetFirst(); }
 
-    public: HIMAGELIST GetIconList() const
-        { return m_hIconList; }
+    public: HIMAGELIST GetIconList() const;
 
     public: IoManager*   GetIoManager()   const { return m_pIoManager; }
 

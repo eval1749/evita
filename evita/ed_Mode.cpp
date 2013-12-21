@@ -12,6 +12,7 @@
 #include "./ed_Mode.h"
 
 #include "base/logging.h"
+#include "base/memory/singleton.h"
 #include "base/strings/string16.h"
 #include "./mode_Config.h"
 #include "./mode_Cxx.h"
@@ -23,8 +24,11 @@
 #include "./mode_Python.h"
 #include "./mode_Xml.h"
 
+#include <commctrl.h>
 #include <string>
 #include <unordered_map>
+
+#pragma comment(lib, "comctl32.lib")
 
 namespace Edit
 {
@@ -309,11 +313,31 @@ HICON LoadIconFromRegistry(const char16* pwszExt)
     return hIcon;
 } // LoadIconFromRegistry
 
-class IconCache {
+class IconCache : public base::Singleton<IconCache> {
   private: std::unordered_map<base::string16, int> map_;
+  private: HIMAGELIST image_list_;
 
-  public: void Add(const base::string16& name, int index) {
-    map_[name] = index;
+  public: IconCache()
+      : image_list_(::ImageList_Create(16, 16, ILC_COLOR32, 10, 10)) {
+  }
+
+  public: ~IconCache() {
+    if (image_list_)
+      ::ImageList_Destroy(image_list_);
+  }
+
+  public: HIMAGELIST image_list() const { return image_list_; }
+
+  public: void Add(const base::string16& name, int icon_index) {
+    DCHECK_GE(icon_index, 0);
+    map_[name] = icon_index;
+  }
+
+  public: int AddIcon(const base::string16& name, HICON icon) {
+    auto const icon_index = ::ImageList_ReplaceIcon(image_list_, -1, icon);
+    if (icon_index >= 0)
+      Add(name, icon_index);
+    return icon_index;
   }
 
   public: int Intern(const base::string16& name) {
@@ -321,11 +345,8 @@ class IconCache {
     if (it != map_.end())
       return it->second + 1;
 
-    if (auto const icon = LoadIconFromRegistry(name.c_str())) {
-      auto const icon_index = Application::Get()->AddIcon(icon);
-      map_[name] = icon_index;
-      return icon_index + 1;
-    }
+    if (auto const icon = LoadIconFromRegistry(name.c_str()))
+      return AddIcon(name, icon) + 1;
 
     return 0;
   }
@@ -348,17 +369,16 @@ base::string16 GetExtension(const base::string16& name,
 ///  </list>
 /// </summary>
 int Mode::GetIcon() const {
-  DEFINE_STATIC_LOCAL(IconCache, s_icon_cache);
   DEFINE_STATIC_LOCAL(const base::string16, default_ext, (L".txt"));
 
   const base::string16 ext = GetExtension(GetBuffer()->GetName(), default_ext);
-  if (auto const icon_index = s_icon_cache.Intern(ext))
+  if (auto const icon_index = IconCache::instance().Intern(ext))
     return icon_index - 1;
 
-  auto const default_icon_index = s_icon_cache.Intern(default_ext);
+  auto const default_icon_index = IconCache::instance().Intern(default_ext);
   ASSERT(default_icon_index);
 
-  s_icon_cache.Add(ext, default_icon_index - 1);
+  IconCache::instance().Add(ext, default_icon_index - 1);
   return default_icon_index - 1;
 }
 
@@ -594,6 +614,10 @@ class EnumProperty
 
 ModeFactoryes g_oModeFactoryes;
 static ModeFactory* s_pPlainTextModeFactory;
+
+HIMAGELIST ModeFactory::icon_image_list() {
+  return IconCache::instance().image_list();
+}
 
 /// <summary>
 ///   Get Mode for specified buffer.

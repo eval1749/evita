@@ -36,38 +36,6 @@
       'sources': [
         'precomp.cpp',
         'ap_main.cpp',
-      ], # sources
-    }, # evita
-
-    {
-      'target_name': 'core',
-      'type': 'static_library',
-      'dependencies': [
-        '<(DEPTH)/base/base.gyp:base',
-        '<(DEPTH)/regex/regex.gyp:regex_lib',
-        '<(DEPTH)/third_party/v8/tools/gyp/v8.gyp:v8',
-      ], # dependencies
-      'sources': [
-        'precomp.cpp',
-        'ed_Buffer.cpp',
-        'ed_BufferCore.cpp',
-        'ed_BufferFind.cpp',
-        'ed_Interval.cpp',
-        'ed_Mode.cpp',
-        'ed_Range.cpp',
-        'ed_Undo.cpp',
-        'li_util.cpp',
-        'mode_Config.cpp',
-        'mode_Cxx.cpp',
-        'mode_Haskell.cpp',
-        'mode_Lisp.cpp',
-        'mode_Mason.cpp',
-        'mode_Perl.cpp',
-        'mode_PlainText.cpp',
-        'mode_Python.cpp',
-        'mode_Xml.cpp',
-        'z_debug.cpp',
-
         'ap_input_history.cpp',
         'cm_CmdProc.cpp',
         'cm_commands.cpp',
@@ -77,7 +45,6 @@
         'evita.rc',
         'ExactStringMatch.cpp',
         'gfx_base.cpp',
-        'RegexMatch.cpp',
         'vcsupport.cpp',
         'vi_Application.cpp',
         'vi_Buffer.cpp',
@@ -104,6 +71,39 @@
 
         'widgets/container_widget.cpp',
         'widgets/widget.cpp',
+      ], # sources
+    }, # evita
+
+    {
+      'target_name': 'core',
+      'type': 'static_library',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        '<(DEPTH)/regex/regex.gyp:regex_lib',
+        '<(DEPTH)/third_party/v8/tools/gyp/v8.gyp:v8',
+      ], # dependencies
+      'sources': [
+        'precomp.cpp',
+        'core/style.cc',
+        'ed_Buffer.cpp',
+        'ed_BufferCore.cpp',
+        'ed_BufferFind.cpp',
+        'ed_Interval.cpp',
+        'ed_Mode.cpp',
+        'ed_Range.cpp',
+        'ed_Undo.cpp',
+        'li_util.cpp',
+        'mode_Config.cpp',
+        'mode_Cxx.cpp',
+        'mode_Haskell.cpp',
+        'mode_Lisp.cpp',
+        'mode_Mason.cpp',
+        'mode_Perl.cpp',
+        'mode_PlainText.cpp',
+        'mode_Python.cpp',
+        'mode_Xml.cpp',
+        'RegexMatch.cpp',
+        'z_debug.cpp',
 
         '../charset/CharsetDecoder.cpp',
         '../charset/CharsetDetector.cpp',

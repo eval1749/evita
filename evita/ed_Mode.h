@@ -15,8 +15,6 @@
 
 #include "./li_util.h"
 
-#include "./vi_Application.h"
-
 namespace Edit
 {
 
@@ -212,6 +210,8 @@ class ModeFactory : public DoubleLinkedNode_<ModeFactory>
     public: ModeFactory(const uint* prgnCharSyntax) :
         m_iIcon(-1),
         m_prgnCharSyntax(prgnCharSyntax) {}
+
+    public: static HIMAGELIST icon_image_list();
 
     // [C]
     public: virtual Mode* Create(Buffer*) = 0;

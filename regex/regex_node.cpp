@@ -11,6 +11,7 @@
 //
 #include "./IRegex.h"
 #include "./regex_node.h"
+#include <algorithm>
 
 namespace Regex
 {
@@ -272,7 +273,7 @@ Node* NodeCharClass::Simplify(IEnvironment* pIEnv, LocalHeap* pHeap)
 //
 int NodeIf::ComputeMinLength() const
 {
-    return min(
+    return std::min(
         m_pThen->ComputeMinLength(),
         m_pElse->ComputeMinLength() );
 } // NodeIf::ComputeMinLength

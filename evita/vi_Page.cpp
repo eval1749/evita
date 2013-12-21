@@ -22,9 +22,6 @@
 #include "./vi_Buffer.h"
 #include "./vi_Selection.h"
 #include "./vi_util.h"
-
-// TODO: move |#undef min| to another place.
-#undef min
 #include <algorithm>
 #include <utility>
 #include <vector>
@@ -295,7 +292,7 @@ class MarkerCell final : public Cell {
       case Kind_Eob: { // Draw <-
         // FIXME 2007-06-13 We should get internal leading from font.
         auto const iInternalLeading = 3;
-        auto const w = max(m_iAscent / 6, 2.0f);
+        auto const w = std::max(m_iAscent / 6, 2.0f);
         auto const y = yBottom - (m_iAscent - iInternalLeading) / 2;
         drawHLine(gfx, stroke_brush, xLeft, xRight, y);
         drawLine(gfx, stroke_brush, xLeft + w, y - w, xLeft, y);
@@ -305,7 +302,7 @@ class MarkerCell final : public Cell {
 
       case Kind_Eol: { // Draw V
         auto const y = yBottom - m_iAscent * 3 / 5;
-        auto const w = max(m_cx / 6, 2);
+        auto const w = std::max(m_cx / 6, 2.0f);
         auto const x = xLeft + m_cx / 2;
         drawVLine(gfx, stroke_brush, x, y, yBottom);
         drawLine(gfx, stroke_brush, x - w, yBottom - w, x, yBottom);
@@ -314,7 +311,7 @@ class MarkerCell final : public Cell {
       }
 
       case Kind_Tab: { // Draw |_|
-        auto const w = max(m_iAscent / 6, 2);
+        auto const w = std::max(m_iAscent / 6, 2.0f);
         drawHLine(gfx, stroke_brush, xLeft + 2, xRight - 3, yBottom);
         drawVLine(gfx, stroke_brush, xLeft + 2, yBottom, yBottom - w * 2);
         drawVLine(gfx, stroke_brush, xRight - 3, yBottom, yBottom - w * 2);
@@ -323,7 +320,7 @@ class MarkerCell final : public Cell {
 
       case Kind_Wrap: { // Draw ->
         auto const ex = xRight - 1;
-        auto const w = max(m_iAscent / 6, 2);
+        auto const w = std::max(m_iAscent / 6, 2.0f);
         auto const y = yTop + m_iAscent / 2;
         drawHLine(gfx, stroke_brush, xLeft, ex, y);
         drawLine(gfx, stroke_brush, ex - w, y - w, xRight, y);
@@ -758,8 +755,8 @@ bool Formatter::FormatLine(Page::Line* pLine) {
     }
 
     x += pCell->m_cx;
-    iDescent = max(pCell->GetDescent(), iDescent);
-    iAscent  = max(pCell->GetHeight() - pCell->GetDescent(),  iAscent);
+    iDescent = std::max(pCell->GetDescent(), iDescent);
+    iAscent  = std::max(pCell->GetHeight() - pCell->GetDescent(),  iAscent);
   }
 
   // We have at least one cell.
@@ -770,8 +767,8 @@ bool Formatter::FormatLine(Page::Line* pLine) {
   pLine->cells().Append(pCell);
 
   x += pCell->m_cx;
-  iDescent = max(pCell->GetDescent(), iDescent);
-  iAscent  = max(pCell->GetHeight() - pCell->GetDescent(),  iAscent);
+  iDescent = std::max(pCell->GetDescent(), iDescent);
+  iAscent  = std::max(pCell->GetHeight() - pCell->GetDescent(),  iAscent);
 
   pLine->m_iHeight = iAscent + iDescent;
 
@@ -1562,7 +1559,7 @@ bool Page::ScrollToPosn(const gfx::Graphics& gfx, Posn lPosn) {
     return false;
 
   auto const cLines = pageLines(gfx);
-  auto const cLines2 = max(cLines / 2, 1);
+  auto const cLines2 = std::max(cLines / 2, 1);
 
   if (lPosn > m_lStart) {
     for (auto k = 0; k < cLines2; k++) {

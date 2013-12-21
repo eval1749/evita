@@ -16,7 +16,7 @@
 #include "./ctrl_tabBand.h"
 
 #include "./gfx_base.h"
-
+#include <algorithm>
 #include <dwmapi.h>
 
 namespace {
@@ -854,7 +854,7 @@ class TabBand : public Element {
     int cxTabs = m_rc.right - x - k_cxMargin;
 
     int cxTab = cxTabs / m_cItems;
-      cxTab = min(cxTab, m_cxMinTab * 2);
+      cxTab = std::min(cxTab, m_cxMinTab * 2);
 
     if (cxTab >= m_cxMinTab) {
       // We can show all tabs.
@@ -1585,7 +1585,7 @@ class TabBand : public Element {
         }
 
         if (pTcItem->mask & TCIF_TEXT) {
-          auto const cwch = min(
+          auto const cwch = std::min(
             ::lstrlen(pItem->m_pwsz),
             pTcItem->cchTextMax - 1);
 
@@ -1626,7 +1626,8 @@ class TabBand : public Element {
 
       case TCM_SETMINTABWIDTH: {
         auto const iPrev = m_cxMinTab;
-        m_cxMinTab = max(static_cast<int>(lParam), k_cxMinTab);
+        m_cxMinTab = std::max(static_cast<int>(lParam),
+                              static_cast<int>(k_cxMinTab));
         return iPrev;
       }
 

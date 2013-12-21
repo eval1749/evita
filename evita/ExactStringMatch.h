@@ -12,6 +12,7 @@
 #define INCLUDE_ExactStringMatch_h
 
 #include "./IStringCursor.h"
+#include <algorithm>
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -46,8 +47,8 @@ class ExactStringMatch : public IStringMatcher
                     wch = ::CharUpcase(wch);
                 }
 
-                m_nMaxChar = max(m_nMaxChar, wch);
-                m_nMinChar = min(m_nMinChar, wch);
+                m_nMaxChar = std::max(m_nMaxChar, static_cast<int>(wch));
+                m_nMinChar = std::min(m_nMinChar, static_cast<int>(wch));
             } // for i
 
             int m = pSearch->m_cwch;

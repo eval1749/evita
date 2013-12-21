@@ -13,6 +13,7 @@
 #include "./regex_bytecode.h"
 #include "./regex_node.h"
 #include "./regex_scanner.h"
+#include <algorithm>
 
 namespace Regex
 {
@@ -389,8 +390,8 @@ class StringScannerCompiler :
             {
                 wch = m_pIContext->CharUpcase(wch);
             }
-            m_nMaxChar = max(m_nMaxChar, wch);
-            m_nMinChar = min(m_nMinChar, wch);
+            m_nMaxChar = std::max(m_nMaxChar, static_cast<int>(wch));
+            m_nMinChar = std::min(m_nMinChar, static_cast<int>(wch));
         } // for pwch
 
         ASSERT(m_nMinChar <= m_nMaxChar);

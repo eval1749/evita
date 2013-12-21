@@ -22,6 +22,8 @@
 
 #include "../charset/CharsetDecoder.h"
 #include "../charset/CharsetDetector.h"
+#include <algorithm>
+
 using namespace Charset;
 
 DWORD  IoRequest::sm_dwThread;
@@ -959,7 +961,7 @@ void SaveRequest::retrieve() {
   auto const cwch = m_pBuffer->GetText(
       rgwch,
       m_lPosn,
-      min(m_lEnd, static_cast<Posn>(m_lPosn + lengthof(rgwch))));
+      std::min(m_lEnd, static_cast<Posn>(m_lPosn + lengthof(rgwch))));
 
   #if _DEBUG
     for (auto i = 0; i < cwch; i++) {

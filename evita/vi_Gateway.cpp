@@ -18,6 +18,7 @@
 #include "./ed_Range.h"
 
 #include "./listener.h"
+#include <algorithm>
 
 extern HINSTANCE g_hInstance;
 
@@ -155,7 +156,7 @@ void Gateway::sendTextAux()
 {
     const Count k = lengthof(m_rgwch);
     Posn lPosn = m_oSendInfo.m_lPosn;
-    Posn lEnd  = min(m_oSendInfo.m_lEnd,  lPosn + k);
+    Posn lEnd  = std::min(m_oSendInfo.m_lEnd,  lPosn + k);
 
     if (lEnd == lPosn) return;
 

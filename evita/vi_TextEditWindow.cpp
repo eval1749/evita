@@ -31,6 +31,7 @@
 #include "./vi_Frame.h"
 #include "./vi_Selection.h"
 #include "./vi_util.h"
+#include <algorithm>
 
 #define DEBUG_TEXT_EDIT_PRINTF(mp_format, ...) \
   DEBUG_PRINTF("|%ls|@%p " mp_format, GetBuffer()->GetName(), this, \
@@ -69,9 +70,9 @@ class TextEditWindow::Autoscroller {
   }
 
   private: void DidFireTime(base::RepeatingTimer<Autoscroller>*) {
-    auto const duration = ::GetTickCount() - started_at_;
+    auto const duration = static_cast<uint>(::GetTickCount() - started_at_);
     auto const scroll_amount = static_cast<Count>(
-        min(max(duration / kScrollSpeedIntervalMs, 1), 20));
+        std::min(std::max(duration / kScrollSpeedIntervalMs, 1u), 20u));
     #if DEBUG_AUTOSCROLL
       DEBUG_PRINTF("dir=%d am=%d duration=%dms\n",
         direction_, scroll_amount, duration);
@@ -228,7 +229,7 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
             break;
           lGoal += 1;
         }
-        *inout_lPosn = computeGoalX(pt.x, min(lGoal, lBufEnd));
+        *inout_lPosn = computeGoalX(pt.x, std::min(lGoal, lBufEnd));
         return k;
       } else if (n < 0) {
         n = -n;
@@ -243,7 +244,7 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
           lStart -= 1;
         }
 
-        *inout_lPosn = computeGoalX(pt.x, max(lStart, lBufStart));
+        *inout_lPosn = computeGoalX(pt.x, std::max(lStart, lBufStart));
         return k;
       }
       return 0;
@@ -860,9 +861,10 @@ void TextEditWindow::Render() {
   if (!rect)
     return;
 
-  auto const caret_width = max(::GetSystemMetrics(SM_CXBORDER), 2.0f);
+  auto const caret_width = std::max(::GetSystemMetrics(SM_CXBORDER), 2);
   gfx::RectF caret_rect(rect.left_top(),
-                        gfx::SizeF(caret_width,  rect.height()));
+                        gfx::SizeF(static_cast<float>(caret_width),
+                                   rect.height()));
   #if SUPPORT_IME
     if (m_fImeTarget) {
       POINT pt = {

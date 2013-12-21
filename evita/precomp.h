@@ -15,12 +15,15 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-// Requires at least Windows Vista
-//#define _WIN32_WINNT 0x600
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0602
+#endif
 
 #define STRICT
 #define INC_OLE2
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 // Note: When defines ISOLATION_AWARE_ENABLE=1, prsht.inl causes compilation
 // error by undefined symbol |IsolationAwarePrivatenCv|.
 //#define ISOLATION_AWARE_ENABLED 1

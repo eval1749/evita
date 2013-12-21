@@ -14,6 +14,7 @@
 #include "./ed_Interval.h"
 
 #include "./ed_Buffer.h"
+#include <algorithm>
 
 extern StyleValues g_DefaultStyle;
 
@@ -76,7 +77,7 @@ void Interval::SetStyle(const StyleValues* p)
 /// <returns>An Interval object</returns>
 Interval* Buffer::GetIntervalAt(Posn lPosn) const
 {
-    lPosn = min(lPosn, GetEnd());
+    lPosn = std::min(lPosn, GetEnd());
 
     Interval* pRunner = m_oIntervalTree.GetRoot();
     while (NULL != pRunner)

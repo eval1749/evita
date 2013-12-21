@@ -20,11 +20,13 @@
     ['OS=="win"', {
       'target_defaults': {
         'defines': [
+          'NOMINMAX',
           # See SDK version in include/shared/sdkddkver.h
           '_WIN32_WINNT=0x0602', # _WIN32_WINNT_WIN8
-          'WINVER=0x0602', # _WIN32_WINNT_WIN8
-          'WIN32',
           '_WINDOWS',
+          'WIN32',
+          'WIN32_LEAN_AND_MEAN',
+          'WINVER=0x0602', # _WIN32_WINNT_WIN8
         ], # defines
 
         # Precompiled header

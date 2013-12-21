@@ -14,6 +14,7 @@
 #include "./ed_Buffer.h"
 #include "./ed_Mode.h"
 #include "./ed_undo.h"
+#include <algorithm>
 
 // Smart handle for HGLOBAL
 template<class T>
@@ -577,13 +578,13 @@ Count Range::Delete(Unit eUnit, Count n)
         if (n > 0)
         {
             int m = m_lStart == m_lEnd ? 0 : 1;
-            Posn lEnd = min(m_lEnd + n - m, m_pBuffer->GetEnd());
+            Posn lEnd = std::min(m_lEnd + n - m, m_pBuffer->GetEnd());
             return m_pBuffer->Delete(m_lStart, lEnd);
         }
         else if (n < 0)
         {
             int m = m_lStart == m_lEnd ? 0 : 1;
-            Posn lStart = max(m_lStart + n + m, 0);
+            Posn lStart = std::max(m_lStart + n + m, static_cast<Posn>(0));
             return m_pBuffer->Delete(lStart, m_lEnd);
         }
         else

@@ -13,6 +13,7 @@
 
 #include "./regex_bytecode.h"
 #include "./regex_util.h"
+#include <algorithm>
 
 namespace Regex {
 
@@ -874,7 +875,7 @@ class NodeOr : public NodeSubNodesBase {
     auto nMinLen = int(Infinity);
     foreach (Nodes::Enum, oEnum, &m_oNodes) {
         auto const pNode = oEnum.Get();
-        nMinLen = min(nMinLen, pNode->ComputeMinLength());
+        nMinLen = std::min(nMinLen, pNode->ComputeMinLength());
     }
     return nMinLen;
   }

@@ -13,6 +13,7 @@
 #include "./ctrl_StatusBar.h"
 
 #include "./vi_defs.h"
+#include <algorithm>
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -65,7 +66,7 @@ void StatusBar::SetParts(const int* prgiPart, int cParts)
         DEBUG_PRINTF(L"%p %d cParts=%d\n", this, ::GetTickCount(), cParts);
     #endif // DEBUG_STATUSBAR
 
-    m_cParts = min(cParts, static_cast<int>(lengthof(m_rgiPart)));
+    m_cParts = std::min(cParts, static_cast<int>(lengthof(m_rgiPart)));
 
     myCopyMemory(m_rgiPart, prgiPart, sizeof(int) * m_cParts);
 

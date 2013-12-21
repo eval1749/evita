@@ -16,8 +16,8 @@
 #include "./ed_Interval.h"
 #include "./ed_Range.h"
 #include "./ed_Undo.h"
-
 #include "./mode_PlainText.h"
+#include <algorithm>
 
 namespace Edit
 {
@@ -214,12 +214,12 @@ Count Buffer::ComputeMotion(Unit eUnit, Count n, Posn* inout_lPosn) const
     {
         if (n > 0)
         {
-            *inout_lPosn = min(GetEnd(), lPosn + n);
+            *inout_lPosn = std::min(GetEnd(), lPosn + n);
             return *inout_lPosn - lPosn;
         }
         else if (n < 0)
         {
-            *inout_lPosn = max(GetStart(), lPosn + n);
+            *inout_lPosn = std::max(GetStart(), lPosn + n);
             return lPosn - *inout_lPosn;
         }
 
@@ -514,7 +514,7 @@ Interval* Buffer::CreateInterval(
     Posn    lEnd,
     int     nZ)
 {
-    return addInterval(new(m_hObjHeap) Interval(lStart, max(lStart, lEnd), nZ));
+    return addInterval(new(m_hObjHeap) Interval(lStart, std::max(lStart, lEnd), nZ));
 } // Buffer::CreateInterval
 #endif
 
@@ -529,7 +529,7 @@ Range* Buffer::CreateRange(Posn lStart, Posn lEnd)
         this,
         Range::Kind_Range,
         lStart,
-        max(lStart, lEnd) );
+        std::max(lStart, lEnd) );
 
     return InternalAddRange(pRange);
 } // Buffer::CreateRange
@@ -558,8 +558,8 @@ Count Buffer::Delete(Posn lStart, Posn lEnd)
     if (IsReadOnly()) return 0;
     if (IsNotReady()) return 0;
 
-    lStart = max(lStart, 0);
-    lEnd   = min(lEnd, GetEnd());
+    lStart = std::max(lStart, static_cast<Posn>(0));
+    lEnd   = std::min(lEnd, GetEnd());
 
     if (lEnd <= lStart) return 0;
 
@@ -613,7 +613,7 @@ Count Buffer::Insert(Posn lPosn, char16 wch, Count n)
     if (IsNotReady()) return 0;
 
     if (n <= 0) return 0;
-    lPosn = min(lPosn, GetEnd());
+    lPosn = std::min(lPosn, GetEnd());
 
     InternalInsert(lPosn, wch, n);
 
@@ -641,7 +641,7 @@ Count Buffer::Insert(Posn lPosn, const char16* pwch, Count n)
     if (IsNotReady()) return 0;
 
     if (n <= 0) return 0;
-    lPosn = min(lPosn, GetEnd());
+    lPosn = std::min(lPosn, GetEnd());
 
     InternalInsert(lPosn, pwch, n);
 
@@ -939,10 +939,10 @@ void Buffer::relocate(Posn lPosn, Count iDelta)
         {
             ChangeTracker* pRunner = oEnum.Get();
 
-            pRunner->m_lStart = min(pRunner->m_lStart, lChangeStart);
-            pRunner->m_lEnd   = max(pRunner->m_lEnd, lChangeEnd),
+            pRunner->m_lStart = std::min(pRunner->m_lStart, lChangeStart);
+            pRunner->m_lEnd   = std::max(pRunner->m_lEnd, lChangeEnd),
 
-            pRunner->m_lEnd = min(pRunner->m_lEnd, GetEnd());
+            pRunner->m_lEnd = std::min(pRunner->m_lEnd, GetEnd());
         } // for each tracker
     }
 } // Buffer::relocate

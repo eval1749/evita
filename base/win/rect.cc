@@ -3,10 +3,6 @@
 
 #include "base/win/rect.h"
 
-// TODO: Move |#undef max| to another place.
-#undef max
-// TODO: Move |#undef min| to another place.
-#undef min
 #include <algorithm>
 
 namespace base {

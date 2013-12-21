@@ -12,6 +12,7 @@
 #include "./ed_BufferCore.h"
 
 #include "./li_util.h"
+#include <algorithm>
 
 #define DEBUG_LIFE 0
 
@@ -158,7 +159,7 @@ Count BufferCore::GetText(char16* prgwch, Posn lStart, Posn lEnd) const
         // <.....>gggg
         // <...ggg>ggg
         // <...ggg...>
-        Posn lMiddle = min(m_lGapStart, lEnd);
+        Posn lMiddle = std::min(m_lGapStart, lEnd);
 
         myCopyMemory(
             prgwch,

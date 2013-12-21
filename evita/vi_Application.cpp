@@ -19,6 +19,11 @@
 Application* Application::sm_pApplication;
 uint g_nDropTargetMsg;
 
+HINSTANCE   g_hInstance;
+HINSTANCE   g_hResource;
+HWND        g_hwndActiveDialog;
+uint        g_TabBand__TabDragMsg;
+
 static const char16 Evita__DropTarget[] = L"Evita.DropTarget";
 
 //////////////////////////////////////////////////////////////////////
@@ -203,6 +208,10 @@ void Application::Init()
     sm_pApplication->m_pIoManager->Realize();
 } // Application::Init
 
+
+void Application::InternalAddBuffer(Buffer* pBuffer) {
+  m_oBuffers.Append(pBuffer);
+}
 
 //////////////////////////////////////////////////////////////////////
 //

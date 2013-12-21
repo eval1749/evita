@@ -32,8 +32,6 @@
 #include "./vi_IoManager.h"
 #include "./vi_Style.h"
 
-#pragma comment(lib, "comctl32.lib")
-
 #if _WIN64
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #else
@@ -41,10 +39,6 @@
 #endif
 
 const char16* k_pwszTitle = L"Evita Common Lisp Listner";
-
-void Application::InternalAddBuffer(Buffer* pBuffer) {
-  m_oBuffers.Append(pBuffer);
-}
 
 namespace {
 
@@ -105,10 +99,10 @@ class EnumArg {
 
 } // namespace
 
-HINSTANCE   g_hInstance;
-HINSTANCE   g_hResource;
-HWND        g_hwndActiveDialog;
-uint        g_TabBand__TabDragMsg;
+extern HINSTANCE   g_hInstance;
+extern HINSTANCE   g_hResource;
+extern HWND        g_hwndActiveDialog;
+extern uint        g_TabBand__TabDragMsg;
 
 extern StyleValues g_DefaultStyle;
 

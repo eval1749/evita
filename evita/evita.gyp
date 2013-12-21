@@ -9,4 +9,11 @@
   'includes': [
     'evita.gypi',
   ], # includes
+
+  'target_defaults': {
+    # Precompiled header
+    # See gyp/pylib/gyp/msvs_settings.py for details
+    'msvs_precompiled_header': 'precomp.h',
+    'msvs_precompiled_source': 'precomp.cpp',
+  }, # target_defaults
 }

@@ -2,17 +2,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 {
+  'target_defaults': {
+    'include_dirs+' : [
+      # TODO(yosi): We should not have |<(DEPTH)/evita| in |include_dirs|.
+      '<(DEPTH)/evita',
+    ], # include_dirs
+  }, # target_defaults
+
   'targets': [
     {
       'target_name': 'evita',
       'type': 'executable',
       'dependencies': [
-        '<(DEPTH)/base/base.gyp:base',
-        '<(DEPTH)/regex/regex.gyp:regex_lib',
+        'core',
       ], # dependencies
-      'include_dirs+' : [
-        '<(DEPTH)/evita',
-      ], # include_dirs
 
       'msvs_settings': {
         'VCLinkerTool': {
@@ -30,22 +33,21 @@
         }, # VCLinkTool
       }, # msvs_settings
 
-      # Precompiled header
-      # See gyp/pylib/gyp/msvs_settings.py for details
-      'msvs_precompiled_header': 'precomp.h',
-      'msvs_precompiled_source': 'precomp.cpp',
-
       'sources': [
         'precomp.cpp',
-        'ap_input_history.cpp',
-        #'ap_lisp_thread.cpp',
-        #'ap_listener_buffer.cpp',
         'ap_main.cpp',
-        'cm_CmdProc.cpp',
-        'cm_commands.cpp',
-        'ctrl_StatusBar.cpp',
-        'ctrl_TabBand.cpp',
-        'ctrl_TitleBar.cpp',
+      ], # sources
+    }, # evita
+
+    {
+      'target_name': 'core',
+      'type': 'static_library',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        '<(DEPTH)/regex/regex.gyp:regex_lib',
+      ], # dependencies
+      'sources': [
+        'precomp.cpp',
         'ed_Buffer.cpp',
         'ed_BufferCore.cpp',
         'ed_BufferFind.cpp',
@@ -53,9 +55,6 @@
         'ed_Mode.cpp',
         'ed_Range.cpp',
         'ed_Undo.cpp',
-        'evita.rc',
-        'ExactStringMatch.cpp',
-        'gfx_base.cpp',
         'li_util.cpp',
         'mode_Config.cpp',
         'mode_Cxx.cpp',
@@ -66,6 +65,17 @@
         'mode_PlainText.cpp',
         'mode_Python.cpp',
         'mode_Xml.cpp',
+        'z_debug.cpp',
+
+        'ap_input_history.cpp',
+        'cm_CmdProc.cpp',
+        'cm_commands.cpp',
+        'ctrl_StatusBar.cpp',
+        'ctrl_TabBand.cpp',
+        'ctrl_TitleBar.cpp',
+        'evita.rc',
+        'ExactStringMatch.cpp',
+        'gfx_base.cpp',
         'RegexMatch.cpp',
         'vcsupport.cpp',
         'vi_Application.cpp',
@@ -86,7 +96,6 @@
         'vi_Selection.cpp',
         'vi_Style.cpp',
         'vi_TextEditWindow.cpp',
-        'z_debug.cpp',
 
         'widgets/container_widget.cpp',
         'widgets/widget.cpp',
@@ -94,6 +103,6 @@
         '../charset/CharsetDecoder.cpp',
         '../charset/CharsetDetector.cpp',
       ], # sources
-    }, # evita
+    }, # core
   ], # targets
 }

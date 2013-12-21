@@ -15,6 +15,8 @@
 #include "./vi_defs.h"
 #include <algorithm>
 
+#pragma comment(lib, "comctl32.lib")
+
 //////////////////////////////////////////////////////////////////////
 //
 // StatusBar::IsEqual

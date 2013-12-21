@@ -5,6 +5,7 @@
 
 #include "base_export.h"
 #include "base/strings/string16.h"
+#include <sstream>
 
 namespace logging {
 
@@ -56,8 +57,16 @@ void BASE_EXPORT CheckTrue(
       int const linenum, \
       const char* const fname) { \
     if (!(a op b)) \
-      CheckFailed(a, b, a_str, b_str, op_str, filename, linenum, fname); \
+      CheckFailed(ToString16(a), ToString16(b), a_str, b_str, op_str, \
+                  filename, linenum, fname); \
   }
+
+template<typename T>
+base::string16 ToString16(const T& value) {
+  std::basic_ostringstream<char16> stream;
+  stream << value;
+  return stream.str();
+}
 
 DEFINE_CHECK_OP(Eq, ==)
 DEFINE_CHECK_OP(Ge, >=)

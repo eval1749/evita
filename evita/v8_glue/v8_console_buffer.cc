@@ -60,13 +60,15 @@ V8ConsoleBuffer::V8ConsoleBuffer()
       context_holder_(isolate_),
       prompt_end_(CreateRange()) {
   SetNoSave(true);
+  PopulateKeyBindings();
   {
     v8::HandleScope handle_scope(isolate_);
     auto context = Initializer::CreateContext(isolate_);
     context_holder_.SetContext(context);
     context->Enter();
+    Emit(L"// JavaScript Console for V8 version ");
+    Emit(v8::String::NewFromUtf8(isolate_, v8::V8::GetVersion()));
   }
-  PopulateKeyBindings();
   EmitPrompt();
 }
 

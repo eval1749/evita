@@ -3,21 +3,20 @@
 # found in the LICENSE file.
 
 {
-  'target_defaults': {
-    'include_dirs': [
-      '<(DEPTH)',
-    ],
-  }, # target_defaults
-
-  'default_configuration': 'Debug',
-
   'variables': {
     'variables': {
-      'component%': 'shared_library', # or 'static_library'
-      'target_arch%': 'ia32', # 'ia32', 'x64'
-    },
-    'clang': 0,
+      'variables': {
+        'clang': 0,
+        'component%': 'shared_library', # or 'static_library'
+        'target_arch%': 'ia32', # 'ia32', 'x64'
+      }, # variables
+      'clang': '<(clang)',
+      'component%': '<(component)',
+      'target_arch%': '<(target_arch)',
+    }, # variables
+    'clang%': '<(clang)',
     'component%': '<(component)',
+    'target_arch%': '<(target_arch)',
 
     # .gyp files or targets should set |evita_code| to 1 if they build
     # Evita-specific code, as opposed to external code. This variable is
@@ -32,6 +31,10 @@
     'v8_enable_i18n_support': 0,
     'v8_optimized_debug%': '(<v8_optimized_debug)',
   }, # variables
+
+  'includes': [
+    'common_evita_code.gypi',
+  ],
 
   'conditions': [
     ['OS=="win" and evita_code==0', {
@@ -82,58 +85,9 @@
        } # target_defaults
     }], # OS=="win" and evita_code==0
 
-    ['OS=="win" and evita_code==1', {
-      'target_defaults': {
-        'defines': [
-          # See SDK version in include/shared/sdkddkver.h
-          '_WIN32_WINNT=0x0602', # _WIN32_WINNT_WIN8
-          'WINVER=0x0602', # _WIN32_WINNT_WIN8
-          'WIN32',
-          '_WINDOWS',
-        ], # defines
-
-        # Precompiled header
-        # See gyp/pylib/gyp/msvs_settings.py for details
-        #'msvs_precompiled_header': '<(DEPTH)/build/precomp.h',
-        #'msvs_precompiled_source': '<(DEPTH)/build/precomp.cc',
-        #'sources': ['<(DEPTH)/build/precomp.cc'],
-
-        'msvs_settings': {
-          'VCCLCompilerTool': {
-            'ExceptionHandling': '0',
-            'WarningLevel': '4', # /Wall
-            'WarnAsError': 'true', # /WX
-            'AdditionalOptions': [
-              '/GR-', # Enables run-time type information (RTTI).
-              #'/Gr', # Uses the __fastcall calling convention (x86 only).
-              '/Zc:forScope',
-              '/Zc:wchar_t',
-              '/analyze-',
-              '/arch:SSE2',
-              '/errorReport:prompt',
-              '/fp:except-',
-              '/fp:fast',
-            ],
-          }, # VCCLCompilerTool
-          'VCLinkerTool': {
-            'AdditionalDependencies': [
-              'kernel32.lib',
-              'advapi32.lib',
-              'user32.lib',
-            ],
-           }, # VCLinkerTool
-           'target_conditions': [
-              ['_type=="executable"', {
-                'VCManifestTool': {
-                  'EmbedManifest': 'true',
-                 },
-              }],
-        ], # target_conditions
-        }, # msvs_settings
-       } # target_defaults
-    }], # OS=="win" and evita_code==1
-
     ['OS=="win"', {
+      'default_configuration': 'Debug',
+
       'target_defaults': {
         'msvs_cygwin_dirs': ['<(DEPTH)/third_party/cygwin'],
         'msvs_cygwin_shell': 0,
@@ -153,6 +107,7 @@
                 'AdditionalDependencies': [
                   'kernel32.lib',
                 ],
+                'SubSytem': 1,
               }, # VCLinkerTool
             }, # msvs_settings
           }, # common_base

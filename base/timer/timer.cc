@@ -1,10 +1,13 @@
-#include "precomp.h"
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "base/memory/singleton.h"
 #include "base/timer/timer.h"
-#include "widgets/naitive_window.h"
+
+#include "base/logging.h"
+#include "base/memory/singleton.h"
+#include "base/win/naitive_window.h"
+#include "base/win/point.h"
+#include "base/win/size.h"
 #include <memory>
 
 #define DEBUG_TIMER 0
@@ -12,7 +15,7 @@
 namespace base {
 namespace impl {
 
-struct TimerEntry : RefCounted<TimerEntry> {
+struct BASE_EXPORT TimerEntry : RefCounted<TimerEntry> {
   AbstractTimer* timer;
   uint repeat_interval_ms;
   TimerEntry(AbstractTimer* timer, uint repeat_interval_ms)
@@ -31,7 +34,7 @@ struct TimerEntry : RefCounted<TimerEntry> {
 class TimerController : public Singleton<TimerController> {
   friend class Singleton<TimerController>;
 
-  private: class MessageWindow : public widgets::NaitiveWindow {
+  private: class MessageWindow : public base::win::NaitiveWindow {
     public: MessageWindow() = default;
     public: virtual ~MessageWindow() = default;
     DISALLOW_COPY_AND_ASSIGN(MessageWindow);
@@ -45,7 +48,7 @@ class TimerController : public Singleton<TimerController> {
 
   private: UINT_PTR ComputeCookie(AbstractTimer* timer) {
     auto const entry = timer->entry_.get();
-    ASSERT(entry);
+    DCHECK(entry);
     auto const cookie = reinterpret_cast<UINT_PTR>(entry);
     return cookie;
   }
@@ -53,7 +56,7 @@ class TimerController : public Singleton<TimerController> {
   private: static std::unique_ptr<MessageWindow> CreateMessageWindow() {
     std::unique_ptr<MessageWindow> window(new MessageWindow());
     window->CreateWindowEx(0, 0, nullptr, HWND_MESSAGE,
-                           gfx::Point(), gfx::Size());
+                           base::win::Point(), base::win::Size());
     return std::move(window);
   }
 

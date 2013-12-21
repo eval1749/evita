@@ -10,6 +10,9 @@
       ['base_target==1', {
         'sources': [
           'logging.cc',
+          'timer/timer.cc',
+          'win/naitive_window.cc',
+          'win/rect.cc',
         ], # sources
       }], # base_target==1
     ],

@@ -5,29 +5,33 @@
 
 #include "base/castable.h"
 #include "base/tree/node.h"
-//#include "./li_util.h"
-#include "gfx/rect.h"
+#include "base/win/naitive_window.h"
+#include "base/win/rect.h"
 #include <memory>
 
 namespace widgets {
 
 class ContainerWidget;
-class NaitiveWindow;
+typedef base::win::NaitiveWindow NaitiveWindow;
+typedef base::win::Point Point;
+typedef base::win::Rect Rect;
 
 //////////////////////////////////////////////////////////////////////
 //
 // Widget
 //
-class Widget : public base::tree::Node_<Widget, ContainerWidget,
-                                        std::unique_ptr<NaitiveWindow>&&>,
-               public base::Castable {
+class Widget
+    : public base::tree::Node_<Widget, ContainerWidget,
+                               std::unique_ptr<NaitiveWindow>&&>,
+      public base::win::MessageDelegate,
+      public base::Castable {
   DECLARE_CASTABLE_CLASS(Widget, Castable);
 
   // Life time of naitive_window_ ends at WM_NCDESTROY rather than
   // destruction of Widget.
   private: std::unique_ptr<NaitiveWindow> naitive_window_;
   private: bool realized_;
-  private: gfx::Rect rect_;
+  private: Rect rect_;
   private: int shown_;
 
   protected: explicit Widget(
@@ -51,7 +55,7 @@ class Widget : public base::tree::Node_<Widget, ContainerWidget,
   protected: NaitiveWindow* naitive_window() const {
     return naitive_window_.get();
   }
-  public: const gfx::Rect& rect() const { return rect_; }
+  public: const Rect& rect() const { return rect_; }
   public: static ContainerWidget& top_level_widget();
 
   // [A]
@@ -76,27 +80,27 @@ class Widget : public base::tree::Node_<Widget, ContainerWidget,
 
   // [G]
   public: virtual const char* GetClass() const { return "Widget"; }
-  public: virtual HCURSOR GetCursorAt(const gfx::Point& point) const;
+  public: virtual HCURSOR GetCursorAt(const Point& point) const;
 
   // [H]
   public: virtual void Hide();
 
   // [O]
   public: virtual bool OnIdle(uint idle_count);
-  public: virtual void OnLeftButtonDown(uint flags, const gfx::Point& point);
-  public: virtual void OnLeftButtonUp(uint flags, const gfx::Point& point);
+  public: virtual void OnLeftButtonDown(uint flags, const Point& point);
+  public: virtual void OnLeftButtonUp(uint flags, const Point& point);
   public: virtual LRESULT OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam);
-  public: virtual void OnMouseMove(uint flags, const gfx::Point& point);
-  public: virtual void OnPaint(const gfx::Rect rect);
+  public: virtual void OnMouseMove(uint flags, const Point& point);
+  public: virtual void OnPaint(const Rect rect);
 
   // [R]
   // Realize widget, one of container must be realized with naitive widnow.
-  public: void Realize(const gfx::Rect& rect);
+  public: void Realize(const Rect& rect);
 
   // Realize top-level widget with naitive window.
   public: void RealizeTopLevelWidget();
   public: void ReleaseCapture() const;
-  public: void ResizeTo(const gfx::Rect& rect);
+  public: void ResizeTo(const Rect& rect);
 
   // [S]
   public: void SetCapture() const;
@@ -114,7 +118,7 @@ class Widget : public base::tree::Node_<Widget, ContainerWidget,
   public: virtual void WillDestroyWidget();
   public: virtual void WillDestroyNaitiveWindow();
   public: virtual LRESULT WindowProc(UINT uMsg, WPARAM wParam,
-                                     LPARAM lParam);
+                                     LPARAM lParam) override;
   DISALLOW_COPY_AND_ASSIGN(Widget);
 };
 

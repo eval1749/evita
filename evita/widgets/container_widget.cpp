@@ -8,7 +8,7 @@
 #include "base/tree/child_nodes.h"
 #include "base/tree/descendants.h"
 #include "base/tree/descendants_or_self.h"
-#include "widgets/naitive_window.h"
+#include "base/win/naitive_window.h"
 #include <algorithm>
 
 #define DEBUG_FOCUS 0
@@ -54,7 +54,7 @@ void ContainerWidget::DidShow() {
 }
 
 void ContainerWidget::DispatchPaintMessage() {
-  gfx::Rect exposed_rect;
+  Rect exposed_rect;
   if (!::GetUpdateRect(*naitive_window(), &exposed_rect, false))
     return;
   #if DEBUG_PAINT
@@ -96,7 +96,7 @@ ContainerWidget& ContainerWidget::GetHostContainer() const {
   CAN_NOT_HAPPEN();
 }
 
-Widget* ContainerWidget::GetWidgetAt(const gfx::Point& point) const {
+Widget* ContainerWidget::GetWidgetAt(const Point& point) const {
   // On release build by MSVS2013, using reverse() causes AV.
   // for (const auto& child: base::adoptors::reverse(child_nodes()))
   for (auto runner = last_child(); runner;
@@ -159,7 +159,7 @@ void ContainerWidget::SetCaptureTo(const Widget& widget) {
 }
 
 bool ContainerWidget::SetCursor() {
-  gfx::Point point;
+  Point point;
   WIN32_VERIFY(::GetCursorPos(&point));
   WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *naitive_window(),
                                  &point, 1));
@@ -272,7 +272,7 @@ LRESULT ContainerWidget::WindowProc(UINT message, WPARAM wParam,
     } else {
       // Note: We send WM_MOUSEWHEEL message to a widget under mouse pointer
       // rather than active widget.
-      gfx::Point point(MAKEPOINTS(lParam));
+      Point point(MAKEPOINTS(lParam));
       if (message == WM_MOUSEWHEEL) {
         WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *naitive_window(),
                                        &point, 1));

@@ -3,6 +3,8 @@
 #if !defined(INCLUDE_base_ref_counted_h)
 #define INCLUDE_base_ref_counted_h
 
+#include "base/logging.h"
+
 namespace base {
 
 template<class T>
@@ -10,12 +12,12 @@ class RefCounted {
   private: mutable int ref_count_;
   protected: RefCounted() : ref_count_(0) {}
   public: ~RefCounted() {
-    ASSERT(!ref_count_);
+    DCHECK(!ref_count_);
   }
   public: int ref_count() const { return ref_count_; }
   public: void AddRef() const { ++ref_count_; }
   public: bool Release() const {
-    ASSERT(ref_count_ >= 1);
+    DCHECK(ref_count_ >= 1);
     --ref_count_;
     if (ref_count_)
       return false;

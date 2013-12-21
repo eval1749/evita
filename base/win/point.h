@@ -1,11 +1,14 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_gfx_point_h)
-#define INCLUDE_gfx_point_h
+#if !defined(INCLUDE_base_win_point_h)
+#define INCLUDE_base_win_point_h
 
-namespace gfx {
+#include "base/base_export.h"
 
-struct Point : POINT {
+namespace base {
+namespace win {
+
+struct BASE_EXPORT Point : POINT {
   Point() {
     x = y = 0;
   }
@@ -24,6 +27,7 @@ struct Point : POINT {
 #define DEBUG_POINT_ARG(mp_point) \
  (mp_point).x, (mp_point).y
 
-} // namespace gfx
+} // namespace win
+} // namespace base
 
-#endif //!defined(INCLUDE_gfx_point_h)
+#endif //!defined(INCLUDE_base_win_point_h)

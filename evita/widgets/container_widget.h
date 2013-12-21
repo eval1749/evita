@@ -12,15 +12,16 @@ class ChildWidgets;
 class ConstChildWidgets;
 
 class ContainerWidget 
-    : public base::tree::ContainerNode_<Widget, ContainerWidget,
-                                        std::unique_ptr<NaitiveWindow>&&> {
+    : public base::tree::ContainerNode_<
+          Widget, ContainerWidget,
+          std::unique_ptr<base::win::NaitiveWindow>&&> {
   DECLARE_CASTABLE_CLASS(ContainerWidget, Widget);
 
   private: Widget* capture_widget_;
   private: Widget* focus_widget_;
 
   protected: explicit ContainerWidget(
-      std::unique_ptr<NaitiveWindow>&& naitive_window);
+      std::unique_ptr<base::win::NaitiveWindow>&& naitive_window);
   protected: ContainerWidget();
   public: virtual ~ContainerWidget();
 
@@ -37,7 +38,7 @@ class ContainerWidget
 
   // [G]
   private: ContainerWidget& GetHostContainer() const;
-  private: Widget* GetWidgetAt(const gfx::Point& point) const;
+  private: Widget* GetWidgetAt(const Point& point) const;
 
   // [H]
   public: virtual void Hide();

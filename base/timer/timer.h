@@ -3,14 +3,16 @@
 #if !defined(INCLUDE_base_timer_timer_h)
 #define INCLUDE_base_timer_timer_h
 
+#include "base/base_export.h"
+#include "base/basictypes.h"
 #include "base/memory/ref_counted.h"
 
 namespace base {
 namespace impl {
 
-struct TimerEntry;
+struct BASE_EXPORT TimerEntry;
 
-class AbstractTimer {
+class BASE_EXPORT AbstractTimer {
   friend class TimerController;
   private: base::scoped_refptr<TimerEntry> entry_;
   protected: AbstractTimer();

@@ -17,6 +17,7 @@
 #include "./vi_Frame.h"
 
 #include "base/tree/ancestors_or_self.h"
+#include "base/win/naitive_window.h"
 #include "./ctrl_TabBand.h"
 #include "./ed_Mode.h"
 #include "./gfx_base.h"
@@ -28,7 +29,6 @@
 #include "./vi_Selection.h"
 #include "./vi_Style.h"
 #include "./vi_util.h"
-#include "widgets/naitive_window.h"
 
 #include <dwmapi.h>
 #pragma comment(lib, "dwmapi.lib")

@@ -6,8 +6,8 @@
 #if !defined(INCLUDE_gfx_base_h)
 #define INCLUDE_gfx_base_h
 
+#include "base/win/rect.h"
 #include "base/win/scoped_comptr.h"
-#include "gfx/rect.h"
 #include "gfx/rect_f.h"
 #include "./li_util.h"
 
@@ -28,6 +28,10 @@
 #pragma warning(default: 4625)
 
 namespace gfx {
+
+typedef base::win::Point Point;
+typedef base::win::Rect Rect;
+typedef base::win::Size Size;
 
 class Object {
   protected: Object() {}

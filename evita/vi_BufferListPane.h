@@ -65,7 +65,7 @@ class BufferListPane : public CommandWindow_<BufferListPane, Pane> {
   // [O]
   private: void onKeyDown(uint);
   private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
-  private: virtual void OnPaint(const gfx::Rect rect) override;
+  private: virtual void OnPaint(const base::win::Rect rect) override;
 
   DISALLOW_COPY_AND_ASSIGN(BufferListPane);
 };

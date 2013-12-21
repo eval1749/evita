@@ -31,7 +31,7 @@ class Pane : public CommandWindow_<Pane>, public ChildNode_<Frame, Pane> {
   protected: const char16*    m_pwszName;
 
   // ctor
-  protected: Pane(std::unique_ptr<widgets::NaitiveWindow>&&);
+  protected: Pane(std::unique_ptr<base::win::NaitiveWindow>&&);
   protected: Pane();
 
   // [A]
@@ -40,7 +40,9 @@ class Pane : public CommandWindow_<Pane>, public ChildNode_<Frame, Pane> {
   // [G]
   public: uint GetActiveTick() const { return m_nActiveTick; }
   public: static const char* GetClass_() { return "Pane"; }
-  public: virtual HCURSOR GetCursorAt(const gfx::Point&) const { return nullptr; }
+  public: virtual HCURSOR GetCursorAt(const base::win::Point&) const {
+    return nullptr;
+  }
 
   public: Frame*   GetFrame() const { return m_pParent; }
   public: const char16*  GetName()  const { return m_pwszName; }

@@ -1,11 +1,14 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_gfx_size_h)
-#define INCLUDE_gfx_size_h
+#if !defined(INCLUDE_base_win_size_h)
+#define INCLUDE_base_win_size_h
 
-namespace gfx {
+#include "base/base_export.h"
 
-struct Size : SIZE {
+namespace base {
+namespace win {
+
+struct BASE_EXPORT Size : SIZE {
   Size() {
     cx = cy = 0;
   }
@@ -23,6 +26,7 @@ struct Size : SIZE {
 #define DEBUG_SIZE_ARG(mp_size) \
  (mp_size).cx, (mp_size).cy
 
-} // namespace gfx
+} // namespace win
+} // namespace base
 
-#endif //!defined(INCLUDE_gfx_size_h)
+#endif //!defined(INCLUDE_base_win_size_h)

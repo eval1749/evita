@@ -1,35 +1,43 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_widgets_naitive_widget_h)
-#define INCLUDE_widgets_naitive_window_h
+#if !defined(INCLUDE_base_win_native_window_h)
+#define INCLUDE_base_win_native_window_h
 
-#include "./li_util.h"
-#include "widgets/widget.h"
+#include "base/base_export.h"
+#include "base/logging.h"
+#include "base/strings/string16.h"
+#include <memory>
 
-#define MY_VK_CONTROL   0x100
-#define MY_VK_SHIFT     0x200
+namespace base {
+namespace win {
 
-namespace widgets {
+struct Point;
+struct Size;
+
+interface BASE_EXPORT MessageDelegate {
+  virtual ~MessageDelegate();
+  virtual LRESULT WindowProc(uint message, WPARAM wParam, LPARAM lParam) = 0;
+};
 
 //////////////////////////////////////////////////////////////////////
 //
 // NaitiveWindow
 //
-class NaitiveWindow {
+class BASE_EXPORT NaitiveWindow {
   protected: HWND hwnd_;
-  private: Widget* widget_;
+  private: MessageDelegate* message_delegate_;
 
-  private: explicit NaitiveWindow(const Widget& widget);
+  private: explicit NaitiveWindow(const MessageDelegate& message_delegate);
 
-  // For Widget-less naitive window.
+  // For MessageDelegate-less naitive window.
   protected: explicit NaitiveWindow();
 
-  // Make destructor of NaitiveWindow for OwnPtr<T>. You should not
+  // Make destructor of NaitiveWindow for std::unique_ptr<T>. You should not
   // call |delete| for NaitiveWindow.
   public: virtual ~NaitiveWindow();
 
   public: operator HWND() const {
-    ASSERT(hwnd_);
+    DCHECK(hwnd_);
     return hwnd_;
   }
 
@@ -38,7 +46,7 @@ class NaitiveWindow {
   }
 
   public: bool operator==(HWND hwnd) const {
-    ASSERT(hwnd_);
+    DCHECK(hwnd_);
     return hwnd_ == hwnd;
   }
 
@@ -47,24 +55,26 @@ class NaitiveWindow {
   }
 
   public: bool operator!=(HWND hwnd) const {
-    ASSERT(hwnd_);
+    DCHECK(hwnd_);
     return hwnd_ == hwnd;
   }
 
   // [C]
-  public: static std::unique_ptr<NaitiveWindow> Create(const Widget& widget);
+  public: static std::unique_ptr<NaitiveWindow> Create(
+      const MessageDelegate& message_delegate);
   public: static std::unique_ptr<NaitiveWindow> Create();
   public: bool CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
-                              const char16* title, HWND parent_hwnd,
-                              const gfx::Point& left_top,
-                              const gfx::Size& size);
+                              const base::char16* title, HWND parent_hwnd,
+                              const Point& left_top,
+                              const Size& size);
 
   // [D]
   public: void Destroy();
   public: LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 
   // [I]
-  public: static int Init();
+  public: static void Init(HINSTANCE hInstance, HINSTANCE hResouce);
+  public: static void Init(HINSTANCE hInstance);
   public: virtual bool IsRealized() const { return hwnd_; }
 
   // [M]
@@ -86,6 +96,7 @@ class NaitiveWindow {
   DISALLOW_COPY_AND_ASSIGN(NaitiveWindow);
 };
 
-} // namespace widgets
+} // namespace win
+} // namespace base
 
-#endif //!defined(INCLUDE_widgets_naitive_widget_h)
+#endif //!defined(INCLUDE_base_win_native_window_h)

@@ -1,14 +1,16 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_gfx_rect_h)
-#define INCLUDE_gfx_rect_h
+#if !defined(INCLUDE_base_win_rect_h)
+#define INCLUDE_base_win_rect_h
 
-#include "gfx/point.h"
-#include "gfx/size.h"
+#include "base/base_export.h"
+#include "base/win/point.h"
+#include "base/win/size.h"
 
-namespace gfx {
+namespace base {
+namespace win {
 
-struct Rect : RECT {
+struct BASE_EXPORT Rect : RECT {
   Rect() {
     left = right = top = bottom =0;
   }
@@ -46,6 +48,7 @@ struct Rect : RECT {
 #define DEBUG_RECT_ARG(mp_rect) \
  (mp_rect).left, (mp_rect).top, (mp_rect).width(), (mp_rect).height()
 
-} // namespace gfx
+} // namespace win
+} // namespace base
 
-#endif //!defined(INCLUDE_gfx_rect_h)
+#endif //!defined(INCLUDE_base_win_rect_h)

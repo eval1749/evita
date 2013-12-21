@@ -12,14 +12,14 @@
 #define INCLUDE_listener_winapp_visual_defs_h
 
 #include "./resource.h"
-#include "gfx/rect.h"
+#include "base/win/rect.h"
 
-// TODO: We should get rid of |using gfx::Point|.
-using gfx::Point;
-// TODO: We should get rid of |using gfx::Size|.
-using gfx::Size;
-// TODO: We should get rid of |using gfx::Rect|.
-using gfx::Rect;
+// TODO: We should use as |base::win::Point|.
+using base::win::Point;
+// TODO: We should use as |base::win::Rect|.
+using base::win::Rect;
+// TODO: We should use as |base::win::Size|.
+using base::win::Size;
 
 extern HINSTANCE g_hInstance;
 extern HINSTANCE g_hResource;

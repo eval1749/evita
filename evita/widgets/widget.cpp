@@ -6,7 +6,6 @@
 #include "base/tree/ancestors_or_self.h"
 #include "base/tree/descendants_or_self.h"
 #include "widgets/container_widget.h"
-#include "widgets/naitive_window.h"
 
 #define DEBUG_FOCUS 0
 #define DEBUG_RESIZE 0
@@ -109,7 +108,7 @@ void Widget::DidDestroyNaitiveWindow() {
   Destroy();
 }
 
-HCURSOR Widget::GetCursorAt(const gfx::Point&) const {
+HCURSOR Widget::GetCursorAt(const Point&) const {
   return nullptr;
 }
 
@@ -128,27 +127,27 @@ bool Widget::OnIdle(uint) {
   return false;
 }
 
-void Widget::OnLeftButtonDown(uint, const gfx::Point&) {
+void Widget::OnLeftButtonDown(uint, const Point&) {
 }
 
-void Widget::OnLeftButtonUp(uint, const gfx::Point&) {
+void Widget::OnLeftButtonUp(uint, const Point&) {
 }
 
 LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
     case WM_LBUTTONDOWN:
       OnLeftButtonDown(static_cast<uint>(wParam), 
-                       gfx::Point(MAKEPOINTS(lParam)));
+                       Point(MAKEPOINTS(lParam)));
       return 0;
 
     case WM_LBUTTONUP:
       OnLeftButtonUp(static_cast<uint>(wParam), 
-                     gfx::Point(MAKEPOINTS(lParam)));
+                     Point(MAKEPOINTS(lParam)));
       return 0;
 
     case WM_MOUSEMOVE:
       OnMouseMove(static_cast<uint>(wParam), 
-                  gfx::Point(MAKEPOINTS(lParam)));
+                  Point(MAKEPOINTS(lParam)));
       return 0;
   }
   if (naitive_window_)
@@ -156,13 +155,13 @@ LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
   return container_widget().OnMessage(message, wParam, lParam);
 }
 
-void Widget::OnMouseMove(uint, const gfx::Point&) {
+void Widget::OnMouseMove(uint, const Point&) {
 }
 
-void Widget::OnPaint(const gfx::Rect) {
+void Widget::OnPaint(const Rect) {
 }
 
-void Widget::Realize(const gfx::Rect& rect) {
+void Widget::Realize(const Rect& rect) {
   ASSERT(parent_node());
   ASSERT(container_widget().is_realized());
   if (is_realized()) {
@@ -201,7 +200,7 @@ void Widget::ReleaseCapture() const {
   container_widget().ReleaseCaptureFrom(*this);
 }
 
-void Widget::ResizeTo(const gfx::Rect& rect) {
+void Widget::ResizeTo(const Rect& rect) {
   ASSERT(realized_);
 
 #if 0

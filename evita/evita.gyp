@@ -92,10 +92,7 @@
         'vi_TextEditWindow.cpp',
         'z_debug.cpp',
 
-        'base/timer/timer.cpp',
-        'gfx/rect.cpp',
         'widgets/container_widget.cpp',
-        'widgets/naitive_window.cpp',
         'widgets/widget.cpp',
 
         '../charset/CharsetDecoder.cpp',

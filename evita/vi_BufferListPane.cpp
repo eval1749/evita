@@ -11,6 +11,7 @@
 //
 #include "./vi_BufferListPane.h"
 
+#include "base/win/naitive_window.h"
 #include "./cm_CmdProc.h"
 #include "./ed_Mode.h"
 
@@ -19,7 +20,6 @@
 #include "./vi_Buffer.h"
 #include "./vi_EditPane.h"
 #include "./vi_Frame.h"
-#include "widgets/naitive_window.h"
 
 #define DEBUG_FOCUS _DEBUG
 
@@ -321,7 +321,7 @@ LRESULT BufferListPane::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
   return Pane::OnMessage(uMsg, wParam, lParam);
 }
 
-void BufferListPane::OnPaint(const gfx::Rect) {
+void BufferListPane::OnPaint(const base::win::Rect) {
   ::InvalidateRect(m_hwndListView, nullptr, true);
   ::UpdateWindow(m_hwndListView);
 }

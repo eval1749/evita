@@ -14,7 +14,7 @@ namespace logging {
       (a), (b), #a, #b, #op, __FILE__, __LINE__, __FUNCTION__)
 
 #define DCHECK(expr) \
-  ::logging::CheckTrue((expr), #expr, \
+  ::logging::CheckTrue(static_cast<bool>(expr), #expr, \
       __FILE__, __LINE__, __FUNCTION__)
 
 #else

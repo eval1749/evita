@@ -326,6 +326,11 @@ char16* lstrrchrW(const char16*, char16);
 // e.g. We don't want to have |case State_Limit|, |cast Kind_Max|, etc.
 #pragma warning(disable: 4062)
 
+// warning  C4251: 'identifier' : class 'type' needs to have dll-interface to
+// be used by clients of class 'type2'
+// Example: std::unique_ptr<T>
+#pragma warning(disable: 4251)
+
 // TODO: We should not disable warning C4350.
 // warning C4350: behavior change: 'member1' called instead of 'member2'
 // An rvalue cannot be bound to a non-const reference. In previous versions

@@ -20,7 +20,7 @@
 
 namespace gfx {
 class Graphics;
-struct Rect;
+using base::win::Rect;
 }
 
 /// <summary>

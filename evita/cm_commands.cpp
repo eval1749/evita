@@ -22,7 +22,7 @@
 #include "./vi_EditPane.h"
 #include "./vi_Selection.h"
 #include "./vi_TextEditWindow.h"
-
+#include <memory>
 
 namespace Command
 {
@@ -1192,7 +1192,10 @@ DEFCOMMAND(ShowV8Console) {
     }
   }
 
-  frame.AddPane(new EditPane(&v8_buffer));
+  std::unique_ptr<EditPane> pane(new EditPane(&v8_buffer));
+  pane->GetActiveWindow()->GetSelection()->SetRange(
+      v8_buffer.GetEnd(), v8_buffer.GetEnd());
+  frame.AddPane(pane.release());
 }
 
 DEFCOMMAND(SplitWindowHorizontally)

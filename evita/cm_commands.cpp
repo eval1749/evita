@@ -14,6 +14,7 @@
 
 #include "./ed_Mode.h"
 
+#include "evita/v8_glue/v8_console_buffer.h"
 #include "./vi_Application.h"
 #include "./vi_Buffer.h"
 #include "./vi_FileDialogBox.h"
@@ -1178,6 +1179,22 @@ DEFCOMMAND(SelectAll)
     pSelection->SetStartIsActive(false);
 } // SelectAll
 
+DEFCOMMAND(ShowV8Console) {
+  if (!pCtx->GetSelection())
+    return;
+  auto& v8_buffer = v8_glue::V8ConsoleBuffer::instance();
+  auto& frame = *Application::Get()->GetActiveFrame();
+  for (auto& pane: frame.panes()) {
+    auto const present = pane.DynamicCast<EditPane>();
+    if (present && v8_buffer == present->GetBuffer()) {
+      pane.Activate();
+      return;
+    }
+  }
+
+  frame.AddPane(new EditPane(&v8_buffer));
+}
+
 DEFCOMMAND(SplitWindowHorizontally)
 {
     if (NULL == pCtx->GetSelection()) return;
@@ -1710,6 +1727,7 @@ void Processor::GlobalInit()
     // Ctrl+Shift
     BIND_KEY(Mod_CtrlShift | 'C', CapitalizeSelection);
     BIND_KEY(Mod_CtrlShift | 'D', DowncaseSelection);
+    BIND_KEY(Mod_CtrlShift | 'J', ShowV8Console);
     BIND_KEY(Mod_CtrlShift | 'N', NewFileInNewFrame);
     BIND_KEY(Mod_CtrlShift | 'O', OpenFileInNewFrame);
     BIND_KEY(Mod_CtrlShift | 'U', UpcaseSelection);

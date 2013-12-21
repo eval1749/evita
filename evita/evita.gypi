@@ -45,6 +45,7 @@
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/regex/regex.gyp:regex_lib',
+        '<(DEPTH)/third_party/v8/tools/gyp/v8.gyp:v8',
       ], # dependencies
       'sources': [
         'precomp.cpp',
@@ -96,6 +97,10 @@
         'vi_Selection.cpp',
         'vi_Style.cpp',
         'vi_TextEditWindow.cpp',
+
+        'v8_glue/context_holder.cc',
+        'v8_glue/per_context_data.cc',
+        'v8_glue/v8_console_buffer.cc',
 
         'widgets/container_widget.cpp',
         'widgets/widget.cpp',

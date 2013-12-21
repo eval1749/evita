@@ -8,6 +8,7 @@
 
   'includes': [
     'evita.gypi',
+    'evita_test.gypi',
   ], # includes
 
   'target_defaults': {

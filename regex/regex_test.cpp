@@ -911,10 +911,3 @@ TEST_F(RegexTest, Capture) {
 }
 
 } // RegexTest
-
-// gtest_main.cc doesn't have "extern C".
-int __cdecl main(int argc, char **argv) {
-  printf("Running main() from gtest_main.cc\n");
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

@@ -14,6 +14,7 @@ namespace content {
 class BufferListWindow
     : public CommandWindow_<BufferListWindow, ContentWindow> {
   DECLARE_CASTABLE_CLASS(BufferListWindow, ContentWindow);
+
   private: typedef CommandWindow_ ParentClass;
 
   private: enum Constant {

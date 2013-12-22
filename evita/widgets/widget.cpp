@@ -387,3 +387,22 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
 }
 
 } // namespace widgets
+
+namespace logging {
+
+base::string16 ToString16(const widgets::Widget& widget) {
+  auto const class_name8 = widget.class_name();
+  base::string16 class_name16(::lstrlenA(class_name8), ' ');
+  auto runner8 = class_name8;
+  for (auto& it: class_name16) {
+    it = *runner8;
+    ++runner8;
+  }
+  class_name16 += '@x';
+  base::char16 address[20];
+  ::wsprintfW(address, L"@%p",  &widget);
+  class_name16 += address;
+  return std::move(class_name16);
+}
+
+}  // namespace logging

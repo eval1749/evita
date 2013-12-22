@@ -74,4 +74,10 @@ class ContainerWidget
 
 } // namespace widgets
 
+namespace logging {
+inline base::string16 ToString16(const widgets::ContainerWidget& widget) {
+  return ToString16(static_cast<const widgets::Widget&>(widget));
+}
+} // logging
+
 #endif //!defined(INCLUDE_widgets_container_widget_h)

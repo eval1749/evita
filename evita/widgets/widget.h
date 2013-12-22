@@ -132,4 +132,8 @@ class Widget
 
 } // namespace widgets
 
+#include "base/logging.h"
+namespace logging {
+base::string16 ToString16(const widgets::Widget&);
+}
 #endif //!defined(INCLUDE_widgets_widget_h)

@@ -353,13 +353,16 @@ void BufferListPane::Refresh() {
     // State
     {
       auto it = buffer.windows().begin();
-      ++it;
+      if (it != buffer.windows().end())
+        ++it;
 
       char16* pwsz = wsz;
       *pwsz++ = static_cast<char16>(buffer.IsModified() ? '*' : '-');
       *pwsz++ = static_cast<char16>(buffer.IsReadOnly() ? '%' : '-');
       *pwsz++ = static_cast<char16>(buffer.IsNotReady() ? '!' : '-');
-      *pwsz++ = static_cast<char16>(it == buffer.windows().end() ? '-' : 'w');
+      *pwsz++ = static_cast<char16>(
+        it == buffer.windows().begin() ? '-' :
+            it == buffer.windows().end() ? '1' : 'w');
       *pwsz = 0;
 
       oItem.iSubItem = 2;

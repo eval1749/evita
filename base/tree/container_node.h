@@ -96,8 +96,8 @@ class ContainerNode_ : public NodeClass {
     if (previous) {
       previous->next_sibling_ = &node;
     } else {
-      ASSERT(first_child_ == ref_child)
-      first_child = &node;
+      ASSERT(first_child_ == ref_node)
+      first_child_ = &node;
     }
     ref_node->previous_sibling_ = &node;
     node.next_sibling_ = ref_node;

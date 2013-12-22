@@ -828,8 +828,7 @@ static void activateLastWindow(Pane* pPane)
 //
 DEFCOMMAND(NextWindow)
 {
-    TextEditWindow* pWindow = pCtx->GetWindow()->
-        DynamicCast<TextEditWindow>();
+    auto* pWindow = pCtx->GetWindow();
 
     Pane* pPane;
 
@@ -839,9 +838,9 @@ DEFCOMMAND(NextWindow)
     }
     else
     {
-        if (NULL != pWindow->GetNext())
+        if (auto const next_sibling = pWindow->next_sibling())
         {
-            pWindow->GetNext()->Activate();
+            next_sibling->SetFocus();
             return;
         }
 
@@ -1013,9 +1012,9 @@ DEFCOMMAND(PreviousWindow)
     }
     else
     {
-        if (NULL != pWindow->GetPrev())
+        if (auto const previous_sibling = pWindow->previous_sibling())
         {
-            pWindow->GetPrev()->Activate();
+            previous_sibling->SetFocus();
             return;
         }
 

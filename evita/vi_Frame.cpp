@@ -152,7 +152,9 @@ void Frame::AddTab(Pane* const pane) {
   ASSERT(m_hwndTabBand);
   TCITEM tab_item;
   tab_item.mask = TCIF_TEXT | TCIF_PARAM;
-  tab_item.pszText = const_cast<char16*>(pane->GetName());
+  char16 name[100];
+  pane->GetTitle(name, arraysize(name));
+  tab_item.pszText = name;
   tab_item.lParam = reinterpret_cast<LPARAM>(pane);
 
   if (auto const edit_pane = pane->DynamicCast<EditPane>()) {

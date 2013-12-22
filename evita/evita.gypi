@@ -39,6 +39,7 @@
         'ap_input_history.cpp',
         'cm_CmdProc.cpp',
         'cm_commands.cpp',
+        'content/content_window.cc',
         'ctrl_StatusBar.cpp',
         'ctrl_TabBand.cpp',
         'ctrl_TitleBar.cpp',

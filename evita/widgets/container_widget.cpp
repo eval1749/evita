@@ -9,6 +9,7 @@
 #include "base/tree/descendants.h"
 #include "base/tree/descendants_or_self.h"
 #include "base/win/naitive_window.h"
+#include "evita/widgets/root_widget.h"
 #include <algorithm>
 
 #define DEBUG_FOCUS 0
@@ -93,7 +94,7 @@ ContainerWidget& ContainerWidget::GetHostContainer() const {
     if (runner.naitive_window())
        return const_cast<ContainerWidget&>(runner);
   }
-  CAN_NOT_HAPPEN();
+  return RootWidget::instance();
 }
 
 Widget* ContainerWidget::GetWidgetAt(const Point& point) const {

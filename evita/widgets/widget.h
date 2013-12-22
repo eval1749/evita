@@ -51,12 +51,10 @@ class Widget
   public: bool is_realized() const { return realized_; }
   public: bool is_shown() const { return shown_; }
   // Expose |is_top_level()| for iterator.
-  public: virtual bool is_top_level() const { return false; }
   protected: NaitiveWindow* naitive_window() const {
     return naitive_window_.get();
   }
   public: const Rect& rect() const { return rect_; }
-  public: static ContainerWidget& top_level_widget();
 
   // [A]
   public: HWND AssociatedHwnd() const;

@@ -71,6 +71,7 @@
         'v8_glue/v8_console_buffer.cc',
 
         'widgets/container_widget.cpp',
+        'widgets/root_widget.cc',
         'widgets/widget.cpp',
       ], # sources
     }, # evita

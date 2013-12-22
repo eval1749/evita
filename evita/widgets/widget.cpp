@@ -5,7 +5,8 @@
 
 #include "base/tree/ancestors_or_self.h"
 #include "base/tree/descendants_or_self.h"
-#include "widgets/container_widget.h"
+#include "evita/widgets/container_widget.h"
+#include "evita/widgets/root_widget.h"
 
 #define DEBUG_FOCUS 0
 #define DEBUG_RESIZE 0
@@ -16,15 +17,6 @@
 #endif
 
 namespace widgets {
-
-namespace {
-class TopLevelWidget : public ContainerWidget {
-  public: TopLevelWidget() {
-  }
-  private: virtual bool is_top_level() const { return true; }
-  DISALLOW_COPY_AND_ASSIGN(TopLevelWidget);
-};
-}
 
 Widget::Widget(std::unique_ptr<NaitiveWindow>&& naitive_window)
     : naitive_window_(std::move(naitive_window)),
@@ -56,13 +48,6 @@ bool Widget::has_focus() const {
     }
   }
   return false;
-}
-
-ContainerWidget& Widget::top_level_widget() {
-  static ContainerWidget* top_level_widget;
-  if (!top_level_widget)
-    top_level_widget = new TopLevelWidget();
-  return *top_level_widget;
 }
 
 HWND Widget::AssociatedHwnd() const {
@@ -187,7 +172,7 @@ void Widget::Realize(const Rect& rect) {
 void Widget::RealizeTopLevelWidget() {
   ASSERT(naitive_window_);
   ASSERT(!realized_);
-  top_level_widget().AppendChild(*this);
+  RootWidget::instance().AppendChild(*this);
   realized_ = true;
   CreateNaitiveWindow();
 }

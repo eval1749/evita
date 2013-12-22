@@ -63,7 +63,7 @@ void BASE_EXPORT CheckTrue(
 
 template<typename T>
 base::string16 ToString16(const T& value) {
-  std::basic_ostringstream<char16> stream;
+  std::basic_ostringstream<base::char16> stream;
   stream << value;
   return stream.str();
 }

@@ -11,6 +11,9 @@
         'sources': [
           'logging.cc',
           'timer/timer.cc',
+          'strings/string_piece.cc',
+          'strings/string_util.cc',
+          'strings/utf_string_conversions.cc',
           'win/naitive_window.cc',
           'win/rect.cc',
         ], # sources

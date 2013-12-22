@@ -1,6 +1,6 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#include "base/win/naitive_window.h"
+#include "base/win/native_window.h"
 
 #include "base/win/point.h"
 #include "base/win/size.h"
@@ -10,7 +10,7 @@ namespace win {
 
 namespace {
 ATOM s_window_class;
-NaitiveWindow* s_creating_window;
+NativeWindow* s_creating_window;
 HINSTANCE s_hInstance;
 HINSTANCE s_hResource;
 } // namespace
@@ -24,18 +24,18 @@ MessageDelegate::~MessageDelegate() {
 
 //////////////////////////////////////////////////////////////////////
 //
-// NaitiveWindow
+// NativeWindow
 //
-NaitiveWindow::NaitiveWindow(const MessageDelegate& message_delegate)
+NativeWindow::NativeWindow(const MessageDelegate& message_delegate)
     : hwnd_(nullptr),
       message_delegate_(const_cast<MessageDelegate*>(&message_delegate)) {
 }
 
-NaitiveWindow::NaitiveWindow()
+NativeWindow::NativeWindow()
     : hwnd_(nullptr), message_delegate_(nullptr) {
 }
 
-NaitiveWindow::~NaitiveWindow() {
+NativeWindow::~NativeWindow() {
   #if DEBUG_DESTROY
     DEBUG_PRINTF("%p " DEBUG_MESSAGE_DELEGATE_FORMAT "\n", this,
         DEBUG_MESSAGE_DELEGATE_ARG(message_delegate_));
@@ -44,17 +44,17 @@ NaitiveWindow::~NaitiveWindow() {
   DCHECK(!message_delegate_);
 }
 
-std::unique_ptr<NaitiveWindow> NaitiveWindow::Create(
+std::unique_ptr<NativeWindow> NativeWindow::Create(
     const MessageDelegate& message_delegate) {
-  return std::move(std::unique_ptr<NaitiveWindow>(
-      new NaitiveWindow(message_delegate)));
+  return std::move(std::unique_ptr<NativeWindow>(
+      new NativeWindow(message_delegate)));
 }
 
-std::unique_ptr<NaitiveWindow> NaitiveWindow::Create() {
-  return std::unique_ptr<NaitiveWindow>();
+std::unique_ptr<NativeWindow> NativeWindow::Create() {
+  return std::unique_ptr<NativeWindow>();
 }
 
-bool NaitiveWindow::CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
+bool NativeWindow::CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
                                   const char16* title, HWND parent_hwnd, 
                                   const Point& left_top,
                                   const Size& size) {
@@ -74,7 +74,7 @@ bool NaitiveWindow::CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
     wc.hCursor = nullptr;
     wc.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);
     wc.lpszMenuName = nullptr;
-    wc.lpszClassName = L"EvitaNaitiveWindow";
+    wc.lpszClassName = L"EvitaNativeWindow";
     #pragma warning(suppress: 4302)
     wc.hIconSm  = ::LoadIconW(s_hResource, MAKEINTRESOURCE(IDI_APPLICATION));
     s_window_class = ::RegisterClassExW(&wc);
@@ -86,17 +86,17 @@ bool NaitiveWindow::CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
                           parent_hwnd, nullptr, s_hInstance, 0);
 }
 
-void NaitiveWindow::Destroy() {
+void NativeWindow::Destroy() {
   DCHECK(IsRealized());
   ::DestroyWindow(hwnd_);
 }
 
-LRESULT NaitiveWindow::DefWindowProc(UINT message, WPARAM wParam,
+LRESULT NativeWindow::DefWindowProc(UINT message, WPARAM wParam,
                                     LPARAM lParam) {
   return ::DefWindowProc(hwnd_, message, wParam, lParam);
 }
 
-void NaitiveWindow::Init(HINSTANCE hInstance, HINSTANCE hResource) {
+void NativeWindow::Init(HINSTANCE hInstance, HINSTANCE hResource) {
   DCHECK(hInstance);
   DCHECK(hResource);
   DCHECK(!s_hInstance);
@@ -105,17 +105,17 @@ void NaitiveWindow::Init(HINSTANCE hInstance, HINSTANCE hResource) {
   s_hResource = hResource;
 }
 
-void NaitiveWindow::Init(HINSTANCE hInstance) {
+void NativeWindow::Init(HINSTANCE hInstance) {
   Init(hInstance, hInstance);
 }
 
-NaitiveWindow* NaitiveWindow::MapHwnToNaitiveWindow(HWND const hwnd) {
+NativeWindow* NativeWindow::MapHwnToNativeWindow(HWND const hwnd) {
   DCHECK(hwnd);
-  return reinterpret_cast<NaitiveWindow*>(
+  return reinterpret_cast<NativeWindow*>(
     static_cast<LONG_PTR>(::GetWindowLongPtrW(hwnd, GWLP_USERDATA)));
 }
 
-LRESULT CALLBACK NaitiveWindow::WindowProc(HWND hwnd, UINT message,
+LRESULT CALLBACK NativeWindow::WindowProc(HWND hwnd, UINT message,
                                            WPARAM wParam, LPARAM  lParam) {
 
   if (auto const window = s_creating_window) {
@@ -126,7 +126,7 @@ LRESULT CALLBACK NaitiveWindow::WindowProc(HWND hwnd, UINT message,
     return window->WindowProc(message, wParam, lParam);
   }
 
-  auto const window = MapHwnToNaitiveWindow(hwnd);
+  auto const window = MapHwnToNativeWindow(hwnd);
   DCHECK(window);
   if (message == WM_NCDESTROY) {
     window->hwnd_ = nullptr;
@@ -139,7 +139,7 @@ LRESULT CALLBACK NaitiveWindow::WindowProc(HWND hwnd, UINT message,
   return window->WindowProc(message, wParam, lParam);
 }
 
-LRESULT NaitiveWindow::WindowProc(UINT message, WPARAM wParam,
+LRESULT NativeWindow::WindowProc(UINT message, WPARAM wParam,
                                   LPARAM lParam) {
   if (message_delegate_)
     return message_delegate_->WindowProc(message, wParam, lParam);

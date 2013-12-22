@@ -23,8 +23,8 @@ class KeyBindEntry;
 //
 class CommandWindow : public widgets::ContainerWidget {
     protected: CommandWindow(
-        std::unique_ptr<widgets::NaitiveWindow>&& naitive_window)
-        : widgets::ContainerWidget(std::move(naitive_window)) {
+        std::unique_ptr<widgets::NativeWindow>&& native_window)
+        : widgets::ContainerWidget(std::move(native_window)) {
     }
 
     protected: CommandWindow() {
@@ -51,8 +51,8 @@ template<class T, class Parent_ = CommandWindow>
 class CommandWindow_ : public Parent_ 
 {
     protected: CommandWindow_(
-        std::unique_ptr<widgets::NaitiveWindow>&& naitive_window)
-      : Parent_(std::move(naitive_window)) {
+        std::unique_ptr<widgets::NativeWindow>&& native_window)
+      : Parent_(std::move(native_window)) {
     }
 
     protected: CommandWindow_() {

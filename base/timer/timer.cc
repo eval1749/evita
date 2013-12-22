@@ -5,7 +5,7 @@
 
 #include "base/logging.h"
 #include "base/memory/singleton.h"
-#include "base/win/naitive_window.h"
+#include "base/win/native_window.h"
 #include "base/win/point.h"
 #include "base/win/size.h"
 #include <memory>
@@ -34,7 +34,7 @@ struct BASE_EXPORT TimerEntry : RefCounted<TimerEntry> {
 class TimerController : public Singleton<TimerController> {
   friend class Singleton<TimerController>;
 
-  private: class MessageWindow : public base::win::NaitiveWindow {
+  private: class MessageWindow : public base::win::NativeWindow {
     public: MessageWindow() = default;
     public: virtual ~MessageWindow() = default;
     DISALLOW_COPY_AND_ASSIGN(MessageWindow);

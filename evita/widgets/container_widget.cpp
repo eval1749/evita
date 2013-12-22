@@ -8,7 +8,7 @@
 #include "base/tree/child_nodes.h"
 #include "base/tree/descendants.h"
 #include "base/tree/descendants_or_self.h"
-#include "base/win/naitive_window.h"
+#include "base/win/native_window.h"
 #include "evita/widgets/root_widget.h"
 #include <algorithm>
 
@@ -20,14 +20,14 @@
 namespace widgets {
 
 ContainerWidget::ContainerWidget(
-    std::unique_ptr<NaitiveWindow>&& naitive_window)
-    : ContainerNode_(std::move(naitive_window)),
+    std::unique_ptr<NativeWindow>&& native_window)
+    : ContainerNode_(std::move(native_window)),
       capture_widget_(nullptr),
       focus_widget_(nullptr) {
 }
 
 ContainerWidget::ContainerWidget()
-    : ContainerWidget(NaitiveWindow::Create()) {
+    : ContainerWidget(NativeWindow::Create()) {
 }
 
 ContainerWidget::~ContainerWidget() {
@@ -62,7 +62,7 @@ void ContainerWidget::DidShow() {
 
 void ContainerWidget::DispatchPaintMessage() {
   Rect exposed_rect;
-  if (!::GetUpdateRect(*naitive_window(), &exposed_rect, false))
+  if (!::GetUpdateRect(*native_window(), &exposed_rect, false))
     return;
   #if DEBUG_PAINT
     DEBUG_WIDGET_PRINTF("Start " DEBUG_RECT_FORMAT "\n", 
@@ -75,7 +75,7 @@ void ContainerWidget::DispatchPaintMessage() {
   #endif
 
    for (auto& child : child_nodes()) {
-    if (!child.is_shown() || child.has_naitive_window())
+    if (!child.is_shown() || child.has_native_window())
       continue;
     auto const rect = exposed_rect.Intersect(child.rect());
     if (rect) {
@@ -97,7 +97,7 @@ void ContainerWidget::DispatchPaintMessage() {
 
 ContainerWidget& ContainerWidget::GetHostContainer() const {
   for (auto& runner: base::tree::ancestors_or_self(*this)) {
-    if (runner.naitive_window())
+    if (runner.native_window())
        return const_cast<ContainerWidget&>(runner);
   }
   return RootWidget::instance();
@@ -161,14 +161,14 @@ void ContainerWidget::SetCaptureTo(const Widget& widget) {
         DEBUG_WIDGET_ARG(host.capture_widget_), DEBUG_WIDGET_ARG(&widget));
   #endif
   if (!host.capture_widget_)
-    ::SetCapture(*host.naitive_window());
+    ::SetCapture(*host.native_window());
   host.capture_widget_ = const_cast<Widget*>(&widget);
 }
 
 bool ContainerWidget::SetCursor() {
   Point point;
   WIN32_VERIFY(::GetCursorPos(&point));
-  WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *naitive_window(),
+  WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *native_window(),
                                  &point, 1));
   auto const widget = GetWidgetAt(point);
   if (!widget)
@@ -181,15 +181,15 @@ bool ContainerWidget::SetCursor() {
 }
 
 void ContainerWidget::SetFocusTo(const Widget& widget) {
-  if (!naitive_window()) {
+  if (!native_window()) {
     GetHostContainer().SetFocusTo(widget);
     return;
   }
 
-  auto const hwnd = static_cast<HWND>(*naitive_window());
+  auto const hwnd = static_cast<HWND>(*native_window());
 
   #if DEBUG_FOCUS
-    DEBUG_WIDGET_PRINTF("naitive_focus=%d"
+    DEBUG_WIDGET_PRINTF("native_focus=%d"
                         " new=" DEBUG_WIDGET_FORMAT
                         " cur=" DEBUG_WIDGET_FORMAT "\n",
         ::GetFocus() == hwnd,
@@ -253,7 +253,7 @@ LRESULT ContainerWidget::WindowProc(UINT message, WPARAM wParam,
 
     case WM_PAINT:
       DispatchPaintMessage();
-      ::ValidateRect(*naitive_window(), nullptr);
+      ::ValidateRect(*native_window(), nullptr);
       return 0;
 
     case WM_SETCURSOR:
@@ -286,7 +286,7 @@ LRESULT ContainerWidget::WindowProc(UINT message, WPARAM wParam,
       // rather than active widget.
       Point point(MAKEPOINTS(lParam));
       if (message == WM_MOUSEWHEEL) {
-        WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *naitive_window(),
+        WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *native_window(),
                                        &point, 1));
       }
       #if DEBUG_MOUSE

@@ -14,7 +14,7 @@
           'strings/string_piece.cc',
           'strings/string_util.cc',
           'strings/utf_string_conversions.cc',
-          'win/naitive_window.cc',
+          'win/native_window.cc',
           'win/rect.cc',
         ], # sources
       }], # base_target==1

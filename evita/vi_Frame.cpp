@@ -1,3 +1,4 @@
+
 #include "precomp.h"
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -17,7 +18,7 @@
 #include "./vi_Frame.h"
 
 #include "base/tree/ancestors_or_self.h"
-#include "base/win/naitive_window.h"
+#include "base/win/native_window.h"
 #include "./ctrl_TabBand.h"
 #include "./ed_Mode.h"
 #include "./gfx_base.h"
@@ -99,7 +100,7 @@ extern uint g_TabBand__TabDragMsg;
 
 Frame::Frame()
     : ALLOW_THIS_IN_INITIALIZER_LIST(
-          widgets::ContainerWidget(widgets::NaitiveWindow::Create(*this))),
+          widgets::ContainerWidget(widgets::NativeWindow::Create(*this))),
       gfx_(new gfx::Graphics()),
       m_hwndTabBand(nullptr),
       m_pActivePane(nullptr) {
@@ -115,11 +116,11 @@ Frame::~Frame() {
 }
 
 Frame::operator HWND() const {
-  return *naitive_window();
+  return *native_window();
 }
 
 bool Frame::Activate() {
-  return ::SetForegroundWindow(*naitive_window());
+  return ::SetForegroundWindow(*native_window());
 }
 
 void Frame::AddPane(Pane* const pane) {
@@ -272,8 +273,8 @@ void Frame::DidChangeTabSelection(int selected_index) {
   #endif
 }
 
-void Frame::DidCreateNaitiveWindow() {
-  ::DragAcceptFiles(*naitive_window(), TRUE);
+void Frame::DidCreateNativeWindow() {
+  ::DragAcceptFiles(*native_window(), TRUE);
 
   {
     m_hwndTabBand = ::CreateWindowEx(
@@ -282,7 +283,7 @@ void Frame::DidCreateNaitiveWindow() {
         nullptr,
         WS_CHILD | WS_VISIBLE | TCS_TOOLTIPS,
         0, 0, 0, 0,
-        *naitive_window(),
+        *native_window(),
         reinterpret_cast<HMENU>(CtrlId_TabBand),
         g_hInstance,
         nullptr);
@@ -299,11 +300,11 @@ void Frame::DidCreateNaitiveWindow() {
     m_cyTabBand = rc.bottom - rc.top;
   }
 
-  m_oStatusBar.Realize(*naitive_window(), CtrlId_StatusBar);
-  m_oTitleBar.Realize(*naitive_window());
+  m_oStatusBar.Realize(*native_window(), CtrlId_StatusBar);
+  m_oTitleBar.Realize(*native_window());
 
-  CompositionState::Update(*naitive_window());
-  gfx_->Init(*naitive_window());
+  CompositionState::Update(*native_window());
+  gfx_->Init(*native_window());
 
   ASSERT(!m_oPanes.IsEmpty());
   auto const pane_rect = GetPaneRect();
@@ -626,7 +627,7 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
                          LPARAM const lParam) {
   switch (uMsg) {
     case WM_DWMCOMPOSITIONCHANGED:
-      CompositionState::Update(*naitive_window());
+      CompositionState::Update(*native_window());
       // FALLTHROUGH
 
     case WM_ACTIVATE: {
@@ -635,7 +636,7 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
         margins.cxRightWidth = 0;
         margins.cyBottomHeight = 0;
         margins.cyTopHeight = CompositionState::IsEnabled() ? m_cyTabBand : 0;
-        auto const hr = ::DwmExtendFrameIntoClientArea(*naitive_window(),
+        auto const hr = ::DwmExtendFrameIntoClientArea(*native_window(),
                                                        &margins);
         if (FAILED(hr)) {
           DEBUG_PRINTF("DwmExtendFrameIntoClientArea hr=0x%08X\n", hr);
@@ -663,21 +664,21 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
     case WM_NCHITTEST:
       if (CompositionState::IsEnabled()) {
         LRESULT lResult;
-        if (::DwmDefWindowProc(*naitive_window(), uMsg, wParam, lParam, &lResult))
+        if (::DwmDefWindowProc(*native_window(), uMsg, wParam, lParam, &lResult))
             return lResult;
 
         POINT const ptMouse = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
         RECT rcWindow;
-        ::GetWindowRect(*naitive_window(), &rcWindow);
+        ::GetWindowRect(*native_window(), &rcWindow);
 
         RECT rcClient = { 0 };
         ::AdjustWindowRectEx(
             &rcClient,
             static_cast<DWORD>(
-                ::GetWindowLong(*naitive_window(), GWL_STYLE)),
+                ::GetWindowLong(*native_window(), GWL_STYLE)),
             false,
             static_cast<DWORD>(
-                ::GetWindowLong(*naitive_window(), GWL_EXSTYLE)));
+                ::GetWindowLong(*native_window(), GWL_EXSTYLE)));
 
         if (ptMouse.y >= rcWindow.top
             && ptMouse.y < rcWindow.top - rcClient.top + m_cyTabBand) {
@@ -786,7 +787,7 @@ bool Frame::onTabDrag(TabBandDragAndDrop const eAction,
 /// <summary>
 ///   Realize this frame.
 /// </summary>
-void Frame::CreateNaitiveWindow() const {
+void Frame::CreateNativeWindow() const {
   int const cColumns = 80;
   int const cRows    = 40;
 
@@ -817,7 +818,7 @@ void Frame::CreateNaitiveWindow() const {
   Rect rcWork;
   ::SystemParametersInfo(SPI_GETWORKAREA, 0, &rcWork, 0);
 
-  naitive_window()->CreateWindowEx(
+  native_window()->CreateWindowEx(
       dwExStyle, dwStyle, L"", nullptr,
       gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
       gfx::Size(rc.width(), rcWork.height() * 4 / 5));

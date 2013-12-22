@@ -34,11 +34,11 @@ class BufferListWindow
 
   // [C]
   private: static int CALLBACK compareItems(LPARAM, LPARAM, LPARAM);
-  protected: virtual void CreateNaitiveWindow() const override;
+  protected: virtual void CreateNativeWindow() const override;
 
   // [D]
   private: virtual void DidChangeHierarchy() override;
-  private: virtual void DidCreateNaitiveWindow() override;
+  private: virtual void DidCreateNativeWindow() override;
   private: virtual void DidResize() override;
   private: virtual void DidSetFocus() override;
   private: void dragFinish(POINT);

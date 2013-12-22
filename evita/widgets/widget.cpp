@@ -18,14 +18,14 @@
 
 namespace widgets {
 
-Widget::Widget(std::unique_ptr<NaitiveWindow>&& naitive_window)
-    : naitive_window_(std::move(naitive_window)),
+Widget::Widget(std::unique_ptr<NativeWindow>&& native_window)
+    : native_window_(std::move(native_window)),
       realized_(false),
       shown_(0) {
 }
 
 Widget::Widget()
-    : Widget(NaitiveWindow::Create()) {
+    : Widget(NativeWindow::Create()) {
 }
 
 Widget::~Widget() {
@@ -33,12 +33,12 @@ Widget::~Widget() {
     DEBUG_WIDGET_PRINTF("realized=%d show=%d " DEBUG_RECT_FORMAT "\n",
         realized_, shown_, DEBUG_RECT_ARG(rect_));
   #endif
-  ASSERT(!naitive_window_);
+  ASSERT(!native_window_);
 }
 
 bool Widget::has_focus() const {
   for (auto& runner: base::tree::ancestors_or_self(*this)) {
-    if (auto const window = runner.naitive_window_.get()) {
+    if (auto const window = runner.native_window_.get()) {
       if (::GetFocus() != *window)
         return false;
       if (runner == this)
@@ -52,13 +52,13 @@ bool Widget::has_focus() const {
 
 HWND Widget::AssociatedHwnd() const {
   for (auto& runner: base::tree::ancestors_or_self(*this)) {
-    if (auto const window = runner.naitive_window_.get())
+    if (auto const window = runner.native_window_.get())
       return *window;
   }
   CAN_NOT_HAPPEN();
 }
 
-void Widget::CreateNaitiveWindow() const {
+void Widget::CreateNativeWindow() const {
 }
 
 void Widget::Destroy() {
@@ -66,8 +66,8 @@ void Widget::Destroy() {
     DEBUG_WIDGET_PRINTF("realized=%d show=%d " DEBUG_RECT_FORMAT "\n",
         realized_, shown_, DEBUG_RECT_ARG(rect_));
   #endif
-  if (naitive_window_) {
-    ::DestroyWindow(*naitive_window_.get());
+  if (native_window_) {
+    ::DestroyWindow(*native_window_.get());
     return;
   }
   WillDestroyWidget();
@@ -79,16 +79,16 @@ void Widget::Destroy() {
 void Widget::DidChangeHierarchy() {
 }
 
-void Widget::DidCreateNaitiveWindow() {
+void Widget::DidCreateNativeWindow() {
 }
 
-void Widget::DidDestroyNaitiveWindow() {
+void Widget::DidDestroyNativeWindow() {
   #if DEBUG_DESTROY
     DEBUG_WIDGET_PRINTF("realized=%d show=%d " DEBUG_RECT_FORMAT "\n",
         realized_, shown_, DEBUG_RECT_ARG(rect_));
   #endif
-  ASSERT(!naitive_window_);
-  // Since naitive window, which handles UI, is destroyed, this widget should
+  ASSERT(!native_window_);
+  // Since native window, which handles UI, is destroyed, this widget should
   // be destroyed too.
   Destroy();
 }
@@ -102,8 +102,8 @@ void Widget::Hide() {
     DEBUG_WIDGET_PRINTF("focus=%d show=%d\n", has_focus(), shown_);
   #endif
   shown_ = 0;
-  if (naitive_window_)
-    ::ShowWindow(*naitive_window_.get(), SW_HIDE);
+  if (native_window_)
+    ::ShowWindow(*native_window_.get(), SW_HIDE);
   else
     DidHide();
 }
@@ -135,8 +135,8 @@ LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
                   Point(MAKEPOINTS(lParam)));
       return 0;
   }
-  if (naitive_window_)
-    return naitive_window_->DefWindowProc(message, wParam, lParam);
+  if (native_window_)
+    return native_window_->DefWindowProc(message, wParam, lParam);
   return container_widget().OnMessage(message, wParam, lParam);
 }
 
@@ -150,7 +150,7 @@ void Widget::Realize(const Rect& rect) {
   ASSERT(parent_node());
   ASSERT(container_widget().is_realized());
   if (is_realized()) {
-    if (auto const window = naitive_window())
+    if (auto const window = native_window())
       ::SetParent(*window, container_widget().AssociatedHwnd());
     DidChangeHierarchy();
     ResizeTo(rect);
@@ -159,9 +159,9 @@ void Widget::Realize(const Rect& rect) {
 
   realized_ = true;
   rect_ = rect;
-  if (naitive_window_) {
-    // On WM_CREATE, we call DidCreateNaitiveWindow() instead of DidRealized().
-    CreateNaitiveWindow();
+  if (native_window_) {
+    // On WM_CREATE, we call DidCreateNativeWindow() instead of DidRealized().
+    CreateNativeWindow();
     return;
   }
 
@@ -170,15 +170,15 @@ void Widget::Realize(const Rect& rect) {
 }
 
 void Widget::RealizeTopLevelWidget() {
-  ASSERT(naitive_window_);
+  ASSERT(native_window_);
   ASSERT(!realized_);
   RootWidget::instance().AppendChild(*this);
   realized_ = true;
-  CreateNaitiveWindow();
+  CreateNativeWindow();
 }
 
 void Widget::ReleaseCapture() const {
-  if (naitive_window_) {
+  if (native_window_) {
     ::ReleaseCapture();
     return;
   }
@@ -193,8 +193,8 @@ void Widget::ResizeTo(const Rect& rect) {
   if (rect == rect_)
     return;
 #endif
-  if (naitive_window_) {
-    ::SetWindowPos(*naitive_window_.get(), nullptr, rect.left, rect.top,
+  if (native_window_) {
+    ::SetWindowPos(*native_window_.get(), nullptr, rect.left, rect.top,
                    rect.width(), rect.height(), SWP_NOACTIVATE);
   } else {
     rect_ = rect;
@@ -203,8 +203,8 @@ void Widget::ResizeTo(const Rect& rect) {
 }
 
 void Widget::SetCapture() const {
-  if (naitive_window_) {
-    ::SetCapture(*naitive_window_.get());
+  if (native_window_) {
+    ::SetCapture(*native_window_.get());
     return;
   }
   container_widget().SetCaptureTo(*this);
@@ -215,8 +215,8 @@ void Widget::SetFocus() {
     DEBUG_WIDGET_PRINTF("focus=%d show=%d\n", has_focus(), shown_);
   #endif
   // This wieget might be hidden during creating window.
-  if (naitive_window_) {
-    ::SetFocus(*naitive_window_.get());
+  if (native_window_) {
+    ::SetFocus(*native_window_.get());
     return;
   }
   container_widget().SetFocusTo(*this);
@@ -232,7 +232,7 @@ void Widget::SetParentWidget(const ContainerWidget& new_parent) {
   }
   const_cast<ContainerWidget&>(new_parent).AppendChild(*this);
   if (new_parent.is_realized()) {
-    if (auto const window = naitive_window())
+    if (auto const window = native_window())
       ::SetParent(*window, new_parent.AssociatedHwnd());
     DidChangeHierarchy();
   }
@@ -246,8 +246,8 @@ void Widget::Show() {
     DEBUG_WIDGET_PRINTF("focus=%d show=%d\n", has_focus(), shown_);
   #endif
   ++shown_;
-  if (naitive_window_) {
-    ::ShowWindow(*naitive_window_.get(), SW_SHOW);
+  if (native_window_) {
+    ::ShowWindow(*native_window_.get(), SW_SHOW);
   } else if (shown_ == 1) {
     DidShow();
     OnPaint(rect());
@@ -261,7 +261,7 @@ void Widget::WillDestroyWidget() {
   #endif
 }
 
-void Widget::WillDestroyNaitiveWindow() {
+void Widget::WillDestroyNativeWindow() {
   #if DEBUG_DESTROY
     DEBUG_WIDGET_PRINTF("realized=%d show=%d " DEBUG_RECT_FORMAT "\n",
         realized_, shown_, DEBUG_RECT_ARG(rect_));
@@ -269,17 +269,17 @@ void Widget::WillDestroyNaitiveWindow() {
 }
 
 LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
-  ASSERT(naitive_window_);
+  ASSERT(native_window_);
   switch (message) {
     case WM_CREATE:
       if (reinterpret_cast<CREATESTRUCT*>(lParam)->style & WS_VISIBLE)
         ++shown_;
-      ::GetClientRect(*naitive_window_.get(), &rect_);
-      DidCreateNaitiveWindow();
+      ::GetClientRect(*native_window_.get(), &rect_);
+      DidCreateNativeWindow();
       return 0;
 
     case WM_DESTROY:
-      WillDestroyNaitiveWindow();
+      WillDestroyNativeWindow();
       return 0;
 
     case WM_KILLFOCUS:
@@ -287,10 +287,10 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       return 0;
 
     case WM_NCDESTROY:
-      ASSERT(naitive_window_);
-      // NaitiveWindow::WindowProc() will delete |naitive_window_|.
-      naitive_window_.release();
-      DidDestroyNaitiveWindow();
+      ASSERT(native_window_);
+      // NativeWindow::WindowProc() will delete |native_window_|.
+      native_window_.release();
+      DidDestroyNativeWindow();
       return 0;
 
     case WM_SETFOCUS:
@@ -357,12 +357,12 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       if (!(wp->flags & 0x10000000) && (wp->flags & SWP_NOSIZE))
         return 0;
 
-      if (::IsIconic(*naitive_window_.get())) {
+      if (::IsIconic(*native_window_.get())) {
         // We don't take care miminize window.
         return 0;
       }
 
-      ::GetClientRect(*naitive_window_.get(), &rect_);
+      ::GetClientRect(*native_window_.get(), &rect_);
       DidResize();
       return 0;
     }

@@ -91,14 +91,14 @@ class Frame final : public widgets::ContainerWidget,
 
   // [C]
   private: bool canClose();
-  private: virtual void CreateNaitiveWindow() const override;
+  private: virtual void CreateNativeWindow() const override;
 
   // [D]
   private: virtual void DidAddChildWidget(
       const Widget& widget) override;
   public: void DidActivatePane(Pane*);
   private: void DidChangeTabSelection(int selected_index);
-  private: virtual void DidCreateNaitiveWindow() override;
+  private: virtual void DidCreateNativeWindow() override;
   private: virtual void DidRemoveChildWidget(
       const Widget& widget) override;
   private: virtual void DidResize() override;

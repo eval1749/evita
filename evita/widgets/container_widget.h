@@ -14,14 +14,14 @@ class ConstChildWidgets;
 class ContainerWidget 
     : public base::tree::ContainerNode_<
           Widget, ContainerWidget,
-          std::unique_ptr<base::win::NaitiveWindow>&&> {
+          std::unique_ptr<base::win::NativeWindow>&&> {
   DECLARE_CASTABLE_CLASS(ContainerWidget, Widget);
 
   private: Widget* capture_widget_;
   private: Widget* focus_widget_;
 
   protected: explicit ContainerWidget(
-      std::unique_ptr<base::win::NaitiveWindow>&& naitive_window);
+      std::unique_ptr<base::win::NativeWindow>&& native_window);
   protected: ContainerWidget();
   public: virtual ~ContainerWidget();
 

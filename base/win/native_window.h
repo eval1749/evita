@@ -21,27 +21,27 @@ interface BASE_EXPORT MessageDelegate {
 
 //////////////////////////////////////////////////////////////////////
 //
-// NaitiveWindow
+// NativeWindow
 //
-class BASE_EXPORT NaitiveWindow {
+class BASE_EXPORT NativeWindow {
   protected: HWND hwnd_;
   private: MessageDelegate* message_delegate_;
 
-  private: explicit NaitiveWindow(const MessageDelegate& message_delegate);
+  private: explicit NativeWindow(const MessageDelegate& message_delegate);
 
-  // For MessageDelegate-less naitive window.
-  protected: explicit NaitiveWindow();
+  // For MessageDelegate-less native window.
+  protected: explicit NativeWindow();
 
-  // Make destructor of NaitiveWindow for std::unique_ptr<T>. You should not
-  // call |delete| for NaitiveWindow.
-  public: virtual ~NaitiveWindow();
+  // Make destructor of NativeWindow for std::unique_ptr<T>. You should not
+  // call |delete| for NativeWindow.
+  public: virtual ~NativeWindow();
 
   public: operator HWND() const {
     DCHECK(hwnd_);
     return hwnd_;
   }
 
-  public: bool operator==(const NaitiveWindow* other) const {
+  public: bool operator==(const NativeWindow* other) const {
     return this == other;
   }
 
@@ -50,7 +50,7 @@ class BASE_EXPORT NaitiveWindow {
     return hwnd_ == hwnd;
   }
 
-  public: bool operator!=(const NaitiveWindow* other) const {
+  public: bool operator!=(const NativeWindow* other) const {
     return this != other;
   }
 
@@ -60,9 +60,9 @@ class BASE_EXPORT NaitiveWindow {
   }
 
   // [C]
-  public: static std::unique_ptr<NaitiveWindow> Create(
+  public: static std::unique_ptr<NativeWindow> Create(
       const MessageDelegate& message_delegate);
-  public: static std::unique_ptr<NaitiveWindow> Create();
+  public: static std::unique_ptr<NativeWindow> Create();
   public: bool CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
                               const base::char16* title, HWND parent_hwnd,
                               const Point& left_top,
@@ -78,7 +78,7 @@ class BASE_EXPORT NaitiveWindow {
   public: virtual bool IsRealized() const { return hwnd_; }
 
   // [M]
-  protected: static NaitiveWindow* MapHwnToNaitiveWindow(HWND);
+  protected: static NativeWindow* MapHwnToNativeWindow(HWND);
 
   // [S]
   public: LRESULT SendMessage(uint uMsg, WPARAM wParam = 0,
@@ -93,7 +93,7 @@ class BASE_EXPORT NaitiveWindow {
   public: virtual LRESULT WindowProc(UINT message, WPARAM wParam,
                                      LPARAM lParam);
 
-  DISALLOW_COPY_AND_ASSIGN(NaitiveWindow);
+  DISALLOW_COPY_AND_ASSIGN(NativeWindow);
 };
 
 } // namespace win

@@ -31,7 +31,7 @@ class Pane : public CommandWindow_<Pane>, public ChildNode_<Frame, Pane> {
   protected: const char16*    m_pwszName;
 
   // ctor
-  protected: Pane(std::unique_ptr<base::win::NaitiveWindow>&&);
+  protected: Pane(std::unique_ptr<base::win::NativeWindow>&&);
   protected: Pane();
 
   // [A]

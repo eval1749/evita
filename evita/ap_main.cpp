@@ -15,7 +15,7 @@
 #define DEBUG_BUSY 0
 #define DEBUG_IDLE 0
 
-#include "base/win/naitive_window.h"
+#include "base/win/native_window.h"
 
 #if USE_LISTENER
     #include "./ap_listener_buffer.h"
@@ -268,7 +268,7 @@ static int MainLoop(EnumArg* pEnumArg) {
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
-  base::win::NaitiveWindow::Init(hInstance);
+  base::win::NativeWindow::Init(hInstance);
   g_hInstance = hInstance;
   g_hResource = hInstance;
 

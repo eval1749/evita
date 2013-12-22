@@ -325,7 +325,7 @@ IoManager::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
         return 0;
     } // switch message
 
-    return NaitiveWindow::WindowProc(uMsg, wParam, lParam);
+    return NativeWindow::WindowProc(uMsg, wParam, lParam);
 } // IoManager::onMessage
 
 

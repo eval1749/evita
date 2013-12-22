@@ -2,7 +2,7 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #include "evita/content/buffer_list_window.h"
 
-#include "base/win/naitive_window.h"
+#include "base/win/native_window.h"
 #include "evita/cm_CmdProc.h"
 #include "evita/ed_Mode.h"
 
@@ -72,7 +72,7 @@ Command::KeyBinds* BufferListWindow::sm_pKeyBinds;
 
 BufferListWindow::BufferListWindow()
     : ALLOW_THIS_IN_INITIALIZER_LIST(
-          CommandWindow_(widgets::NaitiveWindow::Create(*this))),
+          CommandWindow_(widgets::NativeWindow::Create(*this))),
       m_pDragItem(nullptr),
       m_hwndListView(nullptr) {
 }
@@ -110,8 +110,8 @@ int CALLBACK BufferListWindow::compareItems(LPARAM a, LPARAM b, LPARAM) {
 }
 
 // Creates host window for ListViewControl
-void BufferListWindow::CreateNaitiveWindow() const {
-  naitive_window()->CreateWindowEx(0, WS_CHILD | WS_VISIBLE,
+void BufferListWindow::CreateNativeWindow() const {
+  native_window()->CreateWindowEx(0, WS_CHILD | WS_VISIBLE,
                                    L"Buffer List",
                                    container_widget().AssociatedHwnd(),
                                    rect().left_top(), rect().size());
@@ -206,7 +206,7 @@ void BufferListWindow::DidChangeHierarchy() {
   ::SetParent(m_hwndListView, AssociatedHwnd());
 }
 
-void BufferListWindow::DidCreateNaitiveWindow() {
+void BufferListWindow::DidCreateNativeWindow() {
   DEBUG_WIDGET_PRINTF("shown=%d " DEBUG_RECT_FORMAT "\n", is_shown(),
       DEBUG_RECT_ARG(rect()));
 
@@ -227,7 +227,7 @@ void BufferListWindow::DidCreateNaitiveWindow() {
                                     dwStyle,
                                     0, 0,
                                     rect().width(), rect().height(),
-                                    *naitive_window(),
+                                    *native_window(),
                                     reinterpret_cast<HMENU>(ListViewId),
                                     g_hInstance,
                                     nullptr);

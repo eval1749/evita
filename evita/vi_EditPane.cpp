@@ -1306,36 +1306,10 @@ HCURSOR EditPane::GetCursorAt(const gfx::Point& point) const {
 }
 
 int EditPane::GetTitle(char16* out_wszTitle, int cchTitle) {
-  auto const pBuffer = GetActiveWindow()->GetBuffer();
-  auto const pwszName = pBuffer->GetName();
-  auto const cwchName = ::lstrlenW(pwszName);
-
-  auto const cwchExtra = pBuffer->IsModified() ? 3 : 1;
-
-  auto cwch = cwchName;
-  if (cchTitle < cwchName + cwchExtra) {
-    cwch = cchTitle - 2;
-  }
-
-  myCopyMemory(
-      out_wszTitle,
-      pwszName,
-      sizeof(char16) * cwch);
-
-  auto pwch = out_wszTitle + cwch;
-
-  if (cwch != cwchName) {
-    *pwch++ = '.';
-    *pwch++ = '.';
-  }
-
-  if (pBuffer->IsModified()) {
-    *pwch++ = ' ';
-    *pwch++ = '*';
-  }
-
-  *pwch = 0;
-  return static_cast<int>(pwch - out_wszTitle);
+  const auto& title = GetActiveWindow()->GetTitle(cchTitle);
+  ::CopyMemory(out_wszTitle, title.data(), title.size() * sizeof(char16));
+  out_wszTitle[title.size()] = 0;
+  return static_cast<int>(title.size());
 }
 
 Command::KeyBindEntry* EditPane::MapKey(uint nKey) {
@@ -1360,27 +1334,6 @@ void EditPane::OnLeftButtonUp(uint, const gfx::Point& point) {
 
 void EditPane::OnMouseMove(uint, const gfx::Point& point) {
   splitter_controller_->Move(point);
-}
-
-void EditPane::setupStatusBar() {
-  static const int rgiWidth[] = {
-      25, // ins/ovf
-      70, // posn
-      40, // column
-      50, // line
-      32, // newline
-      50, // code page
-      70, // mode
-      0,
-  };
-
-  int rgiRight[ARRAYSIZE(rgiWidth)];
-  auto iRight = frame().GetCxStatusBar();
-  for (auto i = 0u; i < ARRAYSIZE(rgiRight); i++) {
-    rgiRight[ARRAYSIZE(rgiRight) - i - 1] = iRight;
-    iRight -= rgiWidth[i];
-  }
-  frame().SetStatusBarParts(rgiRight, lengthof(rgiRight));
 }
 
 EditPane::Window* EditPane::SplitHorizontally() {
@@ -1418,71 +1371,7 @@ EditPane::Window* EditPane::SplitVertically() {
 }
 
 void EditPane::UpdateStatusBar() {
-  static const char16* const k_rgwszNewline[4] = {
-    L"--",
-    L"LF",
-    L"CR",
-    L"CRLF",
-  };
-
-  setupStatusBar();
-
-  auto const pBuffer = GetActiveWindow()->GetBuffer();
-
-  frame().ShowMessage(
-      MessageLevel_Idle,
-      static_cast<uint>(
-        pBuffer->IsNotReady()
-            ? IDS_STATUS_BUSY
-            : GetActiveWindow()->has_focus()
-                ? IDS_STATUS_READY
-                : 0
-     ));
-
-  frame().SetStatusBarf(
-      StatusBarPart_Mode,
-      pBuffer->GetMode()->GetName());
-
-  frame().SetStatusBarf(
-      StatusBarPart_CodePage,
-      L"CP%u",
-      pBuffer->GetCodePage());
-
-  frame().SetStatusBarf(
-      StatusBarPart_Newline,
-      k_rgwszNewline[pBuffer->GetNewline()]);
-
-  auto const pSelection = GetActiveWindow()->GetSelection();
-
-  // FIXME 2007-07-18 yosi We should use lazy evaluation object for
-  // computing line number of column or cache.
-  Selection::Information oInfo;
-  pSelection->GetInformation(&oInfo);
-
-  frame().SetStatusBarf(
-      StatusBarPart_LineNumber,
-      L"Ln %d%s",
-      oInfo.m_lLineNum,
-      oInfo.m_fLineNum ? L"" : L"+");
-
-  frame().SetStatusBarf(
-      StatusBarPart_Column,
-      L"Cn %d%s",
-      oInfo.m_lColumn,
-      oInfo.m_fColumn ? L"" : L"+");
-
-  frame().SetStatusBarf(
-      StatusBarPart_Posn,
-      L"Ch %d",
-      pSelection->IsStartActive() ?
-          pSelection->GetStart() : pSelection->GetEnd());
-
-  // FIXME 2007-07-25 yosi@msn.com We need to show "OVR" if
-  // we are in overwrite mode.
-  frame().SetStatusBarf(
-      StatusBarPart_Insert,
-      pBuffer->IsReadOnly() ? L"R/O" : L"INS",
-      pBuffer->GetStart());
+  GetActiveWindow()->UpdateStatusBar();
 }
 
 void EditPane::WillDestroyWidget() {

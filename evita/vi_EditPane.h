@@ -32,17 +32,6 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
     k_cyMinBox = k_cySplitter,
   };
 
-  private: enum StatusBarPart {
-    StatusBarPart_Message,
-    StatusBarPart_Mode,
-    StatusBarPart_CodePage,
-    StatusBarPart_Newline,
-    StatusBarPart_LineNumber,
-    StatusBarPart_Column,
-    StatusBarPart_Posn,
-    StatusBarPart_Insert,
-  };
-
   private: typedef TextEditWindow Window;
   private: typedef DoubleLinkedList_<Window> Windows;
 
@@ -110,7 +99,6 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
   private: virtual void OnMouseMove(uint flags, const Point&) override;
 
   // [S]
-  private: void setupStatusBar();
   public: Window* SplitHorizontally();
   public: Window* SplitVertically();
 

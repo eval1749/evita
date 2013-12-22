@@ -22,6 +22,7 @@
 #include "./vi_TextEditWindow.h"
 
 #include "base/timer/timer.h"
+#include "./ed_Mode.h"
 #include "./ed_Style.h"
 #include "./gfx_base.h"
 #include "./vi_Application.h"
@@ -44,10 +45,14 @@ uint TranslateKey(uint);
 }
 
 namespace {
-
-static uint s_active_tick;
-
-} // namespace
+Frame& GetFrame(const widgets::Widget& widget) {
+  for (auto runner = &widget; runner; runner = &runner->container_widget()) {
+    if (runner->is<Frame>())
+      return *const_cast<Frame*>(runner->as<const Frame>());
+  }
+  CAN_NOT_HAPPEN();
+}
+}  //namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -135,7 +140,6 @@ TextEditWindow::TextEditWindow(void* pvHost, Buffer* pBuffer, Posn lStart)
       m_eDragMode(DragMode_None),
       m_gfx(nullptr),
       m_lCaretPosn(-1),
-      m_nActiveTick(0),
       m_pPage(new Page()),
       ALLOW_THIS_IN_INITIALIZER_LIST(selection_(
           new(pBuffer->GetHeap()) Selection(this, pBuffer))),
@@ -333,10 +337,9 @@ void TextEditWindow::DidSetFocus() {
   #if DEBUG_FOCUS
     DEBUG_TEXT_EDIT_PRINTF("focus=%d show=%d\n", has_focus(), is_shown());
   #endif
+  ParentClass::DidSetFocus();
   // Note: It is OK to set focus to hidden window.
   caret_->Take(*m_gfx);
-  s_active_tick += 1;
-  m_nActiveTick = s_active_tick;
   GetBuffer()->UpdateFileStatus(true);
   ASSERT(has_focus());
 }
@@ -460,6 +463,23 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
   return 0;
 }
 
+base::string16 TextEditWindow::GetTitle(size_t max_length) const {
+  auto& buffer = *GetBuffer();
+  auto const name = buffer.GetName();
+  auto const name_length = static_cast<size_t>(::lstrlenW(name));
+  auto const elipsis_length = static_cast<size_t>(
+      name_length > max_length ? 2 : 0);
+  auto const mark_length = static_cast<size_t>(
+      buffer.IsModified() ? 2 : 0);
+
+  base::string16 title(name, name_length - elipsis_length - mark_length);
+  if (elipsis_length)
+    title += L"..";
+  if (mark_length)
+    title += L" *";
+  return title;
+}
+
 Command::KeyBindEntry* TextEditWindow::MapKey(uint nKey) {
   return GetBuffer()->MapKey(nKey);
 }
@@ -565,7 +585,6 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
       #if DEBUG_DESTROY
         DEBUG_TEXT_EDIT_PRINTF("WM_DESTROY\n");
       #endif
-      m_nActiveTick = 0;
       break;
 
     case WM_APPCOMMAND:
@@ -1020,7 +1039,107 @@ void TextEditWindow::updateScrollBar() {
   m_oVertScrollBar.SetInfo(&oInfo, true);
 }
 
+namespace {
+enum StatusBarPart {
+    StatusBarPart_Message,
+    StatusBarPart_Mode,
+    StatusBarPart_CodePage,
+    StatusBarPart_Newline,
+    StatusBarPart_LineNumber,
+    StatusBarPart_Column,
+    StatusBarPart_Posn,
+    StatusBarPart_Insert,
+  };
+
+void SetupStatusBar(Frame* frame) {
+  static const int rgiWidth[] = {
+      25, // ins/ovf
+      70, // posn
+      40, // column
+      50, // line
+      32, // newline
+      50, // code page
+      70, // mode
+      0,
+  };
+
+  int rgiRight[ARRAYSIZE(rgiWidth)];
+  auto iRight = frame->GetCxStatusBar();
+  for (auto i = 0u; i < ARRAYSIZE(rgiRight); i++) {
+    rgiRight[ARRAYSIZE(rgiRight) - i - 1] = iRight;
+    iRight -= rgiWidth[i];
+  }
+  frame->SetStatusBarParts(rgiRight, lengthof(rgiRight));
+}
+}  // namespace
+
+void TextEditWindow::UpdateStatusBar() const {
+  static const char16* const k_rgwszNewline[4] = {
+    L"--",
+    L"LF",
+    L"CR",
+    L"CRLF",
+  };
+
+  auto& frame = GetFrame(*this);
+
+  SetupStatusBar(&frame);
+
+  auto& buffer = *GetBuffer();
+
+  frame.ShowMessage(
+      MessageLevel_Idle,
+      static_cast<uint>(
+        buffer.IsNotReady() ? IDS_STATUS_BUSY : has_focus() ?
+            IDS_STATUS_READY : 0));
+
+  frame.SetStatusBarf(
+      StatusBarPart_Mode,
+      buffer.GetMode()->GetName());
+
+  frame.SetStatusBarf(
+      StatusBarPart_CodePage,
+      L"CP%u",
+      buffer.GetCodePage());
+
+  frame.SetStatusBarf(
+      StatusBarPart_Newline,
+      k_rgwszNewline[buffer.GetNewline()]);
+
+  auto& selection = *GetSelection();
+
+  // FIXME 2007-07-18 yosi We should use lazy evaluation object for
+  // computing line number of column or cache.
+  Selection::Information oInfo;
+  selection.GetInformation(&oInfo);
+
+  frame.SetStatusBarf(
+      StatusBarPart_LineNumber,
+      L"Ln %d%s",
+      oInfo.m_lLineNum,
+      oInfo.m_fLineNum ? L"" : L"+");
+
+  frame.SetStatusBarf(
+      StatusBarPart_Column,
+      L"Cn %d%s",
+      oInfo.m_lColumn,
+      oInfo.m_fColumn ? L"" : L"+");
+
+  frame.SetStatusBarf(
+      StatusBarPart_Posn,
+      L"Ch %d",
+      selection.IsStartActive() ? selection.GetStart() : selection.GetEnd());
+
+  // FIXME 2007-07-25 yosi@msn.com We need to show "OVR" if
+  // we are in overwrite mode.
+  frame.SetStatusBarf(
+      StatusBarPart_Insert,
+      buffer.IsReadOnly() ? L"R/O" : L"INS",
+      buffer.GetStart());
+}
+
 void TextEditWindow::WillDestroyWidget() {
+  ParentClass::WillDestroyWidget();
   GetSelection()->GetBuffer()->RemoveWindow(this);
 }
 

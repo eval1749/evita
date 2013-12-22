@@ -11,6 +11,7 @@
 #if !defined(INCLUDE_listener_winapp_visual_text_pane_h)
 #define INCLUDE_listener_winapp_visual_text_pane_h
 
+#include "evita/content/content_window.h"
 #include "./li_util.h"
 #include "./gfx_base.h"
 #include "./vi_CommandWindow.h"
@@ -38,13 +39,13 @@ enum DragMode
 // A range contains the start position of window.
 //
 class TextEditWindow
-    : public CommandWindow_<TextEditWindow>,
+    : public CommandWindow_<TextEditWindow, content::ContentWindow>,
       public DoubleLinkedNode_<TextEditWindow>,
       public DoubleLinkedNode_<TextEditWindow, Buffer> {
   DECLARE_CASTABLE_CLASS(TextEditWindow, CommandWindow);
 
   private: typedef DoubleLinkedNode_<TextEditWindow> WindowItem;
-  private: typedef CommandWindow ParentClass;
+  private: typedef content::ContentWindow ParentClass;
 
   protected: typedef Edit::Range Range;
 
@@ -87,7 +88,6 @@ class TextEditWindow
   protected: bool m_fHasFocus;
   private: const gfx::Graphics* m_gfx;
   protected: Posn m_lCaretPosn;
-  protected: uint m_nActiveTick;
   protected: int m_nCharTick;
   protected: ScrollBar m_oHoriScrollBar;
   protected: ScrollBar m_oVertScrollBar;
@@ -134,9 +134,11 @@ class TextEditWindow
   protected: void format(const gfx::Graphics&, Posn);
 
   // [G]
-  public: uint GetActiveTick() const { return m_nActiveTick; }
   public: Buffer* GetBuffer() const;
   public: HCURSOR GetCursorAt(const Point&) const;
+  // TODO(yosi): We should not expose TextEdintWindow::GetTitle(). We export
+  // this for EditPane.
+  public: virtual base::string16 GetTitle(size_t max_length) const override;
 
   public: static const char* GetClass_() { return "TextEditWindow"; }
 
@@ -194,6 +196,9 @@ class TextEditWindow
   // [U]
   protected: void updateScreen();
   protected: void updateScrollBar();
+  // TODO(yosi): We should not expose TextEdintWindow::UpdateStatusBar(). We
+  // export this for EditPane.
+  public: virtual void UpdateStatusBar() const override;
 
   // [W]
   private: virtual void WillDestroyWidget() override;

@@ -1,25 +1,19 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// Editor - Buffer List Pane
-// listener/winapp/vi_Buffer.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
+// Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_BufferListPane.h#1 $
-//
-#if !defined(INCLUDE_visual_BufferListPane_h)
-#define INCLUDE_visual_BufferListPane_h
+#if !defined(INCLUDE_evita_content_buffer_list_window_h)
+#define INCLUDE_evita_content_buffer_list_window_h
 
 #include "evita/content/content_window.h"
 
-#include "./cm_CmdProc.h"
+#include "evita/cm_CmdProc.h"
 
 class Buffer;
 
-class BufferListPane
-    : public CommandWindow_<BufferListPane, content::ContentWindow> {
-  DECLARE_CASTABLE_CLASS(BufferListPane, content::ContentWindow);
+namespace content {
+
+class BufferListWindow
+    : public CommandWindow_<BufferListWindow, content::ContentWindow> {
+  DECLARE_CASTABLE_CLASS(BufferListWindow, content::ContentWindow);
   private: typedef CommandWindow_ ParentClass;
 
   private: enum Constant {
@@ -33,7 +27,7 @@ class BufferListPane
   private: HWND m_hwndListView;
 
   // ctor/dtor
-  public: BufferListPane();
+  public: BufferListWindow();
 
   // [A]
   private: void ActivateBuffers(bool);
@@ -53,7 +47,7 @@ class BufferListPane
   private: void dragStop();
 
   // [G]
-  public: static const char* GetClass_() { return "BufferListPane"; }
+  public: static const char* GetClass_() { return "BufferListWindow"; }
 
   public: HWND GetListWindow() const { return m_hwndListView; }
 
@@ -74,7 +68,9 @@ class BufferListPane
   // [U]
   private: virtual void UpdateStatusBar() const override;
 
-  DISALLOW_COPY_AND_ASSIGN(BufferListPane);
+  DISALLOW_COPY_AND_ASSIGN(BufferListWindow);
 };
 
-#endif //!defined(INCLUDE_visual_BufferListPane_h)
+}  // namespace content
+
+#endif //!defined(INCLUDE_evita_content_buffer_list_window_h)

@@ -1,25 +1,16 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - Buffer List Pane
-// listener/winapp/vi_BufferListPane.cpp
-//
-// Copyright (C) 1996-2007 by Project Vogue.
+// Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_BufferListPane.cpp#2 $
-//
-#include "./vi_BufferListPane.h"
+#include "evita/content/buffer_list_window.h"
 
 #include "base/win/naitive_window.h"
-#include "./cm_CmdProc.h"
-#include "./ed_Mode.h"
+#include "evita/cm_CmdProc.h"
+#include "evita/ed_Mode.h"
 
-#include "./vi_defs.h"
-#include "./vi_Application.h"
-#include "./vi_Buffer.h"
-#include "./vi_EditPane.h"
-#include "./vi_Frame.h"
+#include "evita/vi_defs.h"
+#include "evita/vi_Application.h"
+#include "evita/vi_Buffer.h"
+#include "evita/vi_EditPane.h"
+#include "evita/vi_Frame.h"
 
 #define DEBUG_FOCUS _DEBUG
 
@@ -27,6 +18,8 @@ namespace Command {
 uint TranslateKey(uint);
 DEFCOMMAND(KillBuffers);
 } // namespace Command
+
+namespace {
 
 class EnumItem {
   private: HWND   m_hwnd;
@@ -49,9 +42,6 @@ class EnumItem {
   }
 };
 
-HCURSOR BufferListPane::sm_hDragCursor;
-Command::KeyBinds* BufferListPane::sm_pKeyBinds;
-
 static HCURSOR loadCursor(HCURSOR* inout_hCursor,
                           const char16* pwszDll,
                           uint nId) {
@@ -68,12 +58,19 @@ static HCURSOR loadCursor(HCURSOR* inout_hCursor,
   return hCursor;
 } // loadCursor
 
+}  // naemspace
+
+namespace content {
+
+HCURSOR BufferListWindow::sm_hDragCursor;
+Command::KeyBinds* BufferListWindow::sm_pKeyBinds;
+
 //////////////////////////////////////////////////////////////////////
 //
-// BufferListPane
+// BufferListWindow
 //
 
-BufferListPane::BufferListPane()
+BufferListWindow::BufferListWindow()
     : ALLOW_THIS_IN_INITIALIZER_LIST(
           CommandWindow_(widgets::NaitiveWindow::Create(*this))),
       m_pDragItem(nullptr),
@@ -81,7 +78,7 @@ BufferListPane::BufferListPane()
 }
 
 // Activates the first selected buffer in-place.
-void BufferListPane::ActivateBuffers(bool is_new_frame) {
+void BufferListWindow::ActivateBuffers(bool is_new_frame) {
   LVITEM oItem;
   oItem.iSubItem = 0;
   oItem.mask = LVIF_PARAM;
@@ -106,21 +103,21 @@ void BufferListPane::ActivateBuffers(bool is_new_frame) {
   }
 }
 
-int CALLBACK BufferListPane::compareItems(LPARAM a, LPARAM b, LPARAM) {
+int CALLBACK BufferListWindow::compareItems(LPARAM a, LPARAM b, LPARAM) {
   auto const pa = reinterpret_cast<Buffer*>(a);
   auto const pb = reinterpret_cast<Buffer*>(b);
   return ::lstrcmpW(pa->GetName(), pb->GetName());
 }
 
 // Creates host window for ListViewControl
-void BufferListPane::CreateNaitiveWindow() const {
+void BufferListWindow::CreateNaitiveWindow() const {
   naitive_window()->CreateWindowEx(0, WS_CHILD | WS_VISIBLE,
                                    L"Buffer List",
                                    container_widget().AssociatedHwnd(),
                                    rect().left_top(), rect().size());
 }
 
-void BufferListPane::dragFinish(POINT pt) {
+void BufferListWindow::dragFinish(POINT pt) {
   if (!m_pDragItem)
     return;
   auto const buffer = m_pDragItem;
@@ -136,7 +133,7 @@ void BufferListPane::dragFinish(POINT pt) {
   }
 }
 
-void BufferListPane::dragMove(POINT pt) {
+void BufferListWindow::dragMove(POINT pt) {
   if (!m_pDragItem)
     return;
 
@@ -156,7 +153,7 @@ void BufferListPane::dragMove(POINT pt) {
   ::SetCursor(hCursor);
 }
 
-void BufferListPane::dragStart(int iItem) {
+void BufferListWindow::dragStart(int iItem) {
   if (m_pDragItem)
     return;
 
@@ -178,22 +175,22 @@ void BufferListPane::dragStart(int iItem) {
   }
 }
 
-void BufferListPane::dragStop() {
+void BufferListWindow::dragStop() {
   ::ReleaseCapture();
   m_pDragItem = nullptr;
 }
 
-base::string16 BufferListPane::GetTitle(size_t max_length) const {
+base::string16 BufferListWindow::GetTitle(size_t max_length) const {
   base::string16 title(L"*Buffer List*");
   return std::move(
       title.size() <= max_length ? title : title.substr(0, max_length));
 }
 
-void BufferListPane::MakeSelectionVisible() {
-  // TODO(yosi) Implement BufferListPane::MakeSelectionVisible()
+void BufferListWindow::MakeSelectionVisible() {
+  // TODO(yosi) Implement BufferListWindow::MakeSelectionVisible()
 }
 
-Command::KeyBindEntry* BufferListPane::MapKey(uint nKey) {
+Command::KeyBindEntry* BufferListWindow::MapKey(uint nKey) {
   if (!sm_pKeyBinds) {
     sm_pKeyBinds = new Command::KeyBinds;
     sm_pKeyBinds->Bind(VK_DELETE | 0x100, Command::KillBuffers);
@@ -205,11 +202,11 @@ Command::KeyBindEntry* BufferListPane::MapKey(uint nKey) {
   return Command::g_pGlobalBinds->MapKey(nKey);
 }
 
-void BufferListPane::DidChangeHierarchy() {
+void BufferListWindow::DidChangeHierarchy() {
   ::SetParent(m_hwndListView, AssociatedHwnd());
 }
 
-void BufferListPane::DidCreateNaitiveWindow() {
+void BufferListWindow::DidCreateNaitiveWindow() {
   DEBUG_WIDGET_PRINTF("shown=%d " DEBUG_RECT_FORMAT "\n", is_shown(),
       DEBUG_RECT_ARG(rect()));
 
@@ -269,25 +266,25 @@ void BufferListPane::DidCreateNaitiveWindow() {
   Redraw();
 }
 
-void BufferListPane::DidResize() {
+void BufferListWindow::DidResize() {
   ASSERT(m_hwndListView);
   ::SetWindowPos(m_hwndListView, nullptr, 0, 0,
                  rect().width(), rect().height(),
                  SWP_NOZORDER | SWP_SHOWWINDOW);
 }
 
-void BufferListPane::DidSetFocus() {
+void BufferListWindow::DidSetFocus() {
   ::SetFocus(m_hwndListView);
 }
 
-void BufferListPane::onKeyDown(uint nVKey) {
+void BufferListWindow::onKeyDown(uint nVKey) {
   auto const nKey = Command::TranslateKey(nVKey);
   if (!nKey)
     return;
   Application::Get()->Execute(this, nKey, 0);
 }
 
-LRESULT BufferListPane::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT BufferListWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
   switch (uMsg) {
     case WM_LBUTTONUP: {
       POINT pt;
@@ -328,12 +325,12 @@ LRESULT BufferListPane::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
   return ParentClass::OnMessage(uMsg, wParam, lParam);
 }
 
-void BufferListPane::OnPaint(const base::win::Rect) {
+void BufferListWindow::OnPaint(const base::win::Rect) {
   ::InvalidateRect(m_hwndListView, nullptr, true);
   ::UpdateWindow(m_hwndListView);
 }
 
-void BufferListPane::Redraw() {
+void BufferListWindow::Redraw() {
   ListView_DeleteAllItems(m_hwndListView);
 
   for (auto& buffer: Application::Get()->buffers()) {
@@ -410,14 +407,18 @@ void BufferListPane::Redraw() {
   ListView_SetItemState(m_hwndListView, 0, state, state);
 }
 
-void BufferListPane::UpdateStatusBar() const {
+void BufferListWindow::UpdateStatusBar() const {
   frame().SetStatusBar(0, L"");
 }
 
+}  // namespace content
+
 namespace Command {
 
+using content::BufferListWindow;
+
 DEFCOMMAND(KillBuffers) {
-  auto const pBufferList = pCtx->GetWindow()->DynamicCast<BufferListPane>();
+  auto const pBufferList = pCtx->GetWindow()->DynamicCast<BufferListWindow>();
   if (!pBufferList)
     return;
 
@@ -443,7 +444,7 @@ DEFCOMMAND(KillBuffers) {
 DEFCOMMAND(ListBuffer) {
   for (auto& frame: Application::Get()->frames()) {
     for (auto& pane: frame.panes()) {
-      if (auto const pPane = pane.as<BufferListPane>()) {
+      if (auto const pPane = pane.as<BufferListWindow>()) {
         if (pPane->frame() != pCtx->GetFrame())
           pCtx->GetFrame()->AddWindow(pPane);
         pPane->Activate();
@@ -454,7 +455,7 @@ DEFCOMMAND(ListBuffer) {
     }
   }
 
-  auto const pPane = new BufferListPane();
+  auto const pPane = new BufferListWindow();
   pCtx->GetFrame()->AddWindow(pPane);
 }
 

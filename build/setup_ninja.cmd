@@ -12,6 +12,7 @@ setlocal
     --format=ninja ^
     --generator-output=.. ^
     --include build\common.gypi ^
+    %* ^
   build\all.gyp
 
 endlocal

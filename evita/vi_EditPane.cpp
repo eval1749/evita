@@ -14,6 +14,7 @@
 #define DEBUG_SPLIT 0
 #include "./vi_EditPane.h"
 
+#include "base/logging.h"
 #include "./ed_Mode.h"
 #include "./gfx_base.h"
 #include "./vi_Application.h"
@@ -475,9 +476,9 @@ EditPane::LeafBox& EditPane::HorizontalLayoutBox::Split(
   auto pBelow = below.GetActiveLeafBox();
   auto const prcBelow = &pBelow->rect();
   ASSERT(prcBelow->right - prcBelow->left > cxBox);
+  DCHECK_EQ(pBelow->GetWindow()->container_widget(), edit_pane_);
 
   auto const pWindow = new TextEditWindow(
-      pBelow->GetWindow()->GetHost<EditPane>(),
       pBelow->GetWindow()->GetBuffer(),
       pBelow->GetWindow()->GetStart());
   edit_pane_->AppendChild(*pWindow);
@@ -1056,9 +1057,9 @@ EditPane::LeafBox& EditPane::VerticalLayoutBox::Split(
   auto pBelow = below.GetActiveLeafBox();
   auto const prcBelow = &pBelow->rect();
   ASSERT(prcBelow->bottom - prcBelow->top > cyBox);
+  DCHECK_EQ(pBelow->GetWindow()->container_widget(), edit_pane_);
 
   auto const pWindow = new TextEditWindow(
-      pBelow->GetWindow()->GetHost<EditPane>(),
       pBelow->GetWindow()->GetBuffer(),
       pBelow->GetWindow()->GetStart());
   edit_pane_->AppendChild(*pWindow);
@@ -1195,7 +1196,7 @@ EditPane::EditPane(Buffer* pBuffer, Posn lStart)
           root_box_(*new VerticalLayoutBox(this, nullptr))),
       ALLOW_THIS_IN_INITIALIZER_LIST(
           splitter_controller_(new SplitterController(*this))) {
-  auto const pWindow = new TextEditWindow(this, pBuffer, lStart);
+  auto const pWindow = new TextEditWindow(pBuffer, lStart);
   AppendChild(*pWindow);
   ScopedRefCount_<LeafBox> box(*new LeafBox(this, root_box_, pWindow));
   root_box_->Add(*box);

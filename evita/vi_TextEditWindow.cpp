@@ -133,7 +133,7 @@ void TextEditWindow::ScrollBar::ShowWindow(int code) const {
 // TextEditWindow
 //
 
-TextEditWindow::TextEditWindow(void* pvHost, Buffer* pBuffer, Posn lStart)
+TextEditWindow::TextEditWindow(Buffer* pBuffer, Posn lStart)
     : ALLOW_THIS_IN_INITIALIZER_LIST(
         autoscroller_(new Autoscroller(this))),
       caret_(std::move(Caret::Create())),
@@ -143,13 +143,12 @@ TextEditWindow::TextEditWindow(void* pvHost, Buffer* pBuffer, Posn lStart)
       m_pPage(new Page()),
       ALLOW_THIS_IN_INITIALIZER_LIST(selection_(
           new(pBuffer->GetHeap()) Selection(this, pBuffer))),
-      m_pViewRange(pBuffer->CreateRange(lStart)),
       #if SUPPORT_IME
         m_fImeTarget(false),
         m_lImeEnd(0),
         m_lImeStart(0),
       #endif // SUPPORT_IME
-      m_pvHost(pvHost) {
+      m_pViewRange(pBuffer->CreateRange(lStart)) {
   pBuffer->AddWindow(this);
 }
 

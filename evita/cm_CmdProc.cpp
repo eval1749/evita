@@ -60,8 +60,8 @@ void Processor::Execute(
     {
         m_pSelection = pEditWindow->GetSelection();
 
-        m_pFrame = m_pSelection->GetWindow()->
-            GetHost<EditPane>()->GetFrame();
+        m_pFrame = m_pSelection->GetWindow()->container_widget().
+            as<EditPane>()->GetFrame();
     }
 
     m_rgnKey[m_cKeys] = nKey;

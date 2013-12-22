@@ -94,16 +94,15 @@ class TextEditWindow
   protected: Page* m_pPage;
   // TODO(yosi): Manage life time of selection.
   protected: Selection* selection_;
-  protected: Range* m_pViewRange;
   #if SUPPORT_IME
   private: bool m_fImeTarget;
   private: Posn m_lImeStart;
   private: Posn m_lImeEnd;
   #endif // SUPPORT_IME
-  protected: void* m_pvHost;
+  protected: Range* m_pViewRange;
 
   // ctor/dtor
-  public: TextEditWindow(void* pvHost, Buffer*, Posn = 0);
+  public: TextEditWindow(Buffer*, Posn = 0);
   public: ~TextEditWindow();
 
   // [A]
@@ -144,10 +143,6 @@ class TextEditWindow
 
   public: Count GetColumn(Posn);
   public: Posn GetEnd();
-
-  public: template<class T> T* GetHost() const {
-    return reinterpret_cast<T*>(m_pvHost);
-  }
 
   public: TextEditWindow* GetNext() const {
     return static_cast<const WindowItem*>(this)->GetNext();

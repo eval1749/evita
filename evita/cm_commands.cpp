@@ -863,7 +863,7 @@ DEFCOMMAND(NextWindow)
             return;
         }
 
-        pPane = pWindow->GetHost<EditPane>();
+        pPane = pWindow->container_widget().as<EditPane>();
     }
 
     ASSERT(NULL != pPane);
@@ -1044,7 +1044,7 @@ DEFCOMMAND(PreviousWindow)
             return;
         }
 
-        pPane = pWindow->GetHost<EditPane>();
+        pPane = pWindow->container_widget().as<EditPane>();
     }
 
     ASSERT(NULL != pPane);

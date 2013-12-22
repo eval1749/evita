@@ -28,6 +28,7 @@
 #include "./vi_Pane.h"
 #include "./vi_Selection.h"
 #include "./vi_Style.h"
+#include "./vi_TextEditWindow.h"
 #include "./vi_util.h"
 
 #include <dwmapi.h>
@@ -163,6 +164,23 @@ void Frame::AddTab(Pane* const pane) {
   auto const new_tab_item_index = TabCtrl_GetItemCount(m_hwndTabBand);
   TabCtrl_InsertItem(m_hwndTabBand, new_tab_item_index, &tab_item);
   TabCtrl_SetCurSel(m_hwndTabBand, new_tab_item_index);
+}
+
+void Frame::AddWindow(TextEditWindow* window) {
+  DCHECK(!window->parent_node());
+  DCHECK(!window->is_realized());
+  if (auto const pane = GetActivePane()) {
+    if (auto const edit_pane = pane->as<EditPane>()) {
+      if (edit_pane->has_more_than_one_child()) {
+        edit_pane->ReplaceActiveWindow(window);
+        window->Activate();
+        return;
+      }
+    }
+  }
+
+  std::unique_ptr<EditPane> new_pane(new EditPane(window));
+  AddPane(new_pane.release());
 }
 
 bool Frame::canClose() {

@@ -732,15 +732,13 @@ static void newFile(const Context* pCtx, bool fNewFrame)
     if (fNewFrame)
     {
         Frame* pFrame = Application::Get()->CreateFrame();
-        EditPane* pPane = new EditPane(pBuffer);
-        pFrame->AddPane(pPane);
+        pFrame->AddWindow(new TextEditWindow(pBuffer));
         pFrame->Realize();
     }
     else
     {
         Frame* pFrame = pCtx->GetFrame();
-        EditPane* pPane = new EditPane(pBuffer);
-        pFrame->AddPane(pPane);
+        pFrame->AddWindow(new TextEditWindow(pBuffer));
     }
 } // NewFile
 
@@ -766,19 +764,16 @@ DEFCOMMAND(NewFrame)
 
     Frame* pFrame = Application::Get()->CreateFrame();
 
-    EditPane* pPane = new EditPane(pSelection->GetBuffer());
-    pFrame->AddPane(pPane);
+    auto const pWindow = new TextEditWindow(pSelection->GetBuffer());
+    pFrame->AddWindow(pWindow);
     pFrame->Realize();
-
-    // Note: GetFirstWindow() is available after Realize().
-    TextEditWindow* pWindow = pPane->GetFirstWindow();
 
     pWindow->GetSelection()->SetRange(
         pSelection->GetStart(),
         pSelection->GetEnd() );
 
     pWindow->MakeSelectionVisible();
-    pPane->Activate();
+    pWindow->Activate();
 } // NewFrame
 
 
@@ -797,12 +792,9 @@ DEFCOMMAND(NewFrameAndClose)
 
     Frame* pFrame = Application::Get()->CreateFrame();
 
-    EditPane* pPane = new EditPane(pSelection->GetBuffer());
-    pFrame->AddPane(pPane);
+    auto const pWindow = new TextEditWindow(pSelection->GetBuffer());
+    pFrame->AddWindow(pWindow);
     pFrame->Realize();
-
-    // Note: GetFirstWindow() is available after Realize().
-    TextEditWindow* pWindow = pPane->GetFirstWindow();
 
     pWindow->GetSelection()->SetRange(
         pSelection->GetStart(),
@@ -811,7 +803,7 @@ DEFCOMMAND(NewFrameAndClose)
     pSelection->GetWindow()->Destroy();
 
     pWindow->MakeSelectionVisible();
-    pPane->Activate();
+    pWindow->Activate();
 } // NewFrameAndClose
 
 
@@ -953,13 +945,11 @@ static void openFile(const Context* pCtx, bool fNewFrame)
     if (fNewFrame)
     {
         Frame* pFrame = Application::Get()->CreateFrame();
-        EditPane* pPane = new EditPane(pBuffer);
-        pFrame->AddPane(pPane);
+        pFrame->AddWindow(new TextEditWindow(pBuffer));
         pFrame->Realize();
     }
     else
     {
-        Pane* pPane = NULL;
         Frame* pFrame = Application::Get()->GetActiveFrame();
         for (auto& pane: pFrame->panes()) {
             auto const pPresent = pane.DynamicCast<EditPane>();
@@ -970,18 +960,13 @@ static void openFile(const Context* pCtx, bool fNewFrame)
 
             if (pPresent->GetBuffer() == pBuffer)
             {
-                pPane = pPresent;
-                break;
+                pPresent->Activate();
+                return;
             }
         } // for each pane
 
-        if (NULL == pPane)
-        {
-            pPane = new EditPane(pBuffer);
-            pFrame->AddPane(pPane);
-        }
-
-        pPane->Activate();
+        auto const window = new TextEditWindow(pBuffer);
+        pFrame->AddWindow(window);
     } // if
 } // OpenFile
 
@@ -1192,10 +1177,9 @@ DEFCOMMAND(ShowV8Console) {
     }
   }
 
-  std::unique_ptr<EditPane> pane(new EditPane(&v8_buffer));
-  pane->GetActiveWindow()->GetSelection()->SetRange(
-      v8_buffer.GetEnd(), v8_buffer.GetEnd());
-  frame.AddPane(pane.release());
+  std::unique_ptr<TextEditWindow> window(new TextEditWindow(&v8_buffer));
+  window->GetSelection()->SetRange(v8_buffer.GetEnd(), v8_buffer.GetEnd());
+  frame.AddWindow(window.release());
 }
 
 DEFCOMMAND(SplitWindowHorizontally)
@@ -1387,7 +1371,7 @@ DEFCOMMAND(ValidateIntervals)
         { return; }
 
     auto const frame = pCtx->GetFrame();
-    frame->AddPane(new EditPane(pLogBuf));
+    frame->AddWindow(new TextEditWindow(pLogBuf));
 } // ValidateIntervals
 
 static char16 s_rgwchGraphKey[256];

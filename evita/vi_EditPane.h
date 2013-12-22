@@ -56,9 +56,14 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
 
   // ctro/dtor
   public: explicit EditPane(Buffer*, Posn = 0);
+  public: explicit EditPane(TextEditWindow* window);
   public: virtual ~EditPane();
 
   public: Frame& frame() const;
+
+  public: bool has_more_than_one_child() const {
+    return first_child() != last_child();
+  }
 
   // [A]
   public: virtual void Activate() override;
@@ -97,6 +102,9 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
   private: virtual void OnLeftButtonDown(uint flags, const Point&) override;
   private: virtual void OnLeftButtonUp(uint flags, const Point&) override;
   private: virtual void OnMouseMove(uint flags, const Point&) override;
+
+  // [R]
+  public: void ReplaceActiveWindow(TextEditWindow* window);
 
   // [S]
   public: Window* SplitHorizontally();

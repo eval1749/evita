@@ -28,9 +28,9 @@
 #include "./ctrl_TabBand.h"
 
 #include "./vi_Application.h"
-#include "./vi_EditPane.h"
 #include "./vi_IoManager.h"
 #include "./vi_Style.h"
+#include "./vi_TextEditWindow.h"
 
 #if _WIN64
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -201,8 +201,7 @@ static int MainLoop(EnumArg* pEnumArg) {
   while (!pEnumArg->AtEnd()) {
     auto const  pwszArg = pEnumArg->Get();
     auto const buffer = Application::Get()->Load(pwszArg);
-    auto const pane = new EditPane(buffer);
-    frame.AddPane(pane);
+    frame.AddWindow(new TextEditWindow(buffer));
     pEnumArg->Next();
   }
 
@@ -216,8 +215,7 @@ static int MainLoop(EnumArg* pEnumArg) {
     #endif // USE_LISTENER
 
     Application::Get()->InternalAddBuffer(buffer);
-    auto const pane = new EditPane(buffer);
-    frame.AddPane(pane);
+    frame.AddWindow(new TextEditWindow(buffer));
   }
   frame.Realize();
 

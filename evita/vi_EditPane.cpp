@@ -163,6 +163,7 @@ class EditPane::LeafBox final : public EditPane::Box {
   // [R]
   public: virtual void Realize(EditPane*, const gfx::Rect&) override;
   public: virtual void Redraw() const override;
+  public: void ReplaceWindow(TextEditWindow* window);
 
   // [S]
   public: virtual void SetRect(const gfx::Rect&) override;
@@ -812,6 +813,16 @@ void EditPane::LeafBox::Redraw() const {
   m_pWindow->Redraw();
 }
 
+void EditPane::LeafBox::ReplaceWindow(TextEditWindow* window) {
+  DCHECK(!window->parent_node());
+  DCHECK(!window->is_realized());
+  auto const previous_window = m_pWindow;
+  m_pWindow = window;
+  edit_pane_->AppendChild(*window);
+  Realize(edit_pane_, rect());
+  previous_window->Destroy();
+}
+
 void EditPane::LeafBox::SetRect(const gfx::Rect& rect) {
   Box::SetRect(rect);
 
@@ -1191,16 +1202,19 @@ void EditPane::SplitterController::Stop() {
 }
 
 EditPane::EditPane(Buffer* pBuffer, Posn lStart)
+    : EditPane(new TextEditWindow(pBuffer, lStart)) {
+}
+
+EditPane::EditPane(TextEditWindow* pWindow)
     : m_eState(State_NotRealized),
       ALLOW_THIS_IN_INITIALIZER_LIST(
           root_box_(*new VerticalLayoutBox(this, nullptr))),
       ALLOW_THIS_IN_INITIALIZER_LIST(
           splitter_controller_(new SplitterController(*this))) {
-  auto const pWindow = new TextEditWindow(pBuffer, lStart);
   AppendChild(*pWindow);
   ScopedRefCount_<LeafBox> box(*new LeafBox(this, root_box_, pWindow));
   root_box_->Add(*box);
-  m_pwszName = pBuffer->GetName();
+  m_pwszName = pWindow->GetBuffer()->GetName();
 }
 
 EditPane::~EditPane() {
@@ -1337,6 +1351,11 @@ void EditPane::OnMouseMove(uint, const gfx::Point& point) {
   splitter_controller_->Move(point);
 }
 
+void EditPane::ReplaceActiveWindow(TextEditWindow* window) {
+  DCHECK(!window->is_realized());
+  GetActiveLeafBox()->ReplaceWindow(window);
+}
+
 EditPane::Window* EditPane::SplitHorizontally() {
   auto const right_box = GetActiveLeafBox();
   ASSERT(!!right_box);
@@ -1382,8 +1401,12 @@ void EditPane::WillDestroyWidget() {
 void EditPane::WillDestroyChildWidget(const Widget& child) {
   Pane::WillDestroyChildWidget(child);
   auto const box = root_box_->FindLeafBoxFromWidget(child);
-  if (!box)
+  if (!box) {
+    // RepalceActiveWindow() removes window from box then destroys window.
+    if (auto const window = child.as<TextEditWindow>())
+      m_oWindows.Delete(const_cast<TextEditWindow*>(window));
     return;
+  }
 
   #if DEBUG_RESIZE
     DEBUG_WIDGET_PRINTF("box=%p\n", box);

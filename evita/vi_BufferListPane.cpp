@@ -101,7 +101,7 @@ void BufferListPane::ActivateBuffers(bool is_new_frame) {
       if (runner == buffer) {
         if (is_new_frame) {
           auto const frame = Application::Get()->CreateFrame();
-          frame->AddPane(new EditPane(buffer));
+          frame->AddWindow(new TextEditWindow(buffer));
           frame->Realize();
         } else {
           GetFrame()->ShowBuffer(buffer);
@@ -137,7 +137,7 @@ void BufferListPane::dragFinish(POINT pt) {
   } else {
     // Create new fame
     auto const frame = Application::Get()->CreateFrame();
-    frame->AddPane(new EditPane(buffer));
+    frame->AddWindow(new TextEditWindow(buffer));
     frame->Realize();
   }
 }

@@ -15,10 +15,11 @@
 
 #include "./vi_Application.h"
 #include "./vi_Buffer.h"
-#include "./vi_Frame.h"
 #include "./vi_EditPane.h"
+#include "./vi_Frame.h"
 #include "./vi_Listener.h"
 #include "./vi_Selection.h"
+#include "./vi_TextEditWindow.h"
 
 #include "./listener.h"
 
@@ -365,8 +366,7 @@ void IoManager::visitFile(const char16* pwsz)
 
     if (NULL == pPane)
     {
-        pPane = new EditPane(pBuffer);
-        pFrame->AddPane(pPane);
+        pFrame->AddWindow(new TextEditWindow(pBuffer));
     }
 
     pPane->Activate();

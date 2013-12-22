@@ -3,6 +3,8 @@
 
 #include "evita/content/content_window.h"
 
+#include "evita/vi_Frame.h"
+
 namespace content {
 
 ContentWindow::ContentWindow(
@@ -13,6 +15,22 @@ ContentWindow::ContentWindow(
 
 ContentWindow::ContentWindow()
     : ContentWindow(std::move(std::unique_ptr<base::win::NaitiveWindow>())) {
+}
+
+Frame& ContentWindow::frame() const {
+  for (auto runner = static_cast<const Widget*>(this); runner;
+       runner = &runner->container_widget()) {
+    if (runner->is<Frame>())
+      return *const_cast<Frame*>(runner->as<Frame>());
+  }
+  CAN_NOT_HAPPEN();
+}
+
+void ContentWindow::Activate() {
+  #if DEBUG_FOCUS
+    DEBUG_WIDGET_PRINTF("focus=%d show=%d\n", has_focus(), is_shown());
+  #endif
+  SetFocus();
 }
 
 void ContentWindow::DidSetFocus() {

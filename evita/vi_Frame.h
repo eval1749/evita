@@ -40,7 +40,10 @@ enum MessageLevel
 
 class Buffer;
 class Pane;
-class TextEditWindow;
+
+namespace content {
+class ContentWindow;
+}
 
 /// <summary>
 ///   Represents a frame window aka toplevel window. This window communicates
@@ -81,9 +84,9 @@ class Frame final : public widgets::ContainerWidget,
 
   // [A]
   public: bool  Activate();
-  public: void AddPane(Pane*);
+  private: void AddPane(Pane*);
   private: void AddTab(Pane*);
-  public: void AddWindow(TextEditWindow*);
+  public: void AddWindow(content::ContentWindow*);
   private: void AdoptPane(Pane*);
 
   // [C]

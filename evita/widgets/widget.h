@@ -64,7 +64,7 @@ class Widget
 
   // [D]
   public: void Destroy();
-  protected: virtual void DidChangeParentWidget();
+  public: virtual void DidChangeHierarchy();
   // Called on WM_CREATE
   protected: virtual void DidCreateNaitiveWindow();
   // Called on WM_NCDESTORY

@@ -76,7 +76,7 @@ void Widget::Destroy() {
   delete this;
 }
 
-void Widget::DidChangeParentWidget() {
+void Widget::DidChangeHierarchy() {
 }
 
 void Widget::DidCreateNaitiveWindow() {
@@ -152,7 +152,7 @@ void Widget::Realize(const Rect& rect) {
   if (is_realized()) {
     if (auto const window = naitive_window())
       ::SetParent(*window, container_widget().AssociatedHwnd());
-    DidChangeParentWidget();
+    DidChangeHierarchy();
     ResizeTo(rect);
     return;
   }
@@ -234,7 +234,7 @@ void Widget::SetParentWidget(const ContainerWidget& new_parent) {
   if (new_parent.is_realized()) {
     if (auto const window = naitive_window())
       ::SetParent(*window, new_parent.AssociatedHwnd());
-    DidChangeParentWidget();
+    DidChangeHierarchy();
   }
   if (old_parent)
     old_parent->DidRemoveChildWidget(*this);

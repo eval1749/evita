@@ -47,9 +47,14 @@ static Selection* getActiveSelection()
         return NULL;
     }
 
-    TextEditWindow* pEditWindow = pEditPane->GetActiveWindow();
+    auto const window = pEditPane->GetActiveWindow();
+    if (!window)
+        return nullptr;
 
-    return pEditWindow->GetSelection();
+    if (auto const text_edit_window = window->as<TextEditWindow>())
+        return text_edit_window->GetSelection();
+
+    return nullptr;
 } // getActiveSelection
 
 /// <summary>

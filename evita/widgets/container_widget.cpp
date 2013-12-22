@@ -36,6 +36,12 @@ ContainerWidget::~ContainerWidget() {
 void ContainerWidget::DidAddChildWidget(const Widget&) {
 }
 
+void ContainerWidget::DidChangeHierarchy() {
+  for (auto& child: child_nodes()) {
+    child.DidChangeHierarchy();
+  }
+}
+
 void ContainerWidget::DidHide() {
   for (auto& child: child_nodes()) {
     child.Hide();

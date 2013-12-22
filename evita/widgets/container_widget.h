@@ -30,6 +30,7 @@ class ContainerWidget
 
   // [D]
   public: virtual void DidAddChildWidget(const Widget& widget);
+  protected: virtual void DidChangeHierarchy() override;
   protected: virtual void DidHide() override;
   public: virtual void DidRealizeChildWidget(const Widget& widget);
   public: virtual void DidRemoveChildWidget(const Widget& widget);

@@ -16,9 +16,12 @@
 
 class Buffer;
 class Frame;
-class TextEditWindow;
 
-// EditPane is a container of multiple TextEditWindow windows and layouts
+namespace content {
+class ContentWindow;
+}
+
+// EditPane is a container of multiple ContentWindow windows and layouts
 // them vertically with draggable splitter.
 class EditPane final : public CommandWindow_<EditPane, Pane> {
   DECLARE_CASTABLE_CLASS(EditPane, Pane);
@@ -32,8 +35,7 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
     k_cyMinBox = k_cySplitter,
   };
 
-  private: typedef TextEditWindow Window;
-  private: typedef DoubleLinkedList_<Window> Windows;
+  private: typedef content::ContentWindow Window;
 
   private: class Box;
   private: class LayoutBox;
@@ -52,11 +54,10 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
   private: State m_eState;
   private: ScopedRefCount_<LayoutBox> root_box_;
   private: const base::OwnPtr<SplitterController> splitter_controller_;
-  private: Windows m_oWindows;
 
   // ctro/dtor
   public: explicit EditPane(Buffer*, Posn = 0);
-  public: explicit EditPane(TextEditWindow* window);
+  public: explicit EditPane(Window* window);
   public: virtual ~EditPane();
 
   public: Frame& frame() const;
@@ -72,7 +73,6 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
   public: void CloseAllBut(Window*);
 
   // [D]
-  private: virtual void DidChangeParentWidget() override;
   private: virtual void DidRealize() override;
   private: virtual void DidRealizeChildWidget(const Widget&) override;
   private: virtual void DidResize() override;
@@ -85,8 +85,8 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
   public: Buffer* GetBuffer() const;
 
   public: static const char* GetClass_() { return "EditPane"; }
-  public: Window* GetFirstWindow() const { return m_oWindows.GetFirst(); }
-  public: Window* GetLastWindow() const { return m_oWindows.GetLast(); }
+  public: Window* GetFirstWindow() const;
+  public: Window* GetLastWindow() const;
 
   public: virtual int GetTitle(char16*, int) override;
 
@@ -104,7 +104,7 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
   private: virtual void OnMouseMove(uint flags, const Point&) override;
 
   // [R]
-  public: void ReplaceActiveWindow(TextEditWindow* window);
+  public: void ReplaceActiveWindow(Window* window);
 
   // [S]
   public: Window* SplitHorizontally();

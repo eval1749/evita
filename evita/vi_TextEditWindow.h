@@ -40,9 +40,8 @@ enum DragMode
 //
 class TextEditWindow
     : public CommandWindow_<TextEditWindow, content::ContentWindow>,
-      public DoubleLinkedNode_<TextEditWindow>,
       public DoubleLinkedNode_<TextEditWindow, Buffer> {
-  DECLARE_CASTABLE_CLASS(TextEditWindow, CommandWindow);
+  DECLARE_CASTABLE_CLASS(TextEditWindow, content::ContentWindow);
 
   private: typedef DoubleLinkedNode_<TextEditWindow> WindowItem;
   private: typedef content::ContentWindow ParentClass;
@@ -105,9 +104,6 @@ class TextEditWindow
   public: TextEditWindow(Buffer*, Posn = 0);
   public: ~TextEditWindow();
 
-  // [A]
-  public: void Activate();
-
   // [B]
   public: void Blink(Posn, int);
 
@@ -117,7 +113,7 @@ class TextEditWindow
 
   // [D]
   public: void DidChangeFrame();
-  private: virtual void DidChangeParentWidget() override;
+  private: virtual void DidChangeHierarchy() override;
   private: virtual void DidHide() override;
   private: virtual void DidKillFocus() override;
   private: virtual void DidRealize() override;
@@ -144,14 +140,6 @@ class TextEditWindow
   public: Count GetColumn(Posn);
   public: Posn GetEnd();
 
-  public: TextEditWindow* GetNext() const {
-    return static_cast<const WindowItem*>(this)->GetNext();
-  }
-
-  public: TextEditWindow* GetPrev() const {
-    return static_cast<const WindowItem*>(this)->GetPrev();
-  }
-
   public: HWND GetScrollBarHwnd(int) const;
   public: Selection* GetSelection() const { return &*selection_; }
   public: Posn GetStart();
@@ -162,7 +150,7 @@ class TextEditWindow
 
   // [M]
   public: virtual Command::KeyBindEntry* MapKey(uint) override;
-  public: void MakeSelectionVisible();
+  public: virtual void MakeSelectionVisible() override;
   public: Posn MapPointToPosn(const gfx::PointF point);
   public: gfx::RectF MapPosnToPoint(Posn);
 
@@ -176,7 +164,7 @@ class TextEditWindow
   private: void onVScroll(uint);
 
   // [R]
-  public: void Redraw();
+  public: virtual void Redraw() override;
   protected: void redraw(bool);
   private: void Render();
 

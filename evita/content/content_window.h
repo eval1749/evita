@@ -7,6 +7,8 @@
 #include "evita/vi_CommandWindow.h"
 #include <memory>
 
+class Frame;
+
 namespace content {
 
 class ContentWindow : public CommandWindow_<ContentWindow> {
@@ -17,6 +19,11 @@ class ContentWindow : public CommandWindow_<ContentWindow> {
   protected: ContentWindow(std::unique_ptr<base::win::NaitiveWindow>&&);
   protected: ContentWindow();
 
+  public: Frame& frame() const;
+
+  // [A]
+  public: void Activate();
+
   // [D]
   protected: virtual void DidSetFocus() override;
 
@@ -24,6 +31,12 @@ class ContentWindow : public CommandWindow_<ContentWindow> {
   public: uint GetActiveTick() const { return active_tick_; }
   public: static const char* GetClass_() { return "ContentWindow"; }
   public: virtual base::string16 GetTitle(size_t max_length) const = 0;
+
+  // [M]
+  public: virtual void MakeSelectionVisible() = 0;
+
+  // [R]
+  public: virtual void Redraw() = 0;
 
   // [U]
   // TODO(yosi): We should pass StatusBar object to

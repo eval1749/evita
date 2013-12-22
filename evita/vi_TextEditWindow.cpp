@@ -44,16 +44,6 @@ namespace Command {
 uint TranslateKey(uint);
 }
 
-namespace {
-Frame& GetFrame(const widgets::Widget& widget) {
-  for (auto runner = &widget; runner; runner = &runner->container_widget()) {
-    if (runner->is<Frame>())
-      return *const_cast<Frame*>(runner->as<const Frame>());
-  }
-  CAN_NOT_HAPPEN();
-}
-}  //namespace
-
 //////////////////////////////////////////////////////////////////////
 //
 // Autoscroller
@@ -153,13 +143,6 @@ TextEditWindow::TextEditWindow(Buffer* pBuffer, Posn lStart)
 }
 
 TextEditWindow::~TextEditWindow() {
-}
-
-void TextEditWindow::Activate() {
-  #if DEBUG_FOCUS
-    DEBUG_TEXT_EDIT_PRINTF("focus=%d show=%d\n", has_focus(), is_shown());
-  #endif
-  SetFocus();
 }
 
 class TextEditWindow::CaretBlinker {
@@ -285,19 +268,13 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
 }
 
 
-void TextEditWindow::DidChangeFrame() {
-  auto const frame = Frame::FindFrame(*this);
-  ASSERT(frame);
-  m_gfx = &frame->gfx();
+void TextEditWindow::DidChangeHierarchy() {
+  m_gfx = &frame().gfx();
   auto const parent_hwnd = AssociatedHwnd();
   if (auto const hwnd = m_oHoriScrollBar.GetHwnd())
     ::SetParent(hwnd, parent_hwnd);
   if (auto const hwnd = m_oVertScrollBar.GetHwnd())
     ::SetParent(hwnd, parent_hwnd);
-}
-
-void TextEditWindow::DidChangeParentWidget() {
-  DidChangeFrame();
 }
 
 void TextEditWindow::DidHide() {
@@ -1080,7 +1057,7 @@ void TextEditWindow::UpdateStatusBar() const {
     L"CRLF",
   };
 
-  auto& frame = GetFrame(*this);
+  auto& frame = this->frame();
 
   SetupStatusBar(&frame);
 

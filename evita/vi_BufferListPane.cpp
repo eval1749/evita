@@ -78,12 +78,6 @@ BufferListPane::BufferListPane()
           CommandWindow_(widgets::NaitiveWindow::Create(*this))),
       m_pDragItem(nullptr),
       m_hwndListView(nullptr) {
-  m_pwszName = L"Buffer List";
-}
-
-void BufferListPane::Activate() {
-  Pane::Activate();
-  ::SetFocus(m_hwndListView);
 }
 
 // Activates the first selected buffer in-place.
@@ -104,7 +98,7 @@ void BufferListPane::ActivateBuffers(bool is_new_frame) {
           frame->AddWindow(new TextEditWindow(buffer));
           frame->Realize();
         } else {
-          GetFrame()->ShowBuffer(buffer);
+          frame().ShowBuffer(buffer);
         }
         return;
       }
@@ -189,9 +183,14 @@ void BufferListPane::dragStop() {
   m_pDragItem = nullptr;
 }
 
-int BufferListPane::GetTitle(char16* out_wszTitle, int) {
-  ::lstrcpy(out_wszTitle, GetName());
-  return lstrlen(out_wszTitle);
+base::string16 BufferListPane::GetTitle(size_t max_length) const {
+  base::string16 title(L"*Buffer List*");
+  return std::move(
+      title.size() <= max_length ? title : title.substr(0, max_length));
+}
+
+void BufferListPane::MakeSelectionVisible() {
+  // TODO(yosi) Implement BufferListPane::MakeSelectionVisible()
 }
 
 Command::KeyBindEntry* BufferListPane::MapKey(uint nKey) {
@@ -204,6 +203,10 @@ Command::KeyBindEntry* BufferListPane::MapKey(uint nKey) {
   if (pEntry)
     return pEntry;
   return Command::g_pGlobalBinds->MapKey(nKey);
+}
+
+void BufferListPane::DidChangeHierarchy() {
+  ::SetParent(m_hwndListView, AssociatedHwnd());
 }
 
 void BufferListPane::DidCreateNaitiveWindow() {
@@ -263,7 +266,7 @@ void BufferListPane::DidCreateNaitiveWindow() {
     oColumn.iSubItem += 1;
   }
 
-  Refresh();
+  Redraw();
 }
 
 void BufferListPane::DidResize() {
@@ -271,6 +274,10 @@ void BufferListPane::DidResize() {
   ::SetWindowPos(m_hwndListView, nullptr, 0, 0,
                  rect().width(), rect().height(),
                  SWP_NOZORDER | SWP_SHOWWINDOW);
+}
+
+void BufferListPane::DidSetFocus() {
+  ::SetFocus(m_hwndListView);
 }
 
 void BufferListPane::onKeyDown(uint nVKey) {
@@ -318,7 +325,7 @@ LRESULT BufferListPane::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
       return 0;
     } // WM_NOTIFY
   }
-  return Pane::OnMessage(uMsg, wParam, lParam);
+  return ParentClass::OnMessage(uMsg, wParam, lParam);
 }
 
 void BufferListPane::OnPaint(const base::win::Rect) {
@@ -326,7 +333,7 @@ void BufferListPane::OnPaint(const base::win::Rect) {
   ::UpdateWindow(m_hwndListView);
 }
 
-void BufferListPane::Refresh() {
+void BufferListPane::Redraw() {
   ListView_DeleteAllItems(m_hwndListView);
 
   for (auto& buffer: Application::Get()->buffers()) {
@@ -403,6 +410,10 @@ void BufferListPane::Refresh() {
   ListView_SetItemState(m_hwndListView, 0, state, state);
 }
 
+void BufferListPane::UpdateStatusBar() const {
+  frame().SetStatusBar(0, L"");
+}
+
 namespace Command {
 
 DEFCOMMAND(KillBuffers) {
@@ -426,24 +437,25 @@ DEFCOMMAND(KillBuffers) {
   }
 
   if (fKilled)
-    pBufferList->Refresh();
+    pBufferList->Redraw();
 }
 
 DEFCOMMAND(ListBuffer) {
   for (auto& frame: Application::Get()->frames()) {
     for (auto& pane: frame.panes()) {
-      if (auto const pPane = pane.DynamicCast<BufferListPane>()) {
-        if (pPane->GetFrame() != pCtx->GetFrame())
-          pCtx->GetFrame()->AddPane(pPane);
+      if (auto const pPane = pane.as<BufferListPane>()) {
+        if (pPane->frame() != pCtx->GetFrame())
+          pCtx->GetFrame()->AddWindow(pPane);
         pPane->Activate();
-        pPane->Refresh();
+        pPane->Redraw();
+        pPane->SetFocus();
         return;
       }
     }
   }
 
   auto const pPane = new BufferListPane();
-  pCtx->GetFrame()->AddPane(pPane);
+  pCtx->GetFrame()->AddWindow(pPane);
 }
 
 } // Command

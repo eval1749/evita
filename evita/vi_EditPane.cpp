@@ -15,6 +15,7 @@
 #include "./vi_EditPane.h"
 
 #include "base/logging.h"
+#include "content/content_window.h"
 #include "./ed_Mode.h"
 #include "./gfx_base.h"
 #include "./vi_Application.h"
@@ -46,7 +47,7 @@ struct EditPane::HitTestResult {
     ASSERT(type != None);
   }
 
-  TextEditWindow* window() const;
+  content::ContentWindow* window() const;
 };
 
 class EditPane::Box : public DoubleLinkedNode_<EditPane::Box>,
@@ -163,7 +164,7 @@ class EditPane::LeafBox final : public EditPane::Box {
   // [R]
   public: virtual void Realize(EditPane*, const gfx::Rect&) override;
   public: virtual void Redraw() const override;
-  public: void ReplaceWindow(TextEditWindow* window);
+  public: void ReplaceWindow(Window* window);
 
   // [S]
   public: virtual void SetRect(const gfx::Rect&) override;
@@ -472,19 +473,22 @@ void EditPane::HorizontalLayoutBox::SetRect(const gfx::Rect& newRect) {
 }
 
 EditPane::LeafBox& EditPane::HorizontalLayoutBox::Split(
-    Box& below,
+    Box& below_box,
     int cxBox) {
-  auto pBelow = below.GetActiveLeafBox();
+  auto pBelow = below_box.GetActiveLeafBox();
+  auto const below = pBelow->GetWindow()->as<TextEditWindow>();
+  if (!below)
+    return *pBelow;
   auto const prcBelow = &pBelow->rect();
   ASSERT(prcBelow->right - prcBelow->left > cxBox);
   DCHECK_EQ(pBelow->GetWindow()->container_widget(), edit_pane_);
 
   auto const pWindow = new TextEditWindow(
-      pBelow->GetWindow()->GetBuffer(),
-      pBelow->GetWindow()->GetStart());
+      below->GetBuffer(),
+      below->GetStart());
   edit_pane_->AppendChild(*pWindow);
 
-  auto const pSelection = pBelow->GetWindow()->GetSelection();
+  auto const pSelection = below->GetSelection();
 
   pWindow->GetSelection()->SetRange(
       pSelection->GetStart(),
@@ -723,6 +727,7 @@ void EditPane::LeafBox::Destroy() {
 
 void EditPane::LeafBox::DetachWindow() {
   m_pWindow = nullptr;
+  m_hwndVScrollBar = nullptr;
 }
 
 void EditPane::LeafBox::EnsureInHorizontalLayoutBox() {
@@ -787,23 +792,26 @@ void EditPane::LeafBox::Realize(EditPane* edit_pane, const gfx::Rect& rect) {
                        rect.top + splitter_height,
                        rect.right, rect.bottom);
 
-  m_hwndVScrollBar = ::CreateWindowExW(
-        0,
-        L"SCROLLBAR",
-        nullptr, // title
-        WS_CHILD | WS_VISIBLE | SBS_VERT,
-        0, 0, 0, 0,
-        edit_pane->AssociatedHwnd(),
-        nullptr, // menu
-        g_hInstance,
-        nullptr);
+  if (m_pWindow->is<TextEditWindow>()) {
+    m_hwndVScrollBar = ::CreateWindowExW(
+          0,
+          L"SCROLLBAR",
+          nullptr, // title
+          WS_CHILD | WS_VISIBLE | SBS_VERT,
+          0, 0, 0, 0,
+          edit_pane->AssociatedHwnd(),
+          nullptr, // menu
+          g_hInstance,
+          nullptr);
 
-  ::SetWindowLongPtr(m_hwndVScrollBar, GWLP_USERDATA,
-                     reinterpret_cast<LONG_PTR>(m_pWindow));
+    ::SetWindowLongPtr(m_hwndVScrollBar, GWLP_USERDATA,
+                       reinterpret_cast<LONG_PTR>(m_pWindow));
+  }
 
   Rect window_rect(rect.left, rect.top, scroll_bar_rect.left, rect.bottom);
   m_pWindow->Realize(window_rect);
-  m_pWindow->SetScrollBar(m_hwndVScrollBar, SB_VERT);
+  if (m_hwndVScrollBar)
+    m_pWindow->as<TextEditWindow>()->SetScrollBar(m_hwndVScrollBar, SB_VERT);
   m_pWindow->Show();
   // Resize scrollbar
   SetRect(rect);
@@ -813,11 +821,12 @@ void EditPane::LeafBox::Redraw() const {
   m_pWindow->Redraw();
 }
 
-void EditPane::LeafBox::ReplaceWindow(TextEditWindow* window) {
+void EditPane::LeafBox::ReplaceWindow(Window* window) {
   DCHECK(!window->parent_node());
   DCHECK(!window->is_realized());
   auto const previous_window = m_pWindow;
   m_pWindow = window;
+  m_hwndVScrollBar = nullptr;
   edit_pane_->AppendChild(*window);
   Realize(edit_pane_, rect());
   previous_window->Destroy();
@@ -1063,19 +1072,22 @@ void EditPane::VerticalLayoutBox::SetRect(const gfx::Rect& newRect) {
 }
 
 EditPane::LeafBox& EditPane::VerticalLayoutBox::Split(
-    Box& below,
+    Box& below_box,
     int cyBox) {
-  auto pBelow = below.GetActiveLeafBox();
+  auto pBelow = below_box.GetActiveLeafBox();
+  auto const below = pBelow->GetWindow()->as<TextEditWindow>();
+  if (!below)
+    return *pBelow;
   auto const prcBelow = &pBelow->rect();
   ASSERT(prcBelow->bottom - prcBelow->top > cyBox);
   DCHECK_EQ(pBelow->GetWindow()->container_widget(), edit_pane_);
 
   auto const pWindow = new TextEditWindow(
-      pBelow->GetWindow()->GetBuffer(),
-      pBelow->GetWindow()->GetStart());
+      below->GetBuffer(),
+      below->GetStart());
   edit_pane_->AppendChild(*pWindow);
 
-  auto const pSelection = pBelow->GetWindow()->GetSelection();
+  auto const pSelection = below->GetSelection();
 
   pWindow->GetSelection()->SetRange(
       pSelection->GetStart(),
@@ -1205,7 +1217,7 @@ EditPane::EditPane(Buffer* pBuffer, Posn lStart)
     : EditPane(new TextEditWindow(pBuffer, lStart)) {
 }
 
-EditPane::EditPane(TextEditWindow* pWindow)
+EditPane::EditPane(Window* pWindow)
     : m_eState(State_NotRealized),
       ALLOW_THIS_IN_INITIALIZER_LIST(
           root_box_(*new VerticalLayoutBox(this, nullptr))),
@@ -1214,7 +1226,6 @@ EditPane::EditPane(TextEditWindow* pWindow)
   AppendChild(*pWindow);
   ScopedRefCount_<LeafBox> box(*new LeafBox(this, root_box_, pWindow));
   root_box_->Add(*box);
-  m_pwszName = pWindow->GetBuffer()->GetName();
 }
 
 EditPane::~EditPane() {
@@ -1238,12 +1249,6 @@ void EditPane::CloseAllBut(Window* window) {
   root_box_->CloseAllBut(window);
 }
 
-void EditPane::DidChangeParentWidget() {
-  for (auto& window: m_oWindows) {
-    window.DidChangeFrame();
-  }
-}
-
 void EditPane::DidRealize() {
   m_eState = State_Realized;
   root_box_->Realize(this, rect());
@@ -1259,9 +1264,9 @@ void EditPane::DidRealizeChildWidget(const Widget& window) {
    auto const next_window = next_leaf_box ? next_leaf_box->GetWindow() :
       nullptr;
   if (next_window)
-    m_oWindows.InsertBefore(box->GetWindow(), next_window);
+    InsertBefore(*box->GetWindow(), next_window);
   else
-    m_oWindows.Append(box->GetWindow());
+    AppendChild(*box->GetWindow());
 }
 
 void EditPane::DidResize() {
@@ -1292,7 +1297,12 @@ EditPane::Window* EditPane::GetActiveWindow() const {
 }
 
 Buffer* EditPane::GetBuffer() const {
-  return GetActiveWindow()->GetBuffer();
+  auto const window = GetActiveWindow();
+  if (!window)
+    return nullptr;
+  if (auto const text_edit_window = window->as<TextEditWindow>())
+    return text_edit_window->GetBuffer();
+  return nullptr;
 }
 
 HCURSOR EditPane::GetCursorAt(const gfx::Point& point) const {
@@ -1318,6 +1328,20 @@ HCURSOR EditPane::GetCursorAt(const gfx::Point& point) const {
       return arrow_cursor;
     }
   }
+}
+
+EditPane::Window* EditPane::GetFirstWindow() const {
+  auto const window = first_child()->as<Window>();
+  if (window)
+    return window;
+  CAN_NOT_HAPPEN();
+}
+
+EditPane::Window* EditPane::GetLastWindow() const {
+  auto const window = last_child()->as<Window>();
+  if (window)
+    return window;
+  CAN_NOT_HAPPEN();
 }
 
 int EditPane::GetTitle(char16* out_wszTitle, int cchTitle) {
@@ -1351,7 +1375,7 @@ void EditPane::OnMouseMove(uint, const gfx::Point& point) {
   splitter_controller_->Move(point);
 }
 
-void EditPane::ReplaceActiveWindow(TextEditWindow* window) {
+void EditPane::ReplaceActiveWindow(Window* window) {
   DCHECK(!window->is_realized());
   GetActiveLeafBox()->ReplaceWindow(window);
 }
@@ -1403,15 +1427,12 @@ void EditPane::WillDestroyChildWidget(const Widget& child) {
   auto const box = root_box_->FindLeafBoxFromWidget(child);
   if (!box) {
     // RepalceActiveWindow() removes window from box then destroys window.
-    if (auto const window = child.as<TextEditWindow>())
-      m_oWindows.Delete(const_cast<TextEditWindow*>(window));
     return;
   }
 
   #if DEBUG_RESIZE
     DEBUG_WIDGET_PRINTF("box=%p\n", box);
   #endif
-  m_oWindows.Delete(box->GetWindow());
   box->DetachWindow();
   auto const outer = box->outer();
   outer->RemoveBox(*box);

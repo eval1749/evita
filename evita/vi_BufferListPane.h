@@ -11,14 +11,16 @@
 #if !defined(INCLUDE_visual_BufferListPane_h)
 #define INCLUDE_visual_BufferListPane_h
 
-#include "./vi_Pane.h"
+#include "evita/content/content_window.h"
 
 #include "./cm_CmdProc.h"
 
 class Buffer;
 
-class BufferListPane : public CommandWindow_<BufferListPane, Pane> {
-  DECLARE_CASTABLE_CLASS(BufferListPane, Pane);
+class BufferListPane
+    : public CommandWindow_<BufferListPane, content::ContentWindow> {
+  DECLARE_CASTABLE_CLASS(BufferListPane, content::ContentWindow);
+  private: typedef CommandWindow_ ParentClass;
 
   private: enum Constant {
       ListViewId = 1234,
@@ -34,7 +36,6 @@ class BufferListPane : public CommandWindow_<BufferListPane, Pane> {
   public: BufferListPane();
 
   // [A]
-  public: virtual void Activate() override;
   private: void ActivateBuffers(bool);
 
   // [C]
@@ -42,8 +43,10 @@ class BufferListPane : public CommandWindow_<BufferListPane, Pane> {
   protected: virtual void CreateNaitiveWindow() const override;
 
   // [D]
+  private: virtual void DidChangeHierarchy() override;
   private: virtual void DidCreateNaitiveWindow() override;
   private: virtual void DidResize() override;
+  private: virtual void DidSetFocus() override;
   private: void dragFinish(POINT);
   private: void dragMove(POINT);
   private: void dragStart(int);
@@ -54,18 +57,22 @@ class BufferListPane : public CommandWindow_<BufferListPane, Pane> {
 
   public: HWND GetListWindow() const { return m_hwndListView; }
 
-  public: virtual int GetTitle(char16*, int) override;
+  private: virtual base::string16 GetTitle(size_t max_length) const override;
 
   // [L]
-  public: void Refresh();
+  public: virtual void Redraw() override;
 
   // [M]
+  private: virtual void MakeSelectionVisible() override;
   public: virtual Command::KeyBindEntry* MapKey(uint) override;
 
   // [O]
   private: void onKeyDown(uint);
   private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
   private: virtual void OnPaint(const base::win::Rect rect) override;
+
+  // [U]
+  private: virtual void UpdateStatusBar() const override;
 
   DISALLOW_COPY_AND_ASSIGN(BufferListPane);
 };

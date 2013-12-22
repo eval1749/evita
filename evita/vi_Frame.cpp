@@ -158,9 +158,11 @@ void Frame::AddTab(Pane* const pane) {
   tab_item.lParam = reinterpret_cast<LPARAM>(pane);
 
   if (auto const edit_pane = pane->DynamicCast<EditPane>()) {
-    tab_item.iImage = edit_pane->GetBuffer()->GetMode()->GetIcon();
-    if (tab_item.iImage != -1)
-      tab_item.mask |= TCIF_IMAGE;
+    if (auto const buffer = edit_pane->GetBuffer()) {
+      tab_item.iImage = buffer->GetMode()->GetIcon();
+      if (tab_item.iImage != -1)
+        tab_item.mask |= TCIF_IMAGE;
+    }
   }
 
   auto const new_tab_item_index = TabCtrl_GetItemCount(m_hwndTabBand);
@@ -168,7 +170,7 @@ void Frame::AddTab(Pane* const pane) {
   TabCtrl_SetCurSel(m_hwndTabBand, new_tab_item_index);
 }
 
-void Frame::AddWindow(TextEditWindow* window) {
+void Frame::AddWindow(content::ContentWindow* window) {
   DCHECK(!window->parent_node());
   DCHECK(!window->is_realized());
   if (auto const pane = GetActivePane()) {

@@ -84,17 +84,7 @@ static bool hasMoreThanOneWindow()
     Frame* pFrame = Application::Get()->GetFirstFrame();
     if (NULL == pFrame) return false;           // no frame
     if (NULL != pFrame->GetNext()) return true; // more than one frame
-    Pane* pPane = pFrame->GetFirstPane();
-    if (NULL == pPane) return false;          // no pane
-
-    if (EditPane* pEditPane = pPane->DynamicCast<EditPane>())
-    {
-        TextEditWindow* pWindow = pEditPane->GetFirstWindow();
-        if (NULL == pWindow) return false;  // no window
-        return NULL != pWindow->GetNext();
-    }
-
-    return NULL != pPane->GetNext();
+    return pFrame->first_child() != pFrame->last_child();
 } // hasMoreThanOnePane
 
 
@@ -894,7 +884,7 @@ DEFCOMMAND(NextWindow)
 
     if (NULL != pEditPane)
     {
-        TextEditWindow* pFirstWindow = pEditPane->GetFirstWindow();
+        auto const pFirstWindow = pEditPane->GetFirstWindow();
         if (pFirstWindow != pWindow)
         {
             pEditPane->GetFirstWindow()->Activate();
@@ -1068,7 +1058,7 @@ DEFCOMMAND(PreviousWindow)
 
     if (NULL != pEditPane)
     {
-        TextEditWindow* pLastWindow = pEditPane->GetLastWindow();
+        auto const pLastWindow = pEditPane->GetLastWindow();
         if (pLastWindow != pWindow)
         {
             pLastWindow->Activate();
@@ -1194,8 +1184,8 @@ DEFCOMMAND(SplitWindowHorizontally)
         return;
     }
 
-    TextEditWindow* pWindow = pPane->SplitHorizontally();
-    if (NULL == pWindow)
+    auto const pWindow = pPane->SplitHorizontally();
+    if (NULL == pWindow || !pWindow->is<TextEditWindow>())
     {
         Application::Get()->ShowMessage(
             MessageLevel_Warning,
@@ -1204,12 +1194,13 @@ DEFCOMMAND(SplitWindowHorizontally)
     }
 
     Selection* pSelection = pCtx->GetSelection();
+    auto& text_edit_window = *pWindow->as<TextEditWindow>();
 
-    pWindow->GetSelection()->SetRange(
+    text_edit_window.GetSelection()->SetRange(
         pSelection->GetStart(),
         pSelection->GetEnd() );
 
-    pWindow->MakeSelectionVisible();
+    text_edit_window.MakeSelectionVisible();
     pSelection->GetWindow()->MakeSelectionVisible();
 } // SplitWindowHorizontally
 
@@ -1225,8 +1216,8 @@ DEFCOMMAND(SplitWindowVertically)
         return;
     }
 
-    TextEditWindow* pWindow = pPane->SplitVertically();
-    if (NULL == pWindow)
+    auto const pWindow = pPane->SplitVertically();
+    if (NULL == pWindow || !pWindow->is<TextEditWindow>())
     {
         Application::Get()->ShowMessage(
             MessageLevel_Warning,
@@ -1235,12 +1226,13 @@ DEFCOMMAND(SplitWindowVertically)
     }
 
     Selection* pSelection = pCtx->GetSelection();
+    auto& text_edit_window = *pWindow->as<TextEditWindow>();
 
-    pWindow->GetSelection()->SetRange(
+    text_edit_window.GetSelection()->SetRange(
         pSelection->GetStart(),
         pSelection->GetEnd() );
 
-    pWindow->MakeSelectionVisible();
+    text_edit_window.MakeSelectionVisible();
     pSelection->GetWindow()->MakeSelectionVisible();
 } // SplitWindowVertically
 

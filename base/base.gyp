@@ -20,5 +20,20 @@
         'base_target': 1,
       }, # variables
     }, # base
+    {
+      'target_name': 'base_unittests',
+      'type': 'executable',
+      'include_dirs+': [
+        '<(DEPTH)/testing/gtest/include/',
+      ], # include_dirs
+      'dependencies': [
+        'base',
+        '<(DEPTH)/testing/gtest.gyp:gtest',
+        '<(DEPTH)/testing/gtest.gyp:gtest_main',
+      ], # dependencies
+      'sources': [
+        'castable_test.cc',
+      ], # sources
+    },
   ], # targets
 }

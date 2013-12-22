@@ -23,7 +23,7 @@ class Castable {
     return is_class_of(Class::static_class_name());
   }
   protected: virtual bool is_class_of(const char* other_name) const {
-    return class_name() == other_name;
+    return static_class_name() == other_name;
   }
   public: static const char* static_class_name() { return "Castable"; }
 };
@@ -35,7 +35,7 @@ class Castable {
   } \
   protected: virtual bool is_class_of( \
       const char* other_name) const override { \
-    return class_name() == other_name || base_name::is_class_of(other_name); \
+    return static_class_name() == other_name || base_name::is_class_of(other_name); \
   }
 
 } // namespace base

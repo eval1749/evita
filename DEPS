@@ -12,6 +12,9 @@ deps = {
   "src/tools/deps2git":
     "/trunk/tools/deps2git@236839",
 
+  "src/testing/gmock":
+    (Var("googlecode_url") % "googlemock") + "/trunk@410",
+
   "src/testing/gtest":
     (Var("googlecode_url") % "googletest") + "/trunk@643",
 

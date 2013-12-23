@@ -16,3 +16,6 @@
 [submodule "third_party/cygwin"]
 	path = third_party/cygwin
 	url = https://chromium.googlesource.com/chromium/deps/cygwin.git
+[submodule "testing/gmock"]
+	path = testing/gmock
+	url = https://chromium.googlesource.com/external/googlemock.git

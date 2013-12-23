@@ -34,6 +34,7 @@
       'sources': [
         'castable_test.cc',
         'strings/string_piece_test.cc',
+        'strings/stringprintf_test.cc',
         'strings/utf_string_conversions_test.cc',
       ], # sources
     },

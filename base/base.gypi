@@ -11,6 +11,7 @@
         'sources': [
           'logging.cc',
           'timer/timer.cc',
+          'strings/stringprintf.cc',
           'strings/string_piece.cc',
           'strings/string_util.cc',
           'strings/utf_string_conversions.cc',

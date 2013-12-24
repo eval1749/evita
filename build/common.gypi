@@ -72,16 +72,6 @@
           'IntermediateDirectory': '<(DEPTH)\\..\$(ConfigurationName)\\$(ProjectName)',
           'CharacterSet': '1',
         },
-
-        'msvs_settings': {
-          'VCLinkerTool': {
-            'AdditionalDependencies': [
-              'kernel32.lib',
-            ], # AdditionalDependencies
-            'FixBaseAddress': '1',
-            'SubSystem': 1,
-          }, # VCLinkerTool
-        }, # msvs_settings
       }, # Common_Base
 
       'x86_Base': {
@@ -99,6 +89,7 @@
       }, # x86_Base
 
       'x64_Base': {
+        'abstract': 1,
         'msvs_settings': {
           'VCLinkerTool': {
             'AdditionalOptions': [
@@ -191,4 +182,23 @@
       },
     }, # configurations
   }, # target_defaults
+
+  'conditions': [
+    ['OS=="win"', {
+      'target_defaults': {
+        'msvs_settings': {
+          'VCLinkerTool': {
+            'AdditionalDependencies': [
+              'kernel32.lib',
+            ], # AdditionalDependencies
+            'FixBaseAddress': '1',
+            'GenerateDebugInformation': 'true',
+            'ImportLibrary': '$(OutDir)\\lib\\$(TargetName).lib',
+            'MapFileName': '$(OutDir)\\$(TargetName).map',
+            'SubSystem': 1, # /SUBSYSTEM:CONSOLE
+          }, # VCLinkerTool
+        }, # msvs_settings
+      }, # 'target_defaults'
+    }], # OS=="win"
+  ], # 'conditions',
 }

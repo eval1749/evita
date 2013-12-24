@@ -65,7 +65,6 @@
             'MinimalRebuild': 'false',
             'BufferSecurityCheck': 'true',
             'EnableFunctionLevelLinking': 'true', # /Gy
-            'RuntimeLibrary': '<(win_debug_RuntimeLibrary)',
             'RuntimeTypeInfo': 'false', # /GR-
             'WarningLevel': '4', # /Wall
             'WarnAsError': 'true', # /WX

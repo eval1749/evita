@@ -3,6 +3,14 @@
 # found in the LICENSE file.
 
 {
+  'variables': {
+    # .gyp files or targets should set |evita_code| to 1 if they build
+    # Evita-specific code, as opposed to external code. This variable is
+    # used to control such things as the set of warnings to enable, and
+    # whether warnings are treated as errors.
+    'evita_code%': 0,
+  }, # variables
+
   'target_defaults': {
     'target_conditions': [
       ['evita_code==1', {
@@ -10,14 +18,7 @@
           '<(DEPTH)',
         ], # include_dirs
         'conditions': [
-            ['component=="shared_library"', {
-              'target_defaults': {
-                'defines': ['COMPONENT_BUILD'],
-               }, # target_defaults
-            }], # component=="shared_library"
-
             ['OS=="win"', {
-              'target_defaults': {
                 'defines': [
                   'NOMINMAX',
                   # See SDK version in include/shared/sdkddkver.h
@@ -68,7 +69,6 @@
                       }],
                 ], # target_conditions
                 }, # msvs_settings
-               } # target_defaults
             }], # OS=="win"
         ], # conditions
     }], # evita_code==1

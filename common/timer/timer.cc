@@ -6,7 +6,7 @@
 #include <memory>
 
 #include "base/logging.h"
-#include "base/memory/singleton.h"
+#include "common/memory/singleton.h"
 #include "common/win/native_window.h"
 #include "common/win/point.h"
 #include "common/win/size.h"
@@ -32,12 +32,8 @@ struct COMMON_EXPORT TimerEntry : base::RefCounted<TimerEntry> {
   }
 };
 
-class TimerController {
-  friend struct DefaultSingletonTraits<TimerController>;
-
-  public: static TimerController* GetInstance() {
-    return Singleton<TimerController>::get();
-  }
+class TimerController : public common::Singleton<TimerController> {
+  friend class common::Singleton<TimerController>;
 
   private: class MessageWindow : public common::win::NativeWindow {
     public: MessageWindow() = default;
@@ -109,10 +105,10 @@ class TimerController {
       return;
     }
     if (entry->repeat_interval_ms)
-      TimerController::GetInstance()->SetTimer(timer,
-                                               entry->repeat_interval_ms);
+      TimerController::instance().SetTimer(timer,
+                                            entry->repeat_interval_ms);
     else
-      TimerController::GetInstance()->StopTimer(timer);
+      TimerController::instance().StopTimer(timer);
   }
 
   DISALLOW_COPY_AND_ASSIGN(TimerController);
@@ -131,12 +127,12 @@ void AbstractTimer::Start(int next_fire_interval_ms,
                           int repeat_interval_ms) {
   DCHECK_GE(next_fire_interval_ms, 0);
   DCHECK_GE(repeat_interval_ms, 0);
-  TimerController::GetInstance()->StartTimer(this, next_fire_interval_ms,
-                                             repeat_interval_ms);
+  TimerController::instance().StartTimer(this, next_fire_interval_ms,
+                                         repeat_interval_ms);
 }
 
 void AbstractTimer::Stop() {
-  TimerController::GetInstance()->StopTimer(this);
+  TimerController::instance().StopTimer(this);
 }
 
 } // namespace impl

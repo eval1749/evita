@@ -10,6 +10,7 @@
       'dependencies': [
         '../base/base.gyp:*',
         '../evita/evita.gyp:*',
+        '../gin/gin.gyp:*',
         '../v8/tools/gyp/v8.gyp:*',
       ], # dependencies
     } # ALl

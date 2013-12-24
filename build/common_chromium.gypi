@@ -106,6 +106,9 @@
           4706,
           # C4996: 'function': was declared deprecated
           4996, # GetVersionEx
+          # C4251: 'identifier' : class 'type' needs to have dll-interface to
+          # be used by clients of class 'type2'
+          4251,
          ],
     }], # OS=="win"
     ], # target_conditions

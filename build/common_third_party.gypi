@@ -32,9 +32,14 @@
              }, # VCLinkerTool
           }, # msvs_settings
           'msvs_disabled_warnings': [
+            # level 1
             4530,
             4541,
+            # level 2
+            4244,
+            # level 3
             4800,
+            4996,
           ] # msvs_disabled_warnings
       }], # OS=="win"
     ], # target_conditions

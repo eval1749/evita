@@ -6,9 +6,9 @@ setlocal
 : -G msvs_version=2013
 : GYP_MSVS_VERSION=2013|2013e|...
 : GYP_MSVS_OVERRIDE_PATH
+: --debug=general --debug=includes --debug=variables
 
 .\tools\gyp\gyp ^
-  --debug=general --debug=includes --debug=variables ^
     --format=ninja ^
     --generator-output=.. ^
     --include build\common.gypi ^

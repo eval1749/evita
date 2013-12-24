@@ -1,8 +1,11 @@
-#
+# When you update vars or deps, you should run
+#   python tools/deps2git/dep2git.py -w .. -o .DEPS.git
+# then commit both DEPS and .DEPS.git
+
 vars = {
   "googlecode_url": "http://%s.googlecode.com/svn",
   "chromium_git": "https://chromium.googlesource.com",
-  "v8_revision": "18251",
+  "v8_revision": "18396",
 }
 
 deps = {
@@ -22,9 +25,9 @@ deps = {
     (Var("googlecode_url") % "gyp") + "/trunk@1806",
 
   "src/third_party/icu":
-    "/trunk/deps/third_party/icu46@239289",
+    "/trunk/deps/third_party/icu46@242173",
 
-  "src/third_party/v8":
+  "src/v8":
     (Var("googlecode_url") % "v8") + "/trunk@" + Var("v8_revision"),
 }
 

@@ -7,9 +7,9 @@
 [submodule "third_party/icu"]
 	path = third_party/icu
 	url = https://chromium.googlesource.com/chromium/deps/icu46
-[submodule "third_party/v8"]
-	path = third_party/v8
-	url = https://chromium.googlesource.com/external/v8
+#[submodule "third_party/v8"]
+#	path = third_party/v8
+#	url = https://chromium.googlesource.com/external/v8
 [submodule "testing/gtest"]
 	path = testing/gtest
 	url = https://chromium.googlesource.com/chromium/testing/gtest
@@ -19,3 +19,6 @@
 [submodule "testing/gmock"]
 	path = testing/gmock
 	url = https://chromium.googlesource.com/external/googlemock.git
+[submodule "v8"]
+	path = v8
+	url = https://chromium.googlesource.com/external/v8

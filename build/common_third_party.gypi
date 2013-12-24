@@ -15,14 +15,9 @@
                 }],
               ], # conditions
               'AdditionalOptions': ['/MP'],
-              'MinimalRebuild': 'false',
-              'BufferSecurityCheck': 'true',
-              'EnableFunctionLevelLinking': 'true', # /Gy
-              'RuntimeLibrary': '<(win_debug_RuntimeLibrary)',
               'RuntimeTypeInfo': 'false', # /GR-
               'WarningLevel': '3', # /Wall
               'WarnAsError': 'false', # no /WX
-              'DebugInformationFormat': '3',
             }, # VCCLCompilerTool
             'VCLinkerTool': {
               'AdditionalDependencies': [

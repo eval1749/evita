@@ -63,8 +63,6 @@
           'VCCLCompilerTool': {
             'AdditionalOptions': ['/MP'],
             'MinimalRebuild': 'false',
-            'BufferSecurityCheck': 'true',
-            'EnableFunctionLevelLinking': 'true', # /Gy
             'RuntimeTypeInfo': 'false', # /GR-
             'WarningLevel': '4', # /Wall
             'WarnAsError': 'true', # /WX

@@ -25,10 +25,6 @@
     'target_arch%': '<(target_arch)',
     'v8_enable_i18n_support': 1,
     'v8_optimized_debug%': '(<v8_optimized_debug)',
-
-    # TODO(yosi) Should remove following variables.
-    #'win_release_RuntimeLibrary%': 2, # /MD
-    #'win_debug_RuntimeLibrary%': 3, # /MDd
   }, # variables
 
   'includes': [
@@ -42,6 +38,8 @@
       'chromium_code%': '<(chromium_code)',
       'evita_code%': '<(evita_code)',
      }, # variables
+
+     # Choose MSVCRT flavor: MT:multithreaded
      'conditions': [
        ['OS=="win" and component=="shared_library"', {
           'variables': {
@@ -77,6 +75,11 @@
       'x86_Base': {
         'abstract': 1,
         'msvs_settings': {
+          'VCCLCompilerTool': {
+            'AdditionalOptions': [
+              '/arch:SSE2',
+            ],
+          }, # VCCLCompilerTool
           'VCLinkerTool': {
             'AdditionalOptions': [
               '/safeseh',
@@ -107,15 +110,9 @@
         'abstract': 1,
         'msvs_settings': {
           'VCCLCompilerTool': {
-            'AdditionalOptions': [
-              #'/GF-', # Enables string pooling.
-              #'/GS', # Buffer security check
-              #'/Gm-', # Enables minimal rebuild.
-              #'/Gy-', # Enables function-level linking.
-              #'/MTd', # Creates a debug multithreaded executable file using LIBCMTD.lib.
-              #'/Oy-', # Omits frame pointer (x86 only).
-              #'/Zi', # Generates complete debugging information.
-            ],
+            'BufferSecurityCheck': 'true',
+            'DebugInformationFormat': '3',
+            'MinimalRebuild': 'false',
             'Optimization': '0', # /Od
             'PreprocessorDefinitions': ['_DEBUG'],
             'RuntimeLibrary': '<(win_debug_RuntimeLibrary)',
@@ -141,27 +138,33 @@
           # file to be serialized through MSPDBSRV.EXE.) for MSVS=|2013|
           # or # |2013e|.
           'VCCLCompilerTool': {
-            'AdditionalOptions': [
-              '/GF', # Enables string pooling.
-              '/GL', # Enables whole program optimization.
-              '/GS-', # Buffer security check
-              '/Gm-', # Enables minimal rebuild.
-              '/MT', # Creates a multithreaded executable file using LIBCMT.lib.
-              '/Oi', # Generates intrinsic functions.
-              '/Oy', # Omits frame pointer (x86 only).
-            ],
-            'EnableIntrinsicFunctions': 'true', # /Gy
+            'BufferSecurityCheck': 'false', # /GS-
+            'DebugInformationFormat': '3', # /Zi
+            'EnableFiberSafeOptimizations': 'true', # /GT
+            'EnableFunctionLevelLinking': 'true', # /Gy
+            'EnableIntrinsicFunctions': 'true', # /Oi
             'EnableFiberSafeOptimizations': 'true', # /GT
             'FavorSizeOrSpeed': '2', # /Os Favors small code.
+            'InlineFunctionExpansion': '2', # /Ob2
+            'MinimalRebuild': 'false', # /Gm
+            'OmitFramePointers': 'true', # /Oy
+            'Optimization': '3', # /Ox
             'PreprocessorDefinitions': ['NDEBUG'],
-            'Optimization': '3',
             'RuntimeLibrary': '<(win_release_RuntimeLibrary)',
-            'WholeProgramOptimization': 'true', # /Ox
+            'StringPooling': 'true', # /GF
+            'WholeProgramOptimization': 'true', # /GL
           }, # VCCLCompilerTool
+          'VCLibrarianTool': {
+            'LinkTimeCodeGeneration': 'true', # /LTCG
+          }, # VCLibrarianTool
           'VCLinkerTool': {
-            'EnableCOMDATFolding': '2',
+            'EnableCOMDATFolding': 2,
             'GenerateMapFile': 'true',
-            'OptimizeReferences': '2',
+            'LargeAddressAware': 2,
+            'LinkIncremental':  1,
+            'LinkTimeCodeGeneration': 1, # /LTCG
+            'OptimizeReferences': 2,
+            'RandomizedBaseAddress': 1,
           }, # VCLinkerTool
         },
       }, # Release_Base

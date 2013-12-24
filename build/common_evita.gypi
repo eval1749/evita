@@ -56,10 +56,6 @@
                       'advapi32.lib',
                       'user32.lib',
                     ], # AdditionalDependencies
-                    # 0=not set
-                    # 1=/SUBSYSTEM:CONSOLE
-                    # 2=/SUBSYSTEM:WINDOWS
-                    'SubSystem': 1,
                    }, # VCLinkerTool
                    'target_conditions': [
                       ['_type=="executable"', {

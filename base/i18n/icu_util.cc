@@ -44,6 +44,14 @@
 namespace base {
 namespace i18n {
 
+#if 1
+// operator<< for wstring is defined in base/logging.h. However, it isn't
+// seend base::i18n namespace.
+inline std::ostream& operator<<(std::ostream& out, const std::wstring& wstr) {
+  return out << wstr.c_str();
+}
+#endif
+
 bool InitializeICU() {
 #ifndef NDEBUG
   // Assert that we are not called more than once.  Even though calling this

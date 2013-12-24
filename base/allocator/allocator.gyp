@@ -472,7 +472,7 @@
         }],
       ],
     },
-   ],
+   ], # targets
   'conditions': [
     ['OS=="win"', {
       'targets': [
@@ -531,12 +531,12 @@
           ],
           'dependencies': [
             '../../testing/gtest.gyp:gtest',
-            '../base.gyp:base',
+            #'../base.gyp:base',
             'allocator',
           ],
         },
       ],
-    }],
+    }], # OS=="win"
     ['OS=="win" and target_arch=="ia32"', {
       'targets': [
         {

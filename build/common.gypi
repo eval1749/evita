@@ -18,6 +18,8 @@
     'component%': '<(component)',
     'target_arch%': '<(target_arch)',
 
+    'chromium_code': 0,
+
     # .gyp files or targets should set |evita_code| to 1 if they build
     # Evita-specific code, as opposed to external code. This variable is
     # used to control such things as the set of warnings to enable, and
@@ -32,59 +34,16 @@
     'v8_optimized_debug%': '(<v8_optimized_debug)',
   }, # variables
 
-  'includes': [
-    'common_evita_code.gypi',
-  ],
-
   'conditions': [
-    ['OS=="win" and evita_code==0', {
-      'target_defaults': {
-        'msvs_settings': {
-          'VCCLCompilerTool': {
-            'conditions': [
-              ['component=="shared_library"', {
-                'ExceptionHandling': '0',
-              }, {
-                'ExceptionHandling': '0',
-              }],
-            ], # conditions
-           }, # VCCLCompilerTool
-          'VCLinkerTool': {
-            'AdditionalDependencies': [
-              'kernel32.lib',
-              'advapi32.lib',
-            ],
-           }, # VCLinkerTool
-        }, # msvs_settings
-        'msvs_disabled_warnings': [
-           # for ICU
-
-           # warning C4100: 'identifier' : unreferenced formal parameter
-           4100,
-           # warning C4152: non standard extension, function/data ptr
-           # conversion in expression
-           4152,
-           # warning C4255: 'function' : no function prototype given:
-           # converting '()' to '(void)'
-           4255,
-           # warning C4310: cast truncates constant value
-           4310, # Level 3
-           # warning C4530: C++ exception handler used, but unwind semantics
-           # are not enabled. Specify /EHsc
-           4530, # Level 1
-           # warning C4625: derived class' : copy constructor could not be
-           # generated because a base class copy constructor is inaccessible
-           4625,
-           # warning C4668: 'symbol' is not defined as a preprocessor macro,
-           # replacing with '0' for 'directives'
-           4668,
-           # warning C4820: 'bytes' bytes padding added after construct
-           # 'member_name'
-           4820,
-          ] # msvs_disabled_warnings
-       } # target_defaults
-    }], # OS=="win" and evita_code==0
-
+    ['chromium_code==1', {
+      'includes': [ 'common_chromium.gypi' ]
+    }],
+    ['evita_code==1', {
+      'includes': [ 'common_evita.gypi' ]
+    }],
+    ['chromium_code==0 and evita_code==0', {
+      'includes': [ 'common_third_party.gypi' ]
+    }],
     ['OS=="win"', {
       'default_configuration': 'Debug',
 

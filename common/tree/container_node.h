@@ -15,9 +15,9 @@ template<class NodeClass, class ContainerClass, typename... Params>
 class ContainerNode_ : public NodeClass {
   public: typedef ContainerClass Container;
   public: typedef NodeClass Node;
-  public: typedef base::tree::ChildNodes_<const ContainerNode_>
+  public: typedef common::tree::ChildNodes_<const ContainerNode_>
       ConstChildNodes;
-  public: typedef base::tree::ChildNodes_<ContainerNode_> ChildNodes;
+  public: typedef common::tree::ChildNodes_<ContainerNode_> ChildNodes;
 
   private: NodeClass* first_child_;
   private: NodeClass* last_child_;

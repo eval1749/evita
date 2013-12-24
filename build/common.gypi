@@ -18,8 +18,6 @@
     'component%': '<(component)',
     'target_arch%': '<(target_arch)',
 
-    'chromium_code': 0,
-
     # .gyp files or targets should set |evita_code| to 1 if they build
     # Evita-specific code, as opposed to external code. This variable is
     # used to control such things as the set of warnings to enable, and
@@ -34,16 +32,36 @@
     'v8_optimized_debug%': '(<v8_optimized_debug)',
   }, # variables
 
+  'target_defaults': {
+    'variables': {
+      'chromium_code%': '<(chromium_code)',
+      'evita_code%': '<(evita_code)',
+     }, # variables
+     'conditions': [
+          ['OS=="win" and component=="shared_library"', {
+            'variables': {
+              'win_release_RuntimeLibrary%': 2, # /MD
+              'win_debug_RuntimeLibrary%': 3, # /MDd
+            }
+          }, {
+            'variables': {
+              'win_release_RuntimeLibrary%': 0, # /MT
+              'win_debug_RuntimeLibrary%': 1, # /MTd
+            }
+          }], # OS=="win" and component=="shared_library"
+       ['component=="shared_library"', {
+         'defines': ['COMPONENT_BUILD'],
+       }] # component=="shared_library"
+     ], # conditions
+   }, # target_defaults
+
+  'includes': [
+    'common_chromium.gypi',
+    'common_evita.gypi',
+    'common_third_party.gypi',
+  ], # includes
+
   'conditions': [
-    ['chromium_code==1', {
-      'includes': [ 'common_chromium.gypi' ]
-    }],
-    ['evita_code==1', {
-      'includes': [ 'common_evita.gypi' ]
-    }],
-    ['chromium_code==0 and evita_code==0', {
-      'includes': [ 'common_third_party.gypi' ]
-    }],
     ['OS=="win"', {
       'default_configuration': 'Debug',
 
@@ -52,7 +70,7 @@
         'msvs_cygwin_shell': 0,
 
         'configurations': {
-          'common_base': {
+          'Common_Base': {
             'abstract': 1,
 
             'msvs_configuration_attributes': {
@@ -65,40 +83,55 @@
               'VCLinkerTool': {
                 'AdditionalDependencies': [
                   'kernel32.lib',
-                ],
-                'SubSytem': 1,
+                ], # AdditionalDependencies
+                'FixBaseAddress': '1',
+                'SubSystem': 1,
               }, # VCLinkerTool
             }, # msvs_settings
-          }, # common_base
+          }, # Common_Base
 
-          'x86_base': {
+          'x86_Base': {
             'abstract': 1,
             'msvs_settings': {
               'VCLinkerTool': {
                 'AdditionalOptions': [
                   '/safeseh',
                   #'/dynamicbase',
-                  #'/nxcompat',
+                  '/nxcompat',
                 ], # AdditionalOptions
                 'TargetMachine': '1',
               },
             }, # msvs_settings
-          }, # x86_base
+          }, # x86_Base
 
-          'debug_base': {
+          'x64_Base': {
+            'msvs_settings': {
+              'VCLinkerTool': {
+                'AdditionalOptions': [
+                  # safeseh is not compatible with x64
+                  '/dynamicbase',
+                  '/ignore:4199',
+                  '/ignore:4221',
+                  '/nxcompat',
+                ],
+              },
+            },
+          }, # x64_Base
+
+          'Debug_Base': {
             'abstract': 1,
             'msvs_settings': {
               'VCCLCompilerTool': {
                 'Optimization': '0', # /Od
                 'PreprocessorDefinitions': ['_DEBUG'],
                 'AdditionalOptions': [
-                  '/GF-', # Enables string pooling.
-                  '/GS', # Buffer security check
-                  '/Gm-', # Enables minimal rebuild.
-                  '/Gy-', # Enables function-level linking.
-                  '/MTd', # Creates a debug multithreaded executable file using LIBCMTD.lib.
-                  '/Oy-', # Omits frame pointer (x86 only).
-                  '/Zi', # Generates complete debugging information.
+                  #'/GF-', # Enables string pooling.
+                  #'/GS', # Buffer security check
+                  #'/Gm-', # Enables minimal rebuild.
+                  #'/Gy-', # Enables function-level linking.
+                  #'/MTd', # Creates a debug multithreaded executable file using LIBCMTD.lib.
+                  #'/Oy-', # Omits frame pointer (x86 only).
+                  #'/Zi', # Generates complete debugging information.
                 ],
                 'conditions': [
                   ['evita_code==1', {
@@ -113,9 +146,9 @@
                 'GenerateMapFile': 'true',
               }, # VCLinkerTool
             },
-          }, # debug_base
+          }, # Debug_Base
 
-          'release_base': {
+          'Release_Base': {
             'abstract': 1,
             'msvs_settings': {
               # Note: GYP add /FS(Forces writes to the program database (PDB)
@@ -144,15 +177,21 @@
                 'OptimizeReferences': '2',
               }, # VCLinkerTool
             },
-          }, # release_base
+          }, # Release_Base
 
           # Concrete configurations
           'Debug' : {
-            'inherit_from': ['common_base', 'x86_base', 'debug_base'],
+            'inherit_from': ['Common_Base', 'x86_Base', 'Debug_Base'],
           },
 
           'Release' : {
-            'inherit_from': ['common_base', 'x86_base', 'release_base'],
+            'inherit_from': ['Common_Base', 'x86_Base', 'Release_Base'],
+          },
+          'Debug_x64' : {
+            'inherit_from': ['Common_Base', 'x64_Base', 'Debug_Base'],
+          },
+          'Release_x64' : {
+            'inherit_from': ['Common_Base', 'x64_Base', 'Release_Base'],
           },
         }, # configurations
       }, # target_defaults

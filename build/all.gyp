@@ -8,6 +8,7 @@
       'target_name': 'All',
       'type': 'none',
       'dependencies': [
+        '../base/base.gyp:*',
         '../evita/evita.gyp:*',
         #'../third_party/v8/tools/gyp/v8.gyp:*',
       ], # dependencies

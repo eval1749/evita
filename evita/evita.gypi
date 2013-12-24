@@ -82,7 +82,7 @@
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/regex/regex.gyp:regex_lib',
-        '<(DEPTH)/third_party/v8/tools/gyp/v8.gyp:v8',
+        '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
       ], # dependencies
       'sources': [
         'precomp.cpp',

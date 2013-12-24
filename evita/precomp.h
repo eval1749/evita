@@ -291,25 +291,16 @@ class RegKey
     public: operator HKEY() const { return h; }
 }; // RegKey
 
+// TODO(yosi): We should not use |uint|.
+typedef uint32 uint;
 #include "./ed_defs.h"
 
 typedef Edit::Count Count;
 typedef Edit::Posn  Posn;
 
-#if defined(NDEBUG)
-    #if defined (_M_IX86)
-        #pragma function(memcpy)
-        //#pragma function(memset)
-    #endif // defined (_M_IX86)
-    extern "C" void* myCopyMemory(void*, const void*, size_t);
-    extern "C" void* myMoveMemory(void*, const void*, size_t);
-    extern "C" void* myZeroMemory(void*, size_t);
-#else
-    #define myCopyMemory(d, s, n) ::CopyMemory(d, s, n)
-    #define myMoveMemory(d, s, n) ::MoveMemory(d, s, n)
-    #define myZeroMemory(d, n)    ::ZeroMemory(d, n)
-
-#endif // NDEBUG
+#define myCopyMemory(d, s, n) ::CopyMemory(d, s, n)
+#define myMoveMemory(d, s, n) ::MoveMemory(d, s, n)
+#define myZeroMemory(d, n)    ::ZeroMemory(d, n)
 
 char16* lstrchrW(const char16*, char16);
 char16* lstrrchrW(const char16*, char16);
@@ -328,6 +319,11 @@ char16* lstrrchrW(const char16*, char16);
 // not handled
 // e.g. We don't want to have |case State_Limit|, |cast Kind_Max|, etc.
 #pragma warning(disable: 4062)
+
+
+// warning C4127: conditional expression is constant
+// For DCHECK_XX(x)
+#pragma warning(disable: 4127)
 
 // warning  C4251: 'identifier' : class 'type' needs to have dll-interface to
 // be used by clients of class 'type2'

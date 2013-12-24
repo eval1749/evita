@@ -14,6 +14,9 @@
       'target_name': 'evita',
       'type': 'executable',
       'dependencies': [
+        '../base/base.gyp:base',
+        '../common/common.gyp:common',
+        '../v8/tools/gyp/v8.gyp:v8',
         'core',
       ], # dependencies
 
@@ -47,7 +50,6 @@
         'evita.rc',
         'ExactStringMatch.cpp',
         'gfx_base.cpp',
-        'vcsupport.cpp',
         'vi_Application.cpp',
         'vi_Buffer.cpp',
         'vi_Caret.cpp',

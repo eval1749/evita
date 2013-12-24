@@ -21,7 +21,7 @@
 #define DEBUG_SHOW_HIDE 0
 #include "./vi_TextEditWindow.h"
 
-#include "base/timer/timer.h"
+#include "common/timer/timer.h"
 #include "./ed_Mode.h"
 #include "./ed_Style.h"
 #include "./gfx_base.h"
@@ -54,7 +54,7 @@ class TextEditWindow::Autoscroller {
   private: int direction_;
   private: TextEditWindow* editor_;
   private: uint started_at_;
-  private: base::RepeatingTimer<Autoscroller> timer_;
+  private: common::RepeatingTimer<Autoscroller> timer_;
 
   public: Autoscroller(TextEditWindow* edtior)
     : direction_(0),
@@ -64,7 +64,7 @@ class TextEditWindow::Autoscroller {
           timer_(this, &Autoscroller::DidFireTime)) {
   }
 
-  private: void DidFireTime(base::RepeatingTimer<Autoscroller>*) {
+  private: void DidFireTime(common::RepeatingTimer<Autoscroller>*) {
     auto const duration = static_cast<uint>(::GetTickCount() - started_at_);
     auto const scroll_amount = static_cast<Count>(
         std::min(std::max(duration / kScrollSpeedIntervalMs, 1u), 20u));
@@ -148,7 +148,7 @@ TextEditWindow::~TextEditWindow() {
 class TextEditWindow::CaretBlinker {
   private: TextEditWindow* const editor_;
   private: Range* range_;
-  private: base::OneShotTimer<CaretBlinker> timer_;
+  private: common::OneShotTimer<CaretBlinker> timer_;
   public: CaretBlinker(TextEditWindow* editor, Posn posn, uint interval_ms)
       : editor_(editor),
         range_(editor->GetBuffer()->CreateRange(posn, posn)),
@@ -160,7 +160,7 @@ class TextEditWindow::CaretBlinker {
     range_->destroy();
   }
   public: Range& range() const { return *range_; }
-  private: void RestoreCaret(base::OneShotTimer<CaretBlinker>*) {
+  private: void RestoreCaret(common::OneShotTimer<CaretBlinker>*) {
     auto const editor = editor_;
     editor->caret_blinker_.reset();
     editor->Redraw();

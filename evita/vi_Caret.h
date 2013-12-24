@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_listener_winapp_visual_caret_h)
 #define INCLUDE_listener_winapp_visual_caret_h
 
-#include "base/timer/timer.h"
+#include "common/timer/timer.h"
 #include "gfx/rect_f.h"
 #include "./li_util.h"
 #include <memory>
@@ -26,8 +26,8 @@ class Grapchis;
 class Caret {
   private: class BackingStore;
 
-  private: const base::OwnPtr<BackingStore> backing_store_;
-  private: base::RepeatingTimer<Caret> blink_timer_;
+  private: const common::OwnPtr<BackingStore> backing_store_;
+  private: common::RepeatingTimer<Caret> blink_timer_;
   private: const gfx::Graphics* gfx_;
   private: gfx::RectF rect_;
   private: bool shown_;
@@ -36,7 +36,7 @@ class Caret {
 
   private: Caret();
   public: ~Caret();
-  private: void Blink(base::RepeatingTimer<Caret>*);
+  private: void Blink(common::RepeatingTimer<Caret>*);
   public: static std::unique_ptr<Caret> Create();
   public: void Hide();
   public: void Give();

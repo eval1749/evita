@@ -3,12 +3,12 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #include "widgets/container_widget.h"
 
-#include "base/adoptors/reverse.h"
-#include "base/tree/ancestors_or_self.h"
-#include "base/tree/child_nodes.h"
-#include "base/tree/descendants.h"
-#include "base/tree/descendants_or_self.h"
-#include "base/win/native_window.h"
+#include "common/adoptors/reverse.h"
+#include "common/tree/ancestors_or_self.h"
+#include "common/tree/child_nodes.h"
+#include "common/tree/descendants.h"
+#include "common/tree/descendants_or_self.h"
+#include "common/win/native_window.h"
 #include "evita/widgets/root_widget.h"
 #include <algorithm>
 
@@ -96,7 +96,7 @@ void ContainerWidget::DispatchPaintMessage() {
 }
 
 ContainerWidget& ContainerWidget::GetHostContainer() const {
-  for (auto& runner: base::tree::ancestors_or_self(*this)) {
+  for (auto& runner: common::tree::ancestors_or_self(*this)) {
     if (runner.native_window())
        return const_cast<ContainerWidget&>(runner);
   }
@@ -105,7 +105,7 @@ ContainerWidget& ContainerWidget::GetHostContainer() const {
 
 Widget* ContainerWidget::GetWidgetAt(const Point& point) const {
   // On release build by MSVS2013, using reverse() causes AV.
-  // for (const auto& child: base::adoptors::reverse(child_nodes()))
+  // for (const auto& child: common::adoptors::reverse(child_nodes()))
   for (auto runner = last_child(); runner;
        runner = runner->previous_sibling()) {
     const auto& child = *runner;
@@ -123,7 +123,7 @@ Widget* ContainerWidget::GetWidgetAt(const Point& point) const {
 
 // Hide widgets in post order.
 void ContainerWidget::Hide() {
-  for (auto& child: base::adoptors::reverse(child_nodes())) {
+  for (auto& child: common::adoptors::reverse(child_nodes())) {
    child.Hide();
   }
   Widget::Hide();

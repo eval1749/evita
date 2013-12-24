@@ -3,8 +3,8 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #include "widgets/widget.h"
 
-#include "base/tree/ancestors_or_self.h"
-#include "base/tree/descendants_or_self.h"
+#include "common/tree/ancestors_or_self.h"
+#include "common/tree/descendants_or_self.h"
 #include "evita/widgets/container_widget.h"
 #include "evita/widgets/root_widget.h"
 
@@ -37,7 +37,7 @@ Widget::~Widget() {
 }
 
 bool Widget::has_focus() const {
-  for (auto& runner: base::tree::ancestors_or_self(*this)) {
+  for (auto& runner: common::tree::ancestors_or_self(*this)) {
     if (auto const window = runner.native_window_.get()) {
       if (::GetFocus() != *window)
         return false;
@@ -51,7 +51,7 @@ bool Widget::has_focus() const {
 }
 
 HWND Widget::AssociatedHwnd() const {
-  for (auto& runner: base::tree::ancestors_or_self(*this)) {
+  for (auto& runner: common::tree::ancestors_or_self(*this)) {
     if (auto const window = runner.native_window_.get())
       return *window;
   }
@@ -342,14 +342,14 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
 
       if (wp->flags & SWP_HIDEWINDOW) {
         // We don't take care hidden window.
-        for (auto& widget: base::tree::descendants_or_self(*this)) {
+        for (auto& widget: common::tree::descendants_or_self(*this)) {
           widget.shown_ = 0;
         }
         return 0;
       }
 
       if (wp->flags & SWP_SHOWWINDOW) {
-        for (auto& widget: base::tree::descendants_or_self(*this)) {
+        for (auto& widget: common::tree::descendants_or_self(*this)) {
           widget.shown_ = 1;
         }
       }
@@ -373,21 +373,8 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
 
 } // namespace widgets
 
-namespace logging {
-
-base::string16 ToString16(const widgets::Widget& widget) {
-  auto const class_name8 = widget.class_name();
-  base::string16 class_name16(::lstrlenA(class_name8), ' ');
-  auto runner8 = class_name8;
-  for (auto& it: class_name16) {
-    it = *runner8;
-    ++runner8;
-  }
-  class_name16 += '@x';
-  base::char16 address[20];
-  ::wsprintfW(address, L"@%p",  &widget);
-  class_name16 += address;
-  return std::move(class_name16);
+std::ostream& operator<<(std::ostream& out, const widgets::Widget& widget) {
+  out << widget.class_name() << " 0x" << std::hex <<
+    reinterpret_cast<uintptr_t>(&widget);
+  return out;
 }
-
-}  // namespace logging

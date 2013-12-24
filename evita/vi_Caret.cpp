@@ -18,7 +18,7 @@ static const auto kBlinkInterval = 500; // milliseconds
 // BackingStore
 //
 class Caret::BackingStore {
-  private: base::OwnPtr<gfx::Bitmap> bitmap_;
+  private: common::OwnPtr<gfx::Bitmap> bitmap_;
   private: void* render_target_;
   private: gfx::RectF rect_;
 
@@ -57,7 +57,7 @@ void Caret::BackingStore::Save(const gfx::Graphics& gfx,
                                       static_cast<uint>(rect_.top),
                                       static_cast<uint>(rect_.right),
                                       static_cast<uint>(rect_.bottom));
-  base::OwnPtr<gfx::Bitmap> bitmap(*new gfx::Bitmap(gfx,
+  common::OwnPtr<gfx::Bitmap> bitmap(*new gfx::Bitmap(gfx,
                                                     screen_rect.size()));
   COM_VERIFY((*bitmap)->CopyFromRenderTarget(nullptr, gfx, &screen_rect));
   bitmap_ = std::move(bitmap);
@@ -81,7 +81,7 @@ Caret::~Caret() {
   ASSERT(!taken_);
 }
 
-void Caret::Blink(base::RepeatingTimer<Caret>*) {
+void Caret::Blink(common::RepeatingTimer<Caret>*) {
   if (!taken_ || !should_blink_ || !rect_)
     return;
   #if DEBUG_BLINK

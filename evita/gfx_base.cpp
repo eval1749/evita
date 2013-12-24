@@ -68,11 +68,11 @@ class NullFont : IDWriteFont {
 };
 #endif
 
-base::ComPtr<ID2D1Bitmap> CreateBitmap(const Graphics& gfx, HICON hIcon) {
-  base::ComPtr<IWICBitmap> icon;
+common::ComPtr<ID2D1Bitmap> CreateBitmap(const Graphics& gfx, HICON hIcon) {
+  common::ComPtr<IWICBitmap> icon;
   COM_VERIFY(gfx::FactorySet::image().CreateBitmapFromHICON(
       hIcon, &icon));
- base::ComPtr<IWICFormatConverter> converter;
+ common::ComPtr<IWICFormatConverter> converter;
  COM_VERIFY(gfx::FactorySet::image().
     CreateFormatConverter(&converter));
  COM_VERIFY(converter->Initialize(
@@ -82,7 +82,7 @@ base::ComPtr<ID2D1Bitmap> CreateBitmap(const Graphics& gfx, HICON hIcon) {
       nullptr,
       0,
       WICBitmapPaletteTypeMedianCut));
-  base::ComPtr<ID2D1Bitmap> bitmap;
+  common::ComPtr<ID2D1Bitmap> bitmap;
   COM_VERIFY(gfx->CreateBitmapFromWicBitmap(converter, nullptr, &bitmap));
   return std::move(bitmap);
 }
@@ -104,8 +104,8 @@ IDWriteFactory& CreateDWriteFactory() {
   return *factory;
 }
 
-base::ComPtr<IDWriteFontFace> CreateFontFace(const char16* family_name) {
-  base::ComPtr<IDWriteFontCollection> font_collection;
+common::ComPtr<IDWriteFontFace> CreateFontFace(const char16* family_name) {
+  common::ComPtr<IDWriteFontCollection> font_collection;
   COM_VERIFY(gfx::FactorySet::dwrite().
       GetSystemFontCollection(&font_collection, false));
 
@@ -115,17 +115,17 @@ base::ComPtr<IDWriteFontFace> CreateFontFace(const char16* family_name) {
   if (!exists)
    return CreateFontFace(L"Courier New");
 
-  base::ComPtr<IDWriteFontFamily> font_family;
+  common::ComPtr<IDWriteFontFamily> font_family;
   COM_VERIFY(font_collection->GetFontFamily(index, &font_family));
 
-  base::ComPtr<IDWriteFont> font;
+  common::ComPtr<IDWriteFont> font;
   COM_VERIFY(font_family->GetFirstMatchingFont(
     DWRITE_FONT_WEIGHT_NORMAL,
     DWRITE_FONT_STRETCH_NORMAL,
     DWRITE_FONT_STYLE_NORMAL, // normal, italic or oblique
     &font));
 
-  base::ComPtr<IDWriteFontFace> font_face;
+  common::ComPtr<IDWriteFontFace> font_face;
   COM_VERIFY(font->CreateFontFace(&font_face));
   return std::move(font_face);
 }
@@ -140,20 +140,20 @@ IWICImagingFactory& CreateImageFactory() {
   return *factory;
 }
 
-base::ComPtr<ID2D1SolidColorBrush> CreateSolidColorBrush(const Graphics& gfx,
+common::ComPtr<ID2D1SolidColorBrush> CreateSolidColorBrush(const Graphics& gfx,
                                                          ColorF color) {
-  base::ComPtr<ID2D1SolidColorBrush> brush;
+  common::ComPtr<ID2D1SolidColorBrush> brush;
   COM_VERIFY(gfx->CreateSolidColorBrush(color, &brush));
   return brush;
 }
 
-base::ComPtr<IDWriteTextFormat> CreateTextFormat(
+common::ComPtr<IDWriteTextFormat> CreateTextFormat(
     const FactorySet&,
     const LOGFONT& log_font) {
   ASSERT(log_font.lfHeight < 0);
   auto size = FactorySet::CeilToPixel(
       SizeF(0.0f, static_cast<float>(-log_font.lfHeight) * 96.0f / 72.0f));
-  base::ComPtr<IDWriteTextFormat> text_format;
+  common::ComPtr<IDWriteTextFormat> text_format;
   COM_VERIFY(FactorySet::dwrite().CreateTextFormat(
     log_font.lfFaceName,
     nullptr,
@@ -183,8 +183,8 @@ float MultipleOf(float x, float unit) {
 // Bitmap
 //
 namespace {
-base::ComPtr<ID2D1Bitmap> CreateBitmap(const Graphics& gfx, SizeU size) {
-  base::ComPtr<ID2D1Bitmap> bitmap;
+common::ComPtr<ID2D1Bitmap> CreateBitmap(const Graphics& gfx, SizeU size) {
+  common::ComPtr<ID2D1Bitmap> bitmap;
   D2D1_BITMAP_PROPERTIES props;
   props.pixelFormat = gfx->GetPixelFormat();
   gfx->GetDpi(&props.dpiX, &props.dpiY);

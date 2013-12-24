@@ -44,7 +44,7 @@ void FontSet::Add(Font* pFont)
 // Font
 //
 class Font::FontImpl {
-  private: const base::OwnPtr<gfx::FontFace> font_face_;
+  private: const common::OwnPtr<gfx::FontFace> font_face_;
   private: float const em_size_; // the logical size of the font in DIP units.
   private: float const pixels_per_dip_;
   private: const DWRITE_FONT_METRICS metrics_;
@@ -188,8 +188,8 @@ Font::Font(const LOGFONT& log_font)
 Font::~Font() {
 }
 
-base::OwnPtr<Font> Font::Create(const LOGFONT* logFont) {
-  return std::move(base::OwnPtr<Font>(new Font(*logFont)));
+common::OwnPtr<Font> Font::Create(const LOGFONT* logFont) {
+  return std::move(common::OwnPtr<Font>(new Font(*logFont)));
 }
 
 void Font::DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,

@@ -8,13 +8,13 @@
 namespace content {
 
 ContentWindow::ContentWindow(
-    std::unique_ptr<base::win::NativeWindow>&& native_window)
+    std::unique_ptr<common::win::NativeWindow>&& native_window)
     : CommandWindow_(std::move(native_window)),
       active_tick_(0) {
 }
 
 ContentWindow::ContentWindow()
-    : ContentWindow(std::move(std::unique_ptr<base::win::NativeWindow>())) {
+    : ContentWindow(std::move(std::unique_ptr<common::win::NativeWindow>())) {
 }
 
 Frame& ContentWindow::frame() const {

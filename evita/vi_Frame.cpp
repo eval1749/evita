@@ -17,8 +17,8 @@
 #define DEBUG_WINDOWPOS 0
 #include "./vi_Frame.h"
 
-#include "base/tree/ancestors_or_self.h"
-#include "base/win/native_window.h"
+#include "common/tree/ancestors_or_self.h"
+#include "common/win/native_window.h"
 #include "./ctrl_TabBand.h"
 #include "./ed_Mode.h"
 #include "./gfx_base.h"
@@ -370,7 +370,7 @@ void Frame::DidSetFocus() {
 }
 
 Frame* Frame::FindFrame(const widgets::Widget& widget) {
-  for (auto& ancestor: base::tree::ancestors_or_self(widget)) {
+  for (auto& ancestor: common::tree::ancestors_or_self(widget)) {
     if (ancestor.is<Frame>())
       return const_cast<Widget&>(ancestor).as<Frame>();
   }

@@ -20,7 +20,7 @@
 // warning C4626: 'derived class' : assignment operator could not be generated
 // because a base class assignment operator is inaccessible
 #pragma warning(disable: 4626)
-#include "third_party/v8/include/v8.h"
+#include "v8/include/v8.h"
 #pragma warning(pop)
 
 #endif // !defined(INCLUDE_evita_v8_glue_v8_h)

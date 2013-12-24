@@ -20,7 +20,7 @@
 
 namespace gfx {
 class Graphics;
-using base::win::Rect;
+using common::win::Rect;
 }
 
 /// <summary>
@@ -62,7 +62,7 @@ class Frame final : public widgets::ContainerWidget,
 
   private: typedef ChildList_<Frame, Pane> Panes;
 
-  private: base::OwnPtr<gfx::Graphics> gfx_;
+  private: common::OwnPtr<gfx::Graphics> gfx_;
   private: int m_cyTabBand;
   private: HWND m_hwndTabBand;
   private: Panes m_oPanes;

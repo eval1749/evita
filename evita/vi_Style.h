@@ -33,7 +33,7 @@ class Font {
     };
 
     private: LOGFONT m_oLogFont;
-    private: const base::OwnPtr<FontImpl> font_impl_;
+    private: const common::OwnPtr<FontImpl> font_impl_;
     private: const SimpleMetrics metrics_;
 
     private: Font(const LOGFONT&);
@@ -44,7 +44,7 @@ class Font {
     public: float height() const { return metrics_.height; }
 
     // [C]
-    public: static base::OwnPtr<Font> Create(const LOGFONT*);
+    public: static common::OwnPtr<Font> Create(const LOGFONT*);
 
     // [D]
     void DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,

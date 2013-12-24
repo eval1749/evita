@@ -564,7 +564,8 @@ class HashTable_
     } // rehash
 }; // HashTable_
 
-namespace base {
+// TODO(yosi) We should use std::unique_ptr<T> instead of OwnPtr<T>.
+namespace common {
 template<class T>
 class OwnPtr {
   private: T* ptr_;
@@ -604,7 +605,7 @@ class OwnPtr {
     return *ptr;
   }
 };
-} // namespace base
+}  // namespace common
 
 // RefCounted
 template<class T>

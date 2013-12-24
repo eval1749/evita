@@ -7,8 +7,8 @@
 #include "evita/ap_input_history.h"
 #include "evita/cm_CmdProc.h"
 #include "evita/ed_Range.h"
+#include "evita/v8_glue/v8.h"
 #include "evita/vi_Selection.h"
-#include "third_party/v8/include/v8.h"
 
 namespace v8_glue {
 

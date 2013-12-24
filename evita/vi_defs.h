@@ -12,14 +12,14 @@
 #define INCLUDE_listener_winapp_visual_defs_h
 
 #include "./resource.h"
-#include "base/win/rect.h"
+#include "common/win/rect.h"
 
-// TODO: We should use as |base::win::Point|.
-using base::win::Point;
-// TODO: We should use as |base::win::Rect|.
-using base::win::Rect;
-// TODO: We should use as |base::win::Size|.
-using base::win::Size;
+// TODO: We should use as |common::win::Point|.
+using common::win::Point;
+// TODO: We should use as |common::win::Rect|.
+using common::win::Rect;
+// TODO: We should use as |common::win::Size|.
+using common::win::Size;
 
 extern HINSTANCE g_hInstance;
 extern HINSTANCE g_hResource;

@@ -3,7 +3,7 @@
 #if !defined(INCLUDE_widgets_container_widget_h)
 #define INCLUDE_widgets_container_widget_h
 
-#include "base/tree/container_node.h"
+#include "common/tree/container_node.h"
 #include "widgets/widget.h"
 
 namespace widgets {
@@ -12,16 +12,16 @@ class ChildWidgets;
 class ConstChildWidgets;
 
 class ContainerWidget 
-    : public base::tree::ContainerNode_<
+    : public common::tree::ContainerNode_<
           Widget, ContainerWidget,
-          std::unique_ptr<base::win::NativeWindow>&&> {
+          std::unique_ptr<common::win::NativeWindow>&&> {
   DECLARE_CASTABLE_CLASS(ContainerWidget, Widget);
 
   private: Widget* capture_widget_;
   private: Widget* focus_widget_;
 
   protected: explicit ContainerWidget(
-      std::unique_ptr<base::win::NativeWindow>&& native_window);
+      std::unique_ptr<common::win::NativeWindow>&& native_window);
   protected: ContainerWidget();
   public: virtual ~ContainerWidget();
 
@@ -74,11 +74,5 @@ class ContainerWidget
 };
 
 } // namespace widgets
-
-namespace logging {
-inline base::string16 ToString16(const widgets::ContainerWidget& widget) {
-  return ToString16(static_cast<const widgets::Widget&>(widget));
-}
-} // logging
 
 #endif //!defined(INCLUDE_widgets_container_widget_h)

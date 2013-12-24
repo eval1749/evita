@@ -2,7 +2,7 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #include "evita/content/buffer_list_window.h"
 
-#include "base/win/native_window.h"
+#include "common/win/native_window.h"
 #include "evita/cm_CmdProc.h"
 #include "evita/ed_Mode.h"
 
@@ -325,7 +325,7 @@ LRESULT BufferListWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
   return ParentClass::OnMessage(uMsg, wParam, lParam);
 }
 
-void BufferListWindow::OnPaint(const base::win::Rect) {
+void BufferListWindow::OnPaint(const common::win::Rect) {
   ::InvalidateRect(m_hwndListView, nullptr, true);
   ::UpdateWindow(m_hwndListView);
 }

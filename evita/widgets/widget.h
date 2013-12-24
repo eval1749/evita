@@ -3,28 +3,30 @@
 #if !defined(INCLUDE_widgets_widget_h)
 #define INCLUDE_widgets_widget_h
 
-#include "base/castable.h"
-#include "base/tree/node.h"
-#include "base/win/native_window.h"
-#include "base/win/rect.h"
+#include <ostream>
 #include <memory>
+
+#include "common/castable.h"
+#include "common/tree/node.h"
+#include "common/win/native_window.h"
+#include "common/win/rect.h"
 
 namespace widgets {
 
 class ContainerWidget;
-typedef base::win::NativeWindow NativeWindow;
-typedef base::win::Point Point;
-typedef base::win::Rect Rect;
+typedef common::win::NativeWindow NativeWindow;
+typedef common::win::Point Point;
+typedef common::win::Rect Rect;
 
 //////////////////////////////////////////////////////////////////////
 //
 // Widget
 //
 class Widget
-    : public base::tree::Node_<Widget, ContainerWidget,
+    : public common::tree::Node_<Widget, ContainerWidget,
                                std::unique_ptr<NativeWindow>&&>,
-      public base::win::MessageDelegate,
-      public base::Castable {
+      public common::win::MessageDelegate,
+      public common::Castable {
   DECLARE_CASTABLE_CLASS(Widget, Castable);
 
   // Life time of native_window_ ends at WM_NCDESTROY rather than
@@ -130,8 +132,6 @@ class Widget
 
 } // namespace widgets
 
-#include "base/logging.h"
-namespace logging {
-base::string16 ToString16(const widgets::Widget&);
-}
+std::ostream& operator<<(std::ostream& out, const widgets::Widget& widget);
+
 #endif //!defined(INCLUDE_widgets_widget_h)

@@ -6,8 +6,8 @@
 #if !defined(INCLUDE_gfx_base_h)
 #define INCLUDE_gfx_base_h
 
-#include "base/win/rect.h"
-#include "base/win/scoped_comptr.h"
+#include "common/win/rect.h"
+#include "common/win/scoped_comptr.h"
 #include "gfx/rect_f.h"
 #include "./li_util.h"
 
@@ -29,9 +29,9 @@
 
 namespace gfx {
 
-typedef base::win::Point Point;
-typedef base::win::Rect Rect;
-typedef base::win::Size Size;
+typedef common::win::Point Point;
+typedef common::win::Rect Rect;
+typedef common::win::Size Size;
 
 class Object {
   protected: Object() {}
@@ -41,9 +41,9 @@ class Object {
 
 template<class T>
 class SimpleObject_ : public Object {
-  private: const base::ComPtr<T> ptr_;
+  private: const common::ComPtr<T> ptr_;
   protected: SimpleObject_(T* ptr) : ptr_(ptr) {}
-  protected: SimpleObject_(base::ComPtr<T>&& ptr) : ptr_(std::move(ptr)) {}
+  protected: SimpleObject_(common::ComPtr<T>&& ptr) : ptr_(std::move(ptr)) {}
   public: operator T*() const { return ptr_; }
   public: T* operator->() const { return ptr_; }
   DISALLOW_COPY_AND_ASSIGN(SimpleObject_);
@@ -88,12 +88,12 @@ class DpiHandler {
 };
 
 class FactorySet : public RefCounted_<FactorySet>,
-                   public base::ComInit,
+                   public common::ComInit,
                    public DpiHandler,
                    public Object {
-  private: base::ComPtr<ID2D1Factory> d2d1_factory_;
-  private: base::ComPtr<IDWriteFactory> dwrite_factory_;
-  private: base::ComPtr<IWICImagingFactory> image_factory_;
+  private: common::ComPtr<ID2D1Factory> d2d1_factory_;
+  private: common::ComPtr<IDWriteFactory> dwrite_factory_;
+  private: common::ComPtr<IWICImagingFactory> image_factory_;
 
   public: FactorySet();
   public: ~FactorySet() {}
@@ -127,7 +127,7 @@ class FontFace : public SimpleObject_<IDWriteFontFace> {
 class TextFormat : public SimpleObject_<IDWriteTextFormat> {
   private: const ScopedRefCount_<FactorySet> factory_set_;
   public: TextFormat(const LOGFONT& log_font);
-  public: base::OwnPtr<TextLayout> CreateLayout(const char16*, int) const;
+  public: common::OwnPtr<TextLayout> CreateLayout(const char16*, int) const;
   DISALLOW_COPY_AND_ASSIGN(TextFormat);
 };
 

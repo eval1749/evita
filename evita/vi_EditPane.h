@@ -53,7 +53,7 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
 
   private: State m_eState;
   private: ScopedRefCount_<LayoutBox> root_box_;
-  private: const base::OwnPtr<SplitterController> splitter_controller_;
+  private: const common::OwnPtr<SplitterController> splitter_controller_;
 
   // ctro/dtor
   public: explicit EditPane(Buffer*, Posn = 0);

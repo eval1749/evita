@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_visual_IoManager_h)
 #define INCLUDE_visual_IoManager_h
 
-#include "base/win/native_window.h"
+#include "common/win/native_window.h"
 
 class Buffer;
 
@@ -19,7 +19,7 @@ class Buffer;
 //
 // IoManager
 //
-class IoManager : public base::win::NativeWindow
+class IoManager : public common::win::NativeWindow
 {
     public: IoManager();
 

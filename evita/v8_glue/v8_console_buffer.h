@@ -3,11 +3,12 @@
 #if !defined(INCLUDE_evita_v8_glue_v8_console_buffer_h)
 #define INCLUDE_evita_v8_glue_v8_console_buffer_h
 
-#include "base/memory/singleton.h"
+#include <memory>
+
 #include "base/strings/string16.h"
+#include "common/memory/singleton.h"
 #include "evita/vi_Buffer.h"
 #include "evita/v8_glue/context_holder.h"
-#include <memory>
 
 class InputHistory;
 
@@ -24,7 +25,7 @@ class Isolate;
 
 namespace v8_glue {
 
-class V8ConsoleBuffer : public base::Singleton<V8ConsoleBuffer>,
+class V8ConsoleBuffer : public common::Singleton<V8ConsoleBuffer>,
                         public Buffer {
   private: std::unique_ptr<InputHistory> input_history_;
   private: v8::Isolate* const isolate_;

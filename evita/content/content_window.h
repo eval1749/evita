@@ -16,7 +16,7 @@ class ContentWindow : public CommandWindow_<ContentWindow> {
 
   private: uint active_tick_;
 
-  protected: ContentWindow(std::unique_ptr<base::win::NativeWindow>&&);
+  protected: ContentWindow(std::unique_ptr<common::win::NativeWindow>&&);
   protected: ContentWindow();
 
   public: Frame& frame() const;

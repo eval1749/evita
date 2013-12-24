@@ -12,8 +12,8 @@
 #include "./ed_Mode.h"
 
 #include "base/logging.h"
-#include "base/memory/singleton.h"
 #include "base/strings/string16.h"
+#include "common/memory/singleton.h"
 #include "./mode_Config.h"
 #include "./mode_Cxx.h"
 #include "./mode_Haskell.h"
@@ -313,7 +313,7 @@ HICON LoadIconFromRegistry(const char16* pwszExt)
     return hIcon;
 } // LoadIconFromRegistry
 
-class IconCache : public base::Singleton<IconCache> {
+class IconCache : public common::Singleton<IconCache> {
   private: std::unordered_map<base::string16, int> map_;
   private: HIMAGELIST image_list_;
 

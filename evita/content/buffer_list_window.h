@@ -64,7 +64,7 @@ class BufferListWindow
   // [O]
   private: void onKeyDown(uint);
   private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
-  private: virtual void OnPaint(const base::win::Rect rect) override;
+  private: virtual void OnPaint(const common::win::Rect rect) override;
 
   // [U]
   private: virtual void UpdateStatusBar() const override;

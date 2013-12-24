@@ -1,29 +1,30 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_base_win_native_window_h)
-#define INCLUDE_base_win_native_window_h
+#if !defined(INCLUDE_common_win_native_window_h)
+#define INCLUDE_common_win_native_window_h
 
-#include "base/base_export.h"
-#include "base/logging.h"
-#include "base/strings/string16.h"
 #include <memory>
 
-namespace base {
+#include "base/logging.h"
+#include "base/strings/string16.h"
+#include "common/common_export.h"
+
+namespace common {
 namespace win {
 
 struct Point;
 struct Size;
 
-interface BASE_EXPORT MessageDelegate {
+interface COMMON_EXPORT MessageDelegate {
   virtual ~MessageDelegate();
-  virtual LRESULT WindowProc(uint message, WPARAM wParam, LPARAM lParam) = 0;
+  virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
 //
 // NativeWindow
 //
-class BASE_EXPORT NativeWindow {
+class COMMON_EXPORT NativeWindow {
   protected: HWND hwnd_;
   private: MessageDelegate* message_delegate_;
 
@@ -81,7 +82,7 @@ class BASE_EXPORT NativeWindow {
   protected: static NativeWindow* MapHwnToNativeWindow(HWND);
 
   // [S]
-  public: LRESULT SendMessage(uint uMsg, WPARAM wParam = 0,
+  public: LRESULT SendMessage(UINT uMsg, WPARAM wParam = 0,
                               LPARAM lParam = 0) {
     return ::SendMessage(hwnd_, uMsg, wParam, lParam);
   }
@@ -97,6 +98,6 @@ class BASE_EXPORT NativeWindow {
 };
 
 } // namespace win
-} // namespace base
+} // namespace common
 
-#endif //!defined(INCLUDE_base_win_native_window_h)
+#endif //!defined(INCLUDE_common_win_native_window_h)

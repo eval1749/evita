@@ -1,11 +1,11 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_base_tree_abstract_node_iterator_h)
-#define INCLUDE_base_tree_abstract_node_iterator_h
+#if !defined(INCLUDE_common_tree_abstract_node_iterator_h)
+#define INCLUDE_common_tree_abstract_node_iterator_h
 
 #include <iterator>
 
-namespace base {
+namespace common {
 namespace tree {
 namespace impl {
 
@@ -46,6 +46,6 @@ class AbstractNodeIterator_
 
 } // namespace impl
 } // namespace tree
-} // namespace base
+} // namespace common
 
-#endif //!defined(INCLUDE_base_tree_abstract_node_iterator_h)
+#endif //!defined(INCLUDE_common_tree_abstract_node_iterator_h)

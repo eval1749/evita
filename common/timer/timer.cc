@@ -1,24 +1,25 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "base/timer/timer.h"
+#include "common/timer/timer.h"
+
+#include <memory>
 
 #include "base/logging.h"
 #include "base/memory/singleton.h"
-#include "base/win/native_window.h"
-#include "base/win/point.h"
-#include "base/win/size.h"
-#include <memory>
+#include "common/win/native_window.h"
+#include "common/win/point.h"
+#include "common/win/size.h"
 
 #define DEBUG_TIMER 0
 
-namespace base {
+namespace common {
 namespace impl {
 
-struct BASE_EXPORT TimerEntry : RefCounted<TimerEntry> {
+struct COMMON_EXPORT TimerEntry : base::RefCounted<TimerEntry> {
   AbstractTimer* timer;
-  uint repeat_interval_ms;
-  TimerEntry(AbstractTimer* timer, uint repeat_interval_ms)
+  int repeat_interval_ms;
+  TimerEntry(AbstractTimer* timer, int repeat_interval_ms)
       : timer(timer), repeat_interval_ms(repeat_interval_ms) {
     #if DEBUG_TIMER
       DEBUG_PRINTF("%p repeat=%d\n", this, repeat_interval_ms);
@@ -31,10 +32,14 @@ struct BASE_EXPORT TimerEntry : RefCounted<TimerEntry> {
   }
 };
 
-class TimerController : public Singleton<TimerController> {
-  friend class Singleton<TimerController>;
+class TimerController {
+  friend struct DefaultSingletonTraits<TimerController>;
 
-  private: class MessageWindow : public base::win::NativeWindow {
+  public: static TimerController* GetInstance() {
+    return Singleton<TimerController>::get();
+  }
+
+  private: class MessageWindow : public common::win::NativeWindow {
     public: MessageWindow() = default;
     public: virtual ~MessageWindow() = default;
     DISALLOW_COPY_AND_ASSIGN(MessageWindow);
@@ -56,12 +61,12 @@ class TimerController : public Singleton<TimerController> {
   private: static std::unique_ptr<MessageWindow> CreateMessageWindow() {
     std::unique_ptr<MessageWindow> window(new MessageWindow());
     window->CreateWindowEx(0, 0, nullptr, HWND_MESSAGE,
-                           base::win::Point(), base::win::Size());
+                           common::win::Point(), common::win::Size());
     return std::move(window);
   }
 
   private: void SetTimer(AbstractTimer* timer,
-                         uint next_fire_interval_ms) {
+                         int next_fire_interval_ms) {
     ::SetTimer(*message_window_,
                ComputeCookie(timer),
                next_fire_interval_ms,
@@ -69,10 +74,10 @@ class TimerController : public Singleton<TimerController> {
   }
 
   public: void StartTimer(AbstractTimer* timer,
-                          uint next_fire_interval_ms,
-                          uint repeat_interval_ms) {
+                          int next_fire_interval_ms,
+                          int repeat_interval_ms) {
     if (!timer->entry_)
-      timer->entry_.reset(new TimerEntry(timer, repeat_interval_ms));
+      timer->entry_ = new TimerEntry(timer, repeat_interval_ms);
     else
       timer->entry_->repeat_interval_ms = repeat_interval_ms;
     timer->entry_->AddRef();
@@ -86,12 +91,12 @@ class TimerController : public Singleton<TimerController> {
     ::KillTimer(*message_window_, ComputeCookie(timer));
     entry->timer = nullptr;
     entry->Release();
-    timer->entry_.reset();
+    timer->entry_ = nullptr;
   }
 
   private: static void CALLBACK TimerProc(HWND, UINT, UINT_PTR cookie,
                                           DWORD) {
-    base::scoped_refptr<TimerEntry> entry =
+    scoped_refptr<TimerEntry> entry =
         reinterpret_cast<TimerEntry*>(cookie);
     auto const timer = entry->timer;
     if (!timer) {
@@ -104,9 +109,10 @@ class TimerController : public Singleton<TimerController> {
       return;
     }
     if (entry->repeat_interval_ms)
-      instance().SetTimer(timer, entry->repeat_interval_ms);
+      TimerController::GetInstance()->SetTimer(timer,
+                                               entry->repeat_interval_ms);
     else
-      instance().StopTimer(timer);
+      TimerController::GetInstance()->StopTimer(timer);
   }
 
   DISALLOW_COPY_AND_ASSIGN(TimerController);
@@ -121,15 +127,17 @@ AbstractTimer::~AbstractTimer() {
   Stop();
 }
 
-void AbstractTimer::Start(uint next_fire_interval_ms,
-                          uint repeat_interval_ms) {
-  TimerController::instance().StartTimer(this, next_fire_interval_ms,
-                                         repeat_interval_ms);
+void AbstractTimer::Start(int next_fire_interval_ms,
+                          int repeat_interval_ms) {
+  DCHECK_GE(next_fire_interval_ms, 0);
+  DCHECK_GE(repeat_interval_ms, 0);
+  TimerController::GetInstance()->StartTimer(this, next_fire_interval_ms,
+                                             repeat_interval_ms);
 }
 
 void AbstractTimer::Stop() {
-  TimerController::instance().StopTimer(this);
+  TimerController::GetInstance()->StopTimer(this);
 }
 
 } // namespace impl
-} // namespace base
+} // namespace common

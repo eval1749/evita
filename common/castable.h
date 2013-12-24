@@ -1,9 +1,9 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_base_castable_h)
-#define INCLUDE_base_castable_h
+#if !defined(INCLUDE_common_castable_h)
+#define INCLUDE_common_castable_h
 
-namespace base {
+namespace common {
 
 // T* as()
 // const char* class_name()
@@ -35,9 +35,10 @@ class Castable {
   } \
   protected: virtual bool is_class_of( \
       const char* other_name) const override { \
-    return static_class_name() == other_name || base_name::is_class_of(other_name); \
+    return static_class_name() == other_name || \
+           base_name::is_class_of(other_name); \
   }
 
-} // namespace base
+} // namespace common
 
-#endif //!defined(INCLUDE_base_castable_h)
+#endif //!defined(INCLUDE_common_castable_h)

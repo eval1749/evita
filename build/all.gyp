@@ -9,6 +9,7 @@
       'type': 'none',
       'dependencies': [
         '../base/base.gyp:*',
+        '../common/common.gyp:*',
         '../evita/evita.gyp:*',
         '../gin/gin.gyp:*',
         '../v8/tools/gyp/v8.gyp:*',

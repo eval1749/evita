@@ -1,14 +1,14 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_base_win_size_h)
-#define INCLUDE_base_win_size_h
+#if !defined(INCLUDE_common_win_size_h)
+#define INCLUDE_common_win_size_h
 
-#include "base/base_export.h"
+#include "common/common_export.h"
 
-namespace base {
+namespace common {
 namespace win {
 
-struct BASE_EXPORT Size : SIZE {
+struct COMMON_EXPORT Size : SIZE {
   Size() {
     cx = cy = 0;
   }
@@ -27,6 +27,6 @@ struct BASE_EXPORT Size : SIZE {
  (mp_size).cx, (mp_size).cy
 
 } // namespace win
-} // namespace base
+} // namespace common
 
-#endif //!defined(INCLUDE_base_win_size_h)
+#endif //!defined(INCLUDE_common_win_size_h)

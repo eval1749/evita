@@ -1,11 +1,11 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "base/win/rect.h"
+#include "common/win/rect.h"
 
 #include <algorithm>
 
-namespace base {
+namespace common {
 namespace win {
 
 Rect Rect::Intersect(const Rect& other) const {
@@ -14,4 +14,4 @@ Rect Rect::Intersect(const Rect& other) const {
 }
 
 } // namespace win
-} // namespace base
+} // namespace common

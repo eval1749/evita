@@ -1,12 +1,12 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_base_tree_child_nodes_h)
-#define INCLUDE_base_tree_child_nodes_h
+#if !defined(INCLUDE_common_tree_child_nodes_h)
+#define INCLUDE_common_tree_child_nodes_h
 
-#include "base/tree/abstract_node_iterator.h"
-#include "base/tree/container_node.h"
+#include "common/tree/abstract_node_iterator.h"
+#include "common/tree/container_node.h"
 
-namespace base {
+namespace common {
 namespace tree {
 
 template<typename ContainerType>
@@ -90,6 +90,6 @@ class ChildNodes_ {
 };
 
 } // namespace tree
-} // namespace base
+} // namespace common
 
-#endif //!defined(INCLUDE_base_tree_child_nodes_h)
+#endif //!defined(INCLUDE_common_tree_child_nodes_h)

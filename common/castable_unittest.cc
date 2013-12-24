@@ -1,12 +1,12 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "base/castable.h"
+#include "common/castable.h"
 #include "gtest/gtest.h"
 
 namespace {
 
-class Class1 : public base::Castable {
+class Class1 : public common::Castable {
   DECLARE_CASTABLE_CLASS(Class1, Castable);
 };
 

@@ -1,9 +1,9 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_base_tree_node_h)
-#define INCLUDE_base_tree_node_h
+#if !defined(INCLUDE_common_tree_node_h)
+#define INCLUDE_common_tree_node_h
 
-namespace base {
+namespace common {
 namespace tree {
 
 template<class NodeClass, class ContainerClass, typename... Params>
@@ -53,6 +53,6 @@ class Node_ {
   DISALLOW_COPY_AND_ASSIGN(Node_);
 };
 } // namespace tree
-} // namespace base
+} // namespace common
 
-#endif //!defined(INCLUDE_base_tree_node_h)
+#endif //!defined(INCLUDE_common_tree_node_h)

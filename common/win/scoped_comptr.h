@@ -1,9 +1,9 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_base_com_ptr_h)
-#define INCLUDE_base_com_ptr_h
+#if !defined(INCLUDE_common_com_ptr_h)
+#define INCLUDE_common_com_ptr_h
 
-namespace base {
+namespace common {
 
 #if defined(_DEBUG)
 #define COM_VERIFY(expr) { \
@@ -79,6 +79,6 @@ class ComInit {
   public: ~ComInit() { ::CoUninitialize(); }
 };
 
-} // namespace base
+} // namespace common
 
-#endif //!defined(INCLUDE_base_com_ptr_h)
+#endif //!defined(INCLUDE_common_com_ptr_h)

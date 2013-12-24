@@ -1,11 +1,11 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_base_adoptors_reverse_h)
-#define INCLUDE_base_adoptors_reverse_h
+#if !defined(INCLUDE_common_adoptors_reverse_h)
+#define INCLUDE_common_adoptors_reverse_h
 
 #include <utility>
 
-namespace base {
+namespace common {
 namespace adoptors {
 
 namespace impl {
@@ -56,6 +56,6 @@ impl::Reverser<Container> reverse(Container& container) {
 }
 
 } // namespace adoptors
-} // namespace base
+} // namespace common
 
-#endif //!defined(INCLUDE_base_adoptors_reverse_h)
+#endif //!defined(INCLUDE_common_adoptors_reverse_h)

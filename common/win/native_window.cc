@@ -1,11 +1,12 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#include "base/win/native_window.h"
+#include "common/win/native_window.h"
 
-#include "base/win/point.h"
-#include "base/win/size.h"
+#include "base/logging.h"
+#include "common/win/point.h"
+#include "common/win/size.h"
 
-namespace base {
+namespace common {
 namespace win {
 
 namespace {
@@ -147,5 +148,5 @@ LRESULT NativeWindow::WindowProc(UINT message, WPARAM wParam,
 }
 
 } // namespace win
-} // namespace base
+} // namespace common
 

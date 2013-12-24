@@ -1,16 +1,16 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_base_win_rect_h)
-#define INCLUDE_base_win_rect_h
+#if !defined(INCLUDE_common_win_rect_h)
+#define INCLUDE_common_win_rect_h
 
-#include "base/base_export.h"
-#include "base/win/point.h"
-#include "base/win/size.h"
+#include "common/common_export.h"
+#include "common/win/point.h"
+#include "common/win/size.h"
 
-namespace base {
+namespace common {
 namespace win {
 
-struct BASE_EXPORT Rect : RECT {
+struct COMMON_EXPORT Rect : RECT {
   Rect() {
     left = right = top = bottom =0;
   }
@@ -49,6 +49,6 @@ struct BASE_EXPORT Rect : RECT {
  (mp_rect).left, (mp_rect).top, (mp_rect).width(), (mp_rect).height()
 
 } // namespace win
-} // namespace base
+} // namespace common
 
-#endif //!defined(INCLUDE_base_win_rect_h)
+#endif //!defined(INCLUDE_common_win_rect_h)

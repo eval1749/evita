@@ -1,11 +1,11 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_base_tree_descendants_or_self_h)
-#define INCLUDE_base_tree_descendants_or_self_h
+#if !defined(INCLUDE_common_tree_descendants_or_self_h)
+#define INCLUDE_common_tree_descendants_or_self_h
 
-#include "base/tree/abstract_node_iterator.h"
+#include "common/tree/abstract_node_iterator.h"
 
-namespace base {
+namespace common {
 namespace tree {
 namespace impl {
 
@@ -65,6 +65,6 @@ descendants_or_self(NodeClass& node) {
 }
 
 } // namespace tree
-} // namespace base
+} // namespace common
 
-#endif //!defined(INCLUDE_base_tree_descendants_or_self_h)
+#endif //!defined(INCLUDE_common_tree_descendants_or_self_h)

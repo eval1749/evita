@@ -344,7 +344,7 @@ char16* lstrrchrW(const char16*, char16);
 // thread-safe
 #define DEFINE_STATIC_LOCAL(mp_type, mp_name, ...) \
   __pragma(warning(suppress: 4640)) \
-  static mp_type mp_name __VA_ARGS__
+  static mp_type& mp_name = *new mp_type __VA_ARGS__
 
 // L4 C4100:'identifier' : unreferenced formal parameter
 // L4 C4510: 'class' : default constructor could not be generated

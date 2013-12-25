@@ -445,6 +445,8 @@ const char16* Frame::getToolTip(NMTTDISPINFO* const pDisp) const {
     return pPane->GetName();
 
   auto const pBuffer = pEdit->GetBuffer();
+  if (!pBuffer)
+    return pPane->GetName();
 
   const char16* pwszSave;
   char16 wszSave[100];

@@ -43,11 +43,10 @@ class Initializer {
     {
       auto context = v8::Context::New(isolate);
       v8::Context::Scope context_scope(context);
-      auto editor_builder = Application::instance()
-          .GetObjectTemplateBuilder(isolate);
-      auto editor = editor_builder.Build()->NewInstance();
-      global_builder.SetValue("editor", v8::Handle<v8::Value>(editor));
+      global_builder.SetValue("editor",
+                              Application::instance().GetWrapper(isolate));
     }
+
     global_template.Reset(isolate, global_builder.Build());
     return v8::Local<v8::ObjectTemplate>::New(isolate, global_template);
   }

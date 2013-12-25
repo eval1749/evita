@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_app_application_h)
-#define INCLUDE_evita_app_application_h
+#if !defined(INCLUDE_evita_editor_application_h)
+#define INCLUDE_evita_editor_application_h
 
 #include <memory>
 
@@ -97,4 +97,4 @@ class Application : public Command::Processor,
   public: void ShowMessage(MessageLevel, uint);
 };
 
-#endif //!defined(INCLUDE_evita_app_application_h)
+#endif //!defined(INCLUDE_evita_editor_application_h)

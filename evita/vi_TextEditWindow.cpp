@@ -25,7 +25,7 @@
 #include "./ed_Mode.h"
 #include "./ed_Style.h"
 #include "./gfx_base.h"
-#include "./vi_Application.h"
+#include "evita/editor/application.h"
 #include "./vi_Buffer.h"
 #include "./vi_Caret.h"
 #include "./vi_EditPane.h"

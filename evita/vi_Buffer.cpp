@@ -13,7 +13,7 @@
 
 #include "./ed_Mode.h"
 
-#include "./vi_Application.h"
+#include "evita/editor/application.h"
 #include "./vi_Frame.h"
 
 //////////////////////////////////////////////////////////////////////

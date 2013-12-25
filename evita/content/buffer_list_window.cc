@@ -7,7 +7,7 @@
 #include "evita/ed_Mode.h"
 
 #include "evita/vi_defs.h"
-#include "evita/vi_Application.h"
+#include "evita/editor/application.h"
 #include "evita/vi_Buffer.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"

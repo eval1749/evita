@@ -12,7 +12,7 @@
 #define DEBUG_GOAL 0
 #include "./vi_Selection.h"
 
-#include "./vi_Application.h"
+#include "evita/editor/application.h"
 #include "./vi_Buffer.h"
 #include "./vi_TextEditWindow.h"
 

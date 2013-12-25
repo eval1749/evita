@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/vi_Application.h"
+#include "evita/editor/application.h"
 
 #include "evita/ed_Mode.h"
 #include "evita/vi_Buffer.h"

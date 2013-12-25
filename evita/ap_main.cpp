@@ -27,7 +27,7 @@
 
 #include "./ctrl_TabBand.h"
 
-#include "./vi_Application.h"
+#include "evita/editor/application.h"
 #include "./vi_IoManager.h"
 #include "./vi_Style.h"
 #include "./vi_TextEditWindow.h"

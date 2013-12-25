@@ -17,6 +17,7 @@
 #define DEBUG_WINDOWPOS 0
 #include "./vi_Frame.h"
 
+#include "base/strings/string16.h"
 #include "common/tree/ancestors_or_self.h"
 #include "common/win/native_window.h"
 #include "./ctrl_TabBand.h"
@@ -941,12 +942,11 @@ void Frame::updateTitleBar() {
   char16 wsz[1024];
   m_pActivePane->GetTitle(wsz, lengthof(wsz));
 
-  char16 wszTitle[1024];
-  ::wsprintf(wszTitle, L"%s - %s",
-      wsz,
-      Application::Get()->GetTitle());
-
-  m_oTitleBar.SetText(wszTitle, ::lstrlenW(wszTitle));
+  base::string16 title;
+  title += base::string16(wsz);
+  title += L" - ";
+  title += Application::instance().title();
+  m_oTitleBar.SetText(title.data(), title.length());
 
   m_pActivePane->UpdateStatusBar();
 }

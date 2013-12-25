@@ -35,6 +35,14 @@ Application::Application()
 Application::~Application() {
 }
 
+base::string16 Application::title() const {
+  #if _DEBUG
+    return L"evita/debug 5.0";
+  #else
+    return L"evita 5.0";
+  #endif
+}
+
 int Application::Ask(int flags, int format_id, ...) {
   char16 wszFormat[1024];
   ::LoadString(g_hResource, format_id, wszFormat, arraysize(wszFormat));
@@ -45,7 +53,7 @@ int Application::Ask(int flags, int format_id, ...) {
   ::wvsprintf(wsz, wszFormat, args);
   va_end(args);
 
-  return ::MessageBox(*GetActiveFrame(), wsz, GetTitle(), flags);
+  return ::MessageBox(*GetActiveFrame(), wsz, title().c_str(), flags);
 }
 
 bool Application::CanExit() const {
@@ -172,14 +180,6 @@ gin::ObjectTemplateBuilder Application::GetObjectTemplateBuilder(
                                      base::Unretained(&instance())))
 #endif
     .SetProperty("version", version);
-}
-
-const char16* Application::GetTitle() const {
-  #if _DEBUG
-    return L"evita/debug 5.0";
-  #else
-    return L"evita 5.0";
-  #endif
 }
 
 void Application::InternalAddBuffer(Buffer* buffer) {

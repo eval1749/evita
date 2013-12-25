@@ -5,6 +5,7 @@
 
 #include <memory>
 
+#include "base/strings/string16.h"
 #include "common/memory/singleton.h"
 #include "evita/cm_CmdProc.h"
 #include "evita/vi_Frame.h"
@@ -40,6 +41,7 @@ class Application : public Command::Processor,
   public: Buffers& buffers() { return buffers_; }
   public: const Frames& frames() const { return frames_; }
   public: Frames& frames() { return frames_; }
+  public: base::string16 title() const;
 
   // FIXME 2007-08-19 yosi@msn.com We should NOT use InternalAddBufer,
   // this method is just for listener.

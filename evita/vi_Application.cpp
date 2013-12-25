@@ -1,395 +1,246 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - winapp - winmain
-// listener/winapp/winmain.cpp
-//
-// Copyright (C) 1996-2007 by Project Vogue.
+// Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Application.cpp#1 $
-//
-#include "./vi_Application.h"
+
+#include "evita/vi_Application.h"
 
 #include "evita/ed_Mode.h"
-#include "./vi_Buffer.h"
-#include "./vi_EditPane.h"
-#include "./vi_FileDialogBox.h"
-#include "./vi_IoManager.h"
+#include "evita/vi_Buffer.h"
+#include "evita/vi_EditPane.h"
+#include "evita/vi_FileDialogBox.h"
+#include "evita/vi_IoManager.h"
 
-Application* Application::sm_pApplication;
-uint g_nDropTargetMsg;
+UINT g_nDropTargetMsg;
 
-HINSTANCE   g_hInstance;
-HINSTANCE   g_hResource;
-HWND        g_hwndActiveDialog;
-uint        g_TabBand__TabDragMsg;
+HINSTANCE g_hInstance;
+HINSTANCE g_hResource;
+HWND g_hwndActiveDialog;
+UINT g_TabBand__TabDragMsg;
 
 static const char16 Evita__DropTarget[] = L"Evita.DropTarget";
 
-//////////////////////////////////////////////////////////////////////
-//
-// Application ctor
-//
-Application::Application() :
-    m_eNewline(NewlineMode_CrLf),
-    m_nCodePage(932),
-    m_pActiveFrame(NULL),
-    m_pIoManager(NULL)
-{
-    // nothing to do
-} // Application::Application
+Application::Application()
+    : newline_mode_(NewlineMode_CrLf),
+      code_page_(932),
+      active_frame_(nullptr),
+      io_manager_(new IoManager()) {
+  Command::Processor::GlobalInit();
+  io_manager_->Realize();
+}
 
-//////////////////////////////////////////////////////////////////////
-//
-// Application dtor
-//
-Application::~Application()
-{
-} // Application::~Application
+Application::~Application() {
+}
 
-//////////////////////////////////////////////////////////////////////
-//
-// Application::Ask
-//
-int Application::Ask(uint nFlags, uint nFormatId, ...)
-{
-    char16 wszFormat[1024];
-    ::LoadString(g_hResource, nFormatId, wszFormat, lengthof(wszFormat));
+int Application::Ask(int flags, int format_id, ...) {
+  char16 wszFormat[1024];
+  ::LoadString(g_hResource, format_id, wszFormat, arraysize(wszFormat));
 
-    char16 wsz[1024];
-    va_list args;
-    va_start(args, nFormatId);
-    ::wvsprintf(wsz, wszFormat, args);
-    va_end(args);
+  char16 wsz[1024];
+  va_list args;
+  va_start(args, format_id);
+  ::wvsprintf(wsz, wszFormat, args);
+  va_end(args);
 
-    return ::MessageBox(
-        *GetActiveFrame(),
-        wsz,
-        GetTitle(),
-        nFlags);
-} //Application::Ask
+  return ::MessageBox(*GetActiveFrame(), wsz, GetTitle(), flags);
+}
 
-//////////////////////////////////////////////////////////////////////
-//
-// Application::CanExit
-//
-bool Application::CanExit() const
-{
-    for (auto& buffer: m_oBuffers) {
-      // TODO: We should make Buffer::CanKill() const.
-      if (!const_cast<Buffer&>(buffer).CanKill())
-        return false;
-    }
+bool Application::CanExit() const {
+  for (auto& buffer: buffers_) {
+    // TODO: We should make Buffer::CanKill() const.
+    if (!const_cast<Buffer&>(buffer).CanKill())
+      return false;
+  }
+  return true;
+}
 
-    return true;
-} // Application::CanExit
+Frame* Application::CreateFrame() {
+  auto const frame = new Frame();
+  return frames_.Append(frame);
+}
 
-//////////////////////////////////////////////////////////////////////
-//
-// Application::CreateFrame
-//
-Frame* Application::CreateFrame()
-{
-    Frame* pFrame = new Frame;
-    return m_oFrames.Append(pFrame);
-} // Application::CreateFrame
+Frame* Application::DeleteFrame(Frame* frame) {
+  frames_.Delete(frame);
+  if (frames_.IsEmpty())
+    ::PostQuitMessage(0);
+  return frame;
+}
 
-//////////////////////////////////////////////////////////////////////
-//
-// Application::DeleteFrame
-//
-Frame* Application::DeleteFrame(Frame* pFrame)
-{
-    m_oFrames.Delete(pFrame);
+void Application::Exit(bool is_forced) {
+  while (nullptr != buffers_.GetFirst()) {
+    if (!KillBuffer(buffers_.GetFirst(), is_forced))
+      return;
+  }
 
-    if (m_oFrames.IsEmpty())
-    {
-        ::PostQuitMessage(0);
-    } // if
+  while (frames_.GetFirst()) {
+    ::DestroyWindow(*frames_.GetFirst());
+  }
+}
 
-    return pFrame;
-} // Application::DeleteFrame
+Buffer* Application::FindBuffer(const char16* pwszName) const {
+  for (auto& buffer: buffers_) {
+    if (!::lstrcmpiW(buffer.GetName(), pwszName))
+      return const_cast<Buffer*>(&buffer);
+  }
+  return nullptr;
+}
 
-//////////////////////////////////////////////////////////////////////
-//
-// Application::Exit
-//
-void Application::Exit(bool fForce)
-{
-    while (NULL != m_oBuffers.GetFirst())
-    {
-        if (! KillBuffer(m_oBuffers.GetFirst(), fForce))
-        {
-            return;
-        }
-    } // while
+Frame* Application::FindFrame(HWND hwnd) const {
+  for (auto& frame: frames_) {
+      if (frame == hwnd)
+          return const_cast<Frame*>(&frame);
+  }
+  return nullptr;
+}
 
-    while (NULL != m_oFrames.GetFirst())
-    {
-        ::DestroyWindow(*m_oFrames.GetFirst());
-    } // while
-} // Application::Exit
-
-//////////////////////////////////////////////////////////////////////
-//
-// Application::FindBuffer
-//
-Buffer* Application::FindBuffer(const char16* pwszName) const
-{
-    for (auto& buffer: m_oBuffers) {
-      if (!::lstrcmpiW(buffer.GetName(), pwszName))
-        return const_cast<Buffer*>(&buffer);
-    }
+Pane* Application::FindPane(HWND hwndMouse, POINT pt) const {
+  if (!::ClientToScreen(hwndMouse, &pt))
     return nullptr;
-} // Application::FindBuffer
+  auto hwnd = ::WindowFromPoint(pt);
+  if (!hwnd)
+    return nullptr;
 
-//////////////////////////////////////////////////////////////////////
-//
-// Application::FindFrame
-//
-Frame* Application::FindFrame(HWND hwnd) const
-{
-    for (auto& frame: m_oFrames) {
-        if (frame == hwnd)
-            return const_cast<Frame*>(&frame);
-    }
-    return NULL;
-} // Application::FindFrame
+  if (!g_nDropTargetMsg) {
+    g_nDropTargetMsg = ::RegisterWindowMessage(Evita__DropTarget);
+    if (!g_nDropTargetMsg)
+      return nullptr;
+  }
 
-//////////////////////////////////////////////////////////////////////
-//
-// Application::FindPane
-//
-Pane* Application::FindPane(HWND hwndMouse, POINT pt) const
-{
-    unless (::ClientToScreen(hwndMouse, &pt)) return NULL;
-    HWND hwnd = ::WindowFromPoint(pt);
-    when (NULL == hwnd) return NULL;
+  do {
+    if (auto const iAnswer = ::SendMessage(hwnd, g_nDropTargetMsg, 0, 0))
+      return reinterpret_cast<Pane*>(iAnswer);
+    hwnd = ::GetParent(hwnd);
+  } while (hwnd);
 
-    if (0 == g_nDropTargetMsg)
-    {
-        g_nDropTargetMsg = ::RegisterWindowMessage(Evita__DropTarget);
-        when (0 == g_nDropTargetMsg) return NULL;
-    }
-
-    do
-    {
-        LRESULT iAnswer = ::SendMessage(hwnd, g_nDropTargetMsg, 0, 0);
-        when (iAnswer) return reinterpret_cast<Pane*>(iAnswer);
-        hwnd = ::GetParent(hwnd);
-    } while (NULL != hwnd);
-
-    return NULL;
-} // Application::FindPane
+  return nullptr;
+}
 
 HIMAGELIST Application::GetIconList() const {
   return Edit::ModeFactory::icon_image_list();
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// Application::Init
-//
-void Application::Init()
-{
-    Command::Processor::GlobalInit();
-    sm_pApplication = new Application;
-    sm_pApplication->m_pIoManager = new IoManager;
-    sm_pApplication->m_pIoManager->Realize();
-} // Application::Init
-
-
-void Application::InternalAddBuffer(Buffer* pBuffer) {
-  m_oBuffers.Append(pBuffer);
+const char16* Application::GetTitle() const {
+  #if _DEBUG
+    return L"evita/debug 5.0";
+  #else
+    return L"evita 5.0";
+  #endif
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// Application::Load
-//
-Buffer* Application::Load(
-    const char16*   pwszFileName )
-{
-    char16 wszFileName[MAX_PATH+1];
-    char16* pwszFile;
-    ::GetFullPathName(
-        pwszFileName,
-        lengthof(wszFileName),
-        wszFileName,
-        &pwszFile );
+void Application::InternalAddBuffer(Buffer* buffer) {
+  buffers_.Append(buffer);
+}
 
-    for (auto& buffer: m_oBuffers) {
-      if (!::lstrcmpiW(buffer.GetFileName(), wszFileName))
-        return &buffer;
+Buffer* Application::Load(const char16* pwszFileName) {
+  char16 wszFileName[MAX_PATH+1];
+  char16* pwszFile;
+  ::GetFullPathName(
+      pwszFileName,
+      lengthof(wszFileName),
+      wszFileName,
+      &pwszFile );
+
+  for (auto& buffer: buffers_) {
+    if (!::lstrcmpiW(buffer.GetFileName(), wszFileName))
+      return &buffer;
+  }
+
+  auto const buffer = NewBuffer(pwszFile);
+  buffer->Load(wszFileName);
+  return buffer;
+}
+
+bool Application::KillBuffer(Buffer* buffer, bool is_forced) {
+  if (!is_forced && !buffer->CanKill())
+      return false;
+  for (;;) {
+    auto const window = buffer->GetWindow();
+    if (!window)
+      break;
+    window->Destroy();
+  }
+  buffers_.Delete(buffer);
+  delete buffer;
+  return true;
+}
+
+Buffer* Application::NewBuffer(const char16* pwszName) {
+  auto const buffer = new Buffer(pwszName);
+  RenameBuffer(buffer, pwszName);
+  return buffers_.Append(buffer);
+}
+
+bool Application::OnIdle(uint nCount) {
+  auto need_more = false;
+  for (auto& frame: frames_) {
+    if (frame.OnIdle(nCount))
+      need_more = true;
+  }
+  return need_more;
+}
+
+Buffer* Application::RenameBuffer(Buffer* buffer, const char16* pwszName) {
+  auto const present = FindBuffer(pwszName);
+  if (buffer == present)
+    return buffer;
+
+  if (!present) {
+    buffer->SetName(pwszName);
+    return buffer;
+  }
+
+  char16 wsz[MAX_PATH + 1];
+  char16* pwszTail;
+  auto pwszDot = lstrrchrW(pwszName, '.');
+  if (!pwszDot) {
+    pwszTail = wsz + lstrlenW(pwszName);
+    pwszDot = L"";
+  } else {
+    pwszTail = wsz + (pwszDot - pwszName);
+  }
+
+  ::lstrcpyW(wsz, pwszName);
+
+  for (auto n = 2; FindBuffer(wsz); ++ n) {
+    ::wsprintfW(pwszTail, L"<%d>%s", n, pwszDot);
+  }
+
+  buffer->SetName(wsz);
+  return buffer;
+}
+
+bool Application::SaveBuffer(Frame* frame, Buffer* buffer, bool is_save_as) {
+  auto eNewline = buffer->GetNewline();
+  if (NewlineMode_Detect == eNewline)
+    eNewline = GetNewline();
+
+  auto code_page = buffer->GetCodePage();
+  if (!code_page)
+    code_page = GetCodePage();
+
+  FileDialogBox::Param oParam;
+  oParam.m_hwndOwner = *frame;
+
+  oParam.m_wsz[0] = 0;
+  if (is_save_as || !buffer->GetFileName()[0]) {
+    ::lstrcpyW(oParam.m_wsz, buffer->GetFileName());
+    FileDialogBox oDialog;
+    if (!oDialog.GetSaveFileName(&oParam))
+      return true;
+
+    auto pwszName = ::lstrrchrW(oParam.m_wsz, '\\');
+    if (!pwszName) {
+       pwszName = ::lstrrchrW(oParam.m_wsz, '/');
+       if (!pwszName)
+         pwszName = oParam.m_wsz + 1;
     }
 
-    Buffer* pBuffer = NewBuffer(pwszFile);
-    pBuffer->Load(wszFileName);
+    // Skip slash(/)
+    ++pwszName;
+    RenameBuffer(buffer, pwszName);
+  }
 
-    return pBuffer;
-} // Application::Load
+  return buffer->Save(oParam.m_wsz, code_page, eNewline);
+}
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// Application::KillBuffer
-//
-bool Application::KillBuffer(Buffer* pBuffer, bool fForce)
-{
-    if (! fForce && ! pBuffer->CanKill())
-    {
-        return false;
-    }
-
-    for (;;)
-    {
-        Buffer::Window* pWindow = pBuffer->GetWindow();
-        when (NULL == pWindow) break;
-        pWindow->Destroy();
-    } // for each window
-
-    m_oBuffers.Delete(pBuffer);
-
-    delete pBuffer;
-
-    return true;
-} // Application::KillBuffer
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// Application::NewBuffer
-//
-Buffer* Application::NewBuffer(const char16* pwszName)
-{
-    Buffer* pBuffer = new Buffer(pwszName);
-    RenameBuffer(pBuffer, pwszName);
-    return m_oBuffers.Append(pBuffer);
-} // Application::NewBuffer
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// Application::OnIdle
-//
-bool Application::OnIdle(uint nCount)
-{
-    bool fMore = false;
-    for (auto& frame: m_oFrames) {
-        if (frame.OnIdle(nCount))
-            fMore = true;
-    } // for each Frame
-    return fMore;
-} // Application::OnIdle
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// Application::RenameBuffer
-//
-Buffer* Application::RenameBuffer(
-    Buffer*         pBuffer,
-    const char16*   pwszName )
-{
-    Buffer* pPresent = FindBuffer(pwszName);
-    if (pBuffer == pPresent)
-    {
-        return pBuffer;
-    }
-
-    if (NULL == pPresent)
-    {
-        pBuffer->SetName(pwszName);
-        return pBuffer;
-    }
-
-    char16 wsz[MAX_PATH + 1];
-    char16* pwszTail;
-    const char16* pwszDot = lstrrchrW(pwszName, '.');
-    if (NULL == pwszDot)
-    {
-        pwszTail = wsz + lstrlenW(pwszName);
-        pwszDot  = L"";
-    }
-    else
-    {
-        pwszTail = wsz + (pwszDot - pwszName);
-    }
-
-    lstrcpyW(wsz, pwszName);
-
-    uint n = 1;
-    while (NULL != FindBuffer(wsz))
-    {
-        n += 1;
-        ::wsprintf(pwszTail, L"<%d>%s", n, pwszDot);
-    } // while
-
-    pBuffer->SetName(wsz);
-    return pBuffer;
-} // Buffer* Application::RenameBuffer
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// SaveBuffer
-//
-bool Application::SaveBuffer(
-    Frame*    pFrame,
-    Buffer*         pBuffer,
-    bool            fSaveAs )
-{
-    NewlineMode eNewline = pBuffer->GetNewline();
-    if (NewlineMode_Detect == eNewline)
-    {
-        eNewline = GetNewline();
-    } // if
-
-    uint nCodePage = pBuffer->GetCodePage();
-    if (0 == nCodePage)
-    {
-        nCodePage = GetCodePage();
-    } // if
-
-    FileDialogBox::Param oParam;
-    oParam.m_hwndOwner = *pFrame;
-
-    oParam.m_wsz[0] = 0;
-
-    if (fSaveAs || 0 == pBuffer->GetFileName()[0])
-    {
-        ::lstrcpyW(oParam.m_wsz, pBuffer->GetFileName());
-        FileDialogBox oDialog;
-        if (! oDialog.GetSaveFileName(&oParam))
-        {
-            return true;
-        }
-
-        const char16* pwszName = ::lstrrchrW(oParam.m_wsz, '\\');
-        if (NULL == pwszName)
-        {
-            pwszName = ::lstrrchrW(oParam.m_wsz, '/');
-            if (NULL == pwszName)            {
-                pwszName = oParam.m_wsz + 1;
-            }
-        }
-
-        // Skip slash(/)
-        pwszName++;
-
-        RenameBuffer(pBuffer, pwszName);
-    } // if
-
-    return pBuffer->Save(oParam.m_wsz, nCodePage, eNewline);
-} // SaveBuffer
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// Application::ShowMessage
-//
-void Application::ShowMessage(MessageLevel iLevel, uint nFormatId)
-{
-    GetActiveFrame()->ShowMessage(iLevel, nFormatId);
-} // Application::ShowMessage
+void Application::ShowMessage(MessageLevel iLevel, uint nFormatId) {
+  GetActiveFrame()->ShowMessage(iLevel, nFormatId);
+}

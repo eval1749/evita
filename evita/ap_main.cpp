@@ -196,7 +196,6 @@ static int MainLoop(EnumArg* pEnumArg) {
       }
   }
 
-  Application::Init();
   auto& frame = *Application::Get()->CreateFrame();
   while (!pEnumArg->AtEnd()) {
     auto const  pwszArg = pEnumArg->Get();

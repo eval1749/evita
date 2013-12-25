@@ -8,14 +8,21 @@
 #include "common/memory/singleton.h"
 #include "evita/cm_CmdProc.h"
 #include "evita/vi_Frame.h"
+BEGIN_V8_INCLUDE
+#include "gin/wrappable.h"
+END_V8_INCLUDE
+
 
 class Buffer;
 class IoManager;
 
 class Application : public Command::Processor,
-                    public common::Singleton<Application> {
+                    public common::Singleton<Application>,
+                    public gin::Wrappable<Application> {
   protected: typedef DoubleLinkedList_<Frame> Frames;
   protected: typedef DoubleLinkedList_<Buffer> Buffers;
+
+  public: static gin::WrapperInfo kWrapperInfo;
 
   private: NewlineMode newline_mode_;
   private: uint code_page_;
@@ -65,6 +72,8 @@ class Application : public Command::Processor,
   public: IoManager* GetIoManager() const { return io_manager_; }
   public: Frame* GetLastFrame() const { return frames_.GetLast(); }
   public: NewlineMode GetNewline() const { return newline_mode_; }
+  public: virtual gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
+      v8::Isolate* isolate) override;
   public: const char16* GetTitle() const;
 
   // [H]
@@ -95,6 +104,8 @@ class Application : public Command::Processor,
   }
 
   public: void ShowMessage(MessageLevel, uint);
+
+  DISALLOW_COPY_AND_ASSIGN(Application);
 };
 
 #endif //!defined(INCLUDE_evita_editor_application_h)

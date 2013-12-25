@@ -8,12 +8,10 @@
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
 #include "evita/vi_Buffer.h"
-#pragma warning(push)
-#pragma warning(disable: 4100)
-#pragma warning(disable: 4625)
+BEGIN_V8_INCLUDE
 #include "gin/public/context_holder.h"
 #include "gin/public/isolate_holder.h"
-#pragma warning(pop)
+END_V8_INCLUDE
 
 class InputHistory;
 

@@ -11,12 +11,13 @@
 #if !defined(INCLUDE_visual_dialog_file_h)
 #define INCLUDE_visual_dialog_file_h
 
+#pragma warning(push)
 // For defining GetOpenFileName and GetSaveFileName.
 // warning C4191: 'operator/operation' : unsafe conversion from 'type of
 // expression' to 'type required'
 #pragma warning(disable: 4191)
 #include <commdlg.h>
-#pragma warning(default: 4191)
+#pragma warning(pop)
 
 //////////////////////////////////////////////////////////////////////
 //

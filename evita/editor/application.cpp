@@ -3,11 +3,16 @@
 
 #include "evita/editor/application.h"
 
+#include "base/strings/string16.h"
 #include "evita/ed_Mode.h"
 #include "evita/vi_Buffer.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_IoManager.h"
+BEGIN_V8_INCLUDE
+#include "gin/object_template_builder.h"
+#include "gin/public/wrapper_info.h"
+END_V8_INCLUDE
 
 UINT g_nDropTargetMsg;
 
@@ -16,7 +21,7 @@ HINSTANCE g_hResource;
 HWND g_hwndActiveDialog;
 UINT g_TabBand__TabDragMsg;
 
-static const char16 Evita__DropTarget[] = L"Evita.DropTarget";
+gin::WrapperInfo Application::kWrapperInfo = { gin::kEmbedderNativeGin };
 
 Application::Application()
     : newline_mode_(NewlineMode_CrLf),
@@ -99,6 +104,7 @@ Pane* Application::FindPane(HWND hwndMouse, POINT pt) const {
     return nullptr;
 
   if (!g_nDropTargetMsg) {
+    static const char16 Evita__DropTarget[] = L"Evita.DropTarget";
     g_nDropTargetMsg = ::RegisterWindowMessage(Evita__DropTarget);
     if (!g_nDropTargetMsg)
       return nullptr;
@@ -115,6 +121,57 @@ Pane* Application::FindPane(HWND hwndMouse, POINT pt) const {
 
 HIMAGELIST Application::GetIconList() const {
   return Edit::ModeFactory::icon_image_list();
+}
+
+#if 0
+std::string v8_version() {
+  return std::string(v8::V8::GetVersion());
+}
+#else
+// TODO(yosi) We should have v8_glue/converter.cc
+namespace gin {
+template<>
+struct Converter<base::string16> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, const base::string16& string);
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
+                     base::string16* out);
+};
+
+v8::Handle<v8::Value> Converter<base::string16>::ToV8(v8::Isolate* isolate,
+                                                  const base::string16& val) {
+  return v8::String::NewFromTwoByte(isolate,
+                                    reinterpret_cast<const uint16_t*>(val.data()),
+                                    v8::String::kNormalString, val.length());
+}
+
+bool Converter<base::string16>::FromV8(v8::Isolate*,
+                                       v8::Handle<v8::Value> val,
+                                       base::string16* out) {
+  if (!val->IsString())
+    return false;
+  auto str = v8::Handle<v8::String>::Cast(val);
+  auto const length = str->Length();
+  out->resize(length);
+  str->Write(reinterpret_cast<uint16_t*>(&(*out)[0]), 0, length,
+             v8::String::NO_NULL_TERMINATION);
+  return true;
+}
+
+}  // namespace gin
+
+base::string16 version() {
+  return base::string16(L"5.0");
+}
+#endif
+
+gin::ObjectTemplateBuilder Application::GetObjectTemplateBuilder(
+    v8::Isolate* isolate) {
+  return gin::Wrappable<Application>::GetObjectTemplateBuilder(isolate)
+#if 0
+    .SetProperty("title", base::Bind(&Application::GetTitle,
+                                     base::Unretained(&instance())))
+#endif
+    .SetProperty("version", version);
 }
 
 const char16* Application::GetTitle() const {

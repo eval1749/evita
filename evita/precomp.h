@@ -346,4 +346,21 @@ char16* lstrrchrW(const char16*, char16);
   __pragma(warning(suppress: 4640)) \
   static mp_type mp_name __VA_ARGS__
 
+// L4 C4100:'identifier' : unreferenced formal parameter
+// L4 C4510: 'class' : default constructor could not be generated
+// L4 C4512: 'class' : assignment operator could not be generated
+// L4 C4610: object 'class' can never be instantiated - user-defined
+// constructor required
+// L4 C4625: 'derived class' : copy constructor could not be generated because
+// a base class copy constructor is inaccessible
+#define BEGIN_V8_INCLUDE __pragma(warning(push)) \
+  __pragma(warning(disable: 4100 4510 4512 4610 4625))
+
+#define END_V8_INCLUDE __pragma(warning(pop))
+
+// Note: base::Bind generats C4191.
+// C4191: 'operator/operation' : unsafe conversion from 'type of expression'
+// to 'type required'
+#pragma warning(disable: 4191)
+
 #endif //!defined(INCLUDE_listener_winapp_precomp_h)

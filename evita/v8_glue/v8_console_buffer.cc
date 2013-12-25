@@ -6,22 +6,17 @@
 #include "base/strings/string16.h"
 #include "evita/ap_input_history.h"
 #include "evita/cm_CmdProc.h"
+#include "evita/editor/application.h"
 #include "evita/ed_Range.h"
-#include "evita/v8_glue/v8.h"
 #include "evita/vi_Selection.h"
+BEGIN_V8_INCLUDE
+#include "gin/object_template_builder.h"
+END_V8_INCLUDE
 
 namespace v8_glue {
 
 namespace {
 Command::KeyBinds* s_key_bindings;
-
-class Global {
-  public: static void Version(
-      const v8::FunctionCallbackInfo<v8::Value>& params) {
-    params.GetReturnValue().Set(
-        v8::String::NewFromUtf8(params.GetIsolate(), v8::V8::GetVersion()));
-  }
-};
 
 class Initializer {
   public: static v8::Handle<v8::Context> CreateContext(v8::Isolate* isolate) {
@@ -43,11 +38,18 @@ class Initializer {
     if (!global_template.IsEmpty())
       return v8::Local<v8::ObjectTemplate>::New(isolate, global_template);
 
-    v8::Handle<v8::ObjectTemplate> global = v8::ObjectTemplate::New(isolate);
-    global->Set(v8::String::NewFromUtf8(isolate, "version"),
-                v8::FunctionTemplate::New(isolate, Global::Version));
-    global_template.Reset(isolate, global);
-    return global;
+    gin::ObjectTemplateBuilder global_builder(isolate);
+
+    {
+      auto context = v8::Context::New(isolate);
+      v8::Context::Scope context_scope(context);
+      auto editor_builder = Application::instance()
+          .GetObjectTemplateBuilder(isolate);
+      auto editor = editor_builder.Build()->NewInstance();
+      global_builder.SetValue("editor", v8::Handle<v8::Value>(editor));
+    }
+    global_template.Reset(isolate, global_builder.Build());
+    return v8::Local<v8::ObjectTemplate>::New(isolate, global_template);
   }
 };
 

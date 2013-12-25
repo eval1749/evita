@@ -69,6 +69,7 @@
         'vi_Style.cpp',
         'vi_TextEditWindow.cpp',
 
+        'v8_glue/converter.cc',
         'v8_glue/v8_console_buffer.cc',
 
         'widgets/container_widget.cpp',

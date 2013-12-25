@@ -9,10 +9,19 @@
 #include "evita/vi_EditPane.h"
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_IoManager.h"
+#include "evita/v8_glue/converter.h"
 BEGIN_V8_INCLUDE
 #include "gin/object_template_builder.h"
 #include "gin/public/wrapper_info.h"
 END_V8_INCLUDE
+
+#if _DEBUG
+  #define APP_TITLE L"evita/debug"
+#else
+  #define APP_TITLEL L"evita"
+#endif
+#define APP_VERSION L"5.0"
+
 
 UINT g_nDropTargetMsg;
 
@@ -35,12 +44,14 @@ Application::Application()
 Application::~Application() {
 }
 
-base::string16 Application::title() const {
-  #if _DEBUG
-    return L"evita/debug 5.0";
-  #else
-    return L"evita 5.0";
-  #endif
+const base::string16& Application::title() const {
+  DEFINE_STATIC_LOCAL(base::string16, title, (APP_TITLE L" " APP_VERSION));
+  return title;
+}
+
+const base::string16& Application::version() const {
+  DEFINE_STATIC_LOCAL(base::string16, version, (APP_VERSION));
+  return version;
 }
 
 int Application::Ask(int flags, int format_id, ...) {
@@ -131,55 +142,11 @@ HIMAGELIST Application::GetIconList() const {
   return Edit::ModeFactory::icon_image_list();
 }
 
-#if 0
-std::string v8_version() {
-  return std::string(v8::V8::GetVersion());
-}
-#else
-// TODO(yosi) We should have v8_glue/converter.cc
-namespace gin {
-template<>
-struct Converter<base::string16> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, const base::string16& string);
-  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
-                     base::string16* out);
-};
-
-v8::Handle<v8::Value> Converter<base::string16>::ToV8(v8::Isolate* isolate,
-                                                  const base::string16& val) {
-  return v8::String::NewFromTwoByte(isolate,
-                                    reinterpret_cast<const uint16_t*>(val.data()),
-                                    v8::String::kNormalString, val.length());
-}
-
-bool Converter<base::string16>::FromV8(v8::Isolate*,
-                                       v8::Handle<v8::Value> val,
-                                       base::string16* out) {
-  if (!val->IsString())
-    return false;
-  auto str = v8::Handle<v8::String>::Cast(val);
-  auto const length = str->Length();
-  out->resize(length);
-  str->Write(reinterpret_cast<uint16_t*>(&(*out)[0]), 0, length,
-             v8::String::NO_NULL_TERMINATION);
-  return true;
-}
-
-}  // namespace gin
-
-base::string16 version() {
-  return base::string16(L"5.0");
-}
-#endif
-
 gin::ObjectTemplateBuilder Application::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
   return gin::Wrappable<Application>::GetObjectTemplateBuilder(isolate)
-#if 0
-    .SetProperty("title", base::Bind(&Application::GetTitle,
-                                     base::Unretained(&instance())))
-#endif
-    .SetProperty("version", version);
+    .SetProperty("title", &Application::title)
+    .SetProperty("version", &Application::version);
 }
 
 void Application::InternalAddBuffer(Buffer* buffer) {

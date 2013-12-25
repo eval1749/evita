@@ -41,7 +41,8 @@ class Application : public Command::Processor,
   public: Buffers& buffers() { return buffers_; }
   public: const Frames& frames() const { return frames_; }
   public: Frames& frames() { return frames_; }
-  public: base::string16 title() const;
+  public: const base::string16& title() const;
+  public: const base::string16& version() const;
 
   // FIXME 2007-08-19 yosi@msn.com We should NOT use InternalAddBufer,
   // this method is just for listener.

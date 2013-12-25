@@ -12,6 +12,7 @@
 #include "evita/v8_glue/converter.h"
 BEGIN_V8_INCLUDE
 #include "gin/object_template_builder.h"
+#include "gin/per_isolate_data.h"
 #include "gin/public/wrapper_info.h"
 END_V8_INCLUDE
 
@@ -144,9 +145,18 @@ HIMAGELIST Application::GetIconList() const {
 
 gin::ObjectTemplateBuilder Application::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
-  return gin::Wrappable<Application>::GetObjectTemplateBuilder(isolate)
-    .SetProperty("title", &Application::title)
-    .SetProperty("version", &Application::version);
+  auto const data = gin::PerIsolateData::From(isolate);
+  auto templ = data->GetFunctionTemplate(&kWrapperInfo);
+  if (templ.IsEmpty()) {
+    templ = v8::FunctionTemplate::New(isolate);
+    templ->SetClassName(gin::StringToSymbol(isolate, "Editor"));
+    data->SetFunctionTemplate(&kWrapperInfo, templ);
+  }
+
+  gin::ObjectTemplateBuilder builder(isolate, templ->InstanceTemplate());
+  builder.SetProperty("title", &Application::title);
+  builder.SetProperty("version", &Application::version);
+  return builder;
 }
 
 void Application::InternalAddBuffer(Buffer* buffer) {

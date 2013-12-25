@@ -56,28 +56,29 @@ class Initializer {
 V8ConsoleBuffer::V8ConsoleBuffer()
     : Buffer(L"*javascript console*", nullptr),
       input_history_(new InputHistory()),
-      isolate_(Initializer::CreateIsolate()),
-      context_holder_(isolate_),
+      context_holder_(isolate_holder_.isolate()),
       prompt_end_(CreateRange()) {
   SetNoSave(true);
   PopulateKeyBindings();
+  isolate_holder_.isolate()->Enter();
   {
-    v8::HandleScope handle_scope(isolate_);
-    auto context = Initializer::CreateContext(isolate_);
+    v8::HandleScope handle_scope(isolate_holder_.isolate());
+    auto context = Initializer::CreateContext(isolate_holder_.isolate());
     context_holder_.SetContext(context);
     context->Enter();
     Emit(L"// JavaScript Console for V8 version ");
-    Emit(v8::String::NewFromUtf8(isolate_, v8::V8::GetVersion()));
+    Emit(v8::String::NewFromUtf8(isolate_holder_.isolate(),
+         v8::V8::GetVersion()));
   }
   EmitPrompt();
 }
 
 V8ConsoleBuffer::~V8ConsoleBuffer() {
   {
-    v8::HandleScope handle_scope(isolate_);
+    v8::HandleScope handle_scope(isolate_holder_.isolate());
     context_holder_.context()->Exit();
   }
-  isolate_->Dispose();
+  isolate_holder_.isolate()->Exit();
 }
 
 void V8ConsoleBuffer::Emit(const v8::Handle<v8::Value>& value) {
@@ -130,14 +131,14 @@ void V8ConsoleBuffer::ExecuteLastLine() {
   base::string16 text(script_end - script_start, ' ');
   GetText(&text[0], script_start, script_end);
 
-  v8::HandleScope handle_scope(isolate_);
+  v8::HandleScope handle_scope(isolate_holder_.isolate());
   v8::TryCatch try_catch;
   v8::Handle<v8::Script> script = v8::Script::Compile(
-      v8::String::NewFromTwoByte(isolate_,
+      v8::String::NewFromTwoByte(isolate_holder_.isolate(),
                                  reinterpret_cast<uint16*>(&text[0]),
                                  v8::String::kNormalString,
                                  text.size()),
-      v8::String::NewFromUtf8(isolate_, "(console)"));
+      v8::String::NewFromUtf8(isolate_holder_.isolate(), "(console)"));
    if (script.IsEmpty()) {
      ReportException(&try_catch);
      return;
@@ -168,7 +169,7 @@ void V8ConsoleBuffer::PopulateKeyBindings() {
 }
 
 void V8ConsoleBuffer::ReportException(v8::TryCatch* try_catch) {
-  v8::HandleScope handle_scope(isolate_);
+  v8::HandleScope handle_scope(isolate_holder_.isolate());
   v8::Handle<v8::Message> message = try_catch->Message();
   if (message.IsEmpty()) {
     Emit(try_catch->Exception());

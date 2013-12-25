@@ -42,9 +42,7 @@ hooks = [
     {
     'action':
          [
-    'cmd.exe',
-    '/C',
-    'src\\build\\setup_ninja.cmd'
+    'src\\build\\gyp_evita.cmd'
 ],
     'pattern':
          '.'

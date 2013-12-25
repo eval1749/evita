@@ -35,6 +35,6 @@ deps = {
 hooks = [
   {
     'pattern': '.',
-    'action': ['cmd.exe', '/C', 'cd src && build\\setup_ninja.cmd']
+    'action': ['src\\build\\gyp_evita.cmd']
   },
 ]

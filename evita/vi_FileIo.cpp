@@ -322,8 +322,8 @@ bool Buffer::Load(const char16* const pwszFileName) {
 } // Buffer::Load
 
 bool Buffer::Reload() {
-  return *GetFileName() != 0 && Load(GetFileName());
-} // Buffer::Reload
+  return !GetFileName().empty() && Load(GetFileName().c_str());
+}
 
 bool Buffer::Save(
     const char16* const pwszFileIn,
@@ -340,13 +340,13 @@ bool Buffer::Save(
     return false;
   }
 
-  auto const pwszFile = *pwszFileIn == 0 ? m_wszFileName : pwszFileIn;
+  auto const pwszFile = *pwszFileIn ? base::string16(pwszFileIn) : filename_;
   m_nCodePage = nCodePage;
   m_eNewline = eNewline;
 
   auto const pSave = new SaveRequest(
       this,
-      pwszFile,
+      pwszFile.c_str(),
       nCodePage,
       eNewline,
       0,
@@ -368,7 +368,7 @@ bool Buffer::Save(
 void Edit::Buffer::SetFile(
     const char16* const pwszFile,
     const FILETIME* const pftLastWrite) {
-  ::lstrcpy(m_wszFileName, pwszFile);
+  filename_ =  pwszFile;
   m_ftLastWrite = *pftLastWrite;
   m_nSaveTick = m_nCharTick;
   m_eObsolete = Obsolete_No;
@@ -381,9 +381,8 @@ void Edit::Buffer::SetFile(
 ///   If true, ignore cached status.
 /// </param>
 void Buffer::UpdateFileStatus(bool const fForce) {
-  if (*m_wszFileName == 0) {
+  if (filename_.empty())
     return;
-  }
 
   if (IsNotReady()) {
     return;
@@ -402,7 +401,7 @@ void Buffer::UpdateFileStatus(bool const fForce) {
 
   m_tickLastCheck = tickNow;
 
-  auto const pCheck = new InfoRequest(this, m_wszFileName);
+  auto const pCheck = new InfoRequest(this, filename_.c_str());
   m_eObsolete = Obsolete_Checking;
   if (!pCheck->Start()) {
     m_eObsolete = Obsolete_Unknown;

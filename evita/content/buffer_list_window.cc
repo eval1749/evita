@@ -2,6 +2,8 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #include "evita/content/buffer_list_window.h"
 
+#include <vector>
+
 #include "common/win/native_window.h"
 #include "evita/cm_CmdProc.h"
 #include "evita/ed_Mode.h"
@@ -40,6 +42,21 @@ class EnumItem {
   private: void next() {
     m_iItem = ListView_GetNextItem(m_hwnd, m_iItem, m_rgf);
   }
+};
+
+class CString {
+  private: std::vector<char16> cstring_;
+
+  public: CString(const base::string16 string) {
+    cstring_.resize(string.size() + 1);
+    auto dst = cstring_.begin();
+    for (auto wch: string) {
+      *dst = wch;
+      ++dst;
+    }
+    *dst = 0;
+  }
+  public: operator base::char16*() { return cstring_.data(); }
 };
 
 static HCURSOR loadCursor(HCURSOR* inout_hCursor,
@@ -376,7 +393,7 @@ void BufferListWindow::Redraw() {
 
     // Last Saved
     {
-      if (!*buffer.GetFileName()) {
+      if (buffer.GetFileName().empty()) {
          wsz[0] = 0;
       } else {
         // FIXME 2007-08-05 We should use localized date time format.
@@ -394,8 +411,9 @@ void BufferListWindow::Redraw() {
 
     // File
     {
+      CString filename(buffer.GetFileName());
       oItem.iSubItem = 4;
-      oItem.pszText = const_cast<char16*>(buffer.GetFileName());
+      oItem.pszText = filename;
       ListView_SetItem(m_hwndListView, &oItem);
     }
   } // for each bufer

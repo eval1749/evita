@@ -660,7 +660,7 @@ ModeFactory* ModeFactory::Get(Buffer* pBuffer)
             return pModeFactory;
         }
 
-        if (pModeFactory->IsSupported(pBuffer->GetFileName()))
+        if (pModeFactory->IsSupported(pBuffer->GetFileName().c_str()))
         {
             return pModeFactory;
         }

@@ -3,6 +3,7 @@
 #if !defined(INCLUDE_evita_core_buffer_h)
 #define INCLUDE_evita_core_buffer_h
 
+#include "base/strings/string16.h"
 #include "./ed_BinTree.h"
 #include "./li_util.h"
 
@@ -41,7 +42,7 @@ class FileFeatures {
   protected: FileTime m_ftLastWrite;
   protected: uint m_nCodePage;
   protected: uint m_tickLastCheck;
-  protected: char16 m_wszFileName[MAX_PATH + 1];
+  protected: base::string16 filename_;
 
   // ctor
   protected: FileFeatures()
@@ -50,12 +51,11 @@ class FileFeatures {
         m_fNoSave(false),
         m_nCodePage(CP_UTF8),
         m_tickLastCheck(0) {
-    m_wszFileName[0] = 0;
   }
 
   // [G]
   public: uint GetCodePage() const { return m_nCodePage; }
-  public: const char16* GetFileName() const { return m_wszFileName; }
+  public: const base::string16 GetFileName() const { return filename_; }
 
   public: const FileTime* GetLastWriteTime() const { return &m_ftLastWrite; }
 

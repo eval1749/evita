@@ -468,7 +468,7 @@ const char16* Frame::getToolTip(NMTTDISPINFO* const pDisp) const {
 
   const char16* pwszSave;
   char16 wszSave[100];
-  if (!*pBuffer->GetFileName()) {
+  if (pBuffer->GetFileName().empty()) {
     pwszSave = L"Not saved";
   } else {
     // FIXME 2007-08-05 We should use localized date time format.
@@ -500,9 +500,8 @@ const char16* Frame::getToolTip(NMTTDISPINFO* const pDisp) const {
       L"Save: %s\r\n"
       L"%s\r\n",
       pBuffer->GetName(),
-      !*pBuffer->GetFileName()
-          ? L"No file"
-          : pBuffer->GetFileName(),
+      pBuffer->GetFileName().empty() ? L"No file" :
+          pBuffer->GetFileName().c_str(),
       pwszSave,
       pwszModified);
 
@@ -603,7 +602,7 @@ bool Frame::OnIdle(uint const nCount) {
         case IDYES:
           for (auto& window: pBuffer->windows())
             window.GetSelection()->PrepareForReload();
-          pBuffer->Load(pBuffer->GetFileName());
+          pBuffer->Load(pBuffer->GetFileName().c_str());
           break;
 
         default:

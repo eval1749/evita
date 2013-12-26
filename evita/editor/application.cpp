@@ -162,7 +162,7 @@ Buffer* Application::Load(const char16* pwszFileName) {
       &pwszFile );
 
   for (auto& buffer: buffers_) {
-    if (!::lstrcmpiW(buffer.GetFileName(), wszFileName))
+    if (!::lstrcmpiW(buffer.GetFileName().c_str(), wszFileName))
       return &buffer;
   }
 
@@ -244,7 +244,7 @@ bool Application::SaveBuffer(Frame* frame, Buffer* buffer, bool is_save_as) {
 
   oParam.m_wsz[0] = 0;
   if (is_save_as || !buffer->GetFileName()[0]) {
-    ::lstrcpyW(oParam.m_wsz, buffer->GetFileName());
+    ::lstrcpyW(oParam.m_wsz, buffer->GetFileName().c_str());
     FileDialogBox oDialog;
     if (!oDialog.GetSaveFileName(&oParam))
       return true;

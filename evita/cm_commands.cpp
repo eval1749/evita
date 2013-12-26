@@ -703,8 +703,10 @@ static void newFile(const Context* pCtx, bool fNewFrame)
     }
     else if (NULL != pCtx->GetSelection())
     {
-        oParam.SetDirectory(pCtx->GetSelection()->GetBuffer()->GetFileName());
-        oParam.m_hwndOwner = pCtx->GetSelection()->GetWindow()->AssociatedHwnd();
+        oParam.SetDirectory(
+            pCtx->GetSelection()->GetBuffer()->GetFileName().c_str());
+        oParam.m_hwndOwner =
+            pCtx->GetSelection()->GetWindow()->AssociatedHwnd();
 
         FileDialogBox oDialog;
         if (! oDialog.GetSaveFileName(&oParam))
@@ -915,7 +917,7 @@ static void openFile(const Context* pCtx, bool fNewFrame)
 
     if (NULL != pSelection)
     {
-        oParam.SetDirectory(pSelection->GetBuffer()->GetFileName());
+        oParam.SetDirectory(pSelection->GetBuffer()->GetFileName().c_str());
         oParam.m_hwndOwner = pSelection->GetWindow()->AssociatedHwnd();
     }
     else

@@ -24,8 +24,11 @@ class AbstractScriptWrappable {
   protected: virtual const char* wrapper_class_name() const { return nullptr; }
   protected: virtual ScriptWrapperInfo* wrapper_info() const = 0;
 
-  public: virtual v8::Handle<v8::FunctionTemplate>
-      GetFunctionTemplate(v8::Isolate* isolate);
+  protected: static v8::Handle<v8::Function>
+      GetConstructorImpl(v8::Isolate* isolate, ScriptWrapperInfo* info);
+
+  protected: static v8::Handle<v8::FunctionTemplate> GetFunctionTemplateImpl(
+      v8::Isolate* isolate, ScriptWrapperInfo* info);
 
   protected: virtual gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
       v8::Isolate* isolate);
@@ -44,7 +47,12 @@ class ScriptWrappable : public AbstractScriptWrappable {
   protected: virtual ~ScriptWrappable() = default;
 
   private: ScriptWrapperInfo* wrapper_info() const {
-    return &T::kWrapperInfo;
+    return T::static_wrapper_info();
+  }
+
+  public: static v8::Handle<v8::Function> GetConstructor(
+      v8::Isolate* isolate) {
+    return GetConstructorImpl(isolate, T::static_wrapper_info());
   }
 
   // A helper function to get ObjecTemplateBuilder from
@@ -72,8 +80,9 @@ struct Converter<T*, typename base::enable_if<
 
   static bool FromV8(v8::Isolate* isolate,
                      v8::Handle<v8::Value> val, T** out) {
+    auto const wrapper_info = T::static_wrapper_info()->gin_wrapper_info();
     *out = static_cast<T*>(static_cast<v8_glue::AbstractScriptWrappable*>(
-        internal::FromV8Impl(isolate, val, &T::kWrapperInfo)));
+        internal::FromV8Impl(isolate, val, wrapper_info)));
     return *out;
   }
 };

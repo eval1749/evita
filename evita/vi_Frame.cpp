@@ -120,6 +120,11 @@ Frame::operator HWND() const {
   return *native_window();
 }
 
+v8_glue::ScriptWrapperInfo* Frame::static_wrapper_info() {
+  DEFINE_STATIC_LOCAL(v8_glue::ScriptWrapperInfo, wrapper_info, ("Frame"));
+  return &wrapper_info;
+}
+
 bool Frame::Activate() {
   return ::SetForegroundWindow(*native_window());
 }
@@ -426,6 +431,12 @@ int Frame::getTabFromPane(Pane* const pane) const {
     ++index;
   }
   return -1;
+}
+
+gin::ObjectTemplateBuilder Frame::GetObjectTemplateBuilder(
+    v8::Isolate* isolate) {
+  return GetEmptyObjectTemplateBuilder(isolate)
+      .SetMethod("activate", &Frame::Activate);
 }
 
 Rect Frame::GetPaneRect() const {

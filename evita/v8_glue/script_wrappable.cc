@@ -36,26 +36,22 @@ AbstractScriptWrappable::~AbstractScriptWrappable() {
   wrapper_.Reset();
 }
 
-void AbstractScriptWrappable::WeakCallback(
-    const v8::WeakCallbackData<v8::Object, AbstractScriptWrappable>& data) {
-  auto const wrappable = data.GetParameter();
-  wrappable->wrapper_.Reset();
+v8::Handle<v8::Function> AbstractScriptWrappable::GetConstructorImpl(
+    v8::Isolate* isolate, ScriptWrapperInfo* info) {
+  return GetFunctionTemplateImpl(isolate, info)->GetFunction();
 }
 
-v8::Handle<v8::FunctionTemplate> AbstractScriptWrappable::GetFunctionTemplate(
-    v8::Isolate* isolate) {
-  auto const info = wrapper_info();
-  DCHECK(wrapper_class_name());
+v8::Handle<v8::FunctionTemplate>
+    AbstractScriptWrappable::GetFunctionTemplateImpl(
+        v8::Isolate* isolate, ScriptWrapperInfo* info) {
   auto const data = gin::PerIsolateData::From(isolate);
-  auto present = data->GetFunctionTemplate(info);
+  auto present = data->GetFunctionTemplate(info->gin_wrapper_info());
   if (!present.IsEmpty())
     return present;
   auto templ = v8::FunctionTemplate::New(isolate);
-  templ->SetClassName(gin::StringToSymbol(isolate, wrapper_class_name()));
-  data->SetFunctionTemplate(info, templ);
-
+  templ->SetClassName(gin::StringToSymbol(isolate, info->class_name()));
+  data->SetFunctionTemplate(info->gin_wrapper_info(), templ);
   templ->SetCallHandler(constructorCallBack);
-
   // We must set internal field count for instance template before creating
   // function object.
   templ->InstanceTemplate()->
@@ -68,19 +64,21 @@ gin::ObjectTemplateBuilder AbstractScriptWrappable::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
   if (!wrapper_class_name())
     return gin::ObjectTemplateBuilder(isolate);
-  auto templ = GetFunctionTemplate(isolate);
+  auto templ = GetFunctionTemplateImpl(isolate, wrapper_info());
   return gin::ObjectTemplateBuilder(isolate, templ->InstanceTemplate());
 }
 
 v8::Handle<v8::Object> AbstractScriptWrappable::GetWrapper(
     v8::Isolate* isolate) {
+  if (!wrapper_.IsEmpty())
+    return v8::Local<v8::Object>::New(isolate, wrapper_);
   auto const info = wrapper_info();
   auto const data = gin::PerIsolateData::From(isolate);
-  auto templ = data->GetObjectTemplate(info);
+  auto templ = data->GetObjectTemplate(info->gin_wrapper_info());
   if (templ.IsEmpty()) {
     templ = GetObjectTemplateBuilder(isolate).Build();
     CHECK(!templ.IsEmpty());
-    data->SetObjectTemplate(info, templ);
+    data->SetObjectTemplate(info->gin_wrapper_info(), templ);
   }
   CHECK_EQ(gin::kNumberOfInternalFields, templ->InternalFieldCount());
   ConstructorModeScope constructor_mode_scope(isolate, kWrapExistingObject);
@@ -93,6 +91,12 @@ v8::Handle<v8::Object> AbstractScriptWrappable::GetWrapper(
   wrapper_.Reset(isolate, wrapper);
   wrapper_.SetWeak(this, WeakCallback);
   return wrapper;
+}
+
+void AbstractScriptWrappable::WeakCallback(
+    const v8::WeakCallbackData<v8::Object, AbstractScriptWrappable>& data) {
+  auto const wrappable = data.GetParameter();
+  wrappable->wrapper_.Reset();
 }
 
 }  // namespace v8_glue

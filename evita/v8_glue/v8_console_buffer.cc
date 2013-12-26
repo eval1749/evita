@@ -39,20 +39,24 @@ class Initializer {
     if (!global_template.IsEmpty())
       return v8::Local<v8::ObjectTemplate>::New(isolate, global_template);
 
-    gin::ObjectTemplateBuilder global_builder(isolate);
-
+    auto global = v8::ObjectTemplate::New(isolate);
     {
-      auto context = v8::Context::New(isolate);
-      v8::Context::Scope context_scope(context);
-      auto& app = Application::instance();
-      global_builder.SetValue("Editor",
-          v8::Handle<v8::Object>(
-              app.GetFunctionTemplate(isolate)->GetFunction()));
-      global_builder.SetValue("editor", app.GetWrapper(isolate));
+        auto context = v8::Context::New(isolate);
+        v8::Context::Scope context_scope(context);
+        InstallConstructor(global, Application::GetConstructor(isolate));
+        InstallConstructor(global, Frame::GetConstructor(isolate));
+        global->Set(gin::StringToV8(isolate, "editor"),
+          Application::instance().GetWrapper(isolate));
     }
 
-    global_template.Reset(isolate, global_builder.Build());
+    global_template.Reset(isolate, global);
     return v8::Local<v8::ObjectTemplate>::New(isolate, global_template);
+  }
+
+  private: static void InstallConstructor(
+      v8::Handle<v8::ObjectTemplate> templ,
+      v8::Handle<v8::Function> constructor) {
+    templ->Set(constructor->GetName().As<v8::String>(), constructor);
   }
 };
 

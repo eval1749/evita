@@ -11,7 +11,6 @@
 #include "evita/vi_Frame.h"
 #include "evita/v8_glue/script_wrappable.h"
 
-
 class Buffer;
 class IoManager;
 
@@ -20,8 +19,6 @@ class Application : public Command::Processor,
                     public v8_glue::ScriptWrappable<Application> {
   protected: typedef DoubleLinkedList_<Frame> Frames;
   protected: typedef DoubleLinkedList_<Buffer> Buffers;
-
-  public: static v8_glue::ScriptWrapperInfo kWrapperInfo;
 
   private: NewlineMode newline_mode_;
   private: uint code_page_;
@@ -37,11 +34,9 @@ class Application : public Command::Processor,
 
   public: const Buffers& buffers() const { return buffers_; }
   public: Buffers& buffers() { return buffers_; }
-  private: virtual const char* wrapper_class_name() const override {
-    return "Editor";
-  }
   public: const Frames& frames() const { return frames_; }
   public: Frames& frames() { return frames_; }
+  public: static v8_glue::ScriptWrapperInfo* static_wrapper_info();
   public: const base::string16& title() const;
   public: const base::string16& version() const;
 

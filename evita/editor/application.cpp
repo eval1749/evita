@@ -26,10 +26,6 @@ HINSTANCE g_hResource;
 HWND g_hwndActiveDialog;
 UINT g_TabBand__TabDragMsg;
 
-v8_glue::ScriptWrapperInfo Application::kWrapperInfo = {
-  gin::kEmbedderNativeGin
-};
-
 Application::Application()
     : newline_mode_(NewlineMode_CrLf),
       code_page_(932),
@@ -45,6 +41,11 @@ Application::~Application() {
 const base::string16& Application::title() const {
   DEFINE_STATIC_LOCAL(base::string16, title, (APP_TITLE L" " APP_VERSION));
   return title;
+}
+
+v8_glue::ScriptWrapperInfo* Application::static_wrapper_info() {
+  DEFINE_STATIC_LOCAL(v8_glue::ScriptWrapperInfo, wrapper_info, ("Editor"));
+  return &wrapper_info;
 }
 
 const base::string16& Application::version() const {

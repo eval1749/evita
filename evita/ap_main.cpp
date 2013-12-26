@@ -15,6 +15,8 @@
 #define DEBUG_BUSY 0
 #define DEBUG_IDLE 0
 
+#include "base/at_exit.h"
+#include "base/command_line.h"
 #include "common/win/native_window.h"
 
 #if USE_LISTENER
@@ -267,6 +269,8 @@ static int MainLoop(EnumArg* pEnumArg) {
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
+  base::AtExitManager at_exit;
+  CommandLine::Init(0, nullptr);
   common::win::NativeWindow::Init(hInstance);
   g_hInstance = hInstance;
   g_hResource = hInstance;

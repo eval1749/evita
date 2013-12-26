@@ -133,7 +133,6 @@ LRESULT CALLBACK NativeWindow::WindowProc(HWND hwnd, UINT message,
     window->hwnd_ = nullptr;
     window->WindowProc(message, wParam, lParam);
     window->message_delegate_ = nullptr;
-    delete window;
     return 0;
   }
 

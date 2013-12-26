@@ -109,8 +109,6 @@ Frame::Frame()
 }
 
 Frame::~Frame() {
-  Application::Get()->DeleteFrame(this);
-
   for (auto i = 0; i < MessageLevel_Limit; i++) {
     delete[] m_rgpwszMessage[i];
   }
@@ -973,6 +971,10 @@ void Frame::WillDestroyPane(Pane* pane) {
   // Tab control activate another tab if needed.
   TabCtrl_DeleteItem(m_hwndTabBand, tab_index);
   ASSERT(m_pActivePane != pane);
+}
+
+void Frame::WillDestroyWidget() {
+  Application::instance().DeleteFrame(this);
 }
 
 void Frame::WillRemoveChildWidget(const Widget& widget) {

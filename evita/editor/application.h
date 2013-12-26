@@ -25,7 +25,7 @@ class Application : public Command::Processor,
   private: Buffers buffers_;
   private: Frames frames_;
   private: Frame* active_frame_;
-  private: IoManager* io_manager_;
+  private: std::unique_ptr<IoManager> io_manager_;
 
   // ctor/dtor
   friend class common::Singleton<Application>;
@@ -68,7 +68,7 @@ class Application : public Command::Processor,
   public: uint GetCodePage() const { return code_page_; }
   public: Frame* GetFirstFrame() const { return frames_.GetFirst(); }
   public: HIMAGELIST GetIconList() const;
-  public: IoManager* GetIoManager() const { return io_manager_; }
+  public: IoManager* GetIoManager() const { return io_manager_.get(); }
   public: Frame* GetLastFrame() const { return frames_.GetLast(); }
   public: NewlineMode GetNewline() const { return newline_mode_; }
   public: virtual gin::ObjectTemplateBuilder GetObjectTemplateBuilder(

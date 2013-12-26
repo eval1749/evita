@@ -158,8 +158,8 @@ class Frame final : public widgets::ContainerWidget,
 
   // [W]
   public: void WillDestroyPane(Pane*);
-  private: void WillRemoveChildWidget(
-      const Widget& widget) override;
+  private: virtual void WillDestroyWidget() override;
+  private: void WillRemoveChildWidget(const Widget& widget) override;
 
   DISALLOW_COPY_AND_ASSIGN(Frame);
 };

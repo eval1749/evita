@@ -8,6 +8,7 @@
 #include "evita/cm_CmdProc.h"
 #include "evita/editor/application.h"
 #include "evita/ed_Range.h"
+#include "evita/v8_glue/per_isolate_data.h"
 #include "evita/vi_Selection.h"
 BEGIN_V8_INCLUDE
 #include "gin/object_template_builder.h"
@@ -43,8 +44,11 @@ class Initializer {
     {
       auto context = v8::Context::New(isolate);
       v8::Context::Scope context_scope(context);
-      global_builder.SetValue("editor",
-                              Application::instance().GetWrapper(isolate));
+      auto& app = Application::instance();
+      global_builder.SetValue("Editor",
+          v8::Handle<v8::Object>(
+              app.GetFunctionTemplate(isolate)->GetFunction()));
+      global_builder.SetValue("editor", app.GetWrapper(isolate));
     }
 
     global_template.Reset(isolate, global_builder.Build());
@@ -195,7 +199,8 @@ void V8ConsoleBuffer::ReportException(v8::TryCatch* try_catch) {
   SetStyle(line_start + message->GetStartColumn(),
            line_start + message->GetEndColumn(), &style);
 
-  if (!try_catch->StackTrace()->IsUndefined()) {
+  if (!try_catch->StackTrace().IsEmpty() &&
+        !try_catch->StackTrace()->IsUndefined()) {
     Emit(try_catch->StackTrace());
     Emit(L"\n");
   }

@@ -7,10 +7,10 @@
 
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
+#include "evita/v8_glue/isolate_holder.h"
 #include "evita/vi_Buffer.h"
 BEGIN_V8_INCLUDE
 #include "gin/public/context_holder.h"
-#include "gin/public/isolate_holder.h"
 END_V8_INCLUDE
 
 class InputHistory;
@@ -31,7 +31,7 @@ namespace v8_glue {
 class V8ConsoleBuffer : public common::Singleton<V8ConsoleBuffer>,
                         public Buffer {
   private: std::unique_ptr<InputHistory> input_history_;
-  private: gin::IsolateHolder isolate_holder_;
+  private: IsolateHolder isolate_holder_;
   private: gin::ContextHolder context_holder_;
   private: Edit::Range* prompt_end_;
 

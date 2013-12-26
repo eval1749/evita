@@ -10,11 +10,6 @@
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_IoManager.h"
 #include "evita/v8_glue/converter.h"
-BEGIN_V8_INCLUDE
-#include "gin/object_template_builder.h"
-#include "gin/per_isolate_data.h"
-#include "gin/public/wrapper_info.h"
-END_V8_INCLUDE
 
 #if _DEBUG
   #define APP_TITLE L"evita/debug"
@@ -31,7 +26,9 @@ HINSTANCE g_hResource;
 HWND g_hwndActiveDialog;
 UINT g_TabBand__TabDragMsg;
 
-gin::WrapperInfo Application::kWrapperInfo = { gin::kEmbedderNativeGin };
+v8_glue::ScriptWrapperInfo Application::kWrapperInfo = {
+  gin::kEmbedderNativeGin
+};
 
 Application::Application()
     : newline_mode_(NewlineMode_CrLf),
@@ -145,18 +142,9 @@ HIMAGELIST Application::GetIconList() const {
 
 gin::ObjectTemplateBuilder Application::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
-  auto const data = gin::PerIsolateData::From(isolate);
-  auto templ = data->GetFunctionTemplate(&kWrapperInfo);
-  if (templ.IsEmpty()) {
-    templ = v8::FunctionTemplate::New(isolate);
-    templ->SetClassName(gin::StringToSymbol(isolate, "Editor"));
-    data->SetFunctionTemplate(&kWrapperInfo, templ);
-  }
-
-  gin::ObjectTemplateBuilder builder(isolate, templ->InstanceTemplate());
-  builder.SetProperty("title", &Application::title);
-  builder.SetProperty("version", &Application::version);
-  return builder;
+  return GetEmptyObjectTemplateBuilder(isolate)
+      .SetProperty("title", &Application::title)
+      .SetProperty("version", &Application::version);
 }
 
 void Application::InternalAddBuffer(Buffer* buffer) {

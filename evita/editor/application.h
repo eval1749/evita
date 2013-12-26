@@ -9,9 +9,7 @@
 #include "common/memory/singleton.h"
 #include "evita/cm_CmdProc.h"
 #include "evita/vi_Frame.h"
-BEGIN_V8_INCLUDE
-#include "gin/wrappable.h"
-END_V8_INCLUDE
+#include "evita/v8_glue/script_wrappable.h"
 
 
 class Buffer;
@@ -19,11 +17,11 @@ class IoManager;
 
 class Application : public Command::Processor,
                     public common::Singleton<Application>,
-                    public gin::Wrappable<Application> {
+                    public v8_glue::ScriptWrappable<Application> {
   protected: typedef DoubleLinkedList_<Frame> Frames;
   protected: typedef DoubleLinkedList_<Buffer> Buffers;
 
-  public: static gin::WrapperInfo kWrapperInfo;
+  public: static v8_glue::ScriptWrapperInfo kWrapperInfo;
 
   private: NewlineMode newline_mode_;
   private: uint code_page_;
@@ -39,6 +37,9 @@ class Application : public Command::Processor,
 
   public: const Buffers& buffers() const { return buffers_; }
   public: Buffers& buffers() { return buffers_; }
+  private: virtual const char* wrapper_class_name() const override {
+    return "Editor";
+  }
   public: const Frames& frames() const { return frames_; }
   public: Frames& frames() { return frames_; }
   public: const base::string16& title() const;

@@ -15,9 +15,8 @@ ObjectTemplateBuilder::ObjectTemplateBuilder(v8::Isolate* isolate)
 ObjectTemplateBuilder::ObjectTemplateBuilder(
     v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> templ)
     : isolate_(isolate), template_(templ) {
-  template_->SetInternalFieldCount(kNumberOfInternalFields);
+  DCHECK_GE(template_->InternalFieldCount(), kNumberOfInternalFields);
 }
-
 
 ObjectTemplateBuilder::~ObjectTemplateBuilder() {
 }

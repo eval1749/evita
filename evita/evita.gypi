@@ -70,6 +70,9 @@
         'vi_TextEditWindow.cpp',
 
         'v8_glue/converter.cc',
+        'v8_glue/isolate_holder.cc',
+        'v8_glue/per_isolate_data.cc',
+        'v8_glue/script_wrappable.cc',
         'v8_glue/v8_console_buffer.cc',
 
         'widgets/container_widget.cpp',

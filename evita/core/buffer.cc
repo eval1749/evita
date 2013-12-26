@@ -11,7 +11,7 @@
 //
 #define DEBUG_INTERVAL 0
 #define DEBUG_STYLE 0
-#include "./ed_Buffer.h"
+#include "evita/core/buffer.h"
 
 #include "./ed_Interval.h"
 #include "./ed_Range.h"

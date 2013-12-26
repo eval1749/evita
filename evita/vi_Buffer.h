@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_visual_Buffer_h)
 #define INCLUDE_visual_Buffer_h
 
-#include "./ed_Buffer.h"
+#include "evita/core/buffer.h"
 
 #include "./vi_TextEditWindow.h"
 

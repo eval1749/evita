@@ -9,4 +9,4 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_BufferFind.cpp#1 $
 //
-#include "./ed_Buffer.h"
+#include "evita/core/buffer.h"

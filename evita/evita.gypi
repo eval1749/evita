@@ -90,8 +90,8 @@
       ], # dependencies
       'sources': [
         'precomp.cpp',
+        'core/buffer.cc',
         'core/style.cc',
-        'ed_Buffer.cpp',
         'ed_BufferCore.cpp',
         'ed_BufferFind.cpp',
         'ed_Interval.cpp',

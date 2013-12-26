@@ -1269,6 +1269,13 @@ void EditPane::DidRealizeChildWidget(const Widget& window) {
     AppendChild(*box->GetWindow());
 }
 
+void EditPane::DidRemoveChildWidget(const Widget&) {
+  if (root_box_->CountLeafBox())
+    return;
+  // There is no window in this pane. So, we delete this pane.
+  Destroy();
+}
+
 void EditPane::DidResize() {
   #if DEBUG_RESIZE
     DEBUG_WIDGET_PRINTF(DEBUG_RECT_FORMAT "\n", DEBUG_RECT_ARG(rect()));
@@ -1419,11 +1426,13 @@ void EditPane::UpdateStatusBar() {
 }
 
 void EditPane::WillDestroyWidget() {
+  Pane::WillDestroyWidget();
+  m_eState = State_Destroyed;
   root_box_->Destroy();
 }
 
-void EditPane::WillDestroyChildWidget(const Widget& child) {
-  Pane::WillDestroyChildWidget(child);
+void EditPane::WillRemoveChildWidget(const Widget& child) {
+  Pane::WillRemoveChildWidget(child);
   auto const box = root_box_->FindLeafBoxFromWidget(child);
   if (!box) {
     // RepalceActiveWindow() removes window from box then destroys window.
@@ -1436,13 +1445,4 @@ void EditPane::WillDestroyChildWidget(const Widget& child) {
   box->DetachWindow();
   auto const outer = box->outer();
   outer->RemoveBox(*box);
-  if (m_eState != State_Realized)
-    return;
-  if (root_box_->CountLeafBox())
-    return;
-  frame().WillDestroyPane(this);
-
-  // There is no window in this pane. So, we delete this pane.
-  m_eState = State_Destroyed;
-  root_box_->Destroy();
 }

@@ -11,12 +11,13 @@
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Frame.cpp#5 $
 //
 #define DEBUG_DROPFILES 0
-#define DEBUG_FOCUS     0
+#define DEBUG_FOCUS     1
 #define DEBUG_PAINT     0
 #define DEBUG_REDRAW    0
 #define DEBUG_WINDOWPOS 0
 #include "./vi_Frame.h"
 
+#include "base/logging.h"
 #include "base/strings/string16.h"
 #include "common/tree/ancestors_or_self.h"
 #include "common/win/native_window.h"
@@ -321,7 +322,14 @@ void Frame::DidCreateNativeWindow() {
     m_oPanes.GetFirst()->Activate();
 }
 
-void Frame::DidRemoveChildWidget(const widgets::Widget&) {
+void Frame::DidDestroyWidget() {
+  if (!has_script_reference())
+    delete this;
+}
+
+void Frame::DidRemoveChildWidget(const widgets::Widget& widget) {
+  auto const pane = AsPane(widget);
+  m_oPanes.Delete(pane);
   if (m_oPanes.IsEmpty())
     Destroy();
 }
@@ -960,20 +968,8 @@ void Frame::updateTitleBar() {
   m_pActivePane->UpdateStatusBar();
 }
 
-void Frame::WillDestroyPane(Pane* pane) {
-  auto const tab_index = getTabFromPane(pane);
-  ASSERT(tab_index >= 0);
-  m_oPanes.Delete(pane);
-  if (m_oPanes.IsEmpty()) {
-    Destroy();
-    return;
-  }
-  // Tab control activate another tab if needed.
-  TabCtrl_DeleteItem(m_hwndTabBand, tab_index);
-  ASSERT(m_pActivePane != pane);
-}
-
 void Frame::WillDestroyWidget() {
+  ContainerWidget::WillDestroyWidget();
   Application::instance().DeleteFrame(this);
 }
 
@@ -982,7 +978,6 @@ void Frame::WillRemoveChildWidget(const Widget& widget) {
     return;
   auto const pane = AsPane(widget);
   auto const tab_index = getTabFromPane(pane);
-  ASSERT(tab_index >= 0);
+  DCHECK_GE(tab_index, 0);
   TabCtrl_DeleteItem(m_hwndTabBand, tab_index);
-  m_oPanes.Delete(pane);
 }

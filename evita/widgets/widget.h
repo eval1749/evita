@@ -29,12 +29,19 @@ class Widget
       public common::Castable {
   DECLARE_CASTABLE_CLASS(Widget, Castable);
 
+  private: enum State {
+    kDestroyed = -2,
+    kBeingDestroyed = -1,
+    kNotRealized,
+    kRealized,
+  };
+
   // Life time of native_window_ ends at WM_NCDESTROY rather than
   // destruction of Widget.
   private: std::unique_ptr<NativeWindow> native_window_;
-  private: bool realized_;
   private: Rect rect_;
   private: int shown_;
+  private: State state_;
 
   protected: explicit Widget(
       std::unique_ptr<NativeWindow>&& native_window);
@@ -50,7 +57,7 @@ class Widget
     return static_cast<bool>(native_window_);
   }
   public: virtual bool is_container() const { return false; }
-  public: bool is_realized() const { return realized_; }
+  public: bool is_realized() const { return state_ == kRealized; }
   public: bool is_shown() const { return shown_; }
   // Expose |is_top_level()| for iterator.
   protected: NativeWindow* native_window() const {
@@ -69,6 +76,7 @@ class Widget
   public: virtual void DidChangeHierarchy();
   // Called on WM_CREATE
   protected: virtual void DidCreateNativeWindow();
+  protected: virtual void DidDestroyWidget();
   // Called on WM_NCDESTORY
   protected: virtual void DidDestroyNativeWindow();
   public: virtual void DidHide() {}

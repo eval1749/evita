@@ -101,6 +101,7 @@ class Frame final : public widgets::ContainerWidget,
   public: void DidActivatePane(Pane*);
   private: void DidChangeTabSelection(int selected_index);
   private: virtual void DidCreateNativeWindow() override;
+  private: virtual void DidDestroyWidget() override;
   private: virtual void DidRemoveChildWidget(
       const Widget& widget) override;
   private: virtual void DidResize() override;
@@ -157,9 +158,8 @@ class Frame final : public widgets::ContainerWidget,
   public: void updateTitleBar();
 
   // [W]
-  public: void WillDestroyPane(Pane*);
   private: virtual void WillDestroyWidget() override;
-  private: void WillRemoveChildWidget(const Widget& widget) override;
+  private: virtual void WillRemoveChildWidget(const Widget& widget) override;
 
   DISALLOW_COPY_AND_ASSIGN(Frame);
 };

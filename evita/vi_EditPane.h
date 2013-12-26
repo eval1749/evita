@@ -75,6 +75,7 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
   // [D]
   private: virtual void DidRealize() override;
   private: virtual void DidRealizeChildWidget(const Widget&) override;
+  private: virtual void DidRemoveChildWidget(const Widget&) override;
   private: virtual void DidResize() override;
   private: virtual void DidSetFocus() override;
 
@@ -115,7 +116,7 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
 
   // [W]
   private: virtual void WillDestroyWidget() override;
-  private: virtual void WillDestroyChildWidget(const Widget& child) override;
+  private: virtual void WillRemoveChildWidget(const Widget& child) override;
 
   DISALLOW_COPY_AND_ASSIGN(EditPane);
 };

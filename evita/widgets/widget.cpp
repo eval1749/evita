@@ -20,7 +20,7 @@ namespace widgets {
 
 Widget::Widget(std::unique_ptr<NativeWindow>&& native_window)
     : native_window_(std::move(native_window)),
-      realized_(false),
+      state_(kNotRealized),
       shown_(0) {
 }
 
@@ -30,8 +30,8 @@ Widget::Widget()
 
 Widget::~Widget() {
   #if DEBUG_DESTROY
-    DEBUG_WIDGET_PRINTF("realized=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        realized_, shown_, DEBUG_RECT_ARG(rect_));
+    DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
+        state_, shown_, DEBUG_RECT_ARG(rect_));
   #endif
   ASSERT(!native_window_);
 }
@@ -63,17 +63,25 @@ void Widget::CreateNativeWindow() const {
 
 void Widget::Destroy() {
   #if DEBUG_DESTROY
-    DEBUG_WIDGET_PRINTF("realized=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        realized_, shown_, DEBUG_RECT_ARG(rect_));
+    DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
+        state_, shown_, DEBUG_RECT_ARG(rect_));
   #endif
+  if (state_ == kBeingDestroyed) {
+    ASSERT(!native_window_);
+    return;
+  }
   if (native_window_) {
     ::DestroyWindow(*native_window_.get());
     return;
   }
+  state_ = kBeingDestroyed;
   WillDestroyWidget();
-  container_widget().WillDestroyChildWidget(*this);
-  container_widget().RemoveChild(*this);
-  delete this;
+  auto& parent_widget = container_widget();
+  parent_widget.WillRemoveChildWidget(*this);
+  parent_widget.RemoveChild(*this);
+  parent_widget.DidRemoveChildWidget(*this);
+  state_ = kDestroyed;
+  DidDestroyWidget();
 }
 
 void Widget::DidChangeHierarchy() {
@@ -84,13 +92,17 @@ void Widget::DidCreateNativeWindow() {
 
 void Widget::DidDestroyNativeWindow() {
   #if DEBUG_DESTROY
-    DEBUG_WIDGET_PRINTF("realized=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        realized_, shown_, DEBUG_RECT_ARG(rect_));
+    DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
+        state_, shown_, DEBUG_RECT_ARG(rect_));
   #endif
   ASSERT(!native_window_);
   // Since native window, which handles UI, is destroyed, this widget should
   // be destroyed too.
   Destroy();
+}
+
+void Widget::DidDestroyWidget() {
+  delete this;
 }
 
 HCURSOR Widget::GetCursorAt(const Point&) const {
@@ -157,7 +169,7 @@ void Widget::Realize(const Rect& rect) {
     return;
   }
 
-  realized_ = true;
+  state_ = kRealized;
   rect_ = rect;
   if (native_window_) {
     // On WM_CREATE, we call DidCreateNativeWindow() instead of DidRealized().
@@ -171,9 +183,9 @@ void Widget::Realize(const Rect& rect) {
 
 void Widget::RealizeTopLevelWidget() {
   ASSERT(native_window_);
-  ASSERT(!realized_);
+  ASSERT(!is_realized());
   RootWidget::instance().AppendChild(*this);
-  realized_ = true;
+  state_ = kRealized;
   CreateNativeWindow();
 }
 
@@ -186,7 +198,7 @@ void Widget::ReleaseCapture() const {
 }
 
 void Widget::ResizeTo(const Rect& rect) {
-  ASSERT(realized_);
+  ASSERT(state_);
 
 #if 0
   // TODO: We should enable this check.
@@ -256,15 +268,15 @@ void Widget::Show() {
 
 void Widget::WillDestroyWidget() {
   #if DEBUG_DESTROY
-    DEBUG_WIDGET_PRINTF("realized=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        realized_, shown_, DEBUG_RECT_ARG(rect_));
+    DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
+        state_, shown_, DEBUG_RECT_ARG(rect_));
   #endif
 }
 
 void Widget::WillDestroyNativeWindow() {
   #if DEBUG_DESTROY
-    DEBUG_WIDGET_PRINTF("realized=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        realized_, shown_, DEBUG_RECT_ARG(rect_));
+    DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
+        state_, shown_, DEBUG_RECT_ARG(rect_));
   #endif
 }
 

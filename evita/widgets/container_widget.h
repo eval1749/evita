@@ -65,7 +65,6 @@ class ContainerWidget
   }
 
   // [W]
-  public: virtual void WillDestroyChildWidget(const Widget&);
   protected: virtual LRESULT WindowProc(UINT uMsg, WPARAM  wParam,
                                         LPARAM lParam) override;
   public: virtual void WillRemoveChildWidget(const Widget& widget);

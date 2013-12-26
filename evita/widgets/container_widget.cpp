@@ -225,15 +225,12 @@ void ContainerWidget::Show() {
   }
 }
 
-void ContainerWidget::WillDestroyChildWidget(const Widget& widget) {
+void ContainerWidget::WillRemoveChildWidget(const Widget& widget) {
   auto& host = GetHostContainer();
   if (widget != host.focus_widget_)
     return;
   host.focus_widget_ = nullptr;
   const_cast<Widget&>(widget).DidKillFocus();
-}
-
-void ContainerWidget::WillRemoveChildWidget(const Widget&) {
 }
 
 LRESULT ContainerWidget::WindowProc(UINT message, WPARAM wParam,

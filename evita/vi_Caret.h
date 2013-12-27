@@ -41,6 +41,7 @@ class Caret {
   public: void Hide();
   public: void Give();
   private: void Show();
+  public: void ShouldBlink() { should_blink_ = true; }
   // TODO: We should pass Widget to Caret::Take() instead of gfx::Graphics.
   public: void Take(const gfx::Graphics& gfx);
   private: static void CALLBACK TimerProc(HWND, UINT, UINT_PTR, DWORD);

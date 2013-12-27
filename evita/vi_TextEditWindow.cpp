@@ -471,7 +471,7 @@ void TextEditWindow::MakeSelectionVisible() {
   #endif
 
   m_lCaretPosn = -1;
-  redraw(true);
+  Redraw();
 }
 
 Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
@@ -500,10 +500,8 @@ bool TextEditWindow::OnIdle(uint count) {
     DEBUG_TEXT_EDIT_PRINTF("count=%d more=%d\n", count, more);
   #endif
 
-  if (is_shown()) {
-    gfx::Graphics::DrawingScope drawing_scope(*m_gfx);
+  if (is_shown())
     Redraw();
-  }
   return more;
 }
 
@@ -740,18 +738,15 @@ void TextEditWindow::onVScroll(uint nCode) {
 }
 
 void TextEditWindow::Redraw() {
-  auto fSelectionActive = has_focus();
+  auto fSelectionIsActive = has_focus();
 
   if (g_hwndActiveDialog) {
     auto const edit_pane = Application::Get()->GetActiveFrame()->
         GetActivePane()->DynamicCast<EditPane>();
     if (edit_pane)
-      fSelectionActive = edit_pane->GetActiveWindow() == this;
+      fSelectionIsActive = edit_pane->GetActiveWindow() == this;
   }
-  redraw(fSelectionActive);
-}
 
-void TextEditWindow::redraw(bool fSelectionIsActive) {
   DOM_AUTO_LOCK_SCOPE();
 
   #if DEBUG_REDRAW
@@ -823,6 +818,10 @@ void TextEditWindow::redraw(bool fSelectionIsActive) {
             m_pPage, m_pPage->GetStart(), lStart);
         #endif // DEBUG_REDRAW
         format(*m_gfx, startOfLineAux(*m_gfx, lStart));
+    } else {
+      // Page is clean.
+      caret_->ShouldBlink();
+      return;
     }
   }
 

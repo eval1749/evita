@@ -165,7 +165,6 @@ class TextEditWindow
 
   // [R]
   public: virtual void Redraw() override;
-  protected: void redraw(bool);
   private: void Render();
 
   // [S]

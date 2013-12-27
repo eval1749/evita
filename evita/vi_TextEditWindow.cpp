@@ -21,6 +21,7 @@
 #define DEBUG_SHOW_HIDE 0
 #include "./vi_TextEditWindow.h"
 
+#include "base/logging.h"
 #include "common/timer/timer.h"
 #include "./ed_Mode.h"
 #include "./ed_Style.h"
@@ -303,6 +304,7 @@ void TextEditWindow::DidKillFocus() {
   #endif
   ParentClass::DidKillFocus();
   caret_->Give();
+  m_lCaretPosn = -1;
 }
 
 void TextEditWindow::DidRealize() {
@@ -322,13 +324,15 @@ void TextEditWindow::DidResize() {
 
 void TextEditWindow::DidSetFocus() {
   #if DEBUG_FOCUS
-    DEBUG_TEXT_EDIT_PRINTF("focus=%d show=%d\n", has_focus(), is_shown());
+    DEBUG_TEXT_EDIT_PRINTF("focus=%d show=%d caret=%d\n",
+        has_focus(), is_shown(), m_lCaretPosn);
   #endif
   ParentClass::DidSetFocus();
+  ASSERT(has_focus());
   // Note: It is OK to set focus to hidden window.
   caret_->Take(*m_gfx);
   GetBuffer()->UpdateFileStatus(true);
-  ASSERT(has_focus());
+  m_lCaretPosn = -1;
 }
 
 void TextEditWindow::DidShow() {
@@ -492,6 +496,7 @@ Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
 // of caret, If specified buffer position isn't in window, this function
 // returns 0.
 gfx::RectF TextEditWindow::MapPosnToPoint(Posn lPosn) {
+  DCHECK_GE(lPosn, 0);
   ASSERT_DOM_IS_LOCKED();
   updateScreen();
   for (;;) {
@@ -818,6 +823,10 @@ void TextEditWindow::Redraw() {
         m_lCaretPosn = lCaretPosn;
       }
     } else if (m_lCaretPosn != lCaretPosn) {
+        #if DEBUG_FOCUS
+          DEBUG_TEXT_EDIT_PRINTF("Page %p change caret %d to %d\n",
+            m_pPage, m_lCaretPosn, lCaretPosn);
+        #endif
         m_pPage->ScrollToPosn(*m_gfx, lCaretPosn);
         m_lCaretPosn = lCaretPosn;
     } else if (m_pPage->GetStart() != lStart) {
@@ -860,8 +869,12 @@ void TextEditWindow::Render() {
     return;
 
   const auto rect = m_pPage->MapPosnToPoint(*m_gfx, m_lCaretPosn);
-  if (!rect)
+  if (!rect) {
+    #if DEBUG_FOCUS
+      DEBUG_TEXT_EDIT_PRINTF("caret %d isn't in page\n", m_lCaretPosn);
+    #endif
     return;
+  }
 
   auto const caret_width = std::max(::GetSystemMetrics(SM_CXBORDER), 2);
   gfx::RectF caret_rect(rect.left_top(),
@@ -885,6 +898,10 @@ void TextEditWindow::Render() {
     }
   #endif // SUPPORT_IME
 
+  #if DEBUG_FOCUS
+    DEBUG_TEXT_EDIT_PRINTF("Update caret " DEBUG_RECTF_FORMAT "\n",
+        DEBUG_RECTF_ARG(caret_rect));
+  #endif
   caret_->Update(caret_rect);
 }
 

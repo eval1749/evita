@@ -148,21 +148,19 @@ DEFCOMMAND(CloseOtherFrames) {
 //  Evita   Ctrl+Shift+1
 //  Emacs   Ctrl+X 1
 //
-DEFCOMMAND(CloseOtherWindows)
-{
-    if (NULL == pCtx->GetSelection()) return;
-
-    EditPane* pPane = pCtx->GetFrame()->GetActivePane()->
-        DynamicCast<EditPane>();
-
-    if (NULL == pPane)
-    {
-        return;
-    }
-
-    pPane->CloseAllBut(pCtx->GetSelection()->GetWindow());
-} // CloseOtherWindows
-
+DEFCOMMAND(CloseOtherWindows) {
+  auto const selection = pCtx->GetSelection();
+  if (!selection)
+    return;
+  auto const window = pCtx->GetSelection()->GetWindow();
+  auto const pane = window->container_widget().as<EditPane>();
+  if (!pane)
+    return;
+  Application::instance().PostTask(FROM_HERE,
+      base::Bind(&EditPane::CloseAllBut,
+                 base::Unretained(pane),
+                 base::Unretained(window)));
+}
 
 //////////////////////////////////////////////////////////////////////
 //

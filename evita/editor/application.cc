@@ -10,6 +10,7 @@
 #pragma warning(pop)
 #include "base/run_loop.h"
 #include "base/strings/string16.h"
+#include "base/time/time.h"
 #include "evita/ed_Mode.h"
 #include "evita/vi_Buffer.h"
 #include "evita/vi_EditPane.h"
@@ -97,13 +98,16 @@ void Application::DoIdle() {
     DVLOG(4) << "idle_count=" << idle_count << " running=" <<
         message_loop_->is_running();
   #endif
-  if (OnIdle(idle_count))
+  if (OnIdle(idle_count)) {
     ++idle_count;
-  else
-    idle_count= 0;
-  if (!is_quit_)
     message_loop_->PostTask(FROM_HERE, base::Bind(&Application::DoIdle,
                                                   base::Unretained(this)));
+  } else {
+    idle_count= 0;
+    message_loop_->PostNonNestableDelayedTask(FROM_HERE,
+        base::Bind(&Application::DoIdle, base::Unretained(this)),
+        base::TimeDelta::FromMilliseconds(1000 / 60));
+  }
 }
 
 void Application::Exit(bool is_forced) {

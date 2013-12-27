@@ -17,6 +17,7 @@
 
 #include "base/at_exit.h"
 #include "base/command_line.h"
+#include "base/logging.h"
 #include "common/win/native_window.h"
 
 #if USE_LISTENER
@@ -271,6 +272,11 @@ static int MainLoop(EnumArg* pEnumArg) {
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
   base::AtExitManager at_exit;
   CommandLine::Init(0, nullptr);
+  {
+    logging::LoggingSettings settings;
+    settings.logging_dest = logging::LOG_TO_SYSTEM_DEBUG_LOG;
+    logging::InitLogging(settings);
+  }
   common::win::NativeWindow::Init(hInstance);
   g_hInstance = hInstance;
   g_hResource = hInstance;

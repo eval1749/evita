@@ -14,7 +14,7 @@
 #if _DEBUG
   #define APP_TITLE L"evita/debug"
 #else
-  #define APP_TITLEL L"evita"
+  #define APP_TITLE L"evita"
 #endif
 #define APP_VERSION L"5.0"
 

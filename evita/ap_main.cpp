@@ -16,8 +16,15 @@
 #define DEBUG_IDLE 0
 
 #include "base/at_exit.h"
+#include "base/bind.h"
 #include "base/command_line.h"
+#include "base/location.h"
 #include "base/logging.h"
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#include "base/message_loop/message_loop.h"
+#pragma warning(pop)
+#include "base/run_loop.h"
 #include "common/win/native_window.h"
 
 #if USE_LISTENER
@@ -156,8 +163,18 @@ static void NoReturn fatalExit(const char16* pwsz) {
   ::FatalAppExit(0, wsz);
 }
 
-static bool IsKeepIdleMessage(uint message) {
-  return message == WM_SYSTIMER || message == WM_TIMER;
+static void DoIdle() {
+  static int idle_count;
+  #if DEBUG_IDLE
+    DVLOG(4) << "idle_count=" << idle_count << " running=" <<
+        base::MessageLoop::current()->is_running();
+  #endif
+  if (Application::Get()->OnIdle(idle_count))
+    ++idle_count;
+  else
+    idle_count= 0;
+  if (!Application::instance().is_quit())
+    base::MessageLoop::current()->PostTask(FROM_HERE, base::Bind(DoIdle));
 }
 
 static int MainLoop(EnumArg* pEnumArg) {
@@ -221,52 +238,11 @@ static int MainLoop(EnumArg* pEnumArg) {
   }
   frame.Realize();
 
-  int iIdle = 1;
-  MSG oMsg;
-  for (;;) {
-    if (!::PeekMessage(&oMsg, nullptr, 0, 0, PM_REMOVE)) {
-      bool fGotMessage = false;
-      if (iIdle) {
-        #if DEBUG_IDLE
-          DEBUG_PRINTF("idle %d msg=0x%04X qs=0x%0x\n", 
-                       iIdle, oMsg.message,
-                       ::GetQueueStatus(QS_ALLEVENTS));
-        #endif // DEBUG_IDLE
-
-        uint nCount = 0;
-        while (Application::Get()->OnIdle(nCount)) {
-          if (::PeekMessage(&oMsg, nullptr, 0, 0, PM_REMOVE)) {
-            #if DEBUG_BUSY
-              DEBUG_PRINTF("Idle loop is breaked by 0x%04X\n", oMsg.message);
-            #endif
-            fGotMessage = true;
-            break;
-          }
-          nCount += 1;
-        }
-      }
-
-      iIdle = 0;
-      if (!fGotMessage)
-        ::GetMessage(&oMsg, nullptr, 0, 0);
-    }
-
-    if (WM_QUIT == oMsg.message)
-      return static_cast<int>(oMsg.wParam);
-
-    if (g_hwndActiveDialog && ::IsDialogMessage(g_hwndActiveDialog, &oMsg))
-      continue;
-
-    ::TranslateMessage(&oMsg);
-    ::DispatchMessage(&oMsg);
-
-    if (!IsKeepIdleMessage(oMsg.message)) {
-      #if DEBUG_BUSY || DEBUG_IDLE
-        DEBUG_PRINTF("Enable idle by messgage=0x%04X\n", oMsg.message);
-      #endif
-      iIdle = 1;
-    }
-  }
+  base::MessageLoop message_loop(base::MessageLoop::TYPE_UI);
+  DoIdle();
+  base::RunLoop run_loop;
+  run_loop.Run();
+  return 0;
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {

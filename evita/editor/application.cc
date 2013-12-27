@@ -3,6 +3,10 @@
 
 #include "evita/editor/application.h"
 
+#pragma warning(push)
+#pragma warning(disable: 4100)
+#include "base/message_loop/message_loop.h"
+#pragma warning(pop)
 #include "base/strings/string16.h"
 #include "evita/ed_Mode.h"
 #include "evita/vi_Buffer.h"
@@ -30,6 +34,7 @@ Application::Application()
     : newline_mode_(NewlineMode_CrLf),
       code_page_(932),
       active_frame_(nullptr),
+      is_quit_(false),
       io_manager_(new IoManager()) {
   Command::Processor::GlobalInit();
   io_manager_->Realize();
@@ -82,8 +87,10 @@ Frame* Application::CreateFrame() {
 
 Frame* Application::DeleteFrame(Frame* frame) {
   frames_.Delete(frame);
-  if (frames_.IsEmpty())
-    ::PostQuitMessage(0);
+  if (frames_.IsEmpty()) {
+    is_quit_ = true;
+    base::MessageLoop::current()->QuitWhenIdle();
+  }
   return frame;
 }
 

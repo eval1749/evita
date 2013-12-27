@@ -25,6 +25,7 @@ class Application : public Command::Processor,
   private: Buffers buffers_;
   private: Frames frames_;
   private: Frame* active_frame_;
+  private: bool is_quit_;
   private: std::unique_ptr<IoManager> io_manager_;
 
   // ctor/dtor
@@ -36,6 +37,7 @@ class Application : public Command::Processor,
   public: Buffers& buffers() { return buffers_; }
   public: const Frames& frames() const { return frames_; }
   public: Frames& frames() { return frames_; }
+  public: bool is_quit() const { return is_quit_; }
   public: static v8_glue::ScriptWrapperInfo* static_wrapper_info();
   public: const base::string16& title() const;
   public: const base::string16& version() const;

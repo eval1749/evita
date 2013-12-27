@@ -48,7 +48,7 @@
         'ctrl_StatusBar.cpp',
         'ctrl_TabBand.cpp',
         'ctrl_TitleBar.cpp',
-        'editor/application.cpp',
+        'editor/application.cc',
         'evita.rc',
         'ExactStringMatch.cpp',
         'gfx_base.cpp',

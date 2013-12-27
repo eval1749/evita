@@ -44,7 +44,6 @@ class Initializer {
         auto context = v8::Context::New(isolate);
         v8::Context::Scope context_scope(context);
         InstallConstructor(global, Application::GetConstructor(isolate));
-        InstallConstructor(global, Frame::GetConstructor(isolate));
         global->Set(gin::StringToV8(isolate, "editor"),
           Application::instance().GetWrapper(isolate));
     }

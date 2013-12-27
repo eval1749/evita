@@ -119,11 +119,6 @@ Frame::operator HWND() const {
   return *native_window();
 }
 
-v8_glue::ScriptWrapperInfo* Frame::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(v8_glue::ScriptWrapperInfo, wrapper_info, ("Frame"));
-  return &wrapper_info;
-}
-
 bool Frame::Activate() {
   return ::SetForegroundWindow(*native_window());
 }
@@ -323,8 +318,7 @@ void Frame::DidCreateNativeWindow() {
 }
 
 void Frame::DidDestroyWidget() {
-  if (!has_script_reference())
-    delete this;
+  delete this;
 }
 
 void Frame::DidRemoveChildWidget(const widgets::Widget& widget) {
@@ -437,12 +431,6 @@ int Frame::getTabFromPane(Pane* const pane) const {
     ++index;
   }
   return -1;
-}
-
-gin::ObjectTemplateBuilder Frame::GetObjectTemplateBuilder(
-    v8::Isolate* isolate) {
-  return GetEmptyObjectTemplateBuilder(isolate)
-      .SetMethod("activate", &Frame::Activate);
 }
 
 Rect Frame::GetPaneRect() const {

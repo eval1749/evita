@@ -16,7 +16,6 @@
 #include "./ctrl_StatusBar.h"
 #include "./ctrl_TabBand.h"
 #include "./ctrl_TitleBar.h"
-#include "evita/v8_glue/script_wrappable.h"
 #include "./li_util.h"
 
 namespace gfx {
@@ -51,8 +50,7 @@ class ContentWindow;
 ///   with window manager.
 /// </summary>
 class Frame final : public widgets::ContainerWidget,
-                    public DoubleLinkedNode_<Frame>,
-                    public v8_glue::ScriptWrappable<Frame> {
+                    public DoubleLinkedNode_<Frame> {
   private: typedef widgets::ContainerWidget ContainerWidget;
   private: typedef widgets::Widget Widget;
   DECLARE_CASTABLE_CLASS(Frame, ContainerWidget);
@@ -82,7 +80,6 @@ class Frame final : public widgets::ContainerWidget,
   public: gfx::Graphics& gfx() const { return *gfx_; }
   public: const Panes& panes() const { return m_oPanes; }
   public: Panes& panes() { return m_oPanes; }
-  public: static v8_glue::ScriptWrapperInfo* static_wrapper_info();
 
   // [A]
   public: bool  Activate();
@@ -116,9 +113,6 @@ class Frame final : public widgets::ContainerWidget,
 
   public: Pane* GetFirstPane() const { return m_oPanes.GetFirst(); }
   public: Pane* GetLastPane() const { return m_oPanes.GetLast(); }
-
-  public: virtual gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
-      v8::Isolate* isolate) override;
   private: Pane* getPaneFromTab(int) const;
   public: gfx::Rect GetPaneRect() const;
   private: int getTabFromPane(Pane*) const;

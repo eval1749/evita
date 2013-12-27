@@ -177,6 +177,14 @@ void TextEditWindow::Blink(Posn posn, int interval_ms) {
   Redraw();
 }
 
+TextEditWindow* TextEditWindow::Clone() const {
+  ASSERT_DOM_IS_LOCKED();
+  auto const window = new TextEditWindow(GetBuffer(), m_pPage->GetStart());
+  window->selection_->SetRange(selection_->GetStart(), selection_->GetEnd());
+  window->selection_->SetStartIsActive(selection_->IsStartActive());
+  return window;
+}
+
 Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
   if (xGoal < 0)
     return lGoal;

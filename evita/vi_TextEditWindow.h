@@ -108,6 +108,7 @@ class TextEditWindow
   public: void Blink(Posn, int);
 
   // [C]
+  public: TextEditWindow* Clone() const;
   public: Count ComputeMotion(Unit, Count, const gfx::PointF&, Posn*);
   protected: Posn computeGoalX(float, Posn);
 

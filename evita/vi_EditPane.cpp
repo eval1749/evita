@@ -15,7 +15,8 @@
 #include "./vi_EditPane.h"
 
 #include "base/logging.h"
-#include "content/content_window.h"
+#include "evita/content/content_window.h"
+#include "evita/dom/editor.h"
 #include "./ed_Mode.h"
 #include "./gfx_base.h"
 #include "evita/editor/application.h"
@@ -234,6 +235,12 @@ void DrawSplitter(const gfx::Graphics& gfx, RECT* prc,
   gfx.FillRectangle(fillBrush, rc);
   //::DrawEdge(gfx, &rc, EDGE_RAISED, grfFlag);
 }
+
+TextEditWindow* CloneTextEditWindow(const TextEditWindow& window) {
+  DOM_AUTO_LOCK_SCOPE();
+  return window.Clone();
+}
+
 } // namesapce
 
 //
@@ -483,19 +490,8 @@ EditPane::LeafBox& EditPane::HorizontalLayoutBox::Split(
   ASSERT(prcBelow->right - prcBelow->left > cxBox);
   DCHECK_EQ(pBelow->GetWindow()->container_widget(), edit_pane_);
 
-  auto const pWindow = new TextEditWindow(
-      below->GetBuffer(),
-      below->GetStart());
+  auto const pWindow = CloneTextEditWindow(*below);
   edit_pane_->AppendChild(*pWindow);
-
-  auto const pSelection = below->GetSelection();
-
-  pWindow->GetSelection()->SetRange(
-      pSelection->GetStart(),
-      pSelection->GetEnd());
-
-  pWindow->GetSelection()->SetStartIsActive(
-      pSelection->IsStartActive());
 
   auto const pAbove = new LeafBox(edit_pane_, this, pWindow);
   auto const prcAbove = &pAbove->rect();
@@ -1082,19 +1078,8 @@ EditPane::LeafBox& EditPane::VerticalLayoutBox::Split(
   ASSERT(prcBelow->bottom - prcBelow->top > cyBox);
   DCHECK_EQ(pBelow->GetWindow()->container_widget(), edit_pane_);
 
-  auto const pWindow = new TextEditWindow(
-      below->GetBuffer(),
-      below->GetStart());
+  auto const pWindow = CloneTextEditWindow(*below);
   edit_pane_->AppendChild(*pWindow);
-
-  auto const pSelection = below->GetSelection();
-
-  pWindow->GetSelection()->SetRange(
-      pSelection->GetStart(),
-      pSelection->GetEnd());
-
-  pWindow->GetSelection()->SetStartIsActive(
-      pSelection->IsStartActive());
 
   auto const pAbove = new LeafBox(edit_pane_, this, pWindow);
   auto const prcAbove = &pAbove->rect();

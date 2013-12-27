@@ -6,12 +6,9 @@
 #include <memory>
 
 #include "base/strings/string16.h"
+#include "base/strings/string_piece.h"
 #include "common/memory/singleton.h"
-#include "evita/v8_glue/isolate_holder.h"
-#include "evita/vi_Buffer.h"
-BEGIN_V8_INCLUDE
-#include "gin/public/context_holder.h"
-END_V8_INCLUDE
+#include "evita/dom/script_controller.h"
 
 class InputHistory;
 
@@ -31,22 +28,21 @@ namespace v8_glue {
 class V8ConsoleBuffer : public common::Singleton<V8ConsoleBuffer>,
                         public Buffer {
   private: std::unique_ptr<InputHistory> input_history_;
-  private: IsolateHolder isolate_holder_;
-  private: gin::ContextHolder context_holder_;
   private: Edit::Range* prompt_end_;
+  private: Edit::Range* script_end_;
 
   public: V8ConsoleBuffer();
   public: virtual ~V8ConsoleBuffer();
 
-  private: void Emit(const v8::Handle<v8::Value>& value);
-  private: void Emit(const base::char16* string);
+  private: void Emit(const base::StringPiece&);
+  private: void Emit(const base::string16& string);
   private: void Emit(int value);
   private: void EmitPrompt();
   private: static void EnterCommand(const Command::Context* context);
   private: void ExecuteLastLine();
+  private: void HandleEvaluateResult(dom::EvaluateResult result);
   private: virtual Command::KeyBindEntry* MapKey(uint) const override;
   private: void PopulateKeyBindings();
-  private: void ReportException(v8::TryCatch*);
 
   DISALLOW_COPY_AND_ASSIGN(V8ConsoleBuffer);
 };

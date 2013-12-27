@@ -4,6 +4,7 @@
 #include "evita/v8_glue/script_wrappable.h"
 
 #include "base/logging.h"
+#include "evita/gc/collector.h"
 #include "evita/v8_glue/per_isolate_data.h"
 BEGIN_V8_INCLUDE
 #include "gin/converter.h"
@@ -90,6 +91,7 @@ v8::Handle<v8::Object> AbstractScriptWrappable::GetWrapper(
   wrapper->SetAlignedPointerInInternalField(gin::kEncodedValueIndex, this);
   wrapper_.Reset(isolate, wrapper);
   wrapper_.SetWeak(this, WeakCallback);
+  gc::Collector::instance().AddToRootSet(this);
   return wrapper;
 }
 
@@ -97,6 +99,7 @@ void AbstractScriptWrappable::WeakCallback(
     const v8::WeakCallbackData<v8::Object, AbstractScriptWrappable>& data) {
   auto const wrappable = data.GetParameter();
   wrappable->wrapper_.Reset();
+  gc::Collector::instance().RemoveFromRootSet(wrappable);
 }
 
 }  // namespace v8_glue

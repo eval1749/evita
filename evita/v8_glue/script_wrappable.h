@@ -4,6 +4,7 @@
 #if !defined(INCLUDE_evita_v8_glue_script_wrappable_h)
 #define INCLUDE_evita_v8_glue_script_wrappable_h
 
+#include "evita/gc/collectable.h"
 #include "evita/v8_glue/script_wrapper_info.h"
 BEGIN_V8_INCLUDE
 #include "gin/object_template_builder.h"
@@ -11,7 +12,8 @@ END_V8_INCLUDE
 
 namespace v8_glue {
 
-class AbstractScriptWrappable {
+class AbstractScriptWrappable
+    : public gc::Collectable<AbstractScriptWrappable> {
   private: v8::Persistent<v8::Object> wrapper_; // Weak
 
   protected: AbstractScriptWrappable() = default;

@@ -50,65 +50,6 @@
 
 const char16* k_pwszTitle = L"Evita Common Lisp Listner";
 
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-//
-// EnumArg
-//  Enumerates command line arguments.
-//
-// FIXME 2007-08-07 yosi@msn.com We should share EnumArg with console
-// and listener.
-//
-class EnumArg {
-  private: enum { MAX_WORD_LEN = MAX_PATH };
-  private: const char16* runner_;
-  private: char16 m_wsz[MAX_WORD_LEN];
-
-    public: EnumArg(const char16* pwsz)
-      : runner_(pwsz) {
-    // skip command name
-    next();
-    if (!AtEnd())
-      next();
-  }
-
-  public: bool AtEnd() const {
-    return !*runner_ && !*m_wsz;
-  }
-
-  public: LPCWSTR Get() const { ASSERT(!AtEnd()); return m_wsz; }
-  public: void Next() { ASSERT(!AtEnd()); next(); }
-  static bool isspace(char16 wch) { return ' ' == wch || '\t' == wch; }
-
-    void next() {
-      while (isspace(*runner_)) {
-        ++runner_;
-      }
-      auto pwsz = m_wsz;
-      if (*runner_ != 0x22) {
-          while (*runner_) {
-            if (isspace(*runner_))
-              break;
-            *pwsz++ = *runner_;
-            ++runner_;
-          }
-      } else {
-          ++runner_;
-          while (*runner_) {
-            if (*runner_ == 0x22) {
-              ++runner_;
-              break;
-            }
-            *pwsz++ = *++runner_;
-          }
-      }
-      *pwsz = 0;
-  }
-};
-
-} // namespace
-
 extern HINSTANCE   g_hInstance;
 extern HINSTANCE   g_hResource;
 extern HWND        g_hwndActiveDialog;
@@ -119,7 +60,7 @@ extern StyleValues g_DefaultStyle;
 static void NoReturn fatalExit(const char16*);
 
 
-static int callRunningApp(EnumArg* pEnumArg) {
+static int CallRunningApp() {
   Handle shShared = ::OpenFileMapping(
       FILE_MAP_READ | FILE_MAP_WRITE,
       FALSE,
@@ -136,13 +77,11 @@ static int callRunningApp(EnumArg* pEnumArg) {
   if (!p)
     fatalExit(L"MapViewOfFile");
 
-  while (!pEnumArg->AtEnd()) {
-    auto const pwszArg = pEnumArg->Get();
+  for (auto param: CommandLine::ForCurrentProcess()->GetArgs()) {
     char16 wsz[MAX_PATH];
     char16* pwszFile;
-    auto const cwch = ::GetFullPathName(pwszArg, lengthof(wsz), wsz,
+    auto const cwch = ::GetFullPathName(param.c_str(), lengthof(wsz), wsz,
                                         &pwszFile);
-    pEnumArg->Next();
     if (!cwch || cwch > lengthof(wsz))
      continue;
 
@@ -177,7 +116,7 @@ static void DoIdle() {
     base::MessageLoop::current()->PostTask(FROM_HERE, base::Bind(DoIdle));
 }
 
-static int MainLoop(EnumArg* pEnumArg) {
+static int MainLoop() {
   // Initialize Default Style
   // This initialize must be before creating edit buffers.
   {
@@ -217,11 +156,9 @@ static int MainLoop(EnumArg* pEnumArg) {
   }
 
   auto& frame = *Application::Get()->CreateFrame();
-  while (!pEnumArg->AtEnd()) {
-    auto const  pwszArg = pEnumArg->Get();
-    auto const buffer = Application::Get()->Load(pwszArg);
+  for (auto const filename: CommandLine::ForCurrentProcess()->GetArgs()) {
+    auto const buffer = Application::Get()->Load(filename.c_str());
     frame.AddWindow(new TextEditWindow(buffer));
-    pEnumArg->Next();
   }
 
   // When there is no filename argument, we start lisp.
@@ -253,32 +190,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     settings.logging_dest = logging::LOG_TO_SYSTEM_DEBUG_LOG;
     logging::InitLogging(settings);
   }
+
   common::win::NativeWindow::Init(hInstance);
   g_hInstance = hInstance;
   g_hResource = hInstance;
 
-    EnumArg oEnumArg(::GetCommandLine());
-  while (!oEnumArg.AtEnd()) {
-    auto const pwszArg = oEnumArg.Get();
-    if (*pwszArg != '-')
-      break;
+  auto const command_line = CommandLine::ForCurrentProcess();
+  g_fMultiple = command_line->HasSwitch("multiple");
 
-      if (!::lstrcmpW(pwszArg, L"-multiple")) {
-      g_fMultiple = true;
-    } else if (!::lstrcmpW(pwszArg, L"-dll")) {
-      oEnumArg.Next();
-      if (oEnumArg.AtEnd())
-        break;
-    } else if (!::lstrcmpW(pwszArg, L"-image")) {
-      oEnumArg.Next();
-      if (oEnumArg.AtEnd())
-        break;
-    }
-
-      oEnumArg.Next();
-  }
-
-    if (!g_fMultiple) {
+  if (!g_fMultiple) {
     g_hEvent = ::CreateEventW(nullptr,   // lpEventAttrs
                               TRUE,   // fManualReset
                               FALSE,  // fInitialState
@@ -291,7 +211,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
       auto const nWait = ::WaitForSingleObject(g_hEvent, 30 * 100);
       switch (nWait) {
         case WAIT_OBJECT_0:
-          return callRunningApp(&oEnumArg);
+          return CallRunningApp();
 
           default:
           ::MessageBox(nullptr, L"WaitForSignleObject", k_pwszTitle,
@@ -301,7 +221,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     }
   }
 
-    // Common Control
+  // Common Control
   {
       INITCOMMONCONTROLSEX oInit;
       oInit.dwSize = sizeof(oInit);
@@ -320,5 +240,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
     g_TabBand__TabDragMsg = ::RegisterWindowMessage(TabBand__TabDragMsgStr);
 
-  return MainLoop(&oEnumArg);
+  return MainLoop();
 }

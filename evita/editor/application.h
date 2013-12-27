@@ -13,6 +13,10 @@
 class Buffer;
 class IoManager;
 
+namespace base {
+class MessageLoop;
+}
+
 class Application : public Command::Processor,
                     public common::Singleton<Application> {
   protected: typedef DoubleLinkedList_<Frame> Frames;
@@ -25,6 +29,7 @@ class Application : public Command::Processor,
   private: Frame* active_frame_;
   private: bool is_quit_;
   private: std::unique_ptr<IoManager> io_manager_;
+  private: std::unique_ptr<base::MessageLoop> message_loop_;
 
   // ctor/dtor
   friend class common::Singleton<Application>;
@@ -35,7 +40,6 @@ class Application : public Command::Processor,
   public: Buffers& buffers() { return buffers_; }
   public: const Frames& frames() const { return frames_; }
   public: Frames& frames() { return frames_; }
-  public: bool is_quit() const { return is_quit_; }
   public: const base::string16& title() const;
   public: const base::string16& version() const;
 
@@ -52,6 +56,7 @@ class Application : public Command::Processor,
 
   // [D]
   public: Frame* DeleteFrame(Frame* frame);
+  private: void DoIdle();
 
   // [E]
   public: void Exit(bool);
@@ -91,6 +96,7 @@ class Application : public Command::Processor,
 
   // [R]
   public: Buffer* RenameBuffer(Buffer* buffer, const char16* new_name);
+  public: void Run();
 
   // [S]
   public: bool SaveBuffer(Frame* frame, Buffer* buffer, bool save_as = false);

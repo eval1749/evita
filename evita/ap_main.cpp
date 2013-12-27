@@ -18,13 +18,7 @@
 #include "base/at_exit.h"
 #include "base/bind.h"
 #include "base/command_line.h"
-#include "base/location.h"
 #include "base/logging.h"
-#pragma warning(push)
-#pragma warning(disable: 4100)
-#include "base/message_loop/message_loop.h"
-#pragma warning(pop)
-#include "base/run_loop.h"
 #include "common/win/native_window.h"
 
 #if USE_LISTENER
@@ -102,20 +96,6 @@ static void NoReturn fatalExit(const char16* pwsz) {
   ::FatalAppExit(0, wsz);
 }
 
-static void DoIdle() {
-  static int idle_count;
-  #if DEBUG_IDLE
-    DVLOG(4) << "idle_count=" << idle_count << " running=" <<
-        base::MessageLoop::current()->is_running();
-  #endif
-  if (Application::Get()->OnIdle(idle_count))
-    ++idle_count;
-  else
-    idle_count= 0;
-  if (!Application::instance().is_quit())
-    base::MessageLoop::current()->PostTask(FROM_HERE, base::Bind(DoIdle));
-}
-
 static int MainLoop() {
   // Initialize Default Style
   // This initialize must be before creating edit buffers.
@@ -174,11 +154,7 @@ static int MainLoop() {
     frame.AddWindow(new TextEditWindow(buffer));
   }
   frame.Realize();
-
-  base::MessageLoop message_loop(base::MessageLoop::TYPE_UI);
-  DoIdle();
-  base::RunLoop run_loop;
-  run_loop.Run();
+  Application::instance().Run();
   return 0;
 }
 

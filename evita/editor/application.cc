@@ -3,10 +3,12 @@
 
 #include "evita/editor/application.h"
 
+#include "base/bind.h"
 #pragma warning(push)
 #pragma warning(disable: 4100)
 #include "base/message_loop/message_loop.h"
 #pragma warning(pop)
+#include "base/run_loop.h"
 #include "base/strings/string16.h"
 #include "evita/ed_Mode.h"
 #include "evita/vi_Buffer.h"
@@ -34,7 +36,8 @@ Application::Application()
       code_page_(932),
       active_frame_(nullptr),
       is_quit_(false),
-      io_manager_(new IoManager()) {
+      io_manager_(new IoManager()),
+      message_loop_(new base::MessageLoop(base::MessageLoop::TYPE_UI)) {
   Command::Processor::GlobalInit();
   io_manager_->Realize();
 }
@@ -83,9 +86,24 @@ Frame* Application::DeleteFrame(Frame* frame) {
   frames_.Delete(frame);
   if (frames_.IsEmpty()) {
     is_quit_ = true;
-    base::MessageLoop::current()->QuitWhenIdle();
+    message_loop_->QuitWhenIdle();
   }
   return frame;
+}
+
+void Application::DoIdle() {
+  static int idle_count;
+  #if DEBUG_IDLE
+    DVLOG(4) << "idle_count=" << idle_count << " running=" <<
+        message_loop_->is_running();
+  #endif
+  if (OnIdle(idle_count))
+    ++idle_count;
+  else
+    idle_count= 0;
+  if (!is_quit_)
+    message_loop_->PostTask(FROM_HERE, base::Bind(&Application::DoIdle,
+                                                  base::Unretained(this)));
 }
 
 void Application::Exit(bool is_forced) {
@@ -222,6 +240,12 @@ Buffer* Application::RenameBuffer(Buffer* buffer, const char16* pwszName) {
 
   buffer->SetName(wsz);
   return buffer;
+}
+
+void Application::Run() {
+  DoIdle();
+  base::RunLoop run_loop;
+  run_loop.Run();
 }
 
 bool Application::SaveBuffer(Frame* frame, Buffer* buffer, bool is_save_as) {

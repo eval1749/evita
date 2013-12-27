@@ -9,7 +9,7 @@
 #include "base/message_loop/message_loop.h"
 #pragma warning(pop)
 #include "base/threading/thread.h"
-#include "evita/editor/application.h"
+#include "evita/dom/editor.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/per_isolate_data.h"
 BEGIN_V8_INCLUDE
@@ -33,11 +33,12 @@ class Initializer {
 
     auto global = v8::ObjectTemplate::New(isolate);
     {
+        auto& editor = *new dom::Editor();
         auto context = v8::Context::New(isolate);
         v8::Context::Scope context_scope(context);
-        InstallConstructor(global, Application::GetConstructor(isolate));
+        InstallConstructor(global, Editor::GetConstructor(isolate));
         global->Set(gin::StringToV8(isolate, "editor"),
-          Application::instance().GetWrapper(isolate));
+          editor.GetWrapper(isolate));
     }
 
     global_template.Reset(isolate, global);

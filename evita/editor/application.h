@@ -9,14 +9,12 @@
 #include "common/memory/singleton.h"
 #include "evita/cm_CmdProc.h"
 #include "evita/vi_Frame.h"
-#include "evita/v8_glue/script_wrappable.h"
 
 class Buffer;
 class IoManager;
 
 class Application : public Command::Processor,
-                    public common::Singleton<Application>,
-                    public v8_glue::ScriptWrappable<Application> {
+                    public common::Singleton<Application> {
   protected: typedef DoubleLinkedList_<Frame> Frames;
   protected: typedef DoubleLinkedList_<Buffer> Buffers;
 
@@ -38,7 +36,6 @@ class Application : public Command::Processor,
   public: const Frames& frames() const { return frames_; }
   public: Frames& frames() { return frames_; }
   public: bool is_quit() const { return is_quit_; }
-  public: static v8_glue::ScriptWrapperInfo* static_wrapper_info();
   public: const base::string16& title() const;
   public: const base::string16& version() const;
 
@@ -73,8 +70,6 @@ class Application : public Command::Processor,
   public: IoManager* GetIoManager() const { return io_manager_.get(); }
   public: Frame* GetLastFrame() const { return frames_.GetLast(); }
   public: NewlineMode GetNewline() const { return newline_mode_; }
-  public: virtual gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
-      v8::Isolate* isolate) override;
   public: const char16* GetTitle() const;
 
   // [H]

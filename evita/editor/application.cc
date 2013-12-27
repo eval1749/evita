@@ -13,7 +13,6 @@
 #include "evita/vi_EditPane.h"
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_IoManager.h"
-#include "evita/v8_glue/converter.h"
 
 #if _DEBUG
   #define APP_TITLE L"evita/debug"
@@ -46,11 +45,6 @@ Application::~Application() {
 const base::string16& Application::title() const {
   DEFINE_STATIC_LOCAL(base::string16, title, (APP_TITLE L" " APP_VERSION));
   return title;
-}
-
-v8_glue::ScriptWrapperInfo* Application::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(v8_glue::ScriptWrapperInfo, wrapper_info, ("Editor"));
-  return &wrapper_info;
 }
 
 const base::string16& Application::version() const {
@@ -146,13 +140,6 @@ Pane* Application::FindPane(HWND hwndMouse, POINT pt) const {
 
 HIMAGELIST Application::GetIconList() const {
   return Edit::ModeFactory::icon_image_list();
-}
-
-gin::ObjectTemplateBuilder Application::GetObjectTemplateBuilder(
-    v8::Isolate* isolate) {
-  return GetEmptyObjectTemplateBuilder(isolate)
-      .SetProperty("title", &Application::title)
-      .SetProperty("version", &Application::version);
 }
 
 void Application::InternalAddBuffer(Buffer* buffer) {

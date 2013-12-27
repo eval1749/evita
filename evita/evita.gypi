@@ -92,6 +92,7 @@
         'precomp.cpp',
         'core/buffer.cc',
         'core/style.cc',
+        'dom/editor.cc',
         'dom/script_controller.cc',
         'ed_BufferCore.cpp',
         'ed_BufferFind.cpp',

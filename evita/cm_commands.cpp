@@ -829,15 +829,14 @@ static void activateLastWindow(Pane* pPane)
 // NextWindow - Ctrl+Tab
 //  Switch to next pane
 //
-DEFCOMMAND(NextWindow)
-{
-    auto* pWindow = pCtx->GetWindow();
+static void DoNextWindow(CommandWindow* start_window) {
+    auto pWindow = start_window;
 
     Pane* pPane;
 
     if (NULL == pWindow)
     {
-        pPane = pCtx->GetWindow()->DynamicCast<Pane>();
+        pPane = start_window->DynamicCast<Pane>();
     }
     else
     {
@@ -897,8 +896,12 @@ DEFCOMMAND(NextWindow)
     pFrame->ShowMessage(
         MessageLevel_Warning,
         IDS_NO_OTHER_WINDOWS );
-} // NextWindow
+}
 
+DEFCOMMAND(NextWindow) {
+  Application::instance().PostTask(FROM_HERE,
+      base::Bind(DoNextWindow, base::Unretained(pCtx->GetWindow())));
+}
 
 // [O]
 
@@ -1000,16 +1003,14 @@ DEFCOMMAND(PasteFromClipboard)
 // PreviousWindow - Ctrl+Shift+Tab
 //  Switch to previous window
 //
-DEFCOMMAND(PreviousWindow)
-{
-    TextEditWindow* pWindow = pCtx->GetWindow()->
-        DynamicCast<TextEditWindow>();
+static void DoPreviousWindow(CommandWindow* start_window) {
+    auto pWindow = start_window;
 
     Pane* pPane;
 
     if (NULL == pWindow)
     {
-        pPane = pCtx->GetWindow()->DynamicCast<Pane>();
+        pPane = start_window->DynamicCast<Pane>();
     }
     else
     {
@@ -1069,7 +1070,12 @@ DEFCOMMAND(PreviousWindow)
     pFrame->ShowMessage(
         MessageLevel_Warning,
         IDS_NO_OTHER_WINDOWS );
-} // PreviousWindow
+}
+
+DEFCOMMAND(PreviousWindow) {
+  Application::instance().PostTask(FROM_HERE,
+      base::Bind(DoPreviousWindow, base::Unretained(pCtx->GetWindow())));
+}
 
 // [Q]
 DEFCOMMAND(QuotedInsert)

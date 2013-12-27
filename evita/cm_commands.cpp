@@ -12,8 +12,9 @@
 //
 #include "./cm_CmdProc.h"
 
+#include "base/bind.h"
 #include "./ed_Mode.h"
-
+#include "evita/dom/editor.h"
 #include "evita/v8_glue/v8_console_buffer.h"
 #include "evita/editor/application.h"
 #include "./vi_Buffer.h"
@@ -909,10 +910,8 @@ DEFCOMMAND(NextWindow)
 // Note:
 // Set initial directory of file dialogbox from current buffer
 //
-static void openFile(const Context* pCtx, bool fNewFrame)
+static void openFile(Selection* pSelection, bool fNewFrame)
 {
-    Selection* pSelection = pCtx->GetSelection();
-
     FileDialogBox::Param oParam;
 
     if (NULL != pSelection)
@@ -929,7 +928,7 @@ static void openFile(const Context* pCtx, bool fNewFrame)
     if (! oDialog.GetOpenFileName(&oParam))
     {
         return;
-    } // if
+    }
 
     Buffer* pBuffer = Application::Get()->Load(oParam.m_wsz);
 
@@ -967,10 +966,10 @@ static void openFile(const Context* pCtx, bool fNewFrame)
 // OpenFile - Ctrl+O
 //  Load file in tab.
 //
-DEFCOMMAND(OpenFile)
-{
-    openFile(pCtx, false);
-} // OpenFile
+DEFCOMMAND(OpenFile) {
+  Application::instance().PostTask(FROM_HERE,
+      base::Bind(openFile, base::Unretained(pCtx->GetSelection()), false));
+}
 
 
 //////////////////////////////////////////////////////////////////////
@@ -978,10 +977,10 @@ DEFCOMMAND(OpenFile)
 // OpenFileInNewFrame - Ctrl+Shift+O
 //  Load file into new frame.
 //
-DEFCOMMAND(OpenFileInNewFrame)
-{
-    openFile(pCtx, true);
-} // OpenFile
+DEFCOMMAND(OpenFileInNewFrame) {
+  Application::instance().PostTask(FROM_HERE,
+      base::Bind(openFile, base::Unretained(pCtx->GetSelection()), true));
+}
 
 DEFCOMMAND(Outdent)
 {
@@ -1123,10 +1122,14 @@ DEFCOMMAND(Reload)
 
     unless (pBuffer->NeedSave()) return;
 
-    int iAnswer = Application::Get()->Ask(
-        MB_YESNO | MB_ICONQUESTION,
-        IDS_ASK_RELOAD,
-        pBuffer->GetName() );
+    int iAnswer;
+    {
+      DOM_AUTO_UNLOCK_SCOPE();
+      iAnswer = Application::Get()->Ask(
+          MB_YESNO | MB_ICONQUESTION,
+          IDS_ASK_RELOAD,
+          pBuffer->GetName() );
+    }
 
     if (IDYES == iAnswer)
     {
@@ -1135,15 +1138,19 @@ DEFCOMMAND(Reload)
 } // Reload
 
 // [S]
-DEFCOMMAND(SaveFile)
-{
-    if (NULL == pCtx->GetSelection()) return;
+void SaveBuffer(Frame* frame, Buffer* buffer, bool is_save_as) {
+  Application::instance().SaveBuffer(frame, buffer, is_save_as);
+}
 
-    Application::Get()->SaveBuffer(
-        pCtx->GetFrame(),
-        pCtx->GetSelection()->GetBuffer(),
-        pCtx->HasArg() );
-} // SaveFile
+DEFCOMMAND(SaveFile) {
+  if (!pCtx->GetSelection())
+    return;
+  Application::instance().PostTask(FROM_HERE,
+      base::Bind(SaveBuffer,
+                 base::Unretained(pCtx->GetFrame()),
+                 base::Unretained(pCtx->GetSelection()->GetBuffer()),
+                 pCtx->HasArg()));
+}
 
 DEFCOMMAND(SelectAll)
 {
@@ -1170,72 +1177,60 @@ DEFCOMMAND(ShowV8Console) {
 
   std::unique_ptr<TextEditWindow> window(new TextEditWindow(&v8_buffer));
   window->GetSelection()->SetRange(v8_buffer.GetEnd(), v8_buffer.GetEnd());
-  frame.AddWindow(window.release());
+  Application::instance().PostTask(FROM_HERE,
+      base::Bind(&Frame::AddWindow,
+                 base::Unretained(&frame),
+                 base::Unretained(window.release())));
 }
 
-DEFCOMMAND(SplitWindowHorizontally)
-{
-    if (NULL == pCtx->GetSelection()) return;
+namespace {
+enum SplitDirection {
+  kSplitHorizontally,
+  kSplitVertically,
+};
 
-    EditPane* pPane = Application::Get()->GetActiveFrame()->
-        GetActivePane()->DynamicCast<EditPane>();
+void SplitWindow(Selection* selection, EditPane* pane,
+                 SplitDirection direction) {
+  auto const window = direction == kSplitHorizontally ?
+      pane->SplitHorizontally() : pane->SplitVertically();
+  if (!window || !window->is<TextEditWindow>()) {
+    Application::Get()->ShowMessage(MessageLevel_Warning,
+                                    IDS_CAN_NOT_SPLIT);
+    return;
+  }
 
-    if (NULL == pPane)
-    {
-        return;
-    }
+  auto& text_edit_window = *window->as<TextEditWindow>();
+  text_edit_window.GetSelection()->SetRange(selection->GetStart(),
+                                            selection->GetEnd());
+  text_edit_window.MakeSelectionVisible();
+  selection->GetWindow()->MakeSelectionVisible();
+}
+}  //namespace
 
-    auto const pWindow = pPane->SplitHorizontally();
-    if (NULL == pWindow || !pWindow->is<TextEditWindow>())
-    {
-        Application::Get()->ShowMessage(
-            MessageLevel_Warning,
-            IDS_CAN_NOT_SPLIT );
-        return;
-    }
-
-    Selection* pSelection = pCtx->GetSelection();
-    auto& text_edit_window = *pWindow->as<TextEditWindow>();
-
-    text_edit_window.GetSelection()->SetRange(
-        pSelection->GetStart(),
-        pSelection->GetEnd() );
-
-    text_edit_window.MakeSelectionVisible();
-    pSelection->GetWindow()->MakeSelectionVisible();
-} // SplitWindowHorizontally
+DEFCOMMAND(SplitWindowHorizontally) {
+  if (!pCtx->GetSelection())
+    return;
+  auto const pPane = Application::Get()->GetActiveFrame()->
+      GetActivePane()->DynamicCast<EditPane>();
+  if (!pPane)
+    return;
+  Application::instance().PostTask(FROM_HERE,
+      base::Bind(SplitWindow, base::Unretained(pCtx->GetSelection()),
+                 base::Unretained(pPane), kSplitHorizontally));
+}
 
 DEFCOMMAND(SplitWindowVertically)
 {
-    if (NULL == pCtx->GetSelection()) return;
-
-    EditPane* pPane = Application::Get()->GetActiveFrame()->
-        GetActivePane()->DynamicCast<EditPane>();
-
-    if (NULL == pPane)
-    {
-        return;
-    }
-
-    auto const pWindow = pPane->SplitVertically();
-    if (NULL == pWindow || !pWindow->is<TextEditWindow>())
-    {
-        Application::Get()->ShowMessage(
-            MessageLevel_Warning,
-            IDS_CAN_NOT_SPLIT );
-        return;
-    }
-
-    Selection* pSelection = pCtx->GetSelection();
-    auto& text_edit_window = *pWindow->as<TextEditWindow>();
-
-    text_edit_window.GetSelection()->SetRange(
-        pSelection->GetStart(),
-        pSelection->GetEnd() );
-
-    text_edit_window.MakeSelectionVisible();
-    pSelection->GetWindow()->MakeSelectionVisible();
-} // SplitWindowVertically
+  if (!pCtx->GetSelection())
+    return;
+  auto const pPane = Application::Get()->GetActiveFrame()->
+      GetActivePane()->DynamicCast<EditPane>();
+  if (!pPane)
+    return;
+  Application::instance().PostTask(FROM_HERE,
+      base::Bind(SplitWindow, base::Unretained(pCtx->GetSelection()),
+                 base::Unretained(pPane), kSplitVertically));
+}
 
 DEFCOMMAND(StartArgument)
 {

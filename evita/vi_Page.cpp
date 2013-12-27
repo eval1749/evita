@@ -1029,7 +1029,7 @@ Page::Page()
     : m_pBuffer(nullptr),
       m_lStart(0),
       m_lEnd(0),
-      m_nModfTick(0),
+      m_nModfTick(-1),
       m_lSelStart(0),
       m_lSelEnd(0),
       m_crSelFg(0),
@@ -1515,6 +1515,7 @@ bool Page::Render(const gfx::Graphics& gfx) {
 }
 
 void Page::Reset() {
+  m_nModfTick = -1;
   m_oScreenBuf.Reset(gfx::RectF());
 }
 

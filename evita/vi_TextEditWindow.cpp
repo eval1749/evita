@@ -25,6 +25,7 @@
 #include "./ed_Mode.h"
 #include "./ed_Style.h"
 #include "./gfx_base.h"
+#include "evita/dom/editor.h"
 #include "evita/editor/application.h"
 #include "./vi_Buffer.h"
 #include "./vi_Caret.h"
@@ -72,6 +73,7 @@ class TextEditWindow::Autoscroller {
       DEBUG_PRINTF("dir=%d am=%d duration=%dms\n",
         direction_, scroll_amount, duration);
     #endif
+    base::AutoLock auto_lock(*dom::Editor::instance().lock());
     if (Scroll(scroll_amount))
       editor_->Redraw();
     else
@@ -203,6 +205,7 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
 Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
                                     const gfx::PointF& pt,
                                     Posn* inout_lPosn)  {
+  ASSERT_DOM_IS_LOCKED();
   switch (eUnit) {
     case Unit_Line:
       if (n > 0) {
@@ -329,6 +332,7 @@ void TextEditWindow::DidShow() {
 }
 
 Posn TextEditWindow::EndOfLine(Posn lPosn) {
+  ASSERT_DOM_IS_LOCKED();
   if (!m_pPage->IsDirty(rect(), *selection_)) {
     auto const pLine = m_pPage->FindLine(lPosn);
     if (pLine)
@@ -340,6 +344,7 @@ Posn TextEditWindow::EndOfLine(Posn lPosn) {
 }
 
 Posn TextEditWindow::endOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
+  ASSERT_DOM_IS_LOCKED();
   auto const lBufEnd = selection_->GetBuffer()->GetEnd();
   if (lPosn >= lBufEnd)
     return lBufEnd;
@@ -364,6 +369,7 @@ Buffer* TextEditWindow::GetBuffer() const {
 }
 
 Count TextEditWindow::GetColumn(Posn lPosn) {
+  ASSERT_DOM_IS_LOCKED();
   auto const lStart = StartOfLine(lPosn);
   return lPosn - lStart;
 }
@@ -372,9 +378,9 @@ HCURSOR TextEditWindow::GetCursorAt(const Point&) const {
   return ::LoadCursor(nullptr, IDC_IBEAM);
 }
 
-
 // For Selection.MoveDown Screen
 Posn TextEditWindow::GetEnd() {
+  ASSERT_DOM_IS_LOCKED();
   updateScreen();
   return m_pPage->GetEnd();
 }
@@ -387,13 +393,16 @@ HWND TextEditWindow::GetScrollBarHwnd(int nBar) const {
 
 //For Selection.MoveUp Screen
 Posn TextEditWindow::GetStart() {
+  ASSERT_DOM_IS_LOCKED();
   updateScreen();
- return m_pPage->GetStart();
+  return m_pPage->GetStart();
 }
 
 int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
+  ASSERT_DOM_IS_LOCKED();
   updateScreen();
 
+  auto k = 0;
   if (iDy < 0) {
     // Scroll Down -- place top line out of window.
     iDy = -iDy;
@@ -414,10 +423,6 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
           break;
       } while (m_pPage->GetEnd() != lStart);
     }
-
-     if (fRender && k > 0)
-       Render();
-      return k;
   } else if (iDy > 0) {
     // Scroll Up -- format page from page end.
     const Posn lBufEnd = selection_->GetBuffer()->GetEnd();
@@ -431,12 +436,11 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
       #endif
       format(*m_gfx, lStart);
     }
-
-    if (fRender && k > 0)
-      Render();
-    return k;
   }
-  return 0;
+
+  if (fRender && k > 0)
+    Render();
+  return k;
 }
 
 base::string16 TextEditWindow::GetTitle(size_t max_length) const {
@@ -480,6 +484,7 @@ Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
 // of caret, If specified buffer position isn't in window, this function
 // returns 0.
 gfx::RectF TextEditWindow::MapPosnToPoint(Posn lPosn) {
+  ASSERT_DOM_IS_LOCKED();
   updateScreen();
   for (;;) {
     if (auto rect = m_pPage->MapPosnToPoint(*m_gfx, lPosn))
@@ -503,6 +508,7 @@ bool TextEditWindow::OnIdle(uint count) {
 }
 
 void TextEditWindow::OnLeftButtonDown(uint flags, const Point& point) {
+  DOM_AUTO_LOCK_SCOPE();
   auto const lPosn = MapPointToPosn(point);
   #if DEBUG_FOCUS
     DEBUG_TEXT_EDIT_PRINTF(DEBUG_POINT_FORMAT " focus=%d show=%d p=%d\n",
@@ -587,6 +593,7 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
     }
 
     case WM_LBUTTONDBLCLK: {
+      DOM_AUTO_LOCK_SCOPE();
       Point pt(MAKEPOINTS(lParam));
       auto const lPosn = MapPointToPosn(pt);
       if (lPosn >= 0)
@@ -594,23 +601,11 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
       return 0;
     }
 
-#if 0
-    case WM_LBUTTONDOWN:
-      OnLeftButtonDown(static_cast<uint>(wParam), MAKEPOINTS(lParam));
-      return 0;
-
-    case WM_LBUTTONUP:
-      OnLeftButtonUp(static_cast<uint>(wParam), MAKEPOINTS(lParam));
-      return 0;
-
-    case WM_MOUSEMOVE:
-      OnMouseMove(static_cast<uint>(wParam), MAKEPOINTS(lParam));
-      return 0;
-#endif
-
-    case WM_MOUSEWHEEL:
+    case WM_MOUSEWHEEL: {
+      DOM_AUTO_LOCK_SCOPE();
       SmallScroll(0, GET_WHEEL_DELTA_WPARAM(wParam) > 0 ? -2 : 2);
       return 0;
+    }
 
     case WM_USER: {
       gfx::Graphics::DrawingScope drawing_scope(*m_gfx);
@@ -678,6 +673,7 @@ void TextEditWindow::OnMouseMove(uint, const Point& point) {
     return;
   }
 
+  DOM_AUTO_LOCK_SCOPE();
   auto const lPosn = MapPointToPosn(point);
   if (lPosn >= 0)
     selection_->MoveTo(lPosn, true);
@@ -701,6 +697,8 @@ void TextEditWindow::OnPaint(const gfx::Rect) {
 }
 
 void TextEditWindow::onVScroll(uint nCode) {
+  DOM_AUTO_LOCK_SCOPE();
+
   switch (nCode) {
     case SB_ENDSCROLL: // 8
       break;
@@ -754,6 +752,8 @@ void TextEditWindow::Redraw() {
 }
 
 void TextEditWindow::redraw(bool fSelectionIsActive) {
+  DOM_AUTO_LOCK_SCOPE();
+
   #if DEBUG_REDRAW
     DEBUG_TEXT_EDIT_PRINTF(DEBUG_RECT_FORMAT
                            " ~~~~~~~~~~Start selection_is_active=%d\n",
@@ -882,6 +882,7 @@ void TextEditWindow::Render() {
 }
 
 void TextEditWindow::selectWord(Posn lPosn) {
+  DOM_AUTO_LOCK_SCOPE();
   auto const pSelection = GetSelection();
   pSelection->SetStart(lPosn);
   pSelection->StartOf(Unit_Word);
@@ -895,6 +896,7 @@ void TextEditWindow::SetScrollBar(HWND hwnd, int nBar) {
 }
 
 int TextEditWindow::SmallScroll(int, int iDy) {
+  ASSERT_DOM_IS_LOCKED();
   updateScreen();
 
   if (iDy < 0) {
@@ -943,6 +945,7 @@ int TextEditWindow::SmallScroll(int, int iDy) {
 }
 
 Posn TextEditWindow::StartOfLine(Posn lPosn) {
+  ASSERT_DOM_IS_LOCKED();
   return lPosn <= 0 ? 0 : startOfLineAux(*m_gfx, lPosn);
 }
 
@@ -982,6 +985,7 @@ void TextEditWindow::stopDrag() {
 }
 
 void TextEditWindow::updateScreen() {
+  ASSERT_DOM_IS_LOCKED();
   if (!m_pPage->IsDirty(rect(), *selection_))
     return;
 
@@ -1069,6 +1073,8 @@ void TextEditWindow::UpdateStatusBar() const {
         buffer.IsNotReady() ? IDS_STATUS_BUSY : has_focus() ?
             IDS_STATUS_READY : 0));
 
+  DOM_AUTO_LOCK_SCOPE();
+
   frame.SetStatusBarf(
       StatusBarPart_Mode,
       buffer.GetMode()->GetName());
@@ -1153,6 +1159,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
   if (!imc)
     return;
 
+  DOM_AUTO_LOCK_SCOPE();
   Edit::UndoBlock oUndo(GetSelection(), L"IME");
 
   char16 rgwch[1024];

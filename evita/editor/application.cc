@@ -212,6 +212,11 @@ bool Application::OnIdle(uint nCount) {
   return need_more;
 }
 
+void Application::PostTask(const tracked_objects::Location& from_here,
+                          const base::Closure& task) {
+  message_loop_->PostTask(from_here, task);
+}
+
 Buffer* Application::RenameBuffer(Buffer* buffer, const char16* pwszName) {
   auto const present = FindBuffer(pwszName);
   if (buffer == present)

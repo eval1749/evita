@@ -33,12 +33,11 @@ class Initializer {
 
     auto global = v8::ObjectTemplate::New(isolate);
     {
-        auto& editor = *new dom::Editor();
         auto context = v8::Context::New(isolate);
         v8::Context::Scope context_scope(context);
         InstallConstructor(global, Editor::GetConstructor(isolate));
         global->Set(gin::StringToV8(isolate, "editor"),
-          editor.GetWrapper(isolate));
+            Editor::instance().GetWrapper(isolate));
     }
 
     global_template.Reset(isolate, global);
@@ -145,6 +144,9 @@ ScriptController::~ScriptController() {
 void ScriptController::Evaluate(
     base::string16 script_text,
     base::Callback<void(EvaluateResult)> callback) {
+
+  DOM_AUTO_LOCK_SCOPE();
+
   DCHECK(thread_checker_.CalledOnValidThread());
   v8::HandleScope handle_scope(isolate_holder_.isolate());
   v8::TryCatch try_catch;

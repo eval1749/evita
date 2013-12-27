@@ -5,6 +5,11 @@
 
 #include <memory>
 
+#pragma warning(push)
+#pragma warning(disable: 4625)
+#include "base/callback.h"
+#pragma warning(pop)
+#include "base/location.h"
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
 #include "evita/cm_CmdProc.h"
@@ -93,6 +98,10 @@ class Application : public Command::Processor,
 
   // [O]
   public: bool OnIdle(uint hint);
+
+  // [P]
+  public: void PostTask(const tracked_objects::Location& from_here,
+                        const base::Closure& task);
 
   // [R]
   public: Buffer* RenameBuffer(Buffer* buffer, const char16* new_name);

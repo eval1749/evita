@@ -13,6 +13,7 @@ namespace {
 class CollectorVisitor : public Visitor {
   private: Collector* collector_;
   private: Collector::CollectableSet live_set_;
+  private: Collector::VisitableSet visited_set_;
 
   public: CollectorVisitor(Collector* collector) : collector_(collector) {
   }
@@ -24,11 +25,17 @@ class CollectorVisitor : public Visitor {
 
   public: virtual void Visit(Collectable* collectable) override {
     CHECK(!collectable->is_dead());
+    if (visited_set_.find(collectable) == visited_set_.end())
+      return;
+    visited_set_.insert(collectable);
     collectable->Accept(this);
     live_set_.insert(collectable);
   }
 
   public: virtual void Visit(Visitable* visitable) override {
+    if (visited_set_.find(visitable) == visited_set_.end())
+      return;
+    visited_set_.insert(visitable);
     visitable->Accept(this);
   }
 

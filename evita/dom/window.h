@@ -17,8 +17,10 @@ class Window : public v8_glue::Scriptable<Window> {
   private: Window(widgets::WidgetId widget_id);
   public: virtual ~Window();
 
+  static_assert(sizeof(int) == sizeof(widgets::WidgetId),
+                "widgets::WidgetId must be compatible with int.");
+  public: int id() const { return widget_id_; }
   public: static v8_glue::WrapperInfo* static_wrapper_info();
-  public: const base::string16& version() const;
 
   // [G]
   public: virtual gin::ObjectTemplateBuilder

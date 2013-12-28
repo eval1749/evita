@@ -20,7 +20,8 @@ v8_glue::WrapperInfo* Window::static_wrapper_info() {
 
 gin::ObjectTemplateBuilder Window::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
-  return GetEmptyObjectTemplateBuilder(isolate);
+  return GetEmptyObjectTemplateBuilder(isolate)
+    .SetProperty("id", &Window::id);
 }
 
 }  // namespace dom

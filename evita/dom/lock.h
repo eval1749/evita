@@ -9,10 +9,15 @@
 #include "base/synchronization/lock.h"
 #include "common/memory/singleton.h"
 
+namespace editor {
+class DomLock;
+}
+
 namespace dom {
 
 class Lock : public common::Singleton<Lock> {
   friend class common::Singleton<Lock>;
+  friend class editor::DomLock;
 
   public: class AutoLock : public base::AutoLock {
     public: AutoLock(const char* filename, int line_number);

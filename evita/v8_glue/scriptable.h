@@ -12,6 +12,14 @@ END_V8_INCLUDE
 
 namespace v8_glue {
 
+namespace internal {
+
+void* FromV8Impl(v8::Isolate* isolate,
+                 v8::Handle<v8::Value> value,
+                 WrapperInfo* info);
+
+}  // namespace internal
+
 // Note: The |AbstractScriptable| class was called |AbstractScriptWrappable|.
 // Although, it is too long to fit in line. So, we renamed shorter name.
 class AbstractScriptable
@@ -83,9 +91,9 @@ struct Converter<T*, typename base::enable_if<
 
   static bool FromV8(v8::Isolate* isolate,
                      v8::Handle<v8::Value> val, T** out) {
-    auto const wrapper_info = T::static_wrapper_info()->gin_wrapper_info();
+    auto const wrapper_info = T::static_wrapper_info();
     *out = static_cast<T*>(static_cast<v8_glue::AbstractScriptable*>(
-        internal::FromV8Impl(isolate, val, wrapper_info)));
+        v8_glue::internal::FromV8Impl(isolate, val, wrapper_info)));
     return *out;
   }
 };

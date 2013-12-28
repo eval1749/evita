@@ -19,15 +19,18 @@ class WrapperInfo {
   private: const char* const class_name_;
 
   public: WrapperInfo(const char* class_name)
-      : embedder_(kEmbedderEvita),
+      : embedder_(gin::kEmbedderEvita),
         class_name_(class_name) {
   }
   public: ~WrapperInfo() = default;
 
   public: const char* class_name() const { return class_name_; }
+  public: gin::GinEmbedder embedder() const { return embedder_; }
   public: gin::WrapperInfo* gin_wrapper_info() {
     return reinterpret_cast<gin::WrapperInfo*>(this);
   }
+
+  public: static WrapperInfo* From(v8::Handle<v8::Object> object);
 
   DISALLOW_COPY_AND_ASSIGN(WrapperInfo);
 };

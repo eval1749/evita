@@ -75,6 +75,7 @@
         'v8_glue/per_isolate_data.cc',
         'v8_glue/scriptable.cc',
         'v8_glue/v8_console_buffer.cc',
+        'v8_glue/wrapper_info.cc',
 
         'widgets/root_widget.cc',
         'widgets/widget.cc',

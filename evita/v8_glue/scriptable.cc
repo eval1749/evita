@@ -102,4 +102,29 @@ void AbstractScriptable::WeakCallback(
   gc::Collector::instance()->RemoveFromRootSet(wrappable);
 }
 
+namespace internal {
+
+void* FromV8Impl(v8::Isolate*, v8::Handle<v8::Value> val,
+                 WrapperInfo* wrapper_info) {
+  if (!val->IsObject())
+    return nullptr;
+  auto obj = v8::Handle<v8::Object>::Cast(val);
+  auto const info = WrapperInfo::From(obj);
+
+  // If this fails, the object is not managed by Gin. It is either a normal JS
+  // object that's not wrapping any external C++ object, or it is wrapping some
+  // C++ object, but that object isn't managed by Gin (maybe Blink).
+  if (!info)
+    return nullptr;
+
+  // If this fails, the object is managed by Gin, but it's not wrapping an
+  // instance of the C++ class associated with wrapper_info.
+  if (info != wrapper_info)
+    return nullptr;
+
+  return obj->GetAlignedPointerFromInternalField(gin::kEncodedValueIndex);
+}
+
+}  // namespace internal
+
 }  // namespace v8_glue

@@ -11,11 +11,11 @@ namespace v8_glue {
 PerIsolateData::PerIsolateData(v8::Isolate* isolate)
     : construct_mode_(kCreateNewObject),
       isolate_(isolate) {
-  isolate_->SetData(kEmbedderEvita, this);
+  isolate_->SetData(gin::kEmbedderEvita, this);
 }
 
 PerIsolateData* PerIsolateData::From(v8::Isolate* isolate) {
-  return static_cast<PerIsolateData*>(isolate->GetData(kEmbedderEvita));
+  return static_cast<PerIsolateData*>(isolate->GetData(gin::kEmbedderEvita));
 }
 
 }  // namespace v8_glue

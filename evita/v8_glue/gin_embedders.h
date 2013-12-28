@@ -6,6 +6,6 @@
 
 #include "gin/public/gin_embedders.h"
 
-#define kEmbedderEvita gin::kEmbedderBlink
+#define kEmbedderEvita kEmbedderBlink
 
 #endif //!defined(INCLUDE_evita_v8_glue_gin_embedders_h)

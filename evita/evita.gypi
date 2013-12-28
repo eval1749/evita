@@ -93,6 +93,7 @@
         'precomp.cpp',
         'core/buffer.cc',
         'core/style.cc',
+        'dom/console.cc',
         'dom/editor.cc',
         'dom/lock.cc',
         'dom/window.cc',

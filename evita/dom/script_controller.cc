@@ -9,6 +9,7 @@
 #include "base/message_loop/message_loop.h"
 #pragma warning(pop)
 #include "base/threading/thread.h"
+#include "evita/dom/console.h"
 #include "evita/dom/editor.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/window.h"
@@ -38,8 +39,12 @@ class Initializer {
         auto context = v8::Context::New(isolate);
         v8::Context::Scope context_scope(context);
 
+        InstallConstructor(global, Console::GetConstructor(isolate));
         InstallConstructor(global, Editor::GetConstructor(isolate));
         InstallConstructor(global, Window::GetConstructor(isolate));
+
+        global->Set(gin::StringToV8(isolate, "console"),
+            Console::instance()->GetWrapper(isolate));
 
         global->Set(gin::StringToV8(isolate, "editor"),
             Editor::instance()->GetWrapper(isolate));

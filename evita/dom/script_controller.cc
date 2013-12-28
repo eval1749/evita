@@ -11,6 +11,7 @@
 #include "base/threading/thread.h"
 #include "evita/dom/editor.h"
 #include "evita/dom/lock.h"
+#include "evita/dom/window.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/per_isolate_data.h"
 BEGIN_V8_INCLUDE
@@ -36,7 +37,10 @@ class Initializer {
     {
         auto context = v8::Context::New(isolate);
         v8::Context::Scope context_scope(context);
+
         InstallConstructor(global, Editor::GetConstructor(isolate));
+        InstallConstructor(global, Window::GetConstructor(isolate));
+
         global->Set(gin::StringToV8(isolate, "editor"),
             Editor::instance()->GetWrapper(isolate));
     }

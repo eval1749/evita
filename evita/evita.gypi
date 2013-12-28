@@ -94,6 +94,7 @@
         'core/style.cc',
         'dom/editor.cc',
         'dom/lock.cc',
+        'dom/window.cc',
         'dom/script_controller.cc',
         'ed_BufferCore.cpp',
         'ed_BufferFind.cpp',

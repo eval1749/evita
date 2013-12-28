@@ -1,9 +1,7 @@
-// Copyright (C) 1996-2013 by Project Vogue.
+// Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #if !defined(INCLUDE_evita_dom_editor_h)
 #define INCLUDE_evita_dom_editor_h
-
-#include <memory>
 
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"

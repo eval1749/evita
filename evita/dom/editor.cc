@@ -1,4 +1,4 @@
-// Copyright (C) 1996-2013 by Project Vogue.
+// Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 #include "evita/dom/editor.h"

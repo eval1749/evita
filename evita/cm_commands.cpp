@@ -720,9 +720,8 @@ static void newFile(const Context* pCtx, bool fNewFrame)
 
     if (fNewFrame)
     {
-        Frame* pFrame = Application::instance()->CreateFrame();
-        pFrame->AddWindow(new TextEditWindow(pBuffer));
-        pFrame->Realize();
+        auto const frame = Application::instance()->CreateFrame(pBuffer);
+        frame->Realize();
     }
     else
     {
@@ -933,9 +932,8 @@ static void openFile(Selection* pSelection, bool fNewFrame)
 
     if (fNewFrame)
     {
-        Frame* pFrame = Application::instance()->CreateFrame();
-        pFrame->AddWindow(new TextEditWindow(pBuffer));
-        pFrame->Realize();
+        auto const frame = Application::instance()->CreateFrame(pBuffer);
+        frame->Realize();
     }
     else
     {

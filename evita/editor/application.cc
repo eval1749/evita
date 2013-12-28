@@ -89,6 +89,12 @@ Frame* Application::CreateFrame() {
   return frames_.Append(frame);
 }
 
+Frame* Application::CreateFrame(Buffer* buffer) {
+  auto const frame = CreateFrame();
+  frame->AddWindow(new TextEditWindow(buffer));
+  return frame;
+}
+
 Frame* Application::DeleteFrame(Frame* frame) {
   frames_.Delete(frame);
   if (frames_.IsEmpty()) {

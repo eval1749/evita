@@ -10,7 +10,7 @@
 #include "common/tree/descendants_or_self.h"
 #include "evita/widgets/root_widget.h"
 
-#define DEBUG_FOCUS 1
+#define DEBUG_FOCUS 0
 #define DEBUG_IDLE 0
 #define DEBUG_MOUSE 0
 #define DEBUG_RESIZE 0

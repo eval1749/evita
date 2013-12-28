@@ -11,7 +11,7 @@
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Frame.cpp#5 $
 //
 #define DEBUG_DROPFILES 0
-#define DEBUG_FOCUS     1
+#define DEBUG_FOCUS     0
 #define DEBUG_PAINT     0
 #define DEBUG_REDRAW    0
 #define DEBUG_WINDOWPOS 0

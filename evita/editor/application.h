@@ -12,22 +12,25 @@
 #include "base/location.h"
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
-#include "evita/cm_CmdProc.h"
 #include "evita/vi_Frame.h"
 
 class Buffer;
+class CommandWindow;
 class IoManager;
 
 namespace base {
 class MessageLoop;
 }
 
+namespace Command {
+class Processor;
+}
+
 namespace editor {
 class DomLock;
 }
 
-class Application : public Command::Processor,
-                    public common::Singleton<Application> {
+class Application : public common::Singleton<Application> {
   protected: typedef DoubleLinkedList_<Frame> Frames;
   protected: typedef DoubleLinkedList_<Buffer> Buffers;
 
@@ -38,6 +41,7 @@ class Application : public Command::Processor,
   private: Frame* active_frame_;
   private: int idle_count_;
   private: bool is_quit_;
+  private: std::unique_ptr<Command::Processor> command_processor_;
   private: std::unique_ptr<editor::DomLock> dom_lock_;
   private: std::unique_ptr<IoManager> io_manager_;
   private: std::unique_ptr<base::MessageLoop> message_loop_;
@@ -71,6 +75,7 @@ class Application : public Command::Processor,
   private: void DoIdle();
 
   // [E]
+  public: void Execute(CommandWindow* window, uint32 key_code, uint32 repeat);
   public: void Exit(bool);
 
   // [F]

@@ -24,11 +24,17 @@ enum Bind {
   Bind_Argument,
 };
 
+class Command;
+class KeyBinds;
+class Processor;
+
 //////////////////////////////////////////////////////////////////////
 //
 // Context
 //
 class Context {
+  friend class Processor;
+
   protected: enum State {
     State_Arg,
     State_Continue,
@@ -42,20 +48,24 @@ class Context {
   protected: Count m_iSign;
   protected: uint m_cKeys;
   protected: uint m_rgnKey[10];
+  private: Command* m_pLastCommand;
+  private: Command* m_pThisCommand;
   protected: CommandWindow* m_pWindow;
   protected: Frame* m_pFrame;
   protected: Selection* m_pSelection;
   protected: char16 m_wchLast;
 
   // ctor
-  public: Context() = default;
+  public: Context();
   public: ~Context() = default;
 
   // [G]
   public: Count GetArg() const { return m_iArg; }
   public: Frame* GetFrame() const { return m_pFrame; }
   public: char16 GetLastChar() const { return m_wchLast; }
+  public: Command* GetLastCommand() const { return m_pLastCommand; }
   public: Selection* GetSelection() const { return m_pSelection; }
+  public: Command* GetThisCommand() const { return m_pThisCommand; }
   public: CommandWindow* GetWindow() const { return m_pWindow; }
 
   // [H]
@@ -63,9 +73,6 @@ class Context {
 
   DISALLOW_COPY_AND_ASSIGN(Context);
 };
-
-class Command;
-class KeyBinds;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -117,9 +124,7 @@ class KeyBinds : public HasKind_<KeyBinds, KeyBindEntry, Bind> {
 class Processor : public Context {
   private: static KeyBinds* sm_pGlobakBinds;
 
-  private: Command* m_pLastCommand;
   private: KeyBinds* m_pKeyBinds;
-  private: Command* m_pThisCommand;
 
   // ctor
   public: Processor();
@@ -129,8 +134,6 @@ class Processor : public Context {
   public: void Execute(CommandWindow*, uint32, uint32);
 
   // [G]
-  public: Command* GetLastCommand() const { return m_pLastCommand; }
-  public: Command* GetThisCommand() const { return m_pThisCommand; }
   public: static void GlobalInit();
 
   // [R]

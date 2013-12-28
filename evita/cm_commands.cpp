@@ -259,10 +259,10 @@ class DynamicAbbrev :
         // Nothing to do
     } // DynamicAbbrev
 
-    public: void Run(const Context* pCtx)
+    public: void Run(const Context& context)
     {
-        m_pFrame     = pCtx->GetFrame();
-        m_pSelection = pCtx->GetSelection();
+        m_pFrame     = context.GetFrame();
+        m_pSelection = context.GetSelection();
 
         if (NULL == m_pSelection)
         {
@@ -274,7 +274,7 @@ class DynamicAbbrev :
             return;
         }
 
-        if (! isContinue())
+        if (! isContinue(context))
         {
             if (!start())
             {
@@ -384,11 +384,9 @@ class DynamicAbbrev :
     } // findWordAux
 
     // [I]
-    private: bool isContinue()
+    private: bool isContinue(const Context& context)
     {
-        Application* const pApp = Application::instance();
-
-        if (pApp->GetThisCommand()  != pApp->GetLastCommand())
+        if (context.GetThisCommand()  != context.GetLastCommand())
         {
             return false;
         }
@@ -484,7 +482,7 @@ DEFCOMMAND(ExpandDynamicAbbrev)
         pBuffer->PutProperty(pDynamicAbbrev);
     }
 
-    pDynamicAbbrev->Run(pCtx);
+    pDynamicAbbrev->Run(*pCtx);
 } // ExpandDynamicAbbrev
 
 DEFCOMMAND(ExchangeCode)

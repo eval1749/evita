@@ -12,6 +12,7 @@
 #include "base/strings/string16.h"
 #include "base/time/time.h"
 #include "common/memory/scoped_change.h"
+#include "evita/cm_CmdProc.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/ed_Mode.h"
 #include "evita/vi_Buffer.h"
@@ -40,6 +41,7 @@ Application::Application()
       active_frame_(nullptr),
       idle_count_(0),
       is_quit_(false),
+      command_processor_(new Command::Processor()),
       dom_lock_(new editor::DomLock()),
       io_manager_(new IoManager()),
       message_loop_(new base::MessageLoop(base::MessageLoop::TYPE_UI)) {
@@ -112,6 +114,11 @@ void Application::DoIdle() {
         base::Bind(&Application::DoIdle, base::Unretained(this)),
         base::TimeDelta::FromMilliseconds(1000 / 60));
   }
+}
+
+void Application::Execute(CommandWindow* window, uint32 key_code,
+                          uint32 repeat) {
+  command_processor_->Execute(window, key_code, repeat);
 }
 
 void Application::Exit(bool is_forced) {

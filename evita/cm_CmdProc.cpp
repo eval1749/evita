@@ -26,9 +26,19 @@ namespace Command {
 KeyBindEntry* g_pQuotedInsert;
 KeyBindEntry* g_pStartArgument;
 
-/// <summary>
-/// Construct KeyBinds object
-/// </summary>
+//////////////////////////////////////////////////////////////////////
+//
+// Context
+//
+Context::Context()
+    : m_pLastCommand(nullptr),
+      m_pThisCommand(nullptr) {
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// KeyBinds
+//
 KeyBinds::KeyBinds() {
   myZeroMemory(m_rgpBind, sizeof(m_rgpBind));
 }
@@ -37,9 +47,7 @@ KeyBinds::KeyBinds() {
 //
 // Processor
 //
-Processor::Processor()
-    : m_pLastCommand(nullptr),
-      m_pThisCommand(nullptr) {
+Processor::Processor() {
   Reset();
 }
 

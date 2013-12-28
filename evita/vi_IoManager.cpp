@@ -366,7 +366,7 @@ void IoManager::visitFile(const char16* pwsz)
 
     if (NULL == pPane)
     {
-        pFrame->AddWindow(new TextEditWindow(pBuffer));
+        pFrame->AddWindow(pBuffer);
     }
 
     pPane->Activate();

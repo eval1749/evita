@@ -91,7 +91,7 @@ Frame* Application::CreateFrame() {
 
 Frame* Application::CreateFrame(Buffer* buffer) {
   auto const frame = CreateFrame();
-  frame->AddWindow(new TextEditWindow(buffer));
+  frame->AddWindow(buffer);
   return frame;
 }
 

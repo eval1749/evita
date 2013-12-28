@@ -176,6 +176,12 @@ void Frame::AddTab(Pane* const pane) {
   TabCtrl_SetCurSel(m_hwndTabBand, new_tab_item_index);
 }
 
+TextEditWindow* Frame::AddWindow(Buffer* buffer) {
+  auto const window = new TextEditWindow(buffer);
+  AddWindow(window);
+  return window;
+}
+
 void Frame::AddWindow(content::ContentWindow* window) {
   DCHECK(!window->parent_node());
   DCHECK(!window->is_realized());

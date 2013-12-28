@@ -40,6 +40,7 @@ enum MessageLevel
 
 class Buffer;
 class Pane;
+class TextEditWindow;
 
 namespace content {
 class ContentWindow;
@@ -85,6 +86,7 @@ class Frame final : public widgets::ContainerWidget,
   public: bool  Activate();
   private: void AddPane(Pane*);
   private: void AddTab(Pane*);
+  public: TextEditWindow* AddWindow(Buffer* buffer);
   public: void AddWindow(content::ContentWindow*);
   private: void AdoptPane(Pane*);
 

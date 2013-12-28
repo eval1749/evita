@@ -131,14 +131,14 @@ static int MainLoop() {
   auto& frame = *Application::instance()->CreateFrame();
   for (auto const filename: CommandLine::ForCurrentProcess()->GetArgs()) {
     auto const buffer = Application::instance()->Load(filename.c_str());
-    frame.AddWindow(new TextEditWindow(buffer));
+    frame.AddWindow(buffer);
   }
 
   // When there is no filename argument, we start lisp.
   if (!frame.GetFirstPane()) {
     auto const buffer = new Buffer(L"*scratch*");
     Application::instance()->InternalAddBuffer(buffer);
-    frame.AddWindow(new TextEditWindow(buffer));
+    frame.AddWindow(buffer);
   }
   frame.Realize();
   Application::instance()->Run();

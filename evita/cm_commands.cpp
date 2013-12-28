@@ -725,8 +725,7 @@ static void newFile(const Context* pCtx, bool fNewFrame)
     }
     else
     {
-        Frame* pFrame = pCtx->GetFrame();
-        pFrame->AddWindow(new TextEditWindow(pBuffer));
+        pCtx->GetFrame()->AddWindow(pBuffer);
     }
 } // NewFile
 
@@ -752,8 +751,7 @@ DEFCOMMAND(NewFrame)
 
     Frame* pFrame = Application::instance()->CreateFrame();
 
-    auto const pWindow = new TextEditWindow(pSelection->GetBuffer());
-    pFrame->AddWindow(pWindow);
+    auto const pWindow = pFrame->AddWindow(pSelection->GetBuffer());
     pFrame->Realize();
 
     pWindow->GetSelection()->SetRange(
@@ -780,8 +778,7 @@ DEFCOMMAND(NewFrameAndClose)
 
     Frame* pFrame = Application::instance()->CreateFrame();
 
-    auto const pWindow = new TextEditWindow(pSelection->GetBuffer());
-    pFrame->AddWindow(pWindow);
+    auto const pWindow = pFrame->AddWindow(pSelection->GetBuffer());
     pFrame->Realize();
 
     pWindow->GetSelection()->SetRange(
@@ -952,8 +949,7 @@ static void openFile(Selection* pSelection, bool fNewFrame)
             }
         } // for each pane
 
-        auto const window = new TextEditWindow(pBuffer);
-        pFrame->AddWindow(window);
+        pFrame->AddWindow(pBuffer);
     } // if
 } // OpenFile
 
@@ -1162,6 +1158,10 @@ DEFCOMMAND(SelectAll)
     pSelection->SetStartIsActive(false);
 } // SelectAll
 
+static void AddWindow(Frame* frame, TextEditWindow* window) {
+  frame->AddWindow(window);
+}
+
 DEFCOMMAND(ShowV8Console) {
   if (!pCtx->GetSelection())
     return;
@@ -1178,7 +1178,7 @@ DEFCOMMAND(ShowV8Console) {
   std::unique_ptr<TextEditWindow> window(new TextEditWindow(&v8_buffer));
   window->GetSelection()->SetRange(v8_buffer.GetEnd(), v8_buffer.GetEnd());
   Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(&Frame::AddWindow,
+      base::Bind(AddWindow,
                  base::Unretained(&frame),
                  base::Unretained(window.release())));
 }
@@ -1358,8 +1358,7 @@ DEFCOMMAND(ValidateIntervals)
     when (pBuffer->ValidateIntervals(pLogBuf))
         { return; }
 
-    auto const frame = pCtx->GetFrame();
-    frame->AddWindow(new TextEditWindow(pLogBuf));
+    pCtx->GetFrame()->AddWindow(pLogBuf);
 } // ValidateIntervals
 
 static char16 s_rgwchGraphKey[256];

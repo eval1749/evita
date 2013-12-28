@@ -63,7 +63,7 @@ v8::Handle<v8::FunctionTemplate>
 
 gin::ObjectTemplateBuilder AbstractScriptable::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
-  if (!wrapper_class_name())
+  if (!wrapper_info()->class_name())
     return gin::ObjectTemplateBuilder(isolate);
   auto templ = GetFunctionTemplateImpl(isolate, wrapper_info());
   return gin::ObjectTemplateBuilder(isolate, templ->InstanceTemplate());

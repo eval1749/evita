@@ -25,7 +25,6 @@ class AbstractScriptable
     return !wrapper_.IsEmpty();
   }
 
-  protected: virtual const char* wrapper_class_name() const { return nullptr; }
   protected: virtual WrapperInfo* wrapper_info() const = 0;
 
   protected: static v8::Handle<v8::Function>
@@ -50,7 +49,7 @@ class Scriptable : public AbstractScriptable {
   protected: Scriptable() = default;
   protected: virtual ~Scriptable() = default;
 
-  private: WrapperInfo* wrapper_info() const {
+  private: virtual WrapperInfo* wrapper_info() const override {
     return T::static_wrapper_info();
   }
 

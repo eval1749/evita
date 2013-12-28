@@ -20,21 +20,14 @@
 #include "base/command_line.h"
 #include "base/logging.h"
 #include "common/win/native_window.h"
-
-#if USE_LISTENER
-    #include "./ap_listener_buffer.h"
-    #define SINGLE_INSTANCE_NAME    L"3C9C7EC2-0DE7-461e-8F09-14F3B830413E" 
-#else // USE_LISTENER
-    #include "./vi_buffer.h"
-    #define SINGLE_INSTANCE_NAME    L"D47A7677-9F8E-467c-BABE-8ABDE8D58476" 
-#endif // USE_LISTENER
-
+#include "./vi_buffer.h"
 #include "./ctrl_TabBand.h"
-
 #include "evita/editor/application.h"
 #include "./vi_IoManager.h"
 #include "./vi_Style.h"
 #include "./vi_TextEditWindow.h"
+
+#define SINGLE_INSTANCE_NAME L"D47A7677-9F8E-467c-BABE-8ABDE8D58476" 
 
 #if _WIN64
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -143,13 +136,7 @@ static int MainLoop() {
 
   // When there is no filename argument, we start lisp.
   if (!frame.GetFirstPane()) {
-    #if USE_LISTENER && _NDEBUG
-      auto const buffer = new ListenerBuffer();
-      buffer->Start();
-    #else // USE_LISTENER
-      auto const buffer = new Buffer(L"*scratch*");
-    #endif // USE_LISTENER
-
+    auto const buffer = new Buffer(L"*scratch*");
     Application::instance()->InternalAddBuffer(buffer);
     frame.AddWindow(new TextEditWindow(buffer));
   }

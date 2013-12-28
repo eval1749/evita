@@ -5,46 +5,44 @@
 
 #include <iterator>
 
+#include "base/basictypes.h"
+#include "base/logging.h"
+
 namespace common {
 namespace tree {
-namespace impl {
+namespace internal {
 
 template<class IteratorCategory, typename NodeType>
-class AbstractNodeIterator_
-    : public std::iterator<IteratorCategory, NodeType> {
-  protected: typedef NodeType* PtrNodeType;
-  protected: typedef NodeType& RefNodeType;
-  protected: PtrNodeType node_;
+class AbstractNodeIterator
+    : public std::iterator<IteratorCategory, NodeType*> {
+  protected: value_type node_;
 
-  protected: explicit AbstractNodeIterator_(PtrNodeType node)
+  protected: explicit AbstractNodeIterator(value_type node)
       : node_(node) {
   }
 
-  public: operator RefNodeType() const {
-    ASSERT(node_);
-    return *node_;
-  }
-
-  public: RefNodeType operator*() const {
-    ASSERT(node_);
-    return *node_;
-  }
-
-  public: PtrNodeType operator->() const {
-    ASSERT(node_);
+  public: value_type operator*() const {
+    DCHECK(node_);
     return node_;
   }
 
-  public: bool operator==(const AbstractNodeIterator_& other) const {
+  private: value_type operator->() const {
+    DCHECK(node_);
+    return node_;
+  }
+
+  public: bool operator==(const AbstractNodeIterator& other) const {
     return node_ == other.node_;
   }
 
-  public: bool operator!=(const AbstractNodeIterator_& other) const {
+  public: bool operator!=(const AbstractNodeIterator& other) const {
     return node_ != other.node_;
   }
+
+  DISALLOW_COPY_AND_ASSIGN(AbstractNodeIterator);
 };
 
-} // namespace impl
+} // namespace internal
 } // namespace tree
 } // namespace common
 

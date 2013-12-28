@@ -29,15 +29,17 @@
       'target_name': 'common_unittests',
       'type': 'executable',
       'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        '<(DEPTH)/base/base.gyp:run_all_unittests',
         '<(DEPTH)/common/common.gyp:common',
         '<(DEPTH)/testing/gtest.gyp:gtest',
-        '<(DEPTH)/testing/gtest.gyp:gtest_main',
       ], # dependencies
       'include_dirs+' : [
         '<(DEPTH)/testing/gtest/include/',
       ], # include_dirs
       'sources': [
         'castable_unittest.cc',
+        'tree/node_unittest.cc',
       ], # sources
     }, # common_test
   ], # targets

@@ -55,6 +55,7 @@
                       'kernel32.lib',
                       'advapi32.lib',
                       'user32.lib',
+                      'ws2_32.lib', # for libxml
                     ], # AdditionalDependencies
                    }, # VCLinkerTool
                    'target_conditions': [

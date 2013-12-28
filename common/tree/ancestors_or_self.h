@@ -3,49 +3,48 @@
 #if !defined(INCLUDE_common_tree_ancestors_or_slef_h)
 #define INCLUDE_common_tree_ancestors_or_slef_h
 
+#include "base/basictypes.h"
+#include "base/logging.h"
 #include "common/tree/abstract_node_iterator.h"
 
 namespace common {
 namespace tree {
-namespace impl {
+namespace internal {
 template<typename NodeType>
-class AncestorsOrSelf_ {
-  private: typedef NodeType* PtrType;
-  private: typedef NodeType& RefType;
+class AncestorsOrSelf {
   public: class Iterator
-      : public AbstractNodeIterator_<std::input_iterator_tag, NodeType> {
-    public: Iterator(PtrType node)
-        : AbstractNodeIterator_(node) {
+      : public AbstractNodeIterator<std::input_iterator_tag, NodeType> {
+    public: Iterator(NodeType* node) : AbstractNodeIterator(node) {
     }
     public: Iterator& operator++() {
-      ASSERT(node_);
+      DCHECK(node_);
       node_ = node_->parent_node();
       return *this;
     }
   };
 
-  private: RefType node_;
+  private: NodeType* node_;
 
-  public: explicit AncestorsOrSelf_(RefType node) : node_(node) {
+  public: explicit AncestorsOrSelf(NodeType* node) : node_(node) {
   }
 
-  public: Iterator begin() const { return Iterator(&node_); }
+  public: Iterator begin() const { return Iterator(node_); }
   public: Iterator end() const { return Iterator(nullptr); }
 
-  DISALLOW_COPY_AND_ASSIGN(AncestorsOrSelf_);
+  DISALLOW_COPY_AND_ASSIGN(AncestorsOrSelf);
 };
-} // naemspace impl
+} // naemspace internal
 
-template<typename ContainerType>
-impl::AncestorsOrSelf_<const ContainerType>
-ancestors_or_self(const ContainerType& container) {
-  return impl::AncestorsOrSelf_<const ContainerType>(container);
+template<class NodeClass>
+internal::AncestorsOrSelf<const NodeClass>
+ancestors_or_self(const NodeClass* node) {
+  return internal::AncestorsOrSelf<const NodeClass>(node);
 }
 
-template<typename ContainerType>
-impl::AncestorsOrSelf_<ContainerType>
-ancestors_or_self(ContainerType& container) {
-  return impl::AncestorsOrSelf_<ContainerType>(container);
+template<class NodeClass>
+internal::AncestorsOrSelf<NodeClass>
+ancestors_or_self(NodeClass* node) {
+  return internal::AncestorsOrSelf<NodeClass>(node);
 }
 
 } // namespace tree

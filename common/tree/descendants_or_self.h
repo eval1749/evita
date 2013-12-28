@@ -3,27 +3,26 @@
 #if !defined(INCLUDE_common_tree_descendants_or_self_h)
 #define INCLUDE_common_tree_descendants_or_self_h
 
+#include "base/basictypes.h"
+#include "base/logging.h"
 #include "common/tree/abstract_node_iterator.h"
 
 namespace common {
 namespace tree {
-namespace impl {
+namespace internal {
 
 template<typename NodeType>
-class DescendantsOrSelf_ {
-  protected: typedef NodeType* PtrType;
-  protected: typedef NodeType& RefType;
+class DescendantsOrSelf {
   public: class Iterator
-      : public AbstractNodeIterator_<std::input_iterator_tag, NodeType> {
+      : public AbstractNodeIterator<std::input_iterator_tag, NodeType> {
     private: NodeType* scope_;
-    public: Iterator(PtrType scope, PtrType node)
-        : AbstractNodeIterator_(node), scope_(scope) {
+    public: Iterator(NodeType* scope, NodeType* node)
+        : AbstractNodeIterator(node), scope_(scope) {
     }
     public: Iterator& operator++() {
-      ASSERT(node_);
-      auto const container = node_->ToContainer();
-      if (auto first_child = container ? container->first_child() : nullptr) {
-        node_ = container->first_child();
+      DCHECK(node_);
+      if (auto first_child = node_->first_child()) {
+        node_ = first_child;
         return *this;
       }
 
@@ -39,29 +38,29 @@ class DescendantsOrSelf_ {
     }
   };
 
-  protected: RefType node_;
+  protected: NodeType* node_;
 
-  public: explicit DescendantsOrSelf_(RefType node) : node_(node) {
+  public: explicit DescendantsOrSelf(NodeType* node) : node_(node) {
   }
 
-  public: Iterator begin() const { return Iterator(&node_, &node_); }
-  public: Iterator end() const { return Iterator(&node_, nullptr); }
+  public: Iterator begin() const { return Iterator(node_, node_); }
+  public: Iterator end() const { return Iterator(node_, nullptr); }
 
-  DISALLOW_COPY_AND_ASSIGN(DescendantsOrSelf_);
+  DISALLOW_COPY_AND_ASSIGN(DescendantsOrSelf);
 };
 
-} // naemspace impl
+} // naemspace internal
 
 template<class NodeClass>
-impl::DescendantsOrSelf_<const typename NodeClass::Node>
-descendants_or_self(const NodeClass& node) {
-  return impl::DescendantsOrSelf_<const NodeClass::Node>(node);
+internal::DescendantsOrSelf<const NodeClass>
+descendants_or_self(const NodeClass* node) {
+  return internal::DescendantsOrSelf<const NodeClass>(node);
 }
 
 template<class NodeClass>
-impl::DescendantsOrSelf_<typename NodeClass::Node>
-descendants_or_self(NodeClass& node) {
-  return impl::DescendantsOrSelf_<NodeClass::Node>(node);
+internal::DescendantsOrSelf<NodeClass>
+descendants_or_self(NodeClass* node) {
+  return internal::DescendantsOrSelf<NodeClass>(node);
 }
 
 } // namespace tree

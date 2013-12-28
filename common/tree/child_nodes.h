@@ -3,26 +3,27 @@
 #if !defined(INCLUDE_common_tree_child_nodes_h)
 #define INCLUDE_common_tree_child_nodes_h
 
+#include "base/basictypes.h"
+#include "base/logging.h"
 #include "common/tree/abstract_node_iterator.h"
-#include "common/tree/container_node.h"
+#include "common/tree/node.h"
 
 namespace common {
 namespace tree {
 
-template<typename ContainerType>
-class ChildNodes_ {
-  public: typedef typename ContainerType::Node NodeType;
+template<typename NodeType>
+class ChildNodes {
   private: class Iterator
-      : public impl::AbstractNodeIterator_<std::bidirectional_iterator_tag,
-                                           NodeType> {
-    protected: Iterator(NodeType* node) : AbstractNodeIterator_(node) {
+      : public internal::AbstractNodeIterator<std::bidirectional_iterator_tag,
+                                              NodeType> {
+    protected: Iterator(NodeType* node) : AbstractNodeIterator(node) {
     }
     protected: void Decrement() {
-      ASSERT(node_);
+      DCHECK(node_);
       node_ = node_->previous_sibling();
     }
     protected: void Increment() {
-      ASSERT(node_);
+      DCHECK(node_);
       node_ = node_->next_sibling();
     }
   };
@@ -51,43 +52,54 @@ class ChildNodes_ {
     }
   };
 
-  private: ContainerType& container_;
+  private: NodeType* parent_node_;
 
-  public: explicit ChildNodes_(ContainerType& container)
-      : container_(container) {
+  public: explicit ChildNodes(NodeType* parent_node)
+      : parent_node_(parent_node) {
   }
 
   public: ForwardIterator begin() const {
-    return ForwardIterator(container_.first_child());
+    return ForwardIterator(parent_node_->first_child());
   }
   public: ForwardIterator end() const {
     return ForwardIterator(nullptr);
   }
   // TODO: We should have ConstForwardIterator.
   public:ForwardIterator cbegin() const {
-    return ForwardIterator(container_.first_child());
+    return ForwardIterator(parent_node_->first_child());
   }
   // TODO: We should have ConstForwardIterator.
   public:ForwardIterator cend() const {
     return ConstForwardIterator(nullptr);
   }
   public: BackwardIterator rbegin() const {
-    return BackwardIterator(container_.last_child());
+    return BackwardIterator(parent_node_->last_child());
   }
   public: BackwardIterator rend() const {
     return BackwardIterator(nullptr);
   }
   // TODO: We should have ConstBackwardIterator.
   public:BackwardIterator crbegin() const {
-    return BackwardIterator(container_.last_child());
+    return BackwardIterator(parent_node_->last_child());
   }
   // TODO: We should have ConstBackwardIterator.
   public:BackwardIterator crend() const {
     return BackwardIterator(nullptr);
   }
 
-  DISALLOW_COPY_AND_ASSIGN(ChildNodes_);
+  DISALLOW_COPY_AND_ASSIGN(ChildNodes);
 };
+
+template<class NodeClass>
+ChildNodes<const NodeClass> Node<NodeClass>::child_nodes() const {
+  return ChildNodes<const NodeClass>(static_cast<const NodeClass*>(this));
+}
+
+template<class NodeClass>
+ChildNodes<NodeClass> Node<NodeClass>::child_nodes() {
+  return ChildNodes<NodeClass>(static_cast<NodeClass*>(this));
+}
+
 
 } // namespace tree
 } // namespace common

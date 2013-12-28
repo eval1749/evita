@@ -5,44 +5,45 @@
 
 #include "common/tree/descendants_or_self.h"
 
+#include "base/basictypes.h"
+
 namespace common {
 namespace tree {
-namespace impl {
+namespace internal {
 
 template<typename NodeType>
-class Descendants_ : public DescendantsOrSelf_<NodeType> {
-  public: explicit Descendants_(RefType container) 
-      : DescendantsOrSelf_(container) {
+class Descendants : public DescendantsOrSelf<NodeType> {
+  public: explicit Descendants(NodeType* node) 
+      : DescendantsOrSelf(node) {
   }
 
   public: Iterator begin() const {
-    return Iterator(&node_, node_.first_child());
+    return Iterator(node_, node_->first_child());
   }
-  public: Iterator end() const { return Iterator(&node_, nullptr);
+  public: Iterator end() const { return Iterator(node_, nullptr);
   }
 
-  DISALLOW_COPY_AND_ASSIGN(Descendants_);
+  DISALLOW_COPY_AND_ASSIGN(Descendants);
 };
 
-} // naemspace impl
+} // naemspace internal
 
-template<class ContainerClass>
-impl::Descendants_<const typename ContainerClass::Node>
-descendants(const ContainerClass& container) {
-  return impl::Descendants_<const ContainerClass::Node>(container);
+template<class NodeClass>
+internal::Descendants<const NodeClass>
+descendants(const NodeClass* node) {
+  return internal::Descendants<const NodeClass>(node);
 }
 
-template<class ContainerClass>
-impl::Descendants_<typename ContainerClass::Node>
-descendants(ContainerClass& container) {
-  return impl::Descendants_<ContainerClass::Node>(container);
+template<class NodeClass>
+internal::Descendants<NodeClass>
+descendants(NodeClass* node) {
+  return internal::Descendants<NodeClass>(node);
 }
 
-template<class NodeClass, class ContainerClass, typename... Params>
-bool ContainerNode_<NodeClass, ContainerClass, Params...>::Contains(
-    const NodeClass& node) const {
-  for (const auto& child: descendants(*this)) {
-    if (child == node)
+template<class NodeClass>
+bool Node<NodeClass>::Contains(const NodeClass* node) const {
+  for (auto child : descendants(this)) {
+    if (node == child)
       return true;
   }
   return false;

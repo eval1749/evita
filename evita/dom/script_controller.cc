@@ -106,7 +106,7 @@ void ReportException(base::Callback<void(EvaluateResult)> callback,
   }
 
   auto stack_trace = try_catch.StackTrace();
-  if (stack_trace->IsArray()) {
+  if (!stack_trace.IsEmpty() && stack_trace->IsArray()) {
     auto array = stack_trace.As<v8::Array>();
     eval_result.stack_trace.resize(array->Length());
     auto index = 0u;

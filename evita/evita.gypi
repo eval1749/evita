@@ -78,7 +78,7 @@
 
         'widgets/container_widget.cpp',
         'widgets/root_widget.cc',
-        'widgets/widget.cpp',
+        'widgets/widget.cc',
       ], # sources
     }, # evita
 

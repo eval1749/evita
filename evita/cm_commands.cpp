@@ -156,7 +156,7 @@ DEFCOMMAND(CloseOtherWindows) {
   auto const pane = window->container_widget().as<EditPane>();
   if (!pane)
     return;
-  Application::instance().PostDomTask(FROM_HERE,
+  Application::instance()->PostDomTask(FROM_HERE,
       base::Bind(&EditPane::CloseAllBut,
                  base::Unretained(pane),
                  base::Unretained(window)));
@@ -897,7 +897,7 @@ static void DoNextWindow(CommandWindow* start_window) {
 }
 
 DEFCOMMAND(NextWindow) {
-  Application::instance().PostDomTask(FROM_HERE,
+  Application::instance()->PostDomTask(FROM_HERE,
       base::Bind(DoNextWindow, base::Unretained(pCtx->GetWindow())));
 }
 
@@ -968,7 +968,7 @@ static void openFile(Selection* pSelection, bool fNewFrame)
 //  Load file in tab.
 //
 DEFCOMMAND(OpenFile) {
-  Application::instance().PostDomTask(FROM_HERE,
+  Application::instance()->PostDomTask(FROM_HERE,
       base::Bind(openFile, base::Unretained(pCtx->GetSelection()), false));
 }
 
@@ -979,7 +979,7 @@ DEFCOMMAND(OpenFile) {
 //  Load file into new frame.
 //
 DEFCOMMAND(OpenFileInNewFrame) {
-  Application::instance().PostDomTask(FROM_HERE,
+  Application::instance()->PostDomTask(FROM_HERE,
       base::Bind(openFile, base::Unretained(pCtx->GetSelection()), true));
 }
 
@@ -1071,7 +1071,7 @@ static void DoPreviousWindow(CommandWindow* start_window) {
 }
 
 DEFCOMMAND(PreviousWindow) {
-  Application::instance().PostDomTask(FROM_HERE,
+  Application::instance()->PostDomTask(FROM_HERE,
       base::Bind(DoPreviousWindow, base::Unretained(pCtx->GetWindow())));
 }
 
@@ -1143,13 +1143,13 @@ DEFCOMMAND(Reload)
 
 // [S]
 void SaveBuffer(Frame* frame, Buffer* buffer, bool is_save_as) {
-  Application::instance().SaveBuffer(frame, buffer, is_save_as);
+  Application::instance()->SaveBuffer(frame, buffer, is_save_as);
 }
 
 DEFCOMMAND(SaveFile) {
   if (!pCtx->GetSelection())
     return;
-  Application::instance().PostDomTask(FROM_HERE,
+  Application::instance()->PostDomTask(FROM_HERE,
       base::Bind(SaveBuffer,
                  base::Unretained(pCtx->GetFrame()),
                  base::Unretained(pCtx->GetSelection()->GetBuffer()),
@@ -1169,7 +1169,7 @@ DEFCOMMAND(SelectAll)
 DEFCOMMAND(ShowV8Console) {
   if (!pCtx->GetSelection())
     return;
-  auto& v8_buffer = v8_glue::V8ConsoleBuffer::instance();
+  auto& v8_buffer = *v8_glue::V8ConsoleBuffer::instance();
   auto& frame = *Application::Get()->GetActiveFrame();
   for (auto& pane: frame.panes()) {
     auto const present = pane.DynamicCast<EditPane>();
@@ -1181,7 +1181,7 @@ DEFCOMMAND(ShowV8Console) {
 
   std::unique_ptr<TextEditWindow> window(new TextEditWindow(&v8_buffer));
   window->GetSelection()->SetRange(v8_buffer.GetEnd(), v8_buffer.GetEnd());
-  Application::instance().PostDomTask(FROM_HERE,
+  Application::instance()->PostDomTask(FROM_HERE,
       base::Bind(&Frame::AddWindow,
                  base::Unretained(&frame),
                  base::Unretained(window.release())));
@@ -1218,7 +1218,7 @@ DEFCOMMAND(SplitWindowHorizontally) {
       GetActivePane()->DynamicCast<EditPane>();
   if (!pPane)
     return;
-  Application::instance().PostDomTask(FROM_HERE,
+  Application::instance()->PostDomTask(FROM_HERE,
       base::Bind(SplitWindow, base::Unretained(pCtx->GetSelection()),
                  base::Unretained(pPane), kSplitHorizontally));
 }
@@ -1231,7 +1231,7 @@ DEFCOMMAND(SplitWindowVertically)
       GetActivePane()->DynamicCast<EditPane>();
   if (!pPane)
     return;
-  Application::instance().PostDomTask(FROM_HERE,
+  Application::instance()->PostDomTask(FROM_HERE,
       base::Bind(SplitWindow, base::Unretained(pCtx->GetSelection()),
                  base::Unretained(pPane), kSplitVertically));
 }

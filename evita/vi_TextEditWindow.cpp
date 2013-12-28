@@ -386,7 +386,7 @@ void TextEditWindow::ForceRedrawLater() {
     ForceRedraw();
     return;
   }
-  Application::instance().PostDomTask(FROM_HERE,
+  Application::instance()->PostDomTask(FROM_HERE,
       base::Bind(&TextEditWindow::ForceRedraw, base::Unretained(this)));
 }
 

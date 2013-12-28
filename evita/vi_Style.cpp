@@ -52,7 +52,7 @@ class Font::FontImpl {
   public: FontImpl(const char16* face_name, int font_size_pt)
       : font_face_(*new gfx::FontFace(face_name)),
         em_size_(font_size_pt * 96.0f / 72.0f),
-        pixels_per_dip_(gfx::FactorySet::instance().pixels_per_dip().height),
+        pixels_per_dip_(gfx::FactorySet::instance()->pixels_per_dip().height),
         metrics_(GetMetrics()) {
   }
 

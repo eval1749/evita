@@ -372,13 +372,13 @@ int Mode::GetIcon() const {
   DEFINE_STATIC_LOCAL(const base::string16, default_ext, (L".txt"));
 
   const base::string16 ext = GetExtension(GetBuffer()->GetName(), default_ext);
-  if (auto const icon_index = IconCache::instance().Intern(ext))
+  if (auto const icon_index = IconCache::instance()->Intern(ext))
     return icon_index - 1;
 
-  auto const default_icon_index = IconCache::instance().Intern(default_ext);
+  auto const default_icon_index = IconCache::instance()->Intern(default_ext);
   ASSERT(default_icon_index);
 
-  IconCache::instance().Add(ext, default_icon_index - 1);
+  IconCache::instance()->Add(ext, default_icon_index - 1);
   return default_icon_index - 1;
 }
 
@@ -616,7 +616,7 @@ ModeFactoryes g_oModeFactoryes;
 static ModeFactory* s_pPlainTextModeFactory;
 
 HIMAGELIST ModeFactory::icon_image_list() {
-  return IconCache::instance().image_list();
+  return IconCache::instance()->image_list();
 }
 
 /// <summary>

@@ -100,7 +100,7 @@ ContainerWidget& ContainerWidget::GetHostContainer() const {
     if (runner.native_window())
        return const_cast<ContainerWidget&>(runner);
   }
-  return RootWidget::instance();
+  return *RootWidget::instance();
 }
 
 Widget* ContainerWidget::GetWidgetAt(const Point& point) const {

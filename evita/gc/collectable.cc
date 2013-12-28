@@ -12,7 +12,7 @@ namespace internal {
 
 AbstractCollectable::AbstractCollectable()
     : state_(kAlive) {
-  Collector::instance().AddToLiveSet(this);
+  Collector::instance()->AddToLiveSet(this);
 }
 
 AbstractCollectable::~AbstractCollectable() {

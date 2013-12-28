@@ -267,7 +267,7 @@ void Frame::DidChangeTabSelection(int selected_index) {
   m_pActivePane = pane;
   pane->Show();
   pane->Activate();
-  Application::instance().PostDomTask(FROM_HERE,
+  Application::instance()->PostDomTask(FROM_HERE,
       base::Bind(&Frame::updateTitleBar, base::Unretained(this)));
   #if DEBUG_FOCUS
     DEBUG_WIDGET_PRINTF("End selected_index=%d"
@@ -956,7 +956,7 @@ void Frame::updateTitleBar() {
   base::string16 title;
   title += base::string16(wsz);
   title += L" - ";
-  title += Application::instance().title();
+  title += Application::instance()->title();
   m_oTitleBar.SetText(title.data(), title.length());
 
   m_pActivePane->UpdateStatusBar();
@@ -964,7 +964,7 @@ void Frame::updateTitleBar() {
 
 void Frame::WillDestroyWidget() {
   ContainerWidget::WillDestroyWidget();
-  Application::instance().DeleteFrame(this);
+  Application::instance()->DeleteFrame(this);
 }
 
 void Frame::WillRemoveChildWidget(const Widget& widget) {

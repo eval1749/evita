@@ -17,7 +17,7 @@ v8_glue::ScriptWrapperInfo* Editor::static_wrapper_info() {
 }
 
 const base::string16& Editor::version() const {
-  return Application::instance().version();
+  return Application::instance()->version();
 }
 
 gin::ObjectTemplateBuilder Editor::GetObjectTemplateBuilder(

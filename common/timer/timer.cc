@@ -105,10 +105,10 @@ class TimerController : public common::Singleton<TimerController> {
       return;
     }
     if (entry->repeat_interval_ms)
-      TimerController::instance().SetTimer(timer,
+      TimerController::instance()->SetTimer(timer,
                                             entry->repeat_interval_ms);
     else
-      TimerController::instance().StopTimer(timer);
+      TimerController::instance()->StopTimer(timer);
   }
 
   DISALLOW_COPY_AND_ASSIGN(TimerController);
@@ -127,12 +127,12 @@ void AbstractTimer::Start(int next_fire_interval_ms,
                           int repeat_interval_ms) {
   DCHECK_GE(next_fire_interval_ms, 0);
   DCHECK_GE(repeat_interval_ms, 0);
-  TimerController::instance().StartTimer(this, next_fire_interval_ms,
+  TimerController::instance()->StartTimer(this, next_fire_interval_ms,
                                          repeat_interval_ms);
 }
 
 void AbstractTimer::Stop() {
-  TimerController::instance().StopTimer(this);
+  TimerController::instance()->StopTimer(this);
 }
 
 } // namespace impl

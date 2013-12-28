@@ -7,11 +7,11 @@ namespace common {
 
 template<class T>
 class Singleton {
-  public: static T& instance() {
+  public: static T* instance() {
     static T* instance;
     if (!instance)
       instance = new T();
-    return *instance;
+    return instance;
   }
 };
 

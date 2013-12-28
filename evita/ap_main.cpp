@@ -154,7 +154,7 @@ static int MainLoop() {
     frame.AddWindow(new TextEditWindow(buffer));
   }
   frame.Realize();
-  Application::instance().Run();
+  Application::instance()->Run();
   return 0;
 }
 

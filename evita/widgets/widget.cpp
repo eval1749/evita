@@ -184,7 +184,7 @@ void Widget::Realize(const Rect& rect) {
 void Widget::RealizeTopLevelWidget() {
   ASSERT(native_window_);
   ASSERT(!is_realized());
-  RootWidget::instance().AppendChild(*this);
+  RootWidget::instance()->AppendChild(*this);
   state_ = kRealized;
   CreateNativeWindow();
 }

@@ -83,7 +83,7 @@ void V8ConsoleBuffer::ExecuteLastLine() {
   GetText(&text[0], script_start, script_end);
 
   // TODO(yosi) We should retain |this| until |HandleEvaluateResult|.
-  dom::ScriptController::User::instance().Evaluate(
+  dom::ScriptController::User::instance()->Evaluate(
       text, base::Bind(&V8ConsoleBuffer::HandleEvaluateResult,
                        base::Unretained(this)));
 }

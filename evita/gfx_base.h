@@ -6,6 +6,7 @@
 #if !defined(INCLUDE_gfx_base_h)
 #define INCLUDE_gfx_base_h
 
+#include "common/memory/singleton.h"
 #include "common/win/rect.h"
 #include "common/win/scoped_comptr.h"
 #include "gfx/rect_f.h"
@@ -89,30 +90,31 @@ class DpiHandler {
 
 class FactorySet : public RefCounted_<FactorySet>,
                    public common::ComInit,
+                   public common::Singleton<FactorySet>,
                    public DpiHandler,
                    public Object {
+  friend class common::Singleton<FactorySet>;
   private: common::ComPtr<ID2D1Factory> d2d1_factory_;
   private: common::ComPtr<IDWriteFactory> dwrite_factory_;
   private: common::ComPtr<IWICImagingFactory> image_factory_;
 
-  public: FactorySet();
-  public: ~FactorySet() {}
-  public: static FactorySet& instance();
+  private: FactorySet();
+  public: ~FactorySet() = default;
   public: static ID2D1Factory& d2d1() {
-    return *instance().d2d1_factory_;
+    return *instance()->d2d1_factory_;
   }
   public: static IDWriteFactory& dwrite() {
-    return *instance().dwrite_factory_;
+    return *instance()->dwrite_factory_;
   }
   public: static IWICImagingFactory& image() {
-    return *instance().image_factory_;
+    return *instance()->image_factory_;
   }
 
   public: static SizeF AlignToPixel(const SizeF& size) {
-    return instance().DpiHandler::AlignToPixel(size);
+    return instance()->DpiHandler::AlignToPixel(size);
   }
   public: static SizeF CeilToPixel(const SizeF& size) {
-    return instance().DpiHandler::CeilToPixel(size);
+    return instance()->DpiHandler::CeilToPixel(size);
   }
   DISALLOW_COPY_AND_ASSIGN(FactorySet);
 };

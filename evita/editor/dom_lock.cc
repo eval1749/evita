@@ -77,24 +77,24 @@ DomLock::DomLock() : locked_(false) {
 }
 
 DomLock* DomLock::instance() {
-  return Application::instance().dom_lock();
+  return Application::instance()->dom_lock();
 }
 
 void DomLock::Lock() {
   DCHECK(thread_checker_.CalledOnValidThread());
-  dom::Lock::instance().lock()->Acquire();
+  dom::Lock::instance()->lock()->Acquire();
   locked_ = true;
 }
 
 bool DomLock::TryLock() {
   DCHECK(thread_checker_.CalledOnValidThread());
-  locked_ = dom::Lock::instance().lock()->Try();
+  locked_ = dom::Lock::instance()->lock()->Try();
   return locked_;
 }
 
 void DomLock::Unlock() {
   DCHECK(thread_checker_.CalledOnValidThread());
-  dom::Lock::instance().lock()->Release();
+  dom::Lock::instance()->lock()->Release();
   locked_ = false;
 }
 

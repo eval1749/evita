@@ -38,7 +38,7 @@ class Initializer {
         v8::Context::Scope context_scope(context);
         InstallConstructor(global, Editor::GetConstructor(isolate));
         global->Set(gin::StringToV8(isolate, "editor"),
-            Editor::instance().GetWrapper(isolate));
+            Editor::instance()->GetWrapper(isolate));
     }
 
     global_template.Reset(isolate, global);
@@ -178,7 +178,7 @@ void ScriptController::Evaluate(
 static void HackEvaluate(
     base::string16 script_text,
     base::Callback<void(EvaluateResult)> callback) {
-  ScriptController::instance().Evaluate(script_text, callback);
+  ScriptController::instance()->Evaluate(script_text, callback);
 }
 
 // ScriptController::User
@@ -186,7 +186,7 @@ void ScriptController::User::Evaluate(
     base::string16 script_text,
     base::Callback<void(EvaluateResult)> callback) {
   DCHECK(thread_checker_.CalledOnValidThread());
-  ScriptThread::instance().PostTask(
+  ScriptThread::instance()->PostTask(
       FROM_HERE,
       base::Bind(HackEvaluate, script_text, callback));
 }

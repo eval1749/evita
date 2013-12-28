@@ -38,13 +38,13 @@ AbstractScriptWrappable::~AbstractScriptWrappable() {
 }
 
 v8::Handle<v8::Function> AbstractScriptWrappable::GetConstructorImpl(
-    v8::Isolate* isolate, ScriptWrapperInfo* info) {
+    v8::Isolate* isolate, WrapperInfo* info) {
   return GetFunctionTemplateImpl(isolate, info)->GetFunction();
 }
 
 v8::Handle<v8::FunctionTemplate>
     AbstractScriptWrappable::GetFunctionTemplateImpl(
-        v8::Isolate* isolate, ScriptWrapperInfo* info) {
+        v8::Isolate* isolate, WrapperInfo* info) {
   auto const data = gin::PerIsolateData::From(isolate);
   auto present = data->GetFunctionTemplate(info->gin_wrapper_info());
   if (!present.IsEmpty())

@@ -11,8 +11,8 @@ namespace dom {
 Editor::Editor() {
 }
 
-v8_glue::ScriptWrapperInfo* Editor::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(v8_glue::ScriptWrapperInfo, wrapper_info, ("Editor"));
+v8_glue::WrapperInfo* Editor::static_wrapper_info() {
+  DEFINE_STATIC_LOCAL(v8_glue::WrapperInfo, wrapper_info, ("Editor"));
   return &wrapper_info;
 }
 

@@ -5,7 +5,7 @@
 #define INCLUDE_evita_v8_glue_script_wrappable_h
 
 #include "evita/gc/collectable.h"
-#include "evita/v8_glue/script_wrapper_info.h"
+#include "evita/v8_glue/wrapper_info.h"
 BEGIN_V8_INCLUDE
 #include "gin/object_template_builder.h"
 END_V8_INCLUDE
@@ -24,13 +24,13 @@ class AbstractScriptWrappable
   }
 
   protected: virtual const char* wrapper_class_name() const { return nullptr; }
-  protected: virtual ScriptWrapperInfo* wrapper_info() const = 0;
+  protected: virtual WrapperInfo* wrapper_info() const = 0;
 
   protected: static v8::Handle<v8::Function>
-      GetConstructorImpl(v8::Isolate* isolate, ScriptWrapperInfo* info);
+      GetConstructorImpl(v8::Isolate* isolate, WrapperInfo* info);
 
   protected: static v8::Handle<v8::FunctionTemplate> GetFunctionTemplateImpl(
-      v8::Isolate* isolate, ScriptWrapperInfo* info);
+      v8::Isolate* isolate, WrapperInfo* info);
 
   protected: virtual gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
       v8::Isolate* isolate);
@@ -48,7 +48,7 @@ class ScriptWrappable : public AbstractScriptWrappable {
   protected: ScriptWrappable() = default;
   protected: virtual ~ScriptWrappable() = default;
 
-  private: ScriptWrapperInfo* wrapper_info() const {
+  private: WrapperInfo* wrapper_info() const {
     return T::static_wrapper_info();
   }
 
@@ -58,7 +58,7 @@ class ScriptWrappable : public AbstractScriptWrappable {
   }
 
   // A helper function to get ObjecTemplateBuilder from
-  // AbstractScriptWrappable to avoid v8_glue::ScriptWrapperInfo<T> prefix.
+  // AbstractScriptWrappable to avoid v8_glue::WrapperInfo<T> prefix.
   protected: gin::ObjectTemplateBuilder GetEmptyObjectTemplateBuilder(
       v8::Isolate* isolate) {
     return AbstractScriptWrappable::GetObjectTemplateBuilder(isolate);

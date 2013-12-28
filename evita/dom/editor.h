@@ -18,7 +18,7 @@ class Editor : public common::Singleton<Editor>,
   private: Editor();
   public: virtual ~Editor() = default;
 
-  public: static v8_glue::ScriptWrapperInfo* static_wrapper_info();
+  public: static v8_glue::WrapperInfo* static_wrapper_info();
   public: const base::string16& version() const;
 
   // [G]

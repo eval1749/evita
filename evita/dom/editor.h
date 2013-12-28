@@ -7,12 +7,12 @@
 
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
-#include "evita/v8_glue/script_wrappable.h"
+#include "evita/v8_glue/scriptable.h"
 
 namespace dom {
 
 class Editor : public common::Singleton<Editor>,
-               public v8_glue::ScriptWrappable<Editor> {
+               public v8_glue::Scriptable<Editor> {
   friend class common::Singleton<Editor>;
 
   private: Editor();

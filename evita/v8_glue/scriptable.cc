@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/v8_glue/script_wrappable.h"
+#include "evita/v8_glue/scriptable.h"
 
 #include "base/logging.h"
 #include "evita/gc/collector.h"
@@ -33,17 +33,17 @@ void constructorCallBack(const v8::FunctionCallbackInfo<v8::Value>& info) {
 
 }  // namespace
 
-AbstractScriptWrappable::~AbstractScriptWrappable() {
+AbstractScriptable::~AbstractScriptable() {
   wrapper_.Reset();
 }
 
-v8::Handle<v8::Function> AbstractScriptWrappable::GetConstructorImpl(
+v8::Handle<v8::Function> AbstractScriptable::GetConstructorImpl(
     v8::Isolate* isolate, WrapperInfo* info) {
   return GetFunctionTemplateImpl(isolate, info)->GetFunction();
 }
 
 v8::Handle<v8::FunctionTemplate>
-    AbstractScriptWrappable::GetFunctionTemplateImpl(
+    AbstractScriptable::GetFunctionTemplateImpl(
         v8::Isolate* isolate, WrapperInfo* info) {
   auto const data = gin::PerIsolateData::From(isolate);
   auto present = data->GetFunctionTemplate(info->gin_wrapper_info());
@@ -61,7 +61,7 @@ v8::Handle<v8::FunctionTemplate>
   return templ;
 }
 
-gin::ObjectTemplateBuilder AbstractScriptWrappable::GetObjectTemplateBuilder(
+gin::ObjectTemplateBuilder AbstractScriptable::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
   if (!wrapper_class_name())
     return gin::ObjectTemplateBuilder(isolate);
@@ -69,7 +69,7 @@ gin::ObjectTemplateBuilder AbstractScriptWrappable::GetObjectTemplateBuilder(
   return gin::ObjectTemplateBuilder(isolate, templ->InstanceTemplate());
 }
 
-v8::Handle<v8::Object> AbstractScriptWrappable::GetWrapper(
+v8::Handle<v8::Object> AbstractScriptable::GetWrapper(
     v8::Isolate* isolate) {
   if (!wrapper_.IsEmpty())
     return v8::Local<v8::Object>::New(isolate, wrapper_);
@@ -95,8 +95,8 @@ v8::Handle<v8::Object> AbstractScriptWrappable::GetWrapper(
   return wrapper;
 }
 
-void AbstractScriptWrappable::WeakCallback(
-    const v8::WeakCallbackData<v8::Object, AbstractScriptWrappable>& data) {
+void AbstractScriptable::WeakCallback(
+    const v8::WeakCallbackData<v8::Object, AbstractScriptable>& data) {
   auto const wrappable = data.GetParameter();
   wrappable->wrapper_.Reset();
   gc::Collector::instance()->RemoveFromRootSet(wrappable);

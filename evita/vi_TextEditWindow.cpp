@@ -618,13 +618,6 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
       return 0;
     }
 
-    case WM_USER: {
-      gfx::Graphics::DrawingScope drawing_scope(*m_gfx);
-      m_pPage->Reset();
-      m_pPage->Render(*m_gfx);
-      return 0;
-    }
-
     case WM_SIZE:
       #if DEBUG_RESIZE
         DEBUG_TEXT_EDIT_PRINTF("WM_SIZE %dx%d\n",

@@ -8,8 +8,7 @@
 
 namespace dom {
 
-Editor::Editor()
-    : lock_(new base::Lock()) {
+Editor::Editor() {
 }
 
 v8_glue::ScriptWrapperInfo* Editor::static_wrapper_info() {

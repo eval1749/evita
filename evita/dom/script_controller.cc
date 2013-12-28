@@ -10,6 +10,7 @@
 #pragma warning(pop)
 #include "base/threading/thread.h"
 #include "evita/dom/editor.h"
+#include "evita/dom/lock.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/per_isolate_data.h"
 BEGIN_V8_INCLUDE

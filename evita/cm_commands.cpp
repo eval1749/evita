@@ -14,7 +14,7 @@
 
 #include "base/bind.h"
 #include "./ed_Mode.h"
-#include "evita/dom/editor.h"
+#include "evita/dom/lock.h"
 #include "evita/v8_glue/v8_console_buffer.h"
 #include "evita/editor/application.h"
 #include "./vi_Buffer.h"

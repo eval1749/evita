@@ -16,7 +16,7 @@
 
 #include "base/logging.h"
 #include "evita/content/content_window.h"
-#include "evita/dom/editor.h"
+#include "evita/dom/lock.h"
 #include "./ed_Mode.h"
 #include "./gfx_base.h"
 #include "evita/editor/application.h"

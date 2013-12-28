@@ -26,7 +26,7 @@
 #include "./ed_Mode.h"
 #include "./ed_Style.h"
 #include "./gfx_base.h"
-#include "evita/dom/editor.h"
+#include "evita/dom/lock.h"
 #include "evita/editor/application.h"
 #include "./vi_Buffer.h"
 #include "./vi_Caret.h"
@@ -74,7 +74,7 @@ class TextEditWindow::Autoscroller {
       DEBUG_PRINTF("dir=%d am=%d duration=%dms\n",
         direction_, scroll_amount, duration);
     #endif
-    base::AutoLock auto_lock(*dom::Editor::instance().lock());
+    DOM_AUTO_LOCK_SCOPE();
     if (Scroll(scroll_amount))
       editor_->Redraw();
     else

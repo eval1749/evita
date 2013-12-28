@@ -13,7 +13,7 @@
 
 #include "./ed_util.h"
 
-#include "evita/dom/editor.h"
+#include "evita/dom/lock.h"
 #include "evita/editor/application.h"
 #include "./vi_Buffer.h"
 #include "./vi_EditPane.h"

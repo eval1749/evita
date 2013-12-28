@@ -11,6 +11,8 @@
 #include "base/run_loop.h"
 #include "base/strings/string16.h"
 #include "base/time/time.h"
+#include "common/memory/scoped_change.h"
+#include "evita/editor/dom_lock.h"
 #include "evita/ed_Mode.h"
 #include "evita/vi_Buffer.h"
 #include "evita/vi_EditPane.h"
@@ -36,7 +38,9 @@ Application::Application()
     : newline_mode_(NewlineMode_CrLf),
       code_page_(932),
       active_frame_(nullptr),
+      idle_count_(0),
       is_quit_(false),
+      dom_lock_(new editor::DomLock()),
       io_manager_(new IoManager()),
       message_loop_(new base::MessageLoop(base::MessageLoop::TYPE_UI)) {
   Command::Processor::GlobalInit();
@@ -93,17 +97,17 @@ Frame* Application::DeleteFrame(Frame* frame) {
 }
 
 void Application::DoIdle() {
-  static int idle_count;
+  static int idle_count_;
   #if DEBUG_IDLE
-    DVLOG(4) << "idle_count=" << idle_count << " running=" <<
+    DVLOG(4) << "idle_count_=" << idle_count_ << " running=" <<
         message_loop_->is_running();
   #endif
-  if (OnIdle(idle_count)) {
-    ++idle_count;
+  if (TryDoIdle()) {
+    ++idle_count_;
     message_loop_->PostTask(FROM_HERE, base::Bind(&Application::DoIdle,
                                                   base::Unretained(this)));
   } else {
-    idle_count= 0;
+    idle_count_= 0;
     message_loop_->PostNonNestableDelayedTask(FROM_HERE,
         base::Bind(&Application::DoIdle, base::Unretained(this)),
         base::TimeDelta::FromMilliseconds(1000 / 60));
@@ -221,9 +225,14 @@ void Application::PostTask(const tracked_objects::Location& from_here,
   message_loop_->PostTask(from_here, task);
 }
 
+static void RunTaskWithinDomLock(const base::Closure& task) {
+  UI_DOM_AUTO_LOCK_SCOPE();
+  task.Run();
+}
+
 void Application::PostDomTask(const tracked_objects::Location& from_here,
                               const base::Closure& task) {
-  message_loop_->PostTask(from_here, task);
+  message_loop_->PostTask(from_here, base::Bind(RunTaskWithinDomLock, task));
 }
 
 
@@ -299,4 +308,12 @@ bool Application::SaveBuffer(Frame* frame, Buffer* buffer, bool is_save_as) {
 
 void Application::ShowMessage(MessageLevel iLevel, uint nFormatId) {
   GetActiveFrame()->ShowMessage(iLevel, nFormatId);
+}
+
+// TryDoIdle() returns true if more works are needed.
+bool Application::TryDoIdle() {
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(dom_lock);
+  if (!dom_lock.locked())
+    return true;
+  return OnIdle(idle_count_);
 }

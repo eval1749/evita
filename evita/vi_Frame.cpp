@@ -17,6 +17,10 @@
 #define DEBUG_WINDOWPOS 0
 #include "./vi_Frame.h"
 
+#pragma warning(push)
+#pragma warning(disable: 4625)
+#include "base/bind.h"
+#pragma warning(pop)
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "common/tree/ancestors_or_self.h"
@@ -26,6 +30,7 @@
 #include "./gfx_base.h"
 #include "./vi_defs.h"
 #include "evita/editor/application.h"
+#include "evita/editor/dom_lock.h"
 #include "./vi_Buffer.h"
 #include "./vi_EditPane.h"
 #include "./vi_Pane.h"
@@ -262,7 +267,8 @@ void Frame::DidChangeTabSelection(int selected_index) {
   m_pActivePane = pane;
   pane->Show();
   pane->Activate();
-  updateTitleBar();
+  Application::instance().PostDomTask(FROM_HERE,
+      base::Bind(&Frame::updateTitleBar, base::Unretained(this)));
   #if DEBUG_FOCUS
     DEBUG_WIDGET_PRINTF("End selected_index=%d"
         " cur=" DEBUG_WIDGET_FORMAT
@@ -353,6 +359,7 @@ void Frame::DidResize() {
 
   gfx_->Resize(rect());
   {
+    UI_DOM_AUTO_LOCK_SCOPE();
     gfx::Graphics::DrawingScope drawing_scope(*gfx_);
     (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::Green));
 

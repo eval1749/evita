@@ -13,8 +13,8 @@
 
 #include "./ed_util.h"
 
-#include "evita/dom/lock.h"
 #include "evita/editor/application.h"
+#include "evita/editor/dom_lock.h"
 #include "./vi_Buffer.h"
 #include "./vi_EditPane.h"
 #include "./vi_Selection.h"
@@ -169,7 +169,7 @@ void Processor::Execute(
     case Bind_Command:
         m_pThisCommand = pEntry->StaticCast<Command>();
         {
-          DOM_AUTO_LOCK_SCOPE();
+          UI_DOM_AUTO_LOCK_SCOPE();
           pEntry->StaticCast<Command>()->Execute(this);
         }
         m_pLastCommand = m_pThisCommand;

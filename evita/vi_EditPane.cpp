@@ -236,11 +236,6 @@ void DrawSplitter(const gfx::Graphics& gfx, RECT* prc,
   //::DrawEdge(gfx, &rc, EDGE_RAISED, grfFlag);
 }
 
-TextEditWindow* CloneTextEditWindow(const TextEditWindow& window) {
-  DOM_AUTO_LOCK_SCOPE();
-  return window.Clone();
-}
-
 } // namesapce
 
 //
@@ -490,7 +485,7 @@ EditPane::LeafBox& EditPane::HorizontalLayoutBox::Split(
   ASSERT(prcBelow->right - prcBelow->left > cxBox);
   DCHECK_EQ(pBelow->GetWindow()->container_widget(), edit_pane_);
 
-  auto const pWindow = CloneTextEditWindow(*below);
+  auto const pWindow = below->Clone();
   edit_pane_->AppendChild(*pWindow);
 
   auto const pAbove = new LeafBox(edit_pane_, this, pWindow);
@@ -1078,7 +1073,7 @@ EditPane::LeafBox& EditPane::VerticalLayoutBox::Split(
   ASSERT(prcBelow->bottom - prcBelow->top > cyBox);
   DCHECK_EQ(pBelow->GetWindow()->container_widget(), edit_pane_);
 
-  auto const pWindow = CloneTextEditWindow(*below);
+  auto const pWindow = below->Clone();
   edit_pane_->AppendChild(*pWindow);
 
   auto const pAbove = new LeafBox(edit_pane_, this, pWindow);

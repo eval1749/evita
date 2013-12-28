@@ -127,6 +127,8 @@ class TextEditWindow
   protected: Posn endOfLineAux(const gfx::Graphics&, Posn);
 
   // [F]
+  private: void ForceRedraw();
+  private: void ForceRedrawLater();
   protected: void format(const gfx::Graphics&, Posn);
 
   // [G]

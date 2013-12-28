@@ -21,13 +21,17 @@
 #define DEBUG_SHOW_HIDE 0
 #include "./vi_TextEditWindow.h"
 
+#pragma warning(push)
+#pragma warning(disable: 4625)
+#include "base/bind.h"
+#pragma warning(pop)
 #include "base/logging.h"
 #include "common/timer/timer.h"
 #include "./ed_Mode.h"
 #include "./ed_Style.h"
 #include "./gfx_base.h"
-#include "evita/dom/lock.h"
 #include "evita/editor/application.h"
+#include "evita/editor/dom_lock.h"
 #include "./vi_Buffer.h"
 #include "./vi_Caret.h"
 #include "./vi_EditPane.h"
@@ -74,7 +78,7 @@ class TextEditWindow::Autoscroller {
       DEBUG_PRINTF("dir=%d am=%d duration=%dms\n",
         direction_, scroll_amount, duration);
     #endif
-    DOM_AUTO_LOCK_SCOPE();
+    UI_ASSERT_DOM_LOCKED();
     if (Scroll(scroll_amount))
       editor_->Redraw();
     else
@@ -179,7 +183,7 @@ void TextEditWindow::Blink(Posn posn, int interval_ms) {
 }
 
 TextEditWindow* TextEditWindow::Clone() const {
-  ASSERT_DOM_IS_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   auto const window = new TextEditWindow(GetBuffer(), m_pPage->GetStart());
   window->selection_->SetRange(selection_->GetStart(), selection_->GetEnd());
   window->selection_->SetStartIsActive(selection_->IsStartActive());
@@ -214,7 +218,7 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
 Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
                                     const gfx::PointF& pt,
                                     Posn* inout_lPosn)  {
-  ASSERT_DOM_IS_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   switch (eUnit) {
     case Unit_Line:
       if (n > 0) {
@@ -318,8 +322,7 @@ void TextEditWindow::DidResize() {
     DEBUG_TEXT_EDIT_PRINTF("focus=%d show=%d " DEBUG_RECT_FORMAT "\n",
         has_focus(), is_shown(), DEBUG_RECT_ARG(rect()));
   #endif
-  m_pPage->Reset();
-  Redraw();
+  ForceRedrawLater();
 }
 
 void TextEditWindow::DidSetFocus() {
@@ -344,7 +347,7 @@ void TextEditWindow::DidShow() {
 }
 
 Posn TextEditWindow::EndOfLine(Posn lPosn) {
-  ASSERT_DOM_IS_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   if (!m_pPage->IsDirty(rect(), *selection_)) {
     auto const pLine = m_pPage->FindLine(lPosn);
     if (pLine)
@@ -356,7 +359,7 @@ Posn TextEditWindow::EndOfLine(Posn lPosn) {
 }
 
 Posn TextEditWindow::endOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
-  ASSERT_DOM_IS_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   auto const lBufEnd = selection_->GetBuffer()->GetEnd();
   if (lPosn >= lBufEnd)
     return lBufEnd;
@@ -372,6 +375,21 @@ Posn TextEditWindow::endOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
   }
 }
 
+void TextEditWindow::ForceRedraw() {
+  UI_ASSERT_DOM_LOCKED();
+  m_pPage->Reset();
+  Redraw();
+}
+
+void TextEditWindow::ForceRedrawLater() {
+  if (editor::DomLock::instance()->locked()) {
+    ForceRedraw();
+    return;
+  }
+  Application::instance().PostDomTask(FROM_HERE,
+      base::Bind(&TextEditWindow::ForceRedraw, base::Unretained(this)));
+}
+
 void TextEditWindow::format(const gfx::Graphics& gfx, Posn lStart) {
   m_pPage->Format(gfx, gfx::RectF(rect()), *selection_, lStart);
 }
@@ -381,7 +399,7 @@ Buffer* TextEditWindow::GetBuffer() const {
 }
 
 Count TextEditWindow::GetColumn(Posn lPosn) {
-  ASSERT_DOM_IS_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   auto const lStart = StartOfLine(lPosn);
   return lPosn - lStart;
 }
@@ -392,7 +410,7 @@ HCURSOR TextEditWindow::GetCursorAt(const Point&) const {
 
 // For Selection.MoveDown Screen
 Posn TextEditWindow::GetEnd() {
-  ASSERT_DOM_IS_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   updateScreen();
   return m_pPage->GetEnd();
 }
@@ -405,13 +423,13 @@ HWND TextEditWindow::GetScrollBarHwnd(int nBar) const {
 
 //For Selection.MoveUp Screen
 Posn TextEditWindow::GetStart() {
-  ASSERT_DOM_IS_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   updateScreen();
   return m_pPage->GetStart();
 }
 
 int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
-  ASSERT_DOM_IS_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   updateScreen();
 
   auto k = 0;
@@ -497,7 +515,7 @@ Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
 // returns 0.
 gfx::RectF TextEditWindow::MapPosnToPoint(Posn lPosn) {
   DCHECK_GE(lPosn, 0);
-  ASSERT_DOM_IS_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   updateScreen();
   for (;;) {
     if (auto rect = m_pPage->MapPosnToPoint(*m_gfx, lPosn))
@@ -519,7 +537,7 @@ bool TextEditWindow::OnIdle(uint count) {
 }
 
 void TextEditWindow::OnLeftButtonDown(uint flags, const Point& point) {
-  DOM_AUTO_LOCK_SCOPE();
+  UI_DOM_AUTO_LOCK_SCOPE();
   auto const lPosn = MapPointToPosn(point);
   #if DEBUG_FOCUS
     DEBUG_TEXT_EDIT_PRINTF(DEBUG_POINT_FORMAT " focus=%d show=%d p=%d\n",
@@ -604,7 +622,7 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
     }
 
     case WM_LBUTTONDBLCLK: {
-      DOM_AUTO_LOCK_SCOPE();
+      UI_DOM_AUTO_LOCK_SCOPE();
       Point pt(MAKEPOINTS(lParam));
       auto const lPosn = MapPointToPosn(pt);
       if (lPosn >= 0)
@@ -613,7 +631,7 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
     }
 
     case WM_MOUSEWHEEL: {
-      DOM_AUTO_LOCK_SCOPE();
+      UI_DOM_AUTO_LOCK_SCOPE();
       SmallScroll(0, GET_WHEEL_DELTA_WPARAM(wParam) > 0 ? -2 : 2);
       return 0;
     }
@@ -640,6 +658,7 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
 
     case WM_IME_REQUEST:
       if (IMR_RECONVERTSTRING == wParam) {
+          UI_DOM_AUTO_LOCK_SCOPE();
           return static_cast<LRESULT>(setReconvert(
               reinterpret_cast<RECONVERTSTRING*>(lParam),
               GetSelection()->GetStart(),
@@ -655,6 +674,7 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
 
     case WM_IME_STARTCOMPOSITION:
       if (!m_fImeTarget) {
+        UI_DOM_AUTO_LOCK_SCOPE();
         m_lImeStart = GetSelection()->GetStart();
         m_lImeEnd = m_lImeStart;
         m_fImeTarget = false;
@@ -677,7 +697,7 @@ void TextEditWindow::OnMouseMove(uint, const Point& point) {
     return;
   }
 
-  DOM_AUTO_LOCK_SCOPE();
+  UI_DOM_AUTO_LOCK_SCOPE();
   auto const lPosn = MapPointToPosn(point);
   if (lPosn >= 0)
     selection_->MoveTo(lPosn, true);
@@ -696,12 +716,11 @@ void TextEditWindow::OnMouseMove(uint, const Point& point) {
 }
 
 void TextEditWindow::OnPaint(const gfx::Rect) {
-  m_pPage->Reset();
-  Redraw();
+  ForceRedrawLater();
 }
 
 void TextEditWindow::onVScroll(uint nCode) {
-  DOM_AUTO_LOCK_SCOPE();
+  UI_DOM_AUTO_LOCK_SCOPE();
 
   switch (nCode) {
     case SB_ENDSCROLL: // 8
@@ -753,7 +772,7 @@ void TextEditWindow::Redraw() {
       fSelectionIsActive = edit_pane->GetActiveWindow() == this;
   }
 
-  DOM_AUTO_LOCK_SCOPE();
+  UI_ASSERT_DOM_LOCKED();
 
   #if DEBUG_REDRAW
     DEBUG_TEXT_EDIT_PRINTF(DEBUG_RECT_FORMAT
@@ -899,7 +918,7 @@ void TextEditWindow::Render() {
 }
 
 void TextEditWindow::selectWord(Posn lPosn) {
-  DOM_AUTO_LOCK_SCOPE();
+  UI_ASSERT_DOM_LOCKED();
   auto const pSelection = GetSelection();
   pSelection->SetStart(lPosn);
   pSelection->StartOf(Unit_Word);
@@ -913,7 +932,7 @@ void TextEditWindow::SetScrollBar(HWND hwnd, int nBar) {
 }
 
 int TextEditWindow::SmallScroll(int, int iDy) {
-  ASSERT_DOM_IS_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   updateScreen();
 
   if (iDy < 0) {
@@ -962,7 +981,7 @@ int TextEditWindow::SmallScroll(int, int iDy) {
 }
 
 Posn TextEditWindow::StartOfLine(Posn lPosn) {
-  ASSERT_DOM_IS_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   return lPosn <= 0 ? 0 : startOfLineAux(*m_gfx, lPosn);
 }
 
@@ -1002,7 +1021,7 @@ void TextEditWindow::stopDrag() {
 }
 
 void TextEditWindow::updateScreen() {
-  ASSERT_DOM_IS_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   if (!m_pPage->IsDirty(rect(), *selection_))
     return;
 
@@ -1090,7 +1109,7 @@ void TextEditWindow::UpdateStatusBar() const {
         buffer.IsNotReady() ? IDS_STATUS_BUSY : has_focus() ?
             IDS_STATUS_READY : 0));
 
-  DOM_AUTO_LOCK_SCOPE();
+  UI_ASSERT_DOM_LOCKED();
 
   frame.SetStatusBarf(
       StatusBarPart_Mode,
@@ -1172,11 +1191,13 @@ class Imc {
 };
 
 void TextEditWindow::onImeComposition(LPARAM lParam) {
+  UI_DOM_AUTO_LOCK_SCOPE();
+
   Imc imc(AssociatedHwnd());
   if (!imc)
     return;
 
-  DOM_AUTO_LOCK_SCOPE();
+  UI_ASSERT_DOM_LOCKED();
   Edit::UndoBlock oUndo(GetSelection(), L"IME");
 
   char16 rgwch[1024];
@@ -1378,6 +1399,8 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
 // o We should limit number of characters to be reconverted.
 //
 void TextEditWindow::Reconvert(Posn lStart, Posn lEnd) {
+  UI_ASSERT_DOM_LOCKED();
+
   BOOL fSucceeded;
 
   auto const cb = setReconvert(nullptr, lStart, lEnd);
@@ -1427,6 +1450,7 @@ void TextEditWindow::Reconvert(Posn lStart, Posn lEnd) {
 uint TextEditWindow::setReconvert(RECONVERTSTRING* p, Posn lStart,
                                   Posn lEnd) {
   ASSERT(lEnd >= lStart);
+  UI_ASSERT_DOM_LOCKED();
   auto const cwch = lEnd - lStart;
   if (!p || !cwch)
     return 0;

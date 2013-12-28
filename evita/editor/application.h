@@ -22,6 +22,10 @@ namespace base {
 class MessageLoop;
 }
 
+namespace editor {
+class DomLock;
+}
+
 class Application : public Command::Processor,
                     public common::Singleton<Application> {
   protected: typedef DoubleLinkedList_<Frame> Frames;
@@ -32,7 +36,9 @@ class Application : public Command::Processor,
   private: Buffers buffers_;
   private: Frames frames_;
   private: Frame* active_frame_;
+  private: int idle_count_;
   private: bool is_quit_;
+  private: std::unique_ptr<editor::DomLock> dom_lock_;
   private: std::unique_ptr<IoManager> io_manager_;
   private: std::unique_ptr<base::MessageLoop> message_loop_;
 
@@ -45,6 +51,7 @@ class Application : public Command::Processor,
   public: Buffers& buffers() { return buffers_; }
   public: const Frames& frames() const { return frames_; }
   public: Frames& frames() { return frames_; }
+  public: editor::DomLock* dom_lock() const { return dom_lock_.get(); }
   public: const base::string16& title() const;
   public: const base::string16& version() const;
 
@@ -118,6 +125,9 @@ class Application : public Command::Processor,
   }
 
   public: void ShowMessage(MessageLevel, uint);
+
+  // [T]
+  private: bool TryDoIdle();
 
   DISALLOW_COPY_AND_ASSIGN(Application);
 };

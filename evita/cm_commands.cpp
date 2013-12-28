@@ -14,7 +14,7 @@
 
 #include "base/bind.h"
 #include "./ed_Mode.h"
-#include "evita/dom/lock.h"
+#include "evita/editor/dom_lock.h"
 #include "evita/v8_glue/v8_console_buffer.h"
 #include "evita/editor/application.h"
 #include "./vi_Buffer.h"
@@ -1128,7 +1128,7 @@ DEFCOMMAND(Reload)
 
     int iAnswer;
     {
-      DOM_AUTO_UNLOCK_SCOPE();
+      UI_DOM_AUTO_UNLOCK_SCOPE();
       iAnswer = Application::Get()->Ask(
           MB_YESNO | MB_ICONQUESTION,
           IDS_ASK_RELOAD,

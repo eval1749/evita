@@ -103,6 +103,9 @@ class Application : public Command::Processor,
   public: void PostTask(const tracked_objects::Location& from_here,
                         const base::Closure& task);
 
+  public: void PostDomTask(const tracked_objects::Location& from_here,
+                           const base::Closure& task);
+
   // [R]
   public: Buffer* RenameBuffer(Buffer* buffer, const char16* new_name);
   public: void Run();

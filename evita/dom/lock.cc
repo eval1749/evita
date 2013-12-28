@@ -6,7 +6,9 @@
 namespace dom {
 
 Lock::Lock()
-    : lock_(new base::Lock()) {
+    : lock_(new base::Lock()),
+      locker_filename_(nullptr),
+      locker_line_number_(0) {
 }
 
 }  // namespace dom

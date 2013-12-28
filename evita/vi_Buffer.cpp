@@ -29,9 +29,9 @@ bool Buffer::CanKill()
         L"Do you want to save the changes to %s?",
         GetName() );
 
-    Frame* pFrame = Application::Get()->GetActiveFrame();
+    Frame* pFrame = Application::instance()->GetActiveFrame();
 
-    int iAnswer = Application::Get()->Ask(
+    int iAnswer = Application::instance()->Ask(
         MB_ICONWARNING | MB_YESNOCANCEL,
         IDS_ASK_SAVE,
         GetName() );
@@ -42,7 +42,7 @@ bool Buffer::CanKill()
         return false;
 
     case IDYES:
-        if (! Application::Get()->SaveBuffer(pFrame, this))
+        if (! Application::instance()->SaveBuffer(pFrame, this))
         {
             return false;
         }

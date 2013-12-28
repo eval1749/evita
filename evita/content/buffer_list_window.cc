@@ -105,10 +105,10 @@ void BufferListWindow::ActivateBuffers(bool is_new_frame) {
     auto const buffer = reinterpret_cast<Buffer*>(oItem.lParam);
 
     // Make sure buffer is alive.
-    for (auto& runner: Application::Get()->buffers()) {
+    for (auto& runner: Application::instance()->buffers()) {
       if (runner == buffer) {
         if (is_new_frame) {
-          auto const frame = Application::Get()->CreateFrame();
+          auto const frame = Application::instance()->CreateFrame();
           frame->AddWindow(new TextEditWindow(buffer));
           frame->Realize();
         } else {
@@ -139,12 +139,12 @@ void BufferListWindow::dragFinish(POINT pt) {
     return;
   auto const buffer = m_pDragItem;
   dragStop();
-  if (auto const pane = Application::Get()->FindPane(AssociatedHwnd(), pt)) {
+  if (auto const pane = Application::instance()->FindPane(AssociatedHwnd(), pt)) {
     // Drop to pane contains specified point.
     pane->GetFrame()->ShowBuffer(buffer);
   } else {
     // Create new fame
-    auto const frame = Application::Get()->CreateFrame();
+    auto const frame = Application::instance()->CreateFrame();
     frame->AddWindow(new TextEditWindow(buffer));
     frame->Realize();
   }
@@ -159,7 +159,7 @@ void BufferListWindow::dragMove(POINT pt) {
     return;
   }
 
-  auto const pPane = Application::Get()->FindPane(AssociatedHwnd(), pt);
+  auto const pPane = Application::instance()->FindPane(AssociatedHwnd(), pt);
 
   HCURSOR hCursor;
   if (pPane && pPane->Is<EditPane>())
@@ -182,7 +182,7 @@ void BufferListWindow::dragStart(int iItem) {
     return;
 
   auto const pBuffer = reinterpret_cast<Buffer*>(oItem.lParam);
-  for (auto& runner: Application::Get()->buffers()) {
+  for (auto& runner: Application::instance()->buffers()) {
     if (runner == pBuffer) {
         m_pDragItem = pBuffer;
         ::SetCursor(loadCursor(&sm_hDragCursor, L"ole32.dll", 3));
@@ -250,7 +250,7 @@ void BufferListWindow::DidCreateNativeWindow() {
                                     nullptr);
 
   ListView_SetExtendedListViewStyleEx(m_hwndListView, dwExStyle, dwExStyle);
-  ListView_SetImageList(m_hwndListView, Application::Get()->GetIconList(),
+  ListView_SetImageList(m_hwndListView, Application::instance()->GetIconList(),
                         LVSIL_SMALL);
 
   struct ColumnDef {
@@ -298,7 +298,7 @@ void BufferListWindow::onKeyDown(uint nVKey) {
   auto const nKey = Command::TranslateKey(nVKey);
   if (!nKey)
     return;
-  Application::Get()->Execute(this, nKey, 0);
+  Application::instance()->Execute(this, nKey, 0);
 }
 
 LRESULT BufferListWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -350,7 +350,7 @@ void BufferListWindow::OnPaint(const common::win::Rect) {
 void BufferListWindow::Redraw() {
   ListView_DeleteAllItems(m_hwndListView);
 
-  for (auto& buffer: Application::Get()->buffers()) {
+  for (auto& buffer: Application::instance()->buffers()) {
     LVITEM oItem;
     oItem.mask = LVIF_IMAGE | LVIF_PARAM | LVIF_TEXT;
 
@@ -451,7 +451,7 @@ DEFCOMMAND(KillBuffers) {
     if (!ListView_GetItem(hwndList, &oItem))
       continue;
     auto const pBuffer = reinterpret_cast<Buffer*>(oItem.lParam);
-    if (Application::Get()->KillBuffer(pBuffer))
+    if (Application::instance()->KillBuffer(pBuffer))
       fKilled = true;
   }
 
@@ -460,7 +460,7 @@ DEFCOMMAND(KillBuffers) {
 }
 
 DEFCOMMAND(ListBuffer) {
-  for (auto& frame: Application::Get()->frames()) {
+  for (auto& frame: Application::instance()->frames()) {
     for (auto& pane: frame.panes()) {
       if (auto const pPane = pane.as<BufferListWindow>()) {
         if (pPane->frame() != pCtx->GetFrame())

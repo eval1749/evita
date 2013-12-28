@@ -173,7 +173,7 @@ IoManager::FinishLoad(
     ::lstrcpyW(oParam.m_wszFileName, pwszFileName);
 
     ::SendMessage(
-        *Application::Get()->GetIoManager(),
+        *Application::instance()->GetIoManager(),
         Message_FinishLoad,
         0,
         reinterpret_cast<LPARAM>(&oParam) );
@@ -203,7 +203,7 @@ IoManager::FinishSave(
     ::lstrcpyW(oParam.m_wszFileName, pwszFileName);
 
     ::SendMessage(
-        *Application::Get()->GetIoManager(),
+        *Application::instance()->GetIoManager(),
         Message_FinishSave,
         0,
         reinterpret_cast<LPARAM>(&oParam) );
@@ -228,7 +228,7 @@ IoManager::InsertString(
     oParam.m_pwch    = pwch;
 
     ::SendMessage(
-        *Application::Get()->GetIoManager(),
+        *Application::instance()->GetIoManager(),
         Message_InsertString,
         0,
         reinterpret_cast<LPARAM>(&oParam) );
@@ -346,10 +346,10 @@ void IoManager::Realize()
 //
 void IoManager::visitFile(const char16* pwsz)
 {
-    Buffer* pBuffer = Application::Get()->Load(pwsz);
+    Buffer* pBuffer = Application::instance()->Load(pwsz);
 
     Pane* pPane = NULL;
-    Frame* pFrame = Application::Get()->GetActiveFrame();
+    Frame* pFrame = Application::instance()->GetActiveFrame();
     for (auto& pane: pFrame->panes()) {
         auto const pPresent = pane.DynamicCast<EditPane>();
         if (NULL == pPresent)

@@ -54,7 +54,7 @@ void Processor::Execute(
 
     if (NULL == pEditWindow)
     {
-        m_pFrame     = Application::Get()->GetActiveFrame();
+        m_pFrame     = Application::instance()->GetActiveFrame();
         m_pSelection = NULL;
     }
     else
@@ -215,7 +215,7 @@ void Processor::reportUnboundKeys()
 
     oSink.Add(static_cast<char16>(0));
 
-    Application::Get()->GetActiveFrame()->ShowMessage(
+    Application::instance()->GetActiveFrame()->ShowMessage(
         MessageLevel_Warning,
         IDS_NOT_COMMAND,
         oSink.GetStart() );

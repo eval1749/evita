@@ -586,7 +586,7 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
       char16 wch = static_cast<char16>(wParam);
       if (wch >= 0x20) {
         caret_blinker_.reset();
-        Application::Get()->Execute(
+        Application::instance()->Execute(
             this, wch,  static_cast<uint>(HIWORD(lParam) & KF_REPEAT));
       }
       break;
@@ -614,7 +614,7 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
       auto const nKey = Command::TranslateKey(nVKey);
       if (nKey) {
         caret_blinker_.reset();
-        Application::Get()->Execute(
+        Application::instance()->Execute(
             this, nKey, static_cast<uint>(HIWORD(lParam) & KF_REPEAT));
         return 0;
       }
@@ -766,7 +766,7 @@ void TextEditWindow::Redraw() {
   auto fSelectionIsActive = has_focus();
 
   if (g_hwndActiveDialog) {
-    auto const edit_pane = Application::Get()->GetActiveFrame()->
+    auto const edit_pane = Application::instance()->GetActiveFrame()->
         GetActivePane()->DynamicCast<EditPane>();
     if (edit_pane)
       fSelectionIsActive = edit_pane->GetActiveWindow() == this;

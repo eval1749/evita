@@ -194,13 +194,13 @@ void Frame::AddWindow(content::ContentWindow* window) {
 }
 
 bool Frame::canClose() {
-  if (Application::Get()->HasMultipleFrames()) {
+  if (Application::instance()->HasMultipleFrames()) {
     // Destroy this frame since we have multiple frames.
     return true;
   }
 
   // Can we exist applicaiton safety?
-  return Application::Get()->CanExit();
+  return Application::instance()->CanExit();
 }
 
 void Frame::DidActivatePane(Pane* const pane) {
@@ -299,7 +299,7 @@ void Frame::DidCreateNativeWindow() {
        TCM_SETIMAGELIST,
        0,
        reinterpret_cast<LPARAM>(
-          Application::Get()->GetIconList()));
+          Application::instance()->GetIconList()));
 
     RECT rc;
     ::GetWindowRect(m_hwndTabBand, &rc);
@@ -378,7 +378,7 @@ void Frame::DidSetFocus() {
     if (!m_pActivePane)
       return;
   }
-  Application::Get()->SetActiveFrame(this);
+  Application::instance()->SetActiveFrame(this);
   m_pActivePane->SetFocus();
 }
 
@@ -511,7 +511,7 @@ void Frame::onDropFiles(HDROP const hDrop) {
     if (!cwch)
       break;
 
-    auto const pBuffer = Application::Get()->Load(wsz);
+    auto const pBuffer = Application::instance()->Load(wsz);
     Pane* pPane = nullptr;
     for (auto& pane: m_oPanes) {
       auto const pEditPane = pane.DynamicCast<EditPane>();
@@ -585,7 +585,7 @@ bool Frame::OnIdle(uint const nCount) {
       // Prevent further obsolete checking.
       pBuffer->SetObsolete(Edit::Buffer::Obsolete_Ignore);
 
-      auto const iAnswer = Application::Get()->Ask(
+      auto const iAnswer = Application::instance()->Ask(
           MB_YESNO | MB_ICONWARNING | MB_SETFOREGROUND | MB_TOPMOST,
           IDS_ASK_REFRESH,
           pBuffer->GetName());
@@ -761,7 +761,7 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
 
 bool Frame::onTabDrag(TabBandDragAndDrop const eAction,
                       HWND const hwndTabBand) {
-  auto const pFrom = Application::Get()->FindFrame(::GetParent(hwndTabBand));
+  auto const pFrom = Application::instance()->FindFrame(::GetParent(hwndTabBand));
 
   if (!pFrom) {
     // We should not be here.
@@ -785,7 +785,7 @@ bool Frame::onTabDrag(TabBandDragAndDrop const eAction,
       break;
 
     case kThrow: {
-      auto const pNewFrame = Application::Get()->CreateFrame();
+      auto const pNewFrame = Application::instance()->CreateFrame();
       pNewFrame->AdoptPane(pPane);
       pNewFrame->Realize();
       break;

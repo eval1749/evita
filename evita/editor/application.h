@@ -79,7 +79,6 @@ class Application : public Command::Processor,
   public: Pane* FindPane(HWND hwnd, POINT point) const;
 
   // [G]
-  public: static Application* Get() { return instance(); }
   public: Frame* GetActiveFrame() const { return active_frame_; }
   public: uint GetCodePage() const { return code_page_; }
   public: Frame* GetFirstFrame() const { return frames_.GetFirst(); }

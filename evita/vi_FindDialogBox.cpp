@@ -39,7 +39,7 @@
 static Selection* getActiveSelection()
 {
     EditPane* pEditPane =
-        Application::Get()->GetActiveFrame()->GetActivePane()->
+        Application::instance()->GetActiveFrame()->GetActivePane()->
             DynamicCast<EditPane>();
 
     if (NULL == pEditPane)
@@ -70,7 +70,7 @@ FindDialogBox::FindDialogBox() :
 /// </summary>
 void FindDialogBox::clearMessage()
 {
-    Application::Get()->GetActiveFrame()->ShowMessage(MessageLevel_Warning);
+    Application::instance()->GetActiveFrame()->ShowMessage(MessageLevel_Warning);
 } // FindDialogBox::clearMesage
 
 /// <summary>
@@ -120,7 +120,7 @@ void FindDialogBox::DoFind(Direction eDirection)
         int nChar;
         if (int nError = oMatcher.GetError(&nChar))
         {
-            Application::Get()->GetActiveFrame()->ShowMessage(
+            Application::instance()->GetActiveFrame()->ShowMessage(
                 MessageLevel_Warning,
                 IDS_BAD_REGEX,
                 nChar,
@@ -296,7 +296,7 @@ void FindDialogBox::doReplace(uint nCtrl)
         } while (oMatcher.NextMatch());
     } // if
 
-    Application::Get()->GetActiveFrame()->ShowMessage(
+    Application::instance()->GetActiveFrame()->ShowMessage(
         MessageLevel_Information,
         IDS_REPLACED,
         cReplaced );
@@ -320,7 +320,7 @@ bool FindDialogBox::findFirst(
 
     if (pMatcher->WrapMatch())
     {
-        Application::Get()->ShowMessage(
+        Application::instance()->ShowMessage(
             MessageLevel_Warning,
             IDS_PASSED_END );
 
@@ -337,7 +337,7 @@ void FindDialogBox::onCancel()
 {
     clearMessage();
     ::ShowWindow(m_hwnd, SW_HIDE);
-    ::SetActiveWindow(*Application::Get()->GetActiveFrame());
+    ::SetActiveWindow(*Application::instance()->GetActiveFrame());
 } // FindDialogBox::onCancel
 
 /// <summary>
@@ -408,8 +408,8 @@ INT_PTR FindDialogBox::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         if (WA_INACTIVE == wParam)
         {
-            //::SetActiveWindow(*Application::Get()->GetActiveFrame());
-            //::SetFocus(*Application::Get()->GetActiveFrame());
+            //::SetActiveWindow(*Application::instance()->GetActiveFrame());
+            //::SetFocus(*Application::instance()->GetActiveFrame());
             return FALSE;
         }
 
@@ -424,8 +424,8 @@ INT_PTR FindDialogBox::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
             DEBUG_PRINTF("WM_WINDOWPOSCHANGED: %d %p SWP_HIDEWINDOW\n",
                 ::GetTickCount(), this );
-            //::SetActiveWindow(*Application::Get()->GetActiveFrame());
-            Application::Get()->GetActiveFrame()->GetActivePane()->SetFocus();
+            //::SetActiveWindow(*Application::instance()->GetActiveFrame());
+            Application::instance()->GetActiveFrame()->GetActivePane()->SetFocus();
             return TRUE;
         }
         break;
@@ -573,7 +573,7 @@ Selection* FindDialogBox::prepareFind(SearchParameters* pSearch)
 /// </summary>
 void FindDialogBox::reportNotFound()
 {
-    Application::Get()->GetActiveFrame()->ShowMessage(
+    Application::instance()->GetActiveFrame()->ShowMessage(
         MessageLevel_Warning,
         IDS_NOT_FOUND );
 } // FindDialogBox::reportNotFound

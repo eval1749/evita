@@ -82,7 +82,7 @@ KeyBinds* g_pGlobalBinds;
 
 static bool hasMoreThanOneWindow()
 {
-    Frame* pFrame = Application::Get()->GetFirstFrame();
+    Frame* pFrame = Application::instance()->GetFirstFrame();
     if (NULL == pFrame) return false;           // no frame
     if (NULL != pFrame->GetNext()) return true; // more than one frame
     return pFrame->first_child() != pFrame->last_child();
@@ -132,8 +132,8 @@ DEFCOMMAND(CapitalizeSelection)
 //
 DEFCOMMAND(CloseOtherFrames) {
     auto const active_frame = pCtx->GetFrame();
-    auto it = Application::Get()->frames().begin();
-    const auto end = Application::Get()->frames().end();
+    auto it = Application::instance()->frames().begin();
+    const auto end = Application::instance()->frames().end();
     while (it != end) {
       auto& frame = *it;
       ++it;
@@ -386,7 +386,7 @@ class DynamicAbbrev :
     // [I]
     private: bool isContinue()
     {
-        Application* const pApp = Application::Get();
+        Application* const pApp = Application::instance();
 
         if (pApp->GetThisCommand()  != pApp->GetLastCommand())
         {
@@ -579,7 +579,7 @@ DEFCOMMAND(ExchangeCode)
 
 DEFCOMMAND(Exit)
 {
-    Application::Get()->Exit(pCtx->HasArg());
+    Application::instance()->Exit(pCtx->HasArg());
 } // Exit
 
 
@@ -673,7 +673,7 @@ DEFCOMMAND(KillBuffer)
 {
     Selection* pSelection = pCtx->GetSelection();
     if (NULL == pCtx->GetSelection()) return;
-    Application::Get()->KillBuffer(pSelection->GetBuffer());
+    Application::instance()->KillBuffer(pSelection->GetBuffer());
 } // KillBuffer
 
 // [M]
@@ -714,7 +714,7 @@ static void newFile(const Context* pCtx, bool fNewFrame)
         }
     }
 
-    Buffer* pBuffer = Application::Get()->NewBuffer(
+    Buffer* pBuffer = Application::instance()->NewBuffer(
         oParam.m_pwszFile );
 
     FileTime ftZero;
@@ -722,7 +722,7 @@ static void newFile(const Context* pCtx, bool fNewFrame)
 
     if (fNewFrame)
     {
-        Frame* pFrame = Application::Get()->CreateFrame();
+        Frame* pFrame = Application::instance()->CreateFrame();
         pFrame->AddWindow(new TextEditWindow(pBuffer));
         pFrame->Realize();
     }
@@ -753,7 +753,7 @@ DEFCOMMAND(NewFrame)
     Selection* pSelection = pCtx->GetSelection();
     if (NULL == pSelection) return;
 
-    Frame* pFrame = Application::Get()->CreateFrame();
+    Frame* pFrame = Application::instance()->CreateFrame();
 
     auto const pWindow = new TextEditWindow(pSelection->GetBuffer());
     pFrame->AddWindow(pWindow);
@@ -781,7 +781,7 @@ DEFCOMMAND(NewFrameAndClose)
     // result of this command isn't useful.
     unless (pCtx->GetFrame()->HasMultiplePanes()) return;
 
-    Frame* pFrame = Application::Get()->CreateFrame();
+    Frame* pFrame = Application::instance()->CreateFrame();
 
     auto const pWindow = new TextEditWindow(pSelection->GetBuffer());
     pFrame->AddWindow(pWindow);
@@ -864,7 +864,7 @@ static void DoNextWindow(CommandWindow* start_window) {
     }
 
     // Do we have multiple frames?
-    Frame* pFirstFrame = Application::Get()->GetFirstFrame();
+    Frame* pFirstFrame = Application::instance()->GetFirstFrame();
     if (pFirstFrame != pFrame)
     {
         activateFirstWindow(pFirstFrame->GetFirstPane());
@@ -922,7 +922,7 @@ static void openFile(Selection* pSelection, bool fNewFrame)
     }
     else
     {
-        oParam.m_hwndOwner = *Application::Get()->GetActiveFrame();
+        oParam.m_hwndOwner = *Application::instance()->GetActiveFrame();
     }
 
     FileDialogBox oDialog;
@@ -931,17 +931,17 @@ static void openFile(Selection* pSelection, bool fNewFrame)
         return;
     }
 
-    Buffer* pBuffer = Application::Get()->Load(oParam.m_wsz);
+    Buffer* pBuffer = Application::instance()->Load(oParam.m_wsz);
 
     if (fNewFrame)
     {
-        Frame* pFrame = Application::Get()->CreateFrame();
+        Frame* pFrame = Application::instance()->CreateFrame();
         pFrame->AddWindow(new TextEditWindow(pBuffer));
         pFrame->Realize();
     }
     else
     {
-        Frame* pFrame = Application::Get()->GetActiveFrame();
+        Frame* pFrame = Application::instance()->GetActiveFrame();
         for (auto& pane: pFrame->panes()) {
             auto const pPresent = pane.DynamicCast<EditPane>();
             if (NULL == pPresent)
@@ -1038,7 +1038,7 @@ static void DoPreviousWindow(CommandWindow* start_window) {
     }
 
     // Do we have multiple frames?
-    Frame* pLastFrame = Application::Get()->GetLastFrame();
+    Frame* pLastFrame = Application::instance()->GetLastFrame();
     if (pLastFrame != pFrame)
     {
         activateLastWindow(pLastFrame->GetLastPane());
@@ -1111,7 +1111,7 @@ DEFCOMMAND(Redo)
     }
     else
     {
-        Application::Get()->ShowMessage(
+        Application::instance()->ShowMessage(
             MessageLevel_Warning,
             IDS_NO_MORE_REDO );
     }
@@ -1129,7 +1129,7 @@ DEFCOMMAND(Reload)
     int iAnswer;
     {
       UI_DOM_AUTO_UNLOCK_SCOPE();
-      iAnswer = Application::Get()->Ask(
+      iAnswer = Application::instance()->Ask(
           MB_YESNO | MB_ICONQUESTION,
           IDS_ASK_RELOAD,
           pBuffer->GetName() );
@@ -1170,7 +1170,7 @@ DEFCOMMAND(ShowV8Console) {
   if (!pCtx->GetSelection())
     return;
   auto& v8_buffer = *v8_glue::V8ConsoleBuffer::instance();
-  auto& frame = *Application::Get()->GetActiveFrame();
+  auto& frame = *Application::instance()->GetActiveFrame();
   for (auto& pane: frame.panes()) {
     auto const present = pane.DynamicCast<EditPane>();
     if (present && v8_buffer == present->GetBuffer()) {
@@ -1198,7 +1198,7 @@ void SplitWindow(Selection* selection, EditPane* pane,
   auto const window = direction == kSplitHorizontally ?
       pane->SplitHorizontally() : pane->SplitVertically();
   if (!window || !window->is<TextEditWindow>()) {
-    Application::Get()->ShowMessage(MessageLevel_Warning,
+    Application::instance()->ShowMessage(MessageLevel_Warning,
                                     IDS_CAN_NOT_SPLIT);
     return;
   }
@@ -1214,7 +1214,7 @@ void SplitWindow(Selection* selection, EditPane* pane,
 DEFCOMMAND(SplitWindowHorizontally) {
   if (!pCtx->GetSelection())
     return;
-  auto const pPane = Application::Get()->GetActiveFrame()->
+  auto const pPane = Application::instance()->GetActiveFrame()->
       GetActivePane()->DynamicCast<EditPane>();
   if (!pPane)
     return;
@@ -1227,7 +1227,7 @@ DEFCOMMAND(SplitWindowVertically)
 {
   if (!pCtx->GetSelection())
     return;
-  auto const pPane = Application::Get()->GetActiveFrame()->
+  auto const pPane = Application::instance()->GetActiveFrame()->
       GetActivePane()->DynamicCast<EditPane>();
   if (!pPane)
     return;
@@ -1286,7 +1286,7 @@ void TypeChar(const Context* pCtx)
         }
         else if (pSelection->GetStart() != lOpen)
         {
-            Application::Get()->GetActiveFrame()->ShowMessage(
+            Application::instance()->GetActiveFrame()->ShowMessage(
                 MessageLevel_Warning,
                 IDS_NO_MATCHING_PAREN );
         }
@@ -1323,7 +1323,7 @@ DEFCOMMAND(Undo)
     }
     else
     {
-        Application::Get()->ShowMessage(
+        Application::instance()->ShowMessage(
             MessageLevel_Warning,
             IDS_NO_MORE_UNDO );
     }
@@ -1348,10 +1348,10 @@ DEFCOMMAND(ValidateIntervals)
 
     const char16* pwszLogBuf = L"* Debug Log *";
 
-    Buffer* pLogBuf= Application::Get()->FindBuffer(pwszLogBuf);
+    Buffer* pLogBuf= Application::instance()->FindBuffer(pwszLogBuf);
     if (NULL == pLogBuf)
     {
-        pLogBuf = Application::Get()->NewBuffer(pwszLogBuf);
+        pLogBuf = Application::instance()->NewBuffer(pwszLogBuf);
     }
     else if (pCtx->HasArg())
     {

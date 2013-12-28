@@ -135,9 +135,9 @@ static int MainLoop() {
       }
   }
 
-  auto& frame = *Application::Get()->CreateFrame();
+  auto& frame = *Application::instance()->CreateFrame();
   for (auto const filename: CommandLine::ForCurrentProcess()->GetArgs()) {
-    auto const buffer = Application::Get()->Load(filename.c_str());
+    auto const buffer = Application::instance()->Load(filename.c_str());
     frame.AddWindow(new TextEditWindow(buffer));
   }
 
@@ -150,7 +150,7 @@ static int MainLoop() {
       auto const buffer = new Buffer(L"*scratch*");
     #endif // USE_LISTENER
 
-    Application::Get()->InternalAddBuffer(buffer);
+    Application::instance()->InternalAddBuffer(buffer);
     frame.AddWindow(new TextEditWindow(buffer));
   }
   frame.Realize();

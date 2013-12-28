@@ -15,22 +15,27 @@ class Lock : public common::Singleton<Lock> {
   friend class common::Singleton<Lock>;
 
   public: class AutoLock : public base::AutoLock {
-    public: AutoLock(const char* filename, int line_number)
-        : base::AutoLock(*Lock::instance().lock()) {
-      DVLOG(1) << "Lock dom at " << filename << "(" << std::dec <<
-          line_number << ")";
-      Lock::instance().locker_filename_ = filename;
-      Lock::instance().locker_line_number_ = line_number;
-    }
-
-    public: ~AutoLock() {
-      DVLOG(1) << "Unlock dom at " << Lock::instance().locker_filename_ <<
-        "(" << std::dec << Lock::instance().locker_line_number_ << ")";
-    }
-
+    public: AutoLock(const char* filename, int line_number);
+    public: ~AutoLock();
     DISALLOW_COPY_AND_ASSIGN(AutoLock);
   };
   friend class AutoLock;
+
+  public: class AutoTryLock {
+    private: bool locked_;
+    public: AutoTryLock(const char* filename, int line_number);
+    public: ~AutoTryLock();
+    public: bool locked() const { return locked_; }
+    DISALLOW_COPY_AND_ASSIGN(AutoTryLock);
+  };
+  friend class AutoTryLock;
+
+  public: class AutoUnlock : public base::AutoUnlock {
+    public: AutoUnlock(const char* filename, int line_number);
+    public: ~AutoUnlock();
+    DISALLOW_COPY_AND_ASSIGN(AutoUnlock);
+  };
+  friend class AutoUnlock;
 
   private: std::unique_ptr<base::Lock> lock_;
   private: const char* locker_filename_;
@@ -39,7 +44,9 @@ class Lock : public common::Singleton<Lock> {
   private: Lock();
   public: virtual ~Lock() = default;
 
-  public: base::Lock* lock() const { return lock_.get(); }
+  private: base::Lock* lock() const { return lock_.get(); }
+
+  public: void AssertAcquired() { lock_->AssertAcquired(); }
 
   DISALLOW_COPY_AND_ASSIGN(Lock);
 };
@@ -47,12 +54,15 @@ class Lock : public common::Singleton<Lock> {
 }  // namespace dom
 
 #define ASSERT_DOM_IS_LOCKED() \
-  dom::Lock::instance().lock()->AssertAcquired()
+  dom::Lock::instance().AssertAcquired()
 
 #define DOM_AUTO_LOCK_SCOPE() \
   dom::Lock::AutoLock dom_lock_scope(__FILE__, __LINE__)
 
 #define DOM_AUTO_UNLOCK_SCOPE() \
-  base::AutoUnlock dom_lock_scope(*dom::Lock::instance().lock())
+  dom::Lock::AutoUnlock dom_lock_scope(__FILE__, __LINE__)
+
+#define DOM_TRY_LOCK_SCOPE(name) \
+  dom::Lock::AutoTryLock name(__FILE__, __LINE__)
 
 #endif //!defined(INCLUDE_evita_dom_lock_h)

@@ -127,9 +127,47 @@ void TextEditWindow::ScrollBar::ShowWindow(int code) const {
 
 //////////////////////////////////////////////////////////////////////
 //
+// CaretBlinker
+//
+// This class is used for restoring caret position after parenthesis matching.
+//
+// Note: When |TextEditWindow| is destruced, an instance of this class is also
+// destructed and timer is canceled.
+class TextEditWindow::CaretBlinker {
+  private: TextEditWindow* const window_;
+  private: Range* range_;
+  private: common::OneShotTimer<CaretBlinker> timer_;
+
+  public: CaretBlinker(TextEditWindow* editor, Posn posn, uint interval_ms)
+      : window_(editor),
+        range_(editor->GetBuffer()->CreateRange(posn, posn)),
+        ALLOW_THIS_IN_INITIALIZER_LIST(
+          timer_(this, &CaretBlinker::RestoreCaret)) {
+    timer_.Start(interval_ms);
+  }
+  public: ~CaretBlinker() {
+    range_->destroy();
+  }
+
+  // Temporary caret position
+  public: Range& range() const { return *range_; }
+
+  private: void RestoreCaret(common::OneShotTimer<CaretBlinker>*) {
+    DCHECK(!editor::DomLock::instance()->locked());
+    // After |window->caret_blinker_.reset()|. |this| pointer is unavailable.
+    auto const window = window_;
+    window->caret_blinker_.reset();
+    Application::instance()->PostDomTask(FROM_HERE,
+        base::Bind(&TextEditWindow::Redraw, base::Unretained(window)));
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(CaretBlinker);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
 // TextEditWindow
 //
-
 TextEditWindow::TextEditWindow(Buffer* pBuffer, Posn lStart)
     : ALLOW_THIS_IN_INITIALIZER_LIST(
         autoscroller_(new Autoscroller(this))),
@@ -152,31 +190,9 @@ TextEditWindow::TextEditWindow(Buffer* pBuffer, Posn lStart)
 TextEditWindow::~TextEditWindow() {
 }
 
-class TextEditWindow::CaretBlinker {
-  private: TextEditWindow* const editor_;
-  private: Range* range_;
-  private: common::OneShotTimer<CaretBlinker> timer_;
-  public: CaretBlinker(TextEditWindow* editor, Posn posn, uint interval_ms)
-      : editor_(editor),
-        range_(editor->GetBuffer()->CreateRange(posn, posn)),
-        ALLOW_THIS_IN_INITIALIZER_LIST(
-          timer_(this, &CaretBlinker::RestoreCaret)) {
-    timer_.Start(interval_ms);
-  }
-  public: ~CaretBlinker() {
-    range_->destroy();
-  }
-  public: Range& range() const { return *range_; }
-  private: void RestoreCaret(common::OneShotTimer<CaretBlinker>*) {
-    auto const editor = editor_;
-    editor->caret_blinker_.reset();
-    editor->Redraw();
-  }
-  DISALLOW_COPY_AND_ASSIGN(CaretBlinker);
-};
-
 void TextEditWindow::Blink(Posn posn, int interval_ms) {
   ASSERT(interval_ms >= 0);
+  UI_ASSERT_DOM_LOCKED();
   caret_blinker_.reset(std::move(
       new CaretBlinker(this, posn, static_cast<uint>(interval_ms))));
   Redraw();

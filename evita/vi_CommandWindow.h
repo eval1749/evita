@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_visual_CommandWindow_h)
 #define INCLUDE_visual_CommandWindow_h
 
-#include "widgets/container_widget.h"
+#include "widgets/widget.h"
 
 namespace Command {
 class KeyBindEntry;
@@ -21,10 +21,10 @@ class KeyBindEntry;
 //
 // CommandWindow
 //
-class CommandWindow : public widgets::ContainerWidget {
+class CommandWindow : public widgets::Widget {
     protected: CommandWindow(
         std::unique_ptr<widgets::NativeWindow>&& native_window)
-        : widgets::ContainerWidget(std::move(native_window)) {
+        : widgets::Widget(std::move(native_window)) {
     }
 
     protected: CommandWindow() {

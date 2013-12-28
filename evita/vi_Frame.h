@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_visual_Frame_h)
 #define INCLUDE_visual_Frame_h
 
-#include "widgets/container_widget.h"
+#include "widgets/widget.h"
 
 #include "./ctrl_StatusBar.h"
 #include "./ctrl_TabBand.h"
@@ -50,11 +50,11 @@ class ContentWindow;
 ///   Represents a frame window aka toplevel window. This window communicates
 ///   with window manager.
 /// </summary>
-class Frame final : public widgets::ContainerWidget,
+class Frame final : public widgets::Widget,
                     public DoubleLinkedNode_<Frame> {
-  private: typedef widgets::ContainerWidget ContainerWidget;
   private: typedef widgets::Widget Widget;
-  DECLARE_CASTABLE_CLASS(Frame, ContainerWidget);
+  private: typedef widgets::Widget Widget;
+  DECLARE_CASTABLE_CLASS(Frame, Widget);
 
   private: enum CtrlId {
     CtrlId_TabBand  = 1,

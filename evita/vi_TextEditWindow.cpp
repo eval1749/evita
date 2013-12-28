@@ -11,7 +11,7 @@
 //
 #define DEBUG_AUTOSCROLL 0
 #define DEBUG_CARET 0
-#define DEBUG_FOCUS 0
+#define DEBUG_FOCUS 1
 #define DEBUG_IDLE 0
 #define DEBUG_KEY 0
 #define DEBUG_PAINT 0

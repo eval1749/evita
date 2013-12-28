@@ -6,6 +6,8 @@
 #include <ostream>
 #include <memory>
 
+#include "base/basictypes.h"
+#include "base/logging.h"
 #include "common/castable.h"
 #include "common/tree/node.h"
 #include "common/win/native_window.h"
@@ -13,7 +15,6 @@
 
 namespace widgets {
 
-class ContainerWidget;
 typedef common::win::NativeWindow NativeWindow;
 typedef common::win::Point Point;
 typedef common::win::Rect Rect;
@@ -23,10 +24,9 @@ typedef common::win::Rect Rect;
 // Widget
 //
 class Widget
-    : public common::tree::Node_<Widget, ContainerWidget,
-                               std::unique_ptr<NativeWindow>&&>,
-      public common::win::MessageDelegate,
-      public common::Castable {
+    : public common::Castable,
+      public common::tree::Node<Widget>,
+      public common::win::MessageDelegate {
   DECLARE_CASTABLE_CLASS(Widget, Castable);
 
   private: enum State {
@@ -36,8 +36,6 @@ class Widget
     kRealized,
   };
 
-  // Life time of native_window_ ends at WM_NCDESTROY rather than
-  // destruction of Widget.
   private: std::unique_ptr<NativeWindow> native_window_;
   private: Rect rect_;
   private: int shown_;
@@ -48,18 +46,17 @@ class Widget
   protected: Widget();
   protected: ~Widget();
 
-  public: ContainerWidget& container_widget() const {
-    ASSERT(parent_node());
+  public: Widget& container_widget() const {
+    DCHECK(parent_node());
     return *parent_node();
   }
+
   public: bool has_focus() const;
   public: bool has_native_window() const { 
     return static_cast<bool>(native_window_);
   }
-  public: virtual bool is_container() const { return false; }
   public: bool is_realized() const { return state_ == kRealized; }
   public: bool is_shown() const { return shown_; }
-  // Expose |is_top_level()| for iterator.
   protected: NativeWindow* native_window() const {
     return native_window_.get();
   }
@@ -73,22 +70,29 @@ class Widget
 
   // [D]
   public: void Destroy();
-  public: virtual void DidChangeHierarchy();
+  protected: virtual void DidAddChildWidget(const Widget& widget);
+  protected: virtual void DidChangeHierarchy();
   // Called on WM_CREATE
   protected: virtual void DidCreateNativeWindow();
   protected: virtual void DidDestroyWidget();
   // Called on WM_NCDESTORY
   protected: virtual void DidDestroyNativeWindow();
-  public: virtual void DidHide() {}
-  public: virtual void DidKillFocus() {}
-  public: virtual void DidRealize() {}
-  public: virtual void DidResize() {}
-  public: virtual void DidSetFocus() {}
-  public: virtual void DidShow() {}
+  protected: virtual void DidHide();
+  protected: virtual void DidKillFocus() {}
+  protected: virtual void DidRealize() {}
+  protected: virtual void DidRealizeChildWidget(const Widget& widget);
+  protected: virtual void DidRemoveChildWidget(const Widget& widget);
+  protected: virtual void DidResize() {}
+  protected: virtual void DidSetFocus() {}
+  protected: virtual void DidShow();
+  private: void DispatchPaintMessage();
 
   // [G]
   public: virtual const char* GetClass() const { return "Widget"; }
   public: virtual HCURSOR GetCursorAt(const Point& point) const;
+  public: static Widget* GetFocusWidget();
+  private: Widget& GetHostWidget() const;
+  private: Widget* GetWidgetAt(const Point& point) const;
 
   // [H]
   public: virtual void Hide();
@@ -104,29 +108,24 @@ class Widget
   // [R]
   // Realize widget, one of container must be realized with native widnow.
   public: void Realize(const Rect& rect);
-
   // Realize top-level widget with native window.
   public: void RealizeTopLevelWidget();
-  public: void ReleaseCapture() const;
+  public: void ReleaseCapture();
   public: void ResizeTo(const Rect& rect);
 
   // [S]
-  public: void SetCapture() const;
+  public: void SetCapture();
+  private: bool SetCursor();
   public: virtual void SetFocus();
-  public: void SetParentWidget(const ContainerWidget& new_parent);
+  public: void SetParentWidget(const Widget& new_parent);
   public: virtual void Show();
 
-  // [T]
-  public: virtual const ContainerWidget* ToContainer() const {
-    return nullptr;
-  }
-  public: virtual ContainerWidget* ToContainer() { return nullptr; }
-
   // [W]
-  public: virtual void WillDestroyWidget();
-  public: virtual void WillDestroyNativeWindow();
-  public: virtual LRESULT WindowProc(UINT uMsg, WPARAM wParam,
-                                     LPARAM lParam) override;
+  protected: virtual void WillDestroyWidget();
+  protected: virtual void WillDestroyNativeWindow();
+  protected: virtual void WillRemoveChildWidget(const Widget& widget);
+  protected: virtual LRESULT WindowProc(UINT uMsg, WPARAM wParam,
+                                        LPARAM lParam) override;
   DISALLOW_COPY_AND_ASSIGN(Widget);
 };
 
@@ -141,5 +140,10 @@ class Widget
 } // namespace widgets
 
 std::ostream& operator<<(std::ostream& out, const widgets::Widget& widget);
+std::ostream& operator<<(std::ostream& out, const widgets::Widget* widget);
+
+#define DVLOG_WIDGET(n) \
+    DVLOG(n) << __FUNCTION__ << " " << *this << \
+        " hwnd=" << AssociatedHwnd() << " "
 
 #endif //!defined(INCLUDE_widgets_widget_h)

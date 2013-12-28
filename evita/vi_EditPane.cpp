@@ -486,7 +486,7 @@ EditPane::LeafBox& EditPane::HorizontalLayoutBox::Split(
   DCHECK_EQ(pBelow->GetWindow()->container_widget(), edit_pane_);
 
   auto const pWindow = below->Clone();
-  edit_pane_->AppendChild(*pWindow);
+  edit_pane_->AppendChild(pWindow);
 
   auto const pAbove = new LeafBox(edit_pane_, this, pWindow);
   auto const prcAbove = &pAbove->rect();
@@ -818,7 +818,7 @@ void EditPane::LeafBox::ReplaceWindow(Window* window) {
   auto const previous_window = m_pWindow;
   m_pWindow = window;
   m_hwndVScrollBar = nullptr;
-  edit_pane_->AppendChild(*window);
+  edit_pane_->AppendChild(window);
   Realize(edit_pane_, rect());
   previous_window->Destroy();
 }
@@ -1074,7 +1074,7 @@ EditPane::LeafBox& EditPane::VerticalLayoutBox::Split(
   DCHECK_EQ(pBelow->GetWindow()->container_widget(), edit_pane_);
 
   auto const pWindow = below->Clone();
-  edit_pane_->AppendChild(*pWindow);
+  edit_pane_->AppendChild(pWindow);
 
   auto const pAbove = new LeafBox(edit_pane_, this, pWindow);
   auto const prcAbove = &pAbove->rect();
@@ -1176,7 +1176,7 @@ void EditPane::SplitterController::Move(const gfx::Point& point) {
 
 void EditPane::SplitterController::Start(State eState, Box& box) {
   ASSERT(!!box.outer());
-  owner_.SetCapture();
+  const_cast<EditPane&>(owner_).SetCapture();
   m_eState = eState;
   m_pBox = &box;
   box.AddRef();
@@ -1185,7 +1185,7 @@ void EditPane::SplitterController::Start(State eState, Box& box) {
 void EditPane::SplitterController::Stop() {
   if (m_eState != State_None) {
     ASSERT(!!m_pBox);
-    owner_.ReleaseCapture();
+    const_cast<EditPane&>(owner_).ReleaseCapture();
     m_eState = State_None;
     m_pBox->Release();
     m_pBox = nullptr;
@@ -1203,7 +1203,7 @@ EditPane::EditPane(Window* pWindow)
           root_box_(*new VerticalLayoutBox(this, nullptr))),
       ALLOW_THIS_IN_INITIALIZER_LIST(
           splitter_controller_(new SplitterController(*this))) {
-  AppendChild(*pWindow);
+  AppendChild(pWindow);
   ScopedRefCount_<LeafBox> box(*new LeafBox(this, root_box_, pWindow));
   root_box_->Add(*box);
 }
@@ -1244,9 +1244,9 @@ void EditPane::DidRealizeChildWidget(const Widget& window) {
    auto const next_window = next_leaf_box ? next_leaf_box->GetWindow() :
       nullptr;
   if (next_window)
-    InsertBefore(*box->GetWindow(), next_window);
+    InsertBefore(box->GetWindow(), next_window);
   else
-    AppendChild(*box->GetWindow());
+    AppendChild(box->GetWindow());
 }
 
 void EditPane::DidRemoveChildWidget(const Widget&) {

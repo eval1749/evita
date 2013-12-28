@@ -13,7 +13,7 @@
 
 #include "./li_util.h"
 #include "./vi_CommandWindow.h"
-#include "widgets/container_widget.h"
+#include "widgets/widget.h"
 
 namespace gfx {
 class Graphics;
@@ -22,7 +22,7 @@ class Graphics;
 class Frame;
 
 class Pane : public CommandWindow_<Pane>, public ChildNode_<Frame, Pane> {
-  protected: typedef widgets::ContainerWidget ContainerWidget;
+  protected: typedef widgets::Widget Widget;
   protected: typedef widgets::Widget Widget;
 
   DECLARE_CASTABLE_CLASS(Pane, CommandWindow);

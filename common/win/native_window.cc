@@ -38,8 +38,7 @@ NativeWindow::NativeWindow()
 
 NativeWindow::~NativeWindow() {
   #if DEBUG_DESTROY
-    DEBUG_PRINTF("%p " DEBUG_MESSAGE_DELEGATE_FORMAT "\n", this,
-        DEBUG_MESSAGE_DELEGATE_ARG(message_delegate_));
+    DVLOG(0) << "~NativeWindow " << this;
   #endif
   DCHECK(!hwnd_);
   DCHECK(!message_delegate_);
@@ -133,6 +132,7 @@ LRESULT CALLBACK NativeWindow::WindowProc(HWND hwnd, UINT message,
     window->hwnd_ = nullptr;
     window->WindowProc(message, wParam, lParam);
     window->message_delegate_ = nullptr;
+    delete window;
     return 0;
   }
 

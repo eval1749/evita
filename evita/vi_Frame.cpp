@@ -107,7 +107,7 @@ extern uint g_TabBand__TabDragMsg;
 
 Frame::Frame()
     : ALLOW_THIS_IN_INITIALIZER_LIST(
-          widgets::ContainerWidget(widgets::NativeWindow::Create(*this))),
+          widgets::Widget(widgets::NativeWindow::Create(*this))),
       gfx_(new gfx::Graphics()),
       m_hwndTabBand(nullptr),
       m_pActivePane(nullptr) {
@@ -133,7 +133,7 @@ void Frame::AddPane(Pane* const pane) {
   ASSERT(!pane->GetFrame());
   ASSERT(!pane->is_realized());
   m_oPanes.Append(this, pane);
-  AppendChild(*pane);
+  AppendChild(pane);
   if (is_realized()) {
     pane->Realize(GetPaneRect());
     AddTab(pane);
@@ -389,9 +389,9 @@ void Frame::DidSetFocus() {
 }
 
 Frame* Frame::FindFrame(const widgets::Widget& widget) {
-  for (auto& ancestor: common::tree::ancestors_or_self(widget)) {
-    if (ancestor.is<Frame>())
-      return const_cast<Widget&>(ancestor).as<Frame>();
+  for (auto ancestor : common::tree::ancestors_or_self(&widget)) {
+    if (ancestor->is<Frame>())
+      return const_cast<Widget*>(ancestor)->as<Frame>();
   }
   return nullptr;
 }
@@ -640,7 +640,7 @@ bool Frame::OnIdle(uint const nCount) {
     }
   }
 
-  return ContainerWidget::OnIdle(nCount);
+  return Widget::OnIdle(nCount);
 }
 
 LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
@@ -969,7 +969,7 @@ void Frame::updateTitleBar() {
 }
 
 void Frame::WillDestroyWidget() {
-  ContainerWidget::WillDestroyWidget();
+  Widget::WillDestroyWidget();
   Application::instance()->DeleteFrame(this);
 }
 

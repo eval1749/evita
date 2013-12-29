@@ -21,7 +21,7 @@
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_IoManager.h"
 
-#define DEBUG_IDLE 1
+#define DEBUG_IDLE 0
 
 #if _DEBUG
   #define APP_TITLE L"evita/debug"
@@ -77,6 +77,10 @@ int Application::Ask(int flags, int format_id, ...) {
 
   editor::ModalMessageLoopScope modal_mesage_loop_scope;
   return ::MessageBoxW(*GetActiveFrame(), wsz, title().c_str(), flags);
+}
+
+bool Application::CalledOnValidThread() const {
+  return message_loop_.get() == base::MessageLoop::current();
 }
 
 bool Application::CanExit() const {

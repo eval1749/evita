@@ -67,6 +67,7 @@ class Application : public common::Singleton<Application> {
   public: int Ask(int flags, int format_id, ...);
 
   // [C]
+  public: bool CalledOnValidThread() const;
   public: bool CanExit() const;
   public: Frame* CreateFrame();
   public: Frame* CreateFrame(Buffer* buffer);
@@ -136,5 +137,9 @@ class Application : public common::Singleton<Application> {
 
   DISALLOW_COPY_AND_ASSIGN(Application);
 };
+
+#define ASSERT_CALLED_ON_UI_THREAD() \
+  DCHECK(Application::instance()->CalledOnValidThread())
+
 
 #endif //!defined(INCLUDE_evita_editor_application_h)

@@ -16,7 +16,11 @@ END_V8_INCLUDE
 namespace v8_glue {
 
 namespace {
-void constructorCallBack(const v8::FunctionCallbackInfo<v8::Value>& info) {
+// Changes behavior of constructor call:
+//  - Type() => throw "Cannot be called as function"
+//  - new Type() => throw "Cannot use with new operator" if not creating
+//    wrapper
+void ConstructorCallHandler(const v8::FunctionCallbackInfo<v8::Value>& info) {
   auto const isolate = info.GetIsolate();
   if (!info.IsConstructCall()) {
      isolate->ThrowException(
@@ -52,7 +56,7 @@ v8::Handle<v8::FunctionTemplate>
   auto templ = v8::FunctionTemplate::New(isolate);
   templ->SetClassName(gin::StringToSymbol(isolate, info->class_name()));
   data->SetFunctionTemplate(info->gin_wrapper_info(), templ);
-  templ->SetCallHandler(constructorCallBack);
+  templ->SetCallHandler(ConstructorCallHandler);
 
   // We must set internal field count for instance template before creating
   // function object.

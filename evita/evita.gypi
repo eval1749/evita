@@ -98,6 +98,7 @@
         'dom/console.cc',
         'dom/editor.cc',
         'dom/lock.cc',
+        'dom/script_command.cc',
         'dom/script_controller.cc',
         'dom/script_thread.cc',
         'dom/window.cc',

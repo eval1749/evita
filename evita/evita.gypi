@@ -49,6 +49,7 @@
         'ctrl_TabBand.cpp',
         'ctrl_TitleBar.cpp',
         'editor/application.cc',
+        'editor/dialog_box.cc',
         'editor/dom_lock.cc',
         'evita.rc',
         'ExactStringMatch.cpp',

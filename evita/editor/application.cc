@@ -13,12 +13,15 @@
 #include "base/time/time.h"
 #include "common/memory/scoped_change.h"
 #include "evita/cm_CmdProc.h"
+#include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/ed_Mode.h"
 #include "evita/vi_Buffer.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_IoManager.h"
+
+#define DEBUG_IDLE 1
 
 #if _DEBUG
   #define APP_TITLE L"evita/debug"
@@ -72,7 +75,8 @@ int Application::Ask(int flags, int format_id, ...) {
   ::wvsprintf(wsz, wszFormat, args);
   va_end(args);
 
-  return ::MessageBox(*GetActiveFrame(), wsz, title().c_str(), flags);
+  editor::ModalMessageLoopScope modal_mesage_loop_scope;
+  return ::MessageBoxW(*GetActiveFrame(), wsz, title().c_str(), flags);
 }
 
 bool Application::CanExit() const {
@@ -105,12 +109,12 @@ Frame* Application::DeleteFrame(Frame* frame) {
 }
 
 void Application::DoIdle() {
-  static int idle_count_;
   #if DEBUG_IDLE
-    DVLOG(4) << "idle_count_=" << idle_count_ << " running=" <<
-        message_loop_->is_running();
+    DVLOG(0) << "idle_count_=" << idle_count_ <<
+        " running=" << message_loop_->is_running() <<
+        " modal=" << message_loop_->os_modal_loop();
   #endif
-  if (TryDoIdle()) {
+  if (!message_loop_->os_modal_loop() && TryDoIdle()) {
     ++idle_count_;
     message_loop_->PostTask(FROM_HERE, base::Bind(&Application::DoIdle,
                                                   base::Unretained(this)));

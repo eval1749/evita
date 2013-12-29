@@ -365,13 +365,19 @@ void Frame::DidResize() {
 
   gfx_->Resize(rect());
   {
-    UI_DOM_AUTO_LOCK_SCOPE();
     gfx::Graphics::DrawingScope drawing_scope(*gfx_);
     (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::Green));
 
     const auto rc = GetPaneRect();
-    for (auto& pane: m_oPanes) {
-      pane.ResizeTo(rc);
+    if (editor::DomLock::instance()->locked()) {
+      for (auto& pane: m_oPanes) {
+        pane.ResizeTo(rc);
+      }
+    } else {
+      UI_DOM_AUTO_LOCK_SCOPE();
+      for (auto& pane: m_oPanes) {
+        pane.ResizeTo(rc);
+      }
     }
   }
 

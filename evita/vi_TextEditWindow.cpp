@@ -184,6 +184,7 @@ TextEditWindow::TextEditWindow(Buffer* pBuffer, Posn lStart)
         m_lImeStart(0),
       #endif // SUPPORT_IME
       m_pViewRange(pBuffer->CreateRange(lStart)) {
+  UI_ASSERT_DOM_LOCKED();
   pBuffer->AddWindow(this);
 }
 

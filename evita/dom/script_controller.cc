@@ -6,6 +6,7 @@
 #include "base/logging.h"
 #include "evita/dom/console.h"
 #include "evita/dom/editor.h"
+#include "evita/dom/editor_window.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/script_thread.h"
@@ -41,6 +42,7 @@ class Initializer {
         InstallConstructor(global, Console::GetConstructor(isolate));
         InstallConstructor(global, Editor::GetConstructor(isolate));
         InstallConstructor(global, Window::GetConstructor(isolate));
+        InstallConstructor(global, EditorWindow::GetConstructor(isolate));
 
         global->Set(gin::StringToV8(isolate, "console"),
             Console::instance()->GetWrapper(isolate));

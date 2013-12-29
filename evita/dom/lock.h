@@ -58,7 +58,7 @@ class Lock : public common::Singleton<Lock> {
 
 }  // namespace dom
 
-#define ASSERT_DOM_IS_LOCKED() \
+#define ASSERT_DOM_LOCKED() \
   dom::Lock::instance()->AssertAcquired()
 
 #define DOM_AUTO_LOCK_SCOPE() \

@@ -101,6 +101,7 @@ class Command : public KeyBindEntry {
   private: CommandFn function_;
 
   public: Command(CommandFn function);
+  protected: Command();
   public: virtual ~Command() = default;
 
   public: virtual Command* AsCommand() override;

@@ -33,12 +33,16 @@ KeyBindEntry* StartArgumentEntry();
 Command::Command(CommandFn function) : function_(function) {
 }
 
+Command::Command() : function_(nullptr) {
+}
+
 Command* Command::AsCommand() {
   return this;
 }
 
 void Command::Execute(const Context* context) {
   UI_DOM_AUTO_LOCK_SCOPE();
+  DCHECK(function_);
   function_(context);
 }
 

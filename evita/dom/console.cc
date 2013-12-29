@@ -18,7 +18,7 @@ Buffer* InternBuffer(const base::string16& name) {
 }
 
 
-void Log(const base::vector<std::string16>& messages) {
+void Log(const std::vector<base::string16>& messages) {
   auto const buffer = InternBuffer(L"*console log*");
   for (auto message : messages) {
     buffer->Insert(buffer->GetEnd(), message.c_str());

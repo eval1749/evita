@@ -46,9 +46,9 @@ class TextEditWindow
   private: typedef DoubleLinkedNode_<TextEditWindow> WindowItem;
   private: typedef content::ContentWindow ParentClass;
 
-  protected: typedef Edit::Range Range;
+  private: typedef Edit::Range Range;
 
-  protected: struct ScrollBar {
+  private: struct ScrollBar {
     HWND m_hwnd;
     int m_nBar;
 
@@ -83,26 +83,25 @@ class TextEditWindow
   private: std::unique_ptr<Autoscroller> autoscroller_;
   private: std::unique_ptr<Caret> caret_;
   private: std::unique_ptr<CaretBlinker> caret_blinker_;
-  protected: DragMode m_eDragMode;
-  protected: bool m_fHasFocus;
+  private: DragMode m_eDragMode;
   private: const gfx::Graphics* m_gfx;
-  protected: Posn m_lCaretPosn;
-  protected: int m_nCharTick;
-  protected: ScrollBar m_oHoriScrollBar;
-  protected: ScrollBar m_oVertScrollBar;
-  protected: Page* m_pPage;
+  private: Posn m_lCaretPosn;
+  private: int m_nCharTick;
+  private: ScrollBar m_oHoriScrollBar;
+  private: ScrollBar m_oVertScrollBar;
   // TODO(yosi): Manage life time of selection.
-  protected: Selection* selection_;
+  private: Selection* selection_;
   #if SUPPORT_IME
   private: bool m_fImeTarget;
   private: Posn m_lImeStart;
   private: Posn m_lImeEnd;
   #endif // SUPPORT_IME
-  protected: Range* m_pViewRange;
+  private: Range* m_pViewRange;
+  private: std::unique_ptr<Page> m_pPage;
 
   // ctor/dtor
   public: TextEditWindow(Buffer*, Posn = 0);
-  public: ~TextEditWindow();
+  public: virtual ~TextEditWindow();
 
   // [B]
   public: void Blink(Posn, int);
@@ -110,7 +109,7 @@ class TextEditWindow
   // [C]
   public: TextEditWindow* Clone() const;
   public: Count ComputeMotion(Unit, Count, const gfx::PointF&, Posn*);
-  protected: Posn computeGoalX(float, Posn);
+  private: Posn computeGoalX(float, Posn);
 
   // [D]
   public: void DidChangeFrame();
@@ -124,12 +123,12 @@ class TextEditWindow
 
   // [E]
   public: Posn EndOfLine(Posn);
-  protected: Posn endOfLineAux(const gfx::Graphics&, Posn);
+  private: Posn endOfLineAux(const gfx::Graphics&, Posn);
 
   // [F]
   private: void ForceRedraw();
   private: void ForceRedrawLater();
-  protected: void format(const gfx::Graphics&, Posn);
+  private: void format(const gfx::Graphics&, Posn);
 
   // [G]
   public: Buffer* GetBuffer() const;
@@ -171,16 +170,16 @@ class TextEditWindow
   private: void Render();
 
   // [S]
-  protected: void selectWord(Posn);
+  private: void selectWord(Posn);
   public: void SetScrollBar(HWND, int);
   public: int SmallScroll(int, int);
   public: Posn StartOfLine(Posn);
-  protected: Posn startOfLineAux(const gfx::Graphics&, Posn);
+  private: Posn startOfLineAux(const gfx::Graphics&, Posn);
   private: void stopDrag();
 
   // [U]
-  protected: void updateScreen();
-  protected: void updateScrollBar();
+  private: void updateScreen();
+  private: void updateScrollBar();
   // TODO(yosi): We should not expose TextEdintWindow::UpdateStatusBar(). We
   // export this for EditPane.
   public: virtual void UpdateStatusBar() const override;

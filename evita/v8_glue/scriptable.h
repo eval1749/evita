@@ -33,7 +33,9 @@ class AbstractScriptable
     return !wrapper_.IsEmpty();
   }
 
-  protected: virtual WrapperInfo* wrapper_info() const = 0;
+  // Expose as public function for logging. I'm not sure other usages of
+  // |AbstractScriptable::wrapper_info()|.
+  public: virtual WrapperInfo* wrapper_info() const = 0;
 
   protected: static v8::Handle<v8::Function>
       GetConstructorImpl(v8::Isolate* isolate, WrapperInfo* info);
@@ -57,7 +59,9 @@ class Scriptable : public AbstractScriptable {
   protected: Scriptable() = default;
   protected: virtual ~Scriptable() = default;
 
-  private: virtual WrapperInfo* wrapper_info() const override {
+  // Expose as public function for logging. I'm not sure other usages of
+  // |Scriptable::wrapper_info()|.
+  public: virtual WrapperInfo* wrapper_info() const override {
     return T::static_wrapper_info();
   }
 

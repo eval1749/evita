@@ -39,6 +39,8 @@
       ], # include_dirs
       'sources': [
         'castable_unittest.cc',
+        'memory/ref_counted_unittest.cc',
+        'memory/scoped_refptr_unittest.cc',
         'tree/node_unittest.cc',
       ], # sources
     }, # common_test

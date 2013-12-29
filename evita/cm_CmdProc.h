@@ -3,6 +3,11 @@
 #if !defined(INCLUDE_listener_winapp_command_processor_h)
 #define INCLUDE_listener_winapp_command_processor_h
 
+#include <unordered_map>
+#include <vector>
+
+#include "common/memory/ref_counted.h"
+#include "common/memory/scoped_refptr.h"
 #include "evita/li_util.h"
 
 class CommandWindow;
@@ -46,10 +51,9 @@ class Context {
   protected: State m_eState;
   protected: Count m_iArg;
   protected: Count m_iSign;
-  protected: uint m_cKeys;
-  protected: uint m_rgnKey[10];
-  private: Command* m_pLastCommand;
-  private: Command* m_pThisCommand;
+  protected: std::vector<int> key_codes_;
+  private: common::scoped_refptr<Command> m_pLastCommand;
+  private: common::scoped_refptr<Command> m_pThisCommand;
   protected: CommandWindow* m_pWindow;
   protected: Frame* m_pFrame;
   protected: Selection* m_pSelection;
@@ -63,9 +67,9 @@ class Context {
   public: Count GetArg() const { return m_iArg; }
   public: Frame* GetFrame() const { return m_pFrame; }
   public: char16 GetLastChar() const { return m_wchLast; }
-  public: Command* GetLastCommand() const { return m_pLastCommand; }
+  public: Command* GetLastCommand() const { return m_pLastCommand.get(); }
   public: Selection* GetSelection() const { return m_pSelection; }
-  public: Command* GetThisCommand() const { return m_pThisCommand; }
+  public: Command* GetThisCommand() const { return m_pThisCommand.get(); }
   public: CommandWindow* GetWindow() const { return m_pWindow; }
 
   // [H]
@@ -78,10 +82,12 @@ class Context {
 //
 // KeyBindEntry
 //
-class KeyBindEntry : public Castable_<KeyBindEntry> {
-  public: KeyBindEntry() = default;
+class KeyBindEntry : public common::RefCounted<KeyBindEntry> {
+  protected: KeyBindEntry() = default;
   public: virtual ~KeyBindEntry() = default;
-  public: virtual Bind GetKind() const = 0;
+  public: virtual Command* AsCommand();
+  public: virtual void Execute(const Context* context);
+  public: virtual KeyBindEntry* MapKey(int key_code) const;
   DISALLOW_COPY_AND_ASSIGN(KeyBindEntry);
 };
 
@@ -89,13 +95,16 @@ class KeyBindEntry : public Castable_<KeyBindEntry> {
 //
 // Command
 //
-class Command : public HasKind_<Command, KeyBindEntry, Bind> {
-  public: static Bind Kind_() { return Bind_Command; }
-
+class Command : public KeyBindEntry {
   public: typedef void (*CommandFn)(const Context*);
-  private: CommandFn m_pfn;
-  public: Command(CommandFn pfn) : m_pfn(pfn) {}
-  public: void Execute(const Context* pCtx) { m_pfn(pCtx); }
+
+  private: CommandFn function_;
+
+  public: Command(CommandFn function);
+  public: virtual ~Command() = default;
+
+  public: virtual Command* AsCommand() override;
+  public: virtual void Execute(const Context* context) override;
 
   DISALLOW_COPY_AND_ASSIGN(Command);
 };
@@ -104,15 +113,17 @@ class Command : public HasKind_<Command, KeyBindEntry, Bind> {
 //
 // KeyBinds
 //
-class KeyBinds : public HasKind_<KeyBinds, KeyBindEntry, Bind> {
-  public: static Bind Kind_() { return Bind_KeyBinds; }
+class KeyBinds : public KeyBindEntry {
+  private: std::unordered_map<int, common::scoped_refptr<KeyBindEntry>>
+      key_bindings_;
 
-  private: KeyBindEntry* m_rgpBind[0x100 * 8];
+  public: KeyBinds() = default;
+  public: virtual ~KeyBinds() = default;
 
-  public: KeyBinds();
-  public: void Bind(uint, KeyBindEntry*);
-  public: void Bind(uint, Command::CommandFn);
-  public: KeyBindEntry* MapKey(uint) const;
+  public: void Bind(int key_code,
+                    const common::scoped_refptr<KeyBindEntry>& entry);
+  public: void Bind(int key_code, Command::CommandFn);
+  public: virtual KeyBindEntry* MapKey(int) const override;
 
   DISALLOW_COPY_AND_ASSIGN(KeyBinds);
 };
@@ -122,22 +133,16 @@ class KeyBinds : public HasKind_<KeyBinds, KeyBindEntry, Bind> {
 // Processor
 //
 class Processor : public Context {
-  private: static KeyBinds* sm_pGlobakBinds;
-
-  private: KeyBinds* m_pKeyBinds;
+  private: common::scoped_refptr<KeyBindEntry> last_entry_;
 
   // ctor
   public: Processor();
   public: virtual ~Processor() = default;
 
-  // [E]
-  public: void Execute(CommandWindow*, uint32, uint32);
-
-  // [G]
+  public: void Execute(CommandWindow* window, int key_code, int repeat);
   public: static void GlobalInit();
-
-  // [R]
-  protected: void reportUnboundKeys();
+  private: void PrepareExecution(CommandWindow* window);
+  private: void ReportUnboundKeys();
   public: void Reset();
 
   DISALLOW_COPY_AND_ASSIGN(Processor);

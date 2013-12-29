@@ -12,6 +12,8 @@
 //
 #include "./cm_CmdProc.h"
 
+#include <memory>
+
 #include "base/bind.h"
 #include "./ed_Mode.h"
 #include "evita/editor/dom_lock.h"
@@ -23,7 +25,6 @@
 #include "./vi_EditPane.h"
 #include "./vi_Selection.h"
 #include "./vi_TextEditWindow.h"
-#include <memory>
 
 namespace Command
 {
@@ -33,9 +34,6 @@ extern void ListBuffer(const Context*);
 extern void FindCommand(const Context*);
 extern void FindNext(const Context*);
 extern void FindPrevious(const Context*);
-
-extern KeyBindEntry* g_pQuotedInsert;
-extern KeyBindEntry* g_pStartArgument;
 
 
 // 0 = MAPVK_VK_TO_VSC
@@ -1628,13 +1626,34 @@ uint TranslateKey(uint nVKey)
     return nKey;
 } // TranslateKey
 
+namespace {
+
+class StaticKeyBindEntry {
+  private: common::scoped_refptr<KeyBindEntry> entry_;
+  public: StaticKeyBindEntry(Command::CommandFn function)
+      : entry_(new Command(function)) {
+  }
+  public: ~StaticKeyBindEntry() = default;
+  public: KeyBindEntry* get() const { return entry_.get(); }
+};
+
+}  // namespace
+
+KeyBindEntry* QuotedInsertEntry() {
+  DEFINE_STATIC_LOCAL(StaticKeyBindEntry, entry, (QuotedInsert));
+  return entry.get();
+}
+
+KeyBindEntry* StartArgumentEntry() {
+  DEFINE_STATIC_LOCAL(StaticKeyBindEntry, entry, (StartArgument));
+  return entry.get();
+}
 
 //////////////////////////////////////////////////////////////////////
 //
 // Processor::GlobalInit
 //
-void Processor::GlobalInit()
-{
+void Processor::GlobalInit() {
     for (uint nKey = 0; nKey <= 255; nKey++)
     {
         k_rgwszKeyName[nKey*2] = static_cast<char16>(nKey);
@@ -1651,13 +1670,15 @@ void Processor::GlobalInit()
     } // for each nVKey
 
     g_pGlobalBinds = new KeyBinds;
-    Command* pSelfInsert = new Command(TypeChar);
 
     // Self Insert
-    for (uint nKey = 0x20; nKey < 0x7F; nKey++)
     {
-        g_pGlobalBinds->Bind(nKey, pSelfInsert);
-    } // for nKey
+      common::scoped_refptr<KeyBindEntry> self_insert_entry(
+          new Command(TypeChar));
+      for (uint nKey = 0x20; nKey < 0x7F; nKey++) {
+        g_pGlobalBinds->Bind(nKey, self_insert_entry);
+      }
+    }
 
     #define BIND_KEY(mp_keycomb, mp_cmd) \
     { \
@@ -1688,10 +1709,10 @@ void Processor::GlobalInit()
     //BIND_KEY(Mod_Ctrl | 'M', TypeEnter);
     BIND_KEY(Mod_Ctrl | 'N', NewFile);
     BIND_KEY(Mod_Ctrl | 'O', OpenFile);
-    BIND_KEY(Mod_Ctrl | 'Q', QuotedInsert);
+    BIND_KEY(Mod_Ctrl | 'Q', QuotedInsertEntry());
     BIND_KEY(Mod_Ctrl | 'R', Reload);
     BIND_KEY(Mod_Ctrl | 'S', SaveFile);
-    BIND_KEY(Mod_Ctrl | 'U', StartArgument);
+    BIND_KEY(Mod_Ctrl | 'U', StartArgumentEntry());
     BIND_KEY(Mod_Ctrl | 'V', PasteFromClipboard);
     BIND_KEY(Mod_Ctrl | 'W', KillBuffer);
     BIND_KEY(Mod_Ctrl | 'X', CutToClipboard);
@@ -1705,9 +1726,6 @@ void Processor::GlobalInit()
     BIND_KEY(Mod_CtrlShift | 'N', NewFileInNewFrame);
     BIND_KEY(Mod_CtrlShift | 'O', OpenFileInNewFrame);
     BIND_KEY(Mod_CtrlShift | 'U', UpcaseSelection);
-
-    g_pQuotedInsert  = g_pGlobalBinds->MapKey(Mod_Ctrl | 'Q');
-    g_pStartArgument = g_pGlobalBinds->MapKey(Mod_Ctrl | 'U');
 
     // Ctrl+Shift+[0-9]
     BIND_KEY(Mod_CtrlShift | '0', CloseThisWindow);
@@ -1771,29 +1789,7 @@ void Processor::GlobalInit()
     BIND_VKEY(Mod_Shift, F3, FindPrevious);
 } // Processor::GlobalInit
 
-void KeyBinds::Bind(uint nKey, KeyBindEntry* pEntry)
-{
-    if (nKey < lengthof(m_rgpBind))
-    {
-        m_rgpBind[nKey] = pEntry;
-    } // if
-} // KeyBinds::Bind
-
-
-void KeyBinds::Bind(uint nKey, Command::CommandFn pfn)
-{
-    Bind(nKey, new Command(pfn));
-} // KeyBinds::Bind
-
-
-KeyBindEntry* KeyBinds::MapKey(uint nKey) const
-{
-    if (nKey >= lengthof(m_rgpBind)) return NULL;
-    return m_rgpBind[nKey];
-} // KeyBinds::MapKey
-
-} // Command
-
+}  // namespace Command
 
 Command::KeyBindEntry* Buffer::MapKey(uint nKey) const
 {

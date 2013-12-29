@@ -23,8 +23,24 @@
 
 namespace Command {
 
-KeyBindEntry* g_pQuotedInsert;
-KeyBindEntry* g_pStartArgument;
+KeyBindEntry* QuotedInsertEntry();
+KeyBindEntry* StartArgumentEntry();
+
+//////////////////////////////////////////////////////////////////////
+//
+// Command
+//
+Command::Command(CommandFn function) : function_(function) {
+}
+
+Command* Command::AsCommand() {
+  return this;
+}
+
+void Command::Execute(const Context* context) {
+  UI_DOM_AUTO_LOCK_SCOPE();
+  function_(context);
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -37,10 +53,37 @@ Context::Context()
 
 //////////////////////////////////////////////////////////////////////
 //
+// KeyBindEntry
+//
+Command* KeyBindEntry::AsCommand() {
+  return nullptr;
+}
+
+void KeyBinds::Bind(int key_code,
+                    const common::scoped_refptr<KeyBindEntry>& entry) {
+  key_bindings_[key_code] = entry;
+}
+
+void KeyBinds::Bind(int key_code, Command::CommandFn function) {
+  key_bindings_[key_code] = new Command(function);
+}
+
+void KeyBindEntry::Execute(const Context*) {
+  NOTREACHED();
+}
+
+KeyBindEntry* KeyBindEntry::MapKey(int) const {
+  NOTREACHED();
+  return nullptr;
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // KeyBinds
 //
-KeyBinds::KeyBinds() {
-  myZeroMemory(m_rgpBind, sizeof(m_rgpBind));
+KeyBindEntry* KeyBinds::MapKey(int key_code) const {
+  auto const it = key_bindings_.find(key_code);
+  return it == key_bindings_.end() ? nullptr : it->second.get();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -57,73 +100,59 @@ Processor::Processor() {
 /// <param name="fRepeat">True if keyboard repeat event.</param>
 /// <param name="nKey">Key code.</param>
 /// <param name="pWindow">A window object causing an event.</param>
-void Processor::Execute(CommandWindow* pWindow, uint32 nKey, uint32 fRepeat) {
-  KeyBindEntry* pEntry = nullptr;
-
-  m_pWindow = pWindow;
-  m_wchLast = static_cast<char16>(nKey);
-
-  TextEditWindow* pEditWindow = pWindow->DynamicCast<TextEditWindow>();
-
-  if (!pEditWindow) {
-    m_pFrame = Application::instance()->GetActiveFrame();
-    m_pSelection = nullptr;
-  } else {
-    m_pSelection = pEditWindow->GetSelection();
-    m_pFrame = m_pSelection->GetWindow()->container_widget()
-        .as<EditPane>()->GetFrame();
-  }
-
-  m_rgnKey[m_cKeys] = nKey;
-  m_cKeys += 1;
-
+void Processor::Execute(CommandWindow* window, int key_code, int fRepeat) {
+  m_pWindow = window;
+  m_wchLast = static_cast<char16>(key_code);
+  key_codes_.push_back(key_code);
+  PrepareExecution(window);
+  common::scoped_refptr<KeyBindEntry> entry;
   switch (m_eState) {
     case State_Arg:
-      if (nKey >= '0' && nKey <= '9') {
+      if (key_code >= '0' && key_code <= '9') {
         m_iArg *= 10;
-        m_iArg += nKey - '0';
+        m_iArg += key_code - '0';
         return;
       }
       m_iArg *= m_iSign;
-      pEntry = pWindow->MapKey(nKey);
-      break;
+      // FALLTHROUGH
 
     case State_Continue:
-      pEntry = pWindow->MapKey(nKey);
+      entry = last_entry_ ? last_entry_->MapKey(key_code) :
+          window->MapKey(key_code);
       break;
 
     case State_Quote:
       if (m_pSelection) {
         // Insert ASCII character into buffer.
-        if (nKey >= (Mod_Ctrl | 'A') && nKey <= (Mod_Ctrl | 0x5F))
-          nKey &= 0x1F;
+        if (key_code >= (Mod_Ctrl | 'A') && key_code <= (Mod_Ctrl | 0x5F))
+          key_code &= 0x1F;
 
-        if (nKey <= 0x7F)
-          m_pSelection->TypeChar(static_cast<char16>(nKey));
+        if (key_code <= 0x7F)
+          m_pSelection->TypeChar(static_cast<base::char16>(key_code));
       }
       Reset();
       return;
 
     case State_StartArg:
-      if (nKey == '-') {
+      if (key_code == '-') {
         m_eState = State_Arg;
         m_iSign = -1;
         return;
       }
-      if (nKey >= '0' && nKey <= '9') {
+      if (key_code >= '0' && key_code <= '9') {
         m_eState = State_Arg;
-        m_iArg = static_cast<Count>(nKey - '0');
+        m_iArg = static_cast<Count>(key_code - '0');
         return;
       }
       m_iArg = 4;
-      pEntry = pWindow->MapKey(nKey);
+      entry = window->MapKey(key_code);
       break;
 
     case State_Start:
       m_pFrame->ResetMessages();
-      pEntry = pWindow->MapKey(nKey);
+      entry = window->MapKey(key_code);
       m_iArg = fRepeat ? 2 : 1;
-      if (pEntry == g_pStartArgument) {
+      if (entry == StartArgumentEntry()) {
         m_eState = State_StartArg;
         m_iArg = 0;
         m_iSign = 1;
@@ -135,72 +164,73 @@ void Processor::Execute(CommandWindow* pWindow, uint32 nKey, uint32 fRepeat) {
       NOTREACHED();
   }
 
-  if (pEntry == g_pStartArgument) {
+  if (entry == StartArgumentEntry()) {
     m_eState = State_Continue;
     m_iArg *= 4;
     return;
   }
 
-  if (pEntry == g_pQuotedInsert) {
+  if (entry == QuotedInsertEntry()) {
     m_eState = State_Quote;
     return;
   }
 
-  if (!pEntry) {
-    reportUnboundKeys();
+  if (!entry) {
+    ReportUnboundKeys();
     Reset();
     return;
   }
 
-  switch (pEntry->GetKind()) {
-    case Bind_Command:
-      m_pThisCommand = pEntry->StaticCast<Command>();
-      {
-        UI_DOM_AUTO_LOCK_SCOPE();
-        pEntry->StaticCast<Command>()->Execute(this);
-      }
-      m_pLastCommand = m_pThisCommand;
-      Reset();
-      break;
-
-    case Bind_KeyBinds:
-      m_pKeyBinds = pEntry->StaticCast<KeyBinds>();
-      m_eState = State_Continue;
-      break;
-
-    default:
-      NOTREACHED();
+  if (auto const command = entry->AsCommand()) {
+    m_pThisCommand = command;
+    entry->Execute(this);
+    m_pLastCommand = m_pThisCommand;
+    Reset();
+  } else {
+    last_entry_ = entry;
+    m_eState = State_Continue;
   }
 }
 
-void Processor::reportUnboundKeys() {
-  base::string16 key_sequence;
-  for (uint i = 0; i < m_cKeys; i++) {
-    auto const nKey = m_rgnKey[i];
-    if (nKey & Mod_Ctrl)
-      key_sequence.append(L"Ctrl+");
+void Processor::PrepareExecution(CommandWindow* window) {
+  auto const pEditWindow = window->as<TextEditWindow>();
+  if (!pEditWindow) {
+    m_pFrame = Application::instance()->GetActiveFrame();
+    m_pSelection = nullptr;
+    return;
+  }
+  m_pSelection = pEditWindow->GetSelection();
+  m_pFrame = m_pSelection->GetWindow()->parent_node()->
+      as<EditPane>()->GetFrame();
+}
 
-    if (nKey & Mod_Shift)
-      key_sequence.append(L"Shift+");
+void Processor::ReportUnboundKeys() {
+  base::string16 text;
+  for (const auto key_code : key_codes_) {
+    if (key_code & Mod_Ctrl)
+      text.append(L"Ctrl+");
 
-    if (nKey <= 0xFF)
-      key_sequence.push_back(static_cast<base::char16>(nKey));
+    if (key_code & Mod_Shift)
+      text.append(L"Shift+");
+
+    if (key_code <= 0xFF)
+      text.push_back(static_cast<base::char16>(key_code));
     else
-      key_sequence.append(GetKeyName(nKey));
+      text.append(GetKeyName(key_code));
   }
 
   Application::instance()->GetActiveFrame()->ShowMessage(
       MessageLevel_Warning,
       IDS_NOT_COMMAND,
-      key_sequence.c_str());
+      text.c_str());
 }
 
 void Processor::Reset() {
   m_eState = State_Start;
-  m_cKeys = 0;
   m_iArg = 0;
   m_iSign = 0;
-  m_pKeyBinds = nullptr;
+  key_codes_.resize(0);
+  last_entry_ = nullptr;
 }
 
 }  // namespace Command

@@ -53,11 +53,18 @@ v8::Handle<v8::FunctionTemplate>
   templ->SetClassName(gin::StringToSymbol(isolate, info->class_name()));
   data->SetFunctionTemplate(info->gin_wrapper_info(), templ);
   templ->SetCallHandler(constructorCallBack);
+
   // We must set internal field count for instance template before creating
   // function object.
   templ->InstanceTemplate()->
       SetInternalFieldCount(gin::kNumberOfInternalFields);
 
+  if (auto const base_info = info->inherit_from()) {
+    auto base_templ = data->GetFunctionTemplate(base_info->gin_wrapper_info());
+    DCHECK(!base_templ.IsEmpty()) << "No such base class "
+        << base_info->class_name();
+    templ->Inherit(base_templ);
+  }
   return templ;
 }
 

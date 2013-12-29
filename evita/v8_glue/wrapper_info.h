@@ -17,15 +17,18 @@ class WrapperInfo {
   // |embedder_| must be a first member to be compatible with gin::WrapperInfo.
   public: gin::GinEmbedder const embedder_;
   private: const char* const class_name_;
+  // Note: |inherit_from_| should be  |const WrapperInfo*|, although
+  // |gin::PerIsolateData::GetFunctionTempalte()| takes non-const pointer.
+  private: WrapperInfo* const inherit_from_;
 
-  public: WrapperInfo(const char* class_name)
-      : embedder_(gin::kEmbedderEvita),
-        class_name_(class_name) {
-  }
+  public: WrapperInfo(const char* class_name,
+                      WrapperInfo* inherit_from);
+  public: WrapperInfo(const char* class_name);
   public: ~WrapperInfo() = default;
 
   public: const char* class_name() const { return class_name_; }
   public: gin::GinEmbedder embedder() const { return embedder_; }
+  public: WrapperInfo* inherit_from() const { return inherit_from_; }
   public: gin::WrapperInfo* gin_wrapper_info() {
     return reinterpret_cast<gin::WrapperInfo*>(this);
   }

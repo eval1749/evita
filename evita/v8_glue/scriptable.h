@@ -54,8 +54,8 @@ class AbstractScriptable
   DISALLOW_COPY_AND_ASSIGN(AbstractScriptable);
 };
 
-template<typename T>
-class Scriptable : public AbstractScriptable {
+template<typename T, typename B = AbstractScriptable>
+class Scriptable : public B {
   protected: Scriptable() = default;
   protected: virtual ~Scriptable() = default;
 

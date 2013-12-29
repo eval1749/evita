@@ -5,6 +5,17 @@
 
 namespace v8_glue {
 
+WrapperInfo::WrapperInfo(const char* class_name,
+                         WrapperInfo* inherit_from)
+    : embedder_(gin::kEmbedderEvita),
+      class_name_(class_name),
+      inherit_from_(inherit_from) {
+}
+
+WrapperInfo::WrapperInfo(const char* class_name)
+    : WrapperInfo(class_name, nullptr) {
+}
+
 WrapperInfo* WrapperInfo::From(v8::Handle<v8::Object> object) {
   if (object->InternalFieldCount() != gin::kNumberOfInternalFields)
     return nullptr;

@@ -70,11 +70,11 @@ class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
 //
 // Window
 //
-Window::Window(WidgetId widget_id)
+Window::Window()
     : ALLOW_THIS_IN_INITIALIZER_LIST(
         widget_id_(WidgetIdMapper::instance()->Register(this))) {
   ASSERT_CALLED_ON_SCRIPT_THREAD();
-  DCHECK_NE(widgets::kInvalidWidgetId, widget_id);
+  DCHECK_NE(widgets::kInvalidWidgetId, widget_id_);
 }
 
 Window::~Window() {

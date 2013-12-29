@@ -19,7 +19,7 @@ class Window : public v8_glue::Scriptable<Window> {
   // to |kInvalidWidgetId|.
   private: WidgetId widget_id_;
 
-  protected: Window(WidgetId widget_id);
+  protected: Window();
   public: virtual ~Window();
 
   static_assert(sizeof(int) == sizeof(WidgetId),

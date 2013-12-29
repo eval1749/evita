@@ -612,35 +612,30 @@ bool Frame::OnIdle(uint const nCount) {
     }
   }; // Local
 
-  if (!nCount) {
-    if (has_focus()) {
-      updateTitleBar();
+  auto const more = Widget::OnIdle(nCount);
+  if (nCount || !m_pActivePane)
+    return more;
 
-      if (auto const pEditPane = m_pActivePane->DynamicCast<EditPane>()) {
-        auto const pBuffer = pEditPane->GetBuffer();
+  auto const edit_pane = m_pActivePane->as<EditPane>();
+  if (!edit_pane)
+    return more;
 
-        switch (pBuffer->GetObsolete()) {
-          case Buffer::Obsolete_Checking:
-          case Buffer::Obsolete_Ignore:
-          case Buffer::Obsolete_Unknown:
-            break;
+  auto const window = edit_pane->GetActiveWindow();
+  if (!window || !window->has_focus())
+    return more;
 
-          case Buffer::Obsolete_No:
-            pBuffer->UpdateFileStatus();
-            break;
+  auto const text_edit_window = window->as<TextEditWindow>();
+  if (!text_edit_window)
+    return more;
 
-          case Buffer::Obsolete_Yes:
-            Local::HandleObsoleteBuffer(pBuffer);
-            break;
-
-          default:
-             CAN_NOT_HAPPEN();
-        }
-      }
-    }
-  }
-
-  return Widget::OnIdle(nCount);
+  updateTitleBar();
+  auto const buffer = text_edit_window->GetBuffer();
+  auto const state = buffer->GetObsolete();
+  if (state == Buffer::Obsolete_No)
+    buffer->UpdateFileStatus();
+  else if (state == Buffer::Obsolete_Yes)
+    Local::HandleObsoleteBuffer(buffer);
+  return more;
 }
 
 LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,

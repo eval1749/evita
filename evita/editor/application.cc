@@ -241,8 +241,8 @@ bool Application::OnIdle(uint nCount) {
   return need_more;
 }
 
-void Application::PostTask(const tracked_objects::Location& from_here,
-                          const base::Closure& task) {
+void Application::PostUiTask(const tracked_objects::Location& from_here,
+                             const base::Closure& task) {
   message_loop_->PostTask(from_here, task);
 }
 

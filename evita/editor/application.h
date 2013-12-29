@@ -113,8 +113,8 @@ class Application : public common::Singleton<Application> {
   public: bool OnIdle(uint hint);
 
   // [P]
-  public: void PostTask(const tracked_objects::Location& from_here,
-                        const base::Closure& task);
+  public: void PostUiTask(const tracked_objects::Location& from_here,
+                          const base::Closure& task);
 
   public: void PostDomTask(const tracked_objects::Location& from_here,
                            const base::Closure& task);

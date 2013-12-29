@@ -35,16 +35,6 @@ class Castable_
     } // StaticCast
 }; // Castable_
 
-template<class T, class Base_, typename KindType_ = const char*>
-class HasKind_ : public Base_
-{
-    public: virtual KindType_ GetKind() const override
-        { return T::Kind_(); }
-
-    public: static bool Is_(const Base_* p)
-        { return p->GetKind() == T::Kind_(); }
-}; // HasKind_
-
 template<int t_N = 100>
 class CharSink_
 {

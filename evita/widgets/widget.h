@@ -12,6 +12,7 @@
 #include "common/tree/node.h"
 #include "common/win/native_window.h"
 #include "common/win/rect.h"
+#include "evita/widgets/widget_id.h"
 
 namespace widgets {
 
@@ -40,10 +41,14 @@ class Widget
   private: Rect rect_;
   private: int shown_;
   private: State state_;
+  private: const WidgetId widget_id_;
 
+  // TODO(yosi): We allow widget_id as optional until we export all widgets
+  // to DOM.
   protected: explicit Widget(
-      std::unique_ptr<NativeWindow>&& native_window);
-  protected: Widget();
+      std::unique_ptr<NativeWindow>&& native_window,
+      WidgetId widget_id = kInvalidWidgetId);
+  protected: Widget(WidgetId widget_id = kInvalidWidgetId);
   protected: ~Widget();
 
   public: Widget& container_widget() const {
@@ -61,6 +66,7 @@ class Widget
     return native_window_.get();
   }
   public: const Rect& rect() const { return rect_; }
+  public: WidgetId widget_id() const { return widget_id_; }
 
   // [A]
   public: HWND AssociatedHwnd() const;

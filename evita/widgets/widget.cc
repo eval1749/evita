@@ -29,14 +29,16 @@ Widget* focus_widget;
 Widget* will_focus_widget;
 }  // namespace
 
-Widget::Widget(std::unique_ptr<NativeWindow>&& native_window)
+Widget::Widget(std::unique_ptr<NativeWindow>&& native_window,
+               WidgetId widget_id)
     : native_window_(std::move(native_window)),
+      shown_(0),
       state_(kNotRealized),
-      shown_(0) {
+      widget_id_(widget_id) {
 }
 
-Widget::Widget()
-    : Widget(NativeWindow::Create()) {
+Widget::Widget(WidgetId widget_id)
+    : Widget(NativeWindow::Create(), widget_id) {
 }
 
 Widget::~Widget() {

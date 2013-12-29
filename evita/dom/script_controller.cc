@@ -4,15 +4,14 @@
 #include "evita/dom/script_controller.h"
 
 #include "base/logging.h"
-#pragma warning(push)
-#pragma warning(disable: 4100 4625)
-#include "base/message_loop/message_loop.h"
-#pragma warning(pop)
-#include "base/threading/thread.h"
 #include "evita/dom/console.h"
 #include "evita/dom/editor.h"
 #include "evita/dom/lock.h"
+#include "evita/dom/script_controller.h"
+#include "evita/dom/script_thread.h"
 #include "evita/dom/window.h"
+#include "evita/editor/application.h"
+#include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/per_isolate_data.h"
 BEGIN_V8_INCLUDE
@@ -59,37 +58,6 @@ class Initializer {
       v8::Handle<v8::Function> constructor) {
     templ->Set(constructor->GetName()->ToString(), constructor);
   }
-
-  public: static void Start() {
-    ScriptController::instance();
-  }
-};
-
-base::MessageLoop* ui_message_loop;
-
-class ScriptThread : public common::Singleton<ScriptThread> {
-  friend class common::Singleton<ScriptThread>;
-
-  private: base::Thread thread_;
-  private: base::ThreadChecker thread_checker_;
-
-  private: ScriptThread()
-      : thread_("script_thread") {
-    ui_message_loop = base::MessageLoop::current();
-    thread_.Start();
-    thread_.message_loop()->PostTask(FROM_HERE,
-                                     base::Bind(Initializer::Start));
-  }
-
-  public: ~ScriptThread() = default;
-
-  public: void PostTask(const tracked_objects::Location& from_here,
-                        const base::Closure& task) {
-    DCHECK(thread_checker_.CalledOnValidThread());
-    thread_.message_loop()->PostTask(from_here, task);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(ScriptThread);
 };
 
 base::string16 V8ToString(v8::Handle<v8::Value> value) {
@@ -126,13 +94,23 @@ void ReportException(base::Callback<void(EvaluateResult)> callback,
     }
   }
 
-  ui_message_loop->PostTask(FROM_HERE, base::Bind(callback, eval_result));
+  Application::instance()->PostDomTask(FROM_HERE,
+      base::Bind(callback, eval_result));
 }
 
-}  // namespace
+// TODO(yosi) Once we make ScriptThread at start up, we don't need to have
+// |HackEvaluate|.
+void HackEvaluate(base::string16 script_text,
+                  base::Callback<void(EvaluateResult)> callback) {
+  ASSERT_CALLED_ON_SCRIPT_THREAD();
+  ScriptController::instance()->Evaluate(script_text, callback);
+}
+
+}   // namespace
 
 ScriptController::ScriptController()
     : context_holder_(isolate_holder_.isolate()) {
+  ASSERT_CALLED_ON_SCRIPT_THREAD();
   isolate_holder_.isolate()->Enter();
   {
     v8::HandleScope handle_scope(isolate_holder_.isolate());
@@ -143,7 +121,7 @@ ScriptController::ScriptController()
 }
 
 ScriptController::~ScriptController() {
-  DCHECK(thread_checker_.CalledOnValidThread());
+  ASSERT_CALLED_ON_SCRIPT_THREAD();
   {
     v8::HandleScope handle_scope(isolate_holder_.isolate());
     context_holder_.context()->Exit();
@@ -179,22 +157,18 @@ void ScriptController::Evaluate(
 
   EvaluateResult eval_result;
   eval_result.value = V8ToString(result->ToString());
-  ui_message_loop->PostTask(FROM_HERE, base::Bind(callback, eval_result));
+  Application::instance()->PostDomTask(FROM_HERE,
+      base::Bind(callback, eval_result));
 }
 
-// TODO(yosi) Once we make ScriptThread at start up, we don't need to have
-// |HackEvaluate|.
-static void HackEvaluate(
-    base::string16 script_text,
-    base::Callback<void(EvaluateResult)> callback) {
-  ScriptController::instance()->Evaluate(script_text, callback);
-}
-
+//////////////////////////////////////////////////////////////////////
+//
 // ScriptController::User
+//
 void ScriptController::User::Evaluate(
     base::string16 script_text,
     base::Callback<void(EvaluateResult)> callback) {
-  DCHECK(thread_checker_.CalledOnValidThread());
+  ASSERT_CALLED_ON_UI_THREAD();
   ScriptThread::instance()->PostTask(
       FROM_HERE,
       base::Bind(HackEvaluate, script_text, callback));

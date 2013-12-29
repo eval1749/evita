@@ -8,21 +8,29 @@
 
 namespace dom {
 
-// |Window| is correspond to |Widget|.
+// |Window| is correspond to |Widget| in DOM world.
 class Window : public v8_glue::Scriptable<Window> {
+  private: class WidgetIdMapper;
+  friend class WidgetIdMapper;
+
+  protected: typedef widgets::WidgetId WidgetId;
+
   // Associated wiget id. If associated widget is destroyed, it is changed
   // to |kInvalidWidgetId|.
-  private: widgets::WidgetId widget_id_;
+  private: WidgetId widget_id_;
 
-  private: Window(widgets::WidgetId widget_id);
+  protected: Window(WidgetId widget_id);
   public: virtual ~Window();
 
-  static_assert(sizeof(int) == sizeof(widgets::WidgetId),
-                "widgets::WidgetId must be compatible with int.");
+  static_assert(sizeof(int) == sizeof(WidgetId),
+                "WidgetId must be compatible with int.");
   public: int id() const { return widget_id_; }
   public: static v8_glue::WrapperInfo* static_wrapper_info();
+  public: WidgetId widget_id() const { return widget_id_; }
 
-  // [G]
+  public: static void DidDestroyWidget(WidgetId widget_id);
+  public: static Window* FromWidgetId(WidgetId widget_id);
+
   public: virtual gin::ObjectTemplateBuilder
       GetObjectTemplateBuilder(v8::Isolate* isolate) override;
 
@@ -30,5 +38,10 @@ class Window : public v8_glue::Scriptable<Window> {
 };
 
 }  // namespace dom
+
+#include <ostream>
+
+std::ostream& operator<<(std::ostream& ostream, const dom::Window& window);
+std::ostream& operator<<(std::ostream& ostream, const dom::Window* window);
 
 #endif //!defined(INCLUDE_evita_dom_window_h)

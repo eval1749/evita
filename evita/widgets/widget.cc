@@ -8,6 +8,7 @@
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants.h"
 #include "common/tree/descendants_or_self.h"
+#include "evita/dom/window.h"
 #include "evita/widgets/root_widget.h"
 
 #define DEBUG_FOCUS 0
@@ -47,6 +48,8 @@ Widget::~Widget() {
         state_, shown_, DEBUG_RECT_ARG(rect_));
   #endif
   DCHECK(!native_window_);
+  if (widget_id_ != widgets::kInvalidWidgetId)
+    dom::Window::DidDestroyWidget(widget_id_);
 }
 
 bool Widget::has_focus() const {

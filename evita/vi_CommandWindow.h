@@ -15,9 +15,13 @@ class KeyBindEntry;
 // CommandWindow
 //
 class CommandWindow : public widgets::Widget {
-  protected: CommandWindow(
+  protected: explicit CommandWindow(
       std::unique_ptr<widgets::NativeWindow>&& native_window)
       : widgets::Widget(std::move(native_window)) {
+  }
+
+  protected: explicit CommandWindow(widgets::WidgetId widget_id)
+      : widgets::Widget(widget_id) {
   }
 
   protected: CommandWindow() {
@@ -43,6 +47,10 @@ class CommandWindow_ : public Parent_  {
   protected: CommandWindow_(
       std::unique_ptr<widgets::NativeWindow>&& native_window)
     : Parent_(std::move(native_window)) {
+  }
+
+  protected: explicit CommandWindow_(widgets::WidgetId widget_id)
+      : Parent_(widget_id) {
   }
 
   protected: CommandWindow_() {

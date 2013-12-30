@@ -13,8 +13,13 @@ ContentWindow::ContentWindow(
       active_tick_(0) {
 }
 
+ContentWindow::ContentWindow(widgets::WidgetId widget_id)
+    : CommandWindow_(widget_id),
+      active_tick_(0) {
+}
+
 ContentWindow::ContentWindow()
-    : ContentWindow(std::move(std::unique_ptr<common::win::NativeWindow>())) {
+    : ContentWindow(widgets::kInvalidWidgetId) {
 }
 
 Frame& ContentWindow::frame() const {

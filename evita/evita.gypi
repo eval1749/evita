@@ -14,10 +14,6 @@
       'target_name': 'evita',
       'type': 'executable',
       'dependencies': [
-        '../base/base.gyp:base',
-        '../common/common.gyp:common',
-        '../gin/gin.gyp:gin',
-        '../v8/tools/gyp/v8.gyp:v8',
         'ui',
       ], # dependencies
 
@@ -49,6 +45,9 @@
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
+        '<(DEPTH)/common/common.gyp:common',
+        '<(DEPTH)/gin/gin.gyp:gin',
+        '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
         'text',
       ],
       'sources': [

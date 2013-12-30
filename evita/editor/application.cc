@@ -256,6 +256,9 @@ void Application::PostDomTask(const tracked_objects::Location& from_here,
   message_loop_->PostTask(from_here, base::Bind(RunTaskWithinDomLock, task));
 }
 
+void Application::QuitForTest() {
+  message_loop_->QuitWhenIdle();
+}
 
 Buffer* Application::RenameBuffer(Buffer* buffer, const char16* pwszName) {
   auto const present = FindBuffer(pwszName);

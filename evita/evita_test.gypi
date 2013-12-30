@@ -11,6 +11,39 @@
 
   'targets': [
     {
+      'target_name': 'evita_dom_test',
+      'type': 'executable',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        '<(DEPTH)/common/common.gyp:common',
+        'dom',
+        'ui',
+        '<(DEPTH)/testing/gtest.gyp:gtest',
+        '<(DEPTH)/base/base.gyp:run_all_unittests',
+      ], # dependencies
+      'include_dirs+' : [
+        #'<(DEPTH)/evita/',
+        '<(DEPTH)/testing/gtest/include/',
+      ], # include_dirs
+      'msvs_settings': {
+        'VCLinkerTool': {
+          'AdditionalDependencies': [
+            'gdi32.lib',
+            'comdlg32.lib',
+            'advapi32.lib',
+            'shell32.lib',
+            'ole32.lib',
+            'oleaut32.lib',
+            'uuid.lib',
+          ], # AdditionalDependencies
+        }, # VCLinkerTool
+      }, # msvs_settings
+      'sources': [
+        'precomp.cpp',
+        'dom/editor_unittest.cc',
+      ],
+    }, # evita_dom_test
+    {
       'target_name': 'evita_text_test',
       'type': 'executable',
       'dependencies': [
@@ -40,6 +73,6 @@
         'precomp.cpp',
         'core/buffer_test.cc',
       ],
-    }, # evita_test
+    }, # evita_text_test
   ] # targets
 }

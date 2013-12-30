@@ -71,7 +71,7 @@
       }, # msvs_settings
       'sources': [
         'precomp.cpp',
-        'core/buffer_test.cc',
+        'core/buffer_unittest.cc',
       ],
     }, # evita_text_test
   ] # targets

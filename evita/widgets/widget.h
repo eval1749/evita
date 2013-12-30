@@ -81,6 +81,7 @@ class Widget
   // Called on WM_CREATE
   protected: virtual void DidCreateNativeWindow();
   protected: virtual void DidDestroyWidget();
+  public: static void DidDestroyDomWindow(WidgetId widget_id);
   // Called on WM_NCDESTORY
   protected: virtual void DidDestroyNativeWindow();
   protected: virtual void DidHide();

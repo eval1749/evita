@@ -20,6 +20,8 @@ namespace dom {
 //
 // This class represents mapping from widget id to DOM Window object.
 //
+// WidgetIdMapper resets Window::widget_id_ when corresponding widget is
+// destroyed.
 class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
   friend class common::Singleton<WidgetIdMapper>;
 
@@ -38,8 +40,8 @@ class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
     DCHECK_NE(widgets::kInvalidWidgetId, widget_id);
     auto it = map_.find(widget_id);
     if (it == map_.end()) {
-      DVLOG(0) << "Why we don't have widget_id(" << widget_id <<
-        ") in WidgetIdMap?";
+      DVLOG(0) << "Why we don't have a widget for WidgetId " << widget_id <<
+        " in WidgetIdMap?";
       return;
     }
     it->second->widget_id_ = widgets::kInvalidWidgetId;
@@ -79,7 +81,10 @@ Window::Window()
 
 Window::~Window() {
   ASSERT_CALLED_ON_SCRIPT_THREAD();
+  if (widget_id_ == widgets::kInvalidWidgetId)
+    return;
   WidgetIdMapper::instance()->Unregister(widget_id_);
+  widgets::Widget::DidDestroyDomWindow(widget_id_);
 }
 
 v8_glue::WrapperInfo* Window::static_wrapper_info() {
@@ -102,6 +107,7 @@ Window* Window::FromWidgetId(WidgetId widget_id) {
 gin::ObjectTemplateBuilder Window::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
   return GetObjectTemplateBuilderFromBase(isolate)
+    // Note: we expose widget id for debugging.
     .SetProperty("id", &Window::id);
 }
 

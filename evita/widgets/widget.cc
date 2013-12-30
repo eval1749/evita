@@ -3,12 +3,16 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #include "widgets/widget.h"
 
+#include <unordered_map>
+
 #include "common/adoptors/reverse.h"
 #include "common/tree/ancestors_or_self.h"
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants.h"
 #include "common/tree/descendants_or_self.h"
 #include "evita/dom/window.h"
+#include "evita/dom/script_thread.h"
+#include "evita/editor/application.h"
 #include "evita/widgets/root_widget.h"
 
 #define DEBUG_FOCUS 0
@@ -30,12 +34,69 @@ Widget* focus_widget;
 Widget* will_focus_widget;
 }  // namespace
 
+//////////////////////////////////////////////////////////////////////
+//
+// WidgetIdMapper
+//
+// This class represents mapping from widget id to DOM Window object.
+//
+class WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
+  friend class common::Singleton<WidgetIdMapper>;
+
+  private: typedef widgets::WidgetId WidgetId;
+
+  private: std::unordered_map<WidgetId, Widget*> map_;
+  private: WidgetId next_widget_id_;
+
+  private: WidgetIdMapper() : next_widget_id_(1) {
+    ASSERT_CALLED_ON_UI_THREAD();
+  }
+  public: ~WidgetIdMapper() = default;
+
+  public: void DidDestroyDomWindow(WidgetId widget_id) {
+    ASSERT_CALLED_ON_UI_THREAD();
+    DCHECK_NE(widgets::kInvalidWidgetId, widget_id);
+    auto it = map_.find(widget_id);
+    if (it == map_.end()) {
+      DVLOG(0) << "Why we don't have a window for WidgetId " << widget_id <<
+        " in WidgetIdMap?";
+      return;
+    }
+    map_.erase(it);
+  }
+
+  public: Widget* Find(WidgetId widget_id) {
+    ASSERT_CALLED_ON_UI_THREAD();
+    auto it = map_.find(widget_id);
+    return it == map_.end() ? nullptr : it->second;
+  }
+
+  public: WidgetId Register(Widget* window) {
+    ASSERT_CALLED_ON_UI_THREAD();
+    auto widget_id = next_widget_id_;
+    map_[widget_id] = window;
+    ++next_widget_id_;
+    return widget_id;
+  }
+
+  public: void Unregister(WidgetId widget_id) {
+    ASSERT_CALLED_ON_UI_THREAD();
+    DCHECK_NE(widgets::kInvalidWidgetId, widget_id);
+    map_[widget_id] = nullptr;
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// Widget
+//
 Widget::Widget(std::unique_ptr<NativeWindow>&& native_window,
                WidgetId widget_id)
     : native_window_(std::move(native_window)),
       shown_(0),
       state_(kNotRealized),
       widget_id_(widget_id) {
+  WidgetIdMapper::instance()->Register(this);
 }
 
 Widget::Widget(WidgetId widget_id)
@@ -48,8 +109,10 @@ Widget::~Widget() {
         state_, shown_, DEBUG_RECT_ARG(rect_));
   #endif
   DCHECK(!native_window_);
-  if (widget_id_ != widgets::kInvalidWidgetId)
+  if (widget_id_ != widgets::kInvalidWidgetId) {
+    WidgetIdMapper::instance()->Unregister(widget_id_);
     dom::Window::DidDestroyWidget(widget_id_);
+  }
 }
 
 bool Widget::has_focus() const {
@@ -106,6 +169,14 @@ void Widget::DidChangeHierarchy() {
 }
 
 void Widget::DidCreateNativeWindow() {
+}
+
+void Widget::DidDestroyDomWindow(WidgetId widget_id) {
+  ASSERT_CALLED_ON_SCRIPT_THREAD();
+  Application::instance()->PostDomTask(FROM_HERE,
+      base::Bind(&WidgetIdMapper::DidDestroyDomWindow,
+                 base::Unretained(WidgetIdMapper::instance()),
+                 widget_id));
 }
 
 void Widget::DidDestroyNativeWindow() {

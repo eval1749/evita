@@ -3,11 +3,14 @@
 
 #include "evita/dom/window.h"
 
+#include <algorithm>
 #include <unordered_map>
 
 #include "base/bind.h"
 #include "base/logging.h"
+#include "base/strings/stringprintf.h"
 #include "common/memory/singleton.h"
+#include "evita/dom/script_controller.h"
 #include "evita/dom/script_thread.h"
 #include "evita/editor/application.h"
 #include "evita/gc/weak_ptr.h"
@@ -73,8 +76,9 @@ class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
 // Window
 //
 Window::Window()
-    : ALLOW_THIS_IN_INITIALIZER_LIST(
-        widget_id_(WidgetIdMapper::instance()->Register(this))) {
+    : parent_window_(nullptr),
+      ALLOW_THIS_IN_INITIALIZER_LIST(widget_id_(
+          WidgetIdMapper::instance()->Register(this))) {
   ASSERT_CALLED_ON_SCRIPT_THREAD();
   DCHECK_NE(widgets::kInvalidWidgetId, widget_id_);
 }
@@ -92,6 +96,28 @@ v8_glue::WrapperInfo* Window::static_wrapper_info() {
   return &wrapper_info;
 }
 
+void Window::AddWindow(Window* window) {
+  if (window == this) {
+    ScriptController::instance()->ThrowError(
+        base::StringPrintf("Can't add window(%d) to itself.", id()));
+    return;
+  }
+  if (window->parent_window_) {
+    ScriptController::instance()->ThrowError(
+        base::StringPrintf("Window(%d) is already child of window(%d).",
+            window->id(), window->parent_window_->id()));
+    return;
+  }
+  if (IsDescendantOf(window)) {
+    ScriptController::instance()->ThrowError(
+        base::StringPrintf("Window(%d) is parent or ancestor of window(%d).",
+            window->id(), id()));
+    return;
+  }
+  window->parent_window_ = this;
+  child_windows_.push_back(window);
+}
+
 void Window::DidDestroyWidget(WidgetId widget_id) {
   ASSERT_CALLED_ON_UI_THREAD();
   DCHECK_NE(widgets::kInvalidWidgetId, widget_id);
@@ -107,8 +133,40 @@ Window* Window::FromWidgetId(WidgetId widget_id) {
 gin::ObjectTemplateBuilder Window::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
   return GetObjectTemplateBuilderFromBase(isolate)
-    // Note: we expose widget id for debugging.
-    .SetProperty("id", &Window::id);
+      .SetMethod("add", &Window::AddWindow)
+      // Note: we expose widget id for debugging.
+      .SetProperty("id", &Window::id)
+      .SetProperty("parent", &Window::parent_window)
+      .SetMethod("remove", &Window::RemoveWindow);
+}
+
+bool Window::IsDescendantOf(Window* other) const {
+  if (parent_window_ == other)
+    return true;
+  for (auto child : child_windows_) {
+    if (child->IsDescendantOf(other))
+      return true;
+  }
+  return false;
+}
+
+void Window::RemoveWindow(Window* window) {
+  if (window->parent_window_ != window) {
+    ScriptController::instance()->ThrowError(base::StringPrintf(
+        "Can't remove window(%d) which isn't child of window(%d).",
+        window->id(), id()));
+    return;
+  }
+  auto present = std::find(child_windows_.begin(), child_windows_.end(),
+                           window);
+  if (present == child_windows_.end()) {
+    ScriptController::instance()->ThrowError(base::StringPrintf(
+        "INTERNAL ERROR: window(%d) isn't in child list of window(%d).",
+        window->id(), id()));
+    return;
+  }
+  window->parent_window_ = nullptr;
+  child_windows_.erase(present);
 }
 
 }  // namespace dom

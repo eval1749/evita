@@ -11,11 +11,11 @@
 
   'targets': [
     {
-      'target_name': 'evita_test',
+      'target_name': 'evita_text_test',
       'type': 'executable',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
-        '<(DEPTH)/evita/evita.gyp:core',
+        '<(DEPTH)/evita/evita.gyp:text',
         '<(DEPTH)/testing/gtest.gyp:gtest',
         '<(DEPTH)/testing/gtest.gyp:gtest_main',
       ], # dependencies

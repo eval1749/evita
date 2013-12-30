@@ -45,7 +45,38 @@
     }, # evita
 
     {
-      'target_name': 'core',
+      'target_name': 'dom',
+      'type': 'static_library',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        'text',
+      ],
+      'sources': [
+        'precomp.cpp',
+
+        'dom/console.cc',
+        'dom/editor.cc',
+        'dom/editor_window.cc',
+        'dom/lock.cc',
+        'dom/script_command.cc',
+        'dom/script_controller.cc',
+        'dom/script_thread.cc',
+        'dom/window.cc',
+
+        'gc/collectable.cc',
+        'gc/collector.cc',
+        'gc/visitable.cc',
+
+        'v8_glue/converter.cc',
+        'v8_glue/isolate_holder.cc',
+        'v8_glue/per_isolate_data.cc',
+        'v8_glue/scriptable.cc',
+        'v8_glue/v8_console_buffer.cc',
+        'v8_glue/wrapper_info.cc',
+      ], # sources
+    }, # dom
+    {
+      'target_name': 'text',
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
@@ -78,44 +109,12 @@
         '../charset/CharsetDecoder.cpp',
         '../charset/CharsetDetector.cpp',
       ], # sources
-    }, # core
-    {
-      'target_name': 'dom',
-      'type': 'static_library',
-      'dependencies': [
-        '<(DEPTH)/base/base.gyp:base',
-        'core',
-      ],
-      'sources': [
-        'precomp.cpp',
-
-        'dom/console.cc',
-        'dom/editor.cc',
-        'dom/editor_window.cc',
-        'dom/lock.cc',
-        'dom/script_command.cc',
-        'dom/script_controller.cc',
-        'dom/script_thread.cc',
-        'dom/window.cc',
-
-        'gc/collectable.cc',
-        'gc/collector.cc',
-        'gc/visitable.cc',
-
-        'v8_glue/converter.cc',
-        'v8_glue/isolate_holder.cc',
-        'v8_glue/per_isolate_data.cc',
-        'v8_glue/scriptable.cc',
-        'v8_glue/v8_console_buffer.cc',
-        'v8_glue/wrapper_info.cc',
-      ], # sources
-    }, # dom
+    }, # text
     {
       'target_name': 'ui',
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
-        'core',
         'dom',
       ],
       'sources': [

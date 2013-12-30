@@ -91,7 +91,7 @@ class Scriptable : public B {
 
 namespace gin {
 
-// This converter handles any subclass of Wrappable.
+// This converter handles any subclass of Scriptable.
 template<typename T>
 struct Converter<T*, typename base::enable_if<
     base::is_convertible<T*,

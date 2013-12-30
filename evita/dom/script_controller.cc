@@ -176,6 +176,12 @@ void ScriptController::Evaluate(
       base::Bind(callback, eval_result));
 }
 
+void ScriptController::ThrowError(const std::string& message) {
+  auto isolate = isolate_holder_.isolate();
+  isolate->ThrowException(v8::Exception::Error(
+      gin::StringToV8(isolate, message)));
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // ScriptController::User

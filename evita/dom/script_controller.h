@@ -3,6 +3,7 @@
 #if !defined(INCLUDE_evita_dom_script_controller_h)
 #define INCLUDE_evita_dom_script_controller_h
 
+#include <string>
 #include <memory>
 #include <vector>
 
@@ -70,6 +71,7 @@ class ScriptController : public common::Singleton<ScriptController> {
                          base::Callback<void(EvaluateResult)> callback);
 
   public: static void Start();
+  public: void ThrowError(const std::string& message);
 
   DISALLOW_COPY_AND_ASSIGN(ScriptController);
 };

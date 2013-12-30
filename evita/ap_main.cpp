@@ -151,6 +151,7 @@ static int MainLoop() {
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
   base::AtExitManager at_exit;
+  CommandLine::set_slash_is_not_a_switch();
   CommandLine::Init(0, nullptr);
   {
     logging::LoggingSettings settings;

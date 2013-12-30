@@ -30,7 +30,9 @@ class Window : public v8_glue::Scriptable<Window> {
   public: virtual ~Window();
 
   public: int id() const { return widget_id_; }
-  public: Window* parent_window() const { return parent_window_; }
+  public: v8_glue::Nullable<Window> parent_window() const {
+    return parent_window_;
+  }
   public: static v8_glue::WrapperInfo* static_wrapper_info();
   public: WidgetId widget_id() const { return widget_id_; }
 

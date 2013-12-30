@@ -23,6 +23,30 @@ namespace dom {
 
 namespace {
 
+template<typename T>
+class Installer {
+  public: static void Run(v8::Isolate* isolate,
+                          v8::Handle<v8::ObjectTemplate> global) {
+    InstallConstructor(global, T::StaticGetConstructor(isolate));
+    auto const info = T::static_wrapper_info();
+    DCHECK(!info->singleton_name());
+  }
+  public: static void RunSingleton(v8::Isolate* isolate,
+                                   v8::Handle<v8::ObjectTemplate> global) {
+    InstallConstructor(global, T::StaticGetConstructor(isolate));
+    auto const info = T::static_wrapper_info();
+    DCHECK(info->singleton_name());
+    global->Set(gin::StringToV8(isolate, info->singleton_name()),
+                T::instance()->GetWrapper(isolate));
+  }
+
+  private: static void InstallConstructor(
+      v8::Handle<v8::ObjectTemplate> templ,
+      v8::Handle<v8::Function> constructor) {
+    templ->Set(constructor->GetName()->ToString(), constructor);
+  }
+};
+
 class Initializer {
   public: static v8::Handle<v8::Context> CreateContext(v8::Isolate* isolate) {
     return v8::Context::New(isolate, nullptr, GetGlobalTemplate(isolate));
@@ -39,26 +63,15 @@ class Initializer {
         auto context = v8::Context::New(isolate);
         v8::Context::Scope context_scope(context);
 
-        InstallConstructor(global, Console::GetConstructor(isolate));
-        InstallConstructor(global, Editor::GetConstructor(isolate));
-        InstallConstructor(global, Window::GetConstructor(isolate));
-        InstallConstructor(global, EditorWindow::GetConstructor(isolate));
-
-        global->Set(gin::StringToV8(isolate, "console"),
-            Console::instance()->GetWrapper(isolate));
-
-        global->Set(gin::StringToV8(isolate, "editor"),
-            Editor::instance()->GetWrapper(isolate));
+        // Note: super class must be installed before subclass.
+        Installer<Console>::RunSingleton(isolate, global);
+        Installer<Editor>::RunSingleton(isolate, global);
+        Installer<Window>::Run(isolate, global);
+        Installer<EditorWindow>::Run(isolate, global);
     }
 
     global_template.Reset(isolate, global);
     return v8::Local<v8::ObjectTemplate>::New(isolate, global_template);
-  }
-
-  private: static void InstallConstructor(
-      v8::Handle<v8::ObjectTemplate> templ,
-      v8::Handle<v8::Function> constructor) {
-    templ->Set(constructor->GetName()->ToString(), constructor);
   }
 };
 

@@ -6,14 +6,25 @@
 namespace v8_glue {
 
 WrapperInfo::WrapperInfo(const char* class_name,
-                         WrapperInfo* inherit_from)
+                         WrapperInfo* inherit_from,
+                         const char* singleton_name)
     : embedder_(gin::kEmbedderEvita),
       class_name_(class_name),
-      inherit_from_(inherit_from) {
+      inherit_from_(inherit_from),
+      singleton_name_(singleton_name) {
+}
+
+WrapperInfo::WrapperInfo(const char* class_name,
+                         WrapperInfo* inherit_from)
+    : WrapperInfo(class_name, inherit_from, nullptr) {
+}
+
+WrapperInfo::WrapperInfo(const char* class_name, const char* singleton_name)
+    : WrapperInfo(class_name, nullptr, singleton_name) {
 }
 
 WrapperInfo::WrapperInfo(const char* class_name)
-    : WrapperInfo(class_name, nullptr) {
+    : WrapperInfo(class_name, nullptr, nullptr) {
 }
 
 WrapperInfo* WrapperInfo::From(v8::Handle<v8::Object> object) {

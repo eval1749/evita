@@ -101,7 +101,7 @@ Window* Window::FromWidgetId(WidgetId widget_id) {
 
 gin::ObjectTemplateBuilder Window::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
-  return GetEmptyObjectTemplateBuilder(isolate)
+  return GetObjectTemplateBuilderFromBase(isolate)
     .SetProperty("id", &Window::id);
 }
 

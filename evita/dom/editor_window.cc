@@ -28,7 +28,7 @@ v8_glue::WrapperInfo* EditorWindow::static_wrapper_info() {
 gin::ObjectTemplateBuilder EditorWindow::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
   ASSERT_CALLED_ON_SCRIPT_THREAD();
-  return GetEmptyObjectTemplateBuilder(isolate);
+  return GetObjectTemplateBuilderFromBase(isolate);
 }
 
 }  // namespace dom

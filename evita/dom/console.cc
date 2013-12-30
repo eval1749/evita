@@ -29,13 +29,14 @@ void Log(const std::vector<base::string16>& messages) {
 }  // namespace
 
 v8_glue::WrapperInfo* Console::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(v8_glue::WrapperInfo, wrapper_info, ("Console"));
+  DEFINE_STATIC_LOCAL(v8_glue::WrapperInfo, wrapper_info,
+      ("Console", "console"));
   return &wrapper_info;
 }
 
 gin::ObjectTemplateBuilder Console::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
-  return GetEmptyObjectTemplateBuilder(isolate)
+  return GetObjectTemplateBuilderFromBase(isolate)
     .SetMethod("log", Log);
 }
 

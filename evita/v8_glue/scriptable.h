@@ -37,16 +37,16 @@ class AbstractScriptable
   // |AbstractScriptable::wrapper_info()|.
   public: virtual WrapperInfo* wrapper_info() const = 0;
 
-  protected: static v8::Handle<v8::Function>
-      GetConstructorImpl(v8::Isolate* isolate, WrapperInfo* info);
-
-  protected: static v8::Handle<v8::FunctionTemplate> GetFunctionTemplateImpl(
-      v8::Isolate* isolate, WrapperInfo* info);
-
   protected: virtual gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
       v8::Isolate* isolate);
 
   public: v8::Handle<v8::Object> GetWrapper(v8::Isolate* isolate);
+
+  protected: static v8::Handle<v8::Function>
+      StaticGetConstructor(v8::Isolate* isolate, WrapperInfo* info);
+
+  protected: static v8::Handle<v8::FunctionTemplate>
+    StaticGetFunctionTemplate(v8::Isolate* isolate, WrapperInfo* info);
 
   private: static void WeakCallback(
       const v8::WeakCallbackData<v8::Object, AbstractScriptable>& data);
@@ -65,16 +65,23 @@ class Scriptable : public B {
     return T::static_wrapper_info();
   }
 
-  public: static v8::Handle<v8::Function> GetConstructor(
-      v8::Isolate* isolate) {
-    return GetConstructorImpl(isolate, T::static_wrapper_info());
-  }
-
   // A helper function to get ObjecTemplateBuilder from
   // AbstractScriptable to avoid v8_glue::WrapperInfo<T> prefix.
-  protected: gin::ObjectTemplateBuilder GetEmptyObjectTemplateBuilder(
+  protected: gin::ObjectTemplateBuilder GetObjectTemplateBuilderFromBase(
       v8::Isolate* isolate) {
-    return AbstractScriptable::GetObjectTemplateBuilder(isolate);
+    return B::GetObjectTemplateBuilder(isolate);
+  }
+
+  public: static v8::Handle<v8::Function> StaticGetConstructor(
+      v8::Isolate* isolate) {
+    return AbstractScriptable::StaticGetConstructor(
+        isolate, T::static_wrapper_info());
+  }
+
+  public: static v8::Handle<v8::Function> StaticGetFunctionTemplate(
+      v8::Isolate* isolate) {
+    return AbstractScriptable::StaticGetFunctionTemplate(
+        isolate, T::static_wrapper_info());
   }
 
   DISALLOW_COPY_AND_ASSIGN(Scriptable);

@@ -16,11 +16,12 @@ END_V8_INCLUDE
 namespace v8_glue {
 
 namespace {
-// Changes behavior of constructor call:
+// Changes behavior of constructor call for singleton:
 //  - Type() => throw "Cannot be called as function"
 //  - new Type() => throw "Cannot use with new operator" if not creating
 //    wrapper
-void ConstructorCallHandler(const v8::FunctionCallbackInfo<v8::Value>& info) {
+void ConstructorCallHandlerForBlocking(
+    const v8::FunctionCallbackInfo<v8::Value>& info) {
   auto const isolate = info.GetIsolate();
   if (!info.IsConstructCall()) {
      isolate->ThrowException(
@@ -41,42 +42,12 @@ AbstractScriptable::~AbstractScriptable() {
   wrapper_.Reset();
 }
 
-v8::Handle<v8::Function> AbstractScriptable::GetConstructorImpl(
-    v8::Isolate* isolate, WrapperInfo* info) {
-  return GetFunctionTemplateImpl(isolate, info)->GetFunction();
-}
-
-v8::Handle<v8::FunctionTemplate>
-    AbstractScriptable::GetFunctionTemplateImpl(
-        v8::Isolate* isolate, WrapperInfo* info) {
-  auto const data = gin::PerIsolateData::From(isolate);
-  auto present = data->GetFunctionTemplate(info->gin_wrapper_info());
-  if (!present.IsEmpty())
-    return present;
-  auto templ = v8::FunctionTemplate::New(isolate);
-  templ->SetClassName(gin::StringToSymbol(isolate, info->class_name()));
-  data->SetFunctionTemplate(info->gin_wrapper_info(), templ);
-  templ->SetCallHandler(ConstructorCallHandler);
-
-  // We must set internal field count for instance template before creating
-  // function object.
-  templ->InstanceTemplate()->
-      SetInternalFieldCount(gin::kNumberOfInternalFields);
-
-  if (auto const base_info = info->inherit_from()) {
-    auto base_templ = data->GetFunctionTemplate(base_info->gin_wrapper_info());
-    DCHECK(!base_templ.IsEmpty()) << "No such base class "
-        << base_info->class_name();
-    templ->Inherit(base_templ);
-  }
-  return templ;
-}
-
 gin::ObjectTemplateBuilder AbstractScriptable::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
-  if (!wrapper_info()->class_name())
+  auto const info = wrapper_info();
+  if (!info->class_name())
     return gin::ObjectTemplateBuilder(isolate);
-  auto templ = GetFunctionTemplateImpl(isolate, wrapper_info());
+  auto templ = StaticGetFunctionTemplate(isolate, info);
   return gin::ObjectTemplateBuilder(isolate, templ->InstanceTemplate());
 }
 
@@ -104,6 +75,39 @@ v8::Handle<v8::Object> AbstractScriptable::GetWrapper(
   wrapper_.SetWeak(this, WeakCallback);
   gc::Collector::instance()->AddToRootSet(this);
   return wrapper;
+}
+
+v8::Handle<v8::Function> AbstractScriptable::StaticGetConstructor(
+    v8::Isolate* isolate, WrapperInfo* info) {
+  return StaticGetFunctionTemplate(isolate, info)->GetFunction();
+}
+
+v8::Handle<v8::FunctionTemplate>
+    AbstractScriptable::StaticGetFunctionTemplate(
+        v8::Isolate* isolate, WrapperInfo* info) {
+  auto const data = gin::PerIsolateData::From(isolate);
+  auto present = data->GetFunctionTemplate(info->gin_wrapper_info());
+  if (!present.IsEmpty())
+    return present;
+  auto templ = v8::FunctionTemplate::New(isolate);
+  templ->SetClassName(gin::StringToSymbol(isolate, info->class_name()));
+  data->SetFunctionTemplate(info->gin_wrapper_info(), templ);
+
+  if (info->singleton_name())
+    templ->SetCallHandler(ConstructorCallHandlerForBlocking);
+
+  // We must set internal field count for instance template before creating
+  // function object.
+  templ->InstanceTemplate()->
+      SetInternalFieldCount(gin::kNumberOfInternalFields);
+
+  if (auto const base_info = info->inherit_from()) {
+    auto base_templ = data->GetFunctionTemplate(base_info->gin_wrapper_info());
+    DCHECK(!base_templ.IsEmpty()) << "No such base class "
+        << base_info->class_name();
+    templ->Inherit(base_templ);
+  }
+  return templ;
 }
 
 void AbstractScriptable::WeakCallback(

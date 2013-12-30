@@ -20,15 +20,26 @@ class WrapperInfo {
   // Note: |inherit_from_| should be  |const WrapperInfo*|, although
   // |gin::PerIsolateData::GetFunctionTempalte()| takes non-const pointer.
   private: WrapperInfo* const inherit_from_;
+  private: const char* singleton_name_;
 
+  // Singleton for derived class.
+  public: WrapperInfo(const char* class_name,
+                      WrapperInfo* inherit_from,
+                      const char* singleton_name);
+  // Derived class
   public: WrapperInfo(const char* class_name,
                       WrapperInfo* inherit_from);
+  // Simple Singleton
+  public: WrapperInfo(const char* class_name,
+                      const char* singleton_name);
+  // Simple class
   public: WrapperInfo(const char* class_name);
   public: ~WrapperInfo() = default;
 
   public: const char* class_name() const { return class_name_; }
   public: gin::GinEmbedder embedder() const { return embedder_; }
   public: WrapperInfo* inherit_from() const { return inherit_from_; }
+  public: const char* singleton_name() const { return singleton_name_; }
   public: gin::WrapperInfo* gin_wrapper_info() {
     return reinterpret_cast<gin::WrapperInfo*>(this);
   }

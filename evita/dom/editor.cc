@@ -37,7 +37,8 @@ Editor::Editor() {
 }
 
 v8_glue::WrapperInfo* Editor::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(v8_glue::WrapperInfo, wrapper_info, ("Editor"));
+  DEFINE_STATIC_LOCAL(v8_glue::WrapperInfo, wrapper_info,
+      ("Editor", "editor"));
   return &wrapper_info;
 }
 
@@ -47,7 +48,7 @@ const base::string16& Editor::version() const {
 
 gin::ObjectTemplateBuilder Editor::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
-  return GetEmptyObjectTemplateBuilder(isolate)
+  return GetObjectTemplateBuilderFromBase(isolate)
       .SetMethod("addKeyBinding", AddKeyBinding)
       .SetMethod("createFrame", CreateFrame)
       .SetProperty("version", &Editor::version);

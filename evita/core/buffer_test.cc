@@ -2,7 +2,7 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #include "gtest/gtest.h"
 
-#include "evita/ed_Buffer.h"
+#include "evita/core/buffer.h"
 #include <memory>
 
 namespace {

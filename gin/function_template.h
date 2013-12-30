@@ -469,6 +469,7 @@ struct Dispatcher<R(P1, P2, P3, P4, P5, P6)> {
 template<typename Sig>
 v8::Local<v8::FunctionTemplate> CreateFunctionTemplate(
     v8::Isolate* isolate, const base::Callback<Sig> callback,
+    v8::Handle<v8::FunctionTemplate> class_template = v8::Handle<v8::FunctionTemplate>(),
     int callback_flags = 0) {
   typedef internal::CallbackHolder<Sig> HolderT;
   gin::Handle<HolderT> holder = CreateHandle(
@@ -476,7 +477,9 @@ v8::Local<v8::FunctionTemplate> CreateFunctionTemplate(
   return v8::FunctionTemplate::New(
       isolate,
       &internal::Dispatcher<Sig>::DispatchToCallback,
-      ConvertToV8<internal::CallbackHolderBase*>(isolate, holder.get()));
+      ConvertToV8<internal::CallbackHolderBase*>(isolate, holder.get()),
+      callback_flags & HolderIsFirstArgument ? v8::Signature::New(isolate, class_template) :
+          v8::Handle<v8::Signature>());
 }
 
 }  // namespace gin

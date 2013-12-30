@@ -47,8 +47,9 @@ gin::ObjectTemplateBuilder AbstractScriptable::GetObjectTemplateBuilder(
   auto const info = wrapper_info();
   if (!info->class_name())
     return gin::ObjectTemplateBuilder(isolate);
-  auto templ = StaticGetFunctionTemplate(isolate, info);
-  return gin::ObjectTemplateBuilder(isolate, templ->InstanceTemplate());
+  auto class_templ = StaticGetFunctionTemplate(isolate, info);
+  return gin::ObjectTemplateBuilder(isolate, class_templ,
+                                    class_templ->InstanceTemplate());
 }
 
 v8::Handle<v8::Object> AbstractScriptable::GetWrapper(
@@ -134,10 +135,11 @@ void* FromV8Impl(v8::Isolate*, v8::Handle<v8::Value> val,
 
   // If this fails, the object is managed by Gin, but it's not wrapping an
   // instance of the C++ class associated with wrapper_info.
-  if (info != wrapper_info)
-    return nullptr;
-
-  return obj->GetAlignedPointerFromInternalField(gin::kEncodedValueIndex);
+  for (auto runner = info; runner; runner = runner->inherit_from()) {
+    if (runner == wrapper_info)
+      return obj->GetAlignedPointerFromInternalField(gin::kEncodedValueIndex);
+  }
+  return nullptr;
 }
 
 }  // namespace internal

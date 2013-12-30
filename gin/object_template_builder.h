@@ -24,8 +24,9 @@ namespace {
 template<typename T, typename Enable = void>
 struct CallbackTraits {
   static v8::Handle<v8::FunctionTemplate> CreateTemplate(v8::Isolate* isolate,
+                                                         v8::Handle<v8::FunctionTemplate> class_template,
                                                          T callback) {
-    return CreateFunctionTemplate(isolate, base::Bind(callback));
+    return CreateFunctionTemplate(isolate, base::Bind(callback), class_template);
   }
 };
 
@@ -33,8 +34,9 @@ struct CallbackTraits {
 template<typename T>
 struct CallbackTraits<base::Callback<T> > {
   static v8::Handle<v8::FunctionTemplate> CreateTemplate(
-      v8::Isolate* isolate, const base::Callback<T>& callback) {
-    return CreateFunctionTemplate(isolate, callback);
+      v8::Isolate* isolate, v8::Handle<v8::FunctionTemplate> class_template,
+      const base::Callback<T>& callback) {
+    return CreateFunctionTemplate(isolate, callback, class_template);
   }
 };
 
@@ -46,8 +48,9 @@ template<typename T>
 struct CallbackTraits<T, typename base::enable_if<
                            base::is_member_function_pointer<T>::value>::type> {
   static v8::Handle<v8::FunctionTemplate> CreateTemplate(v8::Isolate* isolate,
+                                                         v8::Handle<v8::FunctionTemplate> class_template,
                                                          T callback) {
-    return CreateFunctionTemplate(isolate, base::Bind(callback),
+    return CreateFunctionTemplate(isolate, base::Bind(callback), class_template,
                                   HolderIsFirstArgument);
   }
 };
@@ -71,6 +74,7 @@ class GIN_EXPORT ObjectTemplateBuilder {
  public:
   explicit ObjectTemplateBuilder(v8::Isolate* isolate);
   ObjectTemplateBuilder(v8::Isolate* isolate,
+                        v8::Handle<v8::FunctionTemplate> class_templ,
                         v8::Handle<v8::ObjectTemplate> templ);
   ~ObjectTemplateBuilder();
 
@@ -89,21 +93,21 @@ class GIN_EXPORT ObjectTemplateBuilder {
   template<typename T>
   ObjectTemplateBuilder& SetMethod(const base::StringPiece& name,
                                    const T& callback) {
-    return SetImpl(name, CallbackTraits<T>::CreateTemplate(isolate_, callback));
+    return SetImpl(name, CallbackTraits<T>::CreateTemplate(isolate_, class_template_, callback));
   }
   template<typename T>
   ObjectTemplateBuilder& SetProperty(const base::StringPiece& name,
                                      const T& getter) {
     return SetPropertyImpl(name,
-                           CallbackTraits<T>::CreateTemplate(isolate_, getter),
+                           CallbackTraits<T>::CreateTemplate(isolate_, class_template_, getter),
                            v8::Local<v8::FunctionTemplate>());
   }
   template<typename T, typename U>
   ObjectTemplateBuilder& SetProperty(const base::StringPiece& name,
                                      const T& getter, const U& setter) {
     return SetPropertyImpl(name,
-                           CallbackTraits<T>::CreateTemplate(isolate_, getter),
-                           CallbackTraits<U>::CreateTemplate(isolate_, setter));
+                           CallbackTraits<T>::CreateTemplate(isolate_, class_template_, getter),
+                           CallbackTraits<U>::CreateTemplate(isolate_, class_template_, setter));
   }
 
   v8::Local<v8::ObjectTemplate> Build();
@@ -116,6 +120,9 @@ class GIN_EXPORT ObjectTemplateBuilder {
       v8::Handle<v8::FunctionTemplate> setter);
 
   v8::Isolate* isolate_;
+
+  // Class(FunctionTempale) of object being built.
+  v8::Local<v8::FunctionTemplate> class_template_;
 
   // ObjectTemplateBuilder should only be used on the stack.
   v8::Local<v8::ObjectTemplate> template_;

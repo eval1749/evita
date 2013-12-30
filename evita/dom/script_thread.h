@@ -35,6 +35,6 @@ class ScriptThread : public common::Singleton<ScriptThread> {
 }  // namespace dom
 
 #define ASSERT_CALLED_ON_SCRIPT_THREAD() \
-  DCHECK(ScriptThread::instance()->CalledOnValidThread())
+  DCHECK(dom::ScriptThread::instance()->CalledOnValidThread())
 
 #endif //!defined(INCLUDE_evita_dom_script_thread_h)

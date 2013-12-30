@@ -18,7 +18,7 @@
         '../common/common.gyp:common',
         '../gin/gin.gyp:gin',
         '../v8/tools/gyp/v8.gyp:v8',
-        'core',
+        'ui',
       ], # dependencies
 
       'msvs_settings': {
@@ -40,6 +40,87 @@
       'sources': [
         'precomp.cpp',
         'ap_main.cpp',
+        'evita.rc',
+      ], # sources
+    }, # evita
+
+    {
+      'target_name': 'core',
+      'type': 'static_library',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        '<(DEPTH)/regex/regex.gyp:regex_lib',
+      ], # dependencies
+      'sources': [
+        'precomp.cpp',
+        'core/buffer.cc',
+        'core/style.cc',
+
+        'ed_BufferCore.cpp',
+        'ed_BufferFind.cpp',
+        'ed_Interval.cpp',
+        'ed_Mode.cpp',
+        'ed_Range.cpp',
+        'ed_Undo.cpp',
+        'li_util.cpp',
+        'mode_Config.cpp',
+        'mode_Cxx.cpp',
+        'mode_Haskell.cpp',
+        'mode_Lisp.cpp',
+        'mode_Mason.cpp',
+        'mode_Perl.cpp',
+        'mode_PlainText.cpp',
+        'mode_Python.cpp',
+        'mode_Xml.cpp',
+        'RegexMatch.cpp',
+        'z_debug.cpp',
+
+        '../charset/CharsetDecoder.cpp',
+        '../charset/CharsetDetector.cpp',
+      ], # sources
+    }, # core
+    {
+      'target_name': 'dom',
+      'type': 'static_library',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        'core',
+      ],
+      'sources': [
+        'precomp.cpp',
+
+        'dom/console.cc',
+        'dom/editor.cc',
+        'dom/editor_window.cc',
+        'dom/lock.cc',
+        'dom/script_command.cc',
+        'dom/script_controller.cc',
+        'dom/script_thread.cc',
+        'dom/window.cc',
+
+        'gc/collectable.cc',
+        'gc/collector.cc',
+        'gc/visitable.cc',
+
+        'v8_glue/converter.cc',
+        'v8_glue/isolate_holder.cc',
+        'v8_glue/per_isolate_data.cc',
+        'v8_glue/scriptable.cc',
+        'v8_glue/v8_console_buffer.cc',
+        'v8_glue/wrapper_info.cc',
+      ], # sources
+    }, # dom
+    {
+      'target_name': 'ui',
+      'type': 'static_library',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        'core',
+        'dom',
+      ],
+      'sources': [
+        'precomp.cpp',
+
         'ap_input_history.cpp',
         'cm_CmdProc.cpp',
         'cm_commands.cpp',
@@ -51,7 +132,6 @@
         'editor/application.cc',
         'editor/dialog_box.cc',
         'editor/dom_lock.cc',
-        'evita.rc',
         'ExactStringMatch.cpp',
         'gfx_base.cpp',
         'vi_Buffer.cpp',
@@ -71,64 +151,9 @@
         'vi_Style.cpp',
         'vi_TextEditWindow.cpp',
 
-        'v8_glue/converter.cc',
-        'v8_glue/isolate_holder.cc',
-        'v8_glue/per_isolate_data.cc',
-        'v8_glue/scriptable.cc',
-        'v8_glue/v8_console_buffer.cc',
-        'v8_glue/wrapper_info.cc',
-
         'widgets/root_widget.cc',
         'widgets/widget.cc',
       ], # sources
-    }, # evita
-
-    {
-      'target_name': 'core',
-      'type': 'static_library',
-      'dependencies': [
-        '<(DEPTH)/base/base.gyp:base',
-        '<(DEPTH)/regex/regex.gyp:regex_lib',
-      ], # dependencies
-      'sources': [
-        'precomp.cpp',
-        'core/buffer.cc',
-        'core/style.cc',
-
-        'dom/console.cc',
-        'dom/editor.cc',
-        'dom/editor_window.cc',
-        'dom/lock.cc',
-        'dom/script_command.cc',
-        'dom/script_controller.cc',
-        'dom/script_thread.cc',
-        'dom/window.cc',
-
-        'ed_BufferCore.cpp',
-        'ed_BufferFind.cpp',
-        'ed_Interval.cpp',
-        'ed_Mode.cpp',
-        'ed_Range.cpp',
-        'ed_Undo.cpp',
-        'gc/collectable.cc',
-        'gc/collector.cc',
-        'gc/visitable.cc',
-        'li_util.cpp',
-        'mode_Config.cpp',
-        'mode_Cxx.cpp',
-        'mode_Haskell.cpp',
-        'mode_Lisp.cpp',
-        'mode_Mason.cpp',
-        'mode_Perl.cpp',
-        'mode_PlainText.cpp',
-        'mode_Python.cpp',
-        'mode_Xml.cpp',
-        'RegexMatch.cpp',
-        'z_debug.cpp',
-
-        '../charset/CharsetDecoder.cpp',
-        '../charset/CharsetDetector.cpp',
-      ], # sources
-    }, # core
+    }, # ui
   ], # targets
 }

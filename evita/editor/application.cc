@@ -13,6 +13,7 @@
 #include "base/time/time.h"
 #include "common/memory/scoped_change.h"
 #include "evita/cm_CmdProc.h"
+#include "evita/dom/script_thread.h"
 #include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/ed_Mode.h"
@@ -20,6 +21,7 @@
 #include "evita/vi_EditPane.h"
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_IoManager.h"
+#include "evita/view/view_delegate_impl.h"
 
 #define DEBUG_IDLE 0
 
@@ -47,9 +49,11 @@ Application::Application()
       command_processor_(new Command::Processor()),
       dom_lock_(new editor::DomLock()),
       io_manager_(new IoManager()),
-      message_loop_(new base::MessageLoop(base::MessageLoop::TYPE_UI)) {
+      message_loop_(new base::MessageLoop(base::MessageLoop::TYPE_UI)),
+      view_delegate_impl_(new view::ViewDelegateImpl()) {
   Command::Processor::GlobalInit();
   io_manager_->Realize();
+  dom::ScriptThread::Start(view_delegate_impl_.get(), message_loop_.get());
 }
 
 Application::~Application() {
@@ -254,10 +258,6 @@ static void RunTaskWithinDomLock(const base::Closure& task) {
 void Application::PostDomTask(const tracked_objects::Location& from_here,
                               const base::Closure& task) {
   message_loop_->PostTask(from_here, base::Bind(RunTaskWithinDomLock, task));
-}
-
-void Application::QuitForTest() {
-  message_loop_->QuitWhenIdle();
 }
 
 Buffer* Application::RenameBuffer(Buffer* buffer, const char16* pwszName) {

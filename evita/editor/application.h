@@ -30,6 +30,10 @@ namespace editor {
 class DomLock;
 }
 
+namespace view {
+class ViewDelegateImpl;
+}
+
 class Application : public common::Singleton<Application> {
   protected: typedef DoubleLinkedList_<Frame> Frames;
   protected: typedef DoubleLinkedList_<Buffer> Buffers;
@@ -45,6 +49,7 @@ class Application : public common::Singleton<Application> {
   private: std::unique_ptr<editor::DomLock> dom_lock_;
   private: std::unique_ptr<IoManager> io_manager_;
   private: std::unique_ptr<base::MessageLoop> message_loop_;
+  private: std::unique_ptr<view::ViewDelegateImpl> view_delegate_impl_;
 
   // ctor/dtor
   friend class common::Singleton<Application>;
@@ -117,7 +122,6 @@ class Application : public common::Singleton<Application> {
                           const base::Closure& task);
   public: void PostDomTask(const tracked_objects::Location& from_here,
                            const base::Closure& task);
-  public: void QuitForTest();
 
   // [R]
   public: Buffer* RenameBuffer(Buffer* buffer, const char16* new_name);

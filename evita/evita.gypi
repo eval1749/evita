@@ -149,6 +149,8 @@
         'vi_Style.cpp',
         'vi_TextEditWindow.cpp',
 
+        'view/view_delegate_impl.cc',
+
         'widgets/root_widget.cc',
         'widgets/widget.cc',
       ], # sources

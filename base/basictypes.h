@@ -218,7 +218,8 @@ inline To implicit_cast(From const &f) {
 
 #undef COMPILE_ASSERT
 
-#if __cplusplus >= 201103L
+// Note: MSVS 2013 still defines __cplusplus to 199711.
+#if __cplusplus >= 201103L || _MSC_VER >= 1800
 
 // Under C++11, just use static_assert.
 #define COMPILE_ASSERT(expr, msg) static_assert(expr, #msg)

@@ -5,21 +5,16 @@
 
 #include "base/bind.h"
 #include "evita/dom/script_thread.h"
-#include "evita/editor/application.h"
-#include "evita/vi_Frame.h"
 
 namespace dom {
 
 EditorWindow::EditorWindow() {
-  ASSERT_CALLED_ON_SCRIPT_THREAD();
 }
 
 EditorWindow::~EditorWindow() {
-  ASSERT_CALLED_ON_SCRIPT_THREAD();
 }
 
 v8_glue::WrapperInfo* EditorWindow::static_wrapper_info() {
-  ASSERT_CALLED_ON_SCRIPT_THREAD();
   DEFINE_STATIC_LOCAL(v8_glue::WrapperInfo, wrapper_info,
       ("EditorWindow", Window::static_wrapper_info()));
   return &wrapper_info;
@@ -27,7 +22,6 @@ v8_glue::WrapperInfo* EditorWindow::static_wrapper_info() {
 
 gin::ObjectTemplateBuilder EditorWindow::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
-  ASSERT_CALLED_ON_SCRIPT_THREAD();
   return GetObjectTemplateBuilderFromBase(isolate);
 }
 

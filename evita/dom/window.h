@@ -6,10 +6,7 @@
 #include <vector>
 
 #include "evita/v8_glue/scriptable.h"
-#include "evita/widgets/widget_id.h"
-
-static_assert(sizeof(int) == sizeof(widgets::WidgetId),
-                "WidgetId must be compatible with int.");
+#include "evita/dom/widget_id.h"
 
 namespace dom {
 
@@ -17,8 +14,6 @@ namespace dom {
 class Window : public v8_glue::Scriptable<Window> {
   private: class WidgetIdMapper;
   friend class WidgetIdMapper;
-
-  protected: typedef widgets::WidgetId WidgetId;
 
   private: std::vector<Window*> child_windows_;
   private: Window* parent_window_;
@@ -29,7 +24,7 @@ class Window : public v8_glue::Scriptable<Window> {
   protected: Window();
   public: virtual ~Window();
 
-  public: int id() const { return widget_id_; }
+  public: WidgetId id() const { return widget_id_; }
   public: v8_glue::Nullable<Window> parent_window() const {
     return parent_window_;
   }

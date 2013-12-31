@@ -7,11 +7,10 @@
 #include "evita/dom/console.h"
 #include "evita/dom/editor.h"
 #include "evita/dom/editor_window.h"
-#include "evita/dom/lock.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/script_thread.h"
+#include "evita/dom/view_delegate.h"
 #include "evita/dom/window.h"
-#include "evita/editor/application.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/per_isolate_data.h"
@@ -83,8 +82,8 @@ base::string16 V8ToString(v8::Handle<v8::Value> value) {
                         string_value.length());
 }
 
-void ReportException(base::Callback<void(EvaluateResult)> callback,
-                     const v8::TryCatch& try_catch) {
+// TODO(yosi) We will remove EvaluateResult once V8Console in JS.
+EvaluateResult ReportException(const v8::TryCatch& try_catch) {
   EvaluateResult eval_result;
   auto message = try_catch.Message();
   eval_result.exception = V8ToString(try_catch.Exception());
@@ -108,24 +107,33 @@ void ReportException(base::Callback<void(EvaluateResult)> callback,
       ++index;
     }
   }
-
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(callback, eval_result));
+  return eval_result;
 }
 
-// TODO(yosi) Once we make ScriptThread at start up, we don't need to have
-// |HackEvaluate|.
-void HackEvaluate(base::string16 script_text,
-                  base::Callback<void(EvaluateResult)> callback) {
-  ASSERT_CALLED_ON_SCRIPT_THREAD();
-  ScriptController::instance()->Evaluate(script_text, callback);
-}
+ScriptController* script_controller;
 
 }   // namespace
 
-ScriptController::ScriptController()
-    : context_holder_(isolate_holder_.isolate()) {
-  ASSERT_CALLED_ON_SCRIPT_THREAD();
+//////////////////////////////////////////////////////////////////////
+//
+// EvaluateResult
+//
+EvaluateResult::EvaluateResult(const base::string16& value)
+    : value(value), line_number(0), start_column(0), end_column(0) {
+}
+
+EvaluateResult::EvaluateResult()
+    : EvaluateResult(base::string16()) {
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// ScriptController
+//
+ScriptController::ScriptController(ViewDelegate* view_delegate)
+    : context_holder_(isolate_holder_.isolate()),
+      view_delegate_(view_delegate) {
+  view_delegate_->RegisterViewEventHandler(this);
   isolate_holder_.isolate()->Enter();
   {
     v8::HandleScope handle_scope(isolate_holder_.isolate());
@@ -136,44 +144,50 @@ ScriptController::ScriptController()
 }
 
 ScriptController::~ScriptController() {
-  ASSERT_CALLED_ON_SCRIPT_THREAD();
   {
     v8::HandleScope handle_scope(isolate_holder_.isolate());
     context_holder_.context()->Exit();
   }
   isolate_holder_.isolate()->Exit();
+  script_controller = nullptr;
 }
 
-void ScriptController::Evaluate(
-    base::string16 script_text,
-    base::Callback<void(EvaluateResult)> callback) {
+ViewDelegate* ScriptController::view_delegate() const {
+  DCHECK(view_delegate_);
+  return view_delegate_;
+}
 
-  DOM_AUTO_LOCK_SCOPE();
+ScriptController* ScriptController::instance() {
+  DCHECK(script_controller);
+  return script_controller;
+}
 
-  DCHECK(thread_checker_.CalledOnValidThread());
+EvaluateResult ScriptController::Evaluate(const base::string16& script_text) {
   v8::HandleScope handle_scope(isolate_holder_.isolate());
   v8::TryCatch try_catch;
   v8::Handle<v8::Script> script = v8::Script::Compile(
       v8::String::NewFromTwoByte(isolate_holder_.isolate(),
-                                 reinterpret_cast<uint16*>(&script_text[0]),
+                                 reinterpret_cast<const uint16*>(
+                                    &script_text[0]),
                                  v8::String::kNormalString,
                                  script_text.length()),
-      v8::String::NewFromUtf8(isolate_holder_.isolate(), "(console)"));
+      v8::String::NewFromUtf8(isolate_holder_.isolate(), "(eval)"));
   if (script.IsEmpty()) {
-    ReportException(callback, try_catch);
-    return;
+    return ReportException(try_catch);
   }
   v8::Handle<v8::Value> result = script->Run();
   if (result.IsEmpty()) {
     DCHECK(try_catch.HasCaught());
-    ReportException(callback, try_catch);
-    return;
+    return ReportException(try_catch);
   }
 
-  EvaluateResult eval_result;
-  eval_result.value = V8ToString(result->ToString());
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(callback, eval_result));
+  return EvaluateResult(V8ToString(result->ToString()));
+}
+
+ScriptController* ScriptController::Start(ViewDelegate* view_delegate) {
+  DCHECK(!script_controller);
+  script_controller = new ScriptController(view_delegate);
+  return script_controller;
 }
 
 void ScriptController::ThrowError(const std::string& message) {
@@ -182,17 +196,13 @@ void ScriptController::ThrowError(const std::string& message) {
       gin::StringToV8(isolate, message)));
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// ScriptController::User
-//
-void ScriptController::User::Evaluate(
-    base::string16 script_text,
-    base::Callback<void(EvaluateResult)> callback) {
-  ASSERT_CALLED_ON_UI_THREAD();
-  ScriptThread::instance()->PostTask(
-      FROM_HERE,
-      base::Bind(HackEvaluate, script_text, callback));
+// ViewEventHandler
+void ScriptController::DidDestroyWidget(WidgetId widget_id) {
+  Window::DidDestroyWidget(widget_id);
+}
+
+void ScriptController::WillDestroyHost() {
+  view_delegate_ = nullptr;
 }
 
 }  // namespace dom

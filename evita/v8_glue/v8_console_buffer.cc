@@ -7,7 +7,8 @@
 #include "base/strings/utf_string_conversions.h"
 #include "evita/ap_input_history.h"
 #include "evita/cm_CmdProc.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_thread.h"
+#include "evita/editor/dom_lock.h"
 #include "evita/ed_Range.h"
 #include "evita/vi_Selection.h"
 
@@ -83,12 +84,13 @@ void V8ConsoleBuffer::ExecuteLastLine() {
   GetText(&text[0], script_start, script_end);
 
   // TODO(yosi) We should retain |this| until |HandleEvaluateResult|.
-  dom::ScriptController::User::instance()->Evaluate(
+  dom::ScriptThread::instance()->Evaluate(
       text, base::Bind(&V8ConsoleBuffer::HandleEvaluateResult,
                        base::Unretained(this)));
 }
 
 void V8ConsoleBuffer::HandleEvaluateResult(dom::EvaluateResult result) {
+  UI_DOM_AUTO_LOCK_SCOPE();
   if (result.exception.empty()) {
     Emit(result.value);
   } else if (result.script_resource_name.empty()) {

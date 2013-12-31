@@ -11,8 +11,7 @@
 #include "base/strings/stringprintf.h"
 #include "common/memory/singleton.h"
 #include "evita/dom/script_controller.h"
-#include "evita/dom/script_thread.h"
-#include "evita/editor/application.h"
+#include "evita/dom/view_delegate.h"
 #include "evita/gc/weak_ptr.h"
 
 namespace dom {
@@ -28,36 +27,32 @@ namespace dom {
 class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
   friend class common::Singleton<WidgetIdMapper>;
 
-  private: typedef widgets::WidgetId WidgetId;
+  private: typedef WidgetId WidgetId;
 
   private: std::unordered_map<WidgetId, gc::WeakPtr<Window>> map_;
   private: WidgetId next_widget_id_;
 
   private: WidgetIdMapper() : next_widget_id_(1) {
-    ASSERT_CALLED_ON_SCRIPT_THREAD();
   }
   public: ~WidgetIdMapper() = default;
 
   public: void DidDestroyWidget(WidgetId widget_id) {
-    ASSERT_CALLED_ON_SCRIPT_THREAD();
-    DCHECK_NE(widgets::kInvalidWidgetId, widget_id);
+    DCHECK_NE(kInvalidWidgetId, widget_id);
     auto it = map_.find(widget_id);
     if (it == map_.end()) {
       DVLOG(0) << "Why we don't have a widget for WidgetId " << widget_id <<
         " in WidgetIdMap?";
       return;
     }
-    it->second->widget_id_ = widgets::kInvalidWidgetId;
+    it->second->widget_id_ = kInvalidWidgetId;
   }
 
   public: Window* Find(WidgetId widget_id) {
-    ASSERT_CALLED_ON_SCRIPT_THREAD();
     auto it = map_.find(widget_id);
     return it == map_.end() ? nullptr : it->second.get();
   }
 
   public: WidgetId Register(Window* window) {
-    ASSERT_CALLED_ON_SCRIPT_THREAD();
     auto widget_id = next_widget_id_;
     map_[widget_id] = window;
     ++next_widget_id_;
@@ -65,8 +60,7 @@ class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
   }
 
   public: void Unregister(WidgetId widget_id) {
-    ASSERT_CALLED_ON_SCRIPT_THREAD();
-    DCHECK_NE(widgets::kInvalidWidgetId, widget_id);
+    DCHECK_NE(kInvalidWidgetId, widget_id);
     map_.erase(widget_id);
   }
 };
@@ -79,16 +73,14 @@ Window::Window()
     : parent_window_(nullptr),
       ALLOW_THIS_IN_INITIALIZER_LIST(widget_id_(
           WidgetIdMapper::instance()->Register(this))) {
-  ASSERT_CALLED_ON_SCRIPT_THREAD();
-  DCHECK_NE(widgets::kInvalidWidgetId, widget_id_);
+  DCHECK_NE(kInvalidWidgetId, widget_id_);
 }
 
 Window::~Window() {
-  ASSERT_CALLED_ON_SCRIPT_THREAD();
-  if (widget_id_ == widgets::kInvalidWidgetId)
+  if (widget_id_ == kInvalidWidgetId)
     return;
   WidgetIdMapper::instance()->Unregister(widget_id_);
-  widgets::Widget::DidDestroyDomWindow(widget_id_);
+  ScriptController::instance()->view_delegate()->DestroyWindow(widget_id_);
 }
 
 v8_glue::WrapperInfo* Window::static_wrapper_info() {
@@ -119,11 +111,8 @@ void Window::AddWindow(Window* window) {
 }
 
 void Window::DidDestroyWidget(WidgetId widget_id) {
-  ASSERT_CALLED_ON_UI_THREAD();
-  DCHECK_NE(widgets::kInvalidWidgetId, widget_id);
-  ScriptThread::instance()->PostTask(FROM_HERE,
-    base::Bind(&WidgetIdMapper::DidDestroyWidget,
-        base::Unretained(WidgetIdMapper::instance()), widget_id));
+  DCHECK_NE(kInvalidWidgetId, widget_id);
+  WidgetIdMapper::instance()->DidDestroyWidget(widget_id);
 }
 
 Window* Window::FromWidgetId(WidgetId widget_id) {

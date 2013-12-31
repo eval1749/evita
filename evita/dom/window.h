@@ -36,9 +36,7 @@ class Window : public v8_glue::Scriptable<Window> {
   public: static Window* FromWidgetId(WidgetId widget_id);
   public: bool IsDescendantOf(Window* other) const;
   public: void RemoveWindow(Window* window);
-
-  public: virtual gin::ObjectTemplateBuilder
-      GetObjectTemplateBuilder(v8::Isolate* isolate) override;
+  public: static void ResetForTesting();
 
   DISALLOW_COPY_AND_ASSIGN(Window);
 };

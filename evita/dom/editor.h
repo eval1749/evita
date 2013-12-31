@@ -19,10 +19,6 @@ class Editor : public common::Singleton<Editor>,
   public: static v8_glue::WrapperInfo* static_wrapper_info();
   public: const base::string16& version() const;
 
-  // [G]
-  public: virtual gin::ObjectTemplateBuilder
-      GetObjectTemplateBuilder(v8::Isolate* isolate) override;
-
   DISALLOW_COPY_AND_ASSIGN(Editor);
 };
 

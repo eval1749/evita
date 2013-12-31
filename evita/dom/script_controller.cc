@@ -22,30 +22,6 @@ namespace dom {
 
 namespace {
 
-template<typename T>
-class Installer {
-  public: static void Run(v8::Isolate* isolate,
-                          v8::Handle<v8::ObjectTemplate> global) {
-    InstallConstructor(global, T::StaticGetConstructor(isolate));
-    auto const info = T::static_wrapper_info();
-    DCHECK(!info->singleton_name());
-  }
-  public: static void RunSingleton(v8::Isolate* isolate,
-                                   v8::Handle<v8::ObjectTemplate> global) {
-    InstallConstructor(global, T::StaticGetConstructor(isolate));
-    auto const info = T::static_wrapper_info();
-    DCHECK(info->singleton_name());
-    global->Set(gin::StringToV8(isolate, info->singleton_name()),
-                T::instance()->GetWrapper(isolate));
-  }
-
-  private: static void InstallConstructor(
-      v8::Handle<v8::ObjectTemplate> templ,
-      v8::Handle<v8::Function> constructor) {
-    templ->Set(constructor->GetName()->ToString(), constructor);
-  }
-};
-
 class Initializer {
   public: static v8::Handle<v8::Context> CreateContext(v8::Isolate* isolate) {
     return v8::Context::New(isolate, nullptr, GetGlobalTemplate(isolate));
@@ -63,10 +39,10 @@ class Initializer {
         v8::Context::Scope context_scope(context);
 
         // Note: super class must be installed before subclass.
-        Installer<Console>::RunSingleton(isolate, global);
-        Installer<Editor>::RunSingleton(isolate, global);
-        Installer<Window>::Run(isolate, global);
-        Installer<EditorWindow>::Run(isolate, global);
+        v8_glue::Installer<Console>::Run(isolate, global);
+        v8_glue::Installer<Editor>::Run(isolate, global);
+        v8_glue::Installer<Window>::Run(isolate, global);
+        v8_glue::Installer<EditorWindow>::Run(isolate, global);
     }
 
     global_template.Reset(isolate, global);
@@ -184,9 +160,21 @@ EvaluateResult ScriptController::Evaluate(const base::string16& script_text) {
   return EvaluateResult(V8ToString(result->ToString()));
 }
 
+void ScriptController::ResetForTesting() {
+  Window::ResetForTesting();
+}
+
 ScriptController* ScriptController::Start(ViewDelegate* view_delegate) {
   DCHECK(!script_controller);
   script_controller = new ScriptController(view_delegate);
+  return script_controller;
+}
+
+ScriptController* ScriptController::StartForTesting(
+    ViewDelegate* view_delegate) {
+  if (!script_controller)
+    return Start(view_delegate);
+  script_controller->ResetForTesting();
   return script_controller;
 }
 

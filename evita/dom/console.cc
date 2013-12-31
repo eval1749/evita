@@ -17,7 +17,6 @@ Buffer* InternBuffer(const base::string16& name) {
   return Application::instance()->NewBuffer(name.c_str());
 }
 
-
 void Log(const std::vector<base::string16>& messages) {
   auto const buffer = InternBuffer(L"*console log*");
   for (auto message : messages) {
@@ -26,18 +25,38 @@ void Log(const std::vector<base::string16>& messages) {
   buffer->Insert(buffer->GetEnd(), L"\n");
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// ConsoleWrapperInfo
+//
+class ConsoleWrapperInfo : public v8_glue::WrapperInfo {
+  public: ConsoleWrapperInfo() : v8_glue::WrapperInfo("Console") {
+  }
+  public: ~ConsoleWrapperInfo() = default;
+
+  public: virtual AbstractScriptable* singleton() const override {
+    return Console::instance();
+  }
+
+  public: virtual const char* singleton_name() const override {
+    return "console";
+  }
+
+  private: virtual void SetupInstanceTemplate(
+      ObjectTemplateBuilder& builder) override {
+    builder.SetMethod("log", Log);
+  }
+};
+
 }  // namespace
 
+//////////////////////////////////////////////////////////////////////
+//
+// Console
+//
 v8_glue::WrapperInfo* Console::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(v8_glue::WrapperInfo, wrapper_info,
-      ("Console", "console"));
+  DEFINE_STATIC_LOCAL(ConsoleWrapperInfo, wrapper_info, ());
   return &wrapper_info;
-}
-
-gin::ObjectTemplateBuilder Console::GetObjectTemplateBuilder(
-    v8::Isolate* isolate) {
-  return GetObjectTemplateBuilderFromBase(isolate)
-    .SetMethod("log", Log);
 }
 
 }  // namespace dom

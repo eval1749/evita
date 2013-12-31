@@ -55,7 +55,10 @@ class ScriptController : public ViewEventHandler {
   public: static ScriptController* instance();
 
   public: EvaluateResult Evaluate(const base::string16& script_text);
+  public: void ResetForTesting();
   public: static ScriptController* Start(ViewDelegate* view_delegate);
+  public: static ScriptController* StartForTesting(
+      ViewDelegate* view_delegate);
   public: void ThrowError(const std::string& message);
 
   // ViewEventHandler

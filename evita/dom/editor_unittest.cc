@@ -31,7 +31,8 @@ class ScriptTest : public ::testing::Test {
   private: dom::ScriptController* script_controller_;
 
   protected: ScriptTest()
-      : script_controller_(dom::ScriptController::Start(&mock_view_)) {
+      : script_controller_(
+          dom::ScriptController::StartForTesting(&mock_view_)) {
   }
 
   protected: std::string RunScript(const std::string& text) {
@@ -53,7 +54,11 @@ class EditorTest : public ScriptTest {
 
 TEST_F(EditorTest, Version) {
   EXPECT_EQ("5.0", RunScript("editor.version"));
-  EXPECT_EQ("3", RunScript("1 + 2"));
+}
+
+TEST_F(EditorTest, EditorWindow) {
+  EXPECT_EQ("1", RunScript("(new EditorWindow()).id"));
+  EXPECT_EQ("2", RunScript("(new EditorWindow()).id"));
 }
 
 }  // namespace

@@ -31,27 +31,40 @@ v8::Handle<v8::Object> CreateFrame() {
   return window->GetWrapper(v8::Isolate::GetCurrent());
 }
 
+class EditorWrapperInfo : public v8_glue::WrapperInfo {
+  public: EditorWrapperInfo() : v8_glue::WrapperInfo("Editor") {
+  }
+  public: ~EditorWrapperInfo() = default;
+
+  public: virtual AbstractScriptable* singleton() const override {
+    return Editor::instance();
+  }
+
+  public: virtual const char* singleton_name() const override {
+    return "editor";
+  }
+
+  private: virtual void SetupInstanceTemplate(
+      ObjectTemplateBuilder& builder) override {
+    builder
+      .SetMethod("addKeyBinding", AddKeyBinding)
+      .SetMethod("createFrame", CreateFrame)
+      .SetProperty("version", &Editor::version);
+  }
+};
+
 }  // namespace
 
 Editor::Editor() {
 }
 
 v8_glue::WrapperInfo* Editor::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(v8_glue::WrapperInfo, wrapper_info,
-      ("Editor", "editor"));
+  DEFINE_STATIC_LOCAL(EditorWrapperInfo, wrapper_info, ());
   return &wrapper_info;
 }
 
 const base::string16& Editor::version() const {
   return Application::instance()->version();
-}
-
-gin::ObjectTemplateBuilder Editor::GetObjectTemplateBuilder(
-    v8::Isolate* isolate) {
-  return GetObjectTemplateBuilderFromBase(isolate)
-      .SetMethod("addKeyBinding", AddKeyBinding)
-      .SetMethod("createFrame", CreateFrame)
-      .SetProperty("version", &Editor::version);
 }
 
 }  // namespace dom

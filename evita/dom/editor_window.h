@@ -15,10 +15,6 @@ class EditorWindow : public v8_glue::Scriptable<EditorWindow, Window> {
 
   public: static v8_glue::WrapperInfo* static_wrapper_info();
 
-  // [G]
-  public: virtual gin::ObjectTemplateBuilder
-      GetObjectTemplateBuilder(v8::Isolate* isolate) override;
-
   DISALLOW_COPY_AND_ASSIGN(EditorWindow);
 };
 

@@ -21,10 +21,6 @@ class Console : public common::Singleton<Console>,
 
   public: static v8_glue::WrapperInfo* static_wrapper_info();
 
-  // [G]
-  public: virtual gin::ObjectTemplateBuilder
-      GetObjectTemplateBuilder(v8::Isolate* isolate) override;
-
   DISALLOW_COPY_AND_ASSIGN(Console);
 };
 

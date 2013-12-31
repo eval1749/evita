@@ -66,6 +66,7 @@
         'gc/collector.cc',
         'gc/visitable.cc',
 
+        'v8_glue/constructor_template.cc',
         'v8_glue/converter.cc',
         'v8_glue/isolate_holder.cc',
         'v8_glue/per_isolate_data.cc',

@@ -16,6 +16,23 @@
 
 namespace dom {
 
+namespace {
+class WindowWrapperInfo : public v8_glue::WrapperInfo {
+  public: WindowWrapperInfo() : v8_glue::WrapperInfo("Window") {
+  }
+  public: ~WindowWrapperInfo() = default;
+
+  private: virtual void SetupInstanceTemplate(
+      ObjectTemplateBuilder& builder) override {
+    builder
+        .SetMethod("add", &Window::AddWindow)
+        .SetProperty("id", &Window::id)
+        .SetProperty("parent", &Window::parent_window)
+        .SetMethod("remove", &Window::RemoveWindow);
+  }
+};
+}  // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 // Window::WidgetIdMapper
@@ -59,6 +76,11 @@ class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
     return widget_id;
   }
 
+  public: void ResetForTesting() {
+    next_widget_id_ = 1;
+    map_.clear();
+  }
+
   public: void Unregister(WidgetId widget_id) {
     DCHECK_NE(kInvalidWidgetId, widget_id);
     map_.erase(widget_id);
@@ -84,7 +106,7 @@ Window::~Window() {
 }
 
 v8_glue::WrapperInfo* Window::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(v8_glue::WrapperInfo, wrapper_info, ("Window"));
+  DEFINE_STATIC_LOCAL(WindowWrapperInfo, wrapper_info, ());
   return &wrapper_info;
 }
 
@@ -119,16 +141,6 @@ Window* Window::FromWidgetId(WidgetId widget_id) {
   return WidgetIdMapper::instance()->Find(widget_id);
 }
 
-gin::ObjectTemplateBuilder Window::GetObjectTemplateBuilder(
-    v8::Isolate* isolate) {
-  return GetObjectTemplateBuilderFromBase(isolate)
-      .SetMethod("add", &Window::AddWindow)
-      // Note: we expose widget id for debugging.
-      .SetProperty("id", &Window::id)
-      .SetProperty("parent", &Window::parent_window)
-      .SetMethod("remove", &Window::RemoveWindow);
-}
-
 bool Window::IsDescendantOf(Window* other) const {
   if (parent_window_ == other)
     return true;
@@ -156,6 +168,10 @@ void Window::RemoveWindow(Window* window) {
   }
   window->parent_window_ = nullptr;
   child_windows_.erase(present);
+}
+
+void Window::ResetForTesting() {
+  WidgetIdMapper::instance()->ResetForTesting();
 }
 
 }  // namespace dom

@@ -35,20 +35,13 @@ class AbstractScriptable
     return !wrapper_.IsEmpty();
   }
 
-  // Expose as public function for logging. I'm not sure other usages of
-  // |AbstractScriptable::wrapper_info()|.
   public: virtual WrapperInfo* wrapper_info() const = 0;
 
-  protected: virtual gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
-      v8::Isolate* isolate);
+  // For |new ClassName()|. |Scriptable<T>| is create after wrapper.
+  public: void Bind(v8::Isolate* isolate, v8::Handle<v8::Object> wrapper);
 
+  // Get wrapper for existing |Scriptable<T>|.
   public: v8::Handle<v8::Object> GetWrapper(v8::Isolate* isolate);
-
-  protected: static v8::Handle<v8::Function>
-      StaticGetConstructor(v8::Isolate* isolate, WrapperInfo* info);
-
-  protected: static v8::Handle<v8::FunctionTemplate>
-    StaticGetFunctionTemplate(v8::Isolate* isolate, WrapperInfo* info);
 
   private: static void WeakCallback(
       const v8::WeakCallbackData<v8::Object, AbstractScriptable>& data);
@@ -62,28 +55,9 @@ class Scriptable : public B {
   protected: virtual ~Scriptable() = default;
 
   // Expose as public function for logging. I'm not sure other usages of
-  // |Scriptable::wrapper_info()|.
+  // |AbstractScriptable::wrapper_info()|.
   public: virtual WrapperInfo* wrapper_info() const override {
     return T::static_wrapper_info();
-  }
-
-  // A helper function to get ObjecTemplateBuilder from
-  // AbstractScriptable to avoid v8_glue::WrapperInfo<T> prefix.
-  protected: gin::ObjectTemplateBuilder GetObjectTemplateBuilderFromBase(
-      v8::Isolate* isolate) {
-    return B::GetObjectTemplateBuilder(isolate);
-  }
-
-  public: static v8::Handle<v8::Function> StaticGetConstructor(
-      v8::Isolate* isolate) {
-    return AbstractScriptable::StaticGetConstructor(
-        isolate, T::static_wrapper_info());
-  }
-
-  public: static v8::Handle<v8::Function> StaticGetFunctionTemplate(
-      v8::Isolate* isolate) {
-    return AbstractScriptable::StaticGetFunctionTemplate(
-        isolate, T::static_wrapper_info());
   }
 
   DISALLOW_COPY_AND_ASSIGN(Scriptable);

@@ -24,10 +24,6 @@ namespace dom {
 
 namespace {
 ScriptThread* script_thread;
-
-void StartScriptController(ViewDelegate* view_delegate) {
-  ScriptController::Start(view_delegate);
-}
 }  // namespace
 
 ScriptThread::ScriptThread(ViewDelegate* view_delegate,
@@ -37,7 +33,7 @@ ScriptThread::ScriptThread(ViewDelegate* view_delegate,
       thread_(new base::Thread("script_thread")),
       view_event_handler_(nullptr) {
   thread_->Start();
-  PostTask(FROM_HERE, base::Bind(StartScriptController,
+  PostTask(FROM_HERE, base::Bind(base::IgnoreResult(&ScriptController::Start),
                                  base::Unretained(this)));
 }
 

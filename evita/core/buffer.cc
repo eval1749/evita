@@ -48,7 +48,7 @@ Buffer::Buffer(const char16* pwszName, Mode* pMode) :
         m_oIntervals.Append(pIntv);
     }
 
-    ::lstrcpy(m_wszName, pwszName);
+    SetName(pwszName);
 
     if (NULL == m_pMode)
     {

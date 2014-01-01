@@ -665,7 +665,7 @@ ModeFactory* ModeFactory::Get(Buffer* pBuffer)
             return pModeFactory;
         }
 
-        if (pModeFactory->IsSupported(pBuffer->GetName()))
+        if (pModeFactory->IsSupported(pBuffer->name().c_str()))
         {
             return pModeFactory;
         }

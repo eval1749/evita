@@ -122,7 +122,7 @@ void BufferListWindow::ActivateBuffers(bool is_new_frame) {
 int CALLBACK BufferListWindow::compareItems(LPARAM a, LPARAM b, LPARAM) {
   auto const pa = reinterpret_cast<Buffer*>(a);
   auto const pb = reinterpret_cast<Buffer*>(b);
-  return ::lstrcmpW(pa->GetName(), pb->GetName());
+  return pa->name().compare(pb->name());
 }
 
 // Creates host window for ListViewControl
@@ -357,7 +357,7 @@ void BufferListWindow::Redraw() {
     oItem.iImage   = buffer.GetMode()->GetIcon();
     oItem.iSubItem = 0;
     oItem.lParam   = reinterpret_cast<LPARAM>(&buffer);
-    oItem.pszText  = const_cast<char16*>(buffer.GetName());
+    oItem.pszText  = const_cast<char16*>(buffer.name().c_str());
     ListView_InsertItem(m_hwndListView, &oItem);
 
     oItem.mask = LVIF_TEXT;

@@ -141,7 +141,7 @@ class Buffer : public BufferCore, public FileFeatures {
   };
 
   protected: State m_eState;
-  protected: char16 m_wszName[MAX_PATH + 1];
+  protected: base::string16 name_;
 
   // ctor/dtor
   public: Buffer(const char16*, Mode* = NULL);
@@ -162,6 +162,8 @@ class Buffer : public BufferCore, public FileFeatures {
   public: bool operator!=(const Buffer* other) const {
     return this != other;
   }
+
+  public: const base::string16& name() const { return name_; }
 
   // [C]
   public: bool CanRedo() const;
@@ -204,7 +206,7 @@ class Buffer : public BufferCore, public FileFeatures {
   public: Interval* GetIntervalAt(Posn) const;
   public: Mode* GetMode() const { return m_pMode; }
   public: Count GetModfTick() const { return m_nModfTick; }
-  public: const char16* GetName() const { return m_wszName; }
+  public: const base::string16& GetName() const { return name_; }
   public: Posn GetStart() const { return 0; }
   public: const StyleValues* GetStyleAt(Posn) const;
   public: UndoManager* GetUndo() const { return m_pUndo; }
@@ -246,8 +248,8 @@ class Buffer : public BufferCore, public FileFeatures {
 
   public: void SetMode(Mode*);
 
-  public: const char16* SetName(const char16* pwszName) {
-    return ::lstrcpyW(m_wszName, pwszName);
+  public: void SetName(const char16* pwszName) {
+    name_ = pwszName;
   }
   public: bool SetReadOnly(bool f) { return m_fReadOnly = f; }
   public: void SetStyle(Posn, Posn, const StyleValues*);

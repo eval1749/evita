@@ -17,6 +17,8 @@
 #define DEBUG_WINDOWPOS 0
 #include "./vi_Frame.h"
 
+#include <sstream>
+
 #pragma warning(push)
 #pragma warning(disable: 4625)
 #include "base/bind.h"
@@ -464,6 +466,18 @@ Rect Frame::GetPaneRect() const {
                   kPaddingBottom);
 }
 
+namespace {
+base::string16 MaybeBufferFilename(const Buffer& buffer) {
+  return buffer.GetFileName().empty() ? L"No file" : buffer.GetFileName();
+}
+
+base::string16 ModifiedDisplayText(const Buffer& buffer) {
+ if (!buffer.IsModified())
+    return L"Not modified";
+ return buffer.GetNoSave() ? L"Modified" : L"Not saved";
+}
+}
+
 const char16* Frame::getToolTip(NMTTDISPINFO* const pDisp) const {
   auto const pPane = getPaneFromTab(static_cast<int>(pDisp->hdr.idFrom));
   if (!pPane)
@@ -498,25 +512,13 @@ const char16* Frame::getToolTip(NMTTDISPINFO* const pDisp) const {
   }
 
   //char16 wszMod[100];
-  auto const pwszModified =
-    !pBuffer->IsModified()
-        ? L"Not modified"
-        : pBuffer->GetNoSave()
-            ? L"Modified"
-            : L"Not saved";
-
-  ::wsprintf(m_wszToolTip,
-      L"Name: %s\r\n"
-      L"File: %s\r\n"
-      L"Save: %s\r\n"
-      L"%s\r\n",
-      pBuffer->GetName(),
-      pBuffer->GetFileName().empty() ? L"No file" :
-          pBuffer->GetFileName().c_str(),
-      pwszSave,
-      pwszModified);
-
-    return m_wszToolTip;
+  std::basic_ostringstream<base::char16> tooltip;
+  tooltip << "Name:" << pBuffer->name() << "\r\n" <<
+    "File: " << MaybeBufferFilename(*pBuffer) << "\r\n" <<
+    "Save: " << pwszSave << "\r\n" <<
+    ModifiedDisplayText(*pBuffer);
+  ::lstrcpyW(m_wszToolTip, tooltip.str().c_str());
+  return m_wszToolTip;
 }
 
 void Frame::onDropFiles(HDROP const hDrop) {

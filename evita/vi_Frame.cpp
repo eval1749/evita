@@ -972,7 +972,7 @@ void Frame::updateTitleBar() {
 
 void Frame::WillDestroyWidget() {
   Widget::WillDestroyWidget();
-  Application::instance()->DeleteFrame(this);
+  Application::instance()->WillDestroyFrame(this);
 }
 
 void Frame::WillRemoveChildWidget(const Widget& widget) {

@@ -78,7 +78,6 @@ class Application : public common::Singleton<Application> {
   public: Frame* CreateFrame(Buffer* buffer);
 
   // [D]
-  public: Frame* DeleteFrame(Frame* frame);
   public: void DidCreateFrame(Frame* frame);
   private: void DoIdle();
 
@@ -139,6 +138,9 @@ class Application : public common::Singleton<Application> {
 
   // [T]
   private: bool TryDoIdle();
+
+  // [W]
+  public: void WillDestroyFrame(Frame* frame);
 
   DISALLOW_COPY_AND_ASSIGN(Application);
 };

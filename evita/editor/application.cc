@@ -106,15 +106,6 @@ Frame* Application::CreateFrame(Buffer* buffer) {
   return frame;
 }
 
-Frame* Application::DeleteFrame(Frame* frame) {
-  frames_.Delete(frame);
-  if (frames_.IsEmpty()) {
-    is_quit_ = true;
-    message_loop_->QuitWhenIdle();
-  }
-  return frame;
-}
-
 void Application::DidCreateFrame(Frame* frame) {
   frames_.Append(frame);
 }
@@ -343,4 +334,12 @@ bool Application::TryDoIdle() {
   if (!dom_lock.locked())
     return true;
   return OnIdle(idle_count_);
+}
+
+void Application::WillDestroyFrame(Frame* frame) {
+  frames_.Delete(frame);
+  if (!frames_.IsEmpty())
+    return;
+  is_quit_ = true;
+  message_loop_->QuitWhenIdle();
 }

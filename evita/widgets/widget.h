@@ -120,6 +120,8 @@ class Widget
   public: void Realize(const Rect& rect);
   // Realize top-level widget with native window.
   public: void RealizeTopLevelWidget();
+  // TODO(yosi) Widget::RealizeWidget() should be pure virtual.
+  public: virtual void RealizeWidget();
   public: void ReleaseCapture();
   public: void ResizeTo(const Rect& rect);
 

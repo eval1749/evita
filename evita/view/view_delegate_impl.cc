@@ -29,6 +29,11 @@ void ViewDelegateImpl::DestroyWindow(dom::WidgetId widget_id) {
 
 void ViewDelegateImpl::RealizeWindow(dom::WidgetId widget_id) {
   DCHECK_NE(dom::kInvalidWidgetId, widget_id);
+  auto const widget = widgets::Widget::FromWidgetId(widget_id);
+  if (!widget)
+    return;
+  DCHECK_EQ(widget_id, widget->widget_id());
+  widget->RealizeWidget();
 }
 
 void ViewDelegateImpl::RegisterViewEventHandler(

@@ -372,6 +372,11 @@ void Widget::RealizeTopLevelWidget() {
   CreateNativeWindow();
 }
 
+// TODO(yosi) Widget::RealizeWidget() should be pure virutal.
+void Widget::RealizeWidget() {
+  NOTREACHED();
+}
+
 void Widget::ReleaseCapture() {
   DCHECK_EQ(capture_widget, this);
   capture_widget = nullptr;

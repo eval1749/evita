@@ -11,7 +11,11 @@
 #if !defined(INCLUDE_listener_winapp_visual_gateway_h)
 #define INCLUDE_listener_winapp_visual_gateway_h
 
-class Buffer;
+namespace dom {
+class Document;
+}
+
+using Buffer = dom::Document;
 
 //////////////////////////////////////////////////////////////////////
 //

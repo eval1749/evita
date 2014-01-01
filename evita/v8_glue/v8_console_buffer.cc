@@ -20,7 +20,7 @@ Command::KeyBinds* s_key_bindings;
 }  // namespace
 
 V8ConsoleBuffer::V8ConsoleBuffer()
-    : Buffer(L"*javascript console*", nullptr),
+    : dom::Document(L"*javascript console*"),
       input_history_(new InputHistory()),
       prompt_end_(CreateRange()),
       script_end_(CreateRange()) {

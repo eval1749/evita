@@ -38,13 +38,18 @@ enum MessageLevel
     MessageLevel_Limit,
 }; // MessageLevel
 
-class Buffer;
 class Pane;
 class TextEditWindow;
 
 namespace content {
 class ContentWindow;
 }
+
+namespace dom {
+class Document;
+}
+
+using Buffer = dom::Document;
 
 /// <summary>
 ///   Represents a frame window aka toplevel window. This window communicates

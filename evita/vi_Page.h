@@ -15,11 +15,15 @@
 #include "./vi_style.h"
 #include "gfx_base.h"
 
-class Buffer;
 class Font;
 class Selection;
 class Style;
 
+namespace dom {
+class Document;
+}
+
+using Buffer = dom::Document;
 
 namespace PageInternal {
   class Cell;

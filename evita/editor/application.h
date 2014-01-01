@@ -14,7 +14,6 @@
 #include "common/memory/singleton.h"
 #include "evita/vi_Frame.h"
 
-class Buffer;
 class CommandWindow;
 class IoManager;
 
@@ -25,6 +24,12 @@ class MessageLoop;
 namespace Command {
 class Processor;
 }
+
+namespace dom {
+class Document;
+}
+
+using Buffer = dom::Document;
 
 namespace editor {
 class DomLock;

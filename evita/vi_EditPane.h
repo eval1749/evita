@@ -14,12 +14,17 @@
 #include "./vi_defs.h"
 #include "./vi_Pane.h"
 
-class Buffer;
 class Frame;
 
 namespace content {
 class ContentWindow;
 }
+
+namespace dom {
+class Document;
+}
+
+using Buffer = dom::Document;
 
 // EditPane is a container of multiple ContentWindow windows and layouts
 // them vertically with draggable splitter.

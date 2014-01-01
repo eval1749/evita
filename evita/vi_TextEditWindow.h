@@ -18,11 +18,16 @@
 #include "./vi_Page.h"
 #include <memory>
 
-class Buffer;
 class Caret;
 class EditPane;
 class Page;
 class Selection;
+
+namespace dom {
+class Document;
+}
+
+using Buffer = dom::Document;
 
 enum DragMode
 {

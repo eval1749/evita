@@ -16,12 +16,17 @@
 #include "evita/editor/application.h"
 #include "./vi_Frame.h"
 
-Buffer::Buffer(const char16* pwsz, Edit::Mode* pMode)
+namespace dom {
+
+Document::Document(const char16* pwsz, Edit::Mode* pMode)
     : Edit::Buffer(pwsz, pMode) {
 }
 
+Document::~Document() {
+}
+
 // Returns true if buffer is safe to kill.
-bool Buffer::CanKill() {
+bool Document::CanKill() {
   if (!NeedSave())
     return true;
 
@@ -51,7 +56,7 @@ bool Buffer::CanKill() {
 }
 
 // Returns MRU window
-Buffer::Window* Buffer::GetWindow() const {
+Document::Window* Document::GetWindow() const {
   const auto* mru = m_oWindows.GetFirst();
   for (auto& window: m_oWindows) {
     if (mru->GetActiveTick() < window.GetActiveTick())
@@ -60,7 +65,7 @@ Buffer::Window* Buffer::GetWindow() const {
   return const_cast<Window*>(mru);
 }
 
-bool Buffer::OnIdle(uint) {
+bool Document::OnIdle(uint) {
   #if DEBUG_STYLE
   {
     DEBUG_PRINTF(L"%p\n", this);
@@ -78,3 +83,5 @@ bool Buffer::OnIdle(uint) {
   // more redisplay.
   return GetMode()->DoColor(500);
 }
+
+}  // namespace dom

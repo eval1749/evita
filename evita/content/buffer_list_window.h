@@ -7,7 +7,11 @@
 
 #include "evita/cm_CmdProc.h"
 
-class Buffer;
+namespace dom {
+class Document;
+}
+
+using Buffer = dom::Document;
 
 namespace content {
 

@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_edit_range_h)
 #define INCLUDE_edit_range_h
 
-namespace Edit
+namespace text
 {
 
 /// <summary>
@@ -132,6 +132,6 @@ class Range //: public ObjectInHeap
     private: void  updateGoal();
 }; // Range
 
-} // Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_edit_range_h)

@@ -117,7 +117,7 @@ class Page {
   };
 
   // Buffer
-  public: Edit::Buffer* m_pBuffer;
+  public: text::Buffer* m_pBuffer;
   private: Count m_nModfTick;
 
   // Selection
@@ -152,7 +152,7 @@ class Page {
                            const Selection&, Posn start);
 
   // [G]
-  public: Edit::Buffer* GetBuffer() const { return m_pBuffer; }
+  public: text::Buffer* GetBuffer() const { return m_pBuffer; }
   public: Line* GetFirstLine() const { return m_oFormatBuf.GetFirst(); }
   public: Line* GetLastLine() const { return m_oFormatBuf.GetLast(); }
   public: Posn GetStart() const { return m_lStart; }

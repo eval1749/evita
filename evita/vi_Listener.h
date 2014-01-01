@@ -17,10 +17,10 @@ class Buffer;
 
 using Buffer = dom::Buffer;
 
-namespace Edit
+namespace text
 {
     class Range;
-} // Edit
+}  // namespace text
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -28,7 +28,7 @@ namespace Edit
 //
 class Listener
 {
-    private: typedef Edit::Range Range;
+    private: typedef text::Range Range;
 
     private: struct SendInfo
     {

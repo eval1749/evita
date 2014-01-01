@@ -65,9 +65,9 @@ struct FinishLoadParam
 
         if (0 == m_nError)
         {
-            Edit::ModeFactory* pModeFactory = Edit::ModeFactory::Get(m_pBuffer);
+            text::ModeFactory* pModeFactory = text::ModeFactory::Get(m_pBuffer);
 
-            Edit::Mode* pMode = m_pBuffer->GetMode();
+            text::Mode* pMode = m_pBuffer->GetMode();
             if (pMode->GetClass() != pModeFactory)
             {
                 m_pBuffer->SetMode(pModeFactory->Create(m_pBuffer));
@@ -119,7 +119,7 @@ struct InsertStringParam
 {
     Count           m_cwch;
     Posn            m_lPosn;
-    Edit::Buffer*   m_pBuffer;
+    text::Buffer*   m_pBuffer;
     const char16*   m_pwch;
 
     static void Run(LPARAM lParam)

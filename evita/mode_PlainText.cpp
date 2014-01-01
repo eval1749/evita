@@ -11,7 +11,7 @@
 //
 #include "./mode_PlainText.h"
 
-namespace Edit
+namespace text
 {
 
 // Cxx mode character syntax
@@ -133,4 +133,4 @@ PlainTextMode::PlainTextMode(ModeFactory* pFactory, Buffer* pBuffer) :
 PlainTextModeFactory::PlainTextModeFactory() :
     ModeFactory(k_rgnPlainTextCharSyntax) {}
 
-} // Edit
+}  // namespace text

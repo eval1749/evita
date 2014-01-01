@@ -238,7 +238,7 @@ class DynamicAbbrev :
         Dir_Forward,
     }; // Dir
 
-    private: typedef Edit::Range Range;
+    private: typedef text::Range Range;
 
     private: Count          m_cwch;
     private: bool           m_fFound;
@@ -250,7 +250,7 @@ class DynamicAbbrev :
     private: char16         m_wsz[10];
 
     public: DynamicAbbrev(
-        Edit::Buffer* pBuffer) :
+        text::Buffer* pBuffer) :
             Buffer::Property(k_pszName),
             m_pRange(pBuffer->CreateRange())
     {
@@ -469,7 +469,7 @@ const char* const DynamicAbbrev::k_pszName = "DynamicAbbrev";
 
 DEFCOMMAND(ExpandDynamicAbbrev)
 {
-    Edit::Buffer* pBuffer = pCtx->GetSelection()->GetBuffer();
+    text::Buffer* pBuffer = pCtx->GetSelection()->GetBuffer();
 
     DynamicAbbrev* pDynamicAbbrev = pBuffer->FindProperty<DynamicAbbrev>(
         DynamicAbbrev::k_pszName);
@@ -488,7 +488,7 @@ DEFCOMMAND(ExchangeCode)
     Selection* pSelection = pCtx->GetSelection();
     if (NULL == pSelection) return;
 
-    Edit::Range oRange(pSelection);
+    text::Range oRange(pSelection);
 
     if (oRange.GetStart() == oRange.GetEnd())
     {
@@ -1255,8 +1255,8 @@ void TypeChar(const Context* pCtx)
     pSelection->TypeChar(wch, n);
 
     uint nTrait = pSelection->GetBuffer()->GetMode()->GetCharSyntax(wch);
-    if (Edit::CharSyntax::Syntax_CloseParen ==
-        Edit::CharSyntax::GetSyntax(nTrait) )
+    if (text::CharSyntax::Syntax_CloseParen ==
+        text::CharSyntax::GetSyntax(nTrait) )
     {
         // Force color newly inserted characters.
         // Note: If we are in long comment, parenthesis matching may not

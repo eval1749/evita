@@ -15,7 +15,7 @@
 
 #include "evita/text/buffer.h"
 
-namespace Edit
+namespace text
 {
 
 /// <summary>
@@ -40,6 +40,6 @@ class ConfigModeFactory : public ModeFactory
     public: virtual bool IsSupported(const char16*) const override;
 }; // ConfigModeFactory
 
-} // Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_mode_Config_h)

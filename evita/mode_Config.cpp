@@ -11,7 +11,7 @@
 //
 #include "./mode_Config.h"
 
-namespace Edit
+namespace text
 {
 
 // Config mode character syntax
@@ -387,4 +387,4 @@ bool ConfigModeFactory::IsSupported(const char16* pwsz) const
     return ModeFactory::IsSupported(pwsz);
 } // ConfigModeFactory::IsSupported
 
-} // Edit
+}  // namespace text

@@ -30,7 +30,7 @@ InputHistory::InputHistory() :
 //
 // InputHistory::Add
 //
-void InputHistory::Add(Edit::Buffer* pBuffer, Posn lStart, Posn lEnd)
+void InputHistory::Add(text::Buffer* pBuffer, Posn lStart, Posn lEnd)
 {
     if (lStart >= lEnd)
     {
@@ -86,7 +86,7 @@ void InputHistory::Backward(Selection* pSel)
     if (NULL == pwsz) return;
     m_nCurr -= 1;
     {
-        Edit::DisableUndo oDisable(pSel->GetBuffer());
+        text::DisableUndo oDisable(pSel->GetBuffer());
         pSel->SetEnd(pSel->GetBuffer()->GetEnd());
         pSel->SetText(pwsz, ::lstrlenW(pwsz));
         pSel->Collapse();
@@ -112,7 +112,7 @@ void InputHistory::Forward(Selection* pSel)
     }
 
     {
-        Edit::DisableUndo oDisable(pSel->GetBuffer());
+        text::DisableUndo oDisable(pSel->GetBuffer());
         pSel->SetEnd(pSel->GetBuffer()->GetEnd());
         pSel->SetText(pwsz, ::lstrlenW(pwsz));
         pSel->Collapse();

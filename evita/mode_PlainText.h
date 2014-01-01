@@ -13,7 +13,7 @@
 
 #include "./ed_Mode.h"
 
-namespace Edit
+namespace text
 {
 
 //////////////////////////////////////////////////////////////////////
@@ -51,6 +51,6 @@ class PlainTextModeFactory : public ModeFactory
         { return L"Plain"; }
 }; // PlainTextModeFactory
 
-} // Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_mode_PlainText_h)

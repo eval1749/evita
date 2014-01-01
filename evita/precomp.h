@@ -295,8 +295,8 @@ class RegKey
 typedef uint32 uint;
 #include "./ed_defs.h"
 
-typedef Edit::Count Count;
-typedef Edit::Posn  Posn;
+typedef text::Count Count;
+typedef text::Posn  Posn;
 
 #define myCopyMemory(d, s, n) ::CopyMemory(d, s, n)
 #define myMoveMemory(d, s, n) ::MoveMemory(d, s, n)

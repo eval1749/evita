@@ -38,7 +38,7 @@ class RegexMatcher
     // ctor
     public: RegexMatcher(
         const SearchParameters*,
-        Edit::Buffer*,
+        text::Buffer*,
         Posn,
         Posn );
 
@@ -52,8 +52,8 @@ class RegexMatcher
         return m_oErrorInfo.m_nError;
     } // GetError
 
-    public: Edit::Range* GetMatched(const char16*, int);
-    public: Edit::Range* GetMatched(int);
+    public: text::Range* GetMatched(const char16*, int);
+    public: text::Range* GetMatched(int);
 
     // [N]
     public: bool NextMatch();

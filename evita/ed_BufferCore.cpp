@@ -16,7 +16,7 @@
 
 #define DEBUG_LIFE 0
 
-namespace Edit
+namespace text
 {
 
 //////////////////////////////////////////////////////////////////////
@@ -320,4 +320,4 @@ BufferCore::moveGap(Posn lNewStart)
     } // if
 } // BufferCore::moveGap
 
-} // Edit
+}  // namespace text

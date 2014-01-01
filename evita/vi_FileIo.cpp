@@ -365,7 +365,7 @@ bool Buffer::Save(
 } // Buffer::Save
 
 //  Markes the buffer visited to specified file.
-void Edit::Buffer::SetFile(
+void text::Buffer::SetFile(
     const char16* const pwszFile,
     const FILETIME* const pftLastWrite) {
   filename_ =  pwszFile;

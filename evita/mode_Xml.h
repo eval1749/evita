@@ -13,7 +13,7 @@
 
 #include "./ed_Mode.h"
 
-namespace Edit
+namespace text
 {
 
 //////////////////////////////////////////////////////////////////////
@@ -127,6 +127,6 @@ class XmlModeFactory : public ModeFactory
         { return L"XML"; }
 }; // XmlModeFactory
 
-} // Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_mode_Xml_h)

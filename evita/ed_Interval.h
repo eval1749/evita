@@ -15,7 +15,7 @@
 #include "./ed_Style.h"
 #include "./li_util.h"
 
-namespace Edit
+namespace text
 {
 
 /// <summary>
@@ -62,6 +62,6 @@ class Interval  :
     public: void SetStyle(const StyleValues*);
 }; // Interval
 
-} // Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_edit_interval_h)

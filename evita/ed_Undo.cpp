@@ -14,7 +14,7 @@
 
 #include "evita/text/buffer.h"
 
-namespace Edit
+namespace text
 {
 
 
@@ -1075,4 +1075,4 @@ void UndoBlock::init(Buffer* p, const char16* s)
     m_pUndo->RecordBegin(s);
 } // UndoBlock::init
 
-} // Edit
+}  // namespace text

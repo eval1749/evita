@@ -519,7 +519,7 @@ void Selection::TypeChar(char16 wch, Count k)
     }
     else
     {
-        Edit::UndoBlock oUndo(pBuffer, L"Selection.TypeChar");
+        text::UndoBlock oUndo(pBuffer, L"Selection.TypeChar");
         SetText(NULL, 0);
         pBuffer->Insert(GetStart(), wch, k);
     } // if
@@ -548,7 +548,7 @@ void Selection::TypeEnter(Count k)
         oRange.GetText(&oSpaces);
     }
 
-    Edit::UndoBlock oUndo(GetBuffer(), L"Selection.TypeEnter");
+    text::UndoBlock oUndo(GetBuffer(), L"Selection.TypeEnter");
 
     // Delete trailing whitespaces
     {

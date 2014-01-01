@@ -15,7 +15,7 @@
 
 #include "./li_util.h"
 
-namespace Edit
+namespace text
 {
 
 typedef HashTable_<StringKey, int, 100> KeywordTable;
@@ -263,6 +263,6 @@ class Mode
         { return m_pClass->GetName(); }
 }; // Mode
 
-} // Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_edit_Mode_h)

@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_edit_BufferCore_h)
 #define INCLUDE_edit_BufferCore_h
 
-namespace Edit
+namespace text
 {
 
 //////////////////////////////////////////////////////////////////////
@@ -74,6 +74,6 @@ class BufferCore
     private: void moveGap(Posn);
 }; // BufferCore
 
-} // Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_edit_BufferCore_h)

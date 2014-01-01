@@ -12,7 +12,7 @@
 #include "./mode_Mason.h"
 
 
-namespace Edit
+namespace text
 {
 /// <summary>
 ///   Returns true if Mason mode support specified buffer name.
@@ -24,4 +24,4 @@ bool MasonModeFactory::IsSupported(const char16* pwsz) const
     return ModeFactory::IsSupported(pwsz);
 } // MasonModeFactory::IsSupported
 
-} // Edit
+}  // namespace text

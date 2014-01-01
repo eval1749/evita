@@ -582,11 +582,11 @@ class EnumCI {
   private: Posn m_lBufEnd;
   private: Posn m_lBufStart;
   private: Posn m_lPosn;
-  private: Edit::Buffer* m_pBuffer;
-  private: Edit::Interval* m_pInterval;
+  private: text::Buffer* m_pBuffer;
+  private: text::Interval* m_pInterval;
   private: char16 m_rgwch[80];
 
-  public: EnumCI(Edit::Buffer *pBuffer, Posn lPosn)
+  public: EnumCI(text::Buffer *pBuffer, Posn lPosn)
       : m_pBuffer(pBuffer),
         m_lPosn(lPosn) {
     m_pInterval = m_pBuffer->GetIntervalAt(m_lPosn);
@@ -631,7 +631,7 @@ class EnumCI {
       fill();
 
     if (m_lPosn >= m_pInterval->GetEnd()) {
-      Edit::Interval* pNext = m_pInterval->GetNext();
+      text::Interval* pNext = m_pInterval->GetNext();
       if (pNext)
         m_pInterval = pNext;
     }

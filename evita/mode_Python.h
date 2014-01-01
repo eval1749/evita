@@ -15,7 +15,7 @@
 
 #include "evita/text/buffer.h"
 
-namespace Edit {
+namespace text {
 
 /// <summary>
 ///   PythonMode factory
@@ -35,6 +35,6 @@ class PythonModeFactory : public ModeFactory {
   public: virtual const char16* GetName() const override { return L"Python"; }
 }; // PythonModeFactory
 
-} // Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_mode_Python_h)

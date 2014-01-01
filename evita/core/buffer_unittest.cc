@@ -8,25 +8,25 @@
 namespace {
 
 class BufferTest : public ::testing::Test {
-  private: std::unique_ptr<Edit::Buffer> buffer_;
+  private: std::unique_ptr<text::Buffer> buffer_;
 
-  protected: BufferTest() : buffer_(new Edit::Buffer(L"*test*")) {
+  protected: BufferTest() : buffer_(new text::Buffer(L"*test*")) {
   }
   public: virtual ~BufferTest() {
   }
 
-  public: Edit::Buffer& buffer() const { return *buffer_; }
+  public: text::Buffer& buffer() const { return *buffer_; }
 };
 
 TEST_F(BufferTest, OperatorEqual) {
-  std::unique_ptr<Edit::Buffer> other_buffer;
+  std::unique_ptr<text::Buffer> other_buffer;
   EXPECT_TRUE(buffer() == &buffer());
   EXPECT_TRUE(buffer() == buffer());
   EXPECT_FALSE(buffer() == *other_buffer);
 }
 
 TEST_F(BufferTest, OperatorNotEqual) {
-  std::unique_ptr<Edit::Buffer> other_buffer;
+  std::unique_ptr<text::Buffer> other_buffer;
   EXPECT_FALSE(buffer() != &buffer());
   EXPECT_FALSE(buffer() != buffer());
   EXPECT_TRUE(buffer() != *other_buffer);

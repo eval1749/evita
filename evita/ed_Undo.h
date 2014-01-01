@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_listener_winapp_editor_undo_h)
 #define INCLUDE_listener_winapp_editor_undo_h
 
-namespace Edit
+namespace text
 {
 
 class Record;
@@ -88,6 +88,6 @@ class UndoManager : public ObjectInHeap
     private: void discardRecord(Record*);
 }; // UndoManager
 
-} // Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_listener_winapp_editor_undo_h)

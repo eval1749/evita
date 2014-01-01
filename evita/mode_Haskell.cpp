@@ -11,7 +11,7 @@
 //
 #include "./mode_Haskell.h"
 
-namespace Edit
+namespace text
 {
 
 //////////////////////////////////////////////////////////////////////
@@ -930,4 +930,4 @@ Mode* HaskellModeFactory::Create(Buffer* pBuffer)
     return new HaskellMode(this, pBuffer);
 } // HaskellModeFactory::Create
 
-} // Edit
+}  // namespace text

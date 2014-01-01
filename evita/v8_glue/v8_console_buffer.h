@@ -29,8 +29,8 @@ namespace v8_glue {
 class V8ConsoleBuffer : public common::Singleton<V8ConsoleBuffer>,
                         public Buffer {
   private: std::unique_ptr<InputHistory> input_history_;
-  private: Edit::Range* prompt_end_;
-  private: Edit::Range* script_end_;
+  private: text::Range* prompt_end_;
+  private: text::Range* script_end_;
 
   public: V8ConsoleBuffer();
   public: virtual ~V8ConsoleBuffer();

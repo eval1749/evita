@@ -16,7 +16,7 @@
 // for MasonModeFactory constructor
 #include "./mode_Mason.h"
 
-namespace Edit
+namespace text
 {
 
 //////////////////////////////////////////////////////////////////////
@@ -751,5 +751,5 @@ Mode* PerlModeFactory::Create(Buffer* pBuffer)
 /// </summary>
 MasonModeFactory::MasonModeFactory() :
     ModeFactory(k_rgnPerlCharSyntax) {}
-} // Edit
+}  // namespace text
 

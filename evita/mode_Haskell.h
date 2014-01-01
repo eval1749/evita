@@ -15,7 +15,7 @@
 
 #include "evita/text/buffer.h"
 
-namespace Edit
+namespace text
 {
 
 /// <summary>
@@ -37,6 +37,6 @@ class HaskellModeFactory : public ModeFactory
         { return L"Haskell"; }
 }; // HaskellModeFactory
 
-} // Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_mode_Haskell_h)

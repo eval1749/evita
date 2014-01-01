@@ -33,7 +33,7 @@ enum CharacterName
     SingleQuote     = 0x27,
 }; // CharacterName
 
-namespace Edit
+namespace text
 {
 
 typedef long Count;
@@ -43,7 +43,7 @@ class Buffer;
 class Range;
 class Interval;
 
-} // Edit
+}  // namespace text
 
 enum CollapseWhich
 {

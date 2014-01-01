@@ -13,7 +13,7 @@
 //
 #include "./mode_Python.h"
 
-namespace Edit {
+namespace text {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -605,4 +605,4 @@ Mode* PythonModeFactory::Create(Buffer* pBuffer) {
   return new PythonMode(this, pBuffer);
 }
 
-} // Edit
+}  // namespace text

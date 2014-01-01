@@ -26,7 +26,7 @@ using Buffer = dom::Buffer;
 //
 class Gateway
 {
-    private: typedef Edit::Range Range;
+    private: typedef text::Range Range;
 
     private: struct SendInfo
     {

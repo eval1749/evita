@@ -51,7 +51,7 @@ class TextEditWindow
   private: typedef DoubleLinkedNode_<TextEditWindow> WindowItem;
   private: typedef content::ContentWindow ParentClass;
 
-  private: typedef Edit::Range Range;
+  private: typedef text::Range Range;
 
   private: struct ScrollBar {
     HWND m_hwnd;

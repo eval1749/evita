@@ -21,11 +21,11 @@ class KeyBindEntry;
 
 namespace dom {
 
-class Buffer : public Edit::Buffer, public DoubleLinkedNode_<Buffer> {
+class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
   public: typedef TextEditWindow Window;
   private: WindowList m_oWindows;
 
-  public: Buffer(const char16* pwsz, Edit::Mode* pMode = nullptr);
+  public: Buffer(const char16* pwsz, text::Mode* pMode = nullptr);
   public: virtual ~Buffer();
 
   public: const WindowList& windows() const { return m_oWindows; }

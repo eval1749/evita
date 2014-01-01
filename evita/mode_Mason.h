@@ -13,7 +13,7 @@
 
 #include "./mode_Perl.h"
 
-namespace Edit
+namespace text
 {
 
 /// <summary>
@@ -38,6 +38,6 @@ class MasonModeFactory : public ModeFactory
     public: virtual bool IsSupported(const char16*) const override;
 }; // MasonModeFactory
 
-} // Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_mode_Mason_h)

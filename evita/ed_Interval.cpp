@@ -29,7 +29,7 @@ int TreapRandom()
     return static_cast<int>(s_nRandom & ((1<<28)-1)) & MAXINT;
 } // TreapRandom
 
-namespace Edit
+namespace text
 {
 
 /// <summary>
@@ -579,4 +579,4 @@ bool Interval::CanMerge(const Interval* pIntv) const
     return true;
 } // Interval::CanMerge
 
-} // Edit
+}  // namespace text

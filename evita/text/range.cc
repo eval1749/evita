@@ -103,7 +103,7 @@ class Clipboard
         { return ::SetClipboardData(CF_UNICODETEXT, h) != NULL; }
 }; // Clipboard
 
-namespace Edit
+namespace text
 {
 
 /// <summary>
@@ -1436,4 +1436,4 @@ void Buffer::EnumRange::Next()
 UndoBlock::UndoBlock(Range* p, const char16* s)
     { init(p->GetBuffer(), s); }
 
-} // Edit
+}  // namespace text

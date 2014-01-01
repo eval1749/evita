@@ -15,7 +15,7 @@
 
 #include "evita/text/buffer.h"
 
-namespace Edit
+namespace text
 {
 
 /// <summary>
@@ -37,6 +37,6 @@ class PerlModeFactory : public ModeFactory
         { return L"Perl"; }
 }; // PerlModeFactory
 
-} // Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_mode_Perl_h)

@@ -19,7 +19,7 @@
 #include "./mode_PlainText.h"
 #include <algorithm>
 
-namespace Edit
+namespace text
 {
 
 /// <summary>
@@ -988,4 +988,4 @@ Posn Buffer::Undo(Posn lPosn, Count n)
     return m_pUndo->Undo(lPosn, n);
 } // Buffer::Undo
 
-} // Edit
+}  // namespace text

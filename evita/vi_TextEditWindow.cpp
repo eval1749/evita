@@ -1215,7 +1215,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
     return;
 
   UI_ASSERT_DOM_LOCKED();
-  Edit::UndoBlock oUndo(GetSelection(), L"IME");
+  text::UndoBlock oUndo(GetSelection(), L"IME");
 
   char16 rgwch[1024];
   // If IME has result string, we can insert it into buffer.

@@ -22,7 +22,7 @@ namespace Private
 /// </remark>
 class Capture
 {
-    public: Edit::Range*    m_pRange;
+    public: text::Range*    m_pRange;
     public: char16*         m_pwszName;
 
     public: Capture() :
@@ -89,11 +89,11 @@ class CompileContext : public Regex::ICompileContext
 /// <remark>
 ///   Represents match context regex again Buffer.
 /// </remark>
-/// <see cref="Edit::Buffer"/>
+/// <see cref="text::Buffer"/>
 class BufferMatchContext : public Regex::IMatchContext
 {
     private: int                m_cCaptures;
-    private: Edit::Range        m_oRange;
+    private: text::Range        m_oRange;
     private: CompileContext*    m_pCompileContext;
     private: Regex::IRegex*     m_pIRegex;
     private: Capture*           m_prgoCapture;
@@ -103,7 +103,7 @@ class BufferMatchContext : public Regex::IMatchContext
         CompileContext* pCompileContext,
         Capture*        prgoCapture,
         int             cCaptures,
-        Edit::Buffer*   pBuffer,
+        text::Buffer*   pBuffer,
         Posn            lStart,
         Posn            lEnd ) :
             m_cCaptures(cCaptures),
@@ -136,14 +136,14 @@ class BufferMatchContext : public Regex::IMatchContext
     } // charEqCi
 
     // [G]
-    public: Edit::Range* GetCapture(int nNth) const
+    public: text::Range* GetCapture(int nNth) const
     { 
         return uint(nNth) <= uint(m_cCaptures)
             ? m_prgoCapture[nNth].m_pRange
             : nullptr;
     } // GetCapture
 
-    public: Edit::Range* GetCapture(
+    public: text::Range* GetCapture(
         const char16*   pwchName,
         int             cwchName ) const
     {
@@ -182,8 +182,8 @@ class BufferMatchContext : public Regex::IMatchContext
         return NULL;
     } // GetCapture
 
-    public: Edit::Range* GetRange() const
-        { return const_cast<Edit::Range*>(&m_oRange); }
+    public: text::Range* GetRange() const
+        { return const_cast<text::Range*>(&m_oRange); }
 
     // Regex::IMatchContext
     // [B]
@@ -231,12 +231,12 @@ bool BufferMatchContext::BackwardFindCharCi(
     Posn*   inout_lPosn,
     Posn    lStop ) const
 {
-    Edit::Buffer::EnumCharRev::Arg oArg(
+    text::Buffer::EnumCharRev::Arg oArg(
         m_oRange.GetBuffer(),
         *inout_lPosn,
         lStop );
 
-    foreach (Edit::Buffer::EnumCharRev, oEnum, oArg)
+    foreach (text::Buffer::EnumCharRev, oEnum, oArg)
     {
         if (charEqCi(oEnum.Get(), wchFind))
         {
@@ -252,12 +252,12 @@ bool BufferMatchContext::BackwardFindCharCs(
     Posn*   inout_lPosn,
     Posn    lStop ) const
 {
-    Edit::Buffer::EnumCharRev::Arg oArg(
+    text::Buffer::EnumCharRev::Arg oArg(
         m_oRange.GetBuffer(),
         *inout_lPosn,
         lStop );
 
-    foreach (Edit::Buffer::EnumCharRev, oEnum, oArg)
+    foreach (text::Buffer::EnumCharRev, oEnum, oArg)
     {
         if (charEqCs(oEnum.Get(), wchFind))
         {
@@ -273,12 +273,12 @@ bool BufferMatchContext::ForwardFindCharCi(
     Posn*   inout_lPosn,
     Posn    lStop ) const
 {
-    Edit::Buffer::EnumChar::Arg oArg(
+    text::Buffer::EnumChar::Arg oArg(
         m_oRange.GetBuffer(),
         *inout_lPosn,
         lStop );
 
-    foreach (Edit::Buffer::EnumChar, oEnum, oArg)
+    foreach (text::Buffer::EnumChar, oEnum, oArg)
     {
         if (charEqCi(oEnum.Get(), wchFind))
         {
@@ -295,12 +295,12 @@ bool BufferMatchContext::ForwardFindCharCs(
     Posn*   inout_lPosn,
     Posn    lStop ) const
 {
-    Edit::Buffer::EnumChar::Arg oArg(
+    text::Buffer::EnumChar::Arg oArg(
         m_oRange.GetBuffer(),
         *inout_lPosn,
         lStop );
 
-    foreach (Edit::Buffer::EnumChar, oEnum, oArg)
+    foreach (text::Buffer::EnumChar, oEnum, oArg)
     {
         if (charEqCs(oEnum.Get(), wchFind))
         {
@@ -317,7 +317,7 @@ bool BufferMatchContext::GetCapture(
     Regex::Posn*    out_lStart,
     Regex::Posn*    out_lEnd ) const
 {
-    Edit::Range* pRange = m_prgoCapture[nCapture].m_pRange;
+    text::Range* pRange = m_prgoCapture[nCapture].m_pRange;
     if (NULL == pRange)
     {
         return false;
@@ -332,7 +332,7 @@ bool BufferMatchContext::GetCapture(
 // [R]
 void BufferMatchContext::ResetCapture(int nCapture)
 {
-    if (Edit::Range* pRange = m_prgoCapture[nCapture].m_pRange)
+    if (text::Range* pRange = m_prgoCapture[nCapture].m_pRange)
     {
         pRange->destroy();
         m_prgoCapture[nCapture].m_pRange = NULL;
@@ -352,11 +352,11 @@ void BufferMatchContext::SetCapture(int nCapture, Posn lStart, Posn lEnd)
 {
     ASSERT(static_cast<uint>(nCapture) <= static_cast<uint>(m_cCaptures));
 
-    Edit::Range* pRange = m_prgoCapture[nCapture].m_pRange;
+    text::Range* pRange = m_prgoCapture[nCapture].m_pRange;
     if (NULL == pRange)
     {
-        Edit::Buffer* pBuffer = m_oRange.GetBuffer();
-        pRange = new(pBuffer->GetHeap()) Edit::Range(pBuffer, lStart, lEnd);
+        text::Buffer* pBuffer = m_oRange.GetBuffer();
+        pRange = new(pBuffer->GetHeap()) text::Range(pBuffer, lStart, lEnd);
         m_prgoCapture[nCapture].m_pRange = pRange;
     }
     else
@@ -370,11 +370,11 @@ bool BufferMatchContext::StringEqCi(
     int             cwch,
     Posn            lPosn ) const
 {
-    Edit::Buffer::EnumChar::Arg oArg(
+    text::Buffer::EnumChar::Arg oArg(
         m_oRange.GetBuffer(),
         lPosn );
 
-    Edit::Buffer::EnumChar oEnum(oArg);
+    text::Buffer::EnumChar oEnum(oArg);
     const char16* pwchEnd = pwchStart + cwch;
     for (const char16* pwch = pwchStart; pwch < pwchEnd; pwch++)
     {
@@ -398,11 +398,11 @@ bool BufferMatchContext::StringEqCs(
     int             cwch,
     Posn            lPosn ) const
 {
-    Edit::Buffer::EnumChar::Arg oArg(
+    text::Buffer::EnumChar::Arg oArg(
         m_oRange.GetBuffer(),
         lPosn );
 
-    Edit::Buffer::EnumChar oEnum(oArg);
+    text::Buffer::EnumChar oEnum(oArg);
     const char16* pwchEnd = pwchStart + cwch;
     for (const char16* pwch = pwchStart; pwch < pwchEnd; pwch++)
     {
@@ -428,12 +428,12 @@ using namespace Private;
 // ctor
 /// <summary>Construct RegexMatcher object</summary>
 /// <param name="pSearch">Matching settings</param>
-/// <param name="pBuffer">A Edit::Buffer to match</param>
+/// <param name="pBuffer">A text::Buffer to match</param>
 /// <param name="lStart">Match start position</param>
 /// <param name="lEnd">Match end position (exclusive)</param>
 RegexMatcher::RegexMatcher(
     const SearchParameters* pSearch,
-    Edit::Buffer*           pBuffer,
+    text::Buffer*           pBuffer,
     Posn                    lStart,
     Posn                    lEnd ) :
         m_fMatched(false),
@@ -534,8 +534,8 @@ bool RegexMatcher::FirstMatch()
 /// </summary>
 /// <param name="pwchName">A capture name</param>
 /// <param name="cwchName">A length of capture name</param>
-/// <returns>A Edit::Range of nth capture.</returns>
-Edit::Range* RegexMatcher::GetMatched(int nNth)
+/// <returns>A text::Range of nth capture.</returns>
+text::Range* RegexMatcher::GetMatched(int nNth)
 {
     if (! m_fMatched) 
     {
@@ -560,7 +560,7 @@ Edit::Range* RegexMatcher::GetMatched(int nNth)
 /// </summary>
 /// <param name="pwchName">A capture name</param>
 /// <param name="cwchName">A length of capture name</param>
-Edit::Range* RegexMatcher::GetMatched(const char16* pwchName, int cwchName)
+text::Range* RegexMatcher::GetMatched(const char16* pwchName, int cwchName)
 {
     if (! m_fMatched) 
     {
@@ -633,12 +633,12 @@ class BufferOutputStream
 {
     int             m_cwch;
     int             m_cwchTotal;
-    Edit::Range     m_oRange;
-    Edit::Range*    m_pMatchedRange;
+    text::Range     m_oRange;
+    text::Range*    m_pMatchedRange;
     char16          m_rgwch[80];
 
     public: BufferOutputStream(
-        Edit::Range*     pMatchedRange ) :
+        text::Range*     pMatchedRange ) :
         m_cwch(0),
         m_cwchTotal(0),
         m_oRange(pMatchedRange),
@@ -688,9 +688,9 @@ class BufferOutputStream
         } // for pwch
     } // Write
 
-    public: void Write(Edit::Range* pRange)
+    public: void Write(text::Range* pRange)
     {
-        foreach (Edit::Buffer::EnumChar, oEnum, pRange)
+        foreach (text::Buffer::EnumChar, oEnum, pRange)
         {
             Write(oEnum.Get());
         } // for
@@ -771,7 +771,7 @@ void RegexMatcher::Replace(
     int             cwchWith,
     bool            fMetaChar )
 {
-    Edit::Range* pRange = GetMatched(0);
+    text::Range* pRange = GetMatched(0);
     if (NULL == pRange)
     {
         // This matcher isn't matched.
@@ -1111,7 +1111,7 @@ void RegexMatcher::Replace(
         case State_Ref:
             if (0x7D == wch)
             {
-                if (Edit::Range* pRange = GetMatched(pwch - cChars, cChars))
+                if (text::Range* pRange = GetMatched(pwch - cChars, cChars))
                 {
                     oStream.Write(pRange);
                 }
@@ -1170,7 +1170,7 @@ bool RegexMatcher::WrapMatch()
         return false;
     }
 
-    Edit::Range* pRange = m_pMatchContext->GetRange();
+    text::Range* pRange = m_pMatchContext->GetRange();
 
     if (m_oSearch.IsBackward())
     {

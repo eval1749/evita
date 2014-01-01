@@ -11,7 +11,7 @@
 //
 #include "./mode_Lisp.h"
 
-namespace Edit
+namespace text
 {
 
 // Common Lisp Keywords
@@ -710,4 +710,4 @@ Mode* LispModeFactory::Create(Buffer* pBuffer)
     return new LispMode(this, pBuffer);
 } // LispModeFactory::Create
 
-} // Edit
+}  // namespace text

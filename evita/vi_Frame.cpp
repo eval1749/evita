@@ -601,7 +601,7 @@ bool Frame::OnIdle(uint const nCount) {
   class Local {
     public: static void HandleObsoleteBuffer(Buffer* const pBuffer) {
       // Prevent further obsolete checking.
-      pBuffer->SetObsolete(Edit::Buffer::Obsolete_Ignore);
+      pBuffer->SetObsolete(text::Buffer::Obsolete_Ignore);
 
       auto const iAnswer = Application::instance()->Ask(
           MB_YESNO | MB_ICONWARNING | MB_SETFOREGROUND | MB_TOPMOST,

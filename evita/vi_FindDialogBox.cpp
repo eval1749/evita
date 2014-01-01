@@ -147,7 +147,7 @@ void FindDialogBox::DoFind(Direction eDirection)
 /// </summary>
 /// <param name="pRange">A range to replace</param>
 /// <param name="eCase">Case for replace</param>
-static void caseReplace(Edit::Range* pRange, StringCase eCase)
+static void caseReplace(text::Range* pRange, StringCase eCase)
 {
     switch (eCase)
     {
@@ -193,7 +193,7 @@ void FindDialogBox::doReplace(uint nCtrl)
         return;
     }
 
-    Edit::Buffer* pBuffer = pSelection->GetBuffer();
+    text::Buffer* pBuffer = pSelection->GetBuffer();
 
     Posn lStart = pSelection->GetStart();
     Posn lEnd   = pSelection->GetEnd();
@@ -226,14 +226,14 @@ void FindDialogBox::doReplace(uint nCtrl)
 
     if (IDC_FIND_REPLACE == nCtrl)
     {
-        Edit::Range* pRange = oMatcher.GetMatched(0);
+        text::Range* pRange = oMatcher.GetMatched(0);
 
         if (pSelection->GetStart() == pRange->GetStart() &&
             pSelection->GetEnd()   == pRange->GetEnd() )
         {
             if (oSearch.IsCasePreserve())
             {
-                Edit::UndoBlock oUndo(pBuffer, L"Edit.Replace");
+                text::UndoBlock oUndo(pBuffer, L"Edit.Replace");
                 StringCase eCase = pSelection->AnalyzeCase();
                 oMatcher.Replace(wszWith, cwchWith, fReplaceWithMeta);
                 caseReplace(pSelection, eCase);
@@ -253,13 +253,13 @@ void FindDialogBox::doReplace(uint nCtrl)
     else
     {
         // Replace multiple matched strings
-        Edit::UndoBlock oUndo(pBuffer, L"Edit.Replace");
+        text::UndoBlock oUndo(pBuffer, L"Edit.Replace");
 
-        Edit::Range oRange(pBuffer, lStart, lEnd);
+        text::Range oRange(pBuffer, lStart, lEnd);
 
         do
         {
-            Edit::Range* pRange = oMatcher.GetMatched(0);
+            text::Range* pRange = oMatcher.GetMatched(0);
             ASSERT(NULL != pRange);
 
             bool fEmptyMatch = pRange->GetStart() == pRange->GetEnd();

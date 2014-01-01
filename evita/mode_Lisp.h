@@ -13,7 +13,7 @@
 
 #include "./ed_Mode.h"
 
-namespace Edit
+namespace text
 {
 
 /// <remark>
@@ -35,6 +35,6 @@ class LispModeFactory : public ModeFactory
         { return L"Lisp"; }
 }; // LispModeFactory
 
-} // Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_mode_Lisp_h)

@@ -11,7 +11,7 @@
 #include "./ed_BufferCore.h"
 #include "./ed_Style.h"
 
-namespace Edit {
+namespace text {
 
 class Buffer;
 class Interval;
@@ -599,6 +599,6 @@ class UndoBlock {
   private: void init(Buffer*, const char16*);
 };
 
-}  // namespace Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_evita_text_buffer_h)

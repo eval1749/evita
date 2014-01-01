@@ -24,7 +24,7 @@ class InputHistory
     private: char16* m_rgpwsz[30];
 
     public: InputHistory();
-    public: void Add(Edit::Buffer*, Posn, Posn);
+    public: void Add(text::Buffer*, Posn, Posn);
     public: void Backward(Selection*);
     public: void Forward(Selection*);
 }; // InputHistory

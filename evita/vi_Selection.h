@@ -40,9 +40,9 @@ using Buffer = dom::Buffer;
 //   A line number which selection belongs before reloading. We try to
 //   move selection to this line after reloading.
 //
-class Selection : public Edit::Range
+class Selection : public text::Range
 {
-    private: typedef Edit::Range  Range;
+    private: typedef text::Range  Range;
 
     private: Color              m_crColor;
     private: Color              m_crBackground;

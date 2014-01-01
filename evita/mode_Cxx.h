@@ -15,7 +15,7 @@
 
 #include "evita/text/buffer.h"
 
-namespace Edit
+namespace text
 {
 
 /// <summary>
@@ -56,6 +56,6 @@ class JavaModeFactory : public ModeFactory
         { return L"Java"; }
 }; // JavaModeFactory
 
-} // Edit
+}  // namespace text
 
 #endif //!defined(INCLUDE_mode_Cxx_h)

@@ -13,7 +13,7 @@
 
 #define DEBUG_LEXER 0
 
-namespace Edit
+namespace text
 {
 
 //////////////////////////////////////////////////////////////////////
@@ -1260,4 +1260,4 @@ Mode* JavaModeFactory::Create(Buffer* pBuffer)
     return new JavaMode(this, pBuffer);
 } // JavaModeFactory::Create
 
-} // Edit
+}  // namespace text

@@ -11,7 +11,7 @@
 //
 #include "./mode_Xml.h"
 
-namespace Edit
+namespace text
 {
 
 
@@ -550,4 +550,4 @@ bool XmlMode::DoColor(Count lCount)
 XmlModeFactory::XmlModeFactory() :
     ModeFactory(k_rgnXmlCharSyntax) {}
 
-} // Edit
+}  // namespace text

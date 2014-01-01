@@ -47,7 +47,7 @@ void Listener::OnReceiveText(const char16* pwch, int cwch)
     Posn lLast = pBuffer->GetEnd();
 
     {
-        Edit::UndoBlock oUndo(pBuffer, L"*Listener.Output");
+        text::UndoBlock oUndo(pBuffer, L"*Listener.Output");
 
         m_pOutput->SetText(pwch, cwch);
         m_pOutput->Collapse(Collapse_End);

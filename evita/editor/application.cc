@@ -185,7 +185,7 @@ Pane* Application::FindPane(HWND hwndMouse, POINT pt) const {
 }
 
 HIMAGELIST Application::GetIconList() const {
-  return Edit::ModeFactory::icon_image_list();
+  return text::ModeFactory::icon_image_list();
 }
 
 Buffer* Application::Load(const char16* pwszFileName) {

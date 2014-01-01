@@ -30,7 +30,7 @@
 
 #pragma comment(lib, "comctl32.lib")
 
-namespace Edit
+namespace text
 {
 
 namespace NewLexer
@@ -784,4 +784,4 @@ bool ModeFactory::IsSupported(const char16* pwszName) const
     return State_Match == eState && 0 == *pwsz;
 } // ModeFactory::IsSupported
 
-} // Edit
+}  // namespace text

@@ -12,7 +12,7 @@
 #include "./RegexMatch.h"
 
 #include "evita/core/buffer.h"
-#include "./ed_Range.h"
+#include "evita/dom/range.h"
 
 namespace Private
 {

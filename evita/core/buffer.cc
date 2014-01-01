@@ -14,7 +14,7 @@
 #include "evita/core/buffer.h"
 
 #include "./ed_Interval.h"
-#include "./ed_Range.h"
+#include "evita/dom/range.h"
 #include "./ed_Undo.h"
 #include "./mode_PlainText.h"
 #include <algorithm>

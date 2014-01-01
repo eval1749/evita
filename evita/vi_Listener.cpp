@@ -13,7 +13,7 @@
 
 #include "./listener.h"
 
-#include "./ed_Range.h"
+#include "evita/dom/range.h"
 
 #include "evita/dom/document.h"
 #include "./vi_Selection.h"

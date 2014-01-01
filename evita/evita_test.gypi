@@ -19,10 +19,11 @@
         'dom',
         'ui',
         '<(DEPTH)/testing/gtest.gyp:gtest',
+        '<(DEPTH)/testing/gmock.gyp:gmock',
         '<(DEPTH)/base/base.gyp:run_all_unittests',
       ], # dependencies
       'include_dirs+' : [
-        #'<(DEPTH)/evita/',
+        '<(DEPTH)/testing/gmock/include/',
         '<(DEPTH)/testing/gtest/include/',
       ], # include_dirs
       'msvs_settings': {
@@ -40,7 +41,9 @@
       }, # msvs_settings
       'sources': [
         'precomp.cpp',
+        'dom/abstract_dom_test.cc',
         'dom/editor_unittest.cc',
+        'dom/mock_view_impl.cc',
       ],
     }, # evita_dom_test
     {

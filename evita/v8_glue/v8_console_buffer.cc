@@ -7,7 +7,7 @@
 #include "base/strings/utf_string_conversions.h"
 #include "evita/ap_input_history.h"
 #include "evita/cm_CmdProc.h"
-#include "evita/dom/range.h"
+#include "evita/text/range.h"
 #include "evita/dom/script_thread.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/vi_Selection.h"

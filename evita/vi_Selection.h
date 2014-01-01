@@ -13,7 +13,7 @@
 
 #include "./vi_defs.h"
 
-#include "evita/dom/range.h"
+#include "evita/text/range.h"
 #include "./ed_Style.h"
 #include "./gfx_base.h"
 

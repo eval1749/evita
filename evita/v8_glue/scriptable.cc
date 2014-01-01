@@ -35,10 +35,10 @@ v8::Handle<v8::Object> AbstractScriptable::GetWrapper(
     v8::Isolate* isolate) {
   if (!wrapper_.IsEmpty())
     return v8::Local<v8::Object>::New(isolate, wrapper_);
-  auto const templ = wrapper_info()->GetOrCreateInstanceTemplate(isolate);
-  CHECK_EQ(gin::kNumberOfInternalFields, templ->InternalFieldCount());
+  auto ctor = wrapper_info()->GetOrCreateConstructorTemplate(isolate)->
+      GetFunction();
   ConstructorModeScope constructor_mode_scope(isolate, kWrapExistingObject);
-  auto wrapper = templ->NewInstance();
+  auto const wrapper = ctor->NewInstance();
   CHECK(!wrapper.IsEmpty());
   Bind(isolate, wrapper);
   return wrapper;

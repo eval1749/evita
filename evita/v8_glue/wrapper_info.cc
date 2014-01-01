@@ -78,7 +78,7 @@ gin::ObjectTemplateBuilder WrapperInfo::CreateInstanceTemplateBuilder(
     return gin::ObjectTemplateBuilder(isolate);
   auto class_templ = GetOrCreateConstructorTemplate(isolate);
   gin::ObjectTemplateBuilder builder(isolate, class_templ,
-                                     class_templ->InstanceTemplate());
+                                     class_templ->PrototypeTemplate());
   SetupInstanceTemplate(builder);
   return builder;
 }
@@ -146,12 +146,7 @@ void WrapperInfo::Install(v8::Isolate* isolate,
   }
 }
 
-void WrapperInfo::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
-  // Note: I expected FunctionTemplate::Inherit() copies properties from
-  // base class to derived class, although it doesn't. We copy base class's
-  // properties by ourselves.
-  if (auto const base_info = inherit_from())
-    base_info->SetupInstanceTemplate(builder);
+void WrapperInfo::SetupInstanceTemplate(ObjectTemplateBuilder&) {
 }
 
 }  // namespace v8_glue

@@ -12,7 +12,7 @@
 #define DEBUG_UNDO 0
 #include "./ed_Undo.h"
 
-#include "evita/core/buffer.h"
+#include "evita/text/buffer.h"
 
 namespace Edit
 {

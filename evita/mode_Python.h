@@ -13,7 +13,7 @@
 
 #include "./ed_Mode.h"
 
-#include "evita/core/buffer.h"
+#include "evita/text/buffer.h"
 
 namespace Edit {
 

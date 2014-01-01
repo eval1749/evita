@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_evita_dom_buffer_h)
 #define INCLUDE_evita_dom_buffer_h
 
-#include "evita/core/buffer.h"
+#include "evita/text/buffer.h"
 
 #include "./vi_TextEditWindow.h"
 

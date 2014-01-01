@@ -13,7 +13,7 @@
 #define DEBUG_STYLE     0
 #include "./ed_Interval.h"
 
-#include "evita/core/buffer.h"
+#include "evita/text/buffer.h"
 #include <algorithm>
 
 extern StyleValues g_DefaultStyle;

@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_edit_Mode_h)
 #define INCLUDE_edit_Mode_h
 
-#include "evita/core/buffer.h"
+#include "evita/text/buffer.h"
 
 #include "./li_util.h"
 

@@ -11,7 +11,7 @@
 //
 #include "evita/text/range.h"
 
-#include "evita/core/buffer.h"
+#include "evita/text/buffer.h"
 #include "./ed_Mode.h"
 #include "./ed_undo.h"
 #include <algorithm>

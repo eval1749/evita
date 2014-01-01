@@ -11,7 +11,7 @@
 //
 #include "./RegexMatch.h"
 
-#include "evita/core/buffer.h"
+#include "evita/text/buffer.h"
 #include "evita/text/range.h"
 
 namespace Private

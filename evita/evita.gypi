@@ -86,7 +86,7 @@
       ], # dependencies
       'sources': [
         'precomp.cpp',
-        'core/buffer.cc',
+        'text/buffer.cc',
         'core/style.cc',
 
         'ed_BufferCore.cpp',

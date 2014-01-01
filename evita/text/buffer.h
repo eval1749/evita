@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_core_buffer_h)
-#define INCLUDE_evita_core_buffer_h
+#if !defined(INCLUDE_evita_text_buffer_h)
+#define INCLUDE_evita_text_buffer_h
 
 #include "base/strings/string16.h"
 #include "./ed_BinTree.h"
@@ -601,4 +601,4 @@ class UndoBlock {
 
 }  // namespace Edit
 
-#endif //!defined(INCLUDE_evita_core_buffer_h)
+#endif //!defined(INCLUDE_evita_text_buffer_h)

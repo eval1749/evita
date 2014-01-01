@@ -239,11 +239,6 @@ bool Application::OnIdle(uint nCount) {
   return need_more;
 }
 
-void Application::PostUiTask(const tracked_objects::Location& from_here,
-                             const base::Closure& task) {
-  message_loop_->PostTask(from_here, task);
-}
-
 static void RunTaskWithinDomLock(const base::Closure& task) {
   UI_DOM_AUTO_LOCK_SCOPE();
   task.Run();

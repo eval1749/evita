@@ -46,11 +46,8 @@ class WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
   private: typedef widgets::WidgetId WidgetId;
 
   private: std::unordered_map<WidgetId, Widget*> map_;
-  private: WidgetId next_widget_id_;
 
-  private: WidgetIdMapper() : next_widget_id_(1) {
-    ASSERT_CALLED_ON_UI_THREAD();
-  }
+  private: WidgetIdMapper() = default;
   public: ~WidgetIdMapper() = default;
 
   public: void DidDestroyDomWindow(WidgetId widget_id) {
@@ -67,15 +64,17 @@ class WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
 
   public: Widget* Find(WidgetId widget_id) {
     ASSERT_CALLED_ON_UI_THREAD();
+    DCHECK_NE(kInvalidWidgetId, widget_id);
     auto it = map_.find(widget_id);
     return it == map_.end() ? nullptr : it->second;
   }
 
-  public: WidgetId Register(Widget* window) {
+  public: WidgetId Register(Widget* widget) {
     ASSERT_CALLED_ON_UI_THREAD();
-    auto widget_id = next_widget_id_;
-    map_[widget_id] = window;
-    ++next_widget_id_;
+    auto const widget_id = widget->widget_id();
+    DCHECK_NE(kInvalidWidgetId, widget_id);
+    DCHECK_EQ(0u, map_.count(widget_id));
+    map_[widget_id] = widget;
     return widget_id;
   }
 
@@ -96,7 +95,8 @@ Widget::Widget(std::unique_ptr<NativeWindow>&& native_window,
       shown_(0),
       state_(kNotRealized),
       widget_id_(widget_id) {
-  WidgetIdMapper::instance()->Register(this);
+  if (widget_id != kInvalidWidgetId)
+    WidgetIdMapper::instance()->Register(this);
 }
 
 Widget::Widget(WidgetId widget_id)
@@ -242,6 +242,10 @@ void Widget::DispatchPaintMessage() {
       #endif
     }
   }
+}
+
+Widget* Widget::FromWidgetId(WidgetId widget_id) {
+  return WidgetIdMapper::instance()->Find(widget_id);
 }
 
 HCURSOR Widget::GetCursorAt(const Point&) const {

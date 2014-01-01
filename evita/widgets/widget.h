@@ -94,6 +94,9 @@ class Widget
   protected: virtual void DidShow();
   private: void DispatchPaintMessage();
 
+  // [F]
+  public: static Widget* FromWidgetId(WidgetId widget_id);
+
   // [G]
   public: virtual const char* GetClass() const { return "Widget"; }
   public: virtual HCURSOR GetCursorAt(const Point& point) const;

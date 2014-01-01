@@ -11,7 +11,7 @@
 //
 #include "./ap_input_history.h"
 
-#include "evita/dom/document.h"
+#include "evita/dom/buffer.h"
 #include "./vi_Selection.h"
 
 //////////////////////////////////////////////////////////////////////

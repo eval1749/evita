@@ -19,7 +19,7 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/v8_glue/v8_console_buffer.h"
 #include "evita/editor/application.h"
-#include "evita/dom/document.h"
+#include "evita/dom/buffer.h"
 #include "./vi_FileDialogBox.h"
 #include "./vi_Frame.h"
 #include "./vi_EditPane.h"

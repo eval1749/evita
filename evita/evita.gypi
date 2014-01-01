@@ -54,7 +54,7 @@
         'precomp.cpp',
 
         'dom/console.cc',
-        'dom/document.cc',
+        'dom/buffer.cc',
         'dom/editor.cc',
         'dom/editor_window.cc',
         'dom/lock.cc',

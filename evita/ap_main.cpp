@@ -20,7 +20,7 @@
 #include "base/command_line.h"
 #include "base/logging.h"
 #include "common/win/native_window.h"
-#include "evita/dom/document.h"
+#include "evita/dom/buffer.h"
 #include "./ctrl_TabBand.h"
 #include "evita/editor/application.h"
 #include "./vi_IoManager.h"

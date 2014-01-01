@@ -14,7 +14,7 @@
 #include "./ed_Mode.h"
 
 #include "evita/editor/application.h"
-#include "evita/dom/document.h"
+#include "evita/dom/buffer.h"
 #include "./vi_EditPane.h"
 #include "./vi_Frame.h"
 #include "./vi_Listener.h"

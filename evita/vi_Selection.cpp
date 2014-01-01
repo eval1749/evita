@@ -13,7 +13,7 @@
 #include "./vi_Selection.h"
 
 #include "evita/editor/application.h"
-#include "evita/dom/document.h"
+#include "evita/dom/buffer.h"
 #include "./vi_TextEditWindow.h"
 
 //////////////////////////////////////////////////////////////////////

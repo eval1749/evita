@@ -17,7 +17,7 @@
 #include "./ed_Mode.h"
 #include "./ed_undo.h"
 
-#include "evita/dom/document.h"
+#include "evita/dom/buffer.h"
 #include "./vi_IoManager.h"
 
 #include "../charset/CharsetDecoder.h"

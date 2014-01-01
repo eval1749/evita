@@ -20,7 +20,7 @@
 #include "./ed_Mode.h"
 #include "./gfx_base.h"
 #include "evita/editor/application.h"
-#include "evita/dom/document.h"
+#include "evita/dom/buffer.h"
 #include "./vi_Selection.h"
 #include "./vi_TextEditWindow.h"
 #include "./vi_util.h"

@@ -26,7 +26,7 @@ class Processor;
 }
 
 namespace dom {
-class Document;
+class Buffer;
 }
 
 using Buffer = dom::Buffer;

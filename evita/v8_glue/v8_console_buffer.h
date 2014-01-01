@@ -9,7 +9,7 @@
 #include "base/strings/string_piece.h"
 #include "common/memory/singleton.h"
 #include "evita/dom/script_controller.h"
-#include "evita/dom/document.h"
+#include "evita/dom/buffer.h"
 
 class InputHistory;
 

@@ -16,7 +16,7 @@
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/ed_util.h"
-#include "evita/dom/document.h"
+#include "evita/dom/buffer.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Selection.h"
 #include "evita/vi_TextEditWindow.h"

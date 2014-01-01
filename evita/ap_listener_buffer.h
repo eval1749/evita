@@ -15,7 +15,7 @@
 #include "./ap_lisp_thread.h"
 #include "./vi_Gateway.h"
 
-#include "evita/dom/document.h"
+#include "evita/dom/buffer.h"
 
 class Selection;
 

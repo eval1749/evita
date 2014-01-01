@@ -8,8 +8,8 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Buffer.h#1 $
 //
-#if !defined(INCLUDE_evita_dom_document_h)
-#define INCLUDE_evita_dom_document_h
+#if !defined(INCLUDE_evita_dom_buffer_h)
+#define INCLUDE_evita_dom_buffer_h
 
 #include "evita/core/buffer.h"
 
@@ -68,4 +68,4 @@ class Buffer : public Edit::Buffer, public DoubleLinkedNode_<Buffer> {
 
 using Buffer = dom::Buffer;
 
-#endif //!defined(INCLUDE_evita_dom_document_h)
+#endif //!defined(INCLUDE_evita_dom_buffer_h)

@@ -16,79 +16,65 @@
 #include "evita/editor/application.h"
 #include "./vi_Frame.h"
 
-//////////////////////////////////////////////////////////////////////
-//
-// Buffer::CanKill
-//  Returns true if buffer is safe to kill.
-bool Buffer::CanKill()
-{
-    unless (NeedSave()) return true;
-
-    char16 wsz[1024];
-    ::wsprintf(wsz,
-        L"Do you want to save the changes to %s?",
-        GetName() );
-
-    Frame* pFrame = Application::instance()->GetActiveFrame();
-
-    int iAnswer = Application::instance()->Ask(
-        MB_ICONWARNING | MB_YESNOCANCEL,
-        IDS_ASK_SAVE,
-        GetName() );
-
-    switch (iAnswer)
-    {
-    case IDCANCEL:
-        return false;
-
-    case IDYES:
-        if (! Application::instance()->SaveBuffer(pFrame, this))
-        {
-            return false;
-        }
-        break;
-    } // switch
-
-    return true;
-} // Buffer::CanKill
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// Buffer::GetWindow
-//  Returns MRU window
-Buffer::Window* Buffer::GetWindow() const
-{
-    const auto* mru = m_oWindows.GetFirst();
-    for (auto& window: m_oWindows) {
-        if (mru->GetActiveTick() < window.GetActiveTick())
-            mru = &window;
-    } // for each window
-    return const_cast<Window*>(mru);
+Buffer::Buffer(const char16* pwsz, Edit::Mode* pMode)
+    : Edit::Buffer(pwsz, pMode) {
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// Buffer::OnIdle
-//
-bool Buffer::OnIdle(uint)
-{
-    #if DEBUG_STYLE
-    {
-        DEBUG_PRINTF(L"%p\n", this);
-        int nNth = 0;
-        foreach (EnumInterval, oEnum, this)
-        {
-            Interval* pIntv = oEnum.Get();
-            DEBUG_PRINTF(L"%d [%d, %d] #%06X\n", 
-                nNth, pIntv->GetStart(), pIntv->GetEnd(),
-                pIntv->GetStyle()->GetColor() );
-            nNth += 1;
-        } // for each interval
-    }
-    #endif // DEBUG_STYLE
+// Returns true if buffer is safe to kill.
+bool Buffer::CanKill() {
+  if (!NeedSave())
+    return true;
 
-    // Note: If we decrase number for coloring amount, we'll see
-    // more redisplay.
-    return GetMode()->DoColor(500);
-} // Buffer::OnIdle
+  char16 wsz[1024];
+  ::wsprintf(wsz,
+      L"Do you want to save the changes to %s?",
+      GetName() );
+
+  auto const pFrame = Application::instance()->GetActiveFrame();
+
+  auto const iAnswer = Application::instance()->Ask(
+      MB_ICONWARNING | MB_YESNOCANCEL,
+      IDS_ASK_SAVE,
+      GetName() );
+
+  switch (iAnswer) {
+    case IDCANCEL:
+      return false;
+
+    case IDYES:
+      if (!Application::instance()->SaveBuffer(pFrame, this))
+        return false;
+      break;
+  }
+
+  return true;
+}
+
+// Returns MRU window
+Buffer::Window* Buffer::GetWindow() const {
+  const auto* mru = m_oWindows.GetFirst();
+  for (auto& window: m_oWindows) {
+    if (mru->GetActiveTick() < window.GetActiveTick())
+      mru = &window;
+  }
+  return const_cast<Window*>(mru);
+}
+
+bool Buffer::OnIdle(uint) {
+  #if DEBUG_STYLE
+  {
+    DEBUG_PRINTF(L"%p\n", this);
+    int nNth = 0;
+    foreach (EnumInterval, oEnum, this) {
+      auto const pIntv = oEnum.Get();
+      DEBUG_PRINTF(L"%d [%d, %d] #%06X\n",  nNth, pIntv->GetStart(),
+          pIntv->GetEnd(), pIntv->GetStyle()->GetColor());
+      nNth += 1;
+    }
+  }
+  #endif
+
+  // Note: If we decrase number for coloring amount, we'll see
+  // more redisplay.
+  return GetMode()->DoColor(500);
+}

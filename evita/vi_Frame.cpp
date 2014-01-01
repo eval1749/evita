@@ -286,6 +286,7 @@ void Frame::DidChangeTabSelection(int selected_index) {
 }
 
 void Frame::DidCreateNativeWindow() {
+  Application::instance()->DidCreateFrame(this);
   ::DragAcceptFiles(*native_window(), TRUE);
 
   {

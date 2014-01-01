@@ -79,6 +79,7 @@ class Application : public common::Singleton<Application> {
 
   // [D]
   public: Frame* DeleteFrame(Frame* frame);
+  public: void DidCreateFrame(Frame* frame);
   private: void DoIdle();
 
   // [E]

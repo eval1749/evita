@@ -97,8 +97,7 @@ bool Application::CanExit() const {
 }
 
 Frame* Application::CreateFrame() {
-  auto const frame = new Frame();
-  return frames_.Append(frame);
+  return new Frame();
 }
 
 Frame* Application::CreateFrame(Buffer* buffer) {
@@ -114,6 +113,10 @@ Frame* Application::DeleteFrame(Frame* frame) {
     message_loop_->QuitWhenIdle();
   }
   return frame;
+}
+
+void Application::DidCreateFrame(Frame* frame) {
+  frames_.Append(frame);
 }
 
 void Application::DoIdle() {

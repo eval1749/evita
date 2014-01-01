@@ -144,8 +144,7 @@ void Application::Exit(bool is_forced) {
   }
 }
 
-Buffer* Application::FindBuffer(const char16* pwszName) const {
-  base::string16 name(pwszName);
+Buffer* Application::FindBuffer(const base::string16& name) const {
   for (auto& buffer: buffers_) {
     if (buffer.name() == name)
       return const_cast<Buffer*>(&buffer);

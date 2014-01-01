@@ -87,7 +87,7 @@ class Application : public common::Singleton<Application> {
   public: void Exit(bool);
 
   // [F]
-  public: Buffer* FindBuffer(const char16* name) const;
+  public: Buffer* FindBuffer(const base::string16& name) const;
   public: Frame* FindFrame(HWND hwnd) const;
   public: Pane* FindPane(HWND hwnd, POINT point) const;
 

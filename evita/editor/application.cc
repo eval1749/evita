@@ -187,10 +187,6 @@ HIMAGELIST Application::GetIconList() const {
   return Edit::ModeFactory::icon_image_list();
 }
 
-void Application::InternalAddBuffer(Buffer* buffer) {
-  buffers_.Append(buffer);
-}
-
 Buffer* Application::Load(const char16* pwszFileName) {
   char16 wszFileName[MAX_PATH+1];
   char16* pwszFile;

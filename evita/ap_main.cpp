@@ -98,8 +98,7 @@ static void DoStartUp() {
 
   // When there is no filename argument, we start lisp.
   if (!frame.GetFirstPane()) {
-    auto const buffer = new Buffer(L"*scratch*");
-    Application::instance()->InternalAddBuffer(buffer);
+    auto const buffer = Application::instance()->NewBuffer(L"*scratch*");
     frame.AddWindow(buffer);
   }
   frame.Realize();

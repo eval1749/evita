@@ -64,10 +64,6 @@ class Application : public common::Singleton<Application> {
   public: const base::string16& title() const;
   public: const base::string16& version() const;
 
-  // FIXME 2007-08-19 yosi@msn.com We should NOT use InternalAddBufer,
-  // this method is just for listener.
-  public: void InternalAddBuffer(Buffer* buffer);
-
   // [A]
   public: int Ask(int flags, int format_id, ...);
 

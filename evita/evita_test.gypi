@@ -44,6 +44,7 @@
         'dom/abstract_dom_test.cc',
         'dom/editor_unittest.cc',
         'dom/mock_view_impl.cc',
+        'dom/window_unittest.cc',
       ],
     }, # evita_dom_test
     {

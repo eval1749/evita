@@ -15,8 +15,15 @@ class Window : public v8_glue::Scriptable<Window> {
   private: class WidgetIdMapper;
   friend class WidgetIdMapper;
 
+  private: enum State {
+    kDestroyed = -1,
+    kNotRealized,
+    kRealized,
+  };
+
   private: std::vector<Window*> child_windows_;
   private: Window* parent_window_;
+  private: State state_;
   // Associated wiget id. If associated widget is destroyed, it is changed
   // to |kInvalidWidgetId|.
   private: WidgetId widget_id_;
@@ -35,6 +42,7 @@ class Window : public v8_glue::Scriptable<Window> {
   public: static void DidDestroyWidget(WidgetId widget_id);
   public: static Window* FromWidgetId(WidgetId widget_id);
   public: bool IsDescendantOf(Window* other) const;
+  public: void Realize();
   public: void RemoveWindow(Window* window);
   public: static void ResetForTesting();
 

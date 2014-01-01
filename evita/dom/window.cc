@@ -28,6 +28,7 @@ class WindowWrapperInfo : public v8_glue::WrapperInfo {
         .SetMethod("add", &Window::AddWindow)
         .SetProperty("id", &Window::id)
         .SetProperty("parent", &Window::parent_window)
+        .SetMethod("realize", &Window::Realize)
         .SetMethod("remove", &Window::RemoveWindow);
   }
 };
@@ -61,7 +62,10 @@ class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
         " in WidgetIdMap?";
       return;
     }
-    it->second->widget_id_ = kInvalidWidgetId;
+    auto const widget = it->second.get();
+    widget->widget_id_ = kInvalidWidgetId;
+    DCHECK_EQ(kRealized, widget->state_);
+    widget->state_ = kDestroyed;
   }
 
   public: Window* Find(WidgetId widget_id) {
@@ -93,6 +97,7 @@ class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
 //
 Window::Window()
     : parent_window_(nullptr),
+      state_(kNotRealized),
       ALLOW_THIS_IN_INITIALIZER_LIST(widget_id_(
           WidgetIdMapper::instance()->Register(this))) {
   DCHECK_NE(kInvalidWidgetId, widget_id_);
@@ -149,6 +154,22 @@ bool Window::IsDescendantOf(Window* other) const {
       return true;
   }
   return false;
+}
+
+void Window::Realize() {
+  if (state_ == kDestroyed) {
+    DCHECK_EQ(kInvalidWidgetId, widget_id_);
+    ScriptController::instance()->ThrowError(
+        "Can't realize deatched window.");
+    return;
+  }
+  if (state_ == kRealized) {
+    ScriptController::instance()->ThrowError(
+        "This window is already realized.");
+    return;
+  }
+  state_ = kRealized;
+  ScriptController::instance()->view_delegate()->RealizeWindow(widget_id_);
 }
 
 void Window::RemoveWindow(Window* window) {

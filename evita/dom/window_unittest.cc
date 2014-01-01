@@ -1,0 +1,98 @@
+// Copyright (C) 1996-2013 by Project Vogue.
+// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+#include "gtest/gtest.h"
+
+#include "base/basictypes.h"
+#include "base/strings/string16.h"
+#include "evita/dom/abstract_dom_test.h"
+#include "evita/dom/mock_view_impl.h"
+#include "evita/dom/script_controller.h"
+#include "evita/dom/view_delegate.h"
+#include "evita/dom/window.h"
+#include "evita/v8_glue/converter.h"
+
+namespace {
+
+//////////////////////////////////////////////////////////////////////
+//
+// SampleWindow for JavaScript testing.
+//
+class SampleWindow : public v8_glue::Scriptable<SampleWindow, dom::Window> {
+  class WrapperInfo : public v8_glue::WrapperInfo {
+    public: WrapperInfo() : v8_glue::WrapperInfo("SampleWindow") {
+    }
+    public: ~WrapperInfo() = default;
+  
+    private: virtual v8_glue::WrapperInfo* inherit_from() const override {
+      return dom::Window::static_wrapper_info();
+    }
+  
+    private: virtual v8::Handle<v8::FunctionTemplate>
+        CreateConstructorTemplate(v8::Isolate* isolate) override {
+      return v8_glue::CreateConstructorTemplate(isolate,
+          &SampleWindow::NewSampleWindow);
+    }
+
+    private: virtual void SetupInstanceTemplate(
+        ObjectTemplateBuilder& builder) override {
+      v8_glue::WrapperInfo::SetupInstanceTemplate(builder);
+      builder
+        .SetProperty("name", &SampleWindow::name, &SampleWindow::set_name);
+    }
+  };
+  friend class WrapperInfo;
+
+  private: base::string16 name_;
+
+  public: SampleWindow() = default;
+  public: virtual ~SampleWindow() = default;
+
+  public: const base::string16& name() const { return name_; }
+  public: void set_name(const base::string16& name) { name_ = name; }
+
+  public: static v8_glue::WrapperInfo* static_wrapper_info() {
+    DEFINE_STATIC_LOCAL(WrapperInfo, wrapper_info, ());
+    return &wrapper_info;
+  }
+
+  private: static SampleWindow* NewSampleWindow() {
+    return new SampleWindow();
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(SampleWindow);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// WindowTest
+//
+class WindowTest : public dom::AbstractDomTest {
+  protected: WindowTest() {
+  }
+  public: virtual ~WindowTest() {
+  }
+
+  private: void virtual PopulateGlobalTemplate(
+      v8::Isolate* isolate,
+      v8::Handle<v8::ObjectTemplate> global_template) override {
+    v8_glue::Installer<SampleWindow>::Run(isolate, global_template);
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(WindowTest);
+};
+
+TEST_F(WindowTest, Construction) {
+  RunScript("var sample1 = new SampleWindow()");
+  EXPECT_EQ("1", RunScript("sample1.id"));
+  RunScript("sample1.name = 'test';");
+  EXPECT_EQ("test", RunScript("sample1.name"));
+}
+
+TEST_F(WindowTest, Realize) {
+  EXPECT_CALL(*mock_view_impl(), RealizeWindow(::testing::Eq(1)));
+  RunScript("var sample1 = new SampleWindow(); sample1.realize()");
+  EXPECT_EQ("Error: This window is already realized.",
+            RunScript("sample1.realize(); 'PASS'"));
+}
+
+}  // namespace

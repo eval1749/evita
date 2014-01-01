@@ -12,6 +12,7 @@
 #include "gfx/rect_f.h"
 #include "./li_util.h"
 
+#pragma warning(push)
 // warning C4263: 'function' : member function does not override any base
 // class virtual member function
 #pragma warning(disable: 4263)
@@ -20,13 +21,13 @@
 #pragma warning(disable: 4264)
 
 #include <dwrite.h>
-#pragma warning(default: 4263)
-#pragma warning(default: 4264)
+#pragma warning(pop)
 
 //'warning C4625: derived class' : copy constructor could not be generated because a base class copy constructor is inaccessible
+#pragma warning(push)
 #pragma warning(disable: 4625)
 #include <wincodec.h>
-#pragma warning(default: 4625)
+#pragma warning(pop)
 
 namespace gfx {
 

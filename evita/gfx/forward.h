@@ -3,11 +3,12 @@
 #if !defined(INCLUDE_gfx_forward_h)
 #define INCLUDE_gfx_forward_h
 
+#pragma warning(push)
 // warning C4917: 'declarator' : a GUID can only be associated with a class,
 // interface or namespace
 #pragma warning(disable: 4917)
 #include <d2d1.h>
-#pragma warning(default: 4917)
+#pragma warning(pop)
 
 namespace gfx {
 class Brush;

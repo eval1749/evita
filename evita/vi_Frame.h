@@ -46,10 +46,10 @@ class ContentWindow;
 }
 
 namespace dom {
-class Document;
+class Buffer;
 }
 
-using Buffer = dom::Document;
+using Buffer = dom::Buffer;
 
 /// <summary>
 ///   Represents a frame window aka toplevel window. This window communicates

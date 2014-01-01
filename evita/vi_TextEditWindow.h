@@ -24,10 +24,10 @@ class Page;
 class Selection;
 
 namespace dom {
-class Document;
+class Buffer;
 }
 
-using Buffer = dom::Document;
+using Buffer = dom::Buffer;
 
 enum DragMode
 {

@@ -21,10 +21,10 @@ class ContentWindow;
 }
 
 namespace dom {
-class Document;
+class Buffer;
 }
 
-using Buffer = dom::Document;
+using Buffer = dom::Buffer;
 
 // EditPane is a container of multiple ContentWindow windows and layouts
 // them vertically with draggable splitter.

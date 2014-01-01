@@ -27,10 +27,10 @@ enum SelectionType
 class TextEditWindow;
 
 namespace dom {
-class Document;
+class Buffer;
 }
 
-using Buffer = dom::Document;
+using Buffer = dom::Buffer;
 
 //////////////////////////////////////////////////////////////////////
 //

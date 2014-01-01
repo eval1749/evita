@@ -29,7 +29,7 @@ namespace dom {
 class Document;
 }
 
-using Buffer = dom::Document;
+using Buffer = dom::Buffer;
 
 namespace editor {
 class DomLock;

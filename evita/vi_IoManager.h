@@ -14,10 +14,10 @@
 #include "common/win/native_window.h"
 
 namespace dom {
-class Document;
+class Buffer;
 }
 
-using Buffer = dom::Document;
+using Buffer = dom::Buffer;
 
 //////////////////////////////////////////////////////////////////////
 //

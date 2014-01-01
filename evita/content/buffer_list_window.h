@@ -8,10 +8,10 @@
 #include "evita/cm_CmdProc.h"
 
 namespace dom {
-class Document;
+class Buffer;
 }
 
-using Buffer = dom::Document;
+using Buffer = dom::Buffer;
 
 namespace content {
 

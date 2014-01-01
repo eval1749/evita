@@ -27,7 +27,7 @@ class Isolate;
 namespace v8_glue {
 
 class V8ConsoleBuffer : public common::Singleton<V8ConsoleBuffer>,
-                        public dom::Document {
+                        public Buffer {
   private: std::unique_ptr<InputHistory> input_history_;
   private: Edit::Range* prompt_end_;
   private: Edit::Range* script_end_;

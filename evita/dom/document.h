@@ -21,12 +21,12 @@ class KeyBindEntry;
 
 namespace dom {
 
-class Document : public Edit::Buffer, public DoubleLinkedNode_<Document> {
+class Buffer : public Edit::Buffer, public DoubleLinkedNode_<Buffer> {
   public: typedef TextEditWindow Window;
   private: WindowList m_oWindows;
 
-  public: Document(const char16* pwsz, Edit::Mode* pMode = nullptr);
-  public: virtual ~Document();
+  public: Buffer(const char16* pwsz, Edit::Mode* pMode = nullptr);
+  public: virtual ~Buffer();
 
   public: const WindowList& windows() const { return m_oWindows; }
   public: WindowList& windows() { return m_oWindows; }
@@ -66,6 +66,6 @@ class Document : public Edit::Buffer, public DoubleLinkedNode_<Document> {
 
 } // namespace dom
 
-using Buffer = dom::Document;
+using Buffer = dom::Buffer;
 
 #endif //!defined(INCLUDE_evita_dom_document_h)

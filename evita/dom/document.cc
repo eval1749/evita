@@ -18,15 +18,15 @@
 
 namespace dom {
 
-Document::Document(const char16* pwsz, Edit::Mode* pMode)
+Buffer::Buffer(const char16* pwsz, Edit::Mode* pMode)
     : Edit::Buffer(pwsz, pMode) {
 }
 
-Document::~Document() {
+Buffer::~Buffer() {
 }
 
 // Returns true if buffer is safe to kill.
-bool Document::CanKill() {
+bool Buffer::CanKill() {
   if (!NeedSave())
     return true;
 
@@ -56,7 +56,7 @@ bool Document::CanKill() {
 }
 
 // Returns MRU window
-Document::Window* Document::GetWindow() const {
+Buffer::Window* Buffer::GetWindow() const {
   const auto* mru = m_oWindows.GetFirst();
   for (auto& window: m_oWindows) {
     if (mru->GetActiveTick() < window.GetActiveTick())
@@ -65,7 +65,7 @@ Document::Window* Document::GetWindow() const {
   return const_cast<Window*>(mru);
 }
 
-bool Document::OnIdle(uint) {
+bool Buffer::OnIdle(uint) {
   #if DEBUG_STYLE
   {
     DEBUG_PRINTF(L"%p\n", this);

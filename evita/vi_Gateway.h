@@ -12,10 +12,10 @@
 #define INCLUDE_listener_winapp_visual_gateway_h
 
 namespace dom {
-class Document;
+class Buffer;
 }
 
-using Buffer = dom::Document;
+using Buffer = dom::Buffer;
 
 //////////////////////////////////////////////////////////////////////
 //

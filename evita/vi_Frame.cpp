@@ -31,7 +31,7 @@
 #include "./vi_defs.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
-#include "./vi_Buffer.h"
+#include "evita/dom/document.h"
 #include "./vi_EditPane.h"
 #include "./vi_Pane.h"
 #include "./vi_Selection.h"

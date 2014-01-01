@@ -5,7 +5,7 @@
 
 #include "evita/editor/application.h"
 #include "evita/v8_glue/converter.h"
-#include "evita/vi_Buffer.h"
+#include "evita/dom/document.h"
 
 namespace dom {
 

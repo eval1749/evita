@@ -15,7 +15,7 @@
 
 #include "./ed_Range.h"
 
-#include "./vi_Buffer.h"
+#include "evita/dom/document.h"
 #include "./vi_Selection.h"
 #include <algorithm>
 

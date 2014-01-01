@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Buffer.cpp#1 $
 //
-#include "./vi_Buffer.h"
+#include "evita/dom/document.h"
 
 #include "./ed_Mode.h"
 

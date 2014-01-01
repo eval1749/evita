@@ -14,7 +14,7 @@
 #include "./RegexMatch.h"
 
 #include "evita/editor/application.h"
-#include "./vi_Buffer.h"
+#include "evita/dom/document.h"
 #include "./vi_EditPane.h"
 #include "./vi_Frame.h"
 #include "./vi_Selection.h"

@@ -54,6 +54,7 @@
         'precomp.cpp',
 
         'dom/console.cc',
+        'dom/document.cc',
         'dom/editor.cc',
         'dom/editor_window.cc',
         'dom/lock.cc',
@@ -133,7 +134,6 @@
         'editor/dom_lock.cc',
         'ExactStringMatch.cpp',
         'gfx_base.cpp',
-        'vi_Buffer.cpp',
         'vi_Caret.cpp',
         'vi_DialogBox.cpp',
         'vi_EditPane.cpp',

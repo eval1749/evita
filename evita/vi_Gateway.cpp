@@ -12,7 +12,7 @@
 #define DEBUG_EVENT 0
 #include "./vi_Gateway.h"
 
-#include "./vi_Buffer.h"
+#include "evita/dom/document.h"
 #include "./vi_Selection.h"
 
 #include "./ed_Range.h"

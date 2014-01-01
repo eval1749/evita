@@ -19,7 +19,7 @@
 #include "./ed_interval.h"
 #include "./ed_util.h"
 #include "./gfx_base.h"
-#include "./vi_Buffer.h"
+#include "evita/dom/document.h"
 #include "./vi_Selection.h"
 #include "./vi_util.h"
 #include <algorithm>

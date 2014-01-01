@@ -17,7 +17,7 @@
 #include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/ed_Mode.h"
-#include "evita/vi_Buffer.h"
+#include "evita/dom/document.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_IoManager.h"

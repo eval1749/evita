@@ -248,8 +248,8 @@ class Buffer : public BufferCore, public FileFeatures {
 
   public: void SetMode(Mode*);
 
-  public: void SetName(const char16* pwszName) {
-    name_ = pwszName;
+  public: void SetName(const base::string16& new_name) {
+    name_ = new_name;
   }
   public: bool SetReadOnly(bool f) { return m_fReadOnly = f; }
   public: void SetStyle(Posn, Posn, const StyleValues*);

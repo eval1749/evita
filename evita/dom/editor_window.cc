@@ -3,6 +3,8 @@
 
 #include "evita/dom/editor_window.h"
 
+#include "evita/dom/script_controller.h"
+#include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/constructor_template.h"
 
 
@@ -45,6 +47,7 @@ class EditorWindowWrapperInfo : public v8_glue::WrapperInfo {
 // EditorWindow
 //
 EditorWindow::EditorWindow() {
+  ScriptController::instance()->view_delegate()->CreateEditorWindow(this);
 }
 
 EditorWindow::~EditorWindow() {

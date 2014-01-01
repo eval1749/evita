@@ -15,7 +15,7 @@
 #include "base/strings/string16.h"
 #include "evita/dom/view_event_handler.h"
 #include "evita/v8_glue/isolate_holder.h"
-#include "evita/vi_Buffer.h"
+#include "evita/v8_glue/v8.h"
 BEGIN_V8_INCLUDE
 #include "gin/public/context_holder.h"
 END_V8_INCLUDE
@@ -56,6 +56,8 @@ class ScriptController : public ViewEventHandler {
 
   public: EvaluateResult Evaluate(const base::string16& script_text);
   public: void ResetForTesting();
+  public: void PopulateGlobalTemplate(
+      v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_template);
   public: static ScriptController* Start(ViewDelegate* view_delegate);
   public: static ScriptController* StartForTesting(
       ViewDelegate* view_delegate);

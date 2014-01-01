@@ -22,34 +22,6 @@ namespace dom {
 
 namespace {
 
-class Initializer {
-  public: static v8::Handle<v8::Context> CreateContext(v8::Isolate* isolate) {
-    return v8::Context::New(isolate, nullptr, GetGlobalTemplate(isolate));
-  }
-
-  private: static v8::Handle<v8::ObjectTemplate> GetGlobalTemplate(
-      v8::Isolate* isolate) {
-    DEFINE_STATIC_LOCAL(v8::Persistent<v8::ObjectTemplate>, global_template);
-    if (!global_template.IsEmpty())
-      return v8::Local<v8::ObjectTemplate>::New(isolate, global_template);
-
-    auto global = v8::ObjectTemplate::New(isolate);
-    {
-        auto context = v8::Context::New(isolate);
-        v8::Context::Scope context_scope(context);
-
-        // Note: super class must be installed before subclass.
-        v8_glue::Installer<Console>::Run(isolate, global);
-        v8_glue::Installer<Editor>::Run(isolate, global);
-        v8_glue::Installer<Window>::Run(isolate, global);
-        v8_glue::Installer<EditorWindow>::Run(isolate, global);
-    }
-
-    global_template.Reset(isolate, global);
-    return v8::Local<v8::ObjectTemplate>::New(isolate, global_template);
-  }
-};
-
 base::string16 V8ToString(v8::Handle<v8::Value> value) {
   v8::String::Value string_value(value);
   if (!string_value.length())
@@ -112,8 +84,16 @@ ScriptController::ScriptController(ViewDelegate* view_delegate)
   view_delegate_->RegisterViewEventHandler(this);
   isolate_holder_.isolate()->Enter();
   {
-    v8::HandleScope handle_scope(isolate_holder_.isolate());
-    auto context = Initializer::CreateContext(isolate_holder_.isolate());
+    auto const isolate = isolate_holder_.isolate();
+    v8::HandleScope handle_scope(isolate);
+    auto global_template = v8::ObjectTemplate::New(isolate);
+    {
+      v8::HandleScope handle_scope(isolate);
+      auto context = v8::Context::New(isolate);
+      v8::Context::Scope context_scope(context);
+      PopulateGlobalTemplate(isolate, global_template);
+    }
+    auto context = v8::Context::New(isolate, nullptr, global_template);
     context_holder_.SetContext(context);
     context->Enter();
   }
@@ -160,6 +140,15 @@ EvaluateResult ScriptController::Evaluate(const base::string16& script_text) {
   return EvaluateResult(V8ToString(result->ToString()));
 }
 
+void ScriptController::PopulateGlobalTemplate(
+    v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_template) {
+  // Note: super class must be installed before subclass.
+  v8_glue::Installer<Console>::Run(isolate, global_template);
+  v8_glue::Installer<Editor>::Run(isolate, global_template);
+  v8_glue::Installer<Window>::Run(isolate, global_template);
+  v8_glue::Installer<EditorWindow>::Run(isolate, global_template);
+}
+
 void ScriptController::ResetForTesting() {
   Window::ResetForTesting();
 }
@@ -174,6 +163,7 @@ ScriptController* ScriptController::StartForTesting(
     ViewDelegate* view_delegate) {
   if (!script_controller)
     return Start(view_delegate);
+  script_controller->view_delegate_ = view_delegate;
   script_controller->ResetForTesting();
   return script_controller;
 }

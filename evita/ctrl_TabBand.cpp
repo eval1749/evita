@@ -600,7 +600,8 @@ class ListButton : public Element {
   // [D]
   public: virtual void Draw(const gfx::Graphics& gfx) const override {
     ASSERT(IsShow());
-    ASSERT(m_rc.left != m_rc.right);
+    if (m_rc.left == m_rc.right)
+        return;
 
     gfx::Brush fillBrush(gfx, backgroundColor());
     gfx.FillRectangle(fillBrush, m_rc);

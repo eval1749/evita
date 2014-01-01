@@ -4,6 +4,8 @@
 #include "evita/view/view_delegate_impl.h"
 
 #include "base/logging.h"
+#include "evita/dom/editor_window.h"
+#include "evita/vi_Frame.h"
 
 namespace view {
 
@@ -17,6 +19,7 @@ ViewDelegateImpl::~ViewDelegateImpl() {
 
 void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
   DCHECK(window);
+  new Frame(window->widget_id());
 }
 
 void ViewDelegateImpl::CreateTextWindow(const dom::TextWindow* window) {

@@ -105,13 +105,17 @@ Pane* AsPane(const widgets::Widget& widget) {
 #define USE_TABBAND_EDGE 0
 extern uint g_TabBand__TabDragMsg;
 
-Frame::Frame()
+Frame::Frame(widgets::WidgetId widget_id)
     : ALLOW_THIS_IN_INITIALIZER_LIST(
-          widgets::Widget(widgets::NativeWindow::Create(*this))),
+          widgets::Widget(widgets::NativeWindow::Create(*this), widget_id)),
       gfx_(new gfx::Graphics()),
       m_hwndTabBand(nullptr),
       m_pActivePane(nullptr) {
   ::ZeroMemory(m_rgpwszMessage, sizeof(m_rgpwszMessage));
+}
+
+Frame::Frame()
+    : Frame(widgets::kInvalidWidgetId) {
 }
 
 Frame::~Frame() {
@@ -319,7 +323,6 @@ void Frame::DidCreateNativeWindow() {
   CompositionState::Update(*native_window());
   gfx_->Init(*native_window());
 
-  ASSERT(!m_oPanes.IsEmpty());
   auto const pane_rect = GetPaneRect();
   for (auto& pane: m_oPanes) {
     pane.Realize(pane_rect);
@@ -849,6 +852,10 @@ void Frame::CreateNativeWindow() const {
 }
 
 void Frame::Realize() {
+  RealizeTopLevelWidget();
+}
+
+void Frame::RealizeWidget() {
   RealizeTopLevelWidget();
 }
 

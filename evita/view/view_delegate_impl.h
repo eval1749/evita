@@ -17,6 +17,10 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   public: ViewDelegateImpl();
   public: virtual ~ViewDelegateImpl();
 
+  public: dom::ViewEventHandler* event_handler() const {
+    return event_handler_;
+  }
+
   // ViewDelegate
   private: virtual void CreateEditorWindow(
       const dom::EditorWindow* window) override;

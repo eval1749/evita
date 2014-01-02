@@ -27,6 +27,7 @@ class Processor;
 
 namespace dom {
 class Buffer;
+class ViewEventHandler;
 }
 
 using Buffer = dom::Buffer;
@@ -68,6 +69,7 @@ class Application : public common::Singleton<Application> {
   public: editor::DomLock* dom_lock() const { return dom_lock_.get(); }
   public: const base::string16& title() const;
   public: const base::string16& version() const;
+  public: dom::ViewEventHandler* view_event_handler() const;
 
   // [A]
   public: int Ask(int flags, int format_id, ...);

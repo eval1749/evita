@@ -70,6 +70,10 @@ const base::string16& Application::version() const {
   return version;
 }
 
+dom::ViewEventHandler* Application::view_event_handler() const {
+  return view_delegate_impl_->event_handler();
+}
+
 int Application::Ask(int flags, int format_id, ...) {
   char16 wszFormat[1024];
   ::LoadString(g_hResource, format_id, wszFormat, arraysize(wszFormat));

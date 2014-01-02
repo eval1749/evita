@@ -5,9 +5,12 @@
 #if !defined(INCLUDE_evita_v8_glue_function_template_builder)
 #define INCLUDE_evita_v8_glue_function_template_builder
 
+#include "evita/v8_glue/function_template.h"
 BEGIN_V8_INCLUDE
 #include "gin/object_template_builder.h"
 END_V8_INCLUDE
+
+// Based on gin/object_template_builder.h
 
 namespace v8_glue {
 

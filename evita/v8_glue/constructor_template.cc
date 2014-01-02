@@ -17,8 +17,7 @@ void FinishConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info,
   info.GetReturnValue().Set(wrapper);
 }
 
-bool IsValidConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info,
-                          int arity) {
+bool IsValidConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info) {
   auto const isolate = info.GetIsolate();
   if (!info.IsConstructCall()) {
     isolate->ThrowException(gin::StringToV8(isolate,
@@ -29,12 +28,6 @@ bool IsValidConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info,
   // already had Scriptable object.
   if (v8_glue::PerIsolateData::From(isolate)->is_creating_wrapper())
     return false;
-  if (arity != info.Length()) {
-    isolate->ThrowException(gin::StringToV8(isolate, base::StringPrintf(
-        "Expect %d argument(s), but %d argument(s) supplied.",
-        arity, info.Length())));
-    return false;
-  }
   return true;
 }
 }  // namespace internal

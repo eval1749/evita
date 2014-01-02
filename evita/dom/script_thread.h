@@ -4,6 +4,8 @@
 #define INCLUDE_evita_dom_script_thread_h
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "base/basictypes.h"
 #include "base/callback_forward.h"
@@ -70,6 +72,7 @@ class ScriptThread final : public ViewDelegate,
   // ViewEventHandler
   private: virtual void DidDestroyWidget(WidgetId widget_id) override;
   private: virtual void DidRealizeWidget(WidgetId widget_id) override;
+  private: virtual void DidStartHost() override;
   private: virtual void WillDestroyHost() override;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptThread);

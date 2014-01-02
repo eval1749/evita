@@ -128,6 +128,15 @@ void ScriptThread::RegisterViewEventHandler(
 }
 
 // ViewEventHandler
+#define DEFINE_VIEW_EVENT_HANDLER_0(name) \
+  void ScriptThread::name() { \
+    DCHECK_CALLED_ON_HOST_THREAD(); \
+    DCHECK(view_event_handler_); \
+    PostTask(FROM_HERE, base::Bind( \
+        &ViewEventHandler::name, \
+        base::Unretained(view_event_handler_))); \
+  }
+
 #define DEFINE_VIEW_EVENT_HANDLER_1(name, type1) \
   void ScriptThread::name(type1 param1) { \
     DCHECK_CALLED_ON_HOST_THREAD(); \
@@ -140,6 +149,7 @@ void ScriptThread::RegisterViewEventHandler(
 
 DEFINE_VIEW_EVENT_HANDLER_1(DidDestroyWidget, WidgetId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidRealizeWidget, WidgetId)
+DEFINE_VIEW_EVENT_HANDLER_0(DidStartHost)
 
 void ScriptThread::WillDestroyHost() {
   DCHECK_CALLED_ON_HOST_THREAD();

@@ -84,6 +84,7 @@ EvaluateResult::EvaluateResult()
 //
 ScriptController::ScriptController(ViewDelegate* view_delegate)
     : context_holder_(isolate_holder_.isolate()),
+      testing_(false),
       view_delegate_(view_delegate) {
   view_delegate_->RegisterViewEventHandler(this);
   isolate_holder_.isolate()->Enter();
@@ -162,6 +163,11 @@ void ScriptController::ResetForTesting() {
 }
 
 ScriptController* ScriptController::Start(ViewDelegate* view_delegate) {
+  // Node: Useing Application::instance() starts thread. So, we don't
+  // start |ScriptController| in testing. Although, we should remove
+  // all |Application::instance()| in DOM world.
+  if (script_controller && script_controller->testing_)
+    return script_controller;
   DCHECK(!script_controller);
   script_controller = new ScriptController(view_delegate);
   return script_controller;
@@ -169,10 +175,14 @@ ScriptController* ScriptController::Start(ViewDelegate* view_delegate) {
 
 ScriptController* ScriptController::StartForTesting(
     ViewDelegate* view_delegate) {
-  if (!script_controller)
-    return Start(view_delegate);
-  script_controller->view_delegate_ = view_delegate;
-  script_controller->ResetForTesting();
+  if (!script_controller) {
+    Start(view_delegate)->testing_ = true;
+  } else {
+    // In testing, view_delegate is gmock'ed object. Each test case passes
+    // newly constructed one.
+    script_controller->view_delegate_ = view_delegate;
+    script_controller->ResetForTesting();
+  }
   return script_controller;
 }
 
@@ -189,6 +199,36 @@ void ScriptController::DidDestroyWidget(WidgetId widget_id) {
 
 void ScriptController::DidRealizeWidget(WidgetId widget_id) {
   Window::DidRealizeWidget(widget_id);
+}
+
+void ScriptController::DidStartHost() {
+#if 0
+  auto& frame = *Application::instance()->CreateFrame();
+  for (auto const filename: CommandLine::ForCurrentProcess()->GetArgs()) {
+    auto const buffer = Application::instance()->Load(filename.c_str());
+    frame.AddWindow(buffer);
+  }
+
+  // When there is no filename argument, we start lisp.
+  if (!frame.GetFirstPane()) {
+    auto const buffer = Application::instance()->NewBuffer(L"*scratch*");
+    frame.AddWindow(buffer);
+  }
+  frame.Realize();
+#endif
+  if (testing_)
+    return;
+  auto result = Evaluate(
+    L"(function() {\n"
+    L"var doc = new Document('*scratch*');\n"
+    L"var range = new Range(doc);\n"
+    L"var editor_window = new EditorWindow();\n"
+    L"var text_window = new TextWindow(range);\n"
+    L"editor_window.add(text_window);\n"
+    L"editor_window.realize();\n"
+    L"})();");
+  CHECK(result.exception.empty()) << result.exception << std::endl <<
+      "line: " << result.line_number;
 }
 
 void ScriptController::WillDestroyHost() {

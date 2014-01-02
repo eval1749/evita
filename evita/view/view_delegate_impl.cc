@@ -6,6 +6,7 @@
 #include "base/logging.h"
 #include "evita/dom/editor_window.h"
 #include "evita/dom/text_window.h"
+#include "evita/dom/view_event_handler.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_TextEditWindow.h"
 
@@ -29,6 +30,24 @@ void ViewDelegateImpl::CreateTextWindow(const dom::TextWindow* window) {
   new TextEditWindow(*window);
 }
 
+void ViewDelegateImpl::AddWindow(dom::WidgetId parent_id,
+                                 dom::WidgetId child_id) {
+  DCHECK_NE(dom::kInvalidWidgetId, parent_id);
+  auto const parent = widgets::Widget::FromWidgetId(parent_id);
+  if (!parent) {
+    DVLOG(0) << "AddWindow: no such parent " << parent_id;
+    return;
+  }
+  DCHECK_EQ(parent_id, parent->widget_id());
+  auto const child = widgets::Widget::FromWidgetId(child_id);
+  if (!child) {
+    DVLOG(0) << "AddWindow: no such child " << child_id;
+    return;
+  }
+  DCHECK_EQ(child_id, child->widget_id());
+  parent->as<Frame>()->AddWindow(child->as<content::ContentWindow>());
+}
+
 void ViewDelegateImpl::DestroyWindow(dom::WidgetId widget_id) {
   DCHECK_NE(dom::kInvalidWidgetId, widget_id);
   widgets::Widget::DidDestroyDomWindow(widget_id);
@@ -47,6 +66,7 @@ void ViewDelegateImpl::RegisterViewEventHandler(
     dom::ViewEventHandler* event_handler) {
   DCHECK(!event_handler_);
   event_handler_ = event_handler;
+  event_handler_->DidStartHost();
 }
 
 }  // namespace view

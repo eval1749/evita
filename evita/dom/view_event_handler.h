@@ -3,6 +3,9 @@
 #if !defined(INCLUDE_evita_dom_view_event_handler_h)
 #define INCLUDE_evita_dom_view_event_handler_h
 
+#include <string>
+#include <vector>
+
 #include "base/strings/string16.h"
 #include "evita/dom/widget_id.h"
 
@@ -12,6 +15,7 @@ class ViewEventHandler {
   public: ViewEventHandler() = default;
   public: virtual ~ViewEventHandler() = default;
 
+  public: virtual void DidStartHost() = 0;
   public: virtual void DidDestroyWidget(WidgetId widget_id) = 0;
   public: virtual void DidRealizeWidget(WidgetId widget_id) = 0;
   public: virtual void WillDestroyHost() = 0;

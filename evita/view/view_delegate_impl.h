@@ -26,6 +26,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       const dom::EditorWindow* window) override;
   private: virtual void CreateTextWindow(
       const dom::TextWindow* window) override;
+  private: virtual void AddWindow(dom::WidgetId parent_id,
+                                  dom::WidgetId child_id) override;
   private: virtual void DestroyWindow(dom::WidgetId widget_id) override;
   private: virtual void RealizeWindow(dom::WidgetId widget_id) override;
   private: virtual void RegisterViewEventHandler(

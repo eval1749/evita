@@ -46,6 +46,7 @@ struct EvaluateResult {
 class ScriptController : public ViewEventHandler {
   private: v8_glue::IsolateHolder isolate_holder_;
   private: gin::ContextHolder context_holder_;
+  private: bool testing_;
   private: ViewDelegate* view_delegate_;
 
   private: ScriptController(ViewDelegate* view_delegate);
@@ -66,6 +67,7 @@ class ScriptController : public ViewEventHandler {
   // ViewEventHandler
   private: virtual void DidDestroyWidget(WidgetId widget_id) override;
   private: virtual void DidRealizeWidget(WidgetId widget_id) override;
+  private: virtual void DidStartHost() override;
   private: virtual void WillDestroyHost() override;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptController);

@@ -16,16 +16,12 @@
 #define DEBUG_IDLE 0
 
 #include "base/at_exit.h"
-#include "base/bind.h"
 #include "base/command_line.h"
 #include "base/logging.h"
-#include "common/win/native_window.h"
-#include "evita/dom/buffer.h"
 #include "./ctrl_TabBand.h"
 #include "evita/editor/application.h"
 #include "./vi_IoManager.h"
 #include "./vi_Style.h"
-#include "./vi_TextEditWindow.h"
 
 #define SINGLE_INSTANCE_NAME L"D47A7677-9F8E-467c-BABE-8ABDE8D58476" 
 
@@ -89,21 +85,6 @@ static void NoReturn fatalExit(const char16* pwsz) {
   ::FatalAppExit(0, wsz);
 }
 
-static void DoStartUp() {
-  auto& frame = *Application::instance()->CreateFrame();
-  for (auto const filename: CommandLine::ForCurrentProcess()->GetArgs()) {
-    auto const buffer = Application::instance()->Load(filename.c_str());
-    frame.AddWindow(buffer);
-  }
-
-  // When there is no filename argument, we start lisp.
-  if (!frame.GetFirstPane()) {
-    auto const buffer = Application::instance()->NewBuffer(L"*scratch*");
-    frame.AddWindow(buffer);
-  }
-  frame.Realize();
-}
-
 static int MainLoop() {
   // Initialize Default Style
   // This initialize must be before creating edit buffers.
@@ -143,7 +124,6 @@ static int MainLoop() {
       }
   }
 
-  Application::instance()->PostDomTask(FROM_HERE, base::Bind(DoStartUp));
   Application::instance()->Run();
   return 0;
 }

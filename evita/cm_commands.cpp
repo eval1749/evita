@@ -687,21 +687,19 @@ DEFCOMMAND(MakeSelectionVisible)
 //   o Show "File Save" Dialog to get new filename from a user
 //   o Create new buffer
 //   o Show it in a frame
-static void newFile(const Context* pCtx, bool fNewFrame)
+static void newFile(TextEditWindow* window, bool fNewFrame, bool save_as)
 {
     FileDialogBox::Param oParam;
 
-    if (pCtx->HasArg())
+    if (save_as)
     {
         ::lstrcpyW(oParam.m_wsz, L"untitled.txt");
         oParam.m_pwszFile = oParam.m_wsz;
     }
-    else if (NULL != pCtx->GetSelection())
+    else if (auto selection = window->GetSelection())
     {
-        oParam.SetDirectory(
-            pCtx->GetSelection()->GetBuffer()->GetFileName().c_str());
-        oParam.m_hwndOwner =
-            pCtx->GetSelection()->GetWindow()->AssociatedHwnd();
+        oParam.SetDirectory(selection->GetBuffer()->GetFileName().c_str());
+        oParam.m_hwndOwner = window->AssociatedHwnd();
 
         FileDialogBox oDialog;
         if (! oDialog.GetSaveFileName(&oParam))
@@ -723,20 +721,26 @@ static void newFile(const Context* pCtx, bool fNewFrame)
     }
     else
     {
-        pCtx->GetFrame()->AddWindow(pBuffer);
+        window->frame().AddWindow(pBuffer);
     }
 } // NewFile
 
 
 // Ctrl+N
-DEFCOMMAND(NewFile)
-    { newFile(pCtx, false); }
-
+DEFCOMMAND(NewFile) {
+  Application::instance()->PostDomTask(FROM_HERE,
+      base::Bind(newFile,
+                 base::Unretained(pCtx->GetWindow()->as<TextEditWindow>()),
+                 false, pCtx->HasArg()));
+}
 
 // Ctrl+Shift+N
-DEFCOMMAND(NewFileInNewFrame)
-    { newFile(pCtx, true); }
-
+DEFCOMMAND(NewFileInNewFrame) {
+  Application::instance()->PostDomTask(FROM_HERE,
+      base::Bind(newFile,
+                 base::Unretained(pCtx->GetWindow()->as<TextEditWindow>()),
+                 true, pCtx->HasArg()));
+}
 
 //////////////////////////////////////////////////////////////////////
 //

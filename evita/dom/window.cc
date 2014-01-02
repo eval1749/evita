@@ -176,6 +176,10 @@ void Window::DidRealizeWidget(WidgetId widget_id) {
   auto const widget = FromWidgetId(widget_id);
   DCHECK_EQ(kRealizing, widget->state_);
   widget->state_ = kRealized;
+  for (auto child : widget->child_windows_) {
+    if (child->state_ == kNotRealized)
+      child->state_ = kRealized;
+  }
 }
 
 Window* Window::FromWidgetId(WidgetId widget_id) {
@@ -216,9 +220,6 @@ void Window::Realize() {
     return;
   }
   state_ = kRealizing;
-  for (auto child : child_windows_) {
-    child->Realize();
-  }
   ScriptController::instance()->view_delegate()->RealizeWindow(widget_id_);
 }
 

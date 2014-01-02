@@ -117,7 +117,7 @@ class Selection : public text::Range
     public: Color SetColor(Color cr) { return m_crColor = cr; }
     public: void  SetEnd(Posn);
     public: void  SetRange(Posn, Posn);
-    public: void  SetRange(Range*);
+    public: void  SetRange(const Range*);
     public: void  SetText(const char16*);
     public: void  SetText(const char16*, int);
     public: void  SetStart(Posn);

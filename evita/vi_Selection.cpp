@@ -449,7 +449,7 @@ void Selection::SetEnd(Posn p)
 void Selection::SetRange(Posn s, Posn e)
     { forgetGoal(); Range::SetRange(s, e); }
 
-void Selection::SetRange(Range* p)
+void Selection::SetRange(const Range* p)
     { forgetGoal(); Range::SetRange(p); }
 
 void Selection::SetStart(Posn p)

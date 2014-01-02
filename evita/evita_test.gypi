@@ -42,6 +42,7 @@
       'sources': [
         'precomp.cpp',
         'dom/abstract_dom_test.cc',
+        'dom/document_unittest.cc',
         'dom/editor_unittest.cc',
         'dom/editor_window_unittest.cc',
         'dom/mock_view_impl.cc',

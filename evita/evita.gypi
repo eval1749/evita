@@ -55,6 +55,7 @@
 
         'dom/console.cc',
         'dom/buffer.cc',
+        'dom/document.cc',
         'dom/editor.cc',
         'dom/editor_window.cc',
         'dom/lock.cc',
@@ -70,6 +71,7 @@
 
         'v8_glue/constructor_template.cc',
         'v8_glue/converter.cc',
+        'v8_glue/function_template_builder.cc',
         'v8_glue/isolate_holder.cc',
         'v8_glue/per_isolate_data.cc',
         'v8_glue/scriptable.cc',

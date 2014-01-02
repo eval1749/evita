@@ -86,7 +86,6 @@ void ScriptThread::Start(ViewDelegate* view_delegate,
   DCHECK(!script_thread);
   script_thread = new ScriptThread(view_delegate, host_message_loop);
 }
-
 // ViewDelegate
 #define DEFINE_VIEW_DELEGATE_1(name, type1) \
   void ScriptThread::name(type1 param1) { \
@@ -99,8 +98,20 @@ void ScriptThread::Start(ViewDelegate* view_delegate,
         param1)); \
   }
 
+#define DEFINE_VIEW_DELEGATE_2(name, type1, type2) \
+  void ScriptThread::name(type1 param1, type2 param2) { \
+    DCHECK_CALLED_ON_SCRIPT_THREAD(); \
+    if (!host_message_loop_) \
+      return; \
+    host_message_loop_->PostTask(FROM_HERE, base::Bind( \
+        &ViewDelegate::name, \
+        base::Unretained(view_delegate_), \
+        param1, param2)); \
+  }
+
 DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
 DEFINE_VIEW_DELEGATE_1(CreateTextWindow, const TextWindow*)
+DEFINE_VIEW_DELEGATE_2(AddWindow, WidgetId, WidgetId)
 DEFINE_VIEW_DELEGATE_1(DestroyWindow, WidgetId)
 DEFINE_VIEW_DELEGATE_1(RealizeWindow, WidgetId)
 

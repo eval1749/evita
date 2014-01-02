@@ -13,6 +13,8 @@
 
 namespace {
 
+using ::testing::Eq;
+
 //////////////////////////////////////////////////////////////////////
 //
 // SampleWindow for JavaScript testing.
@@ -89,8 +91,39 @@ TEST_F(WindowTest, Construction) {
   EXPECT_EQ("0", RunScript("sample1.state"));
 }
 
+TEST_F(WindowTest, Add) {
+  EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(1), Eq(2)));
+  EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(1), Eq(3)));
+  EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
+  EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(2)));
+  EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(3)));
+  RunScript("var parent = new SampleWindow();"
+            "var child1 = new SampleWindow();"
+            "var child2 = new SampleWindow();"
+            "parent.add(child1);"
+            "parent.add(child2);"
+            "parent.realize();");
+  EXPECT_EQ("2", RunScript("parent.children.length"));
+  EXPECT_EQ("1", RunScript("child1.parent.id"));
+  EXPECT_EQ("1", RunScript("child2.parent.id"));
+  dom::Window::DidRealizeWidget(static_cast<dom::WidgetId>(1));
+  dom::Window::DidRealizeWidget(static_cast<dom::WidgetId>(2));
+  dom::Window::DidRealizeWidget(static_cast<dom::WidgetId>(3));
+  dom::Window::DidDestroyWidget(static_cast<dom::WidgetId>(2));
+  EXPECT_EQ("1", RunScript("parent.children.length"));
+  EXPECT_EQ("true", RunScript("child1.parent == null"));
+  EXPECT_EQ("-1", RunScript("child1.state"));
+}
+
+TEST_F(WindowTest, Properties) {
+  RunScript("var sample1 = new SampleWindow()");
+  EXPECT_EQ("0", RunScript("sample1.children.length"));
+  EXPECT_EQ("1", RunScript("sample1.id"));
+  EXPECT_EQ("true", RunScript("sample1.parent == null"));
+}
+
 TEST_F(WindowTest, Realize) {
-  EXPECT_CALL(*mock_view_impl(), RealizeWindow(::testing::Eq(1)));
+  EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
   RunScript("var sample1 = new SampleWindow(); sample1.realize()");
   EXPECT_EQ("1", RunScript("sample1.state"));
   EXPECT_EQ("Error: This window is being realized.",

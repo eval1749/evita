@@ -38,6 +38,7 @@ class WindowWrapperInfo : public v8_glue::WrapperInfo {
       ObjectTemplateBuilder& builder) override {
     builder
         .SetMethod("add", &Window::AddWindow)
+        .SetProperty("children", &Window::child_windows)
         .SetProperty("id", &Window::id)
         .SetProperty("parent", &Window::parent_window)
         .SetProperty("state", &Window::state)
@@ -75,10 +76,14 @@ class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
         " in WidgetIdMap?";
       return;
     }
-    auto const widget = it->second.get();
-    widget->widget_id_ = kInvalidWidgetId;
-    DCHECK_EQ(kRealized, widget->state_);
-    widget->state_ = kDestroyed;
+    auto const window = it->second.get();
+    window->widget_id_ = kInvalidWidgetId;
+    DCHECK_EQ(kRealized, window->state_);
+    window->state_ = kDestroyed;
+    if (auto const parent = window->parent_window_) {
+      parent->child_windows_.erase(window);
+      window->parent_window_ = nullptr;
+    }
   }
 
   public: Window* Find(WidgetId widget_id) {
@@ -123,6 +128,16 @@ Window::~Window() {
   ScriptController::instance()->view_delegate()->DestroyWindow(widget_id_);
 }
 
+std::vector<Window*> Window::child_windows() const {
+  std::vector<Window*> child_windows(child_windows_.size());
+  auto dest = child_windows.begin();
+  for (auto child : child_windows_) {
+    *dest = child;
+    ++dest;
+  }
+  return child_windows;
+}
+
 v8_glue::WrapperInfo* Window::static_wrapper_info() {
   DEFINE_STATIC_LOCAL(WindowWrapperInfo, wrapper_info, ());
   return &wrapper_info;
@@ -147,7 +162,9 @@ void Window::AddWindow(Window* window) {
     return;
   }
   window->parent_window_ = this;
-  child_windows_.push_back(window);
+  child_windows_.insert(window);
+  ScriptController::instance()->view_delegate()->AddWindow(
+      widget_id_, window->widget_id());
 }
 
 void Window::DidDestroyWidget(WidgetId widget_id) {
@@ -193,7 +210,15 @@ void Window::Realize() {
         "This window is being realized.");
     return;
   }
+  if (parent_window_ && parent_window_->state_ == kNotRealized) {
+    ScriptController::instance()->ThrowError(
+        "Parent window isn't realized.");
+    return;
+  }
   state_ = kRealizing;
+  for (auto child : child_windows_) {
+    child->Realize();
+  }
   ScriptController::instance()->view_delegate()->RealizeWindow(widget_id_);
 }
 

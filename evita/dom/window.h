@@ -3,6 +3,7 @@
 #if !defined(INCLUDE_evita_dom_window_h)
 #define INCLUDE_evita_dom_window_h
 
+#include <unordered_set>
 #include <vector>
 
 #include "evita/v8_glue/scriptable.h"
@@ -22,7 +23,7 @@ class Window : public v8_glue::Scriptable<Window> {
     kRealized,
   };
 
-  private: std::vector<Window*> child_windows_;
+  private: std::unordered_set<Window*> child_windows_;
   private: Window* parent_window_;
   private: State state_;
   // Associated wiget id. If associated widget is destroyed, it is changed
@@ -32,6 +33,7 @@ class Window : public v8_glue::Scriptable<Window> {
   protected: Window();
   public: virtual ~Window();
 
+  public: std::vector<Window*> child_windows() const;
   public: WidgetId id() const { return widget_id_; }
   public: v8_glue::Nullable<Window> parent_window() const {
     return parent_window_;

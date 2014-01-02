@@ -60,6 +60,8 @@ class ScriptThread final : public ViewDelegate,
   private: virtual void CreateEditorWindow(
       const EditorWindow* window) override;
   private: virtual void CreateTextWindow(const TextWindow* window) override;
+  private: virtual void AddWindow(WidgetId parent_id,
+                                  WidgetId child_id) override;
   private: virtual void DestroyWindow(WidgetId widget_id) override;
   private: virtual void RealizeWindow(WidgetId widget_id) override;
   private: virtual void RegisterViewEventHandler(

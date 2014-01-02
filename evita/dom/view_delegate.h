@@ -18,6 +18,7 @@ class ViewDelegate {
 
   public: virtual void CreateEditorWindow(const EditorWindow* window) = 0;
   public: virtual void CreateTextWindow(const TextWindow* window) = 0;
+  public: virtual void AddWindow(WidgetId parent_id, WidgetId child_id) = 0;
   public: virtual void DestroyWindow(WidgetId widget_id) = 0;
   public: virtual void RealizeWindow(WidgetId widget_id) = 0;
   public: virtual void RegisterViewEventHandler(

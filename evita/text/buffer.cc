@@ -25,9 +25,9 @@ namespace text
 /// <summary>
 ///   Construct a buffer object.
 /// </summary>
-/// <param name="pwszName">A buffername in C-string.</param>
+/// <param name="name">A buffername in C-string.</param>
 /// <param name="pMode">A editing mode.</param>
-Buffer::Buffer(const char16* pwszName, Mode* pMode) :
+Buffer::Buffer(const base::string16& name, Mode* pMode) :
     m_eState(State_Ready),
     m_fReadOnly(false),
     m_fUndo(true),
@@ -48,7 +48,7 @@ Buffer::Buffer(const char16* pwszName, Mode* pMode) :
         m_oIntervals.Append(pIntv);
     }
 
-    SetName(pwszName);
+    SetName(name);
 
     if (NULL == m_pMode)
     {

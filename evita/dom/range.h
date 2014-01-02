@@ -26,6 +26,7 @@ class Range : public v8_glue::Scriptable<Range> {
   public: int end() const;
   public: int start() const;
   public: static v8_glue::WrapperInfo* static_wrapper_info();
+  public: text::Range* text_range() const { return range_; }
 
   DISALLOW_COPY_AND_ASSIGN(Range);
 };

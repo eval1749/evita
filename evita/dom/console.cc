@@ -12,9 +12,9 @@ namespace dom {
 namespace {
 // TODO(yosi): Move InternBuffer to Application
 Buffer* InternBuffer(const base::string16& name) {
-  if (auto const buffer = Application::instance()->FindBuffer(name.c_str()))
+  if (auto const buffer = Application::instance()->FindBuffer(name))
     return buffer;
-  return Application::instance()->NewBuffer(name.c_str());
+  return Application::instance()->NewBuffer(name);
 }
 
 void Log(const std::vector<base::string16>& messages) {

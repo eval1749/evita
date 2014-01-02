@@ -19,6 +19,10 @@ AbstractDomTest::AbstractDomTest()
 AbstractDomTest::~AbstractDomTest() {
 }
 
+ViewEventHandler* AbstractDomTest::view_event_handler() const {
+  return script_controller_;
+}
+
 std::string AbstractDomTest::RunScript(const std::string& text) {
   auto eval_result = script_controller_->Evaluate(base::ASCIIToUTF16(text));
   if (eval_result.exception.length())

@@ -13,6 +13,7 @@ namespace dom {
 
 class MockViewImpl;
 class ScriptController;
+class ViewEventHandler;
 
 class AbstractDomTest : public ::testing::Test {
   private: v8::UniquePersistent<v8::Context> context_;
@@ -27,6 +28,7 @@ class AbstractDomTest : public ::testing::Test {
   protected: MockViewImpl* mock_view_impl() const {
     return mock_view_impl_.get();
   }
+  protected: ViewEventHandler* view_event_handler() const;
 
   protected: virtual void PopulateGlobalTemplate(
       v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_tempalte);

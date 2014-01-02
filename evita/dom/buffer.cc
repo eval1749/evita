@@ -30,17 +30,12 @@ bool Buffer::CanKill() {
   if (!NeedSave())
     return true;
 
-  char16 wsz[1024];
-  ::wsprintf(wsz,
-      L"Do you want to save the changes to %s?",
-      GetName() );
-
   auto const pFrame = Application::instance()->GetActiveFrame();
 
   auto const iAnswer = Application::instance()->Ask(
       MB_ICONWARNING | MB_YESNOCANCEL,
       IDS_ASK_SAVE,
-      GetName() );
+      name().c_str());
 
   switch (iAnswer) {
     case IDCANCEL:

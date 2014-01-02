@@ -170,6 +170,7 @@ void Widget::DidChangeHierarchy() {
 }
 
 void Widget::DidCreateNativeWindow() {
+  DidRealize();
 }
 
 void Widget::DidDestroyDomWindow(WidgetId widget_id) {
@@ -196,6 +197,12 @@ void Widget::DidDestroyWidget() {
 }
 
 void Widget::DidHide() {
+}
+
+void Widget::DidRealize() {
+  for (auto const child : child_nodes()) {
+    child->RealizeWidget();
+  }
 }
 
 void Widget::DidRealizeChildWidget(const Widget&) {
@@ -375,7 +382,19 @@ void Widget::RealizeTopLevelWidget() {
 
 // TODO(yosi) Widget::RealizeWidget() should be pure virutal.
 void Widget::RealizeWidget() {
-  NOTREACHED();
+  DCHECK(parent_node());
+  DCHECK(parent_node()->is_realized());
+  DCHECK(!is_realized());
+
+  state_ = kRealized;
+  if (native_window_) {
+    // On WM_CREATE, we call DidCreateNativeWindow() instead of DidRealized().
+    CreateNativeWindow();
+    return;
+  }
+
+  DidRealize();
+  container_widget().DidRealizeChildWidget(*this);
 }
 
 void Widget::ReleaseCapture() {

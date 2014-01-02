@@ -86,7 +86,7 @@ class Widget
   protected: virtual void DidDestroyNativeWindow();
   protected: virtual void DidHide();
   protected: virtual void DidKillFocus() {}
-  protected: virtual void DidRealize() {}
+  protected: virtual void DidRealize();
   protected: virtual void DidRealizeChildWidget(const Widget& widget);
   protected: virtual void DidRemoveChildWidget(const Widget& widget);
   protected: virtual void DidResize() {}

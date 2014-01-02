@@ -120,7 +120,7 @@ class Range //: public ObjectInHeap
     // [S]
     public: Posn  SetEnd(Posn);
     public: void  SetRange(Posn, Posn);
-    public: void  SetRange(Range*);
+    public: void  SetRange(const Range*);
     public: Posn  SetStart(Posn);
     public: Count SetText(const char16*);
     public: Count SetText(const char16*, int);

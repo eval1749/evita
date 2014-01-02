@@ -1309,7 +1309,7 @@ void Range::SetRange(Posn lStart, Posn lEnd)
     m_lEnd   = lEnd;
 } // Range::SetRange
 
-void Range::SetRange(Range* pRange)
+void Range::SetRange(const Range* pRange)
 {
     ASSERT(pRange->GetBuffer() == GetBuffer());
     m_lStart = pRange->GetStart();

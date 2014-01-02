@@ -14,7 +14,7 @@ class Selection;
 
 // The |TextWindow| is DOM world representative of UI world TextWidget, aka
 // TextEditWindow.
-class TextWindow : public Window {
+class TextWindow : public v8_glue::Scriptable<TextWindow, Window> {
   private: gc::Member<Selection> selection_;
   private: gc::Member<Range> view_range_;
 

@@ -23,7 +23,7 @@ class TextWindowWrapperInfo : public v8_glue::WrapperInfo {
   }
   public: ~TextWindowWrapperInfo() = default;
 
-  private: virtual WrapperInfo* inherit_from() const override {
+  private: virtual v8_glue::WrapperInfo* inherit_from() const override {
     return Window::static_wrapper_info();
   }
 

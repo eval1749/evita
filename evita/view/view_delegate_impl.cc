@@ -31,6 +31,7 @@ void ViewDelegateImpl::CreateTextWindow(const dom::TextWindow* window) {
 
 void ViewDelegateImpl::DestroyWindow(dom::WidgetId widget_id) {
   DCHECK_NE(dom::kInvalidWidgetId, widget_id);
+  widgets::Widget::DidDestroyDomWindow(widget_id);
 }
 
 void ViewDelegateImpl::RealizeWindow(dom::WidgetId widget_id) {

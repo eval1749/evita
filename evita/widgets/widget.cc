@@ -11,8 +11,7 @@
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants.h"
 #include "common/tree/descendants_or_self.h"
-#include "evita/dom/window.h"
-#include "evita/dom/script_thread.h"
+#include "evita/dom/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/widgets/root_widget.h"
 
@@ -112,7 +111,8 @@ Widget::~Widget() {
   DCHECK(!native_window_);
   if (widget_id_ != widgets::kInvalidWidgetId) {
     WidgetIdMapper::instance()->Unregister(widget_id_);
-    dom::Window::DidDestroyWidget(widget_id_);
+    Application::instance()->view_event_handler()->
+        DidDestroyWidget(widget_id_);
   }
 }
 
@@ -174,11 +174,7 @@ void Widget::DidCreateNativeWindow() {
 }
 
 void Widget::DidDestroyDomWindow(WidgetId widget_id) {
-  ASSERT_CALLED_ON_SCRIPT_THREAD();
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(&WidgetIdMapper::DidDestroyDomWindow,
-                 base::Unretained(WidgetIdMapper::instance()),
-                 widget_id));
+  WidgetIdMapper::instance()->DidDestroyDomWindow(widget_id);
 }
 
 void Widget::DidDestroyNativeWindow() {
@@ -203,6 +199,7 @@ void Widget::DidKillFocus() {
 }
 
 void Widget::DidRealize() {
+  Application::instance()->view_event_handler()->DidRealizeWidget(widget_id_);
   for (auto const child : child_nodes()) {
     child->RealizeWidget();
   }

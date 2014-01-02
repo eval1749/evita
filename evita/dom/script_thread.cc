@@ -81,46 +81,28 @@ void ScriptThread::PostTask(const tracked_objects::Location& from_here,
   thread_->message_loop()->PostTask(from_here, task);
 }
 
+void ScriptThread::Start(ViewDelegate* view_delegate,
+                         base::MessageLoop* host_message_loop) {
+  DCHECK(!script_thread);
+  script_thread = new ScriptThread(view_delegate, host_message_loop);
+}
+
 // ViewDelegate
-void ScriptThread::CreateEditorWindow(const EditorWindow* window) {
-  DCHECK_CALLED_ON_SCRIPT_THREAD();
-  if (!host_message_loop_)
-    return;
-  host_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &ViewDelegate::CreateEditorWindow,
-      base::Unretained(view_delegate_),
-      window));
-}
+#define DEFINE_VIEW_DELEGATE_1(name, type1) \
+  void ScriptThread::name(type1 param1) { \
+    DCHECK_CALLED_ON_SCRIPT_THREAD(); \
+    if (!host_message_loop_) \
+      return; \
+    host_message_loop_->PostTask(FROM_HERE, base::Bind( \
+        &ViewDelegate::name, \
+        base::Unretained(view_delegate_), \
+        param1)); \
+  }
 
-void ScriptThread::CreateTextWindow(const TextWindow* window) {
-  DCHECK_CALLED_ON_SCRIPT_THREAD();
-  if (!host_message_loop_)
-    return;
-  host_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &ViewDelegate::CreateTextWindow,
-      base::Unretained(view_delegate_),
-      window));
-}
-
-void ScriptThread::DestroyWindow(WidgetId widget_id) {
-  DCHECK_CALLED_ON_SCRIPT_THREAD();
-  if (!host_message_loop_)
-    return;
-  host_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &ViewDelegate::DestroyWindow,
-      base::Unretained(view_delegate_),
-      widget_id));
-}
-
-void ScriptThread::RealizeWindow(WidgetId widget_id) {
-  DCHECK_CALLED_ON_SCRIPT_THREAD();
-  if (!host_message_loop_)
-    return;
-  host_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &ViewDelegate::RealizeWindow,
-      base::Unretained(view_delegate_),
-      widget_id));
-}
+DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
+DEFINE_VIEW_DELEGATE_1(CreateTextWindow, const TextWindow*)
+DEFINE_VIEW_DELEGATE_1(DestroyWindow, WidgetId)
+DEFINE_VIEW_DELEGATE_1(RealizeWindow, WidgetId)
 
 void ScriptThread::RegisterViewEventHandler(
     ViewEventHandler* event_handler) {
@@ -132,12 +114,6 @@ void ScriptThread::RegisterViewEventHandler(
       &ViewDelegate::RegisterViewEventHandler,
       base::Unretained(view_delegate_),
       base::Unretained(this)));
-}
-
-void ScriptThread::Start(ViewDelegate* view_delegate,
-                         base::MessageLoop* host_message_loop) {
-  DCHECK(!script_thread);
-  script_thread = new ScriptThread(view_delegate, host_message_loop);
 }
 
 // ViewEventHandler

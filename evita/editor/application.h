@@ -113,7 +113,7 @@ class Application : public common::Singleton<Application> {
   public: Buffer* Load(const char16* filename);
 
   // [N]
-  public: Buffer* NewBuffer(const char16* buffer_name);
+  public: Buffer* NewBuffer(const base::string16& buffer_name);
 
   // [O]
   public: bool OnIdle(uint hint);
@@ -123,7 +123,8 @@ class Application : public common::Singleton<Application> {
                            const base::Closure& task);
 
   // [R]
-  public: Buffer* RenameBuffer(Buffer* buffer, const char16* new_name);
+  public: Buffer* RenameBuffer(Buffer* buffer,
+                               const base::string16& new_name);
   public: void Run();
 
   // [S]

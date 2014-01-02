@@ -10,6 +10,7 @@
 #pragma warning(pop)
 #include "base/run_loop.h"
 #include "base/strings/string16.h"
+#include "base/strings/string_number_conversions.h"
 #include "base/time/time.h"
 #include "common/memory/scoped_change.h"
 #include "evita/cm_CmdProc.h"
@@ -220,9 +221,9 @@ bool Application::KillBuffer(Buffer* buffer, bool is_forced) {
   return true;
 }
 
-Buffer* Application::NewBuffer(const char16* pwszName) {
-  auto const buffer = new Buffer(pwszName);
-  RenameBuffer(buffer, pwszName);
+Buffer* Application::NewBuffer(const base::string16& name) {
+  auto const buffer = new Buffer(name);
+  RenameBuffer(buffer, name);
   return buffers_.Append(buffer);
 }
 
@@ -245,33 +246,35 @@ void Application::PostDomTask(const tracked_objects::Location& from_here,
   message_loop_->PostTask(from_here, base::Bind(RunTaskWithinDomLock, task));
 }
 
-Buffer* Application::RenameBuffer(Buffer* buffer, const char16* pwszName) {
-  auto const present = FindBuffer(pwszName);
+namespace {
+typedef std::pair<base::string16, base::string16> StringPair;
+StringPair SplitByDot(const base::string16& name) {
+  const auto last_dot = name.rfind('.');
+  if (!last_dot || last_dot == base::string16::npos)
+    return StringPair(name, L"");
+  return StringPair(name.substr(0, last_dot), name.substr(last_dot));
+}
+}  // namespace
+
+Buffer* Application::RenameBuffer(Buffer* buffer,
+                                  const base::string16& new_name) {
+  auto const present = FindBuffer(new_name);
   if (buffer == present)
     return buffer;
 
   if (!present) {
-    buffer->SetName(pwszName);
+    buffer->SetName(new_name);
     return buffer;
   }
 
-  char16 wsz[MAX_PATH + 1];
-  char16* pwszTail;
-  auto pwszDot = lstrrchrW(pwszName, '.');
-  if (!pwszDot) {
-    pwszTail = wsz + lstrlenW(pwszName);
-    pwszDot = L"";
-  } else {
-    pwszTail = wsz + (pwszDot - pwszName);
+  const auto pair = SplitByDot(new_name);
+  auto candidate = new_name;
+  for (auto n = 2; FindBuffer(candidate); ++ n) {
+    candidate = pair.first + L" (" + base::IntToString16(n) + L")" +
+        pair.second;
   }
 
-  ::lstrcpyW(wsz, pwszName);
-
-  for (auto n = 2; FindBuffer(wsz); ++ n) {
-    ::wsprintfW(pwszTail, L"<%d>%s", n, pwszDot);
-  }
-
-  buffer->SetName(wsz);
+  buffer->SetName(candidate);
   return buffer;
 }
 

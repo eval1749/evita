@@ -86,13 +86,17 @@ TEST_F(WindowTest, Construction) {
   EXPECT_EQ("1", RunScript("sample1.id"));
   RunScript("sample1.name = 'test';");
   EXPECT_EQ("test", RunScript("sample1.name"));
+  EXPECT_EQ("0", RunScript("sample1.state"));
 }
 
 TEST_F(WindowTest, Realize) {
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(::testing::Eq(1)));
   RunScript("var sample1 = new SampleWindow(); sample1.realize()");
-  EXPECT_EQ("Error: This window is already realized.",
-            RunScript("sample1.realize(); 'PASS'"));
+  EXPECT_EQ("1", RunScript("sample1.state"));
+  EXPECT_EQ("Error: This window is being realized.",
+            RunScript("sample1.realize();"));
+  view_event_handler()->DidRealizeWidget(static_cast<dom::WidgetId>(1));
+  EXPECT_EQ("2", RunScript("sample1.state"));
 }
 
 }  // namespace

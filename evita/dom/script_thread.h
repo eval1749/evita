@@ -67,6 +67,7 @@ class ScriptThread final : public ViewDelegate,
 
   // ViewEventHandler
   private: virtual void DidDestroyWidget(WidgetId widget_id) override;
+  private: virtual void DidRealizeWidget(WidgetId widget_id) override;
   private: virtual void WillDestroyHost() override;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptThread);

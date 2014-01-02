@@ -14,6 +14,18 @@
 #include "evita/dom/view_delegate.h"
 #include "evita/gc/weak_ptr.h"
 
+namespace gin {
+
+template<>
+struct Converter<dom::Window::State> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+                                    dom::Window::State state) {
+    return v8::Integer::New(isolate, state).As<v8::Value>();
+  }
+};
+
+} // namespace gin
+
 namespace dom {
 
 namespace {
@@ -28,6 +40,7 @@ class WindowWrapperInfo : public v8_glue::WrapperInfo {
         .SetMethod("add", &Window::AddWindow)
         .SetProperty("id", &Window::id)
         .SetProperty("parent", &Window::parent_window)
+        .SetProperty("state", &Window::state)
         .SetMethod("realize", &Window::Realize)
         .SetMethod("remove", &Window::RemoveWindow);
   }
@@ -142,7 +155,14 @@ void Window::DidDestroyWidget(WidgetId widget_id) {
   WidgetIdMapper::instance()->DidDestroyWidget(widget_id);
 }
 
+void Window::DidRealizeWidget(WidgetId widget_id) {
+  auto const widget = FromWidgetId(widget_id);
+  DCHECK_EQ(kRealizing, widget->state_);
+  widget->state_ = kRealized;
+}
+
 Window* Window::FromWidgetId(WidgetId widget_id) {
+  DCHECK_NE(kInvalidWidgetId, widget_id);
   return WidgetIdMapper::instance()->Find(widget_id);
 }
 
@@ -168,7 +188,12 @@ void Window::Realize() {
         "This window is already realized.");
     return;
   }
-  state_ = kRealized;
+  if (state_ == kRealizing) {
+    ScriptController::instance()->ThrowError(
+        "This window is being realized.");
+    return;
+  }
+  state_ = kRealizing;
   ScriptController::instance()->view_delegate()->RealizeWindow(widget_id_);
 }
 

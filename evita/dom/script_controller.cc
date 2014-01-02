@@ -187,6 +187,10 @@ void ScriptController::DidDestroyWidget(WidgetId widget_id) {
   Window::DidDestroyWidget(widget_id);
 }
 
+void ScriptController::DidRealizeWidget(WidgetId widget_id) {
+  Window::DidRealizeWidget(widget_id);
+}
+
 void ScriptController::WillDestroyHost() {
   view_delegate_ = nullptr;
 }

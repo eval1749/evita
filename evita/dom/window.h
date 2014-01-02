@@ -15,9 +15,10 @@ class Window : public v8_glue::Scriptable<Window> {
   private: class WidgetIdMapper;
   friend class WidgetIdMapper;
 
-  private: enum State {
+  public: enum State {
     kDestroyed = -1,
     kNotRealized,
+    kRealizing,
     kRealized,
   };
 
@@ -35,11 +36,13 @@ class Window : public v8_glue::Scriptable<Window> {
   public: v8_glue::Nullable<Window> parent_window() const {
     return parent_window_;
   }
+  public: State state() const { return state_; }
   public: static v8_glue::WrapperInfo* static_wrapper_info();
   public: WidgetId widget_id() const { return widget_id_; }
 
   public: void AddWindow(Window* window);
   public: static void DidDestroyWidget(WidgetId widget_id);
+  public: static void DidRealizeWidget(WidgetId widget_id);
   public: static Window* FromWidgetId(WidgetId widget_id);
   public: bool IsDescendantOf(Window* other) const;
   public: void Realize();

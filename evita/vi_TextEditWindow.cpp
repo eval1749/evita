@@ -32,7 +32,11 @@
 #include "./gfx_base.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/dom/document.h"
 #include "evita/dom/buffer.h"
+#include "evita/dom/range.h"
+#include "evita/dom/selection.h"
+#include "evita/dom/text_window.h"
 #include "./vi_Caret.h"
 #include "./vi_EditPane.h"
 #include "./vi_Frame.h"
@@ -168,6 +172,26 @@ class TextEditWindow::CaretBlinker {
 //
 // TextEditWindow
 //
+TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
+    : CommandWindow_(text_window.widget_id()),
+      ALLOW_THIS_IN_INITIALIZER_LIST(
+        autoscroller_(new Autoscroller(this))),
+      caret_(std::move(Caret::Create())),
+      m_eDragMode(DragMode_None),
+      m_gfx(nullptr),
+      m_lCaretPosn(-1),
+      m_pPage(new Page()),
+      selection_(text_window.selection()->view_selection()),
+      #if SUPPORT_IME
+        m_fImeTarget(false),
+        m_lImeEnd(0),
+        m_lImeStart(0),
+      #endif // SUPPORT_IME
+      m_pViewRange(text_window.view_range()->text_range()) {
+  selection_->set_window(this);
+  text_window.document()->buffer()->AddWindow(this);
+}
+
 TextEditWindow::TextEditWindow(Buffer* pBuffer, Posn lStart)
     : ALLOW_THIS_IN_INITIALIZER_LIST(
         autoscroller_(new Autoscroller(this))),

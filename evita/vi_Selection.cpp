@@ -31,6 +31,10 @@ Selection::Selection(TextEditWindow* pWindow, Buffer* pBuffer) :
     pBuffer->InternalAddRange(this);
 } // Selection::Selection
 
+Selection::Selection(const text::Range& range)
+    : Selection(nullptr, static_cast<Buffer*>(range.GetBuffer())) {
+  SetRange(&range);
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -67,6 +71,10 @@ void Selection::Collapse(CollapseWhich eCollapse)
     Range::Collapse(eCollapse);
     m_fStartIsActive = eCollapse == Collapse_Start;
 } // Selection::Collapse
+
+Selection* Selection::Create(const text::Range& range) {
+  return new(range.GetBuffer()->GetHeap()) Selection(range);
+}
 
 
 //////////////////////////////////////////////////////////////////////

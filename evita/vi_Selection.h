@@ -53,14 +53,20 @@ class Selection : public text::Range
     private: TextEditWindow*    m_pWindow;
 
     // ctor
+    private : explicit Selection(const text::Range& range);
     public: Selection(TextEditWindow*, Buffer*);
     public: ~Selection();
+
+    public: void set_window(TextEditWindow* window) {
+        m_pWindow = window;
+    }
 
     // [B]
     public: void Blink(Posn, Count);
 
     // [C]
     public:  void Collapse(CollapseWhich = Collapse_Start);
+    public: static Selection* Create(const text::Range& range);
 
     // [D]
     public: Count Delete(Unit = Unit_Char, Count = 1);

@@ -5,7 +5,9 @@
 
 #include "base/logging.h"
 #include "evita/dom/editor_window.h"
+#include "evita/dom/text_window.h"
 #include "evita/vi_Frame.h"
+#include "evita/vi_TextEditWindow.h"
 
 namespace view {
 
@@ -24,6 +26,7 @@ void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
 
 void ViewDelegateImpl::CreateTextWindow(const dom::TextWindow* window) {
   DCHECK(window);
+  new TextEditWindow(*window);
 }
 
 void ViewDelegateImpl::DestroyWindow(dom::WidgetId widget_id) {

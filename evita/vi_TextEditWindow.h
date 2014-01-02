@@ -25,6 +25,7 @@ class Selection;
 
 namespace dom {
 class Buffer;
+class TextWindow;
 }
 
 using Buffer = dom::Buffer;
@@ -105,6 +106,7 @@ class TextEditWindow
   private: std::unique_ptr<Page> m_pPage;
 
   // ctor/dtor
+  public: explicit TextEditWindow(const dom::TextWindow& window);
   public: TextEditWindow(Buffer*, Posn = 0);
   public: virtual ~TextEditWindow();
 

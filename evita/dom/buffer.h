@@ -25,7 +25,7 @@ class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
   public: typedef TextEditWindow Window;
   private: WindowList m_oWindows;
 
-  public: Buffer(const char16* pwsz, text::Mode* pMode = nullptr);
+  public: Buffer(const base::string16& name, text::Mode* pMode = nullptr);
   public: virtual ~Buffer();
 
   public: const WindowList& windows() const { return m_oWindows; }

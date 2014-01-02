@@ -115,6 +115,14 @@ v8_glue::WrapperInfo* Document::static_wrapper_info() {
   return &wrapper_info;
 }
 
+void Document::DidCreateRange(Range* range) {
+  ranges_.insert(range);
+}
+
+void Document::DidDestroyRange(Range* range) {
+  ranges_.erase(range);
+}
+
 Document* Document::GetOrCreateDocument(Buffer* buffer) {
   auto present = BufferToDocumentMapper::instance()->Find(buffer);
   return present ? present : new Document(buffer);

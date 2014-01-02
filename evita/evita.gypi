@@ -59,6 +59,7 @@
         'dom/editor.cc',
         'dom/editor_window.cc',
         'dom/lock.cc',
+        'dom/range.cc',
         'dom/script_command.cc',
         'dom/script_controller.cc',
         'dom/script_thread.cc',

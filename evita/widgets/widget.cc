@@ -199,6 +199,9 @@ void Widget::DidDestroyWidget() {
 void Widget::DidHide() {
 }
 
+void Widget::DidKillFocus() {
+}
+
 void Widget::DidRealize() {
   for (auto const child : child_nodes()) {
     child->RealizeWidget();
@@ -209,6 +212,12 @@ void Widget::DidRealizeChildWidget(const Widget&) {
 }
 
 void Widget::DidRemoveChildWidget(const Widget&) {
+}
+
+void Widget::DidResize() {
+}
+
+void Widget::DidSetFocus() {
 }
 
 void Widget::DidShow() {

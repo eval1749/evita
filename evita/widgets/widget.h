@@ -85,12 +85,12 @@ class Widget
   // Called on WM_NCDESTORY
   protected: virtual void DidDestroyNativeWindow();
   protected: virtual void DidHide();
-  protected: virtual void DidKillFocus() {}
+  protected: virtual void DidKillFocus();
   protected: virtual void DidRealize();
   protected: virtual void DidRealizeChildWidget(const Widget& widget);
   protected: virtual void DidRemoveChildWidget(const Widget& widget);
-  protected: virtual void DidResize() {}
-  protected: virtual void DidSetFocus() {}
+  protected: virtual void DidResize();
+  protected: virtual void DidSetFocus();
   protected: virtual void DidShow();
   private: void DispatchPaintMessage();
 

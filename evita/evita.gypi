@@ -59,7 +59,6 @@
         'dom/editor.cc',
         'dom/editor_window.cc',
         'dom/lock.cc',
-        'text/range.cc',
         'dom/script_command.cc',
         'dom/script_controller.cc',
         'dom/script_thread.cc',
@@ -89,6 +88,7 @@
       'sources': [
         'precomp.cpp',
         'text/buffer.cc',
+        'text/range.cc',
         'core/style.cc',
 
         'ed_BufferCore.cpp',

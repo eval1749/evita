@@ -324,6 +324,7 @@ void Frame::DidCreateNativeWindow() {
 
   CompositionState::Update(*native_window());
   gfx_->Init(*native_window());
+  Widget::DidCreateNativeWindow();
 
   auto const pane_rect = GetPaneRect();
   for (auto& pane: m_oPanes) {

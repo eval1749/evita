@@ -4,6 +4,7 @@
 #include "widgets/widget.h"
 
 #include <unordered_map>
+#include <vector>
 
 #include "common/adoptors/reverse.h"
 #include "common/tree/ancestors_or_self.h"
@@ -498,6 +499,14 @@ void Widget::WillDestroyNativeWindow() {
     DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
         state_, shown_, DEBUG_RECT_ARG(rect_));
   #endif
+  std::vector<Widget*> non_native_children;
+  for (auto const child : child_nodes()) {
+    if (!child->native_window())
+      non_native_children.push_back(child);
+  }
+  for (auto const child : non_native_children) {
+    child->Destroy();
+  }
 }
 
 void Widget::WillRemoveChildWidget(const Widget&) {

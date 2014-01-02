@@ -11,6 +11,8 @@
 #include "evita/dom/range.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/script_thread.h"
+#include "evita/dom/selection.h"
+#include "evita/dom/text_window.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/window.h"
 #include "evita/v8_glue/converter.h"
@@ -149,8 +151,10 @@ void ScriptController::PopulateGlobalTemplate(
   v8_glue::Installer<Document>::Run(isolate, global_template);
   v8_glue::Installer<Editor>::Run(isolate, global_template);
   v8_glue::Installer<Range>::Run(isolate, global_template);
+  v8_glue::Installer<Selection>::Run(isolate, global_template);
   v8_glue::Installer<Window>::Run(isolate, global_template);
   v8_glue::Installer<EditorWindow>::Run(isolate, global_template);
+  v8_glue::Installer<TextWindow>::Run(isolate, global_template);
 }
 
 void ScriptController::ResetForTesting() {

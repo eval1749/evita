@@ -17,21 +17,8 @@ namespace internal {
 
 void FinishConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info,
                          AbstractScriptable* impl);
-bool IsValidConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info);
-
-//////////////////////////////////////////////////////////////////////
-//
-// Invoker
-//
-#if 0
-template<typename R, typename... Params>
-struct ConstructorInvoker {
-  inline static R Go(const base::Callback<R(Params...)>& callback,
-                     Params&&... params) {
-    return callback.Run(params...);
-  }
-};
-#endif
+bool IsValidConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info,
+                          int arity);
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -51,9 +38,30 @@ struct ConstructorDispatcher<R()> {
     CHECK(args.GetData(&holder_base));
     typedef gin::internal::CallbackHolder<R()> HolderT;
     HolderT* holder = static_cast<HolderT*>(holder_base);
-    if (!IsValidConstructCall(info))
+    if (!IsValidConstructCall(info, 0))
       return;
     auto impl = holder->callback.Run();
+    FinishConstructCall(info, impl);
+  }
+};
+
+template<typename R, typename P1>
+struct ConstructorDispatcher<R(P1)> {
+  static void DispatchToCallback(
+      const v8::FunctionCallbackInfo<v8::Value>& info) {
+    gin::Arguments args(info);
+    gin::internal::CallbackHolderBase* holder_base = NULL;
+    CHECK(args.GetData(&holder_base));
+    typedef gin::internal::CallbackHolder<R(P1)> HolderT;
+    HolderT* holder = static_cast<HolderT*>(holder_base);
+    if (!IsValidConstructCall(info, 1))
+      return;
+    typename gin::internal::CallbackParamTraits<P1>::LocalType a1;
+    if (!gin::internal::GetNextArgument(&args, holder->flags, true, &a1)) {
+      args.ThrowError();
+      return;
+    }
+    auto impl = holder->callback.Run(a1);
     FinishConstructCall(info, impl);
   }
 };

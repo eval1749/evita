@@ -38,6 +38,8 @@ class Document : public v8_glue::Scriptable<Document> {
   // |Document::GetOrCreateDocument(Buffer*)|
   public: static Document* GetOrCreateDocument(Buffer* buffer);
   public: static Range* GetOrCreateRange(text::Range* range);
+  public: bool IsValidPosition(Posn position) const;
+
 
   DISALLOW_COPY_AND_ASSIGN(Document);
 };

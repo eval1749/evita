@@ -51,13 +51,6 @@ class RangeWrapperInfo : public v8_glue::WrapperInfo {
         .SetProperty("text", &Range::text, &Range::set_text);
   }
 };
-
-bool IsValidPosition(const Document* document, Posn position) {
-  if (position >= 0 && position <= document->buffer()->GetEnd())
-    return true;
-  ScriptController::instance()->ThrowError("Invalid position.");
-  return false;
-}
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -87,13 +80,13 @@ base::string16 Range::text() const {
 }
 
 void Range::set_end(int position) {
-  if (!IsValidPosition(document_, position))
+  if (!document_->IsValidPosition(position))
     return;
   range_->SetEnd(position);
 }
 
 void Range::set_start(int position) {
-  if (!IsValidPosition(document_, position))
+  if (!document_->IsValidPosition(position))
     return;
   range_->SetStart(position);
 }

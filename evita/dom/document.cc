@@ -8,6 +8,7 @@
 #include "common/memory/singleton.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
+#include "evita/dom/script_controller.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
@@ -126,6 +127,13 @@ void Document::DidDestroyRange(Range* range) {
 Document* Document::GetOrCreateDocument(Buffer* buffer) {
   auto present = BufferToDocumentMapper::instance()->Find(buffer);
   return present ? present : new Document(buffer);
+}
+
+bool Document::IsValidPosition(Posn position) const {
+  if (position >= 0 && position <= buffer_->GetEnd())
+    return true;
+  ScriptController::instance()->ThrowError("Invalid position.");
+  return false;
 }
 
 }  // namespace dom

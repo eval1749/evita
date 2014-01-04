@@ -12,7 +12,7 @@
 #include "./vi_Listener.h"
 
 #include "./listener.h"
-
+#include "base/strings/string16.h"
 #include "evita/text/range.h"
 
 #include "evita/dom/buffer.h"
@@ -49,7 +49,7 @@ void Listener::OnReceiveText(const char16* pwch, int cwch)
     {
         text::UndoBlock oUndo(pBuffer, L"*Listener.Output");
 
-        m_pOutput->SetText(pwch, cwch);
+        m_pOutput->SetText(base::string16(pwch, cwch));
         m_pOutput->Collapse(Collapse_End);
     }
 

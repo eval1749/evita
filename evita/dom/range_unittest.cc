@@ -6,11 +6,9 @@
 #include "base/basictypes.h"
 #include "gmock/gmock.h"
 #include "evita/dom/abstract_dom_test.h"
-#include "evita/dom/buffer.h"
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
-#include "evita/editor/application.h"
 
 namespace {
 
@@ -37,12 +35,11 @@ TEST_F(RangeTest, Constructor) {
 }
 
 TEST_F(RangeTest, text) {
-  RunScript("var doc1 = new Document('text')");
-  // TODO(yosi) We should not use |Application| in dom.
-  auto buf1 = Application::instance()->FindBuffer(L"text");
-  buf1->Insert(0, L"abcdefghijkl");
-  RunScript("var range1 = new Range(doc1, 3, 6)");
-  EXPECT_EQ("def", RunScript("range1.text"));
+  RunScript("var doc1 = new Document('text');"
+            "var range1 = new Range(doc1);"
+            "range1.text = 'abcdefghijkl';"
+            "var range2 = new Range(doc1, 3, 6);");
+  EXPECT_EQ("def", RunScript("range2.text"));
 }
 
 }  // namespace

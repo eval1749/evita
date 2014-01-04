@@ -15,6 +15,7 @@
 #include <memory>
 
 #include "base/bind.h"
+#include "base/strings/string16.h"
 #include "./ed_Mode.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/v8_glue/v8_console_buffer.h"
@@ -566,7 +567,7 @@ DEFCOMMAND(ExchangeCode)
         rgwch[0] = static_cast<char16>(nCode);
     }
 
-    oRange.SetText(rgwch, cwch);
+    oRange.SetText(base::string16(rgwch, cwch));
     pSelection->SetRange(oRange.GetEnd(), oRange.GetEnd());
 } // ExchangeCode
 

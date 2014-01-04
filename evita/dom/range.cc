@@ -47,7 +47,7 @@ class RangeWrapperInfo : public v8_glue::WrapperInfo {
         .SetProperty("document", &Range::document)
         .SetProperty("end", &Range::end)
         .SetProperty("start", &Range::start)
-        .SetProperty("text", &Range::text);
+        .SetProperty("text", &Range::text, &Range::set_text);
   }
 };
 }  // namespace
@@ -76,6 +76,10 @@ int Range::start() const {
 
 base::string16 Range::text() const {
   return std::move(range_->GetText());
+}
+
+void Range::set_text(const base::string16& text) {
+  range_->SetText(text);
 }
 
 v8_glue::WrapperInfo* Range::static_wrapper_info() {

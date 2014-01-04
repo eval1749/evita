@@ -448,7 +448,7 @@ void Selection::SetText(const char16* pwsz)
 void Selection::SetText(const char16* pwch, int cwch)
 {
     forgetGoal();
-    Range::SetText(pwch, cwch);
+    Range::SetText(base::string16(pwch, cwch));
 } // Selection::SetText
 
 
@@ -562,7 +562,7 @@ void Selection::TypeEnter(Count k)
     {
         Range oRange(*this);
         oRange.MoveStartWhile(L" \t", Count_Backward);
-        oRange.SetText(NULL, 0);
+        oRange.SetText(base::string16());
     }
 
     TypeChar(0x0A, k);

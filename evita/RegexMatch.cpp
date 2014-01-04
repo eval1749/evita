@@ -11,6 +11,7 @@
 //
 #include "./RegexMatch.h"
 
+#include "base/strings/string16.h"
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
 
@@ -652,7 +653,7 @@ class BufferOutputStream
         flush();
 
         // Delete matched string
-        m_pMatchedRange->SetText(NULL, 0);
+        m_pMatchedRange->SetText(base::string16());
         m_pMatchedRange->MoveEnd(Unit_Char, m_cwchTotal);
     } // ~BufferOutputStream
 
@@ -660,7 +661,7 @@ class BufferOutputStream
     private: void flush()
     { 
         m_cwchTotal += m_cwch;
-        m_oRange.SetText(m_rgwch, m_cwch);
+        m_oRange.SetText(base::string16(m_rgwch, m_cwch));
         m_oRange.Collapse(Collapse_End);
         m_cwch = 0;
     } // Flush
@@ -780,7 +781,7 @@ void RegexMatcher::Replace(
 
     if (! fMetaChar)
     {
-        pRange->SetText(pwchWith, cwchWith);
+        pRange->SetText(base::string16(pwchWith, cwchWith));
         return;
     }
 

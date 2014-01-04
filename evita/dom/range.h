@@ -27,6 +27,7 @@ class Range : public v8_glue::Scriptable<Range> {
   public: int end() const;
   public: int start() const;
   public: base::string16 text() const;
+  public: void set_text(const base::string16& text);
   public: static v8_glue::WrapperInfo* static_wrapper_info();
   public: text::Range* text_range() const { return range_; }
 

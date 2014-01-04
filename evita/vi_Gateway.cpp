@@ -12,6 +12,7 @@
 #define DEBUG_EVENT 0
 #include "./vi_Gateway.h"
 
+#include "base/strings/string16.h"
 #include "evita/dom/buffer.h"
 #include "./vi_Selection.h"
 
@@ -74,7 +75,7 @@ LRESULT Gateway::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
             text::UndoBlock oUndo(pBuffer, L"*Listener.Output");
 
-            m_pOutput->SetText(pwch, cwch);
+            m_pOutput->SetText(base::string16(pwch, cwch));
             m_pOutput->Collapse(Collapse_End);
         }
 

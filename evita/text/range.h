@@ -123,8 +123,7 @@ class Range //: public ObjectInHeap
     public: void  SetRange(Posn, Posn);
     public: void  SetRange(const Range*);
     public: Posn  SetStart(Posn);
-    public: Count SetText(const char16*);
-    public: Count SetText(const char16*, int);
+    public: void SetText(const base::string16& text);
     public: Count StartOf(Unit, bool = false);
 
     // [U]

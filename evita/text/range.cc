@@ -1309,48 +1309,33 @@ Posn Range::SetStart(Posn lPosn)
 } // Range::SetStart
 
 /// <summary>
-///  Replace contents of this range with specified C-string.
-/// </summary>
-/// <param name="pwsz">
-///   C-string for replacement. This parameter can be null.
-/// </param>
-/// <returns>Number of characters of C-string.</returns>
-/// <seealso cref="Range::GetText(void)"/>
-Count Range::SetText(const char16* pwsz)
-{
-    int cwch = NULL == pwsz ? 0 : ::lstrlenW(pwsz);
-    return SetText(pwsz, cwch);
-} // Range::SetText
-
-/// <summary>
 ///  Replace contents of this range with specified string.
 /// </summary>
 /// <param name="pwch">Start of string</param>
 /// <param name="cwch">Number of characters in string</param>
 /// <returns>Number of characters of string.</returns>
 /// <seealso cref="Range::GetText(void)"/>
-Count Range::SetText(const char16* pwch, int cwch)
+void Range::SetText(const base::string16& text)
 {
     if (m_pBuffer->IsReadOnly())
     {
-        return 0;
+        // TODO: We should throw read only buffer exception.
+        return;
     }
 
     if (m_lStart == m_lEnd)
     {
-        cwch = m_pBuffer->Insert(m_lStart, pwch, cwch);
+        m_pBuffer->Insert(m_lStart, text.data(), text.length());
     }
     else
     {
         UndoBlock oUndo(this, L"Range.SetText");
         m_pBuffer->Delete(m_lStart, m_lEnd);
-        cwch = m_pBuffer->Insert(m_lStart, pwch, cwch);
+        m_pBuffer->Insert(m_lStart, text.data(), text.length());
     } // if
 
-    m_lEnd = ensurePosn(m_lStart + cwch);
-
-    return cwch;
-} // Range::SetText
+    m_lEnd = ensurePosn(m_lStart + text.length());
+}
 
 /// <summary>
 ///   Move or extend this range to specified start.

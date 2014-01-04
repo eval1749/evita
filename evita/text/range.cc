@@ -981,27 +981,12 @@ void Range::GetInformation(Information* out_oInfo, Count n) const
 /// </summary>
 /// <returns>C-string</returns>
 /// <seealso cref="Range::SetText(const char16*, int)"/>
-char16* Range::GetText() const
+base::string16 Range::GetText() const
 {
     auto const cwch = m_lEnd - m_lStart;
-    auto const pwsz = new char16[static_cast<size_t>(cwch + 1)];
-    m_pBuffer->GetText(pwsz, m_lStart, m_lEnd);
-    pwsz[cwch] = 0;
-    return pwsz;
-} // Range::GetText
-
-/// <summary>
-///  Get contents of this range as StringResult.
-/// </summary>
-/// <returns>StringResult</returns>
-/// <seealso cref="Range::SetText(const char16*, int)"/>
-char16* Range::GetText(StringResult* pString) const
-{
-    auto const cwch = m_lEnd - m_lStart;
-    auto const pwsz = pString->Alloc(static_cast<size_t>(cwch));
-    m_pBuffer->GetText(pwsz, m_lStart, m_lEnd);
-    pwsz[cwch] = 0;
-    return pwsz;
+    base::string16 text(cwch, ' ');
+    m_pBuffer->GetText(&text[0], m_lStart, m_lEnd);
+    return text;
 } // Range::GetText
 
 /// <summary>

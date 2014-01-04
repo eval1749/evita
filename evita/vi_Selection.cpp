@@ -12,6 +12,7 @@
 #define DEBUG_GOAL 0
 #include "./vi_Selection.h"
 
+#include "base/strings/string16.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
 #include "./vi_TextEditWindow.h"
@@ -535,6 +536,12 @@ void Selection::TypeChar(char16 wch, Count k)
     MoveRight(Unit_Char, k);
 } // Selection::TypeChar
 
+static base::string16 GetLeadingSpaces(const text::Range& range) {
+    text::Range oRange(range);
+    oRange.StartOf(Unit_Paragraph);
+    oRange.MoveEndWhile(L" \t");
+    return oRange.GetText();
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -547,14 +554,7 @@ void Selection::TypeEnter(Count k)
         return;
     }
 
-    // Get leading whitespaces
-    StringResult oSpaces;
-    {
-        Range oRange(*this);
-        oRange.StartOf(Unit_Paragraph);
-        oRange.MoveEndWhile(L" \t");
-        oRange.GetText(&oSpaces);
-    }
+    const auto leading_spaces = GetLeadingSpaces(*this);
 
     text::UndoBlock oUndo(GetBuffer(), L"Selection.TypeEnter");
 
@@ -567,7 +567,7 @@ void Selection::TypeEnter(Count k)
 
     TypeChar(0x0A, k);
     MoveEndWhile(L" \t");
-    SetText(oSpaces);
+    SetText(leading_spaces.data(), leading_spaces.length());
     Collapse(Collapse_End);
 } // Selection::TypeEnter
 

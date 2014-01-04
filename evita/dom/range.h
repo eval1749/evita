@@ -3,6 +3,7 @@
 #if !defined(INCLUDE_evita_dom_range_h)
 #define INCLUDE_evita_dom_range_h
 
+#include "base/strings/string16.h"
 #include "evita/gc/member.h"
 #include "evita/v8_glue/scriptable.h"
 
@@ -25,6 +26,7 @@ class Range : public v8_glue::Scriptable<Range> {
   public: Document* document() const { return document_.get(); }
   public: int end() const;
   public: int start() const;
+  public: base::string16 text() const;
   public: static v8_glue::WrapperInfo* static_wrapper_info();
   public: text::Range* text_range() const { return range_; }
 

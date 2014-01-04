@@ -206,34 +206,4 @@ class String
 }; // String
 #endif
 
-//////////////////////////////////////////////////////////////////////
-//
-// StringResult
-//
-// Used for Range::GetText.
-//
-class StringResult
-{
-    private: size_t     m_cwch;
-    private: char16*    m_pwch;
-
-    public: StringResult() :
-        m_cwch(0),
-        m_pwch(NULL) {}
-
-    public: ~StringResult()
-    {
-        delete[] m_pwch;
-    } // ~String
-
-    public: operator const char16*() { return m_pwch; }
-
-    public: char16* Alloc(size_t n)
-    {
-        delete[] m_pwch;
-        m_cwch = n;
-        return m_pwch = new char16[n + 1];
-    } // Alloc
-}; // StringResult
-
 #endif //!defined(INCLUDE_edit_defs_h)

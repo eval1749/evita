@@ -11,6 +11,8 @@
 #if !defined(INCLUDE_edit_range_h)
 #define INCLUDE_edit_range_h
 
+#include "base/strings/string16.h"
+
 namespace text
 {
 
@@ -95,8 +97,7 @@ class Range //: public ObjectInHeap
     public: Posn    GetEnd()    const { return m_lEnd; }
     public: void    GetInformation(Information*, Count = Count_Max) const;
     public: Posn    GetStart()  const { return m_lStart; }
-    public: char16* GetText() const;
-    public: char16* GetText(StringResult*) const;
+    public: base::string16 GetText() const;
 
     // [I]
     public: void Indent();

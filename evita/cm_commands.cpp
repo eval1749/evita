@@ -286,18 +286,16 @@ class DynamicAbbrev :
     // [E]
     private: void expand()
     {
-        StringResult oCurrent;
-        m_pRange->GetText(&oCurrent);
+        const auto current_word = m_pRange->GetText();
 
         while (findWord())
         {
-            StringResult oWord;
-            m_pRange->GetText(&oWord);
+            const auto word = m_pRange->GetText();
 
-            if (0 != ::lstrcmp(oCurrent, oWord))
+            if (current_word != word)
             {
                 m_pSelection->SetStart(m_lStart);
-                m_pSelection->SetText(oWord);
+                m_pSelection->SetText(word.data(), word.length());
                 m_pSelection->Collapse(Collapse_End);
                 m_fFound = true;
                 break;

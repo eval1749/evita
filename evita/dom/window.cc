@@ -18,6 +18,7 @@ namespace gin {
 
 const char* state_strings[] = {
   "destroyed",
+  "destroying",
   "notrealized",
   "realizing",
   "realized",
@@ -27,8 +28,9 @@ template<>
 struct Converter<dom::Window::State> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
                                     dom::Window::State state) {
-    size_t index = state - dom::Window::State::kDestroyed;
-    DCHECK_LE(index, arraysize(state_strings));
+    auto const index = static_cast<size_t>(
+        state - dom::Window::State::kDestroyed);
+    DCHECK_LE(index, arraysize(state_strings) - 1);
     return gin::StringToSymbol(isolate, state_strings[index]);
   }
 };
@@ -46,15 +48,33 @@ class WindowWrapperInfo : public v8_glue::WrapperInfo {
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetMethod("add", &Window::AddWindow)
         .SetProperty("children", &Window::child_windows)
         .SetProperty("id", &Window::id)
         .SetProperty("parent", &Window::parent_window)
         .SetProperty("state", &Window::state)
+        .SetMethod("add", &Window::AddWindow)
+        .SetMethod("destroy", &Window::Destroy)
         .SetMethod("realize", &Window::Realize)
         .SetMethod("remove", &Window::RemoveWindow);
   }
 };
+
+std::vector<Window*> DescendantsOrSelf(Window* window) {
+  class Collector {
+    public: std::vector<Window*> windows_;
+    public: Collector() = default;
+    public: ~Collector() = default;
+    public: void Collect(Window* window) {
+      windows_.push_back(window);
+      for (auto child : window->child_windows()) {
+        Collect(child);
+      }
+    }
+  };
+  Collector collector;
+  collector.Collect(window);
+  return std::move(collector.windows_);
+}
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -87,7 +107,8 @@ class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
     }
     auto const window = it->second.get();
     window->widget_id_ = kInvalidWidgetId;
-    DCHECK_EQ(kRealized, window->state_);
+    DCHECK(kRealized == window->state_ || kDestroying == window->state_ ||
+           kRealizing == window->state_);
     window->state_ = kDestroyed;
     if (auto const parent = window->parent_window_) {
       parent->child_windows_.erase(window);
@@ -176,6 +197,18 @@ void Window::AddWindow(Window* window) {
       widget_id_, window->widget_id());
 }
 
+void Window::Destroy() {
+  if (state_ != kRealized) {
+    ScriptController::instance()->ThrowError(
+        "You can't destroy unrealized window.");
+    return;
+  }
+  for (auto descendant : DescendantsOrSelf(this)) {
+    descendant->state_= kDestroying;
+  }
+  ScriptController::instance()->view_delegate()->DestroyWindow(widget_id_);
+}
+
 void Window::DidDestroyWidget(WidgetId widget_id) {
   DCHECK_NE(kInvalidWidgetId, widget_id);
   WidgetIdMapper::instance()->DidDestroyWidget(widget_id);
@@ -183,7 +216,7 @@ void Window::DidDestroyWidget(WidgetId widget_id) {
 
 void Window::DidRealizeWidget(WidgetId widget_id) {
   auto const widget = FromWidgetId(widget_id);
-  DCHECK_EQ(kRealizing, widget->state_);
+  DCHECK(kRealizing == widget->state_ || kDestroying == widget->state_);
   widget->state_ = kRealized;
   for (auto child : widget->child_windows_) {
     if (child->state_ == kNotRealized)

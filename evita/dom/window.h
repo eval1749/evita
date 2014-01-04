@@ -17,11 +17,13 @@ class Window : public v8_glue::Scriptable<Window> {
   friend class WidgetIdMapper;
 
   public: enum State {
-    kDestroyed = -1,
+    kDestroyed = -2,
+    kDestroying,
     kNotRealized,
     kRealizing,
     kRealized,
   };
+  static_assert(!kNotRealized, "Window::State::kNotRealized should be zero.");
 
   private: std::unordered_set<Window*> child_windows_;
   private: Window* parent_window_;
@@ -43,6 +45,7 @@ class Window : public v8_glue::Scriptable<Window> {
   public: WidgetId widget_id() const { return widget_id_; }
 
   public: void AddWindow(Window* window);
+  public: void Destroy();
   public: static void DidDestroyWidget(WidgetId widget_id);
   public: static void DidRealizeWidget(WidgetId widget_id);
   public: static Window* FromWidgetId(WidgetId widget_id);

@@ -261,7 +261,9 @@ void Window::Realize() {
         "Parent window isn't realized.");
     return;
   }
-  state_ = kRealizing;
+  for (auto descendant : DescendantsOrSelf(this)) {
+    descendant->state_= kRealizing;
+  }
   ScriptController::instance()->view_delegate()->RealizeWindow(widget_id_);
 }
 

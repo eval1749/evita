@@ -48,6 +48,7 @@
         '<(DEPTH)/common/common.gyp:common',
         '<(DEPTH)/gin/gin.gyp:gin',
         '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
+        'dom_jslib',
         'text',
       ],
       'sources': [
@@ -81,6 +82,44 @@
         'v8_glue/wrapper_info.cc',
       ], # sources
     }, # dom
+    {
+      'target_name': 'dom_jslib',
+      'type': 'static_library',
+      'dependencies': [ 'dom_jslib_js2c', ], 
+      'msvs_precompiled_header': '',
+      'msvs_precompiled_source': '',
+      'sources': [
+        '<(SHARED_INTERMEDIATE_DIR)/dom_jslib.cc',
+      ], # sources
+    },
+    {
+      'target_name': 'dom_jslib_js2c',
+      'type': 'none',
+      'variables': {
+        'library_files': [
+          'dom/runtime.js',
+          'dom/range.js',
+          'dom/selection.js',
+          'dom/key_bindings.js',
+        ],
+      }, # variables
+      'actions': [
+        {
+          'action_name': 'js2c',
+          'inputs': [
+            '<(DEPTH)/evita/dom/make_get_jslib.py',
+            '<@(library_files)',
+          ], # inputs
+          'outputs': [ '<(SHARED_INTERMEDIATE_DIR)/dom_jslib.cc' ],
+          'action': [
+            'python',
+            '<(DEPTH)/evita/dom/make_get_jslib.py',
+            '<@(_outputs)',
+            '<@(library_files)',
+          ], # action
+        }, # js2c
+      ], # actions
+    }, # js2c
     {
       'target_name': 'text',
       'type': 'static_library',

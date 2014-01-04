@@ -4,6 +4,7 @@
 #include "evita/dom/script_controller.h"
 
 #include "base/logging.h"
+#include "base/strings/string16.h"
 #include "evita/dom/console.h"
 #include "evita/dom/document.h"
 #include "evita/dom/editor.h"
@@ -24,6 +25,8 @@ END_V8_INCLUDE
 
 namespace dom {
 
+const base::string16& GetJsLibSource();
+
 namespace {
 
 base::string16 V8ToString(v8::Handle<v8::Value> value) {
@@ -32,6 +35,18 @@ base::string16 V8ToString(v8::Handle<v8::Value> value) {
     return base::string16();
   return base::string16(reinterpret_cast<base::char16*>(*string_value),
                         string_value.length());
+}
+
+void LoadJsLibrary() {
+  auto result = ScriptController::instance()->Evaluate(GetJsLibSource());
+  if (result.exception.empty())
+    return;
+
+  DVLOG(0) << "LoadJsLibrary: " << result.exception << " at" <<
+    " line:" << result.line_number <<
+    " column:" << result.start_column <<
+    " source:" << result.source_line;
+  NOTREACHED();
 }
 
 // TODO(yosi) We will remove EvaluateResult once V8Console in JS.
@@ -216,6 +231,7 @@ void ScriptController::DidStartHost() {
   }
   frame.Realize();
 #endif
+  LoadJsLibrary();
   if (testing_)
     return;
   auto result = Evaluate(

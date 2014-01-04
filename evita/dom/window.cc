@@ -16,11 +16,20 @@
 
 namespace gin {
 
+const char* state_strings[] = {
+  "destroyed",
+  "notrealized",
+  "realizing",
+  "realized",
+};
+
 template<>
 struct Converter<dom::Window::State> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
                                     dom::Window::State state) {
-    return v8::Integer::New(isolate, state).As<v8::Value>();
+    size_t index = state - dom::Window::State::kDestroyed;
+    DCHECK_LE(index, arraysize(state_strings));
+    return gin::StringToSymbol(isolate, state_strings[index]);
   }
 };
 

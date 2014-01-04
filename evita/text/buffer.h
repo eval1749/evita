@@ -557,14 +557,6 @@ class Buffer : public BufferCore, public FileFeatures {
       m_lCurEnd = lEnd;
     }
 
-    public: void SetText(const char16* pwch, int cwch) {
-      auto const iDelta = cwch - (m_lCurEnd - m_lCurStart);
-      m_pBuffer->Delete(m_lCurStart, m_lCurEnd);
-      m_pBuffer->Insert(m_lCurStart, pwch, cwch);
-      m_lEnd += iDelta;
-      m_lCurEnd += iDelta;
-    }
-
     public: Posn SetStart(Posn lStart) { return m_lCurStart = lStart; }
   };
 };

@@ -175,11 +175,11 @@ Range::Range(Buffer* pBuffer, Posn lStart, Posn lEnd) :
 ///   Constructs Range object as same as pRange.
 /// </summary>
 /// <param name="pRange">Range object</param>
-Range::Range(Range* pRange) :
+Range::Range(const Range& other) :
     m_eKind(Kind_Range),
-    m_lEnd(pRange->GetEnd()),
-    m_lStart(pRange->GetStart()),
-    m_pBuffer(pRange->GetBuffer()),
+    m_lEnd(other.GetEnd()),
+    m_lStart(other.GetStart()),
+    m_pBuffer(other.GetBuffer()),
     m_pNext(NULL),
     m_pPrev(NULL)
 {

@@ -396,7 +396,7 @@ class DynamicAbbrev :
             return false;
         }
 
-        Range oRange(m_pSelection);
+        Range oRange(*m_pSelection);
         oRange.MoveStart(Unit_Word, -1);
         return matchPrefix(&oRange);
     } // isContinue
@@ -424,7 +424,7 @@ class DynamicAbbrev :
     // [S]
     private: bool start()
     {
-        Range oRange(m_pSelection);
+        Range oRange(*m_pSelection);
         oRange.MoveStart(Unit_Word, -1);
         Count cwch = oRange.GetEnd() - oRange.GetStart();
         if (cwch > lengthof(m_wsz) - 1)
@@ -488,7 +488,7 @@ DEFCOMMAND(ExchangeCode)
     Selection* pSelection = pCtx->GetSelection();
     if (NULL == pSelection) return;
 
-    text::Range oRange(pSelection);
+    text::Range oRange(*pSelection);
 
     if (oRange.GetStart() == oRange.GetEnd())
     {

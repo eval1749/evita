@@ -641,7 +641,7 @@ class BufferOutputStream
         text::Range*     pMatchedRange ) :
         m_cwch(0),
         m_cwchTotal(0),
-        m_oRange(pMatchedRange),
+        m_oRange(*pMatchedRange),
         m_pMatchedRange(pMatchedRange)
     {
         m_oRange.Collapse(Collapse_End);

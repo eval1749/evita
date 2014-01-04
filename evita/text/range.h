@@ -62,7 +62,7 @@ class Range //: public ObjectInHeap
         m_pPrev(NULL) {}
 
     public: Range(Buffer*, Posn, Posn);
-    public: Range(Range*);
+    public: explicit Range(const Range& other);
 
     public: ~Range();
 

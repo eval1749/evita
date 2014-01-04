@@ -550,7 +550,7 @@ void Selection::TypeEnter(Count k)
     // Get leading whitespaces
     StringResult oSpaces;
     {
-        Range oRange(this);
+        Range oRange(*this);
         oRange.StartOf(Unit_Paragraph);
         oRange.MoveEndWhile(L" \t");
         oRange.GetText(&oSpaces);
@@ -560,7 +560,7 @@ void Selection::TypeEnter(Count k)
 
     // Delete trailing whitespaces
     {
-        Range oRange(this);
+        Range oRange(*this);
         oRange.MoveStartWhile(L" \t", Count_Backward);
         oRange.SetText(NULL, 0);
     }

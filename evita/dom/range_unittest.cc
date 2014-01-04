@@ -23,6 +23,8 @@ class RangeTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(RangeTest);
 };
 
+static const char* kInvalidPosition = "Error: Invalid position.";
+
 TEST_F(RangeTest, Constructor) {
   // TODO(yosi): We should remove all buffers for each test case.
   RunScript("var doc1 = new Document('range')");
@@ -32,6 +34,20 @@ TEST_F(RangeTest, Constructor) {
   EXPECT_EQ("true", RunScript("range1.document === doc1"));
   EXPECT_EQ("true", RunScript("range2.document === doc1"));
   EXPECT_EQ("true", RunScript("range3.document === doc1"));
+}
+
+TEST_F(RangeTest, set_start_end) {
+  RunScript("var doc1 = new Document('text');"
+            "var range1 = new Range(doc1);"
+            "range1.text = 'abcdefghijkl';"
+            "range1.start = 5;");
+  EXPECT_EQ("5", RunScript("range1.start"));
+  EXPECT_EQ("1 5",
+            RunScript("range1.end = 1; range1.start + ' ' + range1.end"));
+  EXPECT_EQ(kInvalidPosition, RunScript("range1.start = -1"));
+  EXPECT_EQ(kInvalidPosition, RunScript("range1.start = 100"));
+  EXPECT_EQ(kInvalidPosition, RunScript("range1.end = -1"));
+  EXPECT_EQ(kInvalidPosition, RunScript("range1.end = 100"));
 }
 
 TEST_F(RangeTest, text) {

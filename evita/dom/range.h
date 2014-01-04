@@ -26,6 +26,8 @@ class Range : public v8_glue::Scriptable<Range> {
   public: Document* document() const { return document_.get(); }
   public: int end() const;
   public: int start() const;
+  public: void set_end(int position);
+  public: void set_start(int position);
   public: base::string16 text() const;
   public: void set_text(const base::string16& text);
   public: static v8_glue::WrapperInfo* static_wrapper_info();

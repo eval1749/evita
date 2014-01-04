@@ -7,6 +7,7 @@
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
+#include "evita/dom/script_controller.h"
 #include "evita/text/range.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
@@ -45,11 +46,18 @@ class RangeWrapperInfo : public v8_glue::WrapperInfo {
       ObjectTemplateBuilder& builder) override {
     builder
         .SetProperty("document", &Range::document)
-        .SetProperty("end", &Range::end)
-        .SetProperty("start", &Range::start)
+        .SetProperty("end", &Range::end, &Range::set_end)
+        .SetProperty("start", &Range::start, &Range::set_start)
         .SetProperty("text", &Range::text, &Range::set_text);
   }
 };
+
+bool IsValidPosition(const Document* document, Posn position) {
+  if (position >= 0 && position <= document->buffer()->GetEnd())
+    return true;
+  ScriptController::instance()->ThrowError("Invalid position.");
+  return false;
+}
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -76,6 +84,18 @@ int Range::start() const {
 
 base::string16 Range::text() const {
   return std::move(range_->GetText());
+}
+
+void Range::set_end(int position) {
+  if (!IsValidPosition(document_, position))
+    return;
+  range_->SetEnd(position);
+}
+
+void Range::set_start(int position) {
+  if (!IsValidPosition(document_, position))
+    return;
+  range_->SetStart(position);
 }
 
 void Range::set_text(const base::string16& text) {

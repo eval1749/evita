@@ -40,4 +40,6 @@ class AbstractDomTest : public ::testing::Test {
 };
 }  // namespace dom
 
+#define EXPECT_SCRIPT_EQ(expect, script) EXPECT_EQ(expect, RunScript(script))
+
 #endif //!defined(INCLUDE_evita_dom_abstract_dom_test_h)

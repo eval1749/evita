@@ -24,8 +24,8 @@ BEGIN_V8_INCLUDE
 END_V8_INCLUDE
 
 namespace dom {
-const base::string16& GetJsLibSource();
 namespace internal {
+const base::string16& GetJsLibSource();
 v8::Handle<v8::Array> GetUcdObject(v8::Isolate* isolate);
 }  // namespace internal
 
@@ -151,7 +151,7 @@ EvaluateResult ScriptController::Evaluate(const base::string16& script_text) {
 }
 
 void ScriptController::LoadJsLibrary() {
-  auto result = Evaluate(GetJsLibSource());
+  auto result = Evaluate(internal::GetJsLibSource());
   if (result.exception.empty())
     return;
 

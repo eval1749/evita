@@ -16,6 +16,7 @@ SOURCE = """\
 #include "base/strings/utf_string_conversions.h"
 
 namespace dom {
+namespace internal {
 
 static const char ascii_script_source[] =
 %(script_source)s;
@@ -26,6 +27,7 @@ const base::string16& GetJsLibSource() {
   return jslib_source;
 }
 
+}  // namespace internal
 }  // namespace dom
 """
 

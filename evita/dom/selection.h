@@ -30,6 +30,8 @@ class Selection : public v8_glue::Scriptable<Selection> {
 
   public: Document* document() const { return document_.get(); }
   public: Range* range() const { return range_.get(); }
+  public: bool start_is_active() const;
+  public: void set_start_is_active(bool start_is_active);
   public: static v8_glue::WrapperInfo* static_wrapper_info();
   public: ::Selection* view_selection() const { return view_selection_; }
   public: TextWindow* window() const { return text_window_; }

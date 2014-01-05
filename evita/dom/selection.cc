@@ -40,6 +40,8 @@ class SelectionWrapperInfo : public v8_glue::WrapperInfo {
     builder
         .SetProperty("document", &Selection::document)
         .SetProperty("range", &Selection::range)
+        .SetProperty("startIsActive", &Selection::start_is_active,
+                     &Selection::set_start_is_active)
         .SetProperty("window", &Selection::window);
   }
 };
@@ -56,6 +58,14 @@ Selection::Selection(TextWindow* text_window, Range* range)
 }
 
 Selection::~Selection() {
+}
+
+bool Selection::start_is_active() const {
+  return view_selection_->IsStartActive();
+}
+
+void Selection::set_start_is_active(bool start_is_active) {
+  view_selection_->SetStartIsActive(start_is_active);
 }
 
 v8_glue::WrapperInfo* Selection::static_wrapper_info() {

@@ -11,11 +11,27 @@ END_V8_INCLUDE
 namespace gin {
 
 template<>
+struct Converter<base::char16> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+                                    base::char16 val);
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
+                     base::char16* out);
+};
+
+template<>
 struct Converter<base::string16> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
                                     const base::string16& string);
   static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
                      base::string16* out);
+};
+
+template<>
+struct Converter<text::Posn> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+                                    text::Posn position);
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
+                     text::Posn* out);
 };
 
 } // namespace gin

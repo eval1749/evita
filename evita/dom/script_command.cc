@@ -7,8 +7,10 @@
 #include "base/logging.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/script_thread.h"
+#include "evita/dom/window.h"
 #include "evita/editor/application.h"
 #include "evita/v8_glue/converter.h"
+#include "evita/vi_CommandWindow.h"
 
 namespace dom {
 
@@ -29,12 +31,26 @@ void ScriptCommand::Execute(const ::Command::Context* context) {
 void ScriptCommand::RunCommand(const ::Command::Context* context) {
   ASSERT_CALLED_ON_SCRIPT_THREAD();
   DCHECK(context);
+  auto const active_window = Window::FromWidgetId(
+      context->GetWindow()->widget_id());
+  if (!active_window)
+    return;
+
   auto const isolate = v8::Isolate::GetCurrent();
   v8::HandleScope handle_scope(isolate);
+
+  const auto receiver = active_window->GetWrapper(isolate);
+
+  v8::Handle<v8::Value> argv[1];
+  if (context->HasArg())
+    argv[0] = v8::Integer::New(context->GetArg());
+  else
+    argv[0] = v8::Undefined(isolate);
+
   DOM_AUTO_LOCK_SCOPE();
   auto command = command_.NewLocal(isolate);
   if (command->IsCallable()) {
-    command->CallAsFunction(v8::Null(isolate), 0, nullptr);
+    command->CallAsFunction(receiver, arraysize(argv), argv);
     return;
   }
   auto value = command->Get(gin::StringToSymbol(isolate, "value"));
@@ -47,7 +63,7 @@ void ScriptCommand::RunCommand(const ::Command::Context* context) {
     DVLOG(0) << "Command object doesn't have callable object.";
     return;
   }
-  function->CallAsFunction(v8::Null(isolate), 0, nullptr);
+  function->CallAsFunction(receiver, arraysize(argv), argv);
 }
 
 }  // namespace dom

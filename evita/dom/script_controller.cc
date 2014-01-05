@@ -24,8 +24,10 @@ BEGIN_V8_INCLUDE
 END_V8_INCLUDE
 
 namespace dom {
-
 const base::string16& GetJsLibSource();
+namespace internal {
+v8::Handle<v8::Array> GetUcdObject(v8::Isolate* isolate);
+}  // namespace internal
 
 namespace {
 
@@ -171,6 +173,8 @@ void ScriptController::PopulateGlobalTemplate(
   v8_glue::Installer<Window>::Run(isolate, global_template);
   v8_glue::Installer<EditorWindow>::Run(isolate, global_template);
   v8_glue::Installer<TextWindow>::Run(isolate, global_template);
+  global_template->Set(gin::StringToV8(isolate, "UCD"),
+                       internal::GetUcdObject(isolate));
 }
 
 void ScriptController::ResetForTesting() {

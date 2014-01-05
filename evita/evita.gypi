@@ -45,10 +45,12 @@
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
+        '<(DEPTH)/base/base.gyp:base_i18n',
         '<(DEPTH)/common/common.gyp:common',
         '<(DEPTH)/gin/gin.gyp:gin',
         '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
         'dom_jslib',
+        'dom_ucd_lib_icu',
         'text',
       ],
       'sources': [
@@ -119,7 +121,57 @@
           ], # action
         }, # js2c
       ], # actions
-    }, # js2c
+    }, # dom_jslib_js2c
+    {
+      'target_name': 'dom_ucd_lib_icu',
+      'type': 'static_library',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base_i18n',
+        '<(icu_gyp_path):icuuc',
+      ], 
+      'include_dirs+': [ '<(DEPTH)/third_party/icu/source/common' ],
+      'msvs_precompiled_header': '',
+      'msvs_precompiled_source': '',
+      'sources': [
+        'dom/ucd_icu.cc',
+      ], # sources
+    },
+    {
+      'target_name': 'dom_ucd_lib',
+      'type': 'static_library',
+      'msvs_precompiled_header': '',
+      'msvs_precompiled_source': '',
+      'dependencies': [ 'dom_ucd_lib_cc' ],
+      'sources': [
+        '<(SHARED_INTERMEDIATE_DIR)/dom_ucd_lib.cc',
+      ], # sources
+    }, # dom_ucd_lib
+    {
+      # Because of Chromium icudata doesn't contain unames.icu. So, we create
+      # our own UCD data table.
+      # See third_party/icu/patches/data.build.patch
+      'target_name': 'dom_ucd_lib_cc',
+      'type': 'none',
+      'variables': {
+        'unicode_data_txt': '<(DEPTH)/third_party/unicode/UnicodeData.txt',
+      }, # variables
+      'actions': [
+        {
+          'action_name': 'make_dom_ucd_lib_cc',
+          'inputs': [
+            'dom/make_ucd_lib_cc.py',
+            '<(unicode_data_txt)',
+          ], # inputs
+          'outputs': [ '<(SHARED_INTERMEDIATE_DIR)/dom_ucd_lib.cc', ],
+          'action': [
+            'python',
+            'dom/make_ucd_lib_cc.py',
+            '<@(_outputs)',
+            '<(unicode_data_txt)',
+          ], # action
+        },
+      ], # actions
+    },
     {
       'target_name': 'text',
       'type': 'static_library',

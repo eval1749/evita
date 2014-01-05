@@ -41,6 +41,7 @@ class AbstractDomTest : public ::testing::Test {
 }  // namespace dom
 
 #define EXPECT_SCRIPT_EQ(expect, script) EXPECT_EQ(expect, RunScript(script))
+#define EXPECT_SCRIPT_FALSE(script) EXPECT_SCRIPT_EQ("false", (script))
 #define EXPECT_SCRIPT_TRUE(script) EXPECT_SCRIPT_EQ("true", (script))
 
 #endif //!defined(INCLUDE_evita_dom_abstract_dom_test_h)

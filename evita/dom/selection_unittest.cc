@@ -29,11 +29,11 @@ TEST_F(SelectionTest, Realize) {
             "var range = new Range(doc);"
             "var text_window = new TextWindow(range);"
             "var sample = text_window.selection");
-  EXPECT_EQ("true", RunScript("sample instanceof Selection"));
-  EXPECT_EQ("false", RunScript("sample instanceof Range"));
-  EXPECT_EQ("true", RunScript("sample.document == doc"));
-  EXPECT_EQ("0", RunScript("sample.range.start"));
-  EXPECT_EQ("0", RunScript("sample.range.end"));
+  EXPECT_SCRIPT_TRUE("sample instanceof Selection");
+  EXPECT_SCRIPT_FALSE("sample instanceof Range");
+  EXPECT_SCRIPT_TRUE("sample.document == doc");
+  EXPECT_SCRIPT_EQ("0", "sample.range.start");
+  EXPECT_SCRIPT_EQ("0", "sample.range.end");
 }
 
 }  // namespace

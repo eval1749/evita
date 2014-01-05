@@ -25,40 +25,32 @@ class DocumentTest : public dom::AbstractDomTest {
 
 TEST_F(DocumentTest, Constructor) {
   // TODO(yosi): We should remove all buffers for each test case.
-  EXPECT_EQ("bar", RunScript("var sample1 = new Document('bar');"
-                             "sample1.name"));
-  EXPECT_EQ("bar (2)",
-            RunScript("var sample2 = new Document('bar');"
-                      "sample2.name"));
-  EXPECT_EQ("bar (3)",
-            RunScript("var sample2 = new Document('bar');"
-                      "sample2.name"));
+  EXPECT_SCRIPT_EQ("bar", "var sample1 = new Document('bar');"
+                          "sample1.name");
+  EXPECT_SCRIPT_EQ("bar (2)",
+                   "var sample2 = new Document('bar'); sample2.name");
+  EXPECT_SCRIPT_EQ("bar (3)",
+                   "var sample2 = new Document('bar'); sample2.name");
 
   RunScript("new Document('bar.cc')");
-  EXPECT_EQ("bar (2).cc",
-            RunScript("var sample2 = new Document('bar.cc');"
-                      "sample2.name"));
-  EXPECT_EQ("bar (3).cc",
-            RunScript("var sample2 = new Document('bar.cc');"
-                      "sample2.name"));
+  EXPECT_SCRIPT_EQ("bar (2).cc",
+                   "var sample2 = new Document('bar.cc'); sample2.name");
+  EXPECT_SCRIPT_EQ("bar (3).cc",
+                   "var sample2 = new Document('bar.cc'); sample2.name");
 
   RunScript("new Document('.bar')");
-  EXPECT_EQ(".bar (2)",
-            RunScript("var sample2 = new Document('.bar');"
-                      "sample2.name"));
-  EXPECT_EQ(".bar (3)",
-            RunScript("var sample2 = new Document('.bar');"
-                      "sample2.name"));
+  EXPECT_SCRIPT_EQ(".bar (2)",
+                   "var sample2 = new Document('.bar'); sample2.name");
+  EXPECT_SCRIPT_EQ(".bar (3)",
+                   "var sample2 = new Document('.bar'); sample2.name");
 }
 
-TEST_F(DocumentTest, FindBuffer) {
-  EXPECT_EQ("PASS",
-            RunScript("var sample1 = Document.find('foo');"
-                      "sample1 == null ? 'PASS' : 'FAIL'"));
+TEST_F(DocumentTest, DocumentFind) {
+  EXPECT_SCRIPT_EQ("true",
+                   "var sample1 = Document.find('foo'); sample1 == null");
   RunScript("new Document('foo')");
-  EXPECT_EQ("foo",
-            RunScript("var sample2 = Document.find('foo');"
-                      "sample2.name"));
+  EXPECT_SCRIPT_EQ("foo",
+                   "var sample2 = Document.find('foo'); sample2.name");
 }
 
 TEST_F(DocumentTest, length) {
@@ -68,10 +60,8 @@ TEST_F(DocumentTest, length) {
   EXPECT_SCRIPT_EQ("6", "doc.length");
 }
 
-TEST_F(DocumentTest, Name) {
-  EXPECT_EQ("DocumentTest",
-            RunScript("var sample1 = new Document('DocumentTest');"
-                      "sample1.name"));
+TEST_F(DocumentTest, name) {
+  EXPECT_SCRIPT_EQ("baz", "var sample1 = new Document('baz'); sample1.name");
 }
 
 }  // namespace

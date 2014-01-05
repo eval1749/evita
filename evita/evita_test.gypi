@@ -11,7 +11,7 @@
 
   'targets': [
     {
-      'target_name': 'evita_dom_test',
+      'target_name': 'evita_dom_unittests',
       'type': 'executable',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
@@ -54,7 +54,7 @@
       ],
     }, # evita_dom_test
     {
-      'target_name': 'evita_text_test',
+      'target_name': 'evita_text_unittests',
       'type': 'executable',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',

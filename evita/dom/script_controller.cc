@@ -9,6 +9,7 @@
 #include "evita/dom/document.h"
 #include "evita/dom/editor.h"
 #include "evita/dom/editor_window.h"
+#include "evita/dom/lock.h"
 #include "evita/dom/range.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/script_thread.h"
@@ -151,6 +152,7 @@ EvaluateResult ScriptController::Evaluate(const base::string16& script_text) {
 }
 
 void ScriptController::LoadJsLibrary() {
+  ASSERT_DOM_LOCKED();
   auto result = Evaluate(internal::GetJsLibSource());
   if (result.exception.empty())
     return;
@@ -235,6 +237,8 @@ void ScriptController::DidStartHost() {
   }
   frame.Realize();
 #endif
+  // We should prevent UI thread to access DOM.
+  DOM_AUTO_LOCK_SCOPE();
   LoadJsLibrary();
   if (testing_)
     return;

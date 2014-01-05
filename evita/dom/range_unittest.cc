@@ -20,6 +20,13 @@ class RangeTest : public dom::AbstractDomTest {
   public: virtual ~RangeTest() {
   }
 
+  protected: void PopulateSample(const char* sample) {
+    RunScript(std::string() +
+        "var doc = new Document('sample');"
+        "var r = new Range(doc);" +
+        "r.text = '" + sample + "';");
+  }
+
   DISALLOW_COPY_AND_ASSIGN(RangeTest);
 };
 
@@ -56,6 +63,26 @@ TEST_F(RangeTest, text) {
             "range1.text = 'abcdefghijkl';"
             "var range2 = new Range(doc1, 3, 6);");
   EXPECT_EQ("def", RunScript("range2.text"));
+}
+
+TEST_F(RangeTest, toLocalLocaleLowerCase) {
+  PopulateSample("ABCDEFGHIJ");
+  EXPECT_EQ("abcdefghij", RunScript("r.toLocaleLowerCase(); r.text"));
+}
+
+TEST_F(RangeTest, toLocalLowerCase) {
+  PopulateSample("ABCDEFGHIJ");
+  EXPECT_EQ("abcdefghij", RunScript("r.toLowerCase(); r.text"));
+}
+
+TEST_F(RangeTest, toLocalLocaleUpperCase) {
+  PopulateSample("abcdefghij");
+  EXPECT_EQ("ABCDEFGHIJ", RunScript("r.toLocaleUpperCase(); r.text"));
+}
+
+TEST_F(RangeTest, toLocalUpperCase) {
+  PopulateSample("abcdefghij");
+  EXPECT_EQ("ABCDEFGHIJ", RunScript("r.toUpperCase(); r.text"));
 }
 
 }  // namespace

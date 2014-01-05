@@ -59,6 +59,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
+        .SetMethod("charCodeAt", &Document::charCodeAt)
         .SetProperty("length", &Document::length)
         .SetProperty("name", &Document::name);
   }
@@ -106,6 +107,12 @@ Document::Document(Buffer* buffer)
 
 Document::~Document() {
   BufferToDocumentMapper::instance()->Unregister(this);
+}
+
+base::char16 Document::charCodeAt(text::Posn position) const {
+  if (!IsValidPosition(position))
+    return 0;
+  return buffer_->GetCharAt(position);
 }
 
 int Document::length() const {

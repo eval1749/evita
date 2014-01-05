@@ -6,6 +6,7 @@
 #include <memory>
 #include <unordered_set>
 
+#include "base/strings/string16.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace dom {
@@ -29,6 +30,7 @@ class Document : public v8_glue::Scriptable<Document> {
 
   public: const Buffer* buffer() const { return buffer_.get(); }
   public: Buffer* buffer() { return buffer_.get(); }
+  public: base::char16 charCodeAt(text::Posn position) const;
   public: int length() const;
   public: const base::string16& name() const;
   public: static v8_glue::WrapperInfo* static_wrapper_info();

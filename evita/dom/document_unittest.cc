@@ -51,6 +51,12 @@ TEST_F(DocumentTest, DocumentFind) {
   EXPECT_SCRIPT_EQ("foo", "var sample2 = Document.find('foo'); sample2.name");
 }
 
+TEST_F(DocumentTest, charCodeAt) {
+  RunScript("var doc = new Document('foo');"
+            "new Range(doc).text = 'foobar';");
+  EXPECT_SCRIPT_EQ("111", "doc.charCodeAt(1)");
+}
+
 TEST_F(DocumentTest, length) {
   RunScript("var doc = new Document('length');");
   EXPECT_SCRIPT_EQ("0", "doc.length");

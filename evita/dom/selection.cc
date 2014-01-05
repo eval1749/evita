@@ -39,8 +39,7 @@ class SelectionWrapperInfo : public v8_glue::WrapperInfo {
       ObjectTemplateBuilder& builder) override {
     builder
         .SetProperty("document", &Selection::document)
-        .SetProperty("end", &Selection::end)
-        .SetProperty("start", &Selection::start)
+        .SetProperty("range", &Selection::range)
         .SetProperty("window", &Selection::window);
   }
 };
@@ -52,18 +51,11 @@ class SelectionWrapperInfo : public v8_glue::WrapperInfo {
 //
 Selection::Selection(TextWindow* text_window, Range* range)
     : document_(range->document()), text_window_(text_window),
-      view_selection_(::Selection::Create(*range->text_range())) {
+      view_selection_(::Selection::Create(*range->text_range())),
+      range_(new Range(document_, view_selection_)) {
 }
 
 Selection::~Selection() {
-}
-
-int Selection::end() const {
-  return view_selection_->GetEnd();
-}
-
-int Selection::start() const {
-  return view_selection_->GetStart();
 }
 
 v8_glue::WrapperInfo* Selection::static_wrapper_info() {

@@ -21,6 +21,7 @@ class Range : public v8_glue::Scriptable<Range> {
   private: text::Range* range_;
 
   public: Range(Document* document, text::Posn start, text::Posn end);
+  public: Range(Document* document, text::Range* range);
   public: virtual ~Range();
 
   public: Document* document() const { return document_.get(); }

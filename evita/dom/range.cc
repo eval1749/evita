@@ -58,8 +58,13 @@ class RangeWrapperInfo : public v8_glue::WrapperInfo {
 // Range
 //
 Range::Range(Document* document, text::Posn start, text::Posn end)
+    : Range(document, document->buffer()->CreateRange(start, end)) {
+}
+
+Range::Range(Document* document, text::Range* range)
     : document_(document),
-      range_(document->buffer()->CreateRange(start, end)) {
+      range_(range) {
+  DCHECK_EQ(document->buffer(), range->GetBuffer());
   document_->DidCreateRange(this);
 }
 

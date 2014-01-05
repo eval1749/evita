@@ -23,13 +23,13 @@ class Selection : public v8_glue::Scriptable<Selection> {
   private: gc::Member<TextWindow> text_window_;
   // TODO(yosi): We should remove ::Selection.
   private: ::Selection* view_selection_;
+  private: gc::Member<Range> range_;
 
   public: Selection(TextWindow* text_window, Range* range);
   public: virtual ~Selection();
 
   public: Document* document() const { return document_.get(); }
-  public: int end() const;
-  public: int start() const;
+  public: Range* range() const { return range_.get(); }
   public: static v8_glue::WrapperInfo* static_wrapper_info();
   public: ::Selection* view_selection() const { return view_selection_; }
   public: TextWindow* window() const { return text_window_; }

@@ -32,8 +32,8 @@ TEST_F(SelectionTest, Realize) {
   EXPECT_EQ("true", RunScript("sample instanceof Selection"));
   EXPECT_EQ("false", RunScript("sample instanceof Range"));
   EXPECT_EQ("true", RunScript("sample.document == doc"));
-  EXPECT_EQ("0", RunScript("sample.start"));
-  EXPECT_EQ("0", RunScript("sample.end"));
+  EXPECT_EQ("0", RunScript("sample.range.start"));
+  EXPECT_EQ("0", RunScript("sample.range.end"));
 }
 
 }  // namespace

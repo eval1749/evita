@@ -99,9 +99,11 @@
       'type': 'none',
       'variables': {
         'library_files': [
+          'dom/types.js',
           'dom/runtime.js',
           'dom/range.js',
           'dom/selection.js',
+          'dom/key_names.js',
           'dom/key_bindings.js',
         ],
       }, # variables

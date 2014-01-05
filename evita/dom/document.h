@@ -31,7 +31,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: const Buffer* buffer() const { return buffer_.get(); }
   public: Buffer* buffer() { return buffer_.get(); }
   public: base::char16 charCodeAt(text::Posn position) const;
-  public: int length() const;
+  public: text::Posn length() const;
   public: const base::string16& name() const;
   public: static v8_glue::WrapperInfo* static_wrapper_info();
 
@@ -41,7 +41,7 @@ class Document : public v8_glue::Scriptable<Document> {
   // |Document::GetOrCreateDocument(Buffer*)|
   public: static Document* GetOrCreateDocument(Buffer* buffer);
   public: static Range* GetOrCreateRange(text::Range* range);
-  public: bool IsValidPosition(Posn position) const;
+  public: bool IsValidPosition(text::Posn position) const;
 
 
   DISALLOW_COPY_AND_ASSIGN(Document);

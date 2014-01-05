@@ -115,7 +115,7 @@ base::char16 Document::charCodeAt(text::Posn position) const {
   return buffer_->GetCharAt(position);
 }
 
-int Document::length() const {
+text::Posn Document::length() const {
   return buffer_->GetEnd();
 }
 
@@ -141,7 +141,7 @@ Document* Document::GetOrCreateDocument(Buffer* buffer) {
   return present ? present : new Document(buffer);
 }
 
-bool Document::IsValidPosition(Posn position) const {
+bool Document::IsValidPosition(text::Posn position) const {
   if (position >= 0 && position <= buffer_->GetEnd())
     return true;
   ScriptController::instance()->ThrowError("Invalid position.");

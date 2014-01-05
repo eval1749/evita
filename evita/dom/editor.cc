@@ -48,7 +48,7 @@ class EditorWrapperInfo : public v8_glue::WrapperInfo {
       ObjectTemplateBuilder& builder) override {
     builder
       .SetMethod("createFrame", CreateFrame)
-      .SetMethod("setdKeyBinding_", SetKeyBinding)
+      .SetMethod("setKeyBinding_", SetKeyBinding)
       .SetProperty("version", &Editor::version);
   }
 };

@@ -29,6 +29,7 @@ class Document : public v8_glue::Scriptable<Document> {
 
   public: const Buffer* buffer() const { return buffer_.get(); }
   public: Buffer* buffer() { return buffer_.get(); }
+  public: int length() const;
   public: const base::string16& name() const;
   public: static v8_glue::WrapperInfo* static_wrapper_info();
 

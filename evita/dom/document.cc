@@ -59,6 +59,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
+        .SetProperty("length", &Document::length)
         .SetProperty("name", &Document::name);
   }
 };
@@ -105,6 +106,10 @@ Document::Document(Buffer* buffer)
 
 Document::~Document() {
   BufferToDocumentMapper::instance()->Unregister(this);
+}
+
+int Document::length() const {
+  return buffer_->GetEnd();
 }
 
 const base::string16& Document::name() const {

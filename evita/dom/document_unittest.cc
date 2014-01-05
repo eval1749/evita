@@ -61,6 +61,13 @@ TEST_F(DocumentTest, FindBuffer) {
                       "sample2.name"));
 }
 
+TEST_F(DocumentTest, length) {
+  RunScript("var doc = new Document('length');");
+  EXPECT_SCRIPT_EQ("0", "doc.length");
+  RunScript("new Range(doc).text = 'foobar';");
+  EXPECT_SCRIPT_EQ("6", "doc.length");
+}
+
 TEST_F(DocumentTest, Name) {
   EXPECT_EQ("DocumentTest",
             RunScript("var sample1 = new Document('DocumentTest');"

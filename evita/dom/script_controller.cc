@@ -37,18 +37,6 @@ base::string16 V8ToString(v8::Handle<v8::Value> value) {
                         string_value.length());
 }
 
-void LoadJsLibrary() {
-  auto result = ScriptController::instance()->Evaluate(GetJsLibSource());
-  if (result.exception.empty())
-    return;
-
-  DVLOG(0) << "LoadJsLibrary: " << result.exception << " at" <<
-    " line:" << result.line_number <<
-    " column:" << result.start_column <<
-    " source:" << result.source_line;
-  NOTREACHED();
-}
-
 // TODO(yosi) We will remove EvaluateResult once V8Console in JS.
 EvaluateResult ReportException(const v8::TryCatch& try_catch) {
   EvaluateResult eval_result;
@@ -158,6 +146,18 @@ EvaluateResult ScriptController::Evaluate(const base::string16& script_text) {
   }
 
   return EvaluateResult(V8ToString(result->ToString()));
+}
+
+void ScriptController::LoadJsLibrary() {
+  auto result = Evaluate(GetJsLibSource());
+  if (result.exception.empty())
+    return;
+
+  DVLOG(0) << "LoadJsLibrary: " << result.exception << " at" <<
+    " line:" << result.line_number <<
+    " column:" << result.start_column <<
+    " source:" << result.source_line;
+  NOTREACHED();
 }
 
 void ScriptController::PopulateGlobalTemplate(

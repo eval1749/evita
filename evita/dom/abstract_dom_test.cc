@@ -54,6 +54,7 @@ void AbstractDomTest::SetUp() {
   auto context = v8::Context::New(isolate, nullptr, global_template);
   context_.Reset(isolate, context);
   context->Enter();
+  script_controller_->LoadJsLibrary();
 }
 
 void AbstractDomTest::PopulateGlobalTemplate(v8::Isolate*,

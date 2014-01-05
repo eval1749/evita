@@ -56,6 +56,7 @@ class ScriptController : public ViewEventHandler {
   public: static ScriptController* instance();
 
   public: EvaluateResult Evaluate(const base::string16& script_text);
+  public: void LoadJsLibrary();
   public: void ResetForTesting();
   public: void PopulateGlobalTemplate(
       v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_template);

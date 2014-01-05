@@ -46,11 +46,9 @@ TEST_F(DocumentTest, Constructor) {
 }
 
 TEST_F(DocumentTest, DocumentFind) {
-  EXPECT_SCRIPT_EQ("true",
-                   "var sample1 = Document.find('foo'); sample1 == null");
+  EXPECT_SCRIPT_TRUE("var sample1 = Document.find('foo'); sample1 == null");
   RunScript("new Document('foo')");
-  EXPECT_SCRIPT_EQ("foo",
-                   "var sample2 = Document.find('foo'); sample2.name");
+  EXPECT_SCRIPT_EQ("foo", "var sample2 = Document.find('foo'); sample2.name");
 }
 
 TEST_F(DocumentTest, length) {

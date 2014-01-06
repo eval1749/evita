@@ -10,14 +10,8 @@
 namespace dom {
 
 namespace {
-Document* GetOrCreateDocument(const base::string16& name) {
-  if (auto const document = Document::Find(name))
-    return document;
-  return new Document(name);
-}
-
 void Log(const std::vector<base::string16>& messages) {
-  auto const document = GetOrCreateDocument(L"*console log*");
+  auto const document = Document::GetOrNew(L"*console log*");
   auto const buffer = document->buffer();
   for (auto message : messages) {
     buffer->Insert(buffer->GetEnd(), message.c_str());

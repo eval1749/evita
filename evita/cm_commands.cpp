@@ -21,6 +21,7 @@
 #include "evita/v8_glue/v8_console_buffer.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
+#include "evita/dom/document.h"
 #include "./vi_FileDialogBox.h"
 #include "./vi_Frame.h"
 #include "./vi_EditPane.h"
@@ -1343,14 +1344,9 @@ DEFCOMMAND(ValidateIntervals)
 {
     when (NULL == pCtx->GetSelection()) return;
 
-    const char16* pwszLogBuf = L"* Debug Log *";
-
-    Buffer* pLogBuf= Application::instance()->FindBuffer(pwszLogBuf);
-    if (NULL == pLogBuf)
-    {
-        pLogBuf = Application::instance()->NewBuffer(pwszLogBuf);
-    }
-    else if (pCtx->HasArg())
+    auto const document = dom::Document::GetOrNew(L"* Debug Log *");
+    auto const pLogBuf = document->buffer();
+    if (pCtx->HasArg())
     {
         pLogBuf->Delete(0, pLogBuf->GetEnd());
     }

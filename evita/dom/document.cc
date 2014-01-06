@@ -97,6 +97,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         &DocumentWrapperInfo::NewDocument);
     return v8_glue::FunctionTemplateBuilder(isolate, templ)
         .SetMethod("find", &DocumentList::StaticFind)
+        .SetMethod("getOrNew", &Document::GetOrNew)
         .Build();
   }
 
@@ -157,6 +158,12 @@ void Document::DidDestroyRange(Range* range) {
 
 Document* Document::Find(const base::string16& name) {
   return DocumentList::instance()->Find(name);
+}
+
+Document* Document::GetOrNew(const base::string16& name) {
+  if (auto const document = Find(name))
+    return document;
+  return new Document(name);
 }
 
 bool Document::IsValidPosition(text::Posn position) const {

@@ -3,22 +3,22 @@
 
 #include "evita/dom/console.h"
 
-#include "evita/editor/application.h"
-#include "evita/v8_glue/converter.h"
 #include "evita/dom/buffer.h"
+#include "evita/dom/document.h"
+#include "evita/v8_glue/converter.h"
 
 namespace dom {
 
 namespace {
-// TODO(yosi): Move InternBuffer to Application
-Buffer* InternBuffer(const base::string16& name) {
-  if (auto const buffer = Application::instance()->FindBuffer(name))
-    return buffer;
-  return Application::instance()->NewBuffer(name);
+Document* GetOrCreateDocument(const base::string16& name) {
+  if (auto const document = Document::Find(name))
+    return document;
+  return new Document(name);
 }
 
 void Log(const std::vector<base::string16>& messages) {
-  auto const buffer = InternBuffer(L"*console log*");
+  auto const document = GetOrCreateDocument(L"*console log*");
+  auto const buffer = document->buffer();
   for (auto message : messages) {
     buffer->Insert(buffer->GetEnd(), message.c_str());
   }

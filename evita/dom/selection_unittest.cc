@@ -34,9 +34,9 @@ TEST_F(SelectionTest, Realize) {
   EXPECT_SCRIPT_TRUE("sample.document == doc");
   EXPECT_SCRIPT_EQ("0", "sample.range.start");
   EXPECT_SCRIPT_EQ("0", "sample.range.end");
-  EXPECT_SCRIPT_FALSE("sample.start_is_active");
-  RunScript("sample.start_is_active = true;");
-  EXPECT_SCRIPT_TRUE("sample.start_is_active");
+  EXPECT_SCRIPT_FALSE("sample.startIsActive");
+  RunScript("sample.startIsActive = true;");
+  EXPECT_SCRIPT_TRUE("sample.startIsActive");
 }
 
 }  // namespace

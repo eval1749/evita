@@ -175,9 +175,10 @@ var VKEY_NAMES = [
   'NONAME',    // 0xFC
   'PA1',       // 0xFD
   'OEM_CLEAR', // 0xFE
-  'FF',
+  'FF'
 ];
 
+/** @type {Array.<string>} */
 var KEY_NAMES = (function() {
   var names = new Array(256);
   for (var key_code = 0x20; key_code < 0x7E; ++key_code) {
@@ -189,6 +190,7 @@ var KEY_NAMES = (function() {
   return names;
 })();
 
+/** @type {Array.<string, number>} */
 var KEY_CODE_MAP = (function() {
   var map = {};
   KEY_NAMES.forEach(function(name, index) {

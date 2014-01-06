@@ -4,32 +4,49 @@
 
 'use strict';
 
-var Alter, Direction, Granularity, NewlineMode, Unit;
-(function() {
-  function makeEnum() {
-    var names = Array.prototype.slice.call(arguments, 0);
-    return Object.create(Object.prototype, (function() {
-      var map = {};
-      names.forEach(function(name) {
-        map[name.toUpperCase()] = {
-          configurable: false,
-          enumerable: true,
-          value: name,
-          writable: false,
-        };
-      });
-      return map;
-    })());
-  }
+/** @enum {string} */
+var Alter = {
+  EXTEND: 'extend',
+  MOVE: 'move'
+};
 
-  Alter = makeEnum('extend', 'move');
-  Direction = makeEnum('backward', 'forward', 'left', 'right');
-  NewlineMode = makeEnum('cr', 'crlf', 'lf', 'unknown');
-  Unit = makeEnum('char', 'document', 'line', 'page', 'paragraph',
-                  'screen', 'sentence', 'window', 'word');
-  Granularity = Unit;
-})();
+/** @enum{string} */
+var Direction = {
+  BACKWARD: 'backward',
+  FORWARD: 'forward',
+  LEFT: 'left',
+  RIGHT: 'right'
+};
 
+/** @enum{string} */
+var NewlineMode = {
+  CR: 'cr',
+  CRLF: 'crlf',
+  LF: 'lf',
+  UNKNOWN: 'unknown'
+};
+
+/**
+ * Also called granularity.
+ * @enum{string}
+ */
+var Unit = {
+  CHAR: 'char',
+  DOCUMENT: 'document',
+  LINE: 'line',
+  PAGE: 'page',
+  PARAGRAPH: 'paragraph',
+  SCREEN: 'screen',
+  SENTENCE: 'sentence',
+  WINDOW: 'window',
+  WORD: 'word'
+};
+
+/**
+ * @param {Object} fields Enum type.
+ * @param {string} message An error message.
+ * @constructor
+ */
 function EnumError(fields, message) {
   TypeError.call(this, message);
   this.fields = fields;
@@ -43,13 +60,13 @@ EnumError.prototype = Object.create(TypeError.prototype, {
     configurable: true,
     enumerable: true,
     value: [],
-    writable: true,
+    writable: true
   }, // fields
   toString: {
     value: function() {
       return this.message + ' accepts only ' + this.fields + '.';
     },
     configurable: true,
-    enumerable: true,
-  }, // toString
+    enumerable: true
+  } // toString
 });

@@ -5,30 +5,30 @@
 'use strict';
 
 (function() {
-  var MOD_CTRL = 0x200;
-  var MOD_SHIFT = 0x400;
+  /** @const */ var MOD_CTRL = 0x200;
+  /** @const */ var MOD_SHIFT = 0x400;
 
   var KEY_COMBINATION_RULES = [
     {
       modifiers: MOD_CTRL | MOD_SHIFT,
-      re: /^Ctrl[-+]Shift[-+](.+)$/i,
+      re: /^Ctrl[-+]Shift[-+](.+)$/i
     },
     {
       modifiers: MOD_CTRL | MOD_SHIFT,
-      re: /^Shift[-+]Ctrl[-+](.+)$/i,
+      re: /^Shift[-+]Ctrl[-+](.+)$/i
     },
     {
       modifiers: MOD_CTRL,
-      re: /^Ctrl[-+](.+)$/i,
+      re: /^Ctrl[-+](.+)$/i
     },
     {
       modifiers: MOD_SHIFT,
-      re: /^Shift[-+](.+)$/i,
+      re: /^Shift[-+](.+)$/i
     },
     {
       modifiers: 0,
-      re: /^(.+)$/,
-    },
+      re: /^(.+)$/
+    }
   ];
 
   function parseKeyCombination(spec) {

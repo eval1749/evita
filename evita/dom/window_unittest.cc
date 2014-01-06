@@ -128,6 +128,7 @@ TEST_F(WindowTest, Destroy) {
             RunScript("sample1.destroy()"));
   view_event_handler()->DidRealizeWidget(static_cast<dom::WidgetId>(1));
   EXPECT_EQ("realized", RunScript("sample1.state"));
+  EXPECT_CALL(*mock_view_impl(), DestroyWindow(Eq(1)));
   RunScript("sample1.destroy()");
   EXPECT_EQ("destroying", RunScript("sample1.state"));
   EXPECT_EQ("destroying", RunScript("child1.state"));

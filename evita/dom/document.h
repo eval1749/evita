@@ -35,6 +35,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: void DidCreateRange(Range* range);
   public: void DidDestroyRange(Range* range);
   public: static Range* GetOrCreateRange(text::Range* range);
+  public: static Document* Find(const base::string16& name);
   public: bool IsValidPosition(text::Posn position) const;
   public: void RenameTo(const base::string16& new_name);
   public: static void ResetForTesting();

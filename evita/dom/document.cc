@@ -155,6 +155,10 @@ void Document::DidDestroyRange(Range* range) {
   ranges_.erase(range);
 }
 
+Document* Document::Find(const base::string16& name) {
+  return DocumentList::instance()->Find(name);
+}
+
 bool Document::IsValidPosition(text::Posn position) const {
   if (position >= 0 && position <= buffer_->GetEnd())
     return true;

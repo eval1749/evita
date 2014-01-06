@@ -65,6 +65,10 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
   }
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// BufferToDocumentMapper
+//
 class BufferToDocumentMapper
     : public common::Singleton<BufferToDocumentMapper> {
   private: typedef std::unordered_map<uintptr_t, Document*>

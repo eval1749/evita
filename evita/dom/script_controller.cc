@@ -256,6 +256,10 @@ void ScriptController::DidStartHost() {
       "line: " << result.line_number;
 }
 
+void ScriptController::RunCallback(base::Closure callback) {
+  callback.Run();
+}
+
 void ScriptController::WillDestroyHost() {
   view_delegate_ = nullptr;
 }

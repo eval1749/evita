@@ -7,6 +7,7 @@
 #include "evita/dom/editor_window.h"
 #include "evita/dom/text_window.h"
 #include "evita/dom/view_event_handler.h"
+#include "evita/vi_FileDialogBox.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_TextEditWindow.h"
 
@@ -51,6 +52,25 @@ void ViewDelegateImpl::AddWindow(dom::WidgetId parent_id,
 void ViewDelegateImpl::DestroyWindow(dom::WidgetId widget_id) {
   DCHECK_NE(dom::kInvalidWidgetId, widget_id);
   widgets::Widget::DidDestroyDomWindow(widget_id);
+}
+
+void ViewDelegateImpl::GetSaveFilename(
+    dom::WidgetId widget_id, const base::string16& dir_path,
+    GetSaveFilenameCallback callback) {
+  auto const widget = widgets::Widget::FromWidgetId(widget_id);
+  if (!widget) {
+    DVLOG(0) << "GetSaveFilename: no such widget " << widget_id;
+    event_handler_->RunCallback(base::Bind(callback, base::string16()));
+    return;
+  }
+  FileDialogBox::Param params;
+  params.SetDirectory(dir_path.c_str());
+  params.m_hwndOwner = widget->AssociatedHwnd();
+  FileDialogBox oDialog;
+  if (!oDialog.GetSaveFileName(&params))
+    *params.m_pwszFile = 0;
+  event_handler_->RunCallback(base::Bind(callback,
+                                         base::string16(params.m_pwszFile)));
 }
 
 void ViewDelegateImpl::RealizeWindow(dom::WidgetId widget_id) {

@@ -65,6 +65,9 @@ class ScriptThread final : public ViewDelegate,
   private: virtual void AddWindow(WidgetId parent_id,
                                   WidgetId child_id) override;
   private: virtual void DestroyWindow(WidgetId widget_id) override;
+  private: virtual void GetSaveFilename(
+      WidgetId widget_id, const base::string16& dir_path,
+      GetSaveFilenameCallback callback) override;
   private: virtual void RealizeWindow(WidgetId widget_id) override;
   private: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) override;
@@ -73,6 +76,7 @@ class ScriptThread final : public ViewDelegate,
   private: virtual void DidDestroyWidget(WidgetId widget_id) override;
   private: virtual void DidRealizeWidget(WidgetId widget_id) override;
   private: virtual void DidStartHost() override;
+  private: virtual void RunCallback(base::Closure callback) override;
   private: virtual void WillDestroyHost() override;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptThread);

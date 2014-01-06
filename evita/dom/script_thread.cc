@@ -109,10 +109,23 @@ void ScriptThread::Start(ViewDelegate* view_delegate,
         param1, param2)); \
   }
 
+#define DEFINE_VIEW_DELEGATE_3(name, type1, type2, type3) \
+  void ScriptThread::name(type1 param1, type2 param2, type3 param3) { \
+    DCHECK_CALLED_ON_SCRIPT_THREAD(); \
+    if (!host_message_loop_) \
+      return; \
+    host_message_loop_->PostTask(FROM_HERE, base::Bind( \
+        &ViewDelegate::name, \
+        base::Unretained(view_delegate_), \
+        param1, param2, param3)); \
+  }
+
 DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
 DEFINE_VIEW_DELEGATE_1(CreateTextWindow, const TextWindow*)
 DEFINE_VIEW_DELEGATE_2(AddWindow, WidgetId, WidgetId)
 DEFINE_VIEW_DELEGATE_1(DestroyWindow, WidgetId)
+DEFINE_VIEW_DELEGATE_3(GetSaveFilename, WidgetId, const base::string16&,
+                       ViewDelegate::GetSaveFilenameCallback)
 DEFINE_VIEW_DELEGATE_1(RealizeWindow, WidgetId)
 
 void ScriptThread::RegisterViewEventHandler(
@@ -150,6 +163,7 @@ void ScriptThread::RegisterViewEventHandler(
 DEFINE_VIEW_EVENT_HANDLER_1(DidDestroyWidget, WidgetId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidRealizeWidget, WidgetId)
 DEFINE_VIEW_EVENT_HANDLER_0(DidStartHost)
+DEFINE_VIEW_EVENT_HANDLER_1(RunCallback, base::Closure)
 
 void ScriptThread::WillDestroyHost() {
   DCHECK_CALLED_ON_HOST_THREAD();

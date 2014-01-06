@@ -4,6 +4,7 @@
 #define INCLUDE_evita_dom_mock_view_impl_h
 
 #include "base/basictypes.h"
+#include "base/callback.h"
 #include "gmock/gmock.h"
 #include "evita/dom/view_delegate.h"
 
@@ -16,6 +17,8 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD1(CreateTextWindow, void(const TextWindow*));
   MOCK_METHOD2(AddWindow, void(WidgetId, WidgetId));
   MOCK_METHOD1(DestroyWindow, void(WidgetId));
+  MOCK_METHOD3(GetSaveFilename, void(WidgetId, const base::string16&,
+                                     GetSaveFilenameCallback));
   MOCK_METHOD1(RealizeWindow, void(WidgetId));
   MOCK_METHOD1(RegisterViewEventHandler, void(ViewEventHandler*));
 

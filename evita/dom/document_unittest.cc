@@ -68,4 +68,9 @@ TEST_F(DocumentTest, name) {
   EXPECT_SCRIPT_EQ("baz", "var sample1 = new Document('baz'); sample1.name");
 }
 
+TEST_F(DocumentTest, renameTo) {
+  RunScript("var doc = new Document('foo'); doc.renameTo('bar')");
+  EXPECT_SCRIPT_EQ("bar", "doc.name");
+}
+
 }  // namespace

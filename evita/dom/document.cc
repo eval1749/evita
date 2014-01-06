@@ -5,6 +5,8 @@
 
 #include <unordered_map>
 
+#include "base/logging.h"
+#include "base/strings/string_number_conversions.h"
 #include "common/memory/singleton.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
@@ -25,14 +27,60 @@ template<> struct hash<Buffer*> {
 namespace dom {
 
 namespace {
-v8::Handle<v8::Value> FindDocument(const string16& name) {
-  auto const isolate = v8::Isolate::GetCurrent();
-  auto const present = Application::instance()->FindBuffer(name);
-  if (!present)
-    return v8::Null(isolate);
-  auto const document = Document::GetOrCreateDocument(present);
-  return document->GetWrapper(isolate);
+typedef std::pair<base::string16, base::string16> StringPair;
+StringPair SplitByDot(const base::string16& name) {
+  const auto last_dot = name.rfind('.');
+  if (!last_dot || last_dot == base::string16::npos)
+    return StringPair(name, L"");
+  return StringPair(name.substr(0, last_dot), name.substr(last_dot));
 }
+
+//////////////////////////////////////////////////////////////////////
+//
+// DocumentList
+//
+class DocumentList : public common::Singleton<DocumentList> {
+  friend class common::Singleton<DocumentList>;
+
+  private: std::unordered_map<base::string16, Document*> map_;
+
+  private: DocumentList() = default;
+  public: ~DocumentList() = default;
+
+  public: Document* Find(const base::string16 name) const {
+    auto it = map_.find(name);
+    return it == map_.end() ? nullptr : it->second;
+  }
+  public: base::string16 MakeUniqueName(const base::string16& name) {
+    if (!Find(name))
+      return name;
+    const auto pair = SplitByDot(name);
+    auto candidate = name;
+    for (auto n = 2; Find(candidate); ++ n) {
+      candidate = pair.first + L" (" + base::IntToString16(n) + L")" +
+        pair.second;
+    }
+    return candidate;
+  }
+  public: void Register(Document* document) {
+    CHECK(!Find(document->name()));
+    map_[document->name()] = document;
+  }
+  public: void ResetForTesting() {
+    map_.clear();
+  }
+  public: static v8_glue::Nullable<Document> StaticFind(
+      const base::string16& name) {
+    return instance()->Find(name);
+  }
+  public: void Unregister(Document* document) {
+    auto it = map_.find(document->name());
+    CHECK(it != map_.end());
+    map_.erase(it);
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(DocumentList);
+};
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -48,7 +96,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
     auto templ = v8_glue::CreateConstructorTemplate(isolate,
         &DocumentWrapperInfo::NewDocument);
     return v8_glue::FunctionTemplateBuilder(isolate, templ)
-        .SetMethod("find", &FindDocument)
+        .SetMethod("find", &DocumentList::StaticFind)
         .Build();
   }
 
@@ -61,37 +109,8 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
     builder
         .SetMethod("charCodeAt", &Document::charCodeAt)
         .SetProperty("length", &Document::length)
-        .SetProperty("name", &Document::name);
-  }
-};
-
-//////////////////////////////////////////////////////////////////////
-//
-// BufferToDocumentMapper
-//
-class BufferToDocumentMapper
-    : public common::Singleton<BufferToDocumentMapper> {
-  private: typedef std::unordered_map<uintptr_t, Document*>
-      BufferToDocumentMap;
-  private: BufferToDocumentMap map_;
-
-  private: static uintptr_t key(Buffer* buffer) {
-    return reinterpret_cast<uintptr_t>(buffer);
-  }
-
-  public: Document* Find(Buffer* buffer) const {
-    auto it = map_.find(key(buffer));
-    return it == map_.end() ? nullptr : it->second;
-  }
-
-  public: void Register(Document* document) {
-    map_[key(document->buffer())] = document;
-  }
-
-  public: void Unregister(Document* document) {
-    auto it = map_.find(key(document->buffer()));
-    if (it != map_.end())
-      map_.erase(it);
+        .SetProperty("name", &Document::name)
+        .SetMethod("renameTo", &Document::RenameTo);
   }
 };
 }  // namespace
@@ -101,16 +120,12 @@ class BufferToDocumentMapper
 // Document
 //
 Document::Document(const base::string16 name)
-    : Document(Application::instance()->NewBuffer(name)) {
-}
-
-Document::Document(Buffer* buffer)
-    : buffer_(buffer) {
-  BufferToDocumentMapper::instance()->Register(this);
+    : buffer_(new Buffer(DocumentList::instance()->MakeUniqueName(name))) {
+  DocumentList::instance()->Register(this);
 }
 
 Document::~Document() {
-  BufferToDocumentMapper::instance()->Unregister(this);
+  DocumentList::instance()->Unregister(this);
 }
 
 base::char16 Document::charCodeAt(text::Posn position) const {
@@ -140,16 +155,25 @@ void Document::DidDestroyRange(Range* range) {
   ranges_.erase(range);
 }
 
-Document* Document::GetOrCreateDocument(Buffer* buffer) {
-  auto present = BufferToDocumentMapper::instance()->Find(buffer);
-  return present ? present : new Document(buffer);
-}
-
 bool Document::IsValidPosition(text::Posn position) const {
   if (position >= 0 && position <= buffer_->GetEnd())
     return true;
   ScriptController::instance()->ThrowError("Invalid position.");
   return false;
+}
+
+void Document::RenameTo(const base::string16& new_name) {
+  if (name() == new_name)
+   return;
+  auto& list = *DocumentList::instance();
+  auto new_unique_name = list.MakeUniqueName(new_name);
+  list.Unregister(this);
+  buffer_->SetName(new_unique_name);
+  list.Register(this);
+}
+
+void Document::ResetForTesting() {
+  DocumentList::instance()->ResetForTesting();
 }
 
 }  // namespace dom

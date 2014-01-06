@@ -180,6 +180,7 @@ void ScriptController::PopulateGlobalTemplate(
 }
 
 void ScriptController::ResetForTesting() {
+  Document::ResetForTesting();
   Window::ResetForTesting();
 }
 

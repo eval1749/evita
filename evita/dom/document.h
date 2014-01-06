@@ -23,9 +23,6 @@ class Document : public v8_glue::Scriptable<Document> {
   private: std::unordered_set<Range*> ranges_;
 
   public: explicit Document(base::string16 name);
-  // TODO(yosi) Once we manage life time of Buffer, we don't need to have
-  // |Document(Buffer*)| constructor.
-  private: explicit Document(Buffer* buffer);
   public: virtual ~Document();
 
   public: const Buffer* buffer() const { return buffer_.get(); }
@@ -37,12 +34,10 @@ class Document : public v8_glue::Scriptable<Document> {
 
   public: void DidCreateRange(Range* range);
   public: void DidDestroyRange(Range* range);
-  // TODO(yosi) Once we manage life time of Buffer, we don't need to have
-  // |Document::GetOrCreateDocument(Buffer*)|
-  public: static Document* GetOrCreateDocument(Buffer* buffer);
   public: static Range* GetOrCreateRange(text::Range* range);
   public: bool IsValidPosition(text::Posn position) const;
-
+  public: void RenameTo(const base::string16& new_name);
+  public: static void ResetForTesting();
 
   DISALLOW_COPY_AND_ASSIGN(Document);
 };

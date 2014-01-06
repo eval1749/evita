@@ -16,7 +16,7 @@ namespace dom {
 
 ScriptCommand::ScriptCommand(v8::Handle<v8::Object> command)
     : command_(v8::Isolate::GetCurrent(), command) {
-  ASSERT_CALLED_ON_SCRIPT_THREAD();
+  //ASSERT_CALLED_ON_SCRIPT_THREAD();
 }
 
 void ScriptCommand::Execute(const ::Command::Context* context) {

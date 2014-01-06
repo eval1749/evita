@@ -4,6 +4,7 @@
 #include "evita/dom/abstract_dom_test.h"
 
 #include "base/strings/utf_string_conversions.h"
+#include "evita/dom/lock.h"
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/script_controller.h"
 
@@ -39,6 +40,8 @@ void AbstractDomTest::SetUp() {
 
   script_controller_ = dom::ScriptController::StartForTesting(
     mock_view_impl_.get());
+
+  DOM_AUTO_LOCK_SCOPE();
 
   auto const isolate = v8::Isolate::GetCurrent();
   v8::HandleScope handle_scope(isolate);

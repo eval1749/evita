@@ -26,8 +26,11 @@ v8::Handle<v8::Object> CreateFrame() {
 }
 
 void SetKeyBinding(int key_code, v8::Handle<v8::Object> command) {
-  ASSERT_CALLED_ON_SCRIPT_THREAD();
   ASSERT_DOM_LOCKED();
+  if (!Command::g_pGlobalBinds) {
+    // During DOM unit testing, |g_GlobalBinds| isn't initialized.
+    return;
+  }
   Command::g_pGlobalBinds->Bind(key_code, new ScriptCommand(command));
 }
 

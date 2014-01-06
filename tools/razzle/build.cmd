@@ -10,8 +10,10 @@ for %%x in (%*) do (
   )
 )
 if "%targets%"=="" set targets=evita
+set/a number_of_jobs=%number_of_processors% / 2
+echo config=%config% number_of_jobs=%number_of_jobs% targets=%targets%
 set start=%TIME%
-ninja -C ..\out\%config% %targets%
+ninja -j%number_of_jobs% -C ..\out\%config% %targets%
 set end=%TIME%
 echo Start %start%
 echo End   %end%

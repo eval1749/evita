@@ -33,7 +33,7 @@ namespace
 struct FinishLoadParam
 {
     NewlineMode     m_eNewline;
-    FILETIME        m_ftLastWrite;
+    FileTime        m_ftLastWrite;
     uint            m_nError;
     uint            m_nFileAttrs;
     Buffer*         m_pBuffer;
@@ -48,7 +48,7 @@ struct FinishLoadParam
     {
         if (ERROR_HANDLE_EOF == m_nError)
         {
-            m_pBuffer->SetFile(m_wszFileName, &m_ftLastWrite);
+            m_pBuffer->SetFile(m_wszFileName, m_ftLastWrite);
             if (NewlineMode_Detect == m_pBuffer->GetNewline())
             {
                 m_pBuffer->SetNewline(m_eNewline);
@@ -88,7 +88,7 @@ struct FinishLoadParam
 struct FinishSaveParam
 {
     NewlineMode     m_eNewline;
-    FILETIME        m_ftLastWrite;
+    FileTime        m_ftLastWrite;
     uint            m_nError;
     uint            m_nFileAttrs;
     Buffer*         m_pBuffer;
@@ -103,7 +103,7 @@ struct FinishSaveParam
     {
         if (0 == m_nError)
         {
-            m_pBuffer->SetFile(m_wszFileName, &m_ftLastWrite);
+            m_pBuffer->SetFile(m_wszFileName, m_ftLastWrite);
         } // if
 
         m_pBuffer->FinishIo(m_nError);

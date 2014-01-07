@@ -366,10 +366,10 @@ bool Buffer::Save(
 
 //  Markes the buffer visited to specified file.
 void text::Buffer::SetFile(
-    const char16* const pwszFile,
-    const FILETIME* const pftLastWrite) {
-  filename_ =  pwszFile;
-  m_ftLastWrite = *pftLastWrite;
+    const base::string16& filename,
+    const FileTime& last_write_time) {
+  filename_ =  filename;
+  m_ftLastWrite = last_write_time;
   m_nSaveTick = m_nCharTick;
   m_eObsolete = Obsolete_No;
 } // Buffer::SetFile

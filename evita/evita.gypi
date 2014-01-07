@@ -103,6 +103,7 @@
         'library_files': [
           'dom/types.js',
           'dom/runtime.js',
+          'dom/file_path.js',
           'dom/range.js',
           'dom/selection.js',
           'dom/key_names.js',

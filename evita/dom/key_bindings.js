@@ -56,12 +56,11 @@
 })();
 
 (function() {
-  function selectAll() {
+  // Select all contents
+  editor.setKeyBinding('Ctrl+A', function() {
     var range = this.selection.range;
     range.start = 0
     range.end = range.document.length;
     this.selection.startIsActive = false;
-  }
-
-  editor.setKeyBinding('Ctrl+A', selectAll);
+  });
 })();

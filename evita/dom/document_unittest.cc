@@ -46,6 +46,19 @@ TEST_F(DocumentTest, Constructor) {
                    "var sample2 = new Document('.bar'); sample2.name");
 }
 
+TEST_F(DocumentTest, Document_list) {
+  RunScript("['foo', 'bar', 'baz'].forEach(function(name) {"
+            "  new Document(name);"
+            "});"
+            "var samples = Document.list.sort(function(a, b) {"
+            "  return a.name.localeCompare(b.name);"
+            "});");
+  EXPECT_SCRIPT_EQ("3", "samples.length");
+  EXPECT_SCRIPT_EQ("bar", "samples[0].name");
+  EXPECT_SCRIPT_EQ("baz", "samples[1].name");
+  EXPECT_SCRIPT_EQ("foo", "samples[2].name");
+}
+
 TEST_F(DocumentTest, DocumentFind) {
   EXPECT_SCRIPT_TRUE("var sample1 = Document.find('foo'); sample1 == null");
   RunScript("new Document('foo')");

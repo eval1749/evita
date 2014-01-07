@@ -4,6 +4,8 @@
 #include "evita/dom/document.h"
 
 #include <unordered_map>
+#include <vector>
+#include <utility>
 
 #include "base/logging.h"
 #include "base/strings/string_number_conversions.h"
@@ -48,6 +50,15 @@ class DocumentList : public common::Singleton<DocumentList> {
   private: DocumentList() = default;
   public: ~DocumentList() = default;
 
+  private: std::vector<Document*> list() const {
+    std::vector<Document*> list(map_.size());
+    list.resize(0);
+    for (const auto& pair : map_) {
+      list.push_back(pair.second);
+    }
+    return std::move(list);
+  }
+
   public: Document* Find(const base::string16 name) const {
     auto it = map_.find(name);
     return it == map_.end() ? nullptr : it->second;
@@ -69,6 +80,9 @@ class DocumentList : public common::Singleton<DocumentList> {
   }
   public: void ResetForTesting() {
     map_.clear();
+  }
+  public: static std::vector<Document*> StaticList() {
+    return instance()->list();
   }
   public: static v8_glue::Nullable<Document> StaticFind(
       const base::string16& name) {
@@ -99,6 +113,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
     return v8_glue::FunctionTemplateBuilder(isolate, templ)
         .SetMethod("find", &DocumentList::StaticFind)
         .SetMethod("getOrNew", &Document::GetOrNew)
+        .SetProperty("list", &DocumentList::StaticList)
         .Build();
   }
 

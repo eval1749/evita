@@ -8,16 +8,14 @@
  * @return {Document} A Document object contains contents of file.
  */
 Document.load = function(filename) {
-  var absolute_filename_original= FilePath.fullPath(filename);
-  var absolute_filename = absolute_filename_original.toLocaleLowerCase();
-  var present = null;
-  Document.documents.forEach(function(document) {
-    if (docment.filename.toLocaleLowerCase() == absolute_filename)
-      present = document;
+  var absolute_filename = FilePath.fullPath(filename);
+  var canonical_filename = absolute_filename.toLocaleLowerCase();
+  var present = Document.list.find(function(document) {
+    return document.filename.toLocaleLowerCase() == canonical_filename;
   });
   if (present)
-    return document;
-  var document = new Document(FilePath.filename(absolute_filename.original));
+    return present;
+  var document = new Document(FilePath.filename(filename));
   document.load_(absolute_filename);
   return document;
 };

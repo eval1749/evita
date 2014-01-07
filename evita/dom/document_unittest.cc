@@ -4,8 +4,12 @@
 #include <string>
 
 #include "base/basictypes.h"
+#include "base/strings/utf_string_conversions.h"
 #include "gmock/gmock.h"
 #include "evita/dom/abstract_dom_test.h"
+#include "evita/dom/buffer.h"
+#include "evita/dom/document.h"
+#include "evita/dom/file_path.h"
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
@@ -57,6 +61,22 @@ TEST_F(DocumentTest, Document_list) {
   EXPECT_SCRIPT_EQ("bar", "samples[0].name");
   EXPECT_SCRIPT_EQ("baz", "samples[1].name");
   EXPECT_SCRIPT_EQ("foo", "samples[2].name");
+}
+
+TEST_F(DocumentTest, Document_load) {
+  EXPECT_CALL(*mock_view_impl(),
+              LoadFile(_, Eq(dom::FilePath::FullPath(L"foo"))));
+  EXPECT_CALL(*mock_view_impl(),
+              LoadFile(_, Eq(dom::FilePath::FullPath(L"bar"))));
+  RunScript("var a = Document.load('foo');");
+  auto const document = dom::Document::Find(L"foo");
+  auto const absoulte_filename = dom::FilePath::FullPath(L"foo");
+  document->buffer()->SetFile(absoulte_filename, FileTime());
+  RunScript("var b = Document.load('foo');"
+            "var c = Document.load('bar');");
+  EXPECT_SCRIPT_EQ(base::UTF16ToUTF8(absoulte_filename), "a.filename");
+  EXPECT_SCRIPT_TRUE("a === b");
+  EXPECT_SCRIPT_TRUE("a !== c");
 }
 
 TEST_F(DocumentTest, DocumentFind) {

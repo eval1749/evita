@@ -125,6 +125,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
       ObjectTemplateBuilder& builder) override {
     builder
         .SetMethod("charCodeAt", &Document::charCodeAt)
+        .SetProperty("filename", &Document::filename)
         .SetProperty("length", &Document::length)
         .SetMethod("load_", &Document::Load)
         .SetProperty("name", &Document::name)
@@ -150,6 +151,10 @@ base::char16 Document::charCodeAt(text::Posn position) const {
   if (!IsValidPosition(position))
     return 0;
   return buffer_->GetCharAt(position);
+}
+
+const base::string16& Document::filename() const {
+  return buffer_->GetFileName();
 }
 
 text::Posn Document::length() const {

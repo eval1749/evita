@@ -23,6 +23,14 @@ class EditorTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(EditorTest);
 };
 
+TEST_F(EditorTest, getFilenameForLoad) {
+  RunScript("var filename;"
+            "function gotFilename(x) { filename = x; }"
+            "var window = new EditorWindow();"
+            "editor.getFilenameForLoad(window, 'dir', gotFilename);");
+  EXPECT_SCRIPT_EQ("dir/foo.bar", "filename");
+}
+
 TEST_F(EditorTest, getFilenameForSave) {
   RunScript("var filename;"
             "function gotFilename(x) { filename = x; }"

@@ -28,6 +28,14 @@ v8::Handle<v8::Object> CreateFrame() {
   return window->GetWrapper(v8::Isolate::GetCurrent());
 }
 
+void GetFilenameForLoad(Window* window, const base::string16& dir_path,
+                        v8::Handle<v8::Function> callback) {
+  ScriptController::instance()->view_delegate()->GetFilenameForLoad(
+      window->widget_id(), dir_path,
+      v8_glue::ScriptCallback<ViewDelegate::GetFilenameForLoadCallback>::New(
+          v8::Isolate::GetCurrent(), callback));
+}
+
 void GetFilenameForSave(Window* window, const base::string16& dir_path,
                         v8::Handle<v8::Function> callback) {
   ScriptController::instance()->view_delegate()->GetFilenameForSave(
@@ -62,6 +70,7 @@ class EditorWrapperInfo : public v8_glue::WrapperInfo {
       ObjectTemplateBuilder& builder) override {
     builder
       .SetMethod("createFrame", CreateFrame)
+      .SetMethod("getFilenameForLoad", GetFilenameForLoad)
       .SetMethod("getFilenameForSave", GetFilenameForSave)
       .SetMethod("setKeyBinding_", SetKeyBinding)
       .SetProperty("version", &Editor::version);

@@ -836,85 +836,6 @@ DEFCOMMAND(NextWindow) {
 }
 
 // [O]
-
-//////////////////////////////////////////////////////////////////////
-//
-// OpenFile - Ctrl+O
-//  Load file in new tab or new frame.
-//
-// Note:
-// Set initial directory of file dialogbox from current buffer
-//
-static void openFile(Selection* pSelection, bool fNewFrame)
-{
-    FileDialogBox::Param oParam;
-
-    if (NULL != pSelection)
-    {
-        oParam.SetDirectory(pSelection->GetBuffer()->GetFileName().c_str());
-        oParam.m_hwndOwner = pSelection->GetWindow()->AssociatedHwnd();
-    }
-    else
-    {
-        oParam.m_hwndOwner = *Application::instance()->GetActiveFrame();
-    }
-
-    FileDialogBox oDialog;
-    if (! oDialog.GetOpenFileName(&oParam))
-    {
-        return;
-    }
-
-    Buffer* pBuffer = Application::instance()->Load(oParam.m_wsz);
-
-    if (fNewFrame)
-    {
-        auto const frame = Application::instance()->CreateFrame(pBuffer);
-        frame->Realize();
-    }
-    else
-    {
-        Frame* pFrame = Application::instance()->GetActiveFrame();
-        for (auto& pane: pFrame->panes()) {
-            auto const pPresent = pane.DynamicCast<EditPane>();
-            if (NULL == pPresent)
-            {
-                continue;
-            }
-
-            if (pPresent->GetBuffer() == pBuffer)
-            {
-                pPresent->Activate();
-                return;
-            }
-        } // for each pane
-
-        pFrame->AddWindow(pBuffer);
-    } // if
-} // OpenFile
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// OpenFile - Ctrl+O
-//  Load file in tab.
-//
-DEFCOMMAND(OpenFile) {
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(openFile, base::Unretained(pCtx->GetSelection()), false));
-}
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// OpenFileInNewFrame - Ctrl+Shift+O
-//  Load file into new frame.
-//
-DEFCOMMAND(OpenFileInNewFrame) {
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(openFile, base::Unretained(pCtx->GetSelection()), true));
-}
-
 DEFCOMMAND(Outdent)
 {
     pCtx->GetSelection()->Outdent();
@@ -1644,7 +1565,6 @@ void Processor::GlobalInit() {
     //BIND_KEY(Mod_Ctrl | 'I', Indent);
     BIND_KEY(Mod_Ctrl | 'L', MakeSelectionVisible);
     //BIND_KEY(Mod_Ctrl | 'M', TypeEnter);
-    BIND_KEY(Mod_Ctrl | 'O', OpenFile);
     BIND_KEY(Mod_Ctrl | 'Q', QuotedInsertEntry());
     BIND_KEY(Mod_Ctrl | 'R', Reload);
     BIND_KEY(Mod_Ctrl | 'S', SaveFile);
@@ -1659,7 +1579,6 @@ void Processor::GlobalInit() {
     BIND_KEY(Mod_CtrlShift | 'C', CapitalizeSelection);
     BIND_KEY(Mod_CtrlShift | 'D', DowncaseSelection);
     BIND_KEY(Mod_CtrlShift | 'J', ShowV8Console);
-    BIND_KEY(Mod_CtrlShift | 'O', OpenFileInNewFrame);
     BIND_KEY(Mod_CtrlShift | 'U', UpcaseSelection);
 
     // Ctrl+Shift+[0-9]

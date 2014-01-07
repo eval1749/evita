@@ -107,4 +107,23 @@
           newEditorWindow(new Document(filename));
         });
   });
+
+  // Open document in new or existing window in current editor window.
+  editor.setKeyBinding('Ctrl+O', function() {
+    var editorWindow = this.parent;
+    editor.getFilenameForLoad(this, this.selection.document.filename,
+                              function(filename) {
+      // TODO(yosi) When editorWindow has a window for filename, we should
+      // activate it.
+      newTextWindow(editorWindow, Document.load(filename));
+    });
+  });
+
+  // Open document in new editor window.
+  editor.setKeyBinding('Ctrl+Shift+O', function() {
+    editor.getFilenameForLoad(this, this.selection.document.filename,
+                              function(filename) {
+      newEditorWindow(Document.load(filename));
+    });
+  });
 })();

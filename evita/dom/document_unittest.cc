@@ -72,7 +72,7 @@ TEST_F(DocumentTest, length) {
 
 TEST_F(DocumentTest, load_) {
   EXPECT_CALL(*mock_view_impl(), LoadFile(_, Eq(L"foo")));
-  RunScript("var doc = new Document('foo'); doc.load('foo')");
+  RunScript("var doc = new Document('foo'); doc.load_('foo')");
   
 }
 

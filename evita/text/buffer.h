@@ -55,7 +55,7 @@ class FileFeatures {
 
   // [G]
   public: uint GetCodePage() const { return m_nCodePage; }
-  public: const base::string16 GetFileName() const { return filename_; }
+  public: const base::string16& GetFileName() const { return filename_; }
 
   public: const FileTime* GetLastWriteTime() const { return &m_ftLastWrite; }
 

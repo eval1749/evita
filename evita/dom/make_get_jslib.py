@@ -49,7 +49,7 @@ def ToCString(lines):
       continue
     if len(result):
       result += '\n'
-    line = re.sub(r'\\', '\\\\', line)
+    line = re.sub(r'\\', '\\\\\\\\', line)
     line = re.sub(r'"', '\\"', line)
     result += kIndent + '"' + line + '\\n"'
   return result;

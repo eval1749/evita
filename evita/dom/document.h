@@ -37,6 +37,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: static Document* Find(const base::string16& name);
   public: static Document* GetOrNew(const base::string16& name);
   public: bool IsValidPosition(text::Posn position) const;
+  public: void Load(const base::string16& filename);
   public: void RenameTo(const base::string16& new_name);
   public: static void ResetForTesting();
 

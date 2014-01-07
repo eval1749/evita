@@ -12,6 +12,7 @@
 
 namespace {
 
+using ::testing::Eq;
 using ::testing::_;
 
 class DocumentTest : public dom::AbstractDomTest {
@@ -67,6 +68,12 @@ TEST_F(DocumentTest, length) {
   EXPECT_SCRIPT_EQ("0", "doc.length");
   RunScript("new Range(doc).text = 'foobar';");
   EXPECT_SCRIPT_EQ("6", "doc.length");
+}
+
+TEST_F(DocumentTest, load_) {
+  EXPECT_CALL(*mock_view_impl(), LoadFile(_, Eq(L"foo")));
+  RunScript("var doc = new Document('foo'); doc.load('foo')");
+  
 }
 
 TEST_F(DocumentTest, name) {

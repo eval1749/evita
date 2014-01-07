@@ -4,6 +4,8 @@
 #include "evita/view/view_delegate_impl.h"
 
 #include "base/logging.h"
+#include "evita/dom/buffer.h"
+#include "evita/dom/document.h"
 #include "evita/dom/editor_window.h"
 #include "evita/dom/text_window.h"
 #include "evita/dom/view_event_handler.h"
@@ -71,6 +73,11 @@ void ViewDelegateImpl::GetFilenameForSave(
     return;
   event_handler_->RunCallback(base::Bind(callback,
                                          base::string16(params.m_pwszFile)));
+}
+
+void ViewDelegateImpl::LoadFile(dom::Document* document,
+                                const base::string16& filename) {
+  document->buffer()->Load(filename.c_str());
 }
 
 void ViewDelegateImpl::RealizeWindow(dom::WidgetId widget_id) {

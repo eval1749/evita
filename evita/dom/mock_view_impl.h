@@ -20,6 +20,7 @@ class MockViewImpl : public dom::ViewDelegate {
   public: virtual void GetFilenameForSave(WidgetId widget_id,
     const base::string16& dir_path,
     GetFilenameForSaveCallback callback) override;
+  MOCK_METHOD2(LoadFile, void(Document*, const base::string16&));
   MOCK_METHOD1(RealizeWindow, void(WidgetId));
   MOCK_METHOD1(RegisterViewEventHandler, void(ViewEventHandler*));
 

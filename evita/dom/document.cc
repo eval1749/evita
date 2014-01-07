@@ -11,6 +11,7 @@
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/script_controller.h"
+#include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
@@ -110,6 +111,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
     builder
         .SetMethod("charCodeAt", &Document::charCodeAt)
         .SetProperty("length", &Document::length)
+        .SetMethod("load_", &Document::Load)
         .SetProperty("name", &Document::name)
         .SetMethod("renameTo", &Document::RenameTo);
   }
@@ -171,6 +173,11 @@ bool Document::IsValidPosition(text::Posn position) const {
     return true;
   ScriptController::instance()->ThrowError("Invalid position.");
   return false;
+}
+
+void Document::Load(const base::string16& filename) {
+  // TODO(yosi) We should protect this document againt gc.
+  ScriptController::instance()->view_delegate()->LoadFile(this, filename);
 }
 
 void Document::RenameTo(const base::string16& new_name) {

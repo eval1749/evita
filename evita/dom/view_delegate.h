@@ -9,6 +9,7 @@
 
 namespace dom {
 
+class Document;
 class EditorWindow;
 class TextWindow;
 class ViewEventHandler;
@@ -28,6 +29,8 @@ class ViewDelegate {
   public: virtual void GetFilenameForSave(
       WidgetId widget_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) = 0;
+  public: virtual void LoadFile(Document* document,
+                                const base::string16& filename) = 0;
   public: virtual void RealizeWindow(WidgetId widget_id) = 0;
   public: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) = 0;

@@ -181,11 +181,18 @@ var VKEY_NAMES = [
 /** @type {Array.<string>} */
 var KEY_NAMES = (function() {
   var names = new Array(256);
-  for (var key_code = 0x20; key_code < 0x7E; ++key_code) {
-    names[key_code] = String.fromCharCode(key_code);
+  function populate(start, end) {
+    for (var key_code = start; key_code < end; ++key_code) {
+      names[key_code] = String.fromCharCode(key_code);
+    }
   }
+  // TODO(yosi) We should get supported key code values for current keyboard
+  // from |::MapVirtualKey(vkey, MAPVK_VK_TOCHAR)|.
+  populate(0x20, 0x3F);
+  populate(0x40, 0x5F);
+  populate(0x60, 0x60);
   VKEY_NAMES.forEach(function(name, index) {
-    names[key_code + index + 0x100] = name;
+    names[index + 0x100] = name;
   });
   return names;
 })();

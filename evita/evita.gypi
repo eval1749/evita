@@ -101,6 +101,7 @@
       'type': 'none',
       'variables': {
         'library_files': [
+          'dom/polyfill.js',
           'dom/types.js',
           'dom/runtime.js',
           'dom/document.js',

@@ -65,6 +65,7 @@ struct ScriptCallback<base::Callback<void(Params...)>> {
   }
 
   static void Run(internal::ScriptClosure* closure, Params... params) {
+    v8::HandleScope handle_scope(closure->isolate());
     internal::ScriptCallbackArguments args(closure->isolate());
     args.Populate(params...);
     closure->Run(std::move(args.argv()));

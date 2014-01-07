@@ -29,6 +29,9 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void AddWindow(dom::WidgetId parent_id,
                                   dom::WidgetId child_id) override;
   private: virtual void DestroyWindow(dom::WidgetId widget_id) override;
+  private: virtual void GetFilenameForLoad(
+      dom::WidgetId widget_id, const base::string16& dir_path,
+      GetFilenameForLoadCallback callback) override;
   private: virtual void GetFilenameForSave(
       dom::WidgetId widget_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) override;

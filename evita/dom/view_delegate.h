@@ -17,6 +17,9 @@ class Window;
 
 class ViewDelegate {
   public: typedef base::Callback<void(base::string16 filename)>
+      GetFilenameForLoadCallback;
+
+  public: typedef base::Callback<void(base::string16 filename)>
       GetFilenameForSaveCallback;
 
   public: ViewDelegate() = default;
@@ -26,6 +29,9 @@ class ViewDelegate {
   public: virtual void CreateTextWindow(const TextWindow* window) = 0;
   public: virtual void AddWindow(WidgetId parent_id, WidgetId child_id) = 0;
   public: virtual void DestroyWindow(WidgetId widget_id) = 0;
+  public: virtual void GetFilenameForLoad(
+      WidgetId widget_id, const base::string16& dir_path,
+      GetFilenameForLoadCallback callback) = 0;
   public: virtual void GetFilenameForSave(
       WidgetId widget_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) = 0;

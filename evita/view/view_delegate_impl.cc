@@ -56,6 +56,25 @@ void ViewDelegateImpl::DestroyWindow(dom::WidgetId widget_id) {
   widgets::Widget::DidDestroyDomWindow(widget_id);
 }
 
+void ViewDelegateImpl::GetFilenameForLoad(
+    dom::WidgetId widget_id, const base::string16& dir_path,
+    GetFilenameForLoadCallback callback) {
+  auto const widget = widgets::Widget::FromWidgetId(widget_id);
+  if (!widget) {
+    DVLOG(0) << "GetFilenameForLoad: no such widget " << widget_id;
+    event_handler_->RunCallback(base::Bind(callback, base::string16()));
+    return;
+  }
+  FileDialogBox::Param params;
+  params.SetDirectory(dir_path.c_str());
+  params.m_hwndOwner = widget->AssociatedHwnd();
+  FileDialogBox oDialog;
+  if (!oDialog.GetOpenFileName(&params))
+    return;
+  event_handler_->RunCallback(base::Bind(callback,
+                                         base::string16(params.m_pwszFile)));
+}
+
 void ViewDelegateImpl::GetFilenameForSave(
     dom::WidgetId widget_id, const base::string16& dir_path,
     GetFilenameForSaveCallback callback) {

@@ -124,8 +124,8 @@ DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
 DEFINE_VIEW_DELEGATE_1(CreateTextWindow, const TextWindow*)
 DEFINE_VIEW_DELEGATE_2(AddWindow, WidgetId, WidgetId)
 DEFINE_VIEW_DELEGATE_1(DestroyWindow, WidgetId)
-DEFINE_VIEW_DELEGATE_3(GetSaveFilename, WidgetId, const base::string16&,
-                       ViewDelegate::GetSaveFilenameCallback)
+DEFINE_VIEW_DELEGATE_3(GetFilenameForSave, WidgetId, const base::string16&,
+                       ViewDelegate::GetFilenameForSaveCallback)
 DEFINE_VIEW_DELEGATE_1(RealizeWindow, WidgetId)
 
 void ScriptThread::RegisterViewEventHandler(

@@ -54,12 +54,12 @@ void ViewDelegateImpl::DestroyWindow(dom::WidgetId widget_id) {
   widgets::Widget::DidDestroyDomWindow(widget_id);
 }
 
-void ViewDelegateImpl::GetSaveFilename(
+void ViewDelegateImpl::GetFilenameForSave(
     dom::WidgetId widget_id, const base::string16& dir_path,
-    GetSaveFilenameCallback callback) {
+    GetFilenameForSaveCallback callback) {
   auto const widget = widgets::Widget::FromWidgetId(widget_id);
   if (!widget) {
-    DVLOG(0) << "GetSaveFilename: no such widget " << widget_id;
+    DVLOG(0) << "GetFilenameForSave: no such widget " << widget_id;
     event_handler_->RunCallback(base::Bind(callback, base::string16()));
     return;
   }

@@ -17,8 +17,8 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD1(CreateTextWindow, void(const TextWindow*));
   MOCK_METHOD2(AddWindow, void(WidgetId, WidgetId));
   MOCK_METHOD1(DestroyWindow, void(WidgetId));
-  MOCK_METHOD3(GetSaveFilename, void(WidgetId, const base::string16&,
-                                     GetSaveFilenameCallback));
+  MOCK_METHOD3(GetFilenameForSave, void(WidgetId, const base::string16&,
+                                     GetFilenameForSaveCallback));
   MOCK_METHOD1(RealizeWindow, void(WidgetId));
   MOCK_METHOD1(RegisterViewEventHandler, void(ViewEventHandler*));
 

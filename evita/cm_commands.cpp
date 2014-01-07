@@ -680,68 +680,6 @@ DEFCOMMAND(MakeSelectionVisible)
 } // MakeSelectionVisible
 
 // [N]
-
-//////////////////////////////////////////////////////////////////////
-//
-// newFile
-//   o Show "File Save" Dialog to get new filename from a user
-//   o Create new buffer
-//   o Show it in a frame
-static void newFile(TextEditWindow* window, bool fNewFrame, bool save_as)
-{
-    FileDialogBox::Param oParam;
-
-    if (save_as)
-    {
-        ::lstrcpyW(oParam.m_wsz, L"untitled.txt");
-        oParam.m_pwszFile = oParam.m_wsz;
-    }
-    else if (auto selection = window->GetSelection())
-    {
-        oParam.SetDirectory(selection->GetBuffer()->GetFileName().c_str());
-        oParam.m_hwndOwner = window->AssociatedHwnd();
-
-        FileDialogBox oDialog;
-        if (! oDialog.GetSaveFileName(&oParam))
-        {
-            return;
-        }
-    }
-
-    Buffer* pBuffer = Application::instance()->NewBuffer(
-        oParam.m_pwszFile );
-
-    FileTime ftZero;
-    pBuffer->SetFile(oParam.m_wsz, &ftZero);
-
-    if (fNewFrame)
-    {
-        auto const frame = Application::instance()->CreateFrame(pBuffer);
-        frame->Realize();
-    }
-    else
-    {
-        window->frame().AddWindow(pBuffer);
-    }
-} // NewFile
-
-
-// Ctrl+N
-DEFCOMMAND(NewFile) {
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(newFile,
-                 base::Unretained(pCtx->GetWindow()->as<TextEditWindow>()),
-                 false, pCtx->HasArg()));
-}
-
-// Ctrl+Shift+N
-DEFCOMMAND(NewFileInNewFrame) {
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(newFile,
-                 base::Unretained(pCtx->GetWindow()->as<TextEditWindow>()),
-                 true, pCtx->HasArg()));
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // NewFrame - Ctrl+Shift+3
@@ -1706,7 +1644,6 @@ void Processor::GlobalInit() {
     //BIND_KEY(Mod_Ctrl | 'I', Indent);
     BIND_KEY(Mod_Ctrl | 'L', MakeSelectionVisible);
     //BIND_KEY(Mod_Ctrl | 'M', TypeEnter);
-    BIND_KEY(Mod_Ctrl | 'N', NewFile);
     BIND_KEY(Mod_Ctrl | 'O', OpenFile);
     BIND_KEY(Mod_Ctrl | 'Q', QuotedInsertEntry());
     BIND_KEY(Mod_Ctrl | 'R', Reload);
@@ -1722,7 +1659,6 @@ void Processor::GlobalInit() {
     BIND_KEY(Mod_CtrlShift | 'C', CapitalizeSelection);
     BIND_KEY(Mod_CtrlShift | 'D', DowncaseSelection);
     BIND_KEY(Mod_CtrlShift | 'J', ShowV8Console);
-    BIND_KEY(Mod_CtrlShift | 'N', NewFileInNewFrame);
     BIND_KEY(Mod_CtrlShift | 'O', OpenFileInNewFrame);
     BIND_KEY(Mod_CtrlShift | 'U', UpcaseSelection);
 

@@ -14,6 +14,25 @@
 
 namespace dom {
 
+//////////////////////////////////////////////////////////////////////
+//
+// ScriptCommand::Context
+//
+struct ScriptCommand::Context {
+  int arg;
+  bool has_arg;
+  WidgetId widget_id;
+
+  Context(const ::Command::Context* context)
+      : arg(context->GetArg()), has_arg(context->HasArg()),
+        widget_id(context->GetWindow()->widget_id()) {
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// ScriptCommand
+//
 ScriptCommand::ScriptCommand(v8::Handle<v8::Object> command)
     : command_(v8::Isolate::GetCurrent(), command) {
   //ASSERT_CALLED_ON_SCRIPT_THREAD();
@@ -22,17 +41,17 @@ ScriptCommand::ScriptCommand(v8::Handle<v8::Object> command)
 void ScriptCommand::Execute(const ::Command::Context* context) {
   DCHECK(context);
   ASSERT_CALLED_ON_UI_THREAD();
-  // TODO(yosi) We should manage life time of Command::Context.
+  auto command_context = new Context(context);
   ScriptThread::instance()->PostTask(FROM_HERE,
       base::Bind(&ScriptCommand::RunCommand, this,
-                 base::Unretained(context)));
+                 base::Unretained(command_context)));
 }
 
-void ScriptCommand::RunCommand(const ::Command::Context* context) {
+void ScriptCommand::RunCommand(Context* context) {
   ASSERT_CALLED_ON_SCRIPT_THREAD();
   DCHECK(context);
-  auto const active_window = Window::FromWidgetId(
-      context->GetWindow()->widget_id());
+  std::unique_ptr<Context> scoped_context(context);
+  auto const active_window = Window::FromWidgetId(context->widget_id);
   if (!active_window)
     return;
 
@@ -42,8 +61,8 @@ void ScriptCommand::RunCommand(const ::Command::Context* context) {
   const auto receiver = active_window->GetWrapper(isolate);
 
   v8::Handle<v8::Value> argv[1];
-  if (context->HasArg())
-    argv[0] = v8::Integer::New(context->GetArg());
+  if (context->has_arg)
+    argv[0] = v8::Integer::New(context->arg);
   else
     argv[0] = v8::Undefined(isolate);
 

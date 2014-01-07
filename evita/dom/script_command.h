@@ -12,13 +12,15 @@ namespace dom {
 class ScriptCommand : public Command::Command {
   private: v8_glue::ScopedPersistent<v8::Object> command_;
 
+  private: struct Context;
+
   public: ScriptCommand(v8::Handle<v8::Object> command);
   public: virtual ~ScriptCommand() = default;
 
   public: virtual void Execute(
       const ::Command::Context* context) override;
 
-  private: void RunCommand(const ::Command::Context* context);
+  private: void RunCommand(Context* context);
 
   DISALLOW_COPY_AND_ASSIGN(ScriptCommand);
 };

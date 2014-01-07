@@ -68,7 +68,7 @@ void ViewDelegateImpl::GetFilenameForSave(
   params.m_hwndOwner = widget->AssociatedHwnd();
   FileDialogBox oDialog;
   if (!oDialog.GetSaveFileName(&params))
-    *params.m_pwszFile = 0;
+    return;
   event_handler_->RunCallback(base::Bind(callback,
                                          base::string16(params.m_pwszFile)));
 }

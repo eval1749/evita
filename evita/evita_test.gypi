@@ -45,6 +45,7 @@
         'dom/document_unittest.cc',
         'dom/editor_unittest.cc',
         'dom/editor_window_unittest.cc',
+        'dom/file_path_unittest.cc',
         'dom/mock_view_impl.cc',
         'dom/range_unittest.cc',
         'dom/selection_unittest.cc',

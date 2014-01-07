@@ -61,6 +61,7 @@
         'dom/document.cc',
         'dom/editor.cc',
         'dom/editor_window.cc',
+        'dom/file_path.cc',
         'dom/lock.cc',
         'dom/range.cc',
         'dom/selection.cc',

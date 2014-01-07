@@ -9,6 +9,7 @@
 #include "evita/dom/document.h"
 #include "evita/dom/editor.h"
 #include "evita/dom/editor_window.h"
+#include "evita/dom/file_path.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/range.h"
 #include "evita/dom/script_controller.h"
@@ -170,6 +171,7 @@ void ScriptController::PopulateGlobalTemplate(
   v8_glue::Installer<Console>::Run(isolate, global_template);
   v8_glue::Installer<Document>::Run(isolate, global_template);
   v8_glue::Installer<Editor>::Run(isolate, global_template);
+  v8_glue::Installer<FilePath>::Run(isolate, global_template);
   v8_glue::Installer<Range>::Run(isolate, global_template);
   v8_glue::Installer<Selection>::Run(isolate, global_template);
   v8_glue::Installer<Window>::Run(isolate, global_template);

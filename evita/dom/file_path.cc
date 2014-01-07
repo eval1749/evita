@@ -13,18 +13,6 @@ namespace dom {
 
 namespace {
 
-base::string16 FullPath(const base::string16& filename) {
-  base::string16 full_name(MAX_PATH + 1, 0);
-  char16* file_start = nullptr;
-  auto const length = ::GetFullPathNameW(
-      filename.c_str(),
-      full_name.length(),
-      &full_name[0],
-      &file_start);
-  full_name.resize(length);
-  return full_name;
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // FilePathWrapperInfo
@@ -38,7 +26,7 @@ class FilePathWrapperInfo : public v8_glue::WrapperInfo {
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     auto templ = v8_glue::WrapperInfo::CreateConstructorTemplate(isolate);
     return v8_glue::FunctionTemplateBuilder(isolate, templ)
-        .SetMethod("fullPath", &FullPath)
+        .SetMethod("fullPath", &FilePath::FullPath)
         .Build();
   }
 };
@@ -53,6 +41,18 @@ FilePath::FilePath() {
 }
 
 FilePath::~FilePath() {
+}
+
+base::string16 FilePath::FullPath(const base::string16& filename) {
+  base::string16 full_name(MAX_PATH + 1, 0);
+  char16* file_start = nullptr;
+  auto const length = ::GetFullPathNameW(
+      filename.c_str(),
+      full_name.length(),
+      &full_name[0],
+      &file_start);
+  full_name.resize(length);
+  return full_name;
 }
 
 v8_glue::WrapperInfo* FilePath::static_wrapper_info() {

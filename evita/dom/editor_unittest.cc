@@ -23,8 +23,8 @@ class EditorTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(EditorTest);
 };
 
-TEST_F(EditorTest, Version) {
-  EXPECT_EQ("5.0", RunScript("editor.version"));
+TEST_F(EditorTest, version) {
+  EXPECT_SCRIPT_EQ("5.0", "editor.version");
 }
 
 }  // namespace

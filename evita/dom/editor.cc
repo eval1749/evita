@@ -3,14 +3,17 @@
 
 #include "evita/dom/editor.h"
 
+#include "base/callback.h"
 #include "evita/cm_CmdProc.h"
 #include "evita/gc/local.h"
 #include "evita/dom/editor_window.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/script_command.h"
+#include "evita/dom/script_controller.h"
 #include "evita/dom/script_thread.h"
 #include "evita/editor/application.h"
 #include "evita/v8_glue/converter.h"
+#include "evita/v8_glue/script_callback.h"
 
 namespace dom {
 
@@ -23,6 +26,14 @@ v8::Handle<v8::Object> CreateFrame() {
   ASSERT_DOM_LOCKED();
   auto window = gc::MakeLocal(new EditorWindow());
   return window->GetWrapper(v8::Isolate::GetCurrent());
+}
+
+void GetFilenameForSave(Window* window, const base::string16& dir_path,
+                        v8::Handle<v8::Function> callback) {
+  ScriptController::instance()->view_delegate()->GetFilenameForSave(
+      window->widget_id(), dir_path,
+      v8_glue::ScriptCallback<ViewDelegate::GetFilenameForSaveCallback>::New(
+          v8::Isolate::GetCurrent(), callback));
 }
 
 void SetKeyBinding(int key_code, v8::Handle<v8::Object> command) {
@@ -51,6 +62,7 @@ class EditorWrapperInfo : public v8_glue::WrapperInfo {
       ObjectTemplateBuilder& builder) override {
     builder
       .SetMethod("createFrame", CreateFrame)
+      .SetMethod("getFilenameForSave", GetFilenameForSave)
       .SetMethod("setKeyBinding_", SetKeyBinding)
       .SetProperty("version", &Editor::version);
   }

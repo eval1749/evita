@@ -11,4 +11,11 @@ MockViewImpl::MockViewImpl() {
 MockViewImpl::~MockViewImpl() {
 }
 
+void MockViewImpl::GetFilenameForSave(WidgetId,
+                                      const base::string16& dir_path,
+                                      GetFilenameForSaveCallback callback) {
+  callback.Run(dir_path + L"/foo.bar");
 }
+
+}  // namespace dom
+

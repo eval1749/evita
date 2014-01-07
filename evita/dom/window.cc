@@ -107,8 +107,7 @@ class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
     }
     auto const window = it->second.get();
     window->widget_id_ = kInvalidWidgetId;
-    DCHECK(kRealized == window->state_ || kDestroying == window->state_ ||
-           kRealizing == window->state_);
+    DCHECK_NE(kDestroyed, window->state_);
     window->state_ = kDestroyed;
     if (auto const parent = window->parent_window_) {
       parent->child_windows_.erase(window);

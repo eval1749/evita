@@ -12,6 +12,7 @@
 
 namespace {
 
+using ::testing::Eq;
 using ::testing::_;
 
 class EditorWindowTest : public dom::AbstractDomTest {
@@ -38,13 +39,13 @@ TEST_F(EditorWindowTest, EditorWindow_list) {
 }
 
 TEST_F(EditorWindowTest, Realize) {
-  EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(::testing::_));
+  EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
   RunScript("var sample = new EditorWindow()");
-  EXPECT_EQ("true", RunScript("sample instanceof EditorWindow"));
-  EXPECT_EQ("true", RunScript("sample instanceof Window"));
-  EXPECT_EQ("1", RunScript("sample.id"));
+  EXPECT_SCRIPT_TRUE("sample instanceof EditorWindow");
+  EXPECT_SCRIPT_TRUE("sample instanceof Window");
+  EXPECT_SCRIPT_EQ("1", "sample.id");
 
-  EXPECT_CALL(*mock_view_impl(), RealizeWindow(::testing::Eq(1)));
+  EXPECT_CALL(*mock_view_impl(), RealizeWindow(1));
   RunScript("sample.realize()");
 }
 

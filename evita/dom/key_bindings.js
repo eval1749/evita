@@ -73,6 +73,32 @@
     parent.add(new TextWindow(new Range(document)));
   }
 
+  // Show document in new editor window.
+  editor.setKeyBinding('Ctrl+Shift+3', function() {
+    var text_window = new TextWindow(this.selection.range);
+    var editor_window = new EditorWindow();
+    editor_window.add(text_window);
+    editor_window.realize();
+    text_window.makeSelectionVisible();
+    text_window.focus();
+  });
+
+  // Show document in new editor window and close current editor window.
+  editor.setKeyBinding('Ctrl+Shift+4', function() {
+    var current = this.selection.window.parent;
+    // When editor window has only one tab, we don't ignore this command,
+    // since result of this command isn't useful.
+    if (current.children.length == 1)
+      return;
+    var text_window = new TextWindow(this.selection.range);
+    var editor_window = new EditorWindow();
+    editor_window.add(text_window);
+    editor_window.realize();
+    text_window.makeSelectionVisible();
+    text_window.focus();
+    current.destroy();
+  });
+
   // Select all contents
   editor.setKeyBinding('Ctrl+A', function() {
     var range = this.selection.range;

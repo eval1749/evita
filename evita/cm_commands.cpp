@@ -680,58 +680,6 @@ DEFCOMMAND(MakeSelectionVisible)
 } // MakeSelectionVisible
 
 // [N]
-//////////////////////////////////////////////////////////////////////
-//
-// NewFrame - Ctrl+Shift+3
-//
-DEFCOMMAND(NewFrame)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-
-    Frame* pFrame = Application::instance()->CreateFrame();
-
-    auto const pWindow = pFrame->AddWindow(pSelection->GetBuffer());
-    pFrame->Realize();
-
-    pWindow->GetSelection()->SetRange(
-        pSelection->GetStart(),
-        pSelection->GetEnd() );
-
-    pWindow->MakeSelectionVisible();
-    pWindow->Activate();
-} // NewFrame
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// NewFrameAndClose - Ctrl+Shift+4
-//
-DEFCOMMAND(NewFrameAndClose)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-
-    // When frame has only one tab, we don't ignore this command, since
-    // result of this command isn't useful.
-    unless (pCtx->GetFrame()->HasMultiplePanes()) return;
-
-    Frame* pFrame = Application::instance()->CreateFrame();
-
-    auto const pWindow = pFrame->AddWindow(pSelection->GetBuffer());
-    pFrame->Realize();
-
-    pWindow->GetSelection()->SetRange(
-        pSelection->GetStart(),
-        pSelection->GetEnd() );
-
-    pSelection->GetWindow()->Destroy();
-
-    pWindow->MakeSelectionVisible();
-    pWindow->Activate();
-} // NewFrameAndClose
-
-
 // activateFirstWindow
 static void activateFirstWindow(Pane* pPane)
 {
@@ -1559,8 +1507,6 @@ void Processor::GlobalInit() {
     BIND_KEY(Mod_CtrlShift | '0', CloseThisWindow);
     BIND_KEY(Mod_CtrlShift | '1', CloseOtherWindows);
     BIND_KEY(Mod_CtrlShift | '2', SplitWindowVertically);
-    BIND_KEY(Mod_CtrlShift | '3', NewFrame);
-    BIND_KEY(Mod_CtrlShift | '4', NewFrameAndClose);
     BIND_KEY(Mod_CtrlShift | '5', SplitWindowHorizontally);
     BIND_KEY(Mod_CtrlShift | '9', CloseOtherFrames);
     BIND_KEY(Mod_CtrlShift | 'W', Exit);

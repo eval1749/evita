@@ -222,20 +222,6 @@ void ScriptController::DidRealizeWidget(WidgetId widget_id) {
 }
 
 void ScriptController::DidStartHost() {
-#if 0
-  auto& frame = *Application::instance()->CreateFrame();
-  for (auto const filename: CommandLine::ForCurrentProcess()->GetArgs()) {
-    auto const buffer = Application::instance()->Load(filename.c_str());
-    frame.AddWindow(buffer);
-  }
-
-  // When there is no filename argument, we start lisp.
-  if (!frame.GetFirstPane()) {
-    auto const buffer = Application::instance()->NewBuffer(L"*scratch*");
-    frame.AddWindow(buffer);
-  }
-  frame.Realize();
-#endif
   // We should prevent UI thread to access DOM.
   DOM_AUTO_LOCK_SCOPE();
   LoadJsLibrary();

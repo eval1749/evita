@@ -254,23 +254,35 @@ void ScriptController::DidStartHost() {
       "line: " << result.line_number;
 }
 
-void ScriptController::OpenFile(WidgetId widget_id,
-                                const base::string16& filename){
+static v8::Handle<v8::Value> GetOpenFileHandler(
+    v8::Handle<v8::Context> context, WidgetId widget_id) {
+  auto const isolate = context->GetIsolate();
+  if (widget_id == kInvalidWidgetId)
+    return context->Global()->Get(gin::StringToV8(isolate, "editor"));
+
   auto const window = Window::FromWidgetId(widget_id);
   if (!window) {
     DVLOG(0) << "OpenFile: No suche window " << widget_id;
-    return;
+    return v8::Handle<v8::Value>();
   }
+  return window->GetWrapper(isolate);
+}
+
+void ScriptController::OpenFile(WidgetId widget_id,
+                                const base::string16& filename){
   auto const isolate = isolate_holder_.isolate();
   v8::HandleScope handle_scope(isolate);
-  auto js_window = window->GetWrapper(isolate);
-  auto open_file = js_window->Get(gin::StringToV8(isolate, "openFile"));
+  auto js_handler = GetOpenFileHandler(context_holder_.context(), widget_id);
+  if (js_handler.IsEmpty())
+    return;
+  auto open_file = js_handler->ToObject()->Get(
+      gin::StringToV8(isolate, "open"));
   if (!open_file->IsFunction()) {
     DVLOG(0) << "OpenFile: window doesn't have callable openFile property.";
     return;
   }
   auto js_filename = gin::StringToV8(isolate, filename);
-  open_file->ToObject()->CallAsFunction(js_window, 1, &js_filename);
+  open_file->ToObject()->CallAsFunction(js_handler, 1, &js_filename);
 }
 
 void ScriptController::RunCallback(base::Closure callback) {

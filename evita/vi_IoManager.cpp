@@ -15,6 +15,7 @@
 
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
+#include "evita/dom/view_event_handler.h"
 #include "./vi_EditPane.h"
 #include "./vi_Frame.h"
 #include "./vi_Listener.h"
@@ -344,31 +345,8 @@ void IoManager::Realize()
 //
 // IoManager::visitFile
 //
-void IoManager::visitFile(const char16* pwsz)
-{
-    Buffer* pBuffer = Application::instance()->Load(pwsz);
-
-    Pane* pPane = NULL;
-    Frame* pFrame = Application::instance()->GetActiveFrame();
-    for (auto& pane: pFrame->panes()) {
-        auto const pPresent = pane.DynamicCast<EditPane>();
-        if (NULL == pPresent)
-        {
-            continue;
-        }
-
-        if (pPresent->GetBuffer() == pBuffer)
-        {
-            pPane = pPresent;
-            break;
-        }
-    } // for each pane
-
-    if (NULL == pPane)
-    {
-        pFrame->AddWindow(pBuffer);
-    }
-
-    pPane->Activate();
-    ::SetForegroundWindow(pPane->AssociatedHwnd());
-} // IoManager::visitFile
+void IoManager::visitFile(const char16* pwsz)  {
+  Application::instance()->view_event_handler()->OpenFile(
+      widgets::kInvalidWidgetId, pwsz);
+  // TODO(yosi) Should we call |SetForegroundWindow|?
+}

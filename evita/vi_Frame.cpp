@@ -34,6 +34,7 @@
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/buffer.h"
+#include "evita/dom/view_event_handler.h"
 #include "./vi_EditPane.h"
 #include "./vi_Pane.h"
 #include "./vi_Selection.h"
@@ -525,37 +526,17 @@ const char16* Frame::getToolTip(NMTTDISPINFO* const pDisp) const {
 void Frame::onDropFiles(HDROP const hDrop) {
   uint nIndex = 0;
   for (;;) {
-    char16 wsz[MAX_PATH + 1];
-    auto const cwch = ::DragQueryFile(hDrop, nIndex, wsz, lengthof(wsz));
-    if (!cwch)
+    base::string16 filename(MAX_PATH + 1, 0);
+    auto const length = ::DragQueryFile(hDrop, nIndex, &filename[0],
+                                        filename.size());
+    if (!length)
       break;
-
-    auto const pBuffer = Application::instance()->Load(wsz);
-    Pane* pPane = nullptr;
-    for (auto& pane: m_oPanes) {
-      auto const pEditPane = pane.DynamicCast<EditPane>();
-      if (!pEditPane) {
-        continue;
-      }
-
-      if (pEditPane->GetBuffer () == pBuffer) {
-        pPane = pEditPane;
-        break;
-      }
-    }
-
-    if (!pPane) {
-      pPane = new EditPane(pBuffer);
-      AddPane(pPane);
-    }
-
-    pPane->Activate();
-
+    filename.resize(length);
+    Application::instance()->view_event_handler()->OpenFile(
+        widget_id(), filename);
     nIndex += 1;
   }
-
   ::DragFinish(hDrop);
-  Activate();
 }
 
 void Frame::Paint() {

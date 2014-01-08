@@ -995,16 +995,6 @@ DEFCOMMAND(Reload)
 } // Reload
 
 // [S]
-DEFCOMMAND(SelectAll)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-
-    pSelection->StartOf(Unit_Buffer, true);
-    pSelection->EndOf(Unit_Buffer, true);
-    pSelection->SetStartIsActive(false);
-} // SelectAll
-
 static void AddWindow(Frame* frame, TextEditWindow* window) {
   frame->AddWindow(window);
 }
@@ -1542,7 +1532,6 @@ void Processor::GlobalInit() {
     BIND_KEY(Mod_Ctrl | '.', ExchangeCode);
     BIND_KEY(Mod_Ctrl | '/', ExpandDynamicAbbrev);
 
-    BIND_KEY(Mod_Ctrl | 'A', SelectAll);
     BIND_KEY(Mod_Ctrl | 'B', ListBuffer);
     BIND_KEY(Mod_Ctrl | 'C', CopyToClipboard);
     BIND_KEY(Mod_Ctrl | 'F', FindCommand);

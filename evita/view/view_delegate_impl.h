@@ -41,6 +41,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void RealizeWindow(dom::WidgetId widget_id) override;
   private: virtual void RegisterViewEventHandler(
       dom::ViewEventHandler* event_handler) override;
+  private: virtual void SaveFile(dom::Document* document,
+                                 const base::string16& filename) override;
 
   DISALLOW_COPY_AND_ASSIGN(ViewDelegateImpl);
 };

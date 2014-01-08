@@ -41,6 +41,8 @@ class ViewDelegate {
   public: virtual void RealizeWindow(WidgetId widget_id) = 0;
   public: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) = 0;
+  public: virtual void SaveFile(Document* document,
+                                const base::string16& filename) = 0;
 
   DISALLOW_COPY_AND_ASSIGN(ViewDelegate);
 };

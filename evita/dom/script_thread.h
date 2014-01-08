@@ -77,6 +77,8 @@ class ScriptThread final : public ViewDelegate,
   private: virtual void RealizeWindow(WidgetId widget_id) override;
   private: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) override;
+  private: virtual void SaveFile(Document* document,
+                                 const base::string16& filename) override;
 
   // ViewEventHandler
   private: virtual void DidDestroyWidget(WidgetId widget_id) override;

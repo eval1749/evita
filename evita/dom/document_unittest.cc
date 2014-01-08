@@ -118,4 +118,10 @@ TEST_F(DocumentTest, renameTo) {
   EXPECT_SCRIPT_EQ("bar", "doc.name");
 }
 
+TEST_F(DocumentTest, save) {
+  EXPECT_CALL(*mock_view_impl(), SaveFile(_, Eq(L"foo")));
+  RunScript("var doc = new Document('foo'); doc.save('foo')");
+  
+}
+
 }  // namespace

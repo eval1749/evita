@@ -131,6 +131,7 @@ DEFINE_VIEW_DELEGATE_3(GetFilenameForSave, WidgetId, const base::string16&,
                        ViewDelegate::GetFilenameForSaveCallback)
 DEFINE_VIEW_DELEGATE_2(LoadFile, Document*, const base::string16&)
 DEFINE_VIEW_DELEGATE_1(RealizeWindow, WidgetId)
+DEFINE_VIEW_DELEGATE_2(SaveFile, Document*, const base::string16&)
 
 void ScriptThread::RegisterViewEventHandler(
     ViewEventHandler* event_handler) {

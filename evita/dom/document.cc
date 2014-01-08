@@ -129,7 +129,8 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         .SetProperty("length", &Document::length)
         .SetMethod("load_", &Document::Load)
         .SetProperty("name", &Document::name)
-        .SetMethod("renameTo", &Document::RenameTo);
+        .SetMethod("renameTo", &Document::RenameTo)
+        .SetMethod("save", &Document::Save);
   }
 };
 }  // namespace
@@ -212,6 +213,11 @@ void Document::RenameTo(const base::string16& new_name) {
 
 void Document::ResetForTesting() {
   DocumentList::instance()->ResetForTesting();
+}
+
+void Document::Save(const base::string16& filename) {
+  // TODO(yosi) We should protect this document againt gc.
+  ScriptController::instance()->view_delegate()->SaveFile(this, filename);
 }
 
 }  // namespace dom

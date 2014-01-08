@@ -41,6 +41,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: void Load(const base::string16& filename);
   public: void RenameTo(const base::string16& new_name);
   public: static void ResetForTesting();
+  public: void Save(const base::string16& filename);
 
   DISALLOW_COPY_AND_ASSIGN(Document);
 };

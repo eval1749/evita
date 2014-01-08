@@ -179,6 +179,7 @@ void ScriptController::PopulateGlobalTemplate(
 
 void ScriptController::ResetForTesting() {
   Document::ResetForTesting();
+  EditorWindow::ResetForTesting();
   Window::ResetForTesting();
 }
 

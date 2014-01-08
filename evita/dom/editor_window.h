@@ -15,6 +15,8 @@ class EditorWindow : public v8_glue::Scriptable<EditorWindow, Window> {
 
   public: static v8_glue::WrapperInfo* static_wrapper_info();
 
+  public: static void ResetForTesting();
+
   DISALLOW_COPY_AND_ASSIGN(EditorWindow);
 };
 

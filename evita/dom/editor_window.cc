@@ -44,11 +44,12 @@ class EditorWindowList : public common::Singleton<EditorWindowList> {
   public: void Register(EditorWindow* window) {
     set_.insert(window);
   }
-
+  public: void ResetForTesting() {
+    set_.clear();
+  }
   public: static List StaticList() {
     return instance()->list();
   }
-
   public: void Unregister(EditorWindow* window) {
     set_.erase(window);
   }
@@ -104,6 +105,10 @@ EditorWindow::~EditorWindow() {
 v8_glue::WrapperInfo* EditorWindow::static_wrapper_info() {
   DEFINE_STATIC_LOCAL(EditorWindowWrapperInfo, wrapper_info, ());
   return &wrapper_info;
+}
+
+void EditorWindow::ResetForTesting() {
+  EditorWindowList::instance()->ResetForTesting();
 }
 
 }  // namespace dom

@@ -173,8 +173,8 @@ void Widget::DidCreateNativeWindow() {
   DidRealize();
 }
 
-void Widget::DidDestroyDomWindow(WidgetId widget_id) {
-  WidgetIdMapper::instance()->DidDestroyDomWindow(widget_id);
+void Widget::DidDestroyDomWindow() {
+  WidgetIdMapper::instance()->DidDestroyDomWindow(widget_id_);
 }
 
 void Widget::DidDestroyNativeWindow() {

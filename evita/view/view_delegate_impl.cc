@@ -54,7 +54,13 @@ void ViewDelegateImpl::CreateTextWindow(const dom::TextWindow* window) {
 
 void ViewDelegateImpl::DestroyWindow(dom::WidgetId widget_id) {
   DCHECK_NE(dom::kInvalidWidgetId, widget_id);
-  widgets::Widget::DidDestroyDomWindow(widget_id);
+  auto const widget = widgets::Widget::FromWidgetId(widget_id);
+  if (!widget) {
+    DVLOG(0) << "DestroyWindow: no such widget " << widget_id;
+    return;
+  }
+  widget->DidDestroyDomWindow();
+  widget->Destroy();
 }
 
 void ViewDelegateImpl::FocusWindow(dom::WidgetId widget_id) {

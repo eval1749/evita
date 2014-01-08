@@ -9,6 +9,7 @@
 #include "evita/dom/editor_window.h"
 #include "evita/dom/text_window.h"
 #include "evita/dom/view_event_handler.h"
+#include "evita/editor/dom_lock.h"
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_TextEditWindow.h"
@@ -106,6 +107,22 @@ void ViewDelegateImpl::GetFilenameForSave(
 void ViewDelegateImpl::LoadFile(dom::Document* document,
                                 const base::string16& filename) {
   document->buffer()->Load(filename.c_str());
+}
+
+void ViewDelegateImpl::MakeSelectionVisible(dom::WidgetId widget_id) {
+  DCHECK_NE(dom::kInvalidWidgetId, widget_id);
+  auto const widget = widgets::Widget::FromWidgetId(widget_id);
+  if (!widget) {
+    DVLOG(0) << "MakeSelectionVisible: no such widget " << widget_id;
+    return;
+  }
+  auto const text_widget = widget->as<TextEditWindow>();
+  if (!text_widget) {
+    DVLOG(0) << "MakeSelectionVisible: not TextWidget " << widget_id;
+    return;
+  }
+  UI_DOM_AUTO_LOCK_SCOPE();
+  text_widget->MakeSelectionVisible();
 }
 
 void ViewDelegateImpl::RealizeWindow(dom::WidgetId widget_id) {

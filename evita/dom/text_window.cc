@@ -39,8 +39,10 @@ class TextWindowWrapperInfo : public v8_glue::WrapperInfo {
 
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
-    builder.SetProperty("document", &TextWindow::document);
-    builder.SetProperty("selection", &TextWindow::selection);
+    builder
+        .SetProperty("document", &TextWindow::document)
+        .SetProperty("selection", &TextWindow::selection)
+        .SetMethod("makeSelectionVisible", &TextWindow::MakeSelectionVisible);
   }
 };
 }  // namespace
@@ -65,6 +67,11 @@ Document* TextWindow::document() const {
 v8_glue::WrapperInfo* TextWindow::static_wrapper_info() {
   DEFINE_STATIC_LOCAL(TextWindowWrapperInfo, wrapper_info, ());
   return &wrapper_info;
+}
+
+void TextWindow::MakeSelectionVisible() {
+  ScriptController::instance()->view_delegate()->MakeSelectionVisible(
+      widget_id());
 }
 
 }  // namespace dom

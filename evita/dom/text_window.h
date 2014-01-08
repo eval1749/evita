@@ -26,6 +26,8 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, Window> {
   public: static v8_glue::WrapperInfo* static_wrapper_info();
   public: Range* view_range() const { return view_range_; }
 
+  public: void MakeSelectionVisible();
+
   DISALLOW_COPY_AND_ASSIGN(TextWindow);
 };
 

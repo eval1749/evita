@@ -38,6 +38,8 @@ class ViewDelegate {
       GetFilenameForSaveCallback callback) = 0;
   public: virtual void LoadFile(Document* document,
                                 const base::string16& filename) = 0;
+
+  public: virtual void MakeSelectionVisible(WidgetId widget_id) = 0;
   public: virtual void RealizeWindow(WidgetId widget_id) = 0;
   public: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) = 0;

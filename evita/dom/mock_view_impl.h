@@ -17,6 +17,7 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD1(CreateTextWindow, void(const TextWindow*));
   MOCK_METHOD2(AddWindow, void(WidgetId, WidgetId));
   MOCK_METHOD1(DestroyWindow, void(WidgetId));
+  MOCK_METHOD1(FocusWindow, void(WidgetId));
   public: virtual void GetFilenameForLoad(WidgetId widget_id,
     const base::string16& dir_path,
     GetFilenameForLoadCallback callback) override;

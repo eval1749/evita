@@ -65,6 +65,7 @@ class ScriptThread final : public ViewDelegate,
   private: virtual void AddWindow(WidgetId parent_id,
                                   WidgetId child_id) override;
   private: virtual void DestroyWindow(WidgetId widget_id) override;
+  private: virtual void FocusWindow(WidgetId widget_id) override;
   private: virtual void GetFilenameForLoad(
       WidgetId widget_id, const base::string16& dir_path,
       GetFilenameForLoadCallback callback) override;

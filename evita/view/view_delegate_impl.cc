@@ -56,6 +56,15 @@ void ViewDelegateImpl::DestroyWindow(dom::WidgetId widget_id) {
   widgets::Widget::DidDestroyDomWindow(widget_id);
 }
 
+void ViewDelegateImpl::FocusWindow(dom::WidgetId widget_id) {
+  auto const widget = widgets::Widget::FromWidgetId(widget_id);
+  if (!widget) {
+    DVLOG(0) << "FocusWindow: no such widget " << widget_id;
+    return;
+  }
+  widget->SetFocus();
+}
+
 void ViewDelegateImpl::GetFilenameForLoad(
     dom::WidgetId widget_id, const base::string16& dir_path,
     GetFilenameForLoadCallback callback) {

@@ -995,20 +995,6 @@ DEFCOMMAND(Reload)
 } // Reload
 
 // [S]
-void SaveBuffer(Frame* frame, Buffer* buffer, bool is_save_as) {
-  Application::instance()->SaveBuffer(frame, buffer, is_save_as);
-}
-
-DEFCOMMAND(SaveFile) {
-  if (!pCtx->GetSelection())
-    return;
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(SaveBuffer,
-                 base::Unretained(pCtx->GetFrame()),
-                 base::Unretained(pCtx->GetSelection()->GetBuffer()),
-                 pCtx->HasArg()));
-}
-
 DEFCOMMAND(SelectAll)
 {
     Selection* pSelection = pCtx->GetSelection();
@@ -1567,7 +1553,6 @@ void Processor::GlobalInit() {
     //BIND_KEY(Mod_Ctrl | 'M', TypeEnter);
     BIND_KEY(Mod_Ctrl | 'Q', QuotedInsertEntry());
     BIND_KEY(Mod_Ctrl | 'R', Reload);
-    BIND_KEY(Mod_Ctrl | 'S', SaveFile);
     BIND_KEY(Mod_Ctrl | 'U', StartArgumentEntry());
     BIND_KEY(Mod_Ctrl | 'V', PasteFromClipboard);
     BIND_KEY(Mod_Ctrl | 'W', KillBuffer);

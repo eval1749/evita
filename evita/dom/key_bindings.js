@@ -126,4 +126,17 @@
       newEditorWindow(Document.load(filename));
     });
   });
+
+  // Save file
+  editor.setKeyBinding('Ctrl+S', function(arg) {
+    var document = this.selection.document;
+    if (!arg && document.filename != '') {
+      document.save(filename);
+      return;
+    }
+
+    editor.getFilenameForSave(this, document.filename, function(filename) {
+      document.save(filename);
+    });
+  });
 })();

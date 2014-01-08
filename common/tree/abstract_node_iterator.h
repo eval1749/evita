@@ -38,8 +38,6 @@ class AbstractNodeIterator
   public: bool operator!=(const AbstractNodeIterator& other) const {
     return node_ != other.node_;
   }
-
-  DISALLOW_COPY_AND_ASSIGN(AbstractNodeIterator);
 };
 
 } // namespace internal

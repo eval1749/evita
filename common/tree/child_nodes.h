@@ -13,10 +13,10 @@ namespace tree {
 
 template<typename NodeType>
 class ChildNodes {
-  private: class Iterator
+  private: template<typename T> class Iterator
       : public internal::AbstractNodeIterator<std::bidirectional_iterator_tag,
                                               NodeType> {
-    protected: Iterator(NodeType* node) : AbstractNodeIterator(node) {
+    protected: Iterator(T* node) : AbstractNodeIterator(node) {
     }
     protected: void Decrement() {
       DCHECK(node_);
@@ -27,27 +27,58 @@ class ChildNodes {
       node_ = node_->next_sibling();
     }
   };
-  public: class BackwardIterator : public Iterator {
-    public: explicit BackwardIterator(NodeType* node) : Iterator(node) {
+  public: class iterator : public Iterator<NodeType> {
+    public: explicit iterator(NodeType* node) : Iterator(node) {
     }
-    public: BackwardIterator& operator++() {
+    public: iterator& operator++() {
+      Increment();
+      return *this;
+    }
+    public: iterator& operator--() {
       Decrement();
       return *this;
     }
-    public: BackwardIterator& operator--() {
+  };
+  public: class const_iterator : public Iterator<const NodeType> {
+    public: explicit const_iterator(const NodeType* node) : Iterator(node) {
+    }
+    public: const_iterator& operator++() {
+      Increment();
+      return *this;
+    }
+    public: const_iterator& operator--() {
+      Decrement();
+      return *this;
+    }
+  };
+  public: class reverse_iterator : public Iterator<NodeType> {
+    public: explicit reverse_iterator(NodeType* node) : Iterator(node) {
+    }
+    public: reverse_iterator(const reverse_iterator& other)
+        : Iterator(other.node_) {
+    }
+    public: iterator& operator++() {
+      Decrement();
+      return *this;
+    }
+    public: iterator& operator--() {
       Increment();
       return *this;
     }
   };
-  public: class ForwardIterator : public Iterator {
-    public: explicit ForwardIterator(NodeType* node) : Iterator(node) {
+  public: class const_reverse_iterator : public Iterator<NodeType> {
+    public: explicit const_reverse_iterator(const NodeType* node)
+        : Iterator(node) {
     }
-    public: ForwardIterator& operator++() {
-      Increment();
+    public: const_reverse_iterator(const const_reverse_iterator& other)
+        : Iterator(other.node_) {
+    }
+    public: iterator& operator++() {
+      Decrement();
       return *this;
     }
-    public: ForwardIterator& operator--() {
-      Decrement();
+    public: iterator& operator--() {
+      Increment();
       return *this;
     }
   };
@@ -58,33 +89,34 @@ class ChildNodes {
       : parent_node_(parent_node) {
   }
 
-  public: ForwardIterator begin() const {
-    return ForwardIterator(parent_node_->first_child());
+  // iterrator and reverse_iterrator
+  public: iterator begin() {
+    return iterator(parent_node_->first_child());
   }
-  public: ForwardIterator end() const {
-    return ForwardIterator(nullptr);
+  public: iterator end() { return iterator(nullptr); }
+  public: reverse_iterator rbegin() {
+    return reverse_iterator(parent_node_->last_child());
   }
-  // TODO: We should have ConstForwardIterator.
-  public:ForwardIterator cbegin() const {
-    return ForwardIterator(parent_node_->first_child());
+  public: reverse_iterator rend() { return reverse_iterator(nullptr); }
+
+  // const_iterrator and const_reverse_iterrator
+  public: const_iterator begin() const { return cbegin(); }
+  public: const_iterator end() const { return cend(); }
+  public: const_reverse_iterator rbegin() const { return crbegin(); }
+  public: const_reverse_iterator rend() const { return crend(); }
+
+  // const_iterrator and const_reverse_iterrator
+  public: const_iterator cbegin() const {
+    return const_iterator(parent_node_->first_child());
   }
-  // TODO: We should have ConstForwardIterator.
-  public:ForwardIterator cend() const {
-    return ConstForwardIterator(nullptr);
+  public: const_iterator cend() const {
+    return const_iterator(nullptr);
   }
-  public: BackwardIterator rbegin() const {
-    return BackwardIterator(parent_node_->last_child());
+  public: const_reverse_iterator crbegin() const {
+    return const_reverse_iterator(parent_node_->last_child());
   }
-  public: BackwardIterator rend() const {
-    return BackwardIterator(nullptr);
-  }
-  // TODO: We should have ConstBackwardIterator.
-  public:BackwardIterator crbegin() const {
-    return BackwardIterator(parent_node_->last_child());
-  }
-  // TODO: We should have ConstBackwardIterator.
-  public:BackwardIterator crend() const {
-    return BackwardIterator(nullptr);
+  public: const_reverse_iterator crend() const {
+    return const reverse_iterator(nullptr);
   }
 
   DISALLOW_COPY_AND_ASSIGN(ChildNodes);
@@ -92,14 +124,14 @@ class ChildNodes {
 
 template<class NodeClass>
 ChildNodes<const NodeClass> Node<NodeClass>::child_nodes() const {
-  return ChildNodes<const NodeClass>(static_cast<const NodeClass*>(this));
+  return ChildNodes<const NodeClass>(
+      const_cast<NodeClass*>(static_cast<const NodeClass*>(this)));
 }
 
 template<class NodeClass>
 ChildNodes<NodeClass> Node<NodeClass>::child_nodes() {
   return ChildNodes<NodeClass>(static_cast<NodeClass*>(this));
 }
-
 
 } // namespace tree
 } // namespace common

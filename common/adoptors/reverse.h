@@ -3,56 +3,57 @@
 #if !defined(INCLUDE_common_adoptors_reverse_h)
 #define INCLUDE_common_adoptors_reverse_h
 
-#include <utility>
+//#include <utility>
 
 namespace common {
 namespace adoptors {
 
-namespace impl {
-template<class Container>
-class ConstReverser {
-  private: Container& container_;
-  public: explicit ConstReverser(Container& container)
-      : container_(container) {
+namespace internal {
+
+template <typename T>
+class Reverse {
+  public: typedef typename T::reverse_iterator iterator;
+
+  private: iterator begin_;
+  private: iterator end_;
+
+  public: Reverse(const T& x)
+      : begin_(const_cast<T&>(x).rbegin()),
+        end_(const_cast<T&>(x).rend()) {
   }
-  public: ConstReverser(const ConstReverser& other)
-      : container_(other.container_) {
+  public: ~Reverse() {
   }
-  public: ConstReverser& operator=(const ConstReverser&) = delete;
-  public: auto begin() -> decltype(container_.crbegin()) {
-    return container_.crbegin();
-  }
-  public: auto end() -> decltype(container_.crend()) {
-    return container_.crend();
-  }
+
+  public: iterator begin() { return begin_; }
+  public: iterator end() { return end_; }
 };
 
-template<class Container>
-class Reverser {
-  private: Container& container_;
-  public: explicit Reverser(Container& container) : container_(container) {
-  }
-  public: Reverser(const Reverser& other)
-      : container_(other.container_) {
-  }
-  public: Reverser& operator=(const Reverser&) = delete;
-  public: auto begin() -> decltype(container_.rbegin()) {
-    return container_.rbegin();
-  }
-  public: auto end() -> decltype(container_.rend()) {
-    return container_.rend();
-  }
-};
-} // namespace impl
+template <typename T>
+class ConstReverse {
+  public: typedef typename T::const_reverse_iterator const_iterator;
 
-template<class Container>
-impl::ConstReverser<Container> reverse(const Container& container) {
-  return impl::ConstReverser<Container>(const_cast<Container&>(container));
+  private: const_iterator begin_;
+  private: const_iterator end_;
+
+  public: ConstReverse(const T& x) : begin_(x.rbegin()), end_(x.rend()) {
+  }
+
+  public: ~ConstReverse() {
+  }
+
+  public: const_iterator begin() const { return begin_; }
+  public: const_iterator end() const { return end_; }
+};
+} // namespace internal
+
+template <typename T>
+internal::Reverse<T> reverse(const T& x) {
+  return internal::Reverse<T>(x);
 }
 
-template<class Container>
-impl::Reverser<Container> reverse(Container& container) {
-  return impl::Reverser<Container>(container);
+template <typename T>
+internal::ConstReverse<T> const_reverse(const T& x) {
+  return internal::ConstReverse<T>(x);
 }
 
 } // namespace adoptors

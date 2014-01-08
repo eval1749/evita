@@ -59,4 +59,9 @@ bool Converter<text::Posn>::FromV8(Isolate* isolate, Handle<Value> val,
   return true;
 }
 
+Handle<Value> StringToV8(v8::Isolate* isolate,
+                         const base::string16& string) {
+  return Converter<base::string16>::ToV8(isolate, string);
+}
+
 }  // namespace gin

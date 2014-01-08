@@ -34,6 +34,9 @@ struct Converter<text::Posn> {
                      text::Posn* out);
 };
 
+v8::Handle<v8::Value> StringToV8(v8::Isolate* isolate,
+                                  const base::string16& string);
+
 } // namespace gin
 
 #endif //!defined(INCLUDE_evita_v8_glue_converter_h)

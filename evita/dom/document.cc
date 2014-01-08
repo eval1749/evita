@@ -4,8 +4,8 @@
 #include "evita/dom/document.h"
 
 #include <unordered_map>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "base/logging.h"
 #include "base/strings/string_number_conversions.h"

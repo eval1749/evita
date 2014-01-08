@@ -31,6 +31,10 @@
             'uuid.lib',
           ], # AdditionalDependencies
         }, # VCLinkTool
+        'VCManifestTool': {
+          'AdditionalManifestFiles': [ 'evita.exe.manifest' ],
+          'EmbedManifest': 'true',
+        }, # VCManifestTool
       }, # msvs_settings
 
       'sources': [

@@ -269,6 +269,7 @@ void ScriptController::OpenFile(WidgetId widget_id,
     return;
   }
   auto js_filename = gin::StringToV8(isolate, filename);
+  DOM_AUTO_LOCK_SCOPE();
   open_file->ToObject()->CallAsFunction(js_handler, 1, &js_filename);
 }
 

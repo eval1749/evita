@@ -198,7 +198,7 @@ void Window::AddWindow(Window* window) {
 }
 
 void Window::Destroy() {
-  if (state_ != kRealized) {
+  if (state_ != kRealized && state_ != kRealizing) {
     ScriptController::instance()->ThrowError(
         "You can't destroy unrealized window.");
     return;
@@ -233,7 +233,7 @@ void Window::DidRealizeWidget(WidgetId widget_id) {
 }
 
 void Window::Focus() {
-  if (state_ != kRealized) {
+  if (state_ != kRealized && state_ != kRealizing) {
     ScriptController::instance()->ThrowError(
         "You can't focus unrealized window.");
     return;

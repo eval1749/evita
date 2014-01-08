@@ -19,7 +19,6 @@
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/window.h"
 #include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/per_isolate_data.h"
 BEGIN_V8_INCLUDE
 #include "gin/object_template_builder.h"
@@ -131,15 +130,12 @@ ScriptController* ScriptController::instance() {
 }
 
 EvaluateResult ScriptController::Evaluate(const base::string16& script_text) {
-  v8::HandleScope handle_scope(isolate_holder_.isolate());
+  auto const isolate = isolate_holder_.isolate();
+  v8::HandleScope handle_scope(isolate);
   v8::TryCatch try_catch;
   v8::Handle<v8::Script> script = v8::Script::Compile(
-      v8::String::NewFromTwoByte(isolate_holder_.isolate(),
-                                 reinterpret_cast<const uint16*>(
-                                    &script_text[0]),
-                                 v8::String::kNormalString,
-                                 script_text.length()),
-      v8::String::NewFromUtf8(isolate_holder_.isolate(), "(eval)"));
+      gin::StringToV8(isolate, script_text)->ToString(),
+      gin::StringToV8(isolate, "(eval)")->ToString());
   if (script.IsEmpty()) {
     return ReportException(try_catch);
   }

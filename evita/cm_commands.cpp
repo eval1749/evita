@@ -672,13 +672,6 @@ DEFCOMMAND(KillBuffer)
     Application::instance()->KillBuffer(pSelection->GetBuffer());
 } // KillBuffer
 
-// [M]
-DEFCOMMAND(MakeSelectionVisible)
-{
-    if (NULL == pCtx->GetSelection()) return;
-    pCtx->GetSelection()->GetWindow()->MakeSelectionVisible();
-} // MakeSelectionVisible
-
 // [N]
 // activateFirstWindow
 static void activateFirstWindow(Pane* pPane)
@@ -1486,7 +1479,6 @@ void Processor::GlobalInit() {
     BIND_KEY(Mod_Ctrl | 'G', GoToCommand);
     BIND_KEY(Mod_Ctrl | 'H', FindCommand);
     //BIND_KEY(Mod_Ctrl | 'I', Indent);
-    BIND_KEY(Mod_Ctrl | 'L', MakeSelectionVisible);
     //BIND_KEY(Mod_Ctrl | 'M', TypeEnter);
     BIND_KEY(Mod_Ctrl | 'Q', QuotedInsertEntry());
     BIND_KEY(Mod_Ctrl | 'R', Reload);

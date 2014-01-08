@@ -107,6 +107,11 @@
     this.selection.startIsActive = false;
   });
 
+  // Make selection visible
+  editor.setKeyBinding('Ctrl+L', function() {
+    this.makeSelectionVisible();
+  });
+
   // Open new document in new window in current editor window.
   editor.setKeyBinding('Ctrl+N', function(arg) {
     var editorWindow = this.parent;

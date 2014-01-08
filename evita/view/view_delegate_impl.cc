@@ -23,16 +23,6 @@ ViewDelegateImpl::~ViewDelegateImpl() {
   // event_handler_ should be nullptr
 }
 
-void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
-  DCHECK(window);
-  new Frame(window->widget_id());
-}
-
-void ViewDelegateImpl::CreateTextWindow(const dom::TextWindow* window) {
-  DCHECK(window);
-  new TextEditWindow(*window);
-}
-
 void ViewDelegateImpl::AddWindow(dom::WidgetId parent_id,
                                  dom::WidgetId child_id) {
   DCHECK_NE(dom::kInvalidWidgetId, parent_id);
@@ -49,6 +39,16 @@ void ViewDelegateImpl::AddWindow(dom::WidgetId parent_id,
   }
   DCHECK_EQ(child_id, child->widget_id());
   parent->as<Frame>()->AddWindow(child->as<content::ContentWindow>());
+}
+
+void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
+  DCHECK(window);
+  new Frame(window->widget_id());
+}
+
+void ViewDelegateImpl::CreateTextWindow(const dom::TextWindow* window) {
+  DCHECK(window);
+  new TextEditWindow(*window);
 }
 
 void ViewDelegateImpl::DestroyWindow(dom::WidgetId widget_id) {

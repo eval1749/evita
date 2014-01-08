@@ -11,18 +11,15 @@
 //
 #include "./vi_IoManager.h"
 
-#include "./ed_Mode.h"
-
-#include "evita/editor/application.h"
+#include "base/strings/string16.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/view_event_handler.h"
-#include "./vi_EditPane.h"
-#include "./vi_Frame.h"
-#include "./vi_Listener.h"
-#include "./vi_Selection.h"
-#include "./vi_TextEditWindow.h"
-
-#include "./listener.h"
+#include "evita/editor/application.h"
+#include "evita/ed_Mode.h"
+#include "evita/vi_EditPane.h"
+#include "evita/vi_Frame.h"
+#include "evita/vi_Selection.h"
+#include "evita/vi_TextEditWindow.h"
 
 HANDLE g_hEvent;
 bool   g_fMultiple;
@@ -139,7 +136,7 @@ struct InsertStringParam
 
 enum Message
 {
-    Message_Start = LISTENER_WM_LIMIT,
+    Message_Start = WM_USER,
 
     Message_FinishLoad,
     Message_FinishSave,
@@ -278,40 +275,12 @@ IoManager::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_COPYDATA:
     {
         COPYDATASTRUCT* p = reinterpret_cast<COPYDATASTRUCT*>(lParam);
-        if (0 == p->dwData)
-        {
-            ListenerText* q = reinterpret_cast<ListenerText*>(p->lpData);
-            Listener* pListener = reinterpret_cast<Listener*>(q->m_pvListener);
-            pListener->OnReceiveText(
-                reinterpret_cast<char16*>(q + 1),
-                q->m_cwch );
-        }
-        else
-        {
-            visitFile(reinterpret_cast<char16*>(p->lpData));
-        }
+        auto const filename = reinterpret_cast<base::char16*>(p->lpData);
+        Application::instance()->view_event_handler()->OpenFile(
+            widgets::kInvalidWidgetId, filename);
+        // TODO(yosi) Should we call |SetForegroundWindow|?
         return true;
     } // WM_COPYDATA
-
-    case LISTENER_WM_QUERYCOLUMN:
-    {
-        Listener* pListener= reinterpret_cast<Listener*>(lParam);
-        return pListener->QueryColumn();
-    } // LISTENER_WM_QUERYCOLUMN
-
-    case LISTENER_WN_READY:
-    {
-        Listener* pListener= reinterpret_cast<Listener*>(lParam);
-        pListener->OnReady();
-        return 0;
-    } // LISTENER_WM_READY
-
-    case LISTENER_WN_RECEIVETEXT:
-    {
-        Listener* pListener= reinterpret_cast<Listener*>(lParam);
-        pListener->OnSentText(static_cast<Count>(wParam));
-        return 0;
-    } // LISTENER_WM_RECEIVETEXT
 
     case Message_FinishLoad:
         FinishLoadParam::Run(lParam);
@@ -339,14 +308,3 @@ void IoManager::Realize()
     CreateWindowEx(0, 0, L"IoManager", HWND_MESSAGE, Point(), Size());
     ASSERT(NULL != *this);
 } // IoManager::Realize
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// IoManager::visitFile
-//
-void IoManager::visitFile(const char16* pwsz)  {
-  Application::instance()->view_event_handler()->OpenFile(
-      widgets::kInvalidWidgetId, pwsz);
-  // TODO(yosi) Should we call |SetForegroundWindow|?
-}

@@ -54,9 +54,6 @@ class IoManager : public common::win::NativeWindow
     // [R]
     public: void Realize();
 
-    // [V]
-    private: void visitFile(const char16*);
-
     // [W]
     protected: virtual LRESULT WindowProc(UINT, WPARAM, LPARAM) override;
 

@@ -213,9 +213,17 @@ void Window::DidDestroyWidget(WidgetId widget_id) {
   WidgetIdMapper::instance()->DidDestroyWidget(widget_id);
 }
 
+// Possible state transitions:
+//  kRealizing -> kRealized 
+//    |realize()| call.
+//  kNotRealized -> kRealized
+//    Adding |kNotRealized| window to |kRealized| window.
+//  kDestroying -> kRealized
+//    The window was |kRealizing| then |destroy()|.
 void Window::DidRealizeWidget(WidgetId widget_id) {
   auto const widget = FromWidgetId(widget_id);
-  DCHECK(kRealizing == widget->state_ || kDestroying == widget->state_);
+  DCHECK(kRealizing == widget->state_ || kDestroying == widget->state_ ||
+         kNotRealized == widget->state_);
   widget->state_ = kRealized;
   for (auto child : widget->child_windows_) {
     if (child->state_ == kNotRealized)

@@ -192,25 +192,6 @@ HIMAGELIST Application::GetIconList() const {
   return text::ModeFactory::icon_image_list();
 }
 
-Buffer* Application::Load(const char16* pwszFileName) {
-  char16 wszFileName[MAX_PATH+1];
-  char16* pwszFile;
-  ::GetFullPathName(
-      pwszFileName,
-      lengthof(wszFileName),
-      wszFileName,
-      &pwszFile );
-
-  for (auto& buffer: buffers_) {
-    if (!::lstrcmpiW(buffer.GetFileName().c_str(), wszFileName))
-      return &buffer;
-  }
-
-  auto const buffer = NewBuffer(pwszFile);
-  buffer->Load(wszFileName);
-  return buffer;
-}
-
 bool Application::KillBuffer(Buffer* buffer, bool is_forced) {
   if (!is_forced && !buffer->CanKill())
       return false;
@@ -223,12 +204,6 @@ bool Application::KillBuffer(Buffer* buffer, bool is_forced) {
   buffers_.Delete(buffer);
   delete buffer;
   return true;
-}
-
-Buffer* Application::NewBuffer(const base::string16& name) {
-  auto const buffer = new Buffer(name);
-  RenameBuffer(buffer, name);
-  return buffers_.Append(buffer);
 }
 
 bool Application::OnIdle(uint nCount) {

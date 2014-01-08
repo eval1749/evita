@@ -111,12 +111,6 @@ class Application : public common::Singleton<Application> {
   // [K]
   public: bool KillBuffer(Buffer* buffer, bool force = false);
 
-  // [L]
-  public: Buffer* Load(const char16* filename);
-
-  // [N]
-  public: Buffer* NewBuffer(const base::string16& buffer_name);
-
   // [O]
   public: bool OnIdle(uint hint);
 

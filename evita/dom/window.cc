@@ -54,6 +54,7 @@ class WindowWrapperInfo : public v8_glue::WrapperInfo {
         .SetProperty("state", &Window::state)
         .SetMethod("add", &Window::AddWindow)
         .SetMethod("destroy", &Window::Destroy)
+        .SetMethod("focus", &Window::Focus)
         .SetMethod("realize", &Window::Realize)
         .SetMethod("remove", &Window::RemoveWindow);
   }
@@ -229,6 +230,15 @@ void Window::DidRealizeWidget(WidgetId widget_id) {
     if (child->state_ == kNotRealized)
       child->state_ = kRealized;
   }
+}
+
+void Window::Focus() {
+  if (state_ != kRealized) {
+    ScriptController::instance()->ThrowError(
+        "You can't focus unrealized window.");
+    return;
+  }
+  ScriptController::instance()->view_delegate()->FocusWindow(widget_id_);
 }
 
 Window* Window::FromWidgetId(WidgetId widget_id) {

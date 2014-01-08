@@ -144,6 +144,19 @@ TEST_F(WindowTest, Destroy) {
   EXPECT_EQ("destroyed", RunScript("child3.state"));
 }
 
+TEST_F(WindowTest, focus) {
+  RunScript("var sample = new SampleWindow();");
+  EXPECT_SCRIPT_EQ("Error: You can't focus unrealized window.",
+                   "sample.focus()");
+
+  EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
+  RunScript("sample.realize();");
+  view_event_handler()->DidRealizeWidget(static_cast<dom::WidgetId>(1));
+
+  EXPECT_CALL(*mock_view_impl(), FocusWindow(Eq(1)));
+  RunScript("sample.focus();");
+}
+
 TEST_F(WindowTest, Properties) {
   RunScript("var sample1 = new SampleWindow()");
   EXPECT_EQ("0", RunScript("sample1.children.length"));

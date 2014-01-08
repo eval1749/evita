@@ -48,6 +48,7 @@ class Window : public v8_glue::Scriptable<Window> {
   public: void Destroy();
   public: static void DidDestroyWidget(WidgetId widget_id);
   public: static void DidRealizeWidget(WidgetId widget_id);
+  public: void Focus();
   public: static Window* FromWidgetId(WidgetId widget_id);
   public: bool IsDescendantOf(Window* other) const;
   public: void Realize();

@@ -199,7 +199,12 @@ void Widget::DidKillFocus() {
 }
 
 void Widget::DidRealize() {
-  Application::instance()->view_event_handler()->DidRealizeWidget(widget_id_);
+  // TODO(yosi) Until we manage all widgets by WidgetId, we don't call
+  // ViewEventHandler for unmanaged widget.
+  if (widget_id_ != kInvalidWidgetId) {
+    Application::instance()->view_event_handler()->
+        DidRealizeWidget(widget_id_);
+  }
   for (auto const child : child_nodes()) {
     child->RealizeWidget();
   }

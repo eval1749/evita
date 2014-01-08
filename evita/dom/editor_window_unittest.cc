@@ -23,6 +23,20 @@ class EditorWindowTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(EditorWindowTest);
 };
 
+TEST_F(EditorWindowTest, EditorWindow_list) {
+  EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_)).Times(3);
+  RunScript("var a = new EditorWindow();"
+            "var b = new EditorWindow();"
+            "var c = new EditorWindow();"
+            "var list = EditorWindow.list.sort(function(a, b) {"
+            "  return a.id - b.id;"
+            "});");
+  EXPECT_SCRIPT_EQ("3", "EditorWindow.list.length");
+  EXPECT_SCRIPT_TRUE("list[0] == a");
+  EXPECT_SCRIPT_TRUE("list[1] == b");
+  EXPECT_SCRIPT_TRUE("list[2] == c");
+}
+
 TEST_F(EditorWindowTest, Realize) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(::testing::_));
   RunScript("var sample = new EditorWindow()");

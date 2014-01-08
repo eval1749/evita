@@ -353,6 +353,7 @@ void TextEditWindow::DidKillFocus() {
 }
 
 void TextEditWindow::DidRealize() {
+  ParentClass::DidRealize();
   auto const frame = Frame::FindFrame(*this);
   ASSERT(frame);
   m_gfx = &frame->gfx();

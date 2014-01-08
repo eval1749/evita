@@ -164,9 +164,20 @@ void ScriptThread::RegisterViewEventHandler(
         param1)); \
   }
 
+#define DEFINE_VIEW_EVENT_HANDLER_2(name, type1, type2) \
+  void ScriptThread::name(type1 param1, type2 param2) { \
+    DCHECK_CALLED_ON_HOST_THREAD(); \
+    DCHECK(view_event_handler_); \
+    PostTask(FROM_HERE, base::Bind( \
+        &ViewEventHandler::name, \
+        base::Unretained(view_event_handler_), \
+        param1, param2)); \
+  }
+
 DEFINE_VIEW_EVENT_HANDLER_1(DidDestroyWidget, WidgetId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidRealizeWidget, WidgetId)
 DEFINE_VIEW_EVENT_HANDLER_0(DidStartHost)
+DEFINE_VIEW_EVENT_HANDLER_2(OpenFile, WidgetId, const base::string16&)
 DEFINE_VIEW_EVENT_HANDLER_1(RunCallback, base::Closure)
 
 void ScriptThread::WillDestroyHost() {

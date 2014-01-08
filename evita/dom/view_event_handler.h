@@ -19,6 +19,8 @@ class ViewEventHandler {
   public: virtual void DidStartHost() = 0;
   public: virtual void DidDestroyWidget(WidgetId widget_id) = 0;
   public: virtual void DidRealizeWidget(WidgetId widget_id) = 0;
+  public: virtual void OpenFile(WidgetId widget_id,
+                                const base::string16& filename) = 0;
   public: virtual void RunCallback(base::Closure) = 0;
   public: virtual void WillDestroyHost() = 0;
 

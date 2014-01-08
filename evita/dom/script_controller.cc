@@ -254,6 +254,25 @@ void ScriptController::DidStartHost() {
       "line: " << result.line_number;
 }
 
+void ScriptController::OpenFile(WidgetId widget_id,
+                                const base::string16& filename){
+  auto const window = Window::FromWidgetId(widget_id);
+  if (!window) {
+    DVLOG(0) << "OpenFile: No suche window " << widget_id;
+    return;
+  }
+  auto const isolate = isolate_holder_.isolate();
+  v8::HandleScope handle_scope(isolate);
+  auto js_window = window->GetWrapper(isolate);
+  auto open_file = js_window->Get(gin::StringToV8(isolate, "openFile"));
+  if (!open_file->IsFunction()) {
+    DVLOG(0) << "OpenFile: window doesn't have callable openFile property.";
+    return;
+  }
+  auto js_filename = gin::StringToV8(isolate, filename);
+  open_file->ToObject()->CallAsFunction(js_window, 1, &js_filename);
+}
+
 void ScriptController::RunCallback(base::Closure callback) {
   callback.Run();
 }

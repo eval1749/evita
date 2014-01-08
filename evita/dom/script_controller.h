@@ -69,6 +69,8 @@ class ScriptController : public ViewEventHandler {
   private: virtual void DidDestroyWidget(WidgetId widget_id) override;
   private: virtual void DidRealizeWidget(WidgetId widget_id) override;
   private: virtual void DidStartHost() override;
+  private: virtual void OpenFile(WidgetId widget_id,
+                                 const base::string16& filename) override;
   private: virtual void RunCallback(base::Closure callback) override;
   private: virtual void WillDestroyHost() override;
 

@@ -7,7 +7,7 @@
  * @param {string} A pathname.
  * @return {string} A filename part of pathname.
  */
-FilePath.filename = function(path) {
+FilePath.basename = function(path) {
   var last_slash = path.lastIndexOf('/');
   if (last_slash >= 0)
     return path.substr(last_slash + 1);

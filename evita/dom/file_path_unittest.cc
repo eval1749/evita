@@ -37,8 +37,8 @@ std::string FullPath(const std::string& filename) {
 }
 } // namespace
 
-TEST_F(FilePathTest, filename) {
-  EXPECT_SCRIPT_EQ("bar.txt", "FilePath.filename('/foo/bar.txt')");
+TEST_F(FilePathTest, basename) {
+  EXPECT_SCRIPT_EQ("bar.txt", "FilePath.basename('/foo/bar.txt')");
 }
 
 TEST_F(FilePathTest, fullPath) {

@@ -15,7 +15,7 @@ Document.load = function(filename) {
   });
   if (present)
     return present;
-  var document = new Document(FilePath.filename(filename));
+  var document = new Document(FilePath.basename(filename));
   document.load_(absolute_filename);
   return document;
 };

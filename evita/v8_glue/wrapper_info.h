@@ -50,6 +50,8 @@ class WrapperInfo {
                        v8::Handle<v8::ObjectTemplate> global);
   protected: virtual void SetupInstanceTemplate(
     ObjectTemplateBuilder& builder);
+  protected: virtual void SetupInstanceTemplate(v8::Isolate* isolate,
+    v8::Handle<v8::ObjectTemplate> templ);
 
   DISALLOW_COPY_AND_ASSIGN(WrapperInfo);
 };

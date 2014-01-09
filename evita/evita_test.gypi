@@ -53,6 +53,8 @@
         'dom/text_window_unittest.cc',
         'dom/ucd_unittest.cc',
         'dom/window_unittest.cc',
+
+        'v8_glue/promise_resolver_unittest.cc',
       ],
     }, # evita_dom_test
     {

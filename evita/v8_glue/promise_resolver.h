@@ -26,7 +26,7 @@ class PromiseResolver : public Scriptable<PromiseResolver> {
   private: v8::Handle<v8::Value> Call(v8::Isolate* isolate,
                                       v8::Handle<v8::Value> callback,
                                       const Argv& argv);
-  private: static void PromiseResolver::CallAsFunctionHandler(
+  public: static void PromiseResolver::CallAsFunctionHandler(
       const v8::FunctionCallbackInfo<v8::Value>& info);
   public: v8::Handle<v8::Value> NewPromise(v8::Isolate* isolate);
   public: template<typename T> void Reject(v8::Isolate* isolate, T value) {
@@ -41,6 +41,7 @@ class PromiseResolver : public Scriptable<PromiseResolver> {
   }
 
   public: v8::Handle<v8::Value> TestPromise();
+  public: v8::Handle<v8::Value> TestPromise2(v8::Handle<v8::Value> js_promise);
   public: void TestResolve(v8::Handle<v8::Value> value);
   public: v8::Handle<v8::Value> onresolve() const;
 };

@@ -128,6 +128,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         .SetProperty("filename", &Document::filename)
         .SetProperty("length", &Document::length)
         .SetMethod("load_", &Document::Load)
+        .SetProperty("modified", &Document::modified)
         .SetProperty("name", &Document::name)
         .SetMethod("renameTo", &Document::RenameTo)
         .SetMethod("save", &Document::Save);
@@ -160,6 +161,10 @@ const base::string16& Document::filename() const {
 
 text::Posn Document::length() const {
   return buffer_->GetEnd();
+}
+
+bool Document::modified() const {
+  return buffer_->IsModified();
 }
 
 const base::string16& Document::name() const {

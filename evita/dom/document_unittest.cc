@@ -109,6 +109,23 @@ TEST_F(DocumentTest, load_) {
   
 }
 
+TEST_F(DocumentTest, modified) {
+  RunScript("var doc = new Document('foo');"
+            "var range = new Range(doc);");
+  EXPECT_SCRIPT_FALSE("doc.modified");
+
+  RunScript("range.text = 'foo';");
+  EXPECT_SCRIPT_TRUE("doc.modified");
+
+#if 0
+  // Since mock ViewDelegate doesn't reset modified flag, we disable
+  // this test case.
+  EXPECT_CALL(*mock_view_impl(), SaveFile(_, Eq(L"foo")));
+  RunScript("doc.save('foo')");
+  EXPECT_SCRIPT_FALSE("doc.modified");
+#endif
+}
+
 TEST_F(DocumentTest, name) {
   EXPECT_SCRIPT_EQ("baz", "var sample1 = new Document('baz'); sample1.name");
 }

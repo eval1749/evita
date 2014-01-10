@@ -58,4 +58,12 @@
                        resolved);
     return promise;
   };
+
+  /**
+   * @param {string} combination.
+   * @param {function} command.
+   */
+  Editor.setKeyBinding = function(combination, command) {
+    Editor.setKeyBinding_(parseKeyCombination(combination), command);
+  };
 })();

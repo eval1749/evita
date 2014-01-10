@@ -107,6 +107,7 @@
         'library_files': [
           'dom/polyfill.js',
           'dom/types.js',
+          'dom/key_names.js',
           'dom/runtime.js',
           'dom/messages_en_US.js',
           'dom/document.js',
@@ -115,7 +116,6 @@
           'dom/file_path.js',
           'dom/range.js',
           'dom/selection.js',
-          'dom/key_names.js',
           'dom/key_bindings.js',
         ],
       }, # variables

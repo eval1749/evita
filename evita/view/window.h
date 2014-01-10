@@ -29,7 +29,9 @@ class Window : public widgets::Widget {
 
   // [D]
   public: void DidDestroyDomWindow();
+  protected: virtual void DidKillFocus() override;
   protected: virtual void DidRealize() override;
+  protected: virtual void DidSetFocus() override;
 
   // [F]
   public: static Window* FromWindowId(WindowId window_id);

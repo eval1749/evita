@@ -86,7 +86,9 @@ class ScriptThread final : public ViewDelegate,
 
   // ViewEventHandler
   private: virtual void DidDestroyWidget(WindowId window_id) override;
+  private: virtual void DidKillFocus(WindowId window_id) override;
   private: virtual void DidRealizeWidget(WindowId window_id) override;
+  private: virtual void DidSetFocus(WindowId window_id) override;
   private: virtual void DidStartHost() override;
   private: virtual void OpenFile(WindowId window_id,
                                  const base::string16& filename) override;

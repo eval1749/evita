@@ -49,6 +49,7 @@ class WindowWrapperInfo : public v8_glue::WrapperInfo {
       ObjectTemplateBuilder& builder) override {
     builder
         .SetProperty("children", &Window::child_windows)
+        .SetProperty("focusTick_", &Window::focus_tick)
         .SetProperty("id", &Window::id)
         .SetProperty("parent", &Window::parent_window)
         .SetProperty("state", &Window::state)
@@ -76,6 +77,8 @@ std::vector<Window*> DescendantsOrSelf(Window* window) {
   collector.Collect(window);
   return std::move(collector.windows_);
 }
+
+int global_focus_tick;
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -144,7 +147,8 @@ class Window::WindowIdMapper : public common::Singleton<WindowIdMapper> {
 // Window
 //
 Window::Window()
-    : parent_window_(nullptr),
+    : focus_tick_(0),
+      parent_window_(nullptr),
       state_(kNotRealized),
       ALLOW_THIS_IN_INITIALIZER_LIST(window_id_(
           WindowIdMapper::instance()->Register(this))) {
@@ -209,6 +213,10 @@ void Window::Destroy() {
   ScriptController::instance()->view_delegate()->DestroyWindow(window_id_);
 }
 
+void Window::DidKillFocus(WindowId) {
+  // TODO(yosi) Dispatch blur event.
+}
+
 void Window::DidDestroyWidget(WindowId window_id) {
   DCHECK_NE(kInvalidWindowId, window_id);
   WindowIdMapper::instance()->DidDestroyWidget(window_id);
@@ -230,6 +238,15 @@ void Window::DidRealizeWidget(WindowId window_id) {
     if (child->state_ == kNotRealized)
       child->state_ = kRealized;
   }
+}
+
+void Window::DidSetFocus(dom::WindowId window_id) {
+  auto const window = FromWindowId(window_id);
+  if (!window)
+    return;
+  ++global_focus_tick;
+  window->focus_tick_ = global_focus_tick;
+  // TODO(yosi) Dispatch focus event.
 }
 
 void Window::Focus() {
@@ -304,6 +321,7 @@ void Window::RemoveWindow(Window* window) {
 }
 
 void Window::ResetForTesting() {
+  global_focus_tick = 0;
   WindowIdMapper::instance()->ResetForTesting();
 }
 

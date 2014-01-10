@@ -17,8 +17,10 @@ class ViewEventHandler {
   public: virtual ~ViewEventHandler() = default;
 
   public: virtual void DidStartHost() = 0;
+  public: virtual void DidKillFocus(WindowId window_id) = 0;
   public: virtual void DidDestroyWidget(WindowId window_id) = 0;
   public: virtual void DidRealizeWidget(WindowId window_id) = 0;
+  public: virtual void DidSetFocus(WindowId window_id) = 0;
   public: virtual void OpenFile(WindowId window_id,
                                 const base::string16& filename) = 0;
   public: virtual void RunCallback(base::Closure) = 0;

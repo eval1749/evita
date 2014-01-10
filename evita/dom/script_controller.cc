@@ -218,8 +218,16 @@ void ScriptController::DidDestroyWidget(WindowId window_id) {
   Window::DidDestroyWidget(window_id);
 }
 
+void ScriptController::DidKillFocus(WindowId window_id) {
+  Window::DidKillFocus(window_id);
+}
+
 void ScriptController::DidRealizeWidget(WindowId window_id) {
   Window::DidRealizeWidget(window_id);
+}
+
+void ScriptController::DidSetFocus(WindowId window_id) {
+  Window::DidSetFocus(window_id);
 }
 
 void ScriptController::DidStartHost() {

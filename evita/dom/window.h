@@ -26,6 +26,7 @@ class Window : public v8_glue::Scriptable<Window> {
   static_assert(!kNotRealized, "Window::State::kNotRealized should be zero.");
 
   private: std::unordered_set<Window*> child_windows_;
+  private: int focus_tick_;
   private: Window* parent_window_;
   private: State state_;
   // Associated wiget id. If associated widget is destroyed, it is changed
@@ -36,6 +37,7 @@ class Window : public v8_glue::Scriptable<Window> {
   public: virtual ~Window();
 
   public: std::vector<Window*> child_windows() const;
+  public: int focus_tick() const { return focus_tick_; }
   public: WindowId id() const { return window_id_; }
   public: v8_glue::Nullable<Window> parent_window() const {
     return parent_window_;
@@ -47,7 +49,9 @@ class Window : public v8_glue::Scriptable<Window> {
   public: void AddWindow(Window* window);
   public: void Destroy();
   public: static void DidDestroyWidget(WindowId window_id);
+  public: static void DidKillFocus(WindowId window_id);
   public: static void DidRealizeWidget(WindowId window_id);
+  public: static void DidSetFocus(WindowId window_id);
   public: void Focus();
   public: static Window* FromWindowId(WindowId window_id);
   public: bool IsDescendantOf(Window* other) const;

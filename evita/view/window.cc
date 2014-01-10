@@ -63,6 +63,10 @@ class WindowIdMapper : public common::Singleton<WindowIdMapper> {
   }
 };
 
+dom::ViewEventHandler* view_event_handler() {
+  return Application::instance()->view_event_handler();
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -85,8 +89,7 @@ Window::Window(WindowId window_id)
 Window::~Window() {
   if (window_id_ != view::kInvalidWindowId) {
     WindowIdMapper::instance()->Unregister(window_id_);
-    Application::instance()->view_event_handler()->
-        DidDestroyWidget(window_id_);
+    view_event_handler()->DidDestroyWidget(window_id_);
   }
 }
 
@@ -94,14 +97,26 @@ void Window::DidDestroyDomWindow() {
   WindowIdMapper::instance()->DidDestroyDomWindow(window_id_);
 }
 
+void Window::DidKillFocus() {
+  Widget::DidKillFocus();
+  if (window_id_ != view::kInvalidWindowId)
+    view_event_handler()->DidKillFocus(window_id_);
+}
+
 void Window::DidRealize() {
   // TODO(yosi) Until we manage all widgets by WindowId, we don't call
   // ViewEventHandler for unmanaged widget.
   if (window_id_ != view::kInvalidWindowId) {
-    Application::instance()->view_event_handler()->
+    view_event_handler()->
         DidRealizeWidget(window_id_);
   }
   Widget::DidRealize();
+}
+
+void Window::DidSetFocus() {
+  Widget::DidSetFocus();
+  if (window_id_ != view::kInvalidWindowId)
+    view_event_handler()->DidSetFocus(window_id_);
 }
 
 Window* Window::FromWindowId(WindowId window_id) {

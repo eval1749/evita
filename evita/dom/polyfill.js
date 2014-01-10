@@ -4,10 +4,6 @@
 
 'use strict';
 
-var global = this;
-PromiseResolver.init(global.Promise);
-
-
 // Ecmascript6: Array.prototype.find
 if (!Array.prototype.find) {
   /**

@@ -32,11 +32,13 @@ ViewEventHandler* AbstractDomTest::view_event_handler() const {
 v8::Handle<v8::Value> AbstractDomTest::Call(const base::StringPiece& name,
                                             const Argv& argv) {
   auto const isolate = this->isolate();
-  auto global = isolate->GetCurrentContext()->Global();
-  auto callee = global->Get(gin::StringToV8(isolate, name));
-  DCHECK(!callee.IsEmpty() && callee->IsObject() &&
-         callee->ToObject()->IsCallable());
-  return callee->ToObject()->CallAsFunction(global,
+  auto callee = isolate->GetCurrentContext()->Global()->Get(
+      gin::StringToV8(isolate, name));
+  if (callee.IsEmpty() || !callee->IsObject() ||
+      callee->ToObject()->IsCallable()) {
+    return v8::Undefined(isolate);
+  }
+  return callee->ToObject()->CallAsFunction(v8::Undefined(isolate),
       argv.size(), const_cast<v8::Handle<v8::Value>*>(argv.data()));
 }
 

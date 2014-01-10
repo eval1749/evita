@@ -18,37 +18,30 @@ class PromiseResolverTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(PromiseResolverTest);
 };
 
-TEST_F(PromiseResolverTest, Identity) {
-  v8::HandleScope handle_scope(isolate());
-  RunScript("var resolver = new PromiseResolver();"
-            "var promise = resolver.promise();");
-  EXPECT_SCRIPT_TRUE("promise instanceof Promise");
-}
-
 TEST_F(PromiseResolverTest, Reject) {
   v8::HandleScope handle_scope(isolate());
   PromiseResolver* resolver = new PromiseResolver();
   RunScript("var result = 'not called';"
-            "var promise; function setup(x) { promise = x; }");
-  Call("setup", {resolver->NewPromise(isolate())});
-  EXPECT_SCRIPT_TRUE("promise instanceof Promise");
-  RunScript("promise.then(function(x) { result = 'resolved ' + x; },"
-            "             function(x) { result = 'rejected ' + x;});");
+            "function sample(promise) {"
+            "  promise.then(function(x) { result = x; return 1; },"
+            "               function() { result = 'rejected'; return 2;});"
+            "}");
+  Call("sample", {resolver->NewPromise(isolate())});
   resolver->Reject(isolate(), std::string("foo"));
-  EXPECT_SCRIPT_EQ("rejected foo", "result");
+  EXPECT_SCRIPT_EQ("rejected", "result");
 }
 
 TEST_F(PromiseResolverTest, Resolve) {
   v8::HandleScope handle_scope(isolate());
   PromiseResolver* resolver = new PromiseResolver();
   RunScript("var result = 'not called';"
-            "var promise; function setup(x) { promise = x; }");
-  Call("setup", {resolver->NewPromise(isolate())});
-  EXPECT_SCRIPT_TRUE("promise instanceof Promise");
-  RunScript("promise.then(function(x) { result = 'resolved ' + x; },"
-            "             function(x) { result = 'rejected ' + x;});");
+            "function sample(promise) {"
+            "  promise.then(function(x) { result = x; return 1; },"
+            "               function() { result = 'rejected'; return 2;});"
+            "}");
+  Call("sample", {resolver->NewPromise(isolate())});
   resolver->Resolve(isolate(), std::string("foo"));
-  EXPECT_SCRIPT_EQ("resolved foo", "result");
+  EXPECT_SCRIPT_EQ("foo", "result");
 }
 
 }  // namespace

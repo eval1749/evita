@@ -69,7 +69,6 @@
         'dom/lock.cc',
         'dom/range.cc',
         'dom/selection.cc',
-        'dom/script_callback.cc',
         'dom/script_command.cc',
         'dom/script_controller.cc',
         'dom/script_thread.cc',

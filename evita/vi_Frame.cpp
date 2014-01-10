@@ -712,16 +712,15 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       switch (pNotify->idFrom) {
         case CtrlId_TabBand:
           switch (pNotify->code) {
-            case TABBAND_NOTIFY_CLOSE: {
+            case TABBAND_NOTIFY_CLICK_CLOSE_BUTTON: {
+              if (!HasMultiplePanes() && !canClose())
+                break;
               auto const tab_index = TabBandNotifyData::FromNmhdr(
                     pNotify)->tab_index_;
-                if (auto const pPane = getPaneFromTab(tab_index))
-                  pPane->Destroy();
-                break;
+              if (auto const pPane = getPaneFromTab(tab_index))
+                pPane->Destroy();
+              break;
             }
-
-            case TABBAND_NOTIFY_QUERY_CLOSE:
-              return HasMultiplePanes() || canClose();
 
             case TCN_SELCHANGE:
               DidChangeTabSelection(TabCtrl_GetCurSel(m_hwndTabBand));

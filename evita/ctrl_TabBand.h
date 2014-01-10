@@ -11,8 +11,7 @@
 #if !defined(INCLUDE_control_tabBand_h)
 #define INCLUDE_control_tabBand_h
 
-#define TABBAND_NOTIFY_CLOSE        (TCN_LAST - 1)
-#define TABBAND_NOTIFY_QUERY_CLOSE  (TCN_LAST - 2)
+#define TABBAND_NOTIFY_CLICK_CLOSE_BUTTON (TCN_LAST - 1)
 
 enum TabBandDragAndDrop {
     kHover,

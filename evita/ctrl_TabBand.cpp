@@ -1355,10 +1355,8 @@ class TabBand : public Element {
       }
 
       if (pElement->Is<CloseBox>()) {
-        if (sendNotify(TABBAND_NOTIFY_QUERY_CLOSE)) {
-          if (auto const item = pElement->GetParent()->DynamicCast<Item>())
-            sendNotify(TABBAND_NOTIFY_CLOSE, item->m_iItem);
-        }
+        if (auto const item = pElement->GetParent()->DynamicCast<Item>())
+          sendNotify(TABBAND_NOTIFY_CLICK_CLOSE_BUTTON, item->m_iItem);
         return;
       }
 

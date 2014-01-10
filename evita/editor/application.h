@@ -86,7 +86,6 @@ class Application : public common::Singleton<Application> {
 
   // [E]
   public: void Execute(CommandWindow* window, uint32 key_code, uint32 repeat);
-  public: void Exit(bool);
 
   // [F]
   public: Buffer* FindBuffer(const base::string16& name) const;

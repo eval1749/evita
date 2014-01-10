@@ -138,17 +138,6 @@ void Application::Execute(CommandWindow* window, uint32 key_code,
   command_processor_->Execute(window, key_code, repeat);
 }
 
-void Application::Exit(bool is_forced) {
-  while (nullptr != buffers_.GetFirst()) {
-    if (!KillBuffer(buffers_.GetFirst(), is_forced))
-      return;
-  }
-
-  while (frames_.GetFirst()) {
-    ::DestroyWindow(*frames_.GetFirst());
-  }
-}
-
 Buffer* Application::FindBuffer(const base::string16& name) const {
   for (auto& buffer: buffers_) {
     if (buffer.name() == name)

@@ -88,9 +88,15 @@ class DocumentList : public common::Singleton<DocumentList> {
       const base::string16& name) {
     return instance()->Find(name);
   }
+  public: static void StaticRemove(Document* document) {
+    instance()->Unregister(document);
+  }
   public: void Unregister(Document* document) {
     auto it = map_.find(document->name());
-    CHECK(it != map_.end());
+    if (it == map_.end()) {
+      // We called |Document.remove()| for |document|.
+      return;
+    }
     map_.erase(it);
   }
 
@@ -114,6 +120,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         .SetMethod("find", &DocumentList::StaticFind)
         .SetMethod("getOrNew", &Document::GetOrNew)
         .SetProperty("list", &DocumentList::StaticList)
+        .SetMethod("remove", &DocumentList::StaticRemove)
         .Build();
   }
 

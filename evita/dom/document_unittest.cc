@@ -90,6 +90,16 @@ TEST_F(DocumentTest, DocumentGetOrNew) {
   EXPECT_SCRIPT_TRUE("doc === Document.getOrNew('foo')");
 }
 
+TEST_F(DocumentTest, Document_remove) {
+  RunScript("var doc1 = new Document('foo');"
+            "var doc2 = new Document('bar');"
+            "Document.remove(doc1);");
+  EXPECT_SCRIPT_TRUE("Document.find('foo') == null");
+  EXPECT_SCRIPT_EQ("1", "Document.list.length");
+  RunScript("Document.remove(doc2);");
+  EXPECT_SCRIPT_EQ("0", "Document.list.length");
+}
+
 TEST_F(DocumentTest, charCodeAt) {
   RunScript("var doc = new Document('foo');"
             "new Range(doc).text = 'foobar';");

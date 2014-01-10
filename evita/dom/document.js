@@ -18,7 +18,7 @@ Document.prototype.close = function() {
         case DialogIemId.NO:
           document.forceClose();
           break;
-        case DialogIemId.NO:
+        case DialogIemId.YES:
           Editor.getFilenameForSave(null, document.filename)
             .then(function(filename) {
               document.save(filename).then(function() {
@@ -50,6 +50,14 @@ Document.prototype.listWindows = function() {
     });
   });
   return windows;
+};
+
+/**
+ * @return {boolean}
+ */
+Document.prototype.needSave = function() {
+  // TODO: We should use |document.notForSave|.
+  return this.modified && FilePath.isValidFilename(this.filename);
 };
 
 /**

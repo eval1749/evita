@@ -18,6 +18,27 @@
     return EditorWindow.list.reduce(updateActiveWindow, null);
   };
 
+  Editor.exit = function() {
+    var window = Editor.activeWindow();
+    var can_exit = true;
+    Document.list.forEach(function(document) {
+      if (!document.needSave())
+        return;
+      can_exit = false;
+      // TODO(yosi) How do we handle [Cancel] button?
+      document.close();
+    });
+    if (!can_exit)
+      return;
+    Editor.forceExit();
+  };
+
+  Editor.forceExit = function() {
+    EditorWindow.list.forEach(function(window) {
+      window.destroy();
+    });
+  };
+
   /**
    * @param {?Window} window.
    * @param {string} dirname.

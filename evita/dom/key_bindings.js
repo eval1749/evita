@@ -125,4 +125,11 @@
     var document = this.selection.document;
     document.close();
   });
+
+  Editor.setKeyBinding('Ctrl+Shift+W', function(arg) {
+    if (arg)
+      Editor.forceExit();
+    else
+      Editor.exit();
+  });
 })();

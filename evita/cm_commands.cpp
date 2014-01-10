@@ -572,13 +572,6 @@ DEFCOMMAND(ExchangeCode)
     pSelection->SetRange(oRange.GetEnd(), oRange.GetEnd());
 } // ExchangeCode
 
-
-DEFCOMMAND(Exit)
-{
-    Application::instance()->Exit(pCtx->HasArg());
-} // Exit
-
-
 // [F]
 DefCommand_Motions(Forward, Right, Char)
 DefCommand_Motions(Forward, Right, Word)
@@ -1492,7 +1485,6 @@ void Processor::GlobalInit() {
     BIND_KEY(Mod_CtrlShift | '2', SplitWindowVertically);
     BIND_KEY(Mod_CtrlShift | '5', SplitWindowHorizontally);
     BIND_KEY(Mod_CtrlShift | '9', CloseOtherFrames);
-    BIND_KEY(Mod_CtrlShift | 'W', Exit);
 
     BIND_VKEY(Mod_None,  BACK,   BackwardDeleteChar);
     BIND_VKEY(Mod_None,  DELETE, ForwardDeleteChar);

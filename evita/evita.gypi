@@ -109,6 +109,7 @@
           'dom/types.js',
           'dom/runtime.js',
           'dom/document.js',
+          'dom/editor.js',
           'dom/editor_window.js',
           'dom/file_path.js',
           'dom/range.js',

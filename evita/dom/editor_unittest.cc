@@ -25,17 +25,19 @@ class EditorTest : public dom::AbstractDomTest {
 
 TEST_F(EditorTest, getFilenameForLoad) {
   RunScript("var filename;"
-            "function gotFilename(x) { filename = x; }"
             "var window = new EditorWindow();"
-            "Editor.getFilenameForLoad(window, 'dir', gotFilename);");
+            "Editor.getFilenameForLoad(window, 'dir').then(function(x) {"
+            "  filename = x;"
+            "});");
   EXPECT_SCRIPT_EQ("dir/foo.bar", "filename");
 }
 
 TEST_F(EditorTest, getFilenameForSave) {
   RunScript("var filename;"
-            "function gotFilename(x) { filename = x; }"
             "var window = new EditorWindow();"
-            "Editor.getFilenameForSave(window, 'dir', gotFilename);");
+            "Editor.getFilenameForSave(window, 'dir').then(function(x) {"
+            "  filename = x;"
+            "});");
   EXPECT_SCRIPT_EQ("dir/foo.bar", "filename");
 }
 

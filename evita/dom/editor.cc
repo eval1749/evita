@@ -70,8 +70,8 @@ class EditorWrapperInfo : public v8_glue::WrapperInfo {
         &EditorWrapperInfo::NewEditor);
     return v8_glue::FunctionTemplateBuilder(isolate, templ)
       .SetMethod("createFrame", CreateFrame)
-      .SetMethod("getFilenameForLoad", GetFilenameForLoad)
-      .SetMethod("getFilenameForSave", GetFilenameForSave)
+      .SetMethod("getFilenameForLoad_", GetFilenameForLoad)
+      .SetMethod("getFilenameForSave_", GetFilenameForSave)
       .SetMethod("setKeyBinding_", SetKeyBinding)
       .SetProperty("version", &version)
       .Build();

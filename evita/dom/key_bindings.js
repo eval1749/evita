@@ -120,10 +120,10 @@
       return;
     }
 
-    Editor.getFilenameForSave(this, this.selection.document.filename || '',
-                              function(filename) {
-      newTextWindow(editorWindow, new Document(filename));
-    });
+    Editor.getFilenameForSave(this, this.selection.document.filename)
+        .then(function(filename) {
+          newTextWindow(editorWindow, new Document(filename))
+        });
   });
 
   // Open new document in new editor window.
@@ -133,8 +133,8 @@
       return;
     }
 
-    Editor.getFilenameForSave(this, this.selection.document.filename || '',
-        function(filename) {
+    Editor.getFilenameForSave(this, this.selection.document.filename)
+        .then(function(filename) {
           newEditorWindow(new Document(filename));
         });
   });
@@ -142,20 +142,20 @@
   // Open document in new or existing window in current editor window.
   Editor.setKeyBinding('Ctrl+O', function() {
     var editorWindow = this.parent;
-    Editor.getFilenameForLoad(this, this.selection.document.filename,
-                              function(filename) {
-      // TODO(yosi) When editorWindow has a window for filename, we should
-      // activate it.
-      newTextWindow(editorWindow, Document.load(filename));
-    });
+    Editor.getFilenameForLoad(this, this.selection.document.filename)
+        .then(function(filename) {
+          // TODO(yosi) When editorWindow has a window for filename, we should
+          // activate it.
+          newTextWindow(editorWindow, Document.load(filename));
+        });
   });
 
   // Open document in new editor window.
   Editor.setKeyBinding('Ctrl+Shift+O', function() {
-    Editor.getFilenameForLoad(this, this.selection.document.filename,
-                              function(filename) {
-      newEditorWindow(Document.load(filename));
-    });
+    Editor.getFilenameForLoad(this, this.selection.document.filename)
+        .then(function(filename) {
+          newEditorWindow(Document.load(filename));
+        });
   });
 
   // Save file
@@ -166,8 +166,9 @@
       return;
     }
 
-    Editor.getFilenameForSave(this, document.filename, function(filename) {
-      document.save(filename);
-    });
+    Editor.getFilenameForSave(this, document.filename)
+        .then(function(filename) {
+          document.save(filename);
+        });
   });
 })();

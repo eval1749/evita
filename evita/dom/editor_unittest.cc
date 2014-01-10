@@ -27,7 +27,7 @@ TEST_F(EditorTest, getFilenameForLoad) {
   RunScript("var filename;"
             "function gotFilename(x) { filename = x; }"
             "var window = new EditorWindow();"
-            "editor.getFilenameForLoad(window, 'dir', gotFilename);");
+            "Editor.getFilenameForLoad(window, 'dir', gotFilename);");
   EXPECT_SCRIPT_EQ("dir/foo.bar", "filename");
 }
 
@@ -35,12 +35,12 @@ TEST_F(EditorTest, getFilenameForSave) {
   RunScript("var filename;"
             "function gotFilename(x) { filename = x; }"
             "var window = new EditorWindow();"
-            "editor.getFilenameForSave(window, 'dir', gotFilename);");
+            "Editor.getFilenameForSave(window, 'dir', gotFilename);");
   EXPECT_SCRIPT_EQ("dir/foo.bar", "filename");
 }
 
 TEST_F(EditorTest, version) {
-  EXPECT_SCRIPT_EQ("5.0", "editor.version");
+  EXPECT_SCRIPT_EQ("5.0", "Editor.version");
 }
 
 }  // namespace

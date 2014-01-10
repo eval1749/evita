@@ -50,8 +50,8 @@
     return code;
   }
 
-  editor.setKeyBinding = function(combination, command) {
-    editor.setKeyBinding_(parseKeyCombination(combination), command);
+  Editor.setKeyBinding = function(combination, command) {
+    Editor.setKeyBinding_(parseKeyCombination(combination), command);
   };
 })();
 
@@ -74,7 +74,7 @@
   }
 
   // Show document in new editor window.
-  editor.setKeyBinding('Ctrl+Shift+3', function() {
+  Editor.setKeyBinding('Ctrl+Shift+3', function() {
     var text_window = new TextWindow(this.selection.range);
     var editor_window = new EditorWindow();
     editor_window.add(text_window);
@@ -84,7 +84,7 @@
   });
 
   // Show document in new editor window and close current editor window.
-  editor.setKeyBinding('Ctrl+Shift+4', function() {
+  Editor.setKeyBinding('Ctrl+Shift+4', function() {
     var current = this.selection.window.parent;
     // When editor window has only one tab, we don't ignore this command,
     // since result of this command isn't useful.
@@ -100,7 +100,7 @@
   });
 
   // Select all contents
-  editor.setKeyBinding('Ctrl+A', function() {
+  Editor.setKeyBinding('Ctrl+A', function() {
     var range = this.selection.range;
     range.start = 0
     range.end = range.document.length;
@@ -108,41 +108,41 @@
   });
 
   // Make selection visible
-  editor.setKeyBinding('Ctrl+L', function() {
+  Editor.setKeyBinding('Ctrl+L', function() {
     this.makeSelectionVisible();
   });
 
   // Open new document in new window in current editor window.
-  editor.setKeyBinding('Ctrl+N', function(arg) {
+  Editor.setKeyBinding('Ctrl+N', function(arg) {
     var editorWindow = this.parent;
     if (arg !== undefined) {
       newTextWindow(editorWindow, new Document('untitled.txt'));
       return;
     }
 
-    editor.getFilenameForSave(this, this.selection.document.filename || '',
+    Editor.getFilenameForSave(this, this.selection.document.filename || '',
                               function(filename) {
       newTextWindow(editorWindow, new Document(filename));
     });
   });
 
   // Open new document in new editor window.
-  editor.setKeyBinding('Ctrl+Shift+N', function(arg) {
+  Editor.setKeyBinding('Ctrl+Shift+N', function(arg) {
     if (arg !== undefined) {
       newEditorWindow(new Document('untitled.txt'));
       return;
     }
 
-    editor.getFilenameForSave(this, this.selection.document.filename || '',
+    Editor.getFilenameForSave(this, this.selection.document.filename || '',
         function(filename) {
           newEditorWindow(new Document(filename));
         });
   });
 
   // Open document in new or existing window in current editor window.
-  editor.setKeyBinding('Ctrl+O', function() {
+  Editor.setKeyBinding('Ctrl+O', function() {
     var editorWindow = this.parent;
-    editor.getFilenameForLoad(this, this.selection.document.filename,
+    Editor.getFilenameForLoad(this, this.selection.document.filename,
                               function(filename) {
       // TODO(yosi) When editorWindow has a window for filename, we should
       // activate it.
@@ -151,22 +151,22 @@
   });
 
   // Open document in new editor window.
-  editor.setKeyBinding('Ctrl+Shift+O', function() {
-    editor.getFilenameForLoad(this, this.selection.document.filename,
+  Editor.setKeyBinding('Ctrl+Shift+O', function() {
+    Editor.getFilenameForLoad(this, this.selection.document.filename,
                               function(filename) {
       newEditorWindow(Document.load(filename));
     });
   });
 
   // Save file
-  editor.setKeyBinding('Ctrl+S', function(arg) {
+  Editor.setKeyBinding('Ctrl+S', function(arg) {
     var document = this.selection.document;
     if (!arg && document.filename != '') {
       document.save(filename);
       return;
     }
 
-    editor.getFilenameForSave(this, document.filename, function(filename) {
+    Editor.getFilenameForSave(this, document.filename, function(filename) {
       document.save(filename);
     });
   });

@@ -13,7 +13,7 @@
 #include "evita/dom/script_thread.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
-#include "evita/v8_glue/script_callback.h"
+#include "evita/v8_glue/script_closure.h"
 
 namespace dom {
 

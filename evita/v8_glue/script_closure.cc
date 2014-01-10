@@ -1,7 +1,7 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/v8_glue/script_callback.h"
+#include "evita/v8_glue/script_closure.h"
 
 namespace v8_glue {
 namespace internal {

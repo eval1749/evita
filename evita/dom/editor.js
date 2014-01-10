@@ -28,4 +28,18 @@
     Editor.getFilenameForSave_(window, dirname, resolved);
     return promise;
   };
+
+  /**
+   * @param {Window} window.
+   * @param {string} message
+   * @param {string} title
+   * @param {number} flags
+   * @return {Promise}
+   */
+  Editor.messageBox = function(window, message, title, flags) {
+    var resolved;
+    var promise = new Promise(function(r) { resolved = r; });
+    Editor.messageBox_(window, message, title, flags, resolved);
+    return promise;
+  };
 })();

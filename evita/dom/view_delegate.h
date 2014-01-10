@@ -22,6 +22,9 @@ class ViewDelegate {
   public: typedef base::Callback<void(base::string16 filename)>
       GetFilenameForSaveCallback;
 
+  public: typedef base::Callback<void(int response_code)>
+      MessageBoxCallback;
+
   public: ViewDelegate() = default;
   public: virtual ~ViewDelegate() = default;
 
@@ -40,6 +43,9 @@ class ViewDelegate {
                                 const base::string16& filename) = 0;
 
   public: virtual void MakeSelectionVisible(WidgetId widget_id) = 0;
+  public: virtual void MessageBox(WidgetId widget_id,
+      const base::string16& message, const base::string16& title, int flags,
+      MessageBoxCallback callback) = 0;
   public: virtual void RealizeWindow(WidgetId widget_id) = 0;
   public: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) = 0;

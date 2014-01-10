@@ -39,6 +39,9 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void LoadFile(dom::Document* document,
                                  const base::string16& filename) override;
   private: virtual void MakeSelectionVisible(dom::WidgetId widget_id) override;
+  private: virtual void MessageBox(dom::WidgetId widget_id,
+      const base::string16& message, const base::string16& title, int flags,
+      MessageBoxCallback callback) override;
   private: virtual void RealizeWindow(dom::WidgetId widget_id) override;
   private: virtual void RegisterViewEventHandler(
       dom::ViewEventHandler* event_handler) override;

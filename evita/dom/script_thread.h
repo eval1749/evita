@@ -75,6 +75,9 @@ class ScriptThread final : public ViewDelegate,
   private: virtual void LoadFile(Document* document,
                                  const base::string16& filename) override;
   private: virtual void MakeSelectionVisible(WidgetId widget_id) override;
+  private: virtual void MessageBox(WidgetId widget_id,
+      const base::string16& message, const base::string16& title, int flags,
+      MessageBoxCallback callback) override;
   private: virtual void RealizeWindow(WidgetId widget_id) override;
   private: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) override;

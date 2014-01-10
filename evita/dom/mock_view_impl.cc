@@ -23,5 +23,11 @@ void MockViewImpl::GetFilenameForSave(WidgetId,
   callback.Run(dir_path + L"/foo.bar");
 }
 
+void MockViewImpl::MessageBox(WidgetId, const base::string16&,
+                              const base::string16&, int flags,
+                              MessageBoxCallback callback) {
+  callback.Run(flags);
+}
+
 }  // namespace dom
 

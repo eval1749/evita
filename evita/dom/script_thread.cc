@@ -120,6 +120,28 @@ void ScriptThread::Start(ViewDelegate* view_delegate,
         param1, param2, param3)); \
   }
 
+#define DEFINE_VIEW_DELEGATE_4(name, type1, type2, type3, type4) \
+  void ScriptThread::name(type1 p1, type2 p2, type3 p3, type4 p4) { \
+    DCHECK_CALLED_ON_SCRIPT_THREAD(); \
+    if (!host_message_loop_) \
+      return; \
+    host_message_loop_->PostTask(FROM_HERE, base::Bind( \
+        &ViewDelegate::name, \
+        base::Unretained(view_delegate_), \
+        p1, p2, p3, p4)); \
+  }
+
+#define DEFINE_VIEW_DELEGATE_5(name, type1, type2, type3, type4, type5) \
+  void ScriptThread::name(type1 p1, type2 p2, type3 p3, type4 p4, type5 p5) { \
+    DCHECK_CALLED_ON_SCRIPT_THREAD(); \
+    if (!host_message_loop_) \
+      return; \
+    host_message_loop_->PostTask(FROM_HERE, base::Bind( \
+        &ViewDelegate::name, \
+        base::Unretained(view_delegate_), \
+        p1, p2, p3, p4, p5)); \
+  }
+
 DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
 DEFINE_VIEW_DELEGATE_1(CreateTextWindow, const TextWindow*)
 DEFINE_VIEW_DELEGATE_2(AddWindow, WidgetId, WidgetId)
@@ -131,6 +153,9 @@ DEFINE_VIEW_DELEGATE_3(GetFilenameForSave, WidgetId, const base::string16&,
                        ViewDelegate::GetFilenameForSaveCallback)
 DEFINE_VIEW_DELEGATE_2(LoadFile, Document*, const base::string16&)
 DEFINE_VIEW_DELEGATE_1(MakeSelectionVisible, WidgetId)
+DEFINE_VIEW_DELEGATE_5(MessageBox, WidgetId, const base::string16&,
+                       const::base::string16&, int,
+                       MessageBoxCallback)
 DEFINE_VIEW_DELEGATE_1(RealizeWindow, WidgetId)
 DEFINE_VIEW_DELEGATE_2(SaveFile, Document*, const base::string16&)
 

@@ -131,6 +131,19 @@ void ViewDelegateImpl::MakeSelectionVisible(dom::WidgetId widget_id) {
   text_widget->MakeSelectionVisible();
 }
 
+void ViewDelegateImpl::MessageBox(dom::WidgetId widget_id,
+      const base::string16& message, const base::string16& title, int flags,
+      MessageBoxCallback callback) {
+  auto const widget = widgets::Widget::FromWidgetId(widget_id);
+  if (!widget) {
+    DVLOG(0) << "MessageBox: no such widget " << widget_id;
+    return;
+  }
+  auto response_code = ::MessageBoxW(widget->AssociatedHwnd(), message.c_str(),
+                                     title.c_str(), flags);
+  event_handler_->RunCallback(base::Bind(callback, response_code));
+}
+
 void ViewDelegateImpl::RealizeWindow(dom::WidgetId widget_id) {
   DCHECK_NE(dom::kInvalidWidgetId, widget_id);
   auto const widget = widgets::Widget::FromWidgetId(widget_id);

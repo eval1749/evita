@@ -26,6 +26,9 @@ class MockViewImpl : public dom::ViewDelegate {
     GetFilenameForSaveCallback callback) override;
   MOCK_METHOD2(LoadFile, void(Document*, const base::string16&));
   MOCK_METHOD1(MakeSelectionVisible, void(WidgetId));
+  public: virtual void MessageBox(WidgetId widget_id,
+      const base::string16& message, const base::string16& title, int flags,
+      MessageBoxCallback callback) override;
   MOCK_METHOD2(SaveFile, void(Document*, const base::string16&));
   MOCK_METHOD1(RealizeWindow, void(WidgetId));
   MOCK_METHOD1(RegisterViewEventHandler, void(ViewEventHandler*));

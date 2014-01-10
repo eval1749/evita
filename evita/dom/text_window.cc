@@ -71,7 +71,7 @@ v8_glue::WrapperInfo* TextWindow::static_wrapper_info() {
 
 void TextWindow::MakeSelectionVisible() {
   ScriptController::instance()->view_delegate()->MakeSelectionVisible(
-      widget_id());
+      window_id());
 }
 
 }  // namespace dom

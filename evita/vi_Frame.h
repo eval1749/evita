@@ -77,7 +77,7 @@ class Frame final : public widgets::Widget,
   private: char16* m_rgpwszMessage[MessageLevel_Limit];
   private: mutable char16 m_wszToolTip[1024];
 
-  public: explicit Frame(widgets::WidgetId widget_id);
+  public: explicit Frame(view::WindowId window_id);
   // TODO(yosi) We should remove no parameter Frame ctor.
   public: Frame();
   private: virtual ~Frame();

@@ -108,9 +108,9 @@ Pane* AsPane(const widgets::Widget& widget) {
 #define USE_TABBAND_EDGE 0
 extern uint g_TabBand__TabDragMsg;
 
-Frame::Frame(widgets::WidgetId widget_id)
+Frame::Frame(view::WindowId window_id)
     : ALLOW_THIS_IN_INITIALIZER_LIST(
-          widgets::Widget(widgets::NativeWindow::Create(*this), widget_id)),
+          widgets::Widget(widgets::NativeWindow::Create(*this), window_id)),
       gfx_(new gfx::Graphics()),
       m_hwndTabBand(nullptr),
       m_pActivePane(nullptr) {
@@ -118,7 +118,7 @@ Frame::Frame(widgets::WidgetId widget_id)
 }
 
 Frame::Frame()
-    : Frame(widgets::kInvalidWidgetId) {
+    : Frame(view::kInvalidWindowId) {
 }
 
 Frame::~Frame() {
@@ -537,7 +537,7 @@ void Frame::onDropFiles(HDROP const hDrop) {
       break;
     filename.resize(length);
     Application::instance()->view_event_handler()->OpenFile(
-        widget_id(), filename);
+        window_id(), filename);
     nIndex += 1;
   }
   ::DragFinish(hDrop);

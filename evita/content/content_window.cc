@@ -13,13 +13,13 @@ ContentWindow::ContentWindow(
       active_tick_(0) {
 }
 
-ContentWindow::ContentWindow(widgets::WidgetId widget_id)
-    : CommandWindow_(widget_id),
+ContentWindow::ContentWindow(view::WindowId window_id)
+    : CommandWindow_(window_id),
       active_tick_(0) {
 }
 
 ContentWindow::ContentWindow()
-    : ContentWindow(widgets::kInvalidWidgetId) {
+    : ContentWindow(view::kInvalidWindowId) {
 }
 
 Frame& ContentWindow::frame() const {

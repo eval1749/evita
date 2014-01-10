@@ -7,7 +7,7 @@
 
 #include "base/strings/string16.h"
 #include "evita/vi_CommandWindow.h"
-#include "evita/widgets/widget_id.h"
+#include "evita/view/window_id.h"
 
 class Frame;
 
@@ -20,7 +20,7 @@ class ContentWindow : public CommandWindow_<ContentWindow> {
 
   protected: explicit ContentWindow(
                 std::unique_ptr<common::win::NativeWindow>&&);
-  protected: explicit ContentWindow(widgets::WidgetId widget_id);
+  protected: explicit ContentWindow(view::WindowId window_id);
   protected: ContentWindow();
 
   public: Frame& frame() const;

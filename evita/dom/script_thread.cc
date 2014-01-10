@@ -144,19 +144,19 @@ void ScriptThread::Start(ViewDelegate* view_delegate,
 
 DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
 DEFINE_VIEW_DELEGATE_1(CreateTextWindow, const TextWindow*)
-DEFINE_VIEW_DELEGATE_2(AddWindow, WidgetId, WidgetId)
-DEFINE_VIEW_DELEGATE_1(DestroyWindow, WidgetId)
-DEFINE_VIEW_DELEGATE_1(FocusWindow, WidgetId)
-DEFINE_VIEW_DELEGATE_3(GetFilenameForLoad, WidgetId, const base::string16&,
+DEFINE_VIEW_DELEGATE_2(AddWindow, WindowId, WindowId)
+DEFINE_VIEW_DELEGATE_1(DestroyWindow, WindowId)
+DEFINE_VIEW_DELEGATE_1(FocusWindow, WindowId)
+DEFINE_VIEW_DELEGATE_3(GetFilenameForLoad, WindowId, const base::string16&,
                        ViewDelegate::GetFilenameForLoadCallback)
-DEFINE_VIEW_DELEGATE_3(GetFilenameForSave, WidgetId, const base::string16&,
+DEFINE_VIEW_DELEGATE_3(GetFilenameForSave, WindowId, const base::string16&,
                        ViewDelegate::GetFilenameForSaveCallback)
 DEFINE_VIEW_DELEGATE_2(LoadFile, Document*, const base::string16&)
-DEFINE_VIEW_DELEGATE_1(MakeSelectionVisible, WidgetId)
-DEFINE_VIEW_DELEGATE_5(MessageBox, WidgetId, const base::string16&,
+DEFINE_VIEW_DELEGATE_1(MakeSelectionVisible, WindowId)
+DEFINE_VIEW_DELEGATE_5(MessageBox, WindowId, const base::string16&,
                        const::base::string16&, int,
                        MessageBoxCallback)
-DEFINE_VIEW_DELEGATE_1(RealizeWindow, WidgetId)
+DEFINE_VIEW_DELEGATE_1(RealizeWindow, WindowId)
 DEFINE_VIEW_DELEGATE_2(SaveFile, Document*, const base::string16&)
 
 void ScriptThread::RegisterViewEventHandler(
@@ -201,10 +201,10 @@ void ScriptThread::RegisterViewEventHandler(
         param1, param2)); \
   }
 
-DEFINE_VIEW_EVENT_HANDLER_1(DidDestroyWidget, WidgetId)
-DEFINE_VIEW_EVENT_HANDLER_1(DidRealizeWidget, WidgetId)
+DEFINE_VIEW_EVENT_HANDLER_1(DidDestroyWidget, WindowId)
+DEFINE_VIEW_EVENT_HANDLER_1(DidRealizeWidget, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_0(DidStartHost)
-DEFINE_VIEW_EVENT_HANDLER_2(OpenFile, WidgetId, const base::string16&)
+DEFINE_VIEW_EVENT_HANDLER_2(OpenFile, WindowId, const base::string16&)
 DEFINE_VIEW_EVENT_HANDLER_1(RunCallback, base::Closure)
 
 void ScriptThread::WillDestroyHost() {

@@ -5,7 +5,7 @@
 
 #include "base/callback_forward.h"
 #include "base/strings/string16.h"
-#include "evita/dom/widget_id.h"
+#include "evita/dom/window_id.h"
 
 namespace dom {
 
@@ -30,23 +30,23 @@ class ViewDelegate {
 
   public: virtual void CreateEditorWindow(const EditorWindow* window) = 0;
   public: virtual void CreateTextWindow(const TextWindow* window) = 0;
-  public: virtual void AddWindow(WidgetId parent_id, WidgetId child_id) = 0;
-  public: virtual void DestroyWindow(WidgetId widget_id) = 0;
-  public: virtual void FocusWindow(WidgetId widget_id) = 0;
+  public: virtual void AddWindow(WindowId parent_id, WindowId child_id) = 0;
+  public: virtual void DestroyWindow(WindowId window_id) = 0;
+  public: virtual void FocusWindow(WindowId window_id) = 0;
   public: virtual void GetFilenameForLoad(
-      WidgetId widget_id, const base::string16& dir_path,
+      WindowId window_id, const base::string16& dir_path,
       GetFilenameForLoadCallback callback) = 0;
   public: virtual void GetFilenameForSave(
-      WidgetId widget_id, const base::string16& dir_path,
+      WindowId window_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) = 0;
   public: virtual void LoadFile(Document* document,
                                 const base::string16& filename) = 0;
 
-  public: virtual void MakeSelectionVisible(WidgetId widget_id) = 0;
-  public: virtual void MessageBox(WidgetId widget_id,
+  public: virtual void MakeSelectionVisible(WindowId window_id) = 0;
+  public: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) = 0;
-  public: virtual void RealizeWindow(WidgetId widget_id) = 0;
+  public: virtual void RealizeWindow(WindowId window_id) = 0;
   public: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) = 0;
   public: virtual void SaveFile(Document* document,

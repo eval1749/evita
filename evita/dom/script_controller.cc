@@ -214,12 +214,12 @@ void ScriptController::ThrowError(const std::string& message) {
 }
 
 // ViewEventHandler
-void ScriptController::DidDestroyWidget(WidgetId widget_id) {
-  Window::DidDestroyWidget(widget_id);
+void ScriptController::DidDestroyWidget(WindowId window_id) {
+  Window::DidDestroyWidget(window_id);
 }
 
-void ScriptController::DidRealizeWidget(WidgetId widget_id) {
-  Window::DidRealizeWidget(widget_id);
+void ScriptController::DidRealizeWidget(WindowId window_id) {
+  Window::DidRealizeWidget(window_id);
 }
 
 void ScriptController::DidStartHost() {
@@ -242,24 +242,24 @@ void ScriptController::DidStartHost() {
 }
 
 static v8::Handle<v8::Value> GetOpenFileHandler(
-    v8::Handle<v8::Context> context, WidgetId widget_id) {
+    v8::Handle<v8::Context> context, WindowId window_id) {
   auto const isolate = context->GetIsolate();
-  if (widget_id == kInvalidWidgetId)
+  if (window_id == kInvalidWindowId)
     return context->Global()->Get(gin::StringToV8(isolate, "editor"));
 
-  auto const window = Window::FromWidgetId(widget_id);
+  auto const window = Window::FromWindowId(window_id);
   if (!window) {
-    DVLOG(0) << "OpenFile: No suche window " << widget_id;
+    DVLOG(0) << "OpenFile: No suche window " << window_id;
     return v8::Handle<v8::Value>();
   }
   return window->GetWrapper(isolate);
 }
 
-void ScriptController::OpenFile(WidgetId widget_id,
+void ScriptController::OpenFile(WindowId window_id,
                                 const base::string16& filename){
   auto const isolate = isolate_holder_.isolate();
   v8::HandleScope handle_scope(isolate);
-  auto js_handler = GetOpenFileHandler(context_holder_.context(), widget_id);
+  auto js_handler = GetOpenFileHandler(context_holder_.context(), window_id);
   if (js_handler.IsEmpty())
     return;
   auto open_file = js_handler->ToObject()->Get(

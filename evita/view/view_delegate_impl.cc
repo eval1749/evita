@@ -25,27 +25,27 @@ ViewDelegateImpl::~ViewDelegateImpl() {
   // event_handler_ should be nullptr
 }
 
-void ViewDelegateImpl::AddWindow(dom::WidgetId parent_id,
-                                 dom::WidgetId child_id) {
-  DCHECK_NE(dom::kInvalidWidgetId, parent_id);
-  auto const parent = widgets::Widget::FromWidgetId(parent_id);
+void ViewDelegateImpl::AddWindow(dom::WindowId parent_id,
+                                 dom::WindowId child_id) {
+  DCHECK_NE(dom::kInvalidWindowId, parent_id);
+  auto const parent = widgets::Widget::FromWindowId(parent_id);
   if (!parent) {
     DVLOG(0) << "AddWindow: no such parent " << parent_id;
     return;
   }
-  DCHECK_EQ(parent_id, parent->widget_id());
-  auto const child = widgets::Widget::FromWidgetId(child_id);
+  DCHECK_EQ(parent_id, parent->window_id());
+  auto const child = widgets::Widget::FromWindowId(child_id);
   if (!child) {
     DVLOG(0) << "AddWindow: no such child " << child_id;
     return;
   }
-  DCHECK_EQ(child_id, child->widget_id());
+  DCHECK_EQ(child_id, child->window_id());
   parent->as<Frame>()->AddWindow(child->as<content::ContentWindow>());
 }
 
 void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
   DCHECK(window);
-  new Frame(window->widget_id());
+  new Frame(window->window_id());
 }
 
 void ViewDelegateImpl::CreateTextWindow(const dom::TextWindow* window) {
@@ -53,32 +53,32 @@ void ViewDelegateImpl::CreateTextWindow(const dom::TextWindow* window) {
   new TextEditWindow(*window);
 }
 
-void ViewDelegateImpl::DestroyWindow(dom::WidgetId widget_id) {
-  DCHECK_NE(dom::kInvalidWidgetId, widget_id);
-  auto const widget = widgets::Widget::FromWidgetId(widget_id);
+void ViewDelegateImpl::DestroyWindow(dom::WindowId window_id) {
+  DCHECK_NE(dom::kInvalidWindowId, window_id);
+  auto const widget = widgets::Widget::FromWindowId(window_id);
   if (!widget) {
-    DVLOG(0) << "DestroyWindow: no such widget " << widget_id;
+    DVLOG(0) << "DestroyWindow: no such widget " << window_id;
     return;
   }
   widget->DidDestroyDomWindow();
   widget->Destroy();
 }
 
-void ViewDelegateImpl::FocusWindow(dom::WidgetId widget_id) {
-  auto const widget = widgets::Widget::FromWidgetId(widget_id);
+void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {
+  auto const widget = widgets::Widget::FromWindowId(window_id);
   if (!widget) {
-    DVLOG(0) << "FocusWindow: no such widget " << widget_id;
+    DVLOG(0) << "FocusWindow: no such widget " << window_id;
     return;
   }
   widget->SetFocus();
 }
 
 void ViewDelegateImpl::GetFilenameForLoad(
-    dom::WidgetId widget_id, const base::string16& dir_path,
+    dom::WindowId window_id, const base::string16& dir_path,
     GetFilenameForLoadCallback callback) {
-  auto const widget = widgets::Widget::FromWidgetId(widget_id);
+  auto const widget = widgets::Widget::FromWindowId(window_id);
   if (!widget) {
-    DVLOG(0) << "GetFilenameForLoad: no such widget " << widget_id;
+    DVLOG(0) << "GetFilenameForLoad: no such widget " << window_id;
     event_handler_->RunCallback(base::Bind(callback, base::string16()));
     return;
   }
@@ -93,11 +93,11 @@ void ViewDelegateImpl::GetFilenameForLoad(
 }
 
 void ViewDelegateImpl::GetFilenameForSave(
-    dom::WidgetId widget_id, const base::string16& dir_path,
+    dom::WindowId window_id, const base::string16& dir_path,
     GetFilenameForSaveCallback callback) {
-  auto const widget = widgets::Widget::FromWidgetId(widget_id);
+  auto const widget = widgets::Widget::FromWindowId(window_id);
   if (!widget) {
-    DVLOG(0) << "GetFilenameForSave: no such widget " << widget_id;
+    DVLOG(0) << "GetFilenameForSave: no such widget " << window_id;
     event_handler_->RunCallback(base::Bind(callback, base::string16()));
     return;
   }
@@ -116,28 +116,28 @@ void ViewDelegateImpl::LoadFile(dom::Document* document,
   document->buffer()->Load(filename.c_str());
 }
 
-void ViewDelegateImpl::MakeSelectionVisible(dom::WidgetId widget_id) {
-  DCHECK_NE(dom::kInvalidWidgetId, widget_id);
-  auto const widget = widgets::Widget::FromWidgetId(widget_id);
+void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
+  DCHECK_NE(dom::kInvalidWindowId, window_id);
+  auto const widget = widgets::Widget::FromWindowId(window_id);
   if (!widget) {
-    DVLOG(0) << "MakeSelectionVisible: no such widget " << widget_id;
+    DVLOG(0) << "MakeSelectionVisible: no such widget " << window_id;
     return;
   }
   auto const text_widget = widget->as<TextEditWindow>();
   if (!text_widget) {
-    DVLOG(0) << "MakeSelectionVisible: not TextWidget " << widget_id;
+    DVLOG(0) << "MakeSelectionVisible: not TextWidget " << window_id;
     return;
   }
   UI_DOM_AUTO_LOCK_SCOPE();
   text_widget->MakeSelectionVisible();
 }
 
-void ViewDelegateImpl::MessageBox(dom::WidgetId widget_id,
+void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) {
-  auto const widget = widgets::Widget::FromWidgetId(widget_id);
+  auto const widget = widgets::Widget::FromWindowId(window_id);
   if (!widget) {
-    DVLOG(0) << "MessageBox: no such widget " << widget_id;
+    DVLOG(0) << "MessageBox: no such widget " << window_id;
     return;
   }
   editor::ModalMessageLoopScope modal_mesage_loop_scope;
@@ -146,12 +146,12 @@ void ViewDelegateImpl::MessageBox(dom::WidgetId widget_id,
   event_handler_->RunCallback(base::Bind(callback, response_code));
 }
 
-void ViewDelegateImpl::RealizeWindow(dom::WidgetId widget_id) {
-  DCHECK_NE(dom::kInvalidWidgetId, widget_id);
-  auto const widget = widgets::Widget::FromWidgetId(widget_id);
+void ViewDelegateImpl::RealizeWindow(dom::WindowId window_id) {
+  DCHECK_NE(dom::kInvalidWindowId, window_id);
+  auto const widget = widgets::Widget::FromWindowId(window_id);
   if (!widget)
     return;
-  DCHECK_EQ(widget_id, widget->widget_id());
+  DCHECK_EQ(window_id, widget->window_id());
   widget->RealizeWidget();
 }
 

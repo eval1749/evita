@@ -277,7 +277,7 @@ IoManager::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
         COPYDATASTRUCT* p = reinterpret_cast<COPYDATASTRUCT*>(lParam);
         auto const filename = reinterpret_cast<base::char16*>(p->lpData);
         Application::instance()->view_event_handler()->OpenFile(
-            widgets::kInvalidWidgetId, filename);
+            view::kInvalidWindowId, filename);
         // TODO(yosi) Should we call |SetForegroundWindow|?
         return true;
     } // WM_COPYDATA

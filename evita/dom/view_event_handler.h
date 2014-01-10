@@ -8,7 +8,7 @@
 
 #include "base/callback_forward.h"
 #include "base/strings/string16.h"
-#include "evita/dom/widget_id.h"
+#include "evita/dom/window_id.h"
 
 namespace dom {
 
@@ -17,9 +17,9 @@ class ViewEventHandler {
   public: virtual ~ViewEventHandler() = default;
 
   public: virtual void DidStartHost() = 0;
-  public: virtual void DidDestroyWidget(WidgetId widget_id) = 0;
-  public: virtual void DidRealizeWidget(WidgetId widget_id) = 0;
-  public: virtual void OpenFile(WidgetId widget_id,
+  public: virtual void DidDestroyWidget(WindowId window_id) = 0;
+  public: virtual void DidRealizeWidget(WindowId window_id) = 0;
+  public: virtual void OpenFile(WindowId window_id,
                                 const base::string16& filename) = 0;
   public: virtual void RunCallback(base::Closure) = 0;
   public: virtual void WillDestroyHost() = 0;

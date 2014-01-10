@@ -43,7 +43,7 @@ class EditorClass : public v8_glue::WrapperInfo {
                                           const base::string16& dir_path,
                                           v8::Handle<v8::Function> callback) {
     ScriptController::instance()->view_delegate()->GetFilenameForLoad(
-        window->widget_id(), dir_path,
+        window->window_id(), dir_path,
         v8_glue::ScriptCallback<ViewDelegate::GetFilenameForLoadCallback>::New(
             v8::Isolate::GetCurrent(), callback));
   }
@@ -52,7 +52,7 @@ class EditorClass : public v8_glue::WrapperInfo {
                                           const base::string16& dir_path,
                                           v8::Handle<v8::Function> callback) {
     ScriptController::instance()->view_delegate()->GetFilenameForSave(
-        window->widget_id(), dir_path,
+        window->window_id(), dir_path,
         v8_glue::ScriptCallback<ViewDelegate::GetFilenameForSaveCallback>::New(
             v8::Isolate::GetCurrent(), callback));
   }
@@ -61,7 +61,7 @@ class EditorClass : public v8_glue::WrapperInfo {
                                  const base::string16& title, int flags,
                                  v8::Handle<v8::Function> callback) {
     ScriptController::instance()->view_delegate()->MessageBox(
-        window->widget_id(), message, title, flags,
+        window->window_id(), message, title, flags,
         v8_glue::ScriptCallback<ViewDelegate::MessageBoxCallback>::New(
             v8::Isolate::GetCurrent(), callback));
   }

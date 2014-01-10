@@ -62,33 +62,33 @@ class ScriptThread final : public ViewDelegate,
   private: virtual void CreateEditorWindow(
       const EditorWindow* window) override;
   private: virtual void CreateTextWindow(const TextWindow* window) override;
-  private: virtual void AddWindow(WidgetId parent_id,
-                                  WidgetId child_id) override;
-  private: virtual void DestroyWindow(WidgetId widget_id) override;
-  private: virtual void FocusWindow(WidgetId widget_id) override;
+  private: virtual void AddWindow(WindowId parent_id,
+                                  WindowId child_id) override;
+  private: virtual void DestroyWindow(WindowId window_id) override;
+  private: virtual void FocusWindow(WindowId window_id) override;
   private: virtual void GetFilenameForLoad(
-      WidgetId widget_id, const base::string16& dir_path,
+      WindowId window_id, const base::string16& dir_path,
       GetFilenameForLoadCallback callback) override;
   private: virtual void GetFilenameForSave(
-      WidgetId widget_id, const base::string16& dir_path,
+      WindowId window_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) override;
   private: virtual void LoadFile(Document* document,
                                  const base::string16& filename) override;
-  private: virtual void MakeSelectionVisible(WidgetId widget_id) override;
-  private: virtual void MessageBox(WidgetId widget_id,
+  private: virtual void MakeSelectionVisible(WindowId window_id) override;
+  private: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;
-  private: virtual void RealizeWindow(WidgetId widget_id) override;
+  private: virtual void RealizeWindow(WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) override;
   private: virtual void SaveFile(Document* document,
                                  const base::string16& filename) override;
 
   // ViewEventHandler
-  private: virtual void DidDestroyWidget(WidgetId widget_id) override;
-  private: virtual void DidRealizeWidget(WidgetId widget_id) override;
+  private: virtual void DidDestroyWidget(WindowId window_id) override;
+  private: virtual void DidRealizeWidget(WindowId window_id) override;
   private: virtual void DidStartHost() override;
-  private: virtual void OpenFile(WidgetId widget_id,
+  private: virtual void OpenFile(WindowId window_id,
                                  const base::string16& filename) override;
   private: virtual void RunCallback(base::Closure callback) override;
   private: virtual void WillDestroyHost() override;

@@ -173,7 +173,7 @@ class TextEditWindow::CaretBlinker {
 // TextEditWindow
 //
 TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
-    : CommandWindow_(text_window.widget_id()),
+    : CommandWindow_(text_window.window_id()),
       ALLOW_THIS_IN_INITIALIZER_LIST(
         autoscroller_(new Autoscroller(this))),
       caret_(std::move(Caret::Create())),

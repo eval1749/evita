@@ -21,11 +21,11 @@ namespace dom {
 struct ScriptCommand::Context {
   int arg;
   bool has_arg;
-  WidgetId widget_id;
+  WindowId window_id;
 
   Context(const ::Command::Context* context)
       : arg(context->GetArg()), has_arg(context->HasArg()),
-        widget_id(context->GetWindow()->widget_id()) {
+        window_id(context->GetWindow()->window_id()) {
   }
 };
 
@@ -51,7 +51,7 @@ void ScriptCommand::RunCommand(Context* context) {
   ASSERT_CALLED_ON_SCRIPT_THREAD();
   DCHECK(context);
   std::unique_ptr<Context> scoped_context(context);
-  auto const active_window = Window::FromWidgetId(context->widget_id);
+  auto const active_window = Window::FromWindowId(context->window_id);
   if (!active_window)
     return;
 

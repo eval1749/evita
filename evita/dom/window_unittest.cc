@@ -104,8 +104,8 @@ TEST_F(WindowTest, Add) {
   EXPECT_EQ("2", RunScript("parent.children.length"));
   EXPECT_EQ("1", RunScript("child1.parent.id"));
   EXPECT_EQ("1", RunScript("child2.parent.id"));
-  dom::Window::DidRealizeWidget(static_cast<dom::WidgetId>(1));
-  dom::Window::DidDestroyWidget(static_cast<dom::WidgetId>(2));
+  dom::Window::DidRealizeWidget(static_cast<dom::WindowId>(1));
+  dom::Window::DidDestroyWidget(static_cast<dom::WindowId>(2));
   EXPECT_EQ("1", RunScript("parent.children.length"));
   EXPECT_EQ("true", RunScript("child1.parent == null"));
   EXPECT_EQ("destroyed", RunScript("child1.state"));
@@ -126,15 +126,15 @@ TEST_F(WindowTest, Destroy) {
             "child1.add(child3);"
             "sample1.realize();"
             "sample1.destroy();");
-  view_event_handler()->DidRealizeWidget(static_cast<dom::WidgetId>(1));
+  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
   EXPECT_EQ("destroying", RunScript("sample1.state"));
   EXPECT_EQ("destroying", RunScript("child1.state"));
   EXPECT_EQ("destroying", RunScript("child2.state"));
   EXPECT_EQ("destroying", RunScript("child3.state"));
-  view_event_handler()->DidDestroyWidget(static_cast<dom::WidgetId>(1));
-  view_event_handler()->DidDestroyWidget(static_cast<dom::WidgetId>(2));
-  view_event_handler()->DidDestroyWidget(static_cast<dom::WidgetId>(3));
-  view_event_handler()->DidDestroyWidget(static_cast<dom::WidgetId>(4));
+  view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(1));
+  view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(2));
+  view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(3));
+  view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(4));
   EXPECT_EQ("destroyed", RunScript("sample1.state"));
   EXPECT_EQ("destroyed", RunScript("child1.state"));
   EXPECT_EQ("destroyed", RunScript("child2.state"));
@@ -148,7 +148,7 @@ TEST_F(WindowTest, focus) {
 
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
   RunScript("sample.realize();");
-  view_event_handler()->DidRealizeWidget(static_cast<dom::WidgetId>(1));
+  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
 
   EXPECT_CALL(*mock_view_impl(), FocusWindow(Eq(1)));
   RunScript("sample.focus();");
@@ -167,7 +167,7 @@ TEST_F(WindowTest, Realize) {
   EXPECT_EQ("realizing", RunScript("sample1.state"));
   EXPECT_EQ("Error: This window is being realized.",
             RunScript("sample1.realize();"));
-  view_event_handler()->DidRealizeWidget(static_cast<dom::WidgetId>(1));
+  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
   EXPECT_EQ("realized", RunScript("sample1.state"));
 }
 

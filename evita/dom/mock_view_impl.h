@@ -15,22 +15,22 @@ class MockViewImpl : public dom::ViewDelegate {
   public: virtual ~MockViewImpl();
   MOCK_METHOD1(CreateEditorWindow, void(const EditorWindow*));
   MOCK_METHOD1(CreateTextWindow, void(const TextWindow*));
-  MOCK_METHOD2(AddWindow, void(WidgetId, WidgetId));
-  MOCK_METHOD1(DestroyWindow, void(WidgetId));
-  MOCK_METHOD1(FocusWindow, void(WidgetId));
-  public: virtual void GetFilenameForLoad(WidgetId widget_id,
+  MOCK_METHOD2(AddWindow, void(WindowId, WindowId));
+  MOCK_METHOD1(DestroyWindow, void(WindowId));
+  MOCK_METHOD1(FocusWindow, void(WindowId));
+  public: virtual void GetFilenameForLoad(WindowId window_id,
     const base::string16& dir_path,
     GetFilenameForLoadCallback callback) override;
-  public: virtual void GetFilenameForSave(WidgetId widget_id,
+  public: virtual void GetFilenameForSave(WindowId window_id,
     const base::string16& dir_path,
     GetFilenameForSaveCallback callback) override;
   MOCK_METHOD2(LoadFile, void(Document*, const base::string16&));
-  MOCK_METHOD1(MakeSelectionVisible, void(WidgetId));
-  public: virtual void MessageBox(WidgetId widget_id,
+  MOCK_METHOD1(MakeSelectionVisible, void(WindowId));
+  public: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;
   MOCK_METHOD2(SaveFile, void(Document*, const base::string16&));
-  MOCK_METHOD1(RealizeWindow, void(WidgetId));
+  MOCK_METHOD1(RealizeWindow, void(WindowId));
   MOCK_METHOD1(RegisterViewEventHandler, void(ViewEventHandler*));
 
   DISALLOW_COPY_AND_ASSIGN(MockViewImpl);

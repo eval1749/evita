@@ -8,7 +8,7 @@
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
 #include "evita/v8_glue/scriptable.h"
-#include "evita/widgets/widget_id.h"
+#include "evita/view/window_id.h"
 
 namespace dom {
 

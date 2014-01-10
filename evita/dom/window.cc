@@ -80,34 +80,34 @@ std::vector<Window*> DescendantsOrSelf(Window* window) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// Window::WidgetIdMapper
+// Window::WindowIdMapper
 //
 // This class represents mapping from widget id to DOM Window object.
 //
-// WidgetIdMapper resets Window::widget_id_ when corresponding widget is
+// WindowIdMapper resets Window::window_id_ when corresponding widget is
 // destroyed.
-class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
-  friend class common::Singleton<WidgetIdMapper>;
+class Window::WindowIdMapper : public common::Singleton<WindowIdMapper> {
+  friend class common::Singleton<WindowIdMapper>;
 
-  private: typedef WidgetId WidgetId;
+  private: typedef WindowId WindowId;
 
-  private: std::unordered_map<WidgetId, gc::WeakPtr<Window>> map_;
-  private: WidgetId next_widget_id_;
+  private: std::unordered_map<WindowId, gc::WeakPtr<Window>> map_;
+  private: WindowId next_window_id_;
 
-  private: WidgetIdMapper() : next_widget_id_(1) {
+  private: WindowIdMapper() : next_window_id_(1) {
   }
-  public: ~WidgetIdMapper() = default;
+  public: ~WindowIdMapper() = default;
 
-  public: void DidDestroyWidget(WidgetId widget_id) {
-    DCHECK_NE(kInvalidWidgetId, widget_id);
-    auto it = map_.find(widget_id);
+  public: void DidDestroyWidget(WindowId window_id) {
+    DCHECK_NE(kInvalidWindowId, window_id);
+    auto it = map_.find(window_id);
     if (it == map_.end()) {
-      DVLOG(0) << "Why we don't have a widget for WidgetId " << widget_id <<
-        " in WidgetIdMap?";
+      DVLOG(0) << "Why we don't have a widget for WindowId " << window_id <<
+        " in WindowIdMap?";
       return;
     }
     auto const window = it->second.get();
-    window->widget_id_ = kInvalidWidgetId;
+    window->window_id_ = kInvalidWindowId;
     DCHECK_NE(kDestroyed, window->state_);
     window->state_ = kDestroyed;
     if (auto const parent = window->parent_window_) {
@@ -116,26 +116,26 @@ class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
     }
   }
 
-  public: Window* Find(WidgetId widget_id) {
-    auto it = map_.find(widget_id);
+  public: Window* Find(WindowId window_id) {
+    auto it = map_.find(window_id);
     return it == map_.end() ? nullptr : it->second.get();
   }
 
-  public: WidgetId Register(Window* window) {
-    auto widget_id = next_widget_id_;
-    map_[widget_id] = window;
-    ++next_widget_id_;
-    return widget_id;
+  public: WindowId Register(Window* window) {
+    auto window_id = next_window_id_;
+    map_[window_id] = window;
+    ++next_window_id_;
+    return window_id;
   }
 
   public: void ResetForTesting() {
-    next_widget_id_ = 1;
+    next_window_id_ = 1;
     map_.clear();
   }
 
-  public: void Unregister(WidgetId widget_id) {
-    DCHECK_NE(kInvalidWidgetId, widget_id);
-    map_.erase(widget_id);
+  public: void Unregister(WindowId window_id) {
+    DCHECK_NE(kInvalidWindowId, window_id);
+    map_.erase(window_id);
   }
 };
 
@@ -146,16 +146,16 @@ class Window::WidgetIdMapper : public common::Singleton<WidgetIdMapper> {
 Window::Window()
     : parent_window_(nullptr),
       state_(kNotRealized),
-      ALLOW_THIS_IN_INITIALIZER_LIST(widget_id_(
-          WidgetIdMapper::instance()->Register(this))) {
-  DCHECK_NE(kInvalidWidgetId, widget_id_);
+      ALLOW_THIS_IN_INITIALIZER_LIST(window_id_(
+          WindowIdMapper::instance()->Register(this))) {
+  DCHECK_NE(kInvalidWindowId, window_id_);
 }
 
 Window::~Window() {
-  if (widget_id_ == kInvalidWidgetId)
+  if (window_id_ == kInvalidWindowId)
     return;
-  WidgetIdMapper::instance()->Unregister(widget_id_);
-  ScriptController::instance()->view_delegate()->DestroyWindow(widget_id_);
+  WindowIdMapper::instance()->Unregister(window_id_);
+  ScriptController::instance()->view_delegate()->DestroyWindow(window_id_);
 }
 
 std::vector<Window*> Window::child_windows() const {
@@ -194,7 +194,7 @@ void Window::AddWindow(Window* window) {
   window->parent_window_ = this;
   child_windows_.insert(window);
   ScriptController::instance()->view_delegate()->AddWindow(
-      widget_id_, window->widget_id());
+      window_id_, window->window_id());
 }
 
 void Window::Destroy() {
@@ -206,12 +206,12 @@ void Window::Destroy() {
   for (auto descendant : DescendantsOrSelf(this)) {
     descendant->state_= kDestroying;
   }
-  ScriptController::instance()->view_delegate()->DestroyWindow(widget_id_);
+  ScriptController::instance()->view_delegate()->DestroyWindow(window_id_);
 }
 
-void Window::DidDestroyWidget(WidgetId widget_id) {
-  DCHECK_NE(kInvalidWidgetId, widget_id);
-  WidgetIdMapper::instance()->DidDestroyWidget(widget_id);
+void Window::DidDestroyWidget(WindowId window_id) {
+  DCHECK_NE(kInvalidWindowId, window_id);
+  WindowIdMapper::instance()->DidDestroyWidget(window_id);
 }
 
 // Possible state transitions:
@@ -221,8 +221,8 @@ void Window::DidDestroyWidget(WidgetId widget_id) {
 //    Adding |kNotRealized| window to |kRealized| window.
 //  kDestroying -> kRealized
 //    The window was |kRealizing| then |destroy()|.
-void Window::DidRealizeWidget(WidgetId widget_id) {
-  auto const widget = FromWidgetId(widget_id);
+void Window::DidRealizeWidget(WindowId window_id) {
+  auto const widget = FromWindowId(window_id);
   DCHECK(kRealizing == widget->state_ || kDestroying == widget->state_ ||
          kNotRealized == widget->state_);
   widget->state_ = kRealized;
@@ -238,12 +238,12 @@ void Window::Focus() {
         "You can't focus unrealized window.");
     return;
   }
-  ScriptController::instance()->view_delegate()->FocusWindow(widget_id_);
+  ScriptController::instance()->view_delegate()->FocusWindow(window_id_);
 }
 
-Window* Window::FromWidgetId(WidgetId widget_id) {
-  DCHECK_NE(kInvalidWidgetId, widget_id);
-  return WidgetIdMapper::instance()->Find(widget_id);
+Window* Window::FromWindowId(WindowId window_id) {
+  DCHECK_NE(kInvalidWindowId, window_id);
+  return WindowIdMapper::instance()->Find(window_id);
 }
 
 bool Window::IsDescendantOf(Window* other) const {
@@ -258,7 +258,7 @@ bool Window::IsDescendantOf(Window* other) const {
 
 void Window::Realize() {
   if (state_ == kDestroyed) {
-    DCHECK_EQ(kInvalidWidgetId, widget_id_);
+    DCHECK_EQ(kInvalidWindowId, window_id_);
     ScriptController::instance()->ThrowError(
         "Can't realize deatched window.");
     return;
@@ -281,7 +281,7 @@ void Window::Realize() {
   for (auto descendant : DescendantsOrSelf(this)) {
     descendant->state_= kRealizing;
   }
-  ScriptController::instance()->view_delegate()->RealizeWindow(widget_id_);
+  ScriptController::instance()->view_delegate()->RealizeWindow(window_id_);
 }
 
 void Window::RemoveWindow(Window* window) {
@@ -304,14 +304,14 @@ void Window::RemoveWindow(Window* window) {
 }
 
 void Window::ResetForTesting() {
-  WidgetIdMapper::instance()->ResetForTesting();
+  WindowIdMapper::instance()->ResetForTesting();
 }
 
 }  // namespace dom
 
 std::ostream& operator<<(std::ostream& ostream, const dom::Window& window) {
   ostream << "(" << window.wrapper_info()->class_name() << " widget:" <<
-      window.widget_id() << ")";
+      window.window_id() << ")";
   return ostream;
 }
 

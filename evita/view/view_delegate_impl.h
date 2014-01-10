@@ -26,23 +26,23 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       const dom::EditorWindow* window) override;
   private: virtual void CreateTextWindow(
       const dom::TextWindow* window) override;
-  private: virtual void AddWindow(dom::WidgetId parent_id,
-                                  dom::WidgetId child_id) override;
-  private: virtual void DestroyWindow(dom::WidgetId widget_id) override;
-  private: virtual void FocusWindow(dom::WidgetId widget_id) override;
+  private: virtual void AddWindow(dom::WindowId parent_id,
+                                  dom::WindowId child_id) override;
+  private: virtual void DestroyWindow(dom::WindowId window_id) override;
+  private: virtual void FocusWindow(dom::WindowId window_id) override;
   private: virtual void GetFilenameForLoad(
-      dom::WidgetId widget_id, const base::string16& dir_path,
+      dom::WindowId window_id, const base::string16& dir_path,
       GetFilenameForLoadCallback callback) override;
   private: virtual void GetFilenameForSave(
-      dom::WidgetId widget_id, const base::string16& dir_path,
+      dom::WindowId window_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) override;
   private: virtual void LoadFile(dom::Document* document,
                                  const base::string16& filename) override;
-  private: virtual void MakeSelectionVisible(dom::WidgetId widget_id) override;
-  private: virtual void MessageBox(dom::WidgetId widget_id,
+  private: virtual void MakeSelectionVisible(dom::WindowId window_id) override;
+  private: virtual void MessageBox(dom::WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;
-  private: virtual void RealizeWindow(dom::WidgetId widget_id) override;
+  private: virtual void RealizeWindow(dom::WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(
       dom::ViewEventHandler* event_handler) override;
   private: virtual void SaveFile(dom::Document* document,

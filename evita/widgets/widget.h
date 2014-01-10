@@ -12,7 +12,7 @@
 #include "common/tree/node.h"
 #include "common/win/native_window.h"
 #include "common/win/rect.h"
-#include "evita/widgets/widget_id.h"
+#include "evita/view/window_id.h"
 
 namespace widgets {
 
@@ -41,14 +41,14 @@ class Widget
   private: Rect rect_;
   private: int shown_;
   private: State state_;
-  private: const WidgetId widget_id_;
+  private: const view::WindowId window_id_;
 
-  // TODO(yosi): We allow widget_id as optional until we export all widgets
+  // TODO(yosi): We allow window_id as optional until we export all widgets
   // to DOM.
   protected: explicit Widget(
       std::unique_ptr<NativeWindow>&& native_window,
-      WidgetId widget_id = kInvalidWidgetId);
-  protected: Widget(WidgetId widget_id = kInvalidWidgetId);
+      view::WindowId window_id = view::kInvalidWindowId);
+  protected: Widget(view::WindowId window_id = view::kInvalidWindowId);
   protected: ~Widget();
 
   public: Widget& container_widget() const {
@@ -66,7 +66,7 @@ class Widget
     return native_window_.get();
   }
   public: const Rect& rect() const { return rect_; }
-  public: WidgetId widget_id() const { return widget_id_; }
+  public: view::WindowId window_id() const { return window_id_; }
 
   // [A]
   public: HWND AssociatedHwnd() const;
@@ -95,7 +95,7 @@ class Widget
   private: void DispatchPaintMessage();
 
   // [F]
-  public: static Widget* FromWidgetId(WidgetId widget_id);
+  public: static Widget* FromWindowId(view::WindowId window_id);
 
   // [G]
   public: virtual const char* GetClass() const { return "Widget"; }

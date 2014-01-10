@@ -20,8 +20,8 @@ class CommandWindow : public widgets::Widget {
       : widgets::Widget(std::move(native_window)) {
   }
 
-  protected: explicit CommandWindow(widgets::WidgetId widget_id)
-      : widgets::Widget(widget_id) {
+  protected: explicit CommandWindow(view::WindowId window_id)
+      : widgets::Widget(window_id) {
   }
 
   protected: CommandWindow() {
@@ -49,8 +49,8 @@ class CommandWindow_ : public Parent_  {
     : Parent_(std::move(native_window)) {
   }
 
-  protected: explicit CommandWindow_(widgets::WidgetId widget_id)
-      : Parent_(widget_id) {
+  protected: explicit CommandWindow_(view::WindowId window_id)
+      : Parent_(window_id) {
   }
 
   protected: CommandWindow_() {

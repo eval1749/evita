@@ -15,11 +15,26 @@ typedef common::win::Rect Rect;
 class Window : public widgets::Widget {
   DECLARE_CASTABLE_CLASS(Window, Widget);
 
-  protected: explicit Window(
+  private: const view::WindowId window_id_;
+
+  // TODO(yosi): We allow window_id as optional until we export all widgets
+  // to DOM.
+  protected: Window(
       std::unique_ptr<NativeWindow>&& native_window,
       WindowId window_id = kInvalidWindowId);
-  protected: Window(WindowId window_id = kInvalidWindowId);
+  protected: explicit Window(WindowId window_id = kInvalidWindowId);
   protected: ~Window();
+
+  public: WindowId window_id() const { return window_id_; }
+
+  // [D]
+  public: void DidDestroyDomWindow();
+  protected: virtual void DidRealize() override;
+
+  // [F]
+  public: static Window* FromWindowId(WindowId window_id);
+
+  DISALLOW_COPY_AND_ASSIGN(Window);
 };
 
 }  // namespace view

@@ -14,6 +14,7 @@
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_TextEditWindow.h"
+#include "evita/view/window.h"
 
 namespace view {
 
@@ -28,13 +29,13 @@ ViewDelegateImpl::~ViewDelegateImpl() {
 void ViewDelegateImpl::AddWindow(dom::WindowId parent_id,
                                  dom::WindowId child_id) {
   DCHECK_NE(dom::kInvalidWindowId, parent_id);
-  auto const parent = widgets::Widget::FromWindowId(parent_id);
+  auto const parent = Window::FromWindowId(parent_id);
   if (!parent) {
     DVLOG(0) << "AddWindow: no such parent " << parent_id;
     return;
   }
   DCHECK_EQ(parent_id, parent->window_id());
-  auto const child = widgets::Widget::FromWindowId(child_id);
+  auto const child = Window::FromWindowId(child_id);
   if (!child) {
     DVLOG(0) << "AddWindow: no such child " << child_id;
     return;
@@ -55,7 +56,7 @@ void ViewDelegateImpl::CreateTextWindow(const dom::TextWindow* window) {
 
 void ViewDelegateImpl::DestroyWindow(dom::WindowId window_id) {
   DCHECK_NE(dom::kInvalidWindowId, window_id);
-  auto const widget = widgets::Widget::FromWindowId(window_id);
+  auto const widget = Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "DestroyWindow: no such widget " << window_id;
     return;
@@ -65,7 +66,7 @@ void ViewDelegateImpl::DestroyWindow(dom::WindowId window_id) {
 }
 
 void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {
-  auto const widget = widgets::Widget::FromWindowId(window_id);
+  auto const widget = Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "FocusWindow: no such widget " << window_id;
     return;
@@ -76,7 +77,7 @@ void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {
 void ViewDelegateImpl::GetFilenameForLoad(
     dom::WindowId window_id, const base::string16& dir_path,
     GetFilenameForLoadCallback callback) {
-  auto const widget = widgets::Widget::FromWindowId(window_id);
+  auto const widget = Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "GetFilenameForLoad: no such widget " << window_id;
     event_handler_->RunCallback(base::Bind(callback, base::string16()));
@@ -95,7 +96,7 @@ void ViewDelegateImpl::GetFilenameForLoad(
 void ViewDelegateImpl::GetFilenameForSave(
     dom::WindowId window_id, const base::string16& dir_path,
     GetFilenameForSaveCallback callback) {
-  auto const widget = widgets::Widget::FromWindowId(window_id);
+  auto const widget = Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "GetFilenameForSave: no such widget " << window_id;
     event_handler_->RunCallback(base::Bind(callback, base::string16()));
@@ -118,7 +119,7 @@ void ViewDelegateImpl::LoadFile(dom::Document* document,
 
 void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
   DCHECK_NE(dom::kInvalidWindowId, window_id);
-  auto const widget = widgets::Widget::FromWindowId(window_id);
+  auto const widget = Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "MakeSelectionVisible: no such widget " << window_id;
     return;
@@ -135,7 +136,7 @@ void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
 void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) {
-  auto const widget = widgets::Widget::FromWindowId(window_id);
+  auto const widget = Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "MessageBox: no such widget " << window_id;
     return;
@@ -148,7 +149,7 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
 
 void ViewDelegateImpl::RealizeWindow(dom::WindowId window_id) {
   DCHECK_NE(dom::kInvalidWindowId, window_id);
-  auto const widget = widgets::Widget::FromWindowId(window_id);
+  auto const widget = Window::FromWindowId(window_id);
   if (!widget)
     return;
   DCHECK_EQ(window_id, widget->window_id());

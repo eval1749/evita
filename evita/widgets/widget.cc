@@ -3,7 +3,6 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #include "widgets/widget.h"
 
-#include <unordered_map>
 #include <vector>
 
 #include "common/adoptors/reverse.h"
@@ -11,8 +10,6 @@
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants.h"
 #include "common/tree/descendants_or_self.h"
-#include "evita/dom/view_event_handler.h"
-#include "evita/editor/application.h"
 #include "evita/widgets/root_widget.h"
 
 #define DEBUG_FOCUS 0
@@ -36,71 +33,16 @@ Widget* will_focus_widget;
 
 //////////////////////////////////////////////////////////////////////
 //
-// WindowIdMapper
-//
-// This class represents mapping from widget id to DOM Window object.
-//
-class WindowIdMapper : public common::Singleton<WindowIdMapper> {
-  friend class common::Singleton<WindowIdMapper>;
-
-  private: typedef view::WindowId WindowId;
-
-  private: std::unordered_map<view::WindowId, Widget*> map_;
-
-  private: WindowIdMapper() = default;
-  public: ~WindowIdMapper() = default;
-
-  public: void DidDestroyDomWindow(view::WindowId window_id) {
-    ASSERT_CALLED_ON_UI_THREAD();
-    DCHECK_NE(view::kInvalidWindowId, window_id);
-    auto it = map_.find(window_id);
-    if (it == map_.end()) {
-      DVLOG(0) << "Why we don't have a window for WindowId " << window_id <<
-        " in WindowIdMap?";
-      return;
-    }
-    map_.erase(it);
-  }
-
-  public: Widget* Find(view::WindowId window_id) {
-    ASSERT_CALLED_ON_UI_THREAD();
-    DCHECK_NE(view::kInvalidWindowId, window_id);
-    auto it = map_.find(window_id);
-    return it == map_.end() ? nullptr : it->second;
-  }
-
-  public: WindowId Register(Widget* widget) {
-    ASSERT_CALLED_ON_UI_THREAD();
-    auto const window_id = widget->window_id();
-    DCHECK_NE(view::kInvalidWindowId, window_id);
-    DCHECK_EQ(0u, map_.count(window_id));
-    map_[window_id] = widget;
-    return window_id;
-  }
-
-  public: void Unregister(view::WindowId window_id) {
-    ASSERT_CALLED_ON_UI_THREAD();
-    DCHECK_NE(view::kInvalidWindowId, window_id);
-    map_[window_id] = nullptr;
-  }
-};
-
-//////////////////////////////////////////////////////////////////////
-//
 // Widget
 //
-Widget::Widget(std::unique_ptr<NativeWindow>&& native_window,
-               view::WindowId window_id)
+Widget::Widget(std::unique_ptr<NativeWindow>&& native_window)
     : native_window_(std::move(native_window)),
       shown_(0),
-      state_(kNotRealized),
-      window_id_(window_id) {
-  if (window_id != view::kInvalidWindowId)
-    WindowIdMapper::instance()->Register(this);
+      state_(kNotRealized) {
 }
 
-Widget::Widget(view::WindowId window_id)
-    : Widget(NativeWindow::Create(), window_id) {
+Widget::Widget()
+    : Widget(NativeWindow::Create()) {
 }
 
 Widget::~Widget() {
@@ -109,11 +51,6 @@ Widget::~Widget() {
         state_, shown_, DEBUG_RECT_ARG(rect_));
   #endif
   DCHECK(!native_window_);
-  if (window_id_ != view::kInvalidWindowId) {
-    WindowIdMapper::instance()->Unregister(window_id_);
-    Application::instance()->view_event_handler()->
-        DidDestroyWidget(window_id_);
-  }
 }
 
 bool Widget::has_focus() const {
@@ -173,10 +110,6 @@ void Widget::DidCreateNativeWindow() {
   DidRealize();
 }
 
-void Widget::DidDestroyDomWindow() {
-  WindowIdMapper::instance()->DidDestroyDomWindow(window_id_);
-}
-
 void Widget::DidDestroyNativeWindow() {
   #if DEBUG_DESTROY
     DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
@@ -199,12 +132,6 @@ void Widget::DidKillFocus() {
 }
 
 void Widget::DidRealize() {
-  // TODO(yosi) Until we manage all widgets by WindowId, we don't call
-  // ViewEventHandler for unmanaged widget.
-  if (window_id_ != view::kInvalidWindowId) {
-    Application::instance()->view_event_handler()->
-        DidRealizeWidget(window_id_);
-  }
   for (auto const child : child_nodes()) {
     child->RealizeWidget();
   }
@@ -261,10 +188,6 @@ void Widget::DispatchPaintMessage() {
       #endif
     }
   }
-}
-
-Widget* Widget::FromWindowId(view::WindowId window_id) {
-  return WindowIdMapper::instance()->Find(window_id);
 }
 
 HCURSOR Widget::GetCursorAt(const Point&) const {

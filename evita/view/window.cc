@@ -84,6 +84,8 @@ Window::Window(std::unique_ptr<NativeWindow>&& native_window,
 
 Window::Window(WindowId window_id)
     : window_id_(window_id) {
+  if (window_id != view::kInvalidWindowId)
+    WindowIdMapper::instance()->Register(this);
 }
 
 Window::~Window() {

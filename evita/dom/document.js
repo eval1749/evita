@@ -3,18 +3,13 @@
 // found in the LICENSE file.
 'use strict';
 
-function activeWindow() {
-  // TODO(yosi) Implment active window
-  return EditorWindow.list[0];
-}
-
 Document.prototype.close = function() {
   var document = this;
   if (!document.modified) {
     document.forceClose();
     return;
   }
-  Editor.messageBox(activeWindow(),
+  Editor.messageBox(null,
                     localizeText(IDS_ASK_SAVE, {name: document.name}),
                     localizeText(IDS_APP_TITLE),
                     MessageBox.ICONWARNING | MessageBox.YESNOCANCEL)
@@ -24,7 +19,7 @@ Document.prototype.close = function() {
           document.forceClose();
           break;
         case DialogIemId.NO:
-          Editor.getFilenameForSave(activeWindow(), document.filename)
+          Editor.getFilenameForSave(null, document.filename)
             .then(function(filename) {
               document.save(filename).then(function() {
                 document.forceClose();

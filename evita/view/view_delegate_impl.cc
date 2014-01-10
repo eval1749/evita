@@ -9,6 +9,7 @@
 #include "evita/dom/editor_window.h"
 #include "evita/dom/text_window.h"
 #include "evita/dom/view_event_handler.h"
+#include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_Frame.h"
@@ -139,6 +140,7 @@ void ViewDelegateImpl::MessageBox(dom::WidgetId widget_id,
     DVLOG(0) << "MessageBox: no such widget " << widget_id;
     return;
   }
+  editor::ModalMessageLoopScope modal_mesage_loop_scope;
   auto response_code = ::MessageBoxW(widget->AssociatedHwnd(), message.c_str(),
                                      title.c_str(), flags);
   event_handler_->RunCallback(base::Bind(callback, response_code));

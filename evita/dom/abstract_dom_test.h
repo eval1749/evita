@@ -5,9 +5,7 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
-#include "base/strings/string_piece.h"
 #include "gtest/gtest.h"
 #include "evita/v8_glue/v8.h"
 
@@ -18,8 +16,6 @@ class ScriptController;
 class ViewEventHandler;
 
 class AbstractDomTest : public ::testing::Test {
-  protected: typedef std::vector<v8::Handle<v8::Value>> Argv;
-
   private: v8::UniquePersistent<v8::Context> context_;
   private: std::unique_ptr<MockViewImpl> mock_view_impl_;
 
@@ -29,14 +25,11 @@ class AbstractDomTest : public ::testing::Test {
   protected: AbstractDomTest();
   protected: virtual ~AbstractDomTest();
 
-  protected: v8::Isolate* isolate() const;
   protected: MockViewImpl* mock_view_impl() const {
     return mock_view_impl_.get();
   }
   protected: ViewEventHandler* view_event_handler() const;
 
-  protected: v8::Handle<v8::Value> Call(const base::StringPiece& name,
-                                        const Argv& argv);
   protected: virtual void PopulateGlobalTemplate(
       v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_tempalte);
   protected: std::string RunScript(const std::string& text);

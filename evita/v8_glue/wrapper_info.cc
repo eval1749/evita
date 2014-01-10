@@ -118,7 +118,7 @@ v8::Handle<v8::FunctionTemplate> WrapperInfo::GetOrCreateConstructorTemplate(
   }
 
   // Install instance template
-  SetupInstanceTemplate(isolate, GetOrCreateInstanceTemplate(isolate));
+  GetOrCreateInstanceTemplate(isolate);
 
   return templ;
 }
@@ -147,10 +147,6 @@ void WrapperInfo::Install(v8::Isolate* isolate,
 }
 
 void WrapperInfo::SetupInstanceTemplate(ObjectTemplateBuilder&) {
-}
-
-void WrapperInfo::SetupInstanceTemplate(v8::Isolate*,
-                                        v8::Handle<v8::ObjectTemplate>) {
 }
 
 }  // namespace v8_glue

@@ -20,7 +20,6 @@
 #include "evita/dom/window.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/per_isolate_data.h"
-#include "evita/v8_glue/promise_resolver.h"
 BEGIN_V8_INCLUDE
 #include "gin/object_template_builder.h"
 END_V8_INCLUDE
@@ -165,7 +164,6 @@ void ScriptController::LoadJsLibrary() {
 void ScriptController::PopulateGlobalTemplate(
     v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_template) {
   // Note: super class must be installed before subclass.
-  v8_glue::Installer<v8_glue::PromiseResolver>::Run(isolate, global_template);
   v8_glue::Installer<Console>::Run(isolate, global_template);
   v8_glue::Installer<Document>::Run(isolate, global_template);
   v8_glue::Installer<Editor>::Run(isolate, global_template);

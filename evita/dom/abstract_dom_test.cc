@@ -7,7 +7,6 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/script_controller.h"
-#include "evita/v8_glue/converter.h"
 
 namespace dom {
 
@@ -21,25 +20,8 @@ AbstractDomTest::AbstractDomTest()
 AbstractDomTest::~AbstractDomTest() {
 }
 
-v8::Isolate* AbstractDomTest::isolate() const {
-  return v8::Isolate::GetCurrent();
-}
-
 ViewEventHandler* AbstractDomTest::view_event_handler() const {
   return script_controller_;
-}
-
-v8::Handle<v8::Value> AbstractDomTest::Call(const base::StringPiece& name,
-                                            const Argv& argv) {
-  auto const isolate = this->isolate();
-  auto callee = isolate->GetCurrentContext()->Global()->Get(
-      gin::StringToV8(isolate, name));
-  if (callee.IsEmpty() || !callee->IsObject() ||
-      callee->ToObject()->IsCallable()) {
-    return v8::Undefined(isolate);
-  }
-  return callee->ToObject()->CallAsFunction(v8::Undefined(isolate),
-      argv.size(), const_cast<v8::Handle<v8::Value>*>(argv.data()));
 }
 
 std::string AbstractDomTest::RunScript(const std::string& text) {
@@ -61,7 +43,7 @@ void AbstractDomTest::SetUp() {
 
   DOM_AUTO_LOCK_SCOPE();
 
-  auto const isolate = this->isolate();
+  auto const isolate = v8::Isolate::GetCurrent();
   v8::HandleScope handle_scope(isolate);
   auto global_template = v8::ObjectTemplate::New(isolate);
   {
@@ -83,7 +65,7 @@ void AbstractDomTest::PopulateGlobalTemplate(v8::Isolate*,
 }
 
 void AbstractDomTest::TearDown() {
-  auto const isolate = this->isolate();
+  auto const isolate = v8::Isolate::GetCurrent();
   v8::HandleScope handle_scope(isolate);
   auto context = v8::Local<v8::Context>::New(isolate, context_);
   context->Exit();

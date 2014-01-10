@@ -13,7 +13,7 @@
 
 #include "./li_util.h"
 #include "./vi_CommandWindow.h"
-#include "widgets/widget.h"
+#include "view/window.h"
 
 namespace gfx {
 class Graphics;

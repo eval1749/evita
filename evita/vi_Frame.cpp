@@ -110,7 +110,7 @@ extern uint g_TabBand__TabDragMsg;
 
 Frame::Frame(view::WindowId window_id)
     : ALLOW_THIS_IN_INITIALIZER_LIST(
-          widgets::Widget(widgets::NativeWindow::Create(*this), window_id)),
+          view::Window(widgets::NativeWindow::Create(*this), window_id)),
       gfx_(new gfx::Graphics()),
       m_hwndTabBand(nullptr),
       m_pActivePane(nullptr) {

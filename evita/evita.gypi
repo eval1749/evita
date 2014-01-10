@@ -259,6 +259,7 @@
         'vi_TextEditWindow.cpp',
 
         'view/view_delegate_impl.cc',
+        'view/window.cc',
 
         'widgets/root_widget.cc',
         'widgets/widget.cc',

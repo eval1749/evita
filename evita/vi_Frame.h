@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_visual_Frame_h)
 #define INCLUDE_visual_Frame_h
 
-#include "widgets/widget.h"
+#include "view/window.h"
 
 #include "./ctrl_StatusBar.h"
 #include "./ctrl_TabBand.h"
@@ -55,11 +55,11 @@ using Buffer = dom::Buffer;
 ///   Represents a frame window aka toplevel window. This window communicates
 ///   with window manager.
 /// </summary>
-class Frame final : public widgets::Widget,
+class Frame final : public view::Window,
                     public DoubleLinkedNode_<Frame> {
   private: typedef widgets::Widget Widget;
   private: typedef widgets::Widget Widget;
-  DECLARE_CASTABLE_CLASS(Frame, Widget);
+  DECLARE_CASTABLE_CLASS(Frame, view::Window);
 
   private: enum CtrlId {
     CtrlId_TabBand  = 1,

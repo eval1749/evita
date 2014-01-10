@@ -38,8 +38,13 @@ void ContentWindow::Activate() {
   SetFocus();
 }
 
+void ContentWindow::DidKillFocus() {
+  CommandWindow_::DidKillFocus();
+}
+  
 void ContentWindow::DidSetFocus() {
   DEFINE_STATIC_LOCAL(uint, global_active_tick, (0));
+  CommandWindow_::DidSetFocus();
   ++global_active_tick;
   active_tick_ = global_active_tick;
 }

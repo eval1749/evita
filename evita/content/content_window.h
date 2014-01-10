@@ -29,6 +29,7 @@ class ContentWindow : public CommandWindow_<ContentWindow> {
   public: void Activate();
 
   // [D]
+  protected: virtual void DidKillFocus() override;
   protected: virtual void DidSetFocus() override;
 
   // [G]

@@ -171,4 +171,9 @@
           document.save(filename);
         });
   });
+
+  Editor.setKeyBinding('Ctrl+W', function(arg) {
+    var document = this.selection.document;
+    document.close();
+  });
 })();

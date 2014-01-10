@@ -10,6 +10,8 @@
  * @return {string}
  */
 function localizeText(format_text, variable_map) {
+  if (!(variable_map instanceof Object))
+    return format_text;
   var text = format_text;
   Object.keys(variable_map).forEach(function(key) {
     text = text.replace('__' + key + '__', variable_map[key]);

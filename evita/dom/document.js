@@ -3,6 +3,60 @@
 // found in the LICENSE file.
 'use strict';
 
+function activeWindow() {
+  // TODO(yosi) Implment active window
+  return EditorWindow.list[0];
+}
+
+Document.prototype.close = function() {
+  var document = this;
+  if (!document.modified) {
+    document.forceClose();
+    return;
+  }
+  Editor.messageBox(activeWindow(),
+                    localizeText(IDS_ASK_SAVE, {name: document.name}),
+                    localizeText(IDS_APP_TITLE),
+                    MessageBox.ICONWARNING | MessageBox.YESNOCANCEL)
+    .then(function(response_code) {
+      switch (response_code) {
+        case DialogIemId.NO:
+          document.forceClose();
+          break;
+        case DialogIemId.NO:
+          Editor.getFilenameForSave(activeWindow(), document.filename)
+            .then(function(filename) {
+              document.save(filename).then(function() {
+                document.forceClose();
+              });
+            });
+          break;
+      }
+    });
+};
+
+Document.prototype.forceClose = function() {
+  this.listWindows().forEach(function(window) {
+    window.destroy();
+  });
+  Document.remove(this);
+};
+
+/**
+ * @return {Array.<TextWindow>}
+ */
+Document.prototype.listWindows = function() {
+  var document = this;
+  var windows = [];
+  EditorWindow.list.forEach(function(editorWindow) {
+    editorWindow.children.forEach(function(window) {
+      if ((window instanceof TextWindow) && window.document == document)
+        windows.push(window);
+    });
+  });
+  return windows;
+};
+
 /**
  * @param {string} A filename to load from.
  * @return {Document} A Document object contains contents of file.

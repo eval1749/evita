@@ -108,6 +108,7 @@
           'dom/polyfill.js',
           'dom/types.js',
           'dom/runtime.js',
+          'dom/messages_en_US.js',
           'dom/document.js',
           'dom/editor.js',
           'dom/editor_window.js',

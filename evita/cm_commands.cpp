@@ -664,14 +664,6 @@ DEFCOMMAND(Indent)
 } // Indent
 
 
-// [K]
-DEFCOMMAND(KillBuffer)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pCtx->GetSelection()) return;
-    Application::instance()->KillBuffer(pSelection->GetBuffer());
-} // KillBuffer
-
 // [N]
 // activateFirstWindow
 static void activateFirstWindow(Pane* pPane)
@@ -1484,7 +1476,6 @@ void Processor::GlobalInit() {
     BIND_KEY(Mod_Ctrl | 'R', Reload);
     BIND_KEY(Mod_Ctrl | 'U', StartArgumentEntry());
     BIND_KEY(Mod_Ctrl | 'V', PasteFromClipboard);
-    BIND_KEY(Mod_Ctrl | 'W', KillBuffer);
     BIND_KEY(Mod_Ctrl | 'X', CutToClipboard);
     BIND_KEY(Mod_Ctrl | 'Y', Redo);
     BIND_KEY(Mod_Ctrl | 'Z', Undo);

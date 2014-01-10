@@ -116,6 +116,7 @@ TEST_F(WindowTest, Destroy) {
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(1), Eq(2)));
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(2), Eq(3)));
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(2), Eq(4)));
+  EXPECT_CALL(*mock_view_impl(), DestroyWindow(Eq(1)));
   RunScript("var sample1 = new SampleWindow();"
             "var child1 = new SampleWindow();"
             "var child2 = new SampleWindow();"
@@ -123,13 +124,9 @@ TEST_F(WindowTest, Destroy) {
             "sample1.add(child1);"
             "child1.add(child2);"
             "child1.add(child3);"
-            "sample1.realize()");
-  EXPECT_EQ("Error: You can't destroy unrealized window.",
-            RunScript("sample1.destroy()"));
+            "sample1.realize();"
+            "sample1.destroy();");
   view_event_handler()->DidRealizeWidget(static_cast<dom::WidgetId>(1));
-  EXPECT_EQ("realized", RunScript("sample1.state"));
-  EXPECT_CALL(*mock_view_impl(), DestroyWindow(Eq(1)));
-  RunScript("sample1.destroy()");
   EXPECT_EQ("destroying", RunScript("sample1.state"));
   EXPECT_EQ("destroying", RunScript("child1.state"));
   EXPECT_EQ("destroying", RunScript("child2.state"));

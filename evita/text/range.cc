@@ -1390,7 +1390,8 @@ Buffer::EnumCharRev::EnumCharRev(const Range* pRange) :
 /// </summary>
 /// <param name="p">Range</param>
 /// <param name="s">Name of undo block</param>
-UndoBlock::UndoBlock(Range* p, const char16* s)
-    { init(p->GetBuffer(), s); }
+UndoBlock::UndoBlock(Range* range, const base::string16& name)
+    : UndoBlock(range->GetBuffer(), name) {
+}
 
 }  // namespace text

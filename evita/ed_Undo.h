@@ -11,6 +11,8 @@
 #if !defined(INCLUDE_listener_winapp_editor_undo_h)
 #define INCLUDE_listener_winapp_editor_undo_h
 
+#include "base/strings/string16.h"
+
 namespace text
 {
 
@@ -70,9 +72,9 @@ class UndoManager : public ObjectInHeap
     public: size_t  GetSize()   const { return m_cb; }
 
     // [R]
-    public: void    RecordBegin(const char16*);
+    public: void    RecordBegin(const base::string16& name);
     public: void    RecordDelete(Posn, Posn);
-    public: void    RecordEnd(const char16*);
+    public: void    RecordEnd(const base::string16& name);
     public: void    RecordInsert(Posn, Posn);
     public: Posn    Redo(Posn, Count);
 

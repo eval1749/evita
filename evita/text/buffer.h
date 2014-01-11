@@ -5,6 +5,7 @@
 
 #include <unordered_set>
 
+#include "base/basictypes.h"
 #include "base/strings/string16.h"
 #include "./ed_BinTree.h"
 #include "./li_util.h"
@@ -576,11 +577,12 @@ class DisableUndo {
 /// </summary>
 class UndoBlock {
   private: UndoManager* m_pUndo;
-  private: const char16* m_pwszName;
-  public: UndoBlock(Range* p, const char16* s);
-  public: UndoBlock(Buffer* p, const char16* s) { init(p, s); }
+  private: const base::string16& name_;
+  public: UndoBlock(Range* range, const base::string16& name);
+  public: UndoBlock(Buffer* buffer, const base::string16& name);
   public: ~UndoBlock();
-  private: void init(Buffer*, const char16*);
+
+  DISALLOW_COPY_AND_ASSIGN(UndoBlock);
 };
 
 }  // namespace text

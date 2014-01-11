@@ -57,6 +57,19 @@ TEST_F(RangeTest, set_start_end) {
   EXPECT_EQ(kInvalidPosition, RunScript("range1.end = 100"));
 }
 
+TEST_F(RangeTest, startOf) {
+  RunScript("var doc = new Document('startOf');"
+            "var range = new Range(doc);"
+            "range.text = 'foo bar baz';"
+            "function test(x) {"
+            "  range.start = x;"
+            "  range.startOf(Unit.WORD);"
+            "  return range.start;"
+            "}");
+  EXPECT_SCRIPT_EQ("0", "test(2)");
+  EXPECT_SCRIPT_EQ("4", "test(5)");
+}
+
 TEST_F(RangeTest, text) {
   RunScript("var doc1 = new Document('text');"
             "var range1 = new Range(doc1);"

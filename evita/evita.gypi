@@ -54,7 +54,7 @@
         '<(DEPTH)/gin/gin.gyp:gin',
         '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
         'dom_jslib',
-        'dom_ucd_lib_icu',
+        'dom_unicode_lib_icu',
         'text',
       ],
       'sources': [
@@ -106,6 +106,7 @@
       'variables': {
         'library_files': [
           'dom/polyfill.js',
+          'dom/unicode.js',
           'dom/types.js',
           'dom/key_names.js',
           'dom/runtime.js',
@@ -137,7 +138,7 @@
       ], # actions
     }, # dom_jslib_js2c
     {
-      'target_name': 'dom_ucd_lib_icu',
+      'target_name': 'dom_unicode_lib_icu',
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base_i18n',
@@ -147,39 +148,39 @@
       'msvs_precompiled_header': '',
       'msvs_precompiled_source': '',
       'sources': [
-        'dom/ucd_icu.cc',
+        'dom/unicode_icu.cc',
       ], # sources
     },
     {
-      'target_name': 'dom_ucd_lib',
+      'target_name': 'dom_unicode_lib',
       'type': 'static_library',
       'msvs_precompiled_header': '',
       'msvs_precompiled_source': '',
-      'dependencies': [ 'dom_ucd_lib_cc' ],
+      'dependencies': [ 'dom_unicode_lib_cc' ],
       'sources': [
-        '<(SHARED_INTERMEDIATE_DIR)/dom_ucd_lib.cc',
+        '<(SHARED_INTERMEDIATE_DIR)/dom_unicode_lib.cc',
       ], # sources
-    }, # dom_ucd_lib
+    }, # dom_unicode_lib
     {
       # Because of Chromium icudata doesn't contain unames.icu. So, we create
       # our own UCD data table.
       # See third_party/icu/patches/data.build.patch
-      'target_name': 'dom_ucd_lib_cc',
+      'target_name': 'dom_unicode_lib_cc',
       'type': 'none',
       'variables': {
         'unicode_data_txt': '<(DEPTH)/third_party/unicode/UnicodeData.txt',
       }, # variables
       'actions': [
         {
-          'action_name': 'make_dom_ucd_lib_cc',
+          'action_name': 'make_dom_unicode_lib_cc',
           'inputs': [
-            'dom/make_ucd_lib_cc.py',
+            'dom/make_unicode_lib_cc.py',
             '<(unicode_data_txt)',
           ], # inputs
-          'outputs': [ '<(SHARED_INTERMEDIATE_DIR)/dom_ucd_lib.cc', ],
+          'outputs': [ '<(SHARED_INTERMEDIATE_DIR)/dom_unicode_lib.cc', ],
           'action': [
             'python',
-            'dom/make_ucd_lib_cc.py',
+            'dom/make_unicode_lib_cc.py',
             '<@(_outputs)',
             '<(unicode_data_txt)',
           ], # action

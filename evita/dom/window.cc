@@ -10,6 +10,7 @@
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "common/memory/singleton.h"
+#include "evita/dom/event.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/gc/weak_ptr.h"
@@ -44,6 +45,10 @@ class WindowWrapperInfo : public v8_glue::WrapperInfo {
   public: WindowWrapperInfo() : v8_glue::WrapperInfo("Window") {
   }
   public: ~WindowWrapperInfo() = default;
+
+  private: virtual v8_glue::WrapperInfo* inherit_from() const override {
+    return EventTarget::static_wrapper_info();
+  }
 
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {

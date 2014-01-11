@@ -6,13 +6,14 @@
 #include <unordered_set>
 #include <vector>
 
-#include "evita/v8_glue/scriptable.h"
+#include "evita/dom/event_target.h"
 #include "evita/dom/window_id.h"
+#include "evita/v8_glue/scriptable.h"
 
 namespace dom {
 
 // |Window| is correspond to |Widget| in DOM world.
-class Window : public v8_glue::Scriptable<Window> {
+class Window : public v8_glue::Scriptable<Window, EventTarget> {
   private: class WindowIdMapper;
   friend class WindowIdMapper;
 

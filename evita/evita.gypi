@@ -65,6 +65,8 @@
         'dom/document.cc',
         'dom/editor.cc',
         'dom/editor_window.cc',
+        'dom/event.cc',
+        'dom/event_target.cc',
         'dom/file_path.cc',
         'dom/lock.cc',
         'dom/range.cc',
@@ -73,6 +75,7 @@
         'dom/script_controller.cc',
         'dom/script_thread.cc',
         'dom/text_window.cc',
+        'dom/time_stamp.cc',
         'dom/window.cc',
 
         'gc/collectable.cc',

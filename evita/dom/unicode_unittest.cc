@@ -15,7 +15,7 @@ class UnicodTest : public dom::AbstractDomTest {
 };
 
 TEST_F(UnicodTest, Basic) {
-  RunScript("var u = Unicode");
+  EXPECT_VALID_SCRIPT("var u = Unicode");
   EXPECT_SCRIPT_EQ("65536", "u.UCD.length");
   EXPECT_SCRIPT_TRUE("u.UCD['\\n'.charCodeAt(0)].bidi == u.Bidi.B");
   EXPECT_SCRIPT_TRUE("u.UCD['\\n '.charCodeAt(0)].category == u.Category.Cc");

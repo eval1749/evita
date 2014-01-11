@@ -25,18 +25,18 @@ ViewEventHandler* AbstractDomTest::view_event_handler() const {
   return script_controller_;
 }
 
-void AbstractDomTest::PopulateGlobalTemplate(v8::Isolate*,
-                                             v8::Handle<v8::ObjectTemplate>) {
-}
-
-std::string AbstractDomTest::RunScript(const std::string& text) {
+std::string AbstractDomTest::EvalScript(const std::string& text) {
   auto eval_result = script_controller_->Evaluate(base::ASCIIToUTF16(text));
   if (eval_result.exception.length())
     return base::UTF16ToUTF8(eval_result.exception);
   return base::UTF16ToUTF8(eval_result.value);
 }
 
-bool AbstractDomTest::RunScript2(const std::string& text) {
+void AbstractDomTest::PopulateGlobalTemplate(v8::Isolate*,
+                                             v8::Handle<v8::ObjectTemplate>) {
+}
+
+bool AbstractDomTest::RunScript(const std::string& text) {
   auto eval_result = script_controller_->Evaluate(base::ASCIIToUTF16(text));
   if (!eval_result.exception.length())
     return true;

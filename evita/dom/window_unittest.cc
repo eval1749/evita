@@ -84,31 +84,32 @@ class WindowTest : public dom::AbstractDomTest {
 };
 
 TEST_F(WindowTest, Construction) {
-  RunScript("var sample1 = new SampleWindow()");
-  EXPECT_EQ("1", RunScript("sample1.id"));
-  RunScript("sample1.name = 'test';");
-  EXPECT_EQ("test", RunScript("sample1.name"));
-  EXPECT_EQ("notrealized", RunScript("sample1.state"));
+  EXPECT_VALID_SCRIPT("var sample1 = new SampleWindow()");
+  EXPECT_SCRIPT_EQ("1", "sample1.id");
+  EXPECT_VALID_SCRIPT("sample1.name = 'test';");
+  EXPECT_SCRIPT_EQ("test", "sample1.name");
+  EXPECT_SCRIPT_EQ("notrealized", "sample1.state");
 }
 
 TEST_F(WindowTest, Add) {
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(1), Eq(2)));
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(1), Eq(3)));
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
-  RunScript("var parent = new SampleWindow();"
-            "var child1 = new SampleWindow();"
-            "var child2 = new SampleWindow();"
-            "parent.add(child1);"
-            "parent.add(child2);"
-            "parent.realize();");
-  EXPECT_EQ("2", RunScript("parent.children.length"));
-  EXPECT_EQ("1", RunScript("child1.parent.id"));
-  EXPECT_EQ("1", RunScript("child2.parent.id"));
+  EXPECT_VALID_SCRIPT(
+      "var parent = new SampleWindow();"
+      "var child1 = new SampleWindow();"
+      "var child2 = new SampleWindow();"
+      "parent.add(child1);"
+      "parent.add(child2);"
+      "parent.realize();");
+  EXPECT_SCRIPT_EQ("2", "parent.children.length");
+  EXPECT_SCRIPT_EQ("1", "child1.parent.id");
+  EXPECT_SCRIPT_EQ("1", "child2.parent.id");
   dom::Window::DidRealizeWidget(static_cast<dom::WindowId>(1));
   dom::Window::DidDestroyWidget(static_cast<dom::WindowId>(2));
-  EXPECT_EQ("1", RunScript("parent.children.length"));
-  EXPECT_EQ("true", RunScript("child1.parent == null"));
-  EXPECT_EQ("destroyed", RunScript("child1.state"));
+  EXPECT_SCRIPT_EQ("1", "parent.children.length");
+  EXPECT_SCRIPT_EQ("true", "child1.parent == null");
+  EXPECT_SCRIPT_EQ("destroyed", "child1.state");
 }
 
 TEST_F(WindowTest, Destroy) {
@@ -117,58 +118,59 @@ TEST_F(WindowTest, Destroy) {
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(2), Eq(3)));
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(2), Eq(4)));
   EXPECT_CALL(*mock_view_impl(), DestroyWindow(Eq(1)));
-  RunScript("var sample1 = new SampleWindow();"
-            "var child1 = new SampleWindow();"
-            "var child2 = new SampleWindow();"
-            "var child3 = new SampleWindow();"
-            "sample1.add(child1);"
-            "child1.add(child2);"
-            "child1.add(child3);"
-            "sample1.realize();"
-            "sample1.destroy();");
+  EXPECT_VALID_SCRIPT(
+      "var sample1 = new SampleWindow();"
+      "var child1 = new SampleWindow();"
+      "var child2 = new SampleWindow();"
+      "var child3 = new SampleWindow();"
+      "sample1.add(child1);"
+      "child1.add(child2);"
+      "child1.add(child3);"
+      "sample1.realize();"
+      "sample1.destroy();");
   view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
-  EXPECT_EQ("realized", RunScript("sample1.state"));
-  EXPECT_EQ("destroying", RunScript("child1.state"));
-  EXPECT_EQ("destroying", RunScript("child2.state"));
-  EXPECT_EQ("destroying", RunScript("child3.state"));
+  EXPECT_SCRIPT_EQ("realized", "sample1.state");
+  EXPECT_SCRIPT_EQ("destroying", "child1.state");
+  EXPECT_SCRIPT_EQ("destroying", "child2.state");
+  EXPECT_SCRIPT_EQ("destroying", "child3.state");
   view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(1));
   view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(2));
   view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(3));
   view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(4));
-  EXPECT_EQ("destroyed", RunScript("sample1.state"));
-  EXPECT_EQ("destroyed", RunScript("child1.state"));
-  EXPECT_EQ("destroyed", RunScript("child2.state"));
-  EXPECT_EQ("destroyed", RunScript("child3.state"));
+  EXPECT_SCRIPT_EQ("destroyed", "sample1.state");
+  EXPECT_SCRIPT_EQ("destroyed", "child1.state");
+  EXPECT_SCRIPT_EQ("destroyed", "child2.state");
+  EXPECT_SCRIPT_EQ("destroyed", "child3.state");
 }
 
 TEST_F(WindowTest, focus) {
-  RunScript("var sample = new SampleWindow();");
+  EXPECT_VALID_SCRIPT("var sample = new SampleWindow();");
   EXPECT_SCRIPT_EQ("Error: You can't focus unrealized window.",
                    "sample.focus()");
 
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
-  RunScript("sample.realize();");
+  EXPECT_VALID_SCRIPT("sample.realize();");
   view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
 
   EXPECT_CALL(*mock_view_impl(), FocusWindow(Eq(1)));
-  RunScript("sample.focus();");
+  EXPECT_VALID_SCRIPT("sample.focus();");
 }
 
 TEST_F(WindowTest, Properties) {
-  RunScript("var sample1 = new SampleWindow()");
-  EXPECT_EQ("0", RunScript("sample1.children.length"));
-  EXPECT_EQ("1", RunScript("sample1.id"));
-  EXPECT_EQ("true", RunScript("sample1.parent == null"));
+  EXPECT_VALID_SCRIPT("var sample1 = new SampleWindow()");
+  EXPECT_SCRIPT_EQ("0", "sample1.children.length");
+  EXPECT_SCRIPT_EQ("1", "sample1.id");
+  EXPECT_SCRIPT_EQ("true", "sample1.parent == null");
 }
 
 TEST_F(WindowTest, Realize) {
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
-  RunScript("var sample1 = new SampleWindow(); sample1.realize()");
-  EXPECT_EQ("realizing", RunScript("sample1.state"));
-  EXPECT_EQ("Error: This window is being realized.",
-            RunScript("sample1.realize();"));
+  EXPECT_VALID_SCRIPT("var sample1 = new SampleWindow(); sample1.realize()");
+  EXPECT_SCRIPT_EQ("realizing", "sample1.state");
+  EXPECT_SCRIPT_EQ("Error: This window is being realized.",
+                   "sample1.realize();");
   view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
-  EXPECT_EQ("realized", RunScript("sample1.state"));
+  EXPECT_SCRIPT_EQ("realized", "sample1.state");
 }
 
 }  // namespace

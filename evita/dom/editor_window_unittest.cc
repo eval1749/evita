@@ -26,12 +26,13 @@ class EditorWindowTest : public dom::AbstractDomTest {
 
 TEST_F(EditorWindowTest, EditorWindow_list) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_)).Times(3);
-  RunScript("var a = new EditorWindow();"
-            "var b = new EditorWindow();"
-            "var c = new EditorWindow();"
-            "var list = EditorWindow.list.sort(function(a, b) {"
-            "  return a.id - b.id;"
-            "});");
+  EXPECT_VALID_SCRIPT(
+      "var a = new EditorWindow();"
+      "var b = new EditorWindow();"
+      "var c = new EditorWindow();"
+      "var list = EditorWindow.list.sort(function(a, b) {"
+      "  return a.id - b.id;"
+      "});");
   EXPECT_SCRIPT_EQ("3", "EditorWindow.list.length");
   EXPECT_SCRIPT_TRUE("list[0] == a");
   EXPECT_SCRIPT_TRUE("list[1] == b");
@@ -40,13 +41,13 @@ TEST_F(EditorWindowTest, EditorWindow_list) {
 
 TEST_F(EditorWindowTest, Realize) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
-  RunScript("var sample = new EditorWindow()");
+  EXPECT_VALID_SCRIPT("var sample = new EditorWindow()");
   EXPECT_SCRIPT_TRUE("sample instanceof EditorWindow");
   EXPECT_SCRIPT_TRUE("sample instanceof Window");
   EXPECT_SCRIPT_EQ("1", "sample.id");
 
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(1));
-  RunScript("sample.realize()");
+  EXPECT_VALID_SCRIPT("sample.realize()");
 }
 
 }  // namespace

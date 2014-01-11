@@ -37,13 +37,13 @@ TEST_F(DocumentTest, Constructor) {
   EXPECT_SCRIPT_EQ("bar (3)",
                    "var sample2 = new Document('bar'); sample2.name");
 
-  RunScript("new Document('bar.cc')");
+  EXPECT_VALID_SCRIPT("new Document('bar.cc')");
   EXPECT_SCRIPT_EQ("bar (2).cc",
                    "var sample2 = new Document('bar.cc'); sample2.name");
   EXPECT_SCRIPT_EQ("bar (3).cc",
                    "var sample2 = new Document('bar.cc'); sample2.name");
 
-  RunScript("new Document('.bar')");
+  EXPECT_VALID_SCRIPT("new Document('.bar')");
   EXPECT_SCRIPT_EQ(".bar (2)",
                    "var sample2 = new Document('.bar'); sample2.name");
   EXPECT_SCRIPT_EQ(".bar (3)",
@@ -51,12 +51,13 @@ TEST_F(DocumentTest, Constructor) {
 }
 
 TEST_F(DocumentTest, Document_list) {
-  RunScript("['foo', 'bar', 'baz'].forEach(function(name) {"
-            "  new Document(name);"
-            "});"
-            "var samples = Document.list.sort(function(a, b) {"
-            "  return a.name.localeCompare(b.name);"
-            "});");
+  EXPECT_VALID_SCRIPT(
+      "['foo', 'bar', 'baz'].forEach(function(name) {"
+      "  new Document(name);"
+      "});"
+      "var samples = Document.list.sort(function(a, b) {"
+      "  return a.name.localeCompare(b.name);"
+      "});");
   EXPECT_SCRIPT_EQ("3", "samples.length");
   EXPECT_SCRIPT_EQ("bar", "samples[0].name");
   EXPECT_SCRIPT_EQ("baz", "samples[1].name");
@@ -68,11 +69,11 @@ TEST_F(DocumentTest, Document_load) {
               LoadFile(_, Eq(dom::FilePath::FullPath(L"foo"))));
   EXPECT_CALL(*mock_view_impl(),
               LoadFile(_, Eq(dom::FilePath::FullPath(L"bar"))));
-  RunScript("var a = Document.load('foo');");
+  EXPECT_VALID_SCRIPT("var a = Document.load('foo');");
   auto const document = dom::Document::Find(L"foo");
   auto const absoulte_filename = dom::FilePath::FullPath(L"foo");
   document->buffer()->SetFile(absoulte_filename, FileTime());
-  RunScript("var b = Document.load('foo');"
+  EXPECT_VALID_SCRIPT("var b = Document.load('foo');"
             "var c = Document.load('bar');");
   EXPECT_SCRIPT_EQ(base::UTF16ToUTF8(absoulte_filename), "a.filename");
   EXPECT_SCRIPT_TRUE("a === b");
@@ -81,57 +82,57 @@ TEST_F(DocumentTest, Document_load) {
 
 TEST_F(DocumentTest, DocumentFind) {
   EXPECT_SCRIPT_TRUE("var sample1 = Document.find('foo'); sample1 == null");
-  RunScript("new Document('foo')");
+  EXPECT_VALID_SCRIPT("new Document('foo')");
   EXPECT_SCRIPT_EQ("foo", "var sample2 = Document.find('foo'); sample2.name");
 }
 
 TEST_F(DocumentTest, DocumentGetOrNew) {
-  RunScript("var doc = new Document('foo');");
+  EXPECT_VALID_SCRIPT("var doc = new Document('foo');");
   EXPECT_SCRIPT_TRUE("doc === Document.getOrNew('foo')");
 }
 
 TEST_F(DocumentTest, Document_remove) {
-  RunScript("var doc1 = new Document('foo');"
+  EXPECT_VALID_SCRIPT("var doc1 = new Document('foo');"
             "var doc2 = new Document('bar');"
             "Document.remove(doc1);");
   EXPECT_SCRIPT_TRUE("Document.find('foo') == null");
   EXPECT_SCRIPT_EQ("1", "Document.list.length");
-  RunScript("Document.remove(doc2);");
+  EXPECT_VALID_SCRIPT("Document.remove(doc2);");
   EXPECT_SCRIPT_EQ("0", "Document.list.length");
 }
 
 TEST_F(DocumentTest, charCodeAt_) {
-  RunScript("var doc = new Document('foo');"
+  EXPECT_VALID_SCRIPT("var doc = new Document('foo');"
             "new Range(doc).text = 'foobar';");
   EXPECT_SCRIPT_EQ("111", "doc.charCodeAt_(1)");
 }
 
 TEST_F(DocumentTest, length) {
-  RunScript("var doc = new Document('length');");
+  EXPECT_VALID_SCRIPT("var doc = new Document('length');");
   EXPECT_SCRIPT_EQ("0", "doc.length");
-  RunScript("new Range(doc).text = 'foobar';");
+  EXPECT_VALID_SCRIPT("new Range(doc).text = 'foobar';");
   EXPECT_SCRIPT_EQ("6", "doc.length");
 }
 
 TEST_F(DocumentTest, load_) {
   EXPECT_CALL(*mock_view_impl(), LoadFile(_, Eq(L"foo")));
-  RunScript("var doc = new Document('foo'); doc.load_('foo')");
+  EXPECT_VALID_SCRIPT("var doc = new Document('foo'); doc.load_('foo')");
   
 }
 
 TEST_F(DocumentTest, modified) {
-  RunScript("var doc = new Document('foo');"
+  EXPECT_VALID_SCRIPT("var doc = new Document('foo');"
             "var range = new Range(doc);");
   EXPECT_SCRIPT_FALSE("doc.modified");
 
-  RunScript("range.text = 'foo';");
+  EXPECT_VALID_SCRIPT("range.text = 'foo';");
   EXPECT_SCRIPT_TRUE("doc.modified");
 
 #if 0
   // Since mock ViewDelegate doesn't reset modified flag, we disable
   // this test case.
   EXPECT_CALL(*mock_view_impl(), SaveFile(_, Eq(L"foo")));
-  RunScript("doc.save('foo')");
+  EXPECT_VALID_SCRIPT("doc.save('foo')");
   EXPECT_SCRIPT_FALSE("doc.modified");
 #endif
 }
@@ -141,7 +142,7 @@ TEST_F(DocumentTest, name) {
 }
 
 TEST_F(DocumentTest, redo) {
-  RunScript("var doc = new Document('redo');"
+  EXPECT_VALID_SCRIPT("var doc = new Document('redo');"
             "var range = new Range(doc);"
             "range.text = 'foo';"
             "doc.undo(3);"
@@ -152,17 +153,17 @@ TEST_F(DocumentTest, redo) {
 }
 
 TEST_F(DocumentTest, renameTo) {
-  RunScript("var doc = new Document('foo'); doc.renameTo('bar')");
+  EXPECT_VALID_SCRIPT("var doc = new Document('foo'); doc.renameTo('bar')");
   EXPECT_SCRIPT_EQ("bar", "doc.name");
 }
 
 TEST_F(DocumentTest, save) {
   EXPECT_CALL(*mock_view_impl(), SaveFile(_, Eq(L"foo")));
-  RunScript("var doc = new Document('foo'); doc.save('foo')");
+  EXPECT_VALID_SCRIPT("var doc = new Document('foo'); doc.save('foo')");
 }
 
 TEST_F(DocumentTest, undo) {
-  RunScript("var doc = new Document('undo');"
+  EXPECT_VALID_SCRIPT("var doc = new Document('undo');"
             "var range = new Range(doc);"
             "range.text = 'foo';"
             "doc.undo(3);"

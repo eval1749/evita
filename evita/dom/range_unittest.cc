@@ -21,10 +21,10 @@ class RangeTest : public dom::AbstractDomTest {
   }
 
   protected: void PopulateSample(const char* sample) {
-    RunScript(std::string() +
+    CHECK(RunScript(std::string() +
         "var doc = new Document('sample');"
         "var r = new Range(doc);" +
-        "r.text = '" + sample + "';");
+        "r.text = '" + sample + "';"));
   }
 
   DISALLOW_COPY_AND_ASSIGN(RangeTest);
@@ -33,27 +33,27 @@ class RangeTest : public dom::AbstractDomTest {
 static const char* kInvalidPosition = "Error: Invalid position.";
 
 TEST_F(RangeTest, Constructor) {
-  // TODO(yosi): We should remove all buffers for each test case.
-  RunScript("var doc1 = new Document('range')");
-  RunScript("var range1 = new Range(doc1)");
-  RunScript("var range2 = new Range(doc1, 0)");
-  RunScript("var range3 = new Range(doc1, 0, 0)");
-  EXPECT_EQ("true", RunScript("range1.document === doc1"));
-  EXPECT_EQ("true", RunScript("range2.document === doc1"));
-  EXPECT_EQ("true", RunScript("range3.document === doc1"));
+  EXPECT_VALID_SCRIPT("var doc1 = new Document('range')");
+  EXPECT_VALID_SCRIPT("var range1 = new Range(doc1)");
+  EXPECT_VALID_SCRIPT("var range2 = new Range(doc1, 0)");
+  EXPECT_VALID_SCRIPT("var range3 = new Range(doc1, 0, 0)");
+  EXPECT_SCRIPT_TRUE("range1.document === doc1");
+  EXPECT_SCRIPT_TRUE("range2.document === doc1");
+  EXPECT_SCRIPT_TRUE("range3.document === doc1");
 }
 
 TEST_F(RangeTest, endOf) {
-  RunScript("var doc = new Document('endOf');"
-            "var range = new Range(doc);"
-                         //012345678901
-            "range.text = 'foo bar  baz';"
-            "function test(x) {"
-            "  range.start = x;"
-            "  range.end = x;"
-            "  range.endOf(Unit.WORD);"
-            "  return range.end;"
-            "}");
+  EXPECT_VALID_SCRIPT(
+    "var doc = new Document('endOf');"
+    "var range = new Range(doc);"
+                 //012345678901
+    "range.text = 'foo bar  baz';"
+    "function test(x) {"
+    "  range.start = x;"
+    "  range.end = x;"
+    "  range.endOf(Unit.WORD);"
+    "  return range.end;"
+    "}");
   EXPECT_SCRIPT_EQ("3", "test(0)");
   EXPECT_SCRIPT_EQ("3", "test(1)");
   EXPECT_SCRIPT_EQ("3", "test(2)");
@@ -63,60 +63,62 @@ TEST_F(RangeTest, endOf) {
 }
 
 TEST_F(RangeTest, set_start_end) {
-  RunScript("var doc1 = new Document('text');"
-            "var range1 = new Range(doc1);"
-            "range1.text = 'abcdefghijkl';"
-            "range1.start = 5;");
-  EXPECT_EQ("5", RunScript("range1.start"));
-  EXPECT_EQ("1 5",
-            RunScript("range1.end = 1; range1.start + ' ' + range1.end"));
-  EXPECT_EQ(kInvalidPosition, RunScript("range1.start = -1"));
-  EXPECT_EQ(kInvalidPosition, RunScript("range1.start = 100"));
-  EXPECT_EQ(kInvalidPosition, RunScript("range1.end = -1"));
-  EXPECT_EQ(kInvalidPosition, RunScript("range1.end = 100"));
+  EXPECT_VALID_SCRIPT(
+      "var doc1 = new Document('text');"
+      "var range1 = new Range(doc1);"
+      "range1.text = 'abcdefghijkl';"
+      "range1.start = 5;");
+  EXPECT_SCRIPT_EQ("5", "range1.start");
+  EXPECT_SCRIPT_EQ("1 5", "range1.end = 1; range1.start + ' ' + range1.end");
+  EXPECT_SCRIPT_EQ(kInvalidPosition, "range1.start = -1");
+  EXPECT_SCRIPT_EQ(kInvalidPosition, "range1.start = 100");
+  EXPECT_SCRIPT_EQ(kInvalidPosition, "range1.end = -1");
+  EXPECT_SCRIPT_EQ(kInvalidPosition, "range1.end = 100");
 }
 
 TEST_F(RangeTest, startOf) {
-  RunScript("var doc = new Document('startOf');"
-            "var range = new Range(doc);"
-                         //01234567890
-            "range.text = 'foo bar baz';"
-            "function test(x) {"
-            "  range.end = x;"
-            "  range.start = x;"
-            "  range.startOf(Unit.WORD);"
-            "  return range.start;"
-            "}");
+  EXPECT_VALID_SCRIPT(
+      "var doc = new Document('startOf');"
+      "var range = new Range(doc);"
+                   //01234567890
+      "range.text = 'foo bar baz';"
+      "function test(x) {"
+      "  range.end = x;"
+      "  range.start = x;"
+      "  range.startOf(Unit.WORD);"
+      "  return range.start;"
+      "}");
   EXPECT_SCRIPT_EQ("0", "test(2)");
   EXPECT_SCRIPT_EQ("4", "test(5)");
 }
 
 TEST_F(RangeTest, text) {
-  RunScript("var doc1 = new Document('text');"
-            "var range1 = new Range(doc1);"
-            "range1.text = 'abcdefghijkl';"
-            "var range2 = new Range(doc1, 3, 6);");
-  EXPECT_EQ("def", RunScript("range2.text"));
+  EXPECT_VALID_SCRIPT(
+      "var doc1 = new Document('text');"
+      "var range1 = new Range(doc1);"
+      "range1.text = 'abcdefghijkl';"
+      "var range2 = new Range(doc1, 3, 6);");
+  EXPECT_SCRIPT_EQ("def", "range2.text");
 }
 
 TEST_F(RangeTest, toLocalLocaleLowerCase) {
   PopulateSample("ABCDEFGHIJ");
-  EXPECT_EQ("abcdefghij", RunScript("r.toLocaleLowerCase(); r.text"));
+  EXPECT_SCRIPT_EQ("abcdefghij", "r.toLocaleLowerCase(); r.text");
 }
 
 TEST_F(RangeTest, toLocalLowerCase) {
   PopulateSample("ABCDEFGHIJ");
-  EXPECT_EQ("abcdefghij", RunScript("r.toLowerCase(); r.text"));
+  EXPECT_SCRIPT_EQ("abcdefghij", "r.toLowerCase(); r.text");
 }
 
 TEST_F(RangeTest, toLocalLocaleUpperCase) {
   PopulateSample("abcdefghij");
-  EXPECT_EQ("ABCDEFGHIJ", RunScript("r.toLocaleUpperCase(); r.text"));
+  EXPECT_SCRIPT_EQ("ABCDEFGHIJ", "r.toLocaleUpperCase(); r.text");
 }
 
 TEST_F(RangeTest, toLocalUpperCase) {
   PopulateSample("abcdefghij");
-  EXPECT_EQ("ABCDEFGHIJ", RunScript("r.toUpperCase(); r.text"));
+  EXPECT_SCRIPT_EQ("ABCDEFGHIJ", "r.toUpperCase(); r.text");
 }
 
 }  // namespace

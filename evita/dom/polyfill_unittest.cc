@@ -24,10 +24,11 @@ class PolyfillTest : public dom::AbstractDomTest {
 };
 
 TEST_F(PolyfillTest, Array_find) {
-  RunScript("var list = [{value: 1}, {value: 2}, {value: 3}];"
-            "function predicate(value) {"
-            "  return function(element) { return element.value == value; };"
-            "}");
+  EXPECT_VALID_SCRIPT(
+      "var list = [{value: 1}, {value: 2}, {value: 3}];"
+      "function predicate(value) {"
+      "  return function(element) { return element.value == value; };"
+      "}");
   EXPECT_SCRIPT_EQ("2", "list.find(predicate(2)).value");
   EXPECT_SCRIPT_TRUE("list.find(predicate(4)) == undefined");
 }

@@ -38,17 +38,18 @@ TEST_F(SelectionTest, active) {
 
 TEST_F(SelectionTest, Realize) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
-  RunScript("var doc = new Document('foo');"
-            "var range = new Range(doc);"
-            "var text_window = new TextWindow(range);"
-            "var sample = text_window.selection");
+  EXPECT_VALID_SCRIPT(
+      "var doc = new Document('foo');"
+      "var range = new Range(doc);"
+      "var text_window = new TextWindow(range);"
+      "var sample = text_window.selection");
   EXPECT_SCRIPT_TRUE("sample instanceof Selection");
   EXPECT_SCRIPT_FALSE("sample instanceof Range");
   EXPECT_SCRIPT_TRUE("sample.document == doc");
   EXPECT_SCRIPT_EQ("0", "sample.range.start");
   EXPECT_SCRIPT_EQ("0", "sample.range.end");
   EXPECT_SCRIPT_FALSE("sample.startIsActive");
-  RunScript("sample.startIsActive = true;");
+  EXPECT_VALID_SCRIPT("sample.startIsActive = true;");
   EXPECT_SCRIPT_TRUE("sample.startIsActive");
 }
 

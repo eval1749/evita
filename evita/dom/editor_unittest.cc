@@ -25,32 +25,35 @@ class EditorTest : public dom::AbstractDomTest {
 
 TEST_F(EditorTest, getFilenameForLoad) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
-  RunScript("var filename;"
-            "var window = new EditorWindow();"
-            "Editor.getFilenameForLoad(window, 'dir').then(function(x) {"
-            "  filename = x;"
-            "});");
+  EXPECT_VALID_SCRIPT(
+      "var filename;"
+      "var window = new EditorWindow();"
+      "Editor.getFilenameForLoad(window, 'dir').then(function(x) {"
+      "  filename = x;"
+      "});");
   EXPECT_SCRIPT_EQ("dir/foo.bar", "filename");
 }
 
 TEST_F(EditorTest, getFilenameForSave) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
-  RunScript("var filename;"
-            "var window = new EditorWindow();"
-            "Editor.getFilenameForSave(window, 'dir').then(function(x) {"
-            "  filename = x;"
-            "});");
+  EXPECT_VALID_SCRIPT(
+      "var filename;"
+      "var window = new EditorWindow();"
+      "Editor.getFilenameForSave(window, 'dir').then(function(x) {"
+      "  filename = x;"
+      "});");
   EXPECT_SCRIPT_EQ("dir/foo.bar", "filename");
 }
 
 TEST_F(EditorTest, messageBox) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
-  RunScript("var response_code;"
-            "var window = new EditorWindow();"
-            "Editor.messageBox(window, 'message', 'title', 3)"
-            "    .then(function(x) {"
-            "       response_code = x;"
-            "    });");
+  EXPECT_VALID_SCRIPT(
+      "var response_code;"
+      "var window = new EditorWindow();"
+      "Editor.messageBox(window, 'message', 'title', 3)"
+      "    .then(function(x) {"
+      "       response_code = x;"
+      "    });");
   EXPECT_SCRIPT_EQ("3", "response_code");
 }
 

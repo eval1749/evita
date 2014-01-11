@@ -159,6 +159,10 @@ Document::~Document() {
 }
 
 base::char16 Document::charCodeAt(text::Posn position) const {
+  if (position == length()) {
+    ScriptController::instance()->ThrowError("Invalid position.");
+    return 0;
+  }
   if (!IsValidPosition(position))
     return 0;
   return buffer_->GetCharAt(position);

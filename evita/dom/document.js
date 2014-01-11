@@ -154,12 +154,12 @@
       case Unit.WORD: {
         if (!position)
           return position;
-        var word_class = wordClassOf(document.charCodeAt_(position));
+        var word_class = wordClassAt(document, position);
         if (word_class == WordClass.BLANK)
           return position;
         while (position) {
           --position;
-          var word_class2 = wordClassOf(document.charCodeAt_(position));
+          var word_class2 = wordClassAt(document, position);
           if (word_class != word_class2)
             return position + 1;
         }

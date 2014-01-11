@@ -40,7 +40,7 @@ void V8ConsoleBuffer::Emit(const base::StringPiece& pice) {
 
 void V8ConsoleBuffer::Emit(const base::string16& string) {
   SetReadOnly(false);
-  Insert(GetEnd(), string.data(), string.length());
+  InsertBefore(GetEnd(), string);
   SetReadOnly(true);
 }
 
@@ -52,13 +52,6 @@ void V8ConsoleBuffer::EmitPrompt() {
   Emit("\n> ");
   prompt_end_->SetRange(GetEnd(), GetEnd());
   SetReadOnly(false);
-  for (auto& window: windows()) {
-    auto const selection = window.GetSelection();
-    if (selection->GetStart() == script_end_->GetStart() &&
-        selection->GetEnd() == script_end_->GetEnd()) {
-      selection->SetRange(GetEnd(), GetEnd());
-    }
-  }
 }
 
 void V8ConsoleBuffer::EnterCommand(const Command::Context* context) {

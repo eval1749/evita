@@ -231,6 +231,8 @@ class Buffer : public BufferCore, public FileFeatures {
     Insert(lPosn, pwsz, ::lstrlenW(pwsz));
   }
 
+  public: void InsertBefore(Posn position, const base::string16& text);
+
   // [N]
   public: bool NeedSave () const {
     return !m_fNoSave && IsModified();

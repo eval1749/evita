@@ -13,6 +13,7 @@
 #define DEBUG_STYLE 0
 #include "evita/text/buffer.h"
 
+#include "base/logging.h"
 #include "./ed_Interval.h"
 #include "evita/text/range.h"
 #include "./ed_Undo.h"
@@ -654,6 +655,42 @@ Count Buffer::Insert(Posn lPosn, const char16* pwch, Count n)
     return n;
 } // Buffer::Insert
 
+void Buffer::InsertBefore(Posn position, const base::string16& text) {
+  DCHECK(IsValidPosn(position));
+  DCHECK(!IsReadOnly());
+  DCHECK(!IsNotReady());
+
+  auto const text_length = text.length();
+  insert(position, text.data(), text_length);
+  ++m_nModfTick;
+
+  for (auto* range : ranges_) {
+    if (range->m_lStart >= position)
+      range->m_lStart += text_length;
+    if (range->m_lEnd >= position)
+      range->m_lEnd += text_length;
+  }
+
+  foreach (EnumInterval, enum_interval, this) {
+    auto const interval = enum_interval.Get();
+    if (interval->m_lStart > position)
+      interval->m_lStart += text_length;
+    if (interval->m_lEnd >= position)
+      interval->m_lEnd += text_length;
+  }
+
+  auto const change_end = static_cast<Posn>(position + text_length);
+
+  // Inserted text inherites style before insertion point.
+  SetStyle(position, change_end, position ? GetStyleAt(position - 1) :
+                                            GetDefaultStyle());
+
+  foreach (ChangeTrackers::Enum, enum_tracker, &m_oChangeTrackers) {
+    auto const tracker = enum_tracker.Get();
+    tracker->m_lStart = std::min(tracker->m_lStart, position);
+    tracker->m_lEnd = std::max(tracker->m_lEnd, change_end);
+  }
+}
 
 //////////////////////////////////////////////////////////////////////
 //

@@ -7,6 +7,7 @@
   /**
    * Capitalize range.
    * @this {Range}
+   * @return {Range}
    */
   Range.prototype.capitalize = function() {
     var text = this.text;
@@ -17,9 +18,10 @@
           data.category == Unicode.Category.Lt) {
         this.text = text.substr(0, i) + text.charAt(i).toLocaleUpperCase() +
                     text.substr(i + 1).toLocaleLowerCase();
-        return;
+        break;
       }
     }
+    return this;
   };
 
   /**
@@ -27,6 +29,7 @@
    * @this {Range}
    * @param {Unit} unit.
    * @param {Alter} alter, optional default is Alter.MOVE.
+   * @return {Range}
    */
   Range.prototype.endOf = function(unit, alter) {
     alter = arguments.length == 1 ? Alter.MOVE : alter;
@@ -40,22 +43,26 @@
       default:
         throw TypeError('Invalid alter: ' + alter);
     }
+    return this;
   };
 
   /**
    * @this {Range}
    * @param {Unit} unit.
    * @param {numbe} count.
+   * @return {Range}
    */
   Range.prototype.move = function(unit, count) {
     var position = count > 0 ? this.end : this.start;
     this.collapseTo(this.document.computeMotion_(unit, count, position));
+    return this;
   };
 
   /**
    * @this {Range}
    * @param {Unit} unit.
    * @param {numbe} count.
+   * @return {Range}
    */
   Range.prototype.moveEnd = function(unit, count) {
     var position = this.document.computeMotion_(unit, count, this.end);
@@ -103,29 +110,37 @@
 
   /**
    * @this {Range}
+   * @return {Range}
    */
   Range.prototype.toLocaleLowerCase = function() {
     this.text = this.text.toLocaleLowerCase();
+    return this;
   };
   
   /**
    * @this {Range}
+   * @return {Range}
    */
   Range.prototype.toLocaleUpperCase = function() {
     this.text = this.text.toLocaleUpperCase();
+    return this;
   };
   
   /**
    * @this {Range}
+   * @return {Range}
    */
   Range.prototype.toLowerCase = function() {
     this.text = this.text.toLowerCase();
+    return this;
   };
   
   /**
    * @this {Range}
+   * @return {Range}
    */
   Range.prototype.toUpperCase = function() {
     this.text = this.text.toUpperCase();
+    return this;
   };
 })();

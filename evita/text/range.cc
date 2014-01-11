@@ -1321,7 +1321,8 @@ void Range::SetText(const base::string16& text)
 
     if (m_lStart == m_lEnd)
     {
-        m_pBuffer->Insert(m_lStart, text.data(), text.length());
+      UndoBlock oUndo(this, L"Range.SetText");
+      m_pBuffer->Insert(m_lStart, text.data(), text.length());
     }
     else
     {

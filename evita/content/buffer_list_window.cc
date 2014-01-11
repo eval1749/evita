@@ -14,6 +14,7 @@
 #include "evita/view/window_set.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
+#include "evita/vi_TextEditWindow.h"
 
 #define DEBUG_FOCUS _DEBUG
 

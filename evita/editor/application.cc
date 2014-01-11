@@ -22,6 +22,7 @@
 #include "evita/vi_EditPane.h"
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_IoManager.h"
+#include "evita/vi_TextEditWindow.h"
 #include "evita/view/view_delegate_impl.h"
 #include "evita/view/window_set.h"
 

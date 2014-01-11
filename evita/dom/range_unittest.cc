@@ -135,6 +135,57 @@ TEST_F(RangeTest, move) {
   EXPECT_SCRIPT_EQ("5 5", "test(7, 8, Unit.WORD, -1)");
 }
 
+
+TEST_F(RangeTest, moveEnd) {
+  EXPECT_VALID_SCRIPT(
+      "var doc = new Document('move');"
+      "var range = new Range(doc);"
+                   //0123456789012345  678901234  56789012345
+      "range.text = 'this is a word.\\nline two\\nline three\\n';"
+      "function test(start, end, unit, count) {"
+      "  range.collapseTo(start);"
+      "  range.end = end;"
+      "  range.moveEnd(unit, count);"
+      "  return range.start + ' ' + range.end;"
+      "}");
+  EXPECT_SCRIPT_EQ("2 4", "test(2, 2, Unit.CHARACTER, 2)");
+  EXPECT_SCRIPT_EQ("2 6", "test(2, 4, Unit.CHARACTER, 2)");
+  EXPECT_SCRIPT_EQ("0 0", "test(2, 2, Unit.CHARACTER, -2)");
+  EXPECT_SCRIPT_EQ("2 2", "test(2, 4, Unit.CHARACTER, -2)");
+
+  EXPECT_SCRIPT_EQ("2 36", "test(2, 2, Unit.PARAGRAPH, 2)");
+  EXPECT_SCRIPT_EQ("2 36", "test(2, 4, Unit.PARAGRAPH, 2)");
+  EXPECT_SCRIPT_EQ("0 0", "test(2, 2, Unit.PARAGRAPH, -2)");
+  EXPECT_SCRIPT_EQ("0 0", "test(18, 18, Unit.PARAGRAPH, -1)");
+  EXPECT_SCRIPT_EQ("0 0", "test(2, 4, Unit.PARAGRAPH, -2)");
+  EXPECT_SCRIPT_EQ("0 0", "test(18, 20, Unit.PARAGRAPH, -1)");
+
+  // Forward this |is a word.  => this is |a word.
+  EXPECT_SCRIPT_EQ("5 8", "test(5, 5, Unit.WORD, 1)");
+  EXPECT_SCRIPT_EQ("2 8", "test(2, 5, Unit.WORD, 1)");
+
+  // Backward this |is a word.  => this is |a word.
+  EXPECT_SCRIPT_EQ("4 4", "test(5, 5, Unit.WORD, -1)");
+  EXPECT_SCRIPT_EQ("3 4", "test(3, 5, Unit.WORD, -1)");
+
+  // Forkward th|is is a word. => this |is a word.
+  EXPECT_SCRIPT_EQ("2 5", "test(2, 2, Unit.WORD, 1)");
+  EXPECT_SCRIPT_EQ("0 5", "test(0, 2, Unit.WORD, 1)");
+
+  // Backward th|is is a word. => |this is a word.
+  EXPECT_SCRIPT_EQ("0 0", "test(2, 2, Unit.WORD, -1)");
+  EXPECT_SCRIPT_EQ("0 0", "test(2, 4, Unit.WORD, -1)");
+
+  // Forward this is| a word. =>  this is |a word.
+  EXPECT_SCRIPT_EQ("7 8", "test(7, 7, Unit.WORD, 1)");
+  EXPECT_SCRIPT_EQ("5 8", "test(5, 7, Unit.WORD, 1)");
+
+  // Backward this is| a word. => this |is a word.
+  EXPECT_SCRIPT_EQ("5 5", "test(7, 7, Unit.WORD, -1)");
+  EXPECT_SCRIPT_EQ("5 5", "test(6, 7, Unit.WORD, -1)");
+  EXPECT_SCRIPT_EQ("4 5", "test(4, 7, Unit.WORD, -1)");
+}
+
 TEST_F(RangeTest, set_start_end) {
   EXPECT_VALID_SCRIPT(
       "var doc1 = new Document('text');"

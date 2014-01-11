@@ -34,7 +34,6 @@ Buffer::Buffer(const base::string16& name, Mode* pMode) :
     m_nCharTick(1),
     m_nModfTick(1),
     m_nSaveTick(1),
-    m_pFirstRange(NULL),
     m_pMode(pMode)
 {
     m_hObjHeap = ::HeapCreate(HEAP_NO_SERIALIZE, 0, 0);
@@ -61,10 +60,9 @@ Buffer::Buffer(const base::string16& name, Mode* pMode) :
 /// </summary>
 Buffer::~Buffer()
 {
-    foreach (EnumRange, oEnum, this)
-    {
-        oEnum.Get()->m_pBuffer = NULL;
-    } // for each range
+    for (auto* range : ranges_) {
+        range->m_pBuffer = nullptr;
+    }
 
     if (NULL != m_hObjHeap)
     {
@@ -663,15 +661,7 @@ Count Buffer::Insert(Posn lPosn, const char16* pwch, Count n)
 //
 Range* Buffer::InternalAddRange(Range* pRange)
 {
-    pRange->m_pNext = m_pFirstRange;
-    pRange->m_pPrev = NULL;
-
-    if (NULL != m_pFirstRange)
-    {
-        m_pFirstRange->m_pPrev = pRange;
-    }
-
-    m_pFirstRange = pRange;
+    ranges_.insert(pRange);
     return pRange;
 } // Buffer::InternalAddRange
 
@@ -715,22 +705,7 @@ void Buffer::InternalInsert(Posn lPosn, const char16* pwch, Count n)
 // Buffer::InternalRemoveRange
 void Buffer::InternalRemoveRange(Range* pRange)
 {
-    Range* pNext = pRange->m_pNext;
-    Range* pPrev = pRange->m_pPrev;
-
-    if (NULL != pNext)
-    {
-        pNext->m_pPrev = pPrev;
-    } // if
-
-    if (NULL == pPrev)
-    {
-        m_pFirstRange = pNext;
-    }
-    else
-    {
-        pPrev->m_pNext = pNext;
-    } // if
+    ranges_.erase(pRange);
 } // Buffer::InternalRemoveRange
 
 
@@ -789,10 +764,8 @@ Posn Buffer::Redo(Posn lPosn, Count n)
 void Buffer::relocate(Posn lPosn, Count iDelta)
 {
     // Note: We should scan range backward to terminate faster.
-    foreach (EnumRange, oEnum, this)
+    for (auto* pRunner : ranges_)
     {
-        Range* pRunner = oEnum.Get();
-
         if (pRunner->m_lStart > lPosn)
         {
             pRunner->m_lStart += iDelta;

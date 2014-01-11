@@ -3,6 +3,8 @@
 #if !defined(INCLUDE_evita_text_buffer_h)
 #define INCLUDE_evita_text_buffer_h
 
+#include <unordered_set>
+
 #include "base/strings/string16.h"
 #include "./ed_BinTree.h"
 #include "./li_util.h"
@@ -112,7 +114,7 @@ class Buffer : public BufferCore, public FileFeatures {
   protected: typedef BinaryTree<Interval> IntervalTree;
 
   private: HANDLE m_hObjHeap;
-  private: Range* m_pFirstRange;
+  private: std::unordered_set<Range*> ranges_;
   private: Mode* m_pMode;
 
   protected: bool m_fUndo;
@@ -417,19 +419,6 @@ class Buffer : public BufferCore, public FileFeatures {
   public: class EnumInterval : public Intervals::Enum {
     public: EnumInterval(const Buffer* pBuffer) :
       Intervals::Enum(&pBuffer->m_oIntervals) {}
-  };
-
-  // EnumRange
-  public: class EnumRange {
-    private: Range* m_pRunner;
-
-    public: EnumRange(const Buffer* pBuffer)
-        : m_pRunner(pBuffer->m_pFirstRange) {
-    }
-
-    public: bool AtEnd() const { return NULL == m_pRunner; }
-    public: Range* Get() const { ASSERT(!AtEnd()); return m_pRunner; }
-    public: void Next();
   };
 
   // Cursor

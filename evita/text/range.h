@@ -47,8 +47,6 @@ class Range //: public ObjectInHeap
     private: Kind       m_eKind;
     private: Posn       m_lStart;
     private: Posn       m_lEnd;
-    private: Range*     m_pNext;
-    private: Range*     m_pPrev;
     private: Buffer*    m_pBuffer;
 
     public: Range(
@@ -59,9 +57,8 @@ class Range //: public ObjectInHeap
         m_eKind(eKind),
         m_lStart(lStart),
         m_lEnd(lEnd),
-        m_pBuffer(pBuffer),
-        m_pNext(NULL),
-        m_pPrev(NULL) {}
+        m_pBuffer(pBuffer) {
+    }
 
     public: Range(Buffer*, Posn, Posn);
     public: explicit Range(const Range& other);

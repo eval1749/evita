@@ -163,9 +163,7 @@ Range::Range(Buffer* pBuffer, Posn lStart, Posn lEnd) :
     m_eKind(Kind_Range),
     m_lEnd(lEnd),
     m_lStart(lStart),
-    m_pBuffer(pBuffer),
-    m_pNext(NULL),
-    m_pPrev(NULL)
+    m_pBuffer(pBuffer)
 {
     ASSERT(m_pBuffer->IsValidRange(m_lStart, m_lEnd));
     m_pBuffer->InternalAddRange(this);
@@ -179,9 +177,7 @@ Range::Range(const Range& other) :
     m_eKind(Kind_Range),
     m_lEnd(other.GetEnd()),
     m_lStart(other.GetStart()),
-    m_pBuffer(other.GetBuffer()),
-    m_pNext(NULL),
-    m_pPrev(NULL)
+    m_pBuffer(other.GetBuffer())
 {
     m_pBuffer->InternalAddRange(this);
 } // Range::Range
@@ -1388,15 +1384,6 @@ Buffer::EnumCharRev::EnumCharRev(const Range* pRange) :
     m_lStart(pRange->GetStart()),
     m_lPosn(pRange->GetEnd()),
     m_pBuffer(pRange->GetBuffer()) {}
-
-/// <summary>
-///  Advance range enumerator.
-/// </summary>
-void Buffer::EnumRange::Next()
-{
-    ASSERT(! AtEnd());
-    m_pRunner = m_pRunner->m_pNext;
-} // Buffer::EnumRange::Next
 
 /// <summary>
 ///  Construct UndoBlock with specified range and name

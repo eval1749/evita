@@ -40,9 +40,11 @@ class Document : public v8_glue::Scriptable<Document> {
   public: static Document* GetOrNew(const base::string16& name);
   public: bool IsValidPosition(text::Posn position) const;
   public: void Load(const base::string16& filename);
+  public: Posn Redo(Posn position);
   public: void RenameTo(const base::string16& new_name);
   public: static void ResetForTesting();
   public: void Save(const base::string16& filename);
+  public: Posn Undo(Posn position);
 
   DISALLOW_COPY_AND_ASSIGN(Document);
 };

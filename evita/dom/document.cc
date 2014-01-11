@@ -137,8 +137,10 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         .SetMethod("load_", &Document::Load)
         .SetProperty("modified", &Document::modified)
         .SetProperty("name", &Document::name)
+        .SetMethod("redo", &Document::Redo)
         .SetMethod("renameTo", &Document::RenameTo)
-        .SetMethod("save", &Document::Save);
+        .SetMethod("save", &Document::Save)
+        .SetMethod("undo", &Document::Undo);
   }
 };
 }  // namespace
@@ -213,6 +215,10 @@ void Document::Load(const base::string16& filename) {
   ScriptController::instance()->view_delegate()->LoadFile(this, filename);
 }
 
+Posn Document::Redo(Posn position) {
+  return buffer_->Redo(position);
+}
+
 void Document::RenameTo(const base::string16& new_name) {
   if (name() == new_name)
    return;
@@ -230,6 +236,10 @@ void Document::ResetForTesting() {
 void Document::Save(const base::string16& filename) {
   // TODO(yosi) We should protect this document againt gc.
   ScriptController::instance()->view_delegate()->SaveFile(this, filename);
+}
+
+Posn Document::Undo(Posn position) {
+  return buffer_->Undo(position);
 }
 
 }  // namespace dom

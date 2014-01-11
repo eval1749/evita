@@ -140,6 +140,17 @@ TEST_F(DocumentTest, name) {
   EXPECT_SCRIPT_EQ("baz", "var sample1 = new Document('baz'); sample1.name");
 }
 
+TEST_F(DocumentTest, redo) {
+  RunScript("var doc = new Document('redo');"
+            "var range = new Range(doc);"
+            "range.text = 'foo';"
+            "doc.undo(3);"
+            "doc.redo(0);"
+            "range.start = 0;"
+            "range.end = doc.length");
+  EXPECT_SCRIPT_EQ("foo", "range.text");
+}
+
 TEST_F(DocumentTest, renameTo) {
   RunScript("var doc = new Document('foo'); doc.renameTo('bar')");
   EXPECT_SCRIPT_EQ("bar", "doc.name");
@@ -148,7 +159,16 @@ TEST_F(DocumentTest, renameTo) {
 TEST_F(DocumentTest, save) {
   EXPECT_CALL(*mock_view_impl(), SaveFile(_, Eq(L"foo")));
   RunScript("var doc = new Document('foo'); doc.save('foo')");
-  
+}
+
+TEST_F(DocumentTest, undo) {
+  RunScript("var doc = new Document('undo');"
+            "var range = new Range(doc);"
+            "range.text = 'foo';"
+            "doc.undo(3);"
+            "range.start = 0;"
+            "range.end = doc.length");
+  EXPECT_SCRIPT_EQ("", "range.text");
 }
 
 }  // namespace

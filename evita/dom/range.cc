@@ -46,6 +46,7 @@ class RangeWrapperInfo : public v8_glue::WrapperInfo {
       ObjectTemplateBuilder& builder) override {
     builder
         .SetProperty("document", &Range::document)
+        .SetMethod("collapseTo", &Range::collapseTo)
         .SetProperty("end", &Range::end, &Range::set_end)
         .SetProperty("start", &Range::start, &Range::set_start)
         .SetProperty("text", &Range::text, &Range::set_text);
@@ -103,6 +104,13 @@ void Range::set_text(const base::string16& text) {
 v8_glue::WrapperInfo* Range::static_wrapper_info() {
   DEFINE_STATIC_LOCAL(RangeWrapperInfo, wrapper_info, ());
   return &wrapper_info;
+}
+
+Range* Range::collapseTo(Posn position) {
+  if (!document_->IsValidPosition(position))
+    return this;
+  range_->SetRange(position, position);
+  return this;
 }
 
 }  // namespace dom

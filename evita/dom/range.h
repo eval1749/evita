@@ -34,6 +34,8 @@ class Range : public v8_glue::Scriptable<Range> {
   public: static v8_glue::WrapperInfo* static_wrapper_info();
   public: text::Range* text_range() const { return range_; }
 
+  public: Range* collapseTo(Posn position);
+
   DISALLOW_COPY_AND_ASSIGN(Range);
 };
 

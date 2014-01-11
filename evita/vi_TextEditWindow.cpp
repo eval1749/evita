@@ -189,7 +189,6 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
       #endif // SUPPORT_IME
       m_pViewRange(text_window.view_range()->text_range()) {
   selection_->set_window(this);
-  text_window.document()->buffer()->AddWindow(this);
 }
 
 TextEditWindow::TextEditWindow(Buffer* pBuffer, Posn lStart)
@@ -209,7 +208,6 @@ TextEditWindow::TextEditWindow(Buffer* pBuffer, Posn lStart)
       #endif // SUPPORT_IME
       m_pViewRange(pBuffer->CreateRange(lStart)) {
   UI_ASSERT_DOM_LOCKED();
-  pBuffer->AddWindow(this);
 }
 
 TextEditWindow::~TextEditWindow() {
@@ -1200,7 +1198,6 @@ void TextEditWindow::UpdateStatusBar() const {
 
 void TextEditWindow::WillDestroyWidget() {
   ParentClass::WillDestroyWidget();
-  GetSelection()->GetBuffer()->RemoveWindow(this);
 }
 
 #if SUPPORT_IME

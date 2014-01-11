@@ -13,8 +13,6 @@
 
 #include "evita/text/buffer.h"
 
-#include "./vi_TextEditWindow.h"
-
 namespace Command {
 class KeyBindEntry;
 }
@@ -22,26 +20,15 @@ class KeyBindEntry;
 namespace dom {
 
 class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
-  public: typedef TextEditWindow Window;
-  private: WindowList m_oWindows;
 
   public: Buffer(const base::string16& name, text::Mode* pMode = nullptr);
   public: virtual ~Buffer();
-
-  public: const WindowList& windows() const { return m_oWindows; }
-  public: WindowList& windows() { return m_oWindows; }
-
-  // [A]
-  public: void AddWindow(Window* pWindow) { m_oWindows.Append(pWindow); }
 
   // [C]
   public: bool CanKill();
 
   // [F]
   public: void FinishIo(uint);
-
-  // [G]
-  public: Window* GetWindow() const;
 
   // [L]
   public: bool Load(const char16*);
@@ -54,8 +41,6 @@ class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
 
   // [R]
   public: bool Reload();
-
-  public: void RemoveWindow(Window* pWindow) { m_oWindows.Delete(pWindow); }
 
   // [S]
   public: bool Save(const char16*, uint, NewlineMode);

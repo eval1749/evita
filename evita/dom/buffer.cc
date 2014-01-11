@@ -14,6 +14,7 @@
 #include "./ed_Mode.h"
 
 #include "evita/editor/application.h"
+#include "evita/resource.h"
 #include "./vi_Frame.h"
 
 namespace dom {
@@ -48,16 +49,6 @@ bool Buffer::CanKill() {
   }
 
   return true;
-}
-
-// Returns MRU window
-Buffer::Window* Buffer::GetWindow() const {
-  const auto* mru = m_oWindows.GetFirst();
-  for (auto& window: m_oWindows) {
-    if (mru->GetActiveTick() < window.GetActiveTick())
-      mru = &window;
-  }
-  return const_cast<Window*>(mru);
 }
 
 bool Buffer::OnIdle(uint) {

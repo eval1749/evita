@@ -56,6 +56,15 @@
     this.selection.startIsActive = false;
   });
 
+  Editor.setKeyBinding('Ctrl+Shift+D', function() {
+    var selection = this.selection;
+    if (selection.start == selection.end) {
+      selection.range.startOf(Unit.WORD, Alter.EXTEND);
+      selection.range.endOf(Unit.WORD, Alter.EXTEND);
+    }
+    selection.range.toLowerCase();
+  });
+
   // Make selection visible
   Editor.setKeyBinding('Ctrl+L', function() {
     this.makeSelectionVisible();
@@ -124,6 +133,15 @@
   Editor.setKeyBinding('Ctrl+W', function(arg) {
     var document = this.selection.document;
     document.close();
+  });
+
+  Editor.setKeyBinding('Ctrl+Shift+U', function() {
+    var selection = this.selection;
+    if (selection.start == selection.end) {
+      selection.range.startOf(Unit.WORD, Alter.EXTEND);
+      selection.range.endOf(Unit.WORD, Alter.EXTEND);
+    }
+    selection.range.toUpperCase();
   });
 
   Editor.setKeyBinding('Ctrl+Shift+W', function(arg) {

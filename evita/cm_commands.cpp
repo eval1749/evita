@@ -206,22 +206,6 @@ DEFCOMMAND(CutToClipboard)
     pCtx->GetSelection()->Cut();
 } // CutToClipboard
 
-
-// [D]
-DEFCOMMAND(DowncaseSelection)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-
-    if (Selection_None == pSelection->GetType())
-    {
-        pSelection->StartOf(Unit_Word, true);
-        pSelection->EndOf(Unit_Word, true);
-    }
-    pSelection->Downcase();
-} // DowncaseSelection
-
-
 // [E]
 DefCommand_StartEnd(EndKey,      EndKey, Line)
 DefCommand_StartEnd(EndOfBuffer, EndKey, Buffer)
@@ -1041,21 +1025,6 @@ DEFCOMMAND(TypeEnter)
     pCtx->GetSelection()->TypeEnter(pCtx->GetArg());
 } // TypeEnter
 
-// [U]
-
-DEFCOMMAND(UpcaseSelection)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-
-    if (Selection_None == pSelection->GetType())
-    {
-        pSelection->StartOf(Unit_Word, true);
-        pSelection->EndOf(Unit_Word, true);
-    }
-    pSelection->Upcase();
-} // UpcaseSelection
-
 DEFCOMMAND(ValidateIntervals)
 {
     when (NULL == pCtx->GetSelection()) return;
@@ -1428,9 +1397,7 @@ void Processor::GlobalInit() {
 
     // Ctrl+Shift
     BIND_KEY(Mod_CtrlShift | 'C', CapitalizeSelection);
-    BIND_KEY(Mod_CtrlShift | 'D', DowncaseSelection);
     BIND_KEY(Mod_CtrlShift | 'J', ShowV8Console);
-    BIND_KEY(Mod_CtrlShift | 'U', UpcaseSelection);
 
     // Ctrl+Shift+[0-9]
     BIND_KEY(Mod_CtrlShift | '0', CloseThisWindow);

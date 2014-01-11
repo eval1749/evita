@@ -4,6 +4,47 @@
 'use strict';
 
 (function() {
+  /** @const @type {Map.<string, string>} */
+  var WORD_CLASS_MAP = (function() {
+    function wordClass(name) {
+      var word_class = name.charAt(0);
+      if (word_class == 'L' || word_class == 'N')
+        return 'w';
+      return word_class;
+    }
+    var map = new Map();
+    Unicode.CATEGORY_SHORT_NAMES.forEach(function(name) {
+      map.set(name, wordClass(name));
+    });
+    return map;
+  })();
+
+  /** @enum{string} */
+  var WordClass = {
+    BLANK: 'Z',
+    WORD: 'w'
+  };
+
+  function throwInvalidUnit(unit) {
+    throw 'Invalid unit: ' + unit;
+  }
+
+  function throwNYI(name, unit) {
+    throw 'NYI Range.prototype.' + name + ' Unit.' + unit;
+  }
+
+  function throwUnsupportedUnit(name, unit) {
+    throw 'Range.prototype.' + name + ' does not support Unit.' + unit;
+  }
+
+  function wordClassOf(char_code) {
+    return WORD_CLASS_MAP.get(Unicode.UCD[char_code].category);
+  }
+
+  function wordClassAt(document, position) {
+    return wordClassOf(document.charCodeAt_(position));
+  }
+
   Document.prototype.close = function() {
     var document = this;
     if (!document.modified) {
@@ -29,6 +70,104 @@
             break;
         }
       });
+  };
+
+  /**
+   * @param {Unit} unit.
+   * @param {number} position.
+   * @return {number} new position.
+   */
+  Document.prototype.computeEndOf_ = function(unit, position) {
+    var document = this;
+    switch (unit) {
+      case Unit.CHARACTER:
+        throwUnsupportedUnit('endOf', 'CHARACTER');
+      case Unit.DOCUMENT:
+        return document.length;
+      case Unit.LINE:
+        throwUnsupportedUnit('endOf', 'LINE');
+      case Unit.PAGE:
+        throwUnsupportedUnit('endOf', 'PAGE');
+      case Unit.PARAGRAPH:
+        while (position < document.length) {
+          if (document.charCodeAt_(position) == '\n')
+            return position;
+          ++position;
+        }
+        return position;
+      case Unit.SCREEN:
+        throwUnsupportedUnit('endOf', 'SCREEN');
+      case Unit.SENTENCE:
+        throwNYI('startof', 'SENTENCE');
+      case Unit.WINDOW:
+        throwUnsupportedUnit('endOf', 'WINDOW');
+      case Unit.WORD: {
+        if (position == document.length)
+          return position;
+        var word_class = wordClassAt(document, position);
+        if (word_class == WordClass.BLANK)
+          return position;
+        for (;;) {
+          ++position;
+          if (position == document.length)
+            return position;
+          var word_class2 = wordClassAt(document, position);
+          if (word_class != word_class2)
+            return position;
+        }
+        return position;
+      }
+      default:
+        throwInvalidUnit(unit);
+    }
+  };
+
+  /**
+   * @param {Unit} unit.
+   * @param {number} position.
+   * @return {number} new position.
+   */
+  Document.prototype.computeStartOf_ = function(unit, position) {
+    var document = this;
+    switch (unit) {
+      case Unit.CHARACTER:
+        throwUnsupportedUnit('startOf', 'CHARACTER');
+      case Unit.DOCUMENT:
+        return 0;
+      case Unit.LINE:
+        throwUnsupportedUnit('startOf', 'LINE');
+      case Unit.PAGE:
+        throwUnsupportedUnit('startOf', 'PAGE');
+      case Unit.PARAGRAPH:
+        while (position > 0) {
+          --position;
+          if (document.charCodeAt_(position) == '\n')
+            return position + 1;
+        }
+        return position;
+      case Unit.SCREEN:
+        throwUnsupportedUnit('startOf', 'SCREEN');
+      case Unit.SENTENCE:
+        throwNYI('startof', 'SENTENCE');
+      case Unit.WINDOW:
+        throwUnsupportedUnit('startof', 'WINDOW');
+      case Unit.WORD: {
+        if (!position)
+          return position;
+        var word_class = wordClassOf(document.charCodeAt_(position));
+        if (word_class == WordClass.BLANK)
+          return position;
+        while (position) {
+          --position;
+          var word_class2 = wordClassOf(document.charCodeAt_(position));
+          if (word_class != word_class2)
+            return position + 1;
+        }
+        return position;
+      }
+      default:
+        throwInvalidUnit(unit);
+    }
   };
 
   Document.prototype.forceClose = function() {

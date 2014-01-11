@@ -16,6 +16,8 @@
 #include "evita/dom/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/ed_Mode.h"
+#include "evita/view/window.h"
+#include "evita/view/window_set.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_Selection.h"
@@ -71,8 +73,10 @@ struct FinishLoadParam
                 m_pBuffer->SetMode(pModeFactory->Create(m_pBuffer));
             }
 
-            for (auto& window: m_pBuffer->windows())
-                window.GetSelection()->RestoreForReload();
+            for (auto window : view::Window::all_windows()) {
+                if (auto text_window = window->as<TextEditWindow>())
+                    text_window->GetSelection()->RestoreForReload();
+            }
 
             m_pBuffer->GetMode()->DoColor(m_pBuffer->GetEnd());
         } // if

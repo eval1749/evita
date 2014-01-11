@@ -35,6 +35,7 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/view_event_handler.h"
+#include "evita/view/window_set.h"
 #include "./vi_EditPane.h"
 #include "./vi_Pane.h"
 #include "./vi_Selection.h"
@@ -599,9 +600,14 @@ bool Frame::OnIdle(uint const nCount) {
           break;
 
         case IDYES:
-          for (auto& window: pBuffer->windows())
-            window.GetSelection()->PrepareForReload();
-          pBuffer->Load(pBuffer->GetFileName().c_str());
+          for (auto window : Window::all_windows()) {
+            if (auto text_window = window->as<TextEditWindow>()) {
+              if (text_window->GetBuffer() == pBuffer) {
+                text_window->GetSelection()->PrepareForReload();
+                pBuffer->Load(pBuffer->GetFileName().c_str());
+              }
+            }
+          }
           break;
 
         default:

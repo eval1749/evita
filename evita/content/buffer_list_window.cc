@@ -11,6 +11,7 @@
 #include "evita/vi_defs.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
+#include "evita/view/window_set.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
 
@@ -348,6 +349,8 @@ void BufferListWindow::OnPaint(const common::win::Rect) {
 void BufferListWindow::Redraw() {
   ListView_DeleteAllItems(m_hwndListView);
 
+  auto all_windows = Window::all_windows();
+
   for (auto& buffer: Application::instance()->buffers()) {
     LVITEM oItem;
     oItem.mask = LVIF_IMAGE | LVIF_PARAM | LVIF_TEXT;
@@ -371,17 +374,19 @@ void BufferListWindow::Redraw() {
 
     // State
     {
-      auto it = buffer.windows().begin();
-      if (it != buffer.windows().end())
-        ++it;
+      auto num_windows = 0;
+      for (auto window : all_windows) {
+        if (auto text_window  = window->as<TextEditWindow>()) {
+          if (buffer == text_window->GetBuffer())
+            ++num_windows;
+        }
+      }
 
       char16* pwsz = wsz;
       *pwsz++ = static_cast<char16>(buffer.IsModified() ? '*' : '-');
       *pwsz++ = static_cast<char16>(buffer.IsReadOnly() ? '%' : '-');
       *pwsz++ = static_cast<char16>(buffer.IsNotReady() ? '!' : '-');
-      *pwsz++ = static_cast<char16>(
-        it == buffer.windows().begin() ? '-' :
-            it == buffer.windows().end() ? '1' : 'w');
+      *pwsz++ = static_cast<char16>("-1w"[std::max(num_windows, 2)]);
       *pwsz = 0;
 
       oItem.iSubItem = 2;

@@ -23,6 +23,7 @@
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_IoManager.h"
 #include "evita/view/view_delegate_impl.h"
+#include "evita/view/window_set.h"
 
 #define DEBUG_IDLE 0
 
@@ -184,12 +185,14 @@ HIMAGELIST Application::GetIconList() const {
 bool Application::KillBuffer(Buffer* buffer, bool is_forced) {
   if (!is_forced && !buffer->CanKill())
       return false;
-  for (;;) {
-    auto const window = buffer->GetWindow();
-    if (!window)
-      break;
-    window->Destroy();
+
+  for (auto window : view::Window::all_windows()) {
+    if (auto text_window = window->as<TextEditWindow>()) {
+      if (text_window->GetBuffer() == buffer)
+        window->Destroy();
+    }
   }
+
   buffers_.Delete(buffer);
   delete buffer;
   return true;

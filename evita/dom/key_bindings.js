@@ -132,4 +132,30 @@
     else
       Editor.exit();
   });
+
+  Editor.setKeyBinding('Ctrl+Y', function() {
+    var selection = this.selection;
+    var position = selection.document.redo(selection.active);
+    if (position < 0) {
+      Editor.messageBox(this,
+          localizeText(IDS_NO_MORE_REDO),
+          localizeText(IDS_APP_TITLE),
+          MessageBox.ICONWARNING);
+      return;
+    }
+    selection.range.collapseTo(position);
+  });
+
+  Editor.setKeyBinding('Ctrl+Z', function() {
+    var selection = this.selection;
+    var position = selection.document.undo(selection.active);
+    if (position < 0) {
+      Editor.messageBox(this,
+          localizeText(IDS_NO_MORE_UNDO),
+          localizeText(IDS_APP_TITLE),
+          MessageBox.ICONWARNING);
+      return;
+    }
+    selection.range.collapseTo(position);
+  });
 })();

@@ -874,28 +874,6 @@ DEFCOMMAND(Reconvert)
         pSelection->GetEnd() );
 } // Reconvert
 
-
-DEFCOMMAND(Redo)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-
-    Posn lPosn = pSelection->GetBuffer()->Redo(
-        pSelection->GetActivePosn() );
-
-    if (lPosn >= 0)
-    {
-        pSelection->MoveTo(lPosn);
-
-    }
-    else
-    {
-        Application::instance()->ShowMessage(
-            MessageLevel_Warning,
-            IDS_NO_MORE_REDO );
-    }
-} // Redo
-
 DEFCOMMAND(Reload)
 {
     Selection* pSelection = pCtx->GetSelection();
@@ -1064,29 +1042,6 @@ DEFCOMMAND(TypeEnter)
 } // TypeEnter
 
 // [U]
-
-//////////////////////////////////////////////////////////////////////
-//
-// Undo - Ctrl+Z
-//
-DEFCOMMAND(Undo)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-
-    Posn lPosn = pSelection->GetBuffer()->Undo(
-        pSelection->GetActivePosn() );
-    if (lPosn >= 0)
-    {
-        pSelection->MoveTo(lPosn);
-    }
-    else
-    {
-        Application::instance()->ShowMessage(
-            MessageLevel_Warning,
-            IDS_NO_MORE_UNDO );
-    }
-} // Undo
 
 DEFCOMMAND(UpcaseSelection)
 {
@@ -1470,8 +1425,6 @@ void Processor::GlobalInit() {
     BIND_KEY(Mod_Ctrl | 'U', StartArgumentEntry());
     BIND_KEY(Mod_Ctrl | 'V', PasteFromClipboard);
     BIND_KEY(Mod_Ctrl | 'X', CutToClipboard);
-    BIND_KEY(Mod_Ctrl | 'Y', Redo);
-    BIND_KEY(Mod_Ctrl | 'Z', Undo);
 
     // Ctrl+Shift
     BIND_KEY(Mod_CtrlShift | 'C', CapitalizeSelection);

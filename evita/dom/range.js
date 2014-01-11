@@ -43,6 +43,16 @@
   };
 
   /**
+   * @this {Range}
+   * @param {Unit} unit.
+   * @param {numbe} count.
+   */
+  Range.prototype.move = function(unit, count) {
+    var position = count > 0 ? this.end : this.start;
+    this.collapseTo(this.document.computeMotion_(unit, count, position));
+  };
+
+  /**
    * Move start position of Range at start of specified unit.
    * @this {Range}
    * @param {Unit} unit.

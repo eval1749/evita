@@ -123,6 +123,103 @@
   };
 
   /**
+   * @this {Document}
+   * @param {Unit} unit.
+   * @param {number} count.
+   * @param {number} position.
+   * @return {number}
+   *
+   * Word Motion:
+   *                      forward             backward
+   *  th|is is a word.    this |is a word.    |this is a word.
+   *  this |is a word.    this is| a word.    |this is a word.
+   */
+  Document.prototype.computeMotion_ = function(unit, count, position) {
+    var document = this;
+    switch (unit) {
+      case Unit.CHARACTER:
+        if (count > 0)
+          return Math.min(document.length, position + count);
+        if (count < 0)
+          return Math.max(0, position + n);
+        return position;
+      case Unit.PARAGRAPH:
+        if (count > 0) {
+          for (var k = 0; k < count; ++k) {
+            position = document.computeEndOf_(unit, position);
+            if (position == document.length)
+              return position;
+            ++position;
+          }
+          return position;
+        }
+        if (count < 0) {
+          for (var k = count; k < 0; ++k) {
+            position = document.computeStartOf_(unit, position);
+            if (!position)
+              break;
+          }
+          return position;
+        }
+        return position;
+      case Unit.WORD:
+        if (count > 0) {
+          if (position == document.length)
+            return position;
+          for (var k = 0; k < count; ++k) {
+            var word_class = wordClassAt(document, position);
+            for (;;) {
+              ++position;
+              if (position == document.length)
+                return position;
+              var word_class2 = wordClassAt(document, position);
+              if (word_class == word_class2)
+                continue;
+              while (word_class2 == WordClass.BLANK) {
+                ++position;
+                if (position == document.length)
+                  return position;
+                word_class2 = wordClassAt(document, position);
+              }
+              return position;
+            }
+          }
+          return position;
+        }
+
+        if (count < 0) {
+          if (!position)
+            return position;
+          for (var k = count; k < 0; ++k) {
+            --position;
+            var word_class = wordClassAt(document, position);
+            for (;;) {
+              if (!position)
+                return position;
+              --position;
+              var word_class2 = wordClassAt(document, position);
+              if (word_class == word_class2)
+                continue;
+              if (word_class == WordClass.BLANK) {
+                while (word_class2 == WordClass.BLANK) {
+                  if (!position)
+                    return position;
+                  --position;
+                  word_class2 = wordClassAt(document, position);
+                }
+              }
+              ++position;
+              break;
+            }
+          }
+        }
+        return position;
+      default:
+        throw TypeError('Invalid unit: ' + unit);
+    }
+  };
+
+  /**
    * @param {Unit} unit.
    * @param {number} position.
    * @return {number} new position.

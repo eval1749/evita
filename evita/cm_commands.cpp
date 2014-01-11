@@ -110,20 +110,6 @@ DEFCOMMAND(BackwardDeleteWord)
 } // BackwardDeleteWord
 
 // [C]
-DEFCOMMAND(CapitalizeSelection)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-
-    if (Selection_None == pSelection->GetType())
-    {
-        pSelection->StartOf(Unit_Word, true);
-        pSelection->EndOf(Unit_Word, true);
-    }
-    pSelection->Capitalize();
-} // CapitalizeSelection
-
-
 //////////////////////////////////////////////////////////////////////
 //
 // CloseOtherFrames - Close All Frames But This
@@ -1396,7 +1382,6 @@ void Processor::GlobalInit() {
     BIND_KEY(Mod_Ctrl | 'X', CutToClipboard);
 
     // Ctrl+Shift
-    BIND_KEY(Mod_CtrlShift | 'C', CapitalizeSelection);
     BIND_KEY(Mod_CtrlShift | 'J', ShowV8Console);
 
     // Ctrl+Shift+[0-9]

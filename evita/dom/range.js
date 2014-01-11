@@ -67,6 +67,21 @@
   };
 
   /**
+   * @this {Range}
+   * @param {Unit} unit.
+   * @param {numbe} count.
+   * @return {Range}
+   */
+  Range.prototype.moveStart = function(unit, count) {
+    var position = this.document.computeMotion_(unit, count, this.start);
+    if (position <= this.end)
+      this.start = position;
+    else
+      this.collapseTo(position);
+    return this;
+  };
+
+  /**
    * Move start position of Range at start of specified unit.
    * @this {Range}
    * @param {Unit} unit.

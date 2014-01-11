@@ -23,8 +23,21 @@ class SelectionTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(SelectionTest);
 };
 
+TEST_F(SelectionTest, active) {
+  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
+  EXPECT_VALID_SCRIPT(
+      "var doc = new Document('foo');"
+      "var range = new Range(doc);"
+      "var text_window = new TextWindow(range);"
+      "var sample = text_window.selection;"
+      "sample.range.text = 'foo';");
+  EXPECT_SCRIPT_EQ("3", "sample.active");
+  EXPECT_VALID_SCRIPT("sample.startIsActive = true;");
+  EXPECT_SCRIPT_EQ("0", "sample.active");
+}
+
 TEST_F(SelectionTest, Realize) {
-  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(::testing::_));
+  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
   RunScript("var doc = new Document('foo');"
             "var range = new Range(doc);"
             "var text_window = new TextWindow(range);"

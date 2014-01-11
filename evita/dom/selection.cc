@@ -38,6 +38,7 @@ class SelectionWrapperInfo : public v8_glue::WrapperInfo {
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
+        .SetProperty("active", &Selection::active)
         .SetProperty("document", &Selection::document)
         .SetProperty("range", &Selection::range)
         .SetProperty("startIsActive", &Selection::start_is_active,
@@ -58,6 +59,10 @@ Selection::Selection(TextWindow* text_window, Range* range)
 }
 
 Selection::~Selection() {
+}
+
+Posn Selection::active() const {
+  return start_is_active() ? range_->start() : range_->end();
 }
 
 bool Selection::start_is_active() const {

@@ -28,6 +28,7 @@ class Selection : public v8_glue::Scriptable<Selection> {
   public: Selection(TextWindow* text_window, Range* range);
   public: virtual ~Selection();
 
+  public: Posn active() const;
   public: Document* document() const { return document_.get(); }
   public: Range* range() const { return range_.get(); }
   public: bool start_is_active() const;

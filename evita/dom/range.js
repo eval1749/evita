@@ -38,6 +38,63 @@
   }
 
   /**
+   * Move end position of Range at end of specified unit.
+   * @this {Range}
+   * @param {Unit} unit.
+   */
+  Range.prototype.endOf = function(unit) {
+    var document = this.document;
+    switch (unit) {
+      case Unit.CHARACTER:
+        doesNotSupportUnit('endOf', 'CHARACTER');
+      case Unit.DOCUMENT:
+        this.end = document.length;
+        break;
+      case Unit.LINE:
+        doesNotSupportUnit('endOf', 'LINE');
+      case Unit.PAGE:
+        doesNotSupportUnit('endOf', 'PAGE');
+      case Unit.PARAGRAPH: {
+        var position = this.end;
+        while (position < document.length) {
+          if (document.charCodeAt_(position) == '\n')
+            break;
+          ++position;
+        }
+        this.end = position;
+        break;
+      }
+      case Unit.SCREEN:
+        doesNotSupportUnit('endOf', 'SCREEN');
+      case Unit.SENTENCE:
+        NYI('startof', 'SENTENCE');
+      case Unit.WINDOW:
+        doesNotSupportUnit('startof', 'WINDOW');
+      case Unit.WORD: {
+        if (this.end == document.length)
+          break;
+        var position = this.end;
+        var word_class = wordClassOf(document.charCodeAt_(position));
+        if (word_class == WordClass.BLANK)
+          break;
+        for (;;) {
+          ++position;
+          if (position == document.length)
+            break;
+          var word_class2 = wordClassOf(document.charCodeAt_(position));
+          if (word_class != word_class2) {
+            break;
+          }
+        }
+        this.end = position;
+        break;
+      }
+      default:
+        throw TypeError('Invalid unit: ' + unit);
+    }
+  };
+
+  /**
    * Move start position of Range at start of specified unit.
    * @this {Range}
    * @param {Unit} unit.

@@ -43,6 +43,24 @@ TEST_F(RangeTest, Constructor) {
   EXPECT_EQ("true", RunScript("range3.document === doc1"));
 }
 
+TEST_F(RangeTest, endOf) {
+  RunScript("var doc = new Document('endOf');"
+            "var range = new Range(doc);"
+                         //012345678901
+            "range.text = 'foo bar  baz';"
+            "function test(x) {"
+            "  range.end = x;"
+            "  range.endOf(Unit.WORD);"
+            "  return range.end;"
+            "}");
+  EXPECT_SCRIPT_EQ("3", "test(0)");
+  EXPECT_SCRIPT_EQ("3", "test(1)");
+  EXPECT_SCRIPT_EQ("3", "test(2)");
+  EXPECT_SCRIPT_EQ("7", "test(5)");
+  EXPECT_SCRIPT_EQ("7", "test(7)");
+  EXPECT_SCRIPT_EQ("8", "test(8)");
+}
+
 TEST_F(RangeTest, set_start_end) {
   RunScript("var doc1 = new Document('text');"
             "var range1 = new Range(doc1);"

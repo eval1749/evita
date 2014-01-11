@@ -11,6 +11,7 @@ namespace view {
 typedef common::win::NativeWindow NativeWindow;
 typedef common::win::Point Point;
 typedef common::win::Rect Rect;
+class WindowSet;
 
 class Window : public widgets::Widget {
   DECLARE_CASTABLE_CLASS(Window, Widget);
@@ -25,6 +26,7 @@ class Window : public widgets::Widget {
   protected: explicit Window(WindowId window_id = kInvalidWindowId);
   protected: ~Window();
 
+  public: static WindowSet all_windows();
   public: WindowId window_id() const { return window_id_; }
 
   // [D]

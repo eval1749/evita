@@ -7,6 +7,7 @@
 
 #include "evita/editor/application.h"
 #include "evita/dom/view_event_handler.h"
+#include "evita/view/window_set.h"
 
 namespace view {
 
@@ -27,6 +28,14 @@ class WindowIdMapper : public common::Singleton<WindowIdMapper> {
 
   private: WindowIdMapper() = default;
   public: ~WindowIdMapper() = default;
+
+  public: WindowSet all_windows() const {
+    WindowSet::Set windows;
+    for (const auto& entry : map_) {
+      windows.insert(entry.second);
+    }
+    return WindowSet(std::move(windows));
+  }
 
   public: void DidDestroyDomWindow(WindowId window_id) {
     ASSERT_CALLED_ON_UI_THREAD();
@@ -93,6 +102,10 @@ Window::~Window() {
     WindowIdMapper::instance()->Unregister(window_id_);
     view_event_handler()->DidDestroyWidget(window_id_);
   }
+}
+
+WindowSet Window::all_windows() {
+  return WindowIdMapper::instance()->all_windows();
 }
 
 void Window::DidDestroyDomWindow() {

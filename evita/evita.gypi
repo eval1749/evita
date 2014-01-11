@@ -260,6 +260,7 @@
 
         'view/view_delegate_impl.cc',
         'view/window.cc',
+        'view/window_set.cc',
 
         'widgets/root_widget.cc',
         'widgets/widget.cc',

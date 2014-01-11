@@ -127,7 +127,7 @@ TEST_F(WindowTest, Destroy) {
             "sample1.realize();"
             "sample1.destroy();");
   view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
-  EXPECT_EQ("destroying", RunScript("sample1.state"));
+  EXPECT_EQ("realized", RunScript("sample1.state"));
   EXPECT_EQ("destroying", RunScript("child1.state"));
   EXPECT_EQ("destroying", RunScript("child2.state"));
   EXPECT_EQ("destroying", RunScript("child3.state"));

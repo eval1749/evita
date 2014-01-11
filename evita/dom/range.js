@@ -41,8 +41,10 @@
    * Move end position of Range at end of specified unit.
    * @this {Range}
    * @param {Unit} unit.
+   * @param {Alter} alter, optional default is Alter.MOVE.
    */
-  Range.prototype.endOf = function(unit) {
+  Range.prototype.endOf = function(unit, alter) {
+    alter = arguments.length == 1 ? Alter.MOVE : alter;
     var document = this.document;
     switch (unit) {
       case Unit.CHARACTER:
@@ -92,14 +94,25 @@
       default:
         throw TypeError('Invalid unit: ' + unit);
     }
+    switch (alter) {
+      case Alter.EXTEND:
+        break;
+      case Alter.MOVE:
+        this.start = this.end;
+        break;
+      default:
+        throw TypeError('Invalid alter: ' + alter);
+    }
   };
 
   /**
    * Move start position of Range at start of specified unit.
    * @this {Range}
    * @param {Unit} unit.
+   * @param {Alter} alter, optional default is Alter.MOVE.
    */
-  Range.prototype.startOf = function(unit) {
+  Range.prototype.startOf = function(unit, alter) {
+    alter = arguments.length == 1 ? Alter.MOVE : alter;
     var document = this.document;
     switch (unit) {
       case Unit.CHARACTER:
@@ -149,6 +162,15 @@
       }
       default:
         throw TypeError('Invalid unit: ' + unit);
+    }
+    switch (alter) {
+      case Alter.EXTEND:
+        break;
+      case Alter.MOVE:
+        this.end = this.start;
+        break;
+      default:
+        throw TypeError('Invalid alter: ' + alter);
     }
   };
 

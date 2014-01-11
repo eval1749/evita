@@ -49,6 +49,7 @@ TEST_F(RangeTest, endOf) {
                          //012345678901
             "range.text = 'foo bar  baz';"
             "function test(x) {"
+            "  range.start = x;"
             "  range.end = x;"
             "  range.endOf(Unit.WORD);"
             "  return range.end;"
@@ -78,8 +79,10 @@ TEST_F(RangeTest, set_start_end) {
 TEST_F(RangeTest, startOf) {
   RunScript("var doc = new Document('startOf');"
             "var range = new Range(doc);"
+                         //01234567890
             "range.text = 'foo bar baz';"
             "function test(x) {"
+            "  range.end = x;"
             "  range.start = x;"
             "  range.startOf(Unit.WORD);"
             "  return range.start;"

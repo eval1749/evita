@@ -38,12 +38,15 @@
   }
 
   /**
+   * Move start position of Range at start of specified unit.
    * @this {Range}
    * @param {Unit} unit.
    */
   Range.prototype.startOf = function(unit) {
     var document = this.document;
     switch (unit) {
+      case Unit.CHARACTER:
+        doesNotSupportUnit('startOf', 'CHARACTER');
       case Unit.DOCUMENT:
         this.start = 0;
         break;
@@ -55,7 +58,7 @@
         var position = this.start;
         while (position > 0) {
           --position;
-          if (document.charCodAt_(position) == '\n') {
+          if (document.charCodeAt_(position) == '\n') {
             ++position;
             break;
           }

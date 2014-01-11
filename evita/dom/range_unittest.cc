@@ -42,6 +42,20 @@ TEST_F(RangeTest, Constructor) {
   EXPECT_SCRIPT_TRUE("range3.document === doc1");
 }
 
+TEST_F(RangeTest, capitalize) {
+  EXPECT_VALID_SCRIPT(
+    "var doc = new Document('endOf');"
+    "var range = new Range(doc);"
+    "function test(sample) {"
+    "  range.text = sample;"
+    "  range.capitalize();"
+    "  return range.text;"
+    "}");
+  EXPECT_SCRIPT_EQ("Foo bar", "test('FOO BAR')");
+  EXPECT_SCRIPT_EQ("Foo bar", "test('foo bar')");
+  EXPECT_SCRIPT_EQ(" Foo bar", "test(' foo Bar')");
+}
+
 TEST_F(RangeTest, collapseTo) {
   EXPECT_VALID_SCRIPT(
     "var doc = new Document('endOf');"

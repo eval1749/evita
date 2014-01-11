@@ -38,6 +38,24 @@
   }
 
   /**
+   * Capitalize range.
+   * @this {Range}
+   */
+  Range.prototype.capitalize = function() {
+    var text = this.text;
+    for (var i = 0; i < text.length; ++i) {
+      var data = Unicode.UCD[text.charCodeAt(i)];
+      if (data.category == Unicode.Category.Lu ||
+          data.category == Unicode.Category.Ll ||
+          data.category == Unicode.Category.Lt) {
+        this.text = text.substr(0, i) + text.charAt(i).toLocaleUpperCase() +
+                    text.substr(i + 1).toLocaleLowerCase();
+        return;
+      }
+    }
+  };
+
+  /**
    * Move end position of Range at end of specified unit.
    * @this {Range}
    * @param {Unit} unit.

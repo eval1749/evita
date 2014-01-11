@@ -131,7 +131,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetMethod("charCodeAt", &Document::charCodeAt)
+        .SetMethod("charCodeAt_", &Document::charCodeAt)
         .SetProperty("filename", &Document::filename)
         .SetProperty("length", &Document::length)
         .SetMethod("load_", &Document::Load)

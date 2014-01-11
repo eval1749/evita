@@ -6,8 +6,8 @@
 
 /** @enum {string} */
 var Alter = {
-  EXTEND: 'extend',
-  MOVE: 'move'
+  EXTEND: 'EXTEND',
+  MOVE: 'MOVE'
 };
 
 /** @enum{number} */
@@ -25,10 +25,10 @@ var DialogItemId = {
 
 /** @enum{string} */
 var Direction = {
-  BACKWARD: 'backward',
-  FORWARD: 'forward',
-  LEFT: 'left',
-  RIGHT: 'right'
+  BACKWARD: 'BACKWARD',
+  FORWARD: 'FORWARD',
+  LEFT: 'LEFT',
+  RIGHT: 'RIGHT'
 };
 
 /** @enum{number} */
@@ -66,10 +66,10 @@ var MessageBox = {
 
 /** @enum{string} */
 var NewlineMode = {
-  CR: 'cr',
-  CRLF: 'crlf',
-  LF: 'lf',
-  UNKNOWN: 'unknown'
+  CR: 'CR',
+  CRLF: 'CRLF',
+  LF: 'LF',
+  UNKNOWN: 'UNKNOWN'
 };
 
 /**
@@ -77,15 +77,15 @@ var NewlineMode = {
  * @enum{string}
  */
 var Unit = {
-  CHAR: 'char',
-  DOCUMENT: 'document',
-  LINE: 'line',
-  PAGE: 'page',
-  PARAGRAPH: 'paragraph',
-  SCREEN: 'screen',
-  SENTENCE: 'sentence',
-  WINDOW: 'window',
-  WORD: 'word'
+  CHARACTER: 'CHARACTER',
+  DOCUMENT: 'DOCUMENT',
+  LINE: 'LINE',
+  PAGE: 'PAGE',
+  PARAGRAPH: 'PARAGRAPH',
+  SCREEN: 'SCREEN',
+  SENTENCE: 'SENTENCE',
+  WINDOW: 'WINDOW',
+  WORD: 'WORD'
 };
 
 /**

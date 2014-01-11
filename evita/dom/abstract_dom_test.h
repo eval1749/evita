@@ -33,6 +33,7 @@ class AbstractDomTest : public ::testing::Test {
   protected: virtual void PopulateGlobalTemplate(
       v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_tempalte);
   protected: std::string RunScript(const std::string& text);
+  protected: bool RunScript2(const std::string& text);
   protected: virtual void SetUp() override;
   protected: virtual void TearDown() override;
 
@@ -40,6 +41,7 @@ class AbstractDomTest : public ::testing::Test {
 };
 }  // namespace dom
 
+#define EXPECT_VALID_SCRIPT(script) EXPECT_TRUE(RunScript2(script))
 #define EXPECT_SCRIPT_EQ(expect, script) EXPECT_EQ(expect, RunScript(script))
 #define EXPECT_SCRIPT_FALSE(script) EXPECT_SCRIPT_EQ("false", (script))
 #define EXPECT_SCRIPT_TRUE(script) EXPECT_SCRIPT_EQ("true", (script))

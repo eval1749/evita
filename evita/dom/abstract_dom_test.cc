@@ -3,6 +3,7 @@
 
 #include "evita/dom/abstract_dom_test.h"
 
+#include "base/logging.h"
 #include "base/strings/utf_string_conversions.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/mock_view_impl.h"
@@ -24,11 +25,23 @@ ViewEventHandler* AbstractDomTest::view_event_handler() const {
   return script_controller_;
 }
 
+void AbstractDomTest::PopulateGlobalTemplate(v8::Isolate*,
+                                             v8::Handle<v8::ObjectTemplate>) {
+}
+
 std::string AbstractDomTest::RunScript(const std::string& text) {
   auto eval_result = script_controller_->Evaluate(base::ASCIIToUTF16(text));
   if (eval_result.exception.length())
     return base::UTF16ToUTF8(eval_result.exception);
   return base::UTF16ToUTF8(eval_result.value);
+}
+
+bool AbstractDomTest::RunScript2(const std::string& text) {
+  auto eval_result = script_controller_->Evaluate(base::ASCIIToUTF16(text));
+  if (!eval_result.exception.length())
+    return true;
+  LOG(0) << "RunScript: " << eval_result.exception;
+  return false;
 }
 
 void AbstractDomTest::SetUp() {
@@ -58,10 +71,6 @@ void AbstractDomTest::SetUp() {
   context_.Reset(isolate, context);
   context->Enter();
   script_controller_->LoadJsLibrary();
-}
-
-void AbstractDomTest::PopulateGlobalTemplate(v8::Isolate*,
-                                             v8::Handle<v8::ObjectTemplate>) {
 }
 
 void AbstractDomTest::TearDown() {

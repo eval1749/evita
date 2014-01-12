@@ -5,6 +5,7 @@
 
 #include "evita/dom/converter.h"
 #include "evita/dom/window.h"
+#include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
 namespace {
@@ -12,15 +13,13 @@ namespace {
 //
 // UiEventWrapperInfo
 //
-class UiEventWrapperInfo : public v8_glue::WrapperInfo {
-  public: UiEventWrapperInfo(const char* name)
-      : v8_glue::WrapperInfo(name) {
+class UiEventWrapperInfo :
+    public v8_glue::DerivedWrapperInfo<UiEvent, Event> {
+
+  public: explicit UiEventWrapperInfo(const char* name)
+      : BaseClass(name) {
   }
   public: ~UiEventWrapperInfo() = default;
-
-  private: virtual v8_glue::WrapperInfo* inherit_from() const override {
-    return Event::static_wrapper_info();
-  }
 
   protected: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {

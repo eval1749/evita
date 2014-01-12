@@ -14,6 +14,7 @@
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/gc/weak_ptr.h"
+#include "evita/v8_glue/wrapper_info.h"
 
 namespace gin {
 
@@ -41,15 +42,13 @@ struct Converter<dom::Window::State> {
 namespace dom {
 
 namespace {
-class WindowWrapperInfo : public v8_glue::WrapperInfo {
-  public: WindowWrapperInfo(const char* name)
-      : v8_glue::WrapperInfo(name) {
+class WindowWrapperInfo :
+    public v8_glue::DerivedWrapperInfo<Window, EventTarget> {
+
+  public: explicit WindowWrapperInfo(const char* name)
+      : BaseClass(name) {
   }
   public: ~WindowWrapperInfo() = default;
-
-  private: virtual v8_glue::WrapperInfo* inherit_from() const override {
-    return EventTarget::static_wrapper_info();
-  }
 
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {

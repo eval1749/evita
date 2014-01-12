@@ -20,29 +20,8 @@ using ::testing::Eq;
 // SampleWindow for JavaScript testing.
 //
 class SampleWindow : public v8_glue::Scriptable<SampleWindow, dom::Window> {
-  class WrapperInfo : public v8_glue::WrapperInfo {
-    public: WrapperInfo() : v8_glue::WrapperInfo("SampleWindow") {
-    }
-    public: ~WrapperInfo() = default;
-  
-    private: virtual v8_glue::WrapperInfo* inherit_from() const override {
-      return dom::Window::static_wrapper_info();
-    }
-  
-    private: virtual v8::Handle<v8::FunctionTemplate>
-        CreateConstructorTemplate(v8::Isolate* isolate) override {
-      return v8_glue::CreateConstructorTemplate(isolate,
-          &SampleWindow::NewSampleWindow);
-    }
-
-    private: virtual void SetupInstanceTemplate(
-        ObjectTemplateBuilder& builder) override {
-      v8_glue::WrapperInfo::SetupInstanceTemplate(builder);
-      builder
-        .SetProperty("name", &SampleWindow::name, &SampleWindow::set_name);
-    }
-  };
-  friend class WrapperInfo;
+  DECLARE_SCRIPTABLE_OBJECT(SampleWindow);
+  friend class SampleWindowClass;
 
   private: base::string16 name_;
 
@@ -52,17 +31,36 @@ class SampleWindow : public v8_glue::Scriptable<SampleWindow, dom::Window> {
   public: const base::string16& name() const { return name_; }
   public: void set_name(const base::string16& name) { name_ = name; }
 
-  public: static v8_glue::WrapperInfo* static_wrapper_info() {
-    DEFINE_STATIC_LOCAL(WrapperInfo, wrapper_info, ());
-    return &wrapper_info;
-  }
-
   private: static SampleWindow* NewSampleWindow() {
     return new SampleWindow();
   }
 
   DISALLOW_COPY_AND_ASSIGN(SampleWindow);
 };
+
+class SampleWindowClass :
+    public v8_glue::DerivedWrapperInfo<SampleWindow, dom::Window> {
+
+  public: explicit SampleWindowClass(const char* name)
+      : BaseClass(name) {
+  }
+  public: ~SampleWindowClass() = default;
+
+  private: virtual v8::Handle<v8::FunctionTemplate>
+      CreateConstructorTemplate(v8::Isolate* isolate) override {
+    return v8_glue::CreateConstructorTemplate(isolate,
+        &SampleWindow::NewSampleWindow);
+  }
+
+  private: virtual void SetupInstanceTemplate(
+      ObjectTemplateBuilder& builder) override {
+    BaseClass::SetupInstanceTemplate(builder);
+    builder
+      .SetProperty("name", &SampleWindow::name, &SampleWindow::set_name);
+  }
+};
+
+DEFINE_SCRIPTABLE_OBJECT(SampleWindow, SampleWindowClass);
 
 //////////////////////////////////////////////////////////////////////
 //

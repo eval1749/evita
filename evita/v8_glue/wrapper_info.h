@@ -4,6 +4,8 @@
 #if !defined(INCLUDE_evita_v8_glue_wrapper_info_h)
 #define INCLUDE_evita_v8_glue_wrapper_info_h
 
+#include <type_traits>
+
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/gin_embedders.h"
 #include "evita/v8_glue/object_template_builder.h"
@@ -59,6 +61,24 @@ class Installer {
   public: static void Run(v8::Isolate* isolate,
                           v8::Handle<v8::ObjectTemplate> global) {
     T::static_wrapper_info()->Install(isolate, global);
+  }
+};
+
+template<typename Derived, typename Base>
+class DerivedWrapperInfo : public WrapperInfo {
+  static_assert(std::is_base_of<Base, Derived>::value,
+                "Invalid inheritance");
+
+  protected: typedef DerivedWrapperInfo<Derived, Base> BaseClass;
+
+  protected: DerivedWrapperInfo(const char* class_name)
+      : WrapperInfo(class_name) {
+  }
+
+  protected: virtual ~DerivedWrapperInfo() = default;
+
+  private: virtual v8_glue::WrapperInfo* inherit_from() const override {
+    return Base::static_wrapper_info();
   }
 };
 

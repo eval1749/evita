@@ -10,6 +10,7 @@
 #include "evita/dom/selection.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/converter.h"
+#include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
 
@@ -18,9 +19,11 @@ namespace {
 //
 // TextWindowWrapperInfo
 //
-class TextWindowWrapperInfo : public v8_glue::WrapperInfo {
+class TextWindowWrapperInfo :
+    public v8_glue::DerivedWrapperInfo<TextWindow, Window> {
+
   public: TextWindowWrapperInfo(const char* name)
-      : v8_glue::WrapperInfo(name) {
+      : BaseClass(name) {
   }
   public: ~TextWindowWrapperInfo() = default;
 

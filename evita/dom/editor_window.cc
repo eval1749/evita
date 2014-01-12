@@ -13,7 +13,7 @@
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
-
+#include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
 
@@ -59,15 +59,13 @@ class EditorWindowList : public common::Singleton<EditorWindowList> {
 //
 // EditorWindowWrapperInfo
 //
-class EditorWindowWrapperInfo : public v8_glue::WrapperInfo {
-  public: EditorWindowWrapperInfo(const char* name)
-      : v8_glue::WrapperInfo(name) {
+class EditorWindowWrapperInfo :
+    public v8_glue::DerivedWrapperInfo<EditorWindow, Window> {
+
+  public: explicit EditorWindowWrapperInfo(const char* name)
+      : BaseClass(name) {
   }
   public: ~EditorWindowWrapperInfo() = default;
-
-  private: virtual WrapperInfo* inherit_from() const override {
-    return Window::static_wrapper_info();
-  }
 
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
@@ -84,7 +82,7 @@ class EditorWindowWrapperInfo : public v8_glue::WrapperInfo {
 
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
-    v8_glue::WrapperInfo::SetupInstanceTemplate(builder);
+    BaseClass::SetupInstanceTemplate(builder);
     // TODO(yosi) Add EditorWindow properties.
   }
 };

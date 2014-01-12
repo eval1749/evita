@@ -7,34 +7,50 @@
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
 #include "evita/dom/time_stamp.h"
+#include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace dom {
 
 class EventTarget;
 class TimeStamp;
+using v8_glue::Nullable;
 
 class Event : public v8_glue::Scriptable<Event> {
-    DECLARE_SCRIPTABLE_OBJECT(Event);
+  DECLARE_SCRIPTABLE_OBJECT(Event);
+
+  public: enum PhaseType {
+    kNone,
+    kCapturingPhase,
+    kAtTarget,
+    kBubblingPhase,
+  };
 
   private: bool bubbles_;
   private: bool cancelable_;
   private: gc::Member<EventTarget> current_target_;
   private: bool default_prevented_;
+  private: PhaseType event_phase_;
   private: gc::Member<EventTarget> target_;
   private: TimeStamp time_stamp_;
   private: base::string16 type_;
 
-  public: Event(const base::string16& type, bool bubbles, bool cancelable);
+  public: Event();
   public: virtual ~Event();
 
   public: bool bubbles() const { return bubbles_; }
   public: bool cancelable() const { return cancelable_; }
-  public: EventTarget* current_target() const { return current_target_.get(); }
+  public: Nullable<EventTarget> current_target() const {
+    return current_target_.get();
+  }
   public: bool default_prevented() const { return default_prevented_; }
-  public: EventTarget* target() const { return target_.get(); }
+  public: PhaseType event_phase() const { return event_phase_; }
+  public: Nullable<EventTarget> target() const { return target_.get(); }
   public: TimeStamp time_stamp() const { return time_stamp_; }
   public: const base::string16& type() const { return type_; }
+
+  public: void InitEvent(const base::string16& type, bool bubbles,
+                         bool cancelable);
 
   DISALLOW_COPY_AND_ASSIGN(Event);
 };

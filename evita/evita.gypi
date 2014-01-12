@@ -109,6 +109,7 @@
           'dom/document.js',
           'dom/editor.js',
           'dom/editor_window.js',
+          'dom/events/event.js',
           'dom/file_path.js',
           'dom/range.js',
           'dom/selection.js',

@@ -7,6 +7,16 @@
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/script_controller.h"
 
+namespace gin {
+template<>
+struct Converter<dom::Event::PhaseType> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+                                    dom::Event::PhaseType event_phase) {
+    return ConvertToV8(isolate, static_cast<int>(event_phase));
+  }
+};
+}  // namespace gin
+
 namespace dom {
 namespace {
 //////////////////////////////////////////////////////////////////////
@@ -19,15 +29,28 @@ class EventWrapperInfo : public v8_glue::WrapperInfo {
   }
   public: ~EventWrapperInfo() = default;
 
+  protected: virtual v8::Handle<v8::FunctionTemplate>
+      CreateConstructorTemplate(v8::Isolate* isolate) override {
+    return v8_glue::CreateConstructorTemplate(isolate, 
+        &EventWrapperInfo::NewEvent);
+  }
+
+  private: static Event* NewEvent() {
+    return new Event();
+  }
+
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
         .SetProperty("bubbles", &Event::bubbles)
         .SetProperty("cancelable", &Event::cancelable)
-        .SetProperty("currentTarget", &Event::current_target)
-        .SetProperty("default_prevented", &Event::default_prevented)
+        .SetProperty("current_target", &Event::current_target)
+        .SetProperty("defaultPrevented", &Event::default_prevented)
+        .SetProperty("eventPhase", &Event::event_phase)
         .SetProperty("timeStamp", &Event::time_stamp)
-        .SetProperty("target", &Event::target);
+        .SetProperty("target", &Event::target)
+        .SetProperty("type", &Event::type)
+        .SetMethod("initEvent", &Event::InitEvent);
   }
 };
 }  // namespace
@@ -38,11 +61,19 @@ class EventWrapperInfo : public v8_glue::WrapperInfo {
 //
 DEFINE_SCRIPTABLE_OBJECT(Event, EventWrapperInfo);
 
-Event::Event(const base::string16& type, bool bubbles, bool cancelable)
-    : bubbles_(bubbles), cancelable_(cancelable), type_(type) {
+Event::Event()
+    : bubbles_(false), cancelable_(false), default_prevented_(false),
+      event_phase_(kNone) {
 }
 
 Event::~Event() {
+}
+
+void Event::InitEvent(const base::string16& type, bool bubbles,
+                      bool cancelable) {
+  bubbles_ = bubbles;
+  cancelable_ = cancelable;
+  type_ = type;
 }
 
 }  // namespace dom

@@ -13,13 +13,13 @@
 namespace dom {
 
 class Console : public common::Singleton<Console>,
-               public v8_glue::Scriptable<Console> {
+                public v8_glue::Scriptable<Console> {
+  DECLARE_SCRIPTABLE_OBJECT(Console);
+
   friend class common::Singleton<Console>;
 
-  private: Console() = default;
-  public: virtual ~Console() = default;
-
-  public: static v8_glue::WrapperInfo* static_wrapper_info();
+  private: Console();
+  public: virtual ~Console();
 
   DISALLOW_COPY_AND_ASSIGN(Console);
 };

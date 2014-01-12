@@ -26,7 +26,8 @@ namespace {
 // RangeWrapperInfo
 //
 class RangeWrapperInfo : public v8_glue::WrapperInfo {
-  public: RangeWrapperInfo() : v8_glue::WrapperInfo("Range") {
+  public: RangeWrapperInfo(const char* name)
+      : v8_glue::WrapperInfo(name) {
   }
   public: ~RangeWrapperInfo() = default;
 
@@ -60,6 +61,8 @@ class RangeWrapperInfo : public v8_glue::WrapperInfo {
 //
 // Range
 //
+DEFINE_SCRIPTABLE_OBJECT(Range, RangeWrapperInfo);
+
 Range::Range(Document* document, text::Posn start, text::Posn end)
     : Range(document, document->buffer()->CreateRange(start, end)) {
 }
@@ -101,11 +104,6 @@ void Range::set_start(int position) {
 
 void Range::set_text(const base::string16& text) {
   range_->SetText(text);
-}
-
-v8_glue::WrapperInfo* Range::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(RangeWrapperInfo, wrapper_info, ());
-  return &wrapper_info;
 }
 
 Range* Range::collapseTo(Posn position) {

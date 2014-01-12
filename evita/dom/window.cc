@@ -42,7 +42,8 @@ namespace dom {
 
 namespace {
 class WindowWrapperInfo : public v8_glue::WrapperInfo {
-  public: WindowWrapperInfo() : v8_glue::WrapperInfo("Window") {
+  public: WindowWrapperInfo(const char* name)
+      : v8_glue::WrapperInfo(name) {
   }
   public: ~WindowWrapperInfo() = default;
 
@@ -151,6 +152,8 @@ class Window::WindowIdMapper : public common::Singleton<WindowIdMapper> {
 //
 // Window
 //
+DEFINE_SCRIPTABLE_OBJECT(Window, WindowWrapperInfo)
+
 Window::Window()
     : focus_tick_(0),
       parent_window_(nullptr),
@@ -175,11 +178,6 @@ std::vector<Window*> Window::child_windows() const {
     ++dest;
   }
   return child_windows;
-}
-
-v8_glue::WrapperInfo* Window::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(WindowWrapperInfo, wrapper_info, ());
-  return &wrapper_info;
 }
 
 void Window::AddWindow(Window* window) {

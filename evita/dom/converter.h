@@ -7,6 +7,7 @@
 
 namespace gin {
 
+// text::Posn
 template<>
 struct Converter<text::Posn> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,

@@ -19,7 +19,8 @@ namespace {
 // TextWindowWrapperInfo
 //
 class TextWindowWrapperInfo : public v8_glue::WrapperInfo {
-  public: TextWindowWrapperInfo() : v8_glue::WrapperInfo("TextWindow") {
+  public: TextWindowWrapperInfo(const char* name)
+      : v8_glue::WrapperInfo(name) {
   }
   public: ~TextWindowWrapperInfo() = default;
 
@@ -51,6 +52,8 @@ class TextWindowWrapperInfo : public v8_glue::WrapperInfo {
 //
 // TextWindow
 //
+DEFINE_SCRIPTABLE_OBJECT(TextWindow, TextWindowWrapperInfo);
+
 TextWindow::TextWindow(Range* selection_range)
     : selection_(new Selection(this, selection_range)),
       view_range_(new Range(selection_range->document(), 0, 0)) {
@@ -62,11 +65,6 @@ TextWindow::~TextWindow() {
 
 Document* TextWindow::document() const {
   return selection_->document();
-}
-
-v8_glue::WrapperInfo* TextWindow::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(TextWindowWrapperInfo, wrapper_info, ());
-  return &wrapper_info;
 }
 
 void TextWindow::MakeSelectionVisible() {

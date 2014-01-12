@@ -19,6 +19,8 @@ class Range;
 // Document
 //
 class Document : public v8_glue::Scriptable<Document> {
+  DECLARE_SCRIPTABLE_OBJECT(name);
+
   private: std::unique_ptr<Buffer> buffer_;
   private: std::unordered_set<Range*> ranges_;
 
@@ -32,7 +34,6 @@ class Document : public v8_glue::Scriptable<Document> {
   public: text::Posn length() const;
   public: bool modified() const;
   public: const base::string16& name() const;
-  public: static v8_glue::WrapperInfo* static_wrapper_info();
 
   public: void DidCreateRange(Range* range);
   public: void DidDestroyRange(Range* range);

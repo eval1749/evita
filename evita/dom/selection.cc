@@ -21,7 +21,8 @@ namespace {
 // SelectionWrapperInfo
 //
 class SelectionWrapperInfo : public v8_glue::WrapperInfo {
-  public: SelectionWrapperInfo() : v8_glue::WrapperInfo("Selection") {
+  public: SelectionWrapperInfo(const char* name)
+      : v8_glue::WrapperInfo(name) {
   }
   public: ~SelectionWrapperInfo() = default;
 
@@ -53,6 +54,8 @@ class SelectionWrapperInfo : public v8_glue::WrapperInfo {
 //
 // Selection
 //
+DEFINE_SCRIPTABLE_OBJECT(Selection, SelectionWrapperInfo);
+
 Selection::Selection(TextWindow* text_window, Range* range)
     : document_(range->document()), text_window_(text_window),
       view_selection_(::Selection::Create(*range->text_range())),
@@ -72,11 +75,6 @@ bool Selection::start_is_active() const {
 
 void Selection::set_start_is_active(bool start_is_active) {
   view_selection_->SetStartIsActive(start_is_active);
-}
-
-v8_glue::WrapperInfo* Selection::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(SelectionWrapperInfo, wrapper_info, ());
-  return &wrapper_info;
 }
 
 }  // namespace dom

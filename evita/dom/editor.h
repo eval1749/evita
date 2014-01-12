@@ -9,10 +9,10 @@
 namespace dom {
 
 class Editor : public v8_glue::Scriptable<Editor> {
+  DECLARE_SCRIPTABLE_OBJECT(Editor)
+
   private: Editor();
   public: virtual ~Editor();
-
-  public: static v8_glue::WrapperInfo* static_wrapper_info();
 
   DISALLOW_COPY_AND_ASSIGN(Editor);
 };

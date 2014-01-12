@@ -15,6 +15,8 @@ class EventTarget;
 class TimeStamp;
 
 class Event : public v8_glue::Scriptable<Event> {
+    DECLARE_SCRIPTABLE_OBJECT(Event);
+
   private: bool bubbles_;
   private: bool cancelable_;
   private: gc::Member<EventTarget> current_target_;
@@ -33,7 +35,6 @@ class Event : public v8_glue::Scriptable<Event> {
   public: EventTarget* target() const { return target_.get(); }
   public: TimeStamp time_stamp() const { return time_stamp_; }
   public: const base::string16& type() const { return type_; }
-  public: static v8_glue::WrapperInfo* static_wrapper_info();
 
   DISALLOW_COPY_AND_ASSIGN(Event);
 };

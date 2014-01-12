@@ -110,7 +110,8 @@ class DocumentList : public common::Singleton<DocumentList> {
 // DocumentWrapperInfo
 //
 class DocumentWrapperInfo : public v8_glue::WrapperInfo {
-  public: DocumentWrapperInfo() : v8_glue::WrapperInfo("Document") {
+  public: DocumentWrapperInfo(const char* name)
+      : v8_glue::WrapperInfo(name) {
   }
   public: ~DocumentWrapperInfo() = default;
 
@@ -151,6 +152,8 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
 //
 // Document
 //
+DEFINE_SCRIPTABLE_OBJECT(Document, DocumentWrapperInfo)
+
 Document::Document(const base::string16 name)
     : buffer_(new Buffer(DocumentList::instance()->MakeUniqueName(name))) {
   DocumentList::instance()->Register(this);
@@ -184,11 +187,6 @@ bool Document::modified() const {
 
 const base::string16& Document::name() const {
   return buffer_->name();
-}
-
-v8_glue::WrapperInfo* Document::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(DocumentWrapperInfo, wrapper_info, ());
-  return &wrapper_info;
 }
 
 void Document::DidCreateRange(Range* range) {

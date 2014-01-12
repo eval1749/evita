@@ -18,7 +18,8 @@ namespace {
 // FilePathWrapperInfo
 //
 class FilePathWrapperInfo : public v8_glue::WrapperInfo {
-  public: FilePathWrapperInfo() : v8_glue::WrapperInfo("FilePath") {
+  public: FilePathWrapperInfo(const char* name)
+      : v8_glue::WrapperInfo(name) {
   }
   public: ~FilePathWrapperInfo() = default;
 
@@ -37,6 +38,8 @@ class FilePathWrapperInfo : public v8_glue::WrapperInfo {
 //
 // FilePath
 //
+DEFINE_SCRIPTABLE_OBJECT(FilePath, FilePathWrapperInfo);
+
 FilePath::FilePath() {
 }
 
@@ -53,11 +56,6 @@ base::string16 FilePath::FullPath(const base::string16& filename) {
       &file_start);
   full_name.resize(length);
   return full_name;
-}
-
-v8_glue::WrapperInfo* FilePath::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(FilePathWrapperInfo, wrapper_info, ());
-  return &wrapper_info;
 }
 
 }  // namespace dom

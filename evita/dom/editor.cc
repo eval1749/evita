@@ -26,7 +26,8 @@ const base::char16 kVersion[] = L"5.0";
 // EditorClass
 //
 class EditorClass : public v8_glue::WrapperInfo {
-  public: EditorClass() : v8_glue::WrapperInfo("Editor") {
+  public: EditorClass(const char* name)
+      : v8_glue::WrapperInfo(name) {
   }
   public: ~EditorClass() = default;
 
@@ -104,15 +105,16 @@ class EditorClass : public v8_glue::WrapperInfo {
 
 }  // namespace
 
+//////////////////////////////////////////////////////////////////////
+//
+// Editor
+//
+DEFINE_SCRIPTABLE_OBJECT(Editor, EditorClass);
+
 Editor::Editor() {
 }
 
 Editor::~Editor() {
-}
-
-v8_glue::WrapperInfo* Editor::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(EditorClass, wrapper_info, ());
-  return &wrapper_info;
 }
 
 }  // namespace dom

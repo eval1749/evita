@@ -10,10 +10,10 @@ namespace dom {
 // |dom::EditoWindow| corresponds to |editor::EditorWidget|, also known as
 // |Frame|.
 class EditorWindow : public v8_glue::Scriptable<EditorWindow, Window> {
+  DECLARE_SCRIPTABLE_OBJECT(EditorWindow);
+
   public: EditorWindow();
   public: virtual ~EditorWindow();
-
-  public: static v8_glue::WrapperInfo* static_wrapper_info();
 
   public: static void ResetForTesting();
 

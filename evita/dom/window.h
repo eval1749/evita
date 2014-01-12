@@ -15,6 +15,8 @@ namespace dom {
 
 // |Window| is correspond to |Widget| in DOM world.
 class Window : public v8_glue::Scriptable<Window, EventTarget> {
+  DECLARE_SCRIPTABLE_OBJECT(Window)
+
   private: class WindowIdMapper;
   friend class WindowIdMapper;
 
@@ -45,7 +47,6 @@ class Window : public v8_glue::Scriptable<Window, EventTarget> {
     return parent_window_;
   }
   public: State state() const { return state_; }
-  public: static v8_glue::WrapperInfo* static_wrapper_info();
   public: WindowId window_id() const { return window_id_; }
 
   public: void AddWindow(Window* window);

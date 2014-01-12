@@ -24,7 +24,8 @@ void Log(const std::vector<base::string16>& messages) {
 // ConsoleWrapperInfo
 //
 class ConsoleWrapperInfo : public v8_glue::WrapperInfo {
-  public: ConsoleWrapperInfo() : v8_glue::WrapperInfo("Console") {
+  public: ConsoleWrapperInfo(const char* name)
+      : v8_glue::WrapperInfo(name) {
   }
   public: ~ConsoleWrapperInfo() = default;
 
@@ -48,9 +49,12 @@ class ConsoleWrapperInfo : public v8_glue::WrapperInfo {
 //
 // Console
 //
-v8_glue::WrapperInfo* Console::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(ConsoleWrapperInfo, wrapper_info, ());
-  return &wrapper_info;
+DEFINE_SCRIPTABLE_OBJECT(Console, ConsoleWrapperInfo);
+
+Console::Console() {
+}
+
+Console::~Console() {
 }
 
 }  // namespace dom

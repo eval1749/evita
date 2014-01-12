@@ -15,10 +15,10 @@ namespace dom {
 class Event;
 
 class EventTarget : public v8_glue::Scriptable<EventTarget> {
+  DECLARE_SCRIPTABLE_OBJECT(EventTarget)
+
   protected: EventTarget();
   protected: virtual ~EventTarget();
-
-  public: static v8_glue::WrapperInfo* static_wrapper_info();
 
   public: void AddEventListener(const base::string16& type,
                                 v8::Handle<v8::Function> listener,

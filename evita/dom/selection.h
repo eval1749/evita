@@ -19,6 +19,8 @@ class TextWindow;
 // Selection
 //
 class Selection : public v8_glue::Scriptable<Selection> {
+  DECLARE_SCRIPTABLE_OBJECT(Selection);
+
   private: gc::Member<Document> document_;
   private: gc::Member<TextWindow> text_window_;
   // TODO(yosi): We should remove ::Selection.
@@ -33,7 +35,6 @@ class Selection : public v8_glue::Scriptable<Selection> {
   public: Range* range() const { return range_.get(); }
   public: bool start_is_active() const;
   public: void set_start_is_active(bool start_is_active);
-  public: static v8_glue::WrapperInfo* static_wrapper_info();
   public: ::Selection* view_selection() const { return view_selection_; }
   public: TextWindow* window() const { return text_window_; }
 

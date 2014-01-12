@@ -60,7 +60,8 @@ class EditorWindowList : public common::Singleton<EditorWindowList> {
 // EditorWindowWrapperInfo
 //
 class EditorWindowWrapperInfo : public v8_glue::WrapperInfo {
-  public: EditorWindowWrapperInfo() : v8_glue::WrapperInfo("EditorWindow") {
+  public: EditorWindowWrapperInfo(const char* name)
+      : v8_glue::WrapperInfo(name) {
   }
   public: ~EditorWindowWrapperInfo() = default;
 
@@ -93,6 +94,8 @@ class EditorWindowWrapperInfo : public v8_glue::WrapperInfo {
 //
 // EditorWindow
 //
+DEFINE_SCRIPTABLE_OBJECT(EditorWindow, EditorWindowWrapperInfo);
+
 EditorWindow::EditorWindow() {
   EditorWindowList::instance()->Register(this);
   ScriptController::instance()->view_delegate()->CreateEditorWindow(this);
@@ -100,11 +103,6 @@ EditorWindow::EditorWindow() {
 
 EditorWindow::~EditorWindow() {
   EditorWindowList::instance()->Unregister(this);
-}
-
-v8_glue::WrapperInfo* EditorWindow::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(EditorWindowWrapperInfo, wrapper_info, ());
-  return &wrapper_info;
 }
 
 void EditorWindow::ResetForTesting() {

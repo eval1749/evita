@@ -8,11 +8,12 @@
 namespace dom {
 
 class FilePath : v8_glue::Scriptable<FilePath> {
+  DECLARE_SCRIPTABLE_OBJECT(FilePath)
+
   public: FilePath();
   public: virtual ~FilePath();
 
   public: static base::string16 FullPath(const base::string16& filename);
-  public: static v8_glue::WrapperInfo* static_wrapper_info();
 
   DISALLOW_COPY_AND_ASSIGN(FilePath);
 };

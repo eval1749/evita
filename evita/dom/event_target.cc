@@ -13,7 +13,8 @@ namespace {
 // EventTargetWrapperInfo
 //
 class EventTargetWrapperInfo : public v8_glue::WrapperInfo {
-  public: EventTargetWrapperInfo() : v8_glue::WrapperInfo("EventTarget") {
+  public: EventTargetWrapperInfo(const char* name)
+      : v8_glue::WrapperInfo(name) {
   }
   public: ~EventTargetWrapperInfo() = default;
 
@@ -24,15 +25,16 @@ class EventTargetWrapperInfo : public v8_glue::WrapperInfo {
 };
 }  // namespace
 
+//////////////////////////////////////////////////////////////////////
+//
+// EventTarget
+//
+DEFINE_SCRIPTABLE_OBJECT(EventTarget, EventTargetWrapperInfo);
+
 EventTarget::EventTarget() {
 }
 
 EventTarget::~EventTarget() {
-}
-
-v8_glue::WrapperInfo* EventTarget::static_wrapper_info() {
-  DEFINE_STATIC_LOCAL(EventTargetWrapperInfo, wrapper_info, ());
-  return &wrapper_info;
 }
 
 }  // namespace dom

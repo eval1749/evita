@@ -7,6 +7,7 @@
 
 namespace gin {
 
+// text::Posn
 v8::Handle<v8::Value> Converter<text::Posn>::ToV8(v8::Isolate* isolate,
                                                   text::Posn position) {
   return Converter<int>::ToV8(isolate, static_cast<int>(position));

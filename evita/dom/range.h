@@ -16,6 +16,8 @@ class Document;
 // Range
 //
 class Range : public v8_glue::Scriptable<Range> {
+  DECLARE_SCRIPTABLE_OBJECT(Range);
+
   private: gc::Member<Document> document_;
   // TODO(yosi): We should manage life time of text::Range.
   private: text::Range* range_;
@@ -31,7 +33,6 @@ class Range : public v8_glue::Scriptable<Range> {
   public: void set_start(int position);
   public: base::string16 text() const;
   public: void set_text(const base::string16& text);
-  public: static v8_glue::WrapperInfo* static_wrapper_info();
   public: text::Range* text_range() const { return range_; }
 
   public: Range* collapseTo(Posn position);

@@ -24,7 +24,7 @@ class Document : public v8_glue::Scriptable<Document> {
   private: std::unique_ptr<Buffer> buffer_;
   private: std::unordered_set<Range*> ranges_;
 
-  public: explicit Document(base::string16 name);
+  public: explicit Document(const base::string16& name);
   public: virtual ~Document();
 
   public: const Buffer* buffer() const { return buffer_.get(); }

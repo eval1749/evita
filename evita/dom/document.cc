@@ -154,7 +154,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
 //
 DEFINE_SCRIPTABLE_OBJECT(Document, DocumentWrapperInfo)
 
-Document::Document(const base::string16 name)
+Document::Document(const base::string16& name)
     : buffer_(new Buffer(DocumentList::instance()->MakeUniqueName(name))) {
   DocumentList::instance()->Register(this);
 }

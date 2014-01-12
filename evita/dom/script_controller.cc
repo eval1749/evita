@@ -136,6 +136,10 @@ ScriptController::~ScriptController() {
   script_controller = nullptr;
 }
 
+v8::Isolate* ScriptController::isolate() const {
+  return const_cast<ScriptController*>(this)->isolate_holder_.isolate();
+}
+
 ViewDelegate* ScriptController::view_delegate() const {
   DCHECK(view_delegate_);
   return view_delegate_;

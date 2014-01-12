@@ -781,7 +781,7 @@ bool Frame::onTabDrag(TabBandDragAndDrop const eAction,
       break;
 
     case kThrow: {
-      auto const pNewFrame = Application::instance()->CreateFrame();
+      auto const pNewFrame = new Frame();
       pNewFrame->AdoptPane(pPane);
       pNewFrame->Realize();
       break;

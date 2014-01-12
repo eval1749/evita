@@ -94,12 +94,8 @@ bool Application::CalledOnValidThread() const {
   return message_loop_.get() == base::MessageLoop::current();
 }
 
-Frame* Application::CreateFrame() {
-  return new Frame();
-}
-
 Frame* Application::CreateFrame(Buffer* buffer) {
-  auto const frame = CreateFrame();
+  auto const frame = new Frame();
   frame->AddWindow(buffer);
   return frame;
 }

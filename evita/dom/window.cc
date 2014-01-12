@@ -10,7 +10,7 @@
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "common/memory/singleton.h"
-#include "evita/dom/event.h"
+#include "evita/dom/events/event.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/gc/weak_ptr.h"

@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_event_h)
-#define INCLUDE_evita_dom_event_h
+#if !defined(INCLUDE_evita_dom_events_event_h)
+#define INCLUDE_evita_dom_events_event_h
 
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
@@ -41,4 +41,4 @@ class Event : public v8_glue::Scriptable<Event> {
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_event_h)
+#endif //!defined(INCLUDE_evita_dom_events_event_h)

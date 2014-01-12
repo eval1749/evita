@@ -6,7 +6,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "evita/dom/event_target.h"
+#include "evita/dom/events/event_target.h"
 #include "evita/dom/window_id.h"
 #include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/scriptable.h"

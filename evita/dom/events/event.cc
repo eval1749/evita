@@ -1,10 +1,10 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/event.h"
+#include "evita/dom/events/event.h"
 
 #include "evita/dom/converter.h"
-#include "evita/dom/event_target.h"
+#include "evita/dom/events/event_target.h"
 #include "evita/dom/script_controller.h"
 
 namespace dom {

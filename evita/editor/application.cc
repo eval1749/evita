@@ -94,15 +94,6 @@ bool Application::CalledOnValidThread() const {
   return message_loop_.get() == base::MessageLoop::current();
 }
 
-bool Application::CanExit() const {
-  for (auto& buffer: buffers_) {
-    // TODO: We should make Buffer::CanKill() const.
-    if (!const_cast<Buffer&>(buffer).CanKill())
-      return false;
-  }
-  return true;
-}
-
 Frame* Application::CreateFrame() {
   return new Frame();
 }

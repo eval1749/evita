@@ -1,0 +1,34 @@
+// Copyright (C) 2014 by Project Vogue.
+// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+#if !defined(INCLUDE_evita_dom_events_event_handler_h)
+#define INCLUDE_evita_dom_events_event_handler_h
+
+#include "evita/dom/view_event_handler.h"
+
+namespace dom {
+
+class ScriptController;
+
+class EventHandler : public ViewEventHandler {
+  private: ScriptController* controller_;
+
+  public: EventHandler(ScriptController* controller);
+  public: ~EventHandler();
+
+  // ViewEventHandler
+  private: virtual void DidDestroyWidget(WindowId window_id) override;
+  private: virtual void DidKillFocus(WindowId window_id) override;
+  private: virtual void DidRealizeWidget(WindowId window_id) override;
+  private: virtual void DidSetFocus(WindowId window_id) override;
+  private: virtual void DidStartHost() override;
+  private: virtual void OpenFile(WindowId window_id,
+                                 const base::string16& filename) override;
+  private: virtual void RunCallback(base::Closure callback) override;
+  private: virtual void WillDestroyHost() override;
+
+  DISALLOW_COPY_AND_ASSIGN(EventHandler);
+};
+
+}  // namespace dom
+
+#endif //!defined(INCLUDE_evita_dom_events_event_handler_h)

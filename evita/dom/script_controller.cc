@@ -9,6 +9,7 @@
 #include "evita/dom/editor.h"
 #include "evita/dom/editor_window.h"
 #include "evita/dom/events/event.h"
+#include "evita/dom/events/event_handler.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/ui_event.h"
@@ -90,9 +91,11 @@ EvaluateResult::EvaluateResult()
 //
 ScriptController::ScriptController(ViewDelegate* view_delegate)
     : context_holder_(isolate_holder_.isolate()),
+      ALLOW_THIS_IN_INITIALIZER_LIST(
+          event_handler_(new EventHandler(this))),
       testing_(false),
       view_delegate_(view_delegate) {
-  view_delegate_->RegisterViewEventHandler(this);
+  view_delegate_->RegisterViewEventHandler(event_handler_.get());
   isolate_holder_.isolate()->Enter();
   {
     auto const isolate = isolate_holder_.isolate();
@@ -221,23 +224,6 @@ void ScriptController::ThrowError(const std::string& message) {
       gin::StringToV8(isolate, message)));
 }
 
-// ViewEventHandler
-void ScriptController::DidDestroyWidget(WindowId window_id) {
-  Window::DidDestroyWidget(window_id);
-}
-
-void ScriptController::DidKillFocus(WindowId window_id) {
-  Window::DidKillFocus(window_id);
-}
-
-void ScriptController::DidRealizeWidget(WindowId window_id) {
-  Window::DidRealizeWidget(window_id);
-}
-
-void ScriptController::DidSetFocus(WindowId window_id) {
-  Window::DidSetFocus(window_id);
-}
-
 void ScriptController::DidStartHost() {
   // We should prevent UI thread to access DOM.
   DOM_AUTO_LOCK_SCOPE();
@@ -287,10 +273,6 @@ void ScriptController::OpenFile(WindowId window_id,
   auto js_filename = gin::StringToV8(isolate, filename);
   DOM_AUTO_LOCK_SCOPE();
   open_file->ToObject()->CallAsFunction(js_handler, 1, &js_filename);
-}
-
-void ScriptController::RunCallback(base::Closure callback) {
-  callback.Run();
 }
 
 void ScriptController::WillDestroyHost() {

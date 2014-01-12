@@ -24,6 +24,7 @@ template<typename T> class Callback;
 
 namespace dom {
 
+class EventHandler;
 class ViewDelegate;
 
 // TODO(yosi) We will remove EvaluateResult once V8Console in JS.
@@ -41,9 +42,10 @@ struct EvaluateResult {
   EvaluateResult();
 };
 
-class ScriptController : public ViewEventHandler {
+class ScriptController {
   private: v8_glue::IsolateHolder isolate_holder_;
   private: gin::ContextHolder context_holder_;
+  private: std::unique_ptr<EventHandler> event_handler_;
   private: bool testing_;
   private: ViewDelegate* view_delegate_;
 
@@ -51,29 +53,23 @@ class ScriptController : public ViewEventHandler {
   public: ~ScriptController();
 
   public: ViewDelegate* view_delegate() const;
+  public: EventHandler* event_handler() const { return event_handler_.get(); }
   public: static ScriptController* instance();
 
+  public: void DidStartHost();
   public: EvaluateResult Evaluate(const base::string16& script_text);
   public: void LoadJsLibrary();
   public: void LogException(const v8::TryCatch& try_catch);
   public: void ResetForTesting();
+  public: void OpenFile(WindowId window_id,
+                        const base::string16& filename);
   public: void PopulateGlobalTemplate(
       v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_template);
   public: static ScriptController* Start(ViewDelegate* view_delegate);
   public: static ScriptController* StartForTesting(
       ViewDelegate* view_delegate);
   public: void ThrowError(const std::string& message);
-
-  // ViewEventHandler
-  private: virtual void DidDestroyWidget(WindowId window_id) override;
-  private: virtual void DidKillFocus(WindowId window_id) override;
-  private: virtual void DidRealizeWidget(WindowId window_id) override;
-  private: virtual void DidSetFocus(WindowId window_id) override;
-  private: virtual void DidStartHost() override;
-  private: virtual void OpenFile(WindowId window_id,
-                                 const base::string16& filename) override;
-  private: virtual void RunCallback(base::Closure callback) override;
-  private: virtual void WillDestroyHost() override;
+  public: void WillDestroyHost();
 
   DISALLOW_COPY_AND_ASSIGN(ScriptController);
 };

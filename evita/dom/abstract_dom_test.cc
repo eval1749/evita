@@ -5,6 +5,7 @@
 
 #include "base/logging.h"
 #include "base/strings/utf_string_conversions.h"
+#include "evita/dom/events/event_handler.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/script_controller.h"
@@ -38,7 +39,7 @@ v8::Isolate* AbstractDomTest::isolate() const {
 }
 
 ViewEventHandler* AbstractDomTest::view_event_handler() const {
-  return script_controller_;
+  return script_controller_->event_handler();
 }
 
 bool AbstractDomTest::DoCall(v8::Isolate* isolate,

@@ -7,6 +7,8 @@
 
 namespace dom {
 
+class Event;
+class EventTarget;
 class ScriptController;
 
 class EventHandler : public ViewEventHandler {
@@ -14,6 +16,9 @@ class EventHandler : public ViewEventHandler {
 
   public: EventHandler(ScriptController* controller);
   public: ~EventHandler();
+
+  private: void DoDefaultEventHandling(EventTarget* event_target, 
+                                       Event* event);
 
   // ViewEventHandler
   private: virtual void DidDestroyWidget(WindowId window_id) override;
@@ -23,6 +28,7 @@ class EventHandler : public ViewEventHandler {
   private: virtual void DidStartHost() override;
   private: virtual void OpenFile(WindowId window_id,
                                  const base::string16& filename) override;
+  private: virtual void QueryClose(WindowId window_id) override;
   private: virtual void RunCallback(base::Closure callback) override;
   private: virtual void WillDestroyHost() override;
 

@@ -207,6 +207,7 @@ DEFINE_VIEW_EVENT_HANDLER_1(DidRealizeWidget, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidSetFocus, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_0(DidStartHost)
 DEFINE_VIEW_EVENT_HANDLER_2(OpenFile, WindowId, const base::string16&)
+DEFINE_VIEW_EVENT_HANDLER_1(QueryClose, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(RunCallback, base::Closure)
 
 void ScriptThread::WillDestroyHost() {

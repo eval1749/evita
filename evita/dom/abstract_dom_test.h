@@ -6,7 +6,9 @@
 #include <memory>
 #include <string>
 
+#include "base/strings/string_piece.h"
 #include "gtest/gtest.h"
+#include "evita/v8_glue/script_callback.h"
 #include "evita/v8_glue/v8.h"
 
 namespace dom {
@@ -16,6 +18,8 @@ class ScriptController;
 class ViewEventHandler;
 
 class AbstractDomTest : public ::testing::Test {
+  protected: typedef v8_glue::internal::ScriptClosure::Argv Argv;
+
   private: v8::UniquePersistent<v8::Context> context_;
   private: std::unique_ptr<MockViewImpl> mock_view_impl_;
 
@@ -25,11 +29,16 @@ class AbstractDomTest : public ::testing::Test {
   protected: AbstractDomTest();
   protected: virtual ~AbstractDomTest();
 
+  protected: v8::Isolate* isolate() const;
   protected: MockViewImpl* mock_view_impl() const {
     return mock_view_impl_.get();
   }
   protected: ViewEventHandler* view_event_handler() const;
 
+  protected: template<typename... Params>
+      bool Call(const base::StringPiece& name, Params... params);
+  private: bool DoCall(v8::Isolate* isolate, const base::StringPiece& name,
+                       const Argv& argv);
   protected: std::string EvalScript(const std::string& text);
   protected: virtual void PopulateGlobalTemplate(
       v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_tempalte);
@@ -39,9 +48,20 @@ class AbstractDomTest : public ::testing::Test {
 
   DISALLOW_COPY_AND_ASSIGN(AbstractDomTest);
 };
+
+template<typename... Params>
+bool AbstractDomTest::Call(const base::StringPiece& name, Params... params) {
+  v8::HandleScope handle_scope(isolate());
+  v8_glue::internal::ScriptCallbackArguments args(isolate());
+  args.Populate(params...);
+  return DoCall(isolate(), name, args.argv());
+}
+
 }  // namespace dom
 
 #define EXPECT_VALID_SCRIPT(script) EXPECT_TRUE(RunScript(script))
+#define EXPECT_VALID_SCRIPT_CALL(name, ...) \
+    EXPECT_TRUE(Call(name, __VA_ARGS__))
 #define EXPECT_SCRIPT_EQ(expect, script) EXPECT_EQ(expect, EvalScript(script))
 #define EXPECT_SCRIPT_FALSE(script) EXPECT_SCRIPT_EQ("false", (script))
 #define EXPECT_SCRIPT_TRUE(script) EXPECT_SCRIPT_EQ("true", (script))

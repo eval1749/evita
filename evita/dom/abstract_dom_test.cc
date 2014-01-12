@@ -13,6 +13,18 @@ namespace dom {
 
 using ::testing::_;
 
+namespace {
+
+base::string16 V8ToString(v8::Handle<v8::Value> value) {
+  v8::String::Value string_value(value);
+  if (!string_value.length())
+    return base::string16();
+  return base::string16(reinterpret_cast<base::char16*>(*string_value),
+                        string_value.length());
+}
+
+}  // namespace
+
 AbstractDomTest::AbstractDomTest()
       : mock_view_impl_(new MockViewImpl()),
         script_controller_(nullptr) {
@@ -21,8 +33,27 @@ AbstractDomTest::AbstractDomTest()
 AbstractDomTest::~AbstractDomTest() {
 }
 
+v8::Isolate* AbstractDomTest::isolate() const {
+  return v8::Isolate::GetCurrent();
+}
+
 ViewEventHandler* AbstractDomTest::view_event_handler() const {
   return script_controller_;
+}
+
+bool AbstractDomTest::DoCall(v8::Isolate* isolate,
+                             const base::StringPiece& name,
+                             const Argv& argv) {
+  auto callee = isolate->GetCurrentContext()->Global()->Get(
+      gin::StringToV8(isolate, name));
+  v8::TryCatch try_catch;
+  auto result = callee->ToObject()->CallAsFunction(v8::Null(isolate),
+      argv.size(), const_cast<v8::Handle<v8::Value>*>(argv.data()));
+  if (try_catch.HasCaught()) {
+    LOG(0) << "Call " << name << " failed: " <<
+        V8ToString(try_catch.Exception());
+  }
+  return !result.IsEmpty();
 }
 
 std::string AbstractDomTest::EvalScript(const std::string& text) {

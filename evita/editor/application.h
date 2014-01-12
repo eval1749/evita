@@ -99,11 +99,6 @@ class Application : public common::Singleton<Application> {
   public: NewlineMode GetNewline() const { return newline_mode_; }
   public: const char16* GetTitle() const;
 
-  // [H]
-  public: bool HasMultipleFrames() const {
-    return GetFirstFrame() != GetLastFrame();
-  }
-
   // [K]
   public: bool KillBuffer(Buffer* buffer, bool force = false);
 

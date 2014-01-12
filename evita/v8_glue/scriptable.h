@@ -4,6 +4,8 @@
 #if !defined(INCLUDE_evita_v8_glue_scriptable_h)
 #define INCLUDE_evita_v8_glue_scriptable_h
 
+#include <type_traits>
+
 #include "base/basictypes.h"
 #include "base/logging.h"
 #include "evita/gc/collectable.h"
@@ -68,8 +70,8 @@ class Scriptable : public B {
 
 namespace gin {
 template<typename T>
-struct Converter<T*, typename base::enable_if<
-    base::is_convertible<T*,
+struct Converter<T*, typename std::enable_if<
+    std::is_convertible<T*,
         v8_glue::AbstractScriptable*>::value>::type> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, T* val) {
     return val->GetWrapper(isolate);

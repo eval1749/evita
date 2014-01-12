@@ -10,6 +10,7 @@
 #include "evita/dom/editor_window.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/event_target.h"
+#include "evita/dom/events/ui_event.h"
 #include "evita/dom/file_path.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/range.h"
@@ -164,6 +165,7 @@ void ScriptController::PopulateGlobalTemplate(
   // Note: super class must be installed before subclass.
   v8_glue::Installer<Event>::Run(isolate, global_template);
   v8_glue::Installer<EventTarget>::Run(isolate, global_template);
+  v8_glue::Installer<UiEvent>::Run(isolate, global_template);
   v8_glue::Installer<Document>::Run(isolate, global_template);
   v8_glue::Installer<Editor>::Run(isolate, global_template);
   v8_glue::Installer<FilePath>::Run(isolate, global_template);

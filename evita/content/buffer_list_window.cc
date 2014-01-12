@@ -77,6 +77,12 @@ static HCURSOR loadCursor(HCURSOR* inout_hCursor,
   return hCursor;
 } // loadCursor
 
+Frame* CreateFrame(Buffer* buffer) {
+  auto const frame = new Frame();
+  frame->AddWindow(buffer);
+  return frame;
+}
+
 }  // naemspace
 
 namespace content {
@@ -110,7 +116,7 @@ void BufferListWindow::ActivateBuffers(bool is_new_frame) {
     for (auto& runner: Application::instance()->buffers()) {
       if (runner == buffer) {
         if (is_new_frame) {
-          auto const frame = Application::instance()->CreateFrame(buffer);
+          auto const frame = CreateFrame(buffer);
           frame->Realize();
         } else {
           frame().ShowBuffer(buffer);
@@ -145,7 +151,7 @@ void BufferListWindow::dragFinish(POINT pt) {
     pane->GetFrame()->ShowBuffer(buffer);
   } else {
     // Create new fame
-    auto const frame = Application::instance()->CreateFrame(buffer);
+    auto const frame = CreateFrame(buffer);
     frame->Realize();
   }
 }

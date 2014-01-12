@@ -76,7 +76,6 @@ class Application : public common::Singleton<Application> {
 
   // [C]
   public: bool CalledOnValidThread() const;
-  public: Frame* CreateFrame(Buffer* buffer);
 
   // [D]
   public: void DidCreateFrame(Frame* frame);

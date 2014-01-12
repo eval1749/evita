@@ -4,8 +4,9 @@
 #if !defined(INCLUDE_evita_v8_glue_nullable_h)
 #define INCLUDE_evita_v8_glue_nullable_h
 
+#include <type_traits>
+
 #include "base/logging.h"
-#include "base/template_util.h"
 
 namespace v8_glue {
 class AbstractScriptable;
@@ -15,6 +16,7 @@ class Nullable {
   private: T* ptr_;
   public: Nullable(const Nullable& other) : ptr_(other.ptr_) {}
   public: Nullable(T* ptr) : ptr_(ptr) {}
+  public: Nullable() : ptr_(nullptr) {}
   public: operator T*() const { return ptr_; }
   public: T* operator->() const { DCHECK(ptr_); return ptr_; }
 };
@@ -22,8 +24,8 @@ class Nullable {
 
 namespace gin {
 template<typename T>
-struct Converter<v8_glue::Nullable<T>, typename base::enable_if<
-    base::is_convertible<T*,
+struct Converter<v8_glue::Nullable<T>, typename std::enable_if<
+    std::is_convertible<T*,
         v8_glue::AbstractScriptable*>::value>::type> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, T* val) {
     if (val)
@@ -32,7 +34,7 @@ struct Converter<v8_glue::Nullable<T>, typename base::enable_if<
   }
 
   static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> val, T** out) {
+                     v8::Handle<v8::Value> val, v8_glue::Nullable<T>* out) {
     if (val->IsNull()) {
       *out = nullptr;
       return true;

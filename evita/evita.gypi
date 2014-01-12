@@ -59,7 +59,6 @@
       'sources': [
         'precomp.cpp',
 
-        'dom/console.cc',
         'dom/buffer.cc',
         'dom/converter.cc',
         'dom/document.cc',
@@ -105,6 +104,8 @@
           'dom/key_names.js',
           'dom/runtime.js',
           'dom/messages_en_US.js',
+
+          'dom/console.js',
           'dom/document.js',
           'dom/editor.js',
           'dom/editor_window.js',

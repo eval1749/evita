@@ -13,6 +13,7 @@
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/ui_event.h"
+#include "evita/dom/events/window_event.h"
 #include "evita/dom/file_path.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/range.h"
@@ -230,6 +231,7 @@ void ScriptController::PopulateGlobalTemplate(
   v8_glue::Installer<EventTarget>::Run(isolate, global_template);
   v8_glue::Installer<UiEvent>::Run(isolate, global_template);
   v8_glue::Installer<FocusEvent>::Run(isolate, global_template);
+  v8_glue::Installer<WindowEvent>::Run(isolate, global_template);
   v8_glue::Installer<Document>::Run(isolate, global_template);
   v8_glue::Installer<Editor>::Run(isolate, global_template);
   v8_glue::Installer<FilePath>::Run(isolate, global_template);

@@ -49,7 +49,7 @@ class EnumItem {
 class CString {
   private: std::vector<char16> cstring_;
 
-  public: CString(const base::string16 string) {
+  public: CString(const base::string16& string) {
     cstring_.resize(string.size() + 1);
     auto dst = cstring_.begin();
     for (auto wch: string) {

@@ -26,11 +26,26 @@ class Event : public v8_glue::Scriptable<Event> {
     kBubblingPhase,
   };
 
+  public: class DispatchScope {
+    private: Event* event_;
+
+    public: DispatchScope(Event* event, EventTarget* event_target);
+    public: ~DispatchScope();
+
+    public: void set_current_target(EventTarget* target);
+
+    public: void StartAtTarget();
+    public: void StartBubbling();
+  };
+  friend class DispatchScope;
+
   private: bool bubbles_;
   private: bool cancelable_;
   private: gc::Member<EventTarget> current_target_;
   private: bool default_prevented_;
   private: PhaseType event_phase_;
+  private: bool stop_immediate_propagation_;
+  private: bool stop_propagation_;
   private: gc::Member<EventTarget> target_;
   private: TimeStamp time_stamp_;
   private: base::string16 type_;
@@ -46,11 +61,22 @@ class Event : public v8_glue::Scriptable<Event> {
   public: bool default_prevented() const { return default_prevented_; }
   public: PhaseType event_phase() const { return event_phase_; }
   public: Nullable<EventTarget> target() const { return target_.get(); }
+  public: bool stop_immediate_propagation() const {
+    return stop_immediate_propagation_;
+  }
+  public: bool stop_propagation() const { return stop_propagation_; }
   public: TimeStamp time_stamp() const { return time_stamp_; }
   public: const base::string16& type() const { return type_; }
 
   public: void InitEvent(const base::string16& type, bool bubbles,
                          bool cancelable);
+
+
+  public: void PreventDefault();
+  public: void StopImmediatePropagation() {
+    stop_immediate_propagation_ = true;
+  }
+  public: void StopPropagation() { stop_propagation_ = true; }
 
   DISALLOW_COPY_AND_ASSIGN(Event);
 };

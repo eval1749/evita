@@ -57,13 +57,48 @@ class EventWrapperInfo : public v8_glue::WrapperInfo {
 
 //////////////////////////////////////////////////////////////////////
 //
+// Event::DispatchScope
+//
+Event::DispatchScope::DispatchScope(Event* event, EventTarget* target)
+    : event_(event) {
+  DCHECK_EQ(kNone, event_->event_phase_);
+  DCHECK(!event->current_target_);
+  DCHECK(!event->target_);
+  event_->target_ = target;
+  event_->event_phase_ = kCapturingPhase;
+}
+
+Event::DispatchScope::~DispatchScope() {
+  event_->current_target_ = nullptr;
+  event_->event_phase_ = kNone;
+  event_->target_ = nullptr;
+  event_->time_stamp_ = TimeStamp::Now();
+}
+
+void Event::DispatchScope::set_current_target(EventTarget* target) {
+  event_->current_target_ = target;
+}
+
+void Event::DispatchScope::StartAtTarget() {
+  DCHECK_EQ(kCapturingPhase, event_->event_phase_);
+  event_->event_phase_ = kAtTarget;
+}
+
+void Event::DispatchScope::StartBubbling() {
+  DCHECK_EQ(kAtTarget, event_->event_phase_);
+  event_->event_phase_ = kBubblingPhase;
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // Event
 //
 DEFINE_SCRIPTABLE_OBJECT(Event, EventWrapperInfo);
 
 Event::Event()
     : bubbles_(false), cancelable_(false), default_prevented_(false),
-      event_phase_(kNone) {
+      event_phase_(kNone), stop_immediate_propagation_(false),
+      stop_propagation_(false) {
 }
 
 Event::~Event() {
@@ -71,9 +106,21 @@ Event::~Event() {
 
 void Event::InitEvent(const base::string16& type, bool bubbles,
                       bool cancelable) {
+  if (event_phase_ != kNone)
+    return;
+  DCHECK(!current_target_);
+  DCHECK(!target_);
   bubbles_ = bubbles;
   cancelable_ = cancelable;
+  default_prevented_ = false;
+  stop_immediate_propagation_ = false;
+  stop_propagation_ = false;
+  time_stamp_ = TimeStamp();
   type_ = type;
+}
+
+void Event::PreventDefault() {
+  default_prevented_ = cancelable_;
 }
 
 }  // namespace dom

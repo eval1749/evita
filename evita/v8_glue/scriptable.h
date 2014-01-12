@@ -85,4 +85,16 @@ struct Converter<T*, typename base::enable_if<
 };
 }  // namespace gin
 
+#define DECLARE_SCRIPTABLE_OBJECT(name) \
+  public: static v8_glue::WrapperInfo* static_wrapper_info(); \
+  public: static const char* scriptable_class_name() { return #name; } \
+  private:
+
+#define DEFINE_SCRIPTABLE_OBJECT(name, wrapper_info_name) \
+  v8_glue::WrapperInfo* name::static_wrapper_info() { \
+    DEFINE_STATIC_LOCAL(wrapper_info_name, wrapper_info, \
+        (scriptable_class_name())); \
+    return &wrapper_info; \
+  }
+
 #endif //!defined(INCLUDE_evita_v8_glue_scriptable_h)

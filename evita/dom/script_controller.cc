@@ -161,6 +161,10 @@ void ScriptController::LoadJsLibrary() {
   NOTREACHED();
 }
 
+void ScriptController::LogException(const v8::TryCatch& try_catch) {
+  DVLOG(0) << "Unhandled exception " << V8ToString(try_catch.Exception());
+}
+
 void ScriptController::PopulateGlobalTemplate(
     v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_template) {
   // Note: super class must be installed before subclass.

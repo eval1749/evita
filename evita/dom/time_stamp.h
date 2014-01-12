@@ -18,12 +18,18 @@ class TimeStamp {
 
   public: operator ValueType() const { return value_; }
 
+  public: TimeStamp& operator=(ValueType value) {
+    value_ = value;
+    return *this;
+  }
   public: bool operator==(const TimeStamp& other) const;
   public: bool operator!=(const TimeStamp& other) const;
   public: bool operator<(const TimeStamp& other) const;
   public: bool operator<=(const TimeStamp& other) const;
   public: bool operator>(const TimeStamp& other) const;
   public: bool operator>=(const TimeStamp& other) const;
+
+  public: static TimeStamp Now();
 };
 
 }  // namespace dom

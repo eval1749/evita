@@ -3,6 +3,8 @@
 
 #include "evita/dom/time_stamp.h"
 
+#include "base/time/time.h"
+
 namespace dom {
 
 TimeStamp::TimeStamp(double value) : value_(value) {
@@ -40,6 +42,10 @@ bool TimeStamp::operator>(const TimeStamp& other) const {
 
 bool TimeStamp::operator>=(const TimeStamp& other) const {
   return value_ >= other.value_;
+}
+
+TimeStamp TimeStamp::Now() {
+  return TimeStamp(base::Time::Now().ToDoubleT());
 }
 
 }  // namespace dom

@@ -5,8 +5,11 @@
 #define INCLUDE_evita_v8_glue_nullable_h
 
 #include "base/logging.h"
+#include "base/template_util.h"
 
 namespace v8_glue {
+class AbstractScriptable;
+
 template<typename T>
 class Nullable {
   private: T* ptr_;

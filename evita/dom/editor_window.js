@@ -4,18 +4,22 @@
 
 'use strict';
 
-/**
- * @param {string} filename
- */
-EditorWindow.prototype.open = function(filename) {
-  var document = Document.load(filename);
-  var window = this.children.find(function(present) {
-    return present.document === document;
-  });
-  if (window) {
-    window.focus();
-    return;
-  }
-  var new_window = new TextWindow(new Range(document));
-  this.add(new_window);
-};
+(function() {
+  
+  /**
+   * Open file in window.
+   * @param {string} filename.
+   */
+  EditorWindow.prototype.open = function(filename) {
+    var document = Document.load(filename);
+    var window = this.children.find(function(present) {
+      return present.document === document;
+    });
+    if (window) {
+      window.focus();
+      return;
+    }
+    var new_window = new TextWindow(new Range(document));
+    this.add(new_window);
+  };
+})();

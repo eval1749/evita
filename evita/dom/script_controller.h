@@ -27,6 +27,10 @@ namespace dom {
 class EventHandler;
 class ViewDelegate;
 
+//////////////////////////////////////////////////////////////////////
+//
+// EvaluateResult
+//
 // TODO(yosi) We will remove EvaluateResult once V8Console in JS.
 struct EvaluateResult {
   base::string16 value;
@@ -42,6 +46,10 @@ struct EvaluateResult {
   EvaluateResult();
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// ScriptController
+//
 class ScriptController {
   private: v8_glue::IsolateHolder isolate_holder_;
   private: gin::ContextHolder context_holder_;
@@ -60,11 +68,11 @@ class ScriptController {
   public: EvaluateResult Evaluate(const base::string16& script_text);
   public: void LoadJsLibrary();
   public: void LogException(const v8::TryCatch& try_catch);
-  public: void ResetForTesting();
   public: void OpenFile(WindowId window_id,
                         const base::string16& filename);
   public: void PopulateGlobalTemplate(
       v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_template);
+  public: void ResetForTesting();
   public: static ScriptController* Start(ViewDelegate* view_delegate);
   public: static ScriptController* StartForTesting(
       ViewDelegate* view_delegate);

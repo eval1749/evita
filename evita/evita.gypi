@@ -66,6 +66,7 @@
         'dom/editor_window.cc',
         'dom/events/event.cc',
         'dom/events/event_target.cc',
+        'dom/events/focus_event.cc',
         'dom/events/ui_event.cc',
         'dom/file_path.cc',
         'dom/lock.cc',

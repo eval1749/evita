@@ -48,6 +48,7 @@
         'dom/editor_window_unittest.cc',
         'dom/events/event_unittest.cc',
         'dom/events/ui_event_unittest.cc',
+        'dom/events/focus_event_unittest.cc',
         'dom/file_path_unittest.cc',
         'dom/mock_view_impl.cc',
         'dom/polyfill_unittest.cc',

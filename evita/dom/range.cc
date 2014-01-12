@@ -13,6 +13,7 @@
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/per_isolate_data.h"
+#include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/wrapper_info.h"
 #include "gin/arguments.h"
 
@@ -35,8 +36,8 @@ class RangeWrapperInfo : public v8_glue::WrapperInfo {
   }
 
   private: static Range* NewRange(Document* document,
-                                  gin::Optional<int> start,
-                                  gin::Optional<int> end) {
+                                  v8_glue::Optional<int> start,
+                                  v8_glue::Optional<int> end) {
     auto const start_position = start.get(0);
     auto const end_position = end.get(start_position);
     return new Range(document, start_position, end_position);

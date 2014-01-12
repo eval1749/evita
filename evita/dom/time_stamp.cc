@@ -48,16 +48,17 @@ namespace gin {
 
 v8::Handle<v8::Value> Converter<dom::TimeStamp>::ToV8(
     v8::Isolate* isolate, const dom::TimeStamp& time_stamp) {
-  return gin::ConvertToV8(isolate, time_stamp);
+  return gin::ConvertToV8(isolate, 
+                          static_cast<dom::TimeStamp::ValueType>(time_stamp));
 }
 
 bool Converter<dom::TimeStamp>::FromV8(v8::Isolate* isolate,
                                        v8::Handle<v8::Value> val,
                                        dom::TimeStamp* out) {
-  double double_value;
-  if (!gin::ConvertFromV8(isolate, val, &double_value))
+  dom::TimeStamp::ValueType value;
+  if (!gin::ConvertFromV8(isolate, val, &value))
     return false;
-  *out = dom::TimeStamp(double_value);
+  *out = dom::TimeStamp(value);
   return true;
 }
 

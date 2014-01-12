@@ -8,14 +8,15 @@
 namespace dom {
 
 class TimeStamp {
-  private: double value_;
+  public: typedef double ValueType;
+  private: ValueType value_;
 
   public: explicit TimeStamp(double value);
   public: TimeStamp(const TimeStamp& other);
   public: TimeStamp();
   public: ~TimeStamp();
 
-  public: operator double() const { return value_; }
+  public: operator ValueType() const { return value_; }
 
   public: bool operator==(const TimeStamp& other) const;
   public: bool operator!=(const TimeStamp& other) const;

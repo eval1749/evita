@@ -1,8 +1,14 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#if !defined(INCLUDE_evita_v8_glue_per_isolate_data)
-#define INCLUDE_evita_v8_glue_per_isolate_data
+#if !defined(INCLUDE_evita_v8_glue_per_isolate_data_h)
+#define INCLUDE_evita_v8_glue_per_isolate_data_h
+
+#include "base/basictypes.h"
+#include "evita/v8_glue/v8_glue.h"
+BEGIN_V8_INCLUDE
+#include "gin/per_isolate_data.h"
+END_V8_INCLUDE
 
 namespace v8 {
 class Isolate;
@@ -20,7 +26,7 @@ class PerIsolateData {
   private: v8::Isolate* isolate_;
 
   public: PerIsolateData(v8::Isolate* isolate);
-  public: ~PerIsolateData() = default;
+  public: ~PerIsolateData();
 
   public: ConstructorMode construct_mode() const { return construct_mode_; }
 
@@ -57,4 +63,4 @@ class ConstructorModeScope {
 
 }  // namespace v8_glue
 
-#endif //!defined(INCLUDE_evita_v8_glue_per_isolate_data)
+#endif //!defined(INCLUDE_evita_v8_glue_per_isolate_data_h)

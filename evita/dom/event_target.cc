@@ -4,6 +4,7 @@
 #include "evita/dom/event_target.h"
 
 #include "evita/dom/script_controller.h"
+#include "evita/v8_glue/converter.h"
 
 namespace dom {
 namespace {

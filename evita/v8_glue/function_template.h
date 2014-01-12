@@ -3,6 +3,8 @@
 #if !defined(INCLUDE_evita_v8_glue_function_template_h)
 #define INCLUDE_evita_v8_glue_function_template_h
 
+#include "evita/v8_glue/v8_glue.h"
+
 BEGIN_V8_INCLUDE
 #include "gin/function_template.h"
 END_V8_INCLUDE

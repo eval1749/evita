@@ -14,6 +14,9 @@ PerIsolateData::PerIsolateData(v8::Isolate* isolate)
   isolate_->SetData(gin::kEmbedderEvita, this);
 }
 
+PerIsolateData::~PerIsolateData() {
+}
+
 PerIsolateData* PerIsolateData::From(v8::Isolate* isolate) {
   return static_cast<PerIsolateData*>(isolate->GetData(gin::kEmbedderEvita));
 }

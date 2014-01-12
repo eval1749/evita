@@ -51,17 +51,17 @@
         '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/base/base.gyp:base_i18n',
         '<(DEPTH)/common/common.gyp:common',
-        '<(DEPTH)/gin/gin.gyp:gin',
-        '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
         'dom_jslib',
         'dom_unicode_lib_icu',
         'text',
+        'v8_glue',
       ],
       'sources': [
         'precomp.cpp',
 
         'dom/console.cc',
         'dom/buffer.cc',
+        'dom/converter.cc',
         'dom/document.cc',
         'dom/editor.cc',
         'dom/editor_window.cc',
@@ -76,21 +76,12 @@
         'dom/script_thread.cc',
         'dom/text_window.cc',
         'dom/time_stamp.cc',
+        'dom/v8_console_buffer.cc',
         'dom/window.cc',
 
         'gc/collectable.cc',
         'gc/collector.cc',
         'gc/visitable.cc',
-
-        'v8_glue/constructor_template.cc',
-        'v8_glue/converter.cc',
-        'v8_glue/function_template_builder.cc',
-        'v8_glue/isolate_holder.cc',
-        'v8_glue/per_isolate_data.cc',
-        'v8_glue/scriptable.cc',
-        'v8_glue/script_callback.cc',
-        'v8_glue/v8_console_buffer.cc',
-        'v8_glue/wrapper_info.cc',
       ], # sources
     }, # dom
     {
@@ -270,5 +261,40 @@
         'widgets/widget.cc',
       ], # sources
     }, # ui
+    {
+      'target_name': 'v8_glue',
+      'type': 'static_library',
+      'dependencies': [
+        '<(DEPTH)/gin/gin.gyp:gin',
+        '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
+      ], # dependencies
+      'msvs_precompiled_header': '',
+      'msvs_precompiled_source': '',
+      'msvs_disabled_warnings': [
+        # warning C4127: conditional expression is constant
+        # For DCHECK_XX(x)
+        4127,
+        # warning  C4251: 'identifier' : class 'type' needs to have
+        # dll-interface to be used by clients of class 'type2'
+        # Example: std::unique_ptr<T>
+        4251,
+        # warning C4350: behavior change: 'member1' called instead of
+        # 'member2' An rvalue cannot be bound to a non-const reference. In
+        # previous versions of Visual C++, it was possible to bind an rvalue
+        # to a non-const reference in a direct initialization. This code now
+        # gives a warning.
+        4530,
+      ],
+      'sources': [
+        'v8_glue/constructor_template.cc',
+        'v8_glue/converter.cc',
+        'v8_glue/function_template_builder.cc',
+        'v8_glue/isolate_holder.cc',
+        'v8_glue/per_isolate_data.cc',
+        'v8_glue/scriptable.cc',
+        'v8_glue/script_callback.cc',
+        'v8_glue/wrapper_info.cc',
+      ], # sources
+    }, # v8_glue
   ], # targets
 }

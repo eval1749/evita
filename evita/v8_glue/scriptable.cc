@@ -5,13 +5,8 @@
 
 #include "base/logging.h"
 #include "evita/gc/collector.h"
+#include "evita/v8_glue/object_template_builder.h"
 #include "evita/v8_glue/per_isolate_data.h"
-BEGIN_V8_INCLUDE
-//#include "gin/converter.h"
-#include "gin/object_template_builder.h"
-#include "gin/per_isolate_data.h"
-END_V8_INCLUDE
-
 
 namespace v8_glue {
 

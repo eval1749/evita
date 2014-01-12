@@ -12,6 +12,7 @@
 #include "common/memory/singleton.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
+#include "evita/dom/converter.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/constructor_template.h"

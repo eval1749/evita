@@ -8,9 +8,6 @@
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/per_isolate_data.h"
 #include "evita/v8_glue/scriptable.h"
-BEGIN_V8_INCLUDE
-#include "gin/per_isolate_data.h"
-END_V8_INCLUDE
 
 namespace v8_glue {
 

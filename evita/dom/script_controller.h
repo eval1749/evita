@@ -14,11 +14,9 @@
 #pragma warning(pop)
 #include "base/strings/string16.h"
 #include "evita/dom/view_event_handler.h"
+#include "evita/v8_glue/context_holder.h"
 #include "evita/v8_glue/isolate_holder.h"
 #include "evita/v8_glue/v8.h"
-BEGIN_V8_INCLUDE
-#include "gin/public/context_holder.h"
-END_V8_INCLUDE
 
 namespace base {
 template<typename T> class Callback;

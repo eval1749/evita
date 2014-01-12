@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_v8_glue_v8_console_buffer_h)
-#define INCLUDE_evita_v8_glue_v8_console_buffer_h
+#if !defined(INCLUDE_evita_dom_v8_console_buffer_h)
+#define INCLUDE_evita_dom_v8_console_buffer_h
 
 #include <memory>
 
@@ -50,4 +50,4 @@ class V8ConsoleBuffer : public common::Singleton<V8ConsoleBuffer>,
 
 }  // namespace v8_glue
 
-#endif //!defined(INCLUDE_evita_v8_glue_v8_console_buffer_h)
+#endif //!defined(INCLUDE_evita_dom_v8_console_buffer_h)

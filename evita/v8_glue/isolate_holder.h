@@ -6,6 +6,8 @@
 
 #include <memory>
 
+#include "evita/v8_glue/v8_glue.h"
+
 #include "evita/v8_glue/per_isolate_data.h"
 BEGIN_V8_INCLUDE
 #include "gin/public/isolate_holder.h"

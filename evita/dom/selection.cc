@@ -3,6 +3,7 @@
 
 #include "evita/dom/selection.h"
 
+#include "evita/dom/converter.h"
 #include "evita/dom/document.h"
 #include "evita/dom/range.h"
 #include "evita/dom/script_controller.h"

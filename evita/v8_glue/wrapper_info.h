@@ -6,8 +6,8 @@
 
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/gin_embedders.h"
+#include "evita/v8_glue/object_template_builder.h"
 BEGIN_V8_INCLUDE
-#include "gin/object_template_builder.h"
 #include "gin/public/wrapper_info.h"
 END_V8_INCLUDE
 

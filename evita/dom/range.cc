@@ -6,6 +6,7 @@
 #include "common/memory/singleton.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
+#include "evita/dom/converter.h"
 #include "evita/dom/document.h"
 #include "evita/dom/script_controller.h"
 #include "evita/text/range.h"

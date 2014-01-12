@@ -18,7 +18,7 @@
 #include "base/strings/string16.h"
 #include "./ed_Mode.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/v8_glue/v8_console_buffer.h"
+#include "evita/dom/v8_console_buffer.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"

@@ -4,6 +4,7 @@
 #define INCLUDE_evita_v8_glue_converter_h
 
 #include "base/strings/string16.h"
+#include "evita/v8_glue/v8_glue.h"
 BEGIN_V8_INCLUDE
 #include "gin/converter.h"
 END_V8_INCLUDE
@@ -24,14 +25,6 @@ struct Converter<base::string16> {
                                     const base::string16& string);
   static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
                      base::string16* out);
-};
-
-template<>
-struct Converter<text::Posn> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    text::Posn position);
-  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
-                     text::Posn* out);
 };
 
 v8::Handle<v8::Value> StringToV8(v8::Isolate* isolate,

@@ -7,6 +7,7 @@
 #include "base/basictypes.h"
 #include "base/logging.h"
 #include "evita/gc/collectable.h"
+#include "evita/v8_glue/object_template_builder.h"
 #include "evita/v8_glue/wrapper_info.h"
 BEGIN_V8_INCLUDE
 #include "gin/object_template_builder.h"

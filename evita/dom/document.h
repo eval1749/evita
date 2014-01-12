@@ -19,7 +19,7 @@ class Range;
 // Document
 //
 class Document : public v8_glue::Scriptable<Document> {
-  DECLARE_SCRIPTABLE_OBJECT(name);
+  DECLARE_SCRIPTABLE_OBJECT(Document);
 
   private: std::unique_ptr<Buffer> buffer_;
   private: std::unordered_set<Range*> ranges_;

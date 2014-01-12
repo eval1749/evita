@@ -22,9 +22,9 @@ class UiEvent : public v8_glue::Scriptable<UiEvent, Event> {
   public: int detail() const { return detail_; }
   public: Nullable<Window> view() const { return view_.get(); }
 
-  public: void InitUiEvent(const base::string16& type, bool bubbles,
-                           bool cancelable, const Nullable<Window>& view,
-                           int detail);
+  public: void InitUiEvent(const base::string16& type, BubblingType bubbles,
+                           CancelableType cancelable,
+                           const Nullable<Window>& view, int detail);
 
   DISALLOW_COPY_AND_ASSIGN(UiEvent);
 };

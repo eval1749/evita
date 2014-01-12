@@ -48,7 +48,7 @@ DEFINE_SCRIPTABLE_OBJECT(FocusEvent, FocusEventClass);
 FocusEvent::FocusEvent(const base::string16& name,
                        EventTarget* related_target)
     : related_target_(related_target) {
-  InitEvent(name, true, false);
+  InitEvent(name, Bubbling, NotCancelable);
 }
 
 FocusEvent::~FocusEvent() {

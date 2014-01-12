@@ -19,6 +19,16 @@ using v8_glue::Nullable;
 class Event : public v8_glue::Scriptable<Event> {
   DECLARE_SCRIPTABLE_OBJECT(Event);
 
+  public: enum BubblingType : bool {
+    NotBubbling = false,
+    Bubbling = true,
+  };
+
+  public: enum CancelableType : bool {
+    NotCancelable = false,
+    Cancelable = true,
+  };
+
   public: enum PhaseType {
     kNone,
     kCapturingPhase,
@@ -68,8 +78,8 @@ class Event : public v8_glue::Scriptable<Event> {
   public: TimeStamp time_stamp() const { return time_stamp_; }
   public: const base::string16& type() const { return type_; }
 
-  public: void InitEvent(const base::string16& type, bool bubbles,
-                         bool cancelable);
+  public: void InitEvent(const base::string16& type, BubblingType bubbles,
+                         CancelableType cancelable);
 
 
   public: void PreventDefault();
@@ -82,5 +92,21 @@ class Event : public v8_glue::Scriptable<Event> {
 };
 
 }  // namespace dom
+
+namespace gin {
+
+template<>
+struct Converter<dom::Event::BubblingType> {
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> value,
+                     dom::Event::BubblingType* bubbles);
+};
+
+template<>
+struct Converter<dom::Event::CancelableType> {
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> value,
+                     dom::Event::CancelableType* cancelable);
+};
+
+}  // namespace gin
 
 #endif //!defined(INCLUDE_evita_dom_events_event_h)

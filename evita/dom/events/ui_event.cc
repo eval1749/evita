@@ -54,9 +54,9 @@ UiEvent::UiEvent()
 UiEvent::~UiEvent() {
 }
 
-void UiEvent::InitUiEvent(const base::string16& type, bool bubbles,
-                          bool cancelable, const Nullable<Window>& view,
-                          int detail) {
+void UiEvent::InitUiEvent(const base::string16& type, BubblingType bubbles,
+                          CancelableType cancelable,
+                          const Nullable<Window>& view, int detail) {
   InitEvent(type, bubbles, cancelable);
   detail_ = detail;
   view_ = view;

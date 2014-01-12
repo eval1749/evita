@@ -2,6 +2,20 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 'use strict;'
 
+/** @enum{string} */
+Event.Names = {
+  BLUR: 'blur',
+  CLICK: 'click',
+  DBLCLICK: 'dblclick',
+  FOCUS: 'focus',
+  KEYDOWN: 'keydown',
+  KEYUP: 'keyup',
+  MOUSEDOWN: 'mousedown',
+  MOUSEMOVE: 'mousemove',
+  MOUSEUP: 'mouseup',
+  QUERYCLOSE: 'queryclose'
+};
+
 /** @enum */
 Event.PhaseType = {
   NONE: 0,

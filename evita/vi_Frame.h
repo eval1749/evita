@@ -98,7 +98,6 @@ class Frame final : public view::Window,
   private: void AdoptPane(Pane*);
 
   // [C]
-  private: bool canClose();
   private: virtual void CreateNativeWindow() const override;
 
   // [D]

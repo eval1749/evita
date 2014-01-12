@@ -5,7 +5,34 @@
 'use strict';
 
 (function() {
-  
+  /**
+   * @param {EditorWindow} window.
+   */
+  function handleQueryClose(window) {
+    if (EditorWindow.list.length == 1) {
+      Editor.exit();
+      return;
+    }
+    window.destroy();
+  }
+
+  /**
+   * Default event handler.
+   * @this {EditorWindow}
+   * @param {Event} event.
+   */
+ EditorWindow.handleEvent = function(event) {
+   switch (event.type) {
+     case Event.Names.QUERYCLOSE:
+       handleQueryClose(this);
+       break;
+     default:
+       console.log('EditorWindow.handlEvent received unsupported event',
+                   event);
+       break;
+   }
+ };
+
   /**
    * Open file in window.
    * @param {string} filename.

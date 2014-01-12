@@ -207,16 +207,6 @@ void Frame::AddWindow(content::ContentWindow* window) {
   AddPane(new_pane.release());
 }
 
-bool Frame::canClose() {
-  if (Application::instance()->HasMultipleFrames()) {
-    // Destroy this frame since we have multiple frames.
-    return true;
-  }
-
-  // Can we exist applicaiton safety?
-  return Application::instance()->CanExit();
-}
-
 void Frame::DidActivatePane(Pane* const pane) {
   auto const tab_index = getTabFromPane(pane);
   if (tab_index < 0)
@@ -664,8 +654,7 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       break;
 
     case WM_CLOSE:
-      if (canClose())
-        break;
+      Application::instance()->view_event_handler()->QueryClose(window_id());
       return 0;
 
     case WM_DROPFILES:
@@ -719,8 +708,11 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
         case CtrlId_TabBand:
           switch (pNotify->code) {
             case TABBAND_NOTIFY_CLICK_CLOSE_BUTTON: {
-              if (!HasMultiplePanes() && !canClose())
+              if (!HasMultiplePanes()) {
+                Application::instance()->view_event_handler()->QueryClose(
+                    window_id());
                 break;
+              }
               auto const tab_index = TabBandNotifyData::FromNmhdr(
                     pNotify)->tab_index_;
               if (auto const pPane = getPaneFromTab(tab_index))

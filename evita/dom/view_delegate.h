@@ -28,6 +28,8 @@ class ViewDelegate {
   public: ViewDelegate() = default;
   public: virtual ~ViewDelegate() = default;
 
+  public: virtual void ChangeParentWindow(WindowId window_id,
+                                          WindowId new_parent_window_id) = 0;
   public: virtual void CreateEditorWindow(const EditorWindow* window) = 0;
   public: virtual void CreateTextWindow(const TextWindow* window) = 0;
   public: virtual void AddWindow(WindowId parent_id, WindowId child_id) = 0;

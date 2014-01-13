@@ -18,6 +18,17 @@
 
 namespace view {
 
+namespace {
+Window* FromWindowId(const char* name, dom::WindowId window_id) {
+  auto const window = Window::FromWindowId(window_id);
+  if (!window) {
+    DVLOG(0) << name << ": No such window %d" << window_id;
+    return nullptr;
+  }
+  return window;
+}
+}  // namespace
+
 ViewDelegateImpl::ViewDelegateImpl()
     : event_handler_(nullptr) {
 }
@@ -42,6 +53,17 @@ void ViewDelegateImpl::AddWindow(dom::WindowId parent_id,
   }
   DCHECK_EQ(child_id, child->window_id());
   parent->as<Frame>()->AddWindow(child->as<content::ContentWindow>());
+}
+
+void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
+                                          dom::WindowId new_parent_id) {
+  auto const window = FromWindowId("ChangeParentWindow", window_id);
+  if (!window)
+    return;
+  auto const new_parent = FromWindowId("ChangeParentWindow", new_parent_id);
+  if (!new_parent)
+    return;
+  window->SetParentWidget(new_parent);
 }
 
 void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {

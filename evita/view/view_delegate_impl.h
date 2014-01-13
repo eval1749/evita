@@ -22,6 +22,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   }
 
   // ViewDelegate
+  private: virtual void ChangeParentWindow(dom::WindowId window_id,
+      dom::WindowId new_parent_id) override;
   private: virtual void CreateEditorWindow(
       const dom::EditorWindow* window) override;
   private: virtual void CreateTextWindow(

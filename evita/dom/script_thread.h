@@ -59,6 +59,8 @@ class ScriptThread final : public ViewDelegate,
                             base::MessageLoop* host_message_loop);
 
   // ViewDelegate
+  public: virtual void ChangeParentWindow(WindowId window_id,
+    WindowId new_parent_window_id) override;
   private: virtual void CreateEditorWindow(
       const EditorWindow* window) override;
   private: virtual void CreateTextWindow(const TextWindow* window) override;

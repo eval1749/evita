@@ -13,6 +13,7 @@
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/converter.h"
+#include "evita/dom/script_command.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/constructor_template.h"
@@ -126,12 +127,13 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetMethod("charCodeAt_", &Document::charCodeAt)
         .SetProperty("filename", &Document::filename)
         .SetProperty("length", &Document::length)
-        .SetMethod("load_", &Document::Load)
         .SetProperty("modified", &Document::modified)
         .SetProperty("name", &Document::name)
+        .SetMethod("bindKey_", &Document::BindKey)
+        .SetMethod("charCodeAt_", &Document::charCodeAt)
+        .SetMethod("load_", &Document::Load)
         .SetMethod("redo", &Document::Redo)
         .SetMethod("renameTo", &Document::RenameTo)
         .SetMethod("save", &Document::Save)
@@ -180,6 +182,11 @@ bool Document::modified() const {
 const base::string16& Document::name() const {
   return buffer_->name();
 }
+
+void Document::BindKey(int key_code, v8::Handle<v8::Object> command) {
+  buffer_->BindKey(key_code, new ScriptCommand(command));
+}
+
 
 void Document::DidCreateRange(Range* range) {
   ranges_.insert(range);

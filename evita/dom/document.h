@@ -35,6 +35,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: bool modified() const;
   public: const base::string16& name() const;
 
+  public: void BindKey(int key_code, v8::Handle<v8::Object> command);
   public: void DidCreateRange(Range* range);
   public: void DidDestroyRange(Range* range);
   public: static Document* Find(const base::string16& name);

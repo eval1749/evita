@@ -45,6 +45,15 @@
     return wordClassOf(document.charCodeAt_(position));
   }
 
+  /**
+   * @this {Document}
+   * @param {string} key_combination.
+   * @param {Object} command.
+   */
+  Document.prototype.bindKey = function(combination, command) {
+    this.bindKey_(parseKeyCombination(key_combination), command);
+  };
+
   Document.prototype.close = function() {
     var document = this;
     if (!document.modified) {

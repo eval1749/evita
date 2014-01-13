@@ -21,14 +21,6 @@
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/wrapper_info.h"
 
-namespace std {
-template<> struct hash<Buffer*> {
-  size_t operator()(const Buffer*& key) {
-    return static_cast<size_t>(reinterpret_cast<uintptr_t>(key));
-  }
-};
-}  // namespace std
-
 namespace dom {
 
 namespace {

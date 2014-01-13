@@ -157,7 +157,7 @@ void Frame::AdoptPane(Pane* const pane) {
   ASSERT(!!frame);
   ASSERT(frame != this);
   ASSERT(frame->is_realized());
-  pane->SetParentWidget(*this);
+  pane->SetParentWidget(this);
 }
 
 void Frame::AddTab(Pane* const pane) {

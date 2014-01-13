@@ -118,7 +118,7 @@ class Widget
   public: void SetCapture();
   private: bool SetCursor();
   public: virtual void SetFocus();
-  public: void SetParentWidget(const Widget& new_parent);
+  public: void SetParentWidget(Widget* new_parent);
   public: virtual void Show();
 
   // [W]

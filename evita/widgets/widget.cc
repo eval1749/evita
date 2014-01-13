@@ -403,7 +403,7 @@ void Widget::SetFocus() {
   ::SetFocus(*host.native_window());
 }
 
-void Widget::SetParentWidget(const Widget& new_parent) {
+void Widget::SetParentWidget(Widget* new_parent) {
   auto const old_parent = parent_node();
   if (new_parent == old_parent)
     return;
@@ -411,15 +411,15 @@ void Widget::SetParentWidget(const Widget& new_parent) {
     old_parent->WillRemoveChildWidget(*this);
     old_parent->RemoveChild(this);
   }
-  const_cast<Widget&>(new_parent).AppendChild(this);
-  if (new_parent.is_realized()) {
+  new_parent->AppendChild(this);
+  if (new_parent->is_realized()) {
     if (auto const window = native_window())
-      ::SetParent(*window, new_parent.AssociatedHwnd());
+      ::SetParent(*window, new_parent->AssociatedHwnd());
     DidChangeHierarchy();
   }
   if (old_parent)
     old_parent->DidRemoveChildWidget(*this);
-  const_cast<Widget&>(new_parent).DidAddChildWidget(*this);
+  new_parent->DidAddChildWidget(*this);
 }
 
 void Widget::Show() {

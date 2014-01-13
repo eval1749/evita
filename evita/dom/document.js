@@ -141,7 +141,7 @@
         if (count > 0)
           return Math.min(document.length, position + count);
         if (count < 0)
-          return Math.max(0, position + n);
+          return Math.max(0, position + count);
         return position;
       case Unit.PARAGRAPH:
         if (count > 0) {

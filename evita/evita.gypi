@@ -117,6 +117,7 @@
           'dom/file_path.js',
           'dom/range.js',
           'dom/selection.js',
+          'dom/window.js',
           'dom/key_bindings.js',
         ],
       }, # variables

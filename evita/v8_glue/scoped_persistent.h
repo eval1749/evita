@@ -16,11 +16,14 @@ class ScopedPersistent {
       : handle_(isolate, handle) {
   }
 
+  public: ScopedPersistent() {
+  }
+
   public: ~ScopedPersistent() {
     handle_.Reset();
   }
 
-  public: v8::Persistent<ObjectType>* operator->() const { return handle_; }
+  public: v8::Persistent<ObjectType>* operator->() { return &handle_; }
 
   public: bool operator==(v8::Handle<ObjectType> handle) const {
     return handle == handle_;

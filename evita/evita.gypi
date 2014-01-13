@@ -60,10 +60,6 @@
         'precomp.cpp',
 
         'dom/buffer.cc',
-        'dom/contents/content.cc',
-        'dom/contents/tables/table_cell.cc',
-        'dom/contents/tables/table_row.cc',
-        'dom/contents/tables/table_content.cc',
         'dom/converter.cc',
         'dom/document.cc',
         'dom/editor.cc',
@@ -115,8 +111,6 @@
           'dom/messages_en_US.js',
 
           'dom/console.js',
-          'dom/contents/tables/table_content.js',
-          'dom/contents/tables/table_row.js',
           'dom/document.js',
           'dom/editor.js',
           'dom/editor_window.js',

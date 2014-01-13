@@ -3,12 +3,67 @@
 
 #include "evita/dom/events/event_handler.h"
 
+#include "evita/dom/editor_window.h"
 #include "evita/dom/events/ui_event.h"
+#include "evita/dom/events/window_event.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/window.h"
 #include "evita/gc/local.h"
+#include "evita/v8_glue/converter.h"
 
 namespace dom {
+
+namespace {
+
+base::string16 V8ToString(v8::Handle<v8::Value> value) {
+  if (value.IsEmpty())
+    return L"(empty)";
+  v8::String::Value string_value(value);
+  if (!string_value.length())
+    return base::string16();
+  return base::string16(reinterpret_cast<base::char16*>(*string_value),
+                        string_value.length());
+}
+
+Window* FromWindowId(WindowId window_id) {
+  DCHECK_NE(kInvalidWindowId, window_id);
+  auto const window = Window::FromWindowId(window_id);
+  if (!window)
+    DVLOG(0) << "No such window " << window_id << ".";
+  return window;
+}
+
+Window* NewOrFromWindowId(WindowId window_id) {
+  return window_id == kInvalidWindowId ? new EditorWindow() :
+      FromWindowId(window_id);
+}
+
+// Note: The constructor returned by v8::Object::GetConstructor() doesn't
+// have properties defined in JavaScript.
+v8::Handle<v8::Object> GetClassObject(v8::Isolate* isolate,
+                                      v8::Handle<v8::Object> object) {
+  auto const name = object->GetConstructorName();
+  auto const value = isolate->GetCurrentContext()->Global()->Get(name);
+  if (value.IsEmpty() || !value->IsFunction()) {
+    LOG(0) << "No such class " << V8ToString(name) << ".";
+    return v8::Handle<v8::Object>();
+  }
+  return value->ToObject();
+}
+
+v8::Handle<v8::Object> ToMethodObject(v8::Isolate* isolate,
+                                      v8::Handle<v8::Object> js_class,
+                                      const char* method_name) {
+  auto const value = js_class->Get(gin::StringToV8(isolate, method_name));
+  if (value.IsEmpty() || !value->IsFunction()) {
+    LOG(0) << "Object " << V8ToString(js_class) << " has no method '" <<
+        method_name << "', it has " <<
+        V8ToString(js_class->GetPropertyNames()) << ".";
+    return v8::Handle<v8::Object>();
+  }
+  return value->ToObject();
+}
+}  // namespace
 
 EventHandler::EventHandler(ScriptController* controller)
     : controller_(controller) {
@@ -17,32 +72,26 @@ EventHandler::EventHandler(ScriptController* controller)
 EventHandler::~EventHandler() {
 }
 
+// Call |handleEvent| function in the class of event target.
 void EventHandler::DoDefaultEventHandling(EventTarget* event_target,
                                           Event* event) {
-  auto const class_name = event_target->scriptable_class_name();
-  const char method_name[] = "handleEvent";
+  const char kHandleEvent[] = "handleEvent";
 
   auto const isolate = controller_->isolate();
   v8::HandleScope handle_scope(isolate);
 
   auto const js_target = event_target->GetWrapper(isolate);
-  auto const js_class = js_target->GetConstructor();
-  if (js_class.IsEmpty()) {
-    LOG(0) << "No such class " << class_name;
+  auto const js_class = GetClassObject(isolate, js_target);
+  if (js_class.IsEmpty())
     return;
-  }
 
-  auto const js_method = js_class->ToObject()->Get(
-      gin::StringToV8(isolate, method_name));
-  if (js_method .IsEmpty()) {
-    LOG(0) << "No such method " << class_name << "." << method_name;
+  auto const js_method = ToMethodObject(isolate, js_class, kHandleEvent);
+  if (js_method.IsEmpty())
     return;
-  }
 
   v8::TryCatch try_catch;
   v8::Handle<v8::Value> argv[1] { event->GetWrapper(isolate) };
-  auto const value = js_method->ToObject()->CallAsFunction(
-      js_target, 1, argv);
+  auto const value = js_method->CallAsFunction(js_target, 1, argv);
   if (value.IsEmpty())
     controller_->LogException(try_catch);
 }
@@ -75,10 +124,8 @@ void EventHandler::OpenFile(WindowId window_id,
 
 void EventHandler::QueryClose(WindowId window_id) {
   auto const window = Window::FromWindowId(window_id);
-  if (!window) {
-    DVLOG(0) << "No such window " << window_id;
+  if (!window)
     return;
-  }
   gc::Local<UiEvent> event(new UiEvent());
   event->InitUiEvent(L"queryclose", Event::NotBubbling, Event::Cancelable,
                      window, 0);

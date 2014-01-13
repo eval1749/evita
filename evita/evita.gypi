@@ -71,6 +71,7 @@
         'dom/events/ui_event.cc',
         'dom/events/window_event.cc',
         'dom/file_path.cc',
+        'dom/global.cc',
         'dom/lock.cc',
         'dom/range.cc',
         'dom/selection.cc',

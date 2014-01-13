@@ -6,30 +6,19 @@
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "evita/dom/document.h"
-#include "evita/dom/editor.h"
 #include "evita/dom/editor_window.h"
-#include "evita/dom/events/event.h"
 #include "evita/dom/events/event_handler.h"
-#include "evita/dom/events/event_target.h"
-#include "evita/dom/events/focus_event.h"
-#include "evita/dom/events/ui_event.h"
-#include "evita/dom/events/window_event.h"
-#include "evita/dom/file_path.h"
+#include "evita/dom/global.h"
 #include "evita/dom/lock.h"
-#include "evita/dom/range.h"
-#include "evita/dom/script_controller.h"
-#include "evita/dom/script_thread.h"
-#include "evita/dom/selection.h"
-#include "evita/dom/text_window.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/window.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/per_isolate_data.h"
 
 namespace dom {
+
 namespace internal {
 const base::string16& GetJsLibSource();
-v8::Handle<v8::Object> GetUnicodeObject(v8::Isolate* isolate);
 }  // namespace internal
 
 namespace {
@@ -111,21 +100,13 @@ ScriptController::ScriptController(ViewDelegate* view_delegate)
       testing_(false),
       view_delegate_(view_delegate) {
   view_delegate_->RegisterViewEventHandler(event_handler_.get());
-  isolate_holder_.isolate()->Enter();
-  {
-    auto const isolate = isolate_holder_.isolate();
-    v8::HandleScope handle_scope(isolate);
-    auto global_template = v8::ObjectTemplate::New(isolate);
-    {
-      v8::HandleScope handle_scope(isolate);
-      auto context = v8::Context::New(isolate);
-      v8::Context::Scope context_scope(context);
-      PopulateGlobalTemplate(isolate, global_template);
-    }
-    auto context = v8::Context::New(isolate, nullptr, global_template);
-    context_holder_.SetContext(context);
-    context->Enter();
-  }
+  auto const isolate = isolate_holder_.isolate();
+  isolate->Enter();
+  v8::HandleScope handle_scope(isolate);
+  auto context = v8::Context::New(isolate, nullptr,
+      Global::instance()->object_template(isolate));
+  context_holder_.SetContext(context);
+  context->Enter();
 }
 
 ScriptController::~ScriptController() {
@@ -222,27 +203,6 @@ void ScriptController::OpenFile(WindowId window_id,
   auto js_filename = gin::StringToV8(isolate, filename);
   DOM_AUTO_LOCK_SCOPE();
   open_file->ToObject()->CallAsFunction(js_handler, 1, &js_filename);
-}
-
-void ScriptController::PopulateGlobalTemplate(
-    v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_template) {
-  // Note: super class must be installed before subclass.
-  v8_glue::Installer<Event>::Run(isolate, global_template);
-  v8_glue::Installer<EventTarget>::Run(isolate, global_template);
-  v8_glue::Installer<UiEvent>::Run(isolate, global_template);
-  v8_glue::Installer<FocusEvent>::Run(isolate, global_template);
-  v8_glue::Installer<WindowEvent>::Run(isolate, global_template);
-  v8_glue::Installer<Document>::Run(isolate, global_template);
-  v8_glue::Installer<Editor>::Run(isolate, global_template);
-  v8_glue::Installer<FilePath>::Run(isolate, global_template);
-  v8_glue::Installer<Range>::Run(isolate, global_template);
-  v8_glue::Installer<Selection>::Run(isolate, global_template);
-  v8_glue::Installer<Window>::Run(isolate, global_template);
-  v8_glue::Installer<EditorWindow>::Run(isolate, global_template);
-  v8_glue::Installer<TextWindow>::Run(isolate, global_template);
-  v8::Handle<v8::Object> js_unicode = v8::Object::New(isolate);
-  global_template->Set(gin::StringToV8(isolate, "Unicode"), 
-                       internal::GetUnicodeObject(isolate));
 }
 
 void ScriptController::ResetForTesting() {

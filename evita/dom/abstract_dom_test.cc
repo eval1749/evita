@@ -6,6 +6,7 @@
 #include "base/logging.h"
 #include "base/strings/utf_string_conversions.h"
 #include "evita/dom/events/event_handler.h"
+#include "evita/dom/global.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/script_controller.h"
@@ -90,14 +91,8 @@ void AbstractDomTest::SetUp() {
 
   auto const isolate = v8::Isolate::GetCurrent();
   v8::HandleScope handle_scope(isolate);
-  auto global_template = v8::ObjectTemplate::New(isolate);
-  {
-    v8::HandleScope handle_scope(isolate);
-    v8::Context::Scope context_scope(v8::Context::New(isolate));
-    ScriptController::instance()->PopulateGlobalTemplate(
-        isolate, global_template);
-    PopulateGlobalTemplate(isolate, global_template);
-  }
+  auto global_template = Global::instance()->object_template(isolate);
+  PopulateGlobalTemplate(isolate, global_template);
 
   auto context = v8::Context::New(isolate, nullptr, global_template);
   context_.Reset(isolate, context);

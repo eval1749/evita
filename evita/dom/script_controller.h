@@ -71,8 +71,6 @@ class ScriptController {
   public: void LogException(const v8::TryCatch& try_catch);
   public: void OpenFile(WindowId window_id,
                         const base::string16& filename);
-  public: void PopulateGlobalTemplate(
-      v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_template);
   public: void ResetForTesting();
   public: static ScriptController* Start(ViewDelegate* view_delegate);
   public: static ScriptController* StartForTesting(

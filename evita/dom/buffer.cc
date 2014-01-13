@@ -14,6 +14,7 @@
 #include "./ed_Mode.h"
 
 #include "evita/editor/application.h"
+#include "evita/cm_CmdProc.h"
 #include "evita/resource.h"
 #include "./vi_Frame.h"
 

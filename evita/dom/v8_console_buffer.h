@@ -42,7 +42,6 @@ class V8ConsoleBuffer : public common::Singleton<V8ConsoleBuffer>,
   private: static void EnterCommand(const Command::Context* context);
   private: void ExecuteLastLine();
   private: void HandleEvaluateResult(dom::EvaluateResult result);
-  private: virtual Command::KeyBindEntry* MapKey(uint) const override;
   private: void PopulateKeyBindings();
 
   DISALLOW_COPY_AND_ASSIGN(V8ConsoleBuffer);

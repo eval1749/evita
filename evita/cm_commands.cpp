@@ -1445,7 +1445,16 @@ void Processor::GlobalInit() {
 
 }  // namespace Command
 
-Command::KeyBindEntry* Buffer::MapKey(uint nKey) const
-{
-    return Command::g_pGlobalBinds->MapKey(nKey);
-} // Buffer::MapKey
+void Buffer::BindKey(uint key_code, Command::KeyBindEntry* entry) {
+  if (!key_bindings_)
+    key_bindings_.reset(new Command::KeyBinds());
+  key_bindings_->Bind(key_code, entry);
+}
+
+Command::KeyBindEntry* Buffer::MapKey(uint key_code) const {
+  if (auto const key_bindings = key_bindings_.get()) {
+    if (auto const entry = key_bindings->MapKey(key_code))
+      return entry;
+  }
+  return Command::g_pGlobalBinds->MapKey(key_code);
+}

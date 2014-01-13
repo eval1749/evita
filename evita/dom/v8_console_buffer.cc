@@ -14,11 +14,6 @@
 
 namespace v8_glue {
 
-namespace {
-Command::KeyBinds* s_key_bindings;
-
-}  // namespace
-
 V8ConsoleBuffer::V8ConsoleBuffer()
     : Buffer(L"*javascript console*"),
       input_history_(new InputHistory()),
@@ -115,17 +110,8 @@ void V8ConsoleBuffer::HandleEvaluateResult(dom::EvaluateResult result) {
   EmitPrompt();
 }
 
-Command::KeyBindEntry* V8ConsoleBuffer::MapKey(uint key_code) const {
-  auto const entry = s_key_bindings->MapKey(key_code);
-  return entry ? entry : Command::g_pGlobalBinds->MapKey(key_code);
-}
-
 void V8ConsoleBuffer::PopulateKeyBindings() {
-  if (s_key_bindings)
-    return;
-  s_key_bindings = new Command::KeyBinds();
-  s_key_bindings->Bind(Command::MapVKey(VK_RETURN),
-                       new Command::Command(EnterCommand));
+  BindKey(Command::MapVKey(VK_RETURN), new Command::Command(EnterCommand));
 }
 
 }  // namespace v8_glue

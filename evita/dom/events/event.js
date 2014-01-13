@@ -7,6 +7,7 @@ Event.Names = {
   BLUR: 'blur',
   CLICK: 'click',
   DBLCLICK: 'dblclick',
+  DROPWINDOW: 'dropwindow',
   FOCUS: 'focus',
   KEYDOWN: 'keydown',
   KEYUP: 'keyup',

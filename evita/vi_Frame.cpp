@@ -141,18 +141,6 @@ void Frame::AddPane(Pane* const pane) {
   }
 }
 
-// Adopt pane in another frame into this frame.
-void Frame::AdoptPane(Pane* const pane) {
-  ASSERT(!!pane);
-  ASSERT(pane->is_realized());
-
-  auto const frame = pane->GetFrame();
-  ASSERT(!!frame);
-  ASSERT(frame != this);
-  ASSERT(frame->is_realized());
-  pane->SetParentWidget(this);
-}
-
 void Frame::AddTab(Pane* const pane) {
   ASSERT(is_realized());
   ASSERT(pane->is_realized());
@@ -219,16 +207,23 @@ void Frame::DidActivatePane(Pane* const pane) {
 }
 
 void Frame::DidAddChildWidget(const widgets::Widget& widget) {
-  auto const pane = const_cast<Pane*>(widget.as<Pane>());
-  DCHECK(pane);
-  m_oPanes.Append(this, pane);
-  if (!is_realized())
+  if (auto pane = const_cast<Pane*>(widget.as<Pane>())) {
+    m_oPanes.Append(this, pane);
+    if (!is_realized())
+      return;
+    if (pane->is_realized())
+      pane->ResizeTo(GetPaneRect());
+    else
+      pane->Realize(GetPaneRect());
+    AddTab(pane);
     return;
-  if (pane->is_realized())
-    pane->ResizeTo(GetPaneRect());
-  else
-    pane->Realize(GetPaneRect());
-  AddTab(pane);
+  }
+
+  auto window = const_cast<content::ContentWindow*>(
+      widget.as<content::ContentWindow>());
+  DCHECK(window);
+  RemoveChild(window);
+  AddPane(new EditPane(window));
 }
 
 void Frame::DidChangeTabSelection(int selected_index) {
@@ -765,22 +760,36 @@ bool Frame::onTabDrag(TabBandDragAndDrop const eAction,
     return false;
   }
 
+  auto source_window_id = pPane->window_id();
+  if (source_window_id == view::kInvalidWindowId) {
+    auto const edit_pane = pPane->as<EditPane>();
+    if (!edit_pane)
+      return false;
+    auto const active_window = edit_pane->GetActiveWindow();
+    if (!active_window)
+      return false;
+    source_window_id = active_window->window_id();
+    if (source_window_id == view::kInvalidWindowId)
+      return false;
+  }
+
   switch (eAction) {
     case kDrop:
       if (this == pFrom)
         break;
-      AdoptPane(pPane);
+      Application::instance()->view_event_handler()->DidDropWidget(
+          source_window_id,
+          window_id());
       break;
 
     case kHover:
       break;
 
-    case kThrow: {
-      auto const pNewFrame = new Frame();
-      pNewFrame->Realize();
-      pNewFrame->AdoptPane(pPane);
+    case kThrow:
+      Application::instance()->view_event_handler()->DidDropWidget(
+          source_window_id,
+          view::kInvalidWindowId);
       break;
-    }
 
     default:
       CAN_NOT_HAPPEN();

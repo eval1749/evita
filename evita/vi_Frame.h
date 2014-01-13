@@ -95,7 +95,6 @@ class Frame final : public view::Window,
   private: void AddTab(Pane*);
   public: TextEditWindow* AddWindow(Buffer* buffer);
   public: void AddWindow(content::ContentWindow*);
-  private: void AdoptPane(Pane*);
 
   // [C]
   private: virtual void CreateNativeWindow() const override;

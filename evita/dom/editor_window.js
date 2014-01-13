@@ -6,6 +6,18 @@
 
 (function() {
   /**
+   * @param {EditorWindow} source.
+   * @param {EditorWindow} target.
+   */
+  function handleDropWindow(source, target) {
+    // TODO(yosi) Realize target without showing then show target after
+    // change parent.
+    if (target.state == Window.State.NOTREALIZED)
+      target.realize();
+    source.changeParent(target);
+  }
+
+  /**
    * @param {EditorWindow} window.
    */
   function handleQueryClose(window) {
@@ -23,6 +35,9 @@
    */
  EditorWindow.handleEvent = function(event) {
    switch (event.type) {
+     case Event.Names.DROPWINDOW:
+       handleDropWindow(event.sourceWindow, this);
+       break;
      case Event.Names.QUERYCLOSE:
        handleQueryClose(this);
        break;

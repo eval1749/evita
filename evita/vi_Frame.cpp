@@ -97,13 +97,6 @@ class CompositionState {
   }
 };
 
-Pane* AsPane(const widgets::Widget& widget) {
-  // warning C4946: reinterpret_cast used between related classes: 
-  // 'class1' and 'class2'
-  #pragma warning(suppress: 4946)
-  return reinterpret_cast<Pane*>(&const_cast<widgets::Widget&>(widget));
-}
-
 } // namespace
 
 #define USE_TABBAND_EDGE 0
@@ -226,7 +219,8 @@ void Frame::DidActivatePane(Pane* const pane) {
 }
 
 void Frame::DidAddChildWidget(const widgets::Widget& widget) {
-  auto const pane = AsPane(widget);
+  auto const pane = const_cast<Pane*>(widget.as<Pane>());
+  DCHECK(pane);
   m_oPanes.Append(this, pane);
   if (!is_realized())
     return;
@@ -337,7 +331,8 @@ void Frame::DidDestroyWidget() {
 }
 
 void Frame::DidRemoveChildWidget(const widgets::Widget& widget) {
-  auto const pane = AsPane(widget);
+  auto const pane = const_cast<Pane*>(widget.as<Pane>());
+  DCHECK(pane);
   m_oPanes.Delete(pane);
   if (m_oPanes.IsEmpty())
     Destroy();
@@ -970,7 +965,8 @@ void Frame::WillDestroyWidget() {
 void Frame::WillRemoveChildWidget(const Widget& widget) {
   if (!is_realized())
     return;
-  auto const pane = AsPane(widget);
+  auto const pane = const_cast<Pane*>(widget.as<Pane>());
+  DCHECK(pane);
   auto const tab_index = getTabFromPane(pane);
   DCHECK_GE(tab_index, 0);
   TabCtrl_DeleteItem(m_hwndTabBand, tab_index);

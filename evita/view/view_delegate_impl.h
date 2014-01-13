@@ -22,14 +22,14 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   }
 
   // ViewDelegate
+  private: virtual void AddWindow(dom::WindowId parent_id,
+                                  dom::WindowId child_id) override;
   private: virtual void ChangeParentWindow(dom::WindowId window_id,
       dom::WindowId new_parent_id) override;
   private: virtual void CreateEditorWindow(
       const dom::EditorWindow* window) override;
   private: virtual void CreateTextWindow(
       const dom::TextWindow* window) override;
-  private: virtual void AddWindow(dom::WindowId parent_id,
-                                  dom::WindowId child_id) override;
   private: virtual void DestroyWindow(dom::WindowId window_id) override;
   private: virtual void FocusWindow(dom::WindowId window_id) override;
   private: virtual void GetFilenameForLoad(

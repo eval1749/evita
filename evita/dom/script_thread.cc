@@ -142,10 +142,10 @@ void ScriptThread::Start(ViewDelegate* view_delegate,
         p1, p2, p3, p4, p5)); \
   }
 
+DEFINE_VIEW_DELEGATE_2(AddWindow, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(ChangeParentWindow, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
 DEFINE_VIEW_DELEGATE_1(CreateTextWindow, const TextWindow*)
-DEFINE_VIEW_DELEGATE_2(AddWindow, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_1(DestroyWindow, WindowId)
 DEFINE_VIEW_DELEGATE_1(FocusWindow, WindowId)
 DEFINE_VIEW_DELEGATE_3(GetFilenameForLoad, WindowId, const base::string16&,

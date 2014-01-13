@@ -59,13 +59,13 @@ class ScriptThread final : public ViewDelegate,
                             base::MessageLoop* host_message_loop);
 
   // ViewDelegate
+  private: virtual void AddWindow(WindowId parent_id,
+                                  WindowId child_id) override;
   public: virtual void ChangeParentWindow(WindowId window_id,
     WindowId new_parent_window_id) override;
   private: virtual void CreateEditorWindow(
       const EditorWindow* window) override;
   private: virtual void CreateTextWindow(const TextWindow* window) override;
-  private: virtual void AddWindow(WindowId parent_id,
-                                  WindowId child_id) override;
   private: virtual void DestroyWindow(WindowId window_id) override;
   private: virtual void FocusWindow(WindowId window_id) override;
   private: virtual void GetFilenameForLoad(

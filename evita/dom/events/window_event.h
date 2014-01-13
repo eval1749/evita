@@ -15,6 +15,8 @@ class WindowEvent : public v8_glue::Scriptable<WindowEvent, Event> {
 
   private: gc::Member<Window> source_window_;
 
+  public: WindowEvent(const base::string16& type, BubblingType bubbles,
+                      CancelableType cancelable, Window* source_window);
   public: WindowEvent();
   public: virtual ~WindowEvent();
 

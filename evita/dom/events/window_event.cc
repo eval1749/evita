@@ -46,6 +46,11 @@ class WindowEventWrapperInfo :
 //
 DEFINE_SCRIPTABLE_OBJECT(WindowEvent, WindowEventWrapperInfo);
 
+WindowEvent::WindowEvent(const base::string16& type, BubblingType bubbles,
+                         CancelableType cancelable, Window* source_window) {
+  InitWindowEvent(type, bubbles, cancelable, source_window);
+}
+
 WindowEvent::WindowEvent() {
 }
 

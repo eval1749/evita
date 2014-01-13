@@ -54,7 +54,11 @@ class AbstractScriptable
 
 template<typename T, typename B = AbstractScriptable>
 class Scriptable : public B {
-  protected: Scriptable() = default;
+  protected: typedef Scriptable<T, B> ScriptableBase;
+
+  protected: template<typename... Params>
+      Scriptable(Params... params) : B(params...) {
+  }
   protected: virtual ~Scriptable() = default;
 
   // Expose as public function for logging. I'm not sure other usages of

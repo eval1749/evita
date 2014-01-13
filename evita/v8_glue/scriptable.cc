@@ -28,6 +28,8 @@ void AbstractScriptable::Bind(v8::Isolate* isolate,
 
 v8::Handle<v8::Object> AbstractScriptable::GetWrapper(
     v8::Isolate* isolate) {
+  if (!this)
+    return v8::Handle<v8::Object>();
   if (!wrapper_.IsEmpty())
     return v8::Local<v8::Object>::New(isolate, wrapper_);
   auto ctor = wrapper_info()->GetOrCreateConstructorTemplate(isolate)->

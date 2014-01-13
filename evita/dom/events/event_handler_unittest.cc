@@ -19,6 +19,35 @@ class EventHandlerTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(EventHandlerTest);
 };
 
+TEST_F(EventHandlerTest, DidDropWidget) {
+  EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_)).Times(2);
+  EXPECT_VALID_SCRIPT(
+      "var result, target;"
+      "var source = new EditorWindow();"
+      "var editorWindow = new EditorWindow();"
+      "EditorWindow.handleEvent = function(event) {"
+      "  target = this;"
+      "  result = event;"
+      "}");
+  view_event_handler()->DidDropWidget(1, 2);
+  EXPECT_SCRIPT_EQ("dropwindow", "result.type");
+  EXPECT_SCRIPT_TRUE("target == editorWindow");
+}
+
+TEST_F(EventHandlerTest, DidDropWidget_InvalidWindowId) {
+  EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_)).Times(2);
+  EXPECT_VALID_SCRIPT(
+      "var result, target;"
+      "var source = new EditorWindow();"
+      "EditorWindow.handleEvent = function(event) {"
+      "  target = this;"
+      "  result = event;"
+      "}");
+  view_event_handler()->DidDropWidget(1, dom::kInvalidWindowId);
+  EXPECT_SCRIPT_EQ("dropwindow", "result.type");
+  EXPECT_SCRIPT_EQ("2", "target.id");
+}
+
 TEST_F(EventHandlerTest, QueryClose) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
   EXPECT_VALID_SCRIPT(

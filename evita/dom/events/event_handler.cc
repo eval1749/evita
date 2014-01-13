@@ -101,6 +101,20 @@ void EventHandler::DidDestroyWidget(WindowId window_id) {
   Window::DidDestroyWidget(window_id);
 }
 
+void EventHandler::DidDropWidget(WindowId source_id,
+                                 WindowId target_id) {
+  auto const source_window = FromWindowId(source_id);
+  if (!source_window)
+    return;
+  auto const target_window = NewOrFromWindowId(target_id);
+  if (!target_window)
+    return;
+  auto const event = new WindowEvent(L"dropwindow", Event::NotBubbling,
+                                     Event::NotCancelable, source_window);
+  CHECK(target_window->DispatchEvent(event));
+  DoDefaultEventHandling(target_window, event);
+}
+
 void EventHandler::DidKillFocus(WindowId window_id) {
   Window::DidKillFocus(window_id);
 }

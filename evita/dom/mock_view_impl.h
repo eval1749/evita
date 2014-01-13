@@ -13,6 +13,7 @@ namespace dom {
 class MockViewImpl : public dom::ViewDelegate {
   public: MockViewImpl();
   public: virtual ~MockViewImpl();
+  MOCK_METHOD2(ChangeParentWindow, void(WindowId, WindowId));
   MOCK_METHOD1(CreateEditorWindow, void(const EditorWindow*));
   MOCK_METHOD1(CreateTextWindow, void(const TextWindow*));
   MOCK_METHOD2(AddWindow, void(WindowId, WindowId));

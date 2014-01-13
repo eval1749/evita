@@ -17,6 +17,8 @@ class ViewEventHandler {
   public: virtual ~ViewEventHandler() = default;
 
   public: virtual void DidDestroyWidget(WindowId window_id) = 0;
+  public: virtual void DidDropWidget(WindowId source_id,
+                                     WindowId target_id)  = 0;
   public: virtual void DidKillFocus(WindowId window_id) = 0;
   public: virtual void DidRealizeWidget(WindowId window_id) = 0;
   public: virtual void DidSetFocus(WindowId window_id) = 0;

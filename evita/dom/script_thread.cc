@@ -202,6 +202,7 @@ void ScriptThread::RegisterViewEventHandler(
   }
 
 DEFINE_VIEW_EVENT_HANDLER_1(DidDestroyWidget, WindowId)
+DEFINE_VIEW_EVENT_HANDLER_2(DidDropWidget, WindowId, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidKillFocus, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidRealizeWidget, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidSetFocus, WindowId)

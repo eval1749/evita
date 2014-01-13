@@ -52,7 +52,8 @@ class RangeWrapperInfo : public v8_glue::WrapperInfo {
         .SetProperty("end", &Range::end, &Range::set_end)
         .SetProperty("start", &Range::start, &Range::set_start)
         .SetProperty("text", &Range::text, &Range::set_text)
-        .SetMethod("collapseTo", &Range::CollapseTo);
+        .SetMethod("collapseTo", &Range::CollapseTo)
+        .SetMethod("insertBefore", &Range::InsertBefore);
   }
 };
 }  // namespace
@@ -110,6 +111,11 @@ Range* Range::CollapseTo(Posn position) {
   if (!document_->IsValidPosition(position))
     return this;
   range_->SetRange(position, position);
+  return this;
+}
+
+Range* Range::InsertBefore(const base::string16& text) {
+  document_->buffer()->InsertBefore(start(), text);
   return this;
 }
 

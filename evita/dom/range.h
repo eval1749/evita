@@ -36,6 +36,7 @@ class Range : public v8_glue::Scriptable<Range> {
   public: text::Range* text_range() const { return range_; }
 
   public: Range* CollapseTo(Posn position);
+  public: Range* InsertBefore(const base::string16& text);
 
   DISALLOW_COPY_AND_ASSIGN(Range);
 };

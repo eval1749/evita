@@ -86,6 +86,19 @@ TEST_F(RangeTest, endOf) {
   EXPECT_SCRIPT_EQ("8", "test(8)");
 }
 
+TEST_F(RangeTest, insertBefore) {
+  EXPECT_VALID_SCRIPT(
+    "var doc = new Document('insertBefore');"
+    "var range = new Range(doc);"
+    "range.text = 'foo';"
+    "range.insertBefore('bar');"
+    "var range2 = new Range(doc);"
+    "range2.end = doc.length;");
+  EXPECT_SCRIPT_EQ("3", "range.start");
+  EXPECT_SCRIPT_EQ("6", "range.end");
+  EXPECT_SCRIPT_EQ("barfoo", "range2.text");
+}
+
 TEST_F(RangeTest, move) {
   EXPECT_VALID_SCRIPT(
       "var doc = new Document('move');"

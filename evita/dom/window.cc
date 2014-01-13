@@ -59,6 +59,7 @@ class WindowWrapperInfo :
         .SetProperty("parent", &Window::parent_window)
         .SetProperty("state", &Window::state)
         .SetMethod("add", &Window::AddWindow)
+        .SetMethod("changeParent", &Window::ChangeParentWindow)
         .SetMethod("destroy", &Window::Destroy)
         .SetMethod("focus", &Window::Focus)
         .SetMethod("realize", &Window::Realize)
@@ -201,6 +202,29 @@ void Window::AddWindow(Window* window) {
   child_windows_.insert(window);
   ScriptController::instance()->view_delegate()->AddWindow(
       window_id_, window->window_id());
+}
+
+void Window::ChangeParentWindow(Window* new_parent_window) {
+  if (parent_window_ == new_parent_window)
+    return;
+  if (this == new_parent_window) {
+    ScriptController::instance()->ThrowError(
+      "Can't change parent to itself.");
+    return;
+  }
+  if (new_parent_window->IsDescendantOf(this)) {
+    ScriptController::instance()->ThrowError(base::StringPrintf(
+        "Can't change parent of window(%d) to window(%d), becase window(%d)"
+        " is descendant of window(%d).",
+        window_id_, new_parent_window->window_id(),
+        new_parent_window->window_id(), window_id_));
+    return;
+  }
+  parent_window_->child_windows_.erase(this);
+  parent_window_ = new_parent_window;
+  parent_window_->child_windows_.insert(this);
+  ScriptController::instance()->view_delegate()->ChangeParentWindow(
+      window_id_, new_parent_window->window_id());
 }
 
 void Window::Destroy() {

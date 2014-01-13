@@ -141,6 +141,25 @@ TEST_F(WindowTest, Destroy) {
   EXPECT_SCRIPT_EQ("destroyed", "child3.state");
 }
 
+TEST_F(WindowTest, changeParent) {
+  EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(1), Eq(2)));
+  EXPECT_CALL(*mock_view_impl(), ChangeParentWindow(Eq(2), Eq(3)));
+  EXPECT_VALID_SCRIPT(
+    "var sample1 = new SampleWindow();"
+    "var sample2 = new SampleWindow();"
+    "var sample3 = new SampleWindow();"
+    "sample1.add(sample2)");
+  EXPECT_SCRIPT_EQ(
+    "Error: Can't change parent of window(1) to window(2), becase window(2)"
+    " is descendant of window(1).",
+    "sample1.changeParent(sample2)");
+  EXPECT_SCRIPT_EQ("Error: Can't change parent to itself.",
+                   "sample2.changeParent(sample2)");
+  EXPECT_VALID_SCRIPT("sample2.changeParent(sample1)");
+  EXPECT_VALID_SCRIPT("sample2.changeParent(sample3)");
+  EXPECT_SCRIPT_EQ("3", "sample2.parent.id");
+}
+
 TEST_F(WindowTest, focus) {
   EXPECT_VALID_SCRIPT("var sample = new SampleWindow();");
   EXPECT_SCRIPT_EQ("Error: You can't focus unrealized window.",

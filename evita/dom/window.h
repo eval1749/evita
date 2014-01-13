@@ -50,6 +50,7 @@ class Window : public v8_glue::Scriptable<Window, EventTarget> {
   public: WindowId window_id() const { return window_id_; }
 
   public: void AddWindow(Window* window);
+  public: void ChangeParentWindow(Window* new_parent_window);
   public: void Destroy();
   public: static void DidDestroyWidget(WindowId window_id);
   public: static void DidKillFocus(WindowId window_id);

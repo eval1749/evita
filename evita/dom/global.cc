@@ -3,6 +3,10 @@
 
 #include "evita/dom/global.h"
 
+#include "evita/dom/contents/content.h"
+#include "evita/dom/contents/tables/table_cell.h"
+#include "evita/dom/contents/tables/table_content.h"
+#include "evita/dom/contents/tables/table_row.h"
 #include "evita/dom/document.h"
 #include "evita/dom/editor.h"
 #include "evita/dom/editor_window.h"
@@ -43,6 +47,11 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     v8::Context::Scope context_scope(context);
   
     // Note: super class must be installed before subclass.
+    v8_glue::Installer<contents::Content>::Run(isolate, templ);
+    v8_glue::Installer<contents::TableContent>::Run(isolate, templ);
+    v8_glue::Installer<contents::TableRow>::Run(isolate, templ);
+    v8_glue::Installer<contents::TableCell>::Run(isolate, templ);
+
     v8_glue::Installer<Event>::Run(isolate, templ);
     v8_glue::Installer<EventTarget>::Run(isolate, templ);
     v8_glue::Installer<UiEvent>::Run(isolate, templ);
@@ -59,6 +68,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     v8::Handle<v8::Object> js_unicode = v8::Object::New(isolate);
     templ->Set(gin::StringToV8(isolate, "Unicode"), 
                internal::GetUnicodeObject(isolate));
+
     object_template_.Reset(isolate, templ);
   }
 

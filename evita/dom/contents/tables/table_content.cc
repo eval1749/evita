@@ -68,6 +68,7 @@ TableContent::~TableContent() {
 TableRow* TableContent::row(size_t index) const {
   if (index >= rows_.size()) {
     ScriptController::instance()->ThrowError("Bad index.");
+    return nullptr;
   }
   return rows_[index];
 }

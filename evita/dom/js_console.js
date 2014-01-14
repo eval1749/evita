@@ -244,20 +244,16 @@ var JsConsole = (function() {
   // JsConsole
   //
   function JsConsole() {
+    // TODO(yosi) We should make |*javascript*| document with JavaScript
+    // syntax coloring.
     this.document = console.document_();
     this.history_index = 0;
     this.history = [];
     this.lineNumber = 0;
     this.range = new Range(this.document);
     var self = this;
-    this.document.bindKey('Enter', function() {
-      this.selection.range.collapseTo(self.document.length);
-      self.evalLastLine();
-    });
-    this.document.bindKey('Ctrl+Up', function() {
-      self.backwardHistory();
-      this.selection.range.collapseTo(self.range.end);
-    });
+
+    // JavaScript console specific key bindings.
     this.document.bindKey('Ctrl+Down', function() {
       self.forwardHistory();
       this.selection.range.collapseTo(self.range.end);
@@ -268,6 +264,14 @@ var JsConsole = (function() {
       self.range.text = '';
       self.emitPrompt();
       this.selection.range.collapseTo(self.range.end);
+    });
+    this.document.bindKey('Ctrl+Up', function() {
+      self.backwardHistory();
+      this.selection.range.collapseTo(self.range.end);
+    });
+    this.document.bindKey('Enter', function() {
+      this.selection.range.collapseTo(self.document.length);
+      self.evalLastLine();
     });
   }
 

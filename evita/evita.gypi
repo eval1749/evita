@@ -80,7 +80,6 @@
         'dom/script_thread.cc',
         'dom/text_window.cc',
         'dom/time_stamp.cc',
-        'dom/v8_console_buffer.cc',
         'dom/window.cc',
 
         'gc/collectable.cc',

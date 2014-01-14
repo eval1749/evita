@@ -18,7 +18,6 @@
 #include "base/strings/string16.h"
 #include "./ed_Mode.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/dom/v8_console_buffer.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
@@ -869,31 +868,6 @@ DEFCOMMAND(Reload)
 } // Reload
 
 // [S]
-static void AddWindow(Frame* frame, TextEditWindow* window) {
-  frame->AddWindow(window);
-}
-
-DEFCOMMAND(ShowV8Console) {
-  if (!pCtx->GetSelection())
-    return;
-  auto& v8_buffer = *v8_glue::V8ConsoleBuffer::instance();
-  auto& frame = *Application::instance()->GetActiveFrame();
-  for (auto& pane: frame.panes()) {
-    auto const present = pane.DynamicCast<EditPane>();
-    if (present && v8_buffer == present->GetBuffer()) {
-      pane.Activate();
-      return;
-    }
-  }
-
-  std::unique_ptr<TextEditWindow> window(new TextEditWindow(&v8_buffer));
-  window->GetSelection()->SetRange(v8_buffer.GetEnd(), v8_buffer.GetEnd());
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(AddWindow,
-                 base::Unretained(&frame),
-                 base::Unretained(window.release())));
-}
-
 namespace {
 enum SplitDirection {
   kSplitHorizontally,
@@ -1380,9 +1354,6 @@ void Processor::GlobalInit() {
     BIND_KEY(Mod_Ctrl | 'U', StartArgumentEntry());
     BIND_KEY(Mod_Ctrl | 'V', PasteFromClipboard);
     BIND_KEY(Mod_Ctrl | 'X', CutToClipboard);
-
-    // Ctrl+Shift
-    BIND_KEY(Mod_CtrlShift | 'J', ShowV8Console);
 
     // Ctrl+Shift+[0-9]
     BIND_KEY(Mod_CtrlShift | '0', CloseThisWindow);

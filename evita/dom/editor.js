@@ -10,9 +10,13 @@
    */
   Editor.activeWindow = function() {
     var active = null;
+    function mostRecentlyUsed(a, b) {
+      if (a && b)
+        return a.focusTick_ > b.focusTick_ ? a : b;
+      return a || b;
+    }
     function updateActiveWindow(previous, current) {
-      var newValue = previous && previous.focusTick_ > current.focusTick_ ?
-          previous : current;
+      var newValue = mostRecentlyUsed(previous, current);
       return current.children.reduce(updateActiveWindow, newValue);
     }
     return EditorWindow.list.reduce(updateActiveWindow, null);

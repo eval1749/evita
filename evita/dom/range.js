@@ -28,11 +28,11 @@
    * Move end position of Range at end of specified unit.
    * @this {Range}
    * @param {Unit} unit.
-   * @param {Alter} alter, optional default is Alter.MOVE.
+   * @param {Alter=} opt_alter, default is Alter.MOVE.
    * @return {Range}
    */
-  Range.prototype.endOf = function(unit, alter) {
-    alter = arguments.length == 1 ? Alter.MOVE : alter;
+  Range.prototype.endOf = function(unit, opt_alter) {
+    var alter = arguments.length >= 2 ? opt_alter : Alter.MOVE;
     this.end = this.document.computeEndOf_(unit, this.end);
     switch (alter) {
       case Alter.EXTEND:
@@ -49,10 +49,11 @@
   /**
    * @this {Range}
    * @param {Unit} unit.
-   * @param {numbe} count.
+   * @param {number=} opt_count, defualt is one.
    * @return {Range}
    */
-  Range.prototype.move = function(unit, count) {
+  Range.prototype.move = function(unit, opt_count) {
+    var count = arguments.length >= 2 ? opt_count : 1;
     var position = count > 0 ? this.end : this.start;
     this.collapseTo(this.document.computeMotion_(unit, count, position));
     return this;
@@ -61,10 +62,11 @@
   /**
    * @this {Range}
    * @param {Unit} unit.
-   * @param {numbe} count.
+   * @param {number=} opt_count, defualt is one.
    * @return {Range}
    */
-  Range.prototype.moveEnd = function(unit, count) {
+  Range.prototype.moveEnd = function(unit, opt_count) {
+    var count = arguments.length >= 2 ? opt_count : 1;
     var position = this.document.computeMotion_(unit, count, this.end);
     if (position >= this.start)
       this.end = position;
@@ -76,10 +78,11 @@
   /**
    * @this {Range}
    * @param {Unit} unit.
-   * @param {numbe} count.
+   * @param {number=} opt_count, defualt is one.
    * @return {Range}
    */
-  Range.prototype.moveStart = function(unit, count) {
+  Range.prototype.moveStart = function(unit, opt_count) {
+    var count = arguments.length >= 2 ? opt_count : 1;
     var position = this.document.computeMotion_(unit, count, this.start);
     if (position <= this.end)
       this.start = position;
@@ -92,10 +95,10 @@
    * Move start position of Range at start of specified unit.
    * @this {Range}
    * @param {Unit} unit.
-   * @param {Alter} alter, optional default is Alter.MOVE.
+   * @param {Alter=} opt_alter, default is Alter.MOVE.
    */
-  Range.prototype.startOf = function(unit, alter) {
-    alter = arguments.length == 1 ? Alter.MOVE : alter;
+  Range.prototype.startOf = function(unit, opt_alter) {
+    var alter = arguments.length >= 2 ? opt_alter : Alter.MOVE;
     this.start = this.document.computeStartOf_(unit, this.start);
     switch (alter) {
       case Alter.EXTEND:

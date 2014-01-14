@@ -50,7 +50,7 @@
    * @param {string} key_combination.
    * @param {Object} command.
    */
-  Document.prototype.bindKey = function(combination, command) {
+  Document.prototype.bindKey = function (key_combination, command) {
     this.bindKey_(parseKeyCombination(key_combination), command);
   };
 
@@ -99,7 +99,7 @@
         throwUnsupportedUnit('endOf', 'PAGE');
       case Unit.PARAGRAPH:
         while (position < document.length) {
-          if (document.charCodeAt_(position) == '\n')
+          if (document.charCodeAt_(position) == Unicode.LF)
             return position;
           ++position;
         }
@@ -247,7 +247,7 @@
       case Unit.PARAGRAPH:
         while (position > 0) {
           --position;
-          if (document.charCodeAt_(position) == '\n')
+          if (document.charCodeAt_(position) == Unicode.LF)
             return position + 1;
         }
         return position;

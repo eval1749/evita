@@ -5,6 +5,13 @@
 'use strict';
 
 (function() {
+  // Well known character codes
+  Unicode.CR = 13;
+  Unicode.LF = 10;
+  Unicode.SPACE = 20;
+  Unicode.TAB = 9;
+  Unicode.DEL = 0x7F;
+
   /** @enum{string} */
   Unicode.CATEGORY_MAP = {
     Lu: 'Uppercase_Letter',

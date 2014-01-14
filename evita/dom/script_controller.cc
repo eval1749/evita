@@ -100,6 +100,7 @@ ScriptController::ScriptController(ViewDelegate* view_delegate)
       testing_(false),
       view_delegate_(view_delegate) {
   view_delegate_->RegisterViewEventHandler(event_handler_.get());
+  v8::V8::InitializeICU();
   auto const isolate = isolate_holder_.isolate();
   isolate->Enter();
   v8::HandleScope handle_scope(isolate);

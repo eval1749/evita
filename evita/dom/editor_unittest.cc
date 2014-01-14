@@ -57,6 +57,14 @@ TEST_F(EditorTest, messageBox) {
   EXPECT_SCRIPT_EQ("3", "response_code");
 }
 
+TEST_F(EditorTest, runScript) {
+  EXPECT_SCRIPT_EQ("1", "Editor.runScript('1').value");
+  EXPECT_SCRIPT_EQ(
+      "ReferenceError: foo is not defined,0,1",
+      "var result = Editor.runScript('foo');"
+      "[result.exception, result.start, result.end]");
+}
+
 TEST_F(EditorTest, version) {
   EXPECT_SCRIPT_EQ("5.0", "Editor.version");
 }

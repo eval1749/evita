@@ -73,6 +73,53 @@ class EditorClass : public v8_glue::WrapperInfo {
     return nullptr;
   }
 
+  private: static v8::Local<v8::Object> NewRunScriptResult(
+      v8::Isolate* isolate, v8::Handle<v8::Value> run_value,
+      const v8::TryCatch& try_catch) {
+    auto const result = v8::Object::New(isolate);
+    if (try_catch.HasCaught()) {
+      result->Set(gin::StringToV8(isolate, "exception"),
+          try_catch.Exception());
+      result->Set(gin::StringToV8(isolate, "stackTrace"),
+          try_catch.StackTrace());
+      auto const message = try_catch.Message();
+      result->Set(gin::StringToV8(isolate, "lineNumber"),
+          gin::ConvertToV8(isolate, message->GetLineNumber()));
+      result->Set(gin::StringToV8(isolate, "start"),
+          gin::ConvertToV8(isolate, message->GetStartPosition()));
+      result->Set(gin::StringToV8(isolate, "end"),
+          gin::ConvertToV8(isolate, message->GetEndPosition()));
+      result->Set(gin::StringToV8(isolate, "startColumn"),
+          gin::ConvertToV8(isolate, message->GetStartColumn()));
+      result->Set(gin::StringToV8(isolate, "endColumn"),
+          gin::ConvertToV8(isolate, message->GetEndColumn()));
+    } else {
+      result->Set(gin::StringToV8(isolate, "value"), run_value);
+    }
+    return result;
+  }
+
+  private: static v8::Handle<v8::Object> RunScript(
+      const base::string16& script_text) {
+    auto const isolate = ScriptController::instance()->isolate();
+    v8::EscapableHandleScope handle_scope(isolate);
+    v8::TryCatch try_catch;
+    auto const script = v8::Script::Compile(
+        gin::StringToV8(isolate, script_text)->ToString(),
+        gin::StringToV8(isolate, "(runScript)")->ToString());
+    if (script.IsEmpty()) {
+      return handle_scope.Escape(NewRunScriptResult(isolate,
+          v8::Handle<v8::Value>(), try_catch));
+    }
+    auto const run_value = script->Run();
+    if (run_value.IsEmpty()) {
+      return handle_scope.Escape(NewRunScriptResult(isolate,
+          v8::Handle<v8::Value>(), try_catch));
+    }
+    return handle_scope.Escape(NewRunScriptResult(isolate, run_value,
+        try_catch));
+  }
+
   private: static void SetKeyBinding(int key_code,
                                     v8::Handle<v8::Object> command) {
     ASSERT_DOM_LOCKED();
@@ -97,6 +144,7 @@ class EditorClass : public v8_glue::WrapperInfo {
       .SetMethod("getFilenameForLoad_", &EditorClass::GetFilenameForLoad)
       .SetMethod("getFilenameForSave_", &EditorClass::GetFilenameForSave)
       .SetMethod("messageBox_", &EditorClass::MessageBox)
+      .SetMethod("runScript", &EditorClass::RunScript)
       .SetMethod("setKeyBinding_", &EditorClass::SetKeyBinding)
       .SetProperty("version", &EditorClass::version)
       .Build();

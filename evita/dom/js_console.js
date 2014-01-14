@@ -14,6 +14,7 @@
 //  Enter Executes the last line, between end of prompt to end of document, as
 //        JavaScript source code and inserts result value into the document.
 //  Ctrl+Down Forward history
+//  Ctrl+L Clear console.
 //  Ctlr+Up Backward history
 //
 var JsConsole = (function() {
@@ -259,6 +260,13 @@ var JsConsole = (function() {
     });
     this.document.bindKey('Ctrl+Down', function() {
       self.forwardHistory();
+      this.selection.range.collapseTo(self.range.end);
+    });
+    this.document.bindKey('Ctrl+L', function() {
+      self.range.startOf(Unit.DOCUMENT);
+      self.range.endOf(Unit.DOCUMENT, Alter.EXTEND);
+      self.range.text = '';
+      self.emitPrompt();
       this.selection.range.collapseTo(self.range.end);
     });
   }

@@ -4,7 +4,7 @@
 'use strict';
 
 var console = {
-  DOCUMENT_NAME: '*console log*',
+  DOCUMENT_NAME: '*javascript*',
 
   /**
    * Clear console log contents.
@@ -28,16 +28,35 @@ var console = {
    * @param {...Object}
    */
   log: function() {
+    function uneval(value) {
+      if (value === null)
+        return 'null';
+      if (value === undefined)
+        return 'undefined';
+      try {
+        return value.toString();
+      } catch (e) {
+        return 'Exception in toString: ' + e.toString();
+      }
+    }
+
     var message = Array.prototype.slice.call(arguments, 0).map(function(arg) {
       try {
-        return arg.toString();
+        return uneval(arg);
       } catch (e) {
-        return e.toString();
+        return uneval(e);
       }
     }).join(' ');
     var document = console.document_();
     var range = new Range(document);
-    range.endOf(Unit.DOCUMENT).text = message + '\n';
+    range.collapseTo(document.length);
+    var start = range.start;
+    range.startOf(Unit.PARAGRAPH, Alter.EXTEND);
+    if (start != range.start) {
+      range.collapseTo(range.end);
+      message = '\n' + message;
+    }
+    range.insertBefore(message + '\n');
   },
 
   /**

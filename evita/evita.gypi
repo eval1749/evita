@@ -110,7 +110,6 @@
           'dom/runtime.js',
           'dom/messages_en_US.js',
 
-          'dom/console.js',
           'dom/document.js',
           'dom/editor.js',
           'dom/editor_window.js',
@@ -119,6 +118,8 @@
           'dom/range.js',
           'dom/selection.js',
           'dom/window.js',
+
+          'dom/console.js',
           'dom/key_bindings.js',
         ],
       }, # variables

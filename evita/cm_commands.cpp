@@ -581,19 +581,6 @@ DEFCOMMAND(GoToCloseParenExtend)
     }
 } // GoToCloseParenExtend
 
-DEFCOMMAND(GoToCommand)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-
-    // FIXME 2007-08-21 yosi@msn.com We should display dialog box to
-    // prompt enter line number and list of functions.
-    unless (pCtx->HasArg()) return;
-
-    pSelection->SetRange(0, 0);
-    pSelection->MoveDown(Unit_Paragraph, pCtx->GetArg() - 1);
-} // GoToCommand
-
 DEFCOMMAND(GoToOpenParen)
 {
     Selection* pSelection = pCtx->GetSelection();
@@ -1345,7 +1332,6 @@ void Processor::GlobalInit() {
     BIND_KEY(Mod_Ctrl | 'B', ListBuffer);
     BIND_KEY(Mod_Ctrl | 'C', CopyToClipboard);
     BIND_KEY(Mod_Ctrl | 'F', FindCommand);
-    BIND_KEY(Mod_Ctrl | 'G', GoToCommand);
     BIND_KEY(Mod_Ctrl | 'H', FindCommand);
     //BIND_KEY(Mod_Ctrl | 'I', Indent);
     //BIND_KEY(Mod_Ctrl | 'M', TypeEnter);

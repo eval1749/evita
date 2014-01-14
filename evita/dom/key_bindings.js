@@ -76,6 +76,15 @@
     });
   });
 
+  // TODO(yosi) We should display dialog box to prompt enter line number and
+  // list of functions.
+  Editor.setKeyBinding('Ctrl+G', function(arg) {
+    if (!arg)
+      return;
+    this.selection.range.startOf(Unit.DOCUMENT);
+    this.selection.range.move(Unit.PARAGRAPH, arg - 1);
+  });
+
   // Make selection visible
   Editor.setKeyBinding('Ctrl+L', function() {
     this.makeSelectionVisible();

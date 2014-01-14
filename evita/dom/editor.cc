@@ -80,9 +80,12 @@ class EditorClass : public v8_glue::WrapperInfo {
     if (try_catch.HasCaught()) {
       result->Set(gin::StringToV8(isolate, "exception"),
           try_catch.Exception());
-      result->Set(gin::StringToV8(isolate, "stackTrace"),
-          try_catch.StackTrace());
       auto const message = try_catch.Message();
+      result->Set(gin::StringToV8(isolate, "stackTrace"),
+          message->GetStackTrace().IsEmpty() ? v8::Array::New(isolate, 0) :
+            message->GetStackTrace()->AsArray());
+      result->Set(gin::StringToV8(isolate, "stackTraceString"),
+          try_catch.StackTrace());
       result->Set(gin::StringToV8(isolate, "lineNumber"),
           gin::ConvertToV8(isolate, message->GetLineNumber()));
       result->Set(gin::StringToV8(isolate, "start"),

@@ -118,6 +118,11 @@ ScriptController::~ScriptController() {
   script_controller = nullptr;
 }
 
+ScriptController* ScriptController::instance() {
+  DCHECK(script_controller);
+  return script_controller;
+}
+
 v8::Isolate* ScriptController::isolate() const {
   return const_cast<ScriptController*>(this)->isolate_holder_.isolate();
 }
@@ -125,11 +130,6 @@ v8::Isolate* ScriptController::isolate() const {
 ViewDelegate* ScriptController::view_delegate() const {
   DCHECK(view_delegate_);
   return view_delegate_;
-}
-
-ScriptController* ScriptController::instance() {
-  DCHECK(script_controller);
-  return script_controller;
 }
 
 void ScriptController::DidStartHost() {

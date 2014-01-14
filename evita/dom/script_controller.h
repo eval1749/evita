@@ -60,10 +60,10 @@ class ScriptController {
   private: ScriptController(ViewDelegate* view_delegate);
   public: ~ScriptController();
 
-  public: ViewDelegate* view_delegate() const;
   public: EventHandler* event_handler() const { return event_handler_.get(); }
   public: static ScriptController* instance();
   public: v8::Isolate* isolate() const;
+  public: ViewDelegate* view_delegate() const;
 
   public: void DidStartHost();
   public: EvaluateResult Evaluate(const base::string16& script_text);

@@ -160,7 +160,7 @@ EvaluateResult ScriptController::Evaluate(const base::string16& script_text) {
   auto const isolate = isolate_holder_.isolate();
   v8::HandleScope handle_scope(isolate);
   v8::TryCatch try_catch;
-  v8::Handle<v8::Script> script = v8::Script::Compile(
+  v8::Handle<v8::Script> script = v8::Script::New(
       gin::StringToV8(isolate, script_text)->ToString(),
       gin::StringToV8(isolate, "(eval)")->ToString());
   if (script.IsEmpty()) {

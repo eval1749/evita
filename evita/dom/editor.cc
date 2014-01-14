@@ -106,7 +106,7 @@ class EditorClass : public v8_glue::WrapperInfo {
     auto const context = ScriptController::instance()->context();
     v8::Context::Scope context_scope(context);
     v8::TryCatch try_catch;
-    auto const script = v8::Script::Compile(
+    auto const script = v8::Script::New(
         gin::StringToV8(isolate, script_text)->ToString(),
         gin::StringToV8(isolate, "(runScript)")->ToString());
     if (script.IsEmpty()) {

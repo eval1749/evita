@@ -118,6 +118,10 @@ ScriptController::~ScriptController() {
   script_controller = nullptr;
 }
 
+v8::Handle<v8::Context> ScriptController::context() const {
+  return  context_holder_.context();
+}
+
 ScriptController* ScriptController::instance() {
   DCHECK(script_controller);
   return script_controller;

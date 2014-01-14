@@ -28,7 +28,13 @@ var console = {
    * @param {...Object}
    */
   log: function() {
-    function uneval(value) {
+    function stringify(value) {
+      if (typeof(value) == 'string')
+        return value;
+
+      if (JsConsole.stringify)
+        return JsConsole.stringify(value);
+
       if (value === null)
         return 'null';
       if (value === undefined)
@@ -42,9 +48,9 @@ var console = {
 
     var message = Array.prototype.slice.call(arguments, 0).map(function(arg) {
       try {
-        return uneval(arg);
+        return stringify(arg);
       } catch (e) {
-        return uneval(e);
+        return stringify(e);
       }
     }).join(' ');
     var document = console.document_();

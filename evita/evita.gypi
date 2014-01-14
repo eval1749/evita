@@ -120,6 +120,7 @@
           'dom/window.js',
 
           'dom/console.js',
+          'dom/js_console.js',
           'dom/key_bindings.js',
         ],
       }, # variables

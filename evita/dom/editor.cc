@@ -103,6 +103,8 @@ class EditorClass : public v8_glue::WrapperInfo {
       const base::string16& script_text) {
     auto const isolate = ScriptController::instance()->isolate();
     v8::EscapableHandleScope handle_scope(isolate);
+    auto const context = ScriptController::instance()->context();
+    v8::Context::Scope context_scope(context);
     v8::TryCatch try_catch;
     auto const script = v8::Script::Compile(
         gin::StringToV8(isolate, script_text)->ToString(),

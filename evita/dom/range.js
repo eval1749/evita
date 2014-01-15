@@ -6,8 +6,8 @@
 (function() {
   /**
    * Capitalize range.
-   * @this {Range}
-   * @return {Range}
+   * @this {!Range}
+   * @return {!Range}
    */
   Range.prototype.capitalize = function() {
     var text = this.text;
@@ -26,10 +26,10 @@
 
   /**
    * Move end position of Range at end of specified unit.
-   * @this {Range}
+   * @this {!Range}
    * @param {Unit} unit.
    * @param {Alter=} opt_alter, default is Alter.MOVE.
-   * @return {Range}
+   * @return {!Range}
    */
   Range.prototype.endOf = function(unit, opt_alter) {
     var alter = arguments.length >= 2 ? opt_alter : Alter.MOVE;
@@ -47,10 +47,10 @@
   };
 
   /**
-   * @this {Range}
+   * @this {!Range}
    * @param {Unit} unit.
    * @param {number=} opt_count, defualt is one.
-   * @return {Range}
+   * @return {!Range}
    */
   Range.prototype.move = function(unit, opt_count) {
     var count = arguments.length >= 2 ? opt_count : 1;
@@ -60,10 +60,10 @@
   };
 
   /**
-   * @this {Range}
+   * @this {!Range}
    * @param {Unit} unit.
    * @param {number=} opt_count, defualt is one.
-   * @return {Range}
+   * @return {!Range}
    */
   Range.prototype.moveEnd = function(unit, opt_count) {
     var count = arguments.length >= 2 ? opt_count : 1;
@@ -76,10 +76,10 @@
   };
 
   /**
-   * @this {Range}
+   * @this {!Range}
    * @param {Unit} unit.
    * @param {number=} opt_count, defualt is one.
-   * @return {Range}
+   * @return {!Range}
    */
   Range.prototype.moveStart = function(unit, opt_count) {
     var count = arguments.length >= 2 ? opt_count : 1;
@@ -93,7 +93,6 @@
 
   /**
    * Move start position of Range at start of specified unit.
-   * @this {Range}
    * @param {Unit} unit.
    * @param {Alter=} opt_alter, default is Alter.MOVE.
    */
@@ -112,8 +111,7 @@
   };
 
   /**
-   * @this {Range}
-   * @return {Range}
+   * @return {!Range}
    */
   Range.prototype.toLocaleLowerCase = function() {
     this.text = this.text.toLocaleLowerCase();
@@ -121,8 +119,7 @@
   };
   
   /**
-   * @this {Range}
-   * @return {Range}
+   * @return {!Range}
    */
   Range.prototype.toLocaleUpperCase = function() {
     this.text = this.text.toLocaleUpperCase();
@@ -130,8 +127,7 @@
   };
   
   /**
-   * @this {Range}
-   * @return {Range}
+   * @return {!Range}
    */
   Range.prototype.toLowerCase = function() {
     this.text = this.text.toLowerCase();
@@ -139,8 +135,7 @@
   };
   
   /**
-   * @this {Range}
-   * @return {Range}
+   * @return {!Range}
    */
   Range.prototype.toUpperCase = function() {
     this.text = this.text.toUpperCase();

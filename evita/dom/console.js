@@ -25,9 +25,9 @@ var console = {
 
   /**
    * Output arguments to console log.
-   * @param {...Object}
+   * @param {...} var_args
    */
-  log: function() {
+  log: function(var_args) {
     function stringify(value) {
       if (typeof(value) == 'string')
         return value;
@@ -42,7 +42,7 @@ var console = {
       try {
         return value.toString();
       } catch (e) {
-        return 'Exception in toString: ' + e.toString();
+        return 'Exception in toString: ' + e;
       }
     }
 

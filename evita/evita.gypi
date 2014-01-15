@@ -104,6 +104,7 @@
         'library_files': [
           'dom/polyfill.js',
           'dom/unicode.js',
+          'dom/enums.js',
           'dom/types.js',
           'dom/key_names.js',
           'dom/runtime.js',

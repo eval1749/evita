@@ -6,11 +6,11 @@
 
 (function() {
   // Well known character codes
-  Unicode.CR = 13;
-  Unicode.LF = 10;
-  Unicode.SPACE = 20;
-  Unicode.TAB = 9;
-  Unicode.DEL = 0x7F;
+  /** @const @type{number} */ Unicode.CR = 13;
+  /** @const @type{number} */ Unicode.LF = 10;
+  /** @const @type{number} */ Unicode.SPACE = 20;
+  /** @const @type{number} */ Unicode.TAB = 9;
+  /** @const @type{number} */ Unicode.DEL = 0x7F;
 
   /** @enum{string} */
   Unicode.CATEGORY_MAP = {

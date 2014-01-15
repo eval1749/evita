@@ -6,6 +6,7 @@
 (function() {
   /** @const @type {Map.<string, string>} */
   var WORD_CLASS_MAP = (function() {
+    /** @param {string} name */
     function wordClass(name) {
       var word_class = name.charAt(0);
       if (word_class == 'L' || word_class == 'N')
@@ -37,10 +38,19 @@
     throw 'Range.prototype.' + name + ' does not support Unit.' + unit;
   }
 
+  /**
+   * @param {number} char_code
+   * @return {WordClass|null}
+   */
   function wordClassOf(char_code) {
     return WORD_CLASS_MAP.get(Unicode.UCD[char_code].category);
   }
 
+  /**
+   * @param {Document} document
+   * @param {number} position
+   * @return {WordClass|null}
+   */
   function wordClassAt(document, position) {
     return wordClassOf(document.charCodeAt_(position));
   }
@@ -128,6 +138,7 @@
       }
       default:
         throwInvalidUnit(unit);
+        return 0;
     }
   };
 
@@ -273,6 +284,7 @@
       }
       default:
         throwInvalidUnit(unit);
+        return 0;
     }
   };
 
@@ -299,15 +311,7 @@
   };
 
   /**
-   * @return {boolean}
-   */
-  Document.prototype.needSave = function() {
-    // TODO: We should use |document.notForSave|.
-    return this.modified && FilePath.isValidFilename(this.filename);
-  };
-
-  /**
-   * @param {string} A filename to load from.
+   * @param {string} filename to load from.
    * @return {Document} A Document object contains contents of file.
    */
   Document.load = function(filename) {
@@ -321,5 +325,13 @@
     var document = new Document(FilePath.basename(filename));
     document.load_(absolute_filename);
     return document;
+  };
+
+  /**
+   * @return {boolean}
+   */
+  Document.prototype.needSave = function() {
+    // TODO: We should use |document.notForSave|.
+    return this.modified && FilePath.isValidFilename(this.filename);
   };
 })();

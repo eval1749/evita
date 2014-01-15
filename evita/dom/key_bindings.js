@@ -173,8 +173,8 @@
     var position = selection.document.redo(selection.active);
     if (position < 0) {
       Editor.messageBox(this,
-          localizeText(IDS_NO_MORE_REDO),
-          localizeText(IDS_APP_TITLE),
+          localizeText(Strings.IDS_NO_MORE_REDO),
+          localizeText(Strings.IDS_APP_TITLE),
           MessageBox.ICONWARNING);
       return;
     }
@@ -186,8 +186,8 @@
     var position = selection.document.undo(selection.active);
     if (position < 0) {
       Editor.messageBox(this,
-          localizeText(IDS_NO_MORE_UNDO),
-          localizeText(IDS_APP_TITLE),
+          localizeText(Strings.IDS_NO_MORE_UNDO),
+          localizeText(Strings.IDS_APP_TITLE),
           MessageBox.ICONWARNING);
       return;
     }

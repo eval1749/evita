@@ -61,8 +61,8 @@
       return;
     }
     Editor.messageBox(null,
-                      localizeText(IDS_ASK_SAVE, {name: document.name}),
-                      localizeText(IDS_APP_TITLE),
+                      localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
+                      localizeText(Strings.IDS_APP_TITLE),
                       MessageBox.ICONWARNING | MessageBox.YESNOCANCEL)
       .then(function(response_code) {
         switch (response_code) {

@@ -62,7 +62,7 @@ void ScriptCommand::RunCommand(Context* context) {
 
   v8::Handle<v8::Value> argv[1];
   if (context->has_arg)
-    argv[0] = v8::Integer::New(context->arg);
+    argv[0] = v8::Integer::New(isolate, context->arg);
   else
     argv[0] = v8::Undefined(isolate);
 

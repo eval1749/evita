@@ -5,7 +5,7 @@
 vars = {
   "googlecode_url": "http://%s.googlecode.com/svn",
   "chromium_git": "https://chromium.googlesource.com",
-  "v8_revision": "18437",
+  "v8_revision": "18575",
 }
 
 deps = {
@@ -22,10 +22,10 @@ deps = {
     (Var("googlecode_url") % "googletest") + "/trunk@643",
 
   "src/tools/gyp":
-    (Var("googlecode_url") % "gyp") + "/trunk@1828",
+    (Var("googlecode_url") % "gyp") + "/trunk@1836",
 
   "src/third_party/icu":
-    "/trunk/deps/third_party/icu46@242173",
+    "/trunk/deps/third_party/icu46@244134",
 
   "src/v8":
     (Var("googlecode_url") % "v8") + "/trunk@" + Var("v8_revision"),

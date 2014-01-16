@@ -26,6 +26,7 @@
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "common/tree/ancestors_or_self.h"
+#include "common/tree/child_nodes.h"
 #include "common/win/native_window.h"
 #include "./ctrl_TabBand.h"
 #include "./ed_Mode.h"
@@ -96,6 +97,22 @@ class CompositionState {
 #endif
   }
 };
+
+bool HasChildWindow(widgets::Widget* parent, view::Window* window) {
+  for (auto child : parent->child_nodes()) {
+    if (child == window)
+      return true;
+  }
+  return false;
+}
+
+Pane* GetContainingPane(Frame* frame, view::Window* window) {
+  for (auto child : frame->child_nodes()) {
+    if (HasChildWindow(child, window))
+      return child->as<Pane>();
+  }
+  return nullptr;
+}
 
 } // namespace
 
@@ -385,6 +402,25 @@ void Frame::DidSetFocus() {
   }
   Application::instance()->SetActiveFrame(this);
   m_pActivePane->SetFocus();
+}
+
+void Frame::DidSetFocusOnChild(view::Window* window) {
+  auto const pane = GetContainingPane(this, window);
+  if (!pane) {
+    DVLOG(0) << "Frame::DidSetFolcusOnChild: No pane contains " << window;
+    return;
+  }
+
+  if (pane == m_pActivePane) {
+    // TODO(yosi) This is happened on multiple window in one pane, we should
+    // update tab label text.
+    window->Show();
+    return;
+  }
+
+  auto const tab_index = getTabFromPane(pane);
+  if (tab_index >= 0)
+    DidChangeTabSelection(tab_index);
 }
 
 Frame* Frame::FindFrame(const widgets::Widget& widget) {

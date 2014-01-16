@@ -110,6 +110,7 @@ class Frame final : public view::Window,
       const Widget& widget) override;
   private: virtual void DidResize() override;
   private: virtual void DidSetFocus() override;
+  public: void DidSetFocusOnChild(view::Window* window);
 
   // [G]
   public: Pane* GetActivePane();

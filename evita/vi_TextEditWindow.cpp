@@ -376,6 +376,10 @@ void TextEditWindow::DidSetFocus() {
   caret_->Take(*m_gfx);
   GetBuffer()->UpdateFileStatus(true);
   m_lCaretPosn = -1;
+  if (!is_shown()) {
+    auto const frame = Frame::FindFrame(*this);
+    frame->DidSetFocusOnChild(this);
+  }
 }
 
 void TextEditWindow::DidShow() {

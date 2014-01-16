@@ -10,7 +10,6 @@
  * @constructor
  */
 var Document = function(name) {};
-var Range;
 
 /**
  * @constructor
@@ -29,6 +28,14 @@ var Window = function() {};
 var EditorWindow = function() {};
 
 var FilePath;
+
+/**
+ * @constructor
+ * @param {!Document} document.
+ * @param {number=} opt_start.
+ * @param {number=} opt_end.
+ */
+var Range = function(document, opt_start, opt_end) {};
 
 /**
  * @constructor

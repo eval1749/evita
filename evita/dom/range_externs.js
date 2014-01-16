@@ -3,16 +3,9 @@
 
 /**
  * @fileoverview Range
+ * See types_externs.js for Range constructor.
  * @externs
  */
-
-/**
- * @constructor
- * @param {!Document} document.
- * @param {number=} opt_start.
- * @param {number=} opt_end.
- */
-var Range = function(document, opt_start, opt_end) {};
 
 /** @expose @type {!Document} */
 Range.prototype.document;

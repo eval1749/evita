@@ -29,3 +29,23 @@ Window.prototype.realize = function() {};
 /** @param {!Window} window */
 Window.prototype.remove= function(window) {};
 
+
+/**
+ * @param {string} type
+ * @param {EventListener} listener
+ * @param {boolean=} opt_capture
+ */
+Window.prototype.addEventListener = function(type, listener, opt_capture) {};
+
+/**
+ * @param {Event} event
+ */
+Window.prototype.dispatchEvent = function(event) {};
+
+/**
+ * @param {string} type
+ * @param {EventListener} listener
+ * @param {boolean=} opt_capture
+ */
+Window.prototype.removeEventListener = function(type, listener,
+                                                opt_capture) {};

@@ -10,8 +10,11 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 evita_src = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir));
 
 JAVA_OPTIONS = ['-d64', '-server'];
-CLOSURE_JAR = os.path.join(evita_src, 'third_party', 'closure_compiler',
-                          'compiler.jar');
+CLOSURE_DIR = os.path.join(evita_src, 'third_party', 'closure_compiler')
+CLOSURE_JAR = os.path.join(CLOSURE_DIR, 'compiler.jar')
+ES3_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es3.js')
+ES5_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es5.js')
+ES6_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es6.js')
 
 # See below folow list of warnings:
 # https://code.google.com/p/closure-compiler/wiki/Warnings
@@ -42,13 +45,13 @@ def makeOptions(name, values):
     return ''
   return name + ' ' + (' ' + name + ' ').join(values)
 
-def run(js_files, js_externs):
+def run(js_files, js_externs, closure_options):
   params = {
     'java_options': ' '.join(JAVA_OPTIONS),
     'closure_errors': makeOptions('--jscomp_error', CLOSURE_ERRORS),
     'closure_warnings': makeOptions('--jscomp_warning', CLOSURE_WARNINGS),
     'closure_jar': CLOSURE_JAR,
-    'closure_options': ' '.join(CLOSURE_OPTIONS),
+    'closure_options': ' '.join(CLOSURE_OPTIONS + closure_options),
     'js_files': makeOptions('--js', js_files),
     'js_externs': makeOptions('--externs', js_externs),
   }
@@ -68,16 +71,19 @@ def readFile(filename):
 
 def main():
   js_codes = [];
-  js_externs = [];
+  js_externs = [ES3_EXTERNS_JS, ES5_EXTERNS_JS, ES6_EXTERNS_JS];
+  closure_options = []
   externs = None
   for arg in sys.argv[1:]:
     if arg == '--extern':
       externs = True;
+    elif arg.startswith('--'):
+      closure_options.append(arg)
     elif externs:
       js_externs.append(arg)
     else:
       js_codes.append(arg)
-  run(js_codes, js_externs)
+  run(js_codes, js_externs, closure_options)
 
 if __name__ == '__main__':
   main()

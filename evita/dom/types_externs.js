@@ -16,8 +16,15 @@ var Document = function(name) {};
  */
 var Editor = function() {};
 
+
+/**
+ * @interface
+ */
+var EventTarget = function() {};
+
 /**
  * @constructor
+ * @implements {EventTarget}
  */
 var Window = function() {};
 
@@ -27,13 +34,25 @@ var Window = function() {};
  */
 var EditorWindow = function() {};
 
+/**
+ * @constructor
+ */
+var Event = function() {};
+
+/** @typedef {Function|Object} Object which has |handleEvent(event)| */
+var EventListener;
+
 var FilePath;
+
+
+/** @typedef {number} */
+var Position;
 
 /**
  * @constructor
- * @param {!Document} document.
- * @param {number=} opt_start.
- * @param {number=} opt_end.
+ * @param {!Document} document
+ * @param {number=} opt_start
+ * @param {number=} opt_end
  */
 var Range = function(document, opt_start, opt_end) {};
 
@@ -51,8 +70,29 @@ var TextWindow = function(range) {};
  */
 var Selection = function() {};
 
-/** @typedef {number} */
-var Position;
+/**
+ * @constructor
+ * @extends{Event}
+ */
+var UiEvent = function() {};
+
+/**
+ * @constructor
+ * @extends{UiEvent}
+ * @param {string} type
+ * @param {?EventTarget} related_target
+ */
+var FocusEvent = function(type, related_target) {};
+
+/**
+ * @constructor
+ * @extends{Event}
+ * @param {string} type
+ * @param {boolean} bubbles
+ * @param {boolean} cancelable
+ * @param {!Window} source_window
+ */
+var WindowEvent = function(type, bubbles, cancelable, source_window) {};
 
 //////////////////////////////////////////////////////////////////////
 //

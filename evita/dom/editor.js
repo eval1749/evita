@@ -49,11 +49,10 @@
    * @return {Promise}
    */
   Editor.getFilenameForLoad = function(window, dirname) {
-    var resolved;
-    var promise = new Promise(function(r) { resolved = r; });
+    var deferred = Promise.defer();
     Editor.getFilenameForLoad_(window || Editor.activeWindow(), dirname,
-                               resolved);
-    return promise;
+                               deferred.resolve);
+    return deferred.promise;
   };
 
   /**
@@ -62,11 +61,10 @@
    * @return {Promise}
    */
   Editor.getFilenameForSave = function(window, dirname) {
-    var resolved;
-    var promise = new Promise(function(r) { resolved = r; });
+    var deferred = Promise.defer();
     Editor.getFilenameForSave_(window || Editor.activeWindow(), dirname,
-                               resolved);
-    return promise;
+                               deferred.resolve);
+    return deferred.promise;
   };
 
   /**
@@ -77,16 +75,15 @@
    * @return {Promise}
    */
   Editor.messageBox = function(window, message, title, flags) {
-    var resolved;
-    var promise = new Promise(function(r) { resolved = r; });
+    var deferred = Promise.defer();
     Editor.messageBox_(window || Editor.activeWindow(), message, title, flags,
-                       resolved);
-    return promise;
+                       deferred.resolve);
+    return deferred.promise;
   };
 
   /**
    * @param {string} combination.
-   * @param {function} command.
+   * @param {function(number=)} command.
    */
   Editor.setKeyBinding = function(combination, command) {
     Editor.setKeyBinding_(parseKeyCombination(combination), command);

@@ -47,7 +47,7 @@
   }
 
   /**
-   * @param {Document} document
+   * @param {!Document} document
    * @param {number} position
    * @return {WordClass|null}
    */
@@ -56,7 +56,7 @@
   }
 
   /**
-   * @this {Document}
+   * @this {!Document}
    * @param {string} key_combination.
    * @param {Object} command.
    */
@@ -76,10 +76,10 @@
                       MessageBox.ICONWARNING | MessageBox.YESNOCANCEL)
       .then(function(response_code) {
         switch (response_code) {
-          case DialogIemId.NO:
+          case DialogItemId.NO:
             document.forceClose();
             break;
-          case DialogIemId.YES:
+          case DialogItemId.YES:
             Editor.getFilenameForSave(null, document.filename)
               .then(function(filename) {
                 document.save(filename).then(function() {
@@ -143,7 +143,7 @@
   };
 
   /**
-   * @this {Document}
+   * @this {!Document}
    * @param {Unit} unit.
    * @param {number} count.
    * @param {number} position.
@@ -312,14 +312,15 @@
 
   /**
    * @param {string} filename to load from.
-   * @return {Document} A Document object contains contents of file.
+   * @return {!Document} A Document object contains contents of file.
    */
   Document.load = function(filename) {
     var absolute_filename = FilePath.fullPath(filename);
     var canonical_filename = absolute_filename.toLocaleLowerCase();
-    var present = Document.list.find(function(document) {
-      return document.filename.toLocaleLowerCase() == canonical_filename;
-    });
+    var present = /** @type{Document} */ (Document.list.find(
+        function(document) {
+          return document.filename.toLocaleLowerCase() == canonical_filename;
+        }));
     if (present)
       return present;
     var document = new Document(FilePath.basename(filename));

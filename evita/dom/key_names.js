@@ -4,6 +4,7 @@
 
 'use strict';
 
+/** @const @type{Array.<string>} */
 var VKEY_NAMES = [
   '00', // 0x00
   'LeftButton', // 0x01
@@ -178,9 +179,14 @@ var VKEY_NAMES = [
   'FF'
 ];
 
-/** @type {Array.<string>} */
+/** @const @type {Array.<string>} */
 var KEY_NAMES = (function() {
+  /** @type{Array.<string>} */
   var names = new Array(256);
+  /**
+   * @param{number} start
+   * @param{number} end
+   */
   function populate(start, end) {
     for (var key_code = start; key_code < end; ++key_code) {
       names[key_code] = String.fromCharCode(key_code);
@@ -197,7 +203,7 @@ var KEY_NAMES = (function() {
   return names;
 })();
 
-/** @type {Array.<string, number>} */
+/** @const @type {Array.<string, number>} */
 var KEY_CODE_MAP = (function() {
   var map = {};
   KEY_NAMES.forEach(function(name, index) {

@@ -35,9 +35,11 @@
    */
  EditorWindow.handleEvent = function(event) {
    switch (event.type) {
-     case Event.Names.DROPWINDOW:
-       handleDropWindow(event.sourceWindow, this);
+     case Event.Names.DROPWINDOW: {
+       var window_event = /** @type{WindowEvent} */(event);
+       handleDropWindow(window_event.sourceWindow, this);
        break;
+     }
      case Event.Names.QUERYCLOSE:
        handleQueryClose(this);
        break;

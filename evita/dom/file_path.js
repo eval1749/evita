@@ -6,17 +6,17 @@
 // Provide funciton names are as same as FireFox OS.Path.
 (function() {
 
-  var CURRENT_DIRECTORY = '.';
-  var EMPTY_STRING = '';
-  var PARENT_DIRECTORY = '..';
-  var PATH_SEPARATOR = '\\';
-  var RE_BASENAME = new RegExp('^(.*)[/\\\\]([^/\\\\]+)$');
-  var RE_FILENAME_RESERVED_CHARACTERS = new RegExp('[<>:"|?*]');
-  var RE_PATHNAME = new RegExp('^([^:]+:)?([/\\\\])?(.*)$');
-  var RE_COMPONENT_SEPARATOR = new RegExp('[/\\\\]');
+  /** @const */ var CURRENT_DIRECTORY = '.';
+  /** @const */ var EMPTY_STRING = '';
+  /** @const */ var PARENT_DIRECTORY = '..';
+  /** @const */ var PATH_SEPARATOR = '\\';
+  /** @const */ var RE_BASENAME = new RegExp('^(.*)[/\\\\]([^/\\\\]+)$');
+  /** @const */ var RE_FILENAME_RESERVED_CHARACTERS = new RegExp('[<>:"|?*]');
+  /** @const */ var RE_PATHNAME = new RegExp('^([^:]+:)?([/\\\\])?(.*)$');
+  /** @const */ var RE_COMPONENT_SEPARATOR = new RegExp('[/\\\\]');
 
   /**
-   * @param {string} filename.
+   * @param {string} filename
    * @return {string} A filename part of pathname.
    */
   FilePath.basename = function(filename) {
@@ -25,8 +25,8 @@
   };
 
   /**
-   * @param {string} filename.
-   * @param {string} the directory part of filename.
+   * @param {string} filename
+   * @return {string} the directory part of filename.
    */
   FilePath.dirname = function(filename) {
     var matches = filename.match(RE_BASENAME);
@@ -34,23 +34,23 @@
   };
 
   /**
-   * @param {string} filename.
-   * @param {boolean}
+   * @param {string} filename
+   * @return {boolean}
    */
   FilePath.isValidFilename = function(filename) {
     return !filename.match(RE_FILENAME_RESERVED_CHARACTERS);
   };
 
   /**
-   * @param {string} components
+   * @param {...string} var_components
    * @return {string}
    */
-  FilePath.join = function() {
+  FilePath.join = function(var_components) {
     return Array.prototype.slice.call(arguments, 0).join(PATH_SEPARATOR);
   };
 
   /**
-   * @param {string} filename.
+   * @param {string} filename
    * @return {string}
    */
   FilePath.normalize = function(filename) {
@@ -78,9 +78,9 @@
   };
 
   /**
-   * @param {string} filename.
-   * @return {dict} absolute: {boolean}, components: {Array.<string>},
-   *                winDreict: {?string}
+   * @param {string} filename
+   * @return {{absolute: boolean, components: Array.<string>,
+   *           winDrive: ?string}}
    */
   FilePath.split = function(filename) {
     var matches = filename.match(RE_PATHNAME);

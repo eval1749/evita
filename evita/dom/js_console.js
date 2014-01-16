@@ -4,20 +4,24 @@
 
 'use strict';
 
-// The JavaScript Console.
-//
-// This file introduce editor command |SwitchToJavaScriptConsole| bound to
-// |Ctrl+Shift+I| and |Ctrl+Shift+J|.
-//
-// JavaScript console is represented by the document named |*javascript*| with
-// following key bindings:
-//  Enter Executes the last line, between end of prompt to end of document, as
-//        JavaScript source code and inserts result value into the document.
-//  Ctrl+Down Forward history
-//  Ctrl+L Clear console.
-//  Ctlr+Up Backward history
-//
+/**
+ * The JavaScript Console.
+ *
+ * This file introduce editor command |SwitchToJavaScriptConsole| bound to
+ * |Ctrl+Shift+I| and |Ctrl+Shift+J|.
+ *
+ * JavaScript console is represented by the document named |*javascript*| with
+ * following key bindings:
+ *  Enter Executes the last line, between end of prompt to end of document, as
+ *        JavaScript source code and inserts result value into the document.
+ *  Ctrl+Down Forward history
+ *  Ctrl+L Clear console.
+ *  Ctlr+Up Backward history
+ *
+ * @constructor
+ */
 var JsConsole = (function() {
+  /** @param {!Object} object @return {string|undefined} */
   function getObjectIdLikeThing(object) {
     var key = ['id', 'name'].find(function(key) {
       return object[key] !== undefined;
@@ -43,9 +47,9 @@ var JsConsole = (function() {
 
   /**
    * Stringify value.
-   * @param{Object} value
-   * @param{number} MAX_LEVEL. Default is 10.
-   * @param{number} MAX_LENGTH. Default is 10.
+   * @param{*} value
+   * @param{number=} MAX_LEVEL Default is 10.
+   * @param{number=} MAX_LENGTH Default is 10.
    * @return {string}
    */
   function stringify(value, MAX_LEVEL, MAX_LENGTH) {
@@ -54,6 +58,53 @@ var JsConsole = (function() {
     var visited_map = new Map();
     var num_of_labels = 0;
 
+    /** @interface */
+    var Visitor = function() {};
+
+    /** @param {number} index */
+    Visitor.prototype.visitArrayElement = function(index) {};
+
+    /** @param {*} atom */
+    Visitor.prototype.visitAtom = function(atom) {};
+
+    /** @param {!Object} object */
+    Visitor.prototype.visitConstructed = function(object) {};
+
+    /** @param {!Date} date*/
+    Visitor.prototype.visitDate = function(date) {};
+
+    /** @param {!Object} object */
+    Visitor.prototype.visitFirstTime = function(object) {};
+
+    /** @param {!Function} fun */
+    Visitor.prototype.visitFunction = function(fun) {};
+
+    /** @param {*} key @param {number} index */
+    Visitor.prototype.visitKey = function(key, index) {};
+
+    /** @param {string} string */
+    Visitor.prototype.visitString = function(string) {};
+
+    /** @param {!Object} object */
+    Visitor.prototype.visitVisited = function(object) {};
+
+    /** @param {!Array} array */
+    Visitor.prototype.startArray = function(array) {};
+
+    /** @param {!Array} array @param {boolean} limited */
+    Visitor.prototype.endArray = function(array, limited) {};
+
+    /** @param {!Object} object */
+    Visitor.prototype.startObject = function(object) {};
+
+    /** @param {boolean} limited */
+    Visitor.prototype.endObject = function(limited) {};
+
+    /**
+     * @param {*} value
+     * @param {number} level
+     * @param {Visitor} visitor
+     */
     function visit(value, level, visitor) {
       if (value === null)
         return visitor.visitAtom('null');
@@ -81,49 +132,56 @@ var JsConsole = (function() {
           return visitor.visitString(value);
       }
 
-      if (visited_map.has(value))
-        return visitor.visitVisited(value);
-      visited_map.set(value, 0);
+      var object = /** @type{!Object} */(value);
+
+      if (visited_map.has(object))
+        return visitor.visitVisited(object);
+      visited_map.set(object, 0);
 
       ++level;
       if (level > MAX_LEVEL)
         return visitor.visitAtom('#');
 
-      visitor.visitFirstTime(value);
-      visited_map.set(value, 0);
+      visitor.visitFirstTime(object);
+      visited_map.set(object, 0);
 
-      if (Array.isArray(value)) {
-        visitor.startArray(value);
-        var length = Math.min(value.length, MAX_LENGTH);
+      if (Array.isArray(object)) {
+        var array = /** @type{!Array} */(object);
+        visitor.startArray(array);
+        var length = Math.min(array.length, MAX_LENGTH);
         for (var index = 0; index < length; ++index) {
           visitor.visitArrayElement(index);
-          visit(value[index], level, visitor);
+          visit(array[index], level, visitor);
         }
-        return visitor.endArray(value, value.length >= MAX_LENGTH);
+        return visitor.endArray(array, array.length >= MAX_LENGTH);
       }
 
-      if (isInstanceOf(value, Date))
-        return visitor.visitDate(value);
+      if (isInstanceOf(object, Date))
+        return visitor.visitDate(/** @type{!Date} */(object));
 
-      if (value.constructor.name != 'Object')
-        return visitor.visitConstructed(value);
+      if (object.constructor.name != 'Object')
+        return visitor.visitConstructed(object);
 
-      var keys = Object.keys(value).sort(function(a, b) {
+      var keys = Object.keys(object).sort(function(a, b) {
         return a.localeCompare(b);
       });
 
-      visitor.startObject(value);
+      visitor.startObject(object);
       var count = 0;
       keys.forEach(function(key) {
         if (count > MAX_LENGTH)
           return;
         visitor.visitKey(key, count);
-        visit(value[key], level, visitor);
+        visit(object[key], level, visitor);
         ++count;
       });
       visitor.endObject(count > keys.length);
     }
 
+    /**
+     * @constructor
+     * @implements {Visitor}
+     */
     function Labeler() {
       var label_map = new Map();
       var doNothing = function() {};
@@ -149,15 +207,22 @@ var JsConsole = (function() {
       this.endObject = doNothing;
     }
 
+    /** @const @type{{9: string, 10: string, 13:string}} */
     var ESCAPE_MAP = {
       0x09: 't',
       0x0A: 'n',
       0x0D: 'r'
     };
 
+    /**
+     * @constructor
+     * @implements {Visitor}
+     * @param {Labeler} labeler
+     */
     function Printer(labeler) {
       this.result = '';
-      this.emit = function() {
+      /** @param {...} var_args */
+      this.emit = function(var_args) {
         this.result += Array.prototype.slice.call(arguments, 0).join('');
       };
       this.visitAtom = function(x) {
@@ -243,7 +308,8 @@ var JsConsole = (function() {
   //
   // JsConsole
   //
-  function JsConsole() {
+  /** @constructor */
+  function JsConsole_() {
     // TODO(yosi) We should make |*javascript*| document with JavaScript
     // syntax coloring.
     this.document = console.document_();
@@ -275,14 +341,15 @@ var JsConsole = (function() {
     });
   }
 
-  JsConsole.MAX_HISTORY_LINES = 20;
-  JsConsole.instance = null;
-  JsConsole.stringify = stringify;
+  /** @type{number} */ JsConsole_.MAX_HISTORY_LINES = 20;
+  /** @type{?JsConsole_} */ JsConsole_.instance = null;
+  /** @const @type {function(*, number=, number=) : string} */
+  JsConsole_.stringify = stringify;
 
   /**
-   * @this {JsConsole}
+   * @param {?Window} active_window
    */
-  JsConsole.prototype.activate = function(active_window) {
+  JsConsole_.prototype.activate = function(active_window) {
     if (!active_window) {
       this.newWindow();
       return;
@@ -299,16 +366,13 @@ var JsConsole = (function() {
 
     if (!present) {
       present = new TextWindow(new Range(document));
-      active_editor_window.add(present);
+      active_editor_window.add(/** @type{!Window} */(present));
     }
     present.selection.range.collapseTo(document.length);
     present.focus();
   };
 
-  /**
-   * @this {JsConsole}
-   */
-  JsConsole.prototype.backwardHistory = function() {
+  JsConsole_.prototype.backwardHistory = function() {
     if (this.history_index == this.history.length)
       return;
     ++this.history_index;
@@ -316,10 +380,9 @@ var JsConsole = (function() {
   };
 
   /**
-   * @this {JsConsole}
    * @param {string} text.
    */
-  JsConsole.prototype.emit = function(text) {
+  JsConsole_.prototype.emit = function(text) {
     this.document.readOnly = false;
     //this.range.move(Unit.DOCUMENT, 1);
     this.range.collapseTo(this.document.length);
@@ -327,20 +390,14 @@ var JsConsole = (function() {
     this.document.readOnly = true;
   };
 
-  /**
-   * @this {JsConsole}
-   */
-  JsConsole.prototype.emitPrompt = function() {
+  JsConsole_.prototype.emitPrompt = function() {
     ++this.lineNumber;
     this.emit('\njs:' + this.lineNumber + '> ');
     this.range.collapseTo(this.document.length);
     this.document.readOnly = false;
   };
 
-  /**
-   * @this {JsConsole}
-   */
-  JsConsole.prototype.evalLastLine = function() {
+  JsConsole_.prototype.evalLastLine = function() {
     var range = this.range;
     range.end = this.document.length;
     if (range.start == range.end) {
@@ -351,13 +408,13 @@ var JsConsole = (function() {
     range.collapseTo(range.end);
     range.insertBefore('\n');
 
-    if (this.history.length > JsConsole.MAX_HISTORY_LINES)
+    if (this.history.length > JsConsole_.MAX_HISTORY_LINES)
       this.history.shift();
     this.history.push(line);
     this.history_index = 0;
 
     var result = Editor.runScript(line);
-    JsConsole.result = result;
+    JsConsole_.result = result;
     range.collapseTo(range.end);
     if (result.exception) {
       this.emit('Exception: ' + result.exception.message);
@@ -367,30 +424,21 @@ var JsConsole = (function() {
     this.emitPrompt();
   };
 
-  /**
-   * @this {JsConsole}
-   */
-  JsConsole.prototype.forwardHistory = function() {
+  JsConsole_.prototype.forwardHistory = function() {
     if (!this.history_index)
       return;
     --this.history_index;
     this.useHistory();
   };
 
-  /**
-   * @this {JsConsole}
-   */
-  JsConsole.prototype.newWindow = function() {
+  JsConsole_.prototype.newWindow = function() {
     var editor_window = new EditorWindow();
     var text_window = new TextWindow(new Range(this.document));
     editor_window.add(text_window);
     editor_window.realize();
   };
 
-  /**
-   * @this {JsConsole}
-   */
-  JsConsole.prototype.useHistory = function() {
+  JsConsole_.prototype.useHistory = function() {
     var range = this.range;
     range.end = this.document.length;
     range.text = this.history[this.history.length - this.history_index];
@@ -406,7 +454,7 @@ var JsConsole = (function() {
       JsConsole.instance.activate(active_window);
       return;
     }
-    var instance = new JsConsole(JsConsole.NAME);
+    var instance = new JsConsole_();
     JsConsole.instance = instance;
     instance.emit('\x2F/ JavaScript Console\n');
     instance.emitPrompt();
@@ -416,5 +464,5 @@ var JsConsole = (function() {
   Editor.setKeyBinding('Ctrl+Shift+I', switchToJsConsoleCommand);
   Editor.setKeyBinding('Ctrl+Shift+J', switchToJsConsoleCommand);
 
-  return JsConsole;
+  return JsConsole_;
 })();

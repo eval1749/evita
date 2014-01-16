@@ -3,7 +3,17 @@
 // found in the LICENSE file.
 'use strict';
 
+/**
+ * @const @type{{
+ *    DOCUMENT_NAME: string,
+ *    clear: function(),
+ *    document_: function(): !Document,
+ *    log: function(...),
+ *    show: function()
+ * }}
+ */
 var console = {
+  /** @const @type{string} */
   DOCUMENT_NAME: '*javascript*',
 
   /**
@@ -17,7 +27,7 @@ var console = {
 
   /**
    * @private
-   * @return {Document}
+   * @return {!Document}
    */
   document_: function() {
     return Document.getOrNew(console.DOCUMENT_NAME);

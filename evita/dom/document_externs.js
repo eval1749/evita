@@ -98,7 +98,16 @@ Document.prototype.load_ = function(filename) {};
  */
 Document.prototype.needSave = function() {};
 
+/** @param {!Position} position */
+Document.prototype.redo= function(position) {}
+
+/** @param {string} new_name */
+Document.prototype.renameTo = function(new_name) {}
+
 /**
  * @param {!string} filename.
  */
 Document.prototype.save = function(filename) {};
+
+/** @param {!Position} position */
+Document.prototype.undo = function(position) {}

@@ -7,14 +7,15 @@
 // Ecmascript6: Array.prototype.find
 if (!Array.prototype.find) {
   /**
-   * @param {function(Object, Object) : boolean} callback
+   * @param {function(*) : boolean} callback
+   * @param {*=} opt_thisObject
    * @return {Object|undefined}
    */
-  Array.prototype.find = function(callback, thisObject) {
-    var thisArg = thisObject || this;
+  Array.prototype.find = function(callback, opt_thisObject) {
+    var thisObject = opt_thisObject || this;
     for (var i = 0; i < this.length; ++i) {
       var element = this[i];
-      if (predicate.call(thisArg, element))
+      if (callback.call(thisObject, element))
         return element;
     }
     return undefined;

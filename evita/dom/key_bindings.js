@@ -140,7 +140,7 @@
   Editor.setKeyBinding('Ctrl+S', function(arg) {
     var document = this.selection.document;
     if (!arg && document.filename != '') {
-      document.save(filename);
+      document.save(document.filename);
       return;
     }
 

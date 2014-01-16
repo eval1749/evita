@@ -9,6 +9,51 @@
     ], # include_dirs
   }, # target_defaults
 
+      'variables': {
+        'js_defs_files': [
+          'dom/enums.js',
+          'dom/events/event_enums.js',
+          'dom/strings_en_US.js',
+          'dom/unicode_enums.js',
+        ],
+        'js_externs_files': [
+          'dom/types_externs.js',
+          'dom/events/event_externs.js',
+          'dom/events/event_target_externs.js',
+          'dom/events/focus_event_externs.js',
+          'dom/events/ui_event_externs.js',
+          'dom/events/window_event_externs.js',
+          'dom/editor_externs.js',
+          'dom/editor_window_externs.js',
+          'dom/document_externs.js',
+          'dom/file_path_externs.js',
+          #'dom/key_names_externs.js',
+          'dom/range_externs.js',
+          #'dom/runtime_externs.js',
+          'dom/selection_externs.js',
+          'dom/text_window_externs.js',
+          'dom/window_externs.js',
+        ],
+        'js_lib_files': [
+          'dom/polyfill.js',
+          'dom/key_names.js',
+          'dom/strings_en_US.js',
+          'dom/runtime.js',
+
+          'dom/document.js',
+          'dom/editor.js',
+          'dom/editor_window.js',
+          'dom/file_path.js',
+          'dom/range.js',
+          'dom/selection.js',
+          'dom/window.js',
+
+          'dom/console.js',
+          'dom/js_console.js',
+          'dom/key_bindings.js',
+        ],
+      }, # variables
+
   'targets': [
     {
       'target_name': 'evita',
@@ -88,6 +133,30 @@
       ], # sources
     }, # dom
     {
+      'target_name': 'check_jslib',
+      'type': 'none',
+      'actions': [
+        {
+          'action_name': 'closure_compile',
+          'inputs': [
+              '<@(js_defs_files)',
+              '<@(js_externs_files)',
+              '<@(js_lib_files)'
+          ],
+          'outputs': [ '<(SHARED_INTERMEDIATE_DIR)/jslib_source_map.txt' ],
+          'action': [
+            'python',
+            '<(DEPTH)/tools/razzle/closure_compiler.py',
+            '--create_source_map=<@(_outputs)',
+            '<@(js_lib_files)',
+            '--extern',
+            '<@(js_defs_files)',
+            '<@(js_externs_files)',
+          ],
+        }
+      ], # actions
+    },
+    {
       'target_name': 'dom_jslib',
       'type': 'static_library',
       'dependencies': [ 'dom_jslib_js2c', ], 
@@ -100,43 +169,21 @@
     {
       'target_name': 'dom_jslib_js2c',
       'type': 'none',
-      'variables': {
-        'library_files': [
-          'dom/polyfill.js',
-          'dom/unicode.js',
-          'dom/enums.js',
-          'dom/types.js',
-          'dom/key_names.js',
-          'dom/strings_en_US.js',
-          'dom/runtime.js',
-
-          'dom/document.js',
-          'dom/editor.js',
-          'dom/editor_window.js',
-          'dom/events/event.js',
-          'dom/file_path.js',
-          'dom/range.js',
-          'dom/selection.js',
-          'dom/window.js',
-
-          'dom/console.js',
-          'dom/js_console.js',
-          'dom/key_bindings.js',
-        ],
-      }, # variables
       'actions': [
         {
           'action_name': 'js2c',
           'inputs': [
             '<(DEPTH)/evita/dom/make_get_jslib.py',
-            '<@(library_files)',
+            '<@(js_defs_files)',
+            '<@(js_lib_files)',
           ], # inputs
           'outputs': [ '<(SHARED_INTERMEDIATE_DIR)/dom_jslib.cc' ],
           'action': [
             'python',
             '<(DEPTH)/evita/dom/make_get_jslib.py',
             '<@(_outputs)',
-            '<@(library_files)',
+            '<@(js_defs_files)',
+            '<@(js_lib_files)',
           ], # action
         }, # js2c
       ], # actions

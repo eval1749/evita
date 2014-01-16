@@ -5,22 +5,34 @@
 'use strict';
 
 /**
- * @param {string} format_text
- * @param {Object.<string, string>} opt_dict
- * @return {string}
+ * @fileoverview Runtime
+ *
+ * @suppress {globalThis}
  */
-function localizeText(format_text, opt_dict) {
+
+/**
+ * @param {string} format_text
+ * @param {Object.<string, string>=} opt_dict
+ * @return {string}
+ * @suppress {globalThis}
+ */
+this.localizeText = function(format_text, opt_dict) {
   if (arguments.length == 1)
     return format_text;
+  var dict = /** @type {!Object} */(opt_dict);
   var text = format_text;
-  Object.keys(opt_dict).forEach(function(key) {
+  Object.keys(dict).forEach(function(key) {
     text = text.replace('__' + key + '__', opt_dict[key]);
   });
   return text;
-}
+};
 
-
-var parseKeyCombination = (function() {
+/**
+ * @param {string} spec.
+ * @return {number} key code.
+ * @suppress {globalThis}
+ */
+this.parseKeyCombination = (function() {
   /** @const */ var MOD_CTRL = 0x200;
   /** @const */ var MOD_SHIFT = 0x400;
 

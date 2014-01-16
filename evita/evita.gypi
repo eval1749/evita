@@ -107,8 +107,8 @@
           'dom/enums.js',
           'dom/types.js',
           'dom/key_names.js',
+          'dom/strings_en_US.js',
           'dom/runtime.js',
-          'dom/messages_en_US.js',
 
           'dom/document.js',
           'dom/editor.js',

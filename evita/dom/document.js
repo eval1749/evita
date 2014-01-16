@@ -333,6 +333,7 @@
    */
   Document.prototype.needSave = function() {
     // TODO: We should use |document.notForSave|.
-    return this.modified && FilePath.isValidFilename(this.filename);
+    return this.modified && !this.name.startsWith('*') &&
+           FilePath.isValidFilename(this.filename);
   };
 })();

@@ -23,18 +23,53 @@
   };
 
   Editor.exit = function() {
-    var window = Editor.activeWindow();
-    var can_exit = true;
-    Document.list.forEach(function(document) {
+    var active_window = Editor.activeWindow();
+
+    /**
+     * @param {Document} document
+     * @return {Promise}
+     */
+    function interactiveSave(document) {
+      return Editor.getFilenameForSave(null, document.filename).then(
+        function(filename) {
+          if (!filename.length)
+            return Promise.cast(DialogItemId.CANCEL);
+          document.save(filename);
+          return Promise.cast(DialogItemId.YES);
+        });
+    }
+
+    /**
+     * @param {Document} document
+     * @return {Promise}
+     */
+    function confirmForExit(document) {
       if (!document.needSave())
+        return Promise.cast(true);
+      return Editor.messageBox(null,
+        localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
+        localizeText(Strings.IDS_APP_TITLE),
+        MessageBox.ICONWARNING | MessageBox.YESNOCANCEL).then(function(code) {
+          switch (code) {
+            case DialogItemId.CANCEL:
+            case DialogItemId.NO:
+              return Promise.cast(code);
+            case DialogItemId.YES:
+              return interactiveSave(document);
+           }
+        });
+    }
+
+    /** @param {DialogItemId} answer */
+    function isCanceled(answer) {
+      return answer == DialogItemId.CANCEL;
+    }
+
+    Promise.all(Document.list.map(confirmForExit)).then(function(answers) {
+      if (answers.some(isCanceled))
         return;
-      can_exit = false;
-      // TODO(yosi) How do we handle [Cancel] button?
-      document.close();
+      Editor.forceExit();
     });
-    if (!can_exit)
-      return;
-    Editor.forceExit();
   };
 
   Editor.forceExit = function() {

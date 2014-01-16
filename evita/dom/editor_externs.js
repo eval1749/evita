@@ -11,6 +11,9 @@
  */
 Editor.activeWindow = function() {};
 
+Editor.exit = function() {};
+Editor.forceExit = function() {};
+
 /**
  * @param {?Window} window.
  * @param {!string} filename.

@@ -6,15 +6,15 @@
 
 /**
  * @param {string} format_text
- * @param {dict}
+ * @param {Object.<string, string>} opt_dict
  * @return {string}
  */
-function localizeText(format_text, variable_map) {
-  if (!(variable_map instanceof Object))
+function localizeText(format_text, opt_dict) {
+  if (arguments.length == 1)
     return format_text;
   var text = format_text;
-  Object.keys(variable_map).forEach(function(key) {
-    text = text.replace('__' + key + '__', variable_map[key]);
+  Object.keys(opt_dict).forEach(function(key) {
+    text = text.replace('__' + key + '__', opt_dict[key]);
   });
   return text;
 }

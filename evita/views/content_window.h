@@ -6,8 +6,7 @@
 #include <memory>
 
 #include "base/strings/string16.h"
-#include "evita/vi_CommandWindow.h"
-#include "evita/views/window_id.h"
+#include "evita/views/command_window.h"
 
 class Frame;
 

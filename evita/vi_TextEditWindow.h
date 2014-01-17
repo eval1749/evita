@@ -14,7 +14,7 @@
 #include "evita/views/content_window.h"
 #include "./li_util.h"
 #include "./gfx_base.h"
-#include "./vi_CommandWindow.h"
+#include "evita/views/command_window.h"
 #include "./vi_Page.h"
 #include <memory>
 

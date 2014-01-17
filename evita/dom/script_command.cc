@@ -10,7 +10,7 @@
 #include "evita/dom/window.h"
 #include "evita/editor/application.h"
 #include "evita/v8_glue/converter.h"
-#include "evita/vi_CommandWindow.h"
+#include "evita/views/command_window.h"
 
 namespace dom {
 

@@ -1,8 +1,8 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#if !defined(INCLUDE_visual_CommandWindow_h)
-#define INCLUDE_visual_CommandWindow_h
+#if !defined(INCLUDE_evita_views_command_window_h)
+#define INCLUDE_evita_views_command_window_h
 
 #include "evita/views/window.h"
 
@@ -72,4 +72,4 @@ class CommandWindow_ : public Parent_  {
   DISALLOW_COPY_AND_ASSIGN(CommandWindow_);
 };
 
-#endif //!defined(INCLUDE_visual_CommandWindow_h)
+#endif //!defined(INCLUDE_evita_views_command_window_h)

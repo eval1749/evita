@@ -12,7 +12,7 @@
 #define INCLUDE_vi_Pane_h
 
 #include "./li_util.h"
-#include "./vi_CommandWindow.h"
+#include "evita/views/command_window.h"
 #include "evita/views/window.h"
 
 namespace gfx {

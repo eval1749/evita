@@ -32,6 +32,8 @@ class ViewDelegate {
   public: virtual void ChangeParentWindow(WindowId window_id,
                                           WindowId new_parent_window_id) = 0;
   public: virtual void CreateEditorWindow(const EditorWindow* window) = 0;
+  public: virtual void CreateTableWindow(WindowId window_id,
+                                         Document* document) = 0;
   public: virtual void CreateTextWindow(const TextWindow* window) = 0;
   public: virtual void DestroyWindow(WindowId window_id) = 0;
   public: virtual void FocusWindow(WindowId window_id) = 0;

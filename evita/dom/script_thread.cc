@@ -145,6 +145,7 @@ void ScriptThread::Start(ViewDelegate* view_delegate,
 DEFINE_VIEW_DELEGATE_2(AddWindow, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(ChangeParentWindow, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
+DEFINE_VIEW_DELEGATE_2(CreateTableWindow, WindowId, Document*)
 DEFINE_VIEW_DELEGATE_1(CreateTextWindow, const TextWindow*)
 DEFINE_VIEW_DELEGATE_1(DestroyWindow, WindowId)
 DEFINE_VIEW_DELEGATE_1(FocusWindow, WindowId)

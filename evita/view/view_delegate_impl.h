@@ -28,6 +28,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       dom::WindowId new_parent_id) override;
   private: virtual void CreateEditorWindow(
       const dom::EditorWindow* window) override;
+  private: virtual void CreateTableWindow(
+      dom::WindowId window_id, dom::Document* document) override;
   private: virtual void CreateTextWindow(
       const dom::TextWindow* window) override;
   private: virtual void DestroyWindow(dom::WindowId window_id) override;

@@ -14,7 +14,7 @@
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_TextEditWindow.h"
-#include "evita/view/window.h"
+#include "evita/views/table_view.h"
 
 namespace view {
 
@@ -70,6 +70,12 @@ void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
   DCHECK(window);
   new Frame(window->window_id());
 }
+
+void ViewDelegateImpl::CreateTableWindow(dom::WindowId window_id,
+                                         dom::Document* document) {
+  new view::TableView(window_id, document);
+}
+
 
 void ViewDelegateImpl::CreateTextWindow(const dom::TextWindow* window) {
   DCHECK(window);

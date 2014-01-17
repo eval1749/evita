@@ -123,6 +123,7 @@
         'dom/script_command.cc',
         'dom/script_controller.cc',
         'dom/script_thread.cc',
+        'dom/table_window.cc',
         'dom/text_window.cc',
         'dom/time_stamp.cc',
         'dom/window.cc',
@@ -278,7 +279,7 @@
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
-        'dom',
+        'view',
       ],
       'sources': [
         'precomp.cpp',
@@ -313,6 +314,9 @@
         'view/view_delegate_impl.cc',
         'view/window.cc',
         'view/window_set.cc',
+
+        'views/table_model.cc',
+        'views/table_view.cc',
 
         'widgets/root_widget.cc',
         'widgets/widget.cc',
@@ -353,5 +357,26 @@
         'v8_glue/wrapper_info.cc',
       ], # sources
     }, # v8_glue
+    {
+      'target_name': 'view',
+      'type': 'static_library',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        'dom',
+      ],
+      'sources': [
+        'precomp.cpp',
+
+        'view/view_delegate_impl.cc',
+        'view/window.cc',
+        'view/window_set.cc',
+
+        'views/table_model.cc',
+        'views/table_view.cc',
+
+        'widgets/root_widget.cc',
+        'widgets/widget.cc',
+      ], # sources
+    },
   ], # targets
 }

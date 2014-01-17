@@ -65,6 +65,8 @@ class ScriptThread final : public ViewDelegate,
     WindowId new_parent_window_id) override;
   private: virtual void CreateEditorWindow(
       const EditorWindow* window) override;
+  private: virtual void CreateTableWindow(
+      WindowId window_id, Document* document) override;
   private: virtual void CreateTextWindow(const TextWindow* window) override;
   private: virtual void DestroyWindow(WindowId window_id) override;
   private: virtual void FocusWindow(WindowId window_id) override;

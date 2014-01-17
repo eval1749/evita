@@ -64,10 +64,10 @@ void TableContentBuilder::Build() {
 void TableContentBuilder::BuildHeader() {
   LVCOLUMN column = {0};
   column.mask = LVCF_FMT | LVCF_TEXT | LVCF_WIDTH;
+  column_widths_.clear();
 
   auto const new_num_cols = new_model_->header_row()->length();
   auto const old_num_cols = old_model_->header_row()->length();
-  std::vector<int> column_widths;
   for (auto col_index = 0u; col_index < old_num_cols; ++col_index) {
     if (col_index >= new_num_cols) {
       ListView_DeleteColumn(list_view_, col_index);
@@ -99,37 +99,33 @@ void TableContentBuilder::BuildHeader() {
 }
 
 void TableContentBuilder::BuildRows() {
-  std::unordered_set<const Row*> present_set;
+  std::unordered_set<base::string16> present_set;
 
   for (auto row_index = 0u; row_index < old_model_->size(); ++row_index) {
     LVITEM item = {0};
     item.iItem = row_index;
     item.mask = LVIF_PARAM;
     ListView_GetItem(list_view_, &item);
-    auto old_row = reinterpret_cast<const Row*>(item.lParam);
-    if (!new_model_->FindRow(old_row->key())) {
+    auto const old_row = reinterpret_cast<const Row*>(item.lParam);
+    auto const new_row = new_model_->FindRow(old_row->key());
+    if (!new_row) {
       ListView_DeleteItem(list_view_, row_index);
       continue;
     }
 
-    present_set.insert(old_row);
-    UpdateListViewItem(row_index, old_row);
+    present_set.insert(old_row->key());
+    UpdateListViewItem(row_index, new_row);
   }
 
   for (auto new_row : new_model_->rows()) {
-    if (present_set.find(new_row) != present_set.end())
+    if (present_set.find(new_row->key()) != present_set.end())
       continue;
     LVITEM item = {0};
     item.lParam = reinterpret_cast<LPARAM>(new_row);
     item.mask = LVIF_PARAM | LVIF_TEXT;
     item.pszText = const_cast<base::char16*>(new_row->key().c_str());
     auto const row_index = ListView_InsertItem(list_view_, &item);
-    if (row_index < 0) {
-      DCHECK_GE(row_index, 0);
-      continue;
-    }
-    column_widths_[0] = std::max(column_widths_[0],
-                                 CellWidth(new_row->cell(0)));
+    DCHECK_GE(row_index, 0);
     UpdateListViewItem(row_index, new_row);
   }
 }
@@ -141,6 +137,7 @@ int TableContentBuilder::CellWidth(const TableModel::Cell& cell) {
 }
 
 void TableContentBuilder::UpdateListViewItem(int row_index, const Row* row) {
+  column_widths_[0] = std::max(column_widths_[0], CellWidth(row->cell(0)));
   for (auto index = 1u; index < row->length(); ++index) {
     auto cell = row->cell(index);
     LVITEM item = {0};
@@ -210,11 +207,12 @@ void TableView::Redraw() {
 
   ListView_SortItems(list_view_, CompareItems, nullptr);
 
-  // TODO(yosi) Keep selection.
-  // TODO(yosi) We should select the last active window rather than the first
-  // one.
-  auto const state = LVIS_SELECTED | LVIS_FOCUSED;
-  ListView_SetItemState(list_view_, 0, state, state);
+  if (!ListView_GetSelectedCount(list_view_)) {
+    // TODO(yosi) We should select the last active window rather than the
+    // first // one.
+    auto const state = LVIS_SELECTED | LVIS_FOCUSED;
+    ListView_SetItemState(list_view_, 0, state, state);
+  }
 
   model_ = std::move(new_model);
 }
@@ -222,10 +220,6 @@ void TableView::Redraw() {
 // ContentWindow
 base::string16 TableView::GetTitle(size_t) const {
   return L"*buffer list*";
-}
-
-Command::KeyBindEntry* TableView::MapKey(uint key_code) {
-  return Command::g_pGlobalBinds->MapKey(key_code);
 }
 
 void TableView::MakeSelectionVisible() {
@@ -276,8 +270,11 @@ void TableView::DidResize() {
 }
 
 void TableView::DidSetFocus() {
-  CommandWindow::DidSetFocus();
+  if (!list_view_)
+    return;
   ::SetFocus(list_view_);
+  Redraw();
+  CommandWindow::DidSetFocus();
 }
 
 void TableView::Hide() {

@@ -99,9 +99,6 @@ class Application : public common::Singleton<Application> {
   public: NewlineMode GetNewline() const { return newline_mode_; }
   public: const char16* GetTitle() const;
 
-  // [K]
-  public: bool KillBuffer(Buffer* buffer, bool force = false);
-
   // [O]
   public: bool OnIdle(uint hint);
 

@@ -164,22 +164,6 @@ HIMAGELIST Application::GetIconList() const {
   return text::ModeFactory::icon_image_list();
 }
 
-bool Application::KillBuffer(Buffer* buffer, bool is_forced) {
-  if (!is_forced && !buffer->CanKill())
-      return false;
-
-  for (auto window : views::Window::all_windows()) {
-    if (auto text_window = window->as<TextEditWindow>()) {
-      if (text_window->GetBuffer() == buffer)
-        window->Destroy();
-    }
-  }
-
-  buffers_.Delete(buffer);
-  delete buffer;
-  return true;
-}
-
 bool Application::OnIdle(uint nCount) {
   auto need_more = false;
   for (auto& frame: frames_) {

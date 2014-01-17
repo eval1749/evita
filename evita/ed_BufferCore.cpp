@@ -175,6 +175,14 @@ Count BufferCore::GetText(char16* prgwch, Posn lStart, Posn lEnd) const
     return lEnd - lStart;
 } // BufferCore::GetText
 
+base::string16 BufferCore::GetText(Posn start, Posn end) const {
+    auto const cwch = end - start;
+    if (cwch <= 0)
+      return base::string16();
+    base::string16 text(cwch, ' ');
+    GetText(&text[0], start, end);
+    return std::move(text);
+}
 
 //////////////////////////////////////////////////////////////////////
 //

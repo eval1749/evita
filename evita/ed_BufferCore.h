@@ -11,6 +11,8 @@
 #if !defined(INCLUDE_edit_BufferCore_h)
 #define INCLUDE_edit_BufferCore_h
 
+#include "base/strings/string16.h"
+
 namespace text
 {
 
@@ -58,6 +60,7 @@ class BufferCore
     public: char16 GetCharAt(Posn) const;
     public: Posn   GetEnd() const { return m_lEnd; }
     public: Count  GetText(char16*, Posn, Posn) const;
+    public: base::string16 GetText(Posn start, Posn end) const;
 
     // [I]
     protected: void insert(Posn, char16, Count);

@@ -979,10 +979,7 @@ void Range::GetInformation(Information* out_oInfo, Count n) const
 /// <seealso cref="Range::SetText(const char16*, int)"/>
 base::string16 Range::GetText() const
 {
-    auto const cwch = m_lEnd - m_lStart;
-    base::string16 text(cwch, ' ');
-    m_pBuffer->GetText(&text[0], m_lStart, m_lEnd);
-    return text;
+    return m_pBuffer->GetText(m_lStart, m_lEnd);
 } // Range::GetText
 
 /// <summary>

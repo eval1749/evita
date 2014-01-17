@@ -91,7 +91,38 @@
       }, # msvs_settings
       'sources': [
         'precomp.cpp',
-        'text/buffer_unittest.cc',
+        'core/buffer_unittest.cc',
+      ],
+    }, # evita_text_test
+    {
+      'target_name': 'evita_view_model_unittests',
+      'type': 'executable',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        '<(DEPTH)/evita/evita.gyp:view',
+        '<(DEPTH)/testing/gtest.gyp:gtest',
+        '<(DEPTH)/testing/gtest.gyp:gtest_main',
+      ], # dependencies
+      'include_dirs+' : [
+        #'<(DEPTH)/evita/',
+        '<(DEPTH)/testing/gtest/include/',
+      ], # include_dirs
+      'msvs_settings': {
+        'VCLinkerTool': {
+          'AdditionalDependencies': [
+            'gdi32.lib',
+            'comdlg32.lib',
+            'advapi32.lib',
+            'shell32.lib',
+            'ole32.lib',
+            'oleaut32.lib',
+            'uuid.lib',
+          ], # AdditionalDependencies
+        }, # VCLinkerTool
+      }, # msvs_settings
+      'sources': [
+        'precomp.cpp',
+        'views/table_model_unittest.cc',
       ],
     }, # evita_text_test
   ] # targets

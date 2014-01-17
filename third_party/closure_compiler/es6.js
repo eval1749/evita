@@ -8,9 +8,20 @@
  *  https://github.com/domenic/promises-unwrapping/blob/master/README.md
  *
  * This file contains following ES6 classes:
+ *  - Array
+ *  - Iterable
  *  - Map
  *  - Promise
  */
+
+/**
+ * @template T
+ * @param {function(T, number?, Array?): *} callback.
+ * @param {Object=} this_arg
+ * @return {T|null}
+ */
+Array.prototype.find = function(callback, this_arg) {};
+
 /** @typedef {Array} */
 var Iterable;
 

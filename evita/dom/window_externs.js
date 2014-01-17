@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-/** @type {Array.<Window>} */
+/** @type {Array.<!Window>} */
 Window.prototype.children;
 
 /** @type {number} */
@@ -13,7 +13,7 @@ Window.prototype.id;
 /** @type {?Window} */
 Window.prototype.parent;
 
-/** @type {!string} */
+/** @type {string} */
 Window.prototype.state;
 
 /** @param {!Window} window */
@@ -29,22 +29,21 @@ Window.prototype.realize = function() {};
 /** @param {!Window} window */
 Window.prototype.remove= function(window) {};
 
-
 /**
  * @param {string} type
- * @param {EventListener} listener
+ * @param {!EventListener} listener
  * @param {boolean=} opt_capture
  */
 Window.prototype.addEventListener = function(type, listener, opt_capture) {};
 
 /**
- * @param {Event} event
+ * @param {!Event} event
  */
 Window.prototype.dispatchEvent = function(event) {};
 
 /**
  * @param {string} type
- * @param {EventListener} listener
+ * @param {!EventListener} listener
  * @param {boolean=} opt_capture
  */
 Window.prototype.removeEventListener = function(type, listener,

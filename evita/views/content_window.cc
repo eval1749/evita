@@ -5,7 +5,7 @@
 
 #include "evita/vi_Frame.h"
 
-namespace view {
+namespace views {
 
 ContentWindow::ContentWindow(
     std::unique_ptr<common::win::NativeWindow>&& native_window)
@@ -13,13 +13,13 @@ ContentWindow::ContentWindow(
       active_tick_(0) {
 }
 
-ContentWindow::ContentWindow(view::WindowId window_id)
+ContentWindow::ContentWindow(views::WindowId window_id)
     : CommandWindow_(window_id),
       active_tick_(0) {
 }
 
 ContentWindow::ContentWindow()
-    : ContentWindow(view::kInvalidWindowId) {
+    : ContentWindow(views::kInvalidWindowId) {
 }
 
 Frame& ContentWindow::frame() const {
@@ -53,4 +53,4 @@ void ContentWindow::WillDestroyWidget() {
   active_tick_ = 0;
 }
 
-}  // namespace view
+}  // namespace views

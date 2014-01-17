@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_view_table_view_h)
-#define INCLUDE_view_table_view_h
+#if !defined(INCLUDE_evita_views_table_view_h)
+#define INCLUDE_evita_views_table_view_h
 
 #include "evita/views/content_window.h"
 
@@ -9,20 +9,20 @@
 
 #include "base/basictypes.h"
 #include "evita/gc/member.h"
-#include "evita/view/window_id.h"
+#include "evita/views/window_id.h"
 
 namespace dom {
 class Document;
 }
 
-namespace view {
+namespace views {
 
 class TableModel;
 
-class TableView : public CommandWindow_<TableView, view::ContentWindow> {
-  DECLARE_CASTABLE_CLASS(TableView, view::ContentWindow);
+class TableView : public CommandWindow_<TableView, views::ContentWindow> {
+  DECLARE_CASTABLE_CLASS(TableView, views::ContentWindow);
 
-  private: typedef view::ContentWindow BaseWindow;
+  private: typedef views::ContentWindow BaseWindow;
 
   private: gc::Member<dom::Document> document_;
   private: HWND list_view_;
@@ -35,7 +35,7 @@ class TableView : public CommandWindow_<TableView, view::ContentWindow> {
   private: std::unique_ptr<TableModel> CreateModel();
   private: void Redraw();
 
-  // view::ContentWindow
+  // views::ContentWindow
   private: virtual base::string16 GetTitle(size_t max_length) const;
   private: virtual Command::KeyBindEntry* MapKey(uint key_code) override;
   private: virtual void MakeSelectionVisible() override;
@@ -52,6 +52,6 @@ class TableView : public CommandWindow_<TableView, view::ContentWindow> {
   DISALLOW_COPY_AND_ASSIGN(TableView);
 };
 
-}  // namespace view
+}  // namespace views
 
-#endif //!defined(INCLUDE_view_table_view_h)
+#endif //!defined(INCLUDE_evita_views_table_view_h)

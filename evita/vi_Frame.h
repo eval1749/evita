@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_visual_Frame_h)
 #define INCLUDE_visual_Frame_h
 
-#include "view/window.h"
+#include "evita/views/window.h"
 
 #include "./ctrl_StatusBar.h"
 #include "./ctrl_TabBand.h"
@@ -41,7 +41,7 @@ enum MessageLevel
 class Pane;
 class TextEditWindow;
 
-namespace view {
+namespace views {
 class ContentWindow;
 }
 
@@ -55,11 +55,11 @@ using Buffer = dom::Buffer;
 ///   Represents a frame window aka toplevel window. This window communicates
 ///   with window manager.
 /// </summary>
-class Frame final : public view::Window,
+class Frame final : public views::Window,
                     public DoubleLinkedNode_<Frame> {
   private: typedef widgets::Widget Widget;
   private: typedef widgets::Widget Widget;
-  DECLARE_CASTABLE_CLASS(Frame, view::Window);
+  DECLARE_CASTABLE_CLASS(Frame, views::Window);
 
   private: enum CtrlId {
     CtrlId_TabBand  = 1,
@@ -77,7 +77,7 @@ class Frame final : public view::Window,
   private: char16* m_rgpwszMessage[MessageLevel_Limit];
   private: mutable char16 m_wszToolTip[1024];
 
-  public: explicit Frame(view::WindowId window_id);
+  public: explicit Frame(views::WindowId window_id);
   // TODO(yosi) We should remove no parameter Frame ctor.
   public: Frame();
   private: virtual ~Frame();
@@ -94,7 +94,7 @@ class Frame final : public view::Window,
   private: void AddPane(Pane*);
   private: void AddTab(Pane*);
   public: TextEditWindow* AddWindow(Buffer* buffer);
-  public: void AddWindow(view::ContentWindow*);
+  public: void AddWindow(views::ContentWindow*);
 
   // [C]
   private: virtual void CreateNativeWindow() const override;
@@ -110,7 +110,7 @@ class Frame final : public view::Window,
       const Widget& widget) override;
   private: virtual void DidResize() override;
   private: virtual void DidSetFocus() override;
-  public: void DidSetFocusOnChild(view::Window* window);
+  public: void DidSetFocusOnChild(views::Window* window);
 
   // [G]
   public: Pane* GetActivePane();

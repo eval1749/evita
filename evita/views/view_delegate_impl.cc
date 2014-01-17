@@ -1,7 +1,7 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/view/view_delegate_impl.h"
+#include "evita/views/view_delegate_impl.h"
 
 #include "base/logging.h"
 #include "evita/dom/buffer.h"
@@ -16,7 +16,7 @@
 #include "evita/vi_TextEditWindow.h"
 #include "evita/views/table_view.h"
 
-namespace view {
+namespace views {
 
 namespace {
 Window* FromWindowId(const char* name, dom::WindowId window_id) {
@@ -52,7 +52,7 @@ void ViewDelegateImpl::AddWindow(dom::WindowId parent_id,
     return;
   }
   DCHECK_EQ(child_id, child->window_id());
-  parent->as<Frame>()->AddWindow(child->as<view::ContentWindow>());
+  parent->as<Frame>()->AddWindow(child->as<views::ContentWindow>());
 }
 
 void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
@@ -73,7 +73,7 @@ void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
 
 void ViewDelegateImpl::CreateTableWindow(dom::WindowId window_id,
                                          dom::Document* document) {
-  new view::TableView(window_id, document);
+  new views::TableView(window_id, document);
 }
 
 
@@ -199,4 +199,4 @@ void ViewDelegateImpl::SaveFile(dom::Document* document,
   buffer->Save(filename.c_str(), code_page, newline_mode);
 }
 
-}  // namespace view
+}  // namespace views

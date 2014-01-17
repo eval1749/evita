@@ -36,7 +36,7 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/view_event_handler.h"
-#include "evita/view/window_set.h"
+#include "evita/views/window_set.h"
 #include "./vi_EditPane.h"
 #include "./vi_Pane.h"
 #include "./vi_Selection.h"
@@ -98,7 +98,7 @@ class CompositionState {
   }
 };
 
-bool HasChildWindow(widgets::Widget* parent, view::Window* window) {
+bool HasChildWindow(widgets::Widget* parent, views::Window* window) {
   for (auto child : parent->child_nodes()) {
     if (child == window)
       return true;
@@ -106,7 +106,7 @@ bool HasChildWindow(widgets::Widget* parent, view::Window* window) {
   return false;
 }
 
-Pane* GetContainingPane(Frame* frame, view::Window* window) {
+Pane* GetContainingPane(Frame* frame, views::Window* window) {
   for (auto child : frame->child_nodes()) {
     if (HasChildWindow(child, window))
       return child->as<Pane>();
@@ -119,9 +119,9 @@ Pane* GetContainingPane(Frame* frame, view::Window* window) {
 #define USE_TABBAND_EDGE 0
 extern uint g_TabBand__TabDragMsg;
 
-Frame::Frame(view::WindowId window_id)
+Frame::Frame(views::WindowId window_id)
     : ALLOW_THIS_IN_INITIALIZER_LIST(
-          view::Window(widgets::NativeWindow::Create(*this), window_id)),
+          views::Window(widgets::NativeWindow::Create(*this), window_id)),
       gfx_(new gfx::Graphics()),
       m_hwndTabBand(nullptr),
       m_pActivePane(nullptr) {
@@ -129,7 +129,7 @@ Frame::Frame(view::WindowId window_id)
 }
 
 Frame::Frame()
-    : Frame(view::kInvalidWindowId) {
+    : Frame(views::kInvalidWindowId) {
 }
 
 Frame::~Frame() {
@@ -188,7 +188,7 @@ TextEditWindow* Frame::AddWindow(Buffer* buffer) {
   return window;
 }
 
-void Frame::AddWindow(view::ContentWindow* window) {
+void Frame::AddWindow(views::ContentWindow* window) {
   DCHECK(!window->parent_node());
   DCHECK(!window->is_realized());
   if (auto const pane = GetActivePane()) {
@@ -236,8 +236,8 @@ void Frame::DidAddChildWidget(const widgets::Widget& widget) {
     return;
   }
 
-  auto window = const_cast<view::ContentWindow*>(
-      widget.as<view::ContentWindow>());
+  auto window = const_cast<views::ContentWindow*>(
+      widget.as<views::ContentWindow>());
   DCHECK(window);
   RemoveChild(window);
   AddPane(new EditPane(window));
@@ -404,7 +404,7 @@ void Frame::DidSetFocus() {
   m_pActivePane->SetFocus();
 }
 
-void Frame::DidSetFocusOnChild(view::Window* window) {
+void Frame::DidSetFocusOnChild(views::Window* window) {
   auto const pane = GetContainingPane(this, window);
   if (!pane) {
     DVLOG(0) << "Frame::DidSetFolcusOnChild: No pane contains " << window;
@@ -797,7 +797,7 @@ bool Frame::onTabDrag(TabBandDragAndDrop const eAction,
   }
 
   auto source_window_id = pPane->window_id();
-  if (source_window_id == view::kInvalidWindowId) {
+  if (source_window_id == views::kInvalidWindowId) {
     auto const edit_pane = pPane->as<EditPane>();
     if (!edit_pane)
       return false;
@@ -805,7 +805,7 @@ bool Frame::onTabDrag(TabBandDragAndDrop const eAction,
     if (!active_window)
       return false;
     source_window_id = active_window->window_id();
-    if (source_window_id == view::kInvalidWindowId)
+    if (source_window_id == views::kInvalidWindowId)
       return false;
   }
 
@@ -824,7 +824,7 @@ bool Frame::onTabDrag(TabBandDragAndDrop const eAction,
     case kThrow:
       Application::instance()->view_event_handler()->DidDropWidget(
           source_window_id,
-          view::kInvalidWindowId);
+          views::kInvalidWindowId);
       break;
 
     default:

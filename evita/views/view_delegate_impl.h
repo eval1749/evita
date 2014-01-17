@@ -9,7 +9,7 @@ namespace dom {
 class ViewEventHandler;
 }
 
-namespace view {
+namespace views {
 
 class ViewDelegateImpl : public dom::ViewDelegate {
   private: dom::ViewEventHandler* event_handler_;
@@ -55,6 +55,6 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   DISALLOW_COPY_AND_ASSIGN(ViewDelegateImpl);
 };
 
-}  // namespace view
+}  // namespace views
 
 #endif //!defined(INCLUDE_evita_view_delegate_impl_h)

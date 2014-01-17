@@ -1,12 +1,12 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_view_window_h)
-#define INCLUDE_view_window_h
+#if !defined(INCLUDE_evita_views_window_h)
+#define INCLUDE_evita_views_window_h
 
-#include "evita/view/window_id.h"
+#include "evita/views/window_id.h"
 #include "evita/widgets/widget.h"
 
-namespace view {
+namespace views {
 
 typedef common::win::NativeWindow NativeWindow;
 typedef common::win::Point Point;
@@ -16,7 +16,7 @@ class WindowSet;
 class Window : public widgets::Widget {
   DECLARE_CASTABLE_CLASS(Window, Widget);
 
-  private: const view::WindowId window_id_;
+  private: const views::WindowId window_id_;
 
   // TODO(yosi): We allow window_id as optional until we export all widgets
   // to DOM.
@@ -41,6 +41,6 @@ class Window : public widgets::Widget {
   DISALLOW_COPY_AND_ASSIGN(Window);
 };
 
-}  // namespace view
+}  // namespace views
 
-#endif //!defined(INCLUDE_view_window_h)
+#endif //!defined(INCLUDE_evita_views_window_h)

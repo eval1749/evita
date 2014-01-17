@@ -18,7 +18,7 @@ class TableModeTest : public ::testing::Test {
 };
 
 TEST_F(TableModeTest, AddRow) {
-  std::unique_ptr<view::TableModel> table_model(new view::TableModel());
+  std::unique_ptr<views::TableModel> table_model(new views::TableModel());
   table_model->SetHeaderRow(L"foo\t\bar\tbaz");
   EXPECT_EQ(3, table_model->header_row()->length());
   table_model->AddRow(L"one\t10\t11");
@@ -34,7 +34,7 @@ TEST_F(TableModeTest, AddRow) {
 }
 
 TEST_F(TableModeTest, SetHeaderRow) {
-  std::unique_ptr<view::TableModel> table_model(new view::TableModel());
+  std::unique_ptr<views::TableModel> table_model(new views::TableModel());
   table_model->SetHeaderRow(L"foo\t\bar\tbaz");
   EXPECT_EQ(3, table_model->header_row()->length());
 }

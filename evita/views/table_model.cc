@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace view {
+namespace views {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -124,4 +124,4 @@ void TableModel::SetHeaderRow(const base::string16& text) {
     header_row_.AddCell(text.substr(cell_start, cell_length));
 }
 
-}  // namespace view
+}  // namespace views

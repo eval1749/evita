@@ -7,11 +7,11 @@
 
 #include "base/strings/string16.h"
 #include "evita/vi_CommandWindow.h"
-#include "evita/view/window_id.h"
+#include "evita/views/window_id.h"
 
 class Frame;
 
-namespace view {
+namespace views {
 
 class ContentWindow : public CommandWindow_<ContentWindow> {
   DECLARE_CASTABLE_CLASS(ContentWindow, CommandWindow);
@@ -20,7 +20,7 @@ class ContentWindow : public CommandWindow_<ContentWindow> {
 
   protected: explicit ContentWindow(
                 std::unique_ptr<common::win::NativeWindow>&&);
-  protected: explicit ContentWindow(view::WindowId window_id);
+  protected: explicit ContentWindow(views::WindowId window_id);
   protected: ContentWindow();
 
   public: Frame& frame() const;
@@ -54,6 +54,6 @@ class ContentWindow : public CommandWindow_<ContentWindow> {
   DISALLOW_COPY_AND_ASSIGN(ContentWindow);
 };
 
-}  // namespace view
+}  // namespace views
 
 #endif //!defined(INCLUDE_evita_views_content_window_h)

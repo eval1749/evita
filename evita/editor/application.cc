@@ -23,8 +23,8 @@
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_IoManager.h"
 #include "evita/vi_TextEditWindow.h"
-#include "evita/view/view_delegate_impl.h"
-#include "evita/view/window_set.h"
+#include "evita/views/view_delegate_impl.h"
+#include "evita/views/window_set.h"
 
 #define DEBUG_IDLE 0
 
@@ -53,7 +53,7 @@ Application::Application()
       dom_lock_(new editor::DomLock()),
       io_manager_(new IoManager()),
       message_loop_(new base::MessageLoop(base::MessageLoop::TYPE_UI)),
-      view_delegate_impl_(new view::ViewDelegateImpl()) {
+      view_delegate_impl_(new views::ViewDelegateImpl()) {
   Command::Processor::GlobalInit();
   io_manager_->Realize();
   dom::ScriptThread::Start(view_delegate_impl_.get(), message_loop_.get());
@@ -168,7 +168,7 @@ bool Application::KillBuffer(Buffer* buffer, bool is_forced) {
   if (!is_forced && !buffer->CanKill())
       return false;
 
-  for (auto window : view::Window::all_windows()) {
+  for (auto window : views::Window::all_windows()) {
     if (auto text_window = window->as<TextEditWindow>()) {
       if (text_window->GetBuffer() == buffer)
         window->Destroy();

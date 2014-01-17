@@ -36,7 +36,7 @@ namespace editor {
 class DomLock;
 }
 
-namespace view {
+namespace views {
 class ViewDelegateImpl;
 }
 
@@ -55,7 +55,7 @@ class Application : public common::Singleton<Application> {
   private: std::unique_ptr<editor::DomLock> dom_lock_;
   private: std::unique_ptr<IoManager> io_manager_;
   private: std::unique_ptr<base::MessageLoop> message_loop_;
-  private: std::unique_ptr<view::ViewDelegateImpl> view_delegate_impl_;
+  private: std::unique_ptr<views::ViewDelegateImpl> view_delegate_impl_;
 
   // ctor/dtor
   friend class common::Singleton<Application>;

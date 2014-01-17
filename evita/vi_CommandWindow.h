@@ -4,7 +4,7 @@
 #if !defined(INCLUDE_visual_CommandWindow_h)
 #define INCLUDE_visual_CommandWindow_h
 
-#include "view/window.h"
+#include "evita/views/window.h"
 
 namespace Command {
 class KeyBindEntry;
@@ -14,14 +14,14 @@ class KeyBindEntry;
 //
 // CommandWindow
 //
-class CommandWindow : public view::Window {
+class CommandWindow : public views::Window {
   protected: explicit CommandWindow(
       std::unique_ptr<widgets::NativeWindow>&& native_window)
-      : view::Window(std::move(native_window)) {
+      : views::Window(std::move(native_window)) {
   }
 
-  protected: explicit CommandWindow(view::WindowId window_id)
-      : view::Window(window_id) {
+  protected: explicit CommandWindow(views::WindowId window_id)
+      : views::Window(window_id) {
   }
 
   protected: CommandWindow() {
@@ -49,7 +49,7 @@ class CommandWindow_ : public Parent_  {
     : Parent_(std::move(native_window)) {
   }
 
-  protected: explicit CommandWindow_(view::WindowId window_id)
+  protected: explicit CommandWindow_(views::WindowId window_id)
       : Parent_(window_id) {
   }
 

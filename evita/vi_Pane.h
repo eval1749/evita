@@ -13,7 +13,7 @@
 
 #include "./li_util.h"
 #include "./vi_CommandWindow.h"
-#include "view/window.h"
+#include "evita/views/window.h"
 
 namespace gfx {
 class Graphics;

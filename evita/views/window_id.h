@@ -3,11 +3,11 @@
 #if !defined(INCLUDE_evita_view_window_id_h)
 #define INCLUDE_evita_view_window_id_h
 
-namespace view {
+namespace views {
 
 typedef int WindowId;
 const WindowId kInvalidWindowId = -1;
 
-}  // namespace view
+}  // namespace views
 
 #endif //!defined(INCLUDE_evita_view_window_id_h)

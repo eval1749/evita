@@ -14,7 +14,7 @@
 
 extern HINSTANCE g_hInstance;
 
-namespace view {
+namespace views {
 
 namespace {
 const int kListViewId = 1234;
@@ -297,4 +297,4 @@ void TableView::WillDestroyWidget() {
   CommandWindow::WillDestroyWidget();
 }
 
-}  // namespace view
+}  // namespace views

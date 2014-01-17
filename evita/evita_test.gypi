@@ -99,7 +99,7 @@
       'type': 'executable',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
-        '<(DEPTH)/evita/evita.gyp:view',
+        '<(DEPTH)/evita/evita.gyp:views',
         '<(DEPTH)/testing/gtest.gyp:gtest',
         '<(DEPTH)/testing/gtest.gyp:gtest_main',
       ], # dependencies

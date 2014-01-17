@@ -11,7 +11,7 @@
 #include "evita/vi_defs.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
-#include "evita/view/window_set.h"
+#include "evita/views/window_set.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_TextEditWindow.h"
@@ -85,7 +85,7 @@ Frame* CreateFrame(Buffer* buffer) {
 
 }  // naemspace
 
-namespace view {
+namespace views {
 
 HCURSOR BufferListWindow::sm_hDragCursor;
 Command::KeyBinds* BufferListWindow::sm_pKeyBinds;
@@ -439,11 +439,11 @@ void BufferListWindow::UpdateStatusBar() const {
   frame().SetStatusBar(0, L"");
 }
 
-}  // namespace view
+}  // namespace views
 
 namespace Command {
 
-using view::BufferListWindow;
+using views::BufferListWindow;
 
 DEFCOMMAND(KillBuffers) {
   auto const pBufferList = pCtx->GetWindow()->DynamicCast<BufferListWindow>();

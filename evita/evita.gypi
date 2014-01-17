@@ -279,7 +279,7 @@
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
-        'view',
+        'views',
       ],
       'sources': [
         'precomp.cpp',
@@ -346,7 +346,7 @@
       ], # sources
     }, # v8_glue
     {
-      'target_name': 'view',
+      'target_name': 'views',
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
@@ -355,9 +355,9 @@
       'sources': [
         'precomp.cpp',
 
-        'view/view_delegate_impl.cc',
-        'view/window.cc',
-        'view/window_set.cc',
+        'views/view_delegate_impl.cc',
+        'views/window.cc',
+        'views/window_set.cc',
 
         'views/buffer_list_window.cc',
         'views/content_window.cc',

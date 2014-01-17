@@ -48,7 +48,7 @@ struct EditPane::HitTestResult {
     ASSERT(type != None);
   }
 
-  view::ContentWindow* window() const;
+  views::ContentWindow* window() const;
 };
 
 class EditPane::Box : public DoubleLinkedNode_<EditPane::Box>,

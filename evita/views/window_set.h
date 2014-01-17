@@ -1,12 +1,12 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#if !defined(INCLUDE_view_window_set_h)
-#define INCLUDE_view_window_set_h
+#if !defined(INCLUDE_evita_views_window_set_h)
+#define INCLUDE_evita_views_window_set_h
 
 #include <unordered_set>
 
-namespace view {
+namespace views {
 
 class Window;
 
@@ -21,6 +21,6 @@ class WindowSet {
   public: Set::const_iterator end() const { return set_.end(); }
 };
 
-}  // namespace view
+}  // namespace views
 
-#endif //!defined(INCLUDE_view_window_set_h)
+#endif //!defined(INCLUDE_evita_views_window_set_h)

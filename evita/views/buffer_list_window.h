@@ -13,7 +13,7 @@ class Buffer;
 
 using Buffer = dom::Buffer;
 
-namespace view {
+namespace views {
 
 class BufferListWindow
     : public CommandWindow_<BufferListWindow, ContentWindow> {
@@ -76,6 +76,6 @@ class BufferListWindow
   DISALLOW_COPY_AND_ASSIGN(BufferListWindow);
 };
 
-}  // namespace view
+}  // namespace views
 
 #endif //!defined(INCLUDE_evita_views_buffer_list_window_h)

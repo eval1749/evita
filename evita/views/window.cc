@@ -1,15 +1,15 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/view/window.h"
+#include "evita/views/window.h"
 
 #include <unordered_map>
 
 #include "evita/editor/application.h"
 #include "evita/dom/view_event_handler.h"
-#include "evita/view/window_set.h"
+#include "evita/views/window_set.h"
 
-namespace view {
+namespace views {
 
 namespace {
 
@@ -87,18 +87,18 @@ Window::Window(std::unique_ptr<NativeWindow>&& native_window,
                WindowId window_id)
     : Widget(std::move(native_window)),
       window_id_(window_id) {
-  if (window_id != view::kInvalidWindowId)
+  if (window_id != views::kInvalidWindowId)
     WindowIdMapper::instance()->Register(this);
 }
 
 Window::Window(WindowId window_id)
     : window_id_(window_id) {
-  if (window_id != view::kInvalidWindowId)
+  if (window_id != views::kInvalidWindowId)
     WindowIdMapper::instance()->Register(this);
 }
 
 Window::~Window() {
-  if (window_id_ != view::kInvalidWindowId) {
+  if (window_id_ != views::kInvalidWindowId) {
     WindowIdMapper::instance()->Unregister(window_id_);
     view_event_handler()->DidDestroyWidget(window_id_);
   }
@@ -114,14 +114,14 @@ void Window::DidDestroyDomWindow() {
 
 void Window::DidKillFocus() {
   Widget::DidKillFocus();
-  if (window_id_ != view::kInvalidWindowId)
+  if (window_id_ != views::kInvalidWindowId)
     view_event_handler()->DidKillFocus(window_id_);
 }
 
 void Window::DidRealize() {
   // TODO(yosi) Until we manage all widgets by WindowId, we don't call
   // ViewEventHandler for unmanaged widget.
-  if (window_id_ != view::kInvalidWindowId) {
+  if (window_id_ != views::kInvalidWindowId) {
     view_event_handler()->
         DidRealizeWidget(window_id_);
   }
@@ -130,7 +130,7 @@ void Window::DidRealize() {
 
 void Window::DidSetFocus() {
   Widget::DidSetFocus();
-  if (window_id_ != view::kInvalidWindowId)
+  if (window_id_ != views::kInvalidWindowId)
     view_event_handler()->DidSetFocus(window_id_);
 }
 
@@ -138,4 +138,4 @@ Window* Window::FromWindowId(WindowId window_id) {
   return WindowIdMapper::instance()->Find(window_id);
 }
 
-}  // namespace view
+}  // namespace views

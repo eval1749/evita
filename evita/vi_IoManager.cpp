@@ -16,8 +16,8 @@
 #include "evita/dom/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/ed_Mode.h"
-#include "evita/view/window.h"
-#include "evita/view/window_set.h"
+#include "evita/views/window.h"
+#include "evita/views/window_set.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_Selection.h"
@@ -73,7 +73,7 @@ struct FinishLoadParam
                 m_pBuffer->SetMode(pModeFactory->Create(m_pBuffer));
             }
 
-            for (auto window : view::Window::all_windows()) {
+            for (auto window : views::Window::all_windows()) {
                 if (auto text_window = window->as<TextEditWindow>())
                     text_window->GetSelection()->RestoreForReload();
             }
@@ -281,7 +281,7 @@ IoManager::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
         COPYDATASTRUCT* p = reinterpret_cast<COPYDATASTRUCT*>(lParam);
         auto const filename = reinterpret_cast<base::char16*>(p->lpData);
         Application::instance()->view_event_handler()->OpenFile(
-            view::kInvalidWindowId, filename);
+            views::kInvalidWindowId, filename);
         // TODO(yosi) Should we call |SetForegroundWindow|?
         return true;
     } // WM_COPYDATA

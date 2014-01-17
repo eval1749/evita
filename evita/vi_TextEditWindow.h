@@ -45,12 +45,12 @@ enum DragMode
 // A range contains the start position of window.
 //
 class TextEditWindow
-    : public CommandWindow_<TextEditWindow, view::ContentWindow>,
+    : public CommandWindow_<TextEditWindow, views::ContentWindow>,
       public DoubleLinkedNode_<TextEditWindow, Buffer> {
-  DECLARE_CASTABLE_CLASS(TextEditWindow, view::ContentWindow);
+  DECLARE_CASTABLE_CLASS(TextEditWindow, views::ContentWindow);
 
   private: typedef DoubleLinkedNode_<TextEditWindow> WindowItem;
-  private: typedef view::ContentWindow ParentClass;
+  private: typedef views::ContentWindow ParentClass;
 
   private: typedef text::Range Range;
 

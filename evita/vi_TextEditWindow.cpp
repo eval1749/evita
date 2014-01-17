@@ -370,16 +370,12 @@ void TextEditWindow::DidSetFocus() {
     DEBUG_TEXT_EDIT_PRINTF("focus=%d show=%d caret=%d\n",
         has_focus(), is_shown(), m_lCaretPosn);
   #endif
-  ParentClass::DidSetFocus();
   ASSERT(has_focus());
   // Note: It is OK to set focus to hidden window.
   caret_->Take(*m_gfx);
   GetBuffer()->UpdateFileStatus(true);
   m_lCaretPosn = -1;
-  if (!is_shown()) {
-    auto const frame = Frame::FindFrame(*this);
-    frame->DidSetFocusOnChild(this);
-  }
+  ParentClass::DidSetFocus();
 }
 
 void TextEditWindow::DidShow() {

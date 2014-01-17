@@ -360,6 +360,7 @@
         'views/window_set.cc',
 
         'views/buffer_list_window.cc',
+        'views/command_window.cc',
         'views/content_window.cc',
         'views/table_model.cc',
         'views/table_view.cc',

@@ -16,16 +16,9 @@ class KeyBindEntry;
 //
 class CommandWindow : public views::Window {
   protected: explicit CommandWindow(
-      std::unique_ptr<widgets::NativeWindow>&& native_window)
-      : views::Window(std::move(native_window)) {
-  }
-
-  protected: explicit CommandWindow(views::WindowId window_id)
-      : views::Window(window_id) {
-  }
-
-  protected: CommandWindow() {
-  }
+      std::unique_ptr<widgets::NativeWindow>&& native_window);
+  protected: explicit CommandWindow(views::WindowId window_id);
+  protected: virtual ~CommandWindow();
 
   public: template<class T> T* DynamicCast() {
     return Is<T>() ? static_cast<T*>(this) : nullptr;
@@ -37,7 +30,10 @@ class CommandWindow : public views::Window {
     return T::Is_(this);
   }
 
-  public: virtual Command::KeyBindEntry* MapKey(uint) = 0;
+  public: virtual Command::KeyBindEntry* MapKey(uint key_code);
+
+  // widgets::Widget
+  protected: void virtual DidSetFocus() override;
 
   DISALLOW_COPY_AND_ASSIGN(CommandWindow);
 };

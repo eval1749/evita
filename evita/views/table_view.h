@@ -37,7 +37,6 @@ class TableView : public CommandWindow_<TableView, views::ContentWindow> {
 
   // views::ContentWindow
   private: virtual base::string16 GetTitle(size_t max_length) const;
-  private: virtual Command::KeyBindEntry* MapKey(uint key_code) override;
   private: virtual void MakeSelectionVisible() override;
   private: virtual void UpdateStatusBar() const override;
 

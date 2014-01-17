@@ -27,31 +27,6 @@ Buffer::Buffer(const base::string16& name, text::Mode* pMode)
 Buffer::~Buffer() {
 }
 
-// Returns true if buffer is safe to kill.
-bool Buffer::CanKill() {
-  if (!NeedSave())
-    return true;
-
-  auto const pFrame = Application::instance()->GetActiveFrame();
-
-  auto const iAnswer = Application::instance()->Ask(
-      MB_ICONWARNING | MB_YESNOCANCEL,
-      IDS_ASK_SAVE,
-      name().c_str());
-
-  switch (iAnswer) {
-    case IDCANCEL:
-      return false;
-
-    case IDYES:
-      if (!Application::instance()->SaveBuffer(pFrame, this))
-        return false;
-      break;
-  }
-
-  return true;
-}
-
 bool Buffer::OnIdle(uint) {
   #if DEBUG_STYLE
   {

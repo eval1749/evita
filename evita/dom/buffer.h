@@ -31,9 +31,6 @@ class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
   // [B]
   public: void BindKey(uint key_code, Command::KeyBindEntry* entry);
 
-  // [C]
-  public: bool CanKill();
-
   // [F]
   public: void FinishIo(uint);
 

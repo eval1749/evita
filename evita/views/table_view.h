@@ -9,6 +9,7 @@
 
 #include "base/basictypes.h"
 #include "evita/gc/member.h"
+#include "evita/view/window_id.h"
 
 namespace dom {
 class Document;
@@ -21,16 +22,24 @@ class TableModel;
 class TableView : public CommandWindow_<TableView, content::ContentWindow> {
   DECLARE_CASTABLE_CLASS(TableView, content::ContentWindow);
 
-  private: content::ContentWindow BaseWindow;
+  private: typedef content::ContentWindow BaseWindow;
 
   private: gc::Member<dom::Document> document_;
   private: HWND list_view_;
   private: std::unique_ptr<TableModel> model_;
+  private: int modified_tick_;
 
-  public: TableView();
-  public: virtual ~TableMode();
+  public: TableView(WindowId window_id, dom::Document* document);
+  public: virtual ~TableView();
 
+  private: std::unique_ptr<TableModel> CreateModel();
   private: void Redraw();
+
+  // content::ContentWindow
+  private: virtual base::string16 GetTitle(size_t max_length) const;
+  private: virtual Command::KeyBindEntry* MapKey(uint key_code) override;
+  private: virtual void MakeSelectionVisible() override;
+  private: virtual void UpdateStatusBar() const override;
 
   // widgets::Widget
   private: virtual void Hide() override;

@@ -18,8 +18,6 @@ namespace view {
 
 namespace {
 const int kListViewId = 1234;
-// TODO(yosi) We should get character width from ListView control.
-const int kCharWidth = 20;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -42,10 +40,7 @@ class TableContentBuilder {
   private: void BuildHeader();
   private: void BuildRows();
 
-  private: static int CellWidth(const TableModel::Cell& cell) {
-    return (cell.text().length() + 2) * kCharWidth;
-  }
-
+  private: static int CellWidth(const TableModel::Cell& cell);
   private: void UpdateListViewItem(int row_index, const Row* row);
 
   DISALLOW_COPY_AND_ASSIGN(TableContentBuilder);
@@ -91,9 +86,7 @@ void TableContentBuilder::BuildHeader() {
     ListView_SetColumn(list_view_, col_index, &column);
   }
 
-  for (auto index = old_num_cols;
-       index < new_num_cols;
-       ++index) {
+  for (auto index = old_num_cols; index < new_num_cols; ++index) {
     auto const new_cell = new_model_->header_row()->cell(index);
     auto const new_cell_width = CellWidth(new_cell);
     column_widths_.push_back(new_cell_width);
@@ -135,8 +128,16 @@ void TableContentBuilder::BuildRows() {
       DCHECK_GE(row_index, 0);
       continue;
     }
+    column_widths_[0] = std::max(column_widths_[0],
+                                 CellWidth(new_row->cell(0)));
     UpdateListViewItem(row_index, new_row);
   }
+}
+
+int TableContentBuilder::CellWidth(const TableModel::Cell& cell) {
+  // TODO(yosi) We should get character width from ListView control.
+  const int kCharWidth = 6;
+  return (cell.text().length() + 2) * kCharWidth;
 }
 
 void TableContentBuilder::UpdateListViewItem(int row_index, const Row* row) {

@@ -64,6 +64,7 @@ class TableModel {
   public: ~TableModel();
 
   public: const Row* header_row() const { return &header_row_; }
+  public: const Row& row(size_t index) const { return *rows_[index]; }
   public: const Rows& rows() const { return rows_; }
   public: size_t size() const { return rows_.size(); }
 

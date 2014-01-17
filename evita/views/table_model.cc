@@ -99,6 +99,11 @@ std::unique_ptr<TableModel::Row> TableModel::ParseLine(
     }
   }
 
+  if (auto cell_length = text.length() - cell_start) {
+    if (row->length() < header_row_.length())
+      row->AddCell(text.substr(cell_start, cell_length));
+  }
+
   while (row->length() < header_row_.length()) {
     row->AddCell(L"");
   }

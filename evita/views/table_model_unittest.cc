@@ -25,6 +25,9 @@ TEST_F(TableModeTest, AddRow) {
   table_model->AddRow(L"two\t20\t21\t22\t24");
   table_model->AddRow(L"three\t30");
   EXPECT_EQ(3, table_model->size());
+  EXPECT_EQ(L"11", table_model->row(0).cell(2).text());
+  EXPECT_EQ(L"21", table_model->row(1).cell(2).text());
+  EXPECT_EQ(L"", table_model->row(2).cell(2).text());
   for (auto row : table_model->rows()) {
     EXPECT_EQ(3, row->length()) << row->cell(0).text();
   }

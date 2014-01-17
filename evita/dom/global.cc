@@ -15,6 +15,7 @@
 #include "evita/dom/range.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/selection.h"
+#include "evita/dom/table_window.h"
 #include "evita/dom/text_window.h"
 #include "evita/dom/window.h"
 
@@ -55,6 +56,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     v8_glue::Installer<Selection>::Run(isolate, templ);
     v8_glue::Installer<Window>::Run(isolate, templ);
     v8_glue::Installer<EditorWindow>::Run(isolate, templ);
+    v8_glue::Installer<TableWindow>::Run(isolate, templ);
     v8_glue::Installer<TextWindow>::Run(isolate, templ);
     v8::Handle<v8::Object> js_unicode = v8::Object::New(isolate);
     templ->Set(gin::StringToV8(isolate, "Unicode"), 

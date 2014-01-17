@@ -59,7 +59,14 @@ var Range = function(document, opt_start, opt_end) {};
 /**
  * @constructor
  * @extends {Window}
- * @param {Range} range.
+ * @param {Document} document
+ */
+var TableWindow = function(document) {};
+
+/**
+ * @constructor
+ * @extends {Window}
+ * @param {Range} range
  */
 var TextWindow = function(range) {};
 

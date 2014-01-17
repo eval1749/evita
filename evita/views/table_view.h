@@ -3,7 +3,7 @@
 #if !defined(INCLUDE_view_table_view_h)
 #define INCLUDE_view_table_view_h
 
-#include "evita/content/content_window.h"
+#include "evita/views/content_window.h"
 
 #include <memory>
 
@@ -19,10 +19,10 @@ namespace view {
 
 class TableModel;
 
-class TableView : public CommandWindow_<TableView, content::ContentWindow> {
-  DECLARE_CASTABLE_CLASS(TableView, content::ContentWindow);
+class TableView : public CommandWindow_<TableView, view::ContentWindow> {
+  DECLARE_CASTABLE_CLASS(TableView, view::ContentWindow);
 
-  private: typedef content::ContentWindow BaseWindow;
+  private: typedef view::ContentWindow BaseWindow;
 
   private: gc::Member<dom::Document> document_;
   private: HWND list_view_;
@@ -35,7 +35,7 @@ class TableView : public CommandWindow_<TableView, content::ContentWindow> {
   private: std::unique_ptr<TableModel> CreateModel();
   private: void Redraw();
 
-  // content::ContentWindow
+  // view::ContentWindow
   private: virtual base::string16 GetTitle(size_t max_length) const;
   private: virtual Command::KeyBindEntry* MapKey(uint key_code) override;
   private: virtual void MakeSelectionVisible() override;

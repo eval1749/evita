@@ -188,7 +188,7 @@ TextEditWindow* Frame::AddWindow(Buffer* buffer) {
   return window;
 }
 
-void Frame::AddWindow(content::ContentWindow* window) {
+void Frame::AddWindow(view::ContentWindow* window) {
   DCHECK(!window->parent_node());
   DCHECK(!window->is_realized());
   if (auto const pane = GetActivePane()) {
@@ -236,8 +236,8 @@ void Frame::DidAddChildWidget(const widgets::Widget& widget) {
     return;
   }
 
-  auto window = const_cast<content::ContentWindow*>(
-      widget.as<content::ContentWindow>());
+  auto window = const_cast<view::ContentWindow*>(
+      widget.as<view::ContentWindow>());
   DCHECK(window);
   RemoveChild(window);
   AddPane(new EditPane(window));

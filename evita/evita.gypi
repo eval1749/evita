@@ -287,8 +287,6 @@
         'ap_input_history.cpp',
         'cm_CmdProc.cpp',
         'cm_commands.cpp',
-        'content/buffer_list_window.cc',
-        'content/content_window.cc',
         'ctrl_StatusBar.cpp',
         'ctrl_TabBand.cpp',
         'ctrl_TitleBar.cpp',
@@ -310,16 +308,6 @@
         'vi_Selection.cpp',
         'vi_Style.cpp',
         'vi_TextEditWindow.cpp',
-
-        'view/view_delegate_impl.cc',
-        'view/window.cc',
-        'view/window_set.cc',
-
-        'views/table_model.cc',
-        'views/table_view.cc',
-
-        'widgets/root_widget.cc',
-        'widgets/widget.cc',
       ], # sources
     }, # ui
     {
@@ -371,6 +359,8 @@
         'view/window.cc',
         'view/window_set.cc',
 
+        'views/buffer_list_window.cc',
+        'views/content_window.cc',
         'views/table_model.cc',
         'views/table_view.cc',
 

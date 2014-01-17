@@ -52,7 +52,7 @@ void ViewDelegateImpl::AddWindow(dom::WindowId parent_id,
     return;
   }
   DCHECK_EQ(child_id, child->window_id());
-  parent->as<Frame>()->AddWindow(child->as<content::ContentWindow>());
+  parent->as<Frame>()->AddWindow(child->as<view::ContentWindow>());
 }
 
 void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,

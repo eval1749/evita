@@ -1,6 +1,6 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#include "evita/content/buffer_list_window.h"
+#include "evita/views/buffer_list_window.h"
 
 #include <vector>
 
@@ -85,7 +85,7 @@ Frame* CreateFrame(Buffer* buffer) {
 
 }  // naemspace
 
-namespace content {
+namespace view {
 
 HCURSOR BufferListWindow::sm_hDragCursor;
 Command::KeyBinds* BufferListWindow::sm_pKeyBinds;
@@ -439,11 +439,11 @@ void BufferListWindow::UpdateStatusBar() const {
   frame().SetStatusBar(0, L"");
 }
 
-}  // namespace content
+}  // namespace view
 
 namespace Command {
 
-using content::BufferListWindow;
+using view::BufferListWindow;
 
 DEFCOMMAND(KillBuffers) {
   auto const pBufferList = pCtx->GetWindow()->DynamicCast<BufferListWindow>();

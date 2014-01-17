@@ -41,7 +41,7 @@ enum MessageLevel
 class Pane;
 class TextEditWindow;
 
-namespace content {
+namespace view {
 class ContentWindow;
 }
 
@@ -94,7 +94,7 @@ class Frame final : public view::Window,
   private: void AddPane(Pane*);
   private: void AddTab(Pane*);
   public: TextEditWindow* AddWindow(Buffer* buffer);
-  public: void AddWindow(content::ContentWindow*);
+  public: void AddWindow(view::ContentWindow*);
 
   // [C]
   private: virtual void CreateNativeWindow() const override;

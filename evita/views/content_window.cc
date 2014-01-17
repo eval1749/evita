@@ -1,11 +1,11 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/content/content_window.h"
+#include "evita/views/content_window.h"
 
 #include "evita/vi_Frame.h"
 
-namespace content {
+namespace view {
 
 ContentWindow::ContentWindow(
     std::unique_ptr<common::win::NativeWindow>&& native_window)
@@ -53,4 +53,4 @@ void ContentWindow::WillDestroyWidget() {
   active_tick_ = 0;
 }
 
-}  // namespace content
+}  // namespace view

@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_listener_winapp_visual_text_pane_h)
 #define INCLUDE_listener_winapp_visual_text_pane_h
 
-#include "evita/content/content_window.h"
+#include "evita/views/content_window.h"
 #include "./li_util.h"
 #include "./gfx_base.h"
 #include "./vi_CommandWindow.h"
@@ -45,12 +45,12 @@ enum DragMode
 // A range contains the start position of window.
 //
 class TextEditWindow
-    : public CommandWindow_<TextEditWindow, content::ContentWindow>,
+    : public CommandWindow_<TextEditWindow, view::ContentWindow>,
       public DoubleLinkedNode_<TextEditWindow, Buffer> {
-  DECLARE_CASTABLE_CLASS(TextEditWindow, content::ContentWindow);
+  DECLARE_CASTABLE_CLASS(TextEditWindow, view::ContentWindow);
 
   private: typedef DoubleLinkedNode_<TextEditWindow> WindowItem;
-  private: typedef content::ContentWindow ParentClass;
+  private: typedef view::ContentWindow ParentClass;
 
   private: typedef text::Range Range;
 

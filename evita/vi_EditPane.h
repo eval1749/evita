@@ -16,7 +16,7 @@
 
 class Frame;
 
-namespace content {
+namespace view {
 class ContentWindow;
 }
 
@@ -40,7 +40,7 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
     k_cyMinBox = k_cySplitter,
   };
 
-  private: typedef content::ContentWindow Window;
+  private: typedef view::ContentWindow Window;
 
   private: class Box;
   private: class LayoutBox;

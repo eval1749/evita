@@ -1,9 +1,9 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_content_buffer_list_window_h)
-#define INCLUDE_evita_content_buffer_list_window_h
+#if !defined(INCLUDE_evita_views_buffer_list_window_h)
+#define INCLUDE_evita_views_buffer_list_window_h
 
-#include "evita/content/content_window.h"
+#include "evita/views/content_window.h"
 
 #include "evita/cm_CmdProc.h"
 
@@ -13,7 +13,7 @@ class Buffer;
 
 using Buffer = dom::Buffer;
 
-namespace content {
+namespace view {
 
 class BufferListWindow
     : public CommandWindow_<BufferListWindow, ContentWindow> {
@@ -76,6 +76,6 @@ class BufferListWindow
   DISALLOW_COPY_AND_ASSIGN(BufferListWindow);
 };
 
-}  // namespace content
+}  // namespace view
 
-#endif //!defined(INCLUDE_evita_content_buffer_list_window_h)
+#endif //!defined(INCLUDE_evita_views_buffer_list_window_h)

@@ -15,7 +15,7 @@
 #include "./vi_EditPane.h"
 
 #include "base/logging.h"
-#include "evita/content/content_window.h"
+#include "evita/views/content_window.h"
 #include "evita/dom/lock.h"
 #include "./ed_Mode.h"
 #include "./gfx_base.h"
@@ -48,7 +48,7 @@ struct EditPane::HitTestResult {
     ASSERT(type != None);
   }
 
-  content::ContentWindow* window() const;
+  view::ContentWindow* window() const;
 };
 
 class EditPane::Box : public DoubleLinkedNode_<EditPane::Box>,

@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_content_content_window_h)
-#define INCLUDE_evita_content_content_window_h
+#if !defined(INCLUDE_evita_views_content_window_h)
+#define INCLUDE_evita_views_content_window_h
 
 #include <memory>
 
@@ -11,7 +11,7 @@
 
 class Frame;
 
-namespace content {
+namespace view {
 
 class ContentWindow : public CommandWindow_<ContentWindow> {
   DECLARE_CASTABLE_CLASS(ContentWindow, CommandWindow);
@@ -54,6 +54,6 @@ class ContentWindow : public CommandWindow_<ContentWindow> {
   DISALLOW_COPY_AND_ASSIGN(ContentWindow);
 };
 
-}  // namespace content
+}  // namespace view
 
-#endif //!defined(INCLUDE_evita_content_content_window_h)
+#endif //!defined(INCLUDE_evita_views_content_window_h)

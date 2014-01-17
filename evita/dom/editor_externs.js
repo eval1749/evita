@@ -43,6 +43,13 @@ Editor.getFilenameForSave = function(window, filename) {};
 Editor.getFilenameForSave_ = function(window, filename, callback) {};
 
 /**
+ * @param {string} format_text
+ * @param {Object.<string, string>=} opt_dict
+ * @return {string}
+ */
+Editor.localizeText = function(format_text, opt_dict) {};
+
+/**
  * @param {?Window} window.
  * @param {!string} message.
  * @param {!title} title.
@@ -59,6 +66,12 @@ Editor.messageBox  = function(window, message, title, flags) {};
  * @param {function(number)} callback
  */
 Editor.messageBox_  = function(window, message, title, flags, callback) {};
+
+/**
+ * @param {string} spec
+ * @return {number} key code.
+*/
+Editor.parseKeyCombination = function(spec) {};
 
 /**
  * @param {!string} script_text

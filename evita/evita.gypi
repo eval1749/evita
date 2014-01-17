@@ -29,7 +29,6 @@
           'dom/file_path_externs.js',
           #'dom/key_names_externs.js',
           'dom/range_externs.js',
-          #'dom/runtime_externs.js',
           'dom/selection_externs.js',
           'dom/text_window_externs.js',
           'dom/window_externs.js',
@@ -38,7 +37,6 @@
           'dom/polyfill.js',
           'dom/key_names.js',
           'dom/strings_en_US.js',
-          'dom/runtime.js',
 
           'dom/document.js',
           'dom/editor.js',

@@ -61,7 +61,7 @@
    * @param {Object} command.
    */
   Document.prototype.bindKey = function (key_combination, command) {
-    this.bindKey_(parseKeyCombination(key_combination), command);
+    this.bindKey_(Editor.parseKeyCombination(key_combination), command);
   };
 
   Document.prototype.close = function() {
@@ -71,9 +71,9 @@
       return;
     }
     Editor.messageBox(null,
-                      localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
-                      localizeText(Strings.IDS_APP_TITLE),
-                      MessageBox.ICONWARNING | MessageBox.YESNOCANCEL)
+        Editor.localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
+        Editor.localizeText(Strings.IDS_APP_TITLE),
+        Editor.MessageBox.ICONWARNING | MessageBox.YESNOCANCEL)
       .then(function(response_code) {
         switch (response_code) {
           case DialogItemId.NO:

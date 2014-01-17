@@ -47,8 +47,8 @@
       if (!document.needSave())
         return Promise.cast(true);
       return Editor.messageBox(null,
-        localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
-        localizeText(Strings.IDS_APP_TITLE),
+        Editor.localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
+        Editor.localizeText(Strings.IDS_APP_TITLE),
         MessageBox.ICONWARNING | MessageBox.YESNOCANCEL).then(function(code) {
           switch (code) {
             case DialogItemId.CANCEL:
@@ -103,6 +103,23 @@
   };
 
   /**
+   * @param {string} format_text
+   * @param {Object.<string, string>=} opt_dict
+   * @return {string}
+   * @suppress {globalThis}
+   */
+  Editor.localizeText = function(format_text, opt_dict) {
+    if (arguments.length == 1)
+      return format_text;
+    var dict = /** @type {!Object} */(opt_dict);
+    var text = format_text;
+    Object.keys(dict).forEach(function(key) {
+      text = text.replace('__' + key + '__', opt_dict[key]);
+    });
+    return text;
+  };
+
+  /**
    * @param {?Window} window.
    * @param {string} message
    * @param {string} title
@@ -117,10 +134,66 @@
   };
 
   /**
+   * @param {string} spec.
+   * @return {number} key code.
+   * @suppress {globalThis}
+   */
+  Editor.parseKeyCombination = (function() {
+    /** @const */ var MOD_CTRL = 0x200;
+    /** @const */ var MOD_SHIFT = 0x400;
+
+    var KEY_COMBINATION_RULES = [
+      {
+        modifiers: MOD_CTRL | MOD_SHIFT,
+        re: /^Ctrl[-+]Shift[-+](.+)$/i
+      },
+      {
+        modifiers: MOD_CTRL | MOD_SHIFT,
+        re: /^Shift[-+]Ctrl[-+](.+)$/i
+      },
+      {
+        modifiers: MOD_CTRL,
+        re: /^Ctrl[-+](.+)$/i
+      },
+      {
+        modifiers: MOD_SHIFT,
+        re: /^Shift[-+](.+)$/i
+      },
+      {
+        modifiers: 0,
+        re: /^(.+)$/
+      }
+    ];
+
+    /**
+     * @param {string} spec.
+     * @return {number} key code.
+     */
+    return function(spec) {
+      var code = 0;
+      KEY_COMBINATION_RULES.forEach(function(rule) {
+        if (code)
+          return;
+        var matches = rule.re.exec(spec);
+        if (!matches)
+          return;
+        var key_name = matches[1];
+        var key_code = KEY_CODE_MAP[key_name.toLowerCase()];
+        if (!key_code)
+          throw new Error('Invalid key name: ' + key_name);
+        code = rule.modifiers | key_code;
+      });
+      if (!code)
+        throw new Error('Invalid key specification: ' + spec);
+      return code;
+    }
+  })();
+
+  /**
    * @param {string} combination.
    * @param {function(number=)} command.
    */
   Editor.setKeyBinding = function(combination, command) {
-    Editor.setKeyBinding_(parseKeyCombination(combination), command);
+    Editor.setKeyBinding_(Editor.parseKeyCombination(combination), command);
   };
 })();

@@ -45,6 +45,11 @@ TEST_F(EditorTest, getFilenameForSave) {
   EXPECT_SCRIPT_EQ("dir/foo.bar", "filename");
 }
 
+TEST_F(EditorTest, localizeText) {
+  EXPECT_SCRIPT_EQ("This is a pen",
+      "Editor.localizeText('This is a __item__', {item: 'pen'})");
+}
+
 TEST_F(EditorTest, messageBox) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
   EXPECT_VALID_SCRIPT(

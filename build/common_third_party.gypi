@@ -9,13 +9,12 @@
             'VCCLCompilerTool': {
               'conditions': [
                 ['component=="shared_library"', {
-                  'ExceptionHandling': '0',
+                  'ExceptionHandling': '1',
                 }, {
                   'ExceptionHandling': '0',
                 }],
               ], # conditions
               'AdditionalOptions': ['/MP'],
-              'RuntimeTypeInfo': 'false', # /GR-
               'WarningLevel': '3', # /Wall
               'WarnAsError': 'false', # no /WX
             }, # VCCLCompilerTool
@@ -28,12 +27,18 @@
           }, # msvs_settings
           'msvs_disabled_warnings': [
             # level 1
+            # C4530: C++ exception handler used, but unwind semantics are not
+            # enabled. Specify /EHsc
             4530,
-            4541,
             # level 2
+            # C4244: 'conversion' conversion from 'type1' to 'type2', possible
+            # loss of data
             4244,
             # level 3
+            # C4800: 'type' : forcing value to bool 'true' or 'false'
+            # (performance warning)
             4800,
+            # C4996: 'function': was declared deprecated
             4996,
           ] # msvs_disabled_warnings
       }], # OS=="win"

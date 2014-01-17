@@ -30,8 +30,6 @@
 namespace Command
 {
 
-extern void ListBuffer(const Context*);
-
 extern void FindCommand(const Context*);
 extern void FindNext(const Context*);
 extern void FindPrevious(const Context*);
@@ -1329,7 +1327,6 @@ void Processor::GlobalInit() {
     BIND_KEY(Mod_Ctrl | '.', ExchangeCode);
     BIND_KEY(Mod_Ctrl | '/', ExpandDynamicAbbrev);
 
-    BIND_KEY(Mod_Ctrl | 'B', ListBuffer);
     BIND_KEY(Mod_Ctrl | 'C', CopyToClipboard);
     BIND_KEY(Mod_Ctrl | 'F', FindCommand);
     BIND_KEY(Mod_Ctrl | 'H', FindCommand);

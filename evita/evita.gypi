@@ -50,6 +50,7 @@
 
           'dom/console.js',
           'dom/js_console.js',
+          'dom/document_list.js',
           'dom/key_bindings.js',
         ],
       }, # variables
@@ -359,7 +360,6 @@
         'views/window.cc',
         'views/window_set.cc',
 
-        'views/buffer_list_window.cc',
         'views/command_window.cc',
         'views/content_window.cc',
         'views/table_model.cc',

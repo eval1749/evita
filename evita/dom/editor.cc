@@ -31,6 +31,15 @@ class EditorClass : public v8_glue::WrapperInfo {
   }
   public: ~EditorClass() = default;
 
+  private: static void BindKey(int key_code, v8::Handle<v8::Object> command) {
+    ASSERT_DOM_LOCKED();
+    if (!Command::g_pGlobalBinds) {
+      // During DOM unit testing, |g_GlobalBinds| isn't initialized.
+      return;
+    }
+    Command::g_pGlobalBinds->Bind(key_code, new ScriptCommand(command));
+  }
+
   // TODO(yosi): Until we enable |new EditorWindow()|, we use
   // |editor.createFrame()|.
   private: static v8::Handle<v8::Object> CreateFrame() {
@@ -125,16 +134,6 @@ class EditorClass : public v8_glue::WrapperInfo {
         try_catch));
   }
 
-  private: static void SetKeyBinding(int key_code,
-                                    v8::Handle<v8::Object> command) {
-    ASSERT_DOM_LOCKED();
-    if (!Command::g_pGlobalBinds) {
-      // During DOM unit testing, |g_GlobalBinds| isn't initialized.
-      return;
-    }
-    Command::g_pGlobalBinds->Bind(key_code, new ScriptCommand(command));
-  }
-
   private: static base::string16 version() {
     return kVersion;
   }
@@ -145,12 +144,12 @@ class EditorClass : public v8_glue::WrapperInfo {
     auto templ = v8_glue::CreateConstructorTemplate(isolate,
         &EditorClass::NewEditor);
     return v8_glue::FunctionTemplateBuilder(isolate, templ)
+      .SetMethod("bindKey_", &EditorClass::BindKey)
       .SetMethod("createFrame", &EditorClass::CreateFrame)
       .SetMethod("getFilenameForLoad_", &EditorClass::GetFilenameForLoad)
       .SetMethod("getFilenameForSave_", &EditorClass::GetFilenameForSave)
       .SetMethod("messageBox_", &EditorClass::MessageBox)
       .SetMethod("runScript", &EditorClass::RunScript)
-      .SetMethod("setKeyBinding_", &EditorClass::SetKeyBinding)
       .SetProperty("version", &EditorClass::version)
       .Build();
   }

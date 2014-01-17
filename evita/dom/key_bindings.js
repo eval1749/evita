@@ -23,7 +23,7 @@
   }
 
   // Show document in new editor window.
-  Editor.setKeyBinding('Ctrl+Shift+3', function() {
+  Editor.bindKey('Ctrl+Shift+3', function() {
     var text_window = new TextWindow(this.selection.range);
     var editor_window = new EditorWindow();
     editor_window.add(text_window);
@@ -33,7 +33,7 @@
   });
 
   // Show document in new editor window and close current editor window.
-  Editor.setKeyBinding('Ctrl+Shift+4', function() {
+  Editor.bindKey('Ctrl+Shift+4', function() {
     var current = this.selection.window.parent;
     // When editor window has only one tab, we don't ignore this command,
     // since result of this command isn't useful.
@@ -49,7 +49,7 @@
   });
 
   // Select all contents
-  Editor.setKeyBinding('Ctrl+A', function() {
+  Editor.bindKey('Ctrl+A', function() {
     var range = this.selection.range;
     range.start = 0
     range.end = range.document.length;
@@ -64,13 +64,13 @@
     changer(selection);
   }
 
-  Editor.setKeyBinding('Ctrl+Shift+C', function() {
+  Editor.bindKey('Ctrl+Shift+C', function() {
     changeCase(this.selection, function(selection) {
       selection.range.capitalize();
     });
   });
 
-  Editor.setKeyBinding('Ctrl+Shift+D', function() {
+  Editor.bindKey('Ctrl+Shift+D', function() {
     changeCase(this.selection, function(selection) {
       selection.range.toLowerCase();
     });
@@ -78,7 +78,7 @@
 
   // TODO(yosi) We should display dialog box to prompt enter line number and
   // list of functions.
-  Editor.setKeyBinding('Ctrl+G', function(arg) {
+  Editor.bindKey('Ctrl+G', function(arg) {
     if (!arg)
       return;
     this.selection.range.startOf(Unit.DOCUMENT);
@@ -86,12 +86,12 @@
   });
 
   // Make selection visible
-  Editor.setKeyBinding('Ctrl+L', function() {
+  Editor.bindKey('Ctrl+L', function() {
     this.makeSelectionVisible();
   });
 
   // Open new document in new window in current editor window.
-  Editor.setKeyBinding('Ctrl+N', function(arg) {
+  Editor.bindKey('Ctrl+N', function(arg) {
     var editorWindow = this.parent;
     if (arg !== undefined) {
       newTextWindow(editorWindow, new Document('untitled.txt'));
@@ -105,7 +105,7 @@
   });
 
   // Open new document in new editor window.
-  Editor.setKeyBinding('Ctrl+Shift+N', function(arg) {
+  Editor.bindKey('Ctrl+Shift+N', function(arg) {
     if (arg !== undefined) {
       newEditorWindow(new Document('untitled.txt'));
       return;
@@ -118,7 +118,7 @@
   });
 
   // Open document in new or existing window in current editor window.
-  Editor.setKeyBinding('Ctrl+O', function() {
+  Editor.bindKey('Ctrl+O', function() {
     var editorWindow = this.parent;
     Editor.getFilenameForLoad(this, this.selection.document.filename)
         .then(function(filename) {
@@ -129,7 +129,7 @@
   });
 
   // Open document in new editor window.
-  Editor.setKeyBinding('Ctrl+Shift+O', function() {
+  Editor.bindKey('Ctrl+Shift+O', function() {
     Editor.getFilenameForLoad(this, this.selection.document.filename)
         .then(function(filename) {
           newEditorWindow(Document.load(filename));
@@ -137,7 +137,7 @@
   });
 
   // Save file
-  Editor.setKeyBinding('Ctrl+S', function(arg) {
+  Editor.bindKey('Ctrl+S', function(arg) {
     var document = this.selection.document;
     if (!arg && document.filename != '') {
       document.save(document.filename);
@@ -150,25 +150,25 @@
         });
   });
 
-  Editor.setKeyBinding('Ctrl+W', function(arg) {
+  Editor.bindKey('Ctrl+W', function(arg) {
     var document = this.selection.document;
     document.close();
   });
 
-  Editor.setKeyBinding('Ctrl+Shift+U', function() {
+  Editor.bindKey('Ctrl+Shift+U', function() {
     changeCase(this.selection, function(selection) {
       selection.range.toUpperCase();
     });
   });
 
-  Editor.setKeyBinding('Ctrl+Shift+W', function(arg) {
+  Editor.bindKey('Ctrl+Shift+W', function(arg) {
     if (arg)
       Editor.forceExit();
     else
       Editor.exit();
   });
 
-  Editor.setKeyBinding('Ctrl+Y', function() {
+  Editor.bindKey('Ctrl+Y', function() {
     var selection = this.selection;
     var position = selection.document.redo(selection.active);
     if (position < 0) {
@@ -181,7 +181,7 @@
     selection.range.collapseTo(position);
   });
 
-  Editor.setKeyBinding('Ctrl+Z', function() {
+  Editor.bindKey('Ctrl+Z', function() {
     var selection = this.selection;
     var position = selection.document.undo(selection.active);
     if (position < 0) {

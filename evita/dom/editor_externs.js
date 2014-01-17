@@ -15,6 +15,18 @@ Editor.exit = function() {};
 Editor.forceExit = function() {};
 
 /**
+ * @param {string} key_combination
+ * @param {function(number=)} command
+ */
+Editor.bindKey = function(key_combination, command) {};
+
+/**
+ * @param {number} key_code
+ * @param {function(number=)} command
+ */
+Editor.bindKey_ = function(key_code, command) {};
+
+/**
  * @param {?Window} window.
  * @param {!string} filename.
  * @return {Promise.<string>}
@@ -80,18 +92,6 @@ Editor.parseKeyCombination = function(spec) {};
              end: number, startColumn: number, endColumn: number}}
  */
 Editor.runScript = function(script_text) {};
-
-/**
- * @param {string} key_combination
- * @param {function(number=)} command
- */
-Editor.setKeyBinding = function(key_combination, command) {};
-
-/**
- * @param {number} key_code
- * @param {function(number=)} command
- */
-Editor.setKeyBinding_ = function(key_code, command) {};
 
 /**
  * @const @type{!string}

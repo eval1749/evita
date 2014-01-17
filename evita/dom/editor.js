@@ -22,6 +22,14 @@
     return EditorWindow.list.reduce(updateActiveWindow, null);
   };
 
+  /**
+   * @param {string} combination.
+   * @param {function(number=)} command.
+   */
+  Editor.bindKey = function(combination, command) {
+    Editor.bindKey_(Editor.parseKeyCombination(combination), command);
+  };
+
   Editor.exit = function() {
     var active_window = Editor.activeWindow();
 
@@ -188,12 +196,4 @@
       return code;
     }
   })();
-
-  /**
-   * @param {string} combination.
-   * @param {function(number=)} command.
-   */
-  Editor.setKeyBinding = function(combination, command) {
-    Editor.setKeyBinding_(Editor.parseKeyCombination(combination), command);
-  };
 })();

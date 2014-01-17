@@ -7,7 +7,7 @@
  */
 
 /**
- * @param {!string} name
+ * @param {string} name
  * @return {!Document}
  */
 Document.getOrNew = function(name) {};
@@ -18,11 +18,16 @@ Document.getOrNew = function(name) {};
 Document.list;
 
 /**
+ * @param {string} filename
+ */
+Document.load = function(filename) {};
+
+/**
  * @param {!Document} document
  */
 Document.remove = function(document) {};
 
-/** @expose  @type {!string} */
+/** @expose  @type {string} */
 Document.prototype.filename;
 
 /** @expose  @type {number} */
@@ -31,7 +36,7 @@ Document.prototype.length;
 /** @expose  @type {boolean} */
 Document.prototype.modified;
 
-/** @expose  @type {!string} */
+/** @expose  @type {string} */
 Document.prototype.name;
 
 /**
@@ -84,12 +89,12 @@ Document.prototype.forceClose = function() {};
 Document.prototype.listWindows = function() {};
 
 /**
- * @param {!string} filename
+ * @param {string} filename
  */
 Document.prototype.load = function(filename) {};
 
 /**
- * @param {!string} filename
+ * @param {string} filename
  */
 Document.prototype.load_ = function(filename) {};
 
@@ -105,7 +110,7 @@ Document.prototype.redo= function(position) {}
 Document.prototype.renameTo = function(new_name) {}
 
 /**
- * @param {!string} filename.
+ * @param {string} filename.
  */
 Document.prototype.save = function(filename) {};
 

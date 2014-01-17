@@ -20,7 +20,7 @@ Range.prototype.start = 0;
 /** @expose @type {!string} */
 Range.prototype.text = '';
 
-/** @return {Range} */
+/** @return {!Range} */
 Range.prototype.capitalize = function() {}
 
 /**
@@ -29,22 +29,29 @@ Range.prototype.capitalize = function() {}
 Range.prototype.collapseTo = function(position) {};
 
 /**
- * @param {Unit} unit.
+ * @param {Unit} unit
  * @param {Alter=} opt_alter, default is Alter.MOVE.
  */
 Range.prototype.endOf = function(unit, opt_alter) {};
 
 /**
- * @param {Unit} unit.
+ * @param {Unit} unit
  * @param {number=} opt_count, defualt is one.
- * @return {Range}
+ * @return {!Range}
+ */
+Range.prototype.move = function(unit, opt_count) {};
+
+/**
+ * @param {Unit} unit
+ * @param {number=} opt_count, defualt is one.
+ * @return {!Range}
  */
 Range.prototype.moveEnd = function(unit, opt_count) {};
 
 /**
- * @param {Unit} unit.
+ * @param {Unit} unit
  * @param {number=} opt_count, defualt is one.
- * @return {Range}
+ * @return {!Range}
  */
 Range.prototype.moveStart = function(unit, opt_count) {};
 
@@ -54,20 +61,20 @@ Range.prototype.moveStart = function(unit, opt_count) {};
 Range.prototype.insertBefore = function(text) {};
 
 /**
- * @param {Unit} unit.
+ * @param {Unit} unit
  * @param {Alter=} opt_alter, default is Alter.MOVE.
  */
 Range.prototype.startOf = function(unit, opt_alter) {};
 
 
-/** @return {Range} */
+/** @return {!Range} */
 Range.prototype.toLocaleLowerCase = function() {}
 
-/** @return {Range} */
+/** @return {!Range} */
 Range.prototype.toLocaleUpperCase = function() {}
 
-/** @return {Range} */
+/** @return {!Range} */
 Range.prototype.toLowerCase = function() {}
 
-/** @return {Range} */
+/** @return {!Range} */
 Range.prototype.toUpperCase = function() {}

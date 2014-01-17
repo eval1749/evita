@@ -69,6 +69,12 @@ Editor.messageBox_  = function(window, message, title, flags, callback) {};
 Editor.runScript = function(script_text) {};
 
 /**
+ * @param {string} key_combination
+ * @param {function(number=)} command
+ */
+Editor.setKeyBinding = function(key_combination, command) {};
+
+/**
  * @param {number} key_code
  * @param {function(number=)} command
  */

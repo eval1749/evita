@@ -284,7 +284,6 @@
       'sources': [
         'precomp.cpp',
 
-        'ap_input_history.cpp',
         'cm_CmdProc.cpp',
         'cm_commands.cpp',
         'ctrl_StatusBar.cpp',

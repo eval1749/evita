@@ -66,7 +66,7 @@
 
   Document.prototype.close = function() {
     var document = this;
-    if (!document.modified) {
+    if (!document.needSave()) {
       document.forceClose();
       return;
     }

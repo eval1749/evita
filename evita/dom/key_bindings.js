@@ -6,7 +6,7 @@
 
 (function() {
   /**
-   * @param {Document} document.
+   * @param {!Document} document.
    */
   function newEditorWindow(document) {
     var editorWindow = new EditorWindow();
@@ -15,8 +15,8 @@
   }
 
   /**
-   * @param {Window} document.
-   * @param {Document} document.
+   * @param {!Window} document.
+   * @param {!Document} document.
    */
   function newTextWindow(parent, document) {
     parent.add(new TextWindow(new Range(document)));

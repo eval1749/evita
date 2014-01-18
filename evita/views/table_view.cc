@@ -133,8 +133,7 @@ void TableContentBuilder::BuildRows() {
     if (present_set.find(new_row->key()) != present_set.end())
       continue;
     LVITEM item = {0};
-    item.lParam = reinterpret_cast<LPARAM>(new_row);
-    item.mask = LVIF_PARAM | LVIF_TEXT;
+    item.mask = LVIF_TEXT;
     item.pszText = const_cast<base::char16*>(new_row->key().c_str());
     auto const row_index = ListView_InsertItem(list_view_, &item);
     DCHECK_GE(row_index, 0);
@@ -149,6 +148,11 @@ int TableContentBuilder::CellWidth(const TableModel::Cell& cell) {
 }
 
 void TableContentBuilder::UpdateListViewItem(int row_index, const Row* row) {
+  LVITEM item = {0};
+  item.lParam = reinterpret_cast<LPARAM>(row);
+  item.mask = LVIF_PARAM;
+  ListView_SetItem(list_view_, &item);
+
   column_widths_[0] = std::max(column_widths_[0], CellWidth(row->cell(0)));
   for (auto index = 1u; index < row->length(); ++index) {
     auto cell = row->cell(index);

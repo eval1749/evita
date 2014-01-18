@@ -341,6 +341,13 @@ void TableView::Hide() {
   BaseWindow::Hide();
 }
 
+bool TableView::OnIdle(uint32) {
+  if (!is_shown())
+    return false;
+  Redraw();
+  return true;
+}
+
 LRESULT TableView::OnNotify(NMHDR* nmhdr) {
   if (nmhdr->code == LVN_KEYDOWN) {
     auto const vkey_code = reinterpret_cast<NMLVKEYDOWN*>(nmhdr)->wVKey;

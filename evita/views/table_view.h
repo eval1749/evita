@@ -51,6 +51,7 @@ class TableView : public CommandWindow_<TableView, views::ContentWindow> {
   private: virtual void DidRealize() override;
   private: virtual void DidResize() override;
   private: virtual void DidSetFocus() override;
+  private: virtual bool OnIdle(uint32 idle_count) override;
   private: virtual LRESULT OnNotify(NMHDR* nmhdr) override;
   private: virtual void Show() override;
   private: virtual void WillDestroyWidget() override;

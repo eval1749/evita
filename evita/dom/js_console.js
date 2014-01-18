@@ -59,7 +59,7 @@ var JsConsole = (function() {
     var num_of_labels = 0;
 
     /** @interface */
-    var Visitor = function() {};
+    function Visitor() {}
 
     /** @param {number} index */
     Visitor.prototype.visitArrayElement = function(index) {};
@@ -103,7 +103,7 @@ var JsConsole = (function() {
     /**
      * @param {*} value
      * @param {number} level
-     * @param {Visitor} visitor
+     * @param {!Visitor} visitor
      */
     function visit(value, level, visitor) {
       if (value === null)
@@ -372,6 +372,18 @@ var JsConsole = (function() {
     present.focus();
   };
 
+  /**
+   * @private
+   * @param {string} line
+   */
+  JsConsole_.prototype.addToHistory_ = function(line) {
+    if (this.history.length && this.history[this.history.length - 1] == line)
+      return;
+    if (this.history.length > JsConsole_.MAX_HISTORY_LINES)
+      this.history.shift();
+    this.history.push(line);
+  };
+
   JsConsole_.prototype.backwardHistory = function() {
     if (this.history_index == this.history.length)
       return;
@@ -405,13 +417,10 @@ var JsConsole = (function() {
       return;
     }
     var line = range.text;
+    this.addToHistory_(line);
+    this.history_index = 0;
     range.collapseTo(range.end);
     range.insertBefore('\n');
-
-    if (this.history.length > JsConsole_.MAX_HISTORY_LINES)
-      this.history.shift();
-    this.history.push(line);
-    this.history_index = 0;
 
     var result = Editor.runScript(line);
     JsConsole_.result = result;

@@ -101,20 +101,32 @@ void TableContentBuilder::BuildHeader() {
 void TableContentBuilder::BuildRows() {
   std::unordered_set<base::string16> present_set;
 
-  for (auto row_index = 0u; row_index < old_model_->size(); ++row_index) {
+  std::vector<int> old_item_indices;
+
+  auto const num_items = ListView_GetItemCount(list_view_);
+  for (auto item_index = 0; item_index < num_items; ++item_index) {
     LVITEM item = {0};
-    item.iItem = row_index;
+    item.iItem = item_index;
     item.mask = LVIF_PARAM;
-    ListView_GetItem(list_view_, &item);
+    if (!ListView_GetItem(list_view_, &item)) {
+      DVLOG(0) << "Why do we fail on ListView_GetItem()?";
+      old_item_indices.push_back(item_index);
+      continue;
+    }
     auto const old_row = reinterpret_cast<const Row*>(item.lParam);
     auto const new_row = new_model_->FindRow(old_row->key());
     if (!new_row) {
-      ListView_DeleteItem(list_view_, row_index);
+      old_item_indices.push_back(item_index);
       continue;
     }
 
     present_set.insert(old_row->key());
-    UpdateListViewItem(row_index, new_row);
+    UpdateListViewItem(item_index, new_row);
+  }
+
+  while (old_item_indices.size()) {
+    ListView_DeleteItem(list_view_, old_item_indices.back());
+    old_item_indices.pop_back();
   }
 
   for (auto new_row : new_model_->rows()) {

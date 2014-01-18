@@ -10,11 +10,18 @@
     var keys = documents.map(function(document) {
       return document.name;
     });
+    var needUpdate = false;
     this.selection.getRowStates(keys).forEach(function(state, index) {
       if (!(state & TableViewRowState.SELECTED))
         return;
       documents[index].close();
+      // TODO(yosi) We should handle Document event rather than using
+      // |needUpdate| variable. Because |close()| is asynchronus operation
+      // and document may not be closed yet or cancled.
+      needUpdate = true;
     });
+    if (needUpdate)
+      createDocumentList();
   }
 
   /**

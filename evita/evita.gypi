@@ -18,6 +18,7 @@
         ],
         'js_externs_files': [
           'dom/types_externs.js',
+          'dom/console_externs.js',
           'dom/events/event_externs.js',
           'dom/events/event_target_externs.js',
           'dom/events/focus_event_externs.js',

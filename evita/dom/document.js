@@ -296,14 +296,14 @@
   };
 
   /**
-   * @return {Array.<TextWindow>}
+   * @return {Array.<!DocumentWindow>}
    */
   Document.prototype.listWindows = function() {
     var document = this;
     var windows = [];
     EditorWindow.list.forEach(function(editorWindow) {
       editorWindow.children.forEach(function(window) {
-        if ((window instanceof TextWindow) && window.document == document)
+        if ((window instanceof DocumentWindow) && window.document == document)
           windows.push(window);
       });
     });

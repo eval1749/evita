@@ -84,7 +84,7 @@ Document.prototype.computeStartOf_ = function(unit, position) {};
 Document.prototype.forceClose = function() {};
 
 /**
- * @return {Array.<Window>}
+ * @return {Array.<!DocumentWindow>}
  */
 Document.prototype.listWindows = function() {};
 

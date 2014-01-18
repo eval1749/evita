@@ -10,6 +10,9 @@
 #ifndef BASE_BIND_INTERNAL_H_
 #define BASE_BIND_INTERNAL_H_
 
+#pragma warning(push)
+#pragma warning(disable: 4625 4626)
+
 #include "base/bind_helpers.h"
 #include "base/callback_internal.h"
 #include "base/memory/raw_scoped_refptr_mismatch_checker.h"
@@ -2785,5 +2788,7 @@ struct BindState<Runnable, RunType, void(P1, P2, P3, P4, P5, P6,
 
 }  // namespace internal
 }  // namespace base
+
+#pragma warning(pop)
 
 #endif  // BASE_BIND_INTERNAL_H_

@@ -71,8 +71,11 @@ class ThreadCheckerDoNothing {
 //
 // In Release mode, CalledOnValidThread will always return true.
 #if ENABLE_THREAD_CHECKER
+#pragma warning(push)
+#pragma warning(disable: 4626)
 class ThreadChecker : public ThreadCheckerImpl {
 };
+#pragma warning(pop)
 #else
 class ThreadChecker : public ThreadCheckerDoNothing {
 };

@@ -1,6 +1,9 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+#pragma warning(push)
+#pragma warning(disable: 4365 4625 4626)
 #include "gtest/gtest.h"
+#pragma warning(pop)
 
 #include "base/basictypes.h"
 #include "base/strings/string16.h"

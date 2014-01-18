@@ -39,10 +39,11 @@
                   'VCCLCompilerTool': {
                     'ExceptionHandling': '0',
                     'RuntimeTypeInfo': 'false', # GR-
-                    'WarningLevel': '4', # /Wall
+                    'WarningLevel': 'all', # /Wall
                     'WarnAsError': 'true', # /WX
                     'AdditionalOptions': [
-                      #'/Gr', # Uses the __fastcall calling convention (x86 only).
+                      #'/Gr', # Uses the __fastcall calling convention (x86
+                      # only).
                       '/analyze-',
                       '/arch:SSE2',
                       '/errorReport:prompt',
@@ -57,15 +58,35 @@
                       'user32.lib',
                       'ws2_32.lib', # for libxml
                     ], # AdditionalDependencies
-                   }, # VCLinkerTool
-                   'target_conditions': [
-                      ['_type=="executable"', {
+                  }, # VCLinkerTool
+                  'target_conditions': [
+                    ['_type=="executable"', {
                         'VCManifestTool': {
                           'EmbedManifest': 'true',
                          },
                       }],
-                ], # target_conditions
+                  ], # target_conditions
                 }, # msvs_settings
+                'msvs_disabled_warnings': [
+                  # TODO(yosi): We should not disable warning C4350.
+                  # L1 C4350: behavior change: 'member1' called instead of
+                  # 'member2' An rvalue cannot be bound to a non-const
+                  # reference. In previous versions of Visual C++, it was
+                  # possible to bind an rvalue to a non-const reference in a
+                  # direct initialization. This code now gives a warning.
+                  4350,
+                  # All C4355: 'this' : used in base member initializer list
+                  4355,
+                  # L4 C4514: 'function' : unreferenced inline function has
+                  # been removed
+                  4514,
+                  # L4 C4668: 'symbol' is not defined as a preprocessor macro,
+                  # replacing with '0' for 'directives'
+                  4668,
+                  # L4 C4820: 'bytes' bytes padding added after construct
+                  # 'member_name'
+                  4820,
+                ], # msvs_disabled_warnings
             }], # OS=="win"
         ], # conditions
     }], # evita_code==1

@@ -8,7 +8,7 @@
 #include <vector>
 
 #pragma warning(push)
-#pragma warning(disable: 4100 4625)
+#pragma warning(disable: 4100 4625 4626)
 #include "base/bind.h"
 #include "base/callback.h"
 #pragma warning(pop)

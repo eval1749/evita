@@ -1,9 +1,13 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+#include <memory>
+
+#pragma warning(push)
+#pragma warning(disable: 4365 4625 4626 4826)
 #include "gtest/gtest.h"
+#pragma warning(pop)
 
 #include "evita/text/buffer.h"
-#include <memory>
 
 namespace {
 
@@ -16,6 +20,8 @@ class BufferTest : public ::testing::Test {
   }
 
   public: text::Buffer& buffer() const { return *buffer_; }
+
+  DISALLOW_COPY_AND_ASSIGN(BufferTest);
 };
 
 TEST_F(BufferTest, OperatorEqual) {

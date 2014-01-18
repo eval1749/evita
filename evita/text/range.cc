@@ -1319,16 +1319,18 @@ void Range::SetText(const base::string16& text)
     if (m_lStart == m_lEnd)
     {
       UndoBlock oUndo(this, L"Range.SetText");
-      m_pBuffer->Insert(m_lStart, text.data(), text.length());
+      m_pBuffer->Insert(m_lStart, text.data(),
+                        static_cast<Count>(text.length()));
     }
     else
     {
         UndoBlock oUndo(this, L"Range.SetText");
         m_pBuffer->Delete(m_lStart, m_lEnd);
-        m_pBuffer->Insert(m_lStart, text.data(), text.length());
+        m_pBuffer->Insert(m_lStart, text.data(),
+                          static_cast<Count>(text.length()));
     } // if
 
-    m_lEnd = ensurePosn(m_lStart + text.length());
+    m_lEnd = ensurePosn(static_cast<Posn>(m_lStart + text.length()));
 }
 
 /// <summary>

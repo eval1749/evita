@@ -370,7 +370,10 @@ enum LinkerInitialized { LINKER_INITIALIZED };
 // Use these to declare and define a static local variable (static T;) so that
 // it is leaked so that its destructors are not called at exit. If you need
 // thread-safe initialization, use base/lazy_instance.h instead.
+// L3 C4640: 'instance' : construction of local static object is not
+//           thread-safe
 #define CR_DEFINE_STATIC_LOCAL(type, name, arguments) \
+  __pragma(warning(suppress:4640)) \
   static type& name = *new type arguments
 
 }  // base

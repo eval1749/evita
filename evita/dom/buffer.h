@@ -51,6 +51,8 @@ class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
 
   // [U]
   public: void UpdateFileStatus(bool = false);
+
+  DISALLOW_COPY_AND_ASSIGN(Buffer);
 };
 
 } // namespace dom

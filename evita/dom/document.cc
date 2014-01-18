@@ -184,7 +184,7 @@ const base::string16& Document::name() const {
 }
 
 void Document::BindKey(int key_code, v8::Handle<v8::Object> command) {
-  buffer_->BindKey(key_code, new ScriptCommand(command));
+  buffer_->BindKey(static_cast<uint32>(key_code), new ScriptCommand(command));
 }
 
 

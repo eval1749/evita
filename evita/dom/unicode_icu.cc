@@ -4,11 +4,22 @@
 
 #include <memory>
 
-#pragma warning(disable: 4100 4127 4251 4530)
+// L4 C4100: 'identifier' : unreferenced formal parameter
+// L4 C4251: 'identifier' : class 'type' needs to have dll-interface to be
+// used by clients of class 'type2'
+// L4 C4365: 'action' : conversion from 'type_1' to 'type_2', signed/unsigned
+// mismatch
+// L1 C4530: C++ exception handler used, but unwind semantics are not enabled.
+// Specify /EHsc
+#pragma warning(disable: 4127 4251 4530)
 #include "base/basictypes.h"
 #include "base/i18n/icu_util.h"
+// L4 C4127: conditional expression is constant
+#pragma warning(push)
+#pragma warning(disable: 4127)
 #include "base/logging.h"
-#include "gin/converter.h"
+#pragma warning(pop)
+#include "evita/v8_glue/converter.h"
 #include "third_party/icu/source/common/unicode/uchar.h"
 #include "third_party/icu/source/common/unicode/utypes.h"
 
@@ -110,7 +121,7 @@ v8::Handle<v8::Object> CreateUnicode(v8::Isolate* isolate) {
   for (auto i = 0; i < arraysize(kBidiClassNames); ++i) {
     auto name = gin::StringToV8(isolate, kBidiClassNames[i]);
     bidi_object->Set(name, name);
-    bidi_names->Set(i, name);
+    bidi_names->Set(static_cast<size_t>(i), name);
   }
   unicode->Set(gin::StringToV8(isolate, "Bidi"), bidi_object);
   unicode->Set(gin::StringToV8(isolate, "BIDI_CLASS_SHORT_NAMES"), bidi_names);
@@ -121,7 +132,7 @@ v8::Handle<v8::Object> CreateUnicode(v8::Isolate* isolate) {
   for (auto i = 0; i < arraysize(kCategoryNames); ++i) {
     auto name = gin::StringToV8(isolate, kCategoryNames[i]);
     category_object->Set(name, name);
-    category_names->Set(i, name);
+    category_names->Set(static_cast<size_t>(i), name);
   }
   unicode->Set(gin::StringToV8(isolate, "Category"), category_object);
   unicode->Set(gin::StringToV8(isolate, "CATEGORY_SHORT_NAMES"),
@@ -155,9 +166,10 @@ v8::Handle<v8::Object> CreateUnicode(v8::Isolate* isolate) {
     // gc
     auto const category_index = u_charType(code);
     CHECK(category_index < arraysize(kCategoryNames));
-    data->ForceSet(category, category_names->Get(category_index));
+    data->ForceSet(category, category_names->Get(
+        static_cast<size_t>(category_index)));
 
-    ucd->Set(code, data);
+    ucd->Set(static_cast<size_t>(code), data);
   }
   return handle_scope.Escape(unicode);
 }
@@ -176,6 +188,8 @@ class Unicode {
   public: v8::Handle<v8::Object> Get(v8::Isolate* isolate) {
     return v8::Local<v8::Object>::New(isolate, *unicode_);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(Unicode);
 };
 
 }  // namespace

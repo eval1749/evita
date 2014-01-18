@@ -1332,7 +1332,8 @@ EditPane::Window* EditPane::GetLastWindow() const {
 }
 
 int EditPane::GetTitle(char16* out_wszTitle, int cchTitle) {
-  const auto& title = GetActiveWindow()->GetTitle(cchTitle);
+  const auto& title = GetActiveWindow()->GetTitle(
+      static_cast<size_t>(cchTitle));
   ::CopyMemory(out_wszTitle, title.data(), title.size() * sizeof(char16));
   out_wszTitle[title.size()] = 0;
   return static_cast<int>(title.size());

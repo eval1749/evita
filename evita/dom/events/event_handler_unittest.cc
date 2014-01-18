@@ -4,7 +4,10 @@
 #include "evita/dom/abstract_dom_test.h"
 #include "evita/dom/events/event_handler.h"
 #include "evita/dom/mock_view_impl.h"
+#pragma warning(push)
+#pragma warning(disable: 4625 4626 4365)
 #include "gmock/gmock.h"
+#pragma warning(pop)
 
 namespace {
 

@@ -47,7 +47,7 @@ bool ExactStringMatch::NextMatch()
 
     if (m_oSearch.IsBackward())
     {
-        wchFirst = m_oSearch.search_text_[m - 1];
+        wchFirst = m_oSearch.search_text_[static_cast<size_t>(m - 1)];
         m = -m;
     }
 
@@ -93,12 +93,14 @@ bool ExactStringMatch::NextMatch()
             if (m_oSearch.IsBackward())
             {
                 m_lMatchEnd   = m_pICursor->GetPosition();
-                m_lMatchStart = m_lMatchEnd - m_oSearch.search_text_.length();
+                m_lMatchStart = static_cast<long>(m_lMatchEnd -
+                    m_oSearch.search_text_.length());
             }
             else
             {
                 m_lMatchStart = m_pICursor->GetPosition();
-                m_lMatchEnd   = m_lMatchStart + m_oSearch.search_text_.length();
+                m_lMatchEnd   = static_cast<long>(m_lMatchStart +
+                    m_oSearch.search_text_.length());
             }
             return true;
         }

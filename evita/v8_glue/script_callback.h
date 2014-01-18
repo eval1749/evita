@@ -6,7 +6,14 @@
 #include <vector>
 #include <utility>
 
+// L4 C4625: 'derived class' : copy constructor could not be generated because
+// a base class copy constructor is inaccessible
+// L4 C4626: 'derived class' : assignment operator could not be generated
+// because a base class assignment operator is inaccessible
+#pragma warning(push)
+#pragma warning(disable: 4625 4626)
 #include "base/callback.h"
+#pragma warning(pop)
 #include "evita/v8_glue/converter.h"
 
 namespace v8_glue {

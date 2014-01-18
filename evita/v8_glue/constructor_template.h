@@ -4,7 +4,16 @@
 #if !defined(INCLUDE_evita_v8_glue_constructor_template_h)
 #define INCLUDE_evita_v8_glue_constructor_template_h
 
+// L3 C4191: 'operator/operation' : unsafe conversion from 'type of
+// expression' to 'type required'
+// L4 C4625: 'derived class' : copy constructor could not be generated because
+// a base class copy constructor is inaccessible
+// L4 C4626: 'derived class' : assignment operator could not be generated
+// because a base class assignment operator is inaccessible
+#pragma warning(push)
+#pragma warning(disable: 4191 4625 4626)
 #include "base/bind.h"
+#pragma warning(pop)
 #include "evita/v8_glue/function_template.h"
 
 namespace v8_glue {

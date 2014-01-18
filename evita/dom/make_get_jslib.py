@@ -10,7 +10,13 @@ sys.path.insert(0, os.path.join(evita_src, 'v8', 'tools'))
 import jsmin
 
 SOURCE = """\
-#pragma warning(disable: 4127 4530)
+// L4 C4127: conditional expression is constant
+// L1 C4350: behavior change: 'member1' called instead of 'member2'
+// L4 C4365: 'action' : conversion from 'type_1' to 'type_2', signed/unsigned
+// mismatch
+// L1 C4530: C++ exception handler used, but unwind semantics are not enabled.
+// Specify /EHsc
+#pragma warning(disable: 4127 4350 4365 4530)
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
 #include "base/strings/utf_string_conversions.h"

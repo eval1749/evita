@@ -26,11 +26,14 @@ namespace internal {
 // DoInvoke function to perform the function execution.  This allows
 // us to shield the Callback class from the types of the bound argument via
 // "type erasure."
+#pragma warning(push)
+#pragma warning(disable: 4626)
 class BindStateBase : public RefCountedThreadSafe<BindStateBase> {
  protected:
   friend class RefCountedThreadSafe<BindStateBase>;
   virtual ~BindStateBase() {}
 };
+#pragma warning(pop)
 
 // Holds the Callback methods that don't require specialization to reduce
 // template bloat.

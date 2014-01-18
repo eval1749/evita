@@ -472,7 +472,7 @@ RegexMatcher::RegexMatcher(
     m_pIRegex = Regex::Compile(
         pCompileContext,
         m_oSearch.search_text_.data(),
-        m_oSearch.search_text_.length(),
+        static_cast<int>(m_oSearch.search_text_.length()),
         static_cast<int>(rgfFlag));
 
     if (NULL == m_pIRegex)
@@ -661,7 +661,7 @@ class BufferOutputStream
     private: void flush()
     { 
         m_cwchTotal += m_cwch;
-        m_oRange.SetText(base::string16(m_rgwch, m_cwch));
+        m_oRange.SetText(base::string16(m_rgwch, static_cast<size_t>(m_cwch)));
         m_oRange.Collapse(Collapse_End);
         m_cwch = 0;
     } // Flush
@@ -781,7 +781,8 @@ void RegexMatcher::Replace(
 
     if (! fMetaChar)
     {
-        pRange->SetText(base::string16(pwchWith, cwchWith));
+        pRange->SetText(base::string16(pwchWith,
+                                       static_cast<size_t>(cwchWith)));
         return;
     }
 

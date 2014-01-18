@@ -2,8 +2,12 @@
 
 #define STRICT
 #define INC_OLE2
-//#define WIN32_LEAN_AND_MEAN
+// L4 C4668: 'symbol' is not defined as a preprocessor macro, replacing with
+//           '0' for 'directives'
+#pragma warning(push)
+#pragma warning(disable: 4668)
 #include <windows.h>
+#pragma warning(pop)
 
 // warning  C4251: 'identifier' : class 'type' needs to have dll-interface to
 // be used by clients of class 'type2'

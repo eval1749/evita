@@ -83,6 +83,8 @@ class BASE_EXPORT WeakReference {
  public:
   // Although Flag is bound to a specific thread, it may be deleted from another
   // via base::WeakPtr::~WeakPtr().
+  #pragma warning(push)
+  #pragma warning(disable: 4625 4626)
   class Flag : public RefCountedThreadSafe<Flag> {
    public:
     Flag();
@@ -98,6 +100,7 @@ class BASE_EXPORT WeakReference {
     SequenceChecker sequence_checker_;
     bool is_valid_;
   };
+  #pragma warning(pop)
 
   WeakReference();
   explicit WeakReference(const Flag* flag);

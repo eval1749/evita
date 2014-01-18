@@ -86,7 +86,7 @@ void TableContentBuilder::BuildHeader() {
     column.cx = new_cell_width;
     column.fmt = LVCFMT_LEFT;
     column.pszText = const_cast<base::char16*>(new_cell.text().c_str());
-    column.iSubItem = col_index;
+    column.iSubItem = static_cast<int>(col_index);
     ListView_SetColumn(list_view_, col_index, &column);
   }
 
@@ -97,7 +97,7 @@ void TableContentBuilder::BuildHeader() {
     column.cx = new_cell_width;
     column.fmt = LVCFMT_LEFT;
     column.pszText = const_cast<base::char16*>(new_cell.text().c_str());
-    column.iSubItem = index;
+    column.iSubItem = static_cast<int>(index);
     ListView_InsertColumn(list_view_, index, &column);
   }
 }
@@ -148,7 +148,7 @@ void TableContentBuilder::BuildRows() {
 int TableContentBuilder::CellWidth(const TableModel::Cell& cell) {
   // TODO(yosi) We should get character width from ListView control.
   const int kCharWidth = 6;
-  return (cell.text().length() + 2) * kCharWidth;
+  return static_cast<int>((cell.text().length() + 2) * kCharWidth);
 }
 
 void TableContentBuilder::UpdateListViewItem(int row_index, const Row* row) {
@@ -162,7 +162,7 @@ void TableContentBuilder::UpdateListViewItem(int row_index, const Row* row) {
     auto cell = row->cell(index);
     LVITEM item = {0};
     item.iItem = row_index;
-    item.iSubItem = index;
+    item.iSubItem = static_cast<int>(index);
     item.mask = LVIF_TEXT;
     item.pszText = const_cast<base::char16*>(cell.text().c_str());
     ListView_SetItem(list_view_, &item);
@@ -238,7 +238,7 @@ void TableView::GetRowStates(const std::vector<base::string16>& keys,
     auto const row = reinterpret_cast<TableModel::Row*>(item.lParam);
     auto const present = row_index_map.find(row);
     if (present != row_index_map.end())
-      states[present->second] = item.state;
+      states[present->second] = static_cast<int>(item.state);
   }
 }
 

@@ -4,8 +4,12 @@
 #define INCLUDE_evita_editor_dom_lock_h
 
 #include "base/logging.h"
+// L4 C4625: 'derived class' : copy constructor could not be generated because
+// a base class copy constructor is inaccessible
+// L4 C4626: 'derived class' : assignment operator could not be generated
+// because a base class assignment operator is inaccessible
 #pragma warning(push)
-#pragma warning(disable: 4625)
+#pragma warning(disable: 4625 4626)
 #include "base/threading/thread_checker.h"
 #pragma warning(pop)
 

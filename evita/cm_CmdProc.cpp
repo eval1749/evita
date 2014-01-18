@@ -122,7 +122,7 @@ void Processor::Execute(CommandWindow* window, int key_code, int fRepeat) {
 
     case State_Continue:
       entry = last_entry_ ? last_entry_->MapKey(key_code) :
-          window->MapKey(key_code);
+          window->MapKey(static_cast<uint32>(key_code));
       break;
 
     case State_Quote:
@@ -149,12 +149,12 @@ void Processor::Execute(CommandWindow* window, int key_code, int fRepeat) {
         return;
       }
       m_iArg = 4;
-      entry = window->MapKey(key_code);
+      entry = window->MapKey(static_cast<uint32>(key_code));
       break;
 
     case State_Start:
       m_pFrame->ResetMessages();
-      entry = window->MapKey(key_code);
+      entry = window->MapKey(static_cast<uint32>(key_code));
       m_iArg = fRepeat ? 2 : 1;
       if (entry == StartArgumentEntry()) {
         m_eState = State_StartArg;
@@ -220,7 +220,7 @@ void Processor::ReportUnboundKeys() {
     if (key_code <= 0xFF)
       text.push_back(static_cast<base::char16>(key_code));
     else
-      text.append(GetKeyName(key_code));
+      text.append(GetKeyName(static_cast<uint32>(key_code)));
   }
 
   Application::instance()->GetActiveFrame()->ShowMessage(

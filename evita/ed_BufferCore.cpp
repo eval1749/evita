@@ -179,7 +179,7 @@ base::string16 BufferCore::GetText(Posn start, Posn end) const {
     auto const cwch = end - start;
     if (cwch <= 0)
       return base::string16();
-    base::string16 text(cwch, ' ');
+    base::string16 text(static_cast<size_t>(cwch), ' ');
     GetText(&text[0], start, end);
     return std::move(text);
 }

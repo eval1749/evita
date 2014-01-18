@@ -330,13 +330,6 @@ char16* lstrrchrW(const char16*, char16);
 // Example: std::unique_ptr<T>
 #pragma warning(disable: 4251)
 
-// TODO: We should not disable warning C4350.
-// warning C4350: behavior change: 'member1' called instead of 'member2'
-// An rvalue cannot be bound to a non-const reference. In previous versions
-// of Visual C++, it was possible to bind an rvalue to a non-const reference
-// in a direct initialization. This code now gives a warning.
-#pragma warning(disable: 4350)
-
 // warning C4711: function 'function' selected for inline expansion
 #pragma warning(disable: 4711)
 

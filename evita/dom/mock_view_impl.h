@@ -5,7 +5,10 @@
 
 #include "base/basictypes.h"
 #include "base/callback.h"
+#pragma warning(push)
+#pragma warning(disable: 4365 4628)
 #include "gmock/gmock.h"
+#pragma warning(pop)
 #include "evita/dom/view_delegate.h"
 
 namespace dom {

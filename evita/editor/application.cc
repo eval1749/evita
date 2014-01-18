@@ -5,10 +5,10 @@
 
 #include "base/bind.h"
 #pragma warning(push)
-#pragma warning(disable: 4100)
+#pragma warning(disable: 4100 4625 4626)
 #include "base/message_loop/message_loop.h"
-#pragma warning(pop)
 #include "base/run_loop.h"
+#pragma warning(pop)
 #include "base/strings/string16.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/time/time.h"
@@ -78,7 +78,8 @@ dom::ViewEventHandler* Application::view_event_handler() const {
 
 int Application::Ask(int flags, int format_id, ...) {
   char16 wszFormat[1024];
-  ::LoadString(g_hResource, format_id, wszFormat, arraysize(wszFormat));
+  ::LoadString(g_hResource, static_cast<UINT>(format_id), wszFormat,
+               arraysize(wszFormat));
 
   char16 wsz[1024];
   va_list args;
@@ -87,7 +88,8 @@ int Application::Ask(int flags, int format_id, ...) {
   va_end(args);
 
   editor::ModalMessageLoopScope modal_mesage_loop_scope;
-  return ::MessageBoxW(*GetActiveFrame(), wsz, title().c_str(), flags);
+  return ::MessageBoxW(*GetActiveFrame(), wsz, title().c_str(),
+                       static_cast<UINT>(flags));
 }
 
 bool Application::CalledOnValidThread() const {
@@ -118,7 +120,8 @@ void Application::DoIdle() {
 
 void Application::Execute(CommandWindow* window, uint32 key_code,
                           uint32 repeat) {
-  command_processor_->Execute(window, key_code, repeat);
+  command_processor_->Execute(window, static_cast<int>(key_code),
+                              static_cast<int>(repeat));
 }
 
 Buffer* Application::FindBuffer(const base::string16& name) const {
@@ -264,7 +267,7 @@ bool Application::TryDoIdle() {
   UI_DOM_AUTO_TRY_LOCK_SCOPE(dom_lock);
   if (!dom_lock.locked())
     return true;
-  return OnIdle(idle_count_);
+  return OnIdle(static_cast<uint>(idle_count_));
 }
 
 void Application::WillDestroyFrame(Frame* frame) {

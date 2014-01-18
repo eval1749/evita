@@ -26,6 +26,9 @@
         '<(DEPTH)/testing/gmock/include/',
         '<(DEPTH)/testing/gtest/include/',
       ], # include_dirs
+      'msvs_disabled_warnings': [
+        4365, 4625, 4626, 4628, 4826,
+      ],
       'msvs_settings': {
         'VCLinkerTool': {
           'AdditionalDependencies': [

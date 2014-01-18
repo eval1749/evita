@@ -30,6 +30,7 @@ struct COMMON_EXPORT TimerEntry : base::RefCounted<TimerEntry> {
       DEBUG_PRINTF("%p repeat=%d\n", this, repeat_interval_ms);
     #endif
   }
+  DISALLOW_COPY_AND_ASSIGN(TimerEntry);
 };
 
 class TimerController : public common::Singleton<TimerController> {
@@ -65,7 +66,7 @@ class TimerController : public common::Singleton<TimerController> {
                          int next_fire_interval_ms) {
     ::SetTimer(*message_window_,
                ComputeCookie(timer),
-               next_fire_interval_ms,
+               static_cast<UINT>(next_fire_interval_ms),
                TimerController::TimerProc);
   }
 

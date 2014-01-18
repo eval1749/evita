@@ -14,7 +14,10 @@
 
 #include <memory>
 
+#pragma warning(push)
+#pragma warning(disable: 4625 4626)
 #include "base/bind.h"
+#pragma warning(pop)
 #include "base/strings/string16.h"
 #include "./ed_Mode.h"
 #include "evita/editor/dom_lock.h"
@@ -262,7 +265,8 @@ class DynamicAbbrev :
             if (current_word != word)
             {
                 m_pSelection->SetStart(m_lStart);
-                m_pSelection->SetText(word.data(), word.length());
+                m_pSelection->SetText(word.data(),
+                                      static_cast<int>(word.length()));
                 m_pSelection->Collapse(Collapse_End);
                 m_fFound = true;
                 break;
@@ -533,7 +537,7 @@ DEFCOMMAND(ExchangeCode)
         rgwch[0] = static_cast<char16>(nCode);
     }
 
-    oRange.SetText(base::string16(rgwch, cwch));
+    oRange.SetText(base::string16(rgwch, static_cast<size_t>(cwch)));
     pSelection->SetRange(oRange.GetEnd(), oRange.GetEnd());
 } // ExchangeCode
 
@@ -1300,7 +1304,7 @@ void Processor::GlobalInit() {
     {
       common::scoped_refptr<KeyBindEntry> self_insert_entry(
           new Command(TypeChar));
-      for (uint nKey = 0x20; nKey < 0x7F; nKey++) {
+      for (int nKey = 0x20; nKey < 0x7F; nKey++) {
         TextEditWindow::BindKey(nKey, self_insert_entry);
       }
     }
@@ -1398,12 +1402,12 @@ void Processor::GlobalInit() {
 void Buffer::BindKey(uint key_code, Command::KeyBindEntry* entry) {
   if (!key_bindings_)
     key_bindings_.reset(new Command::KeyBinds());
-  key_bindings_->Bind(key_code, entry);
+  key_bindings_->Bind(static_cast<int>(key_code), entry);
 }
 
 Command::KeyBindEntry* Buffer::MapKey(uint key_code) const {
   auto const key_bindings = key_bindings_.get();
   if (!key_bindings)
     return nullptr;
-  return key_bindings->MapKey(key_code);
+  return key_bindings->MapKey(static_cast<int>(key_code));
 }

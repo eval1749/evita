@@ -22,7 +22,7 @@ base::string16 V8ToString(v8::Handle<v8::Value> value) {
   if (!string_value.length())
     return base::string16();
   return base::string16(reinterpret_cast<base::char16*>(*string_value),
-                        string_value.length());
+                        static_cast<size_t>(string_value.length()));
 }
 
 Window* FromWindowId(WindowId window_id) {

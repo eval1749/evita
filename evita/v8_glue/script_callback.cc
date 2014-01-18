@@ -16,7 +16,8 @@ ScriptClosure::~ScriptClosure() {
 
 void ScriptClosure::Run(Argv argv) {
   auto function = v8::Local<v8::Function>::New(isolate_, function_);
-  function->CallAsFunction(v8::Null(isolate_), argv.size(), argv.data());
+  function->CallAsFunction(v8::Null(isolate_), static_cast<int>(argv.size()),
+                           argv.data());
 }
 
 }  // namespace internal

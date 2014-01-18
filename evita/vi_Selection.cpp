@@ -448,7 +448,7 @@ void Selection::SetText(const char16* pwsz)
 void Selection::SetText(const char16* pwch, int cwch)
 {
     forgetGoal();
-    Range::SetText(base::string16(pwch, cwch));
+    Range::SetText(base::string16(pwch, static_cast<size_t>(cwch)));
 } // Selection::SetText
 
 
@@ -567,7 +567,8 @@ void Selection::TypeEnter(Count k)
 
     TypeChar(0x0A, k);
     MoveEndWhile(L" \t");
-    SetText(leading_spaces.data(), leading_spaces.length());
+    SetText(leading_spaces.data(),
+            static_cast<int>(leading_spaces.length()));
     Collapse(Collapse_End);
 } // Selection::TypeEnter
 

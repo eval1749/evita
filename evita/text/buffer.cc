@@ -13,12 +13,13 @@
 #define DEBUG_STYLE 0
 #include "evita/text/buffer.h"
 
+#include <algorithm>
+
 #include "base/logging.h"
 #include "./ed_Interval.h"
 #include "evita/text/range.h"
 #include "./ed_Undo.h"
 #include "./mode_PlainText.h"
-#include <algorithm>
 
 namespace text
 {
@@ -661,7 +662,7 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
   DCHECK(!IsNotReady());
 
   auto const text_length = text.length();
-  insert(position, text.data(), text_length);
+  insert(position, text.data(), static_cast<Count>(text_length));
   ++m_nModfTick;
 
   for (auto* range : ranges_) {

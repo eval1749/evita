@@ -20,7 +20,7 @@
 #include <sstream>
 
 #pragma warning(push)
-#pragma warning(disable: 4625)
+#pragma warning(disable: 4625 4626)
 #include "base/bind.h"
 #pragma warning(pop)
 #include "base/logging.h"
@@ -997,7 +997,7 @@ void Frame::updateTitleBar() {
   title += base::string16(wsz);
   title += L" - ";
   title += Application::instance()->title();
-  m_oTitleBar.SetText(title.data(), title.length());
+  m_oTitleBar.SetText(title.data(), static_cast<int>(title.length()));
 
   m_pActivePane->UpdateStatusBar();
 }

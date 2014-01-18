@@ -199,7 +199,8 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
   }
   editor::ModalMessageLoopScope modal_mesage_loop_scope;
   auto response_code = ::MessageBoxW(widget->AssociatedHwnd(), message.c_str(),
-                                     title.c_str(), flags);
+                                     title.c_str(),
+                                     static_cast<UINT>(flags));
   event_handler_->RunCallback(base::Bind(callback, response_code));
 }
 

@@ -24,6 +24,8 @@ namespace base {
 // MessagePumpWin serves as the base for specialized versions of the MessagePump
 // for Windows. It provides basic functionality like handling of observers and
 // controlling the lifetime of the message pump.
+#pragma warning(push)
+#pragma warning(disable: 4626)
 class BASE_EXPORT MessagePumpWin : public MessagePump {
  public:
   MessagePumpWin() : have_work_(0), state_(NULL) {}
@@ -76,6 +78,7 @@ class BASE_EXPORT MessagePumpWin : public MessagePump {
   // State for the current invocation of Run.
   RunState* state_;
 };
+#pragma warning(pop)
 
 //-----------------------------------------------------------------------------
 // MessagePumpForUI extends MessagePumpWin with methods that are particular to a

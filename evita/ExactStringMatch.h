@@ -30,7 +30,7 @@ class ExactStringMatch : public IStringMatcher
         BadCharVec(const SearchParameters* pSearch) :
             m_nMaxChar(0x0000u),
             m_nMinChar(0xFFFFu),
-            m_iShift(pSearch->search_text_.length() + 1),
+            m_iShift(static_cast<int>(pSearch->search_text_.length()) + 1),
             m_prgi(NULL)
         {
             if (pSearch->search_text_.empty())
@@ -68,7 +68,8 @@ class ExactStringMatch : public IStringMatcher
             {
                 for (int i = 0; i < m; i++)
                 {
-                    char16 wch = pSearch->search_text_[m - i - 1];
+                    char16 wch = pSearch->search_text_[
+                        static_cast<size_t>(m - i - 1)];
 
                     if (pSearch->IsIgnoreCase())
                     {
@@ -80,7 +81,7 @@ class ExactStringMatch : public IStringMatcher
             }
             else
             {
-                for (int i = 0; i < m; i++)
+                for (auto i = 0u; i < static_cast<size_t>(m); i++)
                 {
                     char16 wch = pSearch->search_text_[i];
 
@@ -89,7 +90,7 @@ class ExactStringMatch : public IStringMatcher
                         wch = ::CharUpcase(wch);
                     }
 
-                    m_prgi[wch - m_nMinChar] = m - i;
+                    m_prgi[wch - m_nMinChar] = static_cast<int>(m - i);
                 } // for i
             }
         } // BadCharVec

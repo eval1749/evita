@@ -33,11 +33,11 @@ void CommandWindow::BindKey(uint32 key_code,
                             Command::Command::CommandFn function) {
   if (!key_bindings)
     key_bindings = new Command::KeyBinds;
-  key_bindings->Bind(key_code, function);
+  key_bindings->Bind(static_cast<int>(key_code), function);
 }
 
 Command::KeyBindEntry* CommandWindow::MapKey(uint key_code) {
-  return key_bindings->MapKey(key_code);
+  return key_bindings->MapKey(static_cast<int>(key_code));
 }
 
 // widgets::Widget

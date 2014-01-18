@@ -7,7 +7,10 @@
 #include <string>
 
 #include "base/strings/string_piece.h"
+#pragma warning(push)
+#pragma warning(disable: 4365 4625 4626 4826)
 #include "gtest/gtest.h"
+#pragma warning(pop)
 #include "evita/v8_glue/script_callback.h"
 #include "evita/v8_glue/v8.h"
 

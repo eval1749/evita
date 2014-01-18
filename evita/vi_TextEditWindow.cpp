@@ -22,7 +22,7 @@
 #include "./vi_TextEditWindow.h"
 
 #pragma warning(push)
-#pragma warning(disable: 4625)
+#pragma warning(disable: 4625 4626)
 #include "base/bind.h"
 #pragma warning(pop)
 #include "base/logging.h"
@@ -60,8 +60,8 @@ uint TranslateKey(uint);
 // Autoscroller
 //
 class TextEditWindow::Autoscroller {
-  private: uint kAutoscrollIntervalMs = 50;
-  private: uint kScrollSpeedIntervalMs = 100;
+  private: static const auto kAutoscrollIntervalMs = 50;
+  private: static const auto kScrollSpeedIntervalMs = 100;
   private: int direction_;
   private: TextEditWindow* editor_;
   private: uint started_at_;
@@ -148,7 +148,7 @@ class TextEditWindow::CaretBlinker {
         range_(editor->GetBuffer()->CreateRange(posn, posn)),
         ALLOW_THIS_IN_INITIALIZER_LIST(
           timer_(this, &CaretBlinker::RestoreCaret)) {
-    timer_.Start(interval_ms);
+    timer_.Start(static_cast<int>(interval_ms));
   }
   public: ~CaretBlinker() {
     range_->destroy();
@@ -553,7 +553,7 @@ Command::KeyBindEntry* TextEditWindow::MapKey(uint nKey) {
   if (auto const entry = GetBuffer()->MapKey(nKey))
     return entry;
 
-  if (auto const entry = key_bindings->MapKey(nKey))
+  if (auto const entry = key_bindings->MapKey(static_cast<int>(nKey)))
     return entry;
 
   return CommandWindow::MapKey(nKey);

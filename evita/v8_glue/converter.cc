@@ -30,7 +30,7 @@ Handle<Value> Converter<base::string16>::ToV8(Isolate* isolate,
                                               const base::string16& val) {
   return String::NewFromTwoByte(
       isolate, reinterpret_cast<const uint16_t*>(val.data()),
-      String::kNormalString, val.length());
+      String::kNormalString, static_cast<int>(val.length()));
 }
 
 bool Converter<base::string16>::FromV8(Isolate*, Handle<Value> val,
@@ -39,7 +39,7 @@ bool Converter<base::string16>::FromV8(Isolate*, Handle<Value> val,
     return false;
   auto str = Handle<String>::Cast(val);
   auto const length = str->Length();
-  out->resize(length);
+  out->resize(static_cast<size_t>(length));
   str->Write(reinterpret_cast<uint16_t*>(&(*out)[0]), 0, length,
              String::NO_NULL_TERMINATION);
   return true;

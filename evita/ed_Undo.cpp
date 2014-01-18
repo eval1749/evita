@@ -113,6 +113,7 @@ class BeginRecord : public Record
 
     // ctor
     public: BeginRecord(const base::string16& name) : name_(name) {}
+    public: virtual ~BeginRecord() = default;
 
     // [G]
     public: static Kind GetKind_() { return Kind_Begin; }
@@ -362,6 +363,7 @@ class EndRecord : public Record
 
     // ctor
     public: EndRecord(const base::string16& name) : name_(name) {}
+    public: virtual ~EndRecord() = default;
 
     // [I]
     public: bool CanMerge(const base::string16& name)

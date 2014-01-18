@@ -1,6 +1,11 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
+// L1 C4191: 'operator/operation' : unsafe conversion from 'type of
+// expression' to 'type required'
+#pragma warning(push)
+#pragma warning(disable: 4191)
+
 #include "evita/v8_glue/wrapper_info.h"
 
 #include "base/bind.h"
@@ -147,3 +152,5 @@ void WrapperInfo::SetupInstanceTemplate(ObjectTemplateBuilder&) {
 }
 
 }  // namespace v8_glue
+
+#pragma warning(pop)

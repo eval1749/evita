@@ -22,7 +22,10 @@
     parent.add(new TextWindow(new Range(document)));
   }
 
-  // Show document in new editor window.
+  /**
+   * Show document in new editor window.
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+Shift+3', function() {
     var text_window = new TextWindow(this.selection.range);
     var editor_window = new EditorWindow();
@@ -32,7 +35,10 @@
     text_window.focus();
   });
 
-  // Show document in new editor window and close current editor window.
+  /**
+   * Show document in new editor window and close current editor window.
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+Shift+4', function() {
     var current = this.selection.window.parent;
     // When editor window has only one tab, we don't ignore this command,
@@ -48,7 +54,10 @@
     current.destroy();
   });
 
-  // Select all contents
+  /**
+   * Select all contents
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+A', function() {
     var range = this.selection.range;
     range.start = 0
@@ -56,6 +65,10 @@
     this.selection.startIsActive = false;
   });
 
+  /**
+   * @param {TextSelection} selection
+   * @param {function(TextSelection)} changer
+   */
   function changeCase(selection, changer) {
     if (selection.start == selection.end) {
       selection.range.startOf(Unit.WORD, Alter.EXTEND);
@@ -64,12 +77,18 @@
     changer(selection);
   }
 
+  /**
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+Shift+C', function() {
     changeCase(this.selection, function(selection) {
       selection.range.capitalize();
     });
   });
 
+  /**
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+Shift+D', function() {
     changeCase(this.selection, function(selection) {
       selection.range.toLowerCase();
@@ -78,6 +97,9 @@
 
   // TODO(yosi) We should display dialog box to prompt enter line number and
   // list of functions.
+  /**
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+G', function(arg) {
     if (!arg)
       return;
@@ -85,12 +107,18 @@
     this.selection.range.move(Unit.PARAGRAPH, arg - 1);
   });
 
-  // Make selection visible
+  /**
+   * Make slection visible.
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+L', function() {
     this.makeSelectionVisible();
   });
 
-  // Open new document in new window in current editor window.
+  /**
+   * Open new document in new window in current editor window.
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+N', function(arg) {
     var editorWindow = this.parent;
     if (arg !== undefined) {
@@ -104,7 +132,10 @@
         });
   });
 
-  // Open new document in new editor window.
+  /**
+   * Open new document in new editor window.
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+Shift+N', function(arg) {
     if (arg !== undefined) {
       newEditorWindow(new Document('untitled.txt'));
@@ -117,7 +148,10 @@
         });
   });
 
-  // Open document in new or existing window in current editor window.
+  /**
+   * Open document in new or existing window in current editor window.
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+O', function() {
     var editorWindow = this.parent;
     Editor.getFilenameForLoad(this, this.selection.document.filename)
@@ -128,7 +162,10 @@
         });
   });
 
-  // Open document in new editor window.
+  /**
+   * Open document in new editor window.
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+Shift+O', function() {
     Editor.getFilenameForLoad(this, this.selection.document.filename)
         .then(function(filename) {
@@ -136,7 +173,10 @@
         });
   });
 
-  // Save file
+  /**
+   * Save file
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+S', function(arg) {
     var document = this.selection.document;
     if (!arg && document.filename != '') {
@@ -150,17 +190,26 @@
         });
   });
 
+  /**
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+W', function(arg) {
     var document = this.selection.document;
     document.close();
   });
 
+  /**
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+Shift+U', function() {
     changeCase(this.selection, function(selection) {
       selection.range.toUpperCase();
     });
   });
 
+  /**
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+Shift+W', function(arg) {
     if (arg)
       Editor.forceExit();
@@ -168,6 +217,9 @@
       Editor.exit();
   });
 
+  /**
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+Y', function() {
     var selection = this.selection;
     var position = selection.document.redo(selection.active);
@@ -181,6 +233,9 @@
     selection.range.collapseTo(position);
   });
 
+  /**
+   * @this {!TextWindow}
+   */
   Editor.bindKey('Ctrl+Z', function() {
     var selection = this.selection;
     var position = selection.document.undo(selection.active);

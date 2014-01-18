@@ -4,11 +4,8 @@
 #if !defined(INCLUDE_evita_views_command_window_h)
 #define INCLUDE_evita_views_command_window_h
 
+#include "evita/cm_CmdProc.h"
 #include "evita/views/window.h"
-
-namespace Command {
-class KeyBindEntry;
-}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -19,6 +16,11 @@ class CommandWindow : public views::Window {
       std::unique_ptr<widgets::NativeWindow>&& native_window);
   protected: explicit CommandWindow(views::WindowId window_id);
   protected: virtual ~CommandWindow();
+
+  public: static void BindKey(int key_code,
+      const common::scoped_refptr<Command::KeyBindEntry>& entry);
+  public: static void BindKey(uint32 key_code,
+      Command::Command::CommandFn function);
 
   public: template<class T> T* DynamicCast() {
     return Is<T>() ? static_cast<T*>(this) : nullptr;

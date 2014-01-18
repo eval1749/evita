@@ -149,8 +149,6 @@ class Processor : public Context {
   DISALLOW_COPY_AND_ASSIGN(Processor);
 };
 
-extern KeyBinds* g_pGlobalBinds;
-
 void TypeChar(const Context*);
 
 inline uint MapVKey(uint nVKey) {

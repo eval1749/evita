@@ -27,6 +27,7 @@
 #pragma warning(pop)
 #include "base/logging.h"
 #include "common/timer/timer.h"
+#include "./cm_CmdProc.h"
 #include "./ed_Mode.h"
 #include "./ed_Style.h"
 #include "./gfx_base.h"
@@ -168,6 +169,10 @@ class TextEditWindow::CaretBlinker {
   DISALLOW_COPY_AND_ASSIGN(CaretBlinker);
 };
 
+namespace {
+Command::KeyBinds* key_bindings;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // TextEditWindow
@@ -219,6 +224,20 @@ void TextEditWindow::Blink(Posn posn, int interval_ms) {
   caret_blinker_.reset(std::move(
       new CaretBlinker(this, posn, static_cast<uint>(interval_ms))));
   Redraw();
+}
+
+void TextEditWindow::BindKey(int key_code,
+    const common::scoped_refptr<Command::KeyBindEntry>& entry) {
+  if (!key_bindings)
+    key_bindings = new Command::KeyBinds;
+  key_bindings->Bind(key_code, entry);
+}
+
+void TextEditWindow::BindKey(int key_code,
+                             Command::Command::CommandFn function) {
+  if (!key_bindings)
+    key_bindings = new Command::KeyBinds;
+  key_bindings->Bind(key_code, function);
 }
 
 TextEditWindow* TextEditWindow::Clone() const {
@@ -531,7 +550,13 @@ base::string16 TextEditWindow::GetTitle(size_t max_length) const {
 }
 
 Command::KeyBindEntry* TextEditWindow::MapKey(uint nKey) {
-  return GetBuffer()->MapKey(nKey);
+  if (auto const entry = GetBuffer()->MapKey(nKey))
+    return entry;
+
+  if (auto const entry = key_bindings->MapKey(nKey))
+    return entry;
+
+  return CommandWindow::MapKey(nKey);
 }
 
 void TextEditWindow::MakeSelectionVisible() {

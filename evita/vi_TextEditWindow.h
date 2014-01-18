@@ -112,6 +112,9 @@ class TextEditWindow
 
   // [B]
   public: void Blink(Posn, int);
+  public: static void BindKey(int key_code,
+      const common::scoped_refptr<Command::KeyBindEntry>& entry);
+  public: static void BindKey(int key_code, Command::Command::CommandFn);
 
   // [C]
   public: TextEditWindow* Clone() const;

@@ -53,8 +53,6 @@ extern void FindPrevious(const Context*);
 // 0x600...0x6FF    Ctrl+Shift+Graphic Key
 // 0x700...0x7FF    Ctrl+Shift+Non-Graphic Key
 
-KeyBinds* g_pGlobalBinds;
-
 #define DefCommand_Motion(mp_dir, mp_motion, mp_unit, mp_extend, mp_suffix) \
     DEFCOMMAND(mp_dir ## mp_suffix) \
     { \
@@ -1298,103 +1296,101 @@ void Processor::GlobalInit() {
         }
     } // for each nVKey
 
-    g_pGlobalBinds = new KeyBinds;
-
     // Self Insert
     {
       common::scoped_refptr<KeyBindEntry> self_insert_entry(
           new Command(TypeChar));
       for (uint nKey = 0x20; nKey < 0x7F; nKey++) {
-        g_pGlobalBinds->Bind(nKey, self_insert_entry);
+        TextEditWindow::BindKey(nKey, self_insert_entry);
       }
     }
 
-    #define BIND_KEY(mp_keycomb, mp_cmd) \
+    #define BIND_KEY(mp_class, mp_keycomb, mp_cmd) \
     { \
-        g_pGlobalBinds->Bind(mp_keycomb, mp_cmd); \
+        mp_class::BindKey(mp_keycomb, mp_cmd); \
     } // BIND_CTRL
 
-    #define BIND_VKEY(mp_mod, mp_keycomb, mp_cmd) \
+    #define BIND_VKEY(mp_class, mp_mod, mp_keycomb, mp_cmd) \
     { \
-        g_pGlobalBinds->Bind( \
+        mp_class::BindKey( \
             mp_mod | VK_ ## mp_keycomb | 0x100, \
             mp_cmd ); \
     } // BIND_CTRL
 
     // Ctrl
     //BIND_KEY(Mod_Ctrl | ',', ValidateIntervals);
-    BIND_KEY(Mod_Ctrl | ',', Reconvert);
-    BIND_KEY(Mod_Ctrl | '.', ExchangeCode);
-    BIND_KEY(Mod_Ctrl | '/', ExpandDynamicAbbrev);
+    BIND_KEY(TextEditWindow, Mod_Ctrl | ',', Reconvert);
+    BIND_KEY(TextEditWindow, Mod_Ctrl | '.', ExchangeCode);
+    BIND_KEY(TextEditWindow, Mod_Ctrl | '/', ExpandDynamicAbbrev);
 
-    BIND_KEY(Mod_Ctrl | 'C', CopyToClipboard);
-    BIND_KEY(Mod_Ctrl | 'F', FindCommand);
-    BIND_KEY(Mod_Ctrl | 'H', FindCommand);
-    //BIND_KEY(Mod_Ctrl | 'I', Indent);
-    //BIND_KEY(Mod_Ctrl | 'M', TypeEnter);
-    BIND_KEY(Mod_Ctrl | 'Q', QuotedInsertEntry());
-    BIND_KEY(Mod_Ctrl | 'R', Reload);
-    BIND_KEY(Mod_Ctrl | 'U', StartArgumentEntry());
-    BIND_KEY(Mod_Ctrl | 'V', PasteFromClipboard);
-    BIND_KEY(Mod_Ctrl | 'X', CutToClipboard);
+    BIND_KEY(TextEditWindow, Mod_Ctrl | 'C', CopyToClipboard);
+    BIND_KEY(TextEditWindow, Mod_Ctrl | 'F', FindCommand);
+    BIND_KEY(TextEditWindow, Mod_Ctrl | 'H', FindCommand);
+    //BIND_KEY(TextEditWindow, Mod_Ctrl | 'I', Indent);
+    //BIND_KEY(TextEditWindow, Mod_Ctrl | 'M', TypeEnter);
+    BIND_KEY(TextEditWindow, Mod_Ctrl | 'Q', QuotedInsertEntry());
+    BIND_KEY(TextEditWindow, Mod_Ctrl | 'R', Reload);
+    BIND_KEY(CommandWindow, Mod_Ctrl | 'U', StartArgumentEntry());
+    BIND_KEY(TextEditWindow, Mod_Ctrl | 'V', PasteFromClipboard);
+    BIND_KEY(TextEditWindow, Mod_Ctrl | 'X', CutToClipboard);
 
     // Ctrl+Shift+[0-9]
-    BIND_KEY(Mod_CtrlShift | '0', CloseThisWindow);
-    BIND_KEY(Mod_CtrlShift | '1', CloseOtherWindows);
-    BIND_KEY(Mod_CtrlShift | '2', SplitWindowVertically);
-    BIND_KEY(Mod_CtrlShift | '5', SplitWindowHorizontally);
-    BIND_KEY(Mod_CtrlShift | '9', CloseOtherFrames);
+    BIND_KEY(CommandWindow, Mod_CtrlShift | '0', CloseThisWindow);
+    BIND_KEY(CommandWindow, Mod_CtrlShift | '1', CloseOtherWindows);
+    BIND_KEY(TextEditWindow, Mod_CtrlShift | '2', SplitWindowVertically);
+    BIND_KEY(TextEditWindow, Mod_CtrlShift | '5', SplitWindowHorizontally);
+    BIND_KEY(CommandWindow, Mod_CtrlShift | '9', CloseOtherFrames);
 
-    BIND_VKEY(Mod_None,  BACK,   BackwardDeleteChar);
-    BIND_VKEY(Mod_None,  DELETE, ForwardDeleteChar);
-    BIND_VKEY(Mod_None,  DOWN,   ForwardLine);
-    BIND_VKEY(Mod_None,  END,    EndKey);
-    BIND_VKEY(Mod_None,  HOME,   HomeKey);
-    BIND_VKEY(Mod_None,  LEFT,   BackwardChar);
-    BIND_VKEY(Mod_None,  NEXT,   ForwardScreen);
-    BIND_VKEY(Mod_None,  PRIOR,  BackwardScreen);
-    BIND_VKEY(Mod_None,  RIGHT,  ForwardChar);
-    BIND_VKEY(Mod_None,  UP,     BackwardLine);
-    BIND_VKEY(Mod_None,  TAB,    Indent);
-    BIND_VKEY(Mod_None,  RETURN, TypeEnter);
+    BIND_VKEY(TextEditWindow, Mod_None,  BACK,   BackwardDeleteChar);
+    BIND_VKEY(TextEditWindow, Mod_None,  DELETE, ForwardDeleteChar);
+    BIND_VKEY(TextEditWindow, Mod_None,  DOWN,   ForwardLine);
+    BIND_VKEY(TextEditWindow, Mod_None,  END,    EndKey);
+    BIND_VKEY(TextEditWindow, Mod_None,  HOME,   HomeKey);
+    BIND_VKEY(TextEditWindow, Mod_None,  LEFT,   BackwardChar);
+    BIND_VKEY(TextEditWindow, Mod_None,  NEXT,   ForwardScreen);
+    BIND_VKEY(TextEditWindow, Mod_None,  PRIOR,  BackwardScreen);
+    BIND_VKEY(TextEditWindow, Mod_None,  RIGHT,  ForwardChar);
+    BIND_VKEY(TextEditWindow, Mod_None,  UP,     BackwardLine);
+    BIND_VKEY(TextEditWindow, Mod_None,  TAB,    Indent);
+    BIND_VKEY(TextEditWindow, Mod_None,  RETURN, TypeEnter);
 
-    BIND_VKEY(Mod_Ctrl, BACK,   BackwardDeleteWord);
-    BIND_VKEY(Mod_Ctrl, DELETE, ForwardDeleteWord);
-    BIND_VKEY(Mod_Ctrl, DOWN,   GoToCloseParen);
-    BIND_VKEY(Mod_Ctrl, END,    EndOfBuffer);
-    BIND_VKEY(Mod_Ctrl, HOME,   StartOfBuffer);
-    BIND_VKEY(Mod_Ctrl, LEFT,   BackwardWord);
-    BIND_VKEY(Mod_Ctrl, NEXT,   ForwardWindow);
-    BIND_VKEY(Mod_Ctrl, PRIOR,  BackwardWindow);
-    BIND_VKEY(Mod_Ctrl, RIGHT,  ForwardWord);
-    BIND_VKEY(Mod_Ctrl, UP,     GoToOpenParen);
-    BIND_VKEY(Mod_Ctrl, TAB,    NextWindow);
+    BIND_VKEY(TextEditWindow, Mod_Ctrl, BACK,   BackwardDeleteWord);
+    BIND_VKEY(TextEditWindow, Mod_Ctrl, DELETE, ForwardDeleteWord);
+    BIND_VKEY(TextEditWindow, Mod_Ctrl, DOWN,   GoToCloseParen);
+    BIND_VKEY(TextEditWindow, Mod_Ctrl, END,    EndOfBuffer);
+    BIND_VKEY(TextEditWindow, Mod_Ctrl, HOME,   StartOfBuffer);
+    BIND_VKEY(TextEditWindow, Mod_Ctrl, LEFT,   BackwardWord);
+    BIND_VKEY(TextEditWindow, Mod_Ctrl, NEXT,   ForwardWindow);
+    BIND_VKEY(TextEditWindow, Mod_Ctrl, PRIOR,  BackwardWindow);
+    BIND_VKEY(TextEditWindow, Mod_Ctrl, RIGHT,  ForwardWord);
+    BIND_VKEY(TextEditWindow, Mod_Ctrl, UP,     GoToOpenParen);
+    BIND_VKEY(CommandWindow, Mod_Ctrl, TAB,    NextWindow);
 
-    BIND_VKEY(Mod_CtrlShift, DELETE,    CopyToClipboard);
-    BIND_VKEY(Mod_CtrlShift, DOWN,      GoToCloseParenExtend);
-    BIND_VKEY(Mod_CtrlShift, END,       EndOfBufferExtend);
-    BIND_VKEY(Mod_CtrlShift, HOME,      StartOfBufferExtend);
-    BIND_VKEY(Mod_CtrlShift, LEFT,      BackwardWordExtend);
-    BIND_VKEY(Mod_CtrlShift, NEXT,      ForwardWindowExtend);
-    BIND_VKEY(Mod_CtrlShift, PRIOR,     BackwardWindowExtend);
-    BIND_VKEY(Mod_CtrlShift, RIGHT,     ForwardWordExtend);
-    BIND_VKEY(Mod_CtrlShift, UP,        GoToOpenParenExtend);
-    BIND_VKEY(Mod_CtrlShift, TAB,       PreviousWindow);
+    BIND_VKEY(TextEditWindow, Mod_CtrlShift, DELETE,    CopyToClipboard);
+    BIND_VKEY(TextEditWindow, Mod_CtrlShift, DOWN,      GoToCloseParenExtend);
+    BIND_VKEY(TextEditWindow, Mod_CtrlShift, END,       EndOfBufferExtend);
+    BIND_VKEY(TextEditWindow, Mod_CtrlShift, HOME,      StartOfBufferExtend);
+    BIND_VKEY(TextEditWindow, Mod_CtrlShift, LEFT,      BackwardWordExtend);
+    BIND_VKEY(TextEditWindow, Mod_CtrlShift, NEXT,      ForwardWindowExtend);
+    BIND_VKEY(TextEditWindow, Mod_CtrlShift, PRIOR,     BackwardWindowExtend);
+    BIND_VKEY(TextEditWindow, Mod_CtrlShift, RIGHT,     ForwardWordExtend);
+    BIND_VKEY(TextEditWindow, Mod_CtrlShift, UP,        GoToOpenParenExtend);
+    BIND_VKEY(CommandWindow, Mod_CtrlShift, TAB,       PreviousWindow);
 
-    BIND_VKEY(Mod_Shift, DELETE,    CutToClipboard);
-    BIND_VKEY(Mod_Shift, DOWN,      ForwardLineExtend);
-    BIND_VKEY(Mod_Shift, END,       EndKeyExtend);
-    BIND_VKEY(Mod_Shift, HOME,      HomeKeyExtend);
-    BIND_VKEY(Mod_Shift, INSERT,    PasteFromClipboard);
-    BIND_VKEY(Mod_Shift, LEFT,      BackwardCharExtend);
-    BIND_VKEY(Mod_Shift, NEXT,      ForwardScreenExtend);
-    BIND_VKEY(Mod_Shift, PRIOR,     BackwardScreenExtend);
-    BIND_VKEY(Mod_Shift, RIGHT,     ForwardCharExtend);
-    BIND_VKEY(Mod_Shift, UP,        BackwardLineExtend);
-    BIND_VKEY(Mod_Shift, TAB,       Outdent);
+    BIND_VKEY(TextEditWindow, Mod_Shift, DELETE,    CutToClipboard);
+    BIND_VKEY(TextEditWindow, Mod_Shift, DOWN,      ForwardLineExtend);
+    BIND_VKEY(TextEditWindow, Mod_Shift, END,       EndKeyExtend);
+    BIND_VKEY(TextEditWindow, Mod_Shift, HOME,      HomeKeyExtend);
+    BIND_VKEY(TextEditWindow, Mod_Shift, INSERT,    PasteFromClipboard);
+    BIND_VKEY(TextEditWindow, Mod_Shift, LEFT,      BackwardCharExtend);
+    BIND_VKEY(TextEditWindow, Mod_Shift, NEXT,      ForwardScreenExtend);
+    BIND_VKEY(TextEditWindow, Mod_Shift, PRIOR,     BackwardScreenExtend);
+    BIND_VKEY(TextEditWindow, Mod_Shift, RIGHT,     ForwardCharExtend);
+    BIND_VKEY(TextEditWindow, Mod_Shift, UP,        BackwardLineExtend);
+    BIND_VKEY(CommandWindow, Mod_Shift, TAB,       Outdent);
 
-    BIND_VKEY(Mod_None,  F3, FindNext);
-    BIND_VKEY(Mod_Shift, F3, FindPrevious);
+    BIND_VKEY(TextEditWindow, Mod_None,  F3, FindNext);
+    BIND_VKEY(TextEditWindow, Mod_Shift, F3, FindPrevious);
 } // Processor::GlobalInit
 
 }  // namespace Command
@@ -1406,9 +1402,8 @@ void Buffer::BindKey(uint key_code, Command::KeyBindEntry* entry) {
 }
 
 Command::KeyBindEntry* Buffer::MapKey(uint key_code) const {
-  if (auto const key_bindings = key_bindings_.get()) {
-    if (auto const entry = key_bindings->MapKey(key_code))
-      return entry;
-  }
-  return Command::g_pGlobalBinds->MapKey(key_code);
+  auto const key_bindings = key_bindings_.get();
+  if (!key_bindings)
+    return nullptr;
+  return key_bindings->MapKey(key_code);
 }

@@ -6,6 +6,10 @@
 #include "evita/cm_CmdProc.h"
 #include "evita/vi_Frame.h"
 
+namespace {
+Command::KeyBinds* key_bindings;
+}
+
 CommandWindow::CommandWindow(
     std::unique_ptr<widgets::NativeWindow>&& native_window)
     : views::Window(std::move(native_window)) {
@@ -18,8 +22,22 @@ CommandWindow::CommandWindow(views::WindowId window_id)
 CommandWindow::~CommandWindow() {
 }
 
+void CommandWindow::BindKey(int key_code,
+    const common::scoped_refptr<Command::KeyBindEntry>& entry) {
+  if (!key_bindings)
+    key_bindings = new Command::KeyBinds;
+  key_bindings->Bind(key_code, entry);
+}
+
+void CommandWindow::BindKey(uint32 key_code,
+                            Command::Command::CommandFn function) {
+  if (!key_bindings)
+    key_bindings = new Command::KeyBinds;
+  key_bindings->Bind(key_code, function);
+}
+
 Command::KeyBindEntry* CommandWindow::MapKey(uint key_code) {
-  return Command::g_pGlobalBinds->MapKey(key_code);
+  return key_bindings->MapKey(key_code);
 }
 
 // widgets::Widget

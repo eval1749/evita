@@ -14,6 +14,7 @@
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/script_callback.h"
+#include "evita/vi_TextEditWindow.h"
 
 namespace dom {
 
@@ -33,11 +34,7 @@ class EditorClass : public v8_glue::WrapperInfo {
 
   private: static void BindKey(int key_code, v8::Handle<v8::Object> command) {
     ASSERT_DOM_LOCKED();
-    if (!Command::g_pGlobalBinds) {
-      // During DOM unit testing, |g_GlobalBinds| isn't initialized.
-      return;
-    }
-    Command::g_pGlobalBinds->Bind(key_code, new ScriptCommand(command));
+    TextEditWindow::BindKey(key_code, new ScriptCommand(command));
   }
 
   // TODO(yosi): Until we enable |new EditorWindow()|, we use

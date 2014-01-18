@@ -57,5 +57,5 @@
     this.parent.add(table_window);
   }
 
-  Editor.bindKey('Ctrl+B', listDocumentCommand);
+  Editor.bindKey(Window, 'Ctrl+B', listDocumentCommand);
 })();

@@ -470,8 +470,8 @@ var JsConsole = (function() {
     instance.activate(active_window);
   }
 
-  Editor.bindKey('Ctrl+Shift+I', switchToJsConsoleCommand);
-  Editor.bindKey('Ctrl+Shift+J', switchToJsConsoleCommand);
+  Editor.bindKey(Window, 'Ctrl+Shift+I', switchToJsConsoleCommand);
+  Editor.bindKey(Window, 'Ctrl+Shift+J', switchToJsConsoleCommand);
 
   return JsConsole_;
 })();

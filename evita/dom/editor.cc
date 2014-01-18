@@ -31,7 +31,13 @@ class EditorClass : public v8_glue::WrapperInfo {
   }
   public: ~EditorClass() = default;
 
-  private: static void BindKey(int key_code, v8::Handle<v8::Object> command) {
+  private: static void BindKeyOnWindow(int key_code,
+                                            v8::Handle<v8::Object> command) {
+    CommandWindow::BindKey(key_code, new ScriptCommand(command));
+  }
+
+  private: static void BindKeyOnTextWindow(int key_code,
+                                            v8::Handle<v8::Object> command) {
     TextEditWindow::BindKey(key_code, new ScriptCommand(command));
   }
 
@@ -130,7 +136,8 @@ class EditorClass : public v8_glue::WrapperInfo {
     auto templ = v8_glue::CreateConstructorTemplate(isolate,
         &EditorClass::NewEditor);
     return v8_glue::FunctionTemplateBuilder(isolate, templ)
-      .SetMethod("bindKey_", &EditorClass::BindKey)
+      .SetMethod("bindKeyOnTextWindow_", &EditorClass::BindKeyOnTextWindow)
+      .SetMethod("bindKeyOnWindow_", &EditorClass::BindKeyOnWindow)
       .SetMethod("getFilenameForLoad_", &EditorClass::GetFilenameForLoad)
       .SetMethod("getFilenameForSave_", &EditorClass::GetFilenameForSave)
       .SetMethod("messageBox_", &EditorClass::MessageBox)

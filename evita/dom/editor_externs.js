@@ -15,16 +15,23 @@ Editor.exit = function() {};
 Editor.forceExit = function() {};
 
 /**
+ * @param {Function} window_class
  * @param {string} key_combination
  * @param {function(number=)} command
  */
-Editor.bindKey = function(key_combination, command) {};
+Editor.bindKey = function(window_class, key_combination, command) {};
 
 /**
  * @param {number} key_code
  * @param {function(number=)} command
  */
-Editor.bindKey_ = function(key_code, command) {};
+Editor.bindKeyOnTextWindow_ = function(key_code, command) {};
+
+/**
+ * @param {number} key_code
+ * @param {function(number=)} command
+ */
+Editor.bindKeyOnWindow_ = function(key_code, command) {};
 
 /**
  * @param {?Window} window.

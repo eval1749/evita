@@ -26,7 +26,7 @@
    * Show document in new editor window.
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+Shift+3', function() {
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+3', function() {
     var text_window = new TextWindow(this.selection.range);
     var editor_window = new EditorWindow();
     editor_window.add(text_window);
@@ -39,7 +39,7 @@
    * Show document in new editor window and close current editor window.
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+Shift+4', function() {
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+4', function() {
     var current = this.selection.window.parent;
     // When editor window has only one tab, we don't ignore this command,
     // since result of this command isn't useful.
@@ -58,7 +58,7 @@
    * Select all contents
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+A', function() {
+  Editor.bindKey(TextWindow, 'Ctrl+A', function() {
     var range = this.selection.range;
     range.start = 0
     range.end = range.document.length;
@@ -80,7 +80,7 @@
   /**
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+Shift+C', function() {
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+C', function() {
     changeCase(this.selection, function(selection) {
       selection.range.capitalize();
     });
@@ -89,7 +89,7 @@
   /**
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+Shift+D', function() {
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+D', function() {
     changeCase(this.selection, function(selection) {
       selection.range.toLowerCase();
     });
@@ -100,7 +100,7 @@
   /**
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+G', function(arg) {
+  Editor.bindKey(TextWindow, 'Ctrl+G', function(arg) {
     if (!arg)
       return;
     this.selection.range.startOf(Unit.DOCUMENT);
@@ -111,7 +111,7 @@
    * Make slection visible.
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+L', function() {
+  Editor.bindKey(TextWindow, 'Ctrl+L', function() {
     this.makeSelectionVisible();
   });
 
@@ -119,7 +119,7 @@
    * Open new document in new window in current editor window.
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+N', function(arg) {
+  Editor.bindKey(TextWindow, 'Ctrl+N', function(arg) {
     var editorWindow = this.parent;
     if (arg !== undefined) {
       newTextWindow(editorWindow, new Document('untitled.txt'));
@@ -136,7 +136,7 @@
    * Open new document in new editor window.
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+Shift+N', function(arg) {
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+N', function(arg) {
     if (arg !== undefined) {
       newEditorWindow(new Document('untitled.txt'));
       return;
@@ -152,7 +152,7 @@
    * Open document in new or existing window in current editor window.
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+O', function() {
+  Editor.bindKey(TextWindow, 'Ctrl+O', function() {
     var editorWindow = this.parent;
     Editor.getFilenameForLoad(this, this.selection.document.filename)
         .then(function(filename) {
@@ -166,7 +166,7 @@
    * Open document in new editor window.
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+Shift+O', function() {
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+O', function() {
     Editor.getFilenameForLoad(this, this.selection.document.filename)
         .then(function(filename) {
           newEditorWindow(Document.load(filename));
@@ -177,7 +177,7 @@
    * Save file
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+S', function(arg) {
+  Editor.bindKey(TextWindow, 'Ctrl+S', function(arg) {
     var document = this.selection.document;
     if (!arg && document.filename != '') {
       document.save(document.filename);
@@ -193,7 +193,7 @@
   /**
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+W', function(arg) {
+  Editor.bindKey(TextWindow, 'Ctrl+W', function(arg) {
     var document = this.selection.document;
     document.close();
   });
@@ -201,7 +201,7 @@
   /**
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+Shift+U', function() {
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+U', function() {
     changeCase(this.selection, function(selection) {
       selection.range.toUpperCase();
     });
@@ -210,7 +210,7 @@
   /**
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+Shift+W', function(arg) {
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+W', function(arg) {
     if (arg)
       Editor.forceExit();
     else
@@ -220,7 +220,7 @@
   /**
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+Y', function() {
+  Editor.bindKey(TextWindow, 'Ctrl+Y', function() {
     var selection = this.selection;
     var position = selection.document.redo(selection.active);
     if (position < 0) {
@@ -236,7 +236,7 @@
   /**
    * @this {!TextWindow}
    */
-  Editor.bindKey('Ctrl+Z', function() {
+  Editor.bindKey(TextWindow, 'Ctrl+Z', function() {
     var selection = this.selection;
     var position = selection.document.undo(selection.active);
     if (position < 0) {

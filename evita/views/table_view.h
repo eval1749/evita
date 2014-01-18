@@ -6,6 +6,7 @@
 #include "evita/views/content_window.h"
 
 #include <memory>
+#include <vector>
 
 #include "base/basictypes.h"
 #include "evita/gc/member.h"
@@ -33,6 +34,8 @@ class TableView : public CommandWindow_<TableView, views::ContentWindow> {
   public: virtual ~TableView();
 
   private: std::unique_ptr<TableModel> CreateModel();
+  public: void GetRowStates(const std::vector<base::string16>& keys,
+                            int* states) const;
   private: void Redraw();
 
   // views::ContentWindow

@@ -3,6 +3,8 @@
 
 #include "evita/dom/mock_view_impl.h"
 
+#include "base/synchronization/waitable_event.h"
+
 namespace dom {
 
 MockViewImpl::MockViewImpl() {
@@ -23,6 +25,15 @@ void MockViewImpl::GetFilenameForSave(WindowId,
   callback.Run(dir_path + L"/foo.bar");
 }
 
+void MockViewImpl::GetTableRowStates(WindowId,
+    const std::vector<base::string16>& keys, int* states,
+    base::WaitableEvent*) {
+  for (auto index = 0u; index < keys.size(); ++index) {
+    *states = index;
+    ++states;
+  }
+}
+
 void MockViewImpl::MessageBox(WindowId, const base::string16&,
                               const base::string16&, int flags,
                               MessageBoxCallback callback) {
@@ -30,4 +41,3 @@ void MockViewImpl::MessageBox(WindowId, const base::string16&,
 }
 
 }  // namespace dom
-

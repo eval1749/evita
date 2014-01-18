@@ -4,6 +4,7 @@
 #include "evita/views/view_delegate_impl.h"
 
 #include "base/logging.h"
+#include "base/synchronization/waitable_event.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
 #include "evita/dom/editor_window.h"
@@ -19,6 +20,20 @@
 namespace views {
 
 namespace {
+
+class WaitableEventScope {
+  private: base::WaitableEvent* event_;
+
+  public: WaitableEventScope(base::WaitableEvent* event) : event_(event) {
+    DCHECK(!event->IsSignaled());
+  }
+  public: ~WaitableEventScope() {
+    event_->Signal();
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(WaitableEventScope);
+};
+
 Window* FromWindowId(const char* name, dom::WindowId window_id) {
   auto const window = Window::FromWindowId(window_id);
   if (!window) {
@@ -138,6 +153,19 @@ void ViewDelegateImpl::GetFilenameForSave(
     return;
   event_handler_->RunCallback(base::Bind(callback,
                                          base::string16(params.m_pwszFile)));
+}
+
+void ViewDelegateImpl::GetTableRowStates(WindowId window_id,
+    const std::vector<base::string16>& keys, int* states,
+    base::WaitableEvent* event) {
+  WaitableEventScope waitable_event_scope(event);
+  auto const widget = FromWindowId("GetTableRowStates", window_id);
+  if (!widget)
+    return;
+  auto const table_view = widget->as<views::TableView>();
+  if (!table_view)
+    return;
+  table_view->GetRowStates(keys, states);
 }
 
 void ViewDelegateImpl::LoadFile(dom::Document* document,

@@ -27,6 +27,9 @@ class MockViewImpl : public dom::ViewDelegate {
   public: virtual void GetFilenameForSave(WindowId window_id,
     const base::string16& dir_path,
     GetFilenameForSaveCallback callback) override;
+  public: void GetTableRowStates(WindowId window_id,
+      const std::vector<base::string16>& keys, int* states,
+      base::WaitableEvent* event) override;
   MOCK_METHOD2(LoadFile, void(Document*, const base::string16&));
   MOCK_METHOD1(MakeSelectionVisible, void(WindowId));
   public: virtual void MessageBox(WindowId window_id,

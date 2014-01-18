@@ -3,9 +3,15 @@
 #if !defined(INCLUDE_evita_dom_view_delegate_h)
 #define INCLUDE_evita_dom_view_delegate_h
 
+#include <vector>
+
 #include "base/callback_forward.h"
 #include "base/strings/string16.h"
 #include "evita/dom/window_id.h"
+
+namespace base {
+class WaitableEvent;
+}
 
 namespace dom {
 
@@ -43,6 +49,9 @@ class ViewDelegate {
   public: virtual void GetFilenameForSave(
       WindowId window_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) = 0;
+  public: virtual void GetTableRowStates(WindowId window_id,
+      const std::vector<base::string16>& keys, int* states,
+      base::WaitableEvent* event) = 0;
   public: virtual void LoadFile(Document* document,
                                 const base::string16& filename) = 0;
 

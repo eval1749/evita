@@ -7,6 +7,7 @@
 #pragma warning(disable: 4100 4625)
 #include "base/message_loop/message_loop.h"
 #pragma warning(pop)
+#include "base/synchronization/waitable_event.h"
 #pragma warning(push)
 #pragma warning(disable: 4625)
 #include "base/threading/thread.h"
@@ -160,6 +161,21 @@ DEFINE_VIEW_DELEGATE_5(MessageBox, WindowId, const base::string16&,
                        MessageBoxCallback)
 DEFINE_VIEW_DELEGATE_1(RealizeWindow, WindowId)
 DEFINE_VIEW_DELEGATE_2(SaveFile, Document*, const base::string16&)
+
+void ScriptThread::GetTableRowStates(WindowId window_id,
+    const std::vector<base::string16>& keys, int* states,
+    base::WaitableEvent* null_event) {
+  DCHECK(!null_event);
+  DCHECK_CALLED_ON_SCRIPT_THREAD();
+  if (!host_message_loop_)
+    return;
+  base::WaitableEvent event(true, false);
+  host_message_loop_->PostTask(FROM_HERE, base::Bind(
+      &ViewDelegate::GetTableRowStates,
+      base::Unretained(view_delegate_), window_id, keys,
+      base::Unretained(states), base::Unretained(&event)));
+  event.Wait();
+}
 
 void ScriptThread::RegisterViewEventHandler(
     ViewEventHandler* event_handler) {

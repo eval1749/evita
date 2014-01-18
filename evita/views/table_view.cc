@@ -192,6 +192,36 @@ std::unique_ptr<TableModel> TableView::CreateModel() {
   return std::move(model);
 }
 
+void TableView::GetRowStates(const std::vector<base::string16>& keys,
+                              int* states) const {
+  DCHECK(list_view_);
+  std::unordered_map<const TableModel::Row*, int> row_index_map;
+  auto state_index = 0;
+  for (auto key : keys) {
+    if (auto const row = model_->FindRow(key))
+      row_index_map[row] = state_index;
+    else
+      DVLOG(0) << "No such row: " << key;
+    ++state_index;
+  }
+  auto const num_items = ListView_GetItemCount(list_view_);
+  for (auto item_index = 0; item_index < num_items; ++item_index) {
+    LVITEM item = {0};
+    item.iItem = item_index;
+    item.mask = LVIF_PARAM | LVIF_STATE;
+    item.stateMask = LVIS_ACTIVATING | LVIS_CUT | LVIS_DROPHILITED |
+                     LVIS_FOCUSED | LVIS_SELECTED;
+    if (!ListView_GetItem(list_view_, &item)) {
+      DVLOG(0) << "ListView__GetItem failed for iItem=" << item_index;
+      continue;
+    }
+    auto const row = reinterpret_cast<TableModel::Row*>(item.lParam);
+    auto const present = row_index_map.find(row);
+    if (present != row_index_map.end())
+      states[present->second] = item.state;
+  }
+}
+
 void TableView::Redraw() {
   DCHECK(list_view_);
 
@@ -224,7 +254,6 @@ base::string16 TableView::GetTitle(size_t) const {
 
 void TableView::MakeSelectionVisible() {
 }
-
 
 void TableView::UpdateStatusBar() const {
   Frame::FindFrame(*this)->SetStatusBar(0, L"");

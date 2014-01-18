@@ -76,6 +76,9 @@ class ScriptThread final : public ViewDelegate,
   private: virtual void GetFilenameForSave(
       WindowId window_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) override;
+  private: virtual void GetTableRowStates(WindowId window_id,
+      const std::vector<base::string16>& keys, int* states,
+      base::WaitableEvent* event) override;
   private: virtual void LoadFile(Document* document,
                                  const base::string16& filename) override;
   private: virtual void MakeSelectionVisible(WindowId window_id) override;

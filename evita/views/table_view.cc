@@ -9,15 +9,19 @@
 #include "evita/cm_CmdProc.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
+#include "evita/editor/application.h"
 #include "evita/vi_Frame.h"
 #include "evita/views/table_model.h"
 
 extern HINSTANCE g_hInstance;
 
+namespace Command {
+uint32 TranslateKey(uint32 vkey_code);
+}
+
 namespace views {
 
 namespace {
-const int kListViewId = 1234;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -263,13 +267,23 @@ void TableView::Redraw() {
   model_ = std::move(new_model);
 }
 
-// ContentWindow
+// views::CommandWindow
+Command::KeyBindEntry* TableView::MapKey(uint nKey) {
+  if (auto const entry = document_->buffer()->MapKey(nKey))
+    return entry;
+
+  return CommandWindow::MapKey(nKey);
+}
+
+// views::ContentWindow
 base::string16 TableView::GetTitle(size_t) const {
   return L"*buffer list*";
 }
 
 void TableView::MakeSelectionVisible() {
 }
+
+
 
 void TableView::UpdateStatusBar() const {
   Frame::FindFrame(*this)->SetStatusBar(0, L"");
@@ -297,7 +311,7 @@ void TableView::DidRealize() {
                                 rect().left, rect().top,
                                 rect().width(), rect().height(),
                                 AssociatedHwnd(),
-                                reinterpret_cast<HMENU>(kListViewId),
+                                reinterpret_cast<HMENU>(this),
                                 g_hInstance,
                                 nullptr);
 
@@ -325,6 +339,20 @@ void TableView::DidSetFocus() {
 void TableView::Hide() {
   ::ShowWindow(list_view_, SW_HIDE);
   BaseWindow::Hide();
+}
+
+LRESULT TableView::OnNotify(NMHDR* nmhdr) {
+  if (nmhdr->code == LVN_KEYDOWN) {
+    auto const vkey_code = reinterpret_cast<NMLVKEYDOWN*>(nmhdr)->wVKey;
+    auto const key_code = Command::TranslateKey(vkey_code);
+    if (!key_code)
+      return FALSE;
+    if (MapKey(key_code)) {
+      Application::instance()->Execute(this, key_code, 0);
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
 
 void TableView::Show() {

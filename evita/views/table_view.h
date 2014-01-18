@@ -38,6 +38,9 @@ class TableView : public CommandWindow_<TableView, views::ContentWindow> {
                             int* states) const;
   private: void Redraw();
 
+  // views::CommandWindow
+  private: virtual Command::KeyBindEntry* MapKey(uint) override;
+
   // views::ContentWindow
   private: virtual base::string16 GetTitle(size_t max_length) const;
   private: virtual void MakeSelectionVisible() override;
@@ -48,6 +51,7 @@ class TableView : public CommandWindow_<TableView, views::ContentWindow> {
   private: virtual void DidRealize() override;
   private: virtual void DidResize() override;
   private: virtual void DidSetFocus() override;
+  private: virtual LRESULT OnNotify(NMHDR* nmhdr) override;
   private: virtual void Show() override;
   private: virtual void WillDestroyWidget() override;
 

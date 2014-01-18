@@ -30,28 +30,23 @@ class ExactStringMatch : public IStringMatcher
         BadCharVec(const SearchParameters* pSearch) :
             m_nMaxChar(0x0000u),
             m_nMinChar(0xFFFFu),
-            m_iShift(pSearch->m_cwch + 1),
+            m_iShift(pSearch->search_text_.length() + 1),
             m_prgi(NULL)
         {
-            if (0 == pSearch->m_cwch)
+            if (pSearch->search_text_.empty())
             {
                 return;
             }
 
-            for (int i = 0; i < pSearch->m_cwch; i++)
+            for (auto const ch : pSearch->search_text_)
             {
-                char16 wch = pSearch->m_wsz[i];
-
-                if (pSearch->IsIgnoreCase())
-                {
-                    wch = ::CharUpcase(wch);
-                }
-
-                m_nMaxChar = std::max(m_nMaxChar, static_cast<int>(wch));
-                m_nMinChar = std::min(m_nMinChar, static_cast<int>(wch));
+                auto const ch2 = pSearch->IsIgnoreCase() ? ::CharUpcase(ch) :
+                    ch;
+                m_nMaxChar = std::max(m_nMaxChar, static_cast<int>(ch2));
+                m_nMinChar = std::min(m_nMinChar, static_cast<int>(ch2));
             } // for i
 
-            int m = pSearch->m_cwch;
+            auto const m = static_cast<int>(pSearch->search_text_.length());
 
             m_iShift = m + 1;
 
@@ -73,7 +68,7 @@ class ExactStringMatch : public IStringMatcher
             {
                 for (int i = 0; i < m; i++)
                 {
-                    char16 wch = pSearch->m_wsz[m - i - 1];
+                    char16 wch = pSearch->search_text_[m - i - 1];
 
                     if (pSearch->IsIgnoreCase())
                     {
@@ -87,7 +82,7 @@ class ExactStringMatch : public IStringMatcher
             {
                 for (int i = 0; i < m; i++)
                 {
-                    char16 wch = pSearch->m_wsz[i];
+                    char16 wch = pSearch->search_text_[i];
 
                     if (pSearch->IsIgnoreCase())
                     {

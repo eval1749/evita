@@ -501,26 +501,30 @@ Selection* FindDialogBox::prepareFind(SearchParameters* pSearch)
 
     HWND hwndWhat = GetDlgItem(IDC_FIND_WHAT);
 
-    pSearch->m_cwch = ::GetWindowTextLength(hwndWhat);
-    if (0 == pSearch->m_cwch)
+    pSearch->search_text_.clear();
+    auto const search_text_length = ::GetWindowTextLength(hwndWhat);
+    if (!search_text_length)
     {
         // Nothing to search
         return NULL;
     }
 
-    ::GetWindowText(hwndWhat, pSearch->m_wsz, lengthof(pSearch->m_wsz));
+    pSearch->search_text_.resize(pSearch->search_text_.length() + 1);
+    ::GetWindowText(hwndWhat, &pSearch->search_text_[0],
+                    search_text_length + 1);
+    pSearch->search_text_.resize(pSearch->search_text_.length());
 
     pSearch->m_rgf  = 0;
 
     if (! GetChecked(IDC_FIND_CASE)) 
     {
-        for (const char16* pwsz = pSearch->m_wsz; 0 != *pwsz; pwsz++)
+        for (auto const ch : pSearch->search_text_)
         {
-            if (IsLowerCase(*pwsz))
+            if (IsLowerCase(ch))
             {
                 pSearch->m_rgf |= SearchFlag_IgnoreCase;
             }
-            else if (IsUpperCase(*pwsz))
+            else if (IsUpperCase(ch))
             {
                 pSearch->m_rgf &= ~SearchFlag_IgnoreCase;
                 break;

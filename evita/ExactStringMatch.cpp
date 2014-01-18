@@ -36,18 +36,18 @@ bool ExactStringMatch::FirstMatch(IStringCursor* pICursor)
 //
 bool ExactStringMatch::NextMatch()
 {
-    int m = m_oSearch.m_cwch;
+    int m = static_cast<int>(m_oSearch.search_text_.length());
 
     if (0 == m)
     {
         return true;
     }
 
-    char16 wchFirst = m_oSearch.m_wsz[0];
+    char16 wchFirst = m_oSearch.search_text_[0];
 
     if (m_oSearch.IsBackward())
     {
-        wchFirst = m_oSearch.m_wsz[m - 1];
+        wchFirst = m_oSearch.search_text_[m - 1];
         m = -m;
     }
 
@@ -86,18 +86,19 @@ bool ExactStringMatch::NextMatch()
             break;
         }
 
-        m_fMatched = m_pICursor->Match(m_oSearch.m_wsz, m, rgfMatch);
+        m_fMatched = m_pICursor->Match(m_oSearch.search_text_.data(), m,
+                                       rgfMatch);
         if (m_fMatched)
         {
             if (m_oSearch.IsBackward())
             {
                 m_lMatchEnd   = m_pICursor->GetPosition();
-                m_lMatchStart = m_lMatchEnd - m_oSearch.m_cwch;
+                m_lMatchStart = m_lMatchEnd - m_oSearch.search_text_.length();
             }
             else
             {
                 m_lMatchStart = m_pICursor->GetPosition();
-                m_lMatchEnd   = m_lMatchStart + m_oSearch.m_cwch;
+                m_lMatchEnd   = m_lMatchStart + m_oSearch.search_text_.length();
             }
             return true;
         }

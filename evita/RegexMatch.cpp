@@ -471,8 +471,8 @@ RegexMatcher::RegexMatcher(
     // in Regex::Compiler method.
     m_pIRegex = Regex::Compile(
         pCompileContext,
-        m_oSearch.m_wsz,
-        ::lstrlenW(m_oSearch.m_wsz),
+        m_oSearch.search_text_.data(),
+        m_oSearch.search_text_.length(),
         static_cast<int>(rgfFlag));
 
     if (NULL == m_pIRegex)

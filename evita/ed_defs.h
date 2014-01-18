@@ -11,6 +11,8 @@
 #if !defined(INCLUDE_edit_defs_h)
 #define INCLUDE_edit_defs_h
 
+#include "base/strings/string16.h"
+
 enum NewlineMode
 {
     NewlineMode_Detect  = 0,
@@ -98,8 +100,7 @@ enum SearchFlag
 //
 struct SearchParameters
 {
-    int     m_cwch;
-    char16  m_wsz[100];
+    base::string16 search_text_;
     uint    m_rgf;
 
     bool IsBackward()   const { return 0 != (m_rgf & SearchFlag_Backward); }

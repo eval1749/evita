@@ -49,10 +49,11 @@ var VKEY_NAMES = [
   'Up', // 0x26
   'Right', // 0x27
   'Down', // 0x28
-  'Select', // 0x2A
-  'Print', // 0x2B
-  'Execute', // 0x2C
-  'Snapshot', // 0x2D
+  'Select', // 0x29
+  'Print', // 0x2A
+  'Execute', // 0x2B
+  'Snapshot', // 0x2C
+  'Insert', // 0x2D
   'Delete', // 0x2E
   'Help', // 0x2F
 

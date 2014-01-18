@@ -280,6 +280,10 @@ LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
 void Widget::OnMouseMove(uint, const Point&) {
 }
 
+LRESULT Widget::OnNotify(NMHDR*) {
+  return 0;
+}
+
 void Widget::OnPaint(const Rect) {
 }
 
@@ -498,6 +502,16 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       native_window_.release();
       DidDestroyNativeWindow();
       return 0;
+
+    case WM_NOTIFY: {
+      auto const nmhdr = reinterpret_cast<NMHDR*>(lParam);
+      auto const widget = reinterpret_cast<Widget*>(nmhdr->idFrom);
+      for (auto child : common::tree::descendants(this)) {
+        if (child == widget)
+          return widget->OnNotify(nmhdr);
+      }
+      break;
+    }
 
     case WM_PAINT:
       DispatchPaintMessage();

@@ -102,6 +102,7 @@ class Widget
   public: virtual void OnLeftButtonUp(uint flags, const Point& point);
   public: virtual LRESULT OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam);
   public: virtual void OnMouseMove(uint flags, const Point& point);
+  protected: virtual LRESULT OnNotify(NMHDR* nmhdr);
   public: virtual void OnPaint(const Rect rect);
 
   // [R]

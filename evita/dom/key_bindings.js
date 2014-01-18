@@ -117,9 +117,9 @@
 
   /**
    * Open new document in new window in current editor window.
-   * @this {!TextWindow}
+   * @this {!Window}
    */
-  Editor.bindKey(TextWindow, 'Ctrl+N', function(arg) {
+  Editor.bindKey(Window, 'Ctrl+N', function(arg) {
     var editorWindow = this.parent;
     if (arg !== undefined) {
       newTextWindow(editorWindow, new Document('untitled.txt'));
@@ -134,9 +134,9 @@
 
   /**
    * Open new document in new editor window.
-   * @this {!TextWindow}
+   * @this {!Window}
    */
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+N', function(arg) {
+  Editor.bindKey(Window, 'Ctrl+Shift+N', function(arg) {
     if (arg !== undefined) {
       newEditorWindow(new Document('untitled.txt'));
       return;
@@ -150,9 +150,9 @@
 
   /**
    * Open document in new or existing window in current editor window.
-   * @this {!TextWindow}
+   * @this {!Window}
    */
-  Editor.bindKey(TextWindow, 'Ctrl+O', function() {
+  Editor.bindKey(Window, 'Ctrl+O', function() {
     var editorWindow = this.parent;
     Editor.getFilenameForLoad(this, this.selection.document.filename)
         .then(function(filename) {
@@ -164,9 +164,9 @@
 
   /**
    * Open document in new editor window.
-   * @this {!TextWindow}
+   * @this {!Window}
    */
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+O', function() {
+  Editor.bindKey(Window, 'Ctrl+Shift+O', function() {
     Editor.getFilenameForLoad(this, this.selection.document.filename)
         .then(function(filename) {
           newEditorWindow(Document.load(filename));
@@ -208,9 +208,9 @@
   });
 
   /**
-   * @this {!TextWindow}
+   * @this {!Window}
    */
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+W', function(arg) {
+  Editor.bindKey(Window, 'Ctrl+Shift+W', function(arg) {
     if (arg)
       Editor.forceExit();
     else

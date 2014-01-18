@@ -341,8 +341,8 @@ var JsConsole = (function() {
     });
   }
 
-  /** @type{number} */ JsConsole_.MAX_HISTORY_LINES = 20;
-  /** @type{?JsConsole_} */ JsConsole_.instance = null;
+  /** @type {number} */ JsConsole_.MAX_HISTORY_LINES = 20;
+  /** @type {?JsConsole_} */ JsConsole_.instance = null;
   /** @const @type {function(*, number=, number=) : string} */
   JsConsole_.stringify = stringify;
 

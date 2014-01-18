@@ -232,7 +232,7 @@ void TableView::GetRowStates(const std::vector<base::string16>& keys,
     item.stateMask = LVIS_ACTIVATING | LVIS_CUT | LVIS_DROPHILITED |
                      LVIS_FOCUSED | LVIS_SELECTED;
     if (!ListView_GetItem(list_view_, &item)) {
-      DVLOG(0) << "ListView__GetItem failed for iItem=" << item_index;
+      DVLOG(0) << "ListView_GetItem failed for iItem=" << item_index;
       continue;
     }
     auto const row = reinterpret_cast<TableModel::Row*>(item.lParam);

@@ -6,7 +6,6 @@
 #include "base/callback.h"
 #include "evita/cm_CmdProc.h"
 #include "evita/gc/local.h"
-#include "evita/dom/lock.h"
 #include "evita/dom/script_command.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/script_thread.h"
@@ -33,7 +32,6 @@ class EditorClass : public v8_glue::WrapperInfo {
   public: ~EditorClass() = default;
 
   private: static void BindKey(int key_code, v8::Handle<v8::Object> command) {
-    ASSERT_DOM_LOCKED();
     TextEditWindow::BindKey(key_code, new ScriptCommand(command));
   }
 

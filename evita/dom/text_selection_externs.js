@@ -7,18 +7,17 @@
  * @externs
  */
 
-/** @expose @type{number} */
+/** @expose @type {number} */
 TextSelection.prototype.active;
 
-
-/** @expose @type{!Document} */
+/** @expose @type {!Document} */
 TextSelection.prototype.document;
 
-/** @expose @type{!Range} */
+/** @expose @type {!Range} */
 TextSelection.prototype.range;
 
-/** @expose @type{boolean} */
+/** @expose @type {boolean} */
 TextSelection.prototype.startIsActive;
 
-/** @expose @type{!DocumentWindow} */
+/** @expose @type {!TextWindow} */
 TextSelection.prototype.window;

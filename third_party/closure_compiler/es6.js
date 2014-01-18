@@ -12,6 +12,7 @@
  *  - Iterable
  *  - Map
  *  - Promise
+ *  - String
  */
 
 /**
@@ -147,3 +148,17 @@ Promise.prototype.chain = function(onRejected) {};
  * @return {Promise.<T>}
  */
 Promise.prototype.then = function(onFulfilled, opt_onRejected) {};
+
+/**
+ * @param {string} searchString
+ * @param {number=} opt_position
+ * @return {boolean}
+ */
+String.prototype.endsWith = function(searchString, opt_position) {};
+
+/**
+ * @param {string} searchString
+ * @param {number=} opt_position
+ * @return {boolean}
+ */
+String.prototype.startsWith = function(searchString, opt_position) {};

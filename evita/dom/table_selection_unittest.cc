@@ -33,4 +33,15 @@ TEST_F(TableSelectionTest, Basic) {
   EXPECT_SCRIPT_TRUE("sample instanceof TableSelection");
 }
 
+TEST_F(TableSelectionTest, getRowStates) {
+  EXPECT_CALL(*mock_view_impl(), CreateTableWindow(_, _));
+  EXPECT_VALID_SCRIPT(
+      "var doc = new Document('foo');"
+      "var table_window = new TableWindow(doc);"
+      "var sample = table_window.selection;"
+      "var result = sample.getRowStates(['a', 'b', 'c']);");
+  EXPECT_SCRIPT_EQ("3", "result.length");
+  EXPECT_SCRIPT_EQ("1", "result[1]");
+}
+
 }  // namespace

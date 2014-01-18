@@ -6,6 +6,7 @@
 #include "evita/dom/converter.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/table_window.h"
+#include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/wrapper_info.h"
@@ -35,6 +36,12 @@ class TableSelectionClass :
     ScriptController::instance()->ThrowError("Can't create selection.");
     return nullptr;
   }
+
+  private: virtual void SetupInstanceTemplate(
+      ObjectTemplateBuilder& builder) override {
+    builder
+        .SetMethod("getRowStates", &TableSelection::GetRowStates);
+  }
 };
 }  // namespace
 
@@ -49,6 +56,14 @@ TableSelection::TableSelection(TableWindow* table_window, Document* document)
 }
 
 TableSelection::~TableSelection() {
+}
+
+std::vector<int> TableSelection::GetRowStates(
+    const std::vector<base::string16>& keys) const {
+  std::vector<int> states(keys.size());
+  ScriptController::instance()->view_delegate()->
+      GetTableRowStates(window()->window_id(), keys, &states[0], nullptr);
+  return states;
 }
 
 }  // namespace dom

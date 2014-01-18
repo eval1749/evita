@@ -3,6 +3,9 @@
 #if !defined(INCLUDE_evita_dom_table_selection_h)
 #define INCLUDE_evita_dom_table_selection_h
 
+#include <vector>
+
+#include "base/strings/string16.h"
 #include "evita/dom/selection.h"
 #include "evita/gc/member.h"
 #include "evita/v8_glue/scriptable.h"
@@ -24,6 +27,9 @@ class TableSelection : public v8_glue::Scriptable<TableSelection, Selection> {
 
   public: TableSelection(TableWindow* table_window, Document* document);
   public: virtual ~TableSelection();
+
+  public: std::vector<int> GetRowStates(
+      const std::vector<base::string16>& keys) const;
 
   DISALLOW_COPY_AND_ASSIGN(TableSelection);
 };

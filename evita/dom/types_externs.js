@@ -83,8 +83,16 @@ var TextWindow = function(range) {};
 /**
  * @constructor
  * @implements {Selection}
- * You can't create |Selection| object dirctory. You can obtain |Selection|
- * object via |TextWindow.prototype.selection|.
+ * You can't create |TableSelection| object dirctory. You can obtain
+ * |TableSelection| object via |TextWindow.prototype.selection|.
+ */
+var TableSelection = function() {};
+
+/**
+ * @constructor
+ * @implements {Selection}
+ * You can't create |TextSelection| object dirctory. You can obtain
+ * |TextSelection| object via |TextWindow.prototype.selection|.
  */
 var TextSelection = function() {};
 

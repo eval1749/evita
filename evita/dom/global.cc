@@ -16,6 +16,7 @@
 #include "evita/dom/range.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/selection.h"
+#include "evita/dom/table_selection.h"
 #include "evita/dom/table_window.h"
 #include "evita/dom/text_selection.h"
 #include "evita/dom/text_window.h"
@@ -47,21 +48,26 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
   
     // Note: super class must be installed before subclass.
     v8_glue::Installer<Event>::Run(isolate, templ);
-    v8_glue::Installer<EventTarget>::Run(isolate, templ);
-    v8_glue::Installer<UiEvent>::Run(isolate, templ);
-    v8_glue::Installer<FocusEvent>::Run(isolate, templ);
-    v8_glue::Installer<WindowEvent>::Run(isolate, templ);
+      v8_glue::Installer<UiEvent>::Run(isolate, templ);
+        v8_glue::Installer<FocusEvent>::Run(isolate, templ);
+      v8_glue::Installer<WindowEvent>::Run(isolate, templ);
+
     v8_glue::Installer<Document>::Run(isolate, templ);
     v8_glue::Installer<Editor>::Run(isolate, templ);
     v8_glue::Installer<FilePath>::Run(isolate, templ);
     v8_glue::Installer<Range>::Run(isolate, templ);
+
+    v8_glue::Installer<EventTarget>::Run(isolate, templ);
+      v8_glue::Installer<Window>::Run(isolate, templ);
+        v8_glue::Installer<DocumentWindow>::Run(isolate, templ);
+          v8_glue::Installer<TableWindow>::Run(isolate, templ);
+          v8_glue::Installer<TextWindow>::Run(isolate, templ);
+        v8_glue::Installer<EditorWindow>::Run(isolate, templ);
+
     v8_glue::Installer<Selection>::Run(isolate, templ);
-    v8_glue::Installer<Window>::Run(isolate, templ);
-    v8_glue::Installer<DocumentWindow>::Run(isolate, templ);
-    v8_glue::Installer<EditorWindow>::Run(isolate, templ);
-    v8_glue::Installer<TableWindow>::Run(isolate, templ);
-    v8_glue::Installer<TextSelection>::Run(isolate, templ);
-    v8_glue::Installer<TextWindow>::Run(isolate, templ);
+        v8_glue::Installer<TableSelection>::Run(isolate, templ);
+        v8_glue::Installer<TextSelection>::Run(isolate, templ);
+
     v8::Handle<v8::Object> js_unicode = v8::Object::New(isolate);
     templ->Set(gin::StringToV8(isolate, "Unicode"), 
                internal::GetUnicodeObject(isolate));

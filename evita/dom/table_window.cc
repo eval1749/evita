@@ -5,7 +5,7 @@
 
 #include "evita/dom/document.h"
 #include "evita/dom/range.h"
-#include "evita/dom/text_selection.h"
+#include "evita/dom/table_selection.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/converter.h"
@@ -19,7 +19,7 @@ namespace {
 // TableWindowClass
 //
 class TableWindowClass :
-    public v8_glue::DerivedWrapperInfo<TableWindow, Window> {
+    public v8_glue::DerivedWrapperInfo<TableWindow, DocumentWindow> {
 
   public: TableWindowClass(const char* name)
       : BaseClass(name) {
@@ -45,9 +45,7 @@ class TableWindowClass :
 DEFINE_SCRIPTABLE_OBJECT(TableWindow, TableWindowClass);
 
 TableWindow::TableWindow(Document* document)
-    // TODO(yosi) Until we have |TableSelection|, we use |Seleciton|.
-    : ScriptableBase(new TextSelection(reinterpret_cast<TextWindow*>(this),
-                                       new Range(document, 0, 0))) {
+    : ScriptableBase(new TableSelection(this, document)) {
   ScriptController::instance()->view_delegate()->CreateTableWindow(
       window_id(), document);
 }

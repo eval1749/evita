@@ -126,6 +126,7 @@
         'dom/script_controller.cc',
         'dom/script_thread.cc',
         'dom/table_window.cc',
+        'dom/table_selection.cc',
         'dom/text_selection.cc',
         'dom/text_window.cc',
         'dom/time_stamp.cc',

@@ -3,6 +3,21 @@
 
 (function() {
   /**
+   * @this {TableWindow}
+   */
+  function closeSelectedDocuments() {
+    var documents = Document.list;
+    var keys = documents.map(function(document) {
+      return document.name;
+    });
+    this.selection.getRowStates(keys).forEach(function(state, index) {
+      if (!(state & TableViewRowState.SELECTED))
+        return;
+      documents[index].close();
+    });
+  }
+
+  /**
    * @return {!Document}
    */
   function createDocumentList() {
@@ -20,7 +35,19 @@
         document.listWindows().length
       ].join('');
     }
-    var document = Document.getOrNew('*buffer list*');
+
+    /** @return {!Document} */
+    function getOrNew() {
+      /** @const @type {string} */ var NAME = '*buffer list*';
+      var present = Document.find(NAME);
+      if (present)
+        return present;
+      var document = new Document(NAME);
+      document.bindKey('Delete', closeSelectedDocuments);
+      return document;
+    }
+
+    var document = getOrNew();
     var range = new Range(document, 0, document.length);
     range.text = '';
     range.text = 'Name\tSize\tState\t\Saved At\tFile\n';

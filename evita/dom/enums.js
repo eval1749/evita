@@ -72,6 +72,16 @@ var NewlineMode = {
   UNKNOWN: 'UNKNOWN'
 };
 
+/** @enum{number} */
+var TableViewRowState = {
+  FOCUSED: 0x0001,
+  SELECTED: 0x0002,
+  CUT: 0x0004,
+  DROPHILITED: 0x0008,
+  GLOW: 0x0010,
+  ACTIVATING: 0x0020
+};
+
 /**
  * Also called granularity.
  * @enum{string}

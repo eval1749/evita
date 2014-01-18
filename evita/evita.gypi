@@ -32,6 +32,7 @@
           #'dom/key_names_externs.js',
           'dom/range_externs.js',
           'dom/selection_externs.js',
+          'dom/table_window_externs.js',
           'dom/text_selection_externs.js',
           'dom/text_window_externs.js',
           'dom/window_externs.js',

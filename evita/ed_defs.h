@@ -99,7 +99,6 @@ enum SearchFlag
 struct SearchParameters
 {
     int     m_cwch;
-    void*   m_pv;
     char16  m_wsz[100];
     uint    m_rgf;
 

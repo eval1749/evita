@@ -6,11 +6,11 @@
 #include "base/callback.h"
 #include "evita/cm_CmdProc.h"
 #include "evita/gc/local.h"
-#include "evita/dom/editor_window.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/script_command.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/script_thread.h"
+#include "evita/dom/window.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/script_callback.h"
@@ -35,15 +35,6 @@ class EditorClass : public v8_glue::WrapperInfo {
   private: static void BindKey(int key_code, v8::Handle<v8::Object> command) {
     ASSERT_DOM_LOCKED();
     TextEditWindow::BindKey(key_code, new ScriptCommand(command));
-  }
-
-  // TODO(yosi): Until we enable |new EditorWindow()|, we use
-  // |editor.createFrame()|.
-  private: static v8::Handle<v8::Object> CreateFrame() {
-    ASSERT_CALLED_ON_SCRIPT_THREAD();
-    ASSERT_DOM_LOCKED();
-    auto window = gc::MakeLocal(new EditorWindow());
-    return window->GetWrapper(v8::Isolate::GetCurrent());
   }
 
   private: static void GetFilenameForLoad(Window* window,
@@ -142,7 +133,6 @@ class EditorClass : public v8_glue::WrapperInfo {
         &EditorClass::NewEditor);
     return v8_glue::FunctionTemplateBuilder(isolate, templ)
       .SetMethod("bindKey_", &EditorClass::BindKey)
-      .SetMethod("createFrame", &EditorClass::CreateFrame)
       .SetMethod("getFilenameForLoad_", &EditorClass::GetFilenameForLoad)
       .SetMethod("getFilenameForSave_", &EditorClass::GetFilenameForSave)
       .SetMethod("messageBox_", &EditorClass::MessageBox)

@@ -1199,10 +1199,8 @@ EditPane::EditPane(Buffer* pBuffer, Posn lStart)
 
 EditPane::EditPane(Window* pWindow)
     : m_eState(State_NotRealized),
-      ALLOW_THIS_IN_INITIALIZER_LIST(
-          root_box_(*new VerticalLayoutBox(this, nullptr))),
-      ALLOW_THIS_IN_INITIALIZER_LIST(
-          splitter_controller_(new SplitterController(*this))) {
+      root_box_(*new VerticalLayoutBox(this, nullptr)),
+      splitter_controller_(new SplitterController(*this)) {
   AppendChild(pWindow);
   ScopedRefCount_<LeafBox> box(*new LeafBox(this, root_box_, pWindow));
   root_box_->Add(*box);

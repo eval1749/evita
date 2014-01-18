@@ -70,7 +70,7 @@ void Caret::BackingStore::Save(const gfx::Graphics& gfx,
 //
 Caret::Caret()
   : backing_store_(new BackingStore()),
-    ALLOW_THIS_IN_INITIALIZER_LIST(blink_timer_(this, &Caret::Blink)),
+    blink_timer_(this, &Caret::Blink),
     gfx_(nullptr),
     shown_(false),
     should_blink_(false),

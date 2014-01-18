@@ -422,7 +422,7 @@ class Item : public Element {
       m_iImage(-1),
       m_iItem(iItem),
       m_rgfState(0),
-      ALLOW_THIS_IN_INITIALIZER_LIST(m_closeBox(this)),
+      m_closeBox(this),
       m_pwsz(nullptr),
       Element(pParent) {
     SetItem(pTcItem);
@@ -791,7 +791,7 @@ class TabBand : public Element {
       m_hwndToolTips(nullptr),
       m_iFocus(-1),
       m_nStyle(0),
-      ALLOW_THIS_IN_INITIALIZER_LIST(m_oListButton(this)),
+      m_oListButton(this),
       m_pDragItem(nullptr),
       m_pHover(nullptr),
       m_pInsertBefore(nullptr),

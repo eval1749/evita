@@ -97,12 +97,6 @@ typedef _IMAGELIST* HIMAGELIST;
 // (performance warning)
 #pragma warning(disable:4800)
 
-// C4355: 'this': used in base member initializer list:
-// http://msdn.microsoft.com/en-us/library/3c594ae3.aspx
-#define ALLOW_THIS_IN_INITIALIZER_LIST(expr) \
-    __pragma(warning(suppress:4355)) \
-    expr
-
 #include "base/basictypes.h"
 
 // TODO(yosi): We should not include string16.h in precomp.h. This is for

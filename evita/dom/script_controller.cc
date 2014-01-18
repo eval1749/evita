@@ -95,8 +95,7 @@ EvaluateResult::EvaluateResult()
 //
 ScriptController::ScriptController(ViewDelegate* view_delegate)
     : context_holder_(isolate_holder_.isolate()),
-      ALLOW_THIS_IN_INITIALIZER_LIST(
-          event_handler_(new EventHandler(this))),
+      event_handler_(new EventHandler(this)),
       testing_(false),
       view_delegate_(view_delegate) {
   view_delegate_->RegisterViewEventHandler(event_handler_.get());

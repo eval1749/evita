@@ -158,8 +158,7 @@ Window::Window()
     : focus_tick_(0),
       parent_window_(nullptr),
       state_(kNotRealized),
-      ALLOW_THIS_IN_INITIALIZER_LIST(window_id_(
-          WindowIdMapper::instance()->Register(this))) {
+      window_id_(WindowIdMapper::instance()->Register(this)) {
   DCHECK_NE(kInvalidWindowId, window_id_);
 }
 

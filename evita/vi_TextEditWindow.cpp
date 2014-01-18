@@ -71,8 +71,7 @@ class TextEditWindow::Autoscroller {
     : direction_(0),
       editor_(edtior),
       started_at_(0),
-      ALLOW_THIS_IN_INITIALIZER_LIST(
-          timer_(this, &Autoscroller::DidFireTime)) {
+      timer_(this, &Autoscroller::DidFireTime) {
   }
 
   private: void DidFireTime(common::RepeatingTimer<Autoscroller>*) {
@@ -146,8 +145,7 @@ class TextEditWindow::CaretBlinker {
   public: CaretBlinker(TextEditWindow* editor, Posn posn, uint interval_ms)
       : window_(editor),
         range_(editor->GetBuffer()->CreateRange(posn, posn)),
-        ALLOW_THIS_IN_INITIALIZER_LIST(
-          timer_(this, &CaretBlinker::RestoreCaret)) {
+        timer_(this, &CaretBlinker::RestoreCaret) {
     timer_.Start(static_cast<int>(interval_ms));
   }
   public: ~CaretBlinker() {
@@ -179,8 +177,7 @@ Command::KeyBinds* key_bindings;
 //
 TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
     : CommandWindow_(text_window.window_id()),
-      ALLOW_THIS_IN_INITIALIZER_LIST(
-        autoscroller_(new Autoscroller(this))),
+      autoscroller_(new Autoscroller(this)),
       caret_(std::move(Caret::Create())),
       m_eDragMode(DragMode_None),
       m_gfx(nullptr),
@@ -197,15 +194,13 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
 }
 
 TextEditWindow::TextEditWindow(Buffer* pBuffer, Posn lStart)
-    : ALLOW_THIS_IN_INITIALIZER_LIST(
-        autoscroller_(new Autoscroller(this))),
+    : autoscroller_(new Autoscroller(this)),
       caret_(std::move(Caret::Create())),
       m_eDragMode(DragMode_None),
       m_gfx(nullptr),
       m_lCaretPosn(-1),
       m_pPage(new Page()),
-      ALLOW_THIS_IN_INITIALIZER_LIST(selection_(
-          new(pBuffer->GetHeap()) Selection(this, pBuffer))),
+      selection_(new(pBuffer->GetHeap()) Selection(this, pBuffer)),
       #if SUPPORT_IME
         m_fImeTarget(false),
         m_lImeEnd(0),

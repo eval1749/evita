@@ -269,7 +269,7 @@ FactorySet::FactorySet()
 //
 FontFace::FontFace(const char16* family_name)
     : SimpleObject_(CreateFontFace(family_name)),
-      ALLOW_THIS_IN_INITIALIZER_LIST(metrics_(GetFontMetrics(*this))) {
+      metrics_(GetFontMetrics(*this)) {
 }
 
 //////////////////////////////////////////////////////////////////////

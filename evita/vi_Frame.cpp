@@ -120,8 +120,7 @@ Pane* GetContainingPane(Frame* frame, views::Window* window) {
 extern uint g_TabBand__TabDragMsg;
 
 Frame::Frame(views::WindowId window_id)
-    : ALLOW_THIS_IN_INITIALIZER_LIST(
-          views::Window(widgets::NativeWindow::Create(*this), window_id)),
+    : views::Window(widgets::NativeWindow::Create(*this), window_id),
       gfx_(new gfx::Graphics()),
       m_hwndTabBand(nullptr),
       m_pActivePane(nullptr) {

@@ -96,8 +96,7 @@ Command::KeyBinds* BufferListWindow::sm_pKeyBinds;
 //
 
 BufferListWindow::BufferListWindow()
-    : ALLOW_THIS_IN_INITIALIZER_LIST(
-          CommandWindow_(widgets::NativeWindow::Create(*this))),
+    : CommandWindow_(widgets::NativeWindow::Create(*this)),
       m_pDragItem(nullptr),
       m_hwndListView(nullptr) {
 }

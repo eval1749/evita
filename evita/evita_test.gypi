@@ -56,7 +56,7 @@
         'dom/mock_view_impl.cc',
         'dom/polyfill_unittest.cc',
         'dom/range_unittest.cc',
-        'dom/selection_unittest.cc',
+        'dom/text_selection_unittest.cc',
         'dom/text_window_unittest.cc',
         'dom/unicode_unittest.cc',
         'dom/window_unittest.cc',

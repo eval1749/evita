@@ -181,7 +181,7 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
       m_gfx(nullptr),
       m_lCaretPosn(-1),
       m_pPage(new Page()),
-      selection_(text_window.selection()->view_selection()),
+      selection_(text_window.view_selection()),
       #if SUPPORT_IME
         m_fImeTarget(false),
         m_lImeEnd(0),

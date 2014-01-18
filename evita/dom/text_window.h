@@ -7,6 +7,8 @@
 
 #include "evita/gc/member.h"
 
+class Selection;
+
 namespace dom {
 class Document;
 class Range;
@@ -23,6 +25,7 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
   public: virtual ~TextWindow();
 
   public: Range* view_range() const { return view_range_; }
+  public: ::Selection* view_selection() const;
 
   public: void MakeSelectionVisible();
 

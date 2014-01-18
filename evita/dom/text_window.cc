@@ -7,7 +7,7 @@
 #include "evita/dom/document.h"
 #include "evita/dom/range.h"
 #include "evita/dom/script_controller.h"
-#include "evita/dom/selection.h"
+#include "evita/dom/text_selection.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/wrapper_info.h"
@@ -52,12 +52,16 @@ class TextWindowWrapperInfo :
 DEFINE_SCRIPTABLE_OBJECT(TextWindow, TextWindowWrapperInfo);
 
 TextWindow::TextWindow(Range* selection_range)
-    : ScriptableBase(new Selection(this, selection_range)),
+    : ScriptableBase(new TextSelection(this, selection_range)),
       view_range_(new Range(selection_range->document(), 0, 0)) {
   ScriptController::instance()->view_delegate()->CreateTextWindow(this);
 }
 
 TextWindow::~TextWindow() {
+}
+
+::Selection* TextWindow::view_selection() const {
+  return static_cast<TextSelection*>(selection())->view_selection();
 }
 
 void TextWindow::MakeSelectionVisible() {

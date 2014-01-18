@@ -6,13 +6,10 @@
 #include "evita/gc/member.h"
 #include "evita/v8_glue/scriptable.h"
 
-class Selection;
-
 namespace dom {
 
 class Document;
-class Range;
-class TextWindow;
+class DocumentWindow;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -22,21 +19,13 @@ class Selection : public v8_glue::Scriptable<Selection> {
   DECLARE_SCRIPTABLE_OBJECT(Selection);
 
   private: gc::Member<Document> document_;
-  private: gc::Member<TextWindow> text_window_;
-  // TODO(yosi): We should remove ::Selection.
-  private: ::Selection* view_selection_;
-  private: gc::Member<Range> range_;
+  private: gc::Member<DocumentWindow> document_window_;
 
-  public: Selection(TextWindow* text_window, Range* range);
+  protected: Selection(DocumentWindow* document_window, Document* document);
   public: virtual ~Selection();
 
-  public: Posn active() const;
-  public: Document* document() const { return document_.get(); }
-  public: Range* range() const { return range_.get(); }
-  public: bool start_is_active() const;
-  public: void set_start_is_active(bool start_is_active);
-  public: ::Selection* view_selection() const { return view_selection_; }
-  public: TextWindow* window() const { return text_window_; }
+  public: Document* document() const { return document_; }
+  public: DocumentWindow* window() const { return document_window_; }
 
   DISALLOW_COPY_AND_ASSIGN(Selection);
 };

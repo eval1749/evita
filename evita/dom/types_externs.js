@@ -16,7 +16,6 @@ var Document = function(name) {};
  */
 var Editor = function() {};
 
-
 /**
  * @interface
  */
@@ -63,6 +62,11 @@ var Position;
 var Range = function(document, opt_start, opt_end) {};
 
 /**
+ * @interface
+ */
+var Selection = function() {};
+
+/**
  * @constructor
  * @extends {DocumentWindow}
  * @param {Document} document
@@ -78,10 +82,11 @@ var TextWindow = function(range) {};
 
 /**
  * @constructor
+ * @implements {Selection}
  * You can't create |Selection| object dirctory. You can obtain |Selection|
  * object via |TextWindow.prototype.selection|.
  */
-var Selection = function() {};
+var TextSelection = function() {};
 
 /**
  * @constructor

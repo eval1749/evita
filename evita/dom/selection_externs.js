@@ -7,17 +7,9 @@
  * @externs
  */
 
-/** @expose @type{number} */
-Selection.prototype.active;
-
 /** @expose @type{!Document} */
 Selection.prototype.document;
 
-/** @expose @type{!Range} */
-Selection.prototype.range;
 
-/** @expose @type{boolean} */
-Selection.prototype.startIsActive;
-
-/** @expose @type{!Window} */
+/** @expose @type{!DocumentWindow} */
 Selection.prototype.window;

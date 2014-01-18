@@ -32,6 +32,7 @@
           #'dom/key_names_externs.js',
           'dom/range_externs.js',
           'dom/selection_externs.js',
+          'dom/text_selection_externs.js',
           'dom/text_window_externs.js',
           'dom/window_externs.js',
         ],
@@ -45,7 +46,6 @@
           'dom/editor_window.js',
           'dom/file_path.js',
           'dom/range.js',
-          'dom/selection.js',
           'dom/window.js',
 
           'dom/console.js',
@@ -126,6 +126,7 @@
         'dom/script_controller.cc',
         'dom/script_thread.cc',
         'dom/table_window.cc',
+        'dom/text_selection.cc',
         'dom/text_window.cc',
         'dom/time_stamp.cc',
         'dom/window.cc',

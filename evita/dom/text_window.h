@@ -3,7 +3,7 @@
 #if !defined(INCLUDE_evita_dom_text_window_h)
 #define INCLUDE_evita_dom_text_window_h
 
-#include "evita/dom/window.h"
+#include "evita/dom/document_window.h"
 
 #include "evita/gc/member.h"
 
@@ -14,17 +14,14 @@ class Selection;
 
 // The |TextWindow| is DOM world representative of UI world TextWidget, aka
 // TextEditWindow.
-class TextWindow : public v8_glue::Scriptable<TextWindow, Window> {
+class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
   DECLARE_SCRIPTABLE_OBJECT(TextWindow);
 
-  private: gc::Member<Selection> selection_;
   private: gc::Member<Range> view_range_;
 
   public: TextWindow(Range* selection_range);
   public: virtual ~TextWindow();
 
-  public: Document* document() const;
-  public: Selection* selection() const { return selection_; }
   public: Range* view_range() const { return view_range_; }
 
   public: void MakeSelectionVisible();

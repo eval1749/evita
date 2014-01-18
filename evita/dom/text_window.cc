@@ -20,7 +20,7 @@ namespace {
 // TextWindowWrapperInfo
 //
 class TextWindowWrapperInfo :
-    public v8_glue::DerivedWrapperInfo<TextWindow, Window> {
+    public v8_glue::DerivedWrapperInfo<TextWindow, DocumentWindow> {
 
   public: TextWindowWrapperInfo(const char* name)
       : BaseClass(name) {
@@ -40,8 +40,6 @@ class TextWindowWrapperInfo :
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetProperty("document", &TextWindow::document)
-        .SetProperty("selection", &TextWindow::selection)
         .SetMethod("makeSelectionVisible", &TextWindow::MakeSelectionVisible);
   }
 };
@@ -54,16 +52,12 @@ class TextWindowWrapperInfo :
 DEFINE_SCRIPTABLE_OBJECT(TextWindow, TextWindowWrapperInfo);
 
 TextWindow::TextWindow(Range* selection_range)
-    : selection_(new Selection(this, selection_range)),
+    : ScriptableBase(new Selection(this, selection_range)),
       view_range_(new Range(selection_range->document(), 0, 0)) {
   ScriptController::instance()->view_delegate()->CreateTextWindow(this);
 }
 
 TextWindow::~TextWindow() {
-}
-
-Document* TextWindow::document() const {
-  return selection_->document();
 }
 
 void TextWindow::MakeSelectionVisible() {

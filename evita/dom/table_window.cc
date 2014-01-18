@@ -4,6 +4,8 @@
 #include "evita/dom/table_window.h"
 
 #include "evita/dom/document.h"
+#include "evita/dom/range.h"
+#include "evita/dom/selection.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/converter.h"
@@ -33,12 +35,6 @@ class TableWindowClass :
   private: static TableWindow* NewTableWindow(Document* document) {
     return new TableWindow(document);
   }
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("document", &TableWindow::document);
-  }
 };
 }  // namespace
 
@@ -49,7 +45,9 @@ class TableWindowClass :
 DEFINE_SCRIPTABLE_OBJECT(TableWindow, TableWindowClass);
 
 TableWindow::TableWindow(Document* document)
-    : document_(document) {
+    // TODO(yosi) Until we have |TableSelection|, we use |Seleciton|.
+    : ScriptableBase(new Selection(reinterpret_cast<TextWindow*>(this),
+                                   new Range(document, 0, 0))) {
   ScriptController::instance()->view_delegate()->CreateTableWindow(
       window_id(), document);
 }

@@ -4,6 +4,7 @@
 #include "evita/dom/global.h"
 
 #include "evita/dom/document.h"
+#include "evita/dom/document_window.h"
 #include "evita/dom/editor.h"
 #include "evita/dom/editor_window.h"
 #include "evita/dom/events/event.h"
@@ -55,6 +56,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     v8_glue::Installer<Range>::Run(isolate, templ);
     v8_glue::Installer<Selection>::Run(isolate, templ);
     v8_glue::Installer<Window>::Run(isolate, templ);
+    v8_glue::Installer<DocumentWindow>::Run(isolate, templ);
     v8_glue::Installer<EditorWindow>::Run(isolate, templ);
     v8_glue::Installer<TableWindow>::Run(isolate, templ);
     v8_glue::Installer<TextWindow>::Run(isolate, templ);

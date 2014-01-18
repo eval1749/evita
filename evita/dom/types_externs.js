@@ -32,6 +32,12 @@ var Window = function() {};
  * @constructor
  * @extends {Window}
  */
+var DocumentWindow = function() {};
+
+/**
+ * @constructor
+ * @extends {Window}
+ */
 var EditorWindow = function() {};
 
 /**
@@ -58,14 +64,14 @@ var Range = function(document, opt_start, opt_end) {};
 
 /**
  * @constructor
- * @extends {Window}
+ * @extends {DocumentWindow}
  * @param {Document} document
  */
 var TableWindow = function(document) {};
 
 /**
  * @constructor
- * @extends {Window}
+ * @extends {DocumentWindow}
  * @param {Range} range
  */
 var TextWindow = function(range) {};

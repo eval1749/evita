@@ -8,6 +8,12 @@
 
 /**
  * @param {string} name
+ * @return {?Document}
+ */
+Document.find = function(name) {};
+
+/**
+ * @param {string} name
  * @return {!Document}
  */
 Document.getOrNew = function(name) {};

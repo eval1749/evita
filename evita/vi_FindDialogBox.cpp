@@ -256,7 +256,7 @@ bool FindDialogBox::FindFirst(RegexMatcher* pMatcher) {
 /// </summary>
 void FindDialogBox::onCancel() {
   ClearMessage();
-  ::ShowWindow(m_hwnd, SW_HIDE);
+  ::ShowWindow(*this, SW_HIDE);
   ::SetActiveWindow(*Application::instance()->GetActiveFrame());
 }
 

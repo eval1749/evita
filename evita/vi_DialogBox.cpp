@@ -1,106 +1,89 @@
 #include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - winapp - Find Dialog
-// listener/winapp/dlg_find.cpp
-//
-// Copyright (C) 1996-2007 by Project Vogue.
+// Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_DialogBox.cpp#2 $
-//
 #include "./vi_DialogBox.h"
 
 extern HINSTANCE g_hInstance;
 extern HINSTANCE g_hResource;
 extern HWND g_hwndActiveDialog;
 
-DialogBox* DialogBox::sm_pCreate;
+namespace {
+DialogBox* creating_dialog_box;
+}
 
-//////////////////////////////////////////////////////////////////////
-//
-// DialogBox::dialogProc
-//
-INT_PTR CALLBACK DialogBox::dialogProc(
-    HWND    hwnd,
-    UINT    uMsg,
-    WPARAM  wParam,
-    LPARAM  lParam )
-{
-    DialogBox* pDialog = reinterpret_cast<DialogBox*>(
-        ::GetWindowLongPtr(hwnd, DWLP_USER) );
+DialogBox::DialogBox() {
+}
 
-    if (NULL == pDialog)
-    {
-        pDialog = sm_pCreate;
-        pDialog->m_hwnd = hwnd;
+DialogBox::~DialogBox() {
+}
 
-        ::SetWindowLongPtr(
-            hwnd,
-            DWLP_USER,
-            reinterpret_cast<LONG_PTR>(pDialog) );
-    }
+INT_PTR CALLBACK DialogBox::DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam,
+    LPARAM lParam) {
+  auto dialog_box = reinterpret_cast<DialogBox*>(
+      ::GetWindowLongPtr(hwnd, DWLP_USER));
 
-    switch (uMsg)
-    {
+  if (!dialog_box) {
+    dialog_box = creating_dialog_box;
+    dialog_box->hwnd_ = hwnd;
+    ::SetWindowLongPtr(hwnd, DWLP_USER, reinterpret_cast<LONG_PTR>(dialog_box));
+  }
+
+  switch (uMsg) {
     case WM_ACTIVATE:
-        DEBUG_PRINTF("WM_ACTIVATE %p wParam=%d\n", pDialog, wParam);
-        if (WA_INACTIVE == wParam)
-        {
-            g_hwndActiveDialog = NULL;
-        }
-        else
-        {
-            g_hwndActiveDialog = pDialog->m_hwnd;
-        }
-        break;
+      DEBUG_PRINTF("WM_ACTIVATE %p wParam=%d\n", dialog_box, wParam);
+      if (WA_INACTIVE == wParam)
+        g_hwndActiveDialog = nullptr;
+      else
+        g_hwndActiveDialog = dialog_box->hwnd_;
+      break;
 
     case WM_COMMAND:
-        pDialog->onCommand(wParam, lParam);
-        return 0;
+      dialog_box->onCommand(wParam, lParam);
+      return 0;
 
     case WM_INITDIALOG:
-        return pDialog->onInitDialog();
-    } // swtich message
+      return dialog_box->onInitDialog();
+    }
 
-    return pDialog->onMessage(uMsg, wParam, lParam);
-} // DialogBox::dialogProc
+  return dialog_box->onMessage(uMsg, wParam, lParam);
+}
 
+bool DialogBox::DoModeless(HWND hwndParent) {
+  creating_dialog_box = this;
+  hwnd_ = ::CreateDialogParam(
+      g_hInstance,
+      MAKEINTRESOURCE(GetTemplate()),
+      hwndParent,
+      DialogProc,
+      reinterpret_cast<LPARAM>(this));
+  return hwnd_;
+}
 
-//////////////////////////////////////////////////////////////////////
-//
-// DialogBox::DoModeless
-//
-bool DialogBox::DoModeless(HWND hwndParent)
-{
-    sm_pCreate = this;
+bool DialogBox::GetChecked(int item_id) const {
+  return BST_CHECKED == ::SendMessage(GetDlgItem(item_id), BM_GETCHECK, 0, 0);
+}
 
-    m_hwnd = ::CreateDialogParam(
-        g_hInstance,
-        MAKEINTRESOURCE(GetTemplate()),
-        hwndParent,
-        dialogProc,
-        reinterpret_cast<LPARAM>(this) );
+HWND DialogBox::GetDlgItem(int item_id) const { 
+  return ::GetDlgItem(hwnd_, item_id);
+}
 
-    return NULL != m_hwnd;
-} // DialogBox::DoModeless
+void DialogBox::onOk() {
+  ::EndDialog(hwnd_, IDOK);
+}
 
+void DialogBox::onCancel() {
+  ::EndDialog(hwnd_, IDCANCEL);
+}
 
-//////////////////////////////////////////////////////////////////////
-//
-// DialogBox::onOk
-//
-void DialogBox::onOk()
-{
-    ::EndDialog(m_hwnd, IDOK);
-} // DialogBox::onOk
+bool DialogBox::onCommand(WPARAM, LPARAM) {
+  return false;
+}
 
+INT_PTR DialogBox::onMessage(UINT, WPARAM, LPARAM) {
+  return 0;
+}
 
-//////////////////////////////////////////////////////////////////////
-//
-// DialogBox::onCancel
-//
-void DialogBox::onCancel()
-{
-    ::EndDialog(m_hwnd, IDCANCEL);
-} // DialogBox::onCancel
+int DialogBox::SetCheckBox(int item_id, bool checked) {
+  return static_cast<int>(::SendMessage(GetDlgItem(item_id), BM_SETCHECK,
+      static_cast<WPARAM>(checked ? BST_CHECKED : BST_UNCHECKED), 0));
+}

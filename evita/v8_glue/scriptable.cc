@@ -10,6 +10,9 @@
 
 namespace v8_glue {
 
+AbstractScriptable::AbstractScriptable() {
+}
+
 AbstractScriptable::~AbstractScriptable() {
   wrapper_.Reset();
 }

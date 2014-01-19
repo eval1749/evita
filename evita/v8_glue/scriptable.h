@@ -31,7 +31,7 @@ class AbstractScriptable
     : public gc::Collectable<AbstractScriptable> {
   private: v8::Persistent<v8::Object> wrapper_; // Weak
 
-  protected: AbstractScriptable() = default;
+  protected: AbstractScriptable();
   protected: virtual ~AbstractScriptable();
 
   public: bool is_instance_of(const WrapperInfo* wrapper_info) const;

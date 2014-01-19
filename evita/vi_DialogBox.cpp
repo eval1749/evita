@@ -3,6 +3,10 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #include "./vi_DialogBox.h"
 
+#include <utility>
+
+#include "base/logging.h"
+
 extern HINSTANCE g_hInstance;
 extern HINSTANCE g_hResource;
 extern HWND g_hwndActiveDialog;
@@ -65,6 +69,20 @@ bool DialogBox::GetChecked(int item_id) const {
 
 HWND DialogBox::GetDlgItem(int item_id) const { 
   return ::GetDlgItem(hwnd_, item_id);
+}
+
+base::string16 DialogBox::GetDlgItemText(int item_id) const {
+  auto const hwnd = GetDlgItem(item_id);
+  auto const length = ::GetWindowTextLength(hwnd);
+  if (!length)
+    return base::string16();
+  // +1 for terminating zero.
+  base::string16 text(static_cast<size_t>(length + 1), '?');
+  auto const length2 = ::GetWindowTextW(hwnd, &text[0],
+                                        static_cast<int>(text.length()));
+  DCHECK_EQ(length, length2);
+  text.resize(static_cast<size_t>(length2));
+  return std::move(text);
 }
 
 void DialogBox::onOk() {

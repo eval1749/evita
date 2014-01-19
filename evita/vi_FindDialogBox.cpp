@@ -4,6 +4,8 @@
 
 #include "evita/vi_FindDialogBox.h"
 
+#include <utility>
+
 #include "base/logging.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
@@ -161,10 +163,8 @@ void FindDialogBox::DoReplace(ReplaceMode replace_mode) {
     return;
   }
 
-  char16 wszWith[100];
-  ::GetWindowText(GetDlgItem(IDC_FIND_WITH), wszWith, lengthof(wszWith));
-
-  auto const cwchWith = ::lstrlenW(wszWith);
+  auto const wszWith = GetDlgItemText(IDC_FIND_WITH);
+  auto const cwchWith = static_cast<int>(wszWith.length());
 
   bool is_replace_with_meta = search.m_rgf & SearchFlag_Regex;
 
@@ -177,10 +177,10 @@ void FindDialogBox::DoReplace(ReplaceMode replace_mode) {
       if (search.IsCasePreserve()) {
         text::UndoBlock oUndo(buffer, L"Edit.Replace");
         StringCase eCase = selection->AnalyzeCase();
-        matcher.Replace(wszWith, cwchWith, is_replace_with_meta);
+        matcher.Replace(wszWith.data(), cwchWith, is_replace_with_meta);
         CaseReplace(selection, eCase);
       } else {
-        matcher.Replace(wszWith, cwchWith, is_replace_with_meta);
+        matcher.Replace(wszWith.data(), cwchWith, is_replace_with_meta);
       }
       ++num_replaced;
     }
@@ -202,10 +202,10 @@ void FindDialogBox::DoReplace(ReplaceMode replace_mode) {
 
       if (search.IsCasePreserve()) {
         StringCase eCase = range->AnalyzeCase();
-        matcher.Replace(wszWith, cwchWith, is_replace_with_meta);
+        matcher.Replace(wszWith.data(), cwchWith, is_replace_with_meta);
         CaseReplace(range, eCase);
       } else {
-        matcher.Replace(wszWith, cwchWith, is_replace_with_meta);
+        matcher.Replace(wszWith.data(), cwchWith, is_replace_with_meta);
       }
 
       ++num_replaced;
@@ -385,19 +385,9 @@ Selection* FindDialogBox::PrepareFind(SearchParameters* search) {
     return nullptr;
   }
 
-  auto const hwndWhat = GetDlgItem(IDC_FIND_WHAT);
-
-  search->search_text_.clear();
-  auto const search_text_length = ::GetWindowTextLength(hwndWhat);
-  if (!search_text_length) {
-    // Nothing to search
+  search->search_text_ = std::move(GetDlgItemText(IDC_FIND_WHAT));
+  if (search->search_text_.empty())
     return nullptr;
-  }
-
-  search->search_text_.resize(search->search_text_.length() + 1);
-  ::GetWindowText(hwndWhat, &search->search_text_[0],
-                  search_text_length + 1);
-  search->search_text_.resize(search->search_text_.length());
   search->m_rgf = 0;
 
   if (!GetChecked(IDC_FIND_CASE))  {
@@ -412,13 +402,11 @@ Selection* FindDialogBox::PrepareFind(SearchParameters* search) {
   }
 
   if (GetChecked(IDC_FIND_PRESERVE)) {
-    char16 wszWith[100];
-    ::GetWindowText(GetDlgItem(IDC_FIND_WITH), wszWith, lengthof(wszWith));
-
-    for (const char16* pwsz = wszWith; 0 != *pwsz; pwsz++) {
-      if (IsLowerCase(*pwsz)) {
+    auto const wszWith = GetDlgItemText(IDC_FIND_WITH);
+    for (auto ch : wszWith) {
+      if (IsLowerCase(ch)) {
         search->m_rgf |= SearchFlag_CasePreserve;
-      } else if (IsUpperCase(*pwsz)) {
+      } else if (IsUpperCase(ch)) {
         search->m_rgf &= ~SearchFlag_CasePreserve;
         break;
       }

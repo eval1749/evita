@@ -3,6 +3,8 @@
 #if !defined(INCLUDE_visual_dialog_h)
 #define INCLUDE_visual_dialog_h
 
+#include "base/strings/string16.h"
+
 #undef DialogBox
 
 //////////////////////////////////////////////////////////////////////
@@ -23,6 +25,7 @@ class DialogBox {
   public: bool DoModeless(HWND hwnd = nullptr);
   protected: bool GetChecked(int control_id) const;
   protected: HWND GetDlgItem(int item_id) const;
+  protected: base::string16 GetDlgItemText(int item_id) const;
   protected: virtual int GetTemplate() const = 0;
   protected: virtual bool onCommand(WPARAM wParam, LPARAM lParam);
   protected: virtual bool onInitDialog() = 0;

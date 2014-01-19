@@ -55,6 +55,7 @@
         'dom/events/event_target_unittest.cc',
         'dom/events/event_unittest.cc',
         'dom/events/focus_event_unittest.cc',
+        'dom/events/form_event_unittest.cc',
         'dom/events/ui_event_unittest.cc',
         'dom/events/window_event_unittest.cc',
         'dom/file_path_unittest.cc',

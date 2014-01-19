@@ -17,6 +17,7 @@
         'dom/events/event_externs.js',
         'dom/events/event_target_externs.js',
         'dom/events/focus_event_externs.js',
+        'dom/events/form_event_externs.js',
         'dom/events/ui_event_externs.js',
         'dom/events/window_event_externs.js',
         'dom/editor_externs.js',
@@ -107,12 +108,15 @@
         'dom/document_window.cc',
         'dom/editor.cc',
         'dom/editor_window.cc',
+
         'dom/events/event.cc',
         'dom/events/event_handler.cc',
         'dom/events/event_target.cc',
         'dom/events/focus_event.cc',
+        'dom/events/form_event.cc',
         'dom/events/ui_event.cc',
         'dom/events/window_event.cc',
+
         'dom/file_path.cc',
         'dom/global.cc',
         'dom/lock.cc',

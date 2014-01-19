@@ -116,6 +116,16 @@ var FocusEvent = function(type, related_target) {};
  * @param {string} type
  * @param {boolean} bubbles
  * @param {boolean} cancelable
+ * @param {string} data
+ */
+var FormEvent = function(type, bubbles, cancelable, data) {};
+
+/**
+ * @constructor
+ * @extends{Event}
+ * @param {string} type
+ * @param {boolean} bubbles
+ * @param {boolean} cancelable
  * @param {!Window} source_window
  */
 var WindowEvent = function(type, bubbles, cancelable, source_window) {};

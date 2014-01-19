@@ -10,6 +10,7 @@
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/events/focus_event.h"
+#include "evita/dom/events/form_event.h"
 #include "evita/dom/events/ui_event.h"
 #include "evita/dom/events/window_event.h"
 #include "evita/dom/file_path.h"
@@ -48,6 +49,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
   
     // Note: super class must be installed before subclass.
     v8_glue::Installer<Event>::Run(isolate, templ);
+      v8_glue::Installer<FormEvent>::Run(isolate, templ);
       v8_glue::Installer<UiEvent>::Run(isolate, templ);
         v8_glue::Installer<FocusEvent>::Run(isolate, templ);
       v8_glue::Installer<WindowEvent>::Run(isolate, templ);

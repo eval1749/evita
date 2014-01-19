@@ -58,6 +58,7 @@
         'dom/events/form_event_unittest.cc',
         'dom/events/ui_event_unittest.cc',
         'dom/events/window_event_unittest.cc',
+        'dom/forms/form_unittest.cc',
         'dom/forms/text_field_control_unittest.cc',
         'dom/file_path_unittest.cc',
         'dom/mock_view_impl.cc',

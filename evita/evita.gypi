@@ -119,6 +119,7 @@
         'dom/events/ui_event.cc',
         'dom/events/window_event.cc',
 
+        'dom/forms/form.cc',
         'dom/forms/form_control.cc',
         'dom/forms/text_field_control.cc',
 

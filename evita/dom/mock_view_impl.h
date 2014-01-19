@@ -19,6 +19,7 @@ class MockViewImpl : public dom::ViewDelegate {
 
   MOCK_METHOD2(AddWindow, void(WindowId, WindowId));
   MOCK_METHOD2(ChangeParentWindow, void(WindowId, WindowId));
+  MOCK_METHOD1(CreateDialogBox, void(DialogBoxId));
   MOCK_METHOD1(CreateEditorWindow, void(const EditorWindow*));
   MOCK_METHOD2(CreateTableWindow, void(WindowId, Document*));
   MOCK_METHOD1(CreateTextWindow, void(const TextWindow*));
@@ -39,8 +40,10 @@ class MockViewImpl : public dom::ViewDelegate {
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;
   MOCK_METHOD2(SaveFile, void(Document*, const base::string16&));
+  MOCK_METHOD1(RealizeDialogBox, void(const Form*));
   MOCK_METHOD1(RealizeWindow, void(WindowId));
   MOCK_METHOD1(RegisterViewEventHandler, void(ViewEventHandler*));
+  MOCK_METHOD1(ShowDialogBox, void(DialogBoxId));
 
   DISALLOW_COPY_AND_ASSIGN(MockViewImpl);
 };

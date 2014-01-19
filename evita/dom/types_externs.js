@@ -56,6 +56,11 @@ var EventListener;
 
 var FilePath;
 
+/**
+ * @constructor
+ * @implements {EventTarget}
+ */
+var Form = function() {};
 
 /** @typedef {number} */
 var Position;

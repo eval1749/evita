@@ -1,0 +1,44 @@
+// Copyright (C) 1996-2013 by Project Vogue.
+// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+
+#include "evita/dom/abstract_dom_test.h"
+
+#include "evita/dom/forms/form.h"
+
+namespace {
+
+class FormTest : public dom::AbstractDomTest {
+  protected: FormTest() {
+  }
+  public: virtual ~FormTest() {
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(FormTest);
+};
+
+TEST_F(FormTest, ctor) {
+  EXPECT_VALID_SCRIPT("var sample = new Form();");
+  EXPECT_SCRIPT_TRUE("sample instanceof EventTarget");
+  EXPECT_SCRIPT_EQ("0", "sample.controls.length");
+}
+
+TEST_F(FormTest, add) {
+  EXPECT_VALID_SCRIPT("var sample = new Form();"
+                      "var text_field = new TextFieldControl(123);"
+                      "sample.add(text_field);");
+  EXPECT_SCRIPT_EQ("1", "sample.controls.length");
+  EXPECT_SCRIPT_TRUE("sample.controls[0] === text_field");
+}
+
+TEST_F(FormTest, realize) {
+  EXPECT_VALID_SCRIPT("var sample = new Form();"
+                      "sample.realize();");
+}
+
+TEST_F(FormTest, show) {
+  EXPECT_VALID_SCRIPT("var sample = new Form();"
+                      "sample.realize();"
+                      "sample.show();");
+}
+
+}  // namespace

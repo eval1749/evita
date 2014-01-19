@@ -13,6 +13,7 @@
 #include "evita/dom/events/form_event.h"
 #include "evita/dom/events/ui_event.h"
 #include "evita/dom/events/window_event.h"
+#include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/forms/text_field_control.h"
 #include "evita/dom/file_path.h"
@@ -62,6 +63,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     v8_glue::Installer<Range>::Run(isolate, templ);
 
     v8_glue::Installer<EventTarget>::Run(isolate, templ);
+      v8_glue::Installer<Form>::Run(isolate, templ);
       v8_glue::Installer<FormControl>::Run(isolate, templ);
         v8_glue::Installer<TextFieldControl>::Run(isolate, templ);
       v8_glue::Installer<Window>::Run(isolate, templ);

@@ -22,6 +22,8 @@
         'dom/events/window_event_externs.js',
         'dom/editor_externs.js',
         'dom/editor_window_externs.js',
+        'dom/forms/form_control_externs.js',
+        'dom/forms/text_field_control_externs.js',
         'dom/file_path_externs.js',
         #'dom/key_names_externs.js',
         'dom/range_externs.js',
@@ -116,6 +118,9 @@
         'dom/events/form_event.cc',
         'dom/events/ui_event.cc',
         'dom/events/window_event.cc',
+
+        'dom/forms/form_control.cc',
+        'dom/forms/text_field_control.cc',
 
         'dom/file_path.cc',
         'dom/global.cc',

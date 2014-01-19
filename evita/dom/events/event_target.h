@@ -43,7 +43,7 @@ class EventTarget : public v8_glue::Scriptable<EventTarget> {
                                 v8::Handle<v8::Object> callback,
                                 Optional<bool> capture);
   public: virtual EventPath BuildEventPath() const;
-  public: bool DispatchEvent(Event* event);
+  public: virtual bool DispatchEvent(Event* event);
   public: static EventTarget* FromEventTargetId(EventTargetId event_target_id);
   private: void InvokeEventListeners(Event* event);
   public: static void ResetForTesting();

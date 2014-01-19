@@ -24,6 +24,13 @@ var EventTarget = function() {};
 /**
  * @constructor
  * @implements {EventTarget}
+ * @param {number} resouce_id
+ */
+var FormControl = function(resouce_id) {};
+
+/**
+ * @constructor
+ * @implements {EventTarget}
  */
 var Window = function() {};
 
@@ -72,6 +79,13 @@ var Selection = function() {};
  * @param {Document} document
  */
 var TableWindow = function(document) {};
+
+/**
+ * @constructor
+ * @extends {FormControl}
+ * @param {number} resouce_id
+ */
+var TextFieldControl = function(resouce_id) {};
 
 /**
  * @constructor

@@ -3,10 +3,12 @@
 #if !defined(INCLUDE_evita_dom_window_id_h)
 #define INCLUDE_evita_dom_window_id_h
 
+#include "evita/dom/events/event_target_id.h"
+
 namespace dom {
 
-typedef int WindowId;
-const WindowId kInvalidWindowId = -1;
+typedef EventTargetId WindowId;
+const WindowId kInvalidWindowId = kInvalidEventTargetId;
 
 }  // namespace dom
 

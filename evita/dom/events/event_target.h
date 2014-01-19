@@ -9,6 +9,7 @@
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
+#include "evita/dom/events/event_target_id.h"
 #include "evita/dom/time_stamp.h"
 #include "evita/v8_glue/function_template.h"
 #include "evita/v8_glue/optional.h"
@@ -22,21 +23,30 @@ using v8_glue::Optional;
 class EventTarget : public v8_glue::Scriptable<EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(EventTarget);
 
+  class EventTargetIdMapper;
+  friend class EventTargetIdMapper;
+
   public: typedef std::vector<EventTarget*> EventPath;
 
   private: class EventListenerMap;
 
+  private: int event_target_id_;
   private: std::unique_ptr<EventListenerMap> event_listener_map_;
 
   protected: EventTarget();
   protected: virtual ~EventTarget();
+
+  public: EventTargetId event_target_id() const { return event_target_id_; }
+  public: EventTargetId id() const { return event_target_id(); }
 
   public: void AddEventListener(const base::string16& type,
                                 v8::Handle<v8::Object> callback,
                                 Optional<bool> capture);
   public: virtual EventPath BuildEventPath() const;
   public: bool DispatchEvent(Event* event);
+  public: static EventTarget* FromEventTargetId(EventTargetId event_target_id);
   private: void InvokeEventListeners(Event* event);
+  public: static void ResetForTesting();
   public: void RemoveEventListener(const base::string16& type,
                                    v8::Handle<v8::Object> callback,
                                    Optional<bool> capture);

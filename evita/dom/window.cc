@@ -93,7 +93,7 @@ int global_focus_tick;
 //
 // This class represents mapping from widget id to DOM Window object.
 //
-// WindowIdMapper resets Window::window_id_ when corresponding widget is
+// WindowIdMapper resets Window::window_id() when corresponding widget is
 // destroyed.
 class Window::WindowIdMapper : public common::Singleton<WindowIdMapper> {
   friend class common::Singleton<WindowIdMapper>;
@@ -101,10 +101,8 @@ class Window::WindowIdMapper : public common::Singleton<WindowIdMapper> {
   private: typedef WindowId WindowId;
 
   private: std::unordered_map<WindowId, gc::WeakPtr<Window>> map_;
-  private: WindowId next_window_id_;
 
-  private: WindowIdMapper() : next_window_id_(1) {
-  }
+  private: WindowIdMapper() = default;
   public: ~WindowIdMapper() = default;
 
   public: void DidDestroyWidget(WindowId window_id) {
@@ -116,7 +114,6 @@ class Window::WindowIdMapper : public common::Singleton<WindowIdMapper> {
       return;
     }
     auto const window = it->second.get();
-    window->window_id_ = kInvalidWindowId;
     DCHECK_NE(kDestroyed, window->state_);
     window->state_ = kDestroyed;
     if (auto const parent = window->parent_window_) {
@@ -130,15 +127,11 @@ class Window::WindowIdMapper : public common::Singleton<WindowIdMapper> {
     return it == map_.end() ? nullptr : it->second.get();
   }
 
-  public: WindowId Register(Window* window) {
-    auto window_id = next_window_id_;
-    map_[window_id] = window;
-    ++next_window_id_;
-    return window_id;
+  public: void Register(Window* window) {
+    map_[window->window_id()] = window;
   }
 
   public: void ResetForTesting() {
-    next_window_id_ = 1;
     map_.clear();
   }
 
@@ -157,16 +150,15 @@ DEFINE_SCRIPTABLE_OBJECT(Window, WindowWrapperInfo)
 Window::Window()
     : focus_tick_(0),
       parent_window_(nullptr),
-      state_(kNotRealized),
-      window_id_(WindowIdMapper::instance()->Register(this)) {
-  DCHECK_NE(kInvalidWindowId, window_id_);
+      state_(kNotRealized) {
+  WindowIdMapper::instance()->Register(this);
 }
 
 Window::~Window() {
-  if (window_id_ == kInvalidWindowId)
+  if (window_id() == kInvalidWindowId)
     return;
-  WindowIdMapper::instance()->Unregister(window_id_);
-  ScriptController::instance()->view_delegate()->DestroyWindow(window_id_);
+  WindowIdMapper::instance()->Unregister(window_id());
+  ScriptController::instance()->view_delegate()->DestroyWindow(window_id());
 }
 
 std::vector<Window*> Window::child_windows() const {
@@ -200,7 +192,7 @@ void Window::AddWindow(Window* window) {
   window->parent_window_ = this;
   child_windows_.insert(window);
   ScriptController::instance()->view_delegate()->AddWindow(
-      window_id_, window->window_id());
+      window_id(), window->window_id());
 }
 
 void Window::ChangeParentWindow(Window* new_parent_window) {
@@ -215,15 +207,15 @@ void Window::ChangeParentWindow(Window* new_parent_window) {
     ScriptController::instance()->ThrowError(base::StringPrintf(
         "Can't change parent of window(%d) to window(%d), becase window(%d)"
         " is descendant of window(%d).",
-        window_id_, new_parent_window->window_id(),
-        new_parent_window->window_id(), window_id_));
+        window_id(), new_parent_window->window_id(),
+        new_parent_window->window_id(), window_id()));
     return;
   }
   parent_window_->child_windows_.erase(this);
   parent_window_ = new_parent_window;
   parent_window_->child_windows_.insert(this);
   ScriptController::instance()->view_delegate()->ChangeParentWindow(
-      window_id_, new_parent_window->window_id());
+      window_id(), new_parent_window->window_id());
 }
 
 void Window::Destroy() {
@@ -235,7 +227,7 @@ void Window::Destroy() {
   for (auto descendant : DescendantsOrSelf(this)) {
     descendant->state_= kDestroying;
   }
-  ScriptController::instance()->view_delegate()->DestroyWindow(window_id_);
+  ScriptController::instance()->view_delegate()->DestroyWindow(window_id());
 }
 
 void Window::DidKillFocus(WindowId) {
@@ -280,7 +272,7 @@ void Window::Focus() {
         "You can't focus unrealized window.");
     return;
   }
-  ScriptController::instance()->view_delegate()->FocusWindow(window_id_);
+  ScriptController::instance()->view_delegate()->FocusWindow(window_id());
 }
 
 Window* Window::FromWindowId(WindowId window_id) {
@@ -300,7 +292,7 @@ bool Window::IsDescendantOf(Window* other) const {
 
 void Window::Realize() {
   if (state_ == kDestroyed) {
-    DCHECK_EQ(kInvalidWindowId, window_id_);
+    DCHECK_EQ(kInvalidWindowId, window_id());
     ScriptController::instance()->ThrowError(
         "Can't realize deatched window.");
     return;
@@ -323,7 +315,7 @@ void Window::Realize() {
   for (auto descendant : DescendantsOrSelf(this)) {
     descendant->state_= kRealizing;
   }
-  ScriptController::instance()->view_delegate()->RealizeWindow(window_id_);
+  ScriptController::instance()->view_delegate()->RealizeWindow(window_id());
 }
 
 void Window::RemoveWindow(Window* window) {
@@ -346,6 +338,7 @@ void Window::RemoveWindow(Window* window) {
 }
 
 void Window::ResetForTesting() {
+  EventTarget::ResetForTesting();
   global_focus_tick = 0;
   WindowIdMapper::instance()->ResetForTesting();
 }

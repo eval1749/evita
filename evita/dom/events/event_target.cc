@@ -7,8 +7,10 @@
 #include <unordered_map>
 
 #include "common/adoptors/reverse.h"
+#include "common/memory/singleton.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/script_controller.h"
+#include "evita/gc/weak_ptr.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/scoped_persistent.h"
 
@@ -41,6 +43,64 @@ class EventTargeClass : public v8_glue::WrapperInfo {
   }
 };
 
+}  // namespace
+
+//////////////////////////////////////////////////////////////////////
+//
+// EventTarget::EventTargetIdMapper
+//
+// This class represents mapping from widget id to DOM EventTarget object.
+//
+class EventTarget::EventTargetIdMapper
+    : public common::Singleton<EventTargetIdMapper> {
+  friend class common::Singleton<EventTargetIdMapper>;
+
+  private: typedef EventTargetId EventTargetId;
+
+  private: std::unordered_map<EventTargetId, gc::WeakPtr<EventTarget>> map_;
+  private: EventTargetId next_event_target_id_;
+
+  private: EventTargetIdMapper() : next_event_target_id_(1) {
+  }
+  public: ~EventTargetIdMapper() = default;
+
+  public: void DidDestroyWidget(EventTargetId event_target_id) {
+    DCHECK_NE(kInvalidEventTargetId, event_target_id);
+    auto it = map_.find(event_target_id);
+    if (it == map_.end()) {
+      DVLOG(0) << "Why we don't have a widget for EventTargetId " <<
+        event_target_id << " in EventTargetIdMap?";
+      return;
+    }
+    auto const event_target = it->second.get();
+    event_target->event_target_id_ = kInvalidEventTargetId;
+  }
+
+  public: EventTarget* Find(EventTargetId event_target_id) {
+    auto it = map_.find(event_target_id);
+    return it == map_.end() ? nullptr : it->second.get();
+  }
+
+  public: EventTargetId Register(EventTarget* event_target) {
+    auto event_target_id = next_event_target_id_;
+    map_[event_target_id] = event_target;
+    ++next_event_target_id_;
+    return event_target_id;
+  }
+
+  public: void ResetForTesting() {
+    next_event_target_id_ = 1;
+    map_.clear();
+  }
+
+  public: void Unregister(EventTargetId event_target_id) {
+    DCHECK_NE(kInvalidEventTargetId, event_target_id);
+    map_.erase(event_target_id);
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(EventTargetIdMapper);
+};
+
 v8::Handle<v8::Object> GetCallee(v8::Isolate* isolate,
                                  v8::Handle<v8::Value> object) {
   if (!object->IsObject())
@@ -53,7 +113,6 @@ v8::Handle<v8::Object> GetCallee(v8::Isolate* isolate,
     return v8::Handle<v8::Object>();
   return handler->ToObject();
 }
-}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -123,7 +182,8 @@ class EventTarget::EventListenerMap {
 DEFINE_SCRIPTABLE_OBJECT(EventTarget, EventTargeClass);
 
 EventTarget::EventTarget()
-    : event_listener_map_(new EventListenerMap()) {
+    : event_listener_map_(new EventListenerMap()),
+      event_target_id_(EventTargetIdMapper::instance()->Register(this)) {
 }
 
 EventTarget::~EventTarget() {
@@ -174,6 +234,11 @@ bool EventTarget::DispatchEvent(Event* event) {
   return !event->default_prevented();
 }
 
+EventTarget* EventTarget::FromEventTargetId(EventTargetId event_target_id) {
+  DCHECK_NE(kInvalidEventTargetId, event_target_id);
+  return EventTargetIdMapper::instance()->Find(event_target_id);
+}
+
 void EventTarget::InvokeEventListeners(Event* event) {
   auto listeners = event_listener_map_->Find(event->type());
   if (!listeners)
@@ -202,6 +267,10 @@ void EventTarget::InvokeEventListeners(Event* event) {
     if (value.IsEmpty())
         ScriptController::instance()->LogException(try_catch);
   }
+}
+
+void EventTarget::ResetForTesting() {
+  EventTargetIdMapper::instance()->ResetForTesting();
 }
 
 void EventTarget::RemoveEventListener(const base::string16& type,

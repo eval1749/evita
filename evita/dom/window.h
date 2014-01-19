@@ -33,21 +33,18 @@ class Window : public v8_glue::Scriptable<Window, EventTarget> {
   private: int focus_tick_;
   private: Window* parent_window_;
   private: State state_;
-  // Associated wiget id. If associated widget is destroyed, it is changed
-  // to |kInvalidWindowId|.
-  private: WindowId window_id_;
 
   protected: Window();
   public: virtual ~Window();
 
   public: std::vector<Window*> child_windows() const;
   public: int focus_tick() const { return focus_tick_; }
-  public: WindowId id() const { return window_id_; }
+  public: WindowId id() const { return event_target_id(); }
   public: v8_glue::Nullable<Window> parent_window() const {
     return parent_window_;
   }
   public: State state() const { return state_; }
-  public: WindowId window_id() const { return window_id_; }
+  public: WindowId window_id() const { return event_target_id(); }
 
   public: void AddWindow(Window* window);
   public: void ChangeParentWindow(Window* new_parent_window);

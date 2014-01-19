@@ -24,7 +24,6 @@
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
-#include "evita/vi_FileDialogBox.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Selection.h"
@@ -32,10 +31,6 @@
 
 namespace Command
 {
-
-extern void FindCommand(const Context*);
-extern void FindNext(const Context*);
-extern void FindPrevious(const Context*);
 
 
 // 0 = MAPVK_VK_TO_VSC
@@ -1328,8 +1323,6 @@ void Processor::GlobalInit() {
     BIND_KEY(TextEditWindow, Mod_Ctrl | '/', ExpandDynamicAbbrev);
 
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'C', CopyToClipboard);
-    BIND_KEY(TextEditWindow, Mod_Ctrl | 'F', FindCommand);
-    BIND_KEY(TextEditWindow, Mod_Ctrl | 'H', FindCommand);
     //BIND_KEY(TextEditWindow, Mod_Ctrl | 'I', Indent);
     //BIND_KEY(TextEditWindow, Mod_Ctrl | 'M', TypeEnter);
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'Q', QuotedInsertEntry());
@@ -1392,9 +1385,6 @@ void Processor::GlobalInit() {
     BIND_VKEY(TextEditWindow, Mod_Shift, RIGHT,     ForwardCharExtend);
     BIND_VKEY(TextEditWindow, Mod_Shift, UP,        BackwardLineExtend);
     BIND_VKEY(CommandWindow, Mod_Shift, TAB,       Outdent);
-
-    BIND_VKEY(TextEditWindow, Mod_None,  F3, FindNext);
-    BIND_VKEY(TextEditWindow, Mod_Shift, F3, FindPrevious);
 } // Processor::GlobalInit
 
 }  // namespace Command

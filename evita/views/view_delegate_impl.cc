@@ -114,6 +114,14 @@ void ViewDelegateImpl::DestroyWindow(dom::WindowId window_id) {
   widget->Destroy();
 }
 
+void ViewDelegateImpl::DoFind(dom::DialogBoxId dialog_box_id,
+                              text::Direction direction) {
+  auto const dialog_box = DialogBox::FromDialogBoxId(dialog_box_id);
+  if (!dialog_box)
+    return;
+  static_cast<FindDialogBox*>(dialog_box)->DoFind(direction);
+}
+
 void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {
   auto const widget = Window::FromWindowId(window_id);
   if (!widget) {

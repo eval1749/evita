@@ -9,6 +9,8 @@
 #include "base/strings/string16.h"
 #include "evita/dom/forms/dialog_box_id.h"
 #include "evita/dom/window_id.h"
+#include "evita/dom/window_id.h"
+#include "evita/text/search_and_replace_model.h"
 
 namespace base {
 class WaitableEvent;
@@ -47,6 +49,8 @@ class ViewDelegate {
                                          Document* document) = 0;
   public: virtual void CreateTextWindow(const TextWindow* window) = 0;
   public: virtual void DestroyWindow(WindowId window_id) = 0;
+  public: virtual void DoFind(DialogBoxId dialog_box_id,
+                              text::Direction direction) = 0;
   public: virtual void FocusWindow(WindowId window_id) = 0;
   public: virtual void GetFilenameForLoad(
       WindowId window_id, const base::string16& dir_path,

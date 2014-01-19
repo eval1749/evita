@@ -5,6 +5,7 @@
 
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/forms/dialog_box_id.h"
+#include "evita/text/search_and_replace_model.h"
 
 #include <vector>
 
@@ -26,6 +27,7 @@ class Form : public v8_glue::Scriptable<Form, EventTarget> {
   public: DialogBoxId dialog_box_id() const { return event_target_id(); }
 
   public: void AddFormControl(FormControl* control);
+  public: void DoFind(text::Direction direction);
   public: void Realize();
   public: void Show();
 

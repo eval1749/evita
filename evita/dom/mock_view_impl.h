@@ -24,6 +24,7 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD2(CreateTableWindow, void(WindowId, Document*));
   MOCK_METHOD1(CreateTextWindow, void(const TextWindow*));
   MOCK_METHOD1(DestroyWindow, void(WindowId));
+  MOCK_METHOD2(DoFind, void(DialogBoxId, text::Direction));
   MOCK_METHOD1(FocusWindow, void(WindowId));
   public: virtual void GetFilenameForLoad(WindowId window_id,
     const base::string16& dir_path,

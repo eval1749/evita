@@ -10,6 +10,7 @@
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/view_event_handler.h"
+#include "evita/editor/dom_lock.h"
 #include "evita/RegexMatch.h"
 #include "evita/text/search_and_replace_model.h"
 #include "evita/vi_EditPane.h"
@@ -90,6 +91,7 @@ void FindDialogBox::ClearMessage() {
 }
 
 void FindDialogBox::DoFind(text::Direction eDirection) {
+  UI_DOM_AUTO_LOCK_SCOPE();
   ClearMessage();
 
   direction_ = eDirection;
@@ -145,6 +147,7 @@ void FindDialogBox::DoFind(text::Direction eDirection) {
 }
 
 void FindDialogBox::DoReplace(text::ReplaceMode replace_mode) {
+  UI_DOM_AUTO_LOCK_SCOPE();
   ClearMessage();
 
   SearchParameters search;
@@ -472,39 +475,3 @@ void FindDialogBox::UpdateUI(bool fActivate) {
   SetCheckBox(IDC_FIND_SELECTION, text::kReplaceInSelection == replace_in_);
   SetCheckBox(IDC_FIND_WHOLE_FILE, text::kReplaceInWhole == replace_in_);
 }
-
-#include "evita/cm_CmdProc.h"
-
-namespace Command {
-
-// Global Find Dialog Box object
-// FIXME 2007-07-17 yosi@msn.com We should initialize controls from
-// saved settings.
-static FindDialogBox* s_pFindDialogBox;
-
-DEFCOMMAND(FindCommand) {
-  DCHECK(pCtx);
-  if (!s_pFindDialogBox) {
-    // TODO(yosi): FindDialogBox doesn't work anymore!
-    s_pFindDialogBox = new FindDialogBox(kInvalidDialogBoxId);
-    s_pFindDialogBox->Realize(nullptr);
-  }
-
-  s_pFindDialogBox->Show();
-}
-
-DEFCOMMAND(FindNext) {
-  DCHECK(pCtx);
-  if (!s_pFindDialogBox)
-    return;
-  s_pFindDialogBox->DoFind(text::kDirectionDown);
-}
-
-DEFCOMMAND(FindPrevious) {
-  DCHECK(pCtx);
-  if (!s_pFindDialogBox)
-    return;
-  s_pFindDialogBox->DoFind(text::kDirectionUp);
-}
-
-}  // namespace Command

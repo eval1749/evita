@@ -9,6 +9,20 @@
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/wrapper_info.h"
 
+namespace gin {
+template<>
+struct Converter<text::Direction> {
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
+                     text::Direction* out) {
+    int value;
+    if (!gin::ConvertFromV8(isolate, val, &value))
+      return false;
+    *out = static_cast<text::Direction>(value);
+    return true;
+  }
+};
+}  // namespace gin
+
 namespace dom {
 
 namespace {
@@ -39,6 +53,7 @@ class FormClass :
     builder
         .SetProperty("controls", &Form::controls)
         .SetMethod("add", &Form::AddFormControl)
+        .SetMethod("doFind_", &Form::DoFind)
         .SetMethod("realize", &Form::Realize)
         .SetMethod("show", &Form::Show);
   }
@@ -62,6 +77,12 @@ Form::~Form() {
 void Form::AddFormControl(FormControl* control) {
   controls_.push_back(control);
 }
+
+void Form::DoFind(text::Direction direction) {
+  ScriptController::instance()->view_delegate()->DoFind(dialog_box_id(),
+                                                        direction);
+}
+
 
 void Form::Realize() {
   ScriptController::instance()->view_delegate()->RealizeDialogBox(this);

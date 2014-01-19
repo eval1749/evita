@@ -49,6 +49,7 @@
         'dom/console.js',
         'dom/js_console.js',
         'dom/document_list.js',
+        'dom/find_and_replace_commands.js',
         'dom/text_window_commands.js',
         'dom/window_commands.js',
       ],

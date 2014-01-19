@@ -1,5 +1,5 @@
 #include "precomp.h"
-// Copyright (C) 1996-2013 by Project Vogue.
+// Copyright (C) 1996-2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 #include "evita/vi_FindDialogBox.h"
@@ -9,6 +9,7 @@
 #include "base/logging.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
+#include "evita/dom/view_event_handler.h"
 #include "evita/RegexMatch.h"
 #include "evita/text/search_and_replace_model.h"
 #include "evita/vi_EditPane.h"
@@ -19,9 +20,9 @@
 #define BEGIN_COMMAND_MAP switch (wParam) {
 #define END_COMMAND_MAP } return false;
 
-#define ON_COMMAND(mp_ctrl, mp_notify, mp_method) \
+#define ON_COMMAND(mp_ctrl, mp_notify, mp_method, ...) \
   case MAKEWPARAM(mp_ctrl, mp_notify): { \
-    mp_method(); \
+    mp_method(__VA_ARGS__); \
     return true; \
   }
 
@@ -71,8 +72,12 @@ Selection* GetActiveSelection() {
 }
 }   // namespace
 
-FindDialogBox::FindDialogBox()
-    : DialogBox(kInvalidDialogBoxId),
+//////////////////////////////////////////////////////////////////////
+//
+// FindDialogBox
+//
+FindDialogBox::FindDialogBox(DialogBoxId dialog_box_id)
+    : DialogBox(dialog_box_id),
       direction_(text::kDirectionDown),
       replace_in_(text::kReplaceInWhole) {
 }
@@ -285,6 +290,11 @@ bool FindDialogBox::onCommand(WPARAM wParam, LPARAM) {
     ON_COMMAND(IDC_FIND_REPLACE_ALL, BN_CLICKED, onReplaceAll)
     ON_COMMAND(IDC_FIND_WHAT, CBN_EDITCHANGE, UpdateUI)
     ON_COMMAND(IDC_FIND_WITH, CBN_EDITCHANGE, UpdateUI)
+
+    ON_COMMAND(IDC_FIND_WHAT, CBN_KILLFOCUS,
+               DispatchTextEvent, L"change", IDC_FIND_WHAT)
+    ON_COMMAND(IDC_FIND_WITH, CBN_KILLFOCUS,
+               DispatchTextEvent, L"change", IDC_FIND_WITH)
   END_COMMAND_MAP
 }
 
@@ -312,7 +322,8 @@ bool FindDialogBox::onInitDialog() {
 
   UpdateUI(true);
 
-  return true;
+  // Returns false not to set focus to dialog.
+  return false;
 }
 
 /// <summary>
@@ -474,8 +485,9 @@ static FindDialogBox* s_pFindDialogBox;
 DEFCOMMAND(FindCommand) {
   DCHECK(pCtx);
   if (!s_pFindDialogBox) {
-    s_pFindDialogBox = new FindDialogBox;
-    s_pFindDialogBox->Realize();
+    // TODO(yosi): FindDialogBox doesn't work anymore!
+    s_pFindDialogBox = new FindDialogBox(kInvalidDialogBoxId);
+    s_pFindDialogBox->Realize(nullptr);
   }
 
   s_pFindDialogBox->Show();

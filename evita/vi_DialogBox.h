@@ -3,11 +3,17 @@
 #if !defined(INCLUDE_visual_dialog_h)
 #define INCLUDE_visual_dialog_h
 
-#include "base/strings/string16.h"
-#include "evita/dom/events/event_target_id.h"
+#include <memory>
 
-typedef dom::EventTargetId DialogBoxId;
-const DialogBoxId kInvalidDialogBoxId = dom::kInvalidEventTargetId;
+#include "base/strings/string16.h"
+#include "evita/dom/forms/dialog_box_id.h"
+
+typedef dom::DialogBoxId DialogBoxId;
+const DialogBoxId kInvalidDialogBoxId = dom::kInvalidDialogBoxId;
+
+namespace dom {
+class Form;
+}
 
 #undef DialogBox
 
@@ -16,8 +22,11 @@ const DialogBoxId kInvalidDialogBoxId = dom::kInvalidEventTargetId;
 // DialogBox
 //
 class DialogBox {
+  private: class Model;
+
   private: DialogBoxId dialog_box_id_;
   private: HWND hwnd_;
+  private: std::unique_ptr<Model> model_;
 
   protected: DialogBox(DialogBoxId dialog_box_id);
   public: virtual ~DialogBox();
@@ -28,6 +37,8 @@ class DialogBox {
   private: static INT_PTR CALLBACK DialogProc(HWND hwnd, UINT message,
                                               WPARAM wParam, LPARAM lParam);
 
+  protected: void DispatchTextEvent(const base::string16& type,
+                                    int control_id);
   public: static DialogBox* FromDialogBoxId(DialogBoxId dialog_box_id);
   protected: bool GetChecked(int control_id) const;
   protected: HWND GetDlgItem(int item_id) const;
@@ -39,9 +50,11 @@ class DialogBox {
   protected: virtual void onCancel();
   protected: virtual INT_PTR onMessage(UINT message, WPARAM wParam,
                                        LPARAM lParam);
-  public: void Realize();
+  public: void Realize(const dom::Form* form);
   public: int SetCheckBox(int item_id, bool checked);
   public: void Show();
+
+  DISALLOW_COPY_AND_ASSIGN(DialogBox);
 };
 
 #endif //!defined(INCLUDE_visual_dialog_h)

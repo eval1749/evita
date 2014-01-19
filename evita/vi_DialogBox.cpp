@@ -8,7 +8,11 @@
 
 #include "base/logging.h"
 #include "common/memory/singleton.h"
+#include "evita/dom/forms/form.h"
+#include "evita/dom/forms/form_control.h"
+#include "evita/dom/view_event_handler.h"
 #include "evita/editor/application.h"
+#include "evita/editor/dom_lock.h"
 
 extern HINSTANCE g_hInstance;
 extern HINSTANCE g_hResource;
@@ -66,13 +70,42 @@ class DialogBoxIdMapper : public common::Singleton<DialogBoxIdMapper> {
     map_[dialog_box_id] = nullptr;
   }
 };
-
-
 DialogBox* creating_dialog_box;
+}  // namespace
+
+//////////////////////////////////////////////////////////////////////
+//
+// DialogBox::DialogBox::Model
+//
+class DialogBox::Model {
+  private: std::unordered_map<int, dom::EventTargetId> id_map_;
+  public: Model() = default;
+  public: ~Model() = default;
+  public: dom::EventTargetId event_target_id_of(int control_id) const;
+  public: void Build(const dom::Form* form);
+};
+
+dom::EventTargetId DialogBox::Model::event_target_id_of(
+    int control_id) const {
+  auto present = id_map_.find(control_id);
+  return present == id_map_.end() ? dom::kInvalidEventTargetId :
+      present->second;
 }
 
+void DialogBox::Model::Build(const dom::Form* form) {
+  UI_DOM_AUTO_LOCK_SCOPE();
+  for (auto control : form->controls()) {
+    id_map_[control->resouce_id()] = control->event_target_id();
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// DialogBox
+//
 DialogBox::DialogBox(DialogBoxId dialog_box_id)
-    : dialog_box_id_(dialog_box_id) {
+    : dialog_box_id_(dialog_box_id),
+      model_(new Model()) {
   DialogBoxIdMapper::instance()->Register(this);
 }
 
@@ -110,6 +143,19 @@ INT_PTR CALLBACK DialogBox::DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam,
   }
 
   return dialog_box->onMessage(uMsg, wParam, lParam);
+}
+
+void DialogBox::DispatchTextEvent(const base::string16& type,
+                                  int control_id) {
+  auto const event_target_id = model_->event_target_id_of(control_id);
+  if (event_target_id == dom::kInvalidEventTargetId)
+    return;
+  dom::ApiFormEvent event {
+      event_target_id,
+      type,
+      GetDlgItemText(control_id)
+  };
+  Application::instance()->view_event_handler()->DispatchFormEvent(event);
 }
 
 DialogBox* DialogBox::FromDialogBoxId(DialogBoxId dialog_box_id) {
@@ -155,7 +201,8 @@ INT_PTR DialogBox::onMessage(UINT, WPARAM, LPARAM) {
   return 0;
 }
 
-void DialogBox::Realize() {
+void DialogBox::Realize(const dom::Form* form) {
+  model_->Build(form);
   creating_dialog_box = this;
   hwnd_ = ::CreateDialogParam(
       g_hInstance,

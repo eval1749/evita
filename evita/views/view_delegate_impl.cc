@@ -8,11 +8,13 @@
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
 #include "evita/dom/editor_window.h"
+#include "evita/dom/forms/form.h"
 #include "evita/dom/text_window.h"
 #include "evita/dom/view_event_handler.h"
 #include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/vi_FileDialogBox.h"
+#include "evita/vi_FindDialogBox.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_TextEditWindow.h"
 #include "evita/views/table_view.h"
@@ -81,7 +83,8 @@ void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
   window->SetParentWidget(new_parent);
 }
 
-void ViewDelegateImpl::CreateDialogBox(dom::DialogBoxId) {
+void ViewDelegateImpl::CreateDialogBox(dom::DialogBoxId dialog_box_id) {
+  new FindDialogBox(dialog_box_id);
 }
 
 void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
@@ -207,7 +210,11 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
   event_handler_->RunCallback(base::Bind(callback, response_code));
 }
 
-void ViewDelegateImpl::RealizeDialogBox(const dom::Form*) {
+void ViewDelegateImpl::RealizeDialogBox(const dom::Form* form) {
+  auto const dialog_box = DialogBox::FromDialogBoxId(form->event_target_id());
+  if (!dialog_box)
+    return;
+  dialog_box->Realize(form);
 }
 
 void ViewDelegateImpl::RealizeWindow(dom::WindowId window_id) {
@@ -234,7 +241,11 @@ void ViewDelegateImpl::SaveFile(dom::Document* document,
   buffer->Save(filename.c_str(), code_page, newline_mode);
 }
 
-void ViewDelegateImpl::ShowDialogBox(dom::DialogBoxId) {
+void ViewDelegateImpl::ShowDialogBox(dom::DialogBoxId dialog_box_id) {
+  auto const dialog_box = DialogBox::FromDialogBoxId(dialog_box_id);
+  if (!dialog_box)
+    return;
+  dialog_box->Show();
 }
 
 }  // namespace views

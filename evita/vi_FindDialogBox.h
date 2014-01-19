@@ -19,7 +19,7 @@ class FindDialogBox final : public DialogBox {
   private: text::Direction direction_;
   private: text::ReplaceIn replace_in_;
 
-  public: FindDialogBox();
+  public: FindDialogBox(DialogBoxId dialog_box_id);
   public: virtual ~FindDialogBox();
 
   private: void ClearMessage();
@@ -41,6 +41,8 @@ class FindDialogBox final : public DialogBox {
   private: virtual bool onCommand(WPARAM, LPARAM) override;
   private: virtual INT_PTR onMessage(UINT, WPARAM, LPARAM) override;
   private: virtual void onOk() override;
+
+  DISALLOW_COPY_AND_ASSIGN(FindDialogBox);
 };
 
 #endif //!defined(INCLUDE_evita_find_dialog_box_h)

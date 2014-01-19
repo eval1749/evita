@@ -4,6 +4,8 @@
 #include "evita/dom/events/event_handler.h"
 
 #include "evita/dom/editor_window.h"
+#include "evita/dom/events/event_target.h"
+#include "evita/dom/events/form_event.h"
 #include "evita/dom/events/ui_event.h"
 #include "evita/dom/events/window_event.h"
 #include "evita/dom/script_controller.h"
@@ -129,6 +131,17 @@ void EventHandler::DidSetFocus(WindowId window_id) {
 
 void EventHandler::DidStartHost() {
   controller_->DidStartHost();
+}
+
+void EventHandler::DispatchFormEvent(const ApiFormEvent& raw_event) {
+  auto const target = EventTarget::FromEventTargetId(
+      raw_event.target_id);
+  if (!target)
+    return;
+  auto event = new FormEvent(raw_event.type, Event::Bubbling,
+                             Event::NotCancelable,
+                             raw_event.data);
+  target->DispatchEvent(event);
 }
 
 void EventHandler::OpenFile(WindowId window_id,

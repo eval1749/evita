@@ -8,9 +8,17 @@
 
 #include "base/callback_forward.h"
 #include "base/strings/string16.h"
+#include "evita/dom/events/event_target_id.h"
 #include "evita/dom/window_id.h"
 
 namespace dom {
+
+
+struct ApiFormEvent {
+  EventTargetId target_id;
+  base::string16 type;
+  base::string16 data;
+};
 
 class ViewEventHandler {
   public: ViewEventHandler() = default;
@@ -23,6 +31,7 @@ class ViewEventHandler {
   public: virtual void DidRealizeWidget(WindowId window_id) = 0;
   public: virtual void DidSetFocus(WindowId window_id) = 0;
   public: virtual void DidStartHost() = 0;
+  public: virtual void DispatchFormEvent(const ApiFormEvent& event) = 0;
   public: virtual void OpenFile(WindowId window_id,
                                 const base::string16& filename) = 0;
   public: virtual void QueryClose(WindowId window_id) = 0;

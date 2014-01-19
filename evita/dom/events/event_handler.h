@@ -28,6 +28,7 @@ class EventHandler : public ViewEventHandler {
   private: virtual void DidRealizeWidget(WindowId window_id) override;
   private: virtual void DidSetFocus(WindowId window_id) override;
   private: virtual void DidStartHost() override;
+  private: virtual void DispatchFormEvent(const ApiFormEvent& event) override;
   private: virtual void OpenFile(WindowId window_id,
                                  const base::string16& filename) override;
   private: virtual void QueryClose(WindowId window_id) override;

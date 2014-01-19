@@ -29,7 +29,8 @@ INT_PTR CALLBACK DialogBox::DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam,
   if (!dialog_box) {
     dialog_box = creating_dialog_box;
     dialog_box->hwnd_ = hwnd;
-    ::SetWindowLongPtr(hwnd, DWLP_USER, reinterpret_cast<LONG_PTR>(dialog_box));
+    ::SetWindowLongPtr(hwnd, DWLP_USER,
+                       reinterpret_cast<LONG_PTR>(dialog_box));
   }
 
   switch (uMsg) {
@@ -47,7 +48,7 @@ INT_PTR CALLBACK DialogBox::DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 
     case WM_INITDIALOG:
       return dialog_box->onInitDialog();
-    }
+  }
 
   return dialog_box->onMessage(uMsg, wParam, lParam);
 }

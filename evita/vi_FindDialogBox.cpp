@@ -22,14 +22,42 @@
     return true; \
   }
 
-static Selection* getActiveSelection() {
-  auto const pEditPane = Application::instance()->GetActiveFrame()->
+namespace {
+
+// Replaces region with specified case.
+void CaseReplace(text::Range* range, StringCase string_case) {
+  switch (string_case) {
+    case StringCase_Capitalized:
+      range->Capitalize();
+      break;
+
+    case StringCase_CapitalizedAll:
+      range->CapitalizeAll();
+      break;
+
+    case StringCase_Lower:
+      range->Downcase();
+      break;
+
+    case StringCase_Mixed:
+    case StringCase_None:
+      // Nothing to do
+      break;
+
+    case StringCase_Upper:
+      range->Upcase();
+      break;
+  }
+}
+
+Selection* GetActiveSelection() {
+  auto const edit_pane = Application::instance()->GetActiveFrame()->
     GetActivePane()->DynamicCast<EditPane>();
 
-  if (!pEditPane)
+  if (!edit_pane)
     return nullptr;
 
-  auto const window = pEditPane->GetActiveWindow();
+  auto const window = edit_pane->GetActiveWindow();
   if (!window)
     return nullptr;
 
@@ -38,52 +66,54 @@ static Selection* getActiveSelection() {
 
   return nullptr;
 }
+}   // namespace
 
 FindDialogBox::FindDialogBox()
-    : m_eDirection(Direction_Down),
-      m_eReplaceIn(ReplaceIn_Whole) {
+    : direction_(kDirectionDown),
+      replace_in_(kReplaceInWhole) {
 }
 
 FindDialogBox::~FindDialogBox() {
 }
 
-void FindDialogBox::clearMessage() {
+void FindDialogBox::ClearMessage() {
   Application::instance()->GetActiveFrame()->ShowMessage(MessageLevel_Warning);
 }
 
 void FindDialogBox::DoFind(Direction eDirection) {
-  clearMessage();
+  ClearMessage();
 
-  m_eDirection = eDirection;
+  direction_ = eDirection;
 
-  SearchParameters oSearch;
-  auto const pSelection = prepareFind(&oSearch);
-  if (!pSelection) {
+  SearchParameters search;
+  auto const selection = PrepareFind(&search);
+  if (!selection) {
     // We may not have search text.
     return;
   }
 
-  if (Direction_Up == eDirection)
-    oSearch.m_rgf |= SearchFlag_Backward;
+  if (kDirectionUp == eDirection)
+    search.m_rgf |= SearchFlag_Backward;
 
-  auto const pBuffer = pSelection->GetBuffer();
-  auto lStart = pSelection->GetStart();
-  auto lEnd = pSelection->GetEnd();
-  if (oSearch.IsWhole()){
-    if (oSearch.IsBackward()) {
-      lStart = 0;
-      lEnd = pSelection->GetStart();
+  auto const buffer = selection->GetBuffer();
+  auto start_position = selection->GetStart();
+  auto end_position = selection->GetEnd();
+  if (search.IsWhole()){
+    if (search.IsBackward()) {
+      start_position = 0;
+      end_position = selection->GetStart();
     } else {
-      lStart = pSelection->GetEnd();
-      lEnd = pBuffer->GetEnd();
+      start_position = selection->GetEnd();
+      end_position = buffer->GetEnd();
     }
   }
 
-  RegexMatcher oMatcher(&oSearch, pSelection->GetBuffer(), lStart, lEnd);
+  RegexMatcher matcher(&search, selection->GetBuffer(), start_position,
+                       end_position);
 
   {
     int nChar;
-    if (int nError = oMatcher.GetError(&nChar)) {
+    if (int nError = matcher.GetError(&nChar)) {
       Application::instance()->GetActiveFrame()->ShowMessage(
           MessageLevel_Warning,
           IDS_BAD_REGEX,
@@ -93,79 +123,41 @@ void FindDialogBox::DoFind(Direction eDirection) {
     }
   }
 
-  if (!findFirst(&oMatcher)) {
-    reportNotFound();
+  if (!FindFirst(&matcher)) {
+    ReportNotFound();
     return;
   }
 
-  pSelection->SetRange(oMatcher.GetMatched(0));
-  pSelection->SetStartIsActive(oSearch.IsBackward());
-  pSelection->GetWindow()->MakeSelectionVisible();
+  selection->SetRange(matcher.GetMatched(0));
+  selection->SetStartIsActive(search.IsBackward());
+  selection->GetWindow()->MakeSelectionVisible();
 
-  updateUI();
+  UpdateUI();
 }
 
-/// <summary>
-///   Replaces region with specified case.
-/// </summary>
-/// <param name="pRange">A range to replace</param>
-/// <param name="eCase">Case for replace</param>
-static void caseReplace(text::Range* pRange, StringCase eCase) {
-  switch (eCase) {
-    case StringCase_Capitalized:
-      pRange->Capitalize();
-      break;
+void FindDialogBox::DoReplace(ReplaceMode replace_mode) {
+  ClearMessage();
 
-    case StringCase_CapitalizedAll:
-      pRange->CapitalizeAll();
-      break;
-
-    case StringCase_Lower:
-      pRange->Downcase();
-      break;
-
-    case StringCase_Mixed:
-    case StringCase_None:
-      // Nothing to do
-      break;
-
-    case StringCase_Upper:
-      pRange->Upcase();
-      break;
-  }
-}
-
-/// <summary>
-///   Handles [Replace] and [Replace All] button click.
-/// </summary>
-/// <param name="nCount">
-///   Specifies maximum number of replacement. For [Replace] button, this
-///   value is 1.
-/// </param>
-void FindDialogBox::doReplace(uint nCtrl) {
-  clearMessage();
-
-  SearchParameters oSearch;
-  Selection* pSelection = prepareFind(&oSearch);
-  if (!pSelection) {
+  SearchParameters search;
+  auto const selection = PrepareFind(&search);
+  if (!selection) {
     // We may not have search text.
     return;
   }
 
-  auto const pBuffer = pSelection->GetBuffer();
-
-  auto lStart = pSelection->GetStart();
-  auto lEnd = pSelection->GetEnd();
-
-  if (oSearch.IsWhole()) {
-    lStart = pBuffer->GetStart();
-    lEnd = pBuffer->GetEnd();
+  auto const buffer = selection->GetBuffer();
+  auto start_position = selection->GetStart();
+  auto end_position = selection->GetEnd();
+  if (search.IsWhole()) {
+    start_position = buffer->GetStart();
+    end_position = buffer->GetEnd();
   }
 
-  RegexMatcher oMatcher(&oSearch, pSelection->GetBuffer(), lStart, lEnd);
+  RegexMatcher matcher(&search, selection->GetBuffer(), start_position,
+                       end_position);
 
-  if (!findFirst(&oMatcher)) {
-    reportNotFound();
+  if (!FindFirst(&matcher)) {
+    ReportNotFound();
     return;
   }
 
@@ -174,72 +166,71 @@ void FindDialogBox::doReplace(uint nCtrl) {
 
   auto const cwchWith = ::lstrlenW(wszWith);
 
-  bool fReplaceWithMeta = oSearch.m_rgf & SearchFlag_Regex;
+  bool is_replace_with_meta = search.m_rgf & SearchFlag_Regex;
 
-  Count cReplaced = 0;
+  Count num_replaced = 0;
 
-  if (IDC_FIND_REPLACE == nCtrl) {
-    auto const * pRange = oMatcher.GetMatched(0);
-
-    if (pSelection->GetStart() == pRange->GetStart() &&
-      pSelection->GetEnd() == pRange->GetEnd()) {
-      if (oSearch.IsCasePreserve()) {
-        text::UndoBlock oUndo(pBuffer, L"Edit.Replace");
-        StringCase eCase = pSelection->AnalyzeCase();
-        oMatcher.Replace(wszWith, cwchWith, fReplaceWithMeta);
-        caseReplace(pSelection, eCase);
+  if (replace_mode == kReplaceOne) {
+    auto range = matcher.GetMatched(0);
+    if (selection->GetStart() == range->GetStart() &&
+      selection->GetEnd() == range->GetEnd()) {
+      if (search.IsCasePreserve()) {
+        text::UndoBlock oUndo(buffer, L"Edit.Replace");
+        StringCase eCase = selection->AnalyzeCase();
+        matcher.Replace(wszWith, cwchWith, is_replace_with_meta);
+        CaseReplace(selection, eCase);
       } else {
-        oMatcher.Replace(wszWith, cwchWith, fReplaceWithMeta);
+        matcher.Replace(wszWith, cwchWith, is_replace_with_meta);
       }
-      ++cReplaced;
+      ++num_replaced;
     }
 
     // Just select matched string or replaced string.
-    pSelection->SetRange(pRange);
-    pSelection->SetStartIsActive(false);
+    selection->SetRange(range);
+    selection->SetStartIsActive(false);
   } else {
     // Replace multiple matched strings
-    text::UndoBlock oUndo(pBuffer, L"Edit.Replace");
+    text::UndoBlock oUndo(buffer, L"Edit.Replace");
 
-    text::Range oRange(pBuffer, lStart, lEnd);
+    text::Range oRange(buffer, start_position, end_position);
 
     do {
-      text::Range* pRange = oMatcher.GetMatched(0);
-      DCHECK(pRange);
+      auto const range = matcher.GetMatched(0);
+      DCHECK(range);
 
-      bool fEmptyMatch = pRange->GetStart() == pRange->GetEnd();
+      bool fEmptyMatch = range->GetStart() == range->GetEnd();
 
-      if (oSearch.IsCasePreserve()) {
-        StringCase eCase = pRange->AnalyzeCase();
-        oMatcher.Replace(wszWith, cwchWith, fReplaceWithMeta);
-        caseReplace(pRange, eCase);
+      if (search.IsCasePreserve()) {
+        StringCase eCase = range->AnalyzeCase();
+        matcher.Replace(wszWith, cwchWith, is_replace_with_meta);
+        CaseReplace(range, eCase);
       } else {
-        oMatcher.Replace(wszWith, cwchWith, fReplaceWithMeta);
+        matcher.Replace(wszWith, cwchWith, is_replace_with_meta);
       }
 
-      ++cReplaced;
+      ++num_replaced;
 
       if (fEmptyMatch) {
-        auto const lPosn = pRange->GetEnd();
-        if (pBuffer->GetEnd() == lPosn) {
+        auto const position = range->GetEnd();
+        if (buffer->GetEnd() == position) {
           // We reach at end of buffer.
           break;
         }
-        pRange->SetEnd(lPosn + 1);
+        range->SetEnd(position + 1);
       }
 
       // FIXME 2008-07-09 yosi@msn.com We should allow interrupt
       // replacing.
-      pRange->Collapse(Collapse_End);
-    } while (oMatcher.NextMatch());
+      range->Collapse(Collapse_End);
+    } while (matcher.NextMatch());
   }
 
   Application::instance()->GetActiveFrame()->ShowMessage(
       MessageLevel_Information,
       IDS_REPLACED,
-      cReplaced);
+      num_replaced);
 
-  pSelection->GetWindow()->MakeSelectionVisible();
+  selection->GetWindow()->MakeSelectionVisible();
 }
 
 /// <summary>
@@ -248,7 +239,7 @@ void FindDialogBox::doReplace(uint nCtrl) {
 /// <param name="pMatcher">
 ///   A matcher initialized from Find Dialog input elements.
 /// </param>
-bool FindDialogBox::findFirst(RegexMatcher* pMatcher) {
+bool FindDialogBox::FindFirst(RegexMatcher* pMatcher) {
   if (pMatcher->FirstMatch())
     return true;
 
@@ -264,7 +255,7 @@ bool FindDialogBox::findFirst(RegexMatcher* pMatcher) {
 ///   Handles [Cancel] button.
 /// </summary>
 void FindDialogBox::onCancel() {
-  clearMessage();
+  ClearMessage();
   ::ShowWindow(m_hwnd, SW_HIDE);
   ::SetActiveWindow(*Application::instance()->GetActiveFrame());
 }
@@ -290,8 +281,8 @@ bool FindDialogBox::onCommand(WPARAM wParam, LPARAM) {
     ON_COMMAND(IDC_FIND_PREVIOUS, BN_CLICKED, onFindPrevious)
     ON_COMMAND(IDC_FIND_REPLACE, BN_CLICKED, onReplaceOne)
     ON_COMMAND(IDC_FIND_REPLACE_ALL, BN_CLICKED, onReplaceAll)
-    ON_COMMAND(IDC_FIND_WHAT, CBN_EDITCHANGE, updateUI)
-    ON_COMMAND(IDC_FIND_WITH, CBN_EDITCHANGE, updateUI)
+    ON_COMMAND(IDC_FIND_WHAT, CBN_EDITCHANGE, UpdateUI)
+    ON_COMMAND(IDC_FIND_WITH, CBN_EDITCHANGE, UpdateUI)
   END_COMMAND_MAP
 }
 
@@ -317,7 +308,7 @@ bool FindDialogBox::onInitDialog() {
  // case-preserving replace.
   SetCheckBox(IDC_FIND_PRESERVE, true);
 
-  updateUI(true);
+  UpdateUI(true);
 
   return true;
 }
@@ -337,7 +328,7 @@ INT_PTR FindDialogBox::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         return FALSE;
       }
 
-      updateUI(true);
+      UpdateUI(true);
       ::SetFocus(GetDlgItem(IDC_FIND_WHAT));
       return TRUE;
 
@@ -356,68 +347,65 @@ INT_PTR FindDialogBox::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 }
 
 void FindDialogBox::onOk() {
-  switch (m_eDirection) {
-    case Direction_Up:
+  switch (direction_) {
+    case kDirectionUp:
       onFindPrevious();
       break;
-
-    case Direction_Down:
+    case kDirectionDown:
       onFindNext();
       break;
   }
 }
 
 void FindDialogBox::onFindNext() {
-  DoFind(Direction_Down);
+  DoFind(kDirectionDown);
 }
 
 void FindDialogBox::onFindPrevious() {
-  DoFind(Direction_Up);
+  DoFind(kDirectionUp);
 }
 
 void FindDialogBox::onReplaceAll() {
-  doReplace(IDC_FIND_REPLACE_ALL);
+  DoReplace(kReplaceAll);
 }
 
-
 void FindDialogBox::onReplaceOne() {
-  doReplace(IDC_FIND_REPLACE);
+  DoReplace(kReplaceOne);
 }
 
 /// <summary>
 ///   Preparation for search. We extract search parameters from dialog box.
 /// </summary>
 /// <returns>Selection to start search.</returns>
-Selection* FindDialogBox::prepareFind(SearchParameters* pSearch) {
-  DCHECK(pSearch);
-  auto const pSelection = getActiveSelection();
-  if (!pSelection) {
+Selection* FindDialogBox::PrepareFind(SearchParameters* search) {
+  DCHECK(search);
+  auto const selection = GetActiveSelection();
+  if (!selection) {
     // Active pane isn't editor.
     return nullptr;
   }
 
   auto const hwndWhat = GetDlgItem(IDC_FIND_WHAT);
 
-  pSearch->search_text_.clear();
+  search->search_text_.clear();
   auto const search_text_length = ::GetWindowTextLength(hwndWhat);
   if (!search_text_length) {
     // Nothing to search
     return nullptr;
   }
 
-  pSearch->search_text_.resize(pSearch->search_text_.length() + 1);
-  ::GetWindowText(hwndWhat, &pSearch->search_text_[0],
+  search->search_text_.resize(search->search_text_.length() + 1);
+  ::GetWindowText(hwndWhat, &search->search_text_[0],
                   search_text_length + 1);
-  pSearch->search_text_.resize(pSearch->search_text_.length());
-
-  pSearch->m_rgf = 0;
+  search->search_text_.resize(search->search_text_.length());
+  search->m_rgf = 0;
 
   if (!GetChecked(IDC_FIND_CASE))  {
-    for (auto const ch : pSearch->search_text_) {
+    for (auto const ch : search->search_text_) {
       if (IsLowerCase(ch)) {
-        pSearch->m_rgf |= SearchFlag_IgnoreCase;
+        search->m_rgf |= SearchFlag_IgnoreCase;
       } else if (IsUpperCase(ch)) {
-        pSearch->m_rgf &= ~SearchFlag_IgnoreCase;
+        search->m_rgf &= ~SearchFlag_IgnoreCase;
         break;
       }
     }
@@ -429,27 +417,27 @@ Selection* FindDialogBox::prepareFind(SearchParameters* pSearch) {
 
     for (const char16* pwsz = wszWith; 0 != *pwsz; pwsz++) {
       if (IsLowerCase(*pwsz)) {
-        pSearch->m_rgf |= SearchFlag_CasePreserve;
+        search->m_rgf |= SearchFlag_CasePreserve;
       } else if (IsUpperCase(*pwsz)) {
-        pSearch->m_rgf &= ~SearchFlag_CasePreserve;
+        search->m_rgf &= ~SearchFlag_CasePreserve;
         break;
       }
     }
   }
 
   if (GetChecked(IDC_FIND_REGEX))
-    pSearch->m_rgf |= SearchFlag_Regex;
+    search->m_rgf |= SearchFlag_Regex;
 
   if (GetChecked(IDC_FIND_WORD))
-    pSearch->m_rgf |= SearchFlag_MatchWord;
+    search->m_rgf |= SearchFlag_MatchWord;
 
   if (GetChecked(IDC_FIND_WHOLE_FILE))
-    pSearch->m_rgf |= SearchFlag_Whole;
+    search->m_rgf |= SearchFlag_Whole;
 
-  return pSelection;
+  return selection;
 }
 
-void FindDialogBox::reportNotFound() {
+void FindDialogBox::ReportNotFound() {
   Application::instance()->GetActiveFrame()->ShowMessage(
       MessageLevel_Warning,
       IDS_NOT_FOUND);
@@ -457,11 +445,11 @@ void FindDialogBox::reportNotFound() {
 
 /// <summary>Updates find dialog box controls.</summary>
 /// <param name="fActivate">True if dialog box is activated</param>
-void FindDialogBox::updateUI(bool fActivate) {
-  SetCheckBox(IDC_FIND_DOWN, Direction_Down == m_eDirection);
-  SetCheckBox(IDC_FIND_UP, Direction_Up == m_eDirection);
+void FindDialogBox::UpdateUI(bool fActivate) {
+  SetCheckBox(IDC_FIND_DOWN, kDirectionDown == direction_);
+  SetCheckBox(IDC_FIND_UP, kDirectionUp == direction_);
 
-  auto const pSelection = getActiveSelection();
+  auto const selection = GetActiveSelection();
   auto const cwch = ::GetWindowTextLength(GetDlgItem(IDC_FIND_WHAT));
 
   ::EnableWindow(GetDlgItem(IDC_FIND_NEXT), cwch >= 1);
@@ -472,15 +460,15 @@ void FindDialogBox::updateUI(bool fActivate) {
 
  // If active selection covers mutliple lines, Search/Replace can be
  // limited in selection.
-  auto const fHasNewline = pSelection->FindFirstChar('\n') >= 0;
+  auto const fHasNewline = selection->FindFirstChar('\n') >= 0;
   ::EnableWindow(GetDlgItem(IDC_FIND_SELECTION), fHasNewline);
   ::EnableWindow(GetDlgItem(IDC_FIND_WHOLE_FILE), fHasNewline);
 
   if (fActivate)
-    m_eReplaceIn = fHasNewline ? ReplaceIn_Selection : ReplaceIn_Whole;
+    replace_in_ = fHasNewline ? kReplaceInSelection : kReplaceInWhole;
 
-  SetCheckBox(IDC_FIND_SELECTION, ReplaceIn_Selection == m_eReplaceIn);
-  SetCheckBox(IDC_FIND_WHOLE_FILE, ReplaceIn_Whole == m_eReplaceIn);
+  SetCheckBox(IDC_FIND_SELECTION, kReplaceInSelection == replace_in_);
+  SetCheckBox(IDC_FIND_WHOLE_FILE, kReplaceInWhole == replace_in_);
 }
 
 #include "./cm_CmdProc.h"
@@ -507,14 +495,14 @@ DEFCOMMAND(FindNext) {
   DCHECK(pCtx);
   if (!s_pFindDialogBox)
     return;
-  s_pFindDialogBox->DoFind(FindDialogBox::Direction_Down);
+  s_pFindDialogBox->DoFind(FindDialogBox::kDirectionDown);
 }
 
 DEFCOMMAND(FindPrevious) {
   DCHECK(pCtx);
   if (!s_pFindDialogBox)
     return;
-  s_pFindDialogBox->DoFind(FindDialogBox::Direction_Up);
+  s_pFindDialogBox->DoFind(FindDialogBox::kDirectionUp);
 }
 
 }  // namespace Command

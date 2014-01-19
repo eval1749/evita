@@ -16,39 +16,45 @@ class Selection;
 //
 class FindDialogBox final : public DialogBox {
   public: enum Direction {
-    Direction_Down,
-    Direction_Up,
+    kDirectionDown,
+    kDirectionUp,
   };
 
   public: enum ReplaceIn {
-    ReplaceIn_Selection,
-    ReplaceIn_Whole,
+    kReplaceInSelection,
+    kReplaceInWhole,
   };
 
-  private: Direction m_eDirection;
-  private: ReplaceIn m_eReplaceIn;
+  private: enum ReplaceMode {
+    kReplaceAll,
+    kReplaceOne,
+  };
+
+  private: Direction direction_;
+  private: ReplaceIn replace_in_;
 
   public: FindDialogBox();
   public: virtual ~FindDialogBox();
 
-  private: void clearMessage();
-
+  private: void ClearMessage();
   public: void DoFind(Direction);
-  private: void doReplace(uint);
-  private: bool findFirst(RegexMatcher*);
-  private: virtual int GetTemplate() const override { return IDD_FIND; }
-  private: void onCancel();
-  private: virtual bool onCommand(WPARAM, LPARAM) override;
-  private: virtual bool onInitDialog() override;
-  private: virtual INT_PTR onMessage(UINT, WPARAM, LPARAM);
+  private: void DoReplace(ReplaceMode replace_mode);
+  private: bool FindFirst(RegexMatcher* matcher);
   private: void onFindNext();
   private: void onFindPrevious();
-  private: void onOk();
   private: void onReplaceOne();
   private: void onReplaceAll();
-  private: Selection* prepareFind(SearchParameters*);
-  private: void reportNotFound();
-  private: void updateUI(bool activate = false);
+  private: Selection* PrepareFind(SearchParameters*);
+  private: void ReportNotFound();
+  private: void UpdateUI(bool activate = false);
+
+  // DialogBox
+  private: virtual int GetTemplate() const override { return IDD_FIND; }
+  private: virtual bool onInitDialog() override;
+  private: virtual void onCancel() override;
+  private: virtual bool onCommand(WPARAM, LPARAM) override;
+  private: virtual INT_PTR onMessage(UINT, WPARAM, LPARAM) override;
+  private: virtual void onOk() override;
 };
 
 #endif //!defined(INCLUDE_evita_find_dialog_box_h)

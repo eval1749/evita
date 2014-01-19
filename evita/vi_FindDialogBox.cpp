@@ -22,12 +22,6 @@
     return true; \
   }
 
-/// <summary>
-///   Returns active selection
-/// </summary>
-/// <returns>
-///   Active selection
-/// </returns>
 static Selection* getActiveSelection() {
   auto const pEditPane = Application::instance()->GetActiveFrame()->
     GetActivePane()->DynamicCast<EditPane>();
@@ -65,7 +59,7 @@ void FindDialogBox::DoFind(Direction eDirection) {
   SearchParameters oSearch;
   auto const pSelection = prepareFind(&oSearch);
   if (!pSelection) {
- // We may not have search text.
+    // We may not have search text.
     return;
   }
 
@@ -73,10 +67,8 @@ void FindDialogBox::DoFind(Direction eDirection) {
     oSearch.m_rgf |= SearchFlag_Backward;
 
   auto const pBuffer = pSelection->GetBuffer();
-
   auto lStart = pSelection->GetStart();
   auto lEnd = pSelection->GetEnd();
-
   if (oSearch.IsWhole()){
     if (oSearch.IsBackward()) {
       lStart = 0;
@@ -134,7 +126,7 @@ static void caseReplace(text::Range* pRange, StringCase eCase) {
 
     case StringCase_Mixed:
     case StringCase_None:
- // Nothing to do
+      // Nothing to do
       break;
 
     case StringCase_Upper:
@@ -156,7 +148,7 @@ void FindDialogBox::doReplace(uint nCtrl) {
   SearchParameters oSearch;
   Selection* pSelection = prepareFind(&oSearch);
   if (!pSelection) {
- // We may not have search text.
+    // We may not have search text.
     return;
   }
 
@@ -202,11 +194,11 @@ void FindDialogBox::doReplace(uint nCtrl) {
       ++cReplaced;
     }
 
- // Just select matched string or replaced string.
+    // Just select matched string or replaced string.
     pSelection->SetRange(pRange);
     pSelection->SetStartIsActive(false);
   } else {
- // Replace multiple matched strings
+    // Replace multiple matched strings
     text::UndoBlock oUndo(pBuffer, L"Edit.Replace");
 
     text::Range oRange(pBuffer, lStart, lEnd);
@@ -230,14 +222,14 @@ void FindDialogBox::doReplace(uint nCtrl) {
       if (fEmptyMatch) {
         auto const lPosn = pRange->GetEnd();
         if (pBuffer->GetEnd() == lPosn) {
- // We reach at end of buffer.
+          // We reach at end of buffer.
           break;
         }
         pRange->SetEnd(lPosn + 1);
       }
 
- // FIXME 2008-07-09 yosi@msn.com We should allow interrupt
- // replacing.
+      // FIXME 2008-07-09 yosi@msn.com We should allow interrupt
+      // replacing.
       pRange->Collapse(Collapse_End);
     } while (oMatcher.NextMatch());
   }

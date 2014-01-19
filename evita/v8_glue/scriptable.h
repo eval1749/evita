@@ -34,6 +34,7 @@ class AbstractScriptable
   protected: AbstractScriptable() = default;
   protected: virtual ~AbstractScriptable();
 
+  public: bool is_instance_of(const WrapperInfo* wrapper_info) const;
   public: bool has_script_reference() const {
     return !wrapper_.IsEmpty();
   }
@@ -60,6 +61,17 @@ class Scriptable : public B {
       Scriptable(Params... params) : B(params...) {
   }
   protected: virtual ~Scriptable() = default;
+
+  public: template<typename T> T* as() {
+    return is<T>() ? static_cast<T*>(this) : nullptr;
+  }
+  public: template<typename T> const T* as() const {
+    return is<T>() ? static_cast<const T*>(this) : nullptr;
+  }
+  public: template<typename T> bool is() const {
+    return wrapper_info()->is_descendant_or_self_of(
+        T::static_wrapper_info());
+  }
 
   // Expose as public function for logging. I'm not sure other usages of
   // |AbstractScriptable::wrapper_info()|.

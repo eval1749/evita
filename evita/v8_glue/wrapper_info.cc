@@ -56,6 +56,14 @@ WrapperInfo* WrapperInfo::inherit_from() const {
   return nullptr;
 }
 
+bool WrapperInfo::is_descendant_or_self_of(const WrapperInfo* other) const {
+  for (auto runner = this; runner; runner = runner->inherit_from()) {
+    if (runner == other)
+      return true;
+  }
+  return false;
+}
+
 const char* WrapperInfo::singleton_name() const {
   return nullptr;
 }

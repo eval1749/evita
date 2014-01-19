@@ -72,8 +72,8 @@ Selection* GetActiveSelection() {
 }   // namespace
 
 FindDialogBox::FindDialogBox()
-    : direction_(kDirectionDown),
-      replace_in_(kReplaceInWhole) {
+    : direction_(text::kDirectionDown),
+      replace_in_(text::kReplaceInWhole) {
 }
 
 FindDialogBox::~FindDialogBox() {
@@ -83,7 +83,7 @@ void FindDialogBox::ClearMessage() {
   Application::instance()->GetActiveFrame()->ShowMessage(MessageLevel_Warning);
 }
 
-void FindDialogBox::DoFind(Direction eDirection) {
+void FindDialogBox::DoFind(text::Direction eDirection) {
   ClearMessage();
 
   direction_ = eDirection;
@@ -95,7 +95,7 @@ void FindDialogBox::DoFind(Direction eDirection) {
     return;
   }
 
-  if (kDirectionUp == eDirection)
+  if (text::kDirectionUp == eDirection)
     search.m_rgf |= SearchFlag_Backward;
 
   auto const buffer = selection->GetBuffer();
@@ -138,7 +138,7 @@ void FindDialogBox::DoFind(Direction eDirection) {
   UpdateUI();
 }
 
-void FindDialogBox::DoReplace(ReplaceMode replace_mode) {
+void FindDialogBox::DoReplace(text::ReplaceMode replace_mode) {
   ClearMessage();
 
   SearchParameters search;
@@ -171,7 +171,7 @@ void FindDialogBox::DoReplace(ReplaceMode replace_mode) {
 
   Count num_replaced = 0;
 
-  if (replace_mode == kReplaceOne) {
+  if (replace_mode == text::kReplaceOne) {
     auto range = matcher.GetMatched(0);
     if (selection->GetStart() == range->GetStart() &&
       selection->GetEnd() == range->GetEnd()) {
@@ -349,29 +349,29 @@ INT_PTR FindDialogBox::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 void FindDialogBox::onOk() {
   switch (direction_) {
-    case kDirectionUp:
+    case text::kDirectionUp:
       onFindPrevious();
       break;
-    case kDirectionDown:
+    case text::kDirectionDown:
       onFindNext();
       break;
   }
 }
 
 void FindDialogBox::onFindNext() {
-  DoFind(kDirectionDown);
+  DoFind(text::kDirectionDown);
 }
 
 void FindDialogBox::onFindPrevious() {
-  DoFind(kDirectionUp);
+  DoFind(text::kDirectionUp);
 }
 
 void FindDialogBox::onReplaceAll() {
-  DoReplace(kReplaceAll);
+  DoReplace(text::kReplaceAll);
 }
 
 void FindDialogBox::onReplaceOne() {
-  DoReplace(kReplaceOne);
+  DoReplace(text::kReplaceOne);
 }
 
 /// <summary>
@@ -435,8 +435,8 @@ void FindDialogBox::ReportNotFound() {
 /// <summary>Updates find dialog box controls.</summary>
 /// <param name="fActivate">True if dialog box is activated</param>
 void FindDialogBox::UpdateUI(bool fActivate) {
-  SetCheckBox(IDC_FIND_DOWN, kDirectionDown == direction_);
-  SetCheckBox(IDC_FIND_UP, kDirectionUp == direction_);
+  SetCheckBox(IDC_FIND_DOWN, text::kDirectionDown == direction_);
+  SetCheckBox(IDC_FIND_UP, text::kDirectionUp == direction_);
 
   auto const selection = GetActiveSelection();
   auto const cwch = ::GetWindowTextLength(GetDlgItem(IDC_FIND_WHAT));
@@ -454,10 +454,11 @@ void FindDialogBox::UpdateUI(bool fActivate) {
   ::EnableWindow(GetDlgItem(IDC_FIND_WHOLE_FILE), fHasNewline);
 
   if (fActivate)
-    replace_in_ = fHasNewline ? kReplaceInSelection : kReplaceInWhole;
+    replace_in_ = fHasNewline ? text::kReplaceInSelection :
+                                text::kReplaceInWhole;
 
-  SetCheckBox(IDC_FIND_SELECTION, kReplaceInSelection == replace_in_);
-  SetCheckBox(IDC_FIND_WHOLE_FILE, kReplaceInWhole == replace_in_);
+  SetCheckBox(IDC_FIND_SELECTION, text::kReplaceInSelection == replace_in_);
+  SetCheckBox(IDC_FIND_WHOLE_FILE, text::kReplaceInWhole == replace_in_);
 }
 
 #include "evita/cm_CmdProc.h"
@@ -484,14 +485,14 @@ DEFCOMMAND(FindNext) {
   DCHECK(pCtx);
   if (!s_pFindDialogBox)
     return;
-  s_pFindDialogBox->DoFind(FindDialogBox::kDirectionDown);
+  s_pFindDialogBox->DoFind(text::kDirectionDown);
 }
 
 DEFCOMMAND(FindPrevious) {
   DCHECK(pCtx);
   if (!s_pFindDialogBox)
     return;
-  s_pFindDialogBox->DoFind(FindDialogBox::kDirectionUp);
+  s_pFindDialogBox->DoFind(text::kDirectionUp);
 }
 
 }  // namespace Command

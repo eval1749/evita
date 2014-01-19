@@ -250,6 +250,7 @@
         'precomp.cpp',
         'text/buffer.cc',
         'text/range.cc',
+        'text/search_and_replace_model.cc',
         'core/style.cc',
 
         'ed_BufferCore.cpp',

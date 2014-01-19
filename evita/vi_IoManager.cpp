@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_IoManager.cpp#3 $
 //
-#include "./vi_IoManager.h"
+#include "evita/vi_IoManager.h"
 
 #include "base/strings/string16.h"
 #include "evita/dom/buffer.h"

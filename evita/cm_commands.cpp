@@ -10,7 +10,7 @@
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/cm_commands.cpp#5 $
 //
 //
-#include "./cm_CmdProc.h"
+#include "evita/cm_CmdProc.h"
 
 #include <memory>
 
@@ -19,16 +19,16 @@
 #include "base/bind.h"
 #pragma warning(pop)
 #include "base/strings/string16.h"
-#include "./ed_Mode.h"
+#include "evita/ed_Mode.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
-#include "./vi_FileDialogBox.h"
-#include "./vi_Frame.h"
-#include "./vi_EditPane.h"
-#include "./vi_Selection.h"
-#include "./vi_TextEditWindow.h"
+#include "evita/vi_FileDialogBox.h"
+#include "evita/vi_Frame.h"
+#include "evita/vi_EditPane.h"
+#include "evita/vi_Selection.h"
+#include "evita/vi_TextEditWindow.h"
 
 namespace Command
 {

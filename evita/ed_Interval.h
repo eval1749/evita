@@ -11,9 +11,9 @@
 #if !defined(INCLUDE_edit_interval_h)
 #define INCLUDE_edit_interval_h
 
-#include "./ed_BinTree.h"
-#include "./ed_Style.h"
-#include "./li_util.h"
+#include "evita/ed_BinTree.h"
+#include "evita/ed_Style.h"
+#include "evita/li_util.h"
 
 namespace text
 {

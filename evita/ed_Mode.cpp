@@ -9,20 +9,20 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_Mode.cpp#10 $
 //
-#include "./ed_Mode.h"
+#include "evita/ed_Mode.h"
 
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
-#include "./mode_Config.h"
-#include "./mode_Cxx.h"
-#include "./mode_Haskell.h"
-#include "./mode_Lisp.h"
-#include "./mode_Mason.h"
-#include "./mode_Perl.h"
-#include "./mode_PlainText.h"
-#include "./mode_Python.h"
-#include "./mode_Xml.h"
+#include "evita/mode_Config.h"
+#include "evita/mode_Cxx.h"
+#include "evita/mode_Haskell.h"
+#include "evita/mode_Lisp.h"
+#include "evita/mode_Mason.h"
+#include "evita/mode_Perl.h"
+#include "evita/mode_PlainText.h"
+#include "evita/mode_Python.h"
+#include "evita/mode_Xml.h"
 
 #include <commctrl.h>
 #include <string>

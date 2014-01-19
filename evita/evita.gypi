@@ -2,61 +2,54 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 {
-  'target_defaults': {
-    'include_dirs+' : [
-      # TODO(yosi): We should not have |<(DEPTH)/evita| in |include_dirs|.
-      '<(DEPTH)/evita',
-    ], # include_dirs
-  }, # target_defaults
+    'variables': {
+      'js_defs_files': [
+        'dom/enums.js',
+        'dom/events/event_enums.js',
+        'dom/strings_en_US.js',
+        'dom/unicode_enums.js',
+      ],
+      'js_externs_files': [
+        'dom/types_externs.js',
+        #'dom/console_externs.js',
+        'dom/document_externs.js',
+        'dom/document_window_externs.js',
+        'dom/events/event_externs.js',
+        'dom/events/event_target_externs.js',
+        'dom/events/focus_event_externs.js',
+        'dom/events/ui_event_externs.js',
+        'dom/events/window_event_externs.js',
+        'dom/editor_externs.js',
+        'dom/editor_window_externs.js',
+        'dom/file_path_externs.js',
+        #'dom/key_names_externs.js',
+        'dom/range_externs.js',
+        'dom/selection_externs.js',
+        'dom/table_selection_externs.js',
+        'dom/table_window_externs.js',
+        'dom/text_selection_externs.js',
+        'dom/text_window_externs.js',
+        'dom/window_externs.js',
+      ],
+      'js_lib_files': [
+        'dom/polyfill.js',
+        'dom/key_names.js',
+        'dom/strings_en_US.js',
 
-      'variables': {
-        'js_defs_files': [
-          'dom/enums.js',
-          'dom/events/event_enums.js',
-          'dom/strings_en_US.js',
-          'dom/unicode_enums.js',
-        ],
-        'js_externs_files': [
-          'dom/types_externs.js',
-          #'dom/console_externs.js',
-          'dom/document_externs.js',
-          'dom/document_window_externs.js',
-          'dom/events/event_externs.js',
-          'dom/events/event_target_externs.js',
-          'dom/events/focus_event_externs.js',
-          'dom/events/ui_event_externs.js',
-          'dom/events/window_event_externs.js',
-          'dom/editor_externs.js',
-          'dom/editor_window_externs.js',
-          'dom/file_path_externs.js',
-          #'dom/key_names_externs.js',
-          'dom/range_externs.js',
-          'dom/selection_externs.js',
-          'dom/table_selection_externs.js',
-          'dom/table_window_externs.js',
-          'dom/text_selection_externs.js',
-          'dom/text_window_externs.js',
-          'dom/window_externs.js',
-        ],
-        'js_lib_files': [
-          'dom/polyfill.js',
-          'dom/key_names.js',
-          'dom/strings_en_US.js',
+        'dom/document.js',
+        'dom/editor.js',
+        'dom/editor_window.js',
+        'dom/file_path.js',
+        'dom/range.js',
+        'dom/window.js',
 
-          'dom/document.js',
-          'dom/editor.js',
-          'dom/editor_window.js',
-          'dom/file_path.js',
-          'dom/range.js',
-          'dom/window.js',
-
-          'dom/console.js',
-          'dom/js_console.js',
-          'dom/document_list.js',
-          'dom/text_window_commands.js',
-          'dom/window_commands.js',
-        ],
-      }, # variables
+        'dom/console.js',
+        'dom/js_console.js',
+        'dom/document_list.js',
+        'dom/text_window_commands.js',
+        'dom/window_commands.js',
+      ],
+    }, # variables
 
   'targets': [
     {

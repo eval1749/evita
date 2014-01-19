@@ -19,7 +19,7 @@
 #define DEBUG_RESIZE 0
 #define DEBUG_SCROLL 0
 #define DEBUG_SHOW_HIDE 0
-#include "./vi_TextEditWindow.h"
+#include "evita/vi_TextEditWindow.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4625 4626)
@@ -27,10 +27,10 @@
 #pragma warning(pop)
 #include "base/logging.h"
 #include "common/timer/timer.h"
-#include "./cm_CmdProc.h"
-#include "./ed_Mode.h"
-#include "./ed_Style.h"
-#include "./gfx_base.h"
+#include "evita/cm_CmdProc.h"
+#include "evita/ed_Mode.h"
+#include "evita/ed_Style.h"
+#include "evita/gfx_base.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/document.h"
@@ -38,11 +38,11 @@
 #include "evita/dom/range.h"
 #include "evita/dom/selection.h"
 #include "evita/dom/text_window.h"
-#include "./vi_Caret.h"
-#include "./vi_EditPane.h"
-#include "./vi_Frame.h"
-#include "./vi_Selection.h"
-#include "./vi_util.h"
+#include "evita/vi_Caret.h"
+#include "evita/vi_EditPane.h"
+#include "evita/vi_Frame.h"
+#include "evita/vi_Selection.h"
+#include "evita/vi_util.h"
 #include <algorithm>
 
 #define DEBUG_TEXT_EDIT_PRINTF(mp_format, ...) \

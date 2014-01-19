@@ -3,9 +3,9 @@
 #if !defined(INCLUDE_evita_find_dialog_box_h)
 #define INCLUDE_evita_find_dialog_box_h
 
-#include "./IStringCursor.h"
-#include "./resource.h"
-#include "./vi_DialogBox.h"
+#include "evita/IStringCursor.h"
+#include "evita/resource.h"
+#include "evita/vi_DialogBox.h"
 
 class RegexMatcher;
 class Selection;

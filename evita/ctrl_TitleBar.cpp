@@ -10,7 +10,7 @@
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/ctrl_TitleBar.cpp#1 $
 //
 #define DEBUG_STATUSBAR 0
-#include "./ctrl_TitleBar.h"
+#include "evita/ctrl_TitleBar.h"
 #include <algorithm>
 
 //////////////////////////////////////////////////////////////////////

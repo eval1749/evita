@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_listener_winapp_visual_defs_h)
 #define INCLUDE_listener_winapp_visual_defs_h
 
-#include "./resource.h"
+#include "evita/resource.h"
 #include "common/win/rect.h"
 
 // TODO: We should use as |common::win::Point|.

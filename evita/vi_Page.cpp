@@ -14,14 +14,14 @@
 #define DEBUG_FORMAT 0
 #define DEBUG_HEAP   0
 #define DEBUG_RENDER 0
-#include "./vi_Page.h"
+#include "evita/vi_Page.h"
 
-#include "./ed_interval.h"
-#include "./ed_util.h"
-#include "./gfx_base.h"
+#include "evita/ed_interval.h"
+#include "evita/ed_util.h"
+#include "evita/gfx_base.h"
 #include "evita/dom/buffer.h"
-#include "./vi_Selection.h"
-#include "./vi_util.h"
+#include "evita/vi_Selection.h"
+#include "evita/vi_util.h"
 #include <algorithm>
 #include <utility>
 #include <vector>

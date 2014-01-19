@@ -1,9 +1,9 @@
 #include "precomp.h"
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#include "./vi_Caret.h"
+#include "evita/vi_Caret.h"
 
-#include "./gfx_base.h"
+#include "evita/gfx_base.h"
 #include <math.h>
 #include <utility>
 

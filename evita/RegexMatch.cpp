@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/RegexMatch.cpp#6 $
 //
-#include "./RegexMatch.h"
+#include "evita/RegexMatch.h"
 
 #include "base/strings/string16.h"
 #include "evita/text/buffer.h"

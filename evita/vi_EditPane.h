@@ -11,8 +11,8 @@
 #if !defined(INCLUDE_listener_winapp_visual_EditPane_h)
 #define INCLUDE_listener_winapp_visual_EditPane_h
 
-#include "./vi_defs.h"
-#include "./vi_Pane.h"
+#include "evita/vi_defs.h"
+#include "evita/vi_Pane.h"
 
 class Frame;
 

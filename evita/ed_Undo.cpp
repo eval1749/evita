@@ -10,7 +10,7 @@
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_Undo.cpp#2 $
 //
 #define DEBUG_UNDO 0
-#include "./ed_Undo.h"
+#include "evita/ed_Undo.h"
 
 #include "evita/text/buffer.h"
 

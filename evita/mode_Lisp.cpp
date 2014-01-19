@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Lisp.cpp#9 $
 //
-#include "./mode_Lisp.h"
+#include "evita/mode_Lisp.h"
 
 namespace text
 {
@@ -18,7 +18,7 @@ namespace text
 static const char16*
 k_rgpwszClKeyword[] =
 {
-    #include "./mode/cl_keywords.inc"
+    #include "evita/mode/cl_keywords.inc"
 
     L"#\\Backspace",
     L"#\\LineFeed",

@@ -9,10 +9,10 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Style.cpp#2 $
 //
-#include "./vi_style.h"
+#include "evita/vi_style.h"
 
-#include "./gfx_base.h"
-#include "./vi_util.h"
+#include "evita/gfx_base.h"
+#include "evita/vi_util.h"
 
 #include <vector>
 

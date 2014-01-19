@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_mode_Python_h)
 #define INCLUDE_mode_Python_h
 
-#include "./ed_Mode.h"
+#include "evita/ed_Mode.h"
 
 #include "evita/text/buffer.h"
 

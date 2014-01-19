@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_BufferCore.cpp#2 $
 //
-#include "./ed_BufferCore.h"
+#include "evita/ed_BufferCore.h"
 
 #include <algorithm>
 

@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Xml.cpp#4 $
 //
-#include "./mode_Xml.h"
+#include "evita/mode_Xml.h"
 
 namespace text
 {

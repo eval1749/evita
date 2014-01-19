@@ -13,7 +13,7 @@
 
 #include "evita/text/buffer.h"
 
-#include "./li_util.h"
+#include "evita/li_util.h"
 
 namespace text
 {

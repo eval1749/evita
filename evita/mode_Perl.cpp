@@ -11,10 +11,10 @@
 //
 // FIXME 2007-07-25 yosi@msn.com We should study cperl-mode in Emacs.
 //
-#include "./mode_Perl.h"
+#include "evita/mode_Perl.h"
 
 // for MasonModeFactory constructor
-#include "./mode_Mason.h"
+#include "evita/mode_Mason.h"
 
 namespace text
 {

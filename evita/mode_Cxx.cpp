@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Cxx.cpp#17 $
 //
-#include "./mode_Cxx.h"
+#include "evita/mode_Cxx.h"
 
 #define DEBUG_LEXER 0
 

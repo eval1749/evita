@@ -11,8 +11,8 @@
 #if !defined(INCLUDE_listener_winapp_visual_formatter_h)
 #define INCLUDE_listener_winapp_visual_formatter_h
 
-#include "./vi_defs.h"
-#include "./vi_style.h"
+#include "evita/vi_defs.h"
+#include "evita/vi_style.h"
 #include "gfx_base.h"
 
 class Font;

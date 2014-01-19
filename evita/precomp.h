@@ -109,7 +109,7 @@ typedef base::char16 char16;
 #define NoReturn __declspec(noreturn)
 
 //#define ASSERT(mp_expr) __assume(mp_expr)
-#include "./z_debug.h"
+#include "evita/z_debug.h"
 
 #define foreach(mp_ty, mp_enum, mp_init) \
     for (mp_ty mp_enum(mp_init); ! mp_enum.AtEnd(); mp_enum.Next())
@@ -287,7 +287,7 @@ class RegKey
 
 // TODO(yosi): We should not use |uint|.
 typedef uint32 uint;
-#include "./ed_defs.h"
+#include "evita/ed_defs.h"
 
 typedef text::Count Count;
 typedef text::Posn  Posn;

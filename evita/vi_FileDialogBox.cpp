@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_FileDialogBox.cpp#1 $
 //
-#include "./vi_FileDialogBox.h"
+#include "evita/vi_FileDialogBox.h"
 
 // FileDialogBox ctor
 FileDialogBox::FileDialogBox()

@@ -2,13 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 {
-  'target_defaults': {
-    'include_dirs+' : [
-      # TODO(yosi): We should not have |<(DEPTH)/evita| in |include_dirs|.
-      '<(DEPTH)/evita',
-    ], # include_dirs
-  }, # target_defaults
-
   'targets': [
     {
       'target_name': 'evita_dom_unittests',
@@ -76,7 +69,6 @@
         '<(DEPTH)/testing/gtest.gyp:gtest_main',
       ], # dependencies
       'include_dirs+' : [
-        #'<(DEPTH)/evita/',
         '<(DEPTH)/testing/gtest/include/',
       ], # include_dirs
       'msvs_settings': {
@@ -107,7 +99,6 @@
         '<(DEPTH)/testing/gtest.gyp:gtest_main',
       ], # dependencies
       'include_dirs+' : [
-        #'<(DEPTH)/evita/',
         '<(DEPTH)/testing/gtest/include/',
       ], # include_dirs
       'msvs_settings': {

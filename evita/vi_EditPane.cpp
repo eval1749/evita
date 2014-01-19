@@ -12,18 +12,18 @@
 #define DEBUG_REDRAW 0
 #define DEBUG_RESIZE 0
 #define DEBUG_SPLIT 0
-#include "./vi_EditPane.h"
+#include "evita/vi_EditPane.h"
 
 #include "base/logging.h"
 #include "evita/views/content_window.h"
 #include "evita/dom/lock.h"
-#include "./ed_Mode.h"
-#include "./gfx_base.h"
+#include "evita/ed_Mode.h"
+#include "evita/gfx_base.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
-#include "./vi_Selection.h"
-#include "./vi_TextEditWindow.h"
-#include "./vi_util.h"
+#include "evita/vi_Selection.h"
+#include "evita/vi_TextEditWindow.h"
+#include "evita/vi_util.h"
 
 struct EditPane::HitTestResult {
   enum Type {

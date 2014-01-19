@@ -460,7 +460,7 @@ void FindDialogBox::UpdateUI(bool fActivate) {
   SetCheckBox(IDC_FIND_WHOLE_FILE, kReplaceInWhole == replace_in_);
 }
 
-#include "./cm_CmdProc.h"
+#include "evita/cm_CmdProc.h"
 
 namespace Command {
 

@@ -9,10 +9,10 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Pane.cpp#1 $
 //
-#include "./vi_Pane.h"
+#include "evita/vi_Pane.h"
 
 #include "common/win/native_window.h"
-#include "./vi_Frame.h"
+#include "evita/vi_Frame.h"
 
 Pane::Pane(std::unique_ptr<common::win::NativeWindow>&& native_window)
     : CommandWindow_(std::move(native_window)),

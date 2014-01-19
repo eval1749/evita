@@ -1,4 +1,3 @@
-#include "precomp.h"
 // Charset Decoder
 // Copyright (C) 1996-2011 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)

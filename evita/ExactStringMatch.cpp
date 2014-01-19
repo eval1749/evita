@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/ExactStringMatch.cpp#1 $
 //
-#include "./ExactStringMatch.h"
+#include "evita/ExactStringMatch.h"
 
 // ctor
 ExactStringMatch::ExactStringMatch(const SearchParameters* pSearch) :

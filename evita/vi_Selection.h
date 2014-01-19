@@ -11,11 +11,11 @@
 #if !defined(INCLUDE_listener_winapp_visual_selection_h)
 #define INCLUDE_listener_winapp_visual_selection_h
 
-#include "./vi_defs.h"
+#include "evita/vi_defs.h"
 
 #include "evita/text/range.h"
-#include "./ed_Style.h"
-#include "./gfx_base.h"
+#include "evita/ed_Style.h"
+#include "evita/gfx_base.h"
 
 enum SelectionType
 {

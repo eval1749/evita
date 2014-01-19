@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_mode_Lisp_h)
 #define INCLUDE_mode_Lisp_h
 
-#include "./ed_Mode.h"
+#include "evita/ed_Mode.h"
 
 namespace text
 {

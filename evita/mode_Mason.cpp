@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Mason.cpp#4 $
 //
-#include "./mode_Mason.h"
+#include "evita/mode_Mason.h"
 
 
 namespace text

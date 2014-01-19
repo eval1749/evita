@@ -15,7 +15,7 @@
 #define DEBUG_PAINT     0
 #define DEBUG_REDRAW    0
 #define DEBUG_WINDOWPOS 0
-#include "./vi_Frame.h"
+#include "evita/vi_Frame.h"
 
 #include <sstream>
 
@@ -28,21 +28,21 @@
 #include "common/tree/ancestors_or_self.h"
 #include "common/tree/child_nodes.h"
 #include "common/win/native_window.h"
-#include "./ctrl_TabBand.h"
-#include "./ed_Mode.h"
-#include "./gfx_base.h"
-#include "./vi_defs.h"
+#include "evita/ctrl_TabBand.h"
+#include "evita/ed_Mode.h"
+#include "evita/gfx_base.h"
+#include "evita/vi_defs.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/view_event_handler.h"
 #include "evita/views/window_set.h"
-#include "./vi_EditPane.h"
-#include "./vi_Pane.h"
-#include "./vi_Selection.h"
-#include "./vi_Style.h"
-#include "./vi_TextEditWindow.h"
-#include "./vi_util.h"
+#include "evita/vi_EditPane.h"
+#include "evita/vi_Pane.h"
+#include "evita/vi_Selection.h"
+#include "evita/vi_Style.h"
+#include "evita/vi_TextEditWindow.h"
+#include "evita/vi_util.h"
 
 #include <dwmapi.h>
 #pragma comment(lib, "dwmapi.lib")

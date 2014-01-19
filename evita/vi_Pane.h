@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_vi_Pane_h)
 #define INCLUDE_vi_Pane_h
 
-#include "./li_util.h"
+#include "evita/li_util.h"
 #include "evita/views/command_window.h"
 #include "evita/views/window.h"
 

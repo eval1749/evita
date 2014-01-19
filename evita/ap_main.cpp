@@ -18,10 +18,10 @@
 #include "base/at_exit.h"
 #include "base/command_line.h"
 #include "base/logging.h"
-#include "./ctrl_TabBand.h"
+#include "evita/ctrl_TabBand.h"
 #include "evita/editor/application.h"
-#include "./vi_IoManager.h"
-#include "./vi_Style.h"
+#include "evita/vi_IoManager.h"
+#include "evita/vi_Style.h"
 
 #define SINGLE_INSTANCE_NAME L"D47A7677-9F8E-467c-BABE-8ABDE8D58476" 
 

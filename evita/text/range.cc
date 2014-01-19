@@ -1,20 +1,12 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - Listner - Editor - Range
-// listener/winapp/ed_Range.cpp
-//
-// Copyright (C) 1996-2008 by Project Vogue.
+// Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_Range.cpp#9 $
-//
 #include "evita/text/range.h"
 
-#include "evita/text/buffer.h"
-#include "./ed_Mode.h"
-#include "./ed_undo.h"
 #include <algorithm>
+
+#include "evita/text/buffer.h"
+#include "evita/ed_Mode.h"
+#include "evita/ed_undo.h"
 
 // Smart handle for HGLOBAL
 template<class T>

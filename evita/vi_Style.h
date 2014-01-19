@@ -11,11 +11,11 @@
 #if !defined(INCLUDE_listener_winapp_visual_fontset_h)
 #define INCLUDE_listener_winapp_visual_fontset_h
 
-#include "./vi_defs.h"
+#include "evita/vi_defs.h"
 
-#include "./ed_Style.h"
+#include "evita/ed_Style.h"
 #include "gfx/forward.h"
-#include "./li_util.h"
+#include "evita/li_util.h"
 
 //////////////////////////////////////////////////////////////////////
 //

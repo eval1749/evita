@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/li_util.cpp#1 $
 //
-#include "./li_util.h"
+#include "evita/li_util.h"
 
 char16* lstrchrW(const char16* pwsz, char16 wch)
 {

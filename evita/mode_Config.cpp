@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Config.cpp#9 $
 //
-#include "./mode_Config.h"
+#include "evita/mode_Config.h"
 
 namespace text
 {

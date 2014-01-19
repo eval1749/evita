@@ -8,12 +8,12 @@
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
 #include "evita/text/search_and_replace_model.h"
-#include "./ed_BinTree.h"
-#include "./li_util.h"
+#include "evita/ed_BinTree.h"
+#include "evita/li_util.h"
 
-#include "./IStringCursor.h"
-#include "./ed_BufferCore.h"
-#include "./ed_Style.h"
+#include "evita/IStringCursor.h"
+#include "evita/ed_BufferCore.h"
+#include "evita/ed_Style.h"
 
 namespace text {
 

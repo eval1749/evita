@@ -10,7 +10,7 @@
 #include "common/win/rect.h"
 #include "common/win/scoped_comptr.h"
 #include "gfx/rect_f.h"
-#include "./li_util.h"
+#include "evita/li_util.h"
 
 #pragma warning(push)
 // warning C4263: 'function' : member function does not override any base

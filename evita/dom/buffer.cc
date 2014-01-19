@@ -1,22 +1,13 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - winapp - Edit Buffer
-// listener/winapp/vi_buffer.cpp
-//
-// Copyright (C) 1996-2007 by Project Vogue.
+// Copyright (C) 1996-2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Buffer.cpp#1 $
-//
 #include "evita/dom/buffer.h"
 
-#include "./ed_Mode.h"
+#include "evita/ed_Mode.h"
 
 #include "evita/editor/application.h"
 #include "evita/cm_CmdProc.h"
 #include "evita/resource.h"
-#include "./vi_Frame.h"
+#include "evita/vi_Frame.h"
 
 namespace dom {
 

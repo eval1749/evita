@@ -1,7 +1,6 @@
-#include "precomp.h"
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#include "widgets/widget.h"
+#include "evita/widgets/widget.h"
 
 #include <vector>
 

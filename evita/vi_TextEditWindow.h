@@ -12,10 +12,10 @@
 #define INCLUDE_listener_winapp_visual_text_pane_h
 
 #include "evita/views/content_window.h"
-#include "./li_util.h"
-#include "./gfx_base.h"
+#include "evita/li_util.h"
+#include "evita/gfx_base.h"
 #include "evita/views/command_window.h"
-#include "./vi_Page.h"
+#include "evita/vi_Page.h"
 #include <memory>
 
 class Caret;

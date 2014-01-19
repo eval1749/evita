@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Haskell.cpp#1 $
 //
-#include "./mode_Haskell.h"
+#include "evita/mode_Haskell.h"
 
 namespace text
 {

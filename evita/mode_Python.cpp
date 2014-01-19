@@ -11,7 +11,7 @@
 //
 // FIXME 2007-07-25 yosi@msn.com We should study cperl-mode in Emacs.
 //
-#include "./mode_Python.h"
+#include "evita/mode_Python.h"
 
 namespace text {
 

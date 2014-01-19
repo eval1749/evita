@@ -12,13 +12,13 @@
 #define DEBUG_IO 0
 #define DEBUG_LOAD 0
 #define DEBUG_SAVE 0
-#include "./vi_FileIo.h"
+#include "evita/vi_FileIo.h"
 
-#include "./ed_Mode.h"
-#include "./ed_undo.h"
+#include "evita/ed_Mode.h"
+#include "evita/ed_undo.h"
 
 #include "evita/dom/buffer.h"
-#include "./vi_IoManager.h"
+#include "evita/vi_IoManager.h"
 
 #include "../charset/CharsetDecoder.h"
 #include "../charset/CharsetDetector.h"

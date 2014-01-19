@@ -13,9 +13,9 @@
 #define DEBUG_HOVER 0
 #define DEBUG_MESSAGE 0
 #define DEBUG_TOOLTIP 0
-#include "./ctrl_tabBand.h"
+#include "evita/ctrl_tabBand.h"
 
-#include "./gfx_base.h"
+#include "evita/gfx_base.h"
 #include <algorithm>
 #include <dwmapi.h>
 

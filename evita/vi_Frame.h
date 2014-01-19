@@ -13,10 +13,10 @@
 
 #include "evita/views/window.h"
 
-#include "./ctrl_StatusBar.h"
-#include "./ctrl_TabBand.h"
-#include "./ctrl_TitleBar.h"
-#include "./li_util.h"
+#include "evita/ctrl_StatusBar.h"
+#include "evita/ctrl_TabBand.h"
+#include "evita/ctrl_TitleBar.h"
+#include "evita/li_util.h"
 
 namespace gfx {
 class Graphics;

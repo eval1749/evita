@@ -8,9 +8,9 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "winres.h"
-#include "./version.h"
-#include "./res/build.h"
-#include "./res/VerEXE.rc"
+#include "evita/version.h"
+#include "evita/res/build.h"
+#include "evita/res/VerEXE.rc"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 

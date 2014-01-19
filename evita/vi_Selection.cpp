@@ -10,12 +10,12 @@
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Selection.cpp#4 $
 //
 #define DEBUG_GOAL 0
-#include "./vi_Selection.h"
+#include "evita/vi_Selection.h"
 
 #include "base/strings/string16.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
-#include "./vi_TextEditWindow.h"
+#include "evita/vi_TextEditWindow.h"
 
 //////////////////////////////////////////////////////////////////////
 //

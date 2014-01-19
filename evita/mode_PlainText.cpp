@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_PlainText.cpp#3 $
 //
-#include "./mode_PlainText.h"
+#include "evita/mode_PlainText.h"
 
 namespace text
 {

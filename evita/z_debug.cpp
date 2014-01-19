@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/z_debug.cpp#1 $
 //
-#include "./z_debug.h"
+#include "evita/z_debug.h"
 
 namespace Debugger
 {

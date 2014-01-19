@@ -10,9 +10,9 @@
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/ctrl_StatusBar.cpp#1 $
 //
 #define DEBUG_STATUSBAR 0
-#include "./ctrl_StatusBar.h"
+#include "evita/ctrl_StatusBar.h"
 
-#include "./vi_defs.h"
+#include "evita/vi_defs.h"
 #include <algorithm>
 
 #pragma comment(lib, "comctl32.lib")

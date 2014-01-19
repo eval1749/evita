@@ -7,6 +7,7 @@
 #pragma warning(push)
 #pragma warning(disable: 4100 4625 4626)
 #include "base/message_loop/message_loop.h"
+#include "base/message_loop/message_pump_observer.h"
 #include "base/run_loop.h"
 #pragma warning(pop)
 #include "base/strings/string16.h"
@@ -43,6 +44,35 @@ HINSTANCE g_hResource;
 HWND g_hwndActiveDialog;
 UINT g_TabBand__TabDragMsg;
 
+namespace {
+class MessagePump : public base::MessagePumpForUI {
+  private: class MessageFilter : public base::MessagePumpForUI::MessageFilter {
+    public: MessageFilter() = default;
+    public: ~MessageFilter() = default;
+
+    // base::MessagePumpForUI:::MessageFilter
+    private: virtual bool ProcessMessage(const MSG& msg) {
+      if (!g_hwndActiveDialog)
+        return false;
+      MSG message = msg;
+      return ::IsDialogMessage(g_hwndActiveDialog, &message);
+    }
+    DISALLOW_COPY_AND_ASSIGN(MessageFilter);
+  };
+
+  public: MessagePump() {
+    SetMessageFilter(make_scoped_ptr(new MessageFilter()));
+  }
+  public: ~MessagePump() = default;
+
+  DISALLOW_COPY_AND_ASSIGN(MessagePump);
+};
+}   // namespace
+
+//////////////////////////////////////////////////////////////////////
+//
+// Application
+//
 Application::Application()
     : newline_mode_(NewlineMode_CrLf),
       code_page_(932),
@@ -52,7 +82,7 @@ Application::Application()
       command_processor_(new Command::Processor()),
       dom_lock_(new editor::DomLock()),
       io_manager_(new IoManager()),
-      message_loop_(new base::MessageLoop(base::MessageLoop::TYPE_UI)),
+      message_loop_(new base::MessageLoop(make_scoped_ptr(new MessagePump()))),
       view_delegate_impl_(new views::ViewDelegateImpl()) {
   Command::Processor::GlobalInit();
   io_manager_->Realize();

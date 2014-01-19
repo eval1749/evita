@@ -54,6 +54,7 @@
           'dom/js_console.js',
           'dom/document_list.js',
           'dom/text_window_commands.js',
+          'dom/window_commands.js',
         ],
       }, # variables
 

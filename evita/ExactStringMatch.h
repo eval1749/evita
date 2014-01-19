@@ -11,8 +11,10 @@
 #if !defined(INCLUDE_ExactStringMatch_h)
 #define INCLUDE_ExactStringMatch_h
 
-#include "./IStringCursor.h"
 #include <algorithm>
+
+#include "evita/IStringCursor.h"
+#include "evita/text/search_and_replace_model.h"
 
 //////////////////////////////////////////////////////////////////////
 //

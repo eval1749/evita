@@ -10,6 +10,7 @@
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
 #include "evita/RegexMatch.h"
+#include "evita/text/search_and_replace_model.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_Selection.h"

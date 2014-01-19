@@ -79,40 +79,6 @@ enum Unit
     Unit_Word,
 }; // Unit
 
-//////////////////////////////////////////////////////////////////////
-//
-// SearchFlag
-//
-enum SearchFlag
-{
-    SearchFlag_Backward     = 1 << 0,
-    SearchFlag_CasePreserve = 1 << 1,
-    SearchFlag_IgnoreCase   = 1 << 2,
-    SearchFlag_MatchWord    = 1 << 3,
-    SearchFlag_Regex        = 1 << 4,
-    SearchFlag_Whole        = 1 << 5,
-}; // SearchFlag
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// SearchParameters
-//
-struct SearchParameters
-{
-    base::string16 search_text_;
-    uint    m_rgf;
-
-    bool IsBackward()   const { return 0 != (m_rgf & SearchFlag_Backward); }
-    bool IsCasePreserve() const 
-        { return 0 != (m_rgf & SearchFlag_CasePreserve); }
-    bool IsIgnoreCase() const { return 0 != (m_rgf & SearchFlag_IgnoreCase); }
-    bool IsMatchWord()  const { return 0 != (m_rgf & SearchFlag_MatchWord); }
-    bool IsRegex()      const { return 0 != (m_rgf & SearchFlag_Regex); }
-    bool IsWhole()      const { return 0 != (m_rgf & SearchFlag_Whole); }
-}; // SearchParameters
-
-
 enum StringCase
 {
     StringCase_None,

@@ -11,6 +11,7 @@
 #if !defined(INCLUDE_RegexMatcher_h)
 #define INCLUDE_RegexMatcher_h
 
+#include "evita/text/search_and_replace_model.h"
 #include "regex/IRegex.h"
 
 namespace Private

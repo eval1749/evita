@@ -11,8 +11,11 @@
 //
 #include "./ed_BufferCore.h"
 
-#include "./li_util.h"
 #include <algorithm>
+
+#include "evita/li_util.h"
+#include "evita/text/search_and_replace_model.h"
+
 
 #define DEBUG_LIFE 0
 

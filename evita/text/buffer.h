@@ -7,6 +7,7 @@
 
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
+#include "evita/text/search_and_replace_model.h"
 #include "./ed_BinTree.h"
 #include "./li_util.h"
 

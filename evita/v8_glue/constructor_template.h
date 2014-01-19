@@ -133,6 +133,43 @@ struct ConstructorDispatcher<R(P1, P2, P3)> {
   }
 };
 
+template<typename R, typename P1, typename P2, typename P3, typename P4>
+struct ConstructorDispatcher<R(P1, P2, P3, P4)> {
+  typedef v8::FunctionCallbackInfo<v8::Value> Info;
+  typedef gin::internal::CallbackHolder<R(P1, P2, P3, P4)> Holder;
+
+  static void DispatchToCallback(const Info& info) {
+    gin::Arguments args(info);
+    gin::internal::CallbackHolderBase* holder_base = nullptr;
+    CHECK(args.GetData(&holder_base));
+    Holder* holder = static_cast<Holder*>(holder_base);
+    if (!IsValidConstructCall(info))
+      return;
+    typename gin::internal::CallbackParamTraits<P1>::LocalType a1;
+    if (!gin::internal::GetNextArgument(&args, holder->flags, true, &a1)) {
+      args.ThrowError();
+      return;
+    }
+    typename gin::internal::CallbackParamTraits<P2>::LocalType a2;
+    if (!gin::internal::GetNextArgument(&args, holder->flags, false, &a2)) {
+      args.ThrowError();
+      return;
+    }
+    typename gin::internal::CallbackParamTraits<P3>::LocalType a3;
+    if (!gin::internal::GetNextArgument(&args, holder->flags, false, &a3)) {
+      args.ThrowError();
+      return;
+    }
+    typename gin::internal::CallbackParamTraits<P4>::LocalType a4;
+    if (!gin::internal::GetNextArgument(&args, holder->flags, false, &a4)) {
+      args.ThrowError();
+      return;
+    }
+    auto impl = holder->callback.Run(a1, a2, a3, a4);
+    FinishConstructCall(info, impl);
+  }
+};
+
 }  // namespace internal
 
 template<typename CxxObject, typename... Params>

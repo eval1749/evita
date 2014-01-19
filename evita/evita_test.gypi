@@ -4,6 +4,15 @@
 {
   'targets': [
     {
+      'target_name': 'evita_all_tests',
+      'type': 'none',
+      'dependencies': [
+        'evita_dom_unittests',
+        'evita_text_unittests',
+        'evita_view_model_unittests',
+      ], # dependencies
+    }, # evita_all_tests
+    {
       'target_name': 'evita_dom_unittests',
       'type': 'executable',
       'dependencies': [

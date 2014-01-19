@@ -63,6 +63,7 @@ class ScriptThread final : public ViewDelegate,
                                   WindowId child_id) override;
   public: virtual void ChangeParentWindow(WindowId window_id,
     WindowId new_parent_window_id) override;
+  private: virtual void CreateDialogBox(DialogBoxId dialog_box_id) override;
   private: virtual void CreateEditorWindow(
       const EditorWindow* window) override;
   private: virtual void CreateTableWindow(
@@ -85,11 +86,13 @@ class ScriptThread final : public ViewDelegate,
   private: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;
+  private: virtual void RealizeDialogBox(const Form* form) override;
   private: virtual void RealizeWindow(WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) override;
   private: virtual void SaveFile(Document* document,
                                  const base::string16& filename) override;
+  private: virtual void ShowDialogBox(DialogBoxId dialog_box_id) override;
 
   // ViewEventHandler
   private: virtual void DidDestroyWidget(WindowId window_id) override;

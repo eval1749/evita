@@ -7,6 +7,7 @@
 
 #include "base/callback_forward.h"
 #include "base/strings/string16.h"
+#include "evita/dom/forms/dialog_box_id.h"
 #include "evita/dom/window_id.h"
 
 namespace base {
@@ -17,9 +18,12 @@ namespace dom {
 
 class Document;
 class EditorWindow;
+class Form;
 class TextWindow;
 class ViewEventHandler;
 class Window;
+
+typedef EventTargetId DialogBoxId;
 
 class ViewDelegate {
   public: typedef base::Callback<void(base::string16 filename)>
@@ -37,6 +41,7 @@ class ViewDelegate {
   public: virtual void AddWindow(WindowId parent_id, WindowId child_id) = 0;
   public: virtual void ChangeParentWindow(WindowId window_id,
                                           WindowId new_parent_window_id) = 0;
+  public: virtual void CreateDialogBox(DialogBoxId dialog_box_id) = 0;
   public: virtual void CreateEditorWindow(const EditorWindow* window) = 0;
   public: virtual void CreateTableWindow(WindowId window_id,
                                          Document* document) = 0;
@@ -59,11 +64,13 @@ class ViewDelegate {
   public: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) = 0;
+  public: virtual void RealizeDialogBox(const Form* form) = 0;
   public: virtual void RealizeWindow(WindowId window_id) = 0;
   public: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) = 0;
   public: virtual void SaveFile(Document* document,
                                 const base::string16& filename) = 0;
+  public: virtual void ShowDialogBox(DialogBoxId dialog_box_id) = 0;
 
   DISALLOW_COPY_AND_ASSIGN(ViewDelegate);
 };

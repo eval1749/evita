@@ -26,6 +26,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
                                   dom::WindowId child_id) override;
   private: virtual void ChangeParentWindow(dom::WindowId window_id,
       dom::WindowId new_parent_id) override;
+  private: virtual void CreateDialogBox(
+      dom::DialogBoxId dialog_box_id) override;
   private: virtual void CreateEditorWindow(
       const dom::EditorWindow* window) override;
   private: virtual void CreateTableWindow(
@@ -49,11 +51,14 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void MessageBox(dom::WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;
+  private: virtual void RealizeDialogBox(const dom::Form* form) override;
   private: virtual void RealizeWindow(dom::WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(
       dom::ViewEventHandler* event_handler) override;
   private: virtual void SaveFile(dom::Document* document,
                                  const base::string16& filename) override;
+  private: virtual void ShowDialogBox(
+      dom::DialogBoxId dialog_box_id) override;
 
   DISALLOW_COPY_AND_ASSIGN(ViewDelegateImpl);
 };

@@ -4,6 +4,8 @@
 #include "evita/dom/forms/form.h"
 
 #include "evita/dom/forms/form_control.h"
+#include "evita/dom/script_controller.h"
+#include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/wrapper_info.h"
 
@@ -50,6 +52,8 @@ class FormClass :
 DEFINE_SCRIPTABLE_OBJECT(Form, FormClass);
 
 Form::Form() {
+  ScriptController::instance()->view_delegate()->CreateDialogBox(
+      dialog_box_id());
 }
 
 Form::~Form() {
@@ -60,9 +64,12 @@ void Form::AddFormControl(FormControl* control) {
 }
 
 void Form::Realize() {
+  ScriptController::instance()->view_delegate()->RealizeDialogBox(this);
 }
 
 void Form::Show() {
+  ScriptController::instance()->view_delegate()->ShowDialogBox(
+      dialog_box_id());
 }
 
 }  // namespace dom

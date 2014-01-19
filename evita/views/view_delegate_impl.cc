@@ -81,6 +81,9 @@ void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
   window->SetParentWidget(new_parent);
 }
 
+void ViewDelegateImpl::CreateDialogBox(dom::DialogBoxId) {
+}
+
 void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
   DCHECK(window);
   new Frame(window->window_id());
@@ -204,6 +207,9 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
   event_handler_->RunCallback(base::Bind(callback, response_code));
 }
 
+void ViewDelegateImpl::RealizeDialogBox(const dom::Form*) {
+}
+
 void ViewDelegateImpl::RealizeWindow(dom::WindowId window_id) {
   DCHECK_NE(dom::kInvalidWindowId, window_id);
   auto const widget = Window::FromWindowId(window_id);
@@ -226,6 +232,9 @@ void ViewDelegateImpl::SaveFile(dom::Document* document,
   auto const newline_mode = buffer->GetNewline() == NewlineMode_Detect ?
         NewlineMode_CrLf : buffer->GetNewline();
   buffer->Save(filename.c_str(), code_page, newline_mode);
+}
+
+void ViewDelegateImpl::ShowDialogBox(dom::DialogBoxId) {
 }
 
 }  // namespace views

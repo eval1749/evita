@@ -4,8 +4,13 @@
 #include "evita/dom/abstract_dom_test.h"
 
 #include "evita/dom/forms/form.h"
+#include "evita/dom/mock_view_impl.h"
+#include "gmock/gmock.h"
 
 namespace {
+
+using ::testing::Eq;
+using ::testing::_;
 
 class FormTest : public dom::AbstractDomTest {
   protected: FormTest() {
@@ -17,12 +22,14 @@ class FormTest : public dom::AbstractDomTest {
 };
 
 TEST_F(FormTest, ctor) {
+  EXPECT_CALL(*mock_view_impl(), CreateDialogBox(Eq(1)));
   EXPECT_VALID_SCRIPT("var sample = new Form();");
   EXPECT_SCRIPT_TRUE("sample instanceof EventTarget");
   EXPECT_SCRIPT_EQ("0", "sample.controls.length");
 }
 
 TEST_F(FormTest, add) {
+  EXPECT_CALL(*mock_view_impl(), CreateDialogBox(Eq(1)));
   EXPECT_VALID_SCRIPT("var sample = new Form();"
                       "var text_field = new TextFieldControl(123);"
                       "sample.add(text_field);");
@@ -31,11 +38,16 @@ TEST_F(FormTest, add) {
 }
 
 TEST_F(FormTest, realize) {
+  EXPECT_CALL(*mock_view_impl(), CreateDialogBox(Eq(1)));
+  EXPECT_CALL(*mock_view_impl(), RealizeDialogBox(_));
   EXPECT_VALID_SCRIPT("var sample = new Form();"
                       "sample.realize();");
 }
 
 TEST_F(FormTest, show) {
+  EXPECT_CALL(*mock_view_impl(), CreateDialogBox(Eq(1)));
+  EXPECT_CALL(*mock_view_impl(), ShowDialogBox(Eq(1)));
+  EXPECT_CALL(*mock_view_impl(), RealizeDialogBox(_));
   EXPECT_VALID_SCRIPT("var sample = new Form();"
                       "sample.realize();"
                       "sample.show();");

@@ -72,7 +72,8 @@ Selection* GetActiveSelection() {
 }   // namespace
 
 FindDialogBox::FindDialogBox()
-    : direction_(text::kDirectionDown),
+    : DialogBox(kInvalidDialogBoxId),
+      direction_(text::kDirectionDown),
       replace_in_(text::kReplaceInWhole) {
 }
 
@@ -474,11 +475,10 @@ DEFCOMMAND(FindCommand) {
   DCHECK(pCtx);
   if (!s_pFindDialogBox) {
     s_pFindDialogBox = new FindDialogBox;
-    s_pFindDialogBox->DoModeless();
+    s_pFindDialogBox->Realize();
   }
 
-  ::ShowWindow(*s_pFindDialogBox, SW_SHOW);
-  ::SetActiveWindow(*s_pFindDialogBox);
+  s_pFindDialogBox->Show();
 }
 
 DEFCOMMAND(FindNext) {

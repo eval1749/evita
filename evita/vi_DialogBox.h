@@ -28,7 +28,6 @@ class DialogBox {
   private: static INT_PTR CALLBACK DialogProc(HWND hwnd, UINT message,
                                               WPARAM wParam, LPARAM lParam);
 
-  public: void DoModal(HWND hwnd);
   public: static DialogBox* FromDialogBoxId(DialogBoxId dialog_box_id);
   protected: bool GetChecked(int control_id) const;
   protected: HWND GetDlgItem(int item_id) const;

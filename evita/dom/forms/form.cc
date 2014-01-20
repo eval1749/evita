@@ -9,20 +9,6 @@
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/wrapper_info.h"
 
-namespace gin {
-template<>
-struct Converter<text::Direction> {
-  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
-                     text::Direction* out) {
-    int value;
-    if (!gin::ConvertFromV8(isolate, val, &value))
-      return false;
-    *out = static_cast<text::Direction>(value);
-    return true;
-  }
-};
-}  // namespace gin
-
 namespace dom {
 
 namespace {

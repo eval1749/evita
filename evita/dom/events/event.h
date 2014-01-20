@@ -93,20 +93,4 @@ class Event : public v8_glue::Scriptable<Event> {
 
 }  // namespace dom
 
-namespace gin {
-
-template<>
-struct Converter<dom::Event::BubblingType> {
-  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> value,
-                     dom::Event::BubblingType* bubbles);
-};
-
-template<>
-struct Converter<dom::Event::CancelableType> {
-  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> value,
-                     dom::Event::CancelableType* cancelable);
-};
-
-}  // namespace gin
-
 #endif //!defined(INCLUDE_evita_dom_events_event_h)

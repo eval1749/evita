@@ -3,39 +3,11 @@
 
 #include "evita/dom/events/event.h"
 
+#include <type_traits>
+
 #include "evita/dom/converter.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/script_controller.h"
-
-namespace gin {
-bool Converter<dom::Event::BubblingType>::FromV8(
-    v8::Isolate* isolate, v8::Handle<v8::Value> value,
-    dom::Event::BubblingType* bubbles) {
-  bool bool_value = false;
-  if (!ConvertFromV8(isolate, value, &bool_value))
-    return false;
-  *bubbles = static_cast<dom::Event::BubblingType>(bool_value);
-  return true;
-}
-
-bool Converter<dom::Event::CancelableType>::FromV8(
-    v8::Isolate* isolate, v8::Handle<v8::Value> value,
-    dom::Event::CancelableType* Cancels) {
-  bool bool_value = false;
-  if (!ConvertFromV8(isolate, value, &bool_value))
-    return false;
-  *Cancels = static_cast<dom::Event::CancelableType>(bool_value);
-  return true;
-}
-
-template<>
-struct Converter<dom::Event::PhaseType> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    dom::Event::PhaseType event_phase) {
-    return ConvertToV8(isolate, static_cast<int>(event_phase));
-  }
-};
-}  // namespace gin
 
 namespace dom {
 namespace {

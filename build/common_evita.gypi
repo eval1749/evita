@@ -83,6 +83,11 @@
                   # L4 C4668: 'symbol' is not defined as a preprocessor macro,
                   # replacing with '0' for 'directives'
                   4668,
+                  # L4 C4710: 'function' : function not inlined
+                  4710,
+                  # L1 C4711: function 'function' selected for inline
+                  # expansion
+                  4711,
                   # L4 C4820: 'bytes' bytes padding added after construct
                   # 'member_name'
                   4820,

@@ -20,11 +20,11 @@ deps = {
     'src/third_party/icu':
         Var('git_url') + '/chromium/deps/icu46.git@89a9e6f6bae1f5a3ffbd5f826efde73bf14c09e6',
     'src/tools/deps2git':
-        Var('git_url') + '/chromium/tools/deps2git.git@6cc35c8cb6cab3a5c9d504fab7c6932244765585',
+        Var('git_url') + '/chromium/tools/deps2git.git@f8d30f6821c454ffa789cb9211bd914a579d0131',
     'src/tools/gyp':
-        Var('git_url') + '/external/gyp.git@1eae492b07f43e79ca3845497a07b42b04f3e3ef',
+        Var('git_url') + '/external/gyp.git@d09e5f258d175b0f35771c71734ce7b529366452',
     'src/v8':
-        Var('git_url') + '/external/v8.git@4ddd2f1981d343a2efe6609a3e0ce6b9c80b6ed9',
+        Var('git_url') + '/external/v8.git@5c88bc39690cc94affe78cf5777eb8180c4af8a4',
 }
 
 deps_os = {

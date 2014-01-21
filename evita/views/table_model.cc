@@ -11,46 +11,46 @@ namespace views {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TableModel::Cell
+// TableData::Cell
 //
-TableModel::Cell::Cell(Cell&& other) : text_(std::move(other.text_)) {
+TableData::Cell::Cell(Cell&& other) : text_(std::move(other.text_)) {
 }
 
-TableModel::Cell::Cell(const base::string16& text) : text_(text) {
+TableData::Cell::Cell(const base::string16& text) : text_(text) {
 }
 
-TableModel::Cell::~Cell() {
+TableData::Cell::~Cell() {
 }
 
-bool TableModel::Cell::operator==(const Cell& other) const {
+bool TableData::Cell::operator==(const Cell& other) const {
   return text_ == other.text_;
 }
 
-bool TableModel::Cell::operator!=(const Cell& other) const {
+bool TableData::Cell::operator!=(const Cell& other) const {
   return text_ == other.text_;
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// TableModel::Row
+// TableData::Row
 //
-TableModel::Row::Row(Row&& other)
+TableData::Row::Row(Row&& other)
     : cells_(std::move(other.cells_)), hash_code_(other.hash_code_) {
 }
 
-TableModel::Row::Row() : hash_code_(0) {
+TableData::Row::Row() : hash_code_(0) {
 }
 
-TableModel::Row::~Row() {
+TableData::Row::~Row() {
 }
 
-void TableModel::Row::AddCell(const base::string16& text) {
+void TableData::Row::AddCell(const base::string16& text) {
   std::hash<base::string16> hasher;
   hash_code_ = hash_code_ ^ hasher(text);
   cells_.push_back(std::move(Cell(text)));
 }
 
-void TableModel::Row::Clear() {
+void TableData::Row::Clear() {
   cells_.clear();
 }
 
@@ -58,13 +58,13 @@ void TableModel::Row::Clear() {
 //
 // TableModle
 //
-TableModel::TableModel() {
+TableData::TableData() {
 }
 
-TableModel::~TableModel() {
+TableData::~TableData() {
 }
 
-void TableModel::AddRow(const base::string16& text) {
+void TableData::AddRow(const base::string16& text) {
   auto row = std::move(ParseLine(text));
   if (!row->length())
     return;
@@ -72,7 +72,7 @@ void TableModel::AddRow(const base::string16& text) {
   rows_.push_back(row.release());
 }
 
-void TableModel::Clear() {
+void TableData::Clear() {
   for (auto row : rows_) {
     delete row;
   }
@@ -81,12 +81,12 @@ void TableModel::Clear() {
   rows_.clear();
 }
 
-const TableModel::Row* TableModel::FindRow(const base::string16& key) const {
+const TableData::Row* TableData::FindRow(const base::string16& key) const {
   auto it = row_map_.find(key);
   return it == row_map_.end() ? nullptr : it->second;
 }
 
-std::unique_ptr<TableModel::Row> TableModel::ParseLine(
+std::unique_ptr<TableData::Row> TableData::ParseLine(
     const base::string16& text) {
   std::unique_ptr<Row> row(new Row());
   size_t cell_start = 0;
@@ -110,7 +110,7 @@ std::unique_ptr<TableModel::Row> TableModel::ParseLine(
   return std::move(row);
 }
 
-void TableModel::SetHeaderRow(const base::string16& text) {
+void TableData::SetHeaderRow(const base::string16& text) {
   header_row_.Clear();
   size_t cell_start = 0;
   for (size_t index = 0; index < text.length(); ++index) {

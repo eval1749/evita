@@ -1,14 +1,14 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/ui/base/table_model.h"
+#include "evita/ui/base/table_mode_observer.h"
 
 namespace ui {
 
-TableModel::TableModel() {
+TableModelObserver::TableModelObserver() {
 }
 
-TableModel::~TableModel() {
+TableModelObserver::~TableModelObserver() {
 }
 
 }  // namespace ui

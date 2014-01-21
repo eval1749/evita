@@ -3,13 +3,15 @@
 
 #include "evita/views/table_view.h"
 
-#include <commctrl.h>
 #include <algorithm>
 
 #include "evita/cm_CmdProc.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
 #include "evita/editor/application.h"
+#include "evita/ui/base/selection_model.h"
+#include "evita/ui/base/table_model_observer.h"
+#include "evita/ui/controls/table_control.h"
 #include "evita/vi_Frame.h"
 #include "evita/views/table_model.h"
 
@@ -23,74 +25,56 @@ namespace views {
 
 namespace {
 
-//////////////////////////////////////////////////////////////////////
-//
-// TableContentBuilder
-//
-class TableContentBuilder {
-  private: typedef TableModel::Row Row;
-
-  private: std::vector<int> column_widths_;
-  private: HWND list_view_;
-  private: const TableModel* new_model_;
-  private: const TableModel* old_model_;
-
-  public: TableContentBuilder(HWND list_view,
-                              const TableModel* new_model,
-                              const TableModel* old_model);
-  public: ~TableContentBuilder() = default;
-
-  public: void Build();
-  private: void BuildHeader();
-  private: void BuildRows();
-
-  private: static int CellWidth(const TableModel::Cell& cell);
-  private: void UpdateListViewItem(int row_index, const Row* row);
-
-  DISALLOW_COPY_AND_ASSIGN(TableContentBuilder);
-};
-
-int CellWith(const TableModel::Cell& cell) {
+float CellWidth(const TableData::Cell& cell) {
   // TODO(yosi) We should get character width from ListView control.
-  const int kCharWidth = 6;
-  return static_cast<int>((cell.text().length() + 2) * kCharWidth);
+  const auto kCharWidth = 6.0f;
+  return (cell.text().length() + 2) * kCharWidth;
 }
 
-std::vector<ui::TableColumn> BuildColumn(const Row* row) {
+std::vector<ui::TableColumn> BuildColumns(const TableData::Row* row) {
   std::vector<ui::TableColumn> columns;
-  for (auto cell : row.cells()) {
+  for (auto cell : *row) {
     ui::TableColumn column;
     column.alignment = ui::TableColumn::Alignment::Left;
     column.text = cell.text();
     column.width = CellWidth(cell);
   }
-  return columns;
+  return std::move(columns);
 }
 
-void NotifyModelChange(ui::TableModelObserver* observer,
-                       const TableModel* new_model,
-                       const TableModel* old_model) {
-  auto new_index = 0u;
-  auto old_index = 0u;
-  while (new_index < new_model->length() && old_index < old_model->length()) {
-    if (new_model->row(new_index) != old_model->row(old_index))
-      break;
-    ++new_index;
-    ++old_index;
+void NotifyModelChanges(ui::TableModelObserver* observer,
+                        const TableData* new_model,
+                        const TableData* old_model) {
+  bool changed = false;
+  auto index = 0u;
+  auto changed_index = 0u;
+  while (index < new_model->size() && index < old_model->size()) {
+    if (new_model->row(index) != old_model->row(index)) {
+      if (!changed)
+        changed_index = index;
+    } else if (changed) {
+      changed = false;
+      observer->DidChangeItems(static_cast<int>(changed_index),
+                               static_cast<int>(index - changed_index));
+    }
+    ++index;
   }
 
-  if (new_index == new_model->length()) {
-    observer->DidRemoveItems(old_index, old_mode->length() - old_index);
+  if (changed) {
+    observer->DidChangeItems(static_cast<int>(changed_index),
+                             static_cast<int>(index - changed_index));
+  }
+
+  if (index == new_model->size()) {
+    observer->DidRemoveItems(static_cast<int>(index),
+                             static_cast<int>(old_model->size() - index));
     return;
   }
 
-  if (old_index == old_model->length()) {
-    observer->DidAddItems(new_index, new_mode->length() - new_index);
-    return;
+  if (index == old_model->size()) {
+    observer->DidAddItems(static_cast<int>(index),
+                          static_cast<int>(new_model->size() - index));
   }
-
-  // TODO(yosi): We should detect add/remove rows.
-  observer->DidChangeModel();
 }
 
 }  // namespace
@@ -102,17 +86,15 @@ void NotifyModelChange(ui::TableModelObserver* observer,
 TableView::TableView(WindowId window_id, dom::Document* document)
     : CommandWindow_(window_id),
       document_(document),
-      list_view_(nullptr),
-      model_(new TableModel()),
+      data_(new TableData()),
       modified_tick_(0) {
 }
 
 TableView::~TableView() {
-  DCHECK(!list_view_);
 }
 
-std::unique_ptr<TableModel> TableView::CreateModel() {
-  std::unique_ptr<TableModel> model(new TableModel());
+std::unique_ptr<TableData> TableView::CreateModel() {
+  std::unique_ptr<TableData> model(new TableData());
   auto const buffer = document_->buffer();
   auto position = buffer->ComputeEndOf(Unit_Paragraph, 0);
   auto header_line = buffer->GetText(0, position);
@@ -130,57 +112,63 @@ std::unique_ptr<TableModel> TableView::CreateModel() {
 }
 
 void TableView::GetRowStates(const std::vector<base::string16>& keys,
-                              int* states) const {
-  DCHECK(list_view_);
-  std::unordered_map<const TableModel::Row*, int> row_index_map;
+                             int* states) const {
+  std::unordered_map<const TableData::Row*, int> row_index_map;
   auto state_index = 0;
   for (auto key : keys) {
-    if (auto const row = model_->FindRow(key))
+    if (auto const row = data_->FindRow(key))
       row_index_map[row] = state_index;
     else
       DVLOG(0) << "No such row: " << key;
     ++state_index;
   }
-  auto const num_items = ListView_GetItemCount(list_view_);
-  for (auto item_index = 0; item_index < num_items; ++item_index) {
-    LVITEM item = {0};
-    item.iItem = item_index;
-    item.mask = LVIF_PARAM | LVIF_STATE;
-    item.stateMask = LVIS_ACTIVATING | LVIS_CUT | LVIS_DROPHILITED |
-                     LVIS_FOCUSED | LVIS_SELECTED;
-    if (!ListView_GetItem(list_view_, &item)) {
-      DVLOG(0) << "ListView_GetItem failed for iItem=" << item_index;
+
+  for (auto row_index = 0u; row_index < data_->size(); ++row_index) {
+    auto row = data_->row(row_index);
+    auto const present = row_index_map.find(&row);
+    if (present == row_index_map.end())
       continue;
-    }
-    auto const row = reinterpret_cast<TableModel::Row*>(item.lParam);
-    auto const present = row_index_map.find(row);
-    if (present != row_index_map.end())
-      states[present->second] = static_cast<int>(item.state);
+    states[present->second] = control_->IsSelected(
+        static_cast<int>(row_index));
   }
 }
 
 void TableView::Redraw() {
-  DCHECK(list_view_);
-
   auto const modified_tick = document_->buffer()->GetModfTick();
   if (modified_tick_ == modified_tick)
     return;
   modified_tick_ = modified_tick;
 
-  std::unique_ptr<TableModel> new_model(CreateModel());
+  std::unique_ptr<TableData> new_data(CreateModel());
 
-  if (*new_model->header_row() == *model_->header_row()) {
-    NotifyModelChanges(control_, new_model, model_);
+  if (*new_data->header_row() == *data_->header_row()) {
+    NotifyModelChanges(control_.get(), new_data.get(), data_.get());
   } else {
     if (control_)
-      RemoveChild(control_);
-    columns_ = BuildColumns(new_model->header_row());
-    control_ = new ui::TableControl(columns_, new_model, this);
-    AppendChild(control_);
-    
+      RemoveChild(control_.get());
+    columns_ = BuildColumns(new_data->header_row());
+    control_.reset(new ui::TableControl(columns_, this, this));
+    AppendChild(control_.get());
   }
 
-  model_ = std::move(new_model);
+  data_ = std::move(new_data);
+}
+
+// ui::TableControlObserver
+void TableView::OnKeyDown(int) {
+}
+
+void TableView::OnSelectionChanged() {
+}
+
+// ui::TableModel
+int TableView::GetRowCount() const {
+  return static_cast<int>(data_->size());
+}
+
+const base::string16& TableView::GetCellText(int row, int column_id) const {
+  return data_->row(static_cast<size_t>(row)).
+      cell(static_cast<size_t>(column_id)).text();
 }
 
 // views::CommandWindow
@@ -193,23 +181,14 @@ Command::KeyBindEntry* TableView::MapKey(uint nKey) {
 
 // views::ContentWindow
 base::string16 TableView::GetTitle(size_t) const {
-  return L"*buffer list*";
+  return L"*document list*";
 }
 
 void TableView::MakeSelectionVisible() {
 }
 
-
-
 void TableView::UpdateStatusBar() const {
   Frame::FindFrame(*this)->SetStatusBar(0, L"");
-}
-
-// ui::TableControlObserver
-void TableView::OnKeyDown(int) {
-}
-
-void TableView::OnSelectionChanged() {
 }
 
 // widgets::Widget
@@ -224,8 +203,6 @@ void TableView::DidResize() {
 }
 
 void TableView::DidSetFocus() {
-  if (!list_view_)
-    return;
   Redraw();
   CommandWindow::DidSetFocus();
 }

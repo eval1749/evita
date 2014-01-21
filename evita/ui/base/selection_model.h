@@ -9,21 +9,22 @@
 
 namespace ui {
 
-class Selection {
+class SelectionModel {
   private: std::unordered_set<int> selected_set_;
 
-  public: Selection();
-  public: ~Selection();
-
-  public: bool is_selected(int index) const;
+  public: SelectionModel();
+  public: ~SelectionModel();
 
   public: void Clear();
   public: void Extend(int direction);
   public: void ExtendTo(int index);
+  public: bool IsSelected(int index) const;
+
   public: void Select(int index);
+
+  DISALLOW_COPY_AND_ASSIGN(SelectionModel);
 };
 
 }  // namespace ui
 
 #endif //!defined(INCLUDE_evita_ui_base_selection_model_h)
-1

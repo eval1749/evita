@@ -1,14 +1,14 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/ui/base/table_model.h"
+#include "evita/ui/base/selection_model.h"
 
 namespace ui {
 
-TableModel::TableModel() {
+SelectionModel::SelectionModel() {
 }
 
-TableModel::~TableModel() {
+SelectionModel::~SelectionModel() {
 }
 
 }  // namespace ui

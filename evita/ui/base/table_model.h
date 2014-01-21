@@ -11,8 +11,11 @@ class TableModel {
   public: TableModel();
   public: virtual ~TableModel();
 
-  public: virtual int row_count() const = 0;
-  public: virtual const base::string16& text(int row, int column_id) const = 0;
+  public: virtual int GetRowCount() const = 0;
+  public: virtual const base::string16& GetCellText(
+    int row_id, int column_id) const = 0;
+
+  DISALLOW_COPY_AND_ASSIGN(TableModel);
 };
 
 struct TableColumn {
@@ -26,8 +29,9 @@ struct TableColumn {
   TableColumn();
 
   Alignment alignment;
+  int id;
   base::string16 text;
-  int width;
+  float width;
 };
 
 }  // namespace ui

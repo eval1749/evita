@@ -68,6 +68,12 @@
                   ], # target_conditions
                 }, # msvs_settings
                 'msvs_disabled_warnings': [
+                  # L4 C4127: conditional expression is constant
+                  # For DCHECK_XX(x)
+                  4127,
+                  # L1 C4251: 'identifier' : class 'type' needs to have
+                  # dll-interface to be used by clients of class 'type2'
+                  4251,
                   # TODO(yosi): We should not disable warning C4350.
                   # L1 C4350: behavior change: 'member1' called instead of
                   # 'member2' An rvalue cannot be bound to a non-const
@@ -80,6 +86,9 @@
                   # L4 C4514: 'function' : unreferenced inline function has
                   # been removed
                   4514,
+                  # L1 warning C4530: C++ exception handler used, but unwind
+                  # semantics are not enabled. Specify /EHsc
+                  4530,
                   # L4 C4668: 'symbol' is not defined as a preprocessor macro,
                   # replacing with '0' for 'directives'
                   4668,

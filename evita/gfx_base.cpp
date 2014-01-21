@@ -278,7 +278,7 @@ FontFace::FontFace(const char16* family_name)
 //
 Graphics::Graphics()
     : batch_nesting_level_(0),
-      factory_set_(*FactorySet::instance()),
+      factory_set_(FactorySet::instance()),
       hwnd_(nullptr),
       render_target_(nullptr),
       work_(nullptr) {
@@ -381,7 +381,7 @@ void Graphics::Resize(const Rect& rc) const {
 //
 TextFormat::TextFormat(const LOGFONT& log_font)
     : SimpleObject_(CreateTextFormat(*FactorySet::instance(), log_font)),
-    factory_set_(*FactorySet::instance()) {
+    factory_set_(FactorySet::instance()) {
 }
 
 } // namespace gfx

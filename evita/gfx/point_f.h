@@ -3,7 +3,7 @@
 #if !defined(INCLUDE_gfx_point_f_h)
 #define INCLUDE_gfx_point_f_h
 
-#include "gfx/size_f.h"
+#include "evita/gfx/size_f.h"
 
 namespace gfx {
 

@@ -13,6 +13,10 @@
 #include "common/win/native_window.h"
 #include "common/win/rect.h"
 
+namespace gfx {
+class Graphics;
+}
+
 namespace widgets {
 
 typedef common::win::NativeWindow NativeWindow;
@@ -97,11 +101,13 @@ class Widget
   public: virtual void Hide();
 
   // [O]
-  public: virtual bool OnIdle(uint idle_count);
-  public: virtual void OnLeftButtonDown(uint flags, const Point& point);
-  public: virtual void OnLeftButtonUp(uint flags, const Point& point);
-  public: virtual LRESULT OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam);
-  public: virtual void OnMouseMove(uint flags, const Point& point);
+  protected: virtual void OnDraw(gfx::Graphics* gfx);
+  public: virtual bool OnIdle(uint32_t idle_count);
+  public: virtual void OnLeftButtonDown(uint32_t flags, const Point& point);
+  public: virtual void OnLeftButtonUp(uint32_t flags, const Point& point);
+  public: virtual LRESULT OnMessage(uint32_t uMsg, WPARAM wParam,
+                                    LPARAM lParam);
+  public: virtual void OnMouseMove(uint32_t flags, const Point& point);
   protected: virtual LRESULT OnNotify(NMHDR* nmhdr);
   public: virtual void OnPaint(const Rect rect);
 

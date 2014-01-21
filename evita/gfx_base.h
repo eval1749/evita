@@ -3,14 +3,19 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 //
-#if !defined(INCLUDE_gfx_base_h)
-#define INCLUDE_gfx_base_h
+#if !defined(INCLUDE_evita_gfx_base_h)
+#define INCLUDE_evita_gfx_base_h
 
+#include <memory>
+
+#include "base/basictypes.h"
+#include "base/logging.h"
+#include "base/memory/ref_counted.h"
 #include "common/memory/singleton.h"
 #include "common/win/rect.h"
 #include "common/win/scoped_comptr.h"
-#include "gfx/rect_f.h"
-#include "evita/li_util.h"
+#include "evita/gfx/rect_f.h"
+
 
 #pragma warning(push)
 // warning C4263: 'function' : member function does not override any base
@@ -89,7 +94,7 @@ class DpiHandler {
   protected: void UpdateDpi(const SizeF&);
 };
 
-class FactorySet : public RefCounted_<FactorySet>,
+class FactorySet : public base::RefCounted<FactorySet>,
                    public common::ComInit,
                    public common::Singleton<FactorySet>,
                    public DpiHandler,
@@ -128,9 +133,10 @@ class FontFace : public SimpleObject_<IDWriteFontFace> {
 };
 
 class TextFormat : public SimpleObject_<IDWriteTextFormat> {
-  private: const ScopedRefCount_<FactorySet> factory_set_;
+  private: const scoped_refptr<FactorySet> factory_set_;
   public: TextFormat(const LOGFONT& log_font);
-  public: common::OwnPtr<TextLayout> CreateLayout(const char16*, int) const;
+  public: TextFormat(const base::string16& face_name, float font_size);
+  public: std::unique_ptr<TextLayout> CreateLayout(const char16*, int) const;
   DISALLOW_COPY_AND_ASSIGN(TextFormat);
 };
 
@@ -142,7 +148,7 @@ class TextLayout : public SimpleObject_<IDWriteTextLayout> {
 
 class Graphics : public Object, public DpiHandler {
   private: mutable int batch_nesting_level_;
-  private: ScopedRefCount_<FactorySet> factory_set_;
+  private: scoped_refptr<FactorySet> factory_set_;
   private: HWND hwnd_;
   private: ID2D1HwndRenderTarget* render_target_;
   private: mutable void* work_;
@@ -175,7 +181,7 @@ class Graphics : public Object, public DpiHandler {
   public: const FactorySet& factory_set() const { return *factory_set_; }
 
   public: ID2D1HwndRenderTarget& render_target() const {
-    ASSERT(!!render_target_);
+    DCHECK(render_target_);
     return *render_target_;
   }
 
@@ -190,7 +196,7 @@ class Graphics : public Object, public DpiHandler {
   // [D]
   public: void DrawLine(const Brush& brush, int sx, int sy, int ex, int ey,
                         float strokeWidth = 1) const {
-    ASSERT(drawing());
+    DCHECK(drawing());
     render_target().DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
                              strokeWidth);
   }
@@ -199,7 +205,7 @@ class Graphics : public Object, public DpiHandler {
                         float sx, float sy,
                         float ex, float ey,
                         float strokeWidth = 1) const {
-    ASSERT(drawing());
+    DCHECK(drawing());
     render_target().DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
                              strokeWidth);
   }
@@ -211,8 +217,8 @@ class Graphics : public Object, public DpiHandler {
 
   public: void DrawRectangle(const Brush& brush, const RectF& rect,
                              float strokeWidth = 1) const {
-    ASSERT(drawing());
-    ASSERT(!!rect);
+    DCHECK(drawing());
+    DCHECK(rect);
     render_target().DrawRectangle(rect, brush, strokeWidth);
   }
 
@@ -220,9 +226,9 @@ class Graphics : public Object, public DpiHandler {
                         const Brush& brush,
                         const RECT& rc,
                         const char16* pwch, size_t cwch) const {
-    ASSERT(drawing());
+    DCHECK(drawing());
     auto rect = RectF(rc);
-    ASSERT(!!rect);
+    DCHECK(rect);
     render_target().DrawText(pwch, cwch, text_format, rect, brush);
   }
 
@@ -246,8 +252,8 @@ class Graphics : public Object, public DpiHandler {
   }
 
   public: void FillRectangle(const Brush& brush, const RectF& rect) const {
-    ASSERT(drawing());
-    ASSERT(!!rect);
+    DCHECK(drawing());
+    DCHECK(rect);
     render_target().FillRectangle(rect, brush);
   }
 
@@ -286,4 +292,4 @@ inline ColorF whiteColor() {
 
 } // namespace gfx
 
-#endif //!defined(INCLUDE_gfx_base_h)
+#endif //!defined(INCLUDE_evita_gfx_base_h)

@@ -58,6 +58,7 @@
 //#pragma warning(default: 4820)
 
 #include <stddef.h>     // ptrdiff_t
+#include <stdint.h>
 #include <windowsx.h>   // GET_X_LPARAM
 
 // Theme (Visual Style)
@@ -88,10 +89,6 @@ typedef _IMAGELIST* HIMAGELIST;
 // warning C4373: previous versions of the compiler did not override when
 // parameters only differed by const/volatile qualifiers
 #pragma warning(disable:4373)
-
-// warning C4530: C++ exception handler used, but unwind semantics are not
-// enabled. Specify /EHsc
-#pragma warning(disable: 4530)
 
 // warning C4800: 'BOOL' : forcing value to bool 'true' or 'false'
 // (performance warning)
@@ -314,18 +311,9 @@ char16* lstrrchrW(const char16*, char16);
 // e.g. We don't want to have |case State_Limit|, |cast Kind_Max|, etc.
 #pragma warning(disable: 4062)
 
-
 // warning C4127: conditional expression is constant
 // For DCHECK_XX(x)
 #pragma warning(disable: 4127)
-
-// warning  C4251: 'identifier' : class 'type' needs to have dll-interface to
-// be used by clients of class 'type2'
-// Example: std::unique_ptr<T>
-#pragma warning(disable: 4251)
-
-// warning C4711: function 'function' selected for inline expansion
-#pragma warning(disable: 4711)
 
 // warning: C4640 'instance' : construction of local static object is not
 // thread-safe

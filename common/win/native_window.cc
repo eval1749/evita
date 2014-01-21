@@ -20,6 +20,9 @@ HINSTANCE s_hResource;
 //
 // MessageDelegate
 //
+MessageDelegate::MessageDelegate() {
+}
+
 MessageDelegate::~MessageDelegate() {
 }
 

@@ -3,19 +3,21 @@
 #if !defined(INCLUDE_common_com_ptr_h)
 #define INCLUDE_common_com_ptr_h
 
+#include "base/logging.h"
+
 namespace common {
 
 #if defined(_DEBUG)
 #define COM_VERIFY(expr) { \
   auto const macro_hr = (expr); \
   if (FAILED(macro_hr)) \
-    Debugger::Fail("hr=%08X\r\n%s\r\n", macro_hr, #expr); \
+    LOG(0) << "hr=" << std::hex << macro_hr << " " <<  #expr; \
 }
 #else
 #define COM_VERIFY(expr) { \
   auto const macro_hr = (expr); \
   if (FAILED(macro_hr)) \
-    Debugger::Fail("hr=%08X\r\n%s\r\n", macro_hr, #expr); \
+    LOG(0) << "hr=" << std::hex << macro_hr << " " <<  #expr; \
 }
 #endif
 

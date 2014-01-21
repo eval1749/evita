@@ -15,9 +15,11 @@ namespace win {
 struct Point;
 struct Size;
 
-interface COMMON_EXPORT MessageDelegate {
-  virtual ~MessageDelegate();
-  virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam) = 0;
+class COMMON_EXPORT MessageDelegate {
+  public: MessageDelegate();
+  public: virtual ~MessageDelegate();
+  public: virtual LRESULT WindowProc(UINT message, WPARAM wParam,
+                                     LPARAM lParam) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////

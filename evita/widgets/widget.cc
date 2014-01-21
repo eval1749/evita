@@ -22,6 +22,13 @@
 #include <string>
 #endif
 
+#define WIN32_VERIFY(expr) { \
+  if (!(expr)) { \
+    auto const error = ::GetLastError(); \
+    LOG(0) << #expr << " error=" << error; \
+  } \
+}
+
 namespace widgets {
 
 namespace {
@@ -61,7 +68,8 @@ HWND Widget::AssociatedHwnd() const {
     if (auto const window = runner->native_window_.get())
       return *window;
   }
-  CAN_NOT_HAPPEN();
+  NOTREACHED();
+  return nullptr;
 }
 
 void Widget::CreateNativeWindow() const {
@@ -236,7 +244,10 @@ void Widget::Hide() {
     DidHide();
 }
 
-bool Widget::OnIdle(uint idle_count) {
+void Widget::OnDraw(gfx::Graphics*) {
+}
+
+bool Widget::OnIdle(uint32_t idle_count) {
   #if DEBUG_IDLE
     DEBUG_WIDGET_PRINTF("count=%d\n", idle_count);
   #endif
@@ -248,26 +259,26 @@ bool Widget::OnIdle(uint idle_count) {
   return more;
 }
 
-void Widget::OnLeftButtonDown(uint, const Point&) {
+void Widget::OnLeftButtonDown(uint32_t, const Point&) {
 }
 
-void Widget::OnLeftButtonUp(uint, const Point&) {
+void Widget::OnLeftButtonUp(uint32_t, const Point&) {
 }
 
 LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
     case WM_LBUTTONDOWN:
-      OnLeftButtonDown(static_cast<uint>(wParam), 
+      OnLeftButtonDown(static_cast<uint32_t>(wParam), 
                        Point(MAKEPOINTS(lParam)));
       return 0;
 
     case WM_LBUTTONUP:
-      OnLeftButtonUp(static_cast<uint>(wParam), 
+      OnLeftButtonUp(static_cast<uint32_t>(wParam), 
                      Point(MAKEPOINTS(lParam)));
       return 0;
 
     case WM_MOUSEMOVE:
-      OnMouseMove(static_cast<uint>(wParam), 
+      OnMouseMove(static_cast<uint32_t>(wParam), 
                   Point(MAKEPOINTS(lParam)));
       return 0;
   }
@@ -276,7 +287,7 @@ LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
   return container_widget().OnMessage(message, wParam, lParam);
 }
 
-void Widget::OnMouseMove(uint, const Point&) {
+void Widget::OnMouseMove(uint32_t, const Point&) {
 }
 
 LRESULT Widget::OnNotify(NMHDR*) {

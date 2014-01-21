@@ -40,6 +40,8 @@ class TableModel {
     public: ~Row();
 
     public: Row& operator=(Row&& other);
+    public: bool operator==(const Row& other) const;
+    public: bool operator!=(const Row& other) const;
 
     public: iterator begin() const { return cells_.begin(); }
     public: const Cell& cell(size_t column) const { return cells_[column]; }

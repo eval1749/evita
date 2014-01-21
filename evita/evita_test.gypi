@@ -9,7 +9,7 @@
       'dependencies': [
         'evita_dom_unittests',
         'evita_text_unittests',
-        'evita_ui_model_unittests',
+        'evita_view_model_unittests',
       ], # dependencies
     }, # evita_all_tests
     {
@@ -102,7 +102,7 @@
       ],
     }, # evita_text_test
     {
-      'target_name': 'evita_ui_model_unittests',
+      'target_name': 'evita_view_model_unittests',
       'type': 'executable',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
@@ -128,7 +128,7 @@
       }, # msvs_settings
       'sources': [
         'precomp.cpp',
-        'ui/controls/table_model_unittest.cc',
+        'views/table_model_unittest.cc',
       ],
     }, # evita_text_test
   ] # targets

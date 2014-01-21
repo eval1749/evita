@@ -1,13 +1,13 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/ui/controls/table_model.h"
+#include "evita/views/table_model.h"
 
 #include <functional>
 #include <string>
 #include <vector>
 
-namespace ui {
+namespace views {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -124,4 +124,4 @@ void TableModel::SetHeaderRow(const base::string16& text) {
     header_row_.AddCell(text.substr(cell_start, cell_length));
 }
 
-}  // namespace ui
+}  // namespace views

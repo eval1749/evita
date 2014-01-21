@@ -16,11 +16,9 @@ namespace dom {
 class Document;
 }
 
-namespace ui {
-class TableModel;
-}
-
 namespace views {
+
+class TableModel;
 
 class TableView : public CommandWindow_<TableView, views::ContentWindow> {
   DECLARE_CASTABLE_CLASS(TableView, views::ContentWindow);
@@ -29,13 +27,13 @@ class TableView : public CommandWindow_<TableView, views::ContentWindow> {
 
   private: gc::Member<dom::Document> document_;
   private: HWND list_view_;
-  private: std::unique_ptr<ui::TableModel> model_;
+  private: std::unique_ptr<TableModel> model_;
   private: int modified_tick_;
 
   public: TableView(WindowId window_id, dom::Document* document);
   public: virtual ~TableView();
 
-  private: std::unique_ptr<ui::TableModel> CreateModel();
+  private: std::unique_ptr<TableModel> CreateModel();
   public: void GetRowStates(const std::vector<base::string16>& keys,
                             int* states) const;
   private: void Redraw();

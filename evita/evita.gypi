@@ -366,14 +366,13 @@
       'sources': [
         'precomp.cpp',
 
-        'ui/controls/table_model.cc',
-
         'views/view_delegate_impl.cc',
         'views/window.cc',
         'views/window_set.cc',
 
         'views/command_window.cc',
         'views/content_window.cc',
+        'views/table_model.cc',
         'views/table_view.cc',
 
         'widgets/root_widget.cc',

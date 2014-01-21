@@ -8,7 +8,7 @@
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
-#include "evita/views/table_model.h"
+#include "evita/ui/controls/table_model.h"
 
 namespace {
 
@@ -22,7 +22,7 @@ class TableModeTest : public ::testing::Test {
 };
 
 TEST_F(TableModeTest, AddRow) {
-  std::unique_ptr<views::TableModel> table_model(new views::TableModel());
+  std::unique_ptr<ui::TableModel> table_model(new ui::TableModel());
   table_model->SetHeaderRow(L"foo\t\bar\tbaz");
   EXPECT_EQ(3, table_model->header_row()->length());
   table_model->AddRow(L"one\t10\t11");
@@ -38,7 +38,7 @@ TEST_F(TableModeTest, AddRow) {
 }
 
 TEST_F(TableModeTest, SetHeaderRow) {
-  std::unique_ptr<views::TableModel> table_model(new views::TableModel());
+  std::unique_ptr<ui::TableModel> table_model(new ui::TableModel());
   table_model->SetHeaderRow(L"foo\t\bar\tbaz");
   EXPECT_EQ(3, table_model->header_row()->length());
 }

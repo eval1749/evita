@@ -10,8 +10,8 @@
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
 #include "evita/editor/application.h"
+#include "evita/ui/controls/table_model.h"
 #include "evita/vi_Frame.h"
-#include "evita/views/table_model.h"
 
 extern HINSTANCE g_hInstance;
 
@@ -28,31 +28,31 @@ namespace {
 // TableContentBuilder
 //
 class TableContentBuilder {
-  private: typedef TableModel::Row Row;
+  private: typedef ui::TableModel::Row Row;
 
   private: std::vector<int> column_widths_;
   private: HWND list_view_;
-  private: const TableModel* new_model_;
-  private: const TableModel* old_model_;
+  private: const ui::TableModel* new_model_;
+  private: const ui::TableModel* old_model_;
 
   public: TableContentBuilder(HWND list_view,
-                              const TableModel* new_model,
-                              const TableModel* old_model);
+                              const ui::TableModel* new_model,
+                              const ui::TableModel* old_model);
   public: ~TableContentBuilder() = default;
 
   public: void Build();
   private: void BuildHeader();
   private: void BuildRows();
 
-  private: static int CellWidth(const TableModel::Cell& cell);
+  private: static int CellWidth(const ui::TableModel::Cell& cell);
   private: void UpdateListViewItem(int row_index, const Row* row);
 
   DISALLOW_COPY_AND_ASSIGN(TableContentBuilder);
 };
 
 TableContentBuilder::TableContentBuilder(HWND list_view,
-                                         const TableModel* new_model,
-                                         const TableModel* old_model)
+                                         const ui::TableModel* new_model,
+                                         const ui::TableModel* old_model)
     : list_view_(list_view), new_model_(new_model), old_model_(old_model) {
 }
 
@@ -145,7 +145,7 @@ void TableContentBuilder::BuildRows() {
   }
 }
 
-int TableContentBuilder::CellWidth(const TableModel::Cell& cell) {
+int TableContentBuilder::CellWidth(const ui::TableModel::Cell& cell) {
   // TODO(yosi) We should get character width from ListView control.
   const int kCharWidth = 6;
   return static_cast<int>((cell.text().length() + 2) * kCharWidth);
@@ -171,8 +171,8 @@ void TableContentBuilder::UpdateListViewItem(int row_index, const Row* row) {
 }
 
 int CALLBACK CompareItems(LPARAM a, LPARAM b, LPARAM) {
-  auto const row_a = reinterpret_cast<const TableModel::Row*>(a);
-  auto const row_b = reinterpret_cast<const TableModel::Row*>(b);
+  auto const row_a = reinterpret_cast<const ui::TableModel::Row*>(a);
+  auto const row_b = reinterpret_cast<const ui::TableModel::Row*>(b);
   return row_a->key().compare(row_b->key());
 }
 
@@ -186,7 +186,7 @@ TableView::TableView(WindowId window_id, dom::Document* document)
     : CommandWindow_(window_id),
       document_(document),
       list_view_(nullptr),
-      model_(new TableModel()),
+      model_(new ui::TableModel()),
       modified_tick_(0) {
 }
 
@@ -194,8 +194,8 @@ TableView::~TableView() {
   DCHECK(!list_view_);
 }
 
-std::unique_ptr<TableModel> TableView::CreateModel() {
-  std::unique_ptr<TableModel> model(new TableModel());
+std::unique_ptr<ui::TableModel> TableView::CreateModel() {
+  std::unique_ptr<ui::TableModel> model(new ui::TableModel());
   auto const buffer = document_->buffer();
   auto position = buffer->ComputeEndOf(Unit_Paragraph, 0);
   auto header_line = buffer->GetText(0, position);
@@ -215,7 +215,7 @@ std::unique_ptr<TableModel> TableView::CreateModel() {
 void TableView::GetRowStates(const std::vector<base::string16>& keys,
                               int* states) const {
   DCHECK(list_view_);
-  std::unordered_map<const TableModel::Row*, int> row_index_map;
+  std::unordered_map<const ui::TableModel::Row*, int> row_index_map;
   auto state_index = 0;
   for (auto key : keys) {
     if (auto const row = model_->FindRow(key))
@@ -235,7 +235,7 @@ void TableView::GetRowStates(const std::vector<base::string16>& keys,
       DVLOG(0) << "ListView_GetItem failed for iItem=" << item_index;
       continue;
     }
-    auto const row = reinterpret_cast<TableModel::Row*>(item.lParam);
+    auto const row = reinterpret_cast<ui::TableModel::Row*>(item.lParam);
     auto const present = row_index_map.find(row);
     if (present != row_index_map.end())
       states[present->second] = static_cast<int>(item.state);
@@ -250,7 +250,7 @@ void TableView::Redraw() {
     return;
   modified_tick_ = modified_tick;
 
-  std::unique_ptr<TableModel> new_model(CreateModel());
+  std::unique_ptr<ui::TableModel> new_model(CreateModel());
 
   TableContentBuilder builder(list_view_, new_model.get(), model_.get());
   builder.Build();

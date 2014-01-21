@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_views_table_model_h)
-#define INCLUDE_evita_views_table_model_h
+#if !defined(INCLUDE_evita_ui_controls_table_model_h)
+#define INCLUDE_evita_ui_controls_table_model_h
 
 #include <iterator>
 #include <memory>
@@ -11,7 +11,7 @@
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
 
-namespace views {
+namespace ui {
 
 class TableModel {
   public: class Cell {
@@ -77,6 +77,6 @@ class TableModel {
   DISALLOW_COPY_AND_ASSIGN(TableModel);
 };
 
-}  // namespace views
+}  // namespace ui
 
-#endif //!defined(INCLUDE_evita_views_table_model_h)
+#endif //!defined(INCLUDE_evita_ui_controls_table_model_h)

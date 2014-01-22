@@ -75,7 +75,7 @@ HWND Widget::AssociatedHwnd() const {
 void Widget::CreateNativeWindow() const {
 }
 
-void Widget::Destroy() {
+void Widget::DestroyWidget() {
   #if DEBUG_DESTROY
     DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
         state_, shown_, DEBUG_RECT_ARG(rect_));
@@ -99,7 +99,7 @@ void Widget::Destroy() {
     DidKillFocus();
   }
   while (first_child()) {
-    first_child()->Destroy();
+    first_child()->DestroyWidget();
   }
   parent_widget.RemoveChild(this);
   parent_widget.DidRemoveChildWidget(*this);
@@ -128,7 +128,7 @@ void Widget::DidDestroyNativeWindow() {
   DCHECK(!native_window_);
   // Since native window, which handles UI, is destroyed, this widget should
   // be destroyed too.
-  Destroy();
+  DestroyWidget();
 }
 
 void Widget::DidDestroyWidget() {
@@ -480,7 +480,7 @@ void Widget::WillDestroyNativeWindow() {
       non_native_children.push_back(child);
   }
   for (auto const child : non_native_children) {
-    child->Destroy();
+    child->DestroyWidget();
   }
 }
 

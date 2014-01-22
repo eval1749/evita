@@ -72,7 +72,7 @@ class Widget
   protected: virtual void CreateNativeWindow() const;
 
   // [D]
-  public: void Destroy();
+  public: void DestroyWidget();
   protected: virtual void DidAddChildWidget(const Widget& widget);
   protected: virtual void DidChangeHierarchy();
   // Called on WM_CREATE

@@ -117,7 +117,7 @@ DEFCOMMAND(CloseOtherFrames) {
       auto& frame = *it;
       ++it;
       if (frame != active_frame)
-        frame.Destroy();
+        frame.DestroyWidget();
     }
 }
 
@@ -169,7 +169,7 @@ DEFCOMMAND(CloseThisWindow)
     }
 
     Selection* pSelection = pCtx->GetSelection();
-    pSelection->GetWindow()->Destroy();
+    pSelection->GetWindow()->DestroyWidget();
 } // CloseThisWindow
 
 

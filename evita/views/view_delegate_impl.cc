@@ -111,7 +111,7 @@ void ViewDelegateImpl::DestroyWindow(dom::WindowId window_id) {
     return;
   }
   widget->DidDestroyDomWindow();
-  widget->Destroy();
+  widget->DestroyWidget();
 }
 
 void ViewDelegateImpl::DoFind(dom::DialogBoxId dialog_box_id,

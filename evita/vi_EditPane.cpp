@@ -707,13 +707,12 @@ EditPane::LeafBox::~LeafBox() {
 }
 
 void EditPane::LeafBox::CloseAllBut(Window* window) {
-  if (GetWindow() != window) {
-    GetWindow()->Destroy();
-  }
+  if (GetWindow() != window)
+    GetWindow()->DestroyWidget();
 }
 
 void EditPane::LeafBox::Destroy() {
-    GetWindow()->Destroy();
+  GetWindow()->DestroyWidget();
 }
 
 void EditPane::LeafBox::DetachWindow() {
@@ -820,7 +819,7 @@ void EditPane::LeafBox::ReplaceWindow(Window* window) {
   m_hwndVScrollBar = nullptr;
   edit_pane_->AppendChild(window);
   Realize(edit_pane_, rect());
-  previous_window->Destroy();
+  previous_window->DestroyWidget();
 }
 
 void EditPane::LeafBox::SetRect(const gfx::Rect& rect) {
@@ -1251,7 +1250,7 @@ void EditPane::DidRemoveChildWidget(const Widget&) {
   if (root_box_->CountLeafBox())
     return;
   // There is no window in this pane. So, we delete this pane.
-  Destroy();
+  DestroyWidget();
 }
 
 void EditPane::DidResize() {

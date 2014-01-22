@@ -125,7 +125,7 @@ bool TableView::DrawIfNeeded() {
     NotifyModelChanges(control_, new_data.get(), model_.get());
   } else {
     if (control_) {
-      control_->Destroy();
+      control_->DestroyWidget();
       control_ = nullptr;
     }
     columns_ = std::move(BuildColumns(new_data->header_row()));

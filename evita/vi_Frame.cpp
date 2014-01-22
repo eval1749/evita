@@ -346,7 +346,7 @@ void Frame::DidRemoveChildWidget(const widgets::Widget& widget) {
   DCHECK(pane);
   m_oPanes.Delete(pane);
   if (m_oPanes.IsEmpty())
-    Destroy();
+    DestroyWidget();
 }
 
 void Frame::DidResize() {
@@ -741,7 +741,7 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
               auto const tab_index = TabBandNotifyData::FromNmhdr(
                     pNotify)->tab_index_;
               if (auto const pPane = getPaneFromTab(tab_index))
-                pPane->Destroy();
+                pPane->DestroyWidget();
               break;
             }
 

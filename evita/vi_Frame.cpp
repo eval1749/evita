@@ -780,6 +780,15 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
   return Widget::OnMessage(uMsg, wParam, lParam);
 }
 
+void Frame::OnPaint(const gfx::Rect rect) {
+  gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  OnDraw(&*gfx_);
+  gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
+                      rect);
+  gfx_->DrawRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
+                      rect, 2.0f);
+}
+
 bool Frame::onTabDrag(TabBandDragAndDrop const eAction,
                       HWND const hwndTabBand) {
   auto const pFrom = Application::instance()->FindFrame(::GetParent(hwndTabBand));

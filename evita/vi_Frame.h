@@ -140,6 +140,7 @@ class Frame final : public views::Window,
   private: void onDropFiles(HDROP);
   public: virtual bool OnIdle(uint) override;
   private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
+  private: virtual void OnPaint(const gfx::Rect paint_rect) override;
   private: bool onTabDrag(TabBandDragAndDrop, HWND);
 
   // [P]

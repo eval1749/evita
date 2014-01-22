@@ -244,7 +244,11 @@ void Widget::Hide() {
     DidHide();
 }
 
-void Widget::OnDraw(gfx::Graphics*) {
+void Widget::OnDraw(gfx::Graphics* gfx) {
+  for (auto child : child_nodes()) {
+    if (child->is_shown())
+      child->OnDraw(gfx);
+  }
 }
 
 bool Widget::OnIdle(uint32_t idle_count) {

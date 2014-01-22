@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_views_table_model_h)
-#define INCLUDE_evita_views_table_model_h
+#if !defined(INCLUDE_evita_views_table_view_model_h)
+#define INCLUDE_evita_views_table_view_model_h
 
 #include <iterator>
 #include <memory>
@@ -13,7 +13,7 @@
 
 namespace views {
 
-class TableModel {
+class TableViewModel {
   public: class Cell {
     private: base::string16 text_;
 
@@ -30,22 +30,23 @@ class TableModel {
 
   public: class Row {
     private: typedef std::vector<Cell> Cells;
-    public: typedef Cells::const_iterator iterator;
 
     private: Cells cells_;
     private: size_t hash_code_;
+    private: int row_id_;
 
-    public: Row(Row&& other);
     public: Row();
     public: ~Row();
 
-    public: Row& operator=(Row&& other);
+    public: bool operator==(const Row& other) const;
+    public: bool operator!=(const Row& other) const;
 
-    public: iterator begin() const { return cells_.begin(); }
     public: const Cell& cell(size_t column) const { return cells_[column]; }
-    public: iterator end() const { return cells_.end(); }
-    public: const base::string16& key() const { return cell(0).text(); }
+    public: const Cells& cells() const { return cells_; }
     public: size_t length() const { return cells_.size(); }
+    public: const base::string16& key() const { return cell(0).text(); }
+    public: int row_id() const { return row_id_; }
+    public: void set_row_id(int row_id) { row_id_ = row_id; }
 
     public: void AddCell(const base::string16& text);
     public: void Clear();
@@ -60,23 +61,23 @@ class TableModel {
   private: RowMap row_map_;
   private: Rows rows_;
 
-  public: TableModel();
-  public: ~TableModel();
+  public: TableViewModel();
+  public: ~TableViewModel();
 
   public: const Row* header_row() const { return &header_row_; }
   public: const Row& row(size_t index) const { return *rows_[index]; }
   public: const Rows& rows() const { return rows_; }
-  public: size_t size() const { return rows_.size(); }
+  public: size_t row_count() const { return rows_.size(); }
 
   public: void AddRow(const base::string16& line);
-  public: const Row* FindRow(const base::string16& key) const;
+  public: Row* FindRow(const base::string16& key) const;
   public: void Clear();
   private: std::unique_ptr<Row> ParseLine(const base::string16& line);
   public: void SetHeaderRow(const base::string16& line);
 
-  DISALLOW_COPY_AND_ASSIGN(TableModel);
+  DISALLOW_COPY_AND_ASSIGN(TableViewModel);
 };
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_table_model_h)
+#endif //!defined(INCLUDE_evita_views_table_view_model_h)

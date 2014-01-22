@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/views/table_model.h"
+#include "evita/views/table_view_model.h"
 
 #include <functional>
 #include <string>
@@ -11,46 +11,60 @@ namespace views {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TableModel::Cell
+// TableViewModel::Cell
 //
-TableModel::Cell::Cell(Cell&& other) : text_(std::move(other.text_)) {
+TableViewModel::Cell::Cell(Cell&& other) : text_(std::move(other.text_)) {
 }
 
-TableModel::Cell::Cell(const base::string16& text) : text_(text) {
+TableViewModel::Cell::Cell(const base::string16& text) : text_(text) {
 }
 
-TableModel::Cell::~Cell() {
+TableViewModel::Cell::~Cell() {
 }
 
-bool TableModel::Cell::operator==(const Cell& other) const {
+bool TableViewModel::Cell::operator==(const Cell& other) const {
   return text_ == other.text_;
 }
 
-bool TableModel::Cell::operator!=(const Cell& other) const {
-  return text_ == other.text_;
+bool TableViewModel::Cell::operator!=(const Cell& other) const {
+  return text_ != other.text_;
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// TableModel::Row
+// TableViewModel::Row
 //
-TableModel::Row::Row(Row&& other)
-    : cells_(std::move(other.cells_)), hash_code_(other.hash_code_) {
+TableViewModel::Row::Row() : hash_code_(0), row_id_(0) {
 }
 
-TableModel::Row::Row() : hash_code_(0) {
+TableViewModel::Row::~Row() {
 }
 
-TableModel::Row::~Row() {
+bool TableViewModel::Row::operator==(const Row& other) const {
+  if (hash_code_ != other.hash_code_)
+    return false;
+  if (cells_.size() != other.cells_.size())
+    return false;
+  auto other_runner = other.cells_.begin();
+  for (const auto& cell : cells_) {
+    if (cell != *other_runner)
+      return false;
+    ++other_runner;
+  }
+  return true;
 }
 
-void TableModel::Row::AddCell(const base::string16& text) {
+bool TableViewModel::Row::operator!=(const Row& other) const {
+  return !operator==(other);
+}
+
+void TableViewModel::Row::AddCell(const base::string16& text) {
   std::hash<base::string16> hasher;
   hash_code_ = hash_code_ ^ hasher(text);
   cells_.push_back(std::move(Cell(text)));
 }
 
-void TableModel::Row::Clear() {
+void TableViewModel::Row::Clear() {
   cells_.clear();
 }
 
@@ -58,13 +72,14 @@ void TableModel::Row::Clear() {
 //
 // TableModle
 //
-TableModel::TableModel() {
+TableViewModel::TableViewModel() {
 }
 
-TableModel::~TableModel() {
+TableViewModel::~TableViewModel() {
+  Clear();
 }
 
-void TableModel::AddRow(const base::string16& text) {
+void TableViewModel::AddRow(const base::string16& text) {
   auto row = std::move(ParseLine(text));
   if (!row->length())
     return;
@@ -72,7 +87,7 @@ void TableModel::AddRow(const base::string16& text) {
   rows_.push_back(row.release());
 }
 
-void TableModel::Clear() {
+void TableViewModel::Clear() {
   for (auto row : rows_) {
     delete row;
   }
@@ -81,12 +96,12 @@ void TableModel::Clear() {
   rows_.clear();
 }
 
-const TableModel::Row* TableModel::FindRow(const base::string16& key) const {
+TableViewModel::Row* TableViewModel::FindRow(const base::string16& key) const {
   auto it = row_map_.find(key);
   return it == row_map_.end() ? nullptr : it->second;
 }
 
-std::unique_ptr<TableModel::Row> TableModel::ParseLine(
+std::unique_ptr<TableViewModel::Row> TableViewModel::ParseLine(
     const base::string16& text) {
   std::unique_ptr<Row> row(new Row());
   size_t cell_start = 0;
@@ -110,7 +125,7 @@ std::unique_ptr<TableModel::Row> TableModel::ParseLine(
   return std::move(row);
 }
 
-void TableModel::SetHeaderRow(const base::string16& text) {
+void TableViewModel::SetHeaderRow(const base::string16& text) {
   header_row_.Clear();
   size_t cell_start = 0;
   for (size_t index = 0; index < text.length(); ++index) {

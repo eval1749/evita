@@ -60,7 +60,7 @@
       'target_name': 'evita',
       'type': 'executable',
       'dependencies': [
-        'ui',
+        'editor',
       ], # dependencies
 
       'msvs_settings': {
@@ -287,7 +287,7 @@
       ], # sources
     }, # text
     {
-      'target_name': 'ui',
+      'target_name': 'editor',
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
@@ -320,7 +320,29 @@
         'vi_Style.cpp',
         'vi_TextEditWindow.cpp',
       ], # sources
-    }, # ui
+    }, # editor
+    {
+      'target_name': 'ui',
+      'type': 'static_library',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+      ],
+      'msvs_precompiled_header': '<(DEPTH)/build/precompile.h',
+      'msvs_precompiled_source': '<(DEPTH)/build/precompile.cc',
+      'sources': [
+        '<(DEPTH)/build/precompile.cc',
+
+        'ui/base/selection_model.cc',
+        'ui/base/table_model.cc',
+        'ui/base/table_model_observer.cc',
+
+        'ui/controls/table_control.cc',
+        'ui/controls/table_control_observer.cc',
+
+        'widgets/root_widget.cc',
+        'widgets/widget.cc',
+      ], # sources
+    },
     {
       'target_name': 'v8_glue',
       'type': 'static_library',
@@ -362,6 +384,7 @@
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
         'dom',
+        'ui',
       ],
       'sources': [
         'precomp.cpp',
@@ -372,11 +395,8 @@
 
         'views/command_window.cc',
         'views/content_window.cc',
-        'views/table_model.cc',
+        'views/table_view_model.cc',
         'views/table_view.cc',
-
-        'widgets/root_widget.cc',
-        'widgets/widget.cc',
       ], # sources
     },
   ], # targets

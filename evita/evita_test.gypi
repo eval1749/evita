@@ -19,7 +19,7 @@
         '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/common/common.gyp:common',
         'dom',
-        'ui',
+        'editor',
         '<(DEPTH)/testing/gtest.gyp:gtest',
         '<(DEPTH)/testing/gmock.gyp:gmock',
         '<(DEPTH)/base/base.gyp:run_all_unittests',

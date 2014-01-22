@@ -10,33 +10,54 @@
 
 #include "base/basictypes.h"
 #include "evita/gc/member.h"
+#include "evita/ui/base/table_model.h"
+#include "evita/ui/controls/table_control_observer.h"
+#include "evita/views/table_view_model.h"
 #include "evita/views/window_id.h"
 
 namespace dom {
 class Document;
 }
 
+namespace ui {
+class TableControl;
+}
+
 namespace views {
 
-class TableModel;
-
-class TableView : public CommandWindow_<TableView, views::ContentWindow> {
+class TableView
+    : public CommandWindow_<TableView, views::ContentWindow>,
+      public ui::TableControlObserver,
+      public ui::TableModel {
   DECLARE_CASTABLE_CLASS(TableView, views::ContentWindow);
 
   private: typedef views::ContentWindow BaseWindow;
 
+  private: std::vector<ui::TableColumn> columns_;
+  private: std::vector<TableViewModel::Row*> rows_;
+  private: std::unordered_map<int, TableViewModel::Row*> row_map_;
+  private: std::unique_ptr<ui::TableControl> control_;
   private: gc::Member<dom::Document> document_;
-  private: HWND list_view_;
-  private: std::unique_ptr<TableModel> model_;
+  private: std::unique_ptr<TableViewModel> data_;
   private: int modified_tick_;
 
   public: TableView(WindowId window_id, dom::Document* document);
   public: virtual ~TableView();
 
-  private: std::unique_ptr<TableModel> CreateModel();
+  private: std::unique_ptr<TableViewModel> CreateModel();
   public: void GetRowStates(const std::vector<base::string16>& keys,
                             int* states) const;
   private: void Redraw();
+
+  // ui::TableControlObserver
+  private: virtual void OnKeyDown(int key_code) override;
+  private: virtual void OnSelectionChanged() override;
+
+  // ui::TableModel
+  private: virtual int GetRowCount() const override;
+  private: virtual int GetRowId(int index) const override;
+  private: virtual base::string16 GetCellText(
+      int row_id, int column_id) const override;
 
   // views::CommandWindow
   private: virtual Command::KeyBindEntry* MapKey(uint) override;
@@ -47,14 +68,11 @@ class TableView : public CommandWindow_<TableView, views::ContentWindow> {
   private: virtual void UpdateStatusBar() const override;
 
   // widgets::Widget
-  private: virtual void Hide() override;
   private: virtual void DidRealize() override;
   private: virtual void DidResize() override;
   private: virtual void DidSetFocus() override;
   private: virtual bool OnIdle(uint32 idle_count) override;
-  private: virtual LRESULT OnNotify(NMHDR* nmhdr) override;
   private: virtual void Show() override;
-  private: virtual void WillDestroyWidget() override;
 
   DISALLOW_COPY_AND_ASSIGN(TableView);
 };

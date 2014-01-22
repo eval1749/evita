@@ -11,29 +11,22 @@
 #include "base/basictypes.h"
 #include "evita/gc/member.h"
 #include "evita/views/window_id.h"
-#include "evita/ui/controls/table_control_observer.h"
 
 namespace dom {
 class Document;
-}
-
-namespace ui {
-class TableControl;
 }
 
 namespace views {
 
 class TableModel;
 
-class TableView : public CommandWindow_<TableView, views::ContentWindow>,
-                  private ui::TableControlObserver {
+class TableView : public CommandWindow_<TableView, views::ContentWindow> {
   DECLARE_CASTABLE_CLASS(TableView, views::ContentWindow);
 
   private: typedef views::ContentWindow BaseWindow;
 
-  private: std::vector<ui::TableColumn> columns_;
-  private: std::unique_ptr<ui::TableControl> control_;
   private: gc::Member<dom::Document> document_;
+  private: HWND list_view_;
   private: std::unique_ptr<TableModel> model_;
   private: int modified_tick_;
 
@@ -53,15 +46,15 @@ class TableView : public CommandWindow_<TableView, views::ContentWindow>,
   private: virtual void MakeSelectionVisible() override;
   private: virtual void UpdateStatusBar() const override;
 
-  // ui::TableControlObserver
-  private: virtual void OnKeyDown(int key_code) override;
-  private: virtual void OnSelectionChanged() override;
-
   // widgets::Widget
+  private: virtual void Hide() override;
   private: virtual void DidRealize() override;
   private: virtual void DidResize() override;
   private: virtual void DidSetFocus() override;
   private: virtual bool OnIdle(uint32 idle_count) override;
+  private: virtual LRESULT OnNotify(NMHDR* nmhdr) override;
+  private: virtual void Show() override;
+  private: virtual void WillDestroyWidget() override;
 
   DISALLOW_COPY_AND_ASSIGN(TableView);
 };

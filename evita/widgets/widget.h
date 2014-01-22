@@ -122,6 +122,7 @@ class Widget
   public: void ResizeTo(const Rect& rect);
 
   // [S]
+  public: void SchedulePaint();
   public: void SetCapture();
   private: bool SetCursor();
   public: virtual void SetFocus();

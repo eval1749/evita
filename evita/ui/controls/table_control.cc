@@ -183,10 +183,6 @@ bool TableControl::IsSelected(int row_id) const {
   return present->second->selected();
 }
 
-void TableControl::SchedulePaint() {
-  ::InvalidateRect(AssociatedHwnd(), &rect(), true);
-}
-
 void TableControl::Select(int row_id) {
   auto const present = row_map_.find(row_id);
   if (present == row_map_.end()) {

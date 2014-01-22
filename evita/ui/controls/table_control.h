@@ -45,7 +45,6 @@ class TableControl :
   private: void DrawRow(gfx::Graphics* gfx, gfx::PointF left_top,
                         const Row* row);
   public: bool IsSelected(int row_id) const;
-  private: void SchedulePaint();
   public: void Select(int row_id);
 
   // TableModelObserver

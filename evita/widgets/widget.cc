@@ -376,6 +376,10 @@ void Widget::ResizeTo(const Rect& rect) {
   }
 }
 
+void Widget::SchedulePaint() {
+  ::InvalidateRect(AssociatedHwnd(), &rect_, true);
+}
+
 void Widget::SetCapture() {
   #if DEBUG_MOUSE
     DEBUG_WIDGET_PRINTF("capture=" DEBUG_WIDGET_FORMAT " new="

@@ -297,7 +297,15 @@ bool Application::TryDoIdle() {
   UI_DOM_AUTO_TRY_LOCK_SCOPE(dom_lock);
   if (!dom_lock.locked())
     return true;
-  return OnIdle(static_cast<uint>(idle_count_));
+  if (!OnIdle(static_cast<uint>(idle_count_)))
+    return false;
+  auto const status = ::GetQueueStatus(QS_ALLEVENTS);
+  #if DEBUG_IDLE
+  if (status) {
+    DVLOG(0) << "We have messages in queue, status=" << std::hex << status;
+  }
+  #endif
+  return status;
 }
 
 void Application::WillDestroyFrame(Frame* frame) {

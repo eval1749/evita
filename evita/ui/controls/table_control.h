@@ -41,7 +41,7 @@ class TableControl :
                        TableControlObserver* observer);
   public: virtual ~TableControl();
 
-  private: void DrawHeaderRow(gfx::Graphics* gfx);
+  private: void DrawHeaderRow(gfx::Graphics* gfx, gfx::PointF left_top);
   private: void DrawRow(gfx::Graphics* gfx, gfx::PointF left_top,
                         const Row* row);
   public: bool IsSelected(int row_id) const;

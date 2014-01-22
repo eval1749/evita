@@ -29,6 +29,8 @@ class TableControl::Column {
 
 TableControl::Column::Column(const TableColumn& data)
     : data_(data) {
+  auto const kRightPadding = 5;
+  data_.width += kRightPadding;
 }
 
 TableControl::Column::~Column() {
@@ -83,8 +85,17 @@ TableControl::TableControl(const std::vector<TableColumn>& columns,
                            TableControlObserver* observer)
     : model_(model),
       observer_(observer),
-      row_height_(17.0f),
-      text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", row_height_ - 4)) {
+      row_height_(20.0f),
+      text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", row_height_ - 6)) {
+
+  {
+    common::ComPtr<IDWriteInlineObject> inline_object;
+    COM_VERIFY(gfx::FactorySet::instance()->dwrite().
+        CreateEllipsisTrimmingSign(*text_format_.get(), &inline_object));
+    DWRITE_TRIMMING trimming {DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0};
+    (*text_format_.get())->SetTrimming(&trimming, inline_object);
+  }
+
   auto const num_rows = static_cast<size_t>(model->GetRowCount());
   for (auto index = 0u; index < num_rows; ++index) {
     auto const row_id = model_->GetRowId(static_cast<int>(index));
@@ -107,19 +118,26 @@ TableControl::~TableControl() {
   }
 }
 
-void TableControl::DrawHeaderRow(gfx::Graphics* gfx) {
+void TableControl::DrawHeaderRow(gfx::Graphics* gfx, gfx::PointF left_top) {
   gfx->FillRectangle(gfx::Brush(*gfx, gfx::ColorF::White),
-                     gfx::RectF(rect().left_top(),
+                     gfx::RectF(left_top,
                                 gfx::SizeF(static_cast<float>(rect().width()),
                                            row_height_)));
   gfx::Brush textBrush(*gfx, gfx::ColorF::Black);
-  gfx::PointF cell_left_top(rect().left_top());
+  gfx::Brush grayBrush(*gfx, gfx::ColorF::LightGray);
+  gfx::PointF cell_left_top(left_top);
+  auto column_index = 0u;
   for (auto column : columns_) {
+    ++column_index;
     (*text_format_)->SetTextAlignment(column->alignment());
-    gfx::RectF rect(cell_left_top, gfx::SizeF(column->width(), row_height_));
+    auto const width = column_index == columns_.size() ?
+        rect().width() - cell_left_top.x : column->width();
+    gfx::RectF rect(cell_left_top, gfx::SizeF(width, row_height_));
     auto text = column->text();
     (*gfx)->DrawText(text.data(), text.length(), *text_format_, rect,
                      textBrush);
+    gfx->DrawLine(grayBrush, rect.right - 5, rect.top,
+                  rect.right - 5, rect.bottom, 0.5f);
     cell_left_top.x += column->width();
   }
 }
@@ -140,13 +158,17 @@ void TableControl::DrawRow(gfx::Graphics* gfx, gfx::PointF row_left_top,
                                            row_height_)));
   gfx::Brush textBrush(*gfx, color);
   gfx::PointF cell_left_top(row_left_top);
+  auto column_index = 0u;
   for (auto column : columns_) {
     auto const text = model_->GetCellText(row->row_id(), column->column_id());
     (*text_format_)->SetTextAlignment(column->alignment());
-    gfx::RectF rect(cell_left_top, gfx::SizeF(column->width(), row_height_));
+    auto const width = column_index == columns_.size() ?
+        rect().width() - cell_left_top.x : column->width();
+    gfx::RectF rect(cell_left_top, gfx::SizeF(width, row_height_));
     (*gfx)->DrawText(text.data(), text.length(), *text_format_, rect,
                      textBrush);
     cell_left_top.x += column->width();
+
   }
 
   gfx->Flush();
@@ -202,25 +224,47 @@ void TableControl::DidRemoveRow(int row_id) {
 
 // Widget
 void TableControl::OnDraw(gfx::Graphics* gfx) {
-  gfx::Graphics::DrawingScope drawing_scope(*gfx);
+  auto const kLeftMargin = 10.0f;
+  auto const kTopMargin = 3.0f;
 
-  DrawHeaderRow(gfx);
+  gfx::RectF rectf(rect());
+  gfx::PointF left_top(rectf.left + kLeftMargin, rectf.top + kTopMargin);
+  gfx::Brush fill_brush(*gfx, gfx::ColorF::White);
 
-  gfx::PointF left_top(static_cast<float>(rect().left),
-                       static_cast<float>(rect().top) + row_height_);
+  // Fill top edge
+  gfx->FillRectangle(fill_brush, gfx::RectF(
+      gfx::PointF(rectf.left, rectf.top),
+      gfx::SizeF(rectf.width(), kTopMargin)));
+
+  DrawHeaderRow(gfx, left_top);
+
+  left_top.y += row_height_;
+
+  // Fill between header and rows
+  gfx->FillRectangle(fill_brush, gfx::RectF(
+      gfx::PointF(rectf.left, left_top.y),
+      gfx::SizeF(rectf.width(), kTopMargin)));
+
+  left_top.y += kTopMargin;
+
+  // Rows
   for (auto row : rows_) {
     DrawRow(gfx, left_top, row);
     left_top.y += row_height_;
-    if (left_top.y >= rect().bottom)
+    if (left_top.y >= rectf.bottom)
       break;
   }
 
-  if (left_top.y < rect().bottom) {
-    gfx::Brush fill_brush(*gfx, gfx::ColorF::White);
-    gfx->FillRectangle(fill_brush,
-                       gfx::RectF(left_top, gfx::SizeF(
-                          static_cast<float>(rect().width()),
-                          static_cast<float>(rect().bottom) - left_top.y)));
+  // Fill right edge
+  gfx->FillRectangle(fill_brush, gfx::RectF(
+      rectf.left_top(),
+      gfx::SizeF(kLeftMargin, left_top.y - rectf.top)));
+
+  // Fill bottom edge
+  if (left_top.y < rectf.bottom) {
+    gfx->FillRectangle(fill_brush, gfx::RectF(
+        gfx::PointF(rectf.left, left_top.y),
+        gfx::SizeF(rectf.width(), rectf.bottom - left_top.y)));
   }
 }
 

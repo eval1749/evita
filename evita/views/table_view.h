@@ -34,12 +34,12 @@ class TableView
   private: typedef views::ContentWindow BaseWindow;
 
   private: std::vector<ui::TableColumn> columns_;
-  private: std::vector<TableViewModel::Row*> rows_;
-  private: std::unordered_map<int, TableViewModel::Row*> row_map_;
   private: ui::TableControl* control_;
   private: gc::Member<dom::Document> document_;
   private: std::unique_ptr<TableViewModel> model_;
   private: int modified_tick_;
+  private: std::vector<TableViewModel::Row*> rows_;
+  private: std::unordered_map<int, TableViewModel::Row*> row_map_;
 
   public: TableView(WindowId window_id, dom::Document* document);
   public: virtual ~TableView();

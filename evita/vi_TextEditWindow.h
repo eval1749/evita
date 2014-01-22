@@ -142,7 +142,7 @@ class TextEditWindow
 
   // [G]
   public: Buffer* GetBuffer() const;
-  public: HCURSOR GetCursorAt(const Point&) const;
+  private: virtual HCURSOR GetCursorAt(const Point&) const override;
   // TODO(yosi): We should not expose TextEdintWindow::GetTitle(). We export
   // this for EditPane.
   public: virtual base::string16 GetTitle(size_t max_length) const override;

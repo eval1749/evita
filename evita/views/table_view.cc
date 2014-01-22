@@ -85,6 +85,7 @@ void NotifyModelChanges(ui::TableModelObserver* observer,
 //
 TableView::TableView(WindowId window_id, dom::Document* document)
     : CommandWindow_(window_id),
+      control_(nullptr),
       document_(document),
       data_(new TableViewModel()),
       modified_tick_(0) {
@@ -121,11 +122,11 @@ bool TableView::DrawIfNeeded() {
   std::unique_ptr<TableViewModel> new_data(CreateModel());
 
   if (*new_data->header_row() == *data_->header_row()) {
-    NotifyModelChanges(control_.get(), new_data.get(), data_.get());
+    NotifyModelChanges(control_, new_data.get(), data_.get());
   } else {
     if (control_) {
       control_->Destroy();
-      control_.reset();
+      control_ = nullptr;
     }
     columns_ = std::move(BuildColumns(new_data->header_row()));
     auto row_id = 0;
@@ -154,8 +155,8 @@ bool TableView::DrawIfNeeded() {
       ++column_runner;
     }
   }
-  control_.reset(new ui::TableControl(columns_, this, this));
-  AppendChild(control_.get());
+  control_ = new ui::TableControl(columns_, this, this);
+  AppendChild(control_);
   control_->Realize(rect());
   return true;
 }

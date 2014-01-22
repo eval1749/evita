@@ -375,17 +375,23 @@ void Frame::DidResize() {
   gfx_->Resize(rect());
   {
     gfx::Graphics::DrawingScope drawing_scope(*gfx_);
-    (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::Green));
 
+    // We should call |ID2D1RenderTarget::Clear()| to reset alpha value of
+    // pixels.
+    (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::White));
+
+    // To avoid script destroys Pane's, we lock DOM.
     const auto rc = GetPaneRect();
     if (editor::DomLock::instance()->locked()) {
       for (auto& pane: m_oPanes) {
         pane.ResizeTo(rc);
+        pane.OnDraw(&*gfx_);
       }
     } else {
       UI_DOM_AUTO_LOCK_SCOPE();
       for (auto& pane: m_oPanes) {
         pane.ResizeTo(rc);
+        pane.OnDraw(&*gfx_);
       }
     }
   }
@@ -781,6 +787,7 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
 }
 
 void Frame::OnPaint(const gfx::Rect rect) {
+  UI_DOM_AUTO_LOCK_SCOPE();
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   OnDraw(&*gfx_);
   gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),

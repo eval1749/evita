@@ -371,14 +371,6 @@ void TextEditWindow::DidRealize() {
   m_gfx = &frame->gfx();
 }
 
-void TextEditWindow::DidResize() {
-  #if DEBUG_RESIZE
-    DEBUG_TEXT_EDIT_PRINTF("focus=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        has_focus(), is_shown(), DEBUG_RECT_ARG(rect()));
-  #endif
-  ForceRedrawLater();
-}
-
 void TextEditWindow::DidSetFocus() {
   #if DEBUG_FOCUS
     DEBUG_TEXT_EDIT_PRINTF("focus=%d show=%d caret=%d\n",
@@ -427,21 +419,6 @@ Posn TextEditWindow::endOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
     if (lPosn < lStart)
       return lStart - 1;
   }
-}
-
-void TextEditWindow::ForceRedraw() {
-  UI_ASSERT_DOM_LOCKED();
-  m_pPage->Reset();
-  Redraw();
-}
-
-void TextEditWindow::ForceRedrawLater() {
-  if (editor::DomLock::instance()->locked()) {
-    ForceRedraw();
-    return;
-  }
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(&TextEditWindow::ForceRedraw, base::Unretained(this)));
 }
 
 void TextEditWindow::format(const gfx::Graphics& gfx, Posn lStart) {
@@ -582,6 +559,12 @@ gfx::RectF TextEditWindow::MapPosnToPoint(Posn lPosn) {
       return rect;
     m_pPage->ScrollToPosn(*m_gfx, lPosn);
   }
+}
+
+void TextEditWindow::OnDraw(gfx::Graphics*) {
+  UI_ASSERT_DOM_LOCKED();
+  m_pPage->Reset();
+  Redraw();
 }
 
 bool TextEditWindow::OnIdle(uint count) {
@@ -773,10 +756,6 @@ void TextEditWindow::OnMouseMove(uint, const Point& point) {
     autoscroller_->Start(1);
   else
     autoscroller_->Stop();
-}
-
-void TextEditWindow::OnPaint(const gfx::Rect) {
-  ForceRedrawLater();
 }
 
 void TextEditWindow::onVScroll(uint nCode) {

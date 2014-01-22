@@ -17,6 +17,7 @@
 #include "base/logging.h"
 #include "evita/views/content_window.h"
 #include "evita/dom/lock.h"
+#include "evita/editor/dom_lock.h"
 #include "evita/ed_Mode.h"
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"
@@ -144,6 +145,7 @@ class EditPane::LeafBox final : public EditPane::Box {
   // [D]
   public: virtual void Destroy() override;
   public: void DetachWindow();
+  private: virtual void DrawSplitters(const gfx::Graphics&) override;
 
   public: void EnsureInHorizontalLayoutBox();
   public: void EnsureInVerticalLayoutBox();
@@ -720,6 +722,11 @@ void EditPane::LeafBox::DetachWindow() {
   m_hwndVScrollBar = nullptr;
 }
 
+
+void EditPane::LeafBox::DrawSplitters(const gfx::Graphics& gfx) {
+  m_pWindow->OnDraw(const_cast<gfx::Graphics*>(&gfx));
+}
+
 void EditPane::LeafBox::EnsureInHorizontalLayoutBox() {
   if (!outer()->IsVerticalLayoutBox()) {
     return;
@@ -1161,6 +1168,7 @@ EditPane::SplitterController::~SplitterController() {
 void EditPane::SplitterController::End(const gfx::Point& point) {
   if (m_eState == SplitterController::State_Drag ||
       m_eState == SplitterController::State_DragSingle) {
+    UI_DOM_AUTO_LOCK_SCOPE();
     m_pBox->outer()->StopSplitter(point, *m_pBox);
     Stop();
   }
@@ -1169,6 +1177,7 @@ void EditPane::SplitterController::End(const gfx::Point& point) {
 void EditPane::SplitterController::Move(const gfx::Point& point) {
   if (m_eState == SplitterController::State_Drag ||
       m_eState == SplitterController::State_DragSingle) {
+    UI_DOM_AUTO_LOCK_SCOPE();
     m_pBox->outer()->MoveSplitter(point, *m_pBox);
   }
 }
@@ -1258,10 +1267,6 @@ void EditPane::DidResize() {
     DEBUG_WIDGET_PRINTF(DEBUG_RECT_FORMAT "\n", DEBUG_RECT_ARG(rect()));
   #endif
   root_box_->SetRect(rect());
-  if (is_shown()) {
-    gfx::Graphics::DrawingScope drawing_scope(frame().gfx());
-    root_box_->DrawSplitters(frame().gfx());
-  }
 }
 
 void EditPane::DidSetFocus() {
@@ -1338,6 +1343,10 @@ int EditPane::GetTitle(char16* out_wszTitle, int cchTitle) {
 
 Command::KeyBindEntry* EditPane::MapKey(uint nKey) {
   return GetActiveWindow()->MapKey(nKey);
+}
+
+void EditPane::OnDraw(gfx::Graphics* gfx) {
+  root_box_->DrawSplitters(*gfx);
 }
 
 void EditPane::OnLeftButtonDown(uint, const gfx::Point& point) {

@@ -105,6 +105,7 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
   public: virtual Command::KeyBindEntry* MapKey(uint) override;
 
   // [O]
+  private: virtual void OnDraw(gfx::Graphics* gfx) override;
   private: virtual void OnLeftButtonDown(uint flags, const Point&) override;
   private: virtual void OnLeftButtonUp(uint flags, const Point&) override;
   private: virtual void OnMouseMove(uint flags, const Point&) override;

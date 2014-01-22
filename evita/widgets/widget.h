@@ -101,7 +101,9 @@ class Widget
   public: virtual void Hide();
 
   // [O]
-  protected: virtual void OnDraw(gfx::Graphics* gfx);
+  // Note: We expose |OnDraw| for real time content resizing during toplevel
+  // window resizing.
+  public: virtual void OnDraw(gfx::Graphics* gfx);
   public: virtual bool OnIdle(uint32_t idle_count);
   public: virtual void OnLeftButtonDown(uint32_t flags, const Point& point);
   public: virtual void OnLeftButtonUp(uint32_t flags, const Point& point);

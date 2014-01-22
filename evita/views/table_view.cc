@@ -235,7 +235,7 @@ void TableView::DidRealize() {
 
 void TableView::DidResize() {
   CommandWindow::DidResize();
-  Redraw();
+  control_->ResizeTo(rect());
 }
 
 void TableView::DidSetFocus() {

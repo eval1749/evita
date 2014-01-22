@@ -127,7 +127,6 @@ class TextEditWindow
   private: virtual void DidHide() override;
   private: virtual void DidKillFocus() override;
   private: virtual void DidRealize() override;
-  private: virtual void DidResize() override;
   private: virtual void DidSetFocus() override;
   private: virtual void DidShow() override;
 
@@ -136,8 +135,6 @@ class TextEditWindow
   private: Posn endOfLineAux(const gfx::Graphics&, Posn);
 
   // [F]
-  private: void ForceRedraw();
-  private: void ForceRedrawLater();
   private: void format(const gfx::Graphics&, Posn);
 
   // [G]
@@ -167,12 +164,12 @@ class TextEditWindow
   public: gfx::RectF MapPosnToPoint(Posn);
 
   // [O]
+  private: virtual void OnDraw(gfx::Graphics* gfx) override;
   private: virtual bool OnIdle(uint) override;
   private: virtual LRESULT OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam);
   private: virtual void OnLeftButtonDown(uint, const Point&) override;
   private: virtual void OnLeftButtonUp(uint, const Point&) override;
   private: virtual void OnMouseMove(uint, const Point&) override;
-  private: virtual void OnPaint(const gfx::Rect) override;
   private: void onVScroll(uint);
 
   // [R]

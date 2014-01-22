@@ -198,7 +198,7 @@ void Widget::DispatchPaintMessage() {
 }
 
 HCURSOR Widget::GetCursorAt(const Point&) const {
-  return nullptr;
+  return ::LoadCursor(nullptr, IDC_ARROW);
 }
 
 Widget* Widget::GetFocusWidget() {

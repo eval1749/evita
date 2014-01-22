@@ -98,6 +98,9 @@ void Widget::Destroy() {
     focus_widget = nullptr;
     DidKillFocus();
   }
+  while (first_child()) {
+    first_child()->Destroy();
+  }
   parent_widget.RemoveChild(this);
   parent_widget.DidRemoveChildWidget(*this);
   state_ = kDestroyed;
@@ -129,6 +132,7 @@ void Widget::DidDestroyNativeWindow() {
 }
 
 void Widget::DidDestroyWidget() {
+  DCHECK_EQ(kDestroyed, state_);
   delete this;
 }
 

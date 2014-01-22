@@ -134,8 +134,8 @@ class FontFace : public SimpleObject_<IDWriteFontFace> {
 
 class TextFormat : public SimpleObject_<IDWriteTextFormat> {
   private: const scoped_refptr<FactorySet> factory_set_;
+  public: TextFormat(const base::string16& font_face_name, float font_size);
   public: TextFormat(const LOGFONT& log_font);
-  public: TextFormat(const base::string16& face_name, float font_size);
   public: std::unique_ptr<TextLayout> CreateLayout(const char16*, int) const;
   DISALLOW_COPY_AND_ASSIGN(TextFormat);
 };

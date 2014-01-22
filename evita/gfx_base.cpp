@@ -147,15 +147,16 @@ common::ComPtr<ID2D1SolidColorBrush> CreateSolidColorBrush(const Graphics& gfx,
   return brush;
 }
 
+static float pt2dip(int pt) {
+  return static_cast<float>(pt) * 96.0f / 72.0f;
+}
+
 common::ComPtr<IDWriteTextFormat> CreateTextFormat(
-    const FactorySet&,
-    const LOGFONT& log_font) {
-  ASSERT(log_font.lfHeight < 0);
-  auto size = FactorySet::CeilToPixel(
-      SizeF(0.0f, static_cast<float>(-log_font.lfHeight) * 96.0f / 72.0f));
+    const base::string16 font_face_name, float font_size) {
+  auto size = FactorySet::CeilToPixel(SizeF(0.0f, font_size));
   common::ComPtr<IDWriteTextFormat> text_format;
-  COM_VERIFY(FactorySet::dwrite().CreateTextFormat(
-    log_font.lfFaceName,
+  COM_VERIFY(FactorySet::instance()->dwrite().CreateTextFormat(
+    font_face_name.c_str(),
     nullptr,
     DWRITE_FONT_WEIGHT_REGULAR,
     DWRITE_FONT_STYLE_NORMAL,
@@ -379,9 +380,15 @@ void Graphics::Resize(const Rect& rc) const {
 //
 // TextFormat
 //
+TextFormat::TextFormat(const base::string16& font_face_name, float font_size)
+    : SimpleObject_(CreateTextFormat(font_face_name, font_size)),
+      factory_set_(FactorySet::instance()) {
+}
+
 TextFormat::TextFormat(const LOGFONT& log_font)
-    : SimpleObject_(CreateTextFormat(*FactorySet::instance(), log_font)),
-    factory_set_(FactorySet::instance()) {
+    : SimpleObject_(CreateTextFormat(log_font.lfFaceName,
+                                     pt2dip(-log_font.lfHeight))),
+      factory_set_(FactorySet::instance()) {
 }
 
 } // namespace gfx

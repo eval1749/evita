@@ -53,9 +53,9 @@ void NotifyModelChanges(ui::TableModelObserver* observer,
   std::vector<TableViewModel::Row*> removed_rows;
   auto max_row_id = 0;
   for (auto old_row : old_model->rows()) {
+    max_row_id = std::max(max_row_id, old_row->row_id());
     if (auto new_row = new_model->FindRow(old_row->key())) {
       new_row->set_row_id(old_row->row_id());
-      max_row_id = std::max(max_row_id, old_row->row_id());
       if (*new_row != *old_row)
         observer->DidChangeRow(new_row->row_id());
     } else {
@@ -122,28 +122,41 @@ bool TableView::DrawIfNeeded() {
 
   if (*new_data->header_row() == *data_->header_row()) {
     NotifyModelChanges(control_.get(), new_data.get(), data_.get());
-    data_ = std::move(new_data);
   } else {
-    if (control_)
+    if (control_) {
       control_->Destroy();
-    columns_ = std::move(BuildColumns(new_data->header_row()));
-    rows_.clear();
-    row_map_.clear();
-    for (auto row : new_data->rows()) {
-      rows_.push_back(row);
-      row->set_row_id(static_cast<int>(rows_.size()));
-      row_map_[row->row_id()] = row;
-      auto column_runner = columns_.begin();
-      for (auto& cell : row->cells()) {
-        column_runner->width = std::max(column_runner->width, CellWidth(cell));
-        ++column_runner;
-      }
+      control_.reset();
     }
-    data_ = std::move(new_data);
-    control_.reset(new ui::TableControl(columns_, this, this));
-    AppendChild(control_.get());
-    control_->Realize(rect());
+    columns_ = std::move(BuildColumns(new_data->header_row()));
+    auto row_id = 0;
+    for (auto row : new_data->rows()) {
+      ++row_id;
+      row->set_row_id(row_id);
+    }
   }
+
+  rows_.clear();
+  row_map_.clear();
+  for (auto row : new_data->rows()) {
+    rows_.push_back(row);
+    DCHECK(row->row_id());
+    row_map_[row->row_id()] = row;
+  }
+
+  data_ = std::move(new_data);
+  if (control_)
+    return true;
+
+  for (auto row : data_->rows()) {
+    auto column_runner = columns_.begin();
+    for (auto& cell : row->cells()) {
+      column_runner->width = std::max(column_runner->width, CellWidth(cell));
+      ++column_runner;
+    }
+  }
+  control_.reset(new ui::TableControl(columns_, this, this));
+  AppendChild(control_.get());
+  control_->Realize(rect());
   return true;
 }
 

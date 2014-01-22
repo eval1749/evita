@@ -87,7 +87,7 @@ TableView::TableView(WindowId window_id, dom::Document* document)
     : CommandWindow_(window_id),
       control_(nullptr),
       document_(document),
-      data_(new TableViewModel()),
+      model_(new TableViewModel()),
       modified_tick_(0) {
 }
 
@@ -121,8 +121,8 @@ bool TableView::DrawIfNeeded() {
 
   std::unique_ptr<TableViewModel> new_data(CreateModel());
 
-  if (*new_data->header_row() == *data_->header_row()) {
-    NotifyModelChanges(control_, new_data.get(), data_.get());
+  if (*new_data->header_row() == *model_->header_row()) {
+    NotifyModelChanges(control_, new_data.get(), model_.get());
   } else {
     if (control_) {
       control_->Destroy();
@@ -144,11 +144,11 @@ bool TableView::DrawIfNeeded() {
     row_map_[row->row_id()] = row;
   }
 
-  data_ = std::move(new_data);
+  model_ = std::move(new_data);
   if (control_)
     return true;
 
-  for (auto row : data_->rows()) {
+  for (auto row : model_->rows()) {
     auto column_runner = columns_.begin();
     for (auto& cell : row->cells()) {
       column_runner->width = std::max(column_runner->width, CellWidth(cell));
@@ -166,7 +166,7 @@ void TableView::GetRowStates(const std::vector<base::string16>& keys,
   std::unordered_map<const TableViewModel::Row*, int> row_index_map;
   auto state_index = 0;
   for (auto key : keys) {
-    if (auto const row = data_->FindRow(key))
+    if (auto const row = model_->FindRow(key))
       row_index_map[row] = state_index;
     else
       DVLOG(0) << "No such row: " << key;
@@ -187,7 +187,7 @@ void TableView::OnSelectionChanged() {
 
 // ui::TableModel
 int TableView::GetRowCount() const {
-  return static_cast<int>(data_->row_count());
+  return static_cast<int>(model_->row_count());
 }
 
 int TableView::GetRowId(int index) const {

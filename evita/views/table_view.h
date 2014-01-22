@@ -38,7 +38,7 @@ class TableView
   private: std::unordered_map<int, TableViewModel::Row*> row_map_;
   private: ui::TableControl* control_;
   private: gc::Member<dom::Document> document_;
-  private: std::unique_ptr<TableViewModel> data_;
+  private: std::unique_ptr<TableViewModel> model_;
   private: int modified_tick_;
 
   public: TableView(WindowId window_id, dom::Document* document);

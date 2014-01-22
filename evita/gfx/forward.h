@@ -3,6 +3,8 @@
 #if !defined(INCLUDE_gfx_forward_h)
 #define INCLUDE_gfx_forward_h
 
+#include <stdint.h>
+
 #pragma warning(push)
 // warning C4917: 'declarator' : a GUID can only be associated with a class,
 // interface or namespace

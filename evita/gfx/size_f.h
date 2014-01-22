@@ -3,7 +3,7 @@
 #if !defined(INCLUDE_gfx_size_f_h)
 #define INCLUDE_gfx_size_f_h
 
-#include "gfx/forward.h"
+#include "evita/gfx/forward.h"
 
 namespace gfx {
 
@@ -70,7 +70,7 @@ class Size_ : public BaseType {
 };
 
 typedef Size_<D2D1_SIZE_F, float> SizeF;
-typedef Size_<D2D1_SIZE_U, uint> SizeU;
+typedef Size_<D2D1_SIZE_U, uint32_t> SizeU;
 
 } // namespace gfx
 

@@ -45,9 +45,9 @@ class TableView
   public: virtual ~TableView();
 
   private: std::unique_ptr<TableViewModel> CreateModel();
+  private: bool DrawIfNeeded();
   public: void GetRowStates(const std::vector<base::string16>& keys,
                             int* states) const;
-  private: void Redraw();
 
   // ui::TableControlObserver
   private: virtual void OnKeyDown(int key_code) override;
@@ -65,6 +65,7 @@ class TableView
   // views::ContentWindow
   private: virtual base::string16 GetTitle(size_t max_length) const;
   private: virtual void MakeSelectionVisible() override;
+  private: virtual void Redraw() override;
   private: virtual void UpdateStatusBar() const override;
 
   // widgets::Widget

@@ -10,6 +10,7 @@
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
 #include "evita/editor/application.h"
+#include "evita/editor/dom_lock.h"
 #include "evita/ui/base/table_model_observer.h"
 #include "evita/ui/controls/table_control.h"
 #include "evita/vi_Frame.h"
@@ -93,6 +94,7 @@ TableView::~TableView() {
 }
 
 std::unique_ptr<TableViewModel> TableView::CreateModel() {
+  UI_DOM_AUTO_LOCK_SCOPE();
   std::unique_ptr<TableViewModel> model(new TableViewModel());
   auto const buffer = document_->buffer();
   auto position = buffer->ComputeEndOf(Unit_Paragraph, 0);
@@ -110,27 +112,10 @@ std::unique_ptr<TableViewModel> TableView::CreateModel() {
   return std::move(model);
 }
 
-void TableView::GetRowStates(const std::vector<base::string16>& keys,
-                             int* states) const {
-  std::unordered_map<const TableViewModel::Row*, int> row_index_map;
-  auto state_index = 0;
-  for (auto key : keys) {
-    if (auto const row = data_->FindRow(key))
-      row_index_map[row] = state_index;
-    else
-      DVLOG(0) << "No such row: " << key;
-    ++state_index;
-  }
-
-  for (auto pair : row_index_map) {
-    states[pair.second] = control_->IsSelected(pair.first->row_id());
-  }
-}
-
-void TableView::Redraw() {
+bool TableView::DrawIfNeeded() {
   auto const modified_tick = document_->buffer()->GetModfTick();
   if (modified_tick_ == modified_tick)
-    return;
+    return false;
   modified_tick_ = modified_tick;
 
   std::unique_ptr<TableViewModel> new_data(CreateModel());
@@ -158,6 +143,24 @@ void TableView::Redraw() {
     control_.reset(new ui::TableControl(columns_, this, this));
     AppendChild(control_.get());
     control_->Realize(rect());
+  }
+  return true;
+}
+
+void TableView::GetRowStates(const std::vector<base::string16>& keys,
+                             int* states) const {
+  std::unordered_map<const TableViewModel::Row*, int> row_index_map;
+  auto state_index = 0;
+  for (auto key : keys) {
+    if (auto const row = data_->FindRow(key))
+      row_index_map[row] = state_index;
+    else
+      DVLOG(0) << "No such row: " << key;
+    ++state_index;
+  }
+
+  for (auto pair : row_index_map) {
+    states[pair.second] = control_->IsSelected(pair.first->row_id());
   }
 }
 
@@ -202,6 +205,10 @@ base::string16 TableView::GetTitle(size_t) const {
 void TableView::MakeSelectionVisible() {
 }
 
+void TableView::Redraw() {
+  DrawIfNeeded();
+}
+
 void TableView::UpdateStatusBar() const {
   Frame::FindFrame(*this)->SetStatusBar(0, L"");
 }
@@ -226,8 +233,7 @@ void TableView::DidSetFocus() {
 bool TableView::OnIdle(uint32) {
   if (!is_shown())
     return false;
-  Redraw();
-  return true;
+  return DrawIfNeeded();
 }
 
 void TableView::Show() {

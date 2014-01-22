@@ -777,13 +777,13 @@ EditPane::HitTestResult EditPane::LeafBox::HitTest(Point pt) const {
 void EditPane::LeafBox::Realize(EditPane* edit_pane, const gfx::Rect& rect) {
   Box::Realize(edit_pane, rect);
 
-  auto const splitter_height = HasSibling() ? 0 : k_cySplitterBig;
-  auto const scroll_bar_width = ::GetSystemMetrics(SM_CXVSCROLL);
-  Rect scroll_bar_rect(rect.right - scroll_bar_width,
-                       rect.top + splitter_height,
-                       rect.right, rect.bottom);
-
+  Rect scroll_bar_rect(rect);
+  scroll_bar_rect.left = rect.right;
   if (m_pWindow->is<TextEditWindow>()) {
+    auto const splitter_height = HasSibling() ? 0 : k_cySplitterBig;
+    auto const scroll_bar_width = ::GetSystemMetrics(SM_CXVSCROLL);
+    scroll_bar_rect.left -= scroll_bar_width;
+    scroll_bar_rect.top += splitter_height;
     m_hwndVScrollBar = ::CreateWindowExW(
           0,
           L"SCROLLBAR",
@@ -833,13 +833,13 @@ void EditPane::LeafBox::SetRect(const gfx::Rect& rect) {
         rect.left, rect.top, rect.right, rect.bottom);
   #endif
 
-  auto const splitter_height = HasSibling() ? 0 : k_cySplitterBig;
-  auto const scroll_bar_width = m_hwndVScrollBar ?
-      ::GetSystemMetrics(SM_CXVSCROLL) : 0;
-  Rect scroll_bar_rect(rect.right - scroll_bar_width,
-                       rect.top + splitter_height,
-                       rect.right, rect.bottom);
+  Rect scroll_bar_rect(rect);
+  scroll_bar_rect.left = rect.right;
   if (m_hwndVScrollBar) {
+    auto const splitter_height = HasSibling() ? 0 : k_cySplitterBig;
+    auto const scroll_bar_width = ::GetSystemMetrics(SM_CXVSCROLL);
+    scroll_bar_rect.left -= scroll_bar_width;
+    scroll_bar_rect.top += splitter_height;
     ::SetWindowPos(
         m_hwndVScrollBar,
         nullptr,

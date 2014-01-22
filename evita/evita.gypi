@@ -60,7 +60,7 @@
       'target_name': 'evita',
       'type': 'executable',
       'dependencies': [
-        'editor',
+        'ui',
       ], # dependencies
 
       'msvs_settings': {
@@ -287,7 +287,7 @@
       ], # sources
     }, # text
     {
-      'target_name': 'editor',
+      'target_name': 'ui',
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
@@ -320,28 +320,7 @@
         'vi_Style.cpp',
         'vi_TextEditWindow.cpp',
       ], # sources
-    }, # editor
-    {
-      'target_name': 'ui',
-      'type': 'static_library',
-      'dependencies': [
-        '<(DEPTH)/base/base.gyp:base',
-      ],
-      'msvs_precompiled_header': '<(DEPTH)/build/precompile.h',
-      'msvs_precompiled_source': '<(DEPTH)/build/precompile.cc',
-      'sources': [
-        '<(DEPTH)/build/precompile.cc',
-
-        'ui/base/selection_model.cc',
-        'ui/base/table_model.cc',
-
-        'ui/controls/table_control.cc',
-        'ui/controls/table_control_observer.cc',
-
-        'widgets/root_widget.cc',
-        'widgets/widget.cc',
-      ], # sources
-    },
+    }, # ui
     {
       'target_name': 'v8_glue',
       'type': 'static_library',
@@ -352,6 +331,9 @@
       'msvs_precompiled_header': '',
       'msvs_precompiled_source': '',
       'msvs_disabled_warnings': [
+        # warning C4127: conditional expression is constant
+        # For DCHECK_XX(x)
+        4127,
         # warning  C4251: 'identifier' : class 'type' needs to have
         # dll-interface to be used by clients of class 'type2'
         # Example: std::unique_ptr<T>
@@ -380,7 +362,6 @@
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
         'dom',
-        'ui',
       ],
       'sources': [
         'precomp.cpp',
@@ -393,6 +374,9 @@
         'views/content_window.cc',
         'views/table_model.cc',
         'views/table_view.cc',
+
+        'widgets/root_widget.cc',
+        'widgets/widget.cc',
       ], # sources
     },
   ], # targets

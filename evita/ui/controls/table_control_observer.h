@@ -11,8 +11,7 @@ class TableControlObserver;
 
 class TableControlObserver {
   public: TableControlObserver();
-  public: virtual ~TableControlObserver();
-
+  public: virtual TableControlObserver();
   public: virtual void OnKeyDown(int key_code);
   public: virtual void OnSelectionChanged();
 };

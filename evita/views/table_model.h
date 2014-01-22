@@ -13,7 +13,7 @@
 
 namespace views {
 
-class TableData {
+class TableModel {
   public: class Cell {
     private: base::string16 text_;
 
@@ -62,8 +62,8 @@ class TableData {
   private: RowMap row_map_;
   private: Rows rows_;
 
-  public: TableData();
-  public: ~TableData();
+  public: TableModel();
+  public: ~TableModel();
 
   public: const Row* header_row() const { return &header_row_; }
   public: const Row& row(size_t index) const { return *rows_[index]; }
@@ -76,7 +76,7 @@ class TableData {
   private: std::unique_ptr<Row> ParseLine(const base::string16& line);
   public: void SetHeaderRow(const base::string16& line);
 
-  DISALLOW_COPY_AND_ASSIGN(TableData);
+  DISALLOW_COPY_AND_ASSIGN(TableModel);
 };
 
 }  // namespace views

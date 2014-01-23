@@ -336,6 +336,9 @@
         'ui/base/table_model.cc',
         'ui/base/table_model_observer.cc',
 
+        'ui/events/event.cc',
+        'ui/events/event_logging.cc',
+
         'ui/controls/table_control.cc',
         'ui/controls/table_control_observer.cc',
 

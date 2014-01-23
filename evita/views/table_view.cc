@@ -179,7 +179,8 @@ void TableView::GetRowStates(const std::vector<base::string16>& keys,
 }
 
 // ui::TableControlObserver
-void TableView::OnKeyDown(int) {
+void TableView::OnKeyDown(int key_code) {
+  Application::instance()->Execute(this, static_cast<uint32_t>(key_code), 0u);
 }
 
 void TableView::OnSelectionChanged() {

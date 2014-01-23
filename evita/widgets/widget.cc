@@ -9,6 +9,7 @@
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants.h"
 #include "common/tree/descendants_or_self.h"
+#include "common/win/win32_verify.h"
 #include "evita/ui/events/event.h"
 #include "evita/widgets/root_widget.h"
 
@@ -22,13 +23,6 @@
 #if DEBUG_RESIZE
 #include <string>
 #endif
-
-#define WIN32_VERIFY(expr) { \
-  if (!(expr)) { \
-    auto const error = ::GetLastError(); \
-    LOG(0) << #expr << " error=" << error; \
-  } \
-}
 
 namespace widgets {
 

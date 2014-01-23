@@ -12,6 +12,7 @@
 
 namespace gfx {
 class Graphics;
+using common::win::Point;
 class TextFormat;
 }
 
@@ -37,6 +38,7 @@ class TableControl :
 
   public: bool IsSelected(int row_id) const;
   public: void Select(int row_id);
+  private: void UpdateViewIfNeeded();
 
   // TableModelObserver
   private: virtual void DidAddRow(int row_id) override;
@@ -48,6 +50,8 @@ class TableControl :
   private: virtual void DidResize() override;
   private: virtual void DidSetFocus() override;
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
+  private: virtual void OnLeftButtonDown(uint32_t flags,
+                                         const gfx::Point& point) override;
 
   DISALLOW_COPY_AND_ASSIGN(TableControl);
 };

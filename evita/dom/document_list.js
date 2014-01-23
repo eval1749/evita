@@ -45,7 +45,7 @@
 
     /** @return {!Document} */
     function getOrNew() {
-      /** @const @type {string} */ var NAME = '*buffer list*';
+      /** @const @type {string} */ var NAME = '*document list*';
       var present = Document.find(NAME);
       if (present)
         return present;

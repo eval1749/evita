@@ -12,5 +12,9 @@ std::ostream& operator<<(std::ostream& out, const ui::Event& event);
 std::ostream& operator<<(std::ostream& out, const ui::Event* event);
 std::ostream& operator<<(std::ostream& out, const ui::KeyboardEvent& event);
 std::ostream& operator<<(std::ostream& out, const ui::KeyboardEvent* event);
+std::ostream& operator<<(std::ostream& out, const ui::MouseEvent& event);
+std::ostream& operator<<(std::ostream& out, const ui::MouseEvent* event);
+std::ostream& operator<<(std::ostream& out, const ui::MouseWheelEvent& event);
+std::ostream& operator<<(std::ostream& out, const ui::MouseWheelEvent* event);
 
 #endif //!defined(INCLUDE_evita_ui_events_event_logging_h)

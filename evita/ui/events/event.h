@@ -5,7 +5,17 @@
 
 #include <stdint.h>
 
+#include "common/win/rect.h"
+
+namespace widgets {
+class Widget;
+}
+
 namespace ui {
+
+using common::win::Point;
+using common::win::Rect;
+using widgets::Widget;
 
 enum class EventType {
   Invalid,
@@ -78,6 +88,53 @@ class KeyboardEvent : public Event {
 
   public: static KeyboardEvent Create(uint32_t message, WPARAM wParam,
                                       LPARAM lParam);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// MouseEvent
+//
+class MouseEvent : public Event {
+  friend class MouseWheelEvent;
+
+  private: uint32_t flags_;
+  private: int click_count_;
+  private: Point client_point_;
+  private: Point screen_point_;
+  protected: MouseEvent(EventType type, int click_count, uint32_t flags,
+                        const Point& point);
+  private: MouseEvent(EventType type, int click_count, Widget* widget,
+                        WPARAM wParam, LPARAM lParam);
+  private: MouseEvent();
+  public: ~MouseEvent();
+
+  public: int click_count() const { return click_count_; }
+  public: uint32_t flags() const { return flags_; }
+  public: bool is_left_button() const { return flags_ & MK_LBUTTON; }
+  public: bool is_middle_button() const { return flags_ & MK_MBUTTON; }
+  public: bool is_right_button() const { return flags_ & MK_RBUTTON; }
+  public: bool is_x_button1() const { return flags_ & MK_XBUTTON1; }
+  public: bool is_x_button2() const { return flags_ & MK_XBUTTON2; }
+  public: bool control_key() const { return flags_ & MK_CONTROL; }
+  public: bool shift_key() const { return flags_ & MK_SHIFT; }
+
+  public: static MouseEvent Create(Widget* widget, uint32_t message,
+                                   WPARAM wParam, LPARAM lParam);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// MouseWheelEvent
+//
+class MouseWheelEvent : public MouseEvent {
+  friend class MouseEvent;
+
+  private: int delta_;
+
+  private: MouseWheelEvent(Widget* widget, WPARAM wParam, LPARAM lParam);
+  public: ~MouseWheelEvent();
+
+  public: int delta() const { return delta_; }
 };
 
 }  // namespace ui

@@ -28,15 +28,23 @@ class Event {
 };
 
 class KeyboardEvent : public Event {
-  private: int key_code_;
+  private: int raw_key_code_;
   private: bool repeat_;
 
   private: KeyboardEvent(EventType type, LPARAM lParam);
   private: KeyboardEvent();
   public: ~KeyboardEvent();
 
-  public: int key_code() const { return key_code_; }
+  public: const bool control_key() const {
+    return raw_key_code_ & static_cast<int>(Modifier::Control);
+  }
+  public: int key_code() const { return raw_key_code_ & 0x1FF; }
+  public: int raw_key_code() const { return raw_key_code_; }
   public: bool repeat() const { return repeat_; }
+
+  public: const bool shift_key() const {
+    return raw_key_code_ & static_cast<int>(Modifier::Shift);
+  }
 
   public: static KeyboardEvent Create(uint32_t message, WPARAM wParam,
                                       LPARAM lParam);

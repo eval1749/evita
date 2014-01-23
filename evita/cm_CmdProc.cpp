@@ -108,7 +108,7 @@ static base::char16 MapKeyCodeToAscii(int key_code) {
 // Advance command processing state with specified keyboard event.
 void Processor::Execute(CommandWindow* window, ui::KeyboardEvent event) {
   m_pWindow = window;
-  auto const key_code = event.key_code();
+  auto const key_code = event.raw_key_code();
   m_wchLast = static_cast<char16>(key_code);
   key_codes_.push_back(key_code);
   PrepareExecution(window);

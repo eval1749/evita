@@ -27,7 +27,8 @@ Event::~Event() {
 // KeyboardEvent
 //
 KeyboardEvent::KeyboardEvent(EventType event_type, LPARAM lParam)
-    : Event(event_type), key_code_(0), repeat_(HIWORD(lParam) & KF_REPEAT) {
+    : Event(event_type), raw_key_code_(0),
+      repeat_(HIWORD(lParam) & KF_REPEAT) {
 }
 
 KeyboardEvent::KeyboardEvent()
@@ -41,17 +42,18 @@ KeyboardEvent KeyboardEvent::Create(uint32_t message, WPARAM wParam,
                                     LPARAM lParam) {
   if (message == WM_CHAR) {
     auto event = KeyboardEvent(EventType::KeyDown, lParam);
-    event.key_code_ = static_cast<int>(wParam);
-    return event.key_code_ < 0x20 ? KeyboardEvent() : event;
+    event.raw_key_code_ = static_cast<int>(wParam);
+    return event.raw_key_code_ < 0x20 ? KeyboardEvent() : event;
   }
 
   if (message == WM_KEYDOWN) {
     auto event = KeyboardEvent(EventType::KeyDown, lParam);
-    event.key_code_ = static_cast<int>(
+    event.raw_key_code_ = static_cast<int>(
         Command::TranslateKey(static_cast<uint32_t>(wParam)));
-    return event.key_code_ ? event : KeyboardEvent();
+    return event.raw_key_code_ ? event : KeyboardEvent();
   }
 
   return KeyboardEvent();
 }
+
 }  // namespace ui

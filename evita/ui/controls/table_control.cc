@@ -420,13 +420,24 @@ void TableControl::TableControlModel::MoveSelection(int direction) {
   UpdateSelectionView();
 }
 
-void TableControl::TableControlModel::OnLeftButtonDown(uint32_t,
+void TableControl::TableControlModel::OnLeftButtonDown(uint32_t flags,
     const gfx::PointF& point) {
   auto item = HitTest(point);
   if (!item)
    return;
-  if (auto row = item->as<Row>())
-    Select(row->row_id());
+  auto row = item->as<Row>();
+  if (!row)
+    return;
+  auto index = GetRowIndex(row);
+  if (index < 0)
+    return;
+  if (flags & MK_CONTROL)
+    selection_.Add(index);
+  else if (flags & MK_SHIFT)
+    selection_.ExtendTo(index);
+  else
+    selection_.CollapseTo(index);
+  UpdateSelectionView();
 }
 
 gfx::RectF TableControl::TableControlModel::ResetDirtyRect() {

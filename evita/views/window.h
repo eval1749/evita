@@ -3,8 +3,8 @@
 #if !defined(INCLUDE_evita_views_window_h)
 #define INCLUDE_evita_views_window_h
 
+#include "evita/ui/widget.h"
 #include "evita/views/window_id.h"
-#include "evita/widgets/widget.h"
 
 namespace views {
 

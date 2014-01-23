@@ -342,8 +342,8 @@
         'ui/controls/table_control.cc',
         'ui/controls/table_control_observer.cc',
 
-        'widgets/root_widget.cc',
-        'widgets/widget.cc',
+        'ui/root_widget.cc',
+        'ui/widget.cc',
       ], # sources
     },
     {

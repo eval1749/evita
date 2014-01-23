@@ -4,7 +4,7 @@
 #include "evita/ui/events/event.h"
 
 #include "common/win/win32_verify.h"
-#include "evita/widgets/widget.h"
+#include "evita/ui/widget.h"
 
 namespace Command {
 uint32_t TranslateKey(uint32_t vkey_code);

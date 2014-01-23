@@ -5,7 +5,7 @@
 
 #include "evita/gfx/point_f.h"
 #include "evita/ui/base/table_model_observer.h"
-#include "evita/widgets/widget.h"
+#include "evita/ui/widget.h"
 
 #include <memory>
 #include <vector>

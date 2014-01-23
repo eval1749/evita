@@ -1,6 +1,6 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#include "evita/widgets/widget.h"
+#include "evita/ui/widget.h"
 
 #include <vector>
 
@@ -11,7 +11,7 @@
 #include "common/tree/descendants_or_self.h"
 #include "common/win/win32_verify.h"
 #include "evita/ui/events/event.h"
-#include "evita/widgets/root_widget.h"
+#include "evita/ui/root_widget.h"
 
 #define DEBUG_FOCUS 0
 #define DEBUG_IDLE 0

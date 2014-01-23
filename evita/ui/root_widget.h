@@ -1,10 +1,10 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_widgets_root_widget_h)
-#define INCLUDE_widgets_root_widget_h
+#if !defined(INCLUDE_evita_ui_root_widget_h)
+#define INCLUDE_evita_ui_root_widget_h
 
 #include "common/memory/singleton.h"
-#include "evita/widgets/widget.h"
+#include "evita/ui/widget.h"
 
 namespace widgets {
 
@@ -18,4 +18,4 @@ class RootWidget : public Widget,
 
 }  // namespace widgets
 
-#endif //!defined(INCLUDE_widgets_root_widget_h)
+#endif //!defined(INCLUDE_evita_ui_root_widget_h)

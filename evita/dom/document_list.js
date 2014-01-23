@@ -2,25 +2,100 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 (function() {
+  // TODO(yosi) We should move |newEditorWindow()| to another place to use
+  // other files, e.g. "window_commands.js".
+  /**
+   * @param {!Document} document
+   */
+  function newEditorWindow(document) {
+    var editor_window = new EditorWindow();
+    newTextWindow(editor_window, document);
+    editor_window.realize();
+  }
+
+  // TODO(yosi) We should move |newTextWindow()| to another place to use
+  // other files, e.g. "window_commands.js".
+  /**
+   * @param {!Window} parent
+   * @param {!Document} document
+   */
+  function newTextWindow(parent, document) {
+    parent.add(new TextWindow(new Range(document)));
+  }
+
+  // TODO(yosi) We should move |openInCurrentParent()| to another place to use
+  // other files, e.g. "window_commands.js".
+  /**
+   * @param {!Window} parent
+   * @param {!Document} document
+   */
+  function openInCurrentParent(parent, document) {
+    var present = parent.children.find(function(window) {
+      return window instanceof TextWindow && window.document == document;
+    });
+    if (present) {
+      present.focus();
+      return;
+    }
+    newTextWindow(parent, document);
+  }
+
+  /**
+   * @param {!TableSelection} selection
+   * @param {number} state_mask
+   * @return {!Object.<string, number>}
+   */
+  function queryRows(selection, state_mask) {
+    var keys = Document.list.map(function(document) {
+      return document.name;
+    });
+    var map = new Object();
+    selection.getRowStates(keys).forEach(function(state, index) {
+      if (state & state_mask)
+        map[keys[index]] = state;
+    });
+    return map;
+  }
+
   /**
    * @this {TableWindow}
    */
   function closeSelectedDocuments() {
-    var documents = Document.list;
-    var keys = documents.map(function(document) {
-      return document.name;
-    });
-    var needUpdate = false;
-    this.selection.getRowStates(keys).forEach(function(state, index) {
-      if (!(state & TableViewRowState.SELECTED))
+    var result_set = queryRows(this.selection, TableViewRowState.SELECTED);
+    var need_update = false;
+    Object.keys(result_set).forEach(function(name) {
+      var document = Document.find(name);
+      if (!document)
         return;
-      documents[index].close();
+      document.close();
       // TODO(yosi) We should handle Document event rather than using
-      // |needUpdate| variable. Because |close()| is asynchronus operation
+      // |need_update| variable. Because |close()| is asynchronus operation
       // and document may not be closed yet or cancled.
-      needUpdate = true;
+      need_update = true;
     });
-    if (needUpdate)
+    if (need_update)
+      createDocumentList();
+  }
+
+  /**
+   * @this {TableWindow}
+   */
+  function openSelectedDocuments() {
+    var result_set = queryRows(this.selection, TableViewRowState.SELECTED);
+    var parent = /** @type {!Window} */(this.parent);
+    var open_count = 0;
+    Object.keys(result_set).forEach(function(name) {
+      var document = Document.find(name);
+      if (!document)
+        return;
+
+      if (!open_count)
+        openInCurrentParent(parent, document);
+      else
+        newEditorWindow(document);
+      ++open_count;
+    });
+    if (open_count)
       createDocumentList();
   }
 
@@ -51,6 +126,7 @@
         return present;
       var document = new Document(NAME);
       document.bindKey('Delete', closeSelectedDocuments);
+      document.bindKey('Enter', openSelectedDocuments);
       return document;
     }
 

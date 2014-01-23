@@ -8,8 +8,6 @@
 #include "evita/widgets/widget.h"
 
 #include <memory>
-#include <list>
-#include <unordered_map>
 #include <vector>
 
 namespace gfx {
@@ -26,24 +24,17 @@ class TableModel;
 class TableControl :
     public widgets::Widget,
     public TableModelObserver {
-  private: class Row;
-  private: class Column;
-  private: std::vector<Column*> columns_;
-  private: const TableModel* model_;
-  private: std::list<Row*> rows_;
-  private: std::unordered_map<int, Row*> row_map_;
+
+  private: class TableControlModel;
+
+  private: std::unique_ptr<TableControlModel> model_;
   private: TableControlObserver* observer_;
-  private: float row_height_;
-  private: std::unique_ptr<gfx::TextFormat> text_format_;
 
   public: TableControl(const std::vector<TableColumn>& columns,
                        const TableModel* model,
                        TableControlObserver* observer);
   public: virtual ~TableControl();
 
-  private: void DrawHeaderRow(gfx::Graphics* gfx, gfx::PointF left_top);
-  private: void DrawRow(gfx::Graphics* gfx, gfx::PointF left_top,
-                        const Row* row);
   public: bool IsSelected(int row_id) const;
   public: void Select(int row_id);
 
@@ -53,6 +44,9 @@ class TableControl :
   private: virtual void DidRemoveRow(int row_id) override;
 
   // Widget
+  private: virtual void DidKillFocus() override;
+  private: virtual void DidResize() override;
+  private: virtual void DidSetFocus() override;
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
 
   DISALLOW_COPY_AND_ASSIGN(TableControl);

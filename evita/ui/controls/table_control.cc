@@ -3,6 +3,11 @@
 
 #include "evita/ui/controls/table_control.h"
 
+#include <list>
+#include <unordered_map>
+#include <vector>
+
+#include "common/castable.h"
 #include "common/win/scoped_comptr.h"
 #include "evita/gfx_base.h"
 #include "evita/ui/base/selection_model.h"
@@ -11,11 +16,39 @@
 
 namespace ui {
 
+namespace {
+
 //////////////////////////////////////////////////////////////////////
 //
-// TableControl::Column
+// Item
 //
-class TableControl::Column {
+class Item : public common::Castable {
+  DECLARE_CASTABLE_CLASS(Item, common::Castable);
+
+  private: gfx::RectF rect_;
+
+  public: Item();
+  public: virtual ~Item();
+
+  public: const gfx::RectF& rect() const { return rect_; }
+  public: void set_rect(const gfx::RectF& rect) { rect_ = rect; }
+
+  DISALLOW_COPY_AND_ASSIGN(Item);
+};
+
+Item::Item() {
+}
+
+Item::~Item() {
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// Column
+//
+class Column : public Item {
+  DECLARE_CASTABLE_CLASS(Column, Item);
+
   private: TableColumn data_;
 
   public: Column(const TableColumn& data);
@@ -25,18 +58,20 @@ class TableControl::Column {
   public: int column_id() const { return data_.column_id; }
   public: const base::string16& text() const { return data_.text; }
   public: float width() const { return data_.width; }
+
+  DISALLOW_COPY_AND_ASSIGN(Column);
 };
 
-TableControl::Column::Column(const TableColumn& data)
+Column::Column(const TableColumn& data)
     : data_(data) {
   auto const kRightPadding = 5;
   data_.width += kRightPadding;
 }
 
-TableControl::Column::~Column() {
+Column::~Column() {
 }
 
-DWRITE_TEXT_ALIGNMENT TableControl::Column::alignment() const {
+DWRITE_TEXT_ALIGNMENT Column::alignment() const {
     static const DWRITE_TEXT_ALIGNMENT dwrite_alignment[] = {
       DWRITE_TEXT_ALIGNMENT_LEADING,
       DWRITE_TEXT_ALIGNMENT_TRAILING,
@@ -47,9 +82,11 @@ DWRITE_TEXT_ALIGNMENT TableControl::Column::alignment() const {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TableControl::Row
+// Row
 //
-class TableControl::Row {
+class Row : public Item{
+  DECLARE_CASTABLE_CLASS(Row, Item);
+
   private: enum RowState {
     kNone = 0,
     kSelected = 1,
@@ -66,28 +103,59 @@ class TableControl::Row {
   public: bool selected() const { return state_ & kSelected; }
 
   public: void Select() { state_ |= kSelected; }
+
+  DISALLOW_COPY_AND_ASSIGN(Row);
 };
 
-TableControl::Row::Row(int row_id) :
+Row::Row(int row_id) :
     row_id_(row_id),
     state_(kNone) {
 }
 
-TableControl::Row::~Row() {
+Row::~Row() {
+}
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// TableControl
+// TableControl::TableControlModel
 //
-TableControl::TableControl(const std::vector<TableColumn>& columns,
-                           const TableModel* model,
-                           TableControlObserver* observer)
-    : model_(model),
-      observer_(observer),
+class TableControl::TableControlModel {
+  private: std::vector<Column*> columns_;
+  private: bool has_focus_;
+  private: const TableModel* model_;
+  private: gfx::RectF rect_;
+  private: std::list<Row*> rows_;
+  private: std::unordered_map<int, Row*> row_map_;
+  private: float row_height_;
+  private: std::unique_ptr<gfx::TextFormat> text_format_;
+
+  public: TableControlModel(const std::vector<TableColumn>& columns,
+                            const TableModel* model);
+  public: ~TableControlModel();
+
+  public: void DidAddRow(int row_id);
+  public: void DidChangeRow(int row_id);
+  public: void DidKillFocus();
+  public: void DidRemoveRow(int row_id);
+  public: void DidResize(const gfx::RectF& rect);
+  public: void DidSetFocus();
+  public: void Draw(gfx::Graphics* gfx) const;
+  private: void DrawHeaderRow(gfx::Graphics* gfx, gfx::PointF left_top) const;
+  private: void DrawRow(gfx::Graphics* gfx, const Row* row) const;
+  public: bool IsSelected(int row_id) const;
+  public: void Select(int row_id);
+
+  DISALLOW_COPY_AND_ASSIGN(TableControlModel);
+};
+
+TableControl::TableControlModel::TableControlModel(
+    const std::vector<TableColumn>& columns,
+    const TableModel* model)
+    : has_focus_(false),
+      model_(model),
       row_height_(20.0f),
       text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", row_height_ - 6)) {
-
   {
     common::ComPtr<IDWriteInlineObject> inline_object;
     COM_VERIFY(gfx::FactorySet::instance()->dwrite().
@@ -109,7 +177,7 @@ TableControl::TableControl(const std::vector<TableColumn>& columns,
   }
 }
 
-TableControl::~TableControl() {
+TableControl::TableControlModel::~TableControlModel() {
   for (auto row : rows_) {
     delete row;
   }
@@ -118,94 +186,20 @@ TableControl::~TableControl() {
   }
 }
 
-void TableControl::DrawHeaderRow(gfx::Graphics* gfx, gfx::PointF left_top) {
-  gfx->FillRectangle(gfx::Brush(*gfx, gfx::ColorF::White),
-                     gfx::RectF(left_top,
-                                gfx::SizeF(static_cast<float>(rect().width()),
-                                           row_height_)));
-  gfx::Brush textBrush(*gfx, gfx::ColorF::Black);
-  gfx::Brush grayBrush(*gfx, gfx::ColorF::LightGray);
-  gfx::PointF cell_left_top(left_top);
-  auto column_index = 0u;
-  for (auto column : columns_) {
-    ++column_index;
-    (*text_format_)->SetTextAlignment(column->alignment());
-    auto const width = column_index == columns_.size() ?
-        rect().width() - cell_left_top.x : column->width();
-    gfx::RectF rect(cell_left_top, gfx::SizeF(width, row_height_));
-    auto text = column->text();
-    (*gfx)->DrawText(text.data(), text.length(), *text_format_, rect,
-                     textBrush);
-    gfx->DrawLine(grayBrush, rect.right - 5, rect.top,
-                  rect.right - 5, rect.bottom, 0.5f);
-    cell_left_top.x += column->width();
-  }
-}
-
-void TableControl::DrawRow(gfx::Graphics* gfx, gfx::PointF row_left_top,
-                           const Row* row) {
-  auto const bgcolor = row->selected() ?
-      has_focus() ? gfx::ColorF(RGB(51, 153, 255)) :
-                    gfx::ColorF(RGB(191, 205, 219)) :
-      gfx::ColorF(RGB(255, 255, 255));
-  auto const color = row->selected() ?
-      has_focus() ? gfx::ColorF(RGB(255, 255, 255)) :
-                    gfx::ColorF(RGB(67, 78, 84)) :
-      gfx::ColorF(RGB(0, 0, 0));
-  gfx->FillRectangle(gfx::Brush(*gfx, bgcolor),
-                     gfx::RectF(row_left_top,
-                                gfx::SizeF(static_cast<float>(rect().width()),
-                                           row_height_)));
-  gfx::Brush textBrush(*gfx, color);
-  gfx::PointF cell_left_top(row_left_top);
-  auto column_index = 0u;
-  for (auto column : columns_) {
-    auto const text = model_->GetCellText(row->row_id(), column->column_id());
-    (*text_format_)->SetTextAlignment(column->alignment());
-    auto const width = column_index == columns_.size() ?
-        rect().width() - cell_left_top.x : column->width();
-    gfx::RectF rect(cell_left_top, gfx::SizeF(width, row_height_));
-    (*gfx)->DrawText(text.data(), text.length(), *text_format_, rect,
-                     textBrush);
-    cell_left_top.x += column->width();
-
-  }
-
-  gfx->Flush();
-}
-
-bool TableControl::IsSelected(int row_id) const {
-  auto const present = row_map_.find(row_id);
-  if (present == row_map_.end()) {
-    DVLOG(0) << "No such row " << row_id;
-    return false;
-  }
-  return present->second->selected();
-}
-
-void TableControl::Select(int row_id) {
-  auto const present = row_map_.find(row_id);
-  if (present == row_map_.end()) {
-    DVLOG(0) << "No such row " << row_id;
-    return;
-  }
-  present->second->selected();
-}
-
-
-// TableModelObserver
-void TableControl::DidAddRow(int row_id) {
+void TableControl::TableControlModel::DidAddRow(int row_id) {
   auto const row = new Row(row_id);
   rows_.push_back(row);
   row_map_[row_id] = row;
-  SchedulePaint();
 }
 
-void TableControl::DidChangeRow(int) {
-  SchedulePaint();
+void TableControl::TableControlModel::DidChangeRow(int) {
 }
 
-void TableControl::DidRemoveRow(int row_id) {
+void TableControl::TableControlModel::DidKillFocus() {
+  has_focus_ = false;
+}
+
+void TableControl::TableControlModel::DidRemoveRow(int row_id) {
   auto const present = row_map_.find(row_id);
   if (present == row_map_.end()) {
     DVLOG(0) << "No such row " << row_id;
@@ -215,22 +209,27 @@ void TableControl::DidRemoveRow(int row_id) {
   row_map_.erase(present);
   rows_.remove(row);
   delete row;
-  SchedulePaint();
 }
 
-// Widget
-void TableControl::OnDraw(gfx::Graphics* gfx) {
+void TableControl::TableControlModel::DidResize(const gfx::RectF& rect) {
+  rect_ = rect;
+}
+
+void TableControl::TableControlModel::DidSetFocus() {
+  has_focus_ = true;
+}
+
+void TableControl::TableControlModel::Draw(gfx::Graphics* gfx) const {
   auto const kLeftMargin = 10.0f;
   auto const kTopMargin = 3.0f;
 
-  gfx::RectF rectf(rect());
-  gfx::PointF left_top(rectf.left + kLeftMargin, rectf.top + kTopMargin);
+  gfx::PointF left_top(rect_.left + kLeftMargin, rect_.top + kTopMargin);
   gfx::Brush fill_brush(*gfx, gfx::ColorF::White);
 
   // Fill top edge
   gfx->FillRectangle(fill_brush, gfx::RectF(
-      gfx::PointF(rectf.left, rectf.top),
-      gfx::SizeF(rectf.width(), kTopMargin)));
+      gfx::PointF(rect_.left, rect_.top),
+      gfx::SizeF(rect_.width(), kTopMargin)));
 
   DrawHeaderRow(gfx, left_top);
 
@@ -238,30 +237,162 @@ void TableControl::OnDraw(gfx::Graphics* gfx) {
 
   // Fill between header and rows
   gfx->FillRectangle(fill_brush, gfx::RectF(
-      gfx::PointF(rectf.left, left_top.y),
-      gfx::SizeF(rectf.width(), kTopMargin)));
+      gfx::PointF(rect_.left, left_top.y),
+      gfx::SizeF(rect_.width(), kTopMargin)));
 
   left_top.y += kTopMargin;
 
   // Rows
   for (auto row : rows_) {
-    DrawRow(gfx, left_top, row);
-    left_top.y += row_height_;
-    if (left_top.y >= rectf.bottom)
+    row->set_rect(gfx::RectF(left_top.x, left_top.y,
+                             rect_.right, left_top.y + row_height_));
+    DrawRow(gfx, row);
+    gfx->Flush();
+    left_top.y += row->rect().height();
+    if (left_top.y >= rect_.bottom)
       break;
   }
 
   // Fill right edge
   gfx->FillRectangle(fill_brush, gfx::RectF(
-      rectf.left_top(),
-      gfx::SizeF(kLeftMargin, left_top.y - rectf.top)));
+      rect_.left_top(),
+      gfx::SizeF(kLeftMargin, left_top.y - rect_.top)));
 
   // Fill bottom edge
-  if (left_top.y < rectf.bottom) {
+  if (left_top.y < rect_.bottom) {
     gfx->FillRectangle(fill_brush, gfx::RectF(
-        gfx::PointF(rectf.left, left_top.y),
-        gfx::SizeF(rectf.width(), rectf.bottom - left_top.y)));
+        gfx::PointF(rect_.left, left_top.y),
+        gfx::SizeF(rect_.width(), rect_.bottom - left_top.y)));
   }
+}
+
+void TableControl::TableControlModel::DrawHeaderRow(gfx::Graphics* gfx,
+    gfx::PointF left_top) const {
+  gfx->FillRectangle(gfx::Brush(*gfx, gfx::ColorF::White),
+                     gfx::RectF(left_top,
+                                gfx::SizeF(static_cast<float>(rect_.width()),
+                                           row_height_)));
+  gfx::Brush textBrush(*gfx, gfx::ColorF::Black);
+  gfx::Brush grayBrush(*gfx, gfx::ColorF::LightGray);
+  gfx::PointF cell_left_top(left_top);
+  auto column_index = 0u;
+  for (auto column : columns_) {
+    ++column_index;
+    (*text_format_)->SetTextAlignment(column->alignment());
+    auto const width = column_index == columns_.size() ?
+        rect_.width() - cell_left_top.x : column->width();
+    gfx::RectF rect(cell_left_top, gfx::SizeF(width, row_height_));
+    column->set_rect(rect);
+    auto text = column->text();
+    (*gfx)->DrawText(text.data(), text.length(), *text_format_, rect,
+                     textBrush);
+    gfx->DrawLine(grayBrush, rect.right - 5, rect.top,
+                  rect.right - 5, rect.bottom, 0.5f);
+    cell_left_top.x += column->width();
+  }
+}
+
+void TableControl::TableControlModel::DrawRow(gfx::Graphics* gfx,
+                                              const Row* row) const {
+  auto const bgcolor = row->selected() ?
+      has_focus_ ? gfx::ColorF(RGB(51, 153, 255)) :
+                    gfx::ColorF(RGB(191, 205, 219)) :
+      gfx::ColorF(RGB(255, 255, 255));
+  auto const color = row->selected() ?
+      has_focus_ ? gfx::ColorF(RGB(255, 255, 255)) :
+                    gfx::ColorF(RGB(67, 78, 84)) :
+      gfx::ColorF(RGB(0, 0, 0));
+  gfx->FillRectangle(gfx::Brush(*gfx, bgcolor), row->rect());
+  gfx::Brush textBrush(*gfx, color);
+  gfx::PointF cell_left_top(row->rect().left_top());
+  auto column_index = 0u;
+  for (auto column : columns_) {
+    auto const text = model_->GetCellText(row->row_id(), column->column_id());
+    (*text_format_)->SetTextAlignment(column->alignment());
+    auto const width = column_index == columns_.size() ?
+        rect_.width() - cell_left_top.x : column->width();
+    gfx::RectF rect(cell_left_top, gfx::SizeF(width, row_height_));
+    (*gfx)->DrawText(text.data(), text.length(), *text_format_, rect,
+                     textBrush);
+    cell_left_top.x += column->width();
+
+  }
+}
+
+bool TableControl::TableControlModel::IsSelected(int row_id) const {
+  auto const present = row_map_.find(row_id);
+  if (present == row_map_.end()) {
+    DVLOG(0) << "No such row " << row_id;
+    return false;
+  }
+  return present->second->selected();
+}
+
+void TableControl::TableControlModel::Select(int row_id) {
+  auto const present = row_map_.find(row_id);
+  if (present == row_map_.end()) {
+    DVLOG(0) << "No such row " << row_id;
+    return;
+  }
+  present->second->selected();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// TableControl
+//
+TableControl::TableControl(const std::vector<TableColumn>& columns,
+                           const TableModel* model,
+                           TableControlObserver* observer)
+    : model_(new TableControlModel(columns, model)),
+      observer_(observer) {
+}
+
+TableControl::~TableControl() {
+}
+
+bool TableControl::IsSelected(int row_id) const {
+  return model_->IsSelected(row_id);
+}
+
+void TableControl::Select(int row_id) {
+  model_->Select(row_id);
+}
+
+// TableModelObserver
+void TableControl::DidAddRow(int row_id) {
+  model_->DidAddRow(row_id);
+  SchedulePaint();
+}
+
+void TableControl::DidChangeRow(int row_id) {
+  model_->DidChangeRow(row_id);
+  SchedulePaint();
+}
+
+void TableControl::DidRemoveRow(int row_id) {
+  model_->DidRemoveRow(row_id);
+  SchedulePaint();
+}
+
+// Widget
+void TableControl::DidKillFocus() {
+  model_->DidKillFocus();
+  SchedulePaint();
+}
+
+void TableControl::DidResize() {
+  model_->DidResize(gfx::RectF(rect()));
+  SchedulePaint();
+}
+
+void TableControl::DidSetFocus() {
+  model_->DidKillFocus();
+  SchedulePaint();
+}
+
+void TableControl::OnDraw(gfx::Graphics* gfx) {
+  model_->Draw(gfx);
 }
 
 }  // namespace ui

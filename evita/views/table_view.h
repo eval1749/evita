@@ -44,10 +44,11 @@ class TableView
   public: TableView(WindowId window_id, dom::Document* document);
   public: virtual ~TableView();
 
-  private: std::unique_ptr<TableViewModel> CreateModel();
   private: bool DrawIfNeeded();
   public: void GetRowStates(const std::vector<base::string16>& keys,
                             int* states) const;
+  private: std::unique_ptr<TableViewModel> UpdateModelIfNeeded();
+  private: void UpdateControl(std::unique_ptr<TableViewModel> new_model);
 
   // ui::TableControlObserver
   private: virtual void OnKeyDown(int key_code) override;

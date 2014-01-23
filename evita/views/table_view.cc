@@ -94,8 +94,69 @@ TableView::TableView(WindowId window_id, dom::Document* document)
 TableView::~TableView() {
 }
 
-std::unique_ptr<TableViewModel> TableView::CreateModel() {
-  UI_DOM_AUTO_LOCK_SCOPE();
+void TableView::GetRowStates(const std::vector<base::string16>& keys,
+                             int* states) const {
+  std::unordered_map<const TableViewModel::Row*, int> row_index_map;
+  auto state_index = 0;
+  for (auto key : keys) {
+    if (auto const row = model_->FindRow(key))
+      row_index_map[row] = state_index;
+    else
+      DVLOG(0) << "No such row: " << key;
+    ++state_index;
+  }
+
+  for (auto pair : row_index_map) {
+    states[pair.second] = control_->GetRowState(pair.first->row_id());
+  }
+}
+
+void TableView::UpdateControl(std::unique_ptr<TableViewModel> new_model) {
+  if (*new_model->header_row() == *model_->header_row()) {
+    NotifyModelChanges(control_, new_model.get(), model_.get());
+  } else {
+    if (control_) {
+      control_->DestroyWidget();
+      control_ = nullptr;
+    }
+    columns_ = std::move(BuildColumns(new_model->header_row()));
+    auto row_id = 0;
+    for (auto row : new_model->rows()) {
+      ++row_id;
+      row->set_row_id(row_id);
+    }
+  }
+
+  rows_.clear();
+  row_map_.clear();
+  for (auto row : new_model->rows()) {
+    rows_.push_back(row);
+    DCHECK(row->row_id());
+    row_map_[row->row_id()] = row;
+  }
+
+  model_ = std::move(new_model);
+  if (control_)
+    return;
+
+  for (auto row : model_->rows()) {
+    auto column_runner = columns_.begin();
+    for (auto& cell : row->cells()) {
+      column_runner->width = std::max(column_runner->width, CellWidth(cell));
+      ++column_runner;
+    }
+  }
+  control_ = new ui::TableControl(columns_, this, this);
+  AppendChild(control_);
+  control_->Realize(rect());
+}
+
+std::unique_ptr<TableViewModel> TableView::UpdateModelIfNeeded() {
+  UI_ASSERT_DOM_LOCKED();
+  auto const modified_tick = document_->buffer()->GetModfTick();
+  if (modified_tick_ == modified_tick)
+    return std::unique_ptr<TableViewModel>();
+  modified_tick_ = modified_tick;
   std::unique_ptr<TableViewModel> model(new TableViewModel());
   auto const buffer = document_->buffer();
   auto position = buffer->ComputeEndOf(Unit_Paragraph, 0);
@@ -111,71 +172,6 @@ std::unique_ptr<TableViewModel> TableView::CreateModel() {
     model->AddRow(line);
   }
   return std::move(model);
-}
-
-bool TableView::DrawIfNeeded() {
-  auto const modified_tick = document_->buffer()->GetModfTick();
-  if (modified_tick_ == modified_tick)
-    return false;
-  modified_tick_ = modified_tick;
-
-  std::unique_ptr<TableViewModel> new_data(CreateModel());
-
-  if (*new_data->header_row() == *model_->header_row()) {
-    NotifyModelChanges(control_, new_data.get(), model_.get());
-  } else {
-    if (control_) {
-      control_->DestroyWidget();
-      control_ = nullptr;
-    }
-    columns_ = std::move(BuildColumns(new_data->header_row()));
-    auto row_id = 0;
-    for (auto row : new_data->rows()) {
-      ++row_id;
-      row->set_row_id(row_id);
-    }
-  }
-
-  rows_.clear();
-  row_map_.clear();
-  for (auto row : new_data->rows()) {
-    rows_.push_back(row);
-    DCHECK(row->row_id());
-    row_map_[row->row_id()] = row;
-  }
-
-  model_ = std::move(new_data);
-  if (control_)
-    return true;
-
-  for (auto row : model_->rows()) {
-    auto column_runner = columns_.begin();
-    for (auto& cell : row->cells()) {
-      column_runner->width = std::max(column_runner->width, CellWidth(cell));
-      ++column_runner;
-    }
-  }
-  control_ = new ui::TableControl(columns_, this, this);
-  AppendChild(control_);
-  control_->Realize(rect());
-  return true;
-}
-
-void TableView::GetRowStates(const std::vector<base::string16>& keys,
-                             int* states) const {
-  std::unordered_map<const TableViewModel::Row*, int> row_index_map;
-  auto state_index = 0;
-  for (auto key : keys) {
-    if (auto const row = model_->FindRow(key))
-      row_index_map[row] = state_index;
-    else
-      DVLOG(0) << "No such row: " << key;
-    ++state_index;
-  }
-
-  for (auto pair : row_index_map) {
-    states[pair.second] = control_->IsSelected(pair.first->row_id());
-  }
 }
 
 // ui::TableControlObserver
@@ -221,7 +217,11 @@ void TableView::MakeSelectionVisible() {
 }
 
 void TableView::Redraw() {
-  DrawIfNeeded();
+  UI_DOM_AUTO_LOCK_SCOPE();
+  auto new_model = UpdateModelIfNeeded();
+  if (!new_model)
+    return;
+  UpdateControl(std::move(new_model));
 }
 
 void TableView::UpdateStatusBar() const {
@@ -248,7 +248,11 @@ void TableView::DidSetFocus() {
 bool TableView::OnIdle(uint32) {
   if (!is_shown())
     return false;
-  return DrawIfNeeded();
+  auto new_model = UpdateModelIfNeeded();
+  if (!new_model)
+    return false;
+  UpdateControl(std::move(new_model));
+  return false;
 }
 
 void TableView::Show() {

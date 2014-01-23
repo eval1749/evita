@@ -102,8 +102,12 @@ class Row : public Item{
 
   public: enum RowState {
     kNone = 0,
-    kSelected = 1,
-    kFocused = 1 << 1,
+    kFocused = 1,
+    kSelected = 1 << 1,
+    kCut = 1 << 2,
+    kDropHilited = 1 << 3,
+    Glow = 1 << 4,
+    Activating = 1 << 5,
   };
 
   private: int row_id_;
@@ -114,6 +118,7 @@ class Row : public Item{
 
   public: int row_id() const { return row_id_; }
   public: bool selected() const { return state_ & kSelected; }
+  public: int state() const { return state_; }
 
   public: void Select() { state_ |= kSelected; }
   public: void UpdateState(int new_state, int state_mask);
@@ -168,8 +173,8 @@ class TableControl::TableControlModel {
   public: void ExtendSelection(int direction);
   private: const Row* GetRowById(int row_id) const;
   private: int GetRowIndex(const Row* row) const;
+  public: int GetRowState(int row_id) const;
   private: Item* HitTest(const gfx::PointF& point) const;
-  public: bool IsSelected(int row_id) const;
   public: void MakeSelectionViewDirty();
   public: void MoveSelection(int direction);
   public: void OnLeftButtonDown(uint32_t flags, const gfx::PointF& point);
@@ -259,8 +264,11 @@ void TableControl::TableControlModel::DidResize(const gfx::RectF& rect) {
 
 void TableControl::TableControlModel::DidSetFocus() {
   has_focus_ = true;
-  if (selection_.empty() && rows_.size())
+  if (selection_.empty() && rows_.size()) {
     selection_.CollapseTo(0);
+    UpdateSelectionView();
+    return;
+  }
   MakeSelectionViewDirty();
 }
 
@@ -386,6 +394,11 @@ int TableControl::TableControlModel::GetRowIndex(const Row* present) const {
   return -1;
 }
 
+int TableControl::TableControlModel::GetRowState(int row_id) const {
+  auto row = GetRowById(row_id);
+  return row ? row->state() : 0;
+}
+
 Item* TableControl::TableControlModel::HitTest(
     const gfx::PointF& point) const {
   for (auto column : columns_) {
@@ -401,16 +414,11 @@ Item* TableControl::TableControlModel::HitTest(
   return nullptr;
 }
 
-bool TableControl::TableControlModel::IsSelected(int row_id) const {
-  auto row = GetRowById(row_id);
-  return row ? row->selected() : false;
-}
-
 void TableControl::TableControlModel::MakeSelectionViewDirty() {
   auto index = 0;
   for(auto row : rows_) {
     if (selection_.IsSelected(index)) {
-      row->UpdateState(row->selected() ? 0 : Row::kSelected, Row::kSelected);
+      row->UpdateState(row->selected() ? Row::kSelected : 0, Row::kSelected);
       dirty_rect_.Unite(row->rect());
     }
     ++index;
@@ -484,8 +492,8 @@ TableControl::TableControl(const std::vector<TableColumn>& columns,
 TableControl::~TableControl() {
 }
 
-bool TableControl::IsSelected(int row_id) const {
-  return model_->IsSelected(row_id);
+int TableControl::GetRowState(int row_id) const {
+  return model_->GetRowState(row_id);
 }
 
 void TableControl::Select(int row_id) {

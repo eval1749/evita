@@ -37,7 +37,7 @@ class TableControl :
                        TableControlObserver* observer);
   public: virtual ~TableControl();
 
-  public: bool IsSelected(int row_id) const;
+  public: int GetRowState(int row_id) const;
   public: void Select(int row_id);
   private: void UpdateViewIfNeeded();
 

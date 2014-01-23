@@ -23,9 +23,9 @@ class KeyboardEvent;
 
 namespace widgets {
 
-typedef common::win::NativeWindow NativeWindow;
-typedef common::win::Point Point;
-typedef common::win::Rect Rect;
+using common::win::NativeWindow;
+using common::win::Point;
+using common::win::Rect;
 using ui::KeyboardEvent;
 
 //////////////////////////////////////////////////////////////////////

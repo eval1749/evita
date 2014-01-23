@@ -502,7 +502,7 @@ void TableControl::Select(int row_id) {
 
 void TableControl::UpdateViewIfNeeded() {
   auto dirty_rect = model_->ResetDirtyRect();
-  if (dirty_rect.is_empty())
+  if (!is_shown() || dirty_rect.is_empty())
     return;
   SchedulePaintInRect(gfx::Rect(dirty_rect));
 }
@@ -526,7 +526,6 @@ void TableControl::DidRemoveRow(int row_id) {
 // Widget
 void TableControl::DidKillFocus() {
   model_->DidKillFocus();
-  auto dirty_rect = model_->ResetDirtyRect();
   UpdateViewIfNeeded();
 }
 

@@ -39,6 +39,10 @@ enum class Modifier {
   Shift = 0x400,
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// Event
+//
 class Event {
   private: EventType event_type_;
 
@@ -49,6 +53,10 @@ class Event {
   public: EventType event_type() const { return event_type_; }
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// KeyboardEvent
+//
 class KeyboardEvent : public Event {
   private: int raw_key_code_;
   private: bool repeat_;
@@ -73,6 +81,5 @@ class KeyboardEvent : public Event {
 };
 
 }  // namespace ui
-
 
 #endif //!defined(INCLUDE_evita_ui_events_event_h)

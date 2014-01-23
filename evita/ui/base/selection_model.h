@@ -18,6 +18,8 @@ class SelectionModel {
   public: SelectionModel(int size);
   public: ~SelectionModel();
 
+  public: bool empty() const { return !set_.size(); }
+
   public: void Add(int index);
   public: void Clear();
   public: void CollapseTo(int index);

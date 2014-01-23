@@ -259,6 +259,8 @@ void TableControl::TableControlModel::DidResize(const gfx::RectF& rect) {
 
 void TableControl::TableControlModel::DidSetFocus() {
   has_focus_ = true;
+  if (selection_.empty() && rows_.size())
+    selection_.CollapseTo(0);
   MakeSelectionViewDirty();
 }
 

@@ -22,6 +22,7 @@
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
+#include "evita/ui/widget_ostream.h"
 #include "evita/vi_Selection.h"
 #include "evita/vi_TextEditWindow.h"
 #include "evita/vi_util.h"

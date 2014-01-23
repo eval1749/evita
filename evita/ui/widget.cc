@@ -12,6 +12,7 @@
 #include "common/win/win32_verify.h"
 #include "evita/ui/events/event.h"
 #include "evita/ui/root_widget.h"
+#include "evita/ui/widget_ostream.h"
 
 #define DEBUG_FOCUS 0
 #define DEBUG_IDLE 0
@@ -685,17 +686,3 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
 }
 
 } // namespace ui
-
-std::ostream& operator<<(std::ostream& out, const ui::Widget& widget) {
-  const auto& rect = widget.rect();
-  out << "{" << widget.class_name() << "@" << std::hex <<
-    reinterpret_cast<uintptr_t>(&widget) << std::dec << " (" << rect.left <<
-    "," << rect.top << ")+(" << rect.width() << "x" << rect.height() << ")}";
-  return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const ui::Widget* widget) {
-  if (widget)
-    return out << *widget;
-  return out << "null";
-}

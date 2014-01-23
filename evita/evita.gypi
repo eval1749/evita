@@ -344,6 +344,7 @@
 
         'ui/root_widget.cc',
         'ui/widget.cc',
+        'ui/widget_ostream.cc',
       ], # sources
     },
     {

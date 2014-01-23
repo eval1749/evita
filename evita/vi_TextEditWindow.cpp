@@ -585,9 +585,7 @@ void TextEditWindow::OnKeyboardEvent(ui::KeyboardEvent event) {
   if (event.event_type() != ui::EventType::KeyDown)
     return;
   caret_blinker_.reset();
-  Application::instance()->Execute(this,
-                                   static_cast<uint32_t>(event.key_code()),
-                                   static_cast<uint32_t>(event.repeat()));
+  Application::instance()->Execute(this, event);
 }
 
 void TextEditWindow::OnLeftButtonDown(uint flags, const Point& point) {

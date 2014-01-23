@@ -17,6 +17,7 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/ed_util.h"
 #include "evita/dom/buffer.h"
+#include "evita/ui/events/event.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Selection.h"
 #include "evita/vi_TextEditWindow.h"
@@ -98,14 +99,16 @@ Processor::Processor() {
   Reset();
 }
 
-/// <summary>
-/// Advance command processing state with specified keyboard event.
-/// </summary>
-/// <param name="fRepeat">True if keyboard repeat event.</param>
-/// <param name="nKey">Key code.</param>
-/// <param name="pWindow">A window object causing an event.</param>
-void Processor::Execute(CommandWindow* window, int key_code, int fRepeat) {
+static base::char16 MapKeyCodeToAscii(int key_code) {
+  if (key_code >= (Mod_Ctrl | 'A') && key_code <= (Mod_Ctrl | 0x5F))
+    return static_cast<base::char16>(key_code & 0x1F);
+  return static_cast<base::char16>(key_code);
+}
+
+// Advance command processing state with specified keyboard event.
+void Processor::Execute(CommandWindow* window, ui::KeyboardEvent event) {
   m_pWindow = window;
+  auto const key_code = event.key_code();
   m_wchLast = static_cast<char16>(key_code);
   key_codes_.push_back(key_code);
   PrepareExecution(window);
@@ -128,11 +131,9 @@ void Processor::Execute(CommandWindow* window, int key_code, int fRepeat) {
     case State_Quote:
       if (m_pSelection) {
         // Insert ASCII character into buffer.
-        if (key_code >= (Mod_Ctrl | 'A') && key_code <= (Mod_Ctrl | 0x5F))
-          key_code &= 0x1F;
-
-        if (key_code <= 0x7F)
-          m_pSelection->TypeChar(static_cast<base::char16>(key_code));
+        auto const char_code = MapKeyCodeToAscii(key_code);
+        if (char_code <= 0x7F)
+          m_pSelection->TypeChar(char_code);
       }
       Reset();
       return;
@@ -155,7 +156,7 @@ void Processor::Execute(CommandWindow* window, int key_code, int fRepeat) {
     case State_Start:
       m_pFrame->ResetMessages();
       entry = window->MapKey(static_cast<uint32>(key_code));
-      m_iArg = fRepeat ? 2 : 1;
+      m_iArg = event.repeat() ? 2 : 1;
       if (entry == StartArgumentEntry()) {
         m_eState = State_StartArg;
         m_iArg = 0;

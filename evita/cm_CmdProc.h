@@ -21,6 +21,10 @@ enum Mod {
   Mod_CtrlShift = 0x600,
 };
 
+namespace ui {
+class KeyboardEvent;
+}
+
 namespace Command {
 
 enum Bind {
@@ -140,7 +144,7 @@ class Processor : public Context {
   public: Processor();
   public: virtual ~Processor() = default;
 
-  public: void Execute(CommandWindow* window, int key_code, int repeat);
+  public: void Execute(CommandWindow* window, ui::KeyboardEvent event);
   public: static void GlobalInit();
   private: void PrepareExecution(CommandWindow* window);
   private: void ReportUnboundKeys();

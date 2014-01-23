@@ -20,6 +20,7 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/ed_Mode.h"
 #include "evita/dom/buffer.h"
+#include "evita/ui/events/event.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_IoManager.h"
@@ -148,10 +149,8 @@ void Application::DoIdle() {
   }
 }
 
-void Application::Execute(CommandWindow* window, uint32 key_code,
-                          uint32 repeat) {
-  command_processor_->Execute(window, static_cast<int>(key_code),
-                              static_cast<int>(repeat));
+void Application::Execute(CommandWindow* window, ui::KeyboardEvent event) {
+  command_processor_->Execute(window, event);
 }
 
 Buffer* Application::FindBuffer(const base::string16& name) const {

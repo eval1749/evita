@@ -27,6 +27,8 @@ class TableControl :
     public ui::Widget,
     public TableModelObserver {
 
+  DECLARE_CASTABLE_CLASS(TableControl, Widget);
+
   private: class TableControlModel;
 
   private: std::unique_ptr<TableControlModel> model_;

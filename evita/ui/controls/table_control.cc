@@ -13,6 +13,7 @@
 #include "evita/ui/base/selection_model.h"
 #include "evita/ui/base/table_model.h"
 #include "evita/ui/controls/table_control_observer.h"
+#include "evita/ui/events/event.h"
 
 namespace ui {
 
@@ -148,13 +149,12 @@ class TableControl::TableControlModel {
   private: std::list<Row*> rows_;
   private: std::unordered_map<int, Row*> row_map_;
   private: float row_height_;
+  private: SelectionModel selection_;
   private: std::unique_ptr<gfx::TextFormat> text_format_;
 
   public: TableControlModel(const std::vector<TableColumn>& columns,
                             const TableModel* model);
   public: ~TableControlModel();
-
-  public: std::vector<Row*> selected_rows() const;
 
   public: void DidAddRow(int row_id);
   public: void DidChangeRow(int row_id);
@@ -165,8 +165,13 @@ class TableControl::TableControlModel {
   public: void Draw(gfx::Graphics* gfx) const;
   private: void DrawHeaderRow(gfx::Graphics* gfx, gfx::PointF left_top) const;
   private: void DrawRow(gfx::Graphics* gfx, const Row* row) const;
+  public: void ExtendSelection(int direction);
+  private: const Row* GetRowById(int row_id) const;
+  private: int GetRowIndex(const Row* row) const;
   private: Item* HitTest(const gfx::PointF& point) const;
   public: bool IsSelected(int row_id) const;
+  public: void MakeSelectionViewDirty();
+  public: void MoveSelection(int direction);
   public: void OnLeftButtonDown(uint32_t flags, const gfx::PointF& point);
   public: gfx::RectF ResetDirtyRect();
   public: void Select(int row_id);
@@ -181,6 +186,7 @@ TableControl::TableControlModel::TableControlModel(
     : has_focus_(false),
       model_(model),
       row_height_(20.0f),
+      selection_(model->GetRowCount()),
       text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", row_height_ - 6)) {
   {
     common::ComPtr<IDWriteInlineObject> inline_object;
@@ -212,27 +218,23 @@ TableControl::TableControlModel::~TableControlModel() {
   }
 }
 
-std::vector<Row*> TableControl::TableControlModel::selected_rows() const {
-  std::vector<Row*> selected_rows;
-  for (auto row : rows_) {
-    if (row->selected())
-      selected_rows.push_back(row);
-  }
-  return selected_rows;
-}
-
 void TableControl::TableControlModel::DidAddRow(int row_id) {
   auto const row = new Row(row_id);
   rows_.push_back(row);
   row_map_[row_id] = row;
+  selection_.DidAddItem();
 }
 
-void TableControl::TableControlModel::DidChangeRow(int) {
+void TableControl::TableControlModel::DidChangeRow(int row_id) {
+  auto row = GetRowById(row_id);
+  if (!row)
+    return;
+  dirty_rect_.Unite(row->rect());
 }
 
 void TableControl::TableControlModel::DidKillFocus() {
   has_focus_ = false;
-  UpdateSelectionView();
+  MakeSelectionViewDirty();
 }
 
 void TableControl::TableControlModel::DidRemoveRow(int row_id) {
@@ -241,10 +243,14 @@ void TableControl::TableControlModel::DidRemoveRow(int row_id) {
     DVLOG(0) << "No such row " << row_id;
     return;
   }
-  auto const row = present->second;
+  auto row = present->second;
+  auto index = GetRowIndex(row);
+  if (index >= 0)
+    selection_.DidRemoveItem(index);
   row_map_.erase(present);
   rows_.remove(row);
   delete row;
+  UpdateSelectionView();
 }
 
 void TableControl::TableControlModel::DidResize(const gfx::RectF& rect) {
@@ -253,7 +259,7 @@ void TableControl::TableControlModel::DidResize(const gfx::RectF& rect) {
 
 void TableControl::TableControlModel::DidSetFocus() {
   has_focus_ = true;
-  UpdateSelectionView();
+  MakeSelectionViewDirty();
 }
 
 void TableControl::TableControlModel::Draw(gfx::Graphics* gfx) const {
@@ -354,6 +360,30 @@ void TableControl::TableControlModel::DrawRow(gfx::Graphics* gfx,
   }
 }
 
+void TableControl::TableControlModel::ExtendSelection(int direction) {
+  selection_.Extend(direction);
+  UpdateSelectionView();
+}
+
+const Row* TableControl::TableControlModel::GetRowById(int row_id) const {
+  auto const present = row_map_.find(row_id);
+  if (present == row_map_.end()) {
+    DVLOG(0) << "No such row " << row_id;
+    return nullptr;
+  }
+  return present->second;
+}
+
+int TableControl::TableControlModel::GetRowIndex(const Row* present) const {
+  auto index = 0;
+  for (auto row : rows_) {
+    if (row == present)
+      return index;
+    ++index;
+  }
+  return -1;
+}
+
 Item* TableControl::TableControlModel::HitTest(
     const gfx::PointF& point) const {
   for (auto column : columns_) {
@@ -370,12 +400,24 @@ Item* TableControl::TableControlModel::HitTest(
 }
 
 bool TableControl::TableControlModel::IsSelected(int row_id) const {
-  auto const present = row_map_.find(row_id);
-  if (present == row_map_.end()) {
-    DVLOG(0) << "No such row " << row_id;
-    return false;
+  auto row = GetRowById(row_id);
+  return row ? row->selected() : false;
+}
+
+void TableControl::TableControlModel::MakeSelectionViewDirty() {
+  auto index = 0;
+  for(auto row : rows_) {
+    if (selection_.IsSelected(index)) {
+      row->UpdateState(row->selected() ? 0 : Row::kSelected, Row::kSelected);
+      dirty_rect_.Unite(row->rect());
+    }
+    ++index;
   }
-  return present->second->selected();
+}
+
+void TableControl::TableControlModel::MoveSelection(int direction) {
+  selection_.Move(direction);
+  UpdateSelectionView();
 }
 
 void TableControl::TableControlModel::OnLeftButtonDown(uint32_t,
@@ -394,25 +436,24 @@ gfx::RectF TableControl::TableControlModel::ResetDirtyRect() {
 }
 
 void TableControl::TableControlModel::Select(int row_id) {
-  auto const present = row_map_.find(row_id);
-  if (present == row_map_.end()) {
-    DVLOG(0) << "No such row " << row_id;
+  auto row = GetRowById(row_id);
+  if (!row)
     return;
-  }
-  auto const new_row = present->second;
-  new_row->UpdateState(Row::kSelected, Row::kSelected);
-  dirty_rect_.Unite(new_row->rect());
-  for (auto old_row : selected_rows()) {
-    if (old_row == new_row)
-      continue;
-    old_row->UpdateState(0, Row::kSelected);
-    dirty_rect_.Unite(present->second->rect());
-  }
+  auto index = GetRowIndex(row);
+  if (index < 0)
+    return;
+  selection_.CollapseTo(index);
+  UpdateSelectionView();
 }
 
 void TableControl::TableControlModel::UpdateSelectionView() {
-  for (auto row : selected_rows()) {
-    dirty_rect_.Unite(row->rect());
+  auto index = 0;
+  for(auto row : rows_) {
+    if (row->selected() != selection_.IsSelected(index)) {
+      row->UpdateState(row->selected() ? 0 : Row::kSelected, Row::kSelected);
+      dirty_rect_.Unite(row->rect());
+    }
+    ++index;
   }
 }
 
@@ -480,6 +521,27 @@ void TableControl::DidSetFocus() {
 
 void TableControl::OnDraw(gfx::Graphics* gfx) {
   model_->Draw(gfx);
+}
+
+void TableControl::OnKeyPressed(const ui::KeyboardEvent& event) {
+  switch (event.key_code()) {
+    case KeyCode::ArrowDown:
+      if (event.shift_key())
+        model_->ExtendSelection(1);
+      else
+        model_->MoveSelection(1);
+      UpdateViewIfNeeded();
+      return;
+    case KeyCode::ArrowUp:
+      if (event.shift_key())
+        model_->ExtendSelection(-1);
+      else
+        model_->MoveSelection(-1);
+      UpdateViewIfNeeded();
+      return;
+  }
+
+  observer_->OnKeyDown(event.raw_key_code());
 }
 
 void TableControl::OnLeftButtonDown(uint32_t flags, const gfx::Point& point) {

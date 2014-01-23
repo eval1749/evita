@@ -10,17 +10,23 @@
 namespace ui {
 
 class SelectionModel {
-  private: std::unordered_set<int> selected_set_;
+  private: int anchor_;
+  private: int focus_;
+  private: int size_;
+  private: std::unordered_set<int> set_;
 
-  public: SelectionModel();
+  public: SelectionModel(int size);
   public: ~SelectionModel();
 
+  public: void Add(int index);
   public: void Clear();
+  public: void CollapseTo(int index);
+  public: void DidAddItem();
+  public: void DidRemoveItem(int index);
   public: void Extend(int direction);
   public: void ExtendTo(int index);
   public: bool IsSelected(int index) const;
-
-  public: void Select(int index);
+  public: void Move(int direction);
 
   DISALLOW_COPY_AND_ASSIGN(SelectionModel);
 };

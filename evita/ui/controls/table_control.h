@@ -18,6 +18,7 @@ class TextFormat;
 
 namespace ui {
 
+class KeyboardEvent;
 struct TableColumn;
 class TableControlObserver;
 class TableModel;
@@ -50,6 +51,7 @@ class TableControl :
   private: virtual void DidResize() override;
   private: virtual void DidSetFocus() override;
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
+  private: virtual void OnKeyPressed(const KeyboardEvent& event) override;
   private: virtual void OnLeftButtonDown(uint32_t flags,
                                          const gfx::Point& point) override;
 

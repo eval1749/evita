@@ -17,11 +17,16 @@ namespace gfx {
 class Graphics;
 }
 
+namespace ui {
+class KeyboardEvent;
+}
+
 namespace widgets {
 
 typedef common::win::NativeWindow NativeWindow;
 typedef common::win::Point Point;
 typedef common::win::Rect Rect;
+using ui::KeyboardEvent;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -107,6 +112,7 @@ class Widget
   public: virtual bool OnIdle(uint32_t idle_count);
   public: virtual void OnLeftButtonDown(uint32_t flags, const Point& point);
   public: virtual void OnLeftButtonUp(uint32_t flags, const Point& point);
+  protected: virtual void OnKeyboardEvent(KeyboardEvent event);
   public: virtual LRESULT OnMessage(uint32_t uMsg, WPARAM wParam,
                                     LPARAM lParam);
   public: virtual void OnMouseMove(uint32_t flags, const Point& point);

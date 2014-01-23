@@ -38,6 +38,8 @@
 #include "evita/dom/range.h"
 #include "evita/dom/selection.h"
 #include "evita/dom/text_window.h"
+#include "evita/ui/events/event.h"
+#include "evita/ui/events/event_logging.h"
 #include "evita/vi_Caret.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
@@ -579,6 +581,15 @@ bool TextEditWindow::OnIdle(uint count) {
   return more;
 }
 
+void TextEditWindow::OnKeyboardEvent(ui::KeyboardEvent event) {
+  if (event.event_type() != ui::EventType::KeyDown)
+    return;
+  caret_blinker_.reset();
+  Application::instance()->Execute(this,
+                                   static_cast<uint32_t>(event.key_code()),
+                                   static_cast<uint32_t>(event.repeat()));
+}
+
 void TextEditWindow::OnLeftButtonDown(uint flags, const Point& point) {
   UI_DOM_AUTO_LOCK_SCOPE();
   auto const lPosn = MapPointToPosn(point);
@@ -624,17 +635,6 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
   }
 
   switch (uMsg) {
-    case WM_CHAR: {
-      // Ctrl+<key> is handled by WM_KEYDOWN.
-      char16 wch = static_cast<char16>(wParam);
-      if (wch >= 0x20) {
-        caret_blinker_.reset();
-        Application::instance()->Execute(
-            this, wch,  static_cast<uint>(HIWORD(lParam) & KF_REPEAT));
-      }
-      break;
-    }
-
     case WM_DESTROY:
       #if DEBUG_DESTROY
         DEBUG_TEXT_EDIT_PRINTF("WM_DESTROY\n");
@@ -646,23 +646,6 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
           DEBUG_TEXT_EDIT_PRINTF("WM_APPCOMMAND %x\n", lParam);
       #endif
       return TRUE;
-
-    case WM_KEYDOWN: {
-      #if DEBUG_KEY
-        DEBUG_TEXT_EDIT_PRINTF("WM_KEYDOWN VKey=0x%0X 0x%04X 0x%04X\r\n",
-            wParam, HIWORD(lParam), LOWORD(lParam));
-      #endif
-
-      auto const nVKey = static_cast<uint>(wParam);
-      auto const nKey = Command::TranslateKey(nVKey);
-      if (nKey) {
-        caret_blinker_.reset();
-        Application::instance()->Execute(
-            this, nKey, static_cast<uint>(HIWORD(lParam) & KF_REPEAT));
-        return 0;
-      }
-      break;
-    }
 
     case WM_LBUTTONDBLCLK: {
       UI_DOM_AUTO_LOCK_SCOPE();

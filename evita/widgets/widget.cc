@@ -9,6 +9,7 @@
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants.h"
 #include "common/tree/descendants_or_self.h"
+#include "evita/ui/events/event.h"
 #include "evita/widgets/root_widget.h"
 
 #define DEBUG_FOCUS 0
@@ -36,6 +37,8 @@ Widget* capture_widget;
 Widget* focus_widget;
 Widget* will_focus_widget;
 }  // namespace
+
+using ui::EventType;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -265,6 +268,9 @@ bool Widget::OnIdle(uint32_t idle_count) {
       more = true;
   }
   return more;
+}
+
+void Widget::OnKeyboardEvent(KeyboardEvent) {
 }
 
 void Widget::OnLeftButtonDown(uint32_t, const Point&) {
@@ -634,8 +640,14 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
   }
 
   if (focus_widget) {
-    if (message >= WM_KEYFIRST && message <= WM_KEYLAST)
+    if (message >= WM_KEYFIRST && message <= WM_KEYLAST) {
+      auto event = KeyboardEvent::Create(message, wParam, lParam);
+      if (event.event_type() != EventType::Invalid) {
+        focus_widget->OnKeyboardEvent(event);
+        return 0;
+      }
       return focus_widget->OnMessage(message, wParam, lParam);
+    }
   }
 
   if (message >= WM_MOUSEFIRST && message <= WM_MOUSELAST) {

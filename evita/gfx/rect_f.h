@@ -3,6 +3,8 @@
 #if !defined(INCLUDE_gfx_rect_f_h)
 #define INCLUDE_gfx_rect_f_h
 
+#include <algorithm>
+
 #include "gfx/point_f.h"
 #include "gfx/size_f.h"
 
@@ -104,7 +106,30 @@ class Rect_ : public BaseType {
 
   public: SizeType size() const { return SizeType(width(), height()); }
   public: UnitType width() const { return right - left; }
+
+  public: bool Contains(PointF point) const;
+  public: void Unite(const Rect_& other);
 };
+
+template<typename BaseType, typename PointType, typename SizeType>
+bool Rect_<BaseType, PointType, SizeType>::Contains(PointF point) const {
+  return point.x >= left && point.x < right && point.y >= top &&
+         point.y < bottom;
+}
+
+template<typename BaseType, typename PointType, typename SizeType>
+void Rect_<BaseType, PointType, SizeType>::Unite(const Rect_& other) {
+  if (other.is_empty())
+    return;
+  if (is_empty()) {
+    *this = other;
+    return;
+  }
+  left = std::min(left, other.left);
+  top = std::min(top, other.top);
+  right = std::max(right, other.right);
+  bottom = std::max(bottom, other.bottom);
+}
 
 typedef Rect_<D2D1_RECT_F, PointF, SizeF> RectF;
 typedef Rect_<D2D1_RECT_U, PointU, SizeU> RectU;

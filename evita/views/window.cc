@@ -42,8 +42,7 @@ class WindowIdMapper : public common::Singleton<WindowIdMapper> {
     DCHECK_NE(kInvalidWindowId, window_id);
     auto it = map_.find(window_id);
     if (it == map_.end()) {
-      DVLOG(0) << "Why we don't have a window for WindowId " << window_id <<
-        " in WindowIdMap?";
+      // The window is destroyed by UI.
       return;
     }
     map_.erase(it);
@@ -68,7 +67,12 @@ class WindowIdMapper : public common::Singleton<WindowIdMapper> {
   public: void Unregister(WindowId window_id) {
     ASSERT_CALLED_ON_UI_THREAD();
     DCHECK_NE(kInvalidWindowId, window_id);
-    map_[window_id] = nullptr;
+    auto it = map_.find(window_id);
+    if (it == map_.end()) {
+      // The window is destroyed by DOM.
+      return;
+    }
+    map_.erase(it);
   }
 };
 

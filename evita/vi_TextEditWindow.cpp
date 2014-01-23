@@ -39,7 +39,7 @@
 #include "evita/dom/selection.h"
 #include "evita/dom/text_window.h"
 #include "evita/ui/events/event.h"
-#include "evita/ui/events/event_logging.h"
+#include "evita/ui/events/event_ostream.h"
 #include "evita/vi_Caret.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"

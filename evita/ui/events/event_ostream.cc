@@ -2,7 +2,7 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 #include "base/basictypes.h"
-#include "evita/ui/events/event_logging.h"
+#include "evita/ui/events/event_ostream.h"
 
 namespace {
 const char* event_names[] = {

@@ -581,9 +581,7 @@ bool TextEditWindow::OnIdle(uint count) {
   return more;
 }
 
-void TextEditWindow::OnKeyboardEvent(ui::KeyboardEvent event) {
-  if (event.event_type() != ui::EventType::KeyDown)
-    return;
+void TextEditWindow::OnKeyPressed(const ui::KeyboardEvent& event) {
   caret_blinker_.reset();
   Application::instance()->Execute(this, event);
 }

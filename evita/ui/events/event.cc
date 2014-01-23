@@ -41,13 +41,13 @@ KeyboardEvent::~KeyboardEvent() {
 KeyboardEvent KeyboardEvent::Create(uint32_t message, WPARAM wParam,
                                     LPARAM lParam) {
   if (message == WM_CHAR) {
-    auto event = KeyboardEvent(EventType::KeyDown, lParam);
+    auto event = KeyboardEvent(EventType::KeyPressed, lParam);
     event.raw_key_code_ = static_cast<int>(wParam);
     return event.raw_key_code_ < 0x20 ? KeyboardEvent() : event;
   }
 
   if (message == WM_KEYDOWN) {
-    auto event = KeyboardEvent(EventType::KeyDown, lParam);
+    auto event = KeyboardEvent(EventType::KeyPressed, lParam);
     event.raw_key_code_ = static_cast<int>(
         Command::TranslateKey(static_cast<uint32_t>(wParam)));
     return event.raw_key_code_ ? event : KeyboardEvent();

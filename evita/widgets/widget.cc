@@ -270,7 +270,10 @@ bool Widget::OnIdle(uint32_t idle_count) {
   return more;
 }
 
-void Widget::OnKeyboardEvent(KeyboardEvent) {
+void Widget::OnKeyPressed(const KeyboardEvent&) {
+}
+
+void Widget::OnKeyReleased(const KeyboardEvent&) {
 }
 
 void Widget::OnLeftButtonDown(uint32_t, const Point&) {
@@ -642,8 +645,12 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
   if (focus_widget) {
     if (message >= WM_KEYFIRST && message <= WM_KEYLAST) {
       auto event = KeyboardEvent::Create(message, wParam, lParam);
-      if (event.event_type() != EventType::Invalid) {
-        focus_widget->OnKeyboardEvent(event);
+      if (event.event_type() == EventType::KeyPressed) {
+        focus_widget->OnKeyPressed(event);
+        return 0;
+      }
+      if (event.event_type() == EventType::KeyReleased) {
+        focus_widget->OnKeyReleased(event);
         return 0;
       }
       return focus_widget->OnMessage(message, wParam, lParam);

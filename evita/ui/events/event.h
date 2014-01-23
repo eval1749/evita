@@ -9,11 +9,11 @@ namespace ui {
 
 enum class EventType {
   Invalid,
-  KeyDown,
-  KeyUp,
-  MouseDown,
+  KeyPressed,
+  KeyReleased,
+  MousePressed,
   MouseMove,
-  MouseUp,
+  MouseReleased,
   MouseWheel,
 };
 

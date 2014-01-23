@@ -170,7 +170,7 @@ class TextEditWindow
   // [O]
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
   private: virtual bool OnIdle(uint) override;
-  private: virtual void OnKeyboardEvent(ui::KeyboardEvent event) override;
+  private: virtual void OnKeyPressed(const ui::KeyboardEvent& event) override;
   private: virtual LRESULT OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam);
   private: virtual void OnLeftButtonDown(uint, const Point&) override;
   private: virtual void OnLeftButtonUp(uint, const Point&) override;

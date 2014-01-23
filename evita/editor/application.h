@@ -40,10 +40,6 @@ namespace editor {
 class DomLock;
 }
 
-namespace ui {
-class KeyboardEvent;
-}
-
 namespace views {
 class ViewDelegateImpl;
 }
@@ -90,7 +86,7 @@ class Application : public common::Singleton<Application> {
   private: void DoIdle();
 
   // [E]
-  public: void Execute(CommandWindow* window, ui::KeyboardEvent event);
+  public: void Execute(CommandWindow* window, uint32 key_code, uint32 repeat);
 
   // [F]
   public: Buffer* FindBuffer(const base::string16& name) const;

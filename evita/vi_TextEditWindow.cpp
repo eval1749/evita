@@ -583,7 +583,9 @@ bool TextEditWindow::OnIdle(uint count) {
 
 void TextEditWindow::OnKeyPressed(const ui::KeyboardEvent& event) {
   caret_blinker_.reset();
-  Application::instance()->Execute(this, event);
+  Application::instance()->Execute(this,
+                                   static_cast<uint32_t>(event.raw_key_code()),
+                                   static_cast<uint32_t>(event.repeat()));
 }
 
 void TextEditWindow::OnLeftButtonDown(uint flags, const Point& point) {

@@ -228,7 +228,7 @@ void TableView::UpdateStatusBar() const {
   Frame::FindFrame(*this)->SetStatusBar(0, L"");
 }
 
-// widgets::Widget
+// ui::Widget
 void TableView::DidRealize() {
   CommandWindow_::DidRealize();
   Redraw();

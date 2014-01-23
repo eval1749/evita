@@ -17,6 +17,6 @@ class TableControlObserver {
   public: virtual void OnSelectionChanged();
 };
 
-}  // namespace widgets
+}  // namespace ui
 
 #endif //!defined(INCLUDE_evita_ui_controls_table_control_observer_h)

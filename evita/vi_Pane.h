@@ -22,8 +22,8 @@ class Graphics;
 class Frame;
 
 class Pane : public CommandWindow_<Pane>, public ChildNode_<Frame, Pane> {
-  protected: typedef widgets::Widget Widget;
-  protected: typedef widgets::Widget Widget;
+  protected: typedef ui::Widget Widget;
+  protected: typedef ui::Widget Widget;
 
   DECLARE_CASTABLE_CLASS(Pane, CommandWindow);
 

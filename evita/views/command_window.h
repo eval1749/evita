@@ -13,7 +13,7 @@
 //
 class CommandWindow : public views::Window {
   protected: explicit CommandWindow(
-      std::unique_ptr<widgets::NativeWindow>&& native_window);
+      std::unique_ptr<ui::NativeWindow>&& native_window);
   protected: explicit CommandWindow(views::WindowId window_id);
   protected: virtual ~CommandWindow();
 
@@ -34,7 +34,7 @@ class CommandWindow : public views::Window {
 
   public: virtual Command::KeyBindEntry* MapKey(uint key_code);
 
-  // widgets::Widget
+  // ui::Widget
   protected: void virtual DidSetFocus() override;
 
   DISALLOW_COPY_AND_ASSIGN(CommandWindow);
@@ -43,7 +43,7 @@ class CommandWindow : public views::Window {
 template<class T, class Parent_ = CommandWindow>
 class CommandWindow_ : public Parent_  {
   protected: CommandWindow_(
-      std::unique_ptr<widgets::NativeWindow>&& native_window)
+      std::unique_ptr<ui::NativeWindow>&& native_window)
     : Parent_(std::move(native_window)) {
   }
 

@@ -7,15 +7,11 @@
 
 #include "common/win/rect.h"
 
-namespace widgets {
-class Widget;
-}
-
 namespace ui {
 
 using common::win::Point;
 using common::win::Rect;
-using widgets::Widget;
+class Widget;
 
 enum class EventType {
   Invalid,

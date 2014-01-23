@@ -68,7 +68,7 @@ class TableView
   private: virtual void Redraw() override;
   private: virtual void UpdateStatusBar() const override;
 
-  // widgets::Widget
+  // ui::Widget
   private: virtual void DidRealize() override;
   private: virtual void DidResize() override;
   private: virtual void DidSetFocus() override;

@@ -2,7 +2,7 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #include "evita/ui/root_widget.h"
 
-namespace widgets {
+namespace ui {
 
 RootWidget::RootWidget() {
 }
@@ -10,4 +10,4 @@ RootWidget::RootWidget() {
 RootWidget::~RootWidget() {
 }
 
-}  // namespace widgets
+}  // namespace ui

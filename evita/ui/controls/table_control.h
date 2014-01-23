@@ -24,7 +24,7 @@ class TableControlObserver;
 class TableModel;
 
 class TableControl :
-    public widgets::Widget,
+    public ui::Widget,
     public TableModelObserver {
 
   private: class TableControlModel;

@@ -24,7 +24,7 @@
 #include <string>
 #endif
 
-namespace widgets {
+namespace ui {
 
 namespace {
 Widget* capture_widget;
@@ -684,9 +684,9 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
   return OnMessage(message, wParam, lParam);
 }
 
-} // namespace widgets
+} // namespace ui
 
-std::ostream& operator<<(std::ostream& out, const widgets::Widget& widget) {
+std::ostream& operator<<(std::ostream& out, const ui::Widget& widget) {
   const auto& rect = widget.rect();
   out << "{" << widget.class_name() << "@" << std::hex <<
     reinterpret_cast<uintptr_t>(&widget) << std::dec << " (" << rect.left <<
@@ -694,7 +694,7 @@ std::ostream& operator<<(std::ostream& out, const widgets::Widget& widget) {
   return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const widgets::Widget* widget) {
+std::ostream& operator<<(std::ostream& out, const ui::Widget* widget) {
   if (widget)
     return out << *widget;
   return out << "null";

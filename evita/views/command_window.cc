@@ -11,7 +11,7 @@ Command::KeyBinds* key_bindings;
 }
 
 CommandWindow::CommandWindow(
-    std::unique_ptr<widgets::NativeWindow>&& native_window)
+    std::unique_ptr<ui::NativeWindow>&& native_window)
     : views::Window(std::move(native_window)) {
 }
 
@@ -40,7 +40,7 @@ Command::KeyBindEntry* CommandWindow::MapKey(uint key_code) {
   return key_bindings->MapKey(static_cast<int>(key_code));
 }
 
-// widgets::Widget
+// ui::Widget
 void CommandWindow::DidSetFocus() {
   if (is_shown())
     return;

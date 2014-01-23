@@ -57,8 +57,8 @@ using Buffer = dom::Buffer;
 /// </summary>
 class Frame final : public views::Window,
                     public DoubleLinkedNode_<Frame> {
-  private: typedef widgets::Widget Widget;
-  private: typedef widgets::Widget Widget;
+  private: typedef ui::Widget Widget;
+  private: typedef ui::Widget Widget;
   DECLARE_CASTABLE_CLASS(Frame, views::Window);
 
   private: enum CtrlId {

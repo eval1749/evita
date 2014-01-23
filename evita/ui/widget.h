@@ -18,15 +18,11 @@ class Graphics;
 }
 
 namespace ui {
-class KeyboardEvent;
-}
-
-namespace widgets {
 
 using common::win::NativeWindow;
 using common::win::Point;
 using common::win::Rect;
-using ui::KeyboardEvent;
+class KeyboardEvent;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -156,10 +152,10 @@ class Widget
 #define DEBUG_WIDGET_ARG(mp_widget) \
   ((mp_widget) ? (mp_widget)->class_name() : "null"), (mp_widget)
 
-} // namespace widgets
+} // namespace ui
 
-std::ostream& operator<<(std::ostream& out, const widgets::Widget& widget);
-std::ostream& operator<<(std::ostream& out, const widgets::Widget* widget);
+std::ostream& operator<<(std::ostream& out, const ui::Widget& widget);
+std::ostream& operator<<(std::ostream& out, const ui::Widget* widget);
 
 #define DVLOG_WIDGET(n) \
     DVLOG(n) << __FUNCTION__ << " " << *this << \

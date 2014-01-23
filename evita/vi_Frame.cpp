@@ -98,7 +98,7 @@ class CompositionState {
   }
 };
 
-bool HasChildWindow(widgets::Widget* parent, views::Window* window) {
+bool HasChildWindow(ui::Widget* parent, views::Window* window) {
   for (auto child : parent->child_nodes()) {
     if (child == window)
       return true;
@@ -120,7 +120,7 @@ Pane* GetContainingPane(Frame* frame, views::Window* window) {
 extern uint g_TabBand__TabDragMsg;
 
 Frame::Frame(views::WindowId window_id)
-    : views::Window(widgets::NativeWindow::Create(*this), window_id),
+    : views::Window(ui::NativeWindow::Create(*this), window_id),
       gfx_(new gfx::Graphics()),
       m_hwndTabBand(nullptr),
       m_pActivePane(nullptr) {
@@ -222,7 +222,7 @@ void Frame::DidActivatePane(Pane* const pane) {
     TabCtrl_SetCurSel(m_hwndTabBand, tab_index);
 }
 
-void Frame::DidAddChildWidget(const widgets::Widget& widget) {
+void Frame::DidAddChildWidget(const ui::Widget& widget) {
   if (auto pane = const_cast<Pane*>(widget.as<Pane>())) {
     m_oPanes.Append(this, pane);
     if (!is_realized())
@@ -341,7 +341,7 @@ void Frame::DidDestroyWidget() {
   delete this;
 }
 
-void Frame::DidRemoveChildWidget(const widgets::Widget& widget) {
+void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
   auto const pane = const_cast<Pane*>(widget.as<Pane>());
   DCHECK(pane);
   m_oPanes.Delete(pane);
@@ -428,7 +428,7 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
     DidChangeTabSelection(tab_index);
 }
 
-Frame* Frame::FindFrame(const widgets::Widget& widget) {
+Frame* Frame::FindFrame(const ui::Widget& widget) {
   for (auto ancestor : common::tree::ancestors_or_self(&widget)) {
     if (ancestor->is<Frame>())
       return const_cast<Widget*>(ancestor)->as<Frame>();

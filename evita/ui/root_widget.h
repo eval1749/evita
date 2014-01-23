@@ -6,7 +6,7 @@
 #include "common/memory/singleton.h"
 #include "evita/ui/widget.h"
 
-namespace widgets {
+namespace ui {
 
 class RootWidget : public Widget,
                    public common::Singleton<RootWidget> {
@@ -16,6 +16,6 @@ class RootWidget : public Widget,
   DISALLOW_COPY_AND_ASSIGN(RootWidget);
 };
 
-}  // namespace widgets
+}  // namespace ui
 
 #endif //!defined(INCLUDE_evita_ui_root_widget_h)

@@ -13,7 +13,7 @@ typedef common::win::Point Point;
 typedef common::win::Rect Rect;
 class WindowSet;
 
-class Window : public widgets::Widget {
+class Window : public ui::Widget {
   DECLARE_CASTABLE_CLASS(Window, Widget);
 
   private: const views::WindowId window_id_;

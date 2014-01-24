@@ -47,6 +47,7 @@ class TableView
   private: bool DrawIfNeeded();
   public: void GetRowStates(const std::vector<base::string16>& keys,
                             int* states) const;
+  private: void RedrawWithinLock();
   private: std::unique_ptr<TableViewModel> UpdateModelIfNeeded();
   private: void UpdateControl(std::unique_ptr<TableViewModel> new_model);
 

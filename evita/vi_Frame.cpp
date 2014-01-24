@@ -909,14 +909,14 @@ void Frame::ResetMessages() {
 /// <summary>
 ///   Set status bar message on specified part.
 /// </summary>
-void Frame::SetStatusBar(int const ePart, const char16* const pwszMsg) const {
+void Frame::SetStatusBar(int const ePart, const base::string16& text) const {
   ::SendMessage(m_oStatusBar, SB_SIMPLE, 0, 0);
 
   ::SendMessage(
       m_oStatusBar,
       SB_SETTEXT,
       static_cast<WPARAM>(ePart | SBT_NOBORDERS),
-      reinterpret_cast<LPARAM>(pwszMsg));
+      reinterpret_cast<LPARAM>(text.c_str()));
 }
 
 /// <summary>

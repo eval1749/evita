@@ -152,7 +152,7 @@ class Frame final : public views::Window,
   public: void ResetMessages();
 
   // [S]
-  public: void SetStatusBar(int, const char16*) const;
+  public: void SetStatusBar(int part, const base::string16& text) const;
   public: void SetStatusBarf(int, const char16*, ...);
   public: void SetStatusBarParts(const int*, int);
   public: bool ShowBuffer(Buffer*);

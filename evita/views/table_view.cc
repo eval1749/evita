@@ -6,6 +6,8 @@
 #include <commctrl.h>
 #include <algorithm>
 
+#include "base/strings/string16.h"
+#include "base/strings/stringprintf.h"
 #include "evita/cm_CmdProc.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
@@ -225,7 +227,11 @@ void TableView::Redraw() {
 }
 
 void TableView::UpdateStatusBar() const {
-  Frame::FindFrame(*this)->SetStatusBar(0, L"");
+  std::vector<base::string16> texts {
+    base::StringPrintf(L"%d documents", GetRowCount())
+  };
+  Frame::FindFrame(*this)->SetStatusBar(texts);
+  
 }
 
 // ui::Widget

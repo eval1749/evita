@@ -51,11 +51,4 @@ namespace Debugger
     void Printf(const char*, ...);
 } // Debugger
 
-#define WIN32_VERIFY(expr) { \
-  if (!(expr)) { \
-    auto const error = ::GetLastError(); \
-    Debugger::Fail("error=%d " #expr "\n", error); \
-  } \
-}
-
 #endif //!defined(INCLUDE_common_debugger_h)

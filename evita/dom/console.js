@@ -12,7 +12,7 @@
  *    show: function()
  * }}
  */
-var console = {
+global.console = {
   /** @const @type{string} */
   DOCUMENT_NAME: '*javascript*',
 

@@ -7,6 +7,11 @@
  */
 
 /**
+ * @type {Object.<string>}
+ */
+var global = {};
+
+/**
  * @constructor
  */
 var Document = function(name) {};
@@ -61,6 +66,11 @@ var FilePath;
  * @implements {EventTarget}
  */
 var Form = function() {};
+
+/**
+ * @type {Object}
+ */
+var JsConsole = {};
 
 /** @typedef {number} */
 var Position;

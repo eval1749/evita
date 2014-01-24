@@ -5,7 +5,7 @@
 'use strict';
 
 /** @const @type{Array.<string>} */
-var VKEY_NAMES = [
+global.VKEY_NAMES = [
   '00', // 0x00
   'LeftButton', // 0x01
   'RightButton', // 0x02
@@ -181,7 +181,7 @@ var VKEY_NAMES = [
 ];
 
 /** @const @type {Array.<string>} */
-var KEY_NAMES = (function() {
+global.KEY_NAMES = (function() {
   /** @type{Array.<string>} */
   var names = new Array(256);
   /**
@@ -205,7 +205,7 @@ var KEY_NAMES = (function() {
 })();
 
 /** @const @type {Array.<string, number>} */
-var KEY_CODE_MAP = (function() {
+global.KEY_CODE_MAP = (function() {
   var map = {};
   KEY_NAMES.forEach(function(name, index) {
     if (name) {

@@ -8,10 +8,11 @@
         'dom/events/event_enums.js',
         'dom/strings_en_US.js',
         'dom/unicode_enums.js',
+        'dom/window_enums.js',
       ],
       'js_externs_files': [
         'dom/types_externs.js',
-        #'dom/console_externs.js',
+        'dom/console_externs.js',
         'dom/document_externs.js',
         'dom/document_window_externs.js',
         'dom/events/event_externs.js',
@@ -22,10 +23,11 @@
         'dom/events/window_event_externs.js',
         'dom/editor_externs.js',
         'dom/editor_window_externs.js',
+        'dom/forms/form_externs.js',
         'dom/forms/form_control_externs.js',
         'dom/forms/text_field_control_externs.js',
         'dom/file_path_externs.js',
-        #'dom/key_names_externs.js',
+        'dom/key_names_externs.js',
         'dom/range_externs.js',
         'dom/selection_externs.js',
         'dom/table_selection_externs.js',
@@ -33,11 +35,11 @@
         'dom/text_selection_externs.js',
         'dom/text_window_externs.js',
         'dom/window_externs.js',
+        'dom/jslib/windows_externs.js',
       ],
       'js_lib_files': [
         'dom/polyfill.js',
         'dom/key_names.js',
-        'dom/strings_en_US.js',
 
         'dom/document.js',
         'dom/editor.js',
@@ -46,9 +48,11 @@
         'dom/range.js',
         'dom/window.js',
 
+        'dom/jslib/windows.js',
+
         'dom/console.js',
-        'dom/js_console.js',
         'dom/document_list.js',
+        'dom/js_console.js',
         'dom/find_and_replace_commands.js',
         'dom/text_window_commands.js',
         'dom/window_commands.js',
@@ -147,26 +151,30 @@
     {
       'target_name': 'check_jslib',
       'type': 'none',
-      'actions': [
+      'rules': [
         {
-          'action_name': 'closure_compile',
+          'rule_name': 'jscomp',
+          'extension': 'js',
           'inputs': [
-              '<@(js_defs_files)',
-              '<@(js_externs_files)',
-              '<@(js_lib_files)'
-          ],
-          'outputs': [ '<(SHARED_INTERMEDIATE_DIR)/jslib_source_map.txt' ],
+             '<(DEPTH)/tools/razzle/closure_compiler.py',
+             '<@(js_defs_files)',
+             '<@(js_externs_files)',
+           ], # inputs
+          'outputs': [
+              '<(SHARED_INTERMEDIATE_DIR)/<(RULE_INPUT_ROOT).min.js',
+           ], # outputs
           'action': [
             'python',
             '<(DEPTH)/tools/razzle/closure_compiler.py',
-            '--create_source_map=<@(_outputs)',
-            '<@(js_lib_files)',
+            '--js_output_file=<@(_outputs)',
+            '<(RULE_INPUT_PATH)',
             '--extern',
             '<@(js_defs_files)',
             '<@(js_externs_files)',
-          ],
-        }
-      ], # actions
+          ], # action
+        } # closure_compiler
+      ], # 'rules'
+      'sources': [ '<@(js_lib_files)', ],
     },
     {
       'target_name': 'dom_jslib',

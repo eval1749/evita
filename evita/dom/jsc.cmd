@@ -4,6 +4,7 @@ setlocal
 set externs_dir=evita\dom
 
 python tools\razzle\closure_compiler.py ^
+  --js_output_file=nul ^
   %* ^
   --extern ^
   %externs_dir%\enums.js ^
@@ -32,6 +33,7 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\table_window_externs.js ^
   %externs_dir%\text_selection_externs.js ^
   %externs_dir%\text_window_externs.js ^
-  %externs_dir%\window_externs.js
+  %externs_dir%\window_externs.js ^
+  %externs_dir%\jslib\windows_externs.js
 
 endlocal

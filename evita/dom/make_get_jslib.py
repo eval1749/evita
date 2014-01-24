@@ -64,7 +64,7 @@ def main():
   output_file = sys.argv[1]
   minifier = jsmin.JavaScriptMinifier()
 
-  script_source = ''
+  script_source = 'var global = this;\n'
   for input_file in sys.argv[2:]:
     lines = '\n'.join(open(input_file, 'rt').readlines())
     script_source += lines

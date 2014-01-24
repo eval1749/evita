@@ -6,36 +6,19 @@
 
 (function() {
   /**
-   * @param {!Document} document.
-   */
-  function newEditorWindow(document) {
-    var editorWindow = new EditorWindow();
-    newTextWindow(editorWindow, document);
-    editorWindow.realize();
-  }
-
-  /**
-   * @param {!Window} document.
-   * @param {!Document} document.
-   */
-  function newTextWindow(parent, document) {
-    parent.add(new TextWindow(new Range(document)));
-  }
-
-  /**
    * Open new document in new window in current editor window.
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+N', function(arg) {
     var editorWindow = this.parent;
     if (arg !== undefined) {
-      newTextWindow(editorWindow, new Document('untitled.txt'));
+      windows.newTextWindow(editorWindow, new Document('untitled.txt'));
       return;
     }
 
     Editor.getFilenameForSave(this, this.selection.document.filename)
         .then(function(filename) {
-          newTextWindow(editorWindow, new Document(filename))
+          windows.newTextWindow(editorWindow, new Document(filename))
         });
   });
 
@@ -45,13 +28,13 @@
    */
   Editor.bindKey(Window, 'Ctrl+Shift+N', function(arg) {
     if (arg !== undefined) {
-      newEditorWindow(new Document('untitled.txt'));
+      windows.newEditorWindow(new Document('untitled.txt'));
       return;
     }
 
     Editor.getFilenameForSave(this, this.selection.document.filename)
         .then(function(filename) {
-          newEditorWindow(new Document(filename));
+          windows.newEditorWindow(new Document(filename));
         });
   });
 
@@ -65,7 +48,7 @@
         .then(function(filename) {
           // TODO(yosi) When editorWindow has a window for filename, we should
           // activate it.
-          newTextWindow(editorWindow, Document.load(filename));
+          windows.newTextWindow(editorWindow, Document.load(filename));
         });
   });
 
@@ -76,7 +59,7 @@
   Editor.bindKey(Window, 'Ctrl+Shift+O', function() {
     Editor.getFilenameForLoad(this, this.selection.document.filename)
         .then(function(filename) {
-          newEditorWindow(Document.load(filename));
+          windows.newEditorWindow(Document.load(filename));
         });
   });
 

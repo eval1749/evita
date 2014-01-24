@@ -2,44 +2,6 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 (function() {
-  // TODO(yosi) We should move |newEditorWindow()| to another place to use
-  // other files, e.g. "window_commands.js".
-  /**
-   * @param {!Document} document
-   */
-  function newEditorWindow(document) {
-    var editor_window = new EditorWindow();
-    newTextWindow(editor_window, document);
-    editor_window.realize();
-  }
-
-  // TODO(yosi) We should move |newTextWindow()| to another place to use
-  // other files, e.g. "window_commands.js".
-  /**
-   * @param {!Window} parent
-   * @param {!Document} document
-   */
-  function newTextWindow(parent, document) {
-    parent.add(new TextWindow(new Range(document)));
-  }
-
-  // TODO(yosi) We should move |openInCurrentParent()| to another place to use
-  // other files, e.g. "window_commands.js".
-  /**
-   * @param {!Window} parent
-   * @param {!Document} document
-   */
-  function openInCurrentParent(parent, document) {
-    var present = parent.children.find(function(window) {
-      return window instanceof TextWindow && window.document == document;
-    });
-    if (present) {
-      present.focus();
-      return;
-    }
-    newTextWindow(parent, document);
-  }
-
   /**
    * @param {!TableSelection} selection
    * @param {number} state_mask
@@ -90,9 +52,9 @@
         return;
 
       if (!open_count)
-        openInCurrentParent(parent, document);
+        windows.activate(parent, document);
       else
-        newEditorWindow(document);
+        windows.newEditorWindow(document);
       ++open_count;
     });
     if (open_count)

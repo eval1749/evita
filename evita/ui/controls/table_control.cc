@@ -569,4 +569,14 @@ void TableControl::OnLeftButtonDown(uint32_t flags, const gfx::Point& point) {
   UpdateViewIfNeeded();
 }
 
+// TODO(yosi) We should use OnMousePressed() instead of OnMessage().
+LRESULT TableControl::OnMessage(uint32_t message, WPARAM wParam,
+                                LPARAM lParam) {
+  if (message == WM_LBUTTONDBLCLK) {
+    observer_->OnKeyDown(static_cast<int>(ui::KeyCode::Enter));
+    return 0;
+  }
+  return Widget::OnMessage(message, wParam, lParam);
+}
+
 }  // namespace ui

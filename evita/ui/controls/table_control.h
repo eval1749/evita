@@ -56,6 +56,8 @@ class TableControl :
   private: virtual void OnKeyPressed(const KeyboardEvent& event) override;
   private: virtual void OnLeftButtonDown(uint32_t flags,
                                          const gfx::Point& point) override;
+  private: virtual LRESULT OnMessage(uint32_t message, WPARAM wParam,
+                                     LPARAM lParam) override;
 
   DISALLOW_COPY_AND_ASSIGN(TableControl);
 };

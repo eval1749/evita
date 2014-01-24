@@ -11,12 +11,13 @@
 #if !defined(INCLUDE_visual_Frame_h)
 #define INCLUDE_visual_Frame_h
 
-#include "evita/views/window.h"
+#include <vector>
 
 #include "evita/ctrl_StatusBar.h"
 #include "evita/ctrl_TabBand.h"
 #include "evita/ctrl_TitleBar.h"
 #include "evita/li_util.h"
+#include "evita/views/window.h"
 
 namespace gfx {
 class Graphics;
@@ -71,7 +72,7 @@ class Frame final : public views::Window,
   private: int m_cyTabBand;
   private: HWND m_hwndTabBand;
   private: Panes m_oPanes;
-  private: StatusBar m_oStatusBar;
+  private: ui::StatusBar m_oStatusBar;
   private: TitleBar m_oTitleBar;
   private: Pane* m_pActivePane;
   private: char16* m_rgpwszMessage[MessageLevel_Limit];
@@ -152,9 +153,8 @@ class Frame final : public views::Window,
   public: void ResetMessages();
 
   // [S]
-  public: void SetStatusBar(int part, const base::string16& text) const;
-  public: void SetStatusBarf(int, const char16*, ...);
-  public: void SetStatusBarParts(const int*, int);
+  public: void SetStatusBar(int part, const base::string16& text);
+  public: void SetStatusBar(std::vector<base::string16> texts);
   public: bool ShowBuffer(Buffer*);
   public: void ShowMessage(MessageLevel, uint = 0, ...);
 

@@ -21,11 +21,15 @@
 #define DEBUG_SHOW_HIDE 0
 #include "evita/vi_TextEditWindow.h"
 
+#include <vector>
+
 #pragma warning(push)
 #pragma warning(disable: 4625 4626)
 #include "base/bind.h"
 #pragma warning(pop)
 #include "base/logging.h"
+#include "base/strings/string16.h"
+#include "base/strings/stringprintf.h"
 #include "common/timer/timer.h"
 #include "evita/cm_CmdProc.h"
 #include "evita/ed_Mode.h"
@@ -1084,41 +1088,8 @@ void TextEditWindow::updateScrollBar() {
   m_oVertScrollBar.SetInfo(&oInfo, true);
 }
 
-namespace {
-enum StatusBarPart {
-    StatusBarPart_Message,
-    StatusBarPart_Mode,
-    StatusBarPart_CodePage,
-    StatusBarPart_Newline,
-    StatusBarPart_LineNumber,
-    StatusBarPart_Column,
-    StatusBarPart_Posn,
-    StatusBarPart_Insert,
-  };
-
-void SetupStatusBar(Frame* frame) {
-  static const int rgiWidth[] = {
-      25, // ins/ovf
-      70, // posn
-      40, // column
-      50, // line
-      32, // newline
-      50, // code page
-      70, // mode
-      0,
-  };
-
-  int rgiRight[ARRAYSIZE(rgiWidth)];
-  auto iRight = frame->GetCxStatusBar();
-  for (auto i = 0u; i < ARRAYSIZE(rgiRight); i++) {
-    rgiRight[ARRAYSIZE(rgiRight) - i - 1] = iRight;
-    iRight -= rgiWidth[i];
-  }
-  frame->SetStatusBarParts(rgiRight, lengthof(rgiRight));
-}
-}  // namespace
-
-void TextEditWindow::UpdateStatusBar() const {
+static std::vector<base::string16> ComposeStatusBarTexts(
+    dom::Buffer* buffer, Selection* selection, bool has_focus) {
   static const char16* const k_rgwszNewline[4] = {
     L"--",
     L"LF",
@@ -1126,63 +1097,33 @@ void TextEditWindow::UpdateStatusBar() const {
     L"CRLF",
   };
 
-  auto& frame = this->frame();
-
-  SetupStatusBar(&frame);
-
-  auto& buffer = *GetBuffer();
-
-  frame.ShowMessage(
-      MessageLevel_Idle,
-      static_cast<uint>(
-        buffer.IsNotReady() ? IDS_STATUS_BUSY : has_focus() ?
-            IDS_STATUS_READY : 0));
-
   UI_ASSERT_DOM_LOCKED();
-
-  frame.SetStatusBarf(
-      StatusBarPart_Mode,
-      buffer.GetMode()->GetName());
-
-  frame.SetStatusBarf(
-      StatusBarPart_CodePage,
-      L"CP%u",
-      buffer.GetCodePage());
-
-  frame.SetStatusBarf(
-      StatusBarPart_Newline,
-      k_rgwszNewline[buffer.GetNewline()]);
-
-  auto& selection = *GetSelection();
 
   // FIXME 2007-07-18 yosi We should use lazy evaluation object for
   // computing line number of column or cache.
   Selection::Information oInfo;
-  selection.GetInformation(&oInfo);
+  selection->GetInformation(&oInfo);
 
-  frame.SetStatusBarf(
-      StatusBarPart_LineNumber,
-      L"Ln %d%s",
-      oInfo.m_lLineNum,
-      oInfo.m_fLineNum ? L"" : L"+");
+  return {
+    buffer->IsNotReady() ? L"Busy" : has_focus ? L"Ready" : L"",
+    buffer->GetMode()->GetName(),
+    base::StringPrintf(L"CP%u", buffer->GetCodePage()),
+    k_rgwszNewline[buffer->GetNewline()],
+    base::StringPrintf(L"Ln %d%ls", oInfo.m_lLineNum,
+                       oInfo.m_fLineNum ? L"" : L"+"),
+    base::StringPrintf(L"Cn %d%ls", oInfo.m_lColumn,
+                       oInfo.m_fColumn ? L"" : L"+"),
+    base::StringPrintf(L"Ch %d", selection->IsStartActive() ?
+        selection->GetStart() : selection->GetEnd()),
+    // FIXME 2007-07-25 yosi@msn.com We need to show "OVR" if
+    // we are in overwrite mode.
+    base::StringPrintf(buffer->IsReadOnly() ? L"R/O" : L"INS"),
+  };
+}
 
-  frame.SetStatusBarf(
-      StatusBarPart_Column,
-      L"Cn %d%s",
-      oInfo.m_lColumn,
-      oInfo.m_fColumn ? L"" : L"+");
-
-  frame.SetStatusBarf(
-      StatusBarPart_Posn,
-      L"Ch %d",
-      selection.IsStartActive() ? selection.GetStart() : selection.GetEnd());
-
-  // FIXME 2007-07-25 yosi@msn.com We need to show "OVR" if
-  // we are in overwrite mode.
-  frame.SetStatusBarf(
-      StatusBarPart_Insert,
-      buffer.IsReadOnly() ? L"R/O" : L"INS",
-      buffer.GetStart());
+void TextEditWindow::UpdateStatusBar() const {
+  frame().SetStatusBar(ComposeStatusBarTexts(GetBuffer(), GetSelection(),
+                                             has_focus()));
 }
 
 void TextEditWindow::WillDestroyWidget() {

@@ -25,6 +25,7 @@
 #pragma warning(pop)
 #include "base/logging.h"
 #include "base/strings/string16.h"
+#include "base/strings/stringprintf.h"
 #include "common/tree/ancestors_or_self.h"
 #include "common/tree/child_nodes.h"
 #include "common/win/native_window.h"
@@ -316,7 +317,7 @@ void Frame::DidCreateNativeWindow() {
     m_cyTabBand = rc.bottom - rc.top;
   }
 
-  m_oStatusBar.Realize(*native_window(), CtrlId_StatusBar);
+  m_oStatusBar.Realize(*native_window());
   m_oTitleBar.Realize(*native_window());
 
   CompositionState::Update(*native_window());
@@ -357,19 +358,13 @@ void Frame::DidResize() {
   // Status Bar
   //  message, code page, newline, line num, column, char, ins/ovr
   if (m_oStatusBar) {
-    ::SetWindowPos(m_oStatusBar, nullptr, rect().left,
-                   rect().bottom - m_oStatusBar.GetCy(), rect().width(),
-                   m_oStatusBar.GetCy(), SWP_NOZORDER);
-
-    ::SendMessage(m_oStatusBar, SB_SIMPLE, 1, 0);
-
-    char16 wsz[100];
-    ::wsprintf(wsz, L"Resizing... %dx%d",
+    auto status_bar_rect = rect();
+    status_bar_rect.top = rect().bottom - m_oStatusBar.height();
+    m_oStatusBar.ResizeTo(status_bar_rect);
+    auto const text = base::StringPrintf(L"Resizing... %dx%d",
         rect().right - rect().left,
         rect().bottom - rect().top);
-
-    ::SendMessage(m_oStatusBar, SB_SETTEXT, SB_SIMPLEID | SBT_NOBORDERS,
-                  reinterpret_cast<LPARAM>(wsz));
+    m_oStatusBar.Set(text);
   }
 
   gfx_->Resize(rect());
@@ -490,7 +485,7 @@ Rect Frame::GetPaneRect() const {
   return Rect(rect().left + k_edge_size + kPaddingLeft,
               rect().top + m_cyTabBand + k_edge_size * 2 + kPaddingLeft,
               rect().right - k_edge_size + kPaddingRight,
-              rect().bottom - m_oStatusBar.GetCy() + k_edge_size +
+              rect().bottom - m_oStatusBar.height() + k_edge_size +
                   kPaddingBottom);
 }
 
@@ -888,7 +883,7 @@ void Frame::CreateNativeWindow() const {
       gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
       gfx::Size(rc.width(), rcWork.height() * 4 / 5));
 
-  SetStatusBar(0, L"Ready");
+  const_cast<Frame*>(this)->SetStatusBar(0, L"Ready");
 }
 
 void Frame::Realize() {
@@ -909,36 +904,15 @@ void Frame::ResetMessages() {
 /// <summary>
 ///   Set status bar message on specified part.
 /// </summary>
-void Frame::SetStatusBar(int const ePart, const base::string16& text) const {
-  ::SendMessage(m_oStatusBar, SB_SIMPLE, 0, 0);
-
-  ::SendMessage(
-      m_oStatusBar,
-      SB_SETTEXT,
-      static_cast<WPARAM>(ePart | SBT_NOBORDERS),
-      reinterpret_cast<LPARAM>(text.c_str()));
+void Frame::SetStatusBar(int part, const base::string16& text) {
+  m_oStatusBar.SetPart(static_cast<size_t>(part), text);
 }
 
 /// <summary>
 ///   Set status bar formatted message on specified part.
 /// </summary>
-void Frame::SetStatusBarf(
-    int const ePart,
-    const char16* pwszFormat, ...) {
-  char16 wsz[1024];
-
-  va_list args;
-  va_start(args, pwszFormat);
-  ::wvsprintf(wsz, pwszFormat, args);
-  va_end(args);
-  SetStatusBar(ePart, wsz);
-}
-
-/// <summary>
-///   Set parts width of status bar.
-/// </summary>
-void Frame::SetStatusBarParts(int const* const prgiPart, int const cParts) {
-  m_oStatusBar.SetParts(prgiPart, cParts);
+void Frame::SetStatusBar(const std::vector<base::string16> texts) {
+  m_oStatusBar.Set(texts);
 }
 
 /// <summary>

@@ -11,25 +11,41 @@
 #if !defined(INCLUDE_visual_statusBar_h)
 #define INCLUDE_visual_statusBar_h
 
+#include <vector>
+
+#include "base/strings/string16.h"
+#include "common/win/rect.h"
+
+namespace ui {
+
+using common::win::Rect;
+
 //////////////////////////////////////////////////////////////////////
 //
 // StatusBar
 //
 class StatusBar {
-  private: int    m_cParts;
-  private: HWND   m_hwnd;
-  private: RECT   m_rc;
-  private: int    m_rgiPart[50];
+  private: HWND hwnd_;
+  private: bool is_simple_mode_;
+  private: std::vector<int> part_rights_;
+  private: std::vector<base::string16> part_texts_;
+  private: common::win::Rect rect_;
+  private: base::string16 simple_text_;
 
   public: StatusBar();
   public: ~StatusBar();
 
-  public: operator HWND() const { return m_hwnd; }
+  public: operator bool() const { return hwnd_; }
+  public: int height() const { return rect_.height(); }
 
-  public: int GetCy() const { return m_rc.bottom - m_rc.top; }
-  public: bool IsEqual(const int* prgiPart, int cParts) const;
-  public: void Realize(HWND hwndParent, int idCtrl);
-  public: void SetParts(const int* prgiPart, int cParts);
+  public: void Realize(HWND hwndParent);
+  public: void ResizeTo(const common::win::Rect& rect);
+  public: void Set(const std::vector<base::string16>& texts);
+  public: void Set(const base::string16& text);
+  public: void SetPart(size_t part, const base::string16& text);
+  public: void SetSimpleMode(bool simple_mode);
 };
+
+}  // namespace ui
 
 #endif //!defined(INCLUDE_visual_statusBar_h)

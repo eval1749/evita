@@ -17,7 +17,8 @@ namespace editor {
 
 class DomLock {
   public: class AutoLock {
-    public: AutoLock(const char* filename, int line_number);
+    public: AutoLock(const char* filename, int line_number,
+                     const char* function_name);
     public: ~AutoLock();
     DISALLOW_COPY_AND_ASSIGN(AutoLock);
   };
@@ -25,7 +26,8 @@ class DomLock {
 
   public: class AutoTryLock {
     private: bool locked_;
-    public: AutoTryLock(const char* filename, int line_number);
+    public: AutoTryLock(const char* filename, int line_number,
+                        const char* function_name);
     public: ~AutoTryLock();
     public: bool locked() const { return locked_; }
     DISALLOW_COPY_AND_ASSIGN(AutoTryLock);
@@ -33,13 +35,15 @@ class DomLock {
   friend class AutoTryLock;
 
   public: class AutoUnlock {
-    public: AutoUnlock(const char* filename, int line_number);
+    public: AutoUnlock(const char* filename, int line_number,
+                       const char* function_name);
     public: ~AutoUnlock();
     DISALLOW_COPY_AND_ASSIGN(AutoUnlock);
   };
   friend class AutoUnlock;
 
   private: const char* locker_filename_;
+  private: const char* locker_function_name_;
   private: int locker_line_number_;
   private: bool locked_;
   private: base::ThreadChecker thread_checker_;
@@ -53,6 +57,7 @@ class DomLock {
     return locked_;
   }
 
+  public: void AssertLocked();
   public: void Lock();
   public: bool TryLock();
   public: void Unlock();
@@ -63,15 +68,15 @@ class DomLock {
 }  // namespace editor
 
 #define UI_ASSERT_DOM_LOCKED() \
-  DCHECK(editor::DomLock::instance()->locked())
+  editor::DomLock::instance()->AssertLocked();
 
 #define UI_DOM_AUTO_LOCK_SCOPE() \
-  editor::DomLock::AutoLock dom_scope(__FILE__, __LINE__)
+  editor::DomLock::AutoLock dom_scope(__FILE__, __LINE__, __FUNCTION__)
 
 #define UI_DOM_AUTO_TRY_LOCK_SCOPE(scope_name) \
-  editor::DomLock::AutoTryLock scope_name(__FILE__, __LINE__)
+  editor::DomLock::AutoTryLock scope_name(__FILE__, __LINE__, __FUNCTION__)
 
 #define UI_DOM_AUTO_UNLOCK_SCOPE() \
-  editor::DomLock::AutoUnlock dom_scope(__FILE__, __LINE__)
+  editor::DomLock::AutoUnlock dom_scope(__FILE__, __LINE__, __FUNCTION__)
 
 #endif //!defined(INCLUDE_evita_editor_dom_lock_h)

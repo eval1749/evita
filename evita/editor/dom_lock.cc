@@ -12,19 +12,21 @@ namespace editor {
 //
 // DomLock::AutoLock
 //
-DomLock::AutoLock::AutoLock(const char* filename, int line_number) {
+DomLock::AutoLock::AutoLock(const char* filename, int line_number,
+                            const char* function_name) {
   DVLOG(1) << "Lock dom at " << filename << "(" <<
-      line_number << ")";
+      line_number << ") " << function_name;
   auto const lock = DomLock::instance();
   lock->Lock();
   lock->locker_filename_ = filename;
+  lock->locker_function_name_ = function_name;
   lock->locker_line_number_ = line_number;
 }
 
 DomLock::AutoLock::~AutoLock() {
   auto const lock = DomLock::instance();
   DVLOG(1) << "Unlock dom at " << lock->locker_filename_ <<
-      "(" << lock->locker_line_number_ << ")";
+      "(" << lock->locker_line_number_ << ") " << lock->locker_function_name_;
   lock->Unlock();
 }
 
@@ -32,52 +34,70 @@ DomLock::AutoLock::~AutoLock() {
 //
 // DomLock::AutoTryLock
 //
-DomLock::AutoTryLock::AutoTryLock(const char* filename, int line_number)
+DomLock::AutoTryLock::AutoTryLock(const char* filename, int line_number,
+                                  const char* function_name)
     : locked_(DomLock::instance()->TryLock()) {
-  DVLOG(1) << "Lock dom at " << filename << "(" <<
-      line_number << ")";
   auto const lock = DomLock::instance();
+  DVLOG(1) << "TryLock dom by " << lock->locker_function_name_ <<
+      " at " << lock->locker_filename_ <<
+      "(" << lock->locker_line_number_ << ") ";
   lock->locker_filename_ = filename;
+  lock->locker_function_name_ = function_name;
   lock->locker_line_number_ = line_number;
 }
 
 DomLock::AutoTryLock::~AutoTryLock() {
+  if (!locked_)
+    return;
   auto const lock = DomLock::instance();
-  if (locked_)
-    lock->Unlock();
-  DVLOG(1) << "Unlock dom at " << lock->locker_filename_ <<
-    "(" << lock->locker_line_number_ << ")";
+  lock->Unlock();
+  DVLOG(1) << "Unlock dom by " << lock->locker_function_name_ <<
+      " at " << lock->locker_filename_ <<
+      "(" << lock->locker_line_number_ << ") ";
 }
 
 //////////////////////////////////////////////////////////////////////
 //
 // DomLock::AutoUnlock
 //
-DomLock::AutoUnlock::AutoUnlock(const char* filename, int line_number) {
-  DVLOG(1) << "Unlock dom at " << filename << "(" <<
-      line_number << ")";
+DomLock::AutoUnlock::AutoUnlock(const char* filename, int line_number,
+                                const char* function_name) {
   auto const lock = DomLock::instance();
+  DVLOG(1) << "Unlock dom by " << lock->locker_function_name_ <<
+      " at " << lock->locker_filename_ <<
+      "(" << lock->locker_line_number_ << ") ";
   lock->Unlock();
   lock->locker_filename_ = filename;
+  lock->locker_function_name_ = function_name;
   lock->locker_line_number_ = line_number;
 }
 
 DomLock::AutoUnlock::~AutoUnlock() {
   auto const lock = DomLock::instance();
   lock->Lock();
-  DVLOG(1) << "Lock dom at " << lock->locker_filename_ <<
-    "(" << lock->locker_line_number_ << ")";
+  DVLOG(1) << "Lock dom by " << lock->locker_function_name_ <<
+      " at " << lock->locker_filename_ <<
+      "(" << lock->locker_line_number_ << ") ";
 }
 
 //////////////////////////////////////////////////////////////////////
 //
 // DomLock
 //
-DomLock::DomLock() : locked_(false) {
+DomLock::DomLock() : locked_(false), locker_filename_(""),
+    locker_function_name_(""), locker_line_number_(0) {
 }
 
 DomLock* DomLock::instance() {
   return Application::instance()->dom_lock();
+}
+
+void DomLock::AssertLocked() {
+  if (locked_)
+    return;
+  LOG(ERROR) << "Locked by " << locker_function_name_ <<
+    locker_filename_ << "(" << locker_line_number_ << ") ";
+  NOTREACHED();
 }
 
 void DomLock::Lock() {

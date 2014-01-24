@@ -15,31 +15,21 @@
 //
 // StatusBar
 //
-class StatusBar
-{
-    private: int    m_cParts;
-    private: HWND   m_hwnd;
-    private: RECT   m_rc;
-    private: int    m_rgiPart[50];
+class StatusBar {
+  private: int    m_cParts;
+  private: HWND   m_hwnd;
+  private: RECT   m_rc;
+  private: int    m_rgiPart[50];
 
-    public: StatusBar() :
-        m_hwnd(NULL),
-        m_cParts(0) {}
+  public: StatusBar();
+  public: ~StatusBar();
 
-    public: operator HWND() const { return m_hwnd; }
+  public: operator HWND() const { return m_hwnd; }
 
-    // [G]
-    public: int GetCy() const { return m_rc.bottom - m_rc.top; }
-
-    // [I]
-    public: bool IsEqual(const int* prgiPart, int cParts) const;
-
-    // [R]
-    public: void Realize(HWND hwndParent, int idCtrl);
-
-    // [S]
-    // SetParts
-    public: void SetParts(const int* prgiPart, int cParts);
-}; // StatusBar
+  public: int GetCy() const { return m_rc.bottom - m_rc.top; }
+  public: bool IsEqual(const int* prgiPart, int cParts) const;
+  public: void Realize(HWND hwndParent, int idCtrl);
+  public: void SetParts(const int* prgiPart, int cParts);
+};
 
 #endif //!defined(INCLUDE_visual_statusBar_h)

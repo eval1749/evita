@@ -67,6 +67,8 @@ class TextEditWindow
           m_nBar(SB_CTL) {
     }
 
+    ~ScrollBar();
+
     bool GetInfo(SCROLLINFO* pInfo) {
       return m_hwnd && ::GetScrollInfo(m_hwnd, m_nBar, pInfo);
     }

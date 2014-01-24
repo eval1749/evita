@@ -126,6 +126,15 @@ class TextEditWindow::Autoscroller {
   DISALLOW_COPY_AND_ASSIGN(Autoscroller);
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// TextEditWindow::ScrollBar
+//
+TextEditWindow::ScrollBar::~ScrollBar() {
+  if (m_hwnd)
+    ::DestroyWindow(m_hwnd);
+}
+
 void TextEditWindow::ScrollBar::ShowWindow(int code) const {
   if (m_hwnd)
     ::ShowWindow(m_hwnd, code);

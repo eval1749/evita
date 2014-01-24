@@ -27,10 +27,29 @@ struct Converter<base::string16> {
                      base::string16* out);
 };
 
-// Converter for enum types as int.
+// Converter for enum:bool types as int.
 // Note: I'm not sure how to get base type of |enum|.
 template<typename T>
-struct Converter<T, typename std::enable_if<std::is_enum<T>::value>::type> {
+struct Converter<T, typename std::enable_if<std::is_enum<T>::value &&
+                                           sizeof(T) == 1>::type> {
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> value,
+                     T* out) {
+    bool bool_value = false;
+    if (!ConvertFromV8(isolate, value, &bool_value))
+      return false;
+    *out = static_cast<T>(bool_value);
+    return true;
+  }
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, T value) {
+    return ConvertToV8(isolate, static_cast<bool>(value));
+  }
+};
+
+// Converter for enum:<non bool> types as int.
+// Note: I'm not sure how to get base type of |enum|.
+template<typename T>
+struct Converter<T, typename std::enable_if<std::is_enum<T>::value &&
+                                            sizeof(T) >= 2>::type> {
   static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> value,
                      T* out) {
     int int_value = 0;

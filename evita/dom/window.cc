@@ -329,6 +329,12 @@ void Window::ResetForTesting() {
 }
 
 static bool CheckSplitParameter(Window* ref_window, Window* new_window) {
+  if (!ref_window->parent_node()) {
+    ScriptController::instance()->ThrowError(
+        "Can't split top-level window.");
+    return false;
+  }
+
   if (ref_window == new_window) {
     ScriptController::instance()->ThrowError(
         "Can't split window with itself.");

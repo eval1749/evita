@@ -850,60 +850,6 @@ DEFCOMMAND(Reload)
 } // Reload
 
 // [S]
-namespace {
-enum SplitDirection {
-  kSplitHorizontally,
-  kSplitVertically,
-};
-
-void SplitWindow(Selection* selection, EditPane* pane,
-                 SplitDirection direction) {
-  auto const ref_window = pane->GetActiveWindow()->as<TextEditWindow>();
-  if (!ref_window)
-    return;
-  std::unique_ptr<TextEditWindow> new_window(ref_window->Clone());
-  auto const splitted = direction == kSplitHorizontally ?
-      pane->SplitHorizontally(ref_window, new_window.get()) :
-      pane->SplitVertically(ref_window, new_window.get());
-  if (!splitted) {
-    Application::instance()->ShowMessage(MessageLevel_Warning,
-                                         IDS_CAN_NOT_SPLIT);
-    return;
-  }
-
-  new_window->GetSelection()->SetRange(selection->GetStart(),
-                                       selection->GetEnd());
-  new_window->MakeSelectionVisible();
-  selection->GetWindow()->MakeSelectionVisible();
-  new_window.release();
-}
-}  //namespace
-
-DEFCOMMAND(SplitWindowHorizontally) {
-  if (!pCtx->GetSelection())
-    return;
-  auto const pPane = Application::instance()->GetActiveFrame()->
-      GetActivePane()->DynamicCast<EditPane>();
-  if (!pPane)
-    return;
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(SplitWindow, base::Unretained(pCtx->GetSelection()),
-                 base::Unretained(pPane), kSplitHorizontally));
-}
-
-DEFCOMMAND(SplitWindowVertically)
-{
-  if (!pCtx->GetSelection())
-    return;
-  auto const pPane = Application::instance()->GetActiveFrame()->
-      GetActivePane()->DynamicCast<EditPane>();
-  if (!pPane)
-    return;
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(SplitWindow, base::Unretained(pCtx->GetSelection()),
-                 base::Unretained(pPane), kSplitVertically));
-}
-
 DEFCOMMAND(StartArgument)
 {
     ASSERT(NULL != pCtx);
@@ -1339,8 +1285,6 @@ void Processor::GlobalInit() {
     // Ctrl+Shift+[0-9]
     BIND_KEY(CommandWindow, Mod_CtrlShift | '0', CloseThisWindow);
     BIND_KEY(CommandWindow, Mod_CtrlShift | '1', CloseOtherWindows);
-    BIND_KEY(TextEditWindow, Mod_CtrlShift | '2', SplitWindowVertically);
-    BIND_KEY(TextEditWindow, Mod_CtrlShift | '5', SplitWindowHorizontally);
     BIND_KEY(CommandWindow, Mod_CtrlShift | '9', CloseOtherFrames);
 
     BIND_VKEY(TextEditWindow, Mod_None,  BACK,   BackwardDeleteChar);

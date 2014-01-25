@@ -23,6 +23,26 @@
   });
 
   /**
+   * Split window vertically and put new window below.
+   * @this {!Window}
+   */
+  Editor.bindKey(Window, 'Ctrl+Shift+2', function() {
+    if (!this.clone)
+      return;
+    this.splitVertically(this.clone());
+  });
+
+  /**
+   * Split window horizontally and put new window right.
+   * @this {!Window}
+   */
+  Editor.bindKey(Window, 'Ctrl+Shift+5', function() {
+    if (!this.clone)
+      return;
+    this.splitHorizontally(this.clone());
+  });
+
+  /**
    * Open new document in new editor window.
    * @this {!Window}
    */

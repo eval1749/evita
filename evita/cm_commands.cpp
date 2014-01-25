@@ -80,18 +80,6 @@ DefCommand_Motions(Backward, Up,   Screen)
 DefCommand_Motions(Backward, Up,   Window)
 
 
-DEFCOMMAND(BackwardDeleteChar)
-{ 
-    if (NULL == pCtx->GetSelection()) return;
-    pCtx->GetSelection()->Delete(Unit_Char, -pCtx->GetArg());
-} // BackwardDeleteChar
-
-DEFCOMMAND(BackwardDeleteWord)
-{ 
-    if (NULL == pCtx->GetSelection()) return;
-    pCtx->GetSelection()->Delete(Unit_Word, -pCtx->GetArg());
-} // BackwardDeleteWord
-
 // [C]
 DEFCOMMAND(CopyToClipboard)
 { 
@@ -462,18 +450,6 @@ DefCommand_Motions(Forward, Right, Word)
 DefCommand_Motions(Forward, Down,  Line)
 DefCommand_Motions(Forward, Down,  Screen)
 DefCommand_Motions(Forward, Down,  Window)
-
-DEFCOMMAND(ForwardDeleteChar)
-{ 
-    if (NULL == pCtx->GetSelection()) return;
-    pCtx->GetSelection()->Delete(Unit_Char, pCtx->GetArg());
-} // ForwardDeleteChar
-
-DEFCOMMAND(ForwardDeleteWord)
-{
-    if (NULL == pCtx->GetSelection()) return;
-    pCtx->GetSelection()->Delete(Unit_Word, pCtx->GetArg());
-} // ForwardDeleteWord
 
 // [G]
 DEFCOMMAND(GoToCloseParen)
@@ -1018,8 +994,6 @@ void Processor::GlobalInit() {
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'V', PasteFromClipboard);
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'X', CutToClipboard);
 
-    BIND_VKEY(TextEditWindow, Mod_None,  BACK,   BackwardDeleteChar);
-    BIND_VKEY(TextEditWindow, Mod_None,  DELETE, ForwardDeleteChar);
     BIND_VKEY(TextEditWindow, Mod_None,  DOWN,   ForwardLine);
     BIND_VKEY(TextEditWindow, Mod_None,  END,    EndKey);
     BIND_VKEY(TextEditWindow, Mod_None,  HOME,   HomeKey);
@@ -1031,8 +1005,6 @@ void Processor::GlobalInit() {
     BIND_VKEY(TextEditWindow, Mod_None,  TAB,    Indent);
     BIND_VKEY(TextEditWindow, Mod_None,  RETURN, TypeEnter);
 
-    BIND_VKEY(TextEditWindow, Mod_Ctrl, BACK,   BackwardDeleteWord);
-    BIND_VKEY(TextEditWindow, Mod_Ctrl, DELETE, ForwardDeleteWord);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, DOWN,   GoToCloseParen);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, END,    EndOfBuffer);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, HOME,   StartOfBuffer);

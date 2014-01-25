@@ -6,6 +6,36 @@
 
 (function() {
   /**
+   * Backward delete character
+   * @param {number=} opt_count
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Backspace', function(opt_count) {
+    var count = arguments.length >= 1 ? opt_count : 1;
+    this.selection.range.delete(Unit.CHARACTER, -count);
+  });
+
+  /**
+   * Backward delete word
+   * @param {number=} opt_count
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Ctrl+Backspace', function(opt_count) {
+    var count = arguments.length >= 1 ? opt_count : 1;
+    this.selection.range.delete(Unit.WORD, -count);
+  });
+
+  /**
+   * Forward delete word
+   * @param {number=} opt_count
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Ctrl+Delete', function(opt_count) {
+    var count = arguments.length >= 1 ? opt_count : 1;
+    this.selection.range.delete(Unit.WORD, count);
+  });
+
+  /**
    * Show document in new editor window.
    * @this {!TextWindow}
    */
@@ -162,5 +192,15 @@
       return;
     }
     selection.range.collapseTo(position);
+  });
+
+  /**
+   * Forward delete character
+   * @param {number=} opt_count
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Delete', function(opt_count) {
+    var count = arguments.length >= 1 ? opt_count : 1;
+    this.selection.range.delete(Unit.CHARACTER, count);
   });
 })();

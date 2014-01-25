@@ -75,7 +75,6 @@ class Range //: public ObjectInHeap
     public: Count Copy();
 
     // [D]
-    public: Count Delete(Unit eUnit = Unit_Char, Count = 1);
     public: void  Downcase();
 
     // [E]

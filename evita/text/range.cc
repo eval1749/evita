@@ -534,51 +534,6 @@ Count Range::Copy()
 } // Range::Copy
 
 /// <summary>
-///  Deletes characters or words from start or end of this range.
-/// </summary>
-/// <param name="eUnit">Unit_Char or Unit_Word</param>
-/// <param name="n">Number of unit to be deleted.</param>
-/// <returns>Number of deleted characters or words</returns>
-Count Range::Delete(Unit eUnit, Count n)
-{
-    switch (eUnit)
-    {
-    case Unit_Char:
-        if (n > 0)
-        {
-            int m = m_lStart == m_lEnd ? 0 : 1;
-            Posn lEnd = std::min(m_lEnd + n - m, m_pBuffer->GetEnd());
-            return m_pBuffer->Delete(m_lStart, lEnd);
-        }
-        else if (n < 0)
-        {
-            int m = m_lStart == m_lEnd ? 0 : 1;
-            Posn lStart = std::max(m_lStart + n + m, static_cast<Posn>(0));
-            return m_pBuffer->Delete(lStart, m_lEnd);
-        }
-        else
-        {
-            return m_pBuffer->Delete(m_lStart, m_lEnd);
-        }
-        break;
-
-    case Unit_Word:
-        if (n > 0)
-        {
-            m_pBuffer->ComputeMotion(Unit_Word, n, &m_lEnd);
-        }
-        else if (n < 0)
-        {
-            m_pBuffer->ComputeMotion(Unit_Word, n, &m_lStart);
-        }
-        return m_pBuffer->Delete(m_lStart, m_lEnd);
-
-    default:
-        CAN_NOT_HAPPEN();
-    } // switch unit
-} // Range::Delete
-
-/// <summary>
 ///   Downcase contents of this region.
 /// </summary>
 /// <seealso cref="Range::Capitalize"/>
@@ -1186,7 +1141,7 @@ void Range::Paste()
 
     UndoBlock oUndo(this, L"Range.Paste");
 
-    Delete(Unit_Char, 0);
+    m_pBuffer->Delete(m_lStart, m_lEnd);
 
     Posn lPosn = m_lStart;
     char16* pwchStart = pwsz;

@@ -27,6 +27,23 @@ struct Converter<base::string16> {
                      base::string16* out);
 };
 
+template<typename T>
+struct Converter<v8::Maybe<T>> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+                                    const v8::Maybe<T>& maybe) {
+    return maybe.has_value ? ConvertToV8(isolate, maybe.value) :
+                             v8::Null(isolate);
+  }
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
+                     v8::Maybe<T>* out) {
+    if (val.IsNull()) {
+      *out = nullptr;
+      return true;
+    }
+    return Converter<T>::FromV8(isolate, val, out);
+  }
+};
+
 // Converter for enum:bool types as int.
 // Note: I'm not sure how to get base type of |enum|.
 template<typename T>

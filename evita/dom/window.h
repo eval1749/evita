@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "common/tree/node.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/window_id.h"
 #include "evita/v8_glue/nullable.h"
@@ -14,9 +15,11 @@
 namespace dom {
 
 // |Window| is correspond to |Widget| in DOM world.
-class Window : public v8_glue::Scriptable<Window, EventTarget> {
+class Window : public v8_glue::Scriptable<Window, EventTarget>,
+               public common::tree::Node<Window> {
   DECLARE_SCRIPTABLE_OBJECT(Window)
 
+  private: typedef common::tree::Node<Window> Node;
   private: class WindowIdMapper;
   friend class WindowIdMapper;
 
@@ -29,19 +32,29 @@ class Window : public v8_glue::Scriptable<Window, EventTarget> {
   };
   static_assert(!kNotRealized, "Window::State::kNotRealized should be zero.");
 
-  private: std::unordered_set<Window*> child_windows_;
   private: int focus_tick_;
-  private: Window* parent_window_;
   private: State state_;
 
   protected: Window();
   public: virtual ~Window();
 
   public: std::vector<Window*> child_windows() const;
+  public: v8_glue::Nullable<Window> first_child() const {
+    return Node::first_child();
+  }
   public: int focus_tick() const { return focus_tick_; }
   public: WindowId id() const { return event_target_id(); }
+  public: v8_glue::Nullable<Window> last_child() const {
+    return Node::last_child();
+  }
+  public: v8_glue::Nullable<Window> next_sibling() const {
+    return Node::next_sibling();
+  }
+  public: v8_glue::Nullable<Window> previous_sibling() const {
+    return Node::previous_sibling();
+  }
   public: v8_glue::Nullable<Window> parent_window() const {
-    return parent_window_;
+    return parent_node();
   }
   public: State state() const { return state_; }
   public: WindowId window_id() const { return event_target_id(); }

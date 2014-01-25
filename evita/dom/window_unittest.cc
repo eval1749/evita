@@ -108,12 +108,20 @@ TEST_F(WindowTest, Add) {
       "parent.appendChild(child2);"
       "parent.realize();");
   EXPECT_SCRIPT_EQ("2", "parent.children.length");
-  EXPECT_SCRIPT_EQ("1", "child1.parent.id");
-  EXPECT_SCRIPT_EQ("1", "child2.parent.id");
+  EXPECT_SCRIPT_TRUE("child1.parent == parent");
+  EXPECT_SCRIPT_TRUE("child2.parent == parent");
+  EXPECT_SCRIPT_TRUE("parent.firstChild == child1");
+  EXPECT_SCRIPT_TRUE("parent.lastChild == child2");
+  EXPECT_SCRIPT_TRUE("child1.nextSibling == child2");
+  EXPECT_SCRIPT_TRUE("child1.previousSibling == null");
+  EXPECT_SCRIPT_TRUE("child2.nextSibling == null");
+  EXPECT_SCRIPT_TRUE("child2.previousSibling == child1");
   dom::Window::DidRealizeWidget(static_cast<dom::WindowId>(1));
   dom::Window::DidDestroyWidget(static_cast<dom::WindowId>(2));
   EXPECT_SCRIPT_EQ("1", "parent.children.length");
-  EXPECT_SCRIPT_EQ("true", "child1.parent == null");
+  EXPECT_SCRIPT_TRUE("parent.firstChild == child2");
+  EXPECT_SCRIPT_TRUE("parent.lastChild == child2");
+  EXPECT_SCRIPT_TRUE("child1.parent == null");
   EXPECT_SCRIPT_EQ("destroyed", "child1.state");
 }
 

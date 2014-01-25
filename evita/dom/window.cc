@@ -10,6 +10,8 @@
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "common/memory/singleton.h"
+#include "common/tree/child_nodes.h"
+#include "common/tree/descendants.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
@@ -53,14 +55,14 @@ class WindowWrapperInfo :
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetValue("firstChild", v8::Maybe<Window*>())
-        .SetValue("lastChild", v8::Maybe<Window*>())
-        .SetValue("nextSibling", v8::Maybe<Window*>())
-        .SetValue("previousSibling", v8::Maybe<Window*>())
         .SetProperty("children", &Window::child_windows)
+        .SetProperty("firstChild", &Window::first_child)
         .SetProperty("focusTick_", &Window::focus_tick)
         .SetProperty("id", &Window::id)
+        .SetProperty("lastChild", &Window::last_child)
+        .SetProperty("nextSibling", &Window::next_sibling)
         .SetProperty("parent", &Window::parent_window)
+        .SetProperty("previousSibling", &Window::previous_sibling)
         .SetProperty("state", &Window::state)
         .SetMethod("appendChild", &Window::AddWindow)
         .SetMethod("changeParent", &Window::ChangeParentWindow)
@@ -70,23 +72,6 @@ class WindowWrapperInfo :
         .SetMethod("removeChild", &Window::RemoveWindow);
   }
 };
-
-std::vector<Window*> DescendantsOrSelf(Window* window) {
-  class Collector {
-    public: std::vector<Window*> windows_;
-    public: Collector() = default;
-    public: ~Collector() = default;
-    public: void Collect(Window* window) {
-      windows_.push_back(window);
-      for (auto child : window->child_windows()) {
-        Collect(child);
-      }
-    }
-  };
-  Collector collector;
-  collector.Collect(window);
-  return std::move(collector.windows_);
-}
 
 int global_focus_tick;
 }  // namespace
@@ -120,9 +105,8 @@ class Window::WindowIdMapper : public common::Singleton<WindowIdMapper> {
     auto const window = it->second.get();
     DCHECK_NE(kDestroyed, window->state_);
     window->state_ = kDestroyed;
-    if (auto const parent = window->parent_window_) {
-      parent->child_windows_.erase(window);
-      window->parent_window_ = nullptr;
+    if (auto const parent = window->parent_node()) {
+      parent->RemoveChild(window);
     }
   }
 
@@ -153,7 +137,6 @@ DEFINE_SCRIPTABLE_OBJECT(Window, WindowWrapperInfo)
 
 Window::Window()
     : focus_tick_(0),
-      parent_window_(nullptr),
       state_(kNotRealized) {
   WindowIdMapper::instance()->Register(this);
 }
@@ -166,11 +149,9 @@ Window::~Window() {
 }
 
 std::vector<Window*> Window::child_windows() const {
-  std::vector<Window*> child_windows(child_windows_.size());
-  auto dest = child_windows.begin();
-  for (auto child : child_windows_) {
-    *dest = child;
-    ++dest;
+  std::vector<Window*> child_windows;
+  for (auto child : child_nodes()) {
+    child_windows.push_back(const_cast<Window*>(child));
   }
   return child_windows;
 }
@@ -181,10 +162,10 @@ void Window::AddWindow(Window* window) {
         base::StringPrintf("Can't add window(%d) to itself.", id()));
     return;
   }
-  if (window->parent_window_) {
+  if (window->parent_node()) {
     ScriptController::instance()->ThrowError(
         base::StringPrintf("Window(%d) is already child of window(%d).",
-            window->id(), window->parent_window_->id()));
+            window->id(), window->parent_node()->id()));
     return;
   }
   if (IsDescendantOf(window)) {
@@ -193,14 +174,13 @@ void Window::AddWindow(Window* window) {
             window->id(), id()));
     return;
   }
-  window->parent_window_ = this;
-  child_windows_.insert(window);
+  AppendChild(window);
   ScriptController::instance()->view_delegate()->AddWindow(
       window_id(), window->window_id());
 }
 
 void Window::ChangeParentWindow(Window* new_parent_window) {
-  if (parent_window_ == new_parent_window)
+  if (parent_node() == new_parent_window)
     return;
   if (this == new_parent_window) {
     ScriptController::instance()->ThrowError(
@@ -215,9 +195,9 @@ void Window::ChangeParentWindow(Window* new_parent_window) {
         new_parent_window->window_id(), window_id()));
     return;
   }
-  parent_window_->child_windows_.erase(this);
-  parent_window_ = new_parent_window;
-  parent_window_->child_windows_.insert(this);
+  if (parent_node())
+    parent_node()->RemoveChild(this);
+  new_parent_window->AppendChild(this);
   ScriptController::instance()->view_delegate()->ChangeParentWindow(
       window_id(), new_parent_window->window_id());
 }
@@ -228,7 +208,7 @@ void Window::Destroy() {
         "You can't destroy unrealized window.");
     return;
   }
-  for (auto descendant : DescendantsOrSelf(this)) {
+  for (auto descendant : common::tree::descendants_or_self(this)) {
     descendant->state_= kDestroying;
   }
   ScriptController::instance()->view_delegate()->DestroyWindow(window_id());
@@ -255,7 +235,7 @@ void Window::DidRealizeWidget(WindowId window_id) {
   DCHECK(kRealizing == widget->state_ || kDestroying == widget->state_ ||
          kNotRealized == widget->state_);
   widget->state_ = kRealized;
-  for (auto child : widget->child_windows_) {
+  for (auto child : widget->child_nodes()) {
     if (child->state_ == kNotRealized)
       child->state_ = kRealized;
   }
@@ -285,10 +265,8 @@ Window* Window::FromWindowId(WindowId window_id) {
 }
 
 bool Window::IsDescendantOf(Window* other) const {
-  if (parent_window_ == other)
-    return true;
-  for (auto child : child_windows_) {
-    if (child->IsDescendantOf(other))
+  for (auto descendant : common::tree::descendants(other)) {
+    if (descendant == this)
       return true;
   }
   return false;
@@ -311,34 +289,25 @@ void Window::Realize() {
         "This window is being realized.");
     return;
   }
-  if (parent_window_ && parent_window_->state_ == kNotRealized) {
+  if (parent_node() && parent_node()->state_ == kNotRealized) {
     ScriptController::instance()->ThrowError(
         "Parent window isn't realized.");
     return;
   }
-  for (auto descendant : DescendantsOrSelf(this)) {
+  for (auto descendant : common::tree::descendants_or_self(this)) {
     descendant->state_= kRealizing;
   }
   ScriptController::instance()->view_delegate()->RealizeWindow(window_id());
 }
 
 void Window::RemoveWindow(Window* window) {
-  if (window->parent_window_ != window) {
+  if (window->parent_node() != window) {
     ScriptController::instance()->ThrowError(base::StringPrintf(
         "Can't remove window(%d) which isn't child of window(%d).",
         window->id(), id()));
     return;
   }
-  auto present = std::find(child_windows_.begin(), child_windows_.end(),
-                           window);
-  if (present == child_windows_.end()) {
-    ScriptController::instance()->ThrowError(base::StringPrintf(
-        "INTERNAL ERROR: window(%d) isn't in child list of window(%d).",
-        window->id(), id()));
-    return;
-  }
-  window->parent_window_ = nullptr;
-  child_windows_.erase(present);
+  parent_node()->RemoveChild(this);
 }
 
 void Window::ResetForTesting() {

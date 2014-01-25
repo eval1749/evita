@@ -53,6 +53,10 @@ class WindowWrapperInfo :
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
+        .SetValue("firstChild", v8::Maybe<Window*>())
+        .SetValue("lastChild", v8::Maybe<Window*>())
+        .SetValue("nextSibling", v8::Maybe<Window*>())
+        .SetValue("previousSibling", v8::Maybe<Window*>())
         .SetProperty("children", &Window::child_windows)
         .SetProperty("focusTick_", &Window::focus_tick)
         .SetProperty("id", &Window::id)

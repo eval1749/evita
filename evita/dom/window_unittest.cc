@@ -90,6 +90,10 @@ TEST_F(WindowTest, Construction) {
   EXPECT_VALID_SCRIPT("sample1.name = 'test';");
   EXPECT_SCRIPT_EQ("test", "sample1.name");
   EXPECT_SCRIPT_EQ("notrealized", "sample1.state");
+  EXPECT_SCRIPT_TRUE("sample1.firstChild === null");
+  EXPECT_SCRIPT_TRUE("sample1.lastChild === null");
+  EXPECT_SCRIPT_TRUE("sample1.nextSibling === null");
+  EXPECT_SCRIPT_TRUE("sample1.previousSibling=== null");
 }
 
 TEST_F(WindowTest, Add) {

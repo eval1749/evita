@@ -4,14 +4,26 @@
 /** @type {Array.<!Window>} */
 Window.prototype.children;
 
+/** @type {Window} */
+Window.prototype.firstChild;
+
 /** @type {number} */
 Window.prototype.focusTick_;
 
 /** @type {number} */
 Window.prototype.id;
 
+/** @type {Window} */
+Window.prototype.lastChild;
+
+/** @type {Window} */
+Window.prototype.nextSibling;
+
 /** @type {?Window} */
 Window.prototype.parent;
+
+/** @type {Window} */
+Window.prototype.previousSibling;
 
 /** @type {string} */
 Window.prototype.state;

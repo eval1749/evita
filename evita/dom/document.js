@@ -104,16 +104,16 @@
       case Unit.DOCUMENT:
         return document.length;
       case Unit.LINE:
-        throwUnsupportedUnit('endOf', 'LINE');
-      case Unit.PAGE:
-        throwUnsupportedUnit('endOf', 'PAGE');
-      case Unit.PARAGRAPH:
         while (position < document.length) {
           if (document.charCodeAt_(position) == Unicode.LF)
             return position;
           ++position;
         }
         return position;
+      case Unit.PAGE:
+        throwUnsupportedUnit('endOf', 'PAGE');
+      case Unit.PARAGRAPH:
+        throwUnsupportedUnit('endOf', 'PARAGRAPH');
       case Unit.SCREEN:
         throwUnsupportedUnit('endOf', 'SCREEN');
       case Unit.SENTENCE:
@@ -163,7 +163,7 @@
         if (count < 0)
           return Math.max(0, position + count);
         return position;
-      case Unit.PARAGRAPH:
+      case Unit.LINE:
         if (count > 0) {
           for (var k = 0; k < count; ++k) {
             position = document.computeEndOf_(unit, position);
@@ -252,16 +252,16 @@
       case Unit.DOCUMENT:
         return 0;
       case Unit.LINE:
-        throwUnsupportedUnit('startOf', 'LINE');
-      case Unit.PAGE:
-        throwUnsupportedUnit('startOf', 'PAGE');
-      case Unit.PARAGRAPH:
         while (position > 0) {
           --position;
           if (document.charCodeAt_(position) == Unicode.LF)
             return position + 1;
         }
         return position;
+      case Unit.PAGE:
+        throwUnsupportedUnit('startOf', 'PAGE');
+      case Unit.PARAGRAPH:
+        throwUnsupportedUnit('startOf', 'PARAGRAPH');
       case Unit.SCREEN:
         throwUnsupportedUnit('startOf', 'SCREEN');
       case Unit.SENTENCE:

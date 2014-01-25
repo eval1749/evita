@@ -67,7 +67,7 @@ global.console = {
     var range = new Range(document);
     range.collapseTo(document.length);
     var start = range.start;
-    range.startOf(Unit.PARAGRAPH, Alter.EXTEND);
+    range.startOf(Unit.LINE, Alter.EXTEND);
     if (start != range.start) {
       range.collapseTo(range.end);
       message = '\n' + message;

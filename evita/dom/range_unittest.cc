@@ -176,12 +176,12 @@ TEST_F(RangeTest, move) {
   EXPECT_SCRIPT_EQ("0 0", "test(2, 2, Unit.CHARACTER, -2)");
   EXPECT_SCRIPT_EQ("0 0", "test(2, 4, Unit.CHARACTER, -2)");
 
-  EXPECT_SCRIPT_EQ("25 25", "test(2, 2, Unit.PARAGRAPH, 2)");
-  EXPECT_SCRIPT_EQ("25 25", "test(2, 4, Unit.PARAGRAPH, 2)");
-  EXPECT_SCRIPT_EQ("0 0", "test(2, 2, Unit.PARAGRAPH, -2)");
-  EXPECT_SCRIPT_EQ("16 16", "test(18, 18, Unit.PARAGRAPH, -1)");
-  EXPECT_SCRIPT_EQ("0 0", "test(2, 4, Unit.PARAGRAPH, -2)");
-  EXPECT_SCRIPT_EQ("16 16", "test(18, 20, Unit.PARAGRAPH, -1)");
+  EXPECT_SCRIPT_EQ("25 25", "test(2, 2, Unit.LINE, 2)");
+  EXPECT_SCRIPT_EQ("25 25", "test(2, 4, Unit.LINE, 2)");
+  EXPECT_SCRIPT_EQ("0 0", "test(2, 2, Unit.LINE, -2)");
+  EXPECT_SCRIPT_EQ("16 16", "test(18, 18, Unit.LINE, -1)");
+  EXPECT_SCRIPT_EQ("0 0", "test(2, 4, Unit.LINE, -2)");
+  EXPECT_SCRIPT_EQ("16 16", "test(18, 20, Unit.LINE, -1)");
 
   // Forward this |is a word.  => this is |a word.
   EXPECT_SCRIPT_EQ("8 8", "test(5, 5, Unit.WORD, 1)");
@@ -226,12 +226,12 @@ TEST_F(RangeTest, moveEnd) {
   EXPECT_SCRIPT_EQ("0 0", "test(2, 2, Unit.CHARACTER, -2)");
   EXPECT_SCRIPT_EQ("2 2", "test(2, 4, Unit.CHARACTER, -2)");
 
-  EXPECT_SCRIPT_EQ("2 25", "test(2, 2, Unit.PARAGRAPH, 2)");
-  EXPECT_SCRIPT_EQ("2 25", "test(2, 4, Unit.PARAGRAPH, 2)");
-  EXPECT_SCRIPT_EQ("0 0", "test(2, 2, Unit.PARAGRAPH, -2)");
-  EXPECT_SCRIPT_EQ("16 16", "test(18, 18, Unit.PARAGRAPH, -1)");
-  EXPECT_SCRIPT_EQ("0 0", "test(2, 4, Unit.PARAGRAPH, -2)");
-  EXPECT_SCRIPT_EQ("16 16", "test(18, 20, Unit.PARAGRAPH, -1)");
+  EXPECT_SCRIPT_EQ("2 25", "test(2, 2, Unit.LINE, 2)");
+  EXPECT_SCRIPT_EQ("2 25", "test(2, 4, Unit.LINE, 2)");
+  EXPECT_SCRIPT_EQ("0 0", "test(2, 2, Unit.LINE, -2)");
+  EXPECT_SCRIPT_EQ("16 16", "test(18, 18, Unit.LINE, -1)");
+  EXPECT_SCRIPT_EQ("0 0", "test(2, 4, Unit.LINE, -2)");
+  EXPECT_SCRIPT_EQ("16 16", "test(18, 20, Unit.LINE, -1)");
 
   // Forward this |is a word.  => this is |a word.
   EXPECT_SCRIPT_EQ("5 8", "test(5, 5, Unit.WORD, 1)");
@@ -276,12 +276,12 @@ TEST_F(RangeTest, moveStart) {
   EXPECT_SCRIPT_EQ("0 2", "test(2, 2, Unit.CHARACTER, -2)");
   EXPECT_SCRIPT_EQ("0 4", "test(2, 4, Unit.CHARACTER, -2)");
 
-  EXPECT_SCRIPT_EQ("25 25", "test(2, 2, Unit.PARAGRAPH, 2)");
-  EXPECT_SCRIPT_EQ("25 25", "test(2, 4, Unit.PARAGRAPH, 2)");
-  EXPECT_SCRIPT_EQ("0 2", "test(2, 2, Unit.PARAGRAPH, -2)");
-  EXPECT_SCRIPT_EQ("16 18", "test(18, 18, Unit.PARAGRAPH, -1)");
-  EXPECT_SCRIPT_EQ("0 4", "test(2, 4, Unit.PARAGRAPH, -2)");
-  EXPECT_SCRIPT_EQ("16 20", "test(18, 20, Unit.PARAGRAPH, -1)");
+  EXPECT_SCRIPT_EQ("25 25", "test(2, 2, Unit.LINE, 2)");
+  EXPECT_SCRIPT_EQ("25 25", "test(2, 4, Unit.LINE, 2)");
+  EXPECT_SCRIPT_EQ("0 2", "test(2, 2, Unit.LINE, -2)");
+  EXPECT_SCRIPT_EQ("16 18", "test(18, 18, Unit.LINE, -1)");
+  EXPECT_SCRIPT_EQ("0 4", "test(2, 4, Unit.LINE, -2)");
+  EXPECT_SCRIPT_EQ("16 20", "test(18, 20, Unit.LINE, -1)");
 
   // Forward this |is a word.  => this is |a word.
   EXPECT_SCRIPT_EQ("8 8", "test(5, 5, Unit.WORD, 1)");

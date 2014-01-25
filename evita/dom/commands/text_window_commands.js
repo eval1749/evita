@@ -140,7 +140,7 @@
     if (!arg)
       return;
     this.selection.range.startOf(Unit.DOCUMENT);
-    this.selection.range.move(Unit.PARAGRAPH, arg - 1);
+    this.selection.range.move(Unit.LINE, arg - 1);
   });
 
   /**

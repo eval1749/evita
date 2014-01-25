@@ -1345,7 +1345,7 @@ void EditPane::ReplaceActiveWindow(Window* window) {
   GetActiveLeafBox()->ReplaceWindow(window);
 }
 
-bool EditPane::SplitHorizontally(Window* left_window,
+void EditPane::SplitHorizontally(Window* left_window,
                                  Window* new_right_window) {
   DCHECK(left_window->is_realized());
   DCHECK_NE(left_window, new_right_window);
@@ -1354,15 +1354,16 @@ bool EditPane::SplitHorizontally(Window* left_window,
   DCHECK(left_box);
 
   auto const width = left_box->rect().width();
-  if (width < k_cxMinBox * 2 + k_cxSplitter)
-    return false;
+  if (width < k_cxMinBox * 2 + k_cxSplitter) {
+    frame().AddWindow(new_right_window);
+    return;
+  }
 
   left_box->EnsureInHorizontalLayoutBox();
   left_box->outer()->Split(left_box, new_right_window, width / 2);
-  return true;
 }
 
-bool EditPane::SplitVertically(Window* above_window,
+void EditPane::SplitVertically(Window* above_window,
                                Window* new_below_window) {
   DCHECK(above_window->is_realized());
   DCHECK_NE(above_window, new_below_window);
@@ -1371,12 +1372,13 @@ bool EditPane::SplitVertically(Window* above_window,
   DCHECK(above_box);
 
   auto const height = above_box->rect().height();
-  if (height < k_cyMinBox * 2 + k_cySplitter)
-    return false;
+  if (height < k_cyMinBox * 2 + k_cySplitter) {
+    frame().AddWindow(new_below_window);
+    return;
+  }
 
   above_box->EnsureInVerticalLayoutBox();
   above_box->outer()->Split(above_box, new_below_window, height / 2);
-  return true;
 }
 
 void EditPane::UpdateStatusBar() {

@@ -81,7 +81,7 @@ Selection* Selection::Create(const text::Range& range) {
 //////////////////////////////////////////////////////////////////////
 //
 // Selection::EndKey
-//  eUnit = Unit_Line | Unit_Buffer
+//  eUnit = Unit_WindowLine | Unit_Buffer
 //
 Count Selection::EndKey(Unit eUnit, bool fExtend)
 {
@@ -92,7 +92,7 @@ Count Selection::EndKey(Unit eUnit, bool fExtend)
 
     Count iEndDelta = EndOf(eUnit, fExtend);
 
-    if (Unit_Line != eUnit)
+    if (Unit_WindowLine != eUnit)
     {
         return iEndDelta;
     }
@@ -143,7 +143,7 @@ Count Selection::EndOf(Unit eUnit, bool fExtend)
         lNew = GetWindow()->GetEnd();
         break;
 
-    case Unit_Line:
+    case Unit_WindowLine:
         lNew = GetWindow()->EndOfLine(GetActivePosn());
         break;
 
@@ -201,7 +201,7 @@ SelectionType Selection::GetType() const
 //////////////////////////////////////////////////////////////////////
 //
 // Selection::HomeKey
-//  eUnit   : Unit_Line | Unit_Buffer
+//  eUnit   : Unit_WindowLine | Unit_Buffer
 //  fExtend : bool => move start only if fExtend.
 //
 //  Returns number of characters moved.
@@ -217,7 +217,7 @@ Count Selection::HomeKey(Unit eUnit, bool fExtend)
 
     Count iStartDelta = StartOf(eUnit, fExtend);
 
-    if (Unit_Line != eUnit)
+    if (Unit_WindowLine != eUnit)
     {
         return iStartDelta;
     }
@@ -466,7 +466,7 @@ Count Selection::StartOf(Unit eUnit, bool fExtend)
     Posn lNew;
     switch (eUnit)
     {
-    case Unit_Line:
+    case Unit_WindowLine:
         lNew = GetWindow()->StartOfLine(GetActivePosn());
         break;
 

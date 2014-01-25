@@ -97,8 +97,8 @@ class TextEditWindow::Autoscroller {
 
   private: Count Scroll(Count amount) {
     if (direction_ > 0)
-      return editor_->GetSelection()->MoveDown(Unit_Line, amount, true);
-     return editor_->GetSelection()->MoveUp(Unit_Line, amount, true);
+      return editor_->GetSelection()->MoveDown(Unit_WindowLine, amount, true);
+     return editor_->GetSelection()->MoveUp(Unit_WindowLine, amount, true);
   }
 
   public: void Start(int direction) {
@@ -280,7 +280,7 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
                                     Posn* inout_lPosn)  {
   UI_ASSERT_DOM_LOCKED();
   switch (eUnit) {
-    case Unit_Line:
+    case Unit_WindowLine:
       if (n > 0) {
         auto const lBufEnd = GetBuffer()->GetEnd();
         auto lGoal = *inout_lPosn;

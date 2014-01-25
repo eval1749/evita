@@ -27,6 +27,10 @@ Range.prototype.capitalize = function() {}
  * @param {Position} position
  */
 Range.prototype.collapseTo = function(position) {};
+
+/** @type {function()} */
+Range.prototype.copy = function() {};
+
 /**
  * @param {Unit} unit
  * @param {number=} opt_count, defualt is one.
@@ -66,12 +70,14 @@ Range.prototype.moveStart = function(unit, opt_count) {};
  */
 Range.prototype.insertBefore = function(text) {};
 
+/** @type {function()} */
+Range.prototype.paste = function() {};
+
 /**
  * @param {Unit} unit
  * @param {Alter=} opt_alter, default is Alter.MOVE.
  */
 Range.prototype.startOf = function(unit, opt_alter) {};
-
 
 /** @return {!Range} */
 Range.prototype.toLocaleLowerCase = function() {}

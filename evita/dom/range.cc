@@ -53,7 +53,9 @@ class RangeWrapperInfo : public v8_glue::WrapperInfo {
         .SetProperty("start", &Range::start, &Range::set_start)
         .SetProperty("text", &Range::text, &Range::set_text)
         .SetMethod("collapseTo", &Range::CollapseTo)
-        .SetMethod("insertBefore", &Range::InsertBefore);
+        .SetMethod("copy", &Range::CopyToClipboard)
+        .SetMethod("insertBefore", &Range::InsertBefore)
+        .SetMethod("paste", &Range::PasteFromClipboard);
   }
 };
 }  // namespace
@@ -114,9 +116,17 @@ Range* Range::CollapseTo(Posn position) {
   return this;
 }
 
+void Range::CopyToClipboard() const {
+  range_->Copy();
+}
+
 Range* Range::InsertBefore(const base::string16& text) {
   document_->buffer()->InsertBefore(start(), text);
   return this;
+}
+
+void Range::PasteFromClipboard() {
+  range_->Paste();
 }
 
 }  // namespace dom

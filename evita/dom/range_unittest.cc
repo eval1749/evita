@@ -66,6 +66,24 @@ TEST_F(RangeTest, collapseTo) {
   EXPECT_SCRIPT_EQ("1", "range.end");
 }
 
+// Note: Since RangeTest.Clipboard uses system clipboard, this test is
+// flaky. User interactio may change contents of clipboard during test
+// execution.
+TEST_F(RangeTest, Clipboard) {
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('Clipboard');"
+    "var range = new Range(doc);"
+    "range.text = 'foo bar';"
+    "range.collapseTo(0);"
+    "range.moveEnd(Unit.CHARACTER, 3);"
+    "range.copy();"
+    "range.collapseTo(3);"
+    "range.paste();"
+    "range.start = 0;"
+    "range.end = doc.length;");
+  EXPECT_SCRIPT_EQ("foofoo bar", "range.text");
+}
+
 TEST_F(RangeTest, delete) {
   EXPECT_SCRIPT_VALID(
     "function testIt(sample, unit, count) {"

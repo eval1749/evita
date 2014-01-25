@@ -54,11 +54,11 @@
         'dom/jslib/windows.js',
 
         'dom/console.js',
-        'dom/document_list.js',
-        'dom/js_console.js',
-        'dom/find_and_replace_commands.js',
-        'dom/text_window_commands.js',
-        'dom/window_commands.js',
+        'dom/commands/document_list.js',
+        'dom/commands/js_console.js',
+        'dom/commands/find_and_replace_commands.js',
+        'dom/commands/text_window_commands.js',
+        'dom/commands/window_commands.js',
       ],
     }, # variables
 

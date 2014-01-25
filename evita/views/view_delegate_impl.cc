@@ -84,15 +84,57 @@ void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
   window->SetParentWidget(new_parent);
 }
 
-void ViewDelegateImpl::ComputeEndOfLine(dom::WindowId window_id,
-                                        text::Posn* inout_position,
-                                        base::WaitableEvent* event) {
+void ViewDelegateImpl::ComputeOnTextWindow(dom::WindowId window_id,
+                                         dom::TextWindowCompute* data,
+                                         base::WaitableEvent* event) {
   WaitableEventScope waitable_event_scope(event);
-  auto const window = FromWindowId("ComputeEndOf", window_id);
+  auto const window = FromWindowId("ComputeOnTextWindow", window_id)->
+      as<TextEditWindow>();
   if (!window)
     return;
   UI_DOM_AUTO_LOCK_SCOPE();
-  *inout_position = window->as<TextEditWindow>()->EndOfLine(*inout_position);
+  switch (data->method) {
+    case dom::TextWindowCompute::Method::EndOfWindow:
+      data->int1 = window->GetEnd();
+      break;
+    case dom::TextWindowCompute::Method::EndOfWindowLine:
+      data->int1 = window->EndOfLine(data->int1);
+      break;
+    case dom::TextWindowCompute::Method::MapPointToPosition:
+     data->int1 = window->MapPointToPosn(gfx::PointF(data->float1,
+                                                     data->float2));
+      break;
+   case dom::TextWindowCompute::Method::MapPositionToPoint: {
+      const auto rect = window->MapPosnToPoint(data->int1);
+      data->float1 = rect.left;
+      break;
+    }
+    case dom::TextWindowCompute::Method::MoveScreen: {
+      gfx::PointF point(data->float1, data->float2);
+      text::Posn position = data->int1;
+      window->ComputeMotion(Unit_Screen, data->int2, point, &position);
+      data->int1 = position;
+      break;
+    }
+    case dom::TextWindowCompute::Method::MoveWindow: {
+      gfx::PointF point(data->float1, data->float2);
+      text::Posn position = data->int1;
+      window->ComputeMotion(Unit_Window, data->int2, point, &position);
+      break;
+    }
+    case dom::TextWindowCompute::Method::MoveWindowLine: {
+      gfx::PointF point(data->float1, data->float2);
+      text::Posn position = data->int1;
+      window->ComputeMotion(Unit_WindowLine, data->int2, point, &position);
+      break;
+    }
+    case dom::TextWindowCompute::Method::StartOfWindow:
+      data->int1 = window->GetStart();
+      break;
+    case dom::TextWindowCompute::Method::StartOfWindowLine:
+      data->int1 = window->StartOfLine(data->int1);
+      break;
+  }
 }
 
 void ViewDelegateImpl::CreateDialogBox(dom::DialogBoxId dialog_box_id) {

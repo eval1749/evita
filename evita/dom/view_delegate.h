@@ -27,6 +27,26 @@ class Window;
 
 typedef EventTargetId DialogBoxId;
 
+struct TextWindowCompute {
+  // Note: Value of |WindowCompute::Method| must match with JavaScript.
+  enum class Method {
+    EndOfWindow,
+    EndOfWindowLine,
+    MapPointToPosition,
+    MapPositionToPoint,
+    MoveScreen,
+    MoveWindow,
+    MoveWindowLine,
+    StartOfWindow,
+    StartOfWindowLine,
+  };
+  Method method;
+  float float1;
+  float float2;
+  int int1;
+  int int2;
+};
+
 class ViewDelegate {
   public: typedef base::Callback<void(base::string16 filename)>
       GetFilenameForLoadCallback;
@@ -43,9 +63,9 @@ class ViewDelegate {
   public: virtual void AddWindow(WindowId parent_id, WindowId child_id) = 0;
   public: virtual void ChangeParentWindow(WindowId window_id,
                                           WindowId new_parent_window_id) = 0;
-  public: virtual void ComputeEndOfLine(WindowId window_id,
-                                        text::Posn* inout_position,
-                                        base::WaitableEvent* event) = 0;
+  public: virtual void ComputeOnTextWindow(WindowId window_id,
+                                         TextWindowCompute* data,
+                                         base::WaitableEvent* event) = 0;
   public: virtual void CreateDialogBox(DialogBoxId dialog_box_id) = 0;
   public: virtual void CreateEditorWindow(const EditorWindow* window) = 0;
   public: virtual void CreateTableWindow(WindowId window_id,

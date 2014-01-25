@@ -151,7 +151,6 @@ class TextEditWindow
 
   public: static const char* GetClass_() { return "TextEditWindow"; }
 
-  public: Count GetColumn(Posn);
   public: Posn GetEnd();
 
   public: HWND GetScrollBarHwnd(int) const;

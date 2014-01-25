@@ -436,12 +436,6 @@ Buffer* TextEditWindow::GetBuffer() const {
   return selection_->GetBuffer();
 }
 
-Count TextEditWindow::GetColumn(Posn lPosn) {
-  UI_ASSERT_DOM_LOCKED();
-  auto const lStart = StartOfLine(lPosn);
-  return lPosn - lStart;
-}
-
 HCURSOR TextEditWindow::GetCursorAt(const Point&) const {
   return ::LoadCursor(nullptr, IDC_IBEAM);
 }

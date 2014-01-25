@@ -418,7 +418,7 @@ JsConsole.prototype.evalLastLine = function() {
   JsConsole.result = result;
   range.collapseTo(range.end);
   if (result.exception) {
-    this.emit('Exception: ' + result.exception.message);
+    this.emit('Exception: ' + result.exception);
   } else {
     this.emit(JsConsole.stringify(result.value));
   }

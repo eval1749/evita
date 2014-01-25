@@ -31,7 +31,7 @@
    * @return {!Range}
    */
   Range.prototype.delete = function(unit, opt_count) {
-    if (arguments.length || this.start == this.end) {
+    if (arguments.length >= 2 || this.start == this.end) {
       var count = arguments.length >= 2 ? opt_count : 1;
       if (count < 0)
         this.moveStart(unit, count);

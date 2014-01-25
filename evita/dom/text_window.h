@@ -27,6 +27,7 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
   public: Range* view_range() const { return view_range_; }
   public: ::Selection* view_selection() const;
 
+  public: text::Posn ComputeEndOfLine(text::Posn position);
   public: void MakeSelectionVisible();
 
   DISALLOW_COPY_AND_ASSIGN(TextWindow);

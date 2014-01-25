@@ -10,5 +10,11 @@ TextWindow.prototype.clone = function() {};
  */
 TextWindow.prototype.selection;
 
+/**
+ * @param {number} position
+ * @return {number}
+ */
+TextWindow.prototype.endOfLine_ = function(position) {};
+
 /** @type {function()} */
 TextWindow.prototype.makeSelectionVisible = function() {};

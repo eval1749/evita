@@ -4,6 +4,7 @@
 #include "evita/dom/text_window.h"
 
 #include "base/bind.h"
+#include "evita/dom/converter.h"
 #include "evita/dom/document.h"
 #include "evita/dom/range.h"
 #include "evita/dom/script_controller.h"
@@ -40,6 +41,7 @@ class TextWindowWrapperInfo :
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
+        .SetMethod("endOfLine_", &TextWindow::ComputeEndOfLine)
         .SetMethod("makeSelectionVisible", &TextWindow::MakeSelectionVisible);
   }
 };
@@ -62,6 +64,13 @@ TextWindow::~TextWindow() {
 
 ::Selection* TextWindow::view_selection() const {
   return static_cast<TextSelection*>(selection())->view_selection();
+}
+
+text::Posn TextWindow::ComputeEndOfLine(text::Posn position) {
+  text::Posn result = position;
+  ScriptController::instance()->view_delegate()->ComputeEndOfLine(
+    id(), &result, nullptr);
+  return result;
 }
 
 void TextWindow::MakeSelectionVisible() {

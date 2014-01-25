@@ -9,6 +9,6 @@ editors.start = function(args) {
   var range = new Range(doc);
   var editor_window = new EditorWindow();
   var text_window = new TextWindow(range);
-  editor_window.addChild_(text_window);
+  editor_window.appendChild(text_window);
   editor_window.realize();
 };

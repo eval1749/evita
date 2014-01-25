@@ -358,7 +358,7 @@ JsConsole.prototype.activate = function(active_window) {
 
   if (!present) {
     present = new TextWindow(new Range(document));
-    active_editor_window.addChild_(/** @type{!Window} */(present));
+    active_editor_window.appendChild(/** @type{!Window} */(present));
   }
   present.selection.range.collapseTo(document.length);
   present.focus();
@@ -435,7 +435,7 @@ JsConsole.prototype.forwardHistory = function() {
 JsConsole.prototype.newWindow = function() {
   var editor_window = new EditorWindow();
   var text_window = new TextWindow(new Range(this.document));
-  editor_window.addChild_(text_window);
+  editor_window.appendChild(text_window);
   editor_window.realize();
 };
 

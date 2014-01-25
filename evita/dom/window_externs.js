@@ -29,7 +29,7 @@ Window.prototype.previousSibling;
 Window.prototype.state;
 
 /** @param {!Window} window */
-Window.prototype.addChild_ = function(window) {};
+Window.prototype.appendChild = function(window) {};
 
 /** @param {!Window} window */
 Window.prototype.changeParent = function(window) {};

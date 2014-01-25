@@ -62,7 +62,7 @@ class WindowWrapperInfo :
         .SetProperty("id", &Window::id)
         .SetProperty("parent", &Window::parent_window)
         .SetProperty("state", &Window::state)
-        .SetMethod("addChild_", &Window::AddWindow)
+        .SetMethod("appendChild", &Window::AddWindow)
         .SetMethod("changeParent", &Window::ChangeParentWindow)
         .SetMethod("destroy", &Window::Destroy)
         .SetMethod("focus", &Window::Focus)

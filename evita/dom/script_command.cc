@@ -68,15 +68,14 @@ void ScriptCommand::RunCommand(Context* context) {
   const auto receiver = active_window->GetWrapper(isolate);
 
   v8::Handle<v8::Value> argv[1];
-  if (context->has_arg)
+  auto const argc = context->has_arg ? 1 : 0;
+  if (argc)
     argv[0] = v8::Integer::New(isolate, context->arg);
-  else
-    argv[0] = v8::Undefined(isolate);
 
   DOM_AUTO_LOCK_SCOPE();
   auto command = command_.NewLocal(isolate);
   if (command->IsCallable()) {
-    command->CallAsFunction(receiver, arraysize(argv), argv);
+    command->CallAsFunction(receiver, argc, argv);
     return;
   }
   auto value = command->Get(gin::StringToSymbol(isolate, "value"));
@@ -89,7 +88,7 @@ void ScriptCommand::RunCommand(Context* context) {
     DVLOG(0) << "Command object doesn't have callable object.";
     return;
   }
-  function->CallAsFunction(receiver, arraysize(argv), argv);
+  function->CallAsFunction(receiver, argc, argv);
 }
 
 }  // namespace dom

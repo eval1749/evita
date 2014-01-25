@@ -31,6 +31,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: Buffer* buffer() { return buffer_.get(); }
   public: base::char16 charCodeAt(text::Posn position) const;
   public: const base::string16& filename() const;
+  public: void set_filename(const base::string16& filename);
   public: text::Posn length() const;
   public: bool modified() const;
   public: const base::string16& name() const;

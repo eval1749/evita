@@ -127,7 +127,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetProperty("filename", &Document::filename)
+        .SetProperty("filename", &Document::filename, &Document::set_filename)
         .SetProperty("length", &Document::length)
         .SetProperty("modified", &Document::modified)
         .SetProperty("name", &Document::name)
@@ -169,6 +169,10 @@ base::char16 Document::charCodeAt(text::Posn position) const {
 
 const base::string16& Document::filename() const {
   return buffer_->GetFileName();
+}
+
+void Document::set_filename(const base::string16& filename) {
+  return buffer_->set_filename(filename);
 }
 
 text::Posn Document::length() const {

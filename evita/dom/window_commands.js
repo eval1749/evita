@@ -18,7 +18,9 @@
 
     Editor.getFilenameForSave(this, this.selection.document.filename)
         .then(function(filename) {
-          windows.newTextWindow(editorWindow, new Document(filename))
+          var document = new Document(FilePath.basename(filename));
+          document.filename = filename;
+          windows.newTextWindow(editorWindow, document)
         });
   });
 

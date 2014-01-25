@@ -148,7 +148,7 @@ void ViewDelegateImpl::GetFilenameForLoad(
   if (!oDialog.GetOpenFileName(&params))
     return;
   event_handler_->RunCallback(base::Bind(callback,
-                                         base::string16(params.m_pwszFile)));
+                                         base::string16(params.m_wsz)));
 }
 
 void ViewDelegateImpl::GetFilenameForSave(
@@ -167,7 +167,7 @@ void ViewDelegateImpl::GetFilenameForSave(
   if (!oDialog.GetSaveFileName(&params))
     return;
   event_handler_->RunCallback(base::Bind(callback,
-                                         base::string16(params.m_pwszFile)));
+                                         base::string16(params.m_wsz)));
 }
 
 void ViewDelegateImpl::GetTableRowStates(WindowId window_id,

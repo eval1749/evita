@@ -24,6 +24,16 @@ class TextWindowTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(TextWindowTest);
 };
 
+TEST_F(TextWindowTest, clone) {
+  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_)).Times(2);
+  EXPECT_VALID_SCRIPT(
+      "var original = new TextWindow(new Range(new Document('foo')));"
+      "original.selection.range.text = 'foo';"
+      "original.selection.range.end = 3;"
+      "var sample = original.clone();");
+  EXPECT_SCRIPT_EQ("3", "sample.selection.range.end");
+}
+
 TEST_F(TextWindowTest, MakeSelectionVisible) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
   EXPECT_CALL(*mock_view_impl(), MakeSelectionVisible(Eq(1)));

@@ -15,10 +15,12 @@
 #include "evita/dom/events/event.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
+#include "evita/dom/window_ostream.h"
 #include "evita/gc/weak_ptr.h"
 #include "evita/v8_glue/wrapper_info.h"
 
-namespace {
+namespace dom {
+namespace internal {
 const char* WindowStateString(dom::Window::State state) {
   static const char* const state_strings[] = {
     "destroyed",
@@ -32,7 +34,8 @@ const char* WindowStateString(dom::Window::State state) {
   DCHECK_LE(index, arraysize(state_strings) - 1);
   return state_strings[index];
 }
-}  // namespace
+}  // namespace internal
+}  // namespace dom
 
 namespace gin {
 
@@ -40,7 +43,8 @@ template<>
 struct Converter<dom::Window::State> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
                                     dom::Window::State state) {
-    return gin::StringToSymbol(isolate, WindowStateString(state));
+    return gin::StringToSymbol(isolate,
+                               dom::internal::WindowStateString(state));
   }
 };
 
@@ -367,17 +371,3 @@ void Window::SplitVertically(Window* new_below_window) {
 }
 
 }  // namespace dom
-
-std::ostream& operator<<(std::ostream& ostream, const dom::Window& window) {
-  ostream << "(" << window.wrapper_info()->class_name() << " widget:" <<
-      window.window_id() << ")";
-  return ostream;
-}
-
-std::ostream& operator<<(std::ostream& ostream, const dom::Window* window) {
-  return ostream << *window;
-}
-
-std::ostream& operator<<(std::ostream& ostream, dom::Window::State state) {
-  return ostream << WindowStateString(state);
-}

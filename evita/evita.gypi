@@ -145,6 +145,7 @@
         'dom/text_window.cc',
         'dom/time_stamp.cc',
         'dom/window.cc',
+        'dom/window_ostream.cc',
 
         'gc/collectable.cc',
         'gc/collector.cc',

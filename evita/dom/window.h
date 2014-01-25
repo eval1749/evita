@@ -81,10 +81,4 @@ class Window : public v8_glue::Scriptable<Window, EventTarget>,
 
 }  // namespace dom
 
-#include <ostream>
-
-std::ostream& operator<<(std::ostream& ostream, const dom::Window& window);
-std::ostream& operator<<(std::ostream& ostream, const dom::Window* window);
-std::ostream& operator<<(std::ostream& ostream, dom::Window::State state);
-
 #endif //!defined(INCLUDE_evita_dom_window_h)

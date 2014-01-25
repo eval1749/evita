@@ -262,7 +262,7 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
   if (pLine)
     return pLine->MapXToPosn(*m_gfx, xGoal);
 
-  auto lStart = GetBuffer()->ComputeStartOf(Unit_Paragraph, lGoal);
+  auto lStart = GetBuffer()->ComputeStartOf(Unit_Line, lGoal);
   Page oPage;
   gfx::RectF page_rect(rect());
   for (;;) {
@@ -419,7 +419,7 @@ Posn TextEditWindow::endOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
 
   Page oPage;
   gfx::RectF page_rect(rect());
-  auto lStart = selection_->GetBuffer()->ComputeStartOf(Unit_Paragraph, lPosn);
+  auto lStart = selection_->GetBuffer()->ComputeStartOf(Unit_Line, lPosn);
   for (;;) {
     auto const pLine = oPage.FormatLine(gfx, page_rect, *selection_, lStart);
     lStart = pLine->GetEnd();
@@ -1016,7 +1016,7 @@ Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
   }
 
   auto lStart = selection_->GetBuffer()->ComputeStartOf(
-      Unit_Paragraph,
+      Unit_Line,
       lPosn);
   if (!lStart)
     return 0;

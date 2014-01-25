@@ -895,7 +895,7 @@ void Range::GetInformation(Information* out_oInfo, Count n) const
 
     out_oInfo->m_fLineNum = k > 0;
 
-    Posn lLineStart = m_pBuffer->ComputeStartOf(Unit_Paragraph, m_lStart);
+    Posn lLineStart = m_pBuffer->ComputeStartOf(Unit_Line, m_lStart);
     out_oInfo->m_fColumn = (m_lStart - lLineStart) < n;
     out_oInfo->m_lColumn = m_lStart - lLineStart;
 } // Range::GetInformation
@@ -922,7 +922,7 @@ void Range::Indent()
     if (m_lStart == m_lEnd)
     {
         // There is no selection. We insert Tab character.
-        Posn lStart = m_pBuffer->ComputeStartOf(Unit_Paragraph, m_lStart);
+        Posn lStart = m_pBuffer->ComputeStartOf(Unit_Line, m_lStart);
         int cwch = iTabWidth - (m_lStart - lStart) % iTabWidth;
         m_pBuffer->Insert(m_lStart, ' ', cwch);
         m_lStart += cwch;
@@ -931,11 +931,11 @@ void Range::Indent()
     }
 
     // Extend Range to cover entire lines
-    m_lStart = m_pBuffer->ComputeStartOf(Unit_Paragraph, m_lStart);
+    m_lStart = m_pBuffer->ComputeStartOf(Unit_Line, m_lStart);
 
-    if (m_pBuffer->ComputeStartOf(Unit_Paragraph, m_lEnd) != m_lEnd)
+    if (m_pBuffer->ComputeStartOf(Unit_Line, m_lEnd) != m_lEnd)
     {
-        m_pBuffer->ComputeMotion(Unit_Paragraph, 1, &m_lEnd);
+        m_pBuffer->ComputeMotion(Unit_Line, 1, &m_lEnd);
     }
 
     // Insert spaces each of start of line except for empty line.
@@ -943,12 +943,12 @@ void Range::Indent()
     Posn lStart = m_lStart;
     do
     {
-        Posn lEnd = m_pBuffer->ComputeEndOf(Unit_Paragraph, lStart);
+        Posn lEnd = m_pBuffer->ComputeEndOf(Unit_Line, lStart);
         if (lStart != lEnd)
         {
             m_pBuffer->Insert(lStart, ' ', iTabWidth);
         }
-        lStart = m_pBuffer->ComputeEndOf(Unit_Paragraph, lStart) + 1;
+        lStart = m_pBuffer->ComputeEndOf(Unit_Line, lStart) + 1;
     } while (lStart < m_lEnd);
 } // Range::Indent
 
@@ -1063,18 +1063,18 @@ void Range::Outdent()
     if (m_lStart == m_lEnd)
     {
         // There is no selection. We insert Tab character.
-        Posn lStart = m_pBuffer->ComputeStartOf(Unit_Paragraph, m_lStart);
+        Posn lStart = m_pBuffer->ComputeStartOf(Unit_Line, m_lStart);
         m_lStart = (m_lStart - lStart - 1) / iTabWidth * iTabWidth + lStart;
         m_lEnd   = m_lStart;
         return;
     }
 
     // Extend Range to cover entire lines
-    m_lStart = m_pBuffer->ComputeStartOf(Unit_Paragraph, m_lStart);
+    m_lStart = m_pBuffer->ComputeStartOf(Unit_Line, m_lStart);
 
-    if (m_pBuffer->ComputeStartOf(Unit_Paragraph, m_lEnd) != m_lEnd)
+    if (m_pBuffer->ComputeStartOf(Unit_Line, m_lEnd) != m_lEnd)
     {
-        m_pBuffer->ComputeMotion(Unit_Paragraph, 1, &m_lEnd);
+        m_pBuffer->ComputeMotion(Unit_Line, 1, &m_lEnd);
     }
 
     // Insert spaces each of start of line except for empty line.
@@ -1106,7 +1106,7 @@ void Range::Outdent()
 
         m_pBuffer->Delete(lStart, lPosn);
 
-        lStart = m_pBuffer->ComputeEndOf(Unit_Paragraph, lStart) + 1;
+        lStart = m_pBuffer->ComputeEndOf(Unit_Line, lStart) + 1;
     } while (lStart < m_lEnd);
 } // Range::Outdent
 

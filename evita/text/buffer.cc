@@ -139,7 +139,7 @@ Posn Buffer::ComputeEndOf(Unit eUnit, Posn lPosn) const
         lPosn = GetEnd();
         break;
 
-    case Unit_Paragraph:
+    case Unit_Line:
         while (lPosn < GetEnd())
         {
             if (0x0A == GetCharAt(lPosn))
@@ -217,14 +217,14 @@ Count Buffer::ComputeMotion(Unit eUnit, Count n, Posn* inout_lPosn) const
         return 0;
     } // char
 
-    case Unit_Paragraph:
+    case Unit_Line:
     {
         if (n > 0)
         {
             Count k;
             for (k = 0; k < n; k++)
             {
-                lPosn = ComputeEndOf(Unit_Paragraph, lPosn);
+                lPosn = ComputeEndOf(Unit_Line, lPosn);
                 if (lPosn == GetEnd()) break;
                 lPosn += 1;
             } // for k
@@ -237,7 +237,7 @@ Count Buffer::ComputeMotion(Unit eUnit, Count n, Posn* inout_lPosn) const
             Count k;
             for (k = 0; k < n; k++)
             {
-                lPosn = ComputeStartOf(Unit_Paragraph, lPosn);
+                lPosn = ComputeStartOf(Unit_Line, lPosn);
                 if (lPosn == GetStart()) break;
                 lPosn -= 1;
             } // for k
@@ -342,7 +342,7 @@ Posn Buffer::ComputeStartOf(Unit eUnit, Posn lPosn) const
         lPosn = GetStart();
         break;
 
-    case Unit_Paragraph:
+    case Unit_Line:
         while (lPosn > 0)
         {
             lPosn -= 1;

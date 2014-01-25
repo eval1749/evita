@@ -168,7 +168,7 @@ std::unique_ptr<TableViewModel> TableView::UpdateModelIfNeeded() {
   modified_tick_ = modified_tick;
   std::unique_ptr<TableViewModel> model(new TableViewModel());
   auto const buffer = document_->buffer();
-  auto position = buffer->ComputeEndOf(Unit_Paragraph, 0);
+  auto position = buffer->ComputeEndOf(Unit_Line, 0);
   auto header_line = buffer->GetText(0, position);
   model->SetHeaderRow(header_line);
   for (;;) {
@@ -176,7 +176,7 @@ std::unique_ptr<TableViewModel> TableView::UpdateModelIfNeeded() {
     if (position == buffer->GetEnd())
       break;
     auto const start = position;
-    position = buffer->ComputeEndOf(Unit_Paragraph, position);
+    position = buffer->ComputeEndOf(Unit_Line, position);
     auto const line = buffer->GetText(start, position);
     model->AddRow(line);
   }

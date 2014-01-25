@@ -403,7 +403,7 @@ Count Selection::MoveUp(Unit eUnit, Count n, bool fExtend)
 void Selection::RestoreForReload()
 {
     SetRange(0, 0);
-    Move(Unit_Paragraph, m_lRestoreLineNum);
+    Move(Unit_Line, m_lRestoreLineNum);
 } // Selection::RestoreForReload
 
 
@@ -526,7 +526,7 @@ void Selection::TypeChar(char16 wch, Count k)
 
 static base::string16 GetLeadingSpaces(const text::Range& range) {
     text::Range oRange(range);
-    oRange.StartOf(Unit_Paragraph);
+    oRange.StartOf(Unit_Line);
     oRange.MoveEndWhile(L" \t");
     return oRange.GetText();
 }

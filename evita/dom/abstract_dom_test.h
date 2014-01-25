@@ -62,8 +62,8 @@ bool AbstractDomTest::Call(const base::StringPiece& name, Params... params) {
 
 }  // namespace dom
 
-#define EXPECT_VALID_SCRIPT(script) EXPECT_TRUE(RunScript(script))
-#define EXPECT_VALID_SCRIPT_CALL(name, ...) \
+#define EXPECT_SCRIPT_VALID(script) EXPECT_TRUE(RunScript(script))
+#define EXPECT_SCRIPT_VALID_CALL(name, ...) \
     EXPECT_TRUE(Call(name, __VA_ARGS__))
 #define EXPECT_SCRIPT_EQ(expect, script) EXPECT_EQ(expect, EvalScript(script))
 #define EXPECT_SCRIPT_FALSE(script) EXPECT_SCRIPT_EQ("false", (script))

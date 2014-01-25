@@ -24,7 +24,7 @@ class EventHandlerTest : public dom::AbstractDomTest {
 
 TEST_F(EventHandlerTest, DidDropWidget) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_)).Times(2);
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var result, target;"
       "var source = new EditorWindow();"
       "var editorWindow = new EditorWindow();"
@@ -39,7 +39,7 @@ TEST_F(EventHandlerTest, DidDropWidget) {
 
 TEST_F(EventHandlerTest, DidDropWidget_InvalidWindowId) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_)).Times(2);
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var result, target;"
       "var source = new EditorWindow();"
       "EditorWindow.handleEvent = function(event) {"
@@ -53,7 +53,7 @@ TEST_F(EventHandlerTest, DidDropWidget_InvalidWindowId) {
 
 TEST_F(EventHandlerTest, QueryClose) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var result, target;"
       "var editorWindow = new EditorWindow();"
       "EditorWindow.handleEvent = function(event) {"

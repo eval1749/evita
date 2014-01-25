@@ -25,7 +25,7 @@ class TableSelectionTest : public dom::AbstractDomTest {
 
 TEST_F(TableSelectionTest, Basic) {
   EXPECT_CALL(*mock_view_impl(), CreateTableWindow(_, _));
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var doc = new Document('foo');"
       "var table_window = new TableWindow(doc);"
       "var sample = table_window.selection;");
@@ -35,7 +35,7 @@ TEST_F(TableSelectionTest, Basic) {
 
 TEST_F(TableSelectionTest, getRowStates) {
   EXPECT_CALL(*mock_view_impl(), CreateTableWindow(_, _));
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var doc = new Document('foo');"
       "var table_window = new TableWindow(doc);"
       "var sample = table_window.selection;"

@@ -15,7 +15,7 @@ class UiEventTest : public dom::AbstractDomTest {
 };
 
 TEST_F(UiEventTest, ctor) {
-  EXPECT_VALID_SCRIPT("var event = new UiEvent();");
+  EXPECT_SCRIPT_VALID("var event = new UiEvent();");
   EXPECT_SCRIPT_FALSE("event.bubbles");
   EXPECT_SCRIPT_FALSE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.current_target == null");
@@ -29,8 +29,8 @@ TEST_F(UiEventTest, ctor) {
 }
 
 TEST_F(UiEventTest, initUiEvent) {
-  EXPECT_VALID_SCRIPT("var event = new UiEvent();");
-  EXPECT_VALID_SCRIPT("event.initUiEvent('foo', true, true, null, 42)");
+  EXPECT_SCRIPT_VALID("var event = new UiEvent();");
+  EXPECT_SCRIPT_VALID("event.initUiEvent('foo', true, true, null, 42)");
   EXPECT_SCRIPT_TRUE("event.bubbles");
   EXPECT_SCRIPT_TRUE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.current_target == null");

@@ -33,17 +33,17 @@ class RangeTest : public dom::AbstractDomTest {
 static const char* kInvalidPosition = "Error: Invalid position.";
 
 TEST_F(RangeTest, Constructor) {
-  EXPECT_VALID_SCRIPT("var doc1 = new Document('range')");
-  EXPECT_VALID_SCRIPT("var range1 = new Range(doc1)");
-  EXPECT_VALID_SCRIPT("var range2 = new Range(doc1, 0)");
-  EXPECT_VALID_SCRIPT("var range3 = new Range(doc1, 0, 0)");
+  EXPECT_SCRIPT_VALID("var doc1 = new Document('range')");
+  EXPECT_SCRIPT_VALID("var range1 = new Range(doc1)");
+  EXPECT_SCRIPT_VALID("var range2 = new Range(doc1, 0)");
+  EXPECT_SCRIPT_VALID("var range3 = new Range(doc1, 0, 0)");
   EXPECT_SCRIPT_TRUE("range1.document === doc1");
   EXPECT_SCRIPT_TRUE("range2.document === doc1");
   EXPECT_SCRIPT_TRUE("range3.document === doc1");
 }
 
 TEST_F(RangeTest, capitalize) {
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
     "var doc = new Document('endOf');"
     "var range = new Range(doc);"
     "function test(sample) {"
@@ -57,7 +57,7 @@ TEST_F(RangeTest, capitalize) {
 }
 
 TEST_F(RangeTest, collapseTo) {
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
     "var doc = new Document('endOf');"
     "var range = new Range(doc);"
     "range.text = 'foo';"
@@ -67,7 +67,7 @@ TEST_F(RangeTest, collapseTo) {
 }
 
 TEST_F(RangeTest, endOf) {
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
     "var doc = new Document('endOf');"
     "var range = new Range(doc);"
                  //012345678901
@@ -87,7 +87,7 @@ TEST_F(RangeTest, endOf) {
 }
 
 TEST_F(RangeTest, insertBefore) {
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
     "var doc = new Document('insertBefore');"
     "var range = new Range(doc);"
     "range.text = 'foo';"
@@ -100,7 +100,7 @@ TEST_F(RangeTest, insertBefore) {
 }
 
 TEST_F(RangeTest, move) {
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var doc = new Document('move');"
       "var range = new Range(doc);"
                    //0123456789012345  678901234  56789012345
@@ -150,7 +150,7 @@ TEST_F(RangeTest, move) {
 
 
 TEST_F(RangeTest, moveEnd) {
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var doc = new Document('move');"
       "var range = new Range(doc);"
                    //0123456789012345  678901234  56789012345
@@ -200,7 +200,7 @@ TEST_F(RangeTest, moveEnd) {
 }
 
 TEST_F(RangeTest, moveStart) {
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var doc = new Document('move');"
       "var range = new Range(doc);"
                    //0123456789012345  678901234  56789012345
@@ -251,7 +251,7 @@ TEST_F(RangeTest, moveStart) {
 }
 
 TEST_F(RangeTest, set_start_end) {
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var doc1 = new Document('text');"
       "var range1 = new Range(doc1);"
       "range1.text = 'abcdefghijkl';"
@@ -265,7 +265,7 @@ TEST_F(RangeTest, set_start_end) {
 }
 
 TEST_F(RangeTest, startOf) {
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var doc = new Document('startOf');"
       "var range = new Range(doc);"
                    //01234567890
@@ -281,7 +281,7 @@ TEST_F(RangeTest, startOf) {
 }
 
 TEST_F(RangeTest, text) {
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var doc1 = new Document('text');"
       "var range1 = new Range(doc1);"
       "range1.text = 'abcdefghijkl';"

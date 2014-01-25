@@ -26,7 +26,7 @@ class EditorWindowTest : public dom::AbstractDomTest {
 
 TEST_F(EditorWindowTest, EditorWindow_list) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_)).Times(3);
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var a = new EditorWindow();"
       "var b = new EditorWindow();"
       "var c = new EditorWindow();"
@@ -41,13 +41,13 @@ TEST_F(EditorWindowTest, EditorWindow_list) {
 
 TEST_F(EditorWindowTest, Realize) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
-  EXPECT_VALID_SCRIPT("var sample = new EditorWindow()");
+  EXPECT_SCRIPT_VALID("var sample = new EditorWindow()");
   EXPECT_SCRIPT_TRUE("sample instanceof EditorWindow");
   EXPECT_SCRIPT_TRUE("sample instanceof Window");
   EXPECT_SCRIPT_EQ("1", "sample.id");
 
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(1));
-  EXPECT_VALID_SCRIPT("sample.realize()");
+  EXPECT_SCRIPT_VALID("sample.realize()");
 }
 
 }  // namespace

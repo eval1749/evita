@@ -25,20 +25,20 @@ class TextSelectionTest : public dom::AbstractDomTest {
 
 TEST_F(TextSelectionTest, active) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var doc = new Document('foo');"
       "var range = new Range(doc);"
       "var text_window = new TextWindow(range);"
       "var sample = text_window.selection;"
       "sample.range.text = 'foo';");
   EXPECT_SCRIPT_EQ("3", "sample.active");
-  EXPECT_VALID_SCRIPT("sample.startIsActive = true;");
+  EXPECT_SCRIPT_VALID("sample.startIsActive = true;");
   EXPECT_SCRIPT_EQ("0", "sample.active");
 }
 
 TEST_F(TextSelectionTest, Realize) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var doc = new Document('foo');"
       "var range = new Range(doc);"
       "var text_window = new TextWindow(range);"
@@ -49,7 +49,7 @@ TEST_F(TextSelectionTest, Realize) {
   EXPECT_SCRIPT_EQ("0", "sample.range.start");
   EXPECT_SCRIPT_EQ("0", "sample.range.end");
   EXPECT_SCRIPT_FALSE("sample.startIsActive");
-  EXPECT_VALID_SCRIPT("sample.startIsActive = true;");
+  EXPECT_SCRIPT_VALID("sample.startIsActive = true;");
   EXPECT_SCRIPT_TRUE("sample.startIsActive");
 }
 

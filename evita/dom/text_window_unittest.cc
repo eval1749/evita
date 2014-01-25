@@ -26,7 +26,7 @@ class TextWindowTest : public dom::AbstractDomTest {
 
 TEST_F(TextWindowTest, clone) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_)).Times(2);
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var original = new TextWindow(new Range(new Document('foo')));"
       "original.selection.range.text = 'foo';"
       "original.selection.range.end = 3;"
@@ -37,14 +37,14 @@ TEST_F(TextWindowTest, clone) {
 TEST_F(TextWindowTest, MakeSelectionVisible) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
   EXPECT_CALL(*mock_view_impl(), MakeSelectionVisible(Eq(1)));
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var sample = new TextWindow(new Range(new Document('foo')));"
       "sample.makeSelectionVisible();");
 }
 
 TEST_F(TextWindowTest, Realize) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var doc = new Document('foo');"
       "var range = new Range(doc);"
       "var sample = new TextWindow(range);");
@@ -55,7 +55,7 @@ TEST_F(TextWindowTest, Realize) {
   EXPECT_SCRIPT_TRUE("sample.selection instanceof Selection");
 
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
-  EXPECT_VALID_SCRIPT("sample.realize()");
+  EXPECT_SCRIPT_VALID("sample.realize()");
 }
 
 }  // namespace

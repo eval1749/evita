@@ -85,9 +85,9 @@ class WindowTest : public dom::AbstractDomTest {
 };
 
 TEST_F(WindowTest, Construction) {
-  EXPECT_VALID_SCRIPT("var sample1 = new SampleWindow()");
+  EXPECT_SCRIPT_VALID("var sample1 = new SampleWindow()");
   EXPECT_SCRIPT_EQ("1", "sample1.id");
-  EXPECT_VALID_SCRIPT("sample1.name = 'test';");
+  EXPECT_SCRIPT_VALID("sample1.name = 'test';");
   EXPECT_SCRIPT_EQ("test", "sample1.name");
   EXPECT_SCRIPT_EQ("notrealized", "sample1.state");
   EXPECT_SCRIPT_TRUE("sample1.firstChild === null");
@@ -100,7 +100,7 @@ TEST_F(WindowTest, Add) {
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(1), Eq(2)));
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(1), Eq(3)));
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var parent = new SampleWindow();"
       "var child1 = new SampleWindow();"
       "var child2 = new SampleWindow();"
@@ -131,7 +131,7 @@ TEST_F(WindowTest, Destroy) {
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(2), Eq(3)));
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(2), Eq(4)));
   EXPECT_CALL(*mock_view_impl(), DestroyWindow(Eq(1)));
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var sample1 = new SampleWindow();"
       "var child1 = new SampleWindow();"
       "var child2 = new SampleWindow();"
@@ -159,7 +159,7 @@ TEST_F(WindowTest, Destroy) {
 TEST_F(WindowTest, changeParent) {
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(1), Eq(2)));
   EXPECT_CALL(*mock_view_impl(), ChangeParentWindow(Eq(2), Eq(3)));
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
     "var sample1 = new SampleWindow();"
     "var sample2 = new SampleWindow();"
     "var sample3 = new SampleWindow();"
@@ -170,26 +170,26 @@ TEST_F(WindowTest, changeParent) {
     "sample1.changeParent(sample2)");
   EXPECT_SCRIPT_EQ("Error: Can't change parent to itself.",
                    "sample2.changeParent(sample2)");
-  EXPECT_VALID_SCRIPT("sample2.changeParent(sample1)");
-  EXPECT_VALID_SCRIPT("sample2.changeParent(sample3)");
+  EXPECT_SCRIPT_VALID("sample2.changeParent(sample1)");
+  EXPECT_SCRIPT_VALID("sample2.changeParent(sample3)");
   EXPECT_SCRIPT_EQ("3", "sample2.parent.id");
 }
 
 TEST_F(WindowTest, focus) {
-  EXPECT_VALID_SCRIPT("var sample = new SampleWindow();");
+  EXPECT_SCRIPT_VALID("var sample = new SampleWindow();");
   EXPECT_SCRIPT_EQ("Error: You can't focus unrealized window.",
                    "sample.focus()");
 
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
-  EXPECT_VALID_SCRIPT("sample.realize();");
+  EXPECT_SCRIPT_VALID("sample.realize();");
   view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
 
   EXPECT_CALL(*mock_view_impl(), FocusWindow(Eq(1)));
-  EXPECT_VALID_SCRIPT("sample.focus();");
+  EXPECT_SCRIPT_VALID("sample.focus();");
 }
 
 TEST_F(WindowTest, Properties) {
-  EXPECT_VALID_SCRIPT("var sample1 = new SampleWindow()");
+  EXPECT_SCRIPT_VALID("var sample1 = new SampleWindow()");
   EXPECT_SCRIPT_EQ("0", "sample1.children.length");
   EXPECT_SCRIPT_EQ("1", "sample1.id");
   EXPECT_SCRIPT_EQ("true", "sample1.parent == null");
@@ -197,7 +197,7 @@ TEST_F(WindowTest, Properties) {
 
 TEST_F(WindowTest, Realize) {
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
-  EXPECT_VALID_SCRIPT("var sample1 = new SampleWindow(); sample1.realize()");
+  EXPECT_SCRIPT_VALID("var sample1 = new SampleWindow(); sample1.realize()");
   EXPECT_SCRIPT_EQ("realizing", "sample1.state");
   EXPECT_SCRIPT_EQ("Error: This window is being realized.",
                    "sample1.realize();");

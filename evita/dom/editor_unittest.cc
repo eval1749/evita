@@ -25,7 +25,7 @@ class EditorTest : public dom::AbstractDomTest {
 
 TEST_F(EditorTest, getFilenameForLoad) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var filename;"
       "var window = new EditorWindow();"
       "Editor.getFilenameForLoad(window, 'dir').then(function(x) {"
@@ -36,7 +36,7 @@ TEST_F(EditorTest, getFilenameForLoad) {
 
 TEST_F(EditorTest, getFilenameForSave) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var filename;"
       "var window = new EditorWindow();"
       "Editor.getFilenameForSave(window, 'dir').then(function(x) {"
@@ -52,7 +52,7 @@ TEST_F(EditorTest, localizeText) {
 
 TEST_F(EditorTest, messageBox) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var response_code;"
       "var window = new EditorWindow();"
       "Editor.messageBox(window, 'message', 'title', 3)"

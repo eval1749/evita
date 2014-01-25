@@ -18,19 +18,19 @@ class ConsoleTest : public dom::AbstractDomTest {
 };
 
 TEST_F(ConsoleTest, log) {
-  EXPECT_VALID_SCRIPT("function consoleContents() {"
+  EXPECT_SCRIPT_VALID("function consoleContents() {"
                       "  var doc = Document.find(console.DOCUMENT_NAME);"
                       "  var range = new Range(doc, 0, doc.length);"
                       "  return range.text;"
                       "}");
 
-  EXPECT_VALID_SCRIPT("console.log()");
+  EXPECT_SCRIPT_VALID("console.log()");
   EXPECT_SCRIPT_EQ("\n", "consoleContents()");
 
-  EXPECT_VALID_SCRIPT("console.log('foo bar')");
+  EXPECT_SCRIPT_VALID("console.log('foo bar')");
   EXPECT_SCRIPT_EQ("\nfoo bar\n", "consoleContents()");
 
-  EXPECT_VALID_SCRIPT("console.clear()");
+  EXPECT_SCRIPT_VALID("console.clear()");
   EXPECT_SCRIPT_EQ("", "consoleContents()");
 }
 

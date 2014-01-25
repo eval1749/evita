@@ -17,15 +17,15 @@ class TextFieldControlTest : public dom::AbstractDomTest {
 };
 
 TEST_F(TextFieldControlTest, ctor) {
-  EXPECT_VALID_SCRIPT("var sample = new TextFieldControl(123);");
+  EXPECT_SCRIPT_VALID("var sample = new TextFieldControl(123);");
   EXPECT_SCRIPT_EQ("123", "sample.resouce_id");
   EXPECT_SCRIPT_EQ("", "sample.value");
-  EXPECT_VALID_SCRIPT("sample.value = 'foo';");
+  EXPECT_SCRIPT_VALID("sample.value = 'foo';");
   EXPECT_SCRIPT_EQ("foo", "sample.value");
 }
 
 TEST_F(TextFieldControlTest, dispatchEvent) {
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var sample = new TextFieldControl(123);"
       "var event = new FormEvent('change', true, false, 'foo');"
       "sample.dispatchEvent(event);");

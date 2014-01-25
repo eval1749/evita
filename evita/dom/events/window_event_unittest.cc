@@ -19,7 +19,7 @@ class WindowEventTest : public dom::AbstractDomTest {
 };
 
 TEST_F(WindowEventTest, ctor) {
-  EXPECT_VALID_SCRIPT("var event = new WindowEvent();");
+  EXPECT_SCRIPT_VALID("var event = new WindowEvent();");
   EXPECT_SCRIPT_FALSE("event.bubbles");
   EXPECT_SCRIPT_FALSE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.current_target == null");
@@ -35,7 +35,7 @@ TEST_F(WindowEventTest, ctor) {
 
 TEST_F(WindowEventTest, initWindowEvent) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var event = new WindowEvent();"
       "var source = new EditorWindow();"
       "event.initWindowEvent('foo', true, true, source)");

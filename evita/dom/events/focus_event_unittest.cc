@@ -18,10 +18,10 @@ class FocusEventTest : public dom::AbstractDomTest {
 
 TEST_F(FocusEventTest, ctor) {
   v8::HandleScope handle_scope(isolate());
-  EXPECT_VALID_SCRIPT("var event;"
+  EXPECT_SCRIPT_VALID("var event;"
                       "function init(x) { event = x; }");
   auto const event = new dom::FocusEvent(L"focusin", nullptr);
-  EXPECT_VALID_SCRIPT_CALL("init", event->GetWrapper(isolate()));
+  EXPECT_SCRIPT_VALID_CALL("init", event->GetWrapper(isolate()));
   EXPECT_SCRIPT_TRUE("event.bubbles");
   EXPECT_SCRIPT_FALSE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.current_target == null");

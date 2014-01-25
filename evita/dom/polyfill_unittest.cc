@@ -24,7 +24,7 @@ class PolyfillTest : public dom::AbstractDomTest {
 };
 
 TEST_F(PolyfillTest, Array_find) {
-  EXPECT_VALID_SCRIPT(
+  EXPECT_SCRIPT_VALID(
       "var list = [{value: 1}, {value: 2}, {value: 3}];"
       "function predicate(value) {"
       "  return function(element) { return element.value == value; };"

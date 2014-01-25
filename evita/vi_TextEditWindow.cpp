@@ -250,14 +250,6 @@ void TextEditWindow::BindKey(int key_code,
   key_bindings->Bind(key_code, function);
 }
 
-TextEditWindow* TextEditWindow::Clone() const {
-  UI_ASSERT_DOM_LOCKED();
-  auto const window = new TextEditWindow(GetBuffer(), m_pPage->GetStart());
-  window->selection_->SetRange(selection_->GetStart(), selection_->GetEnd());
-  window->selection_->SetStartIsActive(selection_->IsStartActive());
-  return window;
-}
-
 Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
   if (xGoal < 0)
     return lGoal;

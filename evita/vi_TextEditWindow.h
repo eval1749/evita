@@ -123,7 +123,6 @@ class TextEditWindow
   public: static void BindKey(int key_code, Command::Command::CommandFn);
 
   // [C]
-  public: TextEditWindow* Clone() const;
   public: Count ComputeMotion(Unit, Count, const gfx::PointF&, Posn*);
   private: Posn computeGoalX(float, Posn);
 

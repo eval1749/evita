@@ -142,15 +142,7 @@ void ScriptController::DidStartHost() {
   LoadJsLibrary();
   if (testing_)
     return;
-  auto result = Evaluate(
-    L"(function() {\n"
-    L"var doc = new Document('*scratch*');\n"
-    L"var range = new Range(doc);\n"
-    L"var editor_window = new EditorWindow();\n"
-    L"var text_window = new TextWindow(range);\n"
-    L"editor_window.addChild_(text_window);\n"
-    L"editor_window.realize();\n"
-    L"})();");
+  auto result = Evaluate(L"editors.start([]);");
   CHECK(result.exception.empty()) << result.exception << std::endl <<
       "line: " << result.line_number;
 }

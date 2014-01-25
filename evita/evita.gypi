@@ -35,6 +35,7 @@
         'dom/text_selection_externs.js',
         'dom/text_window_externs.js',
         'dom/window_externs.js',
+        'dom/jslib/editors_externs.js',
         'dom/jslib/windows_externs.js',
       ],
       'js_lib_files': [
@@ -48,6 +49,7 @@
         'dom/range.js',
         'dom/window.js',
 
+        'dom/jslib/editors.js',
         'dom/jslib/windows.js',
 
         'dom/console.js',

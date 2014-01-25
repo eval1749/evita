@@ -18,24 +18,29 @@
 #include "evita/gc/weak_ptr.h"
 #include "evita/v8_glue/wrapper_info.h"
 
-namespace gin {
+namespace {
+const char* WindowStateString(dom::Window::State state) {
+  static const char* const state_strings[] = {
+    "destroyed",
+    "destroying",
+    "notrealized",
+    "realizing",
+    "realized",
+  };
+  auto const index = static_cast<size_t>(static_cast<int>(state) -
+      static_cast<int>(dom::Window::State::Destroyed));
+  DCHECK_LE(index, arraysize(state_strings) - 1);
+  return state_strings[index];
+}
+}  // namespace
 
-const char* state_strings[] = {
-  "destroyed",
-  "destroying",
-  "notrealized",
-  "realizing",
-  "realized",
-};
+namespace gin {
 
 template<>
 struct Converter<dom::Window::State> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
                                     dom::Window::State state) {
-    auto const index = static_cast<size_t>(
-        state - dom::Window::State::kDestroyed);
-    DCHECK_LE(index, arraysize(state_strings) - 1);
-    return gin::StringToSymbol(isolate, state_strings[index]);
+    return gin::StringToSymbol(isolate, WindowStateString(state));
   }
 };
 
@@ -105,8 +110,8 @@ class Window::WindowIdMapper : public common::Singleton<WindowIdMapper> {
       return;
     }
     auto const window = it->second.get();
-    DCHECK_NE(kDestroyed, window->state_);
-    window->state_ = kDestroyed;
+    DCHECK_NE(State::Destroyed, window->state_);
+    window->state_ = State::Destroyed;
     if (auto const parent = window->parent_node()) {
       parent->RemoveChild(window);
     }
@@ -139,7 +144,7 @@ DEFINE_SCRIPTABLE_OBJECT(Window, WindowWrapperInfo)
 
 Window::Window()
     : focus_tick_(0),
-      state_(kNotRealized) {
+      state_(State::NotRealized) {
   WindowIdMapper::instance()->Register(this);
 }
 
@@ -205,13 +210,13 @@ void Window::ChangeParentWindow(Window* new_parent_window) {
 }
 
 void Window::Destroy() {
-  if (state_ != kRealized && state_ != kRealizing) {
+  if (state_ != State::Realized && state_ != State::Realizing) {
     ScriptController::instance()->ThrowError(
         "You can't destroy unrealized window.");
     return;
   }
   for (auto descendant : common::tree::descendants_or_self(this)) {
-    descendant->state_= kDestroying;
+    descendant->state_= State::Destroying;
   }
   ScriptController::instance()->view_delegate()->DestroyWindow(window_id());
 }
@@ -226,20 +231,21 @@ void Window::DidDestroyWidget(WindowId window_id) {
 }
 
 // Possible state transitions:
-//  kRealizing -> kRealized 
+//  State::Realizing -> State::Realized 
 //    |realize()| call.
-//  kNotRealized -> kRealized
-//    Adding |kNotRealized| window to |kRealized| window.
-//  kDestroying -> kRealized
-//    The window was |kRealizing| then |destroy()|.
+//  State::NotRealized -> State::Realized
+//    Adding |State::NotRealized| window to |State::Realized| window.
+//  State::Destroying -> State::Realized
+//    The window was |State::Realizing| then |destroy()|.
 void Window::DidRealizeWidget(WindowId window_id) {
   auto const widget = FromWindowId(window_id);
-  DCHECK(kRealizing == widget->state_ || kDestroying == widget->state_ ||
-         kNotRealized == widget->state_);
-  widget->state_ = kRealized;
+  DCHECK(widget->state_ == State::Realizing ||
+         widget->state_ == State::Destroying ||
+         widget->state_ == State::NotRealized);
+  widget->state_ = State::Realized;
   for (auto child : widget->child_nodes()) {
-    if (child->state_ == kNotRealized)
-      child->state_ = kRealized;
+    if (child->state_ == State::NotRealized)
+      child->state_ = State::Realized;
   }
 }
 
@@ -253,7 +259,7 @@ void Window::DidSetFocus(dom::WindowId window_id) {
 }
 
 void Window::Focus() {
-  if (state_ != kRealized && state_ != kRealizing) {
+  if (state_ != State::Realized && state_ != State::Realizing) {
     ScriptController::instance()->ThrowError(
         "You can't focus unrealized window.");
     return;
@@ -275,29 +281,29 @@ bool Window::IsDescendantOf(Window* other) const {
 }
 
 void Window::Realize() {
-  if (state_ == kDestroyed) {
+  if (state_ == State::Destroyed) {
     DCHECK_EQ(kInvalidWindowId, window_id());
     ScriptController::instance()->ThrowError(
         "Can't realize deatched window.");
     return;
   }
-  if (state_ == kRealized) {
+  if (state_ == State::Realized) {
     ScriptController::instance()->ThrowError(
         "This window is already realized.");
     return;
   }
-  if (state_ == kRealizing) {
+  if (state_ == State::Realizing) {
     ScriptController::instance()->ThrowError(
         "This window is being realized.");
     return;
   }
-  if (parent_node() && parent_node()->state_ == kNotRealized) {
+  if (parent_node() && parent_node()->state_ == State::NotRealized) {
     ScriptController::instance()->ThrowError(
         "Parent window isn't realized.");
     return;
   }
   for (auto descendant : common::tree::descendants_or_self(this)) {
-    descendant->state_= kRealizing;
+    descendant->state_= State::Realizing;
   }
   ScriptController::instance()->view_delegate()->RealizeWindow(window_id());
 }
@@ -325,7 +331,7 @@ static bool CheckSplitParameter(Window* ref_window, Window* new_window) {
     return false;
   }
 
-  if (ref_window->state() != Window::kRealized) {
+  if (ref_window->state() != Window::State::Realized) {
     ScriptController::instance()->ThrowError(
         "Can't split unrealized window.");
     return false;
@@ -337,7 +343,7 @@ static bool CheckSplitParameter(Window* ref_window, Window* new_window) {
     return false;
   }
 
-  if (new_window->state() != Window::kNotRealized) {
+  if (new_window->state() != Window::State::NotRealized) {
     ScriptController::instance()->ThrowError(
         "Can't split with realized window.");
     return false;
@@ -370,4 +376,8 @@ std::ostream& operator<<(std::ostream& ostream, const dom::Window& window) {
 
 std::ostream& operator<<(std::ostream& ostream, const dom::Window* window) {
   return ostream << *window;
+}
+
+std::ostream& operator<<(std::ostream& ostream, dom::Window::State state) {
+  return ostream << WindowStateString(state);
 }

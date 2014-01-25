@@ -23,14 +23,15 @@ class Window : public v8_glue::Scriptable<Window, EventTarget>,
   private: class WindowIdMapper;
   friend class WindowIdMapper;
 
-  public: enum State {
-    kDestroyed = -2,
-    kDestroying,
-    kNotRealized,
-    kRealizing,
-    kRealized,
+  public: enum class State {
+    Destroyed = -2,
+    Destroying,
+    NotRealized,
+    Realizing,
+    Realized,
   };
-  static_assert(!kNotRealized, "Window::State::kNotRealized should be zero.");
+  static_assert(!static_cast<int>(State::NotRealized),
+                "Window::State::kNotRealized should be zero.");
 
   private: int focus_tick_;
   private: State state_;
@@ -84,5 +85,6 @@ class Window : public v8_glue::Scriptable<Window, EventTarget>,
 
 std::ostream& operator<<(std::ostream& ostream, const dom::Window& window);
 std::ostream& operator<<(std::ostream& ostream, const dom::Window* window);
+std::ostream& operator<<(std::ostream& ostream, dom::Window::State state);
 
 #endif //!defined(INCLUDE_evita_dom_window_h)

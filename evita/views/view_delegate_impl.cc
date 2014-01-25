@@ -84,6 +84,17 @@ void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
   window->SetParentWidget(new_parent);
 }
 
+void ViewDelegateImpl::ComputeEndOfLine(dom::WindowId window_id,
+                                        text::Posn* inout_position,
+                                        base::WaitableEvent* event) {
+  WaitableEventScope waitable_event_scope(event);
+  auto const window = FromWindowId("ComputeEndOf", window_id);
+  if (!window)
+    return;
+  UI_DOM_AUTO_LOCK_SCOPE();
+  *inout_position = window->as<TextEditWindow>()->EndOfLine(*inout_position);
+}
+
 void ViewDelegateImpl::CreateDialogBox(dom::DialogBoxId dialog_box_id) {
   new FindDialogBox(dialog_box_id);
 }

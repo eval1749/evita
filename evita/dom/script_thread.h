@@ -63,6 +63,9 @@ class ScriptThread final : public ViewDelegate,
                                   WindowId child_id) override;
   public: virtual void ChangeParentWindow(WindowId window_id,
     WindowId new_parent_window_id) override;
+  private: virtual void ComputeEndOfLine(WindowId window_id,
+                                         text::Posn* out_position,
+                                         base::WaitableEvent* event) override;
   private: virtual void CreateDialogBox(DialogBoxId dialog_box_id) override;
   private: virtual void CreateEditorWindow(
       const EditorWindow* window) override;

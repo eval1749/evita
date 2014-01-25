@@ -168,6 +168,23 @@ DEFINE_VIEW_DELEGATE_1(ShowDialogBox, DialogBoxId)
 DEFINE_VIEW_DELEGATE_2(SplitHorizontally, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(SplitVertically, WindowId, WindowId)
 
+void ScriptThread::ComputeEndOfLine(WindowId window_id,
+                                    text::Posn* inout_position,
+                                    base::WaitableEvent* null_event) {
+  DCHECK(!null_event);
+  DCHECK(inout_position);
+  DCHECK_CALLED_ON_SCRIPT_THREAD();
+  if (!host_message_loop_)
+    return;
+  base::WaitableEvent event(true, false);
+  DOM_AUTO_UNLOCK_SCOPE();
+  host_message_loop_->PostTask(FROM_HERE, base::Bind(
+      &ViewDelegate::ComputeEndOfLine,
+      base::Unretained(view_delegate_), window_id,
+      base::Unretained(inout_position), base::Unretained(&event)));
+  event.Wait();
+}
+
 void ScriptThread::GetTableRowStates(WindowId window_id,
     const std::vector<base::string16>& keys, int* states,
     base::WaitableEvent* null_event) {

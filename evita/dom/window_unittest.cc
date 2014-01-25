@@ -225,6 +225,8 @@ TEST_F(WindowTest, splitHorizontally) {
   EXPECT_SCRIPT_VALID("sample1.realize();");
   view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
   EXPECT_SCRIPT_VALID("sample1.splitHorizontally(sample2);");
+  EXPECT_SCRIPT_TRUE("sample1.firstChild == sample2");
+  EXPECT_SCRIPT_TRUE("sample2.parent == sample1");
   EXPECT_SCRIPT_EQ("Error: Can't split with child window.",
       "sample1.splitHorizontally(sample3);");
   EXPECT_SCRIPT_EQ("Error: Can't split with realized window.",
@@ -251,6 +253,8 @@ TEST_F(WindowTest, splitVertically) {
   EXPECT_SCRIPT_VALID("sample1.realize();");
   view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
   EXPECT_SCRIPT_VALID("sample1.splitVertically(sample2);");
+  EXPECT_SCRIPT_TRUE("sample1.firstChild == sample2");
+  EXPECT_SCRIPT_TRUE("sample2.parent == sample1");
   EXPECT_SCRIPT_EQ("Error: Can't split with child window.",
       "sample1.splitVertically(sample3);");
   EXPECT_SCRIPT_EQ("Error: Can't split with realized window.",

@@ -359,6 +359,7 @@ static bool CheckSplitParameter(Window* ref_window, Window* new_window) {
 void Window::SplitHorizontally(Window* new_right_window) {
   if (!CheckSplitParameter(this, new_right_window))
     return;
+  parent_node()->InsertAfter(new_right_window, this);
   ScriptController::instance()->view_delegate()->SplitHorizontally(
     id(), new_right_window->id());
 }
@@ -366,6 +367,7 @@ void Window::SplitHorizontally(Window* new_right_window) {
 void Window::SplitVertically(Window* new_below_window) {
   if (!CheckSplitParameter(this, new_below_window))
     return;
+  parent_node()->InsertAfter(new_below_window, this);
   ScriptController::instance()->view_delegate()->SplitVertically(
     id(), new_below_window->id());
 }

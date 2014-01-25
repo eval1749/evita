@@ -25,6 +25,29 @@
   });
 
   /**
+   * Close this window.
+   * @this {!Window}
+   * Note:
+   *   If Windows doesn't generate key combination Ctrl+Shift+0, please
+   *   check "Advanced Key Settings" of "Text Services and Input Languages"
+   *   of "Regional and Language Options". If "Ctrl+Shift" key sequence
+   *   is assigned, turn this assignment off. This may fix this problem.
+   *
+   *   In this case, Windows generates WM_INPUTLANGCHANGEREQUEST for
+   *   Ctrl+Shift sequence.
+   */
+  Editor.bindKey(Window, 'Ctrl+Shift+0', function() {
+    if (!this.nextSibling && !this.previousSibling) {
+      Editor.messageBox(this,
+          Editor.localizeText(Strings.IDS_NO_OTHER_WINDOWS),
+          Editor.localizeText(Strings.IDS_APP_TITLE),
+          MessageBox.ICONWARNING);
+      return;
+    }
+    this.destroy();
+  });
+
+  /**
    * Split window vertically and put new window below.
    * @this {!Window}
    */

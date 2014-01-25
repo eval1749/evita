@@ -72,16 +72,6 @@ namespace Command
     DEFCOMMAND(mp_name ## Extend) \
         { pCtx->GetSelection()->mp_method(Unit_ ## mp_unit, true); }
 
-
-static bool hasMoreThanOneWindow()
-{
-    Frame* pFrame = Application::instance()->GetFirstFrame();
-    if (NULL == pFrame) return false;           // no frame
-    if (NULL != pFrame->GetNext()) return true; // more than one frame
-    return pFrame->first_child() != pFrame->last_child();
-} // hasMoreThanOnePane
-
-
 // [B]
 DefCommand_Motions(Backward, Left, Char)
 DefCommand_Motions(Backward, Left, Word)
@@ -122,38 +112,6 @@ DEFCOMMAND(CloseOtherWindows) {
                  base::Unretained(pane),
                  base::Unretained(window)));
 }
-
-//////////////////////////////////////////////////////////////////////
-//
-// CloseThisWindow
-//  Evita   Ctrl+Shift+0
-//  Emacs   Ctrl+X 0
-//
-// Note:
-//   If Windows doesn't generate key combination Ctrl+Shift+0, please
-//   check "Advanced Key Settings" of "Text Services and Input Languages"
-//   of "Regional and Language Options". If "Ctrl+Shift" key sequence
-//   is assigned, turn this assignment off. This may fix this problem.
-//
-//   In this case, Windows generates WM_INPUTLANGCHANGEREQUEST for
-//   Ctrl+Shift sequence.
-//
-DEFCOMMAND(CloseThisWindow)
-{
-    if (NULL == pCtx->GetSelection()) return;
-
-    if (! hasMoreThanOneWindow())
-    {
-        pCtx->GetFrame()->ShowMessage(
-            MessageLevel_Warning,
-            IDS_NO_OTHER_WINDOWS );
-        return;
-    }
-
-    Selection* pSelection = pCtx->GetSelection();
-    pSelection->GetWindow()->DestroyWidget();
-} // CloseThisWindow
-
 
 DEFCOMMAND(CopyToClipboard)
 { 
@@ -1081,7 +1039,6 @@ void Processor::GlobalInit() {
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'X', CutToClipboard);
 
     // Ctrl+Shift+[0-9]
-    BIND_KEY(CommandWindow, Mod_CtrlShift | '0', CloseThisWindow);
     BIND_KEY(CommandWindow, Mod_CtrlShift | '1', CloseOtherWindows);
 
     BIND_VKEY(TextEditWindow, Mod_None,  BACK,   BackwardDeleteChar);

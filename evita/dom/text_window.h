@@ -6,6 +6,8 @@
 #include "evita/dom/document_window.h"
 
 #include "evita/gc/member.h"
+#include "evita/v8_glue/either.h"
+#include "evita/v8_glue/optional.h"
 
 class Selection;
 
@@ -27,7 +29,9 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
   public: Range* view_range() const { return view_range_; }
   public: ::Selection* view_selection() const;
 
-  public: text::Posn ComputeEndOfLine(text::Posn position);
+  public: v8::Handle<v8::Value> Compute(int method,
+      v8_glue::Optional<v8_glue::Either<int, float>> opt_either1,
+      v8_glue::Optional<v8_glue::Either<int, float>> opt_either2);
   public: void MakeSelectionVisible();
 
   DISALLOW_COPY_AND_ASSIGN(TextWindow);

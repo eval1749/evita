@@ -82,6 +82,19 @@ var TableViewRowState = {
   ACTIVATING: 0x0020
 };
 
+/** @enum{number} */
+var TextWindowComputeMethod = {
+  END_OF_WINDOW: 0,
+  END_OF_WINDOW_LINE: 1,
+  MAP_POINT_TO_POSITION: 2,
+  MAP_POSITION_TO_POINT: 3,
+  MOVE_SCRENN: 4,
+  MOVE_WINDOW: 5,
+  MOVE_WINDOW_LINE: 6,
+  START_OF_WINDOW: 7,
+  START_OF_WINDOW_LINE: 8,
+};
+
 /**
  * Also called granularity.
  * @enum{string}

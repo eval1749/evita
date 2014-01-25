@@ -5,16 +5,19 @@
 TextWindow.prototype.clone = function() {};
 
 /**
+ * @param {number} method
+ * @param {number=} opt_int_or_float1
+ * @param {number=} opt_int_or_float2
+* @return {number}
+ */
+TextWindow.prototype.compute_ = function(method, opt_int_or_float1,
+                                         opt_int_or_float2) {};
+
+/**
  * @override
  * @type {!TextSelection}
  */
 TextWindow.prototype.selection;
-
-/**
- * @param {number} position
- * @return {number}
- */
-TextWindow.prototype.endOfLine_ = function(position) {};
 
 /** @type {function()} */
 TextWindow.prototype.makeSelectionVisible = function() {};

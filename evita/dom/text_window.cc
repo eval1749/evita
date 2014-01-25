@@ -41,7 +41,7 @@ class TextWindowWrapperInfo :
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetMethod("endOfLine_", &TextWindow::ComputeEndOfLine)
+        .SetMethod("compute_", &TextWindow::Compute)
         .SetMethod("makeSelectionVisible", &TextWindow::MakeSelectionVisible);
   }
 };
@@ -66,11 +66,35 @@ TextWindow::~TextWindow() {
   return static_cast<TextSelection*>(selection())->view_selection();
 }
 
-text::Posn TextWindow::ComputeEndOfLine(text::Posn position) {
-  text::Posn result = position;
-  ScriptController::instance()->view_delegate()->ComputeEndOfLine(
-    id(), &result, nullptr);
-  return result;
+v8::Handle<v8::Value> TextWindow::Compute(int method,
+      v8_glue::Optional<v8_glue::Either<int, float>> opt_either1,
+      v8_glue::Optional<v8_glue::Either<int, float>> opt_either2) {
+  TextWindowCompute data;
+  data.method = static_cast<TextWindowCompute::Method>(method);
+  data.int1 = opt_either1.is_supplied && opt_either1.value.is_left ?
+      opt_either1.value.left : 0;
+  data.int2 = opt_either2.is_supplied && opt_either2.value.is_left ?
+      opt_either2.value.left : 0;
+  data.float1 = opt_either1.is_supplied && !opt_either1.value.is_left ?
+      opt_either1.value.right : 0.0f;
+  data.float2 = opt_either2.is_supplied && !opt_either2.value.is_left ?
+      opt_either2.value.right : 0.0f;
+  ScriptController::instance()->view_delegate()->ComputeOnTextWindow(
+    id(), &data, nullptr);
+  switch (data.method) {
+    case TextWindowCompute::Method::EndOfWindow:
+    case TextWindowCompute::Method::EndOfWindowLine:
+    case TextWindowCompute::Method::MapPointToPosition:
+    case TextWindowCompute::Method::MoveWindow:
+    case TextWindowCompute::Method::MoveWindowLine:
+    case TextWindowCompute::Method::StartOfWindow:
+    case TextWindowCompute::Method::StartOfWindowLine:
+      return gin::ConvertToV8(v8::Isolate::GetCurrent(), data.int1);
+    case TextWindowCompute::Method::MapPositionToPoint:
+      return gin::ConvertToV8(v8::Isolate::GetCurrent(), data.float1);
+  }
+  ScriptController::instance()->ThrowError("Invalid method.");
+  return v8::Undefined(v8::Isolate::GetCurrent());
 }
 
 void TextWindow::MakeSelectionVisible() {

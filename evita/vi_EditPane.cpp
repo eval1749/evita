@@ -117,8 +117,8 @@ class EditPane::LayoutBox : public EditPane::Box {
   public: virtual void Redraw() const override final;
   public: void RemoveBox(Box&);
   public: void Replace(Box&, Box&);
-  public: virtual LeafBox& Split(Box&, int) = 0;
-
+  public: virtual void Split(Box* ref_box, int new_box_size,
+                             Window* new_window) = 0;
   public: virtual void StopSplitter(const gfx::Point&, Box&) = 0;
 
   // [U]
@@ -186,7 +186,8 @@ class EditPane::HorizontalLayoutBox final : public EditPane::LayoutBox {
   public: virtual void MoveSplitter(const gfx::Point&, Box&) override;
   public: virtual void Realize(EditPane*, const gfx::Rect&) override;
   public: virtual void SetRect(const gfx::Rect&) override;
-  public: virtual LeafBox& Split(Box&, int) override;
+  private: virtual void Split(Box* ref_box, int new_box_size,
+                              Window* new_window) override;
   public: virtual void StopSplitter(const gfx::Point&, Box&) override;
   DISALLOW_COPY_AND_ASSIGN(HorizontalLayoutBox);
 };
@@ -201,7 +202,8 @@ class EditPane::VerticalLayoutBox final : public LayoutBox {
   public: virtual void MoveSplitter(const gfx::Point&, Box&) override;
   public: virtual void Realize(EditPane*, const gfx::Rect&) override;
   public: virtual void SetRect(const gfx::Rect&) override;
-  public: virtual LeafBox& Split(Box&, int) override;
+  private: virtual void Split(Box* ref_box, int new_box_size,
+                              Window* new_window) override;
   public: virtual void StopSplitter(const gfx::Point&, Box&) override;
   DISALLOW_COPY_AND_ASSIGN(VerticalLayoutBox);
 };
@@ -354,10 +356,9 @@ bool EditPane::HorizontalLayoutBox::IsVerticalLayoutBox() const {
 void EditPane::HorizontalLayoutBox::MoveSplitter(
     const gfx::Point& pt,
     Box& right_box) {
-  auto& left_box = right_box.GetPrev()
-      ? *right_box.GetPrev()
-      : Split(right_box, k_cxSplitter);
-
+  if (!right_box.GetPrev())
+    return;
+  auto& left_box = *right_box.GetPrev();
   if (pt.x - left_box.rect().left <= 0) {
     // Above box is too small.
   } else if (right_box.rect().right - pt.x <= k_cxMinBox) {
@@ -477,39 +478,27 @@ void EditPane::HorizontalLayoutBox::SetRect(const gfx::Rect& newRect) {
   }
 }
 
-EditPane::LeafBox& EditPane::HorizontalLayoutBox::Split(
-    Box& below_box,
-    int cxBox) {
-  auto pBelow = below_box.GetActiveLeafBox();
-  auto const below = pBelow->GetWindow()->as<TextEditWindow>();
-  if (!below)
-    return *pBelow;
-  auto const prcBelow = &pBelow->rect();
-  ASSERT(prcBelow->right - prcBelow->left > cxBox);
-  DCHECK_EQ(pBelow->GetWindow()->container_widget(), edit_pane_);
+void EditPane::HorizontalLayoutBox::Split(
+    Box* right_box,
+    int new_left_width,
+    Window* new_left_window) {
+  DCHECK(!new_left_window->is_realized());
+  edit_pane_->AppendChild(new_left_window);
 
-  auto const pWindow = below->Clone();
-  edit_pane_->AppendChild(pWindow);
+  auto left_box = new LeafBox(edit_pane_, this, new_left_window);
+  boxes_.InsertBefore(left_box, right_box);
+  left_box->AddRef();
 
-  auto const pAbove = new LeafBox(edit_pane_, this, pWindow);
-  auto const prcAbove = &pAbove->rect();
+  auto left_box_rect = right_box->rect();
+  left_box_rect.right = left_box_rect.left + new_left_width;
+  left_box->Realize(edit_pane_, left_box_rect);
 
-  boxes_.InsertBefore(pAbove, pBelow);
-  pAbove->AddRef();
+  auto right_box_rect = right_box->rect();
+  right_box_rect.left = left_box_rect.right + k_cxSplitter;
+  right_box->SetRect(right_box_rect);
 
-  prcAbove->top = prcBelow->top;
-  prcAbove->bottom = prcBelow->bottom;
-  prcAbove->left = prcBelow->left;
-  prcAbove->right = prcBelow->left + cxBox;
-
-  pAbove->Realize(edit_pane_, *prcAbove);
-
-  prcBelow->left = prcAbove->right + k_cxSplitter;
-  pBelow->SetRect(pBelow->rect());
-
-  UpdateSplitters();
-
-  return *pAbove;
+  edit_pane_->SchedulePaintInRect(Rect(left_box_rect.right, rect().top,
+                                       right_box_rect.left, rect().bottom));
 }
 
 void EditPane::HorizontalLayoutBox::StopSplitter(
@@ -945,10 +934,9 @@ void EditPane::VerticalLayoutBox::MoveSplitter(
     const gfx::Point& pt,
     Box& below_box) {
   auto const pBelow = &below_box;
-  auto const pBelowPrev = pBelow->GetPrev();
-  auto const pAbove = pBelowPrev
-      ? pBelowPrev
-      : &Split(*pBelow, k_cySplitter);
+  auto const pAbove = pBelow->GetPrev();
+  if (!pAbove)
+    return;
 
   if (pt.y - pAbove->rect().top <= 0) {
     // Above box is too small.
@@ -1069,39 +1057,27 @@ void EditPane::VerticalLayoutBox::SetRect(const gfx::Rect& newRect) {
   }
 }
 
-EditPane::LeafBox& EditPane::VerticalLayoutBox::Split(
-    Box& below_box,
-    int cyBox) {
-  auto pBelow = below_box.GetActiveLeafBox();
-  auto const below = pBelow->GetWindow()->as<TextEditWindow>();
-  if (!below)
-    return *pBelow;
-  auto const prcBelow = &pBelow->rect();
-  ASSERT(prcBelow->bottom - prcBelow->top > cyBox);
-  DCHECK_EQ(pBelow->GetWindow()->container_widget(), edit_pane_);
+void EditPane::VerticalLayoutBox::Split(
+    Box* below_box,
+    int new_above_height,
+    Window* new_above_window) {
+  DCHECK(!new_above_window->is_realized());
+  edit_pane_->AppendChild(new_above_window);
 
-  auto const pWindow = below->Clone();
-  edit_pane_->AppendChild(pWindow);
+  auto above_box = new LeafBox(edit_pane_, this, new_above_window);
+  boxes_.InsertBefore(above_box, below_box);
+  above_box->AddRef();
 
-  auto const pAbove = new LeafBox(edit_pane_, this, pWindow);
-  auto const prcAbove = &pAbove->rect();
+  auto above_box_rect = below_box->rect();
+  above_box_rect.bottom = above_box_rect.top + new_above_height;
+  above_box->Realize(edit_pane_, above_box_rect);
 
-  boxes_.InsertBefore(pAbove, pBelow);
-  pAbove->AddRef();
+  auto below_box_rect = below_box->rect();
+  below_box_rect.top = above_box_rect.bottom + k_cySplitter;
+  below_box->SetRect(below_box_rect);
 
-  prcAbove->left = prcBelow->left;
-  prcAbove->right = prcBelow->right;
-  prcAbove->top = prcBelow->top;
-  prcAbove->bottom = prcBelow->top + cyBox;
-
-  pAbove->Realize(edit_pane_, *prcAbove);
-
-  prcBelow->top = prcAbove->bottom + k_cySplitter;
-  pBelow->SetRect(pBelow->rect());
-
-  UpdateSplitters();
-
-  return *pAbove;
+  edit_pane_->SchedulePaintInRect(Rect(rect().left, above_box_rect.bottom,
+                                       rect().right, below_box_rect.top));
 }
 
 void EditPane::VerticalLayoutBox::StopSplitter(
@@ -1375,38 +1351,34 @@ void EditPane::ReplaceActiveWindow(Window* window) {
   GetActiveLeafBox()->ReplaceWindow(window);
 }
 
-EditPane::Window* EditPane::SplitHorizontally() {
-  auto const right_box = GetActiveLeafBox();
-  ASSERT(!!right_box);
-  auto const right_rect = right_box->rect();
+bool EditPane::SplitHorizontally(Window* new_left_window,
+                                 Window* right_window) {
+  DCHECK(!new_left_window->is_realized());
+  auto const right_box = root_box_->FindLeafBoxFromWidget(*right_window);
+  DCHECK(right_box);
 
-  // Active Box is too small to split.
-  auto const cxBox = right_rect.right - right_rect.left;
-  if (cxBox < k_cxMinBox * 2 + k_cxSplitter) {
-    return nullptr;
-  }
+  auto const width = right_box->rect().width();
+  if (width < k_cxMinBox * 2 + k_cxSplitter)
+    return false;
 
   right_box->EnsureInHorizontalLayoutBox();
-  right_box->outer()->Split(*right_box, cxBox / 2);
-  right_box->GetWindow()->MakeSelectionVisible();
-  return right_box->GetWindow();
+  right_box->outer()->Split(right_box, width / 2, new_left_window);
+  return true;
 }
 
-EditPane::Window* EditPane::SplitVertically() {
-  auto const below_box = GetActiveLeafBox();
-  ASSERT(!!below_box);
-  auto const belowRect = below_box->rect();
+bool EditPane::SplitVertically(Window* new_above_window,
+                               Window* below_window) {
+  DCHECK(!new_above_window->is_realized());
+  auto const below_box = root_box_->FindLeafBoxFromWidget(*below_window);
+  DCHECK(below_box);
 
-  // Active Box is too small to split.
-  auto const cyBox = belowRect.bottom - belowRect.top;
-  if (cyBox < k_cyMinBox * 2 + k_cySplitter) {
-    return nullptr;
-  }
+  auto const height = below_box->rect().height();
+  if (height < k_cyMinBox * 2 + k_cySplitter)
+    return false;
 
   below_box->EnsureInVerticalLayoutBox();
-  below_box->outer()->Split(*below_box, cyBox / 2);
-  below_box->GetWindow()->MakeSelectionVisible();
-  return below_box->GetWindow();
+  below_box->outer()->Split(below_box, height / 2, new_above_window);
+  return true;
 }
 
 void EditPane::UpdateStatusBar() {

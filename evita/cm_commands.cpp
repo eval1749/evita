@@ -858,19 +858,24 @@ enum SplitDirection {
 
 void SplitWindow(Selection* selection, EditPane* pane,
                  SplitDirection direction) {
-  auto const window = direction == kSplitHorizontally ?
-      pane->SplitHorizontally() : pane->SplitVertically();
-  if (!window || !window->is<TextEditWindow>()) {
+  auto const ref_window = pane->GetActiveWindow()->as<TextEditWindow>();
+  if (!ref_window)
+    return;
+  std::unique_ptr<TextEditWindow> new_window(ref_window->Clone());
+  auto const splitted = direction == kSplitHorizontally ?
+      pane->SplitHorizontally(new_window.get(), ref_window) :
+      pane->SplitVertically(new_window.get(), ref_window);
+  if (!splitted) {
     Application::instance()->ShowMessage(MessageLevel_Warning,
-                                    IDS_CAN_NOT_SPLIT);
+                                         IDS_CAN_NOT_SPLIT);
     return;
   }
 
-  auto& text_edit_window = *window->as<TextEditWindow>();
-  text_edit_window.GetSelection()->SetRange(selection->GetStart(),
-                                            selection->GetEnd());
-  text_edit_window.MakeSelectionVisible();
+  new_window->GetSelection()->SetRange(selection->GetStart(),
+                                       selection->GetEnd());
+  new_window->MakeSelectionVisible();
   selection->GetWindow()->MakeSelectionVisible();
+  new_window.release();
 }
 }  //namespace
 

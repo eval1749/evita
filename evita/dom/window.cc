@@ -67,7 +67,7 @@ class WindowWrapperInfo :
         .SetMethod("destroy", &Window::Destroy)
         .SetMethod("focus", &Window::Focus)
         .SetMethod("realize", &Window::Realize)
-        .SetMethod("remove", &Window::RemoveWindow);
+        .SetMethod("removeChild", &Window::RemoveWindow);
   }
 };
 

@@ -39,7 +39,7 @@ Window.prototype.focus = function() {};
 Window.prototype.realize = function() {};
 
 /** @param {!Window} window */
-Window.prototype.remove= function(window) {};
+Window.prototype.removeChild = function(window) {};
 
 /**
  * @param {string} type

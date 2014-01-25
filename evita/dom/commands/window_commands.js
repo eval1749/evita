@@ -48,6 +48,18 @@
   });
 
   /**
+   * Close all windows but this in current editor window.
+   * @this {!Window}
+   */
+  Editor.bindKey(Window, 'Ctrl+Shift+1', function() {
+    var this_window = this;
+    this.parent.children.forEach(function(window) {
+      if (window != this_window)
+        window.destroy();
+    });
+  });
+
+  /**
    * Split window vertically and put new window below.
    * @this {!Window}
    */

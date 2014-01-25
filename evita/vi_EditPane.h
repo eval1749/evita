@@ -74,9 +74,6 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
   // [A]
   public: virtual void Activate() override;
 
-  // [C]
-  public: void CloseAllBut(Window*);
-
   // [D]
   private: virtual void DidRealize() override;
   private: virtual void DidRealizeChildWidget(const Widget&) override;

@@ -93,26 +93,6 @@ DEFCOMMAND(BackwardDeleteWord)
 } // BackwardDeleteWord
 
 // [C]
-//////////////////////////////////////////////////////////////////////
-//
-// CloseOtherWindows - Close All Windows But This
-//  Evita   Ctrl+Shift+1
-//  Emacs   Ctrl+X 1
-//
-DEFCOMMAND(CloseOtherWindows) {
-  auto const selection = pCtx->GetSelection();
-  if (!selection)
-    return;
-  auto const window = pCtx->GetSelection()->GetWindow();
-  auto const pane = window->container_widget().as<EditPane>();
-  if (!pane)
-    return;
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(&EditPane::CloseAllBut,
-                 base::Unretained(pane),
-                 base::Unretained(window)));
-}
-
 DEFCOMMAND(CopyToClipboard)
 { 
     if (NULL == pCtx->GetSelection()) return;
@@ -1037,9 +1017,6 @@ void Processor::GlobalInit() {
     BIND_KEY(CommandWindow, Mod_Ctrl | 'U', StartArgumentEntry());
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'V', PasteFromClipboard);
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'X', CutToClipboard);
-
-    // Ctrl+Shift+[0-9]
-    BIND_KEY(CommandWindow, Mod_CtrlShift | '1', CloseOtherWindows);
 
     BIND_VKEY(TextEditWindow, Mod_None,  BACK,   BackwardDeleteChar);
     BIND_VKEY(TextEditWindow, Mod_None,  DELETE, ForwardDeleteChar);

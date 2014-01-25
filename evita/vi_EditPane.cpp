@@ -69,7 +69,6 @@ class EditPane::Box : public DoubleLinkedNode_<EditPane::Box>,
     public: const gfx::Rect& rect() const { return rect_; }
     public: Rect& rect() { return rect_; }
     public: void set_outer(LayoutBox& outer) { outer_ = &outer; }
-    public: virtual void CloseAllBut(Window*) = 0;
     public: virtual uint CountLeafBox() const = 0;
     public: virtual void Destroy() = 0;
     public: virtual void DrawSplitters(const gfx::Graphics&) { }
@@ -100,7 +99,6 @@ class EditPane::LayoutBox : public EditPane::Box {
     return boxes_.GetFirst();
   }
   public: void Add(Box& box);
-  public: virtual void CloseAllBut(Window*) override final;
   public: virtual uint CountLeafBox() const override final;
   public: virtual void Destroy() override final;
   protected: virtual void DidRemoveBox(Box*, Box*, const gfx::Rect&) = 0;
@@ -140,7 +138,6 @@ class EditPane::LeafBox final : public EditPane::Box {
   public: virtual ~LeafBox();
 
   // [C]
-  public: virtual void CloseAllBut(Window*) override;
   public: virtual uint CountLeafBox() const  override final { return 1; }
 
   // [D]
@@ -568,16 +565,6 @@ EditPane::LeafBox* EditPane::LayoutBox::GetFirstLeafBox() const {
   return boxes_.GetFirst() ? boxes_.GetFirst()->GetFirstLeafBox() : nullptr;
 }
 
-void EditPane::LayoutBox::CloseAllBut(Window* window) {
-  ASSERT(!is_removed());
-  auto runner = boxes_.GetFirst();
-  while (runner) {
-    auto const next = runner->GetNext();
-    runner->CloseAllBut(window);
-    runner = next;
-  }
-}
-
 uint EditPane::LayoutBox::CountLeafBox() const {
   ASSERT(!is_removed());
   auto count = 0u;
@@ -693,11 +680,6 @@ EditPane::LeafBox::~LeafBox() {
     ::DestroyWindow(m_hwndVScrollBar);
     m_hwndVScrollBar = nullptr;
   }
-}
-
-void EditPane::LeafBox::CloseAllBut(Window* window) {
-  if (GetWindow() != window)
-    GetWindow()->DestroyWidget();
 }
 
 void EditPane::LeafBox::Destroy() {
@@ -1200,10 +1182,6 @@ void EditPane::Activate() {
   if (!window)
     return;
   window->SetFocus();
-}
-
-void EditPane::CloseAllBut(Window* window) {
-  root_box_->CloseAllBut(window);
 }
 
 void EditPane::DidRealize() {

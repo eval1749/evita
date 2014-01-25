@@ -91,6 +91,7 @@ TEST_F(RangeTest, delete) {
     "  var range = new Range(doc);"
     "  range.text = sample.replace('|', '');"
     "  range.collapseTo(sample.indexOf('|'));"
+    "  range.end = sample.lastIndexOf('|');"
     "  range.delete(unit, count);"
     "  var caret = range.start;"
     "  range.start = 0;"
@@ -120,6 +121,9 @@ TEST_F(RangeTest, delete) {
   EXPECT_SCRIPT_EQ("foo|bar", "testIt('foo| bar', Unit.WORD, 1)");
   EXPECT_SCRIPT_EQ("foo |", "testIt('foo |bar', Unit.WORD, 1)");
   EXPECT_SCRIPT_EQ("foo bar|", "testIt('foo bar|', Unit.WORD, 1)");
+
+  // Range
+  EXPECT_SCRIPT_EQ("foo | baz", "testIt('foo |bar| baz', Unit.CHARACTER)");
 }
 
 TEST_F(RangeTest, endOf) {

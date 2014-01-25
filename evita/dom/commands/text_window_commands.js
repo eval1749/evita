@@ -5,6 +5,25 @@
 'use strict';
 
 (function() {
+  /** @this {!TextWindow} window */
+  function copyToClipboardCommand() {
+    this.selection.range.copy();
+  }
+
+  /** @this {!TextWindow} window */
+  function cutToClipboardCommand() {
+    this.selection.range.copy();
+    this.selection.range.text = '';
+  }
+
+  /**
+   * Paste from clipboard
+   * @this {!TextWindow}
+   */
+  function pasteFromClipboardCommand() {
+    this.selection.range.paste();
+  }
+
   /**
    * Backward delete character
    * @param {number=} opt_count
@@ -78,6 +97,8 @@
     this.selection.startIsActive = false;
   });
 
+  Editor.bindKey(TextWindow, 'Ctrl+C', copyToClipboardCommand);
+
   /**
    * @param {TextSelection} selection
    * @param {function(TextSelection)} changer
@@ -107,6 +128,8 @@
       selection.range.toLowerCase();
     });
   });
+
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+Delete', copyToClipboardCommand);
 
   // TODO(yosi) We should display dialog box to prompt enter line number and
   // list of functions.
@@ -145,6 +168,8 @@
         });
   });
 
+  Editor.bindKey(TextWindow, 'Ctrl+V', pasteFromClipboardCommand);
+
   /**
    * @this {!TextWindow}
    */
@@ -161,6 +186,8 @@
       selection.range.toUpperCase();
     });
   });
+
+  Editor.bindKey(TextWindow, 'Ctrl+X', cutToClipboardCommand);
 
   /**
    * @this {!TextWindow}
@@ -203,4 +230,7 @@
     var count = arguments.length >= 1 ? opt_count : 1;
     this.selection.range.delete(Unit.CHARACTER, count);
   });
+
+  Editor.bindKey(TextWindow, 'Shift+Delete', cutToClipboardCommand);
+  Editor.bindKey(TextWindow, 'Shift+Insert', pasteFromClipboardCommand);
 })();

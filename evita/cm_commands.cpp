@@ -79,20 +79,6 @@ DefCommand_Motions(Backward, Up,   Line)
 DefCommand_Motions(Backward, Up,   Screen)
 DefCommand_Motions(Backward, Up,   Window)
 
-
-// [C]
-DEFCOMMAND(CopyToClipboard)
-{ 
-    if (NULL == pCtx->GetSelection()) return;
-    pCtx->GetSelection()->Copy();
-} // CopyToClipboard
-
-DEFCOMMAND(CutToClipboard)
-{ 
-    if (NULL == pCtx->GetSelection()) return;
-    pCtx->GetSelection()->Cut();
-} // CutToClipboard
-
 // [E]
 DefCommand_StartEnd(EndKey,      EndKey, Line)
 DefCommand_StartEnd(EndOfBuffer, EndKey, Buffer)
@@ -985,14 +971,11 @@ void Processor::GlobalInit() {
     BIND_KEY(TextEditWindow, Mod_Ctrl | '.', ExchangeCode);
     BIND_KEY(TextEditWindow, Mod_Ctrl | '/', ExpandDynamicAbbrev);
 
-    BIND_KEY(TextEditWindow, Mod_Ctrl | 'C', CopyToClipboard);
-    //BIND_KEY(TextEditWindow, Mod_Ctrl | 'I', Indent);
+   //BIND_KEY(TextEditWindow, Mod_Ctrl | 'I', Indent);
     //BIND_KEY(TextEditWindow, Mod_Ctrl | 'M', TypeEnter);
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'Q', QuotedInsertEntry());
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'R', Reload);
     BIND_KEY(CommandWindow, Mod_Ctrl | 'U', StartArgumentEntry());
-    BIND_KEY(TextEditWindow, Mod_Ctrl | 'V', PasteFromClipboard);
-    BIND_KEY(TextEditWindow, Mod_Ctrl | 'X', CutToClipboard);
 
     BIND_VKEY(TextEditWindow, Mod_None,  DOWN,   ForwardLine);
     BIND_VKEY(TextEditWindow, Mod_None,  END,    EndKey);
@@ -1014,7 +997,6 @@ void Processor::GlobalInit() {
     BIND_VKEY(TextEditWindow, Mod_Ctrl, RIGHT,  ForwardWord);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, UP,     GoToOpenParen);
 
-    BIND_VKEY(TextEditWindow, Mod_CtrlShift, DELETE,    CopyToClipboard);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, DOWN,      GoToCloseParenExtend);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, END,       EndOfBufferExtend);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, HOME,      StartOfBufferExtend);
@@ -1024,7 +1006,6 @@ void Processor::GlobalInit() {
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, RIGHT,     ForwardWordExtend);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, UP,        GoToOpenParenExtend);
 
-    BIND_VKEY(TextEditWindow, Mod_Shift, DELETE,    CutToClipboard);
     BIND_VKEY(TextEditWindow, Mod_Shift, DOWN,      ForwardLineExtend);
     BIND_VKEY(TextEditWindow, Mod_Shift, END,       EndKeyExtend);
     BIND_VKEY(TextEditWindow, Mod_Shift, HOME,      HomeKeyExtend);

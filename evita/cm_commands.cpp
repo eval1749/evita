@@ -105,24 +105,6 @@ DEFCOMMAND(BackwardDeleteWord)
 // [C]
 //////////////////////////////////////////////////////////////////////
 //
-// CloseOtherFrames - Close All Frames But This
-//  Evita   Ctrl+Shift+9
-//  Emacs   Ctrl+X 1
-//
-DEFCOMMAND(CloseOtherFrames) {
-    auto const active_frame = pCtx->GetFrame();
-    auto it = Application::instance()->frames().begin();
-    const auto end = Application::instance()->frames().end();
-    while (it != end) {
-      auto& frame = *it;
-      ++it;
-      if (frame != active_frame)
-        frame.DestroyWidget();
-    }
-}
-
-//////////////////////////////////////////////////////////////////////
-//
 // CloseOtherWindows - Close All Windows But This
 //  Evita   Ctrl+Shift+1
 //  Emacs   Ctrl+X 1
@@ -1101,7 +1083,6 @@ void Processor::GlobalInit() {
     // Ctrl+Shift+[0-9]
     BIND_KEY(CommandWindow, Mod_CtrlShift | '0', CloseThisWindow);
     BIND_KEY(CommandWindow, Mod_CtrlShift | '1', CloseOtherWindows);
-    BIND_KEY(CommandWindow, Mod_CtrlShift | '9', CloseOtherFrames);
 
     BIND_VKEY(TextEditWindow, Mod_None,  BACK,   BackwardDeleteChar);
     BIND_VKEY(TextEditWindow, Mod_None,  DELETE, ForwardDeleteChar);

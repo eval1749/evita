@@ -45,6 +45,18 @@
   });
 
   /**
+   * Close all editor window but this.
+   * @this {!Window}
+   */
+  Editor.bindKey(Window, 'Ctrl+Shift+9', function() {
+    var this_editor_window = this.parent;
+    EditorWindow.list.forEach(function(editor_window) {
+      if (editor_window != this_editor_window)
+        editor_window.destroy();
+    });
+  });
+
+  /**
    * Open new document in new editor window.
    * @this {!Window}
    */

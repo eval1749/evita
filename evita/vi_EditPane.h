@@ -114,10 +114,10 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
   public: void ReplaceActiveWindow(Window* window);
 
   // [S]
-  public: bool SplitHorizontally(Window* new_left_window,
-                                 Window* right_window);
-  public: bool SplitVertically(Window* new_above_window,
-                               Window* below_window);
+  public: bool SplitHorizontally(Window* left_window,
+                                 Window* new_right_window);
+  public: bool SplitVertically(Window* above_window,
+                               Window* new_below_window);
 
   // [U]
   public: virtual void UpdateStatusBar() override;

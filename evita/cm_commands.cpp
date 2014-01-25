@@ -863,8 +863,8 @@ void SplitWindow(Selection* selection, EditPane* pane,
     return;
   std::unique_ptr<TextEditWindow> new_window(ref_window->Clone());
   auto const splitted = direction == kSplitHorizontally ?
-      pane->SplitHorizontally(new_window.get(), ref_window) :
-      pane->SplitVertically(new_window.get(), ref_window);
+      pane->SplitHorizontally(ref_window, new_window.get()) :
+      pane->SplitVertically(ref_window, new_window.get());
   if (!splitted) {
     Application::instance()->ShowMessage(MessageLevel_Warning,
                                          IDS_CAN_NOT_SPLIT);

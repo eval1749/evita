@@ -13,6 +13,12 @@ TextSelection.prototype.active;
 /** @expose @type {!Document} */
 TextSelection.prototype.document;
 
+/**
+ * @param {Unit} unit
+ * @param {Alter=} opt_alter, default is Alter.MOVE.
+ */
+TextSelection.prototype.endOf = function(unit, opt_alter) {};
+
 /** @expose @type {!Range} */
 TextSelection.prototype.range;
 

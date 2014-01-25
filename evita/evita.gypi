@@ -47,6 +47,7 @@
         'dom/editor_window.js',
         'dom/file_path.js',
         'dom/range.js',
+        'dom/text_selection.js',
         'dom/text_window.js',
         'dom/window.js',
 

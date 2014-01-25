@@ -80,18 +80,6 @@ Selection* Selection::Create(const text::Range& range) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// Selection::Delete
-//  n > 0   Delete
-//  n < 0   Backspace
-Count Selection::Delete(Unit eUnit, Count n)
-{
-    forgetGoal();
-    return Range::Delete(eUnit, n);
-} // Selection::DeleteAfter
-
-
-//////////////////////////////////////////////////////////////////////
-//
 // Selection::EndKey
 //  eUnit = Unit_Line | Unit_Buffer
 //

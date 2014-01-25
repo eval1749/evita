@@ -73,7 +73,6 @@ class Range //: public ObjectInHeap
     public: void  Capitalize();
     public: void  CapitalizeAll();
     public: Count Copy();
-    public: Count Cut();
 
     // [D]
     public: Count Delete(Unit eUnit = Unit_Char, Count = 1);
@@ -125,8 +124,6 @@ class Range //: public ObjectInHeap
 
     // [U]
     public:  void  Upcase();
-    private: void  updateAnchor(Posn, Posn);
-    private: void  updateGoal();
 }; // Range
 
 }  // namespace text

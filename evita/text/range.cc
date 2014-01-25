@@ -534,25 +534,6 @@ Count Range::Copy()
 } // Range::Copy
 
 /// <summary>
-///  Cuts contents of this range into Windows clipboard
-/// </summary>
-/// <returns>Number of characters copied to clipboard</returns>
-/// <seealso cref="Range::Copy"/>
-/// <seealso cref="Range::Paste"/>
-Count Range::Cut()
-{
-    if (m_pBuffer->IsReadOnly()) return 0;
-
-    Count k = Copy();
-    if (k > 0)
-    {
-        k = m_pBuffer->Delete(m_lStart, m_lEnd);
-    }
-
-    return k;
-} // Range::Cut
-
-/// <summary>
 ///  Deletes characters or words from start or end of this range.
 /// </summary>
 /// <param name="eUnit">Unit_Char or Unit_Word</param>

@@ -68,9 +68,6 @@ class Selection : public text::Range
     public:  void Collapse(CollapseWhich = Collapse_Start);
     public: static Selection* Create(const text::Range& range);
 
-    // [D]
-    public: Count Delete(Unit = Unit_Char, Count = 1);
-
     // [E]
     public: Count EndKey(Unit, bool = false);
     public: Count EndOf(Unit, bool = false);

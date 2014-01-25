@@ -25,6 +25,22 @@
   };
 
   /**
+   * Delete
+   * @param {Unit} unit
+   * @param {number=} opt_count, default is one.
+   * @return {!Range}
+   */
+  Range.prototype.delete = function(unit, opt_count) {
+    var count = arguments.length >= 2 ? opt_count : 1;
+    if (count < 0)
+      this.moveStart(unit, count);
+    else
+      this.moveEnd(unit, count);
+    this.text = '';
+    return this;
+  };
+
+  /**
    * Move end position of Range at end of specified unit.
    * @this {!Range}
    * @param {Unit} unit.

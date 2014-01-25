@@ -27,6 +27,12 @@ Range.prototype.capitalize = function() {}
  * @param {Position} position
  */
 Range.prototype.collapseTo = function(position) {};
+/**
+ * @param {Unit} unit
+ * @param {number=} opt_count, defualt is one.
+ * @return {!Range}
+ */
+Range.prototype.delete = function(unit, opt_count) {};
 
 /**
  * @param {Unit} unit

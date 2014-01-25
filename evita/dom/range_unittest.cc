@@ -66,6 +66,44 @@ TEST_F(RangeTest, collapseTo) {
   EXPECT_SCRIPT_EQ("1", "range.end");
 }
 
+TEST_F(RangeTest, delete) {
+  EXPECT_SCRIPT_VALID(
+    "function testIt(sample, unit, count) {"
+    "  var doc = new Document('delete');"
+    "  var range = new Range(doc);"
+    "  range.text = sample.replace('|', '');"
+    "  range.collapseTo(sample.indexOf('|'));"
+    "  range.delete(unit, count);"
+    "  var caret = range.start;"
+    "  range.start = 0;"
+    "  range.end = doc.length;"
+    "  var result = range.text;"
+    "  result = result.substr(0, caret) + '|' + result.substr(caret);"
+    "  return result;"
+    "}");
+  // Backspace
+  EXPECT_SCRIPT_EQ("|abcd", "testIt('|abcd', Unit.CHARACTER, -1)");
+  EXPECT_SCRIPT_EQ("a|cd", "testIt('ab|cd', Unit.CHARACTER, -1)");
+  EXPECT_SCRIPT_EQ("abc|", "testIt('abcd|', Unit.CHARACTER, -1)");
+
+  EXPECT_SCRIPT_EQ("|foo bar", "testIt('|foo bar', Unit.WORD, -1)");
+  EXPECT_SCRIPT_EQ("|o bar", "testIt('fo|o bar', Unit.WORD, -1)");
+  EXPECT_SCRIPT_EQ("| bar", "testIt('foo| bar', Unit.WORD, -1)");
+  EXPECT_SCRIPT_EQ("foo|bar", "testIt('foo |bar', Unit.WORD, -1)");
+  EXPECT_SCRIPT_EQ("foo |", "testIt('foo bar|', Unit.WORD, -1)");
+
+  // Delete
+  EXPECT_SCRIPT_EQ("|bcd", "testIt('|abcd', Unit.CHARACTER, 1)");
+  EXPECT_SCRIPT_EQ("ab|d", "testIt('ab|cd', Unit.CHARACTER, 1)");
+  EXPECT_SCRIPT_EQ("abcd|", "testIt('abcd|', Unit.CHARACTER, 1)");
+
+  EXPECT_SCRIPT_EQ("|bar", "testIt('|foo bar', Unit.WORD, 1)");
+  EXPECT_SCRIPT_EQ("fo|bar", "testIt('fo|o bar', Unit.WORD, 1)");
+  EXPECT_SCRIPT_EQ("foo|bar", "testIt('foo| bar', Unit.WORD, 1)");
+  EXPECT_SCRIPT_EQ("foo |", "testIt('foo |bar', Unit.WORD, 1)");
+  EXPECT_SCRIPT_EQ("foo bar|", "testIt('foo bar|', Unit.WORD, 1)");
+}
+
 TEST_F(RangeTest, endOf) {
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('endOf');"

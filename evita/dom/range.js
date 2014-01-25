@@ -31,13 +31,12 @@
    * @return {!Range}
    */
   Range.prototype.delete = function(unit, opt_count) {
-    if (arguments.length >= 2 || this.start == this.end) {
-      var count = arguments.length >= 2 ? opt_count : 1;
-      if (count < 0)
-        this.moveStart(unit, count);
-      else
-        this.moveEnd(unit, count);
-    }
+    var count = arguments.length >= 2 ? opt_count : 1;
+    var delta = unit == Unit.CHARACTER && this.start != this.end ? 1 : 0;
+    if (count < 0)
+      this.moveStart(unit, count + delta);
+    else if (count > 0)
+      this.moveEnd(unit, count - delta);
     this.text = '';
     return this;
   };

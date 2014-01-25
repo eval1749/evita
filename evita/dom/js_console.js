@@ -28,7 +28,7 @@ function JsConsole() {
   this.history = [];
   this.lineNumber = 0;
   this.range = new Range(this.document);
-  var self = this;
+  var self = /** @type {JsConsole} */(this);
 
   // JavaScript console specific key bindings.
   this.document.bindKey('Ctrl+Down', function() {
@@ -358,7 +358,7 @@ JsConsole.prototype.activate = function(active_window) {
 
   if (!present) {
     present = new TextWindow(new Range(document));
-    active_editor_window.add(/** @type{!Window} */(present));
+    active_editor_window.addChild_(/** @type{!Window} */(present));
   }
   present.selection.range.collapseTo(document.length);
   present.focus();
@@ -435,7 +435,7 @@ JsConsole.prototype.forwardHistory = function() {
 JsConsole.prototype.newWindow = function() {
   var editor_window = new EditorWindow();
   var text_window = new TextWindow(new Range(this.document));
-  editor_window.add(text_window);
+  editor_window.addChild_(text_window);
   editor_window.realize();
 };
 

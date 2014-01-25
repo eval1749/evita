@@ -100,8 +100,8 @@ TEST_F(WindowTest, Add) {
       "var parent = new SampleWindow();"
       "var child1 = new SampleWindow();"
       "var child2 = new SampleWindow();"
-      "parent.add(child1);"
-      "parent.add(child2);"
+      "parent.addChild_(child1);"
+      "parent.addChild_(child2);"
       "parent.realize();");
   EXPECT_SCRIPT_EQ("2", "parent.children.length");
   EXPECT_SCRIPT_EQ("1", "child1.parent.id");
@@ -124,9 +124,9 @@ TEST_F(WindowTest, Destroy) {
       "var child1 = new SampleWindow();"
       "var child2 = new SampleWindow();"
       "var child3 = new SampleWindow();"
-      "sample1.add(child1);"
-      "child1.add(child2);"
-      "child1.add(child3);"
+      "sample1.addChild_(child1);"
+      "child1.addChild_(child2);"
+      "child1.addChild_(child3);"
       "sample1.realize();"
       "sample1.destroy();");
   view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
@@ -151,7 +151,7 @@ TEST_F(WindowTest, changeParent) {
     "var sample1 = new SampleWindow();"
     "var sample2 = new SampleWindow();"
     "var sample3 = new SampleWindow();"
-    "sample1.add(sample2)");
+    "sample1.addChild_(sample2)");
   EXPECT_SCRIPT_EQ(
     "Error: Can't change parent of window(1) to window(2), becase window(2)"
     " is descendant of window(1).",

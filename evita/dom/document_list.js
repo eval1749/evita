@@ -126,7 +126,7 @@
       return;
     }
     var table_window = new TableWindow(document);
-    this.parent.add(table_window);
+    this.parent.addChild_(table_window);
   }
 
   Editor.bindKey(Window, 'Ctrl+B', listDocumentCommand);

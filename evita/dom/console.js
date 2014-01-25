@@ -87,7 +87,7 @@ global.console = {
     }
     var editorWindow = new EditorWindow();
     var window = new TextWindow(new Range(console.document_()));
-    editorWindow.add(window);
+    editorWindow.addChild_(window);
     editorWindow.realize();
   }
 };

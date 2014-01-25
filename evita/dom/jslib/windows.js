@@ -38,6 +38,6 @@ global.windows = {
    * @param {!Document} document
    */
   newTextWindow: function(parent, document) {
-    parent.add(new TextWindow(new Range(document)));
+    parent.addChild_(new TextWindow(new Range(document)));
   }
 };

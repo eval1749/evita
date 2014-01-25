@@ -64,6 +64,6 @@
       return;
     }
     var new_window = new TextWindow(new Range(document));
-    this.add(new_window);
+    this.addChild_(new_window);
   };
 })();

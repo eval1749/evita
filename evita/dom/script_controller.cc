@@ -148,7 +148,7 @@ void ScriptController::DidStartHost() {
     L"var range = new Range(doc);\n"
     L"var editor_window = new EditorWindow();\n"
     L"var text_window = new TextWindow(range);\n"
-    L"editor_window.add(text_window);\n"
+    L"editor_window.addChild_(text_window);\n"
     L"editor_window.realize();\n"
     L"})();");
   CHECK(result.exception.empty()) << result.exception << std::endl <<

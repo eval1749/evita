@@ -12,7 +12,7 @@
   Editor.bindKey(TextWindow, 'Ctrl+Shift+3', function() {
     var text_window = new TextWindow(this.selection.range);
     var editor_window = new EditorWindow();
-    editor_window.add(text_window);
+    editor_window.addChild_(text_window);
     editor_window.realize();
     text_window.makeSelectionVisible();
     text_window.focus();
@@ -30,7 +30,7 @@
       return;
     var text_window = new TextWindow(this.selection.range);
     var editor_window = new EditorWindow();
-    editor_window.add(text_window);
+    editor_window.addChild_(text_window);
     editor_window.realize();
     text_window.makeSelectionVisible();
     text_window.focus();

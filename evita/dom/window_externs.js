@@ -17,7 +17,7 @@ Window.prototype.parent;
 Window.prototype.state;
 
 /** @param {!Window} window */
-Window.prototype.add = function(window) {};
+Window.prototype.addChild_ = function(window) {};
 
 /** @param {!Window} window */
 Window.prototype.changeParent = function(window) {};

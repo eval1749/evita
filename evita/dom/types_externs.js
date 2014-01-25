@@ -68,9 +68,9 @@ var FilePath;
 var Form = function() {};
 
 /**
- * @type {Object}
+ * @constructor
  */
-var JsConsole = {};
+var JsConsole = function() {};
 
 /** @typedef {number} */
 var Position;

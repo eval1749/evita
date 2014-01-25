@@ -607,111 +607,6 @@ DEFCOMMAND(Indent)
     pCtx->GetSelection()->Indent();
 } // Indent
 
-
-// [N]
-// activateFirstWindow
-static void activateFirstWindow(Pane* pPane)
-{
-    EditPane* pEditPane = pPane->DynamicCast<EditPane>();
-    if (NULL != pEditPane)
-    {
-        pEditPane->GetFirstWindow()->Activate();
-    }
-    pPane->Activate();
-} //activateFirstWindow
-
-
-// activateLastWindow
-static void activateLastWindow(Pane* pPane)
-{
-    EditPane* pEditPane = pPane->DynamicCast<EditPane>();
-    if (NULL != pEditPane)
-    {
-        pEditPane->GetLastWindow()->Activate();
-    }
-    pPane->Activate();
-} //activateLastWindow
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// NextWindow - Ctrl+Tab
-//  Switch to next pane
-//
-static void DoNextWindow(CommandWindow* start_window) {
-    auto pWindow = start_window;
-
-    Pane* pPane;
-
-    if (NULL == pWindow)
-    {
-        pPane = start_window->DynamicCast<Pane>();
-    }
-    else
-    {
-        if (auto const next_sibling = pWindow->next_sibling())
-        {
-            next_sibling->SetFocus();
-            return;
-        }
-
-        pPane = pWindow->container_widget().as<EditPane>();
-    }
-
-    ASSERT(NULL != pPane);
-
-    if (NULL != pPane->GetNext())
-    {
-        activateFirstWindow(pPane->GetNext());
-        return;
-    }
-
-    Frame* pFrame = pPane->GetFrame();
-
-    if (NULL != pFrame->GetNext())
-    {
-        activateFirstWindow(pFrame->GetNext()->GetFirstPane());
-        return;
-    }
-
-    // Do we have multiple frames?
-    Frame* pFirstFrame = Application::instance()->GetFirstFrame();
-    if (pFirstFrame != pFrame)
-    {
-        activateFirstWindow(pFirstFrame->GetFirstPane());
-        return;
-    }
-
-    // Do we have multiple panes?
-    if (pFrame->GetFirstPane() != pPane)
-    {
-        activateFirstWindow(pFrame->GetFirstPane());
-        return;
-    }
-
-    // Do we have multiple windows?
-    EditPane* pEditPane = pPane->DynamicCast<EditPane>();
-
-    if (NULL != pEditPane)
-    {
-        auto const pFirstWindow = pEditPane->GetFirstWindow();
-        if (pFirstWindow != pWindow)
-        {
-            pEditPane->GetFirstWindow()->Activate();
-            return;
-        }
-    }
-
-    pFrame->ShowMessage(
-        MessageLevel_Warning,
-        IDS_NO_OTHER_WINDOWS );
-}
-
-DEFCOMMAND(NextWindow) {
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(DoNextWindow, base::Unretained(pCtx->GetWindow())));
-}
-
 // [O]
 DEFCOMMAND(Outdent)
 {
@@ -726,85 +621,6 @@ DEFCOMMAND(PasteFromClipboard)
     pCtx->GetSelection()->Paste();
 } // PasteFromClipboard
 
-//////////////////////////////////////////////////////////////////////
-//
-// PreviousWindow - Ctrl+Shift+Tab
-//  Switch to previous window
-//
-static void DoPreviousWindow(CommandWindow* start_window) {
-    auto pWindow = start_window;
-
-    Pane* pPane;
-
-    if (NULL == pWindow)
-    {
-        pPane = start_window->DynamicCast<Pane>();
-    }
-    else
-    {
-        if (auto const previous_sibling = pWindow->previous_sibling())
-        {
-            previous_sibling->SetFocus();
-            return;
-        }
-
-        pPane = pWindow->container_widget().as<EditPane>();
-    }
-
-    ASSERT(NULL != pPane);
-
-    if (NULL != pPane->GetPrev())
-    {
-        activateLastWindow(pPane->GetPrev());
-        return;
-    }
-
-    Frame* pFrame = pPane->GetFrame();
-
-    if (NULL != pFrame->GetPrev())
-    {
-        activateLastWindow(pFrame->GetPrev()->GetLastPane());
-        return;
-    }
-
-    // Do we have multiple frames?
-    Frame* pLastFrame = Application::instance()->GetLastFrame();
-    if (pLastFrame != pFrame)
-    {
-        activateLastWindow(pLastFrame->GetLastPane());
-        return;
-    }
-
-    // Do we have multiple panes?
-    if (pFrame->GetLastPane() != pPane)
-    {
-        activateLastWindow(pFrame->GetLastPane());
-        return;
-    }
-
-    // Do we have multiple windows?
-    EditPane* pEditPane = pPane->DynamicCast<EditPane>();
-
-    if (NULL != pEditPane)
-    {
-        auto const pLastWindow = pEditPane->GetLastWindow();
-        if (pLastWindow != pWindow)
-        {
-            pLastWindow->Activate();
-            return;
-        }
-    }
-
-    pFrame->ShowMessage(
-        MessageLevel_Warning,
-        IDS_NO_OTHER_WINDOWS );
-}
-
-DEFCOMMAND(PreviousWindow) {
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(DoPreviousWindow, base::Unretained(pCtx->GetWindow())));
-}
-
 // [Q]
 DEFCOMMAND(QuotedInsert)
 {
@@ -1310,7 +1126,6 @@ void Processor::GlobalInit() {
     BIND_VKEY(TextEditWindow, Mod_Ctrl, PRIOR,  BackwardWindow);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, RIGHT,  ForwardWord);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, UP,     GoToOpenParen);
-    BIND_VKEY(CommandWindow, Mod_Ctrl, TAB,    NextWindow);
 
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, DELETE,    CopyToClipboard);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, DOWN,      GoToCloseParenExtend);
@@ -1321,7 +1136,6 @@ void Processor::GlobalInit() {
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, PRIOR,     BackwardWindowExtend);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, RIGHT,     ForwardWordExtend);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, UP,        GoToOpenParenExtend);
-    BIND_VKEY(CommandWindow, Mod_CtrlShift, TAB,       PreviousWindow);
 
     BIND_VKEY(TextEditWindow, Mod_Shift, DELETE,    CutToClipboard);
     BIND_VKEY(TextEditWindow, Mod_Shift, DOWN,      ForwardLineExtend);

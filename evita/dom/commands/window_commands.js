@@ -94,4 +94,41 @@
     else
       Editor.exit();
   });
+
+  /**
+   * Previous window
+   * @this {!Window}
+   */
+  Editor.bindKey(Window, 'Ctrl+Shift+Tab', function() {
+    if (this.previousSibling) {
+      this.previousSibling.focus();
+      return;
+    }
+
+    if (this.parent.previousSibling) {
+      this.parent.previousSibling.lastChild.focus();
+      return;
+    }
+
+    var top_level_windows = EditorWindow.list;
+    top_level_windows[top_level_windows.length - 1].lastChild.focus();
+  });
+
+  /**
+   * Next window
+   * @this {!Window}
+   */
+  Editor.bindKey(Window, 'Ctrl+Tab', function() {
+    if (this.nextSibling) {
+      this.nextSibling.focus();
+      return;
+    }
+
+    if (this.parent.nextSibling) {
+      this.parent.nextSibling.firstChild.focus();
+      return;
+    }
+
+    EditorWindow.list[0].firstChild.focus();
+  });
 })();

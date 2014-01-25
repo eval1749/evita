@@ -205,4 +205,56 @@ TEST_F(WindowTest, Realize) {
   EXPECT_SCRIPT_EQ("realized", "sample1.state");
 }
 
+TEST_F(WindowTest, splitHorizontally) {
+  EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(1), Eq(3)));
+  EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(4)));
+  EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
+  EXPECT_CALL(*mock_view_impl(), SplitHorizontally(Eq(1), Eq(2)));
+  EXPECT_SCRIPT_VALID(
+      "var sample1 = new SampleWindow();"
+      "var sample2 = new SampleWindow();"
+      "var sample3 = new SampleWindow();"
+      "var sample4 = new SampleWindow();"
+      "sample1.appendChild(sample3);"
+      "sample4.realize();");
+  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(4));
+  EXPECT_SCRIPT_EQ("Error: Can't split window with itself.",
+      "sample1.splitHorizontally(sample1);");
+  EXPECT_SCRIPT_EQ("Error: Can't split unrealized window.",
+      "sample1.splitHorizontally(sample2);");
+  EXPECT_SCRIPT_VALID("sample1.realize();");
+  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
+  EXPECT_SCRIPT_VALID("sample1.splitHorizontally(sample2);");
+  EXPECT_SCRIPT_EQ("Error: Can't split with child window.",
+      "sample1.splitHorizontally(sample3);");
+  EXPECT_SCRIPT_EQ("Error: Can't split with realized window.",
+      "sample1.splitHorizontally(sample4);");
+}
+
+TEST_F(WindowTest, splitVertically) {
+  EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(1), Eq(3)));
+  EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(4)));
+  EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
+  EXPECT_CALL(*mock_view_impl(), SplitVertically(Eq(1), Eq(2)));
+  EXPECT_SCRIPT_VALID(
+      "var sample1 = new SampleWindow();"
+      "var sample2 = new SampleWindow();"
+      "var sample3 = new SampleWindow();"
+      "var sample4 = new SampleWindow();"
+      "sample1.appendChild(sample3);"
+      "sample4.realize();");
+  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(4));
+  EXPECT_SCRIPT_EQ("Error: Can't split window with itself.",
+      "sample1.splitVertically(sample1);");
+  EXPECT_SCRIPT_EQ("Error: Can't split unrealized window.",
+      "sample1.splitVertically(sample2);");
+  EXPECT_SCRIPT_VALID("sample1.realize();");
+  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
+  EXPECT_SCRIPT_VALID("sample1.splitVertically(sample2);");
+  EXPECT_SCRIPT_EQ("Error: Can't split with child window.",
+      "sample1.splitVertically(sample3);");
+  EXPECT_SCRIPT_EQ("Error: Can't split with realized window.",
+      "sample1.splitVertically(sample4);");
+}
+
 }  // namespace

@@ -60,3 +60,9 @@ Window.prototype.dispatchEvent = function(event) {};
  */
 Window.prototype.removeEventListener = function(type, listener,
                                                 opt_capture) {};
+
+/** @param {!Window} new_right_window */
+Window.prototype.splitHorizontally = function(new_right_window) {};
+
+/** @param {!Window} new_below_window */
+Window.prototype.splitVertically = function(new_below_window) {};

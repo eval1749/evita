@@ -69,7 +69,9 @@ class WindowWrapperInfo :
         .SetMethod("destroy", &Window::Destroy)
         .SetMethod("focus", &Window::Focus)
         .SetMethod("realize", &Window::Realize)
-        .SetMethod("removeChild", &Window::RemoveWindow);
+        .SetMethod("removeChild", &Window::RemoveWindow)
+        .SetMethod("splitHorizontally", &Window::SplitHorizontally)
+        .SetMethod("splitVertically", &Window::SplitVertically);
   }
 };
 
@@ -314,6 +316,48 @@ void Window::ResetForTesting() {
   EventTarget::ResetForTesting();
   global_focus_tick = 0;
   WindowIdMapper::instance()->ResetForTesting();
+}
+
+static bool CheckSplitParameter(Window* ref_window, Window* new_window) {
+  if (ref_window == new_window) {
+    ScriptController::instance()->ThrowError(
+        "Can't split window with itself.");
+    return false;
+  }
+
+  if (ref_window->state() != Window::kRealized) {
+    ScriptController::instance()->ThrowError(
+        "Can't split unrealized window.");
+    return false;
+  }
+
+  if (new_window->parent_node()) {
+    ScriptController::instance()->ThrowError(
+        "Can't split with child window.");
+    return false;
+  }
+
+  if (new_window->state() != Window::kNotRealized) {
+    ScriptController::instance()->ThrowError(
+        "Can't split with realized window.");
+    return false;
+  }
+
+  return true;
+}
+
+void Window::SplitHorizontally(Window* new_right_window) {
+  if (!CheckSplitParameter(this, new_right_window))
+    return;
+  ScriptController::instance()->view_delegate()->SplitHorizontally(
+    id(), new_right_window->id());
+}
+
+void Window::SplitVertically(Window* new_below_window) {
+  if (!CheckSplitParameter(this, new_below_window))
+    return;
+  ScriptController::instance()->view_delegate()->SplitVertically(
+    id(), new_below_window->id());
 }
 
 }  // namespace dom

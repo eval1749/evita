@@ -72,6 +72,8 @@ class Window : public v8_glue::Scriptable<Window, EventTarget>,
   public: void Realize();
   public: void RemoveWindow(Window* window);
   public: static void ResetForTesting();
+  public: void SplitHorizontally(Window* new_right_window);
+  public: void SplitVertically(Window* new_below_window);
 
   DISALLOW_COPY_AND_ASSIGN(Window);
 };

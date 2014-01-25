@@ -19,7 +19,7 @@ Document.find = function(name) {};
 Document.getOrNew = function(name) {};
 
 /**
- * @type {Array.<Document>}
+ * @type {Array.<!Document>}
  */
 Document.list;
 

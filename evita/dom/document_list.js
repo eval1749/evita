@@ -96,7 +96,27 @@
     var range = new Range(document, 0, document.length);
     range.text = '';
     range.text = 'Name\tSize\tState\t\Saved At\tFile\n';
-    Document.list.forEach(function(document) {
+    /**
+      * Compare document names.
+      * @param {!Document} a
+      * @param {!Document} b
+      * @return {number}
+      */
+    function compareDocument(a, b) {
+      var a_name = a.name;
+      var b_name = b.name;
+      var is_a_star = a_name.charAt(0) == '*';
+      var is_b_star = b_name.charAt(0) == '*';
+      if (is_a_star && is_b_star)
+        return a_name.localeCompare(b.name);
+      if (is_a_star)
+        return 1;
+      if (is_b_star)
+        return -1;
+      return a_name.localeCompare(b_name);
+    }
+    // TODO(yosi) Once TableView support sorting, we don't need to sort here.
+    Document.list.sort(compareDocument).forEach(function(document) {
       range.collapseTo(range.end);
       var fields = [
         document.name,

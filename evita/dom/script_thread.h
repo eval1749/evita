@@ -110,6 +110,10 @@ class ScriptThread final : public ViewDelegate,
   private: virtual void QueryClose(WindowId window_id) override;
   private: virtual void RunCallback(base::Closure callback) override;
   private: virtual void WillDestroyHost() override;
+  private: virtual void SplitHorizontally(WindowId left_window_id,
+      WindowId new_right_window_id) override;
+  private: virtual void SplitVertically(WindowId above_window_id,
+      WindowId new_below_window_id) override;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptThread);
 };

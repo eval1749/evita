@@ -13,6 +13,7 @@
 #include "evita/dom/view_event_handler.h"
 #include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/vi_EditPane.h"
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_FindDialogBox.h"
 #include "evita/vi_Frame.h"
@@ -254,6 +255,36 @@ void ViewDelegateImpl::ShowDialogBox(dom::DialogBoxId dialog_box_id) {
   if (!dialog_box)
     return;
   dialog_box->Show();
+}
+
+void ViewDelegateImpl::SplitHorizontally(dom::WindowId left_window_id,
+    dom::WindowId new_right_window_id) {
+  auto const left_window = Window::FromWindowId(left_window_id);
+  if (!left_window)
+    return;
+  auto const new_right_window = Window::FromWindowId(new_right_window_id);
+  if (!new_right_window)
+    return;
+  auto const parent = left_window->parent_node()->as<EditPane>();
+  if (!parent)
+    return;
+  parent->SplitHorizontally(left_window->as<ContentWindow>(),
+                            new_right_window->as<ContentWindow>());
+}
+
+void ViewDelegateImpl::SplitVertically(dom::WindowId above_window_id,
+    dom::WindowId new_below_window_id) {
+  auto const above_window = Window::FromWindowId(above_window_id);
+  if (!above_window)
+    return;
+  auto const new_below_window = Window::FromWindowId(new_below_window_id);
+  if (!new_below_window)
+    return;
+  auto const parent = above_window->parent_node()->as<EditPane>();
+  if (!parent)
+    return;
+  parent->SplitVertically(above_window->as<ContentWindow>(),
+                          new_below_window->as<ContentWindow>());
 }
 
 }  // namespace views

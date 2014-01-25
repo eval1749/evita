@@ -75,6 +75,10 @@ class ViewDelegate {
   public: virtual void SaveFile(Document* document,
                                 const base::string16& filename) = 0;
   public: virtual void ShowDialogBox(DialogBoxId dialog_box_id) = 0;
+  public: virtual void SplitHorizontally(WindowId left_window_id,
+                                         WindowId new_right_window_id) = 0;
+  public: virtual void SplitVertically(WindowId above_window_id,
+                                       WindowId new_below_window_id) = 0;
 
   DISALLOW_COPY_AND_ASSIGN(ViewDelegate);
 };

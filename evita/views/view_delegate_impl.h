@@ -61,6 +61,10 @@ class ViewDelegateImpl : public dom::ViewDelegate {
                                  const base::string16& filename) override;
   private: virtual void ShowDialogBox(
       dom::DialogBoxId dialog_box_id) override;
+  private: virtual void SplitHorizontally(dom::WindowId left_window,
+      dom::WindowId new_right_window) override;
+  private: virtual void SplitVertically(dom::WindowId above_window,
+      dom::WindowId new_below_window) override;
 
   DISALLOW_COPY_AND_ASSIGN(ViewDelegateImpl);
 };

@@ -45,6 +45,8 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD1(RealizeWindow, void(WindowId));
   MOCK_METHOD1(RegisterViewEventHandler, void(ViewEventHandler*));
   MOCK_METHOD1(ShowDialogBox, void(DialogBoxId));
+  MOCK_METHOD2(SplitHorizontally, void(WindowId, WindowId));
+  MOCK_METHOD2(SplitVertically, void(WindowId, WindowId));
 
   DISALLOW_COPY_AND_ASSIGN(MockViewImpl);
 };

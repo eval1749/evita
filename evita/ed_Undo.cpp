@@ -1060,17 +1060,22 @@ Posn UndoManager::Undo(Posn lPosn, Count lCount)
     return lPosn;
 } // UndoManager::Undo
 
-UndoBlock::~UndoBlock()
-{
-    m_pUndo->CheckPoint();
-    m_pUndo->RecordEnd(name_);
+UndoBlock::~UndoBlock() {
+  buffer_->EndUndoGroup(name_);
 }
 
 UndoBlock::UndoBlock(Buffer* buffer, const base::string16& name)
-    : name_(name) {
-  m_pUndo = buffer->GetUndo();
+    : buffer_(buffer), name_(name) {
+  buffer->StartUndoGroup(name);
+}
+
+void Buffer::EndUndoGroup(const base::string16& name) {
+  m_pUndo->CheckPoint();
+  m_pUndo->RecordEnd(name);
+}
+
+void Buffer::StartUndoGroup(const base::string16& name) {
   m_pUndo->CheckPoint();
   m_pUndo->RecordBegin(name);
 }
-
 }  // namespace text

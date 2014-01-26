@@ -190,6 +190,7 @@ class Buffer : public BufferCore, public FileFeatures {
     m_fUndo = f;
     return f0;
   }
+  public: void EndUndoGroup(const base::string16& name);
 
   // [F]
   // <summary>
@@ -259,6 +260,7 @@ class Buffer : public BufferCore, public FileFeatures {
   }
   public: bool SetReadOnly(bool f) { return m_fReadOnly = f; }
   public: void SetStyle(Posn, Posn, const StyleValues*);
+  public: void StartUndoGroup(const base::string16& name);
 
   // [T]
   private: Interval* tryMergeInterval(Interval*);
@@ -576,7 +578,7 @@ class DisableUndo {
 /// created on stack instead of heap.
 /// </summary>
 class UndoBlock {
-  private: UndoManager* m_pUndo;
+  private: Buffer* buffer_;
   private: const base::string16& name_;
   public: UndoBlock(Range* range, const base::string16& name);
   public: UndoBlock(Buffer* buffer, const base::string16& name);

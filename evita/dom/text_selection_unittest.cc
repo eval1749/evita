@@ -68,6 +68,40 @@ TEST_F(TextSelectionTest, active) {
   EXPECT_SCRIPT_EQ("0", "sample.active");
 }
 
+TEST_F(TextSelectionTest, endKey) {
+  EXPECT_SCRIPT_VALID(
+    "function testIt(sample, unit, opt_alter) {"
+    "  var has_opt_alter = arguments.length >= 3;"
+    "  return doTest(sample, function(selection) {"
+    "   if (has_opt_alter)"
+    "     selection.endKey(unit, opt_alter);"
+    "   else"
+    "     selection.endKey(unit);"
+    "  });"
+    "}");
+
+  EXPECT_SCRIPT_EQ("foo|$bar$", "testIt('|foo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo|$bar$", "testIt('fo|o$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo|  $bar$", "testIt('|foo  $bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo|  $bar$", "testIt('fo|o  $bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo  |$bar$", "testIt('foo|  $bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo|  $bar$", "testIt('foo  |$bar$', Unit.LINE)");
+
+  EXPECT_SCRIPT_EQ("|foo|$bar$",
+                   "testIt('|foo$bar$', Unit.LINE, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("fo|o|$bar$",
+                   "testIt('fo|o$bar$', Unit.LINE, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("|foo|  $bar$",
+                   "testIt('|foo  $bar$', Unit.LINE, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("fo|o|  $bar$",
+                   "testIt('fo|o  $bar$', Unit.LINE, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("foo|  |$bar$",
+                   "testIt('foo|  $bar$', Unit.LINE, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("foo|  |$bar$",
+                   "testIt('foo  |$bar$', Unit.LINE, Alter.EXTEND)");
+
+}
+
 TEST_F(TextSelectionTest, endof) {
   EXPECT_SCRIPT_VALID(
     "function testIt(sample, unit) {"

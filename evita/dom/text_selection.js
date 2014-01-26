@@ -4,6 +4,42 @@
 
 (function() {
   /**
+   * @param {Unit} unit
+   * @param {Alter} opt_alter, default is Alter.MOVE
+   * @return {!TextSelection}
+   */
+  TextSelection.prototype.endKey = function(unit, opt_alter) {
+    var alter = arguments.length >= 2 ? opt_alter : Alter.MOVE;
+    if (this.startIsActive)
+      this.range.collapseTo(this.range.end);
+    var start = this.range.end;
+    this.endOf(unit);
+    var new_end = this.range.end;
+    if (unit == Unit.LINE || unit == Unit.WINDOW_LINE) {
+      this.range.moveEndWhile(' \t', Count.BACKWARD);
+      // Skip trailing whitespace if
+      //   - The selection were at end of line.
+      //   - The selection was at middle of line.
+      if (start == new_end || start != this.range.end)
+        new_end = this.range.end;
+    }
+    if (alter == Alter.EXTEND) {
+      if (new_end < start) {
+        this.range.start = new_end;
+        this.range.end = start;
+        this.startIsActive = true;
+      } else {
+        this.range.start = start;
+        this.range.end = new_end;
+        this.startIsActive = false;
+      }
+    } else {
+      this.range.collapseTo(new_end);
+    }
+    return this;
+  };
+
+  /**
    * Move end position of TextSelection at end of specified unit.
    * @this {!TextSelection}
    * @param {Unit} unit.

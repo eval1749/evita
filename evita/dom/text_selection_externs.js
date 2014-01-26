@@ -15,6 +15,13 @@ TextSelection.prototype.document;
 
 /**
  * @param {Unit} unit
+ * @param {Alter} opt_alter, default is Alter.MOVE
+ * @return {!TextSelection}
+ */
+TextSelection.prototype.endKey = function(unit, opt_alter) {};
+
+/**
+ * @param {Unit} unit
  * @param {Alter=} opt_alter, default is Alter.MOVE.
  */
 TextSelection.prototype.endOf = function(unit, opt_alter) {};

@@ -256,6 +256,29 @@
   }, 'move to end of window line\n' +
      'Move active position of selection to end of window line.');
 
+
+  /**
+   * @param {number=} opt_count
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Enter', function(opt_count) {
+    var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
+    if (count <= 0)
+      return;
+    var selection = this.selection;
+    var leading_whitespaces = (new Range(selection.range)).startOf(Unit.LINE)
+        .moveEndWhile(' \t').text;
+    selection.document.undoGroup('TypeEnter', function() {
+      selection.range.moveStartWhile(' \t', Count.BACKWARD);
+      selection.range.text = '\n'.repeat(count);
+      selection.range.collapseTo(selection.range.end)
+          .moveEndWhile(' \t').text = leading_whitespaces;
+      selection.range.collapseTo(selection.range.end);
+    });
+  }, 'type enter key\n' +
+     'Insert newlines with leading whitespaces and remove trailing' +
+     ' whitespaces.');
+
   Editor.bindKey(TextWindow, 'Home', function() {
     this.selection.homeKey(Unit.WINDOW_LINE);
   }, 'move to home of window line\n' +

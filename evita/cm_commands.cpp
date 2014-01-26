@@ -596,17 +596,6 @@ void TypeChar(const Context* pCtx)
     } // if close paren
 } // TypeChar
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// TypeEnter
-//
-DEFCOMMAND(TypeEnter)
-{
-    if (NULL == pCtx->GetSelection()) return;
-    pCtx->GetSelection()->TypeEnter(pCtx->GetArg());
-} // TypeEnter
-
 DEFCOMMAND(ValidateIntervals)
 {
     when (NULL == pCtx->GetSelection()) return;
@@ -963,7 +952,6 @@ void Processor::GlobalInit() {
     BIND_KEY(TextEditWindow, Mod_Ctrl | '/', ExpandDynamicAbbrev);
 
    //BIND_KEY(TextEditWindow, Mod_Ctrl | 'I', Indent);
-    //BIND_KEY(TextEditWindow, Mod_Ctrl | 'M', TypeEnter);
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'Q', QuotedInsertEntry());
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'R', Reload);
     BIND_KEY(CommandWindow, Mod_Ctrl | 'U', StartArgumentEntry());
@@ -975,7 +963,6 @@ void Processor::GlobalInit() {
     BIND_VKEY(TextEditWindow, Mod_None,  RIGHT,  ForwardChar);
     BIND_VKEY(TextEditWindow, Mod_None,  UP,     BackwardWindowLine);
     BIND_VKEY(TextEditWindow, Mod_None,  TAB,    Indent);
-    BIND_VKEY(TextEditWindow, Mod_None,  RETURN, TypeEnter);
 
     BIND_VKEY(TextEditWindow, Mod_Ctrl, DOWN,   GoToCloseParen);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, LEFT,   BackwardWord);

@@ -608,7 +608,7 @@ bool Frame::OnIdle(uint const nCount) {
       auto const iAnswer = Application::instance()->Ask(
           MB_YESNO | MB_ICONWARNING | MB_SETFOREGROUND | MB_TOPMOST,
           IDS_ASK_REFRESH,
-          pBuffer->GetName());
+          pBuffer->GetName().c_str());
 
       switch (iAnswer) {
         case IDNO:

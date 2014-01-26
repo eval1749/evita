@@ -785,7 +785,7 @@ void RegexObj::Describe() const {
     StdOutPrintf("\n");
   }
 }
-#else
+#elif defined(_DEBUG)
 void RegexObj::Describe() const {
 }
 #endif // DEBUG_EXEC

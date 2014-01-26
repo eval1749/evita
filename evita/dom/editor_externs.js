@@ -18,8 +18,10 @@ Editor.forceExit = function() {};
  * @param {Function} window_class
  * @param {string} key_combination
  * @param {function(number=)} command
+ * @param {string=} opt_description
  */
-Editor.bindKey = function(window_class, key_combination, command) {};
+Editor.bindKey = function(window_class, key_combination, command,
+                          opt_description) {};
 
 /**
  * @param {number} key_code
@@ -60,6 +62,9 @@ Editor.getFilenameForSave = function(window, filename) {};
  * @param {function(!string)} callback
  */
 Editor.getFilenameForSave_ = function(window, filename, callback) {};
+
+/** @type {Map.<string, Map.<number,function(number=)>>} */
+Editor.key_binding_map_map_;
 
 /**
  * @param {string} format_text

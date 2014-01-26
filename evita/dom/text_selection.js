@@ -136,18 +136,19 @@
   TextSelection.prototype.startOf = function(unit, opt_alter) {
     var alter = arguments.length >= 2 ? /** @type{Alter} */(opt_alter) :
                                         Alter.MOVE;
+    var anchor = this.range.end;
     switch (unit) {
       case Unit.WINDOW:
-        return updateSelection(this, alter, this.range.end,
+        return updateSelection(this, alter, anchor,
                  this.window.compute_(
                     TextWindowComputeMethod.START_OF_WINDOW));
       case Unit.WINDOW_LINE:
-        return updateSelection(this, alter, this.range.end,
+        return updateSelection(this, alter, anchor,
                  this.window.compute_(
                     TextWindowComputeMethod.START_OF_WINDOW_LINE,
-                    this.range.end));
+                    anchor));
     }
-    Range.prototype.startOf.call(this.range, unit, alter);
-    return this;
+    this.range.startOf(unit);
+    return updateSelection(this, alter, anchor, this.range.start);
   };
 })();

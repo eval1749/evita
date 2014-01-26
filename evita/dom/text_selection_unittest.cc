@@ -46,8 +46,10 @@ class TextSelectionTest : public dom::AbstractDomTest {
       "  var result = range.text.replace(/\\n/g, '$');"
       "  if (start == end)"
       "    return result.substr(0, start) + '|' + result.substr(start);"
-      "  return result.substr(0, start) + '|' +"
-      "         result.substring(start, end) + '|' +"
+      "  var end_mark = selection.startIsActive ? '^' : '|';"
+      "  var start_mark = selection.startIsActive ? '|' : '^';"
+      "  return result.substr(0, start) + start_mark +"
+      "         result.substring(start, end) + end_mark +"
       "         result.substr(end);"
       "}");
   }
@@ -92,12 +94,12 @@ TEST_F(TextSelectionTest, endKeyExtend) {
     "  });"
     "}");
 
-  EXPECT_SCRIPT_EQ("|foo|$bar$", "testIt('|foo$bar$', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("fo|o|$bar$", "testIt('fo|o$bar$', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("|foo|  $bar$", "testIt('|foo  $bar$', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("fo|o|  $bar$", "testIt('fo|o  $bar$', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("foo|  |$bar$", "testIt('foo|  $bar$', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("foo|  |$bar$", "testIt('foo  |$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("^foo|$bar$", "testIt('|foo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("fo^o|$bar$", "testIt('fo|o$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("^foo|  $bar$", "testIt('|foo  $bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("fo^o|  $bar$", "testIt('fo|o  $bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo^  |$bar$", "testIt('foo|  $bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo|  ^$bar$", "testIt('foo  |$bar$', Unit.LINE)");
 }
 
 TEST_F(TextSelectionTest, endOf) {
@@ -157,18 +159,18 @@ TEST_F(TextSelectionTest, homeKeyExtend) {
     "}");
 
   EXPECT_SCRIPT_EQ("|foo$bar$", "testIt('|foo$bar$', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("|fo|o$bar$", "testIt('fo|o$bar$', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("|foo|$bar$", "testIt('foo|$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("|fo^o$bar$", "testIt('fo|o$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("|foo^$bar$", "testIt('foo|$bar$', Unit.LINE)");
   EXPECT_SCRIPT_EQ("foo$|bar$", "testIt('foo$|bar$', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("foo$|b|ar$", "testIt('foo$b|ar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo$|b^ar$", "testIt('foo$b|ar$', Unit.LINE)");
 
   // Special handling of leading whitespaces.
-  EXPECT_SCRIPT_EQ("|  |foo$bar$", "testIt('|  foo$bar$', Unit.LINE)");
-  EXPECT_SCRIPT_EQ(" | |foo$bar$", "testIt(' | foo$bar$', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("|  |foo$bar$", "testIt('  |foo$bar$', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("  |f|oo$bar$", "testIt('  f|oo$bar$', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("  |fo|o$bar$", "testIt('  fo|o$bar$', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("  |foo|$bar$", "testIt('  foo|$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("^  |foo$bar$", "testIt('|  foo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ(" ^ |foo$bar$", "testIt(' | foo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("|  ^foo$bar$", "testIt('  |foo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("  |f^oo$bar$", "testIt('  f|oo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("  |fo^o$bar$", "testIt('  fo|o$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("  |foo^$bar$", "testIt('  foo|$bar$', Unit.LINE)");
   EXPECT_SCRIPT_EQ("  foo$|bar$", "testIt('  foo$|bar$', Unit.LINE)");
 }
 
@@ -206,19 +208,19 @@ TEST_F(TextSelectionTest, startOfExtend) {
     "  });"
     "}");
   EXPECT_SCRIPT_EQ("|foo$bar$$baz", "testIt('|foo$bar$$baz', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("|fo|o$bar$$baz", "testIt('fo|o$bar$$baz', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("|foo|$bar$$baz", "testIt('foo|$bar$$baz', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("|fo^o$bar$$baz", "testIt('fo|o$bar$$baz', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("|foo^$bar$$baz", "testIt('foo|$bar$$baz', Unit.LINE)");
   EXPECT_SCRIPT_EQ("foo$|bar$$baz", "testIt('foo$|bar$$baz', Unit.LINE)");
   EXPECT_SCRIPT_EQ("foo$bar$|$baz", "testIt('foo$bar$|$baz', Unit.LINE)");
   EXPECT_SCRIPT_EQ("foo$bar$$|baz", "testIt('foo$bar$$|baz', Unit.LINE)");
 
   EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('|foo bar  baz', Unit.WORD)");
-  EXPECT_SCRIPT_EQ("|f|oo bar  baz", "testIt('f|oo bar  baz', Unit.WORD)");
-  EXPECT_SCRIPT_EQ("|fo|o bar  baz", "testIt('fo|o bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("|f^oo bar  baz", "testIt('f|oo bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("|fo^o bar  baz", "testIt('fo|o bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo| bar  baz", "testIt('foo| bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo |bar  baz', Unit.WORD)");
-  EXPECT_SCRIPT_EQ("foo |b|ar  baz", "testIt('foo b|ar  baz', Unit.WORD)");
-  EXPECT_SCRIPT_EQ("foo |ba|r  baz", "testIt('foo ba|r  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo |b^ar  baz", "testIt('foo b|ar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo |ba^r  baz", "testIt('foo ba|r  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar|  baz", "testIt('foo bar|  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar | baz", "testIt('foo bar | baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar  |baz", "testIt('foo bar  |baz', Unit.WORD)");

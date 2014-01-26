@@ -197,6 +197,12 @@ Set.prototype.size;
 String.prototype.endsWith = function(searchString, opt_position) {};
 
 /**
+ * @param {number} count
+ * @return {string}
+ */
+String.prototype.repeat = function(count) {};
+
+/**
  * @param {string} searchString
  * @param {number=} opt_position
  * @return {boolean}

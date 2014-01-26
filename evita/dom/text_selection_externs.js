@@ -32,5 +32,11 @@ TextSelection.prototype.range;
 /** @expose @type {boolean} */
 TextSelection.prototype.startIsActive;
 
+/**
+ * @param {Unit} unit
+ * @param {Alter=} opt_alter, default is Alter.MOVE.
+ */
+TextSelection.prototype.startOf = function(unit, opt_alter) {};
+
 /** @expose @type {!TextWindow} */
 TextSelection.prototype.window;

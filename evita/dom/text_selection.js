@@ -4,6 +4,33 @@
 
 (function() {
   /**
+   * @param {!TextSelection} selection
+   * @param {!Alter} alter
+   * @param {number} position
+   * @return {!TextSelection}
+   */
+  function setStart(selection, alter, position) {
+    switch (alter) {
+      case Alter.EXTEND: {
+        var end = selection.range.end;
+        if (position < end) {
+          selection.range.start = position;
+          selection.startIsActive = true;
+          return selection;
+        }
+        selection.range.end = position;
+        selection.range.start = end;
+        selection.startIsActive = false;
+        return selection;
+      }
+      case Alter.MOVE:
+        selection.range.collapseTo(position);
+        return selection;
+    }
+    throw 'Invalid ALTER: ' + alter;
+  }
+
+  /**
    * @param {Unit} unit
    * @param {Alter} opt_alter, default is Alter.MOVE
    * @return {!TextSelection}
@@ -71,6 +98,32 @@
       default:
         throw TypeError('Invalid alter: ' + alter);
     }
+    return this;
+  };
+
+  /**
+   * Move start position of TextSelection at end of specified unit.
+   * @this {!TextSelection}
+   * @param {Unit} unit, except for CHARACTER and SCREEN,
+   * @param {!Alter=} opt_alter, default is Alter.MOVE.
+   * @return {!TextSelection}
+   */
+  TextSelection.prototype.startOf = function(unit, opt_alter) {
+    var alter = arguments.length >= 2 ? /** @type{Alter} */(opt_alter) :
+                                        Alter.MOVE;
+    switch (unit) {
+      case Unit.WINDOW:
+        return setStart(this, alter,
+                 this.window.compute_(
+                    TextWindowComputeMethod.START_OF_WINDOW));
+        break;
+      case Unit.WINDOW_LINE:
+        return setStart(this, alter,
+                 this.window.compute_(
+                    TextWindowComputeMethod.START_OF_WINDOW_LINE,
+                    this.range.end));
+    }
+    Range.prototype.startOf.call(this.range, unit, alter);
     return this;
   };
 })();

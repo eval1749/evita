@@ -124,6 +124,76 @@ TEST_F(TextSelectionTest, endof) {
   EXPECT_SCRIPT_EQ("foo bar  baz|", "testIt('foo bar  |baz', Unit.WORD)");
 }
 
+TEST_F(TextSelectionTest, startOf) {
+  EXPECT_SCRIPT_VALID(
+    "function testIt(sample, unit, opt_alter) {"
+    "  var has_alter = arguments.length >= 3;"
+    "  return doTest(sample, function(selection) {"
+    "   if (has_alter)"
+    "     selection.startOf(unit, opt_alter);"
+    "   else"
+    "     selection.startOf(unit);"
+    "  });"
+    "}");
+  EXPECT_SCRIPT_EQ("|foo$bar$$baz",
+                   "testIt('|foo$bar$$baz', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("|foo$bar$$baz",
+                   "testIt('fo|o$bar$$baz', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("|foo$bar$$baz",
+                   "testIt('foo|$bar$$baz', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo$|bar$$baz",
+                   "testIt('foo$|bar$$baz', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo$bar$|$baz",
+                   "testIt('foo$bar$|$baz', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo$bar$$|baz",
+                   "testIt('foo$bar$$|baz', Unit.LINE)");
+
+  EXPECT_SCRIPT_EQ("|foo$bar$$baz",
+                   "testIt('|foo$bar$$baz', Unit.LINE, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("|fo|o$bar$$baz",
+                   "testIt('fo|o$bar$$baz', Unit.LINE, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("|foo|$bar$$baz",
+                   "testIt('foo|$bar$$baz', Unit.LINE, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("foo$|bar$$baz",
+                   "testIt('foo$|bar$$baz', Unit.LINE, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("foo$bar$|$baz",
+                   "testIt('foo$bar$|$baz', Unit.LINE, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("foo$bar$$|baz",
+                   "testIt('foo$bar$$|baz', Unit.LINE, Alter.EXTEND)");
+
+  EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('|foo bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('f|oo bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('fo|o bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo| bar  baz", "testIt('foo| bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo |bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo b|ar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo ba|r  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar|  baz", "testIt('foo bar|  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar | baz", "testIt('foo bar | baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar  |baz", "testIt('foo bar  |baz', Unit.WORD)");
+
+  EXPECT_SCRIPT_EQ("|foo bar  baz",
+                   "testIt('|foo bar  baz', Unit.WORD, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("|f|oo bar  baz",
+                   "testIt('f|oo bar  baz', Unit.WORD, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("|fo|o bar  baz",
+                   "testIt('fo|o bar  baz', Unit.WORD, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("foo| bar  baz",
+                   "testIt('foo| bar  baz', Unit.WORD, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("foo |bar  baz",
+                   "testIt('foo |bar  baz', Unit.WORD, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("foo |b|ar  baz",
+                   "testIt('foo b|ar  baz', Unit.WORD, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("foo |ba|r  baz",
+                   "testIt('foo ba|r  baz', Unit.WORD, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("foo bar|  baz",
+                   "testIt('foo bar|  baz', Unit.WORD, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("foo bar | baz",
+                    "testIt('foo bar | baz', Unit.WORD, Alter.EXTEND)");
+  EXPECT_SCRIPT_EQ("foo bar  |baz",
+                   "testIt('foo bar  |baz', Unit.WORD, Alter.EXTEND)");
+}
+
 TEST_F(TextSelectionTest, Realize) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
   EXPECT_SCRIPT_VALID(

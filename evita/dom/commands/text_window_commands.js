@@ -35,6 +35,17 @@
   });
 
   /**
+   * Select all contents
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Ctrl+A', function() {
+    var range = this.selection.range;
+    range.start = 0
+    range.end = range.document.length;
+    this.selection.startIsActive = false;
+  });
+
+  /**
    * Backward delete word
    * @param {number=} opt_count
    * @this {!TextWindow}
@@ -43,6 +54,8 @@
     var count = arguments.length >= 1 ? opt_count : 1;
     this.selection.range.delete(Unit.WORD, -count);
   });
+
+  Editor.bindKey(TextWindow, 'Ctrl+C', copyToClipboardCommand);
 
   /**
    * Forward delete word
@@ -54,50 +67,10 @@
     this.selection.range.delete(Unit.WORD, count);
   });
 
-  /**
-   * Show document in new editor window.
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+3', function() {
-    var text_window = new TextWindow(this.selection.range);
-    var editor_window = new EditorWindow();
-    editor_window.appendChild(text_window);
-    editor_window.realize();
-    text_window.makeSelectionVisible();
-    text_window.focus();
-  });
-
-  /**
-   * Show document in new editor window and close current editor window.
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+4', function() {
-    var current = this.selection.window.parent;
-    // When editor window has only one tab, we don't ignore this command,
-    // since result of this command isn't useful.
-    if (current.children.length == 1)
-      return;
-    var text_window = new TextWindow(this.selection.range);
-    var editor_window = new EditorWindow();
-    editor_window.appendChild(text_window);
-    editor_window.realize();
-    text_window.makeSelectionVisible();
-    text_window.focus();
-    current.destroy();
-  });
-
-  /**
-   * Select all contents
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+A', function() {
-    var range = this.selection.range;
-    range.start = 0
-    range.end = range.document.length;
-    this.selection.startIsActive = false;
-  });
-
-  Editor.bindKey(TextWindow, 'Ctrl+C', copyToClipboardCommand);
+  Editor.bindKey(TextWindow, 'Ctrl+End', function() {
+    this.selection.endKey(Unit.DOCUMENT);
+  }, 'move to end of document\n' +
+     'Move active position of selection to end of document.');
 
   /**
    * @param {TextSelection} selection
@@ -110,26 +83,6 @@
     }
     changer(selection);
   }
-
-  /**
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+C', function() {
-    changeCase(this.selection, function(selection) {
-      selection.range.capitalize();
-    });
-  });
-
-  /**
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+D', function() {
-    changeCase(this.selection, function(selection) {
-      selection.range.toLowerCase();
-    });
-  });
-
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+Delete', copyToClipboardCommand);
 
   // TODO(yosi) We should display dialog box to prompt enter line number and
   // list of functions.
@@ -173,15 +126,67 @@
         });
   });
 
-  Editor.bindKey(TextWindow, 'Ctrl+V', pasteFromClipboardCommand);
+  /**
+   * Show document in new editor window.
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+3', function() {
+    var text_window = new TextWindow(this.selection.range);
+    var editor_window = new EditorWindow();
+    editor_window.appendChild(text_window);
+    editor_window.realize();
+    text_window.makeSelectionVisible();
+    text_window.focus();
+  });
+
+  /**
+   * Show document in new editor window and close current editor window.
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+4', function() {
+    var current = this.selection.window.parent;
+    // When editor window has only one tab, we don't ignore this command,
+    // since result of this command isn't useful.
+    if (current.children.length == 1)
+      return;
+    var text_window = new TextWindow(this.selection.range);
+    var editor_window = new EditorWindow();
+    editor_window.appendChild(text_window);
+    editor_window.realize();
+    text_window.makeSelectionVisible();
+    text_window.focus();
+    current.destroy();
+  });
 
   /**
    * @this {!TextWindow}
    */
-  Editor.bindKey(TextWindow, 'Ctrl+W', function(arg) {
-    var document = this.selection.document;
-    document.close();
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+C', function() {
+    changeCase(this.selection, function(selection) {
+      selection.range.capitalize();
+    });
   });
+
+  /**
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+D', function() {
+    changeCase(this.selection, function(selection) {
+      selection.range.toLowerCase();
+    });
+  });
+
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+Delete', copyToClipboardCommand);
+
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+End', function() {
+    this.selection.endKey(Unit.DOCUMENT, Alter.EXTEND);
+  }, 'extend to end of document\n' +
+     'Move active position of selection to end of document.');
+
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+Home', function() {
+    this.selection.homeKey(Unit.DOCUMENT, Alter.EXTEND);
+  }, 'exthome to home of document\n' +
+     'Move active position of selection to home of document.');
 
   /**
    * @this {!TextWindow}
@@ -190,6 +195,16 @@
     changeCase(this.selection, function(selection) {
       selection.range.toUpperCase();
     });
+  });
+
+  Editor.bindKey(TextWindow, 'Ctrl+V', pasteFromClipboardCommand);
+
+  /**
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Ctrl+W', function(arg) {
+    var document = this.selection.document;
+    document.close();
   });
 
   Editor.bindKey(TextWindow, 'Ctrl+X', cutToClipboardCommand);
@@ -241,40 +256,22 @@
   }, 'move to end of window line\n' +
      'Move active position of selection to end of window line.');
 
-  Editor.bindKey(TextWindow, 'Ctrl+End', function() {
-    this.selection.endKey(Unit.DOCUMENT);
-  }, 'move to end of document\n' +
-     'Move active position of selection to end of document.');
-
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+End', function() {
-    this.selection.endKey(Unit.DOCUMENT, Alter.EXTEND);
-  }, 'extend to end of document\n' +
-     'Move active position of selection to end of document.');
-
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+Home', function() {
-    this.selection.homeKey(Unit.DOCUMENT, Alter.EXTEND);
-  }, 'exthome to home of document\n' +
-     'Move active position of selection to home of document.');
-
   Editor.bindKey(TextWindow, 'Home', function() {
     this.selection.homeKey(Unit.WINDOW_LINE);
   }, 'move to home of window line\n' +
      'Move active position of selection to home of window line.');
 
   Editor.bindKey(TextWindow, 'Shift+Delete', cutToClipboardCommand);
-  Editor.bindKey(TextWindow, 'Shift+Insert', pasteFromClipboardCommand);
 
   Editor.bindKey(TextWindow, 'Shift+End', function() {
     this.selection.endKey(Unit.WINDOW_LINE, Alter.EXTEND);
   }, 'extend to end of window line\n' +
      'Move active position of selection to end of window line.');
 
-  Editor.bindKey(TextWindow, 'Shift+Delete', cutToClipboardCommand);
-  Editor.bindKey(TextWindow, 'Shift+Insert', pasteFromClipboardCommand);
-
   Editor.bindKey(TextWindow, 'Shift+Home', function() {
     this.selection.homeKey(Unit.WINDOW_LINE, Alter.EXTEND);
   }, 'exthome to home of window line\n' +
      'Move active position of selection to home of window line.');
 
+  Editor.bindKey(TextWindow, 'Shift+Insert', pasteFromClipboardCommand);
 })();

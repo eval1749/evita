@@ -231,6 +231,27 @@
     this.selection.range.delete(Unit.CHARACTER, count);
   });
 
+  Editor.bindKey(TextWindow, 'End', function() {
+    this.selection.endKey(Unit.WINDOW_LINE);
+  }, 'move to end of window line\n' +
+     'Move active position of selection to end of window line.');
+
+  Editor.bindKey(TextWindow, 'Ctrl+End', function() {
+    this.selection.endKey(Unit.DOCUMENT);
+  }, 'move to end of document\n' +
+     'Move active position of selection to end of document.');
+
+  Editor.bindKey(TextWindow, 'Shift+Ctrl+End', function() {
+    this.selection.endKey(Unit.DOCUMENT, Alter.EXTEND);
+  }, 'extend to end of document\n' +
+     'Move active position of selection to end of document.');
+
   Editor.bindKey(TextWindow, 'Shift+Delete', cutToClipboardCommand);
   Editor.bindKey(TextWindow, 'Shift+Insert', pasteFromClipboardCommand);
+
+  Editor.bindKey(TextWindow, 'Shift+End', function() {
+    this.selection.endKey(Unit.WINDOW_LINE, Alter.EXTEND);
+  }, 'extend to end of window line\n' +
+     'Move active position of selection to end of window line.');
+
 })();

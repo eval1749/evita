@@ -77,55 +77,6 @@ Selection* Selection::Create(const text::Range& range) {
   return new(range.GetBuffer()->GetHeap()) Selection(range);
 }
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// Selection::EndKey
-//  eUnit = Unit_WindowLine | Unit_Buffer
-//
-Count Selection::EndKey(Unit eUnit, bool fExtend)
-{
-    if (IsStartActive())
-    {
-        Collapse(Collapse_End);
-    }
-
-    Count iEndDelta = EndOf(eUnit, fExtend);
-
-    if (Unit_WindowLine != eUnit)
-    {
-        return iEndDelta;
-    }
-
-    Posn lLineEnd = GetEnd();
-    Count cTrailingSpaces = MoveEndWhile(L" \t", Count_Backward);
-
-    // Selection.End was end of line before MoveWhile.
-    if (0 == iEndDelta)
-    {
-        return cTrailingSpaces;
-    }
-
-    // Selection.End was in middle of line.
-    if (cTrailingSpaces != iEndDelta)
-    {
-        return iEndDelta;
-    }
-
-    // Selection.End was at end of non-whitespaces.
-    if (fExtend)
-    {
-        SetEnd(lLineEnd);
-    }
-    else
-    {
-        SetRange(lLineEnd, lLineEnd);
-    }
-
-    return iEndDelta - cTrailingSpaces;
-} // Selection::EndKey
-
-
 //////////////////////////////////////////////////////////////////////
 //
 // Selection::EndOf

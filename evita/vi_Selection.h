@@ -69,7 +69,6 @@ class Selection : public text::Range
     public: static Selection* Create(const text::Range& range);
 
     // [E]
-    public: Count EndKey(Unit, bool = false);
     public: Count EndOf(Unit, bool = false);
 
     // [G]

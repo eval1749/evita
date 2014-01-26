@@ -109,12 +109,9 @@ TEST_F(TextSelectionTest, endOf) {
     "   selection.endOf(unit);"
     "  });"
     "}");
-  EXPECT_SCRIPT_EQ("foo|$bar$$baz",
-                   "testIt('|foo$bar$$baz', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("foo$bar|$$baz",
-                   "testIt('foo$|bar$$baz', Unit.LINE)");
-  EXPECT_SCRIPT_EQ("foo$bar$|$baz",
-                   "testIt('foo$bar$|$baz', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo|$bar$$baz", "testIt('|foo$bar$$baz', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo$bar|$$baz", "testIt('foo$|bar$$baz', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo$bar$|$baz", "testIt('foo$bar$|$baz', Unit.LINE)");
 
   EXPECT_SCRIPT_EQ("foo| bar  baz", "testIt('|foo bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo| bar  baz", "testIt('f|oo bar  baz', Unit.WORD)");

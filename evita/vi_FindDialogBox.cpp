@@ -453,7 +453,6 @@ void FindDialogBox::UpdateUI(bool fActivate) {
   SetCheckBox(IDC_FIND_DOWN, text::kDirectionDown == direction_);
   SetCheckBox(IDC_FIND_UP, text::kDirectionUp == direction_);
 
-  auto const selection = GetActiveSelection();
   auto const cwch = ::GetWindowTextLength(GetDlgItem(IDC_FIND_WHAT));
 
   ::EnableWindow(GetDlgItem(IDC_FIND_NEXT), cwch >= 1);
@@ -464,14 +463,16 @@ void FindDialogBox::UpdateUI(bool fActivate) {
 
  // If active selection covers mutliple lines, Search/Replace can be
  // limited in selection.
-  auto const fHasNewline = selection->FindFirstChar('\n') >= 0;
-  ::EnableWindow(GetDlgItem(IDC_FIND_SELECTION), fHasNewline);
-  ::EnableWindow(GetDlgItem(IDC_FIND_WHOLE_FILE), fHasNewline);
+  if (auto const selection = GetActiveSelection()) {
+    auto const fHasNewline = selection->FindFirstChar('\n') >= 0;
+    ::EnableWindow(GetDlgItem(IDC_FIND_SELECTION), fHasNewline);
+    ::EnableWindow(GetDlgItem(IDC_FIND_WHOLE_FILE), fHasNewline);
 
-  if (fActivate)
-    replace_in_ = fHasNewline ? text::kReplaceInSelection :
-                                text::kReplaceInWhole;
-
-  SetCheckBox(IDC_FIND_SELECTION, text::kReplaceInSelection == replace_in_);
-  SetCheckBox(IDC_FIND_WHOLE_FILE, text::kReplaceInWhole == replace_in_);
+    if (fActivate) {
+      replace_in_ = fHasNewline ? text::kReplaceInSelection :
+                                  text::kReplaceInWhole;
+    }
+    SetCheckBox(IDC_FIND_SELECTION, text::kReplaceInSelection == replace_in_);
+    SetCheckBox(IDC_FIND_WHOLE_FILE, text::kReplaceInWhole == replace_in_);
+  }
 }

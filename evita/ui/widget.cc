@@ -503,6 +503,15 @@ void Widget::WillRemoveChildWidget(const Widget&) {
 LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
   DCHECK(native_window_);
   switch (message) {
+    case WM_CAPTURECHANGED: {
+      auto const new_capture = reinterpret_cast<HWND>(lParam);
+      if (capture_widget && capture_widget->AssociatedHwnd() != new_capture) {
+        DVLOG_WIDGET(0) << "Someone(" << new_capture <<
+            ") gains the mouse capture.";
+        capture_widget = nullptr;
+      }
+      return 0;
+    }
     case WM_CREATE:
       if (reinterpret_cast<CREATESTRUCT*>(lParam)->style & WS_VISIBLE)
         ++shown_;

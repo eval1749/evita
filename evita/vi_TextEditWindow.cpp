@@ -653,12 +653,6 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
       #endif
       return TRUE;
 
-    case WM_MOUSEWHEEL: {
-      UI_DOM_AUTO_LOCK_SCOPE();
-      SmallScroll(0, GET_WHEEL_DELTA_WPARAM(wParam) > 0 ? -2 : 2);
-      return 0;
-    }
-
     case WM_SIZE:
       #if DEBUG_RESIZE
         DEBUG_TEXT_EDIT_PRINTF("WM_SIZE %dx%d\n",
@@ -736,6 +730,11 @@ void TextEditWindow::OnMouseMoved(const ui::MouseEvent& event) {
     autoscroller_->Start(1);
   else
     autoscroller_->Stop();
+}
+
+void TextEditWindow::OnMouseWheel(const ui::MouseWheelEvent& event) {
+  UI_DOM_AUTO_LOCK_SCOPE();
+  SmallScroll(0, event.delta() > 0 ? -2 : 2);
 }
 
 void TextEditWindow::onVScroll(uint nCode) {

@@ -281,7 +281,15 @@ void Widget::OnMousePressed(const MouseEvent&) {
 void Widget::OnMouseReleased(const MouseEvent&) {
 }
 
+void Widget::OnMouseWheel(const MouseWheelEvent&) {
+}
+
 LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
+  if (message == WM_MOUSEWHEEL) {
+    OnMouseWheel(MouseWheelEvent(this, wParam, lParam));
+    return 0;
+  }
+
   if (message >= WM_MOUSEFIRST && message <= WM_MOUSELAST) {
     auto event = MouseEvent::Create(this, message, wParam, lParam);
     #if DEBUG_MOUSE

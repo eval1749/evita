@@ -39,6 +39,7 @@ enum DragMode
 namespace ui {
 class KeyboardEvent;
 class MouseEvent;
+class MouseWheelEvent;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -176,6 +177,8 @@ class TextEditWindow
   private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
+  private: virtual void OnMouseWheel(
+      const ui::MouseWheelEvent& event) override;
   private: void onVScroll(uint);
 
   // [R]

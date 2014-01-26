@@ -23,6 +23,7 @@ using common::win::Point;
 using common::win::Rect;
 class KeyboardEvent;
 class MouseEvent;
+class MouseWheelEvent;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -113,6 +114,7 @@ class Widget
   protected: virtual void OnMousePressed(const MouseEvent& event);
   protected: virtual void OnMouseReleased(const MouseEvent& event);
   protected: virtual void OnMouseMoved(const MouseEvent& event);
+  protected: virtual void OnMouseWheel(const MouseWheelEvent& event);
   protected: virtual LRESULT OnNotify(NMHDR* nmhdr);
   public: virtual void OnPaint(const Rect rect);
 

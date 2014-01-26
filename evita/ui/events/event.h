@@ -137,7 +137,7 @@ class MouseWheelEvent : public MouseEvent {
 
   private: int delta_;
 
-  private: MouseWheelEvent(Widget* widget, WPARAM wParam, LPARAM lParam);
+  public: MouseWheelEvent(Widget* widget, WPARAM wParam, LPARAM lParam);
   public: ~MouseWheelEvent();
 
   public: int delta() const { return delta_; }

@@ -12,6 +12,7 @@
  *  - Iterable
  *  - Map
  *  - Promise
+ *  - Set
  *  - String
  */
 
@@ -57,7 +58,8 @@ Map.prototype.get = function(key) {};
 Map.prototype.has = function(key) {};
 
 /**
- * @return {Array}
+ * @template T
+ * @return {Array.<T>}
  */
 Map.prototype.keys = function() {};
 
@@ -148,6 +150,44 @@ Promise.prototype.chain = function(onRejected) {};
  * @return {Promise.<T>}
  */
 Promise.prototype.then = function(onFulfilled, opt_onRejected) {};
+
+/**
+ * @constructor
+ * @param {Iterable=} opt_iterable
+ */
+var Set = function(opt_iterable) {};
+
+/**
+ * @template T
+ * @param {T} key
+ */
+Set.prototype.add = function(key) {};
+
+/** @type {function()} */
+Set.prototype.clear = function() {};
+
+/**
+ * @template T
+ * @param {T} key
+ * @return {boolean}
+ */
+Set.prototype.delete = function(key) {};
+
+/**
+ * @template T
+ * @param {T} key
+ * @return {boolean}
+ */
+Set.prototype.has = function(key) {};
+
+/**
+ * @template T
+ * @return {Array.<T>}
+ */
+Set.prototype.keys = function() {};
+
+/** @type {number} */
+Set.prototype.size;
 
 /**
  * @param {string} searchString

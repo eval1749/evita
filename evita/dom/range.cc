@@ -3,20 +3,14 @@
 
 #include "evita/dom/range.h"
 
-#include "common/memory/singleton.h"
-#include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/document.h"
-#include "evita/dom/script_controller.h"
 #include "evita/text/range.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/function_template_builder.h"
-#include "evita/v8_glue/per_isolate_data.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/wrapper_info.h"
-#include "gin/arguments.h"
 
 namespace dom {
 
@@ -33,7 +27,7 @@ class RangeWrapperInfo : public v8_glue::WrapperInfo {
 
   protected: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate, 
+    return v8_glue::CreateConstructorTemplate(isolate,
         &RangeWrapperInfo::NewRange);
   }
 

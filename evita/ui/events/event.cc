@@ -63,18 +63,18 @@ KeyboardEvent KeyboardEvent::Create(uint32_t message, WPARAM wParam,
 //
 // MouseEvent
 //
-MouseEvent::MouseEvent(EventType event_type, int click_count, uint32_t flags,
+MouseEvent::MouseEvent(EventType event_type, int button_flags, uint32_t flags,
                        const Point& point)
     : Event(event_type),
       client_point_(point),
-      click_count_(click_count),
+      button_flags_(button_flags),
       flags_(flags),
       screen_point_(point) {
 }
 
-MouseEvent::MouseEvent(EventType event_type, int click_count, Widget* widget,
+MouseEvent::MouseEvent(EventType event_type, int button_flags, Widget* widget,
                        WPARAM wParam, LPARAM lParam)
-    : MouseEvent(event_type, click_count, GET_KEYSTATE_WPARAM(wParam),
+    : MouseEvent(event_type, button_flags, GET_KEYSTATE_WPARAM(wParam),
                  MAKEPOINTS(lParam)) {
   WIN32_VERIFY(::MapWindowPoints(widget->AssociatedHwnd(), HWND_DESKTOP,
                                  &screen_point_, 1));
@@ -90,25 +90,77 @@ MouseEvent::~MouseEvent() {
 MouseEvent MouseEvent::Create(Widget* widget, uint32_t message, WPARAM wParam,
                               LPARAM lParam) {
   switch (message) {
+    // Left button
     case WM_LBUTTONDBLCLK:
-    case WM_MBUTTONDBLCLK:
-    case WM_RBUTTONDBLCLK:
-    case WM_XBUTTONDBLCLK:
-      return MouseEvent(EventType::MousePressed, 2, widget, wParam, lParam);
+        return MouseEvent(EventType::MousePressed, kLeft | 2, widget, wParam,
+                          lParam);
     case WM_LBUTTONDOWN:
-    case WM_MBUTTONDOWN:
-    case WM_RBUTTONDOWN:
-    case WM_XBUTTONDOWN:
-      return MouseEvent(EventType::MousePressed, 1, widget, wParam, lParam);
+        return MouseEvent(EventType::MousePressed, kLeft | 1, widget, wParam,
+                          lParam);
     case WM_LBUTTONUP:
+        return MouseEvent(EventType::MouseReleased, kLeft, widget, wParam,
+                          lParam);
+
+    // Middle button
+    case WM_MBUTTONDBLCLK:
+        return MouseEvent(EventType::MousePressed, kMiddle | 2, widget, wParam,
+                          lParam);
+    case WM_MBUTTONDOWN:
+        return MouseEvent(EventType::MousePressed, kMiddle | 1, widget, wParam,
+                          lParam);
     case WM_MBUTTONUP:
-    case WM_RBUTTONUP:
-    case WM_XBUTTONUP:
-      return MouseEvent(EventType::MouseReleased, 1, widget, wParam, lParam);
+        return MouseEvent(EventType::MouseReleased, kMiddle, widget, wParam,
+                          lParam);
+
+    // Move
     case WM_MOUSEMOVE:
-      return MouseEvent(EventType::MouseMove, 0, widget, wParam, lParam);
-    case WM_MOUSEWHEEL:
-      return MouseWheelEvent(widget, wParam, lParam);
+      return MouseEvent(EventType::MouseMoved, 0, widget, wParam, lParam);
+
+    // Right button
+    case WM_RBUTTONDBLCLK:
+        return MouseEvent(EventType::MousePressed, kRight | 2, widget, wParam,
+                          lParam);
+    case WM_RBUTTONDOWN:
+        return MouseEvent(EventType::MousePressed, kRight | 1, widget, wParam,
+                          lParam);
+    case WM_RBUTTONUP:
+        return MouseEvent(EventType::MouseReleased, kRight, widget, wParam,
+                          lParam);
+
+    // X button
+    case WM_XBUTTONDBLCLK:
+      if (HIWORD(wParam) == XBUTTON1) {
+        return MouseEvent(EventType::MousePressed, kXButton1 | 2, widget,
+                          wParam,
+                          lParam);
+      }
+      if (HIWORD(wParam) == XBUTTON2) {
+        return MouseEvent(EventType::MousePressed, kXButton2 | 2, widget,
+                          wParam, lParam);
+      }
+      break;
+    case WM_XBUTTONDOWN:
+      if (HIWORD(wParam) == XBUTTON1) {
+        return MouseEvent(EventType::MousePressed, kXButton1 | 1, widget,
+                          wParam,
+                          lParam);
+      }
+      if (HIWORD(wParam) == XBUTTON2) {
+        return MouseEvent(EventType::MousePressed, kXButton2 | 1, widget,
+                          wParam, lParam);
+      }
+      break;
+    case WM_XBUTTONUP:
+      if (HIWORD(wParam) == XBUTTON1) {
+        return MouseEvent(EventType::MouseReleased, kXButton1, widget,
+                          wParam,
+                          lParam);
+      }
+      if (HIWORD(wParam) == XBUTTON2) {
+        return MouseEvent(EventType::MouseReleased, kXButton2, widget,
+                          wParam, lParam);
+      }
+      break;
   }
   return MouseEvent();
 }

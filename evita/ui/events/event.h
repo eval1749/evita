@@ -17,8 +17,8 @@ enum class EventType {
   Invalid,
   KeyPressed,
   KeyReleased,
+  MouseMoved,
   MousePressed,
-  MouseMove,
   MouseReleased,
   MouseWheel,
 };
@@ -93,25 +93,34 @@ class KeyboardEvent : public Event {
 class MouseEvent : public Event {
   friend class MouseWheelEvent;
 
+  private: enum ButtonFlags {
+    kClickMask = 3,
+    kLeft = 1 << 2,
+    kMiddle = 1 << 3,
+    kRight = 1 << 4,
+    kXButton1 = 1 << 5,
+    kXButton2 = 1 << 6,
+  };
+
+  private: int button_flags_;
   private: uint32_t flags_;
-  private: int click_count_;
   private: Point client_point_;
   private: Point screen_point_;
-  protected: MouseEvent(EventType type, int click_count, uint32_t flags,
+  protected: MouseEvent(EventType type, int button_flags, uint32_t flags,
                         const Point& point);
-  private: MouseEvent(EventType type, int click_count, Widget* widget,
-                        WPARAM wParam, LPARAM lParam);
+  private: MouseEvent(EventType type, int button_flags, Widget* widget,
+                      WPARAM wParam, LPARAM lParam);
   private: MouseEvent();
   public: ~MouseEvent();
 
-  public: int click_count() const { return click_count_; }
+  public: int click_count() const { return button_flags_ & kClickMask; }
   public: bool control_key() const { return flags_ & MK_CONTROL; }
   public: uint32_t flags() const { return flags_; }
-  public: bool is_left_button() const { return flags_ & MK_LBUTTON; }
-  public: bool is_middle_button() const { return flags_ & MK_MBUTTON; }
-  public: bool is_right_button() const { return flags_ & MK_RBUTTON; }
-  public: bool is_x_button1() const { return flags_ & MK_XBUTTON1; }
-  public: bool is_x_button2() const { return flags_ & MK_XBUTTON2; }
+  public: bool is_left_button() const { return button_flags_ & kLeft; }
+  public: bool is_middle_button() const { return button_flags_ & kMiddle; }
+  public: bool is_right_button() const { return button_flags_ & kRight; }
+  public: bool is_x_button1() const { return button_flags_ & kXButton1; }
+  public: bool is_x_button2() const { return button_flags_ & kXButton2; }
   public: Point location() const { return client_point_; }
   public: bool shift_key() const { return flags_ & MK_SHIFT; }
 

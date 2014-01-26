@@ -88,7 +88,7 @@ class TextEditWindow::Autoscroller {
       DEBUG_PRINTF("dir=%d am=%d duration=%dms\n",
         direction_, scroll_amount, duration);
     #endif
-    UI_ASSERT_DOM_LOCKED();
+    UI_DOM_AUTO_LOCK_SCOPE();
     if (Scroll(scroll_amount))
       editor_->Redraw();
     else

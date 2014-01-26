@@ -125,7 +125,6 @@ class Selection : public text::Range
 
     // [T]
     public: void TypeChar(char16, Count = 1);
-    public: void TypeEnter(Count);
     public: void TypeText(const char16*, Count);
 
     ////////////////////////////////////////////////////////////

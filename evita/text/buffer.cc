@@ -389,66 +389,6 @@ Posn Buffer::ComputeStartOf(Unit eUnit, Posn lPosn) const
     return lPosn;
 } // Buffer::ComputeStartOf
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// Buffer::ComputeWhile
-//
-Count Buffer::ComputeWhile(
-    const char16*   pwszSet,
-    Count           n,
-    Posn*           inout_lPosn ) const
-{
-    Posn lStart = *inout_lPosn;
-    if (n > 0)
-    {
-        Posn lPosn;
-        for (lPosn = lStart; lPosn < GetEnd(); lPosn += 1)
-        {
-            char16 wch = GetCharAt(lPosn);
-            if (NULL == ::lstrchrW(pwszSet, wch))
-            {
-                break;
-            } // if
-
-            n -= 1;
-            if (0 == n)
-            {
-                break;
-            }
-        } // while
-
-        *inout_lPosn = lPosn;
-        return lPosn - lStart;
-    } // if
-
-    if (n < 0)
-    {
-        Posn lPosn = lStart;
-        while (lPosn > 0)
-        {
-            lPosn -= 1;
-            char16 wch = GetCharAt(lPosn);
-            if (NULL == ::lstrchrW(pwszSet, wch))
-            {
-                lPosn += 1;
-                break;
-            } // if
-
-            n += 1;
-            if (0 == n)
-            {
-                break;
-            }
-        } // while
-
-        *inout_lPosn = lPosn;
-        return lStart - lPosn;
-    } // if
-
-    return 0;
-} // Buffer::ComputeWhile
-
 #if 0
 //////////////////////////////////////////////////////////////////////
 //

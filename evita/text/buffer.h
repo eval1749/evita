@@ -175,8 +175,6 @@ class Buffer : public BufferCore, public FileFeatures {
   public: Posn ComputeEndOf(Unit, Posn) const;
   public: Count ComputeMotion(Unit, Count, Posn*) const;
   public: Posn ComputeStartOf(Unit, Posn) const;
-  public: Count ComputeWhile(const char16*, Count, Posn*) const;
-  //public: Interval* CreateInterval(Posn = 0, Posn = 0, int = 0);
   public: Range* CreateRange(Posn lStart = 0, Posn lEnd = 0);
   public: Range* CreateRange(Range*);
 

@@ -419,43 +419,6 @@ void Selection::TypeChar(char16 wch, Count k)
     MoveRight(Unit_Char, k);
 } // Selection::TypeChar
 
-static base::string16 GetLeadingSpaces(const text::Range& range) {
-    text::Range oRange(range);
-    oRange.StartOf(Unit_Line);
-    oRange.MoveEndWhile(L" \t");
-    return oRange.GetText();
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// Selection::TypeEnter
-//
-void Selection::TypeEnter(Count k)
-{
-    if (k <= 0)
-    {
-        return;
-    }
-
-    const auto leading_spaces = GetLeadingSpaces(*this);
-
-    text::UndoBlock oUndo(GetBuffer(), L"Selection.TypeEnter");
-
-    // Delete trailing whitespaces
-    {
-        Range oRange(*this);
-        oRange.MoveStartWhile(L" \t", Count_Backward);
-        oRange.SetText(base::string16());
-    }
-
-    TypeChar(0x0A, k);
-    MoveEndWhile(L" \t");
-    SetText(leading_spaces.data(),
-            static_cast<int>(leading_spaces.length()));
-    Collapse(Collapse_End);
-} // Selection::TypeEnter
-
-
 //////////////////////////////////////////////////////////////////////
 //
 // Selection::TypeText

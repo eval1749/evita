@@ -991,15 +991,6 @@ Count Range::MoveEnd(Unit eUnit, Count n)
     return m_pBuffer->ComputeMotion(eUnit, n, &m_lEnd);
 } // Range::MoveEnd
 
-//////////////////////////////////////////////////////////////////////
-//
-// Range::MoveEndWhile
-//
-Count Range::MoveEndWhile(const char16* pwszSet, Count n)
-{
-    return m_pBuffer->ComputeWhile(pwszSet, n, &m_lEnd);
-} // Range::MoveEndWhile
-
 /// <summary>
 ///   Move start of this range.
 /// </summary>
@@ -1012,15 +1003,6 @@ Count Range::MoveStart(Unit eUnit, Count n)
 {
     return m_pBuffer->ComputeMotion(eUnit, n, &m_lStart);
 } // Range::MoveStart
-
-//////////////////////////////////////////////////////////////////////
-//
-// Range::MoveStartWhile
-//
-Count Range::MoveStartWhile(const char16* pwszSet, Count n)
-{
-    return m_pBuffer->ComputeWhile(pwszSet, n, &m_lStart);
-} // Range::MoveStartWhile
 
 /// <summary>
 ///   Remove indents in this region.

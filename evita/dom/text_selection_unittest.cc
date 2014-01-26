@@ -121,6 +121,25 @@ TEST_F(TextSelectionTest, endOf) {
   EXPECT_SCRIPT_EQ("foo bar  baz|", "testIt('foo bar  |baz', Unit.WORD)");
 }
 
+TEST_F(TextSelectionTest, endOfExtend) {
+  EXPECT_SCRIPT_VALID(
+    "function testIt(sample, unit) {"
+    "  return doTest(sample, function(selection) {"
+    "   selection.endOf(unit, Alter.EXTEND);"
+    "  });"
+    "}");
+  EXPECT_SCRIPT_EQ("^foo|$bar$$baz", "testIt('|foo$bar$$baz', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo$^bar|$$baz", "testIt('foo$|bar$$baz', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo$bar$|$baz", "testIt('foo$bar$|$baz', Unit.LINE)");
+
+  EXPECT_SCRIPT_EQ("^foo| bar  baz", "testIt('|foo bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("f^oo| bar  baz", "testIt('f|oo bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("fo^o| bar  baz", "testIt('fo|o bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo b^ar|  baz", "testIt('foo b|ar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar|  baz", "testIt('foo bar|  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar  ^baz|", "testIt('foo bar  |baz', Unit.WORD)");
+}
+
 TEST_F(TextSelectionTest, homeKey) {
   EXPECT_SCRIPT_VALID(
     "function testIt(sample, unit) {"

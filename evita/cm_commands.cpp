@@ -475,10 +475,6 @@ DEFCOMMAND(GoToOpenParenExtend)
     }
 } // GoToOpenParenExtend
 
-// [H]
-DefCommand_StartEnd(HomeKey, HomeKey, WindowLine)
-
-
 // [I]
 DEFCOMMAND(Indent)
 { 
@@ -551,8 +547,6 @@ DEFCOMMAND(StartArgument)
     // This is dummy entry of StartArgument command.
     // This command is handled by command processor.
 } // StartArgument
-
-DefCommand_StartEnd(StartOfBuffer, HomeKey, Buffer)
 
 // [T]
 
@@ -975,7 +969,6 @@ void Processor::GlobalInit() {
     BIND_KEY(CommandWindow, Mod_Ctrl | 'U', StartArgumentEntry());
 
     BIND_VKEY(TextEditWindow, Mod_None,  DOWN,   ForwardWindowLine);
-    BIND_VKEY(TextEditWindow, Mod_None,  HOME,   HomeKey);
     BIND_VKEY(TextEditWindow, Mod_None,  LEFT,   BackwardChar);
     BIND_VKEY(TextEditWindow, Mod_None,  NEXT,   ForwardScreen);
     BIND_VKEY(TextEditWindow, Mod_None,  PRIOR,  BackwardScreen);
@@ -985,7 +978,6 @@ void Processor::GlobalInit() {
     BIND_VKEY(TextEditWindow, Mod_None,  RETURN, TypeEnter);
 
     BIND_VKEY(TextEditWindow, Mod_Ctrl, DOWN,   GoToCloseParen);
-    BIND_VKEY(TextEditWindow, Mod_Ctrl, HOME,   StartOfBuffer);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, LEFT,   BackwardWord);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, NEXT,   ForwardWindow);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, PRIOR,  BackwardWindow);
@@ -993,7 +985,6 @@ void Processor::GlobalInit() {
     BIND_VKEY(TextEditWindow, Mod_Ctrl, UP,     GoToOpenParen);
 
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, DOWN,      GoToCloseParenExtend);
-    BIND_VKEY(TextEditWindow, Mod_CtrlShift, HOME,      StartOfBufferExtend);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, LEFT,      BackwardWordExtend);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, NEXT,      ForwardWindowExtend);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, PRIOR,     BackwardWindowExtend);
@@ -1001,7 +992,6 @@ void Processor::GlobalInit() {
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, UP,        GoToOpenParenExtend);
 
     BIND_VKEY(TextEditWindow, Mod_Shift, DOWN,      ForwardWindowLineExtend);
-    BIND_VKEY(TextEditWindow, Mod_Shift, HOME,      HomeKeyExtend);
     BIND_VKEY(TextEditWindow, Mod_Shift, INSERT,    PasteFromClipboard);
     BIND_VKEY(TextEditWindow, Mod_Shift, LEFT,      BackwardCharExtend);
     BIND_VKEY(TextEditWindow, Mod_Shift, NEXT,      ForwardScreenExtend);

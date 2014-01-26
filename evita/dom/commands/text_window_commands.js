@@ -143,6 +143,11 @@
     this.selection.range.move(Unit.LINE, arg - 1);
   });
 
+  Editor.bindKey(TextWindow, 'Ctrl+Home', function() {
+    this.selection.homeKey(Unit.DOCUMENT);
+  }, 'move to home of document\n' +
+     'Move active position of selection to home of document.');
+
   /**
    * Make slection visible.
    * @this {!TextWindow}
@@ -241,10 +246,20 @@
   }, 'move to end of document\n' +
      'Move active position of selection to end of document.');
 
-  Editor.bindKey(TextWindow, 'Shift+Ctrl+End', function() {
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+End', function() {
     this.selection.endKey(Unit.DOCUMENT, Alter.EXTEND);
   }, 'extend to end of document\n' +
      'Move active position of selection to end of document.');
+
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+Home', function() {
+    this.selection.homeKey(Unit.DOCUMENT, Alter.EXTEND);
+  }, 'exthome to home of document\n' +
+     'Move active position of selection to home of document.');
+
+  Editor.bindKey(TextWindow, 'Home', function() {
+    this.selection.homeKey(Unit.WINDOW_LINE);
+  }, 'move to home of window line\n' +
+     'Move active position of selection to home of window line.');
 
   Editor.bindKey(TextWindow, 'Shift+Delete', cutToClipboardCommand);
   Editor.bindKey(TextWindow, 'Shift+Insert', pasteFromClipboardCommand);
@@ -253,5 +268,13 @@
     this.selection.endKey(Unit.WINDOW_LINE, Alter.EXTEND);
   }, 'extend to end of window line\n' +
      'Move active position of selection to end of window line.');
+
+  Editor.bindKey(TextWindow, 'Shift+Delete', cutToClipboardCommand);
+  Editor.bindKey(TextWindow, 'Shift+Insert', pasteFromClipboardCommand);
+
+  Editor.bindKey(TextWindow, 'Shift+Home', function() {
+    this.selection.homeKey(Unit.WINDOW_LINE, Alter.EXTEND);
+  }, 'exthome to home of window line\n' +
+     'Move active position of selection to home of window line.');
 
 })();

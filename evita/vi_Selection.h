@@ -81,9 +81,6 @@ class Selection : public text::Range
     public: SelectionType   GetType()       const;
     public: TextEditWindow* GetWindow()     const { return m_pWindow; }
 
-    // [H]
-    public: Count HomeKey(Unit, bool = false);
-
     // [I]
     protected: bool isSingleLine() const;
     public:    bool IsStartActive() const { return m_fStartIsActive; }

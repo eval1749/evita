@@ -148,68 +148,6 @@ SelectionType Selection::GetType() const
         Selection_Normal;
 } // Selection::GetType
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// Selection::HomeKey
-//  eUnit   : Unit_WindowLine | Unit_Buffer
-//  fExtend : bool => move start only if fExtend.
-//
-//  Returns number of characters moved.
-//
-
-
-Count Selection::HomeKey(Unit eUnit, bool fExtend)
-{
-    if (! IsStartActive())
-    {
-        Collapse(Collapse_Start);
-    }
-
-    Count iStartDelta = StartOf(eUnit, fExtend);
-
-    if (Unit_WindowLine != eUnit)
-    {
-        return iStartDelta;
-    }
-
-    Posn lLineStart = GetStart();
-    Count cLeadingSpaces;
-    if (fExtend)
-    {
-        cLeadingSpaces = MoveStartWhile(L" \t", Count_Forward);
-    }
-    else
-    {
-        cLeadingSpaces = MoveWhile(L" \t", Count_Forward);
-    }
-
-    // Selection.Start was at start of line before MoveWhile.
-    if (0 == iStartDelta)
-    {
-        return cLeadingSpaces;
-    }
-
-    // Selection.Start was in middle of line.
-    if (cLeadingSpaces != iStartDelta)
-    {
-        return iStartDelta;
-    }
-
-    // Selection.Start was at start of non-whitespaces.
-    if (fExtend)
-    {
-        SetStart(lLineStart);
-    }
-    else
-    {
-        SetRange(lLineStart, lLineStart);
-    }
-
-    return iStartDelta - cLeadingSpaces;
-} // Selection::HomeKey
-
-
 //////////////////////////////////////////////////////////////////////
 //
 // Selection::isSingleLine

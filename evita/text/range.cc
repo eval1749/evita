@@ -1022,17 +1022,6 @@ Count Range::MoveStartWhile(const char16* pwszSet, Count n)
     return m_pBuffer->ComputeWhile(pwszSet, n, &m_lStart);
 } // Range::MoveStartWhile
 
-//////////////////////////////////////////////////////////////////////
-//
-// Range::MoveWhile
-//
-Count Range::MoveWhile(const char16* pwszSet, Count n)
-{
-    Count k = m_pBuffer->ComputeWhile(pwszSet, n, &m_lStart);
-    m_lEnd = m_lStart;
-    return k;
-} // Range::MoveWhile
-
 /// <summary>
 ///   Remove indents in this region.
 /// </summary>

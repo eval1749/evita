@@ -101,10 +101,8 @@ class Range //: public ObjectInHeap
     public: Count Move(Unit, Count);
     public: Count MoveEnd(Unit, Count);
     public: Count MoveEndWhile(const char16*, Count = Count_Forward);
-    public: Count MoveEndWhile(uint, Count = Count_Forward);
     public: Count MoveStart(Unit, Count);
     public: Count MoveStartWhile(const char16*, Count = Count_Forward);
-    public: Count MoveStartWhile(uint, Count = Count_Forward);
     public: Count MoveWhile(const char16*, Count = Count_Forward);
 
     // [O]

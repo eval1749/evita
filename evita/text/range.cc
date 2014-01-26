@@ -1000,15 +1000,6 @@ Count Range::MoveEndWhile(const char16* pwszSet, Count n)
     return m_pBuffer->ComputeWhile(pwszSet, n, &m_lEnd);
 } // Range::MoveEndWhile
 
-//////////////////////////////////////////////////////////////////////
-//
-// Range::MoveEndWhile
-//
-Count Range::MoveEndWhile(uint nMask, Count n)
-{
-    return m_pBuffer->ComputeWhile(nMask, n, &m_lEnd);
-} // Range::MoveEndWhile
-
 /// <summary>
 ///   Move start of this range.
 /// </summary>
@@ -1029,15 +1020,6 @@ Count Range::MoveStart(Unit eUnit, Count n)
 Count Range::MoveStartWhile(const char16* pwszSet, Count n)
 {
     return m_pBuffer->ComputeWhile(pwszSet, n, &m_lStart);
-} // Range::MoveStartWhile
-
-//////////////////////////////////////////////////////////////////////
-//
-// Range::MoveStartWhile
-//
-Count Range::MoveStartWhile(uint nMask, Count n)
-{
-    return m_pBuffer->ComputeWhile(nMask, n, &m_lStart);
 } // Range::MoveStartWhile
 
 //////////////////////////////////////////////////////////////////////

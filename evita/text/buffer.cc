@@ -449,52 +449,6 @@ Count Buffer::ComputeWhile(
     return 0;
 } // Buffer::ComputeWhile
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// Buffer::ComputeWhile
-//
-Count Buffer::ComputeWhile(uint nMask, Count n, Posn* inout_lPosn) const
-{
-    Posn lStart = *inout_lPosn;
-    if (n > 0)
-    {
-        Posn lPosn;
-        for (lPosn = lStart; lPosn < GetEnd(); lPosn += 1)
-        {
-            int iClass = getCharClass(GetCharAt(lPosn));
-            if (0 == (iClass & nMask))
-            {
-                break;
-            } // if
-        } // while
-
-        *inout_lPosn = lPosn;
-        return lPosn - lStart;
-    } // if
-
-    if (n < 0)
-    {
-        Posn lPosn = lStart;
-        while (lPosn > 0)
-        {
-            lPosn -= 1;
-            int iClass = getCharClass(GetCharAt(lPosn));
-            if (0 == (iClass & nMask))
-            {
-                lPosn += 1;
-                break;
-            } // if
-        } // while
-
-        *inout_lPosn = lPosn;
-        return lStart - lPosn;
-    } // if
-
-    return 0;
-} // Buffer::ComputeWhile
-
-
 #if 0
 //////////////////////////////////////////////////////////////////////
 //

@@ -6,25 +6,25 @@
   /**
    * @param {!TextSelection} selection
    * @param {!Alter} alter
-   * @param {number} position
+   * @param {number} anchor
+   * @param {number} active_position
    * @return {!TextSelection}
    */
-  function setStart(selection, alter, position) {
+  function updateSelection(selection, alter, anchor, active_position) {
     switch (alter) {
       case Alter.EXTEND: {
-        var end = selection.range.end;
-        if (position < end) {
-          selection.range.start = position;
+        selection.range.collapseTo(anchor);
+        if (anchor < active_position) {
+          selection.range.end = active_position;
+          selection.startIsActive = false;
+        } else {
+          selection.range.start = active_position;
           selection.startIsActive = true;
-          return selection;
         }
-        selection.range.end = position;
-        selection.range.start = end;
-        selection.startIsActive = false;
         return selection;
       }
       case Alter.MOVE:
-        selection.range.collapseTo(position);
+        selection.range.collapseTo(active_position);
         return selection;
     }
     throw 'Invalid ALTER: ' + alter;
@@ -102,6 +102,31 @@
   };
 
   /**
+   * @param {Unit} unit, one of DOCUMENT, LINE, or WINDOW_LINE.
+   * @param {!Alter=} opt_alter, default is Alter.MOVE
+   * @return {!TextSelection}
+   */
+  TextSelection.prototype.homeKey = function(unit, opt_alter) {
+    var alter = arguments.length >= 2 ? /** @type{Alter} */(opt_alter) :
+                                        Alter.MOVE;
+    if (!this.startIsActive)
+      this.range.collapseTo(this.range.start);
+    var anchor = this.range.end;
+    var start = this.range.start;
+    this.startOf(unit);
+    var new_start = this.range.start;
+    if (unit == Unit.LINE || unit == Unit.WINDOW_LINE) {
+      this.range.moveStartWhile(' \t', Count.FORWARD);
+      // Skip leading whitespace if
+      //   - The selection were at end of line.
+      //   - The selection was at middle of line.
+      if (start == new_start || start != this.range.start)
+        new_start = this.range.start;
+    }
+    return updateSelection(this, alter, anchor, new_start);
+  };
+
+  /**
    * Move start position of TextSelection at end of specified unit.
    * @this {!TextSelection}
    * @param {Unit} unit, except for CHARACTER and SCREEN,
@@ -113,12 +138,11 @@
                                         Alter.MOVE;
     switch (unit) {
       case Unit.WINDOW:
-        return setStart(this, alter,
+        return updateSelection(this, alter, this.range.end,
                  this.window.compute_(
                     TextWindowComputeMethod.START_OF_WINDOW));
-        break;
       case Unit.WINDOW_LINE:
-        return setStart(this, alter,
+        return updateSelection(this, alter, this.range.end,
                  this.window.compute_(
                     TextWindowComputeMethod.START_OF_WINDOW_LINE,
                     this.range.end));

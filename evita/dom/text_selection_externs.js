@@ -26,6 +26,13 @@ TextSelection.prototype.endKey = function(unit, opt_alter) {};
  */
 TextSelection.prototype.endOf = function(unit, opt_alter) {};
 
+/**
+ * @param {Unit} unit, one of DOCUMENT, LINE, or WINDOW_LINE.
+ * @param {Alter} opt_alter, default is Alter.MOVE
+ * @return {!TextSelection}
+ */
+TextSelection.prototype.homeKey = function(unit, opt_alter) {};
+
 /** @expose @type {!Range} */
 TextSelection.prototype.range;
 

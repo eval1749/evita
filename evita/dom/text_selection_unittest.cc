@@ -124,6 +124,56 @@ TEST_F(TextSelectionTest, endof) {
   EXPECT_SCRIPT_EQ("foo bar  baz|", "testIt('foo bar  |baz', Unit.WORD)");
 }
 
+TEST_F(TextSelectionTest, homeKey) {
+  EXPECT_SCRIPT_VALID(
+    "function testIt(sample, unit) {"
+    "  var has_opt_alter = arguments.length >= 3;"
+    "  return doTest(sample, function(selection) {"
+    "    selection.homeKey(unit);"
+    "  });"
+    "}");
+
+  EXPECT_SCRIPT_EQ("|foo$bar$", "testIt('|foo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("|foo$bar$", "testIt('fo|o$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("|foo$bar$", "testIt('foo|$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo$|bar$", "testIt('foo$|bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo$|bar$", "testIt('foo$b|ar$', Unit.LINE)");
+
+  // Special handling of leading whitespaces.
+  EXPECT_SCRIPT_EQ("  |foo$bar$", "testIt('|  foo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("  |foo$bar$", "testIt(' | foo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("|  foo$bar$", "testIt('  |foo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("  |foo$bar$", "testIt('  f|oo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("  |foo$bar$", "testIt('  fo|o$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("  |foo$bar$", "testIt('  foo|$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("  foo$|bar$", "testIt('  foo$|bar$', Unit.LINE)");
+}
+
+TEST_F(TextSelectionTest, homeKey_extend) {
+  EXPECT_SCRIPT_VALID(
+    "function testIt(sample, unit) {"
+    "  var has_opt_alter = arguments.length >= 3;"
+    "  return doTest(sample, function(selection) {"
+    "    selection.homeKey(unit, Alter.EXTEND);"
+    "  });"
+    "}");
+
+  EXPECT_SCRIPT_EQ("|foo$bar$", "testIt('|foo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("|fo|o$bar$", "testIt('fo|o$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("|foo|$bar$", "testIt('foo|$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo$|bar$", "testIt('foo$|bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("foo$|b|ar$", "testIt('foo$b|ar$', Unit.LINE)");
+
+  // Special handling of leading whitespaces.
+  EXPECT_SCRIPT_EQ("|  |foo$bar$", "testIt('|  foo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ(" | |foo$bar$", "testIt(' | foo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("|  |foo$bar$", "testIt('  |foo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("  |f|oo$bar$", "testIt('  f|oo$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("  |fo|o$bar$", "testIt('  fo|o$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("  |foo|$bar$", "testIt('  foo|$bar$', Unit.LINE)");
+  EXPECT_SCRIPT_EQ("  foo$|bar$", "testIt('  foo$|bar$', Unit.LINE)");
+}
+
 TEST_F(TextSelectionTest, startOf) {
   EXPECT_SCRIPT_VALID(
     "function testIt(sample, unit, opt_alter) {"

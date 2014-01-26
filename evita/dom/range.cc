@@ -17,18 +17,18 @@ namespace dom {
 namespace {
 //////////////////////////////////////////////////////////////////////
 //
-// RangeWrapperInfo
+// RangeClass
 //
-class RangeWrapperInfo : public v8_glue::WrapperInfo {
-  public: RangeWrapperInfo(const char* name)
+class RangeClass : public v8_glue::WrapperInfo {
+  public: RangeClass(const char* name)
       : v8_glue::WrapperInfo(name) {
   }
-  public: ~RangeWrapperInfo() = default;
+  public: ~RangeClass() = default;
 
   protected: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate,
-        &RangeWrapperInfo::NewRange);
+        &RangeClass::NewRange);
   }
 
   private: static Range* NewRange(Document* document,
@@ -58,7 +58,7 @@ class RangeWrapperInfo : public v8_glue::WrapperInfo {
 //
 // Range
 //
-DEFINE_SCRIPTABLE_OBJECT(Range, RangeWrapperInfo);
+DEFINE_SCRIPTABLE_OBJECT(Range, RangeClass);
 
 Range::Range(Document* document, text::Posn start, text::Posn end)
     : Range(document, document->buffer()->CreateRange(start, end)) {

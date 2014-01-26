@@ -144,6 +144,7 @@
    * Move start position of Range at start of specified unit.
    * @param {Unit} unit.
    * @param {Alter=} opt_alter, default is Alter.MOVE.
+   * @return {!Range}
    */
   Range.prototype.startOf = function(unit, opt_alter) {
     var alter = arguments.length >= 2 ? opt_alter : Alter.MOVE;
@@ -157,6 +158,7 @@
       default:
         throw TypeError('Invalid alter: ' + alter);
     }
+    return this;
   };
 
   /**

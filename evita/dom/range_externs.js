@@ -41,6 +41,7 @@ Range.prototype.delete = function(unit, opt_count) {};
 /**
  * @param {Unit} unit
  * @param {Alter=} opt_alter, default is Alter.MOVE.
+ * @return {!Range}
  */
 Range.prototype.endOf = function(unit, opt_alter) {};
 
@@ -90,6 +91,7 @@ Range.prototype.paste = function() {};
 /**
  * @param {Unit} unit
  * @param {Alter=} opt_alter, default is Alter.MOVE.
+ * @return {!Range}
  */
 Range.prototype.startOf = function(unit, opt_alter) {};
 

@@ -95,6 +95,11 @@ Document.prototype.computeStartOf_ = function(unit, position) {};
  */
 Document.prototype.computeWhile_ = function(char_set, count, position) {};
 
+/**
+ * @param {string} name
+ */
+Document.prototype.endUndoGroup_ = function(name) {};
+
 Document.prototype.forceClose = function() {};
 
 /**
@@ -128,5 +133,17 @@ Document.prototype.renameTo = function(new_name) {}
  */
 Document.prototype.save = function(filename) {};
 
+/**
+ * @param {string} name
+ */
+Document.prototype.startUndoGroup_ = function(name) {};
+
 /** @param {!Position} position */
 Document.prototype.undo = function(position) {}
+
+/**
+ * @param {string} name
+ * @param {function()} callback
+ * @param {!Object=} opt_receiver
+ */
+Document.prototype.undoGroup = function(name, callback, opt_receiver) {};

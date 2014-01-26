@@ -39,6 +39,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: void BindKey(int key_code, v8::Handle<v8::Object> command);
   public: void DidCreateRange(Range* range);
   public: void DidDestroyRange(Range* range);
+  public: void EndUndoGroup(const base::string16& name);
   public: static Document* Find(const base::string16& name);
   public: static Document* GetOrNew(const base::string16& name);
   public: bool IsValidPosition(text::Posn position) const;
@@ -47,6 +48,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: void RenameTo(const base::string16& new_name);
   public: static void ResetForTesting();
   public: void Save(const base::string16& filename);
+  public: void StartUndoGroup(const base::string16& name);
   public: Posn Undo(Posn position);
 
   DISALLOW_COPY_AND_ASSIGN(Document);

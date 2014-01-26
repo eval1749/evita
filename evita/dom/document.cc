@@ -133,10 +133,12 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         .SetProperty("name", &Document::name)
         .SetMethod("bindKey_", &Document::BindKey)
         .SetMethod("charCodeAt_", &Document::charCodeAt)
+        .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
         .SetMethod("load_", &Document::Load)
         .SetMethod("redo", &Document::Redo)
         .SetMethod("renameTo", &Document::RenameTo)
         .SetMethod("save", &Document::Save)
+        .SetMethod("startUndoGroup_", &Document::StartUndoGroup)
         .SetMethod("undo", &Document::Undo);
   }
 };
@@ -200,6 +202,10 @@ void Document::DidDestroyRange(Range* range) {
   ranges_.erase(range);
 }
 
+void Document::EndUndoGroup(const base::string16& name) {
+  buffer_->EndUndoGroup(name);
+}
+
 Document* Document::Find(const base::string16& name) {
   return DocumentList::instance()->Find(name);
 }
@@ -243,6 +249,10 @@ void Document::ResetForTesting() {
 void Document::Save(const base::string16& filename) {
   // TODO(yosi) We should protect this document againt gc.
   ScriptController::instance()->view_delegate()->SaveFile(this, filename);
+}
+
+void Document::StartUndoGroup(const base::string16& name) {
+  buffer_->StartUndoGroup(name);
 }
 
 Posn Document::Undo(Posn position) {

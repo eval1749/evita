@@ -366,4 +366,20 @@
     return this.modified && !this.name.startsWith('*') &&
            FilePath.isValidFilename(this.filename);
   };
+
+  /**
+   * @param {string} name
+   * @param {function()} callback
+   * @param {!Object=} opt_receiver
+   */
+  Document.prototype.undoGroup = function(name, callback, opt_receiver) {
+    var document = this;
+    var receiver = arguments.length >= 3 ? opt_receiver : document;
+    try {
+      document.startUndoGroup_(name);
+      callback.call(receiver);
+    } finally {
+      document.endUndoGroup_(name);
+    }
+  };
 })();

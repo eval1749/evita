@@ -588,6 +588,8 @@ void TextEditWindow::OnKeyPressed(const ui::KeyboardEvent& event) {
 }
 
 void TextEditWindow::OnMousePressed(const ui::MouseEvent& event) {
+  if (!event.is_left_button())
+    return;
   UI_DOM_AUTO_LOCK_SCOPE();
   auto const lPosn = MapPointToPosn(event.location());
   #if DEBUG_FOCUS
@@ -609,6 +611,11 @@ void TextEditWindow::OnMousePressed(const ui::MouseEvent& event) {
     }
   }
 
+  if (event.click_count() == 2) {
+    selectWord(lPosn);
+    return;
+  }
+
   GetSelection()->MoveTo(lPosn, event.shift_key());
 
   if (event.control_key()) {
@@ -619,7 +626,9 @@ void TextEditWindow::OnMousePressed(const ui::MouseEvent& event) {
   }
 }
 
-void TextEditWindow::OnMouseReleased(const ui::MouseEvent&) {
+void TextEditWindow::OnMouseReleased(const ui::MouseEvent& event) {
+  if (!event.is_left_button())
+    return;
   if (m_eDragMode == DragMode_None)
     return;
   ReleaseCapture();
@@ -643,15 +652,6 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
           DEBUG_TEXT_EDIT_PRINTF("WM_APPCOMMAND %x\n", lParam);
       #endif
       return TRUE;
-
-    case WM_LBUTTONDBLCLK: {
-      UI_DOM_AUTO_LOCK_SCOPE();
-      Point pt(MAKEPOINTS(lParam));
-      auto const lPosn = MapPointToPosn(pt);
-      if (lPosn >= 0)
-        selectWord(lPosn);
-      return 0;
-    }
 
     case WM_MOUSEWHEEL: {
       UI_DOM_AUTO_LOCK_SCOPE();

@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evedit2/mainline/regex/regex_exec.cpp#15 $
 //
-#define DEBUG_EXEC _DEBUG
+#define DEBUG_EXEC 0
 #include "./IRegex.h"
 #include "./regex_bytecode.h"
 #include "./regex_scanner.h"
@@ -784,6 +784,9 @@ void RegexObj::Describe() const {
     nPc = printOp(prgnCode, nPc);
     StdOutPrintf("\n");
   }
+}
+#else
+void RegexObj::Describe() const {
 }
 #endif // DEBUG_EXEC
 

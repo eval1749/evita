@@ -177,7 +177,7 @@ class TableControl::TableControlModel {
   private: Item* HitTest(const gfx::PointF& point) const;
   public: void MakeSelectionViewDirty();
   public: void MoveSelection(int direction);
-  public: void OnLeftButtonDown(uint32_t flags, const gfx::PointF& point);
+  public: void OnMousePressed(const ui::MouseEvent& event);
   public: gfx::RectF ResetDirtyRect();
   public: void Select(int row_id);
   private: void UpdateSelectionView();
@@ -430,9 +430,9 @@ void TableControl::TableControlModel::MoveSelection(int direction) {
   UpdateSelectionView();
 }
 
-void TableControl::TableControlModel::OnLeftButtonDown(uint32_t flags,
-    const gfx::PointF& point) {
-  auto item = HitTest(point);
+void TableControl::TableControlModel::OnMousePressed(
+    const ui::MouseEvent& event) {
+  auto const item = HitTest(event.location());
   if (!item)
    return;
   auto row = item->as<Row>();
@@ -441,9 +441,9 @@ void TableControl::TableControlModel::OnLeftButtonDown(uint32_t flags,
   auto index = GetRowIndex(row);
   if (index < 0)
     return;
-  if (flags & MK_CONTROL)
+  if (event.control_key())
     selection_.Add(index);
-  else if (flags & MK_SHIFT)
+  else if (event.shift_key())
     selection_.ExtendTo(index);
   else
     selection_.CollapseTo(index);
@@ -564,8 +564,8 @@ void TableControl::OnKeyPressed(const ui::KeyboardEvent& event) {
   observer_->OnKeyDown(event.raw_key_code());
 }
 
-void TableControl::OnLeftButtonDown(uint32_t flags, const gfx::Point& point) {
-  model_->OnLeftButtonDown(flags, point);
+void TableControl::OnMousePressed(const ui::MouseEvent& event) {
+  model_->OnMousePressed(event);
   UpdateViewIfNeeded();
 }
 

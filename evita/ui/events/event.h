@@ -105,13 +105,14 @@ class MouseEvent : public Event {
   public: ~MouseEvent();
 
   public: int click_count() const { return click_count_; }
+  public: bool control_key() const { return flags_ & MK_CONTROL; }
   public: uint32_t flags() const { return flags_; }
   public: bool is_left_button() const { return flags_ & MK_LBUTTON; }
   public: bool is_middle_button() const { return flags_ & MK_MBUTTON; }
   public: bool is_right_button() const { return flags_ & MK_RBUTTON; }
   public: bool is_x_button1() const { return flags_ & MK_XBUTTON1; }
   public: bool is_x_button2() const { return flags_ & MK_XBUTTON2; }
-  public: bool control_key() const { return flags_ & MK_CONTROL; }
+  public: Point location() const { return client_point_; }
   public: bool shift_key() const { return flags_ & MK_SHIFT; }
 
   public: static MouseEvent Create(Widget* widget, uint32_t message,

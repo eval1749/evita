@@ -587,9 +587,9 @@ void TextEditWindow::OnKeyPressed(const ui::KeyboardEvent& event) {
                                    static_cast<uint32_t>(event.repeat()));
 }
 
-void TextEditWindow::OnLeftButtonDown(uint flags, const Point& point) {
+void TextEditWindow::OnMousePressed(const ui::MouseEvent& event) {
   UI_DOM_AUTO_LOCK_SCOPE();
-  auto const lPosn = MapPointToPosn(point);
+  auto const lPosn = MapPointToPosn(event.location());
   #if DEBUG_FOCUS
     DEBUG_TEXT_EDIT_PRINTF(DEBUG_POINT_FORMAT " focus=%d show=%d p=%d\n",
         DEBUG_POINT_ARG(point),
@@ -609,9 +609,9 @@ void TextEditWindow::OnLeftButtonDown(uint flags, const Point& point) {
     }
   }
 
-  GetSelection()->MoveTo(lPosn, flags & MK_SHIFT);
+  GetSelection()->MoveTo(lPosn, event.shift_key());
 
-  if (flags & MK_CONTROL) {
+  if (event.control_key()) {
     selectWord(lPosn);
   } else {
     m_eDragMode = DragMode_Selection;

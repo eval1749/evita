@@ -22,6 +22,7 @@
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
+#include "evita/ui/events/event.h"
 #include "evita/ui/widget_ostream.h"
 #include "evita/vi_Selection.h"
 #include "evita/vi_TextEditWindow.h"
@@ -1298,7 +1299,18 @@ void EditPane::OnDraw(gfx::Graphics* gfx) {
   root_box_->DrawSplitters(*gfx);
 }
 
-void EditPane::OnLeftButtonDown(uint, const gfx::Point& point) {
+void EditPane::OnLeftButtonUp(uint, const gfx::Point& point) {
+  splitter_controller_->End(point);
+}
+
+void EditPane::OnMouseMove(uint, const gfx::Point& point) {
+  splitter_controller_->Move(point);
+}
+
+void EditPane::OnMousePressed(const ui::MouseEvent& event) {
+  if (!event.is_left_button() && event.click_count() != 1)
+    return;
+  auto const point = event.location();
   auto const result = root_box_->HitTest(point);
   if (result.type == HitTestResult::HSplitter ||
       result.type == HitTestResult::VSplitter) {
@@ -1308,14 +1320,6 @@ void EditPane::OnLeftButtonDown(uint, const gfx::Point& point) {
     splitter_controller_->Start(SplitterController::State_DragSingle,
                                 *result.box);
   }
-}
-
-void EditPane::OnLeftButtonUp(uint, const gfx::Point& point) {
-  splitter_controller_->End(point);
-}
-
-void EditPane::OnMouseMove(uint, const gfx::Point& point) {
-  splitter_controller_->Move(point);
 }
 
 void EditPane::ReplaceActiveWindow(Window* window) {

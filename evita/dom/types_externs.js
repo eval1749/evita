@@ -77,11 +77,11 @@ var Position;
 
 /**
  * @constructor
- * @param {!Document} document
+ * @param {!Document|!Range} document_or_range
  * @param {number=} opt_start
  * @param {number=} opt_end
  */
-var Range = function(document, opt_start, opt_end) {};
+var Range = function(document_or_range, opt_start, opt_end) {};
 
 /**
  * @interface

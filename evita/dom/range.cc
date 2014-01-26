@@ -9,6 +9,7 @@
 #include "evita/text/range.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
+#include "evita/v8_glue/either.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/wrapper_info.h"
 
@@ -31,12 +32,22 @@ class RangeClass : public v8_glue::WrapperInfo {
         &RangeClass::NewRange);
   }
 
-  private: static Range* NewRange(Document* document,
-                                  v8_glue::Optional<int> start,
-                                  v8_glue::Optional<int> end) {
-    auto const start_position = start.get(0);
-    auto const end_position = end.get(start_position);
-    return new Range(document, start_position, end_position);
+  private: static Range* NewRange(
+      v8_glue::Either<Document*, Range*> either_document_or_range,
+      v8_glue::Optional<int> opt_start, v8_glue::Optional<int> opt_end) {
+    if (either_document_or_range.is_left) {
+      auto const document = either_document_or_range.left;
+      auto const start_position = opt_start.get(0);
+      auto const end_position = opt_end.get(start_position);
+      return new Range(document, start_position, end_position);
+    }
+    auto const range = either_document_or_range.right;
+    auto const document = range->document();
+    if (opt_start.is_supplied) {
+      return new Range(document, opt_start.value,
+                       opt_end.get(opt_start.value));
+    }
+    return new Range(document, range->start(), range->end());
   }
 
   private: virtual void SetupInstanceTemplate(

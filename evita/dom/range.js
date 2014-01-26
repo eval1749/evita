@@ -93,6 +93,22 @@
   };
 
   /**
+   * @param {string} char_set
+   * @param {number=} opt_count, default is Count.FORWARD
+   * @return {!Range}
+   */
+  Range.prototype.moveEndWhile = function(char_set, opt_count) {
+    var count = arguments.length >= 2 ? /** @type{number} */(opt_count) :
+        Count.FORWARD;
+    var position = this.document.computeWhile_(char_set, count, this.end);
+    if (position < this.start)
+      this.collapseTo(position);
+    else
+      this.end = position;
+    return this
+  };
+
+  /**
    * @this {!Range}
    * @param {Unit} unit.
    * @param {number=} opt_count, defualt is one.

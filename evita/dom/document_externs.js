@@ -87,6 +87,14 @@ Document.prototype.computeMotion_ = function(unit, count, position) {};
  */
 Document.prototype.computeStartOf_ = function(unit, position) {};
 
+/**
+ * @param {string} char_set
+ * @param {number} count
+ * @param {number} position
+ * @return {number}
+ */
+Document.prototype.computeWhile_ = function(char_set, count, position) {};
+
 Document.prototype.forceClose = function() {};
 
 /**

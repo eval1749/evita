@@ -10,6 +10,12 @@ var Alter = {
   MOVE: 'MOVE'
 };
 
+/** @enum {number} */
+var Count = {
+  BACKWARD: -1 << 28,
+  FORWARD: 1 << 28,
+};
+
 /** @enum{number} */
 var DialogItemId = {
   ABORT: 3,

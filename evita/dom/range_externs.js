@@ -59,6 +59,13 @@ Range.prototype.move = function(unit, opt_count) {};
 Range.prototype.moveEnd = function(unit, opt_count) {};
 
 /**
+ * @param {string} char_set
+ * @param {number=} opt_count
+ * @return {!Range}
+ */
+Range.prototype.moveEndWhile = function(char_set, opt_count) {};
+
+/**
  * @param {Unit} unit
  * @param {number=} opt_count, defualt is one.
  * @return {!Range}

@@ -288,6 +288,36 @@
     }
   };
 
+  /**
+   * @param {string} char_set
+   * @param {number} count
+   * @param {number} start
+   * @return {number}
+   */
+  Document.prototype.computeWhile_ = function(char_set, count, start) {
+    var char_code_set = new Set();
+    for (var i = 0; i < char_set.length; ++i) {
+      char_code_set.add(char_set.charCodeAt(i));
+    }
+    if (count > 0) {
+      var end = Math.min(start + count, this.length);
+      for (var position = start; position < end; ++position) {
+        var char_code = this.charCodeAt_(position);
+        if (!char_code_set.has(char_code))
+          return position;
+      }
+      return end;
+    }
+
+    var end = Math.max(start + count, 0);
+    for (var position = start; position > end; --position) {
+      var char_code = this.charCodeAt_(position - 1);
+      if (!char_code_set.has(char_code))
+        return position;
+    }
+    return end;
+  };
+
   Document.prototype.forceClose = function() {
     this.listWindows().forEach(function(window) {
       window.destroy();

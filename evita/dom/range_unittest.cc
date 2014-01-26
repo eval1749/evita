@@ -27,6 +27,35 @@ class RangeTest : public dom::AbstractDomTest {
         "r.text = '" + sample + "';"));
   }
 
+  protected: virtual void SetUp() override {
+    dom::AbstractDomTest::SetUp();
+    EXPECT_SCRIPT_VALID(
+      "var doc = new Document('sample');"
+      "var range = new Range(doc);"
+      "function doTest(sample, sampler) {"
+      "  range.start = 0;"
+      "  range.end = doc.length;"
+      "  sample = sample.replace(/[$]/g, '\\n');"
+      "  range.text = sample.replace(/[|]/g, '');"
+      "  range.collapseTo(sample.indexOf('|'));"
+      "  var before_end = sample.lastIndexOf('|');"
+      "  if (range.start != before_end)"
+      "    --before_end;"
+      "  range.end = before_end;"
+      "  sampler(range);"
+      "  var start = range.start;"
+      "  var end = range.end;"
+      "  range.start = 0;"
+      "  range.end = doc.length;"
+      "  var result = range.text.replace(/\\n/g, '$');"
+      "  if (start == end)"
+      "    return result.substr(0, start) + '|' + result.substr(start);"
+      "  return result.substr(0, start) + '|' +"
+      "         result.substring(start, end) + '|' +"
+      "         result.substr(end);"
+      "}");
+  }
+
   DISALLOW_COPY_AND_ASSIGN(RangeTest);
 };
 
@@ -263,6 +292,38 @@ TEST_F(RangeTest, moveEnd) {
   EXPECT_SCRIPT_EQ("5 5", "test(7, 7, Unit.WORD, -1)");
   EXPECT_SCRIPT_EQ("5 5", "test(6, 7, Unit.WORD, -1)");
   EXPECT_SCRIPT_EQ("4 5", "test(4, 7, Unit.WORD, -1)");
+}
+
+TEST_F(RangeTest, moveEndWhile) {
+  EXPECT_SCRIPT_VALID(
+      "function testIt(sample, charset, opt_count) {"
+      "  var has_count = arguments.length >= 3;"
+      "  return doTest(sample, function(range) {"
+      "    if (has_count)"
+      "      range.moveEndWhile(charset, opt_count);"
+      "    else"
+      "      range.moveEndWhile(charset);"
+      "  });"
+      "}");
+  EXPECT_SCRIPT_EQ("|...|abc", "testIt('|...abc', '.')");
+  EXPECT_SCRIPT_EQ("|.|..abc", "testIt('|...abc', '.', 1)");
+  EXPECT_SCRIPT_EQ("|..|.abc", "testIt('|...abc', '.', 2)");
+  EXPECT_SCRIPT_EQ("|...|abc", "testIt('|...abc', '.', 3)");
+  EXPECT_SCRIPT_EQ("|...|abc", "testIt('|...abc', '.', 4)");
+  EXPECT_SCRIPT_EQ("|...|abc", "testIt('|...abc', '.', Count.FORWARD)");
+
+  EXPECT_SCRIPT_EQ("..|.abc", "testIt('...|abc', '.', -1)");
+  EXPECT_SCRIPT_EQ(".|..abc", "testIt('...|abc', '.', -2)");
+  EXPECT_SCRIPT_EQ("|...abc", "testIt('...|abc', '.', -3)");
+  EXPECT_SCRIPT_EQ("|...abc", "testIt('...|abc', '.', -4)");
+  EXPECT_SCRIPT_EQ("|...abc", "testIt('...|abc', '.', Count.BACKWARD)");
+
+  EXPECT_SCRIPT_EQ("|...abc", "testIt('|...abc', '.', 0)");
+
+  EXPECT_SCRIPT_EQ("|...abc", "testIt('|...abc', 'x', 1)");
+  EXPECT_SCRIPT_EQ("|...abc", "testIt('|...abc', 'x', -1)");
+  EXPECT_SCRIPT_EQ("...|abc", "testIt('...|abc', 'x', 1)");
+  EXPECT_SCRIPT_EQ("...|abc", "testIt('...|abc', 'x', -1)");
 }
 
 TEST_F(RangeTest, moveStart) {

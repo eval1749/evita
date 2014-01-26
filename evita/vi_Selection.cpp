@@ -341,6 +341,12 @@ void Selection::SetRange(const Range* p)
 void Selection::SetStart(Posn p)
     { forgetGoal(); Range::SetStart(p); }
 
+void Selection::SetStartIsActive(bool new_start_is_active) {
+  // TODO(yosi) We should remove |forgotGoal()| call, once we implement new
+  // goal point tracking. Calling |forgotGoal()| here is temporary solution.
+  forgetGoal();
+  m_fStartIsActive = new_start_is_active;
+}
 
 //////////////////////////////////////////////////////////////////////
 //

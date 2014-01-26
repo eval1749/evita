@@ -120,7 +120,7 @@ class Selection : public text::Range
     public: void  SetText(const char16*);
     public: void  SetText(const char16*, int);
     public: void  SetStart(Posn);
-    public: bool  SetStartIsActive(bool f) { return m_fStartIsActive = f; }
+    public: void SetStartIsActive(bool new_start_is_active);
     public: Count StartOf(Unit, bool = false);
 
     // [T]

@@ -25,6 +25,10 @@
       }
       case Alter.MOVE:
         selection.range.collapseTo(focus);
+        // TODO(yosi) This is temporary hack for forgetting goal x-point.
+        // Once, we implment new goal x-point tracking, we should remove
+        // this hack.
+        selection.startIsActive = true;
         return selection;
     }
     throw 'Invalid ALTER: ' + alter;

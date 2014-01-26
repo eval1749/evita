@@ -619,7 +619,7 @@ void TextEditWindow::OnMousePressed(const ui::MouseEvent& event) {
   }
 }
 
-void TextEditWindow::OnLeftButtonUp(uint, const Point&) {
+void TextEditWindow::OnMouseReleased(const ui::MouseEvent&) {
   if (m_eDragMode == DragMode_None)
     return;
   ReleaseCapture();

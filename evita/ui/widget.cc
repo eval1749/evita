@@ -274,7 +274,7 @@ void Widget::OnKeyReleased(const KeyboardEvent&) {
 void Widget::OnMousePressed(const MouseEvent&) {
 }
 
-void Widget::OnLeftButtonUp(uint32_t, const Point&) {
+void Widget::OnMouseReleased(const MouseEvent&) {
 }
 
 LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
@@ -284,8 +284,7 @@ LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
       return 0;
 
     case WM_LBUTTONUP:
-      OnLeftButtonUp(static_cast<uint32_t>(wParam), 
-                     Point(MAKEPOINTS(lParam)));
+      OnMouseReleased(MouseEvent::Create(this, message, wParam, lParam));
       return 0;
 
     case WM_MOUSEMOVE:

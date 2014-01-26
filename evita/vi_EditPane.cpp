@@ -1299,8 +1299,8 @@ void EditPane::OnDraw(gfx::Graphics* gfx) {
   root_box_->DrawSplitters(*gfx);
 }
 
-void EditPane::OnLeftButtonUp(uint, const gfx::Point& point) {
-  splitter_controller_->End(point);
+void EditPane::OnMouseReleased(const ui::MouseEvent& event) {
+  splitter_controller_->End(event.location());
 }
 
 void EditPane::OnMouseMove(uint, const gfx::Point& point) {

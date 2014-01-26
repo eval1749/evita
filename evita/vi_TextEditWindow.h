@@ -173,9 +173,9 @@ class TextEditWindow
   private: virtual bool OnIdle(uint) override;
   private: virtual void OnKeyPressed(const ui::KeyboardEvent& event) override;
   private: virtual LRESULT OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam);
-  private: virtual void OnLeftButtonUp(uint, const Point&) override;
   private: virtual void OnMouseMove(uint, const Point&) override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
+  private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
   private: void onVScroll(uint);
 
   // [R]

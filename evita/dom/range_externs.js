@@ -73,6 +73,13 @@ Range.prototype.moveEndWhile = function(char_set, opt_count) {};
 Range.prototype.moveStart = function(unit, opt_count) {};
 
 /**
+ * @param {string} char_set
+ * @param {number=} opt_count
+ * @return {!Range}
+ */
+Range.prototype.moveStartWhile = function(char_set, opt_count) {};
+
+/**
  * @param {!string} text
  */
 Range.prototype.insertBefore = function(text) {};

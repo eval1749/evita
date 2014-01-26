@@ -377,6 +377,39 @@ TEST_F(RangeTest, moveStart) {
   EXPECT_SCRIPT_EQ("5 8", "test(7, 8, Unit.WORD, -1)");
 }
 
+
+TEST_F(RangeTest, moveStartWhile) {
+  EXPECT_SCRIPT_VALID(
+      "function testIt(sample, charset, opt_count) {"
+      "  var has_count = arguments.length >= 3;"
+      "  return doTest(sample, function(range) {"
+      "    if (has_count)"
+      "      range.moveStartWhile(charset, opt_count);"
+      "    else"
+      "      range.moveStartWhile(charset);"
+      "  });"
+      "}");
+  EXPECT_SCRIPT_EQ("...|abc", "testIt('|...abc', '.')");
+  EXPECT_SCRIPT_EQ(".|..abc", "testIt('|...abc', '.', 1)");
+  EXPECT_SCRIPT_EQ("..|.abc", "testIt('|...abc', '.', 2)");
+  EXPECT_SCRIPT_EQ("...|abc", "testIt('|...abc', '.', 3)");
+  EXPECT_SCRIPT_EQ("...|abc", "testIt('|...abc', '.', 4)");
+  EXPECT_SCRIPT_EQ("...|abc", "testIt('|...abc', '.', Count.FORWARD)");
+
+  EXPECT_SCRIPT_EQ("..|.|abc", "testIt('...|abc', '.', -1)");
+  EXPECT_SCRIPT_EQ(".|..|abc", "testIt('...|abc', '.', -2)");
+  EXPECT_SCRIPT_EQ("|...|abc", "testIt('...|abc', '.', -3)");
+  EXPECT_SCRIPT_EQ("|...|abc", "testIt('...|abc', '.', -4)");
+  EXPECT_SCRIPT_EQ("|...|abc", "testIt('...|abc', '.', Count.BACKWARD)");
+
+  EXPECT_SCRIPT_EQ("|...abc", "testIt('|...abc', '.', 0)");
+
+  EXPECT_SCRIPT_EQ("|...abc", "testIt('|...abc', 'x', 1)");
+  EXPECT_SCRIPT_EQ("|...abc", "testIt('|...abc', 'x', -1)");
+  EXPECT_SCRIPT_EQ("...|abc", "testIt('...|abc', 'x', 1)");
+  EXPECT_SCRIPT_EQ("...|abc", "testIt('...|abc', 'x', -1)");
+}
+
 TEST_F(RangeTest, set_start_end) {
   EXPECT_SCRIPT_VALID(
       "var doc1 = new Document('text');"

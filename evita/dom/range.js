@@ -125,6 +125,22 @@
   };
 
   /**
+   * @param {string} char_set
+   * @param {number=} opt_count, default is Count.FORWARD
+   * @return {!Range}
+   */
+  Range.prototype.moveStartWhile = function(char_set, opt_count) {
+    var count = arguments.length >= 2 ? /** @type{number} */(opt_count) :
+        Count.FORWARD;
+    var position = this.document.computeWhile_(char_set, count, this.end);
+    if (position > this.end)
+      this.collapseTo(position);
+    else
+      this.start = position;
+    return this
+  };
+
+  /**
    * Move start position of Range at start of specified unit.
    * @param {Unit} unit.
    * @param {Alter=} opt_alter, default is Alter.MOVE.

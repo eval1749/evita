@@ -21,7 +21,10 @@
       'sources': [
         'timer/timer.cc',
         'win/native_window.cc',
+        'win/point_ostream.cc',
         'win/rect.cc',
+        'win/rect_ostream.cc',
+        'win/size_ostream.cc',
       ], # sources
     }, # common
 

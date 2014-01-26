@@ -2,16 +2,17 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 #include "base/basictypes.h"
+#include "common/win/point_ostream.h"
 #include "evita/ui/events/event_ostream.h"
 
 namespace {
 const char* event_names[] = {
   "Invalid",
-  "KeyDown",
-  "KeyUp",
-  "MouseDown",
-  "MouseMove",
-  "MouseUp",
+  "KeyPressed",
+  "KeyReleased",
+  "MouseMoved",
+  "MousePressed",
+  "MouseReleased",
   "MouseWheel",
 };
 
@@ -63,8 +64,8 @@ std::ostream& operator<<(std::ostream& out, const ui::Event* event) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::KeyboardEvent& event) {
-  return out << event.event_type() << "Event(" <<
-      " key_code=" << event.key_code() <<
+  return out << event.event_type() << "Event" <<
+      "(key_code=" << event.key_code() <<
       " repeate=" << event.repeat() << ")";
 }
 
@@ -73,10 +74,11 @@ std::ostream& operator<<(std::ostream& out, const ui::KeyboardEvent* event) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::MouseEvent& event) {
-  return out << event.event_type() << "Event(" <<
-      " button=" << MouseButtons(event.flags()) <<
+  return out << event.event_type() << "Event" <<
+      "(button=" << MouseButtons(event.flags()) <<
       " modifiers=" << MouseModifiers(event.flags()) <<
-      " count=" << event.click_count() << ")";
+      " count=" << event.click_count() <<
+      " at " << event.location() << ")";
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::MouseEvent* event) {

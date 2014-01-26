@@ -288,8 +288,7 @@ LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
       return 0;
 
     case WM_MOUSEMOVE:
-      OnMouseMove(static_cast<uint32_t>(wParam), 
-                  Point(MAKEPOINTS(lParam)));
+      OnMouseMoved(MouseEvent::Create(this, message, wParam, lParam));
       return 0;
   }
   if (native_window_)
@@ -297,7 +296,7 @@ LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
   return container_widget().OnMessage(message, wParam, lParam);
 }
 
-void Widget::OnMouseMove(uint32_t, const Point&) {
+void Widget::OnMouseMoved(const MouseEvent&) {
 }
 
 LRESULT Widget::OnNotify(NMHDR*) {

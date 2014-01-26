@@ -112,7 +112,7 @@ class Widget
                                     LPARAM lParam);
   protected: virtual void OnMousePressed(const MouseEvent& event);
   protected: virtual void OnMouseReleased(const MouseEvent& event);
-  public: virtual void OnMouseMove(uint32_t flags, const Point& point);
+  protected: virtual void OnMouseMoved(const MouseEvent& event);
   protected: virtual LRESULT OnNotify(NMHDR* nmhdr);
   public: virtual void OnPaint(const Rect rect);
 

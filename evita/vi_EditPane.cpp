@@ -1303,8 +1303,8 @@ void EditPane::OnMouseReleased(const ui::MouseEvent& event) {
   splitter_controller_->End(event.location());
 }
 
-void EditPane::OnMouseMove(uint, const gfx::Point& point) {
-  splitter_controller_->Move(point);
+void EditPane::OnMouseMoved(const ui::MouseEvent& event) {
+  splitter_controller_->Move(event.location());
 }
 
 void EditPane::OnMousePressed(const ui::MouseEvent& event) {

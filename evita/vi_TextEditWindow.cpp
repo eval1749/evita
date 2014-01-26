@@ -708,7 +708,7 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
   return ParentClass::OnMessage(uMsg, wParam, lParam);
 }
 
-void TextEditWindow::OnMouseMove(uint, const Point& point) {
+void TextEditWindow::OnMouseMoved(const ui::MouseEvent& event) {
   if (m_eDragMode == DragMode_None) {
     // We have nothing to do if mouse isn't dragged.
     return;
@@ -721,7 +721,7 @@ void TextEditWindow::OnMouseMove(uint, const Point& point) {
   }
 
   UI_DOM_AUTO_LOCK_SCOPE();
-  auto const lPosn = MapPointToPosn(point);
+  auto const lPosn = MapPointToPosn(event.location());
   if (lPosn >= 0)
     selection_->MoveTo(lPosn, true);
 
@@ -730,9 +730,9 @@ void TextEditWindow::OnMouseMove(uint, const Point& point) {
         DEBUG_POINT_ARG);
   #endif // DEBUG_FORMAT
 
-  if (point.y < rect().top)
+  if (event.location().y < rect().top)
     autoscroller_->Start(-1);
-  else if (point.y > rect().bottom)
+  else if (event.location().y > rect().bottom)
     autoscroller_->Start(1);
   else
     autoscroller_->Stop();

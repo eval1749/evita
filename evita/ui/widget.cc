@@ -9,14 +9,18 @@
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants.h"
 #include "common/tree/descendants_or_self.h"
+#include "common/win/point_ostream.h"
+#include "common/win/rect_ostream.h"
 #include "common/win/win32_verify.h"
 #include "evita/ui/events/event.h"
+#include "evita/ui/events/event_ostream.h"
 #include "evita/ui/root_widget.h"
 #include "evita/ui/widget_ostream.h"
 
 #define DEBUG_FOCUS 0
 #define DEBUG_IDLE 0
 #define DEBUG_MOUSE 0
+#define DEBUG_MOUSE_WHEEL 0
 #define DEBUG_RESIZE 0
 #define DEBUG_PAINT 0
 #define DEBUG_SHOW 0
@@ -278,18 +282,25 @@ void Widget::OnMouseReleased(const MouseEvent&) {
 }
 
 LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
-  switch (message) {
-    case WM_LBUTTONDOWN:
-      OnMousePressed(MouseEvent::Create(this, message, wParam, lParam));
-      return 0;
+  if (message >= WM_MOUSEFIRST && message <= WM_MOUSELAST) {
+    auto event = MouseEvent::Create(this, message, wParam, lParam);
+    #if DEBUG_MOUSE
+      DVLOG_WIDGET(0) << "cap=" << capture_widget << " " << event;
+    #endif
+    if (event.event_type() == EventType::MouseMoved) {
+        OnMouseMoved(event);
+        return 0;
+    }
 
-    case WM_LBUTTONUP:
-      OnMouseReleased(MouseEvent::Create(this, message, wParam, lParam));
+    if (event.event_type() == EventType::MousePressed) {
+      OnMousePressed(event);
       return 0;
+    }
 
-    case WM_MOUSEMOVE:
-      OnMouseMoved(MouseEvent::Create(this, message, wParam, lParam));
+    if (event.event_type() == EventType::MouseReleased) {
+      OnMouseReleased(event);
       return 0;
+    }
   }
   if (native_window_)
     return native_window_->DefWindowProc(message, wParam, lParam);
@@ -388,9 +399,7 @@ void Widget::SchedulePaintInRect(const Rect& rect) {
 
 void Widget::SetCapture() {
   #if DEBUG_MOUSE
-    DEBUG_WIDGET_PRINTF("capture=" DEBUG_WIDGET_FORMAT " new="
-                        DEBUG_WIDGET_FORMAT "\n",
-        DEBUG_WIDGET_ARG(capture_widget), DEBUG_WIDGET_ARG(&widget));
+    DVLOG_WIDGET(0) << "cur=" << capture_widget << " new=" << this;
   #endif
   // We don't allow nested capture.
   DCHECK(!capture_widget);
@@ -659,33 +668,32 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
   }
 
   if (message >= WM_MOUSEFIRST && message <= WM_MOUSELAST) {
-    if (capture_widget) {
-      capture_widget->OnMessage(message, wParam, lParam);
-    } else {
-      // Note: We send WM_MOUSEWHEEL message to a widget under mouse pointer
-      // rather than active widget.
-      Point point(MAKEPOINTS(lParam));
-      if (message == WM_MOUSEWHEEL) {
-        WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *native_window(),
-                                       &point, 1));
-      }
-      #if DEBUG_MOUSE
+    if (capture_widget)
+      return capture_widget->OnMessage(message, wParam, lParam);
+
+    // Note: We send WM_MOUSEWHEEL message to a widget under mouse pointer
+    // rather than active widget.
+    Point point(MAKEPOINTS(lParam));
+    if (message == WM_MOUSEWHEEL) {
+      WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *native_window(),
+                                     &point, 1));
+    }
+
+    if (auto child = GetWidgetAt(point)) {
+      #if DEBUG_MOUSE_WHEEL
         if (message == WM_MOUSEWHEEL) {
-          DEBUG_WIDGET_PRINTF("WM_MOUSEWHEEL " DEBUG_POINT_FORMAT "\n",
-              DEBUG_POINT_ARG(point));
+          DVLOG_WIDGET(0) << "WM_MOUSEWHEEL " << child << " at " <<
+              point << " in " << child->rect();
         }
       #endif
-      if (auto child = GetWidgetAt(point)) {
-        #if DEBUG_MOUSE
-          if (message == WM_MOUSEWHEEL) {
-            DEBUG_WIDGET_PRINTF("WM_MOUSEWHEEL to "
-                DEBUG_WIDGET_FORMAT " " DEBUG_RECT_FORMAT "\n",
-                DEBUG_WIDGET_ARG(child), child->rect());
-          }
-        #endif
-        return child->OnMessage(message, wParam, lParam);
-      }
+      return child->OnMessage(message, wParam, lParam);
     }
+
+    #if DEBUG_MOUSE_WHEEL
+      if (message == WM_MOUSEWHEEL) {
+        DVLOG_WIDGET(0) << "WM_MOUSEWHEEL " << this << " at " << point;
+      }
+    #endif
   }
 
   return OnMessage(message, wParam, lParam);

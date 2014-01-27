@@ -559,7 +559,7 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
 
   foreach (EnumInterval, enum_interval, this) {
     auto const interval = enum_interval.Get();
-    if (interval->m_lStart > position)
+    if (interval->m_lStart >= position)
       interval->m_lStart += text_length;
     if (interval->m_lEnd >= position)
       interval->m_lEnd += text_length;

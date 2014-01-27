@@ -11,6 +11,7 @@
 //
 #define DEBUG_INTERVAL  _DEBUG
 #define DEBUG_STYLE     0
+#include "base/logging.h"
 #include "evita/ed_Interval.h"
 
 #include "evita/text/buffer.h"
@@ -67,7 +68,7 @@ void Interval::SetStyle(const StyleValues* p)
 
     #undef mergeStyle
 
-    ASSERT(GetEnd() == lPosn);
+    DCHECK_EQ(GetEnd(), lPosn);
 } // Interval::SetStyle
 
 /// <summary>
@@ -124,30 +125,13 @@ Interval* Buffer::GetIntervalAt(Posn lPosn) const
             }
         } // for
 
-        char16 wsz[200];
-        if (NULL == pFound)
-        {
-            ::wsprintfW(wsz, L"posn=%d isn't in list.", lPosn);
+        if (!pFound) {
+          LOG(0) << "position=" << lPosn << " insnt' in list.";
+        } else {
+          LOG(0) << "position=" << lPosn << " is in list intv[" <<
+            pFound->GetStart() << "," << pFound->GetEnd() << "]";
         }
-        else
-        {
-            ::wsprintf(wsz,
-                L"posn=%d is in list intv[%d, %d].",
-                lPosn,
-                pFound->GetStart(),
-                pFound->GetEnd() );
-        }
-
-        if (::IsDebuggerPresent())
-        {
-            ::MessageBox(NULL, wsz, L"Evita Editor", MB_ICONERROR);
-            ::DebugBreak();
-        }
-        else
-        {
-            ::FatalAppExit(0, wsz);
-        }
-        // NOTREACHED
+        NOTREACHED();
     } // if
 
     return pRunner;
@@ -164,7 +148,7 @@ void Buffer::SetStyle(
     Posn                lEnd,
     const StyleValues*  pStyle )
 {
-    ASSERT(pStyle != NULL);
+    DCHECK(pStyle);
 
     #if DEBUG_STYLE
         DEBUG_PRINTF(L"%p [%d, %d] color=#x%06X\n",
@@ -233,13 +217,13 @@ void Buffer::SetStyle(
         m_oIntervals.InsertBefore(pIntv, pHead);
         m_oIntervalTree.Insert(pIntv);
 
-        ASSERT(pHead->GetPrev() == pIntv);
-        ASSERT(pIntv->GetNext() == pHead);
+        DCHECK_EQ(pHead->GetPrev(), pIntv);
+        DCHECK_EQ(pIntv->GetNext(), pHead);
 
         #if DEBUG_INTERVAL
         {
             Interval* p = GetIntervalAt(pIntv->GetStart());
-            ASSERT(p == pIntv);
+            DCHECK_EQ(p, pIntv);
         }
         #endif
 
@@ -267,8 +251,8 @@ void Buffer::SetStyle(
         m_oIntervals.InsertAfter(pIntv, pHead);
         m_oIntervalTree.Insert(pIntv);
 
-        ASSERT(pHead->GetNext() == pIntv);
-        ASSERT(pIntv->GetPrev() == pHead);
+        DCHECK_EQ(pHead->GetNext(), pIntv);
+        DCHECK_EQ(pIntv->GetPrev(), pHead);
 
         #if DEBUG_INTERVAL
         {
@@ -327,20 +311,10 @@ void Buffer::SetStyle(
 /// </summary>
 /// <param name="lEnd">An end position (exlclude).</param>
 /// <param name="lStart">A start position (include).</param>
-Interval* Buffer::newInterval(Posn lStart, Posn lEnd)
-{
-    unless (lStart <= lEnd)
-    {
-        char16 wsz[100];
-        ::wsprintfW(wsz, L"newInterval: Bad range %d, %d",
-            lStart, lEnd );
-        ::FatalAppExit(0, wsz);
-        // NOTREACHED
-    }
-
-    Interval* pIntv= new(m_hObjHeap) Interval(lStart, lEnd);
-    return pIntv;
-} // Buffer::newInterval
+Interval* Buffer::newInterval(Posn lStart, Posn lEnd) {
+  DCHECK_LE(lStart, lEnd);
+  return new(m_hObjHeap) Interval(lStart, lEnd);
+}
 
 /// <summary>
 ///   Try merge specified interval to previous and next.
@@ -350,8 +324,8 @@ Interval* Buffer::tryMergeInterval(Interval* pIntv)
     // Merge to previous
     if (Interval* pPrev = pIntv->GetPrev())
     {
-        ASSERT(pPrev->GetEnd()  == pIntv->GetStart());
-        ASSERT(pPrev->GetNext() == pIntv);
+        DCHECK_EQ(pPrev->GetEnd(), pIntv->GetStart());
+        DCHECK_EQ(pPrev->GetNext(), pIntv);
 
         if (pIntv->CanMerge(pPrev))
         {
@@ -376,7 +350,7 @@ Interval* Buffer::tryMergeInterval(Interval* pIntv)
     // Absobe next
     if (Interval* pNext = pIntv->GetNext())
     {
-        ASSERT(pIntv->GetEnd() == pNext->GetStart());
+        DCHECK_EQ(pIntv->GetEnd(), pNext->GetStart());
 
         if (pIntv->CanMerge(pNext))
         {

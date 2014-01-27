@@ -277,7 +277,7 @@ void Frame::DidChangeTabSelection(int selected_index) {
   pane->Show();
   pane->Activate();
   Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(&Frame::updateTitleBar, base::Unretained(this)));
+      base::Bind(&Frame::UpdateTitleBarTask, window_id()));
   #if DEBUG_FOCUS
     DEBUG_WIDGET_PRINTF("End selected_index=%d"
         " cur=" DEBUG_WIDGET_FORMAT
@@ -988,6 +988,14 @@ void Frame::updateTitleBar() {
   m_oTitleBar.SetText(title.data(), static_cast<int>(title.length()));
 
   m_pActivePane->UpdateStatusBar();
+}
+
+
+void Frame::UpdateTitleBarTask(views::WindowId window_id) {
+  auto frame = views::Window::FromWindowId(window_id)->as<Frame>();
+  if (!frame)
+    return;
+  frame->updateTitleBar();
 }
 
 void Frame::WillDestroyWidget() {

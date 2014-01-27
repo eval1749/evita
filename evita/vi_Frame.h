@@ -159,7 +159,8 @@ class Frame final : public views::Window,
   public: void ShowMessage(MessageLevel, uint = 0, ...);
 
   // [U]
-  public: void updateTitleBar();
+  private: void updateTitleBar();
+  private: static void UpdateTitleBarTask(views::WindowId window_id);
 
   // [W]
   private: virtual void WillDestroyWidget() override;

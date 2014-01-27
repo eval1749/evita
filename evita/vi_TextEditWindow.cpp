@@ -702,12 +702,6 @@ void TextEditWindow::OnMouseMoved(const ui::MouseEvent& event) {
     return;
   }
 
-  if (::GetCapture() != AssociatedHwnd()){
-    // Someone takes mouse capture.
-    stopDrag();
-    return;
-  }
-
   UI_DOM_AUTO_LOCK_SCOPE();
   auto const lPosn = MapPointToPosn(event.location());
   if (lPosn >= 0)

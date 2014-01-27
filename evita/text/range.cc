@@ -911,48 +911,6 @@ base::string16 Range::GetText() const
 } // Range::GetText
 
 /// <summary>
-///   Indent this region.
-/// </summary>
-/// <seealso cref="Range::Outdent"/>
-void Range::Indent()
-{
-    const int iTabWidth = 4;
-
-    // Insertion point
-    if (m_lStart == m_lEnd)
-    {
-        // There is no selection. We insert Tab character.
-        Posn lStart = m_pBuffer->ComputeStartOf(Unit_Line, m_lStart);
-        int cwch = iTabWidth - (m_lStart - lStart) % iTabWidth;
-        m_pBuffer->Insert(m_lStart, ' ', cwch);
-        m_lStart += cwch;
-        m_lEnd = m_lStart;
-        return;
-    }
-
-    // Extend Range to cover entire lines
-    m_lStart = m_pBuffer->ComputeStartOf(Unit_Line, m_lStart);
-
-    if (m_pBuffer->ComputeStartOf(Unit_Line, m_lEnd) != m_lEnd)
-    {
-        m_pBuffer->ComputeMotion(Unit_Line, 1, &m_lEnd);
-    }
-
-    // Insert spaces each of start of line except for empty line.
-    UndoBlock oUndo(m_pBuffer, L"Range.Indent");
-    Posn lStart = m_lStart;
-    do
-    {
-        Posn lEnd = m_pBuffer->ComputeEndOf(Unit_Line, lStart);
-        if (lStart != lEnd)
-        {
-            m_pBuffer->Insert(lStart, ' ', iTabWidth);
-        }
-        lStart = m_pBuffer->ComputeEndOf(Unit_Line, lStart) + 1;
-    } while (lStart < m_lEnd);
-} // Range::Indent
-
-/// <summary>
 ///   Move start (if n &lt; 0) or end (if n > 0) of this range.
 /// </summary>
 /// <param name="eUnit">Unit to move</param>

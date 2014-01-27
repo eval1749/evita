@@ -94,9 +94,6 @@ class Range //: public ObjectInHeap
     public: Posn    GetStart()  const { return m_lStart; }
     public: base::string16 GetText() const;
 
-    // [I]
-    public: void Indent();
-
     // [M]
     public: Count Move(Unit, Count);
     public: Count MoveEnd(Unit, Count);

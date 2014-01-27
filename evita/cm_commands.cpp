@@ -475,13 +475,6 @@ DEFCOMMAND(GoToOpenParenExtend)
     }
 } // GoToOpenParenExtend
 
-// [I]
-DEFCOMMAND(Indent)
-{ 
-    if (NULL == pCtx->GetSelection()) return;
-    pCtx->GetSelection()->Indent();
-} // Indent
-
 // [O]
 DEFCOMMAND(Outdent)
 {
@@ -962,7 +955,6 @@ void Processor::GlobalInit() {
     BIND_VKEY(TextEditWindow, Mod_None,  PRIOR,  BackwardScreen);
     BIND_VKEY(TextEditWindow, Mod_None,  RIGHT,  ForwardChar);
     BIND_VKEY(TextEditWindow, Mod_None,  UP,     BackwardWindowLine);
-    BIND_VKEY(TextEditWindow, Mod_None,  TAB,    Indent);
 
     BIND_VKEY(TextEditWindow, Mod_Ctrl, DOWN,   GoToCloseParen);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, LEFT,   BackwardWord);

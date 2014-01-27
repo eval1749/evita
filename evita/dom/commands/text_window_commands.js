@@ -297,4 +297,39 @@
      'Move active position of selection to home of window line.');
 
   Editor.bindKey(TextWindow, 'Shift+Insert', pasteFromClipboardCommand);
+
+  /** @const @type {number} */
+  // TODO(yosi) We should get |Indent|/|Outend| tab width from another place.
+  var TAB_WIDTH = 4;
+
+  /** @param {number=} opt_count */
+  Editor.bindKey(TextWindow, 'Tab', function(opt_count) {
+    var tab_width = arguments.length >= 1 ? /** @type{number} */(opt_count) :
+                                          TAB_WIDTH;
+    var range = this.selection.range;
+    if (range.start == range.end) {
+      var current = range.start;
+      range.startOf(Unit.LINE, Alter.EXTEND);
+      var num_spaces = tab_width - (current - range.start) % tab_width;
+      range.start = range.end;
+      range.insertBefore(' '.repeat(num_spaces));
+      return;
+    }
+
+    // Exapnd range to contain whole lines
+    range.startOf(Unit.LINE, Alter.EXTEND).endOf(Unit.LINE, Alter.EXTEND);
+    range.document.undoGroup('Indent', function() {
+      var line_range = new Range(range);
+      line_range.collapseTo(line_range.start);
+      while (line_range.start < range.end) {
+        var spaces = ' '.repeat(tab_width);
+        line_range.endOf(Unit.LINE, Alter.EXTEND);
+        if (line_range.start != line_range.end)
+          line_range.insertBefore(spaces);
+        line_range.move(Unit.CHARACTER);
+      }
+    });
+  }, 'indent\n' +
+     'Caret: insert spaces until tab stop column.\n' +
+     'Range: insert spaces all lines in range.');
 })();

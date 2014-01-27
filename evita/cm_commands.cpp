@@ -73,8 +73,6 @@ namespace Command
         { pCtx->GetSelection()->mp_method(Unit_ ## mp_unit, true); }
 
 // [B]
-DefCommand_Motions(Backward, Left, Char)
-DefCommand_Motions(Backward, Left, Word)
 DefCommand_Motions(Backward, Up,   WindowLine)
 DefCommand_Motions(Backward, Up,   Screen)
 DefCommand_Motions(Backward, Up,   Window)
@@ -428,8 +426,6 @@ DEFCOMMAND(ExchangeCode)
 } // ExchangeCode
 
 // [F]
-DefCommand_Motions(Forward, Right, Char)
-DefCommand_Motions(Forward, Right, Word)
 DefCommand_Motions(Forward, Down,  WindowLine)
 DefCommand_Motions(Forward, Down,  Screen)
 DefCommand_Motions(Forward, Down,  Window)
@@ -944,32 +940,24 @@ void Processor::GlobalInit() {
     BIND_KEY(CommandWindow, Mod_Ctrl | 'U', StartArgumentEntry());
 
     BIND_VKEY(TextEditWindow, Mod_None,  DOWN,   ForwardWindowLine);
-    BIND_VKEY(TextEditWindow, Mod_None,  LEFT,   BackwardChar);
     BIND_VKEY(TextEditWindow, Mod_None,  NEXT,   ForwardScreen);
     BIND_VKEY(TextEditWindow, Mod_None,  PRIOR,  BackwardScreen);
-    BIND_VKEY(TextEditWindow, Mod_None,  RIGHT,  ForwardChar);
     BIND_VKEY(TextEditWindow, Mod_None,  UP,     BackwardWindowLine);
 
     BIND_VKEY(TextEditWindow, Mod_Ctrl, DOWN,   GoToCloseParen);
-    BIND_VKEY(TextEditWindow, Mod_Ctrl, LEFT,   BackwardWord);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, NEXT,   ForwardWindow);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, PRIOR,  BackwardWindow);
-    BIND_VKEY(TextEditWindow, Mod_Ctrl, RIGHT,  ForwardWord);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, UP,     GoToOpenParen);
 
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, DOWN,      GoToCloseParenExtend);
-    BIND_VKEY(TextEditWindow, Mod_CtrlShift, LEFT,      BackwardWordExtend);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, NEXT,      ForwardWindowExtend);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, PRIOR,     BackwardWindowExtend);
-    BIND_VKEY(TextEditWindow, Mod_CtrlShift, RIGHT,     ForwardWordExtend);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, UP,        GoToOpenParenExtend);
 
     BIND_VKEY(TextEditWindow, Mod_Shift, DOWN,      ForwardWindowLineExtend);
     BIND_VKEY(TextEditWindow, Mod_Shift, INSERT,    PasteFromClipboard);
-    BIND_VKEY(TextEditWindow, Mod_Shift, LEFT,      BackwardCharExtend);
     BIND_VKEY(TextEditWindow, Mod_Shift, NEXT,      ForwardScreenExtend);
     BIND_VKEY(TextEditWindow, Mod_Shift, PRIOR,     BackwardScreenExtend);
-    BIND_VKEY(TextEditWindow, Mod_Shift, RIGHT,     ForwardCharExtend);
     BIND_VKEY(TextEditWindow, Mod_Shift, UP,        BackwardWindowLineExtend);
 } // Processor::GlobalInit
 

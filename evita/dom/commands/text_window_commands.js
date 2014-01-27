@@ -17,6 +17,57 @@
   }
 
   /**
+   * @param {!Unit} unit
+   * @param {number} direction
+   */
+  function makeExtendSelectionCommand(unit, direction) {
+    /**
+     * @this {!TextWindow}
+     * @param {number=} opt_count
+     */
+    return function(opt_count) {
+      var count = arguments.length >= 1 ?
+        /** @type {number} */(opt_count) * direction : direction;
+      var selection = this.selection;
+      var range = selection.range;
+      var move_start = range.start == range.end ? count < 0 :
+                                                  selection.startIsActive;
+      if (move_start)
+        range.moveStart(unit, count);
+      else
+        range.moveEnd(unit, count);
+      selection.startIsActive = move_start;
+    };
+  }
+
+  /**
+   * @param {!Unit} unit
+   * @param {number} direction
+   */
+  function makeMoveSelectionCommand(unit, direction) {
+    /**
+     * @this {!TextWindow}
+     * @param {number=} opt_count
+     */
+    return function(opt_count) {
+      var count = arguments.length >= 1 ?
+        /** @type {number} */(opt_count) * direction : direction;
+      var selection = this.selection;
+      var range = selection.range;
+      if (range.start != range.end)
+        range.collapseTo(selection.startIsActive ? range.start : range.end);
+      range.move(unit, count);
+      selection.startIsActive = true;
+    };
+  }
+
+  /** @param {!TextSelection} selection */
+  function resetGoalTracking(selection) {
+    // TODO(yosi) This is temporary hack for resetting goal point tracking.
+    selection.startIsActive = true;
+  }
+
+  /**
    * Paste from clipboard
    * @this {!TextWindow}
    */
@@ -109,6 +160,16 @@
     this.makeSelectionVisible();
   });
 
+  Editor.bindKey(TextWindow, 'Ctrl+Left',
+    makeMoveSelectionCommand(Unit.WORD, -1),
+    'move selection left word\n' +
+    'Move selection to left by words');
+
+  Editor.bindKey(TextWindow, 'Ctrl+Right',
+    makeMoveSelectionCommand(Unit.WORD, 1),
+    'move selection right word\n' +
+    'Move selection to right by words');
+
   /**
    * Save file
    * @this {!TextWindow}
@@ -188,6 +249,16 @@
   }, 'exthome to home of document\n' +
      'Move active position of selection to home of document.');
 
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+Left',
+    makeExtendSelectionCommand(Unit.WORD, -1),
+    'extend selection left word\n' +
+    'Extend selection to left by words');
+
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+Right',
+    makeExtendSelectionCommand(Unit.WORD, 1),
+    'extend selection right word\n' +
+    'Extend selection to right by words');
+
   /**
    * @this {!TextWindow}
    */
@@ -256,7 +327,6 @@
   }, 'move to end of window line\n' +
      'Move active position of selection to end of window line.');
 
-
   /**
    * @param {number=} opt_count
    * @this {!TextWindow}
@@ -284,6 +354,36 @@
   }, 'move to home of window line\n' +
      'Move active position of selection to home of window line.');
 
+  Editor.bindKey(TextWindow, 'Left', function(opt_count) {
+    var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
+    var range = this.selection.range;
+    if (range.start == range.end) {
+      range.move(Unit.CHARACTER, -count);
+      return;
+    }
+    if (!count)
+      return;
+    if (count > 0)
+      range.end = range.start;
+    else
+      range.start = range.end;
+  }, 'move selection to left by character');
+
+  Editor.bindKey(TextWindow, 'Right', function(opt_count) {
+    var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
+    var range = this.selection.range;
+    if (range.start == range.end) {
+      range.move(Unit.CHARACTER, count);
+      return;
+    }
+    if (!count)
+      return;
+    if (count > 0)
+      range.start = range.end;
+    else
+      range.end = range.start;
+  }, 'move selection to right by character');
+
   Editor.bindKey(TextWindow, 'Shift+Delete', cutToClipboardCommand);
 
   Editor.bindKey(TextWindow, 'Shift+End', function() {
@@ -297,6 +397,14 @@
      'Move active position of selection to home of window line.');
 
   Editor.bindKey(TextWindow, 'Shift+Insert', pasteFromClipboardCommand);
+
+  Editor.bindKey(TextWindow, 'Shift+Left',
+      makeExtendSelectionCommand(Unit.CHARACTER, -1),
+      'extend selection to left by character');
+
+  Editor.bindKey(TextWindow, 'Shift+Right',
+      makeExtendSelectionCommand(Unit.CHARACTER, 1),
+      'extend selection to right by character');
 
   /** @const @type {number} */
   // TODO(yosi) We should get |Indent|/|Outend| tab width from another place.

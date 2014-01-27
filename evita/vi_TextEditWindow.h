@@ -155,7 +155,6 @@ class TextEditWindow
 
   public: Posn GetEnd();
 
-  public: HWND GetScrollBarHwnd(int) const;
   public: Selection* GetSelection() const { return &*selection_; }
   public: Posn GetStart();
   public: size_t GetUndoSize() const;

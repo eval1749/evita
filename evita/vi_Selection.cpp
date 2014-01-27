@@ -213,21 +213,6 @@ Count Selection::MoveDown(Unit eUnit, Count n, bool fExtend)
     return moveAux(eUnit, n, fExtend);
 } // Selection::MoveDown
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// Selection::MoveLeft
-//  Unit        | Key Combination
-//  ------------+----------------
-//  Char        | Left
-/// Word        | Ctrl+Left
-Count Selection::MoveLeft(Unit eUnit, Count n, bool fExtend)
-{
-    forgetGoal();
-    return moveAux(eUnit, -n, fExtend);
-} // Selection::MoveLeft
-
-
 //////////////////////////////////////////////////////////////////////
 //
 // Selection::MoveRight

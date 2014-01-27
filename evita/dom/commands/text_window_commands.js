@@ -303,6 +303,39 @@
   var TAB_WIDTH = 4;
 
   /** @param {number=} opt_count */
+  Editor.bindKey(TextWindow, 'Shift+Tab', function(opt_count) {
+    var tab_width = arguments.length >= 1 ? /** @type{number} */(opt_count) :
+                                          TAB_WIDTH;
+    var range = this.selection.range;
+    if (range.start == range.end) {
+      // Move to previous tab stop
+      range.startOf(Unit.LINE, Alter.EXTEND);
+      range.collapseTo(Math.floor((range.start - range.end - 1) / tab_width) *
+                       tab_width + range.end);
+      return;
+    }
+    // Exapnd range to contain whole lines
+    range.startOf(Unit.LINE, Alter.EXTEND).endOf(Unit.LINE, Alter.EXTEND);
+    // Remove leading whitespaces
+    range.document.undoGroup('Outdent', function() {
+      var document = this;
+      var work = new Range(range);
+      work.collapseTo(work.start);
+      while (work.start < range.end) {
+        work.moveEndWhile(' ', tab_width);
+        if (work.end < document.length &&
+            work.end - work.start < tab_width &&
+            document.charCodeAt_(work.end) == 0x09) {
+          work.move(Unit.CHARACTER);
+        }
+        work.text = '';
+        work.endOf(Unit.LINE).move(Unit.CHARACTER);
+      }
+    });
+  }, 'outdent\n' +
+     'Remove leading whitespaces from lines in selection.');
+
+  /** @param {number=} opt_count */
   Editor.bindKey(TextWindow, 'Tab', function(opt_count) {
     var tab_width = arguments.length >= 1 ? /** @type{number} */(opt_count) :
                                           TAB_WIDTH;

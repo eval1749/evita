@@ -474,12 +474,6 @@ DEFCOMMAND(GoToOpenParenExtend)
         pSelection->SetStartIsActive(true);
     }
 } // GoToOpenParenExtend
-
-// [O]
-DEFCOMMAND(Outdent)
-{
-    pCtx->GetSelection()->Outdent();
-} // Outdent
 
 // [P]
 
@@ -977,7 +971,6 @@ void Processor::GlobalInit() {
     BIND_VKEY(TextEditWindow, Mod_Shift, PRIOR,     BackwardScreenExtend);
     BIND_VKEY(TextEditWindow, Mod_Shift, RIGHT,     ForwardCharExtend);
     BIND_VKEY(TextEditWindow, Mod_Shift, UP,        BackwardWindowLineExtend);
-    BIND_VKEY(CommandWindow, Mod_Shift, TAB,       Outdent);
 } // Processor::GlobalInit
 
 }  // namespace Command

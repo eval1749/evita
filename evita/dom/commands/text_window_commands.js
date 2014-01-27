@@ -315,22 +315,23 @@
       return;
     }
     // Exapnd range to contain whole lines
-    range.startOf(Unit.LINE, Alter.EXTEND).endOf(Unit.LINE, Alter.EXTEND);
+    range.startOf(Unit.LINE, Alter.EXTEND);
     // Remove leading whitespaces
     range.document.undoGroup('Outdent', function() {
       var document = this;
-      var work = new Range(range);
-      work.collapseTo(work.start);
-      while (work.start < range.end) {
-        work.moveEndWhile(' ', tab_width);
-        if (work.end < document.length &&
-            work.end - work.start < tab_width &&
-            document.charCodeAt_(work.end) == 0x09) {
-          work.move(Unit.CHARACTER);
+      var line_range = new Range(range);
+      line_range.collapseTo(line_range.start);
+      while (line_range.start < range.end) {
+        line_range.moveEndWhile(' ', tab_width);
+        if (line_range.end < document.length &&
+            line_range.end - line_range.start < tab_width &&
+            document.charCodeAt_(line_range.end) == 0x09) {
+          line_range.move(Unit.CHARACTER);
         }
-        work.text = '';
-        work.endOf(Unit.LINE).move(Unit.CHARACTER);
+        line_range.text = '';
+        line_range.endOf(Unit.LINE).move(Unit.CHARACTER);
       }
+      range.end = line_range.start;
     });
   }, 'outdent\n' +
      'Remove leading whitespaces from lines in selection.');
@@ -350,7 +351,7 @@
     }
 
     // Exapnd range to contain whole lines
-    range.startOf(Unit.LINE, Alter.EXTEND).endOf(Unit.LINE, Alter.EXTEND);
+    range.startOf(Unit.LINE, Alter.EXTEND);
     range.document.undoGroup('Indent', function() {
       var line_range = new Range(range);
       line_range.collapseTo(line_range.start);
@@ -361,7 +362,11 @@
           line_range.insertBefore(spaces);
         line_range.move(Unit.CHARACTER);
       }
+      range.end = line_range.start;
     });
+    // Make selection contains spaces inserted at first line.
+    range.startOf(Unit.LINE, Alter.EXTEND);
+    this.selection.startIsActive = false;
   }, 'indent\n' +
      'Caret: insert spaces until tab stop column.\n' +
      'Range: insert spaces all lines in range.');

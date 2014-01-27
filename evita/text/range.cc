@@ -963,65 +963,6 @@ Count Range::MoveStart(Unit eUnit, Count n)
 } // Range::MoveStart
 
 /// <summary>
-///   Remove indents in this region.
-/// </summary>
-/// <seealso cref="Range::Indent"/>
-void Range::Outdent()
-{
-    const int iTabWidth = 4;
-
-    // Insertion point => move to previous tab position
-    if (m_lStart == m_lEnd)
-    {
-        // There is no selection. We insert Tab character.
-        Posn lStart = m_pBuffer->ComputeStartOf(Unit_Line, m_lStart);
-        m_lStart = (m_lStart - lStart - 1) / iTabWidth * iTabWidth + lStart;
-        m_lEnd   = m_lStart;
-        return;
-    }
-
-    // Extend Range to cover entire lines
-    m_lStart = m_pBuffer->ComputeStartOf(Unit_Line, m_lStart);
-
-    if (m_pBuffer->ComputeStartOf(Unit_Line, m_lEnd) != m_lEnd)
-    {
-        m_pBuffer->ComputeMotion(Unit_Line, 1, &m_lEnd);
-    }
-
-    // Insert spaces each of start of line except for empty line.
-    UndoBlock oUndo(m_pBuffer, L"Range.Outdent");
-    Posn lStart = m_lStart;
-    do
-    {
-        // Note: We handle Tab character as unusual, so we can't
-        // use Buffer::ComputeWhile.
-        Posn lPosn = lStart;
-        for (int iCount = 0; iCount < iTabWidth; iCount++)
-        {
-            char16 wch = m_pBuffer->GetCharAt(lPosn);
-            if (' ' == wch)
-            {
-                // space
-            }
-            else if ('\t' == wch)
-            {
-                iCount += iTabWidth - 1;
-            }
-            else
-            {
-                // We get non-whitespace character.
-                break;
-            }
-            lPosn += 1;
-        } // for
-
-        m_pBuffer->Delete(lStart, lPosn);
-
-        lStart = m_pBuffer->ComputeEndOf(Unit_Line, lStart) + 1;
-    } while (lStart < m_lEnd);
-} // Range::Outdent
-
-/// <summary>
 ///  Replace this range with Windows clipboard
 /// </summary>
 /// <seealso cref="Range::Copy"/>

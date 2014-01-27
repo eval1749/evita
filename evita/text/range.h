@@ -99,9 +99,6 @@ class Range //: public ObjectInHeap
     public: Count MoveEnd(Unit, Count);
     public: Count MoveStart(Unit, Count);
 
-    // [O]
-    public: void Outdent();
-
     // [P]
     public: void Paste();
 

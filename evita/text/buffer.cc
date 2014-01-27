@@ -576,6 +576,12 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
     tracker->m_lStart = std::min(tracker->m_lStart, position);
     tracker->m_lEnd = std::max(tracker->m_lEnd, change_end);
   }
+
+  onChange();
+  if (m_fUndo && m_pUndo) {
+    m_pUndo->CheckPoint();
+    m_pUndo->RecordInsert(position, static_cast<Posn>(position + text_length));
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

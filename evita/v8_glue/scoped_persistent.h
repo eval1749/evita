@@ -33,12 +33,16 @@ class ScopedPersistent {
     return handle != handle_;
   }
 
-  public: v8::Local<ObjectType> NewLocal(v8::Isolate* isolate) {
+  public: v8::Local<ObjectType> NewLocal(v8::Isolate* isolate) const {
     return v8::Local<ObjectType>::New(isolate, handle_);
   }
 
   public: void Reset(v8::Isolate* isolate, v8::Handle<ObjectType> handle) {
     handle_.Reset(isolate, handle);
+  }
+
+  public: void Reset() {
+    handle_.Reset();
   }
 
   DISALLOW_COPY_AND_ASSIGN(ScopedPersistent);

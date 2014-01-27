@@ -18,20 +18,20 @@ namespace dom {
 namespace {
 //////////////////////////////////////////////////////////////////////
 //
-// TextSelectionWrapperInfo
+// TextSelectionClass
 //
-class TextSelectionWrapperInfo :
+class TextSelectionClass :
     public v8_glue::DerivedWrapperInfo<TextSelection, Selection> {
 
-  public: TextSelectionWrapperInfo(const char* name)
+  public: TextSelectionClass(const char* name)
       : BaseClass(name) {
   }
-  public: ~TextSelectionWrapperInfo() = default;
+  public: ~TextSelectionClass() = default;
 
-  protected: virtual v8::Handle<v8::FunctionTemplate>
+  private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate, 
-        &TextSelectionWrapperInfo::NewTextSelection);
+        &TextSelectionClass::NewTextSelection);
   }
 
   private: static TextSelection* NewTextSelection() {
@@ -54,7 +54,7 @@ class TextSelectionWrapperInfo :
 //
 // TextSelection
 //
-DEFINE_SCRIPTABLE_OBJECT(TextSelection, TextSelectionWrapperInfo);
+DEFINE_SCRIPTABLE_OBJECT(TextSelection, TextSelectionClass);
 
 TextSelection::TextSelection(TextWindow* text_window, Range* range)
     : ScriptableBase(text_window, range->document()),

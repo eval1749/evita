@@ -26,7 +26,7 @@ class TableSelectionClass :
   }
   public: ~TableSelectionClass() = default;
 
-  protected: virtual v8::Handle<v8::FunctionTemplate>
+  private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate, 
         &TableSelectionClass::NewTableSelection);

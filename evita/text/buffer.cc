@@ -565,6 +565,22 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
       interval->m_lEnd += text_length;
   }
 
+  if (!position) {
+    // Set default style to new text inserted at start of document.
+    auto const head = m_oIntervals.GetFirst();
+    DCHECK_EQ(static_cast<Posn>(text_length), head->GetStart());
+    // TODO(yosi) We should check head interval has default style or not
+    // without creating Interval object.
+    auto const interval = newInterval(0, head->GetStart());
+    if (interval->CanMerge(head)) {
+      head->m_lStart = 0;
+      destroyObject(interval);
+    } else {
+      m_oIntervals.Prepend(interval);
+      m_oIntervalTree.Insert(interval);
+    }
+  }
+
   auto const change_end = static_cast<Posn>(position + text_length);
 
   // Inserted text inherites style before insertion point.

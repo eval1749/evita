@@ -24,6 +24,7 @@
 #include "evita/dom/table_window.h"
 #include "evita/dom/text_selection.h"
 #include "evita/dom/text_window.h"
+#include "evita/dom/timer.h"
 #include "evita/dom/window.h"
 
 namespace dom {
@@ -75,6 +76,10 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     v8_glue::Installer<Selection>::Run(isolate, templ);
         v8_glue::Installer<TableSelection>::Run(isolate, templ);
         v8_glue::Installer<TextSelection>::Run(isolate, templ);
+
+    v8_glue::Installer<Timer>::Run(isolate, templ);
+      v8_glue::Installer<OneShotTimer>::Run(isolate, templ);
+      v8_glue::Installer<RepeatingTimer>::Run(isolate, templ);
 
     v8::Handle<v8::Object> js_unicode = v8::Object::New(isolate);
     templ->Set(gin::StringToV8(isolate, "Unicode"), 

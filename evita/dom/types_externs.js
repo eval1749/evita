@@ -161,6 +161,31 @@ var WindowEvent = function(type, bubbles, cancelable, source_window) {};
 
 //////////////////////////////////////////////////////////////////////
 //
+// Timer
+//
+/**
+ * @constructor
+ */
+var Timer = function() {};
+
+/**
+ * @constructor
+ * @extends {Timer}
+ * @param {number} delay_ms
+ * @param {function(!Timer)} callback
+ */
+var OneShotTimer = function(delay_ms, callback) {};
+
+/**
+ * @constructor
+ * @extends {Timer}
+ * @param {number} delay_ms
+ * @param {function(!Timer)} callback
+ */
+var RepeatingTimer = function(delay_ms, callback) {};
+
+//////////////////////////////////////////////////////////////////////
+//
 // Unicode
 //
 var Unicode;

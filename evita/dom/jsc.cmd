@@ -33,6 +33,7 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\table_window_externs.js ^
   %externs_dir%\text_selection_externs.js ^
   %externs_dir%\text_window_externs.js ^
+  %externs_dir%\timer_externs.js ^
   %externs_dir%\window_externs.js ^
   %externs_dir%\jslib\editors_externs.js ^
   %externs_dir%\jslib\windows_externs.js

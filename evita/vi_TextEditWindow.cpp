@@ -343,7 +343,6 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
   }
 }
 
-
 void TextEditWindow::DidChangeHierarchy() {
   m_gfx = &frame().gfx();
   auto const parent_hwnd = AssociatedHwnd();
@@ -367,6 +366,9 @@ void TextEditWindow::DidKillFocus() {
     DEBUG_TEXT_EDIT_PRINTF("focus=%d show=%d\n", has_focus(), is_shown());
   #endif
   ParentClass::DidKillFocus();
+  // In case of we didn't get mouse released event, e.g. debugger, Alt+Tab,
+  // etc, we stop dragging along with autoscroll too.
+  stopDrag();
   caret_->Give();
   m_lCaretPosn = -1;
 }

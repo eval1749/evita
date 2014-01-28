@@ -93,37 +93,45 @@ class KeyboardEvent : public Event {
 class MouseEvent : public Event {
   friend class MouseWheelEvent;
 
-  private: enum ButtonFlags {
-    kClickMask = 3,
-    kLeft = 1 << 2,
-    kMiddle = 1 << 3,
-    kRight = 1 << 4,
-    kXButton1 = 1 << 5,
-    kXButton2 = 1 << 6,
+  public: enum Button {
+    kNone = 0,
+    kLeft = 0,
+    kMiddle = 1,
+    kRight = 2,
+    kOther1 = 3,
+    kOther2 = 4,
   };
 
-  private: int button_flags_;
-  private: uint32_t flags_;
+  private: bool alt_key_;
+  private: int button_;
+  private: int buttons_;
+  private: int click_count_;
   private: Point client_point_;
+  private: bool control_key_;
   private: Point screen_point_;
-  protected: MouseEvent(EventType type, int button_flags, uint32_t flags,
-                        const Point& point);
-  private: MouseEvent(EventType type, int button_flags, Widget* widget,
-                      WPARAM wParam, LPARAM lParam);
+  private: bool shift_key_;
+
+  protected: MouseEvent(EventType type, Button button, int click_count,
+                        uint32_t flags, const Point& point);
+  private: MouseEvent(EventType type, Button button, int click_count,
+                      Widget* widget, WPARAM wParam, LPARAM lParam);
   private: MouseEvent();
   public: ~MouseEvent();
 
-  public: int click_count() const { return button_flags_ & kClickMask; }
-  public: bool control_key() const { return flags_ & MK_CONTROL; }
-  public: uint32_t flags() const { return flags_; }
-  public: bool is_left_button() const { return button_flags_ & kLeft; }
-  public: bool is_middle_button() const { return button_flags_ & kMiddle; }
-  public: bool is_right_button() const { return button_flags_ & kRight; }
-  public: bool is_x_button1() const { return button_flags_ & kXButton1; }
-  public: bool is_x_button2() const { return button_flags_ & kXButton2; }
+  public: bool alt_key() const { return alt_key_; }
+  public: int button() const { return button_; }
+  public: int buttons() const { return buttons_; }
+  public: int click_count() const { return click_count_; }
+  public: bool control_key() const { return control_key_; }
+  public: bool is_left_button() const { return button_ == kLeft; }
+  public: bool is_middle_button() const { return button_ == kMiddle; }
+  public: bool is_right_button() const { return button_ == kRight; }
+  public: bool is_other1_button() const { return button_ == kOther1; }
+  public: bool is_other2_button() const { return button_ == kOther2; }
   public: Point location() const { return client_point_; }
-  public: bool shift_key() const { return flags_ & MK_SHIFT; }
+  public: bool shift_key() const { return shift_key_; }
 
+  private: static int ConvertToButtons(uint32_t flags);
   public: static MouseEvent Create(Widget* widget, uint32_t message,
                                    WPARAM wParam, LPARAM lParam);
 };

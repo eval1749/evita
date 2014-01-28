@@ -16,32 +16,25 @@ const char* event_names[] = {
   "MouseWheel",
 };
 
-const char* MouseButtons(uint32_t flags) {
+const char* MouseButton(const ui::MouseEvent& event) {
   static const char* button_names[] = {
-    "",  "L", "M", "LM", "R", "LR", "MR", "LMR",
+    "Left", "Middle", "Right", "Other1", "Other2",
   };
-  static_assert(sizeof(button_names) == sizeof(const char*) * 8,
-                "arraysize(button_names[]) must be 8.");
-  auto index = 0;
-  if (flags & MK_LBUTTON)
-    index |= 1;
-  if (flags & MK_MBUTTON)
-    index |= 2;
-  if (flags & MK_RBUTTON)
-    index |= 4;
-  return button_names[index];
+  if (static_cast<size_t>(event.button()) < arraysize(button_names))
+    return button_names[event.button()];
+  return "?";
 }
 
-const char* MouseModifiers(uint32_t flags) {
+const char* MouseModifiers(const ui::MouseEvent& event) {
   static const char* modifier_names[] = {
-    "", "Ctrl", "Shift", "Ctrl+Shift",
+    "", "Ctrl+", "Shift+", "Ctrl+Shift+",
   };
   static_assert(sizeof(modifier_names) == sizeof(const char*) * 4,
                 "arraysize(modifier_names[]) must be 4.");
   auto index = 0;
-  if (flags & MK_CONTROL)
+  if (event.control_key())
     index |= 1;
-  if (flags & MK_SHIFT)
+  if (event.shift_key())
     index |= 2;
   return modifier_names[index];
 }
@@ -74,10 +67,8 @@ std::ostream& operator<<(std::ostream& out, const ui::KeyboardEvent* event) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::MouseEvent& event) {
-  return out << event.event_type() << "Event" <<
-      "(button=" << MouseButtons(event.flags()) <<
-      " modifiers=" << MouseModifiers(event.flags()) <<
-      " count=" << event.click_count() <<
+  return out << event.event_type() << "Event(" <<
+      MouseModifiers(event) << MouseButton(event) <<
       " at " << event.location() << ")";
 }
 

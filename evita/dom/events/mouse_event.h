@@ -27,6 +27,7 @@ class MouseEvent : public v8_glue::Scriptable<MouseEvent, UiEvent> {
 
   public: bool alt_key() const;
   public: int button() const;
+  public: int buttons() const;
   public: int client_x() const;
   public: int client_y() const;
   public: bool ctrl_key() const;

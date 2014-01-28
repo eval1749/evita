@@ -27,15 +27,17 @@ class MouseEventClass :
         &MouseEventClass::NewMouseEvent);
   }
 
-  private: static MouseEvent* NewMouseEvent() {
-    return new MouseEvent(base::string16(), 0);
+  private: static MouseEvent* NewMouseEvent(const base::string16& type,
+                                            int detail) {
+    return new MouseEvent(type, detail);
   }
 
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetProperty("altKey", &MouseEvent::button)
+        .SetProperty("altKey", &MouseEvent::alt_key)
         .SetProperty("button", &MouseEvent::button)
+        .SetProperty("buttons", &MouseEvent::button)
         .SetProperty("clientX", &MouseEvent::client_x)
         .SetProperty("clientY", &MouseEvent::client_y)
         .SetProperty("ctrlKey", &MouseEvent::ctrl_key)
@@ -44,23 +46,23 @@ class MouseEventClass :
 };
 
 base::string16 ConvertEventType(const domapi::MouseEvent& event) {
-  if (event.type == domapi::EventType::Click)
+  if (event.event_type == domapi::EventType::Click)
     return L"click";
-  if (event.type == domapi::EventType::DblClick)
+  if (event.event_type == domapi::EventType::DblClick)
     return L"dblclick";
-  if (event.type == domapi::EventType::MouseDown)
+  if (event.event_type == domapi::EventType::MouseDown)
     return L"mousedown";
-  if (event.type == domapi::EventType::MouseUp)
+  if (event.event_type == domapi::EventType::MouseUp)
     return L"mouseup";
-  if (event.type == domapi::EventType::Wheel)
+  if (event.event_type == domapi::EventType::Wheel)
     return L"wheel";
   return base::string16();
 }
 
 int ConvertClickCount(const domapi::MouseEvent& event) {
-  if (event.type == domapi::EventType::Click)
+  if (event.event_type == domapi::EventType::Click)
     return 1;
-  if (event.type == domapi::EventType::DblClick)
+  if (event.event_type == domapi::EventType::DblClick)
     return 2;
   return 0;
 }
@@ -80,6 +82,15 @@ MouseEvent::MouseEvent(const domapi::MouseEvent& api_event)
 }
 
 MouseEvent::MouseEvent(const base::string16& type, int detail) {
+  event_.target_id = kInvalidWindowId;
+  event_.event_type = domapi::EventType::Invalid;
+  event_.client_x = 0;
+  event_.client_y = 0;
+  event_.button = domapi::MouseButton::Left;
+  event_.buttons = 0;
+  event_.alt_key = false;
+  event_.control_key = false;
+  event_.shift_key = false;
   InitUiEvent(type, Bubbling, Cancelable, nullptr, detail);
 }
 
@@ -92,6 +103,10 @@ bool MouseEvent::alt_key() const {
 
 int MouseEvent:: button() const {
   return static_cast<int>(event_.button);
+}
+
+int MouseEvent:: buttons() const {
+  return event_.buttons;
 }
 
 int MouseEvent:: client_x() const {

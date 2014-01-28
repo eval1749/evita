@@ -23,7 +23,7 @@ TEST_F(MouseEventTest, ctor) {
                       "function init(x) { event = x; }");
   domapi::MouseEvent api_event;
   api_event.target_id = 1;
-  api_event.type = domapi::EventType::DblClick;
+  api_event.event_type = domapi::EventType::DblClick;
   api_event.client_x = 12;
   api_event.client_y = 34;
   api_event.button = domapi::MouseButton::Left;

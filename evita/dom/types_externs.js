@@ -153,6 +153,14 @@ var FormEvent = function(type, bubbles, cancelable, data) {};
  * @constructor
  * @extends{Event}
  * @param {string} type
+ * @param {number} click_count
+ */
+var MouseEvent = function(type, click_count) {};
+
+/**
+ * @constructor
+ * @extends{Event}
+ * @param {string} type
  * @param {boolean} bubbles
  * @param {boolean} cancelable
  * @param {!Window} source_window

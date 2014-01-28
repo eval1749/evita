@@ -11,6 +11,7 @@
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/form_event.h"
+#include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
 #include "evita/dom/events/window_event.h"
 #include "evita/dom/forms/form.h"
@@ -56,6 +57,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
       v8_glue::Installer<FormEvent>::Run(isolate, templ);
       v8_glue::Installer<UiEvent>::Run(isolate, templ);
         v8_glue::Installer<FocusEvent>::Run(isolate, templ);
+        v8_glue::Installer<MouseEvent>::Run(isolate, templ);
       v8_glue::Installer<WindowEvent>::Run(isolate, templ);
 
     v8_glue::Installer<Document>::Run(isolate, templ);

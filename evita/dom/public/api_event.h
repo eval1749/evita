@@ -37,14 +37,15 @@ enum class MouseButton {
 };
 
 struct MouseEvent {
-  EventType type;
-  dom::WindowId target_id;
+  bool alt_key;
+  MouseButton button;
+  int buttons;
   int client_x;
   int client_y;
-  MouseButton button;
-  bool alt_key;
   bool control_key;
+  EventType event_type;
   bool shift_key;
+  dom::WindowId target_id;
 };
 
 }  // namespace domapi

@@ -95,7 +95,7 @@ MouseEvent MouseEvent::Create(Widget* widget, uint32_t message, WPARAM wParam,
         return MouseEvent(EventType::MousePressed, kLeft | 2, widget, wParam,
                           lParam);
     case WM_LBUTTONDOWN:
-        return MouseEvent(EventType::MousePressed, kLeft | 1, widget, wParam,
+        return MouseEvent(EventType::MousePressed, kLeft, widget, wParam,
                           lParam);
     case WM_LBUTTONUP:
         return MouseEvent(EventType::MouseReleased, kLeft, widget, wParam,
@@ -106,7 +106,7 @@ MouseEvent MouseEvent::Create(Widget* widget, uint32_t message, WPARAM wParam,
         return MouseEvent(EventType::MousePressed, kMiddle | 2, widget, wParam,
                           lParam);
     case WM_MBUTTONDOWN:
-        return MouseEvent(EventType::MousePressed, kMiddle | 1, widget, wParam,
+        return MouseEvent(EventType::MousePressed, kMiddle, widget, wParam,
                           lParam);
     case WM_MBUTTONUP:
         return MouseEvent(EventType::MouseReleased, kMiddle, widget, wParam,
@@ -121,7 +121,7 @@ MouseEvent MouseEvent::Create(Widget* widget, uint32_t message, WPARAM wParam,
         return MouseEvent(EventType::MousePressed, kRight | 2, widget, wParam,
                           lParam);
     case WM_RBUTTONDOWN:
-        return MouseEvent(EventType::MousePressed, kRight | 1, widget, wParam,
+        return MouseEvent(EventType::MousePressed, kRight, widget, wParam,
                           lParam);
     case WM_RBUTTONUP:
         return MouseEvent(EventType::MouseReleased, kRight, widget, wParam,
@@ -141,12 +141,12 @@ MouseEvent MouseEvent::Create(Widget* widget, uint32_t message, WPARAM wParam,
       break;
     case WM_XBUTTONDOWN:
       if (HIWORD(wParam) == XBUTTON1) {
-        return MouseEvent(EventType::MousePressed, kXButton1 | 1, widget,
+        return MouseEvent(EventType::MousePressed, kXButton1, widget,
                           wParam,
                           lParam);
       }
       if (HIWORD(wParam) == XBUTTON2) {
-        return MouseEvent(EventType::MousePressed, kXButton2 | 1, widget,
+        return MouseEvent(EventType::MousePressed, kXButton2, widget,
                           wParam, lParam);
       }
       break;

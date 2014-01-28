@@ -579,24 +579,6 @@ void TypeChar(const Context* pCtx)
     } // if close paren
 } // TypeChar
 
-DEFCOMMAND(ValidateIntervals)
-{
-    when (NULL == pCtx->GetSelection()) return;
-
-    auto const document = dom::Document::GetOrNew(L"* Debug Log *");
-    auto const pLogBuf = document->buffer();
-    if (pCtx->HasArg())
-    {
-        pLogBuf->Delete(0, pLogBuf->GetEnd());
-    }
-
-    Buffer* pBuffer = pCtx->GetSelection()->GetBuffer();
-    when (pBuffer->ValidateIntervals(pLogBuf))
-        { return; }
-
-    pCtx->GetFrame()->AddWindow(pLogBuf);
-} // ValidateIntervals
-
 static char16 s_rgwchGraphKey[256];
 
 static const char16* const s_rgpwszVKeyName[256] =

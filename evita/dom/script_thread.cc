@@ -13,6 +13,7 @@
 #include "base/threading/thread.h"
 #pragma warning(pop)
 #include "evita/dom/lock.h"
+#include "evita/dom/public/api_event.h"
 #include "evita/dom/script_controller.h"
 
 #define DCHECK_CALLED_ON_HOST_THREAD() \
@@ -249,6 +250,7 @@ DEFINE_VIEW_EVENT_HANDLER_1(DidRealizeWidget, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidSetFocus, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_0(DidStartHost)
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchFormEvent, const ApiFormEvent&)
+DEFINE_VIEW_EVENT_HANDLER_1(DispatchMouseEvent, const domapi::MouseEvent&)
 DEFINE_VIEW_EVENT_HANDLER_2(OpenFile, WindowId, const base::string16&)
 DEFINE_VIEW_EVENT_HANDLER_1(QueryClose, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(RunCallback, base::Closure)

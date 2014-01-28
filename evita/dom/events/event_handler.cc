@@ -6,8 +6,10 @@
 #include "evita/dom/editor_window.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/events/form_event.h"
+#include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
 #include "evita/dom/events/window_event.h"
+#include "evita/dom/public/api_event.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/window.h"
 #include "evita/gc/local.h"
@@ -142,6 +144,16 @@ void EventHandler::DispatchFormEvent(const ApiFormEvent& raw_event) {
                              Event::NotCancelable,
                              raw_event.data);
   target->DispatchEvent(event);
+}
+
+void EventHandler::DispatchMouseEvent(const domapi::MouseEvent& api_event) {
+  auto const window = EventTarget::FromEventTargetId(api_event.target_id);
+  if (!window)
+    return;
+  gc::Local<MouseEvent> event(new MouseEvent(api_event));
+  if (!window->DispatchEvent(event))
+    return;
+  DoDefaultEventHandling(window, event);
 }
 
 void EventHandler::OpenFile(WindowId window_id,

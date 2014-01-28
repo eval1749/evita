@@ -21,6 +21,7 @@
 #define DEBUG_SHOW_HIDE 0
 #include "evita/vi_TextEditWindow.h"
 
+#include <algorithm>
 #include <vector>
 
 #pragma warning(push)
@@ -49,7 +50,6 @@
 #include "evita/vi_Frame.h"
 #include "evita/vi_Selection.h"
 #include "evita/vi_util.h"
-#include <algorithm>
 
 #define DEBUG_TEXT_EDIT_PRINTF(mp_format, ...) \
   DEBUG_PRINTF("|%ls|@%p " mp_format, GetBuffer()->GetName(), this, \
@@ -268,11 +268,11 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
         auto const lBufEnd = GetBuffer()->GetEnd();
         auto lGoal = *inout_lPosn;
         auto k = 0;
-        for (k = 0; k < n; k++) {
+        for (k = 0; k < n; ++k) {
           lGoal = EndOfLine(lGoal);
           if (lGoal >= lBufEnd)
             break;
-          lGoal += 1;
+          ++lGoal;
         }
         *inout_lPosn = computeGoalX(pt.x, std::min(lGoal, lBufEnd));
         return k;
@@ -282,11 +282,11 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
         auto const lBufStart = GetBuffer()->GetStart();
         auto lStart = *inout_lPosn;
         auto k = 0;
-        for (k = 0; k < n; k++) {
+        for (k = 0; k < n; ++k) {
           lStart = StartOfLine(lStart);
           if (lStart <= lBufStart)
             break;
-          lStart -= 1;
+          --lStart;
         }
 
         *inout_lPosn = computeGoalX(pt.x, std::max(lStart, lBufStart));
@@ -448,7 +448,7 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
 
     auto const lBufStart = selection_->GetBuffer()->GetStart();
     int k;
-    for (k = 0; k < iDy; k++) {
+    for (k = 0; k < iDy; ++k) {
       auto const lStart = m_pPage->GetStart();
       if (lStart == lBufStart)
         break;
@@ -466,7 +466,7 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
     // Scroll Up -- format page from page end.
     const Posn lBufEnd = selection_->GetBuffer()->GetEnd();
     int k;
-    for (k = 0; k < iDy; k++) {
+    for (k = 0; k < iDy; ++k) {
       auto const lStart = m_pPage->GetEnd();
       if (lStart >= lBufEnd)
         break;
@@ -910,7 +910,7 @@ int TextEditWindow::SmallScroll(int, int iDy) {
     auto const lBufStart = selection_->GetBuffer()->GetStart();
     auto lStart = m_pPage->GetStart();
     int k;
-    for (k = 0; k < iDy; k++) {
+    for (k = 0; k < iDy; ++k) {
       if (lStart == lBufStart)
         break;
         lStart = startOfLineAux(*m_gfx, lStart - 1);
@@ -929,11 +929,11 @@ int TextEditWindow::SmallScroll(int, int iDy) {
   if (iDy > 0) {
     auto const lBufEnd = selection_->GetBuffer()->GetEnd();
     int k;
-    for (k = 0; k < iDy; k++) {
+    for (k = 0; k < iDy; ++k) {
       if (m_pPage->GetEnd() >= lBufEnd) {
           // Make sure whole line of buffer end is visible.
           m_pPage->ScrollToPosn(*m_gfx, lBufEnd);
-          k += 1;
+          ++k;
           break;
       }
 
@@ -1251,7 +1251,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
             break;
         }
 
-        iClause += 1;
+        ++iClause;
         Posn lNext = static_cast<Posn>(m_lImeStart + rgnClause[iClause]);
         GetBuffer()->SetStyle(lPosn, lNext, pStyle);
         lPosn = lNext;

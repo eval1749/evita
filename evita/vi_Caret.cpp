@@ -3,9 +3,10 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #include "evita/vi_Caret.h"
 
-#include "evita/gfx_base.h"
 #include <math.h>
 #include <utility>
+
+#include "evita/gfx_base.h"
 
 #define DEBUG_BLINK 0
 #define DEBUG_DRAW 0
@@ -26,7 +27,7 @@ class Caret::BackingStore {
   public: ~BackingStore();
   public: void Restore(const gfx::Graphics& gfx);
   public: void Save(const gfx::Graphics& gfx, const gfx::RectF& rect);
-        
+
   DISALLOW_COPY_AND_ASSIGN(BackingStore);
 };
 
@@ -48,7 +49,7 @@ void Caret::BackingStore::Restore(const gfx::Graphics& gfx) {
   }
 }
 
-void Caret::BackingStore::Save(const gfx::Graphics& gfx, 
+void Caret::BackingStore::Save(const gfx::Graphics& gfx,
                                const gfx::RectF& rect) {
   ASSERT(!rect.is_empty());
   rect_ = gfx::RectF(::floorf(rect.left), ::floorf(rect.top),
@@ -161,7 +162,7 @@ void Caret::Update(const gfx::RectF& new_rect) {
   ASSERT(taken_);
   ASSERT(!shown_);
   #if DEBUG_SHOW
-    DEBUG_PRINTF("Update caret to (%d,%d) from (%d,%d)\n", 
+    DEBUG_PRINTF("Update caret to (%d,%d) from (%d,%d)\n",
         static_cast<uint>(new_rect.left), static_cast<uint>(new_rect.top),
         static_cast<uint>(rect_.left), static_cast<uint>(rect_.top));
   #endif

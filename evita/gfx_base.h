@@ -153,6 +153,13 @@ class Graphics : public Object, public DpiHandler {
   private: ID2D1HwndRenderTarget* render_target_;
   private: mutable void* work_;
 
+  public: class AxisAlignedClipScope {
+    private: const Graphics& gfx_;
+    public: AxisAlignedClipScope(const Graphics& gfx, const RectF& rect);
+    public: ~AxisAlignedClipScope();
+    DISALLOW_COPY_AND_ASSIGN(AxisAlignedClipScope);
+  };
+
   public: class DrawingScope {
     private: const Graphics& gfx_;
     public: DrawingScope(const Graphics& gfx) : gfx_(gfx) {

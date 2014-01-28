@@ -378,6 +378,20 @@ void Graphics::Resize(const Rect& rc) const {
 
 //////////////////////////////////////////////////////////////////////
 //
+// Graphics::AxisAlignedClipScope
+//
+Graphics::AxisAlignedClipScope::AxisAlignedClipScope(
+    const Graphics& gfx, const RectF& rect)
+    : gfx_(gfx) {
+  gfx_->PushAxisAlignedClip(rect, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+}
+
+Graphics::AxisAlignedClipScope::~AxisAlignedClipScope() {
+  gfx_->PopAxisAlignedClip();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // TextFormat
 //
 TextFormat::TextFormat(const base::string16& font_face_name, float font_size)

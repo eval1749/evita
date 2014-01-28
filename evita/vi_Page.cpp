@@ -1455,6 +1455,7 @@ class LineCopier {
 
 bool Page::Render(const gfx::Graphics& gfx) {
   ASSERT(!m_oFormatBuf.rect().is_empty());
+  gfx::Graphics::AxisAlignedClipScope clip_scope(gfx, m_oFormatBuf.rect());
   auto number_of_rendering = 0;
   LineWithTop format_line(m_oFormatBuf.GetFirst(), m_oFormatBuf.top());
   LineWithTop screen_line(m_oScreenBuf.GetFirst(), m_oScreenBuf.top());

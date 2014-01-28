@@ -19,6 +19,7 @@
         'dom/events/event_target_externs.js',
         'dom/events/focus_event_externs.js',
         'dom/events/form_event_externs.js',
+        'dom/events/mouse_event_externs.js',
         'dom/events/ui_event_externs.js',
         'dom/events/window_event_externs.js',
         'dom/editor_externs.js',
@@ -126,6 +127,7 @@
         'dom/events/event_target.cc',
         'dom/events/focus_event.cc',
         'dom/events/form_event.cc',
+        'dom/events/mouse_event.cc',
         'dom/events/ui_event.cc',
         'dom/events/window_event.cc',
 

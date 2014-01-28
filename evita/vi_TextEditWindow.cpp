@@ -9,16 +9,6 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_TextEditWindow.cpp#3 $
 //
-#define DEBUG_AUTOSCROLL 0
-#define DEBUG_CARET 0
-#define DEBUG_FOCUS 0
-#define DEBUG_IDLE 0
-#define DEBUG_KEY 0
-#define DEBUG_PAINT 0
-#define DEBUG_REDRAW 0
-#define DEBUG_RESIZE 0
-#define DEBUG_SCROLL 0
-#define DEBUG_SHOW_HIDE 0
 #include "evita/vi_TextEditWindow.h"
 
 #include <algorithm>
@@ -44,16 +34,11 @@
 #include "evita/dom/selection.h"
 #include "evita/dom/text_window.h"
 #include "evita/ui/events/event.h"
-#include "evita/ui/events/event_ostream.h"
 #include "evita/vi_Caret.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_Selection.h"
 #include "evita/vi_util.h"
-
-#define DEBUG_TEXT_EDIT_PRINTF(mp_format, ...) \
-  DEBUG_PRINTF("|%ls|@%p " mp_format, GetBuffer()->GetName(), this, \
-               __VA_ARGS__)
 
 extern HWND g_hwndActiveDialog;
 
@@ -84,10 +69,6 @@ class TextEditWindow::Autoscroller {
     auto const duration = static_cast<uint>(::GetTickCount() - started_at_);
     auto const scroll_amount = static_cast<Count>(
         std::min(std::max(duration / kScrollSpeedIntervalMs, 1u), 20u));
-    #if DEBUG_AUTOSCROLL
-      DEBUG_PRINTF("dir=%d am=%d duration=%dms\n",
-        direction_, scroll_amount, duration);
-    #endif
     UI_DOM_AUTO_LOCK_SCOPE();
     if (Scroll(scroll_amount))
       editor_->Redraw();
@@ -102,10 +83,6 @@ class TextEditWindow::Autoscroller {
   }
 
   public: void Start(int direction) {
-    #if DEBUG_AUTOSCROLL
-      DEBUG_PRINTF("active=%d dir=%d start=%d\n",
-        timer_.is_active(), direction_, started_at_);
-    #endif
     if (timer_.is_active()) {
       if (direction_ != direction) {
         direction_ = direction;
@@ -121,9 +98,6 @@ class TextEditWindow::Autoscroller {
   public: void Stop() {
     if (!timer_.is_active())
       return;
-    #if DEBUG_AUTOSCROLL
-      DEBUG_PRINTF("\n");
-    #endif
     timer_.Stop();
   }
 
@@ -337,17 +311,11 @@ void TextEditWindow::DidChangeHierarchy() {
 
 void TextEditWindow::DidHide() {
   // Note: It is OK that hidden window have focus.
-  #if DEBUG_SHOW_HIDE
-    DEBUG_TEXT_EDIT_PRINTF("show=%d\n", is_shown());
-  #endif
   m_oHoriScrollBar.ShowWindow(SW_HIDE);
   m_oVertScrollBar.ShowWindow(SW_HIDE);
 }
 
 void TextEditWindow::DidKillFocus() {
-  #if DEBUG_FOCUS
-    DEBUG_TEXT_EDIT_PRINTF("focus=%d show=%d\n", has_focus(), is_shown());
-  #endif
   ParentClass::DidKillFocus();
   // In case of we didn't get mouse released event, e.g. debugger, Alt+Tab,
   // etc, we stop dragging along with autoscroll too.
@@ -363,10 +331,6 @@ void TextEditWindow::DidRealize() {
 }
 
 void TextEditWindow::DidSetFocus() {
-  #if DEBUG_FOCUS
-    DEBUG_TEXT_EDIT_PRINTF("focus=%d show=%d caret=%d\n",
-        has_focus(), is_shown(), m_lCaretPosn);
-  #endif
   ASSERT(has_focus());
   // Note: It is OK to set focus to hidden window.
   caret_->Take(*m_gfx);
@@ -375,9 +339,6 @@ void TextEditWindow::DidSetFocus() {
 }
 
 void TextEditWindow::DidShow() {
-  #if DEBUG_SHOW_HIDE
-    DEBUG_TEXT_EDIT_PRINTF("focus=%d show=%d\n", has_focus(), is_shown());
-  #endif
   m_oHoriScrollBar.ShowWindow(SW_SHOW);
   m_oVertScrollBar.ShowWindow(SW_SHOW);
 }
@@ -455,9 +416,6 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
 
       // Scroll down until page start goes out to page.
       do {
-        #if DEBUG_SCROLL
-          DEBUG_TEXT_EDIT_PRINTF("scroll down lStart=%d\n", lStart);
-        #endif
         if (!m_pPage->ScrollDown(*m_gfx))
           break;
       } while (m_pPage->GetEnd() != lStart);
@@ -470,9 +428,6 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
       auto const lStart = m_pPage->GetEnd();
       if (lStart >= lBufEnd)
         break;
-      #if DEBUG_SCROLL
-        DEBUG_TEXT_EDIT_PRINTF("scroll up lStart=%d\n", lStart);
-      #endif
       format(*m_gfx, lStart);
     }
   }
@@ -510,11 +465,6 @@ Command::KeyBindEntry* TextEditWindow::MapKey(uint nKey) {
 }
 
 void TextEditWindow::MakeSelectionVisible() {
-  #if DEBUG_CARET
-    DEBUG_TEXT_EDIT_PRINTF("[%d,%d]\n",
-        this, selection_->GetStart(), selection_->GetEnd());
-  #endif
-
   m_lCaretPosn = -1;
   Redraw();
 }
@@ -548,10 +498,6 @@ void TextEditWindow::OnDraw(gfx::Graphics*) {
 bool TextEditWindow::OnIdle(uint count) {
   auto const more = GetBuffer()->OnIdle(count);
 
-  #if DEBUG_IDLE
-    DEBUG_TEXT_EDIT_PRINTF("count=%d more=%d\n", count, more);
-  #endif
-
   if (is_shown())
     Redraw();
   return more;
@@ -569,12 +515,6 @@ void TextEditWindow::OnMousePressed(const ui::MouseEvent& event) {
     return;
   UI_DOM_AUTO_LOCK_SCOPE();
   auto const lPosn = MapPointToPosn(event.location());
-  #if DEBUG_FOCUS
-    DEBUG_TEXT_EDIT_PRINTF(DEBUG_POINT_FORMAT " focus=%d show=%d p=%d\n",
-        DEBUG_POINT_ARG(point),
-        has_focus(), is_shown(), lPosn);
-  #endif
-
   if (lPosn < 0) {
     // Click outside window. We do nothing.
     return;
@@ -667,11 +607,6 @@ void TextEditWindow::OnMouseMoved(const ui::MouseEvent& event) {
   if (lPosn >= 0)
     selection_->MoveTo(lPosn, true);
 
-  #if DEBUG_FORMAT
-    DEBUG_TEXT_EDIT_PRINTF("WM_MOUSEMOVE: " DEBUG_POINT_FORMAT "\n",
-        DEBUG_POINT_ARG);
-  #endif // DEBUG_FORMAT
-
   if (event.location().y < rect().top)
     autoscroller_->Start(-1);
   else if (event.location().y > rect().bottom)
@@ -740,11 +675,6 @@ void TextEditWindow::Redraw() {
 
   UI_ASSERT_DOM_LOCKED();
 
-  #if DEBUG_REDRAW
-    DEBUG_TEXT_EDIT_PRINTF(DEBUG_RECT_FORMAT
-                           " ~~~~~~~~~~Start selection_is_active=%d\n",
-        DEBUG_RECT_ARG(rect()), fSelectionIsActive);
-  #endif
   Posn lCaretPosn;
   Posn lSelStart;
   Posn lSelEnd;
@@ -788,32 +718,17 @@ void TextEditWindow::Redraw() {
   {
     auto const lStart = m_pViewRange->GetStart();
     if (m_pPage->IsDirty(rect(), *selection_, fSelectionIsActive)) {
-      #if DEBUG_REDRAW
-        DEBUG_TEXT_EDIT_PRINTF("Page %p is dirty. lStart=%d\n",
-            m_pPage, lStart);
-      #endif // DEBUG_REDRAW
       format(*m_gfx, startOfLineAux(*m_gfx, lStart));
 
       if (m_lCaretPosn != lCaretPosn) {
         // FIXME 2007-05-12 Fill the page with lines.
-        #if DEBUG_REDRAW
-          DEBUG_TEXT_EDIT_PRINTF("ScrollToPosn %d\n", lCaretPosn);
-        #endif
         m_pPage->ScrollToPosn(*m_gfx, lCaretPosn);
         m_lCaretPosn = lCaretPosn;
       }
     } else if (m_lCaretPosn != lCaretPosn) {
-        #if DEBUG_FOCUS
-          DEBUG_TEXT_EDIT_PRINTF("Page %p change caret %d to %d\n",
-            m_pPage, m_lCaretPosn, lCaretPosn);
-        #endif
         m_pPage->ScrollToPosn(*m_gfx, lCaretPosn);
         m_lCaretPosn = lCaretPosn;
     } else if (m_pPage->GetStart() != lStart) {
-        #if DEBUG_REDRAW
-        DEBUG_TEXT_EDIT_PRINTF("Page %p change start %d to %d\n",
-            m_pPage, m_pPage->GetStart(), lStart);
-        #endif // DEBUG_REDRAW
         format(*m_gfx, startOfLineAux(*m_gfx, lStart));
     } else {
       // Page is clean.
@@ -823,12 +738,6 @@ void TextEditWindow::Redraw() {
   }
 
   Render();
-
-  #if DEBUG_REDRAW
-    DEBUG_TEXT_EDIT_PRINTF(DEBUG_RECT_FORMAT
-                           " ~~~~~~~~~~ End Page=[%d,%d]\n",
-        DEBUG_RECT_ARG(rect()), m_pPage->GetStart(), m_pPage->GetEnd());
-  #endif
 }
 
 void TextEditWindow::Render() {
@@ -850,9 +759,6 @@ void TextEditWindow::Render() {
 
   const auto rect = m_pPage->MapPosnToPoint(*m_gfx, m_lCaretPosn);
   if (!rect) {
-    #if DEBUG_FOCUS
-      DEBUG_TEXT_EDIT_PRINTF("caret %d isn't in page\n", m_lCaretPosn);
-    #endif
     caret_->Reset();
     return;
   }
@@ -875,14 +781,9 @@ void TextEditWindow::Render() {
 
       if (showImeCaret(size, pt))
         return;
-      DEBUG_TEXT_EDIT_PRINTF("showImeCaret failed.\r\n");
     }
   #endif // SUPPORT_IME
 
-  #if DEBUG_FOCUS
-    DEBUG_TEXT_EDIT_PRINTF("Update caret " DEBUG_RECTF_FORMAT "\n",
-        DEBUG_RECTF_ARG(caret_rect));
-  #endif
   caret_->Update(caret_rect);
 }
 
@@ -917,9 +818,6 @@ int TextEditWindow::SmallScroll(int, int iDy) {
     }
 
     if (k > 0) {
-      #if DEBUG_FORMAT
-        DEBUG_TEXT_EDIT_PRINTF("down lStart=%d\n", lStart);
-      #endif // DEBUG_FORMAT
       format(*m_gfx, lStart);
       Render();
     }
@@ -996,9 +894,6 @@ void TextEditWindow::updateScreen() {
 
   Posn lStart = m_pViewRange->GetStart();
   lStart = startOfLineAux(*m_gfx, lStart);
-  #if DEBUG_REDRAW
-    DEBUG_TEXT_EDIT_PRINTF("dirty page lStart=%d\n", lStart);
-  #endif // DEBUG_REDRAW
   format(*m_gfx, lStart);
 }
 
@@ -1142,16 +1037,13 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
     auto const cbAttr = ::ImmGetCompositionString(
         imc, GCS_COMPATTR, rgbAttr, sizeof(rgbAttr));
     if (cbAttr != static_cast<int>(cwch)) {
-      DEBUG_TEXT_EDIT_PRINTF("GCCS_COMPATTR\n");
       return;
     }
 
     auto const lCursor = ::ImmGetCompositionString(
           imc, GCS_CURSORPOS, nullptr, 0);
-    if (lCursor < 0) {
-      DEBUG_TEXT_EDIT_PRINTF("GCCS_CURSORPOS\n");
+    if (lCursor < 0)
       return;
-    }
 
     uint32 rgnClause[100];
     ::ImmGetCompositionString(imc, GCS_COMPCLAUSE, rgnClause,
@@ -1323,10 +1215,8 @@ void TextEditWindow::Reconvert(Posn lStart, Posn lEnd) {
       cb,
       nullptr,
       0);
-  if (!fSucceeded) {
-      DEBUG_TEXT_EDIT_PRINTF("SCS_QUERYRECONVERTSTRING\n");
+  if (!fSucceeded)
       goto exit;
-  }
 
   m_lImeStart = static_cast<Posn>(lStart + p->dwCompStrOffset / 2);
   m_lImeEnd = static_cast<Posn>(m_lImeStart + p->dwCompStrLen);
@@ -1339,10 +1229,8 @@ void TextEditWindow::Reconvert(Posn lStart, Posn lEnd) {
       cb,
       nullptr,
       0);
-  if (!fSucceeded) {
-    DEBUG_TEXT_EDIT_PRINTF("SCS_SETRECONVERTSTRING\n");
+  if (!fSucceeded)
     goto exit;
-  }
 
   exit:
     delete[] pb;

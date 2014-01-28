@@ -8,10 +8,6 @@
 
 #include "evita/gfx_base.h"
 
-#define DEBUG_BLINK 0
-#define DEBUG_DRAW 0
-#define DEBUG_SHOW 0
-
 static const auto kBlinkInterval = 500; // milliseconds
 
 //////////////////////////////////////////////////////////////////////
@@ -41,17 +37,14 @@ Caret::BackingStore::~BackingStore() {
 void Caret::BackingStore::Restore(const gfx::Graphics& gfx) {
   if (!rect_ || render_target_ != &*gfx)
     return;
-  ASSERT(!!bitmap_);
+  DCHECK(bitmap_);
   gfx->DrawBitmap(*bitmap_, rect_);
-  auto const hr = gfx->Flush();
-  if (FAILED(hr)) {
-    DEBUG_PRINTF("DrawBitmap failed hr=0x%08X\n", hr);
-  }
+  gfx->Flush();
 }
 
 void Caret::BackingStore::Save(const gfx::Graphics& gfx,
                                const gfx::RectF& rect) {
-  ASSERT(!rect.is_empty());
+  DCHECK(!rect.is_empty());
   rect_ = gfx::RectF(::floorf(rect.left), ::floorf(rect.top),
                      ::ceilf(rect.right), ::ceilf(rect.bottom));
   gfx::RectU screen_rect = gfx::RectU(static_cast<uint>(rect_.left),
@@ -79,18 +72,12 @@ Caret::Caret()
 }
 
 Caret::~Caret() {
-  ASSERT(!taken_);
+  DCHECK(!taken_);
 }
 
 void Caret::Blink(common::RepeatingTimer<Caret>*) {
   if (!taken_ || !should_blink_ || !rect_)
     return;
-  #if DEBUG_BLINK
-    auto now = ::GetTickCount();
-    static decltype(now) last_at;
-    DEBUG_PRINTF("show=%d %dms\n", shown_, now - last_at);
-    last_at = now;
-  #endif
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   if (shown_)
     Hide();
@@ -103,10 +90,7 @@ std::unique_ptr<Caret> Caret::Create() {
 }
 
 void Caret::Give() {
-  #if DEBUG_SHOW
-    DEBUG_PRINTF("gfx=%p\n", gfx_);
-  #endif
-  ASSERT(taken_);
+  DCHECK(taken_);
   blink_timer_.Stop();
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   Hide();
@@ -114,9 +98,6 @@ void Caret::Give() {
 }
 
 void Caret::Hide() {
-  #if DEBUG_DRAW || DEBUG_SHOW
-    DEBUG_PRINTF("taken=%d shown=%d\n", taken_, shown_);
-  #endif
   if (!taken_)
     return;
   if (!shown_)
@@ -132,10 +113,7 @@ void Caret::Reset() {
 }
 
 void Caret::Show() {
-  #if DEBUG_DRAW
-    DEBUG_PRINTF("taken=%d shown=%d\n", taken_, shown_);
-  #endif
-  ASSERT(!!rect_);
+  DCHECK(rect_);
   if (shown_)
     return;
   backing_store_->Save(*gfx_, rect_);
@@ -145,9 +123,6 @@ void Caret::Show() {
 }
 
 void Caret::Take(const gfx::Graphics& gfx) {
-  #if DEBUG_SHOW
-    DEBUG_PRINTF("gfx=%p taken=%d\n", &gfx, taken_);
-  #endif
   taken_ = true;
   gfx_ = &gfx;
   blink_timer_.Start(kBlinkInterval);
@@ -158,14 +133,9 @@ void Caret::Take(const gfx::Graphics& gfx) {
 }
 
 void Caret::Update(const gfx::RectF& new_rect) {
-  ASSERT(!!new_rect);
-  ASSERT(taken_);
-  ASSERT(!shown_);
-  #if DEBUG_SHOW
-    DEBUG_PRINTF("Update caret to (%d,%d) from (%d,%d)\n",
-        static_cast<uint>(new_rect.left), static_cast<uint>(new_rect.top),
-        static_cast<uint>(rect_.left), static_cast<uint>(rect_.top));
-  #endif
+  DCHECK(new_rect);
+  DCHECK(taken_);
+  DCHECK(!shown_);
   if (rect_ == new_rect) {
     should_blink_ = true;
   } else {

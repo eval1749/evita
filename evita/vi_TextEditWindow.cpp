@@ -773,7 +773,7 @@ void TextEditWindow::Redraw() {
     selection_->SetColor(Color(255, 255, 255));
     selection_->SetBackground(Color(51, 153, 255));
   } else {
-    lCaretPosn = m_lCaretPosn;
+    lCaretPosn = m_lCaretPosn == -1 ? lSelStart : m_lCaretPosn;
 
     Posn lEnd = GetBuffer()->GetEnd();
     if (lSelStart == lEnd && lSelEnd == lEnd)
@@ -782,6 +782,8 @@ void TextEditWindow::Redraw() {
      selection_->SetColor(Color(67, 78, 84));
      selection_->SetBackground(Color(191, 205, 219));
   }
+
+  DCHECK_GE(lCaretPosn, 0);
 
   {
     auto const lStart = m_pViewRange->GetStart();

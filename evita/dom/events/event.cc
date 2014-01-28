@@ -58,13 +58,13 @@ Event::DispatchScope::DispatchScope(Event* event, EventTarget* target)
   DCHECK(!event->target_);
   event_->target_ = target;
   event_->event_phase_ = kCapturingPhase;
+  event_->time_stamp_ = TimeStamp::Now();
 }
 
 Event::DispatchScope::~DispatchScope() {
   event_->current_target_ = nullptr;
   event_->event_phase_ = kNone;
   event_->target_ = nullptr;
-  event_->time_stamp_ = TimeStamp::Now();
 }
 
 void Event::DispatchScope::set_current_target(EventTarget* target) {

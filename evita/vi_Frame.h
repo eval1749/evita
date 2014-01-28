@@ -94,7 +94,6 @@ class Frame final : public views::Window,
   public: bool  Activate();
   private: void AddPane(Pane*);
   private: void AddTab(Pane*);
-  public: TextEditWindow* AddWindow(Buffer* buffer);
   public: void AddWindow(views::ContentWindow*);
 
   // [C]
@@ -155,7 +154,6 @@ class Frame final : public views::Window,
   // [S]
   public: void SetStatusBar(int part, const base::string16& text);
   public: void SetStatusBar(std::vector<base::string16> texts);
-  public: bool ShowBuffer(Buffer*);
   public: void ShowMessage(MessageLevel, uint = 0, ...);
 
   // [U]

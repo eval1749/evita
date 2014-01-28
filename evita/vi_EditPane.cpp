@@ -1155,10 +1155,6 @@ void EditPane::SplitterController::Stop() {
   ASSERT(!m_pBox);
 }
 
-EditPane::EditPane(Buffer* pBuffer, Posn lStart)
-    : EditPane(new TextEditWindow(pBuffer, lStart)) {
-}
-
 EditPane::EditPane(Window* pWindow)
     : m_eState(State_NotRealized),
       root_box_(*new VerticalLayoutBox(this, nullptr)),

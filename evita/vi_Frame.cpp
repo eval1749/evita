@@ -181,12 +181,6 @@ void Frame::AddTab(Pane* const pane) {
   TabCtrl_SetCurSel(m_hwndTabBand, new_tab_item_index);
 }
 
-TextEditWindow* Frame::AddWindow(Buffer* buffer) {
-  auto const window = new TextEditWindow(buffer);
-  AddWindow(window);
-  return window;
-}
-
 void Frame::AddWindow(views::ContentWindow* window) {
   DCHECK(!window->parent_node());
   DCHECK(!window->is_realized());
@@ -912,30 +906,6 @@ void Frame::SetStatusBar(int part, const base::string16& text) {
 /// </summary>
 void Frame::SetStatusBar(const std::vector<base::string16> texts) {
   m_oStatusBar.Set(texts);
-}
-
-/// <summary>
-///   Show or activate specified buffer on this frame.
-/// </summary>
-/// <param name="pBuffer">A buffer to display or activate.</param>
-/// <returns>
-///   True if buffer hasn't been displayed in this frame. False if associated
-///   window is activated.
-/// </returns>
-bool Frame::ShowBuffer(Buffer* const pBuffer) {
-  for (auto& pane: m_oPanes) {
-    if (auto const edit_pane = pane.DynamicCast<EditPane>()) {
-      if (edit_pane->GetBuffer() == pBuffer) {
-        edit_pane->Activate();
-        return false;
-      }
-    }
-  }
-
-  auto const pPane = new EditPane(pBuffer);
-  AddPane(pPane);
-  pPane->Activate();
-  return true;
 }
 
 /// <summary>

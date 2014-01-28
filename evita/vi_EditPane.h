@@ -65,7 +65,6 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
   private: const common::OwnPtr<SplitterController> splitter_controller_;
 
   // ctro/dtor
-  public: explicit EditPane(Buffer*, Posn = 0);
   public: explicit EditPane(Window* window);
   public: virtual ~EditPane();
 

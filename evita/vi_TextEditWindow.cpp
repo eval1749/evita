@@ -208,23 +208,6 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
   selection_->set_window(this);
 }
 
-TextEditWindow::TextEditWindow(Buffer* pBuffer, Posn lStart)
-    : autoscroller_(new Autoscroller(this)),
-      caret_(std::move(Caret::Create())),
-      m_eDragMode(DragMode_None),
-      m_gfx(nullptr),
-      m_lCaretPosn(-1),
-      m_pPage(new Page()),
-      selection_(new(pBuffer->GetHeap()) Selection(this, pBuffer)),
-      #if SUPPORT_IME
-        m_fImeTarget(false),
-        m_lImeEnd(0),
-        m_lImeStart(0),
-      #endif // SUPPORT_IME
-      m_pViewRange(pBuffer->CreateRange(lStart)) {
-  UI_ASSERT_DOM_LOCKED();
-}
-
 TextEditWindow::~TextEditWindow() {
 }
 

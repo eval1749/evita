@@ -115,7 +115,6 @@ class TextEditWindow
 
   // ctor/dtor
   public: explicit TextEditWindow(const dom::TextWindow& window);
-  public: TextEditWindow(Buffer*, Posn = 0);
   public: virtual ~TextEditWindow();
 
   // [B]

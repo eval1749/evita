@@ -979,7 +979,7 @@ Page::Line* Page::FindLine(Posn lPosn) const {
   if (lPosn < m_lStart || lPosn > m_lEnd)
     return nullptr;
 
-  for (auto& line: m_oFormatBuf.lines()) {
+  for (auto& line : m_oFormatBuf.lines()) {
     if (lPosn < line.m_lEnd)
       return const_cast<Line*>(&line);
   }
@@ -1168,7 +1168,7 @@ bool Page::isPosnVisible(Posn lPosn) const {
     return false;
 
   auto y = m_oFormatBuf.top();
-  for (const auto& line: m_oFormatBuf.lines()) {
+  for (const auto& line : m_oFormatBuf.lines()) {
     if (lPosn >= line.GetStart() && lPosn < line.GetEnd())
       return y + line.GetHeight() <= m_oFormatBuf.bottom();
     y += line.GetHeight();
@@ -1183,7 +1183,7 @@ Posn Page::MapPointToPosn(const gfx::Graphics& gfx, gfx::PointF pt) const {
     return GetEnd();
 
   auto yLine = m_oFormatBuf.top();
-  for (const auto& line: m_oFormatBuf.lines()) {
+  for (const auto& line : m_oFormatBuf.lines()) {
     auto const y = pt.y - yLine;
     yLine += line.GetHeight();
 
@@ -1195,7 +1195,7 @@ Posn Page::MapPointToPosn(const gfx::Graphics& gfx, gfx::PointF pt) const {
       return line.GetStart();
 
     auto lPosn = line.GetEnd() - 1;
-    for (const auto& cell: line.cells()) {
+    for (const auto& cell : line.cells()) {
       auto x = pt.x - xCell;
       xCell += cell.m_cx;
       auto lMap = cell.MapXToPosn(gfx, x);
@@ -1219,10 +1219,10 @@ gfx::RectF Page::MapPosnToPoint(const gfx::Graphics& gfx, Posn lPosn) const {
     return gfx::RectF();
 
   auto y = m_oFormatBuf.top();
-  for (const auto& line: m_oFormatBuf.lines()) {
+  for (const auto& line : m_oFormatBuf.lines()) {
     if (lPosn >= line.m_lStart && lPosn < line.m_lEnd) {
         auto x = m_oFormatBuf.left();
-        for (const auto& cell: line.cells()) {
+        for (const auto& cell : line.cells()) {
           float cx = cell.MapPosnToX(gfx, lPosn);
           if (cx >= 0) {
             return gfx::RectF(gfx::PointF(x + cx, y),
@@ -1417,7 +1417,7 @@ class LineCopier {
   }
 
   private: LineWithTop FindSameLine(const LineWithTop& line) const {
-    for (auto present: lines_) {
+    for (auto present : lines_) {
       if (present->Equal(line))
         return present;
     }
@@ -1494,7 +1494,7 @@ bool Page::Render(const gfx::Graphics& gfx) {
   // Update m_oScreenBuf for next rendering.
   {
     auto const hHeap = m_oScreenBuf.Reset(m_oFormatBuf.rect());
-    for (const auto& line: m_oFormatBuf.lines()) {
+    for (const auto& line : m_oFormatBuf.lines()) {
       m_oScreenBuf.Append(line.Copy(hHeap));
     }
   }
@@ -1752,7 +1752,7 @@ Page::Line::Line(const Line& other, HANDLE hHeap)
 Page::Line* Page::Line::Copy(HANDLE hHeap) const {
   auto const pLine = new(hHeap) Line(*this, hHeap);
   ASSERT(pLine->m_pwch);
-  for (const auto& cell: cells()) {
+  for (const auto& cell : cells()) {
     auto const copy = cell.Copy(hHeap, pLine->m_pwch);
     pLine->cells_.Append(copy);
   }
@@ -1769,7 +1769,7 @@ bool Page::Line::Equal(const Line* other) const {
   if (Hash() != other->Hash())
     return false;
   auto other_it = other->cells().begin();
-  for (const auto& cell: cells()) {
+  for (const auto& cell : cells()) {
     if (other_it == other->cells_.end())
       return false;
     if (!cell.Equal(&*other_it))
@@ -1784,7 +1784,7 @@ bool Page::Line::Equal(const Line* other) const {
 void Page::Line::Fix(float iDescent) {
   auto const pwch = m_pwch;
   auto cx = 0.0f;
-  for (auto& cell: cells()) {
+  for (auto& cell : cells()) {
     auto const lEnd = cell.Fix(pwch, m_iHeight, iDescent);
     if (lEnd >= 0)
       m_lEnd = lEnd;
@@ -1796,7 +1796,7 @@ void Page::Line::Fix(float iDescent) {
 uint Page::Line::Hash() const {
   if (m_nHash)
     return m_nHash;
-  for (const auto& cell: cells()) {
+  for (const auto& cell : cells()) {
     m_nHash <<= 5;
     m_nHash ^= cell.Hash();
     m_nHash >>= 3;
@@ -1807,7 +1807,7 @@ uint Page::Line::Hash() const {
 Posn Page::Line::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
   auto xCell = 0.0f;
   auto lPosn = GetEnd() - 1;
-  for (const auto& cell: cells()) {
+  for (const auto& cell : cells()) {
     auto const x = xGoal - xCell;
     xCell += cell.m_cx;
     auto const lMap = cell.MapXToPosn(gfx, x);
@@ -1822,7 +1822,7 @@ Posn Page::Line::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
 void Page::Line::Render(const gfx::Graphics& gfx,
                         const gfx::PointF& left_top) const {
   auto x = left_top.x;
-  for (auto const& cell: cells()) {
+  for (auto const& cell : cells()) {
     gfx::RectF rect(x, left_top.y, x + cell.m_cx,
                     ::ceilf(left_top.y + cell.m_cy));
     cell.Render(gfx, rect);

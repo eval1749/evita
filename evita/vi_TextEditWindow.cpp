@@ -891,6 +891,7 @@ void TextEditWindow::Render() {
     #if DEBUG_FOCUS
       DEBUG_TEXT_EDIT_PRINTF("caret %d isn't in page\n", m_lCaretPosn);
     #endif
+    caret_->Reset();
     return;
   }
 

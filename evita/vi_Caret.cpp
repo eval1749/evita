@@ -124,6 +124,12 @@ void Caret::Hide() {
   shown_ = false;
 }
 
+void Caret::Reset() {
+  DCHECK(!shown_);
+  should_blink_ = false;
+  rect_ = gfx::RectF();
+}
+
 void Caret::Show() {
   #if DEBUG_DRAW
     DEBUG_PRINTF("taken=%d shown=%d\n", taken_, shown_);

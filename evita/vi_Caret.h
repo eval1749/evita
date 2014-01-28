@@ -40,6 +40,7 @@ class Caret {
   public: static std::unique_ptr<Caret> Create();
   public: void Hide();
   public: void Give();
+  public: void Reset();
   private: void Show();
   public: void ShouldBlink() { should_blink_ = true; }
   // TODO: We should pass Widget to Caret::Take() instead of gfx::Graphics.

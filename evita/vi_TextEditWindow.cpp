@@ -370,7 +370,6 @@ void TextEditWindow::DidKillFocus() {
   // etc, we stop dragging along with autoscroll too.
   stopDrag();
   caret_->Give();
-  m_lCaretPosn = -1;
 }
 
 void TextEditWindow::DidRealize() {
@@ -389,7 +388,6 @@ void TextEditWindow::DidSetFocus() {
   // Note: It is OK to set focus to hidden window.
   caret_->Take(*m_gfx);
   GetBuffer()->UpdateFileStatus(true);
-  m_lCaretPosn = -1;
   ParentClass::DidSetFocus();
 }
 

@@ -434,7 +434,7 @@
         if (line_range.end < document.length &&
             line_range.end - line_range.start < tab_width &&
             document.charCodeAt_(line_range.end) == 0x09) {
-          line_range.move(Unit.CHARACTER);
+          line_range.moveEnd(Unit.CHARACTER);
         }
         line_range.text = '';
         line_range.endOf(Unit.LINE).move(Unit.CHARACTER);

@@ -198,9 +198,6 @@ class TextEditWindow
   // export this for EditPane.
   public: virtual void UpdateStatusBar() const override;
 
-  // [W]
-  private: virtual void WillDestroyWidget() override;
-
   #if SUPPORT_IME
   private: void onImeComposition(LPARAM);
   public: void Reconvert(Posn, Posn);

@@ -613,30 +613,7 @@ void TextEditWindow::OnMouseReleased(const ui::MouseEvent& event) {
 }
 
 LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
-  if (WM_SYSTIMER == uMsg) { // WM_SYSTIMER for blinking caret
-    DEBUG_TEXT_EDIT_PRINTF("WM_SYSTIMER\n");
-  }
-
   switch (uMsg) {
-    case WM_DESTROY:
-      #if DEBUG_DESTROY
-        DEBUG_TEXT_EDIT_PRINTF("WM_DESTROY\n");
-      #endif
-      break;
-
-    case WM_APPCOMMAND:
-      #if DEBUG_KEY
-          DEBUG_TEXT_EDIT_PRINTF("WM_APPCOMMAND %x\n", lParam);
-      #endif
-      return TRUE;
-
-    case WM_SIZE:
-      #if DEBUG_RESIZE
-        DEBUG_TEXT_EDIT_PRINTF("WM_SIZE %dx%d\n",
-            LOWORD(lParam), HIWORD(lParam));
-      #endif
-      return 0;
-
     case WM_VSCROLL:
       onVScroll(LOWORD(wParam));
       return 0;
@@ -1081,10 +1058,6 @@ static std::vector<base::string16> ComposeStatusBarTexts(
 void TextEditWindow::UpdateStatusBar() const {
   frame().SetStatusBar(ComposeStatusBarTexts(GetBuffer(), GetSelection(),
                                              has_focus()));
-}
-
-void TextEditWindow::WillDestroyWidget() {
-  ParentClass::WillDestroyWidget();
 }
 
 #if SUPPORT_IME

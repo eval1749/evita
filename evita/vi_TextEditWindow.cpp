@@ -529,14 +529,14 @@ void TextEditWindow::OnMousePressed(const ui::MouseEvent& event) {
   }
 
   if (event.click_count() == 2) {
-    selectWord(lPosn);
+    DispatchMouseEvent(event);
     return;
   }
 
   GetSelection()->MoveTo(lPosn, event.shift_key());
 
   if (event.control_key()) {
-    selectWord(lPosn);
+    DispatchMouseEvent(event);
   } else {
     m_eDragMode = DragMode_Selection;
     SetCapture();

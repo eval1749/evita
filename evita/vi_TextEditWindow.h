@@ -180,7 +180,7 @@ class TextEditWindow
   private: void onVScroll(uint);
 
   // [R]
-  public: virtual void Redraw() override;
+  private: virtual void Redraw() override;
   private: void Render();
 
   // [S]

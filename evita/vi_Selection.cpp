@@ -79,56 +79,6 @@ Selection* Selection::Create(const text::Range& range) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// Selection::EndOf
-//
-Count Selection::EndOf(Unit eUnit, bool fExtend)
-{
-    forgetGoal();
-
-    Posn lEnd = GetEnd();
-
-    Posn lNew;
-    switch (eUnit)
-    {
-    case Unit_Window:
-        lNew = GetWindow()->GetEnd();
-        break;
-
-    case Unit_WindowLine:
-        lNew = GetWindow()->EndOfLine(GetActivePosn());
-        break;
-
-    default:
-        return Range::EndOf(eUnit, fExtend);
-    } // switch unit
-
-    if (fExtend)
-    {
-        if (! IsStartActive())
-        {
-            SetEnd(lNew);
-        }
-        else if (isSingleLine())
-        {
-            SetEnd(lNew);
-            SetStartIsActive(false);
-        }
-        else
-        {
-            SetStart(lNew);
-        }
-    }
-    else
-    {
-        SetRange(lNew, lNew);
-    }
-
-    return lNew - lEnd;
-} // Selection::EndOf
-
-
-//////////////////////////////////////////////////////////////////////
-//
 // Selection::forgetGoal
 //
 void Selection::forgetGoal()
@@ -147,18 +97,6 @@ SelectionType Selection::GetType() const
         Selection_None :
         Selection_Normal;
 } // Selection::GetType
-
-//////////////////////////////////////////////////////////////////////
-//
-// Selection::isSingleLine
-//
-bool Selection::isSingleLine() const
-{
-    Posn lStart = GetWindow()->StartOfLine(GetStart());
-    Posn lEnd   = GetWindow()->StartOfLine(GetEnd());
-    return lStart == lEnd;
-} // Selection::isSingleLine
-
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -335,56 +273,6 @@ void Selection::SetStartIsActive(bool new_start_is_active) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// Selection::StartOf
-//
-Count Selection::StartOf(Unit eUnit, bool fExtend)
-{
-    forgetGoal();
-
-    Posn lStart = GetStart();
-
-    Posn lNew;
-    switch (eUnit)
-    {
-    case Unit_WindowLine:
-        lNew = GetWindow()->StartOfLine(GetActivePosn());
-        break;
-
-    case Unit_Window:
-        lNew = GetWindow()->GetStart();
-        break;
-
-    default:
-        return Range::StartOf(eUnit, fExtend);
-    } // switch unit
-
-    if (fExtend)
-    {
-        if (IsStartActive())
-        {
-            SetStart(lNew);
-        }
-        else if (isSingleLine())
-        {
-            SetStart(lNew);
-            SetStartIsActive(true);
-        }
-        else
-        {
-            SetEnd(lNew);
-        }
-    }
-    else
-    {
-        SetRange(lNew, lNew);
-    }
-
-    return lStart - lNew;
-} // Selection::StartOf
-
-
-//////////////////////////////////////////////////////////////////////
-//
 // Selection::TypeChar
 //
 void Selection::TypeChar(char16 wch, Count k)
@@ -403,17 +291,6 @@ void Selection::TypeChar(char16 wch, Count k)
 
     MoveRight(Unit_Char, k);
 } // Selection::TypeChar
-
-//////////////////////////////////////////////////////////////////////
-//
-// Selection::TypeText
-//
-void Selection::TypeText(const char16* pwch, Count cwch)
-{
-    SetText(pwch, cwch);
-    Collapse(Collapse_End);
-} // Selection::TypeText
-
 
 //////////////////////////////////////////////////////////////////////
 //

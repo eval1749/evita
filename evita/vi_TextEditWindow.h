@@ -184,7 +184,6 @@ class TextEditWindow
   private: void Render();
 
   // [S]
-  private: void selectWord(Posn);
   public: void SetScrollBar(HWND, int);
   public: int SmallScroll(int, int);
   public: Posn StartOfLine(Posn);

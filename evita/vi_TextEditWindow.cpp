@@ -787,15 +787,6 @@ void TextEditWindow::Render() {
   caret_->Update(caret_rect);
 }
 
-void TextEditWindow::selectWord(Posn lPosn) {
-  UI_ASSERT_DOM_LOCKED();
-  auto const pSelection = GetSelection();
-  pSelection->SetStart(lPosn);
-  pSelection->StartOf(Unit_Word);
-  pSelection->EndOf(Unit_Word, true);
-  pSelection->SetStartIsActive(false);
-}
-
 void TextEditWindow::SetScrollBar(HWND hwnd, int nBar) {
   ASSERT(nBar == SB_VERT);
   m_oVertScrollBar.Set(hwnd, SB_CTL);

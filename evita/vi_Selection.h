@@ -68,9 +68,6 @@ class Selection : public text::Range
     public:  void Collapse(CollapseWhich = Collapse_Start);
     public: static Selection* Create(const text::Range& range);
 
-    // [E]
-    public: Count EndOf(Unit, bool = false);
-
     // [G]
     public: Posn GetActivePosn() const
         { return m_fStartIsActive ? GetStart() : GetEnd(); }
@@ -82,12 +79,10 @@ class Selection : public text::Range
     public: TextEditWindow* GetWindow()     const { return m_pWindow; }
 
     // [I]
-    protected: bool isSingleLine() const;
     public:    bool IsStartActive() const { return m_fStartIsActive; }
 
     // [M]
     public:  Count MoveDown (Unit, Count, bool = false);
-    public:  Count MoveLeft (Unit, Count, bool = false);
     public:  Count MoveRight(Unit, Count, bool = false);
     public:  void  MoveTo(Posn, bool = false);
     public:  Count MoveUp(Unit, Count, bool = false);
@@ -99,19 +94,6 @@ class Selection : public text::Range
     public: void RestoreForReload();
 
     // [S]
-    public: Posn SetActivePosn(Posn lPosn)
-    { 
-        if (m_fStartIsActive)
-        {
-            SetStart(lPosn);
-        }
-        else
-        {
-            SetEnd(lPosn);
-        }
-        return lPosn;
-    } // SetActivePosn
-
     public: Color SetBackground(Color cr) { return m_crBackground = cr; }
     public: Color SetColor(Color cr) { return m_crColor = cr; }
     public: void  SetEnd(Posn);
@@ -121,11 +103,10 @@ class Selection : public text::Range
     public: void  SetText(const char16*, int);
     public: void  SetStart(Posn);
     public: void SetStartIsActive(bool new_start_is_active);
-    public: Count StartOf(Unit, bool = false);
 
     // [T]
     public: void TypeChar(char16, Count = 1);
-    public: void TypeText(const char16*, Count);
+    private: void TypeText(const char16*, Count);
 
     ////////////////////////////////////////////////////////////
     //

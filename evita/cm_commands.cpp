@@ -61,16 +61,9 @@ namespace Command
             mp_extend ); \
     }
 
-
 #define DefCommand_Motions(mp_dir, mp_motion, mp_unit) \
     DefCommand_Motion(mp_dir, mp_motion, mp_unit, true,  mp_unit##Extend) \
     DefCommand_Motion(mp_dir, mp_motion, mp_unit, false, mp_unit)
-
-#define DefCommand_StartEnd(mp_name, mp_method, mp_unit) \
-    DEFCOMMAND(mp_name) \
-        { pCtx->GetSelection()->mp_method(Unit_ ## mp_unit); } \
-    DEFCOMMAND(mp_name ## Extend) \
-        { pCtx->GetSelection()->mp_method(Unit_ ## mp_unit, true); }
 
 // [B]
 DefCommand_Motions(Backward, Up,   WindowLine)

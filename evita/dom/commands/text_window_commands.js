@@ -32,10 +32,11 @@
       var range = selection.range;
       var move_start = range.start == range.end ? count < 0 :
                                                   selection.startIsActive;
+      updateGoalX(selection, unit);
       if (move_start)
-        range.moveStart(unit, count);
+        selection.moveStart(unit, count);
       else
-        range.moveEnd(unit, count);
+        selection.moveEnd(unit, count);
       selection.startIsActive = move_start;
     };
   }
@@ -56,7 +57,8 @@
       var range = selection.range;
       if (range.start != range.end)
         range.collapseTo(selection.startIsActive ? range.start : range.end);
-      range.move(unit, count);
+      updateGoalX(selection, unit);
+      selection.move(unit, count);
       selection.startIsActive = true;
     };
   }
@@ -73,6 +75,21 @@
    */
   function pasteFromClipboardCommand() {
     this.selection.range.paste();
+  }
+
+  /**
+   * @param {!TextSelection} selection
+   * @param {!Unit} unit
+   */
+  function updateGoalX(selection, unit) {
+    if (unit != Unit.SCREEN && unit != Unit.WINDOW_LINE) {
+      selection.goal_point_ = undefined;
+      return;
+    }
+    if (selection.goal_point_)
+      return;
+    selection.goal_point_ = selection.window.mapPositionToPoint_(
+        selection.startIsActive ? selection.range.start : selection.range.end);
   }
 
   /**
@@ -356,6 +373,7 @@
 
   Editor.bindKey(TextWindow, 'ArrowLeft', function(opt_count) {
     var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
+    updateGoalX(this.selection, Unit.CHARACTER);
     var range = this.selection.range;
     if (range.start == range.end) {
       range.move(Unit.CHARACTER, -count);
@@ -371,6 +389,7 @@
 
   Editor.bindKey(TextWindow, 'ArrowRight', function(opt_count) {
     var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
+    updateGoalX(this.selection, Unit.CHARACTER);
     var range = this.selection.range;
     if (range.start == range.end) {
       range.move(Unit.CHARACTER, count);
@@ -478,4 +497,64 @@
   }, 'indent\n' +
      'Caret: insert spaces until tab stop column.\n' +
      'Range: insert spaces all lines in range.');
+
+  Editor.bindKey(TextWindow, 'ArrowUp',
+      makeMoveSelectionCommand(Unit.WINDOW_LINE, -1),
+      'move up by window line\n' +
+      'Move focus position up by window line.');
+
+  Editor.bindKey(TextWindow, 'ArrowDown',
+      makeMoveSelectionCommand(Unit.WINDOW_LINE, 1),
+      'move down by window line\n' +
+      'Move focus position down by window line.');
+
+  Editor.bindKey(TextWindow, 'PageUp',
+      makeMoveSelectionCommand(Unit.SCREEN, -1),
+      'move up by screen\n' +
+      'Move focus position up by screen.');
+
+  Editor.bindKey(TextWindow, 'PageDown',
+      makeMoveSelectionCommand(Unit.SCREEN, 1),
+      'move down by screen\n' +
+      'Move focus position down by screen.');
+
+  Editor.bindKey(TextWindow, 'Ctrl+PageUp',
+      makeMoveSelectionCommand(Unit.WINDOW, -1),
+      'move up by window\n' +
+      'Move focus position up by window.');
+
+  Editor.bindKey(TextWindow, 'Ctrl+PageDown',
+      makeMoveSelectionCommand(Unit.WINDOW, 1),
+      'move down by window\n' +
+      'Move focus position down by window.');
+
+  Editor.bindKey(TextWindow, 'Shift+ArrowUp',
+      makeExtendSelectionCommand(Unit.WINDOW_LINE, -1),
+      'extend up by window line\n' +
+      'Extend focus position up by window line.');
+
+  Editor.bindKey(TextWindow, 'Shift+ArrowDown',
+      makeExtendSelectionCommand(Unit.WINDOW_LINE, 1),
+      'extend down by window line\n' +
+      'Extend focus position down by window line.');
+
+  Editor.bindKey(TextWindow, 'Shift+PageUp',
+      makeExtendSelectionCommand(Unit.SCREEN, -1),
+      'extend up by screen\n' +
+      'Extend focus position up by screen.');
+
+  Editor.bindKey(TextWindow, 'Shift+PageDown',
+      makeExtendSelectionCommand(Unit.SCREEN, 1),
+      'extend down by screen\n' +
+      'Extend focus position down by screen.');
+
+  Editor.bindKey(TextWindow, 'Shift+Ctrl+PageUp',
+      makeExtendSelectionCommand(Unit.WINDOW, -1),
+      'extend up by window\n' +
+      'Extend focus position up by window.');
+
+  Editor.bindKey(TextWindow, 'Shift+Ctrl+PageDown',
+      makeExtendSelectionCommand(Unit.WINDOW, 1),
+      'extend down by window\n' +
+      'Extend focus position down by window.');
 })();

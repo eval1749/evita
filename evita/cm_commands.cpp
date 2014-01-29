@@ -51,25 +51,6 @@ namespace Command
 // 0x600...0x6FF    Ctrl+Shift+Graphic Key
 // 0x700...0x7FF    Ctrl+Shift+Non-Graphic Key
 
-#define DefCommand_Motion(mp_dir, mp_motion, mp_unit, mp_extend, mp_suffix) \
-    DEFCOMMAND(mp_dir ## mp_suffix) \
-    { \
-        if (NULL == pCtx->GetSelection()) return; \
-        pCtx->GetSelection()->Move ## mp_motion( \
-            Unit_ ## mp_unit, \
-            pCtx->GetArg(), \
-            mp_extend ); \
-    }
-
-#define DefCommand_Motions(mp_dir, mp_motion, mp_unit) \
-    DefCommand_Motion(mp_dir, mp_motion, mp_unit, true,  mp_unit##Extend) \
-    DefCommand_Motion(mp_dir, mp_motion, mp_unit, false, mp_unit)
-
-// [B]
-DefCommand_Motions(Backward, Up,   WindowLine)
-DefCommand_Motions(Backward, Up,   Screen)
-DefCommand_Motions(Backward, Up,   Window)
-
 // [E]
 /// <summary>
 ///  Dynamic Abbrevation
@@ -417,11 +398,6 @@ DEFCOMMAND(ExchangeCode)
     oRange.SetText(base::string16(rgwch, static_cast<size_t>(cwch)));
     pSelection->SetRange(oRange.GetEnd(), oRange.GetEnd());
 } // ExchangeCode
-
-// [F]
-DefCommand_Motions(Forward, Down,  WindowLine)
-DefCommand_Motions(Forward, Down,  Screen)
-DefCommand_Motions(Forward, Down,  Window)
 
 // [G]
 DEFCOMMAND(GoToCloseParen)
@@ -914,26 +890,13 @@ void Processor::GlobalInit() {
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'R', Reload);
     BIND_KEY(CommandWindow, Mod_Ctrl | 'U', StartArgumentEntry());
 
-    BIND_VKEY(TextEditWindow, Mod_None,  DOWN,   ForwardWindowLine);
-    BIND_VKEY(TextEditWindow, Mod_None,  NEXT,   ForwardScreen);
-    BIND_VKEY(TextEditWindow, Mod_None,  PRIOR,  BackwardScreen);
-    BIND_VKEY(TextEditWindow, Mod_None,  UP,     BackwardWindowLine);
-
     BIND_VKEY(TextEditWindow, Mod_Ctrl, DOWN,   GoToCloseParen);
-    BIND_VKEY(TextEditWindow, Mod_Ctrl, NEXT,   ForwardWindow);
-    BIND_VKEY(TextEditWindow, Mod_Ctrl, PRIOR,  BackwardWindow);
     BIND_VKEY(TextEditWindow, Mod_Ctrl, UP,     GoToOpenParen);
 
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, DOWN,      GoToCloseParenExtend);
-    BIND_VKEY(TextEditWindow, Mod_CtrlShift, NEXT,      ForwardWindowExtend);
-    BIND_VKEY(TextEditWindow, Mod_CtrlShift, PRIOR,     BackwardWindowExtend);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, UP,        GoToOpenParenExtend);
 
-    BIND_VKEY(TextEditWindow, Mod_Shift, DOWN,      ForwardWindowLineExtend);
     BIND_VKEY(TextEditWindow, Mod_Shift, INSERT,    PasteFromClipboard);
-    BIND_VKEY(TextEditWindow, Mod_Shift, NEXT,      ForwardScreenExtend);
-    BIND_VKEY(TextEditWindow, Mod_Shift, PRIOR,     BackwardScreenExtend);
-    BIND_VKEY(TextEditWindow, Mod_Shift, UP,        BackwardWindowLineExtend);
 } // Processor::GlobalInit
 
 }  // namespace Command

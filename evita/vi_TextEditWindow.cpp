@@ -408,7 +408,6 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
     iDy = -iDy;
 
     auto const lBufStart = selection_->GetBuffer()->GetStart();
-    int k;
     for (k = 0; k < iDy; ++k) {
       auto const lStart = m_pPage->GetStart();
       if (lStart == lBufStart)
@@ -423,7 +422,6 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
   } else if (iDy > 0) {
     // Scroll Up -- format page from page end.
     const Posn lBufEnd = selection_->GetBuffer()->GetEnd();
-    int k;
     for (k = 0; k < iDy; ++k) {
       auto const lStart = m_pPage->GetEnd();
       if (lStart >= lBufEnd)

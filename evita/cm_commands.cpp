@@ -880,12 +880,10 @@ void Processor::GlobalInit() {
     } // BIND_CTRL
 
     // Ctrl
-    //BIND_KEY(Mod_Ctrl | ',', ValidateIntervals);
     BIND_KEY(TextEditWindow, Mod_Ctrl | ',', Reconvert);
     BIND_KEY(TextEditWindow, Mod_Ctrl | '.', ExchangeCode);
     BIND_KEY(TextEditWindow, Mod_Ctrl | '/', ExpandDynamicAbbrev);
 
-   //BIND_KEY(TextEditWindow, Mod_Ctrl | 'I', Indent);
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'Q', QuotedInsertEntry());
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'R', Reload);
     BIND_KEY(CommandWindow, Mod_Ctrl | 'U', StartArgumentEntry());
@@ -895,8 +893,6 @@ void Processor::GlobalInit() {
 
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, DOWN,      GoToCloseParenExtend);
     BIND_VKEY(TextEditWindow, Mod_CtrlShift, UP,        GoToOpenParenExtend);
-
-    BIND_VKEY(TextEditWindow, Mod_Shift, INSERT,    PasteFromClipboard);
 } // Processor::GlobalInit
 
 }  // namespace Command

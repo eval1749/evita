@@ -42,13 +42,13 @@ global.VKEY_NAMES = [
 
   'Space', // 0x20
   'PageUp', // 0x21
-  'PageDn', // 0x22
+  'PageDown', // 0x22
   'End', // 0x23
   'Home', // 0x24
-  'Left', // 0x25
-  'Up', // 0x26
-  'Right', // 0x27
-  'Down', // 0x28
+  'ArrowLeft', // 0x25
+  'ArrowUp', // 0x26
+  'ArrowRight', // 0x27
+  'ArrowDown', // 0x28
   'Select', // 0x29
   'Print', // 0x2A
   'Execute', // 0x2B

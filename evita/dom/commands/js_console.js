@@ -31,7 +31,7 @@ function JsConsole() {
   var self = /** @type {JsConsole} */(this);
 
   // JavaScript console specific key bindings.
-  this.document.bindKey('Ctrl+Down', function() {
+  this.document.bindKey('Ctrl+ArrowDown', function() {
     self.forwardHistory();
     this.selection.range.collapseTo(self.range.end);
   });
@@ -42,7 +42,7 @@ function JsConsole() {
     self.emitPrompt();
     this.selection.range.collapseTo(self.range.end);
   });
-  this.document.bindKey('Ctrl+Up', function() {
+  this.document.bindKey('Ctrl+ArrowUp', function() {
     self.backwardHistory();
     this.selection.range.collapseTo(self.range.end);
   });

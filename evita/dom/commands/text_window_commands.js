@@ -160,12 +160,12 @@
     this.makeSelectionVisible();
   });
 
-  Editor.bindKey(TextWindow, 'Ctrl+Left',
+  Editor.bindKey(TextWindow, 'Ctrl+ArrowLeft',
     makeMoveSelectionCommand(Unit.WORD, -1),
     'move selection left word\n' +
     'Move selection to left by words');
 
-  Editor.bindKey(TextWindow, 'Ctrl+Right',
+  Editor.bindKey(TextWindow, 'Ctrl+ArrowRight',
     makeMoveSelectionCommand(Unit.WORD, 1),
     'move selection right word\n' +
     'Move selection to right by words');
@@ -249,12 +249,12 @@
   }, 'exthome to home of document\n' +
      'Move active position of selection to home of document.');
 
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+Left',
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+ArrowLeft',
     makeExtendSelectionCommand(Unit.WORD, -1),
     'extend selection left word\n' +
     'Extend selection to left by words');
 
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+Right',
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+ArrowRight',
     makeExtendSelectionCommand(Unit.WORD, 1),
     'extend selection right word\n' +
     'Extend selection to right by words');
@@ -354,7 +354,7 @@
   }, 'move to home of window line\n' +
      'Move active position of selection to home of window line.');
 
-  Editor.bindKey(TextWindow, 'Left', function(opt_count) {
+  Editor.bindKey(TextWindow, 'ArrowLeft', function(opt_count) {
     var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
     var range = this.selection.range;
     if (range.start == range.end) {
@@ -369,7 +369,7 @@
       range.start = range.end;
   }, 'move selection to left by character');
 
-  Editor.bindKey(TextWindow, 'Right', function(opt_count) {
+  Editor.bindKey(TextWindow, 'ArrowRight', function(opt_count) {
     var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
     var range = this.selection.range;
     if (range.start == range.end) {
@@ -398,11 +398,11 @@
 
   Editor.bindKey(TextWindow, 'Shift+Insert', pasteFromClipboardCommand);
 
-  Editor.bindKey(TextWindow, 'Shift+Left',
+  Editor.bindKey(TextWindow, 'Shift+ArrowLeft',
       makeExtendSelectionCommand(Unit.CHARACTER, -1),
       'extend selection to left by character');
 
-  Editor.bindKey(TextWindow, 'Shift+Right',
+  Editor.bindKey(TextWindow, 'Shift+ArrowRight',
       makeExtendSelectionCommand(Unit.CHARACTER, 1),
       'extend selection to right by character');
 

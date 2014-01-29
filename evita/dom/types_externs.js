@@ -72,6 +72,13 @@ var Form = function() {};
  */
 var JsConsole = function() {};
 
+/**
+ * @constructor
+ * @param {number} x
+ * @param {number} y
+ */
+var Point = function(x, y) {};
+
 /** @typedef {number} */
 var Position;
 

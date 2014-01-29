@@ -18,6 +18,7 @@
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/forms/text_field_control.h"
 #include "evita/dom/file_path.h"
+#include "evita/dom/point.h"
 #include "evita/dom/range.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/selection.h"
@@ -63,6 +64,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     v8_glue::Installer<Document>::Run(isolate, templ);
     v8_glue::Installer<Editor>::Run(isolate, templ);
     v8_glue::Installer<FilePath>::Run(isolate, templ);
+    v8_glue::Installer<Point>::Run(isolate, templ);
     v8_glue::Installer<Range>::Run(isolate, templ);
 
     v8_glue::Installer<EventTarget>::Run(isolate, templ);

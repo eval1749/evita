@@ -34,6 +34,7 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
       v8_glue::Optional<text::Posn> opt_position,
       v8_glue::Optional<int> opt_count, v8_glue::Optional<Point*> opt_point);
   public: void MakeSelectionVisible();
+  public: text::Posn MapPointToPosition(const Point* point);
   public: Point* MapPositionToPoint(text::Posn position);
 
   DISALLOW_COPY_AND_ASSIGN(TextWindow);

@@ -44,6 +44,7 @@ class TextWindowWrapperInfo :
     builder
         .SetMethod("compute_", &TextWindow::ComputeMotion)
         .SetMethod("makeSelectionVisible", &TextWindow::MakeSelectionVisible)
+        .SetMethod("mapPointToPosition_", &TextWindow::MapPointToPosition)
         .SetMethod("mapPositionToPoint_", &TextWindow::MapPositionToPoint);
   }
 };
@@ -98,6 +99,16 @@ text::Posn TextWindow::ComputeMotion(int method,
 void TextWindow::MakeSelectionVisible() {
   ScriptController::instance()->view_delegate()->MakeSelectionVisible(
       window_id());
+}
+
+text::Posn TextWindow::MapPointToPosition(const Point* point) {
+  TextWindowCompute data;
+  data.method = TextWindowCompute::Method::MapPointToPosition;
+  data.x = point->x();
+  data.y = point->y();
+  ScriptController::instance()->view_delegate()->ComputeOnTextWindow(
+    id(), &data, nullptr);
+  return data.position;
 }
 
 Point* TextWindow::MapPositionToPoint(text::Posn position) {

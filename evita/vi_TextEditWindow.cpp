@@ -275,7 +275,7 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
         m_pViewRange->SetRange(lStart, lStart);
         *inout_lPosn = MapPointToPosn(pt);
       } else if (n > 0) {
-        *inout_lPosn = GetEnd();
+        *inout_lPosn = std::min(GetEnd(), GetBuffer()->GetEnd());
         k = 1;
       } else if (n < 0) {
         *inout_lPosn = GetStart();
@@ -286,7 +286,7 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
 
     case Unit_Window:
       if (n > 0) {
-        *inout_lPosn = GetEnd();
+        *inout_lPosn = std::min(GetEnd(), GetBuffer()->GetEnd());
         return 1;
       }
       if (n < 0) {

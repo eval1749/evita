@@ -5,6 +5,36 @@
 (function() {
   /**
    * @param {!TextSelection} selection
+   * @param {Unit} unit
+   * @param {number} count
+   * @param {number} position
+   */
+  function computeMotion(selection, unit, count, position) {
+    if (unit == Unit.SCREEN) {
+      if (!selection.goal_point_)
+        throw 'Goal X point must be initialized.';
+      return selection.window.compute_(TextWindowComputeMethod.MOVE_SCREEN,
+          position, count, selection.goal_point_);
+    }
+
+    if (unit == Unit.WINDOW) {
+      return selection.window.compute_(TextWindowComputeMethod.MOVE_WINDOW,
+                                       position, count);
+    }
+
+    if (unit == Unit.WINDOW_LINE) {
+      if (!selection.goal_point_)
+        throw 'Goal X point must be initialized.';
+      return selection.window.compute_(
+            TextWindowComputeMethod.MOVE_WINDOW_LINE, position, count,
+            selection.goal_point_);
+    }
+
+    return selection.range.document.computeMotion_(unit, count, position);
+  }
+
+  /**
+   * @param {!TextSelection} selection
    * @param {!Alter} alter
    * @param {number} anchor
    * @param {number} focus
@@ -108,6 +138,55 @@
         new_focus = this.range.start;
     }
     return updateSelection(this, alter, anchor, new_focus);
+  };
+
+  /**
+   * @this {!TextSelection}
+   * @param {Unit} unit
+   * @param {number=} opt_count, defualt is one.
+   * @return {!TextSelection}
+   */
+  TextSelection.prototype.move = function(unit, opt_count) {
+    var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
+    if (this.startIsActive) {
+      return updateSelection(this, Alter.MOVE, this.range.end,
+          computeMotion(this, unit, count, this.range.start));
+    }
+
+    return updateSelection(this, Alter.MOVE, this.range.start,
+          computeMotion(this, unit, count, this.range.end));
+  };
+
+  /**
+   * @this {!TextSelection}
+   * @param {Unit} unit
+   * @param {number=} opt_count, defualt is one.
+   * @return {!TextSelection}
+   */
+  TextSelection.prototype.moveEnd = function(unit, opt_count) {
+    var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
+    var position = computeMotion(this, unit, count, this.range.end);
+    if (position < this.range.start)
+      this.range.collapseTo(position);
+    else
+      this.range.end = position;
+    return this;
+  };
+
+  /**
+   * @this {!TextSelection}
+   * @param {Unit} unit
+   * @param {number=} opt_count, defualt is one.
+   * @return {!TextSelection}
+   */
+  TextSelection.prototype.moveStart = function(unit, opt_count) {
+    var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
+    var position = computeMotion(this, unit, count, this.range.start);
+    if (position > this.range.end)
+      this.range.collapseTo(position);
+    else
+      this.range.start = position;
+    return this;
   };
 
   /**

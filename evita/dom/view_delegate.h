@@ -41,10 +41,10 @@ struct TextWindowCompute {
     StartOfWindowLine,
   };
   Method method;
-  float float1;
-  float float2;
-  int int1;
-  int int2;
+  text::Posn position;
+  int count;
+  float x;
+  float y;
 };
 
 class ViewDelegate {

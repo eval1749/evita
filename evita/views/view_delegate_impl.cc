@@ -95,44 +95,47 @@ void ViewDelegateImpl::ComputeOnTextWindow(dom::WindowId window_id,
   UI_DOM_AUTO_LOCK_SCOPE();
   switch (data->method) {
     case dom::TextWindowCompute::Method::EndOfWindow:
-      data->int1 = window->GetEnd();
+      data->position = window->GetEnd();
       break;
     case dom::TextWindowCompute::Method::EndOfWindowLine:
-      data->int1 = window->EndOfLine(data->int1);
+      data->position = window->EndOfLine(data->position);
       break;
     case dom::TextWindowCompute::Method::MapPointToPosition:
-     data->int1 = window->MapPointToPosn(gfx::PointF(data->float1,
-                                                     data->float2));
+     data->position = window->MapPointToPosn(gfx::PointF(data->x, data->y));
       break;
    case dom::TextWindowCompute::Method::MapPositionToPoint: {
-      const auto rect = window->MapPosnToPoint(data->int1);
-      data->float1 = rect.left;
+      const auto rect = window->MapPosnToPoint(data->position);
+      if (rect) {
+        data->x = rect.left;
+        data->y = rect.top;
+      } else {
+        data->x = data->y = -1.0f;
+      }
       break;
     }
     case dom::TextWindowCompute::Method::MoveScreen: {
-      gfx::PointF point(data->float1, data->float2);
-      text::Posn position = data->int1;
-      window->ComputeMotion(Unit_Screen, data->int2, point, &position);
-      data->int1 = position;
+      gfx::PointF point(data->x, data->y);
+      text::Posn position = data->position;
+      window->ComputeMotion(Unit_Screen, data->count, point, &position);
+      data->position = position;
       break;
     }
     case dom::TextWindowCompute::Method::MoveWindow: {
-      gfx::PointF point(data->float1, data->float2);
-      text::Posn position = data->int1;
-      window->ComputeMotion(Unit_Window, data->int2, point, &position);
+      gfx::PointF point(data->x, data->y);
+      window->ComputeMotion(Unit_Window, data->count, point, &data->position);
       break;
     }
     case dom::TextWindowCompute::Method::MoveWindowLine: {
-      gfx::PointF point(data->float1, data->float2);
-      text::Posn position = data->int1;
-      window->ComputeMotion(Unit_WindowLine, data->int2, point, &position);
+      gfx::PointF point(data->x, data->y);
+      window->ComputeMotion(Unit_WindowLine, data->count, point,
+                            &data->position);
       break;
     }
     case dom::TextWindowCompute::Method::StartOfWindow:
-      data->int1 = window->GetStart();
+      data->position = window->GetStart();
       break;
     case dom::TextWindowCompute::Method::StartOfWindowLine:
-      data->int1 = window->StartOfLine(data->int1);
+      data->position = window->StartOfLine(data->position);
       break;
   }
 }

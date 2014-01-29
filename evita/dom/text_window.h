@@ -13,6 +13,7 @@ class Selection;
 
 namespace dom {
 class Document;
+class Point;
 class Range;
 class Selection;
 
@@ -29,10 +30,11 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
   public: Range* view_range() const { return view_range_; }
   public: ::Selection* view_selection() const;
 
-  public: v8::Handle<v8::Value> Compute(int method,
-      v8_glue::Optional<v8_glue::Either<int, float>> opt_either1,
-      v8_glue::Optional<v8_glue::Either<int, float>> opt_either2);
+  public: text::Posn ComputeMotion(int method,
+      v8_glue::Optional<text::Posn> opt_position,
+      v8_glue::Optional<int> opt_count, v8_glue::Optional<Point*> opt_point);
   public: void MakeSelectionVisible();
+  public: Point* MapPositionToPoint(text::Posn position);
 
   DISALLOW_COPY_AND_ASSIGN(TextWindow);
 };

@@ -6,12 +6,13 @@ TextWindow.prototype.clone = function() {};
 
 /**
  * @param {number} method
- * @param {number=} opt_int_or_float1
- * @param {number=} opt_int_or_float2
+ * @param {!Position=} opt_position
+ * @param {number=} opt_count
+ * @param {Point=} opt_point
 * @return {number}
  */
-TextWindow.prototype.compute_ = function(method, opt_int_or_float1,
-                                         opt_int_or_float2) {};
+TextWindow.prototype.compute_ = function(method, opt_position, opt_count,
+                                         opt_point) {};
 
 /**
  * @override
@@ -21,3 +22,9 @@ TextWindow.prototype.selection;
 
 /** @type {function()} */
 TextWindow.prototype.makeSelectionVisible = function() {};
+
+/**
+ * @param {!Position} position
+ * @return {!Point}
+ */
+TextWindow.prototype.mapPositionToPoint_ = function(position) {};

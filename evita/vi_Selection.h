@@ -75,7 +75,6 @@ class Selection : public text::Range
     public: Color           GetBackground() const { return m_crBackground; }
     public: Buffer*         GetBuffer()     const { return m_pBuffer; }
     public: Color           GetColor()      const { return m_crColor; }
-    public: gfx::PointF GetGoalPoint() const { return m_ptGoal; }
     public: SelectionType   GetType()       const;
     public: TextEditWindow* GetWindow()     const { return m_pWindow; }
 

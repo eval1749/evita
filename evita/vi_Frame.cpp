@@ -962,7 +962,10 @@ void Frame::updateTitleBar() {
 
 
 void Frame::UpdateTitleBarTask(views::WindowId window_id) {
-  auto frame = views::Window::FromWindowId(window_id)->as<Frame>();
+  auto const window = views::Window::FromWindowId(window_id);
+  if (!window)
+    return;
+  auto const frame = window->as<Frame>();
   if (!frame)
     return;
   frame->updateTitleBar();

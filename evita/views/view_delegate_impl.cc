@@ -17,6 +17,7 @@
 #include "evita/vi_FileDialogBox.h"
 #include "evita/vi_FindDialogBox.h"
 #include "evita/vi_Frame.h"
+#include "evita/vi_Selection.h"
 #include "evita/vi_TextEditWindow.h"
 #include "evita/views/table_view.h"
 
@@ -110,20 +111,20 @@ void ViewDelegateImpl::ComputeOnTextWindow(dom::WindowId window_id,
       break;
     }
     case dom::TextWindowCompute::Method::MoveScreen: {
-      gfx::PointF point(data->float1, data->float2);
+      auto const point = window->GetSelection()->GetGoalPoint();
       text::Posn position = data->int1;
       window->ComputeMotion(Unit_Screen, data->int2, point, &position);
       data->int1 = position;
       break;
     }
     case dom::TextWindowCompute::Method::MoveWindow: {
-      gfx::PointF point(data->float1, data->float2);
+      auto const point = window->GetSelection()->GetGoalPoint();
       text::Posn position = data->int1;
       window->ComputeMotion(Unit_Window, data->int2, point, &position);
       break;
     }
     case dom::TextWindowCompute::Method::MoveWindowLine: {
-      gfx::PointF point(data->float1, data->float2);
+      auto const point = window->GetSelection()->GetGoalPoint();
       text::Posn position = data->int1;
       window->ComputeMotion(Unit_WindowLine, data->int2, point, &position);
       break;

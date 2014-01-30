@@ -186,18 +186,14 @@ var Timer = function() {};
 /**
  * @constructor
  * @extends {Timer}
- * @param {number} delay_ms
- * @param {function(!Timer)} callback
  */
-var OneShotTimer = function(delay_ms, callback) {};
+var OneShotTimer = function() {};
 
 /**
  * @constructor
  * @extends {Timer}
- * @param {number} delay_ms
- * @param {function(!Timer)} callback
  */
-var RepeatingTimer = function(delay_ms, callback) {};
+var RepeatingTimer = function() {};
 
 //////////////////////////////////////////////////////////////////////
 //

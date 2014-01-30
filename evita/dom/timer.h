@@ -5,6 +5,7 @@
 
 #include <memory>
 
+#include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/scriptable.h"
 #include "evita/v8_glue/scoped_persistent.h"
 
@@ -17,16 +18,16 @@ namespace dom {
 class Timer : public v8_glue::Scriptable<Timer> {
   DECLARE_SCRIPTABLE_OBJECT(Timer);
 
-  public: enum class Type {
+  protected: enum class Type {
     OneShot,
     Repeating,
   };
 
   private: v8_glue::ScopedPersistent<v8::Function> callback_;
+  private: v8_glue::ScopedPersistent<v8::Value> receiver_;
   private: std::unique_ptr<base::Timer> timer_;
-  private: const Type type_;
 
-  protected: Timer(Type type, v8::Handle<v8::Function> callback);
+  protected: Timer(Type type);
   public: ~Timer();
 
   public: bool is_running() const;
@@ -35,7 +36,8 @@ class Timer : public v8_glue::Scriptable<Timer> {
 
   public: void Reset();
   public: void Stop();
-  protected: void Start(int delay_ms);
+  public: void Start(int delay_ms, v8::Handle<v8::Function> callback,
+                     v8_glue::Optional<v8::Handle<v8::Value>> receiver);
 
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };
@@ -43,14 +45,14 @@ class Timer : public v8_glue::Scriptable<Timer> {
 class OneShotTimer : public v8_glue::Scriptable<OneShotTimer, Timer> {
   DECLARE_SCRIPTABLE_OBJECT(OneShotTimer);
 
-  public: OneShotTimer(int delay_ms, v8::Handle<v8::Function> callback);
+  public: OneShotTimer();
   public: ~OneShotTimer();
 };
 
 class RepeatingTimer : public v8_glue::Scriptable<RepeatingTimer, Timer> {
   DECLARE_SCRIPTABLE_OBJECT(RepeatingTimer);
 
-  public: RepeatingTimer(int delay_ms, v8::Handle<v8::Function> callback);
+  public: RepeatingTimer();
   public: ~RepeatingTimer();
 };
 

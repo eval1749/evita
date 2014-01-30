@@ -30,6 +30,7 @@ class TimerClass : public v8_glue::WrapperInfo {
       ObjectTemplateBuilder& builder) override {
     builder
         .SetProperty("isRunning", &Timer::is_running)
+        .SetMethod("start", &Timer::Start)
         .SetMethod("stop", &Timer::Stop);
   }
 
@@ -50,13 +51,12 @@ class OneShotTimerClass :
 
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate, 
+    return v8_glue::CreateConstructorTemplate(isolate,
         &OneShotTimerClass::NewOneShotTimer);
   }
 
-  private: static OneShotTimer* NewOneShotTimer(int delay_ms,
-      v8::Handle<v8::Function> callback) {
-    return new OneShotTimer(delay_ms, callback);
+  private: static OneShotTimer* NewOneShotTimer() {
+    return new OneShotTimer();
   }
 
   DISALLOW_COPY_AND_ASSIGN(OneShotTimerClass);
@@ -76,13 +76,12 @@ class RepeatingTimerClass :
 
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate, 
+    return v8_glue::CreateConstructorTemplate(isolate,
         &RepeatingTimerClass::NewRepeatingTimer);
   }
 
-  private: static RepeatingTimer* NewRepeatingTimer(int delay_ms,
-      v8::Handle<v8::Function> callback) {
-    return new RepeatingTimer(delay_ms, callback);
+  private: static RepeatingTimer* NewRepeatingTimer() {
+    return new RepeatingTimer();
   }
 
   DISALLOW_COPY_AND_ASSIGN(RepeatingTimerClass);
@@ -132,16 +131,13 @@ base::string16 V8ToString(v8::Handle<v8::Value> value) {
 //
 DEFINE_SCRIPTABLE_OBJECT(Timer, TimerClass)
 
-Timer::Timer(Type type, v8::Handle<v8::Function> callback)
-    : callback_(v8::Isolate::GetCurrent(), callback),
-      timer_(new base::Timer(type == Type::Repeating,
-                             type == Type::Repeating)),
-      type_(type) {
+Timer::Timer(Type type)
+    : timer_(new base::Timer(type == Type::Repeating,
+                             type == Type::Repeating)) {
 }
 
 Timer::~Timer() {
-  DCHECK(!timer_->IsRunning());
-  TimerList::instance()->Unregister(this);
+  Stop();
 }
 
 bool Timer::is_running() const {
@@ -152,15 +148,13 @@ void Timer::DidFireTimer() {
   auto const isolate = v8::Isolate::GetCurrent();
   v8::HandleScope handle_scope(isolate);
   auto const callback = callback_.NewLocal(isolate);
-  if (type_ == Type::OneShot)
-    Stop();
   auto const context = ScriptController::instance()->context();
   v8::Context::Scope context_scope(context);
   v8::TryCatch try_catch;
   DOM_AUTO_LOCK_SCOPE();
-  callback->Call(v8::Undefined(isolate), 0, nullptr);
+  callback->Call(receiver_.NewLocal(isolate), 0, nullptr);
   if (try_catch.HasCaught()) {
-    DVLOG(0) << "Exception in timer callback " <<
+    LOG(0) << "Exception in timer callback " <<
         V8ToString(try_catch.Exception());
   }
 }
@@ -168,10 +162,14 @@ void Timer::DidFireTimer() {
 void Timer::Stop() {
   timer_->Stop();
   TimerList::instance()->Unregister(this);
-  callback_.Reset();
 }
 
-void Timer::Start(int delay_ms) {
+void Timer::Start(int delay_ms, v8::Handle<v8::Function> callback,
+                  v8_glue::Optional<v8::Handle<v8::Value>> opt_receiver) {
+  auto const isolate = v8::Isolate::GetCurrent();
+  callback_.Reset(isolate, callback);
+  receiver_.Reset(isolate, opt_receiver.is_supplied ? opt_receiver.value :
+                                                      GetWrapper(isolate));
   TimerList::instance()->Register(this);
   timer_->Start(FROM_HERE, base::TimeDelta::FromMilliseconds(delay_ms),
                 base::Bind(&Timer::DidFireTimer, base::Unretained(this)));
@@ -183,9 +181,7 @@ void Timer::Start(int delay_ms) {
 //
 DEFINE_SCRIPTABLE_OBJECT(OneShotTimer, OneShotTimerClass)
 
-OneShotTimer::OneShotTimer(int dealy_ms, v8::Handle<v8::Function> callback)
-    : ScriptableBase(Type::OneShot, callback) {
-  Start(dealy_ms);
+OneShotTimer::OneShotTimer() : ScriptableBase(Type::OneShot) {
 }
 
 OneShotTimer::~OneShotTimer() {
@@ -197,9 +193,7 @@ OneShotTimer::~OneShotTimer() {
 //
 DEFINE_SCRIPTABLE_OBJECT(RepeatingTimer, RepeatingTimerClass)
 
-RepeatingTimer::RepeatingTimer(int dealy_ms, v8::Handle<v8::Function> callback)
-    : ScriptableBase(Type::Repeating, callback) {
-  Start(dealy_ms);
+RepeatingTimer::RepeatingTimer() : ScriptableBase(Type::Repeating) {
 }
 
 RepeatingTimer::~RepeatingTimer() {

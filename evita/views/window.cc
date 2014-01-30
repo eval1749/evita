@@ -126,10 +126,17 @@ void Window::DidRealize() {
   // TODO(yosi) Until we manage all widgets by WindowId, we don't call
   // ViewEventHandler for unmanaged widget.
   if (window_id_ != views::kInvalidWindowId) {
-    view_event_handler()->
-        DidRealizeWidget(window_id_);
+    view_event_handler()->DidRealizeWidget(window_id_);
+    view_event_handler()->DidResizeWidget(window_id_, rect().left, rect().top,
+                                          rect().right, rect().bottom);
   }
   Widget::DidRealize();
+}
+
+void Window::DidResize() {
+  Widget::DidResize();
+  view_event_handler()->DidResizeWidget(window_id_, rect().left, rect().top,
+                                        rect().right, rect().bottom);
 }
 
 void Window::DidSetFocus() {

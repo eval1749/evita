@@ -182,9 +182,9 @@
       case Alter.MOVE:
         if (this.range.start == this.range.end)
             this.move(unit, count);
-        else if (count > 0)
+        else if (count < 0)
           this.range.collapseTo(this.range.start);
-        else
+        else if (count > 0)
           this.range.collapseTo(this.range.end);
         break;
       default:

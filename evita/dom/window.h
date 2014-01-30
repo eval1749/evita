@@ -68,9 +68,11 @@ class Window : public v8_glue::Scriptable<Window, EventTarget>,
   public: void Focus();
   public: static Window* FromWindowId(WindowId window_id);
   public: bool IsDescendantOf(Window* other) const;
+  public: void ReleaseCapture();
   public: void Realize();
   public: void RemoveWindow(Window* window);
   public: static void ResetForTesting();
+  public: void SetCapture();
   public: void SplitHorizontally(Window* new_right_window);
   public: void SplitVertically(Window* new_below_window);
 

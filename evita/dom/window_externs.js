@@ -53,8 +53,14 @@ Window.prototype.destroy = function() {};
 Window.prototype.focus = function() {};
 Window.prototype.realize = function() {};
 
+/** @type {function()} */
+Window.prototype.releaseCapture = function() {};
+
 /** @param {!Window} window */
 Window.prototype.removeChild = function(window) {};
+
+/** @type {function()} */
+Window.prototype.setCapture = function() {};
 
 /**
  * @param {string} type

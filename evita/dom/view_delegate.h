@@ -95,8 +95,10 @@ class ViewDelegate {
   public: virtual void RealizeWindow(WindowId window_id) = 0;
   public: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) = 0;
+  public: virtual void ReleaseCapture(WindowId window_id) = 0;
   public: virtual void SaveFile(Document* document,
                                 const base::string16& filename) = 0;
+  public: virtual void SetCapture(WindowId window_id) = 0;
   public: virtual void ShowDialogBox(DialogBoxId dialog_box_id) = 0;
   public: virtual void SplitHorizontally(WindowId left_window_id,
                                          WindowId new_right_window_id) = 0;

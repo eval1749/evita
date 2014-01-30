@@ -99,8 +99,10 @@ class WindowWrapperInfo :
         .SetMethod("changeParent", &Window::ChangeParentWindow)
         .SetMethod("destroy", &Window::Destroy)
         .SetMethod("focus", &Window::Focus)
+        .SetMethod("releaseCapture", &Window::ReleaseCapture)
         .SetMethod("realize", &Window::Realize)
         .SetMethod("removeChild", &Window::RemoveWindow)
+        .SetMethod("setCapture", &Window::SetCapture)
         .SetMethod("splitHorizontally", &Window::SplitHorizontally)
         .SetMethod("splitVertically", &Window::SplitVertically);
   }
@@ -397,6 +399,24 @@ static bool CheckSplitParameter(Window* ref_window, Window* new_window) {
   }
 
   return true;
+}
+
+void Window::ReleaseCapture() {
+  if (state_ != State::Realized) {
+    ScriptController::instance()->ThrowError(
+        "Can't release capture to unralized window.");
+    return;
+  }
+  ScriptController::instance()->view_delegate()->ReleaseCapture(window_id());
+}
+
+void Window::SetCapture() {
+  if (state_ != State::Realized) {
+    ScriptController::instance()->ThrowError(
+        "Can't set capture to unralized window.");
+    return;
+  }
+  ScriptController::instance()->view_delegate()->SetCapture(window_id());
 }
 
 void Window::SplitHorizontally(Window* new_right_window) {

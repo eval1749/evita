@@ -313,6 +313,20 @@ void ViewDelegateImpl::ShowDialogBox(dom::DialogBoxId dialog_box_id) {
   dialog_box->Show();
 }
 
+void ViewDelegateImpl::ReleaseCapture(dom::WindowId window_id) {
+  auto const window = FromWindowId("ReleaseCapture", window_id);
+  if (!window)
+    return;
+  window->ReleaseCapture();
+}
+
+void ViewDelegateImpl::SetCapture(dom::WindowId window_id) {
+  auto const window = FromWindowId("SetCapture", window_id);
+  if (!window)
+    return;
+  window->SetCapture();
+}
+
 void ViewDelegateImpl::SplitHorizontally(dom::WindowId left_window_id,
     dom::WindowId new_right_window_id) {
   auto const left_window = Window::FromWindowId(left_window_id);

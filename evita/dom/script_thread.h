@@ -94,8 +94,10 @@ class ScriptThread final : public ViewDelegate,
   private: virtual void RealizeWindow(WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) override;
+  private: virtual void ReleaseCapture(WindowId window_id) override;
   private: virtual void SaveFile(Document* document,
                                  const base::string16& filename) override;
+  private: virtual void SetCapture(WindowId window_id) override;
   private: virtual void ShowDialogBox(DialogBoxId dialog_box_id) override;
 
   // ViewEventHandler

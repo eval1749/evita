@@ -243,10 +243,43 @@ void ScriptThread::RegisterViewEventHandler(
         param1, param2)); \
   }
 
+#define DEFINE_VIEW_EVENT_HANDLER_3(name, type1, type2, type3) \
+  void ScriptThread::name(type1 param1, type2 param2, type3 param3) { \
+    DCHECK_CALLED_ON_HOST_THREAD(); \
+    DCHECK(view_event_handler_); \
+    PostTask(FROM_HERE, base::Bind( \
+        &ViewEventHandler::name, \
+        base::Unretained(view_event_handler_), \
+        param1, param2, param3)); \
+  }
+
+#define DEFINE_VIEW_EVENT_HANDLER_4(name, type1, type2, type3, type4) \
+  void ScriptThread::name(type1 param1, type2 param2, type3 param3, \
+                          type4 param4) { \
+    DCHECK_CALLED_ON_HOST_THREAD(); \
+    DCHECK(view_event_handler_); \
+    PostTask(FROM_HERE, base::Bind( \
+        &ViewEventHandler::name, \
+        base::Unretained(view_event_handler_), \
+        param1, param2, param3, param4)); \
+  }
+
+#define DEFINE_VIEW_EVENT_HANDLER_5(name, type1, type2, type3, type4, type5) \
+  void ScriptThread::name(type1 param1, type2 param2, type3 param3, \
+                          type4 param4, type5 param5) { \
+    DCHECK_CALLED_ON_HOST_THREAD(); \
+    DCHECK(view_event_handler_); \
+    PostTask(FROM_HERE, base::Bind( \
+        &ViewEventHandler::name, \
+        base::Unretained(view_event_handler_), \
+        param1, param2, param3, param4, param5)); \
+  }
+
 DEFINE_VIEW_EVENT_HANDLER_1(DidDestroyWidget, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_2(DidDropWidget, WindowId, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidKillFocus, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidRealizeWidget, WindowId)
+DEFINE_VIEW_EVENT_HANDLER_5(DidResizeWidget, WindowId, int, int, int, int)
 DEFINE_VIEW_EVENT_HANDLER_1(DidSetFocus, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_0(DidStartHost)
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchFormEvent, const ApiFormEvent&)

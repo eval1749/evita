@@ -104,6 +104,8 @@ class ScriptThread final : public ViewDelegate,
                                       WindowId target_id) override;
   private: virtual void DidKillFocus(WindowId window_id) override;
   private: virtual void DidRealizeWidget(WindowId window_id) override;
+  private: virtual void DidResizeWidget(WindowId window_id, int left, int top,
+                                       int right, int bottom) override;
   private: virtual void DidSetFocus(WindowId window_id) override;
   private: virtual void DidStartHost() override;
   private: virtual void DispatchFormEvent(const ApiFormEvent& event) override;

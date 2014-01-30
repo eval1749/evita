@@ -2,5 +2,9 @@
 # Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 Window
+bottom
 focus
 focusTick_
+left
+right
+top

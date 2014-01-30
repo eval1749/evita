@@ -32,6 +32,8 @@ class ViewEventHandler {
                                      WindowId target_id)  = 0;
   public: virtual void DidKillFocus(WindowId window_id) = 0;
   public: virtual void DidRealizeWidget(WindowId window_id) = 0;
+  public: virtual void DidResizeWidget(WindowId window_id, int left, int top,
+                                       int right, int bottom) = 0;
   public: virtual void DidSetFocus(WindowId window_id) = 0;
   public: virtual void DidStartHost() = 0;
   public: virtual void DispatchFormEvent(const ApiFormEvent& event) = 0;

@@ -4,6 +4,9 @@
 /** @type{Window} */
 Window.focus;
 
+/** @type {number} */
+Window.prototype.bottom;
+
 /** @type {Array.<!Window>} */
 Window.prototype.children;
 
@@ -19,6 +22,9 @@ Window.prototype.id;
 /** @type {Window} */
 Window.prototype.lastChild;
 
+/** @type {number} */
+Window.prototype.left;
+
 /** @type {Window} */
 Window.prototype.nextSibling;
 
@@ -28,8 +34,14 @@ Window.prototype.parent;
 /** @type {Window} */
 Window.prototype.previousSibling;
 
+/** @type {number} */
+Window.prototype.right;
+
 /** @type {string} */
 Window.prototype.state;
+
+/** @type {number} */
+Window.prototype.top;
 
 /** @param {!Window} window */
 Window.prototype.appendChild = function(window) {};

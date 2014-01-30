@@ -175,6 +175,21 @@ TEST_F(WindowTest, changeParent) {
   EXPECT_SCRIPT_EQ("3", "sample2.parent.id");
 }
 
+TEST_F(WindowTest, DidResize) {
+  EXPECT_SCRIPT_VALID("var sample = new SampleWindow();");
+  EXPECT_SCRIPT_EQ("0", "sample.left");
+  EXPECT_SCRIPT_EQ("0", "sample.top");
+  EXPECT_SCRIPT_EQ("0", "sample.right");
+  EXPECT_SCRIPT_EQ("0", "sample.bottom");
+
+  view_event_handler()->DidResizeWidget(static_cast<dom::WindowId>(1),
+                                        11, 22, 33, 44);
+  EXPECT_SCRIPT_EQ("11", "sample.left");
+  EXPECT_SCRIPT_EQ("22", "sample.top");
+  EXPECT_SCRIPT_EQ("33", "sample.right");
+  EXPECT_SCRIPT_EQ("44", "sample.bottom");
+}
+
 TEST_F(WindowTest, focus) {
   EXPECT_SCRIPT_VALID("var sample = new SampleWindow();");
   EXPECT_SCRIPT_EQ("Error: You can't focus unrealized window.",

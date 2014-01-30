@@ -63,6 +63,7 @@ class Window : public v8_glue::Scriptable<Window, EventTarget>,
   public: void Destroy();
   public: static void DidDestroyWidget(WindowId window_id);
   public: static void DidRealizeWidget(WindowId window_id);
+  public: void DidResize(int left, int top, int right, int bottom);
   public: void DidSetFocus();
   public: void Focus();
   public: static Window* FromWindowId(WindowId window_id);

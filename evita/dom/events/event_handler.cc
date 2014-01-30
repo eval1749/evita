@@ -132,6 +132,14 @@ void EventHandler::DidRealizeWidget(WindowId window_id) {
   Window::DidRealizeWidget(window_id);
 }
 
+void EventHandler::DidResizeWidget(WindowId window_id, int left, int top,
+                                   int right, int bottom) {
+  auto const window = FromWindowId(window_id);
+  if (!window)
+    return;
+  window->DidResize(left, top, right, bottom);
+}
+
 void EventHandler::DidSetFocus(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)

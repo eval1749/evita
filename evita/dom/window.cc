@@ -270,6 +270,15 @@ void Window::DidRealizeWidget(WindowId window_id) {
 void Window::DidSetFocus() {
   ++global_focus_tick;
   focus_tick_ = global_focus_tick;
+
+  // Update |Window.focus| property to tell focus window to scripts.
+  auto const isolate = v8::Isolate::GetCurrent();
+  v8::HandleScope handle_scope(isolate);
+  auto const context = ScriptController::instance()->context();
+  v8::Context::Scope context_scope(context);
+  auto const object = GetWrapper(isolate);
+  auto const klass = context->Global()->Get(v8Strings::Window.Get(isolate));
+  klass->ToObject()->Set(v8Strings::focus.Get(isolate), object);
 }
 
 void Window::Focus() {

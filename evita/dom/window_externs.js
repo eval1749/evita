@@ -1,6 +1,9 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
+/** @type{Window} */
+Window.focus;
+
 /** @type {Array.<!Window>} */
 Window.prototype.children;
 

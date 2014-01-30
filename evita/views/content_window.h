@@ -34,7 +34,6 @@ class ContentWindow : public CommandWindow_<ContentWindow> {
   // [D]
   protected: virtual void DidKillFocus() override;
   protected: virtual void DidSetFocus() override;
-  protected: void DispatchMouseEvent(const ui::MouseEvent& event);
 
   // [G]
   public: uint GetActiveTick() const { return active_tick_; }

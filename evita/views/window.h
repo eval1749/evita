@@ -6,6 +6,10 @@
 #include "evita/ui/widget.h"
 #include "evita/views/window_id.h"
 
+namespace ui {
+class MouseEvent;
+}
+
 namespace views {
 
 typedef common::win::NativeWindow NativeWindow;
@@ -35,9 +39,15 @@ class Window : public ui::Widget {
   protected: virtual void DidRealize() override;
   protected: virtual void DidResize() override;
   protected: virtual void DidSetFocus() override;
+  protected: void DispatchMouseEvent(const ui::MouseEvent& event);
 
   // [F]
   public: static Window* FromWindowId(WindowId window_id);
+
+  // ui::Widget
+  protected: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
+  protected: virtual void OnMousePressed(const ui::MouseEvent& event) override;
+  protected: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
 
   DISALLOW_COPY_AND_ASSIGN(Window);
 };

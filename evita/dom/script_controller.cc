@@ -21,6 +21,10 @@ namespace internal {
 const base::string16& GetJsLibSource();
 }  // namespace internal
 
+namespace v8Strings {
+void Init(v8::Isolate* isolate);
+}
+
 namespace {
 
 v8::Handle<v8::Value> GetOpenFileHandler(
@@ -103,6 +107,7 @@ ScriptController::ScriptController(ViewDelegate* view_delegate)
   auto const isolate = isolate_holder_.isolate();
   isolate->Enter();
   v8::HandleScope handle_scope(isolate);
+  v8Strings::Init(isolate);
   auto context = v8::Context::New(isolate, nullptr,
       Global::instance()->object_template(isolate));
   context_holder_.SetContext(context);

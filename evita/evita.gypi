@@ -113,6 +113,7 @@
         'text',
         'v8_glue',
       ],
+      'include_dirs+': [ '<(SHARED_INTERMEDIATE_DIR)/' ],
       'sources': [
         'precomp.cpp',
 
@@ -153,6 +154,8 @@
         'dom/time_stamp.cc',
         'dom/window.cc',
         'dom/window_ostream.cc',
+
+        '<(SHARED_INTERMEDIATE_DIR)/v8_strings.cc',
 
         'gc/collectable.cc',
         'gc/collector.cc',
@@ -265,6 +268,29 @@
             'dom/make_unicode_lib_cc.py',
             '<@(_outputs)',
             '<(unicode_data_txt)',
+          ], # action
+        },
+      ], # actions
+    },
+    {
+      'target_name': 'dom_v8_strings_cc',
+      'type': 'none',
+      'actions': [
+        {
+          'action_name': 'make_v9_strings_cc',
+          'inputs': [
+            'dom/make_v8_strings.py',
+            'dom/v8_strings.in',
+          ], # inputs
+          'outputs': [
+            '<(SHARED_INTERMEDIATE_DIR)/v8_strings.cc',
+            '<(SHARED_INTERMEDIATE_DIR)/v8_strings.h',
+          ],
+          'action': [
+            'python',
+            'dom/make_v8_strings.py',
+            '<(SHARED_INTERMEDIATE_DIR)/v8_strings',
+            'dom/v8_strings.in',
           ], # action
         },
       ], # actions

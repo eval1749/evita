@@ -33,7 +33,6 @@ class Window : public v8_glue::Scriptable<Window, EventTarget>,
   static_assert(!static_cast<int>(State::NotRealized),
                 "Window::State::kNotRealized should be zero.");
 
-  private: int focus_tick_;
   private: State state_;
 
   protected: Window();
@@ -43,7 +42,6 @@ class Window : public v8_glue::Scriptable<Window, EventTarget>,
   public: v8_glue::Nullable<Window> first_child() const {
     return Node::first_child();
   }
-  public: int focus_tick() const { return focus_tick_; }
   public: WindowId id() const { return event_target_id(); }
   public: v8_glue::Nullable<Window> last_child() const {
     return Node::last_child();

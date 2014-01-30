@@ -84,7 +84,7 @@ class WindowWrapperInfo :
     builder
         .SetProperty("children", &Window::child_windows)
         .SetProperty("firstChild", &Window::first_child)
-        .SetProperty("focusTick_", &Window::focus_tick)
+        .SetValue("focusTick_", 0)
         .SetProperty("id", &Window::id)
         .SetProperty("lastChild", &Window::last_child)
         .SetProperty("nextSibling", &Window::next_sibling)
@@ -165,8 +165,7 @@ class Window::WindowIdMapper : public common::Singleton<WindowIdMapper> {
 DEFINE_SCRIPTABLE_OBJECT(Window, WindowWrapperInfo)
 
 Window::Window()
-    : focus_tick_(0),
-      state_(State::NotRealized) {
+    : state_(State::NotRealized) {
   WindowIdMapper::instance()->Register(this);
 }
 
@@ -269,16 +268,17 @@ void Window::DidRealizeWidget(WindowId window_id) {
 
 void Window::DidSetFocus() {
   ++global_focus_tick;
-  focus_tick_ = global_focus_tick;
 
-  // Update |Window.focus| property to tell focus window to scripts.
+  // Update |Window.focus| and |Window.prototype.focusTick_|
   auto const isolate = v8::Isolate::GetCurrent();
   v8::HandleScope handle_scope(isolate);
   auto const context = ScriptController::instance()->context();
   v8::Context::Scope context_scope(context);
-  auto const object = GetWrapper(isolate);
+  auto const instance = GetWrapper(isolate);
   auto const klass = context->Global()->Get(v8Strings::Window.Get(isolate));
-  klass->ToObject()->Set(v8Strings::focus.Get(isolate), object);
+  instance->Set(v8Strings::focusTick_.Get(isolate),
+                v8::Integer::New(isolate, global_focus_tick));
+  klass->ToObject()->Set(v8Strings::focus.Get(isolate), instance);
 }
 
 void Window::Focus() {

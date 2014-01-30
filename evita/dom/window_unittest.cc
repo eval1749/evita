@@ -188,6 +188,15 @@ TEST_F(WindowTest, focus) {
   EXPECT_SCRIPT_VALID("sample.focus();");
 }
 
+TEST_F(WindowTest, focusTick_) {
+  EXPECT_SCRIPT_VALID("var sample = new SampleWindow();");
+  EXPECT_SCRIPT_EQ("0", "sample.focusTick_");
+  EXPECT_TRUE("Window.focus == null");
+  view_event_handler()->DidSetFocus(1);
+  EXPECT_SCRIPT_TRUE("Window.focus == sample");
+  EXPECT_SCRIPT_EQ("1", "sample.focusTick_");
+}
+
 TEST_F(WindowTest, Properties) {
   EXPECT_SCRIPT_VALID("var sample1 = new SampleWindow()");
   EXPECT_SCRIPT_EQ("0", "sample1.children.length");

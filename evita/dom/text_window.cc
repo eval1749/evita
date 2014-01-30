@@ -101,11 +101,11 @@ void TextWindow::MakeSelectionVisible() {
       window_id());
 }
 
-text::Posn TextWindow::MapPointToPosition(const Point* point) {
+text::Posn TextWindow::MapPointToPosition(float x, float y) {
   TextWindowCompute data;
   data.method = TextWindowCompute::Method::MapPointToPosition;
-  data.x = point->x();
-  data.y = point->y();
+  data.x = x;
+  data.y = y;
   ScriptController::instance()->view_delegate()->ComputeOnTextWindow(
     id(), &data, nullptr);
   return data.position;

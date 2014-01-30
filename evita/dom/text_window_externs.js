@@ -24,10 +24,11 @@ TextWindow.prototype.selection;
 TextWindow.prototype.makeSelectionVisible = function() {};
 
 /**
- * @param {!Point} point
+ * @param {number} x
+ * @param {number} y
  * @return {!Position}
  */
-TextWindow.prototype.mapPointToPosition_ = function(point) {};
+TextWindow.prototype.mapPointToPosition_ = function(x, y) {};
 
 /**
  * @param {!Position} position

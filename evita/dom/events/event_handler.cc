@@ -10,6 +10,7 @@
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
 #include "evita/dom/events/window_event.h"
+#include "evita/dom/lock.h"
 #include "evita/dom/public/api_event.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/window.h"
@@ -116,6 +117,7 @@ void EventHandler::DidDropWidget(WindowId source_id,
     return;
   auto const event = new WindowEvent(L"dropwindow", Event::NotBubbling,
                                      Event::NotCancelable, source_window);
+  DOM_AUTO_LOCK_SCOPE();
   CHECK(target_window->DispatchEvent(event));
   DoDefaultEventHandling(target_window, event);
 }
@@ -125,6 +127,7 @@ void EventHandler::DidKillFocus(WindowId window_id) {
   if (!window)
     return;
   auto const event = new FocusEvent(L"blur", nullptr);
+  DOM_AUTO_LOCK_SCOPE();
   window->DispatchEvent(event);
 }
 
@@ -146,6 +149,7 @@ void EventHandler::DidSetFocus(WindowId window_id) {
     return;
   window->DidSetFocus();
   auto const event = new FocusEvent(L"focus", nullptr);
+  DOM_AUTO_LOCK_SCOPE();
   window->DispatchEvent(event);
 }
 
@@ -161,6 +165,7 @@ void EventHandler::DispatchFormEvent(const ApiFormEvent& raw_event) {
   auto event = new FormEvent(raw_event.type, Event::Bubbling,
                              Event::NotCancelable,
                              raw_event.data);
+  DOM_AUTO_LOCK_SCOPE();
   target->DispatchEvent(event);
 }
 
@@ -169,6 +174,7 @@ void EventHandler::DispatchMouseEvent(const domapi::MouseEvent& api_event) {
   if (!window)
     return;
   gc::Local<MouseEvent> event(new MouseEvent(api_event));
+  DOM_AUTO_LOCK_SCOPE();
   if (!window->DispatchEvent(event))
     return;
   DoDefaultEventHandling(window, event);
@@ -186,6 +192,7 @@ void EventHandler::QueryClose(WindowId window_id) {
   gc::Local<UiEvent> event(new UiEvent());
   event->InitUiEvent(L"queryclose", Event::NotBubbling, Event::Cancelable,
                      window, 0);
+  DOM_AUTO_LOCK_SCOPE();
   if (!window->DispatchEvent(event))
     return;
   DoDefaultEventHandling(window, event);

@@ -64,9 +64,8 @@ class Window : public v8_glue::Scriptable<Window, EventTarget>,
   public: void ChangeParentWindow(Window* new_parent_window);
   public: void Destroy();
   public: static void DidDestroyWidget(WindowId window_id);
-  public: static void DidKillFocus(WindowId window_id);
   public: static void DidRealizeWidget(WindowId window_id);
-  public: static void DidSetFocus(WindowId window_id);
+  public: void DidSetFocus();
   public: void Focus();
   public: static Window* FromWindowId(WindowId window_id);
   public: bool IsDescendantOf(Window* other) const;

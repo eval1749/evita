@@ -5,6 +5,7 @@
 
 #include "evita/dom/editor_window.h"
 #include "evita/dom/events/event_target.h"
+#include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/form_event.h"
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
@@ -120,7 +121,11 @@ void EventHandler::DidDropWidget(WindowId source_id,
 }
 
 void EventHandler::DidKillFocus(WindowId window_id) {
-  Window::DidKillFocus(window_id);
+  auto const window = FromWindowId(window_id);
+  if (!window)
+    return;
+  auto const event = new FocusEvent(L"blur", nullptr);
+  window->DispatchEvent(event);
 }
 
 void EventHandler::DidRealizeWidget(WindowId window_id) {
@@ -128,7 +133,12 @@ void EventHandler::DidRealizeWidget(WindowId window_id) {
 }
 
 void EventHandler::DidSetFocus(WindowId window_id) {
-  Window::DidSetFocus(window_id);
+  auto const window = FromWindowId(window_id);
+  if (!window)
+    return;
+  window->DidSetFocus();
+  auto const event = new FocusEvent(L"focus", nullptr);
+  window->DispatchEvent(event);
 }
 
 void EventHandler::DidStartHost() {

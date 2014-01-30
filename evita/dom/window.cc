@@ -17,7 +17,10 @@
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/window_ostream.h"
 #include "evita/gc/weak_ptr.h"
+#include "evita/v8_glue/converter.h"
+#include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/wrapper_info.h"
+#include "v8_strings.h"
 
 namespace dom {
 namespace internal {
@@ -60,6 +63,21 @@ class WindowWrapperInfo :
       : BaseClass(name) {
   }
   public: ~WindowWrapperInfo() = default;
+
+  protected: virtual v8::Handle<v8::FunctionTemplate>
+      CreateConstructorTemplate(v8::Isolate* isolate) override {
+    auto templ = v8_glue::CreateConstructorTemplate(isolate,
+        &WindowWrapperInfo::NewWindow);
+    return v8_glue::FunctionTemplateBuilder(isolate, templ)
+        .SetValue("focus", v8::Maybe<Window*>(false, nullptr))
+        .Build();
+  }
+
+  private: static Window* NewWindow() {
+    ScriptController::instance()->ThrowError(
+        "You can't create Window instance.");
+    return nullptr;
+  }
 
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
@@ -225,10 +243,6 @@ void Window::Destroy() {
   ScriptController::instance()->view_delegate()->DestroyWindow(window_id());
 }
 
-void Window::DidKillFocus(WindowId) {
-  // TODO(yosi) Dispatch blur event.
-}
-
 void Window::DidDestroyWidget(WindowId window_id) {
   DCHECK_NE(kInvalidWindowId, window_id);
   WindowIdMapper::instance()->DidDestroyWidget(window_id);
@@ -253,13 +267,9 @@ void Window::DidRealizeWidget(WindowId window_id) {
   }
 }
 
-void Window::DidSetFocus(dom::WindowId window_id) {
-  auto const window = FromWindowId(window_id);
-  if (!window)
-    return;
+void Window::DidSetFocus() {
   ++global_focus_tick;
-  window->focus_tick_ = global_focus_tick;
-  // TODO(yosi) Dispatch focus event.
+  focus_tick_ = global_focus_tick;
 }
 
 void Window::Focus() {

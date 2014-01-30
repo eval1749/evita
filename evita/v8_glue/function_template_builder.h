@@ -80,7 +80,7 @@ class FunctionTemplateBuilder {
   // operator and line up nicely.
   public: template<typename T>
   FunctionTemplateBuilder& SetValue(const base::StringPiece& name, T val) {
-    return SetImpl(name, ConvertToV8(isolate_, val));
+    return SetImpl(name, gin::ConvertToV8(isolate_, val));
   }
 
   // In the following methods, T and U can be function pointer, member function

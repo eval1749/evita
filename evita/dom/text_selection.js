@@ -73,10 +73,12 @@
       selection.goal_point_ = undefined;
       return;
     }
-    if (selection.goal_point_)
+    var focus = selection.startIsActive ? selection.range.start :
+                                          selection.range.end;
+    if (selection.goal_position_ == focus && selection.goal_point_)
       return;
-    selection.goal_point_ = selection.window.mapPositionToPoint_(
-        selection.startIsActive ? selection.range.start : selection.range.end);
+    selection.goal_point_ = selection.window.mapPositionToPoint_(focus);
+    selection.goal_position_ = focus;
   }
 
   /**
@@ -187,6 +189,10 @@
         break;
       default:
         throw 'Invalid alter: ' + alter;
+    }
+    if (this.goal_point_) {
+      this.goal_position_ = this.startIsActive ? this.range.start :
+                                                 this.range.end;
     }
     return this;
   };

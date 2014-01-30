@@ -28,8 +28,11 @@ TextSelection.prototype.endOf = function(unit, opt_alter) {};
 
 // Note: We use |undefined| as marker of no goal x point to avoid
 // initialization of |goal_point_| in C++.
-/** @expose @type {!Point|undefined} */
+/** @type {!Point|undefined} */
 TextSelection.prototype.goal_point_;
+
+/** @type {!Position|undefined} */
+TextSelection.prototype.goal_position_;
 
 /**
  * @param {Unit} unit, one of DOCUMENT, LINE, or WINDOW_LINE.

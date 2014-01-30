@@ -46,11 +46,7 @@ class ViewDelegateImpl;
 
 class Application : public common::Singleton<Application> {
   protected: typedef DoubleLinkedList_<Frame> Frames;
-  protected: typedef DoubleLinkedList_<Buffer> Buffers;
 
-  private: NewlineMode newline_mode_;
-  private: uint code_page_;
-  private: Buffers buffers_;
   private: Frames frames_;
   private: Frame* active_frame_;
   private: int idle_count_;
@@ -66,8 +62,6 @@ class Application : public common::Singleton<Application> {
   private: Application();
   public: ~Application();
 
-  public: const Buffers& buffers() const { return buffers_; }
-  public: Buffers& buffers() { return buffers_; }
   public: const Frames& frames() const { return frames_; }
   public: Frames& frames() { return frames_; }
   public: editor::DomLock* dom_lock() const { return dom_lock_.get(); }
@@ -89,18 +83,12 @@ class Application : public common::Singleton<Application> {
   public: void Execute(CommandWindow* window, uint32 key_code, uint32 repeat);
 
   // [F]
-  public: Buffer* FindBuffer(const base::string16& name) const;
   public: Frame* FindFrame(HWND hwnd) const;
-  public: Pane* FindPane(HWND hwnd, POINT point) const;
 
   // [G]
   public: Frame* GetActiveFrame() const { return active_frame_; }
-  public: uint GetCodePage() const { return code_page_; }
-  public: Frame* GetFirstFrame() const { return frames_.GetFirst(); }
   public: HIMAGELIST GetIconList() const;
   public: IoManager* GetIoManager() const { return io_manager_.get(); }
-  public: Frame* GetLastFrame() const { return frames_.GetLast(); }
-  public: NewlineMode GetNewline() const { return newline_mode_; }
   public: const char16* GetTitle() const;
 
   // [O]
@@ -111,13 +99,9 @@ class Application : public common::Singleton<Application> {
                            const base::Closure& task);
 
   // [R]
-  public: Buffer* RenameBuffer(Buffer* buffer,
-                               const base::string16& new_name);
   public: void Run();
 
   // [S]
-  public: bool SaveBuffer(Frame* frame, Buffer* buffer, bool save_as = false);
-
   public: Frame* SetActiveFrame(Frame* frame) { 
     return active_frame_ = frame;
   }

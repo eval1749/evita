@@ -74,9 +74,7 @@ class MessagePump : public base::MessagePumpForUI {
 // Application
 //
 Application::Application()
-    : newline_mode_(NewlineMode_CrLf),
-      code_page_(932),
-      active_frame_(nullptr),
+    : active_frame_(nullptr),
       idle_count_(0),
       is_quit_(false),
       command_processor_(new Command::Processor()),
@@ -154,42 +152,11 @@ void Application::Execute(CommandWindow* window, uint32 key_code,
                               static_cast<int>(repeat));
 }
 
-Buffer* Application::FindBuffer(const base::string16& name) const {
-  for (auto& buffer: buffers_) {
-    if (buffer.name() == name)
-      return const_cast<Buffer*>(&buffer);
-  }
-  return nullptr;
-}
-
 Frame* Application::FindFrame(HWND hwnd) const {
   for (auto& frame: frames_) {
       if (frame == hwnd)
           return const_cast<Frame*>(&frame);
   }
-  return nullptr;
-}
-
-Pane* Application::FindPane(HWND hwndMouse, POINT pt) const {
-  if (!::ClientToScreen(hwndMouse, &pt))
-    return nullptr;
-  auto hwnd = ::WindowFromPoint(pt);
-  if (!hwnd)
-    return nullptr;
-
-  if (!g_nDropTargetMsg) {
-    static const char16 Evita__DropTarget[] = L"Evita.DropTarget";
-    g_nDropTargetMsg = ::RegisterWindowMessage(Evita__DropTarget);
-    if (!g_nDropTargetMsg)
-      return nullptr;
-  }
-
-  do {
-    if (auto const iAnswer = ::SendMessage(hwnd, g_nDropTargetMsg, 0, 0))
-      return reinterpret_cast<Pane*>(iAnswer);
-    hwnd = ::GetParent(hwnd);
-  } while (hwnd);
-
   return nullptr;
 }
 
@@ -216,76 +183,10 @@ void Application::PostDomTask(const tracked_objects::Location& from_here,
   message_loop_->PostTask(from_here, base::Bind(RunTaskWithinDomLock, task));
 }
 
-namespace {
-typedef std::pair<base::string16, base::string16> StringPair;
-StringPair SplitByDot(const base::string16& name) {
-  const auto last_dot = name.rfind('.');
-  if (!last_dot || last_dot == base::string16::npos)
-    return StringPair(name, L"");
-  return StringPair(name.substr(0, last_dot), name.substr(last_dot));
-}
-}  // namespace
-
-Buffer* Application::RenameBuffer(Buffer* buffer,
-                                  const base::string16& new_name) {
-  auto const present = FindBuffer(new_name);
-  if (buffer == present)
-    return buffer;
-
-  if (!present) {
-    buffer->SetName(new_name);
-    return buffer;
-  }
-
-  const auto pair = SplitByDot(new_name);
-  auto candidate = new_name;
-  for (auto n = 2; FindBuffer(candidate); ++ n) {
-    candidate = pair.first + L" (" + base::IntToString16(n) + L")" +
-        pair.second;
-  }
-
-  buffer->SetName(candidate);
-  return buffer;
-}
-
 void Application::Run() {
   DoIdle();
   base::RunLoop run_loop;
   run_loop.Run();
-}
-
-bool Application::SaveBuffer(Frame* frame, Buffer* buffer, bool is_save_as) {
-  auto eNewline = buffer->GetNewline();
-  if (NewlineMode_Detect == eNewline)
-    eNewline = GetNewline();
-
-  auto code_page = buffer->GetCodePage();
-  if (!code_page)
-    code_page = GetCodePage();
-
-  FileDialogBox::Param oParam;
-  oParam.m_hwndOwner = *frame;
-
-  oParam.m_wsz[0] = 0;
-  if (is_save_as || !buffer->GetFileName()[0]) {
-    ::lstrcpyW(oParam.m_wsz, buffer->GetFileName().c_str());
-    FileDialogBox oDialog;
-    if (!oDialog.GetSaveFileName(&oParam))
-      return true;
-
-    auto pwszName = ::lstrrchrW(oParam.m_wsz, '\\');
-    if (!pwszName) {
-       pwszName = ::lstrrchrW(oParam.m_wsz, '/');
-       if (!pwszName)
-         pwszName = oParam.m_wsz + 1;
-    }
-
-    // Skip slash(/)
-    ++pwszName;
-    RenameBuffer(buffer, pwszName);
-  }
-
-  return buffer->Save(oParam.m_wsz, code_page, eNewline);
 }
 
 void Application::ShowMessage(MessageLevel iLevel, uint nFormatId) {

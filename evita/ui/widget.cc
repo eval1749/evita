@@ -374,7 +374,8 @@ void Widget::RealizeWidget() {
 }
 
 void Widget::ReleaseCapture() {
-  DCHECK_EQ(capture_widget, this);
+  if (capture_widget != this)
+    return;
   capture_widget = nullptr;
   ::ReleaseCapture();
 }

@@ -39,6 +39,15 @@ TextSelection.prototype.goal_point_;
 TextSelection.prototype.homeKey = function(unit, opt_alter) {};
 
 /**
+ * @this {!TextSelection}
+ * @param {Unit} unit
+ * @param {number=} opt_count, default is one.
+ * @param {Alter=} opt_alter, defualt is Alter.MOVE
+ * @return {!TextSelection}
+ */
+TextSelection.prototype.modify = function(unit, opt_count, opt_alter) {};
+
+/**
  * @param {Unit} unit
  * @param {number=} opt_count, defualt is one.
  * @return {!TextSelection}

@@ -65,6 +65,21 @@
   }
 
   /**
+   * @param {!TextSelection} selection
+   * @param {!Unit} unit
+   */
+  function updateGoalX(selection, unit) {
+    if (unit != Unit.SCREEN && unit != Unit.WINDOW_LINE) {
+      selection.goal_point_ = undefined;
+      return;
+    }
+    if (selection.goal_point_)
+      return;
+    selection.goal_point_ = selection.window.mapPositionToPoint_(
+        selection.startIsActive ? selection.range.start : selection.range.end);
+  }
+
+  /**
    * @param {Unit} unit
    * @param {Alter} opt_alter, default is Alter.MOVE
    * @return {!TextSelection}
@@ -138,6 +153,42 @@
         new_focus = this.range.start;
     }
     return updateSelection(this, alter, anchor, new_focus);
+  };
+
+  /**
+   * @this {!TextSelection}
+   * @param {Unit} unit
+   * @param {number=} opt_count, default is one.
+   * @param {Alter=} opt_alter, defualt is Alter.MOVE
+   * @return {!TextSelection}
+   */
+  TextSelection.prototype.modify= function(unit, opt_count, opt_alter) {
+    var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
+    var alter = arguments.length >= 3 ? /** @type {Alter} */(opt_alter) :
+                                        Alter.MOVE;
+    updateGoalX(this, unit);
+    switch (alter) {
+      case Alter.EXTEND: {
+        if (this.range.start == this.range.end)
+          this.startIsActive = count < 0;
+        if (this.startIsActive)
+          this.moveStart(unit, count);
+        else
+          this.moveEnd(unit, count);
+        break;
+      }
+      case Alter.MOVE:
+        if (this.range.start == this.range.end)
+            this.move(unit, count);
+        else if (count > 0)
+          this.range.collapseTo(this.range.start);
+        else
+          this.range.collapseTo(this.range.end);
+        break;
+      default:
+        throw 'Invalid alter: ' + alter;
+    }
+    return this;
   };
 
   /**

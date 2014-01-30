@@ -20,7 +20,7 @@
    * @param {!Unit} unit
    * @param {number} direction
    */
-  function makeExtendSelectionCommand(unit, direction) {
+  function makeSelectionMotionCommand(unit, direction, alter) {
     /**
      * @this {!TextWindow}
      * @param {number=} opt_count
@@ -28,45 +28,8 @@
     return function(opt_count) {
       var count = arguments.length >= 1 ?
         /** @type {number} */(opt_count) * direction : direction;
-      var selection = this.selection;
-      var range = selection.range;
-      var move_start = range.start == range.end ? count < 0 :
-                                                  selection.startIsActive;
-      updateGoalX(selection, unit);
-      if (move_start)
-        selection.moveStart(unit, count);
-      else
-        selection.moveEnd(unit, count);
-      selection.startIsActive = move_start;
+      this.selection.modify(unit, count, alter);
     };
-  }
-
-  /**
-   * @param {!Unit} unit
-   * @param {number} direction
-   */
-  function makeMoveSelectionCommand(unit, direction) {
-    /**
-     * @this {!TextWindow}
-     * @param {number=} opt_count
-     */
-    return function(opt_count) {
-      var count = arguments.length >= 1 ?
-        /** @type {number} */(opt_count) * direction : direction;
-      var selection = this.selection;
-      var range = selection.range;
-      if (range.start != range.end)
-        range.collapseTo(selection.startIsActive ? range.start : range.end);
-      updateGoalX(selection, unit);
-      selection.move(unit, count);
-      selection.startIsActive = true;
-    };
-  }
-
-  /** @param {!TextSelection} selection */
-  function resetGoalTracking(selection) {
-    // TODO(yosi) This is temporary hack for resetting goal point tracking.
-    selection.startIsActive = true;
   }
 
   /**
@@ -75,21 +38,6 @@
    */
   function pasteFromClipboardCommand() {
     this.selection.range.paste();
-  }
-
-  /**
-   * @param {!TextSelection} selection
-   * @param {!Unit} unit
-   */
-  function updateGoalX(selection, unit) {
-    if (unit != Unit.SCREEN && unit != Unit.WINDOW_LINE) {
-      selection.goal_point_ = undefined;
-      return;
-    }
-    if (selection.goal_point_)
-      return;
-    selection.goal_point_ = selection.window.mapPositionToPoint_(
-        selection.startIsActive ? selection.range.start : selection.range.end);
   }
 
   /**
@@ -178,12 +126,12 @@
   });
 
   Editor.bindKey(TextWindow, 'Ctrl+ArrowLeft',
-    makeMoveSelectionCommand(Unit.WORD, -1),
+    makeSelectionMotionCommand(Unit.WORD, -1, Alter.MOVE),
     'move selection left word\n' +
     'Move selection to left by words');
 
   Editor.bindKey(TextWindow, 'Ctrl+ArrowRight',
-    makeMoveSelectionCommand(Unit.WORD, 1),
+    makeSelectionMotionCommand(Unit.WORD, 1, Alter.MOVE),
     'move selection right word\n' +
     'Move selection to right by words');
 
@@ -267,12 +215,12 @@
      'Move active position of selection to home of document.');
 
   Editor.bindKey(TextWindow, 'Ctrl+Shift+ArrowLeft',
-    makeExtendSelectionCommand(Unit.WORD, -1),
+    makeSelectionMotionCommand(Unit.WORD, -1, Alter.EXTEND),
     'extend selection left word\n' +
     'Extend selection to left by words');
 
   Editor.bindKey(TextWindow, 'Ctrl+Shift+ArrowRight',
-    makeExtendSelectionCommand(Unit.WORD, 1),
+    makeSelectionMotionCommand(Unit.WORD, 1, Alter.EXTEND),
     'extend selection right word\n' +
     'Extend selection to right by words');
 
@@ -371,37 +319,13 @@
   }, 'move to home of window line\n' +
      'Move active position of selection to home of window line.');
 
-  Editor.bindKey(TextWindow, 'ArrowLeft', function(opt_count) {
-    var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
-    updateGoalX(this.selection, Unit.CHARACTER);
-    var range = this.selection.range;
-    if (range.start == range.end) {
-      range.move(Unit.CHARACTER, -count);
-      return;
-    }
-    if (!count)
-      return;
-    if (count > 0)
-      range.end = range.start;
-    else
-      range.start = range.end;
-  }, 'move selection to left by character');
+  Editor.bindKey(TextWindow, 'ArrowLeft',
+      makeSelectionMotionCommand(Unit.CHARACTER, -1, Alter.MOVE),
+      'move selection to left by character');
 
-  Editor.bindKey(TextWindow, 'ArrowRight', function(opt_count) {
-    var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
-    updateGoalX(this.selection, Unit.CHARACTER);
-    var range = this.selection.range;
-    if (range.start == range.end) {
-      range.move(Unit.CHARACTER, count);
-      return;
-    }
-    if (!count)
-      return;
-    if (count > 0)
-      range.start = range.end;
-    else
-      range.end = range.start;
-  }, 'move selection to right by character');
+  Editor.bindKey(TextWindow, 'ArrowRight',
+      makeSelectionMotionCommand(Unit.CHARACTER, 1, Alter.MOVE),
+      'move selection to right by character');
 
   Editor.bindKey(TextWindow, 'Shift+Delete', cutToClipboardCommand);
 
@@ -418,11 +342,11 @@
   Editor.bindKey(TextWindow, 'Shift+Insert', pasteFromClipboardCommand);
 
   Editor.bindKey(TextWindow, 'Shift+ArrowLeft',
-      makeExtendSelectionCommand(Unit.CHARACTER, -1),
+      makeSelectionMotionCommand(Unit.CHARACTER, -1, Alter.EXTEND),
       'extend selection to left by character');
 
   Editor.bindKey(TextWindow, 'Shift+ArrowRight',
-      makeExtendSelectionCommand(Unit.CHARACTER, 1),
+      makeSelectionMotionCommand(Unit.CHARACTER, 1, Alter.EXTEND),
       'extend selection to right by character');
 
   /** @const @type {number} */
@@ -499,62 +423,62 @@
      'Range: insert spaces all lines in range.');
 
   Editor.bindKey(TextWindow, 'ArrowUp',
-      makeMoveSelectionCommand(Unit.WINDOW_LINE, -1),
+      makeSelectionMotionCommand(Unit.WINDOW_LINE, -1, Alter.MOVE),
       'move up by window line\n' +
       'Move focus position up by window line.');
 
   Editor.bindKey(TextWindow, 'ArrowDown',
-      makeMoveSelectionCommand(Unit.WINDOW_LINE, 1),
+      makeSelectionMotionCommand(Unit.WINDOW_LINE, 1, Alter.MOVE),
       'move down by window line\n' +
       'Move focus position down by window line.');
 
   Editor.bindKey(TextWindow, 'PageUp',
-      makeMoveSelectionCommand(Unit.SCREEN, -1),
+      makeSelectionMotionCommand(Unit.SCREEN, -1, Alter.MOVE),
       'move up by screen\n' +
       'Move focus position up by screen.');
 
   Editor.bindKey(TextWindow, 'PageDown',
-      makeMoveSelectionCommand(Unit.SCREEN, 1),
+      makeSelectionMotionCommand(Unit.SCREEN, 1, Alter.MOVE),
       'move down by screen\n' +
       'Move focus position down by screen.');
 
   Editor.bindKey(TextWindow, 'Ctrl+PageUp',
-      makeMoveSelectionCommand(Unit.WINDOW, -1),
+      makeSelectionMotionCommand(Unit.WINDOW, -1, Alter.MOVE),
       'move up by window\n' +
       'Move focus position up by window.');
 
   Editor.bindKey(TextWindow, 'Ctrl+PageDown',
-      makeMoveSelectionCommand(Unit.WINDOW, 1),
+      makeSelectionMotionCommand(Unit.WINDOW, 1, Alter.MOVE),
       'move down by window\n' +
       'Move focus position down by window.');
 
   Editor.bindKey(TextWindow, 'Shift+ArrowUp',
-      makeExtendSelectionCommand(Unit.WINDOW_LINE, -1),
+      makeSelectionMotionCommand(Unit.WINDOW_LINE, -1, Alter.EXTEND),
       'extend up by window line\n' +
       'Extend focus position up by window line.');
 
   Editor.bindKey(TextWindow, 'Shift+ArrowDown',
-      makeExtendSelectionCommand(Unit.WINDOW_LINE, 1),
+      makeSelectionMotionCommand(Unit.WINDOW_LINE, 1, Alter.EXTEND),
       'extend down by window line\n' +
       'Extend focus position down by window line.');
 
   Editor.bindKey(TextWindow, 'Shift+PageUp',
-      makeExtendSelectionCommand(Unit.SCREEN, -1),
+      makeSelectionMotionCommand(Unit.SCREEN, -1, Alter.EXTEND),
       'extend up by screen\n' +
       'Extend focus position up by screen.');
 
   Editor.bindKey(TextWindow, 'Shift+PageDown',
-      makeExtendSelectionCommand(Unit.SCREEN, 1),
+      makeSelectionMotionCommand(Unit.SCREEN, 1, Alter.EXTEND),
       'extend down by screen\n' +
       'Extend focus position down by screen.');
 
   Editor.bindKey(TextWindow, 'Shift+Ctrl+PageUp',
-      makeExtendSelectionCommand(Unit.WINDOW, -1),
+      makeSelectionMotionCommand(Unit.WINDOW, -1, Alter.EXTEND),
       'extend up by window\n' +
       'Extend focus position up by window.');
 
   Editor.bindKey(TextWindow, 'Shift+Ctrl+PageDown',
-      makeExtendSelectionCommand(Unit.WINDOW, 1),
+      makeSelectionMotionCommand(Unit.WINDOW, 1, Alter.EXTEND),
       'extend down by window\n' +
       'Extend focus position down by window.');
 })();

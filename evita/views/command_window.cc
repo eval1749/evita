@@ -42,6 +42,7 @@ Command::KeyBindEntry* CommandWindow::MapKey(uint key_code) {
 
 // ui::Widget
 void CommandWindow::DidSetFocus() {
+  Window::DidSetFocus();
   if (is_shown())
     return;
   auto const frame = Frame::FindFrame(*this);

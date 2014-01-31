@@ -115,14 +115,6 @@ class TimerList : public common::Singleton<TimerList> {
   }
 };
 
-base::string16 V8ToString(v8::Handle<v8::Value> value) {
-  v8::String::Value string_value(value);
-  if (!string_value.length())
-    return base::string16();
-  return base::string16(reinterpret_cast<base::char16*>(*string_value),
-                        static_cast<size_t>(string_value.length()));
-}
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -151,12 +143,12 @@ void Timer::DidFireTimer() {
   auto const context = ScriptController::instance()->context();
   v8::Context::Scope context_scope(context);
   v8::TryCatch try_catch;
+  try_catch.SetVerbose(true);
+  try_catch.SetCaptureMessage(true);
   DOM_AUTO_LOCK_SCOPE();
   callback->Call(receiver_.NewLocal(isolate), 0, nullptr);
-  if (try_catch.HasCaught()) {
-    LOG(0) << "Exception in timer callback " <<
-        V8ToString(try_catch.Exception());
-  }
+  if (try_catch.HasCaught())
+    ScriptController::instance()->LogException(try_catch);
 }
 
 void Timer::Stop() {

@@ -53,6 +53,7 @@ class RangeClass : public v8_glue::WrapperInfo {
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
+        .SetProperty("collapsed", &Range::collapsed)
         .SetProperty("document", &Range::document)
         .SetProperty("end", &Range::end, &Range::set_end)
         .SetProperty("start", &Range::start, &Range::set_start)
@@ -84,6 +85,10 @@ Range::Range(Document* document, text::Range* range)
 
 Range::~Range() {
   document_->DidDestroyRange(this);
+}
+
+bool Range::collapsed() const {
+  return range_->GetStart() == range_->GetEnd();
 }
 
 int Range::end() const {

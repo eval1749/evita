@@ -26,6 +26,7 @@ class Range : public v8_glue::Scriptable<Range> {
   public: Range(Document* document, text::Range* range);
   public: virtual ~Range();
 
+  public: bool collapsed() const;
   public: Document* document() const { return document_.get(); }
   public: int end() const;
   public: int start() const;

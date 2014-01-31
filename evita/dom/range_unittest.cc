@@ -109,6 +109,17 @@ TEST_F(RangeTest, capitalize) {
   EXPECT_SCRIPT_EQ(" Foo bar", "test(' foo Bar')");
 }
 
+TEST_F(RangeTest, collapsed) {
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('collapsed');"
+    "var range = new Range(doc);");
+  EXPECT_SCRIPT_TRUE("range.collapsed");
+  EXPECT_SCRIPT_TRUE("range.start == range.end");
+  EXPECT_SCRIPT_VALID("range.text = 'foo';");
+  EXPECT_SCRIPT_FALSE("range.collapsed");
+  EXPECT_SCRIPT_TRUE("range.start != range.end");
+}
+
 TEST_F(RangeTest, collapseTo) {
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('endOf');"

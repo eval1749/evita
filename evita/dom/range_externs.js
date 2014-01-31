@@ -23,6 +23,9 @@ Range.prototype.text = '';
 /** @return {!Range} */
 Range.prototype.capitalize = function() {}
 
+/** @type {boolean} */
+Range.prototype.collapsed;
+
 /**
  * @param {Position} position
  */

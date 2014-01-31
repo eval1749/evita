@@ -63,8 +63,10 @@ def run(js_output_file, js_files, js_externs, closure_options):
                   ' %(js_externs)s') % params;
   exit_code = os.system(command_line)
   if exit_code != 0:
-    print 'remove', js_output_file
-    os.remove(js_output_file)
+    try:
+      os.remove(js_output_file)
+    except OSError as detail:
+      print detail
 
 def readFile(filename):
   lines = ''.join(open(filename, 'rt').readlines());

@@ -509,7 +509,6 @@ void TextEditWindow::OnKeyPressed(const ui::KeyboardEvent& event) {
 }
 
 void TextEditWindow::OnMousePressed(const ui::MouseEvent& event) {
-#if 0
   if (!event.is_left_button())
     return;
   UI_DOM_AUTO_LOCK_SCOPE();
@@ -540,22 +539,15 @@ void TextEditWindow::OnMousePressed(const ui::MouseEvent& event) {
     m_eDragMode = DragMode_Selection;
     SetCapture();
   }
-#else
-  ContentWindow::OnMousePressed(event);
-#endif
 }
 
 void TextEditWindow::OnMouseReleased(const ui::MouseEvent& event) {
-#if 0
   if (!event.is_left_button())
     return;
   if (m_eDragMode == DragMode_None)
     return;
   ReleaseCapture();
   stopDrag();
-#else
-  ContentWindow::OnMouseReleased(event);
-#endif
 }
 
 LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
@@ -603,7 +595,6 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
 }
 
 void TextEditWindow::OnMouseMoved(const ui::MouseEvent& event) {
-#if 0
   if (m_eDragMode == DragMode_None) {
     // We have nothing to do if mouse isn't dragged.
     return;
@@ -620,9 +611,6 @@ void TextEditWindow::OnMouseMoved(const ui::MouseEvent& event) {
     autoscroller_->Start(1);
   else
     autoscroller_->Stop();
-#else
-  ContentWindow::OnMouseMoved(event);
-#endif
 }
 
 void TextEditWindow::OnMouseWheel(const ui::MouseWheelEvent& event) {

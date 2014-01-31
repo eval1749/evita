@@ -62,7 +62,7 @@ void Selection::SetStartIsActive(bool new_start_is_active) {
 
 void Selection::TypeChar(char16 wch, Count k) {
   auto const pBuffer = GetBuffer();
-  if (Selection_None == GetType()) {
+  if (GetStart() == GetEnd()) {
     pBuffer->Insert(GetStart(), wch, k);
   } else {
     text::UndoBlock oUndo(pBuffer, L"Selection.TypeChar");

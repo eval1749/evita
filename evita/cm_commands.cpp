@@ -95,7 +95,7 @@ class DynamicAbbrev :
             return;
         }
 
-        if (Selection_None != m_pSelection->GetType())
+        if (m_pSelection->GetStart() != m_pSelection->GetEnd())
         {
             return;
         }

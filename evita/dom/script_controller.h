@@ -77,6 +77,7 @@ class ScriptController {
   public: static ScriptController* StartForTesting(
       ViewDelegate* view_delegate);
   public: void ThrowError(const std::string& message);
+  public: void ThrowException(v8::Handle<v8::Value> exception);
   public: void WillDestroyHost();
 
   DISALLOW_COPY_AND_ASSIGN(ScriptController);

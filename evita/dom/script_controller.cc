@@ -185,7 +185,12 @@ void ScriptController::LoadJsLibrary() {
 }
 
 void ScriptController::LogException(const v8::TryCatch& try_catch) {
-  DVLOG(0) << "Unhandled exception " << V8ToString(try_catch.Exception());
+  auto const stack_trace = try_catch.StackTrace();
+  if (stack_trace.IsEmpty()) {
+    DVLOG(0) << "Unhandled exception " << V8ToString(try_catch.Exception());
+    return;
+  }
+  DVLOG(0) << V8ToString(stack_trace);
 }
 
 void ScriptController::OpenFile(WindowId window_id,
@@ -240,6 +245,11 @@ void ScriptController::ThrowError(const std::string& message) {
   auto isolate = isolate_holder_.isolate();
   isolate->ThrowException(v8::Exception::Error(
       gin::StringToV8(isolate, message)));
+}
+
+void ScriptController::ThrowException(v8::Handle<v8::Value> exception) {
+  auto isolate = isolate_holder_.isolate();
+  isolate->ThrowException(exception);
 }
 
 void ScriptController::WillDestroyHost() {

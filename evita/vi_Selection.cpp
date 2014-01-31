@@ -21,13 +21,6 @@ Selection::Selection(const text::Range& range)
 Selection::~Selection() {
 }
 
-void Selection::Blink(Posn lPosn, Count nMillisecond) {
-  bool fReadOnly = GetBuffer()->IsReadOnly();
-  GetBuffer()->SetReadOnly(true);
-  GetWindow()->Blink(lPosn, nMillisecond);
-  GetBuffer()->SetReadOnly(fReadOnly);
-}
-
 void Selection::Collapse(CollapseWhich eCollapse) {
   Range::Collapse(eCollapse);
   m_fStartIsActive = eCollapse == Collapse_Start;

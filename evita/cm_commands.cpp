@@ -536,7 +536,13 @@ void TypeChar(const Context* pCtx)
                 nWait = 500;
             }
 
-            pSelection->Blink(lOpen, nWait);
+            // Temporary move caret to |lOpen| |nWait| milliseconds
+            {
+                bool fReadOnly = pSelection->GetBuffer()->IsReadOnly();
+                pSelection->GetBuffer()->SetReadOnly(true);
+                pSelection->GetWindow()->Blink(lOpen, nWait);
+                pSelection->GetBuffer()->SetReadOnly(fReadOnly);
+            }
         }
         else if (pSelection->GetStart() != lOpen)
         {

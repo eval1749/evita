@@ -43,9 +43,6 @@ class Selection : public text::Range {
     m_pWindow = window;
   }
 
-  // [B]
-  public: void Blink(Posn, Count);
-
   // [C]
   public: void Collapse(CollapseWhich = Collapse_Start);
   public: static Selection* Create(const text::Range& range);

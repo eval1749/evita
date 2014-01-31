@@ -51,54 +51,6 @@ SelectionType Selection::GetType() const {
   return GetStart() == GetEnd() ? Selection_None : Selection_Normal;
 }
 
-Count Selection::moveAux(Unit eUnit, Count n, bool fExtend) {
-  Posn lActive;
-  if (fExtend) {
-      // Extend from active position.
-      lActive = GetActivePosn();
-  } else if (GetEnd() == GetStart()) {
-      // Move insertion position.
-      lActive = GetStart();
-  } else {
-    // Move from specified direction end.
-    lActive = n > 0 ? GetEnd() : GetStart();
-
-    // Note: We make selection collapsed instead of moving end.
-    if (eUnit == Unit_Char) {
-        if (!n)
-          return 0;
-        MoveTo(lActive, false);
-        // Note: We count one for degenerating selection.
-        return 1;
-    }
-  }
-
-  auto const k = GetWindow()->ComputeMotion(eUnit, n, m_ptGoal, &lActive);
-  MoveTo(lActive, fExtend);
-  return k;
-}
-
-//  Unit        | Key Combination
-//  ------------+----------------
-//  Char        | Right
-/// Word        | Ctrl+Right
-//
-// Note: If selection isn't nondegenerate and fExtend is false, selection
-// becomes degenerate.
-Count Selection::MoveRight(Unit eUnit, Count n, bool fExtend) {
-  forgetGoal();
-  return moveAux(eUnit, n, fExtend);
-}
-
-void Selection::MoveTo(Posn lPosn, bool fExtend) {
-  if (!fExtend) {
-    Range::SetRange(lPosn, lPosn);
-  } else {
-    Range::SetRange(lPosn, m_fStartIsActive ? GetEnd() : GetStart());
-    m_fStartIsActive = lPosn <= GetStart();
-  }
-}
-
 void Selection::RestoreForReload() {
   SetRange(0, 0);
   Move(Unit_Line, m_lRestoreLineNum);

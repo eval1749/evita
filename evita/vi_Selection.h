@@ -70,10 +70,6 @@ class Selection : public text::Range {
   // [I]
   public: bool IsStartActive() const { return m_fStartIsActive; }
 
-  // [M]
-  public: Count MoveRight(Unit, Count, bool = false);
-  public: void MoveTo(Posn, bool = false);
-
   // [P]
   public: void PrepareForReload();
 
@@ -102,9 +98,6 @@ class Selection : public text::Range {
 
   // [F]
   private: void forgetGoal();
-
-  // [M]
-  private: Count moveAux(Unit, Count, bool);
 
   // [U]
   private: bool updateGoal();

@@ -469,7 +469,7 @@ void TextEditWindow::MakeSelectionVisible() {
 
 Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
   updateScreen();
-  return m_pPage->MapPointToPosn(*m_gfx, pt);
+  return std::min(m_pPage->MapPointToPosn(*m_gfx, pt), GetBuffer()->GetEnd());
 }
 
 // Description:

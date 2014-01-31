@@ -164,7 +164,7 @@
    * @param {Alter=} opt_alter, defualt is Alter.MOVE
    * @return {!TextSelection}
    */
-  TextSelection.prototype.modify= function(unit, opt_count, opt_alter) {
+  TextSelection.prototype.modify = function(unit, opt_count, opt_alter) {
     var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
     var alter = arguments.length >= 3 ? /** @type {Alter} */(opt_alter) :
                                         Alter.MOVE;

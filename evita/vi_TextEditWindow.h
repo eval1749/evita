@@ -30,15 +30,8 @@ class TextWindow;
 
 using Buffer = dom::Buffer;
 
-enum DragMode
-{
-    DragMode_None,
-    DragMode_Selection,
-}; // DragMode
-
 namespace ui {
 class KeyboardEvent;
-class MouseEvent;
 class MouseWheelEvent;
 }
 
@@ -91,13 +84,10 @@ class TextEditWindow
     }
   };
 
-  private: class Autoscroller;
   private: class CaretBlinker;
 
-  private: std::unique_ptr<Autoscroller> autoscroller_;
   private: std::unique_ptr<Caret> caret_;
   private: std::unique_ptr<CaretBlinker> caret_blinker_;
-  private: DragMode m_eDragMode;
   private: const gfx::Graphics* m_gfx;
   private: Posn m_lCaretPosn;
   private: int m_nCharTick;
@@ -172,9 +162,6 @@ class TextEditWindow
   private: virtual bool OnIdle(uint) override;
   private: virtual void OnKeyPressed(const ui::KeyboardEvent& event) override;
   private: virtual LRESULT OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam);
-  private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
-  private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
-  private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
   private: virtual void OnMouseWheel(
       const ui::MouseWheelEvent& event) override;
   private: void onVScroll(uint);

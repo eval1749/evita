@@ -48,64 +48,6 @@ uint TranslateKey(uint);
 
 //////////////////////////////////////////////////////////////////////
 //
-// Autoscroller
-//
-class TextEditWindow::Autoscroller {
-  private: static const auto kAutoscrollIntervalMs = 50;
-  private: static const auto kScrollSpeedIntervalMs = 100;
-  private: int direction_;
-  private: TextEditWindow* editor_;
-  private: uint started_at_;
-  private: common::RepeatingTimer<Autoscroller> timer_;
-
-  public: Autoscroller(TextEditWindow* edtior)
-    : direction_(0),
-      editor_(edtior),
-      started_at_(0),
-      timer_(this, &Autoscroller::DidFireTime) {
-  }
-
-  private: void DidFireTime(common::RepeatingTimer<Autoscroller>*) {
-    auto const duration = static_cast<uint>(::GetTickCount() - started_at_);
-    auto const scroll_amount = static_cast<Count>(
-        std::min(std::max(duration / kScrollSpeedIntervalMs, 1u), 20u));
-    UI_DOM_AUTO_LOCK_SCOPE();
-    if (Scroll(scroll_amount))
-      editor_->Redraw();
-    else
-      Stop();
-  }
-
-  private: Count Scroll(Count amount) {
-    if (direction_ > 0)
-      return editor_->GetSelection()->MoveDown(Unit_WindowLine, amount, true);
-     return editor_->GetSelection()->MoveUp(Unit_WindowLine, amount, true);
-  }
-
-  public: void Start(int direction) {
-    if (timer_.is_active()) {
-      if (direction_ != direction) {
-        direction_ = direction;
-        started_at_ = ::GetTickCount();
-      }
-      return;
-    }
-    direction_ = direction;
-    started_at_ = ::GetTickCount();
-    timer_.Start(kAutoscrollIntervalMs);
-  }
-
-  public: void Stop() {
-    if (!timer_.is_active())
-      return;
-    timer_.Stop();
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(Autoscroller);
-};
-
-//////////////////////////////////////////////////////////////////////
-//
 // TextEditWindow::ScrollBar
 //
 TextEditWindow::ScrollBar::~ScrollBar() {
@@ -166,9 +108,7 @@ Command::KeyBinds* key_bindings;
 //
 TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
     : CommandWindow_(text_window.window_id()),
-      autoscroller_(new Autoscroller(this)),
       caret_(std::move(Caret::Create())),
-      m_eDragMode(DragMode_None),
       m_gfx(nullptr),
       m_lCaretPosn(-1),
       m_pPage(new Page()),
@@ -317,9 +257,6 @@ void TextEditWindow::DidHide() {
 
 void TextEditWindow::DidKillFocus() {
   ParentClass::DidKillFocus();
-  // In case of we didn't get mouse released event, e.g. debugger, Alt+Tab,
-  // etc, we stop dragging along with autoscroll too.
-  stopDrag();
   caret_->Give();
 }
 
@@ -508,48 +445,6 @@ void TextEditWindow::OnKeyPressed(const ui::KeyboardEvent& event) {
                                    static_cast<uint32_t>(event.repeat()));
 }
 
-void TextEditWindow::OnMousePressed(const ui::MouseEvent& event) {
-  if (!event.is_left_button())
-    return;
-  UI_DOM_AUTO_LOCK_SCOPE();
-  auto const lPosn = MapPointToPosn(event.location());
-  if (lPosn < 0) {
-    // Click outside window. We do nothing.
-    return;
-  }
-
-  if (!has_focus()) {
-    SetFocus();
-    if (lPosn >= GetSelection()->GetStart() &&
-        lPosn < GetSelection()->GetEnd()) {
-     return;
-    }
-  }
-
-  if (event.click_count() == 2) {
-    DispatchMouseEvent(event);
-    return;
-  }
-
-  GetSelection()->MoveTo(lPosn, event.shift_key());
-
-  if (event.control_key()) {
-    DispatchMouseEvent(event);
-  } else {
-    m_eDragMode = DragMode_Selection;
-    SetCapture();
-  }
-}
-
-void TextEditWindow::OnMouseReleased(const ui::MouseEvent& event) {
-  if (!event.is_left_button())
-    return;
-  if (m_eDragMode == DragMode_None)
-    return;
-  ReleaseCapture();
-  stopDrag();
-}
-
 LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
   switch (uMsg) {
     case WM_VSCROLL:
@@ -592,25 +487,6 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
     #endif // SUPPORT_IME
   }
   return ParentClass::OnMessage(uMsg, wParam, lParam);
-}
-
-void TextEditWindow::OnMouseMoved(const ui::MouseEvent& event) {
-  if (m_eDragMode == DragMode_None) {
-    // We have nothing to do if mouse isn't dragged.
-    return;
-  }
-
-  UI_DOM_AUTO_LOCK_SCOPE();
-  auto const lPosn = MapPointToPosn(event.location());
-  if (lPosn >= 0)
-    selection_->MoveTo(lPosn, true);
-
-  if (event.location().y < rect().top)
-    autoscroller_->Start(-1);
-  else if (event.location().y > rect().bottom)
-    autoscroller_->Start(1);
-  else
-    autoscroller_->Stop();
 }
 
 void TextEditWindow::OnMouseWheel(const ui::MouseWheelEvent& event) {
@@ -869,11 +745,6 @@ Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
       return pLine->GetStart();
     lStart = lEnd;
   }
-}
-
-void TextEditWindow::stopDrag() {
-  autoscroller_->Stop();
-  m_eDragMode = DragMode_None;
 }
 
 void TextEditWindow::updateScreen() {

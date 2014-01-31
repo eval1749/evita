@@ -71,10 +71,8 @@ class Selection : public text::Range {
   public: bool IsStartActive() const { return m_fStartIsActive; }
 
   // [M]
-  public: Count MoveDown(Unit, Count, bool = false);
   public: Count MoveRight(Unit, Count, bool = false);
   public: void MoveTo(Posn, bool = false);
-  public: Count MoveUp(Unit, Count, bool = false);
 
   // [P]
   public: void PrepareForReload();

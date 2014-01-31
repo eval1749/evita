@@ -80,17 +80,6 @@ Count Selection::moveAux(Unit eUnit, Count n, bool fExtend) {
 
 //  Unit        | Key Combination
 //  ------------+----------------
-//  Line        | Down
-//  Paragraph   | Ctrl+Down
-/// Screen      | PageDown
-//  Window      | Ctrl+PageDown
-Count Selection::MoveDown(Unit eUnit, Count n, bool fExtend) {
-  updateGoal();
-  return moveAux(eUnit, n, fExtend);
-}
-
-//  Unit        | Key Combination
-//  ------------+----------------
 //  Char        | Right
 /// Word        | Ctrl+Right
 //
@@ -108,17 +97,6 @@ void Selection::MoveTo(Posn lPosn, bool fExtend) {
     Range::SetRange(lPosn, m_fStartIsActive ? GetEnd() : GetStart());
     m_fStartIsActive = lPosn <= GetStart();
   }
-}
-
-//  Unit        | Key Combination
-//  ------------+----------------
-//  Line        | Up
-//  Paragraph   | Ctrl+Up
-/// Screen      | PageUp
-//  Window      | Ctrl+PageUp
-Count Selection::MoveUp(Unit eUnit, Count n, bool fExtend) {
-  updateGoal();
-  return moveAux(eUnit, -n, fExtend);
 }
 
 void Selection::RestoreForReload() {

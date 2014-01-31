@@ -411,7 +411,10 @@ void Widget::SetCapture() {
     DVLOG_WIDGET(0) << "cur=" << capture_widget << " new=" << this;
   #endif
   // We don't allow nested capture.
-  DCHECK(!capture_widget);
+  if (capture_widget) {
+    DVLOG_WIDGET(0) << "already captured by " << capture_widget;
+    return;
+  }
   ::SetCapture(*GetHostWidget().native_window());
   capture_widget = this;
 }

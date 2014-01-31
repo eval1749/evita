@@ -12,7 +12,6 @@ Selection::Selection(TextEditWindow* pWindow, Buffer* pBuffer) :
     m_fStartIsActive(false),
     m_lRestoreLineNum(0),
     m_pBuffer(pBuffer),
-    m_ptGoal(-1, -1),
     m_pWindow(pWindow),
     Range(pBuffer, Kind_Selection) {
     pBuffer->InternalAddRange(this);
@@ -34,17 +33,12 @@ void Selection::Blink(Posn lPosn, Count nMillisecond) {
 }
 
 void Selection::Collapse(CollapseWhich eCollapse) {
-  forgetGoal();
   Range::Collapse(eCollapse);
   m_fStartIsActive = eCollapse == Collapse_Start;
 }
 
 Selection* Selection::Create(const text::Range& range) {
   return new(range.GetBuffer()->GetHeap()) Selection(range);
-}
-
-void Selection::forgetGoal() {
-    m_ptGoal.x = m_ptGoal.y = -1;
 }
 
 SelectionType Selection::GetType() const {
@@ -62,35 +56,7 @@ void Selection::PrepareForReload() {
   m_lRestoreLineNum = oInfo.m_lLineNum;
 }
 
-void Selection::SetText(const base::string16& text) {
-  forgetGoal();
-  Range::SetText(text);
-}
-
-void Selection::SetEnd(Posn p) {
-  forgetGoal();
-  Range::SetEnd(p);
-}
-
-void Selection::SetRange(Posn s, Posn e) {
-  forgetGoal();
-  Range::SetRange(s, e);
-}
-
-void Selection::SetRange(const Range* p) {
-  forgetGoal();
-  Range::SetRange(p);
-}
-
-void Selection::SetStart(Posn p) {
-  forgetGoal();
-  Range::SetStart(p);
-}
-
 void Selection::SetStartIsActive(bool new_start_is_active) {
-  // TODO(yosi) We should remove |forgotGoal()| call, once we implement new
-  // goal point tracking. Calling |forgotGoal()| here is temporary solution.
-  forgetGoal();
   m_fStartIsActive = new_start_is_active;
 }
 
@@ -108,14 +74,4 @@ void Selection::TypeChar(char16 wch, Count k) {
     Move(Unit_Char, k);
   else
     Collapse(Collapse_End);
-}
-
-bool Selection::updateGoal() {
-  if (m_ptGoal.x >= 0)
-    return false;
-
-  const auto rect = GetWindow()->MapPosnToPoint(GetActivePosn());
-  if (rect)
-    m_ptGoal = rect.left_top();
-  return true;
 }

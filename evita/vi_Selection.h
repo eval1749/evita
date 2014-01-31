@@ -39,7 +39,6 @@ class Selection : public text::Range {
   private: bool m_fStartIsActive;
   private: Count m_lRestoreLineNum; // for reloading
   private: Buffer* m_pBuffer;
-  private: gfx::PointF m_ptGoal; // Goal point of vertical motion
   private: TextEditWindow* m_pWindow;
 
   private : explicit Selection(const text::Range& range);
@@ -80,27 +79,11 @@ class Selection : public text::Range {
   // [S]
   public: Color SetBackground(Color cr) { return m_crBackground = cr; }
   public: Color SetColor(Color cr) { return m_crColor = cr; }
-  public: void SetEnd(Posn);
-  public: void SetRange(Posn, Posn);
-  public: void SetRange(const Range*);
-  public: void SetText(const base::string16& text);
-  public: void SetStart(Posn);
   public: void SetStartIsActive(bool new_start_is_active);
 
   // [T]
   public: void TypeChar(char16, Count = 1);
   private: void TypeText(const char16*, Count);
-
-  ////////////////////////////////////////////////////////////
-  //
-  // Methods for implementation
-  //
-
-  // [F]
-  private: void forgetGoal();
-
-  // [U]
-  private: bool updateGoal();
-}; // Selection
+};
 
 #endif //!defined(INCLUDE_listener_winapp_visual_selection_h)

@@ -155,7 +155,11 @@ void Selection::TypeChar(char16 wch, Count k) {
     SetText(nullptr, 0);
     pBuffer->Insert(GetStart(), wch, k);
   }
-  MoveRight(Unit_Char, k);
+
+  if (GetEnd() == GetStart())
+    Move(Unit_Char, k);
+  else
+    Collapse(Collapse_End);
 }
 
 bool Selection::updateGoal() {

@@ -755,7 +755,7 @@ void EditPane::LeafBox::Realize(EditPane* edit_pane, const gfx::Rect& rect) {
 
   Rect scroll_bar_rect(rect);
   scroll_bar_rect.left = rect.right;
-  if (m_pWindow->is<TextEditWindow>()) {
+  if (auto text_window = m_pWindow->as<TextEditWindow>()) {
     auto const splitter_height = HasSibling() ? 0 : k_cySplitterBig;
     auto const scroll_bar_width = ::GetSystemMetrics(SM_CXVSCROLL);
     scroll_bar_rect.left -= scroll_bar_width;
@@ -763,7 +763,10 @@ void EditPane::LeafBox::Realize(EditPane* edit_pane, const gfx::Rect& rect) {
     m_hwndVScrollBar = ::CreateWindowExW(
           0,
           L"SCROLLBAR",
-          nullptr, // title
+          // TODO(yosi) For debugging left scrollbar issue, we not set window
+          // title for scrollbar. Once, we fix the issue, we back this to
+          // nullptr.
+          text_window->GetBuffer()->GetName().c_str(),
           WS_CHILD | WS_VISIBLE | SBS_VERT,
           0, 0, 0, 0,
           edit_pane->AssociatedHwnd(),

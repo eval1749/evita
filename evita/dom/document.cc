@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "base/logging.h"
+#include "base/strings/stringprintf.h"
 #include "base/strings/string_number_conversions.h"
 #include "common/memory/singleton.h"
 #include "evita/editor/application.h"
@@ -160,13 +161,15 @@ Document::~Document() {
 }
 
 base::char16 Document::charCodeAt(text::Posn position) const {
-  if (position == length()) {
-    ScriptController::instance()->ThrowError("Invalid position.");
-    return 0;
-  }
-  if (!IsValidPosition(position))
-    return 0;
-  return buffer_->GetCharAt(position);
+  if (position >= 0 && position < length())
+    return buffer_->GetCharAt(position);
+  auto const isolate = v8::Isolate::GetCurrent();
+  auto const error = v8::Exception::RangeError(
+    gin::StringToV8(isolate, base::StringPrintf(
+      "Bad index %d, valid index is [%d, %d]",
+      position, 0, buffer_->GetEnd() - 1)));
+  ScriptController::instance()->ThrowException(error);
+  return 0;
 }
 
 const base::string16& Document::filename() const {
@@ -219,7 +222,12 @@ Document* Document::GetOrNew(const base::string16& name) {
 bool Document::IsValidPosition(text::Posn position) const {
   if (position >= 0 && position <= buffer_->GetEnd())
     return true;
-  ScriptController::instance()->ThrowError("Invalid position.");
+  auto const isolate = v8::Isolate::GetCurrent();
+  auto const error = v8::Exception::RangeError(
+    gin::StringToV8(isolate, base::StringPrintf(
+      "Invalid position %d, valid range is [%d, %d]",
+      position, 0, buffer_->GetEnd())));
+  ScriptController::instance()->ThrowException(error);
   return false;
 }
 

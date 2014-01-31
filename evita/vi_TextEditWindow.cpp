@@ -863,7 +863,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
     // IME set GCS_RESULTSTR without composition.
     if (m_lImeStart != m_lImeEnd) {
       GetSelection()->SetRange(m_lImeStart, m_lImeEnd);
-      GetSelection()->SetText(L"", 0);
+      GetSelection()->SetText(base::string16());
     }
 
     // Get result string
@@ -872,7 +872,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
 
     // Insert result string into buffer
     if (cwch >= 1) {
-      GetSelection()->SetText(rgwch, static_cast<int>(cwch));
+      GetSelection()->SetText(base::string16(rgwch, cwch));
       GetSelection()->Collapse(Collapse_End);
       m_lImeEnd = GetSelection()->GetEnd();
       m_lImeStart = m_lImeEnd;
@@ -884,7 +884,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
     // Remove previous composition string
     if (m_lImeStart != m_lImeEnd) {
         GetSelection()->SetRange(m_lImeStart, m_lImeEnd);
-        GetSelection()->SetText(L"", 0);
+        GetSelection()->SetText(base::string16());
         m_lImeEnd = m_lImeStart;
     }
 
@@ -909,7 +909,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
     ::ImmGetCompositionString(imc, GCS_COMPCLAUSE, rgnClause,
                               sizeof(rgnClause));
 
-    GetSelection()->SetText(rgwch, static_cast<int>(cwch));
+    GetSelection()->SetText(base::string16(rgwch, cwch));
     GetSelection()->Collapse(Collapse_End);
     m_lImeEnd = GetSelection()->GetEnd();
     GetSelection()->SetRange(m_lImeStart + lCursor, m_lImeStart + lCursor);
@@ -1028,7 +1028,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
 
       // Remove previous composition string
       GetSelection()->SetRange(m_lImeStart, m_lImeEnd);
-      GetSelection()->SetText(L"", 0);
+      GetSelection()->SetText(base::string16());
 
       // if (m_fCancelButLeave)
       {
@@ -1039,7 +1039,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
               sizeof(rgwch)) / sizeof(char16);
           if (cwch >= 1)
           {
-              GetSelection()->SetText(rgwch, static_cast<int>(cwch));
+              GetSelection()->SetText(base::string16(rgwch, cwch));
           }
       }
 

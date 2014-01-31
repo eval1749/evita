@@ -62,13 +62,9 @@ void Selection::PrepareForReload() {
   m_lRestoreLineNum = oInfo.m_lLineNum;
 }
 
-void Selection::SetText(const char16* pwsz) {
-  SetText(pwsz, ::lstrlenW(pwsz));
-}
-
-void Selection::SetText(const char16* pwch, int cwch) {
+void Selection::SetText(const base::string16& text) {
   forgetGoal();
-  Range::SetText(base::string16(pwch, static_cast<size_t>(cwch)));
+  Range::SetText(text);
 }
 
 void Selection::SetEnd(Posn p) {
@@ -104,7 +100,7 @@ void Selection::TypeChar(char16 wch, Count k) {
     pBuffer->Insert(GetStart(), wch, k);
   } else {
     text::UndoBlock oUndo(pBuffer, L"Selection.TypeChar");
-    SetText(nullptr, 0);
+    SetText(base::string16());
     pBuffer->Insert(GetStart(), wch, k);
   }
 

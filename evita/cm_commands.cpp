@@ -123,8 +123,7 @@ class DynamicAbbrev :
             if (current_word != word)
             {
                 m_pSelection->SetStart(m_lStart);
-                m_pSelection->SetText(word.data(),
-                                      static_cast<int>(word.length()));
+                m_pSelection->SetText(word);
                 m_pSelection->Collapse(Collapse_End);
                 m_fFound = true;
                 break;

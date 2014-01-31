@@ -5,6 +5,7 @@
 
 #include "evita/vi_defs.h"
 
+#include "base/strings/string16.h"
 #include "evita/text/range.h"
 #include "evita/ed_Style.h"
 #include "evita/gfx_base.h"
@@ -82,8 +83,7 @@ class Selection : public text::Range {
   public: void SetEnd(Posn);
   public: void SetRange(Posn, Posn);
   public: void SetRange(const Range*);
-  public: void SetText(const char16*);
-  public: void SetText(const char16*, int);
+  public: void SetText(const base::string16& text);
   public: void SetStart(Posn);
   public: void SetStartIsActive(bool new_start_is_active);
 

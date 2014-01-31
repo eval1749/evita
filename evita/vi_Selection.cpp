@@ -8,17 +8,13 @@
 #include "evita/dom/buffer.h"
 #include "evita/vi_TextEditWindow.h"
 
-Selection::Selection(TextEditWindow* pWindow, Buffer* pBuffer) :
-    m_fStartIsActive(false),
-    m_lRestoreLineNum(0),
-    m_pBuffer(pBuffer),
-    m_pWindow(pWindow),
-    Range(pBuffer, Kind_Selection) {
-    pBuffer->InternalAddRange(this);
-}
-
 Selection::Selection(const text::Range& range)
-    : Selection(nullptr, static_cast<Buffer*>(range.GetBuffer())) {
+    : Range(static_cast<Buffer*>(range.GetBuffer()), Kind_Selection),
+      m_fStartIsActive(false),
+      m_lRestoreLineNum(0),
+      m_pBuffer(static_cast<Buffer*>(range.GetBuffer())),
+      m_pWindow(nullptr) {
+  m_pBuffer->InternalAddRange(this);
   SetRange(&range);
 }
 
@@ -39,10 +35,6 @@ void Selection::Collapse(CollapseWhich eCollapse) {
 
 Selection* Selection::Create(const text::Range& range) {
   return new(range.GetBuffer()->GetHeap()) Selection(range);
-}
-
-SelectionType Selection::GetType() const {
-  return GetStart() == GetEnd() ? Selection_None : Selection_Normal;
 }
 
 void Selection::RestoreForReload() {

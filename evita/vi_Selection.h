@@ -10,11 +10,6 @@
 #include "evita/ed_Style.h"
 #include "evita/gfx_base.h"
 
-enum SelectionType {
-  Selection_None,
-  Selection_Normal,
-};
-
 class TextEditWindow;
 
 namespace dom {
@@ -42,7 +37,6 @@ class Selection : public text::Range {
   private: TextEditWindow* m_pWindow;
 
   private : explicit Selection(const text::Range& range);
-  public: Selection(TextEditWindow*, Buffer*);
   public: ~Selection();
 
   public: void set_window(TextEditWindow* window) {
@@ -64,7 +58,6 @@ class Selection : public text::Range {
   public: Color GetBackground() const { return m_crBackground; }
   public: Buffer* GetBuffer() const { return m_pBuffer; }
   public: Color GetColor() const { return m_crColor; }
-  public: SelectionType GetType() const;
   public: TextEditWindow* GetWindow() const { return m_pWindow; }
 
   // [I]
@@ -83,7 +76,6 @@ class Selection : public text::Range {
 
   // [T]
   public: void TypeChar(char16, Count = 1);
-  private: void TypeText(const char16*, Count);
 };
 
 #endif //!defined(INCLUDE_listener_winapp_visual_selection_h)

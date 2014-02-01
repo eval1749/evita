@@ -68,6 +68,7 @@
         'dom/range_unittest.cc',
         'dom/style_unittest.cc',
         'dom/table_selection_unittest.cc',
+        'dom/text_position_unittest.cc',
         'dom/text_selection_unittest.cc',
         'dom/text_window_unittest.cc',
         'dom/unicode_unittest.cc',

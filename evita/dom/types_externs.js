@@ -84,6 +84,13 @@ var TextOffset;
 
 /**
  * @constructor
+ * @param {!Document} document
+ * @param {!TextOffset} offset
+ */
+var TextPosition = function(document, offset) {};
+
+/**
+ * @constructor
  * @param {!Document|!Range} document_or_range
  * @param {number=} opt_start
  * @param {number=} opt_end

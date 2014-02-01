@@ -106,6 +106,7 @@ var TextWindowComputeMethod = {
  * @enum{string}
  */
 var Unit = {
+  BRACKET: 'BRACKET',
   CHARACTER: 'CHARACTER',
   DOCUMENT: 'DOCUMENT',
   LINE: 'LINE',

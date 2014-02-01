@@ -166,6 +166,7 @@ DEFINE_VIEW_DELEGATE_3(Reconvert, WindowId, text::Posn, text::Posn);
 DEFINE_VIEW_DELEGATE_1(RealizeDialogBox, const Form*)
 DEFINE_VIEW_DELEGATE_1(RealizeWindow, WindowId)
 DEFINE_VIEW_DELEGATE_1(ReleaseCapture, WindowId)
+DEFINE_VIEW_DELEGATE_1(ReloadTextBuffer, Buffer*)
 DEFINE_VIEW_DELEGATE_2(SaveFile, Document*, const base::string16&)
 DEFINE_VIEW_DELEGATE_1(SetCapture, WindowId)
 DEFINE_VIEW_DELEGATE_1(ShowDialogBox, DialogBoxId)

@@ -25,6 +25,14 @@ namespace v8Strings {
 void Init(v8::Isolate* isolate);
 }
 
+base::string16 V8ToString(v8::Handle<v8::Value> value) {
+  v8::String::Value string_value(value);
+  if (!string_value.length())
+    return base::string16();
+  return base::string16(reinterpret_cast<base::char16*>(*string_value),
+                        static_cast<size_t>(string_value.length()));
+}
+
 namespace {
 
 v8::Handle<v8::Value> GetOpenFileHandler(
@@ -39,14 +47,6 @@ v8::Handle<v8::Value> GetOpenFileHandler(
     return v8::Handle<v8::Value>();
   }
   return window->GetWrapper(isolate);
-}
-
-base::string16 V8ToString(v8::Handle<v8::Value> value) {
-  v8::String::Value string_value(value);
-  if (!string_value.length())
-    return base::string16();
-  return base::string16(reinterpret_cast<base::char16*>(*string_value),
-                        static_cast<size_t>(string_value.length()));
 }
 
 // TODO(yosi) We will remove EvaluateResult once V8Console in JS.

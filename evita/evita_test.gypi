@@ -66,6 +66,7 @@
         'dom/point_unittest.cc',
         'dom/polyfill_unittest.cc',
         'dom/range_unittest.cc',
+        'dom/style_unittest.cc',
         'dom/table_selection_unittest.cc',
         'dom/text_selection_unittest.cc',
         'dom/text_window_unittest.cc',

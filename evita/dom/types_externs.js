@@ -97,6 +97,11 @@ var Selection = function() {};
 
 /**
  * @constructor
+ */
+var Style = function() {};
+
+/**
+ * @constructor
  * @extends {DocumentWindow}
  * @param {Document} document
  */

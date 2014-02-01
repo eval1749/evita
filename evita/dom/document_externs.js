@@ -138,6 +138,12 @@ Document.prototype.save = function(filename) {};
  */
 Document.prototype.startUndoGroup_ = function(name) {};
 
+/**
+ * @param {!Position} position
+ * @return {!Style}
+ */
+Document.prototype.styleAt = function(position) {};
+
 /** @param {!Position} position */
 Document.prototype.undo = function(position) {}
 

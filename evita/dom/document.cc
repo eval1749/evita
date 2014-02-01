@@ -140,6 +140,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         .SetMethod("renameTo", &Document::RenameTo)
         .SetMethod("save", &Document::Save)
         .SetMethod("startUndoGroup_", &Document::StartUndoGroup)
+        .SetMethod("styleAt", &Document::style_at)
         .SetMethod("undo", &Document::Undo);
   }
 };

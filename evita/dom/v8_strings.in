@@ -1,6 +1,18 @@
 # Copyright (C) 2014 by Project Vogue.
 # Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
+# Style
+Style
+backgroundColor
+charSyntax
+color
+descoration
+fontFamily
+fontSize
+fontStyle
+fontWeight
+
+# Window
 Window
 bottom
 focus

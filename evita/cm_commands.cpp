@@ -398,14 +398,6 @@ DEFCOMMAND(ExchangeCode)
     pSelection->SetRange(oRange.GetEnd(), oRange.GetEnd());
 } // ExchangeCode
 
-// [P]
-
-DEFCOMMAND(PasteFromClipboard)
-{
-    if (NULL == pCtx->GetSelection()) return;
-    pCtx->GetSelection()->Paste();
-} // PasteFromClipboard
-
 // [Q]
 DEFCOMMAND(QuotedInsert)
 {

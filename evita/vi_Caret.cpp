@@ -4,6 +4,7 @@
 #include "evita/vi_Caret.h"
 
 #include <math.h>
+#include <memory>
 #include <utility>
 
 #include "evita/gfx_base.h"
@@ -15,7 +16,7 @@ static const auto kBlinkInterval = 500; // milliseconds
 // BackingStore
 //
 class Caret::BackingStore {
-  private: common::OwnPtr<gfx::Bitmap> bitmap_;
+  private: std::unique_ptr<gfx::Bitmap> bitmap_;
   private: void* render_target_;
   private: gfx::RectF rect_;
 
@@ -35,7 +36,7 @@ Caret::BackingStore::~BackingStore() {
 }
 
 void Caret::BackingStore::Restore(const gfx::Graphics& gfx) {
-  if (!rect_ || render_target_ != &*gfx)
+  if (!rect_ || render_target_ != &*gfx || !bitmap_)
     return;
   DCHECK(bitmap_);
   gfx->DrawBitmap(*bitmap_, rect_);
@@ -51,8 +52,10 @@ void Caret::BackingStore::Save(const gfx::Graphics& gfx,
                                       static_cast<uint>(rect_.top),
                                       static_cast<uint>(rect_.right),
                                       static_cast<uint>(rect_.bottom));
-  common::OwnPtr<gfx::Bitmap> bitmap(*new gfx::Bitmap(gfx,
-                                                    screen_rect.size()));
+  std::unique_ptr<gfx::Bitmap> bitmap(
+      new gfx::Bitmap(gfx, screen_rect.size()));
+  if (!bitmap)
+    return;
   COM_VERIFY((*bitmap)->CopyFromRenderTarget(nullptr, gfx, &screen_rect));
   bitmap_ = std::move(bitmap);
   render_target_ = &*gfx;

@@ -23,6 +23,9 @@ class ScopedPersistent {
     handle_.Reset();
   }
 
+  public: const v8::Persistent<ObjectType>* operator->() const {
+    return &handle_;
+  }
   public: v8::Persistent<ObjectType>* operator->() { return &handle_; }
 
   public: bool operator==(v8::Handle<ObjectType> handle) const {

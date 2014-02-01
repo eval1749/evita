@@ -69,7 +69,9 @@ def exclude(line):
   return True
 
 def generate(output_prefix, input_file):
-  names = filter(exclude, map(chop, open(input_file, 'rt').readlines()))
+  name_set = frozenset(filter(exclude, map(chop,
+      open(input_file, 'rt').readlines())))
+  names = list(name_set)
   names.sort()
 
   defs = '\n'.join(map(lambda name: DEF % {'name': name}, names))

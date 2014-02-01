@@ -45,9 +45,9 @@ bool Converter<base::string16>::FromV8(Isolate*, Handle<Value> val,
   return true;
 }
 
-Handle<Value> StringToV8(v8::Isolate* isolate,
+Handle<String> StringToV8(v8::Isolate* isolate,
                          const base::string16& string) {
-  return Converter<base::string16>::ToV8(isolate, string);
+  return Converter<base::string16>::ToV8(isolate, string).As<v8::String>();
 }
 
 }  // namespace gin

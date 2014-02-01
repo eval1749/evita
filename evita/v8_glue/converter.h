@@ -80,7 +80,7 @@ struct Converter<T, typename std::enable_if<std::is_enum<T>::value &&
   }
 };
 
-v8::Handle<v8::Value> StringToV8(v8::Isolate* isolate,
+v8::Handle<v8::String> StringToV8(v8::Isolate* isolate,
                                   const base::string16& string);
 
 } // namespace gin

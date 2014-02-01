@@ -212,7 +212,7 @@ void ScriptController::OpenFile(WindowId window_id,
     DVLOG(0) << "OpenFile: window doesn't have callable openFile property.";
     return;
   }
-  auto js_filename = gin::StringToV8(isolate, filename);
+  v8::Handle<v8::Value> js_filename = gin::StringToV8(isolate, filename);
   DOM_AUTO_LOCK_SCOPE();
   open_file->ToObject()->CallAsFunction(js_handler, 1, &js_filename);
 }

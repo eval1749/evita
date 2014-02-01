@@ -35,3 +35,9 @@ TextWindow.prototype.mapPointToPosition_ = function(x, y) {};
  * @return {!Point}
  */
 TextWindow.prototype.mapPositionToPoint_ = function(position) {};
+
+/**
+ * @param {!TextOffset} start
+ * @param {!TextOffset} end
+ */
+TextWindow.prototype.reconvert_ = function(start, end) {};

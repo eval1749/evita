@@ -45,7 +45,8 @@ class TextWindowWrapperInfo :
         .SetMethod("compute_", &TextWindow::ComputeMotion)
         .SetMethod("makeSelectionVisible", &TextWindow::MakeSelectionVisible)
         .SetMethod("mapPointToPosition_", &TextWindow::MapPointToPosition)
-        .SetMethod("mapPositionToPoint_", &TextWindow::MapPositionToPoint);
+        .SetMethod("mapPositionToPoint_", &TextWindow::MapPositionToPoint)
+        .SetMethod("reconvert_", &TextWindow::Reconvert);
   }
 };
 }  // namespace
@@ -118,6 +119,11 @@ Point* TextWindow::MapPositionToPoint(text::Posn position) {
   ScriptController::instance()->view_delegate()->ComputeOnTextWindow(
     id(), &data, nullptr);
   return new Point(data.x, data.y);
+}
+
+void TextWindow::Reconvert(text::Posn start, text::Posn end) {
+  ScriptController::instance()->view_delegate()->
+      Reconvert(window_id(), start, end);
 }
 
 }  // namespace dom

@@ -8,7 +8,8 @@
 global.Style = function () {
 };
 
-global.Style.prototype = Object.create(Object.prototype, {
+global.Style.prototype = Object.create(
+    /** @type {Object} */(Object.prototype), {
   backgroundColor: {
     enumerable: true,
     writable: true

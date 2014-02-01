@@ -275,6 +275,19 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
   event_handler_->RunCallback(base::Bind(callback, response_code));
 }
 
+void ViewDelegateImpl::Reconvert(WindowId window_id, text::Posn start,
+                                 text::Posn end) {
+  auto const window = FromWindowId("Reconvert", window_id);
+  if (!window)
+    return;
+  auto const text_window = window->as<TextEditWindow>();
+  if (!text_window) {
+    DVLOG(0) << "WindowId " << window_id << " should be TextEditWindow.";
+    return;
+  }
+  text_window->Reconvert(start, end);
+}
+
 void ViewDelegateImpl::RealizeDialogBox(const dom::Form* form) {
   auto const dialog_box = DialogBox::FromDialogBoxId(form->event_target_id());
   if (!dialog_box)

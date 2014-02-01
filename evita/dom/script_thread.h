@@ -90,6 +90,8 @@ class ScriptThread final : public ViewDelegate,
   private: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;
+  private: virtual void Reconvert(WindowId window_id, text::Posn start,
+                                  text::Posn end) override;
   private: virtual void RealizeDialogBox(const Form* form) override;
   private: virtual void RealizeWindow(WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(

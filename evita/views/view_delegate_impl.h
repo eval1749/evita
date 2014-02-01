@@ -55,6 +55,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void MessageBox(dom::WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;
+  public: virtual void Reconvert(dom::WindowId window_id, text::Posn start,
+                                 text::Posn end) override;
   private: virtual void RealizeDialogBox(const dom::Form* form) override;
   private: virtual void RealizeWindow(dom::WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(

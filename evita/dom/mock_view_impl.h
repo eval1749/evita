@@ -43,6 +43,7 @@ class MockViewImpl : public dom::ViewDelegate {
   public: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;
+  MOCK_METHOD3(Reconvert, void(WindowId, text::Posn, text::Posn));
   MOCK_METHOD2(SaveFile, void(Document*, const base::string16&));
   MOCK_METHOD1(RealizeDialogBox, void(const Form*));
   MOCK_METHOD1(RealizeWindow, void(WindowId));

@@ -82,7 +82,6 @@ class Range //: public ObjectInHeap
     private: Posn  ensurePosn(Posn) const;
 
     // [F]
-    public: Posn FindCloseParen(bool = false);
     public: Posn FindFirstChar(char16) const;
     //public: Posn FindLastChar(char16) const;
     public: Posn FindOpenParen(bool = false);

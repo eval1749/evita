@@ -309,95 +309,6 @@ DEFCOMMAND(ExpandDynamicAbbrev)
     pDynamicAbbrev->Run(*pCtx);
 } // ExpandDynamicAbbrev
 
-DEFCOMMAND(ExchangeCode)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-
-    text::Range oRange(*pSelection);
-
-    if (oRange.GetStart() == oRange.GetEnd())
-    {
-        oRange.MoveStart(Unit_Word, -1);
-
-        if (oRange.GetEnd() - oRange.GetStart() > 4)
-        {
-            oRange.SetStart(oRange.GetEnd() - 4);
-        }
-    }
-    else if (oRange.GetEnd() - oRange.GetStart() > 4)
-    {
-        return;
-    }
-
-    int cDigits = 0;
-    int nCode   = 0;
-    int iChar   = -1;
-    int iTimes  = 1;
-    foreach (Buffer::EnumCharRev, oEnum, &oRange)
-    {
-        char16 wch = oEnum.Get();
-
-        if (iChar < 0)
-        {
-            iChar = wch;
-        }
-
-        if (wch >= '0' && wch <= '9')
-        {
-            nCode += (wch - '0') * iTimes;
-        }
-        else if (wch >= 'A' && wch <= 'F')
-        {
-            nCode += (wch - 'A' + 10) * iTimes;
-        }
-        else if (wch >= 'a' && wch <= 'f')
-        {
-            nCode += (wch - 'a' + 10) * iTimes;
-        }
-        else
-        {
-            break;
-        }
-        
-        iTimes <<= 4;
-        cDigits += 1;
-    } // for
-
-    class Util
-    {
-        public: static char16 toxdigit(int x)
-        {
-            if (x >= 0 && x <= 9)   return static_cast<char16>(x + '0');
-            if (x >= 10 && x <= 15) return static_cast<char16>(x + 'A' - 10);
-            return '_';
-        } // toxdigit
-    }; // Util
-
-    char16 rgwch[4];
-    int cwch;
-
-    if (cDigits <= 1)
-    {
-        // Convert the last character to Unicode.
-        oRange.SetStart(oRange.GetEnd() - 1);
-        rgwch[0] = Util::toxdigit((iChar >> 12) & 15);
-        rgwch[1] = Util::toxdigit((iChar >>  8) & 15);
-        rgwch[2] = Util::toxdigit((iChar >>  4) & 15);
-        rgwch[3] = Util::toxdigit((iChar >>  0) & 15);
-        cwch = 4;
-    }
-    else
-    {
-        oRange.SetStart(oRange.GetEnd() - cDigits);
-        cwch = 1;
-        rgwch[0] = static_cast<char16>(nCode);
-    }
-
-    oRange.SetText(base::string16(rgwch, static_cast<size_t>(cwch)));
-    pSelection->SetRange(oRange.GetEnd(), oRange.GetEnd());
-} // ExchangeCode
-
 // [Q]
 DEFCOMMAND(QuotedInsert)
 {
@@ -837,7 +748,6 @@ void Processor::GlobalInit() {
 
     // Ctrl
     BIND_KEY(TextEditWindow, Mod_Ctrl | ',', Reconvert);
-    BIND_KEY(TextEditWindow, Mod_Ctrl | '.', ExchangeCode);
     BIND_KEY(TextEditWindow, Mod_Ctrl | '/', ExpandDynamicAbbrev);
 
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'Q', QuotedInsertEntry());

@@ -51,6 +51,72 @@
   });
 
   /**
+   * Exchange Unicode character code point and character
+   * @this {!TextWindow}
+   * @param {number=} opt_base
+   */
+  Editor.bindKey(TextWindow, 'Ctrl+.', function(opt_base) {
+    var base = arguments.length >= 1 ? /** @type{number} */(opt_base) : 16;
+    if (base < 2 || base > 36)
+      return;
+    var range = new Range(this.selection.range);
+    if (range.start == range.end) {
+      range.moveStart(Unit.WORD, -1);
+      if (range.end - range.start > 4)
+        range.start = range.end - 4;
+    } else if (range.end - range.start > 4) {
+      return;
+    }
+    var text = range.text;
+    if (!text.length)
+      return;
+    /** @type {function(number, number): number} */
+    var fromDigitChar = function(char_code, base) {
+      if (char_code >= Unicode.DIGIT_ZERO &&
+          char_code <= Unicode.DIGIT_ZERO + Math.min(base, 9)) {
+        return char_code - Unicode.DIGIT_ZERO;
+      }
+
+      if (base < 10)
+        return NaN;
+
+      if (char_code >= Unicode.LATIN_CAPITAL_A &&
+          char_code <= Unicode.LATIN_CAPITAL_A + base - 10) {
+        return char_code - Unicode.LATIN_CAPITAL_A + 10;
+      }
+
+      if (char_code >= Unicode.LATIN_SMALL_A &&
+          char_code <= Unicode.LATIN_SMALL_A + base - 10) {
+        return char_code - Unicode.LATIN_SMALL_A + 10;
+      }
+
+      return NaN;
+    };
+
+    /** @type {function(string, number): number} */
+    var myParseInt = function(text, base) {
+      var value = 0;
+      for (var k = 0; k < text.length; ++k) {
+        var digit = fromDigitChar(text.charCodeAt(k), base);
+        if (isNaN(digit))
+          return NaN;
+        value *= base;
+        value += digit;
+      }
+      return value;
+    };
+    var char_code = myParseInt(text, base);
+    if (isNaN(char_code)) {
+      range.start = range.end - 1;
+      range.text = ('000' + text.charCodeAt(text.length - 1).toString(16))
+          .substr(-4);
+    } else {
+      range.text = String.fromCharCode(char_code);
+    }
+    this.selection.range.collapseTo(range.end);
+  }, 'Exchange Unicode code point and character\n');
+
+  /**
    * Select all contents
    * @this {!TextWindow}
    */

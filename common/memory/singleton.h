@@ -15,6 +15,9 @@ class Singleton {
   }
 };
 
+#define DECLARE_SINGLETON_CLASS(name) \
+  friend class common::Singleton<name>
+
 } // namespace common
 
 #endif //!defined(INCLUDE_common_memory_singleton_h)

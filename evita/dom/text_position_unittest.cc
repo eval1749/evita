@@ -56,6 +56,128 @@ TEST_F(TextPositionTest, move) {
   EXPECT_SCRIPT_EQ("2", "pos.move(Unit.CHARACTER, -1).offset");
 }
 
+TEST_F(TextPositionTest, moveBracket) {
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('moveBracket');"
+    "var range = new Range(doc);"
+    "function testIt(sample, direction) {"
+    "  range.start = 0;"
+    "  range.end = doc.length;"
+    "  var text = sample.replace('^', '').replace(/[|]/g, '\"')"
+    "       .replace(/[#]/g, '\\\\');"
+    "  range.text = text;"
+    "  highlight(doc);"
+    "  var pos = new TextPosition(doc, sample.indexOf('^'));"
+    "  pos.move(Unit.BRACKET, direction);"
+    "  var text2 = text.replace(/\"/g, '|').replace(/[\\\\]/g, '#');"
+    "  return text2.substr(0, pos.offset) + '^' + text2.substr(pos.offset);"
+    "}"
+    "function backward(sample) { return testIt(sample, -1); }"
+    "function forward(sample) { return testIt(sample, 1); }"
+    "function highlight(document) {"
+    "  var pos = new TextPosition(document, 0);"
+    "  var range = new Range(document);"
+    "  var state = 'NORMAL';"
+    "  var color = 0;"
+    "  var char_syntax = 0;"
+    "  function finish(advance) {"
+    "    range.end = pos.offset + advance;"
+    "    range.style({charSyntax: char_syntax, color: color});"
+    "    range.collapseTo(range.end);"
+    "    state = 'NORMAL';"
+    "    color = 0;"
+    "    char_syntax = 0;"
+    "  }"
+    "  for (; pos.offset < document.length; pos.move(Unit.CHARACTER)) {"
+    "    var char_code = pos.charCode();"
+    "    switch (state) {"
+    "      case 'NORMAL':"
+    "        if (char_code == Unicode.QUOTATION_MARK) {"
+    "          finish(0);"
+    "          state = 'STRING1';"
+    "          color = 0x000080;"
+    "          char_syntax = 1;"
+    "        } else if (char_code == Unicode.SOLIDUS) {"
+    "          finish(0);"
+    "          state = 'COMMENT_1';"
+    "          color = 0x008000;"
+    "          char_syntax = 2;"
+    "        }"
+    "        break;"
+    "      case 'COMMENT_1':"
+    "        if (char_code == Unicode.SOLIDUS)"
+    "          finish(1);"
+    "        break;"
+    "      case 'STRING1':"
+    "        if (char_code == Unicode.QUOTATION_MARK)"
+    "          finish(1);"
+    "        else if (char_code == Unicode.REVERSE_SOLIDUS)"
+    "          state = 'STRING1_ESCAPE';"
+    "        break;"
+    "      case 'STRING1_ESCAPE':"
+    "        state = 'STRING1';"
+    "        break;"
+    "    }"
+    "  }"
+    "}");
+
+  // forward
+  EXPECT_SCRIPT_EQ("(foo)^ (bar)", "forward('^(foo) (bar)')");
+  EXPECT_SCRIPT_EQ("(foo)^ (bar)", "forward('(^foo) (bar)')");
+  EXPECT_SCRIPT_EQ("(foo)^ (bar)", "forward('(f^oo) (bar)')");
+  EXPECT_SCRIPT_EQ("(foo)^ (bar)", "forward('(fo^o) (bar)')");
+  EXPECT_SCRIPT_EQ("(foo)^ (bar)", "forward('(foo^) (bar)')");
+  EXPECT_SCRIPT_EQ("(foo) ^(bar)", "forward('(foo)^ (bar)')");
+  EXPECT_SCRIPT_EQ("(foo) (bar)^", "forward('(foo) ^(bar)')");
+
+  // string is a different matching context.
+  EXPECT_SCRIPT_EQ("(foo |bar)| baz)^", "forward('^(foo |bar)| baz)')");
+  EXPECT_SCRIPT_EQ("|(foo| bar) |baz)^|", "forward('|^(foo| bar) |baz)|')");
+
+  // escape
+  EXPECT_SCRIPT_EQ("(foo #) bar)^ baz", "forward('^(foo #) bar) baz')");
+  EXPECT_SCRIPT_EQ("(foo ##)^ bar) baz", "forward('^(foo ##) bar) baz')");
+
+  // mismatched
+  EXPECT_SCRIPT_EQ("(foo^] bar", "forward('^(foo] bar')");
+
+  // nested parenthesis
+  EXPECT_SCRIPT_EQ("((foo))^", "forward('^((foo))')");
+  EXPECT_SCRIPT_EQ("((foo)^)", "forward('(^(foo))')");
+
+  // backward
+  EXPECT_SCRIPT_EQ("^(foo) (bar)", "backward('^(foo) (bar)')");
+  EXPECT_SCRIPT_EQ("^(foo) (bar)", "backward('(^foo) (bar)')");
+  EXPECT_SCRIPT_EQ("^(foo) (bar)", "backward('(f^oo) (bar)')");
+  EXPECT_SCRIPT_EQ("^(foo) (bar)", "backward('(fo^o) (bar)')");
+  EXPECT_SCRIPT_EQ("^(foo) (bar)", "backward('(foo^) (bar)')");
+  EXPECT_SCRIPT_EQ("^(foo) (bar)", "backward('(foo)^ (bar)')");
+  EXPECT_SCRIPT_EQ("(foo)^ (bar)", "backward('(foo) ^(bar)')");
+
+  // string is a different matching context.
+  EXPECT_SCRIPT_EQ("^(foo |(bar| baz)", "backward('(foo |(bar| baz)^')");
+
+  // escape
+  EXPECT_SCRIPT_EQ("^(foo #( bar) baz", "backward('(foo #( bar)^ baz')");
+  EXPECT_SCRIPT_EQ("(foo ##^( bar) baz", "backward('(foo ##( bar)^ baz')");
+
+  // mismatched
+  EXPECT_SCRIPT_EQ("(^foo] bar", "backward('(foo]^ bar')");
+  EXPECT_SCRIPT_EQ("|^(foo| (bar |baz)|", "backward('|(foo| (bar |baz)^|')");
+
+  // nested parenthesis
+  EXPECT_SCRIPT_EQ("^((foo))", "backward('^((foo))')");
+  EXPECT_SCRIPT_EQ("^((foo))", "backward('(^(foo))')");
+  EXPECT_SCRIPT_EQ("(^(foo))", "backward('((^foo))')");
+  EXPECT_SCRIPT_EQ("(^(foo))", "backward('((f^oo))')");
+  EXPECT_SCRIPT_EQ("(^(foo))", "backward('((f^oo))')");
+  EXPECT_SCRIPT_EQ("(^(foo))", "backward('((fo^o))')");
+  EXPECT_SCRIPT_EQ("(^(foo))", "backward('((foo^))')");
+  EXPECT_SCRIPT_EQ("(^(foo))", "backward('((foo^))')");
+  EXPECT_SCRIPT_EQ("(^(foo))", "backward('((foo)^)')");
+  EXPECT_SCRIPT_EQ("^((foo))", "backward('((foo))^')");
+}
+
 TEST_F(TextPositionTest, moveWhile) {
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('style');"

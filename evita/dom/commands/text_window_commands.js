@@ -51,6 +51,15 @@
   });
 
   /**
+   * Reeconvert using IME.
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Ctrl+,', function() {
+    var range = this.selection.range;
+    this.reconvert_(range.start, range.end);
+  }, 'Reconvert');
+
+  /**
    * Exchange Unicode character code point and character
    * @this {!TextWindow}
    * @param {number=} opt_base

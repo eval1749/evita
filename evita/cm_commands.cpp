@@ -318,17 +318,6 @@ DEFCOMMAND(QuotedInsert)
 } // StartArgument
 
 // [R]
-
-DEFCOMMAND(Reconvert)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-
-    pSelection->GetWindow()->Reconvert(
-        pSelection->GetStart(),
-        pSelection->GetEnd() );
-} // Reconvert
-
 DEFCOMMAND(Reload)
 {
     Selection* pSelection = pCtx->GetSelection();
@@ -747,7 +736,6 @@ void Processor::GlobalInit() {
     } // BIND_CTRL
 
     // Ctrl
-    BIND_KEY(TextEditWindow, Mod_Ctrl | ',', Reconvert);
     BIND_KEY(TextEditWindow, Mod_Ctrl | '/', ExpandDynamicAbbrev);
 
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'Q', QuotedInsertEntry());

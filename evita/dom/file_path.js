@@ -38,7 +38,11 @@
    * @return {boolean}
    */
   FilePath.isValidFilename = function(filename) {
-    return !filename.match(RE_FILENAME_RESERVED_CHARACTERS);
+    var data = FilePath.split(filename);
+    return !!data.winDrive && data.absolute &&
+           data.components.every(function(component) {
+             return !RE_FILENAME_RESERVED_CHARACTERS.test(component);
+           });
   };
 
   /**

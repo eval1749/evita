@@ -122,7 +122,7 @@ Document.prototype.load_ = function(filename) {};
  */
 Document.prototype.needSave = function() {};
 
-/** @param {!Position} position */
+/** @param {!TextOffset} position */
 Document.prototype.redo= function(position) {}
 
 /** @param {string} new_name */
@@ -139,12 +139,12 @@ Document.prototype.save = function(filename) {};
 Document.prototype.startUndoGroup_ = function(name) {};
 
 /**
- * @param {!Position} position
+ * @param {!TextOffset} position
  * @return {!Style}
  */
 Document.prototype.styleAt = function(position) {};
 
-/** @param {!Position} position */
+/** @param {!TextOffset} position */
 Document.prototype.undo = function(position) {}
 
 /**

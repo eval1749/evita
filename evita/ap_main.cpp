@@ -97,7 +97,7 @@ static int MainLoop() {
           //g_DefaultStyle->SetBackground(Color(0xF0, 0xF0, 0xF0));
           g_DefaultStyle->SetBackground(Color(247, 247, 239));
           g_DefaultStyle->SetColor(Color(0x00, 0x00, 0x00));
-          g_DefaultStyle->SetMarker(Color(0x00, 0x66, 0x00));
+          g_DefaultStyle->SetMarke{r(Color(0x00, 0x66, 0x00));
       #else
           g_DefaultStyle.m_crBackground = Color(255, 255, 255);
           g_DefaultStyle.m_crColor      = Color(0x00, 0x00, 0x00);

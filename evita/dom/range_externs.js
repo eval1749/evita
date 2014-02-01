@@ -10,10 +10,10 @@
 /** @expose @type {!Document} */
 Range.prototype.document;
 
-/** @expose @type {Position} */
+/** @expose @type {!TextOffset} */
 Range.prototype.end = 0;
 
-/** @expose @type {Position} */
+/** @expose @type {!TextOffset} */
 Range.prototype.start = 0;
 
 
@@ -27,7 +27,7 @@ Range.prototype.capitalize = function() {}
 Range.prototype.collapsed;
 
 /**
- * @param {Position} position
+ * @param {!TextOffset} position
  */
 Range.prototype.collapseTo = function(position) {};
 

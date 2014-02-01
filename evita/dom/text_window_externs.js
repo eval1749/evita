@@ -6,7 +6,7 @@ TextWindow.prototype.clone = function() {};
 
 /**
  * @param {number} method
- * @param {!Position=} opt_position
+ * @param {!TextOffset=} opt_position
  * @param {number=} opt_count
  * @param {Point=} opt_point
 * @return {number}
@@ -26,12 +26,12 @@ TextWindow.prototype.makeSelectionVisible = function() {};
 /**
  * @param {number} x
  * @param {number} y
- * @return {!Position}
+ * @return {!TextOffset}
  */
 TextWindow.prototype.mapPointToPosition_ = function(x, y) {};
 
 /**
- * @param {!Position} position
+ * @param {!TextOffset} position
  * @return {!Point}
  */
 TextWindow.prototype.mapPositionToPoint_ = function(position) {};

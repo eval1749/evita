@@ -7,7 +7,7 @@
  * @externs
  */
 
-/** @expose @type {number} */
+/** @expose @type {!TextOffset} */
 TextSelection.prototype.active;
 
 /** @expose @type {!Document} */
@@ -31,7 +31,7 @@ TextSelection.prototype.endOf = function(unit, opt_alter) {};
 /** @type {!Point|undefined} */
 TextSelection.prototype.goal_point_;
 
-/** @type {!Position|undefined} */
+/** @type {!TextOffset|undefined} */
 TextSelection.prototype.goal_position_;
 
 /**

@@ -80,7 +80,7 @@ var JsConsole = function() {};
 var Point = function(x, y) {};
 
 /** @typedef {number} */
-var Position;
+var TextOffset;
 
 /**
  * @constructor

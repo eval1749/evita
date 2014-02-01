@@ -188,8 +188,12 @@ TEST_F(TextPositionTest, moveWhile) {
     "  var char_code = this.charCode();"
     "  return Unicode.UCD[char_code].category.charAt(0) == 'Z';"
     "}");
-  EXPECT_SCRIPT_EQ("3", "pos.moveWhile(whitespace).offset");
+  EXPECT_SCRIPT_EQ("1", "pos.moveWhile(whitespace).offset");
   EXPECT_SCRIPT_EQ("0", "pos.moveWhile(whitespace, -1).offset");
+  EXPECT_SCRIPT_EQ("2", "pos.moveWhile(whitespace, 2).offset");
+  EXPECT_SCRIPT_EQ("1", "pos.moveWhile(whitespace, -1).offset");
+  EXPECT_SCRIPT_EQ("3", "pos.moveWhile(whitespace, Count.FORWARD).offset");
+  EXPECT_SCRIPT_EQ("0", "pos.moveWhile(whitespace, Count.BACKWARD).offset");
 }
 
 }  // namespace

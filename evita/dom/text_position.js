@@ -259,19 +259,21 @@ Bracket.Detail = function(type, pair) {
   global.TextPosition.prototype.moveWhile = function(callback, opt_count) {
     var count = arguments.length >= 2 ? /** @type{number} */(opt_count) : 1;
     if (count < 0) {
-      while (this.offset) {
+      while (count && this.offset) {
         --this.offset;
         if (!callback.call(this)) {
           ++this.offset;
           break;
         }
+        ++count;
       }
     } else if (count > 0) {
       var end = this.document.length;
-      while (this.offset < end) {
+      while (count && this.offset < end) {
         if (!callback.call(this))
           break;
         ++this.offset;
+        --count;
       }
     }
     return this;

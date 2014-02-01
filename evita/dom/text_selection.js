@@ -7,30 +7,37 @@
    * @param {!TextSelection} selection
    * @param {Unit} unit
    * @param {number} count
-   * @param {number} position
+   * @param {number} offset
+   * @return {number}
    */
-  function computeMotion(selection, unit, count, position) {
+  function computeMotion(selection, unit, count, offset) {
+    if (unit == Unit.BRACKET) {
+      var position = new TextPosition(selection.document, offset);
+      position.move(Unit.BRACKET, count);
+      return position.offset;
+    }
+
     if (unit == Unit.SCREEN) {
       if (!selection.goal_point_)
         throw 'Goal X point must be initialized.';
       return selection.window.compute_(TextWindowComputeMethod.MOVE_SCREEN,
-          position, count, selection.goal_point_);
+          offset, count, selection.goal_point_);
     }
 
     if (unit == Unit.WINDOW) {
       return selection.window.compute_(TextWindowComputeMethod.MOVE_WINDOW,
-                                       position, count);
+                                       offset, count);
     }
 
     if (unit == Unit.WINDOW_LINE) {
       if (!selection.goal_point_)
         throw 'Goal X point must be initialized.';
       return selection.window.compute_(
-            TextWindowComputeMethod.MOVE_WINDOW_LINE, position, count,
+            TextWindowComputeMethod.MOVE_WINDOW_LINE, offset, count,
             selection.goal_point_);
     }
 
-    return selection.range.document.computeMotion_(unit, count, position);
+    return selection.range.document.computeMotion_(unit, count, offset);
   }
 
   /**

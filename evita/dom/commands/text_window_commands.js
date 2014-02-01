@@ -442,6 +442,16 @@
       'move down by screen\n' +
       'Move focus position down by screen.');
 
+  Editor.bindKey(TextWindow, 'Ctrl+ArrowUp',
+      makeSelectionMotionCommand(Unit.BRACKET, -1, Alter.MOVE),
+      'move up by bracket\n' +
+      'Move focus position up by bracket.');
+
+  Editor.bindKey(TextWindow, 'Ctrl+ArrowDown',
+      makeSelectionMotionCommand(Unit.BRACKET, 1, Alter.MOVE),
+      'move down by bracket\n' +
+      'Move focus position down by bracket.');
+
   Editor.bindKey(TextWindow, 'Ctrl+PageUp',
       makeSelectionMotionCommand(Unit.WINDOW, -1, Alter.MOVE),
       'move up by window\n' +
@@ -471,6 +481,16 @@
       makeSelectionMotionCommand(Unit.SCREEN, 1, Alter.EXTEND),
       'extend down by screen\n' +
       'Extend focus position down by screen.');
+
+  Editor.bindKey(TextWindow, 'Shift+Ctrl+ArrowDown',
+      makeSelectionMotionCommand(Unit.BRACKET, 1, Alter.EXTEND),
+      'extend down by bracket\n' +
+      'Extend focus position down by bracket');
+
+  Editor.bindKey(TextWindow, 'Shift+Ctrl+ArrowUp',
+      makeSelectionMotionCommand(Unit.BRACKET, -1, Alter.EXTEND),
+      'extend up by bracket\n' +
+      'Extend focus position up by bracket');
 
   Editor.bindKey(TextWindow, 'Shift+Ctrl+PageUp',
       makeSelectionMotionCommand(Unit.WINDOW, -1, Alter.EXTEND),

@@ -398,47 +398,6 @@ DEFCOMMAND(ExchangeCode)
     pSelection->SetRange(oRange.GetEnd(), oRange.GetEnd());
 } // ExchangeCode
 
-// [G]
-DEFCOMMAND(GoToCloseParen)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-    Posn lPosn = pSelection->FindCloseParen(true);
-    when (-1 != lPosn) pSelection->SetRange(lPosn, lPosn);
-} // GoToCloseParen
-
-DEFCOMMAND(GoToCloseParenExtend)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-    Posn lPosn = pSelection->FindCloseParen(true);
-    when (-1 != lPosn)
-    {
-        pSelection->SetEnd(lPosn);
-        pSelection->SetStartIsActive(false);
-    }
-} // GoToCloseParenExtend
-
-DEFCOMMAND(GoToOpenParen)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-    Posn lPosn = pSelection->FindOpenParen(true);
-    when (-1 != lPosn) pSelection->SetRange(lPosn, lPosn);
-} // GoToOpenParen
-
-DEFCOMMAND(GoToOpenParenExtend)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-    Posn lPosn = pSelection->FindOpenParen(true);
-    when (-1 != lPosn)
-    {
-        pSelection->SetStart(lPosn);
-        pSelection->SetStartIsActive(true);
-    }
-} // GoToOpenParenExtend
-
 // [P]
 
 DEFCOMMAND(PasteFromClipboard)
@@ -892,12 +851,6 @@ void Processor::GlobalInit() {
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'Q', QuotedInsertEntry());
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'R', Reload);
     BIND_KEY(CommandWindow, Mod_Ctrl | 'U', StartArgumentEntry());
-
-    BIND_VKEY(TextEditWindow, Mod_Ctrl, DOWN,   GoToCloseParen);
-    BIND_VKEY(TextEditWindow, Mod_Ctrl, UP,     GoToOpenParen);
-
-    BIND_VKEY(TextEditWindow, Mod_CtrlShift, DOWN,      GoToCloseParenExtend);
-    BIND_VKEY(TextEditWindow, Mod_CtrlShift, UP,        GoToOpenParenExtend);
 } // Processor::GlobalInit
 
 }  // namespace Command

@@ -316,32 +316,7 @@ DEFCOMMAND(QuotedInsert)
     // This is dummy entry of QuotedInsert command.
     // This command is handled by command processor.
 } // StartArgument
-
-// [R]
-DEFCOMMAND(Reload)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
 
-    Buffer* pBuffer = pSelection->GetBuffer();
-
-    unless (pBuffer->NeedSave()) return;
-
-    int iAnswer;
-    {
-      UI_DOM_AUTO_UNLOCK_SCOPE();
-      iAnswer = Application::instance()->Ask(
-          MB_YESNO | MB_ICONQUESTION,
-          IDS_ASK_RELOAD,
-          pBuffer->GetName() );
-    }
-
-    if (IDYES == iAnswer)
-    {
-        pBuffer->Reload();
-    }
-} // Reload
-
 // [S]
 DEFCOMMAND(StartArgument)
 {
@@ -739,7 +714,6 @@ void Processor::GlobalInit() {
     BIND_KEY(TextEditWindow, Mod_Ctrl | '/', ExpandDynamicAbbrev);
 
     BIND_KEY(TextEditWindow, Mod_Ctrl | 'Q', QuotedInsertEntry());
-    BIND_KEY(TextEditWindow, Mod_Ctrl | 'R', Reload);
     BIND_KEY(CommandWindow, Mod_Ctrl | 'U', StartArgumentEntry());
 } // Processor::GlobalInit
 

@@ -211,6 +211,24 @@
     'Move selection to right by words');
 
   /**
+   * Reload document
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Ctrl+R', function(arg) {
+    var document = this.document;
+    if (!document.needSave())
+      return;
+    Editor.messageBox(this,
+        Editor.localizeText(Strings.IDS_ASK_RELOAD, {name: document.name}),
+        Editor.localizeText(Strings.IDS_APP_TITLE),
+        MessageBox.ICONQUESTION | MessageBox.YESNO)
+    .then(function(response_code) {
+      if (response_code == DialogItemId.YES)
+        document.reload_();
+    });
+  }, 'reload document');
+
+  /**
    * Save file
    * @this {!TextWindow}
    */

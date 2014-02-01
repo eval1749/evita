@@ -6,11 +6,29 @@ Style
 backgroundColor
 charSyntax
 color
-descoration
 fontFamily
 fontSize
 fontStyle
 fontWeight
+textDecoration
+
+# FontStyle
+normal
+italic
+
+# FontWeight
+normal
+bold
+
+# TextDeocration
+none
+greenwave
+redwave
+underline
+imeinput
+imeactive
+imeinactive1
+imeinactive2
 
 # Window
 Window

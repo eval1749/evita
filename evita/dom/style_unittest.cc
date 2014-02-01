@@ -39,4 +39,16 @@ TEST_F(StyleTest, DefaultStyle) {
   EXPECT_SCRIPT_EQ("normal", "style.fontWeight");
 }
 
+TEST_F(StyleTest, SetStyle) {
+  EXPECT_SCRIPT_EQ("function", "typeof(Style)");
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('style');"
+    "var range = new Range(doc);"
+    "range.text = 'foo';"
+    "range.style({color: 0x00FF00, fontSize: 23});"
+    "var style = doc.styleAt(1);");
+  EXPECT_SCRIPT_EQ("ff00", "style.color.toString(16)");
+  EXPECT_SCRIPT_EQ("23", "style.fontSize");
+}
+
 }  // namespace

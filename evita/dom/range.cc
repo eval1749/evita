@@ -61,7 +61,8 @@ class RangeClass : public v8_glue::WrapperInfo {
         .SetMethod("collapseTo", &Range::CollapseTo)
         .SetMethod("copy", &Range::CopyToClipboard)
         .SetMethod("insertBefore", &Range::InsertBefore)
-        .SetMethod("paste", &Range::PasteFromClipboard);
+        .SetMethod("paste", &Range::PasteFromClipboard)
+        .SetMethod("style", &Range::SetStyle);
   }
 };
 }  // namespace

@@ -125,6 +125,9 @@ Document.prototype.needSave = function() {};
 /** @param {!TextOffset} position */
 Document.prototype.redo= function(position) {}
 
+/** @type {function()} */
+Document.prototype.reload_ = function(document) {};
+
 /** @param {string} new_name */
 Document.prototype.renameTo = function(new_name) {}
 

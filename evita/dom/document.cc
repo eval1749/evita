@@ -137,6 +137,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
         .SetMethod("load_", &Document::Load)
         .SetMethod("redo", &Document::Redo)
+        .SetMethod("reload_", &Document::Reload)
         .SetMethod("renameTo", &Document::RenameTo)
         .SetMethod("save", &Document::Save)
         .SetMethod("startUndoGroup_", &Document::StartUndoGroup)
@@ -239,6 +240,11 @@ void Document::Load(const base::string16& filename) {
 
 Posn Document::Redo(Posn position) {
   return buffer_->Redo(position);
+}
+
+void Document::Reload() {
+  ScriptController::instance()->view_delegate()->ReloadTextBuffer(
+      buffer_.get());
 }
 
 void Document::RenameTo(const base::string16& new_name) {

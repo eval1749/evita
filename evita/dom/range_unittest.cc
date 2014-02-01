@@ -59,8 +59,6 @@ class RangeTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(RangeTest);
 };
 
-static const char* kInvalidPosition = "Error: Invalid position.";
-
 TEST_F(RangeTest, Constructor) {
   EXPECT_SCRIPT_VALID("var doc1 = new Document('range')");
   EXPECT_SCRIPT_VALID("var range1 = new Range(doc1)");
@@ -453,10 +451,14 @@ TEST_F(RangeTest, set_start_end) {
       "range1.start = 5;");
   EXPECT_SCRIPT_EQ("5", "range1.start");
   EXPECT_SCRIPT_EQ("1 5", "range1.end = 1; range1.start + ' ' + range1.end");
-  EXPECT_SCRIPT_EQ(kInvalidPosition, "range1.start = -1");
-  EXPECT_SCRIPT_EQ(kInvalidPosition, "range1.start = 100");
-  EXPECT_SCRIPT_EQ(kInvalidPosition, "range1.end = -1");
-  EXPECT_SCRIPT_EQ(kInvalidPosition, "range1.end = 100");
+  EXPECT_SCRIPT_EQ("RangeError: Invalid position -1, valid range is [0, 12]",
+                   "range1.start = -1");
+  EXPECT_SCRIPT_EQ("RangeError: Invalid position 100, valid range is [0, 12]",
+                   "range1.start = 100");
+  EXPECT_SCRIPT_EQ("RangeError: Invalid position -1, valid range is [0, 12]",
+                   "range1.end = -1");
+  EXPECT_SCRIPT_EQ("RangeError: Invalid position 100, valid range is [0, 12]",
+                   "range1.end = 100");
 }
 
 TEST_F(RangeTest, startOf) {

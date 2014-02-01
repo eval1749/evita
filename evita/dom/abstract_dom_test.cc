@@ -96,6 +96,7 @@ void AbstractDomTest::SetUp() {
 
   auto context = v8::Context::New(isolate, nullptr, global_template);
   context_.Reset(isolate, context);
+  ScriptController::instance()->set_testing_context(context);
   context->Enter();
   script_controller_->LoadJsLibrary();
 }

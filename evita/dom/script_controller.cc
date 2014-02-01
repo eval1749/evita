@@ -124,6 +124,8 @@ ScriptController::~ScriptController() {
 }
 
 v8::Handle<v8::Context> ScriptController::context() const {
+  if (!testing_context_->IsEmpty())
+    return testing_context_.NewLocal(v8::Isolate::GetCurrent());
   return  context_holder_.context();
 }
 
@@ -134,6 +136,10 @@ ScriptController* ScriptController::instance() {
 
 v8::Isolate* ScriptController::isolate() const {
   return const_cast<ScriptController*>(this)->isolate_holder_.isolate();
+}
+
+void ScriptController::set_testing_context(v8::Handle<v8::Context> context) {
+  testing_context_.Reset(v8::Isolate::GetCurrent(), context);
 }
 
 ViewDelegate* ScriptController::view_delegate() const {

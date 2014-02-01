@@ -16,6 +16,7 @@
 #include "evita/dom/view_event_handler.h"
 #include "evita/v8_glue/context_holder.h"
 #include "evita/v8_glue/isolate_holder.h"
+#include "evita/v8_glue/scoped_persistent.h"
 #include "evita/v8_glue/v8.h"
 
 namespace base {
@@ -55,6 +56,7 @@ class ScriptController {
   private: gin::ContextHolder context_holder_;
   private: std::unique_ptr<EventHandler> event_handler_;
   private: bool testing_;
+  private: v8_glue::ScopedPersistent<v8::Context> testing_context_;
   private: ViewDelegate* view_delegate_;
 
   private: ScriptController(ViewDelegate* view_delegate);
@@ -64,6 +66,7 @@ class ScriptController {
   public: EventHandler* event_handler() const { return event_handler_.get(); }
   public: static ScriptController* instance();
   public: v8::Isolate* isolate() const;
+  public: void set_testing_context(v8::Handle<v8::Context> context);
   public: ViewDelegate* view_delegate() const;
 
   public: void DidStartHost();

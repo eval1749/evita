@@ -42,6 +42,8 @@ class AbstractDomTest : public ::testing::Test {
       bool Call(const base::StringPiece& name, Params... params);
   private: bool DoCall(v8::Isolate* isolate, const base::StringPiece& name,
                        const Argv& argv);
+  private: v8::Handle<v8::ObjectTemplate> CreateGlobalTempalte(
+    v8::Isolate* isolate);
   protected: std::string EvalScript(const std::string& text);
   protected: virtual void PopulateGlobalTemplate(
       v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_tempalte);

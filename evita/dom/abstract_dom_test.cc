@@ -58,6 +58,14 @@ bool AbstractDomTest::DoCall(v8::Isolate* isolate,
   return !result.IsEmpty();
 }
 
+v8::Handle<v8::ObjectTemplate> AbstractDomTest::CreateGlobalTempalte(
+    v8::Isolate* isolate) {
+  v8::Context::Scope context_scope(script_controller_->context());
+  auto global_template = Global::instance()->object_template(isolate);
+  PopulateGlobalTemplate(isolate, global_template);
+  return global_template;
+}
+
 std::string AbstractDomTest::EvalScript(const std::string& text) {
   auto eval_result = script_controller_->Evaluate(base::ASCIIToUTF16(text));
   if (eval_result.exception.length())
@@ -91,9 +99,7 @@ void AbstractDomTest::SetUp() {
 
   auto const isolate = v8::Isolate::GetCurrent();
   v8::HandleScope handle_scope(isolate);
-  auto global_template = Global::instance()->object_template(isolate);
-  PopulateGlobalTemplate(isolate, global_template);
-
+  auto const global_template = CreateGlobalTempalte(isolate);
   auto context = v8::Context::New(isolate, nullptr, global_template);
   context_.Reset(isolate, context);
   ScriptController::instance()->set_testing_context(context);

@@ -119,7 +119,7 @@ class EditorClass : public v8_glue::WrapperInfo {
     try_catch.SetVerbose(true);
     auto const script = v8::Script::New(
         gin::StringToV8(isolate, script_text)->ToString(),
-        gin::StringToV8(isolate, opt_file_name.get(L"(runscript)"))
+        gin::StringToV8(isolate, opt_file_name.get(L"__runscript__"))
             ->ToString());
     if (script.IsEmpty()) {
       return handle_scope.Escape(NewRunScriptResult(isolate,

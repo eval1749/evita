@@ -85,6 +85,7 @@ void EventHandler::DoDefaultEventHandling(EventTarget* event_target,
 
   auto const isolate = controller_->isolate();
   v8::HandleScope handle_scope(isolate);
+  v8::Context::Scope context_scope(controller_->context());
 
   auto const js_target = event_target->GetWrapper(isolate);
   auto const js_class = GetClassObject(isolate, js_target);

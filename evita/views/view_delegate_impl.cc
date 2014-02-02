@@ -40,7 +40,7 @@ class WaitableEventScope {
 Window* FromWindowId(const char* name, dom::WindowId window_id) {
   auto const window = Window::FromWindowId(window_id);
   if (!window) {
-    DVLOG(0) << name << ": No such window %d" << window_id;
+    DVLOG(0) << name << ": No such window " << window_id;
     return nullptr;
   }
   return window;
@@ -263,15 +263,15 @@ void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
 void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) {
-  auto const widget = FromWindowId("MessageBoxCallback", window_id);
-  if (!widget)
-    return;
+  auto const widget = window_id == dom::kInvalidWindowId ? nullptr :
+      FromWindowId("MessageBoxCallback", window_id);
+  auto const hwnd = widget ? widget->AssociatedHwnd() : nullptr;
   auto safe_title = title;
   if (!safe_title.empty())
     safe_title += L" - ";
   safe_title += L"evita";
   editor::ModalMessageLoopScope modal_mesage_loop_scope;
-  auto response_code = ::MessageBoxW(widget->AssociatedHwnd(), message.c_str(),
+  auto response_code = ::MessageBoxW(hwnd, message.c_str(),
                                      safe_title.c_str(),
                                      static_cast<UINT>(flags));
   event_handler_->RunCallback(base::Bind(callback, response_code));

@@ -3,8 +3,13 @@
 
 #include "evita/dom/script_controller.h"
 
+#pragma warning(push)
+#pragma warning(disable: 4625 4626)
+#include "base/bind.h"
+#pragma warning(pop)
 #include "base/logging.h"
 #include "base/strings/string16.h"
+#include "base/strings/stringprintf.h"
 #include "evita/dom/document.h"
 #include "evita/dom/editor_window.h"
 #include "evita/dom/events/event_handler.h"
@@ -77,6 +82,56 @@ EvaluateResult ReportException(const v8::TryCatch& try_catch) {
   return eval_result;
 }
 
+void MessageBoxCallback(int) {
+}
+
+bool suppress_message_box;
+
+void MessageBox(const base::string16& message, int flags) {
+  DVLOG(0) << message;
+  if (suppress_message_box)
+    return;
+  ScriptController::instance()->view_delegate()->MessageBox(kInvalidWindowId,
+    message, L"System Message", flags, base::Bind(MessageBoxCallback));
+}
+
+void GcEpilogueCallback(v8::GCType type, v8::GCCallbackFlags flags) {
+  auto text = base::StringPrintf(L"GC finished type=%d flags=0x%X",
+                                 type, flags);
+  MessageBox(text, MB_ICONINFORMATION);
+  dom::Lock::instance()->Release(FROM_HERE);
+}
+
+void GcPrologueCallback(v8::GCType type, v8::GCCallbackFlags flags) {
+  auto text = base::StringPrintf(L"GC Started type=%d flags=%X",
+                                 type, flags);
+  MessageBox(text, MB_ICONINFORMATION);
+  dom::Lock::instance()->Acquire(FROM_HERE);
+}
+
+void MessageCallback(v8::Handle<v8::Message> message,
+                       v8::Handle<v8::Value> error) {
+  auto text = base::StringPrintf(
+      L"Exeption: %ls\n"
+      L"Source: %ls\n"
+      L"Source name: %ls(%d)\n",
+      V8ToString(error).c_str(), V8ToString(message->GetSourceLine()).c_str(),
+      V8ToString(message->GetScriptResourceName()).c_str(),
+      message->GetLineNumber());
+  auto const stack_trace = message->GetStackTrace();
+  if (!stack_trace.IsEmpty()) {
+    text += L"Stack trace:\n";
+    auto const length = static_cast<size_t>(stack_trace->GetFrameCount());
+    for (auto index = 0u; index < length; ++index) {
+      auto const frame = stack_trace->GetFrame(index);
+      text += base::StringPrintf(L"  at %ls (%ls(%d))\n",
+          V8ToString(frame->GetFunctionName()).c_str(),
+          V8ToString(frame->GetScriptName()).c_str(), frame->GetLineNumber());
+    }
+  }
+  MessageBox(text, MB_ICONERROR);
+}
+
 ScriptController* script_controller;
 
 }   // namespace
@@ -106,31 +161,24 @@ ScriptController::ScriptController(ViewDelegate* view_delegate)
   v8::V8::InitializeICU();
   auto const isolate = isolate_holder_.isolate();
   isolate->Enter();
+
   v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
+  v8::V8::AddMessageListener(MessageCallback);
+  v8::V8::AddGCPrologueCallback(GcPrologueCallback);
+  v8::V8::AddGCEpilogueCallback(GcEpilogueCallback);
 
   // See v8/src/flag-definitions.h
   // Note: |EnsureV8Initialized()| in "gin/isolate_holder.cc" also sets
   // flags.
-  auto const flags =
+  char flags[] =
       "--use_strict"
       " --harmony"
       " --harmony_typeof"
       " --trace_exception";
   v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
-
-  v8::HandleScope handle_scope(isolate);
-  v8Strings::Init(isolate);
-  auto context = v8::Context::New(isolate, nullptr,
-      Global::instance()->object_template(isolate));
-  context_holder_.SetContext(context);
-  context->Enter();
 }
 
 ScriptController::~ScriptController() {
-  {
-    v8::HandleScope handle_scope(isolate_holder_.isolate());
-    context_holder_.context()->Exit();
-  }
   isolate_holder_.isolate()->Exit();
   script_controller = nullptr;
 }
@@ -162,6 +210,9 @@ ViewDelegate* ScriptController::view_delegate() const {
 void ScriptController::DidStartHost() {
   // We should prevent UI thread to access DOM.
   DOM_AUTO_LOCK_SCOPE();
+  auto const isolate = this->isolate();
+  v8::HandleScope handle_scope(isolate);
+  v8::Context::Scope context_scope(context());
   LoadJsLibrary();
   if (testing_)
     return;
@@ -176,7 +227,7 @@ EvaluateResult ScriptController::Evaluate(const base::string16& script_text) {
   v8::TryCatch try_catch;
   v8::Handle<v8::Script> script = v8::Script::New(
       gin::StringToV8(isolate, script_text)->ToString(),
-      gin::StringToV8(isolate, "(eval)")->ToString());
+      gin::StringToV8(isolate, "__eval__")->ToString());
   if (script.IsEmpty()) {
     return ReportException(try_catch);
   }
@@ -242,7 +293,15 @@ ScriptController* ScriptController::Start(ViewDelegate* view_delegate) {
   if (script_controller && script_controller->testing_)
     return script_controller;
   DCHECK(!script_controller);
+  suppress_message_box = true;
   script_controller = new ScriptController(view_delegate);
+  auto const isolate = script_controller->isolate();
+  v8::HandleScope handle_scope(isolate);
+  v8Strings::Init(isolate);
+  auto context = v8::Context::New(isolate, nullptr,
+      Global::instance()->object_template(isolate));
+  script_controller->context_holder_.SetContext(context);
+  suppress_message_box = false;
   return script_controller;
 }
 
@@ -256,6 +315,7 @@ ScriptController* ScriptController::StartForTesting(
     script_controller->view_delegate_ = view_delegate;
     script_controller->ResetForTesting();
   }
+  suppress_message_box = true;
   return script_controller;
 }
 

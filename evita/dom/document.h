@@ -8,6 +8,7 @@
 
 #include "base/strings/string16.h"
 #include "evita/v8_glue/scriptable.h"
+#include "evita/v8_glue/scoped_persistent.h"
 
 namespace dom {
 
@@ -23,6 +24,10 @@ class Document : public v8_glue::Scriptable<Document> {
 
   private: std::unique_ptr<Buffer> buffer_;
   private: std::unordered_set<Range*> ranges_;
+  // TODO(yosi) When we set |properties| with |v8::Object::Set()|, it doesn't
+  // appeared in JavaScript. I'm not sure why. So, we hold |properties| in
+  // C++.
+  private: v8_glue::ScopedPersistent<v8::Object> properties_;
 
   public: explicit Document(const base::string16& name);
   public: virtual ~Document();
@@ -35,6 +40,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: text::Posn length() const;
   public: bool modified() const;
   public: const base::string16& name() const;
+  public: v8::Handle<v8::Object> properties() const;
   public: v8::Handle<v8::Object> style_at(text::Posn position) const;
 
   public: void BindKey(int key_code, v8::Handle<v8::Object> command);

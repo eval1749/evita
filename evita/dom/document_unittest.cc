@@ -141,6 +141,16 @@ TEST_F(DocumentTest, name) {
   EXPECT_SCRIPT_EQ("baz", "var sample1 = new Document('baz'); sample1.name");
 }
 
+TEST_F(DocumentTest, properties) {
+  EXPECT_SCRIPT_VALID(
+    "var doc1 = new Document('doc1');"
+    "doc1.properties.set('foo', 'bar');"
+    "var doc2 = new Document('doc2');"
+    "doc2.properties.set('foo', 'baz');");
+  EXPECT_SCRIPT_EQ("bar", "doc1.properties.get('foo')");
+  EXPECT_SCRIPT_EQ("baz", "doc2.properties.get('foo')");
+}
+
 TEST_F(DocumentTest, redo) {
   EXPECT_SCRIPT_VALID("var doc = new Document('redo');"
             "var range = new Range(doc);"

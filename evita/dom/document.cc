@@ -22,6 +22,7 @@
 #include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/wrapper_info.h"
+#include "v8_strings.h"
 
 namespace dom {
 
@@ -32,6 +33,12 @@ StringPair SplitByDot(const base::string16& name) {
   if (!last_dot || last_dot == base::string16::npos)
     return StringPair(name, L"");
   return StringPair(name.substr(0, last_dot), name.substr(last_dot));
+}
+
+v8::Handle<v8::Object> NewMap(v8::Isolate* isolate) {
+  return isolate->GetCurrentContext()->Global()->
+      Get(v8Strings::Map.Get(isolate))->ToObject()->
+          CallAsConstructor(0, nullptr)->ToObject();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -132,6 +139,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         .SetProperty("length", &Document::length)
         .SetProperty("modified", &Document::modified)
         .SetProperty("name", &Document::name)
+        .SetProperty("properties", &Document::properties)
         .SetMethod("bindKey_", &Document::BindKey)
         .SetMethod("charCodeAt_", &Document::charCodeAt)
         .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
@@ -154,7 +162,9 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
 DEFINE_SCRIPTABLE_OBJECT(Document, DocumentWrapperInfo)
 
 Document::Document(const base::string16& name)
-    : buffer_(new Buffer(DocumentList::instance()->MakeUniqueName(name))) {
+    : buffer_(new Buffer(DocumentList::instance()->MakeUniqueName(name))),
+      properties_(v8::Isolate::GetCurrent(),
+                  NewMap(v8::Isolate::GetCurrent())) {
   DocumentList::instance()->Register(this);
 }
 
@@ -192,6 +202,10 @@ bool Document::modified() const {
 
 const base::string16& Document::name() const {
   return buffer_->name();
+}
+
+v8::Handle<v8::Object> Document::properties() const {
+  return properties_.NewLocal(v8::Isolate::GetCurrent());
 }
 
 void Document::BindKey(int key_code, v8::Handle<v8::Object> command) {

@@ -4,6 +4,9 @@
 # Event
 handleEvent
 
+# Document
+Map
+
 # Style
 Style
 backgroundColor

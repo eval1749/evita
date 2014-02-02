@@ -45,12 +45,6 @@ class ScriptThread final : public ViewDelegate,
   public: bool CalledOnValidThread() const;
   private: bool CalledOnScriptThread() const;
 
-// TODO(yosi) We will remove Evaluate once V8Console in JS.
-  public: void Evaluate(const base::string16& script_text,
-                        base::Callback<void(EvaluateResult)> callback);
-  private: void EvaluateImpl(base::string16 script_text,
-                             base::Callback<void(EvaluateResult)> callback);
-
   // TODO(yosi) we will make ScriptThread::PostTask() private.
   public: void PostTask(const tracked_objects::Location& from_here,
                         const base::Closure& task);

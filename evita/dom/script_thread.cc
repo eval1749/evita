@@ -56,27 +56,6 @@ bool ScriptThread::CalledOnScriptThread() const {
   return base::MessageLoop::current() == thread_->message_loop();
 }
 
-void ScriptThread::Evaluate(
-    const base::string16& script_text,
-    base::Callback<void(EvaluateResult)> callback) {
-  DCHECK_CALLED_ON_HOST_THREAD();
-  PostTask(FROM_HERE, base::Bind(&ScriptThread::EvaluateImpl,
-      base::Unretained(this), script_text, callback));
-}
-
-void ScriptThread::EvaluateImpl(
-    base::string16 script_text,
-    base::Callback<void(EvaluateResult)> callback) {
-  DCHECK_CALLED_ON_SCRIPT_THREAD();
-  if (!host_message_loop_) {
-    return;
-  }
-
-  DOM_AUTO_LOCK_SCOPE();
-  auto eval_result = ScriptController::instance()->Evaluate(script_text);
-  host_message_loop_->PostTask(FROM_HERE, base::Bind(callback, eval_result));
-}
-
 void ScriptThread::PostTask(const tracked_objects::Location& from_here,
                             const base::Closure& task) {
   DCHECK_CALLED_ON_HOST_THREAD();

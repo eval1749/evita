@@ -16,6 +16,7 @@
 #include "evita/dom/window.h"
 #include "evita/gc/local.h"
 #include "evita/v8_glue/converter.h"
+#include "v8_strings.h"
 
 namespace dom {
 
@@ -59,11 +60,11 @@ v8::Handle<v8::Object> GetClassObject(v8::Isolate* isolate,
 
 v8::Handle<v8::Object> ToMethodObject(v8::Isolate* isolate,
                                       v8::Handle<v8::Object> js_class,
-                                      const char* method_name) {
-  auto const value = js_class->Get(gin::StringToV8(isolate, method_name));
+                                      v8::Eternal<v8::String> method_name) {
+  auto const value = js_class->Get(method_name.Get(isolate));
   if (value.IsEmpty() || !value->IsFunction()) {
     LOG(0) << "Object " << V8ToString(js_class) << " has no method '" <<
-        method_name << "', it has " <<
+        V8ToString(method_name.Get(isolate)) << "', it has " <<
         V8ToString(js_class->GetPropertyNames()) << ".";
     return v8::Handle<v8::Object>();
   }
@@ -81,8 +82,6 @@ EventHandler::~EventHandler() {
 // Call |handleEvent| function in the class of event target.
 void EventHandler::DoDefaultEventHandling(EventTarget* event_target,
                                           Event* event) {
-  const char kHandleEvent[] = "handleEvent";
-
   auto const isolate = controller_->isolate();
   v8::HandleScope handle_scope(isolate);
   v8::Context::Scope context_scope(controller_->context());
@@ -92,14 +91,15 @@ void EventHandler::DoDefaultEventHandling(EventTarget* event_target,
   if (js_class.IsEmpty())
     return;
 
-  auto const js_method = ToMethodObject(isolate, js_class, kHandleEvent);
+  auto const js_method = ToMethodObject(isolate, js_class,
+                                        v8Strings::handleEvent);
   if (js_method.IsEmpty())
     return;
 
   v8::TryCatch try_catch;
   v8::Handle<v8::Value> argv[1] { event->GetWrapper(isolate) };
-  auto const value = js_method->CallAsFunction(js_target, 1, argv);
-  if (value.IsEmpty())
+  js_method->CallAsFunction(js_target, 1, argv);
+  if (try_catch.HasCaught())
     controller_->LogException(try_catch);
 }
 
@@ -200,7 +200,13 @@ void EventHandler::QueryClose(WindowId window_id) {
 }
 
 void EventHandler::RunCallback(base::Closure callback) {
+  auto const isolate = controller_->isolate();
+  v8::HandleScope handle_scope(isolate);
+  v8::Context::Scope context_scope(controller_->context());
+  v8::TryCatch try_catch;
   callback.Run();
+  if (try_catch.HasCaught())
+    controller_->LogException(try_catch);
 }
 
 void EventHandler::WillDestroyHost() {

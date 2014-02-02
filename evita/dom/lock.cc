@@ -3,69 +3,84 @@
 
 #include "evita/dom/lock.h"
 
+#include <ostream>
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const tracked_objects::Location & location) {
+  return ostream << location.ToString();
+}
+
 namespace dom {
 
 //////////////////////////////////////////////////////////////////////
 //
 // Lock::AutoLock
 //
-Lock::AutoLock::AutoLock(const char* filename, int line_number)
+Lock::AutoLock::AutoLock(const Location& location)
     : base::AutoLock(*Lock::instance()->lock()) {
-  DVLOG(1) << "Lock dom at " << filename << "(" << std::dec <<
-      line_number << ")";
-  Lock::instance()->locker_filename_ = filename;
-  Lock::instance()->locker_line_number_ = line_number;
+  DVLOG(1) << "Lock dom at " << location;
+  Lock::instance()->location_ = location;
 }
 
 Lock::AutoLock::~AutoLock() {
-  DVLOG(1) << "Unlock dom at " << Lock::instance()->locker_filename_ <<
-    "(" << std::dec << Lock::instance()->locker_line_number_ << ")";
+  DVLOG(1) << "Unlock dom at " << Lock::instance()->location_ ;
 }
 
 //////////////////////////////////////////////////////////////////////
 //
 // Lock::AutoTryLock
 //
-Lock::AutoTryLock::AutoTryLock(const char* filename, int line_number)
+Lock::AutoTryLock::AutoTryLock(const Location& location)
     : locked_(Lock::instance()->lock()->Try()) {
-  DVLOG(1) << "Lock dom at " << filename << "(" << std::dec <<
-      line_number << ")";
-  Lock::instance()->locker_filename_ = filename;
-  Lock::instance()->locker_line_number_ = line_number;
+  DVLOG(1) << "TryLock dom at " << location;
+  Lock::instance()->location_ = location;
 }
 
 Lock::AutoTryLock::~AutoTryLock() {
   if (locked_)
     Lock::instance()->lock()->Release();
-  DVLOG(1) << "Unlock dom at " << Lock::instance()->locker_filename_ <<
-    "(" << std::dec << Lock::instance()->locker_line_number_ << ")";
+  DVLOG(1) << "Unlock dom at " << Lock::instance()->location_ ;
 }
 
 //////////////////////////////////////////////////////////////////////
 //
 // Lock::AutoUnlock
 //
-Lock::AutoUnlock::AutoUnlock(const char* filename, int line_number)
+Lock::AutoUnlock::AutoUnlock(const Location& location)
     : base::AutoUnlock(*Lock::instance()->lock()) {
-  DVLOG(1) << "Unlock dom at " << filename << "(" << std::dec <<
-      line_number << ")";
-  Lock::instance()->locker_filename_ = filename;
-  Lock::instance()->locker_line_number_ = line_number;
+  DVLOG(1) << "Unlock dom at " << location;
+  Lock::instance()->location_ = location;
 }
 
 Lock::AutoUnlock::~AutoUnlock() {
-  DVLOG(1) << "Lock dom at " << Lock::instance()->locker_filename_ <<
-    "(" << std::dec << Lock::instance()->locker_line_number_ << ")";
-}
+DVLOG(1) << "Lock dom at " << Lock::instance()->location_ ;}
 
 //////////////////////////////////////////////////////////////////////
 //
 // Lock
 //
-Lock::Lock()
-    : lock_(new base::Lock()),
-      locker_filename_(nullptr),
-      locker_line_number_(0) {
+Lock::Lock() : lock_(new base::Lock()) {
+}
+
+Lock::~Lock() {
+}
+
+void Lock::Acquire(const tracked_objects::Location& location) {
+  location_ = location;
+  lock_->Acquire();
+}
+
+void Lock::Release(const tracked_objects::Location& location) {
+  location_ = location;
+  lock_->Release();
+}
+
+
+bool Lock::TryLock(const tracked_objects::Location& location) {
+  if (!lock_->Try())
+    return false;
+  location_ = location;
+  return true;
 }
 
 }  // namespace dom

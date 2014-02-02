@@ -5,22 +5,20 @@
 
 #include <memory>
 
+#include "base/location.h"
 #include "base/logging.h"
 #include "base/synchronization/lock.h"
 #include "common/memory/singleton.h"
 
-namespace editor {
-class DomLock;
-}
-
 namespace dom {
 
 class Lock : public common::Singleton<Lock> {
-  friend class common::Singleton<Lock>;
-  friend class editor::DomLock;
+  DECLARE_SINGLETON_CLASS(Lock);
+
+  private: typedef tracked_objects::Location Location;
 
   public: class AutoLock : public base::AutoLock {
-    public: AutoLock(const char* filename, int line_number);
+    public: AutoLock(const Location& location);
     public: ~AutoLock();
     DISALLOW_COPY_AND_ASSIGN(AutoLock);
   };
@@ -28,7 +26,7 @@ class Lock : public common::Singleton<Lock> {
 
   public: class AutoTryLock {
     private: bool locked_;
-    public: AutoTryLock(const char* filename, int line_number);
+    public: AutoTryLock(const Location& location);
     public: ~AutoTryLock();
     public: bool locked() const { return locked_; }
     DISALLOW_COPY_AND_ASSIGN(AutoTryLock);
@@ -36,22 +34,25 @@ class Lock : public common::Singleton<Lock> {
   friend class AutoTryLock;
 
   public: class AutoUnlock : public base::AutoUnlock {
-    public: AutoUnlock(const char* filename, int line_number);
+    public: AutoUnlock(const Location& location);
     public: ~AutoUnlock();
     DISALLOW_COPY_AND_ASSIGN(AutoUnlock);
   };
   friend class AutoUnlock;
 
   private: std::unique_ptr<base::Lock> lock_;
-  private: const char* locker_filename_;
-  private: int locker_line_number_;
+  private: Location location_;
 
   private: Lock();
-  public: virtual ~Lock() = default;
+  public: virtual ~Lock();
 
+  public: const Location& location() const { return location_; }
   private: base::Lock* lock() const { return lock_.get(); }
 
+  public: void Acquire(const Location& location);
   public: void AssertAcquired() { lock_->AssertAcquired(); }
+  public: void Release(const Location& location);
+  public: bool TryLock(const Location& location);
 
   DISALLOW_COPY_AND_ASSIGN(Lock);
 };
@@ -62,12 +63,12 @@ class Lock : public common::Singleton<Lock> {
   dom::Lock::instance()->AssertAcquired()
 
 #define DOM_AUTO_LOCK_SCOPE() \
-  dom::Lock::AutoLock dom_lock_scope(__FILE__, __LINE__)
+  dom::Lock::AutoLock dom_lock_scope(FROM_HERE)
 
 #define DOM_AUTO_UNLOCK_SCOPE() \
-  dom::Lock::AutoUnlock dom_lock_scope(__FILE__, __LINE__)
+  dom::Lock::AutoUnlock dom_lock_scope(FROM_HERE)
 
 #define DOM_TRY_LOCK_SCOPE(name) \
-  dom::Lock::AutoTryLock name(__FILE__, __LINE__)
+  dom::Lock::AutoTryLock name(FROM_HERE)
 
 #endif //!defined(INCLUDE_evita_dom_lock_h)

@@ -3,6 +3,7 @@
 #if !defined(INCLUDE_evita_editor_dom_lock_h)
 #define INCLUDE_evita_editor_dom_lock_h
 
+#include "base/location.h"
 #include "base/logging.h"
 // L4 C4625: 'derived class' : copy constructor could not be generated because
 // a base class copy constructor is inaccessible
@@ -16,9 +17,10 @@
 namespace editor {
 
 class DomLock {
+  private: typedef tracked_objects::Location Location;
+
   public: class AutoLock {
-    public: AutoLock(const char* filename, int line_number,
-                     const char* function_name);
+    public: AutoLock(const Location& location);
     public: ~AutoLock();
     DISALLOW_COPY_AND_ASSIGN(AutoLock);
   };
@@ -26,8 +28,7 @@ class DomLock {
 
   public: class AutoTryLock {
     private: bool locked_;
-    public: AutoTryLock(const char* filename, int line_number,
-                        const char* function_name);
+    public: AutoTryLock(const Location& location);
     public: ~AutoTryLock();
     public: bool locked() const { return locked_; }
     DISALLOW_COPY_AND_ASSIGN(AutoTryLock);
@@ -35,32 +36,29 @@ class DomLock {
   friend class AutoTryLock;
 
   public: class AutoUnlock {
-    public: AutoUnlock(const char* filename, int line_number,
-                       const char* function_name);
+    public: AutoUnlock(const Location& location);
     public: ~AutoUnlock();
     DISALLOW_COPY_AND_ASSIGN(AutoUnlock);
   };
   friend class AutoUnlock;
 
-  private: const char* locker_filename_;
-  private: const char* locker_function_name_;
-  private: int locker_line_number_;
   private: bool locked_;
   private: base::ThreadChecker thread_checker_;
 
   public: DomLock();
-  public: ~DomLock() = default;
+  public: ~DomLock();
 
   public: static DomLock* instance();
+  public: const Location& location() const;
   public: bool locked() const {
     DCHECK(thread_checker_.CalledOnValidThread());
     return locked_;
   }
 
-  public: void AssertLocked();
-  public: void Lock();
-  public: bool TryLock();
-  public: void Unlock();
+  public: void Acquire(const Location& location);
+  public: void AssertLocked(const Location& location);
+  public: void Release(const Location& location);
+  public: bool TryLock(const Location& location);
 
   DISALLOW_COPY_AND_ASSIGN(DomLock);
 };
@@ -68,15 +66,15 @@ class DomLock {
 }  // namespace editor
 
 #define UI_ASSERT_DOM_LOCKED() \
-  editor::DomLock::instance()->AssertLocked();
+  editor::DomLock::instance()->AssertLocked(FROM_HERE);
 
 #define UI_DOM_AUTO_LOCK_SCOPE() \
-  editor::DomLock::AutoLock dom_scope(__FILE__, __LINE__, __FUNCTION__)
+  editor::DomLock::AutoLock dom_scope(FROM_HERE)
 
 #define UI_DOM_AUTO_TRY_LOCK_SCOPE(scope_name) \
-  editor::DomLock::AutoTryLock scope_name(__FILE__, __LINE__, __FUNCTION__)
+  editor::DomLock::AutoTryLock scope_name(FROM_HERE)
 
 #define UI_DOM_AUTO_UNLOCK_SCOPE() \
-  editor::DomLock::AutoUnlock dom_scope(__FILE__, __LINE__, __FUNCTION__)
+  editor::DomLock::AutoUnlock dom_scope(FROM_HERE)
 
 #endif //!defined(INCLUDE_evita_editor_dom_lock_h)

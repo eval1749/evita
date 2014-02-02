@@ -28,6 +28,7 @@
         'dom/forms/form_control_externs.js',
         'dom/forms/text_field_control_externs.js',
         'dom/file_path_externs.js',
+        'dom/js_console_externs.js',
         'dom/key_names_externs.js',
         'dom/point_externs.js',
         'dom/range_externs.js',

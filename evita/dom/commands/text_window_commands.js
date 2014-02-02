@@ -294,6 +294,31 @@
     });
   });
 
+  /**
+   * Evaluate script in selection selection
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+E', function() {
+    var selection = this.selection;
+    var is_whole = selection.range.start == selection.range.end;
+    var script_text = is_whole ?
+        (new Range(this.document, 0, this.document.length)).text :
+        selection.range.text;
+    var result = Editor.runScript(script_text, this.document.name);
+    if (!result.exception) {
+      if (result.value != undefined)
+        console.log(JsConsole.stringify(result.value));
+      return;
+    }
+    Editor.messageBox(this, result.stackTraceString, MessageBox.ICONERROR,
+                      'Evaluate Selection Command')
+      .then(function(x) {
+        var offset = is_whole ? 0 : this.selection.range.start;
+        selection.collapseTo(offset + result.start)
+          .moveEnd(Unit.CHARACTER, result.end - result.start);
+    });
+  }, 'Evaluate script in selection');
+
   Editor.bindKey(TextWindow, 'Ctrl+Shift+Delete', copyToClipboardCommand);
 
   Editor.bindKey(TextWindow, 'Ctrl+Shift+End', function() {

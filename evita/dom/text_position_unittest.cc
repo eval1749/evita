@@ -102,6 +102,13 @@ TEST_F(TextPositionTest, moveBracket) {
     "          state = 'COMMENT_1';"
     "          color = 0x008000;"
     "          char_syntax = 2;"
+    "        } else if (char_code == Unicode.LEFT_CURLY_BRACKET ||"
+    "                   char_code == Unicode.RIGHT_CURLY_BRACKET) {"
+    "          finish(0);"
+    "          color = 0;"
+    "          char_syntax = 3;"
+    "          finish(1);"
+    "          pos.move(Unit.CHARACTER);"
     "        }"
     "        break;"
     "      case 'COMMENT_1':"
@@ -130,6 +137,9 @@ TEST_F(TextPositionTest, moveBracket) {
   EXPECT_SCRIPT_EQ("(foo) ^(bar)", "forward('(foo)^ (bar)')");
   EXPECT_SCRIPT_EQ("(foo) (bar)^", "forward('(foo) ^(bar)')");
 
+  // bracket and others have different colors.
+  EXPECT_SCRIPT_EQ("} else ^{ foo", "forward('}^ else { foo')");
+
   // string is a different matching context.
   EXPECT_SCRIPT_EQ("(foo |bar)| baz)^", "forward('^(foo |bar)| baz)')");
   EXPECT_SCRIPT_EQ("|(foo| bar) |baz)^|", "forward('|^(foo| bar) |baz)|')");
@@ -153,6 +163,9 @@ TEST_F(TextPositionTest, moveBracket) {
   EXPECT_SCRIPT_EQ("^(foo) (bar)", "backward('(foo^) (bar)')");
   EXPECT_SCRIPT_EQ("^(foo) (bar)", "backward('(foo)^ (bar)')");
   EXPECT_SCRIPT_EQ("(foo)^ (bar)", "backward('(foo) ^(bar)')");
+
+  // bracket and others have different colors.
+  EXPECT_SCRIPT_EQ("}^ else { foo", "backward('} else ^{ foo')");
 
   // string is a different matching context.
   EXPECT_SCRIPT_EQ("^(foo |(bar| baz)", "backward('(foo |(bar| baz)^')");

@@ -78,7 +78,7 @@ Bracket.Detail = function(type, pair) {
    * @param {!TextPosition} position
    * Note: We use syntax coloring information for preventing matching
    * parenthesis among statement, string and comment.
-   * See also findRightBracket().
+   * See also |moveForwardBracket()|.
    */
   function moveBackwardBracket(position) {
     /** @type {Array.<BracketMatchData>} */ var bracket_stack = [];
@@ -143,7 +143,7 @@ Bracket.Detail = function(type, pair) {
    * @param {!TextPosition} position
    * Note: We use syntax coloring information for preventing matching
    * parenthesis among statement, string and comment.
-   * See also findLeftBracket().
+   * See also |moveBackwardBracket()|.
    */
   function moveForwardBracket(position) {
     /** @type {Array.<BracketMatchData>} */ var bracket_stack = [];
@@ -154,13 +154,12 @@ Bracket.Detail = function(type, pair) {
     for (; position.offset < position.document.length;
          position.move(Unit.CHARACTER)) {
       var bracket = bracketDataOf(position);
-      if (!bracket)
+      if (bracket.type == Bracket.Type.NONE)
         continue;
       if (bracket_char_syntax < 0)
         bracket_char_syntax = position.charSyntax();
       else if (position.charSyntax() != bracket_char_syntax)
         continue;
-
       switch (bracket.type) {
         case Bracket.Type.ESCAPE: {
           var current_offset = position.offset;

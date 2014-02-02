@@ -13,13 +13,22 @@
 #pragma warning(pop)
 #include "base/logging.h"
 #include "evita/dom/lock.h"
+#include "evita/dom/script_controller.h"
 #include "evita/dom/script_thread.h"
+#include "evita/dom/view_delegate.h"
 #include "evita/dom/window.h"
 #include "evita/editor/application.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/views/command_window.h"
 
 namespace dom {
+
+namespace {
+void MessageBoxCallback(int) {
+}
+}  // namespace
+
+base::string16 V8ToString(v8::Handle<v8::Value> value);
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -64,6 +73,7 @@ void ScriptCommand::RunCommand(Context* context) {
 
   auto const isolate = v8::Isolate::GetCurrent();
   v8::HandleScope handle_scope(isolate);
+  v8::Context::Scope context_scope(ScriptController::instance()->context());
 
   const auto receiver = active_window->GetWrapper(isolate);
 
@@ -72,23 +82,36 @@ void ScriptCommand::RunCommand(Context* context) {
   if (argc)
     argv[0] = v8::Integer::New(isolate, context->arg);
 
-  DOM_AUTO_LOCK_SCOPE();
+  v8::TryCatch try_catch;
   auto command = command_.NewLocal(isolate);
   if (command->IsCallable()) {
+    DOM_AUTO_LOCK_SCOPE();
     command->CallAsFunction(receiver, argc, argv);
-    return;
+  } else {
+    auto const value = command->Get(gin::StringToSymbol(isolate, "value"));
+    if (value.IsEmpty() || !value->IsObject()) {
+      DVLOG(0) << "Command object doesn't have 'value' property.";
+      return;
+    }
+    auto const function = value->ToObject();
+    if (!function->IsCallable()) {
+      DVLOG(0) << "Command object doesn't have callable object.";
+      return;
+    }
+
+    {
+      DOM_AUTO_LOCK_SCOPE();
+      function->CallAsFunction(receiver, argc, argv);
+    }
   }
-  auto value = command->Get(gin::StringToSymbol(isolate, "value"));
-  if (value.IsEmpty() || !value->IsObject()) {
-    DVLOG(0) << "Command object doesn't have 'value' property.";
-    return;
-  }
-  auto function = value->ToObject();
-  if (!function->IsCallable()) {
-    DVLOG(0) << "Command object doesn't have callable object.";
-    return;
-  }
-  function->CallAsFunction(receiver, argc, argv);
+
+  if (!try_catch.HasCaught())
+   return;
+
+  base::string16 message = V8ToString(try_catch.StackTrace());
+  ScriptController::instance()->view_delegate()->MessageBox(
+      active_window->window_id(), message, base::string16(), MB_ICONERROR,
+      base::Bind(&MessageBoxCallback));
 }
 
 }  // namespace dom

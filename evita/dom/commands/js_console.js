@@ -66,8 +66,11 @@ JsConsole.Visitor.prototype.visitArrayElement = function(index) {};
   /** @param {*} atom */
 JsConsole.Visitor.prototype.visitAtom = function(atom) {};
 
-  /** @param {!Object} object */
-JsConsole.Visitor.prototype.visitConstructed = function(object) {};
+/**
+ * @param {!Object} object
+ * @param {*} id
+ */
+JsConsole.Visitor.prototype.visitConstructed = function(object, id) {};
 
   /** @param {!Date} date*/
 JsConsole.Visitor.prototype.visitDate = function(date) {};
@@ -75,8 +78,8 @@ JsConsole.Visitor.prototype.visitDate = function(date) {};
   /** @param {!Object} object */
 JsConsole.Visitor.prototype.visitFirstTime = function(object) {};
 
-  /** @param {!Function} fun */
-JsConsole.Visitor.prototype.visitFunction = function(fun) {};
+  /** @param {!Function} fun @param {number} level */
+JsConsole.Visitor.prototype.visitFunction = function(fun, level) {};
 
   /** @param {*} key @param {number} index */
 JsConsole.Visitor.prototype.visitKey = function(key, index) {};
@@ -93,8 +96,8 @@ JsConsole.Visitor.prototype.startArray = function(array) {};
   /** @param {!Array} array @param {boolean} limited */
 JsConsole.Visitor.prototype.endArray = function(array, limited) {};
 
-  /** @param {!Object} object */
-JsConsole.Visitor.prototype.startObject = function(object) {};
+  /** @param {!Object} props @param {string} ctor_name */
+JsConsole.Visitor.prototype.startObject = function(ctor_name, props) {};
 
   /** @param {boolean} limited */
 JsConsole.Visitor.prototype.endObject = function(limited) {};
@@ -141,28 +144,44 @@ JsConsole.stringify = function(value, MAX_LEVEL, MAX_LENGTH) {
   var visited_map = new Map();
   var num_of_labels = 0;
 
+  /**
+   * @param {!Object} object
+   * @return {!Array}
+   */
+  function collectProperties(object) {
+    var override = object['stringifyProperties'];
+    if (typeof(override) == 'function')
+      return override.call(object);
+    var props = [];
+    var remove_function = object.constructor != Object;
+    for (var runner = object; runner;
+         runner = Object.getPrototypeOf(runner)) {
+      if (runner === Object.prototype)
+        break;
+      var current = /** @type{!Object} */(runner);
+      props = props.concat(
+          Object.getOwnPropertyNames(current).map(function(name) {
+            var desc = Object.getOwnPropertyDescriptor(current, name);
+            desc['name'] = name;
+            return desc;
+          }).filter(function(desc) {
+            var value = desc['value'];
+            if (remove_function && typeof(value) == 'function')
+              return false;
+            return value !== undefined;
+          }))
+    }
+    return props.sort(function(a, b) {
+      return a.name.localeCompare(b.name);
+    });
+  }
+
   /** @param {!Object} object @return {string|undefined} */
   function getObjectIdLikeThing(object) {
     var key = ['id', 'name'].find(function(key) {
       return object[key] !== undefined;
     });
     return key ? object[key] : undefined;
-  }
-
-  // Note: I'm not sure why |Array| objects created by C++ has a different
-  // |Array| construct from |Array| objects created in JavaScript. It seems
-  // global objects are different in C++ and JavaScript.
-  // Note: For |Arary|, we use |Array.isArray()|.
-  // See http://web.mit.edu/jwalden/www/isArray.html, this problem can happen
-  // in web browser, e.g. |window| in main resouce and |window| in IFRAME are
-  // different.
-  function isInstanceOf(value, klass) {
-    if (typeof(value) != 'object')
-      return false;
-    if (value instanceof klass)
-      return true;
-    var ctor = value.constructor;
-    return ctor && ctor.name == klass.name;
   }
 
   /**
@@ -190,7 +209,7 @@ JsConsole.stringify = function(value, MAX_LEVEL, MAX_LENGTH) {
       case 'boolean':
         return visitor.visitAtom(value.toString());
       case 'function':
-        return visitor.visitFunction(value);
+        return visitor.visitFunction(value, level);
       case 'number':
         return visitor.visitAtom(value.toString());
       case 'string':
@@ -221,26 +240,27 @@ JsConsole.stringify = function(value, MAX_LEVEL, MAX_LENGTH) {
       return visitor.endArray(array, array.length >= MAX_LENGTH);
     }
 
-    if (isInstanceOf(object, Date))
+    if (object instanceof Date)
       return visitor.visitDate(/** @type{!Date} */(object));
 
-    if (object.constructor.name != 'Object')
-      return visitor.visitConstructed(object);
-
-    var keys = Object.keys(object).sort(function(a, b) {
-      return a.localeCompare(b);
-    });
-
-    visitor.startObject(object);
+    var real_ctor_name = object.constructor.name;
+    var ctor_name = real_ctor_name == 'Object' ? '' : real_ctor_name;
+    if (ctor_name) {
+      var id = getObjectIdLikeThing(object);
+      if (id !== undefined)
+        return visitor.visitConstructed(object, id);
+    }
+    var props = collectProperties(object);
+    visitor.startObject(ctor_name, props);
     var count = 0;
-    keys.forEach(function(key) {
+    props.forEach(function(prop) {
       if (count > MAX_LENGTH)
         return;
-      visitor.visitKey(key, count);
-      visit(object[key], level, visitor);
+      visitor.visitKey(prop.name, count);
+      visit(prop.value, level, visitor);
       ++count;
     });
-    visitor.endObject(count > keys.length);
+    visitor.endObject(count > props.length);
   }
 
   /** @const @type{{9: string, 10: string, 13:string}} */
@@ -264,13 +284,10 @@ JsConsole.stringify = function(value, MAX_LEVEL, MAX_LENGTH) {
     this.visitAtom = function(x) {
       this.emit(x);
     };
-    this.visitConstructed = function(object) {
+    this.visitConstructed = function(object, id) {
       var ctor = object.constructor;
-      var id = getObjectIdLikeThing(object);
-      if (id == undefined)
-        this.emit('#{', ctor ? ctor.name : 'Object', '}');
-      else
-        this.emit('#{', ctor ? ctor.name : 'Object', ' ' , id, '}');
+      var ctor_name = ctor && ctor.name != '' ? ctor.name : '(anonymous)';
+      this.emit('#{', ctor_name, ' ' , id, '}');
     };
     this.visitDate = function(date) {
       this.emit('#{Date ', date.toString(), '}');
@@ -280,8 +297,15 @@ JsConsole.stringify = function(value, MAX_LEVEL, MAX_LENGTH) {
       if (label)
         this.emit('#', label, '=');
     };
-    this.visitFunction = function(fun) {
-      this.emit('(', fun.toString(), ')');
+    this.visitFunction = function(fun, level) {
+      if (!level) {
+        this.emit('(', fun.toString(), ')');
+        return;
+      }
+      if (fun.name)
+        this.emit('#{Function ' + fun.name + '}');
+      else
+        this.emit('#{Function}');
     };
     this.visitKey = function(key, index) {
       if (index)
@@ -324,8 +348,11 @@ JsConsole.stringify = function(value, MAX_LEVEL, MAX_LENGTH) {
       if (index)
         this.emit(', ');
     };
-    this.startObject = function() {
-      this.emit('{');
+    this.startObject = function(ctor_name, props) {
+      if (ctor_name)
+        this.emit('#{', ctor_name, props.length ? ' ' : '');
+      else
+        this.emit('{');
     };
     this.endObject = function(limited) {
       this.emit(limited ? ', ...}' : '}');
@@ -468,4 +495,25 @@ JsConsole.prototype.useHistory = function() {
 
   Editor.bindKey(Window, 'Ctrl+Shift+I', switchToJsConsoleCommand);
   Editor.bindKey(Window, 'Ctrl+Shift+J', switchToJsConsoleCommand);
+
+  // Install printers.
+  Point.prototype.stringifyProperties = function() {
+    return [ {name: 'x', value: this.x},
+             {name: 'y', value: this.y}
+           ];
+  };
+
+  Range.prototype.stringifyProperties = function() {
+    return [ {name: 'document', value: this.document},
+             {name: 'start', value: this.start},
+             {name: 'end', value: this.end}
+           ];
+  };
+
+  TextSelection.prototype.stringifyProperties = function() {
+    return [ {name: 'document', value: this.document},
+             {name: 'start', value: this.range.start},
+             {name: 'end', value: this.range.end}
+           ];
+  };
 })();

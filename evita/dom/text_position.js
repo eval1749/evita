@@ -216,12 +216,15 @@ Bracket.Detail = function(type, pair) {
    * @param {!Document} document
    * @param {!number} offset
    */
-  global.TextPosition = function(document, offset) {
-    if (offset < 0 || offset > document.length)
-      throw new RangeError('Invalid offset ' + offset + ' for ' + document);
-    this.document = document;
-    this.offset = offset;
-  }
+  global.TextPosition = (function() {
+    function TextPosition(document, offset) {
+      if (offset < 0 || offset > document.length)
+        throw new RangeError('Invalid offset ' + offset + ' for ' + document);
+      this.document = document;
+      this.offset = offset;
+    }
+    return TextPosition;
+  })();
 
   /** * @return {number} */
   global.TextPosition.prototype.charCode = function() {

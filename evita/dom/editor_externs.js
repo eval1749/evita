@@ -98,12 +98,13 @@ Editor.messageBox_ = function(window, message, flags, title, callback) {};
 Editor.parseKeyCombination = function(spec) {};
 
 /**
- * @param {!string} script_text
+ * @param {string} script_text
+ * @param {string=} opt_file_name
  * @return {{exception: Error, value: *, stackTrace: Array,
              stackTraceString: string, lineNumber: number, start: number,
              end: number, startColumn: number, endColumn: number}}
  */
-Editor.runScript = function(script_text) {};
+Editor.runScript = function(script_text, opt_file_name) {};
 
 /**
  * @const @type{!string}

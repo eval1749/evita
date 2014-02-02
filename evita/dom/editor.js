@@ -79,7 +79,6 @@
         return Promise.cast(true);
       return Editor.messageBox(null,
         Editor.localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
-        Editor.localizeText(Strings.IDS_APP_TITLE),
         MessageBox.ICONWARNING | MessageBox.YESNOCANCEL).then(function(code) {
           switch (code) {
             case DialogItemId.CANCEL:
@@ -153,15 +152,16 @@
   /**
    * @param {?Window} window.
    * @param {string} message
-   * @param {string} title
    * @param {number} flags
-   * @return {Promise}
+   * @param {string=} opt_title
+   * @return {!Promise.<number>}
    */
-  Editor.messageBox = function(window, message, title, flags) {
+  Editor.messageBox = function (window, message, flags, opt_title) {
+    var title = arguments.length >= 4 ? /** @type{string} */(opt_title) : '';
     var deferred = Promise.defer();
-    Editor.messageBox_(window || Editor.activeWindow(), message, title, flags,
+    Editor.messageBox_(window || Editor.activeWindow(), message, flags, title,
                        deferred.resolve);
-    return deferred.promise;
+    return /** @type{!Promise.<number>} */(deferred.promise);
   };
 
   /**

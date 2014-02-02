@@ -55,7 +55,7 @@ TEST_F(EditorTest, messageBox) {
   EXPECT_SCRIPT_VALID(
       "var response_code;"
       "var window = new EditorWindow();"
-      "Editor.messageBox(window, 'message', 'title', 3)"
+      "Editor.messageBox(window, 'message', 3, 'title')"
       "    .then(function(x) {"
       "       response_code = x;"
       "    });");

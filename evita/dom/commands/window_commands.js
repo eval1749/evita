@@ -54,7 +54,6 @@
     if (!this.nextSibling && !this.previousSibling) {
       Editor.messageBox(this,
           Editor.localizeText(Strings.IDS_NO_OTHER_WINDOWS),
-          Editor.localizeText(Strings.IDS_APP_TITLE),
           MessageBox.ICONWARNING);
       return;
     }

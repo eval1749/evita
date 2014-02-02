@@ -72,7 +72,6 @@
     }
     Editor.messageBox(null,
         Editor.localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
-        Editor.localizeText(Strings.IDS_APP_TITLE),
         MessageBox.ICONWARNING | MessageBox.YESNOCANCEL)
       .then(function(response_code) {
         switch (response_code) {

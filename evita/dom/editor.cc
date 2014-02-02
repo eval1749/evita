@@ -59,8 +59,9 @@ class EditorClass : public v8_glue::WrapperInfo {
             v8::Isolate::GetCurrent(), callback));
   }
 
-  private: static void MessageBox(Window* window, const base::string16& message,
-                                 const base::string16& title, int flags,
+  private: static void MessageBox(Window* window,
+                                 const base::string16& message, int flags,
+                                 const base::string16& title,
                                  v8::Handle<v8::Function> callback) {
     ScriptController::instance()->view_delegate()->MessageBox(
         window->window_id(), message, title, flags,

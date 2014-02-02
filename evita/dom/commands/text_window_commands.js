@@ -220,7 +220,6 @@
       return;
     Editor.messageBox(this,
         Editor.localizeText(Strings.IDS_ASK_RELOAD, {name: document.name}),
-        Editor.localizeText(Strings.IDS_APP_TITLE),
         MessageBox.ICONQUESTION | MessageBox.YESNO)
     .then(function(response_code) {
       if (response_code == DialogItemId.YES)
@@ -347,7 +346,6 @@
     if (position < 0) {
       Editor.messageBox(this,
           Editor.localizeText(Strings.IDS_NO_MORE_REDO),
-          Editor.localizeText(Strings.IDS_APP_TITLE),
           MessageBox.ICONWARNING);
       return;
     }
@@ -363,7 +361,6 @@
     if (position < 0) {
       Editor.messageBox(this,
           Editor.localizeText(Strings.IDS_NO_MORE_UNDO),
-          Editor.localizeText(Strings.IDS_APP_TITLE),
           MessageBox.ICONWARNING);
       return;
     }

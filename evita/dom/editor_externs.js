@@ -74,22 +74,22 @@ Editor.key_binding_map_map_;
 Editor.localizeText = function(format_text, opt_dict) {};
 
 /**
- * @param {?Window} window.
- * @param {!string} message.
- * @param {!title} title.
- * @param {flags} flags.
- * @return {Promise.<number>}
+ * @param {?Window} window
+ * @param {string} message
+ * @param {number} flags
+ * @param {string=} opt_title
+ * @return {!Promise.<number>}
  */
-Editor.messageBox  = function(window, message, title, flags) {};
+Editor.messageBox = function(window, message, flags, opt_title) {};
 
 /**
- * @param {?Window} window.
- * @param {!string} message.
- * @param {!title} title.
- * @param {flags} flags.
- * @param {function(number)} callback
+ * @param {?Window} window
+ * @param {!string} message
+ * @param {number} flags
+ * @param {string} title
+ * @param {!function(number)} callback
  */
-Editor.messageBox_  = function(window, message, title, flags, callback) {};
+Editor.messageBox_ = function(window, message, flags, title, callback) {};
 
 /**
  * @param {string} spec

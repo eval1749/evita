@@ -8,6 +8,8 @@ set outdir=default
 
 if exist src cd src
 
+if "%cd:~-11,-4%"=="release" set mode=release
+
 for %%x in (%*) do (
   if "%%x"=="msvs" set format=%%x
   if "%%x"=="ninja" set format=%%x

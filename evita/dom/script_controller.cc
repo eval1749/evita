@@ -106,6 +106,18 @@ ScriptController::ScriptController(ViewDelegate* view_delegate)
   v8::V8::InitializeICU();
   auto const isolate = isolate_holder_.isolate();
   isolate->Enter();
+  v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
+
+  // See v8/src/flag-definitions.h
+  // Note: |EnsureV8Initialized()| in "gin/isolate_holder.cc" also sets
+  // flags.
+  auto const flags =
+      "--use_strict"
+      " --harmony"
+      " --harmony_typeof"
+      " --trace_exception";
+  v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
+
   v8::HandleScope handle_scope(isolate);
   v8Strings::Init(isolate);
   auto context = v8::Context::New(isolate, nullptr,

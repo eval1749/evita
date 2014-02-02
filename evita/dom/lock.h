@@ -40,12 +40,15 @@ class Lock : public common::Singleton<Lock> {
   };
   friend class AutoUnlock;
 
-  private: std::unique_ptr<base::Lock> lock_;
   private: Location location_;
+  private: std::unique_ptr<base::Lock> lock_;
+  private: bool locked_by_dom_;
 
   private: Lock();
   public: virtual ~Lock();
 
+  public: bool locked_by_dom() const { return locked_by_dom_; }
+  public: void set_locked_by_dom() { locked_by_dom_ = true; }
   public: const Location& location() const { return location_; }
   private: base::Lock* lock() const { return lock_.get(); }
 

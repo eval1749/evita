@@ -20,9 +20,11 @@ Lock::AutoLock::AutoLock(const Location& location)
     : base::AutoLock(*Lock::instance()->lock()) {
   DVLOG(1) << "Lock dom at " << location;
   Lock::instance()->location_ = location;
+  Lock::instance()->locked_by_dom_ = true;;
 }
 
 Lock::AutoLock::~AutoLock() {
+  Lock::instance()->locked_by_dom_ = false;
   DVLOG(1) << "Unlock dom at " << Lock::instance()->location_ ;
 }
 
@@ -34,11 +36,15 @@ Lock::AutoTryLock::AutoTryLock(const Location& location)
     : locked_(Lock::instance()->lock()->Try()) {
   DVLOG(1) << "TryLock dom at " << location;
   Lock::instance()->location_ = location;
+  if (locked_)
+    Lock::instance()->locked_by_dom_ = true;
 }
 
 Lock::AutoTryLock::~AutoTryLock() {
-  if (locked_)
+  if (locked_) {
+    Lock::instance()->locked_by_dom_ = false;
     Lock::instance()->lock()->Release();
+  }
   DVLOG(1) << "Unlock dom at " << Lock::instance()->location_ ;
 }
 
@@ -50,16 +56,19 @@ Lock::AutoUnlock::AutoUnlock(const Location& location)
     : base::AutoUnlock(*Lock::instance()->lock()) {
   DVLOG(1) << "Unlock dom at " << location;
   Lock::instance()->location_ = location;
+  Lock::instance()->locked_by_dom_ = false;
 }
 
 Lock::AutoUnlock::~AutoUnlock() {
-DVLOG(1) << "Lock dom at " << Lock::instance()->location_ ;}
+  DVLOG(1) << "Lock dom at " << Lock::instance()->location_ ;
+  Lock::instance()->locked_by_dom_ = true;
+}
 
 //////////////////////////////////////////////////////////////////////
 //
 // Lock
 //
-Lock::Lock() : lock_(new base::Lock()) {
+Lock::Lock() : lock_(new base::Lock()), locked_by_dom_(false) {
 }
 
 Lock::~Lock() {

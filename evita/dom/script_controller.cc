@@ -85,6 +85,7 @@ EvaluateResult ReportException(const v8::TryCatch& try_catch) {
 void MessageBoxCallback(int) {
 }
 
+bool need_unlock_after_gc;
 bool suppress_message_box;
 
 void MessageBox(const base::string16& message, int flags) {
@@ -99,14 +100,17 @@ void GcEpilogueCallback(v8::GCType type, v8::GCCallbackFlags flags) {
   auto text = base::StringPrintf(L"GC finished type=%d flags=0x%X",
                                  type, flags);
   MessageBox(text, MB_ICONINFORMATION);
-  dom::Lock::instance()->Release(FROM_HERE);
+  if (need_unlock_after_gc)
+    dom::Lock::instance()->Release(FROM_HERE);
 }
 
 void GcPrologueCallback(v8::GCType type, v8::GCCallbackFlags flags) {
   auto text = base::StringPrintf(L"GC Started type=%d flags=%X",
                                  type, flags);
   MessageBox(text, MB_ICONINFORMATION);
-  dom::Lock::instance()->Acquire(FROM_HERE);
+  need_unlock_after_gc = !dom::Lock::instance()->locked_by_dom();
+  if (need_unlock_after_gc)
+    dom::Lock::instance()->Acquire(FROM_HERE);
 }
 
 void MessageCallback(v8::Handle<v8::Message> message,

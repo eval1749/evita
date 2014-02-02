@@ -5,11 +5,13 @@
 /**
  * @constructor
  */
-global.Style = function () {
-};
+global.Style = (function () {
+  return function Style() {
+  };
+})();
 
 global.Style.prototype = Object.create(
-    /** @type {Object} */(Object.prototype), {
+    /** @type {Object} */(Style.prototype), {
   backgroundColor: {
     enumerable: true,
     writable: true

@@ -47,16 +47,9 @@ Window* FromWindowId(const char* name, dom::WindowId window_id) {
   return window;
 }
 
-Frame* GetFrameWindowFor(Window* window) {
-  auto hwnd = window->AssociatedHwnd();
-  while (hwnd) {
-    auto const hwnd_parent = ::GetParent(hwnd);
-    if (!hwnd_parent) {
-      if (auto const frame = Application::instance()->FindFrame(hwnd))
-        return frame;
-      break;
-    }
-  }
+Frame* FindFrame(Window* window) {
+  if (auto const frame = Frame::FindFrame(*window))
+    return frame;
   return Application::instance()->GetActiveFrame();
 }
 
@@ -280,7 +273,7 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
       MessageBoxCallback callback) {
   auto const widget = window_id == dom::kInvalidWindowId ? nullptr :
       FromWindowId("MessageBoxCallback", window_id);
-  auto const response_code = GetFrameWindowFor(widget)->
+  auto const response_code = FindFrame(widget)->
       MessageBox(widget, message, title, flags);
   event_handler_->RunCallback(base::Bind(callback, response_code));
 }

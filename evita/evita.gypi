@@ -64,6 +64,7 @@
 
         'dom/console.js',
         'dom/commands/document_list.js',
+        'dom/commands/dynamic_abbrev.js',
         'dom/commands/js_console.js',
         'dom/commands/find_and_replace_commands.js',
         'dom/commands/text_window_commands.js',

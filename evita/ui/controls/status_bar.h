@@ -1,15 +1,7 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - edit buffer
-// listener/winapp/ed_buffer.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
+// Copyright (C) 1996-2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/ctrl_StatusBar.h#1 $
-//
-#if !defined(INCLUDE_visual_statusBar_h)
-#define INCLUDE_visual_statusBar_h
+#if !defined(INCLUDE_evita_ui_controls_status_bar_h)
+#define INCLUDE_evita_ui_controls_status_bar_h
 
 #include <vector>
 
@@ -48,4 +40,4 @@ class StatusBar {
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_visual_statusBar_h)
+#endif //!defined(INCLUDE_evita_ui_controls_status_bar_h)

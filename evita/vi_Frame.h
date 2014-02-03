@@ -13,10 +13,10 @@
 
 #include <vector>
 
-#include "evita/ctrl_StatusBar.h"
 #include "evita/ctrl_TabBand.h"
 #include "evita/ctrl_TitleBar.h"
 #include "evita/li_util.h"
+#include "evita/ui/controls/status_bar.h"
 #include "evita/views/window.h"
 
 namespace gfx {

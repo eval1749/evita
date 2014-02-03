@@ -349,7 +349,6 @@
 
         'cm_CmdProc.cpp',
         'cm_commands.cpp',
-        'ctrl_StatusBar.cpp',
         'ctrl_TabBand.cpp',
         'ctrl_TitleBar.cpp',
         'editor/application.cc',
@@ -390,6 +389,7 @@
         'ui/events/event.cc',
         'ui/events/event_ostream.cc',
 
+        'ui/controls/status_bar.cc',
         'ui/controls/table_control.cc',
         'ui/controls/table_control_observer.cc',
 

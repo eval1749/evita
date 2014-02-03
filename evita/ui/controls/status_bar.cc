@@ -1,17 +1,8 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - Status Bar
-// listener/winapp/vi_statusBar.cpp
-//
-// Copyright (C) 1996-2007 by Project Vogue.
+// Copyright (C) 1996-2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/ctrl_StatusBar.cpp#1 $
-//
-#define DEBUG_STATUSBAR 0
-#include "evita/ctrl_StatusBar.h"
+#include "evita/ui/controls/status_bar.h"
 
+#include <commctrl.h>
 #include <algorithm>
 
 #include "base/logging.h"

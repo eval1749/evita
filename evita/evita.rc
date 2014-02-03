@@ -125,9 +125,9 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ASK_REFRESH         "%s\nThis file has been modified outside of the editor.\nDo you want to reload it?"
-    IDS_ASK_RELOAD          "Do you really want to discard the changes you made to and revert to saved %s?"
-    IDS_ASK_SAVE            "Do you want to save the changes to %s?"
+    IDS_ASK_REFRESH         "%ls\nThis file has been modified outside of the editor.\nDo you want to reload it?"
+    IDS_ASK_RELOAD          "Do you really want to discard the changes you made to and revert to saved %ls?"
+    IDS_ASK_SAVE            "Do you want to save the changes to %ls?"
 END
 
 STRINGTABLE 
@@ -143,15 +143,15 @@ END
 STRINGTABLE 
 BEGIN
     IDS_DA_CONTINUE         "Passed the start of the document"
-    IDS_DA_NOT_FOUND        "No word starts with '%s'"
-    IDS_DA_NO_MORE          "No more abbreviation starts with '%s'"
+    IDS_DA_NOT_FOUND        "No word starts with '%ls'"
+    IDS_DA_NO_MORE          "No more abbreviation starts with '%ls'"
     IDS_DA_TOO_LONG         "Too long abbreviation"
     IDS_DA_TOO_SHORT        "Too short abbreviation"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_NOT_COMMAND         "%s is not a command"
+    IDS_NOT_COMMAND         "%ls is not a command"
     IDS_NOT_FOUND           "Not found"
     IDS_NO_MATCHING_PAREN   "No matching parenthesis."
     IDS_NO_MORE_REDO        "No more redo"

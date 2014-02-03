@@ -298,7 +298,7 @@
    * Evaluate script in selection selection
    * @this {!TextWindow}
    */
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+E', function() {
+  function evalSelectionCommand() {
     var selection = this.selection;
     var is_whole = selection.range.start == selection.range.end;
     var script_text = is_whole ?
@@ -314,10 +314,14 @@
                       'Evaluate Selection Command')
       .then(function(x) {
         var offset = is_whole ? 0 : this.selection.range.start;
-        selection.collapseTo(offset + result.start)
+        selection.range.collapseTo(offset + result.start)
           .moveEnd(Unit.CHARACTER, result.end - result.start);
-    });
-  }, 'Evaluate script in selection');
+      });
+  }
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+E', evalSelectionCommand,
+    'Evaluate script in selection');
+  Editor.bindKey(TextWindow, 'F5', evalSelectionCommand,
+    'Evaluate script in selection');
 
   Editor.bindKey(TextWindow, 'Ctrl+Shift+Delete', copyToClipboardCommand);
 

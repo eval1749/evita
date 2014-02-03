@@ -386,12 +386,15 @@ global.JsConsole.prototype.activate = function(active_window) {
       present = window;
   });
 
-  if (!present) {
-    present = new TextWindow(new Range(document));
-    active_editor_window.appendChild(/** @type{!Window} */(present));
+  if (present) {
+    present.selection.range.collapseTo(document.length);
+    present.focus();
+    return;
   }
-  present.selection.range.collapseTo(document.length);
-  present.focus();
+
+  var new_window = new TextWindow(new Range(document));
+  active_editor_window.appendChild(new_window);
+  new_window.selection.range.collapseTo(document.length);
 };
 
 /**

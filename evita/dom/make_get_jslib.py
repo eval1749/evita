@@ -3,8 +3,7 @@
 import os, re, sys
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
-evita_src = os.path.abspath(os.path.join(os.path.join(script_dir, os.pardir),
-                            os.pardir))
+evita_src = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 
 sys.path.insert(0, os.path.join(evita_src, 'v8', 'tools'))
 import jsmin
@@ -18,19 +17,32 @@ SOURCE = """\
 // Specify /EHsc
 #pragma warning(disable: 4127 4350 4365 4530)
 #include "base/basictypes.h"
-#include "base/strings/string16.h"
 #include "base/strings/utf_string_conversions.h"
+#include "evita/dom/script_controller.h"
 
 namespace dom {
 namespace internal {
 
-static const char ascii_script_source[] =
-%(script_source)s;
+namespace {
+struct ScriptSouce {
+  const char* file_name;
+  const char* script_text;
+};
+const ScriptSouce entries[] = {
+%(entries)s
+};
+}  // namespace
 
-const base::string16& GetJsLibSource() {
-  CR_DEFINE_STATIC_LOCAL(base::string16, jslib_source,
-                         (base::ASCIIToUTF16(ascii_script_source)));
-  return jslib_source;
+EvaluateResult GetJsLibFiles(ScriptController* controller) {
+  for (auto index = 0u; index < arraysize(entries); ++index) {
+    auto entry = &entries[index];
+    auto result = controller->Evaluate(
+        base::ASCIIToUTF16(entry->script_text),
+        base::ASCIIToUTF16(entry->file_name));
+    if (!result.exception.empty())
+      return result;
+  }
+  return EvaluateResult();
 }
 
 }  // namespace internal
@@ -64,18 +76,22 @@ def main():
   output_file = sys.argv[1]
   minifier = jsmin.JavaScriptMinifier()
 
-  script_source = 'var global = this;\n'
-  for input_file in sys.argv[2:]:
-    lines = '\n'.join(open(input_file, 'rt').readlines())
-    script_source += lines
+  entries = []
 
-  script_source = RemoveCommentsAndTrailingWhitespace(script_source)
-  script_source = minifier.JSMinify(script_source);
-  if script_source[len(script_source) - 1] == '\n':
-    script_source = script_source[0 : len(script_source) - 2]
+  entries.append('{"(global)", "var global = this;"},');
+
+  for input_file in sys.argv[2:]:
+    script_text = '\n'.join(open(input_file, 'rt').readlines())
+    script_text = RemoveCommentsAndTrailingWhitespace(script_text)
+    script_text = minifier.JSMinify(script_text);
+    entries.append('{"%(file_name)s", %(script_text)s},' % {
+      'file_name': input_file,
+      'script_text': ToCString(script_text)
+    })
+
   output = open(output_file, 'w');
   output.write(SOURCE % {
-    'script_source': ToCString(script_source)
+    'entries': '\n'.join(entries)
   })
   output.close()
 

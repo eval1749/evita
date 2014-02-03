@@ -70,6 +70,8 @@ class ScriptController {
   public: ViewDelegate* view_delegate() const;
 
   public: void DidStartHost();
+  public: EvaluateResult Evaluate(const base::string16& script_text,
+                                  const base::string16& file_name);
   public: EvaluateResult Evaluate(const base::string16& script_text);
   public: void LoadJsLibrary();
   public: void LogException(const v8::TryCatch& try_catch);

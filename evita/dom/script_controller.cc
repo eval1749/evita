@@ -23,7 +23,7 @@
 namespace dom {
 
 namespace internal {
-const base::string16& GetJsLibSource();
+EvaluateResult GetJsLibFiles(ScriptController* controller);
 }  // namespace internal
 
 namespace v8Strings {
@@ -225,13 +225,14 @@ void ScriptController::DidStartHost() {
       "line: " << result.line_number;
 }
 
-EvaluateResult ScriptController::Evaluate(const base::string16& script_text) {
+EvaluateResult ScriptController::Evaluate(const base::string16& script_text,
+                                          const base::string16& file_name) {
   auto const isolate = isolate_holder_.isolate();
   v8::HandleScope handle_scope(isolate);
   v8::TryCatch try_catch;
   v8::Handle<v8::Script> script = v8::Script::New(
       gin::StringToV8(isolate, script_text)->ToString(),
-      gin::StringToV8(isolate, "__eval__")->ToString());
+      gin::StringToV8(isolate, file_name)->ToString());
   if (script.IsEmpty()) {
     return ReportException(try_catch);
   }
@@ -244,9 +245,13 @@ EvaluateResult ScriptController::Evaluate(const base::string16& script_text) {
   return EvaluateResult(V8ToString(result->ToString()));
 }
 
+EvaluateResult ScriptController::Evaluate(const base::string16& script_text) {
+  return Evaluate(script_text, L"__eval__");
+}
+
 void ScriptController::LoadJsLibrary() {
   ASSERT_DOM_LOCKED();
-  auto result = Evaluate(internal::GetJsLibSource());
+  auto result = internal::GetJsLibFiles(this);
   if (result.exception.empty())
     return;
 

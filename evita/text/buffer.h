@@ -89,29 +89,6 @@ class FileFeatures {
 /// Represents text buffer.
 /// </summary>
 class Buffer : public BufferCore, public FileFeatures {
-  public: class Property : public DoubleLinkedNode_<Property> {
-    private: const char* const m_pszName;
-
-    public: Property(const char* const pszName) : m_pszName(pszName) {
-    }
-
-    private: Property& operator=(Property&) = delete;
-    private: void operator delete(void*) = delete;
-
-    public: void* operator new(size_t cb, HANDLE h) {
-      return ::HeapAlloc(h, 0, cb);
-    }
-
-    public: const char* GetName() const { return m_pszName; }
-
-    public: template<class T> T* StaticCast() {
-      // warning C4946: reinterpret_cast used between related classes: 
-      // 'class1' and 'class2'
-      #pragma warning(suppress: 4946)
-      return reinterpret_cast<T*>(this);
-    }
-  };
-
   protected: typedef DoubleLinkedList_<Interval> Intervals;
   protected: typedef BinaryTree<Interval> IntervalTree;
 
@@ -134,8 +111,6 @@ class Buffer : public BufferCore, public FileFeatures {
   // Interval
   private: Intervals m_oIntervals;
   private: IntervalTree m_oIntervalTree;
-
-  private: DoubleLinkedList_<Property> m_oProperties;
 
   // Asynchronous Operation Support
   public: enum State {
@@ -190,18 +165,6 @@ class Buffer : public BufferCore, public FileFeatures {
   }
   public: void EndUndoGroup(const base::string16& name);
 
-  // [F]
-  // <summary>
-  // Find property.
-  // </summary>
-  public: template<class T> T* FindProperty(const char* const pszName) const {
-    foreach (DoubleLinkedList_<Property>::Enum, oEnum, &m_oProperties) {
-      if (oEnum.Get()->GetName() == pszName)
-        return oEnum.Get()->StaticCast<T>();
-    }
-    return nullptr;
-  }
-
   // [G]
   public: const StyleValues* GetDefaultStyle() const;
   public: HANDLE GetHeap() const { return m_hObjHeap; }
@@ -239,9 +202,6 @@ class Buffer : public BufferCore, public FileFeatures {
   }
 
   private: Interval* newInterval(Posn, Posn);
-
-  // [P]
-  public: void PutProperty(Property*);
 
   // [R]
   public: Posn Redo(Posn, Count = 1);

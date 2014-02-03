@@ -679,14 +679,6 @@ void Buffer::onChange()
 } // Buffer::onChange
 
 /// <summary>
-///   Put proeprty.
-/// </summary>
-void Buffer::PutProperty(Buffer::Property* pProp)
-{
-    m_oProperties.Append(pProp);
-} // Buffer::PutProperty
-
-/// <summary>
 ///   Redo at specified position.
 /// </summary>
 /// <param name="p">A position doing redo.</param>

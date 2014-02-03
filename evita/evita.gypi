@@ -12,6 +12,7 @@
       ],
       'js_externs_files': [
         'dom/types_externs.js',
+        'dom/bracket_externs.js',
         'dom/console_externs.js',
         'dom/document_externs.js',
         'dom/document_window_externs.js',
@@ -48,6 +49,7 @@
         'dom/polyfill.js',
         'dom/key_names.js',
 
+        'dom/bracket.js',
         'dom/document.js',
         'dom/editor.js',
         'dom/editor_window.js',

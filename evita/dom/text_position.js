@@ -2,49 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Note: When I put |Bracket| into IIFE. Closure compiler can't find
-// |Bracket.Type| and  |Bracket.Data|.
-var Bracket = {};
-
-/** @enum {number} */
-Bracket.Type = {
-  NONE: 0,
-  ESCAPE: 2,
-  LEFT: -1,
-  RIGHT: 1,
-};
-
-/**
- * @constructor
- * @struct
- * @param {!Bracket.Type} type
- * @param {number} pair
- */
-Bracket.Detail = function(type, pair) {
-  this.type = type;
-  this.pair = pair;
-}
-/** @type{number} */ Bracket.Detail.prototype.pair;
-/** @type{!Bracket.Type} */ Bracket.Detail.prototype.type;
-
 (function() {
-  /** @const @type {Object.<number, !Bracket.Detail>} */
-  var BRACKET_DATA_OF = {};
-  BRACKET_DATA_OF[Unicode.LEFT_PARENTHESIS] = new Bracket.Detail(
-      Bracket.Type.LEFT, Unicode.RIGHT_PARENTHESIS);
-  BRACKET_DATA_OF[Unicode.RIGHT_PARENTHESIS] = new Bracket.Detail(
-      Bracket.Type.RIGHT, Unicode.LEFT_PARENTHESIS);
-  BRACKET_DATA_OF[Unicode.LEFT_SQUARE_BRACKET] = new Bracket.Detail(
-      Bracket.Type.LEFT, Unicode.RIGHT_SQUARE_BRACKET);
-  BRACKET_DATA_OF[Unicode.RIGHT_SQUARE_BRACKET] = new Bracket.Detail(
-      Bracket.Type.RIGHT, Unicode.LEFT_SQUARE_BRACKET);
-  BRACKET_DATA_OF[Unicode.LEFT_CURLY_BRACKET] = new Bracket.Detail(
-      Bracket.Type.LEFT, Unicode.RIGHT_CURLY_BRACKET);
-  BRACKET_DATA_OF[Unicode.RIGHT_CURLY_BRACKET] = new Bracket.Detail(
-      Bracket.Type.RIGHT, Unicode.LEFT_CURLY_BRACKET);
-  BRACKET_DATA_OF[Unicode.REVERSE_SOLIDUS] = new Bracket.Detail(
-      Bracket.Type.ESCAPE, 0x00);
-
   /** @const @type {!Bracket.Detail} */
   var NOT_BRACKET = new Bracket.Detail(Bracket.Type.NONE, 0);
 
@@ -71,7 +29,7 @@ Bracket.Detail = function(type, pair) {
   function bracketDataOf(position) {
     var char_code = position.charCode();
     // TODO(yosi) We should get character syntax from mime type information.
-    return BRACKET_DATA_OF[char_code] || NOT_BRACKET;
+    return Bracket.DATA[char_code] || NOT_BRACKET;
   }
 
   /**
@@ -137,6 +95,7 @@ Bracket.Detail = function(type, pair) {
         position.offset = next_offset;
       }
     }
+    position.offset = start_offset;
   }
 
   /**
@@ -209,6 +168,8 @@ Bracket.Detail = function(type, pair) {
     }
     if (bracket_stack.length)
       position.offset = bracket_stack.pop().offset;
+    else
+      position.offset = start_offset;
   }
 
   /**

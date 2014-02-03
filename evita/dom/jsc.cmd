@@ -12,6 +12,7 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\strings_en_US.js ^
   %externs_dir%\unicode_enums.js ^
   %externs_dir%\types_externs.js ^
+  %externs_dir%\bracket_externs.js ^
   %externs_dir%\console_externs.js ^
   %externs_dir%\document_externs.js ^
   %externs_dir%\document_window_externs.js ^

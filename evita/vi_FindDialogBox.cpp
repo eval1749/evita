@@ -87,7 +87,8 @@ FindDialogBox::~FindDialogBox() {
 }
 
 void FindDialogBox::ClearMessage() {
-  Application::instance()->GetActiveFrame()->ShowMessage(MessageLevel_Warning);
+  Application::instance()->GetActiveFrame()->ShowMessage(
+    MessageLevel_Information, base::string16());
 }
 
 void FindDialogBox::DoFind(text::Direction eDirection) {
@@ -254,7 +255,8 @@ bool FindDialogBox::FindFirst(RegexMatcher* pMatcher) {
     return true;
 
   if (pMatcher->WrapMatch()) {
-    Application::instance()->ShowMessage(MessageLevel_Warning, IDS_PASSED_END);
+    Application::instance()->ShowMessage(MessageLevel_Information,
+                                         IDS_PASSED_END);
     return true;
   }
 
@@ -443,8 +445,7 @@ Selection* FindDialogBox::PrepareFind(SearchParameters* search) {
 
 void FindDialogBox::ReportNotFound() {
   Application::instance()->GetActiveFrame()->ShowMessage(
-      MessageLevel_Warning,
-      IDS_NOT_FOUND);
+      MessageLevel_Information, IDS_NOT_FOUND);
 }
 
 /// <summary>Updates find dialog box controls.</summary>

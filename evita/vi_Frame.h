@@ -16,7 +16,6 @@
 #include "evita/ctrl_TabBand.h"
 #include "evita/ctrl_TitleBar.h"
 #include "evita/li_util.h"
-#include "evita/ui/controls/status_bar.h"
 #include "evita/views/window.h"
 
 namespace gfx {
@@ -27,23 +26,18 @@ using common::win::Rect;
 /// <summary>
 ///   Sevirity of message.
 /// </summary>
-enum MessageLevel
-{
-    MessageLevel_Min,
-
-    MessageLevel_Idle = MessageLevel_Min,
-    MessageLevel_Information,
-    MessageLevel_Warning,
-    MessageLevel_Error,
-
-    MessageLevel_Limit,
-}; // MessageLevel
+enum MessageLevel {
+  MessageLevel_Information,
+  MessageLevel_Warning,
+  MessageLevel_Error,
+};
 
 class Pane;
 class TextEditWindow;
 
 namespace views {
 class ContentWindow;
+class MessageView;
 }
 
 namespace dom {
@@ -72,10 +66,9 @@ class Frame final : public views::Window,
   private: int m_cyTabBand;
   private: HWND m_hwndTabBand;
   private: Panes m_oPanes;
-  private: ui::StatusBar m_oStatusBar;
+  private: std::unique_ptr<views::MessageView> message_view_;
   private: TitleBar m_oTitleBar;
   private: Pane* m_pActivePane;
-  private: char16* m_rgpwszMessage[MessageLevel_Limit];
   private: mutable char16 m_wszToolTip[1024];
 
   public: explicit Frame(views::WindowId window_id);
@@ -155,9 +148,9 @@ class Frame final : public views::Window,
   public: void ResetMessages();
 
   // [S]
-  public: void SetStatusBar(int part, const base::string16& text);
   public: void SetStatusBar(std::vector<base::string16> texts);
-  public: void ShowMessage(MessageLevel, uint = 0, ...);
+  public: void ShowMessage(MessageLevel, const base::string16& text) const;
+  public: void ShowMessage(MessageLevel, uint32_t string_id, ...) const;
 
   // [U]
   private: void updateTitleBar();

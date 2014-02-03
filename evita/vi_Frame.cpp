@@ -37,6 +37,7 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/view_event_handler.h"
+#include "evita/views/message_view.h"
 #include "evita/views/window_set.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Pane.h"
@@ -123,9 +124,9 @@ extern uint g_TabBand__TabDragMsg;
 Frame::Frame(views::WindowId window_id)
     : views::Window(ui::NativeWindow::Create(*this), window_id),
       gfx_(new gfx::Graphics()),
+      message_view_(new views::MessageView()),
       m_hwndTabBand(nullptr),
       m_pActivePane(nullptr) {
-  ::ZeroMemory(m_rgpwszMessage, sizeof(m_rgpwszMessage));
 }
 
 Frame::Frame()
@@ -133,9 +134,6 @@ Frame::Frame()
 }
 
 Frame::~Frame() {
-  for (auto i = 0; i < MessageLevel_Limit; i++) {
-    delete[] m_rgpwszMessage[i];
-  }
 }
 
 Frame::operator HWND() const {
@@ -311,7 +309,7 @@ void Frame::DidCreateNativeWindow() {
     m_cyTabBand = rc.bottom - rc.top;
   }
 
-  m_oStatusBar.Realize(*native_window());
+  message_view_->Realize(*native_window());
   m_oTitleBar.Realize(*native_window());
 
   CompositionState::Update(*native_window());
@@ -351,14 +349,14 @@ void Frame::DidResize() {
 
   // Status Bar
   //  message, code page, newline, line num, column, char, ins/ovr
-  if (m_oStatusBar) {
+  {
     auto status_bar_rect = rect();
-    status_bar_rect.top = rect().bottom - m_oStatusBar.height();
-    m_oStatusBar.ResizeTo(status_bar_rect);
+    status_bar_rect.top = rect().bottom - message_view_->height();
+    message_view_->ResizeTo(status_bar_rect);
     auto const text = base::StringPrintf(L"Resizing... %dx%d",
         rect().right - rect().left,
         rect().bottom - rect().top);
-    m_oStatusBar.Set(text);
+    message_view_->SetMessage(text);
   }
 
   gfx_->Resize(rect());
@@ -479,7 +477,7 @@ Rect Frame::GetPaneRect() const {
   return Rect(rect().left + k_edge_size + kPaddingLeft,
               rect().top + m_cyTabBand + k_edge_size * 2 + kPaddingLeft,
               rect().right - k_edge_size + kPaddingRight,
-              rect().bottom - m_oStatusBar.height() + k_edge_size +
+              rect().bottom - message_view_->height() + k_edge_size +
                   kPaddingBottom);
 }
 
@@ -540,6 +538,20 @@ const char16* Frame::getToolTip(NMTTDISPINFO* const pDisp) const {
 
 int Frame::MessageBox(Window*, const base::string16& message,
                       const base::string16& title, int flags) {
+  // If message box has only OK button and
+  auto const kButtonMask = 7;
+  auto const kIconMask = 0x70;
+  auto level = MessageLevel_Information;
+  if ((flags & kIconMask) == MB_ICONERROR)
+    level = MessageLevel_Error;
+  else if ((flags & kIconMask) == MB_ICONWARNING)
+    level = MessageLevel_Warning;
+
+  if (!(flags & kButtonMask) && level != MessageLevel_Error) {
+    ShowMessage(level, message);
+    return IDOK;
+  }
+
   auto safe_title = title;
   if (!safe_title.empty())
     safe_title += L" - ";
@@ -887,8 +899,6 @@ void Frame::CreateNativeWindow() const {
       dwExStyle, dwStyle, L"", nullptr,
       gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
       gfx::Size(rc.width(), rcWork.height() * 4 / 5));
-
-  const_cast<Frame*>(this)->SetStatusBar(0, L"Ready");
 }
 
 void Frame::Realize() {
@@ -903,56 +913,36 @@ void Frame::RealizeWidget() {
 ///   Remove all messages in status bar.
 /// </summary>
 void Frame::ResetMessages() {
-  ::ZeroMemory(m_rgpwszMessage, sizeof(m_rgpwszMessage));
-}
-
-/// <summary>
-///   Set status bar message on specified part.
-/// </summary>
-void Frame::SetStatusBar(int part, const base::string16& text) {
-  m_oStatusBar.SetPart(static_cast<size_t>(part), text);
+  message_view_->SetMessage(base::string16());
 }
 
 /// <summary>
 ///   Set status bar formatted message on specified part.
 /// </summary>
 void Frame::SetStatusBar(const std::vector<base::string16> texts) {
-  m_oStatusBar.Set(texts);
+  message_view_->SetStatus(texts);
+}
+
+void Frame::ShowMessage(MessageLevel, const base::string16& text) const {
+  message_view_->SetMessage(text);
 }
 
 /// <summary>
 ///   Display specified message on status bar.
 /// </summary>
-void Frame::ShowMessage(
-    MessageLevel const iLevel,
-    uint const nFormatId, ...) {
-  delete[] m_rgpwszMessage[iLevel];
-  m_rgpwszMessage[iLevel] = nullptr;
-  if (nFormatId) {
-    char16 wszFormat[1024];
-    ::LoadString(g_hResource, nFormatId, wszFormat, lengthof(wszFormat));
+void Frame::ShowMessage(MessageLevel level,
+                        uint32_t const format_id, ...) const {
+  DCHECK(format_id);
+  base::char16 format[1024];
+  ::LoadString(g_hResource, format_id, format, arraysize(format));
 
-    char16 wsz[1024];
+  base::string16 text;
+  va_list args;
+  va_start(args, format_id);
+  base::StringAppendV(&text, format, args);
+  va_end(args);
 
-    va_list args;
-    va_start(args, nFormatId);
-    ::wvsprintf(wsz, wszFormat, args);
-    va_end(args);
-
-    auto const cwch = static_cast<size_t>(::lstrlenW(wsz));
-    auto const pwsz = new char16[cwch + 1];
-    myCopyMemory(pwsz, wsz, sizeof(char16) * (cwch + 1));
-    m_rgpwszMessage[iLevel] = pwsz;
-  }
-
-  int i = MessageLevel_Limit;
-  do {
-    i -= 1;
-    if (char16* pwsz = m_rgpwszMessage[i]) {
-      SetStatusBar(0, pwsz);
-      return;
-    }
-  } while (i > 0);
+  ShowMessage(level, text);
 }
 
 // [U]

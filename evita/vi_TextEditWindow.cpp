@@ -328,6 +328,11 @@ Posn TextEditWindow::GetEnd() {
   return m_pPage->GetEnd();
 }
 
+HWND TextEditWindow::GetScrollBar(int which) const {
+  DCHECK_EQ(SB_VERT, which);
+  return m_oVertScrollBar.GetHwnd();
+}
+
 //For Selection.MoveUp Screen
 Posn TextEditWindow::GetStart() {
   UI_ASSERT_DOM_LOCKED();
@@ -662,7 +667,8 @@ void TextEditWindow::Render() {
 }
 
 void TextEditWindow::SetScrollBar(HWND hwnd, int nBar) {
-  ASSERT(nBar == SB_VERT);
+  DCHECK_EQ(SB_VERT, nBar);
+  DCHECK(!m_oVertScrollBar.m_hwnd);
   m_oVertScrollBar.Set(hwnd, SB_CTL);
 }
 

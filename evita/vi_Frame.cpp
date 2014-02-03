@@ -33,6 +33,7 @@
 #include "evita/gfx_base.h"
 #include "evita/vi_defs.h"
 #include "evita/editor/application.h"
+#include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/view_event_handler.h"
@@ -535,6 +536,17 @@ const char16* Frame::getToolTip(NMTTDISPINFO* const pDisp) const {
     ModifiedDisplayText(*pBuffer);
   ::lstrcpyW(m_wszToolTip, tooltip.str().c_str());
   return m_wszToolTip;
+}
+
+int Frame::MessageBox(Window*, const base::string16& message,
+                      const base::string16& title, int flags) {
+  auto safe_title = title;
+  if (!safe_title.empty())
+    safe_title += L" - ";
+  safe_title += L"evita";
+  editor::ModalMessageLoopScope modal_mesage_loop_scope;
+  return ::MessageBoxW(*native_window(), message.c_str(), safe_title.c_str(),
+                       static_cast<UINT>(flags));
 }
 
 void Frame::onDropFiles(HDROP const hDrop) {

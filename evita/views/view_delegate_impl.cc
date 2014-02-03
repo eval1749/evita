@@ -11,6 +11,7 @@
 #include "evita/dom/forms/form.h"
 #include "evita/dom/text_window.h"
 #include "evita/dom/view_event_handler.h"
+#include "evita/editor/application.h"
 #include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/vi_EditPane.h"
@@ -45,6 +46,20 @@ Window* FromWindowId(const char* name, dom::WindowId window_id) {
   }
   return window;
 }
+
+Frame* GetFrameWindowFor(Window* window) {
+  auto hwnd = window->AssociatedHwnd();
+  while (hwnd) {
+    auto const hwnd_parent = ::GetParent(hwnd);
+    if (!hwnd_parent) {
+      if (auto const frame = Application::instance()->FindFrame(hwnd))
+        return frame;
+      break;
+    }
+  }
+  return Application::instance()->GetActiveFrame();
+}
+
 }  // namespace
 
 ViewDelegateImpl::ViewDelegateImpl()
@@ -265,15 +280,8 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
       MessageBoxCallback callback) {
   auto const widget = window_id == dom::kInvalidWindowId ? nullptr :
       FromWindowId("MessageBoxCallback", window_id);
-  auto const hwnd = widget ? widget->AssociatedHwnd() : nullptr;
-  auto safe_title = title;
-  if (!safe_title.empty())
-    safe_title += L" - ";
-  safe_title += L"evita";
-  editor::ModalMessageLoopScope modal_mesage_loop_scope;
-  auto response_code = ::MessageBoxW(hwnd, message.c_str(),
-                                     safe_title.c_str(),
-                                     static_cast<UINT>(flags));
+  auto const response_code = GetFrameWindowFor(widget)->
+      MessageBox(widget, message, title, flags);
   event_handler_->RunCallback(base::Bind(callback, response_code));
 }
 

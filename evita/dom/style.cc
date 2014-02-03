@@ -268,7 +268,8 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
 
     ScriptController::instance()->ThrowException(v8::Exception::Error(
         gin::StringToV8(isolate, base::StringPrintf(
-            L"Invalid style attribute name '%s'", V8ToString(name)))));
+            L"Invalid style attribute name '%ls'",
+            V8ToString(name).c_str()))));
     return;
   }
   if (!style_attrs.m_rgfMask)

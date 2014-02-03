@@ -49,6 +49,8 @@ TEST_F(StyleTest, SetStyle) {
     "var style = doc.styleAt(1);");
   EXPECT_SCRIPT_EQ("ff00", "style.color.toString(16)");
   EXPECT_SCRIPT_EQ("23", "style.fontSize");
+  EXPECT_SCRIPT_EQ("Error: Invalid style attribute name 'foo'",
+                   "range.style({foo: 1})");
 }
 
 }  // namespace

@@ -84,10 +84,7 @@ class TextEditWindow
     }
   };
 
-  private: class CaretBlinker;
-
   private: std::unique_ptr<Caret> caret_;
-  private: std::unique_ptr<CaretBlinker> caret_blinker_;
   private: const gfx::Graphics* m_gfx;
   private: Posn m_lCaretPosn;
   private: int m_nCharTick;
@@ -108,7 +105,6 @@ class TextEditWindow
   public: virtual ~TextEditWindow();
 
   // [B]
-  public: void Blink(Posn, int);
   public: static void BindKey(int key_code,
       const common::scoped_refptr<Command::KeyBindEntry>& entry);
   public: static void BindKey(int key_code, Command::Command::CommandFn);

@@ -60,44 +60,6 @@ void TextEditWindow::ScrollBar::ShowWindow(int code) const {
     ::ShowWindow(m_hwnd, code);
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// CaretBlinker
-//
-// This class is used for restoring caret position after parenthesis matching.
-//
-// Note: When |TextEditWindow| is destruced, an instance of this class is also
-// destructed and timer is canceled.
-class TextEditWindow::CaretBlinker {
-  private: TextEditWindow* const window_;
-  private: Range* range_;
-  private: common::OneShotTimer<CaretBlinker> timer_;
-
-  public: CaretBlinker(TextEditWindow* editor, Posn posn, uint interval_ms)
-      : window_(editor),
-        range_(editor->GetBuffer()->CreateRange(posn, posn)),
-        timer_(this, &CaretBlinker::RestoreCaret) {
-    timer_.Start(static_cast<int>(interval_ms));
-  }
-  public: ~CaretBlinker() {
-    range_->destroy();
-  }
-
-  // Temporary caret position
-  public: Range& range() const { return *range_; }
-
-  private: void RestoreCaret(common::OneShotTimer<CaretBlinker>*) {
-    DCHECK(!editor::DomLock::instance()->locked());
-    // After |window->caret_blinker_.reset()|. |this| pointer is unavailable.
-    auto const window = window_;
-    window->caret_blinker_.reset();
-    Application::instance()->PostDomTask(FROM_HERE,
-        base::Bind(&TextEditWindow::Redraw, base::Unretained(window)));
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(CaretBlinker);
-};
-
 namespace {
 Command::KeyBinds* key_bindings;
 }
@@ -123,14 +85,6 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
 }
 
 TextEditWindow::~TextEditWindow() {
-}
-
-void TextEditWindow::Blink(Posn posn, int interval_ms) {
-  ASSERT(interval_ms >= 0);
-  UI_ASSERT_DOM_LOCKED();
-  caret_blinker_.reset(std::move(
-      new CaretBlinker(this, posn, static_cast<uint>(interval_ms))));
-  Redraw();
 }
 
 void TextEditWindow::BindKey(int key_code,
@@ -444,7 +398,6 @@ bool TextEditWindow::OnIdle(uint count) {
 }
 
 void TextEditWindow::OnKeyPressed(const ui::KeyboardEvent& event) {
-  caret_blinker_.reset();
   Application::instance()->Execute(this,
                                    static_cast<uint32_t>(event.raw_key_code()),
                                    static_cast<uint32_t>(event.repeat()));
@@ -554,18 +507,10 @@ void TextEditWindow::Redraw() {
 
   UI_ASSERT_DOM_LOCKED();
 
+  auto const lSelStart = selection_->GetStart();
+  auto const lSelEnd = selection_->GetEnd();
+
   Posn lCaretPosn;
-  Posn lSelStart;
-  Posn lSelEnd;
-
-  if (auto const blinker = caret_blinker_.get()) {
-    lSelStart = blinker->range().GetStart();
-    lSelEnd = blinker->range().GetEnd();
-  } else {
-    lSelStart = selection_->GetStart();
-    lSelEnd = selection_->GetEnd();
-  }
-
   if (fSelectionIsActive) {
     lCaretPosn = selection_->IsStartActive() ? lSelStart : lSelEnd;
 

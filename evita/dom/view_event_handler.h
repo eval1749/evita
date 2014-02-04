@@ -12,7 +12,6 @@
 #include "evita/dom/window_id.h"
 
 namespace domapi {
-struct KeyboardEvent;
 struct MouseEvent;
 };
 
@@ -38,8 +37,6 @@ class ViewEventHandler {
   public: virtual void DidSetFocus(WindowId window_id) = 0;
   public: virtual void DidStartHost() = 0;
   public: virtual void DispatchFormEvent(const ApiFormEvent& event) = 0;
-  public: virtual void DispatchKeyboardEvent(
-      const domapi::KeyboardEvent& event) = 0;
   public: virtual void DispatchMouseEvent(const domapi::MouseEvent& event) = 0;
   public: virtual void OpenFile(WindowId window_id,
                                 const base::string16& filename) = 0;

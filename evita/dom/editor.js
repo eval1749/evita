@@ -49,7 +49,6 @@
     if (!map) {
       map = new Map();
       Editor.key_binding_map_map_.set(window_class, map);
-      window_class['keyBindingMap'] = map;
     }
     map.set(key_code, command);
   };
@@ -202,8 +201,6 @@
      * @return {number} key code.
      */
     return function(spec) {
-      if (spec.length == 1)
-        return spec.charCodeAt(0);
       var code = 0;
       KEY_COMBINATION_RULES.forEach(function(rule) {
         if (code)

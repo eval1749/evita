@@ -7,7 +7,6 @@
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/form_event.h"
-#include "evita/dom/events/keyboard_event.h"
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
 #include "evita/dom/events/window_event.h"
@@ -120,8 +119,8 @@ void EventHandler::DidDropWidget(WindowId source_id,
   auto const event = new WindowEvent(L"dropwindow", Event::NotBubbling,
                                      Event::NotCancelable, source_window);
   DOM_AUTO_LOCK_SCOPE();
-  target_window->DispatchEvent(event);
-  //DoDefaultEventHandling(target_window, event);
+  CHECK(target_window->DispatchEvent(event));
+  DoDefaultEventHandling(target_window, event);
 }
 
 void EventHandler::DidKillFocus(WindowId window_id) {
@@ -171,18 +170,6 @@ void EventHandler::DispatchFormEvent(const ApiFormEvent& raw_event) {
   target->DispatchEvent(event);
 }
 
-void EventHandler::DispatchKeyboardEvent(
-    const domapi::KeyboardEvent& api_event) {
-  auto const window = EventTarget::FromEventTargetId(api_event.target_id);
-  if (!window)
-    return;
-  gc::Local<KeyboardEvent> event(new KeyboardEvent(api_event));
-  DOM_AUTO_LOCK_SCOPE();
-  if (!window->DispatchEvent(event))
-    return;
-  //DoDefaultEventHandling(window, event);
-}
-
 void EventHandler::DispatchMouseEvent(const domapi::MouseEvent& api_event) {
   auto const window = EventTarget::FromEventTargetId(api_event.target_id);
   if (!window)
@@ -191,7 +178,7 @@ void EventHandler::DispatchMouseEvent(const domapi::MouseEvent& api_event) {
   DOM_AUTO_LOCK_SCOPE();
   if (!window->DispatchEvent(event))
     return;
-  //DoDefaultEventHandling(window, event);
+  DoDefaultEventHandling(window, event);
 }
 
 void EventHandler::OpenFile(WindowId window_id,
@@ -209,7 +196,7 @@ void EventHandler::QueryClose(WindowId window_id) {
   DOM_AUTO_LOCK_SCOPE();
   if (!window->DispatchEvent(event))
     return;
-  //DoDefaultEventHandling(window, event);
+  DoDefaultEventHandling(window, event);
 }
 
 void EventHandler::RunCallback(base::Closure callback) {

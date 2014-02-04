@@ -9,7 +9,6 @@
 #include "common/adoptors/reverse.h"
 #include "common/memory/singleton.h"
 #include "evita/dom/events/event.h"
-#include "evita/dom/events/event_handler.h"
 #include "evita/dom/script_controller.h"
 #include "evita/gc/weak_ptr.h"
 #include "evita/v8_glue/converter.h"
@@ -232,13 +231,7 @@ bool EventTarget::DispatchEvent(Event* event) {
       target->InvokeEventListeners(event);
     }
   }
-
-  if (event->default_prevented())
-    return false;
-
-  ScriptController::instance()->event_handler()->DoDefaultEventHandling(
-      this, event);
-  return true;
+  return !event->default_prevented();
 }
 
 EventTarget* EventTarget::FromEventTargetId(EventTargetId event_target_id) {

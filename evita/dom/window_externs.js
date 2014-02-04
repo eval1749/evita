@@ -4,9 +4,6 @@
 /** @type{Window} */
 Window.focus;
 
-/** @type{function(!Event)} */
-Window.handleEvent;
-
 /** @type {number} */
 Window.prototype.bottom;
 

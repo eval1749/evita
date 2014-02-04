@@ -56,7 +56,6 @@
         'dom/events/event_unittest.cc',
         'dom/events/focus_event_unittest.cc',
         'dom/events/form_event_unittest.cc',
-        'dom/events/keyboard_event_unittest.cc',
         'dom/events/mouse_event_unittest.cc',
         'dom/events/ui_event_unittest.cc',
         'dom/events/window_event_unittest.cc',

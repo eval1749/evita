@@ -13,7 +13,6 @@
       'js_externs_files': [
         'dom/types_externs.js',
         'dom/bracket_externs.js',
-        'dom/command_processor_externs.js',
         'dom/console_externs.js',
         'dom/document_externs.js',
         'dom/document_window_externs.js',
@@ -22,7 +21,6 @@
         'dom/events/focus_event_externs.js',
         'dom/events/form_event_externs.js',
         'dom/events/mouse_event_externs.js',
-        'dom/events/keyboard_event_externs.js',
         'dom/events/ui_event_externs.js',
         'dom/events/window_event_externs.js',
         'dom/editor_externs.js',
@@ -52,7 +50,6 @@
         'dom/key_names.js',
 
         'dom/bracket.js',
-        'dom/command_processor.js',
         'dom/document.js',
         'dom/editor.js',
         'dom/editor_window.js',
@@ -140,7 +137,6 @@
         'dom/events/event_target.cc',
         'dom/events/focus_event.cc',
         'dom/events/form_event.cc',
-        'dom/events/keyboard_event.cc',
         'dom/events/mouse_event.cc',
         'dom/events/ui_event.cc',
         'dom/events/window_event.cc',

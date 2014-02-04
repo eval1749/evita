@@ -9,6 +9,7 @@
 
 namespace dom {
 
+class FormEventInitDict;
 class Window;
 
 class FormEvent : public v8_glue::Scriptable<FormEvent, Event> {
@@ -16,9 +17,8 @@ class FormEvent : public v8_glue::Scriptable<FormEvent, Event> {
 
   private: base::string16 data_;
 
-  public: FormEvent(const base::string16& type, BubblingType bubbles,
-                    CancelableType cancelable,
-                    const base::string16& data);
+  public: FormEvent(const base::string16& type,
+                    const FormEventInitDict& init_dict);
   public: virtual ~FormEvent();
 
   public: const base::string16& data() const { return data_; }

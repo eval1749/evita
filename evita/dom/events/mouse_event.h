@@ -14,6 +14,7 @@ struct MouseEvent;
 namespace dom {
 
 class EventHandler;
+class MouseEventInitDict;
 class Window;
 
 class MouseEvent : public v8_glue::Scriptable<MouseEvent, UiEvent> {
@@ -21,7 +22,8 @@ class MouseEvent : public v8_glue::Scriptable<MouseEvent, UiEvent> {
 
   private: domapi::MouseEvent event_;
 
-  public: MouseEvent(const base::string16& type, int click_count);
+  public: MouseEvent(const base::string16& type,
+                     const MouseEventInitDict& init_dict);
   public: MouseEvent(const domapi::MouseEvent& api_event);
   public: virtual ~MouseEvent();
 

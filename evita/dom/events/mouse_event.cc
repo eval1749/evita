@@ -5,6 +5,7 @@
 
 #include "evita/dom/converter.h"
 #include "evita/dom/events/event_target.h"
+#include "evita/dom/events/mouse_event_init_dict.h"
 #include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
@@ -28,8 +29,11 @@ class MouseEventClass :
   }
 
   private: static MouseEvent* NewMouseEvent(const base::string16& type,
-                                            int detail) {
-    return new MouseEvent(type, detail);
+      v8_glue::Optional<v8::Handle<v8::Object>> opt_dict) {
+    MouseEventInitDict init_dict;
+    if (!init_dict.Init(opt_dict.value))
+      return nullptr;
+    return new MouseEvent(type, init_dict);
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -78,12 +82,13 @@ int ConvertClickCount(const domapi::MouseEvent& event) {
 DEFINE_SCRIPTABLE_OBJECT(MouseEvent, MouseEventClass);
 
 MouseEvent::MouseEvent(const domapi::MouseEvent& api_event)
-    : event_(api_event) {
-  InitUiEvent(ConvertEventType(api_event), Bubbling, Cancelable, nullptr,
-              ConvertClickCount(api_event));
+    : MouseEvent(ConvertEventType(api_event), MouseEventInitDict()),
+      event_(api_event) {
 }
 
-MouseEvent::MouseEvent(const base::string16& type, int detail) {
+MouseEvent::MouseEvent(const base::string16& type,
+                       const EventInitDict& init_dict)
+    : UiEvent(type, init_dict) {
   event_.target_id = kInvalidWindowId;
   event_.event_type = domapi::EventType::Invalid;
   event_.client_x = 0;

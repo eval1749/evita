@@ -4,6 +4,7 @@
 #include "evita/dom/events/window_event.h"
 
 #include "evita/dom/converter.h"
+#include "evita/dom/events/window_event_init_dict.h"
 #include "evita/dom/window.h"
 #include "evita/v8_glue/wrapper_info.h"
 
@@ -27,15 +28,18 @@ class WindowEventWrapperInfo :
         &WindowEventWrapperInfo::NewWindowEvent);
   }
 
-  private: static WindowEvent* NewWindowEvent() {
-    return new WindowEvent();
+  private: static WindowEvent* NewWindowEvent(const base::string16& type,
+      v8_glue::Optional<v8::Handle<v8::Object>> opt_dict) {
+    WindowEventInitDict init_dict;
+    if (!init_dict.Init(opt_dict.value))
+      return nullptr;
+    return new WindowEvent(type, init_dict);
   }
 
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetProperty("sourceWindow", &WindowEvent::source_window)
-        .SetMethod("initWindowEvent", &WindowEvent::InitWindowEvent);
+        .SetProperty("sourceWindow", &WindowEvent::source_window);
   }
 };
 }  // namespace
@@ -46,23 +50,16 @@ class WindowEventWrapperInfo :
 //
 DEFINE_SCRIPTABLE_OBJECT(WindowEvent, WindowEventWrapperInfo);
 
-WindowEvent::WindowEvent(const base::string16& type, BubblingType bubbles,
-                         CancelableType cancelable, Window* source_window) {
-  InitWindowEvent(type, bubbles, cancelable, source_window);
+WindowEvent::WindowEvent(const base::string16& type,
+                         const WindowInitDict& init_dict)
+  : Event(type, init_dict),
+    source_window_(init_dict.source_window()) {
 }
 
 WindowEvent::WindowEvent() {
 }
 
 WindowEvent::~WindowEvent() {
-}
-
-void WindowEvent::InitWindowEvent(const base::string16& type,
-                                  BubblingType bubbles,
-                                  CancelableType cancelable,
-                                  Window* source_window) {
-  InitEvent(type, bubbles, cancelable);
-  source_window_ = source_window;
 }
 
 }  // namespace dom

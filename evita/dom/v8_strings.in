@@ -2,7 +2,31 @@
 # Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 # Event
+## EventInit
+bubbles
+cancelable
 handleEvent
+### UIEventInit
+detail
+view
+#### FocusEventInit
+relatedTarget
+#### 3.3 MouseEvent Constructor - MouseEventInit
+screenX
+screenY
+clientX
+clientY
+ctrlKey
+shiftKey
+altKey
+metaKey
+button
+buttons
+relatedTarget
+### FormEvent
+data
+### WindowEvent
+sourceWindow
 
 # Document
 Map

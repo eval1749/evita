@@ -4,7 +4,7 @@
 #include "evita/dom/events/form_event.h"
 
 #include "evita/dom/converter.h"
-#include "evita/dom/events/event.h"
+#include "evita/dom/events/form_event_init_dict.h"
 #include "evita/dom/window.h"
 #include "evita/v8_glue/wrapper_info.h"
 
@@ -29,9 +29,11 @@ class FormEventClass :
   }
 
   private: static FormEvent* NewFormEvent(const base::string16& type,
-      Event::BubblingType bubbles, Event::CancelableType cancelable,
-      const base::string16& data) {
-    return new FormEvent(type, bubbles, cancelable, data);
+      v8_glue::Optional<v8::Handle<v8::Object>> opt_dict) {
+    FormEventInitDict init_dict;
+    if (!init_dict.Init(opt_dict.value))
+      return nullptr;
+    return new FormEvent(type, init_dict);
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -49,9 +51,8 @@ class FormEventClass :
 DEFINE_SCRIPTABLE_OBJECT(FormEvent, FormEventClass);
 
 FormEvent::FormEvent(const base::string16& type,
-    BubblingType bubbles, CancelableType cancelable,
-    const base::string16& data) : data_(data) {
-  InitEvent(type, bubbles, cancelable);
+                     const FormEventInitDict& init_dict)
+    : Event(type, init_dict), data_(init_dict.data()) {
 }
 
 FormEvent::~FormEvent() {

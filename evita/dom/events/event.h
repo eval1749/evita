@@ -53,6 +53,7 @@ class Event : public v8_glue::Scriptable<Event> {
   private: bool cancelable_;
   private: gc::Member<EventTarget> current_target_;
   private: bool default_prevented_;
+  private: bool dispatched_;
   private: PhaseType event_phase_;
   private: bool stop_immediate_propagation_;
   private: bool stop_propagation_;
@@ -69,6 +70,7 @@ class Event : public v8_glue::Scriptable<Event> {
     return current_target_.get();
   }
   public: bool default_prevented() const { return default_prevented_; }
+  public: bool dispatched() const { return dispatched_; }
   public: PhaseType event_phase() const { return event_phase_; }
   public: Nullable<EventTarget> target() const { return target_.get(); }
   public: bool stop_immediate_propagation() const {

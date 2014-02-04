@@ -99,12 +99,19 @@ TEST_F(EventTargetTest, dispatchEvent_function) {
       "sample.addEventListener('foo', handler);"
       "sample.dispatchEvent(event);");
   EXPECT_SCRIPT_TRUE("handled == event");
+  EXPECT_SCRIPT_TRUE("event.target == sample");
+
+  // We can't dispatch again
+  EXPECT_SCRIPT_EQ("Error: InvalidStateError",
+                   "sample.dispatchEvent(event)");
 
   EXPECT_SCRIPT_VALID(
+      "var event2 = new Event();"
+      "event2.initEvent('foo', true, true);"
       "sample.removeEventListener('foo', handler);"
-      "handled = null;"
-      "sample.dispatchEvent(event);");
-  EXPECT_SCRIPT_TRUE("handled == null");
+      "handled = false;"
+      "sample.dispatchEvent(event2);");
+  EXPECT_SCRIPT_TRUE("handled == false");
 }
 
 TEST_F(EventTargetTest, dispatchEvent_handleEvent) {
@@ -115,11 +122,14 @@ TEST_F(EventTargetTest, dispatchEvent_handleEvent) {
       "sample.addEventListener('foo', sample);"
       "sample.dispatchEvent(event);");
   EXPECT_SCRIPT_TRUE("sample.handled == event");
+  EXPECT_SCRIPT_TRUE("event.target == sample");
 
   EXPECT_SCRIPT_VALID(
+      "var event2 = new Event();"
+      "event2.initEvent('foo', true, true);"
       "sample.removeEventListener('foo', sample);"
       "sample.handled = null;"
-      "sample.dispatchEvent(event);");
+      "sample.dispatchEvent(event2);");
   EXPECT_SCRIPT_TRUE("sample.handled == null");
 }
 

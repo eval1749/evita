@@ -200,9 +200,9 @@ EventTarget::EventPath EventTarget::BuildEventPath() const {
 }
 
 bool EventTarget::DispatchEvent(Event* event) {
-  if (event->event_phase() != Event::kNone || event->type().empty()) {
-    ScriptController::instance()->ThrowError("EventTarget.dispatchEvent: "
-        "InvalidStartError");
+  if (event->dispatched() || event->event_phase() != Event::kNone ||
+      event->type().empty()) {
+    ScriptController::instance()->ThrowError("InvalidStateError");
     return false;
   }
 

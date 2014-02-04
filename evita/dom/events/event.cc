@@ -55,7 +55,8 @@ Event::DispatchScope::DispatchScope(Event* event, EventTarget* target)
     : event_(event) {
   DCHECK_EQ(kNone, event_->event_phase_);
   DCHECK(!event->current_target_);
-  DCHECK(!event->target_);
+  DCHECK(!event->dispatched_);
+  event_->dispatched_ = true;
   event_->target_ = target;
   event_->event_phase_ = kCapturingPhase;
   event_->time_stamp_ = TimeStamp::Now();
@@ -64,7 +65,6 @@ Event::DispatchScope::DispatchScope(Event* event, EventTarget* target)
 Event::DispatchScope::~DispatchScope() {
   event_->current_target_ = nullptr;
   event_->event_phase_ = kNone;
-  event_->target_ = nullptr;
 }
 
 void Event::DispatchScope::set_current_target(EventTarget* target) {
@@ -89,8 +89,8 @@ DEFINE_SCRIPTABLE_OBJECT(Event, EventWrapperInfo);
 
 Event::Event()
     : bubbles_(false), cancelable_(false), default_prevented_(false),
-      event_phase_(kNone), stop_immediate_propagation_(false),
-      stop_propagation_(false) {
+      dispatched_(false), event_phase_(kNone),
+      stop_immediate_propagation_(false), stop_propagation_(false) {
 }
 
 Event::~Event() {

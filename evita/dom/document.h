@@ -46,6 +46,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: void BindKey(int key_code, v8::Handle<v8::Object> command);
   public: void DidCreateRange(Range* range);
   public: void DidDestroyRange(Range* range);
+  public: void DoColor(int hint);
   public: void EndUndoGroup(const base::string16& name);
   public: static Document* Find(const base::string16& name);
   public: static Document* GetOrNew(const base::string16& name);

@@ -98,6 +98,9 @@ Document.prototype.computeStartOf_ = function(unit, position) {};
  */
 Document.prototype.computeWhile_ = function(char_set, count, position) {};
 
+/** @param {number} hint */
+Document.prototype.doColor_ = function(hint) {};
+
 /**
  * @param {string} name
  */

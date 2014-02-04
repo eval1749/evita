@@ -17,6 +17,7 @@
 #include "evita/dom/script_command.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
+#include "evita/ed_Mode.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/nullable.h"
@@ -142,6 +143,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         .SetProperty("properties", &Document::properties)
         .SetMethod("bindKey_", &Document::BindKey)
         .SetMethod("charCodeAt_", &Document::charCodeAt)
+        .SetMethod("doColor_", &Document::DoColor)
         .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
         .SetMethod("load_", &Document::Load)
         .SetMethod("redo", &Document::Redo)
@@ -219,6 +221,10 @@ void Document::DidCreateRange(Range* range) {
 
 void Document::DidDestroyRange(Range* range) {
   ranges_.erase(range);
+}
+
+void Document::DoColor(int hint) {
+  buffer_->GetMode()->DoColor(hint);
 }
 
 void Document::EndUndoGroup(const base::string16& name) {

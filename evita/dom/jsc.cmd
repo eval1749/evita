@@ -13,6 +13,7 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\unicode_enums.js ^
   %externs_dir%\types_externs.js ^
   %externs_dir%\bracket_externs.js ^
+  %externs_dir%\command_processor_externs.js ^
   %externs_dir%\console_externs.js ^
   %externs_dir%\document_externs.js ^
   %externs_dir%\document_window_externs.js ^
@@ -20,6 +21,7 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\events\event_target_externs.js ^
   %externs_dir%\events\focus_event_externs.js ^
   %externs_dir%\events\form_event_externs.js ^
+  %externs_dir%\events\keyboard_event_externs.js ^
   %externs_dir%\events\mouse_event_externs.js ^
   %externs_dir%\events\ui_event_externs.js ^
   %externs_dir%\forms\form_externs.js ^

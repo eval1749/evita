@@ -398,9 +398,13 @@ bool TextEditWindow::OnIdle(uint count) {
 }
 
 void TextEditWindow::OnKeyPressed(const ui::KeyboardEvent& event) {
+#if 1
   Application::instance()->Execute(this,
                                    static_cast<uint32_t>(event.raw_key_code()),
                                    static_cast<uint32_t>(event.repeat()));
+#else
+  DispatchKeyboardEvent(event);
+#endif
 }
 
 LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {

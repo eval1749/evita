@@ -107,11 +107,11 @@
         });
   }
 
-  [0x29, 0x5D, 0x7D].forEach(function(char_code) {
+  for (var char_code = 0x20; char_code <= 0x7E; ++char_code) {
     Editor.bindKey(TextWindow, String.fromCharCode(char_code),
         makeTypeCharCommand(char_code),
         'type character ' + String.fromCharCode(char_code));
-  });
+  }
 
   /**
    * Backward delete character
@@ -283,6 +283,10 @@
     'move selection right word\n' +
     'Move selection to right by words');
 
+  Editor.bindKey(TextWindow, 'Ctrl+Q', function() {
+    CommandProcessor.startQuote();
+  });
+
   /**
    * Reload document
    * @this {!TextWindow}
@@ -425,6 +429,10 @@
     changeCase(this.selection, function(selection) {
       selection.range.toUpperCase();
     });
+  });
+
+  Editor.bindKey(TextWindow, 'Ctrl+U', function() {
+    CommandProcessor.startArgument();
   });
 
   Editor.bindKey(TextWindow, 'Ctrl+V', pasteFromClipboardCommand);

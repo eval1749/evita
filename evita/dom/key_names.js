@@ -189,15 +189,14 @@ global.KEY_NAMES = (function() {
    * @param{number} end
    */
   function populate(start, end) {
-    for (var key_code = start; key_code < end; ++key_code) {
+    for (var key_code = start; key_code <= end; ++key_code) {
       names[key_code] = String.fromCharCode(key_code);
     }
   }
   // TODO(yosi) We should get supported key code values for current keyboard
   // from |::MapVirtualKey(vkey, MAPVK_VK_TOCHAR)|.
-  populate(0x20, 0x3F);
-  populate(0x40, 0x5F);
-  populate(0x60, 0x60);
+  populate(0x20, 0x60);
+  populate(0x7B, 0x7E);
   VKEY_NAMES.forEach(function(name, index) {
     names[index + 0x100] = name;
   });

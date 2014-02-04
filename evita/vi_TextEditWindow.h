@@ -87,7 +87,6 @@ class TextEditWindow
   private: std::unique_ptr<Caret> caret_;
   private: const gfx::Graphics* m_gfx;
   private: Posn m_lCaretPosn;
-  private: int m_nCharTick;
   private: ScrollBar m_oHoriScrollBar;
   private: ScrollBar m_oVertScrollBar;
   // TODO(yosi): Manage life time of selection.

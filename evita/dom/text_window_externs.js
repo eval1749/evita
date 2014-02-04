@@ -41,3 +41,10 @@ TextWindow.prototype.mapPositionToPoint_ = function(position) {};
  * @param {!TextOffset} end
  */
 TextWindow.prototype.reconvert_ = function(start, end) {};
+
+/** @type {!Range}
+ * We expose view range for blinking left bracket. Although, we discourage
+ * to use this. We should find out another way off the page blinking.
+ */
+TextWindow.prototype.range_;
+

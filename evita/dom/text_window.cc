@@ -42,6 +42,7 @@ class TextWindowWrapperInfo :
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
+        .SetProperty("range_", &TextWindow::view_range)
         .SetMethod("compute_", &TextWindow::ComputeMotion)
         .SetMethod("makeSelectionVisible", &TextWindow::MakeSelectionVisible)
         .SetMethod("mapPointToPosition_", &TextWindow::MapPointToPosition)

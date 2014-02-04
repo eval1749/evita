@@ -81,45 +81,7 @@ void TypeChar(const Context* pCtx)
     Count  n   = pCtx->GetArg();
 
     pSelection->TypeChar(wch, n);
-
-    uint nTrait = pSelection->GetBuffer()->GetMode()->GetCharSyntax(wch);
-    if (text::CharSyntax::Syntax_CloseParen ==
-        text::CharSyntax::GetSyntax(nTrait) )
-    {
-        // Force color newly inserted characters.
-        // Note: If we are in long comment, parenthesis matching may not
-        // work.
-        pSelection->GetBuffer()->OnIdle(100);
-
-        Posn lOpen = pSelection->FindOpenParen();
-
-        if (lOpen >= 0)
-        {
-            // Blink 100 msec if matched open parenthesis in window,
-            // otherwise blink 500ms
-            int nWait = 100;
-
-            if (lOpen < pSelection->GetWindow()->GetStart())
-            {
-                nWait = 500;
-            }
-
-            // Temporary move caret to |lOpen| |nWait| milliseconds
-            {
-                bool fReadOnly = pSelection->GetBuffer()->IsReadOnly();
-                pSelection->GetBuffer()->SetReadOnly(true);
-                pSelection->GetWindow()->Blink(lOpen, nWait);
-                pSelection->GetBuffer()->SetReadOnly(fReadOnly);
-            }
-        }
-        else if (pSelection->GetStart() != lOpen)
-        {
-            Application::instance()->GetActiveFrame()->ShowMessage(
-                MessageLevel_Warning,
-                IDS_NO_MATCHING_PAREN );
-        }
-    } // if close paren
-} // TypeChar
+}
 
 static char16 s_rgwchGraphKey[256];
 

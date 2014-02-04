@@ -33,12 +33,85 @@
   }
 
   /**
+   * @param {number} char_code
+   */
+  function makeTypeCharCommand(char_code) {
+    return char_code == 0x29 || char_code == 0x5D || char_code == 0x7D ?
+      function(opt_count) {
+        if (arguments.length)
+          typeRightBracket.call(this, char_code);
+        else
+          typeRightBracket.call(this, char_code, opt_count);
+      } : function(opt_count) {
+        if (arguments.length)
+          typeChar.call(this, char_code);
+        else
+          typeChar.call(this, char_code, opt_count);
+      };
+  }
+
+  /**
    * Paste from clipboard
    * @this {!TextWindow}
    */
   function pasteFromClipboardCommand() {
     this.selection.range.paste();
   }
+
+  /**
+   * Type character
+   * @this {!TextWindow}
+   * @param {number} char_code
+   * @param {number=} opt_count
+   */
+  function typeChar(char_code, opt_count) {
+    var count = arguments.length >= 2 ? 1 : /**@type{number}*/(opt_count);
+    var range = this.selection.range;
+    range.text = String.fromCharCode(char_code).repeat(count);
+    range.collapseTo(range.end);
+  }
+
+  /**
+   * Type character
+   * @this {!TextWindow}
+   * @param {number} char_code
+   * @param {number=} opt_count
+   */
+  function typeRightBracket(char_code, opt_count) {
+    var count = arguments.length >= 2 ? 1 : /**@type{number}*/(opt_count);
+    var selection = this.selection;
+    var range = selection.range;
+    range.text = String.fromCharCode(char_code).repeat(count);
+    range.collapseTo(range.end);
+    var start = range.start;
+    var end = range.end;
+
+    // Force color newly inserted characters.
+    // Note: If we are in long comment, parenthesis matching may not work.
+    range.document.doColor_(100);
+    if (selection.move(Unit.BRACKET, -1) == start) {
+      range.collapseTo(end);
+      Editor.messageBox(selection.window, Strings.IDS_NO_MATCHING_PAREN,
+                        MessageBox.ICONINFORMATION);
+      return;
+    }
+
+    // Move caret to left bracket 100ms or 500ms if left bracket above window.
+    range.collapseTo(range.start);
+    selection.document.readOnly = true;
+    // TODO(yosi) Should we share blink timer?
+    (new OneShotTimer()).start(range.start < this.range_.start ? 500 : 100,
+        function() {
+          range.collapseTo(end);
+          range.document.readOnly = false;
+        });
+  }
+
+  [0x29, 0x5D, 0x7D].forEach(function(char_code) {
+    Editor.bindKey(TextWindow, String.fromCharCode(char_code),
+        makeTypeCharCommand(char_code),
+        'type character ' + String.fromCharCode(char_code));
+  });
 
   /**
    * Backward delete character

@@ -13,6 +13,10 @@ void FinishConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info,
                          AbstractScriptable* impl) {
   auto wrapper = info.Holder();
   auto wrapper2 = info.This();
+  if (!impl) {
+    // Constructor may throw an exception.
+    return;
+  }
   impl->Bind(info.GetIsolate(), wrapper);
   info.GetReturnValue().Set(wrapper);
 }

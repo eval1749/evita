@@ -84,6 +84,13 @@ var Form = function() {};
 var JsConsole = function() {};
 
 /**
+ * Note: Since, Closure compiler doesn't support recursive type, we use
+ * |!Map| instead of |!Keymap|.
+ * @typedef {Map.<number, !Function|!Map>}
+ */
+var Keymap;
+
+/**
  * @constructor
  * @param {number} x
  * @param {number} y

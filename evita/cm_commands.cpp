@@ -67,22 +67,6 @@ DEFCOMMAND(StartArgument)
     // This command is handled by command processor.
 } // StartArgument
 
-// [T]
-
-/// <summary>
-///    TypeChar command
-/// </summary>
-void TypeChar(const Context* pCtx)
-{
-    Selection* pSelection = pCtx->GetSelection();
-    if (NULL == pSelection) return;
-
-    char16 wch = pCtx->GetLastChar();
-    Count  n   = pCtx->GetArg();
-
-    pSelection->TypeChar(wch, n);
-}
-
 static char16 s_rgwchGraphKey[256];
 
 static const char16* const s_rgpwszVKeyName[256] =
@@ -392,31 +376,6 @@ void Processor::GlobalInit() {
             s_rgwchGraphKey[nVKey] = static_cast<char16>(nChar);
         }
     } // for each nVKey
-
-    // Self Insert
-    {
-      common::scoped_refptr<KeyBindEntry> self_insert_entry(
-          new Command(TypeChar));
-      for (int nKey = 0x20; nKey < 0x7F; nKey++) {
-        TextEditWindow::BindKey(nKey, self_insert_entry);
-      }
-    }
-
-    #define BIND_KEY(mp_class, mp_keycomb, mp_cmd) \
-    { \
-        mp_class::BindKey(mp_keycomb, mp_cmd); \
-    } // BIND_CTRL
-
-    #define BIND_VKEY(mp_class, mp_mod, mp_keycomb, mp_cmd) \
-    { \
-        mp_class::BindKey( \
-            mp_mod | VK_ ## mp_keycomb | 0x100, \
-            mp_cmd ); \
-    } // BIND_CTRL
-
-    // Ctrl
-    BIND_KEY(TextEditWindow, Mod_Ctrl | 'Q', QuotedInsertEntry());
-    BIND_KEY(CommandWindow, Mod_Ctrl | 'U', StartArgumentEntry());
 } // Processor::GlobalInit
 
 }  // namespace Command

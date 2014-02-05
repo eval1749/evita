@@ -17,7 +17,7 @@ class KeyboardEventTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(KeyboardEventTest);
 };
 
-TEST_F(KeyboardEventTest, ctor) {
+TEST_F(KeyboardEventTest, ctor_event) {
   v8::HandleScope handle_scope(isolate());
   EXPECT_SCRIPT_VALID("var event;"
                       "function init(x) { event = x; }");
@@ -35,7 +35,6 @@ TEST_F(KeyboardEventTest, ctor) {
   auto const event = new dom::KeyboardEvent(raw_event);
   EXPECT_SCRIPT_VALID_CALL("init", event->GetWrapper(isolate()));
 
-  EXPECT_SCRIPT_TRUE("event instanceof KeyboardEvent");
   EXPECT_SCRIPT_TRUE("event.bubbles");
   EXPECT_SCRIPT_TRUE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.current_target == null");
@@ -58,6 +57,42 @@ TEST_F(KeyboardEventTest, ctor) {
   EXPECT_SCRIPT_EQ("66", "event.code");
   EXPECT_SCRIPT_EQ("0", "event.location");
   EXPECT_SCRIPT_FALSE("event.repeat");
+}
+
+TEST_F(KeyboardEventTest, ctor_init_dict) {
+  EXPECT_SCRIPT_VALID(
+    "var event = new KeyboardEvent('keydown', {"
+    "  bubbles: false,"
+    "  cancelable: false,"
+    "  detail: 3,"
+    "  altKey: true, ctrlKey: false, metaKey: true, shiftKey: true,"
+    "  code: 66,"
+    "  location: 3,"
+    "  repeat: true"
+    "});");
+  EXPECT_SCRIPT_TRUE("event instanceof KeyboardEvent");
+  EXPECT_SCRIPT_FALSE("event.bubbles");
+  EXPECT_SCRIPT_FALSE("event.cancelable");
+  EXPECT_SCRIPT_TRUE("event.current_target == null");
+  EXPECT_SCRIPT_FALSE("event.defaultPrevented");
+  EXPECT_SCRIPT_TRUE("event.eventPhase == Event.PhaseType.NONE");
+  EXPECT_SCRIPT_TRUE("event.timeStamp == 0");
+  EXPECT_SCRIPT_TRUE("event.target == null");
+  EXPECT_SCRIPT_EQ("keydown", "event.type");
+
+  // UiEvent
+  EXPECT_SCRIPT_EQ("3", "event.detail");
+  EXPECT_SCRIPT_TRUE("event.view == null");
+
+  // KeyboardEvent
+  EXPECT_SCRIPT_TRUE("event.altKey");
+  EXPECT_SCRIPT_FALSE("event.ctrlKey");
+  EXPECT_SCRIPT_TRUE("event.metaKey");
+  EXPECT_SCRIPT_TRUE("event.shiftKey");
+
+  EXPECT_SCRIPT_EQ("66", "event.code");
+  EXPECT_SCRIPT_EQ("3", "event.location");
+  EXPECT_SCRIPT_TRUE("event.repeat");
 }
 
 }  // namespace

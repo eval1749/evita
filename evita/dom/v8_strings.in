@@ -23,6 +23,15 @@ metaKey
 button
 buttons
 relatedTarget
+### 3.4 KeyboardEvent
+altKey
+code
+ctrlKey
+location
+metaKey
+repeat
+shiftKey
+
 ### FormEvent
 data
 ### WindowEvent

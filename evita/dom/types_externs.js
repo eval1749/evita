@@ -169,6 +169,27 @@ var FocusEvent = function(type, related_target) {};
 var FormEvent = function(type, bubbles, cancelable, data) {};
 
 /**
+ * @typedef {Object}
+ *   altKey: boolean,
+ *   ctrlKey: boolean,
+ *   code: number,
+ *   location: number,
+ *   metaKey: boolean,
+ *   repeat: boolean,
+ *   shiftKey: boolean,
+ */
+var KeyboardEventInit;
+
+/**
+ * @final
+ * @constructor
+ * @extends {Event}
+ * @param {string} type
+ * @param {KeyboardEventInit=} opt_dict
+ */
+var KeyboardEvent = function(type, opt_dict) {};
+
+/**
  * @constructor
  * @extends{Event}
  * @param {string} type

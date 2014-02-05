@@ -4,6 +4,8 @@
 #include "evita/dom/events/keyboard_event.h"
 
 #include "evita/dom/converter.h"
+#include "evita/dom/events/keyboard_event_init.h"
+#include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
@@ -26,8 +28,12 @@ class KeyboardEventClass :
         &KeyboardEventClass::NewKeyboardEvent);
   }
 
-  private: static KeyboardEvent* NewKeyboardEvent(const base::string16& type) {
-    return new KeyboardEvent(type);
+  private: static KeyboardEvent* NewKeyboardEvent(const base::string16& type,
+      v8_glue::Optional<v8::Handle<v8::Object>> opt_dict) {
+    KeyboardEventInit init_dict;
+    if (!init_dict.Init(opt_dict.value))
+      return nullptr;
+    return new KeyboardEvent(type, init_dict);
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -39,9 +45,10 @@ class KeyboardEventClass :
         .SetProperty("location", &KeyboardEvent::location)
         .SetProperty("metaKey", &KeyboardEvent::meta_key)
         .SetProperty("repeat", &KeyboardEvent::repeat)
-        .SetProperty("shiftKey", &KeyboardEvent::shift_key)
-        .SetMethod("init", &KeyboardEvent::Init);
+        .SetProperty("shiftKey", &KeyboardEvent::shift_key);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(KeyboardEventClass);
 };
 
 base::string16 ConvertEventType(const domapi::KeyboardEvent& raw_event) {
@@ -60,56 +67,20 @@ base::string16 ConvertEventType(const domapi::KeyboardEvent& raw_event) {
 //
 DEFINE_SCRIPTABLE_OBJECT(KeyboardEvent, KeyboardEventClass);
 
-KeyboardEvent::KeyboardEvent(const base::string16& type) {
-  InitEvent(type, Bubbling, Cancelable);
-  raw_event_.alt_key = false;
-  raw_event_.control_key = false;
-  raw_event_.key_code = 0;
-  raw_event_.location = 0;
-  raw_event_.meta_key = false;
-  raw_event_.repeat = 0;
-  raw_event_.shift_key = false;
-  raw_event_.target_id = kInvalidWindowId;
+KeyboardEvent::KeyboardEvent(const domapi::KeyboardEvent& event)
+    : KeyboardEvent(ConvertEventType(event), KeyboardEventInit(event)) {
 }
 
-KeyboardEvent::KeyboardEvent(const domapi::KeyboardEvent& raw_event)
-    : raw_event_(raw_event) {
-  InitEvent(ConvertEventType(raw_event), Bubbling, Cancelable);
+KeyboardEvent::KeyboardEvent(const base::string16& type,
+                       const KeyboardEventInit& init_dict)
+    : ScriptableBase(type, init_dict),
+      alt_key_(init_dict.alt_key()), ctrl_key_(init_dict.ctrl_key()),
+      key_code_(init_dict.key_code()), location_(init_dict.location()),
+      meta_key_(init_dict.meta_key()), repeat_(init_dict.repeat()),
+      shift_key_(init_dict.shift_key()) {
 }
 
 KeyboardEvent::~KeyboardEvent() {
-}
-
-bool KeyboardEvent::alt_key() const {
-  return raw_event_.alt_key;
-}
-
-bool KeyboardEvent::ctrl_key() const {
-  return raw_event_.control_key;
-}
-
-int KeyboardEvent::key_code() const {
-  return raw_event_.key_code;
-}
-
-int KeyboardEvent::location() const {
-  return raw_event_.location;
-}
-
-bool KeyboardEvent::meta_key() const {
-  return raw_event_.meta_key;
-}
-
-bool KeyboardEvent::repeat() const {
-  return raw_event_.repeat;
-}
-
-bool KeyboardEvent::shift_key() const {
-  return raw_event_.shift_key;
-}
-
-void KeyboardEvent::Init(int code) {
-  raw_event_.key_code = code;
 }
 
 }  // namespace dom

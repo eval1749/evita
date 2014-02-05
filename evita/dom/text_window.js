@@ -246,7 +246,6 @@ global.TextWindow.prototype.clone = function() {
       default:
         Window.handleEvent(event);
         break;
-      }
     }
   };
 })();

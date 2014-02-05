@@ -48,6 +48,7 @@
     var map = Editor.key_binding_map_map_.get(window_class);
     if (!map) {
       map = new Map();
+      window_class['keymap'] = map;
       Editor.key_binding_map_map_.set(window_class, map);
     }
     map.set(key_code, command);

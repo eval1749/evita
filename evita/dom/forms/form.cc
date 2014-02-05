@@ -43,6 +43,8 @@ class FormClass :
         .SetMethod("realize", &Form::Realize)
         .SetMethod("show", &Form::Show);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(FormClass);
 };
 }  // namespace
 

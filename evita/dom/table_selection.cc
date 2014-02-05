@@ -42,6 +42,8 @@ class TableSelectionClass :
     builder
         .SetMethod("getRowStates", &TableSelection::GetRowStates);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(TableSelectionClass);
 };
 }  // namespace
 

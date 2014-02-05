@@ -49,6 +49,8 @@ class TextWindowWrapperInfo :
         .SetMethod("mapPositionToPoint_", &TextWindow::MapPositionToPoint)
         .SetMethod("reconvert_", &TextWindow::Reconvert);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(TextWindowWrapperInfo);
 };
 }  // namespace
 

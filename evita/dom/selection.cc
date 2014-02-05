@@ -31,6 +31,8 @@ class SelectionClass : public v8_glue::WrapperInfo {
         .SetProperty("document", &Selection::document)
         .SetProperty("window", &Selection::window);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(SelectionClass);
 };
 }  // namespace
 

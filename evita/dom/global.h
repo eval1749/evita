@@ -19,6 +19,8 @@ class Global : public common::Singleton<Global> {
 
   public: v8::Handle<v8::ObjectTemplate>
       object_template(v8::Isolate* isolate);
+
+  DISALLOW_COPY_AND_ASSIGN(Global);
 };
 
 }  // namespace dom

@@ -30,6 +30,8 @@ class DocumentWindowClass :
         .SetProperty("document", &DocumentWindow::document)
         .SetProperty("selection", &DocumentWindow::selection);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(DocumentWindowClass);
 };
 }  // namespace
 

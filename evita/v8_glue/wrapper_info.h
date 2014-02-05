@@ -63,6 +63,7 @@ class Installer {
                           v8::Handle<v8::ObjectTemplate> global) {
     T::static_wrapper_info()->Install(isolate, global);
   }
+  DISALLOW_COPY_AND_ASSIGN(Installer);
 };
 
 template<typename Derived, typename Base>
@@ -81,6 +82,8 @@ class DerivedWrapperInfo : public WrapperInfo {
   private: virtual v8_glue::WrapperInfo* inherit_from() const override {
     return Base::static_wrapper_info();
   }
+
+  DISALLOW_COPY_AND_ASSIGN(DerivedWrapperInfo);
 };
 
 }  // namespace v8_glue

@@ -42,6 +42,8 @@ class TextFieldControlClass :
         .SetProperty("value", &TextFieldControl::value,
             &TextFieldControl::set_value);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(TextFieldControlClass);
 };
 }  // namespace
 

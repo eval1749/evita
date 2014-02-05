@@ -30,6 +30,8 @@ class FilePathWrapperInfo : public v8_glue::WrapperInfo {
         .SetMethod("fullPath", &FilePath::FullPath)
         .Build();
   }
+
+  DISALLOW_COPY_AND_ASSIGN(FilePathWrapperInfo);
 };
 
 }  // namespace

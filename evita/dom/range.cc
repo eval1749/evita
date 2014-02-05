@@ -64,6 +64,8 @@ class RangeClass : public v8_glue::WrapperInfo {
         .SetMethod("paste", &Range::PasteFromClipboard)
         .SetMethod("style", &Range::SetStyle);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(RangeClass);
 };
 }  // namespace
 

@@ -28,6 +28,8 @@ class FormControlClass :
     builder
         .SetProperty("resouce_id", &FormControl::resouce_id);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(FormControlClass);
 };
 }  // namespace
 

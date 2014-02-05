@@ -53,6 +53,8 @@ class EditorWindowList : public common::Singleton<EditorWindowList> {
   public: void Unregister(EditorWindow* window) {
     set_.erase(window);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(EditorWindowList);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -85,6 +87,8 @@ class EditorWindowWrapperInfo :
     BaseClass::SetupInstanceTemplate(builder);
     // TODO(yosi) Add EditorWindow properties.
   }
+
+  DISALLOW_COPY_AND_ASSIGN(EditorWindowWrapperInfo);
 };
 }  // namespace
 

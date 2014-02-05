@@ -154,6 +154,8 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         .SetMethod("styleAt", &Document::style_at)
         .SetMethod("undo", &Document::Undo);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(DocumentWrapperInfo);
 };
 }  // namespace
 

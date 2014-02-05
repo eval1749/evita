@@ -47,6 +47,7 @@ class TextSelectionClass :
         .SetProperty("startIsActive", &TextSelection::start_is_active,
                      &TextSelection::set_start_is_active);
   }
+  DISALLOW_COPY_AND_ASSIGN(TextSelectionClass);
 };
 }  // namespace
 

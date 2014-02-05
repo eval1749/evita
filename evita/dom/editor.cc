@@ -153,6 +153,8 @@ class EditorClass : public v8_glue::WrapperInfo {
       .SetProperty("version", &EditorClass::version)
       .Build();
   }
+
+  DISALLOW_COPY_AND_ASSIGN(EditorClass);
 };
 
 }  // namespace

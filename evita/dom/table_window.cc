@@ -35,6 +35,8 @@ class TableWindowClass :
   private: static TableWindow* NewTableWindow(Document* document) {
     return new TableWindow(document);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(TableWindowClass);
 };
 }  // namespace
 

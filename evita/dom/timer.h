@@ -47,6 +47,8 @@ class OneShotTimer : public v8_glue::Scriptable<OneShotTimer, Timer> {
 
   public: OneShotTimer();
   public: ~OneShotTimer();
+
+  DISALLOW_COPY_AND_ASSIGN(OneShotTimer);
 };
 
 class RepeatingTimer : public v8_glue::Scriptable<RepeatingTimer, Timer> {
@@ -54,6 +56,8 @@ class RepeatingTimer : public v8_glue::Scriptable<RepeatingTimer, Timer> {
 
   public: RepeatingTimer();
   public: ~RepeatingTimer();
+
+  DISALLOW_COPY_AND_ASSIGN(RepeatingTimer);
 };
 
 } // namespace dom

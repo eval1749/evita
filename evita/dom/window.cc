@@ -106,6 +106,8 @@ class WindowWrapperInfo :
         .SetMethod("splitHorizontally", &Window::SplitHorizontally)
         .SetMethod("splitVertically", &Window::SplitVertically);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(WindowWrapperInfo);
 };
 
 int global_focus_tick;
@@ -162,6 +164,8 @@ class Window::WindowIdMapper : public common::Singleton<WindowIdMapper> {
     DCHECK_NE(kInvalidWindowId, window_id);
     map_.erase(window_id);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(WindowIdMapper);
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -58,7 +58,7 @@ class Scriptable : public B {
   protected: typedef Scriptable<T, B> ScriptableBase;
 
   protected: template<typename... Params>
-      Scriptable(Params... params) : B(params...) {
+      Scriptable(Params&&... params) : B(params...) {
   }
   protected: virtual ~Scriptable() = default;
 

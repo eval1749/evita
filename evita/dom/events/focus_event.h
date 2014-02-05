@@ -8,6 +8,7 @@
 
 namespace dom {
 
+class FocusEventInit;
 class Window;
 
 class FocusEvent : public v8_glue::Scriptable<FocusEvent, UiEvent> {
@@ -16,10 +17,10 @@ class FocusEvent : public v8_glue::Scriptable<FocusEvent, UiEvent> {
   private: gc::Member<EventTarget> related_target_;
 
   public: FocusEvent(const base::string16& type,
-                     EventTarget* related_target_);
+                     const FocusEventInit& init_dict);
   public: virtual ~FocusEvent();
 
-  public: Nullable<EventTarget> related_target() const {
+  public: v8_glue::Nullable<EventTarget> related_target() const {
     return related_target_.get();
   }
 

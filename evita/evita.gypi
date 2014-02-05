@@ -134,12 +134,18 @@
 
         'dom/events/event.cc',
         'dom/events/event_handler.cc',
+        'dom/events/event_init.cc',
         'dom/events/event_target.cc',
         'dom/events/focus_event.cc',
+        'dom/events/focus_event_init.cc',
         'dom/events/form_event.cc',
+        'dom/events/form_event_init.cc',
         'dom/events/mouse_event.cc',
+        'dom/events/mouse_event_init.cc',
         'dom/events/ui_event.cc',
+        'dom/events/ui_event_init.cc',
         'dom/events/window_event.cc',
+        'dom/events/window_event_init.cc',
 
         'dom/forms/form.cc',
         'dom/forms/form_control.cc',
@@ -147,6 +153,7 @@
 
         'dom/file_path.cc',
         'dom/global.cc',
+        'dom/init_dict.cc',
         'dom/lock.cc',
         'dom/point.cc',
         'dom/range.cc',

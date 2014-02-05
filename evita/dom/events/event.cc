@@ -3,32 +3,38 @@
 
 #include "evita/dom/events/event.h"
 
-#include <type_traits>
-
+#include "base/strings/stringprintf.h"
 #include "evita/dom/converter.h"
+#include "evita/dom/events/event_init.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/script_controller.h"
+#include "evita/v8_glue/optional.h"
+#include "v8_strings.h"
 
 namespace dom {
 namespace {
 //////////////////////////////////////////////////////////////////////
 //
-// EventWrapperInfo
+// EventClass
 //
-class EventWrapperInfo : public v8_glue::WrapperInfo {
-  public: EventWrapperInfo(const char* name)
+class EventClass : public v8_glue::WrapperInfo {
+  public: EventClass(const char* name)
       : v8_glue::WrapperInfo(name) {
   }
-  public: ~EventWrapperInfo() = default;
+  public: ~EventClass() = default;
 
   protected: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate, 
-        &EventWrapperInfo::NewEvent);
+        &EventClass::NewEvent);
   }
 
-  private: static Event* NewEvent() {
-    return new Event();
+  private: static Event* NewEvent(const base::string16& type,
+      v8_glue::Optional<v8::Handle<v8::Object>> opt_dict) {
+    EventInit init_dict;
+    if (!init_dict.Init(opt_dict.value))
+      return nullptr;
+    return new Event(type, init_dict);
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -41,11 +47,12 @@ class EventWrapperInfo : public v8_glue::WrapperInfo {
         .SetProperty("eventPhase", &Event::event_phase)
         .SetProperty("timeStamp", &Event::time_stamp)
         .SetProperty("target", &Event::target)
-        .SetProperty("type", &Event::type)
-        .SetMethod("initEvent", &Event::InitEvent);
+        .SetProperty("type", &Event::type);
   }
+
+    DISALLOW_COPY_AND_ASSIGN(EventClass);
 };
-}  // namespace
+}   // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -85,30 +92,17 @@ void Event::DispatchScope::StartBubbling() {
 //
 // Event
 //
-DEFINE_SCRIPTABLE_OBJECT(Event, EventWrapperInfo);
+DEFINE_SCRIPTABLE_OBJECT(Event, EventClass);
 
-Event::Event()
-    : bubbles_(false), cancelable_(false), default_prevented_(false),
+Event::Event(const base::string16& type, const EventInit& init_dict)
+    : bubbles_(init_dict.bubbles()),
+      cancelable_(init_dict.cancelable()), default_prevented_(false),
       dispatched_(false), event_phase_(kNone),
-      stop_immediate_propagation_(false), stop_propagation_(false) {
+      stop_immediate_propagation_(false), stop_propagation_(false),
+      type_(type) {
 }
 
 Event::~Event() {
-}
-
-void Event::InitEvent(const base::string16& type, BubblingType bubbles,
-                      CancelableType cancelable) {
-  if (event_phase_ != kNone)
-    return;
-  DCHECK(!current_target_);
-  DCHECK(!target_);
-  bubbles_ = bubbles;
-  cancelable_ = cancelable;
-  default_prevented_ = false;
-  stop_immediate_propagation_ = false;
-  stop_propagation_ = false;
-  time_stamp_ = TimeStamp();
-  type_ = type;
 }
 
 void Event::PreventDefault() {

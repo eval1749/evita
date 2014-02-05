@@ -6,10 +6,13 @@
 #include "evita/dom/editor_window.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/events/focus_event.h"
+#include "evita/dom/events/focus_event_init.h"
 #include "evita/dom/events/form_event.h"
+#include "evita/dom/events/form_event_init.h"
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
 #include "evita/dom/events/window_event.h"
+#include "evita/dom/events/window_event_init.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/public/api_event.h"
 #include "evita/dom/script_controller.h"
@@ -116,8 +119,11 @@ void EventHandler::DidDropWidget(WindowId source_id,
   auto const target_window = NewOrFromWindowId(target_id);
   if (!target_window)
     return;
-  auto const event = new WindowEvent(L"dropwindow", Event::NotBubbling,
-                                     Event::NotCancelable, source_window);
+  WindowEventInit init_dict;
+  init_dict.set_bubbles(false);
+  init_dict.set_cancelable(false);
+  init_dict.set_source_window(source_window);
+  auto const event = new WindowEvent(L"dropwindow", init_dict);
   DOM_AUTO_LOCK_SCOPE();
   CHECK(target_window->DispatchEvent(event));
   DoDefaultEventHandling(target_window, event);
@@ -127,7 +133,7 @@ void EventHandler::DidKillFocus(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)
     return;
-  auto const event = new FocusEvent(L"blur", nullptr);
+  auto const event = new FocusEvent(L"blur", FocusEventInit());
   DOM_AUTO_LOCK_SCOPE();
   window->DispatchEvent(event);
 }
@@ -149,7 +155,7 @@ void EventHandler::DidSetFocus(WindowId window_id) {
   if (!window)
     return;
   window->DidSetFocus();
-  auto const event = new FocusEvent(L"focus", nullptr);
+  auto const event = new FocusEvent(L"focus", FocusEventInit());
   DOM_AUTO_LOCK_SCOPE();
   window->DispatchEvent(event);
 }
@@ -163,9 +169,11 @@ void EventHandler::DispatchFormEvent(const ApiFormEvent& raw_event) {
       raw_event.target_id);
   if (!target)
     return;
-  auto event = new FormEvent(raw_event.type, Event::Bubbling,
-                             Event::NotCancelable,
-                             raw_event.data);
+  FormEventInit init_dict;
+  init_dict.set_bubbles(true);
+  init_dict.set_cancelable(false);
+  init_dict.set_data(raw_event.data);
+  auto event = new FormEvent(raw_event.type, init_dict);
   DOM_AUTO_LOCK_SCOPE();
   target->DispatchEvent(event);
 }
@@ -190,9 +198,11 @@ void EventHandler::QueryClose(WindowId window_id) {
   auto const window = Window::FromWindowId(window_id);
   if (!window)
     return;
-  gc::Local<UiEvent> event(new UiEvent());
-  event->InitUiEvent(L"queryclose", Event::NotBubbling, Event::Cancelable,
-                     window, 0);
+  UiEventInit init_dict;
+  init_dict.set_bubbles(false);
+  init_dict.set_cancelable(true);
+  init_dict.set_view(window);
+  gc::Local<UiEvent> event(new UiEvent(L"queryclose", init_dict));
   DOM_AUTO_LOCK_SCOPE();
   if (!window->DispatchEvent(event))
     return;

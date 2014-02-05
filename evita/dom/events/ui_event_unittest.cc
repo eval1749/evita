@@ -15,7 +15,7 @@ class UiEventTest : public dom::AbstractDomTest {
 };
 
 TEST_F(UiEventTest, ctor) {
-  EXPECT_SCRIPT_VALID("var event = new UiEvent();");
+  EXPECT_SCRIPT_VALID("var event = new UiEvent('foo');");
   EXPECT_SCRIPT_FALSE("event.bubbles");
   EXPECT_SCRIPT_FALSE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.current_target == null");
@@ -23,14 +23,20 @@ TEST_F(UiEventTest, ctor) {
   EXPECT_SCRIPT_TRUE("event.eventPhase == Event.PhaseType.NONE");
   EXPECT_SCRIPT_TRUE("event.timeStamp == 0");
   EXPECT_SCRIPT_TRUE("event.target == null");
-  EXPECT_SCRIPT_EQ("", "event.type");
+  EXPECT_SCRIPT_EQ("foo", "event.type");
+
+  // UiEvent attributes
   EXPECT_SCRIPT_EQ("0", "event.detail");
   EXPECT_SCRIPT_TRUE("event.view == null");
 }
 
-TEST_F(UiEventTest, initUiEvent) {
-  EXPECT_SCRIPT_VALID("var event = new UiEvent();");
-  EXPECT_SCRIPT_VALID("event.initUiEvent('foo', true, true, null, 42)");
+TEST_F(UiEventTest, ctor_init_dict) {
+  EXPECT_SCRIPT_VALID(
+      "var event = new UiEvent('foo', {"
+      "   bubbles: true,"
+      "   cancelable: true,"
+      "   detail: 42"
+      "});");
   EXPECT_SCRIPT_TRUE("event.bubbles");
   EXPECT_SCRIPT_TRUE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.current_target == null");
@@ -40,6 +46,7 @@ TEST_F(UiEventTest, initUiEvent) {
   EXPECT_SCRIPT_TRUE("event.target == null");
   EXPECT_SCRIPT_EQ("foo", "event.type");
 
+  // UiEvent attributes
   EXPECT_SCRIPT_EQ("42", "event.detail");
   EXPECT_SCRIPT_TRUE("event.view == null");
 }

@@ -27,7 +27,7 @@ TEST_F(TextFieldControlTest, ctor) {
 TEST_F(TextFieldControlTest, dispatchEvent) {
   EXPECT_SCRIPT_VALID(
       "var sample = new TextFieldControl(123);"
-      "var event = new FormEvent('change', true, false, 'foo');"
+      "var event = new FormEvent('change', {data: 'foo'});"
       "sample.dispatchEvent(event);");
   EXPECT_SCRIPT_EQ("foo", "sample.value");
 }

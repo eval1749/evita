@@ -15,7 +15,7 @@ class EventTest : public dom::AbstractDomTest {
 };
 
 TEST_F(EventTest, ctor) {
-  EXPECT_SCRIPT_VALID("var event = new Event();");
+  EXPECT_SCRIPT_VALID("var event = new Event('foo');");
   EXPECT_SCRIPT_FALSE("event.bubbles");
   EXPECT_SCRIPT_FALSE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.current_target == null");
@@ -23,12 +23,15 @@ TEST_F(EventTest, ctor) {
   EXPECT_SCRIPT_TRUE("event.eventPhase == Event.PhaseType.NONE");
   EXPECT_SCRIPT_TRUE("event.timeStamp == 0");
   EXPECT_SCRIPT_TRUE("event.target == null");
-  EXPECT_SCRIPT_EQ("", "event.type");
+  EXPECT_SCRIPT_EQ("foo", "event.type");
 }
 
 TEST_F(EventTest, initEvent) {
-  EXPECT_SCRIPT_VALID("var event = new Event();");
-  EXPECT_SCRIPT_VALID("event.initEvent('foo', true, true)");
+  EXPECT_SCRIPT_VALID(
+    "var event = new Event('foo', {"
+    "     bubbles: true,"
+    "     cancelable: true"
+    "});");
   EXPECT_SCRIPT_TRUE("event.bubbles");
   EXPECT_SCRIPT_TRUE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.current_target == null");

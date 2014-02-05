@@ -92,8 +92,7 @@ class EventTargetTest : public dom::AbstractDomTest {
 TEST_F(EventTargetTest, dispatchEvent_function) {
   EXPECT_SCRIPT_VALID(
       "var sample = new SampleEventTarget();"
-      "var event = new Event();"
-      "event.initEvent('foo', true, true);"
+      "var event = new Event('foo');"
       "var handled = false;"
       "function handler(event) { handled = event; }"
       "sample.addEventListener('foo', handler);"
@@ -106,8 +105,7 @@ TEST_F(EventTargetTest, dispatchEvent_function) {
                    "sample.dispatchEvent(event)");
 
   EXPECT_SCRIPT_VALID(
-      "var event2 = new Event();"
-      "event2.initEvent('foo', true, true);"
+      "var event2 = new Event('foo');"
       "sample.removeEventListener('foo', handler);"
       "handled = false;"
       "sample.dispatchEvent(event2);");
@@ -117,16 +115,14 @@ TEST_F(EventTargetTest, dispatchEvent_function) {
 TEST_F(EventTargetTest, dispatchEvent_handleEvent) {
   EXPECT_SCRIPT_VALID(
       "var sample = new SampleEventTarget();"
-      "var event = new Event();"
-      "event.initEvent('foo', true, true);"
+      "var event = new Event('foo');"
       "sample.addEventListener('foo', sample);"
       "sample.dispatchEvent(event);");
   EXPECT_SCRIPT_TRUE("sample.handled == event");
   EXPECT_SCRIPT_TRUE("event.target == sample");
 
   EXPECT_SCRIPT_VALID(
-      "var event2 = new Event();"
-      "event2.initEvent('foo', true, true);"
+      "var event2 = new Event('foo');"
       "sample.removeEventListener('foo', sample);"
       "sample.handled = null;"
       "sample.dispatchEvent(event2);");

@@ -4,10 +4,12 @@
 #define INCLUDE_evita_dom_events_ui_event_h
 
 #include "evita/dom/events/event.h"
+#include "evita/dom/init_dict.h"
 #include "evita/v8_glue/nullable.h"
 
 namespace dom {
 
+class UiEventInit;
 class Window;
 
 class UiEvent : public v8_glue::Scriptable<UiEvent, Event> {
@@ -16,15 +18,12 @@ class UiEvent : public v8_glue::Scriptable<UiEvent, Event> {
   private: int detail_;
   private: gc::Member<Window> view_;
 
-  public: UiEvent();
+  public: UiEvent(const base::string16& type,
+                  const UiEventInit& init_dict);
   public: virtual ~UiEvent();
 
   public: int detail() const { return detail_; }
   public: Nullable<Window> view() const { return view_.get(); }
-
-  public: void InitUiEvent(const base::string16& type, BubblingType bubbles,
-                           CancelableType cancelable,
-                           const Nullable<Window>& view, int detail);
 
   DISALLOW_COPY_AND_ASSIGN(UiEvent);
 };

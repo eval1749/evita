@@ -6,28 +6,20 @@
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
+#include "evita/dom/init_dict.h"
 #include "evita/dom/time_stamp.h"
 #include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace dom {
 
+class EventInit;
 class EventTarget;
 class TimeStamp;
 using v8_glue::Nullable;
 
 class Event : public v8_glue::Scriptable<Event> {
   DECLARE_SCRIPTABLE_OBJECT(Event);
-
-  public: enum BubblingType : bool {
-    NotBubbling = false,
-    Bubbling = true,
-  };
-
-  public: enum CancelableType : bool {
-    NotCancelable = false,
-    Cancelable = true,
-  };
 
   public: enum PhaseType {
     kNone,
@@ -61,7 +53,7 @@ class Event : public v8_glue::Scriptable<Event> {
   private: TimeStamp time_stamp_;
   private: base::string16 type_;
 
-  public: Event();
+  public: Event(const base::string16& type, const EventInit& init_dict);
   public: virtual ~Event();
 
   public: bool bubbles() const { return bubbles_; }
@@ -79,10 +71,6 @@ class Event : public v8_glue::Scriptable<Event> {
   public: bool stop_propagation() const { return stop_propagation_; }
   public: TimeStamp time_stamp() const { return time_stamp_; }
   public: const base::string16& type() const { return type_; }
-
-  public: void InitEvent(const base::string16& type, BubblingType bubbles,
-                         CancelableType cancelable);
-
 
   public: void PreventDefault();
   public: void StopImmediatePropagation() {

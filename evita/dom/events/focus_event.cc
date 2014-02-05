@@ -5,6 +5,7 @@
 
 #include "evita/dom/converter.h"
 #include "evita/dom/events/event_target.h"
+#include "evita/dom/events/focus_event_init.h"
 #include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
@@ -27,8 +28,12 @@ class FocusEventClass :
         &FocusEventClass::NewFocusEvent);
   }
 
-  private: static FocusEvent* NewFocusEvent() {
-    return new FocusEvent(base::string16(), nullptr);
+  private: static FocusEvent* NewFocusEvent(const base::string16& type,
+      v8_glue::Optional<v8::Handle<v8::Object>> dict) {
+    FocusEventInit init_dict;
+    if (!init_dict.Init(dict.value))
+      return nullptr;
+    return new FocusEvent(type, init_dict);
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -36,6 +41,8 @@ class FocusEventClass :
     builder
         .SetProperty("relatedTarget", &FocusEvent::related_target);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(FocusEventClass);
 };
 }  // namespace
 
@@ -45,10 +52,10 @@ class FocusEventClass :
 //
 DEFINE_SCRIPTABLE_OBJECT(FocusEvent, FocusEventClass);
 
-FocusEvent::FocusEvent(const base::string16& name,
-                       EventTarget* related_target)
-    : related_target_(related_target) {
-  InitEvent(name, Bubbling, NotCancelable);
+FocusEvent::FocusEvent(const base::string16& type,
+                       const FocusEventInit& init_dict)
+    : ScriptableBase(type, init_dict),
+      related_target_(init_dict.related_target()) {
 }
 
 FocusEvent::~FocusEvent() {

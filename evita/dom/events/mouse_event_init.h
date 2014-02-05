@@ -1,10 +1,12 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_events_mouse_event_h)
-#define INCLUDE_evita_dom_events_mouse_event_h
+#if !defined(INCLUDE_evita_dom_events_mouse_event_init_h)
+#define INCLUDE_evita_dom_events_mouse_event_init_h
 
-#include "base/strings/string16.h"
-#include "evita/dom/events/ui_event.h"
+#include "evita/dom/events/ui_event_init.h"
+
+#include "evita/dom/public/api_event.h"
+#include "evita/gc/member.h"
 
 namespace domapi {
 struct MouseEvent;
@@ -12,13 +14,9 @@ struct MouseEvent;
 
 namespace dom {
 
-class EventHandler;
-class MouseEventInit;
-class Window;
+class EventTarget;
 
-class MouseEvent : public v8_glue::Scriptable<MouseEvent, UiEvent> {
-  DECLARE_SCRIPTABLE_OBJECT(MouseEvent);
-
+class MouseEventInit : public UiEventInit {
   private: bool alt_key_;
   private: int button_;
   private: int buttons_;
@@ -28,10 +26,9 @@ class MouseEvent : public v8_glue::Scriptable<MouseEvent, UiEvent> {
   private: bool meta_key_;
   private: bool shift_key_;
 
-  public: MouseEvent(const base::string16& type,
-                     const MouseEventInit& init_dict);
-  public: MouseEvent(const domapi::MouseEvent& api_event);
-  public: virtual ~MouseEvent();
+  public: explicit MouseEventInit(const domapi::MouseEvent& api_event);
+  public: MouseEventInit();
+  public: virtual ~MouseEventInit();
 
   public: bool alt_key() const { return alt_key_; }
   public: int button() const { return button_; }
@@ -42,9 +39,12 @@ class MouseEvent : public v8_glue::Scriptable<MouseEvent, UiEvent> {
   public: bool meta_key() const { return meta_key_; }
   public: bool shift_key() const { return shift_key_; }
 
-  DISALLOW_COPY_AND_ASSIGN(MouseEvent);
+  private: virtual HandleResult HandleKeyValue(
+      v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) override;
+
+  DISALLOW_COPY_AND_ASSIGN(MouseEventInit);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_events_mouse_event_h)
+#endif //!defined(INCLUDE_evita_dom_events_mouse_event_init_h)

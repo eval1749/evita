@@ -5,6 +5,7 @@
 
 #include "evita/dom/converter.h"
 #include "evita/dom/events/event_target.h"
+#include "evita/dom/events/mouse_event_init.h"
 #include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
@@ -28,8 +29,11 @@ class MouseEventClass :
   }
 
   private: static MouseEvent* NewMouseEvent(const base::string16& type,
-                                            int detail) {
-    return new MouseEvent(type, detail);
+      v8_glue::Optional<v8::Handle<v8::Object>> opt_dict) {
+    MouseEventInit init_dict;
+    if (!init_dict.Init(opt_dict.value))
+      return nullptr;
+    return new MouseEvent(type, init_dict);
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -43,6 +47,8 @@ class MouseEventClass :
         .SetProperty("ctrlKey", &MouseEvent::ctrl_key)
         .SetProperty("shiftKey", &MouseEvent::shift_key);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(MouseEventClass);
 };
 
 base::string16 ConvertEventType(const domapi::MouseEvent& event) {
@@ -61,14 +67,6 @@ base::string16 ConvertEventType(const domapi::MouseEvent& event) {
   return base::string16();
 }
 
-int ConvertClickCount(const domapi::MouseEvent& event) {
-  if (event.event_type == domapi::EventType::Click)
-    return 1;
-  if (event.event_type == domapi::EventType::DblClick)
-    return 2;
-  return 0;
-}
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -77,54 +75,20 @@ int ConvertClickCount(const domapi::MouseEvent& event) {
 //
 DEFINE_SCRIPTABLE_OBJECT(MouseEvent, MouseEventClass);
 
-MouseEvent::MouseEvent(const domapi::MouseEvent& api_event)
-    : event_(api_event) {
-  InitUiEvent(ConvertEventType(api_event), Bubbling, Cancelable, nullptr,
-              ConvertClickCount(api_event));
+MouseEvent::MouseEvent(const domapi::MouseEvent& event)
+    : MouseEvent(ConvertEventType(event), MouseEventInit(event)) {
 }
 
-MouseEvent::MouseEvent(const base::string16& type, int detail) {
-  event_.target_id = kInvalidWindowId;
-  event_.event_type = domapi::EventType::Invalid;
-  event_.client_x = 0;
-  event_.client_y = 0;
-  event_.button = domapi::MouseButton::Left;
-  event_.buttons = 0;
-  event_.alt_key = false;
-  event_.control_key = false;
-  event_.shift_key = false;
-  InitUiEvent(type, Bubbling, Cancelable, nullptr, detail);
+MouseEvent::MouseEvent(const base::string16& type,
+                       const MouseEventInit& init_dict)
+    : ScriptableBase(type, init_dict),
+      alt_key_(init_dict.alt_key()), button_(init_dict.button()),
+      buttons_(init_dict.buttons()), client_x_(init_dict.client_x()),
+      client_y_(init_dict.client_y()), ctrl_key_(init_dict.ctrl_key()),
+      meta_key_(init_dict.meta_key()), shift_key_(init_dict.shift_key()) {
 }
 
 MouseEvent::~MouseEvent() {
-}
-
-bool MouseEvent::alt_key() const {
-  return event_.alt_key;
-}
-
-int MouseEvent:: button() const {
-  return static_cast<int>(event_.button);
-}
-
-int MouseEvent:: buttons() const {
-  return event_.buttons;
-}
-
-int MouseEvent:: client_x() const {
-  return event_.client_x;
-}
-
-int MouseEvent:: client_y() const {
-  return event_.client_y;
-}
-
-bool MouseEvent::ctrl_key() const {
-  return event_.control_key;
-}
-
-bool MouseEvent::shift_key() const {
-  return event_.shift_key;
 }
 
 }  // namespace dom

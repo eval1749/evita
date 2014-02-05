@@ -4,40 +4,46 @@
 #include "evita/dom/events/ui_event.h"
 
 #include "evita/dom/converter.h"
+#include "evita/dom/events/ui_event_init.h"
 #include "evita/dom/window.h"
 #include "evita/v8_glue/wrapper_info.h"
 
-namespace dom {
+namespace dom   {
 namespace {
 //////////////////////////////////////////////////////////////////////
 //
-// UiEventWrapperInfo
+// UiEventClass
 //
-class UiEventWrapperInfo :
+class UiEventClass :
     public v8_glue::DerivedWrapperInfo<UiEvent, Event> {
 
-  public: explicit UiEventWrapperInfo(const char* name)
+  public: explicit UiEventClass(const char* name)
       : BaseClass(name) {
   }
-  public: ~UiEventWrapperInfo() = default;
+  public: ~UiEventClass() = default;
 
   protected: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate, 
-        &UiEventWrapperInfo::NewUiEvent);
+        &UiEventClass::NewUiEvent);
   }
 
-  private: static UiEvent* NewUiEvent() {
-    return new UiEvent();
+  private: static UiEvent* NewUiEvent(const base::string16& type,
+      v8_glue::Optional<v8::Handle<v8::Object>> opt_dict) {
+    UiEventInit init_dict;
+    if (!init_dict.Init(opt_dict.value))
+      return nullptr;
+    return new UiEvent(type, init_dict);
   }
 
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
         .SetProperty("detail", &UiEvent::detail)
-        .SetProperty("view", &UiEvent::view)
-        .SetMethod("initUiEvent", &UiEvent::InitUiEvent);
+        .SetProperty("view", &UiEvent::view);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(UiEventClass);
 };
 }  // namespace
 
@@ -45,21 +51,15 @@ class UiEventWrapperInfo :
 //
 // UiEvent
 //
-DEFINE_SCRIPTABLE_OBJECT(UiEvent, UiEventWrapperInfo);
+DEFINE_SCRIPTABLE_OBJECT(UiEvent, UiEventClass);
 
-UiEvent::UiEvent()
-    : detail_(0), view_(nullptr) {
+UiEvent::UiEvent(const base::string16& type,
+                 const UiEventInit& init_dict)
+    : ScriptableBase(type, init_dict), detail_(init_dict.detail()),
+      view_(init_dict.view()) {
 }
 
 UiEvent::~UiEvent() {
-}
-
-void UiEvent::InitUiEvent(const base::string16& type, BubblingType bubbles,
-                          CancelableType cancelable,
-                          const Nullable<Window>& view, int detail) {
-  InitEvent(type, bubbles, cancelable);
-  detail_ = detail;
-  view_ = view;
 }
 
 }  // namespace dom

@@ -41,6 +41,8 @@ class EventTargeClass : public v8_glue::WrapperInfo {
       .SetMethod("dispatchEvent", &EventTarget::DispatchEvent)
       .SetMethod("removeEventListener", &EventTarget::RemoveEventListener);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(EventTargeClass);
 };
 
 }  // namespace
@@ -127,6 +129,8 @@ class EventTarget::EventListenerMap {
                   bool capture)
         : capture(capture), callback(isoalte, callback) {
     }
+
+    DISALLOW_COPY_AND_ASSIGN(EventListener);
   };
   public: typedef std::list<EventListener*> EventListenerList;
 
@@ -173,6 +177,7 @@ class EventTarget::EventListenerMap {
       }
     }
   }
+  DISALLOW_COPY_AND_ASSIGN(EventListenerMap);
 };
 
 //////////////////////////////////////////////////////////////////////

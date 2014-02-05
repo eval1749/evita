@@ -19,7 +19,7 @@ class WindowEventTest : public dom::AbstractDomTest {
 };
 
 TEST_F(WindowEventTest, ctor) {
-  EXPECT_SCRIPT_VALID("var event = new WindowEvent();");
+  EXPECT_SCRIPT_VALID("var event = new WindowEvent('foo');");
   EXPECT_SCRIPT_FALSE("event.bubbles");
   EXPECT_SCRIPT_FALSE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.current_target == null");
@@ -27,18 +27,21 @@ TEST_F(WindowEventTest, ctor) {
   EXPECT_SCRIPT_TRUE("event.eventPhase == Event.PhaseType.NONE");
   EXPECT_SCRIPT_TRUE("event.timeStamp == 0");
   EXPECT_SCRIPT_TRUE("event.target == null");
-  EXPECT_SCRIPT_EQ("", "event.type");
+  EXPECT_SCRIPT_EQ("foo", "event.type");
 
   // WindowEvent
   EXPECT_SCRIPT_TRUE("event.sourceWindow == null");
 }
 
-TEST_F(WindowEventTest, initWindowEvent) {
+TEST_F(WindowEventTest, ctor_init_dict) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
   EXPECT_SCRIPT_VALID(
-      "var event = new WindowEvent();"
       "var source = new EditorWindow();"
-      "event.initWindowEvent('foo', true, true, source)");
+      "var event = new WindowEvent('foo', {"
+      "  bubbles: true,"
+      "  cancelable: true,"
+      "  sourceWindow: source"
+      "});");
   EXPECT_SCRIPT_TRUE("event.bubbles");
   EXPECT_SCRIPT_TRUE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.current_target == null");

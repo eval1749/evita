@@ -15,7 +15,12 @@ class FormEventTest : public dom::AbstractDomTest {
 };
 
 TEST_F(FormEventTest, ctor) {
-  EXPECT_SCRIPT_VALID("var event = new FormEvent('foo', true, false, 'bar');");
+  EXPECT_SCRIPT_VALID(
+      "var event = new FormEvent('foo', {"
+      "  bubbles: true,"
+      "  cancelable: false,"
+      "  data: 'bar'"
+      "});");
   EXPECT_SCRIPT_TRUE("event.bubbles");
   EXPECT_SCRIPT_FALSE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.current_target == null");

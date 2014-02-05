@@ -4,6 +4,7 @@
 #include "evita/dom/abstract_dom_test.h"
 
 #include "evita/dom/events/focus_event.h"
+#include "evita/dom/events/focus_event_init.h"
 
 namespace {
 
@@ -20,7 +21,9 @@ TEST_F(FocusEventTest, ctor) {
   v8::HandleScope handle_scope(isolate());
   EXPECT_SCRIPT_VALID("var event;"
                       "function init(x) { event = x; }");
-  auto const event = new dom::FocusEvent(L"focusin", nullptr);
+  dom::FocusEventInit init_dict;
+  init_dict.set_bubbles(true);
+  auto const event = new dom::FocusEvent(L"focusin", init_dict);
   EXPECT_SCRIPT_VALID_CALL("init", event->GetWrapper(isolate()));
   EXPECT_SCRIPT_TRUE("event.bubbles");
   EXPECT_SCRIPT_FALSE("event.cancelable");

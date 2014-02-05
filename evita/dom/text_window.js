@@ -243,6 +243,9 @@ global.TextWindow.prototype.clone = function() {
       case Event.Names.MOUSEUP:
         handleMouseUp(this, /** @type {!MouseEvent} */(event));
         break;
+      default:
+        Window.handleEvent(event);
+        break;
       }
     }
   };

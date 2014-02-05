@@ -4,6 +4,11 @@
 /** @type{Window} */
 Window.focus;
 
+/**
+ * @param {!Event} event
+ */
+Window.handleEvent = function(event) {};
+
 /** @type {number} */
 Window.prototype.bottom;
 

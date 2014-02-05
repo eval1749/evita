@@ -2,5 +2,12 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 (function() {
-
+  /**
+   * Default event handler.
+   * @this {!Window}
+   * @param {!Event} event.
+   */
+  Window.handleEvent = function(event) {
+    commander.handleEvent(event);
+  }
 })();

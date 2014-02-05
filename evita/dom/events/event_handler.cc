@@ -9,6 +9,7 @@
 #include "evita/dom/events/focus_event_init.h"
 #include "evita/dom/events/form_event.h"
 #include "evita/dom/events/form_event_init.h"
+#include "evita/dom/events/keyboard_event.h"
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
 #include "evita/dom/events/window_event.h"
@@ -176,6 +177,18 @@ void EventHandler::DispatchFormEvent(const ApiFormEvent& raw_event) {
   auto event = new FormEvent(raw_event.type, init_dict);
   DOM_AUTO_LOCK_SCOPE();
   target->DispatchEvent(event);
+}
+
+void EventHandler::DispatchKeyboardEvent(
+    const domapi::KeyboardEvent& api_event) {
+  auto const window = EventTarget::FromEventTargetId(api_event.target_id);
+  if (!window)
+    return;
+  gc::Local<KeyboardEvent> event(new KeyboardEvent(api_event));
+  DOM_AUTO_LOCK_SCOPE();
+  if (!window->DispatchEvent(event))
+    return;
+  DoDefaultEventHandling(window, event);
 }
 
 void EventHandler::DispatchMouseEvent(const domapi::MouseEvent& api_event) {

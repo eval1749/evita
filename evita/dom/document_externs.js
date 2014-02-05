@@ -36,6 +36,9 @@ Document.remove = function(document) {};
 /** @expose  @type {string} */
 Document.prototype.filename;
 
+/** @expose  @type {?Keymap} */
+Document.prototype.keymap;
+
 /** @expose  @type {number} */
 Document.prototype.length;
 

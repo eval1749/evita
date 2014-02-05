@@ -52,9 +52,20 @@ var DocumentWindow = function() {};
 var EditorWindow = function() {};
 
 /**
- * @constructor
+ * TODO(yosi) Until Closure compiler supports optional entries in @struct,
+ * we use |Object|.
+ * @typedef {Object}
+ *   bubbles: boolean
+ *   cancelable: boolean
  */
-var Event = function() {};
+var EventInit;
+
+/**
+ * @constructor
+ * @param {string} type
+ * @param {EventInit=} opt_init_dict
+ */
+var Event = function(type, opt_init_dict) {};
 
 /** @typedef {Function|Object} Object which has |handleEvent(event)| */
 var EventListener;
@@ -145,31 +156,70 @@ var TableSelection = function() {};
 var TextSelection = function() {};
 
 /**
- * @constructor
- * @extends{Event}
- */
-var UiEvent = function() {};
-
-/**
- * @constructor
- * @extends{UiEvent}
- * @param {string} type
- * @param {?EventTarget} related_target
- */
-var FocusEvent = function(type, related_target) {};
-
-/**
- * @constructor
- * @extends{Event}
- * @param {string} type
- * @param {boolean} bubbles
- * @param {boolean} cancelable
- * @param {string} data
- */
-var FormEvent = function(type, bubbles, cancelable, data) {};
-
-/**
+ * TODO(yosi) Until Closure compiler supports optional entries in @struct,
+ * we use |Object|.
  * @typedef {Object}
+ *   bubbles: boolean
+ *   cancelable: boolean
+ *   detail: number
+ *   view: ?Window
+ */
+var UiEventInit;
+
+/**
+ * @constructor
+ * @extends {Event}
+ * @param {string} type
+ * @param {UiEventInit=} opt_init_dict
+ */
+var UiEvent = function(type, opt_init_dict) {};
+
+/**
+ * TODO(yosi) Until Closure compiler supports optional entries in @struct,
+ * we use |Object|.
+ * @typedef {Object}
+ *   bubbles: boolean
+ *   cancelable: boolean
+ *   detail: number
+ *   view: ?Window
+ *   relatedTarget: ?Window
+ */
+var FocusEventInit;
+
+/**
+ * @constructor
+ * @extends {UiEvent}
+ * @param {string} type
+ * @param {FocusEventInit=} opt_init_dict
+ */
+var FocusEvent = function(type, opt_init_dict) {};
+
+/**
+ * TODO(yosi) Until Closure compiler supports optional entries in @struct,
+ * we use |Object|.
+ * @typedef {Object}
+ *   bubbles: boolean
+ *   cancelable: boolean
+ *   data: string
+ */
+var FormEventInit;
+
+/**
+ * @constructor
+ * @extends {Event}
+ * @param {string} type
+ * @param {FormEventInit=} opt_init_dict
+ */
+var FormEvent = function(type, opt_init_dict) {};
+
+/**
+ * TODO(yosi) Until Closure compiler supports optional entries in @struct,
+ * we use |Object|.
+ * @typedef {Object}
+ *   bubbles: boolean
+ *   cancelable: boolean
+ *   detail: number
+ *   view: ?Window
  *   altKey: boolean,
  *   ctrlKey: boolean,
  *   code: number,
@@ -185,27 +235,52 @@ var KeyboardEventInit;
  * @constructor
  * @extends {Event}
  * @param {string} type
- * @param {KeyboardEventInit=} opt_dict
+ * @param {KeyboardEventInit=} opt_init_dict
  */
-var KeyboardEvent = function(type, opt_dict) {};
+var KeyboardEvent = function(type, opt_init_dict) {};
+
+/**
+ * TODO(yosi) Until Closure compiler supports optional entries in @struct,
+ * we use |Object|.
+ * @typedef {Object}
+ *   bubbles: boolean
+ *   cancelable: boolean
+ *   detail: number
+ *   view: ?Window
+ *   altKey: boolean,
+ *   button: number,
+ *   buttns: number,
+ *   ctrlKey: boolean,
+ *   metaKey: boolean,
+ *   shiftKey: boolean,
+ */
+var MouseEventInit;
 
 /**
  * @constructor
- * @extends{Event}
+ * @extends {Event}
  * @param {string} type
- * @param {number} click_count
+ * @param {MouseEventInit=} opt_init_dict
  */
-var MouseEvent = function(type, click_count) {};
+var MouseEvent = function(type, opt_init_dict) {};
+
+/**
+ * TODO(yosi) Until Closure compiler supports optional entries in @struct,
+ * we use |Object|.
+ * @typedef {Object}
+ *   bubbles: boolean
+ *   cancelable: boolean
+ *   souceWindow: !Window
+ */
+var WindowEventInit;
 
 /**
  * @constructor
- * @extends{Event}
+ * @extends {Event}
  * @param {string} type
- * @param {boolean} bubbles
- * @param {boolean} cancelable
- * @param {!Window} source_window
+ * @param {WindowEventInit=} opt_init_dict
  */
-var WindowEvent = function(type, bubbles, cancelable, source_window) {};
+var WindowEvent = function(type, opt_init_dict) {};
 
 //////////////////////////////////////////////////////////////////////
 //

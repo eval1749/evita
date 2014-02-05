@@ -202,10 +202,7 @@ global.TextWindow.prototype.clone = function() {
   function handleMouseUp(window, event) {
     if (event.button)
      return;
-    if (window.autoscroller_)
-      window.autoscroller_.stop();
-    if (window.dragController_)
-      window.dragController_.stop();
+    stopControllers(window);
   }
 
   /** @param {!TextWindow} window */
@@ -216,6 +213,14 @@ global.TextWindow.prototype.clone = function() {
     selection.startIsActive = false;
   }
 
+  /** @param {!TextWindow} window */
+  function stopControllers(window) {
+    if (window.autoscroller_)
+      window.autoscroller_.stop();
+    if (window.dragController_)
+      window.dragController_.stop();
+  }
+
   /**
    * Default event handler.
    * @this {!TextWindow}
@@ -224,7 +229,7 @@ global.TextWindow.prototype.clone = function() {
   TextWindow.handleEvent = function(event) {
     switch (event.type) {
       case Event.Names.BLUR:
-        this.dragController_.stop();
+        stopControllers(this);
         break;
       case Event.Names.DBLCLICK:
         selectWord(this);
@@ -238,6 +243,7 @@ global.TextWindow.prototype.clone = function() {
       case Event.Names.MOUSEUP:
         handleMouseUp(this, /** @type {!MouseEvent} */(event));
         break;
+      }
     }
   };
 })();

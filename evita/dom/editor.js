@@ -201,6 +201,8 @@
      * @return {number} key code.
      */
     return function(spec) {
+      if (spec.length == 1)
+        return spec.charCodeAt(0);
       var code = 0;
       KEY_COMBINATION_RULES.forEach(function(rule) {
         if (code)

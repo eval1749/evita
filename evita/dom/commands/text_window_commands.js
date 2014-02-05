@@ -39,14 +39,14 @@
     return char_code == 0x29 || char_code == 0x5D || char_code == 0x7D ?
       function(opt_count) {
         if (arguments.length)
-          typeRightBracket.call(this, char_code);
-        else
           typeRightBracket.call(this, char_code, opt_count);
+        else
+          typeRightBracket.call(this, char_code);
       } : function(opt_count) {
         if (arguments.length)
-          typeChar.call(this, char_code);
-        else
           typeChar.call(this, char_code, opt_count);
+        else
+          typeChar.call(this, char_code);
       };
   }
 
@@ -65,7 +65,7 @@
    * @param {number=} opt_count
    */
   function typeChar(char_code, opt_count) {
-    var count = arguments.length >= 2 ? 1 : /**@type{number}*/(opt_count);
+    var count = arguments.length >= 2 ? /**@type{number}*/(opt_count) : 1;
     var range = this.selection.range;
     range.text = String.fromCharCode(char_code).repeat(count);
     range.collapseTo(range.end);
@@ -78,7 +78,7 @@
    * @param {number=} opt_count
    */
   function typeRightBracket(char_code, opt_count) {
-    var count = arguments.length >= 2 ? 1 : /**@type{number}*/(opt_count);
+    var count = arguments.length >= 2 ? /**@type{number}*/(opt_count) : 1;
     var selection = this.selection;
     var range = selection.range;
     range.text = String.fromCharCode(char_code).repeat(count);

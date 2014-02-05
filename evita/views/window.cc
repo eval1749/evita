@@ -82,6 +82,17 @@ dom::ViewEventHandler* view_event_handler() {
   return Application::instance()->view_event_handler();
 }
 
+domapi::EventType ConvertEventType(const ui::KeyboardEvent event) {
+  auto const event_type = event.event_type();
+  if (event_type == ui::EventType::KeyPressed)
+    return domapi::EventType::KeyDown;
+
+  if (event_type == ui::EventType::KeyReleased)
+    return domapi::EventType::KeyUp;
+
+  return domapi::EventType::Invalid;
+}
+
 domapi::EventType ConvertEventType(const ui::MouseEvent event) {
   auto const event_type = event.event_type();
   if (event_type == ui::EventType::MousePressed) {
@@ -146,6 +157,20 @@ void Window::DidKillFocus() {
     view_event_handler()->DidKillFocus(window_id_);
 }
 
+void Window::DispatchKeyboardEvent(const ui::KeyboardEvent& event) {
+  domapi::KeyboardEvent api_event;
+  api_event.alt_key = false;
+  api_event.control_key = event.control_key();
+  api_event.event_type = ConvertEventType(event);
+  api_event.key_code = event.raw_key_code();
+  api_event.meta_key = false;
+  api_event.repeat = event.repeat();
+  api_event.shift_key = event.shift_key();
+  api_event.target_id = window_id();
+  Application::instance()->view_event_handler()->DispatchKeyboardEvent(
+      api_event);
+}
+
 void Window::DispatchMouseEvent(const ui::MouseEvent& event) {
   #define MUST_EQUAL(name) \
     static_assert(static_cast<int>(domapi::MouseButton::name) == \
@@ -169,6 +194,10 @@ void Window::DispatchMouseEvent(const ui::MouseEvent& event) {
   api_event.target_id = window_id();
   Application::instance()->view_event_handler()->DispatchMouseEvent(
       api_event);
+}
+
+void Window::OnKeyPressed(const ui::KeyboardEvent& event) {
+  DispatchKeyboardEvent(event);
 }
 
 void Window::OnMouseMoved(const ui::MouseEvent& event) {

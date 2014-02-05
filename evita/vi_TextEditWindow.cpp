@@ -397,12 +397,6 @@ bool TextEditWindow::OnIdle(uint count) {
   return more;
 }
 
-void TextEditWindow::OnKeyPressed(const ui::KeyboardEvent& event) {
-  Application::instance()->Execute(this,
-                                   static_cast<uint32_t>(event.raw_key_code()),
-                                   static_cast<uint32_t>(event.repeat()));
-}
-
 LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
   switch (uMsg) {
     case WM_VSCROLL:

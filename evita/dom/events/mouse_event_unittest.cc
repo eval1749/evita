@@ -33,6 +33,7 @@ TEST_F(MouseEventTest, ctor) {
   auto const event = new dom::MouseEvent(api_event);
   EXPECT_SCRIPT_VALID_CALL("init", event->GetWrapper(isolate()));
 
+  EXPECT_SCRIPT_TRUE("event instanceof MouseEvent");
   EXPECT_SCRIPT_TRUE("event.bubbles");
   EXPECT_SCRIPT_TRUE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.current_target == null");

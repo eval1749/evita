@@ -136,9 +136,7 @@ global.commander =
 
   /** @param {!Event} event */
   function handleEvent(event) {
-    // TODO(yosi) We need to study whey
-    // (event instanceof KeyboardEvent) returns false.
-    if (event.type == 'keydown')
+    if (event instanceof KeyboardEvent)
       handleKeyboardEvent(/**@type{!KeyboardEvent}*/(event));
   }
 

@@ -35,6 +35,7 @@ TEST_F(KeyboardEventTest, ctor_event) {
   auto const event = new dom::KeyboardEvent(raw_event);
   EXPECT_SCRIPT_VALID_CALL("init", event->GetWrapper(isolate()));
 
+  EXPECT_SCRIPT_TRUE("event instanceof KeyboardEvent");
   EXPECT_SCRIPT_TRUE("event.bubbles");
   EXPECT_SCRIPT_TRUE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.current_target == null");

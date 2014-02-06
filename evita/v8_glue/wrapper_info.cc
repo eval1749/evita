@@ -148,8 +148,8 @@ v8::Handle<v8::ObjectTemplate> WrapperInfo::GetOrCreateInstanceTemplate(
 
 void WrapperInfo::Install(v8::Isolate* isolate,
                           v8::Handle<v8::ObjectTemplate> global) {
-  auto constructor = GetOrCreateConstructorTemplate(isolate)->GetFunction();
-  global->Set(constructor->GetName()->ToString(), constructor);
+  auto constructor = GetOrCreateConstructorTemplate(isolate);
+  global->Set(gin::StringToV8(isolate, class_name_), constructor);
   if (auto const singleton = this->singleton()) {
     global->Set(gin::StringToV8(isolate, singleton_name()),
                 singleton->GetWrapper(isolate));

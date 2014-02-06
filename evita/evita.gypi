@@ -443,6 +443,8 @@
         'v8_glue/function_template_builder.cc',
         'v8_glue/isolate_holder.cc',
         'v8_glue/per_isolate_data.cc',
+        'v8_glue/runner.cc',
+        'v8_glue/runner_delegate.cc',
         'v8_glue/scriptable.cc',
         'v8_glue/script_callback.cc',
         'v8_glue/wrapper_info.cc',

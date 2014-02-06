@@ -136,5 +136,25 @@
         'views/table_model_unittest.cc',
       ],
     }, # evita_text_test
+    {
+      'target_name': 'evita_glue_unittests',
+      'type': 'executable',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        '<(DEPTH)/evita/evita.gyp:v8_glue',
+        '<(DEPTH)/testing/gtest.gyp:gtest',
+        '<(DEPTH)/testing/gtest.gyp:gtest_main',
+      ], # dependencies
+      'include_dirs+' : [
+        '<(DEPTH)/testing/gtest/include/',
+      ], # include_dirs
+      'msvs_disabled_warnings': [
+        4625, 4626, 4826,
+      ],
+      'sources': [
+        'precomp.cpp',
+        'v8_glue/runner_unittest.cc',
+      ],
+    }, # evita_text_test
   ] # targets
 }

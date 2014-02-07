@@ -11,7 +11,10 @@ TableControlObserver::TableControlObserver() {
 TableControlObserver::~TableControlObserver() {
 }
 
-void TableControlObserver::OnKeyDown(int) {
+void TableControlObserver::OnKeyPressed(const KeyboardEvent&) {
+}
+
+void TableControlObserver::OnMousePressed(const MouseEvent&) {
 }
 
 void TableControlObserver::OnSelectionChanged() {

@@ -561,22 +561,13 @@ void TableControl::OnKeyPressed(const ui::KeyboardEvent& event) {
       return;
   }
 
-  observer_->OnKeyDown(event.raw_key_code());
+  observer_->OnKeyPressed(event);
 }
 
 void TableControl::OnMousePressed(const ui::MouseEvent& event) {
   model_->OnMousePressed(event);
+  observer_->OnMousePressed(event);
   UpdateViewIfNeeded();
-}
-
-// TODO(yosi) We should use OnMousePressed() instead of OnMessage().
-LRESULT TableControl::OnMessage(uint32_t message, WPARAM wParam,
-                                LPARAM lParam) {
-  if (message == WM_LBUTTONDBLCLK) {
-    observer_->OnKeyDown(static_cast<int>(ui::KeyCode::Enter));
-    return 0;
-  }
-  return Widget::OnMessage(message, wParam, lParam);
 }
 
 }  // namespace ui

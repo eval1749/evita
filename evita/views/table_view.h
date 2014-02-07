@@ -20,6 +20,8 @@ class Document;
 }
 
 namespace ui {
+class KeyboardEvent;
+class MouseEvent;
 class TableControl;
 }
 
@@ -52,6 +54,8 @@ class TableView
   private: void UpdateControl(std::unique_ptr<TableViewModel> new_model);
 
   // ui::TableControlObserver
+  private: virtual void OnKeyPressed(const ui::KeyboardEvent&) override;
+  private: virtual void OnMousePressed(const ui::MouseEvent&) override;
   private: virtual void OnSelectionChanged() override;
 
   // ui::TableModel

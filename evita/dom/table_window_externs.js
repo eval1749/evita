@@ -4,5 +4,11 @@
 /** @expose @type {!Document} */
 TableWindow.prototype.document;
 
+/**
+ * @expose
+ * @param {!Event} event
+ */
+TableWindow.prototype.handleEvent = function(event) {};
+
 /** @override @expose @type {!TableSelection} */
 TableWindow.prototype.selection;

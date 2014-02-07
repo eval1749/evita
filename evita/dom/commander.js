@@ -116,7 +116,7 @@ global.commander =
     var present = get(keymap, code);
     if (present)
       return present;
-    if (event.target instanceof TextWindow) {
+    if (event.target instanceof DocumentWindow) {
       var text_window = /**@type {TextWindow} */(event.target);
       present = get(text_window.document['keymap'], code);
       if (present)

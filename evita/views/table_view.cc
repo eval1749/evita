@@ -178,6 +178,14 @@ std::unique_ptr<TableViewModel> TableView::UpdateModelIfNeeded() {
 }
 
 // ui::TableControlObserver
+void TableView::OnKeyPressed(const ui::KeyboardEvent& event) {
+  CommandWindow::OnKeyPressed(event);
+}
+
+void TableView::OnMousePressed(const ui::MouseEvent& event) {
+  CommandWindow::OnMousePressed(event);
+}
+
 void TableView::OnSelectionChanged() {
 }
 

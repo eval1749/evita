@@ -59,6 +59,7 @@
         'dom/file_path.js',
         'dom/range.js',
         'dom/style.js',
+        'dom/table_window.js',
         'dom/text_position.js',
         'dom/text_selection.js',
         'dom/text_window.js',

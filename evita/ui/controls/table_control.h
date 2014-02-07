@@ -55,8 +55,6 @@ class TableControl :
   private: virtual void DidSetFocus() override;
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
   private: virtual void OnKeyPressed(const KeyboardEvent& event) override;
-  private: virtual LRESULT OnMessage(uint32_t message, WPARAM wParam,
-                                     LPARAM lParam) override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
 
   DISALLOW_COPY_AND_ASSIGN(TableControl);

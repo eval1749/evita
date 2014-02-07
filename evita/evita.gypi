@@ -121,6 +121,7 @@
         '<(DEPTH)/common/common.gyp:common',
         'dom_jslib',
         'dom_unicode_lib_icu',
+        'dom_v8_strings_cc',
         'text',
         'v8_glue',
       ],

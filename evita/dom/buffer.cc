@@ -5,7 +5,6 @@
 #include "evita/ed_Mode.h"
 
 #include "evita/editor/application.h"
-#include "evita/cm_CmdProc.h"
 #include "evita/resource.h"
 #include "evita/vi_Frame.h"
 

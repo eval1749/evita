@@ -362,8 +362,6 @@
       'sources': [
         'precomp.cpp',
 
-        'cm_CmdProc.cpp',
-        'cm_commands.cpp',
         'ctrl_TabBand.cpp',
         'ctrl_TitleBar.cpp',
         'editor/application.cc',

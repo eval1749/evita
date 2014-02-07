@@ -1292,10 +1292,6 @@ int EditPane::GetTitle(char16* out_wszTitle, int cchTitle) {
   return static_cast<int>(title.size());
 }
 
-Command::KeyBindEntry* EditPane::MapKey(uint nKey) {
-  return GetActiveWindow()->MapKey(nKey);
-}
-
 void EditPane::OnDraw(gfx::Graphics* gfx) {
   root_box_->DrawSplitters(*gfx);
 }

@@ -8,7 +8,6 @@
 
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
-#include "evita/cm_CmdProc.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
 #include "evita/editor/dom_lock.h"
@@ -18,10 +17,6 @@
 #include "evita/views/table_view_model.h"
 
 extern HINSTANCE g_hInstance;
-
-namespace Command {
-uint32 TranslateKey(uint32 vkey_code);
-}
 
 namespace views {
 
@@ -202,14 +197,6 @@ base::string16 TableView::GetCellText(int row_id, int column_id) const {
     return base::string16();
   }
   return present->second->cell(static_cast<size_t>(column_id)).text();
-}
-
-// views::CommandWindow
-Command::KeyBindEntry* TableView::MapKey(uint nKey) {
-  if (auto const entry = document_->buffer()->MapKey(nKey))
-    return entry;
-
-  return CommandWindow::MapKey(nKey);
 }
 
 // views::ContentWindow

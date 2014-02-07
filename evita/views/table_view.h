@@ -60,9 +60,6 @@ class TableView
   private: virtual base::string16 GetCellText(
       int row_id, int column_id) const override;
 
-  // views::CommandWindow
-  private: virtual Command::KeyBindEntry* MapKey(uint) override;
-
   // views::ContentWindow
   private: virtual base::string16 GetTitle(size_t max_length) const;
   private: virtual void MakeSelectionVisible() override;

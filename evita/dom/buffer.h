@@ -13,18 +13,9 @@
 
 #include "evita/text/buffer.h"
 
-#include <memory>
-
-namespace Command {
-class KeyBindEntry;
-class KeyBinds;
-}
-
 namespace dom {
 
 class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
-  private: std::unique_ptr<Command::KeyBinds> key_bindings_;
-
   public: Buffer(const base::string16& name, text::Mode* pMode = nullptr);
   public: virtual ~Buffer();
 
@@ -32,17 +23,11 @@ class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
     filename_ = filename;
   }
 
-  // [B]
-  public: void BindKey(uint key_code, Command::KeyBindEntry* entry);
-
   // [F]
   public: void FinishIo(uint);
 
   // [L]
   public: bool Load(const char16*);
-
-  // [M]
-  public: virtual Command::KeyBindEntry* MapKey(uint key_code) const;
 
   // [O]
   public: bool OnIdle(uint);

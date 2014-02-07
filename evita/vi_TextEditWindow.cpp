@@ -41,10 +41,6 @@
 
 extern HWND g_hwndActiveDialog;
 
-namespace Command {
-uint TranslateKey(uint);
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // TextEditWindow::ScrollBar
@@ -57,10 +53,6 @@ TextEditWindow::ScrollBar::~ScrollBar() {
 void TextEditWindow::ScrollBar::ShowWindow(int code) const {
   if (m_hwnd)
     ::ShowWindow(m_hwnd, code);
-}
-
-namespace {
-Command::KeyBinds* key_bindings;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -84,20 +76,6 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
 }
 
 TextEditWindow::~TextEditWindow() {
-}
-
-void TextEditWindow::BindKey(int key_code,
-    const common::scoped_refptr<Command::KeyBindEntry>& entry) {
-  if (!key_bindings)
-    key_bindings = new Command::KeyBinds;
-  key_bindings->Bind(key_code, entry);
-}
-
-void TextEditWindow::BindKey(int key_code,
-                             Command::Command::CommandFn function) {
-  if (!key_bindings)
-    key_bindings = new Command::KeyBinds;
-  key_bindings->Bind(key_code, function);
 }
 
 Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
@@ -345,16 +323,6 @@ base::string16 TextEditWindow::GetTitle(size_t max_length) const {
   if (mark_length)
     title += L" *";
   return title;
-}
-
-Command::KeyBindEntry* TextEditWindow::MapKey(uint nKey) {
-  if (auto const entry = GetBuffer()->MapKey(nKey))
-    return entry;
-
-  if (auto const entry = key_bindings->MapKey(static_cast<int>(nKey)))
-    return entry;
-
-  return CommandWindow::MapKey(nKey);
 }
 
 void TextEditWindow::MakeSelectionVisible() {

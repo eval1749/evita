@@ -103,11 +103,6 @@ class TextEditWindow
   public: explicit TextEditWindow(const dom::TextWindow& window);
   public: virtual ~TextEditWindow();
 
-  // [B]
-  public: static void BindKey(int key_code,
-      const common::scoped_refptr<Command::KeyBindEntry>& entry);
-  public: static void BindKey(int key_code, Command::Command::CommandFn);
-
   // [C]
   public: Count ComputeMotion(Unit, Count, const gfx::PointF&, Posn*);
   private: Posn computeGoalX(float, Posn);
@@ -148,7 +143,6 @@ class TextEditWindow
   public: int LargeScroll(int, int, bool = true);
 
   // [M]
-  public: virtual Command::KeyBindEntry* MapKey(uint) override;
   public: virtual void MakeSelectionVisible() override;
   public: Posn MapPointToPosn(const gfx::PointF point);
   public: gfx::RectF MapPosnToPoint(Posn);

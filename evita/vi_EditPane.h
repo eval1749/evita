@@ -101,9 +101,6 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
     return m_eState == State_Realized;
   }
 
-  // [M]
-  public: virtual Command::KeyBindEntry* MapKey(uint) override;
-
   // [O]
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
   private: virtual void OnMouseMoved(const ui::MouseEvent&) override;

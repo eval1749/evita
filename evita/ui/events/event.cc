@@ -3,14 +3,58 @@
 
 #include "evita/ui/events/event.h"
 
+#include <vector>
+
+#include "common/memory/singleton.h"
 #include "common/win/win32_verify.h"
 #include "evita/ui/widget.h"
 
-namespace Command {
-uint32_t TranslateKey(uint32_t vkey_code);
+namespace ui {
+
+namespace {
+
+class KeyCodeMapper : public common::Singleton<KeyCodeMapper> {
+  DECLARE_SINGLETON_CLASS(KeyCodeMapper);
+
+  private: std::vector<int> graph_keys_;
+
+  private: KeyCodeMapper() : graph_keys_(256) {
+    for (auto key_code = 0u; key_code < graph_keys_.size(); ++key_code) {
+      auto const char_code = ::MapVirtualKey(key_code, MAPVK_VK_TO_CHAR);
+      if (char_code >= 0x20)
+        graph_keys_[key_code] = static_cast<int>(char_code);
+    }
+  }
+
+  public: ~KeyCodeMapper() = default;
+
+  public: int Map(int virtual_key_code);
+};
+
+int KeyCodeMapper::Map(int virtual_key_code) {
+  if (VK_CONTROL == virtual_key_code)
+    return 0;
+  if (VK_SHIFT == virtual_key_code)
+    return 0;
+
+  auto key_code = graph_keys_[static_cast<size_t>(virtual_key_code)];
+
+  if (!key_code)
+   key_code = virtual_key_code | 0x100;
+
+  if (::GetKeyState(VK_CONTROL) < 0) {
+    key_code |= static_cast<int>(Modifier::Control);
+  } else if (key_code <= 0xFF) {
+    // For graphics key, we use WM_CHAR.
+    return 0;
+  }
+
+  if (::GetKeyState(VK_SHIFT) < 0)
+    key_code |= static_cast<int>(Modifier::Shift);
+  return key_code;
 }
 
-namespace ui {
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -51,8 +95,8 @@ KeyboardEvent KeyboardEvent::Create(uint32_t message, WPARAM wParam,
 
   if (message == WM_KEYDOWN) {
     auto event = KeyboardEvent(EventType::KeyPressed, lParam);
-    event.raw_key_code_ = static_cast<int>(
-        Command::TranslateKey(static_cast<uint32_t>(wParam)));
+    event.raw_key_code_ = KeyCodeMapper::instance()->
+        Map(static_cast<int>(wParam));
     return event.raw_key_code_ ? event : KeyboardEvent();
   }
 

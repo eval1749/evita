@@ -62,7 +62,6 @@
    */
   Document.prototype.bindKey = function (key_combination, command) {
     var key_code = Editor.parseKeyCombination(key_combination);
-    this.bindKey_(key_code, command);
     var map = this.keymap;
     if (!map) {
       map = new Map();

@@ -43,7 +43,6 @@ class Document : public v8_glue::Scriptable<Document> {
   public: v8::Handle<v8::Object> properties() const;
   public: v8::Handle<v8::Object> style_at(text::Posn position) const;
 
-  public: void BindKey(int key_code, v8::Handle<v8::Object> command);
   public: void DidCreateRange(Range* range);
   public: void DidDestroyRange(Range* range);
   public: void DoColor(int hint);

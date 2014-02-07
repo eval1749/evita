@@ -58,12 +58,6 @@ Document.prototype.properties;
 Document.prototype.bindKey = function (key_combination, command) {};
 
 /**
- * @param {number} key_code
- * @param {function(number?)} command
- */
-Document.prototype.bindKey_ = function(key_code, command) {};
-
-/**
  * @param {number} index
  * @return {number}
  */

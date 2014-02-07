@@ -14,7 +14,6 @@
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/script_command.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/ed_Mode.h"
@@ -141,7 +140,6 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         .SetProperty("modified", &Document::modified)
         .SetProperty("name", &Document::name)
         .SetProperty("properties", &Document::properties)
-        .SetMethod("bindKey_", &Document::BindKey)
         .SetMethod("charCodeAt_", &Document::charCodeAt)
         .SetMethod("doColor_", &Document::DoColor)
         .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
@@ -211,11 +209,6 @@ const base::string16& Document::name() const {
 v8::Handle<v8::Object> Document::properties() const {
   return properties_.NewLocal(v8::Isolate::GetCurrent());
 }
-
-void Document::BindKey(int key_code, v8::Handle<v8::Object> command) {
-  buffer_->BindKey(static_cast<uint32>(key_code), new ScriptCommand(command));
-}
-
 
 void Document::DidCreateRange(Range* range) {
   ranges_.insert(range);

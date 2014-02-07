@@ -11,7 +11,6 @@
 #include "evita/cm_CmdProc.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
-#include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/ui/base/table_model_observer.h"
 #include "evita/ui/controls/table_control.h"
@@ -184,10 +183,6 @@ std::unique_ptr<TableViewModel> TableView::UpdateModelIfNeeded() {
 }
 
 // ui::TableControlObserver
-void TableView::OnKeyDown(int key_code) {
-  Application::instance()->Execute(this, static_cast<uint32_t>(key_code), 0u);
-}
-
 void TableView::OnSelectionChanged() {
 }
 

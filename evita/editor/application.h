@@ -25,10 +25,6 @@ namespace base {
 class MessageLoop;
 }
 
-namespace Command {
-class Processor;
-}
-
 namespace dom {
 class Buffer;
 class ViewEventHandler;
@@ -51,7 +47,6 @@ class Application : public common::Singleton<Application> {
   private: Frame* active_frame_;
   private: int idle_count_;
   private: bool is_quit_;
-  private: std::unique_ptr<Command::Processor> command_processor_;
   private: std::unique_ptr<editor::DomLock> dom_lock_;
   private: std::unique_ptr<IoManager> io_manager_;
   private: std::unique_ptr<base::MessageLoop> message_loop_;
@@ -78,9 +73,6 @@ class Application : public common::Singleton<Application> {
   // [D]
   public: void DidCreateFrame(Frame* frame);
   private: void DoIdle();
-
-  // [E]
-  public: void Execute(CommandWindow* window, uint32 key_code, uint32 repeat);
 
   // [F]
   public: Frame* FindFrame(HWND hwnd) const;

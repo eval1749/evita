@@ -52,7 +52,6 @@ class TableView
   private: void UpdateControl(std::unique_ptr<TableViewModel> new_model);
 
   // ui::TableControlObserver
-  private: virtual void OnKeyDown(int key_code) override;
   private: virtual void OnSelectionChanged() override;
 
   // ui::TableModel

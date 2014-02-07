@@ -14,7 +14,6 @@
 #include "base/strings/string_number_conversions.h"
 #include "base/time/time.h"
 #include "common/memory/scoped_change.h"
-#include "evita/cm_CmdProc.h"
 #include "evita/dom/script_thread.h"
 #include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
@@ -77,12 +76,10 @@ Application::Application()
     : active_frame_(nullptr),
       idle_count_(0),
       is_quit_(false),
-      command_processor_(new Command::Processor()),
       dom_lock_(new editor::DomLock()),
       io_manager_(new IoManager()),
       message_loop_(new base::MessageLoop(make_scoped_ptr(new MessagePump()))),
       view_delegate_impl_(new views::ViewDelegateImpl()) {
-  Command::Processor::GlobalInit();
   io_manager_->Realize();
   dom::ScriptThread::Start(view_delegate_impl_.get(), message_loop_.get());
 }
@@ -144,12 +141,6 @@ void Application::DoIdle() {
         base::Bind(&Application::DoIdle, base::Unretained(this)),
         base::TimeDelta::FromMilliseconds(1000 / 60));
   }
-}
-
-void Application::Execute(CommandWindow* window, uint32 key_code,
-                          uint32 repeat) {
-  command_processor_->Execute(window, static_cast<int>(key_code),
-                              static_cast<int>(repeat));
 }
 
 Frame* Application::FindFrame(HWND hwnd) const {

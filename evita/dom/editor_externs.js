@@ -24,18 +24,6 @@ Editor.bindKey = function(window_class, key_combination, command,
                           opt_description) {};
 
 /**
- * @param {number} key_code
- * @param {function(number=)} command
- */
-Editor.bindKeyOnTextWindow_ = function(key_code, command) {};
-
-/**
- * @param {number} key_code
- * @param {function(number=)} command
- */
-Editor.bindKeyOnWindow_ = function(key_code, command) {};
-
-/**
  * @param {?Window} window.
  * @param {!string} filename.
  * @return {Promise.<string>}

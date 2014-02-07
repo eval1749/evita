@@ -31,16 +31,6 @@
   Editor.bindKey = function(window_class, key_combination, command,
                             opt_description) {
     var key_code = Editor.parseKeyCombination(key_combination);
-    switch (window_class) {
-      case TextWindow:
-        Editor.bindKeyOnTextWindow_(key_code, command);
-        break;
-      case Window:
-        Editor.bindKeyOnWindow_(key_code, command);
-        break;
-      default:
-        throw "Can't bind key on " + window_class;
-    }
     if (arguments.length >= 4)
       command['commandDescription'] = opt_description;
     if (!Editor.key_binding_map_map_)

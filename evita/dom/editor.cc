@@ -4,17 +4,14 @@
 #include "evita/dom/editor.h"
 
 #include "base/callback.h"
-#include "evita/cm_CmdProc.h"
 #include "evita/gc/local.h"
-#include "evita/dom/script_command.h"
 #include "evita/dom/script_controller.h"
-#include "evita/dom/script_thread.h"
+#include "evita/dom/view_delegate.h"
 #include "evita/dom/window.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/script_callback.h"
-#include "evita/vi_TextEditWindow.h"
 
 namespace dom {
 
@@ -31,16 +28,6 @@ class EditorClass : public v8_glue::WrapperInfo {
       : v8_glue::WrapperInfo(name) {
   }
   public: ~EditorClass() = default;
-
-  private: static void BindKeyOnWindow(int key_code,
-                                            v8::Handle<v8::Object> command) {
-    CommandWindow::BindKey(key_code, new ScriptCommand(command));
-  }
-
-  private: static void BindKeyOnTextWindow(int key_code,
-                                            v8::Handle<v8::Object> command) {
-    TextEditWindow::BindKey(key_code, new ScriptCommand(command));
-  }
 
   private: static void GetFilenameForLoad(Window* window,
                                           const base::string16& dir_path,
@@ -144,8 +131,6 @@ class EditorClass : public v8_glue::WrapperInfo {
     auto templ = v8_glue::CreateConstructorTemplate(isolate,
         &EditorClass::NewEditor);
     return v8_glue::FunctionTemplateBuilder(isolate, templ)
-      .SetMethod("bindKeyOnTextWindow_", &EditorClass::BindKeyOnTextWindow)
-      .SetMethod("bindKeyOnWindow_", &EditorClass::BindKeyOnWindow)
       .SetMethod("getFilenameForLoad_", &EditorClass::GetFilenameForLoad)
       .SetMethod("getFilenameForSave_", &EditorClass::GetFilenameForSave)
       .SetMethod("messageBox_", &EditorClass::MessageBox)

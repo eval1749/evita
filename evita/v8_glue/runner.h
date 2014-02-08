@@ -52,7 +52,7 @@ class Runner : public gin::ContextHolder {
   private: int call_depth_;
   private: RunnerDelegate* delegate_;
   #if defined(_DEBUG)
-  private: bool in_scope_;
+  private: int in_scope_;
   #endif
   private: base::WeakPtrFactory<Runner> weak_factory_;
 

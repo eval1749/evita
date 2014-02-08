@@ -24,13 +24,13 @@ Runner::EscapableHandleScope::EscapableHandleScope(Runner* runner)
       context_scope_(runner->context()),
       runner_(runner) {
   #if defined(_DEBUG)
-    runner->in_scope_ = true;
+    ++runner->in_scope_;
   #endif
 }
 
 Runner::EscapableHandleScope::~EscapableHandleScope() {
   #if defined(_DEBUG)
-    runner_->in_scope_ = false;
+    --runner_->in_scope_;
   #endif
 }
 
@@ -44,13 +44,13 @@ Runner::Scope::Scope(Runner* runner)
       context_scope_(runner->context()),
       runner_(runner) {
   #if defined(_DEBUG)
-    runner->in_scope_ = true;
+    ++runner->in_scope_;
   #endif
 }
 
 Runner::Scope::~Scope() {
   #if defined(_DEBUG)
-    runner_->in_scope_ = false;
+    --runner_->in_scope_;
   #endif
 }
 

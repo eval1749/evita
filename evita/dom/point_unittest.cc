@@ -22,7 +22,7 @@ TEST_F(PointTest, Constructor) {
 }
 
 TEST_F(PointTest, Wrapper) {
-  v8::HandleScope handle_scope(isolate());
+  RunnerScope runner_scope(this);
   EXPECT_SCRIPT_VALID("var point;"
                       "function init(x) { point = x; }");
   auto const point = new dom::Point(1234.0f, 4567.0f);

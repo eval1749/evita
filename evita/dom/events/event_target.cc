@@ -12,6 +12,7 @@
 #include "evita/dom/script_controller.h"
 #include "evita/gc/weak_ptr.h"
 #include "evita/v8_glue/converter.h"
+#include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/scoped_persistent.h"
 
 namespace dom {
@@ -260,17 +261,14 @@ void EventTarget::InvokeEventListeners(Event* event) {
         continue;
     }
 
-    auto const isolate = v8::Isolate::GetCurrent();
-    v8::HandleScope handle_scope(isolate);
-    v8::Handle<v8::Value> argv[1] {event->GetWrapper(isolate)};
+    auto const runner = ScriptController::instance()->runner();
+    auto const isolate = runner->isolate();
+    v8_glue::Runner::Scope runner_scope(runner);
     auto const callee = GetCallee(isolate,
         listener->callback.NewLocal(isolate));
     if (callee.IsEmpty())
       continue;
-    v8::TryCatch try_catch;
-    auto const value = callee->CallAsFunction(GetWrapper(isolate), 1, argv);
-    if (value.IsEmpty())
-        ScriptController::instance()->LogException(try_catch);
+    runner->Call(callee, GetWrapper(isolate), event->GetWrapper(isolate));
   }
 }
 

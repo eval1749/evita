@@ -13,6 +13,7 @@
 #include "evita/ed_style.h"
 #include "evita/text/range.h"
 #include "evita/v8_glue/converter.h"
+#include "evita/v8_glue/runner.h"
 #include "v8_strings.h"
 
 namespace dom {
@@ -179,11 +180,11 @@ v8::Handle<v8::Object> Document::style_at(text::Posn position) const {
     return v8::Handle<v8::Object>();
   auto const style_attrs = buffer_->GetStyleAt(position);
 
-  auto const isolate = v8::Isolate::GetCurrent();
-  v8::EscapableHandleScope handle_scope(isolate);
-  auto const context = ScriptController::instance()->context();
-  v8::Context::Scope context_scope(context);
-  auto const style_ctor = context->Global()->Get(
+  auto const runner = ScriptController::instance()->runner();
+  auto const isolate = runner->isolate();
+  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
+
+  auto const style_ctor = runner->global()->Get(
       v8Strings::Style.Get(isolate))->ToObject();
   auto const style = style_ctor->CallAsConstructor(0, nullptr)->ToObject();
 
@@ -223,17 +224,16 @@ v8::Handle<v8::Object> Document::style_at(text::Posn position) const {
     style->Set(v8Strings::charSyntax.Get(isolate),
                v8::Integer::New(isolate, style_attrs->GetSyntax()));
   }
-  return handle_scope.Escape(style);
+  return runner_scope.Escape(style);
 }
 
 void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
   StyleValues style_attrs;
   style_attrs.m_rgfMask = 0;
 
-  auto const isolate = v8::Isolate::GetCurrent();
-  v8::EscapableHandleScope handle_scope(isolate);
-  auto const context = ScriptController::instance()->context();
-  v8::Context::Scope context_scope(context);
+  auto const runner = ScriptController::instance()->runner();
+  auto const isolate = runner->isolate();
+  v8_glue::Runner::Scope runner_scope(runner);
 
   #define LOAD_DICT_VALUE(type, attr_name, mask_name, member_name) \
     auto const attr_name = v8Strings::attr_name.Get(isolate); \

@@ -11,6 +11,8 @@
 #pragma warning(disable: 4365 4625 4626 4826)
 #include "gtest/gtest.h"
 #pragma warning(pop)
+#include "evita/v8_glue/runner_delegate.h"
+#include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/script_callback.h"
 #include "evita/v8_glue/v8.h"
 
@@ -20,11 +22,19 @@ class MockViewImpl;
 class ScriptController;
 class ViewEventHandler;
 
-class AbstractDomTest : public ::testing::Test {
+class AbstractDomTest : public v8_glue::RunnerDelegate,
+                        public ::testing::Test {
   protected: typedef v8_glue::internal::ScriptClosure::Argv Argv;
 
-  private: v8::UniquePersistent<v8::Context> context_;
+  protected: class RunnerScope {
+    private: v8_glue::Runner::Scope runner_scope_;
+    public: RunnerScope(AbstractDomTest* test);
+    public: ~RunnerScope();
+  };
+
+  private: std::string exception_;
   private: std::unique_ptr<MockViewImpl> mock_view_impl_;
+  private: std::unique_ptr<v8_glue::Runner> runner_;
 
   // Note: ScriptController is a singleton.
   private: ScriptController* script_controller_;
@@ -36,20 +46,26 @@ class AbstractDomTest : public ::testing::Test {
   protected: MockViewImpl* mock_view_impl() const {
     return mock_view_impl_.get();
   }
+  protected: v8_glue::Runner* runner() const { return runner_.get(); }
   protected: ViewEventHandler* view_event_handler() const;
 
   protected: template<typename... Params>
       bool Call(const base::StringPiece& name, Params... params);
-  private: bool DoCall(v8::Isolate* isolate, const base::StringPiece& name,
-                       const Argv& argv);
-  private: v8::Handle<v8::ObjectTemplate> CreateGlobalTempalte(
-    v8::Isolate* isolate);
-  protected: std::string EvalScript(const std::string& text);
+  private: bool DoCall(const base::StringPiece& name, const Argv& argv);
+  protected: std::string EvalScript(const base::StringPiece& text,
+                                    const char* file_name, int line_number);
   protected: virtual void PopulateGlobalTemplate(
       v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global_tempalte);
-  protected: bool RunScript(const std::string& text);
+  protected: bool RunScript(const base::StringPiece& text,
+                            const char* file_name, int line_number);
   protected: virtual void SetUp() override;
   protected: virtual void TearDown() override;
+
+  // v8_glue::RunnerDelegate
+  private: virtual v8::Handle<v8::ObjectTemplate>
+      GetGlobalTemplate(v8_glue::Runner* runner) override;
+  private: virtual void UnhandledException(v8_glue::Runner* runner,
+      const v8::TryCatch& try_catch) override;
 
   DISALLOW_COPY_AND_ASSIGN(AbstractDomTest);
 };
@@ -59,15 +75,17 @@ bool AbstractDomTest::Call(const base::StringPiece& name, Params... params) {
   v8::HandleScope handle_scope(isolate());
   v8_glue::internal::ScriptCallbackArguments args(isolate());
   args.Populate(params...);
-  return DoCall(isolate(), name, args.argv());
+  return DoCall(name, args.argv());
 }
 
 }  // namespace dom
 
-#define EXPECT_SCRIPT_VALID(script) EXPECT_TRUE(RunScript(script))
+#define EXPECT_SCRIPT_VALID(script) \
+    EXPECT_TRUE(RunScript(script, __FILE__, __LINE__))
 #define EXPECT_SCRIPT_VALID_CALL(name, ...) \
     EXPECT_TRUE(Call(name, __VA_ARGS__))
-#define EXPECT_SCRIPT_EQ(expect, script) EXPECT_EQ(expect, EvalScript(script))
+#define EXPECT_SCRIPT_EQ(expect, script) \
+    EXPECT_EQ(expect, EvalScript(script, __FILE__, __LINE__))
 #define EXPECT_SCRIPT_FALSE(script) EXPECT_SCRIPT_EQ("false", (script))
 #define EXPECT_SCRIPT_TRUE(script) EXPECT_SCRIPT_EQ("true", (script))
 

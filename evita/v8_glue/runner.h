@@ -20,12 +20,16 @@ class Runner : public gin::ContextHolder {
   public: typedef std::vector<v8::Handle<v8::Value>> Args;
 
   private: RunnerDelegate* delegate_;
+  #if defined(_DEBUG)
+  private: bool in_scope_;
+  #endif
   private: base::WeakPtrFactory<Runner> weak_factory_;
 
   public: class EscapableHandleScope {
     private: v8::Isolate::Scope isolate_scope_;
     private: v8::EscapableHandleScope handle_scope_;
     private: v8::Context::Scope context_scope_;
+    private: Runner* runner_;
 
     public: explicit EscapableHandleScope(Runner* runner);
     public: ~EscapableHandleScope();
@@ -36,17 +40,20 @@ class Runner : public gin::ContextHolder {
 
     DISALLOW_COPY_AND_ASSIGN(EscapableHandleScope);
   };
+  friend class EscapableHandleScope;
 
   public: class Scope {
     private: v8::Isolate::Scope isolate_scope_;
     private: v8::HandleScope handle_scope_;
     private: v8::Context::Scope context_scope_;
+    private: Runner* runner_;
 
     public: explicit Scope(Runner* runner);
     public: ~Scope();
 
     DISALLOW_COPY_AND_ASSIGN(Scope);
   };
+  friend class Scope;
 
   public: explicit Runner(v8::Isolate* isolate, RunnerDelegate* delegate);
   public: ~Runner();

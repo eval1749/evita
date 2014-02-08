@@ -15,18 +15,23 @@ namespace dom {
 
 using ::testing::_;
 
-namespace {
+base::string16 V8ToString(v8::Handle<v8::Value> value);
 
-base::string16 V8ToString(v8::Handle<v8::Value> value) {
-  v8::String::Value string_value(value);
-  if (!string_value.length())
-    return base::string16();
-  return base::string16(reinterpret_cast<base::char16*>(*string_value),
-                        string_value.length());
+//////////////////////////////////////////////////////////////////////
+//
+// AbstractDomTest::RunnerScope
+//
+AbstractDomTest::RunnerScope::RunnerScope(AbstractDomTest* test)
+    : runner_scope_(test->runner()) {
 }
 
-}  // namespace
+AbstractDomTest::RunnerScope::~RunnerScope() {
+}
 
+//////////////////////////////////////////////////////////////////////
+//
+// AbstractDomTest
+//
 AbstractDomTest::AbstractDomTest()
       : mock_view_impl_(new MockViewImpl()),
         script_controller_(nullptr) {
@@ -36,53 +41,70 @@ AbstractDomTest::~AbstractDomTest() {
 }
 
 v8::Isolate* AbstractDomTest::isolate() const {
-  return v8::Isolate::GetCurrent();
+  return runner_->isolate();
 }
 
 ViewEventHandler* AbstractDomTest::view_event_handler() const {
   return script_controller_->event_handler();
 }
 
-bool AbstractDomTest::DoCall(v8::Isolate* isolate,
-                             const base::StringPiece& name,
+bool AbstractDomTest::DoCall(const base::StringPiece& name,
                              const Argv& argv) {
-  auto callee = isolate->GetCurrentContext()->Global()->Get(
-      gin::StringToV8(isolate, name));
-  v8::TryCatch try_catch;
-  auto result = callee->ToObject()->CallAsFunction(v8::Null(isolate),
-      argv.size(), const_cast<v8::Handle<v8::Value>*>(argv.data()));
-  if (try_catch.HasCaught()) {
-    LOG(0) << "Call " << name << " failed: " <<
-        V8ToString(try_catch.Exception());
-  }
+  v8_glue::Runner::Scope runner_scope(runner_.get());
+  auto const isolate = runner_->isolate();
+  auto callee = runner_->GetGlobalProperty(name);
+  auto const result = runner_->Call(callee, v8::Null(isolate), argv);
   return !result.IsEmpty();
 }
 
-v8::Handle<v8::ObjectTemplate> AbstractDomTest::CreateGlobalTempalte(
-    v8::Isolate* isolate) {
-  v8::Context::Scope context_scope(script_controller_->context());
-  auto global_template = Global::instance()->object_template(isolate);
-  PopulateGlobalTemplate(isolate, global_template);
-  return global_template;
-}
-
-std::string AbstractDomTest::EvalScript(const std::string& text) {
-  auto eval_result = script_controller_->Evaluate(base::ASCIIToUTF16(text));
-  if (eval_result.exception.length())
-    return base::UTF16ToUTF8(eval_result.exception);
-  return base::UTF16ToUTF8(eval_result.value);
+std::string AbstractDomTest::EvalScript(const base::StringPiece& script_text,
+                                        const char* file_name,
+                                        int line_number) {
+  v8_glue::Runner::Scope runner_scope(runner_.get());
+  auto const isolate = runner_->isolate();
+  v8::ScriptOrigin script_origin(gin::StringToV8(isolate, file_name),
+                                 v8::Integer::New(isolate, line_number),
+                                 v8::Integer::New(isolate, 0));
+  v8::TryCatch try_catch;
+  auto const script = v8::Script::New(gin::StringToV8(isolate, script_text),
+                                      &script_origin);
+  if (script.IsEmpty()) {
+    UnhandledException(runner_.get(), try_catch);
+    return exception_;
+  }
+  auto const result = script->Run();
+  if (result.IsEmpty()) {
+    UnhandledException(runner_.get(), try_catch);
+    return exception_;
+  }
+  return base::UTF16ToUTF8(V8ToString(result));
 }
 
 void AbstractDomTest::PopulateGlobalTemplate(v8::Isolate*,
                                              v8::Handle<v8::ObjectTemplate>) {
 }
 
-bool AbstractDomTest::RunScript(const std::string& text) {
-  auto eval_result = script_controller_->Evaluate(base::ASCIIToUTF16(text));
-  if (!eval_result.exception.length())
-    return true;
-  LOG(0) << "RunScript: " << eval_result.exception;
-  return false;
+bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
+                                const char* file_name,
+                                int line_number) {
+  v8_glue::Runner::Scope runner_scope(runner_.get());
+  auto const isolate = runner_->isolate();
+  v8::ScriptOrigin script_origin(gin::StringToV8(isolate, file_name),
+                                 v8::Integer::New(isolate, line_number),
+                                 v8::Integer::New(isolate, 0));
+  v8::TryCatch try_catch;
+  auto const script = v8::Script::New(gin::StringToV8(isolate, script_text),
+                                      &script_origin);
+  if (script.IsEmpty()) {
+    UnhandledException(runner_.get(), try_catch);
+    return false;
+  }
+  auto const result = script->Run();
+  if (result.IsEmpty()) {
+    UnhandledException(runner_.get(), try_catch);
+    return false;
+  }
+  return true;
 }
 
 void AbstractDomTest::SetUp() {
@@ -95,23 +117,37 @@ void AbstractDomTest::SetUp() {
   script_controller_ = dom::ScriptController::StartForTesting(
     mock_view_impl_.get());
 
-  DOM_AUTO_LOCK_SCOPE();
-
   auto const isolate = v8::Isolate::GetCurrent();
   v8::HandleScope handle_scope(isolate);
-  auto const global_template = CreateGlobalTempalte(isolate);
-  auto context = v8::Context::New(isolate, nullptr, global_template);
-  context_.Reset(isolate, context);
-  ScriptController::instance()->set_testing_context(context);
-  context->Enter();
-  script_controller_->LoadJsLibrary();
+  runner_.reset(new v8_glue::Runner(isolate, this));
+  ScriptController::instance()->set_testing_runner(runner_.get());
+  ScriptController::instance()->DidStartHost();
 }
 
 void AbstractDomTest::TearDown() {
-  auto const isolate = v8::Isolate::GetCurrent();
-  v8::HandleScope handle_scope(isolate);
-  auto context = v8::Local<v8::Context>::New(isolate, context_);
-  context->Exit();
+}
+
+// v8_glue::RunnerDelegate
+v8::Handle<v8::ObjectTemplate> AbstractDomTest::GetGlobalTemplate(
+    v8_glue::Runner* runner) {
+  DCHECK(!runner_.get());
+  auto const templ =
+    static_cast<v8_glue::RunnerDelegate*>(ScriptController::instance())->
+        GetGlobalTemplate(runner);
+
+  auto const isolate = runner->isolate();
+  v8_glue::RunnerDelegate temp_delegate;
+  v8_glue::Runner temp_runner(isolate, &temp_delegate);
+  auto const context = v8::Context::New(isolate);
+  v8::Context::Scope context_scope(context);
+  PopulateGlobalTemplate(isolate, templ);
+  return templ;
+}
+
+void AbstractDomTest::UnhandledException(v8_glue::Runner*,
+                                         const v8::TryCatch& try_catch) {
+  LOG(0) << V8ToString(try_catch.StackTrace());
+  exception_ = base::UTF16ToUTF8(V8ToString(try_catch.Exception()));
 }
 
 }  // namespace dom

@@ -6,6 +6,7 @@
 #include "base/strings/stringprintf.h"
 #include "evita/dom/script_controller.h"
 #include "evita/v8_glue/converter.h"
+#include "evita/v8_glue/runner.h"
 
 namespace dom {
 
@@ -24,10 +25,9 @@ v8::Isolate* InitDict::isolate() const {
 bool InitDict::Init(v8::Handle<v8::Object> dict) {
   if (dict.IsEmpty())
     return true;
-  auto const isolate = v8::Isolate::GetCurrent();
-  v8::EscapableHandleScope handle_scope(isolate);
-  auto const context = ScriptController::instance()->context();
-  v8::Context::Scope context_scope(context);
+  auto const runner = ScriptController::instance()->runner();
+  v8_glue::Runner::Scope runner_scope(runner);
+  auto const isolate = runner->isolate();
 
   auto const keys = dict->GetPropertyNames();
   auto const keys_length = keys->Length();
@@ -37,12 +37,12 @@ bool InitDict::Init(v8::Handle<v8::Object> dict) {
     auto const result = HandleKeyValue(key, value);
     switch (result) {
       case HandleResult::CanNotConvert:
-        ScriptController::instance()->ThrowException(v8::Exception::TypeError(
+        runner->isolate()->ThrowException(v8::Exception::TypeError(
             gin::StringToV8(isolate, base::StringPrintf(L"Bad value for %ls",
                 V8ToString(key).c_str()))));
         return false;
       case HandleResult::NotFound:
-        ScriptController::instance()->ThrowException(v8::Exception::TypeError(
+        runner->isolate()->ThrowException(v8::Exception::TypeError(
             gin::StringToV8(isolate, base::StringPrintf(L"Invalid key: %ls",
                 V8ToString(key).c_str()))));
         return false;

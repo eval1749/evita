@@ -18,7 +18,7 @@ class FocusEventTest : public dom::AbstractDomTest {
 };
 
 TEST_F(FocusEventTest, ctor) {
-  v8::HandleScope handle_scope(isolate());
+  RunnerScope runner_scope(this);
   EXPECT_SCRIPT_VALID("var event;"
                       "function init(x) { event = x; }");
   dom::FocusEventInit init_dict;

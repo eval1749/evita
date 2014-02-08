@@ -18,7 +18,7 @@ SOURCE = """\
 #pragma warning(disable: 4127 4350 4365 4530)
 #include "base/basictypes.h"
 #include "base/strings/utf_string_conversions.h"
-#include "evita/dom/script_controller.h"
+#include "evita/v8_glue/runner.h"
 
 namespace dom {
 namespace internal {
@@ -33,16 +33,16 @@ const ScriptSouce entries[] = {
 };
 }  // namespace
 
-EvaluateResult GetJsLibFiles(ScriptController* controller) {
+bool GetJsLibFiles(v8_glue::Runner* runner) {
   for (auto index = 0u; index < arraysize(entries); ++index) {
     auto entry = &entries[index];
-    auto result = controller->Evaluate(
+    auto result = runner->Run(
         base::ASCIIToUTF16(entry->script_text),
         base::ASCIIToUTF16(entry->file_name));
-    if (!result.exception.empty())
-      return result;
+    if (result.IsEmpty())
+      return false;
   }
-  return EvaluateResult();
+  return true;
 }
 
 }  // namespace internal

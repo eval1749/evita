@@ -19,6 +19,7 @@
 #include "evita/gc/weak_ptr.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
+#include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/wrapper_info.h"
 #include "v8_strings.h"
 
@@ -277,10 +278,9 @@ void Window::DidRealizeWidget(WindowId window_id) {
 }
 
 void Window::DidResize(int left, int top, int right, int bottom) {
-  auto const isolate = v8::Isolate::GetCurrent();
-  v8::HandleScope handle_scope(isolate);
-  auto const context = ScriptController::instance()->context();
-  v8::Context::Scope context_scope(context);
+  auto const runner = ScriptController::instance()->runner();
+  auto const isolate = runner->isolate();
+  v8_glue::Runner::Scope runner_scope(runner);
   auto const instance = GetWrapper(isolate);
   instance->Set(v8Strings::left.Get(isolate), v8::Integer::New(isolate, left));
   instance->Set(v8Strings::top.Get(isolate), v8::Integer::New(isolate, top));
@@ -294,12 +294,11 @@ void Window::DidSetFocus() {
   ++global_focus_tick;
 
   // Update |Window.focus| and |Window.prototype.focusTick_|
-  auto const isolate = v8::Isolate::GetCurrent();
-  v8::HandleScope handle_scope(isolate);
-  auto const context = ScriptController::instance()->context();
-  v8::Context::Scope context_scope(context);
+  auto const runner = ScriptController::instance()->runner();
+  auto const isolate = runner->isolate();
+  v8_glue::Runner::Scope runner_scope(runner);
   auto const instance = GetWrapper(isolate);
-  auto const klass = context->Global()->Get(v8Strings::Window.Get(isolate));
+  auto const klass = runner->global()->Get(v8Strings::Window.Get(isolate));
   instance->Set(v8Strings::focusTick_.Get(isolate),
                 v8::Integer::New(isolate, global_focus_tick));
   klass->ToObject()->Set(v8Strings::focus.Get(isolate), instance);

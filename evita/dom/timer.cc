@@ -11,6 +11,7 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/script_controller.h"
 #include "evita/v8_glue/converter.h"
+#include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/function_template_builder.h"
 
 namespace dom {
@@ -137,18 +138,13 @@ bool Timer::is_running() const {
 }
 
 void Timer::DidFireTimer() {
-  auto const isolate = v8::Isolate::GetCurrent();
-  v8::HandleScope handle_scope(isolate);
+  auto const runner = ScriptController::instance()->runner();
+  auto const isolate = runner->isolate();
+  v8_glue::Runner::Scope runner_scope(runner);
   auto const callback = callback_.NewLocal(isolate);
-  auto const context = ScriptController::instance()->context();
-  v8::Context::Scope context_scope(context);
-  v8::TryCatch try_catch;
-  try_catch.SetVerbose(true);
-  try_catch.SetCaptureMessage(true);
+  auto const receiver = receiver_.NewLocal(isolate);
   DOM_AUTO_LOCK_SCOPE();
-  callback->Call(receiver_.NewLocal(isolate), 0, nullptr);
-  if (try_catch.HasCaught())
-    ScriptController::instance()->LogException(try_catch);
+  runner->Call(callback, receiver);
 }
 
 void Timer::Stop() {

@@ -14,9 +14,12 @@
 #pragma warning(disable: 4625 4626)
 #include "base/callback.h"
 #pragma warning(pop)
+#include "base/memory/weak_ptr.h"
 #include "evita/v8_glue/converter.h"
 
 namespace v8_glue {
+
+class Runner;
 
 namespace internal {
 
@@ -24,13 +27,14 @@ class ScriptClosure {
   public: typedef std::vector<v8::Handle<v8::Value>> Argv;
 
   private: v8::Persistent<v8::Function> function_;
-  private: v8::Isolate* isolate_;
+  private: base::WeakPtr<Runner> runner_;
 
-  public: ScriptClosure(v8::Isolate* isolate,
+  public: ScriptClosure(base::WeakPtr<Runner> runner,
                         v8::Handle<v8::Function> function);
   public: ~ScriptClosure();
 
-  public: v8::Isolate* isolate() const { return isolate_;}
+  public: v8::Isolate* isolate() const;
+  public: Runner* runner() const;
 
   public: void Run(Argv argv);
 };
@@ -65,15 +69,18 @@ template<typename... Params>
 struct ScriptCallback<base::Callback<void(Params...)>> {
   typedef base::Callback<void(Params...)> Callback;
 
-  static Callback New(v8::Isolate* isolate,
+  static Callback New(base::WeakPtr<Runner> runner,
                       v8::Handle<v8::Function> function) {
-    auto closure = new internal::ScriptClosure(isolate, function);
+    auto closure = new internal::ScriptClosure(runner, function);
     return base::Bind(&ScriptCallback::Run, base::Unretained(closure));
   }
 
   static void Run(internal::ScriptClosure* closure, Params... params) {
-    v8::HandleScope handle_scope(closure->isolate());
-    internal::ScriptCallbackArguments args(closure->isolate());
+    auto const runner = closure->runner();
+    if (!runner)
+      return;
+    Runner::Scope runner_scope(runner);
+    internal::ScriptCallbackArguments args(runner->isolate());
     args.Populate(params...);
     closure->Run(std::move(args.argv()));
     delete closure;

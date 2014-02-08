@@ -4,6 +4,7 @@
 #include <string>
 
 #include "base/basictypes.h"
+#include "base/strings/stringprintf.h"
 #include "gmock/gmock.h"
 #include "evita/dom/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
@@ -21,10 +22,11 @@ class RangeTest : public dom::AbstractDomTest {
   }
 
   protected: void PopulateSample(const char* sample) {
-    CHECK(RunScript(std::string() +
+    EXPECT_SCRIPT_VALID(base::StringPrintf(
         "var doc = new Document('sample');"
-        "var r = new Range(doc);" +
-        "r.text = '" + sample + "';"));
+        "var r = new Range(doc);"
+        "r.text = '%s';",
+        sample));
   }
 
   protected: virtual void SetUp() override {

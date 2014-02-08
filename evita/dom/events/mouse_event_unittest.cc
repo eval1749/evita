@@ -18,7 +18,7 @@ class MouseEventTest : public dom::AbstractDomTest {
 };
 
 TEST_F(MouseEventTest, ctor) {
-  v8::HandleScope handle_scope(isolate());
+  RunnerScope runner_scope(this);
   EXPECT_SCRIPT_VALID("var event;"
                       "function init(x) { event = x; }");
   domapi::MouseEvent api_event;

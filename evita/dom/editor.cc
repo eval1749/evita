@@ -11,6 +11,7 @@
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/optional.h"
+#include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/script_callback.h"
 
 namespace dom {
@@ -32,29 +33,32 @@ class EditorClass : public v8_glue::WrapperInfo {
   private: static void GetFilenameForLoad(Window* window,
                                           const base::string16& dir_path,
                                           v8::Handle<v8::Function> callback) {
+    auto const runner = ScriptController::instance()->runner();
     ScriptController::instance()->view_delegate()->GetFilenameForLoad(
         window->window_id(), dir_path,
         v8_glue::ScriptCallback<ViewDelegate::GetFilenameForLoadCallback>::New(
-            v8::Isolate::GetCurrent(), callback));
+            runner->GetWeakPtr(), callback));
   }
 
   private: static void GetFilenameForSave(Window* window,
                                           const base::string16& dir_path,
                                           v8::Handle<v8::Function> callback) {
+    auto const runner = ScriptController::instance()->runner();
     ScriptController::instance()->view_delegate()->GetFilenameForSave(
         window->window_id(), dir_path,
         v8_glue::ScriptCallback<ViewDelegate::GetFilenameForSaveCallback>::New(
-            v8::Isolate::GetCurrent(), callback));
+            runner->GetWeakPtr(), callback));
   }
 
   private: static void MessageBox(Window* window,
                                  const base::string16& message, int flags,
                                  const base::string16& title,
                                  v8::Handle<v8::Function> callback) {
+    auto const runner = ScriptController::instance()->runner();
     ScriptController::instance()->view_delegate()->MessageBox(
         window->window_id(), message, title, flags,
         v8_glue::ScriptCallback<ViewDelegate::MessageBoxCallback>::New(
-            v8::Isolate::GetCurrent(), callback));
+            runner->GetWeakPtr(), callback));
   }
 
   private: static Editor* NewEditor() {
@@ -97,10 +101,9 @@ class EditorClass : public v8_glue::WrapperInfo {
   private: static v8::Handle<v8::Object> RunScript(
       const base::string16& script_text,
       v8_glue::Optional<base::string16> opt_file_name) {
-    auto const isolate = ScriptController::instance()->isolate();
-    v8::EscapableHandleScope handle_scope(isolate);
-    auto const context = ScriptController::instance()->context();
-    v8::Context::Scope context_scope(context);
+    auto const runner = ScriptController::instance()->runner();
+    auto const isolate = runner->isolate();
+    v8_glue::Runner::EscapableHandleScope runner_scope(runner);
     v8::TryCatch try_catch;
     try_catch.SetCaptureMessage(true);
     try_catch.SetVerbose(true);
@@ -109,15 +112,15 @@ class EditorClass : public v8_glue::WrapperInfo {
         gin::StringToV8(isolate, opt_file_name.get(L"__runscript__"))
             ->ToString());
     if (script.IsEmpty()) {
-      return handle_scope.Escape(NewRunScriptResult(isolate,
+      return runner_scope.Escape(NewRunScriptResult(isolate,
           v8::Handle<v8::Value>(), try_catch));
     }
     auto const run_value = script->Run();
     if (run_value.IsEmpty()) {
-      return handle_scope.Escape(NewRunScriptResult(isolate,
+      return runner_scope.Escape(NewRunScriptResult(isolate,
           v8::Handle<v8::Value>(), try_catch));
     }
-    return handle_scope.Escape(NewRunScriptResult(isolate, run_value,
+    return runner_scope.Escape(NewRunScriptResult(isolate, run_value,
         try_catch));
   }
 

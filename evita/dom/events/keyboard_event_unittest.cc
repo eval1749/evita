@@ -18,7 +18,7 @@ class KeyboardEventTest : public dom::AbstractDomTest {
 };
 
 TEST_F(KeyboardEventTest, ctor_event) {
-  v8::HandleScope handle_scope(isolate());
+  RunnerScope runner_scope(this);
   EXPECT_SCRIPT_VALID("var event;"
                       "function init(x) { event = x; }");
   domapi::KeyboardEvent raw_event;

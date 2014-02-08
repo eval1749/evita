@@ -14,13 +14,17 @@
 #pragma warning(pop)
 #include "base/strings/string16.h"
 #include "evita/dom/view_event_handler.h"
-#include "evita/v8_glue/context_holder.h"
 #include "evita/v8_glue/isolate_holder.h"
+#include "evita/v8_glue/runner_delegate.h"
 #include "evita/v8_glue/scoped_persistent.h"
 #include "evita/v8_glue/v8.h"
 
 namespace base {
 template<typename T> class Callback;
+}
+
+namespace v8_glue {
+class Runner;
 }
 
 namespace dom {
@@ -30,51 +34,28 @@ class ViewDelegate;
 
 //////////////////////////////////////////////////////////////////////
 //
-// EvaluateResult
-//
-// TODO(yosi) We will remove EvaluateResult once V8Console in JS.
-struct EvaluateResult {
-  base::string16 value;
-  base::string16 script_resource_name;
-  base::string16 exception;
-  base::string16 source_line;
-  int line_number;
-  int start_column;
-  int end_column;
-  std::vector<base::string16> stack_trace;
-
-  EvaluateResult(const base::string16& script_text);
-  EvaluateResult();
-};
-
-//////////////////////////////////////////////////////////////////////
-//
 // ScriptController
 //
-class ScriptController {
+class ScriptController : public v8_glue::RunnerDelegate {
   private: v8_glue::IsolateHolder isolate_holder_;
-  private: gin::ContextHolder context_holder_;
   private: std::unique_ptr<EventHandler> event_handler_;
+  private: std::unique_ptr<v8_glue::Runner> runner_;
+  private: bool started_;
   private: bool testing_;
-  private: v8_glue::ScopedPersistent<v8::Context> testing_context_;
+  private: v8_glue::Runner* testing_runner_;
   private: ViewDelegate* view_delegate_;
 
   private: ScriptController(ViewDelegate* view_delegate);
   public: ~ScriptController();
 
-  public: v8::Handle<v8::Context> context() const;
   public: EventHandler* event_handler() const { return event_handler_.get(); }
   public: static ScriptController* instance();
+  public: v8_glue::Runner* runner() const;
   public: v8::Isolate* isolate() const;
-  public: void set_testing_context(v8::Handle<v8::Context> context);
+  public: void set_testing_runner(v8_glue::Runner* runner);
   public: ViewDelegate* view_delegate() const;
 
   public: void DidStartHost();
-  public: EvaluateResult Evaluate(const base::string16& script_text,
-                                  const base::string16& file_name);
-  public: EvaluateResult Evaluate(const base::string16& script_text);
-  public: void LoadJsLibrary();
-  public: void LogException(const v8::TryCatch& try_catch);
   public: void OpenFile(WindowId window_id,
                         const base::string16& filename);
   public: void ResetForTesting();
@@ -84,6 +65,12 @@ class ScriptController {
   public: void ThrowError(const std::string& message);
   public: void ThrowException(v8::Handle<v8::Value> exception);
   public: void WillDestroyHost();
+
+  // v8_glue::RunnerDelegate
+  private: virtual v8::Handle<v8::ObjectTemplate>
+      GetGlobalTemplate(v8_glue::Runner* runner) override;
+  private: virtual void UnhandledException(v8_glue::Runner* runner,
+                                           const v8::TryCatch& try_catch);
 
   DISALLOW_COPY_AND_ASSIGN(ScriptController);
 };

@@ -20,6 +20,7 @@
 #include "evita/dom/window.h"
 #include "evita/gc/local.h"
 #include "evita/v8_glue/converter.h"
+#include "evita/v8_glue/runner.h"
 #include "v8_strings.h"
 
 namespace dom {
@@ -86,9 +87,9 @@ EventHandler::~EventHandler() {
 // Call |handleEvent| function in the class of event target.
 void EventHandler::DoDefaultEventHandling(EventTarget* event_target,
                                           Event* event) {
-  auto const isolate = controller_->isolate();
-  v8::HandleScope handle_scope(isolate);
-  v8::Context::Scope context_scope(controller_->context());
+  auto const runner = controller_->runner();
+  auto const isolate = runner->isolate();
+  v8_glue::Runner::Scope runner_scope(runner);
 
   auto const js_target = event_target->GetWrapper(isolate);
   auto const js_class = GetClassObject(isolate, js_target);
@@ -100,11 +101,7 @@ void EventHandler::DoDefaultEventHandling(EventTarget* event_target,
   if (js_method.IsEmpty())
     return;
 
-  v8::TryCatch try_catch;
-  v8::Handle<v8::Value> argv[1] { event->GetWrapper(isolate) };
-  js_method->CallAsFunction(js_target, 1, argv);
-  if (try_catch.HasCaught())
-    controller_->LogException(try_catch);
+  runner->Call(js_method, js_target, event->GetWrapper(isolate));
 }
 
 // ViewEventHandler
@@ -223,13 +220,7 @@ void EventHandler::QueryClose(WindowId window_id) {
 }
 
 void EventHandler::RunCallback(base::Closure callback) {
-  auto const isolate = controller_->isolate();
-  v8::HandleScope handle_scope(isolate);
-  v8::Context::Scope context_scope(controller_->context());
-  v8::TryCatch try_catch;
   callback.Run();
-  if (try_catch.HasCaught())
-    controller_->LogException(try_catch);
 }
 
 void EventHandler::WillDestroyHost() {

@@ -32,6 +32,7 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\file_path_externs.js ^
   %externs_dir%\js_console_externs.js ^
   %externs_dir%\key_names_externs.js ^
+  %externs_dir%\point_externs.js ^
   %externs_dir%\range_externs.js ^
   %externs_dir%\selection_externs.js ^
   %externs_dir%\style_externs.js ^

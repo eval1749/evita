@@ -11,6 +11,19 @@ namespace v8_glue {
 
 //////////////////////////////////////////////////////////////////////
 //
+// Runner::EscapableHandleScope
+//
+Runner::EscapableHandleScope::EscapableHandleScope(Runner* runner)
+    : isolate_scope_(runner->isolate()),
+      handle_scope_(runner->isolate()),
+      context_scope_(runner->context()) {
+}
+
+Runner::EscapableHandleScope::~EscapableHandleScope() {
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // Runner::Scope
 //
 Runner::Scope::Scope(Runner* runner)
@@ -47,19 +60,34 @@ v8::Handle<v8::Object> Runner::global() const {
   return context()->Global();
 }
 
-v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Object> callee,
-      v8::Handle<v8::Object> receiver, const Args& args) {
+v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
+      v8::Handle<v8::Value> receiver, const Args& args) {
   delegate_->WillRunScript(this);
   v8::TryCatch try_catch;
   try_catch.SetCaptureMessage(true);
   try_catch.SetVerbose(true);
-  auto const value = callee->CallAsFunction(receiver,
+  auto const value = callee->ToObject()->CallAsFunction(receiver,
       static_cast<int>(args.size()),
       const_cast<v8::Handle<v8::Value>*>(args.data()));
   delegate_->DidRunScript(this);
   if (try_catch.HasCaught())
     delegate_->UnhandledException(this, try_catch);
   return value;
+}
+
+v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
+      v8::Handle<v8::Value> receiver, v8::Handle<v8::Value> arg) {
+  return Call(callee, receiver, Args{arg});
+}
+
+v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
+      v8::Handle<v8::Value> receiver) {
+  return Call(callee, receiver, Args());
+}
+
+v8::Handle<v8::Value> Runner::GetGlobalProperty(
+    const base::StringPiece& name) {
+  return global()->Get(gin::StringToV8(isolate(), name));
 }
 
 base::WeakPtr<Runner> Runner::GetWeakPtr() {

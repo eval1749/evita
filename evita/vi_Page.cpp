@@ -956,7 +956,7 @@ void Page::fillBottom(const gfx::Graphics& gfx, float y) const {
 
   // FIXME 2007-08-05 yosi@msn.com We should expose rule position to
   // user.
-  auto const num_columns = 80;
+  auto const num_columns = 81;
   auto const width_of_M = AlignWidthToPixel(gfx, pFont->GetCharWidth('M'));
   drawVLine(gfx, gfx::Brush(gfx, gfx::ColorF::LightGray),
             m_oFormatBuf.left() + width_of_M * num_columns,

@@ -26,9 +26,8 @@
      * @param {number=} opt_count
      */
     return function(opt_count) {
-      var count = arguments.length >= 1 ?
-        /** @type {number} */(opt_count) * direction : direction;
-      this.selection.modify(unit, count, alter);
+      var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
+      this.selection.modify(unit, count * direction, alter);
     };
   }
 

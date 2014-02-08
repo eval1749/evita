@@ -158,10 +158,23 @@ global.commander =
     }
 
     if (typeof(binding) == 'function') {
-      if (argument.hasValue)
-        binding.call(event.target, argument.value);
-      else
-        binding.call(event.target);
+      try {
+        if (argument.hasValue)
+          binding.call(event.target, argument.value);
+        else
+          binding.call(event.target);
+      } catch (exception) {
+        if (!(exception instanceof DocumentReadOnly))
+          throw exception;
+        if (!(event.target instanceof DocumentWindow))
+          throw exception;
+        var window = /** @type{!DocumentWindow} */ (event.target);
+        var error = /** @type{!DocumentReadOnly} */(exception);
+        if (error.document != window.document)
+          throw error;
+        Editor.messageBox(window, 'Can not change readonly document.',
+                          MessageBox.ICONINFORMATION);
+      }
       if (handler == handleEventAsCommand)
         reset();
       return;

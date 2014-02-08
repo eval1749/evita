@@ -1,20 +1,11 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - Editor - Perl Mode
-// listener/winapp/mode_Perl.cpp
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Perl.cpp#9 $
-//
-// FIXME 2007-07-25 yosi@msn.com We should study cperl-mode in Emacs.
-//
-#include "evita/mode_Perl.h"
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "evita/dom/modes/perl_mode.h"
 
 // for MasonModeFactory constructor
-#include "evita/mode_Mason.h"
+#include "evita/dom/modes/mason_mode.h"
 
 namespace text
 {

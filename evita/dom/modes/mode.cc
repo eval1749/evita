@@ -1,28 +1,21 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - Editor - Plain Text Mode
-// listener/winapp/mode_PlainText.cpp
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_Mode.cpp#10 $
-//
-#include "evita/ed_Mode.h"
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "evita/dom/modes/mode.h"
 
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
-#include "evita/mode_Config.h"
-#include "evita/mode_Cxx.h"
-#include "evita/mode_Haskell.h"
-#include "evita/mode_Lisp.h"
-#include "evita/mode_Mason.h"
-#include "evita/mode_Perl.h"
-#include "evita/mode_PlainText.h"
-#include "evita/mode_Python.h"
-#include "evita/mode_Xml.h"
+#include "evita/dom/modes/config_mode.h"
+#include "evita/dom/modes/cxx_mode.h"
+#include "evita/dom/modes/haskell_mode.h"
+#include "evita/dom/modes/lisp_mode.h"
+#include "evita/dom/modes/mason_mode.h"
+#include "evita/dom/modes/perl_mode.h"
+#include "evita/dom/modes/plain_text_mode.h"
+#include "evita/dom/modes/python_mode.h"
+#include "evita/dom/modes/xml_mode.h"
 
 #include <commctrl.h>
 #include <string>

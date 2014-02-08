@@ -2,7 +2,7 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #include "evita/dom/buffer.h"
 
-#include "evita/ed_Mode.h"
+#include "evita/dom/modes/mode.h"
 
 #include "evita/editor/application.h"
 #include "evita/resource.h"

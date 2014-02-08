@@ -16,7 +16,7 @@
 #include "evita/dom/converter.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
-#include "evita/ed_Mode.h"
+#include "evita/dom/modes/mode.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/nullable.h"

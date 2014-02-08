@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_mode_Mason_h)
 #define INCLUDE_mode_Mason_h
 
-#include "evita/mode_Perl.h"
+#include "evita/dom/modes/perl_mode.h"
 
 namespace text
 {

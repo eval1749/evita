@@ -1,15 +1,9 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - Editor - C++ Mode
-// listener/winapp/mode_Cxx.cpp
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Cxx.cpp#17 $
-//
-#include "evita/mode_Cxx.h"
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+
+#include "evita/dom/modes/cxx_mode.h"
 
 #define DEBUG_LEXER 0
 

@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////////////////////////
 //
 // Editor - Edit Mode
-// listener/winapp/ed_Mode.h
+// listener/winapp/dom/modes/mode.h
 //
 // Copyright (C) 1996-2007 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 //
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_Mode.h#8 $
+// @(#)$Id: //proj/evcl3/mainline/listener/winapp/dom/modes/mode.h#8 $
 //
 #if !defined(INCLUDE_edit_Mode_h)
 #define INCLUDE_edit_Mode_h

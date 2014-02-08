@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_mode_Perl_h)
 #define INCLUDE_mode_Perl_h
 
-#include "evita/ed_Mode.h"
+#include "evita/dom/modes/mode.h"
 
 #include "evita/text/buffer.h"
 

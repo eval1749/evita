@@ -1,15 +1,8 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - Editor - Config Mode
-// listener/winapp/mode_Config.cpp
-//
-// Copyright (C) 1996-2008 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Config.cpp#9 $
-//
-#include "evita/mode_Config.h"
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "evita/dom/modes/config_mode.h"
 
 namespace text
 {

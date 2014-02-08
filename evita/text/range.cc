@@ -5,7 +5,7 @@
 #include <algorithm>
 
 #include "evita/text/buffer.h"
-#include "evita/ed_Mode.h"
+#include "evita/dom/modes/mode.h"
 #include "evita/ed_undo.h"
 
 // Smart handle for HGLOBAL

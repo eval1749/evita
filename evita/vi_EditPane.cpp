@@ -18,7 +18,7 @@
 #include "evita/views/content_window.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/ed_Mode.h"
+#include "evita/dom/modes/mode.h"
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"

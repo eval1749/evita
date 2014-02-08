@@ -1,17 +1,8 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - Editor - Python Mode
-// listener/winapp/mode_Python.cpp
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Python.cpp#9 $
-//
-// FIXME 2007-07-25 yosi@msn.com We should study cperl-mode in Emacs.
-//
-#include "evita/mode_Python.h"
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "evita/dom/modes/python_mode.h"
 
 namespace text {
 

@@ -11,6 +11,7 @@
         'dom/window_enums.js',
       ],
       'js_externs_files': [
+        'dom/errors_externs.js',
         'dom/types_externs.js',
         'dom/bracket_externs.js',
         'dom/commander_externs.js',
@@ -56,6 +57,7 @@
         'dom/document.js',
         'dom/editor.js',
         'dom/editor_window.js',
+        'dom/errors.js',
         'dom/file_path.js',
         'dom/range.js',
         'dom/style.js',

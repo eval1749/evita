@@ -51,6 +51,7 @@
         'dom/document_unittest.cc',
         'dom/editor_unittest.cc',
         'dom/editor_window_unittest.cc',
+        'dom/errors_unittest.cc',
         'dom/events/event_handler_unittest.cc',
         'dom/events/event_target_unittest.cc',
         'dom/events/event_unittest.cc',

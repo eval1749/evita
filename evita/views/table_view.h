@@ -53,6 +53,9 @@ class TableView
   private: std::unique_ptr<TableViewModel> UpdateModelIfNeeded();
   private: void UpdateControl(std::unique_ptr<TableViewModel> new_model);
 
+  // ContentWindow
+  private: virtual int GetIconIndex() const override;
+
   // ui::TableControlObserver
   private: virtual void OnKeyPressed(const ui::KeyboardEvent&) override;
   private: virtual void OnMousePressed(const ui::MouseEvent&) override;

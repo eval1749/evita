@@ -211,8 +211,6 @@ class ModeFactory : public DoubleLinkedNode_<ModeFactory>
         m_iIcon(-1),
         m_prgnCharSyntax(prgnCharSyntax) {}
 
-    public: static HIMAGELIST icon_image_list();
-
     // [C]
     public: virtual Mode* Create(Buffer*) = 0;
 
@@ -256,8 +254,6 @@ class Mode
 
     public: uint GetCharSyntax(char16 wch) const
         { return m_pClass->GetCharSyntax(wch); }
-
-    public: virtual int GetIcon() const;
 
     public: virtual const char16* GetName() const
         { return m_pClass->GetName(); }

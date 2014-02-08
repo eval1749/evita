@@ -33,6 +33,7 @@
 #include "evita/dom/selection.h"
 #include "evita/dom/text_window.h"
 #include "evita/ui/events/event.h"
+#include "evita/views/icon_cache.h"
 #include "evita/vi_Caret.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
@@ -1053,3 +1054,9 @@ BOOL TextEditWindow::showImeCaret(SIZE sz, POINT pt) {
 }
 
 #endif // SUPPORT_IME
+
+// ContentWindow
+int TextEditWindow::GetIconIndex() const {
+  return views::IconCache::instance()->GetIconForFileName(
+      GetBuffer()->GetName());
+}

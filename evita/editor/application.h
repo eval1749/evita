@@ -79,7 +79,6 @@ class Application : public common::Singleton<Application> {
 
   // [G]
   public: Frame* GetActiveFrame() const { return active_frame_; }
-  public: HIMAGELIST GetIconList() const;
   public: IoManager* GetIoManager() const { return io_manager_.get(); }
   public: const char16* GetTitle() const;
 

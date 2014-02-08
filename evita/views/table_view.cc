@@ -13,8 +13,9 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/ui/base/table_model_observer.h"
 #include "evita/ui/controls/table_control.h"
-#include "evita/vi_Frame.h"
+#include "evita/views/icon_cache.h"
 #include "evita/views/table_view_model.h"
+#include "evita/vi_Frame.h"
 
 extern HINSTANCE g_hInstance;
 
@@ -175,6 +176,11 @@ std::unique_ptr<TableViewModel> TableView::UpdateModelIfNeeded() {
     model->AddRow(line);
   }
   return std::move(model);
+}
+
+// ContentWindow
+int TableView::GetIconIndex() const {
+  return IconCache::instance()->GetIconForFileName(L"foo.txt");
 }
 
 // ui::TableControlObserver

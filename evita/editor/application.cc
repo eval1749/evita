@@ -17,7 +17,6 @@
 #include "evita/dom/script_thread.h"
 #include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/ed_Mode.h"
 #include "evita/dom/buffer.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_FileDialogBox.h"
@@ -149,10 +148,6 @@ Frame* Application::FindFrame(HWND hwnd) const {
           return const_cast<Frame*>(&frame);
   }
   return nullptr;
-}
-
-HIMAGELIST Application::GetIconList() const {
-  return text::ModeFactory::icon_image_list();
 }
 
 bool Application::OnIdle(uint nCount) {

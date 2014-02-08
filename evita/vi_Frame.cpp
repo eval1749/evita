@@ -37,6 +37,7 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/view_event_handler.h"
+#include "evita/views/icon_cache.h"
 #include "evita/views/message_view.h"
 #include "evita/views/window_set.h"
 #include "evita/vi_EditPane.h"
@@ -168,8 +169,8 @@ void Frame::AddTab(Pane* const pane) {
   tab_item.lParam = reinterpret_cast<LPARAM>(pane);
 
   if (auto const edit_pane = pane->DynamicCast<EditPane>()) {
-    if (auto const buffer = edit_pane->GetBuffer()) {
-      tab_item.iImage = buffer->GetMode()->GetIcon();
+    if (auto const active_window= edit_pane->GetActiveWindow()) {
+      tab_item.iImage = active_window->GetIconIndex();
       if (tab_item.iImage != -1)
         tab_item.mask |= TCIF_IMAGE;
     }
@@ -301,8 +302,7 @@ void Frame::DidCreateNativeWindow() {
        m_hwndTabBand,
        TCM_SETIMAGELIST,
        0,
-       reinterpret_cast<LPARAM>(
-          Application::instance()->GetIconList()));
+       reinterpret_cast<LPARAM>(views::IconCache::instance()->image_list()));
 
     RECT rc;
     ::GetWindowRect(m_hwndTabBand, &rc);

@@ -38,6 +38,7 @@ class ContentWindow : public CommandWindow_<ContentWindow> {
   // [G]
   public: uint GetActiveTick() const { return active_tick_; }
   public: static const char* GetClass_() { return "ContentWindow"; }
+  public: virtual int GetIconIndex() const = 0;
   public: virtual base::string16 GetTitle(size_t max_length) const = 0;
 
   // [M]

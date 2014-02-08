@@ -19,12 +19,6 @@ class RunnerDelegate;
 class Runner : public gin::ContextHolder {
   public: typedef std::vector<v8::Handle<v8::Value>> Args;
 
-  private: RunnerDelegate* delegate_;
-  #if defined(_DEBUG)
-  private: bool in_scope_;
-  #endif
-  private: base::WeakPtrFactory<Runner> weak_factory_;
-
   public: class EscapableHandleScope {
     private: v8::Isolate::Scope isolate_scope_;
     private: v8::EscapableHandleScope handle_scope_;
@@ -55,6 +49,13 @@ class Runner : public gin::ContextHolder {
   };
   friend class Scope;
 
+  private: int call_depth_;
+  private: RunnerDelegate* delegate_;
+  #if defined(_DEBUG)
+  private: bool in_scope_;
+  #endif
+  private: base::WeakPtrFactory<Runner> weak_factory_;
+
   public: explicit Runner(v8::Isolate* isolate, RunnerDelegate* delegate);
   public: ~Runner();
 
@@ -68,6 +69,7 @@ class Runner : public gin::ContextHolder {
       v8::Handle<v8::Value> receiver);
   public: v8::Handle<v8::Value> Call(v8::Handle<v8::Value> callee,
       const Args& args);
+  private: bool CheckCallDepth();
   public: v8::Handle<v8::Value> GetGlobalProperty(
       const base::StringPiece& name);
   public: base::WeakPtr<Runner> GetWeakPtr();

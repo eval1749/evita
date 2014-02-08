@@ -4,10 +4,15 @@
 
 #include "evita/v8_glue/runner.h"
 
+#include "common/temporary_change_value.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner_delegate.h"
 
 namespace v8_glue {
+
+namespace {
+const int kMaxCallDepth = 20;
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -55,6 +60,7 @@ Runner::Scope::~Scope() {
 //
 Runner::Runner(v8::Isolate* isoalte, RunnerDelegate* delegate)
     : gin::ContextHolder(isoalte),
+      call_depth_(0),
       delegate_(delegate),
       #if defined(_DEBUG)
       in_scope_(false),
@@ -80,6 +86,9 @@ v8::Handle<v8::Object> Runner::global() const {
 v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
       v8::Handle<v8::Value> receiver, const Args& args) {
   DCHECK(in_scope_);
+  common::TemporaryChangeValue<int> call_depth(call_depth_, call_depth_ + 1);
+  if (!CheckCallDepth())
+    return v8::Handle<v8::Value>();
   delegate_->WillRunScript(this);
   v8::TryCatch try_catch;
   try_catch.SetCaptureMessage(true);
@@ -101,6 +110,15 @@ v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
 v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
       v8::Handle<v8::Value> receiver) {
   return Call(callee, receiver, Args());
+}
+
+bool Runner::CheckCallDepth() {
+  if (call_depth_ < kMaxCallDepth)
+    return true;
+  auto const isolate = this->isolate();
+  isolate->ThrowException(v8::Exception::RangeError(
+      gin::StringToV8(isolate, "Maximum call stack size exceeded")));
+  return false;
 }
 
 v8::Handle<v8::Value> Runner::GetGlobalProperty(
@@ -129,6 +147,9 @@ v8::Handle<v8::Value> Runner::Run(const base::string16& script_text,
 
 v8::Handle<v8::Value> Runner::Run(v8::Handle<v8::Script> script) {
   DCHECK(in_scope_);
+  common::TemporaryChangeValue<int> call_depth(call_depth_, call_depth_ + 1);
+  if (!CheckCallDepth())
+    return v8::Handle<v8::Value>();
   delegate_->WillRunScript(this);
   v8::TryCatch try_catch;
   try_catch.SetCaptureMessage(true);

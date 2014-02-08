@@ -466,6 +466,7 @@
       'sources': [
         'precomp.cpp',
 
+        'views/icon_cache.cc',
         'views/view_delegate_impl.cc',
         'views/window.cc',
         'views/window_set.cc',

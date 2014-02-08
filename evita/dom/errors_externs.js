@@ -9,13 +9,8 @@
  */
 var DocumentError = function(document, opt_message) {};
 
-/**
- * @constructor
- * @extends {DocumentError}
- * @param {!Document} document
- * @param {string=} opt_message
- */
-var DocumentNotReadyError = function(document, opt_message) {};
+/** @expose @type {!Document} */
+DocumentError.prototype.document;
 
 /**
  * @constructor
@@ -23,5 +18,13 @@ var DocumentNotReadyError = function(document, opt_message) {};
  * @param {!Document} document
  * @param {string=} opt_message
  */
-var DocumentReadOnlyError = function(document, opt_message) {};
+var DocumentNotReady = function(document, opt_message) {};
+
+/**
+ * @constructor
+ * @extends {DocumentError}
+ * @param {!Document} document
+ * @param {string=} opt_message
+ */
+var DocumentReadOnly = function(document, opt_message) {};
 

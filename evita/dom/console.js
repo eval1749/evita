@@ -72,7 +72,10 @@ global.console = {
       range.collapseTo(range.end);
       message = '\n' + message;
     }
+    var readonly = document.readonly;
+    document.readonly = false;
     range.insertBefore(message + '\n');
+    document.readonly = readonly;
   },
 
   /**

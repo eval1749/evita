@@ -19,15 +19,14 @@ namespace text
 ///   Construct a buffer object.
 /// </summary>
 /// <param name="name">A buffername in C-string.</param>
-/// <param name="pMode">A editing mode.</param>
-Buffer::Buffer(const base::string16& name, Mode* pMode) :
+Buffer::Buffer(const base::string16& name) :
     m_eState(State_Ready),
     m_fReadOnly(false),
     m_fUndo(true),
     m_nCharTick(1),
     m_nModfTick(1),
     m_nSaveTick(1),
-    m_pMode(pMode)
+    m_pMode(nullptr)
 {
     m_hObjHeap = ::HeapCreate(HEAP_NO_SERIALIZE, 0, 0);
 
@@ -42,7 +41,7 @@ Buffer::Buffer(const base::string16& name, Mode* pMode) :
 
     SetName(name);
 
-    if (NULL == m_pMode)
+    if (!m_pMode)
     {
         m_pMode = ModeFactory::Get(this)->Create(this);
     }

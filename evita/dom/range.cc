@@ -119,6 +119,8 @@ void Range::set_start(int position) {
 }
 
 void Range::set_text(const base::string16& text) {
+  if (!document_->CheckCanChange())
+    return;
   range_->SetText(text);
 }
 
@@ -134,11 +136,15 @@ void Range::CopyToClipboard() const {
 }
 
 Range* Range::InsertBefore(const base::string16& text) {
+  if (!document_->CheckCanChange())
+    return this;
   document_->buffer()->InsertBefore(start(), text);
   return this;
 }
 
 void Range::PasteFromClipboard() {
+  if (!document_->CheckCanChange())
+    return;
   range_->Paste();
 }
 

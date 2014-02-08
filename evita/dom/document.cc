@@ -21,6 +21,7 @@
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/function_template_builder.h"
+#include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/wrapper_info.h"
 #include "v8_strings.h"
 
@@ -140,6 +141,8 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         .SetProperty("modified", &Document::modified)
         .SetProperty("name", &Document::name)
         .SetProperty("properties", &Document::properties)
+        .SetProperty("readonly", &Document::read_only,
+                     &Document::set_read_only)
         .SetMethod("charCodeAt_", &Document::charCodeAt)
         .SetMethod("doColor_", &Document::DoColor)
         .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
@@ -208,6 +211,28 @@ const base::string16& Document::name() const {
 
 v8::Handle<v8::Object> Document::properties() const {
   return properties_.NewLocal(v8::Isolate::GetCurrent());
+}
+
+bool Document::read_only() const {
+  return buffer_->IsReadOnly();
+}
+
+void Document::set_read_only(bool read_only) const {
+  buffer_->SetReadOnly(read_only);
+}
+
+bool Document::CheckCanChange() const {
+  if (buffer_->IsReadOnly()) {
+    auto const runner = ScriptController::instance()->runner();
+    auto const isolate = runner->isolate();
+    v8_glue::Runner::Scope runner_scope(runner);
+    auto const ctor = runner->global()->Get(
+        v8Strings::DocumentReadOnly.Get(isolate));
+    auto const error = runner->CallAsConstructor(ctor, GetWrapper(isolate));
+    ScriptController::instance()->ThrowException(error);
+    return false;
+  }
+  return true;
 }
 
 void Document::DidCreateRange(Range* range) {

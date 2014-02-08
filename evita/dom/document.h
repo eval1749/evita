@@ -41,8 +41,11 @@ class Document : public v8_glue::Scriptable<Document> {
   public: bool modified() const;
   public: const base::string16& name() const;
   public: v8::Handle<v8::Object> properties() const;
+  public: bool read_only() const;
+  public: void set_read_only(bool read_only) const;
   public: v8::Handle<v8::Object> style_at(text::Posn position) const;
 
+  public: bool CheckCanChange() const;
   public: void DidCreateRange(Range* range);
   public: void DidDestroyRange(Range* range);
   public: void DoColor(int hint);

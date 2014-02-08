@@ -249,6 +249,7 @@
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base_i18n',
+        '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
         '<(icu_gyp_path):icuuc',
       ], 
       'include_dirs+': [ '<(DEPTH)/third_party/icu/source/common' ],
@@ -263,7 +264,10 @@
       'type': 'static_library',
       'msvs_precompiled_header': '',
       'msvs_precompiled_source': '',
-      'dependencies': [ 'dom_unicode_lib_cc' ],
+      'dependencies': [
+        '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
+        'dom_unicode_lib_cc'
+      ],
       'sources': [
         '<(SHARED_INTERMEDIATE_DIR)/dom_unicode_lib.cc',
       ], # sources

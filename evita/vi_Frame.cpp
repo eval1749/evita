@@ -865,7 +865,7 @@ bool Frame::onTabDrag(TabBandDragAndDrop const eAction,
 ///   Realize this frame.
 /// </summary>
 void Frame::CreateNativeWindow() const {
-  int const cColumns = 80;
+  int const cColumns = 83;
   int const cRows    = 40;
 
   // Note: WS_EX_COMPOSITED posts WM_PAINT many times.

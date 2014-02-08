@@ -102,14 +102,20 @@ v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
   return value;
 }
 
-v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
-      v8::Handle<v8::Value> receiver, v8::Handle<v8::Value> arg) {
-  return Call(callee, receiver, Args{arg});
-}
-
-v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
-      v8::Handle<v8::Value> receiver) {
-  return Call(callee, receiver, Args());
+v8::Handle<v8::Value> Runner::CallAsConstructor(
+    v8::Handle<v8::Value> callee, const Args& args) {
+  DCHECK(in_scope_);
+  delegate_->WillRunScript(this);
+  v8::TryCatch try_catch;
+  try_catch.SetCaptureMessage(true);
+  try_catch.SetVerbose(true);
+  auto const value = callee->ToObject()->CallAsConstructor(
+      static_cast<int>(args.size()),
+      const_cast<v8::Handle<v8::Value>*>(args.data()));
+  delegate_->DidRunScript(this);
+  if (try_catch.HasCaught())
+    delegate_->UnhandledException(this, try_catch);
+  return value;
 }
 
 bool Runner::CheckCallDepth() {

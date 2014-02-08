@@ -63,13 +63,14 @@ class Runner : public gin::ContextHolder {
 
   public: v8::Handle<v8::Value> Call(v8::Handle<v8::Value> callee,
       v8::Handle<v8::Value> receiver, const Args& args);
-  public: v8::Handle<v8::Value> Call(v8::Handle<v8::Value> callee,
-      v8::Handle<v8::Value> receiver, v8::Handle<v8::Value> arg);
-  public: v8::Handle<v8::Value> Call(v8::Handle<v8::Value> callee,
-      v8::Handle<v8::Value> receiver);
-  public: v8::Handle<v8::Value> Call(v8::Handle<v8::Value> callee,
-      const Args& args);
   private: bool CheckCallDepth();
+  public: v8::Handle<v8::Value> CallAsConstructor(
+      v8::Handle<v8::Value> callee, const Args& args);
+  public: template<typename... Params> v8::Handle<v8::Value>
+      Call(v8::Handle<v8::Value> callee, v8::Handle<v8::Value> receiver,
+           Params... params);
+  public: template<typename... Params> v8::Handle<v8::Value>
+      CallAsConstructor(v8::Handle<v8::Value> callee, Params... params);
   public: v8::Handle<v8::Value> GetGlobalProperty(
       const base::StringPiece& name);
   public: base::WeakPtr<Runner> GetWeakPtr();
@@ -79,6 +80,17 @@ class Runner : public gin::ContextHolder {
 
    DISALLOW_COPY_AND_ASSIGN(Runner);
 };
+
+template<typename... Params> v8::Handle<v8::Value>
+Runner::Call(v8::Handle<v8::Value> callee, v8::Handle<v8::Value> receiver,
+             Params... params) {
+  return Call(callee, receiver, Args{params...});
+}
+
+template<typename... Params> v8::Handle<v8::Value>
+Runner::CallAsConstructor(v8::Handle<v8::Value> callee, Params... params) {
+  return CallAsConstructor(callee, Args{params...});
+}
 
 }  // namespace v8_glue
 

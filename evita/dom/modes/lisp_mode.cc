@@ -619,6 +619,8 @@ class LispLexer : public NewLexer::LexerBase
 
         return ! m_oEnumChar.AtEnd();
     } // Run
+
+    DISALLOW_COPY_AND_ASSIGN(LispLexer);
 }; // LispLexer
 
 // Map Token Type To color
@@ -659,6 +661,8 @@ class ClLexer : public LispLexer
         }
         return s_pKeywordTab;
     } // initKeywords
+
+    DISALLOW_COPY_AND_ASSIGN(ClLexer);
 }; // ClLexer
 
 KeywordTable* ClLexer::s_pKeywordTab;
@@ -687,6 +691,8 @@ class LispMode : public Mode
     {
         return m_oLexer.Run(lCount);
     } // DoColor
+
+    DISALLOW_COPY_AND_ASSIGN(LispMode);
 }; // LispMode
 
 /// <summary>

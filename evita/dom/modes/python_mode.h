@@ -33,6 +33,8 @@ class PythonModeFactory : public ModeFactory {
   }
 
   public: virtual const char16* GetName() const override { return L"Python"; }
+
+  DISALLOW_COPY_AND_ASSIGN(PythonModeFactory);
 }; // PythonModeFactory
 
 }  // namespace text

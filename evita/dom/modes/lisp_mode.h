@@ -33,6 +33,9 @@ class LispModeFactory : public ModeFactory
 
     public: virtual const char16* GetName() const override
         { return L"Lisp"; }
+
+
+    DISALLOW_COPY_AND_ASSIGN(LispModeFactory);
 }; // LispModeFactory
 
 }  // namespace text

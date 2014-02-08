@@ -1098,6 +1098,8 @@ class ClikeLexer : public NewLexer::LexerBase
 
         return ! m_oEnumChar.AtEnd();
     } // Run
+
+    DISALLOW_COPY_AND_ASSIGN(ClikeLexer);
 }; // ClikeLexer
 
 //////////////////////////////////////////////////////////////////////
@@ -1150,6 +1152,8 @@ class CxxLexer : public ClikeLexer
 
         return s_pKeywordTab;
     } // CxxLexer
+
+    DISALLOW_COPY_AND_ASSIGN(CxxLexer);
 }; //CxxLexer
 
 KeywordTable* CxxLexer::s_pKeywordTab;
@@ -1171,6 +1175,8 @@ class CxxMode : public Mode
     {
         return m_oLexer.Run(lCount);
     } // DoColor
+
+    DISALLOW_COPY_AND_ASSIGN(CxxMode);
 }; // CxxMode
 
 /// <summary>
@@ -1217,6 +1223,8 @@ class JavaLexer : public ClikeLexer
 
         return s_pKeywordTab;
     } // initKeywordTab
+
+    DISALLOW_COPY_AND_ASSIGN(JavaLexer);
 }; //JavaLexer
 
 KeywordTable* JavaLexer::s_pKeywordTab;
@@ -1238,6 +1246,8 @@ class JavaMode : public Mode
     {
         return m_oLexer.Run(lCount);
     } // DoColor
+
+    DISALLOW_COPY_AND_ASSIGN(JavaMode);
 }; // JavaMode
 
 /// <summary>

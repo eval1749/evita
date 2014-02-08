@@ -35,6 +35,8 @@ class PerlModeFactory : public ModeFactory
 
     public: virtual const char16* GetName() const override
         { return L"Perl"; }
+
+    DISALLOW_COPY_AND_ASSIGN(PerlModeFactory);
 }; // PerlModeFactory
 
 }  // namespace text

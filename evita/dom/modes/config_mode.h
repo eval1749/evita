@@ -38,6 +38,8 @@ class ConfigModeFactory : public ModeFactory
 
     // [I]
     public: virtual bool IsSupported(const char16*) const override;
+
+    DISALLOW_COPY_AND_ASSIGN(ConfigModeFactory);
 }; // ConfigModeFactory
 
 }  // namespace text

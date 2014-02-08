@@ -317,6 +317,8 @@ class ConfigLexer : public NewLexer::LexerBase
 
         return ! m_oEnumChar.AtEnd();
     } // Run
+
+    DISALLOW_COPY_AND_ASSIGN(ConfigLexer);
 }; // ConfigLexer
 
 const uint32
@@ -352,6 +354,8 @@ class ConfigMode : public Mode
     {
         return m_oLexer.Run(lCount);
     } // DoColor
+
+    DISALLOW_COPY_AND_ASSIGN(ConfigMode);
 }; // ConfigMode
 
 /// <summary>

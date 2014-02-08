@@ -89,6 +89,8 @@ class XmlLexer : public LexerBase
     private: void setStateCont(State);
     private: void setStateEnd(State, int = 0);
     private: void setStateStart(State, int = 0);
+
+    DISALLOW_COPY_AND_ASSIGN(XmlLexer);
 }; // XmlLexer
 
 
@@ -105,6 +107,8 @@ class XmlMode : public Mode
 
     // [D]
     public: virtual bool DoColor(Count) override;
+
+    DISALLOW_COPY_AND_ASSIGN(XmlMode);
 }; // XmlMode
 
 /// <summary>
@@ -125,6 +129,8 @@ class XmlModeFactory : public ModeFactory
 
     public: virtual const char16* GetName() const override
         { return L"XML"; }
+
+    DISALLOW_COPY_AND_ASSIGN(XmlModeFactory);
 }; // XmlModeFactory
 
 }  // namespace text

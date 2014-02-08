@@ -35,6 +35,8 @@ class CxxModeFactory : public ModeFactory
 
     public: virtual const char16* GetName() const override
         { return L"C++"; }
+
+    DISALLOW_COPY_AND_ASSIGN(CxxModeFactory);
 }; // CxxModeFactory
 
 /// <summary>
@@ -54,6 +56,8 @@ class JavaModeFactory : public ModeFactory
 
     public: virtual const char16* GetName() const override
         { return L"Java"; }
+
+    DISALLOW_COPY_AND_ASSIGN(JavaModeFactory);
 }; // JavaModeFactory
 
 }  // namespace text

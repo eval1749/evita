@@ -27,6 +27,8 @@ class PlainTextMode : public Mode
 
     // [D]
     public: virtual bool DoColor(Count) override { return false; }
+
+    DISALLOW_COPY_AND_ASSIGN(PlainTextMode);
 }; // PlainTextMode
 
 
@@ -49,6 +51,8 @@ class PlainTextModeFactory : public ModeFactory
 
     public: virtual const char16* GetName() const override
         { return L"Plain"; }
+
+    DISALLOW_COPY_AND_ASSIGN(PlainTextModeFactory);
 }; // PlainTextModeFactory
 
 }  // namespace text

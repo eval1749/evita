@@ -551,6 +551,8 @@ class PythonLexer : public NewLexer::LexerBase {
 
     return !m_oEnumChar.AtEnd();
   }
+
+  DISALLOW_COPY_AND_ASSIGN(PythonLexer);
 };
 
 KeywordTable* PythonLexer::s_pKeywordTab;
@@ -581,6 +583,8 @@ class PythonMode : public Mode {
   public: virtual bool DoColor(Count lCount) override {
     return m_oLexer.Run(lCount);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(PythonMode);
 };
 
 /// <summary>

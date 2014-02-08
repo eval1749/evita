@@ -870,6 +870,8 @@ class HaskellLexer : public NewLexer::LexerBase
 
         return ! m_oEnumChar.AtEnd();
     } // Run
+
+    DISALLOW_COPY_AND_ASSIGN(HaskellLexer);
 }; // HaskellLexer
 
 //////////////////////////////////////////////////////////////////////
@@ -907,6 +909,8 @@ class HaskellMode : public Mode
     {
         return m_oLexer.Run(lCount);
     } // DoColor
+
+    DISALLOW_COPY_AND_ASSIGN(HaskellMode);
 }; // HaskellMode
 
 /// <summary>

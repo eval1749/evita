@@ -645,6 +645,8 @@ class PerlLexer : public NewLexer::LexerBase
 
         return ! m_oEnumChar.AtEnd();
     } // Run
+
+    DISALLOW_COPY_AND_ASSIGN(PerlLexer);
 }; // PerlLexer
 
 KeywordTable* PerlLexer::s_pKeywordTab;
@@ -670,6 +672,8 @@ class MasonLexer : public PerlLexer
 {
     public: MasonLexer(Buffer* pBuffer) :
         PerlLexer(pBuffer) {}
+
+    DISALLOW_COPY_AND_ASSIGN(MasonLexer);
 }; // MasonLexer
 
 /// <summary>
@@ -694,6 +698,8 @@ class MasonMode : public Mode
     {
         return m_oLexer.Run(lCount);
     } // MasonMode::DoColor
+
+    DISALLOW_COPY_AND_ASSIGN(MasonMode);
 }; // MasonMode
 
 /// <summary>
@@ -713,6 +719,8 @@ class PerlMode : public Mode
     {
         return m_oLexer.Run(lCount);
     } // DoColor
+
+    DISALLOW_COPY_AND_ASSIGN(PerlMode);
 }; // PerlMode
 
 /// <summary>

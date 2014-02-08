@@ -35,6 +35,8 @@ class HaskellModeFactory : public ModeFactory
 
     public: virtual const char16* GetName() const override
         { return L"Haskell"; }
+
+    DISALLOW_COPY_AND_ASSIGN(HaskellModeFactory);
 }; // HaskellModeFactory
 
 }  // namespace text

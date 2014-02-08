@@ -451,6 +451,14 @@ JsConsole.prototype.evalLastLine = function() {
   JsConsole.result = result;
   range.collapseTo(range.end);
   if (result.exception) {
+    if (result.stackTraceString == '') {
+      result.stackTraceString = result.exception +
+        result.stackTrace.map(function(stackFrame) {
+          return '\n  at ' + stackFrame.functionName + ' (' +
+              stackFrame.scriptName + '(' + stackFrame.lineNumber + ':' +
+              stackFrame.column + ')';
+        }).join('');
+    }
     this.emit('Exception: ' + result.stackTraceString);
   } else {
     this.emit(JsConsole.stringify(result.value));

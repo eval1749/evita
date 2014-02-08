@@ -420,18 +420,18 @@ JsConsole.prototype.backwardHistory = function() {
  * @param {string} text.
  */
 JsConsole.prototype.emit = function(text) {
-  this.document.readOnly = false;
+  this.document.readonly = false;
   //this.range.move(Unit.DOCUMENT, 1);
   this.range.collapseTo(this.document.length);
   this.range.insertBefore(text);
-  this.document.readOnly = true;
+  this.document.readonly = true;
 };
 
 JsConsole.prototype.emitPrompt = function() {
   ++this.lineNumber;
   this.emit('\njs:' + this.lineNumber + '> ');
   this.range.collapseTo(this.document.length);
-  this.document.readOnly = false;
+  this.document.readonly = false;
 };
 
 JsConsole.prototype.evalLastLine = function() {

@@ -97,12 +97,12 @@
 
     // Move caret to left bracket 100ms or 500ms if left bracket above window.
     range.collapseTo(range.start);
-    selection.document.readOnly = true;
+    selection.document.readonly = true;
     // TODO(yosi) Should we share blink timer?
     (new OneShotTimer()).start(range.start < this.range_.start ? 500 : 100,
         function() {
           range.collapseTo(end);
-          range.document.readOnly = false;
+          range.document.readonly = false;
         });
   }
 

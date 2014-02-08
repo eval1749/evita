@@ -51,6 +51,9 @@ Document.prototype.name;
 /** @expose  @type {!Map.<string, *>} */
 Document.prototype.properties;
 
+/** @expose  @type {boolean} */
+Document.prototype.readonly;
+
 /**
  * @param {string} key_combination.
  * @param {Object} command.

@@ -72,7 +72,7 @@
     function stateString(document) {
       return [
         document.modified ? '*' : '-',
-        // TODO(yosi) Should be document.readOnly ? '%' : '-'
+        // TODO(yosi) Should be document.readonly ? '%' : '-'
         '?',
         // TODO(yosi) Should be document.state == 'ready' ? '-' : '!'
         '?',

@@ -101,6 +101,17 @@ class EditorClass : public v8_glue::WrapperInfo {
   private: static v8::Handle<v8::Object> RunScript(
       const base::string16& script_text,
       v8_glue::Optional<base::string16> opt_file_name) {
+    auto const file_name = opt_file_name.get(L"__runscript__");
+    if (file_name == L"*javascript*") {
+      SuppressMessageBoxScope suppress_messagebox_scope;
+      return RunScriptInternal(script_text, file_name);
+    }
+    return RunScriptInternal(script_text, file_name);
+  }
+
+  private: static v8::Handle<v8::Object> RunScriptInternal(
+      const base::string16& script_text,
+      const base::string16& file_name) {
     auto const runner = ScriptController::instance()->runner();
     auto const isolate = runner->isolate();
     v8_glue::Runner::EscapableHandleScope runner_scope(runner);
@@ -109,7 +120,7 @@ class EditorClass : public v8_glue::WrapperInfo {
     try_catch.SetVerbose(true);
     auto const script = v8::Script::New(
         gin::StringToV8(isolate, script_text)->ToString(),
-        gin::StringToV8(isolate, opt_file_name.get(L"__runscript__"))
+        gin::StringToV8(isolate, file_name)
             ->ToString());
     if (script.IsEmpty()) {
       return runner_scope.Escape(NewRunScriptResult(isolate,

@@ -447,11 +447,11 @@ JsConsole.prototype.evalLastLine = function() {
   range.collapseTo(range.end);
   range.insertBefore('\n');
 
-  var result = Editor.runScript(line);
+  var result = Editor.runScript(line, console.DOCUMENT_NAME);
   JsConsole.result = result;
   range.collapseTo(range.end);
   if (result.exception) {
-    this.emit('Exception: ' + result.exception);
+    this.emit('Exception: ' + result.stackTraceString);
   } else {
     this.emit(JsConsole.stringify(result.value));
   }

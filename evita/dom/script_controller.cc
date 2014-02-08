@@ -59,7 +59,7 @@ void MessageBoxCallback(int) {
 }
 
 bool need_unlock_after_gc;
-bool suppress_message_box;
+int suppress_message_box;
 
 void MessageBox(const base::string16& message, int flags) {
   DVLOG(0) << message;
@@ -112,6 +112,18 @@ void MessageCallback(v8::Handle<v8::Message> message,
 ScriptController* script_controller;
 
 }   // namespace
+
+//////////////////////////////////////////////////////////////////////
+//
+// SuppressMessageBoxScope
+SuppressMessageBoxScope::SuppressMessageBoxScope() {
+  ++suppress_message_box;
+}
+
+SuppressMessageBoxScope::~SuppressMessageBoxScope() {
+  DCHECK_GE(suppress_message_box, 1);
+  --suppress_message_box;
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -214,14 +226,13 @@ ScriptController* ScriptController::Start(ViewDelegate* view_delegate) {
   if (script_controller && script_controller->testing_)
     return script_controller;
   DCHECK(!script_controller);
-  suppress_message_box = true;
+  SuppressMessageBoxScope suppress_messagebox_scope;
   script_controller = new ScriptController(view_delegate);
   auto const isolate = script_controller->isolate();
   v8::HandleScope handle_scope(isolate);
   v8Strings::Init(isolate);
   script_controller->runner_.reset(
       new v8_glue::Runner(isolate, script_controller));
-  suppress_message_box = false;
   return script_controller;
 }
 
@@ -235,7 +246,7 @@ ScriptController* ScriptController::StartForTesting(
     script_controller->view_delegate_ = view_delegate;
     script_controller->ResetForTesting();
   }
-  suppress_message_box = true;
+  suppress_message_box = 1;
   return script_controller;
 }
 

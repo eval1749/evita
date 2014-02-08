@@ -34,6 +34,15 @@ class ViewDelegate;
 
 //////////////////////////////////////////////////////////////////////
 //
+// SuppressMessageBoxScope
+//
+class SuppressMessageBoxScope {
+  public: SuppressMessageBoxScope();
+  public: ~SuppressMessageBoxScope();
+};
+
+//////////////////////////////////////////////////////////////////////
+//
 // ScriptController
 //
 class ScriptController : public v8_glue::RunnerDelegate {

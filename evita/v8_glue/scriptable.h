@@ -29,12 +29,12 @@ void* FromV8Impl(v8::Isolate* isolate,
 // Although, it is too long to fit in line. So, we renamed shorter name.
 class AbstractScriptable
     : public gc::Collectable<AbstractScriptable> {
-  private: v8::Persistent<v8::Object> wrapper_; // Weak
+  private: mutable v8::Persistent<v8::Object> wrapper_; // Weak
 
   protected: AbstractScriptable();
   protected: virtual ~AbstractScriptable();
 
-  public: bool is_instance_of(const WrapperInfo* wrapper_info) const;
+  public: bool is_instance_of(const WrapperInfo* wrapper_info);
   public: bool has_script_reference() const {
     return !wrapper_.IsEmpty();
   }
@@ -45,7 +45,7 @@ class AbstractScriptable
   public: void Bind(v8::Isolate* isolate, v8::Handle<v8::Object> wrapper);
 
   // Get wrapper for existing |Scriptable<T>|.
-  public: v8::Handle<v8::Object> GetWrapper(v8::Isolate* isolate);
+  public: v8::Handle<v8::Object> GetWrapper(v8::Isolate* isolate) const;
 
   private: static void WeakCallback(
       const v8::WeakCallbackData<v8::Object, AbstractScriptable>& data);

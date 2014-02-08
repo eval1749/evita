@@ -30,7 +30,7 @@ void AbstractScriptable::Bind(v8::Isolate* isolate,
 }
 
 v8::Handle<v8::Object> AbstractScriptable::GetWrapper(
-    v8::Isolate* isolate) {
+    v8::Isolate* isolate) const {
   if (!this)
     return v8::Handle<v8::Object>();
   if (!wrapper_.IsEmpty())
@@ -40,7 +40,7 @@ v8::Handle<v8::Object> AbstractScriptable::GetWrapper(
   ConstructorModeScope constructor_mode_scope(isolate, kWrapExistingObject);
   auto const wrapper = ctor->NewInstance();
   CHECK(!wrapper.IsEmpty());
-  Bind(isolate, wrapper);
+  const_cast<AbstractScriptable*>(this)->Bind(isolate, wrapper);
   return wrapper;
 }
 

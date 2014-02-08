@@ -86,9 +86,19 @@ Editor.messageBox_ = function(window, message, flags, title, callback) {};
 Editor.parseKeyCombination = function(spec) {};
 
 /**
+ * @typedef {{
+ *  column: number,
+ *  functionName: string,
+ *  lineNumber: number,
+ *  scriptName: string
+ * }}
+ */
+var StackFrame;
+
+/**
  * @param {string} script_text
  * @param {string=} opt_file_name
- * @return {{exception: Error, value: *, stackTrace: Array,
+ * @return {{exception: Error, value: *, stackTrace: Array.<!StackFrame>,
              stackTraceString: string, lineNumber: number, start: number,
              end: number, startColumn: number, endColumn: number}}
  */

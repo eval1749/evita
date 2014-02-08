@@ -8,7 +8,6 @@ global.DocumentError = (function() {
    * @param {string=} opt_message
    */
   function DocumentError(document, opt_message) {
-  console.log(this, arguments.length, document, opt_message);
     if (arguments.length >= 2) {
       Error.call(this, opt_message);
       // TODO(yosi) Not sure why |Error.call(this, opt_message)| doesn't set

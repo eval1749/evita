@@ -85,7 +85,9 @@ v8::Handle<v8::Object> Runner::global() const {
 
 v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
       v8::Handle<v8::Value> receiver, const Args& args) {
-  DCHECK(in_scope_);
+  #if defined(_DEBUG)
+    DCHECK(in_scope_);
+  #endif
   common::TemporaryChangeValue<int> call_depth(call_depth_, call_depth_ + 1);
   if (!CheckCallDepth())
     return v8::Handle<v8::Value>();
@@ -104,7 +106,9 @@ v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
 
 v8::Handle<v8::Value> Runner::CallAsConstructor(
     v8::Handle<v8::Value> callee, const Args& args) {
-  DCHECK(in_scope_);
+  #if defined(_DEBUG)
+    DCHECK(in_scope_);
+  #endif
   delegate_->WillRunScript(this);
   v8::TryCatch try_catch;
   try_catch.SetCaptureMessage(true);
@@ -129,7 +133,9 @@ bool Runner::CheckCallDepth() {
 
 v8::Handle<v8::Value> Runner::GetGlobalProperty(
     const base::StringPiece& name) {
-  DCHECK(in_scope_);
+  #if defined(_DEBUG)
+    DCHECK(in_scope_);
+  #endif
   return global()->Get(gin::StringToV8(isolate(), name));
 }
 
@@ -139,7 +145,9 @@ base::WeakPtr<Runner> Runner::GetWeakPtr() {
 
 v8::Handle<v8::Value> Runner::Run(const base::string16& script_text,
     const base::string16& script_name) {
-  DCHECK(in_scope_);
+  #if defined(_DEBUG)
+    DCHECK(in_scope_);
+  #endif
   v8::TryCatch try_catch;
   try_catch.SetCaptureMessage(true);
   try_catch.SetVerbose(true);
@@ -152,7 +160,9 @@ v8::Handle<v8::Value> Runner::Run(const base::string16& script_text,
 }
 
 v8::Handle<v8::Value> Runner::Run(v8::Handle<v8::Script> script) {
-  DCHECK(in_scope_);
+  #if defined(_DEBUG)
+    DCHECK(in_scope_);
+  #endif
   common::TemporaryChangeValue<int> call_depth(call_depth_, call_depth_ + 1);
   if (!CheckCallDepth())
     return v8::Handle<v8::Value>();

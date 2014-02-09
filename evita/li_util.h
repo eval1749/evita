@@ -35,61 +35,6 @@ class Castable_
     } // StaticCast
 }; // Castable_
 
-template<int t_N = 100>
-class CharSink_
-{
-    private: int     m_cwch;
-    private: char16* m_pwsz;
-    private: char16* m_pwszBuffer;
-    private: char16  m_wsz[t_N];
-
-    // ctor
-    public: CharSink_() :
-        m_cwch(t_N),
-        m_pwsz(m_wsz),
-        m_pwszBuffer(m_wsz) {}
-
-    // dtor
-    public: ~CharSink_()
-        { releaseBuffer(); }
-
-    // [A]
-    public: void Add(char16 wch)
-    {
-        if (m_pwsz - m_pwszBuffer >= m_cwch)
-        {
-            auto const cwch = m_cwch * 13 / 10;
-            char16* pwszNew = new char16[static_cast<size_t>(cwch)];
-            myCopyMemory(pwszNew, m_pwsz, sizeof(char16) * m_cwch);
-            releaseBuffer();
-            m_pwszBuffer = pwszNew;
-            m_pwsz       = pwszNew + m_cwch;
-            m_cwch       = cwch;
-        }
-
-        *m_pwsz++ = wch;
-    } // Add
-
-    public: void Add(const char16* s)
-    {
-        while (0 != *s) Add(*s++);
-    } // Add
-
-    // [G]
-    public: const char16* GetStart() const
-        { return m_pwszBuffer; }
-
-    // [R]
-    protected: void releaseBuffer()
-    {
-        if (m_wsz != m_pwszBuffer)
-        {
-            delete[] m_pwszBuffer;
-        }
-    } // releaseBuffer
-}; // CharSink_
-
-
 template<class Item_, class Parent_>
 class DoubleLinkedList_;
 
@@ -387,49 +332,6 @@ class ChildList_ : public DoubleLinkedList_<Item_, Parent_>
         return pItem;
     } // Append
 };  // ChiildList_
-
-// TODO(yosi) We should use std::unique_ptr<T> instead of OwnPtr<T>.
-namespace common {
-template<class T>
-class OwnPtr {
-  private: T* ptr_;
-  public: OwnPtr() : ptr_(nullptr) {}
-  public: explicit OwnPtr(T* ptr) : ptr_(ptr) { ASSERT(ptr_); }
-  public: explicit OwnPtr(T& obj) : ptr_(&obj) {}
-  public: OwnPtr(OwnPtr& other) : ptr_(other.ptr_) {}
-  public: OwnPtr(OwnPtr&& other) : ptr_(other.ptr_) {
-    other.ptr_ = nullptr;
-  }
-  public: ~OwnPtr() { delete ptr_; }
-  public: operator T*() const { ASSERT(ptr_); return ptr_; }
-  public: T* operator ->() const { ASSERT(ptr_); return ptr_; }
-  public: T& operator*() const { ASSERT(ptr_); return *ptr_; }
-  public: operator bool() const { return ptr_; }
-  public: bool operator!() const { return !ptr_; }
-  public: OwnPtr& operator=(OwnPtr&) = delete;
-  public: OwnPtr& operator=(OwnPtr&& other) {
-    delete ptr_;
-    ptr_ = other.ptr_;
-    other.ptr_ = nullptr;
-    return *this;
-  }
-  public: bool operator==(const OwnPtr<T>& other) const {
-    return ptr_ == other.ptr_;
-  }
-  public: bool operator!=(const OwnPtr<T>& other) const {
-    return ptr_ == other.ptr_;
-  }
-  public: bool operator==(const T* other) const { return ptr_ == other; }
-  public: bool operator!=(const T* other) const { return ptr_ != other; }
-  public: bool operator==(const T& other) const { return ptr_ == &other; }
-  public: bool operator!=(const T& other) const { return ptr_ != &other; }
-  public: T& DeprecatedDetach() {
-    auto const ptr = ptr_;
-    ptr_ = nullptr;
-    return *ptr;
-  }
-};
-}  // namespace common
 
 // RefCounted
 template<class T>

@@ -8,11 +8,11 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Config.h#3 $
 //
-#if !defined(INCLUDE_mode_Config_h)
-#define INCLUDE_mode_Config_h
+#if !defined(INCLUDE_evita_text_modes_config_mode_h)
+#define INCLUDE_evita_text_modes_config_mode_h
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/mode_factory.h"
-#include "evita/text/buffer.h"
 
 namespace text
 {
@@ -20,10 +20,13 @@ namespace text
 /// <summary>
 ///   Configuration file mode
 /// </summary>
-class ConfigModeFactory : public ModeFactory
-{
+class ConfigModeFactory : public common::Singleton<ConfigModeFactory>,
+                          public ModeFactory {
+    DECLARE_SINGLETON_CLASS(ConfigModeFactory);
+
     // ctor
-    public: ConfigModeFactory();
+    private: ConfigModeFactory();
+    public: ~ConfigModeFactory();
 
     // [C]
     public: virtual Mode* Create(Buffer*) override;
@@ -43,4 +46,4 @@ class ConfigModeFactory : public ModeFactory
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_mode_Config_h)
+#endif //!defined(INCLUDE_evita_text_modes_config_mode_h)

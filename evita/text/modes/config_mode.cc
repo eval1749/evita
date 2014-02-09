@@ -368,6 +368,9 @@ class ConfigMode : public Mode
 ConfigModeFactory::ConfigModeFactory() {
 }
 
+ConfigModeFactory::~ConfigModeFactory() {
+}
+
 /// <summary>
 ///   Create a ConfigModeFactory instance.
 /// </summary>

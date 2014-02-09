@@ -231,7 +231,7 @@ class EnumProperty {
 // ModeChoser
 //
 ModeChooser::ModeChooser() {
-  factories_.push_back(new ConfigModeFactory());
+  factories_.push_back(ConfigModeFactory::instance());
   factories_.push_back(new CxxModeFactory());
   factories_.push_back(new HaskellModeFactory());
   factories_.push_back(new LispModeFactory());

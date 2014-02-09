@@ -83,8 +83,6 @@ class Range //: public ObjectInHeap
 
     // [F]
     public: Posn FindFirstChar(char16) const;
-    //public: Posn FindLastChar(char16) const;
-    public: Posn FindOpenParen(bool = false);
 
     // [G]
     public: Buffer* GetBuffer() const { return m_pBuffer; }

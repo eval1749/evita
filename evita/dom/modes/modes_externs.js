@@ -58,3 +58,10 @@ var LispMode = function(document) {};
  * @param {!Document} document
  */
 var MasonMode = function(document) {};
+
+/**
+ * @constructor
+ * @extends {Mode}
+ * @param {!Document} document
+ */
+var PerlMode = function(document) {};

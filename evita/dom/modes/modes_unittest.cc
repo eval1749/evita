@@ -79,4 +79,15 @@ TEST_F(ModesTest, MasonMode) {
   EXPECT_SCRIPT_EQ("Mason", "mode.name");
 }
 
+TEST_F(ModesTest, PerlMode) {
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "var mode = new PerlMode(doc);");
+  EXPECT_SCRIPT_TRUE("PerlMode.keymap instanceof Map");
+  EXPECT_SCRIPT_TRUE("mode instanceof Mode");
+  EXPECT_SCRIPT_TRUE("mode instanceof PerlMode");
+  EXPECT_SCRIPT_TRUE("mode.document === doc");
+  EXPECT_SCRIPT_EQ("Perl", "mode.name");
+}
+
 }  // namespace

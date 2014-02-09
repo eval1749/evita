@@ -23,3 +23,10 @@ Mode.prototype.doCall_ = function(number) {};
  * @param {!Document} document
  */
 var ConfigMode = function(document) {};
+
+/**
+ * @constructor
+ * @extends {Mode}
+ * @param {!Document} document
+ */
+var CxxMode = function(document) {};

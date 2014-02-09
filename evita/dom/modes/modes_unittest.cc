@@ -24,4 +24,15 @@ TEST_F(ModesTest, ConfigMode) {
   EXPECT_SCRIPT_EQ("Config", "mode.name");
 }
 
+TEST_F(ModesTest, CxxMode) {
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "var mode = new CxxMode(doc);");
+  EXPECT_SCRIPT_TRUE("CxxMode.keymap instanceof Map");
+  EXPECT_SCRIPT_TRUE("mode instanceof Mode");
+  EXPECT_SCRIPT_TRUE("mode instanceof CxxMode");
+  EXPECT_SCRIPT_TRUE("mode.document === doc");
+  EXPECT_SCRIPT_EQ("C++", "mode.name");
+}
+
 }  // namespace

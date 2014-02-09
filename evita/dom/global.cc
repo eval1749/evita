@@ -20,6 +20,7 @@
 #include "evita/dom/forms/text_field_control.h"
 #include "evita/dom/file_path.h"
 #include "evita/dom/modes/config_mode.h"
+#include "evita/dom/modes/cxx_mode.h"
 #include "evita/dom/modes/mode.h"
 #include "evita/dom/point.h"
 #include "evita/dom/range.h"
@@ -83,6 +84,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
 
     v8_glue::Installer<Mode>::Run(isolate, templ);
       v8_glue::Installer<ConfigMode>::Run(isolate, templ);
+      v8_glue::Installer<CxxMode>::Run(isolate, templ);
 
     v8_glue::Installer<Selection>::Run(isolate, templ);
         v8_glue::Installer<TableSelection>::Run(isolate, templ);

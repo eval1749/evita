@@ -3,3 +3,4 @@
 // found in the LICENSE file.
 
 global.ConfigMode.keymap = new Map();
+global.CxxMode.keymap = new Map();

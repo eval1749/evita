@@ -333,41 +333,4 @@ class ChildList_ : public DoubleLinkedList_<Item_, Parent_>
     } // Append
 };  // ChiildList_
 
-// RefCounted
-template<class T>
-class RefCounted_ {
-  private: mutable int ref_count_;
-  protected: RefCounted_() : ref_count_(0) {}
-  public: ~RefCounted_() {
-    ASSERT(!ref_count_);
-  }
-  public: int ref_count() const { return ref_count_; }
-  public: void AddRef() const { ++ref_count_; }
-  public: void Release() const {
-    ASSERT(ref_count_ >= 1);
-    --ref_count_;
-    if (!ref_count_) {
-      delete static_cast<T*>(const_cast<RefCounted_*>(this));
-    }
-  }
-};
-
-template<class T> class ScopedRefCount_ {
-  private: T* const pointer_;
-  public: ScopedRefCount_(T& object) : pointer_(&object) { object.AddRef(); }
-  public: ~ScopedRefCount_() { if (pointer_) pointer_->Release(); }
-  public: operator T*() const { return pointer_; }
-  public: T* operator->() const { return pointer_; }
-  public: T& operator*() const { return *pointer_; }
-
-  public: T& Detach() {
-    ASSERT(!!pointer_);
-    auto const retval = pointer_;
-    pointer_ = nullptr;
-    return retval;
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(ScopedRefCount_);
-};
-
 #endif //!defined(INCLUDE_listener_util_h)

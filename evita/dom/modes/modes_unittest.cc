@@ -57,6 +57,17 @@ TEST_F(ModesTest, JavaMode) {
   EXPECT_SCRIPT_EQ("Java", "mode.name");
 }
 
+TEST_F(ModesTest, JavaScriptMode) {
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "var mode = new JavaScriptMode(doc);");
+  EXPECT_SCRIPT_TRUE("JavaScriptMode.keymap instanceof Map");
+  EXPECT_SCRIPT_TRUE("mode instanceof Mode");
+  EXPECT_SCRIPT_TRUE("mode instanceof JavaScriptMode");
+  EXPECT_SCRIPT_TRUE("mode.document === doc");
+  EXPECT_SCRIPT_EQ("JavaScript", "mode.name");
+}
+
 TEST_F(ModesTest, LispMode) {
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"

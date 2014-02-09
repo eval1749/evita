@@ -43,6 +43,13 @@ var JavaMode = function(document) {};
  * @extends {Mode}
  * @param {!Document} document
  */
+var JavaScriptMode = function(document) {};
+
+/**
+ * @constructor
+ * @extends {Mode}
+ * @param {!Document} document
+ */
 var HaskellMode = function(document) {};
 
 /**

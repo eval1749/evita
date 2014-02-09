@@ -6,6 +6,7 @@ global.ConfigMode.keymap = new Map();
 global.CxxMode.keymap = new Map();
 global.HaskellMode.keymap = new Map();
 global.JavaMode.keymap = new Map();
+global.JavaScriptMode.keymap = new Map();
 global.LispMode.keymap = new Map();
 global.MasonMode.keymap = new Map();
 global.PerlMode.keymap = new Map();

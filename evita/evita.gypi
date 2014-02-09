@@ -34,6 +34,7 @@
         'dom/file_path_externs.js',
         'dom/js_console_externs.js',
         'dom/key_names_externs.js',
+        'dom/modes/modes_externs.js',
         'dom/point_externs.js',
         'dom/range_externs.js',
         'dom/selection_externs.js',
@@ -164,6 +165,8 @@
         'dom/global.cc',
         'dom/init_dict.cc',
         'dom/lock.cc',
+
+        'dom/modes/mode.cc',
 
         'dom/point.cc',
         'dom/range.cc',

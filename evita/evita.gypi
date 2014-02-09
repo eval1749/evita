@@ -170,6 +170,7 @@
         'dom/modes/mode.cc',
         'dom/modes/config_mode.cc',
         'dom/modes/cxx_mode.cc',
+        'dom/modes/haskell_mode.cc',
         'dom/modes/java_mode.cc',
 
         'dom/point.cc',

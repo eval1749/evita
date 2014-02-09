@@ -37,3 +37,10 @@ var CxxMode = function(document) {};
  * @param {!Document} document
  */
 var JavaMode = function(document) {};
+
+/**
+ * @constructor
+ * @extends {Mode}
+ * @param {!Document} document
+ */
+var HaskellMode = function(document) {};

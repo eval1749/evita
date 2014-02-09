@@ -11,10 +11,6 @@
 
 namespace text {
 
-//////////////////////////////////////////////////////////////////////
-//
-// CxxModeFactory
-//
 class CxxModeFactory : public common::Singleton<CxxModeFactory>,
                        public ModeFactory {
   DECLARE_SINGLETON_CLASS(CxxModeFactory);
@@ -29,26 +25,6 @@ class CxxModeFactory : public common::Singleton<CxxModeFactory>,
   public: virtual const char16* GetName() const override { return L"C++"; }
 
   DISALLOW_COPY_AND_ASSIGN(CxxModeFactory);
-};
-
-//////////////////////////////////////////////////////////////////////
-//
-// JavaModeFactory
-//
-class JavaModeFactory : public common::Singleton<JavaModeFactory>,
-                        public ModeFactory {
-  DECLARE_SINGLETON_CLASS(JavaModeFactory);
-
-  private: JavaModeFactory();
-  public: ~JavaModeFactory();
-
-  public: virtual Mode* Create(Buffer*) override;
-  protected: virtual const char16* getExtensions() const override {
-    return L"java js";
-  }
-  public: virtual const char16* GetName() const override { return L"Java"; }
-
-  DISALLOW_COPY_AND_ASSIGN(JavaModeFactory);
 };
 
 }  // namespace text

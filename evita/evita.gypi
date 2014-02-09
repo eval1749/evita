@@ -359,6 +359,7 @@
         'text/modes/config_mode.cc',
         'text/modes/cxx_mode.cc',
         'text/modes/haskell_mode.cc',
+        'text/modes/java_mode.cc',
         'text/modes/lexer.cc',
         'text/modes/lisp_mode.cc',
         'text/modes/mason_mode.cc',

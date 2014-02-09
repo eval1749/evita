@@ -5,7 +5,7 @@
 #include "evita/dom/modes/java_mode.h"
 
 #include "evita/dom/document.h"
-#include "evita/text/modes/cxx_mode.h"
+#include "evita/text/modes/java_mode.h"
 #include "evita/v8_glue/converter.h"
 
 namespace dom {

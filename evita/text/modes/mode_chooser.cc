@@ -8,6 +8,7 @@
 #include "evita/text/modes/config_mode.h"
 #include "evita/text/modes/cxx_mode.h"
 #include "evita/text/modes/haskell_mode.h"
+#include "evita/text/modes/java_mode.h"
 #include "evita/text/modes/lisp_mode.h"
 #include "evita/text/modes/mason_mode.h"
 #include "evita/text/modes/perl_mode.h"

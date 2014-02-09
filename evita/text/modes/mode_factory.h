@@ -6,13 +6,12 @@
 #define INCLUDE_evita_dom_modes_mode_factory_h
 
 #include "base/basictypes.h"
-#include "evita/li_util.h"
 
 namespace text {
 
 class Mode;
 
-class ModeFactory : public DoubleLinkedNode_<ModeFactory> {
+class ModeFactory {
   protected: const uint32_t* m_prgnCharSyntax;
 
   public: ModeFactory(const uint* prgnCharSyntax);
@@ -32,8 +31,6 @@ class ModeFactory : public DoubleLinkedNode_<ModeFactory> {
   // [I]
   public: virtual bool IsSupported(const char16*) const;
 };
-
-typedef DoubleLinkedList_<ModeFactory> ModeFactoryes;
 
 } // namespace text
 

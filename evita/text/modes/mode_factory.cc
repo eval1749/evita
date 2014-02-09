@@ -6,18 +6,14 @@
 
 #include "base/logging.h"
 #include "evita/text/modes/char_syntax.h"
-#include "evita/text/modes/config_mode.h"
-#include "evita/text/modes/cxx_mode.h"
-#include "evita/text/modes/haskell_mode.h"
-#include "evita/text/modes/lisp_mode.h"
-#include "evita/text/modes/mason_mode.h"
-#include "evita/text/modes/perl_mode.h"
-#include "evita/text/modes/plain_text_mode.h"
-#include "evita/text/modes/python_mode.h"
-#include "evita/text/modes/xml_mode.h"
+#include "evita/text/modes/mode_chooser.h"
 
 namespace text {
 
+//////////////////////////////////////////////////////////////////////
+//
+// ModeFactory
+//
 ModeFactory::ModeFactory(const uint* prgnCharSyntax)
     : m_prgnCharSyntax(prgnCharSyntax) {
 }
@@ -79,254 +75,8 @@ uint32_t ModeFactory::GetCharSyntax(char16 wch) const {
   return CharSyntax::Syntax_None;
 }
 
-namespace {
-class EnumProperty {
-  private: uint m_nNth;
-  private: Buffer::EnumChar m_oEnumChar;
-  private: char16 m_wszName[100];
-  private: char16 m_wszValue[100];
-
-  public: EnumProperty(Buffer* pBuffer)
-      : m_nNth(0),
-        m_oEnumChar(pBuffer) {
-    m_wszName[0] = 0;
-
-    if (hasProperties())
-      next();
-  }
-
-  public: bool AtEnd() const { return 0 == m_wszName[0]; }
-
-  public: const char16* GetName() const {
-    DCHECK(!AtEnd());
-    return m_wszName;
-  }
-
-  public: const char16* GetValue() const {
-    DCHECK(!AtEnd());
-    return m_wszValue;
-  }
-
-  public: void Next() {
-    DCHECK(!AtEnd());
-    next();
-  }
-
-  private: void next() {
-    enum State {
-      State_Start,
-
-      State_Name,
-      State_Value,
-      State_ValueStart,
-    } eState = State_Start;
-
-    auto nName = 0u;
-    auto nValue = 0u;
-
-    m_wszName[0] = 0;
-    m_wszValue[0] = 0;
-
-    while (!m_oEnumChar.AtEnd()) {
-      auto const wch = m_oEnumChar.Get();
-      m_oEnumChar.Next();
-
-      switch (eState) {
-        case State_Start:
-          if (!IsWhitespace(wch)) {
-            m_wszName[nName + 0] = wch;
-            m_wszName[nName + 1] = 0;
-            nName += 1;
-
-            eState = State_Name;
-          }
-          break;
-
-        case State_Name:
-          if (':' == wch) {
-            eState = State_ValueStart;
-          } else if (nName < lengthof(m_wszName) - 1) {
-            m_wszName[nName + 0] = wch;
-            m_wszName[nName + 1] = 0;
-            nName += 1;
-          }
-          break;
-
-        case State_ValueStart:
-          if (!IsWhitespace(wch)) {
-            m_wszValue[nValue + 0] = wch;
-            m_wszValue[nValue + 1] = 0;
-            nValue += 1;
-            eState = State_Value;
-          }
-          break;
-
-        case State_Value:
-          if (';' == wch) {
-            m_nNth += 1;
-             return;
-          }
-
-          if (nValue < lengthof(m_wszValue) - 1) {
-            m_wszValue[nValue + 0] = wch;
-            m_wszValue[nValue + 1] = 0;
-            nValue += 1;
-          }
-          break;
-
-        default:
-          NOTREACHED();
-      }
-    }
-
-    // for -*- lisp -*-
-    if (!m_nNth && State_Name == eState) {
-      ::lstrcpy(m_wszValue, m_wszName);
-      ::lstrcpy(m_wszName, L"Mode");
-    }
-  }
-
-  private: bool hasProperties() {
-    enum State {
-      State_Start,
-
-      State_Dash, // -^
-      State_DashStar, // -*^
-
-      State_EndDash,
-      State_EndDashStar,
-
-      State_Properties, // after "-*-"
-    } eState = State_Start;
-
-    Posn lPropStart = 0;
-    Posn lPropEnd = 0;
-
-    while (!m_oEnumChar.AtEnd()) {
-      auto const wch = m_oEnumChar.Get();
-      m_oEnumChar.Next();
-
-      if (Newline == wch)
-        return false;
-
-      switch (eState) {
-        case State_Start:
-          switch (wch) {
-            case '-':
-              eState = State_Dash;
-              break;
-          }
-          break;
-
-        case State_Dash:
-          switch (wch) {
-            case '*':
-              eState = State_DashStar;
-              break;
-            case '-':
-              break;
-            default:
-              eState = State_Start;
-              break;
-          }
-          break;
-
-      case State_DashStar:
-          switch (wch) {
-            case '-':
-              eState = State_Properties;
-              lPropStart = m_oEnumChar.GetPosn();
-              break;
-            default:
-              eState = State_Start;
-              break;
-          }
-          break;
-
-      case State_Properties:
-          switch (wch) {
-            case '-':
-              eState = State_EndDash;
-              lPropEnd = m_oEnumChar.GetPosn() - 1;
-              break;
-          }
-          break;
-
-      case State_EndDash:
-          switch (wch) {
-            case '*':
-              eState = State_EndDashStar;
-              break;
-            default:
-              eState = State_Properties;
-              break;
-          }
-          break;
-
-      case State_EndDashStar:
-          switch (wch) {
-            case '-':
-              m_oEnumChar.SetRange(lPropStart, lPropEnd);
-              return true;
-
-            default:
-              eState = State_Properties;
-              break;
-          }
-          break;
-
-      default:
-          NOTREACHED();
-      }
-    }
-    return false;
-  }
-};
-
-ModeFactoryes g_oModeFactoryes;
-ModeFactory* s_pPlainTextModeFactory;
-
-}   // namespace
-
-ModeFactory* ModeFactory::Get(Buffer* pBuffer) {
-  DCHECK(pBuffer);
-
-  if (g_oModeFactoryes.IsEmpty()) {
-      g_oModeFactoryes.Append(new ConfigModeFactory);
-      g_oModeFactoryes.Append(new CxxModeFactory);
-      g_oModeFactoryes.Append(new HaskellModeFactory);
-      g_oModeFactoryes.Append(new LispModeFactory);
-      g_oModeFactoryes.Append(new PerlModeFactory);
-      g_oModeFactoryes.Append(new MasonModeFactory);
-      g_oModeFactoryes.Append(new JavaModeFactory);
-      s_pPlainTextModeFactory = new PlainTextModeFactory;
-      g_oModeFactoryes.Append(s_pPlainTextModeFactory);
-      g_oModeFactoryes.Append(new XmlModeFactory);
-      g_oModeFactoryes.Append(new PythonModeFactory);
-  }
-
-  char16 wszMode[100];
-  wszMode[0] = 0;
-  foreach (EnumProperty, oEnum, pBuffer) {
-    if (!::lstrcmpi(oEnum.GetName(), L"Mode")) {
-      ::lstrcpy(wszMode, oEnum.GetValue());
-      break;
-    }
-  }
-
-  foreach (ModeFactoryes::Enum, oEnum, &g_oModeFactoryes) {
-    auto const pModeFactory = oEnum.Get();
-    if (!::lstrcmpi(pModeFactory->GetName(), wszMode))
-      return pModeFactory;
-
-    if (pModeFactory->IsSupported(pBuffer->GetFileName().c_str()))
-      return pModeFactory;
-
-    if (pModeFactory->IsSupported(pBuffer->name().c_str()))
-      return pModeFactory;
-  }
-
-  return s_pPlainTextModeFactory;
+ModeFactory* ModeFactory::Get(Buffer* buffer) {
+  return ModeChooser::instance()->Choose(buffer);
 }
 
 bool ModeFactory::IsSupported(const char16* pwszName) const {
@@ -407,7 +157,7 @@ bool ModeFactory::IsSupported(const char16* pwszName) const {
     }
   }
 
-  return State_Match == eState && 0 == *pwsz;
+  return State_Match == eState && !*pwsz;
 }
 
 }  // namespace text

@@ -739,6 +739,9 @@ Mode* MasonModeFactory::Create(Buffer* pBuffer)
 PerlModeFactory::PerlModeFactory() {
 }
 
+PerlModeFactory::~PerlModeFactory() {
+}
+
 /// <summary>
 ///   Create a PerlModeFactory instance.
 /// </summary>

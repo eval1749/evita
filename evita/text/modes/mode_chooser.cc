@@ -234,10 +234,10 @@ ModeChooser::ModeChooser() {
   factories_.push_back(ConfigModeFactory::instance());
   factories_.push_back(CxxModeFactory::instance());
   factories_.push_back(HaskellModeFactory::instance());
+  factories_.push_back(JavaModeFactory::instance());
   factories_.push_back(LispModeFactory::instance());
   factories_.push_back(MasonModeFactory::instance());
-  factories_.push_back(new PerlModeFactory());
-  factories_.push_back(JavaModeFactory::instance());
+  factories_.push_back(PerlModeFactory::instance());
   plain_text_mode_factory_ = new PlainTextModeFactory();
   factories_.push_back(plain_text_mode_factory_);
   factories_.push_back(new PythonModeFactory());

@@ -8,21 +8,22 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Perl.h#4 $
 //
-#if !defined(INCLUDE_mode_Perl_h)
-#define INCLUDE_mode_Perl_h
+#if !defined(INCLUDE_evita_text_modes_perl_mode_h)
+#define INCLUDE_evita_text_modes_perl_mode_h
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/mode_factory.h"
 #include "evita/text/buffer.h"
 
 namespace text
 {
 
-/// <summary>
-///   PerlMode factory
-/// </summary>
-class PerlModeFactory : public ModeFactory
-{
+class PerlModeFactory : public common::Singleton<PerlModeFactory>,
+                       public ModeFactory {
+    DECLARE_SINGLETON_CLASS(PerlModeFactory);
+
     // ctor
+    private: ~PerlModeFactory();
     public: PerlModeFactory();
 
     // [C]
@@ -40,4 +41,4 @@ class PerlModeFactory : public ModeFactory
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_mode_Perl_h)
+#endif //!defined(INCLUDE_evita_text_modes_perl_mode_h)

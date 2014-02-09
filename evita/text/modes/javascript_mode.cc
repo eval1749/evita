@@ -4,6 +4,8 @@
 
 #include "evita/text/modes/javascript_mode.h"
 
+#include <memory>
+
 #include "evita/text/modes/clike_lexer.h"
 #include "evita/text/modes/mode.h"
 
@@ -237,16 +239,19 @@ class JavaScriptLexer : public ClikeLexer {
 // JavaScriptMode
 //
 class JavaScriptMode : public Mode {
-  private: JavaScriptLexer m_oLexer;
+  private: std::unique_ptr<JavaScriptLexer> lexer_;
 
-  // ctor/dtor
-  public: JavaScriptMode(ModeFactory* pFactory, Buffer* pBuffer)
-      : Mode(pFactory, pBuffer), m_oLexer(pBuffer) {
+  public: JavaScriptMode() = default;
+  public: ~JavaScriptMode() = default;
+
+  public: virtual bool DoColor(Count lCount) override {
+    if (!lexer_)
+      lexer_.reset(new JavaScriptLexer(buffer()));
+    return lexer_->Run(lCount);
   }
 
-  // [D]
-  public: virtual bool DoColor(Count lCount) override {
-    return m_oLexer.Run(lCount);
+  public: virtual const char16* GetName() const override {
+    return L"JavaScript";
   }
 
   DISALLOW_COPY_AND_ASSIGN(JavaScriptMode);
@@ -262,8 +267,8 @@ JavaScriptModeFactory::JavaScriptModeFactory() {
 JavaScriptModeFactory::~JavaScriptModeFactory() {
 }
 
-Mode* JavaScriptModeFactory::Create(Buffer* pBuffer) {
-  return new JavaScriptMode(this, pBuffer);
+Mode* JavaScriptModeFactory::Create() {
+  return new JavaScriptMode();
 }
 
 } // namespace text

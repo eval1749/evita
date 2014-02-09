@@ -43,8 +43,7 @@ Buffer::Buffer(const base::string16& name) :
 
     SetName(name);
 
-    if (!m_pMode)
-        m_pMode = ModeChooser::instance()->Choose(this)->Create(this);
+    SetMode(ModeChooser::instance()->Choose(this)->Create());
 } // Buffer::Buffer
 
 /// <summary>
@@ -876,10 +875,9 @@ bool Buffer::SetCharAt(Posn lPosn, char16 wch)
 ///  Set editting mode.
 /// </summary>
 /// <param name="pMode">A Mode object.</param>
-void Buffer::SetMode(Mode* pMode)
-{
-    delete m_pMode;
-    m_pMode = pMode;
+void Buffer::SetMode(Mode* mode) {
+  m_pMode = mode;
+  m_pMode->set_buffer(this);
 } // Buffer::SetMode
 
 /// <summary>

@@ -4,6 +4,8 @@
 
 #include "evita/text/modes/perl_mode.h"
 
+#include <memory>
+
 #include "evita/text/modes/char_syntax.h"
 #include "evita/text/modes/lexer.h"
 #include "evita/text/modes/mason_mode.h"
@@ -661,67 +663,64 @@ PerlLexer::k_rgnSyntax2Color[PerlLexer::Syntax_Max_1] =
 /// <summary>
 ///   Mason lexer
 /// </summary>
-class MasonLexer : public PerlLexer
-{
-    public: MasonLexer(Buffer* pBuffer) :
-        PerlLexer(pBuffer) {}
+class MasonLexer : public PerlLexer {
+  public: MasonLexer(Buffer* buffer) : PerlLexer(buffer) {
+  }
+  public: ~MasonLexer() = default;
 
-    DISALLOW_COPY_AND_ASSIGN(MasonLexer);
+  DISALLOW_COPY_AND_ASSIGN(MasonLexer);
 }; // MasonLexer
 
 /// <summary>
 ///   Mason mode
 /// </summary>
-class MasonMode : public Mode
-{
-    private: MasonLexer m_oLexer;
+class MasonMode : public Mode {
+  private: std::unique_ptr<MasonLexer> lexer_;
 
-    /// <summary>
-    ///  Construct MasonMode object
-    /// </summary>
-    public: MasonMode(ModeFactory* pFactory, Buffer* pBuffer) :
-        m_oLexer(pBuffer),
-        Mode(pFactory, pBuffer) {}
+  public: MasonMode() = default;
+  public: ~MasonMode() = default;
 
+  public: bool MasonMode::DoColor(Count lCount) {
+      if (!lexer_)
+        lexer_.reset(new MasonLexer(buffer()));
+      return lexer_->Run(lCount);
+  }
 
-    /// <summary>
-    ///   Color buffer
-    /// </summary>
-    public: bool MasonMode::DoColor(Count lCount)
-    {
-        return m_oLexer.Run(lCount);
-    } // MasonMode::DoColor
+  public: virtual const char16* GetName() const override {
+    return L"Mason";
+  }
 
-    DISALLOW_COPY_AND_ASSIGN(MasonMode);
+  DISALLOW_COPY_AND_ASSIGN(MasonMode);
 }; // MasonMode
 
 /// <summary>
 ///   Perl mode
 /// </summary>
-class PerlMode : public Mode
-{
-    private: PerlLexer m_oLexer;
+class PerlMode : public Mode {
+  private: std::unique_ptr<PerlLexer> lexer_;
 
-    // ctor/dtor
-    public: PerlMode(ModeFactory* pFactory, Buffer* pBuffer) :
-        m_oLexer(pBuffer),
-        Mode(pFactory, pBuffer) {}
+  public: PerlMode() = default;
+  public: ~PerlMode() = default;
 
-    // [D]
-    public: virtual bool DoColor(Count lCount) override
-    {
-        return m_oLexer.Run(lCount);
-    } // DoColor
+  public: virtual bool DoColor(Count lCount) override {
+    if (!lexer_)
+      lexer_.reset(new PerlLexer(buffer()));
+    return lexer_->Run(lCount);
+  }
 
-    DISALLOW_COPY_AND_ASSIGN(PerlMode);
+  public: virtual const char16* GetName() const override {
+    return L"Perl";
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(PerlMode);
 }; // PerlMode
 
 /// <summary>
 ///   Create Mason mode for specified buffer.
 /// </summary>
-Mode* MasonModeFactory::Create(Buffer* pBuffer)
+Mode* MasonModeFactory::Create()
 {
-    return new MasonMode(this, pBuffer);
+    return new MasonMode();
 } // MasonModeFactory::Create
 
 /// <summary>
@@ -736,9 +735,9 @@ PerlModeFactory::~PerlModeFactory() {
 /// <summary>
 ///   Create a PerlModeFactory instance.
 /// </summary>
-Mode* PerlModeFactory::Create(Buffer* pBuffer)
+Mode* PerlModeFactory::Create()
 {
-    return new PerlMode(this, pBuffer);
+    return new PerlMode();
 } // PerlModeFactory::Create
 
 }  // namespace text

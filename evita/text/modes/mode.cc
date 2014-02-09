@@ -4,20 +4,20 @@
 
 #include "evita/text/modes/mode.h"
 
-#include "evita/text/modes/mode_factory.h"
+#include "base/logging.h"
 
 namespace text {
 
-Mode::Mode(ModeFactory* pClass, Buffer* pBuffer)
-    : m_pBuffer(pBuffer),
-      m_pClass(pClass) {
+Mode::Mode() : buffer_(nullptr) {
 }
 
 Mode::~Mode() {
 }
 
-const char16* Mode::GetName() const {
-  return m_pClass->GetName();
+void Mode::set_buffer(Buffer* buffer) {
+  DCHECK(!buffer_);
+  DCHECK(buffer);
+  buffer_ = buffer;
 }
 
 }  // namespace text

@@ -4,6 +4,8 @@
 
 #include "evita/text/modes/haskell_mode.h"
 
+#include <memory>
+
 #include "evita/text/modes/char_syntax.h"
 #include "evita/text/modes/lexer.h"
 #include "evita/text/modes/mode.h"
@@ -870,22 +872,23 @@ HaskellLexer::k_rgnSyntax2Color[HaskellLexer::Syntax_Max_1] =
 /// <summary>
 ///   Haskell mode
 /// </summary>
-class HaskellMode : public Mode
-{
-    private: HaskellLexer m_oLexer;
+class HaskellMode : public Mode {
+  private: std::unique_ptr<HaskellLexer> lexer_;
 
-    // ctor/dtor
-    public: HaskellMode(ModeFactory* pFactory, Buffer* pBuffer) :
-        m_oLexer(pBuffer),
-        Mode(pFactory, pBuffer) {}
+  public: HaskellMode() = default;
+  public: ~HaskellMode() = default;
 
-    // [D]
-    public: virtual bool DoColor(Count lCount) override
-    {
-        return m_oLexer.Run(lCount);
-    } // DoColor
+  public: virtual bool DoColor(Count lCount) override {
+      if (!lexer_)
+        lexer_.reset(new HaskellLexer(buffer()));
+      return lexer_->Run(lCount);
+  }
 
-    DISALLOW_COPY_AND_ASSIGN(HaskellMode);
+  public: virtual const char16* GetName() const override {
+    return L"Haskell";
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(HaskellMode);
 }; // HaskellMode
 
 /// <summary>
@@ -900,9 +903,9 @@ HaskellModeFactory::~HaskellModeFactory() {
 /// <summary>
 ///   Construct HaskellMode object.
 /// </summary>
-Mode* HaskellModeFactory::Create(Buffer* pBuffer)
+Mode* HaskellModeFactory::Create()
 {
-    return new HaskellMode(this, pBuffer);
+    return new HaskellMode();
 } // HaskellModeFactory::Create
 
 }  // namespace text

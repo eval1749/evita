@@ -10,10 +10,18 @@ namespace text {
 //
 // PlainTextMode
 //
-PlainTextMode::PlainTextMode(ModeFactory* pFactory, Buffer* pBuffer) :
-    Mode(pFactory, pBuffer) {}
+PlainTextMode::PlainTextMode() {
+}
 
 PlainTextMode::~PlainTextMode() {
+}
+
+bool PlainTextMode::DoColor(Count) {
+  return false;
+}
+
+const char16* PlainTextMode::GetName() const {
+  return L"Plain";
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -24,6 +32,10 @@ PlainTextModeFactory::PlainTextModeFactory() {
 }
 
 PlainTextModeFactory::~PlainTextModeFactory() {
+}
+
+Mode* PlainTextModeFactory::Create() {
+  return new PlainTextMode();
 }
 
 }  // namespace text

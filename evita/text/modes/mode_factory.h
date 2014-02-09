@@ -16,7 +16,7 @@ class ModeFactory {
   public: virtual ~ModeFactory();
 
   // [C]
-  public: virtual Mode* Create(Buffer*) = 0;
+  public: virtual Mode* Create() = 0;
 
   // [E]
   protected: virtual const char16* getExtensions() const { return L""; }

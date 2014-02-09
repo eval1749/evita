@@ -28,8 +28,8 @@ class JavaScriptModeClass
         &JavaScriptModeClass::NewJavaScriptMode);
   }
 
-  private: static JavaScriptMode* NewJavaScriptMode(Document* document) {
-    return new JavaScriptMode(document, text::JavaScriptModeFactory::instance());
+  private: static JavaScriptMode* NewJavaScriptMode() {
+    return new JavaScriptMode();
   }
 
   DISALLOW_COPY_AND_ASSIGN(JavaScriptModeClass);
@@ -42,8 +42,8 @@ class JavaScriptModeClass
 //
 DEFINE_SCRIPTABLE_OBJECT(JavaScriptMode, JavaScriptModeClass);
 
-JavaScriptMode::JavaScriptMode(Document* document, text::ModeFactory* mode_factory)
-    : ScriptableBase(document, mode_factory) {
+JavaScriptMode::JavaScriptMode()
+    : ScriptableBase(text::JavaScriptModeFactory::instance()) {
 }
 
 JavaScriptMode::~JavaScriptMode() {

@@ -12,7 +12,7 @@ namespace dom {
 class PerlMode : public v8_glue::Scriptable<PerlMode, Mode> {
   DECLARE_SCRIPTABLE_OBJECT(PerlMode);
 
-  public: PerlMode(Document* document, text::ModeFactory* mode_factory);
+  public: PerlMode();
   public: ~PerlMode();
 
   DISALLOW_COPY_AND_ASSIGN(PerlMode);

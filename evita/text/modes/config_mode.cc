@@ -4,6 +4,8 @@
 
 #include "evita/text/modes/config_mode.h"
 
+#include <memory>
+
 #include "evita/text/modes/char_syntax.h"
 #include "evita/text/modes/lexer.h"
 #include "evita/text/modes/mode.h"
@@ -339,25 +341,20 @@ ConfigLexer::k_rgnSyntax2Color[ConfigLexer::Syntax_Limit] =
 /// </summary>
 class ConfigMode : public Mode
 {
-    private: ConfigLexer m_oLexer;
+    private: std::unique_ptr<ConfigLexer> lexer_;
 
-    /// <summary>
-    ///   Construct ConfigMode
-    /// </summary>
-    /// <param naem="pBuffer">A buffer applied to this mode</param>
-    /// <param name="pFactory">Mode factory</param>
-    public: ConfigMode(ModeFactory* pFactory, Buffer* pBuffer) :
-        m_oLexer(pBuffer),
-        Mode(pFactory, pBuffer) {}
+    public: ConfigMode() = default;
+    public: ~ConfigMode() = default;
 
-    // [D]
-    /// <summary>
-    ///   Color buffer with Config file syntax.
-    /// </summary>
-    public: virtual bool DoColor(Count lCount) override
-    {
-        return m_oLexer.Run(lCount);
-    } // DoColor
+    public: virtual bool DoColor(Count lCount) override {
+      if (!lexer_)
+        lexer_.reset(new ConfigLexer(buffer()));
+      return lexer_->Run(lCount);
+    }
+
+    public: virtual const char16* GetName() const override {
+      return L"Config";
+    }
 
     DISALLOW_COPY_AND_ASSIGN(ConfigMode);
 }; // ConfigMode
@@ -374,9 +371,9 @@ ConfigModeFactory::~ConfigModeFactory() {
 /// <summary>
 ///   Create a ConfigModeFactory instance.
 /// </summary>
-Mode* ConfigModeFactory::Create(Buffer* pBuffer)
+Mode* ConfigModeFactory::Create() 
 {
-    return new ConfigMode(this, pBuffer);
+    return new ConfigMode();
 } // ConfigModeFactory::Create
 
 /// <summary>

@@ -4,6 +4,8 @@
 
 #include "evita/text/modes/python_mode.h"
 
+#include <memory>
+
 #include "evita/text/modes/char_syntax.h"
 #include "evita/text/modes/lexer.h"
 #include "evita/text/modes/mode.h"
@@ -572,16 +574,19 @@ PythonLexer::k_rgnSyntax2Color[PythonLexer::Syntax_Max_1] = {
 ///   Python mode
 /// </summary>
 class PythonMode : public Mode {
-  private: PythonLexer m_oLexer;
+  private: std::unique_ptr<PythonLexer> lexer_;
 
-  // ctor/dtor
-  public: PythonMode(ModeFactory* pFactory, Buffer* pBuffer)
-    : m_oLexer(pBuffer),
-      Mode(pFactory, pBuffer) {}
+  public: PythonMode() = default;
+  public: ~PythonMode() = default;
 
-  // [D]
   public: virtual bool DoColor(Count lCount) override {
-    return m_oLexer.Run(lCount);
+    if (!lexer_)
+      lexer_.reset(new PythonLexer(buffer()));
+    return lexer_->Run(lCount);
+  }
+
+  public: virtual const char16* GetName() const override {
+    return L"Python";
   }
 
   DISALLOW_COPY_AND_ASSIGN(PythonMode);
@@ -593,8 +598,8 @@ PythonModeFactory::PythonModeFactory() {
 PythonModeFactory::~PythonModeFactory() {
 }
 
-Mode* PythonModeFactory::Create(Buffer* pBuffer) {
-  return new PythonMode(this, pBuffer);
+Mode* PythonModeFactory::Create() {
+  return new PythonMode();
 }
 
 }  // namespace text

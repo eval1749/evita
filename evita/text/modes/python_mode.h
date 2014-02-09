@@ -13,7 +13,6 @@
 
 #include "common/memory/singleton.h"
 #include "evita/text/modes/mode_factory.h"
-#include "evita/text/buffer.h"
 
 namespace text {
 
@@ -29,7 +28,7 @@ class PythonModeFactory : public common::Singleton<PythonModeFactory>,
   public: ~PythonModeFactory();
 
   // [C]
-  public: virtual Mode* Create(Buffer*) override;
+  public: virtual Mode* Create() override;
 
   // [G]
   protected: virtual const char16* getExtensions() const override {

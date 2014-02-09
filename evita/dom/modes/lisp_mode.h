@@ -12,7 +12,7 @@ namespace dom {
 class LispMode : public v8_glue::Scriptable<LispMode, Mode> {
   DECLARE_SCRIPTABLE_OBJECT(LispMode);
 
-  public: LispMode(Document* document, text::ModeFactory* mode_factory);
+  public: LispMode();
   public: ~LispMode();
 
   DISALLOW_COPY_AND_ASSIGN(LispMode);

@@ -28,8 +28,8 @@ class PlainTextModeClass
         &PlainTextModeClass::NewPlainTextMode);
   }
 
-  private: static PlainTextMode* NewPlainTextMode(Document* document) {
-    return new PlainTextMode(document, text::PlainTextModeFactory::instance());
+  private: static PlainTextMode* NewPlainTextMode() {
+    return new PlainTextMode();
   }
 
   DISALLOW_COPY_AND_ASSIGN(PlainTextModeClass);
@@ -42,8 +42,8 @@ class PlainTextModeClass
 //
 DEFINE_SCRIPTABLE_OBJECT(PlainTextMode, PlainTextModeClass);
 
-PlainTextMode::PlainTextMode(Document* document, text::ModeFactory* mode_factory)
-    : ScriptableBase(document, mode_factory) {
+PlainTextMode::PlainTextMode()
+    : ScriptableBase(text::PlainTextModeFactory::instance()) {
 }
 
 PlainTextMode::~PlainTextMode() {

@@ -30,7 +30,7 @@ class HaskellModeFactory : public common::Singleton<HaskellModeFactory>,
     public: ~HaskellModeFactory();
 
     // [C]
-    public: virtual Mode* Create(Buffer*) override;
+    public: virtual Mode* Create() override;
 
     // [G]
     protected: virtual const char16* getExtensions() const override

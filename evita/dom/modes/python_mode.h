@@ -12,7 +12,7 @@ namespace dom {
 class PythonMode : public v8_glue::Scriptable<PythonMode, Mode> {
   DECLARE_SCRIPTABLE_OBJECT(PythonMode);
 
-  public: PythonMode(Document* document, text::ModeFactory* mode_factory);
+  public: PythonMode();
   public: ~PythonMode();
 
   DISALLOW_COPY_AND_ASSIGN(PythonMode);

@@ -12,7 +12,7 @@ namespace dom {
 class XmlMode : public v8_glue::Scriptable<XmlMode, Mode> {
   DECLARE_SCRIPTABLE_OBJECT(XmlMode);
 
-  public: XmlMode(Document* document, text::ModeFactory* mode_factory);
+  public: XmlMode();
   public: ~XmlMode();
 
   DISALLOW_COPY_AND_ASSIGN(XmlMode);

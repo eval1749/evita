@@ -22,18 +22,15 @@ namespace text
 //
 // PlainTextMode
 //
-class PlainTextMode : public Mode
-{
-    // ctor
-    public: PlainTextMode(ModeFactory*, Buffer*);
-    public: ~PlainTextMode();
+class PlainTextMode : public Mode {
+  public: PlainTextMode();
+  public: ~PlainTextMode();
 
-    // [D]
-    public: virtual bool DoColor(Count) override { return false; }
+  public: virtual bool DoColor(Count) override;
+  public: virtual const char16* GetName() const override;
 
-    DISALLOW_COPY_AND_ASSIGN(PlainTextMode);
+  DISALLOW_COPY_AND_ASSIGN(PlainTextMode);
 }; // PlainTextMode
-
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -48,8 +45,7 @@ class PlainTextModeFactory : public common::Singleton<PlainTextModeFactory>,
     public: ~PlainTextModeFactory();
 
     // [C]
-    public: virtual Mode* Create(Buffer* pBuffer) override
-        { return new PlainTextMode(this, pBuffer); }
+    public: virtual Mode* Create() override;
 
     // [G]
     protected: virtual const char16* getExtensions() const override

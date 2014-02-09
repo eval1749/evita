@@ -27,8 +27,8 @@ class XmlModeClass : public v8_glue::DerivedWrapperInfo<XmlMode, Mode> {
         &XmlModeClass::NewXmlMode);
   }
 
-  private: static XmlMode* NewXmlMode(Document* document) {
-    return new XmlMode(document, text::XmlModeFactory::instance());
+  private: static XmlMode* NewXmlMode() {
+    return new XmlMode();
   }
 
   DISALLOW_COPY_AND_ASSIGN(XmlModeClass);
@@ -41,8 +41,8 @@ class XmlModeClass : public v8_glue::DerivedWrapperInfo<XmlMode, Mode> {
 //
 DEFINE_SCRIPTABLE_OBJECT(XmlMode, XmlModeClass);
 
-XmlMode::XmlMode(Document* document, text::ModeFactory* mode_factory)
-    : ScriptableBase(document, mode_factory) {
+XmlMode::XmlMode()
+    : ScriptableBase(text::XmlModeFactory::instance()) {
 }
 
 XmlMode::~XmlMode() {

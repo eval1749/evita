@@ -22,12 +22,10 @@ class Document;
 class Mode : public v8_glue::Scriptable<Mode> {
   DECLARE_SCRIPTABLE_OBJECT(Mode);
   private: std::unique_ptr<text::Mode> mode_;
-  private: gc::Member<Document> document_;
 
-  protected: Mode(Document* document, text::ModeFactory* mode_factory);
+  protected: Mode(text::ModeFactory* mode_factory);
   public: ~Mode();
 
-  public: Document* document() const { return document_.get(); }
   public: base::string16 name() const;
 
   public: void DoColor(int hint);

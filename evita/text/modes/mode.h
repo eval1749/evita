@@ -15,20 +15,16 @@ class Mode;
 class ModeFactory;
 
 class Mode {
-  protected: Buffer* m_pBuffer;
-  protected: ModeFactory* m_pClass;
+  private: Buffer* buffer_;
 
-  protected: Mode(ModeFactory*, Buffer*);
+  protected: Mode();
   public: virtual ~Mode();
 
-  // [D]
+  public: Buffer* buffer() const { return buffer_; }
+  public: void set_buffer(Buffer* buffer);
+
   public: virtual bool DoColor(Count) = 0;
-
-  // [G]
-  public: Buffer* GetBuffer() const { return m_pBuffer; }
-
-  public: ModeFactory* GetClass() const { return m_pClass; }
-  public: virtual const char16* GetName() const;
+  public: virtual const char16* GetName() const = 0;
 
   DISALLOW_COPY_AND_ASSIGN(Mode);
 };

@@ -27,8 +27,8 @@ class ConfigModeClass : public v8_glue::DerivedWrapperInfo<ConfigMode, Mode> {
         &ConfigModeClass::NewConfigMode);
   }
 
-  private: static ConfigMode* NewConfigMode(Document* document) {
-    return new ConfigMode(document, text::ConfigModeFactory::instance());
+  private: static ConfigMode* NewConfigMode() {
+    return new ConfigMode();
   }
 
   DISALLOW_COPY_AND_ASSIGN(ConfigModeClass);
@@ -41,8 +41,8 @@ class ConfigModeClass : public v8_glue::DerivedWrapperInfo<ConfigMode, Mode> {
 //
 DEFINE_SCRIPTABLE_OBJECT(ConfigMode, ConfigModeClass);
 
-ConfigMode::ConfigMode(Document* document, text::ModeFactory* mode_factory)
-    : ScriptableBase(document, mode_factory) {
+ConfigMode::ConfigMode()
+    : ScriptableBase(text::ConfigModeFactory::instance()) {
 }
 
 ConfigMode::~ConfigMode() {

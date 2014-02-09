@@ -27,8 +27,8 @@ class HaskellModeClass : public v8_glue::DerivedWrapperInfo<HaskellMode, Mode> {
         &HaskellModeClass::NewHaskellMode);
   }
 
-  private: static HaskellMode* NewHaskellMode(Document* document) {
-    return new HaskellMode(document, text::HaskellModeFactory::instance());
+  private: static HaskellMode* NewHaskellMode() {
+    return new HaskellMode();
   }
 
   DISALLOW_COPY_AND_ASSIGN(HaskellModeClass);
@@ -41,8 +41,8 @@ class HaskellModeClass : public v8_glue::DerivedWrapperInfo<HaskellMode, Mode> {
 //
 DEFINE_SCRIPTABLE_OBJECT(HaskellMode, HaskellModeClass);
 
-HaskellMode::HaskellMode(Document* document, text::ModeFactory* mode_factory)
-    : ScriptableBase(document, mode_factory) {
+HaskellMode::HaskellMode()
+    : ScriptableBase(text::HaskellModeFactory::instance()) {
 }
 
 HaskellMode::~HaskellMode() {

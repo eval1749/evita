@@ -12,7 +12,7 @@ namespace dom {
 class MasonMode : public v8_glue::Scriptable<MasonMode, Mode> {
   DECLARE_SCRIPTABLE_OBJECT(MasonMode);
 
-  public: MasonMode(Document* document, text::ModeFactory* mode_factory);
+  public: MasonMode();
   public: ~MasonMode();
 
   DISALLOW_COPY_AND_ASSIGN(MasonMode);

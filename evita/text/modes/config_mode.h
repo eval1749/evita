@@ -29,7 +29,7 @@ class ConfigModeFactory : public common::Singleton<ConfigModeFactory>,
     public: ~ConfigModeFactory();
 
     // [C]
-    public: virtual Mode* Create(Buffer*) override;
+    public: virtual Mode* Create() override;
 
     // [G]
     protected: virtual const char16* getExtensions() const override

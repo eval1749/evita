@@ -12,7 +12,7 @@ namespace dom {
 class PlainTextMode : public v8_glue::Scriptable<PlainTextMode, Mode> {
   DECLARE_SCRIPTABLE_OBJECT(PlainTextMode);
 
-  public: PlainTextMode(Document* document, text::ModeFactory* mode_factory);
+  public: PlainTextMode();
   public: ~PlainTextMode();
 
   DISALLOW_COPY_AND_ASSIGN(PlainTextMode);

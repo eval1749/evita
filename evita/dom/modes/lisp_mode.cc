@@ -27,8 +27,8 @@ class LispModeClass : public v8_glue::DerivedWrapperInfo<LispMode, Mode> {
         &LispModeClass::NewLispMode);
   }
 
-  private: static LispMode* NewLispMode(Document* document) {
-    return new LispMode(document, text::LispModeFactory::instance());
+  private: static LispMode* NewLispMode() {
+    return new LispMode();
   }
 
   DISALLOW_COPY_AND_ASSIGN(LispModeClass);
@@ -41,8 +41,8 @@ class LispModeClass : public v8_glue::DerivedWrapperInfo<LispMode, Mode> {
 //
 DEFINE_SCRIPTABLE_OBJECT(LispMode, LispModeClass);
 
-LispMode::LispMode(Document* document, text::ModeFactory* mode_factory)
-    : ScriptableBase(document, mode_factory) {
+LispMode::LispMode()
+    : ScriptableBase(text::LispModeFactory::instance()) {
 }
 
 LispMode::~LispMode() {

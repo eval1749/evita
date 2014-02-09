@@ -4,12 +4,8 @@
 
 /**
  * @constructor
- * @param {!Document} document
  */
-var Mode = function(document) {};
-
-/** @expose @type {!Document} */
-Mode.prototype.document;
+var Mode = function() {};
 
 /** @expose @type {string} */
 Mode.prototype.name;
@@ -20,76 +16,65 @@ Mode.prototype.doCall_ = function(number) {};
 /**
  * @constructor
  * @extends {Mode}
- * @param {!Document} document
  */
-var ConfigMode = function(document) {};
+var ConfigMode = function() {};
 
 /**
  * @constructor
  * @extends {Mode}
- * @param {!Document} document
  */
-var CxxMode = function(document) {};
+var CxxMode = function() {};
 
 /**
  * @constructor
  * @extends {Mode}
- * @param {!Document} document
  */
-var JavaMode = function(document) {};
+var JavaMode = function() {};
 
 /**
  * @constructor
  * @extends {Mode}
- * @param {!Document} document
  */
-var JavaScriptMode = function(document) {};
+var JavaScriptMode = function() {};
 
 /**
  * @constructor
  * @extends {Mode}
- * @param {!Document} document
  */
-var HaskellMode = function(document) {};
+var HaskellMode = function() {};
 
 /**
  * @constructor
  * @extends {Mode}
- * @param {!Document} document
  */
-var LispMode = function(document) {};
+var LispMode = function() {};
 
 /**
  * @constructor
  * @extends {Mode}
- * @param {!Document} document
  */
-var MasonMode = function(document) {};
+var MasonMode = function() {};
 
 /**
  * @constructor
  * @extends {Mode}
- * @param {!Document} document
  */
-var PerlMode = function(document) {};
+var PerlMode = function() {};
 
 /**
  * @constructor
  * @extends {Mode}
- * @param {!Document} document
  */
-var PlainTextMode = function(document) {};
+var PlainTextMode = function() {};
 
 /**
  * @constructor
  * @extends {Mode}
- * @param {!Document} document
  */
-var PythonMode = function(document) {};
+var PythonMode = function() {};
 
 /**
  * @constructor
  * @extends {Mode}
- * @param {!Document} document
  */
-var XmlMode = function(document) {};
+var XmlMode = function() {};

@@ -523,21 +523,25 @@ void XmlLexer::setStateStart(State eState, int iExtra)
     m_eState = eState;
 } // XmlLexer::setStateStart
 
-/// <summary>
-///  Construct XmlMode object
-/// </summary>
-XmlMode::XmlMode(ModeFactory* pFactory, Buffer* pBuffer) :
-    m_oLexer(pBuffer),
-    Mode(pFactory, pBuffer) {}
-
 //////////////////////////////////////////////////////////////////////
 //
-// XmlMode::DoColor
+// XmlMode
 //
-bool XmlMode::DoColor(Count lCount)
-{
-    return m_oLexer.Run(lCount);
-} // XmlMode::DoColor
+XmlMode::XmlMode() {
+}
+
+XmlMode::~XmlMode() {
+}
+
+bool XmlMode::DoColor(Count lCount) {
+  if (!lexer_)
+    lexer_.reset(new XmlLexer(buffer()));
+  return lexer_->Run(lCount);
+}
+
+const char16* XmlMode::GetName() const {
+  return L"XML";
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -547,6 +551,10 @@ XmlModeFactory::XmlModeFactory() {
 }
 
 XmlModeFactory::~XmlModeFactory() {
+}
+
+Mode* XmlModeFactory::Create() {
+  return new XmlMode();
 }
 
 }  // namespace text

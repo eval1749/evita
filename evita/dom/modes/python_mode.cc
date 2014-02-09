@@ -27,8 +27,8 @@ class PythonModeClass : public v8_glue::DerivedWrapperInfo<PythonMode, Mode> {
         &PythonModeClass::NewPythonMode);
   }
 
-  private: static PythonMode* NewPythonMode(Document* document) {
-    return new PythonMode(document, text::PythonModeFactory::instance());
+  private: static PythonMode* NewPythonMode() {
+    return new PythonMode();
   }
 
   DISALLOW_COPY_AND_ASSIGN(PythonModeClass);
@@ -41,8 +41,8 @@ class PythonModeClass : public v8_glue::DerivedWrapperInfo<PythonMode, Mode> {
 //
 DEFINE_SCRIPTABLE_OBJECT(PythonMode, PythonModeClass);
 
-PythonMode::PythonMode(Document* document, text::ModeFactory* mode_factory)
-    : ScriptableBase(document, mode_factory) {
+PythonMode::PythonMode()
+    : ScriptableBase(text::PythonModeFactory::instance()) {
 }
 
 PythonMode::~PythonMode() {

@@ -27,8 +27,8 @@ class JavaModeClass : public v8_glue::DerivedWrapperInfo<JavaMode, Mode> {
         &JavaModeClass::NewJavaMode);
   }
 
-  private: static JavaMode* NewJavaMode(Document* document) {
-    return new JavaMode(document, text::JavaModeFactory::instance());
+  private: static JavaMode* NewJavaMode() {
+    return new JavaMode();
   }
 
   DISALLOW_COPY_AND_ASSIGN(JavaModeClass);
@@ -41,8 +41,8 @@ class JavaModeClass : public v8_glue::DerivedWrapperInfo<JavaMode, Mode> {
 //
 DEFINE_SCRIPTABLE_OBJECT(JavaMode, JavaModeClass);
 
-JavaMode::JavaMode(Document* document, text::ModeFactory* mode_factory)
-    : ScriptableBase(document, mode_factory) {
+JavaMode::JavaMode()
+    : ScriptableBase(text::JavaModeFactory::instance()) {
 }
 
 JavaMode::~JavaMode() {

@@ -27,8 +27,8 @@ class MasonModeClass : public v8_glue::DerivedWrapperInfo<MasonMode, Mode> {
         &MasonModeClass::NewMasonMode);
   }
 
-  private: static MasonMode* NewMasonMode(Document* document) {
-    return new MasonMode(document, text::MasonModeFactory::instance());
+  private: static MasonMode* NewMasonMode() {
+    return new MasonMode();
   }
 
   DISALLOW_COPY_AND_ASSIGN(MasonModeClass);
@@ -41,8 +41,8 @@ class MasonModeClass : public v8_glue::DerivedWrapperInfo<MasonMode, Mode> {
 //
 DEFINE_SCRIPTABLE_OBJECT(MasonMode, MasonModeClass);
 
-MasonMode::MasonMode(Document* document, text::ModeFactory* mode_factory)
-    : ScriptableBase(document, mode_factory) {
+MasonMode::MasonMode()
+    : ScriptableBase(text::MasonModeFactory::instance()) {
 }
 
 MasonMode::~MasonMode() {

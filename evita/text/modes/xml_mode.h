@@ -11,6 +11,8 @@
 #if !defined(INCLUDE_evita_text_modes_xml_mode_h)
 #define INCLUDE_evita_text_modes_xml_mode_h
 
+#include <memory>
+
 #include "common/memory/singleton.h"
 #include "evita/text/modes/lexer.h"
 #include "evita/text/modes/mode.h"
@@ -103,13 +105,15 @@ class XmlLexer : public LexerBase
 //
 class XmlMode : public Mode
 {
-    private: XmlLexer m_oLexer;
+    private: std::unique_ptr<XmlLexer> lexer_;
 
     // ctor
-    public: XmlMode(ModeFactory*, Buffer*);
+    public: XmlMode();
+    public: ~XmlMode();
 
     // [D]
     public: virtual bool DoColor(Count) override;
+    public: virtual const char16* GetName() const override;
 
     DISALLOW_COPY_AND_ASSIGN(XmlMode);
 }; // XmlMode
@@ -126,8 +130,7 @@ class XmlModeFactory : public common::Singleton<XmlModeFactory>,
     public: ~XmlModeFactory();
 
     // [C]
-    public: virtual Mode* Create(Buffer* pBuffer) override
-        { return new XmlMode(this, pBuffer); }
+    public: virtual Mode* Create() override;
 
     // [G]
     protected: virtual const char16* getExtensions() const override

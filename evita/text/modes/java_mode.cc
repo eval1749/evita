@@ -4,6 +4,8 @@
 
 #include "evita/text/modes/java_mode.h"
 
+#include <memory>
+
 #include "evita/text/modes/clike_lexer.h"
 #include "evita/text/modes/mode.h"
 
@@ -237,16 +239,19 @@ class JavaLexer : public ClikeLexer {
 // JavaMode
 //
 class JavaMode : public Mode {
-  private: JavaLexer m_oLexer;
+  private: std::unique_ptr<JavaLexer> lexer_;
 
-  // ctor/dtor
-  public: JavaMode(ModeFactory* pFactory, Buffer* pBuffer)
-      : Mode(pFactory, pBuffer), m_oLexer(pBuffer) {
+  public: JavaMode() = default;
+  public: ~JavaMode() = default;
+
+  public: virtual bool DoColor(Count lCount) override {
+    if (!lexer_)
+      lexer_.reset(new JavaLexer(buffer()));
+    return lexer_->Run(lCount);
   }
 
-  // [D]
-  public: virtual bool DoColor(Count lCount) override {
-    return m_oLexer.Run(lCount);
+  public: virtual const char16* GetName() const override {
+    return L"Java";
   }
 
   DISALLOW_COPY_AND_ASSIGN(JavaMode);
@@ -262,8 +267,8 @@ JavaModeFactory::JavaModeFactory() {
 JavaModeFactory::~JavaModeFactory() {
 }
 
-Mode* JavaModeFactory::Create(Buffer* pBuffer) {
-  return new JavaMode(this, pBuffer);
+Mode* JavaModeFactory::Create() {
+  return new JavaMode();
 }
 
 } // namespace text

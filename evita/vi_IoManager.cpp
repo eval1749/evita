@@ -71,9 +71,9 @@ struct FinishLoadParam
                 text::ModeChooser::instance()->Choose(m_pBuffer);
 
             text::Mode* pMode = m_pBuffer->GetMode();
-            if (pMode->GetClass() != pModeFactory)
+            if (::lstrcmp(pModeFactory->GetName(), pMode->GetName()))
             {
-                m_pBuffer->SetMode(pModeFactory->Create(m_pBuffer));
+                m_pBuffer->SetMode(pModeFactory->Create());
             }
 
             for (auto window : views::Window::all_windows()) {

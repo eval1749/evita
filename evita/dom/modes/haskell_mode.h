@@ -12,7 +12,7 @@ namespace dom {
 class HaskellMode : public v8_glue::Scriptable<HaskellMode, Mode> {
   DECLARE_SCRIPTABLE_OBJECT(HaskellMode);
 
-  public: HaskellMode(Document* document, text::ModeFactory* mode_factory);
+  public: HaskellMode();
   public: ~HaskellMode();
 
   DISALLOW_COPY_AND_ASSIGN(HaskellMode);

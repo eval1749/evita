@@ -12,7 +12,7 @@ namespace dom {
 class ConfigMode : public v8_glue::Scriptable<ConfigMode, Mode> {
   DECLARE_SCRIPTABLE_OBJECT(ConfigMode);
 
-  public: ConfigMode(Document* document, text::ModeFactory* mode_factory);
+  public: ConfigMode();
   public: ~ConfigMode();
 
   DISALLOW_COPY_AND_ASSIGN(ConfigMode);

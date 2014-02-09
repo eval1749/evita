@@ -4,6 +4,8 @@
 
 #include "evita/text/modes/cxx_mode.h"
 
+#include <memory>
+
 #include "evita/text/modes/clike_lexer.h"
 #include "evita/text/modes/mode.h"
 
@@ -331,18 +333,19 @@ class CxxLexer : public ClikeLexer {
 // CxxMode
 //
 class CxxMode : public Mode {
-  private: CxxLexer m_oLexer;
+  private: std::unique_ptr<CxxLexer> lexer_;
 
-  // ctor/dtor
-  public: CxxMode(ModeFactory* pFactory, Buffer* pBuffer)
-      : Mode(pFactory, pBuffer), m_oLexer(pBuffer) {
-  }
-
+  public: CxxMode() = default;
   public: ~CxxMode() = default;
 
-  // [D]
   public: virtual bool DoColor(Count lCount) override {
-    return m_oLexer.Run(lCount);
+    if (!lexer_)
+      lexer_.reset(new CxxLexer(buffer()));
+    return lexer_->Run(lCount);
+  }
+
+  public: virtual const char16* GetName() const override {
+    return L"C++";
   }
 
   DISALLOW_COPY_AND_ASSIGN(CxxMode);
@@ -358,8 +361,8 @@ CxxModeFactory::CxxModeFactory() {
 CxxModeFactory::~CxxModeFactory() {
 }
 
-Mode* CxxModeFactory::Create(Buffer* pBuffer) {
-  return new CxxMode(this, pBuffer);
+Mode* CxxModeFactory::Create() {
+  return new CxxMode();
 }
 
 } // namespace text

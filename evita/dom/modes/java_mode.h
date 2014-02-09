@@ -12,7 +12,7 @@ namespace dom {
 class JavaMode : public v8_glue::Scriptable<JavaMode, Mode> {
   DECLARE_SCRIPTABLE_OBJECT(JavaMode);
 
-  public: JavaMode(Document* document, text::ModeFactory* mode_factory);
+  public: JavaMode();
   public: ~JavaMode();
 
   DISALLOW_COPY_AND_ASSIGN(JavaMode);

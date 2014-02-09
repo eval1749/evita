@@ -26,7 +26,6 @@ class ModeClass : public v8_glue::WrapperInfo {
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetProperty("document", &Mode::document)
         .SetProperty("name", &Mode::name)
         .SetMethod("doColor_", &Mode::DoColor);
   }
@@ -41,8 +40,8 @@ class ModeClass : public v8_glue::WrapperInfo {
 //
 DEFINE_SCRIPTABLE_OBJECT(Mode, ModeClass);
 
-Mode::Mode(Document* document, text::ModeFactory* mode_factory)
-    : document_(document), mode_(mode_factory->Create(document->buffer())) {
+Mode::Mode(text::ModeFactory* mode_factory)
+    : mode_(mode_factory->Create()) {
 }
 
 Mode::~Mode() {

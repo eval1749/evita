@@ -12,7 +12,7 @@ namespace dom {
 class CxxMode : public v8_glue::Scriptable<CxxMode, Mode> {
   DECLARE_SCRIPTABLE_OBJECT(CxxMode);
 
-  public: CxxMode(Document* document, text::ModeFactory* mode_factory);
+  public: CxxMode();
   public: ~CxxMode();
 
   DISALLOW_COPY_AND_ASSIGN(CxxMode);

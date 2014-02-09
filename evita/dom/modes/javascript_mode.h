@@ -12,7 +12,7 @@ namespace dom {
 class JavaScriptMode : public v8_glue::Scriptable<JavaScriptMode, Mode> {
   DECLARE_SCRIPTABLE_OBJECT(JavaScriptMode);
 
-  public: JavaScriptMode(Document* document, text::ModeFactory* mode_factory);
+  public: JavaScriptMode();
   public: ~JavaScriptMode();
 
   DISALLOW_COPY_AND_ASSIGN(JavaScriptMode);

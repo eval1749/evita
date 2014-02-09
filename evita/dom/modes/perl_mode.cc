@@ -27,8 +27,8 @@ class PerlModeClass : public v8_glue::DerivedWrapperInfo<PerlMode, Mode> {
         &PerlModeClass::NewPerlMode);
   }
 
-  private: static PerlMode* NewPerlMode(Document* document) {
-    return new PerlMode(document, text::PerlModeFactory::instance());
+  private: static PerlMode* NewPerlMode() {
+    return new PerlMode();
   }
 
   DISALLOW_COPY_AND_ASSIGN(PerlModeClass);
@@ -41,8 +41,8 @@ class PerlModeClass : public v8_glue::DerivedWrapperInfo<PerlMode, Mode> {
 //
 DEFINE_SCRIPTABLE_OBJECT(PerlMode, PerlModeClass);
 
-PerlMode::PerlMode(Document* document, text::ModeFactory* mode_factory)
-    : ScriptableBase(document, mode_factory) {
+PerlMode::PerlMode()
+    : ScriptableBase(text::PerlModeFactory::instance()) {
 }
 
 PerlMode::~PerlMode() {

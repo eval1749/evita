@@ -7,7 +7,6 @@
 
 #include "common/memory/singleton.h"
 #include "evita/text/modes/mode_factory.h"
-#include "evita/text/buffer.h"
 
 namespace text {
 
@@ -18,7 +17,7 @@ class JavaModeFactory : public common::Singleton<JavaModeFactory>,
   private: JavaModeFactory();
   public: ~JavaModeFactory();
 
-  public: virtual Mode* Create(Buffer*) override;
+  public: virtual Mode* Create() override;
   protected: virtual const char16* getExtensions() const override {
     return L"java";
   }

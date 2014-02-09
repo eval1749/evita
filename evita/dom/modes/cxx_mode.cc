@@ -27,8 +27,8 @@ class CxxModeClass : public v8_glue::DerivedWrapperInfo<CxxMode, Mode> {
         &CxxModeClass::NewCxxMode);
   }
 
-  private: static CxxMode* NewCxxMode(Document* document) {
-    return new CxxMode(document, text::CxxModeFactory::instance());
+  private: static CxxMode* NewCxxMode() {
+    return new CxxMode();
   }
 
   DISALLOW_COPY_AND_ASSIGN(CxxModeClass);
@@ -41,8 +41,8 @@ class CxxModeClass : public v8_glue::DerivedWrapperInfo<CxxMode, Mode> {
 //
 DEFINE_SCRIPTABLE_OBJECT(CxxMode, CxxModeClass);
 
-CxxMode::CxxMode(Document* document, text::ModeFactory* mode_factory)
-    : ScriptableBase(document, mode_factory) {
+CxxMode::CxxMode()
+    : ScriptableBase(text::CxxModeFactory::instance()) {
 }
 
 CxxMode::~CxxMode() {

@@ -4,6 +4,8 @@
 
 #include "evita/text/modes/lisp_mode.h"
 
+#include <memory>
+
 #include "evita/text/modes/char_syntax.h"
 #include "evita/text/modes/lexer.h"
 #include "evita/text/modes/mode.h"
@@ -658,29 +660,23 @@ class ClLexer : public LispLexer
 /// <summary>
 ///   Lisp file mode
 /// </summary>
-class LispMode : public Mode
-{
-    private: ClLexer m_oLexer;
+class LispMode : public Mode {
+  private: std::unique_ptr<ClLexer> lexer_;
 
-    /// <summary>
-    ///   Construct LispMode
-    /// </summary>
-    /// <param naem="pBuffer">A buffer applied to this mode</param>
-    /// <param name="pFactory">Mode factory</param>
-    public: LispMode(ModeFactory* pFactory, Buffer* pBuffer) :
-        Mode(pFactory, pBuffer),
-        m_oLexer(pBuffer) {}
+  public: LispMode() = default;
+  public: ~LispMode() = default;
 
-    // [D]
-    /// <summary>
-    ///   Color buffer with Lisp syntax.
-    /// </summary>
-    public: virtual bool DoColor(Count lCount) override
-    {
-        return m_oLexer.Run(lCount);
-    } // DoColor
+  public: virtual bool DoColor(Count lCount) override {
+    if (!lexer_)
+      lexer_.reset(new ClLexer(buffer()));
+    return lexer_->Run(lCount);
+  }
 
-    DISALLOW_COPY_AND_ASSIGN(LispMode);
+  public: virtual const char16* GetName() const override {
+    return L"Lisp";
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(LispMode);
 }; // LispMode
 
 /// <summary>
@@ -695,9 +691,9 @@ LispModeFactory::~LispModeFactory() {
 /// <summary>
 ///   Create a LispModeFactory instance.
 /// </summary>
-Mode* LispModeFactory::Create(Buffer* pBuffer)
+Mode* LispModeFactory::Create()
 {
-    return new LispMode(this, pBuffer);
+    return new LispMode();
 } // LispModeFactory::Create
 
 }  // namespace text

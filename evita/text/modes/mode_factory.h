@@ -12,9 +12,7 @@ namespace text {
 class Mode;
 
 class ModeFactory {
-  protected: const uint32_t* m_prgnCharSyntax;
-
-  public: ModeFactory(const uint* prgnCharSyntax);
+  protected: ModeFactory();
   public: virtual ~ModeFactory();
 
   // [C]

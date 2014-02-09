@@ -542,7 +542,7 @@ bool XmlMode::DoColor(Count lCount)
 /// <summary>
 ///  Construct XmlModeFactory object
 /// </summary>
-XmlModeFactory::XmlModeFactory() :
-    ModeFactory(k_rgnXmlCharSyntax) {}
+XmlModeFactory::XmlModeFactory() {
+}
 
 }  // namespace text

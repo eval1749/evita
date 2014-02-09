@@ -1186,9 +1186,8 @@ class CxxMode : public Mode
 /// <summary>
 ///  Construct CxxModeFactory object
 /// </summary>
-CxxModeFactory::CxxModeFactory() :
-    ModeFactory(k_rgnCxxCharSyntax) {}
-
+CxxModeFactory::CxxModeFactory() {
+}
 /// <summary>
 ///   Construct CxxMode object.
 /// </summary>
@@ -1257,9 +1256,8 @@ class JavaMode : public Mode
 /// <summary>
 ///  Construct JavaModeFactory object
 /// </summary>
-JavaModeFactory::JavaModeFactory() :
-    ModeFactory(k_rgnCxxCharSyntax) {}
-
+JavaModeFactory::JavaModeFactory() {
+}
 /// <summary>
 ///   Construct JavaMode object.
 /// </summary>

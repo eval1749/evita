@@ -594,8 +594,8 @@ class PythonMode : public Mode {
 /// <summary>
 ///  Construct PythonModeFactory object
 /// </summary>
-PythonModeFactory::PythonModeFactory()
-  : ModeFactory(k_rgnPythonCharSyntax) {}
+PythonModeFactory::PythonModeFactory() {
+}
 
 /// <summary>
 ///   Create a PythonModeFactory instance.

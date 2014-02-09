@@ -920,8 +920,8 @@ class HaskellMode : public Mode
 /// <summary>
 ///  Construct HaskellModeFactory object
 /// </summary>
-HaskellModeFactory::HaskellModeFactory() :
-    ModeFactory(k_rgnHaskellCharSyntax) {}
+HaskellModeFactory::HaskellModeFactory() {
+}
 
 /// <summary>
 ///   Construct HaskellMode object.

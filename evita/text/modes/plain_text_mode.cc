@@ -126,7 +126,7 @@ PlainTextMode::PlainTextMode(ModeFactory* pFactory, Buffer* pBuffer) :
 /// <summary>
 ///  Construct PlainTextModeFactory object
 /// </summary>
-PlainTextModeFactory::PlainTextModeFactory() :
-    ModeFactory(k_rgnPlainTextCharSyntax) {}
+PlainTextModeFactory::PlainTextModeFactory() {
+}
 
 }  // namespace text

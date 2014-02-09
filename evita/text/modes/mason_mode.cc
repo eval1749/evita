@@ -6,8 +6,11 @@
 
 #include "evita/text/modes/mode_factory.h"
 
-namespace text
-{
+namespace text {
+
+MasonModeFactory::MasonModeFactory() {
+}
+
 /// <summary>
 ///   Returns true if Mason mode support specified buffer name.
 /// </summary>

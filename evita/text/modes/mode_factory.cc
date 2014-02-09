@@ -14,8 +14,7 @@ namespace text {
 //
 // ModeFactory
 //
-ModeFactory::ModeFactory(const uint* prgnCharSyntax)
-    : m_prgnCharSyntax(prgnCharSyntax) {
+ModeFactory::ModeFactory() {
 }
 
 ModeFactory::~ModeFactory() {

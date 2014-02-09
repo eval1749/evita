@@ -365,8 +365,8 @@ class ConfigMode : public Mode
 /// <summary>
 ///  Construct ConfigModeFactory object
 /// </summary>
-ConfigModeFactory::ConfigModeFactory() :
-    ModeFactory(k_rgnConfigCharSyntax) {}
+ConfigModeFactory::ConfigModeFactory() {
+}
 
 /// <summary>
 ///   Create a ConfigModeFactory instance.

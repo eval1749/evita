@@ -702,8 +702,8 @@ class LispMode : public Mode
 /// <summary>
 ///  Construct LispModeFactory object
 /// </summary>
-LispModeFactory::LispModeFactory() :
-    ModeFactory(k_rgnClCharSyntax) {}
+LispModeFactory::LispModeFactory() {
+}
 
 /// <summary>
 ///   Create a LispModeFactory instance.

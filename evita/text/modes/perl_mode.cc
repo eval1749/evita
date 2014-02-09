@@ -736,8 +736,8 @@ Mode* MasonModeFactory::Create(Buffer* pBuffer)
 /// <summary>
 ///  Construct PerlModeFactory object
 /// </summary>
-PerlModeFactory::PerlModeFactory() :
-    ModeFactory(k_rgnPerlCharSyntax) {}
+PerlModeFactory::PerlModeFactory() {
+}
 
 /// <summary>
 ///   Create a PerlModeFactory instance.
@@ -747,10 +747,5 @@ Mode* PerlModeFactory::Create(Buffer* pBuffer)
     return new PerlMode(this, pBuffer);
 } // PerlModeFactory::Create
 
-/// <summary>
-///  Construct MasonModeFactory object
-/// </summary>
-MasonModeFactory::MasonModeFactory() :
-    ModeFactory(k_rgnPerlCharSyntax) {}
 }  // namespace text
 

@@ -705,6 +705,9 @@ class LispMode : public Mode
 LispModeFactory::LispModeFactory() {
 }
 
+LispModeFactory::~LispModeFactory() {
+}
+
 /// <summary>
 ///   Create a LispModeFactory instance.
 /// </summary>

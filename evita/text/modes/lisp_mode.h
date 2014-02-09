@@ -8,9 +8,10 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Lisp.h#3 $
 //
-#if !defined(INCLUDE_mode_Lisp_h)
-#define INCLUDE_mode_Lisp_h
+#if !defined(INCLUDE_evita_text_modes_lisp_mode_h)
+#define INCLUDE_evita_text_modes_lisp_mode_h
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/mode_factory.h"
 
 namespace text
@@ -19,9 +20,12 @@ namespace text
 /// <remark>
 ///   Lisp mode facotry
 /// </remark>
-class LispModeFactory : public ModeFactory
-{
+class LispModeFactory : public common::Singleton<LispModeFactory>,
+                       public ModeFactory {
+    DECLARE_SINGLETON_CLASS(LispModeFactory);
+
     // ctor
+    private: ~LispModeFactory();
     public: LispModeFactory();
 
     // [C]
@@ -40,4 +44,4 @@ class LispModeFactory : public ModeFactory
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_mode_Lisp_h)
+#endif //!defined(INCLUDE_evita_text_modes_lisp_mode_h)

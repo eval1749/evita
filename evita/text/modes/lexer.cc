@@ -27,6 +27,28 @@ namespace NewLexer {
 
 //////////////////////////////////////////////////////////////////////
 //
+// KeywordTable
+//
+KeywordTable::KeywordTable() {
+}
+
+KeywordTable::~KeywordTable() {
+}
+
+void KeywordTable::AddKeywords(const char16** prgpwszKeyword,
+                               size_t cKeywords) {
+  for (const char16** runner = prgpwszKeyword;
+       runner < prgpwszKeyword + cKeywords; runner++) {
+    keyword_set_.insert(*runner);
+  }
+}
+
+bool KeywordTable::IsKeyword(const base::string16& word) const {
+  return keyword_set_.find(word) != keyword_set_.end();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // LexerBase::EnumChar
 //
 LexerBase::EnumChar::EnumChar(Buffer* buffer) : Super(buffer) {
@@ -69,22 +91,6 @@ LexerBase::~LexerBase() {
   m_pBuffer->UnregisterChangeTracker(&m_oChange);
 }
 
-void LexerBase::addKeywords(KeywordTable* pKeyTab,
-                            const char16** prgpwszKeyword,
-                            size_t cKeywords) {
-  for (const char16** p = prgpwszKeyword; p < prgpwszKeyword + cKeywords;
-       p++) {
-    pKeyTab->Put(new StringKey(*p), 1);
-  }
-}
-
-KeywordTable* LexerBase::installKeywords(const char16** prgpwszKeyword,
-                                         size_t cKeywords) {
-  KeywordTable* pKeyTab = new KeywordTable;
-  addKeywords(pKeyTab, prgpwszKeyword, cKeywords);
-  return pKeyTab;
-}
-
 bool LexerBase::isConsChar(char16 wch) const {
   if (wch >= 0x7F)
     return true;
@@ -92,6 +98,10 @@ bool LexerBase::isConsChar(char16 wch) const {
     return false;
   uint32_t nSyntax = m_prgnCharSyntax[wch - 0x20];
   return CharSyntax::Syntax_Word == CharSyntax::GetSyntax(nSyntax);
+}
+
+bool LexerBase::IsKeyword(const base::string16& word) const {
+  return m_pKeywordTab->IsKeyword(word);
 }
 
 bool LexerBase::isPunctChar(char16 wch) const {

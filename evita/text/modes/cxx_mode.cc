@@ -664,7 +664,7 @@ class ClikeLexer : public NewLexer::LexerBase {
 
   protected: ClikeLexer(
       Buffer* pBuffer,
-      KeywordTable* pKeywordTab,
+      NewLexer::KeywordTable* pKeywordTab,
       const uint* prgnCharSyntax,
       char16 wchAnnotation)
       : NewLexer::LexerBase(pBuffer, pKeywordTab, prgnCharSyntax),
@@ -917,6 +917,23 @@ class ClikeLexer : public NewLexer::LexerBase {
     }
   }
 
+  private: base::string16 GetWord() const {
+    auto const kMaxWordLength = 40;
+
+    if (auto const prefix = m_oToken.m_wchPrefix) {
+      auto const word_length = m_oToken.m_lEnd - m_oToken.m_lWordStart + 1;
+      if (word_length > kMaxWordLength)
+        return base::string16();
+      base::string16 word(static_cast<size_t>(word_length), '?');
+      word[0] = prefix;
+      m_pBuffer->GetText(&word[1], m_oToken.m_lWordStart, m_oToken.m_lEnd);
+      return word;
+    }
+    auto const word_length = m_oToken.m_lEnd - m_oToken.m_lWordStart;
+    return word_length > kMaxWordLength ? base::string16() :
+        m_pBuffer->GetText(m_oToken.m_lWordStart, m_oToken.m_lEnd);
+  }
+
   private: void processToken() {
     if (m_oToken.m_fPartial)
       return;
@@ -929,24 +946,7 @@ class ClikeLexer : public NewLexer::LexerBase {
         return;
     }
 
-    char16 wszWord[40];
-    auto cwchWord = m_oToken.m_lEnd - m_oToken.m_lWordStart + 1;
-    if (cwchWord >= arraysize(wszWord))
-      return;
-
-    auto pwszWord = wszWord;
-    if (!m_oToken.m_wchPrefix) {
-      ++pwszWord;
-      --cwchWord;
-    } else {
-      *pwszWord = m_oToken.m_wchPrefix;
-    }
-
-    m_pBuffer->GetText(wszWord + 1, m_oToken.m_lWordStart, m_oToken.m_lEnd);
-
-    StringKey oWord(pwszWord, cwchWord);
-    auto const piType = m_pKeywordTab->Get(&oWord);
-    if (piType)
+    if (IsKeyword(GetWord()))
       m_oToken.m_eSyntax = Syntax_WordReserved;
   }
 
@@ -1014,33 +1014,34 @@ const uint32_t ClikeLexer::k_rgnSyntax2Color[ClikeLexer::Syntax_Max_1] = {
   RGB( 0, 0, 255), // Syntax_WordReserved
 };
 
+namespace {
+class CxxKeywordTable : public common::Singleton<CxxKeywordTable>,
+                        public NewLexer::KeywordTable {
+  DECLARE_SINGLETON_CLASS(CxxKeywordTable);
+
+  private: CxxKeywordTable() {
+    AddKeywords(k_rgpwszCKeyword, arraysize(k_rgpwszCKeyword));
+    AddKeywords(k_rgpwszCxxKeyword, arraysize(k_rgpwszCxxKeyword));
+  }
+
+  public: ~CxxKeywordTable() = default;
+
+  DISALLOW_COPY_AND_ASSIGN(CxxKeywordTable);
+};
+}  // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 // CxxLexer
 //
 class CxxLexer : public ClikeLexer {
-  private: static KeywordTable* s_pKeywordTab;
-
-  // ctor
   public: CxxLexer(Buffer* pBuffer)
-    : ClikeLexer(pBuffer, initKeywordTab(), k_rgnCxxCharSyntax, '#') {
-  }
-
-  private: static KeywordTable* initKeywordTab() {
-    if (!s_pKeywordTab) {
-      s_pKeywordTab = installKeywords(k_rgpwszCKeyword,
-                                      arraysize(k_rgpwszCKeyword));
-
-      addKeywords(s_pKeywordTab, k_rgpwszCxxKeyword,
-                  arraysize(k_rgpwszCxxKeyword));
-    }
-    return s_pKeywordTab;
+    : ClikeLexer(pBuffer, CxxKeywordTable::instance(),
+                 k_rgnCxxCharSyntax, '#') {
   }
 
   DISALLOW_COPY_AND_ASSIGN(CxxLexer);
 };
-
-KeywordTable* CxxLexer::s_pKeywordTab;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -1053,6 +1054,8 @@ class CxxMode : public Mode {
   public: CxxMode(ModeFactory* pFactory, Buffer* pBuffer)
       : Mode(pFactory, pBuffer), m_oLexer(pBuffer) {
   }
+
+  public: ~CxxMode() = default;
 
   // [D]
   public: virtual bool DoColor(Count lCount) override {
@@ -1076,31 +1079,35 @@ Mode* CxxModeFactory::Create(Buffer* pBuffer) {
   return new CxxMode(this, pBuffer);
 }
 
+namespace {
+class JavaKeywordTable :
+    public common::Singleton<JavaKeywordTable>, public NewLexer::KeywordTable {
+  DECLARE_SINGLETON_CLASS(JavaKeywordTable);
+
+  private: JavaKeywordTable() {
+    AddKeywords(k_rgpwszJavaKeyword, arraysize(k_rgpwszJavaKeyword));
+  }
+
+  public: ~JavaKeywordTable() = default;
+
+  DISALLOW_COPY_AND_ASSIGN(JavaKeywordTable);
+};
+}  // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 // JavaLexer
 //
 class JavaLexer : public ClikeLexer {
-  private: static KeywordTable* s_pKeywordTab;
-
-  // ctor
   public: JavaLexer(Buffer* pBuffer)
-    : ClikeLexer(pBuffer, initKeywordTab(), k_rgnCxxCharSyntax, '@') {
+    : ClikeLexer(pBuffer, JavaKeywordTable::instance(),
+                 k_rgnCxxCharSyntax, '@') {
   }
 
-  private: static KeywordTable* initKeywordTab() {
-    if (!s_pKeywordTab) {
-      s_pKeywordTab = installKeywords(k_rgpwszJavaKeyword,
-                                      arraysize(k_rgpwszJavaKeyword));
-    }
-
-    return s_pKeywordTab;
-  }
+  public: ~JavaLexer() = default;
 
   DISALLOW_COPY_AND_ASSIGN(JavaLexer);
 };
-
-KeywordTable* JavaLexer::s_pKeywordTab;
 
 //////////////////////////////////////////////////////////////////////
 //

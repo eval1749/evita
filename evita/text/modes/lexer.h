@@ -5,11 +5,12 @@
 #if !defined(INCLUDE_evita_dom_modes_lexer_h)
 #define INCLUDE_evita_dom_modes_lexer_h
 
+#include <unordered_set>
+
+#include "base/strings/string16.h"
 #include "evita/text/buffer.h"
 
 namespace text {
-
-typedef HashTable_<StringKey, int, 100> KeywordTable;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -29,6 +30,22 @@ class LexerBase {
 };
 
 namespace NewLexer {
+
+//////////////////////////////////////////////////////////////////////
+//
+// KeywordTable
+//
+class KeywordTable {
+  private: std::unordered_set<base::string16> keyword_set_;
+
+  protected: KeywordTable();
+  public: ~KeywordTable();
+
+  public: void AddKeywords(const char16** keywrods, size_t num_keywords);
+  public: bool IsKeyword(const base::string16& word) const;
+
+  DISALLOW_COPY_AND_ASSIGN(KeywordTable);
+};
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -59,15 +76,8 @@ class LexerBase {
   protected: LexerBase(Buffer*, KeywordTable*, const uint*);
   protected: ~LexerBase();
 
-  // [A]
-  protected: static void addKeywords(KeywordTable* keyword_table,
-                                     const char16** keywords,
-                                     size_t num_keywords);
-
-  // [I]
-  protected: static KeywordTable* installKeywords(const char16** keywords,
-                                                  size_t num_keywords);
   protected: bool isConsChar(char16 wch) const;
+  protected: bool IsKeyword(const base::string16& word) const;
   protected: bool isPunctChar(char16 wch) const;
 
   // [S]

@@ -249,6 +249,20 @@ k_rgnPerlCharSyntax[0x80 - 0x20] =
     CharSyntax::Syntax_Control,                     // 0x7F DEL
 }; // k_rgnPerlCharSyntax
 
+namespace {
+class PerlKeywordTable : public common::Singleton<PerlKeywordTable>,
+                         public NewLexer::KeywordTable {
+  DECLARE_SINGLETON_CLASS(PerlKeywordTable);
+
+  private: PerlKeywordTable() {
+    AddKeywords(k_rgpwszPerlKeyword, arraysize(k_rgpwszPerlKeyword));
+  }
+  public: ~PerlKeywordTable() = default;
+
+  DISALLOW_COPY_AND_ASSIGN(PerlKeywordTable);
+};
+}  // namespace
+
 /// <summary>
 ///   A base class of C-like language.
 /// </summary>
@@ -307,7 +321,6 @@ class PerlLexer : public NewLexer::LexerBase
     }; // Token
 
     private: static const uint32 k_rgnSyntax2Color[Syntax_Max_1];
-    private: static KeywordTable* s_pKeywordTab;
 
     private: State          m_eState;
     private: Token          m_oToken;
@@ -317,7 +330,7 @@ class PerlLexer : public NewLexer::LexerBase
         Buffer*         pBuffer ) :
             NewLexer::LexerBase(
                 pBuffer, 
-                initKeywords(), 
+                PerlKeywordTable::instance(), 
                 k_rgnPerlCharSyntax ),
             m_eState(State_Normal) {}
 
@@ -538,18 +551,6 @@ class PerlLexer : public NewLexer::LexerBase
         } // for
     } // getToken
 
-    // [I]
-    private: static KeywordTable* initKeywords()
-    {
-        if (NULL == s_pKeywordTab)
-        {
-            s_pKeywordTab = installKeywords(
-                k_rgpwszPerlKeyword,
-                lengthof(k_rgpwszPerlKeyword) );
-        }
-        return s_pKeywordTab;
-    } // initKeywords
-
     // [P]
     private: void processToken()
     {
@@ -568,21 +569,13 @@ class PerlLexer : public NewLexer::LexerBase
             return;
         } // switch syntax
 
-        char16 wszWord[40];
+        auto const kMaxWordLength = 20;
         int cwchWord = m_oToken.m_lEnd - m_oToken.m_lStart;
-        if (cwchWord >= lengthof(wszWord))
-        {
+        if (cwchWord >= kMaxWordLength) {
             return;
-        } // if too long word
-
-        m_pBuffer->GetText(wszWord, m_oToken.m_lStart, m_oToken.m_lEnd);
-
-        StringKey oWord(wszWord, cwchWord);
-        int* piType = m_pKeywordTab->Get(&oWord);
-        if (NULL != piType)
-        {
-            m_oToken.m_eSyntax = Syntax_WordReserved;
         }
+        if (IsKeyword(m_pBuffer->GetText(m_oToken.m_lStart, m_oToken.m_lEnd)))
+            m_oToken.m_eSyntax = Syntax_WordReserved;
     } // processToken
 
     // [R]
@@ -650,8 +643,6 @@ class PerlLexer : public NewLexer::LexerBase
 
     DISALLOW_COPY_AND_ASSIGN(PerlLexer);
 }; // PerlLexer
-
-KeywordTable* PerlLexer::s_pKeywordTab;
 
 const uint32
 PerlLexer::k_rgnSyntax2Color[PerlLexer::Syntax_Max_1] =
@@ -751,4 +742,3 @@ Mode* PerlModeFactory::Create(Buffer* pBuffer)
 } // PerlModeFactory::Create
 
 }  // namespace text
-

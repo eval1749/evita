@@ -134,6 +134,20 @@ k_rgnClCharSyntax[0x80 - 0x20] =
     CharSyntax::Syntax_Control,                     // 0x7F DEL
 }; // k_rgnClCharSyntax
 
+namespace {
+class LispKeywordTable : public common::Singleton<LispKeywordTable>,
+                         public NewLexer::KeywordTable {
+  DECLARE_SINGLETON_CLASS(LispKeywordTable);
+
+  private: LispKeywordTable() {
+    AddKeywords(k_rgpwszClKeyword, arraysize(k_rgpwszClKeyword));
+  }
+  public: ~LispKeywordTable() = default;
+
+  DISALLOW_COPY_AND_ASSIGN(LispKeywordTable);
+};
+}  // namespace
+
 /// <summary>
 ///  Lexer for Config file
 /// </summary>
@@ -199,11 +213,10 @@ class LispLexer : public NewLexer::LexerBase
     /// </summary>
     public: LispLexer(
         Buffer*         pBuffer,
-        KeywordTable*   pKeywordTab,
         const uint*     prgnCharSyntax ) :
             NewLexer::LexerBase(
                 pBuffer,
-                pKeywordTab,
+                LispKeywordTable::instance(),
                 prgnCharSyntax ),
             m_eState(State_Normal) {}
 
@@ -520,44 +533,31 @@ class LispLexer : public NewLexer::LexerBase
         }
 
         // Note: The longest Common Lisp keyword is
-        //  least-negative-normalized-double-float
-        char16 wszWord[40];
+        //  length("least-negative-normalized-double-float") == 38
+        auto const kMaxWordLength = 40;
 
         int cwchWord = m_oToken.m_lEnd - m_oToken.m_lStart;
-        if (cwchWord >= lengthof(wszWord))
-        {
+        if (cwchWord >= kMaxWordLength) {
             processNotKeyword();
             return;
-        } // if too long word
+        }
 
-        m_pBuffer->GetText(wszWord, m_oToken.m_lStart, m_oToken.m_lEnd);
-
-        if (':' == *wszWord)
-        {
+        auto word = m_pBuffer->GetText(m_oToken.m_lStart, m_oToken.m_lEnd);
+        if (':' == word[0]) {
             m_oToken.m_eSyntax = Syntax_WordQuoted;
             return;
         }
 
-        const char16* pwszWord = wszWord;
-        if (cwchWord >= 4 &&
-            ':' == wszWord[2] &&
-            'l' == wszWord[1] &&
-            'c' == wszWord[0] )
-        {
-            pwszWord += 3;
-            cwchWord -= 3;
+        if (word.size() >= 4u && word[0] == 'c' && word[1] == 'l' &&
+            word[2] == ':') {
+          // remove "cl:"
+          word = word.substr(3);
         }
 
-        StringKey oWord(pwszWord, cwchWord);
-        int* piType = m_pKeywordTab->Get(&oWord);
-        if (NULL != piType)
-        {
+        if (IsKeyword(word))
             m_oToken.m_eSyntax = Syntax_WordReserved;
-        }
         else
-        {
             processNotKeyword();
-        }
     } // processToken
 
     // [R]
@@ -647,29 +647,13 @@ LispLexer::k_rgnSyntax2Color[LispLexer::Syntax_Max_1] =
 /// </summary>
 class ClLexer : public LispLexer
 {
-    private: static KeywordTable* s_pKeywordTab;
-
     public: ClLexer(Buffer* pBuffer) :
         LispLexer(
             pBuffer,
-            initKeywords(),
             k_rgnClCharSyntax ) {}
-
-    private: static KeywordTable* initKeywords()
-    {
-        if (NULL == s_pKeywordTab)
-        {
-            s_pKeywordTab = installKeywords(
-                k_rgpwszClKeyword,
-                lengthof(k_rgpwszClKeyword) );
-        }
-        return s_pKeywordTab;
-    } // initKeywords
 
     DISALLOW_COPY_AND_ASSIGN(ClLexer);
 }; // ClLexer
-
-KeywordTable* ClLexer::s_pKeywordTab;
 
 /// <summary>
 ///   Lisp file mode

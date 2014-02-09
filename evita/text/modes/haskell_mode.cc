@@ -13,7 +13,7 @@ namespace text
 
 //////////////////////////////////////////////////////////////////////
 //
-// C Keywords
+// Haskell Keywords
 //
 static const char16*
 k_rgpwszHaskellKeyword[] =
@@ -285,6 +285,20 @@ k_rgnHaskellCharSyntax[0x80 - 0x20] =
     CharSyntax::Syntax_Control,                     // 0x7F DEL
 }; // k_rgnHaskellCharSyntax
 
+namespace {
+class HaskellKeywordTable : public common::Singleton<HaskellKeywordTable>,
+                            public NewLexer::KeywordTable {
+  DECLARE_SINGLETON_CLASS(HaskellKeywordTable);
+
+  private: HaskellKeywordTable() {
+    AddKeywords(k_rgpwszHaskellKeyword, arraysize(k_rgpwszHaskellKeyword));
+  }
+  public: ~HaskellKeywordTable() = default;
+
+  DISALLOW_COPY_AND_ASSIGN(HaskellKeywordTable);
+};
+}  // namespace
+
 /// <summary>
 ///   A base class of C-like language.
 /// </summary>
@@ -369,43 +383,13 @@ class HaskellLexer : public NewLexer::LexerBase
     private: Token          m_oToken;
     private: char16         m_wchAnnotation;
 
-    // ctor
-    protected: HaskellLexer(
-        Buffer*         pBuffer,
-        KeywordTable*   pKeywordTab,
-        const uint*     prgnCharSyntax,
-        char16          wchAnnotation ) :
-            NewLexer::LexerBase(pBuffer, pKeywordTab, prgnCharSyntax),
-            m_eState(State_StartLine),
-            m_wchAnnotation(wchAnnotation) {}
-
-    private: static KeywordTable* s_pKeywordTab;
-
-    // ctor
     public: HaskellLexer(Buffer* pBuffer) :
         NewLexer::LexerBase(
             pBuffer,
-            initKeywordTab(),
+            HaskellKeywordTable::instance(),
             k_rgnHaskellCharSyntax ),
         m_eState(State_StartLine),
         m_wchAnnotation('#') {}
-
-    // [I]
-    /// <summary>
-    ///   Initialize keyword table.
-    /// </summary>
-    private: static KeywordTable* initKeywordTab()
-    {
-        if (NULL == s_pKeywordTab)
-        {
-            s_pKeywordTab = installKeywords(
-                k_rgpwszHaskellKeyword,
-                lengthof(k_rgpwszHaskellKeyword) );
-        } // if
-
-        return s_pKeywordTab;
-    } // HaskellLexer
-
 
     // [C]
     /// <summary>
@@ -754,6 +738,23 @@ class HaskellLexer : public NewLexer::LexerBase
         } // for
     } // getToken
 
+    private: base::string16 GetWord() const {
+      auto const kMaxWordLength = 40;
+
+      if (auto const prefix = m_oToken.m_wchPrefix) {
+        auto const word_length = m_oToken.m_lEnd - m_oToken.m_lWordStart + 1;
+        if (word_length > kMaxWordLength)
+          return base::string16();
+        base::string16 word(static_cast<size_t>(word_length), '?');
+        word[0] = prefix;
+        m_pBuffer->GetText(&word[1], m_oToken.m_lWordStart, m_oToken.m_lEnd);
+        return word;
+      }
+      auto const word_length = m_oToken.m_lEnd - m_oToken.m_lWordStart;
+      return word_length > kMaxWordLength ? base::string16() :
+          m_pBuffer->GetText(m_oToken.m_lWordStart, m_oToken.m_lEnd);
+    }
+
     // [P]
     /// <summary>
     ///   Checks token is keyword or not.
@@ -775,36 +776,8 @@ class HaskellLexer : public NewLexer::LexerBase
             return;
         } // switch syntax
 
-        char16 wszWord[40];
-
-        int cwchWord = m_oToken.m_lEnd - m_oToken.m_lWordStart + 1;
-        if (cwchWord >= lengthof(wszWord))
-        {
-            return;
-        } // if too long word
-
-        char16* pwszWord = wszWord;
-        if (0 == m_oToken.m_wchPrefix)
-        {
-            pwszWord++;
-            cwchWord -= 1;
-        }
-        else
-        {
-            *pwszWord = m_oToken.m_wchPrefix;
-        }
-
-        m_pBuffer->GetText(
-            wszWord + 1,
-            m_oToken.m_lWordStart,
-            m_oToken.m_lEnd );
-
-        StringKey oWord(pwszWord, cwchWord);
-        int* piType = m_pKeywordTab->Get(&oWord);
-        if (NULL != piType)
-        {
+        if (IsKeyword(GetWord()))
             m_oToken.m_eSyntax = Syntax_WordReserved;
-        }
     } // processToken
 
     // [R]
@@ -893,8 +866,6 @@ HaskellLexer::k_rgnSyntax2Color[HaskellLexer::Syntax_Max_1] =
     RGB(  0,    0,   0),    // Syntax_Word
     RGB(  0,    0, 255),    // Syntax_WordReserved
 }; // k_rgnSyntax2Color
-
-KeywordTable* HaskellLexer::s_pKeywordTab;
 
 /// <summary>
 ///   Haskell mode

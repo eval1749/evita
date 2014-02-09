@@ -159,6 +159,20 @@ k_rgnPythonCharSyntax[0x80 - 0x20] = {
   CharSyntax::Syntax_Control,           // 0x7F DEL
 };
 
+namespace {
+class PythonKeywordTable : public common::Singleton<PythonKeywordTable>,
+                           public NewLexer::KeywordTable {
+  DECLARE_SINGLETON_CLASS(PythonKeywordTable);
+
+  private: PythonKeywordTable() {
+    AddKeywords(k_rgpwszPythonKeyword, arraysize(k_rgpwszPythonKeyword));
+  }
+  public: ~PythonKeywordTable() = default;
+
+  DISALLOW_COPY_AND_ASSIGN(PythonKeywordTable);
+};
+}  // namespace
+
 /// <summary>
 ///   A base class of C-like language.
 /// </summary>
@@ -220,7 +234,6 @@ class PythonLexer : public NewLexer::LexerBase {
   };
 
   private: static const uint32 k_rgnSyntax2Color[Syntax_Max_1];
-  private: static KeywordTable* s_pKeywordTab;
 
   private: State      m_eState;
   private: Token      m_oToken;
@@ -229,7 +242,7 @@ class PythonLexer : public NewLexer::LexerBase {
   public: PythonLexer(Buffer* pBuffer)
     : NewLexer::LexerBase(
         pBuffer,
-        initKeywords(),
+        PythonKeywordTable::instance(),
         k_rgnPythonCharSyntax),
       m_eState(State_Normal) {}
 
@@ -471,16 +484,6 @@ class PythonLexer : public NewLexer::LexerBase {
     }
   }
 
-  // [I]
-  private: static KeywordTable* initKeywords() {
-    if (NULL == s_pKeywordTab) {
-      s_pKeywordTab = installKeywords(
-          k_rgpwszPythonKeyword,
-          lengthof(k_rgpwszPythonKeyword));
-    }
-    return s_pKeywordTab;
-  }
-
   // [P]
   private: void processToken() {
     if (m_oToken.m_fPartial)
@@ -489,17 +492,12 @@ class PythonLexer : public NewLexer::LexerBase {
     if (m_oToken.m_eSyntax != Syntax_Word)
       return;
 
-    char16 wszWord[40];
-    auto const cwchWord = m_oToken.m_lEnd - m_oToken.m_lStart;
-    if (cwchWord >= lengthof(wszWord)) {
-      // Word is too long
+    auto const kMaxWordLength = 20;
+    int word_length = m_oToken.m_lEnd - m_oToken.m_lStart;
+    if (word_length >= kMaxWordLength)
       return;
-    }
 
-    m_pBuffer->GetText(wszWord, m_oToken.m_lStart, m_oToken.m_lEnd);
-
-    StringKey oWord(wszWord, cwchWord);
-    if (!!m_pKeywordTab->Get(&oWord))
+    if (IsKeyword(m_pBuffer->GetText(m_oToken.m_lStart, m_oToken.m_lEnd)))
       m_oToken.m_eSyntax = Syntax_WordReserved;
   }
 
@@ -558,8 +556,6 @@ class PythonLexer : public NewLexer::LexerBase {
 
   DISALLOW_COPY_AND_ASSIGN(PythonLexer);
 };
-
-KeywordTable* PythonLexer::s_pKeywordTab;
 
 const uint32
 PythonLexer::k_rgnSyntax2Color[PythonLexer::Syntax_Max_1] = {

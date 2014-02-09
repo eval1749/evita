@@ -44,3 +44,10 @@ var JavaMode = function(document) {};
  * @param {!Document} document
  */
 var HaskellMode = function(document) {};
+
+/**
+ * @constructor
+ * @extends {Mode}
+ * @param {!Document} document
+ */
+var LispMode = function(document) {};

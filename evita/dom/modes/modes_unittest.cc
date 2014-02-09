@@ -57,4 +57,15 @@ TEST_F(ModesTest, JavaMode) {
   EXPECT_SCRIPT_EQ("Java", "mode.name");
 }
 
+TEST_F(ModesTest, LispMode) {
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "var mode = new LispMode(doc);");
+  EXPECT_SCRIPT_TRUE("LispMode.keymap instanceof Map");
+  EXPECT_SCRIPT_TRUE("mode instanceof Mode");
+  EXPECT_SCRIPT_TRUE("mode instanceof LispMode");
+  EXPECT_SCRIPT_TRUE("mode.document === doc");
+  EXPECT_SCRIPT_EQ("Lisp", "mode.name");
+}
+
 }  // namespace

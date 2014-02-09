@@ -355,6 +355,7 @@
         'li_util.cpp',
         'RegexMatch.cpp',
         'text/buffer.cc',
+        'text/modes/clike_lexer.cc',
         'text/modes/config_mode.cc',
         'text/modes/cxx_mode.cc',
         'text/modes/haskell_mode.cc',

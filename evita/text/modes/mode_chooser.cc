@@ -238,8 +238,7 @@ ModeChooser::ModeChooser() {
   factories_.push_back(LispModeFactory::instance());
   factories_.push_back(MasonModeFactory::instance());
   factories_.push_back(PerlModeFactory::instance());
-  plain_text_mode_factory_ = new PlainTextModeFactory();
-  factories_.push_back(plain_text_mode_factory_);
+  factories_.push_back(PlainTextModeFactory::instance());
   factories_.push_back(new PythonModeFactory());
   factories_.push_back(new XmlModeFactory());
 }
@@ -265,7 +264,7 @@ ModeFactory* ModeChooser::Choose(Buffer* buffer) {
       return factory;
   }
 
-  return plain_text_mode_factory_;
+  return PlainTextModeFactory::instance();
 }
 
 }  // namespace text

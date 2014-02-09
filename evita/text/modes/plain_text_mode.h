@@ -8,9 +8,10 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_PlainText.h#2 $
 //
-#if !defined(INCLUDE_mode_PlainText_h)
-#define INCLUDE_mode_PlainText_h
+#if !defined(INCLUDE_evita_text_modes_plain_text_mode_h)
+#define INCLUDE_evita_text_modes_plain_text_mode_h
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/mode.h"
 #include "evita/text/modes/mode_factory.h"
 
@@ -25,6 +26,7 @@ class PlainTextMode : public Mode
 {
     // ctor
     public: PlainTextMode(ModeFactory*, Buffer*);
+    public: ~PlainTextMode();
 
     // [D]
     public: virtual bool DoColor(Count) override { return false; }
@@ -37,10 +39,13 @@ class PlainTextMode : public Mode
 //
 // PlainTextModeFactory
 //
-class PlainTextModeFactory : public ModeFactory
-{
+class PlainTextModeFactory : public common::Singleton<PlainTextModeFactory>,
+                       public ModeFactory {
+    DECLARE_SINGLETON_CLASS(PlainTextModeFactory);
+
     // ctor
-    public: PlainTextModeFactory();
+    private: PlainTextModeFactory();
+    public: ~PlainTextModeFactory();
 
     // [C]
     public: virtual Mode* Create(Buffer* pBuffer) override
@@ -58,4 +63,4 @@ class PlainTextModeFactory : public ModeFactory
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_mode_PlainText_h)
+#endif //!defined(INCLUDE_evita_text_modes_plain_text_mode_h)

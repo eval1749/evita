@@ -18,7 +18,6 @@ class ModeChooser : public common::Singleton<ModeChooser> {
   DECLARE_SINGLETON_CLASS(ModeChooser);
 
   private: std::vector<ModeFactory*> factories_;
-  private: ModeFactory* plain_text_mode_factory_;
 
   private: ModeChooser();
   public: ~ModeChooser() = default;

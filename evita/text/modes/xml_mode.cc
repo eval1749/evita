@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/modes/xml_mode.h"
+#include "evita/text/modes/xml_mode.h"
 
-#include "evita/dom/modes/char_syntax.h"
+#include "evita/text/modes/char_syntax.h"
 
 namespace text
 {

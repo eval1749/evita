@@ -2,14 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "evita/text/modes/haskell_mode.h"
 
-#include "evita/dom/modes/cxx_mode.h"
-
-#include "evita/dom/modes/char_syntax.h"
-#include "evita/dom/modes/lexer.h"
-#include "evita/dom/modes/mode.h"
-
-#define DEBUG_LEXER 0
+#include "evita/text/modes/char_syntax.h"
+#include "evita/text/modes/lexer.h"
+#include "evita/text/modes/mode.h"
 
 namespace text
 {
@@ -19,60 +16,113 @@ namespace text
 // C Keywords
 //
 static const char16*
-k_rgpwszCKeyword[] =
+k_rgpwszHaskellKeyword[] =
 {
-    // Operator
-    L"+",  L"-",  L"*",  L"/",  L"%",  L"&",  L"^",  L"|",
-    L"+=", L"-=", L"*=", L"/=", L"%=", L"&=", L"^=", L"|=",
-    L"&&", L"||",
-    L"++", L"--",
-    L"<<", L">>", L"<<=", L">>=",
-    L"==", L"!=", L"<", L"<=", L">", L">=",
-    L"!", L"~",
-    L"(", L")", L"[", L"]", L"{", L"}",
+    // reservedop
+    L"..",  L":",  L"::",  L"=",  L"\\",  L"|",  L"<-",  L"->",
+    L"@", L"~", L"=>",
 
-    L"asm",
-    L"auto",
-    L"break",
+    // Reserved words
     L"case",
-    L"char",
-    L"const",
-    L"continue",
-    L"decltype",
+    L"class",
+    L"data",
     L"default",
+    L"deriving",
     L"do",
-    L"double",
     L"else",
-    L"enum",
-    L"extern",
-    L"float",
-    L"for",
-    L"goto",
     L"if",
-    L"int",
-    L"long",
-    L"nullptr",
-    L"register",
-    L"return",
-    L"short",
-    L"signed",
-    L"sizeof",
-    L"static",
-    L"static_assert",
-    L"struct",
-    L"switch",
-    L"typedef",
-    L"union",
-    L"unsigned",
-    L"void",
-    L"volatile",
-    L"while",
+    L"import",
+    L"in",
+    L"infix",
+    L"infixl",
+    L"infixr",
+    L"instance",
+    L"let",
+    L"module",
+    L"newtype",
+    L"of",
+    L"then",
+    L"type",
+    L"where",
+    L"_",
+
+    // import
+    L"as",
+    L"hiding",
+    L"qualified",
+
+    // Well Known Functions
+    L"$",
+    L"$$",
+    L"all",         // PreludeList
+    L"and",         // PreludeList
+    L"any",         // PreludeList
+    L"break",       // PreludeList
+    L"catch",
+    L"concat",      // PreludeList
+    L"const",
+    L"curry",
+    L"cycle",       // PreludeList
+    L"drop",        // PreludeList
+    L"dropWhile",   // PreludeList
+    L"either",      // Either.either
+    L"elem",        // PreludeList
+    L"error",
+    L"fail",        // Monad.fail
+    L"filter",      // PreludeList
+    L"fmap",        // Functor.fmap
+    L"foldl",       // PreludeList
+    L"foldr",       // PreludeList
+    L"fst",
+    L"head",        // PreludeList
+    L"init",        // PreludeList
+    L"iterate",     // PreludeList
+    L"last",        // PreludeList
+    L"length",      // PreludeList
+    L"lines",       // PreludeList
+    L"lookup",      // PreludeList
+    L"map",         // PreludeList
+    L"maybe",       // Maybe.maybe
+    L"maximum",     // PreludeList
+    L"minimum",     // PreludeList
+    L"not",
+    L"notElem",     // PreludeList
+    L"null",        // PreludeList
+    L"or",          // PreludeList
+    L"otherwise",
+    L"product",     // PreludeList
+    L"read",
+    L"readList",    // PreludeText
+    L"readPrec",    // PreludeText
+    L"replicate",   // PreludeList
+    L"repeat",      // PreludeList
+    L"return",      // Mona.return
+    L"scanl",       // PreludeList
+    L"scanl1",      // PreludeList
+    L"scanr",       // PreludeList
+    L"seq",
+    L"show",
+    L"showList",    // PreludeText
+    L"showPrec",    // PreludeText
+    L"span",        // PreludeList
+    L"splitAt",     // PreludeList
+    L"sum",         // PreludeList
+    L"tail",        // PreludeList
+    L"take",        // PreludeList
+    L"takeWhile",   // PreludeList
+    L"throw",
+    L"uncurry",
+    L"until",
+    L"undefined",
+    L"unzip",       // PreludeList
+    L"unzip3",      // PreludeList
+    L"twords",      // PreludeList
+    L"zip",         // PreludeList
+    L"zip3",        // PreludeList
+    L"zipWith",     // PreludeList
+    L"zipWith3",    // PreludeList
 
     // CPP
-    // TODO yosi@msn.com 2008-06-14 How do we support CPP operators, such as
-    //  defined, ##, #, #@?
-    // TODO yosi@msn.com 2008-06-14 How do we support #pragma operators, such
-    // as #pragma warning, comment, and so on.
     L"#define",
     L"#else",
     L"#elif",
@@ -81,420 +131,56 @@ k_rgpwszCKeyword[] =
     L"#if",
     L"#ifdef",
     L"#ifndef",
-    L"#import",         // MSC
     L"#include",
     L"#line",
-    L"#pragma",
     L"#undef",
-    L"#using",          // MSC
 
-    // ANSI-C Predefined Macros
-    L"__DATE__",
-    L"__FILE__",
-    L"__LINE__",
-    L"__STDC__",
-    L"__TIME__",
-    L"__TIMESTAMP__",
-
-    // MSC Predefined Macros
-    L"_ATL_VER",
-    L"_CHAR_UNSIGNED",
-    L"__CLR_VER",
-    L"__cplusplus_cli",
-    L"__COUNTER__",
-    L"__cplusplus",
-    L"__CPPLIB_VER",
-    L"__CPPRTTI",
-    L"__CPPUNWIND",
-    L"__DEBUG",
-    L"_DLL",
-    L"__FUNCDNAME__",
-    L"__FUNCSIG__",
-    L"__FUNCTION__",
-    L"_INTEGRAL_MAX_BITS",
-    L"_M_ALPHA",
-    L"_M_CEE",
-    L"_M_CEE_PURE",
-    L"_M_CEE_SAFE",
-    L"_M_IX86",
-    L"_MIA64",
-    L"_M_IX86_FP",
-    L"_M_MPPC",
-    L"_M_MRX000",
-    L"_M_PPC",
-    L"_M_X64",
-    L"_MANAGED",
-    L"_MFC_VER",
-    L"_MSC_EXTENSIONS",
-    L"_MSC_VER",
-    L"_MSVC_RUNTIME_CHECKES",
-    L"_MT",
-    L"_NATIVE_WCHAR_T_DEFINED",
-    L"_OPENMP",
-    L"_VC_NODEFAULTLIB",
-    L"_WCHAR_T_DEFINED",
-    L"_WIN32",
-    L"_WIN64",
-    L"_Wp64",
-}; // k_rgpwszCKeyword
-
-//////////////////////////////////////////////////////////////////////
-//
-// C++ Keywords
-//
-static const char16*
-k_rgpwszCxxKeyword[] = {
-    L"abstract",    // C#
-    // L"and",
-    // L"and_eq",
-    // L"asm",      // C
-    // L"auto",     // C
-    // L"bitand",
-    // L"bitor",
-    L"bool",
-    // L"break",    // C
-    // L"case",     // C
-    L"catch",
-    // L"char",     // C
-    L"checked",     // C#
-    L"class",
-    // L"compl",
-    // L"const",    // C
-    L"const_cast",
-    // L"continue", // C
-    // L"default",  // C
-    L"delete",
-    L"delegate",    // C#
-    // L"do",       // C
-    // L"double",   // C
-    L"dynamic_cast",
-    // L"else",     // C
-    // L"enum",     // C
-    L"explicit",
-    // L"export",   // C
-    // L"extern",   // C
-    L"false",
-    // L"float",    // C
-    // L"for",      // C
-    L"friend",
-    // L"goto",     // C
-    // L"if",       // C
-    L"implicit",    // C#
-    L"inline",
-    // L"int",      // C
-    L"namespace",
-    L"new",
-    // L"not",      // C
-    // L"not_eq",   // C
-    L"operator",
-    // L"or",       // C
-    // L"or_eq",    // C
-    L"private",
-    L"protected",
-    L"public",
-    // L"register", // C
-    L"reinterpret_cast",
-    // L"return",   // C
-    // L"short",    // C
-    // L"signed",   // C
-    // L"sizeof",   // C
-    // L"static",   // C
-    L"static_cast",
-    // L"struct",   // C
-    // L"switch",   // C
-    L"template",
-    L"this",
-    L"throw",
-    L"true",
-    L"try",
-    // L"typedef",  // C
-    L"typeid",
-    L"typename",
-    // L"union",    // C
-    // L"unsigned", // C
-    L"using",
-    L"var",         // C# continue keyword
-    // L"void",     // C
-    L"virtual",
-    // L"volatile",
-    L"wchar_t",
-    L"where",       // C# contextual keyword
-    // L"while",
-    // L"xor",
-    // L"xor_eq",
-
-    // Microsoft C++
-    L"__abstract",
-    L"__alignof",
-    L"__asm",
-    L"__assume",
-    L"__based",
-    L"__box",
-    L"__cdecl",
-    L"__declspec",
-    //L"__delegate",
-    //L"delegate",  context sensitive keyword
-    L"deprecated",
-    L"dllexport",
-    L"dllimport",
-    //L"event",
-    //L"__event",
-    L"__except",
-    L"__fastcall",
-    L"__finally",
-    L"__forceinline",
-    L"generic",
-    L"__inline",
-    L"__int8",
-    L"__int16",
-    L"__int32",
-    L"__int64",
-    L"__interface",
-    L"__Leave",
-    L"__m64",
-    L"__m128",
-    L"__m128d",
-    L"__m128i",
-    L"__pragma",
-    L"__raise",
-    L"__sealed",
-    L"sealed",
-    L"selectany",
-    L"__stdcall",
-    L"__super",
-    L"__unaligned",
-    L"__unhook",
-    L"__uuidof",
-    L"__value",
-    L"__w64",
-
-    // Standard C Library
-    L"NULL",
-    L"_complex",
-    L"div_t",
-    L"ldiv_t",
-    L"ptrdiff_t",
-    L"size_t",
-    L"va_arg",
-    L"va_end",
-    L"va_list",
-    L"va_start",
-    L"wchar_t",
-
-    // Win32
-    L"HANDLE",
-    L"HKEY",
-    L"INVALID_HANDLE_VALUE",
-
-    // Vogue Extensions
-    L"char16",
-    L"foreach",
-    L"interface",
-    L"lengthof",
-    L"override",
-    L"uint",
-    L"uint32",
-    L"uint64",
-    L"uint8",
-    L"unless",
-    L"when",
-}; // k_rgpwszCxxKeyword
-
-//////////////////////////////////////////////////////////////////////
-//
-// Java Keywords
-//
-static const char16*
-k_rgpwszJavaKeyword[] =
-{
-
-    // Operator
-    L"+",  L"-",  L"*",  L"/",  L"%",  L"&",  L"^",  L"|",
-    L"+=", L"-=", L"*=", L"/=", L"%=", L"&=", L"^=", L"|=",
-    L"&&", L"||",
-    L"++", L"--",
-    L"<<", L">>", L"<<=", L">>=",
-    L"==", L"!=", L"<", L"<=", L">", L">=",
-    L"!", L"~",
-    L"(", L")", L"[", L"]", L"{", L"}",
-
-    L"abstract",
-    L"assert",       // 3rd
-    L"boolean",
-    L"break",
-    L"byte",
-    L"case",
-    L"catch",
-    L"char",
-    L"class",
-    L"const",
-    L"continue",
-    L"default",
-    L"do",
-    L"double",
-    L"else",
-    L"enum",         // 3rd
-    L"extends",
-    L"final",
-    L"finally",
-    L"float",
-    L"for",
-    L"if",
-    L"goto",
-    L"implements",
-    L"import",
-    L"instanceof",
-    L"int",
-    L"interface",
-    L"long",
-    L"native",
-    L"new",
-    L"package",
-    L"private",
-    L"protected",
-    L"public",
-    L"return",
-    L"short",
-    L"static",
-    L"strictfp",
-    L"super",
-    L"switch",
-    L"synchronized",
-    L"this",
-    L"throw",
-    L"throws",
-    L"transient",
-    L"try",
-    L"void",
-    L"volatile",
-    L"while",
-
-    // Literals
-    L"false",
-    L"null",
-    L"true",
-
-    // Interfaces in java.lang
-    L"Appendable",
-    L"CharSequence",
-    L"Cloneable",
-    L"Comparable",
-    L"Iterable",
-    L"Readable",
-    L"Runnable",
-    L"Thread.UncaughtExceptionHandler",
-
-    // Classes in java.lang
-    L"Boolean",
-    L"Byte",
-    L"Character",
-    L"Character.Subset",
-    L"Character.Unicode",
-    L"Class",
-    L"ClassLoader",
-    L"Compiler",
+    // Well Known Types from Prelude
+    L"Array",
+    L"Bool",
+    L"Bounded",
+    L"Char",
+    L"Data",
     L"Double",
+    L"Either",
     L"Enum",
+    L"Eq",
+    L"False",
     L"Float",
-    L"InheritableThreadLocal",
+    L"Graph",
+    L"Int",
+    L"Int8",
+    L"Int16",
+    L"Int32",
+    L"Int64",
     L"Integer",
-    L"Long",
-    L"Math",
-    L"Number",
-    L"Object",
-    L"Package",
-    L"Process",
-    L"ProcessBuilder",
-    L"Runtime",
-    L"RuntimePermission",
-    L"SecurityManager",
-    L"Short",
-    L"StackTraceElement",
-    L"StrictMath",
+    L"IO",
+    L"IOError",
+    L"IORef",
+    L"Just",
+    L"List",
+    L"Maybe",
+    L"Monad",
+    L"Nothing",
+    L"Num",
+    L"Ord",
+    L"Ordering",
+    L"Read",
+    L"Show",
     L"String",
-    L"StringBuffer",
-    L"StringBuilder",
-    L"System",
-    L"Thread",
-    L"ThreadGroup",
-    L"ThreadLocal",
-    L"Throwable",
-    L"Void",
+    L"Tree",
+    L"True",
+    L"Tuple",
+    L"Word",
+    L"Word8",
+    L"Word16",
+    L"Word32",
+    L"Word64",
+}; // k_rgpwszHaskellKeyword
 
-    // Exceptions in java.lang
-    L"ArithmeticException",
-    L"ArrayIndexOutOfBoundsException",
-    L"ArrayStoreException",
-    L"ClassCastException",
-    L"ClassNotFoundException",
-    L"CloneNotSupportedException",
-    L"EnumConstantNotPresentException",
-    L"Exception",
-    L"IllegalAccessException",
-    L"IllegalArgumentException",
-    L"IllegalMonitorStateException",
-    L"IllegalStateException",
-    L"IllegalThreadStateException",
-    L"IndexOutOfBoundsException",
-    L"InstantiationException",
-    L"InterruptedException",
-    L"NegativeArraySizeException",
-    L"NoSuchFieldException",
-    L"NoSuchMethodException",
-    L"NullPointerException",
-    L"NumberFormatException",
-    L"RuntimeException",
-    L"SecurityException",
-    L"StringIndexOutOfBoundsException",
-    L"TypeNotPresentException",
-    L"UnsupportedOperationException",
-
-    // Errors in java.lang
-    L"AbstractMethodError",
-    L"AssertionError",
-    L"ClassCircularityError",
-    L"ClassFormatError",
-    L"Error",
-    L"ExceptionInInitializerError",
-    L"IllegalAccessError",
-    L"IncompatibleClassChangeError",
-    L"InstantiationError",
-    L"InternalError",
-    L"LinkageError",
-    L"NoClassDefFoundError",
-    L"NoSuchFieldError",
-    L"NoSuchMethodError",
-    L"OutOfMemoryError",
-    L"StackOverflowError",
-    L"ThreadDeath",
-    L"UnknownError",
-    L"UnsatisfiedLinkError",
-    L"UnsupportedClassVersionError",
-    L"VerifyError",
-    L"VirtualMachineError",
-
-    // Methods of java.lang.Object
-    #if 0
-        L".clone",
-        L".equals",
-        L".finalize",
-        L".getClass",
-        L".hashCode",
-        L".notify",
-        L".notifyAll",
-        L".toString",
-        L".wait",
-    #endif
-
-    // Annotations
-    L"@Deprecated",
-    L"@Override",
-    L"@SuppressWarnings",
-}; // k_rgpwszJavaKeyword
-
-// Cxx mode character syntax
+// Haskell mode character syntax
 static const uint
-k_rgnCxxCharSyntax[0x80 - 0x20] =
+k_rgnHaskellCharSyntax[0x80 - 0x20] =
 {
     CharSyntax::Syntax_Whitespace,                  // 0x20
     CharSyntax::Syntax_Punctuation,                 // 0x21 !
@@ -503,7 +189,7 @@ k_rgnCxxCharSyntax[0x80 - 0x20] =
     CharSyntax::Syntax_Punctuation,                 // 0x24 $
     CharSyntax::Syntax_Punctuation,                 // 0x25 %
     CharSyntax::Syntax_Punctuation,                 // 0x26 &
-    CharSyntax::Syntax_StringQuote | (0x27 << CharSyntax::Trait_PairShift),   // 0x27 '
+    CharSyntax::Syntax_Punctuation,
     CharSyntax::Syntax_OpenParen   | (0x29 << CharSyntax::Trait_PairShift),   // 0x28 (
     CharSyntax::Syntax_CloseParen  | (0x28 << CharSyntax::Trait_PairShift),   // 0x29 )
     CharSyntax::Syntax_Punctuation,                 // 0x2A *
@@ -564,7 +250,7 @@ k_rgnCxxCharSyntax[0x80 - 0x20] =
     CharSyntax::Syntax_Punctuation,                 // 0x5E ^
     CharSyntax::Syntax_Word,                        // 0x5F _
 
-    CharSyntax::Syntax_Punctuation,                 // 0x60 `
+    CharSyntax::Syntax_StringQuote | (0x60 << CharSyntax::Trait_PairShift),   // 0x60 `
     CharSyntax::Syntax_Word,                        // 0x61 a
     CharSyntax::Syntax_Word,                        // 0x62 b
     CharSyntax::Syntax_Word,                        // 0x63 c
@@ -597,12 +283,12 @@ k_rgnCxxCharSyntax[0x80 - 0x20] =
     CharSyntax::Syntax_CloseParen | (0x7B << CharSyntax::Trait_PairShift),    // 0x7D }
     CharSyntax::Syntax_Word,                        // 0x7E ^
     CharSyntax::Syntax_Control,                     // 0x7F DEL
-}; // k_rgnCxxCharSyntax
+}; // k_rgnHaskellCharSyntax
 
 /// <summary>
 ///   A base class of C-like language.
 /// </summary>
-class ClikeLexer : public NewLexer::LexerBase
+class HaskellLexer : public NewLexer::LexerBase
 {
     public: enum State
     {
@@ -610,8 +296,15 @@ class ClikeLexer : public NewLexer::LexerBase
 
         State_Annotation,
 
+        State_BackQuote,
+
         State_BlockComment,
         State_BlockComment_Star,
+
+        State_Brace,
+
+        State_Dash,
+        State_DashDash,
 
         State_DoubleQuote,
         State_DoubleQuote_Backslash,
@@ -621,11 +314,11 @@ class ClikeLexer : public NewLexer::LexerBase
 
         State_Normal,
 
-        State_SingleQuote,
-        State_SingleQuote_Backslash,
+        State_Operator,
 
         State_Sharp,
-        State_Slash,
+        State_SingleQuote,
+        State_SingleQuote_Backslash,
 
         State_Word,
 
@@ -636,6 +329,7 @@ class ClikeLexer : public NewLexer::LexerBase
     {
         Syntax_None,
         Syntax_Comment,
+        Syntax_Infix,
         Syntax_Operator,
         Syntax_String,
         Syntax_Word,
@@ -676,7 +370,7 @@ class ClikeLexer : public NewLexer::LexerBase
     private: char16         m_wchAnnotation;
 
     // ctor
-    protected: ClikeLexer(
+    protected: HaskellLexer(
         Buffer*         pBuffer,
         KeywordTable*   pKeywordTab,
         const uint*     prgnCharSyntax,
@@ -684,6 +378,34 @@ class ClikeLexer : public NewLexer::LexerBase
             NewLexer::LexerBase(pBuffer, pKeywordTab, prgnCharSyntax),
             m_eState(State_StartLine),
             m_wchAnnotation(wchAnnotation) {}
+
+    private: static KeywordTable* s_pKeywordTab;
+
+    // ctor
+    public: HaskellLexer(Buffer* pBuffer) :
+        NewLexer::LexerBase(
+            pBuffer,
+            initKeywordTab(),
+            k_rgnHaskellCharSyntax ),
+        m_eState(State_StartLine),
+        m_wchAnnotation('#') {}
+
+    // [I]
+    /// <summary>
+    ///   Initialize keyword table.
+    /// </summary>
+    private: static KeywordTable* initKeywordTab()
+    {
+        if (NULL == s_pKeywordTab)
+        {
+            s_pKeywordTab = installKeywords(
+                k_rgpwszHaskellKeyword,
+                lengthof(k_rgpwszHaskellKeyword) );
+        } // if
+
+        return s_pKeywordTab;
+    } // HaskellLexer
+
 
     // [C]
     /// <summary>
@@ -758,11 +480,20 @@ class ClikeLexer : public NewLexer::LexerBase
                 }
                 break;
 
+            case State_BackQuote:
+                switch (wch)
+                {
+                case '`':
+                    m_oEnumChar.Next();
+                    return endToken(wch);
+                }
+                break;
+
             case State_BlockComment:
                 ASSERT(Syntax_Comment == m_oToken.m_eSyntax);
                 switch (wch)
                 {
-                case '*':
+                case '-':
                     m_eState = State_BlockComment_Star;
                     break;
                 } // swtich wch
@@ -772,10 +503,11 @@ class ClikeLexer : public NewLexer::LexerBase
                 ASSERT(Syntax_Comment == m_oToken.m_eSyntax);
                 switch (wch)
                 {
-                case '*':
+                case '-':
+                    m_eState = State_BlockComment_Star;
                     break;
 
-                case '/':
+                case '}':
                     m_oEnumChar.Next();
                     return endToken(wch);
 
@@ -784,6 +516,43 @@ class ClikeLexer : public NewLexer::LexerBase
                     break;
                 } // switch wch
                 break;
+
+            case State_Brace:
+                switch (wch)
+                {
+                case '-':
+                    m_oToken.m_eSyntax = Syntax_Comment;
+                    m_eState = State_BlockComment;
+                    break;
+
+                default:
+                    return endToken(wch);
+                } // switch wch
+                break;
+
+            case State_Dash:
+                switch (wch)
+                {
+                case '-':
+                    m_eState = State_DashDash;
+                    break;
+
+                default:
+                    m_oToken.m_eSyntax = Syntax_Operator;
+                    return endToken(wch);
+                } // switch wch
+                break;
+
+            case State_DashDash:
+                if (isPunctChar(wch))
+                {
+                    m_oToken.m_eSyntax = Syntax_Operator;
+                    return endToken(wch);
+                }
+
+                m_oToken.m_eSyntax = Syntax_Comment;
+                m_eState = State_LineComment;
+                goto tryAgain;
 
             case State_DoubleQuote:
                 ASSERT(Syntax_String == m_oToken.m_eSyntax);
@@ -855,9 +624,19 @@ class ClikeLexer : public NewLexer::LexerBase
                     m_eState = State_SingleQuote;
                     break;
 
-                case '/':
+                case '-':
                     m_oToken.m_eSyntax = Syntax_Operator;
-                    m_eState = State_Slash;
+                    m_eState = State_Dash;
+                    break;
+
+                case '`':
+                    m_oToken.m_eSyntax = Syntax_Infix;
+                    m_eState = State_BackQuote;
+                    break;
+
+                case '{':
+                    m_oToken.m_eSyntax = Syntax_Operator;
+                    m_eState = State_Brace;
                     break;
 
                 default:
@@ -874,31 +653,21 @@ class ClikeLexer : public NewLexer::LexerBase
                     }
                     else
                     {
-                        m_oEnumChar.Next();
                         m_oToken.m_eSyntax = Syntax_Operator;
-                        return endToken(wch);
+                        m_oToken.m_lWordStart = m_oToken.m_lStart;
+                        m_oToken.m_wchPrefix = 0;
+                        m_eState = State_Operator;
                     }
                     break;
                 } // swtich wch
                 break;
 
-            case State_SingleQuote:
-                ASSERT(Syntax_String == m_oToken.m_eSyntax);
-                switch (wch)
+            case State_Operator:
+                ASSERT(Syntax_Operator == m_oToken.m_eSyntax);
+                if (! isPunctChar(wch))
                 {
-                case '\'':
-                    m_oEnumChar.Next();
                     return endToken(wch);
-
-                case '\\':
-                    m_eState = State_SingleQuote_Backslash;
-                    break;
-                } // switch wc
-                break;
-
-            case State_SingleQuote_Backslash:
-                ASSERT(Syntax_String == m_oToken.m_eSyntax);
-                m_eState = State_SingleQuote;
+                } // if
                 break;
 
             case State_Sharp:
@@ -927,22 +696,23 @@ class ClikeLexer : public NewLexer::LexerBase
                 } // swtich wch
                 break;
 
-            case State_Slash:
+            case State_SingleQuote:
+                ASSERT(Syntax_String == m_oToken.m_eSyntax);
                 switch (wch)
                 {
-                case '/':
-                    m_oToken.m_eSyntax = Syntax_Comment;
-                    m_eState = State_LineComment;
-                    break;
-
-                case '*':
-                    m_oToken.m_eSyntax = Syntax_Comment;
-                    m_eState = State_BlockComment;
-                    break;
-
-                default:
+                case '\'':
+                    m_oEnumChar.Next();
                     return endToken(wch);
-                } // switch wch
+
+                case '\\':
+                    m_eState = State_SingleQuote_Backslash;
+                    break;
+                } // switch wc
+                break;
+
+            case State_SingleQuote_Backslash:
+                ASSERT(Syntax_String == m_oToken.m_eSyntax);
+                m_eState = State_SingleQuote;
                 break;
 
             case State_StartLine:
@@ -966,7 +736,11 @@ class ClikeLexer : public NewLexer::LexerBase
 
             case State_Word:
                 ASSERT(Syntax_Word == m_oToken.m_eSyntax);
-                if (! isConsChar(wch))
+                if (isConsChar(wch) || wch == '\'')
+                {
+                    // still collect word
+                }
+                else
                 {
                     return endToken(wch);
                 } // if
@@ -993,6 +767,7 @@ class ClikeLexer : public NewLexer::LexerBase
 
         switch (m_oToken.m_eSyntax)
         {
+        case Syntax_Operator:
         case Syntax_Word:
             break;
 
@@ -1040,9 +815,7 @@ class ClikeLexer : public NewLexer::LexerBase
     {
         m_oEnumChar.SyncEnd();
 
-        #if DEBUG_LEXER
-          DEBUG_PRINTF("Backtrack from %d\n", m_oChange.GetStart());
-        #endif
+        DEBUG_PRINTF("Backtrack from %d\n", m_oChange.GetStart());
 
         m_eState   = State_StartLine;
 
@@ -1068,9 +841,8 @@ class ClikeLexer : public NewLexer::LexerBase
             }
         } // for
 
-        #if DEBUG_LEXER
-          DEBUG_PRINTF("restart from %d state=%d\n", lStart, m_eState);
-        #endif
+        DEBUG_PRINTF("restart from %d state=%d\n",
+            lStart, m_eState );
 
         m_oToken.Reset(lStart);
 
@@ -1103,74 +875,36 @@ class ClikeLexer : public NewLexer::LexerBase
         return ! m_oEnumChar.AtEnd();
     } // Run
 
-    DISALLOW_COPY_AND_ASSIGN(ClikeLexer);
-}; // ClikeLexer
+    DISALLOW_COPY_AND_ASSIGN(HaskellLexer);
+}; // HaskellLexer
 
 //////////////////////////////////////////////////////////////////////
 //
 // Map Token Type To color
 //
 const uint32
-ClikeLexer::k_rgnSyntax2Color[ClikeLexer::Syntax_Max_1] =
+HaskellLexer::k_rgnSyntax2Color[HaskellLexer::Syntax_Max_1] =
 {
     RGB(  0,    0,   0),    // Syntax_None
     RGB(  0,  128,   0),    // Syntax_Comment
-    RGB(  0,    0,  33),    // Syntax_Operator
+    RGB(  0,  128, 255),    // Syntax_Infix
+    RGB(  0,    0, 128),    // Syntax_Operator
     RGB(163,   21,  21),    // Syntax_String
     RGB(  0,    0,   0),    // Syntax_Word
     RGB(  0,    0, 255),    // Syntax_WordReserved
 }; // k_rgnSyntax2Color
 
-/// <summary>
-///   C++ lexer
-/// </summary>
-class CxxLexer : public ClikeLexer
-{
-    private: static KeywordTable* s_pKeywordTab;
-
-    // ctor
-    public: CxxLexer(Buffer* pBuffer) :
-        ClikeLexer(
-            pBuffer,
-            initKeywordTab(),
-            k_rgnCxxCharSyntax,
-            '#' ) {}
-
-    // [I]
-    /// <summary>
-    ///   Initialize keyword table.
-    /// </summary>
-    private: static KeywordTable* initKeywordTab()
-    {
-        if (NULL == s_pKeywordTab)
-        {
-            s_pKeywordTab = installKeywords(
-                k_rgpwszCKeyword,
-                lengthof(k_rgpwszCKeyword) );
-
-            addKeywords(
-                s_pKeywordTab,
-                k_rgpwszCxxKeyword,
-                lengthof(k_rgpwszCxxKeyword) );
-        } // if
-
-        return s_pKeywordTab;
-    } // CxxLexer
-
-    DISALLOW_COPY_AND_ASSIGN(CxxLexer);
-}; //CxxLexer
-
-KeywordTable* CxxLexer::s_pKeywordTab;
+KeywordTable* HaskellLexer::s_pKeywordTab;
 
 /// <summary>
-///   C++ mode
+///   Haskell mode
 /// </summary>
-class CxxMode : public Mode
+class HaskellMode : public Mode
 {
-    private: CxxLexer m_oLexer;
+    private: HaskellLexer m_oLexer;
 
     // ctor/dtor
-    public: CxxMode(ModeFactory* pFactory, Buffer* pBuffer) :
+    public: HaskellMode(ModeFactory* pFactory, Buffer* pBuffer) :
         m_oLexer(pBuffer),
         Mode(pFactory, pBuffer) {}
 
@@ -1180,92 +914,21 @@ class CxxMode : public Mode
         return m_oLexer.Run(lCount);
     } // DoColor
 
-    DISALLOW_COPY_AND_ASSIGN(CxxMode);
-}; // CxxMode
+    DISALLOW_COPY_AND_ASSIGN(HaskellMode);
+}; // HaskellMode
 
 /// <summary>
-///  Construct CxxModeFactory object
+///  Construct HaskellModeFactory object
 /// </summary>
-CxxModeFactory::CxxModeFactory() :
-    ModeFactory(k_rgnCxxCharSyntax) {}
+HaskellModeFactory::HaskellModeFactory() :
+    ModeFactory(k_rgnHaskellCharSyntax) {}
 
 /// <summary>
-///   Construct CxxMode object.
+///   Construct HaskellMode object.
 /// </summary>
-Mode* CxxModeFactory::Create(Buffer* pBuffer)
+Mode* HaskellModeFactory::Create(Buffer* pBuffer)
 {
-    return new CxxMode(this, pBuffer);
-} // CxxModeFactory::Create
-
-/// <summary>
-///   Java lexer
-/// </summary>
-class JavaLexer : public ClikeLexer
-{
-    private: static KeywordTable* s_pKeywordTab;
-
-    // ctor
-    public: JavaLexer(Buffer* pBuffer) :
-        ClikeLexer(
-            pBuffer,
-            initKeywordTab(),
-            k_rgnCxxCharSyntax,
-            '@' ) {}
-
-    // [I]
-    /// <summary>
-    ///   Initialize keyword table.
-    /// </summary>
-    private: static KeywordTable* initKeywordTab()
-    {
-        if (NULL == s_pKeywordTab)
-        {
-            s_pKeywordTab = installKeywords(
-                k_rgpwszJavaKeyword,
-                lengthof(k_rgpwszJavaKeyword) );
-        } // if
-
-        return s_pKeywordTab;
-    } // initKeywordTab
-
-    DISALLOW_COPY_AND_ASSIGN(JavaLexer);
-}; //JavaLexer
-
-KeywordTable* JavaLexer::s_pKeywordTab;
-
-/// <summary>
-///   Java mode
-/// </summary>
-class JavaMode : public Mode
-{
-    private: JavaLexer m_oLexer;
-
-    // ctor/dtor
-    public: JavaMode(ModeFactory* pFactory, Buffer* pBuffer) :
-        m_oLexer(pBuffer),
-        Mode(pFactory, pBuffer) {}
-
-    // [D]
-    public: virtual bool DoColor(Count lCount) override
-    {
-        return m_oLexer.Run(lCount);
-    } // DoColor
-
-    DISALLOW_COPY_AND_ASSIGN(JavaMode);
-}; // JavaMode
-
-/// <summary>
-///  Construct JavaModeFactory object
-/// </summary>
-JavaModeFactory::JavaModeFactory() :
-    ModeFactory(k_rgnCxxCharSyntax) {}
-
-/// <summary>
-///   Construct JavaMode object.
-/// </summary>
-Mode* JavaModeFactory::Create(Buffer* pBuffer)
-{
-    return new JavaMode(this, pBuffer);
-} // JavaModeFactory::Create
+    return new HaskellMode(this, pBuffer);
+} // HaskellModeFactory::Create
 
 }  // namespace text

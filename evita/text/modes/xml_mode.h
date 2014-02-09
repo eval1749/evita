@@ -11,9 +11,9 @@
 #if !defined(INCLUDE_mode_Xml_h)
 #define INCLUDE_mode_Xml_h
 
-#include "evita/dom/modes/lexer.h"
-#include "evita/dom/modes/mode.h"
-#include "evita/dom/modes/mode_factory.h"
+#include "evita/text/modes/lexer.h"
+#include "evita/text/modes/mode.h"
+#include "evita/text/modes/mode_factory.h"
 
 namespace text
 {

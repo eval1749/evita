@@ -29,7 +29,7 @@
 #include "common/tree/child_nodes.h"
 #include "common/win/native_window.h"
 #include "evita/ctrl_TabBand.h"
-#include "evita/dom/modes/mode.h"
+#include "evita/text/modes/mode.h"
 #include "evita/gfx_base.h"
 #include "evita/vi_defs.h"
 #include "evita/editor/application.h"

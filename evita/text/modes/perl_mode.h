@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_mode_Perl_h)
 #define INCLUDE_mode_Perl_h
 
-#include "evita/dom/modes/mode_factory.h"
+#include "evita/text/modes/mode_factory.h"
 #include "evita/text/buffer.h"
 
 namespace text

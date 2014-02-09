@@ -10,7 +10,7 @@
 #include "evita/ed_Interval.h"
 #include "evita/text/range.h"
 #include "evita/ed_Undo.h"
-#include "evita/dom/modes/plain_text_mode.h"
+#include "evita/text/modes/plain_text_mode.h"
 
 namespace text
 {

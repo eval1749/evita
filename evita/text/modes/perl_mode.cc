@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/modes/perl_mode.h"
+#include "evita/text/modes/perl_mode.h"
 
-#include "evita/dom/modes/char_syntax.h"
-#include "evita/dom/modes/lexer.h"
-#include "evita/dom/modes/mason_mode.h"
-#include "evita/dom/modes/mode.h"
+#include "evita/text/modes/char_syntax.h"
+#include "evita/text/modes/lexer.h"
+#include "evita/text/modes/mason_mode.h"
+#include "evita/text/modes/mode.h"
 
 namespace text
 {

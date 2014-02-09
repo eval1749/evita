@@ -14,7 +14,7 @@
 #define DEBUG_SAVE 0
 #include "evita/vi_FileIo.h"
 
-#include "evita/dom/modes/mode.h"
+#include "evita/text/modes/mode.h"
 #include "evita/ed_undo.h"
 
 #include "evita/dom/buffer.h"

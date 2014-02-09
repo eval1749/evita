@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/modes/mode_factory.h"
+#include "evita/text/modes/mode_factory.h"
 
 #include "base/logging.h"
-#include "evita/dom/modes/char_syntax.h"
-#include "evita/dom/modes/config_mode.h"
-#include "evita/dom/modes/cxx_mode.h"
-#include "evita/dom/modes/haskell_mode.h"
-#include "evita/dom/modes/lisp_mode.h"
-#include "evita/dom/modes/mason_mode.h"
-#include "evita/dom/modes/perl_mode.h"
-#include "evita/dom/modes/plain_text_mode.h"
-#include "evita/dom/modes/python_mode.h"
-#include "evita/dom/modes/xml_mode.h"
+#include "evita/text/modes/char_syntax.h"
+#include "evita/text/modes/config_mode.h"
+#include "evita/text/modes/cxx_mode.h"
+#include "evita/text/modes/haskell_mode.h"
+#include "evita/text/modes/lisp_mode.h"
+#include "evita/text/modes/mason_mode.h"
+#include "evita/text/modes/perl_mode.h"
+#include "evita/text/modes/plain_text_mode.h"
+#include "evita/text/modes/python_mode.h"
+#include "evita/text/modes/xml_mode.h"
 
 namespace text {
 

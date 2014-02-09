@@ -11,8 +11,8 @@
 #if !defined(INCLUDE_mode_PlainText_h)
 #define INCLUDE_mode_PlainText_h
 
-#include "evita/dom/modes/mode.h"
-#include "evita/dom/modes/mode_factory.h"
+#include "evita/text/modes/mode.h"
+#include "evita/text/modes/mode_factory.h"
 
 namespace text
 {

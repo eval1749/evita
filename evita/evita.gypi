@@ -18,6 +18,7 @@
         'dom/console_externs.js',
         'dom/document_externs.js',
         'dom/document_window_externs.js',
+        'dom/events/document_event_externs.js',
         'dom/events/event_externs.js',
         'dom/events/event_target_externs.js',
         'dom/events/focus_event_externs.js',
@@ -141,6 +142,8 @@
         'dom/editor.cc',
         'dom/editor_window.cc',
 
+        'dom/events/document_event.cc',
+        'dom/events/document_event_init.cc',
         'dom/events/event.cc',
         'dom/events/event_handler.cc',
         'dom/events/event_init.cc',

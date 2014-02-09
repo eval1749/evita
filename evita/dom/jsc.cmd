@@ -18,6 +18,7 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\document_externs.js ^
   %externs_dir%\document_window_externs.js ^
   %externs_dir%\errors_externs.js ^
+  %externs_dir%\events\document_event_externs.js ^
   %externs_dir%\events\event_externs.js ^
   %externs_dir%\events\event_target_externs.js ^
   %externs_dir%\events\focus_event_externs.js ^

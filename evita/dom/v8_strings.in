@@ -36,6 +36,8 @@ location
 metaKey
 repeat
 shiftKey
+### DocumentEvent
+errorCode
 
 ### FormEvent
 data

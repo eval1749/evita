@@ -11,10 +11,12 @@ Event.Names = {
   FOCUS: 'focus',
   KEYDOWN: 'keydown',
   KEYUP: 'keyup',
+  LOAD: 'load',
   MOUSEDOWN: 'mousedown',
   MOUSEMOVE: 'mousemove',
   MOUSEUP: 'mouseup',
-  QUERYCLOSE: 'queryclose'
+  QUERYCLOSE: 'queryclose',
+  SAVE: 'save'
 };
 
 /** @enum */

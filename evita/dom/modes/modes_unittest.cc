@@ -13,6 +13,23 @@ class ModesTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(ModesTest);
 };
 
+TEST_F(ModesTest, chooseModeByFileName) {
+  EXPECT_SCRIPT_VALID(
+      "function testIt(filename) {"
+      "  return Mode.chooseModeByFileName(filename).name;"
+      "}");
+  EXPECT_SCRIPT_EQ("C++", "testIt('foo.cc')");
+  EXPECT_SCRIPT_EQ("C++", "testIt('foo.cpp')");
+  EXPECT_SCRIPT_EQ("C++", "testIt('foo.h')");
+  EXPECT_SCRIPT_EQ("XML", "testIt('foo.html')");
+  EXPECT_SCRIPT_EQ("Java", "testIt('foo.java')");
+  EXPECT_SCRIPT_EQ("JavaScript", "testIt('foo.js')");
+  EXPECT_SCRIPT_EQ("Plain", "testIt('foo.txt')");
+  EXPECT_SCRIPT_EQ("XML", "testIt('foo.xml')");
+  EXPECT_SCRIPT_TRUE("Mode.defaultMode.name == testIt('foo.unknown')");
+  EXPECT_SCRIPT_TRUE("Mode.defaultMode.name == testIt('foo')");
+}
+
 TEST_F(ModesTest, ConfigMode) {
   EXPECT_SCRIPT_VALID("var mode = new ConfigMode();");
   EXPECT_SCRIPT_TRUE("ConfigMode.keymap instanceof Map");

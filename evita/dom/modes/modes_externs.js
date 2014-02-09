@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/** @expose @function {function(string): !Mode} */
+Mode.chooseModeByName = function(filename) {};
+
+/** @expose @type {!Mode} */
+Mode.defaultMode;
+
+/** @expose @type {!Map.<string, ModeDescription>} */
+Mode.modeMap;
+
 /** @expose @type {string} */
 Mode.prototype.name;
 

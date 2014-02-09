@@ -11,8 +11,7 @@
 #if !defined(INCLUDE_mode_Config_h)
 #define INCLUDE_mode_Config_h
 
-#include "evita/dom/modes/mode.h"
-
+#include "evita/dom/modes/mode_factory.h"
 #include "evita/text/buffer.h"
 
 namespace text

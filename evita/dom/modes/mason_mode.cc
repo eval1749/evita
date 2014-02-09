@@ -4,6 +4,8 @@
 
 #include "evita/dom/modes/mason_mode.h"
 
+#include "evita/dom/modes/mode_factory.h"
+
 namespace text
 {
 /// <summary>

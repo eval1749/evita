@@ -11,8 +11,7 @@
 #if !defined(INCLUDE_mode_Python_h)
 #define INCLUDE_mode_Python_h
 
-#include "evita/dom/modes/mode.h"
-
+#include "evita/dom/modes/mode_factory.h"
 #include "evita/text/buffer.h"
 
 namespace text {

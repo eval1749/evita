@@ -13,6 +13,7 @@
 
 #include "evita/dom/modes/lexer.h"
 #include "evita/dom/modes/mode.h"
+#include "evita/dom/modes/mode_factory.h"
 
 namespace text
 {

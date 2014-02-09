@@ -172,6 +172,7 @@
         'dom/modes/lisp_mode.cc',
         'dom/modes/mason_mode.cc',
         'dom/modes/mode.cc',
+        'dom/modes/mode_factory.cc',
         'dom/modes/perl_mode.cc',
         'dom/modes/plain_text_mode.cc',
         'dom/modes/python_mode.cc',

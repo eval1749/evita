@@ -16,6 +16,7 @@
 #include "evita/dom/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/dom/modes/mode.h"
+#include "evita/dom/modes/mode_factory.h"
 #include "evita/views/window.h"
 #include "evita/views/window_set.h"
 #include "evita/vi_EditPane.h"

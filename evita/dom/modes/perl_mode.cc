@@ -7,6 +7,7 @@
 #include "evita/dom/modes/char_syntax.h"
 #include "evita/dom/modes/lexer.h"
 #include "evita/dom/modes/mason_mode.h"
+#include "evita/dom/modes/mode.h"
 
 namespace text
 {

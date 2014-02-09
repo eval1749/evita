@@ -12,6 +12,7 @@
 #define INCLUDE_mode_PlainText_h
 
 #include "evita/dom/modes/mode.h"
+#include "evita/dom/modes/mode_factory.h"
 
 namespace text
 {

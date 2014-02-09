@@ -48,6 +48,7 @@ static const char16* k_rgpwszCKeyword[] = {
   L"if",
   L"int",
   L"long",
+  L"mutable",
   L"nullptr",
   L"register",
   L"return",

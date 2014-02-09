@@ -539,10 +539,14 @@ bool XmlMode::DoColor(Count lCount)
     return m_oLexer.Run(lCount);
 } // XmlMode::DoColor
 
-/// <summary>
-///  Construct XmlModeFactory object
-/// </summary>
+//////////////////////////////////////////////////////////////////////
+//
+// XmlModeFactory
+//
 XmlModeFactory::XmlModeFactory() {
+}
+
+XmlModeFactory::~XmlModeFactory() {
 }
 
 }  // namespace text

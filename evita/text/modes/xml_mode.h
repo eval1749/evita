@@ -8,9 +8,10 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Xml.h#3 $
 //
-#if !defined(INCLUDE_mode_Xml_h)
-#define INCLUDE_mode_Xml_h
+#if !defined(INCLUDE_evita_text_modes_xml_mode_h)
+#define INCLUDE_evita_text_modes_xml_mode_h
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/lexer.h"
 #include "evita/text/modes/mode.h"
 #include "evita/text/modes/mode_factory.h"
@@ -116,10 +117,13 @@ class XmlMode : public Mode
 /// <summary>
 ///   XML Mode factory
 /// </summary>
-class XmlModeFactory : public ModeFactory
-{
+class XmlModeFactory : public common::Singleton<XmlModeFactory>,
+                       public ModeFactory {
+    DECLARE_SINGLETON_CLASS(XmlModeFactory);
+
     // ctor
-    public: XmlModeFactory();
+    private: XmlModeFactory();
+    public: ~XmlModeFactory();
 
     // [C]
     public: virtual Mode* Create(Buffer* pBuffer) override
@@ -137,4 +141,4 @@ class XmlModeFactory : public ModeFactory
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_mode_Xml_h)
+#endif //!defined(INCLUDE_evita_text_modes_xml_mode_h)

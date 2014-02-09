@@ -240,7 +240,7 @@ ModeChooser::ModeChooser() {
   factories_.push_back(PerlModeFactory::instance());
   factories_.push_back(PlainTextModeFactory::instance());
   factories_.push_back(PythonModeFactory::instance());
-  factories_.push_back(new XmlModeFactory());
+  factories_.push_back(XmlModeFactory::instance());
 }
 
 ModeFactory* ModeChooser::Choose(Buffer* buffer) {

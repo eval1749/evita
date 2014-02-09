@@ -11,8 +11,6 @@
 #include "evita/text/range.h"
 #include "evita/ed_Undo.h"
 #include "evita/text/modes/mode.h"
-#include "evita/text/modes/mode_chooser.h"
-#include "evita/text/modes/mode_factory.h"
 
 namespace text
 {
@@ -21,7 +19,7 @@ namespace text
 ///   Construct a buffer object.
 /// </summary>
 /// <param name="name">A buffername in C-string.</param>
-Buffer::Buffer(const base::string16& name) :
+Buffer::Buffer(const base::string16& name, Mode* mode) :
     m_eState(State_Ready),
     m_fReadOnly(false),
     m_fUndo(true),
@@ -42,8 +40,7 @@ Buffer::Buffer(const base::string16& name) :
     }
 
     SetName(name);
-
-    SetMode(ModeChooser::instance()->Choose(this)->Create());
+    SetMode(mode);
 } // Buffer::Buffer
 
 /// <summary>

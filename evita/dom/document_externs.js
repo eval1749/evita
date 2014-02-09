@@ -14,9 +14,10 @@ Document.find = function(name) {};
 
 /**
  * @param {string} name
+ * @param {!Mode=} opt_mode
  * @return {!Document}
  */
-Document.getOrNew = function(name) {};
+Document.getOrNew = function(name, opt_mode) {};
 
 /**
  * @type {Array.<!Document>}
@@ -41,6 +42,9 @@ Document.prototype.keymap;
 
 /** @expose  @type {number} */
 Document.prototype.length;
+
+/** @expose  @type {!Mode} */
+Document.prototype.mode;
 
 /** @expose  @type {boolean} */
 Document.prototype.modified;

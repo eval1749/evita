@@ -14,13 +14,15 @@
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/converter.h"
+#include "evita/dom/modes/plain_text_mode.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/text/modes/mode.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/function_template_builder.h"
+#include "evita/v8_glue/nullable.h"
+#include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/wrapper_info.h"
 #include "v8_strings.h"
@@ -123,14 +125,24 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         &DocumentWrapperInfo::NewDocument);
     return v8_glue::FunctionTemplateBuilder(isolate, templ)
         .SetMethod("find", &DocumentList::StaticFind)
-        .SetMethod("getOrNew", &Document::GetOrNew)
+        .SetMethod("getOrNew", &GetOrNew)
         .SetProperty("list", &DocumentList::StaticList)
         .SetMethod("remove", &DocumentList::StaticRemove)
         .Build();
   }
 
-  private: static Document* NewDocument(const base::string16& name) {
-    return new Document(name);
+  private: static Document* GetOrNew(const base::string16& name,
+                                     v8_glue::Optional<Mode*> opt_mode) {
+    if (auto const document = DocumentList::StaticFind(name))
+      return document;
+    return NewDocument(name, opt_mode);
+  }
+
+  private: static Document* NewDocument(const base::string16& name,
+                                        v8_glue::Optional<Mode*> opt_mode) {
+    if (opt_mode.is_supplied)
+      return new Document(name, opt_mode.value);
+    return new Document(name, new PlainTextMode());
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -138,6 +150,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
     builder
         .SetProperty("filename", &Document::filename, &Document::set_filename)
         .SetProperty("length", &Document::length)
+        .SetProperty("mode", &Document::mode, &Document::set_mode)
         .SetProperty("modified", &Document::modified)
         .SetProperty("name", &Document::name)
         .SetProperty("properties", &Document::properties)
@@ -166,8 +179,9 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
 //
 DEFINE_SCRIPTABLE_OBJECT(Document, DocumentWrapperInfo)
 
-Document::Document(const base::string16& name)
-    : buffer_(new Buffer(DocumentList::instance()->MakeUniqueName(name))),
+Document::Document(const base::string16& name, Mode* mode)
+    : buffer_(new Buffer(DocumentList::instance()->MakeUniqueName(name),
+                         mode->text_mode())),
       properties_(v8::Isolate::GetCurrent(),
                   NewMap(v8::Isolate::GetCurrent())) {
   DocumentList::instance()->Register(this);
@@ -199,6 +213,11 @@ void Document::set_filename(const base::string16& filename) {
 
 text::Posn Document::length() const {
   return buffer_->GetEnd();
+}
+
+void Document::set_mode(Mode* mode) {
+  mode_ = mode;
+  buffer_->SetMode(mode_->text_mode());
 }
 
 bool Document::modified() const {
@@ -253,12 +272,6 @@ void Document::EndUndoGroup(const base::string16& name) {
 
 Document* Document::Find(const base::string16& name) {
   return DocumentList::instance()->Find(name);
-}
-
-Document* Document::GetOrNew(const base::string16& name) {
-  if (auto const document = Find(name))
-    return document;
-  return new Document(name);
 }
 
 bool Document::IsValidPosition(text::Posn position) const {

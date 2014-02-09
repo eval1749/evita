@@ -120,6 +120,14 @@ TEST_F(DocumentTest, load_) {
   
 }
 
+TEST_F(DocumentTest, mode) {
+  EXPECT_SCRIPT_VALID(
+      "var doc = new Document('foo');"
+      "var mode = new PlainTextMode();"
+      "doc.mode = mode;");
+  EXPECT_SCRIPT_TRUE("doc.mode === mode");
+}
+
 TEST_F(DocumentTest, modified) {
   EXPECT_SCRIPT_VALID("var doc = new Document('foo');"
             "var range = new Range(doc);");

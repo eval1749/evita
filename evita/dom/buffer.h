@@ -16,7 +16,7 @@
 namespace dom {
 
 class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
-  public: Buffer(const base::string16& name);
+  public: Buffer(const base::string16& name, text::Mode* mode);
   public: virtual ~Buffer();
 
   public: void set_filename(const base::string16& filename) {

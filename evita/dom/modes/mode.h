@@ -26,6 +26,7 @@ class Mode : public v8_glue::Scriptable<Mode> {
   protected: Mode(text::ModeFactory* mode_factory);
   public: ~Mode();
 
+  public: text::Mode* text_mode() const { return mode_.get(); }
   public: base::string16 name() const;
 
   public: void DoColor(int hint);

@@ -123,7 +123,7 @@ class Buffer : public BufferCore, public FileFeatures {
   protected: base::string16 name_;
 
   // ctor/dtor
-  public: Buffer(const base::string16& name);
+  public: Buffer(const base::string16& name, Mode* mode);
   public: virtual ~Buffer();
 
   public: bool operator==(const Buffer& other) const {

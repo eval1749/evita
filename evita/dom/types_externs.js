@@ -14,7 +14,14 @@ var global = {};
 /**
  * @constructor
  */
-var Document = function(name) {};
+var Mode = function() {};
+
+/**
+ * @constructor
+ * @param {string} name
+ * @param {!Mode=} opt_mode
+ */
+var Document = function(name, opt_mode) {};
 
 /**
  * @constructor

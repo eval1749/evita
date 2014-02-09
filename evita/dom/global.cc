@@ -25,8 +25,9 @@
 #include "evita/dom/modes/java_mode.h"
 #include "evita/dom/modes/lisp_mode.h"
 #include "evita/dom/modes/mason_mode.h"
-#include "evita/dom/modes/perl_mode.h"
 #include "evita/dom/modes/mode.h"
+#include "evita/dom/modes/perl_mode.h"
+#include "evita/dom/modes/plain_text_mode.h"
 #include "evita/dom/point.h"
 #include "evita/dom/range.h"
 #include "evita/dom/script_controller.h"
@@ -95,6 +96,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
       v8_glue::Installer<LispMode>::Run(isolate, templ);
       v8_glue::Installer<MasonMode>::Run(isolate, templ);
       v8_glue::Installer<PerlMode>::Run(isolate, templ);
+      v8_glue::Installer<PlainTextMode>::Run(isolate, templ);
 
     v8_glue::Installer<Selection>::Run(isolate, templ);
         v8_glue::Installer<TableSelection>::Run(isolate, templ);

@@ -90,4 +90,15 @@ TEST_F(ModesTest, PerlMode) {
   EXPECT_SCRIPT_EQ("Perl", "mode.name");
 }
 
+TEST_F(ModesTest, PlainTextMode) {
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "var mode = new PlainTextMode(doc);");
+  EXPECT_SCRIPT_TRUE("PlainTextMode.keymap instanceof Map");
+  EXPECT_SCRIPT_TRUE("mode instanceof Mode");
+  EXPECT_SCRIPT_TRUE("mode instanceof PlainTextMode");
+  EXPECT_SCRIPT_TRUE("mode.document === doc");
+  EXPECT_SCRIPT_EQ("Plain", "mode.name");
+}
+
 }  // namespace

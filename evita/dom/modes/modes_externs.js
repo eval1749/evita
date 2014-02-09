@@ -65,3 +65,10 @@ var MasonMode = function(document) {};
  * @param {!Document} document
  */
 var PerlMode = function(document) {};
+
+/**
+ * @constructor
+ * @extends {Mode}
+ * @param {!Document} document
+ */
+var PlainTextMode = function(document) {};

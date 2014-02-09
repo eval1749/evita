@@ -11,6 +11,7 @@
 #if !defined(INCLUDE_listener_winapp_visual_EditPane_h)
 #define INCLUDE_listener_winapp_visual_EditPane_h
 
+#include "base/memory/ref_counted.h"
 #include "evita/vi_defs.h"
 #include "evita/vi_Pane.h"
 
@@ -61,7 +62,7 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
   };
 
   private: State m_eState;
-  private: ScopedRefCount_<LayoutBox> root_box_;
+  private: scoped_refptr<LayoutBox> root_box_;
   private: const std::unique_ptr<SplitterController> splitter_controller_;
 
   // ctro/dtor

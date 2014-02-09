@@ -15,6 +15,7 @@
 #include "evita/vi_EditPane.h"
 
 #include "base/logging.h"
+#include "base/memory/ref_counted.h"
 #include "evita/views/content_window.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
@@ -55,7 +56,7 @@ struct EditPane::HitTestResult {
 };
 
 class EditPane::Box : public DoubleLinkedNode_<EditPane::Box>,
-                      public RefCounted_<EditPane::Box> {
+                      public base::RefCounted<EditPane::Box> {
     protected: EditPane* edit_pane_;
     private: bool is_removed_;
     private: LayoutBox* outer_;
@@ -437,7 +438,7 @@ void EditPane::HorizontalLayoutBox::SetRect(const gfx::Rect& newRect) {
       pBox->rect().right = rect().right;
     }
   } else {
-    ScopedRefCount_<LayoutBox> protect(*this);
+    scoped_refptr<LayoutBox> protect(this);
 
     tryAgain:
       auto xBox = rect().left;
@@ -506,7 +507,7 @@ void EditPane::HorizontalLayoutBox::StopSplitter(
     return;
   }
 
-  ScopedRefCount_<LayoutBox> protect(*this);
+  scoped_refptr<LayoutBox> protect(this);
   auto& above_box = *below_box.GetPrev();
   auto const cxMin = k_cxMinBox;
   if (pt.x - above_box.rect().left < cxMin) {
@@ -580,11 +581,9 @@ void EditPane::LayoutBox::Destroy() {
     DEBUG_PRINTF("%p\n", this);
   #endif
   ASSERT(!is_removed());
-  auto runner = boxes_.GetFirst();
-  while (runner) {
-    auto const next = runner->GetNext();
-    runner->Destroy();
-    runner = next;
+  scoped_refptr<LayoutBox> protect(this);
+  while (auto const box = boxes_.GetFirst()) {
+    box->Destroy();
   }
 }
 
@@ -703,7 +702,7 @@ void EditPane::LeafBox::EnsureInHorizontalLayoutBox() {
   }
 
   auto& layout_box = *new HorizontalLayoutBox(edit_pane_, outer());
-  ScopedRefCount_<LeafBox> protect(*this);
+  scoped_refptr<LeafBox> protect(this);
   outer()->Replace(layout_box, *this);
   layout_box.Realize(edit_pane_, rect());
   layout_box.Add(*this);
@@ -716,7 +715,7 @@ void EditPane::LeafBox::EnsureInVerticalLayoutBox() {
   }
 
   auto& layout_box = *new VerticalLayoutBox(edit_pane_, outer());
-  ScopedRefCount_<LeafBox> protect(*this);
+  scoped_refptr<LeafBox> protect(this);
   outer()->Replace(layout_box, *this);
   layout_box.Realize(edit_pane_, rect());
   layout_box.Add(*this);
@@ -1003,7 +1002,7 @@ void EditPane::VerticalLayoutBox::SetRect(const gfx::Rect& newRect) {
       pBox->rect().bottom = rect().bottom;
     }
   } else {
-    ScopedRefCount_<LayoutBox> protect(*this);
+    scoped_refptr<LayoutBox> protect(this);
     tryAgain:
       auto yBox = rect().top;
       auto cySplitter = 0;
@@ -1072,7 +1071,7 @@ void EditPane::VerticalLayoutBox::StopSplitter(
     return;
   }
 
-  ScopedRefCount_<LayoutBox> protect(*this);
+  scoped_refptr<LayoutBox> protect(this);
   auto& above_box = *below_box.GetPrev();
   auto const cyMin = k_cyMinBox;
   if (pt.y - above_box.rect().top < cyMin) {
@@ -1162,10 +1161,10 @@ void EditPane::SplitterController::Stop() {
 
 EditPane::EditPane(Window* pWindow)
     : m_eState(State_NotRealized),
-      root_box_(*new VerticalLayoutBox(this, nullptr)),
+      root_box_(new VerticalLayoutBox(this, nullptr)),
       splitter_controller_(new SplitterController(*this)) {
   AppendChild(pWindow);
-  ScopedRefCount_<LeafBox> box(*new LeafBox(this, root_box_, pWindow));
+  scoped_refptr<LeafBox> box(new LeafBox(this, root_box_, pWindow));
   root_box_->Add(*box);
 }
 

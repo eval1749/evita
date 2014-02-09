@@ -20,7 +20,7 @@ class JavaModeFactory : public common::Singleton<JavaModeFactory>,
 
   public: virtual Mode* Create(Buffer*) override;
   protected: virtual const char16* getExtensions() const override {
-    return L"java js";
+    return L"java";
   }
   public: virtual const char16* GetName() const override { return L"Java"; }
 

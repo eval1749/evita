@@ -9,6 +9,7 @@
 #include "evita/text/modes/cxx_mode.h"
 #include "evita/text/modes/haskell_mode.h"
 #include "evita/text/modes/java_mode.h"
+#include "evita/text/modes/javascript_mode.h"
 #include "evita/text/modes/lisp_mode.h"
 #include "evita/text/modes/mason_mode.h"
 #include "evita/text/modes/perl_mode.h"
@@ -236,6 +237,7 @@ ModeChooser::ModeChooser() {
   factories_.push_back(CxxModeFactory::instance());
   factories_.push_back(HaskellModeFactory::instance());
   factories_.push_back(JavaModeFactory::instance());
+  factories_.push_back(JavaScriptModeFactory::instance());
   factories_.push_back(LispModeFactory::instance());
   factories_.push_back(MasonModeFactory::instance());
   factories_.push_back(PerlModeFactory::instance());

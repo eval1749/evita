@@ -65,6 +65,7 @@
         'dom/forms/text_field_control_unittest.cc',
         'dom/file_path_unittest.cc',
         'dom/mock_view_impl.cc',
+        'dom/modes/modes_unittest.cc',
         'dom/point_unittest.cc',
         'dom/polyfill_unittest.cc',
         'dom/range_unittest.cc',

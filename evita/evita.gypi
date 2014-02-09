@@ -60,6 +60,7 @@
         'dom/editor_window.js',
         'dom/errors.js',
         'dom/file_path.js',
+        'dom/modes/modes.js',
         'dom/range.js',
         'dom/style.js',
         'dom/table_window.js',
@@ -167,6 +168,7 @@
         'dom/lock.cc',
 
         'dom/modes/mode.cc',
+        'dom/modes/config_mode.cc',
 
         'dom/point.cc',
         'dom/range.cc',

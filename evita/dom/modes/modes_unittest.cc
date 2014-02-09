@@ -17,6 +17,7 @@ TEST_F(ModesTest, ConfigMode) {
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"
     "var mode = new ConfigMode(doc);");
+  EXPECT_SCRIPT_TRUE("ConfigMode.keymap instanceof Map");
   EXPECT_SCRIPT_TRUE("mode instanceof Mode");
   EXPECT_SCRIPT_TRUE("mode instanceof ConfigMode");
   EXPECT_SCRIPT_TRUE("mode.document === doc");

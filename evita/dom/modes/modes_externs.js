@@ -16,3 +16,10 @@ Mode.prototype.name;
 
 /** @expose @type {function(number)} */
 Mode.prototype.doCall_ = function(number) {};
+
+/**
+ * @constructor
+ * @extends {Mode}
+ * @param {!Document} document
+ */
+var ConfigMode = function(document) {};

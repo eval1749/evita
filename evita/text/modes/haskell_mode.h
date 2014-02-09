@@ -8,8 +8,8 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Haskell.h#1 $
 //
-#if !defined(INCLUDE_mode_Haskell_h)
-#define INCLUDE_mode_Haskell_h
+#if !defined(INCLUDE_evita_text_modes_haskell_mode_h)
+#define INCLUDE_evita_text_modes_haskell_mode_h
 
 #include "common/memory/singleton.h"
 #include "evita/text/modes/mode_factory.h"
@@ -26,8 +26,8 @@ class HaskellModeFactory : public common::Singleton<HaskellModeFactory>,
     DECLARE_SINGLETON_CLASS(HaskellModeFactory);
 
     // ctor
-    private: ~HaskellModeFactory();
-    public: HaskellModeFactory();
+    private: HaskellModeFactory();
+    public: ~HaskellModeFactory();
 
     // [C]
     public: virtual Mode* Create(Buffer*) override;
@@ -44,4 +44,4 @@ class HaskellModeFactory : public common::Singleton<HaskellModeFactory>,
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_mode_Haskell_h)
+#endif //!defined(INCLUDE_evita_text_modes_haskell_mode_h)

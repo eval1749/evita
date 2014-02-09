@@ -8,8 +8,8 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Cxx.h#7 $
 //
-#if !defined(INCLUDE_mode_Cxx_h)
-#define INCLUDE_mode_Cxx_h
+#if !defined(INCLUDE_evita_text_modes_cxx_mode_h)
+#define INCLUDE_evita_text_modes_cxx_mode_h
 
 #include "common/memory/singleton.h"
 #include "evita/text/modes/mode_factory.h"
@@ -50,8 +50,8 @@ class JavaModeFactory : public common::Singleton<JavaModeFactory>,
     DECLARE_SINGLETON_CLASS(JavaModeFactory);
 
     // ctor
-    public: JavaModeFactory();
-    private: ~JavaModeFactory();
+    private: JavaModeFactory();
+    public: ~JavaModeFactory();
 
     // [C]
     public: virtual Mode* Create(Buffer*) override;
@@ -68,4 +68,4 @@ class JavaModeFactory : public common::Singleton<JavaModeFactory>,
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_mode_Cxx_h)
+#endif //!defined(INCLUDE_evita_text_modes_cxx_mode_h)

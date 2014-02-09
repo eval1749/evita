@@ -72,3 +72,10 @@ var PerlMode = function(document) {};
  * @param {!Document} document
  */
 var PlainTextMode = function(document) {};
+
+/**
+ * @constructor
+ * @extends {Mode}
+ * @param {!Document} document
+ */
+var PythonMode = function(document) {};

@@ -30,7 +30,10 @@ global.console = {
    * @return {!Document}
    */
   document_: function() {
-    return Document.getOrNew(console.DOCUMENT_NAME);
+    var document = Document.find(console.DOCUMENT_NAME);
+    if (document)
+      return document;
+    return new Document(console.DOCUMENT_NAME, new JavaScriptMode());
   },
 
   /**

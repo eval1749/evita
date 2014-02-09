@@ -11,6 +11,7 @@
 #if !defined(INCLUDE_mode_Haskell_h)
 #define INCLUDE_mode_Haskell_h
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/mode_factory.h"
 #include "evita/text/buffer.h"
 
@@ -20,9 +21,12 @@ namespace text
 /// <summary>
 ///  Haskell mode factory
 /// </summary>
-class HaskellModeFactory : public ModeFactory
-{
+class HaskellModeFactory : public common::Singleton<HaskellModeFactory>,
+                       public ModeFactory {
+    DECLARE_SINGLETON_CLASS(HaskellModeFactory);
+
     // ctor
+    private: ~HaskellModeFactory();
     public: HaskellModeFactory();
 
     // [C]

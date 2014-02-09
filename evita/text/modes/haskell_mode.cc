@@ -923,6 +923,9 @@ class HaskellMode : public Mode
 HaskellModeFactory::HaskellModeFactory() {
 }
 
+HaskellModeFactory::~HaskellModeFactory() {
+}
+
 /// <summary>
 ///   Construct HaskellMode object.
 /// </summary>

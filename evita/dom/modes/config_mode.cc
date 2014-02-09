@@ -31,14 +31,6 @@ class ConfigModeClass : public v8_glue::DerivedWrapperInfo<ConfigMode, Mode> {
     return new ConfigMode(document, text::ConfigModeFactory::instance());
   }
 
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("document", &Mode::document)
-        .SetProperty("name", &Mode::name)
-        .SetMethod("doColor_", &Mode::DoColor);
-  }
-
   DISALLOW_COPY_AND_ASSIGN(ConfigModeClass);
 };
 }  // namespace

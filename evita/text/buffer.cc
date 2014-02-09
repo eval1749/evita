@@ -10,7 +10,9 @@
 #include "evita/ed_Interval.h"
 #include "evita/text/range.h"
 #include "evita/ed_Undo.h"
-#include "evita/text/modes/plain_text_mode.h"
+#include "evita/text/modes/mode.h"
+#include "evita/text/modes/mode_chooser.h"
+#include "evita/text/modes/mode_factory.h"
 
 namespace text
 {
@@ -42,9 +44,7 @@ Buffer::Buffer(const base::string16& name) :
     SetName(name);
 
     if (!m_pMode)
-    {
-        m_pMode = ModeFactory::Get(this)->Create(this);
-    }
+        m_pMode = ModeChooser::instance()->Choose(this)->Create(this);
 } // Buffer::Buffer
 
 /// <summary>

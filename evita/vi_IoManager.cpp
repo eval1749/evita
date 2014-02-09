@@ -16,6 +16,7 @@
 #include "evita/dom/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/text/modes/mode.h"
+#include "evita/text/modes/mode_chooser.h"
 #include "evita/text/modes/mode_factory.h"
 #include "evita/views/window.h"
 #include "evita/views/window_set.h"
@@ -66,7 +67,8 @@ struct FinishLoadParam
 
         if (0 == m_nError)
         {
-            text::ModeFactory* pModeFactory = text::ModeFactory::Get(m_pBuffer);
+            text::ModeFactory* pModeFactory =
+                text::ModeChooser::instance()->Choose(m_pBuffer);
 
             text::Mode* pMode = m_pBuffer->GetMode();
             if (pMode->GetClass() != pModeFactory)

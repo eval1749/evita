@@ -75,10 +75,6 @@ uint32_t ModeFactory::GetCharSyntax(char16 wch) const {
   return CharSyntax::Syntax_None;
 }
 
-ModeFactory* ModeFactory::Get(Buffer* buffer) {
-  return ModeChooser::instance()->Choose(buffer);
-}
-
 bool ModeFactory::IsSupported(const char16* pwszName) const {
   DCHECK(pwszName);
 

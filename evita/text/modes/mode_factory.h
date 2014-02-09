@@ -25,7 +25,6 @@ class ModeFactory {
 
   // [G]
   public: virtual const char16* GetName() const = 0;
-  public: static ModeFactory* Get(Buffer*);
   public: uint32_t GetCharSyntax(char16) const;
 
   // [I]

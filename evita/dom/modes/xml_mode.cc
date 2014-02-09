@@ -4,6 +4,8 @@
 
 #include "evita/dom/modes/xml_mode.h"
 
+#include "evita/dom/modes/char_syntax.h"
+
 namespace text
 {
 

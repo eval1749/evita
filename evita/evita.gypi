@@ -168,6 +168,7 @@
         'dom/modes/config_mode.cc',
         'dom/modes/cxx_mode.cc',
         'dom/modes/haskell_mode.cc',
+        'dom/modes/lexer.cc',
         'dom/modes/lisp_mode.cc',
         'dom/modes/mason_mode.cc',
         'dom/modes/mode.cc',

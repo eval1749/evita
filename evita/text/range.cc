@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "evita/text/buffer.h"
+#include "evita/dom/modes/char_syntax.h"
 #include "evita/dom/modes/mode.h"
 #include "evita/ed_undo.h"
 

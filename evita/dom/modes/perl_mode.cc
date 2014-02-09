@@ -4,7 +4,8 @@
 
 #include "evita/dom/modes/perl_mode.h"
 
-// for MasonModeFactory constructor
+#include "evita/dom/modes/char_syntax.h"
+#include "evita/dom/modes/lexer.h"
 #include "evita/dom/modes/mason_mode.h"
 
 namespace text

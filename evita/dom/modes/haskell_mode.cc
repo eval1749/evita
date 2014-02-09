@@ -4,6 +4,9 @@
 
 #include "evita/dom/modes/haskell_mode.h"
 
+#include "evita/dom/modes/char_syntax.h"
+#include "evita/dom/modes/lexer.h"
+
 namespace text
 {
 

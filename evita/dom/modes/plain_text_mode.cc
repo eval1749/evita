@@ -4,6 +4,8 @@
 
 #include "evita/dom/modes/plain_text_mode.h"
 
+#include "evita/dom/modes/char_syntax.h"
+
 namespace text
 {
 

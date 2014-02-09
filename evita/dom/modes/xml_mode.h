@@ -11,6 +11,7 @@
 #if !defined(INCLUDE_mode_Xml_h)
 #define INCLUDE_mode_Xml_h
 
+#include "evita/dom/modes/lexer.h"
 #include "evita/dom/modes/mode.h"
 
 namespace text

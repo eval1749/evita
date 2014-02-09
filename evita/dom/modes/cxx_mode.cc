@@ -5,6 +5,9 @@
 
 #include "evita/dom/modes/cxx_mode.h"
 
+#include "evita/dom/modes/char_syntax.h"
+#include "evita/dom/modes/lexer.h"
+
 #define DEBUG_LEXER 0
 
 namespace text

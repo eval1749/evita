@@ -11,3 +11,4 @@ global.MasonMode.keymap = new Map();
 global.PerlMode.keymap = new Map();
 global.PlainTextMode.keymap = new Map();
 global.PythonMode.keymap = new Map();
+global.XmlMode.keymap = new Map();

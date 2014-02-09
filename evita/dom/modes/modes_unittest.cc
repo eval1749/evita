@@ -112,4 +112,15 @@ TEST_F(ModesTest, PythonMode) {
   EXPECT_SCRIPT_EQ("Python", "mode.name");
 }
 
+TEST_F(ModesTest, XmlMode) {
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "var mode = new XmlMode(doc);");
+  EXPECT_SCRIPT_TRUE("XmlMode.keymap instanceof Map");
+  EXPECT_SCRIPT_TRUE("mode instanceof Mode");
+  EXPECT_SCRIPT_TRUE("mode instanceof XmlMode");
+  EXPECT_SCRIPT_TRUE("mode.document === doc");
+  EXPECT_SCRIPT_EQ("XML", "mode.name");
+}
+
 }  // namespace

@@ -79,3 +79,10 @@ var PlainTextMode = function(document) {};
  * @param {!Document} document
  */
 var PythonMode = function(document) {};
+
+/**
+ * @constructor
+ * @extends {Mode}
+ * @param {!Document} document
+ */
+var XmlMode = function(document) {};

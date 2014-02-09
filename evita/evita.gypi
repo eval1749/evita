@@ -177,6 +177,7 @@
         'dom/modes/perl_mode.cc',
         'dom/modes/plain_text_mode.cc',
         'dom/modes/python_mode.cc',
+        'dom/modes/xml_mode.cc',
 
         'dom/point.cc',
         'dom/range.cc',

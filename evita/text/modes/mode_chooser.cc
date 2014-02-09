@@ -232,12 +232,12 @@ class EnumProperty {
 //
 ModeChooser::ModeChooser() {
   factories_.push_back(ConfigModeFactory::instance());
-  factories_.push_back(new CxxModeFactory());
+  factories_.push_back(CxxModeFactory::instance());
   factories_.push_back(new HaskellModeFactory());
   factories_.push_back(new LispModeFactory());
   factories_.push_back(new PerlModeFactory());
   factories_.push_back(new MasonModeFactory());
-  factories_.push_back(new JavaModeFactory());
+  factories_.push_back(JavaModeFactory::instance());
   plain_text_mode_factory_ = new PlainTextModeFactory();
   factories_.push_back(plain_text_mode_factory_);
   factories_.push_back(new XmlModeFactory());

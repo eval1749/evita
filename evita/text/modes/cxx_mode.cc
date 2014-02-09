@@ -1188,6 +1188,10 @@ class CxxMode : public Mode
 /// </summary>
 CxxModeFactory::CxxModeFactory() {
 }
+
+CxxModeFactory::~CxxModeFactory() {
+}
+
 /// <summary>
 ///   Construct CxxMode object.
 /// </summary>
@@ -1258,6 +1262,10 @@ class JavaMode : public Mode
 /// </summary>
 JavaModeFactory::JavaModeFactory() {
 }
+
+JavaModeFactory::~JavaModeFactory() {
+}
+
 /// <summary>
 ///   Construct JavaMode object.
 /// </summary>

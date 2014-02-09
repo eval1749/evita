@@ -11,6 +11,7 @@
 #if !defined(INCLUDE_mode_Cxx_h)
 #define INCLUDE_mode_Cxx_h
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/mode_factory.h"
 #include "evita/text/buffer.h"
 
@@ -20,10 +21,13 @@ namespace text
 /// <summary>
 ///  C++ mode factory
 /// </summary>
-class CxxModeFactory : public ModeFactory
-{
+class CxxModeFactory : public common::Singleton<CxxModeFactory>,
+                       public ModeFactory {
+    DECLARE_SINGLETON_CLASS(CxxModeFactory);
+
     // ctor
-    public: CxxModeFactory();
+    private: CxxModeFactory();
+    public: ~CxxModeFactory();
 
     // [C]
     public: virtual Mode* Create(Buffer*) override;
@@ -41,10 +45,13 @@ class CxxModeFactory : public ModeFactory
 /// <summary>
 ///  Java mode factory
 /// </summary>
-class JavaModeFactory : public ModeFactory
-{
+class JavaModeFactory : public common::Singleton<JavaModeFactory>,
+                        public ModeFactory {
+    DECLARE_SINGLETON_CLASS(JavaModeFactory);
+
     // ctor
     public: JavaModeFactory();
+    private: ~JavaModeFactory();
 
     // [C]
     public: virtual Mode* Create(Buffer*) override;

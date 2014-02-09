@@ -25,7 +25,6 @@ class ModeFactory {
 
   // [G]
   public: virtual const char16* GetName() const = 0;
-  public: uint32_t GetCharSyntax(char16) const;
 
   // [I]
   public: virtual bool IsSupported(const char16*) const;

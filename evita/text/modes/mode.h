@@ -28,7 +28,6 @@ class Mode {
   public: Buffer* GetBuffer() const { return m_pBuffer; }
 
   public: ModeFactory* GetClass() const { return m_pClass; }
-  public: uint32_t GetCharSyntax(base::char16 wch) const;
   public: virtual const char16* GetName() const;
 };
 

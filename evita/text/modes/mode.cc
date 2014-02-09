@@ -8,16 +8,12 @@
 
 namespace text {
 
-Mode::Mode(ModeFactory* pClass, Buffer* pBuffer) :
-    m_pBuffer(pBuffer),
-    m_pClass(pClass) {
+Mode::Mode(ModeFactory* pClass, Buffer* pBuffer)
+    : m_pBuffer(pBuffer),
+      m_pClass(pClass) {
 }
 
 Mode::~Mode() {
-}
-
-uint32_t Mode::GetCharSyntax(base::char16 wch) const {
-  return m_pClass->GetCharSyntax(wch);
 }
 
 const char16* Mode::GetName() const {

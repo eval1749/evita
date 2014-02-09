@@ -21,66 +21,12 @@ ModeFactory::ModeFactory(const uint* prgnCharSyntax)
 ModeFactory::~ModeFactory() {
 }
 
-/// <summary>
-/// Get syntax of specified character.
-/// </summary>
-// Returns ANSIC C/POSIX(LC_TYPE)
-//
-// See WinNls.h for C1_xxx
-// C1_UPPER 0x001
-// C1_LOWER 0x002
-// C1_DIGIT 0x004
-// C1_SPACE 0x008
-// C1_PUNCT 0x010
-// C1_CNTRL 0x020
-// C1_BLANK 0x040
-// C1_XDIGIT 0x080
-// C1_ALPHA 0x100
-// C1_DEFINED 0x200
-//
-// Code Name Type
-// +-------+---------+-------------------------------
-// | 0x09 | TAB | C1_SPACE + C1_CNTRL + C1_BLANK
-// | 0x0A | LF | C1_SPACE + C1_CNTRL
-// | 0x0D | CR | C1_SPACE + C1_CNTRL
-// | 0x20 | SPACE | C1_SPACE + C1_BLANK
-// +-------+---------+-------------------------------
-//
-uint32_t ModeFactory::GetCharSyntax(char16 wch) const {
-  if (wch < 0x20)
-    return CharSyntax::Syntax_Control;
-
-  if (wch < 0x80) {
-    uint32_t nSyntax = m_prgnCharSyntax[wch - 0x20];
-    if (nSyntax)
-      return nSyntax;
-  }
-
-  WORD wType;
-  if (!::GetStringTypeW(CT_CTYPE1, &wch, 1, &wType))
-    return CharSyntax::Syntax_None;
-
-  if (wType & (C1_ALPHA | C1_DIGIT))
-    return CharSyntax::Syntax_Word;
-
-  if (wType & (C1_BLANK | C1_SPACE))
-    return CharSyntax::Syntax_Whitespace;
-
-  if (wType & C1_PUNCT)
-    return CharSyntax::Syntax_Punctuation;
-
-  if (wType & C1_CNTRL)
-    return CharSyntax::Syntax_Control;
-
-  return CharSyntax::Syntax_None;
-}
-
 bool ModeFactory::IsSupported(const char16* pwszName) const {
   DCHECK(pwszName);
 
   const char16* pwszExt = lstrrchrW(pwszName, '.');
   if (!pwszExt) {
-    // Name doesn't contain have no file extension.
+    // Name doesn't have no file extension.
     return false;
   }
 

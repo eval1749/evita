@@ -44,13 +44,13 @@ void FontSet::Add(Font* pFont)
 // Font
 //
 class Font::FontImpl {
-  private: const common::OwnPtr<gfx::FontFace> font_face_;
+  private: const std::unique_ptr<gfx::FontFace> font_face_;
   private: float const em_size_; // the logical size of the font in DIP units.
   private: float const pixels_per_dip_;
   private: const DWRITE_FONT_METRICS metrics_;
 
   public: FontImpl(const char16* face_name, int font_size_pt)
-      : font_face_(*new gfx::FontFace(face_name)),
+      : font_face_(new gfx::FontFace(face_name)),
         em_size_(font_size_pt * 96.0f / 72.0f),
         pixels_per_dip_(gfx::FactorySet::instance()->pixels_per_dip().height),
         metrics_(GetMetrics()) {
@@ -181,15 +181,15 @@ class Font::FontImpl {
 
 Font::Font(const LOGFONT& log_font)
     : m_oLogFont(log_font),
-      font_impl_(*new FontImpl(log_font.lfFaceName, log_font.lfHeight)),
+      font_impl_(new FontImpl(log_font.lfFaceName, log_font.lfHeight)),
       metrics_(font_impl_->CalculateMetrics()) {
 }
 
 Font::~Font() {
 }
 
-common::OwnPtr<Font> Font::Create(const LOGFONT* logFont) {
-  return std::move(common::OwnPtr<Font>(new Font(*logFont)));
+std::unique_ptr<Font> Font::Create(const LOGFONT* logFont) {
+  return std::move(std::unique_ptr<Font>(new Font(*logFont)));
 }
 
 void Font::DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,
@@ -457,7 +457,7 @@ FontSet* FontSet::Get(const StyleValues* pStyle)
 
         Font* pFont = g_pFontCache->Get(&oLogFont);
         if (!pFont) {
-            pFont = &Font::Create(&oLogFont).DeprecatedDetach();
+            pFont = Font::Create(&oLogFont).release();
             g_pFontCache->Put(pFont);
         }
 

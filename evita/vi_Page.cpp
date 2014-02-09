@@ -1348,7 +1348,7 @@ class LineCopier {
 
   private: const gfx::RectF rect_;
   private: const gfx::Graphics& gfx_;
-  private: const common::OwnPtr<gfx::Bitmap> screen_bitmap_;
+  private: const std::unique_ptr<gfx::Bitmap> screen_bitmap_;
   private: std::vector<const LineWithTop> lines_;
 
   public: LineCopier(const gfx::Graphics& gfx, const gfx::RectF& dst_rect,
@@ -1371,7 +1371,7 @@ class LineCopier {
     }
   }
 
-  private: static common::OwnPtr<gfx::Bitmap> CreateBitmap(
+  private: static std::unique_ptr<gfx::Bitmap> CreateBitmap(
       const gfx::Graphics& gfx,
       const gfx::RectF& rect, const gfx::RectF& src_rect) {
     // TODO: We should allow copy bitmap from large screen to small screen.
@@ -1380,10 +1380,10 @@ class LineCopier {
         static_cast<float>(screen_rect.height()) != rect.height() ||
         static_cast<float>(screen_rect.width()) != src_rect.width() ||
         static_cast<float>(screen_rect.height()) != src_rect.height()) {
-      return std::move(common::OwnPtr<gfx::Bitmap>());
+      return std::move(std::unique_ptr<gfx::Bitmap>());
     }
 
-    common::OwnPtr<gfx::Bitmap> bitmap(new gfx::Bitmap(gfx));
+    std::unique_ptr<gfx::Bitmap> bitmap(new gfx::Bitmap(gfx));
     COM_VERIFY((*bitmap)->CopyFromRenderTarget(nullptr, gfx, &screen_rect));
     return std::move(bitmap);
   }

@@ -26,7 +26,7 @@ class Grapchis;
 class Caret {
   private: class BackingStore;
 
-  private: const common::OwnPtr<BackingStore> backing_store_;
+  private: const std::unique_ptr<BackingStore> backing_store_;
   private: common::RepeatingTimer<Caret> blink_timer_;
   private: const gfx::Graphics* gfx_;
   private: gfx::RectF rect_;

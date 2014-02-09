@@ -62,7 +62,7 @@ class Frame final : public views::Window,
   };
 
   private: typedef ChildList_<Frame, Pane> Panes;
-  private: common::OwnPtr<gfx::Graphics> gfx_;
+  private: std::unique_ptr<gfx::Graphics> gfx_;
   private: int m_cyTabBand;
   private: HWND m_hwndTabBand;
   private: Panes m_oPanes;

@@ -4,3 +4,4 @@
 
 global.ConfigMode.keymap = new Map();
 global.CxxMode.keymap = new Map();
+global.JavaMode.keymap = new Map();

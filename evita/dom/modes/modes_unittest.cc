@@ -35,4 +35,15 @@ TEST_F(ModesTest, CxxMode) {
   EXPECT_SCRIPT_EQ("C++", "mode.name");
 }
 
+TEST_F(ModesTest, JavaMode) {
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "var mode = new JavaMode(doc);");
+  EXPECT_SCRIPT_TRUE("JavaMode.keymap instanceof Map");
+  EXPECT_SCRIPT_TRUE("mode instanceof Mode");
+  EXPECT_SCRIPT_TRUE("mode instanceof JavaMode");
+  EXPECT_SCRIPT_TRUE("mode.document === doc");
+  EXPECT_SCRIPT_EQ("Java", "mode.name");
+}
+
 }  // namespace

@@ -7,3 +7,4 @@ global.CxxMode.keymap = new Map();
 global.HaskellMode.keymap = new Map();
 global.JavaMode.keymap = new Map();
 global.LispMode.keymap = new Map();
+global.MasonMode.keymap = new Map();

@@ -68,4 +68,15 @@ TEST_F(ModesTest, LispMode) {
   EXPECT_SCRIPT_EQ("Lisp", "mode.name");
 }
 
+TEST_F(ModesTest, MasonMode) {
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "var mode = new MasonMode(doc);");
+  EXPECT_SCRIPT_TRUE("MasonMode.keymap instanceof Map");
+  EXPECT_SCRIPT_TRUE("mode instanceof Mode");
+  EXPECT_SCRIPT_TRUE("mode instanceof MasonMode");
+  EXPECT_SCRIPT_TRUE("mode.document === doc");
+  EXPECT_SCRIPT_EQ("Mason", "mode.name");
+}
+
 }  // namespace

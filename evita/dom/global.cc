@@ -24,6 +24,7 @@
 #include "evita/dom/modes/haskell_mode.h"
 #include "evita/dom/modes/java_mode.h"
 #include "evita/dom/modes/lisp_mode.h"
+#include "evita/dom/modes/mason_mode.h"
 #include "evita/dom/modes/mode.h"
 #include "evita/dom/point.h"
 #include "evita/dom/range.h"
@@ -91,6 +92,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
       v8_glue::Installer<HaskellMode>::Run(isolate, templ);
       v8_glue::Installer<JavaMode>::Run(isolate, templ);
       v8_glue::Installer<LispMode>::Run(isolate, templ);
+      v8_glue::Installer<MasonMode>::Run(isolate, templ);
 
     v8_glue::Installer<Selection>::Run(isolate, templ);
         v8_glue::Installer<TableSelection>::Run(isolate, templ);

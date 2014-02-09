@@ -51,3 +51,10 @@ var HaskellMode = function(document) {};
  * @param {!Document} document
  */
 var LispMode = function(document) {};
+
+/**
+ * @constructor
+ * @extends {Mode}
+ * @param {!Document} document
+ */
+var MasonMode = function(document) {};

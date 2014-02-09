@@ -173,6 +173,7 @@
         'dom/modes/haskell_mode.cc',
         'dom/modes/java_mode.cc',
         'dom/modes/lisp_mode.cc',
+        'dom/modes/mason_mode.cc',
 
         'dom/point.cc',
         'dom/range.cc',

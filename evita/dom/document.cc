@@ -14,7 +14,7 @@
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/modes/plain_text_mode.h"
+#include "evita/dom/modes/mode.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/text/modes/mode.h"
@@ -142,7 +142,23 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
                                         v8_glue::Optional<Mode*> opt_mode) {
     if (opt_mode.is_supplied)
       return new Document(name, opt_mode.value);
-    return new Document(name, new PlainTextMode());
+
+    // Get mode by |Mode.chooseModeByFileName()|.
+    auto const runner = ScriptController::instance()->runner();
+    auto const isolate = runner->isolate();
+    auto const js_mode_class = runner->global()->Get(
+        v8Strings::Mode.Get(isolate));
+    auto const js_choose = js_mode_class->ToObject()->Get(
+        v8Strings::chooseModeByFileName.Get(isolate));
+    auto const js_name = gin::StringToV8(isolate, name);
+    auto const js_mode = runner->Call(js_choose, js_mode_class, js_name);
+    Mode* mode;
+    if (!gin::ConvertFromV8(isolate, js_mode, &mode)) {
+      ScriptController::instance()->ThrowException(v8::Exception::TypeError(
+          v8Strings::Mode.Get(isolate)));
+      return nullptr;
+    }
+    return new Document(name, mode);
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -182,6 +198,7 @@ DEFINE_SCRIPTABLE_OBJECT(Document, DocumentWrapperInfo)
 Document::Document(const base::string16& name, Mode* mode)
     : buffer_(new Buffer(DocumentList::instance()->MakeUniqueName(name),
                          mode->text_mode())),
+      mode_(mode),
       properties_(v8::Isolate::GetCurrent(),
                   NewMap(v8::Isolate::GetCurrent())) {
   DocumentList::instance()->Register(this);

@@ -128,6 +128,18 @@ TEST_F(DocumentTest, mode) {
   EXPECT_SCRIPT_TRUE("doc.mode === mode");
 }
 
+TEST_F(DocumentTest, mode_auto_mode) {
+  EXPECT_SCRIPT_VALID(
+      "function testIt(filename) {"
+      "  return (new Document(filename)).mode.constructor.name;"
+      "}");
+  EXPECT_SCRIPT_EQ("CxxMode", "testIt('foo.cc')");
+  EXPECT_SCRIPT_EQ("CxxMode", "testIt('foo.cpp')");
+  EXPECT_SCRIPT_EQ("CxxMode", "testIt('foo.h')");
+  EXPECT_SCRIPT_EQ("JavaMode", "testIt('foo.java')");
+  EXPECT_SCRIPT_EQ("JavaScriptMode", "testIt('foo.js')");
+}
+
 TEST_F(DocumentTest, modified) {
   EXPECT_SCRIPT_VALID("var doc = new Document('foo');"
             "var range = new Range(doc);");

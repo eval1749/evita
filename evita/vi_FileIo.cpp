@@ -14,6 +14,9 @@
 #define DEBUG_SAVE 0
 #include "evita/vi_FileIo.h"
 
+#include "base/bind.h"
+#include "base/callback.h"
+#include "base/logging.h"
 #include "evita/text/modes/mode.h"
 #include "evita/ed_undo.h"
 
@@ -31,6 +34,9 @@ HANDLE IoRequest::sm_hIoCompletionPort;
 HANDLE IoRequest::sm_hThread;
 
 const DWORD k_cbHugeFile = 1u << 28;
+
+#define DVLOG_WIN32_ERROR(level, name) \
+  DVLOG(level) << name ": " << this << " " << file_name_ << " err=" << dwError
 
 /// <summary>
 ///   Represents file information request used by Buffer.UpdateFileStatus.
@@ -179,6 +185,7 @@ class LoadRequest : public FileIoRequest, public CharsetDecoder::Callback {
     private: char* m_pchEnd;
   };
 
+  private: dom::ViewDelegate::LoadFileCallback callback_;
   private: DoubleLinkedList_<Chunk> m_Chunks;
   private: CharsetDecoder* m_CharsetDecoder;
   private: CharsetDetector m_CharsetDetector;
@@ -193,11 +200,13 @@ class LoadRequest : public FileIoRequest, public CharsetDecoder::Callback {
 
   // ctor
   public: LoadRequest(
+      const dom::ViewDelegate::LoadFileCallback& callback,
       Buffer* const pBuffer,
-      const char16* const pwszFileName,
+      const base::string16& file_name,
       uint const nCodePage,
       NewlineMode const eNewline)
-      : FileIoRequest(pwszFileName),
+      : FileIoRequest(file_name),
+        callback_(callback),
         m_CharsetDecoder(nullptr),
         m_NewlineDetector(eNewline),
         m_cwchPending(0),
@@ -289,14 +298,16 @@ void Buffer::FinishIo(uint const nError) {
 //      o Make buffer r/w
 //      o Discard contents of buffer
 //      o Request "Load" to I/O thread
-bool Buffer::Load(const char16* const pwszFileName) {
+bool Buffer::Load(const base::string16& file_name,
+                  const dom::ViewDelegate::LoadFileCallback& callback) {
   if (IsNotReady()) {
       return false;
   }
 
   auto const pLoad = new LoadRequest(
+      callback,
       this,
-      pwszFileName,
+      file_name,
       m_nCodePage,
       NewlineMode_Detect);
 
@@ -321,8 +332,17 @@ bool Buffer::Load(const char16* const pwszFileName) {
   return true;
 } // Buffer::Load
 
+namespace {
+void DummyCallback(int) {
+}
+}
+
+bool Buffer::Load(const base::string16& file_name) {
+  return Load(file_name, base::Bind(DummyCallback));
+}
+
 bool Buffer::Reload() {
-  return !GetFileName().empty() && Load(GetFileName().c_str());
+  return !GetFileName().empty() && Load(GetFileName());
 }
 
 bool Buffer::Save(
@@ -413,7 +433,7 @@ uint FileRequest::openForLoad() {
   ASSERT(m_hFile == INVALID_HANDLE_VALUE);
 
   m_hFile = ::CreateFile(
-      m_wszFileName,
+      file_name_.c_str(),
       GENERIC_READ,
       FILE_SHARE_READ | FILE_SHARE_DELETE,
       nullptr,
@@ -422,16 +442,14 @@ uint FileRequest::openForLoad() {
       nullptr);
   if (m_hFile == INVALID_HANDLE_VALUE) {
     auto const dwError = ::GetLastError();
-    DEBUG_PRINTF("CreateFile: %p %ls %u\n",
-        this, m_wszFileName, dwError);
+    DVLOG_WIN32_ERROR(0, "CreateFile");
     return dwError;
-  } // if
+  }
 
   BY_HANDLE_FILE_INFORMATION oInfo;
   if (!::GetFileInformationByHandle(m_hFile, &oInfo)) {
     auto const dwError = ::GetLastError();
-    DEBUG_PRINTF("GetFileInformationByHandle: %p %ls %u\n",
-        this, m_wszFileName, dwError);
+    DVLOG_WIN32_ERROR(0, "GetFileInformationByHandle");
     return dwError;
   }
 
@@ -455,8 +473,7 @@ bool IoRequest::associate(HANDLE hFile) {
 
   if (hPort != sm_hIoCompletionPort) {
     auto const dwError = ::GetLastError();
-    DEBUG_PRINTF("CreateIoCompletionPort: %p %ls %u\n",
-        this, m_wszFileName, dwError);
+    DVLOG_WIN32_ERROR(0, "GetFileInformationByHandle");
     finishIo(dwError);
     return false;
   } // if
@@ -609,8 +626,9 @@ void LoadRequest::finishIo(uint const nError) {
           : m_nCodePage);
 
   IoManager::FinishLoad(
+      callback_,
       m_pBuffer,
-      m_wszFileName,
+      file_name_,
       nError,
       eNewline,
       m_nFileAttrs,
@@ -658,9 +676,9 @@ void LoadRequest::insertChar(char16 wch) {
 
 void LoadRequest::onEvent(uint const cbRead) {
   #if DEBUG_LOAD
-      DEBUG_PRINTF("%p %ls cb=%u @%u\n",
-          this, m_wszFileName, cbRead, m_oOverlapped.Offset);
-  #endif // DEBUG_LOAD
+    DVLOG_WIN32_ERROR(0, "LoadRequest::onEvent") << " cb=" << cbRead <<
+        " ofs=" << m_oOverlapped.Offset;
+  #endif
 
   if (m_hFile == INVALID_HANDLE_VALUE) {
     auto const nError = openForLoad();
@@ -764,7 +782,7 @@ void LoadRequest::requestRead() {
     auto const dwError = ::GetLastError();
 
     #if DEBUG_LOAD
-      DEBUG_PRINTF("ReadFile: %p %ls %u\n", this, m_wszFileName, dwError);
+      DVLOG_WIN32_ERROR(0, "ReadFile");
     #endif
 
     switch (dwError) {
@@ -803,17 +821,14 @@ void SaveRequest::finishIo(uint const nError) {
       li.LowPart = static_cast<DWORD>(m_cbFile);
       if (!::SetFilePointerEx(m_hFile, li, nullptr, FILE_BEGIN)) {
         auto const dwError = ::GetLastError();
-        DEBUG_PRINTF("SetFilePointerEx: %p %ls %u\n",
-            this, m_wszFileName, dwError);
+        DVLOG_WIN32_ERROR(0, "SetFilePointerEx");
         finishIo(dwError);
         return;
       } // if
 
       if (!::SetEndOfFile(m_hFile)) {
         auto const dwError = ::GetLastError();
-
-        DEBUG_PRINTF("SetEndOfFile: %p %ls %u\n",
-            this, m_wszFileName, dwError);
+        DVLOG_WIN32_ERROR(0, "SetEndOfFile");
         finishIo(dwError);
         return;
       } // if
@@ -825,13 +840,12 @@ void SaveRequest::finishIo(uint const nError) {
     {
       auto const fSucceeded = ::MoveFileEx(
           m_wszTempName,
-          m_wszFileName,
+          file_name_.c_str(),
           MOVEFILE_REPLACE_EXISTING);
 
       if (!fSucceeded) {
         auto const dwError = ::GetLastError();
-        DEBUG_PRINTF("MoveFileEx: %p %ls %u %ls\n",
-            this, m_wszFileName, dwError, m_wszTempName);
+        DVLOG_WIN32_ERROR(0, "MoveFileEx") << " tmp=" << m_wszTempName;
         finishIo(dwError);
         return;
       } // if
@@ -844,7 +858,7 @@ void SaveRequest::finishIo(uint const nError) {
 
   IoManager::FinishSave(
       m_pBuffer,
-      m_wszFileName,
+      file_name_.c_str(),
       nError,
       NewlineMode_Detect,
       m_nFileAttrs,
@@ -855,8 +869,8 @@ void SaveRequest::finishIo(uint const nError) {
 
 void SaveRequest::onEvent(uint const cbWritten) {
   #if DEBUG_SAVE
-    DEBUG_PRINTF("%p %ls cb=%u @%u\n",
-        this, m_wszFileName, cbWritten, m_oOverlapped.Offset);
+    DVLOG_WIN32_ERROR(0, "SaveRequest::onEvent") << " cb=" << cbWritten <<
+        " ofs=" << m_oOverlapped.Offset;
   #endif // DEBUG_SAVE
 
   if (m_hFile == INVALID_HANDLE_VALUE) {
@@ -864,14 +878,13 @@ void SaveRequest::onEvent(uint const cbWritten) {
       char16 wszTempDir[MAX_PATH + 1];
       char16* pwszFile;
       auto const cwchFull = ::GetFullPathName(
-          m_wszFileName,
+          file_name_.c_str(),
           lengthof(wszTempDir),
           wszTempDir,
           &pwszFile);
       if (cwchFull == 0) {
         auto const dwError = ::GetLastError();
-        DEBUG_PRINTF("GetFullPathName: %p %ls %u\n",
-            this, m_wszFileName, dwError);
+        DVLOG_WIN32_ERROR(0, "GetFullPathName");
         finishIo(dwError);
         return;
       } // if
@@ -884,8 +897,7 @@ void SaveRequest::onEvent(uint const cbWritten) {
           m_wszTempName);
       if (cwchTemp == 0) {
         auto const dwError = ::GetLastError();
-        DEBUG_PRINTF("GetTempName: %p %ls %u %ls\n",
-            this, m_wszFileName, dwError, wszTempDir);
+        DVLOG_WIN32_ERROR(0, "GetTempName") << " dir=" << wszTempDir;
         finishIo(dwError);
         return;
       } // if
@@ -901,8 +913,7 @@ void SaveRequest::onEvent(uint const cbWritten) {
         nullptr);
     if (m_hFile == INVALID_HANDLE_VALUE) {
       auto const dwError = ::GetLastError();
-      DEBUG_PRINTF("CreateFile: %p %ls %u %ls\n",
-          this, m_wszFileName, dwError, m_wszTempName);
+      DVLOG_WIN32_ERROR(0, "CreateFile");
       finishIo(dwError);
       return;
     } // if
@@ -930,8 +941,8 @@ void SaveRequest::onEvent(uint const cbWritten) {
 
 void SaveRequest::requestWrite(uint const cbWrite) {
   #if DEBUG_SAVE
-    DEBUG_PRINTF("%p %ls cb=%u @%u\n",
-        this, m_wszFileName, cbWrite, m_oOverlapped.Offset);
+    DVLOG_WIN32_ERROR(0, "SaveRequest::requestWrite") << " cb=" cbWrite <<
+        " ofs=" << m_oOverlapped.Offset;
   #endif // DEBUG_SAVE
 
   m_cbFile += cbWrite;
@@ -949,8 +960,7 @@ void SaveRequest::requestWrite(uint const cbWrite) {
   if (dwError == ERROR_IO_PENDING)
     return;
 
-  DEBUG_PRINTF("WriteFile: %p %ls %u\n",
-    this, m_wszFileName, dwError);
+  DVLOG_WIN32_ERROR(0, "WriteFile");
   finishIo(dwError);
 } // SaveRequest::requestWrite
 
@@ -1037,8 +1047,7 @@ void SaveRequest::retrieve() {
           break;
         } // if
 
-        DEBUG_PRINTF("WideCharToMultiByte: %p %ls %u\n",
-            this, m_wszFileName, dwError);
+        DVLOG_WIN32_ERROR(0, "WideCharToMultiByte");
         finishIo(dwError);
         return;
       } // if

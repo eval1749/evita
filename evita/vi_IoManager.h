@@ -12,6 +12,7 @@
 #define INCLUDE_visual_IoManager_h
 
 #include "common/win/native_window.h"
+#include "evita/dom/view_delegate.h"
 
 namespace dom {
 class Buffer;
@@ -29,12 +30,13 @@ class IoManager : public common::win::NativeWindow
 
     // [F]
     public: static void FinishLoad(
-        Buffer*,
-        const char16*,
-        uint,
-        NewlineMode,
-        uint,
-        const FILETIME* );
+        const dom::ViewDelegate::LoadFileCallback& callback,
+        Buffer* buffer,
+        const base::string16& file_name,
+        uint32_t error_code,
+        NewlineMode newline_mode,
+        uint32_t file_attributes,
+        const FILETIME* last_write_time);
 
     public: static void FinishSave(
         Buffer*,

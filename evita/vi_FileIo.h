@@ -11,6 +11,8 @@
 #if !defined(INCLUDE_visual_file_h)
 #define INCLUDE_visual_file_h
 
+#include "base/strings/string16.h"
+
 //////////////////////////////////////////////////////////////////////
 //
 // IoRequest
@@ -18,19 +20,16 @@
 class IoRequest
 {
     protected: HANDLE   m_hFile;
-    protected: char16   m_wszFileName[MAX_PATH + 1];
+    protected: base::string16 file_name_;
 
     private: static DWORD   sm_dwThread;
     private: static HANDLE  sm_hIoCompletionPort;
     private: static HANDLE  sm_hThread;
 
     // ctor
-    protected: IoRequest(
-        const char16*   pwszFileName ) :
-            m_hFile(INVALID_HANDLE_VALUE)
-    {
-        ::lstrcpyW(m_wszFileName, pwszFileName);
-    } // IoRequest
+    protected: IoRequest(const base::string16& file_name)
+        : m_hFile(INVALID_HANDLE_VALUE), file_name_(file_name) {
+    }
 
     // ctor
     public: virtual ~IoRequest()
@@ -77,11 +76,9 @@ class FileRequest : public IoRequest
     protected: FILETIME m_ftLastWrite;
 
     // FileRequest ctor
-    protected: FileRequest(
-        const char16*   pwszFileName ) :
-            m_cbFile(0),
-            m_nFileAttrs(0),
-            IoRequest(pwszFileName) {}
+    protected: FileRequest(const base::string16&  file_name)
+        : IoRequest(file_name), m_cbFile(0), m_nFileAttrs(0) {
+    }
 
     protected: uint openForLoad();
 }; // FileIoRequest
@@ -102,10 +99,8 @@ class FileIoRequest : public FileRequest
     protected: char         m_rgchIoBuffer[k_cbIoBufferSize];
 
     // FileIoRequest ctor
-    protected: FileIoRequest(
-        const char16*   pwszFileName ) :
-            FileRequest(pwszFileName)
-    {
+    protected: FileIoRequest(const base::string16& file_name)
+        : FileRequest(file_name) {
         myZeroMemory(&m_oOverlapped, sizeof(m_oOverlapped));
     } // FileIoRequest
 }; // FileIoRequest

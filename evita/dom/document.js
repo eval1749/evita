@@ -359,8 +359,23 @@
     if (present)
       return present;
     var document = new Document(FilePath.basename(filename));
-    document.load_(absolute_filename);
+    document.load(absolute_filename);
     return document;
+  };
+
+  /**
+   * @param {string} filename
+   * @return {!Promise.<number>}
+   */
+  Document.prototype.load = function(filename) {
+    var deferred = Promise.defer();
+    this.load_(filename, function(error_code) {
+      if (!error_code)
+        deferred.resolve(error_code);
+      else
+        deferred.reject(error_code);
+    });
+    return /**@type{!Promise.<number>}*/(deferred.promise);
   };
 
   /**

@@ -50,7 +50,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       const std::vector<base::string16>& keys, int* states,
       base::WaitableEvent* event) override;
   private: virtual void LoadFile(dom::Document* document,
-                                 const base::string16& filename) override;
+                                 const base::string16& filename,
+                                 LoadFileCallback callback) override;
   private: virtual void MakeSelectionVisible(dom::WindowId window_id) override;
   private: virtual void MessageBox(dom::WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,

@@ -11,11 +11,12 @@
 //
 #define DEBUG_INTERVAL  _DEBUG
 #define DEBUG_STYLE     0
+
+#include <algorithm>
+
 #include "base/logging.h"
 #include "evita/ed_Interval.h"
-
 #include "evita/text/buffer.h"
-#include <algorithm>
 
 extern StyleValues g_DefaultStyle;
 
@@ -372,143 +373,6 @@ Interval* Buffer::tryMergeInterval(Interval* pIntv)
 
     return pIntv;
 } // Buffer::tryMergeInterval
-
-void BufPrintf(Buffer* pBuffer, const char16* pwszFormat, ...)
-{
-    char16 wsz[256];
-    va_list args;
-    va_start(args, pwszFormat);
-    ::wvsprintfW(wsz, pwszFormat, args);
-    va_end(args);
-    pBuffer->Insert(pBuffer->GetEnd(), wsz);
-} // BufPrintf
-
-bool Buffer::ValidateIntervals(Buffer* pLogBuf) const
-{
-    bool fValid = true;
-
-    uint cIntvs = 0;
-
-    {
-        Posn lLast = 0;
-        foreach (Intervals::Enum, oEnum, &m_oIntervals)
-        {
-            Interval* pIntv = oEnum.Get();
-            if (pIntv->GetStart() != lLast)
-            {
-                fValid = false;
-
-                BufPrintf(pLogBuf, L"Start of [%d, %d] must be %d\n",
-                    pIntv->GetStart(),
-                    pIntv->GetEnd(),
-                    lLast );
-            }
-
-            if (pIntv->GetStart() >= pIntv->GetEnd())
-            {
-                fValid = false;
-
-                BufPrintf(pLogBuf, L"Empty [%d, %d]\n",
-                    pIntv->GetStart(),
-                    pIntv->GetEnd() );
-            }
-
-            if (pIntv->GetEnd() > GetEnd() + 1)
-            {
-                fValid = false;
-
-                BufPrintf(pLogBuf, L"Outside [%d, %d]\n",
-                    pIntv->GetStart(),
-                    pIntv->GetEnd() );
-            }
-
-            lLast = pIntv->GetEnd();
-
-            cIntvs += 1;
-        } // for each interval
-    }
-
-    BufPrintf(pLogBuf, L"Buffer '%s' has %d intervals.\n",
-        GetName(),
-        cIntvs );
-
-    for (Posn lPosn = 0; lPosn < GetEnd(); lPosn += 1)
-    {
-        Interval* pRunner = m_oIntervalTree.GetRoot();
-        Interval* pFound  = NULL;
-        while (NULL != pRunner)
-        {
-            if (pRunner->Contains(lPosn))
-            {
-                pFound = pRunner;
-                break;
-            }
-
-            if (lPosn < pRunner->GetStart())
-            {
-                pRunner = pRunner->GetLeft();
-            }
-            else
-            {
-                pRunner = pRunner->GetRight();
-            }
-        } // while
-
-        if (NULL == pFound)
-        {
-            fValid = false;
-            BufPrintf(pLogBuf, L"Posn %d isn't in tree.\n", lPosn);
-        }
-    } // for all posn
-
-
-    class TreeWalker
-    {
-        public: static bool Walk(Interval* pIntv, Buffer* pLogBuf)
-        {
-            when (NULL == pIntv) return true;
-
-            bool fValid = true;
-
-            if (Interval* pLeft = pIntv->GetLeft())
-            {
-                unless (pLeft->GetEnd() <= pIntv->GetStart())
-                {
-                    fValid = false;
-                    BufPrintf(pLogBuf, L"left [%d, %d] must be %d.\n",
-                        pLeft->GetStart(),
-                        pLeft->GetEnd(),
-                        pIntv->GetStart() );
-                }
-
-                unless (Walk(pLeft, pLogBuf)) fValid = false;
-            }
-
-            if (Interval* pRight = pIntv->GetRight())
-            {
-                unless (pRight->GetStart() >= pIntv->GetEnd())
-                {
-                    fValid = false;
-                    BufPrintf(pLogBuf, L"right [%d, %d] must be %d.\n",
-                        pRight->GetStart(),
-                        pRight->GetEnd(),
-                        pIntv->GetStart() );
-                }
-
-                unless (Walk(pRight, pLogBuf)) fValid = false;
-            }
-
-            return fValid;
-        } // Walk
-    }; // TreeWalker
-
-    unless (TreeWalker::Walk(m_oIntervalTree.GetRoot(), pLogBuf))
-    {
-        fValid = false;
-    }
-
-    return fValid;
-} // Buffer::ValiateIntervals
 
 /// <summary>
 ///   Returns true if this interval and pIntv can be merged. If two

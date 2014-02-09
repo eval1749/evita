@@ -226,9 +226,6 @@ class Buffer : public BufferCore, public FileFeatures {
   // [U]
   public: Posn Undo(Posn, Count = 1);
 
-  // [V]
-  public: bool ValidateIntervals(Buffer*) const;
-
   // Buffer management methods
   private: void onChange();
   private: void relocate(Posn, Count);

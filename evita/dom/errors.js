@@ -24,7 +24,6 @@ global.DocumentError = (function() {
       document: {configurable: false, enumerable: false, writable: true}
   });
   DocumentError.prototype.constructor = DocumentError;
-  DocumentError.prototype.document = null;
   DocumentError.prototype.name = DocumentError.name;
   return DocumentError;
 })();
@@ -38,8 +37,8 @@ global.DocumentNotReady = (function() {
   function DocumentNotReady(document, opt_message) {
     DocumentError.apply(this, arguments);
   }
-  DocumentNotReady.prototype = Object.create(
-    /** @type {!Object} */ (DocumentError.prototype), {});
+  DocumentNotReady.prototype = /** @type {!DocumentNotReady} */ (Object.create(
+    /** @type {!Object} */ (DocumentError.prototype), {}));
   DocumentNotReady.prototype.constructor = DocumentNotReady;
   DocumentNotReady.prototype.name = DocumentNotReady.name;
   return DocumentNotReady;
@@ -53,8 +52,8 @@ global.DocumentReadOnly = (function() {
   function DocumentReadOnly(document, opt_message) {
     DocumentError.apply(this, arguments);
   }
-  DocumentReadOnly.prototype = Object.create(
-    /** @type {!Object} */ (DocumentError.prototype), {});
+  DocumentReadOnly.prototype = /** @type {!DocumentReadOnly} */(Object.create(
+    /** @type {!Object} */ (DocumentError.prototype), {}));
   DocumentReadOnly.prototype.constructor = DocumentReadOnly;
   DocumentReadOnly.prototype.name = DocumentReadOnly.name;
   return DocumentReadOnly;

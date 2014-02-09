@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_modes_mode_h)
-#define INCLUDE_evita_dom_modes_mode_h
+#if !defined(INCLUDE_evita_text_modes_mode_h)
+#define INCLUDE_evita_text_modes_mode_h
 
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
@@ -29,8 +29,10 @@ class Mode {
 
   public: ModeFactory* GetClass() const { return m_pClass; }
   public: virtual const char16* GetName() const;
+
+  DISALLOW_COPY_AND_ASSIGN(Mode);
 };
 
 } // namespace text
 
-#endif //!defined(INCLUDE_evita_dom_modes_mode_h)
+#endif //!defined(INCLUDE_evita_text_modes_mode_h)

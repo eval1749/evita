@@ -99,16 +99,23 @@ class EditorWindowWrapperInfo :
 DEFINE_SCRIPTABLE_OBJECT(EditorWindow, EditorWindowWrapperInfo);
 
 EditorWindow::EditorWindow() {
-  EditorWindowList::instance()->Register(this);
   ScriptController::instance()->view_delegate()->CreateEditorWindow(this);
 }
 
 EditorWindow::~EditorWindow() {
-  EditorWindowList::instance()->Unregister(this);
 }
 
 void EditorWindow::ResetForTesting() {
   EditorWindowList::instance()->ResetForTesting();
+}
+
+// Window
+void EditorWindow::DidDestroyWindow() {
+  EditorWindowList::instance()->Unregister(this);
+}
+
+void EditorWindow::DidRealizeWindow() {
+  EditorWindowList::instance()->Register(this);
 }
 
 }  // namespace dom

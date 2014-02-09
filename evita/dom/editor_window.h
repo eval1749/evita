@@ -17,6 +17,10 @@ class EditorWindow : public v8_glue::Scriptable<EditorWindow, Window> {
 
   public: static void ResetForTesting();
 
+  // Window
+  private: virtual void DidDestroyWindow() override;
+  private: virtual void DidRealizeWindow() override;
+
   DISALLOW_COPY_AND_ASSIGN(EditorWindow);
 };
 

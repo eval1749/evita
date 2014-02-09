@@ -253,9 +253,8 @@ void Window::Destroy() {
   ScriptController::instance()->view_delegate()->DestroyWindow(window_id());
 }
 
-void Window::DidDestroyWidget(WindowId window_id) {
-  DCHECK_NE(kInvalidWindowId, window_id);
-  WindowIdMapper::instance()->DidDestroyWidget(window_id);
+void Window::DidDestroyWindow() {
+  WindowIdMapper::instance()->DidDestroyWidget(window_id());
 }
 
 // Possible state transitions:
@@ -265,13 +264,12 @@ void Window::DidDestroyWidget(WindowId window_id) {
 //    Adding |State::NotRealized| window to |State::Realized| window.
 //  State::Destroying -> State::Realized
 //    The window was |State::Realizing| then |destroy()|.
-void Window::DidRealizeWidget(WindowId window_id) {
-  auto const widget = FromWindowId(window_id);
-  DCHECK(widget->state_ == State::Realizing ||
-         widget->state_ == State::Destroying ||
-         widget->state_ == State::NotRealized);
-  widget->state_ = State::Realized;
-  for (auto child : widget->child_nodes()) {
+void Window::DidRealizeWindow() {
+  DCHECK(state_ == State::Realizing ||
+         state_ == State::Destroying ||
+         state_ == State::NotRealized);
+  state_ = State::Realized;
+  for (auto child : child_nodes()) {
     if (child->state_ == State::NotRealized)
       child->state_ = State::Realized;
   }

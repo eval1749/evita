@@ -116,8 +116,8 @@ TEST_F(WindowTest, Add) {
   EXPECT_SCRIPT_TRUE("child1.previousSibling == null");
   EXPECT_SCRIPT_TRUE("child2.nextSibling == null");
   EXPECT_SCRIPT_TRUE("child2.previousSibling == child1");
-  dom::Window::DidRealizeWidget(static_cast<dom::WindowId>(1));
-  dom::Window::DidDestroyWidget(static_cast<dom::WindowId>(2));
+  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
+  view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(2));
   EXPECT_SCRIPT_EQ("1", "parent.children.length");
   EXPECT_SCRIPT_TRUE("parent.firstChild == child2");
   EXPECT_SCRIPT_TRUE("parent.lastChild == child2");

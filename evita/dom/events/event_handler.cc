@@ -106,7 +106,10 @@ void EventHandler::DoDefaultEventHandling(EventTarget* event_target,
 
 // ViewEventHandler
 void EventHandler::DidDestroyWidget(WindowId window_id) {
-  Window::DidDestroyWidget(window_id);
+  auto const window = FromWindowId(window_id);
+  if (!window)
+    return;
+  window->DidDestroyWindow();
 }
 
 void EventHandler::DidDropWidget(WindowId source_id,
@@ -137,7 +140,10 @@ void EventHandler::DidKillFocus(WindowId window_id) {
 }
 
 void EventHandler::DidRealizeWidget(WindowId window_id) {
-  Window::DidRealizeWidget(window_id);
+  auto const window = FromWindowId(window_id);
+  if (!window)
+    return;
+  window->DidRealizeWindow();
 }
 
 void EventHandler::DidResizeWidget(WindowId window_id, int left, int top,

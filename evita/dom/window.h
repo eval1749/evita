@@ -61,8 +61,8 @@ class Window : public v8_glue::Scriptable<Window, EventTarget>,
   public: void AddWindow(Window* window);
   public: void ChangeParentWindow(Window* new_parent_window);
   public: void Destroy();
-  public: static void DidDestroyWidget(WindowId window_id);
-  public: static void DidRealizeWidget(WindowId window_id);
+  public: virtual void DidDestroyWindow();
+  public: virtual void DidRealizeWindow();
   public: void DidResize(int left, int top, int right, int bottom);
   public: void DidSetFocus();
   public: void Focus();

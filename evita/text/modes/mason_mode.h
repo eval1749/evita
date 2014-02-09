@@ -8,21 +8,22 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Mason.h#3 $
 //
-#if !defined(INCLUDE_mode_Mason_h)
-#define INCLUDE_mode_Mason_h
+#if !defined(INCLUDE_evita_text_modes_mason_mode_h)
+#define INCLUDE_evita_text_modes_mason_mode_h
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/perl_mode.h"
 
 namespace text
 {
 
-/// <summary>
-///   Mason mode factory.
-/// </summary>
-class MasonModeFactory : public ModeFactory
-{
+class MasonModeFactory : public common::Singleton<MasonModeFactory>,
+                       public ModeFactory {
+    DECLARE_SINGLETON_CLASS(MasonModeFactory);
+
     // ctor
-    public: MasonModeFactory();
+    private: MasonModeFactory();
+    public: ~MasonModeFactory();
 
     // [C]
     public: virtual Mode* Create(Buffer*) override;
@@ -40,4 +41,4 @@ class MasonModeFactory : public ModeFactory
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_mode_Mason_h)
+#endif //!defined(INCLUDE_evita_text_modes_mason_mode_h)

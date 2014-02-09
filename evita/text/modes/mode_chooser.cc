@@ -235,7 +235,7 @@ ModeChooser::ModeChooser() {
   factories_.push_back(CxxModeFactory::instance());
   factories_.push_back(HaskellModeFactory::instance());
   factories_.push_back(LispModeFactory::instance());
-  factories_.push_back(new MasonModeFactory());
+  factories_.push_back(MasonModeFactory::instance());
   factories_.push_back(new PerlModeFactory());
   factories_.push_back(JavaModeFactory::instance());
   plain_text_mode_factory_ = new PlainTextModeFactory();

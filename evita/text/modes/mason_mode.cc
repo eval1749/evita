@@ -11,6 +11,9 @@ namespace text {
 MasonModeFactory::MasonModeFactory() {
 }
 
+MasonModeFactory::~MasonModeFactory() {
+}
+
 /// <summary>
 ///   Returns true if Mason mode support specified buffer name.
 /// </summary>

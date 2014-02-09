@@ -591,15 +591,12 @@ class PythonMode : public Mode {
   DISALLOW_COPY_AND_ASSIGN(PythonMode);
 };
 
-/// <summary>
-///  Construct PythonModeFactory object
-/// </summary>
 PythonModeFactory::PythonModeFactory() {
 }
 
-/// <summary>
-///   Create a PythonModeFactory instance.
-/// </summary>
+PythonModeFactory::~PythonModeFactory() {
+}
+
 Mode* PythonModeFactory::Create(Buffer* pBuffer) {
   return new PythonMode(this, pBuffer);
 }

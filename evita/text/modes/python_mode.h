@@ -8,9 +8,10 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/mode_Python.h#4 $
 //
-#if !defined(INCLUDE_mode_Python_h)
-#define INCLUDE_mode_Python_h
+#if !defined(INCLUDE_evita_text_modes_python_mode_h)
+#define INCLUDE_evita_text_modes_python_mode_h
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/mode_factory.h"
 #include "evita/text/buffer.h"
 
@@ -19,9 +20,13 @@ namespace text {
 /// <summary>
 ///   PythonMode factory
 /// </summary>
-class PythonModeFactory : public ModeFactory {
+class PythonModeFactory : public common::Singleton<PythonModeFactory>,
+                          public ModeFactory {
+  DECLARE_SINGLETON_CLASS(PythonModeFactory);
+
   // ctor
-  public: PythonModeFactory();
+  private: PythonModeFactory();
+  public: ~PythonModeFactory();
 
   // [C]
   public: virtual Mode* Create(Buffer*) override;
@@ -38,4 +43,4 @@ class PythonModeFactory : public ModeFactory {
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_mode_Python_h)
+#endif //!defined(INCLUDE_evita_text_modes_python_mode_h)

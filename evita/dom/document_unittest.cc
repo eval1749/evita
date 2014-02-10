@@ -158,6 +158,20 @@ TEST_F(DocumentTest, name) {
   EXPECT_SCRIPT_EQ("baz", "var sample1 = new Document('baz'); sample1.name");
 }
 
+TEST_F(DocumentTest, parseFileProperties) {
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "var range = new Range(doc);"
+    "range.text = '-*- var1: foo; VAR2: bar ; var3 : baz; -*-';"
+    "doc.parseFileProperties();");
+  // Property names are case sensitive
+  // Property values doesn't have leading and trailing whitespaces.
+  EXPECT_SCRIPT_EQ("foo", "doc.properties.get('var1')");
+  EXPECT_SCRIPT_EQ("undefined", "doc.properties.get('var2')");
+  EXPECT_SCRIPT_EQ("bar", "doc.properties.get('VAR2')");
+  EXPECT_SCRIPT_EQ("baz", "doc.properties.get('var3')");
+}
+
 TEST_F(DocumentTest, properties) {
   EXPECT_SCRIPT_VALID(
     "var doc1 = new Document('doc1');"

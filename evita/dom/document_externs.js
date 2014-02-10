@@ -135,8 +135,11 @@ Document.prototype.load_ = function(filename, callback) {};
  */
 Document.prototype.needSave = function() {};
 
+/** @expose @type {function()} */
+Document.prototype.parseFileProperties;
+
 /** @param {!TextOffset} position */
-Document.prototype.redo= function(position) {}
+Document.prototype.redo = function(position) {}
 
 /** @type {function()} */
 Document.prototype.reload_ = function(document) {};

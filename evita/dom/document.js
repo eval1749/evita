@@ -376,9 +376,9 @@
    * @return {!Promise.<number>}
    */
   Document.prototype.load = function(opt_filename) {
-
+    var document = this;
     if (!arguments.length) {
-      if (this.filename == '')
+      if (document.filename == '')
         throw 'Document isn\'t bound to file.';
     } else {
       var filename = /** @type{string} */(opt_filename);
@@ -386,17 +386,25 @@
       var present = findDocumentOnFile(absolute_filename);
       if (present !== this)
         throw filename + ' is already bound to ' + present;
-      this.filename = absolute_filename;
+      document.filename = absolute_filename;
     }
 
     var deferred = Promise.defer();
-    this.load_(this.filename, function(error_code) {
+    document.load_(document.filename, function(error_code) {
       if (!error_code)
         deferred.resolve(error_code);
       else
         deferred.reject(error_code);
     });
-    return /**@type{!Promise.<number>}*/(deferred.promise);
+    return deferred.promise.then(function(error_code) {
+      document.parseFileProperties();
+      var new_mode = Mode.chooseMode(document);
+      if (new_mode.name != document.mode.name) {
+        Editor.messageBox(null, 'Switch to ' + new_mode.name,
+                          MessageBox.ICONINFORMATION);
+        document.mode = new_mode;
+      }
+    });
   };
 
   /**
@@ -406,6 +414,25 @@
     // TODO: We should use |document.notForSave|.
     return this.modified && !this.name.startsWith('*') &&
            FilePath.isValidFilename(this.filename);
+  };
+
+  /**
+   * This function handles Emacs "File Variables" in the first line.
+   * TODO(yosi) Support "Local Variables: ... End:".
+   */
+  Document.prototype.parseFileProperties = function() {
+    var document = this;
+    var first_line = new Range(document);
+    first_line.endOf(Unit.LINE, Alter.EXTEND);
+    var file_vars_matches = /-\*-\s+(.+?)\s+-\*-/.exec(first_line.text);
+    if (!file_vars_matches)
+      return;
+    file_vars_matches[1].split(';').forEach(function(var_def) {
+      var matches = /^\s*([^:\s]+)\s*:\s*(.+?)\s*$/.exec(var_def);
+      if (!matches)
+        return;
+      document.properties.set(matches[1], matches[2]);
+    });
   };
 
   /**

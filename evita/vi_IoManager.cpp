@@ -11,8 +11,14 @@
 //
 #include "evita/vi_IoManager.h"
 
+#pragma warning(push)
+#pragma warning(disable: 4365)
+#include "base/bind.h"
+#include "base/callback.h"
+#pragma warning(pop)
 #include "base/strings/string16.h"
 #include "evita/dom/buffer.h"
+#include "evita/dom/view_delegate.h"
 #include "evita/dom/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/text/modes/mode.h"
@@ -34,23 +40,22 @@ namespace
 // FinishLoadParam
 struct FinishLoadParam
 {
+    dom::ViewDelegate::LoadFileCallback callback_;
+    base::string16 file_name_;
     NewlineMode     m_eNewline;
     FileTime        m_ftLastWrite;
     uint            m_nError;
     uint            m_nFileAttrs;
     Buffer*         m_pBuffer;
-    char16          m_wszFileName[MAX_PATH];
 
-    static void Run(LPARAM lParam)
-    {
-        reinterpret_cast<FinishLoadParam*>(lParam)->run();
-    } // Run
+    static void Run(LPARAM lParam) {
+      reinterpret_cast<FinishLoadParam*>(lParam)->run();
+    }
 
-    void run()
-    {
+    void run() {
         if (ERROR_HANDLE_EOF == m_nError)
         {
-            m_pBuffer->SetFile(m_wszFileName, m_ftLastWrite);
+            m_pBuffer->SetFile(file_name_.c_str(), m_ftLastWrite);
             if (NewlineMode_Detect == m_pBuffer->GetNewline())
             {
                 m_pBuffer->SetNewline(m_eNewline);
@@ -65,7 +70,7 @@ struct FinishLoadParam
             m_nError = 0;
         } // if
 
-        if (0 == m_nError)
+        if (!m_nError)
         {
             text::ModeFactory* pModeFactory =
                 text::ModeChooser::instance()->Choose(m_pBuffer);
@@ -85,6 +90,8 @@ struct FinishLoadParam
         } // if
 
         m_pBuffer->FinishIo(m_nError);
+        Application::instance()->view_event_handler()->RunCallback(
+            base::Bind(callback_, m_nError));
     } // run
 }; // FinishLoadParam
 
@@ -161,21 +168,22 @@ IoManager::IoManager() {
 //
 void
 IoManager::FinishLoad(
+    const dom::ViewDelegate::LoadFileCallback& callback,
     Buffer*             pBuffer,
-    const char16*       pwszFileName,
+    const base::string16& file_name,
     uint                nError,
     NewlineMode         eNewline,
     uint                nFileAttrs,
     const FILETIME*     pftLastWrite )
 {
     FinishLoadParam oParam;
+    oParam.callback_ = callback;
+    oParam.file_name_ = file_name;
     oParam.m_eNewline     = eNewline;
     oParam.m_ftLastWrite  = *pftLastWrite;
     oParam.m_nError       = nError;
     oParam.m_nFileAttrs   = nFileAttrs;
     oParam.m_pBuffer      = pBuffer;
-
-    ::lstrcpyW(oParam.m_wszFileName, pwszFileName);
 
     ::SendMessage(
         *Application::instance()->GetIoManager(),

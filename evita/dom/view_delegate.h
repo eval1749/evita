@@ -55,6 +55,9 @@ class ViewDelegate {
   public: typedef base::Callback<void(base::string16 filename)>
       GetFilenameForSaveCallback;
 
+  public: typedef base::Callback<void(int error_code)>
+      LoadFileCallback;
+
   public: typedef base::Callback<void(int response_code)>
       MessageBoxCallback;
 
@@ -86,8 +89,8 @@ class ViewDelegate {
       const std::vector<base::string16>& keys, int* states,
       base::WaitableEvent* event) = 0;
   public: virtual void LoadFile(Document* document,
-                                const base::string16& filename) = 0;
-
+                                const base::string16& filename,
+                                LoadFileCallback callback) = 0;
   public: virtual void MakeSelectionVisible(WindowId window_id) = 0;
   public: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,

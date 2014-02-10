@@ -24,6 +24,7 @@
 #include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/runner.h"
+#include "evita/v8_glue/script_callback.h"
 #include "evita/v8_glue/wrapper_info.h"
 #include "v8_strings.h"
 
@@ -303,9 +304,12 @@ bool Document::IsValidPosition(text::Posn position) const {
   return false;
 }
 
-void Document::Load(const base::string16& filename) {
-  // TODO(yosi) We should protect this document againt gc.
-  ScriptController::instance()->view_delegate()->LoadFile(this, filename);
+void Document::Load(const base::string16& filename,
+                    v8::Handle<v8::Function> callback) {
+  auto const runner = ScriptController::instance()->runner();
+  ScriptController::instance()->view_delegate()->LoadFile(this, filename,
+      v8_glue::ScriptCallback<ViewDelegate::LoadFileCallback>::New(
+          runner->GetWeakPtr(), callback));
 }
 
 Posn Document::Redo(Posn position) {

@@ -38,7 +38,8 @@ class MockViewImpl : public dom::ViewDelegate {
   public: void GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys, int* states,
       base::WaitableEvent* event) override;
-  MOCK_METHOD2(LoadFile, void(Document*, const base::string16&));
+  MOCK_METHOD3(LoadFile, void(Document*, const base::string16&,
+                              LoadFileCallback));
   MOCK_METHOD1(MakeSelectionVisible, void(WindowId));
   public: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,

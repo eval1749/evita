@@ -26,6 +26,7 @@ Document.list;
 
 /**
  * @param {string} filename
+ * @return {!Document}
  */
 Document.load = function(filename) {};
 
@@ -119,13 +120,15 @@ Document.prototype.listWindows = function() {};
 
 /**
  * @param {string} filename
- */
+* @return {!Promise.<number>}
+*/
 Document.prototype.load = function(filename) {};
 
 /**
  * @param {string} filename
+ * @param {function(number)} callback
  */
-Document.prototype.load_ = function(filename) {};
+Document.prototype.load_ = function(filename, callback) {};
 
 /**
  * @return {boolean}.

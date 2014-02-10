@@ -66,9 +66,9 @@ TEST_F(DocumentTest, Document_list) {
 
 TEST_F(DocumentTest, Document_load) {
   EXPECT_CALL(*mock_view_impl(),
-              LoadFile(_, Eq(dom::FilePath::FullPath(L"foo"))));
+              LoadFile(_, Eq(dom::FilePath::FullPath(L"foo")), _));
   EXPECT_CALL(*mock_view_impl(),
-              LoadFile(_, Eq(dom::FilePath::FullPath(L"bar"))));
+              LoadFile(_, Eq(dom::FilePath::FullPath(L"bar")), _));
   EXPECT_SCRIPT_VALID("var a = Document.load('foo');");
   auto const document = dom::Document::Find(L"foo");
   auto const absoulte_filename = dom::FilePath::FullPath(L"foo");
@@ -115,9 +115,10 @@ TEST_F(DocumentTest, length) {
 }
 
 TEST_F(DocumentTest, load_) {
-  EXPECT_CALL(*mock_view_impl(), LoadFile(_, Eq(L"foo")));
-  EXPECT_SCRIPT_VALID("var doc = new Document('foo'); doc.load_('foo')");
-  
+  EXPECT_CALL(*mock_view_impl(), LoadFile(_, Eq(L"foo"), _));
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "doc.load_('foo', function(error_code){})");
 }
 
 TEST_F(DocumentTest, mode) {

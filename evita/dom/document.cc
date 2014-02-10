@@ -112,18 +112,18 @@ class DocumentList : public common::Singleton<DocumentList> {
 
 //////////////////////////////////////////////////////////////////////
 //
-// DocumentWrapperInfo
+// DocumentClass
 //
-class DocumentWrapperInfo : public v8_glue::WrapperInfo {
-  public: DocumentWrapperInfo(const char* name)
+class DocumentClass : public v8_glue::WrapperInfo {
+  public: DocumentClass(const char* name)
       : v8_glue::WrapperInfo(name) {
   }
-  public: ~DocumentWrapperInfo() = default;
+  public: ~DocumentClass() = default;
 
   protected: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     auto templ = v8_glue::CreateConstructorTemplate(isolate,
-        &DocumentWrapperInfo::NewDocument);
+        &DocumentClass::NewDocument);
     return v8_glue::FunctionTemplateBuilder(isolate, templ)
         .SetMethod("find", &DocumentList::StaticFind)
         .SetMethod("getOrNew", &GetOrNew)
@@ -186,7 +186,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
         .SetMethod("undo", &Document::Undo);
   }
 
-  DISALLOW_COPY_AND_ASSIGN(DocumentWrapperInfo);
+  DISALLOW_COPY_AND_ASSIGN(DocumentClass);
 };
 }  // namespace
 
@@ -194,7 +194,7 @@ class DocumentWrapperInfo : public v8_glue::WrapperInfo {
 //
 // Document
 //
-DEFINE_SCRIPTABLE_OBJECT(Document, DocumentWrapperInfo)
+DEFINE_SCRIPTABLE_OBJECT(Document, DocumentClass)
 
 Document::Document(const base::string16& name, Mode* mode)
     : buffer_(new Buffer(DocumentList::instance()->MakeUniqueName(name),

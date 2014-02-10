@@ -226,6 +226,7 @@ void EventHandler::QueryClose(WindowId window_id) {
 }
 
 void EventHandler::RunCallback(base::Closure callback) {
+  DOM_AUTO_LOCK_SCOPE();
   callback.Run();
 }
 

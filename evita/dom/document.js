@@ -404,6 +404,7 @@
                           MessageBox.ICONINFORMATION);
         document.mode = new_mode;
       }
+      document.doColor_(Math.min(document.length, 1024 * 8));
     });
   };
 

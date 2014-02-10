@@ -21,9 +21,6 @@
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/view_event_handler.h"
 #include "evita/editor/application.h"
-#include "evita/text/modes/mode.h"
-#include "evita/text/modes/mode_chooser.h"
-#include "evita/text/modes/mode_factory.h"
 #include "evita/views/window.h"
 #include "evita/views/window_set.h"
 #include "evita/vi_EditPane.h"
@@ -72,22 +69,11 @@ struct FinishLoadParam
 
         if (!m_nError)
         {
-            text::ModeFactory* pModeFactory =
-                text::ModeChooser::instance()->Choose(m_pBuffer);
-
-            text::Mode* pMode = m_pBuffer->GetMode();
-            if (::lstrcmp(pModeFactory->GetName(), pMode->GetName()))
-            {
-                m_pBuffer->SetMode(pModeFactory->Create());
-            }
-
             for (auto window : views::Window::all_windows()) {
                 if (auto text_window = window->as<TextEditWindow>())
                     text_window->GetSelection()->RestoreForReload();
             }
-
-            m_pBuffer->GetMode()->DoColor(m_pBuffer->GetEnd());
-        } // if
+        }
 
         m_pBuffer->FinishIo(m_nError);
         Application::instance()->view_event_handler()->RunCallback(

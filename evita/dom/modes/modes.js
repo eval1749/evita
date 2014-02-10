@@ -18,7 +18,7 @@ global.XmlMode.keymap = new Map();
 Mode.defaultMode = new PlainTextMode();
 
 /** @type {!Map.<string, Mode.Description>} */
-Mode.modeMap = (function() {
+Mode.extenstionMap = (function() {
   var map = /** @type{!Map.<string, Mode.Description>} */(new Map());
   map.set('asdl', {mode: XmlMode, name: 'ASDL Document'});
   map.set('cc', {mode: CxxMode, name: 'C++ Source'});
@@ -61,6 +61,40 @@ Mode.modeMap = (function() {
   return map;
 })();
 
+/** @expose @type {!Map.<string, !Function>} */
+Mode.nameMap = (function() {
+  var map = new Map();
+  map.set('config', ConfigMode);
+  map.set('c++', CxxMode);
+  map.set('haskell', HaskellMode);
+  map.set('java', JavaMode);
+  map.set('javascript', JavaScriptMode);
+  map.set('lisp', LispMode);
+  map.set('mason', MasonMode);
+  map.set('perl', PerlMode);
+  map.set('plain', PlainTextMode);
+  map.set('python', PythonMode);
+  map.set('xml', XmlMode);
+  return map;
+})();
+
+/**
+ * @param {!Document} document
+ * @return {!Mode}
+ */
+Mode.chooseMode = function(document) {
+  var mode_name = document.properties.get('mode') ||
+                  document.properties.get('Mode');
+  if (mode_name !== undefined) {
+    var mode_ctor = Mode.nameMap.get(mode_name.toLowerCase());
+    if (mode_ctor)
+      return new mode_ctor();
+  }
+  if (document.filename != '')
+    return Mode.chooseModeByFileName(document.filename);
+  return Mode.chooseModeByFileName(document.name);
+};
+
 /**
  * @param {string} filename
  * @return {!Mode}
@@ -69,7 +103,7 @@ Mode.chooseModeByFileName = function(filename) {
   var matches = /[.](.+)$/.exec(FilePath.basename(filename));
   if (!matches)
    return new Mode.defaultMode.constructor();
-  var description = Mode.modeMap.get(matches[1]);
+  var description = Mode.extenstionMap.get(matches[1]);
   if (!description)
     return new Mode.defaultMode.constructor();
   return new description.mode();

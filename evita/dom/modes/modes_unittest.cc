@@ -13,6 +13,17 @@ class ModesTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(ModesTest);
 };
 
+TEST_F(ModesTest, chooseMode) {
+  EXPECT_SCRIPT_VALID(
+    "function testIt(mode_name) {"
+    "  var doc = new Document('foo');"
+    "  doc.properties.set('mode', mode_name);"
+    "  return Mode.chooseMode(doc).name;"
+    "}");
+  EXPECT_SCRIPT_EQ("C++", "testIt('C++')");
+  EXPECT_SCRIPT_EQ("Lisp", "testIt('Lisp')");
+}
+
 TEST_F(ModesTest, chooseModeByFileName) {
   EXPECT_SCRIPT_VALID(
       "function testIt(filename) {"

@@ -64,17 +64,13 @@ TEST_F(DocumentTest, Document_list) {
   EXPECT_SCRIPT_EQ("foo", "samples[2].name");
 }
 
-TEST_F(DocumentTest, Document_load) {
-  EXPECT_CALL(*mock_view_impl(),
-              LoadFile(_, Eq(dom::FilePath::FullPath(L"foo")), _));
-  EXPECT_CALL(*mock_view_impl(),
-              LoadFile(_, Eq(dom::FilePath::FullPath(L"bar")), _));
-  EXPECT_SCRIPT_VALID("var a = Document.load('foo');");
+TEST_F(DocumentTest, Document_open) {
+  EXPECT_SCRIPT_VALID("var a = Document.open('foo');");
   auto const document = dom::Document::Find(L"foo");
   auto const absoulte_filename = dom::FilePath::FullPath(L"foo");
   document->buffer()->SetFile(absoulte_filename, FileTime());
-  EXPECT_SCRIPT_VALID("var b = Document.load('foo');"
-            "var c = Document.load('bar');");
+  EXPECT_SCRIPT_VALID("var b = Document.open('foo');"
+                      "var c = Document.open('bar');");
   EXPECT_SCRIPT_EQ(base::UTF16ToUTF8(absoulte_filename), "a.filename");
   EXPECT_SCRIPT_TRUE("a === b");
   EXPECT_SCRIPT_TRUE("a !== c");

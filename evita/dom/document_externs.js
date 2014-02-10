@@ -28,7 +28,7 @@ Document.list;
  * @param {string} filename
  * @return {!Document}
  */
-Document.load = function(filename) {};
+Document.open = function(filename) {};
 
 /**
  * @param {!Document} document
@@ -119,10 +119,10 @@ Document.prototype.forceClose = function() {};
 Document.prototype.listWindows = function() {};
 
 /**
- * @param {string} filename
+ * @param {string=} opt_filename
 * @return {!Promise.<number>}
 */
-Document.prototype.load = function(filename) {};
+Document.prototype.load = function(opt_filename) {};
 
 /**
  * @param {string} filename

@@ -4,6 +4,18 @@
 'use strict';
 
 (function() {
+  /**
+   * @param {string} absolute_filename
+   * @return {Document}
+   */
+  function findDocumentOnFile(absolute_filename) {
+    var canonical_filename = absolute_filename.toLocaleLowerCase();
+    return /** @type{Document} */ (Document.list.find(
+        function(document) {
+          return document.filename.toLocaleLowerCase() == canonical_filename;
+        }));
+  }
+
   /** @const @type {Map.<string, string>} */
   var WORD_CLASS_MAP = (function() {
     /** @param {string} name */
@@ -346,30 +358,39 @@
   };
 
   /**
-   * @param {string} filename to load from.
-   * @return {!Document} A Document object contains contents of file.
+   * @param {string} filename A backing store file of document.
+   * @return {!Document} A Document bound to filename
    */
-  Document.load = function(filename) {
+  Document.open = function(filename) {
     var absolute_filename = FilePath.fullPath(filename);
-    var canonical_filename = absolute_filename.toLocaleLowerCase();
-    var present = /** @type{Document} */ (Document.list.find(
-        function(document) {
-          return document.filename.toLocaleLowerCase() == canonical_filename;
-        }));
+    var present = findDocumentOnFile(absolute_filename);
     if (present)
       return present;
     var document = new Document(FilePath.basename(filename));
-    document.load(absolute_filename);
+    document.filename = absolute_filename;
     return document;
   };
 
   /**
-   * @param {string} filename
+   * @param {string=} opt_filename
    * @return {!Promise.<number>}
    */
-  Document.prototype.load = function(filename) {
+  Document.prototype.load = function(opt_filename) {
+
+    if (!arguments.length) {
+      if (this.filename == '')
+        throw 'Document isn\'t bound to file.';
+    } else {
+      var filename = /** @type{string} */(opt_filename);
+      var absolute_filename = FilePath.fullPath(filename);
+      var present = findDocumentOnFile(absolute_filename);
+      if (present !== this)
+        throw filename + ' is already bound to ' + present;
+      this.filename = absolute_filename;
+    }
+
     var deferred = Promise.defer();
-    this.load_(filename, function(error_code) {
+    this.load_(this.filename, function(error_code) {
       if (!error_code)
         deferred.resolve(error_code);
       else

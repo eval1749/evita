@@ -6,6 +6,22 @@
 
 (function() {
   /**
+   * @param {string} absolute_filename
+   * @return {!Document}
+   */
+  function openFile(absolute_filename) {
+    var document = Document.open(absolute_filename);
+    if (!document.length) {
+      document.load(absolute_filename).catch(function(error_code) {
+        Editor.messageBox(null, 'Failed to load ' + absolute_filename + '\n' +
+            'error=' + error_code,
+            MessageBox.ICONERROR);
+      });
+    }
+    return document;
+  }
+
+  /**
    * Open new document in new window in current editor window.
    * @this {!Window}
    */
@@ -34,7 +50,7 @@
         .then(function(filename) {
           // TODO(yosi) When editorWindow has a window for filename, we should
           // activate it.
-          windows.newTextWindow(editorWindow, Document.load(filename));
+          windows.newTextWindow(editorWindow, openFile(filename));
         });
   });
 
@@ -127,7 +143,7 @@
   Editor.bindKey(Window, 'Ctrl+Shift+O', function() {
     Editor.getFilenameForLoad(this, this.selection.document.filename)
         .then(function(filename) {
-          windows.newEditorWindow(Document.load(filename));
+          windows.newEditorWindow(openFile(filename));
         });
   });
 

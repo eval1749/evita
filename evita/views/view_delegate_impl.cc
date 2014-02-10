@@ -248,9 +248,8 @@ void ViewDelegateImpl::GetTableRowStates(WindowId window_id,
 }
 
 void ViewDelegateImpl::LoadFile(dom::Document* document,
-                                const base::string16& filename,
-                                LoadFileCallback callback) {
-  document->buffer()->Load(filename.c_str(), callback);
+                                const base::string16& filename) {
+  document->buffer()->Load(filename.c_str());
 }
 
 void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {

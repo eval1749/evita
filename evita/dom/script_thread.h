@@ -79,8 +79,7 @@ class ScriptThread final : public ViewDelegate,
       const std::vector<base::string16>& keys, int* states,
       base::WaitableEvent* event) override;
   private: virtual void LoadFile(Document* document,
-                                 const base::string16& filename,
-                                 LoadFileCallback callback) override;
+                                 const base::string16& filename) override;
   private: virtual void MakeSelectionVisible(WindowId window_id) override;
   private: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,

@@ -11,7 +11,6 @@
 #if !defined(INCLUDE_evita_dom_buffer_h)
 #define INCLUDE_evita_dom_buffer_h
 
-#include "evita/dom/view_delegate.h"
 #include "evita/text/buffer.h"
 
 namespace dom {
@@ -28,9 +27,7 @@ class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
   public: void FinishIo(uint);
 
   // [L]
-  public: bool Load(const base::string16& filename,
-                    const dom::ViewDelegate::LoadFileCallback& callback);
-  public: bool Load(const base::string16& filename);
+  public: bool Load(const char16*);
 
   // [O]
   public: bool OnIdle(uint);

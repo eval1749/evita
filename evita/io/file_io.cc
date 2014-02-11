@@ -1,18 +1,11 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - Editor - Buffer File I/O
-// listener/winapp/ed_file.cpp
-//
-// Copyright (C) 1996-2011 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_FileIo.cpp#5 $
-//
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #define DEBUG_IO 0
 #define DEBUG_LOAD 0
 #define DEBUG_SAVE 0
-#include "evita/vi_FileIo.h"
+#include "evita/io/file_io.h"
 
 #include "base/bind.h"
 #include "base/callback.h"
@@ -21,10 +14,10 @@
 #include "evita/ed_undo.h"
 
 #include "evita/dom/buffer.h"
-#include "evita/vi_IoManager.h"
+#include "evita/io/io_manager.h"
 
-#include "../charset/CharsetDecoder.h"
-#include "../charset/CharsetDetector.h"
+#include "../../charset/CharsetDecoder.h"
+#include "../../charset/CharsetDetector.h"
 #include <algorithm>
 
 using namespace Charset;

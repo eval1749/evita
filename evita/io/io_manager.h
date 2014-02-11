@@ -1,15 +1,9 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - edit buffer
-// listener/winapp/ed_gateway.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_IoManager.h#1 $
-//
-#if !defined(INCLUDE_visual_IoManager_h)
-#define INCLUDE_visual_IoManager_h
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#if !defined(INCLUDE_evita_io_io_manager_h)
+#define INCLUDE_evita_io_io_manager_h
 
 #include "common/win/native_window.h"
 #include "evita/dom/view_delegate.h"
@@ -83,4 +77,4 @@ const uint k_cbFileMapping = 1024 * 64;
 extern HANDLE g_hEvent;
 extern bool   g_fMultiple;
 
-#endif //!defined(INCLUDE_visual_IoManager_h)
+#endif //!defined(INCLUDE_evita_io_io_manager_h)

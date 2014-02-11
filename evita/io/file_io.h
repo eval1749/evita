@@ -1,15 +1,9 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - edit buffer
-// listener/winapp/ed_buffer.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_FileIo.h#1 $
-//
-#if !defined(INCLUDE_visual_file_h)
-#define INCLUDE_visual_file_h
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#if !defined(INCLUDE_evita_io_file_io_h)
+#define INCLUDE_evita_io_file_io_h
 
 #include "base/strings/string16.h"
 
@@ -105,4 +99,4 @@ class FileIoRequest : public FileRequest
     } // FileIoRequest
 }; // FileIoRequest
 
-#endif //!defined(INCLUDE_visual_file_h)
+#endif //!defined(INCLUDE_evita_io_file_io_h)

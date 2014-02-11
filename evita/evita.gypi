@@ -385,6 +385,7 @@
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
+        'io',
         'views',
       ],
       'sources': [
@@ -401,10 +402,8 @@
         'vi_DialogBox.cpp',
         'vi_EditPane.cpp',
         'vi_FileDialogBox.cpp',
-        'vi_FileIo.cpp',
         'vi_FindDialogBox.cpp',
         'vi_Frame.cpp',
-        'vi_IoManager.cpp',
         'vi_Page.cpp',
         'vi_Pane.cpp',
         'vi_Selection.cpp',
@@ -412,6 +411,22 @@
         'vi_TextEditWindow.cpp',
       ], # sources
     }, # editor
+    {
+      'target_name': 'io',
+      'type': 'static_library',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        'dom',
+        'text',
+        'views',
+      ],
+      'sources': [
+        'precomp.cpp',
+
+        'io/file_io.cc',
+        'io/io_manager.cc',
+      ], # sources
+    }, # io
     {
       'target_name': 'ui',
       'type': 'static_library',

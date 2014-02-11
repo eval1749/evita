@@ -20,7 +20,7 @@
 #include "evita/dom/buffer.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_FileDialogBox.h"
-#include "evita/vi_IoManager.h"
+#include "evita/io/io_manager.h"
 #include "evita/vi_TextEditWindow.h"
 #include "evita/views/view_delegate_impl.h"
 #include "evita/views/window_set.h"

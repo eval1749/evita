@@ -1,15 +1,8 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - editor - IoManager
-// listener/winapp/IoManager.cpp
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_IoManager.cpp#3 $
-//
-#include "evita/vi_IoManager.h"
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "evita/io/io_manager.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4365)

@@ -22,15 +22,6 @@ class IoManager : public common::win::NativeWindow {
   public: IoManager();
   public: virtual ~IoManager();
 
-  public: static void FinishLoad(
-      const dom::ViewDelegate::LoadFileCallback& callback,
-      Buffer* buffer,
-      const base::string16& file_name,
-      uint32_t error_code,
-      NewlineMode newline_mode,
-      uint32_t file_attributes,
-      const FILETIME* last_write_time);
-
   public: static void FinishSave(
       Buffer* buffer,
       const char16* file_name,
@@ -38,12 +29,6 @@ class IoManager : public common::win::NativeWindow {
       NewlineMode newline_mode,
       uint file_attributes,
       const FILETIME* last_write_time);
-
-  public: static void InsertString(
-      Buffer* buffer,
-      Posn position,
-      const char16* text,
-      Count count);
 
   public: void Realize();
 

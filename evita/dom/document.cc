@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "base/logging.h"
+#include "base/memory/ref_counted.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/string_number_conversions.h"
 #include "common/memory/singleton.h"
@@ -15,6 +16,7 @@
 #include "evita/dom/buffer.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/modes/mode.h"
+#include "evita/dom/public/api_callback.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/text/modes/mode.h"
@@ -187,6 +189,36 @@ class DocumentClass : public v8_glue::WrapperInfo {
 
   DISALLOW_COPY_AND_ASSIGN(DocumentClass);
 };
+
+class LoadFileCallback : public base::RefCounted<LoadFileCallback> {
+  private: gc::Member<Document> document_;
+  private: v8_glue::ScopedPersistent<v8::Function> function_;
+  private: base::WeakPtr<v8_glue::Runner> runner_;
+
+  public: LoadFileCallback(v8_glue::Runner* runner,
+                       Document* document, v8::Handle<v8::Function> function)
+    : document_(document), function_(runner->isolate(), function),
+      runner_(runner->GetWeakPtr()) {
+  }
+
+  public: void Run(const domapi::LoadFileCallbackData& data) {
+    auto const buffer = document_->buffer();
+    buffer->SetCodePage(static_cast<uint32_t>(data.code_page));
+    buffer->SetNewline(data.newline_mode);
+    buffer->SetFile(buffer->GetFileName(), data.last_write_time);
+    buffer->FinishIo(static_cast<uint32_t>(data.error_code));
+    if (!runner_)
+      return;
+    v8_glue::Runner::Scope runner_scope(runner_.get());
+    auto const isolate = runner_->isolate();
+    auto const function = function_.NewLocal(isolate);
+    runner_->Call(function, document_->GetWrapper(isolate),
+                  v8::Integer::New(isolate, data.error_code));
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(LoadFileCallback);
+};
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -306,9 +338,10 @@ bool Document::IsValidPosition(text::Posn position) const {
 void Document::Load(const base::string16& filename,
                     v8::Handle<v8::Function> callback) {
   auto const runner = ScriptController::instance()->runner();
+  auto const load_callback = make_scoped_refptr(
+      new LoadFileCallback(runner, this, callback));
   ScriptController::instance()->view_delegate()->LoadFile(this, filename,
-      v8_glue::ScriptCallback<ViewDelegate::LoadFileCallback>::New(
-          runner->GetWeakPtr(), callback));
+      base::Bind(&LoadFileCallback::Run, load_callback));
 }
 
 Posn Document::Redo(Posn position) {

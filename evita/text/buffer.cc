@@ -539,7 +539,7 @@ Count Buffer::Insert(Posn lPosn, const char16* pwch, Count n)
 void Buffer::InsertBefore(Posn position, const base::string16& text) {
   DCHECK(IsValidPosn(position));
   DCHECK(!IsReadOnly());
-  DCHECK(!IsNotReady());
+  DCHECK_NE(State_Save, m_eState);
 
   auto const text_length = text.length();
   insert(position, text.data(), static_cast<Count>(text_length));

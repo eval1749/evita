@@ -16,6 +16,10 @@ namespace base {
 class WaitableEvent;
 }
 
+namespace domapi {
+struct LoadFileCallbackData;
+}
+
 namespace dom {
 
 class Buffer;
@@ -55,7 +59,7 @@ class ViewDelegate {
   public: typedef base::Callback<void(base::string16 filename)>
       GetFilenameForSaveCallback;
 
-  public: typedef base::Callback<void(int error_code)>
+  public: typedef base::Callback<void(const domapi::LoadFileCallbackData&)>
       LoadFileCallback;
 
   public: typedef base::Callback<void(int response_code)>

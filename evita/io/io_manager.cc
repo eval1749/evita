@@ -14,57 +14,11 @@
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/view_event_handler.h"
 #include "evita/editor/application.h"
-#include "evita/views/window.h"
-#include "evita/views/window_set.h"
-#include "evita/vi_EditPane.h"
-#include "evita/vi_Frame.h"
-#include "evita/vi_Selection.h"
-#include "evita/vi_TextEditWindow.h"
 
 HANDLE g_hEvent;
 bool g_fMultiple;
 
 namespace {
-
-// FinishLoadParam
-struct FinishLoadParam {
-  dom::ViewDelegate::LoadFileCallback callback_;
-  base::string16 file_name_;
-  NewlineMode m_eNewline;
-  FileTime m_ftLastWrite;
-  uint m_nError;
-  uint m_nFileAttrs;
-  Buffer* m_pBuffer;
-
-  static void Run(LPARAM lParam) {
-    reinterpret_cast<FinishLoadParam*>(lParam)->run();
-  }
-
-  void run() {
-    if (ERROR_HANDLE_EOF == m_nError) {
-      m_pBuffer->SetFile(file_name_.c_str(), m_ftLastWrite);
-      if (NewlineMode_Detect == m_pBuffer->GetNewline())
-        m_pBuffer->SetNewline(m_eNewline);
-
-      if (m_nFileAttrs & FILE_ATTRIBUTE_READONLY)
-        m_pBuffer->SetReadOnly(true);
-
-      // Make EOF not error
-      m_nError = 0;
-    }
-
-    if (!m_nError) {
-      for (auto window : views::Window::all_windows()) {
-          if (auto text_window = window->as<TextEditWindow>())
-              text_window->GetSelection()->RestoreForReload();
-      }
-    }
-
-    m_pBuffer->FinishIo(m_nError);
-    Application::instance()->view_event_handler()->RunCallback(
-        base::Bind(callback_, m_nError));
-  }
-};
 
 // FinishSaveParam
 struct FinishSaveParam {
@@ -88,33 +42,12 @@ struct FinishSaveParam {
 
 //////////////////////////////////////////////////////////////////////
 //
-// InsertStringParam
-//
-struct InsertStringParam {
-  Count m_cwch;
-  Posn m_lPosn;
-  text::Buffer* m_pBuffer;
-  const char16* m_pwch;
-
-  static void Run(LPARAM lParam) {
-    reinterpret_cast<InsertStringParam*>(lParam)->run();
-  }
-
-  void run() {
-    m_pBuffer->InternalInsert(m_lPosn, m_pwch, m_cwch);
-  }
-};
-
-//////////////////////////////////////////////////////////////////////
-//
 // IoManager
 //
 enum Message {
   Message_Start = WM_USER,
 
-  Message_FinishLoad,
   Message_FinishSave,
-  Message_InsertString,
 };
 
 }
@@ -123,30 +56,6 @@ IoManager::IoManager() {
 }
 
 IoManager::~IoManager() {
-}
-
-void IoManager::FinishLoad(
-    const dom::ViewDelegate::LoadFileCallback& callback,
-    Buffer* pBuffer,
-    const base::string16& file_name,
-    uint nError,
-    NewlineMode eNewline,
-    uint nFileAttrs,
-    const FILETIME* pftLastWrite) {
-  FinishLoadParam oParam;
-  oParam.callback_ = callback;
-  oParam.file_name_ = file_name;
-  oParam.m_eNewline = eNewline;
-  oParam.m_ftLastWrite = *pftLastWrite;
-  oParam.m_nError = nError;
-  oParam.m_nFileAttrs = nFileAttrs;
-  oParam.m_pBuffer = pBuffer;
-
-  ::SendMessage(
-      *Application::instance()->GetIoManager(),
-      Message_FinishLoad,
-      0,
-      reinterpret_cast<LPARAM>(&oParam));
 }
 
 void IoManager::FinishSave(
@@ -168,21 +77,6 @@ void IoManager::FinishSave(
   ::SendMessage(
       *Application::instance()->GetIoManager(),
       Message_FinishSave,
-      0,
-      reinterpret_cast<LPARAM>(&oParam));
-}
-
-void IoManager::InsertString(Buffer* pBuffer, Posn lPosn, const char16* pwch,
-                             Count cwch) {
-  InsertStringParam oParam;
-  oParam.m_cwch = cwch;
-  oParam.m_lPosn = lPosn;
-  oParam.m_pBuffer = pBuffer;
-  oParam.m_pwch = pwch;
-
-  ::SendMessage(
-      *Application::instance()->GetIoManager(),
-      Message_InsertString,
       0,
       reinterpret_cast<LPARAM>(&oParam));
 }
@@ -224,22 +118,15 @@ LRESULT IoManager::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
       return true;
     }
 
-    case Message_FinishLoad:
-      FinishLoadParam::Run(lParam);
-      return 0;
-
     case Message_FinishSave:
       FinishSaveParam::Run(lParam);
-      return 0;
-
-    case Message_InsertString:
-      InsertStringParam::Run(lParam);
       return 0;
   }
   return NativeWindow::WindowProc(uMsg, wParam, lParam);
 }
 
 void IoManager::Realize() {
-  CreateWindowEx(0, 0, L"IoManager", HWND_MESSAGE, Point(), Size());
+  CreateWindowEx(0, 0, L"IoManager", HWND_MESSAGE, common::win::Point(),
+                 common::win::Size());
   DCHECK(*this);
 }

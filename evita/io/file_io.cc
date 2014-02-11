@@ -13,6 +13,9 @@
 #include "base/callback.h"
 #include "base/logging.h"
 #include "evita/dom/buffer.h"
+#include "evita/dom/public/api_callback.h"
+#include "evita/dom/view_event_handler.h"
+#include "evita/editor/application.h"
 #include "evita/ed_undo.h"
 #include "evita/io/io_manager.h"
 #include "../../charset/CharsetDecoder.h"
@@ -218,8 +221,8 @@ class LoadRequest : public FileIoRequest, public CharsetDecoder::Callback {
   private: CharsetDetector m_CharsetDetector;
   private: NewlineDetector m_NewlineDetector;
 
-  private: uint m_nCodePage;
-  private: uint m_nDefaultCodePage;
+  private: int m_nCodePage;
+  private: int m_nDefaultCodePage;
   private: Buffer* m_pBuffer;
 
   private: int m_cwchPending;
@@ -230,7 +233,7 @@ class LoadRequest : public FileIoRequest, public CharsetDecoder::Callback {
       const dom::ViewDelegate::LoadFileCallback& callback,
       Buffer* const pBuffer,
       const base::string16& file_name,
-      uint const nCodePage,
+      int const nCodePage,
       NewlineMode const eNewline)
       : FileIoRequest(file_name),
         callback_(callback),
@@ -257,6 +260,9 @@ class LoadRequest : public FileIoRequest, public CharsetDecoder::Callback {
   // [F]
   private: virtual void finishIo(uint) override;
   private: void flushSendBuffer();
+
+  // [G]
+  private: int GetCodePage() const;
 
   // [I]
   private: void insertBytes(const char*, const char*);
@@ -336,7 +342,7 @@ bool Buffer::Load(const base::string16& file_name,
       callback,
       this,
       file_name,
-      m_nCodePage,
+      static_cast<int>(m_nCodePage),
       NewlineMode_Detect);
 
   // We'll set read-only flag from file attributes.
@@ -361,7 +367,7 @@ bool Buffer::Load(const base::string16& file_name,
 }
 
 namespace {
-void DummyCallback(int) {
+void DummyCallback(const domapi::LoadFileCallbackData&) {
 }
 }
 
@@ -617,7 +623,7 @@ void LoadRequest::finishIo(uint const nError) {
     eNewline = m_NewlineDetector.Detect();
     if (!m_CharsetDecoder) {
       if (auto const nCodePage = m_CharsetDetector.Finish()) {
-        m_nCodePage = static_cast<uint>(nCodePage);
+        m_nCodePage = nCodePage;
         m_CharsetDecoder = CharsetDecoder::Create(
             static_cast<CodePage>(nCodePage), this);
       }
@@ -642,34 +648,35 @@ void LoadRequest::finishIo(uint const nError) {
 
   flushSendBuffer();
 
-  m_pBuffer->SetCodePage(
-      m_CharsetDetector.IsBinary()
-          ? 0
-          : m_nCodePage == 0
-          ? m_nDefaultCodePage
-          : m_nCodePage);
+  domapi::LoadFileCallbackData data;
+  data.buffer = m_pBuffer;
+  data.code_page = GetCodePage();
+  data.error_code = nError == ERROR_HANDLE_EOF ? 0 : static_cast<int>(nError);
+  data.last_write_time = m_ftLastWrite;
+  data.newline_mode = eNewline;
+  data.readonly = m_nFileAttrs & FILE_ATTRIBUTE_READONLY;
 
-  IoManager::FinishLoad(
-      callback_,
-      m_pBuffer,
-      file_name_,
-      nError,
-      eNewline,
-      m_nFileAttrs,
-      &m_ftLastWrite);
+  Application::instance()->view_event_handler()->RunCallback(
+      base::Bind(callback_, data));
 
   delete this;
 }
 
 void LoadRequest::flushSendBuffer() {
-  if (m_cwchPending > 0) {
-    IoManager::InsertString(
+  if (!m_cwchPending)
+    return;
+  Application::instance()->view_event_handler()->AppendTextToBuffer(
       m_pBuffer,
-      m_pBuffer->GetEnd(),
-      m_rgwchPending,
-      m_cwchPending);
-    m_cwchPending = 0;
-  }
+      base::string16(m_rgwchPending, static_cast<size_t>(m_cwchPending)));
+  m_cwchPending = 0;
+}
+
+int LoadRequest::GetCodePage() const {
+  if (m_CharsetDetector.IsBinary())
+    return 0;
+  if (!m_nCodePage)
+    return m_nDefaultCodePage;
+  return m_nCodePage;
 }
 
 void LoadRequest::insertBytes(
@@ -762,7 +769,7 @@ void LoadRequest::processRead(const char* start, const char* end) {
 
   if (!m_CharsetDecoder) {
     if (auto const nCodePage = m_CharsetDetector.Detect(runner, end)) {
-      m_nCodePage = static_cast<uint>(nCodePage);
+      m_nCodePage = nCodePage;
       m_CharsetDecoder = CharsetDecoder::Create(
           static_cast<CodePage>(nCodePage), this);
 

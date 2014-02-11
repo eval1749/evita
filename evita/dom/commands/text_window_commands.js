@@ -292,12 +292,17 @@
     var document = this.document;
     if (!document.needSave())
       return;
+    var selection = this.selection;
+    var offset = selection.range.start;
     Editor.messageBox(this,
         Editor.localizeText(Strings.IDS_ASK_RELOAD, {name: document.name}),
         MessageBox.ICONQUESTION | MessageBox.YESNO)
     .then(function(response_code) {
-      if (response_code == DialogItemId.YES)
-        document.reload_();
+      if (response_code != DialogItemId.YES)
+        return;
+      document.load().then(function() {
+        selection.range.collapseTo(offset);
+      });
     });
   }, 'reload document');
 

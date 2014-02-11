@@ -59,7 +59,7 @@ Map.prototype.has = function(key) {};
 
 /**
  * @template T
- * @return {Array.<T>}
+ * @return {!Array.<T>}
  */
 Map.prototype.keys = function() {};
 
@@ -75,7 +75,7 @@ Map.prototype.set = function(key, value) {};
 Map.prototype.size;
 
 /**
- * @return {Array}
+ * @return {!Array}
  */
 Map.prototype.values = function() {};
 
@@ -87,13 +87,13 @@ Map.prototype.values = function() {};
 /**
  * @constructor
  * @template T
- * @param {function(T=)} onFulfilled.
- * @param {function(*=)} onRejected.
+ * @param {!function(T=)} onFulfilled.
+ * @param {!function(*=)} onRejected.
  */
 var Promise = function(onFulfilled, onRejected) {};
 
 /**
- * @param {!Iterable.<Promise>} iterable.
+ * @param {!Iterable.<!Promise>} iterable.
  * @return {!Promise}
  */
 Promise.all = function(iterable){};
@@ -106,12 +106,12 @@ Promise.cast = function(value) {};
 
 /**
  * @param {*} value.
- * @return {{promise: Promise, resolve: function(*), reject: function(*)}}
+ * @return {{promise: !Promise, resolve: !function(*), reject: !function(*)}}
  */
 Promise.defer = function() {};
 
 /**
- * @param {!Iterable.<Promise>} iterable.
+ * @param {!Iterable.<!Promise>} iterable.
  * @return {!Promise}
  */
 Promise.race = function(iterable){};
@@ -130,30 +130,30 @@ Promise.resolve = function(value){};
 
 /**
  * @template T
- * @param {function(T=)} onRejected
+ * @param {!function(T=)} onRejected
  * @return {!Promise}
  */
 Promise.prototype.catch= function(onRejected) {};
 
 /**
  * @template T
- * @param {function(T)} onFulfilled.
- * @param {function()=} onRejected
+ * @param {!function(T)} onFulfilled.
+ * @param {!function()=} onRejected
  * @return {!Promise.<T>}
  */
 Promise.prototype.chain = function(onRejected) {};
 
 /**
  * @template T
- * @param {function(T)} onFulfilled.
- * @param {function()=} opt_onRejected
+ * @param {!function(T)} onFulfilled.
+ * @param {!function()=} opt_onRejected
  * @return {!Promise.<T>}
  */
 Promise.prototype.then = function(onFulfilled, opt_onRejected) {};
 
 /**
  * @constructor
- * @param {Iterable=} opt_iterable
+ * @param {!Iterable=} opt_iterable
  */
 var Set = function(opt_iterable) {};
 
@@ -182,7 +182,7 @@ Set.prototype.has = function(key) {};
 
 /**
  * @template T
- * @return {Array.<T>}
+ * @return {!Array.<T>}
  */
 Set.prototype.keys = function() {};
 

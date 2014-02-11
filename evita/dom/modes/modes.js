@@ -78,6 +78,16 @@ Mode.nameMap = (function() {
   return map;
 })();
 
+/** @expose @type {!Map.<string, !Function>} */
+Mode.fileNameMap = (function() {
+  var map = new Map();
+  map.set('Makefile', ConfigMode);
+  map.set('autohandler', MasonMode);
+  map.set('dhandler', MasonMode);
+  map.set('makefile', ConfigMode);
+  return map;
+})();
+
 /**
  * @param {!Document} document
  * @return {!Mode}
@@ -101,8 +111,12 @@ Mode.chooseMode = function(document) {
  */
 Mode.chooseModeByFileName = function(filename) {
   var matches = /[.](.+)$/.exec(FilePath.basename(filename));
-  if (!matches)
-   return new Mode.defaultMode.constructor();
+  if (!matches) {
+    var mode_ctor = Mode.fileNameMap.get(FilePath.basename(filename));
+    if (mode_ctor)
+      return new mode_ctor();
+    return new Mode.defaultMode.constructor();
+  }
   var description = Mode.extenstionMap.get(matches[1]);
   if (!description)
     return new Mode.defaultMode.constructor();

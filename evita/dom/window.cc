@@ -242,6 +242,8 @@ void Window::ChangeParentWindow(Window* new_parent_window) {
 }
 
 void Window::Destroy() {
+  if (state_ == State::NotRealized)
+    return;
   if (state_ != State::Realized && state_ != State::Realizing) {
     ScriptController::instance()->ThrowError(
         "You can't destroy unrealized window.");

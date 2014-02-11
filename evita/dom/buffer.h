@@ -35,9 +35,6 @@ class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
   // [O]
   public: bool OnIdle(uint);
 
-  // [R]
-  public: bool Reload();
-
   // [S]
   public: bool Save(const char16*, uint, NewlineMode);
 

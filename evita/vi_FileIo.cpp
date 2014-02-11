@@ -341,10 +341,6 @@ bool Buffer::Load(const base::string16& file_name) {
   return Load(file_name, base::Bind(DummyCallback));
 }
 
-bool Buffer::Reload() {
-  return !GetFileName().empty() && Load(GetFileName());
-}
-
 bool Buffer::Save(
     const char16* const pwszFileIn,
     uint const nCodePage,

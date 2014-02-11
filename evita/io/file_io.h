@@ -5,98 +5,67 @@
 #if !defined(INCLUDE_evita_io_file_io_h)
 #define INCLUDE_evita_io_file_io_h
 
+#include "base/basictypes.h"
 #include "base/strings/string16.h"
 
 //////////////////////////////////////////////////////////////////////
 //
 // IoRequest
 //
-class IoRequest
-{
-    protected: HANDLE   m_hFile;
-    protected: base::string16 file_name_;
+class IoRequest {
+  protected: HANDLE m_hFile;
+  protected: base::string16 file_name_;
 
-    private: static DWORD   sm_dwThread;
-    private: static HANDLE  sm_hIoCompletionPort;
-    private: static HANDLE  sm_hThread;
+  private: static DWORD sm_dwThread;
+  private: static HANDLE sm_hIoCompletionPort;
+  private: static HANDLE sm_hThread;
 
-    // ctor
-    protected: IoRequest(const base::string16& file_name)
-        : m_hFile(INVALID_HANDLE_VALUE), file_name_(file_name) {
-    }
+  protected: IoRequest(const base::string16& file_name);
+  public: virtual ~IoRequest();
 
-    // ctor
-    public: virtual ~IoRequest()
-    {
-        if (INVALID_HANDLE_VALUE != m_hFile)
-        {
-            ::CloseHandle(m_hFile);
-        } // if
-    } // ~IoRequest
+  protected: bool associate(HANDLE);
+  protected: static bool ensureThread();
+  protected: virtual void finishIo(uint) = 0;
+  protected: virtual void onEvent(uint) = 0;
+  public: bool Start();
+  protected: static DWORD WINAPI threadProc(void*);
 
-    // [A]
-    protected: bool associate(HANDLE);
-
-    // [E]
-    protected: static bool ensureThread();
-
-    // [F]
-    protected: virtual void finishIo(uint) = 0;
-
-    // [O]
-    protected: virtual void onEvent(uint) = 0;
-
-    // [S]
-    public: bool Start();
-
-    // [T]
-    protected: static DWORD WINAPI threadProc(void*);
-}; // IoRequest
-
+  DISALLOW_COPY_AND_ASSIGN(IoRequest);
+};
 
 //////////////////////////////////////////////////////////////////////
 //
 // FileRequest
 //
-class FileRequest : public IoRequest
-{
-    protected: enum
-    {
-        k_cbIoBufferSize = 4096,
-    }; // enum
+class FileRequest : public IoRequest {
+  protected: Count m_cbFile;
+  protected: uint32 m_nFileAttrs;
+  protected: FILETIME m_ftLastWrite;
 
-    protected: Count    m_cbFile;
-    protected: uint32   m_nFileAttrs;
-    protected: FILETIME m_ftLastWrite;
+  protected: FileRequest(const base::string16& file_name);
+  public: virtual ~FileRequest();
 
-    // FileRequest ctor
-    protected: FileRequest(const base::string16&  file_name)
-        : IoRequest(file_name), m_cbFile(0), m_nFileAttrs(0) {
-    }
+  protected: uint openForLoad();
 
-    protected: uint openForLoad();
-}; // FileIoRequest
-
+  DISALLOW_COPY_AND_ASSIGN(FileRequest);
+};
 
 //////////////////////////////////////////////////////////////////////
 //
 // FileIoRequest
 //
-class FileIoRequest : public FileRequest
-{
-    protected: enum
-    {
-        k_cbIoBufferSize = 4096,
-    }; // enum
+class FileIoRequest : public FileRequest {
+  protected: enum {
+    k_cbIoBufferSize = 4096,
+  };
 
-    protected: OVERLAPPED   m_oOverlapped;
-    protected: char         m_rgchIoBuffer[k_cbIoBufferSize];
+  protected: OVERLAPPED m_oOverlapped;
+  protected: char m_rgchIoBuffer[k_cbIoBufferSize];
 
-    // FileIoRequest ctor
-    protected: FileIoRequest(const base::string16& file_name)
-        : FileRequest(file_name) {
-        myZeroMemory(&m_oOverlapped, sizeof(m_oOverlapped));
-    } // FileIoRequest
-}; // FileIoRequest
+  protected: FileIoRequest(const base::string16& file_name);
+  public: virtual ~FileIoRequest();
+
+  DISALLOW_COPY_AND_ASSIGN(FileIoRequest);
+};
 
 #endif //!defined(INCLUDE_evita_io_file_io_h)

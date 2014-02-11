@@ -274,8 +274,11 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
       MessageBoxCallback callback) {
   auto const widget = window_id == dom::kInvalidWindowId ? nullptr :
       FromWindowId("MessageBoxCallback", window_id);
-  auto const response_code = FindFrame(widget)->
-      MessageBox(widget, message, title, flags);
+  auto const frame = widget ? FindFrame(widget) : nullptr;
+  auto const response_code = frame ?
+      frame->MessageBox(widget, message, title, flags) :
+      ::MessageBoxW(nullptr, message.c_str(), title.c_str(),
+                    static_cast<UINT>(flags));
   event_handler_->RunCallback(base::Bind(callback, response_code));
 }
 

@@ -799,7 +799,7 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
 }
 
 void Frame::OnPaint(const gfx::Rect rect) {
-  if (editor::DomLock::instance()->locked()) {
+  if (!editor::DomLock::instance()->locked()) {
     UI_DOM_AUTO_LOCK_SCOPE();
     OnPaint(rect);
     return;

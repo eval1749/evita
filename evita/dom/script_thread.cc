@@ -16,8 +16,8 @@
 #include "evita/dom/public/api_event.h"
 #include "evita/dom/script_controller.h"
 
-#define DCHECK_CALLED_ON_HOST_THREAD() \
-  DCHECK(thread_checker_.CalledOnValidThread());
+#define DCHECK_CALLED_ON_NON_SCRIPT_THREAD() \
+  DCHECK(!ScriptThread::instance()->CalledOnValidThread())
 
 #define DCHECK_CALLED_ON_SCRIPT_THREAD() \
   DCHECK(ScriptThread::instance()->CalledOnValidThread())
@@ -35,8 +35,6 @@ ScriptThread::ScriptThread(ViewDelegate* view_delegate,
       thread_(new base::Thread("script_thread")),
       view_event_handler_(nullptr) {
   thread_->Start();
-  PostTask(FROM_HERE, base::Bind(base::IgnoreResult(&ScriptController::Start),
-                                 base::Unretained(this)));
 }
 
 ScriptThread::~ScriptThread() {
@@ -58,7 +56,7 @@ bool ScriptThread::CalledOnScriptThread() const {
 
 void ScriptThread::PostTask(const tracked_objects::Location& from_here,
                             const base::Closure& task) {
-  DCHECK_CALLED_ON_HOST_THREAD();
+  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   thread_->message_loop()->PostTask(from_here, task);
 }
 
@@ -66,7 +64,11 @@ void ScriptThread::Start(ViewDelegate* view_delegate,
                          base::MessageLoop* host_message_loop) {
   DCHECK(!script_thread);
   script_thread = new ScriptThread(view_delegate, host_message_loop);
+  script_thread->PostTask(FROM_HERE,
+      base::Bind(base::IgnoreResult(&ScriptController::Start),
+                                    base::Unretained(script_thread)));
 }
+
 // ViewDelegate
 #define DEFINE_VIEW_DELEGATE_1(name, type1) \
   void ScriptThread::name(type1 param1) { \
@@ -199,7 +201,7 @@ void ScriptThread::RegisterViewEventHandler(
 // ViewEventHandler
 #define DEFINE_VIEW_EVENT_HANDLER_0(name) \
   void ScriptThread::name() { \
-    DCHECK_CALLED_ON_HOST_THREAD(); \
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD(); \
     DCHECK(view_event_handler_); \
     PostTask(FROM_HERE, base::Bind( \
         &ViewEventHandler::name, \
@@ -208,7 +210,7 @@ void ScriptThread::RegisterViewEventHandler(
 
 #define DEFINE_VIEW_EVENT_HANDLER_1(name, type1) \
   void ScriptThread::name(type1 param1) { \
-    DCHECK_CALLED_ON_HOST_THREAD(); \
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD(); \
     DCHECK(view_event_handler_); \
     PostTask(FROM_HERE, base::Bind( \
         &ViewEventHandler::name, \
@@ -218,7 +220,7 @@ void ScriptThread::RegisterViewEventHandler(
 
 #define DEFINE_VIEW_EVENT_HANDLER_2(name, type1, type2) \
   void ScriptThread::name(type1 param1, type2 param2) { \
-    DCHECK_CALLED_ON_HOST_THREAD(); \
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD(); \
     DCHECK(view_event_handler_); \
     PostTask(FROM_HERE, base::Bind( \
         &ViewEventHandler::name, \
@@ -228,7 +230,7 @@ void ScriptThread::RegisterViewEventHandler(
 
 #define DEFINE_VIEW_EVENT_HANDLER_3(name, type1, type2, type3) \
   void ScriptThread::name(type1 param1, type2 param2, type3 param3) { \
-    DCHECK_CALLED_ON_HOST_THREAD(); \
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD(); \
     DCHECK(view_event_handler_); \
     PostTask(FROM_HERE, base::Bind( \
         &ViewEventHandler::name, \
@@ -239,7 +241,7 @@ void ScriptThread::RegisterViewEventHandler(
 #define DEFINE_VIEW_EVENT_HANDLER_4(name, type1, type2, type3, type4) \
   void ScriptThread::name(type1 param1, type2 param2, type3 param3, \
                           type4 param4) { \
-    DCHECK_CALLED_ON_HOST_THREAD(); \
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD(); \
     DCHECK(view_event_handler_); \
     PostTask(FROM_HERE, base::Bind( \
         &ViewEventHandler::name, \
@@ -250,7 +252,7 @@ void ScriptThread::RegisterViewEventHandler(
 #define DEFINE_VIEW_EVENT_HANDLER_5(name, type1, type2, type3, type4, type5) \
   void ScriptThread::name(type1 param1, type2 param2, type3 param3, \
                           type4 param4, type5 param5) { \
-    DCHECK_CALLED_ON_HOST_THREAD(); \
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD(); \
     DCHECK(view_event_handler_); \
     PostTask(FROM_HERE, base::Bind( \
         &ViewEventHandler::name, \
@@ -274,7 +276,7 @@ DEFINE_VIEW_EVENT_HANDLER_1(QueryClose, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(RunCallback, base::Closure)
 
 void ScriptThread::WillDestroyHost() {
-  DCHECK_CALLED_ON_HOST_THREAD();
+  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   DCHECK(view_event_handler_);
   view_delegate_ = nullptr;
   host_message_loop_ = nullptr;

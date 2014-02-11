@@ -10,10 +10,6 @@
 #include "base/basictypes.h"
 #include "base/callback_forward.h"
 #include "base/location.h"
-#pragma warning(push)
-#pragma warning(disable: 4625)
-#include "base/threading/thread_checker.h"
-#pragma warning(pop)
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/view_event_handler.h"
 
@@ -33,7 +29,6 @@ class ScriptThread final : public ViewDelegate,
   private: ViewDelegate* view_delegate_;
   private: base::MessageLoop* host_message_loop_;
   private: std::unique_ptr<base::Thread> thread_;
-  private: base::ThreadChecker thread_checker_;
   private: ViewEventHandler* view_event_handler_;
 
   private: ScriptThread(ViewDelegate* view_delegate,

@@ -799,7 +799,12 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
 }
 
 void Frame::OnPaint(const gfx::Rect rect) {
-  UI_DOM_AUTO_LOCK_SCOPE();
+  if (editor::DomLock::instance()->locked()) {
+    UI_DOM_AUTO_LOCK_SCOPE();
+    OnPaint(rect);
+    return;
+  }
+
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   OnDraw(&*gfx_);
   gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),

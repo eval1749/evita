@@ -67,6 +67,21 @@
     return wordClassOf(document.charCodeAt_(position));
   }
 
+  /** @enum{number} */
+  global.Document.Obsolete = {
+    NO: 0,
+    CHECKING: 1,
+    IGNORE: 2,
+    UNKNOWN: 3,
+    YES: 4
+  };
+
+  /** @type {!Document.Obsolete} */
+  Document.prototype.obsolete = Document.Obsolete.UNKNOWN;
+
+  /** @type {number} */
+  Document.prototype.lastStatusCheckTime_ = 0;
+
   /**
    * @this {!Document}
    * @param {string} key_combination.
@@ -397,17 +412,25 @@
         deferred.reject(error_code);
     });
     return deferred.promise.then(function(error_code) {
+      console.log('load', document, 'error', error_code);
       document.parseFileProperties();
       var new_mode = Mode.chooseMode(document);
       if (new_mode.name != document.mode.name) {
-        Editor.messageBox(null, 'Switch to ' + new_mode.name,
+        Editor.messageBox(null, 'Change mode to ' + new_mode.name,
                           MessageBox.ICONINFORMATION);
         document.mode = new_mode;
       }
-      document.doColor_(Math.min(document.length, 1024 * 8));
+      document.obsolete = Document.Obsolete.NO;
+      document.lastStatusCheckTime_ = Date.now();
       document.listWindows().forEach(function(window) {
-        window.selection.range.collapseTo(0);
+        if (window instanceof TextWindow) {
+          console.log('Reset selection offset', document, window);
+          window.selection.range.collapseTo(0);
+        }
       });
+      document.doColor_(Math.min(document.length, 1024 * 8));
+    }).catch(function(exception) {
+      console.log('Exception', exception, 'during loading into', document);
     });
   };
 

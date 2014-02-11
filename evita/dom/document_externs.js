@@ -7,6 +7,17 @@
  */
 
 /**
+ * @enum {number}
+ */
+Document.Obsolete = {
+  NO: 0,
+  CHECKING: 1,
+  IGNORE: 2,
+  UNKNOWN: 3,
+  YES: 4
+};
+
+/**
  * @param {string} name
  * @return {?Document}
  */
@@ -41,6 +52,9 @@ Document.prototype.filename;
 /** @expose  @type {?Keymap} */
 Document.prototype.keymap;
 
+/** @type {number} */
+Document.prototype.lastStatusCheckTime_;
+
 /** @expose  @type {number} */
 Document.prototype.length;
 
@@ -52,6 +66,9 @@ Document.prototype.modified;
 
 /** @expose  @type {string} */
 Document.prototype.name;
+
+/** @expose @type {number} */
+Document.prototype.obsolete;
 
 /** @expose  @type {!Map.<string, *>} */
 Document.prototype.properties;

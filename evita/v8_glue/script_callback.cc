@@ -17,6 +17,7 @@ ScriptClosure::~ScriptClosure() {
 }
 
 v8::Isolate* ScriptClosure::isolate() const {
+  DCHECK(runner_);
   return runner_->isolate();
 }
 
@@ -25,8 +26,10 @@ Runner* ScriptClosure::runner() const {
 }
 
 void ScriptClosure::Run(Argv argv) {
+  if (!runner_)
+    return;
   auto const isolate = runner_->isolate();
-  auto function = v8::Local<v8::Function>::New(isolate, function_);
+  auto function = function_.NewLocal(isolate);
   runner_->Call(function, v8::Undefined(isolate), argv);
 }
 

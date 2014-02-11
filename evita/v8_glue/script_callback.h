@@ -16,6 +16,7 @@
 #pragma warning(pop)
 #include "base/memory/weak_ptr.h"
 #include "evita/v8_glue/converter.h"
+#include "evita/v8_glue/scoped_persistent.h"
 
 namespace v8_glue {
 
@@ -26,7 +27,7 @@ namespace internal {
 class ScriptClosure {
   public: typedef std::vector<v8::Handle<v8::Value>> Argv;
 
-  private: v8::Persistent<v8::Function> function_;
+  private: ScopedPersistent<v8::Function> function_;
   private: base::WeakPtr<Runner> runner_;
 
   public: ScriptClosure(base::WeakPtr<Runner> runner,
@@ -37,6 +38,8 @@ class ScriptClosure {
   public: Runner* runner() const;
 
   public: void Run(Argv argv);
+
+  DISALLOW_COPY_AND_ASSIGN(ScriptClosure);
 };
 
 class ScriptCallbackArguments {
@@ -57,6 +60,8 @@ class ScriptCallbackArguments {
     argv_.push_back(gin::Converter<Arg1>::ToV8(isolate_,  arg1));
     Populate(args...);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(ScriptCallbackArguments);
 };
 
 }  // namespace internal
@@ -85,6 +90,8 @@ struct ScriptCallback<base::Callback<void(Params...)>> {
     closure->Run(std::move(args.argv()));
     delete closure;
   }
+
+  DISALLOW_COPY_AND_ASSIGN(ScriptCallback);
 };
 
 }  // namespace v8_glue

@@ -12,7 +12,8 @@
 #define INCLUDE_evita_text_modes_mason_mode_h
 
 #include "common/memory/singleton.h"
-#include "evita/text/modes/perl_mode.h"
+#include "evita/text/modes/mode.h"
+#include "evita/text/modes/mode_factory.h"
 
 namespace text
 {
@@ -38,6 +39,19 @@ class MasonModeFactory : public common::Singleton<MasonModeFactory>,
     // [I]
     public: virtual bool IsSupported(const char16*) const override;
 }; // MasonModeFactory
+
+class MasonMode : public ModeWithLexer {
+  public: MasonMode();
+  public: virtual ~MasonMode();
+
+  // Mode
+  private: virtual const char16* GetName() const override;
+
+  // ModeWithLexer
+  private: virtual Lexer* CreateLexer(Buffer* buffer) override;
+
+  DISALLOW_COPY_AND_ASSIGN(MasonMode);
+};
 
 }  // namespace text
 

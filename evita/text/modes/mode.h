@@ -5,12 +5,15 @@
 #if !defined(INCLUDE_evita_text_modes_mode_h)
 #define INCLUDE_evita_text_modes_mode_h
 
+#include <memory>
+
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
 
 namespace text {
 
 class Buffer;
+class Lexer;
 class Mode;
 class ModeFactory;
 
@@ -27,6 +30,20 @@ class Mode {
   public: virtual const char16* GetName() const = 0;
 
   DISALLOW_COPY_AND_ASSIGN(Mode);
+};
+
+class ModeWithLexer : public Mode {
+  private: std::unique_ptr<Lexer> lexer_;
+
+  protected: ModeWithLexer();
+  protected: virtual ~ModeWithLexer();
+
+  protected: virtual Lexer* CreateLexer(Buffer* buffer) = 0;
+
+  // Mode
+  private: virtual bool DoColor(Count) override;
+
+  DISALLOW_COPY_AND_ASSIGN(ModeWithLexer);
 };
 
 } // namespace text

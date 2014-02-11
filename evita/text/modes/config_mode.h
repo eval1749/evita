@@ -12,10 +12,10 @@
 #define INCLUDE_evita_text_modes_config_mode_h
 
 #include "common/memory/singleton.h"
+#include "evita/text/modes/mode.h"
 #include "evita/text/modes/mode_factory.h"
 
-namespace text
-{
+namespace text {
 
 /// <summary>
 ///   Configuration file mode
@@ -43,6 +43,19 @@ class ConfigModeFactory : public common::Singleton<ConfigModeFactory>,
 
     DISALLOW_COPY_AND_ASSIGN(ConfigModeFactory);
 }; // ConfigModeFactory
+
+class ConfigMode : public ModeWithLexer {
+  public: ConfigMode();
+  public: virtual ~ConfigMode();
+
+  // Mode
+  private: virtual const char16* GetName() const override;
+
+  // ModeWithLexer
+  private: virtual Lexer* CreateLexer(Buffer* buffer) override;
+
+  DISALLOW_COPY_AND_ASSIGN(ConfigMode);
+};
 
 }  // namespace text
 

@@ -5,6 +5,7 @@
 #include "evita/text/modes/mode.h"
 
 #include "base/logging.h"
+#include "evita/text/modes/lexer.h"
 
 namespace text {
 
@@ -18,6 +19,18 @@ void Mode::set_buffer(Buffer* buffer) {
   DCHECK(!buffer_);
   DCHECK(buffer);
   buffer_ = buffer;
+}
+
+ModeWithLexer::ModeWithLexer() {
+}
+
+ModeWithLexer::~ModeWithLexer() {
+}
+
+bool ModeWithLexer::DoColor(Count hint) {
+  if (!lexer_)
+    lexer_.reset(CreateLexer(buffer()));
+  return lexer_->Run(hint);
 }
 
 }  // namespace text

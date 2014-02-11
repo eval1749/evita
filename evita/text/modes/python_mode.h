@@ -12,6 +12,7 @@
 #define INCLUDE_evita_text_modes_python_mode_h
 
 #include "common/memory/singleton.h"
+#include "evita/text/modes/mode.h"
 #include "evita/text/modes/mode_factory.h"
 
 namespace text {
@@ -39,6 +40,19 @@ class PythonModeFactory : public common::Singleton<PythonModeFactory>,
 
   DISALLOW_COPY_AND_ASSIGN(PythonModeFactory);
 }; // PythonModeFactory
+
+class PythonMode : public ModeWithLexer {
+  public: PythonMode();
+  public: virtual ~PythonMode();
+
+  // Mode
+  private: virtual const char16* GetName() const override;
+
+  // ModeWithLexer
+  private: virtual Lexer* CreateLexer(Buffer* buffer) override;
+
+  DISALLOW_COPY_AND_ASSIGN(PythonMode);
+};
 
 }  // namespace text
 

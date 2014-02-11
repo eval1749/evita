@@ -24,13 +24,14 @@ namespace text
 //
 class PlainTextMode : public Mode {
   public: PlainTextMode();
-  public: ~PlainTextMode();
+  public: virtual ~PlainTextMode();
 
-  public: virtual bool DoColor(Count) override;
-  public: virtual const char16* GetName() const override;
+  // Mode
+  private: virtual bool DoColor(Count hint) override;
+  private: virtual const char16* GetName() const override;
 
   DISALLOW_COPY_AND_ASSIGN(PlainTextMode);
-}; // PlainTextMode
+};
 
 //////////////////////////////////////////////////////////////////////
 //

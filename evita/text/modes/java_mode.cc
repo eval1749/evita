@@ -238,24 +238,21 @@ class JavaLexer : public ClikeLexer {
 //
 // JavaMode
 //
-class JavaMode : public Mode {
-  private: std::unique_ptr<JavaLexer> lexer_;
+JavaMode::JavaMode() {
+}
 
-  public: JavaMode() = default;
-  public: ~JavaMode() = default;
+JavaMode::~JavaMode() {
+}
 
-  public: virtual bool DoColor(Count lCount) override {
-    if (!lexer_)
-      lexer_.reset(new JavaLexer(buffer()));
-    return lexer_->Run(lCount);
-  }
+// Mode
+const char16* JavaMode::GetName() const {
+  return L"Java";
+}
 
-  public: virtual const char16* GetName() const override {
-    return L"Java";
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(JavaMode);
-};
+// ModeWithLexer
+Lexer* JavaMode::CreateLexer(Buffer* buffer) {
+  return new JavaLexer(buffer);
+}
 
 //////////////////////////////////////////////////////////////////////
 //

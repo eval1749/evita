@@ -332,24 +332,21 @@ class CxxLexer : public ClikeLexer {
 //
 // CxxMode
 //
-class CxxMode : public Mode {
-  private: std::unique_ptr<CxxLexer> lexer_;
+CxxMode::CxxMode() {
+}
 
-  public: CxxMode() = default;
-  public: ~CxxMode() = default;
+CxxMode::~CxxMode() {
+}
 
-  public: virtual bool DoColor(Count lCount) override {
-    if (!lexer_)
-      lexer_.reset(new CxxLexer(buffer()));
-    return lexer_->Run(lCount);
-  }
+// Mode
+const char16* CxxMode::GetName() const {
+  return L"C++";
+}
 
-  public: virtual const char16* GetName() const override {
-    return L"C++";
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(CxxMode);
-};
+// ModeWithLexer
+Lexer* CxxMode::CreateLexer(Buffer* buffer) {
+  return new CxxLexer(buffer);
+}
 
 //////////////////////////////////////////////////////////////////////
 //

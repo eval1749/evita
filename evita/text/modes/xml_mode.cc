@@ -533,14 +533,14 @@ XmlMode::XmlMode() {
 XmlMode::~XmlMode() {
 }
 
-bool XmlMode::DoColor(Count lCount) {
-  if (!lexer_)
-    lexer_.reset(new XmlLexer(buffer()));
-  return lexer_->Run(lCount);
-}
-
+// Mode
 const char16* XmlMode::GetName() const {
   return L"XML";
+}
+
+// ModeWithLexer
+Lexer* XmlMode::CreateLexer(Buffer* buffer) {
+  return new XmlLexer(buffer);
 }
 
 //////////////////////////////////////////////////////////////////////

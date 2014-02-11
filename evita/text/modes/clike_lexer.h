@@ -84,7 +84,9 @@ class ClikeLexer : public NewLexer::LexerBase {
   private: base::string16 GetWord() const;
   private: void processToken();
   private: void restart();
-  public: bool Run(Count lCount);
+
+  // Lexer
+  private: virtual bool Run(Count lCount) override;
 
   DISALLOW_COPY_AND_ASSIGN(ClikeLexer);
 };

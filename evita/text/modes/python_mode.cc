@@ -538,7 +538,7 @@ class PythonLexer : public NewLexer::LexerBase {
   /// <summary>
   ///   Lexer entry point.
   /// </summary>
-  public: bool Run(Count lCount) {
+  private: virtual bool Run(Count lCount) override {
     auto const lChange = m_oChange.GetStart();
     if (m_oEnumChar.GetPosn() >= lChange) {
       // The buffer is changed since last scan.
@@ -570,28 +570,6 @@ PythonLexer::k_rgnSyntax2Color[PythonLexer::Syntax_Max_1] = {
   RGB(  0,   0, 255), // Syntax_WordReserved
 };
 
-/// <summary>
-///   Python mode
-/// </summary>
-class PythonMode : public Mode {
-  private: std::unique_ptr<PythonLexer> lexer_;
-
-  public: PythonMode() = default;
-  public: ~PythonMode() = default;
-
-  public: virtual bool DoColor(Count lCount) override {
-    if (!lexer_)
-      lexer_.reset(new PythonLexer(buffer()));
-    return lexer_->Run(lCount);
-  }
-
-  public: virtual const char16* GetName() const override {
-    return L"Python";
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(PythonMode);
-};
-
 PythonModeFactory::PythonModeFactory() {
 }
 
@@ -600,6 +578,22 @@ PythonModeFactory::~PythonModeFactory() {
 
 Mode* PythonModeFactory::Create() {
   return new PythonMode();
+}
+
+PythonMode::PythonMode() {
+}
+
+PythonMode::~PythonMode() {
+}
+
+// Mode
+const char16* PythonMode::GetName() const {
+  return L"Python";
+}
+
+// ModeWithLexer
+Lexer* PythonMode::CreateLexer(Buffer* buffer) {
+  return new PythonLexer(buffer);
 }
 
 }  // namespace text

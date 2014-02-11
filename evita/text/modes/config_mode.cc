@@ -300,7 +300,7 @@ class ConfigLexer : public NewLexer::LexerBase
         m_oEnumChar.GoTo(lStart);
     } // restart
 
-    public: bool Run(Count lCount)
+    public: virtual bool Run(Count lCount) override
     {
         Posn lChange = m_oChange.GetStart();
         if (m_oEnumChar.GetPosn() >= lChange)
@@ -337,29 +337,6 @@ ConfigLexer::k_rgnSyntax2Color[ConfigLexer::Syntax_Limit] =
 }; // k_rgnSyntax2Color
 
 /// <summary>
-///   Configuration file mode
-/// </summary>
-class ConfigMode : public Mode
-{
-    private: std::unique_ptr<ConfigLexer> lexer_;
-
-    public: ConfigMode() = default;
-    public: ~ConfigMode() = default;
-
-    public: virtual bool DoColor(Count lCount) override {
-      if (!lexer_)
-        lexer_.reset(new ConfigLexer(buffer()));
-      return lexer_->Run(lCount);
-    }
-
-    public: virtual const char16* GetName() const override {
-      return L"Config";
-    }
-
-    DISALLOW_COPY_AND_ASSIGN(ConfigMode);
-}; // ConfigMode
-
-/// <summary>
 ///  Construct ConfigModeFactory object
 /// </summary>
 ConfigModeFactory::ConfigModeFactory() {
@@ -387,5 +364,21 @@ bool ConfigModeFactory::IsSupported(const char16* pwsz) const
     if (0 == lstrcmpW(pwsz, L"makefile")) return true;
     return ModeFactory::IsSupported(pwsz);
 } // ConfigModeFactory::IsSupported
+
+ConfigMode::ConfigMode() {
+}
+
+ConfigMode::~ConfigMode() {
+}
+
+// Mode
+const char16* ConfigMode::GetName() const {
+  return L"Config";
+}
+
+// ModeWithLexer
+Lexer* ConfigMode::CreateLexer(Buffer* buffer) {
+  return new ConfigLexer(buffer);
+}
 
 }  // namespace text

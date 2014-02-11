@@ -14,9 +14,22 @@ namespace text {
 
 //////////////////////////////////////////////////////////////////////
 //
+// Lexer
+//
+class Lexer {
+  protected: Lexer();
+  public: virtual ~Lexer();
+
+  public: virtual bool Run(Count hint) = 0;
+
+  DISALLOW_COPY_AND_ASSIGN(Lexer);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
 // LexerBase
 //
-class LexerBase {
+class LexerBase : public Lexer {
   protected: Posn m_lTokenStart;
   protected: Buffer::ChangeTracker m_oChange;
   protected: Buffer::EnumChar m_oEnumChar;
@@ -24,7 +37,7 @@ class LexerBase {
 
   // ctor/dtor
   protected: LexerBase(Buffer*);
-  protected: ~LexerBase();
+  protected: virtual ~LexerBase();
 
   DISALLOW_COPY_AND_ASSIGN(LexerBase);
 };
@@ -51,7 +64,7 @@ class KeywordTable {
 //
 // NewLexer::LexerBase
 //
-class LexerBase {
+class LexerBase : public Lexer {
   private: class EnumChar : public Buffer::EnumChar {
     private: typedef Buffer::EnumChar Super;
 
@@ -74,7 +87,7 @@ class LexerBase {
 
   // ctor/dtor
   protected: LexerBase(Buffer*, KeywordTable*, const uint*);
-  protected: ~LexerBase();
+  protected: virtual ~LexerBase();
 
   protected: bool isConsChar(char16 wch) const;
   protected: bool IsKeyword(const base::string16& word) const;

@@ -622,8 +622,7 @@ class PerlLexer : public NewLexer::LexerBase
     /// <summary>
     ///   Lexer entry point.
     /// </summary>
-    public: bool Run(Count lCount)
-    {
+    public: virtual bool Run(Count lCount) override {
         Posn lChange = m_oChange.GetStart();
         if (m_oEnumChar.GetPosn() >= lChange)
         {
@@ -660,60 +659,38 @@ PerlLexer::k_rgnSyntax2Color[PerlLexer::Syntax_Max_1] =
     RGB(  0,   0, 255), // Syntax_WordReserved
 }; // PerlLexer::k_rgnSyntax2Color
 
-/// <summary>
-///   Mason lexer
-/// </summary>
+
+//////////////////////////////////////////////////////////////////////
+//
+// MasonLexer
+//
 class MasonLexer : public PerlLexer {
   public: MasonLexer(Buffer* buffer) : PerlLexer(buffer) {
   }
   public: ~MasonLexer() = default;
 
   DISALLOW_COPY_AND_ASSIGN(MasonLexer);
-}; // MasonLexer
+};
 
-/// <summary>
-///   Mason mode
-/// </summary>
-class MasonMode : public Mode {
-  private: std::unique_ptr<MasonLexer> lexer_;
+PerlMode::PerlMode() {
+}
 
-  public: MasonMode() = default;
-  public: ~MasonMode() = default;
+PerlMode::~PerlMode() {
+}
 
-  public: bool MasonMode::DoColor(Count lCount) {
-      if (!lexer_)
-        lexer_.reset(new MasonLexer(buffer()));
-      return lexer_->Run(lCount);
-  }
+// Mode
+const char16* PerlMode::GetName() const {
+  return L"Perl";
+}
 
-  public: virtual const char16* GetName() const override {
-    return L"Mason";
-  }
+// ModeWithLexer
+Lexer* PerlMode::CreateLexer(Buffer* buffer) {
+  return new PerlLexer(buffer);
+}
 
-  DISALLOW_COPY_AND_ASSIGN(MasonMode);
-}; // MasonMode
-
-/// <summary>
-///   Perl mode
-/// </summary>
-class PerlMode : public Mode {
-  private: std::unique_ptr<PerlLexer> lexer_;
-
-  public: PerlMode() = default;
-  public: ~PerlMode() = default;
-
-  public: virtual bool DoColor(Count lCount) override {
-    if (!lexer_)
-      lexer_.reset(new PerlLexer(buffer()));
-    return lexer_->Run(lCount);
-  }
-
-  public: virtual const char16* GetName() const override {
-    return L"Perl";
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(PerlMode);
-}; // PerlMode
+Lexer* MasonMode::CreateLexer(Buffer* buffer) {
+  return new MasonLexer(buffer);
+}
 
 /// <summary>
 ///   Create Mason mode for specified buffer.

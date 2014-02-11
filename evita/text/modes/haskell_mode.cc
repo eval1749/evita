@@ -829,8 +829,7 @@ class HaskellLexer : public NewLexer::LexerBase
     /// <summary>
     ///   Lexer entry point.
     /// </summary>
-    public: bool Run(Count lCount)
-    {
+    public: virtual bool Run(Count lCount) override {
         Posn lChange = m_oChange.GetStart();
         if (m_oEnumChar.GetPosn() >= lChange)
         {
@@ -870,28 +869,6 @@ HaskellLexer::k_rgnSyntax2Color[HaskellLexer::Syntax_Max_1] =
 }; // k_rgnSyntax2Color
 
 /// <summary>
-///   Haskell mode
-/// </summary>
-class HaskellMode : public Mode {
-  private: std::unique_ptr<HaskellLexer> lexer_;
-
-  public: HaskellMode() = default;
-  public: ~HaskellMode() = default;
-
-  public: virtual bool DoColor(Count lCount) override {
-      if (!lexer_)
-        lexer_.reset(new HaskellLexer(buffer()));
-      return lexer_->Run(lCount);
-  }
-
-  public: virtual const char16* GetName() const override {
-    return L"Haskell";
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(HaskellMode);
-}; // HaskellMode
-
-/// <summary>
 ///  Construct HaskellModeFactory object
 /// </summary>
 HaskellModeFactory::HaskellModeFactory() {
@@ -907,5 +884,22 @@ Mode* HaskellModeFactory::Create()
 {
     return new HaskellMode();
 } // HaskellModeFactory::Create
+
+
+HaskellMode::HaskellMode() {
+}
+
+HaskellMode::~HaskellMode() {
+}
+
+// Mode
+const char16* HaskellMode::GetName() const {
+  return L"Haskell";
+}
+
+// ModeWithLexer
+Lexer* HaskellMode::CreateLexer(Buffer* buffer) {
+  return new HaskellLexer(buffer);
+}
 
 }  // namespace text

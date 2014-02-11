@@ -86,7 +86,7 @@ class XmlLexer : public LexerBase
 
     // [R]
     private: void restart();
-    public: bool  Run(Count);
+    public: virtual bool  Run(Count) override;
     private: void runAux(char16);
 
     // [S]
@@ -103,20 +103,18 @@ class XmlLexer : public LexerBase
 //
 // XmlMode
 //
-class XmlMode : public Mode
-{
-    private: std::unique_ptr<XmlLexer> lexer_;
+class XmlMode : public ModeWithLexer {
+  public: XmlMode();
+  public: virtual ~XmlMode();
 
-    // ctor
-    public: XmlMode();
-    public: ~XmlMode();
+  // Mode
+  private: virtual const char16* GetName() const override;
 
-    // [D]
-    public: virtual bool DoColor(Count) override;
-    public: virtual const char16* GetName() const override;
+  // ModeWithLexer
+  private: virtual Lexer* CreateLexer(Buffer* buffer) override;
 
-    DISALLOW_COPY_AND_ASSIGN(XmlMode);
-}; // XmlMode
+  DISALLOW_COPY_AND_ASSIGN(XmlMode);
+};
 
 /// <summary>
 ///   XML Mode factory

@@ -605,8 +605,7 @@ class LispLexer : public NewLexer::LexerBase
     /// <summary>
     ///   Lisp lexer entry point.
     /// </summary>
-    public: bool Run(Count lCount)
-    {
+    public: virtual bool Run(Count lCount) override {
         Posn lChange = m_oChange.GetStart();
         if (m_oEnumChar.GetPosn() >= lChange)
         {
@@ -657,27 +656,21 @@ class ClLexer : public LispLexer
     DISALLOW_COPY_AND_ASSIGN(ClLexer);
 }; // ClLexer
 
-/// <summary>
-///   Lisp file mode
-/// </summary>
-class LispMode : public Mode {
-  private: std::unique_ptr<ClLexer> lexer_;
+LispMode::LispMode() {
+}
 
-  public: LispMode() = default;
-  public: ~LispMode() = default;
+LispMode::~LispMode() {
+}
 
-  public: virtual bool DoColor(Count lCount) override {
-    if (!lexer_)
-      lexer_.reset(new ClLexer(buffer()));
-    return lexer_->Run(lCount);
-  }
+// Mode
+const char16* LispMode::GetName() const {
+  return L"Lisp";
+}
 
-  public: virtual const char16* GetName() const override {
-    return L"Lisp";
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(LispMode);
-}; // LispMode
+// ModeWithLexer
+Lexer* LispMode::CreateLexer(Buffer* buffer) {
+  return new ClLexer(buffer);
+}
 
 /// <summary>
 ///  Construct LispModeFactory object

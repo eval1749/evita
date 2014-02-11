@@ -12,6 +12,7 @@
 #define INCLUDE_evita_text_modes_perl_mode_h
 
 #include "common/memory/singleton.h"
+#include "evita/text/modes/mode.h"
 #include "evita/text/modes/mode_factory.h"
 
 namespace text
@@ -37,6 +38,19 @@ class PerlModeFactory : public common::Singleton<PerlModeFactory>,
 
     DISALLOW_COPY_AND_ASSIGN(PerlModeFactory);
 }; // PerlModeFactory
+
+class PerlMode : public ModeWithLexer {
+  public: PerlMode();
+  public: virtual ~PerlMode();
+
+  // Mode
+  private: virtual const char16* GetName() const override;
+
+  // ModeWithLexer
+  private: virtual Lexer* CreateLexer(Buffer* buffer) override;
+
+  DISALLOW_COPY_AND_ASSIGN(PerlMode);
+};
 
 }  // namespace text
 

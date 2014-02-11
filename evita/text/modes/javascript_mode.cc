@@ -238,24 +238,21 @@ class JavaScriptLexer : public ClikeLexer {
 //
 // JavaScriptMode
 //
-class JavaScriptMode : public Mode {
-  private: std::unique_ptr<JavaScriptLexer> lexer_;
+JavaScriptMode::JavaScriptMode() {
+}
 
-  public: JavaScriptMode() = default;
-  public: ~JavaScriptMode() = default;
+JavaScriptMode::~JavaScriptMode() {
+}
 
-  public: virtual bool DoColor(Count lCount) override {
-    if (!lexer_)
-      lexer_.reset(new JavaScriptLexer(buffer()));
-    return lexer_->Run(lCount);
-  }
+// Mode
+const char16* JavaScriptMode::GetName() const {
+  return L"JavaScript";
+}
 
-  public: virtual const char16* GetName() const override {
-    return L"JavaScript";
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(JavaScriptMode);
-};
+// ModeWithLexer
+Lexer* JavaScriptMode::CreateLexer(Buffer* buffer) {
+  return new JavaScriptLexer(buffer);
+}
 
 //////////////////////////////////////////////////////////////////////
 //

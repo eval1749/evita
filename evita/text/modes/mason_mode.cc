@@ -8,6 +8,17 @@
 
 namespace text {
 
+
+MasonMode::MasonMode() {
+}
+
+MasonMode::~MasonMode() {
+}
+
+const char16* MasonMode::GetName() const {
+  return L"Mason";
+}
+
 MasonModeFactory::MasonModeFactory() {
 }
 

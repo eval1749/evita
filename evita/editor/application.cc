@@ -18,6 +18,7 @@
 #include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/buffer.h"
+#include "evita/io/io_thread.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_FileDialogBox.h"
 #include "evita/io/io_manager.h"
@@ -79,8 +80,10 @@ Application::Application()
       io_manager_(new IoManager()),
       message_loop_(new base::MessageLoop(make_scoped_ptr(new MessagePump()))),
       view_delegate_impl_(new views::ViewDelegateImpl()) {
-  io_manager_->Realize();
-  dom::ScriptThread::Start(view_delegate_impl_.get(), message_loop_.get());
+  io_manager_->Start();
+  dom::ScriptThread::Start(message_loop_.get(), view_delegate_impl_.get(),
+                           io_manager_->message_loop(),
+                           io_manager_->io_delegate());
 }
 
 Application::~Application() {

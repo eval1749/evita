@@ -129,8 +129,10 @@ SuppressMessageBoxScope::~SuppressMessageBoxScope() {
 //
 // ScriptController
 //
-ScriptController::ScriptController(ViewDelegate* view_delegate)
+ScriptController::ScriptController(ViewDelegate* view_delegate,
+                                   domapi::IoDelegate* io_delegate)
     : event_handler_(new EventHandler(this)),
+      io_delegate_(io_delegate),
       started_(false),
       testing_(false),
       testing_runner_(nullptr),
@@ -219,7 +221,8 @@ void ScriptController::ResetForTesting() {
   Window::ResetForTesting();
 }
 
-ScriptController* ScriptController::Start(ViewDelegate* view_delegate) {
+ScriptController* ScriptController::Start(ViewDelegate* view_delegate,
+                                          domapi::IoDelegate* io_deleage) {
   // Node: Useing Application::instance() starts thread. So, we don't
   // start |ScriptController| in testing. Although, we should remove
   // all |Application::instance()| in DOM world.
@@ -227,7 +230,7 @@ ScriptController* ScriptController::Start(ViewDelegate* view_delegate) {
     return script_controller;
   DCHECK(!script_controller);
   SuppressMessageBoxScope suppress_messagebox_scope;
-  script_controller = new ScriptController(view_delegate);
+  script_controller = new ScriptController(view_delegate, io_deleage);
   auto const isolate = script_controller->isolate();
   v8::HandleScope handle_scope(isolate);
   v8Strings::Init(isolate);
@@ -237,12 +240,13 @@ ScriptController* ScriptController::Start(ViewDelegate* view_delegate) {
 }
 
 ScriptController* ScriptController::StartForTesting(
-    ViewDelegate* view_delegate) {
+    ViewDelegate* view_delegate, domapi::IoDelegate* io_delegate) {
   if (!script_controller) {
-    Start(view_delegate)->testing_ = true;
+    Start(view_delegate, io_delegate)->testing_ = true;
   } else {
     // In testing, view_delegate is gmock'ed object. Each test case passes
     // newly constructed one.
+    script_controller->io_delegate_ = io_delegate;
     script_controller->view_delegate_ = view_delegate;
     script_controller->ResetForTesting();
   }

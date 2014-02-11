@@ -39,6 +39,14 @@ shiftKey
 ### DocumentEvent
 errorCode
 
+# FilePath
+errorCode
+size
+isDir
+isSymLink
+lastModificationDate
+readonly
+
 ### FormEvent
 data
 ### WindowEvent

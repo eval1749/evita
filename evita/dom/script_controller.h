@@ -23,6 +23,10 @@ namespace base {
 template<typename T> class Callback;
 }
 
+namespace domapi {
+class IoDelegate;
+}
+
 namespace v8_glue {
 class Runner;
 }
@@ -48,19 +52,22 @@ class SuppressMessageBoxScope {
 class ScriptController : public v8_glue::RunnerDelegate {
   private: v8_glue::IsolateHolder isolate_holder_;
   private: std::unique_ptr<EventHandler> event_handler_;
+  private: domapi::IoDelegate* io_delegate_;
   private: std::unique_ptr<v8_glue::Runner> runner_;
   private: bool started_;
   private: bool testing_;
   private: v8_glue::Runner* testing_runner_;
   private: ViewDelegate* view_delegate_;
 
-  private: ScriptController(ViewDelegate* view_delegate);
+  private: ScriptController(ViewDelegate* view_delegate,
+                            domapi::IoDelegate* io_deleage);
   public: ~ScriptController();
 
   public: EventHandler* event_handler() const { return event_handler_.get(); }
   public: static ScriptController* instance();
-  public: v8_glue::Runner* runner() const;
+  public: domapi::IoDelegate* io_delegate() const { return io_delegate_; }
   public: v8::Isolate* isolate() const;
+  public: v8_glue::Runner* runner() const;
   public: void set_testing_runner(v8_glue::Runner* runner);
   public: ViewDelegate* view_delegate() const;
 
@@ -68,9 +75,10 @@ class ScriptController : public v8_glue::RunnerDelegate {
   public: void OpenFile(WindowId window_id,
                         const base::string16& filename);
   public: void ResetForTesting();
-  public: static ScriptController* Start(ViewDelegate* view_delegate);
+  public: static ScriptController* Start(ViewDelegate* view_delegate,
+                                         domapi::IoDelegate* io_delegate);
   public: static ScriptController* StartForTesting(
-      ViewDelegate* view_delegate);
+      ViewDelegate* view_delegate, domapi::IoDelegate* io_delegate);
   public: void ThrowError(const std::string& message);
   public: void ThrowException(v8::Handle<v8::Value> exception);
   public: void WillDestroyHost();

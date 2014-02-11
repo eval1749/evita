@@ -6,7 +6,13 @@
 #define INCLUDE_evita_io_io_manager_h
 
 #include "common/win/native_window.h"
+#include "evita/dom/public/io_delegate.h"
 #include "evita/dom/view_delegate.h"
+
+namespace base {
+class MessageLoop;
+class Thread;
+}
 
 namespace dom {
 class Buffer;
@@ -18,9 +24,15 @@ using Buffer = dom::Buffer;
 //
 // IoManager
 //
-class IoManager : public common::win::NativeWindow {
+class IoManager : public common::win::NativeWindow, public domapi::IoDelegate {
+  private: std::unique_ptr<domapi::IoDelegate> io_delegate_;
+  private: std::unique_ptr<base::Thread> io_thread_;
+
   public: IoManager();
   public: virtual ~IoManager();
+
+  public: domapi::IoDelegate* io_delegate() const;
+  public: base::MessageLoop* message_loop() const;
 
   public: static void FinishSave(
       Buffer* buffer,
@@ -30,10 +42,14 @@ class IoManager : public common::win::NativeWindow {
       uint file_attributes,
       const FILETIME* last_write_time);
 
-  public: void Realize();
+  public: void Start();
 
-  // [W]
-  protected: virtual LRESULT WindowProc(UINT, WPARAM, LPARAM) override;
+  // domapi::IoDelegate
+  private: virtual void QueryFileStatus(const base::string16& filename,
+      const QueryFileStatusCallback& callback);
+
+  // common::win::NativeWindow
+  private: virtual LRESULT WindowProc(UINT, WPARAM, LPARAM) override;
 
   DISALLOW_COPY_AND_ASSIGN(IoManager);
 };

@@ -8,6 +8,7 @@
 #include "evita/dom/events/event_handler.h"
 #include "evita/dom/global.h"
 #include "evita/dom/lock.h"
+#include "evita/dom/mock_io_delegate.h"
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/script_controller.h"
 
@@ -33,7 +34,8 @@ AbstractDomTest::RunnerScope::~RunnerScope() {
 // AbstractDomTest
 //
 AbstractDomTest::AbstractDomTest()
-      : mock_view_impl_(new MockViewImpl()),
+      : mock_io_delegate_(new MockIoDelegate()),
+        mock_view_impl_(new MockViewImpl()),
         script_controller_(nullptr) {
 }
 
@@ -115,7 +117,7 @@ void AbstractDomTest::SetUp() {
     .Times(number_of_called == 1 ? 1 : 0);
 
   script_controller_ = dom::ScriptController::StartForTesting(
-    mock_view_impl_.get());
+    mock_view_impl_.get(), mock_io_delegate_.get());
 
   auto const isolate = v8::Isolate::GetCurrent();
   v8::HandleScope handle_scope(isolate);

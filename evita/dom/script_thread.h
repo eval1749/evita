@@ -10,6 +10,7 @@
 #include "base/basictypes.h"
 #include "base/callback_forward.h"
 #include "base/location.h"
+#include "evita/dom/public/io_delegate.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/view_event_handler.h"
 
@@ -24,15 +25,20 @@ class EditorWindow;
 struct EvaluateResult;
 class TextWindow;
 
-class ScriptThread final : public ViewDelegate,
+class ScriptThread final : public domapi::IoDelegate,
+                           public ViewDelegate,
                            public ViewEventHandler {
-  private: ViewDelegate* view_delegate_;
   private: base::MessageLoop* host_message_loop_;
+  private: domapi::IoDelegate* io_delegate_;
+  private: base::MessageLoop* io_message_loop_;
   private: std::unique_ptr<base::Thread> thread_;
+  private: ViewDelegate* view_delegate_;
   private: ViewEventHandler* view_event_handler_;
 
-  private: ScriptThread(ViewDelegate* view_delegate,
-                        base::MessageLoop* host_message_loop);
+  private: ScriptThread(base::MessageLoop* host_message_loop,
+                        ViewDelegate* view_delegate,
+                        base::MessageLoop* io_message_loop,
+                        domapi::IoDelegate* io_delegate);
   public: ~ScriptThread();
 
   public: static ScriptThread* instance();
@@ -44,8 +50,14 @@ class ScriptThread final : public ViewDelegate,
   public: void PostTask(const tracked_objects::Location& from_here,
                         const base::Closure& task);
 
-  public: static void Start(ViewDelegate* view_delegate,
-                            base::MessageLoop* host_message_loop);
+  public: static void Start(base::MessageLoop* host_message_loop,
+                            ViewDelegate* view_delegate,
+                            base::MessageLoop* io_message_loop,
+                            domapi::IoDelegate* io_delegate);
+
+  // IoDelegate
+  private: virtual void QueryFileStatus(const base::string16& filename,
+      const QueryFileStatusCallback& callback) override;
 
   // ViewDelegate
   private: virtual void AddWindow(WindowId parent_id,

@@ -18,6 +18,7 @@
 
 namespace dom {
 
+class MockIoDelegate;
 class MockViewImpl;
 class ScriptController;
 class ViewEventHandler;
@@ -33,6 +34,7 @@ class AbstractDomTest : public v8_glue::RunnerDelegate,
   };
 
   private: std::string exception_;
+  private: std::unique_ptr<MockIoDelegate> mock_io_delegate_;
   private: std::unique_ptr<MockViewImpl> mock_view_impl_;
   private: std::unique_ptr<v8_glue::Runner> runner_;
 
@@ -43,6 +45,9 @@ class AbstractDomTest : public v8_glue::RunnerDelegate,
   protected: virtual ~AbstractDomTest();
 
   protected: v8::Isolate* isolate() const;
+  protected: MockIoDelegate* mock_io_delegate() const {
+    return mock_io_delegate_.get();
+  }
   protected: MockViewImpl* mock_view_impl() const {
     return mock_view_impl_.get();
   }

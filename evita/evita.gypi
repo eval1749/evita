@@ -36,6 +36,7 @@
         'dom/js_console_externs.js',
         'dom/key_names_externs.js',
         'dom/modes/modes_externs.js',
+        'dom/os_file_externs.js',
         'dom/point_externs.js',
         'dom/range_externs.js',
         'dom/selection_externs.js',
@@ -62,6 +63,7 @@
         'dom/errors.js',
         'dom/file_path.js',
         'dom/modes/modes.js',
+        'dom/os_file.js',
         'dom/range.js',
         'dom/style.js',
         'dom/table_window.js',
@@ -183,6 +185,7 @@
         'dom/modes/python_mode.cc',
         'dom/modes/xml_mode.cc',
 
+        'dom/os_file.cc',
         'dom/point.cc',
         'dom/range.cc',
         'dom/selection.cc',
@@ -197,6 +200,8 @@
         'dom/time_stamp.cc',
         'dom/window.cc',
         'dom/window_ostream.cc',
+
+        'dom/public/io_delegate.cc',
 
         '<(SHARED_INTERMEDIATE_DIR)/v8_strings.cc',
 
@@ -423,6 +428,7 @@
       'sources': [
         'precomp.cpp',
 
+        'io/io_delegate_impl.cc',
         'io/file_io.cc',
         'io/io_manager.cc',
       ], # sources

@@ -1,0 +1,95 @@
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "evita/io/io_delegate_impl.h"
+
+#include "base/bind.h"
+#include "base/callback.h"
+#pragma warning(push)
+#pragma warning(disable: 4100 4625 4626)
+#include "base/message_loop/message_pump_win.h"
+#pragma warning(pop)
+#include "base/time/time.h"
+#include "evita/dom/view_event_handler.h"
+#include "evita/editor/application.h"
+
+#define DVLOG_WIN32_ERROR(level, name) \
+  DVLOG(level) << name ": " << this << " " << file_name << " err=" << dwError
+
+namespace io {
+
+namespace {
+const DWORD kHugeFileSize = 1u << 28;
+
+//////////////////////////////////////////////////////////////////////
+//
+// QueryFileStatusHandler
+//
+class QueryFileStatusHandler {
+  private: domapi::QueryFileStatusCallbackData data_;
+  private: HANDLE find_handle_;
+
+  public: QueryFileStatusHandler(const base::string16& file_name);
+  public: ~QueryFileStatusHandler();
+
+  public: const domapi::QueryFileStatusCallbackData& data() const {
+    return data_;
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(QueryFileStatusHandler);
+};
+
+QueryFileStatusHandler::QueryFileStatusHandler(
+    const base::string16& file_name) {
+  data_ = {0};
+
+  WIN32_FIND_DATAW find_data;
+  find_handle_ = ::FindFirstFileW(file_name.c_str(), &find_data);
+  if (find_handle_ == INVALID_HANDLE_VALUE) {
+    auto const dwError = ::GetLastError();
+    DVLOG_WIN32_ERROR(0, "FindFirstFileW");
+    data_.error_code = static_cast<int>(dwError);
+    return;
+  }
+
+  if (find_data.nFileSizeHigh || find_data.nFileSizeLow > kHugeFileSize) {
+    data_.error_code = static_cast<int>(ERROR_NOT_ENOUGH_MEMORY);
+    return ;
+  }
+
+  data_.error_code = 0;
+  data_.file_size = static_cast<int>(find_data.nFileSizeLow);
+  data_.is_directory = find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+  data_.is_symlink = find_data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT;
+  data_.last_write_time = base::Time::FromFileTime(find_data.ftLastWriteTime);
+  data_.readonly = find_data.dwFileAttributes & FILE_ATTRIBUTE_READONLY;
+}
+
+QueryFileStatusHandler::~QueryFileStatusHandler() {
+  if (find_handle_ != INVALID_HANDLE_VALUE) {
+    ::FindClose(find_handle_);
+  }
+}
+
+}  // namespace
+
+//////////////////////////////////////////////////////////////////////
+//
+// IoDelegateImpl
+//
+IoDelegateImpl::IoDelegateImpl() {
+}
+
+IoDelegateImpl::~IoDelegateImpl() {
+}
+
+// domapi::IoDelegate
+void IoDelegateImpl::QueryFileStatus(const base::string16& file_name,
+                                     const QueryFileStatusCallback& callback) {
+  QueryFileStatusHandler handler(file_name);
+  Application::instance()->view_event_handler()->RunCallback(
+      base::Bind(callback, handler.data()));
+}
+
+}  // namespace io

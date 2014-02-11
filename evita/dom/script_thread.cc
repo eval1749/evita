@@ -28,11 +28,15 @@ namespace {
 ScriptThread* script_thread;
 }  // namespace
 
-ScriptThread::ScriptThread(ViewDelegate* view_delegate,
-                           base::MessageLoop* host_message_loop)
-    : view_delegate_(view_delegate),
-      host_message_loop_(host_message_loop),
+ScriptThread::ScriptThread(base::MessageLoop* host_message_loop,
+                           ViewDelegate* view_delegate,
+                           base::MessageLoop* io_message_loop,
+                           domapi::IoDelegate* io_delegate)
+    : host_message_loop_(host_message_loop),
+      io_delegate_(io_delegate),
+      io_message_loop_(io_message_loop),
       thread_(new base::Thread("script_thread")),
+      view_delegate_(view_delegate),
       view_event_handler_(nullptr) {
   thread_->Start();
 }
@@ -60,13 +64,25 @@ void ScriptThread::PostTask(const tracked_objects::Location& from_here,
   thread_->message_loop()->PostTask(from_here, task);
 }
 
-void ScriptThread::Start(ViewDelegate* view_delegate,
-                         base::MessageLoop* host_message_loop) {
+void ScriptThread::Start(base::MessageLoop* host_message_loop,
+                         ViewDelegate* view_delegate,
+                         base::MessageLoop* io_message_loop,
+                         domapi::IoDelegate* io_delegate) {
   DCHECK(!script_thread);
-  script_thread = new ScriptThread(view_delegate, host_message_loop);
+  script_thread = new ScriptThread(host_message_loop, view_delegate,
+                                   io_message_loop, io_delegate);
   script_thread->PostTask(FROM_HERE,
       base::Bind(base::IgnoreResult(&ScriptController::Start),
+                                    base::Unretained(script_thread),
                                     base::Unretained(script_thread)));
+}
+
+// IoDelegate
+void ScriptThread:: QueryFileStatus(const base::string16& filename,
+    const QueryFileStatusCallback& callback) {
+  io_message_loop_->PostTask(FROM_HERE, base::Bind(
+      &domapi::IoDelegate::QueryFileStatus, base::Unretained(io_delegate_),
+      filename, callback));
 }
 
 // ViewDelegate

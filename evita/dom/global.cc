@@ -32,6 +32,7 @@
 #include "evita/dom/modes/plain_text_mode.h"
 #include "evita/dom/modes/python_mode.h"
 #include "evita/dom/modes/xml_mode.h"
+#include "evita/dom/os_file.h"
 #include "evita/dom/point.h"
 #include "evita/dom/range.h"
 #include "evita/dom/script_controller.h"
@@ -114,6 +115,13 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
       v8_glue::Installer<OneShotTimer>::Run(isolate, templ);
       v8_glue::Installer<RepeatingTimer>::Run(isolate, templ);
 
+    // Os
+    auto const os_templ = v8::ObjectTemplate::New(isolate);
+    templ->Set(gin::StringToV8(isolate, "Os"), os_templ);
+    os_templ->Set(gin::StringToV8(isolate, "File"),
+                  os::file::CreateObjectTemplate(isolate));
+
+    // Unicode
     v8::Handle<v8::Object> js_unicode = v8::Object::New(isolate);
     templ->Set(gin::StringToV8(isolate, "Unicode"), 
                internal::GetUnicodeObject(isolate));

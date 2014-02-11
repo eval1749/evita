@@ -102,7 +102,6 @@ class ViewDelegate {
   public: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) = 0;
   public: virtual void ReleaseCapture(WindowId window_id) = 0;
-  public: virtual void ReloadTextBuffer(dom::Buffer* buffer) = 0;
   public: virtual void SaveFile(Document* document,
                                 const base::string16& filename) = 0;
   public: virtual void SetCapture(WindowId window_id) = 0;

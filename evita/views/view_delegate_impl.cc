@@ -337,10 +337,6 @@ void ViewDelegateImpl::ReleaseCapture(dom::WindowId window_id) {
   window->ReleaseCapture();
 }
 
-void ViewDelegateImpl::ReloadTextBuffer(dom::Buffer* buffer) {
-  buffer->Reload();
-}
-
 void ViewDelegateImpl::SetCapture(dom::WindowId window_id) {
   auto const window = FromWindowId("SetCapture", window_id);
   if (!window)

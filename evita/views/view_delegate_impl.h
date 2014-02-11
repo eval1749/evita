@@ -63,7 +63,6 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void RegisterViewEventHandler(
       dom::ViewEventHandler* event_handler) override;
   private: virtual void ReleaseCapture(dom::WindowId window_id) override;
-  private: virtual void ReloadTextBuffer(dom::Buffer* buffer) override;
   private: virtual void SaveFile(dom::Document* document,
                                  const base::string16& filename) override;
   private: virtual void SetCapture(dom::WindowId window_id) override;

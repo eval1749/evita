@@ -336,35 +336,6 @@ ConfigLexer::k_rgnSyntax2Color[ConfigLexer::Syntax_Limit] =
     RGB(  0,   0,    0),    // Syntax_Word
 }; // k_rgnSyntax2Color
 
-/// <summary>
-///  Construct ConfigModeFactory object
-/// </summary>
-ConfigModeFactory::ConfigModeFactory() {
-}
-
-ConfigModeFactory::~ConfigModeFactory() {
-}
-
-/// <summary>
-///   Create a ConfigModeFactory instance.
-/// </summary>
-Mode* ConfigModeFactory::Create() 
-{
-    return new ConfigMode();
-} // ConfigModeFactory::Create
-
-/// <summary>
-///   Check filename supproted in ConfigMode.
-/// </summary>
-/// <param name="pwsz">A filename</param>
-/// <returns>True if specified filename supported in Config mode</returns>
-bool ConfigModeFactory::IsSupported(const char16* pwsz) const
-{
-    if (0 == lstrcmpW(pwsz, L"Makefile")) return true;
-    if (0 == lstrcmpW(pwsz, L"makefile")) return true;
-    return ModeFactory::IsSupported(pwsz);
-} // ConfigModeFactory::IsSupported
-
 ConfigMode::ConfigMode() {
 }
 

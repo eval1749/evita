@@ -11,38 +11,9 @@
 #if !defined(INCLUDE_evita_text_modes_config_mode_h)
 #define INCLUDE_evita_text_modes_config_mode_h
 
-#include "common/memory/singleton.h"
 #include "evita/text/modes/mode.h"
-#include "evita/text/modes/mode_factory.h"
 
 namespace text {
-
-/// <summary>
-///   Configuration file mode
-/// </summary>
-class ConfigModeFactory : public common::Singleton<ConfigModeFactory>,
-                          public ModeFactory {
-    DECLARE_SINGLETON_CLASS(ConfigModeFactory);
-
-    // ctor
-    private: ConfigModeFactory();
-    public: ~ConfigModeFactory();
-
-    // [C]
-    public: virtual Mode* Create() override;
-
-    // [G]
-    protected: virtual const char16* getExtensions() const override
-        { return L"cfg mk stanza"; }
-
-    public: virtual const char16* GetName() const override
-        { return L"Config"; }
-
-    // [I]
-    public: virtual bool IsSupported(const char16*) const override;
-
-    DISALLOW_COPY_AND_ASSIGN(ConfigModeFactory);
-}; // ConfigModeFactory
 
 class ConfigMode : public ModeWithLexer {
   public: ConfigMode();

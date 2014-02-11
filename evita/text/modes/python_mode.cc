@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/char_syntax.h"
 #include "evita/text/modes/lexer.h"
 #include "evita/text/modes/mode.h"
@@ -570,16 +571,10 @@ PythonLexer::k_rgnSyntax2Color[PythonLexer::Syntax_Max_1] = {
   RGB(  0,   0, 255), // Syntax_WordReserved
 };
 
-PythonModeFactory::PythonModeFactory() {
-}
-
-PythonModeFactory::~PythonModeFactory() {
-}
-
-Mode* PythonModeFactory::Create() {
-  return new PythonMode();
-}
-
+//////////////////////////////////////////////////////////////////////
+//
+// PythonMode
+//
 PythonMode::PythonMode() {
 }
 

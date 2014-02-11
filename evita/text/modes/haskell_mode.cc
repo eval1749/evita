@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/char_syntax.h"
 #include "evita/text/modes/lexer.h"
 #include "evita/text/modes/mode.h"
@@ -868,24 +869,10 @@ HaskellLexer::k_rgnSyntax2Color[HaskellLexer::Syntax_Max_1] =
     RGB(  0,    0, 255),    // Syntax_WordReserved
 }; // k_rgnSyntax2Color
 
-/// <summary>
-///  Construct HaskellModeFactory object
-/// </summary>
-HaskellModeFactory::HaskellModeFactory() {
-}
-
-HaskellModeFactory::~HaskellModeFactory() {
-}
-
-/// <summary>
-///   Construct HaskellMode object.
-/// </summary>
-Mode* HaskellModeFactory::Create()
-{
-    return new HaskellMode();
-} // HaskellModeFactory::Create
-
-
+//////////////////////////////////////////////////////////////////////
+//
+// HaskellMode
+//
 HaskellMode::HaskellMode() {
 }
 

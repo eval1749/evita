@@ -5,9 +5,87 @@
 #include "evita/text/modes/xml_mode.h"
 
 #include "evita/text/modes/char_syntax.h"
+#include "evita/text/modes/lexer.h"
 
 namespace text
 {
+
+//////////////////////////////////////////////////////////////////////
+//
+// XmlLexer
+//
+class XmlLexer : public LexerBase
+{
+    public: enum State
+    {
+        State_Error,
+
+        State_Text,
+        State_Lt,
+        State_Amp,
+
+        State_Tag,                         // < Name
+            State_Att,
+            State_AttVal1,
+            State_AttVal2,
+
+        State_Lt_Bang,                         // <!
+            State_Lt_Bang_Dash,                // <!-
+                State_Comment,
+                    State_Comment_Dash,        // <!-- ... -
+                    State_Comment_Dash_Dash,   // <!-- ... --
+
+            State_Lt_Bang_LBrk,                // <![
+                State_Lt_Bang_LBrk_C,
+                State_Lt_Bang_LBrk_CD,
+                State_Lt_Bang_LBrk_CDA,
+                State_Lt_Bang_LBrk_CDAT,
+                State_Lt_Bang_LBrk_CDATA,
+                    State_CData,               // <![CDATA[...
+                    State_CData_RBrk,          // <![CDATA[... ]
+                    State_CData_RBrk_RBrk,     // <![CDATA[... ]]
+
+        State_Limit,
+    }; // State
+
+    enum Style
+    {
+        Style_Unknown,
+        Style_Keyword,
+        Style_AttVal1,
+        Style_AttVal2,
+        Style_Comment,
+        Style_EntityRef,
+        Style_Tag,
+        Style_Text,
+        Style_CData,
+        Style_Sym,
+        Style_Att,
+
+        Style_Limit,
+    }; // enum StyleT
+
+    private: State m_eState;
+
+    // ctor
+    public: XmlLexer(Buffer*);
+
+    // [P]
+    private: void processTag();
+
+    // [R]
+    private: void restart();
+    public: virtual bool  Run(Count) override;
+    private: void runAux(char16);
+
+    // [S]
+    private: void setColor(State, int = 0);
+    private: void setStateCont(State);
+    private: void setStateEnd(State, int = 0);
+    private: void setStateStart(State, int = 0);
+
+    DISALLOW_COPY_AND_ASSIGN(XmlLexer);
+}; // XmlLexer
 
 
 //////////////////////////////////////////////////////////////////////
@@ -541,20 +619,6 @@ const char16* XmlMode::GetName() const {
 // ModeWithLexer
 Lexer* XmlMode::CreateLexer(Buffer* buffer) {
   return new XmlLexer(buffer);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// XmlModeFactory
-//
-XmlModeFactory::XmlModeFactory() {
-}
-
-XmlModeFactory::~XmlModeFactory() {
-}
-
-Mode* XmlModeFactory::Create() {
-  return new XmlMode();
 }
 
 }  // namespace text

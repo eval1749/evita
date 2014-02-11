@@ -11,37 +11,9 @@
 #if !defined(INCLUDE_evita_text_modes_lisp_mode_h)
 #define INCLUDE_evita_text_modes_lisp_mode_h
 
-#include "common/memory/singleton.h"
 #include "evita/text/modes/mode.h"
-#include "evita/text/modes/mode_factory.h"
 
-namespace text
-{
-
-/// <remark>
-///   Lisp mode facotry
-/// </remark>
-class LispModeFactory : public common::Singleton<LispModeFactory>,
-                       public ModeFactory {
-    DECLARE_SINGLETON_CLASS(LispModeFactory);
-
-    // ctor
-    private: ~LispModeFactory();
-    public: LispModeFactory();
-
-    // [C]
-    public: virtual Mode* Create() override;
-
-    // [G]
-    protected: virtual const char16* getExtensions() const override
-        { return L"cl l lisp lsp scm el"; }
-
-    public: virtual const char16* GetName() const override
-        { return L"Lisp"; }
-
-
-    DISALLOW_COPY_AND_ASSIGN(LispModeFactory);
-}; // LispModeFactory
+namespace text {
 
 class LispMode : public ModeWithLexer {
   public: LispMode();

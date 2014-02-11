@@ -6,10 +6,6 @@
 
 namespace text {
 
-//////////////////////////////////////////////////////////////////////
-//
-// PlainTextMode
-//
 PlainTextMode::PlainTextMode() {
 }
 
@@ -22,20 +18,6 @@ bool PlainTextMode::DoColor(Count) {
 
 const char16* PlainTextMode::GetName() const {
   return L"Plain";
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// PlainTextModeFactory
-//
-PlainTextModeFactory::PlainTextModeFactory() {
-}
-
-PlainTextModeFactory::~PlainTextModeFactory() {
-}
-
-Mode* PlainTextModeFactory::Create() {
-  return new PlainTextMode();
 }
 
 }  // namespace text

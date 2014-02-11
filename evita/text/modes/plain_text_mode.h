@@ -11,17 +11,10 @@
 #if !defined(INCLUDE_evita_text_modes_plain_text_mode_h)
 #define INCLUDE_evita_text_modes_plain_text_mode_h
 
-#include "common/memory/singleton.h"
 #include "evita/text/modes/mode.h"
-#include "evita/text/modes/mode_factory.h"
 
-namespace text
-{
+namespace text {
 
-//////////////////////////////////////////////////////////////////////
-//
-// PlainTextMode
-//
 class PlainTextMode : public Mode {
   public: PlainTextMode();
   public: virtual ~PlainTextMode();
@@ -32,31 +25,6 @@ class PlainTextMode : public Mode {
 
   DISALLOW_COPY_AND_ASSIGN(PlainTextMode);
 };
-
-//////////////////////////////////////////////////////////////////////
-//
-// PlainTextModeFactory
-//
-class PlainTextModeFactory : public common::Singleton<PlainTextModeFactory>,
-                       public ModeFactory {
-    DECLARE_SINGLETON_CLASS(PlainTextModeFactory);
-
-    // ctor
-    private: PlainTextModeFactory();
-    public: ~PlainTextModeFactory();
-
-    // [C]
-    public: virtual Mode* Create() override;
-
-    // [G]
-    protected: virtual const char16* getExtensions() const override
-        { return L"txt"; }
-
-    public: virtual const char16* GetName() const override
-        { return L"Plain"; }
-
-    DISALLOW_COPY_AND_ASSIGN(PlainTextModeFactory);
-}; // PlainTextModeFactory
 
 }  // namespace text
 

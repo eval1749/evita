@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/clike_lexer.h"
 #include "evita/text/modes/mode.h"
 
@@ -252,20 +253,6 @@ const char16* JavaScriptMode::GetName() const {
 // ModeWithLexer
 Lexer* JavaScriptMode::CreateLexer(Buffer* buffer) {
   return new JavaScriptLexer(buffer);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// JavaScriptModeFactory
-//
-JavaScriptModeFactory::JavaScriptModeFactory() {
-}
-
-JavaScriptModeFactory::~JavaScriptModeFactory() {
-}
-
-Mode* JavaScriptModeFactory::Create() {
-  return new JavaScriptMode();
 }
 
 } // namespace text

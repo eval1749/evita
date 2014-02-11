@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/char_syntax.h"
 #include "evita/text/modes/lexer.h"
 #include "evita/text/modes/mode.h"
@@ -656,6 +657,10 @@ class ClLexer : public LispLexer
     DISALLOW_COPY_AND_ASSIGN(ClLexer);
 }; // ClLexer
 
+//////////////////////////////////////////////////////////////////////
+//
+// LispMode
+//
 LispMode::LispMode() {
 }
 
@@ -671,22 +676,5 @@ const char16* LispMode::GetName() const {
 Lexer* LispMode::CreateLexer(Buffer* buffer) {
   return new ClLexer(buffer);
 }
-
-/// <summary>
-///  Construct LispModeFactory object
-/// </summary>
-LispModeFactory::LispModeFactory() {
-}
-
-LispModeFactory::~LispModeFactory() {
-}
-
-/// <summary>
-///   Create a LispModeFactory instance.
-/// </summary>
-Mode* LispModeFactory::Create()
-{
-    return new LispMode();
-} // LispModeFactory::Create
 
 }  // namespace text

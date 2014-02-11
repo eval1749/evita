@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/char_syntax.h"
 #include "evita/text/modes/lexer.h"
 #include "evita/text/modes/mason_mode.h"
@@ -691,30 +692,5 @@ Lexer* PerlMode::CreateLexer(Buffer* buffer) {
 Lexer* MasonMode::CreateLexer(Buffer* buffer) {
   return new MasonLexer(buffer);
 }
-
-/// <summary>
-///   Create Mason mode for specified buffer.
-/// </summary>
-Mode* MasonModeFactory::Create()
-{
-    return new MasonMode();
-} // MasonModeFactory::Create
-
-/// <summary>
-///  Construct PerlModeFactory object
-/// </summary>
-PerlModeFactory::PerlModeFactory() {
-}
-
-PerlModeFactory::~PerlModeFactory() {
-}
-
-/// <summary>
-///   Create a PerlModeFactory instance.
-/// </summary>
-Mode* PerlModeFactory::Create()
-{
-    return new PerlMode();
-} // PerlModeFactory::Create
 
 }  // namespace text

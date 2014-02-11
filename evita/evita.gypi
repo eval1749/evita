@@ -369,8 +369,6 @@
         'text/modes/lisp_mode.cc',
         'text/modes/mason_mode.cc',
         'text/modes/mode.cc',
-        'text/modes/mode_chooser.cc',
-        'text/modes/mode_factory.cc',
         'text/modes/perl_mode.cc',
         'text/modes/plain_text_mode.cc',
         'text/modes/python_mode.cc',

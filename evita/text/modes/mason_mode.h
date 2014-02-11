@@ -11,34 +11,9 @@
 #if !defined(INCLUDE_evita_text_modes_mason_mode_h)
 #define INCLUDE_evita_text_modes_mason_mode_h
 
-#include "common/memory/singleton.h"
 #include "evita/text/modes/mode.h"
-#include "evita/text/modes/mode_factory.h"
 
-namespace text
-{
-
-class MasonModeFactory : public common::Singleton<MasonModeFactory>,
-                       public ModeFactory {
-    DECLARE_SINGLETON_CLASS(MasonModeFactory);
-
-    // ctor
-    private: MasonModeFactory();
-    public: ~MasonModeFactory();
-
-    // [C]
-    public: virtual Mode* Create() override;
-
-    // [G]
-    protected: virtual const char16* getExtensions() const override
-        { return L"m mi"; }
-
-    public: virtual const char16* GetName() const override
-        { return L"Mason"; }
-
-    // [I]
-    public: virtual bool IsSupported(const char16*) const override;
-}; // MasonModeFactory
+namespace text {
 
 class MasonMode : public ModeWithLexer {
   public: MasonMode();

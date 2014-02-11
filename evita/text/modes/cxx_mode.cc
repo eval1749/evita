@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "common/memory/singleton.h"
 #include "evita/text/modes/clike_lexer.h"
 #include "evita/text/modes/mode.h"
 
@@ -346,20 +347,6 @@ const char16* CxxMode::GetName() const {
 // ModeWithLexer
 Lexer* CxxMode::CreateLexer(Buffer* buffer) {
   return new CxxLexer(buffer);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// CxxModeFactory
-//
-CxxModeFactory::CxxModeFactory() {
-}
-
-CxxModeFactory::~CxxModeFactory() {
-}
-
-Mode* CxxModeFactory::Create() {
-  return new CxxMode();
 }
 
 } // namespace text

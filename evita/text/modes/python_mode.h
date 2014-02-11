@@ -11,35 +11,9 @@
 #if !defined(INCLUDE_evita_text_modes_python_mode_h)
 #define INCLUDE_evita_text_modes_python_mode_h
 
-#include "common/memory/singleton.h"
 #include "evita/text/modes/mode.h"
-#include "evita/text/modes/mode_factory.h"
 
 namespace text {
-
-/// <summary>
-///   PythonMode factory
-/// </summary>
-class PythonModeFactory : public common::Singleton<PythonModeFactory>,
-                          public ModeFactory {
-  DECLARE_SINGLETON_CLASS(PythonModeFactory);
-
-  // ctor
-  private: PythonModeFactory();
-  public: ~PythonModeFactory();
-
-  // [C]
-  public: virtual Mode* Create() override;
-
-  // [G]
-  protected: virtual const char16* getExtensions() const override {
-    return L"py gyp gypi";
-  }
-
-  public: virtual const char16* GetName() const override { return L"Python"; }
-
-  DISALLOW_COPY_AND_ASSIGN(PythonModeFactory);
-}; // PythonModeFactory
 
 class PythonMode : public ModeWithLexer {
   public: PythonMode();

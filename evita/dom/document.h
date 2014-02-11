@@ -60,7 +60,6 @@ class Document : public v8_glue::Scriptable<Document> {
   public: void Load(const base::string16& filename,
                     v8::Handle<v8::Function> callback);
   public: Posn Redo(Posn position);
-  public: void Reload();
   public: void RenameTo(const base::string16& new_name);
   public: static void ResetForTesting();
   public: void Save(const base::string16& filename);

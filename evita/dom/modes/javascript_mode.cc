@@ -43,7 +43,7 @@ class JavaScriptModeClass
 DEFINE_SCRIPTABLE_OBJECT(JavaScriptMode, JavaScriptModeClass);
 
 JavaScriptMode::JavaScriptMode()
-    : ScriptableBase(text::JavaScriptModeFactory::instance()) {
+    : ScriptableBase(new text::JavaScriptMode()) {
 }
 
 JavaScriptMode::~JavaScriptMode() {

@@ -42,7 +42,7 @@ class PythonModeClass : public v8_glue::DerivedWrapperInfo<PythonMode, Mode> {
 DEFINE_SCRIPTABLE_OBJECT(PythonMode, PythonModeClass);
 
 PythonMode::PythonMode()
-    : ScriptableBase(text::PythonModeFactory::instance()) {
+    : ScriptableBase(new text::PythonMode()) {
 }
 
 PythonMode::~PythonMode() {

@@ -43,7 +43,7 @@ class PlainTextModeClass
 DEFINE_SCRIPTABLE_OBJECT(PlainTextMode, PlainTextModeClass);
 
 PlainTextMode::PlainTextMode()
-    : ScriptableBase(text::PlainTextModeFactory::instance()) {
+    : ScriptableBase(new text::PlainTextMode()) {
 }
 
 PlainTextMode::~PlainTextMode() {

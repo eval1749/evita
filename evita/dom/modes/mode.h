@@ -12,7 +12,6 @@
 
 namespace text {
 class Mode;
-class ModeFactory;
 }
 
 namespace dom {
@@ -23,7 +22,7 @@ class Mode : public v8_glue::Scriptable<Mode> {
   DECLARE_SCRIPTABLE_OBJECT(Mode);
   private: std::unique_ptr<text::Mode> mode_;
 
-  protected: Mode(text::ModeFactory* mode_factory);
+  protected: Mode(text::Mode* text_mode);
   public: ~Mode();
 
   public: text::Mode* text_mode() const { return mode_.get(); }

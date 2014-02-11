@@ -42,7 +42,7 @@ class XmlModeClass : public v8_glue::DerivedWrapperInfo<XmlMode, Mode> {
 DEFINE_SCRIPTABLE_OBJECT(XmlMode, XmlModeClass);
 
 XmlMode::XmlMode()
-    : ScriptableBase(text::XmlModeFactory::instance()) {
+    : ScriptableBase(new text::XmlMode()) {
 }
 
 XmlMode::~XmlMode() {

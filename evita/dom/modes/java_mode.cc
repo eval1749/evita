@@ -42,7 +42,7 @@ class JavaModeClass : public v8_glue::DerivedWrapperInfo<JavaMode, Mode> {
 DEFINE_SCRIPTABLE_OBJECT(JavaMode, JavaModeClass);
 
 JavaMode::JavaMode()
-    : ScriptableBase(text::JavaModeFactory::instance()) {
+    : ScriptableBase(new text::JavaMode()) {
 }
 
 JavaMode::~JavaMode() {

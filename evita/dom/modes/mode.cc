@@ -7,7 +7,6 @@
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
 #include "evita/text/modes/mode.h"
-#include "evita/text/modes/mode_factory.h"
 #include "evita/v8_glue/converter.h"
 
 namespace dom {
@@ -40,8 +39,8 @@ class ModeClass : public v8_glue::WrapperInfo {
 //
 DEFINE_SCRIPTABLE_OBJECT(Mode, ModeClass);
 
-Mode::Mode(text::ModeFactory* mode_factory)
-    : mode_(mode_factory->Create()) {
+Mode::Mode(text::Mode* text_mode)
+    : mode_(text_mode) {
 }
 
 Mode::~Mode() {

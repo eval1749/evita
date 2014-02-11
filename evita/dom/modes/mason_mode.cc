@@ -42,7 +42,7 @@ class MasonModeClass : public v8_glue::DerivedWrapperInfo<MasonMode, Mode> {
 DEFINE_SCRIPTABLE_OBJECT(MasonMode, MasonModeClass);
 
 MasonMode::MasonMode()
-    : ScriptableBase(text::MasonModeFactory::instance()) {
+    : ScriptableBase(new text::MasonMode()) {
 }
 
 MasonMode::~MasonMode() {

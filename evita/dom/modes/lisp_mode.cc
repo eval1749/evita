@@ -42,7 +42,7 @@ class LispModeClass : public v8_glue::DerivedWrapperInfo<LispMode, Mode> {
 DEFINE_SCRIPTABLE_OBJECT(LispMode, LispModeClass);
 
 LispMode::LispMode()
-    : ScriptableBase(text::LispModeFactory::instance()) {
+    : ScriptableBase(new text::LispMode()) {
 }
 
 LispMode::~LispMode() {

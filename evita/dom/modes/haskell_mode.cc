@@ -42,7 +42,7 @@ class HaskellModeClass : public v8_glue::DerivedWrapperInfo<HaskellMode, Mode> {
 DEFINE_SCRIPTABLE_OBJECT(HaskellMode, HaskellModeClass);
 
 HaskellMode::HaskellMode()
-    : ScriptableBase(text::HaskellModeFactory::instance()) {
+    : ScriptableBase(new text::HaskellMode()) {
 }
 
 HaskellMode::~HaskellMode() {

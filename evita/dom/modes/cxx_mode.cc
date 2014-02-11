@@ -42,7 +42,7 @@ class CxxModeClass : public v8_glue::DerivedWrapperInfo<CxxMode, Mode> {
 DEFINE_SCRIPTABLE_OBJECT(CxxMode, CxxModeClass);
 
 CxxMode::CxxMode()
-    : ScriptableBase(text::CxxModeFactory::instance()) {
+    : ScriptableBase(new text::CxxMode()) {
 }
 
 CxxMode::~CxxMode() {

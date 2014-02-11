@@ -42,7 +42,7 @@ class ConfigModeClass : public v8_glue::DerivedWrapperInfo<ConfigMode, Mode> {
 DEFINE_SCRIPTABLE_OBJECT(ConfigMode, ConfigModeClass);
 
 ConfigMode::ConfigMode()
-    : ScriptableBase(text::ConfigModeFactory::instance()) {
+    : ScriptableBase(new text::ConfigMode()) {
 }
 
 ConfigMode::~ConfigMode() {

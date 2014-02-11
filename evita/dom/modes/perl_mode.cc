@@ -42,7 +42,7 @@ class PerlModeClass : public v8_glue::DerivedWrapperInfo<PerlMode, Mode> {
 DEFINE_SCRIPTABLE_OBJECT(PerlMode, PerlModeClass);
 
 PerlMode::PerlMode()
-    : ScriptableBase(text::PerlModeFactory::instance()) {
+    : ScriptableBase(new text::PerlMode()) {
 }
 
 PerlMode::~PerlMode() {

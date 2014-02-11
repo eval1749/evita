@@ -86,7 +86,8 @@ void DomLock::Release(const Location& location) {
 
 bool DomLock::TryLock(const Location& location) {
   DCHECK(thread_checker_.CalledOnValidThread());
-  locked_ = dom::Lock::instance()->TryLock(location);
+  if (!locked_)
+    locked_ = dom::Lock::instance()->TryLock(location);
   return locked_;
 }
 

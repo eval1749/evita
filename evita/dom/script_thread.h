@@ -93,6 +93,8 @@ class ScriptThread final : public ViewDelegate,
   private: virtual void ShowDialogBox(DialogBoxId dialog_box_id) override;
 
   // ViewEventHandler
+  private: virtual void AppendTextToBuffer(text::Buffer* buffer,
+                                           const base::string16& text) override;
   private: virtual void DidDestroyWidget(WindowId window_id) override;
   private: virtual void DidDropWidget(WindowId source_id,
                                       WindowId target_id) override;

@@ -19,6 +19,7 @@
 #include "evita/dom/script_controller.h"
 #include "evita/dom/window.h"
 #include "evita/gc/local.h"
+#include "evita/text/buffer.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
 #include "v8_strings.h"
@@ -82,6 +83,17 @@ EventHandler::EventHandler(ScriptController* controller)
 }
 
 EventHandler::~EventHandler() {
+}
+
+void EventHandler::AppendTextToBuffer(text::Buffer* buffer,
+                                      const base::string16& text) {
+  DOM_AUTO_LOCK_SCOPE();
+  auto const readonly = buffer->IsReadOnly();
+  if (readonly)
+    buffer->SetReadOnly(false);
+  buffer->InsertBefore(buffer->GetEnd(), text);
+  if (readonly)
+    buffer->SetReadOnly(true);
 }
 
 // Call |handleEvent| function in the class of event target.

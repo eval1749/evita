@@ -236,7 +236,8 @@ class Graphics : public Object, public DpiHandler {
     DCHECK(drawing());
     auto rect = RectF(rc);
     DCHECK(rect);
-    render_target().DrawText(pwch, cwch, text_format, rect, brush);
+    render_target().DrawText(pwch, static_cast<uint32_t>(cwch), text_format,
+                             rect, brush);
   }
 
   // [E]

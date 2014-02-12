@@ -337,8 +337,8 @@ void TableControl::TableControlModel::DrawHeaderRow(gfx::Graphics* gfx,
     gfx::RectF rect(cell_left_top, gfx::SizeF(width, row_height_));
     column->set_rect(rect);
     auto text = column->text();
-    (*gfx)->DrawText(text.data(), text.length(), *text_format_, rect,
-                     textBrush);
+    (*gfx)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
+                     *text_format_, rect, textBrush);
     gfx->DrawLine(grayBrush, rect.right - 5, rect.top,
                   rect.right - 5, rect.bottom, 0.5f);
     cell_left_top.x += column->width();
@@ -363,8 +363,8 @@ void TableControl::TableControlModel::DrawRow(gfx::Graphics* gfx,
     auto const width = column_index == columns_.size() ?
         rect_.width() - cell_left_top.x : column->width();
     gfx::RectF rect(cell_left_top, gfx::SizeF(width, row_height_));
-    (*gfx)->DrawText(text.data(), text.length(), *text_format_, rect,
-                     textBrush);
+    (*gfx)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
+                     *text_format_, rect, textBrush);
     cell_left_top.x += column->width();
 
   }

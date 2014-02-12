@@ -93,6 +93,7 @@
 
       'x64_Base': {
         'abstract': 1,
+        'msvs_configuration_platform': 'x64',
         'msvs_settings': {
           'VCLinkerTool': {
             'AdditionalOptions': [
@@ -102,7 +103,8 @@
               '/ignore:4221',
               '/nxcompat',
             ],
-          },
+            'TargetMachine': '17', # x86 - 64
+          }, # VCLinkerTool
         },
       }, # x64_Base
 

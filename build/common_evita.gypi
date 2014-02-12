@@ -45,7 +45,6 @@
                       #'/Gr', # Uses the __fastcall calling convention (x86
                       # only).
                       '/analyze-',
-                      '/arch:SSE2',
                       '/errorReport:prompt',
                       '/fp:except-',
                       '/fp:fast',
@@ -74,6 +73,11 @@
                   # L1 C4251: 'identifier' : class 'type' needs to have
                   # dll-interface to be used by clients of class 'type2'
                   4251,
+                  # TODO(yosi) We disable C4267 temporary. We should not disable
+                  # this.
+                  # L3 C4267: 'var' : conversion from 'size_t' to 'type',
+                  # possible loss of data
+                  4267,
                   # TODO(yosi): We should not disable warning C4350.
                   # L1 C4350: behavior change: 'member1' called instead of
                   # 'member2' An rvalue cannot be bound to a non-const
@@ -81,6 +85,10 @@
                   # possible to bind an rvalue to a non-const reference in a
                   # direct initialization. This code now gives a warning.
                   4350,
+                  # ? C4371: 'T' : layout of class may have changed from a
+                  # previous version of the compiler due to better packing of
+                  # member 'var'
+                  4371,
                   # All C4355: 'this' : used in base member initializer list
                   4355,
                   # L4 C4514: 'function' : unreferenced inline function has

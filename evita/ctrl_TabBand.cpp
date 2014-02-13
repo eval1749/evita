@@ -1606,6 +1606,13 @@ class TabBand : public Element {
         return reinterpret_cast<LRESULT>(hOldImageList);
       }
 
+      case TCM_SETITEM:
+        if (auto const item = findItem(static_cast<int>(wParam))) {
+          item->SetItem(reinterpret_cast<TCITEM*>(lParam));
+          item->Invalidate(m_hwnd);
+        }
+        return FALSE;
+
       case TCM_SETMINTABWIDTH: {
         auto const iPrev = m_cxMinTab;
         m_cxMinTab = std::max(static_cast<int>(lParam),

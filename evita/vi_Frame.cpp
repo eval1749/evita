@@ -958,6 +958,14 @@ void Frame::updateTitleBar() {
   char16 wsz[1024];
   m_pActivePane->GetTitle(wsz, lengthof(wsz));
 
+  auto const tab_index = getTabFromPane(m_pActivePane);
+  if (tab_index >= 0) {
+    TCITEM tab_item = {0};
+    tab_item.mask = TCIF_TEXT;
+    tab_item.pszText = wsz;
+    TabCtrl_SetItem(m_hwndTabBand, tab_index, &tab_item);
+  }
+
   base::string16 title;
   title += base::string16(wsz);
   title += L" - ";

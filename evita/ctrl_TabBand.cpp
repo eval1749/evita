@@ -15,9 +15,11 @@
 #define DEBUG_TOOLTIP 0
 #include "evita/ctrl_tabBand.h"
 
-#include "evita/gfx_base.h"
-#include <algorithm>
 #include <dwmapi.h>
+#include <algorithm>
+
+#include "base/strings/string16.h"
+#include "evita/gfx_base.h"
 
 namespace {
 
@@ -407,8 +409,7 @@ class Item : public Element {
   public: static const char16*  GetClass_() { return L"Item"; }
   public: virtual const char16* GetClass()  const { return GetClass_(); }
 
-  public: int m_cwch;
-  public: char16* m_pwsz;
+  public: base::string16 label_;
   public: int m_iItem;
   public: int m_iImage;
   public: LPARAM m_lParam;
@@ -418,20 +419,15 @@ class Item : public Element {
 
   // ctor
   public: Item(Element* pParent, int iItem, const TCITEM* pTcItem) :
-      m_cwch(0),
       m_iImage(-1),
       m_iItem(iItem),
       m_rgfState(0),
       m_closeBox(this),
-      m_pwsz(nullptr),
       Element(pParent) {
     SetItem(pTcItem);
   }
 
-  // dtor
-  public: ~Item() {
-    delete [] m_pwsz;
-  }
+  public: ~Item() = default;
 
   public: void ComputeLayout() {
     m_rcLabel = m_rc;
@@ -463,7 +459,7 @@ class Item : public Element {
       DEBUG_PRINTF("%p sel=%d %ls\n",
         this,
         IsSelected(),
-        m_pwsz);
+        label.c_str());
     #endif
 
     {
@@ -491,8 +487,8 @@ class Item : public Element {
       rc.bottom = rc.bottom - 2;
 
       gfx::Brush brush(gfx, gfx::sysColor(COLOR_BTNTEXT));
-      gfx.DrawText(*gfx.work<gfx::TextFormat>(), brush, rc, m_pwsz, 
-                   static_cast<size_t>(m_cwch));
+      gfx.DrawText(*gfx.work<gfx::TextFormat>(), brush, rc, label_.data(),
+                   label_.length());
     }
   }
 
@@ -517,9 +513,6 @@ class Item : public Element {
                                icon_offset;
     gfx->DrawBitmap(bitmap, gfx::RectF(icon_left_top, icon_size));
   }
-
-  // [G]
-  public: const char16* GetLabel() const { return m_pwsz; }
 
   // [H]
   public: bool HasCloseBox() const {
@@ -549,18 +542,8 @@ class Item : public Element {
       m_rgfState |= pTcItem->dwState | pTcItem->dwStateMask;
     }
 
-    if (pTcItem->mask & TCIF_TEXT) {
-      m_cwch = ::lstrlenW(pTcItem->pszText);
-      m_pwsz = new char16[static_cast<size_t>(m_cwch + 1)];
-      if (!m_pwsz) {
-        return;
-      }
-
-      ::CopyMemory(
-        m_pwsz,
-        pTcItem->pszText,
-        sizeof(char16) * (m_cwch + 1));
-    }
+    if (pTcItem->mask & TCIF_TEXT)
+      label_ = pTcItem->pszText;
   }
 
   // [U]
@@ -1096,7 +1079,7 @@ class TabBand : public Element {
           m_hTabListMenu,
           static_cast<uint>(rgfFlag),
           static_cast<uint>(pItem->m_iItem),
-          pItem->m_pwsz);
+          pItem->label_.c_str());
     }
 
     ::TrackPopupMenuEx(
@@ -1585,13 +1568,13 @@ class TabBand : public Element {
 
         if (pTcItem->mask & TCIF_TEXT) {
           auto const cwch = std::min(
-            ::lstrlen(pItem->m_pwsz),
-            pTcItem->cchTextMax - 1);
+            pItem->label_.length(),
+            static_cast<size_t>(pTcItem->cchTextMax - 1));
 
           ::CopyMemory(
               pTcItem->pszText,
-              pItem->m_pwsz,
-              sizeof(char16) * cwch);
+              pItem->label_.data(),
+              sizeof(base::char16) * cwch);
 
           pTcItem->pszText[cwch] = 0;
         }

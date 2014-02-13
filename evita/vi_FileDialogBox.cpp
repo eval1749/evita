@@ -11,6 +11,8 @@
 //
 #include "evita/vi_FileDialogBox.h"
 
+#include "evita/editor/dialog_box.h"
+
 // FileDialogBox ctor
 FileDialogBox::FileDialogBox()
 {
@@ -39,10 +41,10 @@ bool FileDialogBox::GetOpenFileName(Param* pParam)
     oOfn.Flags           |= OFN_EXPLORER;
     oOfn.Flags           |= OFN_FILEMUSTEXIST;
     oOfn.Flags           |= OFN_PATHMUSTEXIST;
-    if (! ::GetOpenFileName(&oOfn))
-    {
+
+    editor::ModalMessageLoopScope modal_mesage_loop_scope;
+    if (!::GetOpenFileName(&oOfn))
         return false;
-    } // if
 
     pParam->m_fReadOnly = (oOfn.Flags & OFN_READONLY) != 0;
     pParam->m_pwszFile = oOfn.lpstrFile + oOfn.nFileOffset;
@@ -73,10 +75,9 @@ bool FileDialogBox::GetSaveFileNameW(Param* pParam)
     oOfn.Flags       |= OFN_OVERWRITEPROMPT;
     oOfn.Flags       |= OFN_PATHMUSTEXIST;
     oOfn.Flags       |= OFN_SHAREAWARE;
-    if (! ::GetSaveFileName(&oOfn))
-    {
+    editor::ModalMessageLoopScope modal_mesage_loop_scope;
+    if (!::GetSaveFileName(&oOfn))
         return false;
-    } // if
 
     pParam->m_pwszFile = oOfn.lpstrFile + oOfn.nFileOffset;
 

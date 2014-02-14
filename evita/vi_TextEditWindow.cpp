@@ -315,8 +315,9 @@ base::string16 TextEditWindow::GetTitle(size_t max_length) const {
   auto const elipsis_length = static_cast<size_t>(
       name_length > max_length ? 2 : 0);
   auto const mark_length = static_cast<size_t>(
-      buffer.IsModified() ? 2 : 0);
-  auto const length = name_length - elipsis_length - mark_length;
+      !buffer.GetFileName().empty() && buffer.IsModified() ? 2 : 0);
+  auto const length = std::min(name_length,
+                               max_length - elipsis_length - mark_length);
   base::string16 title = name.substr(0, length);
   if (elipsis_length)
     title += L"..";

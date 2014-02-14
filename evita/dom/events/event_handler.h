@@ -17,8 +17,7 @@ class EventHandler : public ViewEventHandler {
   public: EventHandler(ScriptController* controller);
   public: ~EventHandler();
 
-  private: void DoDefaultEventHandling(EventTarget* event_target,
-                                       Event* event);
+  private: void DispatchEvent(EventTarget* event_target, Event* event);
 
   // ViewEventHandler
   private: virtual void AppendTextToBuffer(text::Buffer* buffer,

@@ -86,8 +86,10 @@ EventHandler::~EventHandler() {
 }
 
 // Call |handleEvent| function in the class of event target.
-void EventHandler::DoDefaultEventHandling(EventTarget* event_target,
-                                          Event* event) {
+void EventHandler::DispatchEvent(EventTarget* event_target, Event* event) {
+  DOM_AUTO_LOCK_SCOPE();
+  if (!event_target->DispatchEvent(event))
+    return;
   auto const runner = controller_->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
@@ -137,19 +139,14 @@ void EventHandler::DidDropWidget(WindowId source_id,
   init_dict.set_bubbles(false);
   init_dict.set_cancelable(false);
   init_dict.set_source_window(source_window);
-  auto const event = new WindowEvent(L"dropwindow", init_dict);
-  DOM_AUTO_LOCK_SCOPE();
-  CHECK(target_window->DispatchEvent(event));
-  DoDefaultEventHandling(target_window, event);
+  DispatchEvent(target_window, new WindowEvent(L"dropwindow", init_dict));
 }
 
 void EventHandler::DidKillFocus(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)
     return;
-  auto const event = new FocusEvent(L"blur", FocusEventInit());
-  DOM_AUTO_LOCK_SCOPE();
-  window->DispatchEvent(event);
+  DispatchEvent(window, new FocusEvent(L"blur", FocusEventInit()));
 }
 
 void EventHandler::DidRealizeWidget(WindowId window_id) {
@@ -172,9 +169,7 @@ void EventHandler::DidSetFocus(WindowId window_id) {
   if (!window)
     return;
   window->DidSetFocus();
-  auto const event = new FocusEvent(L"focus", FocusEventInit());
-  DOM_AUTO_LOCK_SCOPE();
-  window->DispatchEvent(event);
+  DispatchEvent(window, new FocusEvent(L"focus", FocusEventInit()));
 }
 
 void EventHandler::DidStartHost() {
@@ -190,9 +185,7 @@ void EventHandler::DispatchFormEvent(const ApiFormEvent& raw_event) {
   init_dict.set_bubbles(true);
   init_dict.set_cancelable(false);
   init_dict.set_data(raw_event.data);
-  auto event = new FormEvent(raw_event.type, init_dict);
-  DOM_AUTO_LOCK_SCOPE();
-  target->DispatchEvent(event);
+  DispatchEvent(target, new FormEvent(raw_event.type, init_dict));
 }
 
 void EventHandler::DispatchKeyboardEvent(
@@ -200,22 +193,14 @@ void EventHandler::DispatchKeyboardEvent(
   auto const window = EventTarget::FromEventTargetId(api_event.target_id);
   if (!window)
     return;
-  gc::Local<KeyboardEvent> event(new KeyboardEvent(api_event));
-  DOM_AUTO_LOCK_SCOPE();
-  if (!window->DispatchEvent(event))
-    return;
-  DoDefaultEventHandling(window, event);
+  DispatchEvent(window, new KeyboardEvent(api_event));
 }
 
 void EventHandler::DispatchMouseEvent(const domapi::MouseEvent& api_event) {
   auto const window = EventTarget::FromEventTargetId(api_event.target_id);
   if (!window)
     return;
-  gc::Local<MouseEvent> event(new MouseEvent(api_event));
-  DOM_AUTO_LOCK_SCOPE();
-  if (!window->DispatchEvent(event))
-    return;
-  DoDefaultEventHandling(window, event);
+  DispatchEvent(window, new MouseEvent(api_event));
 }
 
 void EventHandler::OpenFile(WindowId window_id,
@@ -231,11 +216,7 @@ void EventHandler::QueryClose(WindowId window_id) {
   init_dict.set_bubbles(false);
   init_dict.set_cancelable(true);
   init_dict.set_view(window);
-  gc::Local<UiEvent> event(new UiEvent(L"queryclose", init_dict));
-  DOM_AUTO_LOCK_SCOPE();
-  if (!window->DispatchEvent(event))
-    return;
-  DoDefaultEventHandling(window, event);
+  DispatchEvent(window, new UiEvent(L"queryclose", init_dict));
 }
 
 void EventHandler::RunCallback(base::Closure callback) {

@@ -14,6 +14,7 @@
 #pragma warning(disable: 4100 4625 4626)
 #include "base/threading/thread.h"
 #pragma warning(pop)
+#include "base/time/time.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/view_event_handler.h"
@@ -32,7 +33,7 @@ namespace {
 // FinishSaveParam
 struct FinishSaveParam {
   NewlineMode m_eNewline;
-  FileTime m_ftLastWrite;
+  base::Time last_write_time_;
   uint m_nError;
   uint m_nFileAttrs;
   Buffer* m_pBuffer;
@@ -44,7 +45,7 @@ struct FinishSaveParam {
 
   void run() {
     if (!m_nError)
-      m_pBuffer->SetFile(m_wszFileName, m_ftLastWrite);
+      m_pBuffer->SetFile(m_wszFileName, last_write_time_);
     m_pBuffer->FinishIo(m_nError);
   }
 };
@@ -83,10 +84,10 @@ void IoManager::FinishSave(
     uint nError,
     NewlineMode eNewline,
     uint nFileAttrs,
-    const FILETIME* pftLastWrite) {
+    base::Time last_write_time) {
   FinishSaveParam oParam;
   oParam.m_eNewline = eNewline;
-  oParam.m_ftLastWrite = *pftLastWrite;
+  oParam.last_write_time_ = last_write_time;
   oParam.m_nError = nError;
   oParam.m_nFileAttrs = nFileAttrs;
   oParam.m_pBuffer = pBuffer;

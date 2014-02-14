@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_evita_dom_public_api_callback_h)
 #define INCLUDE_evita_dom_public_api_callback_h
 
+#include "base/time/time.h"
+
 namespace dom {
 class Buffer;
 }
@@ -15,7 +17,7 @@ struct LoadFileCallbackData {
   dom::Buffer* buffer;
   int code_page;
   int error_code;
-  FileTime last_write_time;
+  base::Time last_write_time;
   NewlineMode newline_mode;
   bool readonly;
 };

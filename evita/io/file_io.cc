@@ -93,8 +93,7 @@ class InfoRequest : public FileRequest {
       return;
     }
 
-    auto const file_write_time = base::Time::FromFileTime(m_ftLastWrite);
-    m_pBuffer->SetObsolete(m_pBuffer->GetLastWriteTime() != file_write_time ?
+    m_pBuffer->SetObsolete(m_pBuffer->GetLastWriteTime() != last_write_time_ ?
         Buffer::Obsolete_Yes : Buffer::Obsolete_No);
     m_pBuffer->SetReadOnly(m_nFileAttrs & FILE_ATTRIBUTE_READONLY);
   }
@@ -419,9 +418,9 @@ bool Buffer::Save(
 //  Markes the buffer visited to specified file.
 void text::Buffer::SetFile(
     const base::string16& filename,
-    const FileTime& last_write_time) {
+    base::Time last_write_time) {
   filename_ =  filename;
-  last_write_time_ = base::Time::FromFileTime(last_write_time);
+  last_write_time_ = last_write_time;
   m_nSaveTick = m_nCharTick;
   m_eObsolete = Obsolete_No;
 }
@@ -490,7 +489,7 @@ uint FileRequest::openForLoad() {
   }
 
   m_cbFile = static_cast<Count>(oInfo.nFileSizeLow);
-  m_ftLastWrite = oInfo.ftLastWriteTime;
+  last_write_time_ = base::Time::FromFileTime(oInfo.ftLastWriteTime);
   m_nFileAttrs = oInfo.dwFileAttributes;
 
   return 0;
@@ -654,7 +653,7 @@ void LoadRequest::finishIo(uint const nError) {
   data.buffer = m_pBuffer;
   data.code_page = GetCodePage();
   data.error_code = nError == ERROR_HANDLE_EOF ? 0 : static_cast<int>(nError);
-  data.last_write_time = m_ftLastWrite;
+  data.last_write_time = last_write_time_;
   data.newline_mode = eNewline;
   data.readonly = m_nFileAttrs & FILE_ATTRIBUTE_READONLY;
 
@@ -895,7 +894,7 @@ void SaveRequest::finishIo(uint const nError) {
       nError,
       NewlineMode_Detect,
       m_nFileAttrs,
-      &m_ftLastWrite);
+      last_write_time_);
 
   delete this;
 }

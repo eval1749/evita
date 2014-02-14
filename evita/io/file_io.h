@@ -7,6 +7,7 @@
 
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
+#include "base/time/time.h"
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -40,7 +41,7 @@ class IoRequest {
 class FileRequest : public IoRequest {
   protected: Count m_cbFile;
   protected: uint32 m_nFileAttrs;
-  protected: FILETIME m_ftLastWrite;
+  protected: base::Time last_write_time_;
 
   protected: FileRequest(const base::string16& file_name);
   public: virtual ~FileRequest();

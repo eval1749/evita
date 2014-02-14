@@ -209,7 +209,7 @@ class Buffer : public BufferCore, public FileFeatures {
   // [S]
   public: bool SetCharAt(Posn, char16);
   public: void SetFile(const base::string16& filename,
-                       const FileTime& last_write_time);
+                       base::Time last_write_time);
 
   public: void SetMode(Mode*);
 

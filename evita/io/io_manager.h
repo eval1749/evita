@@ -5,6 +5,10 @@
 #if !defined(INCLUDE_evita_io_io_manager_h)
 #define INCLUDE_evita_io_io_manager_h
 
+namespace base {
+class Time;
+}
+
 #include "common/win/native_window.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/view_delegate.h"
@@ -40,7 +44,7 @@ class IoManager : public common::win::NativeWindow, public domapi::IoDelegate {
       uint error_code,
       NewlineMode newline_mode,
       uint file_attributes,
-      const FILETIME* last_write_time);
+      base::Time last_write_time);
 
   public: void Start();
 

@@ -405,7 +405,7 @@ static bool CheckSplitParameter(Window* ref_window, Window* new_window) {
 }
 
 void Window::ReleaseCapture() {
-  if (state_ != State::Realized) {
+  if (window_id() == kInvalidWindowId) {
     ScriptController::instance()->ThrowError(
         "Can't release capture to unralized window.");
     return;

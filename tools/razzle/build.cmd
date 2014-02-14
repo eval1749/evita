@@ -2,7 +2,7 @@
 setlocal
 setlocal enabledelayedexpansion
 set config=debug
-if "%cd:~-11,-4%"=="release" set config=release
+if "%cd:~-11,-4%"=="release" set config=release_x64
 
 for %%x in (%*) do (
   set targets=!targets! %%x

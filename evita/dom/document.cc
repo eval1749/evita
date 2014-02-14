@@ -182,7 +182,7 @@ class DocumentClass : public v8_glue::WrapperInfo {
         .SetMethod("load_", &Document::Load)
         .SetMethod("redo", &Document::Redo)
         .SetMethod("renameTo", &Document::RenameTo)
-        .SetMethod("save", &Document::Save)
+        .SetMethod("save_", &Document::Save)
         .SetMethod("startUndoGroup_", &Document::StartUndoGroup)
         .SetMethod("styleAt", &Document::style_at)
         .SetMethod("undo", &Document::Undo);
@@ -191,13 +191,18 @@ class DocumentClass : public v8_glue::WrapperInfo {
   DISALLOW_COPY_AND_ASSIGN(DocumentClass);
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// LoadFileCallback
+//
 class LoadFileCallback : public base::RefCounted<LoadFileCallback> {
   private: gc::Member<Document> document_;
   private: v8_glue::ScopedPersistent<v8::Function> function_;
   private: base::WeakPtr<v8_glue::Runner> runner_;
 
   public: LoadFileCallback(v8_glue::Runner* runner,
-                       Document* document, v8::Handle<v8::Function> function)
+                           Document* document,
+                           v8::Handle<v8::Function> function)
     : document_(document), function_(runner->isolate(), function),
       runner_(runner->GetWeakPtr()) {
   }
@@ -221,6 +226,39 @@ class LoadFileCallback : public base::RefCounted<LoadFileCallback> {
   }
 
   DISALLOW_COPY_AND_ASSIGN(LoadFileCallback);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// SaveFileCallback
+//
+class SaveFileCallback : public base::RefCounted<SaveFileCallback> {
+  private: gc::Member<Document> document_;
+  private: v8_glue::ScopedPersistent<v8::Function> function_;
+  private: base::WeakPtr<v8_glue::Runner> runner_;
+
+  public: SaveFileCallback(v8_glue::Runner* runner,
+                           Document* document,
+                           v8::Handle<v8::Function> function)
+    : document_(document), function_(runner->isolate(), function),
+      runner_(runner->GetWeakPtr()) {
+  }
+
+  public: void Run(const domapi::SaveFileCallbackData& data) {
+    auto const buffer = document_->buffer();
+    if (!data.error_code)
+      buffer->SetFile(buffer->GetFileName(), data.last_write_time);
+    buffer->FinishIo(static_cast<uint32_t>(data.error_code));
+    if (!runner_)
+      return;
+    v8_glue::Runner::Scope runner_scope(runner_.get());
+    auto const isolate = runner_->isolate();
+    auto const function = function_.NewLocal(isolate);
+    runner_->Call(function, document_->GetWrapper(isolate),
+                  v8::Integer::New(isolate, data.error_code));
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(SaveFileCallback);
 };
 
 }  // namespace
@@ -370,9 +408,13 @@ void Document::ResetForTesting() {
   DocumentList::instance()->ResetForTesting();
 }
 
-void Document::Save(const base::string16& filename) {
-  // TODO(yosi) We should protect this document againt gc.
-  ScriptController::instance()->view_delegate()->SaveFile(this, filename);
+void Document::Save(const base::string16& filename,
+                    v8::Handle<v8::Function> callback) {
+  auto const runner = ScriptController::instance()->runner();
+  auto const save_callback = make_scoped_refptr(
+      new SaveFileCallback(runner, this, callback));
+  ScriptController::instance()->view_delegate()->SaveFile(this, filename,
+      base::Bind(&SaveFileCallback::Run, save_callback));
 }
 
 void Document::StartUndoGroup(const base::string16& name) {

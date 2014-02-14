@@ -64,7 +64,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       dom::ViewEventHandler* event_handler) override;
   private: virtual void ReleaseCapture(dom::WindowId window_id) override;
   private: virtual void SaveFile(dom::Document* document,
-                                 const base::string16& filename) override;
+                                 const base::string16& filename,
+                                 const SaveFileCallback& callback) override;
   private: virtual void SetCapture(dom::WindowId window_id) override;
   private: virtual void ShowDialogBox(
       dom::DialogBoxId dialog_box_id) override;

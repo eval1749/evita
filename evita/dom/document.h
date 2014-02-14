@@ -63,7 +63,8 @@ class Document : public v8_glue::Scriptable<Document> {
   public: Posn Redo(Posn position);
   public: void RenameTo(const base::string16& new_name);
   public: static void ResetForTesting();
-  public: void Save(const base::string16& filename);
+  public: void Save(const base::string16& filename,
+                    v8::Handle<v8::Function> callback);
   public: void StartUndoGroup(const base::string16& name);
   public: Posn Undo(Posn position);
 

@@ -482,4 +482,45 @@
       document.endUndoGroup_(name);
     }
   };
+
+  /**
+   * @param {string=} opt_filename
+   * @return {!Promise.<number>}
+   */
+  Document.prototype.save = function(opt_filename) {
+    var document = this;
+    if (!arguments.length) {
+      if (document.filename == '')
+        throw 'Document isn\'t bound to file.';
+    } else {
+      var filename = /** @type{string} */(opt_filename);
+      var absolute_filename = FilePath.fullPath(filename);
+      var present = findDocumentOnFile(absolute_filename);
+      if (present && present !== this)
+        throw filename + ' is already bound to ' + present;
+      document.filename = absolute_filename;
+    }
+
+    var deferred = Promise.defer();
+    var filename = document.filename;
+    document.save_(filename, function(error_code) {
+      if (!error_code)
+        deferred.resolve(error_code);
+      else
+        deferred.reject(error_code);
+    });
+
+    return deferred.promise.then(function(error_code) {
+      Editor.messageBox(null, 'Saved to ' + filename,
+                        MessageBox.ICONINFORMATION);
+      document.lastStatusCheckTime_ = new Date();
+      document.obsolete = Document.Obsolete.NO;
+      return deferred.promise;
+    }).catch(function(reason) {
+      console.log('Failed to save', document, 'to', filename);
+      document.lastStatusCheckTime_ = new Date();
+      document.obsolete = Document.Obsolete.UNKNOWN;
+      return deferred.promise;
+    });
+  };
 })();

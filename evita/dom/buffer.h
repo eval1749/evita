@@ -36,7 +36,9 @@ class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
   public: bool OnIdle(uint);
 
   // [S]
-  public: bool Save(const char16*, uint, NewlineMode);
+  public: bool Save(const base::string16& filename,
+                    int code_page, NewlineMode newline_mode,
+                    const dom::ViewDelegate::SaveFileCallback& callback);
 
   // [U]
   public: void UpdateFileStatus(bool = false);

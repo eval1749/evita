@@ -16,14 +16,17 @@ namespace dom {
 
 class MockViewImpl : public dom::ViewDelegate {
   private: domapi::LoadFileCallbackData load_file_callback_data_;
+  private: domapi::SaveFileCallbackData save_file_callback_data_;
 
   public: MockViewImpl();
   public: virtual ~MockViewImpl();
 
   public: void SetLoadFileCallbackData(
       const domapi::LoadFileCallbackData& data);
+  public: void SetSaveFileCallbackData(
+      const domapi::SaveFileCallbackData& data);
 
-  // dom::ViewDelegate
+  // ViewDelegate
   MOCK_METHOD2(AddWindow, void(WindowId, WindowId));
   MOCK_METHOD2(ChangeParentWindow, void(WindowId, WindowId));
   MOCK_METHOD3(ComputeOnTextWindow, void(WindowId,
@@ -52,7 +55,9 @@ class MockViewImpl : public dom::ViewDelegate {
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;
   MOCK_METHOD3(Reconvert, void(WindowId, text::Posn, text::Posn));
-  MOCK_METHOD2(SaveFile, void(Document*, const base::string16&));
+  public: virtual void SaveFile(Document* document,
+                                const base::string16& filename,
+                                const SaveFileCallback& callback) override;
   MOCK_METHOD1(RealizeDialogBox, void(const Form*));
   MOCK_METHOD1(RealizeWindow, void(WindowId));
   MOCK_METHOD1(RegisterViewEventHandler, void(ViewEventHandler*));

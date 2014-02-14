@@ -18,6 +18,7 @@ class WaitableEvent;
 
 namespace domapi {
 struct LoadFileCallbackData;
+struct SaveFileCallbackData;
 }
 
 namespace dom {
@@ -65,6 +66,9 @@ class ViewDelegate {
   public: typedef base::Callback<void(int response_code)>
       MessageBoxCallback;
 
+  public: typedef base::Callback<void(const domapi::SaveFileCallbackData&)>
+      SaveFileCallback;
+
   public: ViewDelegate() = default;
   public: virtual ~ViewDelegate() = default;
 
@@ -107,7 +111,8 @@ class ViewDelegate {
       ViewEventHandler* event_handler) = 0;
   public: virtual void ReleaseCapture(WindowId window_id) = 0;
   public: virtual void SaveFile(Document* document,
-                                const base::string16& filename) = 0;
+                                const base::string16& filename,
+                                const SaveFileCallback& callback) = 0;
   public: virtual void SetCapture(WindowId window_id) = 0;
   public: virtual void ShowDialogBox(DialogBoxId dialog_box_id) = 0;
   public: virtual void SplitHorizontally(WindowId left_window_id,

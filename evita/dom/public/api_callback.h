@@ -22,6 +22,11 @@ struct LoadFileCallbackData {
   bool readonly;
 };
 
+struct SaveFileCallbackData {
+  int error_code;
+  base::Time last_write_time;
+};
+
 }  // namespace domapi
 
 #endif //!defined(INCLUDE_evita_dom_public_api_callback_h)

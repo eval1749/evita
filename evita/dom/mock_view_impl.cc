@@ -4,6 +4,7 @@
 #include "evita/dom/mock_view_impl.h"
 
 #include "base/synchronization/waitable_event.h"
+#include "evita/dom/document.h"
 
 namespace dom {
 
@@ -16,6 +17,11 @@ MockViewImpl::~MockViewImpl() {
 void MockViewImpl::SetLoadFileCallbackData(
     const domapi::LoadFileCallbackData& data) {
   load_file_callback_data_ = data;
+}
+
+void MockViewImpl::SetSaveFileCallbackData(
+    const domapi::SaveFileCallbackData& data) {
+  save_file_callback_data_ = data;
 }
 
 // dom::ViewDelegate
@@ -49,6 +55,11 @@ void MockViewImpl::MessageBox(WindowId, const base::string16&,
                               const base::string16&, int flags,
                               MessageBoxCallback callback) {
   callback.Run(flags);
+}
+
+void MockViewImpl::SaveFile(Document*, const base::string16&,
+                            const SaveFileCallback& callback) {
+  callback.Run(save_file_callback_data_);
 }
 
 }  // namespace dom

@@ -345,12 +345,14 @@ void ViewDelegateImpl::RegisterViewEventHandler(
   event_handler_->DidStartHost();
 }
 void ViewDelegateImpl::SaveFile(dom::Document* document,
-                                const base::string16& filename) {
+                                const base::string16& filename,
+                                const SaveFileCallback& callback) {
   auto const buffer = document->buffer();
-  auto const code_page = buffer->GetCodePage() ? buffer->GetCodePage() : 932;
+  auto const code_page = buffer->GetCodePage() ?
+      static_cast<int>(buffer->GetCodePage()) : 932;
   auto const newline_mode = buffer->GetNewline() == NewlineMode_Detect ?
         NewlineMode_CrLf : buffer->GetNewline();
-  buffer->Save(filename.c_str(), code_page, newline_mode);
+  buffer->Save(filename, code_page, newline_mode, callback);
 }
 
 void ViewDelegateImpl::ShowDialogBox(dom::DialogBoxId dialog_box_id) {

@@ -232,9 +232,32 @@ TEST_F(DocumentTest, renameTo) {
   EXPECT_SCRIPT_EQ("bar", "doc.name");
 }
 
-TEST_F(DocumentTest, save) {
-  EXPECT_CALL(*mock_view_impl(), SaveFile(_, Eq(L"foo")));
-  EXPECT_SCRIPT_VALID("var doc = new Document('foo'); doc.save('foo')");
+TEST_F(DocumentTest, save_failed) {
+  domapi::SaveFileCallbackData data;
+  data.error_code = 123;
+  data.last_write_time = base::Time::FromJsTime(123456.0);
+  mock_view_impl()->SetSaveFileCallbackData(data);
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "doc.save('foo.cc');");
+  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
+  EXPECT_SCRIPT_EQ("-1", "doc.obsolete");
+  EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
+}
+
+TEST_F(DocumentTest, save_succeeded) {
+  domapi::SaveFileCallbackData data;
+  data.error_code = 0;
+  data.last_write_time = base::Time::FromJsTime(123456.0);
+  mock_view_impl()->SetSaveFileCallbackData(data);
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "doc.save('foo.cc');");
+  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_EQ("123456", "doc.lastWriteTime.valueOf()");
+  EXPECT_SCRIPT_EQ("0", "doc.obsolete");
+  EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
 }
 
 TEST_F(DocumentTest, undo) {

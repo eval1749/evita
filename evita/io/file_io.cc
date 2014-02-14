@@ -286,6 +286,7 @@ class LoadRequest : public FileIoRequest, public CharsetDecoder::Callback {
 };
 
 class SaveRequest : public FileIoRequest {
+  private: dom::ViewDelegate::SaveFileCallback callback_;
   private: NewlineMode m_eNewline;
   private: uint m_nCodePage;
   private: Posn m_lEnd;
@@ -295,18 +296,20 @@ class SaveRequest : public FileIoRequest {
 
   // ctor
   public: SaveRequest(
+      const dom::ViewDelegate::SaveFileCallback callback,
       Buffer*         pBuffer,
-      const char16*   pwszFileName,
+      const base::string16& filename,
       uint            nCodePage,
       NewlineMode     eNewline,
       Posn            lStart,
       Posn            lEnd)
-      : m_eNewline(eNewline),
+      : callback_(callback),
+        m_eNewline(eNewline),
         m_lEnd(lEnd),
         m_lPosn(lStart),
         m_nCodePage(nCodePage),
         m_pBuffer(pBuffer),
-        FileIoRequest(pwszFileName) {
+        FileIoRequest(filename) {
   }
 
   // [F]
@@ -376,10 +379,9 @@ bool Buffer::Load(const base::string16& file_name) {
   return Load(file_name, base::Bind(DummyCallback));
 }
 
-bool Buffer::Save(
-    const char16* const pwszFileIn,
-    uint const nCodePage,
-    NewlineMode const eNewline) {
+bool Buffer::Save(const base::string16& filename, int const nCodePage,
+    NewlineMode const eNewline,
+    const dom::ViewDelegate::SaveFileCallback& callback) {
   if (IsNotReady()) {
     return false;
   }
@@ -391,14 +393,14 @@ bool Buffer::Save(
     return false;
   }
 
-  auto const pwszFile = *pwszFileIn ? base::string16(pwszFileIn) : filename_;
-  m_nCodePage = nCodePage;
+  m_nCodePage = static_cast<uint32_t>(nCodePage);
   m_eNewline = eNewline;
 
   auto const pSave = new SaveRequest(
+      callback,
       this,
-      pwszFile.c_str(),
-      nCodePage,
+      filename,
+      static_cast<uint32_t>(nCodePage),
       eNewline,
       0,
       GetEnd());
@@ -888,13 +890,12 @@ void SaveRequest::finishIo(uint const nError) {
 
   ::DeleteFile(m_wszTempName);
 
-  IoManager::FinishSave(
-      m_pBuffer,
-      file_name_.c_str(),
-      nError,
-      NewlineMode_Detect,
-      m_nFileAttrs,
-      last_write_time_);
+  domapi::SaveFileCallbackData data;
+  data.error_code = static_cast<int>(nError);
+  data.last_write_time = nError ? base::Time() : last_write_time_;
+
+  Application::instance()->view_event_handler()->RunCallback(
+      base::Bind(callback_, data));
 
   delete this;
 }

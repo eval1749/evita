@@ -165,9 +165,16 @@ Document.prototype.redo = function(position) {}
 Document.prototype.renameTo = function(new_name) {}
 
 /**
- * @param {string} filename.
+ * @param {string=} opt_filename
+ * @return {!Promise.<number>}
  */
-Document.prototype.save = function(filename) {};
+Document.prototype.save = function(opt_filename) {};
+
+/**
+ * @param {string} filename
+ * @param {function(number)} callback
+ */
+Document.prototype.save_ = function(filename, callback) {};
 
 /**
  * @param {string} name

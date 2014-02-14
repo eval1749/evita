@@ -668,7 +668,8 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
   }
 
   if (focus_widget) {
-    if (message >= WM_KEYFIRST && message <= WM_KEYLAST) {
+    if (message >= WM_KEYFIRST && message <= WM_KEYLAST ||
+        message >= WM_IME_STARTCOMPOSITION && message<= WM_IME_KEYLAST) {
       auto event = KeyboardEvent::Create(message, wParam, lParam);
       if (event.event_type() == EventType::KeyPressed) {
         focus_widget->OnKeyPressed(event);

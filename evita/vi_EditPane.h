@@ -33,7 +33,7 @@ using Buffer = dom::Buffer;
 
 // EditPane is a container of multiple ContentWindow windows and layouts
 // them vertically with draggable splitter.
-class EditPane final : public CommandWindow_<EditPane, Pane> {
+class EditPane final : public Pane {
   DECLARE_CASTABLE_CLASS(EditPane, Pane);
 
   private: enum Limits {
@@ -91,7 +91,6 @@ class EditPane final : public CommandWindow_<EditPane, Pane> {
   public: Window* GetActiveWindow() const;
   public: Buffer* GetBuffer() const;
 
-  public: static const char* GetClass_() { return "EditPane"; }
   public: Window* GetFirstWindow() const;
   public: Window* GetLastWindow() const;
 

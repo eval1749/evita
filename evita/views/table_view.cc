@@ -81,7 +81,7 @@ void NotifyModelChanges(ui::TableModelObserver* observer,
 // TableView
 //
 TableView::TableView(WindowId window_id, dom::Document* document)
-    : CommandWindow_(window_id),
+    : ContentWindow(window_id),
       control_(nullptr),
       document_(document),
       model_(new TableViewModel()),
@@ -185,11 +185,11 @@ int TableView::GetIconIndex() const {
 
 // ui::TableControlObserver
 void TableView::OnKeyPressed(const ui::KeyboardEvent& event) {
-  CommandWindow::OnKeyPressed(event);
+  ContentWindow::OnKeyPressed(event);
 }
 
 void TableView::OnMousePressed(const ui::MouseEvent& event) {
-  CommandWindow::OnMousePressed(event);
+  ContentWindow::OnMousePressed(event);
 }
 
 void TableView::OnSelectionChanged() {
@@ -241,18 +241,18 @@ void TableView::UpdateStatusBar() const {
 
 // ui::Widget
 void TableView::DidRealize() {
-  CommandWindow_::DidRealize();
+  ContentWindow::DidRealize();
   Redraw();
 }
 
 void TableView::DidResize() {
-  CommandWindow::DidResize();
+  ContentWindow::DidResize();
   control_->ResizeTo(rect());
 }
 
 void TableView::DidSetFocus() {
   Redraw();
-  CommandWindow::DidSetFocus();
+  ContentWindow::DidSetFocus();
   control_->SetFocus();
 }
 
@@ -267,7 +267,7 @@ bool TableView::OnIdle(uint32) {
 }
 
 void TableView::Show() {
-  BaseWindow::Show();
+  ContentWindow::Show();
   Redraw();
 }
 

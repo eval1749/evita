@@ -11,55 +11,17 @@
 // CommandWindow
 //
 class CommandWindow : public views::Window {
+  DECLARE_CASTABLE_CLASS(CommandWindow, views::Window);
+
   protected: explicit CommandWindow(
       std::unique_ptr<ui::NativeWindow>&& native_window);
   protected: explicit CommandWindow(views::WindowId window_id);
   protected: virtual ~CommandWindow();
 
-  public: template<class T> T* DynamicCast() {
-    return Is<T>() ? static_cast<T*>(this) : nullptr;
-  }
-
-  public: virtual bool IsPane() const { return false; }
-
-  public: template<class T> bool Is() const {
-    return T::Is_(this);
-  }
-
   // ui::Widget
   protected: void virtual DidSetFocus() override;
 
   DISALLOW_COPY_AND_ASSIGN(CommandWindow);
-};
-
-template<class T, class Parent_ = CommandWindow>
-class CommandWindow_ : public Parent_  {
-  protected: CommandWindow_(
-      std::unique_ptr<ui::NativeWindow>&& native_window)
-    : Parent_(std::move(native_window)) {
-  }
-
-  protected: explicit CommandWindow_(views::WindowId window_id)
-      : Parent_(window_id) {
-  }
-
-  protected: CommandWindow_() {
-  }
-
-  public: static bool Is_(const CommandWindow* p) {
-    return T::GetClass_() == p->GetClass();
-  }
-
-  public: static T* FromHwnd(HWND const hwnd) {
-    auto* const p = reinterpret_cast<CommandWindow*>(MapHwndToWindow(hwnd));
-    return p ? p->DynamicCast<T>() : nullptr;
-  }
-
-  public: virtual const char* GetClass() const override {
-    return T::GetClass_();
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(CommandWindow_);
 };
 
 #endif //!defined(INCLUDE_evita_views_command_window_h)

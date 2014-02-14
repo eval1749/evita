@@ -93,7 +93,6 @@ class Widget
   private: void DispatchPaintMessage();
 
   // [G]
-  public: virtual const char* GetClass() const { return "Widget"; }
   public: virtual HCURSOR GetCursorAt(const Point& point) const;
   public: static Widget* GetFocusWidget();
   private: Widget& GetHostWidget() const;

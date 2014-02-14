@@ -169,8 +169,8 @@ void Frame::AddTab(Pane* const pane) {
   tab_item.pszText = name;
   tab_item.lParam = reinterpret_cast<LPARAM>(pane);
 
-  if (auto const edit_pane = pane->DynamicCast<EditPane>()) {
-    if (auto const active_window= edit_pane->GetActiveWindow()) {
+  if (auto const edit_pane = pane->as<EditPane>()) {
+    if (auto const active_window = edit_pane->GetActiveWindow()) {
       tab_item.iImage = active_window->GetIconIndex();
       if (tab_item.iImage != -1)
         tab_item.mask |= TCIF_IMAGE;
@@ -515,7 +515,7 @@ const char16* Frame::getToolTip(NMTTDISPINFO* const pDisp) const {
   if (!pPane)
     return L"";
 
-  auto const pEdit = pPane->DynamicCast<EditPane>();
+  auto const pEdit = pPane->as<EditPane>();
   if (!pEdit)
     return pPane->GetName();
 

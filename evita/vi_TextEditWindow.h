@@ -44,7 +44,7 @@ class MouseWheelEvent;
 // A range contains the start position of window.
 //
 class TextEditWindow
-    : public CommandWindow_<TextEditWindow, views::ContentWindow>,
+    : public views::ContentWindow,
       public DoubleLinkedNode_<TextEditWindow, Buffer> {
   DECLARE_CASTABLE_CLASS(TextEditWindow, views::ContentWindow);
 
@@ -130,8 +130,6 @@ class TextEditWindow
   // TODO(yosi): We should not expose TextEdintWindow::GetTitle(). We export
   // this for EditPane.
   public: virtual base::string16 GetTitle(size_t max_length) const override;
-
-  public: static const char* GetClass_() { return "TextEditWindow"; }
 
   public: Posn GetEnd();
 

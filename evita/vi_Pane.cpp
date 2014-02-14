@@ -15,7 +15,7 @@
 #include "evita/vi_Frame.h"
 
 Pane::Pane(std::unique_ptr<common::win::NativeWindow>&& native_window)
-    : CommandWindow_(std::move(native_window)),
+    : CommandWindow(std::move(native_window)),
       m_nActiveTick(0),
       m_pwszName(L"") {
 }

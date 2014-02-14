@@ -107,9 +107,6 @@ class Frame final : public views::Window,
 
   // [G]
   public: Pane* GetActivePane();
-  public: virtual const char* GetClass() const override {
-    return class_name();
-  }
   public: int GetCxStatusBar() const;
 
   public: Pane* GetFirstPane() const { return m_oPanes.GetFirst(); }

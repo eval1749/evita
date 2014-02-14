@@ -61,7 +61,7 @@ void TextEditWindow::ScrollBar::ShowWindow(int code) const {
 // TextEditWindow
 //
 TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
-    : CommandWindow_(text_window.window_id()),
+    : ContentWindow(text_window.window_id()),
       caret_(std::move(Caret::Create())),
       m_gfx(nullptr),
       m_lCaretPosn(-1),
@@ -462,7 +462,7 @@ void TextEditWindow::Redraw() {
 
   if (g_hwndActiveDialog) {
     auto const edit_pane = Application::instance()->GetActiveFrame()->
-        GetActivePane()->DynamicCast<EditPane>();
+        GetActivePane()->as<EditPane>();
     if (edit_pane)
       fSelectionIsActive = edit_pane->GetActiveWindow() == this;
   }

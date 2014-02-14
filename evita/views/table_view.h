@@ -28,12 +28,10 @@ class TableControl;
 namespace views {
 
 class TableView
-    : public CommandWindow_<TableView, views::ContentWindow>,
+    : public views::ContentWindow,
       public ui::TableControlObserver,
       public ui::TableModel {
-  DECLARE_CASTABLE_CLASS(TableView, views::ContentWindow);
-
-  private: typedef views::ContentWindow BaseWindow;
+  DECLARE_CASTABLE_CLASS(TableView, ContentWindow);
 
   private: std::vector<ui::TableColumn> columns_;
   private: ui::TableControl* control_;

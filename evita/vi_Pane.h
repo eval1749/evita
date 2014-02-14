@@ -21,7 +21,7 @@ class Graphics;
 
 class Frame;
 
-class Pane : public CommandWindow_<Pane>, public ChildNode_<Frame, Pane> {
+class Pane : public CommandWindow, public ChildNode_<Frame, Pane> {
   protected: typedef ui::Widget Widget;
   protected: typedef ui::Widget Widget;
 
@@ -39,7 +39,6 @@ class Pane : public CommandWindow_<Pane>, public ChildNode_<Frame, Pane> {
 
   // [G]
   public: uint GetActiveTick() const { return m_nActiveTick; }
-  public: static const char* GetClass_() { return "Pane"; }
   public: virtual HCURSOR GetCursorAt(const common::win::Point&) const {
     return nullptr;
   }
@@ -47,11 +46,6 @@ class Pane : public CommandWindow_<Pane>, public ChildNode_<Frame, Pane> {
   public: Frame*   GetFrame() const { return m_pParent; }
   public: const char16*  GetName()  const { return m_pwszName; }
   public: virtual int    GetTitle(char16* pwsz, int) = 0;
-
-  // [I]
-  public: virtual bool IsPane() const override { return true; }
-
-  public: static bool Is_(const CommandWindow* p) { return p->IsPane(); }
 
   // [U]
   public: virtual void UpdateStatusBar() {}

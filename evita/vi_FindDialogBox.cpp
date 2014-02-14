@@ -57,7 +57,7 @@ void CaseReplace(text::Range* range, StringCase string_case) {
 
 Selection* GetActiveSelection() {
   auto const edit_pane = Application::instance()->GetActiveFrame()->
-    GetActivePane()->DynamicCast<EditPane>();
+    GetActivePane()->as<EditPane>();
 
   if (!edit_pane)
     return nullptr;

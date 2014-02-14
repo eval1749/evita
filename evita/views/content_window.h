@@ -16,7 +16,7 @@ class MouseEvent;
 
 namespace views {
 
-class ContentWindow : public CommandWindow_<ContentWindow> {
+class ContentWindow : public CommandWindow {
   DECLARE_CASTABLE_CLASS(ContentWindow, CommandWindow);
 
   private: uint active_tick_;
@@ -37,7 +37,6 @@ class ContentWindow : public CommandWindow_<ContentWindow> {
 
   // [G]
   public: uint GetActiveTick() const { return active_tick_; }
-  public: static const char* GetClass_() { return "ContentWindow"; }
   public: virtual int GetIconIndex() const = 0;
   public: virtual base::string16 GetTitle(size_t max_length) const = 0;
 

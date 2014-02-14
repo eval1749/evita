@@ -26,7 +26,7 @@ if "%format%"=="ninja" (
 )
 
 if "%mode%"=="release" (
-  set defines=-D component=static_library -D target_arch=x64 %defines%
+  set defines=-D component=static_library %defines%
 )
 
 : Check settings

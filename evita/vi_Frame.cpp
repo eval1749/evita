@@ -25,6 +25,7 @@
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
+#include "base/time/time.h"
 #include "common/tree/ancestors_or_self.h"
 #include "common/tree/child_nodes.h"
 #include "common/win/native_window.h"
@@ -486,6 +487,22 @@ base::string16 MaybeBufferFilename(const Buffer& buffer) {
   return buffer.GetFileName().empty() ? L"No file" : buffer.GetFileName();
 }
 
+base::string16 MaybeBufferSaveTime(const Buffer& buffer){
+  if (buffer.GetFileName().empty())
+    return L"Not saved";
+ 
+  // FIXME 2007-08-05 We should use localized date time format.
+  base::Time::Exploded exploded_time;
+  buffer.GetLastWriteTime().LocalExplode(&exploded_time);
+  return base::StringPrintf(L"%02d/%02d/%d %02d:%02d:%02d",
+      exploded_time.month,
+      exploded_time.day_of_month,
+      exploded_time.year,
+      exploded_time.hour,
+      exploded_time.minute,
+      exploded_time.second);
+}
+
 base::string16 ModifiedDisplayText(const Buffer& buffer) {
  if (!buffer.IsModified())
     return L"Not modified";
@@ -506,31 +523,10 @@ const char16* Frame::getToolTip(NMTTDISPINFO* const pDisp) const {
   if (!pBuffer)
     return pPane->GetName();
 
-  const char16* pwszSave;
-  char16 wszSave[100];
-  if (pBuffer->GetFileName().empty()) {
-    pwszSave = L"Not saved";
-  } else {
-    // FIXME 2007-08-05 We should use localized date time format.
-    FILETIME ft;
-    ::FileTimeToLocalFileTime(pBuffer->GetLastWriteTime(), &ft);
-    SYSTEMTIME st;
-    ::FileTimeToSystemTime(&ft, &st);
-    ::wsprintf(wszSave, L"%d/%d/%d %02d:%02d:%02d",
-        st.wMonth,
-        st.wDay,
-        st.wYear,
-        st.wHour,
-        st.wMinute,
-        st.wSecond);
-    pwszSave = wszSave;
-  }
-
-  //char16 wszMod[100];
   std::basic_ostringstream<base::char16> tooltip;
   tooltip << "Name:" << pBuffer->name() << "\r\n" <<
     "File: " << MaybeBufferFilename(*pBuffer) << "\r\n" <<
-    "Save: " << pwszSave << "\r\n" <<
+    "Save: " << MaybeBufferSaveTime(*pBuffer) << "\r\n" <<
     ModifiedDisplayText(*pBuffer);
   ::lstrcpyW(m_wszToolTip, tooltip.str().c_str());
   return m_wszToolTip;

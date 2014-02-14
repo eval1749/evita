@@ -12,6 +12,7 @@
 #include "base/bind.h"
 #include "base/callback.h"
 #include "base/logging.h"
+#include "base/time/time.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/public/api_callback.h"
 #include "evita/dom/view_event_handler.h"
@@ -92,8 +93,9 @@ class InfoRequest : public FileRequest {
       return;
     }
 
-    auto const iDiff = m_pBuffer->GetLastWriteTime()->Compare(&m_ftLastWrite);
-    m_pBuffer->SetObsolete(iDiff ? Buffer::Obsolete_Yes : Buffer::Obsolete_No);
+    auto const file_write_time = base::Time::FromFileTime(m_ftLastWrite);
+    m_pBuffer->SetObsolete(m_pBuffer->GetLastWriteTime() != file_write_time ?
+        Buffer::Obsolete_Yes : Buffer::Obsolete_No);
     m_pBuffer->SetReadOnly(m_nFileAttrs & FILE_ATTRIBUTE_READONLY);
   }
 
@@ -419,7 +421,7 @@ void text::Buffer::SetFile(
     const base::string16& filename,
     const FileTime& last_write_time) {
   filename_ =  filename;
-  m_ftLastWrite = last_write_time;
+  last_write_time_ = base::Time::FromFileTime(last_write_time);
   m_nSaveTick = m_nCharTick;
   m_eObsolete = Obsolete_No;
 }

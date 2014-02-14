@@ -7,6 +7,7 @@
 
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
+#include "base/time/time.h"
 #include "evita/text/search_and_replace_model.h"
 #include "evita/ed_BinTree.h"
 #include "evita/li_util.h"
@@ -43,7 +44,7 @@ class FileFeatures {
   protected: NewlineMode m_eNewline;
   protected: Obsolete m_eObsolete;
   protected: bool m_fNoSave;
-  protected: FileTime m_ftLastWrite;
+  protected: base::Time last_write_time_;
   protected: uint m_nCodePage;
   protected: uint m_tickLastCheck;
   protected: base::string16 filename_;
@@ -60,8 +61,7 @@ class FileFeatures {
   // [G]
   public: uint GetCodePage() const { return m_nCodePage; }
   public: const base::string16& GetFileName() const { return filename_; }
-
-  public: const FileTime* GetLastWriteTime() const { return &m_ftLastWrite; }
+  public: base::Time GetLastWriteTime() const { return last_write_time_; }
 
   public: NewlineMode GetNewline() const { return m_eNewline; }
   public: bool GetNoSave() const { return m_fNoSave; }

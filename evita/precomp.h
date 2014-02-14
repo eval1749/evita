@@ -146,30 +146,6 @@ swap(T& rx, T& ry)
     #define SUPPORT_IME 1
 #endif // ! defined(SUPPORT_IME)
 
-class FileTime : public FILETIME
-{
-    public: FileTime()
-    {
-        dwLowDateTime  = 0;
-        dwHighDateTime = 0;
-    } // FileTime
-
-    public: FILETIME& operator =(const FILETIME& ft)
-    {
-        dwLowDateTime  = ft.dwLowDateTime;
-        dwHighDateTime = ft.dwHighDateTime;
-        return *this;
-    } // opeator =
-
-    public: int Compare(const FILETIME* p) const {
-      if (dwHighDateTime - p->dwHighDateTime)
-        return dwHighDateTime > p->dwHighDateTime ? 1 : -1;
-      if (dwLowDateTime - p->dwLowDateTime)
-        return dwLowDateTime > p->dwLowDateTime ? 1 : -1;
-      return 0;
-    } // Compare
-}; // FileTime
-
 //////////////////////////////////////////////////////////////////////
 //
 // FileHandle

@@ -85,17 +85,6 @@ EventHandler::EventHandler(ScriptController* controller)
 EventHandler::~EventHandler() {
 }
 
-void EventHandler::AppendTextToBuffer(text::Buffer* buffer,
-                                      const base::string16& text) {
-  DOM_AUTO_LOCK_SCOPE();
-  auto const readonly = buffer->IsReadOnly();
-  if (readonly)
-    buffer->SetReadOnly(false);
-  buffer->InsertBefore(buffer->GetEnd(), text);
-  if (readonly)
-    buffer->SetReadOnly(true);
-}
-
 // Call |handleEvent| function in the class of event target.
 void EventHandler::DoDefaultEventHandling(EventTarget* event_target,
                                           Event* event) {
@@ -114,6 +103,18 @@ void EventHandler::DoDefaultEventHandling(EventTarget* event_target,
     return;
 
   runner->Call(js_method, js_target, event->GetWrapper(isolate));
+}
+
+// ViewEventHandler
+void EventHandler::AppendTextToBuffer(text::Buffer* buffer,
+                                      const base::string16& text) {
+  DOM_AUTO_LOCK_SCOPE();
+  auto const readonly = buffer->IsReadOnly();
+  if (readonly)
+    buffer->SetReadOnly(false);
+  buffer->InsertBefore(buffer->GetEnd(), text);
+  if (readonly)
+    buffer->SetReadOnly(true);
 }
 
 // ViewEventHandler

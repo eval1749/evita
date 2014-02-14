@@ -17,7 +17,7 @@ class EventHandler : public ViewEventHandler {
   public: EventHandler(ScriptController* controller);
   public: ~EventHandler();
 
-  private: void DoDefaultEventHandling(EventTarget* event_target, 
+  private: void DoDefaultEventHandling(EventTarget* event_target,
                                        Event* event);
 
   // ViewEventHandler

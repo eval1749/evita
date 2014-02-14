@@ -536,31 +536,6 @@ const char16* Frame::getToolTip(NMTTDISPINFO* const pDisp) const {
   return m_wszToolTip;
 }
 
-int Frame::MessageBox(Window*, const base::string16& message,
-                      const base::string16& title, int flags) {
-  // If message box has only OK button and
-  auto const kButtonMask = 7;
-  auto const kIconMask = 0x70;
-  auto level = MessageLevel_Information;
-  if ((flags & kIconMask) == MB_ICONERROR)
-    level = MessageLevel_Error;
-  else if ((flags & kIconMask) == MB_ICONWARNING)
-    level = MessageLevel_Warning;
-
-  if (!(flags & kButtonMask) && level != MessageLevel_Error) {
-    ShowMessage(level, message);
-    return IDOK;
-  }
-
-  auto safe_title = title;
-  if (!safe_title.empty())
-    safe_title += L" - ";
-  safe_title += L"evita";
-  editor::ModalMessageLoopScope modal_mesage_loop_scope;
-  return ::MessageBoxW(*native_window(), message.c_str(), safe_title.c_str(),
-                       static_cast<UINT>(flags));
-}
-
 void Frame::onDropFiles(HDROP const hDrop) {
   uint nIndex = 0;
   for (;;) {

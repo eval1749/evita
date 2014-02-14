@@ -129,9 +129,6 @@ class Frame final : public views::Window,
     return GetFirstPane() != GetLastPane();
   }
 
-  public: int MessageBox(Window* window, const base::string16& message,
-                         const base::string16& title, int flags);
-
   // [O]
   private: void onDropFiles(HDROP);
   public: virtual bool OnIdle(uint) override;

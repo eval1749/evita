@@ -47,7 +47,12 @@ Window* FromWindowId(const char* name, dom::WindowId window_id) {
   return window;
 }
 
-Frame* FindFrame(Window* window) {
+Frame* GetFrameForMessage(dom::WindowId window_id) {
+  if (window_id == dom::kInvalidWindowId)
+    return Application::instance()->GetActiveFrame();
+  auto const window = FromWindowId("GetFrameForMessage", window_id);
+  if (!window)
+    return Application::instance()->GetActiveFrame();
   if (auto const frame = Frame::FindFrame(*window))
     return frame;
   return Application::instance()->GetActiveFrame();
@@ -272,14 +277,36 @@ void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
 void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) {
-  auto const widget = window_id == dom::kInvalidWindowId ? nullptr :
-      FromWindowId("MessageBoxCallback", window_id);
-  auto const frame = widget ? FindFrame(widget) : nullptr;
-  auto const response_code = frame ?
-      frame->MessageBox(widget, message, title, flags) :
-      ::MessageBoxW(nullptr, message.c_str(), title.c_str(),
-                    static_cast<UINT>(flags));
-  event_handler_->RunCallback(base::Bind(callback, response_code));
+  auto const frame = GetFrameForMessage(window_id);
+
+  auto const kButtonMask = 7;
+  auto const kIconMask = 0x70;
+  auto const need_response = flags & kButtonMask;
+  auto const level = (flags & kIconMask) == MB_ICONERROR ?
+      MessageLevel_Error :
+      (flags & kIconMask) == MB_ICONWARNING ? MessageLevel_Warning :
+          MessageLevel_Information;
+
+  if (!need_response && level != MessageLevel_Error) {
+    if (frame)
+      frame->ShowMessage(level, message);
+    event_handler_->RunCallback(base::Bind(callback, IDOK));
+    return;
+  }
+
+  auto safe_title = title;
+  if (!safe_title.empty())
+    safe_title += L" - ";
+  safe_title += L"evita 5.0";
+  #if defined(_DEBUG)
+    safe_title += L"/debug";
+  #endif
+  auto const hwnd = frame ? frame->AssociatedHwnd() : nullptr;
+  editor::ModalMessageLoopScope modal_mesage_loop_scope;
+  auto const response= ::MessageBoxW(hwnd,
+                                     message.c_str(), title.c_str(),
+                                     static_cast<UINT>(flags));
+  event_handler_->RunCallback(base::Bind(callback, response));
 }
 
 void ViewDelegateImpl::Reconvert(WindowId window_id, text::Posn start,

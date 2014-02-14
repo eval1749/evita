@@ -10,6 +10,7 @@
 #include "evita/dom/window.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
+#include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/script_callback.h"
@@ -50,13 +51,14 @@ class EditorClass : public v8_glue::WrapperInfo {
             runner->GetWeakPtr(), callback));
   }
 
-  private: static void MessageBox(Window* window,
+  private: static void MessageBox(v8_glue::Nullable<Window> maybe_window,
                                  const base::string16& message, int flags,
                                  const base::string16& title,
                                  v8::Handle<v8::Function> callback) {
     auto const runner = ScriptController::instance()->runner();
     ScriptController::instance()->view_delegate()->MessageBox(
-        window->window_id(), message, title, flags,
+        maybe_window ? maybe_window->window_id() : kInvalidWindowId,
+        message, title, flags,
         v8_glue::ScriptCallback<ViewDelegate::MessageBoxCallback>::New(
             runner->GetWeakPtr(), callback));
   }

@@ -28,34 +28,17 @@ class UndoManager;
 // Represents file related properties.
 /// </summary>
 class FileFeatures {
-  public: enum Obsolete {
-    Obsolete_No,
-
-    Obsolete_Checking,
-    Obsolete_Ignore,
-    Obsolete_Unknown,
-    Obsolete_Yes,
-  };
-
-  enum Limits {
-    k_tickFileCheck = 1000 * 60, // one minute
-  };
-
   protected: NewlineMode m_eNewline;
-  protected: Obsolete m_eObsolete;
   protected: bool m_fNoSave;
   protected: base::Time last_write_time_;
   protected: uint m_nCodePage;
-  protected: uint m_tickLastCheck;
   protected: base::string16 filename_;
 
   // ctor
   protected: FileFeatures()
       : m_eNewline(NewlineMode_Detect),
-        m_eObsolete(Obsolete_No),
         m_fNoSave(false),
-        m_nCodePage(CP_UTF8),
-        m_tickLastCheck(0) {
+        m_nCodePage(CP_UTF8) {
   }
 
   // [G]
@@ -65,12 +48,6 @@ class FileFeatures {
 
   public: NewlineMode GetNewline() const { return m_eNewline; }
   public: bool GetNoSave() const { return m_fNoSave; }
-
-  /// <summary>
-  /// Retreives buffer obsolete state.
-  /// </summary>
-  /// <seealso>::Buffer::UpdateFileStatus</seealso>
-  public: Obsolete GetObsolete() const { return m_eObsolete; }
 
   // [S]
   public: uint SetCodePage(uint const nCodePage) {
@@ -82,7 +59,6 @@ class FileFeatures {
   }
 
   public: bool SetNoSave(bool f) { return m_fNoSave = f; }
-  public: Obsolete SetObsolete(Obsolete e) { return m_eObsolete = e; }
 };
 
 /// <summary>

@@ -69,43 +69,6 @@ FileIoRequest::FileIoRequest(const base::string16& file_name)
 FileIoRequest::~FileIoRequest() {
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// InfoRequest
-// Represents file information request used by Buffer.UpdateFileStatus.
-//
-class InfoRequest : public FileRequest {
-  private: Buffer* m_pBuffer;
-
-  public: InfoRequest(
-      Buffer* const pBuffer,
-      const base::string16& file_name)
-        : m_pBuffer(pBuffer),
-          FileRequest(file_name) {
-  }
-
-  private: void finishIo(uint nError) {
-    #if DEBUG_IO
-      DEBUG_PRINTF("%p err=%d buf=%s\n", this, nError, m_pBuffer->GetName());
-    #endif
-    if (nError) {
-      m_pBuffer->SetObsolete(Buffer::Obsolete_Unknown);
-      return;
-    }
-
-    m_pBuffer->SetObsolete(m_pBuffer->GetLastWriteTime() != last_write_time_ ?
-        Buffer::Obsolete_Yes : Buffer::Obsolete_No);
-    m_pBuffer->SetReadOnly(m_nFileAttrs & FILE_ATTRIBUTE_READONLY);
-  }
-
-  private: void onEvent(uint) {
-    finishIo(openForLoad());
-    delete this;
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(InfoRequest);
-};
-
 class NewlineDetector {
   public: enum Type {
     Ignore,
@@ -325,10 +288,8 @@ class SaveRequest : public FileIoRequest {
   DISALLOW_COPY_AND_ASSIGN(SaveRequest);
 };
 
-void Buffer::FinishIo(uint const nError) {
-  m_eObsolete = nError ? Obsolete_Unknown : Obsolete_No;
+void Buffer::FinishIo(uint const) {
   m_eState = State_Ready;
-  m_tickLastCheck = ::GetTickCount();
 }
 
 //  Start loading from file. This consists following steps:
@@ -358,7 +319,6 @@ bool Buffer::Load(const base::string16& file_name,
     m_pUndo->Empty();
   }
 
-  m_eObsolete = Obsolete_Checking;
   m_eState = State_Load;
 
   if (!pLoad->Start()) {
@@ -405,7 +365,6 @@ bool Buffer::Save(const base::string16& filename, int const nCodePage,
       0,
       GetEnd());
 
-  m_eObsolete = Obsolete_Checking;
   m_eState = State_Save;
 
   if (!pSave->Start()) {
@@ -424,7 +383,6 @@ void text::Buffer::SetFile(
   filename_ =  filename;
   last_write_time_ = last_write_time;
   m_nSaveTick = m_nCharTick;
-  m_eObsolete = Obsolete_No;
 }
 
 uint FileRequest::openForLoad() {

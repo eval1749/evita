@@ -96,7 +96,7 @@ var Promise = function(onFulfilled, onRejected) {};
  * @param {!Iterable.<!Promise>} iterable.
  * @return {!Promise}
  */
-Promise.all = function(iterable){};
+Promise.all = function(iterable) {};
 
 /**
  * @param {*} value.
@@ -114,19 +114,19 @@ Promise.defer = function() {};
  * @param {!Iterable.<!Promise>} iterable.
  * @return {!Promise}
  */
-Promise.race = function(iterable){};
+Promise.race = function(iterable) {};
 
 /**
  * @param {*} value
  * @return {!Promise}
  */
-Promise.rekect = function(value){};
+Promise.reject = function(value) {};
 
 /**
  * @param {*} value
  * @return {!Promise}
  */
-Promise.resolve = function(value){};
+Promise.resolve = function(value) {};
 
 /**
  * @template T
@@ -138,7 +138,7 @@ Promise.prototype.catch= function(onRejected) {};
 /**
  * @template T
  * @param {!function(T)} onFulfilled.
- * @param {!function()=} onRejected
+ * @param {!function(*)=} onRejected
  * @return {!Promise.<T>}
  */
 Promise.prototype.chain = function(onRejected) {};
@@ -146,7 +146,7 @@ Promise.prototype.chain = function(onRejected) {};
 /**
  * @template T
  * @param {!function(T)} onFulfilled.
- * @param {!function()=} opt_onRejected
+ * @param {!function(*)=} opt_onRejected
  * @return {!Promise.<T>}
  */
 Promise.prototype.then = function(onFulfilled, opt_onRejected) {};

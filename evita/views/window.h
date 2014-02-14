@@ -20,6 +20,7 @@ class WindowSet;
 class Window : public ui::Widget {
   DECLARE_CASTABLE_CLASS(Window, Widget);
 
+  private: int active_tick_;
   private: const views::WindowId window_id_;
 
   // TODO(yosi): We allow window_id as optional until we export all widgets
@@ -30,6 +31,7 @@ class Window : public ui::Widget {
   protected: explicit Window(WindowId window_id = kInvalidWindowId);
   protected: ~Window();
 
+  public: int active_tick() const { return active_tick_; }
   public: static WindowSet all_windows();
   public: WindowId window_id() const { return window_id_; }
 
@@ -45,12 +47,16 @@ class Window : public ui::Widget {
   // [F]
   public: static Window* FromWindowId(WindowId window_id);
 
+  // [U]
+  public: void UpdateActiveTick();
+
   // ui::Widget
   protected: virtual void OnKeyPressed(
       const ui::KeyboardEvent& event) override;
   protected: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
   protected: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   protected: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
+  protected: virtual void WillDestroyWidget() override;
 
   DISALLOW_COPY_AND_ASSIGN(Window);
 };

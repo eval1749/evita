@@ -20,8 +20,6 @@ CommandWindow::~CommandWindow() {
 // ui::Widget
 void CommandWindow::DidSetFocus() {
   Window::DidSetFocus();
-  if (is_shown())
-    return;
   auto const frame = Frame::FindFrame(*this);
   frame->DidSetFocusOnChild(this);
 }

@@ -404,13 +404,17 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
     return;
   }
 
+  pane->UpdateActiveTick();
+
   if (pane == m_pActivePane) {
     // TODO(yosi) This is happened on multiple window in one pane, we should
     // update tab label text.
-    window->Show();
+    if (!window->is_shown())
+      window->Show();
     return;
   }
 
+  DCHECK(!window->is_shown());
   auto const tab_index = getTabFromPane(pane);
   if (tab_index >= 0)
     DidChangeTabSelection(tab_index);
@@ -425,12 +429,12 @@ Frame* Frame::FindFrame(const ui::Widget& widget) {
 }
 
 Pane* Frame::GetActivePane() {
-  if (m_pActivePane && m_pActivePane->GetActiveTick())
+  if (m_pActivePane && m_pActivePane->active_tick())
     return m_pActivePane;
 
   auto pActive = m_oPanes.GetFirst();
   for (auto& pane: m_oPanes) {
-    if (pActive->GetActiveTick() < pane.GetActiveTick())
+    if (pActive->active_tick() < pane.active_tick())
       pActive = &pane;
   }
 

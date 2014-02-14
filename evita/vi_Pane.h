@@ -27,7 +27,6 @@ class Pane : public CommandWindow, public ChildNode_<Frame, Pane> {
 
   DECLARE_CASTABLE_CLASS(Pane, CommandWindow);
 
-  protected: uint             m_nActiveTick;
   protected: const char16*    m_pwszName;
 
   // ctor
@@ -38,7 +37,6 @@ class Pane : public CommandWindow, public ChildNode_<Frame, Pane> {
   public: virtual void Activate();
 
   // [G]
-  public: uint GetActiveTick() const { return m_nActiveTick; }
   public: virtual HCURSOR GetCursorAt(const common::win::Point&) const {
     return nullptr;
   }

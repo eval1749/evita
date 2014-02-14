@@ -16,7 +16,6 @@
 
 Pane::Pane(std::unique_ptr<common::win::NativeWindow>&& native_window)
     : CommandWindow(std::move(native_window)),
-      m_nActiveTick(0),
       m_pwszName(L"") {
 }
 
@@ -25,6 +24,5 @@ Pane::Pane()
 }
 
 void Pane::Activate() {
-  ++m_nActiveTick;
   GetFrame()->DidActivatePane(this);
 }

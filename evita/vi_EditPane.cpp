@@ -549,7 +549,7 @@ EditPane::LeafBox* EditPane::LayoutBox::GetActiveLeafBox() const {
 
     private: static uint activeTick(const LeafBox& box) {
       auto& window = *box.GetWindow();
-      return window.is_shown() ? window.GetActiveTick() : 0u;
+      return window.is_shown() ? window.active_tick() : 0u;
     }
   };
 

@@ -130,9 +130,7 @@ class TextEditWindow
   // TODO(yosi): We should not expose TextEdintWindow::GetTitle(). We export
   // this for EditPane.
   public: virtual base::string16 GetTitle(size_t max_length) const override;
-
   public: Posn GetEnd();
-
   public: Selection* GetSelection() const { return &*selection_; }
   public: Posn GetStart();
   public: size_t GetUndoSize() const;

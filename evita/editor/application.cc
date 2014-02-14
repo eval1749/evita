@@ -198,8 +198,16 @@ bool Application::TryDoIdle() {
 
 void Application::WillDestroyFrame(Frame* frame) {
   frames_.Delete(frame);
-  if (!frames_.IsEmpty())
+  if (active_frame_ == frame)
+    active_frame_ = frames_.GetFirst();
+  if (frames_.IsEmpty()) {
+    is_quit_ = true;
+    message_loop_->QuitWhenIdle();
     return;
-  is_quit_ = true;
-  message_loop_->QuitWhenIdle();
+  }
+
+  for (auto& candidate : frames_) {
+    if (active_frame_->active_tick() < candidate.active_tick())
+      active_frame_ = &candidate;
+  }
 }

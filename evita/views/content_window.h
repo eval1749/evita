@@ -19,8 +19,6 @@ namespace views {
 class ContentWindow : public CommandWindow {
   DECLARE_CASTABLE_CLASS(ContentWindow, CommandWindow);
 
-  private: uint active_tick_;
-
   protected: explicit ContentWindow(
                 std::unique_ptr<common::win::NativeWindow>&&);
   protected: explicit ContentWindow(views::WindowId window_id);
@@ -31,12 +29,7 @@ class ContentWindow : public CommandWindow {
   // [A]
   public: void Activate();
 
-  // [D]
-  protected: virtual void DidKillFocus() override;
-  protected: virtual void DidSetFocus() override;
-
   // [G]
-  public: uint GetActiveTick() const { return active_tick_; }
   public: virtual int GetIconIndex() const = 0;
   public: virtual base::string16 GetTitle(size_t max_length) const = 0;
 
@@ -50,9 +43,6 @@ class ContentWindow : public CommandWindow {
   // TODO(yosi): We should pass StatusBar object to
   // ContentWindow::UpdateStatusBar.
   public: virtual void UpdateStatusBar() const = 0;
-
-  // [W]
-  protected: virtual void WillDestroyWidget() override;
 
   DISALLOW_COPY_AND_ASSIGN(ContentWindow);
 };

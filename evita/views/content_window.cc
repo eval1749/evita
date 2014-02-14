@@ -10,13 +10,11 @@ namespace views {
 
 ContentWindow::ContentWindow(
     std::unique_ptr<common::win::NativeWindow>&& native_window)
-    : CommandWindow(std::move(native_window)),
-      active_tick_(0) {
+    : CommandWindow(std::move(native_window)) {
 }
 
 ContentWindow::ContentWindow(views::WindowId window_id)
-    : CommandWindow(window_id),
-      active_tick_(0) {
+    : CommandWindow(window_id) {
 }
 
 ContentWindow::ContentWindow()
@@ -37,21 +35,6 @@ void ContentWindow::Activate() {
     DEBUG_WIDGET_PRINTF("focus=%d show=%d\n", has_focus(), is_shown());
   #endif
   SetFocus();
-}
-
-void ContentWindow::DidKillFocus() {
-  CommandWindow::DidKillFocus();
-}
-  
-void ContentWindow::DidSetFocus() {
-  DEFINE_STATIC_LOCAL(uint, global_active_tick, (0));
-  CommandWindow::DidSetFocus();
-  ++global_active_tick;
-  active_tick_ = global_active_tick;
-}
-
-void ContentWindow::WillDestroyWidget() {
-  active_tick_ = 0;
 }
 
 }  // namespace views

@@ -203,7 +203,6 @@ void TextEditWindow::DidSetFocus() {
   ASSERT(has_focus());
   // Note: It is OK to set focus to hidden window.
   caret_->Take(*m_gfx);
-  GetBuffer()->UpdateFileStatus(true);
   ParentClass::DidSetFocus();
 }
 

@@ -40,9 +40,6 @@ class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
                     int code_page, NewlineMode newline_mode,
                     const dom::ViewDelegate::SaveFileCallback& callback);
 
-  // [U]
-  public: void UpdateFileStatus(bool = false);
-
   DISALLOW_COPY_AND_ASSIGN(Buffer);
 };
 

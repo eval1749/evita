@@ -427,41 +427,6 @@ void text::Buffer::SetFile(
   m_eObsolete = Obsolete_No;
 }
 
-/// <summary>
-///   Updates buffer obsolete status from associated file.
-/// </summary>
-/// <param name="fForce">
-///   If true, ignore cached status.
-/// </param>
-void Buffer::UpdateFileStatus(bool const fForce) {
-  if (filename_.empty())
-    return;
-
-  if (IsNotReady()) {
-    return;
-  }
-
-  if (m_eObsolete == Obsolete_Checking ||m_eObsolete == Obsolete_Ignore)
-      return;
-
-  auto const tickNow = ::GetTickCount();
-
-  if (!fForce) {
-    if (tickNow - m_tickLastCheck < k_tickFileCheck) {
-      return;
-    }
-  }
-
-  m_tickLastCheck = tickNow;
-
-  auto const pCheck = new InfoRequest(this, filename_);
-  m_eObsolete = Obsolete_Checking;
-  if (!pCheck->Start()) {
-    m_eObsolete = Obsolete_Unknown;
-    delete pCheck;
-  }
-}
-
 uint FileRequest::openForLoad() {
   ASSERT(m_hFile == INVALID_HANDLE_VALUE);
 

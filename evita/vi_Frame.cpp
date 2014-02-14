@@ -589,37 +589,6 @@ void Frame::Paint() {
 ///   Idle processing
 /// </summary>
 bool Frame::OnIdle(uint const nCount) {
-  class Local {
-    public: static void HandleObsoleteBuffer(Buffer* const pBuffer) {
-      // Prevent further obsolete checking.
-      pBuffer->SetObsolete(text::Buffer::Obsolete_Ignore);
-
-      auto const iAnswer = Application::instance()->Ask(
-          MB_YESNO | MB_ICONWARNING | MB_SETFOREGROUND | MB_TOPMOST,
-          IDS_ASK_REFRESH,
-          pBuffer->GetName().c_str());
-
-      switch (iAnswer) {
-        case IDNO:
-          break;
-
-        case IDYES:
-          for (auto window : Window::all_windows()) {
-            if (auto text_window = window->as<TextEditWindow>()) {
-              if (text_window->GetBuffer() == pBuffer) {
-                text_window->GetSelection()->PrepareForReload();
-                pBuffer->Load(pBuffer->GetFileName().c_str());
-              }
-            }
-          }
-          break;
-
-        default:
-         CAN_NOT_HAPPEN();
-      }
-    }
-  }; // Local
-
   auto const more = Widget::OnIdle(nCount);
   if (nCount || !m_pActivePane)
     return more;
@@ -637,12 +606,6 @@ bool Frame::OnIdle(uint const nCount) {
     return more;
 
   updateTitleBar();
-  auto const buffer = text_edit_window->GetBuffer();
-  auto const state = buffer->GetObsolete();
-  if (state == Buffer::Obsolete_No)
-    buffer->UpdateFileStatus();
-  else if (state == Buffer::Obsolete_Yes)
-    Local::HandleObsoleteBuffer(buffer);
   return more;
 }
 

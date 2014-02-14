@@ -122,6 +122,53 @@ global.TextWindow.prototype.clone = function() {
 
   /**
    * @param {!TextWindow} window
+   */
+  function handleFocus(window) {
+    stopControllers(window);
+    var document = window.document;
+    if (document.filename == '')
+      return;
+    if (document.obsolete == Document.Obsolete.CHECKING) {
+      Editor.messageBox(window, 'Checking file status...',
+                        MessageBox.ICONINFORMATION);
+      return;
+    }
+    if (document.obsolete == Document.Obsolete.YES) {
+      Editor.messageBox(window, 'This document has been stale.',
+                        MessageBox.ICONWARNING);
+      return;
+    }
+    document.obsolete = Document.Obsolete.CHECKING;
+    Os.File.stat(document.filename).then(function(info) {
+      document.lastStatTime_ = new Date();
+      document.obsolete = info.lastModificationDate.valueOf() ==
+                            document.lastWriteTime.valueOf() ?
+          Document.Obsolete.NO : Document.Obsolete.YES;
+      if (document.obsolete == Document.Obsolete.NO) {
+        Editor.messageBox(window, 'Status is OK.', MessageBox.ICONINFORMATION);
+        return;
+      }
+      Editor.messageBox(window, 'This document is stale.',
+                        MessageBox.ICONWARNING);
+      Editor.messageBox(window,
+          Editor.localizeText(Strings.IDS_ASK_REFRESH, {name: document.name}),
+          MessageBox.YESNO | MessageBox.ICONWARNING | MessageBox.TOPMOST |
+              MessageBox.SETFOREGROUND).then(function(response) {
+        if (response != DialogItemId.YES) {
+          document.lastWriteTime = info.lastModificationDate;
+          return;
+        }
+        reloadDocument(window, document);
+      });
+    }).catch(function(reason) {
+      console.log('Os.File.stat', document.filename, reason);
+      document.lastStatTime_ = new Date();
+      document.obsolete = Document.Obsolete.UNKNOWN;
+    });
+  }
+
+  /**
+   * @param {!TextWindow} window
    * @param {!MouseEvent} event
    */
   function handleMouseDown(window, event) {
@@ -213,6 +260,26 @@ global.TextWindow.prototype.clone = function() {
     selection.startIsActive = false;
   }
 
+  /**
+   * @param {!TextWindow} window
+   * @param {!Document} document
+   */
+  function reloadDocument(window, document) {
+    var selection_map = new Map();
+    document.listWindows().forEach(function(window) {
+      var selection = window.selection;
+      selection_map.set(selection, selection.range.start);
+    })
+    document.load().then(function(zero) {
+      Editor.messageBox(window, 'Reloaded', MessageBox.ICONINFORMATION);
+      document.listWindows().forEach(function (window) {
+        var selection = window.selection;
+        var present = selection_map.get(selection);
+        selection.range.collapseTo(present ? present : 0);
+      });
+    });
+  }
+
   /** @param {!TextWindow} window */
   function stopControllers(window) {
     if (window.autoscroller_)
@@ -233,6 +300,9 @@ global.TextWindow.prototype.clone = function() {
         break;
       case Event.Names.DBLCLICK:
         selectWord(this);
+        break;
+      case Event.Names.FOCUS:
+        handleFocus(this);
         break;
       case Event.Names.MOUSEDOWN:
         handleMouseDown(this, /** @type {!MouseEvent} */(event));

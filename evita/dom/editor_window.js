@@ -35,6 +35,9 @@
    */
  EditorWindow.handleEvent = function(event) {
    switch (event.type) {
+     case Event.Names.BLUR:
+     case Event.Names.FOCUS:
+       break;
      case Event.Names.DROPWINDOW: {
        var window_event = /** @type{WindowEvent} */(event);
        handleDropWindow(window_event.sourceWindow, this);

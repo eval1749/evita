@@ -73,14 +73,13 @@
     UNKNOWN: -1,
     NO: 0,
     YES: 1,
-    IGNORE: 2
   };
-
-  /** @type {!Document.Obsolete} */
-  Document.prototype.obsolete = Document.Obsolete.UNKNOWN;
 
   /** @type {number} */
   Document.prototype.lastStatTime_ = new Date(0);
+
+  /** @type {!Document.Obsolete} */
+  Document.prototype.obsolete = Document.Obsolete.UNKNOWN;
 
   /**
    * @this {!Document}
@@ -405,6 +404,9 @@
     }
 
     var deferred = Promise.defer();
+    document.obsolete = Document.Obsolete.CHECKING;
+    Editor.messageBox(null, 'Loading ' + document.filename,
+                      MessageBox.ICONINFORMATION);
     document.load_(document.filename, function(error_code) {
       if (!error_code)
         deferred.resolve(error_code);
@@ -412,6 +414,8 @@
         deferred.reject(error_code);
     });
     return deferred.promise.then(function(error_code) {
+      Editor.messageBox(null, 'Loaded ' + document.filename,
+                        MessageBox.ICONINFORMATION);
       console.log('load', document, 'error', error_code);
       document.obsolete = Document.Obsolete.NO;
       document.lastStatTime_ = new Date();
@@ -503,6 +507,9 @@
 
     var deferred = Promise.defer();
     var filename = document.filename;
+    document.obsolete = Document.Obsolete.CHECKING;
+    Editor.messageBox(null, 'Saving to ' + document.filename,
+                      MessageBox.ICONINFORMATION);
     document.save_(filename, function(error_code) {
       if (!error_code)
         deferred.resolve(error_code);

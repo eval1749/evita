@@ -168,7 +168,8 @@ class DocumentClass : public v8_glue::WrapperInfo {
       ObjectTemplateBuilder& builder) override {
     builder
         .SetProperty("filename", &Document::filename, &Document::set_filename)
-        .SetProperty("lastWriteTime", &Document::last_write_time)
+        .SetProperty("lastWriteTime", &Document::last_write_time,
+                     &Document::set_last_write_time)
         .SetProperty("length", &Document::length)
         .SetProperty("mode", &Document::mode, &Document::set_mode)
         .SetProperty("modified", &Document::modified)
@@ -304,6 +305,10 @@ void Document::set_filename(const base::string16& filename) {
 
 base::Time Document::last_write_time() const {
   return buffer_->GetLastWriteTime();
+}
+
+void Document::set_last_write_time(base::Time last_write_time) {
+  return buffer_->SetFile(buffer_->GetFileName(), last_write_time);
 }
 
 text::Posn Document::length() const {

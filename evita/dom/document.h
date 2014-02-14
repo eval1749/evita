@@ -40,6 +40,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: base::char16 charCodeAt(text::Posn position) const;
   public: const base::string16& filename() const;
   public: void set_filename(const base::string16& filename);
+  public: base::Time last_write_time() const;
   public: text::Posn length() const;
   public: Mode* mode() const { return mode_.get(); }
   public: void set_mode(Mode* mode);

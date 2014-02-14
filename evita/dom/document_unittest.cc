@@ -110,11 +110,45 @@ TEST_F(DocumentTest, length) {
   EXPECT_SCRIPT_EQ("6", "doc.length");
 }
 
-TEST_F(DocumentTest, load_) {
-  EXPECT_CALL(*mock_view_impl(), LoadFile(_, Eq(L"foo"), _));
+TEST_F(DocumentTest, load_failed) {
+  domapi::LoadFileCallbackData data;
+  data.error_code = 123;
+  mock_view_impl()->SetLoadFileCallbackData(data);
+
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"
-    "doc.load_('foo', function(error_code){})");
+    "doc.load('foo.cc')");
+  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
+  EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
+  EXPECT_SCRIPT_TRUE("doc.obsolete == Document.Obsolete.UNKNOWN");
+  EXPECT_SCRIPT_FALSE("doc.readonly");
+}
+
+TEST_F(DocumentTest, load_succeeded) {
+  domapi::LoadFileCallbackData data;
+  data.code_page = 123;
+  data.error_code = 0;
+  data.last_write_time = base::Time::FromJsTime(123456.0);
+  data.newline_mode = NewlineMode_Lf;
+  data.readonly = true;
+  mock_view_impl()->SetLoadFileCallbackData(data);
+
+  EXPECT_SCRIPT_VALID(
+    "console.log = log;"
+    "var doc = new Document('foo');"
+    "var promise = doc.load('foo.cc');");
+  EXPECT_SCRIPT_TRUE("promise instanceof Promise");
+  EXPECT_SCRIPT_VALID(
+      "var error_code;"
+      "promise.then(function(x) { error_code = x; });");
+  EXPECT_SCRIPT_EQ("0", "error_code");
+  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_EQ("123456", "doc.lastWriteTime.valueOf()");
+  EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
+  EXPECT_SCRIPT_EQ("C++", "doc.mode.name");
+  EXPECT_SCRIPT_EQ("0", "doc.obsolete");
+  EXPECT_SCRIPT_TRUE("doc.readonly");
 }
 
 TEST_F(DocumentTest, mode) {

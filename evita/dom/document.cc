@@ -204,9 +204,12 @@ class LoadFileCallback : public base::RefCounted<LoadFileCallback> {
 
   public: void Run(const domapi::LoadFileCallbackData& data) {
     auto const buffer = document_->buffer();
-    buffer->SetCodePage(static_cast<uint32_t>(data.code_page));
-    buffer->SetNewline(data.newline_mode);
-    buffer->SetFile(buffer->GetFileName(), data.last_write_time);
+    if (!data.error_code) {
+      buffer->SetCodePage(static_cast<uint32_t>(data.code_page));
+      buffer->SetNewline(data.newline_mode);
+      buffer->SetFile(buffer->GetFileName(), data.last_write_time);
+      buffer->SetReadOnly(data.readonly);
+    }
     buffer->FinishIo(static_cast<uint32_t>(data.error_code));
     if (!runner_)
       return;

@@ -9,14 +9,21 @@
 #pragma warning(disable: 4365 4628)
 #include "gmock/gmock.h"
 #pragma warning(pop)
+#include "evita/dom/public/api_callback.h"
 #include "evita/dom/view_delegate.h"
 
 namespace dom {
 
 class MockViewImpl : public dom::ViewDelegate {
+  private: domapi::LoadFileCallbackData load_file_callback_data_;
+
   public: MockViewImpl();
   public: virtual ~MockViewImpl();
 
+  public: void SetLoadFileCallbackData(
+      const domapi::LoadFileCallbackData& data);
+
+  // dom::ViewDelegate
   MOCK_METHOD2(AddWindow, void(WindowId, WindowId));
   MOCK_METHOD2(ChangeParentWindow, void(WindowId, WindowId));
   MOCK_METHOD3(ComputeOnTextWindow, void(WindowId,
@@ -38,8 +45,8 @@ class MockViewImpl : public dom::ViewDelegate {
   public: void GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys, int* states,
       base::WaitableEvent* event) override;
-  MOCK_METHOD3(LoadFile, void(Document*, const base::string16&,
-                              LoadFileCallback));
+  public: void LoadFile(Document* document, const base::string16& filename,
+                        LoadFileCallback callback);
   MOCK_METHOD1(MakeSelectionVisible, void(WindowId));
   public: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,

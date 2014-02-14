@@ -69,11 +69,11 @@
 
   /** @enum{number} */
   global.Document.Obsolete = {
+    CHECKING: -2,
+    UNKNOWN: -1,
     NO: 0,
-    CHECKING: 1,
-    IGNORE: 2,
-    UNKNOWN: 3,
-    YES: 4
+    YES: 1,
+    IGNORE: 2
   };
 
   /** @type {!Document.Obsolete} */
@@ -399,7 +399,7 @@
       var filename = /** @type{string} */(opt_filename);
       var absolute_filename = FilePath.fullPath(filename);
       var present = findDocumentOnFile(absolute_filename);
-      if (present !== this)
+      if (present && present !== this)
         throw filename + ' is already bound to ' + present;
       document.filename = absolute_filename;
     }
@@ -413,6 +413,8 @@
     });
     return deferred.promise.then(function(error_code) {
       console.log('load', document, 'error', error_code);
+      document.obsolete = Document.Obsolete.NO;
+      document.lastStatTime_ = new Date();
       document.parseFileProperties();
       var new_mode = Mode.chooseMode(document);
       if (new_mode.name != document.mode.name) {
@@ -420,8 +422,6 @@
                           MessageBox.ICONINFORMATION);
         document.mode = new_mode;
       }
-      document.obsolete = Document.Obsolete.NO;
-      document.lastStatTime_ = new Date();
       document.listWindows().forEach(function(window) {
         if (window instanceof TextWindow) {
           console.log('Reset selection offset', document, window);
@@ -429,8 +429,13 @@
         }
       });
       document.doColor_(Math.min(document.length, 1024 * 8));
+      return deferred.promise;
     }).catch(function(exception) {
-      console.log('Exception', exception, 'during loading into', document);
+      console.log('load.catch', exception, 'during loading', filename,
+                  'into', document);
+      document.lastStatTime_ = new Date();
+      document.obsolete = Document.Obsolete.UNKNOWN;
+      return deferred.promise;
     });
   };
 

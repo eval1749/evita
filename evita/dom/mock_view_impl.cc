@@ -13,6 +13,12 @@ MockViewImpl::MockViewImpl() {
 MockViewImpl::~MockViewImpl() {
 }
 
+void MockViewImpl::SetLoadFileCallbackData(
+    const domapi::LoadFileCallbackData& data) {
+  load_file_callback_data_ = data;
+}
+
+// dom::ViewDelegate
 void MockViewImpl::GetFilenameForLoad(WindowId,
                                       const base::string16& dir_path,
                                       GetFilenameForLoadCallback callback) {
@@ -32,6 +38,11 @@ void MockViewImpl::GetTableRowStates(WindowId,
     *states = index;
     ++states;
   }
+}
+
+void MockViewImpl::LoadFile(Document*, const base::string16&,
+                            LoadFileCallback callback) {
+  callback.Run(load_file_callback_data_);
 }
 
 void MockViewImpl::MessageBox(WindowId, const base::string16&,

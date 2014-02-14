@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "evita/ctrl_TabBand.h"
-#include "evita/ctrl_TitleBar.h"
 #include "evita/li_util.h"
 #include "evita/views/window.h"
 
@@ -38,6 +37,7 @@ class TextEditWindow;
 namespace views {
 class ContentWindow;
 class MessageView;
+class TitleBar;
 }
 
 namespace dom {
@@ -67,7 +67,7 @@ class Frame final : public views::Window,
   private: HWND m_hwndTabBand;
   private: Panes m_oPanes;
   private: std::unique_ptr<views::MessageView> message_view_;
-  private: TitleBar m_oTitleBar;
+  private: std::unique_ptr<views::TitleBar> title_bar_;
   private: Pane* m_pActivePane;
   private: mutable char16 m_wszToolTip[1024];
 

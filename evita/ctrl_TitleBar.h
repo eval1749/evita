@@ -5,17 +5,21 @@
 #if !defined(INCLUDE_visual_control_TitleBar_h)
 #define INCLUDE_visual_control_TitleBar_h
 
+#include "base/strings/string16.h"
+
+namespace views {
+
 class TitleBar {
-  private: int    m_cwch;
-  private: HWND   m_hwnd;
-  private: char16 m_wsz[100];
+  private: HWND  hwnd_;
+  private: base::string16 title_;
 
   public: TitleBar();
   public: ~TitleBar();
 
-  public: bool IsEqual(const char16* title, int title_length) const;
-  public: int Realize(HWND hwnd);
-  public: int SetText(const char16* new_title, int new_title_length);
+  public: void Realize(HWND hwnd);
+  public: void SetText(const base::string16& new_title);
 };
+
+}  // namespace views
 
 #endif //!defined(INCLUDE_visual_control_TitleBar_h)

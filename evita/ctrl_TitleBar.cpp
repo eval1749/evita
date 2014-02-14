@@ -1,4 +1,3 @@
-#include "precomp.h"
 // Copyright (c) 2014 Project Vogue. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -7,39 +6,33 @@
 
 #include <algorithm>
 
+#include "base/logging.h"
+
+namespace views {
+
 TitleBar::TitleBar()
-    : m_cwch(0),
-      m_hwnd(NULL) {
-  m_wsz[0] = 0;
+    : hwnd_(nullptr) {
 }
 
 TitleBar::~TitleBar() {
 }
 
-int TitleBar::Realize(HWND hwnd) {
-  m_hwnd = hwnd;
-  return 0;
+void TitleBar::Realize(HWND hwnd) {
+  DCHECK(hwnd);
+  DCHECK(!hwnd_);
+  hwnd_ = hwnd;
 }
 
-bool TitleBar::IsEqual(const char16* pwch, int cwch) const {
-  cwch = std::min(cwch, static_cast<int>(lengthof(m_wsz) - 1));
-  if (m_cwch != cwch) return false;
-  return 0 == ::memcmp(m_wsz, pwch, sizeof(char16) * m_cwch);
-}
+void TitleBar::SetText(const base::string16& new_title) {
+  if (title_ == new_title)
+    return;
 
-int TitleBar::SetText(const char16* pwch, int cwch) {
-  if (IsEqual(pwch, cwch))
-    return 0;
-
-  m_cwch = std::min(cwch, static_cast<int>(lengthof(m_wsz) - 1));
-
-  ::CopyMemory(m_wsz, pwch, sizeof(char16) * m_cwch);
-  m_wsz[cwch] = 0;
-
-  if (!::SetWindowText(m_hwnd, m_wsz)) {
+  if (::SetWindowTextW(hwnd_, new_title.c_str())) {
+    title_ = new_title;
+  } else {
     auto const dwError = ::GetLastError();
-    return static_cast<int>(dwError);
+    DVLOG(0) << "SetWindowText err=" << dwError;
   }
-
-  return 0;
 }
+
+}  // namespace views

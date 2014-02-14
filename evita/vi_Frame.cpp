@@ -30,6 +30,7 @@
 #include "common/tree/child_nodes.h"
 #include "common/win/native_window.h"
 #include "evita/ctrl_TabBand.h"
+#include "evita/ctrl_TitleBar.h"
 #include "evita/text/modes/mode.h"
 #include "evita/gfx_base.h"
 #include "evita/vi_defs.h"
@@ -127,6 +128,7 @@ Frame::Frame(views::WindowId window_id)
     : views::Window(ui::NativeWindow::Create(*this), window_id),
       gfx_(new gfx::Graphics()),
       message_view_(new views::MessageView()),
+      title_bar_(new views::TitleBar()),
       m_hwndTabBand(nullptr),
       m_pActivePane(nullptr) {
 }
@@ -310,7 +312,7 @@ void Frame::DidCreateNativeWindow() {
   }
 
   message_view_->Realize(*native_window());
-  m_oTitleBar.Realize(*native_window());
+  title_bar_->Realize(*native_window());
 
   CompositionState::Update(*native_window());
   gfx_->Init(*native_window());
@@ -905,8 +907,7 @@ void Frame::updateTitleBar() {
   }
 
   auto const window_title = title + L" - " + Application::instance()->title();
-  m_oTitleBar.SetText(window_title.data(),
-                      static_cast<int>(window_title.length()));
+  title_bar_->SetText(window_title);
   m_pActivePane->UpdateStatusBar();
 }
 

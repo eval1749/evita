@@ -52,8 +52,8 @@ Document.prototype.filename;
 /** @expose  @type {?Keymap} */
 Document.prototype.keymap;
 
-/** @type {number} */
-Document.prototype.lastStatusCheckTime_;
+/** @type {!Date} */
+Document.prototype.lastStatTime_;
 
 /** @type {!Date} */
 Document.prototype.lastWriteTime;

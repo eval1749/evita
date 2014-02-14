@@ -80,7 +80,7 @@
   Document.prototype.obsolete = Document.Obsolete.UNKNOWN;
 
   /** @type {number} */
-  Document.prototype.lastStatusCheckTime_ = 0;
+  Document.prototype.lastStatTime_ = new Date(0);
 
   /**
    * @this {!Document}
@@ -421,7 +421,7 @@
         document.mode = new_mode;
       }
       document.obsolete = Document.Obsolete.NO;
-      document.lastStatusCheckTime_ = Date.now();
+      document.lastStatTime_ = new Date();
       document.listWindows().forEach(function(window) {
         if (window instanceof TextWindow) {
           console.log('Reset selection offset', document, window);

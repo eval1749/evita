@@ -297,14 +297,10 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
   auto safe_title = title;
   if (!safe_title.empty())
     safe_title += L" - ";
-  safe_title += L"evita 5.0";
-  #if defined(_DEBUG)
-    safe_title += L"/debug";
-  #endif
+  safe_title += Application::instance()->title();
   auto const hwnd = frame ? frame->AssociatedHwnd() : nullptr;
   editor::ModalMessageLoopScope modal_mesage_loop_scope;
-  auto const response= ::MessageBoxW(hwnd,
-                                     message.c_str(), title.c_str(),
+  auto const response= ::MessageBoxW(hwnd, message.c_str(), title.c_str(),
                                      static_cast<UINT>(flags));
   event_handler_->RunCallback(base::Bind(callback, response));
 }

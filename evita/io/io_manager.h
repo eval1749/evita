@@ -38,14 +38,6 @@ class IoManager : public common::win::NativeWindow, public domapi::IoDelegate {
   public: domapi::IoDelegate* io_delegate() const;
   public: base::MessageLoop* message_loop() const;
 
-  public: static void FinishSave(
-      Buffer* buffer,
-      const char16* file_name,
-      uint error_code,
-      NewlineMode newline_mode,
-      uint file_attributes,
-      base::Time last_write_time);
-
   public: void Start();
 
   // domapi::IoDelegate

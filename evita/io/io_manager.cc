@@ -30,38 +30,16 @@ using io::IoDelegateImpl;
 
 namespace {
 
-// FinishSaveParam
-struct FinishSaveParam {
-  NewlineMode m_eNewline;
-  base::Time last_write_time_;
-  uint m_nError;
-  uint m_nFileAttrs;
-  Buffer* m_pBuffer;
-  char16 m_wszFileName[MAX_PATH];
-
-  static void Run(LPARAM lParam) {
-    reinterpret_cast<FinishSaveParam*>(lParam)->run();
-  }
-
-  void run() {
-    if (!m_nError)
-      m_pBuffer->SetFile(m_wszFileName, last_write_time_);
-    m_pBuffer->FinishIo(m_nError);
-  }
+enum Message {
+  Message_Start = WM_USER,
 };
+
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // IoManager
 //
-enum Message {
-  Message_Start = WM_USER,
-
-  Message_FinishSave,
-};
-
-}  // namespace
-
 IoManager::IoManager()
     : io_delegate_(new IoDelegateImpl()),
       io_thread_(new base::Thread("io_manager_thread")) {
@@ -76,29 +54,6 @@ domapi::IoDelegate* IoManager::io_delegate() const {
 
 base::MessageLoop* IoManager::message_loop() const {
   return io_thread_->message_loop();
-}
-
-void IoManager::FinishSave(
-    Buffer* pBuffer,
-    const char16* pwszFileName,
-    uint nError,
-    NewlineMode eNewline,
-    uint nFileAttrs,
-    base::Time last_write_time) {
-  FinishSaveParam oParam;
-  oParam.m_eNewline = eNewline;
-  oParam.last_write_time_ = last_write_time;
-  oParam.m_nError = nError;
-  oParam.m_nFileAttrs = nFileAttrs;
-  oParam.m_pBuffer = pBuffer;
-
-  ::lstrcpyW(oParam.m_wszFileName, pwszFileName);
-
-  ::SendMessage(
-      *Application::instance()->GetIoManager(),
-      Message_FinishSave,
-      0,
-      reinterpret_cast<LPARAM>(&oParam));
 }
 
 void IoManager::Start() {
@@ -154,10 +109,6 @@ LRESULT IoManager::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
       // TODO(yosi) Should we call |SetForegroundWindow|?
       return true;
     }
-
-    case Message_FinishSave:
-      FinishSaveParam::Run(lParam);
-      return 0;
   }
   return NativeWindow::WindowProc(uMsg, wParam, lParam);
 }

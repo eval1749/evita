@@ -68,8 +68,8 @@ class Frame final : public views::Window,
   private: Panes m_oPanes;
   private: std::unique_ptr<views::MessageView> message_view_;
   private: std::unique_ptr<views::TitleBar> title_bar_;
+  private: base::string16 tooltip_;
   private: Pane* m_pActivePane;
-  private: mutable char16 m_wszToolTip[1024];
 
   public: explicit Frame(views::WindowId window_id);
   // TODO(yosi) We should remove no parameter Frame ctor.
@@ -114,7 +114,6 @@ class Frame final : public views::Window,
   private: Pane* getPaneFromTab(int) const;
   public: gfx::Rect GetPaneRect() const;
   private: int getTabFromPane(Pane*) const;
-  private: const char16* getToolTip(NMTTDISPINFO*) const;
 
   // [F]
   public: static Frame* FindFrame(const Widget& widget);
@@ -149,6 +148,7 @@ class Frame final : public views::Window,
   // [U]
   private: void updateTitleBar();
   private: static void UpdateTitleBarTask(views::WindowId window_id);
+  private: void UpdateTooltip(NMTTDISPINFO*);
 
   // [W]
   private: virtual void WillDestroyWidget() override;

@@ -8,8 +8,7 @@
 #include "evita/vi_Frame.h"
 
 Pane::Pane(std::unique_ptr<common::win::NativeWindow>&& native_window)
-    : CommandWindow(std::move(native_window)),
-      m_pwszName(L"") {
+    : CommandWindow(std::move(native_window)) {
 }
 
 Pane::Pane()

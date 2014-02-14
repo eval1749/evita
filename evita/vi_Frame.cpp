@@ -518,28 +518,6 @@ base::string16 ModifiedDisplayText(const Buffer& buffer) {
 }
 }
 
-const char16* Frame::getToolTip(NMTTDISPINFO* const pDisp) const {
-  auto const pPane = getPaneFromTab(static_cast<int>(pDisp->hdr.idFrom));
-  if (!pPane)
-    return L"";
-
-  auto const pEdit = pPane->as<EditPane>();
-  if (!pEdit)
-    return pPane->GetName();
-
-  auto const pBuffer = pEdit->GetBuffer();
-  if (!pBuffer)
-    return pPane->GetName();
-
-  std::basic_ostringstream<base::char16> tooltip;
-  tooltip << "Name:" << pBuffer->name() << "\r\n" <<
-    "File: " << MaybeBufferFilename(*pBuffer) << "\r\n" <<
-    "Save: " << MaybeBufferSaveTime(*pBuffer) << "\r\n" <<
-    ModifiedDisplayText(*pBuffer);
-  ::lstrcpyW(m_wszToolTip, tooltip.str().c_str());
-  return m_wszToolTip;
-}
-
 void Frame::onDropFiles(HDROP const hDrop) {
   uint nIndex = 0;
   for (;;) {
@@ -685,7 +663,8 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       if (TTN_NEEDTEXT == pNotify->code) {
           auto const p = reinterpret_cast<NMTTDISPINFO*>(lParam);
           ::SendMessage(p->hdr.hwndFrom, TTM_SETMAXTIPWIDTH, 0, 300);
-          p->lpszText = const_cast<char16*>(getToolTip(p));
+          UpdateTooltip(p);
+          p->lpszText = const_cast<LPWSTR>(tooltip_.c_str());
           return 0;
       }
 
@@ -920,6 +899,33 @@ void Frame::UpdateTitleBarTask(views::WindowId window_id) {
   if (!frame)
     return;
   frame->updateTitleBar();
+}
+
+void Frame::UpdateTooltip(NMTTDISPINFO* const pDisp) {
+  auto const pPane = getPaneFromTab(static_cast<int>(pDisp->hdr.idFrom));
+  if (!pPane) {
+    tooltip_ = base::string16();
+    return;
+  }
+
+  auto const pEdit = pPane->as<EditPane>();
+  if (!pEdit) {
+    tooltip_ = pPane->GetName();
+    return;
+  }
+
+  auto const pBuffer = pEdit->GetBuffer();
+  if (!pBuffer) {
+    tooltip_ = pPane->GetName();
+    return;
+  }
+
+  std::basic_ostringstream<base::char16> tooltip;
+  tooltip << "Name:" << pBuffer->name() << "\r\n" <<
+    "File: " << MaybeBufferFilename(*pBuffer) << "\r\n" <<
+    "Save: " << MaybeBufferSaveTime(*pBuffer) << "\r\n" <<
+    ModifiedDisplayText(*pBuffer);
+  tooltip_ = std::move(tooltip.str());
 }
 
 void Frame::WillDestroyWidget() {

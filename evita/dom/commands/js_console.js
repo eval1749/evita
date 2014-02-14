@@ -508,23 +508,29 @@ JsConsole.prototype.useHistory = function() {
   Editor.bindKey(Window, 'Ctrl+Shift+J', switchToJsConsoleCommand);
 
   // Install printers.
+  Error.prototype.stringifyProperties = function() {
+    return [{name: 'message', value: this.message},
+            {name: 'stack', value: this.stack}];
+  };
+
+  Event.prototype.stringifyProperties = function() {
+    return [{name: 'type', value: this.type},
+            {name: 'target', value: this.target}];
+  };
+
   Point.prototype.stringifyProperties = function() {
-    return [ {name: 'x', value: this.x},
-             {name: 'y', value: this.y}
-           ];
+    return [{name: 'x', value: this.x}, {name: 'y', value: this.y}];
   };
 
   Range.prototype.stringifyProperties = function() {
-    return [ {name: 'document', value: this.document},
-             {name: 'start', value: this.start},
-             {name: 'end', value: this.end}
-           ];
+    return [{name: 'document', value: this.document},
+            {name: 'start', value: this.start},
+            {name: 'end', value: this.end}];
   };
 
   TextSelection.prototype.stringifyProperties = function() {
-    return [ {name: 'document', value: this.document},
-             {name: 'start', value: this.range.start},
-             {name: 'end', value: this.range.end}
-           ];
+    return [{name: 'document', value: this.document},
+            {name: 'start', value: this.range.start},
+            {name: 'end', value: this.range.end}];
   };
 })();

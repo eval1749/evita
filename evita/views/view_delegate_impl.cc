@@ -315,6 +315,7 @@ void ViewDelegateImpl::Reconvert(WindowId window_id, text::Posn start,
     DVLOG(0) << "WindowId " << window_id << " should be TextEditWindow.";
     return;
   }
+  UI_DOM_AUTO_LOCK_SCOPE();
   text_window->Reconvert(start, end);
 }
 

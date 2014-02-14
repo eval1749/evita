@@ -505,7 +505,8 @@ void TextEditWindow::Redraw() {
         format(*m_gfx, startOfLineAux(*m_gfx, lStart));
     } else {
       // Page is clean.
-      caret_->ShouldBlink();
+      if (!m_fImeTarget)
+        caret_->ShouldBlink();
       return;
     }
   }
@@ -747,7 +748,11 @@ class Imc {
 };
 
 void TextEditWindow::onImeComposition(LPARAM lParam) {
-  UI_DOM_AUTO_LOCK_SCOPE();
+  if (!editor::DomLock::instance()->locked()) {
+    UI_DOM_AUTO_LOCK_SCOPE();
+    onImeComposition(lParam);
+    return;
+  }
 
   Imc imc(AssociatedHwnd());
   if (!imc)
@@ -960,11 +965,9 @@ void TextEditWindow::Reconvert(Posn lStart, Posn lEnd) {
   if (!cb)
     return;
 
-  auto const pb = new char[cb];
-  if (!pb)
-    return;
+  std::vector<uint8_t> buffer(cb);
 
-  auto const p = reinterpret_cast<RECONVERTSTRING*>(pb);
+  auto const p = reinterpret_cast<RECONVERTSTRING*>(&buffer[0]);
   setReconvert(p, lStart, lEnd);
 
   Imc imc(AssociatedHwnd());
@@ -975,8 +978,10 @@ void TextEditWindow::Reconvert(Posn lStart, Posn lEnd) {
       cb,
       nullptr,
       0);
-  if (!fSucceeded)
-      goto exit;
+  if (!fSucceeded) {
+    DVLOG(0) << "ImmSetCompositionString SCS_QUERYRECONVERTSTRING failed";
+    return;
+  }
 
   m_lImeStart = static_cast<Posn>(lStart + p->dwCompStrOffset / 2);
   m_lImeEnd = static_cast<Posn>(m_lImeStart + p->dwCompStrLen);
@@ -989,22 +994,23 @@ void TextEditWindow::Reconvert(Posn lStart, Posn lEnd) {
       cb,
       nullptr,
       0);
-  if (!fSucceeded)
-    goto exit;
-
-  exit:
-    delete[] pb;
+  if (!fSucceeded) {
+    DVLOG(0) << "ImmSetCompositionString SCS_SETRECONVERTSTRING failed";
+    return;
+  }
 }
 
-uint TextEditWindow::setReconvert(RECONVERTSTRING* p, Posn lStart,
+size_t TextEditWindow::setReconvert(RECONVERTSTRING* p, Posn lStart,
                                   Posn lEnd) {
   ASSERT(lEnd >= lStart);
   UI_ASSERT_DOM_LOCKED();
   auto const cwch = lEnd - lStart;
-  if (!p || !cwch)
-    return 0;
+  if (!cwch)
+    return 0u;
 
   auto const cb = sizeof(RECONVERTSTRING) + sizeof(char16) * (cwch + 1);
+  if (!p)
+    return cb;
   p->dwSize = cb;
   p->dwVersion = 0;
   p->dwStrLen = static_cast<DWORD>(cwch);

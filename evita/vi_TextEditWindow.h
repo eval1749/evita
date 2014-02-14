@@ -172,7 +172,7 @@ class TextEditWindow
   #if SUPPORT_IME
   private: void onImeComposition(LPARAM);
   public: void Reconvert(Posn, Posn);
-  private: uint setReconvert(RECONVERTSTRING*, Posn, Posn);
+  private: size_t setReconvert(RECONVERTSTRING*, Posn start, Posn end);
   private: BOOL showImeCaret(SIZE, POINT);
   #endif // SUPPORT_IME
 

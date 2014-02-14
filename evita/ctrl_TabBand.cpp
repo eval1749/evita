@@ -528,8 +528,11 @@ class Item : public Element {
   }
 
   // [S]
-  public: void SetItem(const TCITEM* pTcItem) {
+  public: bool SetItem(const TCITEM* pTcItem) {
+    auto changed = false;
     if (pTcItem->mask & TCIF_IMAGE) {
+      if (m_iImage != pTcItem->iImage)
+        changed = true;
       m_iImage = pTcItem->iImage;
     }
 
@@ -538,12 +541,21 @@ class Item : public Element {
     }
 
     if (pTcItem->mask & TCIF_STATE) {
+      auto const old_state = m_rgfState;
       m_rgfState &= ~pTcItem->dwStateMask;
       m_rgfState |= pTcItem->dwState | pTcItem->dwStateMask;
+      if (m_rgfState != old_state)
+        changed = true;
     }
 
-    if (pTcItem->mask & TCIF_TEXT)
-      label_ = pTcItem->pszText;
+    if (pTcItem->mask & TCIF_TEXT) {
+      auto const new_label = pTcItem->pszText;
+      if (label_ != new_label) {
+        label_ = new_label;
+        changed = true;
+      }
+    }
+    return changed;
   }
 
   // [U]
@@ -1608,8 +1620,8 @@ class TabBand : public Element {
 
       case TCM_SETITEM:
         if (auto const item = findItem(static_cast<int>(wParam))) {
-          item->SetItem(reinterpret_cast<TCITEM*>(lParam));
-          item->Invalidate(m_hwnd);
+          if (item->SetItem(reinterpret_cast<TCITEM*>(lParam)))
+            item->Invalidate(m_hwnd);
         }
         return FALSE;
 

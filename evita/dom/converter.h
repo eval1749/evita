@@ -5,7 +5,19 @@
 
 #include "evita/v8_glue/converter.h"
 
+namespace base {
+class Time;
+}
+
 namespace gin {
+
+// base::Time
+template<>
+struct Converter<base::Time> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, base::Time file_time);
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
+                     base::Time* out);
+};
 
 // text::Posn
 template<>

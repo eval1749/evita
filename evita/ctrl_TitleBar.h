@@ -1,42 +1,21 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - edit buffer
-// listener/winapp/ed_buffer.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/ctrl_TitleBar.h#1 $
-//
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #if !defined(INCLUDE_visual_control_TitleBar_h)
 #define INCLUDE_visual_control_TitleBar_h
 
-//////////////////////////////////////////////////////////////////////
-//
-// TitleBar
-//
-class TitleBar
-{
-    private: int    m_cwch;
-    private: HWND   m_hwnd;
-    private: char16 m_wsz[100];
+class TitleBar {
+  private: int    m_cwch;
+  private: HWND   m_hwnd;
+  private: char16 m_wsz[100];
 
-    // ctor
-    public: TitleBar() :
-        m_cwch(0),
-        m_hwnd(NULL)
-    {
-        m_wsz[0] = 0;
-    } // TitleBar
+  public: TitleBar();
+  public: ~TitleBar();
 
-    // [I]
-    public: bool IsEqual(const char16*, int) const;
-
-    // [R]
-    public: int Realize(HWND);
-
-    // [S]
-    public: int SetText(const char16*, int);
-}; // TitleBar
+  public: bool IsEqual(const char16* title, int title_length) const;
+  public: int Realize(HWND hwnd);
+  public: int SetText(const char16* new_title, int new_title_length);
+};
 
 #endif //!defined(INCLUDE_visual_control_TitleBar_h)

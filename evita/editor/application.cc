@@ -184,9 +184,7 @@ void Application::ShowMessage(MessageLevel iLevel, uint nFormatId) {
 
 // TryDoIdle() returns true if more works are needed.
 bool Application::TryDoIdle() {
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(dom_lock);
-  if (!dom_lock.locked())
-    return true;
+  UI_DOM_AUTO_LOCK_SCOPE();
   if (!OnIdle(static_cast<uint>(idle_count_)))
     return false;
   auto const status = ::GetQueueStatus(QS_ALLEVENTS);

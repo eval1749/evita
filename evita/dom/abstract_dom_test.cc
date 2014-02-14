@@ -68,6 +68,8 @@ std::string AbstractDomTest::EvalScript(const base::StringPiece& script_text,
                                  v8::Integer::New(isolate, line_number),
                                  v8::Integer::New(isolate, 0));
   v8::TryCatch try_catch;
+  try_catch.SetCaptureMessage(true);
+  try_catch.SetVerbose(true);
   auto const script = v8::Script::New(gin::StringToV8(isolate, script_text),
                                       &script_origin);
   if (script.IsEmpty()) {
@@ -95,6 +97,8 @@ bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
                                  v8::Integer::New(isolate, line_number),
                                  v8::Integer::New(isolate, 0));
   v8::TryCatch try_catch;
+  try_catch.SetCaptureMessage(true);
+  try_catch.SetVerbose(true);
   auto const script = v8::Script::New(gin::StringToV8(isolate, script_text),
                                       &script_origin);
   if (script.IsEmpty()) {
@@ -129,6 +133,18 @@ void AbstractDomTest::SetUp() {
 void AbstractDomTest::TearDown() {
 }
 
+namespace {
+void LogCallback(const v8::FunctionCallbackInfo<v8::Value>& info) {
+  base::string16 message;
+  for (int index = 0; index < info.Length(); ++index) {
+    if (index)
+      message += L" ";
+    message += V8ToString(info[index]);
+  }
+  LOG(0) << message;
+}
+} // namespace
+
 // v8_glue::RunnerDelegate
 v8::Handle<v8::ObjectTemplate> AbstractDomTest::GetGlobalTemplate(
     v8_glue::Runner* runner) {
@@ -143,6 +159,10 @@ v8::Handle<v8::ObjectTemplate> AbstractDomTest::GetGlobalTemplate(
   auto const context = v8::Context::New(isolate);
   v8::Context::Scope context_scope(context);
   PopulateGlobalTemplate(isolate, templ);
+
+  templ->Set(gin::StringToV8(isolate, "log"),
+             v8::FunctionTemplate::New(isolate, LogCallback));
+
   return templ;
 }
 

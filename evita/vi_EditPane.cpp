@@ -1283,12 +1283,9 @@ EditPane::Window* EditPane::GetLastWindow() const {
   CAN_NOT_HAPPEN();
 }
 
-int EditPane::GetTitle(char16* out_wszTitle, int cchTitle) {
-  const auto& title = GetActiveWindow()->GetTitle(
-      static_cast<size_t>(cchTitle));
-  ::CopyMemory(out_wszTitle, title.data(), title.size() * sizeof(char16));
-  out_wszTitle[title.size()] = 0;
-  return static_cast<int>(title.size());
+base::string16 EditPane::GetTitle() {
+  auto const window = GetActiveWindow();
+  return window ? window->GetTitle() : base::string16();
 }
 
 void EditPane::OnDraw(gfx::Graphics* gfx) {

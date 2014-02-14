@@ -308,22 +308,9 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
   return k;
 }
 
-base::string16 TextEditWindow::GetTitle(size_t max_length) const {
-  auto& buffer = *GetBuffer();
-  auto const name = buffer.name();
-  auto const name_length = name.length();
-  auto const elipsis_length = static_cast<size_t>(
-      name_length > max_length ? 2 : 0);
-  auto const mark_length = static_cast<size_t>(
-      !buffer.GetFileName().empty() && buffer.IsModified() ? 2 : 0);
-  auto const length = std::min(name_length,
-                               max_length - elipsis_length - mark_length);
-  base::string16 title = name.substr(0, length);
-  if (elipsis_length)
-    title += L"..";
-  if (mark_length)
-    title += L" *";
-  return title;
+base::string16 TextEditWindow::GetTitle() const {
+  return GetBuffer()->GetFileName().empty() || !GetBuffer()->IsModified() ?
+      GetBuffer()->name(): GetBuffer()->name() + L"*";
 }
 
 void TextEditWindow::MakeSelectionVisible() {

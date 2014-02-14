@@ -66,7 +66,7 @@ class TableView
       int row_id, int column_id) const override;
 
   // views::ContentWindow
-  private: virtual base::string16 GetTitle(size_t max_length) const;
+  private: virtual base::string16 GetTitle() const;
   private: virtual void MakeSelectionVisible() override;
   private: virtual void Redraw() override;
   private: virtual void UpdateStatusBar() const override;

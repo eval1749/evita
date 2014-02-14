@@ -214,7 +214,7 @@ base::string16 TableView::GetCellText(int row_id, int column_id) const {
 }
 
 // views::ContentWindow
-base::string16 TableView::GetTitle(size_t) const {
+base::string16 TableView::GetTitle() const {
   return L"*document list*";
 }
 

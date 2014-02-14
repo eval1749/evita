@@ -11,6 +11,7 @@
 #if !defined(INCLUDE_vi_Pane_h)
 #define INCLUDE_vi_Pane_h
 
+#include "base/strings/string16.h"
 #include "evita/li_util.h"
 #include "evita/views/command_window.h"
 #include "evita/views/window.h"
@@ -43,7 +44,7 @@ class Pane : public CommandWindow, public ChildNode_<Frame, Pane> {
 
   public: Frame*   GetFrame() const { return m_pParent; }
   public: const char16*  GetName()  const { return m_pwszName; }
-  public: virtual int    GetTitle(char16* pwsz, int) = 0;
+  public: virtual base::string16 GetTitle() = 0;
 
   // [U]
   public: virtual void UpdateStatusBar() {}

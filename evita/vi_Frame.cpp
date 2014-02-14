@@ -164,9 +164,8 @@ void Frame::AddTab(Pane* const pane) {
   ASSERT(m_hwndTabBand);
   TCITEM tab_item;
   tab_item.mask = TCIF_TEXT | TCIF_PARAM;
-  char16 name[100];
-  pane->GetTitle(name, arraysize(name));
-  tab_item.pszText = name;
+  auto const name = pane->GetTitle();
+  tab_item.pszText = const_cast<LPWSTR>(name.c_str());
   tab_item.lParam = reinterpret_cast<LPARAM>(pane);
 
   if (auto const edit_pane = pane->as<EditPane>()) {
@@ -405,6 +404,9 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
   }
 
   pane->UpdateActiveTick();
+
+  if (window->is_shown())
+    return;
 
   if (pane == m_pActivePane) {
     // TODO(yosi) This is happened on multiple window in one pane, we should
@@ -893,23 +895,18 @@ void Frame::ShowMessage(MessageLevel level,
 ///   Updates title bar to display active buffer.
 /// </summary>
 void Frame::updateTitleBar() {
-  char16 wsz[1024];
-  m_pActivePane->GetTitle(wsz, lengthof(wsz));
-
+  auto const title = m_pActivePane->GetTitle();
   auto const tab_index = getTabFromPane(m_pActivePane);
   if (tab_index >= 0) {
     TCITEM tab_item = {0};
     tab_item.mask = TCIF_TEXT;
-    tab_item.pszText = wsz;
+    tab_item.pszText = const_cast<LPWSTR>(title.c_str());
     TabCtrl_SetItem(m_hwndTabBand, tab_index, &tab_item);
   }
 
-  base::string16 title;
-  title += base::string16(wsz);
-  title += L" - ";
-  title += Application::instance()->title();
-  m_oTitleBar.SetText(title.data(), static_cast<int>(title.length()));
-
+  auto const window_title = title + L" - " + Application::instance()->title();
+  m_oTitleBar.SetText(window_title.data(),
+                      static_cast<int>(window_title.length()));
   m_pActivePane->UpdateStatusBar();
 }
 

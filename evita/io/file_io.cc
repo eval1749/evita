@@ -652,7 +652,6 @@ void LoadRequest::finishIo(uint const nError) {
   flushSendBuffer();
 
   domapi::LoadFileCallbackData data;
-  data.buffer = m_pBuffer;
   data.code_page = GetCodePage();
   data.error_code = nError == ERROR_HANDLE_EOF ? 0 : static_cast<int>(nError);
   data.last_write_time = last_write_time_;

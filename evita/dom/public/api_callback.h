@@ -14,7 +14,6 @@ class Buffer;
 namespace domapi {
 
 struct LoadFileCallbackData {
-  dom::Buffer* buffer;
   int code_page;
   int error_code;
   base::Time last_write_time;

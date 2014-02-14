@@ -631,8 +631,11 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
         CHECK_FLAG(NOCLIENTMOVE) // 0x1000
         CHECK_FLAG(DEFERERASE) // 0x2000
         CHECK_FLAG(ASYNCWINDOWPOS) // 0x4000
-        DEBUG_WIDGET_PRINTF("WM_WINDOWPOSCHANGED (%d,%d)+%dx%d %08X%s\n",
-            wp->x, wp->y, wp->cx, wp->cy, wp->flags, flags.c_str());
+        DVLOG_WIDGET(0) << "WM_WINDOWPOSCHANGED " <<
+            "(" << wp->x << "," << wp->y << ")" <<
+            "+" << wp->cx << "x" << wp->cy <<
+            " insertAfter" << wp->hwndInsertAfter <<
+            " flags=" << std::hex << wp->flags << flags;
       }
       #endif
 

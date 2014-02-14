@@ -32,7 +32,6 @@ class Selection : public text::Range {
   private: Color m_crColor;
   private: Color m_crBackground;
   private: bool m_fStartIsActive;
-  private: Count m_lRestoreLineNum; // for reloading
   private: Buffer* m_pBuffer;
   private: TextEditWindow* m_pWindow;
 
@@ -60,19 +59,10 @@ class Selection : public text::Range {
   // [I]
   public: bool IsStartActive() const { return m_fStartIsActive; }
 
-  // [P]
-  public: void PrepareForReload();
-
-  // [R]
-  public: void RestoreForReload();
-
   // [S]
   public: Color SetBackground(Color cr) { return m_crBackground = cr; }
   public: Color SetColor(Color cr) { return m_crColor = cr; }
   public: void SetStartIsActive(bool new_start_is_active);
-
-  // [T]
-  public: void TypeChar(char16, Count = 1);
 };
 
 #endif //!defined(INCLUDE_listener_winapp_visual_selection_h)

@@ -33,6 +33,7 @@
         'dom/forms/checkbox_control_externs.js',
         'dom/forms/form_externs.js',
         'dom/forms/form_control_externs.js',
+        'dom/forms/radio_button_control_externs.js',
         'dom/forms/text_field_control_externs.js',
 
         'dom/file_path_externs.js',
@@ -169,6 +170,7 @@
         'dom/forms/checkbox_control.cc',
         'dom/forms/form.cc',
         'dom/forms/form_control.cc',
+        'dom/forms/radio_button_control.cc',
         'dom/forms/text_field_control.cc',
 
         'dom/file_path.cc',

@@ -23,52 +23,41 @@
     IDC_FIND_REPLACE_ALL: 1017
   };
 
-  /**
-   * @constructor
-   */
-  var FindAndReplaceForm = function() {
-    this.form = new Form();
-    this.find_what = new TextFieldControl(FindDialogBoxId.IDC_FIND_WHAT);
-    this.find_with = new TextFieldControl(FindDialogBoxId.IDC_FIND_WITH);
-    this.form.add(this.find_what);
-    this.form.add(this.find_with);
-    this.form.realize();
-  };
+  /** @type {?Form} */
+  var form = null;
 
-  /** @type {FindAndReplaceForm} */
-  FindAndReplaceForm.instance_ = null;
+  /** @return {!Form} */
+  function ensureForm() {
+    if (form)
+      return form;
+    form = new Form();
+    /** @type {!TextFieldControl} */
+    var find_what = new TextFieldControl(FindDialogBoxId.IDC_FIND_WHAT);
 
-  /** @type {!Form} */
-  FindAndReplaceForm.prototype.form;
+    /** @type {!TextFieldControl} */
+    var find_with = new TextFieldControl(FindDialogBoxId.IDC_FIND_WITH);
 
-  /** @type {!TextFieldControl} */
-  FindAndReplaceForm.prototype.find_with;
+    form.add(find_what);
+    form.add(find_with);
+    form.realize();
 
-  /** @type {TextFieldControl} */
-  FindAndReplaceForm.prototype.find_what;
-
-  /**
-   * @this {!FindAndReplaceForm}
-   * @return {!FindAndReplaceForm}
-   */
-  FindAndReplaceForm.instance = function() {
-    if (!this.instance_)
-      this.instance_ = new FindAndReplaceForm();
-    return this.instance_;
-  };
+    // TODO(yosi) |global.findForm| is only for debugging purpose.
+    global.findForm = form;
+    return form;
+  }
 
   function showFindDialogCommand() {
-    FindAndReplaceForm.instance().form.show();
+    ensureForm().show();
   }
 
   Editor.bindKey(TextWindow, 'Ctrl+F', showFindDialogCommand);
   Editor.bindKey(TextWindow, 'Ctrl+H', showFindDialogCommand);
 
   Editor.bindKey(TextWindow, 'F3', function() {
-    FindAndReplaceForm.instance().form.doFind_(0);
+    ensureForm().doFind_(0);
   });
 
   Editor.bindKey(TextWindow, 'Shift+F3', function() {
-    FindAndReplaceForm.instance().form.doFind_(1);
+    ensureForm().doFind_(1);
   });
 })();

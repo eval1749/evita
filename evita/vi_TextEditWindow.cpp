@@ -61,7 +61,7 @@ void TextEditWindow::ScrollBar::ShowWindow(int code) const {
 //
 TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
     : ContentWindow(text_window.window_id()),
-      caret_(std::move(Caret::Create())),
+      caret_(std::move(std::make_unique<Caret>())),
       m_gfx(nullptr),
       m_lCaretPosn(-1),
       m_pPage(new Page()),

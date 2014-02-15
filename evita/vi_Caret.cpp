@@ -88,10 +88,6 @@ void Caret::Blink(common::RepeatingTimer<Caret>*) {
     Show();
 }
 
-std::unique_ptr<Caret> Caret::Create() {
-  return std::move(std::unique_ptr<Caret>(new Caret()));
-}
-
 void Caret::Give() {
   DCHECK(taken_);
   blink_timer_.Stop();

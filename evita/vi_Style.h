@@ -36,15 +36,12 @@ class Font {
     private: const std::unique_ptr<FontImpl> font_impl_;
     private: const SimpleMetrics metrics_;
 
-    private: Font(const LOGFONT&);
+    public: Font(const LOGFONT* logFont);
     public: ~Font();
 
     private: float ascent() const { return metrics_.ascent; }
     public: float descent() const { return metrics_.descent; }
     public: float height() const { return metrics_.height; }
-
-    // [C]
-    public: static std::unique_ptr<Font> Create(const LOGFONT*);
 
     // [D]
     void DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,

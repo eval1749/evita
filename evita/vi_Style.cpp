@@ -178,17 +178,13 @@ class Font::FontImpl {
   DISALLOW_COPY_AND_ASSIGN(FontImpl);
 };
 
-Font::Font(const LOGFONT& log_font)
-    : m_oLogFont(log_font),
-      font_impl_(new FontImpl(log_font.lfFaceName, log_font.lfHeight)),
+Font::Font(const LOGFONT* log_font)
+    : m_oLogFont(*log_font),
+      font_impl_(new FontImpl(log_font->lfFaceName, log_font->lfHeight)),
       metrics_(font_impl_->CalculateMetrics()) {
 }
 
 Font::~Font() {
-}
-
-std::unique_ptr<Font> Font::Create(const LOGFONT* logFont) {
-  return std::move(std::unique_ptr<Font>(new Font(*logFont)));
 }
 
 void Font::DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,
@@ -456,7 +452,7 @@ FontSet* FontSet::Get(const StyleValues* pStyle)
 
         Font* pFont = g_pFontCache->Get(&oLogFont);
         if (!pFont) {
-            pFont = Font::Create(&oLogFont).release();
+            pFont = new Font(&oLogFont);
             g_pFontCache->Put(pFont);
         }
 

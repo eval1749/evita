@@ -34,10 +34,9 @@ class Caret {
   private: bool should_blink_;
   private: bool taken_;
 
-  private: Caret();
+  public: Caret();
   public: ~Caret();
   private: void Blink(common::RepeatingTimer<Caret>*);
-  public: static std::unique_ptr<Caret> Create();
   public: void Hide();
   public: void Give();
   public: void Reset();

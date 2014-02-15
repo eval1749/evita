@@ -11,7 +11,7 @@
 #include "evita/dom/buffer.h"
 #include "evita/dom/view_event_handler.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/RegexMatch.h"
+#include "evita/text/regex_matcher.h"
 #include "evita/text/search_and_replace_model.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"

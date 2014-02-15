@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
-#include "evita/RegexMatch.h"
+#include "evita/text/regex_matcher.h"
 #include "evita/text/buffer.h"
 #include "evita/text/modes/plain_text_mode.h"
 #include "evita/text/range.h"

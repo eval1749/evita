@@ -917,7 +917,7 @@ void RegexMatcher::Replace(const base::string16& with, bool fMetaChar) {
 // Continue to find match from start of document or end of document if
 // this match is applied for whole document.
 bool RegexMatcher::WrapMatch() {
-  if (!regex_ || !match_context_ || !search_params_.IsWhole())
+  if (!regex_ || !match_context_ || search_params_.IsInSelection())
     return false;
 
   auto const pRange = match_context_->GetRange();

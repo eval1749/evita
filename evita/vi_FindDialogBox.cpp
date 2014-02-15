@@ -110,7 +110,7 @@ void FindDialogBox::DoFind(text::Direction eDirection) {
   auto const buffer = selection->GetBuffer();
   auto start_position = selection->GetStart();
   auto end_position = selection->GetEnd();
-  if (search.IsWhole()){
+  if (!search.IsInSelection()){
     if (search.IsBackward()) {
       start_position = 0;
       end_position = selection->GetStart();
@@ -158,7 +158,7 @@ void FindDialogBox::DoReplace(text::ReplaceMode replace_mode) {
   auto const buffer = selection->GetBuffer();
   auto start_position = selection->GetStart();
   auto end_position = selection->GetEnd();
-  if (search.IsWhole()) {
+  if (!search.IsInSelection()) {
     start_position = buffer->GetStart();
     end_position = buffer->GetEnd();
   }
@@ -427,8 +427,8 @@ Selection* FindDialogBox::PrepareFind(SearchParameters* search) {
   if (GetChecked(IDC_FIND_WORD))
     search->m_rgf |= SearchFlag_MatchWord;
 
-  if (GetChecked(IDC_FIND_WHOLE_FILE))
-    search->m_rgf |= SearchFlag_Whole;
+  if (GetChecked(IDC_FIND_SELECTION))
+    search->m_rgf |= SearchFlag_InSelection;
 
   return selection;
 }

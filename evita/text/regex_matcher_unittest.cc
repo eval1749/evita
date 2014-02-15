@@ -82,7 +82,7 @@ TEST_F(RegexMatchTest, NextMatch_succeeded) {
 TEST_F(RegexMatchTest, WrapMatch) {
   SearchParameters params;
   params.search_text_ = L"baz";
-  params.m_rgf = SearchFlag_Whole;
+  params.m_rgf = 0;
   text::RegexMatcher matcher(&params, buffer(), 12, buffer()->GetEnd());
   EXPECT_FALSE(matcher.FirstMatch());
   EXPECT_TRUE(matcher.WrapMatch());

@@ -3,6 +3,12 @@
 
 #include "evita/text/search_and_replace_model.h"
 
+SearchParameters::SearchParameters() : m_rgf(0) {
+}
+
+SearchParameters::~SearchParameters() {
+}
+
 namespace text {
 
 SearchAndReplaceModel::SearchAndReplaceModel()

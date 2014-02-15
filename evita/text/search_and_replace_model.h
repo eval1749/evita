@@ -9,21 +9,24 @@ enum SearchFlag {
   SearchFlag_Backward = 1 << 0,
   SearchFlag_CasePreserve = 1 << 1,
   SearchFlag_IgnoreCase = 1 << 2,
-  SearchFlag_MatchWord = 1 << 3,
-  SearchFlag_Regex = 1 << 4,
-  SearchFlag_Whole = 1 << 5,
+  SearchFlag_InSelection = 1 << 3,
+  SearchFlag_MatchWord = 1 << 4,
+  SearchFlag_Regex = 1 << 5,
 };
 
 struct SearchParameters {
   base::string16 search_text_;
   int m_rgf;
 
+  SearchParameters();
+  ~SearchParameters();
+
   bool IsBackward() const { return m_rgf & SearchFlag_Backward; }
   bool IsCasePreserve() const { return m_rgf & SearchFlag_CasePreserve; }
   bool IsIgnoreCase() const { return m_rgf & SearchFlag_IgnoreCase; }
+  bool IsInSelection() const { return m_rgf & SearchFlag_InSelection; }
   bool IsMatchWord() const { return m_rgf & SearchFlag_MatchWord; }
   bool IsRegex() const { return m_rgf & SearchFlag_Regex; }
-  bool IsWhole() const { return m_rgf & SearchFlag_Whole; }
 };
 
 namespace text {
@@ -66,14 +69,16 @@ class SearchAndReplaceModel {
     return flags_ & SearchFlag_IgnoreCase;
   }
   public: void set_is_ignore_case(bool is_ignore_case);
+  public: bool is_in_selection() const {
+      return flags_ & SearchFlag_InSelection;
+  }
+  public: void set_is_in_selection(bool is_in_selection);
   public: bool is_match_word() const {
     return flags_ & SearchFlag_MatchWord;
   }
   public: void set_is_match_word(bool is_match_word);
   public: bool is_regex() const { return flags_ & SearchFlag_Regex; }
   public: void set_is_regex(bool is_regex);
-  public: bool is_whole() const { return flags_ & SearchFlag_Whole; }
-  public: void set_is_whole(bool is_whole);
 
   public: ReplaceIn replace_in() const { return replace_in_; }
   public: void set_replace_in(ReplaceIn replace_in) {

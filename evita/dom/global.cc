@@ -70,56 +70,58 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
 
     auto context = v8::Context::New(isolate);
     v8::Context::Scope context_scope(context);
+
+    #define INSTALL(name) v8_glue::Installer<name>::Run(isolate, templ);
   
     // Note: super class must be installed before subclass.
-    v8_glue::Installer<Event>::Run(isolate, templ);
-      v8_glue::Installer<DocumentEvent>::Run(isolate, templ);
-      v8_glue::Installer<FormEvent>::Run(isolate, templ);
-      v8_glue::Installer<UiEvent>::Run(isolate, templ);
-        v8_glue::Installer<FocusEvent>::Run(isolate, templ);
-        v8_glue::Installer<KeyboardEvent>::Run(isolate, templ);
-        v8_glue::Installer<MouseEvent>::Run(isolate, templ);
-      v8_glue::Installer<WindowEvent>::Run(isolate, templ);
+    INSTALL(Event);
+      INSTALL(DocumentEvent);
+      INSTALL(FormEvent);
+      INSTALL(UiEvent);
+        INSTALL(FocusEvent);
+        INSTALL(KeyboardEvent);
+        INSTALL(MouseEvent);
+      INSTALL(WindowEvent);
 
-    v8_glue::Installer<Document>::Run(isolate, templ);
-    v8_glue::Installer<Editor>::Run(isolate, templ);
-    v8_glue::Installer<FilePath>::Run(isolate, templ);
-    v8_glue::Installer<Point>::Run(isolate, templ);
-    v8_glue::Installer<Range>::Run(isolate, templ);
+    INSTALL(Document);
+    INSTALL(Editor);
+    INSTALL(FilePath);
+    INSTALL(Point);
+    INSTALL(Range);
 
-    v8_glue::Installer<EventTarget>::Run(isolate, templ);
-      v8_glue::Installer<Form>::Run(isolate, templ);
-      v8_glue::Installer<FormControl>::Run(isolate, templ);
-        v8_glue::Installer<ButtonControl>::Run(isolate, templ);
-        v8_glue::Installer<CheckboxControl>::Run(isolate, templ);
-        v8_glue::Installer<RadioButtonControl>::Run(isolate, templ);
-        v8_glue::Installer<TextFieldControl>::Run(isolate, templ);
-      v8_glue::Installer<Window>::Run(isolate, templ);
-        v8_glue::Installer<DocumentWindow>::Run(isolate, templ);
-          v8_glue::Installer<TableWindow>::Run(isolate, templ);
-          v8_glue::Installer<TextWindow>::Run(isolate, templ);
-        v8_glue::Installer<EditorWindow>::Run(isolate, templ);
+    INSTALL(EventTarget);
+      INSTALL(Form);
+      INSTALL(FormControl);
+        INSTALL(ButtonControl);
+        INSTALL(CheckboxControl);
+        INSTALL(RadioButtonControl);
+        INSTALL(TextFieldControl);
+      INSTALL(Window);
+        INSTALL(DocumentWindow);
+          INSTALL(TableWindow);
+          INSTALL(TextWindow);
+        INSTALL(EditorWindow);
 
-    v8_glue::Installer<Mode>::Run(isolate, templ);
-      v8_glue::Installer<ConfigMode>::Run(isolate, templ);
-      v8_glue::Installer<CxxMode>::Run(isolate, templ);
-      v8_glue::Installer<HaskellMode>::Run(isolate, templ);
-      v8_glue::Installer<JavaMode>::Run(isolate, templ);
-      v8_glue::Installer<JavaScriptMode>::Run(isolate, templ);
-      v8_glue::Installer<LispMode>::Run(isolate, templ);
-      v8_glue::Installer<MasonMode>::Run(isolate, templ);
-      v8_glue::Installer<PerlMode>::Run(isolate, templ);
-      v8_glue::Installer<PlainTextMode>::Run(isolate, templ);
-      v8_glue::Installer<PythonMode>::Run(isolate, templ);
-      v8_glue::Installer<XmlMode>::Run(isolate, templ);
+    INSTALL(Mode);
+      INSTALL(ConfigMode);
+      INSTALL(CxxMode);
+      INSTALL(HaskellMode);
+      INSTALL(JavaMode);
+      INSTALL(JavaScriptMode);
+      INSTALL(LispMode);
+      INSTALL(MasonMode);
+      INSTALL(PerlMode);
+      INSTALL(PlainTextMode);
+      INSTALL(PythonMode);
+      INSTALL(XmlMode);
 
-    v8_glue::Installer<Selection>::Run(isolate, templ);
-        v8_glue::Installer<TableSelection>::Run(isolate, templ);
-        v8_glue::Installer<TextSelection>::Run(isolate, templ);
+    INSTALL(Selection);
+        INSTALL(TableSelection);
+        INSTALL(TextSelection);
 
-    v8_glue::Installer<Timer>::Run(isolate, templ);
-      v8_glue::Installer<OneShotTimer>::Run(isolate, templ);
-      v8_glue::Installer<RepeatingTimer>::Run(isolate, templ);
+    INSTALL(Timer);
+      INSTALL(OneShotTimer);
+      INSTALL(RepeatingTimer);
 
     // Os
     auto const os_templ = v8::ObjectTemplate::New(isolate);

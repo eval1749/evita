@@ -9,11 +9,14 @@
 //
 // @(#)$Id: //proj/evedit2/mainline/regex/regex_compile.cpp#9 $
 //
+#include <algorithm>
+
 #include "./IRegex.h"
 #include "./regex_bytecode.h"
 #include "./regex_node.h"
 #include "./regex_scanner.h"
-#include <algorithm>
+
+#define DEBUG_REGEX 0
 
 namespace Regex
 {
@@ -665,7 +668,7 @@ class Compiler
             static_cast<int>(ofsCode),
             static_cast<int>(ofsScanner) );
 
-        #if _DEBUG
+        #if DEBUG_REGEX
             pRegex->Describe();
             printf("\n\n");
         #endif
@@ -746,7 +749,7 @@ class Compiler
     // [P]
     public: void PatchLabel(int nRefPc)
     {
-        #if _DEBUG
+        #if DEBUG_REGEX
             printf("PatchLabel: @%d <- L%04X\n", nRefPc, GetPc());
         #endif
 

@@ -12,6 +12,8 @@
 #include "./IRegex.h"
 #include "./regex_node.h"
 
+#define DEBUG_REGEX 0
+
 namespace Regex
 {
 
@@ -95,7 +97,7 @@ IRegex* Compile(
             pTree->m_lErrorPosn, 
             pTree->m_iErrorCode );
 
-        #if _DEBUG
+        #if DEBUG_REGEX
         {
             const char16* pwchStart = pwch;
             const char16* pwchEnd   = pwch + cwch;
@@ -126,11 +128,11 @@ IRegex* Compile(
             } // for
             printf("^\n");
         }
-        #endif // _DEBUG
+        #endif
         return NULL;
     } // if
 
-    #if _DEBUG
+    #if DEBUG_REGEX
         pTree->m_pNode->Print();
         printf("\n\n");
     #endif

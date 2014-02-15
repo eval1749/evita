@@ -11,9 +11,14 @@
 #if !defined(INCLUDE_regex_node_h)
 #define INCLUDE_regex_node_h
 
+#include <algorithm>
+
 #include "./regex_bytecode.h"
 #include "./regex_util.h"
-#include <algorithm>
+
+#if !defined(DEBUG_REGEX)
+#define DEBUG_REGEX 0
+#endif
 
 namespace Regex {
 
@@ -109,7 +114,7 @@ class Node
   // [S]
   public: virtual Node* Simplify(IEnvironment*, LocalHeap*) { return this; }
 
-  #if _DEBUG
+  #if DEBUG_REGEX
       public: virtual void Print() const {
         printf("%s", GetKind());
       }
@@ -292,7 +297,7 @@ class NodeSubNodeBase : public Node {
     return this;
   }
 
-  #if _DEBUG
+  #if DEBUG_REGEX
     public: void Print() const override {
       printf("(%s ", GetKind());
       node_->Print();
@@ -322,7 +327,7 @@ class NodeSubNodesBase : public Node {
   // [R]
   public: Node* Reverse() override;
 
-  #if _DEBUG
+  #if DEBUG_REGEX
     public: void Print() const override {
       printf("(%s", GetKind());
       foreach (Nodes::Enum, oEnum, &m_oNodes) {
@@ -461,7 +466,7 @@ class NodeCapture : public NodeSubNodeBase, public WithDirection {
   /// </summary>
   public: bool NeedStack() const override { return true; }
 
-  #if _DEBUG
+  #if DEBUG_REGEX
     public: virtual void Print() const override {
       printf("(%s[%d] ",
           IsBackward() ? "CaptureB" : "CaptureF",
@@ -566,7 +571,7 @@ class NodeChar : public NodeCsBase {
   // [S]
   public: Node* Simplify(IEnvironment*, LocalHeap*) override final;
 
-  #if _DEBUG
+  #if DEBUG_REGEX
     public: virtual void Print() const override final {
       printf("(Char%s%s%s '%c')",
           IsNot() ? "Ne" : "Eq",
@@ -612,7 +617,7 @@ class NodeCharClass: public NodeSubNodesBase, public WithDirection {
   // [S]
   public: Node* Simplify(IEnvironment*, LocalHeap*) override final;
 
-  #if _DEBUG
+  #if DEBUG_REGEX
     public: void Print() const override final {
       printf("(CharClass%s", IsNot() ? "Not" : "");
       foreach (Nodes::Enum, oEnum, &m_oNodes) {
@@ -668,7 +673,7 @@ class NodeCharSet : public NodeEqBase {
     return IsNot();
   }
 
-  #if _DEBUG
+  #if DEBUG_REGEX
     public: void Print() const override final {
       printf("(%s '%ls')",
           IsNot() ? "CharSetNe" : "CharSetEq",
@@ -719,7 +724,7 @@ class NodeIf : public Node {
     return this;
   }
 
-  #if _DEBUG
+  #if DEBUG_REGEX
     public: virtual void Print() const override final {
       printf("(if ");
       m_pCond->Print();
@@ -790,7 +795,7 @@ class NodeMinMax : public NodeSubNodeBase, public WithDirection {
   // [N]
   public: virtual bool NeedStack() const override { return true; }
 
-  #if _DEBUG
+  #if DEBUG_REGEX
     public: virtual void Print() const override {
       printf("(%s min=%d max=%d ", GetKind(), GetMin(), GetMax());
           GetNode()->Print();
@@ -948,7 +953,7 @@ class NodeRange : public NodeCsBase {
   // [S]
   public: virtual Node* Simplify(IEnvironment*, LocalHeap*) override final;
 
-  #if _DEBUG
+  #if DEBUG_REGEX
     public: virtual void Print() const override {
       printf("(Range%s%s %lc-%lc)",
           IsNot() ? "Not" : "",
@@ -1015,7 +1020,7 @@ class NodeString : public NodeCsBase {
   public: const char16* GetStart() const { return m_pwch; }
 
   // [P]
-  #if _DEBUG
+  #if DEBUG_REGEX
     public: virtual void Print() const override final {
       printf("(String%s%s%s '%ls')",
           IsNot() ? "Ne" : "Eq",

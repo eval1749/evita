@@ -30,8 +30,8 @@ class RegexMatcher {
   private: Regex::IRegex* regex_;
   private: SearchParameters search_params_;
 
-  public: RegexMatcher(const SearchParameters* params, text::Buffer* buffer,
-      Posn start, Posn end);
+  public: RegexMatcher(const text::SearchParameters* params,
+                       text::Buffer* buffer, Posn start, Posn end);
   public: ~RegexMatcher();
 
   public: bool FirstMatch();

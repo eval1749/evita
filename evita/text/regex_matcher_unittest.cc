@@ -35,18 +35,14 @@ class RegexMatchTest : public ::testing::Test {
 };
 
 TEST_F(RegexMatchTest, FirstMatch_failed) {
-  SearchParameters params;
-  params.search_text_ = L"quux";
-  params.m_rgf = 0;
+  text::SearchParameters params(L"quux");
   text::RegexMatcher matcher(&params, buffer(), 0, buffer()->GetEnd());
   EXPECT_FALSE(matcher.FirstMatch());
   EXPECT_EQ(nullptr, matcher.GetMatched(0));
 }
 
 TEST_F(RegexMatchTest, FirstMatch_succeeded) {
-  SearchParameters params;
-  params.search_text_ = L"baz";
-  params.m_rgf = 0;
+  text::SearchParameters params(L"baz");
   text::RegexMatcher matcher(&params, buffer(), 0, buffer()->GetEnd());
   EXPECT_TRUE(matcher.FirstMatch());
 
@@ -56,9 +52,7 @@ TEST_F(RegexMatchTest, FirstMatch_succeeded) {
 }
 
 TEST_F(RegexMatchTest, NextMatch_failed) {
-  SearchParameters params;
-  params.search_text_ = L"baz";
-  params.m_rgf = 0;
+  text::SearchParameters params(L"baz");
   text::RegexMatcher matcher(&params, buffer(), 0, buffer()->GetEnd());
   EXPECT_TRUE(matcher.FirstMatch());
   matcher.GetMatched(0)->Collapse(Collapse_End);
@@ -66,9 +60,7 @@ TEST_F(RegexMatchTest, NextMatch_failed) {
 }
 
 TEST_F(RegexMatchTest, NextMatch_succeeded) {
-  SearchParameters params;
-  params.search_text_ = L"foo";
-  params.m_rgf = 0;
+  text::SearchParameters params(L"foo");
   text::RegexMatcher matcher(&params, buffer(), 0, buffer()->GetEnd());
   EXPECT_TRUE(matcher.FirstMatch());
   matcher.GetMatched(0)->Collapse(Collapse_End);
@@ -80,9 +72,7 @@ TEST_F(RegexMatchTest, NextMatch_succeeded) {
 }
 
 TEST_F(RegexMatchTest, WrapMatch) {
-  SearchParameters params;
-  params.search_text_ = L"baz";
-  params.m_rgf = 0;
+  text::SearchParameters params(L"baz");
   text::RegexMatcher matcher(&params, buffer(), 12, buffer()->GetEnd());
   EXPECT_FALSE(matcher.FirstMatch());
   EXPECT_TRUE(matcher.WrapMatch());

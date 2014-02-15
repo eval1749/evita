@@ -5,30 +5,6 @@
 
 #include "base/strings/string16.h"
 
-enum SearchFlag {
-  SearchFlag_Backward = 1 << 0,
-  SearchFlag_CasePreserve = 1 << 1,
-  SearchFlag_IgnoreCase = 1 << 2,
-  SearchFlag_InSelection = 1 << 3,
-  SearchFlag_MatchWord = 1 << 4,
-  SearchFlag_Regex = 1 << 5,
-};
-
-struct SearchParameters {
-  base::string16 search_text_;
-  int m_rgf;
-
-  SearchParameters();
-  ~SearchParameters();
-
-  bool IsBackward() const { return m_rgf & SearchFlag_Backward; }
-  bool IsCasePreserve() const { return m_rgf & SearchFlag_CasePreserve; }
-  bool IsIgnoreCase() const { return m_rgf & SearchFlag_IgnoreCase; }
-  bool IsInSelection() const { return m_rgf & SearchFlag_InSelection; }
-  bool IsMatchWord() const { return m_rgf & SearchFlag_MatchWord; }
-  bool IsRegex() const { return m_rgf & SearchFlag_Regex; }
-};
-
 namespace text {
 
 enum Direction {
@@ -44,6 +20,31 @@ enum ReplaceIn {
 enum ReplaceMode {
   kReplaceAll,
   kReplaceOne,
+};
+
+enum SearchFlag {
+  SearchFlag_Backward = 1 << 0,
+  SearchFlag_CasePreserve = 1 << 1,
+  SearchFlag_IgnoreCase = 1 << 2,
+  SearchFlag_InSelection = 1 << 3,
+  SearchFlag_MatchWord = 1 << 4,
+  SearchFlag_Regex = 1 << 5,
+};
+
+struct SearchParameters {
+  base::string16 search_text;
+  int flags;
+
+  SearchParameters(const base::string16& search_text);
+  SearchParameters();
+  ~SearchParameters();
+
+  bool IsBackward() const { return flags & SearchFlag_Backward; }
+  bool IsCasePreserve() const { return flags & SearchFlag_CasePreserve; }
+  bool IsIgnoreCase() const { return flags & SearchFlag_IgnoreCase; }
+  bool IsInSelection() const { return flags & SearchFlag_InSelection; }
+  bool IsMatchWord() const { return flags & SearchFlag_MatchWord; }
+  bool IsRegex() const { return flags & SearchFlag_Regex; }
 };
 
 class SearchAndReplaceModel {

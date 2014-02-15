@@ -33,7 +33,7 @@ class FindDialogBox final : public DialogBox {
   private: void onFindPrevious();
   private: void onReplaceOne();
   private: void onReplaceAll();
-  private: Selection* PrepareFind(SearchParameters*);
+  private: Selection* PrepareFind(text::SearchParameters*);
   private: void ReportNotFound();
   private: void UpdateUI(bool activate = false);
 

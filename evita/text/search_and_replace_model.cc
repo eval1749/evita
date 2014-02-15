@@ -3,13 +3,17 @@
 
 #include "evita/text/search_and_replace_model.h"
 
-SearchParameters::SearchParameters() : m_rgf(0) {
+namespace text {
+
+SearchParameters::SearchParameters(const base::string16& search_text)
+    : flags(0), search_text(search_text) {
+}
+
+SearchParameters::SearchParameters() : SearchParameters(base::string16()) {
 }
 
 SearchParameters::~SearchParameters() {
 }
-
-namespace text {
 
 SearchAndReplaceModel::SearchAndReplaceModel()
     : direction_(kDirectionDown), flags_(0), replace_in_(kReplaceInWhole) {

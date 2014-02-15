@@ -366,33 +366,32 @@ bool RegexMatcher::BufferMatchContext::StringEqCs(const char16* pwchStart,
 //
 // RegexMatcher
 //
-RegexMatcher::RegexMatcher(const SearchParameters* pSearch,
+RegexMatcher::RegexMatcher(const text::SearchParameters* pSearch,
                            text::Buffer* pBuffer, Posn lStart, Posn lEnd)
     : matched_(false), search_params_(*pSearch), regex_(nullptr) {
   auto rgfFlag = static_cast<int>(Regex::Option_ExactString);
-  if (pSearch->m_rgf & SearchFlag_Backward)
+  if (pSearch->IsBackward())
     rgfFlag |= Regex::Option_Backward;
 
-  if (pSearch->m_rgf & SearchFlag_IgnoreCase)
+  if (pSearch->IsIgnoreCase())
     rgfFlag |= Regex::Option_IgnoreCase;
 
-  // FIXME 2008-07-08 yosi@msn.com How do we handle SearchFlag_MatchWord?
-  if (pSearch->m_rgf & SearchFlag_Regex) {
+  // FIXME 2008-07-08 yosi@msn.com How do we handle text::SearchFlag_MatchWord?
+  if (pSearch->IsRegex()) {
     rgfFlag &= ~Regex::Option_ExactString;
     rgfFlag |= Regex::Option_Multiline;
     rgfFlag |= Regex::Option_Unicode;
-  } else if (pSearch->m_rgf & SearchFlag_MatchWord) {
+  } else if (pSearch->IsMatchWord()) {
     rgfFlag |= Regex::Option_ExactWord;
   }
 
-  auto compile_context = std::unique_ptr<CompileContext>(
-      new CompileContext());
+  auto compile_context = std::make_unique<CompileContext>();
 
   // FIXME 2008-07-08 yosi@msn.com We should not allocate Regex object
   // in Regex::Compiler method.
   regex_ = Regex::Compile(compile_context.get(),
-      search_params_.search_text_.data(),
-      static_cast<int>(search_params_.search_text_.length()),
+      search_params_.search_text.data(),
+      static_cast<int>(search_params_.search_text.length()),
       rgfFlag);
   if (!regex_) {
     error_info_ = compile_context->error_info();

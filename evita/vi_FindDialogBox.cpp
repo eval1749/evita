@@ -97,7 +97,7 @@ void FindDialogBox::DoFind(text::Direction eDirection) {
 
   direction_ = eDirection;
 
-  SearchParameters search;
+  text::SearchParameters search;
   auto const selection = PrepareFind(&search);
   if (!selection) {
     // We may not have search text.
@@ -105,7 +105,7 @@ void FindDialogBox::DoFind(text::Direction eDirection) {
   }
 
   if (text::kDirectionUp == eDirection)
-    search.m_rgf |= SearchFlag_Backward;
+    search.flags |= text::SearchFlag_Backward;
 
   auto const buffer = selection->GetBuffer();
   auto start_position = selection->GetStart();
@@ -148,7 +148,7 @@ void FindDialogBox::DoReplace(text::ReplaceMode replace_mode) {
   UI_DOM_AUTO_LOCK_SCOPE();
   ClearMessage();
 
-  SearchParameters search;
+  text::SearchParameters search;
   auto const selection = PrepareFind(&search);
   if (!selection) {
     // We may not have search text.
@@ -172,7 +172,7 @@ void FindDialogBox::DoReplace(text::ReplaceMode replace_mode) {
   }
 
   auto const wszWith = GetDlgItemText(IDC_FIND_WITH);
-  bool is_replace_with_meta = search.m_rgf & SearchFlag_Regex;
+  bool is_replace_with_meta = search.flags & text::SearchFlag_Regex;
 
   Count num_replaced = 0;
 
@@ -385,7 +385,7 @@ void FindDialogBox::onReplaceOne() {
 ///   Preparation for search. We extract search parameters from dialog box.
 /// </summary>
 /// <returns>Selection to start search.</returns>
-Selection* FindDialogBox::PrepareFind(SearchParameters* search) {
+Selection* FindDialogBox::PrepareFind(text::SearchParameters* search) {
   DCHECK(search);
   auto const selection = GetActiveSelection();
   if (!selection) {
@@ -393,17 +393,17 @@ Selection* FindDialogBox::PrepareFind(SearchParameters* search) {
     return nullptr;
   }
 
-  search->search_text_ = std::move(GetDlgItemText(IDC_FIND_WHAT));
-  if (search->search_text_.empty())
+  search->search_text = std::move(GetDlgItemText(IDC_FIND_WHAT));
+  if (search->search_text.empty())
     return nullptr;
-  search->m_rgf = 0;
+  search->flags = 0;
 
   if (!GetChecked(IDC_FIND_CASE))  {
-    for (auto const ch : search->search_text_) {
+    for (auto const ch : search->search_text) {
       if (IsLowerCase(ch)) {
-        search->m_rgf |= SearchFlag_IgnoreCase;
+        search->flags |= text::SearchFlag_IgnoreCase;
       } else if (IsUpperCase(ch)) {
-        search->m_rgf &= ~SearchFlag_IgnoreCase;
+        search->flags &= ~text::SearchFlag_IgnoreCase;
         break;
       }
     }
@@ -413,22 +413,22 @@ Selection* FindDialogBox::PrepareFind(SearchParameters* search) {
     auto const wszWith = GetDlgItemText(IDC_FIND_WITH);
     for (auto ch : wszWith) {
       if (IsLowerCase(ch)) {
-        search->m_rgf |= SearchFlag_CasePreserve;
+        search->flags |= text::SearchFlag_CasePreserve;
       } else if (IsUpperCase(ch)) {
-        search->m_rgf &= ~SearchFlag_CasePreserve;
+        search->flags &= ~text::SearchFlag_CasePreserve;
         break;
       }
     }
   }
 
   if (GetChecked(IDC_FIND_REGEX))
-    search->m_rgf |= SearchFlag_Regex;
+    search->flags |= text::SearchFlag_Regex;
 
   if (GetChecked(IDC_FIND_WORD))
-    search->m_rgf |= SearchFlag_MatchWord;
+    search->flags |= text::SearchFlag_MatchWord;
 
   if (GetChecked(IDC_FIND_SELECTION))
-    search->m_rgf |= SearchFlag_InSelection;
+    search->flags |= text::SearchFlag_InSelection;
 
   return selection;
 }

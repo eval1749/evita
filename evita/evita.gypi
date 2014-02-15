@@ -29,9 +29,12 @@
         'dom/events/window_event_externs.js',
         'dom/editor_externs.js',
         'dom/editor_window_externs.js',
+
+        'dom/forms/checkbox_control_externs.js',
         'dom/forms/form_externs.js',
         'dom/forms/form_control_externs.js',
         'dom/forms/text_field_control_externs.js',
+
         'dom/file_path_externs.js',
         'dom/js_console_externs.js',
         'dom/key_names_externs.js',
@@ -163,6 +166,7 @@
         'dom/events/window_event.cc',
         'dom/events/window_event_init.cc',
 
+        'dom/forms/checkbox_control.cc',
         'dom/forms/form.cc',
         'dom/forms/form_control.cc',
         'dom/forms/text_field_control.cc',

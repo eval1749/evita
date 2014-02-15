@@ -16,6 +16,7 @@
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
 #include "evita/dom/events/window_event.h"
+#include "evita/dom/forms/checkbox_control.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/forms/text_field_control.h"
@@ -87,6 +88,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     v8_glue::Installer<EventTarget>::Run(isolate, templ);
       v8_glue::Installer<Form>::Run(isolate, templ);
       v8_glue::Installer<FormControl>::Run(isolate, templ);
+        v8_glue::Installer<CheckboxControl>::Run(isolate, templ);
         v8_glue::Installer<TextFieldControl>::Run(isolate, templ);
       v8_glue::Installer<Window>::Run(isolate, templ);
         v8_glue::Installer<DocumentWindow>::Run(isolate, templ);

@@ -8,13 +8,15 @@
 #pragma warning(pop)
 
 #include "evita/text/buffer.h"
+#include "evita/text/modes/plain_text_mode.h"
 
 namespace {
 
 class BufferTest : public ::testing::Test {
   private: std::unique_ptr<text::Buffer> buffer_;
 
-  protected: BufferTest() : buffer_(new text::Buffer(L"*test*")) {
+  protected: BufferTest()
+      : buffer_(new text::Buffer(L"*test*", new  text::PlainTextMode())) {
   }
   public: virtual ~BufferTest() {
   }

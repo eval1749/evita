@@ -63,6 +63,11 @@ static int const k_edge_size = 0;
 using common::win::Rect;
 
 namespace {
+
+enum CtrlId {
+  CtrlId_TabBand  = 1,
+};
+
 class CompositionState {
   private: BOOL enabled_;
   private: CompositionState() : enabled_(false) {}
@@ -133,10 +138,6 @@ Frame::Frame(views::WindowId window_id)
       title_bar_(new views::TitleBar()),
       m_hwndTabBand(nullptr),
       m_pActivePane(nullptr) {
-}
-
-Frame::Frame()
-    : Frame(views::kInvalidWindowId) {
 }
 
 Frame::~Frame() {

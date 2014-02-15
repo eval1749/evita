@@ -44,13 +44,10 @@ class MouseWheelEvent;
 // A range contains the start position of window.
 //
 class TextEditWindow
-    : public views::ContentWindow,
-      public DoubleLinkedNode_<TextEditWindow, Buffer> {
+    : public views::ContentWindow {
   DECLARE_CASTABLE_CLASS(TextEditWindow, views::ContentWindow);
 
-  private: typedef DoubleLinkedNode_<TextEditWindow> WindowItem;
   private: typedef views::ContentWindow ParentClass;
-
   private: typedef common::win::Point Point;
   private: typedef text::Range Range;
 
@@ -161,7 +158,6 @@ class TextEditWindow
   public: int SmallScroll(int, int);
   public: Posn StartOfLine(Posn);
   private: Posn startOfLineAux(const gfx::Graphics&, Posn);
-  private: void stopDrag();
 
   // [U]
   private: void updateScreen();

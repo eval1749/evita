@@ -40,28 +40,17 @@ class MessageView;
 class TitleBar;
 }
 
-namespace dom {
-class Buffer;
-}
-
-using Buffer = dom::Buffer;
-
 /// <summary>
 ///   Represents a frame window aka toplevel window. This window communicates
 ///   with window manager.
 /// </summary>
 class Frame final : public views::Window,
                     public DoubleLinkedNode_<Frame> {
-  private: typedef ui::Widget Widget;
-  private: typedef ui::Widget Widget;
   DECLARE_CASTABLE_CLASS(Frame, views::Window);
 
-  private: enum CtrlId {
-    CtrlId_TabBand  = 1,
-    CtrlId_StatusBar,
-  };
-
+  private: typedef ui::Widget Widget;
   private: typedef ChildList_<Frame, Pane> Panes;
+
   private: std::unique_ptr<gfx::Graphics> gfx_;
   private: int m_cyTabBand;
   private: HWND m_hwndTabBand;
@@ -72,8 +61,6 @@ class Frame final : public views::Window,
   private: Pane* m_pActivePane;
 
   public: explicit Frame(views::WindowId window_id);
-  // TODO(yosi) We should remove no parameter Frame ctor.
-  public: Frame();
   private: virtual ~Frame();
 
   // TODO: We should not use Frame to HWDN.
@@ -84,7 +71,7 @@ class Frame final : public views::Window,
   public: Panes& panes() { return m_oPanes; }
 
   // [A]
-  public: bool  Activate();
+  public: bool Activate();
   private: void AddPane(Pane*);
   private: void AddTab(Pane*);
   public: void AddWindow(views::ContentWindow*);

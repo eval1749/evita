@@ -5,7 +5,6 @@
 //
 #define IDC_HSPLIT                      101
 #define IDC_VSPLIT                      102
-#define IDC_FIND_EXACT                  201
 #define IDD_FIND                        1000
 #define IDC_FIND_WHAT                   1001
 #define IDC_FIND_WITH                   1002
@@ -24,6 +23,7 @@
 #define IDC_FIND_PREVIOUS               1015
 #define IDC_FIND_REPLACE                1016
 #define IDC_FIND_REPLACE_ALL            1017
+#define IDC_FIND_EXACT                  1018
 #define IDS_ASK_REFRESH                 0x4100
 #define IDS_ASK_RELOAD                  0x4101
 #define IDS_ASK_SAVE                    0x4102

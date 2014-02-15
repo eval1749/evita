@@ -7,6 +7,7 @@
 #include <unordered_set>
 
 #include "base/strings/string16.h"
+#include "base/time/time.h"
 #include "evita/gc/member.h"
 #include "evita/v8_glue/scriptable.h"
 #include "evita/v8_glue/scoped_persistent.h"

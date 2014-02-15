@@ -196,6 +196,7 @@ void ScriptThread::GetTableRowStates(WindowId window_id,
   if (!host_message_loop_)
     return;
   base::WaitableEvent event(true, false);
+  DOM_AUTO_UNLOCK_SCOPE();
   host_message_loop_->PostTask(FROM_HERE, base::Bind(
       &ViewDelegate::GetTableRowStates,
       base::Unretained(view_delegate_), window_id, keys,

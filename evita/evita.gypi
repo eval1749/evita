@@ -410,7 +410,6 @@
         'editor/application.cc',
         'editor/dialog_box.cc',
         'editor/dom_lock.cc',
-        'ExactStringMatch.cpp',
         'gfx_base.cpp',
         'vi_Caret.cpp',
         'vi_DialogBox.cpp',

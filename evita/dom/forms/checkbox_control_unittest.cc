@@ -17,7 +17,7 @@ class CheckboxControlTest : public dom::AbstractDomTest {
 
 TEST_F(CheckboxControlTest, ctor) {
   EXPECT_SCRIPT_VALID("var sample = new CheckboxControl(123);");
-  EXPECT_SCRIPT_EQ("123", "sample.resource_id");
+  EXPECT_SCRIPT_EQ("123", "sample.controlId");
   EXPECT_SCRIPT_EQ("false", "sample.checked");
   EXPECT_SCRIPT_VALID("sample.checked = true;");
   EXPECT_SCRIPT_EQ("true", "sample.checked");

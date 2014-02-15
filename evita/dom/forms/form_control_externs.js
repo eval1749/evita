@@ -2,7 +2,7 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 /** @expose @type{number} */
-FormControl.prototype.resource_id;
+FormControl.prototype.controlId;
 
 /**
  * @param {string} type

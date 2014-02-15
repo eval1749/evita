@@ -26,7 +26,7 @@ class FormControlClass :
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetProperty("resource_id", &FormControl::resource_id);
+        .SetProperty("controlId", &FormControl::control_id);
   }
 
   DISALLOW_COPY_AND_ASSIGN(FormControlClass);
@@ -39,8 +39,8 @@ class FormControlClass :
 //
 DEFINE_SCRIPTABLE_OBJECT(FormControl, FormControlClass);
 
-FormControl::FormControl(FormResourceId resource_id)
-    : resource_id_(resource_id) {
+FormControl::FormControl(FormResourceId control_id)
+    : control_id_(control_id) {
 }
 
 FormControl::FormControl() : FormControl(kInvalidFormResourceId) {

@@ -26,6 +26,12 @@ Form.prototype.dispatchEvent = function(event) {};
  */
 Form.prototype.doFind_ = function(direction) {};
 
+/**
+ * @param {number} control_id
+ * @return {!FormControl}
+ */
+Form.prototype.get = function(control_id) {};
+
 Form.prototype.realize = function() {};
 
 /**

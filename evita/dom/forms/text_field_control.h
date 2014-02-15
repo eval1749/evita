@@ -13,7 +13,7 @@ class TextFieldControl
 
   private: base::string16 value_;
 
-  public: TextFieldControl(FormResourceId resource_id);
+  public: TextFieldControl(FormResourceId control_id);
   public: virtual ~TextFieldControl();
 
   public: const base::string16& value() const { return value_; }

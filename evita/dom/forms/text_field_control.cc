@@ -32,8 +32,8 @@ class TextFieldControlClass :
   }
 
   private: static TextFieldControl* NewTextFieldControl(
-      FormResourceId resource_id) {
-    return new TextFieldControl(resource_id);
+      FormResourceId control_id) {
+    return new TextFieldControl(control_id);
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -53,8 +53,8 @@ class TextFieldControlClass :
 //
 DEFINE_SCRIPTABLE_OBJECT(TextFieldControl, TextFieldControlClass);
 
-TextFieldControl::TextFieldControl(FormResourceId resource_id)
-    : ScriptableBase(resource_id) {
+TextFieldControl::TextFieldControl(FormResourceId control_id)
+    : ScriptableBase(control_id) {
 }
 
 TextFieldControl::~TextFieldControl() {

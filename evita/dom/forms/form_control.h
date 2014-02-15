@@ -15,13 +15,13 @@ const FormResourceId kInvalidFormResourceId = -1;
 class FormControl : public v8_glue::Scriptable<FormControl, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(FormControl);
 
-  private: FormResourceId resource_id_;
+  private: FormResourceId control_id_;
 
-  protected: explicit FormControl(int resource_id);
+  protected: explicit FormControl(int control_id);
   protected: FormControl();
   public: virtual ~FormControl();
 
-  public: FormResourceId resource_id() const { return resource_id_; }
+  public: FormResourceId control_id() const { return control_id_; }
 
   DISALLOW_COPY_AND_ASSIGN(FormControl);
 };

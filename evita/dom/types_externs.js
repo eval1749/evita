@@ -36,9 +36,9 @@ var EventTarget = function() {};
 /**
  * @constructor
  * @implements {EventTarget}
- * @param {number} resouce_id
+ * @param {number} control_id
  */
-var FormControl = function(resouce_id) {};
+var FormControl = function(control_id) {};
 
 /**
  * @constructor
@@ -142,9 +142,9 @@ var TableWindow = function(document) {};
 /**
  * @constructor
  * @extends {FormControl}
- * @param {number} resouce_id
+ * @param {number} control_id
  */
-var TextFieldControl = function(resouce_id) {};
+var TextFieldControl = function(control_id) {};
 
 /**
  * @constructor

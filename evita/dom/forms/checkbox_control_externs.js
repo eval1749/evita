@@ -5,9 +5,9 @@
 /**
  * @constructor
  * @extends {FormControl}
- * @param {number} resource_id
+ * @param {number} control_id
  */
-var CheckboxControl = function(resource_id) {};
+var CheckboxControl = function(control_id) {};
 
 /** @type {boolean} */
 CheckboxControl.prototype.checked;

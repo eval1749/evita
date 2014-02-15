@@ -26,6 +26,7 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\events\keyboard_event_externs.js ^
   %externs_dir%\events\mouse_event_externs.js ^
   %externs_dir%\events\ui_event_externs.js ^
+  %externs_dir%\forms\button_control_externs.js ^
   %externs_dir%\forms\checkbox_control_externs.js ^
   %externs_dir%\forms\form_externs.js ^
   %externs_dir%\forms\form_control_externs.js ^

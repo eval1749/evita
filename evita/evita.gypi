@@ -30,6 +30,7 @@
         'dom/editor_externs.js',
         'dom/editor_window_externs.js',
 
+        'dom/forms/button_control_externs.js',
         'dom/forms/checkbox_control_externs.js',
         'dom/forms/form_externs.js',
         'dom/forms/form_control_externs.js',
@@ -168,6 +169,7 @@
         'dom/events/window_event.cc',
         'dom/events/window_event_init.cc',
 
+        'dom/forms/button_control.cc',
         'dom/forms/checkbox_control.cc',
         'dom/forms/form.cc',
         'dom/forms/form_control.cc',

@@ -63,6 +63,7 @@
         'dom/events/ui_event_unittest.cc',
         'dom/events/window_event_unittest.cc',
 
+        'dom/forms/button_control_unittest.cc',
         'dom/forms/checkbox_control_unittest.cc',
         'dom/forms/form_unittest.cc',
         'dom/forms/radio_button_control_unittest.cc',

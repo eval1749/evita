@@ -11,10 +11,9 @@
 //
 #include "evita/vi_style.h"
 
-#include "evita/gfx_base.h"
-#include "evita/vi_util.h"
-
 #include <vector>
+
+#include "evita/gfx_base.h"
 
 namespace {
 bool IsCacheableChar(char16 wch) {

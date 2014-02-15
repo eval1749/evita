@@ -16,15 +16,15 @@
 #define DEBUG_RENDER 0
 #include "evita/vi_Page.h"
 
+#include <algorithm>
+#include <utility>
+#include <vector>
+
 #include "evita/ed_interval.h"
 #include "evita/ed_util.h"
 #include "evita/gfx_base.h"
 #include "evita/dom/buffer.h"
 #include "evita/vi_Selection.h"
-#include "evita/vi_util.h"
-#include <algorithm>
-#include <utility>
-#include <vector>
 
 namespace PageInternal {
 

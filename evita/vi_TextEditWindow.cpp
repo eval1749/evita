@@ -38,7 +38,6 @@
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_Selection.h"
-#include "evita/vi_util.h"
 
 extern HWND g_hwndActiveDialog;
 

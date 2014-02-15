@@ -47,7 +47,6 @@
 #include "evita/vi_Selection.h"
 #include "evita/vi_Style.h"
 #include "evita/vi_TextEditWindow.h"
-#include "evita/vi_util.h"
 
 #include <dwmapi.h>
 #pragma comment(lib, "dwmapi.lib")

@@ -95,7 +95,7 @@ dom::EventTargetId DialogBox::Model::event_target_id_of(
 void DialogBox::Model::Build(const dom::Form* form) {
   UI_DOM_AUTO_LOCK_SCOPE();
   for (auto control : form->controls()) {
-    id_map_[control->resouce_id()] = control->event_target_id();
+    id_map_[control->control_id()] = control->event_target_id();
   }
 }
 

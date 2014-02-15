@@ -11,8 +11,6 @@
 #if !defined(INCLUDE_listener_winapp_visual_fontset_h)
 #define INCLUDE_listener_winapp_visual_fontset_h
 
-#include "evita/vi_defs.h"
-
 #include <memory>
 
 #include "evita/ed_Style.h"

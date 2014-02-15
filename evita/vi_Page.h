@@ -11,7 +11,6 @@
 #if !defined(INCLUDE_listener_winapp_visual_formatter_h)
 #define INCLUDE_listener_winapp_visual_formatter_h
 
-#include "evita/vi_defs.h"
 #include "evita/vi_style.h"
 #include "gfx_base.h"
 
@@ -37,6 +36,8 @@ namespace PageInternal {
 //
 class Page {
   friend class PageInternal::Formatter;
+
+  private: typedef common::win::Rect Rect;
 
   private: typedef PageInternal::Cell Cell;
   private: class DisplayBuffer;

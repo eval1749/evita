@@ -16,6 +16,9 @@
 #define DEBUG_WINDOWPOS 0
 #include "evita/vi_Frame.h"
 
+#include <dwmapi.h>
+#pragma comment(lib, "dwmapi.lib")
+
 #include <sstream>
 
 #pragma warning(push)
@@ -33,7 +36,6 @@
 #include "evita/ctrl_TitleBar.h"
 #include "evita/text/modes/mode.h"
 #include "evita/gfx_base.h"
-#include "evita/vi_defs.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
@@ -48,16 +50,17 @@
 #include "evita/vi_Style.h"
 #include "evita/vi_TextEditWindow.h"
 
-#include <dwmapi.h>
-#pragma comment(lib, "dwmapi.lib")
-
 extern uint g_nDropTargetMsg;
+extern HINSTANCE g_hInstance;
+extern HINSTANCE g_hResource;
 
 static int const kPaddingBottom = 0;
 static int const kPaddingLeft = 0;
 static int const kPaddingRight = 0;
 static int const kPaddingTop = 0;
 static int const k_edge_size = 0;
+
+using common::win::Rect;
 
 namespace {
 class CompositionState {

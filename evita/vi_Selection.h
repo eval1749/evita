@@ -3,8 +3,6 @@
 #if !defined(INCLUDE_listener_winapp_visual_selection_h)
 #define INCLUDE_listener_winapp_visual_selection_h
 
-#include "evita/vi_defs.h"
-
 #include "base/strings/string16.h"
 #include "evita/text/range.h"
 #include "evita/ed_Style.h"

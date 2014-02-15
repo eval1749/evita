@@ -12,7 +12,6 @@
 #define INCLUDE_listener_winapp_visual_EditPane_h
 
 #include "base/memory/ref_counted.h"
-#include "evita/vi_defs.h"
 #include "evita/vi_Pane.h"
 
 class Frame;
@@ -35,6 +34,9 @@ using Buffer = dom::Buffer;
 // them vertically with draggable splitter.
 class EditPane final : public Pane {
   DECLARE_CASTABLE_CLASS(EditPane, Pane);
+
+  private: typedef common::win::Point Point;
+  private: typedef common::win::Rect Rect;
 
   private: enum Limits {
     k_cxSplitter = 8,

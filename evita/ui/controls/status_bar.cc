@@ -7,9 +7,10 @@
 
 #include "base/logging.h"
 #include "common/win/win32_verify.h"
-#include "evita/vi_defs.h"
 
 #pragma comment(lib, "comctl32.lib")
+
+extern HINSTANCE g_hInstance;
 
 namespace ui {
 

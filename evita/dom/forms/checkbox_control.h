@@ -15,7 +15,7 @@ class CheckboxControl
 
   private: bool checked_;
 
-  public: CheckboxControl(FormResourceId resouce_id);
+  public: CheckboxControl(FormResourceId resource_id);
   public: virtual ~CheckboxControl();
 
   public: const bool checked() const { return checked_; }

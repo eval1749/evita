@@ -33,8 +33,8 @@ class CheckboxControlClass :
   }
 
   private: static CheckboxControl* NewCheckboxControl(
-      FormResourceId resouce_id) {
-    return new CheckboxControl(resouce_id);
+      FormResourceId resource_id) {
+    return new CheckboxControl(resource_id);
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -54,8 +54,8 @@ class CheckboxControlClass :
 //
 DEFINE_SCRIPTABLE_OBJECT(CheckboxControl, CheckboxControlClass);
 
-CheckboxControl::CheckboxControl(FormResourceId resouce_id)
-    : ScriptableBase(resouce_id), checked_(false) {
+CheckboxControl::CheckboxControl(FormResourceId resource_id)
+    : ScriptableBase(resource_id), checked_(false) {
 }
 
 CheckboxControl::~CheckboxControl() {

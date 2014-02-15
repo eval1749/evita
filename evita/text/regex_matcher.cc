@@ -411,7 +411,7 @@ bool RegexMatcher::FirstMatch() {
   return matched_ = Regex::StartMatch(regex_, match_context_.get());
 }
 
-RegexMatcher::ErrorInfo RegexMatcher::GetError() const {
+RegexMatcher::ErrorInfo RegexMatcher::GetErrorInfo() const {
   return error_info_;
 }
 

@@ -35,7 +35,7 @@ class RegexMatcher {
   public: ~RegexMatcher();
 
   public: bool FirstMatch();
-  public: ErrorInfo GetError() const;
+  public: ErrorInfo GetErrorInfo() const;
   private: text::Range* GetMatched(const base::string16& name);
   public: text::Range* GetMatched(int);
   public: bool NextMatch();

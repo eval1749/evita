@@ -123,7 +123,7 @@ void FindDialogBox::DoFind(text::Direction eDirection) {
   text::RegexMatcher matcher(&search, selection->GetBuffer(), start_position,
                              end_position);
 
-  auto const error_info = matcher.GetError();
+  auto const error_info = matcher.GetErrorInfo();
   if (auto const error_code = error_info.error_code) {
     Application::instance()->GetActiveFrame()->ShowMessage(
         MessageLevel_Warning,

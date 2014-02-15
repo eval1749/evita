@@ -11,59 +11,46 @@
 #if !defined(INCLUDE_RegexMatcher_h)
 #define INCLUDE_RegexMatcher_h
 
+#include <memory>
+
+#include "base/basictypes.h"
 #include "evita/text/search_and_replace_model.h"
 #include "regex/IRegex.h"
 
-namespace Private
-{
-    class BufferMatchContext;
-} // Private
+namespace text {
 
-class RegexMatcher
-{
-    private: struct ErrorInfo
-    {
-        int m_nError;
-        int m_nPosn;
+class RegexMatcher {
+  private: class BufferMatchContext;
 
-        ErrorInfo() :
-            m_nError(0), m_nPosn(0) {}
-    }; // ErrorInfo
+  public: struct ErrorInfo {
+    int error_code;
+    int offset;
 
-    private: bool                           m_fMatched;
-    private: ErrorInfo                      m_oErrorInfo;
-    private: SearchParameters               m_oSearch;
-    private: Regex::IRegex*                 m_pIRegex;
-    private: Private::BufferMatchContext*   m_pMatchContext;
+    ErrorInfo() : error_code(0), offset(0) {
+    }
+  };
 
-    // ctor
-    public: RegexMatcher(
-        const SearchParameters*,
-        text::Buffer*,
-        Posn,
-        Posn );
+  private: ErrorInfo error_info_;
+  private: bool matched_;
+  private: std::unique_ptr<BufferMatchContext> match_context_;
+  private: Regex::IRegex* regex_;
+  private: SearchParameters search_params_;
 
-    // [F]
-    public: bool FirstMatch();
+  public: RegexMatcher(const SearchParameters* params, text::Buffer* buffer,
+      Posn start, Posn end);
+  public: ~RegexMatcher();
 
-    // [G]
-    public: int GetError(int* out_nChar)
-    {
-        *out_nChar = m_oErrorInfo.m_nPosn;
-        return m_oErrorInfo.m_nError;
-    } // GetError
+  public: bool FirstMatch();
+  public: ErrorInfo GetError() const;
+  private: text::Range* GetMatched(const base::string16& name);
+  public: text::Range* GetMatched(int);
+  public: bool NextMatch();
+  public: void Replace(const base::string16& with, bool meta_char);
+  public: bool WrapMatch();
 
-    public: text::Range* GetMatched(const char16*, int);
-    public: text::Range* GetMatched(int);
+  DISALLOW_COPY_AND_ASSIGN(RegexMatcher);
+};
 
-    // [N]
-    public: bool NextMatch();
-
-    // [R]
-    public: void Replace(const char16*, int, bool);
-
-    // [W]
-    public: bool WrapMatch();
-}; // RegexMatcher
+}  // namespace text
 
 #endif //!defined(INCLUDE_RegexMatcher_h)

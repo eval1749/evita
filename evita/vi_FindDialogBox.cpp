@@ -19,7 +19,7 @@
 #include "evita/vi_TextEditWindow.h"
 
 #define BEGIN_COMMAND_MAP switch (wParam) {
-#define END_COMMAND_MAP } return false;
+#define END_COMMAND_MAP } return DialogBox::onCommand(wParam, lParam);
 
 #define ON_COMMAND(mp_ctrl, mp_notify, mp_method, ...) \
   case MAKEWPARAM(mp_ctrl, mp_notify): { \
@@ -120,19 +120,16 @@ void FindDialogBox::DoFind(text::Direction eDirection) {
     }
   }
 
-  RegexMatcher matcher(&search, selection->GetBuffer(), start_position,
-                       end_position);
+  text::RegexMatcher matcher(&search, selection->GetBuffer(), start_position,
+                             end_position);
 
-  {
-    int nChar;
-    if (int nError = matcher.GetError(&nChar)) {
-      Application::instance()->GetActiveFrame()->ShowMessage(
-          MessageLevel_Warning,
-          IDS_BAD_REGEX,
-          nChar,
-          nError);
-      return;
-    }
+  auto const error_info = matcher.GetError();
+  if (auto const error_code = error_info.error_code) {
+    Application::instance()->GetActiveFrame()->ShowMessage(
+        MessageLevel_Warning,
+        IDS_BAD_REGEX,
+        error_info.offset, error_code);
+    return;
   }
 
   if (!FindFirst(&matcher)) {
@@ -166,8 +163,8 @@ void FindDialogBox::DoReplace(text::ReplaceMode replace_mode) {
     end_position = buffer->GetEnd();
   }
 
-  RegexMatcher matcher(&search, selection->GetBuffer(), start_position,
-                       end_position);
+  text::RegexMatcher matcher(&search, selection->GetBuffer(), start_position,
+                             end_position);
 
   if (!FindFirst(&matcher)) {
     ReportNotFound();
@@ -175,8 +172,6 @@ void FindDialogBox::DoReplace(text::ReplaceMode replace_mode) {
   }
 
   auto const wszWith = GetDlgItemText(IDC_FIND_WITH);
-  auto const cwchWith = static_cast<int>(wszWith.length());
-
   bool is_replace_with_meta = search.m_rgf & SearchFlag_Regex;
 
   Count num_replaced = 0;
@@ -188,10 +183,10 @@ void FindDialogBox::DoReplace(text::ReplaceMode replace_mode) {
       if (search.IsCasePreserve()) {
         text::UndoBlock oUndo(buffer, L"Edit.Replace");
         StringCase eCase = selection->AnalyzeCase();
-        matcher.Replace(wszWith.data(), cwchWith, is_replace_with_meta);
+        matcher.Replace(wszWith, is_replace_with_meta);
         CaseReplace(selection, eCase);
       } else {
-        matcher.Replace(wszWith.data(), cwchWith, is_replace_with_meta);
+        matcher.Replace(wszWith, is_replace_with_meta);
       }
       ++num_replaced;
     }
@@ -213,10 +208,10 @@ void FindDialogBox::DoReplace(text::ReplaceMode replace_mode) {
 
       if (search.IsCasePreserve()) {
         StringCase eCase = range->AnalyzeCase();
-        matcher.Replace(wszWith.data(), cwchWith, is_replace_with_meta);
+        matcher.Replace(wszWith, is_replace_with_meta);
         CaseReplace(range, eCase);
       } else {
-        matcher.Replace(wszWith.data(), cwchWith, is_replace_with_meta);
+        matcher.Replace(wszWith, is_replace_with_meta);
       }
 
       ++num_replaced;
@@ -250,7 +245,7 @@ void FindDialogBox::DoReplace(text::ReplaceMode replace_mode) {
 /// <param name="pMatcher">
 ///   A matcher initialized from Find Dialog input elements.
 /// </param>
-bool FindDialogBox::FindFirst(RegexMatcher* pMatcher) {
+bool FindDialogBox::FindFirst(text::RegexMatcher* pMatcher) {
   if (pMatcher->FirstMatch())
     return true;
 
@@ -281,7 +276,7 @@ void FindDialogBox::onCancel() {
 /// <param name="lParam">
 ///   lParam of window message
 /// </param>
-bool FindDialogBox::onCommand(WPARAM wParam, LPARAM) {
+bool FindDialogBox::onCommand(WPARAM wParam, LPARAM lParam) {
   DVLOG(1) << "FindDialogBox::onCommand ctrlid=" << LOWORD(wParam) <<
       " notify=" << std::hex << HIWORD(wParam);
 
@@ -295,11 +290,6 @@ bool FindDialogBox::onCommand(WPARAM wParam, LPARAM) {
     ON_COMMAND(IDC_FIND_REPLACE_ALL, BN_CLICKED, onReplaceAll)
     ON_COMMAND(IDC_FIND_WHAT, CBN_EDITCHANGE, UpdateUI)
     ON_COMMAND(IDC_FIND_WITH, CBN_EDITCHANGE, UpdateUI)
-
-    ON_COMMAND(IDC_FIND_WHAT, CBN_KILLFOCUS,
-               DispatchTextEvent, L"change", IDC_FIND_WHAT)
-    ON_COMMAND(IDC_FIND_WITH, CBN_KILLFOCUS,
-               DispatchTextEvent, L"change", IDC_FIND_WITH)
   END_COMMAND_MAP
 }
 

@@ -8,8 +8,11 @@
 #include "evita/text/search_and_replace_model.h"
 #include "evita/vi_DialogBox.h"
 
-class RegexMatcher;
 class Selection;
+
+namespace text {
+class RegexMatcher;
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -25,7 +28,7 @@ class FindDialogBox final : public DialogBox {
   private: void ClearMessage();
   public: void DoFind(text::Direction);
   private: void DoReplace(text::ReplaceMode replace_mode);
-  private: bool FindFirst(RegexMatcher* matcher);
+  private: bool FindFirst(text::RegexMatcher* matcher);
   private: void onFindNext();
   private: void onFindPrevious();
   private: void onReplaceOne();

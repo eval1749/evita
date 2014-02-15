@@ -114,6 +114,7 @@
       'sources': [
         'precomp.cpp',
         'core/buffer_unittest.cc',
+        'text/regex_matcher_unittest.cc',
       ],
     }, # evita_text_test
     {

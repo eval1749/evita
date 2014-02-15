@@ -38,6 +38,7 @@
 #include "evita/dom/os_file.h"
 #include "evita/dom/point.h"
 #include "evita/dom/range.h"
+#include "evita/dom/regexp.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/selection.h"
 #include "evita/dom/table_selection.h"
@@ -84,7 +85,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
       INSTALL(WindowEvent);
 
     INSTALL(Document);
-    INSTALL(Editor);
+    auto const editor_templ = INSTALL(Editor);
     INSTALL(FilePath);
     INSTALL(Point);
     INSTALL(Range);
@@ -122,6 +123,11 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     INSTALL(Timer);
       INSTALL(OneShotTimer);
       INSTALL(RepeatingTimer);
+
+    // Editor
+    editor_templ->Set(gin::StringToV8(isolate, "RegExp"),
+                      RegExp::static_wrapper_info()->
+                          GetOrCreateConstructorTemplate(isolate));
 
     // Os
     auto const os_templ = v8::ObjectTemplate::New(isolate);

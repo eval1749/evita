@@ -17,6 +17,10 @@ namespace v8_glue {
 
 class AbstractScriptable;
 
+//////////////////////////////////////////////////////////////////////
+//
+// WrapperInfo
+//
 // Note: The |WrapperInfo| class was called |ScriptWrapperInfo|. Although, it
 // is too long to fit in line. So, we renamed shorter name.
 class WrapperInfo {
@@ -49,7 +53,7 @@ class WrapperInfo {
       v8::Isolate* isolate);
   public: v8::Handle<v8::ObjectTemplate> GetOrCreateInstanceTemplate(
       v8::Isolate* isolate);
-  public: void Install(v8::Isolate* isolate,
+  public: v8::Handle<v8::FunctionTemplate> Install(v8::Isolate* isolate,
                        v8::Handle<v8::ObjectTemplate> global);
   protected: virtual void SetupInstanceTemplate(
     ObjectTemplateBuilder& builder);
@@ -57,15 +61,23 @@ class WrapperInfo {
   DISALLOW_COPY_AND_ASSIGN(WrapperInfo);
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// Installer
+//
 template<typename T>
 class Installer {
-  public: static void Run(v8::Isolate* isolate,
-                          v8::Handle<v8::ObjectTemplate> global) {
-    T::static_wrapper_info()->Install(isolate, global);
+  public: static v8::Handle<v8::FunctionTemplate>
+      Run(v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> global) {
+    return T::static_wrapper_info()->Install(isolate, global);
   }
   DISALLOW_COPY_AND_ASSIGN(Installer);
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// DerivedWrapperInfo
+//
 template<typename Derived, typename Base>
 class DerivedWrapperInfo : public WrapperInfo {
   static_assert(std::is_base_of<Base, Derived>::value,

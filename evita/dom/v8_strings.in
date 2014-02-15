@@ -78,6 +78,21 @@ italic
 normal
 bold
 
+# Regex
+Editor
+Match
+RegExp
+backward
+end
+global
+ignoreCase
+matchExact
+matchWord
+multiline
+name
+start
+sticky
+
 # TextDeocration
 none
 greenwave

@@ -66,6 +66,7 @@
         'dom/editor_window.js',
         'dom/errors.js',
         'dom/file_path.js',
+        'dom/forms/form.js',
         'dom/modes/modes.js',
         'dom/os_file.js',
         'dom/range.js',

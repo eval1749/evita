@@ -376,7 +376,6 @@
       ], # dependencies
       'sources': [
         'precomp.cpp',
-        'core/style.cc',
         'ed_BufferCore.cpp',
         'ed_BufferFind.cpp',
         'ed_Interval.cpp',
@@ -398,6 +397,7 @@
         'text/modes/python_mode.cc',
         'text/modes/xml_mode.cc',
         'text/range.cc',
+        'text/style.cc',
         'z_debug.cpp',
         '../charset/CharsetDecoder.cpp',
         '../charset/CharsetDetector.cpp',

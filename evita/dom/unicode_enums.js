@@ -40,6 +40,7 @@
   /** @const @type{number} */ Unicode.EQUALS_SIGN = 0x3D;
   /** @const @type{number} */ Unicode.GREATER_THAN_SIGN = 0x3E;
   /** @const @type{number} */ Unicode.QUESTION_MARK = 0x3F;
+  /** @const @type{number} */ Unicode.COMMERCIAL_AT = 0x40;
   /** @const @type{number} */ Unicode.LATIN_CAPITAL_A = 0x41;
   /** @const @type{number} */ Unicode.LATIN_CAPITAL_B = 0x42;
   /** @const @type{number} */ Unicode.LATIN_CAPITAL_C = 0x43;

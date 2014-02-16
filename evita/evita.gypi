@@ -68,7 +68,14 @@
         'dom/editor_window.js',
         'dom/errors.js',
         'dom/file_path.js',
+
+        'dom/forms/button_control.js',
+        'dom/forms/checkbox_control.js',
         'dom/forms/form.js',
+        'dom/forms/form_control.js',
+        'dom/forms/radio_button_control.js',
+        'dom/forms/text_field_control.js',
+
         'dom/modes/modes.js',
         'dom/os_file.js',
         'dom/range.js',

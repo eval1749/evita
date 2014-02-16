@@ -166,7 +166,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_REPLACED            "Replace %d occurences"
+    IDS_REPLACED            "Replace %d occurrences"
 END
 
 STRINGTABLE 

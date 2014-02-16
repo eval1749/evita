@@ -414,12 +414,12 @@
       'sources': [
         'precomp.cpp',
 
-        'ctrl_TabBand.cpp',
         'ctrl_TitleBar.cpp',
         'editor/application.cc',
         'editor/dialog_box.cc',
         'editor/dom_lock.cc',
         'gfx_base.cpp',
+        'views/tab_strip.cc',
         'vi_Caret.cpp',
         'vi_DialogBox.cpp',
         'vi_EditPane.cpp',

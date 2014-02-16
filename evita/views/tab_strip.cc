@@ -1,19 +1,12 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// Tab Band Control
-// ctrl_TabBand.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/ctrl_TabBand.cpp#2 $
-//
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #define DEBUG_DRAG 0
 #define DEBUG_HOVER 0
 #define DEBUG_MESSAGE 0
 #define DEBUG_TOOLTIP 0
-#include "evita/ctrl_tabBand.h"
+#include "evita/views/tab_strip.h"
 
 #include <dwmapi.h>
 #include <algorithm>

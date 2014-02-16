@@ -18,9 +18,9 @@
 #include "base/at_exit.h"
 #include "base/command_line.h"
 #include "base/logging.h"
-#include "evita/ctrl_TabBand.h"
 #include "evita/editor/application.h"
 #include "evita/io/io_manager.h"
+#include "evita/views/tab_strip.h"
 #include "evita/vi_Style.h"
 
 #define SINGLE_INSTANCE_NAME L"D47A7677-9F8E-467c-BABE-8ABDE8D58476" 

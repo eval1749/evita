@@ -13,8 +13,8 @@
 
 #include <vector>
 
-#include "evita/ctrl_TabBand.h"
 #include "evita/li_util.h"
+#include "evita/views/tab_strip.h"
 #include "evita/views/window.h"
 
 namespace gfx {

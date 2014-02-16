@@ -32,7 +32,6 @@
 #include "common/tree/ancestors_or_self.h"
 #include "common/tree/child_nodes.h"
 #include "common/win/native_window.h"
-#include "evita/ctrl_TabBand.h"
 #include "evita/ctrl_TitleBar.h"
 #include "evita/text/modes/mode.h"
 #include "evita/gfx_base.h"

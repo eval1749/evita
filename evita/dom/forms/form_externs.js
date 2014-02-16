@@ -23,11 +23,6 @@ Form.prototype.addEventListener = function(type, listener, opt_capture) {};
 Form.prototype.dispatchEvent = function(event) {};
 
 /**
- * @param {number} direction
- */
-Form.prototype.doFind_ = function(direction) {};
-
-/**
  * @param {number} control_id
  * @return {!FormControl}
  */

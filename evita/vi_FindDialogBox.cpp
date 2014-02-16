@@ -1,17 +1,10 @@
-#include "precomp.h"
 // Copyright (C) 1996-2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 #include "evita/vi_FindDialogBox.h"
 
-#include <utility>
-
 #include "base/logging.h"
 #include "evita/editor/application.h"
-#include "evita/dom/buffer.h"
-#include "evita/dom/view_event_handler.h"
-#include "evita/editor/dom_lock.h"
-#include "evita/text/regex_matcher.h"
 #include "evita/text/search_and_replace_model.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"

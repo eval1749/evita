@@ -398,7 +398,6 @@
         'text/modes/python_mode.cc',
         'text/modes/xml_mode.cc',
         'text/range.cc',
-        'text/regex_matcher.cc',
         'text/search_and_replace_model.cc',
         'z_debug.cpp',
         '../charset/CharsetDecoder.cpp',

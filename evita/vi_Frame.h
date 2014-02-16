@@ -14,7 +14,7 @@
 #include <vector>
 
 #include "evita/li_util.h"
-#include "evita/views/tab_strip.h"
+#include "evita/views/tab_strip_delegate.h"
 #include "evita/views/window.h"
 
 namespace gfx {
@@ -38,6 +38,7 @@ namespace views {
 class ContentWindow;
 class MessageView;
 class TitleBar;
+class TabStrip;
 }
 
 /// <summary>
@@ -45,6 +46,7 @@ class TitleBar;
 ///   with window manager.
 /// </summary>
 class Frame final : public views::Window,
+                    public views::TabStripDelegate,
                     public DoubleLinkedNode_<Frame> {
   DECLARE_CASTABLE_CLASS(Frame, views::Window);
 
@@ -56,6 +58,7 @@ class Frame final : public views::Window,
   private: HWND m_hwndTabBand;
   private: Panes m_oPanes;
   private: std::unique_ptr<views::MessageView> message_view_;
+  private: views::TabStrip* tab_strip_;
   private: std::unique_ptr<views::TitleBar> title_bar_;
   private: base::string16 tooltip_;
   private: Pane* m_pActivePane;

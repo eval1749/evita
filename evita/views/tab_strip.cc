@@ -11,12 +11,13 @@
 #include <dwmapi.h>
 #include <algorithm>
 
+#include "base/logging.h"
 #include "base/strings/string16.h"
 #include "evita/gfx_base.h"
+#include "evita/ui/events/event.h"
+#include "evita/views/tab_strip_delegate.h"
 
 namespace {
-
-#define WC_TABBANDCLASS  L"TabBandClass"
 
 static HINSTANCE g_hInstance;
 
@@ -267,8 +268,8 @@ class Element : public DoubleLinkedNode_<Element> {
     return m_fHover = f;
   }
 
-  public: HIMAGELIST SetImageList(HIMAGELIST h) {
-    return m_hImageList = h;
+  public: void SetImageList(HIMAGELIST hImageList) {
+    m_hImageList = hImageList;
   }
 
   public: Element* SetParent(Element* p) {
@@ -299,9 +300,9 @@ class Element : public DoubleLinkedNode_<Element> {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TabBand Design Parameters
+// TabStripImpl Design Parameters
 //
-enum TabBandDesignParams {
+enum TabStripImplDesignParams {
   k_cxMargin = 3,
   k_cyMargin = 2,
   k_cxListButton = 16,
@@ -311,7 +312,7 @@ enum TabBandDesignParams {
   k_cxMinTab = 140,
   k_cyBorder = 5,
   k_cyIcon = 16,
-}; // TabBandDesignParams
+}; // TabStripImplDesignParams
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -627,11 +628,11 @@ static uint s_nTagDragMsg;
 
 // Send TabDragMsg to window which can handle it.
 static HWND handleTabDragAndDrop(
-    HWND const hwndTabBand,
+    HWND const hwndTabStripImpl,
     POINT const ptClient,
     TabBandDragAndDrop const eAction) {
   auto ptScreen = ptClient;
-  if (!::ClientToScreen(hwndTabBand, &ptScreen)) {
+  if (!::ClientToScreen(hwndTabStripImpl, &ptScreen)) {
     return nullptr;
   }
 
@@ -643,8 +644,7 @@ static HWND handleTabDragAndDrop(
   if (s_nTagDragMsg == 0) {
     s_nTagDragMsg = ::RegisterWindowMessage(TabBand__TabDragMsgStr);
     if (s_nTagDragMsg == 0) {
-      DEBUG_PRINTF("Failed RegisterWindowMessage %ls\n",
-        TabBand__TabDragMsgStr);
+      DVLOG(0) << "Failed RegisterWindowMessage " << TabBand__TabDragMsgStr;
       return nullptr;
     }
   }
@@ -654,7 +654,7 @@ static HWND handleTabDragAndDrop(
       hwnd,
       s_nTagDragMsg,
       eAction,
-      reinterpret_cast<LPARAM>(hwndTabBand));
+      reinterpret_cast<LPARAM>(hwndTabStripImpl));
 
     if (iAnswer) {
       return hwnd;
@@ -664,12 +664,12 @@ static HWND handleTabDragAndDrop(
   } while (hwnd);
 
   if (eAction == kDrop) {
-    auto const hwnd = ::GetParent(hwndTabBand);
+    auto const hwnd = ::GetParent(hwndTabStripImpl);
     auto const iAnswer = ::SendMessage(
         hwnd,
         s_nTagDragMsg,
         kThrow,
-        reinterpret_cast<LPARAM>(hwndTabBand));
+        reinterpret_cast<LPARAM>(hwndTabStripImpl));
     return iAnswer ? hwnd : nullptr;
   }
 
@@ -707,9 +707,14 @@ static void loadDragTabCursor() {
   ::FreeLibrary(hDll);
 }
 
+}  // namespace
+
+
+namespace views {
+
 //////////////////////////////////////////////////////////////////////
 //
-// TabBand class
+// TabStripImpl class
 
 //
 
@@ -722,7 +727,9 @@ static void loadDragTabCursor() {
 //    Tab Band control is smaller than total number of tabs times
 //    m_cxTab.
 //
-class TabBand : public Element {
+class TabStrip::TabStripImpl : public Element {
+  friend class TabStrip;
+
   private: enum Constants {
     k_TabListId = 1000,
     k_TabViewId,
@@ -737,7 +744,7 @@ class TabBand : public Element {
     Drag_Start,
   }; // Drag
 
-  public: static const char16*  GetClass_() { return L"TabBand"; }
+  public: static const char16*  GetClass_() { return L"TabStripImpl"; }
 
   public: virtual const char16* GetClass()  const override {
     return GetClass_();
@@ -766,43 +773,8 @@ class TabBand : public Element {
   private: POINT m_ptDragStart;
   private: int m_xTab;
 
-  // ctor
-  private: TabBand(HWND hwnd) :
-      m_cItems(0),
-      m_compositionEnabled(false),
-      m_cxTab(0),
-      m_cxMinTab(k_cxMinTab),
-      m_eDrag(Drag_None),
-      m_fMouseTracking(false),
-      m_hTabListMenu(nullptr),
-      m_hwnd(hwnd),
-      m_hwndToolTips(nullptr),
-      m_iFocus(-1),
-      m_nStyle(0),
-      m_oListButton(this),
-      m_pDragItem(nullptr),
-      m_pHover(nullptr),
-      m_pInsertBefore(nullptr),
-      m_pSelected(nullptr),
-      m_xTab(0),
-      Element(nullptr) {
-    m_oElements.Append(&m_oListButton);
-    COM_VERIFY(::DwmIsCompositionEnabled(&m_compositionEnabled));
-  }
-
-  // dotr
-  private: ~TabBand() {
-    if (auto const text_format = m_gfx.work<gfx::TextFormat>())
-        delete text_format;
-
-    if (m_hwndToolTips && (m_nStyle & TCS_TOOLTIPS) != 0) {
-      ::DestroyWindow(m_hwndToolTips);
-    }
-
-    if (m_hTabListMenu) {
-      ::DestroyMenu(m_hTabListMenu);
-    }
-  }
+  public: TabStripImpl(HWND hwnd);
+  public: virtual ~TabStripImpl();
 
   // [C]
   private: bool changeFont(const gfx::Graphics& gfx) {
@@ -1120,66 +1092,7 @@ class TabBand : public Element {
   }
 
   // [I]
-  // Init
-  public: static BOOL Init(HINSTANCE hInstance) {
-    WNDCLASSEXW oWC;
-    oWC.cbSize = sizeof(oWC);
-    oWC.style = CS_DBLCLKS | CS_BYTEALIGNCLIENT;
-    oWC.lpfnWndProc = windowProc;
-    oWC.cbClsExtra = 0;
-    oWC.cbWndExtra = 0;
-    oWC.hInstance = hInstance;
-    oWC.hIcon = nullptr;
-    oWC.hCursor = ::LoadCursor(nullptr, IDC_ARROW);
-    oWC.hbrBackground = nullptr;
-    oWC.lpszMenuName = nullptr;
-    oWC.lpszClassName = WC_TABBANDCLASS;
-    oWC.hIconSm = nullptr;
-
-    g_hInstance = hInstance;
-
-    return ::RegisterClassExW(&oWC);
-  }
-
-  // [O]
-  private: LRESULT onCreate(CREATESTRUCT* pcs) {
-    m_gfx.Init(m_hwnd);
-    changeFont(m_gfx);
-
-    if (pcs->style & TCS_TOOLTIPS) {
-      m_hwndToolTips = ::CreateWindowEx(
-          WS_EX_TOPMOST,
-          TOOLTIPS_CLASS,
-          nullptr,
-          WS_POPUP | TTS_NOPREFIX, // | TTS_ALWAYSTIP,
-          CW_USEDEFAULT,
-          CW_USEDEFAULT,
-          CW_USEDEFAULT,
-          CW_USEDEFAULT,
-          m_hwnd,
-          nullptr,
-          g_hInstance,
-          nullptr);
-
-      if (m_hwndToolTips) {
-        m_nStyle |= TCS_TOOLTIPS;
-
-        TOOLINFO ti;
-        ti.cbSize = sizeof(ti);
-        ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
-        ti.hwnd = m_hwnd;
-        ti.uId = reinterpret_cast<UINT_PTR>(m_hwnd);
-        ti.lpszText = nullptr;
-        ::SendMessage(
-            m_hwndToolTips,
-            TTM_ADDTOOL,
-            0,
-            reinterpret_cast<LPARAM>(&ti));
-      }
-    }
-
-    return TRUE;
-  }
+  public: void DidCreateNativeWindow();
 
   // onDeleteItem
   private: bool OnDeleteItem(int iDeleteItem) {
@@ -1384,9 +1297,14 @@ class TabBand : public Element {
 
   // onMessage
   private: LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    static UINT last_message = 0;
     #if DEBUG_MESSAGE
-      DEBUG_PRINTF("%p msg=0x%x\n", this, uMsg);
-    #endif // DEBUG_MESSAGE
+      if (uMsg != 0x133C && last_message != uMsg) {
+        last_message = uMsg;
+        DVLOG(0) << "TabStrip::TabBand " << this << " msg=" << std::hex <<
+            uMsg;
+      }
+    #endif
 
     switch (uMsg) {
       case WM_COMMAND: {
@@ -1397,29 +1315,10 @@ class TabBand : public Element {
         return 0;
       }
 
-      case WM_CREATE:
-        return onCreate(reinterpret_cast<CREATESTRUCT*>(lParam));
-
       case WM_DWMCOMPOSITIONCHANGED:
         if (FAILED(DwmIsCompositionEnabled(&m_compositionEnabled)))
             m_compositionEnabled = false;
         break;
-
-      case WM_LBUTTONDOWN: {
-        POINT pt;
-        pt.x = GET_X_LPARAM(lParam);
-        pt.y = GET_Y_LPARAM(lParam);
-        onLButtonDown(pt);
-        return 0;
-      }
-
-      case WM_LBUTTONUP: {
-        POINT pt;
-        pt.x = GET_X_LPARAM(lParam);
-        pt.y = GET_Y_LPARAM(lParam);
-        onLButtonUp(pt);
-        return 0;
-      }
 
       case WM_MOUSELEAVE: {
         #if DEBUG_HOVER
@@ -1434,24 +1333,14 @@ class TabBand : public Element {
         return 0;
       }
 
-      case WM_MOUSEMOVE: {
-        POINT const pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-        OnMouseMove(pt);
-        return 0;
-      }
-
-      case WM_NCDESTROY:
-        delete this;
-        break;
-
       case WM_NCHITTEST: {
         POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
         if (::ScreenToClient(m_hwnd, &pt)) {
-          if (!hitTest(pt)) {
+          if (!hitTest(pt))
             return ::SendMessage(::GetParent(m_hwnd), uMsg, wParam, lParam);
-          }
+          return HTCLIENT;
         }
-        break;
+        return HTNOWHERE;
       }
 
       case WM_NCLBUTTONDOWN:
@@ -1459,6 +1348,9 @@ class TabBand : public Element {
       case WM_NCMOUSEMOVE:
       case WM_NCRBUTTONDOWN:
       case WM_NCRBUTTONUP:
+        // Redirect non-client mouse move to parent for top level window
+        // management, e.g. moving top level window by grabing empty area
+        // of tabs.
         return ::SendMessage(::GetParent(m_hwnd), uMsg, wParam, lParam);
 
       case WM_NOTIFY: {
@@ -1477,35 +1369,6 @@ class TabBand : public Element {
             lParam);
       }
 
-      case WM_PAINT:
-        Draw(m_gfx);
-        ValidateRect(m_hwnd, nullptr);
-        return 0;
-
-      case WM_SIZE: {
-        // Handle WM_SIZE at window creation. We won't receive WM_SIZE
-        // since we handle WM_WINDOWPOSCHANGED.
-        auto const hwndParent = ::GetParent(m_hwnd);
-        if (!hwndParent) {
-          return 0;
-        }
-
-        ::GetClientRect(hwndParent, &m_rc);
-        auto const iFontHeight = 16;  // must be >= 16 (Small Icon Height)
-        //m_rc.bottom = m_rc.top + 6 + iFontHeight + 10;
-        m_rc.bottom = m_rc.top + 2 + 7 + iFontHeight + 5 + 2;
-
-        ::SetWindowPos(
-            m_hwnd,
-            nullptr,
-            m_rc.left,
-            m_rc.top,
-            m_rc.right - m_rc.left,
-            m_rc.bottom - m_rc.top,
-            SWP_NOZORDER);
-        return 0;
-      }
-
       case WM_SETTINGCHANGE:
         switch (wParam) {
           case SPI_SETICONTITLELOGFONT:
@@ -1519,38 +1382,10 @@ class TabBand : public Element {
       case WM_USER:
         return static_cast<LRESULT>(::GetSysColor(COLOR_3DFACE));
 
-      case WM_WINDOWPOSCHANGED: {
-        auto const wp = reinterpret_cast<WINDOWPOS*>(lParam);
-        if (wp->flags & SWP_NOSIZE) {
-          return 0;
-        }
-
-        m_rc.left = wp->x;
-        m_rc.top = wp->y;
-        m_rc.right = wp->x + wp->cx;
-        m_rc.bottom = wp->y + wp->cy;
-
-        m_gfx.Resize(m_rc);
-        Redraw();
-        return 0;
-      }
-
       ////////////////////////////////////////////////////////////
       //
       // Tab Control Messages
       //
-      case TCM_DELETEITEM:
-        return OnDeleteItem(static_cast<int>(wParam));
-
-      case TCM_GETCURFOCUS:
-        return m_iFocus;
-
-      case TCM_GETCURSEL:
-        return m_pSelected ? m_pSelected->m_iItem : -1;
-
-      case TCM_GETIMAGELIST:
-        return reinterpret_cast<LRESULT>(m_hImageList);
-
       case TCM_GETITEM: {
         auto const pItem = findItem(static_cast<int>(wParam));
         if (!pItem) {
@@ -1585,52 +1420,9 @@ class TabBand : public Element {
         }
         return TRUE;
       }
-
-      case TCM_GETITEMCOUNT:
-        return m_cItems;
-
-      case TCM_GETTOOLTIPS:
-        return reinterpret_cast<LRESULT>(m_hwndToolTips);
-
-      case TCM_INSERTITEM:
-        return onInsertItem(
-            static_cast<int>(wParam),
-            reinterpret_cast<TCITEM*>(lParam));
-
-      case TCM_SETCURFOCUS:
-        m_iFocus = static_cast<int>(wParam);
-        return 0;
-
-      case TCM_SETCURSEL:
-        return SelectItem(static_cast<int>(wParam));
-
-      case TCM_SETIMAGELIST: {
-        auto const hOldImageList = m_hImageList;
-        SetImageList(reinterpret_cast<HIMAGELIST>(lParam));
-        Redraw();
-        return reinterpret_cast<LRESULT>(hOldImageList);
-      }
-
-      case TCM_SETITEM:
-        if (auto const item = findItem(static_cast<int>(wParam))) {
-          if (item->SetItem(reinterpret_cast<TCITEM*>(lParam)))
-            item->Invalidate(m_hwnd);
-        }
-        return FALSE;
-
-      case TCM_SETMINTABWIDTH: {
-        auto const iPrev = m_cxMinTab;
-        m_cxMinTab = std::max(static_cast<int>(lParam),
-                              static_cast<int>(k_cxMinTab));
-        return iPrev;
-      }
-
-      case TCM_SETTOOLTIPS:
-        m_hwndToolTips = reinterpret_cast<HWND>(wParam);
-        return 0;
     }
 
-    return ::DefWindowProc(m_hwnd, uMsg, wParam, lParam);
+    return 0;
   }
 
   private: void OnMouseMove(POINT pt) {
@@ -1776,37 +1568,222 @@ class TabBand : public Element {
   }
 
   // [U]
-  private: void Redraw() {
-    UpdateLayout();
-    ::InvalidateRect(m_hwnd, nullptr, false);
-  }
+  public: void Redraw();
 
-  // [W]
-  private: static LRESULT CALLBACK windowProc(
-      HWND const hwnd,
-      UINT const uMsg,
-      WPARAM const wParam,
-      LPARAM const lParam) {
-    auto tabBand = reinterpret_cast<TabBand*>(
-      ::GetWindowLongPtr(hwnd, GWLP_USERDATA));
-
-    if (!tabBand) {
-      tabBand = new TabBand(hwnd);
-
-      ::SetWindowLongPtr(
-        hwnd,
-        GWLP_USERDATA,
-        reinterpret_cast<LONG_PTR>(tabBand));
-    }
-
-    return tabBand->OnMessage(uMsg, wParam, lParam);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(TabBand);
+  DISALLOW_COPY_AND_ASSIGN(TabStripImpl);
 };
 
+TabStrip::TabStripImpl::TabStripImpl(HWND hwnd)
+    : Element(nullptr),
+      m_cItems(0),
+      m_compositionEnabled(false),
+      m_cxTab(0),
+      m_cxMinTab(k_cxMinTab),
+      m_eDrag(Drag_None),
+      m_fMouseTracking(false),
+      m_hTabListMenu(nullptr),
+      m_hwnd(hwnd),
+      m_hwndToolTips(nullptr),
+      m_iFocus(-1),
+      m_nStyle(0),
+      m_oListButton(this),
+      m_pDragItem(nullptr),
+      m_pHover(nullptr),
+      m_pInsertBefore(nullptr),
+      m_pSelected(nullptr),
+      m_xTab(0) {
+  m_oElements.Append(&m_oListButton);
+  COM_VERIFY(::DwmIsCompositionEnabled(&m_compositionEnabled));
 }
 
-void TabBand__Init(HINSTANCE const hInstance) {
-  TabBand::Init(hInstance);
+TabStrip::TabStripImpl::~TabStripImpl() {
+  if (auto const text_format = m_gfx.work<gfx::TextFormat>())
+      delete text_format;
+
+  if (m_hwndToolTips && (m_nStyle & TCS_TOOLTIPS) != 0) {
+    ::DestroyWindow(m_hwndToolTips);
+  }
+
+  if (m_hTabListMenu) {
+    ::DestroyMenu(m_hTabListMenu);
+  }
 }
+
+void TabStrip::TabStripImpl::DidCreateNativeWindow() {
+  m_gfx.Init(m_hwnd);
+  changeFont(m_gfx);
+
+  m_hwndToolTips = ::CreateWindowEx(
+      WS_EX_TOPMOST,
+      TOOLTIPS_CLASS,
+      nullptr,
+      WS_POPUP | TTS_NOPREFIX, // | TTS_ALWAYSTIP,
+      CW_USEDEFAULT,
+      CW_USEDEFAULT,
+      CW_USEDEFAULT,
+      CW_USEDEFAULT,
+      m_hwnd,
+      nullptr,
+      g_hInstance,
+      nullptr);
+
+  if (m_hwndToolTips) {
+    m_nStyle |= TCS_TOOLTIPS;
+
+    TOOLINFO ti;
+    ti.cbSize = sizeof(ti);
+    ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+    ti.hwnd = m_hwnd;
+    ti.uId = reinterpret_cast<UINT_PTR>(m_hwnd);
+    ti.lpszText = nullptr;
+    ::SendMessage(
+        m_hwndToolTips,
+        TTM_ADDTOOL,
+        0,
+        reinterpret_cast<LPARAM>(&ti));
+  }
+}
+
+void TabStrip::TabStripImpl::Redraw() {
+  UpdateLayout();
+  ::InvalidateRect(m_hwnd, nullptr, false);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// TabStrip
+//
+TabStrip::TabStrip(TabStripDelegate* delegate)
+    : ui::Widget(ui::NativeWindow::Create(*this)), delegate_(delegate) {
+}
+
+TabStrip::~TabStrip() {
+}
+
+Size TabStrip::GetPreferreSize() const {
+  auto const font_height = 16;  // must be >= 16 (Small Icon Height)
+  return Size(font_height * 40, 2 + 7 + font_height + 5 + 2);
+}
+
+void TabStrip::SetIconList(HIMAGELIST icon_list) {
+  impl_->SetImageList(icon_list);
+  impl_->Redraw();
+}
+
+// ui::Widget
+void TabStrip::CreateNativeWindow() const {
+  native_window()->CreateWindowEx(
+      0, WS_CHILD | WS_VISIBLE, L"TabStrip", parent_node()->AssociatedHwnd(),
+      rect().left_top(),
+      rect().size());
+}
+
+void TabStrip::DidCreateNativeWindow() {
+  impl_.reset(new TabStripImpl(*native_window()));
+  impl_->m_rc = rect();
+  impl_->DidCreateNativeWindow();
+}
+
+void TabStrip::DidResize() {
+  if (!impl_)
+    return;
+  impl_->m_rc = rect();
+  impl_->m_gfx.Resize(rect());
+  impl_->Redraw();
+}
+
+LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
+  switch (uMsg) {
+    case WM_NCDESTROY:
+      // No self delete.
+      return false;
+    case WM_COMMAND:
+    case WM_DWMCOMPOSITIONCHANGED:
+    case WM_MOUSELEAVE:
+    case WM_NCHITTEST:
+    case WM_NCLBUTTONDOWN:
+    case WM_NCLBUTTONUP:
+    case WM_NCMOUSEMOVE:
+    case WM_NCRBUTTONDOWN:
+    case WM_NCRBUTTONUP:
+    case WM_NOTIFY:
+    case WM_SETTINGCHANGE:
+    case WM_USER:
+    case TCM_GETITEM:
+      return impl_->OnMessage(uMsg, wParam, lParam);
+
+    ////////////////////////////////////////////////////////////
+    //
+    // TabBand messages
+    //
+    case TCM_DELETEITEM:
+      return impl_->OnDeleteItem(static_cast<int>(wParam));
+
+    case TCM_GETCURFOCUS:
+      return impl_->m_iFocus;
+
+    case TCM_GETCURSEL:
+      return impl_->m_pSelected ? impl_->m_pSelected->m_iItem : -1;
+
+    case TCM_GETIMAGELIST:
+      return reinterpret_cast<LRESULT>(impl_->m_hImageList);
+
+    case TCM_GETITEMCOUNT:
+      return impl_->m_cItems;
+
+    case TCM_GETTOOLTIPS:
+      return reinterpret_cast<LRESULT>(impl_->m_hwndToolTips);
+
+    case TCM_INSERTITEM:
+      return impl_->onInsertItem(
+          static_cast<int>(wParam),
+          reinterpret_cast<TCITEM*>(lParam));
+
+    case TCM_SETCURFOCUS:
+      impl_->m_iFocus = static_cast<int>(wParam);
+      return 0;
+
+    case TCM_SETCURSEL:
+      return impl_->SelectItem(static_cast<int>(wParam));
+
+    case TCM_SETITEM:
+      if (auto const item = impl_->findItem(static_cast<int>(wParam))) {
+        if (item->SetItem(reinterpret_cast<TCITEM*>(lParam)))
+          item->Invalidate(impl_->m_hwnd);
+      }
+      return FALSE;
+
+    case TCM_SETMINTABWIDTH: {
+      auto const iPrev = impl_->m_cxMinTab;
+      impl_->m_cxMinTab = std::max(static_cast<int>(lParam),
+                            static_cast<int>(k_cxMinTab));
+      return iPrev;
+    }
+
+    case TCM_SETTOOLTIPS:
+      impl_->m_hwndToolTips = reinterpret_cast<HWND>(wParam);
+      return 0;
+  }
+
+  return ui::Widget::OnMessage(uMsg, wParam, lParam);
+}
+
+void TabStrip::OnMouseMoved(const ui::MouseEvent& event) {
+  impl_->OnMouseMove(event.location());
+}
+
+void TabStrip::OnMousePressed(const ui::MouseEvent& event) {
+  if (event.is_left_button())
+    impl_->onLButtonDown(event.location());
+}
+
+void TabStrip::OnMouseReleased(const ui::MouseEvent& event) {
+  if (event.is_left_button())
+    impl_->onLButtonUp(event.location());
+}
+
+void TabStrip::OnPaint(const Rect) {
+  impl_->Draw(impl_->m_gfx);
+}
+
+}  // namespace views

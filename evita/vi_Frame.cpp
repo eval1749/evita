@@ -42,6 +42,7 @@
 #include "evita/dom/view_event_handler.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/message_view.h"
+#include "evita/views/tab_strip.h"
 #include "evita/views/window_set.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Pane.h"
@@ -62,10 +63,6 @@ static int const k_edge_size = 0;
 using common::win::Rect;
 
 namespace {
-
-enum CtrlId {
-  CtrlId_TabBand  = 1,
-};
 
 class CompositionState {
   private: BOOL enabled_;
@@ -133,10 +130,13 @@ extern uint g_TabBand__TabDragMsg;
 Frame::Frame(views::WindowId window_id)
     : views::Window(ui::NativeWindow::Create(*this), window_id),
       gfx_(new gfx::Graphics()),
+      m_cyTabBand(0),
+      m_hwndTabBand(nullptr),
       message_view_(new views::MessageView()),
       title_bar_(new views::TitleBar()),
-      m_hwndTabBand(nullptr),
+      tab_strip_(new views::TabStrip(this)),
       m_pActivePane(nullptr) {
+  AppendChild(tab_strip_);
 }
 
 Frame::~Frame() {
@@ -290,34 +290,16 @@ void Frame::DidCreateNativeWindow() {
   Application::instance()->DidCreateFrame(this);
   ::DragAcceptFiles(*native_window(), TRUE);
 
-  {
-    m_hwndTabBand = ::CreateWindowEx(
-        0,
-        L"TabBandClass",
-        nullptr,
-        WS_CHILD | WS_VISIBLE | TCS_TOOLTIPS,
-        0, 0, 0, 0,
-        *native_window(),
-        reinterpret_cast<HMENU>(CtrlId_TabBand),
-        g_hInstance,
-        nullptr);
-
-    ::SendMessage(
-       m_hwndTabBand,
-       TCM_SETIMAGELIST,
-       0,
-       reinterpret_cast<LPARAM>(views::IconCache::instance()->image_list()));
-
-    RECT rc;
-    ::GetWindowRect(m_hwndTabBand, &rc);
-    m_cyTabBand = rc.bottom - rc.top;
-  }
-
   message_view_->Realize(*native_window());
   title_bar_->Realize(*native_window());
 
   CompositionState::Update(*native_window());
   gfx_->Init(*native_window());
+
+
+  // TODO(yosi) How do we detemine height of TabStrip?
+  m_cyTabBand = tab_strip_->GetPreferreSize().cy;
+  tab_strip_->ResizeTo(Rect(0, 0, rect().width(), m_cyTabBand));
 
   auto const pane_rect = GetPaneRect();
   for (auto& pane: m_oPanes) {
@@ -325,6 +307,9 @@ void Frame::DidCreateNativeWindow() {
   }
 
   Widget::DidCreateNativeWindow();
+
+  m_hwndTabBand = tab_strip_->AssociatedHwnd();
+  tab_strip_->SetIconList(views::IconCache::instance()->image_list());
 
   for (auto& pane: m_oPanes) {
     AddTab(&pane);
@@ -340,19 +325,22 @@ void Frame::DidDestroyWidget() {
 
 void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
   auto const pane = const_cast<Pane*>(widget.as<Pane>());
-  DCHECK(pane);
+  if (!pane)
+    return;
   m_oPanes.Delete(pane);
   if (m_oPanes.IsEmpty())
     DestroyWidget();
 }
 
 void Frame::DidResize() {
-  // Tab Band
-  ::SetWindowPos(m_hwndTabBand, nullptr, rect().left, rect().top,
-                 rect().width(), m_cyTabBand, SWP_NOZORDER);
+  {
+    auto tab_strip_rect = rect();
+    tab_strip_rect.bottom = tab_strip_rect.top + m_cyTabBand;
+    tab_strip_->ResizeTo(tab_strip_rect);
+  }
 
-  // Status Bar
-  //  message, code page, newline, line num, column, char, ins/ovr
+  // Status bar shows:
+  //    message, code page, newline, line num, column, char, ins/ovr
   {
     auto status_bar_rect = rect();
     status_bar_rect.top = rect().bottom - message_view_->height();
@@ -367,7 +355,7 @@ void Frame::DidResize() {
   {
     gfx::Graphics::DrawingScope drawing_scope(*gfx_);
 
-    // We should call |ID2D1RenderTarget::Clear()| to reset alpha value of
+    // We need to call |ID2D1RenderTarget::Clear()| to reset alpha value of
     // pixels.
     (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::White));
 
@@ -662,6 +650,7 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
 
     case WM_NOTIFY: {
       auto const pNotify = reinterpret_cast<NMHDR*>(lParam);
+      // TODO(yosi) We should check TTN_NEEDTEXT is send by tooltip control.
       if (TTN_NEEDTEXT == pNotify->code) {
           auto const p = reinterpret_cast<NMTTDISPINFO*>(lParam);
           ::SendMessage(p->hdr.hwndFrom, TTM_SETMAXTIPWIDTH, 0, 300);
@@ -670,28 +659,28 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
           return 0;
       }
 
-      switch (pNotify->idFrom) {
-        case CtrlId_TabBand:
-          switch (pNotify->code) {
-            case TABBAND_NOTIFY_CLICK_CLOSE_BUTTON: {
-              if (!HasMultiplePanes()) {
-                Application::instance()->view_event_handler()->QueryClose(
-                    window_id());
-                break;
-              }
-              auto const tab_index = TabBandNotifyData::FromNmhdr(
-                    pNotify)->tab_index_;
-              if (auto const pPane = getPaneFromTab(tab_index))
-                pPane->DestroyWidget();
+      if (pNotify->idFrom == tab_strip_->child_window_id()) {
+        switch (pNotify->code) {
+          case TABBAND_NOTIFY_CLICK_CLOSE_BUTTON: {
+            if (!HasMultiplePanes()) {
+              Application::instance()->view_event_handler()->QueryClose(
+                  window_id());
               break;
             }
-
-            case TCN_SELCHANGE:
-              DidChangeTabSelection(TabCtrl_GetCurSel(m_hwndTabBand));
-              break;
+            auto const tab_index = TabBandNotifyData::FromNmhdr(
+                  pNotify)->tab_index_;
+            if (auto const pPane = getPaneFromTab(tab_index))
+              pPane->DestroyWidget();
+            break;
           }
+
+          case TCN_SELCHANGE:
+            DidChangeTabSelection(TabCtrl_GetCurSel(m_hwndTabBand));
+            break;
         }
         return 0;
+      }
+      return 0;
     }
 
     case WM_VSCROLL: {
@@ -939,7 +928,8 @@ void Frame::WillRemoveChildWidget(const Widget& widget) {
   if (!is_realized())
     return;
   auto const pane = const_cast<Pane*>(widget.as<Pane>());
-  DCHECK(pane);
+  if (!pane)
+    return;
   auto const tab_index = getTabFromPane(pane);
   DCHECK_GE(tab_index, 0);
   TabCtrl_DeleteItem(m_hwndTabBand, tab_index);

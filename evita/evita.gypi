@@ -420,6 +420,7 @@
         'editor/dom_lock.cc',
         'gfx_base.cpp',
         'views/tab_strip.cc',
+        'views/tab_strip_delegate.cc',
         'vi_Caret.cpp',
         'vi_DialogBox.cpp',
         'vi_EditPane.cpp',

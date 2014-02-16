@@ -177,8 +177,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
       }
   }
 
-    ::TabBand__Init(g_hInstance);
-
     g_TabBand__TabDragMsg = ::RegisterWindowMessage(TabBand__TabDragMsgStr);
 
   return MainLoop();

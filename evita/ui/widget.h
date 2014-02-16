@@ -56,6 +56,8 @@ class Widget
     return *parent_node();
   }
 
+  // |child_window_id()| is used for |NMHDR.idFrom| of |WM_NOTIFY|.
+  public: UINT_PTR child_window_id() const;
   public: bool has_focus() const;
   public: bool has_native_window() const { 
     return static_cast<bool>(native_window_);
@@ -110,9 +112,9 @@ class Widget
   protected: virtual void OnKeyReleased(const KeyboardEvent& event);
   public: virtual LRESULT OnMessage(uint32_t uMsg, WPARAM wParam,
                                     LPARAM lParam);
+  protected: virtual void OnMouseMoved(const MouseEvent& event);
   protected: virtual void OnMousePressed(const MouseEvent& event);
   protected: virtual void OnMouseReleased(const MouseEvent& event);
-  protected: virtual void OnMouseMoved(const MouseEvent& event);
   protected: virtual void OnMouseWheel(const MouseWheelEvent& event);
   protected: virtual LRESULT OnNotify(NMHDR* nmhdr);
   public: virtual void OnPaint(const Rect rect);

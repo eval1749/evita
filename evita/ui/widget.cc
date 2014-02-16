@@ -61,6 +61,13 @@ Widget::~Widget() {
   DCHECK(!native_window_);
 }
 
+// Child window is assigned in |commonn::NativeWindow::CreateWindowEx()|.
+UINT_PTR Widget::child_window_id() const {
+  DCHECK(native_window());
+  DCHECK(parent_node());
+  return reinterpret_cast<UINT_PTR>(native_window());
+}
+
 bool Widget::has_focus() const {
   return focus_widget == this;
 }
@@ -388,7 +395,7 @@ void Widget::ResizeTo(const Rect& rect) {
   if (rect == rect_)
     return;
 #endif
-  if (native_window_) {
+  if (is_realized() && native_window_) {
     ::SetWindowPos(*native_window_.get(), nullptr, rect.left, rect.top,
                    rect.width(), rect.height(), SWP_NOACTIVATE);
   } else {

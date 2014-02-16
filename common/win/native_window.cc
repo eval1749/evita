@@ -84,9 +84,16 @@ bool NativeWindow::CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
     DCHECK(s_window_class);
   }
 
-  return ::CreateWindowEx(dwExStyle, MAKEINTATOM(s_window_class), title,
-                          dwStyle, left_top.x, left_top.y, size.cx, size.cy,
-                          parent_hwnd, nullptr, s_hInstance, 0);
+  // For child window, we need to assign unique id in parent window.
+  // |ui::Widget::child_window_id()| exposes child window id.
+  auto const child_id = parent_hwnd && parent_hwnd != HWND_MESSAGE ?
+      reinterpret_cast<HMENU>(this) : static_cast<HMENU>(nullptr);
+  auto const hwnd = ::CreateWindowEx(dwExStyle, MAKEINTATOM(s_window_class),
+                                     title, dwStyle, left_top.x, left_top.y,
+                                     size.cx, size.cy, parent_hwnd, child_id,
+                                     s_hInstance, 0);
+  DCHECK(hwnd) << "CreateWindowEx err=" << ::GetLastError();
+  return hwnd;
 }
 
 void NativeWindow::Destroy() {

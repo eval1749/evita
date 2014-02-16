@@ -180,7 +180,8 @@ JsConsole.stringify = function(value, MAX_LEVEL, MAX_LENGTH) {
   function getObjectIdLikeThing(object) {
     try {
       var key = ['id', 'name'].find(function(key) {
-        return object[key] !== undefined;
+        var value = object[key];
+        return value != undefined && value.toString().length;
       });
       return key ? object[key] : undefined;
     } catch (e) {

@@ -161,14 +161,14 @@
       if (base < 10)
         return NaN;
 
-      if (char_code >= Unicode.LATIN_CAPITAL_A &&
-          char_code <= Unicode.LATIN_CAPITAL_A + base - 10) {
-        return char_code - Unicode.LATIN_CAPITAL_A + 10;
+      if (char_code >= Unicode.LATIN_CAPITAL_LETTER_A &&
+          char_code <= Unicode.LATIN_CAPITAL_LETTER_A + base - 10) {
+        return char_code - Unicode.LATIN_CAPITAL_LETTER_A + 10;
       }
 
-      if (char_code >= Unicode.LATIN_SMALL_A &&
-          char_code <= Unicode.LATIN_SMALL_A + base - 10) {
-        return char_code - Unicode.LATIN_SMALL_A + 10;
+      if (char_code >= Unicode.LATIN_SMALL_LETTER_A &&
+          char_code <= Unicode.LATIN_SMALL_LETTER_A + base - 10) {
+        return char_code - Unicode.LATIN_SMALL_LETTER_A + 10;
       }
 
       return NaN;

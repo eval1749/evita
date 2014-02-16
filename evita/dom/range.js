@@ -193,10 +193,7 @@
     if (!matches)
       return null;
     var strings = matches.map(function(match) {
-      // TODO(yosi) We should use |Document.prototype.substring|.
-      range.collapseTo(match.start);
-      range.end = match.end;
-      return range.text;
+      return range.document.slice(match.start, match.end);
     });
     range.collapseTo(start);
     range.end = end;

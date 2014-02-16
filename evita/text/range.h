@@ -65,17 +65,9 @@ class Range //: public ObjectInHeap
 
     public: ~Range();
 
-    // [A]
-    public: StringCase AnalyzeCase() const;
-
     // [C]
     public: void  Collapse(CollapseWhich = Collapse_Start);
-    public: void  Capitalize();
-    public: void  CapitalizeAll();
     public: Count Copy();
-
-    // [D]
-    public: void  Downcase();
 
     // [E]
     public:  Count EndOf(Unit, bool = false);
@@ -106,9 +98,6 @@ class Range //: public ObjectInHeap
     public: Posn  SetStart(Posn);
     public: void SetText(const base::string16& text);
     public: Count StartOf(Unit, bool = false);
-
-    // [U]
-    public:  void  Upcase();
 }; // Range
 
 }  // namespace text

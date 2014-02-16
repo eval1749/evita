@@ -21,20 +21,6 @@ enum NewlineMode
     NewlineMode_CrLf    = 3,
 }; // Newline
 
-enum CharacterName
-{
-    Backslash       = 0x5C,
-    CloseBrace      = 0x7D,
-    CloseBracket    = 0x5D,
-    CloseParen      = 0x29,
-    DoubleQuote     = 0x22,
-    Newline         = 0x0A,
-    OpenBrace       = 0x7B,
-    OpenBracket     = 0x5B,
-    OpenParen       = 0x28,
-    SingleQuote     = 0x27,
-}; // CharacterName
-
 namespace text
 {
 
@@ -80,97 +66,14 @@ enum Unit
     Unit_Word,
 }; // Unit
 
-enum StringCase
-{
-    StringCase_None,
-
-    StringCase_Capitalized,         // "This is capitalized."
-    StringCase_CapitalizedAll,      // "This Is Capitalized All."
-    StringCase_Lower,               // "this is lower."
-    StringCase_Mixed,               // "ThisIsMixed."
-    StringCase_Upper,               // "THIS IS UPPER."
-}; // String_Case
-
 //////////////////////////////////////////////////////////////////////
 //
 // Utitlity Functions
 //
-inline char16 CharDowncase(char16 wch)
-{
-    return static_cast<char16>(
-        reinterpret_cast<UINT_PTR>(::CharLower((char16*) wch)));
-} // CharDowncase
-
-
-inline char16 CharUpcase(char16 wch)
-{
-    return static_cast<char16>(
-        reinterpret_cast<UINT_PTR>(::CharUpper((char16*) wch)));
-} // CharUpcase
-
-inline bool IsLowerCase(char16 wch)
-{
-    return 0 != ::IsCharLower(wch);
-} // IsUpperCase
-
-inline bool IsUpperCase(char16 wch)
-{
-    return 0 != ::IsCharUpper(wch);
-} // IsUpperCase
-
 inline bool IsWhitespace(char16 wch)
 {
     if (0x20 == wch) return true;
     return wch >= 0x09 && wch <= 0x0C;
 } // IsWhitespace
-
-#if 0
-//////////////////////////////////////////////////////////////////////
-//
-// String
-//
-class String
-{
-    private: int            m_cwch;
-    private: const char16*  m_pwch;
-
-    // ctor
-    public: String(const char16* pwch = NULL, int cwch = 0) :
-        m_cwch(cwch),
-        m_pwch(pwch) {}
-
-    public: operator const char16*() { return m_pwch; }
-
-    // [E]
-    public: class Enum
-    {
-        private: const char16*  m_pwch;
-        private: const char16*  m_pwchEnd;
-
-        public: Enum(const String* p) :
-            m_pwchEnd(p->m_pwch + p->m_cwch),
-            m_pwch(p->m_pwch) {}
-
-        public: Enum(const String& r) :
-            m_pwchEnd(r.m_pwch + r.m_cwch),
-            m_pwch(r.m_pwch) {}
-
-        public: bool AtEnd() const { return m_pwchEnd == m_pwch; }
-        public: char16 Get() const { ASSERT(!AtEnd()); return *m_pwch; }
-        public: void Next() { ASSERT(!AtEnd()); m_pwch++; }
-    }; // Enum
-
-    // [H]
-    bool HasUpperCase() const
-    {
-        foreach (String::Enum, oEnum, this)
-        {
-            char16 wch = oEnum.Get();
-            if (IsUpperCase(wch)) return true;
-        } // for each char
-        return false;
-    } // hasUpperCase
-}; // String
-#endif
 
 #endif //!defined(INCLUDE_edit_defs_h)

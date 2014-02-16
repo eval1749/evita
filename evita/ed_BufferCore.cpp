@@ -241,43 +241,6 @@ void BufferCore::insert(Posn lPosn, const char16* pwch, Count n)
 
 //////////////////////////////////////////////////////////////////////
 //
-// BufferCore::Match
-//
-bool BufferCore::Match(
-    Posn            lPosn,
-    const char16*   pwch,
-    int             cwch,
-    uint            rgfMatch ) const
-{
-    Posn lStart = lPosn;
-    Posn lEnd   = lPosn + cwch;
-    if (lStart > lEnd) swap(lStart, lEnd);
-    if (! IsValidRange(lStart, lEnd)) return false;
-
-    for (Posn lPosn = lStart; lPosn < lEnd; lPosn++)
-    {
-        char16 wch = GetCharAt(lPosn);
-        if (*pwch != wch)
-        {
-            if (0 == (rgfMatch & SearchFlag_IgnoreCase))
-            {
-                return false;
-            }
-
-            if (CharUpcase(*pwch) != CharUpcase(wch))
-            {
-                return false;
-            }
-        } // if
-        pwch++;
-    } // for lPosn
-
-    return true;
-} // BufferCore::Match
-
-
-//////////////////////////////////////////////////////////////////////
-//
 // Move Gap To Specified Position
 //
 // Called by:

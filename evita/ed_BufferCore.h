@@ -73,7 +73,7 @@ class BufferCore
         { return IsValidPosn(s) && IsValidPosn(e) && s <= e; }
 
     // [M]
-    public:  bool Match(Posn, const char16*, int, uint) const;
+    private:  bool Match(Posn, const char16*, int, uint) const;
     private: void moveGap(Posn);
 }; // BufferCore
 

@@ -12,35 +12,13 @@ Editor.RegExp.Match = (function() {
 })();
 
 /**
- * @param {string|!Document|!Range} target
- * @param {number=} opt_start
- * @param {number=} opt_end
+ * @param {*} target
  * @return {?Array.<string>}
  */
-global.Editor.RegExp.prototype.exec = function(target, opt_start, opt_end) {
-  function execOnDocument(regexp, document, start, end) {
-    var matches = document.match_(regexp, start, end);
-    if (!matches)
-      return null;
-    var range = new Range(document);
-    return matches.map(function(match) {
-      // TODO(yosi) We should use |Document.prototype.substring|.
-      range.collapseTo(match.start);
-      range.end = match.end;
-      return range.text;
-    });
-  }
-  if (target instanceof Document) {
-    var document = /** @type {!Document} */(target);
-    var start = arguments.length >= 2 ? /** @type {number} */(opt_start) : 0;
-    var end = arguments.length >= 3 ? /** @type {number} */(opt_end) :
-                                      document.length;
-    return execOnDocument(this, document, start, end);
-  }
-
+global.Editor.RegExp.prototype.exec = function(target) {
   if (target instanceof Range) {
     var range = /** @type {!Range} */(target);
-    return execOnDocument(this, range.document, range.start, range.end);
+    return range.match(this);
   }
 
   var string = target.toString();

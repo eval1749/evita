@@ -64,6 +64,28 @@
   };
 
   /**
+   * @param {!Editor.RegExp} regexp
+   * @return {?Array.<string>}
+   */
+  Range.prototype.match = function(regexp) {
+    var range = this;
+    var start = range.start;
+    var end = range.end;
+    var matches = range.document.match_(regexp, start, end);
+    if (!matches)
+      return null;
+    var strings = matches.map(function(match) {
+      // TODO(yosi) We should use |Document.prototype.substring|.
+      range.collapseTo(match.start);
+      range.end = match.end;
+      return range.text;
+    });
+    range.collapseTo(start);
+    range.end = end;
+    return strings;
+  };
+
+  /**
    * @this {!Range}
    * @param {Unit} unit.
    * @param {number=} opt_count, defualt is one.

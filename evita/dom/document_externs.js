@@ -154,14 +154,6 @@ Document.prototype.load_ = function(filename, callback) {};
  * @param {!Editor.RegExp} regexp
  * @param {number} start
  * @param {number} end
- * @return {?Array.<string>}
- */
-Document.prototype.match = function(regexp, start, end) {};
-
-/**
- * @param {!Editor.RegExp} regexp
- * @param {number} start
- * @param {number} end
  * @return {?Array.<!Editor.RegExp.Match>}
  */
 Document.prototype.match_ = function(regexp, start, end) {};

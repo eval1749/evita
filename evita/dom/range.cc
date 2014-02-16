@@ -62,7 +62,6 @@ class RangeClass : public v8_glue::WrapperInfo {
         .SetMethod("collapseTo", &Range::CollapseTo)
         .SetMethod("copy", &Range::CopyToClipboard)
         .SetMethod("insertBefore", &Range::InsertBefore)
-        .SetMethod("match_", &Range::Match)
         .SetMethod("paste", &Range::PasteFromClipboard)
         .SetMethod("style", &Range::SetStyle);
   }
@@ -142,10 +141,6 @@ Range* Range::InsertBefore(const base::string16& text) {
     return this;
   document_->buffer()->InsertBefore(start(), text);
   return this;
-}
-
-v8::Handle<v8::Value> Range::Match(RegExp* regexp) {
-  return regexp->ExecuteOnDocument(document(), start(), end());
 }
 
 void Range::PasteFromClipboard() {

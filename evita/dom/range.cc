@@ -6,6 +6,7 @@
 #include "evita/dom/buffer.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/document.h"
+#include "evita/dom/regexp.h"
 #include "evita/text/range.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
@@ -61,6 +62,7 @@ class RangeClass : public v8_glue::WrapperInfo {
         .SetMethod("collapseTo", &Range::CollapseTo)
         .SetMethod("copy", &Range::CopyToClipboard)
         .SetMethod("insertBefore", &Range::InsertBefore)
+        .SetMethod("match_", &Range::Match)
         .SetMethod("paste", &Range::PasteFromClipboard)
         .SetMethod("style", &Range::SetStyle);
   }
@@ -140,6 +142,10 @@ Range* Range::InsertBefore(const base::string16& text) {
     return this;
   document_->buffer()->InsertBefore(start(), text);
   return this;
+}
+
+v8::Handle<v8::Value> Range::Match(RegExp* regexp) {
+  return regexp->ExecuteOnDocument(document(), start(), end());
 }
 
 void Range::PasteFromClipboard() {

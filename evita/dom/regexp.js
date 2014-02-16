@@ -19,7 +19,7 @@ Editor.RegExp.Match = (function() {
  */
 global.Editor.RegExp.prototype.exec = function(target, opt_start, opt_end) {
   function execOnDocument(regexp, document, start, end) {
-    var matches = regexp.execOnDocument_(document, start, end);
+    var matches = document.match_(regexp, start, end);
     if (!matches)
       return null;
     var range = new Range(document);
@@ -44,7 +44,7 @@ global.Editor.RegExp.prototype.exec = function(target, opt_start, opt_end) {
   }
 
   var string = target.toString();
-  var matches = this.execOnString_(string);
+  var matches = this.exec_(string);
   if (!matches)
     return null;
   var strings = [];

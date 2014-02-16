@@ -17,6 +17,7 @@
 #include "evita/dom/converter.h"
 #include "evita/dom/modes/mode.h"
 #include "evita/dom/public/api_callback.h"
+#include "evita/dom/regexp.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/text/modes/mode.h"
@@ -181,6 +182,7 @@ class DocumentClass : public v8_glue::WrapperInfo {
         .SetMethod("doColor_", &Document::DoColor)
         .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
         .SetMethod("load_", &Document::Load)
+        .SetMethod("match_", &Document::Match)
         .SetMethod("redo", &Document::Redo)
         .SetMethod("renameTo", &Document::RenameTo)
         .SetMethod("save_", &Document::Save)
@@ -393,6 +395,10 @@ void Document::Load(const base::string16& filename,
       new LoadFileCallback(runner, this, callback));
   ScriptController::instance()->view_delegate()->LoadFile(this, filename,
       base::Bind(&LoadFileCallback::Run, load_callback));
+}
+
+v8::Handle<v8::Value> Document::Match(RegExp* regexp, int start, int end) {
+  return regexp->ExecuteOnDocument(this, start, end);
 }
 
 Posn Document::Redo(Posn position) {

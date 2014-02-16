@@ -22,7 +22,7 @@ TEST_F(RegExpTest, execOnDocument_) {
       "range.text = 'foo bar baz';"
       "function exec(source, match_exact) {"
       "  var regexp = new Editor.RegExp(source, {matchExact: match_exact});"
-      "  var matches = regexp.execOnDocument_(doc, 0, doc.length);"
+      "  var matches = doc.match_(regexp, 0, doc.length);"
       "  if (!matches)"
       "    return null;"
       "  return matches.map(function(match) {"

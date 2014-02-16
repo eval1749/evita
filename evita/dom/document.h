@@ -17,6 +17,7 @@ namespace dom {
 class Buffer;
 class Mode;
 class Range;
+class RegExp;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -62,6 +63,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: bool IsValidPosition(text::Posn position) const;
   public: void Load(const base::string16& filename,
                     v8::Handle<v8::Function> callback);
+  public: v8::Handle<v8::Value> Match(RegExp* regexp, int start, int end);
   public: Posn Redo(Posn position);
   public: void RenameTo(const base::string16& new_name);
   public: static void ResetForTesting();

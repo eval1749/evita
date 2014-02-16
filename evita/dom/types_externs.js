@@ -104,6 +104,30 @@ var Keymap;
  */
 var Point = function(x, y) {};
 
+/**
+ * @typedef {!Object}
+ *  backward: boolean,
+ *  global: boolean,
+ *  ignoreCase: boolean,
+ *  matchExact: boolean,
+ *  matchWord: boolean,
+ *  multiline: boolean,
+ *  sticky: boolean,
+ */
+Editor.RegExpInit;
+
+/**
+ * @constructor
+ * @param {string} source
+ * @param {Editor.RegExpInit=} opt_init_dict
+ */
+Editor.RegExp = function(source, opt_init_dict) {};
+
+/**
+ * @typedef {{name: string, start: number, end: number}}
+ */
+Editor.RegExp.Match;
+
 /** @typedef {number} */
 var TextOffset;
 

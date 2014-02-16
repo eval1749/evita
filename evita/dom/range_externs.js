@@ -48,6 +48,19 @@ Range.prototype.delete = function(unit, opt_count) {};
  */
 Range.prototype.endOf = function(unit, opt_alter) {};
 
+
+/**
+ * @param {!Editor.RegExp} regexp
+ * @return {?Array.<string>}
+ */
+Range.prototype.match = function(regexp) {};
+
+/**
+ * @param {!Editor.RegExp} regexp
+ * @return {?Array.<!Editor.RegExp.Match>}
+ */
+Range.prototype.match_ = function(regexp) {};
+
 /**
  * @param {Unit} unit
  * @param {number=} opt_count, defualt is one.
@@ -90,6 +103,13 @@ Range.prototype.insertBefore = function(text) {};
 
 /** @type {function()} */
 Range.prototype.paste = function() {};
+
+/**
+ * @param {!Editor.RegExp} regexp
+ * @param {string|!function(string, ...):string} replacement
+ * @return {?Array.<string>}
+ */
+Range.prototype.replace = function(regexp, replacement) {};
 
 /**
  * @param {Unit} unit

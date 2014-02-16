@@ -402,8 +402,7 @@ class RegExp::RegExpClass : public v8_glue::WrapperInfo {
         .SetProperty("matchWord", &RegExp::match_word)
         .SetProperty("multiline", &RegExp::multiline)
         .SetProperty("source", &RegExp::source)
-        .SetProperty("sticky", &RegExp::sticky)
-        .SetMethod("execOnDocument_", &RegExp::ExecuteOnDocument);
+        .SetProperty("sticky", &RegExp::sticky);
   }
 
   DISALLOW_COPY_AND_ASSIGN(RegExpClass);

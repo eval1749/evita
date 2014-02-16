@@ -10,6 +10,7 @@
 namespace dom {
 
 class Document;
+class RegExp;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -39,6 +40,7 @@ class Range : public v8_glue::Scriptable<Range> {
   public: Range* CollapseTo(Posn position);
   public: void CopyToClipboard() const;
   public: Range* InsertBefore(const base::string16& text);
+  public: v8::Handle<v8::Value> Match(RegExp* regexp);
   public: void PasteFromClipboard();
   public: void SetStyle(v8::Handle<v8::Object> style_dict) const;
 

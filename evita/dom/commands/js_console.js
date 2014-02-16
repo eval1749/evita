@@ -178,10 +178,16 @@ JsConsole.stringify = function(value, MAX_LEVEL, MAX_LENGTH) {
 
   /** @param {!Object} object @return {string|undefined} */
   function getObjectIdLikeThing(object) {
-    var key = ['id', 'name'].find(function(key) {
-      return object[key] !== undefined;
-    });
-    return key ? object[key] : undefined;
+    try {
+      var key = ['id', 'name'].find(function(key) {
+        return object[key] !== undefined;
+      });
+      return key ? object[key] : undefined;
+    } catch (e) {
+      // We can't acccess |Window.prototype.id|, because it has no C++
+      // object associated it.
+      return undefined;
+    }
   }
 
   /**

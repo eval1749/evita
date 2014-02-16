@@ -5,7 +5,6 @@
 
 #include "base/logging.h"
 #include "evita/editor/application.h"
-#include "evita/text/search_and_replace_model.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_Selection.h"
@@ -46,8 +45,8 @@ Selection* GetActiveSelection() {
 //
 FindDialogBox::FindDialogBox(DialogBoxId dialog_box_id)
     : DialogBox(dialog_box_id),
-      direction_(text::kDirectionDown),
-      replace_in_(text::kReplaceInWhole) {
+      direction_(kDirectionDown),
+      replace_in_(kReplaceInWhole) {
 }
 
 FindDialogBox::~FindDialogBox() {
@@ -120,7 +119,7 @@ void FindDialogBox::onOk() {
             reinterpret_cast<LPARAM>(GetDlgItem(IDC_FIND_WHAT)));
   onCommand(MAKEWPARAM(IDC_FIND_WITH, CBN_KILLFOCUS),
             reinterpret_cast<LPARAM>(GetDlgItem(IDC_FIND_WITH)));
-  auto const control_id = direction_ == text::kDirectionUp ?
+  auto const control_id = direction_ == kDirectionUp ?
       IDC_FIND_PREVIOUS : IDC_FIND_NEXT;
   onCommand(MAKEWPARAM(control_id, BN_CLICKED),
             reinterpret_cast<LPARAM>(GetDlgItem(control_id)));
@@ -129,8 +128,8 @@ void FindDialogBox::onOk() {
 /// <summary>Updates find dialog box controls.</summary>
 /// <param name="fActivate">True if dialog box is activated</param>
 void FindDialogBox::UpdateUI(bool fActivate) {
-  SetCheckBox(IDC_FIND_DOWN, text::kDirectionDown == direction_);
-  SetCheckBox(IDC_FIND_UP, text::kDirectionUp == direction_);
+  SetCheckBox(IDC_FIND_DOWN, kDirectionDown == direction_);
+  SetCheckBox(IDC_FIND_UP, kDirectionUp == direction_);
 
   auto const cwch = ::GetWindowTextLength(GetDlgItem(IDC_FIND_WHAT));
 
@@ -148,10 +147,9 @@ void FindDialogBox::UpdateUI(bool fActivate) {
     ::EnableWindow(GetDlgItem(IDC_FIND_WHOLE_FILE), fHasNewline);
 
     if (fActivate) {
-      replace_in_ = fHasNewline ? text::kReplaceInSelection :
-                                  text::kReplaceInWhole;
+      replace_in_ = fHasNewline ? kReplaceInSelection : kReplaceInWhole;
     }
-    SetCheckBox(IDC_FIND_SELECTION, text::kReplaceInSelection == replace_in_);
-    SetCheckBox(IDC_FIND_WHOLE_FILE, text::kReplaceInWhole == replace_in_);
+    SetCheckBox(IDC_FIND_SELECTION, kReplaceInSelection == replace_in_);
+    SetCheckBox(IDC_FIND_WHOLE_FILE, kReplaceInWhole == replace_in_);
   }
 }

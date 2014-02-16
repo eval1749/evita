@@ -14,8 +14,6 @@
 #include <algorithm>
 
 #include "evita/li_util.h"
-#include "evita/text/search_and_replace_model.h"
-
 
 #define DEBUG_LIFE 0
 

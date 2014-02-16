@@ -5,7 +5,6 @@
 
 #include "evita/IStringCursor.h"
 #include "evita/resource.h"
-#include "evita/text/search_and_replace_model.h"
 #include "evita/vi_DialogBox.h"
 
 class Selection;
@@ -19,8 +18,18 @@ class RegexMatcher;
 // FindDialogBox
 //
 class FindDialogBox final : public DialogBox {
-  private: text::Direction direction_;
-  private: text::ReplaceIn replace_in_;
+  private: enum Direction {
+    kDirectionDown,
+    kDirectionUp,
+  };
+
+  private: enum ReplaceIn {
+    kReplaceInSelection,
+    kReplaceInWhole,
+  };
+
+  private: Direction direction_;
+  private: ReplaceIn replace_in_;
 
   public: FindDialogBox(DialogBoxId dialog_box_id);
   public: virtual ~FindDialogBox();

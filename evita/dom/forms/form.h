@@ -5,7 +5,6 @@
 
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/forms/dialog_box_id.h"
-#include "evita/text/search_and_replace_model.h"
 
 #include <vector>
 

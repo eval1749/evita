@@ -10,7 +10,6 @@
 #include "evita/dom/forms/dialog_box_id.h"
 #include "evita/dom/window_id.h"
 #include "evita/dom/window_id.h"
-#include "evita/text/search_and_replace_model.h"
 
 namespace base {
 class WaitableEvent;

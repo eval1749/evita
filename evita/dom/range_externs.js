@@ -1,11 +1,21 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2013-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 /**
  * @fileoverview Range
  * See types_externs.js for Range constructor.
  * @externs
  */
+
+/** @enum {string} */
+Range.Case = {
+  CAPITALIZED_TEXT: 'CAPITALIZED_TEXT',
+  CAPITALIZED_WORDS: 'CAPITALIZED_WORDS',
+  LOWER: 'LOWER',
+  MIXED: 'MIXED',
+  UPPER: 'UPPER'
+};
 
 /** @expose @type {!Document} */
 Range.prototype.document;
@@ -25,6 +35,11 @@ Range.prototype.capitalize = function() {}
 
 /** @type {boolean} */
 Range.prototype.collapsed;
+
+/**
+ * @return {!Range.Case}
+ */
+Range.prototype.analyzeCase = function() {};
 
 /**
  * @param {!TextOffset} position

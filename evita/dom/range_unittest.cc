@@ -61,7 +61,23 @@ class RangeTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(RangeTest);
 };
 
-TEST_F(RangeTest, Constructor) {
+TEST_F(RangeTest, analyzeCase) {
+  EXPECT_SCRIPT_VALID(
+      "function testIt(sample) {"
+      "  var doc = new Document('analyzeCase');"
+      "  var range = new Range(doc);"
+      "  range.text = sample;"
+      "  return range.analyzeCase();"
+      "}");
+  EXPECT_SCRIPT_EQ("CAPITALIZED_TEXT", "testIt('Foo::bar(baz)')");
+  EXPECT_SCRIPT_EQ("CAPITALIZED_WORDS", "testIt('Foo::Bar::Baz')");
+  EXPECT_SCRIPT_EQ("LOWER", "testIt('abcd')");
+  EXPECT_SCRIPT_EQ("MIXED", "testIt('0x25AD')");
+  EXPECT_SCRIPT_EQ("MIXED", "testIt('MiXed')");
+  EXPECT_SCRIPT_EQ("UPPER", "testIt('ABCD')");
+}
+
+TEST_F(RangeTest, ctor) {
   EXPECT_SCRIPT_VALID("var doc1 = new Document('range')");
   EXPECT_SCRIPT_VALID("var range1 = new Range(doc1)");
   EXPECT_SCRIPT_TRUE("range1.document === doc1");

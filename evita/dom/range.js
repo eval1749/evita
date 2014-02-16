@@ -4,6 +4,124 @@
 'use strict';
 
 (function() {
+  global.Range.Case = {
+    CAPITALIZED_TEXT: 'CAPITALIZED_TEXT',
+    CAPITALIZED_WORDS: 'CAPITALIZED_WORDS',
+    LOWER: 'LOWER',
+    MIXED: 'MIXED',
+    UPPER: 'UPPER'
+  };
+
+  /**
+   * @return {!Range.Case}
+   */
+  Range.prototype.analyzeCase = function() {
+    /** @enum{string} */
+    var State = {
+      FIRST_CAP_IN_WORD: 'FIRST_CAP_IN_WORD',
+      FIRST_CAP_NOT_WORD: 'FIRST_CAP_NOT_WORD',
+      FIRST_CAP_SECOND: 'FIRST_CAP_SECOND',
+      LOWER: 'LOWER',
+      REST_CAP_IN_WORD: 'REST_CAP_IN_WORD',
+      REST_CAP_NOT_WORD: 'REST_CAP_NOT_WORD',
+      REST_CAP_REST: 'REST_CAP_REST',
+      START: 'START',
+      UPPER: 'UPPER',
+    };
+    var document = this.document;
+    var start = this.start;
+    var end = this.end;
+    var string_case = Range.Case.MIXED;
+    var state = State.START;
+    for (var offset = start; offset < end; ++offset) {
+      var char_code = document.charCodeAt_(offset);
+      var ucd = Unicode.UCD[char_code];
+      var lower_case = ucd.category == Unicode.Category.Ll ||
+                       ucd.category == Unicode.Category.Lt;
+      var upper_case = ucd.category == Unicode.Category.Lu;
+      switch (state) {
+        case State.START:
+          if (upper_case) {
+            string_case = Range.Case.CAPITALIZED_WORDS;
+            state = State.FIRST_CAP_SECOND;
+          } else if (lower_case) {
+            string_case = Range.Case.LOWER;
+            state = State.LOWER;
+          }
+          break;
+        case State.FIRST_CAP_IN_WORD:
+          if (upper_case) {
+            // We found "FoB".
+            return Range.Case.MIXED;
+          } else if (lower_case) {
+            // We found "Foo".
+          } else {
+            // We found "Foo+".
+            state = State.FIRST_CAP_NOT_WORD;
+          }
+          break;
+        case State.FIRST_CAP_NOT_WORD:
+          if (upper_case) {
+            // We found "Foo B".
+            state = State.REST_CAP_IN_WORD;
+          } else if (lower_case) {
+            // We found "Foo b"
+            string_case = Range.Case.CAPITALIZED_TEXT;
+            state = State.LOWER;
+          }
+          break;
+        case State.FIRST_CAP_SECOND:
+          if (upper_case) {
+            // We found "FO"
+            string_case = Range.Case.UPPER;
+            state = State.UPPER;
+          } else if (lower_case) {
+            // We found "Fo"
+            state = State.FIRST_CAP_IN_WORD;
+          } else {
+            // We see "F+"
+            state = State.FIRST_CAP_NOT_WORD;
+          }
+          break;
+        case State.LOWER:
+          if (upper_case) {
+            // We found "foB"
+            return Range.Case.MIXED;
+          }
+          break;
+        case State.REST_CAP_IN_WORD:
+          if (upper_case) {
+            // We found "Foo Bar BaZ"
+            return Range.Case.MIXED;
+          }
+          if (!lower_case) {
+            // We found "Foo Bar+"
+            state = State.REST_CAP_NOT_WORD;
+          }
+          break;
+        case State.REST_CAP_NOT_WORD:
+          if (lower_case) {
+            // We found "Foo Bar+b"
+            return Range.Case.MIXED;
+          }
+          if (upper_case) {
+            // We found "Foo Bar+B"
+            state = State.REST_CAP_IN_WORD;
+          }
+          break;
+        case State.UPPER:
+          if (lower_case) {
+            // We found "FOo"
+            return Range.Case.MIXED;
+          }
+          break;
+        default:
+          throw 'Unexepcted state ' + state;
+      }
+    }
+    return string_case;
+  };
+
   /**
    * Capitalize range.
    * @this {!Range}

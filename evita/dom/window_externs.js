@@ -45,6 +45,12 @@ Window.prototype.right;
 /** @type {string} */
 Window.prototype.state;
 
+/**
+ * @type {string}
+ * setter displays status text in status bar if possible.
+ */
+Window.prototype.status;
+
 /** @type {number} */
 Window.prototype.top;
 

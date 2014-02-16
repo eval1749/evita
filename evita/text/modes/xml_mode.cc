@@ -10,6 +10,22 @@
 namespace text
 {
 
+namespace {
+enum CharacterName
+{
+    Backslash       = 0x5C,
+    CloseBrace      = 0x7D,
+    CloseBracket    = 0x5D,
+    CloseParen      = 0x29,
+    DoubleQuote     = 0x22,
+    Newline         = 0x0A,
+    OpenBrace       = 0x7B,
+    OpenBracket     = 0x5B,
+    OpenParen       = 0x28,
+    SingleQuote     = 0x27,
+};
+}  // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 // XmlLexer

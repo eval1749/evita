@@ -33,8 +33,14 @@ struct ErrorInfo {
   }
 };
 
+base::char16 CharUpcase(base::char16 wch) {
+  return static_cast<base::char16>(
+      reinterpret_cast<UINT_PTR>(
+          ::CharUpper(reinterpret_cast<base::char16*>(wch))));
+}
+
 bool CharEqCi(base::char16 wch1, base::char16 wch2) {
-  return wch1 == wch2 || ::CharUpcase(wch1) == ::CharUpcase(wch2);
+  return wch1 == wch2 || CharUpcase(wch1) == CharUpcase(wch2);
 }
 
 bool CharEqCs(base::char16 wch1, base::char16 wch2) {

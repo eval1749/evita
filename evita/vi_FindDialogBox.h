@@ -25,25 +25,15 @@ class FindDialogBox final : public DialogBox {
   public: FindDialogBox(DialogBoxId dialog_box_id);
   public: virtual ~FindDialogBox();
 
-  private: void ClearMessage();
-  public: void DoFind(text::Direction);
-  private: void DoReplace(text::ReplaceMode replace_mode);
-  private: bool FindFirst(text::RegexMatcher* matcher);
-  private: void onFindNext();
-  private: void onFindPrevious();
-  private: void onReplaceOne();
-  private: void onReplaceAll();
-  private: Selection* PrepareFind(text::SearchParameters*);
-  private: void ReportNotFound();
   private: void UpdateUI(bool activate = false);
 
   // DialogBox
   private: virtual int GetTemplate() const override { return IDD_FIND; }
-  private: virtual bool onInitDialog() override;
   private: virtual void onCancel() override;
   private: virtual bool onCommand(WPARAM, LPARAM) override;
-  private: virtual INT_PTR onMessage(UINT, WPARAM, LPARAM) override;
+  private: virtual bool onInitDialog() override;
   private: virtual void onOk() override;
+  private: virtual INT_PTR onMessage(UINT, WPARAM, LPARAM) override;
 
   DISALLOW_COPY_AND_ASSIGN(FindDialogBox);
 };

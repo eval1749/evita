@@ -70,6 +70,13 @@ class DialogBoxIdMapper : public common::Singleton<DialogBoxIdMapper> {
     map_[dialog_box_id] = nullptr;
   }
 };
+
+bool IsCheckBoxOrRadioButton(HWND hwnd){
+  auto const style = ::GetWindowLong(hwnd, GWL_STYLE);
+  auto const type = style & BS_TYPEMASK;
+  return type == BS_AUTOCHECKBOX || type == BS_AUTORADIOBUTTON;
+}
+
 DialogBox* creating_dialog_box;
 }  // namespace
 
@@ -145,16 +152,12 @@ INT_PTR CALLBACK DialogBox::DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam,
   return dialog_box->onMessage(uMsg, wParam, lParam);
 }
 
-void DialogBox::DispatchTextEvent(const base::string16& type,
-                                  int control_id) {
+void DialogBox::DispatchFormEvent(const base::string16& type, int control_id,
+                                  const base::string16& value) {
   auto const event_target_id = model_->event_target_id_of(control_id);
   if (event_target_id == dom::kInvalidEventTargetId)
     return;
-  dom::ApiFormEvent event {
-      event_target_id,
-      type,
-      GetDlgItemText(control_id)
-  };
+  dom::ApiFormEvent event {event_target_id, type, value};
   Application::instance()->view_event_handler()->DispatchFormEvent(event);
 }
 
@@ -193,7 +196,39 @@ void DialogBox::onCancel() {
   ::EndDialog(hwnd_, IDCANCEL);
 }
 
-bool DialogBox::onCommand(WPARAM, LPARAM) {
+bool DialogBox::onCommand(WPARAM wParam, LPARAM lParam) {
+  auto const hwnd = reinterpret_cast<HWND>(lParam);
+  base::string16 class_name(100, '?');
+  auto const class_name_length = ::GetClassName(hwnd, &class_name[0],
+      static_cast<int>(class_name.length()));
+  class_name.resize(static_cast<size_t>(class_name_length));
+  auto const code = HIWORD(wParam);
+  auto const control_id = LOWORD(wParam);
+
+  if (class_name == L"Button") {
+    if (IsCheckBoxOrRadioButton(hwnd)) {
+      if (code == BN_CLICKED) {
+        DispatchFormEvent(L"change", control_id,
+                          Button_GetCheck(hwnd) == BST_CHECKED ? L"1" :
+                          base::string16());
+      }
+      return false;
+    }
+
+    if (code == BN_CLICKED) {
+      DispatchFormEvent(L"click", control_id, base::string16());
+      return false;
+    }
+    return false;
+  }
+
+  if (class_name == L"ComboBox") {
+    if (code == CBN_KILLFOCUS) {
+      DispatchFormEvent(L"change", control_id, GetDlgItemText(control_id));
+      return false;
+    }
+  }
+
   return false;
 }
 

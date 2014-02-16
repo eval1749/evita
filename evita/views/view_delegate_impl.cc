@@ -184,12 +184,8 @@ void ViewDelegateImpl::DestroyWindow(dom::WindowId window_id) {
   widget->DestroyWidget();
 }
 
-void ViewDelegateImpl::DoFind(dom::DialogBoxId dialog_box_id,
-                              text::Direction direction) {
-  auto const dialog_box = DialogBox::FromDialogBoxId(dialog_box_id);
-  if (!dialog_box)
-    return;
-  static_cast<FindDialogBox*>(dialog_box)->DoFind(direction);
+void ViewDelegateImpl::DoFind(dom::DialogBoxId, text::Direction) {
+  DVLOG(0) << "DoFind is deprecated.";
 }
 
 void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {

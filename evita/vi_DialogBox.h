@@ -36,20 +36,19 @@ class DialogBox {
 
   private: static INT_PTR CALLBACK DialogProc(HWND hwnd, UINT message,
                                               WPARAM wParam, LPARAM lParam);
-
-  protected: void DispatchTextEvent(const base::string16& type,
-                                    int control_id);
+  protected: void DispatchFormEvent(const base::string16& type, int control_id,
+                                    const base::string16& value);
   public: static DialogBox* FromDialogBoxId(DialogBoxId dialog_box_id);
   protected: bool GetChecked(int control_id) const;
   protected: HWND GetDlgItem(int item_id) const;
   protected: base::string16 GetDlgItemText(int item_id) const;
   protected: virtual int GetTemplate() const = 0;
+  protected: virtual void onCancel();
   protected: virtual bool onCommand(WPARAM wParam, LPARAM lParam);
   protected: virtual bool onInitDialog() = 0;
-  protected: virtual void onOk();
-  protected: virtual void onCancel();
   protected: virtual INT_PTR onMessage(UINT message, WPARAM wParam,
                                        LPARAM lParam);
+  protected: virtual void onOk();
   public: void Realize(const dom::Form* form);
   public: int SetCheckBox(int item_id, bool checked);
   public: void Show();

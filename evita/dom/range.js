@@ -5,11 +5,11 @@
 
 (function() {
   global.Range.Case = {
-    CAPITALIZED_TEXT: 'CAPITALIZED_TEXT',
-    CAPITALIZED_WORDS: 'CAPITALIZED_WORDS',
-    LOWER: 'LOWER',
-    MIXED: 'MIXED',
-    UPPER: 'UPPER'
+    CAPITALIZED_TEXT: 'CAPITALIZED_TEXT', // "This is capitalized."
+    CAPITALIZED_WORDS: 'CAPITALIZED_WORDS', // "This Is Capitalized Words."
+    LOWER: 'LOWER', // "this is lower."
+    MIXED: 'MIXED', // "ThisIsMixed."
+    UPPER: 'UPPER' // "THIS IS UPPER."
   };
 
   /**

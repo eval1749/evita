@@ -52,9 +52,8 @@ void Caret::BackingStore::Save(const gfx::Graphics& gfx,
                                       static_cast<uint>(rect_.top),
                                       static_cast<uint>(rect_.right),
                                       static_cast<uint>(rect_.bottom));
-  std::unique_ptr<gfx::Bitmap> bitmap(
-      new gfx::Bitmap(gfx, screen_rect.size()));
-  if (!bitmap)
+  auto bitmap = std::make_unique<gfx::Bitmap>(gfx, screen_rect.size());
+  if (!bitmap || !*bitmap)
     return;
   COM_VERIFY((*bitmap)->CopyFromRenderTarget(nullptr, gfx, &screen_rect));
   bitmap_ = std::move(bitmap);

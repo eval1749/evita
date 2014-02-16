@@ -227,27 +227,6 @@ Count Range::Copy()
 } // Range::Copy
 
 /// <summary>
-///   Move or extend this range to specified end.
-/// </summary>
-/// <param name="eUnit">Unit for end</param>
-/// <param name="fExtend">True to extend this range, or false to move</param>
-/// <seealso cref="Range::StartOf"/>
-Count Range::EndOf(Unit eUnit, bool fExtend)
-{
-    Posn lPosn = m_pBuffer->ComputeEndOf(eUnit, m_lEnd);
-
-    Count k = m_lEnd - lPosn;
-
-    m_lEnd = lPosn;
-    if (! fExtend)
-    {
-        m_lStart = m_lEnd;
-    }
-
-    return k;
-} // Range::EndOf
-
-/// <summary>
 ///   Returns valid position
 /// </summary>
 /// <param name="lPosn">Position to validate</param>
@@ -310,58 +289,6 @@ base::string16 Range::GetText() const
 {
     return m_pBuffer->GetText(m_lStart, m_lEnd);
 } // Range::GetText
-
-/// <summary>
-///   Move start (if n &lt; 0) or end (if n > 0) of this range.
-/// </summary>
-/// <param name="eUnit">Unit to move</param>
-/// <param name="n">Number of unit to move</param>
-/// <returns>Number of moved unit</returns>
-/// <seealso cref="Range::MoveEnd"/>
-/// <seealso cref="Range::MoveStart"/>
-Count Range::Move(Unit eUnit, Count n)
-{
-    if (n > 0)
-    {
-        m_lEnd = m_lStart;
-    }
-    else
-    {
-        m_lStart = m_lEnd;
-    }
-
-    Count k = m_pBuffer->ComputeMotion(eUnit, n, &m_lStart);
-
-    m_lEnd = m_lStart;
-
-    return k;
-} // Range::Move
-
-/// <summary>
-///   Move end of this range.
-/// </summary>
-/// <param name="eUnit">Unit to move</param>
-/// <param name="n">Number of unit to move</param>
-/// <returns>Number of moved unit</returns>
-/// <seealso cref="Range::Move"/>
-/// <seealso cref="Range::MoveStart"/>
-Count Range::MoveEnd(Unit eUnit, Count n)
-{
-    return m_pBuffer->ComputeMotion(eUnit, n, &m_lEnd);
-} // Range::MoveEnd
-
-/// <summary>
-///   Move start of this range.
-/// </summary>
-/// <param name="eUnit">Unit to move</param>
-/// <param name="n">Number of unit to move</param>
-/// <returns>Number of moved unit</returns>
-/// <seealso cref="Range::Move"/>
-/// <seealso cref="Range::MoveEnd"/>
-Count Range::MoveStart(Unit eUnit, Count n)
-{
-    return m_pBuffer->ComputeMotion(eUnit, n, &m_lStart);
-} // Range::MoveStart
 
 /// <summary>
 ///  Replace this range with Windows clipboard
@@ -513,24 +440,6 @@ void Range::SetText(const base::string16& text)
 
     m_lEnd = ensurePosn(static_cast<Posn>(m_lStart + text.length()));
 }
-
-/// <summary>
-///   Move or extend this range to specified start.
-/// </summary>
-/// <param name="eUnit">Unit for start</param>
-/// <param name="fExtend">True to extend this range, or false to move</param>
-/// <seealso cref="Range::EndOf"/>
-Count Range::StartOf(Unit eUnit, bool fExtend)
-{
-    Posn lPosn = m_pBuffer->ComputeStartOf(eUnit, m_lStart);
-
-    Count k = lPosn - m_lStart;
-
-    m_lStart = lPosn;
-    if (! fExtend) m_lEnd = m_lStart;
-
-    return k;
-} // Range::StartOf
 
 /// <summary>
 ///  Constructs buffer character enumerator from range.

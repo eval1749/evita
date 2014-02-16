@@ -45,10 +45,6 @@ class Selection : public text::Range {
   public: static Selection* Create(const text::Range& range);
 
   // [G]
-  public: Posn GetActivePosn() const {
-    return m_fStartIsActive ? GetStart() : GetEnd();
-  }
-
   public: Color GetBackground() const { return m_crBackground; }
   public: Buffer* GetBuffer() const { return m_pBuffer; }
   public: Color GetColor() const { return m_crColor; }

@@ -70,7 +70,6 @@ class Range //: public ObjectInHeap
     public: Count Copy();
 
     // [E]
-    public:  Count EndOf(Unit, bool = false);
     private: Posn  ensurePosn(Posn) const;
 
     // [F]
@@ -83,11 +82,6 @@ class Range //: public ObjectInHeap
     public: Posn    GetStart()  const { return m_lStart; }
     public: base::string16 GetText() const;
 
-    // [M]
-    public: Count Move(Unit, Count);
-    public: Count MoveEnd(Unit, Count);
-    public: Count MoveStart(Unit, Count);
-
     // [P]
     public: void Paste();
 
@@ -97,7 +91,6 @@ class Range //: public ObjectInHeap
     public: void  SetRange(const Range*);
     public: Posn  SetStart(Posn);
     public: void SetText(const base::string16& text);
-    public: Count StartOf(Unit, bool = false);
 }; // Range
 
 }  // namespace text

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-'use strict';
 /**
  * @enum{string}
  */
@@ -18,13 +17,15 @@ var Strings = {
   IDS_DA_NO_MORE: 'No more abbreviation starts with \'__prefix__\'',
   IDS_DA_TOO_LONG: 'Too long abbreviation',
   IDS_DA_TOO_SHORT: 'Too short abbreviation',
+  IDS_FIND_FOUND: 'Found "__text__"',
+  IDS_FIND_NOT_FOUND: 'Not found "__text__"',
   IDS_NOT_COMMAND: '__name__ is not a command',
-  IDS_NOT_FOUND: 'Not found',
   IDS_NO_MATCHING_PAREN: 'No matching parenthesis.',
   IDS_NO_MORE_REDO: 'No more redo',
   IDS_NO_MORE_UNDO: 'No more undo',
   IDS_NO_OTHER_WINDOWS: 'No other windows',
   IDS_PASSED_END: 'Passed the end of the document',
+  IDS_REPLACED: 'Replaced __count__ occurrences',
   IDS_STATUS_BUSY: 'Busy',
   IDS_STATUS_READY: 'Ready'
 };

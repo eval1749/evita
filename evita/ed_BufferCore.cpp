@@ -179,6 +179,14 @@ Count BufferCore::GetText(char16* prgwch, Posn lStart, Posn lEnd) const
 } // BufferCore::GetText
 
 base::string16 BufferCore::GetText(Posn start, Posn end) const {
+    if (start < 0)
+      start = std::max(GetEnd() + start, static_cast<Posn>(0));
+    else if (start > GetEnd())
+      start = GetEnd();
+    if (end < 0)
+      end = std::max(GetEnd() + end, static_cast<Posn>(0));
+    else if (end > GetEnd())
+      end = GetEnd();
     auto const cwch = end - start;
     if (cwch <= 0)
       return base::string16();

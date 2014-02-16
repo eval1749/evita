@@ -186,6 +186,7 @@ class DocumentClass : public v8_glue::WrapperInfo {
         .SetMethod("redo", &Document::Redo)
         .SetMethod("renameTo", &Document::RenameTo)
         .SetMethod("save_", &Document::Save)
+        .SetMethod("slice", &Document::Slice)
         .SetMethod("startUndoGroup_", &Document::StartUndoGroup)
         .SetMethod("styleAt", &Document::style_at)
         .SetMethod("undo", &Document::Undo);
@@ -426,6 +427,11 @@ void Document::Save(const base::string16& filename,
       new SaveFileCallback(runner, this, callback));
   ScriptController::instance()->view_delegate()->SaveFile(this, filename,
       base::Bind(&SaveFileCallback::Run, save_callback));
+}
+
+base::string16 Document::Slice(int start, v8_glue::Optional<int> opt_end) {
+  auto const end = opt_end.is_supplied ? opt_end.value : buffer_->GetEnd();
+  return buffer_->GetText(start, end);
 }
 
 void Document::StartUndoGroup(const base::string16& name) {

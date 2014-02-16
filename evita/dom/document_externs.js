@@ -185,6 +185,13 @@ Document.prototype.save = function(opt_filename) {};
 Document.prototype.save_ = function(filename, callback) {};
 
 /**
+ * @param {number} start
+ * @param {number=} opt_end
+ * @return {string}
+ */
+Document.prototype.slice = function(start, opt_end) {};
+
+/**
  * @param {string} name
  */
 Document.prototype.startUndoGroup_ = function(name) {};

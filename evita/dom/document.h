@@ -9,6 +9,7 @@
 #include "base/strings/string16.h"
 #include "base/time/time.h"
 #include "evita/gc/member.h"
+#include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/scriptable.h"
 #include "evita/v8_glue/scoped_persistent.h"
 
@@ -69,6 +70,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: static void ResetForTesting();
   public: void Save(const base::string16& filename,
                     v8::Handle<v8::Function> callback);
+  public: base::string16 Slice(int start, v8_glue::Optional<int> opt_end);
   public: void StartUndoGroup(const base::string16& name);
   public: Posn Undo(Posn position);
 

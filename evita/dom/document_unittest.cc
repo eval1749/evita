@@ -260,6 +260,18 @@ TEST_F(DocumentTest, save_succeeded) {
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
 }
 
+TEST_F(DocumentTest, slice) {
+  EXPECT_SCRIPT_VALID("var doc = new Document('slice');"
+    "var range = new Range(doc);"
+    "range.text = '0123456789';");
+  EXPECT_SCRIPT_EQ("56789", "doc.slice(5)");
+  EXPECT_SCRIPT_EQ("34", "doc.slice(3, 5)");
+  EXPECT_SCRIPT_EQ("789", "doc.slice(-3)");
+  EXPECT_SCRIPT_EQ("3456", "doc.slice(-7, -3)");
+  EXPECT_SCRIPT_EQ("", "doc.slice(100)");
+  EXPECT_SCRIPT_EQ("56789", "doc.slice(5, 100)");
+}
+
 TEST_F(DocumentTest, undo) {
   EXPECT_SCRIPT_VALID("var doc = new Document('undo');"
             "var range = new Range(doc);"

@@ -12,6 +12,10 @@
   }
 })();
 
+['left', 'right', 'top', 'bottom', 'focusTick_'].forEach(function(name) {
+  Object.defineProperty(Window.prototype, name, {value: 0, writable: true});
+});
+
 Object.defineProperty(Window.prototype, 'status', (function() {
   var status = '';
   return {

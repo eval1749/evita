@@ -83,19 +83,14 @@ class WindowWrapperInfo :
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetValue("bottom", 0)
         .SetProperty("children", &Window::child_windows)
         .SetProperty("firstChild", &Window::first_child)
-        .SetValue("focusTick_", 0)
         .SetProperty("id", &Window::id)
         .SetProperty("lastChild", &Window::last_child)
-        .SetValue("left", 0)
         .SetProperty("nextSibling", &Window::next_sibling)
         .SetProperty("parent", &Window::parent_window)
         .SetProperty("previousSibling", &Window::previous_sibling)
-        .SetValue("right", 0)
         .SetProperty("state", &Window::state)
-        .SetValue("top", 0)
         .SetMethod("appendChild", &Window::AddWindow)
         .SetMethod("changeParent", &Window::ChangeParentWindow)
         .SetMethod("destroy", &Window::Destroy)
@@ -110,6 +105,9 @@ class WindowWrapperInfo :
 
   DISALLOW_COPY_AND_ASSIGN(WindowWrapperInfo);
 };
+
+const v8::PropertyAttribute kDefaultPropertyAttribute =
+    static_cast<v8::PropertyAttribute>(v8::DontEnum | v8::DontDelete);
 
 int global_focus_tick;
 }  // namespace
@@ -282,12 +280,14 @@ void Window::DidResize(int left, int top, int right, int bottom) {
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
   auto const instance = GetWrapper(isolate);
-  instance->Set(v8Strings::left.Get(isolate), v8::Integer::New(isolate, left));
-  instance->Set(v8Strings::top.Get(isolate), v8::Integer::New(isolate, top));
-  instance->Set(v8Strings::right.Get(isolate),
-                v8::Integer::New(isolate, right));
-  instance->Set(v8Strings::bottom.Get(isolate),
-                v8::Integer::New(isolate, bottom));
+  #define SET_PROP(name) \
+    instance->Set(v8Strings::name.Get(isolate), \
+                  v8::Integer::New(isolate, name), \
+                  kDefaultPropertyAttribute)
+  SET_PROP(left);
+  SET_PROP(top);
+  SET_PROP(right);
+  SET_PROP(bottom);
 }
 
 void Window::DidSetFocus() {
@@ -300,8 +300,10 @@ void Window::DidSetFocus() {
   auto const instance = GetWrapper(isolate);
   auto const klass = runner->global()->Get(v8Strings::Window.Get(isolate));
   instance->Set(v8Strings::focusTick_.Get(isolate),
-                v8::Integer::New(isolate, global_focus_tick));
-  klass->ToObject()->Set(v8Strings::focus.Get(isolate), instance);
+                v8::Integer::New(isolate, global_focus_tick),
+                kDefaultPropertyAttribute);
+  klass->ToObject()->Set(v8Strings::focus.Get(isolate), instance,
+                         kDefaultPropertyAttribute);
 }
 
 void Window::Focus() {

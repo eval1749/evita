@@ -181,7 +181,7 @@ void Frame::AddTab(Pane* const pane) {
   }
 
   auto const new_tab_item_index = tab_strip_->number_of_tabs();
-  TabCtrl_InsertItem(m_hwndTabBand, new_tab_item_index, &tab_item);
+  tab_strip_->InsertTab(new_tab_item_index, &tab_item);
   tab_strip_->SelectTab(new_tab_item_index);
 }
 

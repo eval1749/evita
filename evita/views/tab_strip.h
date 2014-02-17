@@ -39,6 +39,7 @@ class TabStrip : public ui::Widget {
 
   public: Size GetPreferreSize() const;
   public: void DeleteTab(int tab_index);
+  public: void InsertTab(int new_tab_index, const TCITEM* tab_data);
   public: void SelectTab(int tab_index);
   public: void SetIconList(HIMAGELIST icon_list);
   public: void SetTab(int tab_index, const TCITEM* tab_data);

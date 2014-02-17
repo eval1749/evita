@@ -1157,11 +1157,10 @@ class TabStrip::TabStripImpl : public Element {
     }
   }
 
-  // onInsertItem
-  private: int onInsertItem(int iItem, const TCITEM* pTcItem) {
+  private: void InsertTab(int iItem, const TCITEM* pTcItem) {
     auto const pNewItem = new Item(this, iItem, pTcItem);
     if (!pNewItem) {
-      return -1;
+      return;
     }
 
     pNewItem->m_iItem = iItem;
@@ -1208,8 +1207,6 @@ class TabStrip::TabStripImpl : public Element {
     }
 
     Redraw();
-
-    return iItem;
   }
 
   // onLButtonDown
@@ -1659,6 +1656,10 @@ Size TabStrip::GetPreferreSize() const {
   return Size(font_height * 40, 2 + 7 + font_height + 5 + 2);
 }
 
+void TabStrip::InsertTab(int new_tab_index, const TCITEM* tab_data) {
+  impl_->InsertTab(new_tab_index, tab_data);
+}
+
 void TabStrip::SelectTab(int tab_index) {
   impl_->SelectItem(tab_index);
 }
@@ -1730,11 +1731,6 @@ LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
 
     case TCM_GETTOOLTIPS:
       return reinterpret_cast<LRESULT>(impl_->m_hwndToolTips);
-
-    case TCM_INSERTITEM:
-      return impl_->onInsertItem(
-          static_cast<int>(wParam),
-          reinterpret_cast<TCITEM*>(lParam));
 
     case TCM_SETCURFOCUS:
       impl_->m_iFocus = static_cast<int>(wParam);

@@ -851,6 +851,13 @@ void Frame::updateTitleBar() {
     TCITEM tab_item = {0};
     tab_item.mask = TCIF_TEXT;
     tab_item.pszText = const_cast<LPWSTR>(title.c_str());
+    if (auto const edit_pane = m_pActivePane->as<EditPane>()) {
+      if (auto const active_window = edit_pane->GetActiveWindow()) {
+        tab_item.iImage = active_window->GetIconIndex();
+        if (tab_item.iImage != -1)
+          tab_item.mask |= TCIF_IMAGE;
+      }
+    }
     TabCtrl_SetItem(m_hwndTabBand, tab_index, &tab_item);
   }
 

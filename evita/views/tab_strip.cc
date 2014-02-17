@@ -1013,6 +1013,8 @@ class TabStrip::TabStripImpl : public Element {
     return nullptr;
   }
 
+  bool GetTab(int tab_index, TCITEM* pTcItem) const;
+
   // [H]
 
   // handleTabListMenu
@@ -1376,45 +1378,6 @@ class TabStrip::TabStripImpl : public Element {
 
       case WM_USER:
         return static_cast<LRESULT>(::GetSysColor(COLOR_3DFACE));
-
-      ////////////////////////////////////////////////////////////
-      //
-      // Tab Control Messages
-      //
-      case TCM_GETITEM: {
-        auto const pItem = findItem(static_cast<int>(wParam));
-        if (!pItem) {
-          return FALSE;
-        }
-
-        auto const pTcItem = reinterpret_cast<TCITEM*>(lParam);
-
-        if (pTcItem->mask & TCIF_IMAGE) {
-          pTcItem->iImage = pItem->m_iImage;
-        }
-
-        if (pTcItem->mask & TCIF_PARAM) {
-          pTcItem->lParam = pItem->m_lParam;
-        }
-
-        if (pTcItem->mask & TCIF_STATE) {
-          pTcItem->dwState = pItem->m_rgfState & pTcItem->dwStateMask;
-        }
-
-        if (pTcItem->mask & TCIF_TEXT) {
-          auto const cwch = std::min(
-            pItem->label_.length(),
-            static_cast<size_t>(pTcItem->cchTextMax - 1));
-
-          ::CopyMemory(
-              pTcItem->pszText,
-              pItem->label_.data(),
-              sizeof(base::char16) * cwch);
-
-          pTcItem->pszText[cwch] = 0;
-        }
-        return TRUE;
-      }
     }
 
     return 0;
@@ -1623,6 +1586,39 @@ void TabStrip::TabStripImpl::DidCreateNativeWindow() {
   }
 }
 
+bool TabStrip::TabStripImpl::GetTab(int tab_index, TCITEM* pTcItem) const {
+  auto const pItem = findItem(tab_index);
+  if (!pItem) {
+    return false;
+  }
+
+  if (pTcItem->mask & TCIF_IMAGE) {
+    pTcItem->iImage = pItem->m_iImage;
+  }
+
+  if (pTcItem->mask & TCIF_PARAM) {
+    pTcItem->lParam = pItem->m_lParam;
+  }
+
+  if (pTcItem->mask & TCIF_STATE) {
+    pTcItem->dwState = pItem->m_rgfState & pTcItem->dwStateMask;
+  }
+
+  if (pTcItem->mask & TCIF_TEXT) {
+    auto const cwch = std::min(
+      pItem->label_.length(),
+      static_cast<size_t>(pTcItem->cchTextMax - 1));
+
+    ::CopyMemory(
+        pTcItem->pszText,
+        pItem->label_.data(),
+        sizeof(base::char16) * cwch);
+
+    pTcItem->pszText[cwch] = 0;
+  }
+  return true;
+}
+
 void TabStrip::TabStripImpl::Redraw() {
   UpdateLayout();
   ::InvalidateRect(m_hwnd, nullptr, false);
@@ -1654,6 +1650,10 @@ void TabStrip::DeleteTab(int tab_index) {
 Size TabStrip::GetPreferreSize() const {
   auto const font_height = 16;  // must be >= 16 (Small Icon Height)
   return Size(font_height * 40, 2 + 7 + font_height + 5 + 2);
+}
+
+bool TabStrip::GetTab(int tab_index, TCITEM* tab_data) {
+  return impl_->GetTab(tab_index, tab_data);
 }
 
 void TabStrip::InsertTab(int new_tab_index, const TCITEM* tab_data) {
@@ -1716,7 +1716,6 @@ LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
     case WM_NOTIFY:
     case WM_SETTINGCHANGE:
     case WM_USER:
-    case TCM_GETITEM:
       return impl_->OnMessage(uMsg, wParam, lParam);
 
     ////////////////////////////////////////////////////////////

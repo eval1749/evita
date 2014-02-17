@@ -38,6 +38,7 @@ class TabStrip : public ui::Widget {
   public: int selected_index() const;
 
   public: Size GetPreferreSize() const;
+  public: bool GetTab(int tab_index, TCITEM* tab_data);
   public: void DeleteTab(int tab_index);
   public: void InsertTab(int new_tab_index, const TCITEM* tab_data);
   public: void SelectTab(int tab_index);

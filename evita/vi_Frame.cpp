@@ -441,16 +441,16 @@ int Frame::GetCxStatusBar() const {
   return cx;
 }
 
-static Pane* getPaneAt(HWND hwnd, int const index) {
+static Pane* getPaneAt(views::TabStrip* tab_strip, int const index) {
   TCITEM tab_item;
   tab_item.mask = TCIF_PARAM;
-  if (!TabCtrl_GetItem(hwnd, index, &tab_item))
+  if (!tab_strip->GetTab(index, &tab_item))
       return nullptr;
   return reinterpret_cast<Pane*>(tab_item.lParam);
 }
 
 Pane* Frame::getPaneFromTab(int const index) const {
-  auto const present = getPaneAt(m_hwndTabBand, index);
+  auto const present = getPaneAt(tab_strip_, index);
   if (!present)
     return nullptr;
 
@@ -465,7 +465,7 @@ Pane* Frame::getPaneFromTab(int const index) const {
 int Frame::getTabFromPane(Pane* const pane) const {
   auto const num_tabs = tab_strip_->number_of_tabs();
   for (auto tab_index = 0; tab_index < num_tabs; ++tab_index) {
-    if (getPaneAt(m_hwndTabBand, tab_index) == pane)
+    if (getPaneAt(tab_strip_, tab_index) == pane)
       return tab_index;
   }
   return -1;

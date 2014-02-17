@@ -1304,14 +1304,6 @@ class TabStrip::TabStripImpl : public Element {
     #endif
 
     switch (uMsg) {
-      case WM_COMMAND: {
-        int const iItem = LOWORD(wParam);
-        if (iItem >= 0) {
-          SelectItem(iItem);
-        }
-        return 0;
-      }
-
       case WM_DWMCOMPOSITIONCHANGED:
         if (FAILED(DwmIsCompositionEnabled(&m_compositionEnabled)))
             m_compositionEnabled = false;
@@ -1375,9 +1367,6 @@ class TabStrip::TabStripImpl : public Element {
           }
         }
         break;
-
-      case WM_USER:
-        return static_cast<LRESULT>(::GetSysColor(COLOR_3DFACE));
     }
 
     return 0;
@@ -1717,34 +1706,6 @@ LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
     case WM_SETTINGCHANGE:
     case WM_USER:
       return impl_->OnMessage(uMsg, wParam, lParam);
-
-    ////////////////////////////////////////////////////////////
-    //
-    // TabBand messages
-    //
-    case TCM_GETCURFOCUS:
-      return impl_->m_iFocus;
-
-    case TCM_GETIMAGELIST:
-      return reinterpret_cast<LRESULT>(impl_->m_hImageList);
-
-    case TCM_GETTOOLTIPS:
-      return reinterpret_cast<LRESULT>(impl_->m_hwndToolTips);
-
-    case TCM_SETCURFOCUS:
-      impl_->m_iFocus = static_cast<int>(wParam);
-      return 0;
-
-    case TCM_SETMINTABWIDTH: {
-      auto const iPrev = impl_->m_cxMinTab;
-      impl_->m_cxMinTab = std::max(static_cast<int>(lParam),
-                            static_cast<int>(k_cxMinTab));
-      return iPrev;
-    }
-
-    case TCM_SETTOOLTIPS:
-      impl_->m_hwndToolTips = reinterpret_cast<HWND>(wParam);
-      return 0;
   }
 
   return ui::Widget::OnMessage(uMsg, wParam, lParam);

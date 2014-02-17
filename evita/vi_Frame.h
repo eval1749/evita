@@ -86,7 +86,6 @@ class Frame final : public views::Window,
   private: virtual void DidAddChildWidget(
       const Widget& widget) override;
   public: void DidActivatePane(Pane*);
-  private: void DidChangeTabSelection(int selected_index);
   private: virtual void DidCreateNativeWindow() override;
   private: virtual void DidDestroyWidget() override;
   private: virtual void DidRemoveChildWidget(
@@ -143,6 +142,9 @@ class Frame final : public views::Window,
   // [W]
   private: virtual void WillDestroyWidget() override;
   private: virtual void WillRemoveChildWidget(const Widget& widget) override;
+
+  // views::TabStripDelegate
+  private: virtual void DidChangeTabSelection(int new_selected_index) override;
 
   DISALLOW_COPY_AND_ASSIGN(Frame);
 };

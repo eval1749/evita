@@ -757,6 +757,7 @@ class TabStrip::TabStripImpl : public Element {
   private: BOOL m_compositionEnabled;
   private: int m_cxTab;
   private: int m_cxMinTab;
+  private: TabStripDelegate* delegate_;
   private: Drag m_eDrag;
   private: bool m_fMouseTracking;
   private: HMENU m_hTabListMenu;
@@ -773,7 +774,7 @@ class TabStrip::TabStripImpl : public Element {
   private: POINT m_ptDragStart;
   private: int m_xTab;
 
-  public: TabStripImpl(HWND hwnd);
+  public: TabStripImpl(HWND hwnd, TabStripDelegate* delegate);
   public: virtual ~TabStripImpl();
 
   // [C]
@@ -937,6 +938,8 @@ class TabStrip::TabStripImpl : public Element {
   }
 
   // [D]
+  private: void DidChangeTabSelection();
+
   private: virtual void Draw(const gfx::Graphics& gfx) const override {
     do {
       gfx.BeginDraw();
@@ -1149,11 +1152,9 @@ class TabStrip::TabStripImpl : public Element {
     Redraw();
 
     if (fSelChanged) {
-      if (m_pSelected) {
+      if (m_pSelected)
         m_pSelected->SetState(Element::State_Selected);
-      }
-
-      sendNotify(TCN_SELCHANGE);
+      DidChangeTabSelection();
     }
 
     return TRUE;
@@ -1531,7 +1532,7 @@ class TabStrip::TabStripImpl : public Element {
         pItem->Invalidate(m_hwnd);
       }
 
-      sendNotify(TCN_SELCHANGE);
+      DidChangeTabSelection();
     }
 
     return m_pSelected ? m_pSelected->m_iItem : -1;
@@ -1573,12 +1574,13 @@ class TabStrip::TabStripImpl : public Element {
   DISALLOW_COPY_AND_ASSIGN(TabStripImpl);
 };
 
-TabStrip::TabStripImpl::TabStripImpl(HWND hwnd)
+TabStrip::TabStripImpl::TabStripImpl(HWND hwnd, TabStripDelegate* delegate)
     : Element(nullptr),
       m_cItems(0),
       m_compositionEnabled(false),
       m_cxTab(0),
       m_cxMinTab(k_cxMinTab),
+      delegate_(delegate),
       m_eDrag(Drag_None),
       m_fMouseTracking(false),
       m_hTabListMenu(nullptr),
@@ -1607,6 +1609,10 @@ TabStrip::TabStripImpl::~TabStripImpl() {
   if (m_hTabListMenu) {
     ::DestroyMenu(m_hTabListMenu);
   }
+}
+
+void TabStrip::TabStripImpl::DidChangeTabSelection() {
+  delegate_->DidChangeTabSelection(m_pSelected ? m_pSelected->m_iItem : -1);
 }
 
 void TabStrip::TabStripImpl::DidCreateNativeWindow() {
@@ -1679,7 +1685,7 @@ void TabStrip::CreateNativeWindow() const {
 }
 
 void TabStrip::DidCreateNativeWindow() {
-  impl_.reset(new TabStripImpl(*native_window()));
+  impl_.reset(new TabStripImpl(*native_window(), delegate_));
   impl_->m_rc = rect();
   impl_->DidCreateNativeWindow();
 }

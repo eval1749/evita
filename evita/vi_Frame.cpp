@@ -673,10 +673,6 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
               pPane->DestroyWidget();
             break;
           }
-
-          case TCN_SELCHANGE:
-            DidChangeTabSelection(TabCtrl_GetCurSel(m_hwndTabBand));
-            break;
         }
         return 0;
       }

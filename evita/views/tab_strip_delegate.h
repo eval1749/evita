@@ -17,6 +17,8 @@ class TabStripDelegate {
   public: TabStripDelegate();
   public: virtual ~TabStripDelegate();
 
+  public: virtual void DidChangeTabSelection(int new_selected_index) = 0;
+
   DISALLOW_COPY_AND_ASSIGN(TabStripDelegate);
 };
 

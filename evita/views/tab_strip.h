@@ -34,6 +34,7 @@ class TabStrip : public ui::Widget {
   public: TabStrip(TabStripDelegate* delegate);
   public: virtual ~TabStrip();
 
+  public: int number_of_tabs() const;
   public: int selected_index() const;
 
   public: Size GetPreferreSize() const;

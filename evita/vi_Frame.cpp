@@ -180,7 +180,7 @@ void Frame::AddTab(Pane* const pane) {
     }
   }
 
-  auto const new_tab_item_index = TabCtrl_GetItemCount(m_hwndTabBand);
+  auto const new_tab_item_index = tab_strip_->number_of_tabs();
   TabCtrl_InsertItem(m_hwndTabBand, new_tab_item_index, &tab_item);
   tab_strip_->SelectTab(new_tab_item_index);
 }
@@ -463,7 +463,7 @@ Pane* Frame::getPaneFromTab(int const index) const {
 }
 
 int Frame::getTabFromPane(Pane* const pane) const {
-  auto const num_tabs = TabCtrl_GetItemCount(m_hwndTabBand);
+  auto const num_tabs = tab_strip_->number_of_tabs();
   for (auto tab_index = 0; tab_index < num_tabs; ++tab_index) {
     if (getPaneAt(m_hwndTabBand, tab_index) == pane)
       return tab_index;

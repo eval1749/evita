@@ -1642,6 +1642,10 @@ TabStrip::TabStrip(TabStripDelegate* delegate)
 TabStrip::~TabStrip() {
 }
 
+int TabStrip::number_of_tabs() const {
+  return impl_->m_cItems;
+}
+
 int TabStrip::selected_index() const {
   return impl_->m_pSelected ? impl_->m_pSelected->m_iItem : -1;
 }
@@ -1715,9 +1719,6 @@ LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
 
     case TCM_GETIMAGELIST:
       return reinterpret_cast<LRESULT>(impl_->m_hImageList);
-
-    case TCM_GETITEMCOUNT:
-      return impl_->m_cItems;
 
     case TCM_GETTOOLTIPS:
       return reinterpret_cast<LRESULT>(impl_->m_hwndToolTips);

@@ -121,9 +121,6 @@ class Frame final : public views::Window,
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;
   private: bool onTabDrag(TabBandDragAndDrop, HWND);
 
-  // [P]
-  private: void Paint();
-
   // [R]
   public: void Realize();
   public: void virtual RealizeWidget() override;

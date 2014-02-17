@@ -124,7 +124,6 @@ Pane* GetContainingPane(Frame* frame, views::Window* window) {
 
 } // namespace
 
-#define USE_TABBAND_EDGE 0
 extern uint g_TabBand__TabDragMsg;
 
 Frame::Frame(views::WindowId window_id)
@@ -374,8 +373,6 @@ void Frame::DidResize() {
       }
     }
   }
-
-  Paint();
 }
 
 void Frame::DidSetFocus() {
@@ -521,43 +518,6 @@ void Frame::onDropFiles(HDROP const hDrop) {
     nIndex += 1;
   }
   ::DragFinish(hDrop);
-}
-
-void Frame::Paint() {
-#if USE_TABBAND_EDGE
-  {
-    RECT rc = rect_;
-
-    #if DEBUG_REDRAW
-      DEBUG_PRINTF("frame=%p %dx%d+%d+%d\n",
-          this,
-          rc.right - rc.left, rc.bottom - rc.top, rc.left, rc.top);
-     #endif
-
-     rc.top += m_cyTabBand;
-     rc.bottom = rc.top + k_edge_size;
-
-     {
-       auto const color = static_cast<COLORREF>(
-          ::SendMessage(m_hwndTabBand, WM_USER, 0, 0));
-
-        auto const hBrush = ::CreateSolidBrush(color);
-
-        ::FillRect(hdc, &rc, hBrush);
-        ::DeleteObject(hBrush);
-     }
-  }
-
-  {
-    RECT rc;
-    GetPaneRect(&rc);
-    rc.top -= k_edge_size;
-    rc.left -= k_edge_size;
-    rc.right += k_edge_size;
-    rc.bottom +=  k_edge_size;
-    ::DrawEdge(hdc, &rc, EDGE_SUNKEN, BF_RECT);
-  }
-#endif //USE_TABBAND_EDGE
 }
 
 /// <summary>

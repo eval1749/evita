@@ -130,7 +130,6 @@ Frame::Frame(views::WindowId window_id)
     : views::Window(ui::NativeWindow::Create(*this), window_id),
       gfx_(new gfx::Graphics()),
       m_cyTabBand(0),
-      m_hwndTabBand(nullptr),
       message_view_(new views::MessageView()),
       title_bar_(new views::TitleBar()),
       tab_strip_(new views::TabStrip(this)),
@@ -164,7 +163,6 @@ void Frame::AddPane(Pane* const pane) {
 void Frame::AddTab(Pane* const pane) {
   ASSERT(is_realized());
   ASSERT(pane->is_realized());
-  ASSERT(m_hwndTabBand);
   TCITEM tab_item;
   tab_item.mask = TCIF_TEXT | TCIF_PARAM;
   auto const name = pane->GetTitle();
@@ -307,7 +305,6 @@ void Frame::DidCreateNativeWindow() {
 
   Widget::DidCreateNativeWindow();
 
-  m_hwndTabBand = tab_strip_->AssociatedHwnd();
   tab_strip_->SetIconList(views::IconCache::instance()->image_list());
 
   for (auto& pane: m_oPanes) {

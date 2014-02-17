@@ -55,7 +55,6 @@ class Frame final : public views::Window,
 
   private: std::unique_ptr<gfx::Graphics> gfx_;
   private: int m_cyTabBand;
-  private: HWND m_hwndTabBand;
   private: Panes m_oPanes;
   private: std::unique_ptr<views::MessageView> message_view_;
   private: views::TabStrip* tab_strip_;

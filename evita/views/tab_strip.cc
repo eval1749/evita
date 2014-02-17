@@ -1097,11 +1097,10 @@ class TabStrip::TabStripImpl : public Element {
   // [I]
   public: void DidCreateNativeWindow();
 
-  // onDeleteItem
-  private: bool OnDeleteItem(int iDeleteItem) {
+  public: void DeleteTab(int iDeleteItem) {
     auto const pItem = findItem(iDeleteItem);
     if (!pItem) {
-      return FALSE;
+      return;
     }
 
     bool fSelChanged = m_pSelected == pItem;
@@ -1156,8 +1155,6 @@ class TabStrip::TabStripImpl : public Element {
         m_pSelected->SetState(Element::State_Selected);
       DidChangeTabSelection();
     }
-
-    return TRUE;
   }
 
   // onInsertItem
@@ -1645,6 +1642,10 @@ TabStrip::TabStrip(TabStripDelegate* delegate)
 TabStrip::~TabStrip() {
 }
 
+void TabStrip::DeleteTab(int tab_index) {
+  impl_->DeleteTab(tab_index);
+}
+
 Size TabStrip::GetPreferreSize() const {
   auto const font_height = 16;  // must be >= 16 (Small Icon Height)
   return Size(font_height * 40, 2 + 7 + font_height + 5 + 2);
@@ -1701,9 +1702,6 @@ LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
     //
     // TabBand messages
     //
-    case TCM_DELETEITEM:
-      return impl_->OnDeleteItem(static_cast<int>(wParam));
-
     case TCM_GETCURFOCUS:
       return impl_->m_iFocus;
 

@@ -910,7 +910,7 @@ void Frame::WillRemoveChildWidget(const Widget& widget) {
     return;
   auto const tab_index = getTabFromPane(pane);
   DCHECK_GE(tab_index, 0);
-  TabCtrl_DeleteItem(m_hwndTabBand, tab_index);
+  tab_strip_->DeleteTab(tab_index);
 }
 
 // views::TabStripDelegate

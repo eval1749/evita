@@ -191,7 +191,8 @@
       new_text = caseReplace(new_text, range.analyzeCase());
     range.text = new_text;
     selection.startIsActive = false;
-    window.status = Editor.localizeText(Strings.IDS_REPLACED, {count: 1});
+    window.status = Editor.localizeText(Strings.IDS_REPLACED,
+                                        {count: 1, text: regexp.source});
     window.makeSelectionVisible();
     return regexp;
   }
@@ -233,7 +234,8 @@
     if (num_replaced) {
       selection.startIsActive = false;
       window.status = Editor.localizeText(Strings.IDS_REPLACED,
-                                          {text: regexp.source});
+                                          {count: num_replaced,
+                                           text: regexp.source});
       window.makeSelectionVisible();
     } else {
       window.status = Editor.localizeText(Strings.IDS_FIND_NOT_FOUND,

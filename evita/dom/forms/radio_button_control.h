@@ -15,11 +15,12 @@ class RadioButtonControl
 
   private: bool checked_;
 
-  public: RadioButtonControl(FormResourceId control_id);
+  public: RadioButtonControl(const base::string16& name,
+                             FormResourceId control_id);
   public: virtual ~RadioButtonControl();
 
   public: const bool checked() const { return checked_; }
-  public: void set_checked(bool checked) { checked_ = checked; }
+  public: void set_checked(bool checked);
 
   // EventTarget
   private: virtual bool DispatchEvent(Event* event) override;

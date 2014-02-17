@@ -257,15 +257,15 @@
     form.add(new CheckboxControl(ControlId.CASE));
     form.add(new CheckboxControl(ControlId.PRESERVE));
 
-    form.add(new RadioButtonControl(ControlId.EXACT));
-    form.add(new RadioButtonControl(ControlId.WORD));
-    form.add(new RadioButtonControl(ControlId.REGEX));
+    form.add(new RadioButtonControl('use', ControlId.EXACT));
+    form.add(new RadioButtonControl('use', ControlId.WORD));
+    form.add(new RadioButtonControl('use', ControlId.REGEX));
 
-    form.add(new RadioButtonControl(ControlId.UP));
-    form.add(new RadioButtonControl(ControlId.DOWN));
+    form.add(new RadioButtonControl('direction', ControlId.UP));
+    form.add(new RadioButtonControl('direction', ControlId.DOWN));
 
-    form.add(new RadioButtonControl(ControlId.WHOLE_FILE));
-    form.add(new RadioButtonControl(ControlId.SELECTION));
+    form.add(new RadioButtonControl('where', ControlId.WHOLE_FILE));
+    form.add(new RadioButtonControl('where', ControlId.SELECTION));
 
     form.add(new ButtonControl(ControlId.NEXT));
     form.add(new ButtonControl(ControlId.PREVIOUS));

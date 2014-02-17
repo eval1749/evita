@@ -5,6 +5,7 @@
 #include "evita/dom/forms/radio_button_control.h"
 
 #include "evita/dom/events/form_event.h"
+#include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
@@ -33,8 +34,8 @@ class RadioButtonControlClass :
   }
 
   private: static RadioButtonControl* NewRadioButtonControl(
-      FormResourceId control_id) {
-    return new RadioButtonControl(control_id);
+      const base::string16& name, FormResourceId control_id) {
+    return new RadioButtonControl(name, control_id);
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -54,19 +55,36 @@ class RadioButtonControlClass :
 //
 DEFINE_SCRIPTABLE_OBJECT(RadioButtonControl, RadioButtonControlClass);
 
-RadioButtonControl::RadioButtonControl(FormResourceId control_id)
-    : ScriptableBase(control_id), checked_(false) {
+RadioButtonControl::RadioButtonControl(const base::string16& name,
+                                       FormResourceId control_id)
+    : ScriptableBase(control_id, name), checked_(false) {
 }
 
 RadioButtonControl::~RadioButtonControl() {
 }
 
+void RadioButtonControl::set_checked(bool checked) {
+  if (!form() || !checked) {
+    checked_ = checked;
+    return;
+  }
+
+  for (auto control : form()->controls()) {
+    auto const radio_button = control->as<RadioButtonControl>();
+    if (radio_button && radio_button->name() == name())
+      radio_button->checked_ = false;
+  }
+
+  checked_ = true;
+}
+
+// EventTarget
 bool RadioButtonControl::DispatchEvent(Event* event) {
   CR_DEFINE_STATIC_LOCAL(base::string16, kChangeEvent, (L"change"));
 
   if (auto const form_event = event->as<FormEvent>()) {
     if (event->type() == kChangeEvent)
-      checked_ = !form_event->data().empty();
+      set_checked(true);
   }
 
   return FormControl::DispatchEvent(event);

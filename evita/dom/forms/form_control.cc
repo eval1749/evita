@@ -3,6 +3,7 @@
 
 #include "evita/dom/forms/form_control.h"
 
+#include "evita/dom/forms/form.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/converter.h"
@@ -26,7 +27,9 @@ class FormControlClass :
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetProperty("controlId", &FormControl::control_id);
+        .SetProperty("controlId", &FormControl::control_id)
+        .SetProperty("form", &FormControl::form)
+        .SetProperty("name", &FormControl::name);
   }
 
   DISALLOW_COPY_AND_ASSIGN(FormControlClass);
@@ -39,8 +42,12 @@ class FormControlClass :
 //
 DEFINE_SCRIPTABLE_OBJECT(FormControl, FormControlClass);
 
+FormControl::FormControl(FormResourceId control_id, const base::string16& name)
+    : control_id_(control_id), name_(name) {
+}
+
 FormControl::FormControl(FormResourceId control_id)
-    : control_id_(control_id) {
+    : FormControl(control_id, base::string16()) {
 }
 
 FormControl::FormControl() : FormControl(kInvalidFormResourceId) {

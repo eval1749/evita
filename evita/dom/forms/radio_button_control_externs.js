@@ -5,9 +5,10 @@
 /**
  * @constructor
  * @extends {FormControl}
+ * @param {string} name
  * @param {number} control_id
  */
-var RadioButtonControl = function(control_id) {};
+var RadioButtonControl = function(name, control_id) {};
 
 /** @type {boolean} */
 RadioButtonControl.prototype.checked;

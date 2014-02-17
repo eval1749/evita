@@ -63,6 +63,7 @@ Form::~Form() {
 
 void Form::AddFormControl(FormControl* control) {
   controls_.push_back(control);
+  control->form_ = this;
 }
 
 void Form::Realize() {

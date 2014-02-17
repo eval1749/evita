@@ -144,6 +144,7 @@ class Frame final : public views::Window,
   private: virtual void WillRemoveChildWidget(const Widget& widget) override;
 
   // views::TabStripDelegate
+  private: virtual void DidClickTabCloseButton(int tab_index) override;
   private: virtual void DidChangeTabSelection(int new_selected_index) override;
 
   DISALLOW_COPY_AND_ASSIGN(Frame);

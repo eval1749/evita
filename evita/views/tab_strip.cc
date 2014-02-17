@@ -1258,7 +1258,7 @@ class TabStrip::TabStripImpl : public Element {
 
       if (pElement->Is<CloseBox>()) {
         if (auto const item = pElement->GetParent()->DynamicCast<Item>())
-          sendNotify(TABBAND_NOTIFY_CLICK_CLOSE_BUTTON, item->m_iItem);
+          delegate_->DidClickTabCloseButton(item->m_iItem);
         return;
       }
 
@@ -1536,27 +1536,6 @@ class TabStrip::TabStripImpl : public Element {
     }
 
     return m_pSelected ? m_pSelected->m_iItem : -1;
-  }
-
-  // sendNotify
-  private: LRESULT sendNotify(uint const nCode, int tab_index = 0) {
-    auto const hwndParent = ::GetParent(m_hwnd);
-
-    if (!hwndParent) {
-      return TRUE;
-    }
-
-    TabBandNotifyData oNotify;
-    oNotify.code = nCode;
-    oNotify.hwndFrom = m_hwnd;
-    oNotify.idFrom = static_cast<uint>(::GetDlgCtrlID(m_hwnd));
-    oNotify.tab_index_ = tab_index;
-
-    return ::SendMessage(
-      hwndParent,
-      WM_NOTIFY,
-      oNotify.idFrom,
-      reinterpret_cast<LPARAM>(&oNotify));
   }
 
   private: void stopDrag() {

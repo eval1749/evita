@@ -9,16 +9,6 @@
 
 #include "evita/ui/widget.h"
 
-#define TABBAND_NOTIFY_CLICK_CLOSE_BUTTON (TCN_LAST - 1)
-
-struct TabBandNotifyData : NMHDR {
-  int tab_index_;
-  static TabBandNotifyData* FromNmhdr(NMHDR* nmhdr) {
-    #pragma warning(suppress: 4946)
-    return reinterpret_cast<TabBandNotifyData*>(nmhdr);
-  }
-};
-
 const char16 TabBand__TabDragMsgStr[] = L"Evita.TabBand.TabDrag";
 
 namespace ui {

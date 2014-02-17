@@ -658,24 +658,6 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
           p->lpszText = const_cast<LPWSTR>(tooltip_.c_str());
           return 0;
       }
-
-      if (pNotify->idFrom == tab_strip_->child_window_id()) {
-        switch (pNotify->code) {
-          case TABBAND_NOTIFY_CLICK_CLOSE_BUTTON: {
-            if (!HasMultiplePanes()) {
-              Application::instance()->view_event_handler()->QueryClose(
-                  window_id());
-              break;
-            }
-            auto const tab_index = TabBandNotifyData::FromNmhdr(
-                  pNotify)->tab_index_;
-            if (auto const pPane = getPaneFromTab(tab_index))
-              pPane->DestroyWidget();
-            break;
-          }
-        }
-        return 0;
-      }
       return 0;
     }
 
@@ -929,4 +911,18 @@ void Frame::WillRemoveChildWidget(const Widget& widget) {
   auto const tab_index = getTabFromPane(pane);
   DCHECK_GE(tab_index, 0);
   TabCtrl_DeleteItem(m_hwndTabBand, tab_index);
+}
+
+// views::TabStripDelegate
+void Frame::DidClickTabCloseButton(int tab_index) {
+  if (!HasMultiplePanes()) {
+    Application::instance()->view_event_handler()->QueryClose(
+        window_id());
+    return;
+  }
+
+  if (auto const pane = getPaneFromTab(tab_index))
+    pane->DestroyWidget();
+
+  LOG(ERROR) << "There is no tab[" << tab_index << "]";
 }

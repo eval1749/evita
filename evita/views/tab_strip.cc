@@ -1651,6 +1651,10 @@ Size TabStrip::GetPreferreSize() const {
   return Size(font_height * 40, 2 + 7 + font_height + 5 + 2);
 }
 
+void TabStrip::SelectTab(int tab_index) {
+  impl_->SelectItem(tab_index);
+}
+
 void TabStrip::SetIconList(HIMAGELIST icon_list) {
   impl_->SetImageList(icon_list);
   impl_->Redraw();
@@ -1725,9 +1729,6 @@ LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
     case TCM_SETCURFOCUS:
       impl_->m_iFocus = static_cast<int>(wParam);
       return 0;
-
-    case TCM_SETCURSEL:
-      return impl_->SelectItem(static_cast<int>(wParam));
 
     case TCM_SETITEM:
       if (auto const item = impl_->findItem(static_cast<int>(wParam))) {

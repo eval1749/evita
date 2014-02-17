@@ -182,7 +182,7 @@ void Frame::AddTab(Pane* const pane) {
 
   auto const new_tab_item_index = TabCtrl_GetItemCount(m_hwndTabBand);
   TabCtrl_InsertItem(m_hwndTabBand, new_tab_item_index, &tab_item);
-  TabCtrl_SetCurSel(m_hwndTabBand, new_tab_item_index);
+  tab_strip_->SelectTab(new_tab_item_index);
 }
 
 void Frame::AddWindow(views::ContentWindow* window) {
@@ -217,7 +217,7 @@ void Frame::DidActivatePane(Pane* const pane) {
   #endif
 
   if (tab_index != selected_index)
-    TabCtrl_SetCurSel(m_hwndTabBand, tab_index);
+    tab_strip_->SelectTab(tab_index);
 }
 
 void Frame::DidAddChildWidget(const ui::Widget& widget) {

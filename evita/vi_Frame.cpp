@@ -857,7 +857,7 @@ void Frame::updateTitleBar() {
           tab_item.mask |= TCIF_IMAGE;
       }
     }
-    TabCtrl_SetItem(m_hwndTabBand, tab_index, &tab_item);
+    tab_strip_->SetTab(tab_index, &tab_item);
   }
 
   auto const window_title = title + L" - " + Application::instance()->title();

@@ -1668,6 +1668,14 @@ void TabStrip::SetIconList(HIMAGELIST icon_list) {
   impl_->Redraw();
 }
 
+void TabStrip::SetTab(int tab_index, const TCITEM* tab_data) {
+  auto const item = impl_->findItem(tab_index);
+  if (!item)
+    return;
+  if (item->SetItem(tab_data))
+    item->Invalidate(impl_->m_hwnd);
+}
+
 // ui::Widget
 void TabStrip::CreateNativeWindow() const {
   native_window()->CreateWindowEx(
@@ -1731,13 +1739,6 @@ LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
     case TCM_SETCURFOCUS:
       impl_->m_iFocus = static_cast<int>(wParam);
       return 0;
-
-    case TCM_SETITEM:
-      if (auto const item = impl_->findItem(static_cast<int>(wParam))) {
-        if (item->SetItem(reinterpret_cast<TCITEM*>(lParam)))
-          item->Invalidate(impl_->m_hwnd);
-      }
-      return FALSE;
 
     case TCM_SETMINTABWIDTH: {
       auto const iPrev = impl_->m_cxMinTab;

@@ -41,6 +41,7 @@ class TabStrip : public ui::Widget {
   public: void DeleteTab(int tab_index);
   public: void SelectTab(int tab_index);
   public: void SetIconList(HIMAGELIST icon_list);
+  public: void SetTab(int tab_index, const TCITEM* tab_data);
 
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;

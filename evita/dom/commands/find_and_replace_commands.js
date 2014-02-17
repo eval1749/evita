@@ -89,71 +89,6 @@
     throw 'Invalid Range.Case ' + string_case;
   }
 
-  /** @return {!Form} */
-  function ensureForm() {
-    if (form)
-      return form;
-    form = new Form();
-    // TODO(yosi) |global.findForm| is only for debugging purpose.
-    global.findForm = form;
-
-    form.add(new TextFieldControl(ControlId.WHAT));
-    form.add(new TextFieldControl(ControlId.WITH));
-
-    form.add(new CheckboxControl(ControlId.ALLDOCS));
-    form.add(new CheckboxControl(ControlId.CASE));
-    form.add(new CheckboxControl(ControlId.PRESERVE));
-
-    form.add(new RadioButtonControl(ControlId.EXACT));
-    form.add(new RadioButtonControl(ControlId.WORD));
-    form.add(new RadioButtonControl(ControlId.REGEX));
-
-    form.add(new RadioButtonControl(ControlId.UP));
-    form.add(new RadioButtonControl(ControlId.DOWN));
-
-    form.add(new RadioButtonControl(ControlId.WHOLE_FILE));
-    form.add(new RadioButtonControl(ControlId.SELECTION));
-
-    form.add(new ButtonControl(ControlId.NEXT));
-    form.add(new ButtonControl(ControlId.PREVIOUS));
-    form.add(new ButtonControl(ControlId.REPLACE));
-    form.add(new ButtonControl(ControlId.REPLACE_ALL));
-
-    form.get(ControlId.EXACT).checked = true;
-    form.get(ControlId.PRESERVE).checked = true;
-    form.get(ControlId.UP).checked = true;
-    form.get(ControlId.WHOLE_FILE).checked = true;
-
-    form.get(ControlId.NEXT).addEventListener('click', function() {
-      if (!Window.focus)
-        return;
-      doFind(/**@type{!Window}*/(Window.focus), /**@type{!Form}*/(form),
-             ControlId.NEXT);
-    });
-
-    form.get(ControlId.PREVIOUS).addEventListener('click', function() {
-      if (!Window.focus)
-        return;
-      doFind(/**@type{!Window}*/(Window.focus), /**@type{!Form}*/(form),
-             ControlId.PREVIOUS);
-    });
-
-    form.get(ControlId.REPLACE).addEventListener('click', function() {
-      if (!Window.focus)
-        return;
-      doReplaceOne(/**@type{!Window}*/(Window.focus), /**@type{!Form}*/(form));
-    });
-
-    form.get(ControlId.REPLACE_ALL).addEventListener('click', function() {
-      if (!Window.focus)
-        return;
-      doReplaceAll(/**@type{!Window}*/(Window.focus), /**@type{!Form}*/(form));
-    });
-
-    form.realize();
-    return form;
-  }
-
   /**
    * @param {!Window} window
    * @param {!Form} form
@@ -305,6 +240,71 @@
                                           {text: regexp.source});
     }
     return regexp;
+  }
+
+  /** @return {!Form} */
+  function ensureForm() {
+    if (form)
+      return form;
+    form = new Form();
+    // TODO(yosi) |global.findForm| is only for debugging purpose.
+    global.findForm = form;
+
+    form.add(new TextFieldControl(ControlId.WHAT));
+    form.add(new TextFieldControl(ControlId.WITH));
+
+    form.add(new CheckboxControl(ControlId.ALLDOCS));
+    form.add(new CheckboxControl(ControlId.CASE));
+    form.add(new CheckboxControl(ControlId.PRESERVE));
+
+    form.add(new RadioButtonControl(ControlId.EXACT));
+    form.add(new RadioButtonControl(ControlId.WORD));
+    form.add(new RadioButtonControl(ControlId.REGEX));
+
+    form.add(new RadioButtonControl(ControlId.UP));
+    form.add(new RadioButtonControl(ControlId.DOWN));
+
+    form.add(new RadioButtonControl(ControlId.WHOLE_FILE));
+    form.add(new RadioButtonControl(ControlId.SELECTION));
+
+    form.add(new ButtonControl(ControlId.NEXT));
+    form.add(new ButtonControl(ControlId.PREVIOUS));
+    form.add(new ButtonControl(ControlId.REPLACE));
+    form.add(new ButtonControl(ControlId.REPLACE_ALL));
+
+    form.get(ControlId.EXACT).checked = true;
+    form.get(ControlId.PRESERVE).checked = true;
+    form.get(ControlId.UP).checked = true;
+    form.get(ControlId.WHOLE_FILE).checked = true;
+
+    form.get(ControlId.NEXT).addEventListener('click', function() {
+      if (!Window.focus)
+        return;
+      doFind(/**@type{!Window}*/(Window.focus), /**@type{!Form}*/(form),
+             ControlId.NEXT);
+    });
+
+    form.get(ControlId.PREVIOUS).addEventListener('click', function() {
+      if (!Window.focus)
+        return;
+      doFind(/**@type{!Window}*/(Window.focus), /**@type{!Form}*/(form),
+             ControlId.PREVIOUS);
+    });
+
+    form.get(ControlId.REPLACE).addEventListener('click', function() {
+      if (!Window.focus)
+        return;
+      doReplaceOne(/**@type{!Window}*/(Window.focus), /**@type{!Form}*/(form));
+    });
+
+    form.get(ControlId.REPLACE_ALL).addEventListener('click', function() {
+      if (!Window.focus)
+        return;
+      doReplaceAll(/**@type{!Window}*/(Window.focus), /**@type{!Form}*/(form));
+    });
+
+    form.realize();
+    return form;
   }
 
   /**

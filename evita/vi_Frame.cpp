@@ -206,7 +206,7 @@ void Frame::DidActivatePane(Pane* const pane) {
   auto const tab_index = getTabFromPane(pane);
   if (tab_index < 0)
     return;
-  auto const selected_index = TabCtrl_GetCurSel(m_hwndTabBand);
+  auto const selected_index = tab_strip_->selected_index();
   #if DEBUG_FOCUS
    DEBUG_WIDGET_PRINTF("selected_index=%d"
                        " cur=" DEBUG_WIDGET_FORMAT ".focus=%d"

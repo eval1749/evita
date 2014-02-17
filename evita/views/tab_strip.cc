@@ -1642,6 +1642,10 @@ TabStrip::TabStrip(TabStripDelegate* delegate)
 TabStrip::~TabStrip() {
 }
 
+int TabStrip::selected_index() const {
+  return impl_->m_pSelected ? impl_->m_pSelected->m_iItem : -1;
+}
+
 void TabStrip::DeleteTab(int tab_index) {
   impl_->DeleteTab(tab_index);
 }
@@ -1708,9 +1712,6 @@ LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
     //
     case TCM_GETCURFOCUS:
       return impl_->m_iFocus;
-
-    case TCM_GETCURSEL:
-      return impl_->m_pSelected ? impl_->m_pSelected->m_iItem : -1;
 
     case TCM_GETIMAGELIST:
       return reinterpret_cast<LRESULT>(impl_->m_hImageList);

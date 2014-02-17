@@ -463,11 +463,10 @@ Pane* Frame::getPaneFromTab(int const index) const {
 }
 
 int Frame::getTabFromPane(Pane* const pane) const {
-  auto index = 0;
-  while (auto const present = getPaneAt(m_hwndTabBand, index)) {
-    if (present == pane)
-      return index;
-    ++index;
+  auto const num_tabs = TabCtrl_GetItemCount(m_hwndTabBand);
+  for (auto tab_index = 0; tab_index < num_tabs; ++tab_index) {
+    if (getPaneAt(m_hwndTabBand, tab_index) == pane)
+      return tab_index;
   }
   return -1;
 }

@@ -215,22 +215,24 @@
     }
     var case_preserve = form.get(ControlId.PRESERVE).checked;
     var num_replaced = 0;
-    while (!replace_range.collapsed) {
-      var matches = document.match_(regexp, replace_range.start,
-                                    replace_range.end);
-      if (!matches)
-        break;
-      ++num_replaced;
-      range.collapseTo(matches[0].start);
-      range.end = matches[0].end;
-      var new_text = form.get(ControlId.WITH).value;
-      if (!regexp.matchExact)
-        new_text = parseReplacement(document, new_text, matches);
-      if (case_preserve)
-        new_text = caseReplace(new_text, range.analyzeCase());
-      range.text = new_text;
-      replace_range.start = range.end;
-    }
+    document.undoGroup('replace all', function() {
+      while (!replace_range.collapsed) {
+        var matches = document.match_(regexp, replace_range.start,
+                                      replace_range.end);
+        if (!matches)
+          break;
+        ++num_replaced;
+        range.collapseTo(matches[0].start);
+        range.end = matches[0].end;
+        var new_text = form.get(ControlId.WITH).value;
+        if (!regexp.matchExact)
+          new_text = parseReplacement(document, new_text, matches);
+        if (case_preserve)
+          new_text = caseReplace(new_text, range.analyzeCase());
+        range.text = new_text;
+        replace_range.start = range.end;
+      }
+    });
     if (num_replaced) {
       selection.startIsActive = false;
       window.status = Editor.localizeText(Strings.IDS_REPLACED,

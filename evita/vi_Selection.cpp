@@ -6,23 +6,25 @@
 #include "base/strings/string16.h"
 #include "evita/editor/application.h"
 #include "evita/dom/buffer.h"
+#include "evita/text/range.h"
 #include "evita/vi_TextEditWindow.h"
 
-Selection::Selection(const text::Range& range)
-    : text::Range(range.GetBuffer(), range.GetStart(), range.GetEnd()),
-      m_fStartIsActive(false),
-      m_pBuffer(static_cast<Buffer*>(range.GetBuffer())),
+Selection::Selection(dom::Buffer* buffer, text::Range* range)
+    : m_fStartIsActive(false),
+      m_pBuffer(buffer),
+      m_pRange(range),
       m_pWindow(nullptr) {
-  m_pBuffer->InternalAddRange(this);
-  SetRange(range.GetStart(), range.GetEnd());
 }
 
 Selection::~Selection() {
 }
 
-void Selection::Collapse(CollapseWhich eCollapse) {
-  Range::Collapse(eCollapse);
-  m_fStartIsActive = eCollapse == Collapse_Start;
+Posn Selection::GetEnd() const {
+  return m_pRange->GetEnd();
+}
+
+Posn Selection::GetStart() const {
+  return m_pRange->GetStart();
 }
 
 void Selection::SetStartIsActive(bool new_start_is_active) {

@@ -22,9 +22,8 @@ class TextWindow;
 class TextSelection : public v8_glue::Scriptable<TextSelection, Selection> {
   DECLARE_SCRIPTABLE_OBJECT(TextSelection);
 
-  // TODO(yosi): We should remove ::TextSelection.
-  private: ::Selection* view_selection_;
   private: gc::Member<Range> range_;
+  private: ::Selection* view_selection_;
 
   public: TextSelection(TextWindow* text_window, Range* range);
   public: virtual ~TextSelection();

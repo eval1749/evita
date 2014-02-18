@@ -77,14 +77,8 @@ class RangeClass : public v8_glue::WrapperInfo {
 DEFINE_SCRIPTABLE_OBJECT(Range, RangeClass);
 
 Range::Range(Document* document, text::Posn start, text::Posn end)
-    : Range(document, new text::Range(document->buffer(), start, end)) {
-}
-
-Range::Range(Document* document, text::Range* range)
     : document_(document),
-      range_(range) {
-  DCHECK_EQ(document->buffer(), range->GetBuffer());
-  document_->DidCreateRange(this);
+      range_(new text::Range(document->buffer(), start, end)) {
 }
 
 Range::~Range() {

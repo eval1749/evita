@@ -5,6 +5,7 @@
 
 #include "base/logging.h"
 #include "evita/editor/application.h"
+#include "evita/text/range.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_Selection.h"
@@ -142,7 +143,7 @@ void FindDialogBox::UpdateUI(bool fActivate) {
  // If active selection covers mutliple lines, Search/Replace can be
  // limited in selection.
   if (auto const selection = GetActiveSelection()) {
-    auto const fHasNewline = selection->FindFirstChar('\n') >= 0;
+    auto const fHasNewline = selection->range()->FindFirstChar('\n') >= 0;
     ::EnableWindow(GetDlgItem(IDC_FIND_SELECTION), fHasNewline);
     ::EnableWindow(GetDlgItem(IDC_FIND_WHOLE_FILE), fHasNewline);
 

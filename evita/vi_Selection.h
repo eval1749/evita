@@ -3,10 +3,7 @@
 #if !defined(INCLUDE_listener_winapp_visual_selection_h)
 #define INCLUDE_listener_winapp_visual_selection_h
 
-#include "base/strings/string16.h"
-#include "evita/text/range.h"
 #include "evita/ed_Style.h"
-#include "evita/gfx_base.h"
 
 class TextEditWindow;
 
@@ -14,7 +11,9 @@ namespace dom {
 class Buffer;
 }
 
-using Buffer = dom::Buffer;
+namespace text {
+class Range;
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -24,30 +23,30 @@ using Buffer = dom::Buffer;
 // A line number which selection belongs before reloading. We try to
 // move selection to this line after reloading.
 //
-class Selection : public text::Range {
-  private: typedef text::Range Range;
-
+class Selection {
   private: Color m_crColor;
   private: Color m_crBackground;
   private: bool m_fStartIsActive;
-  private: Buffer* m_pBuffer;
+  private: dom::Buffer* m_pBuffer;
+  private: text::Range* m_pRange;
   private: TextEditWindow* m_pWindow;
 
-  public: explicit Selection(const text::Range& range);
+  public: Selection(dom::Buffer* buffer, text::Range* range);
   public: ~Selection();
+
+  public: text::Range* range() const { return m_pRange; }
 
   public: void set_window(TextEditWindow* window) {
     m_pWindow = window;
   }
 
-  // [C]
-  public: void Collapse(CollapseWhich = Collapse_Start);
-
   // [G]
   public: Color GetBackground() const { return m_crBackground; }
-  public: Buffer* GetBuffer() const { return m_pBuffer; }
+  public: dom::Buffer* GetBuffer() const { return m_pBuffer; }
+  public: Posn GetEnd() const;
   public: Color GetColor() const { return m_crColor; }
-  public: TextEditWindow* GetWindow() const { return m_pWindow; }
+  public: Posn GetStart() const;
+  private: TextEditWindow* GetWindow() const { return m_pWindow; }
 
   // [I]
   public: bool IsStartActive() const { return m_fStartIsActive; }

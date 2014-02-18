@@ -59,8 +59,9 @@ DEFINE_SCRIPTABLE_OBJECT(TextSelection, TextSelectionClass);
 
 TextSelection::TextSelection(TextWindow* text_window, Range* range)
     : ScriptableBase(text_window, range->document()),
-      view_selection_(new ::Selection(*range->text_range())),
-      range_(new Range(range->document(), view_selection_)) {
+      range_(new Range(range->document(), range->start(), range->end())),
+      view_selection_(new ::Selection(range->document()->buffer(),
+                                      range_->text_range())) {
 }
 
 TextSelection::~TextSelection() {

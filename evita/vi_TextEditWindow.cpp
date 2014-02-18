@@ -32,6 +32,7 @@
 #include "evita/dom/range.h"
 #include "evita/dom/selection.h"
 #include "evita/dom/text_window.h"
+#include "evita/text/range.h"
 #include "evita/ui/events/event.h"
 #include "evita/views/icon_cache.h"
 #include "evita/vi_Caret.h"
@@ -244,7 +245,7 @@ void TextEditWindow::format(const gfx::Graphics& gfx, Posn lStart) {
 }
 
 Buffer* TextEditWindow::GetBuffer() const {
-  return selection_->GetBuffer();
+  return GetSelection()->GetBuffer();
 }
 
 HCURSOR TextEditWindow::GetCursorAt(const Point&) const {
@@ -687,8 +688,8 @@ static std::vector<base::string16> ComposeStatusBarTexts(
 
   // FIXME 2007-07-18 yosi We should use lazy evaluation object for
   // computing line number of column or cache.
-  Selection::Information oInfo;
-  selection->GetInformation(&oInfo);
+  text::Range::Information oInfo;
+  selection->range()->GetInformation(&oInfo);
 
   return {
     buffer->IsNotReady() ? L"Busy" : has_focus ? L"Ready" : L"",
@@ -753,7 +754,8 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
     return;
 
   UI_ASSERT_DOM_LOCKED();
-  text::UndoBlock oUndo(GetSelection(), L"IME");
+  auto const range = GetSelection()->range();
+  text::UndoBlock oUndo(range, L"IME");
 
   char16 rgwch[1024];
   // If IME has result string, we can insert it into buffer.
@@ -761,8 +763,8 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
     // Remove previous composition string. If user inputs "Space",
     // IME set GCS_RESULTSTR without composition.
     if (m_lImeStart != m_lImeEnd) {
-      GetSelection()->SetRange(m_lImeStart, m_lImeEnd);
-      GetSelection()->SetText(base::string16());
+      range->SetRange(m_lImeStart, m_lImeEnd);
+      range->SetText(base::string16());
     }
 
     // Get result string
@@ -771,8 +773,9 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
 
     // Insert result string into buffer
     if (cwch >= 1) {
-      GetSelection()->SetText(base::string16(rgwch, cwch));
-      GetSelection()->Collapse(Collapse_End);
+      range->SetText(base::string16(rgwch, cwch));
+      range->Collapse(Collapse_End);
+      GetSelection()->SetStartIsActive(false);
       m_lImeEnd = GetSelection()->GetEnd();
       m_lImeStart = m_lImeEnd;
     }
@@ -782,8 +785,8 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
   if ((lParam & GCS_COMPSTRATTR) == GCS_COMPSTRATTR) {
     // Remove previous composition string
     if (m_lImeStart != m_lImeEnd) {
-        GetSelection()->SetRange(m_lImeStart, m_lImeEnd);
-        GetSelection()->SetText(base::string16());
+        range->SetRange(m_lImeStart, m_lImeEnd);
+        range->SetText(base::string16());
         m_lImeEnd = m_lImeStart;
     }
 
@@ -808,10 +811,11 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
     ::ImmGetCompositionString(imc, GCS_COMPCLAUSE, rgnClause,
                               sizeof(rgnClause));
 
-    GetSelection()->SetText(base::string16(rgwch, cwch));
-    GetSelection()->Collapse(Collapse_End);
+    range->SetText(base::string16(rgwch, cwch));
+    range->Collapse(Collapse_End);
+    GetSelection()->SetStartIsActive(false);
     m_lImeEnd = GetSelection()->GetEnd();
-    GetSelection()->SetRange(m_lImeStart + lCursor, m_lImeStart + lCursor);
+    range->SetRange(m_lImeStart + lCursor, m_lImeStart + lCursor);
 
     if (!g_pImeStyleInput.m_rgfMask) {
           // Converted[0]
@@ -926,8 +930,8 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
       m_fImeTarget = false;
 
       // Remove previous composition string
-      GetSelection()->SetRange(m_lImeStart, m_lImeEnd);
-      GetSelection()->SetText(base::string16());
+      range->SetRange(m_lImeStart, m_lImeEnd);
+      range->SetText(base::string16());
 
       // if (m_fCancelButLeave)
       {
@@ -938,7 +942,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
               sizeof(rgwch)) / sizeof(char16);
           if (cwch >= 1)
           {
-              GetSelection()->SetText(base::string16(rgwch, cwch));
+              range->SetText(base::string16(rgwch, cwch));
           }
       }
 

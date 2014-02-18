@@ -28,8 +28,6 @@ class Buffer;
 class TextWindow;
 }
 
-using Buffer = dom::Buffer;
-
 namespace ui {
 class KeyboardEvent;
 class MouseWheelEvent;
@@ -122,7 +120,7 @@ class TextEditWindow
   private: void format(const gfx::Graphics&, Posn);
 
   // [G]
-  public: Buffer* GetBuffer() const;
+  public: dom::Buffer* GetBuffer() const;
   private: virtual HCURSOR GetCursorAt(const Point&) const override;
   public: HWND GetScrollBar(int which) const;
   // TODO(yosi): We should not expose TextEdintWindow::GetTitle(). We export

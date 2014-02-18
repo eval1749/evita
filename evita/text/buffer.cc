@@ -184,66 +184,17 @@ Posn Buffer::ComputeEndOf(Unit eUnit, Posn lPosn) const
     return lPosn;
 } // Buffer::ComputeEndOf
 
-//////////////////////////////////////////////////////////////////////
-//
-// Buffer::ComputeStartOf
-//
-Posn Buffer::ComputeStartOf(Unit eUnit, Posn lPosn) const
-{
-    ASSERT(IsValidPosn(lPosn));
-
-    switch (eUnit)
-    {
-    case Unit_Buffer:
-        lPosn = GetStart();
-        break;
-
-    case Unit_Line:
-        while (lPosn > 0)
-        {
-            lPosn -= 1;
-
-            if (0x0A == GetCharAt(lPosn))
-            {
-                lPosn += 1;
-                break;
-            } // if
-        } // while
-        break;
-
-    case Unit_Word:
-        if (lPosn <= 0)
-        {
-            lPosn = 0;
-        }
-        else
-        {
-            int iClass1 = getCharClass(GetCharAt(lPosn));
-            if (iClass1 & C1_BLANK)
-            {
-                // We are on whiespace.
-                return lPosn;
-            } // if
-
-            // Move to start of word.
-            while (lPosn > 0)
-            {
-                lPosn -= 1;
-                int iClass2 = getCharClass(GetCharAt(lPosn));
-                if (iClass1 != iClass2)
-                {
-                    lPosn += 1; // back to previous character.
-                    break;
-                } // if
-            } // while
-        } // if
-        break;
-
-    default:
-        CAN_NOT_HAPPEN();
-    } // switch eUnit
-    return lPosn;
-} // Buffer::ComputeStartOf
+Posn Buffer::ComputeStartOfLine(Posn lPosn) const {
+  DCHECK(IsValidPosn(lPosn));
+  while (lPosn > 0) {
+    --lPosn;
+    if (0x0A == GetCharAt(lPosn)) {
+      lPosn += 1;
+      break;
+    }
+  }
+  return lPosn;
+}
 
 #if 0
 //////////////////////////////////////////////////////////////////////

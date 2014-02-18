@@ -275,7 +275,7 @@ void Range::GetInformation(Information* out_oInfo, Count n) const
 
     out_oInfo->m_fLineNum = k > 0;
 
-    Posn lLineStart = m_pBuffer->ComputeStartOf(Unit_Line, m_lStart);
+    Posn lLineStart = m_pBuffer->ComputeStartOfLine(m_lStart);
     out_oInfo->m_fColumn = (m_lStart - lLineStart) < n;
     out_oInfo->m_lColumn = m_lStart - lLineStart;
 } // Range::GetInformation

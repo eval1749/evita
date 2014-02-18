@@ -1615,7 +1615,7 @@ bool Page::ScrollDown(const gfx::Graphics& gfx) {
   }
 
   auto const lGoal  = m_lStart - 1;
-  auto const lStart = m_pBuffer->ComputeStartOf(Unit_Line, lGoal);
+  auto const lStart = m_pBuffer->ComputeStartOfLine(lGoal);
   Formatter formatter(gfx, m_oFormatBuf.GetHeap(), this, lStart);
 
   do {
@@ -1664,7 +1664,7 @@ bool Page::ScrollToPosn(const gfx::Graphics& gfx, Posn lPosn) {
   for (int k = 0; k < cLines2; k++) {
     if (!lStart)
       break;
-    lStart = m_pBuffer->ComputeStartOf(Unit_Line, lStart - 1);
+    lStart = m_pBuffer->ComputeStartOfLine(lStart - 1);
   }
 
   #if DEBUG_FORMAT

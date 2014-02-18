@@ -165,10 +165,10 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
         return 1;
       }
       return 0;
-
-    default:
-      return GetBuffer()->ComputeMotion(eUnit, n, inout_lPosn);
   }
+
+  LOG(ERROR) << "Unsupported unit " << eUnit;
+  return 0;
 }
 
 void TextEditWindow::DidChangeHierarchy() {

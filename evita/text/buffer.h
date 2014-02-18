@@ -123,21 +123,15 @@ class Buffer : public BufferCore, public FileFeatures {
   public: bool CanRedo() const;
   public: bool CanUndo() const;
   public: void ClearUndo();
-  public: Posn ComputeEndOfLine(Posn) const;
+  public: Posn ComputeEndOfLine(Posn offset) const;
   public: Posn ComputeStartOfLine(Posn offset) const;
-  public: Range* CreateRange(Posn lStart = 0, Posn lEnd = 0);
-  public: Range* CreateRange(Range*);
+  public: Range* CreateRange(Posn lStart, Posn lEnd);
 
   // [D]
   private: void destroyObject(void* pv) { ::HeapFree(m_hObjHeap, 0, pv); }
   public: Count Delete(Posn, Posn);
 
   // [E]
-  public: bool EnableUndo(bool f) {
-    bool f0 = f;
-    m_fUndo = f;
-    return f0;
-  }
   public: void EndUndoGroup(const base::string16& name);
 
   // [G]
@@ -150,15 +144,12 @@ class Buffer : public BufferCore, public FileFeatures {
   public: Posn GetStart() const { return 0; }
   public: const StyleValues* GetStyleAt(Posn) const;
   public: UndoManager* GetUndo() const { return m_pUndo; }
-  public: size_t GetUndoSize() const;
 
   // [I]
   public: Count IncCharTick(int n) { return m_nCharTick += n; }
-  public: Count Insert(Posn, char16, Count);
   public: Count Insert(Posn, const char16*, Count);
   public: Range* InternalAddRange(Range*);
   public: void InternalDelete(Posn, Posn);
-  public: void InternalInsert(Posn, char16, Count);
   public: void InternalInsert(Posn, const char16*, Count);
   public: void InternalRemoveRange(Range*);
   public: bool IsModified() const { return m_nCharTick != m_nSaveTick; }
@@ -182,7 +173,6 @@ class Buffer : public BufferCore, public FileFeatures {
   public: Posn Redo(Posn, Count = 1);
 
   // [S]
-  public: bool SetCharAt(Posn, char16);
   public: void SetFile(const base::string16& filename,
                        base::Time last_write_time);
 
@@ -293,16 +283,6 @@ class Buffer : public BufferCore, public FileFeatures {
     public: Posn GoTo(Posn lPosn) { return m_lPosn = lPosn; }
     public: void Next() { ASSERT(!AtEnd()); m_lPosn += 1; }
     public: void Prev() { m_lPosn -= 1; }
-
-    public: char16 Set(char16 wch) { 
-      m_pBuffer->SetCharAt(m_lPosn, wch); 
-      return wch;
-    }
-
-    public: void SetRange(Posn lStart, Posn lEnd) {
-      m_lPosn = lStart;
-      m_lEnd = lEnd;
-    }
 
     public: void SyncEnd() { m_lEnd = m_pBuffer->GetEnd(); }
   };

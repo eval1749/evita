@@ -197,30 +197,6 @@ base::string16 BufferCore::GetText(Posn start, Posn end) const {
 //
 // BufferCore::insert
 //
-void BufferCore::insert(Posn lPosn, char16 wch, Count n)
-{
-    ASSERT(IsValidPosn(lPosn));
-
-    extend(lPosn, n);
-
-    {
-        char16* pwchStart = m_pwch + lPosn;
-        char16* pwchEnd   = pwchStart + n;
-        for (char16* pwch = pwchStart; pwch < pwchEnd; pwch++)
-        {
-            *pwch = wch;
-        } // for pwch
-    }
-
-    m_lGapStart += n;
-    m_lEnd += n;
-} // BufferCore::insert
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// BufferCore::insert
-//
 // Description:
 //  Inserts specified string (pwch, n) before lPosn.
 //

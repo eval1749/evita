@@ -131,7 +131,6 @@ class TextEditWindow
   public: Posn GetEnd();
   public: Selection* GetSelection() const { return &*selection_; }
   public: Posn GetStart();
-  public: size_t GetUndoSize() const;
 
   // [L]
   public: int LargeScroll(int, int, bool = true);

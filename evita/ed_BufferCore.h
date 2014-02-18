@@ -63,7 +63,6 @@ class BufferCore
     public: base::string16 GetText(Posn start, Posn end) const;
 
     // [I]
-    protected: void insert(Posn, char16, Count);
     protected: void insert(Posn, const char16*, Count);
 
     public: bool IsValidPosn(Posn p) const

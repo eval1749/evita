@@ -94,6 +94,18 @@ Posn Buffer::ComputeEndOfLine(Posn lPosn) const {
   return lPosn;
 }
 
+Posn Buffer::ComputeStartOfLine(Posn lPosn) const {
+  DCHECK(IsValidPosn(lPosn));
+  while (lPosn > 0) {
+    --lPosn;
+    if (0x0A == GetCharAt(lPosn)) {
+      lPosn += 1;
+      break;
+    }
+  }
+  return lPosn;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // Buffer::CreateRange
@@ -108,17 +120,6 @@ Range* Buffer::CreateRange(Posn lStart, Posn lEnd)
 
     return InternalAddRange(pRange);
 } // Buffer::CreateRange
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// Buffer::CreateRange
-//
-Range* Buffer::CreateRange(Range* pRange)
-{
-    return CreateRange(pRange->GetStart(), pRange->GetEnd());
-} // Buffer::CreateRange
-
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -163,46 +164,6 @@ const StyleValues* Buffer::GetStyleAt(Posn lPosn) const
 {
     return GetIntervalAt(lPosn)->GetStyle();
 } // Buffer::GetStyleAt
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// Buffer::GetUndoSize
-//
-size_t Buffer::GetUndoSize() const
-{
-    if (NULL == m_pUndo) return 0;
-    return m_pUndo->GetSize();
-} // Buffer::GetUndoSize
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// Buffer::Insert
-//
-Count Buffer::Insert(Posn lPosn, char16 wch, Count n)
-{
-    ASSERT(IsValidPosn(lPosn));
-
-    if (IsReadOnly()) return 0;
-    if (IsNotReady()) return 0;
-
-    if (n <= 0) return 0;
-    lPosn = std::min(lPosn, GetEnd());
-
-    InternalInsert(lPosn, wch, n);
-
-    onChange();
-
-    if (m_fUndo && NULL != m_pUndo)
-    {
-        m_pUndo->CheckPoint();
-        m_pUndo->RecordInsert(lPosn, lPosn + n);
-    } // if
-
-    return n;
-} // Buffer::Insert
-
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -311,19 +272,6 @@ void Buffer::InternalDelete(Posn lStart, Posn lEnd)
     m_nModfTick += 1;
     relocate(lStart, -n);
 } // Buffer::InternalDelete
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// Buffer::InternalInsert
-//
-void Buffer::InternalInsert(Posn lPosn, char16 wch, Count n)
-{
-    insert(lPosn, wch, n);
-    m_nModfTick += 1;
-    relocate(lPosn, n);
-} // Buffer::InternalInsert
-
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -546,22 +494,6 @@ void Buffer::relocate(Posn lPosn, Count iDelta)
         } // for each tracker
     }
 } // Buffer::relocate
-
-/// <summary>
-///  Replace character at specified position.
-/// </summary>
-/// <param name="lPosn">A position to replace.</param>
-/// <param name="wch">A character to be replaced.</param>
-/// <returns>True if successfully replaced.</returns>
-bool Buffer::SetCharAt(Posn lPosn, char16 wch)
-{
-    if (1 != Insert(lPosn, wch, 1))
-    {
-        return false;
-    }
-    
-    return 1 == Delete(lPosn + 1, lPosn + 2);
-} // Buffer::SetCharAt
 
 /// <summary>
 ///  Set editting mode.

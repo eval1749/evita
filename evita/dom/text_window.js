@@ -129,8 +129,7 @@ global.TextWindow.prototype.clone = function() {
     if (document.filename == '')
       return;
     if (document.obsolete == Document.Obsolete.CHECKING) {
-      Editor.messageBox(window, 'Checking file status...',
-                        MessageBox.ICONINFORMATION);
+      window.status = 'Checking file status...';
       return;
     }
     if (document.obsolete == Document.Obsolete.YES) {
@@ -145,7 +144,7 @@ global.TextWindow.prototype.clone = function() {
                             document.lastWriteTime.valueOf() ?
           Document.Obsolete.NO : Document.Obsolete.YES;
       if (document.obsolete == Document.Obsolete.NO) {
-        Editor.messageBox(window, 'Status is OK.', MessageBox.ICONINFORMATION);
+        window.status = 'Healthy';
         return;
       }
       Editor.messageBox(window, 'This document is stale.',
@@ -271,7 +270,7 @@ global.TextWindow.prototype.clone = function() {
       selection_map.set(selection, selection.range.start);
     })
     document.load().then(function(zero) {
-      Editor.messageBox(window, 'Reloaded', MessageBox.ICONINFORMATION);
+      window.status = 'Reloaded';
       document.listWindows().forEach(function (window) {
         var selection = window.selection;
         var present = selection_map.get(selection);

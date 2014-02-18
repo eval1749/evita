@@ -172,8 +172,7 @@ global.commander =
         var error = /** @type{!DocumentReadOnly} */(exception);
         if (error.document != window.document)
           throw error;
-        Editor.messageBox(window, 'Can not change readonly document.',
-                          MessageBox.ICONINFORMATION);
+        window.status = 'Can not change readonly document.';
       }
       if (handler == handleEventAsCommand)
         reset();

@@ -90,8 +90,7 @@
     range.document.doColor_(100);
     if (selection.move(Unit.BRACKET, -1) == start) {
       range.collapseTo(end);
-      Editor.messageBox(selection.window, Strings.IDS_NO_MATCHING_PAREN,
-                        MessageBox.ICONINFORMATION);
+      selection.window.status = Strings.IDS_NO_MATCHING_PAREN;
       return;
     }
 

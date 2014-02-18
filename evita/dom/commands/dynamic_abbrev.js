@@ -78,11 +78,10 @@ DynamicAbbrevExpander.prototype.expand = function(selection) {
 
   // Nothing changed.
   range.collapseTo(range.end);
-  Editor.messageBox(selection.window, current_word ?
+  selection.window.status = current_word ?
     'No more words start with "' + this.prefix + '", other than "' +
         current_word + '"' :
-    'No word starts with "' + this.prefix + '".',
-    MessageBox.ICONINFORMATION);
+    'No word starts with "' + this.prefix + '".';
 };
 
 /**

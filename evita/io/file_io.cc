@@ -312,13 +312,7 @@ bool Buffer::Load(const base::string16& file_name,
 
   // We'll set read-only flag from file attributes.
   SetReadOnly(false);
-
   Delete(0, GetEnd());
-
-  if (m_pUndo) {
-    m_pUndo->Empty();
-  }
-
   m_eState = State_Load;
 
   if (!pLoad->Start()) {

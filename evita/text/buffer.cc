@@ -78,6 +78,11 @@ bool Buffer::CanUndo() const
     return m_pUndo->CanUndo();
 } // Buffer::CanUndo
 
+void Buffer::ClearUndo() {
+  if (!m_pUndo)
+    return;
+  m_pUndo->Empty();
+}
 
 //////////////////////////////////////////////////////////////////////
 //

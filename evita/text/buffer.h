@@ -122,6 +122,7 @@ class Buffer : public BufferCore, public FileFeatures {
   // [C]
   public: bool CanRedo() const;
   public: bool CanUndo() const;
+  public: void ClearUndo();
   public: Posn ComputeEndOf(Unit, Posn) const;
   public: Count ComputeMotion(Unit, Count, Posn*) const;
   public: Posn ComputeStartOf(Unit, Posn) const;

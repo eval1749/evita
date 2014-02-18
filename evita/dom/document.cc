@@ -218,6 +218,9 @@ class LoadFileCallback : public base::RefCounted<LoadFileCallback> {
       buffer->SetNewline(data.newline_mode);
       buffer->SetFile(buffer->GetFileName(), data.last_write_time);
       buffer->SetReadOnly(data.readonly);
+      // Noet: There is no good reason to undo of file loading. Although, users
+      // can undo failure loading.
+      buffer->ClearUndo();
     }
     buffer->FinishIo(static_cast<uint32_t>(data.error_code));
     if (!runner_)

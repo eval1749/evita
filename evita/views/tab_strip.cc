@@ -235,11 +235,8 @@ class Element : public DoubleLinkedNode_<Element> {
 
   // [H]
   public: virtual Element* HitTest(POINT pt) const {
-    if (!::PtInRect(&m_rc, pt)) {
-      return nullptr;
-    }
-
-    return const_cast<Element*>(this);
+    return IsShow() && ::PtInRect(&m_rc, pt) ? const_cast<Element*>(this) :
+                                               nullptr;
   }
 
   // [I]

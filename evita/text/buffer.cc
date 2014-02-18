@@ -108,21 +108,6 @@ Posn Buffer::ComputeStartOfLine(Posn lPosn) const {
 
 //////////////////////////////////////////////////////////////////////
 //
-// Buffer::CreateRange
-//
-Range* Buffer::CreateRange(Posn lStart, Posn lEnd)
-{
-    Range* pRange = new(m_hObjHeap) Range(
-        this,
-        Range::Kind_Range,
-        lStart,
-        std::max(lStart, lEnd) );
-
-    return InternalAddRange(pRange);
-} // Buffer::CreateRange
-
-//////////////////////////////////////////////////////////////////////
-//
 // Buffer::Delete
 //
 // Description:

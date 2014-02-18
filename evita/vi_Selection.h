@@ -33,7 +33,7 @@ class Selection : public text::Range {
   private: Buffer* m_pBuffer;
   private: TextEditWindow* m_pWindow;
 
-  private : explicit Selection(const text::Range& range);
+  public: explicit Selection(const text::Range& range);
   public: ~Selection();
 
   public: void set_window(TextEditWindow* window) {
@@ -42,7 +42,6 @@ class Selection : public text::Range {
 
   // [C]
   public: void Collapse(CollapseWhich = Collapse_Start);
-  public: static Selection* Create(const text::Range& range);
 
   // [G]
   public: Color GetBackground() const { return m_crBackground; }

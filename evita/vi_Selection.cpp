@@ -25,10 +25,6 @@ void Selection::Collapse(CollapseWhich eCollapse) {
   m_fStartIsActive = eCollapse == Collapse_Start;
 }
 
-Selection* Selection::Create(const text::Range& range) {
-  return new(range.GetBuffer()->GetHeap()) Selection(range);
-}
-
 void Selection::SetStartIsActive(bool new_start_is_active) {
   m_fStartIsActive = new_start_is_active;
 }

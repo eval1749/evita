@@ -125,7 +125,6 @@ class Buffer : public BufferCore, public FileFeatures {
   public: void ClearUndo();
   public: Posn ComputeEndOfLine(Posn offset) const;
   public: Posn ComputeStartOfLine(Posn offset) const;
-  public: Range* CreateRange(Posn lStart, Posn lEnd);
 
   // [D]
   private: void destroyObject(void* pv) { ::HeapFree(m_hObjHeap, 0, pv); }

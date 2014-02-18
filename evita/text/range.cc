@@ -126,16 +126,6 @@ Range::~Range()
 } // Range::~Range
 
 /// <summary>
-///   Delete object.
-/// </summary>
-void Range::destroy() {
-    HANDLE const h = m_pBuffer->GetHeap();
-    ASSERT(NULL != h);
-    this->Range::~Range();
-    ::HeapFree(h, 0, this);
-} // destroy
-
-/// <summary>
 ///  Collapse this range to specified end.
 /// </summary>
 /// <param name="eCollapse">Collapse direction</param>

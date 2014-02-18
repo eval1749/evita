@@ -37,13 +37,6 @@ class Range //: public ObjectInHeap
         Kind_Selection,
     }; // Kind
 
-    public: void* operator new(size_t cb, HANDLE h)
-        { return ::HeapAlloc(h, 0, cb); }
-
-    private: void operator delete(void*) {}
-
-    public: void destroy();
-
     private: Kind       m_eKind;
     private: Posn       m_lStart;
     private: Posn       m_lEnd;

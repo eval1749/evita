@@ -84,114 +84,12 @@ void Buffer::ClearUndo() {
   m_pUndo->Empty();
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// getCharClass
-//  Returns ANSIC C/POSIX(LC_TYPE)
-//
-// See WinNls.h for C1_xxx
-//  C1_UPPER    0x001
-//  C1_LOWER    0x002
-//  C1_DIGIT    0x004
-//  C1_SPACE    0x008
-//  C1_PUNCT    0x010
-//  C1_CTRL     0x020
-//  C1_BLANK    0x040
-//  C1_XDIGIT   0x080
-//  C1_ALPHA    0x100
-//  C1_DEFINED  0x200
-//
-//    Code    Name      Type
-//  +-------+---------+-------------------------------
-//  | 0x09  | TAB     | C1_SPACE + C1_CTRL + C1_BLANK
-//  | 0x0A  | LF      | C1_SPACE + C1_CTRL
-//  | 0x0D  | CR      | C1_SPACE + C1_CTRL
-//  | 0x20  | SPACE   | C1_SPACE + C1_BLANK
-//  +-------+---------+-------------------------------
-//
-static int getCharClass(char16 wch)
-{
-    WORD wType;
-    if (! ::GetStringTypeW(CT_CTYPE1, &wch, 1, &wType)) return 0;
-    int iMask = 0;
-    //iMask |= C1_ALPHA;
-    iMask |= C1_BLANK;
-    iMask |= C1_CNTRL;
-    //iMask |= C1_DEFINED;
-    iMask |= C1_PUNCT;
-    iMask |= C1_SPACE;
-    return wType & iMask;
-} // getCharClass
-
-/// <summary>
-///   Computes end position of specified unit.
-/// </summary>
-/// <param name="eUnit">An unit for computing end position.</param>
-/// <param name="lPosn">A position starting computation.</param>
-/// <returns>An end position of specified unit.</returns>
-Posn Buffer::ComputeEndOf(Unit eUnit, Posn lPosn) const
-{
-    ASSERT(IsValidPosn(lPosn));
-
-    switch (eUnit)
-    {
-    case Unit_Buffer:
-        lPosn = GetEnd();
-        break;
-
-    case Unit_Line:
-        while (lPosn < GetEnd())
-        {
-            if (0x0A == GetCharAt(lPosn))
-            {
-                break;
-            } // if
-            lPosn += 1;
-        } // while
-        break;
-
-    case Unit_Word:
-        if (lPosn >= GetEnd())
-        {
-            lPosn = GetEnd();
-        }
-        else
-        {
-            int iClass1 = getCharClass(GetCharAt(lPosn));
-            if (iClass1 & C1_BLANK)
-            {
-                // We are on whiespace.
-                return lPosn;
-            } // if
-
-            // Move to end of word.
-            while (lPosn < GetEnd())
-            {
-                int iClass2 = getCharClass(GetCharAt(lPosn));
-                if (iClass1 != iClass2)
-                {
-                    break;
-                } // if
-                lPosn += 1;
-            } // while
-        } // if
-        break;
-
-    default:
-        CAN_NOT_HAPPEN();
-    } // switch unit
-
-    return lPosn;
-} // Buffer::ComputeEndOf
-
-Posn Buffer::ComputeStartOfLine(Posn lPosn) const {
+Posn Buffer::ComputeEndOfLine(Posn lPosn) const {
   DCHECK(IsValidPosn(lPosn));
-  while (lPosn > 0) {
-    --lPosn;
-    if (0x0A == GetCharAt(lPosn)) {
-      lPosn += 1;
+  while (lPosn < GetEnd()) {
+    if (0x0A == GetCharAt(lPosn))
       break;
-    }
+    ++lPosn;
   }
   return lPosn;
 }

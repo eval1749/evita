@@ -123,7 +123,7 @@ class Buffer : public BufferCore, public FileFeatures {
   public: bool CanRedo() const;
   public: bool CanUndo() const;
   public: void ClearUndo();
-  public: Posn ComputeEndOf(Unit, Posn) const;
+  public: Posn ComputeEndOfLine(Posn) const;
   public: Posn ComputeStartOfLine(Posn offset) const;
   public: Range* CreateRange(Posn lStart = 0, Posn lEnd = 0);
   public: Range* CreateRange(Range*);

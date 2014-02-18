@@ -24,7 +24,7 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
 
   private: gc::Member<Range> view_range_;
 
-  public: TextWindow(Range* selection_range);
+  public: explicit TextWindow(Range* selection_range);
   public: virtual ~TextWindow();
 
   public: Range* view_range() const { return view_range_; }

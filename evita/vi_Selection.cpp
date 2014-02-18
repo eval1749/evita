@@ -9,7 +9,7 @@
 #include "evita/vi_TextEditWindow.h"
 
 Selection::Selection(const text::Range& range)
-    : Range(static_cast<Buffer*>(range.GetBuffer()), Kind_Selection),
+    : text::Range(range.GetBuffer(), range.GetStart(), range.GetEnd()),
       m_fStartIsActive(false),
       m_pBuffer(static_cast<Buffer*>(range.GetBuffer())),
       m_pWindow(nullptr) {

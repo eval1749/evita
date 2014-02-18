@@ -104,7 +104,6 @@ namespace text
 /// <param name="lStart">Start position</param>
 /// <param name="lEnd">End position</param>
 Range::Range(Buffer* pBuffer, Posn lStart, Posn lEnd) :
-    m_eKind(Kind_Range),
     m_lEnd(lEnd),
     m_lStart(lStart),
     m_pBuffer(pBuffer)

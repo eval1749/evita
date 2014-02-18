@@ -31,30 +31,11 @@ class Range //: public ObjectInHeap
         Count   m_lColumn;
     }; // Information
 
-    protected: enum Kind
-    {
-        Kind_Range,
-        Kind_Selection,
-    }; // Kind
-
-    private: Kind       m_eKind;
     private: Posn       m_lStart;
     private: Posn       m_lEnd;
     private: Buffer*    m_pBuffer;
 
-    public: Range(
-            Buffer* pBuffer,
-            Kind    eKind   = Kind_Range,
-            Posn    lStart  = 0,
-            Posn    lEnd    = 0) :
-        m_eKind(eKind),
-        m_lStart(lStart),
-        m_lEnd(lEnd),
-        m_pBuffer(pBuffer) {
-    }
-
     public: Range(Buffer*, Posn, Posn);
-
     public: ~Range();
 
     // [C]

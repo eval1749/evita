@@ -527,9 +527,6 @@ void TextEditWindow::Render() {
     updateScrollBar();
   }
 
-  if (!has_focus())
-    return;
-
   const auto rect = m_pPage->MapPosnToPoint(*m_gfx, m_lCaretPosn);
   if (!rect) {
     caret_->Reset();

@@ -112,6 +112,7 @@ void Caret::Reset() {
 
 void Caret::Show() {
   DCHECK(rect_);
+  DCHECK(taken_);
   if (shown_)
     return;
   backing_store_->Save(*gfx_, rect_);
@@ -132,8 +133,11 @@ void Caret::Take(const gfx::Graphics& gfx) {
 
 void Caret::Update(const gfx::RectF& new_rect) {
   DCHECK(new_rect);
-  DCHECK(taken_);
   DCHECK(!shown_);
+  if (!taken_) {
+    rect_ = new_rect;
+    return;
+  }
   if (rect_ == new_rect) {
     should_blink_ = true;
   } else {

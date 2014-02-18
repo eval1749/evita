@@ -196,21 +196,6 @@ Posn Buffer::ComputeStartOfLine(Posn lPosn) const {
   return lPosn;
 }
 
-#if 0
-//////////////////////////////////////////////////////////////////////
-//
-// Buffer::CreateInterval
-//
-Interval* Buffer::CreateInterval(
-    Posn    lStart,
-    Posn    lEnd,
-    int     nZ)
-{
-    return addInterval(new(m_hObjHeap) Interval(lStart, std::max(lStart, lEnd), nZ));
-} // Buffer::CreateInterval
-#endif
-
-
 //////////////////////////////////////////////////////////////////////
 //
 // Buffer::CreateRange

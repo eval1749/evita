@@ -12,8 +12,7 @@
 Selection::Selection(dom::Buffer* buffer, text::Range* range)
     : m_fStartIsActive(false),
       m_pBuffer(buffer),
-      m_pRange(range),
-      m_pWindow(nullptr) {
+      m_pRange(range) {
 }
 
 Selection::~Selection() {

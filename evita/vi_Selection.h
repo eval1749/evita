@@ -29,16 +29,11 @@ class Selection {
   private: bool m_fStartIsActive;
   private: dom::Buffer* m_pBuffer;
   private: text::Range* m_pRange;
-  private: TextEditWindow* m_pWindow;
 
   public: Selection(dom::Buffer* buffer, text::Range* range);
   public: ~Selection();
 
   public: text::Range* range() const { return m_pRange; }
-
-  public: void set_window(TextEditWindow* window) {
-    m_pWindow = window;
-  }
 
   // [G]
   public: Color GetBackground() const { return m_crBackground; }
@@ -46,7 +41,6 @@ class Selection {
   public: Posn GetEnd() const;
   public: Color GetColor() const { return m_crColor; }
   public: Posn GetStart() const;
-  private: TextEditWindow* GetWindow() const { return m_pWindow; }
 
   // [I]
   public: bool IsStartActive() const { return m_fStartIsActive; }

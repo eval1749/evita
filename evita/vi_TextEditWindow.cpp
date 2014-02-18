@@ -73,7 +73,6 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
         m_lImeStart(0),
       #endif // SUPPORT_IME
       m_pViewRange(text_window.view_range()->text_range()) {
-  selection_->set_window(this);
 }
 
 TextEditWindow::~TextEditWindow() {

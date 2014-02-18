@@ -27,6 +27,7 @@ void MessageView::ResizeTo(const Rect& rect) {
 }
 
 void MessageView::SetMessage(const base::string16& text) {
+  message_time_ = base::Time::Now();
   if (message_text_ == text)
     return;
   message_text_ = text;
@@ -42,8 +43,12 @@ void MessageView::SetStatus(const std::vector<base::string16>& texts) {
   DCHECK(!texts.empty());
   status_bar_texts_ = texts;
   if (texts[0] == status_text_) {
-    if (!message_text_.empty())
-      status_bar_texts_[0] = message_text_;
+    if (!message_text_.empty()) {
+      if (base::Time::Now() - message_time_ < base::TimeDelta::FromSeconds(5))
+        status_bar_texts_[0] = message_text_;
+      else
+        message_text_.clear();
+    }
   } else {
     status_text_ = texts[0];
     message_text_.clear();

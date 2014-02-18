@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "base/strings/string16.h"
+#include "base/time/time.h"
 #include "common/win/rect.h"
 
 namespace ui {
@@ -21,6 +22,7 @@ class MessageView {
   private: std::unique_ptr<ui::StatusBar> status_bar_;
   private: std::vector<base::string16> status_bar_texts_;
   private: base::string16 message_text_;
+  private: base::Time message_time_;
   private: base::string16 status_text_;
 
   public: MessageView();

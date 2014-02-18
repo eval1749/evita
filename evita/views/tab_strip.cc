@@ -1690,9 +1690,6 @@ LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
     case WM_COMMAND:
       SelectTab(static_cast<int>(LOWORD(wParam)));
       return 0;
-    case WM_NCDESTROY:
-      // No self delete.
-      return false;
     case WM_DWMCOMPOSITIONCHANGED:
     case WM_MOUSELEAVE:
     case WM_NCHITTEST:

@@ -124,7 +124,6 @@ class Buffer : public BufferCore, public FileFeatures {
   public: bool CanUndo() const;
   public: void ClearUndo();
   public: Posn ComputeEndOf(Unit, Posn) const;
-  public: Count ComputeMotion(Unit, Count, Posn*) const;
   public: Posn ComputeStartOf(Unit, Posn) const;
   public: Range* CreateRange(Posn lStart = 0, Posn lEnd = 0);
   public: Range* CreateRange(Range*);

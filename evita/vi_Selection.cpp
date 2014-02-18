@@ -14,7 +14,7 @@ Selection::Selection(const text::Range& range)
       m_pBuffer(static_cast<Buffer*>(range.GetBuffer())),
       m_pWindow(nullptr) {
   m_pBuffer->InternalAddRange(this);
-  SetRange(&range);
+  SetRange(range.GetStart(), range.GetEnd());
 }
 
 Selection::~Selection() {

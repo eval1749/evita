@@ -79,8 +79,7 @@ class Range //: public ObjectInHeap
 
     // [S]
     public: Posn  SetEnd(Posn);
-    public: void  SetRange(Posn, Posn);
-    public: void  SetRange(const Range*);
+    public: void  SetRange(Posn start, Posn end);
     public: Posn  SetStart(Posn);
     public: void SetText(const base::string16& text);
 

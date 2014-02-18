@@ -57,6 +57,8 @@ class Selection : public text::Range {
   public: Color SetBackground(Color cr) { return m_crBackground = cr; }
   public: Color SetColor(Color cr) { return m_crColor = cr; }
   public: void SetStartIsActive(bool new_start_is_active);
+
+  DISALLOW_COPY_AND_ASSIGN(Selection);
 };
 
 #endif //!defined(INCLUDE_listener_winapp_visual_selection_h)

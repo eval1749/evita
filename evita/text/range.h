@@ -61,7 +61,6 @@ class Range //: public ObjectInHeap
     }
 
     public: Range(Buffer*, Posn, Posn);
-    public: explicit Range(const Range& other);
 
     public: ~Range();
 
@@ -91,6 +90,8 @@ class Range //: public ObjectInHeap
     public: void  SetRange(const Range*);
     public: Posn  SetStart(Posn);
     public: void SetText(const base::string16& text);
+
+    DISALLOW_COPY_AND_ASSIGN(Range);
 }; // Range
 
 }  // namespace text

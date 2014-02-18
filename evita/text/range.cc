@@ -114,19 +114,6 @@ Range::Range(Buffer* pBuffer, Posn lStart, Posn lEnd) :
 } // Range::Range
 
 /// <summary>
-///   Constructs Range object as same as pRange.
-/// </summary>
-/// <param name="pRange">Range object</param>
-Range::Range(const Range& other) :
-    m_eKind(Kind_Range),
-    m_lEnd(other.GetEnd()),
-    m_lStart(other.GetStart()),
-    m_pBuffer(other.GetBuffer())
-{
-    m_pBuffer->InternalAddRange(this);
-} // Range::Range
-
-/// <summary>
 ///  Remove this range from buffer
 /// </summary>
 Range::~Range()

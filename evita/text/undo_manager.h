@@ -1,97 +1,85 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - edit buffer
-// listener/winapp/ed_buffer.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_Undo.h#1 $
-//
-#if !defined(INCLUDE_listener_winapp_editor_undo_h)
-#define INCLUDE_listener_winapp_editor_undo_h
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#if !defined(INCLUDE_evita_text_undo_manager_h)
+#define INCLUDE_evita_text_undo_manager_h
 
 #include "base/strings/string16.h"
 
-namespace text
-{
+namespace text {
 
 class Record;
 
-//////////////////////////////////////////////////////////////////////
+// m_cb
+// Holds hint of total size of edit log records.
+// m_fMerge
+// We merge consecutive insert/delete edit log records.
+// m_fTruncate
+// We truncate edit log if undo/redo operation is interrupted.
 //
-// UndoManager
-//
-//  m_cb
-//    Holds hint of total size of edit log records.
-//  m_fMerge
-//    We merge consecutive insert/delete edit log records.
-//  m_fTruncate
-//    We truncate edit log if undo/redo operation is interrupted.
-//
-class UndoManager
-{
-    public: enum State
-    {
-        State_Disabled,
-        State_Log,
-        State_Redo,
-        State_Undo,
-    }; // State
+class UndoManager {
+  public: enum State {
+    State_Disabled,
+    State_Log,
+    State_Redo,
+    State_Undo,
+  };
 
-    private: size_t  m_cb;
-    private: State   m_eState;
-    private: bool    m_fMerge;
-    private: bool    m_fTruncate;
-    private: HANDLE  m_hObjHeap;
-    private: Buffer* m_pBuffer;
-    private: Record* m_pFirst;
-    private: Record* m_pLast;
-    private: Record* m_pRedo;
-    private: Record* m_pUndo;
+  private: size_t m_cb;
+  private: State m_eState;
+  private: bool m_fMerge;
+  private: bool m_fTruncate;
+  private: HANDLE m_hObjHeap;
+  private: Buffer* m_pBuffer;
+  private: Record* m_pFirst;
+  private: Record* m_pLast;
+  private: Record* m_pRedo;
+  private: Record* m_pUndo;
 
-    public: explicit UndoManager(Buffer*);
-    public: ~UndoManager();
+  public: explicit UndoManager(Buffer*);
+  public: ~UndoManager();
 
-    // [A]
-    public: void*   Alloc(size_t);
+  // [A]
+  public: void* Alloc(size_t);
+  private: void addRecord(Record*);
 
-    // [C]
-    public: bool    CanRedo() const;
-    public: bool    CanUndo() const;
-    public: void    CheckPoint();
+  // [C]
+  public: bool CanRedo() const;
+  public: bool CanUndo() const;
+  public: void CheckPoint();
 
-    // [E]
-    public: void    Empty();
+  // [D]
+  private: void delRecord(Record*);
+  private: void discardRecord(Record*);
 
-    // [F]
-    public: void    Free(void*);
 
-    // [G]
-    public: Buffer* GetBuffer() const { return m_pBuffer; }
-    public: size_t  GetSize()   const { return m_cb; }
+  // [E]
+  public: void Empty();
 
-    // [R]
-    public: void    RecordBegin(const base::string16& name);
-    public: void    RecordDelete(Posn, Posn);
-    public: void    RecordEnd(const base::string16& name);
-    public: void    RecordInsert(Posn, Posn);
-    public: Posn    Redo(Posn, Count);
+  // [F]
+  public: void Free(void*);
 
-    // [T]
-    public: void    TruncateLog();
+  // [G]
+  public: Buffer* GetBuffer() const { return m_pBuffer; }
+  public: size_t GetSize() const { return m_cb; }
 
-    // [U]
-    public: Posn    Undo(Posn, Count);
+  // [R]
+  public: void RecordBegin(const base::string16& name);
+  public: void RecordDelete(Posn, Posn);
+  public: void RecordEnd(const base::string16& name);
+  public: void RecordInsert(Posn, Posn);
+  public: Posn Redo(Posn, Count);
 
-    // Private methods
-    private: void addRecord(Record*);
-    private: void delRecord(Record*);
-    private: void discardRecord(Record*);
+  // [T]
+  public: void TruncateLog();
 
-    DISALLOW_COPY_AND_ASSIGN(UndoManager);
-}; // UndoManager
+  // [U]
+  public: Posn Undo(Posn, Count);
+
+  DISALLOW_COPY_AND_ASSIGN(UndoManager);
+};
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_listener_winapp_editor_undo_h)
+#endif // !defined(INCLUDE_evita_text_undo_manager_h)

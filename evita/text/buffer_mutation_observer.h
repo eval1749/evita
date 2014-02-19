@@ -16,6 +16,7 @@ class BufferMutationObserver {
   public: virtual void DidDeleteAt(Posn offset, size_t length) = 0;
   public: virtual void DidInsertAt(Posn offset, size_t length) = 0;
   public: virtual void DidInsertBefore(Posn offset, size_t length) = 0;
+  public: virtual void WillDeleteAt(Posn offset, size_t length);
 
   DISALLOW_COPY_AND_ASSIGN(BufferMutationObserver);
 };

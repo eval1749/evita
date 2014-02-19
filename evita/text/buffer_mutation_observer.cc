@@ -12,4 +12,7 @@ BufferMutationObserver::BufferMutationObserver() {
 BufferMutationObserver::~BufferMutationObserver() {
 }
 
+void BufferMutationObserver::WillDeleteAt(Posn, size_t) {
+}
+
 }  // namespace text

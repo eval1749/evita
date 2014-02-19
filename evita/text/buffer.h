@@ -12,7 +12,6 @@
 #pragma warning(pop)
 #include "base/strings/string16.h"
 #include "base/time/time.h"
-#include "evita/ed_BinTree.h"
 #include "evita/li_util.h"
 
 #include "evita/IStringCursor.h"
@@ -24,6 +23,7 @@ namespace text {
 class Buffer;
 class BufferMutationObserver;
 class Interval;
+class IntervalSet;
 class Mode;
 class Range;
 class RangeList;
@@ -70,11 +70,9 @@ class FileFeatures {
 /// Represents text buffer.
 /// </summary>
 class Buffer : public BufferCore, public FileFeatures {
-  protected: typedef DoubleLinkedList_<Interval> Intervals;
-  protected: typedef BinaryTree<Interval> IntervalTree;
-
   private: HANDLE m_hObjHeap;
   private: ObserverList<BufferMutationObserver> observers_;
+  private: std::unique_ptr<IntervalSet> intervals_;
   private: std::unique_ptr<RangeList> ranges_;
   private: Mode* m_pMode;
 
@@ -89,10 +87,6 @@ class Buffer : public BufferCore, public FileFeatures {
   // Modified?
   private: int m_nCharTick;
   private: int m_nSaveTick;
-
-  // Interval
-  private: Intervals m_oIntervals;
-  private: IntervalTree m_oIntervalTree;
 
   // Asynchronous Operation Support
   public: enum State {
@@ -175,8 +169,6 @@ class Buffer : public BufferCore, public FileFeatures {
   public: bool NeedSave () const {
     return !m_fNoSave && IsModified();
   }
-
-  private: Interval* newInterval(Posn, Posn);
 
   // [R]
   public: Posn Redo(Posn, Count = 1);
@@ -337,12 +329,6 @@ class Buffer : public BufferCore, public FileFeatures {
 
     public: void Next() { ASSERT(!AtEnd()); --m_lPosn; }
     public: void Prev() { ++m_lPosn; }
-  };
-
-  // EnumInterval
-  public: class EnumInterval : public Intervals::Enum {
-    public: EnumInterval(const Buffer* pBuffer) :
-      Intervals::Enum(&pBuffer->m_oIntervals) {}
   };
 
   DISALLOW_COPY_AND_ASSIGN(Buffer);

@@ -17,6 +17,7 @@
 #include "base/logging.h"
 #include "evita/ed_Interval.h"
 #include "evita/text/buffer.h"
+#include "evita/text/interval_set.h"
 
 extern StyleValues g_DefaultStyle;
 
@@ -77,66 +78,9 @@ void Interval::SetStyle(const StyleValues* p)
 /// </summary>
 /// <param name="lPosn">A postion for an interval to get.</param>
 /// <returns>An Interval object</returns>
-Interval* Buffer::GetIntervalAt(Posn lPosn) const
-{
-    lPosn = std::min(lPosn, GetEnd());
-
-    Interval* pRunner = m_oIntervalTree.GetRoot();
-    while (NULL != pRunner)
-    {
-        if (pRunner->Contains(lPosn))
-        {
-            break;
-        }
-
-        if (lPosn < pRunner->GetStart())
-        {
-            pRunner = pRunner->GetLeft();
-        }
-        else
-        {
-            pRunner = pRunner->GetRight();
-        }
-    } // while
-
-    #if DEBUG_STYLE
-    {
-        DEBUG_PRINTF(L"%p lPosn=%d\n", this, lPosn);
-        int nNth = 0;
-        foreach (EnumInterval, oEnum, this)
-        {
-            Interval* pIntv = oEnum.Get();
-            DEBUG_PRINTF(L"%d %p [%d, %d] #%06X\n",
-                nNth, pIntv, pIntv->GetStart(), pIntv->GetEnd(),
-                pIntv->m_Style.m_crColor );
-            nNth += 1;
-        } // for each interval
-    }
-    #endif // DEBUG_STYLE
-
-    if (NULL == pRunner)
-    {
-        const Interval* pFound = NULL;
-        foreach (Intervals::Enum, oEnum, &m_oIntervals)
-        {
-            if (oEnum.Get()->Contains(lPosn))
-            {
-                pFound = oEnum.Get();
-                break;
-            }
-        } // for
-
-        if (!pFound) {
-          LOG(0) << "position=" << lPosn << " insnt' in list.";
-        } else {
-          LOG(0) << "position=" << lPosn << " is in list intv[" <<
-            pFound->GetStart() << "," << pFound->GetEnd() << "]";
-        }
-        NOTREACHED();
-    } // if
-
-    return pRunner;
-} // Buffer::GetIntervalAt
+Interval* Buffer::GetIntervalAt(Posn lPosn) const {
+  return intervals_->GetIntervalAt(std::min(lPosn, GetEnd()));
+}
 
 /// <summary>
 ///   Set style of range of buffer.
@@ -212,11 +156,10 @@ void Buffer::SetStyle(
             }
         }
 
-        Interval* pIntv = newInterval(lStart, lEnd);
+        auto const pIntv = new Interval(lStart, lEnd);
         pIntv->SetStyle(pStyle);
 
-        m_oIntervals.InsertBefore(pIntv, pHead);
-        m_oIntervalTree.Insert(pIntv);
+        intervals_->InsertBefore(pIntv, pHead);
 
         DCHECK_EQ(pHead->GetPrev(), pIntv);
         DCHECK_EQ(pIntv->GetNext(), pHead);
@@ -246,11 +189,10 @@ void Buffer::SetStyle(
             }
         }
 
-        Interval* pIntv = newInterval(lStart, lEnd);
+        auto const pIntv = new Interval(lStart, lEnd);
         pIntv->SetStyle(pStyle);
 
-        m_oIntervals.InsertAfter(pIntv, pHead);
-        m_oIntervalTree.Insert(pIntv);
+        intervals_->InsertAfter(pIntv, pHead);
 
         DCHECK_EQ(pHead->GetNext(), pIntv);
         DCHECK_EQ(pIntv->GetPrev(), pHead);
@@ -271,11 +213,10 @@ void Buffer::SetStyle(
         // Range: -----s....e--------
         pHead->m_lEnd = lStart;
 
-        Interval* pTail = newInterval(lEnd, lHeadEnd);
+        auto const pTail = new Interval(lEnd, lHeadEnd);
         pTail->SetStyle(pHead->GetStyle());
 
-        m_oIntervals.InsertAfter(pTail, pHead);
-        m_oIntervalTree.Insert(pTail);
+        intervals_->InsertAfter(pTail, pHead);
 
         ASSERT(pHead->GetNext() == pTail);
         ASSERT(pTail->GetPrev() == pHead);
@@ -287,11 +228,10 @@ void Buffer::SetStyle(
         }
         #endif
 
-        Interval* pIntv = newInterval(lStart, lEnd);
+        auto const pIntv = new Interval(lStart, lEnd);
         pIntv->SetStyle(pStyle);
 
-        m_oIntervals.InsertAfter(pIntv, pHead);
-        m_oIntervalTree.Insert(pIntv);
+        intervals_->InsertAfter(pIntv, pHead);
 
         ASSERT(pHead->GetNext() == pIntv);
         ASSERT(pIntv->GetPrev() == pHead);
@@ -306,16 +246,6 @@ void Buffer::SetStyle(
         return;
     //}
 } // Buffer::SetStyle
-
-/// <summary>
-///   Create a new interval for specified range.
-/// </summary>
-/// <param name="lEnd">An end position (exlclude).</param>
-/// <param name="lStart">A start position (include).</param>
-Interval* Buffer::newInterval(Posn lStart, Posn lEnd) {
-  DCHECK_LE(lStart, lEnd);
-  return new(m_hObjHeap) Interval(lStart, lEnd);
-}
 
 /// <summary>
 ///   Try merge specified interval to previous and next.
@@ -337,10 +267,8 @@ Interval* Buffer::tryMergeInterval(Interval* pIntv)
                     pIntv, pIntv->GetStart(), pIntv->GetEnd() );
             #endif
 
-            m_oIntervals.Delete(pIntv);
-            m_oIntervalTree.Delete(pIntv);
-
-            destroyObject(pIntv);
+            intervals_->RemoveInterval(pIntv);
+            delete pIntv;
 
             pIntv = pPrev;
 
@@ -362,10 +290,8 @@ Interval* Buffer::tryMergeInterval(Interval* pIntv)
                     pNext, pNext->GetStart(), pNext->GetEnd() );
             #endif
 
-            m_oIntervals.Delete(pNext);
-            m_oIntervalTree.Delete(pNext);
-
-            destroyObject(pNext);
+            intervals_->RemoveInterval(pNext);
+            delete pNext;
 
             pIntv->m_lEnd = lEnd;
         }

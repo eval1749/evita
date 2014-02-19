@@ -18,16 +18,18 @@
 namespace text
 {
 
+class IntervalSet;
+
 /// <summary>
 ///   An interval on buffer. An interval object contains style and syntax
 ///   information.
 /// </summary>
 class Interval  :
     public BinaryTree<Interval>::NodeBase,
-    public DoubleLinkedNode_<Interval>,
-    public ObjectInHeap
+    public DoubleLinkedNode_<Interval>
 {
     friend class Buffer;
+    friend class IntervalSet;
 
     private: Posn           m_lEnd;
     private: Posn           m_lStart;

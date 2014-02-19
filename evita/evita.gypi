@@ -383,6 +383,7 @@
         'li_util.cpp',
         'text/buffer.cc',
         'text/buffer_mutation_observer.cc',
+        'text/interval_set.cc',
         'text/modes/clike_lexer.cc',
         'text/modes/config_mode.cc',
         'text/modes/cxx_mode.cc',

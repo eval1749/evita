@@ -10,6 +10,7 @@
 
 #include "base/logging.h"
 #include "evita/ed_Interval.h"
+#include "evita/text/interval_set.h"
 #include "evita/text/range.h"
 #include "evita/text/range_list.h"
 #include "evita/ed_Undo.h"
@@ -19,6 +20,7 @@ namespace text {
 
 Buffer::Buffer(const base::string16& name, Mode* mode)
     : m_hObjHeap(::HeapCreate(HEAP_NO_SERIALIZE, 0, 0)),
+      intervals_(new IntervalSet(this)),
       ranges_(new RangeList(this)),
       m_pMode(mode),
       m_pUndo(new(m_hObjHeap) UndoManager(this)),
@@ -30,13 +32,6 @@ Buffer::Buffer(const base::string16& name, Mode* mode)
       m_nSaveTick(1),
       name_(name) {
   mode->set_buffer(this);
-
-  {
-    auto const interval = newInterval(0, 1);
-    interval->SetStyle(&g_DefaultStyle);
-    m_oIntervalTree.Insert(interval);
-    m_oIntervals.Append(interval);
-  }
 }
 
 Buffer::~Buffer() {
@@ -115,7 +110,7 @@ Count Buffer::Delete(Posn lStart, Posn lEnd) {
 }
 
 const StyleValues* Buffer::GetDefaultStyle() const {
-  return m_oIntervals.GetLast()->GetStyle();
+  return GetIntervalAt(GetEnd())->GetStyle();
 }
 
 const StyleValues* Buffer::GetStyleAt(Posn lPosn) const {
@@ -156,30 +151,6 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
 
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
       DidInsertBefore(position, text_length));
-
-  foreach (EnumInterval, enum_interval, this) {
-    auto const interval = enum_interval.Get();
-    if (interval->m_lStart >= position)
-      interval->m_lStart += text_length;
-    if (interval->m_lEnd >= position)
-      interval->m_lEnd += text_length;
-  }
-
-  if (!position) {
-    // Set default style to new text inserted at start of document.
-    auto const head = m_oIntervals.GetFirst();
-    DCHECK_EQ(static_cast<Posn>(text_length), head->GetStart());
-    // TODO(yosi) We should check head interval has default style or not
-    // without creating Interval object.
-    auto const interval = newInterval(0, head->GetStart());
-    if (interval->CanMerge(head)) {
-      head->m_lStart = 0;
-      destroyObject(interval);
-    } else {
-      m_oIntervals.Prepend(interval);
-      m_oIntervalTree.Insert(interval);
-    }
-  }
 
   auto const change_end = static_cast<Posn>(position + text_length);
 
@@ -233,82 +204,6 @@ Posn Buffer::Redo(Posn lPosn, Count n) {
 }
 
 void Buffer::relocate(Posn lPosn, Count iDelta) {
-  // Remove empty interval
-  if (iDelta < 0) {
-    auto const lBufEnd1 = GetEnd() + 1;
-
-    // Note: We should scan interval backward to terminate faster.
-    EnumInterval oEnum(this);
-    while (!oEnum.AtEnd()) {
-      auto const pRunner = oEnum.Get();
-      oEnum.Next();
-
-      auto lStart = pRunner->m_lStart;
-      auto lEnd = pRunner->m_lEnd;
-
-      if (lEnd <= lPosn)
-        continue;
-
-      if (lStart > lPosn) {
-        lStart += iDelta;
-        if (lStart < lPosn)
-          lStart = lPosn;
-        else if (lStart > lBufEnd1)
-          lStart = lBufEnd1;
-      }
-
-      if (lEnd > lPosn) {
-        lEnd += iDelta;
-        if (lEnd < lPosn)
-          lEnd = lPosn;
-        else if (lEnd > lBufEnd1)
-          lEnd = lBufEnd1;
-      }
-
-      if (lStart == lEnd) {
-        m_oIntervals.Delete(pRunner);
-        m_oIntervalTree.Delete(pRunner);
-
-        #if DEBUG_INTERVAL
-          DEBUG_PRINTF("destroyObject: interval [%d,%d] @ posn=%d%d\n",
-              pRunner->m_lStart, pRunner->m_lEnd, lPosn, iDelta );
-        #endif
-        destroyObject(pRunner);
-      }
-    }
-  }
-
-  // Relocate intervals
-  {
-    Posn lBufEnd1 = GetEnd() + 1;
-    foreach (EnumInterval, oEnum, this) {
-      auto const pRunner = oEnum.Get();
-
-      auto lStart = pRunner->m_lStart;
-      auto lEnd   = pRunner->m_lEnd;
-
-      if (lStart > lPosn) {
-        lStart += iDelta;
-        if (lStart < lPosn)
-          lStart = lPosn;
-        else if (lStart > lBufEnd1)
-          lStart = lBufEnd1;
-      }
-
-      if (lEnd > lPosn) {
-        lEnd += iDelta;
-        if (lEnd < lPosn)
-          lEnd = lPosn;
-        else if (lEnd > lBufEnd1)
-          lEnd = lBufEnd1;
-      }
-
-      DCHECK_LT(lStart, lEnd);
-      pRunner->m_lStart = lStart;
-      pRunner->m_lEnd   = lEnd;
-    }
-  }
-
   // Update change trackers
   {
     Posn lChangeStart = lPosn;

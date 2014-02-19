@@ -544,7 +544,7 @@
           throw 'Unknown state ' + state;
       }
     }
-    if (state = State.DOLLAR_DIGIT)
+    if (state == State.DOLLAR_DIGIT)
       addMatch(accumulatr);
     return new_text;
   }

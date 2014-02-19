@@ -146,14 +146,9 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
       DidInsertBefore(position, text_length));
 
-  auto const change_end = static_cast<Posn>(position + text_length);
-
-  // Inserted text inherites style before insertion point.
-  SetStyle(position, change_end, position ? GetStyleAt(position - 1) :
-                                            GetDefaultStyle());
-
   onChange();
   if (undo_manager_) {
+    auto const change_end = static_cast<Posn>(position + text_length);
     undo_manager_->CheckPoint();
     undo_manager_->RecordInsert(position, change_end);
   }

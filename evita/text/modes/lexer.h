@@ -31,9 +31,9 @@ class ChangeTracker :  public BufferMutationObserver {
   public: void Reset();
 
   // BufferMutationObserver
-  private: virtual void DidDeleteAt(int offset, size_t length) override;
-  private: virtual void DidInsertAt(int offset, size_t length) override;
-  private: virtual void DidInsertBefore(int offset, size_t length) override;
+  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
+  private: virtual void DidInsertAt(Posn offset, size_t length) override;
+  private: virtual void DidInsertBefore(Posn offset, size_t length) override;
 
   DISALLOW_COPY_AND_ASSIGN(ChangeTracker);
 };

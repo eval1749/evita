@@ -28,7 +28,7 @@ void RangeList::RemoveRange(Range* range) {
 }
 
 // BufferMutationObserver
-void RangeList::DidDeleteAt(int offset, size_t length) {
+void RangeList::DidDeleteAt(Posn offset, size_t length) {
   for (auto* range : ranges_) {
     if (range->m_lStart > offset)
       range->m_lStart -= length;
@@ -37,7 +37,7 @@ void RangeList::DidDeleteAt(int offset, size_t length) {
   }
 }
 
-void RangeList::DidInsertAt(int offset, size_t length) {
+void RangeList::DidInsertAt(Posn offset, size_t length) {
   for (auto* range : ranges_) {
     if (range->m_lStart > offset)
       range->m_lStart += length;
@@ -46,7 +46,7 @@ void RangeList::DidInsertAt(int offset, size_t length) {
   }
 }
 
-void RangeList::DidInsertBefore(int offset, size_t text_length) {
+void RangeList::DidInsertBefore(Posn offset, size_t text_length) {
   for (auto* range : ranges_) {
     if (range->m_lStart >= offset)
       range->m_lStart += text_length;

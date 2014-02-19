@@ -56,17 +56,16 @@ void IntervalSet::RemoveInterval(Interval* interval) {
 }
 
 // BufferMutationObserver
-void IntervalSet::DidDeleteAt(int offset, size_t text_length) {
+void IntervalSet::DidDeleteAt(Posn offset, size_t text_length) {
   {
     auto interval = list_.GetLast();
     while (interval && interval->m_lEnd > offset) {
       auto const next = interval->GetPrev();
       auto const start = interval->m_lStart > offset ?
           std::max(static_cast<Posn>(interval->m_lStart - text_length),
-                   static_cast<Posn>(offset)) : interval->m_lStart;
+                   offset) : interval->m_lStart;
       auto const end =
-        std::max(static_cast<Posn>(interval->m_lEnd - text_length),
-                 static_cast<Posn>(offset));
+        std::max(static_cast<Posn>(interval->m_lEnd - text_length), offset);
       if (start == end) {
         list_.Delete(interval);
         tree_.Delete(interval);
@@ -80,16 +79,15 @@ void IntervalSet::DidDeleteAt(int offset, size_t text_length) {
     if (interval->m_lStart > offset) {
       interval->m_lStart =
           std::max(static_cast<Posn>(interval->m_lStart - text_length),
-                   static_cast<Posn>(offset));
+                   offset);
     }
     interval->m_lEnd =
-        std::max(static_cast<Posn>(interval->m_lEnd - text_length),
-                 static_cast<Posn>(offset));
+        std::max(static_cast<Posn>(interval->m_lEnd - text_length), offset);
     interval = interval->GetPrev();
   }
 }
 
-void IntervalSet::DidInsertAt(int offset, size_t text_length) {
+void IntervalSet::DidInsertAt(Posn offset, size_t text_length) {
   auto interval = list_.GetLast();
   while (interval && interval->m_lEnd > offset) {
     if (interval->m_lStart > offset)
@@ -99,7 +97,7 @@ void IntervalSet::DidInsertAt(int offset, size_t text_length) {
   }
 }
 
-void IntervalSet::DidInsertBefore(int offset, size_t text_length) {
+void IntervalSet::DidInsertBefore(Posn offset, size_t text_length) {
   auto interval = list_.GetLast();
   while (interval && interval->m_lEnd >= offset) {
     if (interval->m_lStart >= offset)

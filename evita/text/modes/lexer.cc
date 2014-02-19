@@ -31,20 +31,20 @@ void ChangeTracker::Reset() {
 }
 
 // BufferMutationObserver
-void ChangeTracker::DidDeleteAt(int offset, size_t) {
-  m_lStart = std::min(m_lStart, static_cast<Posn>(offset));
+void ChangeTracker::DidDeleteAt(Posn offset, size_t) {
+  m_lStart = std::min(m_lStart, offset);
   m_lEnd = std::max(m_lEnd, buffer_->GetEnd());
 }
 
-void ChangeTracker::DidInsertAt(int offset, size_t text_length) {
-  auto const change_end = static_cast<Posn>(offset+ text_length);
-  m_lStart = std::min(m_lStart, static_cast<Posn>(offset));
+void ChangeTracker::DidInsertAt(Posn offset, size_t text_length) {
+  auto const change_end = static_cast<Posn>(offset + text_length);
+  m_lStart = std::min(m_lStart, offset);
   m_lEnd = std::max(m_lEnd, change_end);
 }
 
-void ChangeTracker::DidInsertBefore(int offset, size_t text_length) {
-  auto const change_end = static_cast<Posn>(offset+ text_length);
-  m_lStart = std::min(m_lStart, static_cast<Posn>(offset));
+void ChangeTracker::DidInsertBefore(Posn offset, size_t text_length) {
+  auto const change_end = static_cast<Posn>(offset + text_length);
+  m_lStart = std::min(m_lStart, offset);
   m_lEnd = std::max(m_lEnd, change_end);
 }
 

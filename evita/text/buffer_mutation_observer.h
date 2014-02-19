@@ -13,9 +13,9 @@ class BufferMutationObserver {
   public: BufferMutationObserver();
   public: virtual ~BufferMutationObserver();
 
-  public: virtual void DidDeleteAt(int offset, size_t length) = 0;
-  public: virtual void DidInsertAt(int offset, size_t length) = 0;
-  public: virtual void DidInsertBefore(int offset, size_t length) = 0;
+  public: virtual void DidDeleteAt(Posn offset, size_t length) = 0;
+  public: virtual void DidInsertAt(Posn offset, size_t length) = 0;
+  public: virtual void DidInsertBefore(Posn offset, size_t length) = 0;
 
   DISALLOW_COPY_AND_ASSIGN(BufferMutationObserver);
 };

@@ -11,6 +11,7 @@
 #include "base/logging.h"
 #include "evita/ed_Interval.h"
 #include "evita/text/range.h"
+#include "evita/text/range_list.h"
 #include "evita/ed_Undo.h"
 #include "evita/text/modes/mode.h"
 
@@ -18,6 +19,7 @@ namespace text {
 
 Buffer::Buffer(const base::string16& name, Mode* mode)
     : m_hObjHeap(::HeapCreate(HEAP_NO_SERIALIZE, 0, 0)),
+      ranges_(new RangeList(this)),
       m_pMode(mode),
       m_pUndo(new(m_hObjHeap) UndoManager(this)),
       m_eState(State_Ready),
@@ -38,12 +40,12 @@ Buffer::Buffer(const base::string16& name, Mode* mode)
 }
 
 Buffer::~Buffer() {
-  for (auto* range : ranges_) {
-    range->m_pBuffer = nullptr;
-  }
-
   if (m_hObjHeap)
     ::HeapDestroy(m_hObjHeap);
+}
+
+void Buffer::AddObserver(BufferMutationObserver* observer) {
+  observers_.AddObserver(observer);
 }
 
 bool Buffer::CanRedo() const {
@@ -152,12 +154,8 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
   insert(position, text.data(), static_cast<Count>(text_length));
   ++m_nModfTick;
 
-  for (auto* range : ranges_) {
-    if (range->m_lStart >= position)
-      range->m_lStart += text_length;
-    if (range->m_lEnd >= position)
-      range->m_lEnd += text_length;
-  }
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
+      DidInsertBefore(position, text_length));
 
   foreach (EnumInterval, enum_interval, this) {
     auto const interval = enum_interval.Get();
@@ -202,25 +200,20 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
   }
 }
 
-Range* Buffer::InternalAddRange(Range* pRange) {
-  ranges_.insert(pRange);
-  return pRange;
-}
-
 void Buffer::InternalDelete(Posn lStart, Posn lEnd) {
   Count n = deleteChars(lStart, lEnd);
   ++m_nModfTick;
   relocate(lStart, -n);
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
+      DidDeleteAt(lStart, static_cast<size_t>(n)));
 }
 
 void Buffer::InternalInsert(Posn lPosn, const char16* pwch, Count n) {
   insert(lPosn, pwch, n);
   ++m_nModfTick;
   relocate(lPosn, n);
-}
-
-void Buffer::InternalRemoveRange(Range* pRange) {
-  ranges_.erase(pRange);
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
+      DidDeleteAt(lPosn, static_cast<size_t>(n)));
 }
 
 bool Buffer::IsNotReady() const {
@@ -240,25 +233,6 @@ Posn Buffer::Redo(Posn lPosn, Count n) {
 }
 
 void Buffer::relocate(Posn lPosn, Count iDelta) {
-  // Note: We should scan range backward to terminate faster.
-  for (auto* pRunner : ranges_) {
-    if (pRunner->m_lStart > lPosn) {
-      pRunner->m_lStart += iDelta;
-      if (pRunner->m_lStart < lPosn)
-        pRunner->m_lStart = lPosn;
-      else if (pRunner->m_lStart > GetEnd())
-        pRunner->m_lStart = GetEnd();
-    }
-
-    if (pRunner->m_lEnd > lPosn) {
-      pRunner->m_lEnd += iDelta;
-      if (pRunner->m_lEnd < lPosn)
-        pRunner->m_lEnd = lPosn;
-      else if (pRunner->m_lEnd > GetEnd())
-        pRunner->m_lEnd = GetEnd();
-    }
-  }
-
   // Remove empty interval
   if (iDelta < 0) {
     auto const lBufEnd1 = GetEnd() + 1;

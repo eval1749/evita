@@ -8,6 +8,7 @@
 
 #include "base/logging.h"
 #include "evita/text/buffer.h"
+#include "evita/text/range_list.h"
 #include "evita/ed_undo.h"
 
 // Smart handle for HGLOBAL
@@ -98,12 +99,12 @@ Range::Range(Buffer* pBuffer, Posn lStart, Posn lEnd)
       m_lStart(lStart),
       m_pBuffer(pBuffer) {
   DCHECK(m_pBuffer->IsValidRange(m_lStart, m_lEnd));
-  m_pBuffer->InternalAddRange(this);
+  m_pBuffer->ranges()->AddRange(this);
 }
 
 Range::~Range() {
   if (m_pBuffer)
-    m_pBuffer->InternalRemoveRange(this);
+    m_pBuffer->ranges()->RemoveRange(this);
 }
 
 void Range::Collapse(CollapseWhich eCollapse) {

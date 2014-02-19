@@ -3,9 +3,13 @@
 #if !defined(INCLUDE_evita_text_buffer_h)
 #define INCLUDE_evita_text_buffer_h
 
-#include <unordered_set>
+#include <memory>
 
 #include "base/basictypes.h"
+#pragma warning(push)
+#pragma warning(disable: 4625 4626)
+#include "base/observer_list.h"
+#pragma warning(pop)
 #include "base/strings/string16.h"
 #include "base/time/time.h"
 #include "evita/ed_BinTree.h"
@@ -18,9 +22,11 @@
 namespace text {
 
 class Buffer;
+class BufferMutationObserver;
 class Interval;
 class Mode;
 class Range;
+class RangeList;
 class UndoManager;
 
 /// <summary>
@@ -68,7 +74,8 @@ class Buffer : public BufferCore, public FileFeatures {
   protected: typedef BinaryTree<Interval> IntervalTree;
 
   private: HANDLE m_hObjHeap;
-  private: std::unordered_set<Range*> ranges_;
+  private: ObserverList<BufferMutationObserver> observers_;
+  private: std::unique_ptr<RangeList> ranges_;
   private: Mode* m_pMode;
 
   protected: bool m_fUndo;
@@ -118,6 +125,9 @@ class Buffer : public BufferCore, public FileFeatures {
   }
 
   public: const base::string16& name() const { return name_; }
+  public: RangeList* ranges() const { return ranges_.get(); }
+
+  public: void AddObserver(BufferMutationObserver* observer);
 
   // [C]
   public: bool CanRedo() const;
@@ -334,6 +344,8 @@ class Buffer : public BufferCore, public FileFeatures {
     public: EnumInterval(const Buffer* pBuffer) :
       Intervals::Enum(&pBuffer->m_oIntervals) {}
   };
+
+  DISALLOW_COPY_AND_ASSIGN(Buffer);
 };
 
 /// <summary>

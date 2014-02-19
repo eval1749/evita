@@ -9,8 +9,10 @@
 
 namespace text {
 
+class RangeList;
+
 class Range {
-  friend class Buffer;
+  friend class RangeList;
 
   public: struct Information {
       bool m_fLineNum;

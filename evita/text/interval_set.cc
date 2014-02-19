@@ -60,10 +60,12 @@ void IntervalSet::DidDeleteAt(int offset, size_t text_length) {
   {
     auto interval = list_.GetLast();
     while (interval && interval->m_lEnd > offset) {
-      auto const next = interval = interval->GetPrev();
+      auto const next = interval->GetPrev();
       auto const start = interval->m_lStart > offset ?
-          interval->m_lStart - text_length : interval->m_lStart;
-      auto const end = interval->m_lEnd - text_length;
+          static_cast<Posn>(interval->m_lStart - text_length) : offset;
+      DCHECK_GE(start, static_cast<Posn>(offset));
+      auto const end = static_cast<Posn>(interval->m_lEnd - text_length);
+      DCHECK_GE(end, static_cast<Posn>(offset));
       if (start == end) {
         list_.Delete(interval);
         tree_.Delete(interval);

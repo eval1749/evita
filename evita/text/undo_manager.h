@@ -6,6 +6,7 @@
 #define INCLUDE_evita_text_undo_manager_h
 
 #include "base/strings/string16.h"
+#include "evita/text/buffer_mutation_observer.h"
 
 namespace text {
 
@@ -18,7 +19,7 @@ class Record;
 // m_fTruncate
 // We truncate edit log if undo/redo operation is interrupted.
 //
-class UndoManager {
+class UndoManager : public BufferMutationObserver {
   public: enum State {
     State_Disabled,
     State_Log,
@@ -76,6 +77,10 @@ class UndoManager {
 
   // [U]
   public: Posn Undo(Posn, Count);
+
+  // BufferMutationObserver
+  private: virtual void DidInsertAt(Posn offset, size_t length) override;
+  private: virtual void WillDeleteAt(Posn offset, size_t length) override;
 
   DISALLOW_COPY_AND_ASSIGN(UndoManager);
 };

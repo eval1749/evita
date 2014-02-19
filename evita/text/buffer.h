@@ -149,10 +149,6 @@ class Buffer : public BufferCore, public FileFeatures {
   // [I]
   public: Count IncCharTick(int n) { return m_nCharTick += n; }
   public: Count Insert(Posn, const char16*, Count);
-  public: Range* InternalAddRange(Range*);
-  public: void InternalDelete(Posn, Posn);
-  public: void InternalInsert(Posn, const char16*, Count);
-  public: void InternalRemoveRange(Range*);
   public: bool IsModified() const { return m_nCharTick != m_nSaveTick; }
   public: bool IsNotReady() const;
   public: bool IsReadOnly() const { return m_fReadOnly; }

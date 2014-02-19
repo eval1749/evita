@@ -218,7 +218,7 @@ void DeleteRecord::insertChars(Buffer* pBuffer) const {
   auto lPosn = m_lStart;
   foreach (EnumChars, oEnum, this) {
     auto const pChars = oEnum.Get();
-    pBuffer->InternalInsert(lPosn, pChars->GetString(), pChars->GetLength());
+    pBuffer->Insert(lPosn, pChars->GetString(), pChars->GetLength());
     lPosn += pChars->GetLength();
   }
 }
@@ -424,13 +424,13 @@ size_t InsertRecord::GetSize() const {
 }
 
 void InsertRecord::Redo(Buffer* pBuffer) {
-  pBuffer->InternalDelete(m_lStart, m_lEnd);
+  pBuffer->Delete(m_lStart, m_lEnd);
   pBuffer->IncCharTick(1);
 }
 
 void InsertRecord::Undo(Buffer* pBuffer) {
   pBuffer->GetUndo()->RecordDelete(m_lStart, m_lEnd);
-  pBuffer->InternalDelete(m_lStart, m_lEnd);
+  pBuffer->Delete(m_lStart, m_lEnd);
   pBuffer->IncCharTick(-1);
 }
 
@@ -453,6 +453,7 @@ UndoManager::UndoManager(Buffer* pBuffer)
       m_pLast(nullptr),
       m_pRedo(nullptr),
       m_pUndo(nullptr) {
+  m_pBuffer->AddObserver(this);
 }
 
 UndoManager::~UndoManager() {
@@ -761,6 +762,26 @@ Posn UndoManager::Undo(Posn lPosn, Count lCount) {
   return lPosn;
 }
 
+
+// BufferMutationObserver
+void UndoManager::DidInsertAt(Posn offset, size_t length) {
+  if (m_eState != State_Log)
+    return;
+  CheckPoint();
+  RecordInsert(offset, static_cast<Posn>(offset + length));
+}
+
+void UndoManager::WillDeleteAt(Posn offset, size_t length) {
+  if (m_eState != State_Log)
+    return;
+  CheckPoint();
+  RecordDelete(offset, static_cast<Posn>(offset + length));
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// UndoBlock
+//
 UndoBlock::~UndoBlock() {
   buffer_->EndUndoGroup(name_);
 }

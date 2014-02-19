@@ -88,17 +88,21 @@ Count Buffer::Delete(Posn lStart, Posn lEnd) {
   lStart = std::max(lStart, static_cast<Posn>(0));
   lEnd   = std::min(lEnd, GetEnd());
 
-  if (lEnd <= lStart)
+  auto const length = lEnd - lStart;
+  if (!length)
     return 0;
 
-  if (undo_manager_) {
-    undo_manager_->CheckPoint();
-    undo_manager_->RecordDelete(lStart, lEnd);
-  }
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
+      WillDeleteAt(lStart, static_cast<size_t>(length)));
 
-  InternalDelete(lStart, lEnd);
+  deleteChars(lStart, lEnd);
+  ++m_nModfTick;
+
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
+      DidDeleteAt(lStart, static_cast<size_t>(length)));
+
   onChange();
-  return lEnd - lStart;
+  return length;
 }
 
 const StyleValues* Buffer::GetDefaultStyle() const {
@@ -120,14 +124,11 @@ Count Buffer::Insert(Posn lPosn, const char16* pwch, Count n) {
   if (n <= 0)
     return 0;
   lPosn = std::min(lPosn, GetEnd());
-
-  InternalInsert(lPosn, pwch, n);
+  insert(lPosn, pwch, n);
+  ++m_nModfTick;
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
+      DidInsertAt(lPosn, static_cast<size_t>(n)));
   onChange();
-
-  if (undo_manager_) {
-    undo_manager_->CheckPoint();
-    undo_manager_->RecordInsert(lPosn, lPosn + n);
-  }
 
   return n;
 }
@@ -140,6 +141,7 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
   auto const text_length = text.length();
   if (!text_length)
     return;
+
   insert(position, text.data(), static_cast<Count>(text_length));
   ++m_nModfTick;
 
@@ -147,25 +149,6 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
       DidInsertBefore(position, text_length));
 
   onChange();
-  if (undo_manager_) {
-    auto const change_end = static_cast<Posn>(position + text_length);
-    undo_manager_->CheckPoint();
-    undo_manager_->RecordInsert(position, change_end);
-  }
-}
-
-void Buffer::InternalDelete(Posn lStart, Posn lEnd) {
-  Count n = deleteChars(lStart, lEnd);
-  ++m_nModfTick;
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-      DidDeleteAt(lStart, static_cast<size_t>(n)));
-}
-
-void Buffer::InternalInsert(Posn lPosn, const char16* pwch, Count n) {
-  insert(lPosn, pwch, n);
-  ++m_nModfTick;
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-      DidInsertAt(lPosn, static_cast<size_t>(n)));
 }
 
 bool Buffer::IsNotReady() const {

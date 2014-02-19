@@ -1,438 +1,319 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #include "evita/text/range.h"
 
 #include <algorithm>
 
+#include "base/logging.h"
 #include "evita/text/buffer.h"
 #include "evita/ed_undo.h"
 
 // Smart handle for HGLOBAL
 template<class T>
-class Global
-{
-    private: HGLOBAL m_h;
-    private: T*      m_p;
+class Global {
+  private: HGLOBAL m_h;
+  private: T*      m_p;
 
-    public: Global() : m_h(NULL), m_p(NULL) {}
+  public: Global() : m_h(nullptr), m_p(nullptr) {
+  }
 
-    public: ~Global()
-    {
-        if (m_h != NULL)
-        {
-            if (m_p != NULL) ::GlobalUnlock(m_h);
-            ::GlobalFree(m_h);
-        }
-    } // ~Global
-
-    public: operator HANDLE()
-        { return reinterpret_cast<HANDLE>(m_h); }
-
-    public: bool Alloc(size_t cb)
-    {
-        ASSERT(m_h == NULL);
-        m_h = ::GlobalAlloc(GMEM_MOVEABLE, cb);
-        return m_h != NULL;
-    } // Alloc
-
-    public: void Detach()
-    {
-        ASSERT(m_p == NULL);
-        ASSERT(m_h != NULL);
-        m_h = NULL;
-    } // Detach
-
-    public: T* Lock()
-    {
-        if (m_h == NULL) return NULL;
-        return m_p = reinterpret_cast<T*>(::GlobalLock(m_h));
-    } // Lock
-
-    public: void Unlock()
-    {
-        if (m_h == NULL) return;
-        if (m_p == NULL) return;
-        m_p = NULL;
+  public: ~Global() {
+    if (m_h) {
+      if (m_p)
         ::GlobalUnlock(m_h);
-    } // Unlock
-}; // Global
-
-/// <remark>
-///  Smart handle for Windows clipboard
-/// </remark>
-class Clipboard
-{
-    private: BOOL m_fSucceeded;
-    private: mutable HANDLE m_hGlobal;
-
-    public: Clipboard() : m_hGlobal(NULL)
-        { m_fSucceeded = ::OpenClipboard(NULL); }
-
-    public: ~Clipboard()
-    {
-        if (NULL != m_hGlobal) ::GlobalUnlock(m_hGlobal);
-        if (m_fSucceeded) ::CloseClipboard();
-    } // ~Clipboard
-
-    public: BOOL Empty()
-        { return ::EmptyClipboard(); }
-
-    public: char16* GetText() const
-    {
-        m_hGlobal = ::GetClipboardData(CF_UNICODETEXT);
-        if (NULL == m_hGlobal) return NULL;
-
-        return reinterpret_cast<char16*>(::GlobalLock(m_hGlobal));
-    } // GetText
-
-    public: BOOL HasFormat(uint uFormat) const
-        { return ::IsClipboardFormatAvailable(uFormat); }
-
-    public: BOOL IsOpen() const { return m_fSucceeded; }
-
-    public: bool Set(HANDLE h)
-        { return ::SetClipboardData(CF_UNICODETEXT, h) != NULL; }
-}; // Clipboard
-
-namespace text
-{
-
-/// <summary>
-///   Constructs Range object for Buffer with specified range.
-/// </summary>
-/// <param name="pBuffer">Buffer object for Range</param>
-/// <param name="lStart">Start position</param>
-/// <param name="lEnd">End position</param>
-Range::Range(Buffer* pBuffer, Posn lStart, Posn lEnd) :
-    m_lEnd(lEnd),
-    m_lStart(lStart),
-    m_pBuffer(pBuffer)
-{
-    ASSERT(m_pBuffer->IsValidRange(m_lStart, m_lEnd));
-    m_pBuffer->InternalAddRange(this);
-} // Range::Range
-
-/// <summary>
-///  Remove this range from buffer
-/// </summary>
-Range::~Range()
-{
-    DEBUG_PRINTF("%p\n", this);
-    if (NULL != m_pBuffer)
-    {
-        m_pBuffer->InternalRemoveRange(this);
+      ::GlobalFree(m_h);
     }
-} // Range::~Range
+  }
 
-/// <summary>
-///  Collapse this range to specified end.
-/// </summary>
-/// <param name="eCollapse">Collapse direction</param>
-void Range::Collapse(CollapseWhich eCollapse)
-{
-    switch (eCollapse)
-    {
-    case Collapse_End:
-        m_lStart = m_lEnd;
-        break;
+  public: operator HANDLE() { return reinterpret_cast<HANDLE>(m_h); }
 
-    case Collapse_Start:
-        m_lEnd = m_lStart;
-        break;
-    }
-} // Range::Collapse
+  public: bool Alloc(size_t cb) {
+    DCHECK(!m_h);
+    m_h = ::GlobalAlloc(GMEM_MOVEABLE, cb);
+    return m_h != nullptr;
+  }
 
-/// <summary>
-///  Copies contents of this range into Windows clipboard
-/// </summary>
-/// <returns>Number of characters copied to clipboard</returns>
-/// <seealso cref="Range::Cut"/>
-/// <seealso cref="Range::Paste"/>
-Count Range::Copy()
-{
-    if (m_lStart == m_lEnd)
-    {
-        return 0;
-    }
+  public: void Detach() {
+    DCHECK(!m_p);
+    DCHECK(m_h);
+    m_h = nullptr;
+  }
 
-    Count cwch = 0;
-    for (Posn lPosn = m_lStart; lPosn < m_lEnd; lPosn += 1)
-    {
-        char16 wch = m_pBuffer->GetCharAt(lPosn);
-        if (wch == 0x0A)
-        {
-            cwch += 1;
-        }
+  public: T* Lock() {
+    if (!m_h)
+      return nullptr;
+    return m_p = reinterpret_cast<T*>(::GlobalLock(m_h));
+  }
 
-        cwch += 1;
-    } // for posn
-
-    size_t cb = sizeof(char16) * (cwch + 1);
-
-    Global<char16> oGlobal;
-    if (! oGlobal.Alloc(cb)) return 0;
-
-    {
-        char16* pwch = oGlobal.Lock();
-
-        if (NULL == pwch) return 0;
-
-        for (Posn lPosn = m_lStart; lPosn < m_lEnd; lPosn += 1)
-        {
-            char16 wch = m_pBuffer->GetCharAt(lPosn);
-            if (wch == 0x0A)
-            {
-                *pwch++ = 0x0D;
-            }
-            *pwch++ = wch;
-        } // for posn
-
-        *pwch = 0;
-
-        oGlobal.Unlock();
-    }
-
-    Clipboard oClipboard;
-    if (! oClipboard.IsOpen()) return 0;
-    if (! oClipboard.Empty()) return 0;
-    if (! oClipboard.Set(oGlobal)) return 0;
-
-    oGlobal.Detach();
-
-    return cwch;
-} // Range::Copy
-
-/// <summary>
-///   Returns valid position
-/// </summary>
-/// <param name="lPosn">Position to validate</param>
-/// <returns>Valid position</returns>
-Posn Range::ensurePosn(Posn lPosn) const
-{
-    if (lPosn < 0) return 0;
-    if (lPosn > m_pBuffer->GetEnd()) return m_pBuffer->GetEnd();
-    return lPosn;
-} // ensurePosn
-
-/// <summary>
-///   Find specified character in range from start.
-/// </summary>
-/// <returns>Position of character or -1 if not found</returns>
-Posn Range::FindFirstChar(char16 wchFind) const
-{
-    foreach (Buffer::EnumChar, oEnum, this)
-    {
-        if (oEnum.Get() == wchFind)
-        {
-            return oEnum.GetPosn();
-        }
-    } // for posn
-
-    return -1;
-} // Range::FindFirstChar
-
-/// <summary>
-///   Retrive line number and column of this range.
-/// </summary>
-/// <param name="n">Maximum number of scanning</param>
-/// <param name="out_oInfo">Information to be return</param>
-// FIXME 2007-07-18 yosi We should stop if counter reaches zero.
-void Range::GetInformation(Information* out_oInfo, Count n) const
-{
-    Count k = n;
-    out_oInfo->m_lLineNum = 1;
-    for (Posn lPosn = 0; lPosn < m_lStart; lPosn++)
-    {
-        if (m_pBuffer->GetCharAt(lPosn) == 0x0A)
-        {
-            out_oInfo->m_lLineNum += 1;
-        }
-    } // for posn
-
-    out_oInfo->m_fLineNum = k > 0;
-
-    Posn lLineStart = m_pBuffer->ComputeStartOfLine(m_lStart);
-    out_oInfo->m_fColumn = (m_lStart - lLineStart) < n;
-    out_oInfo->m_lColumn = m_lStart - lLineStart;
-} // Range::GetInformation
-
-/// <summary>
-///  Get contents of this range as C-string.
-/// </summary>
-/// <returns>C-string</returns>
-/// <seealso cref="Range::SetText(const char16*, int)"/>
-base::string16 Range::GetText() const
-{
-    return m_pBuffer->GetText(m_lStart, m_lEnd);
-} // Range::GetText
-
-/// <summary>
-///  Replace this range with Windows clipboard
-/// </summary>
-/// <seealso cref="Range::Copy"/>
-/// <seealso cref="Range::Cut"/>
-void Range::Paste()
-{
-    if (m_pBuffer->IsReadOnly())
-    {
+  public: void Unlock() {
+    if (!m_h || !m_p)
         return;
-    }
+    m_p = nullptr;
+    ::GlobalUnlock(m_h);
+  }
+};
 
-    Clipboard oClipboard;
-    if (! oClipboard.IsOpen())
-    {
-        return;
-    }
+//  Smart handle for Windows clipboard
+class Clipboard {
+  private: bool m_fSucceeded;
+  private: mutable HANDLE m_hGlobal;
 
-    char16* pwsz = oClipboard.GetText();
-    if (NULL == pwsz)
-    {
-        return;
-    }
+  public: Clipboard()
+      : m_fSucceeded(::OpenClipboard(nullptr)), m_hGlobal(nullptr) {
+  }
 
-    if (0 == *pwsz)
-    {
-        return;
-    }
+  public: ~Clipboard() {
+    if (m_hGlobal)
+      ::GlobalUnlock(m_hGlobal);
+    if (m_fSucceeded)
+      ::CloseClipboard();
+  }
 
-    UndoBlock oUndo(this, L"Range.Paste");
+  public: bool Empty() { return ::EmptyClipboard(); }
 
-    m_pBuffer->Delete(m_lStart, m_lEnd);
+  public: char16* GetText() const {
+    m_hGlobal = ::GetClipboardData(CF_UNICODETEXT);
+    if (!m_hGlobal)
+      return nullptr;
+    return reinterpret_cast<char16*>(::GlobalLock(m_hGlobal));
+  }
 
-    Posn lPosn = m_lStart;
-    char16* pwchStart = pwsz;
-    enum { Start, Normal, Cr } eState = Start;
-    while (0 != *pwsz)
-    {
-        switch (eState)
-        {
-        case Normal:
-            if (0x0D == *pwsz)
-            {
-                eState = Cr;
-            }
-            break;
+  public: bool HasFormat(uint uFormat) const {
+    return ::IsClipboardFormatAvailable(uFormat);
+  }
 
-        case Cr:
-            switch (*pwsz)
-            {
-            case 0x0A:
-            {
-                pwsz[-1] = 0x0A;
-                Count k = static_cast<Count>(pwsz - pwchStart);
-                m_pBuffer->Insert(lPosn, pwchStart, k);
-                lPosn += k;
-                eState = Start;
-                pwchStart = pwsz + 1;
-                break;
-            } // 0x0A
+  public: bool IsOpen() const { return m_fSucceeded; }
 
-            case 0x0D:
-                break;
+  public: bool Set(HANDLE h) {
+    return ::SetClipboardData(CF_UNICODETEXT, h);
+  }
+};
 
-            default:
-                eState = Normal;
-                break;
-            }
-            break;
+namespace text {
 
-        case Start:
-            eState = 0x0D == *pwsz ? Cr : Normal;
-            break;
-        } // switch eState
-        pwsz++;
-    } // while
-
-    if (Start != eState)
-    {
-        Count k = static_cast<Count>(pwsz - pwchStart);
-        m_pBuffer->Insert(lPosn, pwchStart, k);
-        lPosn += k;
-    }
-
-    m_lStart = lPosn;
-    m_lEnd   = lPosn;
-} // Range::Paste
-
-// Range::SetEnd
-Posn Range::SetEnd(Posn lPosn)
-{
-    SetRange(m_lStart, lPosn);
-    return m_lEnd;
-} // Range::SetEnd
-
-// Range::SetRange
-void Range::SetRange(Posn lStart, Posn lEnd)
-{
-    lStart = ensurePosn(lStart);
-    lEnd   = ensurePosn(lEnd);
-    if (lStart > lEnd) swap(lStart, lEnd);
-    m_lStart = lStart;
-    m_lEnd   = lEnd;
-} // Range::SetRange
-
-// Range::SetStart
-Posn Range::SetStart(Posn lPosn)
-{
-    SetRange(lPosn, m_lEnd);
-    return m_lStart;
-} // Range::SetStart
-
-/// <summary>
-///  Replace contents of this range with specified string.
-/// </summary>
-/// <param name="pwch">Start of string</param>
-/// <param name="cwch">Number of characters in string</param>
-/// <returns>Number of characters of string.</returns>
-/// <seealso cref="Range::GetText(void)"/>
-void Range::SetText(const base::string16& text)
-{
-    if (m_pBuffer->IsReadOnly())
-    {
-        // TODO: We should throw read only buffer exception.
-        return;
-    }
-
-    if (m_lStart == m_lEnd)
-    {
-      UndoBlock oUndo(this, L"Range.SetText");
-      m_pBuffer->Insert(m_lStart, text.data(),
-                        static_cast<Count>(text.length()));
-    }
-    else
-    {
-        UndoBlock oUndo(this, L"Range.SetText");
-        m_pBuffer->Delete(m_lStart, m_lEnd);
-        m_pBuffer->Insert(m_lStart, text.data(),
-                          static_cast<Count>(text.length()));
-    } // if
-
-    m_lEnd = ensurePosn(static_cast<Posn>(m_lStart + text.length()));
+Range::Range(Buffer* pBuffer, Posn lStart, Posn lEnd)
+    : m_lEnd(lEnd),
+      m_lStart(lStart),
+      m_pBuffer(pBuffer) {
+  DCHECK(m_pBuffer->IsValidRange(m_lStart, m_lEnd));
+  m_pBuffer->InternalAddRange(this);
 }
 
-/// <summary>
-///  Constructs buffer character enumerator from range.
-/// </summary>
-/// <param name="pRange">Range for enumeration</param>
-Buffer::EnumChar::EnumChar(const Range* pRange) :
-    m_lEnd(pRange->GetEnd()),
-    m_lPosn(pRange->GetStart()),
-    m_pBuffer(pRange->GetBuffer()) {}
+Range::~Range() {
+  if (m_pBuffer)
+    m_pBuffer->InternalRemoveRange(this);
+}
 
-/// <summary>
-///  Constructs buffer reverse character enumerator from range.
-/// </summary>
-/// <param name="pRange">Range for enumeration</param>
-Buffer::EnumCharRev::EnumCharRev(const Range* pRange) :
-    m_lStart(pRange->GetStart()),
-    m_lPosn(pRange->GetEnd()),
-    m_pBuffer(pRange->GetBuffer()) {}
+void Range::Collapse(CollapseWhich eCollapse) {
+  switch (eCollapse) {
+  case Collapse_End:
+    m_lStart = m_lEnd;
+    break;
+  case Collapse_Start:
+    m_lEnd = m_lStart;
+    break;
+  default:
+    NOTREACHED();
+  }
+}
 
-/// <summary>
-///  Construct UndoBlock with specified range and name
-/// </summary>
-/// <param name="p">Range</param>
-/// <param name="s">Name of undo block</param>
+Count Range::Copy() {
+  if (m_lStart == m_lEnd)
+    return 0;
+
+  Count cwch = 0;
+  for (Posn lPosn = m_lStart; lPosn < m_lEnd; lPosn += 1) {
+    auto const wch = m_pBuffer->GetCharAt(lPosn);
+    if (wch == 0x0A)
+      ++cwch;
+    ++cwch;
+  }
+
+  auto const cb = sizeof(char16) * (cwch + 1);
+
+  Global<char16> oGlobal;
+  if (!oGlobal.Alloc(cb))
+    return 0;
+
+  {
+    auto pwch = oGlobal.Lock();
+    if (!pwch)
+      return 0;
+    for (Posn lPosn = m_lStart; lPosn < m_lEnd; lPosn += 1) {
+      auto const wch = m_pBuffer->GetCharAt(lPosn);
+      if (wch == 0x0A)
+        *pwch++ = 0x0D;
+      *pwch++ = wch;
+    }
+    *pwch = 0;
+    oGlobal.Unlock();
+  }
+
+  Clipboard oClipboard;
+  if (!oClipboard.IsOpen())
+    return 0;
+  if (!oClipboard.Empty())
+    return 0;
+  if (!oClipboard.Set(oGlobal))
+    return 0;
+
+  oGlobal.Detach();
+  return cwch;
+}
+
+Posn Range::ensurePosn(Posn lPosn) const {
+  if (lPosn < 0)
+    return 0;
+  if (lPosn > m_pBuffer->GetEnd())
+    return m_pBuffer->GetEnd();
+  return lPosn;
+}
+
+Posn Range::FindFirstChar(char16 wchFind) const {
+  foreach (Buffer::EnumChar, oEnum, this) {
+    if (oEnum.Get() == wchFind)
+        return oEnum.GetPosn();
+  }
+    return -1;
+}
+
+// FIXME 2007-07-18 yosi We should stop if counter reaches zero.
+void Range::GetInformation(Information* out_oInfo, Count n) const {
+  Count k = n;
+  out_oInfo->m_lLineNum = 1;
+  for (Posn lPosn = 0; lPosn < m_lStart; lPosn++) {
+    if (m_pBuffer->GetCharAt(lPosn) == 0x0A)
+      ++out_oInfo->m_lLineNum;
+  }
+
+  out_oInfo->m_fLineNum = k > 0;
+  auto const lLineStart = m_pBuffer->ComputeStartOfLine(m_lStart);
+  out_oInfo->m_fColumn = (m_lStart - lLineStart) < n;
+  out_oInfo->m_lColumn = m_lStart - lLineStart;
+}
+
+base::string16 Range::GetText() const {
+  return m_pBuffer->GetText(m_lStart, m_lEnd);
+}
+
+void Range::Paste() {
+  if (m_pBuffer->IsReadOnly())
+    return;
+
+  Clipboard oClipboard;
+  if (!oClipboard.IsOpen())
+    return;
+
+  char16* pwsz = oClipboard.GetText();
+  if (!pwsz)
+    return;
+
+  if (!*pwsz)
+    return;
+
+  UndoBlock oUndo(this, L"Range.Paste");
+
+  m_pBuffer->Delete(m_lStart, m_lEnd);
+
+  auto lPosn = m_lStart;
+  auto pwchStart = pwsz;
+  enum { Start, Normal, Cr } eState = Start;
+  while (*pwsz) {
+    switch (eState) {
+      case Normal:
+        if (0x0D == *pwsz)
+          eState = Cr;
+        break;
+
+      case Cr:
+        switch (*pwsz) {
+          case 0x0A: {
+            pwsz[-1] = 0x0A;
+            Count k = static_cast<Count>(pwsz - pwchStart);
+            m_pBuffer->Insert(lPosn, pwchStart, k);
+            lPosn += k;
+            eState = Start;
+            pwchStart = pwsz + 1;
+            break;
+        }
+
+          case 0x0D:
+            break;
+
+          default:
+            eState = Normal;
+            break;
+        }
+        break;
+
+      case Start:
+        eState = 0x0D == *pwsz ? Cr : Normal;
+        break;
+    }
+    ++pwsz;
+  }
+
+  if (Start != eState) {
+    auto const k = static_cast<Count>(pwsz - pwchStart);
+    m_pBuffer->Insert(lPosn, pwchStart, k);
+    lPosn += k;
+  }
+
+  m_lStart = lPosn;
+  m_lEnd   = lPosn;
+}
+
+Posn Range::SetEnd(Posn lPosn) {
+  SetRange(m_lStart, lPosn);
+  return m_lEnd;
+}
+
+void Range::SetRange(Posn lStart, Posn lEnd) {
+  lStart = ensurePosn(lStart);
+  lEnd   = ensurePosn(lEnd);
+  if (lStart > lEnd)
+    swap(lStart, lEnd);
+  m_lStart = lStart;
+  m_lEnd   = lEnd;
+}
+
+Posn Range::SetStart(Posn lPosn) {
+  SetRange(lPosn, m_lEnd);
+  return m_lStart;
+}
+
+void Range::SetText(const base::string16& text) {
+  if (m_pBuffer->IsReadOnly()) {
+    // TODO: We should throw read only buffer exception.
+    return;
+  }
+
+  if (m_lStart == m_lEnd) {
+    UndoBlock oUndo(this, L"Range.SetText");
+    m_pBuffer->Insert(m_lStart, text.data(), static_cast<Count>(text.length()));
+  } else {
+    UndoBlock oUndo(this, L"Range.SetText");
+    m_pBuffer->Delete(m_lStart, m_lEnd);
+    m_pBuffer->Insert(m_lStart, text.data(), static_cast<Count>(text.length()));
+  }
+
+  m_lEnd = ensurePosn(static_cast<Posn>(m_lStart + text.length()));
+}
+
+Buffer::EnumChar::EnumChar(const Range* pRange)
+    : m_lEnd(pRange->GetEnd()),
+      m_lPosn(pRange->GetStart()),
+      m_pBuffer(pRange->GetBuffer()) {
+}
+
+Buffer::EnumCharRev::EnumCharRev(const Range* pRange)
+    : m_lStart(pRange->GetStart()),
+      m_lPosn(pRange->GetEnd()),
+      m_pBuffer(pRange->GetBuffer()) {
+}
+
 UndoBlock::UndoBlock(Range* range, const base::string16& name)
     : UndoBlock(range->GetBuffer(), name) {
 }

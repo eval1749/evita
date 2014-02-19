@@ -1,72 +1,60 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - edit range
-// listener/winapp/ed_range.h
-//
-// Copyright (C) 1996-2008 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_Range.h#5 $
-//
-#if !defined(INCLUDE_edit_range_h)
-#define INCLUDE_edit_range_h
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#if !defined(INCLUDE_evita_text_range_h)
+#define INCLUDE_evita_text_range_h
 
 #include "base/strings/string16.h"
 
-namespace text
-{
+namespace text {
 
-/// <summary>
-///  Represents a range in buffer.
-/// </summary>
-class Range //: public ObjectInHeap
-{
-    friend class Buffer;
+class Range {
+  friend class Buffer;
 
-    public: struct Information
-    {
-        bool    m_fLineNum;
-        bool    m_fColumn;
-        Count   m_lLineNum;
-        Count   m_lColumn;
-    }; // Information
+  public: struct Information {
+      bool m_fLineNum;
+      bool m_fColumn;
+      Count m_lLineNum;
+      Count m_lColumn;
+  }; // Information
 
-    private: Posn       m_lStart;
-    private: Posn       m_lEnd;
-    private: Buffer*    m_pBuffer;
+  private: Posn m_lStart;
+  private: Posn m_lEnd;
+  private: Buffer* m_pBuffer;
 
-    public: Range(Buffer*, Posn, Posn);
-    public: ~Range();
+  public: Range(Buffer*, Posn, Posn);
+  public: ~Range();
 
-    // [C]
-    public: void  Collapse(CollapseWhich = Collapse_Start);
-    public: Count Copy();
+  // [C]
+  public: void Collapse(CollapseWhich = Collapse_Start);
+  public: Count Copy();
 
-    // [E]
-    private: Posn  ensurePosn(Posn) const;
+  // [E]
+  private: Posn ensurePosn(Posn) const;
 
-    // [F]
-    public: Posn FindFirstChar(char16) const;
+  // [F]
+  public: Posn FindFirstChar(char16) const;
 
-    // [G]
-    public: Buffer* GetBuffer() const { return m_pBuffer; }
-    public: Posn    GetEnd()    const { return m_lEnd; }
-    public: void    GetInformation(Information*, Count = Count_Max) const;
-    public: Posn    GetStart()  const { return m_lStart; }
-    public: base::string16 GetText() const;
+  // [G]
+  public: Buffer* GetBuffer() const { return m_pBuffer; }
+  public: Posn GetEnd() const { return m_lEnd; }
+  public: void GetInformation(Information*, Count = Count_Max) const;
+  public: Posn GetStart() const { return m_lStart; }
+  public: base::string16 GetText() const;
 
-    // [P]
-    public: void Paste();
+  // [P]
+  public: void Paste();
 
-    // [S]
-    public: Posn  SetEnd(Posn);
-    public: void  SetRange(Posn start, Posn end);
-    public: Posn  SetStart(Posn);
-    public: void SetText(const base::string16& text);
+  // [S]
+  public: Posn SetEnd(Posn);
+  public: void SetRange(Posn start, Posn end);
+  public: Posn SetStart(Posn);
+  public: void SetText(const base::string16& text);
 
-    DISALLOW_COPY_AND_ASSIGN(Range);
-}; // Range
+  DISALLOW_COPY_AND_ASSIGN(Range);
+};
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_edit_range_h)
+#endif //!defined(INCLUDE_evita_text_range_h)

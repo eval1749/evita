@@ -292,7 +292,6 @@ void Range::SetText(const base::string16& text) {
   }
 
   if (m_lStart == m_lEnd) {
-    UndoBlock oUndo(this, L"Range.SetText");
     m_pBuffer->Insert(m_lStart, text.data(), static_cast<Count>(text.length()));
   } else {
     UndoBlock oUndo(this, L"Range.SetText");

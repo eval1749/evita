@@ -43,24 +43,17 @@ void Buffer::AddObserver(BufferMutationObserver* observer) {
 }
 
 bool Buffer::CanRedo() const {
-  if (!m_pUndo)
-    return false;
   return m_pUndo->CanRedo();
 }
 
 /// <summary>
 ///   Returns true if this buffer undo-able.
 /// </summary>
-bool Buffer::CanUndo() const
-{
-  if (!m_pUndo)
-    return false;
+bool Buffer::CanUndo() const {
   return m_pUndo->CanUndo();
 }
 
 void Buffer::ClearUndo() {
-  if (!m_pUndo)
-    return;
   m_pUndo->Empty();
 }
 
@@ -189,7 +182,7 @@ void Buffer::onChange() {
 }
 
 Posn Buffer::Redo(Posn lPosn, Count n) {
-  if (IsReadOnly() || !m_pUndo)
+  if (IsReadOnly())
     return -1;
   return m_pUndo->Redo(lPosn, n);
 }
@@ -204,7 +197,7 @@ void Buffer::SetMode(Mode* mode) {
 }
 
 Posn Buffer::Undo(Posn lPosn, Count n) {
-  if (IsReadOnly() || !m_pUndo)
+  if (IsReadOnly())
     return -1;
   return m_pUndo->Undo(lPosn, n);
 }

@@ -172,6 +172,7 @@ class Buffer : public BufferCore, public FileFeatures {
 
   // [R]
   public: Posn Redo(Posn, Count = 1);
+  public: void RemoveObserver(BufferMutationObserver* observer);
 
   // [S]
   public: void SetFile(const base::string16& filename,
@@ -194,36 +195,6 @@ class Buffer : public BufferCore, public FileFeatures {
 
   // Buffer management methods
   private: void onChange();
-  private: void relocate(Posn, Count);
-
-  // ChangeTracker
-  public: class ChangeTracker :  public DoubleLinkedNode_<ChangeTracker> {
-    friend class Buffer;
-
-    private: Posn m_lStart;
-    private: Posn m_lEnd;
-
-    public: ChangeTracker() { Reset(); }
-
-    public: Posn GetStart() const { return m_lStart; }
-    public: Posn GetEnd() const { return m_lEnd; }
-
-    public: void Reset() {
-      m_lStart = Posn_Max;
-      m_lEnd = 0;
-    }
-  };
-
-  private: typedef DoubleLinkedList_<ChangeTracker> ChangeTrackers;
-  private: ChangeTrackers m_oChangeTrackers;
-
-  public: void RegisterChangeTracker(ChangeTracker* p) {
-    m_oChangeTrackers.Append(p);
-  }
-
-  public: void UnregisterChangeTracker(ChangeTracker* p) {
-    m_oChangeTrackers.Delete(p);
-  }
 
   /// <summary>
   /// Buffer character enumerator

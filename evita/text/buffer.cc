@@ -158,23 +158,16 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
   SetStyle(position, change_end, position ? GetStyleAt(position - 1) :
                                             GetDefaultStyle());
 
-  foreach (ChangeTrackers::Enum, enum_tracker, &m_oChangeTrackers) {
-    auto const tracker = enum_tracker.Get();
-    tracker->m_lStart = std::min(tracker->m_lStart, position);
-    tracker->m_lEnd = std::max(tracker->m_lEnd, change_end);
-  }
-
   onChange();
   if (m_fUndo && m_pUndo) {
     m_pUndo->CheckPoint();
-    m_pUndo->RecordInsert(position, static_cast<Posn>(position + text_length));
+    m_pUndo->RecordInsert(position, change_end);
   }
 }
 
 void Buffer::InternalDelete(Posn lStart, Posn lEnd) {
   Count n = deleteChars(lStart, lEnd);
   ++m_nModfTick;
-  relocate(lStart, -n);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
       DidDeleteAt(lStart, static_cast<size_t>(n)));
 }
@@ -182,7 +175,6 @@ void Buffer::InternalDelete(Posn lStart, Posn lEnd) {
 void Buffer::InternalInsert(Posn lPosn, const char16* pwch, Count n) {
   insert(lPosn, pwch, n);
   ++m_nModfTick;
-  relocate(lPosn, n);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
       DidDeleteAt(lPosn, static_cast<size_t>(n)));
 }
@@ -203,22 +195,8 @@ Posn Buffer::Redo(Posn lPosn, Count n) {
   return m_pUndo->Redo(lPosn, n);
 }
 
-void Buffer::relocate(Posn lPosn, Count iDelta) {
-  // Update change trackers
-  {
-    Posn lChangeStart = lPosn;
-    Posn lChangeEnd   = lPosn;
-
-    if (iDelta > 0)
-      lChangeEnd += iDelta;
-
-    foreach (ChangeTrackers::Enum, oEnum, &m_oChangeTrackers) {
-      auto const pRunner = oEnum.Get();
-      pRunner->m_lStart = std::min(pRunner->m_lStart, lChangeStart);
-      pRunner->m_lEnd   = std::max(pRunner->m_lEnd, lChangeEnd),
-      pRunner->m_lEnd = std::min(pRunner->m_lEnd, GetEnd());
-    }
-  }
+void Buffer::RemoveObserver(BufferMutationObserver* observer) {
+  observers_.RemoveObserver(observer);
 }
 
 void Buffer::SetMode(Mode* mode) {

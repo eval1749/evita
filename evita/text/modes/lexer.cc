@@ -4,10 +4,49 @@
 
 #include "evita/text/modes/lexer.h"
 
+#include <algorithm>
+
 #include "base/logging.h"
+#include "evita/text/buffer.h"
 #include "evita/text/modes/char_syntax.h"
 
 namespace text {
+
+//////////////////////////////////////////////////////////////////////
+//
+// ChangeTracker
+//
+ChangeTracker::ChangeTracker(Buffer* buffer) : buffer_(buffer) {
+  Reset();
+  buffer_->AddObserver(this);
+}
+
+ChangeTracker::~ChangeTracker() {
+  buffer_->RemoveObserver(this);
+}
+
+void ChangeTracker::Reset() {
+  m_lStart = Posn_Max;
+  m_lEnd = 0;
+}
+
+// BufferMutationObserver
+void ChangeTracker::DidDeleteAt(int offset, size_t) {
+  m_lStart = std::min(m_lStart, static_cast<Posn>(offset));
+  m_lEnd = std::max(m_lEnd, buffer_->GetEnd());
+}
+
+void ChangeTracker::DidInsertAt(int offset, size_t text_length) {
+  auto const change_end = static_cast<Posn>(offset+ text_length);
+  m_lStart = std::min(m_lStart, static_cast<Posn>(offset));
+  m_lEnd = std::max(m_lEnd, change_end);
+}
+
+void ChangeTracker::DidInsertBefore(int offset, size_t text_length) {
+  auto const change_end = static_cast<Posn>(offset+ text_length);
+  m_lStart = std::min(m_lStart, static_cast<Posn>(offset));
+  m_lEnd = std::max(m_lEnd, change_end);
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -24,13 +63,12 @@ Lexer::~Lexer() {
 // LexerBase
 //
 LexerBase::LexerBase(Buffer* pBuffer)
-    : m_oEnumChar(pBuffer),
+    : m_oChange(pBuffer),
+      m_oEnumChar(pBuffer),
       m_pBuffer(pBuffer) {
-  pBuffer->RegisterChangeTracker(&m_oChange);
 }
 
 LexerBase::~LexerBase() {
-  m_pBuffer->UnregisterChangeTracker(&m_oChange);
 }
 
 namespace NewLexer {
@@ -90,15 +128,14 @@ void LexerBase::EnumChar::Next() {
 //
 LexerBase::LexerBase(Buffer* pBuffer, KeywordTable* pKeywordTab,
                      const uint* prgnCharSyntax)
-    : m_oEnumChar(pBuffer),
+    : m_oChange(pBuffer),
+      m_oEnumChar(pBuffer),
       m_pBuffer(pBuffer),
       m_pKeywordTab(pKeywordTab),
       m_prgnCharSyntax(prgnCharSyntax) {
-      pBuffer->RegisterChangeTracker(&m_oChange);
 }
 
 LexerBase::~LexerBase() {
-  m_pBuffer->UnregisterChangeTracker(&m_oChange);
 }
 
 bool LexerBase::isConsChar(char16 wch) const {

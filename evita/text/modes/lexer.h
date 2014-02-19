@@ -9,8 +9,34 @@
 
 #include "base/strings/string16.h"
 #include "evita/text/buffer.h"
+#include "evita/text/buffer_mutation_observer.h"
 
 namespace text {
+
+//////////////////////////////////////////////////////////////////////
+//
+// ChangeTracker
+//
+class ChangeTracker :  public BufferMutationObserver {
+  private: Buffer* buffer_;
+  private: Posn m_lStart;
+  private: Posn m_lEnd;
+
+  public: ChangeTracker(Buffer* buffer);
+  public: ~ChangeTracker();
+
+  public: Posn GetStart() const { return m_lStart; }
+  public: Posn GetEnd() const { return m_lEnd; }
+
+  public: void Reset();
+
+  // BufferMutationObserver
+  private: virtual void DidDeleteAt(int offset, size_t length) override;
+  private: virtual void DidInsertAt(int offset, size_t length) override;
+  private: virtual void DidInsertBefore(int offset, size_t length) override;
+
+  DISALLOW_COPY_AND_ASSIGN(ChangeTracker);
+};
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -31,7 +57,7 @@ class Lexer {
 //
 class LexerBase : public Lexer {
   protected: Posn m_lTokenStart;
-  protected: Buffer::ChangeTracker m_oChange;
+  protected: ChangeTracker m_oChange;
   protected: Buffer::EnumChar m_oEnumChar;
   protected: Buffer* m_pBuffer;
 
@@ -79,7 +105,7 @@ class LexerBase : public Lexer {
     public: void SetCounter(Count lCount) { m_lCount = lCount; }
   };
 
-  protected: Buffer::ChangeTracker m_oChange;
+  protected: ChangeTracker m_oChange;
   protected: EnumChar m_oEnumChar;
   protected: Buffer* m_pBuffer;
   protected: const uint* m_prgnCharSyntax;

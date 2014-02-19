@@ -9,10 +9,10 @@
 
 namespace text {
 
-class RangeList;
+class RangeSet;
 
 class Range {
-  friend class RangeList;
+  friend class RangeSet;
 
   public: struct Information {
       bool m_fLineNum;

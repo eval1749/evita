@@ -26,7 +26,7 @@ class Interval;
 class IntervalSet;
 class Mode;
 class Range;
-class RangeList;
+class RangeSet;
 class UndoManager;
 
 /// <summary>
@@ -73,7 +73,7 @@ class Buffer : public BufferCore, public FileFeatures {
   private: HANDLE m_hObjHeap;
   private: ObserverList<BufferMutationObserver> observers_;
   private: std::unique_ptr<IntervalSet> intervals_;
-  private: std::unique_ptr<RangeList> ranges_;
+  private: std::unique_ptr<RangeSet> ranges_;
   private: Mode* m_pMode;
   private: std::unique_ptr<UndoManager> undo_manager_;
 
@@ -117,7 +117,7 @@ class Buffer : public BufferCore, public FileFeatures {
   }
 
   public: const base::string16& name() const { return name_; }
-  public: RangeList* ranges() const { return ranges_.get(); }
+  public: RangeSet* ranges() const { return ranges_.get(); }
 
   public: void AddObserver(BufferMutationObserver* observer);
 

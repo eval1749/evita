@@ -398,7 +398,7 @@
         'text/modes/python_mode.cc',
         'text/modes/xml_mode.cc',
         'text/range.cc',
-        'text/range_list.cc',
+        'text/range_set.cc',
         'text/style.cc',
         'text/undo_manager.cc',
         'z_debug.cpp',

@@ -2,33 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/text/range_list.h"
+#include "evita/text/range_set.h"
 
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
 
 namespace text {
 
-RangeList::RangeList(Buffer* buffer) {
+RangeSet::RangeSet(Buffer* buffer) {
   buffer->AddObserver(this);
 }
 
-RangeList::~RangeList() {
+RangeSet::~RangeSet() {
   for (auto* range : ranges_) {
     range->m_pBuffer = nullptr;
   }
 }
 
-void RangeList::AddRange(Range* range) {
+void RangeSet::AddRange(Range* range) {
   ranges_.insert(range);
 }
 
-void RangeList::RemoveRange(Range* range) {
+void RangeSet::RemoveRange(Range* range) {
   ranges_.erase(range);
 }
 
 // BufferMutationObserver
-void RangeList::DidDeleteAt(Posn offset, size_t length) {
+void RangeSet::DidDeleteAt(Posn offset, size_t length) {
   for (auto* range : ranges_) {
     if (range->m_lStart > offset)
       range->m_lStart -= length;
@@ -37,7 +37,7 @@ void RangeList::DidDeleteAt(Posn offset, size_t length) {
   }
 }
 
-void RangeList::DidInsertAt(Posn offset, size_t length) {
+void RangeSet::DidInsertAt(Posn offset, size_t length) {
   for (auto* range : ranges_) {
     if (range->m_lStart > offset)
       range->m_lStart += length;
@@ -46,7 +46,7 @@ void RangeList::DidInsertAt(Posn offset, size_t length) {
   }
 }
 
-void RangeList::DidInsertBefore(Posn offset, size_t text_length) {
+void RangeSet::DidInsertBefore(Posn offset, size_t text_length) {
   for (auto* range : ranges_) {
     if (range->m_lStart >= offset)
       range->m_lStart += text_length;

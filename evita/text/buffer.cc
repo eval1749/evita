@@ -12,7 +12,7 @@
 #include "evita/ed_Interval.h"
 #include "evita/text/interval_set.h"
 #include "evita/text/range.h"
-#include "evita/text/range_list.h"
+#include "evita/text/range_set.h"
 #include "evita/text/modes/mode.h"
 #include "evita/text/undo_manager.h"
 
@@ -21,7 +21,7 @@ namespace text {
 Buffer::Buffer(const base::string16& name, Mode* mode)
     : m_hObjHeap(::HeapCreate(HEAP_NO_SERIALIZE, 0, 0)),
       intervals_(new IntervalSet(this)),
-      ranges_(new RangeList(this)),
+      ranges_(new RangeSet(this)),
       m_pMode(mode),
       undo_manager_(new UndoManager(this)),
       m_eState(State_Ready),

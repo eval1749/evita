@@ -8,7 +8,7 @@
 
 #include "base/logging.h"
 #include "evita/text/buffer.h"
-#include "evita/text/range_list.h"
+#include "evita/text/range_set.h"
 #include "evita/text/undo_manager.h"
 
 // Smart handle for HGLOBAL

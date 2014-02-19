@@ -64,9 +64,6 @@ class Application : public common::Singleton<Application> {
   public: const base::string16& version() const;
   public: dom::ViewEventHandler* view_event_handler() const;
 
-  // [A]
-  public: int Ask(int flags, int format_id, ...);
-
   // [C]
   public: bool CalledOnValidThread() const;
 
@@ -96,8 +93,6 @@ class Application : public common::Singleton<Application> {
   public: Frame* SetActiveFrame(Frame* frame) { 
     return active_frame_ = frame;
   }
-
-  public: void ShowMessage(MessageLevel, uint);
 
   // [T]
   private: bool TryDoIdle();

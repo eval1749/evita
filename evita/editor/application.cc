@@ -103,22 +103,6 @@ dom::ViewEventHandler* Application::view_event_handler() const {
   return view_delegate_impl_->event_handler();
 }
 
-int Application::Ask(int flags, int format_id, ...) {
-  char16 wszFormat[1024];
-  ::LoadString(g_hResource, static_cast<UINT>(format_id), wszFormat,
-               arraysize(wszFormat));
-
-  char16 wsz[1024];
-  va_list args;
-  va_start(args, format_id);
-  ::wvsprintf(wsz, wszFormat, args);
-  va_end(args);
-
-  editor::ModalMessageLoopScope modal_mesage_loop_scope;
-  return ::MessageBoxW(*GetActiveFrame(), wsz, title().c_str(),
-                       static_cast<UINT>(flags));
-}
-
 bool Application::CalledOnValidThread() const {
   return message_loop_.get() == base::MessageLoop::current();
 }
@@ -176,10 +160,6 @@ void Application::Run() {
   DoIdle();
   base::RunLoop run_loop;
   run_loop.Run();
-}
-
-void Application::ShowMessage(MessageLevel iLevel, uint nFormatId) {
-  GetActiveFrame()->ShowMessage(iLevel, nFormatId);
 }
 
 // TryDoIdle() returns true if more works are needed.

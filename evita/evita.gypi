@@ -419,6 +419,8 @@
         'editor/dialog_box.cc',
         'editor/dom_lock.cc',
         'gfx_base.cpp',
+        'views/frame_list.cc',
+        'views/frame_observer.cc',
         'views/tab_strip.cc',
         'views/tab_strip_delegate.cc',
         'vi_Caret.cpp',

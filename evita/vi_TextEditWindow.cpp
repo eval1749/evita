@@ -34,6 +34,7 @@
 #include "evita/dom/text_window.h"
 #include "evita/text/range.h"
 #include "evita/ui/events/event.h"
+#include "evita/views/frame_list.h"
 #include "evita/views/icon_cache.h"
 #include "evita/vi_Caret.h"
 #include "evita/vi_EditPane.h"
@@ -447,7 +448,7 @@ void TextEditWindow::Redraw() {
   auto fSelectionIsActive = has_focus();
 
   if (g_hwndActiveDialog) {
-    auto const edit_pane = Application::instance()->GetActiveFrame()->
+    auto const edit_pane = views::FrameList::instance()->active_frame()->
         GetActivePane()->as<EditPane>();
     if (edit_pane)
       fSelectionIsActive = edit_pane->GetActiveWindow() == this;

@@ -16,7 +16,6 @@
 #include "base/location.h"
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
-#include "evita/vi_Frame.h"
 
 class CommandWindow;
 class IoManager;
@@ -41,10 +40,6 @@ class ViewDelegateImpl;
 }
 
 class Application : public common::Singleton<Application> {
-  protected: typedef DoubleLinkedList_<Frame> Frames;
-
-  private: Frames frames_;
-  private: Frame* active_frame_;
   private: int idle_count_;
   private: bool is_quit_;
   private: std::unique_ptr<editor::DomLock> dom_lock_;
@@ -57,8 +52,6 @@ class Application : public common::Singleton<Application> {
   private: Application();
   public: ~Application();
 
-  public: const Frames& frames() const { return frames_; }
-  public: Frames& frames() { return frames_; }
   public: editor::DomLock* dom_lock() const { return dom_lock_.get(); }
   public: const base::string16& title() const;
   public: const base::string16& version() const;
@@ -68,14 +61,9 @@ class Application : public common::Singleton<Application> {
   public: bool CalledOnValidThread() const;
 
   // [D]
-  public: void DidCreateFrame(Frame* frame);
   private: void DoIdle();
 
-  // [F]
-  public: Frame* FindFrame(HWND hwnd) const;
-
   // [G]
-  public: Frame* GetActiveFrame() const { return active_frame_; }
   public: IoManager* GetIoManager() const { return io_manager_.get(); }
   public: const char16* GetTitle() const;
 
@@ -86,19 +74,14 @@ class Application : public common::Singleton<Application> {
   public: void PostDomTask(const tracked_objects::Location& from_here,
                            const base::Closure& task);
 
+  // [Q]
+  public: void Quit();
+
   // [R]
   public: void Run();
 
-  // [S]
-  public: Frame* SetActiveFrame(Frame* frame) { 
-    return active_frame_ = frame;
-  }
-
   // [T]
   private: bool TryDoIdle();
-
-  // [W]
-  public: void WillDestroyFrame(Frame* frame);
 
   DISALLOW_COPY_AND_ASSIGN(Application);
 };

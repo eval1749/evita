@@ -19,6 +19,7 @@
 #include "evita/vi_FindDialogBox.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_TextEditWindow.h"
+#include "evita/views/frame_list.h"
 #include "evita/views/table_view.h"
 
 namespace views {
@@ -49,13 +50,13 @@ Window* FromWindowId(const char* name, dom::WindowId window_id) {
 
 Frame* GetFrameForMessage(dom::WindowId window_id) {
   if (window_id == dom::kInvalidWindowId)
-    return Application::instance()->GetActiveFrame();
+    return FrameList::instance()->active_frame();
   auto const window = FromWindowId("GetFrameForMessage", window_id);
   if (!window)
-    return Application::instance()->GetActiveFrame();
+    return FrameList::instance()->active_frame();
   if (auto const frame = Frame::FindFrame(*window))
     return frame;
-  return Application::instance()->GetActiveFrame();
+  return FrameList::instance()->active_frame();
 }
 
 }  // namespace

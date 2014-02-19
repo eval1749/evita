@@ -13,6 +13,10 @@
 
 #include <vector>
 
+#pragma warning(push)
+#pragma warning(disable: 4625 4626)
+#include "base/observer_list.h"
+#pragma warning(pop)
 #include "evita/li_util.h"
 #include "evita/views/tab_strip_delegate.h"
 #include "evita/views/window.h"
@@ -36,6 +40,7 @@ class TextEditWindow;
 
 namespace views {
 class ContentWindow;
+class FrameObserver;
 class MessageView;
 class TitleBar;
 class TabStrip;
@@ -46,8 +51,7 @@ class TabStrip;
 ///   with window manager.
 /// </summary>
 class Frame final : public views::Window,
-                    public views::TabStripDelegate,
-                    public DoubleLinkedNode_<Frame> {
+                    public views::TabStripDelegate {
   DECLARE_CASTABLE_CLASS(Frame, views::Window);
 
   private: typedef ui::Widget Widget;
@@ -57,6 +61,7 @@ class Frame final : public views::Window,
   private: int m_cyTabBand;
   private: Panes m_oPanes;
   private: std::unique_ptr<views::MessageView> message_view_;
+  private: ObserverList<views::FrameObserver> observers_;
   private: views::TabStrip* tab_strip_;
   private: std::unique_ptr<views::TitleBar> title_bar_;
   private: base::string16 tooltip_;
@@ -74,6 +79,7 @@ class Frame final : public views::Window,
 
   // [A]
   public: bool Activate();
+  public: void AddObserver(views::FrameObserver* observer);
   private: void AddPane(Pane*);
   private: void AddTab(Pane*);
   public: void AddWindow(views::ContentWindow*);

@@ -26,7 +26,7 @@
 #include "evita/resource.h"
 #include "evita/ui/events/event.h"
 #include "evita/ui/widget_ostream.h"
-#include "evita/vi_Selection.h"
+#include "evita/vi_Frame.h"
 #include "evita/vi_TextEditWindow.h"
 
 extern HINSTANCE g_hInstance;

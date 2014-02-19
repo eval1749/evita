@@ -4,8 +4,8 @@
 #include "evita/vi_FindDialogBox.h"
 
 #include "base/logging.h"
-#include "evita/editor/application.h"
 #include "evita/text/range.h"
+#include "evita/views/frame_list.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_Selection.h"
@@ -23,7 +23,7 @@
 namespace {
 
 Selection* GetActiveSelection() {
-  auto const edit_pane = Application::instance()->GetActiveFrame()->
+  auto const edit_pane = views::FrameList::instance()->active_frame()->
     GetActivePane()->as<EditPane>();
 
   if (!edit_pane)
@@ -55,7 +55,7 @@ FindDialogBox::~FindDialogBox() {
 
 void FindDialogBox::onCancel() {
   ::ShowWindow(*this, SW_HIDE);
-  ::SetActiveWindow(*Application::instance()->GetActiveFrame());
+  ::SetActiveWindow(*views::FrameList::instance()->active_frame());
 }
 
 bool FindDialogBox::onCommand(WPARAM wParam, LPARAM lParam) {
@@ -105,7 +105,8 @@ INT_PTR FindDialogBox::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     case WM_WINDOWPOSCHANGED: {
       auto const wp = reinterpret_cast<WINDOWPOS*>(lParam);
       if (wp->flags & SWP_HIDEWINDOW) {
-        Application::instance()->GetActiveFrame()->GetActivePane()->SetFocus();
+        views::FrameList::instance()->active_frame()->GetActivePane()->
+            SetFocus();
         return TRUE;
       }
       break;

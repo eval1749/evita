@@ -11,20 +11,16 @@
 #include "base/run_loop.h"
 #pragma warning(pop)
 #include "base/strings/string16.h"
-#include "base/strings/string_number_conversions.h"
+//#include "base/strings/string_number_conversions.h"
 #include "base/time/time.h"
-#include "common/memory/scoped_change.h"
 #include "evita/dom/script_thread.h"
 #include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/dom/buffer.h"
 #include "evita/io/io_thread.h"
-#include "evita/vi_EditPane.h"
-#include "evita/vi_FileDialogBox.h"
+#include "evita/views/frame_list.h"
 #include "evita/io/io_manager.h"
-#include "evita/vi_TextEditWindow.h"
+#include "evita/views/frame_list.h"
 #include "evita/views/view_delegate_impl.h"
-#include "evita/views/window_set.h"
 
 #define DEBUG_IDLE 0
 
@@ -73,8 +69,7 @@ class MessagePump : public base::MessagePumpForUI {
 // Application
 //
 Application::Application()
-    : active_frame_(nullptr),
-      idle_count_(0),
+    : idle_count_(0),
       is_quit_(false),
       dom_lock_(new editor::DomLock()),
       io_manager_(new IoManager()),
@@ -107,10 +102,6 @@ bool Application::CalledOnValidThread() const {
   return message_loop_.get() == base::MessageLoop::current();
 }
 
-void Application::DidCreateFrame(Frame* frame) {
-  frames_.Append(frame);
-}
-
 void Application::DoIdle() {
   #if DEBUG_IDLE
     DVLOG(0) << "idle_count_=" << idle_count_ <<
@@ -129,21 +120,13 @@ void Application::DoIdle() {
   }
 }
 
-Frame* Application::FindFrame(HWND hwnd) const {
-  for (auto& frame: frames_) {
-      if (frame == hwnd)
-          return const_cast<Frame*>(&frame);
-  }
-  return nullptr;
+bool Application::OnIdle(uint hint) {
+  return views::FrameList::instance()->DoIdle(static_cast<int>(hint));
 }
 
-bool Application::OnIdle(uint nCount) {
-  auto need_more = false;
-  for (auto& frame: frames_) {
-    if (frame.OnIdle(nCount))
-      need_more = true;
-  }
-  return need_more;
+void Application::Quit() {
+  is_quit_ = true;
+  message_loop_->QuitWhenIdle();
 }
 
 static void RunTaskWithinDomLock(const base::Closure& task) {
@@ -174,20 +157,4 @@ bool Application::TryDoIdle() {
   }
   #endif
   return status;
-}
-
-void Application::WillDestroyFrame(Frame* frame) {
-  frames_.Delete(frame);
-  if (active_frame_ == frame)
-    active_frame_ = frames_.GetFirst();
-  if (frames_.IsEmpty()) {
-    is_quit_ = true;
-    message_loop_->QuitWhenIdle();
-    return;
-  }
-
-  for (auto& candidate : frames_) {
-    if (active_frame_->active_tick() < candidate.active_tick())
-      active_frame_ = &candidate;
-  }
 }

@@ -15,11 +15,14 @@
 #include "base/threading/thread.h"
 #pragma warning(pop)
 #include "base/time/time.h"
+#include "common/win/point.h"
+#include "common/win/size.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/io/io_delegate_impl.h"
+#include "evita/views/window_id.h"
 
 HANDLE g_hEvent;
 bool g_fMultiple;

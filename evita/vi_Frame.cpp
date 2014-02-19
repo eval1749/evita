@@ -40,6 +40,8 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/view_event_handler.h"
+#include "evita/views/frame_list.h"
+#include "evita/views/frame_observer.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/message_view.h"
 #include "evita/views/tab_strip.h"
@@ -146,6 +148,10 @@ Frame::operator HWND() const {
 
 bool Frame::Activate() {
   return ::SetForegroundWindow(*native_window());
+}
+
+void Frame::AddObserver(views::FrameObserver* observer) {
+  observers_.AddObserver(observer);
 }
 
 void Frame::AddPane(Pane* const pane) {
@@ -284,7 +290,7 @@ void Frame::DidChangeTabSelection(int selected_index) {
 }
 
 void Frame::DidCreateNativeWindow() {
-  Application::instance()->DidCreateFrame(this);
+  views::FrameList::instance()->AddFrame(this);
   ::DragAcceptFiles(*native_window(), TRUE);
 
   message_view_->Realize(*native_window());
@@ -378,8 +384,8 @@ void Frame::DidSetFocus() {
     if (!m_pActivePane)
       return;
   }
-  Application::instance()->SetActiveFrame(this);
   m_pActivePane->SetFocus();
+  FOR_EACH_OBSERVER(views::FrameObserver, observers_, DidActiveFrame(this));
 }
 
 void Frame::DidSetFocusOnChild(views::Window* window) {
@@ -661,7 +667,8 @@ void Frame::OnPaint(const gfx::Rect rect) {
 
 bool Frame::onTabDrag(TabBandDragAndDrop const eAction,
                       HWND const hwndTabBand) {
-  auto const pFrom = Application::instance()->FindFrame(::GetParent(hwndTabBand));
+  auto const pFrom = views::FrameList::instance()->FindFrameByHwnd(
+      ::GetParent(hwndTabBand));
 
   if (!pFrom) {
     // We should not be here.
@@ -862,7 +869,7 @@ void Frame::UpdateTooltip(NMTTDISPINFO* const pDisp) {
 
 void Frame::WillDestroyWidget() {
   Widget::WillDestroyWidget();
-  Application::instance()->WillDestroyFrame(this);
+  views::FrameList::instance()->RemoveFrame(this);
 }
 
 void Frame::WillRemoveChildWidget(const Widget& widget) {

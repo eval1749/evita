@@ -6,7 +6,7 @@
 
 #include "base/logging.h"
 #include "evita/text/buffer.h"
-#include "evita/ed_interval.h"
+#include "evita/text/interval.h"
 
 namespace text {
 

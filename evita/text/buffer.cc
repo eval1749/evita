@@ -9,7 +9,7 @@
 #include <algorithm>
 
 #include "base/logging.h"
-#include "evita/ed_Interval.h"
+#include "evita/text/interval.h"
 #include "evita/text/interval_set.h"
 #include "evita/text/range.h"
 #include "evita/text/range_set.h"

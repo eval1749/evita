@@ -20,9 +20,9 @@
 #include <utility>
 #include <vector>
 
-#include "evita/ed_interval.h"
 #include "evita/gfx_base.h"
 #include "evita/dom/buffer.h"
+#include "evita/text/interval.h"
 #include "evita/vi_Selection.h"
 
 namespace PageInternal {

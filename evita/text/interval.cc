@@ -1,4 +1,3 @@
-#include "precomp.h"
 //////////////////////////////////////////////////////////////////////////////
 //
 // evcl - listener - editor - interval
@@ -15,8 +14,8 @@
 #include <algorithm>
 
 #include "base/logging.h"
-#include "evita/ed_Interval.h"
 #include "evita/text/buffer.h"
+#include "evita/text/interval.h"
 #include "evita/text/interval_set.h"
 
 extern StyleValues g_DefaultStyle;

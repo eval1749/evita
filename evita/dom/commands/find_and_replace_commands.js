@@ -527,6 +527,7 @@
             break;
           }
           addMatch(accumulatr);
+          addChar(char_code);
           accumulatr = 0;
           state = State.START;
           break;

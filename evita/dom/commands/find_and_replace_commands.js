@@ -69,7 +69,7 @@
           } else if (upper_case) {
             in_word = true;
           } else if (lower_case) {
-            new_char_code = String.fromCharCode(char_code).toLocaleLowerCase()
+            new_char_code = String.fromCharCode(char_code).toLocaleUpperCase()
                 .charCodeAt(0);
             in_word = true;
           }

@@ -13,8 +13,8 @@
 #include "evita/text/interval_set.h"
 #include "evita/text/range.h"
 #include "evita/text/range_list.h"
-#include "evita/ed_Undo.h"
 #include "evita/text/modes/mode.h"
+#include "evita/text/undo_manager.h"
 
 namespace text {
 

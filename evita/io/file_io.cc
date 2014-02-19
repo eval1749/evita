@@ -17,8 +17,8 @@
 #include "evita/dom/public/api_callback.h"
 #include "evita/dom/view_event_handler.h"
 #include "evita/editor/application.h"
-#include "evita/ed_undo.h"
 #include "evita/io/io_manager.h"
+#include "evita/text/undo_manager.h"
 #include "../../charset/CharsetDecoder.h"
 #include "../../charset/CharsetDetector.h"
 

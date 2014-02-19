@@ -1,4 +1,3 @@
-#include "precomp.h"
 //////////////////////////////////////////////////////////////////////////////
 //
 // evcl - editor - undo manager
@@ -10,7 +9,7 @@
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_Undo.cpp#2 $
 //
 #define DEBUG_UNDO 0
-#include "evita/ed_Undo.h"
+#include "evita/text/undo_manager.h"
 
 #include "evita/text/buffer.h"
 

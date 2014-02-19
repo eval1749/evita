@@ -76,7 +76,6 @@ class Buffer : public BufferCore, public FileFeatures {
   private: std::unique_ptr<RangeList> ranges_;
   private: Mode* m_pMode;
 
-  protected: bool m_fUndo;
   protected: UndoManager* m_pUndo;
 
   private: bool m_fReadOnly;

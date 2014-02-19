@@ -138,6 +138,8 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
   DCHECK_NE(State_Save, m_eState);
 
   auto const text_length = text.length();
+  if (!text_length)
+    return;
   insert(position, text.data(), static_cast<Count>(text_length));
   ++m_nModfTick;
 

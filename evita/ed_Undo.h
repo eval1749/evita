@@ -29,7 +29,7 @@ class Record;
 //  m_fTruncate
 //    We truncate edit log if undo/redo operation is interrupted.
 //
-class UndoManager : public ObjectInHeap
+class UndoManager
 {
     public: enum State
     {
@@ -50,8 +50,8 @@ class UndoManager : public ObjectInHeap
     private: Record* m_pRedo;
     private: Record* m_pUndo;
 
-    // ctor
-    public: UndoManager(Buffer*);
+    public: explicit UndoManager(Buffer*);
+    public: ~UndoManager();
 
     // [A]
     public: void*   Alloc(size_t);
@@ -88,6 +88,8 @@ class UndoManager : public ObjectInHeap
     private: void addRecord(Record*);
     private: void delRecord(Record*);
     private: void discardRecord(Record*);
+
+    DISALLOW_COPY_AND_ASSIGN(UndoManager);
 }; // UndoManager
 
 }  // namespace text

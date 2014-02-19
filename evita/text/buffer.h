@@ -75,8 +75,7 @@ class Buffer : public BufferCore, public FileFeatures {
   private: std::unique_ptr<IntervalSet> intervals_;
   private: std::unique_ptr<RangeList> ranges_;
   private: Mode* m_pMode;
-
-  protected: UndoManager* m_pUndo;
+  private: std::unique_ptr<UndoManager> undo_manager_;
 
   private: bool m_fReadOnly;
 
@@ -145,7 +144,7 @@ class Buffer : public BufferCore, public FileFeatures {
   public: const base::string16& GetName() const { return name_; }
   public: Posn GetStart() const { return 0; }
   public: const StyleValues* GetStyleAt(Posn) const;
-  public: UndoManager* GetUndo() const { return m_pUndo; }
+  public: UndoManager* GetUndo() const { return undo_manager_.get(); }
 
   // [I]
   public: Count IncCharTick(int n) { return m_nCharTick += n; }

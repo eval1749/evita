@@ -23,7 +23,7 @@ Buffer::Buffer(const base::string16& name, Mode* mode)
       intervals_(new IntervalSet(this)),
       ranges_(new RangeList(this)),
       m_pMode(mode),
-      m_pUndo(new(m_hObjHeap) UndoManager(this)),
+      undo_manager_(new UndoManager(this)),
       m_eState(State_Ready),
       m_fReadOnly(false),
       m_nCharTick(1),
@@ -43,18 +43,18 @@ void Buffer::AddObserver(BufferMutationObserver* observer) {
 }
 
 bool Buffer::CanRedo() const {
-  return m_pUndo->CanRedo();
+  return undo_manager_->CanRedo();
 }
 
 /// <summary>
 ///   Returns true if this buffer undo-able.
 /// </summary>
 bool Buffer::CanUndo() const {
-  return m_pUndo->CanUndo();
+  return undo_manager_->CanUndo();
 }
 
 void Buffer::ClearUndo() {
-  m_pUndo->Empty();
+  undo_manager_->Empty();
 }
 
 Posn Buffer::ComputeEndOfLine(Posn lPosn) const {
@@ -91,9 +91,9 @@ Count Buffer::Delete(Posn lStart, Posn lEnd) {
   if (lEnd <= lStart)
     return 0;
 
-  if (m_pUndo) {
-    m_pUndo->CheckPoint();
-    m_pUndo->RecordDelete(lStart, lEnd);
+  if (undo_manager_) {
+    undo_manager_->CheckPoint();
+    undo_manager_->RecordDelete(lStart, lEnd);
   }
 
   InternalDelete(lStart, lEnd);
@@ -124,9 +124,9 @@ Count Buffer::Insert(Posn lPosn, const char16* pwch, Count n) {
   InternalInsert(lPosn, pwch, n);
   onChange();
 
-  if (m_pUndo) {
-    m_pUndo->CheckPoint();
-    m_pUndo->RecordInsert(lPosn, lPosn + n);
+  if (undo_manager_) {
+    undo_manager_->CheckPoint();
+    undo_manager_->RecordInsert(lPosn, lPosn + n);
   }
 
   return n;
@@ -151,9 +151,9 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
                                             GetDefaultStyle());
 
   onChange();
-  if (m_pUndo) {
-    m_pUndo->CheckPoint();
-    m_pUndo->RecordInsert(position, change_end);
+  if (undo_manager_) {
+    undo_manager_->CheckPoint();
+    undo_manager_->RecordInsert(position, change_end);
   }
 }
 
@@ -184,7 +184,7 @@ void Buffer::onChange() {
 Posn Buffer::Redo(Posn lPosn, Count n) {
   if (IsReadOnly())
     return -1;
-  return m_pUndo->Redo(lPosn, n);
+  return undo_manager_->Redo(lPosn, n);
 }
 
 void Buffer::RemoveObserver(BufferMutationObserver* observer) {
@@ -199,7 +199,7 @@ void Buffer::SetMode(Mode* mode) {
 Posn Buffer::Undo(Posn lPosn, Count n) {
   if (IsReadOnly())
     return -1;
-  return m_pUndo->Undo(lPosn, n);
+  return undo_manager_->Undo(lPosn, n);
 }
 
 }  // namespace text

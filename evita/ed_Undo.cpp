@@ -501,6 +501,8 @@ UndoManager::UndoManager(Buffer* pBuffer) :
     #endif
 } // UndoManager::UndoManager
 
+UndoManager::~UndoManager() {
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -1070,12 +1072,12 @@ UndoBlock::UndoBlock(Buffer* buffer, const base::string16& name)
 }
 
 void Buffer::EndUndoGroup(const base::string16& name) {
-  m_pUndo->CheckPoint();
-  m_pUndo->RecordEnd(name);
+  undo_manager_->CheckPoint();
+  undo_manager_->RecordEnd(name);
 }
 
 void Buffer::StartUndoGroup(const base::string16& name) {
-  m_pUndo->CheckPoint();
-  m_pUndo->RecordBegin(name);
+  undo_manager_->CheckPoint();
+  undo_manager_->RecordBegin(name);
 }
 }  // namespace text

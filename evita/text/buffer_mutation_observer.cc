@@ -12,6 +12,16 @@ BufferMutationObserver::BufferMutationObserver() {
 BufferMutationObserver::~BufferMutationObserver() {
 }
 
+void BufferMutationObserver::DidDeleteAt(Posn, size_t) {
+}
+
+void BufferMutationObserver::DidInsertAt(Posn, size_t) {
+}
+
+void BufferMutationObserver::DidInsertBefore(Posn offset, size_t length) {
+  DidInsertAt(offset, length);
+}
+
 void BufferMutationObserver::WillDeleteAt(Posn, size_t) {
 }
 

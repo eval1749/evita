@@ -305,7 +305,7 @@ class Buffer : public BufferCore, public FileFeatures {
 /// </summary>
 class UndoBlock {
   private: Buffer* buffer_;
-  private: const base::string16& name_;
+  private: const base::string16 name_;
   public: UndoBlock(Range* range, const base::string16& name);
   public: UndoBlock(Buffer* buffer, const base::string16& name);
   public: ~UndoBlock();

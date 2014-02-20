@@ -12,6 +12,7 @@
 #define INCLUDE_listener_winapp_visual_formatter_h
 
 #include "evita/vi_style.h"
+#include "evita/text/buffer_mutation_observer.h"
 #include "gfx_base.h"
 
 class Font;
@@ -34,7 +35,7 @@ namespace PageInternal {
 //
 // Page
 //
-class Page {
+class Page : public text::BufferMutationObserver {
   friend class PageInternal::Formatter;
 
   private: typedef common::win::Rect Rect;
@@ -45,6 +46,8 @@ class Page {
 
   private: class DisplayBuffer {
     private: typedef DoubleLinkedList_<Line, DisplayBuffer> Lines;
+
+    private: bool dirty_;
     private: float m_cy;
     private: HANDLE m_hObjHeap;
     private: Lines lines_;
@@ -55,6 +58,7 @@ class Page {
     public: ~DisplayBuffer();
 
     public: float bottom() const { return rect_.bottom; }
+    public: bool dirty() const { return dirty_; }
     public: float height() const { return rect_.height(); }
     public: float left() const { return rect_.left; }
     public: const Lines& lines() const { return lines_; }
@@ -65,6 +69,7 @@ class Page {
 
     public: void Append(Line*);
     public: void* Alloc(size_t);
+    public: void Finish();
     public: Line* GetFirst() const { return lines_.GetFirst(); }
     public: HANDLE GetHeap() const { return m_hObjHeap; }
     public: float GetHeight() const { return m_cy; }
@@ -74,6 +79,7 @@ class Page {
     public: HANDLE Reset(const gfx::RectF& page_rect);
     public: Line* ScrollDown();
     public: Line* ScrollUp();
+    public: void SetBufferDirtyOffset(Posn offset);
   };
 
   // Line
@@ -118,8 +124,7 @@ class Page {
   };
 
   // Buffer
-  public: text::Buffer* m_pBuffer;
-  private: Count m_nModfTick;
+  public: text::Buffer* const m_pBuffer;
 
   // Selection
   public: Posn m_lSelStart;;
@@ -135,7 +140,7 @@ class Page {
   private: DisplayBuffer m_oFormatBuf;
   private: DisplayBuffer m_oScreenBuf;
 
-  public: Page();
+  public: Page(text::Buffer* buffer);
   public: ~Page();
 
   // [A]
@@ -160,8 +165,6 @@ class Page {
   public: Posn GetEnd() const { return m_lEnd; }
 
   // [I]
-  public: bool IsDirty(const Rect& page_rect, const Selection&,
-                       bool is_selection_active = false) const;
   private: bool isPosnVisible(Posn) const;
 
   // [M]
@@ -181,6 +184,16 @@ class Page {
   public: bool ScrollDown(const gfx::Graphics&);
   public: bool ScrollToPosn(const gfx::Graphics&, Posn target_position);
   public: bool ScrollUp(const gfx::Graphics&);
+  public: void SetBufferDirtyOffset(Posn offset);
+  public: bool ShouldFormat(const Rect& page_rect, const Selection&,
+                          bool is_selection_active = false) const;
+  public: bool ShouldRender() const;
+
+  // text::BufferMutationObserver
+  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
+  private: virtual void DidInsertAt(Posn offset, size_t length) override;
+
+  DISALLOW_COPY_AND_ASSIGN(Page);
 };
 
 #endif //!defined(INCLUDE_listener_winapp_visual_formatter_h)

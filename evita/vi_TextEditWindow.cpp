@@ -66,7 +66,7 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
       caret_(std::move(std::make_unique<Caret>())),
       m_gfx(nullptr),
       m_lCaretPosn(-1),
-      m_pPage(new Page()),
+      m_pPage(new Page(text_window.view_range()->text_range()->GetBuffer())),
       selection_(text_window.view_selection()),
       #if SUPPORT_IME
         m_fImeTarget(false),
@@ -85,14 +85,16 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
 
   Page::Line* pLine = nullptr;
 
-  if (!m_pPage->IsDirty(rect(), *selection_))
+  if (!m_pPage->ShouldFormat(rect(), *selection_))
     pLine = m_pPage->FindLine(lGoal);
 
   if (pLine)
     return pLine->MapXToPosn(*m_gfx, xGoal);
 
   auto lStart = GetBuffer()->ComputeStartOfLine(lGoal);
-  Page oPage;
+  // TODO(yosi) We should not use another object for formatting line instead of
+  // Page.
+  Page oPage(m_pPage->GetBuffer());
   gfx::RectF page_rect(rect());
   for (;;) {
     auto const pLine = oPage.FormatLine(*m_gfx, page_rect,
@@ -213,7 +215,7 @@ void TextEditWindow::DidShow() {
 
 Posn TextEditWindow::EndOfLine(Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
-  if (!m_pPage->IsDirty(rect(), *selection_)) {
+  if (!m_pPage->ShouldFormat(rect(), *selection_)) {
     auto const pLine = m_pPage->FindLine(lPosn);
     if (pLine)
       return pLine->GetEnd() - 1;
@@ -229,7 +231,9 @@ Posn TextEditWindow::endOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
   if (lPosn >= lBufEnd)
     return lBufEnd;
 
-  Page oPage;
+  // TODO(yosi) We should not use another object for formatting line instead of
+  // Page.
+  Page oPage(m_pPage->GetBuffer());
   gfx::RectF page_rect(rect());
   auto lStart = selection_->GetBuffer()->ComputeStartOfLine(lPosn);
   for (;;) {
@@ -490,7 +494,7 @@ void TextEditWindow::Redraw() {
 
   {
     auto const lStart = m_pViewRange->GetStart();
-    if (m_pPage->IsDirty(rect(), *selection_, fSelectionIsActive)) {
+    if (m_pPage->ShouldFormat(rect(), *selection_, fSelectionIsActive)) {
       format(*m_gfx, startOfLineAux(*m_gfx, lStart));
 
       if (m_lCaretPosn != lCaretPosn) {
@@ -503,7 +507,7 @@ void TextEditWindow::Redraw() {
         m_lCaretPosn = lCaretPosn;
     } else if (m_pPage->GetStart() != lStart) {
         format(*m_gfx, startOfLineAux(*m_gfx, lStart));
-    } else {
+    } else if (!m_pPage->ShouldRender()) {
       // Page is clean.
       if (!m_fImeTarget)
         caret_->ShouldBlink();
@@ -620,7 +624,7 @@ Posn TextEditWindow::StartOfLine(Posn lPosn) {
 // Description:
 // Returns start position of window line of specified position.
 Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
-  if (!m_pPage->IsDirty(rect(), *selection_)) {
+  if (!m_pPage->ShouldFormat(rect(), *selection_)) {
     auto const pLine = m_pPage->FindLine(lPosn);
     if (pLine)
       return pLine->GetStart();
@@ -630,12 +634,13 @@ Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
   if (!lStart)
     return 0;
 
-  Page oPage;
+  // TODO(yosi) We should not use another object for formatting line instead of
+  // Page.
+  Page oPage(m_pPage->GetBuffer());
   gfx::RectF page_rect(rect());
   for (;;) {
     auto const pLine = oPage.FormatLine(gfx, page_rect, *selection_,
                                         lStart);
-
     auto const lEnd = pLine->GetEnd();
     if (lPosn < lEnd)
       return pLine->GetStart();
@@ -645,7 +650,7 @@ Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
 
 void TextEditWindow::updateScreen() {
   UI_ASSERT_DOM_LOCKED();
-  if (!m_pPage->IsDirty(rect(), *selection_))
+  if (!m_pPage->ShouldFormat(rect(), *selection_))
     return;
 
   Posn lStart = m_pViewRange->GetStart();

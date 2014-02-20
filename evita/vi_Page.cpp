@@ -780,6 +780,8 @@ void Formatter::Format() {
       break;
     }
   }
+
+  m_pPage->m_oFormatBuf.Finish();
 }
 
 // Returns true if more contents is avaialble, otherwise returns false.
@@ -1106,140 +1108,20 @@ Page::Line* Page::FormatLine(const gfx::Graphics& gfx,
 //
 // Page
 //
-Page::Page()
-    : m_pBuffer(nullptr),
+Page::Page(text::Buffer* buffer)
+    : m_pBuffer(buffer),
       m_lStart(0),
       m_lEnd(0),
-      m_nModfTick(-1),
       m_lSelStart(0),
       m_lSelEnd(0),
       m_crSelFg(0),
       m_crSelBg(0),
       m_crBackground(0) {
+  m_pBuffer->AddObserver(this);
 }
 
 Page::~Page() {
-}
-
-bool Page::IsDirty(const Rect& rc, const Selection& selection,
-                   bool fSelection) const {
-  if (!m_pBuffer) {
-      #if DEBUG_DIRTY
-          DEBUG_PRINTF("%p: No buffer.\n", this);
-      #endif // DEBUG_DIRTY
-      return true;
-  }
-
-  if (rc.width() != m_oFormatBuf.width()) {
-      #if DEBUG_DIRTY
-          DEBUG_PRINTF("%p: Width is changed.\n", this);
-      #endif // DEBUG_DIRTY
-      return true;
-  }
-
-  if (rc.height() != m_oFormatBuf.height()) {
-      #if DEBUG_DIRTY
-          DEBUG_PRINTF("%p: Height is changed.\n", this);
-      #endif // DEBUG_DIRTY
-      return true;
-  }
-
-  // Buffer
-  const auto* const pBuffer = selection.GetBuffer();
-  if (m_pBuffer != pBuffer) {
-    #if DEBUG_DIRTY
-        DEBUG_PRINTF("%p: Buffer is changed.\n", this);
-    #endif // DEBUG_DIRTY
-    return true;
-  }
-
-  if (m_nModfTick != pBuffer->GetModfTick()) {
-    #if DEBUG_DIRTY
-        DEBUG_PRINTF("%p: ModfTick is changed.\n", this);
-    #endif // DEBUG_DIRTY
-    return true;
-  }
-
-  auto const lSelStart = selection.GetStart();
-  auto const lSelEnd = selection.GetEnd();
-
-  // Page shows caret instead of seleciton.
-  if (m_lSelStart == m_lSelEnd) {
-    if (lSelStart == lSelEnd) {
-        #if DEBUG_DIRTY
-            DEBUG_PRINTF("%p: clean with caret.\n", this);
-        #endif // DEBUG_DIRTY
-        return false;
-    }
-
-    if (!fSelection) {
-        if (lSelEnd < m_lStart || lSelStart > m_lEnd) {
-            #if DEBUG_DIRTY
-                DEBUG_PRINTF("%p: clean with selection in outside.\n", this);
-            #endif // DEBUG_DIRTY
-            return false;
-        }
-    }
-
-    #if DEBUG_DIRTY
-        DEBUG_PRINTF("%p: Need to show selection.\n", this);
-    #endif // DEBUG_DIRTY
-    return true;
-  }
-
-  if (!fSelection) {
-    // Page doesn't contain selection.
-    if (m_lSelEnd < m_lStart || m_lSelStart > m_lEnd) {
-        if (lSelStart == lSelEnd) {
-            #if DEBUG_DIRTY
-                DEBUG_PRINTF("%p: clean with selection.\n", this);
-            #endif // DEBUG_DIRTY
-            return false;
-        }
-
-        if (lSelEnd < m_lStart || lSelStart > m_lEnd)
-            return false;
-        #if DEBUG_DIRTY
-            DEBUG_PRINTF("%p: Need to show selection.\n", this);
-        #endif // DEBUG_DIRTY
-        return true;
-    }
-  }
-
-  // Page shows selection.
-  if (m_lSelStart != lSelStart) {
-    #if DEBUG_DIRTY
-        DEBUG_PRINTF("%p: Selection start is changed.\n", this);
-    #endif // DEBUG_DIRTY
-    return true;
-  }
-
-  if (m_lSelEnd != lSelEnd) {
-    #if DEBUG_DIRTY
-        DEBUG_PRINTF("%p: Selection end is changed.\n", this);
-    #endif // DEBUG_DIRTY
-    return true;
-  }
-
-  if (m_crSelFg != selection.GetColor()) {
-    #if DEBUG_DIRTY
-        DEBUG_PRINTF("%p: SelColor is changed.\n", this);
-    #endif // DEBUG_DIRTY
-    return true;
-  }
-
-  if (m_crSelBg  != selection.GetBackground()) {
-    #if DEBUG_DIRTY
-        DEBUG_PRINTF("%p: SelBackground is changed.\n", this);
-    #endif // DEBUG_DIRTY
-    return true;
-  }
-
-  #if DEBUG_DIRTY
-    DEBUG_PRINTF("%p is clean.\n", this);
-  #endif // DEBUG_DIRTY
-
-  return false;
+  m_pBuffer->RemoveObserver(this);
 }
 
 bool Page::isPosnVisible(Posn lPosn) const {
@@ -1328,8 +1210,6 @@ int Page::pageLines(const gfx::Graphics& gfx) const {
 
 void Page::Prepare(const Selection& selection) {
   auto& buffer = *selection.GetBuffer();
-  m_pBuffer = &buffer;
-  m_nModfTick = buffer.GetModfTick();
 
   // Selection
   m_lSelStart = selection.GetStart();
@@ -1580,6 +1460,8 @@ bool Page::Render(const gfx::Graphics& gfx) {
     }
   }
 
+  m_oScreenBuf.Finish();
+
   #if DEBUG_RENDER
     if (number_of_rendering >= 1) {
       DEBUG_PRINTF("%p"
@@ -1597,7 +1479,6 @@ bool Page::Render(const gfx::Graphics& gfx) {
 }
 
 void Page::Reset() {
-  m_nModfTick = -1;
   m_oScreenBuf.Reset(gfx::RectF());
 }
 
@@ -1724,8 +1605,128 @@ bool Page::ScrollUp(const gfx::Graphics& gfx) {
   return fMore;
 }
 
+bool Page::ShouldFormat(const Rect& rc, const Selection& selection,
+                      bool fSelection) const {
+  if (m_oFormatBuf.dirty())
+    return true;
+
+  if (rc.width() != m_oFormatBuf.width()) {
+      #if DEBUG_DIRTY
+          DEBUG_PRINTF("%p: Width is changed.\n", this);
+      #endif // DEBUG_DIRTY
+      return true;
+  }
+
+  if (rc.height() != m_oFormatBuf.height()) {
+      #if DEBUG_DIRTY
+          DEBUG_PRINTF("%p: Height is changed.\n", this);
+      #endif // DEBUG_DIRTY
+      return true;
+  }
+
+  // Buffer
+  auto const lSelStart = selection.GetStart();
+  auto const lSelEnd = selection.GetEnd();
+
+  // Page shows caret instead of seleciton.
+  if (m_lSelStart == m_lSelEnd) {
+    if (lSelStart == lSelEnd) {
+        #if DEBUG_DIRTY
+            DEBUG_PRINTF("%p: clean with caret.\n", this);
+        #endif // DEBUG_DIRTY
+        return false;
+    }
+
+    if (!fSelection) {
+        if (lSelEnd < m_lStart || lSelStart > m_lEnd) {
+            #if DEBUG_DIRTY
+                DEBUG_PRINTF("%p: clean with selection in outside.\n", this);
+            #endif // DEBUG_DIRTY
+            return false;
+        }
+    }
+
+    #if DEBUG_DIRTY
+        DEBUG_PRINTF("%p: Need to show selection.\n", this);
+    #endif // DEBUG_DIRTY
+    return true;
+  }
+
+  if (!fSelection) {
+    // Page doesn't contain selection.
+    if (m_lSelEnd < m_lStart || m_lSelStart > m_lEnd) {
+        if (lSelStart == lSelEnd) {
+            #if DEBUG_DIRTY
+                DEBUG_PRINTF("%p: clean with selection.\n", this);
+            #endif // DEBUG_DIRTY
+            return false;
+        }
+
+        if (lSelEnd < m_lStart || lSelStart > m_lEnd)
+            return false;
+        #if DEBUG_DIRTY
+            DEBUG_PRINTF("%p: Need to show selection.\n", this);
+        #endif // DEBUG_DIRTY
+        return true;
+    }
+  }
+
+  // Page shows selection.
+  if (m_lSelStart != lSelStart) {
+    #if DEBUG_DIRTY
+        DEBUG_PRINTF("%p: Selection start is changed.\n", this);
+    #endif // DEBUG_DIRTY
+    return true;
+  }
+
+  if (m_lSelEnd != lSelEnd) {
+    #if DEBUG_DIRTY
+        DEBUG_PRINTF("%p: Selection end is changed.\n", this);
+    #endif // DEBUG_DIRTY
+    return true;
+  }
+
+  if (m_crSelFg != selection.GetColor()) {
+    #if DEBUG_DIRTY
+        DEBUG_PRINTF("%p: SelColor is changed.\n", this);
+    #endif // DEBUG_DIRTY
+    return true;
+  }
+
+  if (m_crSelBg  != selection.GetBackground()) {
+    #if DEBUG_DIRTY
+        DEBUG_PRINTF("%p: SelBackground is changed.\n", this);
+    #endif // DEBUG_DIRTY
+    return true;
+  }
+
+  #if DEBUG_DIRTY
+    DEBUG_PRINTF("%p is clean.\n", this);
+  #endif // DEBUG_DIRTY
+
+  return false;
+}
+
+bool Page::ShouldRender() const {
+  return m_oScreenBuf.dirty();
+}
+
+// text::BufferMutationObserver
+void Page::DidDeleteAt(Posn offset, size_t) {
+  m_oFormatBuf.SetBufferDirtyOffset(offset);
+}
+
+void Page::DidInsertAt(Posn offset, size_t) {
+  m_oFormatBuf.SetBufferDirtyOffset(offset);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// Page::DisplayBuffer
+//
 Page::DisplayBuffer::DisplayBuffer()
-    : m_cy(0),
+    : dirty_(true),
+      m_cy(0),
       m_hObjHeap(nullptr) {
 }
 
@@ -1745,6 +1746,10 @@ void Page::DisplayBuffer::Append(Line* pLine) {
 
 void* Page::DisplayBuffer::Alloc(size_t cb) {
   return ::HeapAlloc(m_hObjHeap, 0, cb);
+}
+
+void Page::DisplayBuffer::Finish() {
+  dirty_ = !GetFirst();
 }
 
 Page::Line* Page::DisplayBuffer::NewLine() {
@@ -1770,6 +1775,7 @@ HANDLE Page::DisplayBuffer::Reset(const gfx::RectF& new_rect) {
 
   m_hObjHeap = ::HeapCreate(HEAP_NO_SERIALIZE, 0, 0);
   lines_.DeleteAll();
+  dirty_ = true;
   m_cy = 0;
   rect_ = new_rect;
 
@@ -1798,6 +1804,13 @@ Page::Line* Page::DisplayBuffer::ScrollUp() {
   lines_.Delete(line);
   m_cy -= line->GetHeight();
   return line;
+}
+
+void Page::DisplayBuffer::SetBufferDirtyOffset(Posn offset) {
+  if (dirty_)
+    return;
+  dirty_ = GetFirst()->GetStart() >= offset ||
+           GetLast()->GetEnd() >= offset;
 }
 
 //////////////////////////////////////////////////////////////////////

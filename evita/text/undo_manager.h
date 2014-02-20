@@ -12,8 +12,6 @@ namespace text {
 
 class Record;
 
-// m_cb
-// Holds hint of total size of edit log records.
 // m_fMerge
 // We merge consecutive insert/delete edit log records.
 // m_fTruncate
@@ -27,7 +25,6 @@ class UndoManager : public BufferMutationObserver {
     State_Undo,
   };
 
-  private: size_t m_cb;
   private: State m_eState;
   private: bool m_fMerge;
   private: bool m_fTruncate;
@@ -63,7 +60,6 @@ class UndoManager : public BufferMutationObserver {
 
   // [G]
   public: Buffer* GetBuffer() const { return m_pBuffer; }
-  public: size_t GetSize() const { return m_cb; }
 
   // [R]
   public: void RecordBegin(const base::string16& name);

@@ -37,7 +37,6 @@ class Record : common::Castable {
   public: virtual Posn GetAfterUndo() const = 0;
   public: virtual Posn GetBeforeRedo() const = 0;
   public: virtual Posn GetBeforeUndo() const = 0;
-  public: virtual size_t GetSize() const = 0;
   public: virtual void Redo(Buffer*) {}
   public: virtual void Undo(Buffer*) = 0;
 
@@ -88,7 +87,6 @@ class BeginRecord : public Record {
   private: virtual Posn GetAfterUndo() const override;
   private: virtual Posn GetBeforeRedo() const override;
   private: virtual Posn GetBeforeUndo() const override;
-  private: virtual size_t GetSize() const override;
   private: virtual void Undo(Buffer* pBuffer) override;
 
   DISALLOW_COPY_AND_ASSIGN(BeginRecord);
@@ -112,10 +110,6 @@ Posn BeginRecord::GetBeforeRedo() const {
 
 Posn BeginRecord::GetBeforeUndo() const {
   return m_pNext->GetBeforeUndo();
-}
-
-size_t BeginRecord::GetSize() const {
-  return sizeof(BeginRecord);
 }
 
 void BeginRecord::Undo(Buffer* pBuffer) {
@@ -195,7 +189,6 @@ class DeleteRecord : public TextRecord {
   private: virtual Posn GetAfterUndo() const override;
   private: virtual Posn GetBeforeRedo() const override;
   private: virtual Posn GetBeforeUndo() const override;
-  private: virtual size_t GetSize() const override;
   private: virtual void Redo(Buffer* pBuffer) override;
   private: virtual void Undo(Buffer* pBuffer) override;
 
@@ -281,10 +274,6 @@ Posn DeleteRecord::GetBeforeUndo() const {
   return m_lStart;
 }
 
-size_t DeleteRecord::GetSize() const {
-  return sizeof(DeleteRecord) + sizeof(char16) * (m_lEnd - m_lStart);
-}
-
 void DeleteRecord::Redo(Buffer* pBuffer) {
   insertChars(pBuffer);
   pBuffer->IncCharTick(1);
@@ -314,7 +303,6 @@ class EndRecord : public Record {
   private: virtual Posn GetAfterUndo() const override;
   private: virtual Posn GetBeforeRedo() const override;
   private: virtual Posn GetBeforeUndo() const override;
-  private: virtual size_t GetSize() const override;
   private: virtual void Undo(Buffer* pBuffer) override;
 
   DISALLOW_COPY_AND_ASSIGN(EndRecord);
@@ -344,10 +332,6 @@ Posn EndRecord::GetBeforeUndo() const {
   return m_pPrev->GetBeforeUndo();
 }
 
-size_t EndRecord::GetSize() const {
-  return sizeof(EndRecord);
-}
-
 void EndRecord::Undo(Buffer* pBuffer) {
   pBuffer->GetUndo()->RecordBegin(name_);
 }
@@ -374,7 +358,6 @@ class InsertRecord : public TextRecord {
   private: virtual Posn GetAfterUndo() const override;
   private: virtual Posn GetBeforeRedo() const override;
   private: virtual Posn GetBeforeUndo() const override;
-  private: virtual size_t GetSize() const override;
   private: virtual void Redo(Buffer* pBuffer) override;;
   private: virtual void Undo(Buffer* pBuffer) override;;
 
@@ -419,10 +402,6 @@ Posn InsertRecord::GetBeforeUndo() const {
   return m_lEnd;
 }
 
-size_t InsertRecord::GetSize() const {
-  return sizeof(InsertRecord);
-}
-
 void InsertRecord::Redo(Buffer* pBuffer) {
   pBuffer->Delete(m_lStart, m_lEnd);
   pBuffer->IncCharTick(1);
@@ -443,8 +422,7 @@ using namespace internal;
 // UndoManager
 //
 UndoManager::UndoManager(Buffer* pBuffer)
-    : m_cb(0),
-      m_eState(State_Log),
+    : m_eState(State_Log),
       m_fMerge(true),
       m_fTruncate(false),
       m_hObjHeap(::HeapCreate(HEAP_NO_SERIALIZE, 0, 0)),
@@ -491,13 +469,11 @@ void UndoManager::delRecord(Record* pRecord) {
 void UndoManager::discardRecord(Record* pRecord) {
   DCHECK_NE(pRecord, m_pUndo);
   DCHECK_NE(pRecord, m_pRedo);
-  m_cb -= pRecord->GetSize();
   pRecord->Discard(this);
   ::HeapFree(m_hObjHeap, 0, pRecord);
 }
 
 void* UndoManager::Alloc(size_t cb) {
-  m_cb += cb;
   return ::HeapAlloc(m_hObjHeap, 0, cb);
 }
 

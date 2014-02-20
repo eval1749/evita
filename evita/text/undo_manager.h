@@ -12,8 +12,6 @@ namespace text {
 
 class Record;
 
-// m_fMerge
-// We merge consecutive insert/delete edit log records.
 // m_fTruncate
 // We truncate edit log if undo/redo operation is interrupted.
 //
@@ -26,7 +24,6 @@ class UndoManager : public BufferMutationObserver {
   };
 
   private: State m_eState;
-  private: bool m_fMerge;
   private: bool m_fTruncate;
   private: HANDLE m_hObjHeap;
   private: Buffer* m_pBuffer;

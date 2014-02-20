@@ -423,7 +423,6 @@ using namespace internal;
 //
 UndoManager::UndoManager(Buffer* pBuffer)
     : m_eState(State_Log),
-      m_fMerge(true),
       m_fTruncate(false),
       m_hObjHeap(::HeapCreate(HEAP_NO_SERIALIZE, 0, 0)),
       m_pBuffer(pBuffer),
@@ -546,7 +545,7 @@ void UndoManager::RecordBegin(const base::string16& name) {
   if (m_eState == State_Disabled)
     return;
 
-  if (m_fMerge && m_eState == State_Log && m_pLast &&
+  if (m_eState == State_Log && m_pLast &&
       m_pLast->is<EndRecord>()) {
     auto const pLast = m_pLast->as<EndRecord>();
     if (pLast->CanMerge(name)) {
@@ -569,7 +568,7 @@ void UndoManager::RecordDelete(Posn lStart, Posn lEnd) {
   if (State_Disabled == m_eState)
     return;
 
-  if (m_fMerge && m_pLast && m_pLast->is<DeleteRecord>()) {
+  if (m_pLast && m_pLast->is<DeleteRecord>()) {
     auto const pLast = m_pLast->as<DeleteRecord>();
     if (pLast->Merge(this, lStart, lEnd)) {
       m_pBuffer->IncCharTick(-1);
@@ -604,7 +603,7 @@ void UndoManager::RecordInsert(Posn lStart, Posn lEnd) {
     return;
 
   // Merge insert record.
-  if (m_fMerge && m_pLast && m_pLast->is<InsertRecord>()) {
+  if (m_pLast && m_pLast->is<InsertRecord>()) {
     auto const pLast = m_pLast->as<InsertRecord>();
     if (pLast->Merge(m_pBuffer, lStart, lEnd)) {
       m_pBuffer->IncCharTick(-1);

@@ -61,9 +61,6 @@ class UndoStack : public BufferMutationObserver {
   public: void RecordInsert(Posn, Posn);
   public: Posn Redo(Posn, Count);
 
-  // [T]
-  public: void TruncateLog();
-
   // [U]
   public: Posn Undo(Posn, Count);
 

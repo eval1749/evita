@@ -205,16 +205,17 @@
     var regexp = createRegExp(window, form, ControlId.NEXT);
     if (!regexp)
       return;
+    var document = window.document;
     var selection = window.selection;
-    var range = selection.range;
-    var document = range.document;
-    var replace_range = new Range(range);
-    if (!form.get(ControlId.SELECTION) || range.collapsed) {
+    var selection_range = selection.range;
+    var replace_range = new Range(selection_range);
+    if (selection_range.collapsed) {
       replace_range.start = 0;
       replace_range.end = document.length;
     }
     var case_preserve = form.get(ControlId.PRESERVE).checked;
     var num_replaced = 0;
+    var range = new Range(document);
     document.undoGroup('replace all', function() {
       while (!replace_range.collapsed) {
         var matches = document.match_(regexp, replace_range.start,

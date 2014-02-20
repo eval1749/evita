@@ -491,7 +491,7 @@ void Widget::Show() {
     ::ShowWindow(*native_window_.get(), SW_SHOW);
   } else if (shown_ == 1) {
     DidShow();
-    OnPaint(rect());
+    SchedulePaint();
   }
 
   // Show child in bottom to top == pre-order.

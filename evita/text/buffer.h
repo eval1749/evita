@@ -183,9 +183,7 @@ class Buffer : public BufferCore, public FileFeatures {
 
   // [U]
   public: Posn Undo(Posn, Count = 1);
-
-  // Buffer management methods
-  private: void onChange();
+  private: void UpdateChangeTick();
 
   /// <summary>
   /// Buffer character enumerator

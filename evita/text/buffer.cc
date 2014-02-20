@@ -98,7 +98,7 @@ Count Buffer::Delete(Posn lStart, Posn lEnd) {
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
       DidDeleteAt(lStart, static_cast<size_t>(length)));
 
-  onChange();
+  UpdateChangeTick();
   return length;
 }
 
@@ -129,7 +129,7 @@ Count Buffer::Insert(Posn lPosn, const char16* pwch, Count n) {
   ++m_nModfTick;
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
       DidInsertAt(lPosn, static_cast<size_t>(n)));
-  onChange();
+  UpdateChangeTick();
 
   return n;
 }
@@ -149,17 +149,11 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
       DidInsertBefore(position, text_length));
 
-  onChange();
+  UpdateChangeTick();
 }
 
 bool Buffer::IsNotReady() const {
   return m_eState != State_Ready;
-}
-
-void Buffer::onChange() {
-  if (m_nCharTick < m_nSaveTick)
-    m_nCharTick = m_nSaveTick;
-  ++m_nCharTick;
 }
 
 Posn Buffer::Redo(Posn lPosn, Count n) {
@@ -185,6 +179,12 @@ Posn Buffer::Undo(Posn lPosn, Count n) {
   if (IsReadOnly())
     return -1;
   return undo_stack_->Undo(lPosn, n);
+}
+
+void Buffer::UpdateChangeTick() {
+  if (m_nCharTick < m_nSaveTick)
+    m_nCharTick = m_nSaveTick;
+  ++m_nCharTick;
 }
 
 //////////////////////////////////////////////////////////////////////

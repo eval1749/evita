@@ -115,6 +115,7 @@
       'sources': [
         'precomp.cpp',
         'text/buffer_unittest.cc',
+        'text/undo_stack_unittest.cc',
       ],
     }, # evita_text_test
     {

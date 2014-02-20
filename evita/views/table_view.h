@@ -10,6 +10,7 @@
 
 #include "base/basictypes.h"
 #include "evita/gc/member.h"
+#include "evita/text/buffer_mutation_observer.h"
 #include "evita/ui/base/table_model.h"
 #include "evita/ui/controls/table_control_observer.h"
 #include "evita/views/table_view_model.h"
@@ -28,7 +29,8 @@ class TableControl;
 namespace views {
 
 class TableView
-    : public views::ContentWindow,
+    : public text::BufferMutationObserver,
+      public views::ContentWindow,
       public ui::TableControlObserver,
       public ui::TableModel {
   DECLARE_CASTABLE_CLASS(TableView, ContentWindow);
@@ -37,9 +39,9 @@ class TableView
   private: ui::TableControl* control_;
   private: gc::Member<dom::Document> document_;
   private: std::unique_ptr<TableViewModel> model_;
-  private: int modified_tick_;
   private: std::vector<TableViewModel::Row*> rows_;
   private: std::unordered_map<int, TableViewModel::Row*> row_map_;
+  private: bool should_update_model_;
 
   public: TableView(WindowId window_id, dom::Document* document);
   public: virtual ~TableView();
@@ -51,7 +53,11 @@ class TableView
   private: std::unique_ptr<TableViewModel> UpdateModelIfNeeded();
   private: void UpdateControl(std::unique_ptr<TableViewModel> new_model);
 
-  // ContentWindow
+  // text::BufferMutationObserver
+  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
+  private: virtual void DidInsertAt(Posn offset, size_t length) override;
+
+  // views::ContentWindow
   private: virtual int GetIconIndex() const override;
 
   // ui::TableControlObserver

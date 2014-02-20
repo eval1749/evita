@@ -85,10 +85,12 @@ TableView::TableView(WindowId window_id, dom::Document* document)
       control_(nullptr),
       document_(document),
       model_(new TableViewModel()),
-      modified_tick_(0) {
+      should_update_model_(true) {
+  document_->buffer()->AddObserver(this);
 }
 
 TableView::~TableView() {
+  document_->buffer()->RemoveObserver(this);
 }
 
 void TableView::GetRowStates(const std::vector<base::string16>& keys,
@@ -156,11 +158,10 @@ void TableView::UpdateControl(std::unique_ptr<TableViewModel> new_model) {
 }
 
 std::unique_ptr<TableViewModel> TableView::UpdateModelIfNeeded() {
-  UI_ASSERT_DOM_LOCKED();
-  auto const modified_tick = document_->buffer()->GetModfTick();
-  if (modified_tick_ == modified_tick)
+  if (!should_update_model_)
     return std::unique_ptr<TableViewModel>();
-  modified_tick_ = modified_tick;
+  UI_ASSERT_DOM_LOCKED();
+  should_update_model_ = false;
   std::unique_ptr<TableViewModel> model(new TableViewModel());
   auto const buffer = document_->buffer();
   auto position = buffer->ComputeEndOfLine(0);
@@ -178,7 +179,16 @@ std::unique_ptr<TableViewModel> TableView::UpdateModelIfNeeded() {
   return std::move(model);
 }
 
-// ContentWindow
+// text::BufferMutationObserver
+void TableView::DidDeleteAt(Posn, size_t) {
+  should_update_model_ = true;
+}
+
+void TableView::DidInsertAt(Posn, size_t) {
+  should_update_model_ = true;
+}
+
+// views::ContentWindow
 int TableView::GetIconIndex() const {
   return IconCache::instance()->GetIconForFileName(L"foo.txt");
 }

@@ -12,10 +12,10 @@ namespace text {
 
 //////////////////////////////////////////////////////////////////////
 //
-// Record
+// UndoStep
 //
-class Record : common::Castable {
-  DECLARE_CASTABLE_CLASS(Record, Castable);
+class UndoStep : common::Castable {
+  DECLARE_CASTABLE_CLASS(UndoStep, Castable);
 
   friend class UndoStack;
 
@@ -26,11 +26,11 @@ class Record : common::Castable {
   private: void operator delete(void*) {
   }
 
-  protected: Record* m_pNext;
-  protected: Record* m_pPrev;
+  protected: UndoStep* m_pNext;
+  protected: UndoStep* m_pPrev;
 
-  protected: Record();
-  public: virtual ~Record() = default;
+  protected: UndoStep();
+  public: virtual ~UndoStep() = default;
 
   public: virtual void Discard(UndoStack*) {}
   public: virtual Posn GetAfterRedo() const = 0;
@@ -40,31 +40,31 @@ class Record : common::Castable {
   public: virtual void Redo(Buffer*) {}
   public: virtual void Undo(Buffer*) = 0;
 
-  DISALLOW_COPY_AND_ASSIGN(Record);
+  DISALLOW_COPY_AND_ASSIGN(UndoStep);
 };
 
-Record::Record() : m_pNext(nullptr), m_pPrev(nullptr) {
+UndoStep::UndoStep() : m_pNext(nullptr), m_pPrev(nullptr) {
 }
 
 namespace internal {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TextRecord
+// TextUndoStep
 //
-class TextRecord : public Record {
-  DECLARE_CASTABLE_CLASS(TextRecord, Record);
+class TextUndoStep : public UndoStep {
+  DECLARE_CASTABLE_CLASS(TextUndoStep, UndoStep);
 
   protected: Posn m_lEnd;
   protected: Posn m_lStart;
 
-  protected: TextRecord(Posn lStart, Posn lEnd);
-  public: virtual ~TextRecord() = default;
+  protected: TextUndoStep(Posn lStart, Posn lEnd);
+  public: virtual ~TextUndoStep() = default;
 
-  DISALLOW_COPY_AND_ASSIGN(TextRecord);
+  DISALLOW_COPY_AND_ASSIGN(TextUndoStep);
 };
 
-TextRecord::TextRecord(Posn lStart, Posn lEnd)
+TextUndoStep::TextUndoStep(Posn lStart, Posn lEnd)
     : m_lEnd(lEnd),
       m_lStart(lStart) {
   DCHECK_LE(m_lStart, m_lEnd);
@@ -72,59 +72,59 @@ TextRecord::TextRecord(Posn lStart, Posn lEnd)
 
 //////////////////////////////////////////////////////////////////////
 //
-// BeginRecord
+// BeginUndoStep
 //
-class BeginRecord : public Record {
-  DECLARE_CASTABLE_CLASS(BeginRecord, Record);
+class BeginUndoStep : public UndoStep {
+  DECLARE_CASTABLE_CLASS(BeginUndoStep, UndoStep);
 
   private: const base::string16 name_;
 
-  public: BeginRecord(const base::string16& name);
-  public: virtual ~BeginRecord() = default;
+  public: BeginUndoStep(const base::string16& name);
+  public: virtual ~BeginUndoStep() = default;
 
-  // Record
+  // UndoStep
   private: virtual Posn GetAfterRedo() const override;
   private: virtual Posn GetAfterUndo() const override;
   private: virtual Posn GetBeforeRedo() const override;
   private: virtual Posn GetBeforeUndo() const override;
   private: virtual void Undo(Buffer* pBuffer) override;
 
-  DISALLOW_COPY_AND_ASSIGN(BeginRecord);
+  DISALLOW_COPY_AND_ASSIGN(BeginUndoStep);
 };
 
-BeginRecord::BeginRecord(const base::string16& name) : name_(name) {
+BeginUndoStep::BeginUndoStep(const base::string16& name) : name_(name) {
 }
 
-// Record
-Posn BeginRecord::GetAfterRedo() const {
+// UndoStep
+Posn BeginUndoStep::GetAfterRedo() const {
   return m_pNext->GetAfterRedo();
 }
 
-Posn BeginRecord::GetAfterUndo() const {
+Posn BeginUndoStep::GetAfterUndo() const {
   return m_pNext->GetAfterUndo();
 }
 
-Posn BeginRecord::GetBeforeRedo() const {
+Posn BeginUndoStep::GetBeforeRedo() const {
   return m_pNext->GetBeforeRedo();
 }
 
-Posn BeginRecord::GetBeforeUndo() const {
+Posn BeginUndoStep::GetBeforeUndo() const {
   return m_pNext->GetBeforeUndo();
 }
 
-void BeginRecord::Undo(Buffer* pBuffer) {
+void BeginUndoStep::Undo(Buffer* pBuffer) {
   pBuffer->GetUndo()->EndUndoGroup(name_);
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// DeleteRecord
+// DeleteUndoStep
 //
-class DeleteRecord : public TextRecord {
-  DECLARE_CASTABLE_CLASS(DeleteRecord, TextRecord);
+class DeleteUndoStep : public TextUndoStep {
+  DECLARE_CASTABLE_CLASS(DeleteUndoStep, TextUndoStep);
 
   private: class Chars {
-    friend class DeleteRecord;
+    friend class DeleteUndoStep;
 
     private: Count m_cwch;
     private: Chars* m_pNext;
@@ -154,7 +154,7 @@ class DeleteRecord : public TextRecord {
   public: class EnumChars {
     private: Chars* m_pRunner;
 
-    public: EnumChars(const DeleteRecord* p) : m_pRunner(p->m_pFirst) {
+    public: EnumChars(const DeleteUndoStep* p) : m_pRunner(p->m_pFirst) {
     }
 
     public: bool AtEnd() const { return nullptr == m_pRunner; }
@@ -173,12 +173,12 @@ class DeleteRecord : public TextRecord {
   private: Chars* m_pFirst;
   private: Chars* m_pLast;
 
-  public: DeleteRecord(UndoStack* pUndo, Posn lStart, Posn lEnd);
-  public: virtual ~DeleteRecord() = default;
+  public: DeleteUndoStep(UndoStack* pUndo, Posn lStart, Posn lEnd);
+  public: virtual ~DeleteUndoStep() = default;
 
   private: Chars* createChars(UndoStack* pUndo, Posn lStart, Posn lEnd);
   private: void insertChars(Buffer* pBuffer) const;
-  // Merges new delete information into the last delete record if
+  // Merges new delete information into the last delete UndoStep if
   // o New delete doesn't start with newline.
   // o New delete doesn't end with newline.
   public: bool Merge(UndoStack* pUndo, Posn lStart, Posn lEnd);
@@ -192,22 +192,22 @@ class DeleteRecord : public TextRecord {
   private: virtual void Redo(Buffer* pBuffer) override;
   private: virtual void Undo(Buffer* pBuffer) override;
 
-  DISALLOW_COPY_AND_ASSIGN(DeleteRecord);
+  DISALLOW_COPY_AND_ASSIGN(DeleteUndoStep);
 };
 
-DeleteRecord::DeleteRecord(UndoStack* pUndo, Posn lStart, Posn lEnd) :
-    TextRecord(lStart, lEnd)
+DeleteUndoStep::DeleteUndoStep(UndoStack* pUndo, Posn lStart, Posn lEnd) :
+    TextUndoStep(lStart, lEnd)
 {
     m_pFirst = createChars(pUndo, lStart, lEnd);
     m_pLast = m_pFirst;
 }
 
-DeleteRecord::Chars* DeleteRecord::createChars(UndoStack* pUndo,
+DeleteUndoStep::Chars* DeleteUndoStep::createChars(UndoStack* pUndo,
                                                Posn lStart, Posn lEnd) {
   return new(pUndo, lStart, lEnd) Chars(pUndo, lStart, lEnd);
 }
 
-void DeleteRecord::insertChars(Buffer* pBuffer) const {
+void DeleteUndoStep::insertChars(Buffer* pBuffer) const {
   auto lPosn = m_lStart;
   foreach (EnumChars, oEnum, this) {
     auto const pChars = oEnum.Get();
@@ -216,7 +216,7 @@ void DeleteRecord::insertChars(Buffer* pBuffer) const {
   }
 }
 
-bool DeleteRecord::Merge(UndoStack* pUndo, Posn lStart, Posn lEnd) {
+bool DeleteUndoStep::Merge(UndoStack* pUndo, Posn lStart, Posn lEnd) {
   if (pUndo->GetBuffer()->GetCharAt(lStart) == 0x0A)
     return false;
 
@@ -248,8 +248,8 @@ bool DeleteRecord::Merge(UndoStack* pUndo, Posn lStart, Posn lEnd) {
   return false;
 }
 
-// Record
-void DeleteRecord::Discard(UndoStack* pUndo) {
+// UndoStep
+void DeleteUndoStep::Discard(UndoStack* pUndo) {
   EnumChars oEnum(this);
   while (!oEnum.AtEnd()) {
       Chars* pChars = oEnum.Get();
@@ -258,28 +258,28 @@ void DeleteRecord::Discard(UndoStack* pUndo) {
   }
 }
 
-Posn DeleteRecord::GetAfterRedo() const {
+Posn DeleteUndoStep::GetAfterRedo() const {
   return m_lEnd;
 }
 
-Posn DeleteRecord::GetAfterUndo() const {
+Posn DeleteUndoStep::GetAfterUndo() const {
   return m_lEnd;
 }
 
-Posn DeleteRecord::GetBeforeRedo() const {
+Posn DeleteUndoStep::GetBeforeRedo() const {
   return m_lStart;
 }
 
-Posn DeleteRecord::GetBeforeUndo() const {
+Posn DeleteUndoStep::GetBeforeUndo() const {
   return m_lStart;
 }
 
-void DeleteRecord::Redo(Buffer* pBuffer) {
+void DeleteUndoStep::Redo(Buffer* pBuffer) {
   insertChars(pBuffer);
   pBuffer->IncCharTick(1);
 }
 
-void DeleteRecord::Undo(Buffer* pBuffer) {
+void DeleteUndoStep::Undo(Buffer* pBuffer) {
   insertChars(pBuffer);
   pBuffer->GetUndo()->PushInsertText(m_lStart, m_lEnd);
   pBuffer->IncCharTick(-1);
@@ -287,15 +287,15 @@ void DeleteRecord::Undo(Buffer* pBuffer) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// EndRecord
+// EndUndoStep
 //
-class EndRecord : public Record {
-  DECLARE_CASTABLE_CLASS(EndRecord, Record);
+class EndUndoStep : public UndoStep {
+  DECLARE_CASTABLE_CLASS(EndUndoStep, UndoStep);
 
   private: const base::string16 name_;
 
-  public: EndRecord(const base::string16& name);
-  public: virtual ~EndRecord() = default;
+  public: EndUndoStep(const base::string16& name);
+  public: virtual ~EndUndoStep() = default;
 
   public: bool CanMerge(const base::string16& name) const;
 
@@ -305,55 +305,55 @@ class EndRecord : public Record {
   private: virtual Posn GetBeforeUndo() const override;
   private: virtual void Undo(Buffer* pBuffer) override;
 
-  DISALLOW_COPY_AND_ASSIGN(EndRecord);
+  DISALLOW_COPY_AND_ASSIGN(EndUndoStep);
 };
 
-EndRecord::EndRecord(const base::string16& name) : name_(name) {
+EndUndoStep::EndUndoStep(const base::string16& name) : name_(name) {
 }
 
-bool EndRecord::CanMerge(const base::string16& name) const {
+bool EndUndoStep::CanMerge(const base::string16& name) const {
   return name_ == name && '*' == name[0];
 }
 
-// Record
-Posn EndRecord::GetAfterRedo() const {
+// UndoStep
+Posn EndUndoStep::GetAfterRedo() const {
   return m_pPrev->GetAfterRedo();
 }
 
-Posn EndRecord::GetAfterUndo() const {
+Posn EndUndoStep::GetAfterUndo() const {
   return m_pPrev->GetAfterUndo();
 }
 
-Posn EndRecord::GetBeforeRedo() const {
+Posn EndUndoStep::GetBeforeRedo() const {
   return m_pPrev->GetBeforeRedo();
 }
 
-Posn EndRecord::GetBeforeUndo() const {
+Posn EndUndoStep::GetBeforeUndo() const {
   return m_pPrev->GetBeforeUndo();
 }
 
-void EndRecord::Undo(Buffer* pBuffer) {
+void EndUndoStep::Undo(Buffer* pBuffer) {
   pBuffer->GetUndo()->BeginUndoGroup(name_);
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// InsertRecord
+// InsertUndoStep
 //
-class InsertRecord : public TextRecord {
-  DECLARE_CASTABLE_CLASS(InsertRecord, TextRecord);
+class InsertUndoStep : public TextUndoStep {
+  DECLARE_CASTABLE_CLASS(InsertUndoStep, TextUndoStep);
 
-  public: InsertRecord(Posn lStart, Posn lEnd);
-  public: virtual ~InsertRecord() = default;
+  public: InsertUndoStep(Posn lStart, Posn lEnd);
+  public: virtual ~InsertUndoStep() = default;
 
   // Merge
-  // Merge "Insert" record if
+  // Merge "Insert" UndoStep if
   // o [last][new]
   // o [new][last]
   // and there is no newline between last and new.
   public: bool Merge(Buffer* pBuffer, Posn lStart, Posn lEnd);
 
-  // Record
+  // UndoStep
   private: virtual Posn GetAfterRedo() const override;
   private: virtual Posn GetAfterUndo() const override;
   private: virtual Posn GetBeforeRedo() const override;
@@ -361,14 +361,14 @@ class InsertRecord : public TextRecord {
   private: virtual void Redo(Buffer* pBuffer) override;;
   private: virtual void Undo(Buffer* pBuffer) override;;
 
-  DISALLOW_COPY_AND_ASSIGN(InsertRecord);
+  DISALLOW_COPY_AND_ASSIGN(InsertUndoStep);
 };
 
-InsertRecord::InsertRecord(Posn lStart, Posn lEnd)
-    : TextRecord(lStart, lEnd) {
+InsertUndoStep::InsertUndoStep(Posn lStart, Posn lEnd)
+    : TextUndoStep(lStart, lEnd) {
 }
 
-bool InsertRecord::Merge(Buffer* pBuffer, Posn lStart, Posn lEnd) {
+bool InsertUndoStep::Merge(Buffer* pBuffer, Posn lStart, Posn lEnd) {
   if (m_lEnd == lStart) {
     // [last][new]
     if (pBuffer->GetCharAt(m_lEnd - 1) != 0x0A) {
@@ -385,29 +385,29 @@ bool InsertRecord::Merge(Buffer* pBuffer, Posn lStart, Posn lEnd) {
   return false;
 }
 
-// Record
-Posn InsertRecord::GetAfterRedo() const {
+// UndoStep
+Posn InsertUndoStep::GetAfterRedo() const {
   return m_lStart;
 }
 
-Posn InsertRecord::GetAfterUndo() const {
+Posn InsertUndoStep::GetAfterUndo() const {
   return m_lStart;
 }
 
-Posn InsertRecord::GetBeforeRedo() const {
+Posn InsertUndoStep::GetBeforeRedo() const {
   return m_lEnd;
 }
 
-Posn InsertRecord::GetBeforeUndo() const {
+Posn InsertUndoStep::GetBeforeUndo() const {
   return m_lEnd;
 }
 
-void InsertRecord::Redo(Buffer* pBuffer) {
+void InsertUndoStep::Redo(Buffer* pBuffer) {
   pBuffer->Delete(m_lStart, m_lEnd);
   pBuffer->IncCharTick(1);
 }
 
-void InsertRecord::Undo(Buffer* pBuffer) {
+void InsertUndoStep::Undo(Buffer* pBuffer) {
   pBuffer->GetUndo()->PushDeleteText(m_lStart, m_lEnd);
   pBuffer->Delete(m_lStart, m_lEnd);
   pBuffer->IncCharTick(-1);
@@ -435,21 +435,21 @@ UndoStack::UndoStack(Buffer* pBuffer)
 UndoStack::~UndoStack() {
 }
 
-void UndoStack::addRecord(Record* pRecord) {
-  pRecord->m_pPrev = m_pLast;
+void UndoStack::addUndoStep(UndoStep* pUndoStep) {
+  pUndoStep->m_pPrev = m_pLast;
 
   if (m_pLast)
-    m_pLast->m_pNext = pRecord;
+    m_pLast->m_pNext = pUndoStep;
 
-  m_pLast = pRecord;
+  m_pLast = pUndoStep;
 
   if (!m_pFirst)
-    m_pFirst = pRecord;
+    m_pFirst = pUndoStep;
 }
 
-void UndoStack::delRecord(Record* pRecord) {
-  auto const pNext = pRecord->m_pNext;
-  auto const pPrev = pRecord->m_pPrev;
+void UndoStack::delUndoStep(UndoStep* pUndoStep) {
+  auto const pNext = pUndoStep->m_pNext;
+  auto const pPrev = pUndoStep->m_pPrev;
 
   if (!pNext)
     m_pLast = pPrev;
@@ -461,14 +461,14 @@ void UndoStack::delRecord(Record* pRecord) {
   else
     pPrev->m_pNext = pNext;
 
-  discardRecord(pRecord);
+  discardUndoStep(pUndoStep);
 }
 
-void UndoStack::discardRecord(Record* pRecord) {
-  DCHECK_NE(pRecord, m_pUndo);
-  DCHECK_NE(pRecord, m_pRedo);
-  pRecord->Discard(this);
-  ::HeapFree(m_hObjHeap, 0, pRecord);
+void UndoStack::discardUndoStep(UndoStep* pUndoStep) {
+  DCHECK_NE(pUndoStep, m_pUndo);
+  DCHECK_NE(pUndoStep, m_pRedo);
+  pUndoStep->Discard(this);
+  ::HeapFree(m_hObjHeap, 0, pUndoStep);
 }
 
 void* UndoStack::Alloc(size_t cb) {
@@ -507,7 +507,7 @@ void UndoStack::CheckPoint() {
         auto pRunner = m_pRedo->m_pNext;
         while (pRunner) {
           auto const pNext = pRunner->m_pNext;
-          discardRecord(pRunner);
+          discardUndoStep(pRunner);
           pRunner = pNext;
         }
         m_pRedo->m_pNext = nullptr;
@@ -541,18 +541,18 @@ void UndoStack::BeginUndoGroup(const base::string16& name) {
     return;
 
   if (m_eState == State_Log && m_pLast &&
-      m_pLast->is<EndRecord>()) {
-    auto const pLast = m_pLast->as<EndRecord>();
+      m_pLast->is<EndUndoStep>()) {
+    auto const pLast = m_pLast->as<EndUndoStep>();
     if (pLast->CanMerge(name)) {
-      // If the last record is generated by same operation, we merge
-      // the last record and new record.
-      delRecord(m_pLast);
+      // If the last UndoStep is generated by same operation, we merge
+      // the last UndoStep and new UndoStep.
+      delUndoStep(m_pLast);
       return;
     }
   }
 
-  BeginRecord* pRecord = new(this) BeginRecord(name);
-  addRecord(pRecord);
+  BeginUndoStep* pUndoStep = new(this) BeginUndoStep(name);
+  addUndoStep(pUndoStep);
 }
 
 void UndoStack::PushDeleteText(Posn lStart, Posn lEnd) {
@@ -563,16 +563,16 @@ void UndoStack::PushDeleteText(Posn lStart, Posn lEnd) {
   if (State_Disabled == m_eState)
     return;
 
-  if (m_pLast && m_pLast->is<DeleteRecord>()) {
-    auto const pLast = m_pLast->as<DeleteRecord>();
+  if (m_pLast && m_pLast->is<DeleteUndoStep>()) {
+    auto const pLast = m_pLast->as<DeleteUndoStep>();
     if (pLast->Merge(this, lStart, lEnd)) {
       m_pBuffer->IncCharTick(-1);
       return;
     }
   }
 
-  auto const pRecord = new(this) DeleteRecord(this, lStart, lEnd);
-  addRecord(pRecord);
+  auto const pUndoStep = new(this) DeleteUndoStep(this, lStart, lEnd);
+  addUndoStep(pUndoStep);
 }
 
 void UndoStack::EndUndoGroup(const base::string16& pwszName) {
@@ -581,14 +581,14 @@ void UndoStack::EndUndoGroup(const base::string16& pwszName) {
 
   if (m_pLast) {
     // Is empty block?
-    if (m_pLast->is<BeginRecord>()) {
-      delRecord(m_pLast);
+    if (m_pLast->is<BeginUndoStep>()) {
+      delUndoStep(m_pLast);
       return;
     }
   }
 
-  auto const pRecord = new(this) EndRecord(pwszName);
-  addRecord(pRecord);
+  auto const pUndoStep = new(this) EndUndoStep(pwszName);
+  addUndoStep(pUndoStep);
 }
 
 void UndoStack::PushInsertText(Posn lStart, Posn lEnd) {
@@ -597,17 +597,17 @@ void UndoStack::PushInsertText(Posn lStart, Posn lEnd) {
   if (lStart >= lEnd || m_eState == State_Disabled)
     return;
 
-  // Merge insert record.
-  if (m_pLast && m_pLast->is<InsertRecord>()) {
-    auto const pLast = m_pLast->as<InsertRecord>();
+  // Merge insert UndoStep.
+  if (m_pLast && m_pLast->is<InsertUndoStep>()) {
+    auto const pLast = m_pLast->as<InsertUndoStep>();
     if (pLast->Merge(m_pBuffer, lStart, lEnd)) {
       m_pBuffer->IncCharTick(-1);
       return;
     }
   }
 
-  auto const pRecord = new(this) InsertRecord(lStart, lEnd);
-  addRecord(pRecord);
+  auto const pUndoStep = new(this) InsertUndoStep(lStart, lEnd);
+  addUndoStep(pUndoStep);
 }
 
 Posn UndoStack::Redo(Posn lPosn, Count lCount) {
@@ -631,7 +631,7 @@ Posn UndoStack::Redo(Posn lPosn, Count lCount) {
     auto const pUndo = m_pUndo;
 
     if (pRedo == m_pUndo) {
-      // We don't have no redo record.
+      // We don't have no redo UndoStep.
       break;
     }
 
@@ -644,9 +644,9 @@ Posn UndoStack::Redo(Posn lPosn, Count lCount) {
       }
     }
 
-    if (pRedo->is<BeginRecord>())
+    if (pRedo->is<BeginUndoStep>())
       ++iDepth;
-    else if (pRedo->is<EndRecord>())
+    else if (pRedo->is<EndUndoStep>())
       --iDepth;
 
     pRedo->Redo(m_pBuffer);
@@ -679,28 +679,28 @@ Posn UndoStack::Undo(Posn lPosn, Count lCount) {
       --lCount;
     }
 
-    auto const pRecord = m_pUndo;
-    if (!pRecord) {
+    auto const pUndoStep = m_pUndo;
+    if (!pUndoStep) {
       DCHECK(!iDepth);
       break;
     }
 
     if (!lCount && !iDepth) {
-      auto const lUndo = pRecord->GetBeforeUndo();
+      auto const lUndo = pUndoStep->GetBeforeUndo();
       if (lPosn != lUndo) {
         lPosn = lUndo;
         break;
       }
     }
 
-    if (pRecord->is<BeginRecord>())
+    if (pUndoStep->is<BeginUndoStep>())
       --iDepth;
-    else if (pRecord->is<EndRecord>())
+    else if (pUndoStep->is<EndUndoStep>())
       ++iDepth;
 
-    pRecord->Undo(m_pBuffer);
-    lPosn = pRecord->GetAfterUndo();
-    m_pUndo = pRecord->m_pPrev;
+    pUndoStep->Undo(m_pBuffer);
+    lPosn = pUndoStep->GetAfterUndo();
+    m_pUndo = pUndoStep->m_pPrev;
   }
 
   m_pRedo = m_pLast;

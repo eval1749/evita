@@ -10,7 +10,7 @@
 
 namespace text {
 
-class Record;
+class UndoStep;
 
 class UndoStack : public BufferMutationObserver {
   public: enum State {
@@ -23,17 +23,17 @@ class UndoStack : public BufferMutationObserver {
   private: State m_eState;
   private: HANDLE m_hObjHeap;
   private: Buffer* m_pBuffer;
-  private: Record* m_pFirst;
-  private: Record* m_pLast;
-  private: Record* m_pRedo;
-  private: Record* m_pUndo;
+  private: UndoStep* m_pFirst;
+  private: UndoStep* m_pLast;
+  private: UndoStep* m_pRedo;
+  private: UndoStep* m_pUndo;
 
   public: explicit UndoStack(Buffer*);
   public: ~UndoStack();
 
   // [A]
   public: void* Alloc(size_t);
-  private: void addRecord(Record*);
+  private: void addUndoStep(UndoStep*);
 
   // [B]
   public: void BeginUndoGroup(const base::string16& name);
@@ -44,8 +44,8 @@ class UndoStack : public BufferMutationObserver {
   public: void CheckPoint();
 
   // [D]
-  private: void delRecord(Record*);
-  private: void discardRecord(Record*);
+  private: void delUndoStep(UndoStep*);
+  private: void discardUndoStep(UndoStep*);
 
   // [E]
   public: void Empty();

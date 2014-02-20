@@ -401,6 +401,7 @@
         'text/range_set.cc',
         'text/style.cc',
         'text/undo_stack.cc',
+        'text/undo_step.cc',
         'z_debug.cpp',
         '../charset/CharsetDecoder.cpp',
         '../charset/CharsetDetector.cpp',

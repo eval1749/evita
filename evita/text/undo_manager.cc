@@ -423,7 +423,6 @@ using namespace internal;
 //
 UndoManager::UndoManager(Buffer* pBuffer)
     : m_eState(State_Log),
-      m_fTruncate(false),
       m_hObjHeap(::HeapCreate(HEAP_NO_SERIALIZE, 0, 0)),
       m_pBuffer(pBuffer),
       m_pFirst(nullptr),
@@ -499,14 +498,10 @@ void UndoManager::CheckPoint() {
       return;
 
     case State_Undo:
-      if (m_fTruncate)
-        TruncateLog();
       break;
 
     case State_Redo:
-      if (m_fTruncate) {
-        TruncateLog();
-      } else if (m_pRedo) {
+      if (m_pRedo) {
         // Truncate executed redo logs
         // discarc m_pRedo->m_pNext ... m_pLast
         auto pRunner = m_pRedo->m_pNext;
@@ -660,31 +655,6 @@ Posn UndoManager::Redo(Posn lPosn, Count lCount) {
     m_pUndo = pUndo != nullptr ? pUndo->m_pNext : m_pFirst;
   }
   return lPosn;
-}
-
-// UndoManager::TruncateLog
-// Discards records from m_pUndo (exclusive) to end of log.
-void UndoManager::TruncateLog() {
-  Record* pRunner;
-  if (!m_pUndo) {
-    pRunner = m_pFirst;
-    m_pFirst = nullptr;
-  } else {
-    pRunner = m_pUndo->m_pNext;
-    m_pUndo->m_pNext = nullptr;
-  }
-
-  m_pRedo = nullptr;
-
-  while (pRunner != m_pUndo) {
-    if (!pRunner)
-      break;
-    auto const pNext = pRunner->m_pNext;
-    discardRecord(pRunner);
-    pRunner = pNext;
-  }
-
-  m_pLast = m_pUndo;
 }
 
 Posn UndoManager::Undo(Posn lPosn, Count lCount) {

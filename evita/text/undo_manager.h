@@ -12,9 +12,6 @@ namespace text {
 
 class Record;
 
-// m_fTruncate
-// We truncate edit log if undo/redo operation is interrupted.
-//
 class UndoManager : public BufferMutationObserver {
   public: enum State {
     State_Disabled,
@@ -24,7 +21,6 @@ class UndoManager : public BufferMutationObserver {
   };
 
   private: State m_eState;
-  private: bool m_fTruncate;
   private: HANDLE m_hObjHeap;
   private: Buffer* m_pBuffer;
   private: Record* m_pFirst;

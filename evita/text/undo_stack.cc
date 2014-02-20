@@ -13,11 +13,9 @@
 #include "evita/text/buffer.h"
 #include "evita/text/undo_step.h"
 
-#if _DEBUG
 std::ostream& operator<<(std::ostream& ostream, text::UndoStack::State state) {
   return ostream << static_cast<int>(state);
 }
-#endif
 
 namespace text {
 

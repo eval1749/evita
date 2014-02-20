@@ -19,8 +19,7 @@
 namespace text {
 
 Buffer::Buffer(const base::string16& name, Mode* mode)
-    : m_hObjHeap(::HeapCreate(HEAP_NO_SERIALIZE, 0, 0)),
-      intervals_(new IntervalSet(this)),
+    : intervals_(new IntervalSet(this)),
       ranges_(new RangeSet(this)),
       m_pMode(mode),
       undo_stack_(new UndoStack(this)),
@@ -34,8 +33,6 @@ Buffer::Buffer(const base::string16& name, Mode* mode)
 }
 
 Buffer::~Buffer() {
-  if (m_hObjHeap)
-    ::HeapDestroy(m_hObjHeap);
 }
 
 void Buffer::AddObserver(BufferMutationObserver* observer) {

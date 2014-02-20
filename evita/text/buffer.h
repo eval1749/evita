@@ -70,7 +70,6 @@ class FileFeatures {
 /// Represents text buffer.
 /// </summary>
 class Buffer : public BufferCore, public FileFeatures {
-  private: HANDLE m_hObjHeap;
   private: ObserverList<BufferMutationObserver> observers_;
   private: std::unique_ptr<IntervalSet> intervals_;
   private: std::unique_ptr<RangeSet> ranges_;
@@ -129,7 +128,6 @@ class Buffer : public BufferCore, public FileFeatures {
   public: Posn ComputeStartOfLine(Posn offset) const;
 
   // [D]
-  private: void destroyObject(void* pv) { ::HeapFree(m_hObjHeap, 0, pv); }
   public: Count Delete(Posn, Posn);
 
   // [E]
@@ -137,7 +135,6 @@ class Buffer : public BufferCore, public FileFeatures {
 
   // [G]
   public: const StyleValues* GetDefaultStyle() const;
-  public: HANDLE GetHeap() const { return m_hObjHeap; }
   public: Interval* GetIntervalAt(Posn) const;
   public: Mode* GetMode() const { return m_pMode; }
   public: Count GetModfTick() const { return m_nModfTick; }

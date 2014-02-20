@@ -56,16 +56,16 @@ void IntervalSet::RemoveInterval(Interval* interval) {
 }
 
 // BufferMutationObserver
-void IntervalSet::DidDeleteAt(Posn offset, size_t text_length) {
+void IntervalSet::DidDeleteAt(Posn offset, size_t length) {
   {
     auto interval = list_.GetLast();
     while (interval && interval->m_lEnd > offset) {
       auto const next = interval->GetPrev();
       auto const start = interval->m_lStart > offset ?
-          std::max(static_cast<Posn>(interval->m_lStart - text_length),
+          std::max(static_cast<Posn>(interval->m_lStart - length),
                    offset) : interval->m_lStart;
       auto const end =
-        std::max(static_cast<Posn>(interval->m_lEnd - text_length), offset);
+        std::max(static_cast<Posn>(interval->m_lEnd - length), offset);
       if (start == end) {
         list_.Delete(interval);
         tree_.Delete(interval);
@@ -78,38 +78,38 @@ void IntervalSet::DidDeleteAt(Posn offset, size_t text_length) {
   while (interval && interval->m_lEnd > offset) {
     if (interval->m_lStart > offset) {
       interval->m_lStart =
-          std::max(static_cast<Posn>(interval->m_lStart - text_length),
+          std::max(static_cast<Posn>(interval->m_lStart - length),
                    offset);
     }
-    interval->m_lEnd =
-        std::max(static_cast<Posn>(interval->m_lEnd - text_length), offset);
+    interval->m_lEnd = std::max(static_cast<Posn>(interval->m_lEnd - length),
+                                offset);
     interval = interval->GetPrev();
   }
 }
 
-void IntervalSet::DidInsertAt(Posn offset, size_t text_length) {
+void IntervalSet::DidInsertAt(Posn offset, size_t length) {
   auto interval = list_.GetLast();
   while (interval && interval->m_lEnd > offset) {
     if (interval->m_lStart > offset)
-      interval->m_lStart += text_length;
-    interval->m_lEnd += text_length;
+      interval->m_lStart += length;
+    interval->m_lEnd += length;
     interval = interval->GetPrev();
   }
 }
 
-void IntervalSet::DidInsertBefore(Posn offset, size_t text_length) {
+void IntervalSet::DidInsertBefore(Posn offset, size_t length) {
   auto interval = list_.GetLast();
   while (interval && interval->m_lEnd >= offset) {
     if (interval->m_lStart >= offset)
-      interval->m_lStart += text_length;
-    interval->m_lEnd += text_length;
+      interval->m_lStart += length;
+    interval->m_lEnd += length;
     interval = interval->GetPrev();
   }
 
   if (!offset) {
     // Set default style to new text inserted at start of document.
     auto const head = list_.GetFirst();
-    DCHECK_EQ(static_cast<Posn>(text_length), head->GetStart());
+    DCHECK_EQ(static_cast<Posn>(length), head->GetStart());
     // TODO(yosi) We should check head interval has default style or not
     // without creating Interval object.
     auto const interval = new Interval(0, head->GetStart());

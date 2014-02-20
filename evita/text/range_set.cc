@@ -52,12 +52,12 @@ void RangeSet::DidInsertAt(Posn offset, size_t length) {
   }
 }
 
-void RangeSet::DidInsertBefore(Posn offset, size_t text_length) {
+void RangeSet::DidInsertBefore(Posn offset, size_t length) {
   for (auto* range : ranges_) {
     if (range->m_lStart >= offset)
-      range->m_lStart += text_length;
+      range->m_lStart += length;
     if (range->m_lEnd >= offset)
-      range->m_lEnd += text_length;
+      range->m_lEnd += length;
   }
 }
 

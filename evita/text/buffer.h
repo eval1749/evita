@@ -27,7 +27,7 @@ class IntervalSet;
 class Mode;
 class Range;
 class RangeSet;
-class UndoManager;
+class UndoStack;
 
 /// <summary>
 // Represents file related properties.
@@ -75,7 +75,7 @@ class Buffer : public BufferCore, public FileFeatures {
   private: std::unique_ptr<IntervalSet> intervals_;
   private: std::unique_ptr<RangeSet> ranges_;
   private: Mode* m_pMode;
-  private: std::unique_ptr<UndoManager> undo_manager_;
+  private: std::unique_ptr<UndoStack> undo_stack_;
 
   private: bool m_fReadOnly;
 
@@ -144,7 +144,7 @@ class Buffer : public BufferCore, public FileFeatures {
   public: const base::string16& GetName() const { return name_; }
   public: Posn GetStart() const { return 0; }
   public: const StyleValues* GetStyleAt(Posn) const;
-  public: UndoManager* GetUndo() const { return undo_manager_.get(); }
+  public: UndoStack* GetUndo() const { return undo_stack_.get(); }
 
   // [I]
   public: Count IncCharTick(int n) { return m_nCharTick += n; }

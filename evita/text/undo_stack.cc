@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/text/undo_manager.h"
+#include "evita/text/undo_stack.h"
 
 #include "base/logging.h"
 #include "common/castable.h"
@@ -17,9 +17,9 @@ namespace text {
 class Record : common::Castable {
   DECLARE_CASTABLE_CLASS(Record, Castable);
 
-  friend class UndoManager;
+  friend class UndoStack;
 
-  public: void* operator new(size_t cb, UndoManager* p) {
+  public: void* operator new(size_t cb, UndoStack* p) {
     return p->Alloc(cb);
   }
 
@@ -32,7 +32,7 @@ class Record : common::Castable {
   protected: Record();
   public: virtual ~Record() = default;
 
-  public: virtual void Discard(UndoManager*) {}
+  public: virtual void Discard(UndoStack*) {}
   public: virtual Posn GetAfterRedo() const = 0;
   public: virtual Posn GetAfterUndo() const = 0;
   public: virtual Posn GetBeforeRedo() const = 0;
@@ -129,7 +129,7 @@ class DeleteRecord : public TextRecord {
     private: Count m_cwch;
     private: Chars* m_pNext;
 
-    public: void* operator new(size_t cb, UndoManager* pUndo, Posn lStart,
+    public: void* operator new(size_t cb, UndoStack* pUndo, Posn lStart,
                                Posn lEnd) {
       return pUndo->Alloc(cb + sizeof(char16) * (lEnd - lStart));
     }
@@ -140,7 +140,7 @@ class DeleteRecord : public TextRecord {
       return reinterpret_cast<const char16*>(this + 1);
     }
 
-    public: Chars(UndoManager* pUndo, Posn lStart, Posn lEnd)
+    public: Chars(UndoStack* pUndo, Posn lStart, Posn lEnd)
         : m_cwch(lEnd - lStart),
           m_pNext(nullptr) {
       auto const pBuffer = pUndo->GetBuffer();
@@ -173,18 +173,18 @@ class DeleteRecord : public TextRecord {
   private: Chars* m_pFirst;
   private: Chars* m_pLast;
 
-  public: DeleteRecord(UndoManager* pUndo, Posn lStart, Posn lEnd);
+  public: DeleteRecord(UndoStack* pUndo, Posn lStart, Posn lEnd);
   public: virtual ~DeleteRecord() = default;
 
-  private: Chars* createChars(UndoManager* pUndo, Posn lStart, Posn lEnd);
+  private: Chars* createChars(UndoStack* pUndo, Posn lStart, Posn lEnd);
   private: void insertChars(Buffer* pBuffer) const;
   // Merges new delete information into the last delete record if
   // o New delete doesn't start with newline.
   // o New delete doesn't end with newline.
-  public: bool Merge(UndoManager* pUndo, Posn lStart, Posn lEnd);
+  public: bool Merge(UndoStack* pUndo, Posn lStart, Posn lEnd);
 
   // Recrod
-  private: virtual void Discard(UndoManager* pUndo) override;
+  private: virtual void Discard(UndoStack* pUndo) override;
   private: virtual Posn GetAfterRedo() const override;
   private: virtual Posn GetAfterUndo() const override;
   private: virtual Posn GetBeforeRedo() const override;
@@ -195,14 +195,14 @@ class DeleteRecord : public TextRecord {
   DISALLOW_COPY_AND_ASSIGN(DeleteRecord);
 };
 
-DeleteRecord::DeleteRecord(UndoManager* pUndo, Posn lStart, Posn lEnd) :
+DeleteRecord::DeleteRecord(UndoStack* pUndo, Posn lStart, Posn lEnd) :
     TextRecord(lStart, lEnd)
 {
     m_pFirst = createChars(pUndo, lStart, lEnd);
     m_pLast = m_pFirst;
 }
 
-DeleteRecord::Chars* DeleteRecord::createChars(UndoManager* pUndo,
+DeleteRecord::Chars* DeleteRecord::createChars(UndoStack* pUndo,
                                                Posn lStart, Posn lEnd) {
   return new(pUndo, lStart, lEnd) Chars(pUndo, lStart, lEnd);
 }
@@ -216,7 +216,7 @@ void DeleteRecord::insertChars(Buffer* pBuffer) const {
   }
 }
 
-bool DeleteRecord::Merge(UndoManager* pUndo, Posn lStart, Posn lEnd) {
+bool DeleteRecord::Merge(UndoStack* pUndo, Posn lStart, Posn lEnd) {
   if (pUndo->GetBuffer()->GetCharAt(lStart) == 0x0A)
     return false;
 
@@ -249,7 +249,7 @@ bool DeleteRecord::Merge(UndoManager* pUndo, Posn lStart, Posn lEnd) {
 }
 
 // Record
-void DeleteRecord::Discard(UndoManager* pUndo) {
+void DeleteRecord::Discard(UndoStack* pUndo) {
   EnumChars oEnum(this);
   while (!oEnum.AtEnd()) {
       Chars* pChars = oEnum.Get();
@@ -419,9 +419,9 @@ using namespace internal;
 
 //////////////////////////////////////////////////////////////////////
 //
-// UndoManager
+// UndoStack
 //
-UndoManager::UndoManager(Buffer* pBuffer)
+UndoStack::UndoStack(Buffer* pBuffer)
     : m_eState(State_Log),
       m_hObjHeap(::HeapCreate(HEAP_NO_SERIALIZE, 0, 0)),
       m_pBuffer(pBuffer),
@@ -432,10 +432,10 @@ UndoManager::UndoManager(Buffer* pBuffer)
   m_pBuffer->AddObserver(this);
 }
 
-UndoManager::~UndoManager() {
+UndoStack::~UndoStack() {
 }
 
-void UndoManager::addRecord(Record* pRecord) {
+void UndoStack::addRecord(Record* pRecord) {
   pRecord->m_pPrev = m_pLast;
 
   if (m_pLast)
@@ -447,7 +447,7 @@ void UndoManager::addRecord(Record* pRecord) {
     m_pFirst = pRecord;
 }
 
-void UndoManager::delRecord(Record* pRecord) {
+void UndoStack::delRecord(Record* pRecord) {
   auto const pNext = pRecord->m_pNext;
   auto const pPrev = pRecord->m_pPrev;
 
@@ -464,22 +464,22 @@ void UndoManager::delRecord(Record* pRecord) {
   discardRecord(pRecord);
 }
 
-void UndoManager::discardRecord(Record* pRecord) {
+void UndoStack::discardRecord(Record* pRecord) {
   DCHECK_NE(pRecord, m_pUndo);
   DCHECK_NE(pRecord, m_pRedo);
   pRecord->Discard(this);
   ::HeapFree(m_hObjHeap, 0, pRecord);
 }
 
-void* UndoManager::Alloc(size_t cb) {
+void* UndoStack::Alloc(size_t cb) {
   return ::HeapAlloc(m_hObjHeap, 0, cb);
 }
 
-bool UndoManager::CanRedo() const {
+bool UndoStack::CanRedo() const {
   return m_pUndo != m_pRedo;
 }
 
-bool UndoManager::CanUndo() const {
+bool UndoStack::CanUndo() const {
   switch (m_eState) {
     case State_Log:
       return m_pLast;
@@ -492,7 +492,7 @@ bool UndoManager::CanUndo() const {
   }
 }
 
-void UndoManager::CheckPoint() {
+void UndoStack::CheckPoint() {
   switch (m_eState) {
     case State_Disabled:
       return;
@@ -519,7 +519,7 @@ void UndoManager::CheckPoint() {
   m_eState = State_Log;
 }
 
-void UndoManager::Empty() {
+void UndoStack::Empty() {
   if (m_hObjHeap) {
     ::HeapDestroy(m_hObjHeap);
     m_hObjHeap = ::HeapCreate(HEAP_NO_SERIALIZE, 0, 0);
@@ -532,11 +532,11 @@ void UndoManager::Empty() {
   m_pUndo = nullptr;
 }
 
-void UndoManager::Free(void* pv) {
+void UndoStack::Free(void* pv) {
   ::HeapFree(m_hObjHeap, 0, pv);
 }
 
-void UndoManager::RecordBegin(const base::string16& name) {
+void UndoStack::RecordBegin(const base::string16& name) {
   if (m_eState == State_Disabled)
     return;
 
@@ -555,7 +555,7 @@ void UndoManager::RecordBegin(const base::string16& name) {
   addRecord(pRecord);
 }
 
-void UndoManager::RecordDelete(Posn lStart, Posn lEnd) {
+void UndoStack::RecordDelete(Posn lStart, Posn lEnd) {
   auto const cwch = lEnd - lStart;
   if (cwch <= 0)
     return;
@@ -575,7 +575,7 @@ void UndoManager::RecordDelete(Posn lStart, Posn lEnd) {
   addRecord(pRecord);
 }
 
-void UndoManager::RecordEnd(const base::string16& pwszName) {
+void UndoStack::RecordEnd(const base::string16& pwszName) {
   if (m_eState == State_Disabled)
     return;
 
@@ -591,7 +591,7 @@ void UndoManager::RecordEnd(const base::string16& pwszName) {
   addRecord(pRecord);
 }
 
-void UndoManager::RecordInsert(Posn lStart, Posn lEnd) {
+void UndoStack::RecordInsert(Posn lStart, Posn lEnd) {
   DCHECK_LE(lStart, lEnd);
 
   if (lStart >= lEnd || m_eState == State_Disabled)
@@ -610,7 +610,7 @@ void UndoManager::RecordInsert(Posn lStart, Posn lEnd) {
   addRecord(pRecord);
 }
 
-Posn UndoManager::Redo(Posn lPosn, Count lCount) {
+Posn UndoStack::Redo(Posn lPosn, Count lCount) {
   if (!CanRedo())
     return -1;
 
@@ -657,7 +657,7 @@ Posn UndoManager::Redo(Posn lPosn, Count lCount) {
   return lPosn;
 }
 
-Posn UndoManager::Undo(Posn lPosn, Count lCount) {
+Posn UndoStack::Undo(Posn lPosn, Count lCount) {
   if (!CanUndo())
     return -1;
 
@@ -709,14 +709,14 @@ Posn UndoManager::Undo(Posn lPosn, Count lCount) {
 
 
 // BufferMutationObserver
-void UndoManager::DidInsertAt(Posn offset, size_t length) {
+void UndoStack::DidInsertAt(Posn offset, size_t length) {
   if (m_eState != State_Log)
     return;
   CheckPoint();
   RecordInsert(offset, static_cast<Posn>(offset + length));
 }
 
-void UndoManager::WillDeleteAt(Posn offset, size_t length) {
+void UndoStack::WillDeleteAt(Posn offset, size_t length) {
   if (m_eState != State_Log)
     return;
   CheckPoint();
@@ -737,13 +737,13 @@ UndoBlock::UndoBlock(Buffer* buffer, const base::string16& name)
 }
 
 void Buffer::EndUndoGroup(const base::string16& name) {
-  undo_manager_->CheckPoint();
-  undo_manager_->RecordEnd(name);
+  undo_stack_->CheckPoint();
+  undo_stack_->RecordEnd(name);
 }
 
 void Buffer::StartUndoGroup(const base::string16& name) {
-  undo_manager_->CheckPoint();
-  undo_manager_->RecordBegin(name);
+  undo_stack_->CheckPoint();
+  undo_stack_->RecordBegin(name);
 }
 
 }  // namespace text

@@ -9,7 +9,7 @@
 #include "base/logging.h"
 #include "evita/text/buffer.h"
 #include "evita/text/range_set.h"
-#include "evita/text/undo_manager.h"
+#include "evita/text/undo_stack.h"
 
 // Smart handle for HGLOBAL
 template<class T>

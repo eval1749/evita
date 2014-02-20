@@ -400,7 +400,7 @@
         'text/range.cc',
         'text/range_set.cc',
         'text/style.cc',
-        'text/undo_manager.cc',
+        'text/undo_stack.cc',
         'z_debug.cpp',
         '../charset/CharsetDecoder.cpp',
         '../charset/CharsetDetector.cpp',

@@ -14,7 +14,7 @@
 #include "evita/text/range.h"
 #include "evita/text/range_set.h"
 #include "evita/text/modes/mode.h"
-#include "evita/text/undo_manager.h"
+#include "evita/text/undo_stack.h"
 
 namespace text {
 
@@ -23,7 +23,7 @@ Buffer::Buffer(const base::string16& name, Mode* mode)
       intervals_(new IntervalSet(this)),
       ranges_(new RangeSet(this)),
       m_pMode(mode),
-      undo_manager_(new UndoManager(this)),
+      undo_stack_(new UndoStack(this)),
       m_eState(State_Ready),
       m_fReadOnly(false),
       m_nCharTick(1),
@@ -43,18 +43,18 @@ void Buffer::AddObserver(BufferMutationObserver* observer) {
 }
 
 bool Buffer::CanRedo() const {
-  return undo_manager_->CanRedo();
+  return undo_stack_->CanRedo();
 }
 
 /// <summary>
 ///   Returns true if this buffer undo-able.
 /// </summary>
 bool Buffer::CanUndo() const {
-  return undo_manager_->CanUndo();
+  return undo_stack_->CanUndo();
 }
 
 void Buffer::ClearUndo() {
-  undo_manager_->Empty();
+  undo_stack_->Empty();
 }
 
 Posn Buffer::ComputeEndOfLine(Posn lPosn) const {
@@ -164,7 +164,7 @@ void Buffer::onChange() {
 Posn Buffer::Redo(Posn lPosn, Count n) {
   if (IsReadOnly())
     return -1;
-  return undo_manager_->Redo(lPosn, n);
+  return undo_stack_->Redo(lPosn, n);
 }
 
 void Buffer::RemoveObserver(BufferMutationObserver* observer) {
@@ -179,7 +179,7 @@ void Buffer::SetMode(Mode* mode) {
 Posn Buffer::Undo(Posn lPosn, Count n) {
   if (IsReadOnly())
     return -1;
-  return undo_manager_->Undo(lPosn, n);
+  return undo_stack_->Undo(lPosn, n);
 }
 
 }  // namespace text

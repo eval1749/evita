@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_text_undo_manager_h)
-#define INCLUDE_evita_text_undo_manager_h
+#if !defined(INCLUDE_evita_text_undo_stack_h)
+#define INCLUDE_evita_text_undo_stack_h
 
 #include "base/strings/string16.h"
 #include "evita/text/buffer_mutation_observer.h"
@@ -12,7 +12,7 @@ namespace text {
 
 class Record;
 
-class UndoManager : public BufferMutationObserver {
+class UndoStack : public BufferMutationObserver {
   public: enum State {
     State_Disabled,
     State_Log,
@@ -28,8 +28,8 @@ class UndoManager : public BufferMutationObserver {
   private: Record* m_pRedo;
   private: Record* m_pUndo;
 
-  public: explicit UndoManager(Buffer*);
-  public: ~UndoManager();
+  public: explicit UndoStack(Buffer*);
+  public: ~UndoStack();
 
   // [A]
   public: void* Alloc(size_t);
@@ -71,9 +71,9 @@ class UndoManager : public BufferMutationObserver {
   private: virtual void DidInsertAt(Posn offset, size_t length) override;
   private: virtual void WillDeleteAt(Posn offset, size_t length) override;
 
-  DISALLOW_COPY_AND_ASSIGN(UndoManager);
+  DISALLOW_COPY_AND_ASSIGN(UndoStack);
 };
 
 }  // namespace text
 
-#endif // !defined(INCLUDE_evita_text_undo_manager_h)
+#endif // !defined(INCLUDE_evita_text_undo_stack_h)

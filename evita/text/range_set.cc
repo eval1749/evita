@@ -4,6 +4,8 @@
 
 #include "evita/text/range_set.h"
 
+#include <algorithm>
+
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
 
@@ -30,10 +32,14 @@ void RangeSet::RemoveRange(Range* range) {
 // BufferMutationObserver
 void RangeSet::DidDeleteAt(Posn offset, size_t length) {
   for (auto* range : ranges_) {
-    if (range->m_lStart > offset)
-      range->m_lStart -= length;
-    if (range->m_lEnd > offset)
-      range->m_lEnd -= length;
+    if (range->m_lStart > offset) {
+      range->m_lStart = std::max(static_cast<Posn>(range->m_lStart - length),
+                                 offset);
+    }
+    if (range->m_lEnd > offset) {
+      range->m_lEnd = std::max(static_cast<Posn>(range->m_lEnd - length),
+                               offset);
+    }
   }
 }
 

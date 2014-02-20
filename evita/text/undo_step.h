@@ -6,6 +6,7 @@
 #define INCLUDE_evita_text_undo_step_h
 
 #include "base/basictypes.h"
+#include "base/strings/string16.h"
 #include "common/castable.h"
 
 namespace text {
@@ -21,16 +22,12 @@ class UndoStep : common::Castable {
 
   friend class UndoStack;
 
-  public: void* operator new(size_t size, UndoStack* undo_stack);
-  private: void operator delete(void* undo_step);
-
   protected: UndoStep* m_pNext;
   protected: UndoStep* m_pPrev;
 
   protected: UndoStep();
   public: virtual ~UndoStep();
 
-  public: virtual void Discard(UndoStack*);
   public: virtual Posn GetAfterRedo() const = 0;
   public: virtual Posn GetAfterUndo() const = 0;
   public: virtual Posn GetBeforeRedo() const = 0;
@@ -86,24 +83,17 @@ class BeginUndoStep : public UndoStep {
 class DeleteUndoStep : public TextUndoStep {
   DECLARE_CASTABLE_CLASS(DeleteUndoStep, TextUndoStep);
 
-  private: class Chars;
-  private: class EnumChars;
-
-  private: Chars* m_pFirst;
-  private: Chars* m_pLast;
+  private: base::string16 text_;
 
   public: DeleteUndoStep(UndoStack* pUndo, Posn lStart, Posn lEnd);
   public: virtual ~DeleteUndoStep();
 
-  private: Chars* createChars(UndoStack* pUndo, Posn lStart, Posn lEnd);
-  private: void insertChars(Buffer* pBuffer) const;
   // Merges new delete information into the last delete UndoStep if
   // o New delete doesn't start with newline.
   // o New delete doesn't end with newline.
   public: bool Merge(UndoStack* pUndo, Posn lStart, Posn lEnd);
 
   // Recrod
-  private: virtual void Discard(UndoStack* pUndo) override;
   private: virtual Posn GetAfterRedo() const override;
   private: virtual Posn GetAfterUndo() const override;
   private: virtual Posn GetBeforeRedo() const override;

@@ -14,21 +14,10 @@ namespace text {
 //
 // UndoStep
 //
-void* UndoStep::operator new(size_t size, UndoStack* undo_stack) {
-  return undo_stack->Alloc(size);
-}
-
-void UndoStep::operator delete(void*) {
-  NOTREACHED();
-}
-
 UndoStep::UndoStep() : m_pNext(nullptr), m_pPrev(nullptr) {
 }
 
 UndoStep::~UndoStep() {
-}
-
-void UndoStep::Discard(UndoStack*) {
 }
 
 void UndoStep::Redo(Buffer*) {
@@ -83,106 +72,37 @@ void BeginUndoStep::Undo(Buffer* pBuffer) {
 //
 // DeleteUndoStep
 //
-class DeleteUndoStep::Chars {
-  friend class DeleteUndoStep;
-
-  private: Count m_cwch;
-  private: Chars* m_pNext;
-
-  public: void* operator new(size_t cb, UndoStack* pUndo, Posn lStart,
-                             Posn lEnd) {
-    return pUndo->Alloc(cb + sizeof(char16) * (lEnd - lStart));
-  }
-
-  public: Count GetLength() const { return m_cwch; }
-
-  public: const char16* GetString() const {
-    return reinterpret_cast<const char16*>(this + 1);
-  }
-
-  public: Chars(UndoStack* pUndo, Posn lStart, Posn lEnd)
-      : m_cwch(lEnd - lStart),
-        m_pNext(nullptr) {
-    auto const pBuffer = pUndo->GetBuffer();
-    auto pwch = const_cast<char16*>(GetString());
-    for (Posn lPosn = lStart; lPosn < lEnd; lPosn++) {
-      *pwch++ = pBuffer->GetCharAt(lPosn);
-    }
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(Chars);
-};
-
-class DeleteUndoStep::EnumChars {
-  private: Chars* m_pRunner;
-
-  public: EnumChars(const DeleteUndoStep* p) : m_pRunner(p->m_pFirst) {
-  }
-
-  public: bool AtEnd() const { return nullptr == m_pRunner; }
-
-  public: Chars* Get() const {
-    DCHECK(!AtEnd());
-    return m_pRunner;
-  }
-
-  public: void Next() {
-    DCHECK(!AtEnd());
-    m_pRunner = m_pRunner->m_pNext;
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(EnumChars);
-};
-
-DeleteUndoStep::DeleteUndoStep(UndoStack* pUndo, Posn lStart, Posn lEnd)
-    : TextUndoStep(lStart, lEnd) {
-  m_pFirst = createChars(pUndo, lStart, lEnd);
-  m_pLast = m_pFirst;
+DeleteUndoStep::DeleteUndoStep(UndoStack* undo_stack, Posn start, Posn end)
+    : TextUndoStep(start, end),
+      text_(std::move(undo_stack->GetBuffer()->GetText(start, end))) {
 }
 
 DeleteUndoStep::~DeleteUndoStep() {
 }
 
-DeleteUndoStep::Chars* DeleteUndoStep::createChars(UndoStack* pUndo,
-                                               Posn lStart, Posn lEnd) {
-  return new(pUndo, lStart, lEnd) Chars(pUndo, lStart, lEnd);
-}
-
-void DeleteUndoStep::insertChars(Buffer* pBuffer) const {
-  auto lPosn = m_lStart;
-  foreach (EnumChars, oEnum, this) {
-    auto const pChars = oEnum.Get();
-    pBuffer->Insert(lPosn, pChars->GetString(), pChars->GetLength());
-    lPosn += pChars->GetLength();
-  }
-}
-
-bool DeleteUndoStep::Merge(UndoStack* pUndo, Posn lStart, Posn lEnd) {
-  if (pUndo->GetBuffer()->GetCharAt(lStart) == 0x0A)
+bool DeleteUndoStep::Merge(UndoStack* undo_stack, Posn start, Posn end) {
+  auto const buffer = undo_stack->GetBuffer();
+  if (buffer->GetCharAt(start) == 0x0A)
     return false;
 
-  if (pUndo->GetBuffer()->GetCharAt(lEnd - 1) == 0x0A)
+  if (buffer->GetCharAt(end - 1) == 0x0A)
     return false;
 
   // For [Backspace] key
   // 1. abc|
   // 2. ab|
-  if (m_lStart == lEnd) {
-    auto const pChars = createChars(pUndo, lStart, lEnd);
-    pChars->m_pNext = m_pFirst;
-    m_pFirst = pChars;
-    m_lStart = lStart;
+  if (m_lStart == end) {
+    text_ = buffer->GetText(start, end) + text_;
+    m_lStart = start;
     return true;
   }
 
   // For [Delete] key
   // 1. a|bc
   // 2. a|c
-  if (m_lStart == lStart) {
-    auto const pChars = createChars(pUndo, lStart, lEnd);
-    m_pLast->m_pNext = pChars;
-    m_pLast = pChars;
-    m_lEnd += lEnd - lStart;
+  if (m_lStart == start) {
+    text_ += buffer->GetText(start, end);
+    m_lEnd += end - start;
     return true;
   }
 
@@ -190,15 +110,6 @@ bool DeleteUndoStep::Merge(UndoStack* pUndo, Posn lStart, Posn lEnd) {
 }
 
 // UndoStep
-void DeleteUndoStep::Discard(UndoStack* pUndo) {
-  EnumChars oEnum(this);
-  while (!oEnum.AtEnd()) {
-      Chars* pChars = oEnum.Get();
-      oEnum.Next();
-      pUndo->Free(pChars);
-  }
-}
-
 Posn DeleteUndoStep::GetAfterRedo() const {
   return m_lEnd;
 }
@@ -216,12 +127,12 @@ Posn DeleteUndoStep::GetBeforeUndo() const {
 }
 
 void DeleteUndoStep::Redo(Buffer* pBuffer) {
-  insertChars(pBuffer);
+  pBuffer->Insert(m_lStart, text_.data(), static_cast<Count>(text_.length()));
   pBuffer->IncCharTick(1);
 }
 
 void DeleteUndoStep::Undo(Buffer* pBuffer) {
-  insertChars(pBuffer);
+  pBuffer->Insert(m_lStart, text_.data(), static_cast<Count>(text_.length()));
   pBuffer->GetUndo()->PushInsertText(m_lStart, m_lEnd);
   pBuffer->IncCharTick(-1);
 }

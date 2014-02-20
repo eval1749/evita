@@ -12,7 +12,6 @@ namespace text {
 
 UndoStack::UndoStack(Buffer* pBuffer)
     : m_eState(State_Log),
-      m_hObjHeap(::HeapCreate(HEAP_NO_SERIALIZE, 0, 0)),
       m_pBuffer(pBuffer),
       m_pFirst(nullptr),
       m_pLast(nullptr),
@@ -22,6 +21,7 @@ UndoStack::UndoStack(Buffer* pBuffer)
 }
 
 UndoStack::~UndoStack() {
+  Empty();
 }
 
 void UndoStack::addUndoStep(UndoStep* pUndoStep) {
@@ -50,18 +50,7 @@ void UndoStack::delUndoStep(UndoStep* pUndoStep) {
   else
     pPrev->m_pNext = pNext;
 
-  discardUndoStep(pUndoStep);
-}
-
-void UndoStack::discardUndoStep(UndoStep* pUndoStep) {
-  DCHECK_NE(pUndoStep, m_pUndo);
-  DCHECK_NE(pUndoStep, m_pRedo);
-  pUndoStep->Discard(this);
-  ::HeapFree(m_hObjHeap, 0, pUndoStep);
-}
-
-void* UndoStack::Alloc(size_t cb) {
-  return ::HeapAlloc(m_hObjHeap, 0, cb);
+  delete pUndoStep;
 }
 
 bool UndoStack::CanRedo() const {
@@ -96,7 +85,7 @@ void UndoStack::CheckPoint() {
         auto pRunner = m_pRedo->m_pNext;
         while (pRunner) {
           auto const pNext = pRunner->m_pNext;
-          discardUndoStep(pRunner);
+          delete pRunner;
           pRunner = pNext;
         }
         m_pRedo->m_pNext = nullptr;
@@ -109,9 +98,16 @@ void UndoStack::CheckPoint() {
 }
 
 void UndoStack::Empty() {
-  if (m_hObjHeap) {
-    ::HeapDestroy(m_hObjHeap);
-    m_hObjHeap = ::HeapCreate(HEAP_NO_SERIALIZE, 0, 0);
+  while (m_pUndo){
+    auto const next = m_pUndo->m_pNext;
+    delete m_pUndo;
+    m_pUndo = next;
+  }
+
+  while (m_pRedo){
+    auto const next = m_pRedo->m_pNext;
+    delete m_pRedo;
+    m_pRedo = next;
   }
 
   m_eState = State_Log;
@@ -119,10 +115,6 @@ void UndoStack::Empty() {
   m_pLast = nullptr;
   m_pRedo = nullptr;
   m_pUndo = nullptr;
-}
-
-void UndoStack::Free(void* pv) {
-  ::HeapFree(m_hObjHeap, 0, pv);
 }
 
 void UndoStack::BeginUndoGroup(const base::string16& name) {
@@ -140,7 +132,7 @@ void UndoStack::BeginUndoGroup(const base::string16& name) {
     }
   }
 
-  BeginUndoStep* pUndoStep = new(this) BeginUndoStep(name);
+  BeginUndoStep* pUndoStep = new BeginUndoStep(name);
   addUndoStep(pUndoStep);
 }
 
@@ -160,7 +152,7 @@ void UndoStack::PushDeleteText(Posn lStart, Posn lEnd) {
     }
   }
 
-  auto const pUndoStep = new(this) DeleteUndoStep(this, lStart, lEnd);
+  auto const pUndoStep = new DeleteUndoStep(this, lStart, lEnd);
   addUndoStep(pUndoStep);
 }
 
@@ -176,7 +168,7 @@ void UndoStack::EndUndoGroup(const base::string16& pwszName) {
     }
   }
 
-  auto const pUndoStep = new(this) EndUndoStep(pwszName);
+  auto const pUndoStep = new EndUndoStep(pwszName);
   addUndoStep(pUndoStep);
 }
 
@@ -195,7 +187,7 @@ void UndoStack::PushInsertText(Posn lStart, Posn lEnd) {
     }
   }
 
-  auto const pUndoStep = new(this) InsertUndoStep(lStart, lEnd);
+  auto const pUndoStep = new InsertUndoStep(lStart, lEnd);
   addUndoStep(pUndoStep);
 }
 

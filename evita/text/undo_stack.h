@@ -21,7 +21,6 @@ class UndoStack : public BufferMutationObserver {
   };
 
   private: State m_eState;
-  private: HANDLE m_hObjHeap;
   private: Buffer* m_pBuffer;
   private: UndoStep* m_pFirst;
   private: UndoStep* m_pLast;
@@ -32,7 +31,6 @@ class UndoStack : public BufferMutationObserver {
   public: ~UndoStack();
 
   // [A]
-  public: void* Alloc(size_t);
   private: void addUndoStep(UndoStep*);
 
   // [B]
@@ -45,14 +43,10 @@ class UndoStack : public BufferMutationObserver {
 
   // [D]
   private: void delUndoStep(UndoStep*);
-  private: void discardUndoStep(UndoStep*);
 
   // [E]
   public: void Empty();
   public: void EndUndoGroup(const base::string16& name);
-
-  // [F]
-  public: void Free(void*);
 
   // [G]
   public: Buffer* GetBuffer() const { return m_pBuffer; }

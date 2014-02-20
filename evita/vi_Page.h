@@ -19,12 +19,6 @@ class Font;
 class Selection;
 class Style;
 
-namespace dom {
-class Buffer;
-}
-
-using Buffer = dom::Buffer;
-
 namespace PageInternal {
   class Cell;
   class DisplayBuffer;

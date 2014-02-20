@@ -176,6 +176,4 @@ class TextEditWindow
   DISALLOW_COPY_AND_ASSIGN(TextEditWindow);
 };
 
-typedef DoubleLinkedList_<TextEditWindow, Buffer> WindowList;
-
 #endif //!defined(INCLUDE_listener_winapp_visual_text_pane_h)

@@ -35,6 +35,9 @@ class UndoStack : public BufferMutationObserver {
   public: void* Alloc(size_t);
   private: void addRecord(Record*);
 
+  // [B]
+  public: void BeginUndoGroup(const base::string16& name);
+
   // [C]
   public: bool CanRedo() const;
   public: bool CanUndo() const;
@@ -44,9 +47,9 @@ class UndoStack : public BufferMutationObserver {
   private: void delRecord(Record*);
   private: void discardRecord(Record*);
 
-
   // [E]
   public: void Empty();
+  public: void EndUndoGroup(const base::string16& name);
 
   // [F]
   public: void Free(void*);
@@ -54,11 +57,11 @@ class UndoStack : public BufferMutationObserver {
   // [G]
   public: Buffer* GetBuffer() const { return m_pBuffer; }
 
+  // [P]
+  public: void PushDeleteText(Posn, Posn);
+  public: void PushInsertText(Posn, Posn);
+
   // [R]
-  public: void RecordBegin(const base::string16& name);
-  public: void RecordDelete(Posn, Posn);
-  public: void RecordEnd(const base::string16& name);
-  public: void RecordInsert(Posn, Posn);
   public: Posn Redo(Posn, Count);
 
   // [U]

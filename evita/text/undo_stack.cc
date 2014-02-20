@@ -113,7 +113,7 @@ Posn BeginRecord::GetBeforeUndo() const {
 }
 
 void BeginRecord::Undo(Buffer* pBuffer) {
-  pBuffer->GetUndo()->RecordEnd(name_);
+  pBuffer->GetUndo()->EndUndoGroup(name_);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -281,7 +281,7 @@ void DeleteRecord::Redo(Buffer* pBuffer) {
 
 void DeleteRecord::Undo(Buffer* pBuffer) {
   insertChars(pBuffer);
-  pBuffer->GetUndo()->RecordInsert(m_lStart, m_lEnd);
+  pBuffer->GetUndo()->PushInsertText(m_lStart, m_lEnd);
   pBuffer->IncCharTick(-1);
 }
 
@@ -333,7 +333,7 @@ Posn EndRecord::GetBeforeUndo() const {
 }
 
 void EndRecord::Undo(Buffer* pBuffer) {
-  pBuffer->GetUndo()->RecordBegin(name_);
+  pBuffer->GetUndo()->BeginUndoGroup(name_);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -408,7 +408,7 @@ void InsertRecord::Redo(Buffer* pBuffer) {
 }
 
 void InsertRecord::Undo(Buffer* pBuffer) {
-  pBuffer->GetUndo()->RecordDelete(m_lStart, m_lEnd);
+  pBuffer->GetUndo()->PushDeleteText(m_lStart, m_lEnd);
   pBuffer->Delete(m_lStart, m_lEnd);
   pBuffer->IncCharTick(-1);
 }
@@ -536,7 +536,7 @@ void UndoStack::Free(void* pv) {
   ::HeapFree(m_hObjHeap, 0, pv);
 }
 
-void UndoStack::RecordBegin(const base::string16& name) {
+void UndoStack::BeginUndoGroup(const base::string16& name) {
   if (m_eState == State_Disabled)
     return;
 
@@ -555,7 +555,7 @@ void UndoStack::RecordBegin(const base::string16& name) {
   addRecord(pRecord);
 }
 
-void UndoStack::RecordDelete(Posn lStart, Posn lEnd) {
+void UndoStack::PushDeleteText(Posn lStart, Posn lEnd) {
   auto const cwch = lEnd - lStart;
   if (cwch <= 0)
     return;
@@ -575,7 +575,7 @@ void UndoStack::RecordDelete(Posn lStart, Posn lEnd) {
   addRecord(pRecord);
 }
 
-void UndoStack::RecordEnd(const base::string16& pwszName) {
+void UndoStack::EndUndoGroup(const base::string16& pwszName) {
   if (m_eState == State_Disabled)
     return;
 
@@ -591,7 +591,7 @@ void UndoStack::RecordEnd(const base::string16& pwszName) {
   addRecord(pRecord);
 }
 
-void UndoStack::RecordInsert(Posn lStart, Posn lEnd) {
+void UndoStack::PushInsertText(Posn lStart, Posn lEnd) {
   DCHECK_LE(lStart, lEnd);
 
   if (lStart >= lEnd || m_eState == State_Disabled)
@@ -713,14 +713,14 @@ void UndoStack::DidInsertAt(Posn offset, size_t length) {
   if (m_eState != State_Log)
     return;
   CheckPoint();
-  RecordInsert(offset, static_cast<Posn>(offset + length));
+  PushInsertText(offset, static_cast<Posn>(offset + length));
 }
 
 void UndoStack::WillDeleteAt(Posn offset, size_t length) {
   if (m_eState != State_Log)
     return;
   CheckPoint();
-  RecordDelete(offset, static_cast<Posn>(offset + length));
+  PushDeleteText(offset, static_cast<Posn>(offset + length));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -738,12 +738,12 @@ UndoBlock::UndoBlock(Buffer* buffer, const base::string16& name)
 
 void Buffer::EndUndoGroup(const base::string16& name) {
   undo_stack_->CheckPoint();
-  undo_stack_->RecordEnd(name);
+  undo_stack_->EndUndoGroup(name);
 }
 
 void Buffer::StartUndoGroup(const base::string16& name) {
   undo_stack_->CheckPoint();
-  undo_stack_->RecordBegin(name);
+  undo_stack_->BeginUndoGroup(name);
 }
 
 }  // namespace text

@@ -164,7 +164,9 @@ bool DeleteUndoStep::TryMerge(const Buffer*, const UndoStep* other) {
 
 void DeleteUndoStep::Undo(Buffer* buffer) {
   buffer->Insert(start(), text().data(), static_cast<Count>(text().length()));
-  buffer->IncCharTick(-1);
+  // -1 for |Buffer::Insert()| in this function.
+  // -1 for |Buffer::Delete()| which creates this |DeleteUndoStep|.
+  buffer->IncCharTick(-2);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -246,7 +248,9 @@ void InsertUndoStep::Redo(Buffer* buffer) {
 
 void InsertUndoStep::Undo(Buffer* buffer) {
   buffer->Delete(start(), end());
-  buffer->IncCharTick(-1);
+  // -1 for |Buffer::Delete()| in this function.
+  // -1 for |Buffer::Insert()| which creates this |InsertUndoStep|.
+  buffer->IncCharTick(-2);
 }
 
 }  // namespace text

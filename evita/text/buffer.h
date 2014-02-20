@@ -174,6 +174,9 @@ class Buffer : public BufferCore, public FileFeatures {
   public: void SetName(const base::string16& new_name) {
     name_ = new_name;
   }
+  public: void SetNotModifiedForTesting() {
+    m_nSaveTick = m_nCharTick;
+  }
   public: bool SetReadOnly(bool f) { return m_fReadOnly = f; }
   public: void SetStyle(Posn, Posn, const StyleValues*);
   public: void StartUndoGroup(const base::string16& name);

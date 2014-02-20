@@ -29,11 +29,22 @@ class UndoStackTest : public ::testing::Test {
 
 TEST_F(UndoStackTest, Delete) {
   buffer()->Insert(0, L"foo");
+  // Simulate for load file.
+  buffer()->SetNotModifiedForTesting();
+
   buffer()->Delete(0, 3);
   buffer()->Undo(0);
   EXPECT_EQ(3, buffer()->GetEnd());
+  EXPECT_FALSE(buffer()->IsModified()) <<
+    "Undo delete should make document not modified.";
+
   buffer()->Redo(3);
   EXPECT_EQ(0, buffer()->GetEnd());
+  EXPECT_TRUE(buffer()->IsModified());
+
+  buffer()->Undo(0);
+  EXPECT_FALSE(buffer()->IsModified()) <<
+      "Undo should make document not modified even if after redo.";
 }
 
 TEST_F(UndoStackTest, Group) {
@@ -44,6 +55,8 @@ TEST_F(UndoStackTest, Group) {
   }
   buffer()->Undo(4);
   EXPECT_EQ(0, buffer()->GetEnd());
+  EXPECT_FALSE(buffer()->IsModified()) <<
+      "Undo should make document not modified even if after redo.";
 }
 
 TEST_F(UndoStackTest, Insert) {
@@ -53,8 +66,16 @@ TEST_F(UndoStackTest, Insert) {
       "Undo isn't occured position other than last editing position.";
   EXPECT_EQ(0, buffer()->Undo(3)) << "Undo at the last editing position";
   EXPECT_EQ(0, buffer()->GetEnd());
+  EXPECT_FALSE(buffer()->IsModified()) <<
+      "Undo should make document not modified.";
+
   buffer()->Redo(0);
   EXPECT_EQ(3, buffer()->GetEnd());
+  EXPECT_TRUE(buffer()->IsModified());
+
+  buffer()->Undo(3);
+  EXPECT_FALSE(buffer()->IsModified()) <<
+      "Undo should make document not modified.";
 }
 
 TEST_F(UndoStackTest, Merge) {
@@ -68,6 +89,9 @@ TEST_F(UndoStackTest, Merge) {
   }
   EXPECT_EQ(0, buffer()->Undo(6));
   EXPECT_EQ(0, buffer()->GetEnd());
+  EXPECT_FALSE(buffer()->IsModified()) <<
+      "Undo should make document not modified.";
+
 }
 
 }  // namespace

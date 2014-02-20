@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_evita_text_undo_stack_h)
 #define INCLUDE_evita_text_undo_stack_h
 
+#include <vector>
+
 #include "base/strings/string16.h"
 #include "evita/text/buffer_mutation_observer.h"
 
@@ -13,25 +15,19 @@ namespace text {
 class UndoStep;
 
 class UndoStack : public BufferMutationObserver {
-  public: enum State {
-    State_Disabled,
-    State_Log,
-    State_Redo,
-    State_Undo,
+  public: enum class State {
+    Normal,
+    Redo,
+    Undo,
   };
 
-  private: State m_eState;
-  private: Buffer* m_pBuffer;
-  private: UndoStep* m_pFirst;
-  private: UndoStep* m_pLast;
-  private: UndoStep* m_pRedo;
-  private: UndoStep* m_pUndo;
+  private: Buffer* buffer_;
+  private: std::vector<UndoStep*> redo_steps_;
+  private: State state_;
+  private: std::vector<UndoStep*> undo_steps_;
 
   public: explicit UndoStack(Buffer*);
-  public: ~UndoStack();
-
-  // [A]
-  private: void addUndoStep(UndoStep*);
+  public: virtual ~UndoStack();
 
   // [B]
   public: void BeginUndoGroup(const base::string16& name);
@@ -39,21 +35,10 @@ class UndoStack : public BufferMutationObserver {
   // [C]
   public: bool CanRedo() const;
   public: bool CanUndo() const;
-  public: void CheckPoint();
-
-  // [D]
-  private: void delUndoStep(UndoStep*);
 
   // [E]
   public: void Empty();
   public: void EndUndoGroup(const base::string16& name);
-
-  // [G]
-  public: Buffer* GetBuffer() const { return m_pBuffer; }
-
-  // [P]
-  public: void PushDeleteText(Posn, Posn);
-  public: void PushInsertText(Posn, Posn);
 
   // [R]
   public: Posn Redo(Posn, Count);

@@ -105,6 +105,10 @@ Count Buffer::Delete(Posn lStart, Posn lEnd) {
   return length;
 }
 
+void Buffer::EndUndoGroup(const base::string16& name) {
+  undo_stack_->EndUndoGroup(name);
+}
+
 const StyleValues* Buffer::GetDefaultStyle() const {
   return GetIntervalAt(GetEnd())->GetStyle();
 }
@@ -176,10 +180,27 @@ void Buffer::SetMode(Mode* mode) {
   m_pMode->set_buffer(this);
 }
 
+void Buffer::StartUndoGroup(const base::string16& name) {
+  undo_stack_->BeginUndoGroup(name);
+}
+
 Posn Buffer::Undo(Posn lPosn, Count n) {
   if (IsReadOnly())
     return -1;
   return undo_stack_->Undo(lPosn, n);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// UndoBlock
+//
+UndoBlock::~UndoBlock() {
+  buffer_->EndUndoGroup(name_);
+}
+
+UndoBlock::UndoBlock(Buffer* buffer, const base::string16& name)
+    : buffer_(buffer), name_(name) {
+  buffer->StartUndoGroup(name_);
 }
 
 }  // namespace text

@@ -57,4 +57,17 @@ TEST_F(UndoStackTest, Insert) {
   EXPECT_EQ(3, buffer()->GetEnd());
 }
 
+TEST_F(UndoStackTest, Merge) {
+  {
+    text::UndoBlock undo_group(buffer(), L"test");
+    buffer()->Insert(0, L"foo");
+  }
+  {
+    text::UndoBlock undo_group(buffer(), L"test");
+    buffer()->Insert(3, L"bar");
+  }
+  EXPECT_EQ(0, buffer()->Undo(6));
+  EXPECT_EQ(0, buffer()->GetEnd());
+}
+
 }  // namespace

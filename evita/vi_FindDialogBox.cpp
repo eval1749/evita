@@ -23,9 +23,10 @@
 namespace {
 
 Selection* GetActiveSelection() {
-  auto const edit_pane = views::FrameList::instance()->active_frame()->
-    GetActivePane()->as<EditPane>();
-
+  auto const frame = views::FrameList::instance()->active_frame();
+  if (!frame)
+    return nullptr;
+  auto const edit_pane = frame->GetActivePane()->as<EditPane>();
   if (!edit_pane)
     return nullptr;
 

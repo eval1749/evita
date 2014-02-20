@@ -430,6 +430,7 @@
         if (window instanceof TextWindow) {
           console.log('Reset selection offset', document, window);
           window.selection.range.collapseTo(0);
+          window.makeSelectionVisible();
         }
       });
       document.doColor_(Math.min(document.length, 1024 * 8));

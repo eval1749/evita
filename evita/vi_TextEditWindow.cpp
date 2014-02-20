@@ -39,6 +39,7 @@
 #include "evita/vi_Caret.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
+#include "evita/vi_Page.h"
 #include "evita/vi_Selection.h"
 
 extern HWND g_hwndActiveDialog;
@@ -66,7 +67,7 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
       caret_(std::move(std::make_unique<Caret>())),
       m_gfx(nullptr),
       m_lCaretPosn(-1),
-      m_pPage(new Page(text_window.view_range()->text_range()->GetBuffer())),
+      m_pRenderPage(new RenderPage(text_window.view_range()->text_range()->GetBuffer())),
       selection_(text_window.view_selection()),
       #if SUPPORT_IME
         m_fImeTarget(false),
@@ -83,21 +84,21 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
   if (xGoal < 0)
     return lGoal;
 
-  Page::Line* pLine = nullptr;
+  RenderPage::Line* pLine = nullptr;
 
-  if (!m_pPage->ShouldFormat(rect(), *selection_))
-    pLine = m_pPage->FindLine(lGoal);
+  if (!m_pRenderPage->ShouldFormat(rect(), *selection_))
+    pLine = m_pRenderPage->FindLine(lGoal);
 
   if (pLine)
     return pLine->MapXToPosn(*m_gfx, xGoal);
 
   auto lStart = GetBuffer()->ComputeStartOfLine(lGoal);
   // TODO(yosi) We should not use another object for formatting line instead of
-  // Page.
-  Page oPage(m_pPage->GetBuffer());
+  // RenderPage.
+  RenderPage oRenderPage(m_pRenderPage->GetBuffer());
   gfx::RectF page_rect(rect());
   for (;;) {
-    auto const pLine = oPage.FormatLine(*m_gfx, page_rect,
+    auto const pLine = oRenderPage.FormatLine(*m_gfx, page_rect,
                                         *selection_, lStart);
     auto const lEnd = pLine->GetEnd();
     if (lGoal < lEnd)
@@ -145,7 +146,7 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
     case Unit_Screen: {
       auto k = LargeScroll(0, n, false);
       if (k > 0) {
-        auto const lStart = m_pPage->GetStart();
+        auto const lStart = m_pRenderPage->GetStart();
         m_pViewRange->SetRange(lStart, lStart);
         *inout_lPosn = MapPointToPosn(pt);
       } else if (n > 0) {
@@ -215,8 +216,8 @@ void TextEditWindow::DidShow() {
 
 Posn TextEditWindow::EndOfLine(Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
-  if (!m_pPage->ShouldFormat(rect(), *selection_)) {
-    auto const pLine = m_pPage->FindLine(lPosn);
+  if (!m_pRenderPage->ShouldFormat(rect(), *selection_)) {
+    auto const pLine = m_pRenderPage->FindLine(lPosn);
     if (pLine)
       return pLine->GetEnd() - 1;
   }
@@ -232,12 +233,12 @@ Posn TextEditWindow::endOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
     return lBufEnd;
 
   // TODO(yosi) We should not use another object for formatting line instead of
-  // Page.
-  Page oPage(m_pPage->GetBuffer());
+  // RenderPage.
+  RenderPage oRenderPage(m_pRenderPage->GetBuffer());
   gfx::RectF page_rect(rect());
   auto lStart = selection_->GetBuffer()->ComputeStartOfLine(lPosn);
   for (;;) {
-    auto const pLine = oPage.FormatLine(gfx, page_rect, *selection_, lStart);
+    auto const pLine = oRenderPage.FormatLine(gfx, page_rect, *selection_, lStart);
     lStart = pLine->GetEnd();
     if (lPosn < lStart)
       return lStart - 1;
@@ -245,7 +246,7 @@ Posn TextEditWindow::endOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
 }
 
 void TextEditWindow::format(const gfx::Graphics& gfx, Posn lStart) {
-  m_pPage->Format(gfx, gfx::RectF(rect()), *selection_, lStart);
+  m_pRenderPage->Format(gfx, gfx::RectF(rect()), *selection_, lStart);
 }
 
 Buffer* TextEditWindow::GetBuffer() const {
@@ -260,7 +261,7 @@ HCURSOR TextEditWindow::GetCursorAt(const Point&) const {
 Posn TextEditWindow::GetEnd() {
   UI_ASSERT_DOM_LOCKED();
   updateScreen();
-  return m_pPage->GetEnd();
+  return m_pRenderPage->GetEnd();
 }
 
 HWND TextEditWindow::GetScrollBar(int which) const {
@@ -272,7 +273,7 @@ HWND TextEditWindow::GetScrollBar(int which) const {
 Posn TextEditWindow::GetStart() {
   UI_ASSERT_DOM_LOCKED();
   updateScreen();
-  return m_pPage->GetStart();
+  return m_pRenderPage->GetStart();
 }
 
 int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
@@ -286,21 +287,21 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
 
     auto const lBufStart = selection_->GetBuffer()->GetStart();
     for (k = 0; k < iDy; ++k) {
-      auto const lStart = m_pPage->GetStart();
+      auto const lStart = m_pRenderPage->GetStart();
       if (lStart == lBufStart)
         break;
 
       // Scroll down until page start goes out to page.
       do {
-        if (!m_pPage->ScrollDown(*m_gfx))
+        if (!m_pRenderPage->ScrollDown(*m_gfx))
           break;
-      } while (m_pPage->GetEnd() != lStart);
+      } while (m_pRenderPage->GetEnd() != lStart);
     }
   } else if (iDy > 0) {
     // Scroll Up -- format page from page end.
     const Posn lBufEnd = selection_->GetBuffer()->GetEnd();
     for (k = 0; k < iDy; ++k) {
-      auto const lStart = m_pPage->GetEnd();
+      auto const lStart = m_pRenderPage->GetEnd();
       if (lStart >= lBufEnd)
         break;
       format(*m_gfx, lStart);
@@ -324,7 +325,7 @@ void TextEditWindow::MakeSelectionVisible() {
 
 Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
   updateScreen();
-  return std::min(m_pPage->MapPointToPosn(*m_gfx, pt), GetBuffer()->GetEnd());
+  return std::min(m_pRenderPage->MapPointToPosn(*m_gfx, pt), GetBuffer()->GetEnd());
 }
 
 // Description:
@@ -336,15 +337,15 @@ gfx::RectF TextEditWindow::MapPosnToPoint(Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
   updateScreen();
   for (;;) {
-    if (auto rect = m_pPage->MapPosnToPoint(*m_gfx, lPosn))
+    if (auto rect = m_pRenderPage->MapPosnToPoint(*m_gfx, lPosn))
       return rect;
-    m_pPage->ScrollToPosn(*m_gfx, lPosn);
+    m_pRenderPage->ScrollToPosn(*m_gfx, lPosn);
   }
 }
 
 void TextEditWindow::OnDraw(gfx::Graphics*) {
   UI_ASSERT_DOM_LOCKED();
-  m_pPage->Reset();
+  m_pRenderPage->Reset();
   Redraw();
 }
 
@@ -494,21 +495,21 @@ void TextEditWindow::Redraw() {
 
   {
     auto const lStart = m_pViewRange->GetStart();
-    if (m_pPage->ShouldFormat(rect(), *selection_, fSelectionIsActive)) {
+    if (m_pRenderPage->ShouldFormat(rect(), *selection_, fSelectionIsActive)) {
       format(*m_gfx, startOfLineAux(*m_gfx, lStart));
 
       if (m_lCaretPosn != lCaretPosn) {
         // FIXME 2007-05-12 Fill the page with lines.
-        m_pPage->ScrollToPosn(*m_gfx, lCaretPosn);
+        m_pRenderPage->ScrollToPosn(*m_gfx, lCaretPosn);
         m_lCaretPosn = lCaretPosn;
       }
     } else if (m_lCaretPosn != lCaretPosn) {
-        m_pPage->ScrollToPosn(*m_gfx, lCaretPosn);
+        m_pRenderPage->ScrollToPosn(*m_gfx, lCaretPosn);
         m_lCaretPosn = lCaretPosn;
-    } else if (m_pPage->GetStart() != lStart) {
+    } else if (m_pRenderPage->GetStart() != lStart) {
         format(*m_gfx, startOfLineAux(*m_gfx, lStart));
-    } else if (!m_pPage->ShouldRender()) {
-      // Page is clean.
+    } else if (!m_pRenderPage->ShouldRender()) {
+      // RenderPage is clean.
       if (!m_fImeTarget)
         caret_->ShouldBlink();
       return;
@@ -524,15 +525,15 @@ void TextEditWindow::Render() {
 
   gfx::Graphics::DrawingScope drawing_scope(*m_gfx);
   caret_->Hide();
-  m_pPage->Render(*m_gfx);
+  m_pRenderPage->Render(*m_gfx);
 
   {
-    auto const lStart = m_pPage->GetStart();
+    auto const lStart = m_pRenderPage->GetStart();
     m_pViewRange->SetRange(lStart, lStart);
     updateScrollBar();
   }
 
-  const auto rect = m_pPage->MapPosnToPoint(*m_gfx, m_lCaretPosn);
+  const auto rect = m_pRenderPage->MapPosnToPoint(*m_gfx, m_lCaretPosn);
   if (!rect) {
     caret_->Reset();
     return;
@@ -576,7 +577,7 @@ int TextEditWindow::SmallScroll(int, int iDy) {
     iDy = -iDy;
 
     auto const lBufStart = selection_->GetBuffer()->GetStart();
-    auto lStart = m_pPage->GetStart();
+    auto lStart = m_pRenderPage->GetStart();
     int k;
     for (k = 0; k < iDy; ++k) {
       if (lStart == lBufStart)
@@ -595,14 +596,14 @@ int TextEditWindow::SmallScroll(int, int iDy) {
     auto const lBufEnd = selection_->GetBuffer()->GetEnd();
     int k;
     for (k = 0; k < iDy; ++k) {
-      if (m_pPage->GetEnd() >= lBufEnd) {
+      if (m_pRenderPage->GetEnd() >= lBufEnd) {
           // Make sure whole line of buffer end is visible.
-          m_pPage->ScrollToPosn(*m_gfx, lBufEnd);
+          m_pRenderPage->ScrollToPosn(*m_gfx, lBufEnd);
           ++k;
           break;
       }
 
-      if (!m_pPage->ScrollUp(*m_gfx))
+      if (!m_pRenderPage->ScrollUp(*m_gfx))
         break;
     }
 
@@ -624,8 +625,8 @@ Posn TextEditWindow::StartOfLine(Posn lPosn) {
 // Description:
 // Returns start position of window line of specified position.
 Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
-  if (!m_pPage->ShouldFormat(rect(), *selection_)) {
-    auto const pLine = m_pPage->FindLine(lPosn);
+  if (!m_pRenderPage->ShouldFormat(rect(), *selection_)) {
+    auto const pLine = m_pRenderPage->FindLine(lPosn);
     if (pLine)
       return pLine->GetStart();
   }
@@ -635,11 +636,11 @@ Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
     return 0;
 
   // TODO(yosi) We should not use another object for formatting line instead of
-  // Page.
-  Page oPage(m_pPage->GetBuffer());
+  // RenderPage.
+  RenderPage oRenderPage(m_pRenderPage->GetBuffer());
   gfx::RectF page_rect(rect());
   for (;;) {
-    auto const pLine = oPage.FormatLine(gfx, page_rect, *selection_,
+    auto const pLine = oRenderPage.FormatLine(gfx, page_rect, *selection_,
                                         lStart);
     auto const lEnd = pLine->GetEnd();
     if (lPosn < lEnd)
@@ -650,7 +651,7 @@ Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
 
 void TextEditWindow::updateScreen() {
   UI_ASSERT_DOM_LOCKED();
-  if (!m_pPage->ShouldFormat(rect(), *selection_))
+  if (!m_pRenderPage->ShouldFormat(rect(), *selection_))
     return;
 
   Posn lStart = m_pViewRange->GetStart();
@@ -659,18 +660,19 @@ void TextEditWindow::updateScreen() {
 }
 
 void TextEditWindow::updateScrollBar() {
-  if (!m_pPage->GetBuffer())
+  if (!m_pRenderPage->GetBuffer())
     return;
 
-  auto const lBufEnd = m_pPage->GetBuffer()->GetEnd() + 1;
+  auto const lBufEnd = m_pRenderPage->GetBuffer()->GetEnd() + 1;
 
   SCROLLINFO oInfo;
   oInfo.cbSize = sizeof(oInfo);
   oInfo.fMask = SIF_POS | SIF_RANGE | SIF_PAGE | SIF_DISABLENOSCROLL;
-  oInfo.nPage = static_cast<uint>(m_pPage->GetEnd() - m_pPage->GetStart());
+  oInfo.nPage = static_cast<uint>(m_pRenderPage->GetEnd() -
+                                        m_pRenderPage->GetStart());
   oInfo.nMin = 0;
   oInfo.nMax = lBufEnd;
-  oInfo.nPos = m_pPage->GetStart();
+  oInfo.nPos = m_pRenderPage->GetStart();
 
   if (static_cast<Count>(oInfo.nPage) >= lBufEnd) {
     // Current screen shows entire buffer. We disable scroll bar.

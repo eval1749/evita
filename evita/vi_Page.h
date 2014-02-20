@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-// evcl - listener - Page object
+// evcl - listener - RenderPage object
 // listener/winapp/vi_page.h
 //
 // Copyright (C) 1996-2007 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 //
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Page.h#1 $
+// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_RenderPage.h#1 $
 //
 #if !defined(INCLUDE_listener_winapp_visual_formatter_h)
 #define INCLUDE_listener_winapp_visual_formatter_h
@@ -19,22 +19,24 @@ class Font;
 class Selection;
 class Style;
 
-namespace PageInternal {
+namespace rendering {
+
+namespace RenderPageInternal {
   class Cell;
   class DisplayBuffer;
   class Formatter;
-}; // PageInternal
+}; // RenderPageInternal
 
 //////////////////////////////////////////////////////////////////////
 //
-// Page
+// RenderPage
 //
-class Page : public text::BufferMutationObserver {
-  friend class PageInternal::Formatter;
+class RenderPage : public text::BufferMutationObserver {
+  friend class RenderPageInternal::Formatter;
 
   private: typedef common::win::Rect Rect;
 
-  private: typedef PageInternal::Cell Cell;
+  private: typedef RenderPageInternal::Cell Cell;
   private: class DisplayBuffer;
   public: class Line;
 
@@ -80,9 +82,9 @@ class Page : public text::BufferMutationObserver {
   public: class Line : public DoubleLinkedNode_<Line, DisplayBuffer>,
                        public ObjectInHeap {
     private: typedef DoubleLinkedList_<Cell, Line> Cells;
-    friend class Page;
+    friend class RenderPage;
     friend class DisplayBuffer;
-    friend class PageInternal::Formatter;
+    friend class RenderPageInternal::Formatter;
 
     private: Cells cells_;
     private: uint m_cwch;
@@ -134,8 +136,8 @@ class Page : public text::BufferMutationObserver {
   private: DisplayBuffer m_oFormatBuf;
   private: DisplayBuffer m_oScreenBuf;
 
-  public: Page(text::Buffer* buffer);
-  public: ~Page();
+  public: RenderPage(text::Buffer* buffer);
+  public: ~RenderPage();
 
   // [A]
   private: void allocHeap();
@@ -187,7 +189,9 @@ class Page : public text::BufferMutationObserver {
   private: virtual void DidDeleteAt(Posn offset, size_t length) override;
   private: virtual void DidInsertAt(Posn offset, size_t length) override;
 
-  DISALLOW_COPY_AND_ASSIGN(Page);
+  DISALLOW_COPY_AND_ASSIGN(RenderPage);
 };
+
+}  // namespace rendering
 
 #endif //!defined(INCLUDE_listener_winapp_visual_formatter_h)

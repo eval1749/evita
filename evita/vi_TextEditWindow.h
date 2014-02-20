@@ -11,21 +11,25 @@
 #if !defined(INCLUDE_listener_winapp_visual_text_pane_h)
 #define INCLUDE_listener_winapp_visual_text_pane_h
 
+#include <memory>
+
 #include "evita/views/content_window.h"
 #include "evita/li_util.h"
 #include "evita/gfx_base.h"
 #include "evita/views/command_window.h"
-#include "evita/vi_Page.h"
-#include <memory>
 
 class Caret;
 class EditPane;
-class Page;
+class RenderPage;
 class Selection;
 
 namespace dom {
 class Buffer;
 class TextWindow;
+}
+
+namespace rendering {
+class RenderPage;
 }
 
 namespace ui {
@@ -47,6 +51,7 @@ class TextEditWindow
 
   private: typedef views::ContentWindow ParentClass;
   private: typedef common::win::Point Point;
+  private: typedef rendering::RenderPage RenderPage;
   private: typedef text::Range Range;
 
   private: struct ScrollBar {
@@ -93,7 +98,7 @@ class TextEditWindow
   private: Posn m_lImeEnd;
   #endif // SUPPORT_IME
   private: Range* m_pViewRange;
-  private: std::unique_ptr<Page> m_pPage;
+  private: std::unique_ptr<RenderPage> m_pRenderPage;
 
   // ctor/dtor
   public: explicit TextEditWindow(const dom::TextWindow& window);

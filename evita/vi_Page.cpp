@@ -1,13 +1,13 @@
 #include "precomp.h"
 //////////////////////////////////////////////////////////////////////////////
 //
-// evcl - listener - Page
-// listener/winapp/vi_Page.cpp
+// evcl - listener - RenderPage
+// listener/winapp/vi_RenderPage.cpp
 //
 // Copyright (C) 1996-2007 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 //
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Page.cpp#3 $
+// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_RenderPage.cpp#3 $
 //
 #define DEBUG_DIRTY  0
 #define DEBUG_DISPBUF 0
@@ -25,7 +25,9 @@
 #include "evita/text/interval.h"
 #include "evita/vi_Selection.h"
 
-namespace PageInternal {
+namespace rendering {
+
+namespace RenderPageInternal {
 
 const float cxLeftMargin = 7.0f;
 const int k_nTabWidth = 4;
@@ -97,7 +99,7 @@ enum CellKind {
 // Cell
 //
 class Cell
-    : public DoubleLinkedNode_<Cell, Page::Line>,
+    : public DoubleLinkedNode_<Cell, RenderPage::Line>,
       public ObjectInHeap {
   public: float m_cx;
   public: float m_cy;
@@ -726,23 +728,23 @@ class LocalCharSink_
 class Formatter {
   private: const gfx::Graphics& m_gfx;
   private: HANDLE const m_hObjHeap;
-  private: Page*  const m_pPage;
+  private: RenderPage*  const m_pRenderPage;
   private: LocalCharSink_<> m_oCharSink;
   private: EnumCI m_oEnumCI;
 
   public: Formatter(const gfx::Graphics& gfx,
                     HANDLE hHeap,
-                    Page* pPage,
+                    RenderPage* pRenderPage,
                     Posn lStart)
       : m_gfx(gfx),
         m_hObjHeap(hHeap),
-        m_pPage(pPage),
+        m_pRenderPage(pRenderPage),
         m_oCharSink(hHeap),
-        m_oEnumCI(pPage->GetBuffer(), lStart) {
+        m_oEnumCI(pRenderPage->GetBuffer(), lStart) {
   }
 
   public: void Format();
-  public: bool FormatLine(Page::Line*);
+  public: bool FormatLine(RenderPage::Line*);
 
   private: Cell* formatChar(Cell*, float x, char16);
   private: Cell* formatMarker(MarkerCell::Kind);
@@ -754,24 +756,24 @@ class Formatter {
 void Formatter::Format() {
   #if DEBUG_FORMAT
     DEBUG_PRINTF("%p: start=%d " DEBUG_RECTF_FORMAT "\n",
-        m_pPage, m_pPage->GetStart(), 
-        DEBUG_RECTF_ARG(m_pPage->m_oFormatBuf.rect()));
+        m_pRenderPage, m_pRenderPage->GetStart(),
+        DEBUG_RECTF_ARG(m_pRenderPage->m_oFormatBuf.rect()));
   #endif
 
-  auto const cyPage = m_pPage->m_oFormatBuf.height();
+  auto const cyRenderPage = m_pRenderPage->m_oFormatBuf.height();
   for (;;) {
-    Page::Line* pLine = m_pPage->m_oFormatBuf.NewLine();
+    RenderPage::Line* pLine = m_pRenderPage->m_oFormatBuf.NewLine();
 
     bool fMore = FormatLine(pLine);
     ASSERT(pLine->m_iHeight >= 1);
 
-    m_pPage->m_oFormatBuf.Append(pLine);
+    m_pRenderPage->m_oFormatBuf.Append(pLine);
 
     // Line must have at least one cell other than filler.
     ASSERT(pLine->GetEnd() >= pLine->GetStart());
 
-    if (m_pPage->m_oFormatBuf.GetHeight() >= cyPage) {
-      // Page is filled up with lines.
+    if (m_pRenderPage->m_oFormatBuf.GetHeight() >= cyRenderPage) {
+      // RenderPage is filled up with lines.
       break;
     }
 
@@ -781,16 +783,16 @@ void Formatter::Format() {
     }
   }
 
-  m_pPage->m_oFormatBuf.Finish();
+  m_pRenderPage->m_oFormatBuf.Finish();
 }
 
 // Returns true if more contents is avaialble, otherwise returns false.
-bool Formatter::FormatLine(Page::Line* pLine) {
+bool Formatter::FormatLine(RenderPage::Line* pLine) {
   auto fMoreContents = true;
   pLine->m_lStart = m_oEnumCI.GetPosn();
   m_oCharSink.Reset();
 
-  auto x = m_pPage->m_oFormatBuf.left();
+  auto x = m_pRenderPage->m_oFormatBuf.left();
   auto iDescent = 0.0f;
   auto iAscent  = 0.0f;
 
@@ -800,7 +802,7 @@ bool Formatter::FormatLine(Page::Line* pLine) {
   {
     auto const cyMinHeight = 1.0f;
 
-    pCell = new(m_hObjHeap) FillerCell(m_pPage->m_crBackground,
+    pCell = new(m_hObjHeap) FillerCell(m_pRenderPage->m_crBackground,
                                        cxLeftMargin, cyMinHeight);
     pLine->cells().Append(pCell);
     x += cxLeftMargin;
@@ -878,9 +880,9 @@ Cell* Formatter::formatChar(
   auto const lPosn = m_oEnumCI.GetPosn();
   const auto* const pStyle = m_oEnumCI.GetStyle();
 
-  if (lPosn >= m_pPage->m_lSelStart && lPosn < m_pPage->m_lSelEnd) {
-    crColor      = m_pPage->m_crSelFg;
-    crBackground = m_pPage->m_crSelBg;
+  if (lPosn >= m_pRenderPage->m_lSelStart && lPosn < m_pRenderPage->m_lSelEnd) {
+    crColor      = m_pRenderPage->m_crSelFg;
+    crBackground = m_pRenderPage->m_crSelBg;
     eDecoration  = TextDecoration_None;
   } else {
     crColor      = pStyle->GetColor();
@@ -895,7 +897,7 @@ Cell* Formatter::formatChar(
     auto const x2 = (x + cxTab - cxLeftMargin) / cxTab * cxTab;
     auto const cx = (x2 + cxLeftMargin) - x;
     auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
-    if (pPrev && x2 + cxM > m_pPage->m_oFormatBuf.right())
+    if (pPrev && x2 + cxM > m_pRenderPage->m_oFormatBuf.right())
       return nullptr;
 
     return new(m_hObjHeap) MarkerCell(
@@ -933,7 +935,7 @@ Cell* Formatter::formatChar(
     auto const cxUni = 6.0f +
         AlignWidthToPixel(m_gfx, pFont->GetTextWidth(rgwch, cwch));
     auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
-    if (pPrev && x + cxUni + cxM > m_pPage->m_oFormatBuf.right())
+    if (pPrev && x + cxUni + cxM > m_pRenderPage->m_oFormatBuf.right())
       return nullptr;
 
     UnicodeCell* pCell = new(m_hObjHeap) UnicodeCell(
@@ -964,7 +966,7 @@ Cell* Formatter::formatChar(
   }
 
   auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
-  if (x + cx + cxM > m_pPage->m_oFormatBuf.right()) {
+  if (x + cx + cxM > m_pRenderPage->m_oFormatBuf.right()) {
     // We doesn't have enough room for a char in the line.
     return nullptr;
   }
@@ -991,11 +993,11 @@ Cell* Formatter::formatMarker(MarkerCell::Kind  eKind) {
     Posn lPosn = m_oEnumCI.GetPosn();
     const StyleValues* pStyle = m_oEnumCI.GetStyle();
 
-    if (lPosn >= m_pPage->m_lSelStart &&
-        lPosn < m_pPage->m_lSelEnd)
+    if (lPosn >= m_pRenderPage->m_lSelStart &&
+        lPosn < m_pRenderPage->m_lSelEnd)
     {
-        crColor      = m_pPage->m_crSelFg;
-        crBackground = m_pPage->m_crSelBg;
+        crColor      = m_pRenderPage->m_crSelFg;
+        crBackground = m_pRenderPage->m_crSelBg;
     }
     else
     {
@@ -1015,11 +1017,11 @@ Cell* Formatter::formatMarker(MarkerCell::Kind  eKind) {
     return pCell;
 }
 
-} // namespace PageInternal
+} // namespace RenderPageInternal
 
-using namespace PageInternal;
+using namespace RenderPageInternal;
 
-void Page::fillBottom(const gfx::Graphics& gfx, float y) const {
+void RenderPage::fillBottom(const gfx::Graphics& gfx, float y) const {
   if (y < m_oFormatBuf.bottom()) {
     gfx::RectF rect(m_oFormatBuf.left(), y, m_oFormatBuf.right(),
                     m_oFormatBuf.bottom());
@@ -1046,7 +1048,7 @@ void Page::fillBottom(const gfx::Graphics& gfx, float y) const {
             m_oFormatBuf.top(), m_oFormatBuf.bottom());
 }
 
-void Page::fillRight(const gfx::Graphics& gfx, const Line* pLine,
+void RenderPage::fillRight(const gfx::Graphics& gfx, const Line* pLine,
                      float y) const {
   gfx::RectF rc;
   rc.left  = m_oFormatBuf.left() + pLine->GetWidth();
@@ -1058,7 +1060,7 @@ void Page::fillRight(const gfx::Graphics& gfx, const Line* pLine,
   }
 }
 
-Page::Line* Page::FindLine(Posn lPosn) const {
+RenderPage::Line* RenderPage::FindLine(Posn lPosn) const {
   if (lPosn < m_lStart || lPosn > m_lEnd)
     return nullptr;
 
@@ -1071,14 +1073,14 @@ Page::Line* Page::FindLine(Posn lPosn) const {
   return nullptr;
 }
 
-void Page::Format(const gfx::Graphics& gfx, gfx::RectF page_rect,
+void RenderPage::Format(const gfx::Graphics& gfx, gfx::RectF page_rect,
                   const Selection& selection, Posn lStart) {
   ASSERT(!page_rect.is_empty());
   Prepare(selection);
   formatAux(gfx, page_rect, lStart);
 }
 
-void Page::formatAux(const gfx::Graphics& gfx, gfx::RectF page_rect,
+void RenderPage::formatAux(const gfx::Graphics& gfx, gfx::RectF page_rect,
                      Posn lStart) {
   ASSERT(!page_rect.is_empty());
   m_oFormatBuf.Reset(page_rect);
@@ -1089,7 +1091,7 @@ void Page::formatAux(const gfx::Graphics& gfx, gfx::RectF page_rect,
   m_lEnd = GetLastLine()->GetEnd();
 }
 
-Page::Line* Page::FormatLine(const gfx::Graphics& gfx,
+RenderPage::Line* RenderPage::FormatLine(const gfx::Graphics& gfx,
                              const gfx::RectF& page_rect,
                              const Selection& selection,
                              Posn lStart) {
@@ -1106,9 +1108,9 @@ Page::Line* Page::FormatLine(const gfx::Graphics& gfx,
 
 //////////////////////////////////////////////////////////////////////
 //
-// Page
+// RenderPage
 //
-Page::Page(text::Buffer* buffer)
+RenderPage::RenderPage(text::Buffer* buffer)
     : m_pBuffer(buffer),
       m_lStart(0),
       m_lEnd(0),
@@ -1120,11 +1122,11 @@ Page::Page(text::Buffer* buffer)
   m_pBuffer->AddObserver(this);
 }
 
-Page::~Page() {
+RenderPage::~RenderPage() {
   m_pBuffer->RemoveObserver(this);
 }
 
-bool Page::isPosnVisible(Posn lPosn) const {
+bool RenderPage::isPosnVisible(Posn lPosn) const {
   if (lPosn < m_lStart)
     return false;
   if (lPosn >= m_lEnd)
@@ -1139,7 +1141,7 @@ bool Page::isPosnVisible(Posn lPosn) const {
   return false;
 }
 
-Posn Page::MapPointToPosn(const gfx::Graphics& gfx, gfx::PointF pt) const {
+Posn RenderPage::MapPointToPosn(const gfx::Graphics& gfx, gfx::PointF pt) const {
   if (pt.y < m_oFormatBuf.top())
     return GetStart();
   if (pt.y >= m_oFormatBuf.bottom())
@@ -1175,9 +1177,9 @@ Posn Page::MapPointToPosn(const gfx::Graphics& gfx, gfx::PointF pt) const {
 // Maps specified buffer position to window point and returns true. If
 // specified buffer point isn't in window, this function returns false.
 //
-// A Page object must be formatted with the latest buffer.
+// A RenderPage object must be formatted with the latest buffer.
 //
-gfx::RectF Page::MapPosnToPoint(const gfx::Graphics& gfx, Posn lPosn) const {
+gfx::RectF RenderPage::MapPosnToPoint(const gfx::Graphics& gfx, Posn lPosn) const {
   if (lPosn < m_lStart || lPosn > m_lEnd)
     return gfx::RectF();
 
@@ -1201,14 +1203,14 @@ gfx::RectF Page::MapPosnToPoint(const gfx::Graphics& gfx, Posn lPosn) const {
 
 // Returns number of lines to be displayed in this page when using
 // buffer's default style.
-int Page::pageLines(const gfx::Graphics& gfx) const {
+int RenderPage::pageLines(const gfx::Graphics& gfx) const {
   auto const pFont = FontSet::Get(gfx, m_pBuffer->GetDefaultStyle())->
         FindFont(gfx, 'x');
   auto const height = AlignHeightToPixel(gfx, pFont->height());
   return static_cast<int>(m_oFormatBuf.height() / height);
 }
 
-void Page::Prepare(const Selection& selection) {
+void RenderPage::Prepare(const Selection& selection) {
   auto& buffer = *selection.GetBuffer();
 
   // Selection
@@ -1223,7 +1225,7 @@ void Page::Prepare(const Selection& selection) {
         m_crSelFg, m_crSelBg);
   #endif // DEBUG_FORMAT
 
-  // Page
+  // RenderPage
   m_crBackground = buffer.GetDefaultStyle()->GetBackground();
 }
 
@@ -1234,7 +1236,7 @@ namespace {
 // LineWithTop
 //
 class LineWithTop {
-  private: typedef Page::Line Line;
+  private: typedef RenderPage::Line Line;
 
   private: const Line* line_;
   private: float line_top_;
@@ -1305,7 +1307,7 @@ class LineWithTop {
 // LineCopier
 //
 class LineCopier {
-  private: typedef Page::Line Line;
+  private: typedef RenderPage::Line Line;
 
   private: const gfx::RectF rect_;
   private: const gfx::Graphics& gfx_;
@@ -1414,7 +1416,7 @@ class LineCopier {
 
 } // namespace
 
-bool Page::Render(const gfx::Graphics& gfx) {
+bool RenderPage::Render(const gfx::Graphics& gfx) {
   ASSERT(!m_oFormatBuf.rect().is_empty());
   gfx::Graphics::AxisAlignedClipScope clip_scope(gfx, m_oFormatBuf.rect());
   auto number_of_rendering = 0;
@@ -1478,11 +1480,11 @@ bool Page::Render(const gfx::Graphics& gfx) {
   return number_of_rendering > 0;
 }
 
-void Page::Reset() {
+void RenderPage::Reset() {
   m_oScreenBuf.Reset(gfx::RectF());
 }
 
-bool Page::ScrollDown(const gfx::Graphics& gfx) {
+bool RenderPage::ScrollDown(const gfx::Graphics& gfx) {
   if (!m_lStart) {
     // This page shows start of buffer.
     return false;
@@ -1518,7 +1520,7 @@ bool Page::ScrollDown(const gfx::Graphics& gfx) {
   return true;
 }
 
-bool Page::ScrollToPosn(const gfx::Graphics& gfx, Posn lPosn) {
+bool RenderPage::ScrollToPosn(const gfx::Graphics& gfx, Posn lPosn) {
   if (isPosnVisible(lPosn))
     return false;
 
@@ -1572,7 +1574,7 @@ bool Page::ScrollToPosn(const gfx::Graphics& gfx, Posn lPosn) {
   return true;
 }
 
-bool Page::ScrollUp(const gfx::Graphics& gfx) {
+bool RenderPage::ScrollUp(const gfx::Graphics& gfx) {
   // Note: We should scroll up if page shows end of buffer. Since,
   // the last line may not be fully visible.
 
@@ -1591,8 +1593,8 @@ bool Page::ScrollUp(const gfx::Graphics& gfx) {
   auto const fMore = oFormatter.FormatLine(pLine);
   m_oFormatBuf.Append(pLine);
 
-  auto const cyPage = m_oFormatBuf.height();
-  while (m_oFormatBuf.GetHeight() > cyPage) {
+  auto const cyRenderPage = m_oFormatBuf.height();
+  while (m_oFormatBuf.GetHeight() > cyRenderPage) {
     auto const pFirst = m_oFormatBuf.ScrollUp();
     if (!pFirst)
       break;
@@ -1605,7 +1607,7 @@ bool Page::ScrollUp(const gfx::Graphics& gfx) {
   return fMore;
 }
 
-bool Page::ShouldFormat(const Rect& rc, const Selection& selection,
+bool RenderPage::ShouldFormat(const Rect& rc, const Selection& selection,
                       bool fSelection) const {
   if (m_oFormatBuf.dirty())
     return true;
@@ -1628,7 +1630,7 @@ bool Page::ShouldFormat(const Rect& rc, const Selection& selection,
   auto const lSelStart = selection.GetStart();
   auto const lSelEnd = selection.GetEnd();
 
-  // Page shows caret instead of seleciton.
+  // RenderPage shows caret instead of seleciton.
   if (m_lSelStart == m_lSelEnd) {
     if (lSelStart == lSelEnd) {
         #if DEBUG_DIRTY
@@ -1653,7 +1655,7 @@ bool Page::ShouldFormat(const Rect& rc, const Selection& selection,
   }
 
   if (!fSelection) {
-    // Page doesn't contain selection.
+    // RenderPage doesn't contain selection.
     if (m_lSelEnd < m_lStart || m_lSelStart > m_lEnd) {
         if (lSelStart == lSelEnd) {
             #if DEBUG_DIRTY
@@ -1671,7 +1673,7 @@ bool Page::ShouldFormat(const Rect& rc, const Selection& selection,
     }
   }
 
-  // Page shows selection.
+  // RenderPage shows selection.
   if (m_lSelStart != lSelStart) {
     #if DEBUG_DIRTY
         DEBUG_PRINTF("%p: Selection start is changed.\n", this);
@@ -1707,30 +1709,30 @@ bool Page::ShouldFormat(const Rect& rc, const Selection& selection,
   return false;
 }
 
-bool Page::ShouldRender() const {
+bool RenderPage::ShouldRender() const {
   return m_oScreenBuf.dirty();
 }
 
 // text::BufferMutationObserver
-void Page::DidDeleteAt(Posn offset, size_t) {
+void RenderPage::DidDeleteAt(Posn offset, size_t) {
   m_oFormatBuf.SetBufferDirtyOffset(offset);
 }
 
-void Page::DidInsertAt(Posn offset, size_t) {
+void RenderPage::DidInsertAt(Posn offset, size_t) {
   m_oFormatBuf.SetBufferDirtyOffset(offset);
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// Page::DisplayBuffer
+// RenderPage::DisplayBuffer
 //
-Page::DisplayBuffer::DisplayBuffer()
+RenderPage::DisplayBuffer::DisplayBuffer()
     : dirty_(true),
       m_cy(0),
       m_hObjHeap(nullptr) {
 }
 
-Page::DisplayBuffer::~DisplayBuffer() {
+RenderPage::DisplayBuffer::~DisplayBuffer() {
   #if DEBUG_HEAP
     DEBUG_PRINTF("%p: heap=%p\n", this, m_hObjHeap);
   #endif // DEBUG_HEAP
@@ -1739,29 +1741,29 @@ Page::DisplayBuffer::~DisplayBuffer() {
     ::HeapDestroy(m_hObjHeap);
 }
 
-void Page::DisplayBuffer::Append(Line* pLine) {
+void RenderPage::DisplayBuffer::Append(Line* pLine) {
   lines_.Append(pLine);
   m_cy += pLine->GetHeight();
 }
 
-void* Page::DisplayBuffer::Alloc(size_t cb) {
+void* RenderPage::DisplayBuffer::Alloc(size_t cb) {
   return ::HeapAlloc(m_hObjHeap, 0, cb);
 }
 
-void Page::DisplayBuffer::Finish() {
+void RenderPage::DisplayBuffer::Finish() {
   dirty_ = !GetFirst();
 }
 
-Page::Line* Page::DisplayBuffer::NewLine() {
+RenderPage::Line* RenderPage::DisplayBuffer::NewLine() {
   return new(m_hObjHeap) Line(m_hObjHeap);
 }
 
-void Page::DisplayBuffer::Prepend(Line* line) {
+void RenderPage::DisplayBuffer::Prepend(Line* line) {
   lines_.Prepend(line);
   m_cy += line->GetHeight();
 }
 
-HANDLE Page::DisplayBuffer::Reset(const gfx::RectF& new_rect) {
+HANDLE RenderPage::DisplayBuffer::Reset(const gfx::RectF& new_rect) {
   #if DEBUG_DISPBUF
     DEBUG_PRINTF("%p " DEBUG_RECTF_FORMAT " to " DEBUG_RECTF_FORMAT "\n",
         this, DEBUG_RECTF_ARG(rect()), DEBUG_RECTF_ARG(new_rect));
@@ -1786,7 +1788,7 @@ HANDLE Page::DisplayBuffer::Reset(const gfx::RectF& new_rect) {
   return m_hObjHeap;
 }
 
-Page::Line* Page::DisplayBuffer::ScrollDown() {
+RenderPage::Line* RenderPage::DisplayBuffer::ScrollDown() {
   if (lines_.IsEmpty())
     return nullptr;
 
@@ -1796,7 +1798,7 @@ Page::Line* Page::DisplayBuffer::ScrollDown() {
   return line;
 }
 
-Page::Line* Page::DisplayBuffer::ScrollUp() {
+RenderPage::Line* RenderPage::DisplayBuffer::ScrollUp() {
   if (lines_.IsEmpty())
     return nullptr;
 
@@ -1806,7 +1808,7 @@ Page::Line* Page::DisplayBuffer::ScrollUp() {
   return line;
 }
 
-void Page::DisplayBuffer::SetBufferDirtyOffset(Posn offset) {
+void RenderPage::DisplayBuffer::SetBufferDirtyOffset(Posn offset) {
   if (dirty_)
     return;
   dirty_ = GetFirst()->GetStart() >= offset ||
@@ -1817,7 +1819,7 @@ void Page::DisplayBuffer::SetBufferDirtyOffset(Posn offset) {
 //
 // Line
 //
-Page::Line::Line(HANDLE hHeap)
+RenderPage::Line::Line(HANDLE hHeap)
     : m_cwch(0),
       m_nHash(0),
       m_hObjHeap(hHeap),
@@ -1829,7 +1831,7 @@ Page::Line::Line(HANDLE hHeap)
   ASSERT(m_hObjHeap);
 }
 
-Page::Line::Line(const Line& other, HANDLE hHeap)
+RenderPage::Line::Line(const Line& other, HANDLE hHeap)
     : m_cwch(other.m_cwch),
       m_nHash(other.m_nHash),
       m_hObjHeap(hHeap),
@@ -1843,7 +1845,7 @@ Page::Line::Line(const Line& other, HANDLE hHeap)
   myCopyMemory(m_pwch, other.m_pwch, sizeof(char16) * m_cwch);
 }
 
-Page::Line* Page::Line::Copy(HANDLE hHeap) const {
+RenderPage::Line* RenderPage::Line::Copy(HANDLE hHeap) const {
   auto const pLine = new(hHeap) Line(*this, hHeap);
   ASSERT(pLine->m_pwch);
   for (const auto& cell : cells()) {
@@ -1853,13 +1855,13 @@ Page::Line* Page::Line::Copy(HANDLE hHeap) const {
   return pLine;
 }
 
-void Page::Line::Discard() {
+void RenderPage::Line::Discard() {
   if (m_pwch)
     ::HeapFree(m_hObjHeap, 0, m_pwch);
   ::HeapFree(m_hObjHeap, 0, this);
 }
 
-bool Page::Line::Equal(const Line* other) const {
+bool RenderPage::Line::Equal(const Line* other) const {
   if (Hash() != other->Hash())
     return false;
   auto other_it = other->cells().begin();
@@ -1875,7 +1877,7 @@ bool Page::Line::Equal(const Line* other) const {
 
 // o Assign real pointer to m_pwch.
 // o Adjust line cell height.
-void Page::Line::Fix(float iDescent) {
+void RenderPage::Line::Fix(float iDescent) {
   auto const pwch = m_pwch;
   auto cx = 0.0f;
   for (auto& cell : cells()) {
@@ -1887,7 +1889,7 @@ void Page::Line::Fix(float iDescent) {
   m_iWidth  = cx;
 }
 
-uint Page::Line::Hash() const {
+uint RenderPage::Line::Hash() const {
   if (m_nHash)
     return m_nHash;
   for (const auto& cell : cells()) {
@@ -1898,7 +1900,7 @@ uint Page::Line::Hash() const {
   return m_nHash;
 }
 
-Posn Page::Line::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
+Posn RenderPage::Line::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
   auto xCell = 0.0f;
   auto lPosn = GetEnd() - 1;
   for (const auto& cell : cells()) {
@@ -1913,7 +1915,7 @@ Posn Page::Line::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
   return lPosn;
 }
 
-void Page::Line::Render(const gfx::Graphics& gfx,
+void RenderPage::Line::Render(const gfx::Graphics& gfx,
                         const gfx::PointF& left_top) const {
   auto x = left_top.x;
   for (auto const& cell : cells()) {
@@ -1925,7 +1927,7 @@ void Page::Line::Render(const gfx::Graphics& gfx,
   gfx.Flush();
 }
 
-void Page::Line::Reset() {
+void RenderPage::Line::Reset() {
   ASSERT(!GetNext());
   ASSERT(!GetPrev());
   cells_.DeleteAll();
@@ -1940,3 +1942,5 @@ void Page::Line::Reset() {
     m_pwch = nullptr;
   }
 }
+
+}  // namespace rendering

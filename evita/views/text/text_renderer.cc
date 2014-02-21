@@ -1,20 +1,13 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - RenderPage
-// listener/winapp/vi_RenderPage.cpp
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_RenderPage.cpp#3 $
-//
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #define DEBUG_DIRTY  0
 #define DEBUG_DISPBUF 0
 #define DEBUG_FORMAT 0
 #define DEBUG_HEAP   0
 #define DEBUG_RENDER 0
-#include "evita/vi_Page.h"
+#include "evita/views/text/text_renderer.h"
 
 #include <algorithm>
 #include <utility>
@@ -25,9 +18,9 @@
 #include "evita/text/interval.h"
 #include "evita/vi_Selection.h"
 
-namespace rendering {
+namespace views {
 
-namespace RenderPageInternal {
+namespace TextRendererInternal {
 
 const float cxLeftMargin = 7.0f;
 const int k_nTabWidth = 4;
@@ -99,7 +92,7 @@ enum CellKind {
 // Cell
 //
 class Cell
-    : public DoubleLinkedNode_<Cell, RenderPage::Line>,
+    : public DoubleLinkedNode_<Cell, TextRenderer::Line>,
       public ObjectInHeap {
   public: float m_cx;
   public: float m_cy;
@@ -728,23 +721,23 @@ class LocalCharSink_
 class Formatter {
   private: const gfx::Graphics& m_gfx;
   private: HANDLE const m_hObjHeap;
-  private: RenderPage*  const m_pRenderPage;
+  private: TextRenderer*  const m_pTextRenderer;
   private: LocalCharSink_<> m_oCharSink;
   private: EnumCI m_oEnumCI;
 
   public: Formatter(const gfx::Graphics& gfx,
                     HANDLE hHeap,
-                    RenderPage* pRenderPage,
+                    TextRenderer* pTextRenderer,
                     Posn lStart)
       : m_gfx(gfx),
         m_hObjHeap(hHeap),
-        m_pRenderPage(pRenderPage),
+        m_pTextRenderer(pTextRenderer),
         m_oCharSink(hHeap),
-        m_oEnumCI(pRenderPage->GetBuffer(), lStart) {
+        m_oEnumCI(pTextRenderer->GetBuffer(), lStart) {
   }
 
   public: void Format();
-  public: bool FormatLine(RenderPage::Line*);
+  public: bool FormatLine(TextRenderer::Line*);
 
   private: Cell* formatChar(Cell*, float x, char16);
   private: Cell* formatMarker(MarkerCell::Kind);
@@ -756,24 +749,24 @@ class Formatter {
 void Formatter::Format() {
   #if DEBUG_FORMAT
     DEBUG_PRINTF("%p: start=%d " DEBUG_RECTF_FORMAT "\n",
-        m_pRenderPage, m_pRenderPage->GetStart(),
-        DEBUG_RECTF_ARG(m_pRenderPage->m_oFormatBuf.rect()));
+        m_pTextRenderer, m_pTextRenderer->GetStart(),
+        DEBUG_RECTF_ARG(m_pTextRenderer->m_oFormatBuf.rect()));
   #endif
 
-  auto const cyRenderPage = m_pRenderPage->m_oFormatBuf.height();
+  auto const cyTextRenderer = m_pTextRenderer->m_oFormatBuf.height();
   for (;;) {
-    RenderPage::Line* pLine = m_pRenderPage->m_oFormatBuf.NewLine();
+    TextRenderer::Line* pLine = m_pTextRenderer->m_oFormatBuf.NewLine();
 
     bool fMore = FormatLine(pLine);
     ASSERT(pLine->m_iHeight >= 1);
 
-    m_pRenderPage->m_oFormatBuf.Append(pLine);
+    m_pTextRenderer->m_oFormatBuf.Append(pLine);
 
     // Line must have at least one cell other than filler.
     ASSERT(pLine->GetEnd() >= pLine->GetStart());
 
-    if (m_pRenderPage->m_oFormatBuf.GetHeight() >= cyRenderPage) {
-      // RenderPage is filled up with lines.
+    if (m_pTextRenderer->m_oFormatBuf.GetHeight() >= cyTextRenderer) {
+      // TextRenderer is filled up with lines.
       break;
     }
 
@@ -783,16 +776,16 @@ void Formatter::Format() {
     }
   }
 
-  m_pRenderPage->m_oFormatBuf.Finish();
+  m_pTextRenderer->m_oFormatBuf.Finish();
 }
 
 // Returns true if more contents is avaialble, otherwise returns false.
-bool Formatter::FormatLine(RenderPage::Line* pLine) {
+bool Formatter::FormatLine(TextRenderer::Line* pLine) {
   auto fMoreContents = true;
   pLine->m_lStart = m_oEnumCI.GetPosn();
   m_oCharSink.Reset();
 
-  auto x = m_pRenderPage->m_oFormatBuf.left();
+  auto x = m_pTextRenderer->m_oFormatBuf.left();
   auto iDescent = 0.0f;
   auto iAscent  = 0.0f;
 
@@ -802,7 +795,7 @@ bool Formatter::FormatLine(RenderPage::Line* pLine) {
   {
     auto const cyMinHeight = 1.0f;
 
-    pCell = new(m_hObjHeap) FillerCell(m_pRenderPage->m_crBackground,
+    pCell = new(m_hObjHeap) FillerCell(m_pTextRenderer->m_crBackground,
                                        cxLeftMargin, cyMinHeight);
     pLine->cells().Append(pCell);
     x += cxLeftMargin;
@@ -880,9 +873,9 @@ Cell* Formatter::formatChar(
   auto const lPosn = m_oEnumCI.GetPosn();
   const auto* const pStyle = m_oEnumCI.GetStyle();
 
-  if (lPosn >= m_pRenderPage->m_lSelStart && lPosn < m_pRenderPage->m_lSelEnd) {
-    crColor      = m_pRenderPage->m_crSelFg;
-    crBackground = m_pRenderPage->m_crSelBg;
+  if (lPosn >= m_pTextRenderer->m_lSelStart && lPosn < m_pTextRenderer->m_lSelEnd) {
+    crColor      = m_pTextRenderer->m_crSelFg;
+    crBackground = m_pTextRenderer->m_crSelBg;
     eDecoration  = TextDecoration_None;
   } else {
     crColor      = pStyle->GetColor();
@@ -897,7 +890,7 @@ Cell* Formatter::formatChar(
     auto const x2 = (x + cxTab - cxLeftMargin) / cxTab * cxTab;
     auto const cx = (x2 + cxLeftMargin) - x;
     auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
-    if (pPrev && x2 + cxM > m_pRenderPage->m_oFormatBuf.right())
+    if (pPrev && x2 + cxM > m_pTextRenderer->m_oFormatBuf.right())
       return nullptr;
 
     return new(m_hObjHeap) MarkerCell(
@@ -935,7 +928,7 @@ Cell* Formatter::formatChar(
     auto const cxUni = 6.0f +
         AlignWidthToPixel(m_gfx, pFont->GetTextWidth(rgwch, cwch));
     auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
-    if (pPrev && x + cxUni + cxM > m_pRenderPage->m_oFormatBuf.right())
+    if (pPrev && x + cxUni + cxM > m_pTextRenderer->m_oFormatBuf.right())
       return nullptr;
 
     UnicodeCell* pCell = new(m_hObjHeap) UnicodeCell(
@@ -966,7 +959,7 @@ Cell* Formatter::formatChar(
   }
 
   auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
-  if (x + cx + cxM > m_pRenderPage->m_oFormatBuf.right()) {
+  if (x + cx + cxM > m_pTextRenderer->m_oFormatBuf.right()) {
     // We doesn't have enough room for a char in the line.
     return nullptr;
   }
@@ -993,11 +986,11 @@ Cell* Formatter::formatMarker(MarkerCell::Kind  eKind) {
     Posn lPosn = m_oEnumCI.GetPosn();
     const StyleValues* pStyle = m_oEnumCI.GetStyle();
 
-    if (lPosn >= m_pRenderPage->m_lSelStart &&
-        lPosn < m_pRenderPage->m_lSelEnd)
+    if (lPosn >= m_pTextRenderer->m_lSelStart &&
+        lPosn < m_pTextRenderer->m_lSelEnd)
     {
-        crColor      = m_pRenderPage->m_crSelFg;
-        crBackground = m_pRenderPage->m_crSelBg;
+        crColor      = m_pTextRenderer->m_crSelFg;
+        crBackground = m_pTextRenderer->m_crSelBg;
     }
     else
     {
@@ -1017,11 +1010,11 @@ Cell* Formatter::formatMarker(MarkerCell::Kind  eKind) {
     return pCell;
 }
 
-} // namespace RenderPageInternal
+} // namespace TextRendererInternal
 
-using namespace RenderPageInternal;
+using namespace TextRendererInternal;
 
-void RenderPage::fillBottom(const gfx::Graphics& gfx, float y) const {
+void TextRenderer::fillBottom(const gfx::Graphics& gfx, float y) const {
   if (y < m_oFormatBuf.bottom()) {
     gfx::RectF rect(m_oFormatBuf.left(), y, m_oFormatBuf.right(),
                     m_oFormatBuf.bottom());
@@ -1048,7 +1041,7 @@ void RenderPage::fillBottom(const gfx::Graphics& gfx, float y) const {
             m_oFormatBuf.top(), m_oFormatBuf.bottom());
 }
 
-void RenderPage::fillRight(const gfx::Graphics& gfx, const Line* pLine,
+void TextRenderer::fillRight(const gfx::Graphics& gfx, const Line* pLine,
                      float y) const {
   gfx::RectF rc;
   rc.left  = m_oFormatBuf.left() + pLine->GetWidth();
@@ -1060,7 +1053,7 @@ void RenderPage::fillRight(const gfx::Graphics& gfx, const Line* pLine,
   }
 }
 
-RenderPage::Line* RenderPage::FindLine(Posn lPosn) const {
+TextRenderer::Line* TextRenderer::FindLine(Posn lPosn) const {
   if (lPosn < m_lStart || lPosn > m_lEnd)
     return nullptr;
 
@@ -1073,14 +1066,14 @@ RenderPage::Line* RenderPage::FindLine(Posn lPosn) const {
   return nullptr;
 }
 
-void RenderPage::Format(const gfx::Graphics& gfx, gfx::RectF page_rect,
+void TextRenderer::Format(const gfx::Graphics& gfx, gfx::RectF page_rect,
                   const Selection& selection, Posn lStart) {
   ASSERT(!page_rect.is_empty());
   Prepare(selection);
   formatAux(gfx, page_rect, lStart);
 }
 
-void RenderPage::formatAux(const gfx::Graphics& gfx, gfx::RectF page_rect,
+void TextRenderer::formatAux(const gfx::Graphics& gfx, gfx::RectF page_rect,
                      Posn lStart) {
   ASSERT(!page_rect.is_empty());
   m_oFormatBuf.Reset(page_rect);
@@ -1091,7 +1084,7 @@ void RenderPage::formatAux(const gfx::Graphics& gfx, gfx::RectF page_rect,
   m_lEnd = GetLastLine()->GetEnd();
 }
 
-RenderPage::Line* RenderPage::FormatLine(const gfx::Graphics& gfx,
+TextRenderer::Line* TextRenderer::FormatLine(const gfx::Graphics& gfx,
                              const gfx::RectF& page_rect,
                              const Selection& selection,
                              Posn lStart) {
@@ -1108,9 +1101,9 @@ RenderPage::Line* RenderPage::FormatLine(const gfx::Graphics& gfx,
 
 //////////////////////////////////////////////////////////////////////
 //
-// RenderPage
+// TextRenderer
 //
-RenderPage::RenderPage(text::Buffer* buffer)
+TextRenderer::TextRenderer(text::Buffer* buffer)
     : m_pBuffer(buffer),
       m_lStart(0),
       m_lEnd(0),
@@ -1122,11 +1115,11 @@ RenderPage::RenderPage(text::Buffer* buffer)
   m_pBuffer->AddObserver(this);
 }
 
-RenderPage::~RenderPage() {
+TextRenderer::~TextRenderer() {
   m_pBuffer->RemoveObserver(this);
 }
 
-bool RenderPage::isPosnVisible(Posn lPosn) const {
+bool TextRenderer::isPosnVisible(Posn lPosn) const {
   if (lPosn < m_lStart)
     return false;
   if (lPosn >= m_lEnd)
@@ -1141,7 +1134,7 @@ bool RenderPage::isPosnVisible(Posn lPosn) const {
   return false;
 }
 
-Posn RenderPage::MapPointToPosn(const gfx::Graphics& gfx, gfx::PointF pt) const {
+Posn TextRenderer::MapPointToPosn(const gfx::Graphics& gfx, gfx::PointF pt) const {
   if (pt.y < m_oFormatBuf.top())
     return GetStart();
   if (pt.y >= m_oFormatBuf.bottom())
@@ -1177,9 +1170,9 @@ Posn RenderPage::MapPointToPosn(const gfx::Graphics& gfx, gfx::PointF pt) const 
 // Maps specified buffer position to window point and returns true. If
 // specified buffer point isn't in window, this function returns false.
 //
-// A RenderPage object must be formatted with the latest buffer.
+// A TextRenderer object must be formatted with the latest buffer.
 //
-gfx::RectF RenderPage::MapPosnToPoint(const gfx::Graphics& gfx, Posn lPosn) const {
+gfx::RectF TextRenderer::MapPosnToPoint(const gfx::Graphics& gfx, Posn lPosn) const {
   if (lPosn < m_lStart || lPosn > m_lEnd)
     return gfx::RectF();
 
@@ -1203,14 +1196,14 @@ gfx::RectF RenderPage::MapPosnToPoint(const gfx::Graphics& gfx, Posn lPosn) cons
 
 // Returns number of lines to be displayed in this page when using
 // buffer's default style.
-int RenderPage::pageLines(const gfx::Graphics& gfx) const {
+int TextRenderer::pageLines(const gfx::Graphics& gfx) const {
   auto const pFont = FontSet::Get(gfx, m_pBuffer->GetDefaultStyle())->
         FindFont(gfx, 'x');
   auto const height = AlignHeightToPixel(gfx, pFont->height());
   return static_cast<int>(m_oFormatBuf.height() / height);
 }
 
-void RenderPage::Prepare(const Selection& selection) {
+void TextRenderer::Prepare(const Selection& selection) {
   auto& buffer = *selection.GetBuffer();
 
   // Selection
@@ -1225,7 +1218,7 @@ void RenderPage::Prepare(const Selection& selection) {
         m_crSelFg, m_crSelBg);
   #endif // DEBUG_FORMAT
 
-  // RenderPage
+  // TextRenderer
   m_crBackground = buffer.GetDefaultStyle()->GetBackground();
 }
 
@@ -1236,7 +1229,7 @@ namespace {
 // LineWithTop
 //
 class LineWithTop {
-  private: typedef RenderPage::Line Line;
+  private: typedef TextRenderer::Line Line;
 
   private: const Line* line_;
   private: float line_top_;
@@ -1307,7 +1300,7 @@ class LineWithTop {
 // LineCopier
 //
 class LineCopier {
-  private: typedef RenderPage::Line Line;
+  private: typedef TextRenderer::Line Line;
 
   private: const gfx::RectF rect_;
   private: const gfx::Graphics& gfx_;
@@ -1416,7 +1409,7 @@ class LineCopier {
 
 } // namespace
 
-bool RenderPage::Render(const gfx::Graphics& gfx) {
+bool TextRenderer::Render(const gfx::Graphics& gfx) {
   ASSERT(!m_oFormatBuf.rect().is_empty());
   gfx::Graphics::AxisAlignedClipScope clip_scope(gfx, m_oFormatBuf.rect());
   auto number_of_rendering = 0;
@@ -1480,11 +1473,11 @@ bool RenderPage::Render(const gfx::Graphics& gfx) {
   return number_of_rendering > 0;
 }
 
-void RenderPage::Reset() {
+void TextRenderer::Reset() {
   m_oScreenBuf.Reset(gfx::RectF());
 }
 
-bool RenderPage::ScrollDown(const gfx::Graphics& gfx) {
+bool TextRenderer::ScrollDown(const gfx::Graphics& gfx) {
   if (!m_lStart) {
     // This page shows start of buffer.
     return false;
@@ -1520,7 +1513,7 @@ bool RenderPage::ScrollDown(const gfx::Graphics& gfx) {
   return true;
 }
 
-bool RenderPage::ScrollToPosn(const gfx::Graphics& gfx, Posn lPosn) {
+bool TextRenderer::ScrollToPosn(const gfx::Graphics& gfx, Posn lPosn) {
   if (isPosnVisible(lPosn))
     return false;
 
@@ -1574,7 +1567,7 @@ bool RenderPage::ScrollToPosn(const gfx::Graphics& gfx, Posn lPosn) {
   return true;
 }
 
-bool RenderPage::ScrollUp(const gfx::Graphics& gfx) {
+bool TextRenderer::ScrollUp(const gfx::Graphics& gfx) {
   // Note: We should scroll up if page shows end of buffer. Since,
   // the last line may not be fully visible.
 
@@ -1593,8 +1586,8 @@ bool RenderPage::ScrollUp(const gfx::Graphics& gfx) {
   auto const fMore = oFormatter.FormatLine(pLine);
   m_oFormatBuf.Append(pLine);
 
-  auto const cyRenderPage = m_oFormatBuf.height();
-  while (m_oFormatBuf.GetHeight() > cyRenderPage) {
+  auto const cyTextRenderer = m_oFormatBuf.height();
+  while (m_oFormatBuf.GetHeight() > cyTextRenderer) {
     auto const pFirst = m_oFormatBuf.ScrollUp();
     if (!pFirst)
       break;
@@ -1607,7 +1600,7 @@ bool RenderPage::ScrollUp(const gfx::Graphics& gfx) {
   return fMore;
 }
 
-bool RenderPage::ShouldFormat(const Rect& rc, const Selection& selection,
+bool TextRenderer::ShouldFormat(const Rect& rc, const Selection& selection,
                       bool fSelection) const {
   if (m_oFormatBuf.dirty())
     return true;
@@ -1630,7 +1623,7 @@ bool RenderPage::ShouldFormat(const Rect& rc, const Selection& selection,
   auto const lSelStart = selection.GetStart();
   auto const lSelEnd = selection.GetEnd();
 
-  // RenderPage shows caret instead of seleciton.
+  // TextRenderer shows caret instead of seleciton.
   if (m_lSelStart == m_lSelEnd) {
     if (lSelStart == lSelEnd) {
         #if DEBUG_DIRTY
@@ -1655,7 +1648,7 @@ bool RenderPage::ShouldFormat(const Rect& rc, const Selection& selection,
   }
 
   if (!fSelection) {
-    // RenderPage doesn't contain selection.
+    // TextRenderer doesn't contain selection.
     if (m_lSelEnd < m_lStart || m_lSelStart > m_lEnd) {
         if (lSelStart == lSelEnd) {
             #if DEBUG_DIRTY
@@ -1673,7 +1666,7 @@ bool RenderPage::ShouldFormat(const Rect& rc, const Selection& selection,
     }
   }
 
-  // RenderPage shows selection.
+  // TextRenderer shows selection.
   if (m_lSelStart != lSelStart) {
     #if DEBUG_DIRTY
         DEBUG_PRINTF("%p: Selection start is changed.\n", this);
@@ -1709,30 +1702,30 @@ bool RenderPage::ShouldFormat(const Rect& rc, const Selection& selection,
   return false;
 }
 
-bool RenderPage::ShouldRender() const {
+bool TextRenderer::ShouldRender() const {
   return m_oScreenBuf.dirty();
 }
 
 // text::BufferMutationObserver
-void RenderPage::DidDeleteAt(Posn offset, size_t) {
+void TextRenderer::DidDeleteAt(Posn offset, size_t) {
   m_oFormatBuf.SetBufferDirtyOffset(offset);
 }
 
-void RenderPage::DidInsertAt(Posn offset, size_t) {
+void TextRenderer::DidInsertAt(Posn offset, size_t) {
   m_oFormatBuf.SetBufferDirtyOffset(offset);
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// RenderPage::DisplayBuffer
+// TextRenderer::DisplayBuffer
 //
-RenderPage::DisplayBuffer::DisplayBuffer()
+TextRenderer::DisplayBuffer::DisplayBuffer()
     : dirty_(true),
       m_cy(0),
       m_hObjHeap(nullptr) {
 }
 
-RenderPage::DisplayBuffer::~DisplayBuffer() {
+TextRenderer::DisplayBuffer::~DisplayBuffer() {
   #if DEBUG_HEAP
     DEBUG_PRINTF("%p: heap=%p\n", this, m_hObjHeap);
   #endif // DEBUG_HEAP
@@ -1741,29 +1734,29 @@ RenderPage::DisplayBuffer::~DisplayBuffer() {
     ::HeapDestroy(m_hObjHeap);
 }
 
-void RenderPage::DisplayBuffer::Append(Line* pLine) {
+void TextRenderer::DisplayBuffer::Append(Line* pLine) {
   lines_.Append(pLine);
   m_cy += pLine->GetHeight();
 }
 
-void* RenderPage::DisplayBuffer::Alloc(size_t cb) {
+void* TextRenderer::DisplayBuffer::Alloc(size_t cb) {
   return ::HeapAlloc(m_hObjHeap, 0, cb);
 }
 
-void RenderPage::DisplayBuffer::Finish() {
+void TextRenderer::DisplayBuffer::Finish() {
   dirty_ = !GetFirst();
 }
 
-RenderPage::Line* RenderPage::DisplayBuffer::NewLine() {
+TextRenderer::Line* TextRenderer::DisplayBuffer::NewLine() {
   return new(m_hObjHeap) Line(m_hObjHeap);
 }
 
-void RenderPage::DisplayBuffer::Prepend(Line* line) {
+void TextRenderer::DisplayBuffer::Prepend(Line* line) {
   lines_.Prepend(line);
   m_cy += line->GetHeight();
 }
 
-HANDLE RenderPage::DisplayBuffer::Reset(const gfx::RectF& new_rect) {
+HANDLE TextRenderer::DisplayBuffer::Reset(const gfx::RectF& new_rect) {
   #if DEBUG_DISPBUF
     DEBUG_PRINTF("%p " DEBUG_RECTF_FORMAT " to " DEBUG_RECTF_FORMAT "\n",
         this, DEBUG_RECTF_ARG(rect()), DEBUG_RECTF_ARG(new_rect));
@@ -1788,7 +1781,7 @@ HANDLE RenderPage::DisplayBuffer::Reset(const gfx::RectF& new_rect) {
   return m_hObjHeap;
 }
 
-RenderPage::Line* RenderPage::DisplayBuffer::ScrollDown() {
+TextRenderer::Line* TextRenderer::DisplayBuffer::ScrollDown() {
   if (lines_.IsEmpty())
     return nullptr;
 
@@ -1798,7 +1791,7 @@ RenderPage::Line* RenderPage::DisplayBuffer::ScrollDown() {
   return line;
 }
 
-RenderPage::Line* RenderPage::DisplayBuffer::ScrollUp() {
+TextRenderer::Line* TextRenderer::DisplayBuffer::ScrollUp() {
   if (lines_.IsEmpty())
     return nullptr;
 
@@ -1808,7 +1801,7 @@ RenderPage::Line* RenderPage::DisplayBuffer::ScrollUp() {
   return line;
 }
 
-void RenderPage::DisplayBuffer::SetBufferDirtyOffset(Posn offset) {
+void TextRenderer::DisplayBuffer::SetBufferDirtyOffset(Posn offset) {
   if (dirty_)
     return;
   dirty_ = GetFirst()->GetStart() >= offset ||
@@ -1819,7 +1812,7 @@ void RenderPage::DisplayBuffer::SetBufferDirtyOffset(Posn offset) {
 //
 // Line
 //
-RenderPage::Line::Line(HANDLE hHeap)
+TextRenderer::Line::Line(HANDLE hHeap)
     : m_cwch(0),
       m_nHash(0),
       m_hObjHeap(hHeap),
@@ -1831,7 +1824,7 @@ RenderPage::Line::Line(HANDLE hHeap)
   ASSERT(m_hObjHeap);
 }
 
-RenderPage::Line::Line(const Line& other, HANDLE hHeap)
+TextRenderer::Line::Line(const Line& other, HANDLE hHeap)
     : m_cwch(other.m_cwch),
       m_nHash(other.m_nHash),
       m_hObjHeap(hHeap),
@@ -1845,7 +1838,7 @@ RenderPage::Line::Line(const Line& other, HANDLE hHeap)
   myCopyMemory(m_pwch, other.m_pwch, sizeof(char16) * m_cwch);
 }
 
-RenderPage::Line* RenderPage::Line::Copy(HANDLE hHeap) const {
+TextRenderer::Line* TextRenderer::Line::Copy(HANDLE hHeap) const {
   auto const pLine = new(hHeap) Line(*this, hHeap);
   ASSERT(pLine->m_pwch);
   for (const auto& cell : cells()) {
@@ -1855,13 +1848,13 @@ RenderPage::Line* RenderPage::Line::Copy(HANDLE hHeap) const {
   return pLine;
 }
 
-void RenderPage::Line::Discard() {
+void TextRenderer::Line::Discard() {
   if (m_pwch)
     ::HeapFree(m_hObjHeap, 0, m_pwch);
   ::HeapFree(m_hObjHeap, 0, this);
 }
 
-bool RenderPage::Line::Equal(const Line* other) const {
+bool TextRenderer::Line::Equal(const Line* other) const {
   if (Hash() != other->Hash())
     return false;
   auto other_it = other->cells().begin();
@@ -1877,7 +1870,7 @@ bool RenderPage::Line::Equal(const Line* other) const {
 
 // o Assign real pointer to m_pwch.
 // o Adjust line cell height.
-void RenderPage::Line::Fix(float iDescent) {
+void TextRenderer::Line::Fix(float iDescent) {
   auto const pwch = m_pwch;
   auto cx = 0.0f;
   for (auto& cell : cells()) {
@@ -1889,7 +1882,7 @@ void RenderPage::Line::Fix(float iDescent) {
   m_iWidth  = cx;
 }
 
-uint RenderPage::Line::Hash() const {
+uint TextRenderer::Line::Hash() const {
   if (m_nHash)
     return m_nHash;
   for (const auto& cell : cells()) {
@@ -1900,7 +1893,7 @@ uint RenderPage::Line::Hash() const {
   return m_nHash;
 }
 
-Posn RenderPage::Line::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
+Posn TextRenderer::Line::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
   auto xCell = 0.0f;
   auto lPosn = GetEnd() - 1;
   for (const auto& cell : cells()) {
@@ -1915,7 +1908,7 @@ Posn RenderPage::Line::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
   return lPosn;
 }
 
-void RenderPage::Line::Render(const gfx::Graphics& gfx,
+void TextRenderer::Line::Render(const gfx::Graphics& gfx,
                         const gfx::PointF& left_top) const {
   auto x = left_top.x;
   for (auto const& cell : cells()) {
@@ -1927,7 +1920,7 @@ void RenderPage::Line::Render(const gfx::Graphics& gfx,
   gfx.Flush();
 }
 
-void RenderPage::Line::Reset() {
+void TextRenderer::Line::Reset() {
   ASSERT(!GetNext());
   ASSERT(!GetPrev());
   cells_.DeleteAll();
@@ -1943,4 +1936,5 @@ void RenderPage::Line::Reset() {
   }
 }
 
-}  // namespace rendering
+}  // namespaec views
+

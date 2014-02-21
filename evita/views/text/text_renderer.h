@@ -1,42 +1,36 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - RenderPage object
-// listener/winapp/vi_page.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_RenderPage.h#1 $
-//
-#if !defined(INCLUDE_listener_winapp_visual_formatter_h)
-#define INCLUDE_listener_winapp_visual_formatter_h
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
+#if !defined(INCLUDE_evita_views_text_text_renderer_h)
+#define INCLUDE_evita_views_text_text_renderer_h
+
+#include "evita/gfx_base.h"
 #include "evita/vi_style.h"
 #include "evita/text/buffer_mutation_observer.h"
-#include "gfx_base.h"
 
 class Font;
 class Selection;
 class Style;
 
-namespace rendering {
+namespace views {
 
-namespace RenderPageInternal {
+namespace TextRendererInternal {
   class Cell;
   class DisplayBuffer;
   class Formatter;
-}; // RenderPageInternal
+}; // TextRendererInternal
 
 //////////////////////////////////////////////////////////////////////
 //
-// RenderPage
+// TextRenderer
 //
-class RenderPage : public text::BufferMutationObserver {
-  friend class RenderPageInternal::Formatter;
+class TextRenderer : public text::BufferMutationObserver {
+  friend class TextRendererInternal::Formatter;
 
   private: typedef common::win::Rect Rect;
 
-  private: typedef RenderPageInternal::Cell Cell;
+  private: typedef TextRendererInternal::Cell Cell;
   private: class DisplayBuffer;
   public: class Line;
 
@@ -82,9 +76,9 @@ class RenderPage : public text::BufferMutationObserver {
   public: class Line : public DoubleLinkedNode_<Line, DisplayBuffer>,
                        public ObjectInHeap {
     private: typedef DoubleLinkedList_<Cell, Line> Cells;
-    friend class RenderPage;
+    friend class TextRenderer;
     friend class DisplayBuffer;
-    friend class RenderPageInternal::Formatter;
+    friend class TextRendererInternal::Formatter;
 
     private: Cells cells_;
     private: uint m_cwch;
@@ -136,8 +130,8 @@ class RenderPage : public text::BufferMutationObserver {
   private: DisplayBuffer m_oFormatBuf;
   private: DisplayBuffer m_oScreenBuf;
 
-  public: RenderPage(text::Buffer* buffer);
-  public: ~RenderPage();
+  public: TextRenderer(text::Buffer* buffer);
+  public: ~TextRenderer();
 
   // [A]
   private: void allocHeap();
@@ -189,9 +183,9 @@ class RenderPage : public text::BufferMutationObserver {
   private: virtual void DidDeleteAt(Posn offset, size_t length) override;
   private: virtual void DidInsertAt(Posn offset, size_t length) override;
 
-  DISALLOW_COPY_AND_ASSIGN(RenderPage);
+  DISALLOW_COPY_AND_ASSIGN(TextRenderer);
 };
 
-}  // namespace rendering
+}  // namespace views
 
-#endif //!defined(INCLUDE_listener_winapp_visual_formatter_h)
+#endif //!defined(INCLUDE_evita_views_text_text_renderer_h)

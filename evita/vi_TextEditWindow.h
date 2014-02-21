@@ -20,7 +20,7 @@
 
 class Caret;
 class EditPane;
-class RenderPage;
+class TextRenderer;
 class Selection;
 
 namespace dom {
@@ -28,8 +28,8 @@ class Buffer;
 class TextWindow;
 }
 
-namespace rendering {
-class RenderPage;
+namespace views {
+class TextRenderer;
 }
 
 namespace ui {
@@ -49,10 +49,10 @@ class TextEditWindow
     : public views::ContentWindow {
   DECLARE_CASTABLE_CLASS(TextEditWindow, views::ContentWindow);
 
-  private: typedef views::ContentWindow ParentClass;
   private: typedef common::win::Point Point;
-  private: typedef rendering::RenderPage RenderPage;
   private: typedef text::Range Range;
+  private: typedef views::ContentWindow ParentClass;
+  private: typedef views::TextRenderer TextRenderer;
 
   private: struct ScrollBar {
     HWND m_hwnd;
@@ -98,7 +98,7 @@ class TextEditWindow
   private: Posn m_lImeEnd;
   #endif // SUPPORT_IME
   private: Range* m_pViewRange;
-  private: std::unique_ptr<RenderPage> m_pRenderPage;
+  private: std::unique_ptr<TextRenderer> text_renderer_;
 
   // ctor/dtor
   public: explicit TextEditWindow(const dom::TextWindow& window);

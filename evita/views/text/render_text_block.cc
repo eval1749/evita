@@ -9,16 +9,16 @@
 namespace views {
 namespace rendering {
 
-DisplayBuffer::DisplayBuffer()
+TextBlock::TextBlock()
     : dirty_(true),
       dirty_line_point_(true),
       m_cy(0) {
 }
 
-DisplayBuffer::~DisplayBuffer() {
+TextBlock::~TextBlock() {
 }
 
-void DisplayBuffer::Append(TextLine* pLine) {
+void TextBlock::Append(TextLine* pLine) {
   DCHECK_LT(pLine->GetHeight(), 100.0f);
   if (!dirty_line_point_) {
     auto const last_line = lines_.back();
@@ -28,7 +28,7 @@ void DisplayBuffer::Append(TextLine* pLine) {
   m_cy += pLine->GetHeight();
 }
 
-void DisplayBuffer::EnsureLinePoints() {
+void TextBlock::EnsureLinePoints() {
   if (!dirty_line_point_)
     return;
   auto line_top = top();
@@ -40,19 +40,19 @@ void DisplayBuffer::EnsureLinePoints() {
   dirty_line_point_ = false;
 }
 
-void DisplayBuffer::Finish() {
+void TextBlock::Finish() {
   dirty_ = lines_.empty();
   dirty_line_point_ = dirty_;
 }
 
-void DisplayBuffer::Prepend(TextLine* line) {
+void TextBlock::Prepend(TextLine* line) {
   DCHECK_LT(line->GetHeight(), 100.0f);
   lines_.push_front(line);
   m_cy += line->GetHeight();
   dirty_line_point_ = true;
 }
 
-void DisplayBuffer::Reset(const gfx::RectF& new_rect) {
+void TextBlock::Reset(const gfx::RectF& new_rect) {
   #if DEBUG_DISPBUF
     DEBUG_PRINTF("%p " DEBUG_RECTF_FORMAT " to " DEBUG_RECTF_FORMAT "\n",
         this, DEBUG_RECTF_ARG(rect()), DEBUG_RECTF_ARG(new_rect));
@@ -69,7 +69,7 @@ void DisplayBuffer::Reset(const gfx::RectF& new_rect) {
   rect_ = new_rect;
 }
 
-TextLine* DisplayBuffer::ScrollDown() {
+TextLine* TextBlock::ScrollDown() {
   if (lines_.empty())
     return nullptr;
 
@@ -79,7 +79,7 @@ TextLine* DisplayBuffer::ScrollDown() {
   return line;
 }
 
-TextLine* DisplayBuffer::ScrollUp() {
+TextLine* TextBlock::ScrollUp() {
   if (lines_.empty())
     return nullptr;
 
@@ -90,7 +90,7 @@ TextLine* DisplayBuffer::ScrollUp() {
   return line;
 }
 
-void DisplayBuffer::SetBufferDirtyOffset(Posn offset) {
+void TextBlock::SetBufferDirtyOffset(Posn offset) {
   if (dirty_)
     return;
   dirty_ = GetFirst()->GetStart() >= offset ||

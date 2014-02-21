@@ -18,7 +18,7 @@ namespace views {
 
 namespace rendering {
   class Cell;
-  class DisplayBuffer;
+  class TextBlock;
   class Formatter;
   class TextLine;
 };
@@ -32,7 +32,7 @@ class TextRenderer : public text::BufferMutationObserver {
 
   private: typedef common::win::Rect Rect;
   private: typedef rendering::Cell Cell;
-  public: typedef rendering::DisplayBuffer DisplayBuffer;
+  public: typedef rendering::TextBlock TextBlock;
   public: typedef rendering::TextLine Line;
 
   // Buffer
@@ -49,8 +49,8 @@ class TextRenderer : public text::BufferMutationObserver {
   private: Posn m_lStart;
   private: Posn m_lEnd;
 
-  private: DisplayBuffer m_oFormatBuf;
-  private: DisplayBuffer m_oScreenBuf;
+  private: TextBlock m_oFormatBuf;
+  private: TextBlock m_oScreenBuf;
 
   public: TextRenderer(text::Buffer* buffer);
   public: ~TextRenderer();

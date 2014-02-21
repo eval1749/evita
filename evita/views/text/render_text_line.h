@@ -17,12 +17,12 @@ class TextRenderer;
 namespace rendering {
 
 class Cell;
-class DisplayBuffer;
+class TextBlock;
 class Formatter;
 
 class TextLine {
   friend class TextRenderer;
-  friend class DisplayBuffer;
+  friend class TextBlock;
   friend class rendering::Formatter;
 
   private: std::vector<Cell*> cells_;

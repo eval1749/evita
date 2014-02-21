@@ -620,18 +620,18 @@ namespace {
 // LineCopier
 //
 class LineCopier {
-  private: typedef TextRenderer::DisplayBuffer DisplayBuffer;
+  private: typedef TextRenderer::TextBlock TextBlock;
   private: typedef TextLine Line;
   private: typedef std::list<Line*>::const_iterator LineIterator;
 
-  private: const DisplayBuffer* destination_;
+  private: const TextBlock* destination_;
   private: const gfx::Graphics& gfx_;
-  private: const DisplayBuffer* source_;
+  private: const TextBlock* source_;
   private: const std::unique_ptr<gfx::Bitmap> screen_bitmap_;
 
   public: LineCopier(const gfx::Graphics& gfx,
-                     const DisplayBuffer* destination,
-                     const DisplayBuffer* source)
+                     const TextBlock* destination,
+                     const TextBlock* source)
       : gfx_(gfx), destination_(destination), source_(source),
         screen_bitmap_(CreateBitmap(gfx, destination->rect(), source->rect())) {
   }

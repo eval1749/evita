@@ -15,16 +15,16 @@ namespace rendering {
 
 class TextLine;
 
-class DisplayBuffer {
+class TextBlock {
   private: bool dirty_;
   private: bool dirty_line_point_;
   private: float m_cy;
   private: std::list<TextLine*> lines_;
   private: gfx::RectF rect_;
 
-  public: DisplayBuffer(const DisplayBuffer& other);
-  public: DisplayBuffer();
-  public: ~DisplayBuffer();
+  public: TextBlock(const TextBlock& other);
+  public: TextBlock();
+  public: ~TextBlock();
 
   public: float bottom() const { return rect_.bottom; }
   public: bool dirty() const { return dirty_; }

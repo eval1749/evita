@@ -36,6 +36,7 @@
 #include "evita/ui/events/event.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/icon_cache.h"
+#include "evita/views/text/render_selection.h"
 #include "evita/views/text/render_text_line.h"
 #include "evita/views/text/text_renderer.h"
 #include "evita/vi_Caret.h"
@@ -44,6 +45,42 @@
 #include "evita/vi_Selection.h"
 
 extern HWND g_hwndActiveDialog;
+
+namespace {
+class RenderSelection : public views::rendering::Selection {
+  public: RenderSelection(::Selection* selection, bool is_active);
+  public: explicit RenderSelection(::Selection* selection);
+  public: ~RenderSelection() = default;
+};
+
+RenderSelection::RenderSelection(::Selection* selection, bool is_active) {
+  if (is_active) {
+    // EvEdit 1.0's highlight color
+    //selection_->SetColor(Color(0, 0, 0));
+    //selection_->SetBackground(Color(0xCC, 0xCC, 0xFF));
+
+    // We should not use GetSysColor. If we want to use here
+    // default background must be obtained from GetSysColor.
+    //selection_->SetColor(::GetSysColor(COLOR_HIGHLIGHTTEXT));
+    //selection_->SetBackground(::GetSysColor(COLOR_HIGHLIGHT));
+
+    // We use Vista's highlight color.
+    color = Color(255, 255, 255);
+    bgcolor = Color(51, 153, 255);
+  } else {
+    color = Color(67, 78, 84);
+    bgcolor = Color(191, 205, 219);
+  }
+
+  start = selection->GetStart();
+  end = selection->GetEnd();
+}
+
+RenderSelection::RenderSelection(::Selection* selection)
+    : RenderSelection(selection, false) {
+}
+
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -82,11 +119,24 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
 TextEditWindow::~TextEditWindow() {
 }
 
+bool TextEditWindow::is_selection_active() const {
+  if (has_focus())
+    return true;
+
+  if (!g_hwndActiveDialog)
+    return false;
+
+  auto const edit_pane = views::FrameList::instance()->active_frame()->
+    GetActivePane()->as<EditPane>();
+  return edit_pane && edit_pane->GetActiveWindow() == this;
+}
+
 Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
   if (xGoal < 0)
     return lGoal;
 
-  if (!text_renderer_->ShouldFormat(rect(), *selection_)) {
+  RenderSelection selection(selection_);
+  if (!text_renderer_->ShouldFormat(rect(), selection)) {
     if (auto const line = text_renderer_->FindLine(lGoal))
       return line->MapXToPosn(*m_gfx, xGoal);
   }
@@ -95,10 +145,10 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
   // TODO(yosi) We should not use another object for formatting line instead of
   // TextRenderer.
   TextRenderer oTextRenderer(text_renderer_->GetBuffer());
+  oTextRenderer.Prepare(selection);
   gfx::RectF page_rect(rect());
   for (;;) {
-    auto const pLine = oTextRenderer.FormatLine(*m_gfx, page_rect,
-                                                *selection_, lStart);
+    auto const pLine = oTextRenderer.FormatLine(*m_gfx, page_rect, lStart);
     auto const lEnd = pLine->GetEnd();
     if (lGoal < lEnd)
       return pLine->MapXToPosn(*m_gfx, xGoal);
@@ -215,7 +265,8 @@ void TextEditWindow::DidShow() {
 
 Posn TextEditWindow::EndOfLine(Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
-  if (!text_renderer_->ShouldFormat(rect(), *selection_)) {
+  RenderSelection selection(selection_);
+  if (!text_renderer_->ShouldFormat(rect(), selection)) {
     auto const pLine = text_renderer_->FindLine(lPosn);
     if (pLine)
       return pLine->GetEnd() - 1;
@@ -233,12 +284,13 @@ Posn TextEditWindow::endOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
 
   // TODO(yosi) We should not use another object for formatting line instead of
   // TextRenderer.
+  RenderSelection selection(selection_);
   TextRenderer oTextRenderer(text_renderer_->GetBuffer());
+  oTextRenderer.Prepare(selection);
   gfx::RectF page_rect(rect());
   auto lStart = selection_->GetBuffer()->ComputeStartOfLine(lPosn);
   for (;;) {
-    auto const pLine = oTextRenderer.FormatLine(gfx, page_rect, *selection_,
-                                                lStart);
+    auto const pLine = oTextRenderer.FormatLine(gfx, page_rect, lStart);
     lStart = pLine->GetEnd();
     if (lPosn < lStart)
       return lStart - 1;
@@ -246,7 +298,7 @@ Posn TextEditWindow::endOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
 }
 
 void TextEditWindow::format(const gfx::Graphics& gfx, Posn lStart) {
-  text_renderer_->Format(gfx, gfx::RectF(rect()), *selection_, lStart);
+  text_renderer_->Format(gfx, gfx::RectF(rect()), lStart);
 }
 
 Buffer* TextEditWindow::GetBuffer() const {
@@ -450,52 +502,32 @@ void TextEditWindow::onVScroll(uint nCode) {
 }
 
 void TextEditWindow::Redraw() {
-  auto fSelectionIsActive = has_focus();
-
-  if (g_hwndActiveDialog) {
-    auto const edit_pane = views::FrameList::instance()->active_frame()->
-        GetActivePane()->as<EditPane>();
-    if (edit_pane)
-      fSelectionIsActive = edit_pane->GetActiveWindow() == this;
-  }
+  auto const selection_is_active = is_selection_active();
 
   UI_ASSERT_DOM_LOCKED();
+
+  RenderSelection selection (selection_, selection_is_active);
 
   auto const lSelStart = selection_->GetStart();
   auto const lSelEnd = selection_->GetEnd();
 
   Posn lCaretPosn;
-  if (fSelectionIsActive) {
+  if (selection_is_active) {
     lCaretPosn = selection_->IsStartActive() ? lSelStart : lSelEnd;
-
-    // EvEdit 1.0's highlight color
-    //selection_->SetColor(Color(0, 0, 0));
-    //selection_->SetBackground(Color(0xCC, 0xCC, 0xFF));
-
-    // We should not use GetSysColor. If we want to use here
-    // default background must be obtained from GetSysColor.
-    //selection_->SetColor(::GetSysColor(COLOR_HIGHLIGHTTEXT));
-    //selection_->SetBackground(::GetSysColor(COLOR_HIGHLIGHT));
-
-    // We use Vista's highlight color.
-    selection_->SetColor(Color(255, 255, 255));
-    selection_->SetBackground(Color(51, 153, 255));
   } else {
     lCaretPosn = m_lCaretPosn == -1 ? lSelStart : m_lCaretPosn;
 
     Posn lEnd = GetBuffer()->GetEnd();
     if (lSelStart == lEnd && lSelEnd == lEnd)
       lCaretPosn = lEnd;
-
-     selection_->SetColor(Color(67, 78, 84));
-     selection_->SetBackground(Color(191, 205, 219));
   }
 
   DCHECK_GE(lCaretPosn, 0);
 
   {
     auto const lStart = m_pViewRange->GetStart();
-    if (text_renderer_->ShouldFormat(rect(), *selection_, fSelectionIsActive)) {
+    if (text_renderer_->ShouldFormat(rect(), selection, selection_is_active)) {
+      text_renderer_->Prepare(selection);
       format(*m_gfx, startOfLineAux(*m_gfx, lStart));
 
       if (m_lCaretPosn != lCaretPosn) {
@@ -504,10 +536,12 @@ void TextEditWindow::Redraw() {
         m_lCaretPosn = lCaretPosn;
       }
     } else if (m_lCaretPosn != lCaretPosn) {
-        text_renderer_->ScrollToPosn(*m_gfx, lCaretPosn);
-        m_lCaretPosn = lCaretPosn;
+      text_renderer_->Prepare(selection);
+      text_renderer_->ScrollToPosn(*m_gfx, lCaretPosn);
+      m_lCaretPosn = lCaretPosn;
     } else if (text_renderer_->GetStart() != lStart) {
-        format(*m_gfx, startOfLineAux(*m_gfx, lStart));
+      text_renderer_->Prepare(selection);
+      format(*m_gfx, startOfLineAux(*m_gfx, lStart));
     } else if (!text_renderer_->ShouldRender()) {
       // TextRenderer is clean.
       if (!m_fImeTarget)
@@ -625,7 +659,8 @@ Posn TextEditWindow::StartOfLine(Posn lPosn) {
 // Description:
 // Returns start position of window line of specified position.
 Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
-  if (!text_renderer_->ShouldFormat(rect(), *selection_)) {
+  RenderSelection selection(selection_);
+  if (!text_renderer_->ShouldFormat(rect(), selection)) {
     auto const pLine = text_renderer_->FindLine(lPosn);
     if (pLine)
       return pLine->GetStart();
@@ -638,10 +673,10 @@ Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
   // TODO(yosi) We should not use another object for formatting line instead of
   // TextRenderer.
   TextRenderer oTextRenderer(text_renderer_->GetBuffer());
+  oTextRenderer.Prepare(selection);
   gfx::RectF page_rect(rect());
   for (;;) {
-    auto const pLine = oTextRenderer.FormatLine(gfx, page_rect, *selection_,
-                                        lStart);
+    auto const pLine = oTextRenderer.FormatLine(gfx, page_rect, lStart);
     auto const lEnd = pLine->GetEnd();
     if (lPosn < lEnd)
       return pLine->GetStart();
@@ -651,9 +686,10 @@ Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
 
 void TextEditWindow::updateScreen() {
   UI_ASSERT_DOM_LOCKED();
-  if (!text_renderer_->ShouldFormat(rect(), *selection_))
+  RenderSelection selection(selection_);
+  if (!text_renderer_->ShouldFormat(rect(), selection))
     return;
-
+  text_renderer_->Prepare(selection);
   Posn lStart = m_pViewRange->GetStart();
   lStart = startOfLineAux(*m_gfx, lStart);
   format(*m_gfx, lStart);

@@ -104,6 +104,8 @@ class TextEditWindow
   public: explicit TextEditWindow(const dom::TextWindow& window);
   public: virtual ~TextEditWindow();
 
+  private: bool is_selection_active() const;
+
   // [C]
   public: Count ComputeMotion(Unit, Count, const gfx::PointF&, Posn*);
   private: Posn computeGoalX(float, Posn);

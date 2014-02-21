@@ -9,16 +9,15 @@
 #include "evita/views/text/text_renderer.h"
 
 #include <algorithm>
+#include <list>
+#include <memory>
 #include <utility>
-#include <vector>
 
-#include "base/strings/string16.h"
 #include "evita/gfx_base.h"
 #include "evita/dom/buffer.h"
 #include "evita/views/text/render_cell.h"
 #include "evita/views/text/render_text_line.h"
 #include "evita/views/text/text_formatter.h"
-#include "evita/vi_Selection.h"
 
 namespace views {
 namespace {
@@ -129,9 +128,8 @@ TextLine* TextRenderer::FindLine(Posn lPosn) const {
 }
 
 void TextRenderer::Format(const gfx::Graphics& gfx, gfx::RectF page_rect,
-                          const ::Selection& selection, Posn lStart) {
+                          Posn lStart) {
   ASSERT(!page_rect.is_empty());
-  Prepare(selection);
   formatAux(gfx, page_rect, lStart);
 }
 
@@ -147,10 +145,7 @@ void TextRenderer::formatAux(const gfx::Graphics& gfx, gfx::RectF page_rect,
 }
 
 TextLine* TextRenderer::FormatLine(const gfx::Graphics& gfx,
-                             const gfx::RectF& page_rect,
-                             const ::Selection& selection,
-                             Posn lStart) {
-  Prepare(selection);
+                             const gfx::RectF& page_rect, Posn lStart) {
   m_oFormatBuf.Reset(page_rect);
 
   TextFormatter oFormatter(gfx, &m_oFormatBuf, m_pBuffer, lStart, selection_);
@@ -245,11 +240,8 @@ int TextRenderer::pageLines(const gfx::Graphics& gfx) const {
   return static_cast<int>(m_oFormatBuf.height() / height);
 }
 
-void TextRenderer::Prepare(const ::Selection& selection) {
-  selection_.start = selection.GetStart();
-  selection_.end = selection.GetEnd();
-  selection_.color = selection.GetColor();
-  selection_.bgcolor = selection.GetBackground();
+void TextRenderer::Prepare(const Selection& selection) {
+  selection_ = selection;
   m_crBackground = m_pBuffer->GetDefaultStyle()->GetBackground();
 }
 
@@ -559,7 +551,7 @@ bool TextRenderer::ScrollUp(const gfx::Graphics& gfx) {
   return fMore;
 }
 
-bool TextRenderer::ShouldFormat(const Rect& rc, const ::Selection& selection,
+bool TextRenderer::ShouldFormat(const Rect& rc, const Selection& selection,
                       bool fSelection) const {
   if (m_oFormatBuf.dirty())
     return true;
@@ -579,8 +571,8 @@ bool TextRenderer::ShouldFormat(const Rect& rc, const ::Selection& selection,
   }
 
   // Buffer
-  auto const lSelStart = selection.GetStart();
-  auto const lSelEnd = selection.GetEnd();
+  auto const lSelStart = selection.start;
+  auto const lSelEnd = selection.end;
 
   // TextRenderer shows caret instead of seleciton.
   if (selection_.start == selection_.end) {
@@ -640,14 +632,14 @@ bool TextRenderer::ShouldFormat(const Rect& rc, const ::Selection& selection,
     return true;
   }
 
-  if (selection_.color != selection.GetColor()) {
+  if (selection_.color != selection.color) {
     #if DEBUG_DIRTY
         DEBUG_PRINTF("%p: SelColor is changed.\n", this);
     #endif // DEBUG_DIRTY
     return true;
   }
 
-  if (selection_.bgcolor  != selection.GetBackground()) {
+  if (selection_.bgcolor != selection.bgcolor) {
     #if DEBUG_DIRTY
         DEBUG_PRINTF("%p: SelBackground is changed.\n", this);
     #endif // DEBUG_DIRTY

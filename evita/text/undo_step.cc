@@ -88,11 +88,8 @@ BeginUndoStep::~BeginUndoStep() {
 }
 
 // UndoStep
-bool BeginUndoStep::TryMerge(const Buffer*, const UndoStep* other) {
-  auto const end_step = other->as<EndUndoStep>();
-  if (!end_step)
-    return false;
-  return name() == end_step->name();
+bool BeginUndoStep::TryMerge(const Buffer*, const UndoStep*) {
+  return false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -181,11 +178,8 @@ EndUndoStep::~EndUndoStep() {
 }
 
 // UndoStep
-bool EndUndoStep::TryMerge(const Buffer*, const UndoStep* other) {
-  auto const begin_step = other->as<BeginUndoStep>();
-  if (!begin_step)
-    return false;
-  return name() == begin_step->name();
+bool EndUndoStep::TryMerge(const Buffer*, const UndoStep*) {
+  return false;
 }
 
 //////////////////////////////////////////////////////////////////////

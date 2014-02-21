@@ -27,15 +27,14 @@
    */
   Editor.bindKey(Window, 'Ctrl+N', function(arg) {
     var editorWindow = this.parent;
-    if (arg !== undefined) {
+    if (arguments.length >= 1) {
       windows.newTextWindow(editorWindow, new Document('untitled.txt'));
       return;
     }
 
     Editor.getFilenameForSave(this, this.selection.document.filename)
         .then(function(filename) {
-          var document = new Document(FilePath.basename(filename));
-          document.filename = filename;
+          var document = Document.open(filename);
           windows.newTextWindow(editorWindow, document)
         });
   });
@@ -125,14 +124,15 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+Shift+N', function(arg) {
-    if (arg !== undefined) {
+    if (arguments.length >= 1) {
       windows.newEditorWindow(new Document('untitled.txt'));
       return;
     }
 
     Editor.getFilenameForSave(this, this.selection.document.filename)
         .then(function(filename) {
-          windows.newEditorWindow(new Document(filename));
+          var document = Document.open(filename);
+          windows.newEditorWindow(document);
         });
   });
 

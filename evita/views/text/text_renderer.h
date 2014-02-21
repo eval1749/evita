@@ -32,7 +32,8 @@ class TextRenderer : public text::BufferMutationObserver {
 
   private: typedef rendering::Cell Cell;
   private: class DisplayBuffer;
-  public: class Line;
+  public: class TextLine;
+  public: typedef TextLine Line;
 
   private: class DisplayBuffer {
     private: typedef DoubleLinkedList_<Line, DisplayBuffer> Lines;
@@ -72,8 +73,8 @@ class TextRenderer : public text::BufferMutationObserver {
     public: void SetBufferDirtyOffset(Posn offset);
   };
 
-  // Line
-  public: class Line : public DoubleLinkedNode_<Line, DisplayBuffer>,
+  // TextLine
+  public: class TextLine : public DoubleLinkedNode_<TextLine, DisplayBuffer>,
                        public ObjectInHeap {
     private: typedef DoubleLinkedList_<Cell, Line> Cells;
     friend class TextRenderer;
@@ -90,16 +91,16 @@ class TextRenderer : public text::BufferMutationObserver {
     private: Posn m_lEnd;
     private: char16* m_pwch;
 
-    public: explicit Line(HANDLE hHeap);
-    private: Line(const Line& other, HANDLE hHeap);
-    private: ~Line() {}
+    public: explicit TextLine(HANDLE hHeap);
+    private: TextLine(const TextLine& other, HANDLE hHeap);
+    private: ~TextLine() {}
 
     public: const Cells& cells() const { return cells_; }
     public: Cells& cells() { return cells_; }
 
     public: void Discard();
-    public: Line* Copy(HANDLE hHeap) const;
-    public: bool Equal(const Line*) const;
+    public: TextLine* Copy(HANDLE hHeap) const;
+    public: bool Equal(const TextLine*) const;
     public: void Fix(float dscent);
     public: Cell* GetCell() const { return cells_.GetFirst(); }
     public: Posn GetEnd() const { return m_lEnd; }

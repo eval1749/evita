@@ -92,7 +92,7 @@ enum CellKind {
 // Cell
 //
 class Cell
-    : public DoubleLinkedNode_<Cell, TextRenderer::Line>,
+    : public DoubleLinkedNode_<Cell, TextRenderer::TextLine>,
       public ObjectInHeap {
   public: float m_cx;
   public: float m_cy;
@@ -737,7 +737,7 @@ class Formatter {
   }
 
   public: void Format();
-  public: bool FormatLine(TextRenderer::Line*);
+  public: bool FormatLine(TextRenderer::TextLine*);
 
   private: Cell* formatChar(Cell*, float x, char16);
   private: Cell* formatMarker(MarkerCell::Kind);
@@ -755,7 +755,7 @@ void Formatter::Format() {
 
   auto const cyTextRenderer = m_pTextRenderer->m_oFormatBuf.height();
   for (;;) {
-    TextRenderer::Line* pLine = m_pTextRenderer->m_oFormatBuf.NewLine();
+    TextRenderer::TextLine* pLine = m_pTextRenderer->m_oFormatBuf.NewLine();
 
     bool fMore = FormatLine(pLine);
     ASSERT(pLine->m_iHeight >= 1);
@@ -780,7 +780,7 @@ void Formatter::Format() {
 }
 
 // Returns true if more contents is avaialble, otherwise returns false.
-bool Formatter::FormatLine(TextRenderer::Line* pLine) {
+bool Formatter::FormatLine(TextRenderer::TextLine* pLine) {
   auto fMoreContents = true;
   pLine->m_lStart = m_oEnumCI.GetPosn();
   m_oCharSink.Reset();
@@ -1053,7 +1053,7 @@ void TextRenderer::fillRight(const gfx::Graphics& gfx, const Line* pLine,
   }
 }
 
-TextRenderer::Line* TextRenderer::FindLine(Posn lPosn) const {
+TextRenderer::TextLine* TextRenderer::FindLine(Posn lPosn) const {
   if (lPosn < m_lStart || lPosn > m_lEnd)
     return nullptr;
 
@@ -1084,7 +1084,7 @@ void TextRenderer::formatAux(const gfx::Graphics& gfx, gfx::RectF page_rect,
   m_lEnd = GetLastLine()->GetEnd();
 }
 
-TextRenderer::Line* TextRenderer::FormatLine(const gfx::Graphics& gfx,
+TextRenderer::TextLine* TextRenderer::FormatLine(const gfx::Graphics& gfx,
                              const gfx::RectF& page_rect,
                              const Selection& selection,
                              Posn lStart) {
@@ -1229,7 +1229,7 @@ namespace {
 // LineWithTop
 //
 class LineWithTop {
-  private: typedef TextRenderer::Line Line;
+  private: typedef TextRenderer::TextLine Line;
 
   private: const Line* line_;
   private: float line_top_;
@@ -1300,7 +1300,7 @@ class LineWithTop {
 // LineCopier
 //
 class LineCopier {
-  private: typedef TextRenderer::Line Line;
+  private: typedef TextRenderer::TextLine Line;
 
   private: const gfx::RectF rect_;
   private: const gfx::Graphics& gfx_;
@@ -1747,7 +1747,7 @@ void TextRenderer::DisplayBuffer::Finish() {
   dirty_ = !GetFirst();
 }
 
-TextRenderer::Line* TextRenderer::DisplayBuffer::NewLine() {
+TextRenderer::TextLine* TextRenderer::DisplayBuffer::NewLine() {
   return new(m_hObjHeap) Line(m_hObjHeap);
 }
 
@@ -1781,7 +1781,7 @@ HANDLE TextRenderer::DisplayBuffer::Reset(const gfx::RectF& new_rect) {
   return m_hObjHeap;
 }
 
-TextRenderer::Line* TextRenderer::DisplayBuffer::ScrollDown() {
+TextRenderer::TextLine* TextRenderer::DisplayBuffer::ScrollDown() {
   if (lines_.IsEmpty())
     return nullptr;
 
@@ -1791,7 +1791,7 @@ TextRenderer::Line* TextRenderer::DisplayBuffer::ScrollDown() {
   return line;
 }
 
-TextRenderer::Line* TextRenderer::DisplayBuffer::ScrollUp() {
+TextRenderer::TextLine* TextRenderer::DisplayBuffer::ScrollUp() {
   if (lines_.IsEmpty())
     return nullptr;
 
@@ -1812,7 +1812,7 @@ void TextRenderer::DisplayBuffer::SetBufferDirtyOffset(Posn offset) {
 //
 // Line
 //
-TextRenderer::Line::Line(HANDLE hHeap)
+TextRenderer::TextLine::TextLine(HANDLE hHeap)
     : m_cwch(0),
       m_nHash(0),
       m_hObjHeap(hHeap),
@@ -1824,7 +1824,7 @@ TextRenderer::Line::Line(HANDLE hHeap)
   ASSERT(m_hObjHeap);
 }
 
-TextRenderer::Line::Line(const Line& other, HANDLE hHeap)
+TextRenderer::TextLine::TextLine(const Line& other, HANDLE hHeap)
     : m_cwch(other.m_cwch),
       m_nHash(other.m_nHash),
       m_hObjHeap(hHeap),
@@ -1838,7 +1838,7 @@ TextRenderer::Line::Line(const Line& other, HANDLE hHeap)
   myCopyMemory(m_pwch, other.m_pwch, sizeof(char16) * m_cwch);
 }
 
-TextRenderer::Line* TextRenderer::Line::Copy(HANDLE hHeap) const {
+TextRenderer::TextLine* TextRenderer::TextLine::Copy(HANDLE hHeap) const {
   auto const pLine = new(hHeap) Line(*this, hHeap);
   ASSERT(pLine->m_pwch);
   for (const auto& cell : cells()) {
@@ -1848,13 +1848,13 @@ TextRenderer::Line* TextRenderer::Line::Copy(HANDLE hHeap) const {
   return pLine;
 }
 
-void TextRenderer::Line::Discard() {
+void TextRenderer::TextLine::Discard() {
   if (m_pwch)
     ::HeapFree(m_hObjHeap, 0, m_pwch);
   ::HeapFree(m_hObjHeap, 0, this);
 }
 
-bool TextRenderer::Line::Equal(const Line* other) const {
+bool TextRenderer::TextLine::Equal(const Line* other) const {
   if (Hash() != other->Hash())
     return false;
   auto other_it = other->cells().begin();
@@ -1870,7 +1870,7 @@ bool TextRenderer::Line::Equal(const Line* other) const {
 
 // o Assign real pointer to m_pwch.
 // o Adjust line cell height.
-void TextRenderer::Line::Fix(float iDescent) {
+void TextRenderer::TextLine::Fix(float iDescent) {
   auto const pwch = m_pwch;
   auto cx = 0.0f;
   for (auto& cell : cells()) {
@@ -1882,7 +1882,7 @@ void TextRenderer::Line::Fix(float iDescent) {
   m_iWidth  = cx;
 }
 
-uint TextRenderer::Line::Hash() const {
+uint TextRenderer::TextLine::Hash() const {
   if (m_nHash)
     return m_nHash;
   for (const auto& cell : cells()) {
@@ -1893,7 +1893,7 @@ uint TextRenderer::Line::Hash() const {
   return m_nHash;
 }
 
-Posn TextRenderer::Line::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
+Posn TextRenderer::TextLine::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
   auto xCell = 0.0f;
   auto lPosn = GetEnd() - 1;
   for (const auto& cell : cells()) {
@@ -1908,7 +1908,7 @@ Posn TextRenderer::Line::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const
   return lPosn;
 }
 
-void TextRenderer::Line::Render(const gfx::Graphics& gfx,
+void TextRenderer::TextLine::Render(const gfx::Graphics& gfx,
                         const gfx::PointF& left_top) const {
   auto x = left_top.x;
   for (auto const& cell : cells()) {
@@ -1920,7 +1920,7 @@ void TextRenderer::Line::Render(const gfx::Graphics& gfx,
   gfx.Flush();
 }
 
-void TextRenderer::Line::Reset() {
+void TextRenderer::TextLine::Reset() {
   ASSERT(!GetNext());
   ASSERT(!GetPrev());
   cells_.DeleteAll();

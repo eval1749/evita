@@ -17,6 +17,7 @@
 #include "evita/dom/buffer.h"
 #include "evita/text/interval.h"
 #include "evita/views/text/render_cell.h"
+#include "evita/views/text/render_text_line.h"
 #include "evita/vi_Selection.h"
 
 namespace views {
@@ -154,7 +155,7 @@ class Formatter {
   public: ~Formatter();
 
   public: void Format();
-  public: bool FormatLine(TextRenderer::TextLine*);
+  public: bool FormatLine(TextLine* line);
 
   private: Cell* formatChar(Cell*, float x, char16);
   private: Cell* formatMarker(MarkerCell::Kind);
@@ -175,7 +176,7 @@ void Formatter::Format() {
 
   auto const cyTextRenderer = m_pTextRenderer->m_oFormatBuf.height();
   for (;;) {
-    auto const pLine = new TextRenderer::TextLine();
+    auto const pLine = new TextLine();
 
     bool fMore = FormatLine(pLine);
     DCHECK_GT(pLine->rect().height(), 0.0f);
@@ -200,7 +201,7 @@ void Formatter::Format() {
 }
 
 // Returns true if more contents is avaialble, otherwise returns false.
-bool Formatter::FormatLine(TextRenderer::TextLine* pLine) {
+bool Formatter::FormatLine(TextLine* pLine) {
   auto fMoreContents = true;
   pLine->m_lStart = m_oEnumCI.GetPosn();
 
@@ -463,7 +464,7 @@ void TextRenderer::fillRight(const gfx::Graphics& gfx,
   fillRect(gfx, rc, ColorToColorF(m_crBackground));
 }
 
-TextRenderer::TextLine* TextRenderer::FindLine(Posn lPosn) const {
+TextLine* TextRenderer::FindLine(Posn lPosn) const {
   if (lPosn < m_lStart || lPosn > m_lEnd)
     return nullptr;
 
@@ -494,7 +495,7 @@ void TextRenderer::formatAux(const gfx::Graphics& gfx, gfx::RectF page_rect,
   m_lEnd = GetLastLine()->GetEnd();
 }
 
-TextRenderer::TextLine* TextRenderer::FormatLine(const gfx::Graphics& gfx,
+TextLine* TextRenderer::FormatLine(const gfx::Graphics& gfx,
                              const gfx::RectF& page_rect,
                              const Selection& selection,
                              Posn lStart) {
@@ -620,7 +621,7 @@ namespace {
 //
 class LineCopier {
   private: typedef TextRenderer::DisplayBuffer DisplayBuffer;
-  private: typedef TextRenderer::TextLine Line;
+  private: typedef TextLine Line;
   private: typedef std::list<Line*>::const_iterator LineIterator;
 
   private: const DisplayBuffer* destination_;
@@ -1030,216 +1031,6 @@ void TextRenderer::DidDeleteAt(Posn offset, size_t) {
 
 void TextRenderer::DidInsertAt(Posn offset, size_t) {
   m_oFormatBuf.SetBufferDirtyOffset(offset);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// TextRenderer::DisplayBuffer
-//
-TextRenderer::DisplayBuffer::DisplayBuffer()
-    : dirty_(true),
-      dirty_line_point_(true),
-      m_cy(0) {
-}
-
-TextRenderer::DisplayBuffer::~DisplayBuffer() {
-}
-
-void TextRenderer::DisplayBuffer::Append(Line* pLine) {
-  DCHECK_LT(pLine->GetHeight(), 100.0f);
-  if (!dirty_line_point_) {
-    auto const last_line = lines_.back();
-    pLine->set_left_top(gfx::PointF(last_line->left(), last_line->bottom()));
-  }
-  lines_.push_back(pLine);
-  m_cy += pLine->GetHeight();
-}
-
-void TextRenderer::DisplayBuffer::EnsureLinePoints() {
-  if (!dirty_line_point_)
-    return;
-  auto line_top = top();
-  for (auto line : lines_) {
-    line->set_left_top(gfx::PointF(left(), line_top));
-    line_top = line->bottom();
-  }
-
-  dirty_line_point_ = false;
-}
-
-void TextRenderer::DisplayBuffer::Finish() {
-  dirty_ = lines_.empty();
-  dirty_line_point_ = dirty_;
-}
-
-void TextRenderer::DisplayBuffer::Prepend(Line* line) {
-  DCHECK_LT(line->GetHeight(), 100.0f);
-  lines_.push_front(line);
-  m_cy += line->GetHeight();
-  dirty_line_point_ = true;
-}
-
-void TextRenderer::DisplayBuffer::Reset(const gfx::RectF& new_rect) {
-  #if DEBUG_DISPBUF
-    DEBUG_PRINTF("%p " DEBUG_RECTF_FORMAT " to " DEBUG_RECTF_FORMAT "\n",
-        this, DEBUG_RECTF_ARG(rect()), DEBUG_RECTF_ARG(new_rect));
-  #endif
-
-  for (auto const line : lines_) {
-    delete line;
-  }
-
-  lines_.clear();
-  dirty_ = true;
-  dirty_line_point_ = true;
-  m_cy = 0;
-  rect_ = new_rect;
-}
-
-TextRenderer::TextLine* TextRenderer::DisplayBuffer::ScrollDown() {
-  if (lines_.empty())
-    return nullptr;
-
-  auto const line = lines_.back();
-  lines_.pop_back();
-  m_cy -= line->GetHeight();
-  return line;
-}
-
-TextRenderer::TextLine* TextRenderer::DisplayBuffer::ScrollUp() {
-  if (lines_.empty())
-    return nullptr;
-
-  auto const line = lines_.front();
-  lines_.pop_front();
-  m_cy -= line->GetHeight();
-  dirty_line_point_ = true;
-  return line;
-}
-
-void TextRenderer::DisplayBuffer::SetBufferDirtyOffset(Posn offset) {
-  if (dirty_)
-    return;
-  dirty_ = GetFirst()->GetStart() >= offset ||
-           GetLast()->GetEnd() >= offset;
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// Line
-//
-TextRenderer::TextLine::TextLine(const Line& other)
-    : m_nHash(other.m_nHash),
-      m_lEnd(other.m_lEnd),
-      m_lStart(other.m_lStart),
-      rect_(other.rect_) {
-  for (auto cell : other.cells_) {
-    cells_.push_back(cell->Copy());
-  }
-}
-
-TextRenderer::TextLine::TextLine()
-    : m_nHash(0),
-      m_lStart(0),
-      m_lEnd(0) {
-}
-
-TextRenderer::TextLine::~TextLine() {
-}
-
-void TextRenderer::TextLine::set_left_top(const gfx::PointF& left_top) {
-  rect_.right = rect_.width() + left_top.x;
-  rect_.bottom = rect_.height() + left_top.y;
-  rect_.left = left_top.x;
-  rect_.top = left_top.y;
-}
-
-TextRenderer::TextLine* TextRenderer::TextLine::Copy() const {
-  return new TextLine(*this);
-}
-
-bool TextRenderer::TextLine::Equal(const Line* other) const {
-  if (Hash() != other->Hash())
-    return false;
-  if (cells_.size() != other->cells_.size())
-    return false;
-  auto other_it = other->cells_.begin();
-  for (auto cell : cells_) {
-    if (!cell->Equal(*other_it))
-      return false;
-    ++other_it;
-  }
-  return true;
-}
-
-void TextRenderer::TextLine::AddCell(Cell* cell) {
-  cells_.push_back(cell);
-}
-
-void TextRenderer::TextLine::Fix(float left, float top,
-                                 float ascent, float descent) {
-  auto const height = ascent + descent;
-  DCHECK_LT(height, 100.0f);
-  auto right = left;
-  for (auto cell : cells_) {
-    auto const lEnd = cell->Fix(height, descent);
-    if (lEnd >= 0)
-      m_lEnd = lEnd;
-    right += cell->GetWidth();
-  }
-  rect_.left = left;
-  rect_.top = top;
-  rect_.right = right;
-  rect_.bottom = top + height;
-}
-
-uint TextRenderer::TextLine::Hash() const {
-  if (m_nHash)
-    return m_nHash;
-  for (const auto cell : cells_) {
-    m_nHash <<= 5;
-    m_nHash ^= cell->Hash();
-    m_nHash >>= 3;
-  }
-  return m_nHash;
-}
-
-Posn TextRenderer::TextLine::MapXToPosn(const gfx::Graphics& gfx,
-                                        float xGoal) const {
-  auto xCell = 0.0f;
-  auto lPosn = GetEnd() - 1;
-  for (const auto cell : cells_) {
-    auto const x = xGoal - xCell;
-    xCell += cell->m_cx;
-    auto const lMap = cell->MapXToPosn(gfx, x);
-    if (lMap >= 0)
-      lPosn = lMap;
-    if (x >= 0 && x < cell->m_cx)
-      break;
-  }
-  return lPosn;
-}
-
-void TextRenderer::TextLine::Render(const gfx::Graphics& gfx) const {
-  auto x = rect_.left;
-  for (auto cell : cells_) {
-    gfx::RectF rect(x, rect_.top, x + cell->m_cx,
-                    ::ceilf(rect_.top + cell->m_cy));
-    cell->Render(gfx, rect);
-    x = rect.right;
-  }
-  gfx.Flush();
-}
-
-void TextRenderer::TextLine::Reset() {
-  for (auto cell : cells_) {
-    delete cell;
-  }
-  cells_.clear();
-  rect_ = gfx::RectF();
-  m_nHash = 0;
-  m_lStart = -1;
-  m_lEnd = -1;
 }
 
 }  // namespaec views

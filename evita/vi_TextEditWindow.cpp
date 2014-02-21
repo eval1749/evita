@@ -36,6 +36,7 @@
 #include "evita/ui/events/event.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/icon_cache.h"
+#include "evita/views/text/render_text_line.h"
 #include "evita/views/text/text_renderer.h"
 #include "evita/vi_Caret.h"
 #include "evita/vi_EditPane.h"

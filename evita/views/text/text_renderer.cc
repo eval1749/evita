@@ -67,10 +67,6 @@ TextRenderer::TextRenderer(text::Buffer* buffer)
     : m_pBuffer(buffer),
       m_lStart(0),
       m_lEnd(0),
-      m_lSelStart(0),
-      m_lSelEnd(0),
-      m_crSelFg(0),
-      m_crSelBg(0),
       m_crBackground(0) {
   m_pBuffer->AddObserver(this);
 }
@@ -133,7 +129,7 @@ TextLine* TextRenderer::FindLine(Posn lPosn) const {
 }
 
 void TextRenderer::Format(const gfx::Graphics& gfx, gfx::RectF page_rect,
-                  const Selection& selection, Posn lStart) {
+                          const ::Selection& selection, Posn lStart) {
   ASSERT(!page_rect.is_empty());
   Prepare(selection);
   formatAux(gfx, page_rect, lStart);
@@ -145,19 +141,19 @@ void TextRenderer::formatAux(const gfx::Graphics& gfx, gfx::RectF page_rect,
   m_oFormatBuf.Reset(page_rect);
   m_lStart = lStart;
 
-  TextFormatter oFormatter(gfx, this, lStart);
+  TextFormatter oFormatter(gfx, &m_oFormatBuf, m_pBuffer, lStart, selection_);
   oFormatter.Format();
   m_lEnd = GetLastLine()->GetEnd();
 }
 
 TextLine* TextRenderer::FormatLine(const gfx::Graphics& gfx,
                              const gfx::RectF& page_rect,
-                             const Selection& selection,
+                             const ::Selection& selection,
                              Posn lStart) {
   Prepare(selection);
   m_oFormatBuf.Reset(page_rect);
 
-  TextFormatter oFormatter(gfx, this, lStart);
+  TextFormatter oFormatter(gfx, &m_oFormatBuf, m_pBuffer, lStart, selection_);
   auto const line = new TextLine();
   oFormatter.FormatLine(line);
   return line;
@@ -249,23 +245,12 @@ int TextRenderer::pageLines(const gfx::Graphics& gfx) const {
   return static_cast<int>(m_oFormatBuf.height() / height);
 }
 
-void TextRenderer::Prepare(const Selection& selection) {
-  auto& buffer = *selection.GetBuffer();
-
-  // Selection
-  m_lSelStart = selection.GetStart();
-  m_lSelEnd = selection.GetEnd();
-  m_crSelFg = selection.GetColor();
-  m_crSelBg = selection.GetBackground();
-
-  #if DEBUG_FORMAT
-    DEBUG_PRINTF("selection: %d...%d 0x%x/0x%x\n",
-        m_lSelStart, m_lSelEnd,
-        m_crSelFg, m_crSelBg);
-  #endif // DEBUG_FORMAT
-
-  // TextRenderer
-  m_crBackground = buffer.GetDefaultStyle()->GetBackground();
+void TextRenderer::Prepare(const ::Selection& selection) {
+  selection_.start = selection.GetStart();
+  selection_.end = selection.GetEnd();
+  selection_.color = selection.GetColor();
+  selection_.bgcolor = selection.GetBackground();
+  m_crBackground = m_pBuffer->GetDefaultStyle()->GetBackground();
 }
 
 namespace {
@@ -440,7 +425,7 @@ bool TextRenderer::Render(const gfx::Graphics& gfx) {
                    this,
                    number_of_rendering,
                    m_lStart, m_lEnd,
-                   m_lSelStart, m_lSelEnd,
+                   selection_.start, selection_.end,
                    DEBUG_RECTF_ARG(m_oScreenBuf.rect()));
     }
   #endif // DEBUG_RENDER
@@ -466,7 +451,7 @@ bool TextRenderer::ScrollDown(const gfx::Graphics& gfx) {
 
   auto const lGoal  = m_lStart - 1;
   auto const lStart = m_pBuffer->ComputeStartOfLine(lGoal);
-  TextFormatter formatter(gfx, this, lStart);
+  TextFormatter formatter(gfx, &m_oFormatBuf, m_pBuffer, lStart, selection_);
 
   do {
     pLine->Reset();
@@ -554,7 +539,8 @@ bool TextRenderer::ScrollUp(const gfx::Graphics& gfx) {
 
   pLine->Reset();
 
-  TextFormatter oFormatter(gfx, this, GetLastLine()->GetEnd());
+  TextFormatter oFormatter(gfx, &m_oFormatBuf, m_pBuffer,
+                           GetLastLine()->GetEnd(), selection_);
 
   auto const fMore = oFormatter.FormatLine(pLine);
   m_oFormatBuf.Append(pLine);
@@ -573,7 +559,7 @@ bool TextRenderer::ScrollUp(const gfx::Graphics& gfx) {
   return fMore;
 }
 
-bool TextRenderer::ShouldFormat(const Rect& rc, const Selection& selection,
+bool TextRenderer::ShouldFormat(const Rect& rc, const ::Selection& selection,
                       bool fSelection) const {
   if (m_oFormatBuf.dirty())
     return true;
@@ -597,7 +583,7 @@ bool TextRenderer::ShouldFormat(const Rect& rc, const Selection& selection,
   auto const lSelEnd = selection.GetEnd();
 
   // TextRenderer shows caret instead of seleciton.
-  if (m_lSelStart == m_lSelEnd) {
+  if (selection_.start == selection_.end) {
     if (lSelStart == lSelEnd) {
         #if DEBUG_DIRTY
             DEBUG_PRINTF("%p: clean with caret.\n", this);
@@ -622,7 +608,7 @@ bool TextRenderer::ShouldFormat(const Rect& rc, const Selection& selection,
 
   if (!fSelection) {
     // TextRenderer doesn't contain selection.
-    if (m_lSelEnd < m_lStart || m_lSelStart > m_lEnd) {
+    if (selection_.end < m_lStart || selection_.start > m_lEnd) {
         if (lSelStart == lSelEnd) {
             #if DEBUG_DIRTY
                 DEBUG_PRINTF("%p: clean with selection.\n", this);
@@ -640,28 +626,28 @@ bool TextRenderer::ShouldFormat(const Rect& rc, const Selection& selection,
   }
 
   // TextRenderer shows selection.
-  if (m_lSelStart != lSelStart) {
+  if (selection_.start != lSelStart) {
     #if DEBUG_DIRTY
         DEBUG_PRINTF("%p: Selection start is changed.\n", this);
     #endif // DEBUG_DIRTY
     return true;
   }
 
-  if (m_lSelEnd != lSelEnd) {
+  if (selection_.end != lSelEnd) {
     #if DEBUG_DIRTY
         DEBUG_PRINTF("%p: Selection end is changed.\n", this);
     #endif // DEBUG_DIRTY
     return true;
   }
 
-  if (m_crSelFg != selection.GetColor()) {
+  if (selection_.color != selection.GetColor()) {
     #if DEBUG_DIRTY
         DEBUG_PRINTF("%p: SelColor is changed.\n", this);
     #endif // DEBUG_DIRTY
     return true;
   }
 
-  if (m_crSelBg  != selection.GetBackground()) {
+  if (selection_.bgcolor  != selection.GetBackground()) {
     #if DEBUG_DIRTY
         DEBUG_PRINTF("%p: SelBackground is changed.\n", this);
     #endif // DEBUG_DIRTY

@@ -8,6 +8,7 @@
 #include "evita/gfx_base.h"
 #include "evita/vi_style.h"
 #include "evita/text/buffer_mutation_observer.h"
+#include "evita/views/text/render_selection.h"
 #include "evita/views/text/render_text_block.h"
 
 class Font;
@@ -28,31 +29,19 @@ namespace rendering {
 // TextRenderer
 //
 class TextRenderer : public text::BufferMutationObserver {
-  // TODO(yosi) Once we make |TextFormatter| using |TextBlock|, we should not
-  // make |TextFormatter| as friend class of |TextRenderer|.
-  friend class rendering::TextFormatter;
-
   private: typedef common::win::Rect Rect;
   private: typedef rendering::Cell Cell;
+  private: typedef rendering::Selection Selection;
   public: typedef rendering::TextBlock TextBlock;
   public: typedef rendering::TextLine Line;
 
-  // Buffer
-  public: text::Buffer* const m_pBuffer;
-
-  // Selection
-  public: Posn m_lSelStart;;
-  public: Posn m_lSelEnd;
-  public: Color m_crSelFg;
-  public: Color m_crSelBg;
-
-  public: Color m_crBackground;
-
+  private: text::Buffer* const m_pBuffer;
   private: Posn m_lStart;
   private: Posn m_lEnd;
-
+  private: Color m_crBackground;
   private: TextBlock m_oFormatBuf;
   private: TextBlock m_oScreenBuf;
+  private: Selection selection_;
 
   public: TextRenderer(text::Buffer* buffer);
   public: ~TextRenderer();
@@ -62,11 +51,11 @@ class TextRenderer : public text::BufferMutationObserver {
   private: void fillRight(const gfx::Graphics&, const Line*) const;
   private: void formatAux(const gfx::Graphics&, const gfx::RectF, Posn);
   public: Line* FindLine(Posn) const;
-  public: void Format(const gfx::Graphics&, gfx::RectF, const Selection&,
+  public: void Format(const gfx::Graphics&, gfx::RectF, const ::Selection&,
                       Posn);
   public: Line* FormatLine(const gfx::Graphics& gfx,
                            const gfx::RectF& page_rect,
-                           const Selection&, Posn start);
+                           const ::Selection&, Posn start);
 
   // [G]
   public: text::Buffer* GetBuffer() const { return m_pBuffer; }
@@ -85,7 +74,7 @@ class TextRenderer : public text::BufferMutationObserver {
 
   // [P]
   private: int pageLines(const gfx::Graphics&) const;
-  private: void Prepare(const Selection&);
+  private: void Prepare(const ::Selection&);
 
   // [R]
   public: bool Render(const gfx::Graphics&);
@@ -96,8 +85,8 @@ class TextRenderer : public text::BufferMutationObserver {
   public: bool ScrollToPosn(const gfx::Graphics&, Posn target_position);
   public: bool ScrollUp(const gfx::Graphics&);
   public: void SetBufferDirtyOffset(Posn offset);
-  public: bool ShouldFormat(const Rect& page_rect, const Selection&,
-                          bool is_selection_active = false) const;
+  public: bool ShouldFormat(const Rect& page_rect, const ::Selection& selection,
+                            bool is_selection_active = false) const;
   public: bool ShouldRender() const;
 
   // text::BufferMutationObserver

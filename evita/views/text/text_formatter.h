@@ -2,34 +2,42 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_text_render_text_formatter_h)
-#define INCLUDE_evita_views_text_render_text_formatter_h
+#if !defined(INCLUDE_evita_views_text_text_formatter_h)
+#define INCLUDE_evita_views_text_text_formatter_h
 
 #include <memory>
 
 #include "base/basictypes.h"
+#include "evita/ed_style.h"
 #include "evita/gfx_base.h"
 
-namespace views {
-class TextRenderer;
+namespace text {
+class Buffer;
+}
 
+namespace views {
 namespace rendering {
 
 class Cell;
+struct Selection;
+class TextBlock;
 class TextLine;
 enum class TextMarker;
 
 class TextFormatter {
   private: class EnumCI;
 
+  private: Color const filler_color_;
   private: const gfx::Graphics& m_gfx;
-  private: TextRenderer* const m_pTextRenderer;
+  private: const Selection& selection_;
+  private: TextBlock* const text_block_;
   private: std::unique_ptr<EnumCI> m_oEnumCI;
 
   // TODO(yosi) We should use |TextBlock| instead of |TextRenderer| in
   // |TextFormatter|.
-  public: TextFormatter(const gfx::Graphics& gfx, TextRenderer* renderer,
-                        Posn lStart);
+  public: TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
+                        text::Buffer* buffer, Posn start,
+                        const Selection& selection);
   public: ~TextFormatter();
 
   public: void Format();
@@ -44,4 +52,4 @@ class TextFormatter {
 } // namespace rendering
 } // namespace views
 
-#endif //!defined(INCLUDE_evita_views_text_render_text_formatter_h)
+#endif //!defined(INCLUDE_evita_views_text_text_formatter_h)

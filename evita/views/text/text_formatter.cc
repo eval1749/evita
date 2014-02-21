@@ -8,11 +8,9 @@
 #include "evita/text/buffer.h"
 #include "evita/text/interval.h"
 #include "evita/views/text/render_cell.h"
+#include "evita/views/text/render_selection.h"
 #include "evita/views/text/render_text_block.h"
 #include "evita/views/text/render_text_line.h"
-#include "evita/views/text/text_renderer.h"
-
-#define DEBUG_FORMAT 0
 
 namespace views {
 namespace rendering {
@@ -107,36 +105,30 @@ class TextFormatter::EnumCI {
 //
 // TextFormatter
 //
-TextFormatter::TextFormatter(const gfx::Graphics& gfx,
-                             TextRenderer* pTextRenderer, Posn lStart)
-    : m_gfx(gfx),
-      m_pTextRenderer(pTextRenderer),
-      m_oEnumCI(new EnumCI(pTextRenderer->GetBuffer(), lStart)) {
+TextFormatter::TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
+                             text::Buffer* buffer, Posn lStart,
+                             const Selection& selection)
+    : filler_color_(buffer->GetDefaultStyle()->GetBackground()), m_gfx(gfx),
+      selection_(selection), text_block_(text_block),
+      m_oEnumCI(new EnumCI(buffer, lStart)) {
 }
 
 TextFormatter::~TextFormatter() {
 }
 
 void TextFormatter::Format() {
-  #if DEBUG_FORMAT
-    DEBUG_PRINTF("%p: start=%d " DEBUG_RECTF_FORMAT "\n",
-        m_pTextRenderer, m_pTextRenderer->GetStart(),
-        DEBUG_RECTF_ARG(m_pTextRenderer->m_oFormatBuf.rect()));
-  #endif
-
-  auto const cyTextRenderer = m_pTextRenderer->m_oFormatBuf.height();
   for (;;) {
     auto const pLine = new TextLine();
 
     bool fMore = FormatLine(pLine);
     DCHECK_GT(pLine->rect().height(), 0.0f);
 
-    m_pTextRenderer->m_oFormatBuf.Append(pLine);
+    text_block_->Append(pLine);
 
     // Line must have at least one cell other than filler.
     DCHECK_GE(pLine->GetEnd(), pLine->GetStart());
 
-    if (m_pTextRenderer->m_oFormatBuf.GetHeight() >= cyTextRenderer) {
+    if (text_block_->GetHeight() >= text_block_->height()) {
       // TextRenderer is filled up with lines.
       break;
     }
@@ -147,7 +139,7 @@ void TextFormatter::Format() {
     }
   }
 
-  m_pTextRenderer->m_oFormatBuf.Finish();
+  text_block_->Finish();
 }
 
 // Returns true if more contents is avaialble, otherwise returns false.
@@ -155,7 +147,7 @@ bool TextFormatter::FormatLine(TextLine* pLine) {
   auto fMoreContents = true;
   pLine->set_start(m_oEnumCI->GetPosn());
 
-  auto x = m_pTextRenderer->m_oFormatBuf.left();
+  auto x = text_block_->left();
   auto descent = 0.0f;
   auto ascent  = 0.0f;
 
@@ -165,7 +157,7 @@ bool TextFormatter::FormatLine(TextLine* pLine) {
   {
     auto const cyMinHeight = 1.0f;
 
-    pCell = new FillerCell(m_pTextRenderer->m_crBackground, cxLeftMargin,
+    pCell = new FillerCell(filler_color_, cxLeftMargin,
                            cyMinHeight);
     pLine->AddCell(pCell);
     x += cxLeftMargin;
@@ -218,9 +210,7 @@ bool TextFormatter::FormatLine(TextLine* pLine) {
   descent = std::max(pCell->GetDescent(), descent);
   ascent  = std::max(pCell->GetHeight() - pCell->GetDescent(), ascent);
 
-  pLine->Fix(m_pTextRenderer->m_oFormatBuf.left(),
-             m_pTextRenderer->m_oFormatBuf.top() + 
-                 m_pTextRenderer->m_oFormatBuf.GetHeight(),
+  pLine->Fix(text_block_->left(), text_block_->top() + text_block_->GetHeight(),
              ascent, descent);
 
   return fMoreContents;
@@ -241,10 +231,10 @@ Cell* TextFormatter::formatChar(
   auto const lPosn = m_oEnumCI->GetPosn();
   const auto* const pStyle = m_oEnumCI->GetStyle();
 
-  if (lPosn >= m_pTextRenderer->m_lSelStart &&
-      lPosn < m_pTextRenderer->m_lSelEnd) {
-    crColor      = m_pTextRenderer->m_crSelFg;
-    crBackground = m_pTextRenderer->m_crSelBg;
+  if (lPosn >= selection_.start &&
+      lPosn < selection_.end) {
+    crColor      = selection_.color;
+    crBackground = selection_.bgcolor;
     eDecoration  = TextDecoration_None;
   } else {
     crColor      = pStyle->GetColor();
@@ -259,7 +249,7 @@ Cell* TextFormatter::formatChar(
     auto const x2 = (x + cxTab - cxLeftMargin) / cxTab * cxTab;
     auto const cx = (x2 + cxLeftMargin) - x;
     auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
-    if (pPrev && x2 + cxM > m_pTextRenderer->m_oFormatBuf.right())
+    if (pPrev && x2 + cxM > text_block_->right())
       return nullptr;
 
     return new MarkerCell(pStyle->GetMarker(), crBackground, cx,
@@ -267,7 +257,7 @@ Cell* TextFormatter::formatChar(
         TextMarker::Tab);
   }
 
-  auto const pFont = wch < 0x20 ? 
+  auto const pFont = wch < 0x20 ?
       nullptr :
       FontSet::Get(m_gfx, pStyle)->FindFont(m_gfx, wch);
 
@@ -289,7 +279,7 @@ Cell* TextFormatter::formatChar(
     auto const cxUni = 6.0f + AlignWidthToPixel(m_gfx,
                                                 pFont->GetTextWidth(string));
     auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
-    if (pPrev && x + cxUni + cxM > m_pTextRenderer->m_oFormatBuf.right())
+    if (pPrev && x + cxUni + cxM > text_block_->right())
       return nullptr;
 
     return new UnicodeCell(m_gfx, pStyle, pStyle->GetMarker(), crBackground,
@@ -300,7 +290,7 @@ Cell* TextFormatter::formatChar(
 
   if (pPrev) {
     auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
-    if (x + cx + cxM > m_pTextRenderer->m_oFormatBuf.right()) {
+    if (x + cx + cxM > text_block_->right()) {
       // We doesn't have enough room for a char in the line.
       return nullptr;
     }
@@ -322,11 +312,11 @@ Cell* TextFormatter::formatMarker(TextMarker marker_name) {
     Posn lPosn = m_oEnumCI->GetPosn();
     const StyleValues* pStyle = m_oEnumCI->GetStyle();
 
-    if (lPosn >= m_pTextRenderer->m_lSelStart &&
-        lPosn < m_pTextRenderer->m_lSelEnd)
+    if (lPosn >= selection_.start &&
+        lPosn < selection_.end)
     {
-        crColor      = m_pTextRenderer->m_crSelFg;
-        crBackground = m_pTextRenderer->m_crSelBg;
+        crColor      = selection_.color;
+        crBackground = selection_.bgcolor;
     }
     else
     {

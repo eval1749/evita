@@ -20,7 +20,7 @@
 
 namespace views {
 
-namespace TextRendererInternal {
+namespace rendering {
 
 const float cxLeftMargin = 7.0f;
 const int k_nTabWidth = 4;
@@ -1010,9 +1010,9 @@ Cell* Formatter::formatMarker(MarkerCell::Kind  eKind) {
     return pCell;
 }
 
-} // namespace TextRendererInternal
+} // namespace rendering
 
-using namespace TextRendererInternal;
+using namespace rendering;
 
 void TextRenderer::fillBottom(const gfx::Graphics& gfx, float y) const {
   if (y < m_oFormatBuf.bottom()) {

@@ -15,22 +15,22 @@ class Style;
 
 namespace views {
 
-namespace TextRendererInternal {
+namespace rendering {
   class Cell;
   class DisplayBuffer;
   class Formatter;
-}; // TextRendererInternal
+};
 
 //////////////////////////////////////////////////////////////////////
 //
 // TextRenderer
 //
 class TextRenderer : public text::BufferMutationObserver {
-  friend class TextRendererInternal::Formatter;
+  friend class rendering::Formatter;
 
   private: typedef common::win::Rect Rect;
 
-  private: typedef TextRendererInternal::Cell Cell;
+  private: typedef rendering::Cell Cell;
   private: class DisplayBuffer;
   public: class Line;
 
@@ -78,7 +78,7 @@ class TextRenderer : public text::BufferMutationObserver {
     private: typedef DoubleLinkedList_<Cell, Line> Cells;
     friend class TextRenderer;
     friend class DisplayBuffer;
-    friend class TextRendererInternal::Formatter;
+    friend class rendering::Formatter;
 
     private: Cells cells_;
     private: uint m_cwch;

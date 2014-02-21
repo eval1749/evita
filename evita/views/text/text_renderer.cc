@@ -13,10 +13,10 @@
 #include <vector>
 
 #include "base/strings/string16.h"
-#include "common/castable.h"
 #include "evita/gfx_base.h"
 #include "evita/dom/buffer.h"
 #include "evita/text/interval.h"
+#include "evita/views/text/render_cell.h"
 #include "evita/vi_Selection.h"
 
 namespace views {
@@ -79,89 +79,6 @@ static void DrawText(const gfx::Graphics& gfx, const Font& font,
               const base::string16& string) {
   font.DrawText(gfx, text_brush, rect, string);
   gfx.Flush();
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// Cell
-//
-class Cell : public common::Castable {
-  DECLARE_CASTABLE_CLASS(Cell, Castable);
-
-  public: float m_cx;
-  public: float m_cy;
-
-  protected: Color m_crBackground;
-
-  public: Cell(Color cr, float cx, float cy)
-      : m_crBackground(cr),
-        m_cx(cx),
-        m_cy(cy) {
-    ASSERT(cx >= 1);
-    ASSERT(cy >= 1);
-  }
-
-  public: explicit Cell(const Cell& other)
-      : m_crBackground(other.m_crBackground),
-        m_cx(other.m_cx),
-        m_cy(other.m_cy) {
-  }
-
-  public: virtual ~Cell();
-
-  public: virtual Cell* Copy() const = 0;
-
-  public: virtual bool Equal(const Cell* pCell) const {
-    if (pCell->class_name() != class_name()) return false;
-    if (pCell->m_cx != m_cx) return false;
-    if (pCell->m_cy != m_cy) return false;
-    if (!pCell->m_crBackground.Equal(m_crBackground)) return false;
-    return true;
-  }
-
-  protected: void FillBackground(const gfx::Graphics& gfx,
-                                 const gfx::RectF& rect) const {
-    fillRect(gfx, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
-                             ::ceilf(rect.bottom)),
-             ColorToColorF(m_crBackground));
-  }
-
-  public: virtual Posn Fix(float iHeight, float) {
-    m_cy = iHeight;
-    return -1;
-  }
-
-  public: virtual float GetDescent() const { return 0; }
-  public: float GetHeight() const { return m_cy; }
-  public: float GetWidth() const { return m_cx; }
-
-  public: virtual uint Hash() const {
-    uint nHash = static_cast<uint>(m_cx);
-    nHash ^= static_cast<uint>(m_cy);
-    nHash ^= m_crBackground.Hash();
-    return nHash;
-  }
-
-  public: virtual float MapPosnToX(const gfx::Graphics&, Posn) const {
-    return -1.0f;
-  }
-
-    // MapXToPosn - x is cell relative.
-  public: virtual Posn MapXToPosn(const gfx::Graphics&, float) const {
-    return -1;
-  }
-
-  public: virtual bool Merge(Font*, Color, Color, TextDecoration, float) {
-    return false;
-  }
-
-  public: virtual void Render(const gfx::Graphics& gfx,
-                               const gfx::RectF& rect) const {
-    FillBackground(gfx, rect);
-  }
-};
-
-Cell::~Cell() {
 }
 
 //////////////////////////////////////////////////////////////////////

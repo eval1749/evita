@@ -428,6 +428,7 @@
         'views/frame_observer.cc',
         'views/tab_strip.cc',
         'views/tab_strip_delegate.cc',
+        'views/text/render_cell.cc',
         'views/text/text_renderer.cc',
         'vi_Caret.cpp',
         'vi_DialogBox.cpp',

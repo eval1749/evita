@@ -5,6 +5,9 @@
 #if !defined(INCLUDE_evita_views_text_text_renderer_h)
 #define INCLUDE_evita_views_text_text_renderer_h
 
+#include <list>
+#include <vector>
+
 #include "evita/gfx_base.h"
 #include "evita/vi_style.h"
 #include "evita/text/buffer_mutation_observer.h"
@@ -31,17 +34,14 @@ class TextRenderer : public text::BufferMutationObserver {
   private: typedef common::win::Rect Rect;
 
   private: typedef rendering::Cell Cell;
-  private: class DisplayBuffer;
   public: class TextLine;
   public: typedef TextLine Line;
 
-  private: class DisplayBuffer {
-    private: typedef DoubleLinkedList_<Line, DisplayBuffer> Lines;
-
+  public: class DisplayBuffer {
     private: bool dirty_;
+    private: bool dirty_line_point_;
     private: float m_cy;
-    private: HANDLE m_hObjHeap;
-    private: Lines lines_;
+    private: std::list<TextLine*> lines_;
     private: gfx::RectF rect_;
 
     public: DisplayBuffer();
@@ -52,65 +52,64 @@ class TextRenderer : public text::BufferMutationObserver {
     public: bool dirty() const { return dirty_; }
     public: float height() const { return rect_.height(); }
     public: float left() const { return rect_.left; }
-    public: const Lines& lines() const { return lines_; }
+    public: const std::list<TextLine*>& lines() const { return lines_; }
     public: const gfx::RectF& rect() const { return rect_; }
     public: float right() const { return rect_.right; }
     public: float top() const { return rect_.top; }
     public: float width() const { return rect_.width(); }
 
     public: void Append(Line*);
-    public: void* Alloc(size_t);
+    public: void EnsureLinePoints();
     public: void Finish();
-    public: Line* GetFirst() const { return lines_.GetFirst(); }
-    public: HANDLE GetHeap() const { return m_hObjHeap; }
+    public: Line* GetFirst() const { return lines_.front(); }
     public: float GetHeight() const { return m_cy; }
-    public: Line* GetLast() const { return lines_.GetLast(); }
-    public: Line* NewLine();
+    public: Line* GetLast() const { return lines_.back(); }
     public: void Prepend(Line*);
-    public: HANDLE Reset(const gfx::RectF& page_rect);
+    public: void Reset(const gfx::RectF& page_rect);
     public: Line* ScrollDown();
     public: Line* ScrollUp();
     public: void SetBufferDirtyOffset(Posn offset);
   };
 
   // TextLine
-  public: class TextLine : public DoubleLinkedNode_<TextLine, DisplayBuffer>,
-                       public ObjectInHeap {
-    private: typedef DoubleLinkedList_<Cell, Line> Cells;
+  public: class TextLine {
     friend class TextRenderer;
     friend class DisplayBuffer;
     friend class rendering::Formatter;
 
-    private: Cells cells_;
-    private: uint m_cwch;
+    private: std::vector<Cell*> cells_;
     private: mutable uint m_nHash;
-    private: HANDLE m_hObjHeap;
-    private: float m_iHeight;
-    private: float m_iWidth;
     private: Posn m_lStart;
     private: Posn m_lEnd;
-    private: char16* m_pwch;
+    private: gfx::RectF rect_;
 
-    public: explicit TextLine(HANDLE hHeap);
-    private: TextLine(const TextLine& other, HANDLE hHeap);
-    private: ~TextLine() {}
+    private: TextLine(const TextLine& other);
+    public: TextLine();
+    private: ~TextLine();
 
-    public: const Cells& cells() const { return cells_; }
-    public: Cells& cells() { return cells_; }
+    public: bool operator==(const TextLine& other) const;
+    public: bool operator!=(const TextLine& other) const;
 
-    public: void Discard();
-    public: TextLine* Copy(HANDLE hHeap) const;
+    public: float bottom() const { return rect_.bottom; }
+    public: const std::vector<Cell*>& cells() const { return cells_; }
+    public: Cell* last_cell() const { return cells_.back(); }
+    public: float left() const { return rect_.left; }
+    public: const gfx::RectF& rect() const { return rect_; }
+    public: float right() const { return rect_.right; }
+    public: float top() const { return rect_.top; }
+    public: void set_left_top(const gfx::PointF& left_top);
+
+    public: void AddCell(Cell* cell);
+    public: TextLine* Copy() const;
     public: bool Equal(const TextLine*) const;
-    public: void Fix(float dscent);
-    public: Cell* GetCell() const { return cells_.GetFirst(); }
+    public: void Fix(float left, float top, float ascent, float dscent);
     public: Posn GetEnd() const { return m_lEnd; }
-    public: float GetHeight() const { return m_iHeight; }
+    public: float GetHeight() const { return rect_.height(); }
     public: Posn GetStart() const { return m_lStart; }
-    public: float GetWidth() const { return m_iWidth; }
+    public: float GetWidth() const { return rect_.width(); }
     public: uint Hash() const;
     public: Posn MapXToPosn(const gfx::Graphics&, float) const;
-    public: void Render(const gfx::Graphics&,
-                         const gfx::PointF& left_top) const;
+    public: void Render(const gfx::Graphics& gfx) const;
     public: void Reset();
   };
 
@@ -134,12 +133,9 @@ class TextRenderer : public text::BufferMutationObserver {
   public: TextRenderer(text::Buffer* buffer);
   public: ~TextRenderer();
 
-  // [A]
-  private: void allocHeap();
-
   // [F]
-  private: void fillBottom(const gfx::Graphics&, float top) const;
-  private: void fillRight(const gfx::Graphics&, const Line*, float) const;
+  private: void fillBottom(const gfx::Graphics&) const;
+  private: void fillRight(const gfx::Graphics&, const Line*) const;
   private: void formatAux(const gfx::Graphics&, const gfx::RectF, Posn);
   public: Line* FindLine(Posn) const;
   public: void Format(const gfx::Graphics&, gfx::RectF, const Selection&,

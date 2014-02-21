@@ -188,10 +188,17 @@ Font::~Font() {
 }
 
 void Font::DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,
-                    const gfx::RectF& rect, const char16* chars,
+                    const gfx::RectF& rect, const base::char16* chars,
                     uint num_chars) const {
   auto const baseline = rect.left_top() + gfx::SizeF(0.0f, metrics_.ascent);
   font_impl_->DrawText(gfx, text_brush, baseline, chars, num_chars);
+}
+
+void Font::DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,
+                    const gfx::RectF& rect,
+                    const base::string16& string) const {
+  DrawText(gfx, text_brush, rect, string.data(),
+           static_cast<uint32>(string.length()));
 }
 
 float Font::GetCharWidth(char16 wch) const {
@@ -210,6 +217,10 @@ float Font::GetTextWidth(const char16* pwch, size_t cwch) const {
     width += metric.advanceWidth;
   }
   return font_impl_->ConvertToDip(width);
+}
+
+float Font::GetTextWidth(const base::string16& string) const {
+  return GetTextWidth(string.data(), static_cast<uint32>(string.length()));
 }
 
 bool Font::HasCharacter(char16 wch) const {

@@ -13,6 +13,7 @@
 
 #include <memory>
 
+#include "base/strings/string16.h"
 #include "evita/ed_Style.h"
 #include "gfx/forward.h"
 #include "evita/li_util.h"
@@ -44,9 +45,11 @@ class Font {
     public: float height() const { return metrics_.height; }
 
     // [D]
-    void DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,
-                  const gfx::RectF& rect, const char16* chars,
+    public: void DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,
+                  const gfx::RectF& rect, const base::char16* chars,
                   uint num_chars) const;
+    public: void DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,
+                  const gfx::RectF& rect, const base::string16& string) const;
 
     // [E]
     public: bool EqualKey(const Key* pKey) const {
@@ -56,7 +59,8 @@ class Font {
     // [G]
     public: float GetCharWidth(char16) const;
     public: const Key* GetKey() const { return &m_oLogFont; }
-    public: float GetTextWidth(const char16* pwch, size_t cwch) const;
+    public: float GetTextWidth(const base::char16* pwch, size_t cwch) const;
+    public: float GetTextWidth(const base::string16& string) const;
 
     // [H]
     public: bool HasCharacter(char16) const;

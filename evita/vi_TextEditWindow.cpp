@@ -85,13 +85,10 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
   if (xGoal < 0)
     return lGoal;
 
-  TextRenderer::Line* pLine = nullptr;
-
-  if (!text_renderer_->ShouldFormat(rect(), *selection_))
-    pLine = text_renderer_->FindLine(lGoal);
-
-  if (pLine)
-    return pLine->MapXToPosn(*m_gfx, xGoal);
+  if (!text_renderer_->ShouldFormat(rect(), *selection_)) {
+    if (auto const line = text_renderer_->FindLine(lGoal))
+      return line->MapXToPosn(*m_gfx, xGoal);
+  }
 
   auto lStart = GetBuffer()->ComputeStartOfLine(lGoal);
   // TODO(yosi) We should not use another object for formatting line instead of

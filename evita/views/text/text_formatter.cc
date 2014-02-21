@@ -173,7 +173,7 @@ bool TextFormatter::FormatLine(TextLine* pLine) {
 
   for (;;) {
     if (m_oEnumCI->AtEnd()) {
-      pCell = formatMarker(MarkerCell::Kind_Eob);
+      pCell = formatMarker(TextMarker::EndOfDocument);
       fMoreContents = false;
       break;
     }
@@ -181,7 +181,7 @@ bool TextFormatter::FormatLine(TextLine* pLine) {
     auto const wch = m_oEnumCI->GetChar();
 
     if (wch == 0x0A) {
-      pCell = formatMarker(MarkerCell::Kind_Eol);
+      pCell = formatMarker(TextMarker::EndOfLine);
       m_oEnumCI->Next();
       break;
     }
@@ -190,7 +190,7 @@ bool TextFormatter::FormatLine(TextLine* pLine) {
 
     pCell = formatChar(pCell, x, wch);
     if (!pCell) {
-      pCell = formatMarker(MarkerCell::Kind_Wrap);
+      pCell = formatMarker(TextMarker::LineWrap);
       break;
     }
 
@@ -262,14 +262,9 @@ Cell* TextFormatter::formatChar(
     if (pPrev && x2 + cxM > m_pTextRenderer->m_oFormatBuf.right())
       return nullptr;
 
-    return new MarkerCell(
-        pStyle->GetMarker(),
-        crBackground,
-        cx,
-        AlignHeightToPixel(m_gfx, pFont->height()),
-        pFont->descent(),
-        lPosn,
-        MarkerCell::Kind_Tab);
+    return new MarkerCell(pStyle->GetMarker(), crBackground, cx,
+        AlignHeightToPixel(m_gfx, pFont->height()), pFont->descent(), lPosn,
+        TextMarker::Tab);
   }
 
   auto const pFont = wch < 0x20 ? 
@@ -320,7 +315,7 @@ Cell* TextFormatter::formatChar(
                       base::string16(1u, wch));
 }
 
-Cell* TextFormatter::formatMarker(MarkerCell::Kind  eKind) {
+Cell* TextFormatter::formatMarker(TextMarker marker_name) {
     Color crColor;
     Color crBackground;
 
@@ -347,7 +342,7 @@ Cell* TextFormatter::formatMarker(MarkerCell::Kind  eKind) {
         AlignHeightToPixel(m_gfx, pFont->height()),
         pFont->descent(),
         m_oEnumCI->GetPosn(),
-        eKind);
+        marker_name);
     return pCell;
 }
 

@@ -9,14 +9,15 @@
 
 #include "base/basictypes.h"
 #include "evita/gfx_base.h"
-#include "evita/views/text/render_cell.h"
 
 namespace views {
 class TextRenderer;
 
 namespace rendering {
 
+class Cell;
 class TextLine;
+enum class TextMarker;
 
 class TextFormatter {
   private: class EnumCI;
@@ -35,9 +36,7 @@ class TextFormatter {
   public: bool FormatLine(TextLine* line);
 
   private: Cell* formatChar(Cell*, float x, char16);
-  // TODO(yosi) We should move |MarkerCell::Kind| to another place to avoid
-  // including "evita/views/text/render_cell.h".
-  private: Cell* formatMarker(MarkerCell::Kind);
+  private: Cell* formatMarker(TextMarker marker_name);
 
   DISALLOW_COPY_AND_ASSIGN(TextFormatter);
 };

@@ -12,6 +12,14 @@
 namespace views {
 namespace rendering {
 
+enum class TextMarker{
+  EndOfDocument,
+  EndOfLine,
+  LineWrap,
+  Tab,
+};
+
+
 //////////////////////////////////////////////////////////////////////
 //
 // Cell
@@ -68,27 +76,15 @@ class FillerCell final : public Cell {
 class MarkerCell final : public Cell {
   DECLARE_CASTABLE_CLASS(MarkerCell, Cell);
 
-  public: enum Kind {
-    Kind_Eob,
-    Kind_Eol,
-    Kind_Tab,
-    Kind_Wrap,
-  };
-
   private: Posn m_lStart;
   private: Posn m_lEnd;
   private: Color m_crColor;
   private: float m_iAscent;
   private: float m_iDescent;
-  private: Kind m_eKind;
+  private: TextMarker marker_name_;
 
-  public: MarkerCell(Color crColor,
-                     Color crBackground,
-                     float cx,
-                     float iHeight,
-                     float iDescent,
-                     Posn lPosn,
-                     Kind eKind);
+  public: MarkerCell(Color color, Color bgcolor, float cx, float iHeight,
+                     float iDescent, Posn lPosn, TextMarker marker_name);
   public: MarkerCell(const MarkerCell& other);
   public: ~MarkerCell();
 

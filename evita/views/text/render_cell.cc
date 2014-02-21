@@ -146,14 +146,14 @@ Cell* FillerCell::Copy() const {
 //
 
 MarkerCell::MarkerCell(Color crColor, Color bgcolor, float cx, float iHeight,
-                       float iDescent, Posn lPosn, Kind eKind)
+                       float iDescent, Posn lPosn, TextMarker marker_name)
     : Cell(bgcolor, cx, iHeight),
       m_lStart(lPosn),
-      m_lEnd(eKind == Kind_Wrap ? lPosn : lPosn + 1),
+      m_lEnd(marker_name == TextMarker::LineWrap ? lPosn : lPosn + 1),
       m_crColor(crColor),
       m_iAscent(iHeight - iDescent),
       m_iDescent(iDescent),
-      m_eKind(eKind) {
+      marker_name_(marker_name) {
 }
 
 MarkerCell::MarkerCell(const MarkerCell& other)
@@ -163,7 +163,7 @@ MarkerCell::MarkerCell(const MarkerCell& other)
       m_crColor(other.m_crColor),
       m_iAscent(other.m_iAscent),
       m_iDescent(other.m_iDescent),
-      m_eKind(other.m_eKind) {
+      marker_name_(other.marker_name_) {
 }
 
 MarkerCell::~MarkerCell() {
@@ -179,7 +179,7 @@ bool MarkerCell::Equal(const Cell* other) const {
     return false;
   auto const marker_cell = other->as<MarkerCell>();
   return m_crColor.Equal(marker_cell->m_crColor) &&
-         m_eKind == marker_cell->m_eKind;
+         marker_name_ == marker_cell->marker_name_;
 }
 
 Posn MarkerCell::Fix(float iHeight, float iDescent) {
@@ -197,7 +197,7 @@ uint MarkerCell::Hash() const {
   nHash <<= 8;
   nHash ^= m_crColor.Hash();
   nHash <<= 8;
-  nHash ^= m_eKind;
+  nHash ^= static_cast<int>(marker_name_);
   return nHash;
 }
 
@@ -215,7 +215,7 @@ Posn MarkerCell::MapXToPosn(const gfx::Graphics&, float) const {
 
 void MarkerCell::Render(const gfx::Graphics& gfx,
                         const gfx::RectF& rect) const {
-  FillBackground(gfx, rect);
+  Cell::Render(gfx, rect);
 
   auto const yBottom = rect.bottom - m_iDescent;
   auto const yTop = yBottom - m_iAscent;
@@ -224,8 +224,8 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
 
   gfx::Brush stroke_brush(gfx, ColorToColorF(m_crColor));
 
-  switch (m_eKind) {
-    case Kind_Eob: { // Draw <-
+  switch (marker_name_) {
+    case TextMarker::EndOfDocument: { // Draw <-
       // FIXME 2007-06-13 We should get internal leading from font.
       auto const iInternalLeading = 3;
       auto const w = std::max(m_iAscent / 6, 2.0f);
@@ -236,7 +236,7 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
       break;
     }
 
-    case Kind_Eol: { // Draw V
+    case TextMarker::EndOfLine: { // Draw V
       auto const y = yBottom - m_iAscent * 3 / 5;
       auto const w = std::max(m_cx / 6, 2.0f);
       auto const x = xLeft + m_cx / 2;
@@ -246,15 +246,8 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
       break;
     }
 
-    case Kind_Tab: { // Draw |_|
-      auto const w = std::max(m_iAscent / 6, 2.0f);
-      DrawHLine(gfx, stroke_brush, xLeft + 2, xRight - 3, yBottom);
-      DrawVLine(gfx, stroke_brush, xLeft + 2, yBottom, yBottom - w * 2);
-      DrawVLine(gfx, stroke_brush, xRight - 3, yBottom, yBottom - w * 2);
-      break;
-    }
 
-    case Kind_Wrap: { // Draw ->
+    case TextMarker::LineWrap: { // Draw ->
       auto const ex = xRight - 1;
       auto const w = std::max(m_iAscent / 6, 2.0f);
       auto const y = yTop + m_iAscent / 2;
@@ -264,8 +257,13 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
       break;
     }
 
-      default:
-      CAN_NOT_HAPPEN();
+    case TextMarker::Tab: { // Draw |_|
+      auto const w = std::max(m_iAscent / 6, 2.0f);
+      DrawHLine(gfx, stroke_brush, xLeft + 2, xRight - 3, yBottom);
+      DrawVLine(gfx, stroke_brush, xLeft + 2, yBottom, yBottom - w * 2);
+      DrawVLine(gfx, stroke_brush, xRight - 3, yBottom, yBottom - w * 2);
+      break;
+    }
   }
 }
 

@@ -80,7 +80,7 @@ class MarkerCell final : public Cell {
   private: Color m_crColor;
   private: float m_iAscent;
   private: float m_iDescent;
-  private: Kind  m_eKind;
+  private: Kind m_eKind;
 
   public: MarkerCell(Color crColor,
                      Color crBackground,
@@ -106,7 +106,50 @@ class MarkerCell final : public Cell {
                                const gfx::RectF& rect) const override;
 };
 
-}  // namespace rendering
-}  // namespace views
+//////////////////////////////////////////////////////////////////////
+//
+// TextCell
+//
+class TextCell : public Cell {
+  DECLARE_CASTABLE_CLASS(TextCell, Cell);
+
+  protected: Color m_crColor;
+  protected: TextDecoration m_eDecoration;
+  protected: float m_iDescent;
+
+  protected: Posn m_lStart;
+  protected: Posn m_lEnd;
+
+  protected: Font* m_pFont;
+  private: base::string16 characters_;
+
+  public: TextCell(const gfx::Graphics& gfx, const StyleValues* pStyle,
+                   Color crColor, Color crBackground, Font* pFont, float cx,
+                   Posn lPosn, const base::string16& characters);
+  public: TextCell(const TextCell& other);
+  public: virtual ~TextCell();
+
+  public: const base::string16 characters() const { return characters_; }
+
+  public: void AddChar(base::char16 char_code);
+
+  // rendering::Cell
+  private: virtual Cell* Copy() const override;
+  public: virtual bool Equal(const Cell* pCell) const override;
+  public: virtual Posn Fix(float iHeight, float iDescent) override;
+  public: virtual float GetDescent() const override;
+  public: virtual uint Hash() const override final;
+  public: virtual float MapPosnToX(const gfx::Graphics& gfx,
+                                   Posn lPosn) const override final;
+  public: virtual Posn MapXToPosn(const gfx::Graphics& gfx,
+                                  float x) const override final;
+  public: virtual bool Merge(Font* pFont, Color crColor, Color crBackground,
+                             TextDecoration eDecoration, float cx) override;
+  public: virtual void Render(const gfx::Graphics& gfx,
+                              const gfx::RectF& rect) const override;
+};
+
+} // namespace rendering
+} // namespace views
 
 #endif //!defined(INCLUDE_evita_views_text_render_cell_h)

@@ -23,7 +23,6 @@ class Formatter;
 class TextLine {
   friend class TextRenderer;
   friend class TextBlock;
-  friend class rendering::Formatter;
 
   private: std::vector<Cell*> cells_;
   private: mutable uint m_nHash;
@@ -43,6 +42,7 @@ class TextLine {
   public: float right() const { return rect_.right; }
   public: float top() const { return rect_.top; }
   public: void set_left_top(const gfx::PointF& left_top);
+  public: void set_start(Posn start) { m_lStart = start; }
 
   public: void AddCell(Cell* cell);
   public: TextLine* Copy() const;

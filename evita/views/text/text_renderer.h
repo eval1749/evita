@@ -19,7 +19,7 @@ namespace views {
 namespace rendering {
   class Cell;
   class TextBlock;
-  class Formatter;
+  class TextFormatter;
   class TextLine;
 };
 
@@ -28,7 +28,9 @@ namespace rendering {
 // TextRenderer
 //
 class TextRenderer : public text::BufferMutationObserver {
-  friend class rendering::Formatter;
+  // TODO(yosi) Once we make |TextFormatter| using |TextBlock|, we should not
+  // make |TextFormatter| as friend class of |TextRenderer|.
+  friend class rendering::TextFormatter;
 
   private: typedef common::win::Rect Rect;
   private: typedef rendering::Cell Cell;

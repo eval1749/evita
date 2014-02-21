@@ -113,14 +113,14 @@ class MarkerCell final : public Cell {
 class TextCell : public Cell {
   DECLARE_CASTABLE_CLASS(TextCell, Cell);
 
-  protected: Color m_crColor;
-  protected: TextDecoration m_eDecoration;
-  protected: float m_iDescent;
+  private: Color m_crColor;
+  private: TextDecoration m_eDecoration;
+  private: float m_iDescent;
 
-  protected: Posn m_lStart;
-  protected: Posn m_lEnd;
+  private: Posn m_lStart;
+  private: Posn m_lEnd;
 
-  protected: Font* m_pFont;
+  private: Font* m_pFont;
   private: base::string16 characters_;
 
   public: TextCell(const gfx::Graphics& gfx, const StyleValues* pStyle,
@@ -130,6 +130,8 @@ class TextCell : public Cell {
   public: virtual ~TextCell();
 
   public: const base::string16 characters() const { return characters_; }
+  public: Color color() const { return m_crColor; }
+  public: Font* font() const { return m_pFont; }
 
   public: void AddChar(base::char16 char_code);
 
@@ -147,6 +149,26 @@ class TextCell : public Cell {
                              TextDecoration eDecoration, float cx) override;
   public: virtual void Render(const gfx::Graphics& gfx,
                               const gfx::RectF& rect) const override;
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// UnicodeCell
+//
+class UnicodeCell final : public TextCell {
+  DECLARE_CASTABLE_CLASS(UnicodeCell, TextCell);
+
+  public: UnicodeCell(const gfx::Graphics& gfx, const StyleValues* pStyle,
+                      Color crColor, Color crBackground, Font* pFont,
+                      float cx, Posn lPosn,
+                      const base::string16& characters);
+  public: UnicodeCell(const UnicodeCell& other);
+  public: virtual ~UnicodeCell();
+
+  // rendering::Cell
+  private: virtual Cell* Copy() const override;
+  private: virtual void Render(const gfx::Graphics& gfx,
+                               const gfx::RectF& rect) const override;
 };
 
 } // namespace rendering

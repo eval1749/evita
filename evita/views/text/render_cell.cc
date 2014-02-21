@@ -427,5 +427,42 @@ void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
   #endif
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// UnicodeCell
+//
+UnicodeCell::UnicodeCell(const gfx::Graphics& gfx, const StyleValues* pStyle,
+                         Color crColor, Color crBackground, Font* pFont,
+                         float cx, Posn lPosn,
+                         const base::string16& characters)
+    : TextCell(gfx, pStyle, crColor, crBackground, pFont, cx, lPosn,
+               characters) {
+  m_cy += 4;
+}
+
+UnicodeCell::UnicodeCell(const UnicodeCell& other)
+    : TextCell(other) {
+}
+
+UnicodeCell::~UnicodeCell() {
+}
+
+// rendering::Cell
+Cell* UnicodeCell::Copy() const {
+  return new UnicodeCell(*this);
+}
+
+void UnicodeCell::Render(const gfx::Graphics& gfx,
+                         const gfx::RectF& rect) const {
+  FillBackground(gfx, rect);
+
+  gfx::Brush text_brush(gfx, ColorToColorF(color()));
+  DrawText(gfx, *font(), text_brush, rect, characters());
+
+  gfx.DrawRectangle(text_brush,
+                    gfx::RectF(rect.left, rect.top,
+                               rect.right - 1, rect.bottom - 1));
+}
+
 } // namespace rendering
 } // namespace views

@@ -58,11 +58,6 @@ inline void drawLine(const gfx::Graphics& gfx, const gfx::Brush& brush,
   gfx.DrawLine(brush, sx, sy, ex, ey);
 }
 
-inline void drawHLine(const gfx::Graphics& gfx, const gfx::Brush& brush,
-                      float sx, float ex, float y) {
-  drawLine(gfx, brush, sx, y, ex, y);
-}
-
 inline void drawVLine(const gfx::Graphics& gfx, const gfx::Brush& brush,
                       float x, float sy, float ey) {
   drawLine(gfx, brush, x, sy, x, ey);
@@ -72,70 +67,6 @@ inline void fillRect(const gfx::Graphics& gfx, const gfx::RectF& rect,
                      gfx::ColorF color) {
   gfx::Brush fill_brush(gfx, color);
   gfx.FillRectangle(fill_brush, rect);
-}
-
-void DrawText(const gfx::Graphics& gfx, const Font& font,
-              const gfx::Brush& text_brush, const gfx::RectF& rect,
-              const base::string16& string) {
-  font.DrawText(gfx, text_brush, rect, string);
-  gfx.Flush();
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// UnicodeCell
-//
-class UnicodeCell final : public TextCell {
-  DECLARE_CASTABLE_CLASS(UnicodeCell, TextCell);
-
-  public: UnicodeCell(
-      const gfx::Graphics& gfx,
-      const StyleValues*    pStyle,
-      Color           crColor,
-      Color           crBackground,
-      Font*           pFont,
-      float           cx,
-      Posn            lPosn,
-      const base::string16& characters)
-        : TextCell(
-              gfx,
-              pStyle,
-              crColor,
-              crBackground,
-              pFont,
-              cx,
-              lPosn,
-              characters) {
-      m_cy += 4;
-  }
-
-  public: UnicodeCell(const UnicodeCell& other);
-  public: virtual ~UnicodeCell();
-
-  private: virtual Cell* Copy() const override;
-
-  public: virtual void Render(const gfx::Graphics& gfx,
-                              const gfx::RectF& rect) const override {
-    FillBackground(gfx, rect);
-
-    gfx::Brush text_brush(gfx, ColorToColorF(m_crColor));
-    DrawText(gfx, *m_pFont, text_brush, rect, characters());
-
-    gfx.DrawRectangle(text_brush,
-                      gfx::RectF(rect.left, rect.top,
-                                 rect.right - 1, rect.bottom - 1));
-  }
-};
-
-UnicodeCell::UnicodeCell(const UnicodeCell& other)
-    : TextCell(other) {
-}
-
-UnicodeCell::~UnicodeCell() {
-}
-
-Cell* UnicodeCell::Copy() const {
-  return new UnicodeCell(*this);
 }
 
 //////////////////////////////////////////////////////////////////////

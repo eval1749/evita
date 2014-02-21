@@ -87,9 +87,6 @@ class TextRenderer : public text::BufferMutationObserver {
     public: TextLine();
     private: ~TextLine();
 
-    public: bool operator==(const TextLine& other) const;
-    public: bool operator!=(const TextLine& other) const;
-
     public: float bottom() const { return rect_.bottom; }
     public: const std::vector<Cell*>& cells() const { return cells_; }
     public: Cell* last_cell() const { return cells_.back(); }

@@ -1274,8 +1274,10 @@ bool TextRenderer::Render(const gfx::Graphics& gfx) {
   auto screen_line_runner = m_oScreenBuf.lines().begin();
   while (format_line_runner != format_line_end &&
          screen_line_runner != screen_line_end) {
-    if (*format_line_runner != *screen_line_runner)
+    if ((*format_line_runner)->rect() != (*screen_line_runner)->rect() ||
+        !(*format_line_runner)->Equal(*screen_line_runner)) {
       break;
+    }
     ++format_line_runner;
     ++screen_line_runner;
   }

@@ -423,6 +423,7 @@
         'editor/dialog_box.cc',
         'editor/dom_lock.cc',
         'gfx_base.cpp',
+        'gfx/size_f.cc',
         'views/frame_list.cc',
         'views/frame_observer.cc',
         'views/tab_strip.cc',

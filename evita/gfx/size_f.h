@@ -80,4 +80,8 @@ typedef Size_<D2D1_SIZE_U, uint32_t> SizeU;
   static_cast<int>((size).width * 1000), \
   static_cast<int>((size).height * 1000)
 
+#include <ostream>
+std::ostream& operator<<(std::ostream& ostream, const gfx::SizeF& size);
+std::ostream& operator<<(std::ostream& ostream, const gfx::SizeF* size);
+
 #endif //!defined(INCLUDE_gfx_size_f_h)

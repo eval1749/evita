@@ -86,5 +86,24 @@ void Cell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
   FillBackground(gfx, rect);
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// FillerCell
+//
+FillerCell::FillerCell(Color bgcolor, float width, float height)
+    : Cell(bgcolor, width, height) {
+}
+
+FillerCell::FillerCell(const FillerCell& other)
+    : Cell(other) {
+}
+
+FillerCell::~FillerCell() {
+}
+
+Cell* FillerCell::Copy() const {
+  return new FillerCell(*this);
+}
+
 }  // namespace rendering
 }  // namespace views

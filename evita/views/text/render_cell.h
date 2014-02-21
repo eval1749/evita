@@ -46,6 +46,21 @@ class Cell : public common::Castable {
                                const gfx::RectF& rect) const;
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// FillerCell
+//
+class FillerCell final : public Cell {
+  DECLARE_CASTABLE_CLASS(FillerCell, Cell);
+
+  public: FillerCell(Color bgcolor, float width, float height);
+  public: FillerCell(const FillerCell& other);
+  public: virtual ~FillerCell();
+
+  // rendering::Cell
+  private: virtual Cell* Copy() const override;
+};
+
 }  // namespace rendering
 }  // namespace views
 

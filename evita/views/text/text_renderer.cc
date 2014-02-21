@@ -83,33 +83,6 @@ static void DrawText(const gfx::Graphics& gfx, const Font& font,
 
 //////////////////////////////////////////////////////////////////////
 //
-// FillerCell
-//
-class FillerCell final : public Cell {
-  DECLARE_CASTABLE_CLASS(FillerCell, Cell);
-
-  public: FillerCell(Color cr, float cx, float cy)
-      : Cell(cr, cx, cy) {
-  }
-
-  public: FillerCell(const FillerCell& other);
-  public: virtual ~FillerCell();
-
-  public: virtual Cell* Copy() const override {
-    return new FillerCell(*this);
-  }
-
-};
-
-FillerCell::FillerCell(const FillerCell& other)
-    : Cell(other) {
-}
-
-FillerCell::~FillerCell() {
-}
-
-//////////////////////////////////////////////////////////////////////
-//
 // MarkerCell
 //
 class MarkerCell final : public Cell {

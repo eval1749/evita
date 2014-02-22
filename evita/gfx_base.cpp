@@ -290,6 +290,10 @@ Graphics::~Graphics() {
     render_target_->Release();
 }
 
+void Graphics::AddObserver(Observer* observer) {
+  observers_.AddObserver(observer);
+}
+
 void Graphics::BeginDraw() const {
   #if DEBUG_DRAW
     DEBUG_PRINTF("%p nesting=%d\n", render_target_, batch_nesting_level_);
@@ -326,8 +330,6 @@ bool Graphics::EndDraw() {
         Debugger::Printf("ID2D1RenderTarget::EndDraw failed hr=0x%0X\n", hr);
       }
   }
-  if (::IsDebuggerPresent())
-    __debugbreak();
   render_target_->Release();
   const_cast<Graphics*>(this)->render_target_ = nullptr;
   const_cast<Graphics*>(this)->Reinitialize();
@@ -369,6 +371,11 @@ void Graphics::Reinitialize() {
   render_target_->GetDpi(&dpi.width, &dpi.height);
   UpdateDpi(dpi);
   render_target_->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
+  FOR_EACH_OBSERVER(Observer, observers_, ShouldDiscardResources());
+}
+
+void Graphics::RemoveObserver(Observer* observer) {
+  observers_.RemoveObserver(observer);
 }
 
 void Graphics::Resize(const Rect& rc) const {

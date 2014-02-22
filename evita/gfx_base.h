@@ -9,6 +9,10 @@
 #include <memory>
 
 #include "base/basictypes.h"
+#pragma warning(push)
+#pragma warning(disable: 4625 4626)
+#include "base/observer_list.h"
+#pragma warning(pop)
 #include "base/logging.h"
 #include "base/memory/ref_counted.h"
 #include "common/memory/singleton.h"
@@ -147,9 +151,17 @@ class TextLayout : public SimpleObject_<IDWriteTextLayout> {
 };
 
 class Graphics : public Object, public DpiHandler {
+  public: class Observer {
+    public: Observer();
+    public: virtual ~Observer();
+
+    public: virtual void ShouldDiscardResources() = 0;
+  };
+
   private: mutable int batch_nesting_level_;
   private: scoped_refptr<FactorySet> factory_set_;
   private: HWND hwnd_;
+  private: ObserverList<Observer> observers_;
   private: ID2D1HwndRenderTarget* render_target_;
   private: mutable void* work_;
 
@@ -196,6 +208,9 @@ class Graphics : public Object, public DpiHandler {
     return reinterpret_cast<T*>(work_); 
   }
   public: void set_work(void* ptr) const { work_ = ptr; }
+
+  // [A]
+  public: void AddObserver(Observer* observer);
 
   // [B]
   public: void BeginDraw() const;
@@ -272,6 +287,7 @@ class Graphics : public Object, public DpiHandler {
 
   // [R]
   private: void Reinitialize();
+  public: void RemoveObserver(Observer* observer);
   public: void Resize(const Rect& rc) const;
 
   DISALLOW_COPY_AND_ASSIGN(Graphics);

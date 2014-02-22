@@ -19,6 +19,7 @@ namespace views {
 
 namespace rendering {
   class Cell;
+  class ScreenTextBlock;
   class TextBlock;
   class TextFormatter;
   class TextBlock;
@@ -32,6 +33,7 @@ namespace rendering {
 class TextRenderer : public text::BufferMutationObserver {
   private: typedef common::win::Rect Rect;
   private: typedef rendering::Cell Cell;
+  public: typedef rendering::ScreenTextBlock ScreenTextBlock;
   private: typedef rendering::Selection Selection;
   public: typedef rendering::TextBlock TextBlock;
   public: typedef rendering::TextLine Line;
@@ -41,7 +43,7 @@ class TextRenderer : public text::BufferMutationObserver {
   private: Posn m_lStart;
   private: Posn m_lEnd;
   private: Color m_crBackground;
-  private: std::unique_ptr<TextBlock> screen_text_block_;
+  private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
   private: Selection selection_;
   private: std::unique_ptr<TextBlock> text_block_;
 
@@ -73,7 +75,7 @@ class TextRenderer : public text::BufferMutationObserver {
   public: void Prepare(const Selection&);
 
   // [R]
-  public: bool Render();
+  public: void Render();
   public: void Reset();
 
   // [S]

@@ -32,7 +32,7 @@ class TextLine {
 
   private: TextLine(const TextLine& other);
   public: TextLine();
-  private: ~TextLine();
+  public: ~TextLine();
 
   public: float bottom() const { return rect_.bottom; }
   public: const std::vector<Cell*>& cells() const { return cells_; }

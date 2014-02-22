@@ -110,16 +110,5 @@ void TextLine::Render(const gfx::Graphics& gfx) const {
   gfx.Flush();
 }
 
-void TextLine::Reset() {
-  for (auto cell : cells_) {
-    delete cell;
-  }
-  cells_.clear();
-  rect_ = gfx::RectF();
-  m_nHash = 0;
-  m_lStart = -1;
-  m_lEnd = -1;
-}
-
 }  // namespace rendering
 }  // namespace views

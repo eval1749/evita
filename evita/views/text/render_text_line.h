@@ -55,7 +55,6 @@ class TextLine {
   public: uint Hash() const;
   public: Posn MapXToPosn(const gfx::Graphics&, float) const;
   public: void Render(const gfx::Graphics& gfx) const;
-  private: void Reset();
 };
 
 } // namespace rendering

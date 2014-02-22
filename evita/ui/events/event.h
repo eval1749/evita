@@ -36,6 +36,7 @@ enum class KeyCode {
   Insert = VK_INSERT | 0x100,
   PageDown  = VK_NEXT | 0x100,
   PageUp = VK_PRIOR | 0x100,
+  Pause = VK_PAUSE | 0x100,
   Tab = VK_TAB | 0x100,
 };
 

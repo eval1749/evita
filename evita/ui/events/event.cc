@@ -39,8 +39,12 @@ int KeyCodeMapper::Map(int virtual_key_code) {
 
   auto key_code = graph_keys_[static_cast<size_t>(virtual_key_code)];
 
-  if (!key_code)
-   key_code = virtual_key_code | 0x100;
+  if (!key_code) {
+   if (virtual_key_code == VK_CANCEL)
+     key_code = VK_PAUSE | 0x100;
+   else
+     key_code = virtual_key_code | 0x100;
+  }
 
   if (::GetKeyState(VK_CONTROL) < 0) {
     key_code |= static_cast<int>(Modifier::Control);

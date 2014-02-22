@@ -78,7 +78,7 @@ TextLine* TextRenderer::FindLine(Posn lPosn) const {
     return nullptr;
 
   for (auto const line : text_block_->lines()) {
-    if (lPosn < line->m_lEnd)
+    if (lPosn < line->text_end())
       return line;
   }
 
@@ -165,7 +165,7 @@ gfx::RectF TextRenderer::MapPosnToPoint(Posn lPosn) const {
 
   auto y = text_block_->top();
   for (auto const line : text_block_->lines()) {
-    if (lPosn >= line->m_lStart && lPosn < line->m_lEnd) {
+    if (lPosn >= line->text_start() && lPosn < line->text_end()) {
         auto x = text_block_->left();
         for (const auto cell : line->cells()) {
           float cx = cell->MapPosnToX(*gfx_, lPosn);

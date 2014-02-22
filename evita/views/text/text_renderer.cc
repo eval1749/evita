@@ -16,6 +16,7 @@
 #include "evita/gfx_base.h"
 #include "evita/dom/buffer.h"
 #include "evita/views/text/render_cell.h"
+#include "evita/views/text/render_text_block.h"
 #include "evita/views/text/render_text_line.h"
 #include "evita/views/text/text_formatter.h"
 
@@ -67,7 +68,9 @@ TextRenderer::TextRenderer(text::Buffer* buffer)
       m_pBuffer(buffer),
       m_lStart(0),
       m_lEnd(0),
-      m_crBackground(0) {
+      m_crBackground(0),
+      text_block_(new TextBlock()),
+      screen_text_block_(new TextBlock()) {
   m_pBuffer->AddObserver(this);
 }
 
@@ -77,9 +80,9 @@ TextRenderer::~TextRenderer() {
 
 void TextRenderer::fillBottom() const {
   DCHECK(gfx_);
-  auto const lines_bottom = m_oFormatBuf.top() + m_oFormatBuf.GetHeight();
-  if (lines_bottom < m_oFormatBuf.bottom()) {
-    gfx::RectF rect(m_oFormatBuf.rect());
+  auto const lines_bottom = text_block_->top() + text_block_->GetHeight();
+  if (lines_bottom < text_block_->bottom()) {
+    gfx::RectF rect(text_block_->rect());
     rect.top = lines_bottom;
     #if DEBUG_RENDER
       DEBUG_PRINTF("fill rect #%06X " DEBUG_RECTF_FORMAT "\n",
@@ -100,15 +103,15 @@ void TextRenderer::fillBottom() const {
   auto const num_columns = 81;
   auto const width_of_M = AlignWidthToPixel(*gfx_, pFont->GetCharWidth('M'));
   drawVLine(*gfx_, gfx::Brush(*gfx_, gfx::ColorF::LightGray),
-            m_oFormatBuf.left() + width_of_M * num_columns,
-            m_oFormatBuf.top(), m_oFormatBuf.bottom());
+            text_block_->left() + width_of_M * num_columns,
+            text_block_->top(), text_block_->bottom());
 }
 
 void TextRenderer::fillRight(const TextLine* pLine) const {
   DCHECK(gfx_);
   gfx::RectF rc;
-  rc.left  = m_oFormatBuf.left() + pLine->GetWidth();
-  rc.right = m_oFormatBuf.right();
+  rc.left  = text_block_->left() + pLine->GetWidth();
+  rc.right = text_block_->right();
   if (rc.left >= rc.right)
     return;
   rc.top = pLine->top();
@@ -120,7 +123,7 @@ TextLine* TextRenderer::FindLine(Posn lPosn) const {
   if (lPosn < m_lStart || lPosn > m_lEnd)
     return nullptr;
 
-  for (auto const line : m_oFormatBuf.lines()) {
+  for (auto const line : text_block_->lines()) {
     if (lPosn < line->m_lEnd)
       return line;
   }
@@ -131,17 +134,19 @@ TextLine* TextRenderer::FindLine(Posn lPosn) const {
 
 void TextRenderer::Format(Posn lStart) {
   DCHECK(gfx_);
-  m_oFormatBuf.Reset();
+  text_block_->Reset();
   m_lStart = lStart;
 
-  TextFormatter oFormatter(*gfx_, &m_oFormatBuf, m_pBuffer, lStart, selection_);
+  TextFormatter oFormatter(*gfx_, text_block_.get(), m_pBuffer, lStart,
+                           selection_);
   oFormatter.Format();
-  m_lEnd = GetLastLine()->GetEnd();
+  m_lEnd = text_block_->GetLast()->GetEnd();
 }
 
 TextLine* TextRenderer::FormatLine(Posn lStart) {
   DCHECK(gfx_);
-  TextFormatter oFormatter(*gfx_, &m_oFormatBuf, m_pBuffer, lStart, selection_);
+  TextFormatter oFormatter(*gfx_, text_block_.get(), m_pBuffer, lStart,
+                           selection_);
   return oFormatter.FormatLine();
 }
 
@@ -151,10 +156,10 @@ bool TextRenderer::isPosnVisible(Posn lPosn) const {
   if (lPosn >= m_lEnd)
     return false;
 
-  auto y = m_oFormatBuf.top();
-  for (const auto& line : m_oFormatBuf.lines()) {
+  auto y = text_block_->top();
+  for (const auto& line : text_block_->lines()) {
     if (lPosn >= line->GetStart() && lPosn < line->GetEnd())
-      return y + line->GetHeight() <= m_oFormatBuf.bottom();
+      return y + line->GetHeight() <= text_block_->bottom();
     y += line->GetHeight();
   }
   return false;
@@ -162,20 +167,20 @@ bool TextRenderer::isPosnVisible(Posn lPosn) const {
 
 Posn TextRenderer::MapPointToPosn(gfx::PointF pt) const {
   DCHECK(gfx_);
-  if (pt.y < m_oFormatBuf.top())
+  if (pt.y < text_block_->top())
     return GetStart();
-  if (pt.y >= m_oFormatBuf.bottom())
+  if (pt.y >= text_block_->bottom())
     return GetEnd();
 
-  auto yLine = m_oFormatBuf.top();
-  for (const auto line : m_oFormatBuf.lines()) {
+  auto yLine = text_block_->top();
+  for (const auto line : text_block_->lines()) {
     auto const y = pt.y - yLine;
     yLine += line->GetHeight();
 
     if (y >= line->GetHeight())
       continue;
 
-    auto xCell = m_oFormatBuf.left();
+    auto xCell = text_block_->left();
     if (pt.x < xCell)
       return line->GetStart();
 
@@ -204,10 +209,10 @@ gfx::RectF TextRenderer::MapPosnToPoint(Posn lPosn) const {
   if (lPosn < m_lStart || lPosn > m_lEnd)
     return gfx::RectF();
 
-  auto y = m_oFormatBuf.top();
-  for (auto const line : m_oFormatBuf.lines()) {
+  auto y = text_block_->top();
+  for (auto const line : text_block_->lines()) {
     if (lPosn >= line->m_lStart && lPosn < line->m_lEnd) {
-        auto x = m_oFormatBuf.left();
+        auto x = text_block_->left();
         for (const auto cell : line->cells()) {
           float cx = cell->MapPosnToX(*gfx_, lPosn);
           if (cx >= 0) {
@@ -229,7 +234,7 @@ int TextRenderer::pageLines() const {
   auto const pFont = FontSet::Get(*gfx_, m_pBuffer->GetDefaultStyle())->
         FindFont(*gfx_, 'x');
   auto const height = AlignHeightToPixel(*gfx_, pFont->height());
-  return static_cast<int>(m_oFormatBuf.height() / height);
+  return static_cast<int>(text_block_->height() / height);
 }
 
 void TextRenderer::Prepare(const Selection& selection) {
@@ -360,14 +365,14 @@ class LineCopier {
 
 bool TextRenderer::Render() {
   DCHECK(gfx_);
-  DCHECK(!m_oFormatBuf.rect().empty());
-  DCHECK(!m_oScreenBuf.rect().empty());
+  DCHECK(!text_block_->rect().empty());
+  DCHECK(!screen_text_block_->rect().empty());
   auto number_of_rendering = 0;
-  m_oFormatBuf.EnsureLinePoints();
-  auto const format_line_end = m_oFormatBuf.lines().end();
-  auto format_line_runner = m_oFormatBuf.lines().begin();
-  auto const screen_line_end = m_oScreenBuf.lines().end();
-  auto screen_line_runner = m_oScreenBuf.lines().begin();
+  text_block_->EnsureLinePoints();
+  auto const format_line_end = text_block_->lines().end();
+  auto format_line_runner = text_block_->lines().begin();
+  auto const screen_line_end = screen_text_block_->lines().end();
+  auto screen_line_runner = screen_text_block_->lines().begin();
   while (format_line_runner != format_line_end &&
          screen_line_runner != screen_line_end) {
     if ((*format_line_runner)->rect() != (*screen_line_runner)->rect() ||
@@ -379,10 +384,10 @@ bool TextRenderer::Render() {
   }
 
   if (format_line_runner != format_line_end) {
-    LineCopier line_copier(*gfx_, &m_oFormatBuf, &m_oScreenBuf);
+    LineCopier line_copier(*gfx_, text_block_.get(), screen_text_block_.get());
     // Note: LineCopier uses ID2D1Bitmap::CopyFromRenderTarget. It should be
     // called without clipping.
-    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, m_oFormatBuf.rect());
+    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, text_block_->rect());
     while (format_line_runner != format_line_end) {
       format_line_runner = line_copier.TryCopy(format_line_runner);
       if (format_line_runner == format_line_end)
@@ -398,12 +403,12 @@ bool TextRenderer::Render() {
   fillBottom();
 
   // Update m_oScreenBuf for next rendering.
-  m_oScreenBuf.Reset();
-  for (const auto line : m_oFormatBuf.lines()) {
-    m_oScreenBuf.Append(line->Copy());
+  screen_text_block_->Reset();
+  for (const auto line : text_block_->lines()) {
+    screen_text_block_->Append(line->Copy());
   }
 
-  m_oScreenBuf.Finish();
+  screen_text_block_->Finish();
 
   #if DEBUG_RENDER
     if (number_of_rendering >= 1) {
@@ -415,43 +420,43 @@ bool TextRenderer::Render() {
                    number_of_rendering,
                    m_lStart, m_lEnd,
                    selection_.start, selection_.end,
-                   DEBUG_RECTF_ARG(m_oScreenBuf.rect()));
+                   DEBUG_RECTF_ARG(screen_text_block_->rect()));
     }
   #endif // DEBUG_RENDER
   return number_of_rendering > 0;
 }
 
 void TextRenderer::Reset() {
-  m_oScreenBuf.Reset();
+  screen_text_block_->Reset();
 }
 
 bool TextRenderer::ScrollDown() {
   DCHECK(gfx_);
-  if (m_oFormatBuf.GetHeight() >= m_oFormatBuf.height() &&
-      !m_oFormatBuf.ScrollDown()) {
+  if (text_block_->GetHeight() >= text_block_->height() &&
+      !text_block_->ScrollDown()) {
     // This page shows only one line.
     return false;
   }
 
   auto const lGoal  = m_lStart - 1;
   auto const lStart = m_pBuffer->ComputeStartOfLine(lGoal);
-  TextFormatter formatter(*gfx_, &m_oFormatBuf, m_pBuffer, lStart, selection_);
+  TextFormatter formatter(*gfx_, text_block_.get(), m_pBuffer, lStart, selection_);
 
   for (;;) {
     auto const line = formatter.FormatLine();
     if (lGoal < line->GetEnd()) {
-      m_oFormatBuf.Prepend(line);
+      text_block_->Prepend(line);
       break;
     }
   }
 
-  while (m_oFormatBuf.GetHeight() > m_oFormatBuf.height()) {
-    if (!m_oFormatBuf.ScrollDown())
+  while (text_block_->GetHeight() > text_block_->height()) {
+    if (!text_block_->ScrollDown())
       break;
   }
 
-  m_lStart = m_oFormatBuf.GetFirst()->GetStart();
-  m_lEnd = m_oFormatBuf.GetLast()->GetEnd();
+  m_lStart = text_block_->GetFirst()->GetStart();
+  m_lEnd = text_block_->GetLast()->GetEnd();
   return true;
 }
 
@@ -516,28 +521,28 @@ bool TextRenderer::ScrollUp() {
   // the last line may not be fully visible.
 
   // Recycle the first line.
-  if (!m_oFormatBuf.ScrollUp()) {
+  if (!text_block_->ScrollUp()) {
     // This page shows only one line.
     return false;
   }
 
-  TextFormatter oFormatter(*gfx_, &m_oFormatBuf, m_pBuffer,
-                           GetLastLine()->GetEnd(), selection_);
+  TextFormatter oFormatter(*gfx_, text_block_.get(), m_pBuffer,
+                           text_block_->GetLast()->GetEnd(), selection_);
 
   auto const line = oFormatter.FormatLine();
-  m_oFormatBuf.Append(line);
+  text_block_->Append(line);
 
-  auto const cyTextRenderer = m_oFormatBuf.height();
+  auto const cyTextRenderer = text_block_->height();
   auto more = true;
-  while (m_oFormatBuf.GetHeight() > cyTextRenderer) {
-    if (!m_oFormatBuf.ScrollUp()) {
+  while (text_block_->GetHeight() > cyTextRenderer) {
+    if (!text_block_->ScrollUp()) {
       more = false;
       break;
     }
   }
 
-  m_lStart = m_oFormatBuf.GetFirst()->GetStart();
-  m_lEnd = m_oFormatBuf.GetLast()->GetEnd();
+  m_lStart = text_block_->GetFirst()->GetStart();
+  m_lEnd = text_block_->GetLast()->GetEnd();
   return more;
 }
 
@@ -547,13 +552,13 @@ void TextRenderer::SetGraphics(const gfx::Graphics* gfx) {
 
 void TextRenderer::SetRect(const Rect& rect) {
   gfx::RectF rectf(rect);
-  m_oFormatBuf.SetRect(rectf);
-  m_oScreenBuf.SetRect(rectf);
+  text_block_->SetRect(rectf);
+  screen_text_block_->SetRect(rectf);
 }
 
 bool TextRenderer::ShouldFormat(const Selection& selection,
                                 bool fSelection) const {
-  if (m_oFormatBuf.dirty())
+  if (text_block_->dirty())
     return true;
 
   // Buffer
@@ -640,16 +645,16 @@ bool TextRenderer::ShouldFormat(const Selection& selection,
 }
 
 bool TextRenderer::ShouldRender() const {
-  return m_oScreenBuf.dirty();
+  return screen_text_block_->dirty();
 }
 
 // text::BufferMutationObserver
 void TextRenderer::DidDeleteAt(Posn offset, size_t) {
-  m_oFormatBuf.SetBufferDirtyOffset(offset);
+  text_block_->SetBufferDirtyOffset(offset);
 }
 
 void TextRenderer::DidInsertAt(Posn offset, size_t) {
-  m_oFormatBuf.SetBufferDirtyOffset(offset);
+  text_block_->SetBufferDirtyOffset(offset);
 }
 
 }  // namespaec views

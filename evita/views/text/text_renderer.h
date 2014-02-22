@@ -5,11 +5,12 @@
 #if !defined(INCLUDE_evita_views_text_text_renderer_h)
 #define INCLUDE_evita_views_text_text_renderer_h
 
+#include <memory>
+
 #include "evita/gfx_base.h"
 #include "evita/vi_style.h"
 #include "evita/text/buffer_mutation_observer.h"
 #include "evita/views/text/render_selection.h"
-#include "evita/views/text/render_text_block.h"
 
 class Font;
 class Style;
@@ -20,6 +21,7 @@ namespace rendering {
   class Cell;
   class TextBlock;
   class TextFormatter;
+  class TextBlock;
   class TextLine;
 };
 
@@ -39,9 +41,9 @@ class TextRenderer : public text::BufferMutationObserver {
   private: Posn m_lStart;
   private: Posn m_lEnd;
   private: Color m_crBackground;
-  private: TextBlock m_oFormatBuf;
-  private: TextBlock m_oScreenBuf;
+  private: std::unique_ptr<TextBlock> screen_text_block_;
   private: Selection selection_;
+  private: std::unique_ptr<TextBlock> text_block_;
 
   public: TextRenderer(text::Buffer* buffer);
   public: ~TextRenderer();
@@ -55,8 +57,6 @@ class TextRenderer : public text::BufferMutationObserver {
 
   // [G]
   public: text::Buffer* GetBuffer() const { return m_pBuffer; }
-  public: Line* GetFirstLine() const { return m_oFormatBuf.GetFirst(); }
-  public: Line* GetLastLine() const { return m_oFormatBuf.GetLast(); }
   public: Posn GetStart() const { return m_lStart; }
   public: Posn GetEnd() const { return m_lEnd; }
 

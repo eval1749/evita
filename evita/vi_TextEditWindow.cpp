@@ -142,14 +142,8 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
   }
 
   auto lStart = GetBuffer()->ComputeStartOfLine(lGoal);
-  // TODO(yosi) We should use another object for formatting line instead of
-  // TextRenderer.
-  TextRenderer oTextRenderer(text_renderer_->GetBuffer());
-  oTextRenderer.Prepare(selection);
-  oTextRenderer.SetGraphics(m_gfx);
-  oTextRenderer.SetRect(rect());
   for (;;) {
-    auto const pLine = oTextRenderer.FormatLine(lStart);
+    auto const pLine = text_renderer_->FormatLine(lStart);
     auto const lEnd = pLine->GetEnd();
     if (lGoal < lEnd)
       return pLine->MapXToPosn(*m_gfx, xGoal);
@@ -279,15 +273,9 @@ Posn TextEditWindow::EndOfLine(Posn lPosn) {
   if (lPosn >= lBufEnd)
     return lBufEnd;
 
-  // TODO(yosi) We should use another object for formatting line instead of
-  // |TextRenderer|.
-  TextRenderer oTextRenderer(text_renderer_->GetBuffer());
-  oTextRenderer.Prepare(selection);
-  oTextRenderer.SetGraphics(m_gfx);
-  oTextRenderer.SetRect(rect());
   auto lStart = selection_->GetBuffer()->ComputeStartOfLine(lPosn);
   for (;;) {
-    auto const pLine = oTextRenderer.FormatLine(lStart);
+    auto const pLine = text_renderer_->FormatLine(lStart);
     lStart = pLine->GetEnd();
     if (lPosn < lStart)
       return lStart - 1;
@@ -658,14 +646,8 @@ Posn TextEditWindow::StartOfLine(Posn lPosn) {
   if (!lStart)
     return 0;
 
-  // TODO(yosi) We should use another object for formatting line instead of
-  // TextRenderer.
-  TextRenderer oTextRenderer(text_renderer_->GetBuffer());
-  oTextRenderer.Prepare(selection);
-  oTextRenderer.SetGraphics(m_gfx);
-  oTextRenderer.SetRect(rect());
   for (;;) {
-    auto const pLine = oTextRenderer.FormatLine(lStart);
+    auto const pLine = text_renderer_->FormatLine(lStart);
     auto const lEnd = pLine->GetEnd();
     if (lPosn < lEnd)
       return pLine->GetStart();

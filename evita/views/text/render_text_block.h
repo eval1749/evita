@@ -43,10 +43,11 @@ class TextBlock {
   public: float GetHeight() const { return m_cy; }
   public: TextLine* GetLast() const { return lines_.back(); }
   public: void Prepend(TextLine*);
-  public: void Reset(const gfx::RectF& page_rect);
+  public: void Reset();
   public: TextLine* ScrollDown();
   public: TextLine* ScrollUp();
   public: void SetBufferDirtyOffset(Posn offset);
+  public: void SetRect(const gfx::RectF& rect);
 };
 
 } // namespace rendering

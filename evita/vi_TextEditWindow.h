@@ -177,7 +177,10 @@ class TextEditWindow
   private: BOOL showImeCaret(SIZE, POINT);
   #endif // SUPPORT_IME
 
-  // ContentWindow
+  // ui::Widget
+  private: virtual void DidResize() override;
+
+  // views::ContentWindow
   private: virtual int GetIconIndex() const override;
 
   DISALLOW_COPY_AND_ASSIGN(TextEditWindow);

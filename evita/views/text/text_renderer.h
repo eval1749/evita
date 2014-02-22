@@ -48,12 +48,10 @@ class TextRenderer : public text::BufferMutationObserver {
   // [F]
   private: void fillBottom(const gfx::Graphics&) const;
   private: void fillRight(const gfx::Graphics&, const Line*) const;
-  private: void formatAux(const gfx::Graphics&, const gfx::RectF, Posn);
+  private: void formatAux(const gfx::Graphics& gfx, Posn start);
   public: Line* FindLine(Posn) const;
-  public: void Format(const gfx::Graphics&, gfx::RectF, Posn start);
-  public: Line* FormatLine(const gfx::Graphics& gfx,
-                           const gfx::RectF& page_rect,
-                           Posn start);
+  public: void Format(const gfx::Graphics&, Posn start);
+  public: Line* FormatLine(const gfx::Graphics& gfx, Posn start);
 
   // [G]
   public: text::Buffer* GetBuffer() const { return m_pBuffer; }
@@ -83,7 +81,8 @@ class TextRenderer : public text::BufferMutationObserver {
   public: bool ScrollToPosn(const gfx::Graphics&, Posn target_position);
   public: bool ScrollUp(const gfx::Graphics&);
   public: void SetBufferDirtyOffset(Posn offset);
-  public: bool ShouldFormat(const Rect& page_rect, const Selection& selection,
+  public: void SetRect(const Rect& rect);
+  public: bool ShouldFormat(const Selection& selection,
                             bool check_selection_color = false) const;
   public: bool ShouldRender() const;
 

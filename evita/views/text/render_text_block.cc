@@ -52,12 +52,7 @@ void TextBlock::Prepend(TextLine* line) {
   dirty_line_point_ = true;
 }
 
-void TextBlock::Reset(const gfx::RectF& new_rect) {
-  #if DEBUG_DISPBUF
-    DEBUG_PRINTF("%p " DEBUG_RECTF_FORMAT " to " DEBUG_RECTF_FORMAT "\n",
-        this, DEBUG_RECTF_ARG(rect()), DEBUG_RECTF_ARG(new_rect));
-  #endif
-
+void TextBlock::Reset() {
   for (auto const line : lines_) {
     delete line;
   }
@@ -66,7 +61,6 @@ void TextBlock::Reset(const gfx::RectF& new_rect) {
   dirty_ = true;
   dirty_line_point_ = true;
   m_cy = 0;
-  rect_ = new_rect;
 }
 
 TextLine* TextBlock::ScrollDown() {
@@ -95,6 +89,11 @@ void TextBlock::SetBufferDirtyOffset(Posn offset) {
     return;
   dirty_ = GetFirst()->GetStart() >= offset ||
            GetLast()->GetEnd() >= offset;
+}
+
+void TextBlock::SetRect(const gfx::RectF& rect) {
+  rect_ = rect;
+  Reset();
 }
 
 }  // namespace rendering

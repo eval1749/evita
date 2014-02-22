@@ -111,12 +111,14 @@ TextFormatter::TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
     : filler_color_(buffer->GetDefaultStyle()->GetBackground()), m_gfx(gfx),
       selection_(selection), text_block_(text_block),
       m_oEnumCI(new EnumCI(buffer, lStart)) {
+  DCHECK(!text_block_->rect().empty());
 }
 
 TextFormatter::~TextFormatter() {
 }
 
 void TextFormatter::Format() {
+  DCHECK(!text_block_->rect().empty());
   for (;;) {
     auto const pLine = new TextLine();
 
@@ -144,6 +146,7 @@ void TextFormatter::Format() {
 
 // Returns true if more contents is avaialble, otherwise returns false.
 bool TextFormatter::FormatLine(TextLine* pLine) {
+  DCHECK(!text_block_->rect().empty());
   auto fMoreContents = true;
   pLine->set_start(m_oEnumCI->GetPosn());
 

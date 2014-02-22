@@ -127,16 +127,12 @@ TextLine* TextRenderer::FindLine(Posn lPosn) const {
   return nullptr;
 }
 
-void TextRenderer::Format(const gfx::Graphics& gfx, gfx::RectF page_rect,
-                          Posn lStart) {
-  ASSERT(!page_rect.empty());
-  formatAux(gfx, page_rect, lStart);
+void TextRenderer::Format(const gfx::Graphics& gfx, Posn lStart) {
+  formatAux(gfx, lStart);
 }
 
-void TextRenderer::formatAux(const gfx::Graphics& gfx, gfx::RectF page_rect,
-                     Posn lStart) {
-  ASSERT(!page_rect.empty());
-  m_oFormatBuf.Reset(page_rect);
+void TextRenderer::formatAux(const gfx::Graphics& gfx, Posn lStart) {
+  m_oFormatBuf.Reset();
   m_lStart = lStart;
 
   TextFormatter oFormatter(gfx, &m_oFormatBuf, m_pBuffer, lStart, selection_);
@@ -144,10 +140,8 @@ void TextRenderer::formatAux(const gfx::Graphics& gfx, gfx::RectF page_rect,
   m_lEnd = GetLastLine()->GetEnd();
 }
 
-TextLine* TextRenderer::FormatLine(const gfx::Graphics& gfx,
-                             const gfx::RectF& page_rect, Posn lStart) {
-  m_oFormatBuf.Reset(page_rect);
-
+TextLine* TextRenderer::FormatLine(const gfx::Graphics& gfx, Posn lStart) {
+  m_oFormatBuf.Reset();
   TextFormatter oFormatter(gfx, &m_oFormatBuf, m_pBuffer, lStart, selection_);
   auto const line = new TextLine();
   oFormatter.FormatLine(line);
@@ -401,7 +395,7 @@ bool TextRenderer::Render(const gfx::Graphics& gfx) {
   fillBottom(gfx);
 
   // Update m_oScreenBuf for next rendering.
-  m_oScreenBuf.Reset(m_oFormatBuf.rect());
+  m_oScreenBuf.Reset();
   for (const auto line : m_oFormatBuf.lines()) {
     m_oScreenBuf.Append(line->Copy());
   }
@@ -425,7 +419,7 @@ bool TextRenderer::Render(const gfx::Graphics& gfx) {
 }
 
 void TextRenderer::Reset() {
-  m_oScreenBuf.Reset(gfx::RectF());
+  m_oScreenBuf.Reset();
 }
 
 bool TextRenderer::ScrollDown(const gfx::Graphics& gfx) {
@@ -498,7 +492,7 @@ bool TextRenderer::ScrollToPosn(const gfx::Graphics& gfx, Posn lPosn) {
     DEBUG_PRINTF("%p\n", this);
   #endif // DEBUG_FORMAT
 
-  formatAux(gfx, m_oFormatBuf.rect(), lStart);
+  formatAux(gfx, lStart);
   for (;;) {
     if (isPosnVisible(lPosn))
       break;
@@ -551,24 +545,16 @@ bool TextRenderer::ScrollUp(const gfx::Graphics& gfx) {
   return fMore;
 }
 
-bool TextRenderer::ShouldFormat(const Rect& rc, const Selection& selection,
-                      bool fSelection) const {
+void TextRenderer::SetRect(const Rect& rect) {
+  gfx::RectF rectf(rect);
+  m_oFormatBuf.SetRect(rectf);
+  m_oScreenBuf.SetRect(rectf);
+}
+
+bool TextRenderer::ShouldFormat(const Selection& selection,
+                                bool fSelection) const {
   if (m_oFormatBuf.dirty())
     return true;
-
-  if (rc.width() != m_oFormatBuf.width()) {
-      #if DEBUG_DIRTY
-          DEBUG_PRINTF("%p: Width is changed.\n", this);
-      #endif // DEBUG_DIRTY
-      return true;
-  }
-
-  if (rc.height() != m_oFormatBuf.height()) {
-      #if DEBUG_DIRTY
-          DEBUG_PRINTF("%p: Height is changed.\n", this);
-      #endif // DEBUG_DIRTY
-      return true;
-  }
 
   // Buffer
   auto const lSelStart = selection.start;

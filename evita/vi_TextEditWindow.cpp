@@ -136,7 +136,7 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
     return lGoal;
 
   RenderSelection selection(selection_);
-  if (!text_renderer_->ShouldFormat(rect(), selection)) {
+  if (!text_renderer_->ShouldFormat(selection)) {
     if (auto const line = text_renderer_->FindLine(lGoal))
       return line->MapXToPosn(*m_gfx, xGoal);
   }
@@ -145,10 +145,10 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
   // TODO(yosi) We should not use another object for formatting line instead of
   // TextRenderer.
   TextRenderer oTextRenderer(text_renderer_->GetBuffer());
+  oTextRenderer.SetRect(rect());
   oTextRenderer.Prepare(selection);
-  gfx::RectF page_rect(rect());
   for (;;) {
-    auto const pLine = oTextRenderer.FormatLine(*m_gfx, page_rect, lStart);
+    auto const pLine = oTextRenderer.FormatLine(*m_gfx, lStart);
     auto const lEnd = pLine->GetEnd();
     if (lGoal < lEnd)
       return pLine->MapXToPosn(*m_gfx, xGoal);
@@ -266,7 +266,7 @@ void TextEditWindow::DidShow() {
 Posn TextEditWindow::EndOfLine(Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
   RenderSelection selection(selection_);
-  if (!text_renderer_->ShouldFormat(rect(), selection)) {
+  if (!text_renderer_->ShouldFormat(selection)) {
     auto const pLine = text_renderer_->FindLine(lPosn);
     if (pLine)
       return pLine->GetEnd() - 1;
@@ -287,10 +287,10 @@ Posn TextEditWindow::endOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
   RenderSelection selection(selection_);
   TextRenderer oTextRenderer(text_renderer_->GetBuffer());
   oTextRenderer.Prepare(selection);
-  gfx::RectF page_rect(rect());
+  oTextRenderer.SetRect(rect());
   auto lStart = selection_->GetBuffer()->ComputeStartOfLine(lPosn);
   for (;;) {
-    auto const pLine = oTextRenderer.FormatLine(gfx, page_rect, lStart);
+    auto const pLine = oTextRenderer.FormatLine(gfx, lStart);
     lStart = pLine->GetEnd();
     if (lPosn < lStart)
       return lStart - 1;
@@ -298,7 +298,7 @@ Posn TextEditWindow::endOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
 }
 
 void TextEditWindow::format(const gfx::Graphics& gfx, Posn lStart) {
-  text_renderer_->Format(gfx, gfx::RectF(rect()), lStart);
+  text_renderer_->Format(gfx, lStart);
 }
 
 Buffer* TextEditWindow::GetBuffer() const {
@@ -526,7 +526,7 @@ void TextEditWindow::Redraw() {
 
   {
     auto const lStart = m_pViewRange->GetStart();
-    if (text_renderer_->ShouldFormat(rect(), selection, selection_is_active)) {
+    if (text_renderer_->ShouldFormat(selection, selection_is_active)) {
       text_renderer_->Prepare(selection);
       format(*m_gfx, startOfLineAux(*m_gfx, lStart));
 
@@ -660,7 +660,7 @@ Posn TextEditWindow::StartOfLine(Posn lPosn) {
 // Returns start position of window line of specified position.
 Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
   RenderSelection selection(selection_);
-  if (!text_renderer_->ShouldFormat(rect(), selection)) {
+  if (!text_renderer_->ShouldFormat(selection)) {
     auto const pLine = text_renderer_->FindLine(lPosn);
     if (pLine)
       return pLine->GetStart();
@@ -674,9 +674,9 @@ Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
   // TextRenderer.
   TextRenderer oTextRenderer(text_renderer_->GetBuffer());
   oTextRenderer.Prepare(selection);
-  gfx::RectF page_rect(rect());
+  oTextRenderer.SetRect(rect());
   for (;;) {
-    auto const pLine = oTextRenderer.FormatLine(gfx, page_rect, lStart);
+    auto const pLine = oTextRenderer.FormatLine(gfx, lStart);
     auto const lEnd = pLine->GetEnd();
     if (lPosn < lEnd)
       return pLine->GetStart();
@@ -687,7 +687,7 @@ Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
 void TextEditWindow::updateScreen() {
   UI_ASSERT_DOM_LOCKED();
   RenderSelection selection(selection_);
-  if (!text_renderer_->ShouldFormat(rect(), selection))
+  if (!text_renderer_->ShouldFormat(selection))
     return;
   text_renderer_->Prepare(selection);
   Posn lStart = m_pViewRange->GetStart();
@@ -1089,7 +1089,12 @@ BOOL TextEditWindow::showImeCaret(SIZE sz, POINT pt) {
 
 #endif // SUPPORT_IME
 
-// ContentWindow
+// ui::Widget
+void TextEditWindow::DidResize() {
+  text_renderer_->SetRect(rect());
+}
+
+// views::ContentWindow
 int TextEditWindow::GetIconIndex() const {
   return views::IconCache::instance()->GetIconForFileName(
       GetBuffer()->GetName());

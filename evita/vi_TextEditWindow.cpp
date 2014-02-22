@@ -142,13 +142,14 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
   }
 
   auto lStart = GetBuffer()->ComputeStartOfLine(lGoal);
-  // TODO(yosi) We should not use another object for formatting line instead of
+  // TODO(yosi) We should use another object for formatting line instead of
   // TextRenderer.
   TextRenderer oTextRenderer(text_renderer_->GetBuffer());
-  oTextRenderer.SetRect(rect());
   oTextRenderer.Prepare(selection);
+  oTextRenderer.SetGraphics(m_gfx);
+  oTextRenderer.SetRect(rect());
   for (;;) {
-    auto const pLine = oTextRenderer.FormatLine(*m_gfx, lStart);
+    auto const pLine = oTextRenderer.FormatLine(lStart);
     auto const lEnd = pLine->GetEnd();
     if (lGoal < lEnd)
       return pLine->MapXToPosn(*m_gfx, xGoal);
@@ -226,6 +227,7 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
 
 void TextEditWindow::DidChangeHierarchy() {
   m_gfx = &frame().gfx();
+  text_renderer_->SetGraphics(m_gfx);
   auto const parent_hwnd = AssociatedHwnd();
   if (auto const hwnd = m_oHoriScrollBar.GetHwnd())
     ::SetParent(hwnd, parent_hwnd);
@@ -249,6 +251,7 @@ void TextEditWindow::DidRealize() {
   auto const frame = Frame::FindFrame(*this);
   ASSERT(frame);
   m_gfx = &frame->gfx();
+  text_renderer_->SetGraphics(m_gfx);
 }
 
 void TextEditWindow::DidSetFocus() {
@@ -273,32 +276,22 @@ Posn TextEditWindow::EndOfLine(Posn lPosn) {
   }
 
   auto const lBufEnd = selection_->GetBuffer()->GetEnd();
-  return lPosn >= lBufEnd ? lBufEnd : endOfLineAux(*m_gfx, lPosn);
-}
-
-Posn TextEditWindow::endOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
-  UI_ASSERT_DOM_LOCKED();
-  auto const lBufEnd = selection_->GetBuffer()->GetEnd();
   if (lPosn >= lBufEnd)
     return lBufEnd;
 
-  // TODO(yosi) We should not use another object for formatting line instead of
-  // TextRenderer.
-  RenderSelection selection(selection_);
+  // TODO(yosi) We should use another object for formatting line instead of
+  // |TextRenderer|.
   TextRenderer oTextRenderer(text_renderer_->GetBuffer());
   oTextRenderer.Prepare(selection);
+  oTextRenderer.SetGraphics(m_gfx);
   oTextRenderer.SetRect(rect());
   auto lStart = selection_->GetBuffer()->ComputeStartOfLine(lPosn);
   for (;;) {
-    auto const pLine = oTextRenderer.FormatLine(gfx, lStart);
+    auto const pLine = oTextRenderer.FormatLine(lStart);
     lStart = pLine->GetEnd();
     if (lPosn < lStart)
       return lStart - 1;
   }
-}
-
-void TextEditWindow::format(const gfx::Graphics& gfx, Posn lStart) {
-  text_renderer_->Format(gfx, lStart);
 }
 
 Buffer* TextEditWindow::GetBuffer() const {
@@ -345,7 +338,7 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
 
       // Scroll down until page start goes out to page.
       do {
-        if (!text_renderer_->ScrollDown(*m_gfx))
+        if (!text_renderer_->ScrollDown())
           break;
       } while (text_renderer_->GetEnd() != lStart);
     }
@@ -356,7 +349,7 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
       auto const lStart = text_renderer_->GetEnd();
       if (lStart >= lBufEnd)
         break;
-      format(*m_gfx, lStart);
+      text_renderer_->Format(lStart);
     }
   }
 
@@ -377,7 +370,7 @@ void TextEditWindow::MakeSelectionVisible() {
 
 Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
   updateScreen();
-  return std::min(text_renderer_->MapPointToPosn(*m_gfx, pt), GetBuffer()->GetEnd());
+  return std::min(text_renderer_->MapPointToPosn(pt), GetBuffer()->GetEnd());
 }
 
 // Description:
@@ -389,9 +382,9 @@ gfx::RectF TextEditWindow::MapPosnToPoint(Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
   updateScreen();
   for (;;) {
-    if (auto rect = text_renderer_->MapPosnToPoint(*m_gfx, lPosn))
+    if (auto rect = text_renderer_->MapPosnToPoint(lPosn))
       return rect;
-    text_renderer_->ScrollToPosn(*m_gfx, lPosn);
+    text_renderer_->ScrollToPosn(lPosn);
   }
 }
 
@@ -489,8 +482,8 @@ void TextEditWindow::onVScroll(uint nCode) {
       oInfo.cbSize = sizeof(oInfo);
       oInfo.fMask = SIF_ALL;
       if (m_oVertScrollBar.GetInfo(&oInfo)) {
-        auto const lStart = startOfLineAux(*m_gfx, oInfo.nTrackPos);
-        format(*m_gfx, lStart);
+        auto const lStart = StartOfLine(oInfo.nTrackPos);
+        text_renderer_->Format(lStart);
         Render();
       }
       break;
@@ -528,22 +521,22 @@ void TextEditWindow::Redraw() {
     auto const lStart = m_pViewRange->GetStart();
     if (text_renderer_->ShouldFormat(selection, selection_is_active)) {
       text_renderer_->Prepare(selection);
-      format(*m_gfx, startOfLineAux(*m_gfx, lStart));
+      text_renderer_->Format(StartOfLine(lStart));
 
       if (m_lCaretPosn != lCaretPosn) {
         // FIXME 2007-05-12 Fill the page with lines.
-        text_renderer_->ScrollToPosn(*m_gfx, lCaretPosn);
+        text_renderer_->ScrollToPosn(lCaretPosn);
         m_lCaretPosn = lCaretPosn;
       }
     } else if (m_lCaretPosn != lCaretPosn) {
       text_renderer_->Prepare(selection);
-      text_renderer_->ScrollToPosn(*m_gfx, lCaretPosn);
+      text_renderer_->ScrollToPosn(lCaretPosn);
       m_lCaretPosn = lCaretPosn;
     } else if (text_renderer_->GetStart() != lStart) {
       text_renderer_->Prepare(selection);
-      format(*m_gfx, startOfLineAux(*m_gfx, lStart));
+      text_renderer_->Format(StartOfLine(lStart));
     } else if (!text_renderer_->ShouldRender()) {
-      // TextRenderer is clean.
+      // The screen is clean.
       if (!m_fImeTarget)
         caret_->ShouldBlink();
       return;
@@ -559,7 +552,7 @@ void TextEditWindow::Render() {
 
   gfx::Graphics::DrawingScope drawing_scope(*m_gfx);
   caret_->Hide();
-  text_renderer_->Render(*m_gfx);
+  text_renderer_->Render();
 
   {
     auto const lStart = text_renderer_->GetStart();
@@ -567,7 +560,7 @@ void TextEditWindow::Render() {
     updateScrollBar();
   }
 
-  const auto rect = text_renderer_->MapPosnToPoint(*m_gfx, m_lCaretPosn);
+  const auto rect = text_renderer_->MapPosnToPoint(m_lCaretPosn);
   if (!rect) {
     caret_->Reset();
     return;
@@ -616,11 +609,11 @@ int TextEditWindow::SmallScroll(int, int iDy) {
     for (k = 0; k < iDy; ++k) {
       if (lStart == lBufStart)
         break;
-        lStart = startOfLineAux(*m_gfx, lStart - 1);
+        lStart = StartOfLine(lStart - 1);
     }
 
     if (k > 0) {
-      format(*m_gfx, lStart);
+      text_renderer_->Format(lStart);
       Render();
     }
     return k;
@@ -632,12 +625,12 @@ int TextEditWindow::SmallScroll(int, int iDy) {
     for (k = 0; k < iDy; ++k) {
       if (text_renderer_->GetEnd() >= lBufEnd) {
           // Make sure whole line of buffer end is visible.
-          text_renderer_->ScrollToPosn(*m_gfx, lBufEnd);
+          text_renderer_->ScrollToPosn(lBufEnd);
           ++k;
           break;
       }
 
-      if (!text_renderer_->ScrollUp(*m_gfx))
+      if (!text_renderer_->ScrollUp())
         break;
     }
 
@@ -651,14 +644,9 @@ int TextEditWindow::SmallScroll(int, int iDy) {
 
 Posn TextEditWindow::StartOfLine(Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
-  return lPosn <= 0 ? 0 : startOfLineAux(*m_gfx, lPosn);
-}
+  if (lPosn <= 0 )
+    return 0;
 
-// See Also:
-// EditPange::endOfLineAux
-// Description:
-// Returns start position of window line of specified position.
-Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
   RenderSelection selection(selection_);
   if (!text_renderer_->ShouldFormat(selection)) {
     auto const pLine = text_renderer_->FindLine(lPosn);
@@ -670,13 +658,14 @@ Posn TextEditWindow::startOfLineAux(const gfx::Graphics& gfx, Posn lPosn) {
   if (!lStart)
     return 0;
 
-  // TODO(yosi) We should not use another object for formatting line instead of
+  // TODO(yosi) We should use another object for formatting line instead of
   // TextRenderer.
   TextRenderer oTextRenderer(text_renderer_->GetBuffer());
   oTextRenderer.Prepare(selection);
+  oTextRenderer.SetGraphics(m_gfx);
   oTextRenderer.SetRect(rect());
   for (;;) {
-    auto const pLine = oTextRenderer.FormatLine(gfx, lStart);
+    auto const pLine = oTextRenderer.FormatLine(lStart);
     auto const lEnd = pLine->GetEnd();
     if (lPosn < lEnd)
       return pLine->GetStart();
@@ -691,8 +680,8 @@ void TextEditWindow::updateScreen() {
     return;
   text_renderer_->Prepare(selection);
   Posn lStart = m_pViewRange->GetStart();
-  lStart = startOfLineAux(*m_gfx, lStart);
-  format(*m_gfx, lStart);
+  lStart = StartOfLine(lStart);
+  text_renderer_->Format(lStart);
 }
 
 void TextEditWindow::updateScrollBar() {

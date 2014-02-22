@@ -34,6 +34,7 @@ class TextRenderer : public text::BufferMutationObserver {
   public: typedef rendering::TextBlock TextBlock;
   public: typedef rendering::TextLine Line;
 
+  private: const gfx::Graphics* gfx_;
   private: text::Buffer* const m_pBuffer;
   private: Posn m_lStart;
   private: Posn m_lEnd;
@@ -46,12 +47,11 @@ class TextRenderer : public text::BufferMutationObserver {
   public: ~TextRenderer();
 
   // [F]
-  private: void fillBottom(const gfx::Graphics&) const;
-  private: void fillRight(const gfx::Graphics&, const Line*) const;
-  private: void formatAux(const gfx::Graphics& gfx, Posn start);
+  private: void fillBottom() const;
+  private: void fillRight(const Line*) const;
   public: Line* FindLine(Posn) const;
-  public: void Format(const gfx::Graphics&, Posn start);
-  public: Line* FormatLine(const gfx::Graphics& gfx, Posn start);
+  public: void Format(Posn start);
+  public: Line* FormatLine(Posn start);
 
   // [G]
   public: text::Buffer* GetBuffer() const { return m_pBuffer; }
@@ -65,22 +65,23 @@ class TextRenderer : public text::BufferMutationObserver {
 
   // [M]
   public: void MakePosnVisible(Posn);
-  public: Posn MapPointToPosn(const gfx::Graphics&, gfx::PointF) const;
-  public: gfx::RectF MapPosnToPoint(const gfx::Graphics&, Posn) const;
+  public: Posn MapPointToPosn(gfx::PointF) const;
+  public: gfx::RectF MapPosnToPoint(Posn) const;
 
   // [P]
-  private: int pageLines(const gfx::Graphics&) const;
+  private: int pageLines() const;
   public: void Prepare(const Selection&);
 
   // [R]
-  public: bool Render(const gfx::Graphics&);
+  public: bool Render();
   public: void Reset();
 
   // [S]
-  public: bool ScrollDown(const gfx::Graphics&);
-  public: bool ScrollToPosn(const gfx::Graphics&, Posn target_position);
-  public: bool ScrollUp(const gfx::Graphics&);
+  public: bool ScrollDown();
+  public: bool ScrollToPosn(Posn target_position);
+  public: bool ScrollUp();
   public: void SetBufferDirtyOffset(Posn offset);
+  public: void SetGraphics(const gfx::Graphics* gfx);
   public: void SetRect(const Rect& rect);
   public: bool ShouldFormat(const Selection& selection,
                             bool check_selection_color = false) const;

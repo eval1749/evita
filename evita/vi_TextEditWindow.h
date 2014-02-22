@@ -121,10 +121,6 @@ class TextEditWindow
 
   // [E]
   public: Posn EndOfLine(Posn);
-  private: Posn endOfLineAux(const gfx::Graphics&, Posn);
-
-  // [F]
-  private: void format(const gfx::Graphics&, Posn);
 
   // [G]
   public: dom::Buffer* GetBuffer() const;
@@ -161,7 +157,6 @@ class TextEditWindow
   public: void SetScrollBar(HWND, int);
   public: int SmallScroll(int, int);
   public: Posn StartOfLine(Posn);
-  private: Posn startOfLineAux(const gfx::Graphics&, Posn);
 
   // [U]
   private: void updateScreen();

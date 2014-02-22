@@ -63,7 +63,8 @@ using namespace rendering;
 // TextRenderer
 //
 TextRenderer::TextRenderer(text::Buffer* buffer)
-    : m_pBuffer(buffer),
+    : gfx_(nullptr),
+      m_pBuffer(buffer),
       m_lStart(0),
       m_lEnd(0),
       m_crBackground(0) {
@@ -74,7 +75,8 @@ TextRenderer::~TextRenderer() {
   m_pBuffer->RemoveObserver(this);
 }
 
-void TextRenderer::fillBottom(const gfx::Graphics& gfx) const {
+void TextRenderer::fillBottom() const {
+  DCHECK(gfx_);
   auto const lines_bottom = m_oFormatBuf.top() + m_oFormatBuf.GetHeight();
   if (lines_bottom < m_oFormatBuf.bottom()) {
     gfx::RectF rect(m_oFormatBuf.rect());
@@ -83,27 +85,27 @@ void TextRenderer::fillBottom(const gfx::Graphics& gfx) const {
       DEBUG_PRINTF("fill rect #%06X " DEBUG_RECTF_FORMAT "\n",
           m_crBackground, DEBUG_RECTF_ARG(rect));
     #endif
-    fillRect(gfx, rect, ColorToColorF(m_crBackground));
+    fillRect(*gfx_, rect, ColorToColorF(m_crBackground));
   }
 
   // FIXME 2007-08-05 yosi@msn.com We should expose show/hide
   // ruler settings to both script and UI.
 
   // Ruler
-  auto const pFont = FontSet::Get(gfx, m_pBuffer->GetDefaultStyle())->
-    FindFont(gfx, 'x');
+  auto const pFont = FontSet::Get(*gfx_, m_pBuffer->GetDefaultStyle())->
+    FindFont(*gfx_, 'x');
 
   // FIXME 2007-08-05 yosi@msn.com We should expose rule position to
   // user.
   auto const num_columns = 81;
-  auto const width_of_M = AlignWidthToPixel(gfx, pFont->GetCharWidth('M'));
-  drawVLine(gfx, gfx::Brush(gfx, gfx::ColorF::LightGray),
+  auto const width_of_M = AlignWidthToPixel(*gfx_, pFont->GetCharWidth('M'));
+  drawVLine(*gfx_, gfx::Brush(*gfx_, gfx::ColorF::LightGray),
             m_oFormatBuf.left() + width_of_M * num_columns,
             m_oFormatBuf.top(), m_oFormatBuf.bottom());
 }
 
-void TextRenderer::fillRight(const gfx::Graphics& gfx,
-                             const TextLine* pLine) const {
+void TextRenderer::fillRight(const TextLine* pLine) const {
+  DCHECK(gfx_);
   gfx::RectF rc;
   rc.left  = m_oFormatBuf.left() + pLine->GetWidth();
   rc.right = m_oFormatBuf.right();
@@ -111,7 +113,7 @@ void TextRenderer::fillRight(const gfx::Graphics& gfx,
     return;
   rc.top = pLine->top();
   rc.bottom = ::ceilf(rc.top + pLine->GetHeight());
-  fillRect(gfx, rc, ColorToColorF(m_crBackground));
+  fillRect(*gfx_, rc, ColorToColorF(m_crBackground));
 }
 
 TextLine* TextRenderer::FindLine(Posn lPosn) const {
@@ -127,22 +129,21 @@ TextLine* TextRenderer::FindLine(Posn lPosn) const {
   return nullptr;
 }
 
-void TextRenderer::Format(const gfx::Graphics& gfx, Posn lStart) {
-  formatAux(gfx, lStart);
-}
-
-void TextRenderer::formatAux(const gfx::Graphics& gfx, Posn lStart) {
+void TextRenderer::Format(Posn lStart) {
+  DCHECK(gfx_);
   m_oFormatBuf.Reset();
   m_lStart = lStart;
 
-  TextFormatter oFormatter(gfx, &m_oFormatBuf, m_pBuffer, lStart, selection_);
+  TextFormatter oFormatter(*gfx_, &m_oFormatBuf, m_pBuffer, lStart, selection_);
   oFormatter.Format();
   m_lEnd = GetLastLine()->GetEnd();
 }
 
-TextLine* TextRenderer::FormatLine(const gfx::Graphics& gfx, Posn lStart) {
+TextLine* TextRenderer::FormatLine(Posn lStart) {
+  DCHECK(gfx_);
+  // TODO(yosi) Why do we need to reset |TextBlock|?
   m_oFormatBuf.Reset();
-  TextFormatter oFormatter(gfx, &m_oFormatBuf, m_pBuffer, lStart, selection_);
+  TextFormatter oFormatter(*gfx_, &m_oFormatBuf, m_pBuffer, lStart, selection_);
   auto const line = new TextLine();
   oFormatter.FormatLine(line);
   return line;
@@ -163,8 +164,8 @@ bool TextRenderer::isPosnVisible(Posn lPosn) const {
   return false;
 }
 
-Posn TextRenderer::MapPointToPosn(const gfx::Graphics& gfx,
-                                  gfx::PointF pt) const {
+Posn TextRenderer::MapPointToPosn(gfx::PointF pt) const {
+  DCHECK(gfx_);
   if (pt.y < m_oFormatBuf.top())
     return GetStart();
   if (pt.y >= m_oFormatBuf.bottom())
@@ -186,7 +187,7 @@ Posn TextRenderer::MapPointToPosn(const gfx::Graphics& gfx,
     for (const auto cell : line->cells()) {
       auto x = pt.x - xCell;
       xCell += cell->m_cx;
-      auto lMap = cell->MapXToPosn(gfx, x);
+      auto lMap = cell->MapXToPosn(*gfx_, x);
       if (lMap >= 0)
         lPosn = lMap;
       if (x >= 0 && x < cell->m_cx)
@@ -202,8 +203,8 @@ Posn TextRenderer::MapPointToPosn(const gfx::Graphics& gfx,
 //
 // A TextRenderer object must be formatted with the latest buffer.
 //
-gfx::RectF TextRenderer::MapPosnToPoint(const gfx::Graphics& gfx,
-                                        Posn lPosn) const {
+gfx::RectF TextRenderer::MapPosnToPoint(Posn lPosn) const {
+  DCHECK(gfx_);
   if (lPosn < m_lStart || lPosn > m_lEnd)
     return gfx::RectF();
 
@@ -212,7 +213,7 @@ gfx::RectF TextRenderer::MapPosnToPoint(const gfx::Graphics& gfx,
     if (lPosn >= line->m_lStart && lPosn < line->m_lEnd) {
         auto x = m_oFormatBuf.left();
         for (const auto cell : line->cells()) {
-          float cx = cell->MapPosnToX(gfx, lPosn);
+          float cx = cell->MapPosnToX(*gfx_, lPosn);
           if (cx >= 0) {
             return gfx::RectF(gfx::PointF(x + cx, y),
                               gfx::SizeF(cell->m_cx, cell->m_cy));
@@ -227,10 +228,11 @@ gfx::RectF TextRenderer::MapPosnToPoint(const gfx::Graphics& gfx,
 
 // Returns number of lines to be displayed in this page when using
 // buffer's default style.
-int TextRenderer::pageLines(const gfx::Graphics& gfx) const {
-  auto const pFont = FontSet::Get(gfx, m_pBuffer->GetDefaultStyle())->
-        FindFont(gfx, 'x');
-  auto const height = AlignHeightToPixel(gfx, pFont->height());
+int TextRenderer::pageLines() const {
+  DCHECK(gfx_);
+  auto const pFont = FontSet::Get(*gfx_, m_pBuffer->GetDefaultStyle())->
+        FindFont(*gfx_, 'x');
+  auto const height = AlignHeightToPixel(*gfx_, pFont->height());
   return static_cast<int>(m_oFormatBuf.height() / height);
 }
 
@@ -357,8 +359,10 @@ class LineCopier {
 
 } // namespace
 
-bool TextRenderer::Render(const gfx::Graphics& gfx) {
-  ASSERT(!m_oFormatBuf.rect().empty());
+bool TextRenderer::Render() {
+  DCHECK(gfx_);
+  DCHECK(!m_oFormatBuf.rect().empty());
+  DCHECK(!m_oScreenBuf.rect().empty());
   auto number_of_rendering = 0;
   m_oFormatBuf.EnsureLinePoints();
   auto const format_line_end = m_oFormatBuf.lines().end();
@@ -376,23 +380,23 @@ bool TextRenderer::Render(const gfx::Graphics& gfx) {
   }
 
   if (format_line_runner != format_line_end) {
-    LineCopier line_copier(gfx, &m_oFormatBuf, &m_oScreenBuf);
+    LineCopier line_copier(*gfx_, &m_oFormatBuf, &m_oScreenBuf);
     // Note: LineCopier uses ID2D1Bitmap::CopyFromRenderTarget. It should be
     // called without clipping.
-    gfx::Graphics::AxisAlignedClipScope clip_scope(gfx, m_oFormatBuf.rect());
+    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, m_oFormatBuf.rect());
     while (format_line_runner != format_line_end) {
       format_line_runner = line_copier.TryCopy(format_line_runner);
       if (format_line_runner == format_line_end)
         break;
       auto const format_line = *format_line_runner;
-      format_line->Render(gfx);
-      fillRight(gfx, format_line);
+      format_line->Render(*gfx_);
+      fillRight(format_line);
       ++number_of_rendering;
       ++format_line_runner;
     }
   }
 
-  fillBottom(gfx);
+  fillBottom();
 
   // Update m_oScreenBuf for next rendering.
   m_oScreenBuf.Reset();
@@ -422,7 +426,8 @@ void TextRenderer::Reset() {
   m_oScreenBuf.Reset();
 }
 
-bool TextRenderer::ScrollDown(const gfx::Graphics& gfx) {
+bool TextRenderer::ScrollDown() {
+  DCHECK(gfx_);
   if (!m_lStart) {
     // This page shows start of buffer.
     return false;
@@ -437,7 +442,7 @@ bool TextRenderer::ScrollDown(const gfx::Graphics& gfx) {
 
   auto const lGoal  = m_lStart - 1;
   auto const lStart = m_pBuffer->ComputeStartOfLine(lGoal);
-  TextFormatter formatter(gfx, &m_oFormatBuf, m_pBuffer, lStart, selection_);
+  TextFormatter formatter(*gfx_, &m_oFormatBuf, m_pBuffer, lStart, selection_);
 
   do {
     pLine->Reset();
@@ -458,23 +463,24 @@ bool TextRenderer::ScrollDown(const gfx::Graphics& gfx) {
   return true;
 }
 
-bool TextRenderer::ScrollToPosn(const gfx::Graphics& gfx, Posn lPosn) {
+bool TextRenderer::ScrollToPosn(Posn lPosn) {
+  DCHECK(gfx_);
   if (isPosnVisible(lPosn))
     return false;
 
-  auto const cLines = pageLines(gfx);
+  auto const cLines = pageLines();
   auto const cLines2 = std::max(cLines / 2, 1);
 
   if (lPosn > m_lStart) {
     for (auto k = 0; k < cLines2; k++) {
-        if (!ScrollUp(gfx))
+        if (!ScrollUp())
           return k;
         if (isPosnVisible(lPosn))
           return true;
     }
   } else {
     for (int k = 0; k < cLines2; k++) {
-      if (!ScrollDown(gfx))
+      if (!ScrollDown())
         return k;
       if (isPosnVisible(lPosn))
         return true;
@@ -492,11 +498,11 @@ bool TextRenderer::ScrollToPosn(const gfx::Graphics& gfx, Posn lPosn) {
     DEBUG_PRINTF("%p\n", this);
   #endif // DEBUG_FORMAT
 
-  formatAux(gfx, lStart);
+  Format(lStart);
   for (;;) {
     if (isPosnVisible(lPosn))
       break;
-    if (!ScrollUp(gfx))
+    if (!ScrollUp())
       break;
   }
 
@@ -504,15 +510,16 @@ bool TextRenderer::ScrollToPosn(const gfx::Graphics& gfx, Posn lPosn) {
   // posibble to fit in page.
   if (GetEnd() >= m_pBuffer->GetEnd()) {
     while (isPosnVisible(lPosn)) {
-      if (!ScrollDown(gfx))
+      if (!ScrollDown())
         return true;
     }
-    ScrollUp(gfx);
+    ScrollUp();
   }
   return true;
 }
 
-bool TextRenderer::ScrollUp(const gfx::Graphics& gfx) {
+bool TextRenderer::ScrollUp() {
+  DCHECK(gfx_);
   // Note: We should scroll up if page shows end of buffer. Since,
   // the last line may not be fully visible.
 
@@ -525,7 +532,7 @@ bool TextRenderer::ScrollUp(const gfx::Graphics& gfx) {
 
   pLine->Reset();
 
-  TextFormatter oFormatter(gfx, &m_oFormatBuf, m_pBuffer,
+  TextFormatter oFormatter(*gfx_, &m_oFormatBuf, m_pBuffer,
                            GetLastLine()->GetEnd(), selection_);
 
   auto const fMore = oFormatter.FormatLine(pLine);
@@ -543,6 +550,10 @@ bool TextRenderer::ScrollUp(const gfx::Graphics& gfx) {
   m_lEnd   = GetLastLine()->GetEnd();
 
   return fMore;
+}
+
+void TextRenderer::SetGraphics(const gfx::Graphics* gfx) {
+  gfx_ = gfx;
 }
 
 void TextRenderer::SetRect(const Rect& rect) {

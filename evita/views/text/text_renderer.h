@@ -9,7 +9,6 @@
 
 #include "evita/gfx_base.h"
 #include "evita/vi_style.h"
-#include "evita/text/buffer_mutation_observer.h"
 #include "evita/views/text/render_selection.h"
 
 class Font;
@@ -30,7 +29,7 @@ namespace rendering {
 //
 // TextRenderer
 //
-class TextRenderer : public text::BufferMutationObserver {
+class TextRenderer {
   private: typedef common::win::Rect Rect;
   private: typedef rendering::Cell Cell;
   public: typedef rendering::ScreenTextBlock ScreenTextBlock;
@@ -82,16 +81,11 @@ class TextRenderer : public text::BufferMutationObserver {
   public: bool ScrollDown();
   public: bool ScrollToPosn(Posn target_position);
   public: bool ScrollUp();
-  public: void SetBufferDirtyOffset(Posn offset);
   public: void SetGraphics(const gfx::Graphics* gfx);
   public: void SetRect(const Rect& rect);
   public: bool ShouldFormat(const Selection& selection,
                             bool check_selection_color = false) const;
   public: bool ShouldRender() const;
-
-  // text::BufferMutationObserver
-  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
-  private: virtual void DidInsertAt(Posn offset, size_t length) override;
 
   DISALLOW_COPY_AND_ASSIGN(TextRenderer);
 };

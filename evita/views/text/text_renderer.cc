@@ -9,7 +9,6 @@
 #include "evita/views/text/text_renderer.h"
 
 #include <algorithm>
-#include <list>
 #include <memory>
 #include <utility>
 
@@ -65,12 +64,10 @@ TextRenderer::TextRenderer(text::Buffer* buffer)
       m_lEnd(0),
       m_crBackground(0),
       screen_text_block_(new ScreenTextBlock()),
-      text_block_(new TextBlock()) {
-  m_pBuffer->AddObserver(this);
+      text_block_(new TextBlock(buffer)) {
 }
 
 TextRenderer::~TextRenderer() {
-  m_pBuffer->RemoveObserver(this);
 }
 
 TextLine* TextRenderer::FindLine(Posn lPosn) const {
@@ -441,15 +438,6 @@ bool TextRenderer::ShouldFormat(const Selection& selection,
 
 bool TextRenderer::ShouldRender() const {
   return screen_text_block_->dirty();
-}
-
-// text::BufferMutationObserver
-void TextRenderer::DidDeleteAt(Posn offset, size_t) {
-  text_block_->SetBufferDirtyOffset(offset);
-}
-
-void TextRenderer::DidInsertAt(Posn offset, size_t) {
-  text_block_->SetBufferDirtyOffset(offset);
 }
 
 }  // namespaec views

@@ -8,6 +8,7 @@
 #include <list>
 
 #include "evita/gfx_base.h"
+#include "evita/text/buffer_mutation_observer.h"
 #include "evita/vi_style.h"
 
 namespace views {
@@ -15,14 +16,15 @@ namespace rendering {
 
 class TextLine;
 
-class TextBlock {
+class TextBlock : public text::BufferMutationObserver {
   private: bool dirty_;
   private: bool dirty_line_point_;
   private: float m_cy;
   private: std::list<TextLine*> lines_;
   private: gfx::RectF rect_;
+  private: text::Buffer* const text_buffer_;
 
-  public: TextBlock();
+  public: TextBlock(text::Buffer* buffer);
   public: ~TextBlock();
 
   public: float bottom() const { return rect_.bottom; }
@@ -41,18 +43,23 @@ class TextBlock {
   public: TextLine* GetFirst() const { return lines_.front(); }
   public: float GetHeight() const { return m_cy; }
   public: TextLine* GetLast() const { return lines_.back(); }
+  private: void InvalidateLines(text::Posn offset);
   public: void Prepend(TextLine*);
   public: void Reset();
   // Returns true if scrolled.
   public: bool ScrollDown();
   // Returns true if scrolled.
   public: bool ScrollUp();
-  public: void SetBufferDirtyOffset(Posn offset);
   public: void SetRect(const gfx::RectF& rect);
+
+  // text::BufferMutationObserver
+  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
+  private: virtual void DidInsertAt(Posn offset, size_t length) override;
+
+  DISALLOW_COPY_AND_ASSIGN(TextBlock);
 };
 
 } // namespace rendering
 } // namespace views
 
 #endif //!defined(INCLUDE_evita_views_text_render_text_block_h)
-

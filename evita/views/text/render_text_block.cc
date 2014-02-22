@@ -4,18 +4,22 @@
 
 #include "evita/views/text/render_text_block.h"
 
+#include "evita/text/buffer.h"
 #include "evita/views/text/render_text_line.h"
 
 namespace views {
 namespace rendering {
 
-TextBlock::TextBlock()
+TextBlock::TextBlock(text::Buffer* text_buffer)
     : dirty_(true),
       dirty_line_point_(true),
-      m_cy(0) {
+      m_cy(0),
+      text_buffer_(text_buffer) {
+  text_buffer->AddObserver(this);
 }
 
 TextBlock::~TextBlock() {
+  text_buffer_->RemoveObserver(this);
 }
 
 void TextBlock::Append(TextLine* pLine) {
@@ -43,6 +47,13 @@ void TextBlock::EnsureLinePoints() {
 void TextBlock::Finish() {
   dirty_ = lines_.empty();
   dirty_line_point_ = dirty_;
+}
+
+void TextBlock::InvalidateLines(text::Posn offset) {
+  if (dirty_)
+    return;
+  if (GetFirst()->GetStart() >= offset || GetLast()->GetEnd() >= offset)
+    Reset();
 }
 
 void TextBlock::Prepend(TextLine* line) {
@@ -86,16 +97,18 @@ bool TextBlock::ScrollUp() {
   return true;
 }
 
-void TextBlock::SetBufferDirtyOffset(Posn offset) {
-  if (dirty_)
-    return;
-  dirty_ = GetFirst()->GetStart() >= offset ||
-           GetLast()->GetEnd() >= offset;
-}
-
 void TextBlock::SetRect(const gfx::RectF& rect) {
   rect_ = rect;
   Reset();
+}
+
+// text::BufferMutationObserver
+void TextBlock::DidDeleteAt(Posn offset, size_t) {
+  InvalidateLines(offset);
+}
+
+void TextBlock::DidInsertAt(Posn offset, size_t) {
+  InvalidateLines(offset);
 }
 
 }  // namespace rendering

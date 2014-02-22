@@ -144,9 +144,7 @@ TextLine* TextRenderer::FormatLine(Posn lStart) {
   // TODO(yosi) Why do we need to reset |TextBlock|?
   m_oFormatBuf.Reset();
   TextFormatter oFormatter(*gfx_, &m_oFormatBuf, m_pBuffer, lStart, selection_);
-  auto const line = new TextLine();
-  oFormatter.FormatLine(line);
-  return line;
+  return oFormatter.FormatLine();
 }
 
 bool TextRenderer::isPosnVisible(Posn lPosn) const {
@@ -428,14 +426,8 @@ void TextRenderer::Reset() {
 
 bool TextRenderer::ScrollDown() {
   DCHECK(gfx_);
-  if (!m_lStart) {
-    // This page shows start of buffer.
-    return false;
-  }
-
-  auto const pLine = m_oFormatBuf.GetHeight() < m_oFormatBuf.height() ?
-      new TextLine() : m_oFormatBuf.ScrollDown();
-  if (!pLine) {
+  if (m_oFormatBuf.GetHeight() >= m_oFormatBuf.height() &&
+      !m_oFormatBuf.ScrollDown()) {
     // This page shows only one line.
     return false;
   }
@@ -444,22 +436,21 @@ bool TextRenderer::ScrollDown() {
   auto const lStart = m_pBuffer->ComputeStartOfLine(lGoal);
   TextFormatter formatter(*gfx_, &m_oFormatBuf, m_pBuffer, lStart, selection_);
 
-  do {
-    pLine->Reset();
-    formatter.FormatLine(pLine);
-  } while (lGoal >= pLine->GetEnd());
-
-  m_oFormatBuf.Prepend(pLine);
-
-  while (m_oFormatBuf.GetHeight() > m_oFormatBuf.height()) {
-    auto const pLast = m_oFormatBuf.ScrollDown();
-    if (!pLast)
+  for (;;) {
+    auto const line = formatter.FormatLine();
+    if (lGoal < line->GetEnd()) {
+      m_oFormatBuf.Prepend(line);
       break;
-    delete pLast;
+    }
   }
 
-  m_lStart = GetFirstLine()->GetStart();
-  m_lEnd   = GetLastLine()->GetEnd();
+  while (m_oFormatBuf.GetHeight() > m_oFormatBuf.height()) {
+    if (!m_oFormatBuf.ScrollDown())
+      break;
+  }
+
+  m_lStart = m_oFormatBuf.GetFirst()->GetStart();
+  m_lEnd = m_oFormatBuf.GetLast()->GetEnd();
   return true;
 }
 
@@ -524,32 +515,29 @@ bool TextRenderer::ScrollUp() {
   // the last line may not be fully visible.
 
   // Recycle the first line.
-  auto const pLine = m_oFormatBuf.ScrollUp();
-  if (!pLine) {
+  if (!m_oFormatBuf.ScrollUp()) {
     // This page shows only one line.
     return false;
   }
 
-  pLine->Reset();
-
   TextFormatter oFormatter(*gfx_, &m_oFormatBuf, m_pBuffer,
                            GetLastLine()->GetEnd(), selection_);
 
-  auto const fMore = oFormatter.FormatLine(pLine);
-  m_oFormatBuf.Append(pLine);
+  auto const line = oFormatter.FormatLine();
+  m_oFormatBuf.Append(line);
 
   auto const cyTextRenderer = m_oFormatBuf.height();
+  auto more = true;
   while (m_oFormatBuf.GetHeight() > cyTextRenderer) {
-    auto const pFirst = m_oFormatBuf.ScrollUp();
-    if (!pFirst)
+    if (!m_oFormatBuf.ScrollUp()) {
+      more = false;
       break;
-    delete pFirst;
+    }
   }
 
-  m_lStart = GetFirstLine()->GetStart();
-  m_lEnd   = GetLastLine()->GetEnd();
-
-  return fMore;
+  m_lStart = m_oFormatBuf.GetFirst()->GetStart();
+  m_lEnd = m_oFormatBuf.GetLast()->GetEnd();
+  return more;
 }
 
 void TextRenderer::SetGraphics(const gfx::Graphics* gfx) {

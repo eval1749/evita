@@ -41,7 +41,7 @@ class TextFormatter {
   public: ~TextFormatter();
 
   public: void Format();
-  public: bool FormatLine(TextLine* line);
+  public: TextLine* FormatLine();
 
   private: Cell* formatChar(Cell*, float x, char16);
   private: Cell* formatMarker(TextMarker marker_name);

@@ -88,6 +88,8 @@ class MarkerCell final : public Cell {
   public: MarkerCell(const MarkerCell& other);
   public: ~MarkerCell();
 
+  public: TextMarker marker_name() const { return marker_name_; }
+
   // rendering::Cell
   private: virtual Cell* Copy() const override;
   private: virtual bool Equal(const Cell* pCell) const override;

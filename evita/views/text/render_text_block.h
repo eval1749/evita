@@ -44,8 +44,10 @@ class TextBlock {
   public: TextLine* GetLast() const { return lines_.back(); }
   public: void Prepend(TextLine*);
   public: void Reset();
-  public: TextLine* ScrollDown();
-  public: TextLine* ScrollUp();
+  // Returns true if scrolled.
+  public: bool ScrollDown();
+  // Returns true if scrolled.
+  public: bool ScrollUp();
   public: void SetBufferDirtyOffset(Posn offset);
   public: void SetRect(const gfx::RectF& rect);
 };

@@ -120,9 +120,7 @@ TextFormatter::~TextFormatter() {
 void TextFormatter::Format() {
   DCHECK(!text_block_->rect().empty());
   for (;;) {
-    auto const pLine = new TextLine();
-
-    bool fMore = FormatLine(pLine);
+    auto const pLine = FormatLine();
     DCHECK_GT(pLine->rect().height(), 0.0f);
 
     text_block_->Append(pLine);
@@ -131,13 +129,15 @@ void TextFormatter::Format() {
     DCHECK_GE(pLine->GetEnd(), pLine->GetStart());
 
     if (text_block_->GetHeight() >= text_block_->height()) {
-      // TextRenderer is filled up with lines.
+      // TextBlock is filled up with lines.
       break;
     }
 
-    if (!fMore) {
-      // We have no more contents. Add a filler line.
-      break;
+    if (auto const marker_cell = pLine->cells().back()->as<MarkerCell>()) {
+      if (marker_cell->marker_name() == TextMarker::EndOfDocument) {
+        // We have no more contents.
+        break;
+      }
     }
   }
 
@@ -145,9 +145,9 @@ void TextFormatter::Format() {
 }
 
 // Returns true if more contents is avaialble, otherwise returns false.
-bool TextFormatter::FormatLine(TextLine* pLine) {
+TextLine* TextFormatter::FormatLine() {
   DCHECK(!text_block_->rect().empty());
-  auto fMoreContents = true;
+  auto const pLine = new TextLine();
   pLine->set_start(m_oEnumCI->GetPosn());
 
   auto x = text_block_->left();
@@ -169,7 +169,6 @@ bool TextFormatter::FormatLine(TextLine* pLine) {
   for (;;) {
     if (m_oEnumCI->AtEnd()) {
       pCell = formatMarker(TextMarker::EndOfDocument);
-      fMoreContents = false;
       break;
     }
 
@@ -216,7 +215,7 @@ bool TextFormatter::FormatLine(TextLine* pLine) {
   pLine->Fix(text_block_->left(), text_block_->top() + text_block_->GetHeight(),
              ascent, descent);
 
-  return fMoreContents;
+  return pLine;
 }
 
 //////////////////////////////////////////////////////////////////////

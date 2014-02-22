@@ -63,25 +63,27 @@ void TextBlock::Reset() {
   m_cy = 0;
 }
 
-TextLine* TextBlock::ScrollDown() {
+bool TextBlock::ScrollDown() {
   if (lines_.empty())
-    return nullptr;
+    return false;
 
   auto const line = lines_.back();
-  lines_.pop_back();
   m_cy -= line->GetHeight();
-  return line;
+  delete line;
+  lines_.pop_back();
+  return true;
 }
 
-TextLine* TextBlock::ScrollUp() {
+bool TextBlock::ScrollUp() {
   if (lines_.empty())
-    return nullptr;
+    return false;
 
   auto const line = lines_.front();
-  lines_.pop_front();
   m_cy -= line->GetHeight();
+  delete line;
+  lines_.pop_front();
   dirty_line_point_ = true;
-  return line;
+  return true;
 }
 
 void TextBlock::SetBufferDirtyOffset(Posn offset) {

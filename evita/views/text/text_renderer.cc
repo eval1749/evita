@@ -141,8 +141,6 @@ void TextRenderer::Format(Posn lStart) {
 
 TextLine* TextRenderer::FormatLine(Posn lStart) {
   DCHECK(gfx_);
-  // TODO(yosi) Why do we need to reset |TextBlock|?
-  m_oFormatBuf.Reset();
   TextFormatter oFormatter(*gfx_, &m_oFormatBuf, m_pBuffer, lStart, selection_);
   return oFormatter.FormatLine();
 }

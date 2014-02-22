@@ -432,6 +432,8 @@ void TextRenderer::Reset() {
 
 bool TextRenderer::ScrollDown() {
   DCHECK(gfx_);
+  if (!m_lStart)
+    return false;
   if (text_block_->GetHeight() >= text_block_->height() &&
       !text_block_->ScrollDown()) {
     // This page shows only one line.

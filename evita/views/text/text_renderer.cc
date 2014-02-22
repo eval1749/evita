@@ -259,18 +259,15 @@ class LineCopier {
                      const TextBlock* destination,
                      const TextBlock* source)
       : gfx_(gfx), destination_(destination), source_(source),
-        screen_bitmap_(CreateBitmap(gfx, destination->rect(), source->rect())) {
+        screen_bitmap_(CreateBitmap(gfx, source)) {
   }
 
   private: static std::unique_ptr<gfx::Bitmap> CreateBitmap(
       const gfx::Graphics& gfx,
-      const gfx::RectF& rect, const gfx::RectF& src_rect) {
-    if (rect.width() > src_rect.width())
+      const TextBlock* source) {
+    if (source->dirty())
       return std::unique_ptr<gfx::Bitmap>();
     gfx::RectU screen_rect(gfx->GetPixelSize());
-    if (static_cast<float>(screen_rect.width()) < src_rect.width())
-      return std::unique_ptr<gfx::Bitmap>();
-
     auto bitmap = std::make_unique<gfx::Bitmap>(gfx);
     auto hr = (*bitmap)->CopyFromRenderTarget(nullptr, gfx, &screen_rect);
     if (FAILED(hr)) {
@@ -310,9 +307,15 @@ class LineCopier {
   }
 
   private: LineIterator FindSameLine(const Line* line) const {
+    auto const top = (*source_->lines().begin())->top();
     for (auto runner = source_->lines().begin();
          runner != source_->lines().end(); ++runner) {
-      if ((*runner)->Equal(line))
+      auto const candidate = *runner;
+      if (candidate->bottom() - top > source_->height()) {
+        // This line is rendered partially.
+        break;
+      }
+      if (candidate->Equal(line))
         return runner;
     }
     return source_->lines().end();

@@ -22,7 +22,6 @@ class TextBlock {
   private: std::list<TextLine*> lines_;
   private: gfx::RectF rect_;
 
-  public: TextBlock(const TextBlock& other);
   public: TextBlock();
   public: ~TextBlock();
 

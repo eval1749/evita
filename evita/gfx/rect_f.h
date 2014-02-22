@@ -67,8 +67,8 @@ class Rect_ : public BaseType {
                  right * size.width, bottom * size.height);
   }
 
-  public: operator bool() const { return !is_empty(); }
-  public: bool operator!() const { return is_empty(); }
+  public: operator bool() const { return !empty(); }
+  public: bool operator!() const { return empty(); }
 
   public: Rect_& operator*=(const SizeType& size) {
     left *= size.width;
@@ -90,7 +90,7 @@ class Rect_ : public BaseType {
 
   public: UnitType height() const { return bottom - top; }
 
-  public: bool is_empty() const {
+  public: bool empty() const {
     return width() <= 0 || height() <= 0;
   }
 
@@ -119,9 +119,9 @@ bool Rect_<BaseType, PointType, SizeType>::Contains(PointF point) const {
 
 template<typename BaseType, typename PointType, typename SizeType>
 void Rect_<BaseType, PointType, SizeType>::Unite(const Rect_& other) {
-  if (other.is_empty())
+  if (other.empty())
     return;
-  if (is_empty()) {
+  if (empty()) {
     *this = other;
     return;
   }

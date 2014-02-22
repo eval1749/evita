@@ -45,7 +45,7 @@ void Caret::BackingStore::Restore(const gfx::Graphics& gfx) {
 
 void Caret::BackingStore::Save(const gfx::Graphics& gfx,
                                const gfx::RectF& rect) {
-  DCHECK(!rect.is_empty());
+  DCHECK(!rect.empty());
   rect_ = gfx::RectF(::floorf(rect.left), ::floorf(rect.top),
                      ::ceilf(rect.right), ::ceilf(rect.bottom));
   gfx::RectU screen_rect = gfx::RectU(static_cast<uint>(rect_.left),

@@ -18,8 +18,8 @@ struct COMMON_EXPORT Size : SIZE {
     this->cy = cy;
   }
 
-  operator bool() const { return !is_empty(); }
-  bool is_empty() const { return cx <= 0 || cx <= 0; }
+  operator bool() const { return !empty(); }
+  bool empty() const { return cx <= 0 || cx <= 0; }
 };
 
 #define DEBUG_SIZE_FORMAT "%dx%d"

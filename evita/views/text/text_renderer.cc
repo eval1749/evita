@@ -129,13 +129,13 @@ TextLine* TextRenderer::FindLine(Posn lPosn) const {
 
 void TextRenderer::Format(const gfx::Graphics& gfx, gfx::RectF page_rect,
                           Posn lStart) {
-  ASSERT(!page_rect.is_empty());
+  ASSERT(!page_rect.empty());
   formatAux(gfx, page_rect, lStart);
 }
 
 void TextRenderer::formatAux(const gfx::Graphics& gfx, gfx::RectF page_rect,
                      Posn lStart) {
-  ASSERT(!page_rect.is_empty());
+  ASSERT(!page_rect.empty());
   m_oFormatBuf.Reset(page_rect);
   m_lStart = lStart;
 
@@ -364,7 +364,7 @@ class LineCopier {
 } // namespace
 
 bool TextRenderer::Render(const gfx::Graphics& gfx) {
-  ASSERT(!m_oFormatBuf.rect().is_empty());
+  ASSERT(!m_oFormatBuf.rect().empty());
   auto number_of_rendering = 0;
   m_oFormatBuf.EnsureLinePoints();
   auto const format_line_end = m_oFormatBuf.lines().end();

@@ -30,8 +30,8 @@ struct COMMON_EXPORT Rect : RECT {
     left = rc.left; right = rc.right; top = rc.top; bottom = rc.bottom;
   }
 
-  operator bool() const { return !is_empty(); }
-  bool is_empty() const { return width() <= 0 || height() <= 0; }
+  operator bool() const { return !empty(); }
+  bool empty() const { return width() <= 0 || height() <= 0; }
   int height() const { return bottom - top; }
   Point left_top() const { return Point(left, top); }
   int width() const { return right - left; }

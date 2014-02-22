@@ -502,7 +502,7 @@ void TableControl::Select(int row_id) {
 
 void TableControl::UpdateViewIfNeeded() {
   auto dirty_rect = model_->ResetDirtyRect();
-  if (!is_shown() || dirty_rect.is_empty())
+  if (!is_shown() || dirty_rect.empty())
     return;
   SchedulePaintInRect(gfx::Rect(dirty_rect));
 }

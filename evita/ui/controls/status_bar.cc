@@ -34,12 +34,12 @@ void StatusBar::Realize(HWND hwndParent) {
       nullptr);
   WIN32_VERIFY(hwnd_);
   WIN32_VERIFY(::GetWindowRect(hwnd_, &rect_));
-  DCHECK(!rect_.is_empty());
+  DCHECK(!rect_.empty());
 }
 
 void StatusBar::ResizeTo(const common::win::Rect& rect) {
   DCHECK(hwnd_);
-  DCHECK(!rect.is_empty());
+  DCHECK(!rect.empty());
   rect_ = rect;
   ::SetWindowPos(hwnd_, nullptr, rect.left, rect.top, rect.width(),
                  rect.height(), SWP_NOZORDER);

@@ -65,7 +65,7 @@ class Size_ : public BaseType {
     return Size_(width / scalar, height / scalar);
   }
 
-  public: bool is_empty() const { return width <= 0 || height <= 0; }
+  public: bool empty() const { return width <= 0 || height <= 0; }
   public: bool is_zero() const { return !width && !height; }
 };
 

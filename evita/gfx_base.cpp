@@ -227,7 +227,7 @@ Brush::~Brush() {
 // DpiHandler
 //
 SizeF DpiHandler::AlignToPixel(const SizeF& size) const {
-  ASSERT(!pixels_per_dip_.is_empty());
+  ASSERT(!pixels_per_dip_.empty());
   return SizeF(MultipleOf(size.width, pixels_per_dip_.width),
                MultipleOf(size.height, pixels_per_dip_.height));
 }

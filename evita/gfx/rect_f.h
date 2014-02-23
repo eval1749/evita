@@ -5,8 +5,8 @@
 
 #include <algorithm>
 
-#include "gfx/point_f.h"
-#include "gfx/size_f.h"
+#include "evita/gfx/point_f.h"
+#include "evita/gfx/size_f.h"
 
 namespace gfx {
 
@@ -143,5 +143,9 @@ typedef Rect_<D2D1_RECT_U, PointU, SizeU> RectU;
     static_cast<int>((rect).top * 1000), \
     static_cast<int>((rect).width() * 1000), \
     static_cast<int>((rect).height() * 1000)
+
+#include <ostream>
+std::ostream& operator<<(std::ostream& ostream, const gfx::RectF& rect);
+std::ostream& operator<<(std::ostream& ostream, const gfx::RectF* rect);
 
 #endif //!defined(INCLUDE_gfx_rect_f_h)

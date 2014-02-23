@@ -76,4 +76,8 @@ typedef Point_<D2D1_POINT_2U, SizeU> PointU;
   static_cast<int>((point).x * 1000), \
   static_cast<int>((point).y * 1000)
 
+#include <ostream>
+std::ostream& operator<<(std::ostream& ostream, const gfx::PointF& point);
+std::ostream& operator<<(std::ostream& ostream, const gfx::PointF* point);
+
 #endif //!defined(INCLUDE_gfx_pont_f_h)

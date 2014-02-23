@@ -657,7 +657,7 @@ Posn TextEditWindow::StartOfLine(Posn lPosn) {
 
 void TextEditWindow::updateScreen() {
   UI_ASSERT_DOM_LOCKED();
-  RenderSelection selection(selection_);
+  RenderSelection selection(selection_, is_selection_active());
   if (!text_renderer_->ShouldFormat(selection))
     return;
   text_renderer_->Prepare(selection);

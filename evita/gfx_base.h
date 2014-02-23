@@ -230,6 +230,10 @@ class Graphics : public Object, public DpiHandler {
   public: Graphics CreateCompatible(const gfx::SizeF& size) const;
 
   // [D]
+  public: void DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
+                          const RectF& src_rect, float opacity = 1.0f,
+                          D2D1_BITMAP_INTERPOLATION_MODE mode =
+                              D2D1_BITMAP_INTERPOLATION_MODE_LINEAR) const;
   public: void DrawLine(const Brush& brush, int sx, int sy, int ex, int ey,
                         float strokeWidth = 1) const {
     DCHECK(drawing());

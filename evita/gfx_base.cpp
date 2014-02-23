@@ -367,6 +367,12 @@ Graphics Graphics::CreateCompatible(const SizeF& size) const {
   return std::move(Graphics(compatible_target.release()));
 }
 
+void Graphics::DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
+                          const RectF& src_rect, float opacity,
+                          D2D1_BITMAP_INTERPOLATION_MODE mode) const {
+  render_target_->DrawBitmap(bitmap, dst_rect, opacity, mode, src_rect);
+}
+
 bool Graphics::EndDraw() {
   #if DEBUG_DRAW
     DEBUG_PRINTF("%p nesting=%d\n", render_target_, batch_nesting_level_);

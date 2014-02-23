@@ -866,22 +866,9 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
               StyleValues::Mask_Color |
               StyleValues::Mask_Decoration;
 
-          #if 0
-              g_pImeStyleTargetNotConverted.m_crBackground =
-                  g_DefaultStyle.GetColor();
-
-              g_pImeStyleTargetNotConverted.m_crColor =
-                  g_DefaultStyle.GetBackground();
-          #else
-              g_pImeStyleTargetNotConverted.m_crBackground =
-                  GetSelection()->GetBackground();
-
-              g_pImeStyleTargetNotConverted.m_crColor =
-                  GetSelection()->GetColor();
-          #endif
-
-          g_pImeStyleTargetNotConverted.m_eDecoration =
-              TextDecoration_None;
+          g_pImeStyleTargetNotConverted.m_crBackground = Color(51, 153, 255);
+          g_pImeStyleTargetNotConverted.m_crColor = Color(255, 255, 255);
+          g_pImeStyleTargetNotConverted.m_eDecoration = TextDecoration_None;
       }
 
       m_fImeTarget = false;

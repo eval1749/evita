@@ -5,6 +5,7 @@
 #include "evita/views/text/screen_text_block.h"
 
 #include "base/logging.h"
+#include "evita/views/text/render_cell.h"
 #include "evita/views/text/render_selection.h"
 #include "evita/views/text/render_text_block.h"
 #include "evita/views/text/render_text_line.h"
@@ -84,9 +85,9 @@ class ScreenTextBlock::RenderContext {
   public: void FillBottom(const TextLine* line) const;
   public: void FillRight(const TextLine* line) const;
   private: std::vector<TextLine*>::const_iterator FindSameLine(
-      const TextLine* line) const;
-  public: LineIterator TryCopy(const LineIterator& new_start,
-                               const LineIterator& new_end) const;
+      TextLine* line) const;
+  public: LineIterator TryCopy(const LineIterator& format_line_start,
+                               const LineIterator& format_line_end) const;
 
   DISALLOW_COPY_AND_ASSIGN(RenderContext);
 };
@@ -141,8 +142,7 @@ void ScreenTextBlock::RenderContext::FillRight(const TextLine* line) const {
 }
 
 std::vector<TextLine*>::const_iterator
-    ScreenTextBlock::RenderContext::FindSameLine(
-        const TextLine* format_line) const {
+    ScreenTextBlock::RenderContext::FindSameLine(TextLine* format_line) const {
   for (auto runner = screen_lines_.begin(); runner != screen_lines_.end();
        ++runner) {
     if ((*runner)->Equal(format_line))
@@ -152,41 +152,48 @@ std::vector<TextLine*>::const_iterator
 }
 
 LineIterator ScreenTextBlock::RenderContext::TryCopy(
-    const LineIterator& format_start, const LineIterator& format_end) const {
+    const LineIterator& format_current, const LineIterator& format_end) const {
   if (!screen_text_block_->bitmap_)
-    return format_start;
-
-  // TODO(yosi) Should we look up longest match?
-  auto screen_start = FindSameLine(*format_start);
-  if (screen_start == screen_lines_.end())
-    return format_start;
+    return format_current;
 
   auto const screen_end = screen_lines_.end();
-  auto format_last = format_start;
-  auto format_runner = format_start;
-  ++format_runner;
-  auto screen_runner = screen_start;
-  ++screen_runner;
-  auto const skip = (*format_start)->top() == (*screen_start)->top();
-  if (skip)
-    AddRect(skip_rects_, (*format_start)->rect());
-  else
-    AddRect(copy_rects_, (*format_start)->rect());
-  while (format_runner != format_end && screen_runner != screen_end) {
-    if (!(*format_runner)->Equal(*screen_runner))
-      break;
-    if (skip)
-      AddRect(skip_rects_, (*format_runner)->rect());
-    else
-      AddRect(copy_rects_, (*format_runner)->rect());
-    format_last = format_runner;
-    ++format_runner;
-    ++screen_runner;
-  }
+  auto format_runner = format_current;
+  while (format_runner != format_end) {
+    // TODO(yosi) Should we search longest match? How?
+    auto const format_start = format_runner;
+    auto const screen_start = FindSameLine(*format_start);
+    if (screen_start == screen_lines_.end())
+      return format_runner;
 
-  if (!skip) {
-    Copy((*format_start)->top(), (*format_last)->bottom(),
-         (*screen_start)->top());
+    auto const dst_top = (*format_start)->top();
+    auto const src_top = (*screen_start)->top();
+
+    auto const skip = dst_top == src_top;
+    if (skip)
+      AddRect(skip_rects_, (*format_start)->rect());
+    else
+      AddRect(copy_rects_, (*format_start)->rect());
+
+    auto dst_bottom = (*format_start)->bottom();
+    ++format_runner;
+    auto screen_runner = screen_start;
+    ++screen_runner;
+
+    while (format_runner != format_end && screen_runner != screen_end) {
+      auto const format_line = *format_runner;
+      if (!format_line->Equal(*screen_runner))
+        break;
+      if (skip)
+        AddRect(skip_rects_, format_line->rect());
+      else
+        AddRect(copy_rects_, format_line->rect());
+      dst_bottom = format_line->bottom();
+      ++format_runner;
+      ++screen_runner;
+    }
+
+    if (!skip)
+      Copy(dst_top, dst_bottom, src_top);
   }
   return format_runner;
 }
@@ -217,10 +224,10 @@ void ScreenTextBlock::DrawDirtyRect(const gfx::RectF& rect, float red,
 }
 
 void ScreenTextBlock::Render(const TextBlock* text_block, gfx::ColorF bgcolor) {
-  auto const format_line_end = text_block->lines().end();
-  auto format_line_runner = text_block->lines().begin();
-  auto const screen_line_end = lines_.end();
-  auto screen_line_runner = lines_.begin();
+  auto const format_line_end = text_block->lines().cend();
+  auto format_line_runner = text_block->lines().cbegin();
+  auto const screen_line_end = lines_.cend();
+  auto screen_line_runner = lines_.cbegin();
   std::vector<gfx::RectF> skip_rects;
   while (format_line_runner != format_line_end &&
          screen_line_runner != screen_line_end) {

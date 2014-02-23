@@ -43,6 +43,7 @@ static const char16* k_rgpwszCKeyword[] = {
   L"else",
   L"enum",
   L"extern",
+  L"final",
   L"float",
   L"for",
   L"goto",
@@ -185,6 +186,7 @@ static const char16* k_rgpwszCxxKeyword[] = {
   // L"not", // C
   // L"not_eq", // C
   L"operator",
+  L"override",
   // L"or", // C
   // L"or_eq", // C
   L"private",
@@ -284,18 +286,40 @@ static const char16* k_rgpwszCxxKeyword[] = {
   L"HKEY",
   L"INVALID_HANDLE_VALUE",
 
-  // Vogue Extensions
-  L"char16",
-  L"foreach",
-  L"interface",
+  // Chromium
   L"arraysize",
-  L"override",
-  L"uint",
-  L"uint32",
-  L"uint64",
-  L"uint8",
-  L"unless",
-  L"when",
+  L"base::Bind",
+  L"base::Time",
+  L"base::char16",
+  L"base::string16",
+  L"scoped_refptr",
+
+  // stdint
+  L"int16_t",
+  L"int32_t",
+  L"int64_t",
+  L"uint8_t",
+  L"uint16_t",
+  L"uint32_t",
+  L"uint64_t",
+  L"uint8_t",
+
+  // std::
+  L"std::iterator",
+  L"std::list",
+  L"std::max",
+  L"std::min",
+  L"std::move",
+  L"std::string",
+  L"std::uique_ptr",
+  L"std::unordered_map",
+  L"std::unordered_set",
+  L"std::vector",
+
+  // Vogue Extensions
+  L"gfx::PointF",
+  L"gfx::RectF",
+  L"gfx::SizeF",
 };
 
 //////////////////////////////////////////////////////////////////////

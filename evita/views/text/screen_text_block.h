@@ -5,6 +5,7 @@
 #if !defined(INCLUDE_evita_views_text_screen_text_block_h)
 #define INCLUDE_evita_views_text_screen_text_block_h
 
+#include <memory>
 #include <vector>
 
 #include "base/basictypes.h"
@@ -17,10 +18,11 @@ namespace rendering {
 class TextLine;
 class TextBlock;
 
-class ScreenTextBlock {
+class ScreenTextBlock : public gfx::Graphics::Observer {
   private: class RenderContext;
   friend class RenderContext;
 
+  private: std::unique_ptr<gfx::Bitmap> bitmap_;
   private: bool dirty_;
   private: const gfx::Graphics* gfx_;
   private: std::vector<TextLine*> lines_;
@@ -35,6 +37,9 @@ class ScreenTextBlock {
   public: void Reset();
   public: void SetGraphics(const gfx::Graphics* gfx);
   public: void SetRect(const gfx::RectF& rect);
+
+  // gfx::Graphics::Observer
+  private: void ShouldDiscardResources() override;
 
   DISALLOW_COPY_AND_ASSIGN(ScreenTextBlock);
 };

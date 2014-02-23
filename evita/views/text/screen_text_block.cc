@@ -41,6 +41,16 @@ inline void FillRect(const gfx::Graphics& gfx, const gfx::RectF& rect,
   gfx.FillRectangle(fill_brush, rect);
 }
 
+void AddRect(std::vector<gfx::RectF>& rects, const gfx::RectF& rect) {
+  if (rects.empty() || rects.back().bottom != rect.top) {
+    rects.push_back(rect);
+  } else {
+    auto& last = rects.back();
+    last.right = std::max(last.right, rect.right);
+    last.bottom = rect.bottom;
+  }
+}
+
 } // namespace
 
 typedef std::list<TextLine*>::const_iterator LineIterator;
@@ -54,8 +64,9 @@ class ScreenTextBlock::RenderContext {
   private: mutable std::vector<gfx::RectF> copy_rects_;
   private: const gfx::Graphics* gfx_;
   private: const gfx::RectF rect_;
-  private: std::vector<TextLine*> lines_;
+  private: std::vector<TextLine*> screen_lines_;
   private: const ScreenTextBlock* screen_text_block_;
+  private: mutable std::vector<gfx::RectF> skip_rects_;
 
   public: RenderContext(const ScreenTextBlock* screen_text_block,
                         gfx::ColorF bgcolor);
@@ -63,6 +74,10 @@ class ScreenTextBlock::RenderContext {
 
   public: const std::vector<gfx::RectF>& copy_rects() const {
     return copy_rects_;
+  }
+
+  public: const std::vector<gfx::RectF>& skip_rects() const {
+    return skip_rects_;
   }
 
   private: void Copy(float dst_top, float dst_bottom, float src_top) const;
@@ -80,10 +95,10 @@ ScreenTextBlock::RenderContext::RenderContext(
     const ScreenTextBlock* screen_text_block, gfx::ColorF bgcolor)
     : bgcolor_(bgcolor), screen_text_block_(screen_text_block),
       gfx_(screen_text_block->gfx_), rect_(screen_text_block->rect_) {
-  for (auto line : screen_text_block->lines_) {
-    if (line->bottom() > rect_.bottom)
+  for (auto screen_line : screen_text_block->lines_) {
+    if (screen_line->bottom() > rect_.bottom)
       break;
-    lines_.push_back(line);
+    screen_lines_.push_back(screen_line);
   }
 }
 
@@ -96,8 +111,9 @@ void ScreenTextBlock::RenderContext::Copy(float dst_top, float dst_bottom,
       std::min(rect_.bottom, src_bottom) - src_top);
 
   gfx::RectF dst_rect(rect_.left, dst_top, rect_.right, dst_top + height);
-  gfx::RectF src_rect(0.0f, src_top - lines_.front()->top(),
-                      rect_.width(), src_top + height - lines_.front()->top());
+  gfx::RectF src_rect(0.0f, src_top - screen_lines_.front()->top(),
+                      rect_.width(),
+                      src_top + height - screen_lines_.front()->top());
   DCHECK_EQ(dst_rect.size(), src_rect.size());
   #if DEBUG_DRAW
     DVLOG(0) << "Copy to " << dst_rect << " from " << src_rect;
@@ -105,7 +121,6 @@ void ScreenTextBlock::RenderContext::Copy(float dst_top, float dst_bottom,
   (*gfx_)->DrawBitmap(*screen_text_block_->bitmap_, dst_rect, 1.0f,
                       D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
                       src_rect);
-  copy_rects_.push_back(dst_rect);
 }
 
 void ScreenTextBlock::RenderContext::FillBottom(const TextLine* line) const {
@@ -126,46 +141,54 @@ void ScreenTextBlock::RenderContext::FillRight(const TextLine* line) const {
 }
 
 std::vector<TextLine*>::const_iterator
-    ScreenTextBlock::RenderContext::FindSameLine(const TextLine* line) const {
-  for (auto runner = lines_.begin(); runner != lines_.end(); ++runner) {
-    if ((*runner)->Equal(line))
+    ScreenTextBlock::RenderContext::FindSameLine(
+        const TextLine* format_line) const {
+  for (auto runner = screen_lines_.begin(); runner != screen_lines_.end();
+       ++runner) {
+    if ((*runner)->Equal(format_line))
       return runner;
   }
-  return lines_.end();
+  return screen_lines_.end();
 }
 
 LineIterator ScreenTextBlock::RenderContext::TryCopy(
-    const LineIterator& new_start, const LineIterator& new_end) const {
+    const LineIterator& format_start, const LineIterator& format_end) const {
   if (!screen_text_block_->bitmap_)
-    return new_start;
+    return format_start;
 
-  auto present_start = FindSameLine(*new_start);
-  if (present_start == lines_.end())
-    return new_start;
+  // TODO(yosi) Should we look up longest match?
+  auto screen_start = FindSameLine(*format_start);
+  if (screen_start == screen_lines_.end())
+    return format_start;
 
-  auto const present_end = lines_.end();
-
-  auto new_last = new_start;
-  auto new_runner = new_start;
-  ++new_runner;
-  auto present_runner = present_start;
-  ++present_runner;
-  while (new_runner != new_end && present_runner != present_end) {
-    if ((*present_runner)->bottom() > rect_.bottom ||
-        !(*new_runner)->Equal(*present_runner)) {
+  auto const screen_end = screen_lines_.end();
+  auto format_last = format_start;
+  auto format_runner = format_start;
+  ++format_runner;
+  auto screen_runner = screen_start;
+  ++screen_runner;
+  auto const skip = (*format_start)->top() == (*screen_start)->top();
+  if (skip)
+    AddRect(skip_rects_, (*format_start)->rect());
+  else
+    AddRect(copy_rects_, (*format_start)->rect());
+  while (format_runner != format_end && screen_runner != screen_end) {
+    if (!(*format_runner)->Equal(*screen_runner))
       break;
-    }
-    new_last = new_runner;
-    ++new_runner;
-    ++present_runner;
+    if (skip)
+      AddRect(skip_rects_, (*format_runner)->rect());
+    else
+      AddRect(copy_rects_, (*format_runner)->rect());
+    format_last = format_runner;
+    ++format_runner;
+    ++screen_runner;
   }
 
-  if ((*new_start)->top() != (*present_start)->top()) {
-    Copy((*new_start)->top(), (*new_last)->bottom(),
-         (*present_start)->top());
-    ++new_last;
+  if (!skip) {
+    Copy((*format_start)->top(), (*format_last)->bottom(),
+         (*screen_start)->top());
   }
-  return new_last;
+  return format_runner;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -179,17 +202,35 @@ ScreenTextBlock::ScreenTextBlock()
 ScreenTextBlock::~ScreenTextBlock() {
 }
 
+void ScreenTextBlock::CopyBitmap(const gfx::RectF& rect) const {
+  gfx_->DrawBitmap(*bitmap_,
+                   gfx::RectF(rect_.left, rect.top, rect_.right, rect.bottom),
+                   gfx::RectF(0.0f, rect.top - rect_.top, rect_.width(),
+                              rect.bottom - rect_.top));
+}
+
+void ScreenTextBlock::DrawDirtyRect(const gfx::RectF& rect, float red,
+                                    float green, float blue) const {
+  CopyBitmap(rect);
+  gfx_->FillRectangle(gfx::Brush(*gfx_, red, green, blue, 0.1f), rect);
+  gfx_->DrawRectangle(gfx::Brush(*gfx_, red, green, blue, 0.2f), rect, 0.5f);
+}
+
 void ScreenTextBlock::Render(const TextBlock* text_block, gfx::ColorF bgcolor) {
   auto const format_line_end = text_block->lines().end();
   auto format_line_runner = text_block->lines().begin();
   auto const screen_line_end = lines_.end();
   auto screen_line_runner = lines_.begin();
+  std::vector<gfx::RectF> skip_rects;
   while (format_line_runner != format_line_end &&
          screen_line_runner != screen_line_end) {
-    if ((*format_line_runner)->rect() != (*screen_line_runner)->rect() ||
-        !(*format_line_runner)->Equal(*screen_line_runner)) {
+    auto const format_line = *format_line_runner;
+    auto const screen_line = *screen_line_runner;
+    if (format_line->rect() != screen_line->rect() ||
+        !format_line->Equal(screen_line)) {
       break;
     }
+    AddRect(skip_rects, format_line->rect());
     ++format_line_runner;
     ++screen_line_runner;
   }
@@ -208,16 +249,19 @@ void ScreenTextBlock::Render(const TextBlock* text_block, gfx::ColorF bgcolor) {
       auto const format_line = *format_line_runner;
       format_line->Render(*gfx_);
       render_context.FillRight(format_line);
-      if (dirty_rects.empty() ||
-          dirty_rects.back().bottom != format_line->top()) {
-        dirty_rects.push_back(format_line->rect());
-      } else {
-        auto& last = dirty_rects.back();
-        last.right = std::max(last.right, format_line->right());
-        last.bottom = format_line->bottom();
-      }
+      AddRect(dirty_rects, format_line->rect());
       ++format_line_runner;
       dirty_ = true;
+    }
+  }
+
+  {
+    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
+    for (auto rect : skip_rects) {
+      CopyBitmap(rect);
+    }
+    for (auto rect : render_context.skip_rects()) {
+      CopyBitmap(rect);
     }
   }
 
@@ -235,22 +279,15 @@ void ScreenTextBlock::Render(const TextBlock* text_block, gfx::ColorF bgcolor) {
       gfx::PointF(rect_.left, lines_.front()->rect().top),
       gfx::SizeF(rect_.width(), lines_.back()->rect().bottom)));
 
-  auto const bitmap_origin = lines_.front()->rect().left_top();
-  for (auto rect : render_context.copy_rects()) {
-    gfx_->DrawBitmap(*bitmap_,
-                     gfx::RectF(rect_.left, rect.top, rect_.right, rect.bottom),
-                     gfx::RectF(0.0f, rect.top - bitmap_origin.y,
-                                rect_.width(), rect.bottom - bitmap_origin.y));
-    gfx_->FillRectangle(gfx::Brush(*gfx_, 0.0f, 1.0f, 1.0f, 0.05f), rect);
-    gfx_->DrawRectangle(gfx::Brush(*gfx_, 0.0f, 1.0f, 1.0f, 0.1f), rect, 0.5f);
-  }
-  for (auto rect : dirty_rects) {
-    gfx_->DrawBitmap(*bitmap_,
-                     gfx::RectF(rect_.left, rect.top, rect_.right, rect.bottom),
-                     gfx::RectF(0.0f, rect.top - bitmap_origin.y,
-                                rect_.width(), rect.bottom - bitmap_origin.y));
-    gfx_->FillRectangle(gfx::Brush(*gfx_, 1.0f, 0.0f, 1.0f, 0.05f), rect);
-    gfx_->DrawRectangle(gfx::Brush(*gfx_, 1.0f, 0.0f, 1.0f, 0.1f), rect, 0.5f);
+  {
+    // Draw dirty rectangles for debugging.
+    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
+    for (auto rect : render_context.copy_rects()) {
+      DrawDirtyRect(rect, 0.0f, 0.0f, 1.0f);
+    }
+    for (auto rect : dirty_rects) {
+      DrawDirtyRect(rect, 1.0f, 0.0f, 1.0f);
+    }
   }
 
   dirty_ = false;
@@ -262,23 +299,22 @@ void ScreenTextBlock::Reset() {
     delete line;
   }
   lines_.clear();
+  bitmap_.reset();
 }
 
 void ScreenTextBlock::SetGraphics(const gfx::Graphics* gfx) {
   Reset();
   gfx_ = gfx;
-  bitmap_.reset();
 }
 
 void ScreenTextBlock::SetRect(const gfx::RectF& rect) {
   Reset();
   rect_ = rect;
-  bitmap_.reset();
 }
 
 // gfx::Graphics::Observer
 void ScreenTextBlock::ShouldDiscardResources() {
-  bitmap_.reset();
+  Reset();
 }
 
 } // namespace rendering

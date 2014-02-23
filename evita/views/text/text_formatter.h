@@ -33,8 +33,6 @@ class TextFormatter {
   private: TextBlock* const text_block_;
   private: std::unique_ptr<EnumCI> m_oEnumCI;
 
-  // TODO(yosi) We should use |TextBlock| instead of |TextRenderer| in
-  // |TextFormatter|.
   public: TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
                         text::Buffer* buffer, Posn start,
                         const Selection& selection);

@@ -235,13 +235,13 @@ Brush::Brush(const Graphics& gfx, float red, float green, float blue,
                                           ColorF(red, green, blue, alpha))) {
 }
 
-#if _DEBUG
 Brush::~Brush() {
-  uint ref_count = (*this)->AddRef();
-  ASSERT(ref_count == 2);
-  (*this)->Release();
+  #if _DEBUG
+    auto const ref_count = (*this)->AddRef();
+    DCHECK_EQ(2u, ref_count);
+    (*this)->Release();
+  #endif
 }
-#endif
 
 //////////////////////////////////////////////////////////////////////
 //

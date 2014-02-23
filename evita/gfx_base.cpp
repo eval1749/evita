@@ -229,6 +229,12 @@ Brush::Brush(const Graphics& gfx, ColorF color)
     : SimpleObject_(CreateSolidColorBrush(gfx, color)) {
 }
 
+Brush::Brush(const Graphics& gfx, float red, float green, float blue,
+             float alpha)
+    : SimpleObject_(CreateSolidColorBrush(gfx,
+                                          ColorF(red, green, blue, alpha))) {
+}
+
 #if _DEBUG
 Brush::~Brush() {
   uint ref_count = (*this)->AddRef();

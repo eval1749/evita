@@ -82,6 +82,8 @@ class Bitmap : public SimpleObject_<ID2D1Bitmap> {
 
 class Brush : public SimpleObject_<ID2D1SolidColorBrush> {
   public: Brush(const Graphics& gfx, ColorF color);
+  public: Brush(const Graphics& gfx, float red, float green, float blue,
+                float alpha = 1.0f);
   #if _DEBUG
     public: ~Brush();
   #endif

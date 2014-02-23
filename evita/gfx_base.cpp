@@ -466,6 +466,16 @@ Graphics::AxisAlignedClipScope::~AxisAlignedClipScope() {
 
 //////////////////////////////////////////////////////////////////////
 //
+// Graphics::Observer
+//
+Graphics::Observer::Observer() {
+}
+
+Graphics::Observer::~Observer() {
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // TextFormat
 //
 TextFormat::TextFormat(const base::string16& font_face_name, float font_size)

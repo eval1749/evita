@@ -17,6 +17,21 @@
 
 #define DEBUG_DRAW 0
 
+std::ostream& operator<<(std::ostream& ostream,
+                         D2D1_TEXT_ANTIALIAS_MODE mode) {
+  switch (mode) {
+    case D2D1_TEXT_ANTIALIAS_MODE_DEFAULT:
+      return ostream << "DEFAULT";
+    case D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE:
+      return ostream << "CLEARTYPE";
+    case D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE:
+      return ostream << "GRAYSCALE";
+    case D2D1_TEXT_ANTIALIAS_MODE_ALIASED:
+      return ostream << "ALIASED";
+  }
+  return ostream << "UNKNOWN_" << static_cast<int>(mode);
+}
+
 namespace gfx {
 
 namespace {
@@ -277,17 +292,40 @@ FontFace::FontFace(const char16* family_name)
 //
 // Graphics
 //
-Graphics::Graphics()
+Graphics::Graphics(ID2D1RenderTarget* render_target)
     : batch_nesting_level_(0),
       factory_set_(FactorySet::instance()),
       hwnd_(nullptr),
-      render_target_(nullptr),
+      render_target_(render_target),
       work_(nullptr) {
+  if (render_target_) {
+    SizeF dpi;
+    render_target_->GetDpi(&dpi.width, &dpi.height);
+    UpdateDpi(dpi);
+  }
+}
+
+Graphics::Graphics(Graphics&& other)
+    : batch_nesting_level_(0),
+      factory_set_(std::move(other.factory_set_)),
+      hwnd_(other.hwnd_),
+      render_target_(std::move(other.render_target_)),
+      work_(nullptr) {
+  other.hwnd_ = nullptr;
+}
+
+Graphics::Graphics() : Graphics(nullptr) {
 }
 
 Graphics::~Graphics() {
-  if (render_target_)
-    render_target_->Release();
+}
+
+Graphics& Graphics::operator=(Graphics&& other) {
+  factory_set_ = std::move(other.factory_set_);
+  render_target_ = std::move(other.render_target_);
+  hwnd_ = other.hwnd_;
+  other.hwnd_ = nullptr;
+  return *this;
 }
 
 void Graphics::AddObserver(Observer* observer) {
@@ -302,6 +340,31 @@ void Graphics::BeginDraw() const {
   if (!batch_nesting_level_)
     render_target_->BeginDraw();
   ++batch_nesting_level_;
+}
+
+Graphics Graphics::CreateCompatible(const SizeF& size) const {
+  common::ComPtr<ID2D1BitmapRenderTarget> compatible_target;
+  auto const hr = render_target_->CreateCompatibleRenderTarget(
+    size, &compatible_target);
+  if (FAILED(hr)) {
+    DVLOG(0) << "CreateCompatibleRenderTarget: hr=0x" << std::hex << hr;
+    return Graphics();
+  }
+  common::ComPtr<IDWriteRenderingParams> params;
+  render_target_->GetTextRenderingParams(&params);
+  if (params) {
+    compatible_target->SetTextRenderingParams(params);
+    DVLOG(0) << "ClearTypeLevel=" << params->GetClearTypeLevel() <<
+                " Gamma=" << params->GetGamma() <<
+                " PixelGeometry=" << params->GetPixelGeometry() <<
+                " RenderingMode=" << params->GetRenderingMode();
+  }
+  DVLOG(0) << "Before AntialiasMode=" <<
+    compatible_target->GetTextAntialiasMode();
+  auto const antialias_mode = render_target_->GetTextAntialiasMode();
+  compatible_target->SetTextAntialiasMode(antialias_mode);
+  DVLOG(0) << "AntialiasMode=" << antialias_mode;
+  return std::move(Graphics(compatible_target.release()));
 }
 
 bool Graphics::EndDraw() {
@@ -330,8 +393,7 @@ bool Graphics::EndDraw() {
         Debugger::Printf("ID2D1RenderTarget::EndDraw failed hr=0x%0X\n", hr);
       }
   }
-  render_target_->Release();
-  const_cast<Graphics*>(this)->render_target_ = nullptr;
+  const_cast<Graphics*>(this)->render_target_.reset();
   const_cast<Graphics*>(this)->Reinitialize();
   return false;
 }
@@ -350,7 +412,8 @@ void Graphics::Init(HWND hwnd) {
 }
 
 void Graphics::Reinitialize() {
-  ASSERT(!render_target_);
+  DCHECK(!render_target_);
+  DCHECK(hwnd_);
   RECT rc;
   ::GetClientRect(hwnd_, &rc);
   auto const pixel_format = D2D1::PixelFormat(
@@ -360,13 +423,15 @@ void Graphics::Reinitialize() {
   // TODO: When should use D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE?
   //auto const usage = D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE;
   auto const usage = D2D1_RENDER_TARGET_USAGE_NONE;
+  common::ComPtr<ID2D1HwndRenderTarget> hwnd_render_target;
   COM_VERIFY(FactorySet::d2d1().CreateHwndRenderTarget(
       D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT,
                                    pixel_format, 0.0f, 0.0f,
                                    usage),
       D2D1::HwndRenderTargetProperties(hwnd_, size,
                                        D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS),
-      &render_target_));
+      &hwnd_render_target));
+  render_target_.reset(hwnd_render_target);
   SizeF dpi;
   render_target_->GetDpi(&dpi.width, &dpi.height);
   UpdateDpi(dpi);
@@ -380,7 +445,9 @@ void Graphics::RemoveObserver(Observer* observer) {
 
 void Graphics::Resize(const Rect& rc) const {
   SizeU size(rc.width(), rc.height());
-  COM_VERIFY(render_target().Resize(size));
+  common::ComPtr<ID2D1HwndRenderTarget> hwnd_render_target;
+  COM_VERIFY(hwnd_render_target.QueryFrom(render_target_));
+  COM_VERIFY(hwnd_render_target->Resize(size));
 }
 
 //////////////////////////////////////////////////////////////////////

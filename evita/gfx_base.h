@@ -150,6 +150,10 @@ class TextLayout : public SimpleObject_<IDWriteTextLayout> {
   DISALLOW_COPY_AND_ASSIGN(TextLayout);
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// Graphics
+//
 class Graphics : public Object, public DpiHandler {
   public: class Observer {
     public: Observer();
@@ -162,7 +166,7 @@ class Graphics : public Object, public DpiHandler {
   private: scoped_refptr<FactorySet> factory_set_;
   private: HWND hwnd_;
   private: ObserverList<Observer> observers_;
-  private: ID2D1HwndRenderTarget* render_target_;
+  private: common::ComPtr<ID2D1RenderTarget> render_target_;
   private: mutable void* work_;
 
   public: class AxisAlignedClipScope {
@@ -185,23 +189,30 @@ class Graphics : public Object, public DpiHandler {
   };
   friend class DrawingScope;
 
+  private: Graphics(ID2D1RenderTarget* render_target);
+  public: Graphics(Graphics&& other);
   public: Graphics();
   public: ~Graphics();
 
-  public: operator ID2D1HwndRenderTarget*() const {
-    return &render_target();
+  public: operator bool() const {
+    return render_target_;
   }
-  public: ID2D1HwndRenderTarget* operator->() const {
-    return &render_target();
+  public: operator ID2D1RenderTarget*() const {
+    return render_target_.get();
   }
+  public: ID2D1RenderTarget* operator->() const {
+    return render_target_.get();
+  }
+
+  public: Graphics& operator=(Graphics&& other);
 
   // |drawing()| is for debugging.
   public: bool drawing() const { return batch_nesting_level_; }
   public: const FactorySet& factory_set() const { return *factory_set_; }
 
-  public: ID2D1HwndRenderTarget& render_target() const {
-    DCHECK(render_target_);
-    return *render_target_;
+  public: ID2D1RenderTarget& render_target() const {
+    DCHECK(render_target_) << "No ID2D1RenderTarget";
+    return *render_target_.get();
   }
 
   public: template<typename T> T* work() const { 
@@ -214,6 +225,9 @@ class Graphics : public Object, public DpiHandler {
 
   // [B]
   public: void BeginDraw() const;
+
+  // [C]
+  public: Graphics CreateCompatible(const gfx::SizeF& size) const;
 
   // [D]
   public: void DrawLine(const Brush& brush, int sx, int sy, int ex, int ey,

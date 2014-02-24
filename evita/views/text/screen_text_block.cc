@@ -208,6 +208,8 @@ bool ScreenTextBlock::RenderContext::Render(const TextBlock* text_block) {
 
 void ScreenTextBlock::RenderContext::RestoreDirtyRect(
     const gfx::RectF& rect) const {
+  if (!*screen_text_block_->bitmap_)
+    return;
   gfx_->DrawBitmap(*screen_text_block_->bitmap_,
                    gfx::RectF(rect_.left, rect.top, rect_.right, rect.bottom),
                    gfx::RectF(0.0f, rect.top - rect_.top, rect_.width(),

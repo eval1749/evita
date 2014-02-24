@@ -54,7 +54,7 @@ void AddRect(std::vector<gfx::RectF>& rects, const gfx::RectF& rect) {
 
 } // namespace
 
-typedef std::list<TextLine*>::const_iterator LineIterator;
+typedef std::list<TextLine*>::const_iterator FormatLineIterator;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -64,10 +64,10 @@ class ScreenTextBlock::RenderContext {
   private: const gfx::ColorF bgcolor_;
   private: mutable std::vector<gfx::RectF> copy_rects_;
   private: mutable std::vector<gfx::RectF> dirty_rects_;
-  private: const TextBlock* format_text_block_;
+  private: const std::list<TextLine*>& format_lines_;
   private: const gfx::Graphics* gfx_;
   private: const gfx::RectF rect_;
-  private: std::vector<TextLine*> screen_lines_;
+  private: const std::vector<TextLine*>& screen_lines_;
   private: const ScreenTextBlock* screen_text_block_;
   private: mutable std::vector<gfx::RectF> skip_rects_;
 
@@ -81,13 +81,16 @@ class ScreenTextBlock::RenderContext {
                               float blue) const;
   public: void FillBottom(const TextLine* line) const;
   private: void FillRight(const TextLine* line) const;
-  private: std::vector<TextLine*>::const_iterator FindSameLine(
+  private: FormatLineIterator FindFirstMismatch() const;
+  private: FormatLineIterator FindLastMismatch() const;
+  private: std::vector<TextLine*>::const_iterator FindCopyable(
       TextLine* line) const;
   public: void Finish();
   public: bool Render();
   private: void RestoreDirtyRect(const gfx::RectF& rect) const;
-  public: LineIterator TryCopy(const LineIterator& format_line_start,
-                               const LineIterator& format_line_end) const;
+  public: FormatLineIterator TryCopy(
+      const FormatLineIterator& format_line_start,
+      const FormatLineIterator& format_line_end) const;
 
   DISALLOW_COPY_AND_ASSIGN(RenderContext);
 };
@@ -95,14 +98,10 @@ class ScreenTextBlock::RenderContext {
 ScreenTextBlock::RenderContext::RenderContext(
     const ScreenTextBlock* screen_text_block,
     const TextBlock* format_text_block, gfx::ColorF bgcolor)
-    : bgcolor_(bgcolor),  format_text_block_(format_text_block),
+    : bgcolor_(bgcolor),  format_lines_(format_text_block->lines()),
       gfx_(screen_text_block->gfx_), rect_(screen_text_block->rect_),
-      screen_text_block_(screen_text_block) {
-  for (auto screen_line : screen_text_block->lines_) {
-    if (screen_line->bottom() > rect_.bottom)
-      break;
-    screen_lines_.push_back(screen_line);
-  }
+      screen_text_block_(screen_text_block),
+      screen_lines_(screen_text_block->lines_) {
 }
 
 void ScreenTextBlock::RenderContext::Copy(float dst_top, float dst_bottom,
@@ -150,12 +149,62 @@ void ScreenTextBlock::RenderContext::FillRight(const TextLine* line) const {
   FillRect(*gfx_, rect, bgcolor_);
 }
 
+FormatLineIterator ScreenTextBlock::RenderContext::FindFirstMismatch() const {
+  auto screen_line_runner = screen_lines_.cbegin();
+  for (auto format_line_runner = format_lines_.cbegin();
+       format_line_runner != format_lines_.cend();
+       ++format_line_runner) {
+    if (screen_line_runner == screen_lines_.cend())
+      return format_line_runner;
+    auto const format_line = (*format_line_runner);
+    auto const screen_line = (*screen_line_runner);
+    if (format_line->rect() != screen_line->rect() ||
+        !format_line->Equal(screen_line)) {
+      return format_line_runner;
+    }
+    AddRect(skip_rects_, format_line->rect());
+  }
+  return format_lines_.cend();
+}
+
+FormatLineIterator ScreenTextBlock::RenderContext::FindLastMismatch() const {
+#if 0
+  auto screen_line_runner = screen_lines_.crbegin();
+  auto format_last_match = format_lines_.crbegin();
+  for (auto format_line_runner = format_lines_.crbegin();
+       format_line_runner != format_lines_.crend();
+       ++format_line_runner) {
+    auto const format_line = (*format_line_runner);
+    if (format_line->top() >= rect_.bottom)
+      continue;
+    if (screen_line_runner == screen_lines_.crend())
+      break;
+    auto const screen_line = (*screen_line_runner);
+    if (format_line->rect() != screen_line->rect() ||
+        !format_line->Equal(screen_line)) {
+      break;
+    }
+    AddRect(skip_rects_, format_line->rect());
+    format_last_match = format_line_runner;
+    ++screen_line_runner;
+  }
+
+  return format_last_match == format_lines_.crbegin() ? format_lines.end() :
+      std::find(format_lines_.cbegin(), format_lines_.cend(),
+                *format_last_match);
+#else
+  return format_lines_.end();
+#endif
+}
+
 std::vector<TextLine*>::const_iterator
-    ScreenTextBlock::RenderContext::FindSameLine(TextLine* format_line) const {
+    ScreenTextBlock::RenderContext::FindCopyable(TextLine* format_line) const {
   for (auto runner = screen_lines_.begin(); runner != screen_lines_.end();
        ++runner) {
-    if ((*runner)->Equal(format_line))
+    if ((*runner)->Equal(format_line) &&
+        (*runner)->rect().bottom <= rect_.bottom) {
       return runner;
+    }
   }
   return screen_lines_.end();
 }
@@ -172,35 +221,24 @@ void ScreenTextBlock::RenderContext::Finish() {
 }
 
 bool ScreenTextBlock::RenderContext::Render() {
-  auto const format_line_end = format_text_block_->lines().cend();
-  auto format_line_runner = format_text_block_->lines().cbegin();
-  auto const screen_line_end = screen_text_block_->lines_.cend();
-  auto screen_line_runner = screen_text_block_->lines_.cbegin();
-  while (format_line_runner != format_line_end &&
-         screen_line_runner != screen_line_end) {
-    auto const format_line = *format_line_runner;
-    auto const screen_line = *screen_line_runner;
-    if (format_line->rect() != screen_line->rect() ||
-        !format_line->Equal(screen_line)) {
-      break;
-    }
-    AddRect(skip_rects_, format_line->rect());
-    ++format_line_runner;
-    ++screen_line_runner;
-  }
-
   auto dirty = false;
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
-  while (format_line_runner != format_line_end) {
-    format_line_runner = TryCopy(format_line_runner, format_line_end);
-    if (format_line_runner == format_line_end)
-      break;
-    auto const format_line = *format_line_runner;
-    format_line->Render(*gfx_);
-    FillRight(format_line);
-    AddRect(dirty_rects_, format_line->rect());
-    ++format_line_runner;
-    dirty = true;
+
+  auto const format_line_start = FindFirstMismatch();
+  if (format_line_start != format_lines_.end()) {
+    auto const format_line_end = FindLastMismatch();
+    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
+    for (auto format_line_runner = format_line_start;
+         format_line_runner != format_line_end;
+         ++format_line_runner) {
+      format_line_runner = TryCopy(format_line_runner, format_line_end);
+      if (format_line_runner == format_line_end)
+        break;
+      auto const format_line = *format_line_runner;
+      format_line->Render(*gfx_);
+      FillRight(format_line);
+      AddRect(dirty_rects_, format_line->rect());
+      dirty = true;
+    }
   }
 
   // Erase dirty rectangle markers.
@@ -212,7 +250,7 @@ bool ScreenTextBlock::RenderContext::Render() {
 
 void ScreenTextBlock::RenderContext::RestoreDirtyRect(
     const gfx::RectF& rect) const {
-  if (!*screen_text_block_->bitmap_)
+  if (!screen_text_block_->bitmap_ || !*screen_text_block_->bitmap_)
     return;
   gfx_->DrawBitmap(*screen_text_block_->bitmap_,
                    gfx::RectF(rect_.left, rect.top, rect_.right, rect.bottom),
@@ -220,8 +258,9 @@ void ScreenTextBlock::RenderContext::RestoreDirtyRect(
                               rect.bottom - rect_.top));
 }
 
-LineIterator ScreenTextBlock::RenderContext::TryCopy(
-    const LineIterator& format_current, const LineIterator& format_end) const {
+FormatLineIterator ScreenTextBlock::RenderContext::TryCopy(
+    const FormatLineIterator& format_current,
+    const FormatLineIterator& format_end) const {
   if (!screen_text_block_->bitmap_)
     return format_current;
 
@@ -230,7 +269,7 @@ LineIterator ScreenTextBlock::RenderContext::TryCopy(
   while (format_runner != format_end) {
     // TODO(yosi) Should we search longest match? How?
     auto const format_start = format_runner;
-    auto const screen_start = FindSameLine(*format_start);
+    auto const screen_start = FindCopyable(*format_start);
     if (screen_start == screen_lines_.end())
       return format_runner;
 

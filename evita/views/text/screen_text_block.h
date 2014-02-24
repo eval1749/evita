@@ -33,9 +33,6 @@ class ScreenTextBlock : public gfx::Graphics::Observer {
 
   public: bool dirty() const { return dirty_; }
 
-  private: void CopyBitmap(const gfx::RectF& rect) const;
-  private: void DrawDirtyRect(const gfx::RectF& rect, float red, float green,
-                              float blue) const;
   public: void Render(const TextBlock* text_block, gfx::ColorF bgcolor);
   public: void Reset();
   public: void SetGraphics(const gfx::Graphics* gfx);

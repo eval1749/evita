@@ -63,6 +63,7 @@ typedef std::list<TextLine*>::const_iterator LineIterator;
 class ScreenTextBlock::RenderContext {
   private: const gfx::ColorF bgcolor_;
   private: mutable std::vector<gfx::RectF> copy_rects_;
+  private: mutable std::vector<gfx::RectF> dirty_rects_;
   private: const gfx::Graphics* gfx_;
   private: const gfx::RectF rect_;
   private: std::vector<TextLine*> screen_lines_;
@@ -73,19 +74,16 @@ class ScreenTextBlock::RenderContext {
                         gfx::ColorF bgcolor);
   public: ~RenderContext() = default;
 
-  public: const std::vector<gfx::RectF>& copy_rects() const {
-    return copy_rects_;
-  }
-
-  public: const std::vector<gfx::RectF>& skip_rects() const {
-    return skip_rects_;
-  }
-
   private: void Copy(float dst_top, float dst_bottom, float src_top) const;
+  private: void DrawDirtyRect(const gfx::RectF& rect, float red, float green,
+                              float blue) const;
   public: void FillBottom(const TextLine* line) const;
-  public: void FillRight(const TextLine* line) const;
+  private: void FillRight(const TextLine* line) const;
   private: std::vector<TextLine*>::const_iterator FindSameLine(
       TextLine* line) const;
+  public: void Finish();
+  public: bool Render(const TextBlock* text_block);
+  private: void RestoreDirtyRect(const gfx::RectF& rect) const;
   public: LineIterator TryCopy(const LineIterator& format_line_start,
                                const LineIterator& format_line_end) const;
 
@@ -124,6 +122,13 @@ void ScreenTextBlock::RenderContext::Copy(float dst_top, float dst_bottom,
                       src_rect);
 }
 
+void ScreenTextBlock::RenderContext::DrawDirtyRect(
+    const gfx::RectF& rect, float red, float green, float blue) const {
+  RestoreDirtyRect(rect);
+  gfx_->FillRectangle(gfx::Brush(*gfx_, red, green, blue, 0.1f), rect);
+  gfx_->DrawRectangle(gfx::Brush(*gfx_, red, green, blue, 0.2f), rect, 0.5f);
+}
+
 void ScreenTextBlock::RenderContext::FillBottom(const TextLine* line) const {
   gfx::RectF rect(rect_);;
   rect.top = line->bottom();
@@ -149,6 +154,64 @@ std::vector<TextLine*>::const_iterator
       return runner;
   }
   return screen_lines_.end();
+}
+
+void ScreenTextBlock::RenderContext::Finish() {
+  // Draw dirty rectangles for debugging.
+  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
+  for (auto rect : copy_rects_) {
+    DrawDirtyRect(rect, 0.0f, 0.0f, 1.0f);
+  }
+  for (auto rect : dirty_rects_) {
+    DrawDirtyRect(rect, 1.0f, 0.0f, 1.0f);
+  }
+}
+
+bool ScreenTextBlock::RenderContext::Render(const TextBlock* text_block) {
+  auto const format_line_end = text_block->lines().cend();
+  auto format_line_runner = text_block->lines().cbegin();
+  auto const screen_line_end = screen_text_block_->lines_.cend();
+  auto screen_line_runner = screen_text_block_->lines_.cbegin();
+  while (format_line_runner != format_line_end &&
+         screen_line_runner != screen_line_end) {
+    auto const format_line = *format_line_runner;
+    auto const screen_line = *screen_line_runner;
+    if (format_line->rect() != screen_line->rect() ||
+        !format_line->Equal(screen_line)) {
+      break;
+    }
+    AddRect(skip_rects_, format_line->rect());
+    ++format_line_runner;
+    ++screen_line_runner;
+  }
+
+  auto dirty = false;
+  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
+  while (format_line_runner != format_line_end) {
+    format_line_runner = TryCopy(format_line_runner, format_line_end);
+    if (format_line_runner == format_line_end)
+      break;
+    auto const format_line = *format_line_runner;
+    format_line->Render(*gfx_);
+    FillRight(format_line);
+    AddRect(dirty_rects_, format_line->rect());
+    ++format_line_runner;
+    dirty = true;
+  }
+
+  // Erase dirty rectangle markers.
+  for (auto rect : skip_rects_) {
+    RestoreDirtyRect(rect);
+  }
+  return dirty;
+}
+
+void ScreenTextBlock::RenderContext::RestoreDirtyRect(
+    const gfx::RectF& rect) const {
+  gfx_->DrawBitmap(*screen_text_block_->bitmap_,
+                   gfx::RectF(rect_.left, rect.top, rect_.right, rect.bottom),
+                   gfx::RectF(0.0f, rect.top - rect_.top, rect_.width(),
+                              rect.bottom - rect_.top));
 }
 
 LineIterator ScreenTextBlock::RenderContext::TryCopy(
@@ -209,69 +272,9 @@ ScreenTextBlock::ScreenTextBlock()
 ScreenTextBlock::~ScreenTextBlock() {
 }
 
-void ScreenTextBlock::CopyBitmap(const gfx::RectF& rect) const {
-  gfx_->DrawBitmap(*bitmap_,
-                   gfx::RectF(rect_.left, rect.top, rect_.right, rect.bottom),
-                   gfx::RectF(0.0f, rect.top - rect_.top, rect_.width(),
-                              rect.bottom - rect_.top));
-}
-
-void ScreenTextBlock::DrawDirtyRect(const gfx::RectF& rect, float red,
-                                    float green, float blue) const {
-  CopyBitmap(rect);
-  gfx_->FillRectangle(gfx::Brush(*gfx_, red, green, blue, 0.1f), rect);
-  gfx_->DrawRectangle(gfx::Brush(*gfx_, red, green, blue, 0.2f), rect, 0.5f);
-}
-
 void ScreenTextBlock::Render(const TextBlock* text_block, gfx::ColorF bgcolor) {
-  auto const format_line_end = text_block->lines().cend();
-  auto format_line_runner = text_block->lines().cbegin();
-  auto const screen_line_end = lines_.cend();
-  auto screen_line_runner = lines_.cbegin();
-  std::vector<gfx::RectF> skip_rects;
-  while (format_line_runner != format_line_end &&
-         screen_line_runner != screen_line_end) {
-    auto const format_line = *format_line_runner;
-    auto const screen_line = *screen_line_runner;
-    if (format_line->rect() != screen_line->rect() ||
-        !format_line->Equal(screen_line)) {
-      break;
-    }
-    AddRect(skip_rects, format_line->rect());
-    ++format_line_runner;
-    ++screen_line_runner;
-  }
-
   RenderContext render_context(this, bgcolor);
-  std::vector<gfx::RectF> dirty_rects;
-  {
-    // Note: ID2D1Bitmap::CopyFromRenderTarget should be called without
-    // clipping.
-    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
-    while (format_line_runner != format_line_end) {
-      format_line_runner = render_context.TryCopy(format_line_runner,
-                                                  format_line_end);
-      if (format_line_runner == format_line_end)
-        break;
-      auto const format_line = *format_line_runner;
-      format_line->Render(*gfx_);
-      render_context.FillRight(format_line);
-      AddRect(dirty_rects, format_line->rect());
-      ++format_line_runner;
-      dirty_ = true;
-    }
-  }
-
-  {
-    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
-    for (auto rect : skip_rects) {
-      CopyBitmap(rect);
-    }
-    for (auto rect : render_context.skip_rects()) {
-      CopyBitmap(rect);
-    }
-  }
-
+  dirty_ = render_context.Render(text_block);
   if (!dirty_)
     return;
 
@@ -286,17 +289,7 @@ void ScreenTextBlock::Render(const TextBlock* text_block, gfx::ColorF bgcolor) {
       gfx::PointF(rect_.left, lines_.front()->rect().top),
       gfx::SizeF(rect_.width(), lines_.back()->rect().bottom)));
 
-  {
-    // Draw dirty rectangles for debugging.
-    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
-    for (auto rect : render_context.copy_rects()) {
-      DrawDirtyRect(rect, 0.0f, 0.0f, 1.0f);
-    }
-    for (auto rect : dirty_rects) {
-      DrawDirtyRect(rect, 1.0f, 0.0f, 1.0f);
-    }
-  }
-
+  render_context.Finish();
   dirty_ = false;
 }
 

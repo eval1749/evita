@@ -64,6 +64,7 @@ class ScreenTextBlock::RenderContext {
   private: const gfx::ColorF bgcolor_;
   private: mutable std::vector<gfx::RectF> copy_rects_;
   private: mutable std::vector<gfx::RectF> dirty_rects_;
+  private: const TextBlock* format_text_block_;
   private: const gfx::Graphics* gfx_;
   private: const gfx::RectF rect_;
   private: std::vector<TextLine*> screen_lines_;
@@ -71,6 +72,7 @@ class ScreenTextBlock::RenderContext {
   private: mutable std::vector<gfx::RectF> skip_rects_;
 
   public: RenderContext(const ScreenTextBlock* screen_text_block,
+                        const TextBlock* format_text_block,
                         gfx::ColorF bgcolor);
   public: ~RenderContext() = default;
 
@@ -82,7 +84,7 @@ class ScreenTextBlock::RenderContext {
   private: std::vector<TextLine*>::const_iterator FindSameLine(
       TextLine* line) const;
   public: void Finish();
-  public: bool Render(const TextBlock* text_block);
+  public: bool Render();
   private: void RestoreDirtyRect(const gfx::RectF& rect) const;
   public: LineIterator TryCopy(const LineIterator& format_line_start,
                                const LineIterator& format_line_end) const;
@@ -91,9 +93,11 @@ class ScreenTextBlock::RenderContext {
 };
 
 ScreenTextBlock::RenderContext::RenderContext(
-    const ScreenTextBlock* screen_text_block, gfx::ColorF bgcolor)
-    : bgcolor_(bgcolor), screen_text_block_(screen_text_block),
-      gfx_(screen_text_block->gfx_), rect_(screen_text_block->rect_) {
+    const ScreenTextBlock* screen_text_block,
+    const TextBlock* format_text_block, gfx::ColorF bgcolor)
+    : bgcolor_(bgcolor),  format_text_block_(format_text_block),
+      gfx_(screen_text_block->gfx_), rect_(screen_text_block->rect_),
+      screen_text_block_(screen_text_block) {
   for (auto screen_line : screen_text_block->lines_) {
     if (screen_line->bottom() > rect_.bottom)
       break;
@@ -167,9 +171,9 @@ void ScreenTextBlock::RenderContext::Finish() {
   }
 }
 
-bool ScreenTextBlock::RenderContext::Render(const TextBlock* text_block) {
-  auto const format_line_end = text_block->lines().cend();
-  auto format_line_runner = text_block->lines().cbegin();
+bool ScreenTextBlock::RenderContext::Render() {
+  auto const format_line_end = format_text_block_->lines().cend();
+  auto format_line_runner = format_text_block_->lines().cbegin();
   auto const screen_line_end = screen_text_block_->lines_.cend();
   auto screen_line_runner = screen_text_block_->lines_.cbegin();
   while (format_line_runner != format_line_end &&
@@ -275,8 +279,8 @@ ScreenTextBlock::~ScreenTextBlock() {
 }
 
 void ScreenTextBlock::Render(const TextBlock* text_block, gfx::ColorF bgcolor) {
-  RenderContext render_context(this, bgcolor);
-  dirty_ = render_context.Render(text_block);
+  RenderContext render_context(this, text_block, bgcolor);
+  dirty_ = render_context.Render();
   if (!dirty_)
     return;
 

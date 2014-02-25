@@ -224,7 +224,7 @@ bool TextRenderer::ScrollDown() {
   if (!m_lStart)
     return false;
   if (text_block_->GetHeight() >= text_block_->height() &&
-      !text_block_->ScrollDown()) {
+      !text_block_->DiscardLastLine()) {
     // This page shows only one line.
     return false;
   }
@@ -242,7 +242,7 @@ bool TextRenderer::ScrollDown() {
   }
 
   while (text_block_->GetHeight() > text_block_->height()) {
-    if (!text_block_->ScrollDown())
+    if (!text_block_->DiscardLastLine())
       break;
   }
 
@@ -311,11 +311,8 @@ bool TextRenderer::ScrollUp() {
   // Note: We should scroll up if page shows end of buffer. Since,
   // the last line may not be fully visible.
 
-  // Recycle the first line.
-  if (!text_block_->ScrollUp()) {
-    // This page shows only one line.
+  if (!text_block_->DiscardFirstLine())
     return false;
-  }
 
   TextFormatter oFormatter(*gfx_, text_block_.get(), m_pBuffer,
                            text_block_->GetLast()->GetEnd(), selection_);
@@ -323,10 +320,9 @@ bool TextRenderer::ScrollUp() {
   auto const line = oFormatter.FormatLine();
   text_block_->Append(line);
 
-  auto const cyTextRenderer = text_block_->height();
   auto more = true;
-  while (text_block_->GetHeight() > cyTextRenderer) {
-    if (!text_block_->ScrollUp()) {
+  while (text_block_->GetHeight() > text_block_->height()) {
+    if (!text_block_->DiscardFirstLine()) {
       more = false;
       break;
     }

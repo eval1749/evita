@@ -38,6 +38,10 @@ class TextBlock : public text::BufferMutationObserver {
   public: float width() const { return rect_.width(); }
 
   public: void Append(TextLine*);
+  // Returns true if discarded the first line.
+  public: bool DiscardFirstLine();
+  // Returns true if discarded the last line.
+  public: bool DiscardLastLine();
   public: void EnsureLinePoints();
   public: void Finish();
   public: TextLine* GetFirst() const { return lines_.front(); }
@@ -46,10 +50,6 @@ class TextBlock : public text::BufferMutationObserver {
   private: void InvalidateLines(text::Posn offset);
   public: void Prepend(TextLine*);
   public: void Reset();
-  // Returns true if scrolled.
-  public: bool ScrollDown();
-  // Returns true if scrolled.
-  public: bool ScrollUp();
   public: void SetRect(const gfx::RectF& rect);
 
   // text::BufferMutationObserver

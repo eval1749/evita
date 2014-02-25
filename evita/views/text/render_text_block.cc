@@ -32,6 +32,29 @@ void TextBlock::Append(TextLine* pLine) {
   m_cy += pLine->GetHeight();
 }
 
+bool TextBlock::DiscardFirstLine() {
+  if (lines_.empty())
+    return false;
+
+  auto const line = lines_.front();
+  m_cy -= line->GetHeight();
+  delete line;
+  lines_.pop_front();
+  dirty_line_point_ = true;
+  return true;
+}
+
+bool TextBlock::DiscardLastLine() {
+  if (lines_.empty())
+    return false;
+
+  auto const line = lines_.back();
+  m_cy -= line->GetHeight();
+  delete line;
+  lines_.pop_back();
+  return true;
+}
+
 void TextBlock::EnsureLinePoints() {
   if (!dirty_line_point_)
     return;
@@ -72,29 +95,6 @@ void TextBlock::Reset() {
   dirty_ = true;
   dirty_line_point_ = true;
   m_cy = 0;
-}
-
-bool TextBlock::ScrollDown() {
-  if (lines_.empty())
-    return false;
-
-  auto const line = lines_.back();
-  m_cy -= line->GetHeight();
-  delete line;
-  lines_.pop_back();
-  return true;
-}
-
-bool TextBlock::ScrollUp() {
-  if (lines_.empty())
-    return false;
-
-  auto const line = lines_.front();
-  m_cy -= line->GetHeight();
-  delete line;
-  lines_.pop_front();
-  dirty_line_point_ = true;
-  return true;
 }
 
 void TextBlock::SetRect(const gfx::RectF& rect) {

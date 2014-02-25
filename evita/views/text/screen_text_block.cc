@@ -11,6 +11,7 @@
 #include "evita/views/text/render_text_line.h"
 
 #define DEBUG_DRAW 0
+#define USE_OVERLAY 0
 
 namespace views {
 namespace rendering {
@@ -128,8 +129,14 @@ void ScreenTextBlock::RenderContext::Copy(float dst_top, float dst_bottom,
 void ScreenTextBlock::RenderContext::DrawDirtyRect(
     const gfx::RectF& rect, float red, float green, float blue) const {
   RestoreDirtyRect(rect);
-  gfx_->FillRectangle(gfx::Brush(*gfx_, red, green, blue, 0.1f), rect);
-  gfx_->DrawRectangle(gfx::Brush(*gfx_, red, green, blue, 0.2f), rect, 0.5f);
+  #if USE_OVERLAY
+    gfx_->FillRectangle(gfx::Brush(*gfx_, red, green, blue, 0.1f), rect);
+    gfx_->DrawRectangle(gfx::Brush(*gfx_, red, green, blue, 0.5f), rect, 0.5f);
+  #else
+    auto marker_rect = rect;
+    marker_rect.right = marker_rect.left + 4.0f;
+    gfx_->FillRectangle(gfx::Brush(*gfx_, red, green, blue), marker_rect);
+  #endif
 }
 
 void ScreenTextBlock::RenderContext::FillBottom(const TextLine* line) const {
@@ -250,12 +257,17 @@ bool ScreenTextBlock::RenderContext::Render() {
 
 void ScreenTextBlock::RenderContext::RestoreDirtyRect(
     const gfx::RectF& rect) const {
-  if (!screen_text_block_->bitmap_ || !*screen_text_block_->bitmap_)
-    return;
-  gfx_->DrawBitmap(*screen_text_block_->bitmap_,
-                   gfx::RectF(rect_.left, rect.top, rect_.right, rect.bottom),
-                   gfx::RectF(0.0f, rect.top - rect_.top, rect_.width(),
-                              rect.bottom - rect_.top));
+  auto marker_rect = rect;
+  marker_rect.right = marker_rect.left + 4.0f;
+  gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF::White), marker_rect);
+  #if USE_OVERLAY
+    if (!screen_text_block_->bitmap_ || !*screen_text_block_->bitmap_)
+      return;
+    gfx_->DrawBitmap(*screen_text_block_->bitmap_,
+                     gfx::RectF(rect_.left, rect.top, rect_.right, rect.bottom),
+                     gfx::RectF(0.0f, rect.top - rect_.top, rect_.width(),
+                                rect.bottom - rect_.top));
+  #endif
 }
 
 FormatLineIterator ScreenTextBlock::RenderContext::TryCopy(

@@ -319,18 +319,9 @@ bool TextRenderer::ScrollUp() {
 
   auto const line = oFormatter.FormatLine();
   text_block_->Append(line);
-
-  auto more = true;
-  while (text_block_->GetHeight() > text_block_->height()) {
-    if (!text_block_->DiscardFirstLine()) {
-      more = false;
-      break;
-    }
-  }
-
   m_lStart = text_block_->GetFirst()->GetStart();
   m_lEnd = text_block_->GetLast()->GetEnd();
-  return more;
+  return true;
 }
 
 void TextRenderer::SetGraphics(const gfx::Graphics* gfx) {

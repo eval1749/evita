@@ -134,7 +134,8 @@ void ScreenTextBlock::RenderContext::DrawDirtyRect(
     gfx_->DrawRectangle(gfx::Brush(*gfx_, red, green, blue, 0.5f), rect, 0.5f);
   #else
     auto marker_rect = rect;
-    marker_rect.right = marker_rect.left + 4.0f;
+    marker_rect.left += 2.0f;
+    marker_rect.right = marker_rect.left + 3.0f;
     gfx_->FillRectangle(gfx::Brush(*gfx_, red, green, blue), marker_rect);
   #endif
 }
@@ -259,7 +260,8 @@ bool ScreenTextBlock::RenderContext::Render() {
 void ScreenTextBlock::RenderContext::RestoreDirtyRect(
     const gfx::RectF& rect) const {
   auto marker_rect = rect;
-  marker_rect.right = marker_rect.left + 4.0f;
+  marker_rect.left += 2.0f;
+  marker_rect.right = marker_rect.left + 3.0f;
   gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF::White), marker_rect);
   #if USE_OVERLAY
     if (!screen_text_block_->bitmap_ || !*screen_text_block_->bitmap_)

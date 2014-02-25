@@ -83,7 +83,7 @@ class ScreenTextBlock::RenderContext {
   public: void FillBottom(const TextLine* line) const;
   private: void FillRight(const TextLine* line) const;
   private: FormatLineIterator FindFirstMismatch() const;
-  private: FormatLineIterator FindLastMismatch() const;
+  private: FormatLineIterator FindLastMatch() const;
   private: std::vector<TextLine*>::const_iterator FindCopyable(
       TextLine* line) const;
   public: void Finish();
@@ -176,8 +176,7 @@ FormatLineIterator ScreenTextBlock::RenderContext::FindFirstMismatch() const {
   return format_lines_.cend();
 }
 
-FormatLineIterator ScreenTextBlock::RenderContext::FindLastMismatch() const {
-#if 0
+FormatLineIterator ScreenTextBlock::RenderContext::FindLastMatch() const {
   auto screen_line_runner = screen_lines_.crbegin();
   auto format_last_match = format_lines_.crbegin();
   for (auto format_line_runner = format_lines_.crbegin();
@@ -198,12 +197,9 @@ FormatLineIterator ScreenTextBlock::RenderContext::FindLastMismatch() const {
     ++screen_line_runner;
   }
 
-  return format_last_match == format_lines_.crbegin() ? format_lines.end() :
+  return format_last_match == format_lines_.crbegin() ? format_lines_.end() :
       std::find(format_lines_.cbegin(), format_lines_.cend(),
                 *format_last_match);
-#else
-  return format_lines_.end();
-#endif
 }
 
 std::vector<TextLine*>::const_iterator
@@ -232,17 +228,17 @@ void ScreenTextBlock::RenderContext::Finish() {
 bool ScreenTextBlock::RenderContext::Render() {
   auto dirty = false;
 
-  auto const format_line_start = FindFirstMismatch();
-  if (format_line_start != format_lines_.end()) {
-    auto const format_line_end = FindLastMismatch();
+  auto const dirty_line_start = FindFirstMismatch();
+  if (dirty_line_start != format_lines_.end()) {
+    auto const clean_line_start = FindLastMatch();
     gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
-    for (auto format_line_runner = format_line_start;
-         format_line_runner != format_line_end;
-         ++format_line_runner) {
-      format_line_runner = TryCopy(format_line_runner, format_line_end);
-      if (format_line_runner == format_line_end)
+    for (auto dirty_line_runner = dirty_line_start;
+         dirty_line_runner != clean_line_start;
+         ++dirty_line_runner) {
+      dirty_line_runner = TryCopy(dirty_line_runner, clean_line_start);
+      if (dirty_line_runner == clean_line_start)
         break;
-      auto const format_line = *format_line_runner;
+      auto const format_line = *dirty_line_runner;
       format_line->Render(*gfx_);
       FillRight(format_line);
       AddRect(dirty_rects_, format_line->rect());

@@ -35,9 +35,9 @@ class UndoStack : public BufferMutationObserver {
   // [C]
   public: bool CanRedo() const;
   public: bool CanUndo() const;
+  public: void Clear();
 
   // [E]
-  public: void Empty();
   public: void EndUndoGroup(const base::string16& name);
 
   // [R]

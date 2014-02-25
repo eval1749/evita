@@ -51,7 +51,7 @@ bool Buffer::CanUndo() const {
 }
 
 void Buffer::ClearUndo() {
-  undo_stack_->Empty();
+  undo_stack_->Clear();
 }
 
 Posn Buffer::ComputeEndOfLine(Posn lPosn) const {

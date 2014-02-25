@@ -25,7 +25,7 @@ UndoStack::UndoStack(Buffer* pBuffer)
 }
 
 UndoStack::~UndoStack() {
-  Empty();
+  Clear();
 }
 
 bool UndoStack::CanRedo() const {
@@ -36,7 +36,7 @@ bool UndoStack::CanUndo() const {
   return !undo_steps_.empty();
 }
 
-void UndoStack::Empty() {
+void UndoStack::Clear() {
   for (auto undo_step : undo_steps_) {
     delete undo_step;
   }

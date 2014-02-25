@@ -10,13 +10,17 @@
 #include "evita/views/text/render_text_block.h"
 #include "evita/views/text/render_text_line.h"
 
-#define DEBUG_DRAW 0
-#define USE_OVERLAY 0
+#define DEBUG_DRAW _DEBUG
+#define DEBUG_RENDER_TARGET 0
+#define USE_OVERLAY 1
 
 namespace views {
 namespace rendering {
 
 namespace {
+
+const auto kMarkerLeftMargin = 2.0f;
+const auto kMarkerWidth = 4.0f;
 
 std::unique_ptr<gfx::Bitmap> CopyFromRenderTarget(const gfx::Graphics* gfx,
                                                   const gfx::RectF rect) {
@@ -27,7 +31,7 @@ std::unique_ptr<gfx::Bitmap> CopyFromRenderTarget(const gfx::Graphics* gfx,
                                  static_cast<uint32_t>(rect.bottom));
   DCHECK_EQ(static_cast<float>(rect_u.width()), rect.width());
   DCHECK_EQ(static_cast<float>(rect_u.height()), rect.height());
-  #if DEBUG_DRAW
+  #if DEBUG_RENDER_TARGET
     DVLOG(0) << "CopyFromRenderTarget " << rect;
   #endif
   auto const hr = (*bitmap)->CopyFromRenderTarget(nullptr, *gfx, &rect_u);
@@ -80,7 +84,7 @@ class ScreenTextBlock::RenderContext {
   private: void Copy(float dst_top, float dst_bottom, float src_top) const;
   private: void DrawDirtyRect(const gfx::RectF& rect, float red, float green,
                               float blue) const;
-  public: void FillBottom(const TextLine* line) const;
+  private: void FillBottom(const TextLine* line) const;
   private: void FillRight(const TextLine* line) const;
   private: FormatLineIterator FindFirstMismatch() const;
   private: FormatLineIterator FindLastMatch() const;
@@ -107,19 +111,18 @@ ScreenTextBlock::RenderContext::RenderContext(
 
 void ScreenTextBlock::RenderContext::Copy(float dst_top, float dst_bottom,
                                           float src_top) const {
-  auto const src_bottom = src_top + dst_bottom - dst_top;
+  auto const height = dst_bottom - dst_top;
+  DCHECK_GT(height, 0.0f);
+  DCHECK_LE(src_top + height, rect_.bottom);
 
-  auto const height = std::min(
-      std::min(rect_.bottom, dst_bottom) - dst_top,
-      std::min(rect_.bottom, src_bottom) - src_top);
+  auto const bitmap_top = screen_lines_.front()->top();
 
   gfx::RectF dst_rect(rect_.left, dst_top, rect_.right, dst_top + height);
-  gfx::RectF src_rect(0.0f, src_top - screen_lines_.front()->top(),
-                      rect_.width(),
-                      src_top + height - screen_lines_.front()->top());
+  gfx::RectF src_rect(0.0f, src_top - bitmap_top,
+                      rect_.width(), src_top + height - bitmap_top);
   DCHECK_EQ(dst_rect.size(), src_rect.size());
   #if DEBUG_DRAW
-    DVLOG(0) << "Copy to " << dst_rect << " from " << src_rect;
+    DVLOG(0) << "Copy to " << dst_rect << " from " << src_rect.left_top();
   #endif
   (*gfx_)->DrawBitmap(*screen_text_block_->bitmap_, dst_rect, 1.0f,
                       D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
@@ -134,8 +137,8 @@ void ScreenTextBlock::RenderContext::DrawDirtyRect(
     gfx_->DrawRectangle(gfx::Brush(*gfx_, red, green, blue, 0.5f), rect, 0.5f);
   #else
     auto marker_rect = rect;
-    marker_rect.left += 2.0f;
-    marker_rect.right = marker_rect.left + 3.0f;
+    marker_rect.left += kMarkerLeftMargin;
+    marker_rect.right = marker_rect.left + kMarkerWidth;
     gfx_->FillRectangle(gfx::Brush(*gfx_, red, green, blue), marker_rect);
   #endif
 }
@@ -206,8 +209,10 @@ std::vector<TextLine*>::const_iterator
     ScreenTextBlock::RenderContext::FindCopyable(TextLine* format_line) const {
   for (auto runner = screen_lines_.begin(); runner != screen_lines_.end();
        ++runner) {
-    if ((*runner)->Equal(format_line) &&
-        (*runner)->rect().bottom <= rect_.bottom) {
+    auto const screen_line = *runner;
+    if (screen_line->Equal(format_line) &&
+        (format_line->rect().top == screen_line->rect().top ||
+         screen_line->rect().bottom <= rect_.bottom)) {
       return runner;
     }
   }
@@ -218,19 +223,35 @@ void ScreenTextBlock::RenderContext::Finish() {
   // Draw dirty rectangles for debugging.
   gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
   for (auto rect : copy_rects_) {
-    DrawDirtyRect(rect, 0.0f, 0.0f, 1.0f);
+    DVLOG(0) << "copy " << rect;
+    DrawDirtyRect(rect, 58.0f / 255, 128.0f / 255, 247.0f / 255);
   }
   for (auto rect : dirty_rects_) {
-    DrawDirtyRect(rect, 1.0f, 0.0f, 1.0f);
+    DVLOG(0) << "dirty " << rect;
+    DrawDirtyRect(rect, 219.0f / 255, 68.0f / 255, 55.0f / 255);
   }
 }
 
 bool ScreenTextBlock::RenderContext::Render() {
-  auto dirty = false;
+  #if DEBUG_DRAW
+    DVLOG(0) << "Start rendering";
+  #endif
+
+  if (VLOG_IS_ON(0)) {
+    // TextBlock must cover whole screen area.
+    auto const last_format_line = format_lines_.back();
+    if (!last_format_line->cells().back()->is<MarkerCell>())
+      DCHECK_GE(last_format_line->rect().bottom, rect_.bottom);
+  }
 
   auto const dirty_line_start = FindFirstMismatch();
   if (dirty_line_start != format_lines_.end()) {
     auto const clean_line_start = FindLastMatch();
+    #if DEBUG_DRAW
+      DVLOG(0) << "dirty " << (*dirty_line_start)->rect().top << "," <<
+        (clean_line_start == format_lines_.end() ? rect_.bottom :
+            (*clean_line_start)->rect().top);
+    #endif
     gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
     for (auto dirty_line_runner = dirty_line_start;
          dirty_line_runner != clean_line_start;
@@ -242,22 +263,33 @@ bool ScreenTextBlock::RenderContext::Render() {
       format_line->Render(*gfx_);
       FillRight(format_line);
       AddRect(dirty_rects_, format_line->rect());
-      dirty = true;
     }
   }
 
   // Erase dirty rectangle markers.
   for (auto rect : skip_rects_) {
+    #if DEBUG_DRAW
+      DVLOG(0) << "skip " << rect;
+    #endif
     RestoreDirtyRect(rect);
   }
+
+  auto const dirty = !copy_rects_.empty() || !dirty_rects_.empty();
+
+  if (dirty)
+    FillBottom(format_lines_.back());
+
+  #if DEBUG_DRAW
+    DVLOG(0) << "End rendering dirty=" << dirty;
+  #endif
   return dirty;
 }
 
 void ScreenTextBlock::RenderContext::RestoreDirtyRect(
     const gfx::RectF& rect) const {
   auto marker_rect = rect;
-  marker_rect.left += 2.0f;
-  marker_rect.right = marker_rect.left + 3.0f;
+  marker_rect.left += kMarkerLeftMargin;
+  marker_rect.right = marker_rect.left + kMarkerWidth;
   gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF::White), marker_rect);
   #if USE_OVERLAY
     if (!screen_text_block_->bitmap_ || !*screen_text_block_->bitmap_)
@@ -300,7 +332,9 @@ FormatLineIterator ScreenTextBlock::RenderContext::TryCopy(
 
     while (format_runner != format_end && screen_runner != screen_end) {
       auto const format_line = *format_runner;
-      if (!format_line->Equal(*screen_runner))
+      auto const screen_line = *screen_runner;
+      if (screen_line->rect().bottom > rect_.bottom ||
+          !format_line->Equal(screen_line))
         break;
       if (skip)
         AddRect(skip_rects_, format_line->rect());
@@ -339,8 +373,6 @@ void ScreenTextBlock::Render(const TextBlock* text_block, gfx::ColorF bgcolor) {
   for (auto line : text_block->lines()) {
     lines_.push_back(line->Copy());
   }
-  render_context.FillBottom(lines_.back());
-
   bitmap_ = CopyFromRenderTarget(gfx_, gfx::RectF(
       gfx::PointF(rect_.left, lines_.front()->rect().top),
       gfx::SizeF(rect_.width(), lines_.back()->rect().bottom)));

@@ -17,7 +17,7 @@ namespace rendering {
 
 namespace {
 
-const float cxLeftMargin = 7.0f;
+const float cxLeftMargin = 10.0f;
 const int k_nTabWidth = 4;
 
 float AlignHeightToPixel(const gfx::Graphics& gfx, float height) {

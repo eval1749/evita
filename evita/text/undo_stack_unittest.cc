@@ -87,8 +87,9 @@ TEST_F(UndoStackTest, Merge) {
     text::UndoBlock undo_group(buffer(), L"test");
     buffer()->Insert(3, L"bar");
   }
-  EXPECT_EQ(0, buffer()->Undo(6));
-  EXPECT_EQ(0, buffer()->GetEnd());
+  EXPECT_EQ(3, buffer()->Undo(6));
+  EXPECT_EQ(3, buffer()->GetEnd());
+  EXPECT_EQ(0, buffer()->Undo(3));
   EXPECT_FALSE(buffer()->IsModified()) <<
       "Undo should make document not modified.";
 

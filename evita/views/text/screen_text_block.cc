@@ -170,6 +170,7 @@ FormatLineIterator ScreenTextBlock::RenderContext::FindFirstMismatch() const {
       return format_line_runner;
     }
     AddRect(skip_rects_, format_line->rect());
+    ++screen_line_runner;
   }
   return format_lines_.cend();
 }

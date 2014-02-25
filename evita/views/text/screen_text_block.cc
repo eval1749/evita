@@ -10,7 +10,7 @@
 #include "evita/views/text/render_text_block.h"
 #include "evita/views/text/render_text_line.h"
 
-#define DEBUG_DRAW _DEBUG
+#define DEBUG_DRAW 0
 #define DEBUG_RENDER_TARGET 0
 #define USE_OVERLAY 1
 
@@ -48,13 +48,25 @@ inline void FillRect(const gfx::Graphics& gfx, const gfx::RectF& rect,
 }
 
 void AddRect(std::vector<gfx::RectF>& rects, const gfx::RectF& rect) {
-  if (rects.empty() || rects.back().bottom != rect.top) {
+  if (rects.empty()) {
     rects.push_back(rect);
-  } else {
-    auto& last = rects.back();
+    return;
+  }
+
+  auto& last = rects.back();
+  if (last.bottom == rect.top) {
     last.right = std::max(last.right, rect.right);
     last.bottom = rect.bottom;
+    return;
   }
+
+  if (last.top == rect.bottom) {
+    last.right = std::max(last.right, rect.right);
+    last.top = rect.top;
+    return;
+  }
+
+  rects.push_back(rect);
 }
 
 } // namespace
@@ -223,11 +235,15 @@ void ScreenTextBlock::RenderContext::Finish() {
   // Draw dirty rectangles for debugging.
   gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
   for (auto rect : copy_rects_) {
-    DVLOG(0) << "copy " << rect;
+    #if DEBUG_DRAW
+      DVLOG(0) << "copy " << rect;
+    #endif
     DrawDirtyRect(rect, 58.0f / 255, 128.0f / 255, 247.0f / 255);
   }
   for (auto rect : dirty_rects_) {
-    DVLOG(0) << "dirty " << rect;
+    #if DEBUG_DRAW
+      DVLOG(0) << "dirty " << rect;
+    #endif
     DrawDirtyRect(rect, 219.0f / 255, 68.0f / 255, 55.0f / 255);
   }
 }

@@ -31,7 +31,7 @@ float AlignWidthToPixel(const gfx::Graphics&, float width) {
   return width;
 }
 
-inline gfx::ColorF ColorToColorF(Color color) {
+inline gfx::ColorF ColorToColorF(text::Color color) {
   COLORREF const cr = color;
   return gfx::ColorF(
       static_cast<float>(GetRValue(cr)) / 255,
@@ -190,7 +190,7 @@ int TextRenderer::pageLines() const {
 
 void TextRenderer::Prepare(const Selection& selection) {
   selection_ = selection;
-  m_crBackground = m_pBuffer->GetDefaultStyle()->GetBackground();
+  m_crBackground = m_pBuffer->GetDefaultStyle().bgcolor();
 }
 
 void TextRenderer::Render() {

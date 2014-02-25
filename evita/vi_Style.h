@@ -14,9 +14,12 @@
 #include <memory>
 
 #include "base/strings/string16.h"
-#include "evita/text/style.h"
 #include "gfx/forward.h"
 #include "evita/li_util.h"
+
+namespace text {
+class StyleValues;
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -116,10 +119,11 @@ class FontSet : public Fonts
     public: Font* FindFont(char16) const;
 
     // [G]
-    public: static FontSet* Get(const gfx::Graphics&, const StyleValues* p) {
-      return Get(p);
+    public: static FontSet* Get(const gfx::Graphics&,
+                                const text::StyleValues& style) {
+      return Get(style);
     }
-    public: static FontSet* Get(const StyleValues*);
+    public: static FontSet* Get(const text::StyleValues& style);
     public: const Key* GetKey() const { return this; }
 
     // [H]

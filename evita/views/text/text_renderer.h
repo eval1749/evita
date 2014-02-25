@@ -41,7 +41,7 @@ class TextRenderer {
   private: text::Buffer* const m_pBuffer;
   private: Posn m_lStart;
   private: Posn m_lEnd;
-  private: Color m_crBackground;
+  private: text::Color m_crBackground;
   private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
   private: Selection selection_;
   private: std::unique_ptr<TextBlock> text_block_;

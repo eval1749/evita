@@ -21,7 +21,6 @@
 #include "evita/editor/application.h"
 #include "evita/io/io_manager.h"
 #include "evita/views/tab_strip.h"
-#include "evita/vi_Style.h"
 
 #define SINGLE_INSTANCE_NAME L"D47A7677-9F8E-467c-BABE-8ABDE8D58476" 
 
@@ -31,8 +30,6 @@ extern HINSTANCE   g_hInstance;
 extern HINSTANCE   g_hResource;
 extern HWND        g_hwndActiveDialog;
 extern uint        g_TabBand__TabDragMsg;
-
-extern StyleValues g_DefaultStyle;
 
 static void NoReturn fatalExit(const char16*);
 
@@ -80,44 +77,6 @@ static void NoReturn fatalExit(const char16* pwsz) {
 }
 
 static int MainLoop() {
-  // Initialize Default Style
-  // This initialize must be before creating edit buffers.
-  {
-      g_DefaultStyle.m_rgfMask =
-          StyleValues::Mask_Background |
-          StyleValues::Mask_Color |
-          StyleValues::Mask_Decoration |
-          StyleValues::Mask_FontFamily |
-          StyleValues::Mask_FontStyle |
-          StyleValues::Mask_FontWeight |
-          StyleValues::Mask_Marker |
-          StyleValues::Mask_Syntax;
-
-        #if 0
-          //g_DefaultStyle->SetBackground(Color(0xF0, 0xF0, 0xF0));
-          g_DefaultStyle->SetBackground(Color(247, 247, 239));
-          g_DefaultStyle->SetColor(Color(0x00, 0x00, 0x00));
-          g_DefaultStyle->SetMarke{r(Color(0x00, 0x66, 0x00));
-      #else
-          g_DefaultStyle.m_crBackground = Color(255, 255, 255);
-          g_DefaultStyle.m_crColor      = Color(0x00, 0x00, 0x00);
-          g_DefaultStyle.m_crMarker     = Color(0x00, 0x99, 0x00);
-      #endif
-
-        //#define BaseFont L"Lucida Console"
-      //#define BaseFont L"Courier New"
-      #define BaseFont L"Consolas, MS Gothic"
-
-        {
-          //FontSet* pFontSet = new FontSet;
-          //pFontSet->Add(Font::Create(BaseFont, nFontSize, ANSI_CHARSET));
-          //pFontSet->Add(Font::Create(L"Courier New", nFontSize, ANSI_CHARSET));
-          //pFontSet->Add(Font::Create(L"MS Gothic", nFontSize, SHIFTJIS_CHARSET));
-          g_DefaultStyle.m_pwszFontFamily = BaseFont;
-          g_DefaultStyle.m_nFontSize      = 10;
-      }
-  }
-
   Application::instance()->Run();
   return 0;
 }

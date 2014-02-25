@@ -18,8 +18,6 @@
 #include "evita/text/interval.h"
 #include "evita/text/interval_set.h"
 
-extern StyleValues g_DefaultStyle;
-
 ///
 /// <summary>
 ///   Returns random number for Treap.
@@ -41,35 +39,14 @@ Interval::Interval(Posn lStart, Posn lEnd, int nZ) :
     m_lEnd(lEnd),
     m_lStart(lStart),
     m_nZ(nZ),
-    m_Style(g_DefaultStyle) {}
+    m_Style(*StyleValues::Default()) {}
 
 /// <summary>
 ///   Set style of interval.
 /// </summary>
-void Interval::SetStyle(const StyleValues* p)
+void Interval::SetStyle(const StyleValues& other)
 {
-    #define mergeStyle(mp_field) \
-        if (p->m_rgfMask & StyleValues::Mask_##mp_field) \
-        { \
-            m_Style.m_rgfMask |= StyleValues::Mask_##mp_field; \
-            m_Style.Set##mp_field(p->Get##mp_field()); \
-        }
-
-    Posn lPosn = GetEnd();
-
-    mergeStyle(Background);
-    mergeStyle(Color);
-    mergeStyle(Decoration);
-    mergeStyle(FontFamily);
-    mergeStyle(FontSize);
-    mergeStyle(FontStyle);
-    mergeStyle(FontWeight);
-    mergeStyle(Marker);
-    mergeStyle(Syntax);
-
-    #undef mergeStyle
-
-    DCHECK_EQ(GetEnd(), lPosn);
+    m_Style.OverrideBy(other);
 } // Interval::SetStyle
 
 /// <summary>
@@ -86,24 +63,17 @@ Interval* Buffer::GetIntervalAt(Posn lPosn) const {
 /// </summary>
 /// <param name="lEnd">An end position (exlclude).</param>
 /// <param name="lStart">A start position (include).</param>
-/// <param name="pStyle">A style to set</param>
+/// <param name="style">A style to set</param>
 void Buffer::SetStyle(
     Posn                lStart,
     Posn                lEnd,
-    const StyleValues*  pStyle )
+    const StyleValues&  style)
 {
-    DCHECK(pStyle);
-
-    #if DEBUG_STYLE
-        DEBUG_PRINTF(L"%p [%d, %d] color=#x%06X\n",
-            this, lStart, lEnd, pStyle->GetColor() );
-    #endif // DEBUG_STYLE
-
     if (lStart < 0) lStart = 0;
     if (lEnd > GetEnd()) lEnd = GetEnd();
     if (lStart >= lEnd) return;
 
-    // To improve performance, we don't check contents of pStyle.
+    // To improve performance, we don't check contents of |style|.
     // This may be enough for syntax coloring.
     m_nModfTick += 1;
 
@@ -117,7 +87,7 @@ void Buffer::SetStyle(
     {
         // pHead: ---s......e---
         // Range: ---s......e---
-        pHead->SetStyle(pStyle);
+        pHead->SetStyle(style);
         tryMergeInterval(pHead);
         return;
     }
@@ -126,14 +96,14 @@ void Buffer::SetStyle(
     {
         // pHead: --s...e----
         // Range: ----s.....e----
-        SetStyle(lStart,   lHeadEnd, pStyle);
-        SetStyle(lHeadEnd, lEnd,     pStyle);
+        SetStyle(lStart,   lHeadEnd, style);
+        SetStyle(lHeadEnd, lEnd,     style);
         return;
     } // if
 
     // New style is compatibile with existing one.
     Interval oIntv(lStart, lEnd);
-    oIntv.SetStyle(pStyle);
+    oIntv.SetStyle(style);
     if (oIntv.CanMerge(pHead))
     {
         return;
@@ -156,7 +126,7 @@ void Buffer::SetStyle(
         }
 
         auto const pIntv = new Interval(lStart, lEnd);
-        pIntv->SetStyle(pStyle);
+        pIntv->SetStyle(style);
 
         intervals_->InsertBefore(pIntv, pHead);
 
@@ -189,7 +159,7 @@ void Buffer::SetStyle(
         }
 
         auto const pIntv = new Interval(lStart, lEnd);
-        pIntv->SetStyle(pStyle);
+        pIntv->SetStyle(style);
 
         intervals_->InsertAfter(pIntv, pHead);
 
@@ -228,7 +198,7 @@ void Buffer::SetStyle(
         #endif
 
         auto const pIntv = new Interval(lStart, lEnd);
-        pIntv->SetStyle(pStyle);
+        pIntv->SetStyle(style);
 
         intervals_->InsertAfter(pIntv, pHead);
 
@@ -305,41 +275,7 @@ Interval* Buffer::tryMergeInterval(Interval* pIntv)
 /// </summary>
 bool Interval::CanMerge(const Interval* pIntv) const
 {
-    const StyleValues* p = GetStyle();
-    const StyleValues* q = pIntv->GetStyle();
-
-    if (p->m_rgfMask != q->m_rgfMask)
-    {
-        return false;
-    }
-
-    #define compare(mp_name) \
-        if (p->m_rgfMask & StyleValues::Mask_##mp_name && \
-            p->Get##mp_name() != q->Get##mp_name() ) \
-        { \
-            return false; \
-        }
-
-    compare(Background)
-    compare(Color)
-    compare(Decoration)
-    compare(FontSize)
-    compare(FontStyle)
-    compare(FontWeight)
-    compare(Marker)
-    compare(Syntax)
-
-    #undef compare
-
-    if (p->m_rgfMask & StyleValues::Mask_FontFamily)
-    {
-        if (::lstrcmpW(p->m_pwszFontFamily, q->m_pwszFontFamily))
-        {
-            return false;
-        }
-    }
-
-    return true;
+    return GetStyle() == pIntv->GetStyle();
 } // Interval::CanMerge
 
 }  // namespace text

@@ -27,7 +27,7 @@ enum class TextMarker;
 class TextFormatter {
   private: class EnumCI;
 
-  private: Color const filler_color_;
+  private: text::Color const filler_color_;
   private: const gfx::Graphics& m_gfx;
   private: const Selection& selection_;
   private: TextBlock* const text_block_;

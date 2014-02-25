@@ -5,85 +5,129 @@
 #if !defined(INCLUDE_evita_text_style_h)
 #define INCLUDE_evita_text_style_h
 
+#include "base/strings/string16.h"
+
+namespace text {
+
 // Color
-class Color
-{
-    COLORREF    m_cr;
+class Color {
+  COLORREF    m_cr;
 
-    public: Color(COLORREF cr = 0) : m_cr(cr) {}
-    public: Color(uint r, uint g, uint b) : m_cr(RGB(r, g, b)) {}
+  public: Color(COLORREF cr = 0);
+  public: Color(int r, int g, int b);
+  public: ~Color();
 
-    public: operator COLORREF() const { return m_cr; }
+  public: operator COLORREF() const { return m_cr; }
 
-    public: bool Equal(const Color& cr) const { return m_cr == cr.m_cr; }
-    public: uint Hash() const { return m_cr; }
-}; // Color
+  public: bool Equal(const Color& cr) const { return m_cr == cr.m_cr; }
+  public: uint32_t Hash() const { return m_cr; }
+};
 
-enum FontStyle
-{
-    FontStyle_Normal,
+typedef int FontSize;
 
-    FontStyle_Italic,
-}; // FontStyle
+enum FontStyle {
+  FontStyle_Normal,
+  FontStyle_Italic,
+};
 
+enum FontWeight {
+  FontWeight_Normal,
+  FontWeight_Bold,
+};
 
-enum FontWeight
-{
-    FontWeight_Normal,
+enum TextDecoration {
+  TextDecoration_None,
+  TextDecoration_GreenWave,
+  TextDecoration_RedWave,
+  TextDecoration_Underline,
+  #if SUPPORT_IME
+  TextDecoration_ImeInput,        // dotted underline
+  TextDecoration_ImeActive,       // 2 pixel underline
+  TextDecoration_ImeInactiveA,    // 1 pixel underline
+  TextDecoration_ImeInactiveB,    // 1 pixel underline
+  #endif // SUPPORT_IME
+};
 
-    FontWeight_Bold,
-}; // FontStyle
+typedef int Syntax;
 
+//////////////////////////////////////////////////////////////////////
+//
+// StyleValues
+//
+class StyleValues {
+  private: enum Mask {
+    Mask_BgColor = 1 << 0,
+    Mask_Color      = 1 << 1,
+    Mask_FontFamily = 1 << 2,
+    Mask_FontSize   = 1 << 3,
+    Mask_FontStyle  = 1 << 4,
+    Mask_FontWeight = 1 << 5,
+    Mask_MarkerColor = 1 << 6,
+    Mask_Syntax     = 1 << 7,
+    Mask_TextDecoration = 1 << 8,
+  };
 
-enum TextDecoration
-{
-    TextDecoration_None,
-    TextDecoration_GreenWave,
-    TextDecoration_RedWave,
-    TextDecoration_Underline,
-    #if SUPPORT_IME
-    TextDecoration_ImeInput,        // dotted underline
-    TextDecoration_ImeActive,       // 2 pixel underline
-    TextDecoration_ImeInactiveA,    // 1 pixel underline
-    TextDecoration_ImeInactiveB,    // 1 pixel underline
-    #endif // SUPPORT_IME
-}; // TextDecoration
+  private: Color bgcolor_;
+  private: Color color_;
+  private: base::string16 font_family_;
+  private: int font_size_;
+  private: FontStyle font_style_;
+  private: FontWeight font_weight_;
+  private: Color marker_color_;
+  private: int masks_;
+  private: int syntax_;
+  private: TextDecoration text_decoration_;
 
-struct StyleValues
-{
-    enum Mask
-    {
-        Mask_Background = 1 << 0,
-        Mask_Color      = 1 << 1,
-        Mask_Decoration = 1 << 2,
-        Mask_FontFamily = 1 << 3,
-        Mask_FontSize   = 1 << 4,
-        Mask_FontStyle  = 1 << 5,
-        Mask_FontWeight = 1 << 6,
-        Mask_Marker     = 1 << 7,
-        Mask_Syntax     = 1 << 8,
-    }; // Mask
+  public: StyleValues(Color color, Color bgcolor);
+  public: StyleValues(const StyleValues& other);
+  public: StyleValues();
+  public: ~StyleValues();
 
-    uint            m_rgfMask;
+  public: bool operator==(const StyleValues& other) const;
+  public: bool operator!=(const StyleValues& other) const;
 
-    #define DefineField(mp_ty, mp_prefix, mp_name) \
-        mp_ty m_##mp_prefix##mp_name; \
-        mp_ty Get##mp_name() const { return m_##mp_prefix##mp_name; } \
-        mp_ty Set##mp_name(mp_ty x) { return m_##mp_prefix##mp_name = x; }
+  public: Color bgcolor() const;
+  public: bool has_bgcolor() const { return masks_ & Mask_BgColor; }
+  public: void set_bgcolor(Color bgcolor);
 
-    DefineField(Color,          cr,     Background)
-    DefineField(Color,          cr,     Color)
-    DefineField(Color,          cr,     Marker)
-    DefineField(TextDecoration, e,      Decoration)
-    DefineField(const char16*,  pwsz,   FontFamily);
-    DefineField(int,            n,      FontSize)
-    DefineField(FontStyle,      e,      FontStyle)
-    DefineField(FontWeight,     e,      FontWeight)
-    DefineField(int,            n,      Syntax);
+  public: Color color() const;
+  public: bool has_color() const { return masks_ & Mask_Color; }
+  public: void set_color(Color color);
 
-    #undef DefineField
-}; // StyleValues
+  public: const base::string16& font_family() const;
+  public: bool has_font_family() const { return masks_ & Mask_FontFamily; }
+  public: void set_font_family(const base::string16& font_family);
 
-extern StyleValues g_DefaultStyle;
+  public: FontSize font_size() const;
+  public: bool has_font_size() const { return masks_ & Mask_FontSize; }
+  public: void set_font_size(FontSize font_size);
+
+  public: FontStyle font_style() const;
+  public: bool has_font_style() const { return masks_ & Mask_FontStyle; }
+  public: void set_font_style(FontStyle font_style);
+
+  public: FontWeight font_weight() const;
+  public: bool has_font_weight() const { return masks_ & Mask_FontWeight; }
+  public: void set_font_weight(FontWeight font_weight);
+
+  public: Color marker_color() const;
+  public: bool has_marker_color() const { return masks_ & Mask_MarkerColor; }
+  public: void set_marker_color(Color marker_color);
+
+  public: Syntax syntax() const;
+  public: bool has_syntax() const { return masks_ & Mask_Syntax; }
+  public: void set_syntax(Syntax syntax);
+
+  public: TextDecoration text_decoration() const;
+  public: bool has_text_decoration() const {
+    return masks_ & Mask_TextDecoration;
+  }
+  public: void set_text_decoration(TextDecoration text_decoration);
+
+  public: static StyleValues* Default();
+  public: void OverrideBy(const StyleValues& style);
+};
+
+}  // namespace text
 
 #endif //!defined(INCLUDE_evita_text_style_h)

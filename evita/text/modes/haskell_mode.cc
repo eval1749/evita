@@ -804,8 +804,8 @@ class HaskellLexer : public NewLexer::LexerBase
             char16 wch = oEnum.Get();
             if (0x20 == wch || 0x09 == wch || 0x0A == wch)
             {
-                const StyleValues* pStyle = oEnum.GetStyle();
-                if (Syntax_None == pStyle->GetSyntax())
+                const auto& style = oEnum.GetStyle();
+                if (Syntax_None == style.syntax())
                 {
                     lStart = oEnum.GetPosn() - 1;
                     if (0x0A != wch)

@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "evita/gfx_base.h"
+#include "evita/text/style.h"
 
 namespace {
 bool IsCacheableChar(char16 wch) {
@@ -404,30 +405,30 @@ FontSetCache* g_pFontSetCache;
 //
 // FontSet::Get
 //
-FontSet* FontSet::Get(const StyleValues* pStyle)
+FontSet* FontSet::Get(const text::StyleValues& style)
 {
     Fonts oFonts;
     oFonts.m_cFonts = 0;
 
-    const char16* pwszFamily = pStyle->GetFontFamily();
+    const char16* pwszFamily = style.font_family().data();
     while (0 != *pwszFamily)
     {
         LOGFONT oLogFont;
         ::ZeroMemory(&oLogFont, sizeof(oLogFont));
 
-        oLogFont.lfHeight = pStyle->m_nFontSize;
+        oLogFont.lfHeight = style.font_size();
         oLogFont.lfWidth = 0;
         oLogFont.lfEscapement = 0;
         oLogFont.lfOrientation = 0;
 
         oLogFont.lfWeight =
-            FontWeight_Bold == pStyle->GetFontWeight() ? FW_BOLD : FW_NORMAL;
+            text::FontWeight_Bold == style.font_weight() ? FW_BOLD : FW_NORMAL;
 
         oLogFont.lfItalic =
-            FontStyle_Italic == pStyle->GetFontStyle() ? 1u : 0u;
+            text::FontStyle_Italic == style.font_style() ? 1u : 0u;
 
         oLogFont.lfUnderline =
-            TextDecoration_Underline == pStyle->GetDecoration() ? 1u : 0u;
+            text::TextDecoration_Underline == style.text_decoration() ? 1u : 0u;
 
         oLogFont.lfStrikeOut     = 0;
         oLogFont.lfCharSet       = ANSI_CHARSET;;

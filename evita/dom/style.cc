@@ -95,16 +95,16 @@ class TextDecorationValue : public common::Singleton<TextDecorationValue>,
 namespace gin {
 
 template<>
-struct Converter<Color> {
+struct Converter<text::Color> {
   static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> js_value,
-                     Color* out_color) {
+                     text::Color* out_color) {
     int int_value;
     if (!ConvertFromV8(isolate, js_value, &int_value))
       return false;
-    *out_color = Color(static_cast<COLORREF>(int_value));
+    *out_color = text::Color(static_cast<COLORREF>(int_value));
     return true;
   }
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, Color color) {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, text::Color color) {
     return ConvertToV8(isolate, static_cast<int>(static_cast<COLORREF>(color)));
   }
 };
@@ -125,19 +125,19 @@ struct EnumConverter {
 };
 
 template<>
-struct Converter<FontStyle> :
-    EnumConverter<FontStyle, dom::internal::FontStyleValue> {
+struct Converter<text::FontStyle> :
+    EnumConverter<text::FontStyle, dom::internal::FontStyleValue> {
 };
 
 template<>
-struct Converter<FontWeight> :
-    EnumConverter<FontWeight, dom::internal::FontWeightValue> {
+struct Converter<text::FontWeight> :
+    EnumConverter<text::FontWeight, dom::internal::FontWeightValue> {
 };
 
 
 template<>
-struct Converter<TextDecoration> :
-    EnumConverter<TextDecoration, dom::internal::TextDecorationValue> {
+struct Converter<text::TextDecoration> :
+    EnumConverter<text::TextDecoration, dom::internal::TextDecorationValue> {
 };
 
 }  // namespace gin
@@ -178,7 +178,7 @@ void InvalidStyleAttributeValue(v8::Isolate* isolate,
 v8::Handle<v8::Object> Document::style_at(text::Posn position) const {
   if (!IsValidPosition(position))
     return v8::Handle<v8::Object>();
-  auto const style_attrs = buffer_->GetStyleAt(position);
+  const auto& style_values = buffer_->GetStyleAt(position);
 
   auto const runner = ScriptController::instance()->runner();
   auto const isolate = runner->isolate();
@@ -186,56 +186,56 @@ v8::Handle<v8::Object> Document::style_at(text::Posn position) const {
 
   auto const style_ctor = runner->global()->Get(
       v8Strings::Style.Get(isolate))->ToObject();
-  auto const style = style_ctor->CallAsConstructor(0, nullptr)->ToObject();
+  auto const js_style = style_ctor->CallAsConstructor(0, nullptr)->ToObject();
 
-  if (style_attrs->m_rgfMask  & StyleValues::Mask_Background) {
-    style->Set(v8Strings::backgroundColor.Get(isolate),
-               v8::Integer::New(isolate,
-                   static_cast<int>(style_attrs->GetBackground())));
+  if (style_values.has_bgcolor()) {
+    js_style->Set(v8Strings::backgroundColor.Get(isolate),
+                  v8::Integer::New(isolate,
+                      static_cast<int>(style_values.bgcolor())));
   }
 
-  if (style_attrs->m_rgfMask  & StyleValues::Mask_Color) {
-    style->Set(v8Strings::color.Get(isolate),
-               v8::Integer::New(isolate,
-                    static_cast<int>(style_attrs->GetColor())));
+  if (style_values.has_color()) {
+    js_style->Set(v8Strings::color.Get(isolate),
+                  v8::Integer::New(isolate,
+                      static_cast<int>(style_values.color())));
   }
 
-  if (style_attrs->m_rgfMask & StyleValues::Mask_Decoration) {
-    style->Set(v8Strings::textDecoration.Get(isolate),
-               gin::ConvertToV8(isolate, style_attrs->GetDecoration()));
+  if (style_values.has_text_decoration()) {
+    js_style->Set(v8Strings::textDecoration.Get(isolate),
+                  gin::ConvertToV8(isolate, style_values.text_decoration()));
   }
 
-  if (style_attrs->m_rgfMask  & StyleValues::Mask_FontSize) {
-    style->Set(v8Strings::fontSize.Get(isolate),
-               v8::Integer::New(isolate, style_attrs->GetFontSize()));
+  if (style_values.has_font_size()) {
+    js_style->Set(v8Strings::fontSize.Get(isolate),
+                  v8::Integer::New(isolate, style_values.font_size()));
   }
 
-  if (style_attrs->m_rgfMask & StyleValues::Mask_FontStyle) {
-    style->Set(v8Strings::fontStyle.Get(isolate),
-               gin::ConvertToV8(isolate, style_attrs->GetFontStyle()));
+  if (style_values.has_font_style()) {
+    js_style->Set(v8Strings::fontStyle.Get(isolate),
+                  gin::ConvertToV8(isolate, style_values.font_style()));
   }
 
-  if (style_attrs->m_rgfMask & StyleValues::Mask_FontWeight) {
-    style->Set(v8Strings::fontWeight.Get(isolate),
-               gin::ConvertToV8(isolate, style_attrs->GetFontWeight()));
+  if (style_values.has_font_weight()) {
+    js_style->Set(v8Strings::fontWeight.Get(isolate),
+                  gin::ConvertToV8(isolate, style_values.font_weight()));
   }
 
-  if (style_attrs->m_rgfMask & StyleValues::Mask_Syntax) {
-    style->Set(v8Strings::charSyntax.Get(isolate),
-               v8::Integer::New(isolate, style_attrs->GetSyntax()));
+  if (style_values.has_syntax()) {
+    js_style->Set(v8Strings::charSyntax.Get(isolate),
+                  v8::Integer::New(isolate, style_values.syntax()));
   }
-  return runner_scope.Escape(style);
+  return runner_scope.Escape(js_style);
 }
 
 void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
-  StyleValues style_attrs;
-  style_attrs.m_rgfMask = 0;
+  text::StyleValues style_values;
+  bool changed = false;
 
   auto const runner = ScriptController::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
 
-  #define LOAD_DICT_VALUE(type, attr_name, mask_name, member_name) \
+  #define LOAD_DICT_VALUE(type, attr_name, member_name) \
     auto const attr_name = v8Strings::attr_name.Get(isolate); \
     if (EqualNames(name, attr_name)) { \
       auto const js_value = style_dict->Get(attr_name); \
@@ -243,8 +243,8 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
         continue; \
       auto const attr_value = ConvertFromV8<type>(isolate, js_value); \
       if (attr_value.has_value) { \
-        style_attrs.m_rgfMask |= StyleValues::Mask_ ## mask_name; \
-        style_attrs.member_name = attr_value.value; \
+        style_values.set_##member_name(attr_value.value); \
+        changed = true; \
         continue; \
       } \
       InvalidStyleAttributeValue(isolate, attr_name); \
@@ -257,14 +257,13 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
     auto const name = names->Get(index);
     if (name.IsEmpty())
       continue;
-    LOAD_DICT_VALUE(Color, backgroundColor, Background, m_crBackground);
-    LOAD_DICT_VALUE(int, charSyntax, Syntax, m_nSyntax);
-    LOAD_DICT_VALUE(Color, color, Color, m_crColor);
-    LOAD_DICT_VALUE(int, fontSize, FontSize, m_nFontSize);
-    LOAD_DICT_VALUE(FontStyle, fontStyle, FontStyle, m_eFontStyle);
-    LOAD_DICT_VALUE(FontWeight, fontWeight, FontWeight, m_eFontWeight);
-    LOAD_DICT_VALUE(TextDecoration, textDecoration, Decoration,
-                    m_eDecoration);
+    LOAD_DICT_VALUE(text::Color, backgroundColor, bgcolor);
+    LOAD_DICT_VALUE(int, charSyntax, syntax);
+    LOAD_DICT_VALUE(text::Color, color, color);
+    LOAD_DICT_VALUE(int, fontSize, font_size);
+    LOAD_DICT_VALUE(text::FontStyle, fontStyle, font_style);
+    LOAD_DICT_VALUE(text::FontWeight, fontWeight, font_weight);
+    LOAD_DICT_VALUE(text::TextDecoration, textDecoration, text_decoration)
 
     ScriptController::instance()->ThrowException(v8::Exception::Error(
         gin::StringToV8(isolate, base::StringPrintf(
@@ -272,10 +271,10 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
             V8ToString(name).c_str()))));
     return;
   }
-  if (!style_attrs.m_rgfMask)
+  if (!changed)
     return;
   document_->buffer()->SetStyle(range_->GetStart(), range_->GetEnd(),
-                                &style_attrs);
+                                style_values);
 }
 
 }  // namespace

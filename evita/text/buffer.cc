@@ -106,11 +106,11 @@ void Buffer::EndUndoGroup(const base::string16& name) {
   undo_stack_->EndUndoGroup(name);
 }
 
-const StyleValues* Buffer::GetDefaultStyle() const {
+const StyleValues& Buffer::GetDefaultStyle() const {
   return GetIntervalAt(GetEnd())->GetStyle();
 }
 
-const StyleValues* Buffer::GetStyleAt(Posn lPosn) const {
+const StyleValues& Buffer::GetStyleAt(Posn lPosn) const {
   return GetIntervalAt(lPosn)->GetStyle();
 }
 

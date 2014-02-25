@@ -5,12 +5,14 @@
 #if !defined(INCLUDE_evita_views_text_render_selection_h)
 #define INCLUDE_evita_views_text_render_selection_h
 
+#include "evita/text/style.h"
+
 namespace views {
 namespace rendering {
 
 struct Selection {
-  Color bgcolor;
-  Color color;
+  text::Color bgcolor;
+  text::Color color;
   text::Posn start;
   text::Posn end;
 };

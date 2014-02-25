@@ -7,6 +7,7 @@
 
 #include "common/castable.h"
 #include "evita/gfx_base.h"
+#include "evita/text/style.h"
 #include "evita/vi_style.h"
 
 namespace views {
@@ -19,6 +20,12 @@ enum class TextMarker{
   Tab,
 };
 
+// TODO(yosi) We should remove |using text::Color|.
+using text::Color;
+// TODO(yosi) We should remove |using text::StyleValues|.
+using text::StyleValues;
+// TODO(yosi) We should remove |using text::TextDecoration|.
+using text::TextDecoration;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -121,7 +128,7 @@ class TextCell : public Cell {
   private: Font* m_pFont;
   private: base::string16 characters_;
 
-  public: TextCell(const gfx::Graphics& gfx, const StyleValues* pStyle,
+  public: TextCell(const gfx::Graphics& gfx, const StyleValues& style,
                    Color crColor, Color crBackground, Font* pFont, float cx,
                    Posn lPosn, const base::string16& characters);
   public: TextCell(const TextCell& other);
@@ -156,7 +163,7 @@ class TextCell : public Cell {
 class UnicodeCell final : public TextCell {
   DECLARE_CASTABLE_CLASS(UnicodeCell, TextCell);
 
-  public: UnicodeCell(const gfx::Graphics& gfx, const StyleValues* pStyle,
+  public: UnicodeCell(const gfx::Graphics& gfx, const StyleValues& style,
                       Color crColor, Color crBackground, Font* pFont,
                       float cx, Posn lPosn,
                       const base::string16& characters);

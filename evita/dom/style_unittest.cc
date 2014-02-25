@@ -9,17 +9,10 @@ namespace {
 
 class StyleTest : public dom::AbstractDomTest {
   protected: StyleTest() {
-    g_DefaultStyle.m_rgfMask = StyleValues::Mask_Background |
-                               StyleValues::Mask_Color |
-                               StyleValues::Mask_Decoration |
-                               StyleValues::Mask_FontFamily |
-                               StyleValues::Mask_FontStyle |
-                               StyleValues::Mask_FontWeight |
-                               StyleValues::Mask_Marker |
-                               StyleValues::Mask_Syntax;
-    g_DefaultStyle.m_crBackground = Color(255, 255, 255);
-    g_DefaultStyle.m_crColor = Color(0x00, 0x00, 0x00);
-    g_DefaultStyle.m_crMarker = Color(0x00, 0x99, 0x00);
+    auto const style = text::StyleValues::Default();
+    style->set_bgcolor(text::Color(255, 255, 255));
+    style->set_color(text::Color(0x00, 0x00, 0x00));
+    style->set_marker_color(text::Color(0x00, 0x99, 0x00));
   }
   public: virtual ~StyleTest() {
   }

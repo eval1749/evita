@@ -550,19 +550,12 @@ void XmlLexer::setColor(State eState, int iExtra)
 
     if (m_lTokenStart != lTokenEnd)
     {
-        StyleValues oStyleValues;
-        oStyleValues.m_rgfMask =
-            StyleValues::Mask_Background |
-            StyleValues::Mask_Color;
-        oStyleValues.m_crBackground = RGB(255, 255, 255);
-
-        oStyleValues.m_crColor =
-            k_rgnToken2Color[k_rgnState2Token[eState]];
-
         m_pBuffer->SetStyle(
             m_lTokenStart,
             lTokenEnd,
-            &oStyleValues );
+            StyleValues(k_rgnToken2Color[k_rgnState2Token[eState]],
+                        RGB(255, 255, 255)));
+
 
         m_lTokenStart = lTokenEnd;
     }
@@ -587,32 +580,23 @@ void XmlLexer::setStateStart(State eState, int iExtra)
 {
     Posn lTokenEnd = m_oEnumChar.GetPosn() + iExtra;
 
-    StyleValues oStyleValues;
-    oStyleValues.m_rgfMask =
-        StyleValues::Mask_Background |
-        StyleValues::Mask_Color;
-    oStyleValues.m_crBackground = RGB(255, 255, 255);
-
     if (m_lTokenStart != lTokenEnd)
     {
-        oStyleValues.m_crColor =
-                k_rgnToken2Color[k_rgnState2Token[m_eState]];
-
         m_pBuffer->SetStyle(
             m_lTokenStart,
             lTokenEnd,
-            &oStyleValues );
+            StyleValues(k_rgnToken2Color[k_rgnState2Token[m_eState]],
+            RGB(255, 255, 255)));
     }
 
     m_lTokenStart = lTokenEnd;
 
-    oStyleValues.m_crColor =
-            k_rgnToken2Color[k_rgnState2Token[eState]];
-
     m_pBuffer->SetStyle(
         m_lTokenStart,
         m_lTokenStart + 1,
-        &oStyleValues );
+        StyleValues(k_rgnToken2Color[k_rgnState2Token[eState]],
+                    RGB(255, 255, 255)));
+
 
     m_eState = eState;
 } // XmlLexer::setStateStart

@@ -12,13 +12,14 @@
 #define INCLUDE_edit_interval_h
 
 #include "evita/ed_BinTree.h"
-#include "evita/text/style.h"
 #include "evita/li_util.h"
+#include "evita/text/style.h"
 
 namespace text
 {
 
 class IntervalSet;
+
 
 /// <summary>
 ///   An interval on buffer. An interval object contains style and syntax
@@ -55,13 +56,13 @@ class Interval  :
     // [G]
     public: Posn      GetEnd()   const { return m_lEnd; }
     public: Posn      GetStart() const { return m_lStart; }
-    public: const StyleValues* GetStyle() const { return &m_Style; }
+    public: const StyleValues& GetStyle() const { return m_Style; }
 
     // [I]
     public: bool IsEmpty() const { return m_lStart == m_lEnd; }
 
     // [S]
-    public: void SetStyle(const StyleValues*);
+    public: void SetStyle(const StyleValues&);
 }; // Interval
 
 }  // namespace text

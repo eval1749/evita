@@ -79,7 +79,7 @@ class TextFormatter::EnumCI {
 
   public: Posn GetPosn() const { return m_lPosn; }
 
-  public: const StyleValues* GetStyle() const {
+  public: const StyleValues& GetStyle() const {
     if (AtEnd())
       return m_pBuffer->GetDefaultStyle();
     DCHECK(m_pInterval);
@@ -108,7 +108,7 @@ class TextFormatter::EnumCI {
 TextFormatter::TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
                              text::Buffer* buffer, Posn lStart,
                              const Selection& selection)
-    : filler_color_(buffer->GetDefaultStyle()->GetBackground()), m_gfx(gfx),
+    : filler_color_(buffer->GetDefaultStyle().bgcolor()), m_gfx(gfx),
       selection_(selection), text_block_(text_block),
       m_oEnumCI(new EnumCI(buffer, lStart)) {
   DCHECK(!text_block_->rect().empty());
@@ -231,21 +231,21 @@ Cell* TextFormatter::formatChar(
   TextDecoration  eDecoration;
 
   auto const lPosn = m_oEnumCI->GetPosn();
-  const auto* const pStyle = m_oEnumCI->GetStyle();
+  const auto& style = m_oEnumCI->GetStyle();
 
   if (lPosn >= selection_.start &&
       lPosn < selection_.end) {
     crColor      = selection_.color;
     crBackground = selection_.bgcolor;
-    eDecoration  = TextDecoration_None;
+    eDecoration  = text::TextDecoration_None;
   } else {
-    crColor      = pStyle->GetColor();
-    crBackground = pStyle->GetBackground();
-    eDecoration  = pStyle->GetDecoration();
+    crColor      = style.color();
+    crBackground = style.bgcolor();
+    eDecoration  = style.text_decoration();
   }
 
   if (0x09 == wch) {
-    auto const pFont = FontSet::Get(m_gfx, pStyle)->FindFont(m_gfx, 'x');
+    auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
     auto const cxTab = AlignWidthToPixel(m_gfx, pFont->GetCharWidth(' ')) *
                           k_nTabWidth;
     auto const x2 = (x + cxTab - cxLeftMargin) / cxTab * cxTab;
@@ -254,17 +254,17 @@ Cell* TextFormatter::formatChar(
     if (pPrev && x2 + cxM > text_block_->right())
       return nullptr;
 
-    return new MarkerCell(pStyle->GetMarker(), crBackground, cx,
+    return new MarkerCell(style.marker_color(), crBackground, cx,
         AlignHeightToPixel(m_gfx, pFont->height()), pFont->descent(), lPosn,
         TextMarker::Tab);
   }
 
   auto const pFont = wch < 0x20 ?
       nullptr :
-      FontSet::Get(m_gfx, pStyle)->FindFont(m_gfx, wch);
+      FontSet::Get(m_gfx, style)->FindFont(m_gfx, wch);
 
   if (!pFont) {
-    auto const pFont = FontSet::Get(m_gfx, pStyle)->FindFont(m_gfx, 'u');
+    auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'u');
     base::string16 string;
 
     if (wch < 0x20) {
@@ -284,7 +284,7 @@ Cell* TextFormatter::formatChar(
     if (pPrev && x + cxUni + cxM > text_block_->right())
       return nullptr;
 
-    return new UnicodeCell(m_gfx, pStyle, pStyle->GetMarker(), crBackground,
+    return new UnicodeCell(m_gfx, style, style.marker_color(), crBackground,
                            pFont, cxUni, lPosn, string);
   }
 
@@ -303,7 +303,7 @@ Cell* TextFormatter::formatChar(
     }
   }
 
-  return new TextCell(m_gfx, pStyle, crColor, crBackground, pFont, cx, lPosn,
+  return new TextCell(m_gfx, style, crColor, crBackground, pFont, cx, lPosn,
                       base::string16(1u, wch));
 }
 
@@ -312,7 +312,7 @@ Cell* TextFormatter::formatMarker(TextMarker marker_name) {
     Color crBackground;
 
     Posn lPosn = m_oEnumCI->GetPosn();
-    const StyleValues* pStyle = m_oEnumCI->GetStyle();
+    const StyleValues& style = m_oEnumCI->GetStyle();
 
     if (lPosn >= selection_.start &&
         lPosn < selection_.end)
@@ -322,11 +322,11 @@ Cell* TextFormatter::formatMarker(TextMarker marker_name) {
     }
     else
     {
-        crColor      = pStyle->GetMarker();
-        crBackground = pStyle->GetBackground();
+        crColor      = style.marker_color();
+        crBackground = style.bgcolor();
     }
 
-    Font* pFont = FontSet::Get(m_gfx, pStyle)->FindFont(m_gfx, 'x');
+    Font* pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
     MarkerCell* pCell = new MarkerCell(
         crColor,
         crBackground,

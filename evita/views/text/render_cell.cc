@@ -271,12 +271,12 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
 //
 // TextCell
 //
-TextCell::TextCell(const gfx::Graphics& gfx, const StyleValues* pStyle,
+TextCell::TextCell(const gfx::Graphics& gfx, const StyleValues& style,
                    Color crColor, Color crBackground, Font* pFont, float cx,
                    Posn lPosn, const base::string16& characters)
     : Cell(crBackground, cx, AlignHeightToPixel(gfx, pFont->height())),
       m_crColor(crColor),
-      m_eDecoration(pStyle->GetDecoration()),
+      m_eDecoration(style.text_decoration()),
       m_lStart(lPosn),
       m_lEnd(lPosn + 1),
       m_pFont(pFont),
@@ -386,39 +386,39 @@ void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
   DrawText(gfx, *m_pFont, text_brush, rect, characters_);
 
   auto const y = rect.bottom - m_iDescent -
-                 (m_eDecoration != TextDecoration_None ? 1 : 0);
+                 (m_eDecoration != text::TextDecoration_None ? 1 : 0);
   #if SUPPORT_IME
   switch (m_eDecoration) {
-    case TextDecoration_ImeInput:
+    case text::TextDecoration_ImeInput:
       // TODO: We should use dotted line. It was PS_DOT.
       DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 3);
       break;
 
-    case TextDecoration_ImeInactiveA:
+    case text::TextDecoration_ImeInactiveA:
       DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 3);
       break;
 
-    case TextDecoration_ImeInactiveB:
+    case text::TextDecoration_ImeInactiveB:
       DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 3);
       break;
 
-    case TextDecoration_ImeActive:
+    case text::TextDecoration_ImeActive:
       DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 3);
       DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 2);
       break;
 
-    case TextDecoration_None:
+    case text::TextDecoration_None:
       break;
 
-    case TextDecoration_GreenWave:
+    case text::TextDecoration_GreenWave:
       // TODO: Implement TextDecoration_RedWave
       break;
 
-    case TextDecoration_RedWave:
+    case text::TextDecoration_RedWave:
       // TODO: Implement TextDecoration_RedWave
       break;
 
-    case TextDecoration_Underline:
+    case text::TextDecoration_Underline:
       // TODO: Implement TextDecoration_Underline
       break;
   }
@@ -429,11 +429,11 @@ void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
 //
 // UnicodeCell
 //
-UnicodeCell::UnicodeCell(const gfx::Graphics& gfx, const StyleValues* pStyle,
+UnicodeCell::UnicodeCell(const gfx::Graphics& gfx, const StyleValues& style,
                          Color crColor, Color crBackground, Font* pFont,
                          float cx, Posn lPosn,
                          const base::string16& characters)
-    : TextCell(gfx, pStyle, crColor, crBackground, pFont, cx, lPosn,
+    : TextCell(gfx, style, crColor, crBackground, pFont, cx, lPosn,
                characters) {
   m_cy += 4;
 }

@@ -16,7 +16,7 @@
 
 #include "evita/IStringCursor.h"
 #include "evita/ed_BufferCore.h"
-#include "evita/ed_Style.h"
+#include "evita/text/style.h"
 
 namespace text {
 

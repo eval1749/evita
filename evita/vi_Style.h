@@ -14,7 +14,7 @@
 #include <memory>
 
 #include "base/strings/string16.h"
-#include "evita/ed_Style.h"
+#include "evita/text/style.h"
 #include "gfx/forward.h"
 #include "evita/li_util.h"
 

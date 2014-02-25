@@ -1,15 +1,9 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// Editor - Buffer
-// listener/winapp/ed_Buffer.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_Style.h#2 $
-//
-#if !defined(INCLUDE_edit_Style_h)
-#define INCLUDE_edit_Style_h
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#if !defined(INCLUDE_evita_text_style_h)
+#define INCLUDE_evita_text_style_h
 
 // Color
 class Color
@@ -92,4 +86,4 @@ struct StyleValues
 
 extern StyleValues g_DefaultStyle;
 
-#endif //!defined(INCLUDE_edit_Style_h)
+#endif //!defined(INCLUDE_evita_text_style_h)

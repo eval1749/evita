@@ -3,7 +3,7 @@
 
 #include "base/basictypes.h"
 #include "evita/dom/abstract_dom_test.h"
-#include "evita/ed_style.h"
+#include "evita/text/style.h"
 
 namespace {
 

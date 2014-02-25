@@ -12,7 +12,7 @@
 #define INCLUDE_edit_interval_h
 
 #include "evita/ed_BinTree.h"
-#include "evita/ed_Style.h"
+#include "evita/text/style.h"
 #include "evita/li_util.h"
 
 namespace text

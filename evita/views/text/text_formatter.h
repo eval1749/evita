@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "base/basictypes.h"
-#include "evita/ed_style.h"
+#include "evita/text/style.h"
 #include "evita/gfx_base.h"
 
 namespace text {

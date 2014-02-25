@@ -3,7 +3,7 @@
 #if !defined(INCLUDE_listener_winapp_visual_selection_h)
 #define INCLUDE_listener_winapp_visual_selection_h
 
-#include "evita/ed_Style.h"
+#include "evita/text/style.h"
 
 class TextEditWindow;
 

@@ -1,0 +1,56 @@
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "evita/views/text/render_style.h"
+
+namespace views {
+namespace rendering {
+
+namespace {
+inline gfx::ColorF ColorToColorF(text::Color color) {
+  COLORREF const cr = color;
+  return gfx::ColorF(
+      static_cast<float>(GetRValue(cr)) / 255,
+      static_cast<float>(GetGValue(cr)) / 255,
+      static_cast<float>(GetBValue(cr)) / 255);
+}
+}  // namespace
+
+RenderStyle::RenderStyle(const text::StyleValues& values, Font* font)
+    : bgcolor_(ColorToColorF(values.bgcolor())),
+      color_(ColorToColorF(values.color())), font_(font),
+      text_decoration_(values.text_decoration()) {
+}
+
+RenderStyle::RenderStyle(const RenderStyle& other)
+    : bgcolor_(other.bgcolor_), color_(other.color_), font_(other.font_),
+      text_decoration_(other.text_decoration_) {
+}
+
+RenderStyle::~RenderStyle() {
+}
+
+bool RenderStyle::operator==(const RenderStyle& other) const {
+  return bgcolor_ == other.bgcolor_ && color_ == other.color_ &&
+         font_ == other.font_ && text_decoration_ == other.text_decoration_;
+}
+
+bool RenderStyle::operator!=(const RenderStyle& other) const {
+  return !operator==(other);
+}
+
+} // namespace rendering
+} // namespace views
+
+namespace std {
+size_t hash<views::rendering::RenderStyle>::operator()(
+    const views::rendering::RenderStyle& style) const {
+  auto result = static_cast<size_t>(0);
+  result ^= std::hash<gfx::ColorF>()(style.bgcolor());
+  result ^= std::hash<gfx::ColorF>()(style.color());
+  result ^= std::hash<Font*>()(style.font());
+  result ^= std::hash<text::TextDecoration>()(style.text_decoration());
+  return result;
+}
+}  // namespace std

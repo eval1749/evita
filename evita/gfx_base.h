@@ -18,6 +18,7 @@
 #include "common/memory/singleton.h"
 #include "common/win/rect.h"
 #include "common/win/scoped_comptr.h"
+#include "evita/gfx/color_f.h"
 #include "evita/gfx/rect_f.h"
 
 
@@ -64,7 +65,7 @@ class SimpleObject_ : public Object {
 //
 // Graphics objects
 //
-typedef D2D1::ColorF ColorF;
+class ColorF;
 class Bitmap;
 class Brush;
 class FactorySet;

@@ -423,6 +423,7 @@
         'editor/dialog_box.cc',
         'editor/dom_lock.cc',
         'gfx_base.cpp',
+        'gfx/color_f.cc',
         'gfx/point_f.cc',
         'gfx/size_f.cc',
         'gfx/rect_f.cc',

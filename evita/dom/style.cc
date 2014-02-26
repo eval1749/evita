@@ -228,7 +228,7 @@ v8::Handle<v8::Object> Document::style_at(text::Posn position) const {
 }
 
 void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
-  text::StyleValues style_values;
+  text::Style style_values;
   bool changed = false;
 
   auto const runner = ScriptController::instance()->runner();

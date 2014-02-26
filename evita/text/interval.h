@@ -35,7 +35,7 @@ class Interval  :
     private: Posn           m_lEnd;
     private: Posn           m_lStart;
     private: int            m_nZ;
-    private: StyleValues    m_Style;
+    private: Style    m_Style;
 
     // ctor
     public: Interval(Posn lStart, Posn lEnd, int nZ = 9);
@@ -56,13 +56,13 @@ class Interval  :
     // [G]
     public: Posn      GetEnd()   const { return m_lEnd; }
     public: Posn      GetStart() const { return m_lStart; }
-    public: const StyleValues& GetStyle() const { return m_Style; }
+    public: const Style& GetStyle() const { return m_Style; }
 
     // [I]
     public: bool IsEmpty() const { return m_lStart == m_lEnd; }
 
     // [S]
-    public: void SetStyle(const StyleValues&);
+    public: void SetStyle(const Style&);
 }; // Interval
 
 }  // namespace text

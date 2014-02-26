@@ -553,7 +553,7 @@ void XmlLexer::setColor(State eState, int iExtra)
         m_pBuffer->SetStyle(
             m_lTokenStart,
             lTokenEnd,
-            StyleValues(k_rgnToken2Color[k_rgnState2Token[eState]],
+            text::Style(k_rgnToken2Color[k_rgnState2Token[eState]],
                         RGB(255, 255, 255)));
 
 
@@ -585,8 +585,8 @@ void XmlLexer::setStateStart(State eState, int iExtra)
         m_pBuffer->SetStyle(
             m_lTokenStart,
             lTokenEnd,
-            StyleValues(k_rgnToken2Color[k_rgnState2Token[m_eState]],
-            RGB(255, 255, 255)));
+            text::Style(k_rgnToken2Color[k_rgnState2Token[m_eState]],
+                        RGB(255, 255, 255)));
     }
 
     m_lTokenStart = lTokenEnd;
@@ -594,7 +594,7 @@ void XmlLexer::setStateStart(State eState, int iExtra)
     m_pBuffer->SetStyle(
         m_lTokenStart,
         m_lTokenStart + 1,
-        StyleValues(k_rgnToken2Color[k_rgnState2Token[eState]],
+        text::Style(k_rgnToken2Color[k_rgnState2Token[eState]],
                     RGB(255, 255, 255)));
 
 

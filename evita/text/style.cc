@@ -31,15 +31,15 @@ bool Color::operator!=(const Color& other) const {
 
 //////////////////////////////////////////////////////////////////////
 //
-// StyleValues
+// Style
 //
-StyleValues::StyleValues(Color color, Color bgcolor)
-    : StyleValues() {
+Style::Style(Color color, Color bgcolor)
+    : Style() {
   set_color(color);
   set_bgcolor(bgcolor);
 }
 
-StyleValues::StyleValues(const StyleValues& other)
+Style::Style(const Style& other)
     : bgcolor_(other.bgcolor_),
       color_(other.color_),
       font_family_(other.font_family_),
@@ -52,13 +52,13 @@ StyleValues::StyleValues(const StyleValues& other)
       text_decoration_(other.text_decoration_) {
 }
 
-StyleValues::StyleValues() : masks_(0) {
+Style::Style() : masks_(0) {
 }
 
-StyleValues::~StyleValues() {
+Style::~Style() {
 }
 
-bool StyleValues::operator==(const StyleValues& other) const {
+bool Style::operator==(const Style& other) const {
   if (masks_ != other.masks_)
     return false;
   if (has_bgcolor() && bgcolor_ != other.bgcolor_)
@@ -80,104 +80,104 @@ bool StyleValues::operator==(const StyleValues& other) const {
   return !has_font_family() || font_family_ == other.font_family_;
 }
 
-bool StyleValues::operator!=(const StyleValues& other) const {
+bool Style::operator!=(const Style& other) const {
   return !operator==(other);
 }
 
-Color StyleValues::bgcolor() const {
+Color Style::bgcolor() const {
   DCHECK(has_bgcolor());
   return bgcolor_;
 }
 
-void StyleValues::set_bgcolor(Color color) {
+void Style::set_bgcolor(Color color) {
   bgcolor_ = color;
   masks_ |= Mask_BgColor;
 }
 
-Color StyleValues::color() const {
+Color Style::color() const {
   DCHECK(has_color());
   return color_;
 }
 
-void StyleValues::set_color(Color color) {
+void Style::set_color(Color color) {
   color_ = color;
   masks_ |= Mask_Color;
 }
 
-const base::string16& StyleValues::font_family() const {
+const base::string16& Style::font_family() const {
   DCHECK(has_font_family());
   return font_family_;
 }
 
-void StyleValues::set_font_family(const base::string16& font_family) {
+void Style::set_font_family(const base::string16& font_family) {
   font_family_ = font_family;
   masks_ |= Mask_FontFamily;
 }
 
-FontSize StyleValues::font_size() const {
+FontSize Style::font_size() const {
   DCHECK(has_font_size());
   return font_size_;
 }
 
-void StyleValues::set_font_size(FontSize font_size) {
+void Style::set_font_size(FontSize font_size) {
   font_size_ = font_size;
   masks_ |= Mask_FontSize;
 }
 
-FontStyle StyleValues::font_style() const {
+FontStyle Style::font_style() const {
   DCHECK(has_font_style());
   return font_style_;
 }
 
-void StyleValues::set_font_style(FontStyle font_style) {
+void Style::set_font_style(FontStyle font_style) {
   font_style_ = font_style;
   masks_ |= Mask_FontStyle;
 }
 
-FontWeight StyleValues::font_weight() const {
+FontWeight Style::font_weight() const {
   DCHECK(has_font_weight());
   return font_weight_;
 }
 
-void StyleValues::set_font_weight(FontWeight font_weight) {
+void Style::set_font_weight(FontWeight font_weight) {
   font_weight_ = font_weight;
   masks_ |= Mask_FontWeight;
 }
 
-Color StyleValues::marker_color() const {
+Color Style::marker_color() const {
   DCHECK(has_marker_color());
   return marker_color_;
 }
 
-void StyleValues::set_marker_color(Color color) {
+void Style::set_marker_color(Color color) {
   marker_color_ = color;
   masks_ |= Mask_MarkerColor;
 }
 
-Syntax StyleValues::syntax() const {
+Syntax Style::syntax() const {
   DCHECK(has_syntax());
   return syntax_;
 }
 
-void StyleValues::set_syntax(Syntax syntax) {
+void Style::set_syntax(Syntax syntax) {
   syntax_ = syntax;
   masks_ |= Mask_Syntax;
 }
 
-TextDecoration StyleValues::text_decoration() const {
+TextDecoration Style::text_decoration() const {
   DCHECK(has_text_decoration());
   return text_decoration_;
 }
 
-void StyleValues::set_text_decoration(
+void Style::set_text_decoration(
     TextDecoration text_decoration) {
   text_decoration_ = text_decoration;
   masks_ |= Mask_TextDecoration;
 }
 
-StyleValues* StyleValues::Default() {
+Style* Style::Default() {
   static bool init;
-  DEFINE_STATIC_LOCAL(StyleValues, default_style, ());
+  DEFINE_STATIC_LOCAL(Style, default_style, ());
   if (!init) {
     init = true;
     #if 0
@@ -202,7 +202,7 @@ StyleValues* StyleValues::Default() {
   return &default_style;
 }
 
-void StyleValues::OverrideBy(const StyleValues& other) {
+void Style::OverrideBy(const Style& other) {
   if (other.has_bgcolor()) {
     set_bgcolor(other.bgcolor());
   }
@@ -239,8 +239,8 @@ size_t hash<text::Color>::operator()(const text::Color& color) const {
   return color.Hash();
 }
 
-size_t hash<text::StyleValues>::operator()(
-    const text::StyleValues& style) const {
+size_t hash<text::Style>::operator()(
+    const text::Style& style) const {
   size_t result = 137u;
   if (style.has_bgcolor()) {
     result <<= 1;

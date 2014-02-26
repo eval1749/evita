@@ -18,7 +18,7 @@
 #include "evita/li_util.h"
 
 namespace text {
-class StyleValues;
+class Style;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -120,10 +120,10 @@ class FontSet : public Fonts
 
     // [G]
     public: static FontSet* Get(const gfx::Graphics&,
-                                const text::StyleValues& style) {
+                                const text::Style& style) {
       return Get(style);
     }
-    public: static FontSet* Get(const text::StyleValues& style);
+    public: static FontSet* Get(const text::Style& style);
     public: const Key* GetKey() const { return this; }
 
     // [H]

@@ -9,7 +9,7 @@ namespace {
 
 class StyleTest : public dom::AbstractDomTest {
   protected: StyleTest() {
-    auto const style = text::StyleValues::Default();
+    auto const style = text::Style::Default();
     style->set_bgcolor(text::Color(255, 255, 255));
     style->set_color(text::Color(0x00, 0x00, 0x00));
     style->set_marker_color(text::Color(0x00, 0x99, 0x00));

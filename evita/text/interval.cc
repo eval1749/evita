@@ -39,12 +39,12 @@ Interval::Interval(Posn lStart, Posn lEnd, int nZ) :
     m_lEnd(lEnd),
     m_lStart(lStart),
     m_nZ(nZ),
-    m_Style(*StyleValues::Default()) {}
+    m_Style(*Style::Default()) {}
 
 /// <summary>
 ///   Set style of interval.
 /// </summary>
-void Interval::SetStyle(const StyleValues& other)
+void Interval::SetStyle(const Style& other)
 {
     m_Style.OverrideBy(other);
 } // Interval::SetStyle
@@ -67,7 +67,7 @@ Interval* Buffer::GetIntervalAt(Posn lPosn) const {
 void Buffer::SetStyle(
     Posn                lStart,
     Posn                lEnd,
-    const StyleValues&  style)
+    const Style&  style)
 {
     if (lStart < 0) lStart = 0;
     if (lEnd > GetEnd()) lEnd = GetEnd();

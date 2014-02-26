@@ -21,7 +21,7 @@ class RenderStyle {
   private: Font* font_;
   private: text::TextDecoration text_decoration_;
 
-  public: RenderStyle(const text::StyleValues& values, Font* font);
+  public: RenderStyle(const text::Style& values, Font* font);
   public: RenderStyle(const RenderStyle& other);
   public: ~RenderStyle();
 

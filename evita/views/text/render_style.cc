@@ -17,7 +17,7 @@ inline gfx::ColorF ColorToColorF(text::Color color) {
 }
 }  // namespace
 
-RenderStyle::RenderStyle(const text::StyleValues& values, Font* font)
+RenderStyle::RenderStyle(const text::Style& values, Font* font)
     : bgcolor_(ColorToColorF(values.bgcolor())),
       color_(ColorToColorF(values.color())), font_(font),
       text_decoration_(values.text_decoration()) {

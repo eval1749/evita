@@ -21,8 +21,8 @@ enum class TextMarker{
 
 // TODO(yosi) We should remove |using text::Color|.
 //using text::Color;
-// TODO(yosi) We should remove |using text::StyleValues|.
-//using text::StyleValues;
+// TODO(yosi) We should remove |using text::Style|.
+//using text::Style;
 // TODO(yosi) We should remove |using text::TextDecoration|.
 //using text::TextDecoration;
 

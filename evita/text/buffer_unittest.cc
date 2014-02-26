@@ -30,11 +30,11 @@ class BufferTest : public ::testing::Test {
 TEST_F(BufferTest, InsertAt) {
   buffer()->InsertBefore(0, L"abc");
 
-  text::StyleValues style_values1;;
+  text::Style style_values1;;
   style_values1.set_syntax(1);
   buffer()->SetStyle(1, 2, style_values1);
 
-  text::StyleValues style_values2;;
+  text::Style style_values2;;
   style_values2.set_syntax(2);
   buffer()->SetStyle(2, 3, style_values2);
 
@@ -58,11 +58,11 @@ TEST_F(BufferTest, InsertAt) {
 TEST_F(BufferTest, InsertBefore) {
   buffer()->InsertBefore(0, L"abc");
 
-  text::StyleValues style_values1;;
+  text::Style style_values1;;
   style_values1.set_syntax(1);
   buffer()->SetStyle(1, 2, style_values1);
 
-  text::StyleValues style_values2;;
+  text::Style style_values2;;
   style_values2.set_syntax(2);
   buffer()->SetStyle(2, 3, style_values2);
 

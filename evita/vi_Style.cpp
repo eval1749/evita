@@ -405,7 +405,7 @@ FontSetCache* g_pFontSetCache;
 //
 // FontSet::Get
 //
-FontSet* FontSet::Get(const text::StyleValues& style)
+FontSet* FontSet::Get(const text::Style& style)
 {
     Fonts oFonts;
     oFonts.m_cFonts = 0;

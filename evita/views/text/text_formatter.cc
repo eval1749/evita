@@ -35,12 +35,12 @@ inline char16 toxdigit(int k) {
  return static_cast<char16>(k - 10 + 'A');
 }
 
-Font* GetFont(const gfx::Graphics& gfx, const text::StyleValues& style) {
+Font* GetFont(const gfx::Graphics& gfx, const text::Style& style) {
   return FontSet::Get(gfx, style)->FindFont(gfx, 'x');
 }
 
 RenderStyle GetRenderStyle(const gfx::Graphics& gfx,
-                           const text::StyleValues& style) {
+                           const text::Style& style) {
   return RenderStyle(style, GetFont(gfx, style));
 }
 
@@ -89,7 +89,7 @@ class TextFormatter::EnumCI {
 
   public: Posn GetPosn() const { return m_lPosn; }
 
-  public: const text::StyleValues& GetStyle() const {
+  public: const text::Style& GetStyle() const {
     if (AtEnd())
       return m_pBuffer->GetDefaultStyle();
     DCHECK(m_pInterval);

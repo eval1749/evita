@@ -57,9 +57,9 @@ typedef int Syntax;
 
 //////////////////////////////////////////////////////////////////////
 //
-// StyleValues
+// Style
 //
-class StyleValues {
+class Style {
   private: enum Mask {
     Mask_BgColor = 1 << 0,
     Mask_Color      = 1 << 1,
@@ -83,13 +83,13 @@ class StyleValues {
   private: int syntax_;
   private: TextDecoration text_decoration_;
 
-  public: StyleValues(Color color, Color bgcolor);
-  public: StyleValues(const StyleValues& other);
-  public: StyleValues();
-  public: ~StyleValues();
+  public: Style(Color color, Color bgcolor);
+  public: Style(const Style& other);
+  public: Style();
+  public: ~Style();
 
-  public: bool operator==(const StyleValues& other) const;
-  public: bool operator!=(const StyleValues& other) const;
+  public: bool operator==(const Style& other) const;
+  public: bool operator!=(const Style& other) const;
 
   public: Color bgcolor() const;
   public: bool has_bgcolor() const { return masks_ & Mask_BgColor; }
@@ -129,8 +129,8 @@ class StyleValues {
   }
   public: void set_text_decoration(TextDecoration text_decoration);
 
-  public: static StyleValues* Default();
-  public: void OverrideBy(const StyleValues& style);
+  public: static Style* Default();
+  public: void OverrideBy(const Style& style);
 };
 
 }  // namespace text
@@ -140,8 +140,8 @@ template<> struct hash<text::Color> {
   size_t operator()(const text::Color& color) const;
 };
 
-template<> struct hash<text::StyleValues> {
-  size_t operator()(const text::StyleValues& style) const;
+template<> struct hash<text::Style> {
+  size_t operator()(const text::Style& style) const;
 };
 }  // namespace std
 

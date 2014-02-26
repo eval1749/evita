@@ -28,7 +28,7 @@ class TextFormatter {
   private: class EnumCI;
 
   private: RenderStyle default_render_style_;
-  private: text::StyleValues default_style_;
+  private: text::Style default_style_;
   private: const gfx::Graphics& m_gfx;
   private: const Selection& selection_;
   private: TextBlock* const text_block_;

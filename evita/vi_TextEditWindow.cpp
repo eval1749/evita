@@ -734,10 +734,10 @@ void TextEditWindow::UpdateStatusBar() const {
 #include <imm.h>
 #pragma comment(lib, "imm32.lib")
 
-text::StyleValues* g_rgpImeStyleConverted[2];
-text::StyleValues* g_pImeStyleInput;
-text::StyleValues* g_pImeStyleTargetConverted;
-text::StyleValues* g_pImeStyleTargetNotConverted;
+text::Style* g_rgpImeStyleConverted[2];
+text::Style* g_pImeStyleInput;
+text::Style* g_pImeStyleTargetConverted;
+text::Style* g_pImeStyleTargetNotConverted;
 
 #define GCS_COMPSTRATTR (GCS_COMPSTR | GCS_COMPATTR | GCS_CURSORPOS)
 
@@ -832,27 +832,27 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
 
     if (!g_pImeStyleInput) {
           // Converted[0]
-          g_rgpImeStyleConverted[0] = new text::StyleValues();
+          g_rgpImeStyleConverted[0] = new text::Style();
           g_rgpImeStyleConverted[0]->set_text_decoration(
               text::TextDecoration_ImeInactiveA);
 
           // Converted[1]
-          g_rgpImeStyleConverted[1] = new text::StyleValues();
+          g_rgpImeStyleConverted[1] = new text::Style();
           g_rgpImeStyleConverted[1]->set_text_decoration(
               text::TextDecoration_ImeInactiveB);
 
           // Input
-          g_pImeStyleInput = new text::StyleValues();
+          g_pImeStyleInput = new text::Style();
           g_pImeStyleInput->set_text_decoration(
               text::TextDecoration_ImeInput);
 
           // Target Converted
-          g_pImeStyleTargetConverted = new text::StyleValues();
+          g_pImeStyleTargetConverted = new text::Style();
           g_pImeStyleTargetConverted->set_text_decoration(
               text::TextDecoration_ImeActive);
 
           // Target Not Converted
-          g_pImeStyleTargetNotConverted = new text::StyleValues();
+          g_pImeStyleTargetNotConverted = new text::Style();
           g_pImeStyleTargetNotConverted->set_bgcolor(
               text::Color(51, 153, 255));
           g_pImeStyleTargetNotConverted->set_color(text::Color(255, 255, 255));
@@ -866,7 +866,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
       int iClause = 0;
       int iConverted = 0;
       while (lPosn < lEnd) {
-        const text::StyleValues* pStyle;
+        const text::Style* pStyle;
         switch (rgbAttr[lPosn - m_lImeStart]) {
           case ATTR_INPUT:
           case ATTR_INPUT_ERROR:

@@ -400,6 +400,8 @@
         'text/range.cc',
         'text/range_set.cc',
         'text/style.cc',
+        'text/style_sheet.cc',
+        'text/style_selector.cc',
         'text/undo_stack.cc',
         'text/undo_step.cc',
         'z_debug.cpp',

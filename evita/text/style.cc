@@ -202,6 +202,36 @@ Style* Style::Default() {
   return &default_style;
 }
 
+void Style::Merge(const Style& other) {
+  if (!has_bgcolor() && other.has_bgcolor()) {
+    set_bgcolor(other.bgcolor());
+  }
+  if (!has_color() && other.has_color()) {
+    set_color(other.color());
+  }
+  if (!has_font_family() && other.has_font_family()) {
+    set_font_family(other.font_family());
+  }
+  if (!has_font_size() && other.has_font_size()) {
+    set_font_size(other.font_size());
+  }
+  if (!has_font_style() && other.has_font_style()) {
+    set_font_style(other.font_style());
+  }
+  if (!has_font_weight() && other.has_font_weight()) {
+    set_font_weight(other.font_weight());
+  }
+  if (!has_marker_color() && other.has_marker_color()) {
+    set_marker_color(other.marker_color());
+  }
+  if (!has_syntax() && other.has_syntax()) {
+    set_syntax(other.syntax());
+  }
+  if (!has_text_decoration() && other.has_text_decoration()) {
+    set_text_decoration(other.text_decoration());
+  }
+}
+
 void Style::OverrideBy(const Style& other) {
   if (other.has_bgcolor()) {
     set_bgcolor(other.bgcolor());

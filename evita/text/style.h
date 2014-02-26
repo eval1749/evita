@@ -130,6 +130,7 @@ class Style {
   public: void set_text_decoration(TextDecoration text_decoration);
 
   public: static Style* Default();
+  public: void Merge(const Style& style);
   public: void OverrideBy(const Style& style);
 };
 

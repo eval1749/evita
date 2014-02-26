@@ -7,8 +7,7 @@
 
 #include "common/castable.h"
 #include "evita/gfx_base.h"
-#include "evita/text/style.h"
-#include "evita/vi_style.h"
+#include "evita/views/text/render_style.h"
 
 namespace views {
 namespace rendering {
@@ -21,11 +20,13 @@ enum class TextMarker{
 };
 
 // TODO(yosi) We should remove |using text::Color|.
-using text::Color;
+//using text::Color;
 // TODO(yosi) We should remove |using text::StyleValues|.
-using text::StyleValues;
+//using text::StyleValues;
 // TODO(yosi) We should remove |using text::TextDecoration|.
-using text::TextDecoration;
+//using text::TextDecoration;
+
+class RenderStyle;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -36,12 +37,13 @@ class Cell : public common::Castable {
 
   public: float m_cx;
   public: float m_cy;
+  private: RenderStyle style_;
 
-  protected: Color m_crBackground;
-
-  public: Cell(Color bgcolor, float width, float height);
+  public: Cell(const RenderStyle& style, float width, float height);
   public: explicit Cell(const Cell& other);
   public: virtual ~Cell();
+
+  protected: const RenderStyle& style() const { return style_; }
 
   protected: void FillBackground(const gfx::Graphics& gfx,
                                  const gfx::RectF& rect) const;
@@ -56,7 +58,7 @@ class Cell : public common::Castable {
   public: virtual uint Hash() const;
   public: virtual float MapPosnToX(const gfx::Graphics&, Posn) const;
   public: virtual Posn MapXToPosn(const gfx::Graphics&, float) const;
-  public: virtual bool Merge(Font*, Color, Color, TextDecoration, float);
+  public: virtual bool Merge(const RenderStyle& style, float width);
   public: virtual void Render(const gfx::Graphics& gfx,
                                const gfx::RectF& rect) const;
 };
@@ -68,7 +70,7 @@ class Cell : public common::Castable {
 class FillerCell final : public Cell {
   DECLARE_CASTABLE_CLASS(FillerCell, Cell);
 
-  public: FillerCell(Color bgcolor, float width, float height);
+  public: FillerCell(const RenderStyle& style, float width, float height);
   public: FillerCell(const FillerCell& other);
   public: virtual ~FillerCell();
 
@@ -85,13 +87,12 @@ class MarkerCell final : public Cell {
 
   private: Posn m_lStart;
   private: Posn m_lEnd;
-  private: Color m_crColor;
   private: float m_iAscent;
   private: float m_iDescent;
   private: TextMarker marker_name_;
 
-  public: MarkerCell(Color color, Color bgcolor, float cx, float iHeight,
-                     float iDescent, Posn lPosn, TextMarker marker_name);
+  public: MarkerCell(const RenderStyle& style, float width, float height,
+                     Posn lPosn, TextMarker marker_name);
   public: MarkerCell(const MarkerCell& other);
   public: ~MarkerCell();
 
@@ -118,25 +119,19 @@ class MarkerCell final : public Cell {
 class TextCell : public Cell {
   DECLARE_CASTABLE_CLASS(TextCell, Cell);
 
-  private: Color m_crColor;
-  private: TextDecoration m_eDecoration;
   private: float m_iDescent;
 
   private: Posn m_lStart;
   private: Posn m_lEnd;
 
-  private: Font* m_pFont;
   private: base::string16 characters_;
 
-  public: TextCell(const gfx::Graphics& gfx, const StyleValues& style,
-                   Color crColor, Color crBackground, Font* pFont, float cx,
+  public: TextCell(const RenderStyle& style, float width, float height,
                    Posn lPosn, const base::string16& characters);
   public: TextCell(const TextCell& other);
   public: virtual ~TextCell();
 
   public: const base::string16 characters() const { return characters_; }
-  public: Color color() const { return m_crColor; }
-  public: Font* font() const { return m_pFont; }
 
   public: void AddChar(base::char16 char_code);
 
@@ -150,8 +145,7 @@ class TextCell : public Cell {
                                    Posn lPosn) const override final;
   public: virtual Posn MapXToPosn(const gfx::Graphics& gfx,
                                   float x) const override final;
-  public: virtual bool Merge(Font* pFont, Color crColor, Color crBackground,
-                             TextDecoration eDecoration, float cx) override;
+  public: virtual bool Merge(const RenderStyle& style, float width) override;
   public: virtual void Render(const gfx::Graphics& gfx,
                               const gfx::RectF& rect) const override;
 };
@@ -163,10 +157,8 @@ class TextCell : public Cell {
 class UnicodeCell final : public TextCell {
   DECLARE_CASTABLE_CLASS(UnicodeCell, TextCell);
 
-  public: UnicodeCell(const gfx::Graphics& gfx, const StyleValues& style,
-                      Color crColor, Color crBackground, Font* pFont,
-                      float cx, Posn lPosn,
-                      const base::string16& characters);
+  public: UnicodeCell(const RenderStyle& style, float width, float height,
+                      Posn lPosn, const base::string16& characters);
   public: UnicodeCell(const UnicodeCell& other);
   public: virtual ~UnicodeCell();
 

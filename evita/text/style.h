@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_evita_text_style_h)
 #define INCLUDE_evita_text_style_h
 
+#include <functional>
+
 #include "base/strings/string16.h"
 
 namespace text {
@@ -19,8 +21,11 @@ class Color {
 
   public: operator COLORREF() const { return m_cr; }
 
+  public: bool operator==(const Color& other) const;
+  public: bool operator!=(const Color& other) const;
+
   public: bool Equal(const Color& cr) const { return m_cr == cr.m_cr; }
-  public: uint32_t Hash() const { return m_cr; }
+  public: size_t Hash() const { return m_cr; }
 };
 
 typedef int FontSize;
@@ -129,5 +134,15 @@ class StyleValues {
 };
 
 }  // namespace text
+
+namespace std {
+template<> struct hash<text::Color> {
+  size_t operator()(const text::Color& color) const;
+};
+
+template<> struct hash<text::StyleValues> {
+  size_t operator()(const text::StyleValues& style) const;
+};
+}  // namespace std
 
 #endif //!defined(INCLUDE_evita_text_style_h)

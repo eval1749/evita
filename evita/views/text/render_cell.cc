@@ -5,26 +5,12 @@
 #include "evita/views/text/render_cell.h"
 
 #include "base/logging.h"
+#include "evita/views/text/render_style.h"
 
 namespace views {
 namespace rendering {
 
 namespace {
-float AlignHeightToPixel(const gfx::Graphics& gfx, float height) {
-  return gfx.AlignToPixel(gfx::SizeF(0.0f, height)).height;
-}
-
-float AlignWidthToPixel(const gfx::Graphics&, float width) {
-  return width;
-}
-
-inline gfx::ColorF ColorToColorF(Color color) {
-  COLORREF const cr = color;
-  return gfx::ColorF(
-      static_cast<float>(GetRValue(cr)) / 255,
-      static_cast<float>(GetGValue(cr)) / 255,
-      static_cast<float>(GetBValue(cr)) / 255);
-}
 
 inline void DrawLine(const gfx::Graphics& gfx, const gfx::Brush& brush,
                      float sx, float sy, float ex, float ey) {
@@ -64,16 +50,14 @@ float FloorWidthToPixel(const gfx::Graphics& gfx, float width) {
 //
 // Cell
 //
-Cell::Cell(Color cr, float cx, float cy)
-    : m_crBackground(cr),
-      m_cx(cx),
-      m_cy(cy) {
+Cell::Cell(const RenderStyle& style, float cx, float cy)
+    : m_cx(cx), m_cy(cy), style_(style) {
   DCHECK_GE(cx, 1.0f);
   DCHECK_GE(cy, 1.0f);
 }
 
 Cell::Cell(const Cell& other)
-    : Cell(other.m_crBackground, other.m_cx, other.m_cy) {
+    : Cell(other.style_, other.m_cx, other.m_cy) {
 }
 
 Cell::~Cell() {
@@ -82,13 +66,13 @@ void Cell::FillBackground(const gfx::Graphics& gfx,
                           const gfx::RectF& rect) const {
   FillRect(gfx, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
                            ::ceilf(rect.bottom)),
-           ColorToColorF(m_crBackground));
+           style_.bgcolor());
 }
 
 // rendering::Cell
 bool Cell::Equal(const Cell* other) const {
   return other->class_name() == class_name() && other->m_cx == m_cx &&
-         other->m_cy == m_cy && other->m_crBackground.Equal(m_crBackground);
+         other->m_cy == m_cy && other->style_ == style_;
 }
 
 Posn Cell::Fix(float iHeight, float) {
@@ -101,7 +85,7 @@ float Cell::GetDescent() const { return 0; }
 uint Cell::Hash() const {
   auto nHash = static_cast<uint>(m_cx);
   nHash ^= static_cast<uint>(m_cy);
-  nHash ^= m_crBackground.Hash();
+  nHash ^= std::hash<RenderStyle>()(style_);
   return nHash;
 }
 
@@ -113,7 +97,7 @@ Posn Cell::MapXToPosn(const gfx::Graphics&, float) const {
   return -1;
 }
 
-bool Cell::Merge(Font*, Color, Color, TextDecoration, float) {
+bool Cell::Merge(const RenderStyle&, float) {
   return false;
 }
 
@@ -125,8 +109,8 @@ void Cell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
 //
 // FillerCell
 //
-FillerCell::FillerCell(Color bgcolor, float width, float height)
-    : Cell(bgcolor, width, height) {
+FillerCell::FillerCell(const RenderStyle& style, float width, float height)
+    : Cell(style, width, height) {
 }
 
 FillerCell::FillerCell(const FillerCell& other)
@@ -145,14 +129,13 @@ Cell* FillerCell::Copy() const {
 // MarkerCell
 //
 
-MarkerCell::MarkerCell(Color crColor, Color bgcolor, float cx, float iHeight,
-                       float iDescent, Posn lPosn, TextMarker marker_name)
-    : Cell(bgcolor, cx, iHeight),
+MarkerCell::MarkerCell(const RenderStyle& style, float width, float height,
+                       Posn lPosn, TextMarker marker_name)
+    : Cell(style, width, height),
       m_lStart(lPosn),
       m_lEnd(marker_name == TextMarker::LineWrap ? lPosn : lPosn + 1),
-      m_crColor(crColor),
-      m_iAscent(iHeight - iDescent),
-      m_iDescent(iDescent),
+      m_iAscent(height - style.font()->descent()),
+      m_iDescent(style.font()->descent()),
       marker_name_(marker_name) {
 }
 
@@ -160,7 +143,6 @@ MarkerCell::MarkerCell(const MarkerCell& other)
     : Cell(other),
       m_lStart(other.m_lStart),
       m_lEnd(other.m_lEnd),
-      m_crColor(other.m_crColor),
       m_iAscent(other.m_iAscent),
       m_iDescent(other.m_iDescent),
       marker_name_(other.marker_name_) {
@@ -178,8 +160,7 @@ bool MarkerCell::Equal(const Cell* other) const {
   if (!Cell::Equal(other))
     return false;
   auto const marker_cell = other->as<MarkerCell>();
-  return m_crColor.Equal(marker_cell->m_crColor) &&
-         marker_name_ == marker_cell->marker_name_;
+  return marker_name_ == marker_cell->marker_name_;
 }
 
 Posn MarkerCell::Fix(float iHeight, float iDescent) {
@@ -194,8 +175,6 @@ float MarkerCell::GetDescent() const {
 
 uint MarkerCell::Hash() const {
   auto nHash = Cell::Hash();
-  nHash <<= 8;
-  nHash ^= m_crColor.Hash();
   nHash <<= 8;
   nHash ^= static_cast<int>(marker_name_);
   return nHash;
@@ -222,7 +201,7 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
   auto const xLeft = rect.left;
   auto const xRight = rect.right;
 
-  gfx::Brush stroke_brush(gfx, ColorToColorF(m_crColor));
+  gfx::Brush stroke_brush(gfx, style().color());
 
   switch (marker_name_) {
     case TextMarker::EndOfDocument: { // Draw <-
@@ -271,26 +250,20 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
 //
 // TextCell
 //
-TextCell::TextCell(const gfx::Graphics& gfx, const StyleValues& style,
-                   Color crColor, Color crBackground, Font* pFont, float cx,
+TextCell::TextCell(const RenderStyle& style, float width, float height,
                    Posn lPosn, const base::string16& characters)
-    : Cell(crBackground, cx, AlignHeightToPixel(gfx, pFont->height())),
-      m_crColor(crColor),
-      m_eDecoration(style.text_decoration()),
+    : Cell(style, width, height),
+      m_iDescent(style.font()->descent()),
       m_lStart(lPosn),
       m_lEnd(lPosn + 1),
-      m_pFont(pFont),
       characters_(characters) {
 }
 
 TextCell::TextCell(const TextCell& other)
     : Cell(other),
-      m_crColor(other.m_crColor),
-      m_eDecoration(other.m_eDecoration),
       m_iDescent(other.m_iDescent),
       m_lStart(other.m_lStart),
       m_lEnd(other.m_lEnd),
-      m_pFont(other.m_pFont),
       characters_(other.characters_) {
 }
 
@@ -306,17 +279,10 @@ Cell* TextCell::Copy() const {
   return new TextCell(*this);
 }
 
-bool TextCell::Equal(const Cell* pCell) const {
-  if (!Cell::Equal(pCell))
+bool TextCell::Equal(const Cell* other) const {
+  if (!Cell::Equal(other))
     return false;
-  // reinterpret_cast used between related classes: 'class1' and 'class2'
-  #pragma warning(suppress: 4946)
-  auto const pText = reinterpret_cast<const TextCell*>(pCell);
-  if (!m_crColor.Equal(pText->m_crColor))
-    return false;
-  if (m_eDecoration != pText->m_eDecoration)
-    return false;
-  return characters_ == pText->characters_;
+  return characters_ == other->as<TextCell>()->characters_;
 }
 
 Posn TextCell::Fix(float iHeight, float iDescent) {
@@ -327,21 +293,11 @@ Posn TextCell::Fix(float iHeight, float iDescent) {
 }
 
 float TextCell::GetDescent() const {
-  return m_pFont->descent();
+  return style().font()->descent();
 }
 
 uint TextCell::Hash() const {
-  uint nHash = Cell::Hash();
-  nHash ^= m_crColor.Hash();
-  nHash ^= m_pFont->Hash();
-  nHash ^= m_eDecoration;
-  nHash ^= static_cast<uint32_t>(characters_.length());
-  for (auto ch : characters_) {
-    nHash <<= 5;
-    nHash ^= ch;
-    nHash >>= 3;
-  }
-  return nHash;
+  return (Cell::Hash() << 3) ^ std::hash<base::string16>()(characters_);
 }
 
 float TextCell::MapPosnToX(const gfx::Graphics& gfx, Posn lPosn) const {
@@ -352,7 +308,7 @@ float TextCell::MapPosnToX(const gfx::Graphics& gfx, Posn lPosn) const {
   auto const cwch = static_cast<size_t>(lPosn - m_lStart);
   if (!cwch)
     return 0;
-  auto const width = m_pFont->GetTextWidth(characters_.data(), cwch);
+  auto const width = style().font()->GetTextWidth(characters_.data(), cwch);
   return FloorWidthToPixel(gfx, width);
 }
 
@@ -361,20 +317,25 @@ Posn TextCell::MapXToPosn(const gfx::Graphics& gfx, float x) const {
     return m_lEnd;
   for (auto k = 1u; k <= characters_.length(); ++k) {
     auto const cx = FloorWidthToPixel(gfx,
-      m_pFont->GetTextWidth(characters_.data(), k));
+      style().font()->GetTextWidth(characters_.data(), k));
     if (x < cx)
       return static_cast<Posn>(m_lStart + k - 1);
   }
   return m_lEnd;
 }
 
-bool TextCell::Merge(Font* pFont, Color crColor, Color crBackground,
-                    TextDecoration eDecoration, float cx) {
-  if (m_pFont != pFont) return false;
-  if (m_crColor != crColor) return false;
-  if (m_crBackground != crBackground) return false;
-  if (m_eDecoration != eDecoration) return false;
-  m_cx += cx;
+bool TextCell::Merge(const RenderStyle& style, float width) {
+  if (this->style().font() != style.font())
+    return false;
+  if (this->style().bgcolor() != style.bgcolor())
+    return false;
+  if (this->style().color() != style.color())
+    return false;
+  if (this->style().text_decoration() !=
+        style.text_decoration()) {
+    return false;
+  }
+  m_cx += width;
   m_lEnd += 1;
   return true;
 }
@@ -382,13 +343,14 @@ bool TextCell::Merge(Font* pFont, Color crColor, Color crBackground,
 void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
   DCHECK(!characters_.empty());
   FillBackground(gfx, rect);
-  gfx::Brush text_brush(gfx, ColorToColorF(m_crColor));
-  DrawText(gfx, *m_pFont, text_brush, rect, characters_);
+  gfx::Brush text_brush(gfx, style().color());
+  DrawText(gfx, *style().font(), text_brush, rect, characters_);
 
   auto const y = rect.bottom - m_iDescent -
-                 (m_eDecoration != text::TextDecoration_None ? 1 : 0);
+                 (style().text_decoration() !=
+                      text::TextDecoration_None ? 1 : 0);
   #if SUPPORT_IME
-  switch (m_eDecoration) {
+  switch (style().text_decoration()) {
     case text::TextDecoration_ImeInput:
       // TODO: We should use dotted line. It was PS_DOT.
       DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 3);
@@ -429,13 +391,9 @@ void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
 //
 // UnicodeCell
 //
-UnicodeCell::UnicodeCell(const gfx::Graphics& gfx, const StyleValues& style,
-                         Color crColor, Color crBackground, Font* pFont,
-                         float cx, Posn lPosn,
-                         const base::string16& characters)
-    : TextCell(gfx, style, crColor, crBackground, pFont, cx, lPosn,
-               characters) {
-  m_cy += 4;
+UnicodeCell::UnicodeCell(const RenderStyle& style, float width, float height,
+                         Posn lPosn, const base::string16& characters)
+    : TextCell(style, width, height + 4.0f, lPosn, characters) {
 }
 
 UnicodeCell::UnicodeCell(const UnicodeCell& other)
@@ -454,8 +412,8 @@ void UnicodeCell::Render(const gfx::Graphics& gfx,
                          const gfx::RectF& rect) const {
   FillBackground(gfx, rect);
 
-  gfx::Brush text_brush(gfx, ColorToColorF(color()));
-  DrawText(gfx, *font(), text_brush, rect, characters());
+  gfx::Brush text_brush(gfx, style().color());
+  DrawText(gfx, *style().font(), text_brush, rect, characters());
 
   gfx.DrawRectangle(text_brush,
                     gfx::RectF(rect.left, rect.top,

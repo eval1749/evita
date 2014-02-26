@@ -21,6 +21,14 @@ Color::Color(int r, int g, int b) : m_cr(RGB(r, g, b)) {
 Color::~Color() {
 }
 
+bool Color::operator==(const Color& other) const {
+  return m_cr == other.m_cr;
+}
+
+bool Color::operator!=(const Color& other) const {
+  return !operator==(other);
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // StyleValues
@@ -225,3 +233,51 @@ void StyleValues::OverrideBy(const StyleValues& other) {
 }
 
 }  // namspace text
+
+namespace std {
+size_t hash<text::Color>::operator()(const text::Color& color) const {
+  return color.Hash();
+}
+
+size_t hash<text::StyleValues>::operator()(
+    const text::StyleValues& style) const {
+  size_t result = 137u;
+  if (style.has_bgcolor()) {
+    result <<= 1;
+    result ^= std::hash<text::Color>()(style.bgcolor());
+  }
+  if (style.has_color()) {
+    result <<= 1;
+    result ^= std::hash<text::Color>()(style.color());
+  }
+  if (style.has_font_family()) {
+    result <<= 1;
+    result ^= std::hash<base::string16>()(style.font_family());
+  }
+  if (style.has_font_size()) {
+    result <<= 1;
+    result ^= std::hash<text::FontSize>()(style.font_size());
+  }
+  if (style.has_font_style()) {
+    result <<= 1;
+    result ^= std::hash<text::FontStyle>()(style.font_style());
+  }
+  if (style.has_font_weight()) {
+    result <<= 1;
+    result ^= std::hash<text::FontWeight>()(style.font_weight());
+  }
+  if (style.has_marker_color()) {
+    result <<= 1;
+    result ^= std::hash<text::Color>()(style.marker_color());
+  }
+  if (style.has_syntax()) {
+    result <<= 1;
+    result ^= std::hash<text::Syntax>()(style.syntax());
+  }
+  if (style.has_text_decoration()) {
+    result <<= 1;
+    result ^= std::hash<text::TextDecoration>()(style.text_decoration());
+  }
+  return result;
+}
+}  // namespace std

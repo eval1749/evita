@@ -8,6 +8,7 @@
 #include "evita/text/buffer.h"
 #include "evita/text/interval.h"
 #include "evita/views/text/render_cell.h"
+#include "evita/views/text/render_style.h"
 #include "evita/views/text/render_selection.h"
 #include "evita/views/text/render_text_block.h"
 #include "evita/views/text/render_text_line.h"
@@ -32,6 +33,15 @@ inline char16 toxdigit(int k) {
   if (k <= 9)
     return static_cast<char16>(k + '0');
  return static_cast<char16>(k - 10 + 'A');
+}
+
+Font* GetFont(const gfx::Graphics& gfx, const text::StyleValues& style) {
+  return FontSet::Get(gfx, style)->FindFont(gfx, 'x');
+}
+
+RenderStyle GetRenderStyle(const gfx::Graphics& gfx,
+                           const text::StyleValues& style) {
+  return RenderStyle(style, GetFont(gfx, style));
 }
 
 }  // namespace
@@ -79,7 +89,7 @@ class TextFormatter::EnumCI {
 
   public: Posn GetPosn() const { return m_lPosn; }
 
-  public: const StyleValues& GetStyle() const {
+  public: const text::StyleValues& GetStyle() const {
     if (AtEnd())
       return m_pBuffer->GetDefaultStyle();
     DCHECK(m_pInterval);
@@ -108,7 +118,9 @@ class TextFormatter::EnumCI {
 TextFormatter::TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
                              text::Buffer* buffer, Posn lStart,
                              const Selection& selection)
-    : filler_color_(buffer->GetDefaultStyle().bgcolor()), m_gfx(gfx),
+    : default_render_style_(GetRenderStyle(gfx, buffer->GetDefaultStyle())),
+      default_style_(buffer->GetDefaultStyle()),
+      m_gfx(gfx),
       selection_(selection), text_block_(text_block),
       m_oEnumCI(new EnumCI(buffer, lStart)) {
   DCHECK(!text_block_->rect().empty());
@@ -160,8 +172,7 @@ TextLine* TextFormatter::FormatLine() {
   {
     auto const cyMinHeight = 1.0f;
 
-    pCell = new FillerCell(filler_color_, cxLeftMargin,
-                           cyMinHeight);
+    pCell = new FillerCell(default_render_style_, cxLeftMargin, cyMinHeight);
     pLine->AddCell(pCell);
     x += cxLeftMargin;
   }
@@ -222,26 +233,14 @@ TextLine* TextFormatter::FormatLine() {
 //
 // TextFormatter::formatChar
 //
-Cell* TextFormatter::formatChar(
-    Cell* pPrev,
-    float x,
-    char16 wch) {
-  Color crColor;
-  Color crBackground;
-  TextDecoration  eDecoration;
-
+Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
   auto const lPosn = m_oEnumCI->GetPosn();
-  const auto& style = m_oEnumCI->GetStyle();
+  auto style = m_oEnumCI->GetStyle();
 
-  if (lPosn >= selection_.start &&
-      lPosn < selection_.end) {
-    crColor      = selection_.color;
-    crBackground = selection_.bgcolor;
-    eDecoration  = text::TextDecoration_None;
-  } else {
-    crColor      = style.color();
-    crBackground = style.bgcolor();
-    eDecoration  = style.text_decoration();
+  if (lPosn >= selection_.start && lPosn < selection_.end) {
+    style.set_color(selection_.color);
+    style.set_bgcolor(selection_.bgcolor);
+    style.set_text_decoration(text::TextDecoration_None);
   }
 
   if (0x09 == wch) {
@@ -254,9 +253,8 @@ Cell* TextFormatter::formatChar(
     if (pPrev && x2 + cxM > text_block_->right())
       return nullptr;
 
-    return new MarkerCell(style.marker_color(), crBackground, cx,
-        AlignHeightToPixel(m_gfx, pFont->height()), pFont->descent(), lPosn,
-        TextMarker::Tab);
+    return new MarkerCell(RenderStyle(style, pFont), cx,
+        AlignHeightToPixel(m_gfx, pFont->height()), lPosn, TextMarker::Tab);
   }
 
   auto const pFont = wch < 0x20 ?
@@ -284,12 +282,13 @@ Cell* TextFormatter::formatChar(
     if (pPrev && x + cxUni + cxM > text_block_->right())
       return nullptr;
 
-    return new UnicodeCell(m_gfx, style, style.marker_color(), crBackground,
-                           pFont, cxUni, lPosn, string);
+    auto const height = AlignHeightToPixel(m_gfx, pFont->height());
+    return new UnicodeCell(RenderStyle(style, pFont), cxUni, height, lPosn,
+                           string);
   }
 
   auto const cx = AlignWidthToPixel(m_gfx, pFont->GetCharWidth(wch));
-
+  RenderStyle render_style(style, pFont);
   if (pPrev) {
     auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
     if (x + cx + cxM > text_block_->right()) {
@@ -297,45 +296,32 @@ Cell* TextFormatter::formatChar(
       return nullptr;
     }
 
-    if (pPrev->Merge(pFont, crColor, crBackground, eDecoration, cx)) {
+    if (pPrev->Merge(render_style, cx)) {
       pPrev->as<TextCell>()->AddChar(wch);
       return pPrev;
     }
   }
 
-  return new TextCell(m_gfx, style, crColor, crBackground, pFont, cx, lPosn,
-                      base::string16(1u, wch));
+  auto const height = AlignHeightToPixel(m_gfx, pFont->height());
+  return new TextCell(render_style, cx, height, lPosn, base::string16(1u, wch));
 }
 
 Cell* TextFormatter::formatMarker(TextMarker marker_name) {
-    Color crColor;
-    Color crBackground;
+  auto const lPosn = m_oEnumCI->GetPosn();
+  auto style = m_oEnumCI->GetStyle();
 
-    Posn lPosn = m_oEnumCI->GetPosn();
-    const StyleValues& style = m_oEnumCI->GetStyle();
+  if (lPosn >= selection_.start && lPosn < selection_.end) {
+    style.set_color(selection_.color);
+    style.set_bgcolor(selection_.bgcolor);
+  } else {
+    style.set_color(style.marker_color());
+  }
 
-    if (lPosn >= selection_.start &&
-        lPosn < selection_.end)
-    {
-        crColor      = selection_.color;
-        crBackground = selection_.bgcolor;
-    }
-    else
-    {
-        crColor      = style.marker_color();
-        crBackground = style.bgcolor();
-    }
-
-    Font* pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
-    MarkerCell* pCell = new MarkerCell(
-        crColor,
-        crBackground,
-        AlignWidthToPixel(m_gfx, pFont->GetCharWidth('x')),
-        AlignHeightToPixel(m_gfx, pFont->height()),
-        pFont->descent(),
-        m_oEnumCI->GetPosn(),
-        marker_name);
-    return pCell;
+  auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
+  auto const width = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('x'));
+  auto const height = AlignHeightToPixel(m_gfx, pFont->height());
+  return new MarkerCell(RenderStyle(style, pFont), width, height,
+                        m_oEnumCI->GetPosn(), marker_name);
 }
 
 } // namespace rendering

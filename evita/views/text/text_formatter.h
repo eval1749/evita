@@ -8,8 +8,8 @@
 #include <memory>
 
 #include "base/basictypes.h"
-#include "evita/text/style.h"
 #include "evita/gfx_base.h"
+#include "evita/views/text/render_style.h"
 
 namespace text {
 class Buffer;
@@ -27,7 +27,8 @@ enum class TextMarker;
 class TextFormatter {
   private: class EnumCI;
 
-  private: text::Color const filler_color_;
+  private: RenderStyle default_render_style_;
+  private: text::StyleValues default_style_;
   private: const gfx::Graphics& m_gfx;
   private: const Selection& selection_;
   private: TextBlock* const text_block_;

@@ -94,7 +94,7 @@
         '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/evita/evita.gyp:text',
         '<(DEPTH)/testing/gtest.gyp:gtest',
-        '<(DEPTH)/testing/gtest.gyp:gtest_main',
+        '<(DEPTH)/base/base.gyp:run_all_unittests',
       ], # dependencies
       'include_dirs+' : [
         '<(DEPTH)/testing/gtest/include/',
@@ -125,7 +125,7 @@
         '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/evita/evita.gyp:views',
         '<(DEPTH)/testing/gtest.gyp:gtest',
-        '<(DEPTH)/testing/gtest.gyp:gtest_main',
+        '<(DEPTH)/base/base.gyp:run_all_unittests',
       ], # dependencies
       'include_dirs+' : [
         '<(DEPTH)/testing/gtest/include/',
@@ -155,7 +155,7 @@
         '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/evita/evita.gyp:v8_glue',
         '<(DEPTH)/testing/gtest.gyp:gtest',
-        '<(DEPTH)/testing/gtest.gyp:gtest_main',
+        '<(DEPTH)/base/base.gyp:run_all_unittests',
       ], # dependencies
       'include_dirs+' : [
         '<(DEPTH)/testing/gtest/include/',

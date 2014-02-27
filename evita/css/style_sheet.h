@@ -8,27 +8,31 @@
 #include <memory>
 #include <unordered_map>
 
+#pragma warning(push)
+#pragma warning(disable: 4625 4626)
+#include "base/observer_list.h"
+#pragma warning(pop)
 #include "base/strings/string16.h"
-#include "evita/css/style.h"
+#include "evita/css/style_sheet_observer.h"
 
 namespace css {
+
+class Style;
 
 class StyleSheet {
   private: typedef std::unordered_map<base::string16, std::unique_ptr<Style>>
       StyleMap;
 
-  private: StyleSheet* base_style_sheet_;
+  private: ObserverList<StyleSheetObserver> observers_;
   private: StyleMap selector_map_;
-  private: mutable StyleMap style_cache_;
 
   public: StyleSheet();
-  private: StyleSheet(bool for_default_style_sheet);
   public: ~StyleSheet();
 
+  public: void AddObserver(StyleSheetObserver* observer) const;
   public: void AddRule(const base::string16& selector, const Style& style);
-  private: void ClearCache();
-  private: static StyleSheet* DefaultStyleSheet();
-  public: const Style& Resolve(const base::string16& selector) const;
+  public: const Style* Find(const base::string16& selector) const;
+  public: void RemoveObserver(StyleSheetObserver* observer) const;
 
   DISALLOW_COPY_AND_ASSIGN(StyleSheet);
 };

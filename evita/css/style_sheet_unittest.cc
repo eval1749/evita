@@ -8,15 +8,12 @@
 #pragma warning(pop)
 
 #include "base/logging.h"
+#include "evita/css/style.h"
+#include "evita/css/style_resolver.h"
 #include "evita/css/style_selector.h"
 #include "evita/css/style_sheet.h"
 
 namespace {
-
-using css::Color;
-using css::Style;
-using css::StyleSelector;
-using css::StyleSheet;
 
 class StyleSheetTest : public ::testing::Test {
   public: StyleSheetTest() = default;
@@ -26,19 +23,24 @@ class StyleSheetTest : public ::testing::Test {
 };
 
 TEST_F(StyleSheetTest, Resolve_default) {
-  StyleSheet style_sheet;
-  const auto& style1 = style_sheet.Resolve(StyleSelector::defaults());
+  css::StyleSheet style_sheet;
+  css::StyleResolver style_resolver;
+  style_resolver.AddStyleSheet(&style_sheet);
+  const auto& style1 = style_resolver.Resolve(css::StyleSelector::defaults());
   EXPECT_EQ(css::FontStyle::Normal, style1.font_style());
   EXPECT_EQ(css::FontWeight::Normal, style1.font_weight());
 }
 
 TEST_F(StyleSheetTest, Resolve_some) {
-  StyleSheet style_sheet;
-  style_sheet.AddRule(StyleSelector::active_selection(),
-                      Style(Color(1, 2, 3), Color(4, 5, 6)));
-  const auto& style1 = style_sheet.Resolve(StyleSelector::active_selection());
-  EXPECT_EQ(Color(1, 2, 3), style1.color());
-  EXPECT_EQ(Color(4, 5, 6), style1.bgcolor());
+  css::StyleSheet style_sheet;
+  style_sheet.AddRule(css::StyleSelector::active_selection(),
+                      css::Style(css::Color(1, 2, 3), css::Color(4, 5, 6)));
+  css::StyleResolver style_resolver;
+  style_resolver.AddStyleSheet(&style_sheet);
+  const auto& style1 = style_resolver.Resolve(
+      css::StyleSelector::active_selection());
+  EXPECT_EQ(css::Color(1, 2, 3), style1.color());
+  EXPECT_EQ(css::Color(4, 5, 6), style1.bgcolor());
   EXPECT_EQ(css::FontStyle::Normal, style1.font_style());
 }
 

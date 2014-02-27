@@ -378,7 +378,10 @@
         'precomp.cpp',
 
         'css/style.cc',
+        'css/style_resolver.cc',
+        'css/style_rule.cc',
         'css/style_sheet.cc',
+        'css/style_sheet_observer.cc',
         'css/style_selector.cc',
 
         'ed_BufferCore.cpp',

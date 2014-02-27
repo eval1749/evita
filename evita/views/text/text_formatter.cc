@@ -5,6 +5,9 @@
 #include "evita/views/text/text_formatter.h"
 
 #include "base/logging.h"
+#include "evita/css/style.h"
+#include "evita/css/style_resolver.h"
+#include "evita/css/style_selector.h"
 #include "evita/text/buffer.h"
 #include "evita/text/interval.h"
 #include "evita/views/text/render_cell.h"
@@ -65,6 +68,10 @@ class TextFormatter::EnumCI {
     m_pInterval = m_pBuffer->GetIntervalAt(m_lPosn);
     DCHECK(m_pInterval);
     fill();
+  }
+
+  public: const css::StyleResolver* style_resolver() const {
+    return m_pBuffer->style_resolver();
   }
 
   public: bool AtEnd() const {
@@ -238,9 +245,11 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
   auto style = m_oEnumCI->GetStyle();
 
   if (lPosn >= selection_.start && lPosn < selection_.end) {
-    style.set_color(selection_.color);
-    style.set_bgcolor(selection_.bgcolor);
-    style.set_text_decoration(css::TextDecoration::None);
+    auto& selection_style = m_oEnumCI->style_resolver()->
+        ResolveWithoutDefaults(selection_.active ?
+            css::StyleSelector::active_selection() :
+            css::StyleSelector::inactive_selection());
+    style.OverrideBy(selection_style);
   }
 
   if (0x09 == wch) {
@@ -309,12 +318,15 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
 Cell* TextFormatter::formatMarker(TextMarker marker_name) {
   auto const lPosn = m_oEnumCI->GetPosn();
   auto style = m_oEnumCI->GetStyle();
+  style.OverrideBy(m_oEnumCI->style_resolver()->Resolve(
+      css::StyleSelector::end_of_line_marker()));
 
   if (lPosn >= selection_.start && lPosn < selection_.end) {
-    style.set_color(selection_.color);
-    style.set_bgcolor(selection_.bgcolor);
-  } else {
-    style.set_color(style.marker_color());
+    auto& selection_style = m_oEnumCI->style_resolver()->
+        ResolveWithoutDefaults(selection_.active ?
+            css::StyleSelector::active_selection() :
+            css::StyleSelector::inactive_selection());
+    style.OverrideBy(selection_style);
   }
 
   auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');

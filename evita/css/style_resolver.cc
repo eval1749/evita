@@ -49,13 +49,13 @@ StyleSheet* GetDefaultStyleSheet() {
   // We use Vista's highlight color.
   Style active_selection;
   active_selection.set_color(Color(255, 255, 255));
-  active_selection.set_color(Color(51, 153, 255));
+  active_selection.set_bgcolor(Color(51, 153, 255));
   default_style_sheet.AddRule(StyleSelector::active_selection(),
                               active_selection);
 
   Style inactive_selection;
   inactive_selection.set_color(Color(67, 78, 84));
-  inactive_selection.set_color(Color(191, 205, 219));
+  inactive_selection.set_bgcolor(Color(191, 205, 219));
   default_style_sheet.AddRule(StyleSelector::inactive_selection(),
                               inactive_selection);
 
@@ -80,7 +80,22 @@ void StyleResolver::AddStyleSheet(const StyleSheet* style_sheet) {
 }
 
 void StyleResolver::ClearCache() {
+  partial_style_cache_.clear();
   style_cache_.clear();
+}
+
+void StyleResolver::InvalidateCache(const StyleRule* rule) {
+  if (rule->selector() == StyleSelector::defaults()) {
+    ClearCache();
+  } else {
+    auto it = style_cache_.find(rule->selector());
+    if (it != style_cache_.end())
+      style_cache_.erase(it);
+
+    auto it2 = partial_style_cache_.find(rule->selector());
+    if (it2 != partial_style_cache_.end())
+      partial_style_cache_.erase(it);
+  }
 }
 
 void StyleResolver::RemoveStyleSheet(const StyleSheet* style_sheet) {
@@ -97,13 +112,26 @@ const Style& StyleResolver::Resolve(const base::string16& selector) const {
   if (cache != style_cache_.end())
     return *cache->second;
 
+  auto style = ResolveWithoutDefaults(selector);
+  if (selector != StyleSelector::defaults())
+    style.Merge(Resolve(StyleSelector::defaults()));
+  auto new_style = std::make_unique<Style>(style);
+  auto const new_style_ptr = new_style.get();
+  style_cache_[selector] = std::move(new_style);
+  return *new_style_ptr;
+}
+
+const Style& StyleResolver::ResolveWithoutDefaults(
+    const base::string16& selector) const {
+  auto const cache = partial_style_cache_.find(selector);
+  if (cache != partial_style_cache_.end())
+    return *cache->second;
+
   auto new_style = std::make_unique<Style>();
   for (auto style_sheet : style_sheets_) {
     if (auto const style = style_sheet->Find(selector))
       new_style->OverrideBy(*style);
   }
-  if (selector != StyleSelector::defaults())
-    new_style->Merge(Resolve(StyleSelector::defaults()));
   auto const new_style_ptr = new_style.get();
   style_cache_[selector] = std::move(new_style);
   return *new_style_ptr;
@@ -111,23 +139,11 @@ const Style& StyleResolver::Resolve(const base::string16& selector) const {
 
 // css::StyleSheetObserver
 void StyleResolver::DidAddRule(const StyleRule* rule) {
-  if (rule->selector() == StyleSelector::defaults()) {
-    ClearCache();
-  } else {
-    auto it = style_cache_.find(rule->selector());
-    if (it != style_cache_.end())
-      style_cache_.erase(it);
-  }
+  InvalidateCache(rule);
 }
 
 void StyleResolver::DidRemoveRule(const StyleRule* rule) {
-  if (rule->selector() == StyleSelector::defaults()) {
-    ClearCache();
-  } else {
-    auto it = style_cache_.find(rule->selector());
-    if (it != style_cache_.end())
-      style_cache_.erase(it);
-  }
+  InvalidateCache(rule);
 }
 
 }  // namespace css

@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include "base/logging.h"
+#include "evita/css/style_resolver.h"
 #include "evita/text/interval.h"
 #include "evita/text/interval_set.h"
 #include "evita/text/range.h"
@@ -22,6 +23,7 @@ Buffer::Buffer(const base::string16& name, Mode* mode)
     : intervals_(new IntervalSet(this)),
       ranges_(new RangeSet(this)),
       m_pMode(mode),
+      style_resolver_(std::make_unique<css::StyleResolver>()),
       undo_stack_(new UndoStack(this)),
       m_eState(State_Ready),
       m_fReadOnly(false),

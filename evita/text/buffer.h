@@ -19,6 +19,7 @@
 
 namespace css {
 class Style;
+class StyleResolver;
 }
 
 namespace text {
@@ -77,6 +78,7 @@ class Buffer : public BufferCore, public FileFeatures {
   private: std::unique_ptr<IntervalSet> intervals_;
   private: std::unique_ptr<RangeSet> ranges_;
   private: Mode* m_pMode;
+  private: std::unique_ptr<css::StyleResolver> style_resolver_;
   private: std::unique_ptr<UndoStack> undo_stack_;
 
   private: bool m_fReadOnly;
@@ -120,6 +122,10 @@ class Buffer : public BufferCore, public FileFeatures {
 
   public: const base::string16& name() const { return name_; }
   public: RangeSet* ranges() const { return ranges_.get(); }
+
+  public: const css::StyleResolver* style_resolver() const {
+    return style_resolver_.get();
+  }
 
   public: void AddObserver(BufferMutationObserver* observer);
 

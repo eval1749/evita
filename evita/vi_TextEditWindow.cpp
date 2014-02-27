@@ -54,24 +54,7 @@ class RenderSelection : public views::rendering::Selection {
 };
 
 RenderSelection::RenderSelection(::Selection* selection, bool is_active) {
-  if (is_active) {
-    // EvEdit 1.0's highlight color
-    //selection_->SetColor(Color(0, 0, 0));
-    //selection_->SetBackground(Color(0xCC, 0xCC, 0xFF));
-
-    // We should not use GetSysColor. If we want to use here
-    // default background must be obtained from GetSysColor.
-    //selection_->SetColor(::GetSysColor(COLOR_HIGHLIGHTTEXT));
-    //selection_->SetBackground(::GetSysColor(COLOR_HIGHLIGHT));
-
-    // We use Vista's highlight color.
-    color = css::Color(255, 255, 255);
-    bgcolor = css::Color(51, 153, 255);
-  } else {
-    color = css::Color(67, 78, 84);
-    bgcolor = css::Color(191, 205, 219);
-  }
-
+  active = is_active;
   start = selection->GetStart();
   end = selection->GetEnd();
 }

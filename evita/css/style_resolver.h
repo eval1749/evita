@@ -21,6 +21,7 @@ class StyleResolver : private StyleSheetObserver {
   private: typedef std::unordered_map<base::string16,
                                       std::unique_ptr<Style>> StyleCache;
 
+  private: mutable StyleCache partial_style_cache_;
   private: std::vector<const StyleSheet*> style_sheets_;
   private: mutable StyleCache style_cache_;
 
@@ -29,8 +30,11 @@ class StyleResolver : private StyleSheetObserver {
 
   public: void AddStyleSheet(const StyleSheet* style_sheet);
   private: void ClearCache();
+  private: void InvalidateCache(const StyleRule*rule);
   public: void RemoveStyleSheet(const StyleSheet* style_sheet);
   public: const Style& Resolve(const base::string16& selector) const;
+  public: const Style& ResolveWithoutDefaults(
+      const base::string16& selector) const;
 
   // css::StyleSheetObserver
   private: virtual void DidAddRule(const StyleRule* rule) override;

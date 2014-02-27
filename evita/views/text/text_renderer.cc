@@ -402,16 +402,9 @@ bool TextRenderer::ShouldFormat(const Selection& selection,
     return true;
   }
 
-  if (selection_.color != selection.color) {
+  if (selection_.active != selection.active) {
     #if DEBUG_DIRTY
-        DEBUG_PRINTF("%p: SelColor is changed.\n", this);
-    #endif // DEBUG_DIRTY
-    return true;
-  }
-
-  if (selection_.bgcolor != selection.bgcolor) {
-    #if DEBUG_DIRTY
-        DEBUG_PRINTF("%p: SelBackground is changed.\n", this);
+        DEBUG_PRINTF("%p: selection.active is changed.\n", this);
     #endif // DEBUG_DIRTY
     return true;
   }

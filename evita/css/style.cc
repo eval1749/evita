@@ -8,31 +8,6 @@
 
 namespace css {
 
-//////////////////////////////////////////////////////////////////////
-//
-// Color
-//
-Color::Color(COLORREF cr) : m_cr(cr) {
-}
-
-Color::Color(int r, int g, int b) : m_cr(RGB(r, g, b)) {
-}
-
-Color::~Color() {
-}
-
-bool Color::operator==(const Color& other) const {
-  return m_cr == other.m_cr;
-}
-
-bool Color::operator!=(const Color& other) const {
-  return !operator==(other);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// Style
-//
 Style::Style(Color color, Color bgcolor)
     : Style() {
   set_color(color);
@@ -265,10 +240,6 @@ void Style::OverrideBy(const Style& other) {
 }  // namspace css
 
 namespace std {
-size_t hash<css::Color>::operator()(const css::Color& color) const {
-  return color.Hash();
-}
-
 size_t hash<css::Style>::operator()(
     const css::Style& style) const {
   size_t result = 137u;

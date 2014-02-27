@@ -377,6 +377,7 @@
       'sources': [
         'precomp.cpp',
 
+        'css/color.cc',
         'css/style.cc',
         'css/style_resolver.cc',
         'css/style_rule.cc',

@@ -8,25 +8,9 @@
 #include <functional>
 
 #include "base/strings/string16.h"
+#include "evita/css/color.h"
 
 namespace css {
-
-// Color
-class Color {
-  COLORREF    m_cr;
-
-  public: Color(COLORREF cr = 0);
-  public: Color(int r, int g, int b);
-  public: ~Color();
-
-  public: operator COLORREF() const { return m_cr; }
-
-  public: bool operator==(const Color& other) const;
-  public: bool operator!=(const Color& other) const;
-
-  public: bool Equal(const Color& cr) const { return m_cr == cr.m_cr; }
-  public: size_t Hash() const { return m_cr; }
-};
 
 typedef int FontSize;
 
@@ -137,10 +121,6 @@ class Style {
 }  // namespace css
 
 namespace std {
-template<> struct hash<css::Color> {
-  size_t operator()(const css::Color& color) const;
-};
-
 template<> struct hash<css::Style> {
   size_t operator()(const css::Style& style) const;
 };

@@ -28,6 +28,10 @@ RenderStyle::RenderStyle(const RenderStyle& other)
       text_decoration_(other.text_decoration_) {
 }
 
+RenderStyle::RenderStyle()
+    : font_(nullptr), text_decoration_(css::TextDecoration::None) {
+}
+
 RenderStyle::~RenderStyle() {
 }
 

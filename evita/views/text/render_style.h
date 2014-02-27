@@ -23,6 +23,7 @@ class RenderStyle {
 
   public: RenderStyle(const css::Style& values, Font* font);
   public: RenderStyle(const RenderStyle& other);
+  public: RenderStyle();
   public: ~RenderStyle();
 
   public: bool operator==(const RenderStyle& other) const;

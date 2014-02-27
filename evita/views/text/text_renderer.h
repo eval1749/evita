@@ -49,8 +49,6 @@ class TextRenderer {
   public: ~TextRenderer();
 
   // [F]
-  private: void fillBottom() const;
-  private: void fillRight(const Line*) const;
   public: Line* FindLine(Posn) const;
   public: void Format(Posn start);
   public: Line* FormatLine(Posn start);

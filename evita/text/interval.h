@@ -13,7 +13,7 @@
 
 #include "evita/ed_BinTree.h"
 #include "evita/li_util.h"
-#include "evita/text/style.h"
+#include "evita/css/style.h"
 
 namespace text
 {

@@ -5,7 +5,7 @@
 #if !defined(INCLUDE_evita_views_text_render_selection_h)
 #define INCLUDE_evita_views_text_render_selection_h
 
-#include "evita/text/style.h"
+#include "evita/css/style.h"
 
 namespace views {
 namespace rendering {

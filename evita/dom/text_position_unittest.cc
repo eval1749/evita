@@ -4,7 +4,7 @@
 
 #include "base/basictypes.h"
 #include "evita/dom/abstract_dom_test.h"
-#include "evita/text/style.h"
+#include "evita/css/style.h"
 
 namespace {
 

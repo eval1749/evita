@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/text/style_sheet.h"
+#include "evita/css/style_sheet.h"
 
 #include "base/logging.h"
-#include "evita/text/style_selector.h"
+#include "evita/css/style_selector.h"
 
 namespace text {
 

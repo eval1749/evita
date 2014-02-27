@@ -14,7 +14,7 @@
 #include <vector>
 
 #include "evita/gfx_base.h"
-#include "evita/text/style.h"
+#include "evita/css/style.h"
 
 namespace {
 bool IsCacheableChar(char16 wch) {

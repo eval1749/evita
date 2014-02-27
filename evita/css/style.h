@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_text_style_h)
-#define INCLUDE_evita_text_style_h
+#if !defined(INCLUDE_evita_css_style_h)
+#define INCLUDE_evita_css_style_h
 
 #include <functional>
 
@@ -146,4 +146,4 @@ template<> struct hash<text::Style> {
 };
 }  // namespace std
 
-#endif //!defined(INCLUDE_evita_text_style_h)
+#endif //!defined(INCLUDE_evita_css_style_h)

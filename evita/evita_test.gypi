@@ -114,8 +114,8 @@
       }, # msvs_settings
       'sources': [
         'precomp.cpp',
+        'css/style_sheet_unittest.cc',
         'text/buffer_unittest.cc',
-        'text/style_sheet_unittest.cc',
         'text/undo_stack_unittest.cc',
       ],
     }, # evita_text_test

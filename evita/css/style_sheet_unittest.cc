@@ -7,8 +7,8 @@
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
-#include "evita/text/style_selector.h"
-#include "evita/text/style_sheet.h"
+#include "evita/css/style_selector.h"
+#include "evita/css/style_sheet.h"
 
 #include "base/logging.h"
 

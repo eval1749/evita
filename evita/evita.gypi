@@ -376,6 +376,11 @@
       ], # dependencies
       'sources': [
         'precomp.cpp',
+
+        'css/style.cc',
+        'css/style_sheet.cc',
+        'css/style_selector.cc',
+
         'ed_BufferCore.cpp',
         'ed_BufferFind.cpp',
         'li_util.cpp',
@@ -399,9 +404,6 @@
         'text/modes/xml_mode.cc',
         'text/range.cc',
         'text/range_set.cc',
-        'text/style.cc',
-        'text/style_sheet.cc',
-        'text/style_selector.cc',
         'text/undo_stack.cc',
         'text/undo_step.cc',
         'z_debug.cpp',

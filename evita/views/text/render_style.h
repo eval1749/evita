@@ -9,7 +9,7 @@
 
 #include "base/basictypes.h"
 #include "evita/gfx_base.h"
-#include "evita/text/style.h"
+#include "evita/css/style.h"
 #include "evita/vi_Style.h"
 
 namespace views {

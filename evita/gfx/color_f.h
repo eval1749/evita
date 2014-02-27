@@ -20,6 +20,11 @@ class ColorF : public D2D1::ColorF {
 
   public: bool operator==(const ColorF& other) const;
   public: bool operator!=(const ColorF& other) const;
+
+  public: float alpha() const { return a; }
+  public: float blue() const { return b; }
+  public: float green() const { return g; }
+  public: float red() const { return r; }
 };
 
 } // namespace gfx

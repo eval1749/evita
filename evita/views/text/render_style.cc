@@ -25,6 +25,7 @@ RenderStyle::RenderStyle(const css::Style& values, Font* font)
 
 RenderStyle::RenderStyle(const RenderStyle& other)
     : bgcolor_(other.bgcolor_), color_(other.color_), font_(other.font_),
+      overlay_color_(other.overlay_color_),
       text_decoration_(other.text_decoration_) {
 }
 
@@ -37,11 +38,16 @@ RenderStyle::~RenderStyle() {
 
 bool RenderStyle::operator==(const RenderStyle& other) const {
   return bgcolor_ == other.bgcolor_ && color_ == other.color_ &&
-         font_ == other.font_ && text_decoration_ == other.text_decoration_;
+         font_ == other.font_ && overlay_color_ == other.overlay_color_ &&
+         text_decoration_ == other.text_decoration_;
 }
 
 bool RenderStyle::operator!=(const RenderStyle& other) const {
   return !operator==(other);
+}
+
+void RenderStyle::set_overlay_color(const css::Color& color){
+  overlay_color_ = ColorToColorF(color);
 }
 
 } // namespace rendering
@@ -54,6 +60,7 @@ size_t hash<views::rendering::RenderStyle>::operator()(
   result ^= std::hash<gfx::ColorF>()(style.bgcolor());
   result ^= std::hash<gfx::ColorF>()(style.color());
   result ^= std::hash<Font*>()(style.font());
+  result ^= std::hash<gfx::ColorF>()(style.overlay_color());
   result ^= std::hash<css::TextDecoration>()(style.text_decoration());
   return result;
 }

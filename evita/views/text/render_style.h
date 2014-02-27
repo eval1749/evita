@@ -19,6 +19,7 @@ class RenderStyle {
   private: gfx::ColorF bgcolor_;
   private: gfx::ColorF color_;
   private: Font* font_;
+  private: gfx::ColorF overlay_color_;
   private: css::TextDecoration text_decoration_;
 
   public: RenderStyle(const css::Style& values, Font* font);
@@ -32,6 +33,9 @@ class RenderStyle {
   public: const gfx::ColorF& bgcolor() const { return bgcolor_; }
   public: const gfx::ColorF& color() const { return color_; }
   public: Font* font() const { return font_; }
+  public: void set_fond(Font* font) { font_ = font; }
+  public: const gfx::ColorF& overlay_color() const { return overlay_color_; }
+  public: void set_overlay_color(const css::Color& color);
   public: css::TextDecoration text_decoration() const {
     return text_decoration_;
   }

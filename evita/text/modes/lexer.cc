@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "base/logging.h"
+#include "evita/css/style.h"
 #include "evita/text/buffer.h"
 #include "evita/text/modes/char_syntax.h"
 
@@ -165,7 +166,7 @@ void LexerBase::setColor(Posn lStart, Posn lEnd, uint32_t nSyntax,
   if (lStart >= lEnd)
     return;
 
-  Style style_values;
+  css::Style style_values;
   style_values.set_bgcolor(RGB(255, 255, 255));
   style_values.set_color(nColor);
   style_values.set_syntax(static_cast<int>(nSyntax));

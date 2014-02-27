@@ -6,7 +6,7 @@
 
 #include "base/logging.h"
 
-namespace text {
+namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -262,23 +262,23 @@ void Style::OverrideBy(const Style& other) {
   }
 }
 
-}  // namspace text
+}  // namspace css
 
 namespace std {
-size_t hash<text::Color>::operator()(const text::Color& color) const {
+size_t hash<css::Color>::operator()(const css::Color& color) const {
   return color.Hash();
 }
 
-size_t hash<text::Style>::operator()(
-    const text::Style& style) const {
+size_t hash<css::Style>::operator()(
+    const css::Style& style) const {
   size_t result = 137u;
   if (style.has_bgcolor()) {
     result <<= 1;
-    result ^= std::hash<text::Color>()(style.bgcolor());
+    result ^= std::hash<css::Color>()(style.bgcolor());
   }
   if (style.has_color()) {
     result <<= 1;
-    result ^= std::hash<text::Color>()(style.color());
+    result ^= std::hash<css::Color>()(style.color());
   }
   if (style.has_font_family()) {
     result <<= 1;
@@ -286,27 +286,27 @@ size_t hash<text::Style>::operator()(
   }
   if (style.has_font_size()) {
     result <<= 1;
-    result ^= std::hash<text::FontSize>()(style.font_size());
+    result ^= std::hash<css::FontSize>()(style.font_size());
   }
   if (style.has_font_style()) {
     result <<= 1;
-    result ^= std::hash<text::FontStyle>()(style.font_style());
+    result ^= std::hash<css::FontStyle>()(style.font_style());
   }
   if (style.has_font_weight()) {
     result <<= 1;
-    result ^= std::hash<text::FontWeight>()(style.font_weight());
+    result ^= std::hash<css::FontWeight>()(style.font_weight());
   }
   if (style.has_marker_color()) {
     result <<= 1;
-    result ^= std::hash<text::Color>()(style.marker_color());
+    result ^= std::hash<css::Color>()(style.marker_color());
   }
   if (style.has_syntax()) {
     result <<= 1;
-    result ^= std::hash<text::Syntax>()(style.syntax());
+    result ^= std::hash<css::Syntax>()(style.syntax());
   }
   if (style.has_text_decoration()) {
     result <<= 1;
-    result ^= std::hash<text::TextDecoration>()(style.text_decoration());
+    result ^= std::hash<css::TextDecoration>()(style.text_decoration());
   }
   return result;
 }

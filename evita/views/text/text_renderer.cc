@@ -31,7 +31,7 @@ float AlignWidthToPixel(const gfx::Graphics&, float width) {
   return width;
 }
 
-inline gfx::ColorF ColorToColorF(text::Color color) {
+inline gfx::ColorF ColorToColorF(css::Color color) {
   COLORREF const cr = color;
   return gfx::ColorF(
       static_cast<float>(GetRValue(cr)) / 255,

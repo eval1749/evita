@@ -12,8 +12,8 @@
 #define INCLUDE_edit_interval_h
 
 #include "evita/ed_BinTree.h"
-#include "evita/li_util.h"
 #include "evita/css/style.h"
+#include "evita/li_util.h"
 
 namespace text
 {
@@ -35,7 +35,7 @@ class Interval  :
     private: Posn           m_lEnd;
     private: Posn           m_lStart;
     private: int            m_nZ;
-    private: Style    m_Style;
+    private: css::Style    m_Style;
 
     // ctor
     public: Interval(Posn lStart, Posn lEnd, int nZ = 9);
@@ -56,13 +56,13 @@ class Interval  :
     // [G]
     public: Posn      GetEnd()   const { return m_lEnd; }
     public: Posn      GetStart() const { return m_lStart; }
-    public: const Style& GetStyle() const { return m_Style; }
+    public: const css::Style& GetStyle() const { return m_Style; }
 
     // [I]
     public: bool IsEmpty() const { return m_lStart == m_lEnd; }
 
     // [S]
-    public: void SetStyle(const Style&);
+    public: void SetStyle(const css::Style&);
 }; // Interval
 
 }  // namespace text

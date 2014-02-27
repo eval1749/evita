@@ -13,9 +13,6 @@
 
 namespace css {
 
-// TODO(yosi) We should not have |using text::Style|.
-using text::Style;
-
 class StyleSheet {
   private: typedef std::unordered_map<base::string16, std::unique_ptr<Style>>
       StyleMap;

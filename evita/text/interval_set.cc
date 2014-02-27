@@ -15,7 +15,7 @@ IntervalSet::IntervalSet(Buffer* buffer) {
 
   {
     auto const interval = new Interval(0, 1);
-    interval->SetStyle(*Style::Default());
+    interval->SetStyle(*css::Style::Default());
     tree_.Insert(interval);
     list_.Append(interval);
   }

@@ -17,7 +17,7 @@
 #include "gfx/forward.h"
 #include "evita/li_util.h"
 
-namespace text {
+namespace css {
 class Style;
 }
 
@@ -120,10 +120,10 @@ class FontSet : public Fonts
 
     // [G]
     public: static FontSet* Get(const gfx::Graphics&,
-                                const text::Style& style) {
+                                const css::Style& style) {
       return Get(style);
     }
-    public: static FontSet* Get(const text::Style& style);
+    public: static FontSet* Get(const css::Style& style);
     public: const Key* GetKey() const { return this; }
 
     // [H]

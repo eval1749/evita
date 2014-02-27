@@ -19,9 +19,9 @@ class RenderStyle {
   private: gfx::ColorF bgcolor_;
   private: gfx::ColorF color_;
   private: Font* font_;
-  private: text::TextDecoration text_decoration_;
+  private: css::TextDecoration text_decoration_;
 
-  public: RenderStyle(const text::Style& values, Font* font);
+  public: RenderStyle(const css::Style& values, Font* font);
   public: RenderStyle(const RenderStyle& other);
   public: ~RenderStyle();
 
@@ -31,7 +31,7 @@ class RenderStyle {
   public: gfx::ColorF bgcolor() const { return bgcolor_; }
   public: gfx::ColorF color() const { return color_; }
   public: Font* font() const { return font_; }
-  public: text::TextDecoration text_decoration() const {
+  public: css::TextDecoration text_decoration() const {
     return text_decoration_;
   }
 };

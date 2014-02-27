@@ -405,7 +405,7 @@ FontSetCache* g_pFontSetCache;
 //
 // FontSet::Get
 //
-FontSet* FontSet::Get(const text::Style& style)
+FontSet* FontSet::Get(const css::Style& style)
 {
     Fonts oFonts;
     oFonts.m_cFonts = 0;
@@ -422,13 +422,13 @@ FontSet* FontSet::Get(const text::Style& style)
         oLogFont.lfOrientation = 0;
 
         oLogFont.lfWeight =
-            text::FontWeight_Bold == style.font_weight() ? FW_BOLD : FW_NORMAL;
+            css::FontWeight_Bold == style.font_weight() ? FW_BOLD : FW_NORMAL;
 
         oLogFont.lfItalic =
-            text::FontStyle_Italic == style.font_style() ? 1u : 0u;
+            css::FontStyle_Italic == style.font_style() ? 1u : 0u;
 
         oLogFont.lfUnderline =
-            text::TextDecoration_Underline == style.text_decoration() ? 1u : 0u;
+            css::TextDecoration_Underline == style.text_decoration() ? 1u : 0u;
 
         oLogFont.lfStrikeOut     = 0;
         oLogFont.lfCharSet       = ANSI_CHARSET;;

@@ -16,7 +16,10 @@
 
 #include "evita/IStringCursor.h"
 #include "evita/ed_BufferCore.h"
-#include "evita/css/style.h"
+
+namespace css {
+class Style;
+}
 
 namespace text {
 
@@ -134,13 +137,13 @@ class Buffer : public BufferCore, public FileFeatures {
   public: void EndUndoGroup(const base::string16& name);
 
   // [G]
-  public: const Style& GetDefaultStyle() const;
+  public: const css::Style& GetDefaultStyle() const;
   public: Interval* GetIntervalAt(Posn) const;
   public: Mode* GetMode() const { return m_pMode; }
   public: Count GetModfTick() const { return m_nModfTick; }
   public: const base::string16& GetName() const { return name_; }
   public: Posn GetStart() const { return 0; }
-  public: const Style& GetStyleAt(Posn) const;
+  public: const css::Style& GetStyleAt(Posn) const;
   public: UndoStack* GetUndo() const { return undo_stack_.get(); }
 
   // [I]
@@ -178,7 +181,7 @@ class Buffer : public BufferCore, public FileFeatures {
     m_nSaveTick = m_nCharTick;
   }
   public: bool SetReadOnly(bool f) { return m_fReadOnly = f; }
-  public: void SetStyle(Posn, Posn, const Style& style_values);
+  public: void SetStyle(Posn, Posn, const css::Style& style_values);
   public: void StartUndoGroup(const base::string16& name);
 
   // [T]
@@ -239,7 +242,7 @@ class Buffer : public BufferCore, public FileFeatures {
 
     public: Posn GetPosn() const { return m_lPosn; }
 
-    public: const Style& GetStyle() const {
+    public: const css::Style& GetStyle() const {
       ASSERT(!AtEnd());
       return m_pBuffer->GetStyleAt(m_lPosn);
     }
@@ -285,7 +288,7 @@ class Buffer : public BufferCore, public FileFeatures {
 
     public: Posn GetPosn() const { ASSERT(!AtEnd()); return m_lPosn; }
 
-    public: const Style& GetStyle() const {
+    public: const css::Style& GetStyle() const {
       ASSERT(!AtEnd());
       return m_pBuffer->GetStyleAt(m_lPosn - 1);
     }

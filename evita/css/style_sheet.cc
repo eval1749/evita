@@ -9,8 +9,8 @@
 
 namespace css {
 
-// TODO(yosi) We should not have |using text::Color|.
-using text::Color;
+// TODO(yosi) We should not have |using css::Color|.
+using css::Color;
 
 StyleSheet::StyleSheet()
     : base_style_sheet_(DefaultStyleSheet()) {
@@ -45,11 +45,11 @@ StyleSheet* StyleSheet::DefaultStyleSheet() {
   Style default_style(Color(0, 0, 0), Color(255, 255, 255));
   default_style.set_font_family(L"Consolas, MS Gothic");
   default_style.set_font_size(10);
-  default_style.set_font_style(text::FontStyle_Normal);
-  default_style.set_font_weight(text::FontWeight_Normal);
+  default_style.set_font_style(css::FontStyle_Normal);
+  default_style.set_font_weight(css::FontWeight_Normal);
   // TODO(yosi) We should move Style::syntax() to another place.
   default_style.set_syntax(0);
-  default_style.set_text_decoration(text::TextDecoration_None);
+  default_style.set_text_decoration(css::TextDecoration_None);
   style_sheet.AddRule(StyleSelector::defaults(), default_style);
 
   Style marker_style;

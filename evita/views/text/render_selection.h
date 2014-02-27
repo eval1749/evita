@@ -11,8 +11,8 @@ namespace views {
 namespace rendering {
 
 struct Selection {
-  text::Color bgcolor;
-  text::Color color;
+  css::Color bgcolor;
+  css::Color color;
   text::Posn start;
   text::Posn end;
 };

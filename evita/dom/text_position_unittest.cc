@@ -10,10 +10,10 @@ namespace {
 
 class TextPositionTest : public dom::AbstractDomTest {
   protected: TextPositionTest() {
-    auto const style = text::Style::Default();
-    style->set_bgcolor(text::Color(255, 255, 255));
-    style->set_color(text::Color(0x00, 0x00, 0x00));
-    style->set_marker_color(text::Color(0x00, 0x99, 0x00));
+    auto const style = css::Style::Default();
+    style->set_bgcolor(css::Color(255, 255, 255));
+    style->set_color(css::Color(0x00, 0x00, 0x00));
+    style->set_marker_color(css::Color(0x00, 0x99, 0x00));
   }
   public: virtual ~TextPositionTest() {
   }

@@ -35,12 +35,12 @@ inline char16 toxdigit(int k) {
  return static_cast<char16>(k - 10 + 'A');
 }
 
-Font* GetFont(const gfx::Graphics& gfx, const text::Style& style) {
+Font* GetFont(const gfx::Graphics& gfx, const css::Style& style) {
   return FontSet::Get(gfx, style)->FindFont(gfx, 'x');
 }
 
 RenderStyle GetRenderStyle(const gfx::Graphics& gfx,
-                           const text::Style& style) {
+                           const css::Style& style) {
   return RenderStyle(style, GetFont(gfx, style));
 }
 
@@ -89,7 +89,7 @@ class TextFormatter::EnumCI {
 
   public: Posn GetPosn() const { return m_lPosn; }
 
-  public: const text::Style& GetStyle() const {
+  public: const css::Style& GetStyle() const {
     if (AtEnd())
       return m_pBuffer->GetDefaultStyle();
     DCHECK(m_pInterval);
@@ -240,7 +240,7 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
   if (lPosn >= selection_.start && lPosn < selection_.end) {
     style.set_color(selection_.color);
     style.set_bgcolor(selection_.bgcolor);
-    style.set_text_decoration(text::TextDecoration_None);
+    style.set_text_decoration(css::TextDecoration_None);
   }
 
   if (0x09 == wch) {

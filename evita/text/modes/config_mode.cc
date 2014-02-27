@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "evita/css/style.h"
 #include "evita/text/modes/char_syntax.h"
 #include "evita/text/modes/lexer.h"
 #include "evita/text/modes/mode.h"

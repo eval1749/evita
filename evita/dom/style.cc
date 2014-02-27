@@ -95,16 +95,16 @@ class TextDecorationValue : public common::Singleton<TextDecorationValue>,
 namespace gin {
 
 template<>
-struct Converter<text::Color> {
+struct Converter<css::Color> {
   static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> js_value,
-                     text::Color* out_color) {
+                     css::Color* out_color) {
     int int_value;
     if (!ConvertFromV8(isolate, js_value, &int_value))
       return false;
-    *out_color = text::Color(static_cast<COLORREF>(int_value));
+    *out_color = css::Color(static_cast<COLORREF>(int_value));
     return true;
   }
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, text::Color color) {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, css::Color color) {
     return ConvertToV8(isolate, static_cast<int>(static_cast<COLORREF>(color)));
   }
 };
@@ -125,19 +125,19 @@ struct EnumConverter {
 };
 
 template<>
-struct Converter<text::FontStyle> :
-    EnumConverter<text::FontStyle, dom::internal::FontStyleValue> {
+struct Converter<css::FontStyle> :
+    EnumConverter<css::FontStyle, dom::internal::FontStyleValue> {
 };
 
 template<>
-struct Converter<text::FontWeight> :
-    EnumConverter<text::FontWeight, dom::internal::FontWeightValue> {
+struct Converter<css::FontWeight> :
+    EnumConverter<css::FontWeight, dom::internal::FontWeightValue> {
 };
 
 
 template<>
-struct Converter<text::TextDecoration> :
-    EnumConverter<text::TextDecoration, dom::internal::TextDecorationValue> {
+struct Converter<css::TextDecoration> :
+    EnumConverter<css::TextDecoration, dom::internal::TextDecorationValue> {
 };
 
 }  // namespace gin
@@ -228,7 +228,7 @@ v8::Handle<v8::Object> Document::style_at(text::Posn position) const {
 }
 
 void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
-  text::Style style_values;
+  css::Style style_values;
   bool changed = false;
 
   auto const runner = ScriptController::instance()->runner();
@@ -257,13 +257,13 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
     auto const name = names->Get(index);
     if (name.IsEmpty())
       continue;
-    LOAD_DICT_VALUE(text::Color, backgroundColor, bgcolor);
+    LOAD_DICT_VALUE(css::Color, backgroundColor, bgcolor);
     LOAD_DICT_VALUE(int, charSyntax, syntax);
-    LOAD_DICT_VALUE(text::Color, color, color);
+    LOAD_DICT_VALUE(css::Color, color, color);
     LOAD_DICT_VALUE(int, fontSize, font_size);
-    LOAD_DICT_VALUE(text::FontStyle, fontStyle, font_style);
-    LOAD_DICT_VALUE(text::FontWeight, fontWeight, font_weight);
-    LOAD_DICT_VALUE(text::TextDecoration, textDecoration, text_decoration)
+    LOAD_DICT_VALUE(css::FontStyle, fontStyle, font_style);
+    LOAD_DICT_VALUE(css::FontWeight, fontWeight, font_weight);
+    LOAD_DICT_VALUE(css::TextDecoration, textDecoration, text_decoration)
 
     ScriptController::instance()->ThrowException(v8::Exception::Error(
         gin::StringToV8(isolate, base::StringPrintf(

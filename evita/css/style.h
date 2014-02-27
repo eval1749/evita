@@ -9,7 +9,7 @@
 
 #include "base/strings/string16.h"
 
-namespace text {
+namespace css {
 
 // Color
 class Color {
@@ -134,15 +134,15 @@ class Style {
   public: void OverrideBy(const Style& style);
 };
 
-}  // namespace text
+}  // namespace css
 
 namespace std {
-template<> struct hash<text::Color> {
-  size_t operator()(const text::Color& color) const;
+template<> struct hash<css::Color> {
+  size_t operator()(const css::Color& color) const;
 };
 
-template<> struct hash<text::Style> {
-  size_t operator()(const text::Style& style) const;
+template<> struct hash<css::Style> {
+  size_t operator()(const css::Style& style) const;
 };
 }  // namespace std
 

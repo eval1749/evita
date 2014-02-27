@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "common/memory/singleton.h"
+#include "evita/css/style.h"
 #include "evita/text/modes/char_syntax.h"
 #include "evita/text/modes/lexer.h"
 #include "evita/text/modes/mode.h"

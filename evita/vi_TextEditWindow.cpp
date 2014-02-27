@@ -65,11 +65,11 @@ RenderSelection::RenderSelection(::Selection* selection, bool is_active) {
     //selection_->SetBackground(::GetSysColor(COLOR_HIGHLIGHT));
 
     // We use Vista's highlight color.
-    color = text::Color(255, 255, 255);
-    bgcolor = text::Color(51, 153, 255);
+    color = css::Color(255, 255, 255);
+    bgcolor = css::Color(51, 153, 255);
   } else {
-    color = text::Color(67, 78, 84);
-    bgcolor = text::Color(191, 205, 219);
+    color = css::Color(67, 78, 84);
+    bgcolor = css::Color(191, 205, 219);
   }
 
   start = selection->GetStart();
@@ -734,10 +734,10 @@ void TextEditWindow::UpdateStatusBar() const {
 #include <imm.h>
 #pragma comment(lib, "imm32.lib")
 
-text::Style* g_rgpImeStyleConverted[2];
-text::Style* g_pImeStyleInput;
-text::Style* g_pImeStyleTargetConverted;
-text::Style* g_pImeStyleTargetNotConverted;
+css::Style* g_rgpImeStyleConverted[2];
+css::Style* g_pImeStyleInput;
+css::Style* g_pImeStyleTargetConverted;
+css::Style* g_pImeStyleTargetNotConverted;
 
 #define GCS_COMPSTRATTR (GCS_COMPSTR | GCS_COMPATTR | GCS_CURSORPOS)
 
@@ -832,32 +832,32 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
 
     if (!g_pImeStyleInput) {
           // Converted[0]
-          g_rgpImeStyleConverted[0] = new text::Style();
+          g_rgpImeStyleConverted[0] = new css::Style();
           g_rgpImeStyleConverted[0]->set_text_decoration(
-              text::TextDecoration_ImeInactiveA);
+              css::TextDecoration_ImeInactiveA);
 
           // Converted[1]
-          g_rgpImeStyleConverted[1] = new text::Style();
+          g_rgpImeStyleConverted[1] = new css::Style();
           g_rgpImeStyleConverted[1]->set_text_decoration(
-              text::TextDecoration_ImeInactiveB);
+              css::TextDecoration_ImeInactiveB);
 
           // Input
-          g_pImeStyleInput = new text::Style();
+          g_pImeStyleInput = new css::Style();
           g_pImeStyleInput->set_text_decoration(
-              text::TextDecoration_ImeInput);
+              css::TextDecoration_ImeInput);
 
           // Target Converted
-          g_pImeStyleTargetConverted = new text::Style();
+          g_pImeStyleTargetConverted = new css::Style();
           g_pImeStyleTargetConverted->set_text_decoration(
-              text::TextDecoration_ImeActive);
+              css::TextDecoration_ImeActive);
 
           // Target Not Converted
-          g_pImeStyleTargetNotConverted = new text::Style();
+          g_pImeStyleTargetNotConverted = new css::Style();
           g_pImeStyleTargetNotConverted->set_bgcolor(
-              text::Color(51, 153, 255));
-          g_pImeStyleTargetNotConverted->set_color(text::Color(255, 255, 255));
+              css::Color(51, 153, 255));
+          g_pImeStyleTargetNotConverted->set_color(css::Color(255, 255, 255));
           g_pImeStyleTargetNotConverted->set_text_decoration(
-              text::TextDecoration_None);
+              css::TextDecoration_None);
       }
 
       m_fImeTarget = false;
@@ -866,7 +866,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
       int iClause = 0;
       int iConverted = 0;
       while (lPosn < lEnd) {
-        const text::Style* pStyle;
+        const css::Style* pStyle;
         switch (rgbAttr[lPosn - m_lImeStart]) {
           case ATTR_INPUT:
           case ATTR_INPUT_ERROR:

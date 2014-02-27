@@ -5,6 +5,7 @@
 #include "evita/text/modes/clike_lexer.h"
 
 #include "base/logging.h"
+#include "evita/css/style.h"
 #include "evita/text/modes/char_syntax.h"
 
 namespace text {

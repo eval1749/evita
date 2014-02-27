@@ -7,6 +7,7 @@
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
+#include "evita/css/style.h"
 #include "evita/text/buffer.h"
 #include "evita/text/modes/plain_text_mode.h"
 #include "evita/text/range.h"
@@ -30,11 +31,11 @@ class BufferTest : public ::testing::Test {
 TEST_F(BufferTest, InsertAt) {
   buffer()->InsertBefore(0, L"abc");
 
-  text::Style style_values1;;
+  css::Style style_values1;;
   style_values1.set_syntax(1);
   buffer()->SetStyle(1, 2, style_values1);
 
-  text::Style style_values2;;
+  css::Style style_values2;;
   style_values2.set_syntax(2);
   buffer()->SetStyle(2, 3, style_values2);
 
@@ -58,11 +59,11 @@ TEST_F(BufferTest, InsertAt) {
 TEST_F(BufferTest, InsertBefore) {
   buffer()->InsertBefore(0, L"abc");
 
-  text::Style style_values1;;
+  css::Style style_values1;;
   style_values1.set_syntax(1);
   buffer()->SetStyle(1, 2, style_values1);
 
-  text::Style style_values2;;
+  css::Style style_values2;;
   style_values2.set_syntax(2);
   buffer()->SetStyle(2, 3, style_values2);
 

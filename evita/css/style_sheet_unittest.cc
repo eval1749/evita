@@ -7,15 +7,14 @@
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
+#include "base/logging.h"
 #include "evita/css/style_selector.h"
 #include "evita/css/style_sheet.h"
 
-#include "base/logging.h"
-
 namespace {
 
-using text::Color;
-using text::Style;
+using css::Color;
+using css::Style;
 using css::StyleSelector;
 using css::StyleSheet;
 
@@ -29,8 +28,8 @@ class StyleSheetTest : public ::testing::Test {
 TEST_F(StyleSheetTest, Resolve_default) {
   StyleSheet style_sheet;
   const auto& style1 = style_sheet.Resolve(StyleSelector::defaults());
-  EXPECT_EQ(text::FontStyle_Normal, style1.font_style());
-  EXPECT_EQ(text::FontWeight_Normal, style1.font_weight());
+  EXPECT_EQ(css::FontStyle_Normal, style1.font_style());
+  EXPECT_EQ(css::FontWeight_Normal, style1.font_weight());
 }
 
 TEST_F(StyleSheetTest, Resolve_some) {
@@ -40,7 +39,7 @@ TEST_F(StyleSheetTest, Resolve_some) {
   const auto& style1 = style_sheet.Resolve(StyleSelector::active_selection());
   EXPECT_EQ(Color(1, 2, 3), style1.color());
   EXPECT_EQ(Color(4, 5, 6), style1.bgcolor());
-  EXPECT_EQ(text::FontStyle_Normal, style1.font_style());
+  EXPECT_EQ(css::FontStyle_Normal, style1.font_style());
 }
 
 }  // namespace

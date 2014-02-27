@@ -11,9 +11,10 @@
 #include "base/strings/string16.h"
 #include "evita/css/style.h"
 
-namespace text {
+namespace css {
 
-class Style;
+// TODO(yosi) We should not have |using text::Style|.
+using text::Style;
 
 class StyleSheet {
   private: typedef std::unordered_map<base::string16, std::unique_ptr<Style>>
@@ -35,6 +36,6 @@ class StyleSheet {
   DISALLOW_COPY_AND_ASSIGN(StyleSheet);
 };
 
-}  // namespace text
+}  // namespace css
 
 #endif //!defined(INCLUDE_evita_css_style_sheet_h)

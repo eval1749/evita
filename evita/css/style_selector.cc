@@ -4,7 +4,7 @@
 
 #include "evita/css/style_selector.h"
 
-namespace text {
+namespace css {
 
 #define DEFINE_STYLE_SELECTOR(name) \
   const base::string16& StyleSelector::name() { \
@@ -25,4 +25,4 @@ DEFINE_STYLE_SELECTOR(operators)
 DEFINE_STYLE_SELECTOR(string_literal)
 DEFINE_STYLE_SELECTOR(tab_marker)
 
-}  // namespace text
+}  // namespace css

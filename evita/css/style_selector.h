@@ -7,7 +7,7 @@
 
 #include "base/strings/string16.h"
 
-namespace text {
+namespace css {
 
 class StyleSelector {
   public: StyleSelector() = delete;
@@ -27,6 +27,6 @@ class StyleSelector {
   public: static const base::string16& tab_marker();
 };
 
-}  // namespace text
+}  // namespace css
 
 #endif //!defined(INCLUDE_evita_css_style_selector_h)

@@ -16,8 +16,8 @@ namespace {
 
 using text::Color;
 using text::Style;
-using text::StyleSelector;
-using text::StyleSheet;
+using css::StyleSelector;
+using css::StyleSheet;
 
 class StyleSheetTest : public ::testing::Test {
   public: StyleSheetTest() = default;

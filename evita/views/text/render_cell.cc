@@ -348,40 +348,40 @@ void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
 
   auto const y = rect.bottom - m_iDescent -
                  (style().text_decoration() !=
-                      css::TextDecoration_None ? 1 : 0);
+                      css::TextDecoration::None ? 1 : 0);
   #if SUPPORT_IME
   switch (style().text_decoration()) {
-    case css::TextDecoration_ImeInput:
+    case css::TextDecoration::ImeInput:
       // TODO: We should use dotted line. It was PS_DOT.
       DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 3);
       break;
 
-    case css::TextDecoration_ImeInactiveA:
+    case css::TextDecoration::ImeInactiveA:
       DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 3);
       break;
 
-    case css::TextDecoration_ImeInactiveB:
+    case css::TextDecoration::ImeInactiveB:
       DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 3);
       break;
 
-    case css::TextDecoration_ImeActive:
+    case css::TextDecoration::ImeActive:
       DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 3);
       DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 2);
       break;
 
-    case css::TextDecoration_None:
+    case css::TextDecoration::None:
       break;
 
-    case css::TextDecoration_GreenWave:
-      // TODO: Implement TextDecoration_RedWave
+    case css::TextDecoration::GreenWave:
+      // TODO: Implement TextDecoration::RedWave
       break;
 
-    case css::TextDecoration_RedWave:
-      // TODO: Implement TextDecoration_RedWave
+    case css::TextDecoration::RedWave:
+      // TODO: Implement TextDecoration::RedWave
       break;
 
-    case css::TextDecoration_Underline:
-      // TODO: Implement TextDecoration_Underline
+    case css::TextDecoration::Underline:
+      // TODO: Implement TextDecoration::Underline
       break;
   }
   #endif

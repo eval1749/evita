@@ -834,22 +834,22 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
           // Converted[0]
           g_rgpImeStyleConverted[0] = new css::Style();
           g_rgpImeStyleConverted[0]->set_text_decoration(
-              css::TextDecoration_ImeInactiveA);
+              css::TextDecoration::ImeInactiveA);
 
           // Converted[1]
           g_rgpImeStyleConverted[1] = new css::Style();
           g_rgpImeStyleConverted[1]->set_text_decoration(
-              css::TextDecoration_ImeInactiveB);
+              css::TextDecoration::ImeInactiveB);
 
           // Input
           g_pImeStyleInput = new css::Style();
           g_pImeStyleInput->set_text_decoration(
-              css::TextDecoration_ImeInput);
+              css::TextDecoration::ImeInput);
 
           // Target Converted
           g_pImeStyleTargetConverted = new css::Style();
           g_pImeStyleTargetConverted->set_text_decoration(
-              css::TextDecoration_ImeActive);
+              css::TextDecoration::ImeActive);
 
           // Target Not Converted
           g_pImeStyleTargetNotConverted = new css::Style();
@@ -857,7 +857,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
               css::Color(51, 153, 255));
           g_pImeStyleTargetNotConverted->set_color(css::Color(255, 255, 255));
           g_pImeStyleTargetNotConverted->set_text_decoration(
-              css::TextDecoration_None);
+              css::TextDecoration::None);
       }
 
       m_fImeTarget = false;

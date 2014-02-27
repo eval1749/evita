@@ -240,7 +240,7 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
   if (lPosn >= selection_.start && lPosn < selection_.end) {
     style.set_color(selection_.color);
     style.set_bgcolor(selection_.bgcolor);
-    style.set_text_decoration(css::TextDecoration_None);
+    style.set_text_decoration(css::TextDecoration::None);
   }
 
   if (0x09 == wch) {

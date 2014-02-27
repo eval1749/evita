@@ -193,10 +193,10 @@ Style* Style::Default() {
 
     default_style.set_font_family(L"Consolas, MS Gothic");
     default_style.set_font_size(10);
-    default_style.set_font_style(FontStyle_Normal);
-    default_style.set_font_weight(FontWeight_Normal);
+    default_style.set_font_style(FontStyle::Normal);
+    default_style.set_font_weight(FontWeight::Normal);
     default_style.set_syntax(0);
-    default_style.set_text_decoration(TextDecoration_None);
+    default_style.set_text_decoration(TextDecoration::None);
   }
 
   return &default_style;

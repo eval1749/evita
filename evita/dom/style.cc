@@ -43,7 +43,7 @@ class EnumValue {
                                                           T index) {
     if (static_cast<size_t>(index) >= values_.size())
       return v8::String::Empty(isolate);
-    return values_[index]->Get(isolate);
+    return values_[static_cast<size_t>(index)]->Get(isolate);
   }
 };
 

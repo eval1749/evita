@@ -30,26 +30,26 @@ class Color {
 
 typedef int FontSize;
 
-enum FontStyle {
-  FontStyle_Normal,
-  FontStyle_Italic,
+enum class FontStyle {
+  Normal,
+  Italic,
 };
 
-enum FontWeight {
-  FontWeight_Normal,
-  FontWeight_Bold,
+enum class FontWeight {
+  Normal,
+  Bold,
 };
 
-enum TextDecoration {
-  TextDecoration_None,
-  TextDecoration_GreenWave,
-  TextDecoration_RedWave,
-  TextDecoration_Underline,
+enum class TextDecoration {
+  None,
+  GreenWave,
+  RedWave,
+  Underline,
   #if SUPPORT_IME
-  TextDecoration_ImeInput,        // dotted underline
-  TextDecoration_ImeActive,       // 2 pixel underline
-  TextDecoration_ImeInactiveA,    // 1 pixel underline
-  TextDecoration_ImeInactiveB,    // 1 pixel underline
+  ImeInput,        // dotted underline
+  ImeActive,       // 2 pixel underline
+  ImeInactiveA,    // 1 pixel underline
+  ImeInactiveB,    // 1 pixel underline
   #endif // SUPPORT_IME
 };
 

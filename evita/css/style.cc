@@ -8,7 +8,7 @@
 
 namespace css {
 
-Style::Style(Color color, Color bgcolor)
+Style::Style(const Color& color, const Color& bgcolor)
     : Style() {
   set_color(color);
   set_bgcolor(bgcolor);

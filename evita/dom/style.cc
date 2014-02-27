@@ -101,11 +101,17 @@ struct Converter<css::Color> {
     int int_value;
     if (!ConvertFromV8(isolate, js_value, &int_value))
       return false;
-    *out_color = css::Color(static_cast<COLORREF>(int_value));
+    // TODO(yosi) How do we represent css::Color in JS?
+    *out_color = css::Color((int_value >> 16) & 0xFF,
+                            (int_value >> 8) & 0xFF,
+                            int_value & 0xFF);
     return true;
   }
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, css::Color color) {
-    return ConvertToV8(isolate, static_cast<int>(static_cast<COLORREF>(color)));
+    // TODO(yosi) How do we represent css::Color in JS?
+    auto const int_value = (color.red() << 16) | (color.green() << 8) |
+                           color.blue();
+    return ConvertToV8(isolate, int_value);
   }
 };
 
@@ -190,14 +196,12 @@ v8::Handle<v8::Object> Document::style_at(text::Posn position) const {
 
   if (style_values.has_bgcolor()) {
     js_style->Set(v8Strings::backgroundColor.Get(isolate),
-                  v8::Integer::New(isolate,
-                      static_cast<int>(style_values.bgcolor())));
+                  gin::ConvertToV8(isolate, style_values.bgcolor()));
   }
 
   if (style_values.has_color()) {
     js_style->Set(v8Strings::color.Get(isolate),
-                  v8::Integer::New(isolate,
-                      static_cast<int>(style_values.color())));
+                  gin::ConvertToV8(isolate, style_values.color()));
   }
 
   if (style_values.has_text_decoration()) {

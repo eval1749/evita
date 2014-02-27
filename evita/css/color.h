@@ -7,23 +7,29 @@
 
 #include <functional>
 
+#include "base/basictypes.h"
+
 namespace css {
 
 // Color
 class Color {
-  COLORREF    m_cr;
+  private: uint32_t rgb_;
+  private: float alpha_;
 
-  public: Color(COLORREF cr = 0);
-  public: Color(int r, int g, int b);
+  public: Color(int red, int green, int blue, float alpha = 1.0f);
+  public: Color();
   public: ~Color();
-
-  public: operator COLORREF() const { return m_cr; }
 
   public: bool operator==(const Color& other) const;
   public: bool operator!=(const Color& other) const;
 
-  public: bool Equal(const Color& cr) const { return m_cr == cr.m_cr; }
-  public: size_t Hash() const { return m_cr; }
+  public: float alpha() const { return alpha_; }
+  public: int blue() const { return static_cast<int>(rgb_ & 0xFF); }
+  public: int green() const { return static_cast<int>((rgb_ >> 8) & 0xFF); }
+  public: int red() const { return static_cast<int>((rgb_ >> 16) & 0xFF); }
+
+  public: bool Equal(const Color& cr) const;
+  public: size_t Hash() const;
 };
 
 }  // namespace css

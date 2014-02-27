@@ -67,7 +67,7 @@ class Style {
   private: int syntax_;
   private: TextDecoration text_decoration_;
 
-  public: Style(Color color, Color bgcolor);
+  public: Style(const Color& color, const Color& bgcolor);
   public: Style(const Style& other);
   public: Style();
   public: ~Style();

@@ -4,23 +4,41 @@
 
 #include "evita/css/color.h"
 
+#include "base/logging.h"
+
 namespace css {
 
-Color::Color(COLORREF cr) : m_cr(cr) {
+namespace {
+uint32_t PackRgbToUint32(int red, int green, int blue) {
+  DCHECK_LE(static_cast<uint32_t>(red), 0xFFu);
+  DCHECK_LE(static_cast<uint32_t>(green), 0xFFu);
+  DCHECK_LE(static_cast<uint32_t>(blue), 0xFFu);
+  return (static_cast<uint32_t>(red & 0xFF) << 16) |
+         (static_cast<uint32_t>(green & 0xFF) << 8) |
+         static_cast<uint32_t>(blue & 0xFF);
+}
+}  // namespace
+
+Color::Color(int red, int green, int blue, float alpha)
+    : alpha_(alpha), rgb_(PackRgbToUint32(red, green, blue)) {
 }
 
-Color::Color(int r, int g, int b) : m_cr(RGB(r, g, b)) {
+Color::Color() : Color(0, 0, 0, 0.0f) {
 }
 
 Color::~Color() {
 }
 
 bool Color::operator==(const Color& other) const {
-  return m_cr == other.m_cr;
+  return rgb_ == other.rgb_ && alpha_ == other.alpha_;
 }
 
 bool Color::operator!=(const Color& other) const {
   return !operator==(other);
+}
+
+size_t Color::Hash() const {
+  return std::hash<uint32_t>()(rgb_) ^ std::hash<float>()(alpha_);
 }
 
 }  // namespace css

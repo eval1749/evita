@@ -8,12 +8,12 @@ namespace views {
 namespace rendering {
 
 namespace {
-inline gfx::ColorF ColorToColorF(css::Color color) {
-  COLORREF const cr = color;
+inline gfx::ColorF ColorToColorF(const css::Color& color) {
   return gfx::ColorF(
-      static_cast<float>(GetRValue(cr)) / 255,
-      static_cast<float>(GetGValue(cr)) / 255,
-      static_cast<float>(GetBValue(cr)) / 255);
+      static_cast<float>(color.red()) / 255,
+      static_cast<float>(color.green()) / 255,
+      static_cast<float>(color.blue()) / 255,
+      color.alpha());
 }
 }  // namespace
 

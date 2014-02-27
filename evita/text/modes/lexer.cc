@@ -167,8 +167,10 @@ void LexerBase::setColor(Posn lStart, Posn lEnd, uint32_t nSyntax,
     return;
 
   css::Style style_values;
-  style_values.set_bgcolor(RGB(255, 255, 255));
-  style_values.set_color(nColor);
+  style_values.set_bgcolor(css::Color(255, 255, 255));
+  style_values.set_color(css::Color(GetRValue(nColor),
+                                    GetGValue(nColor),
+                                    GetBValue(nColor)));
   style_values.set_syntax(static_cast<int>(nSyntax));
   m_pBuffer->SetStyle(lStart, lEnd, style_values);
 }

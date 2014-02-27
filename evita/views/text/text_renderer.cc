@@ -31,12 +31,12 @@ float AlignWidthToPixel(const gfx::Graphics&, float width) {
   return width;
 }
 
-inline gfx::ColorF ColorToColorF(css::Color color) {
-  COLORREF const cr = color;
+gfx::ColorF ColorToColorF(css::Color color) {
   return gfx::ColorF(
-      static_cast<float>(GetRValue(cr)) / 255,
-      static_cast<float>(GetGValue(cr)) / 255,
-      static_cast<float>(GetBValue(cr)) / 255);
+      static_cast<float>(color.red()) / 255,
+      static_cast<float>(color.green()) / 255,
+      static_cast<float>(color.blue()) / 255,
+      color.alpha());
 }
 
 inline void drawLine(const gfx::Graphics& gfx, const gfx::Brush& brush,
@@ -62,7 +62,6 @@ TextRenderer::TextRenderer(text::Buffer* buffer)
       m_pBuffer(buffer),
       m_lStart(0),
       m_lEnd(0),
-      m_crBackground(0),
       screen_text_block_(new ScreenTextBlock()),
       text_block_(new TextBlock(buffer)) {
 }

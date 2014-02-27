@@ -109,7 +109,7 @@ class XmlLexer : public LexerBase
 //
 // Map Token Type To color
 //
-static uint32
+static uint32_t
 k_rgnToken2Color[XmlLexer::Style_Limit] =
 {
     RGB(255,   0,  0),  // Style_Unknown
@@ -124,6 +124,10 @@ k_rgnToken2Color[XmlLexer::Style_Limit] =
     RGB(  0,   0, 128), // Style_Sym
     RGB(128,   0, 128), // Style_Att
 }; // k_rgnToken2Color
+
+css::Color Uint32ToColor(uint32_t ui32) {
+  return css::Color(GetRValue(ui32), GetGValue(ui32), GetBValue(ui32));
+}
 
 
 //////////////////////////////////////////////////////////////////////
@@ -554,8 +558,9 @@ void XmlLexer::setColor(State eState, int iExtra)
         m_pBuffer->SetStyle(
             m_lTokenStart,
             lTokenEnd,
-            css::Style(k_rgnToken2Color[k_rgnState2Token[eState]],
-                        RGB(255, 255, 255)));
+            css::Style(Uint32ToColor(
+                          k_rgnToken2Color[k_rgnState2Token[eState]]),
+                       css::Color(255, 255, 255)));
 
 
         m_lTokenStart = lTokenEnd;
@@ -586,8 +591,9 @@ void XmlLexer::setStateStart(State eState, int iExtra)
         m_pBuffer->SetStyle(
             m_lTokenStart,
             lTokenEnd,
-            css::Style(k_rgnToken2Color[k_rgnState2Token[m_eState]],
-                        RGB(255, 255, 255)));
+            css::Style(Uint32ToColor(
+                          k_rgnToken2Color[k_rgnState2Token[m_eState]]),
+                       css::Color(255, 255, 255)));
     }
 
     m_lTokenStart = lTokenEnd;
@@ -595,8 +601,8 @@ void XmlLexer::setStateStart(State eState, int iExtra)
     m_pBuffer->SetStyle(
         m_lTokenStart,
         m_lTokenStart + 1,
-        css::Style(k_rgnToken2Color[k_rgnState2Token[eState]],
-                    RGB(255, 255, 255)));
+        css::Style(Uint32ToColor(k_rgnToken2Color[k_rgnState2Token[eState]]),
+                   css::Color(255, 255, 255)));
 
 
     m_eState = eState;

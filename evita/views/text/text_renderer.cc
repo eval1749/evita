@@ -31,14 +31,6 @@ float AlignWidthToPixel(const gfx::Graphics&, float width) {
   return width;
 }
 
-gfx::ColorF ColorToColorF(css::Color color) {
-  return gfx::ColorF(
-      static_cast<float>(color.red()) / 255,
-      static_cast<float>(color.green()) / 255,
-      static_cast<float>(color.blue()) / 255,
-      color.alpha());
-}
-
 inline void drawLine(const gfx::Graphics& gfx, const gfx::Brush& brush,
                      float sx, float sy, float ex, float ey) {
   gfx.DrawLine(brush, sx, sy, ex, ey);
@@ -189,14 +181,13 @@ int TextRenderer::pageLines() const {
 
 void TextRenderer::Prepare(const Selection& selection) {
   selection_ = selection;
-  m_crBackground = m_pBuffer->GetDefaultStyle().bgcolor();
 }
 
 void TextRenderer::Render() {
   DCHECK(gfx_);
   DCHECK(!text_block_->rect().empty());
   text_block_->EnsureLinePoints();
-  screen_text_block_->Render(text_block_.get(), ColorToColorF(m_crBackground));
+  screen_text_block_->Render(text_block_.get());
 
   // FIXME 2007-08-05 yosi@msn.com We should expose show/hide
   // ruler settings to both script and UI.

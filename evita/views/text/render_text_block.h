@@ -9,14 +9,17 @@
 
 #include "evita/gfx_base.h"
 #include "evita/text/buffer_mutation_observer.h"
+#include "evita/views/text/render_style.h"
 #include "evita/vi_style.h"
 
 namespace views {
 namespace rendering {
 
+class RenderStyle;
 class TextLine;
 
 class TextBlock : public text::BufferMutationObserver {
+  private: RenderStyle default_style_;
   private: bool dirty_;
   private: bool dirty_line_point_;
   private: float m_cy;
@@ -28,12 +31,17 @@ class TextBlock : public text::BufferMutationObserver {
   public: ~TextBlock();
 
   public: float bottom() const { return rect_.bottom; }
+  public: const RenderStyle& default_style() const { return default_style_; }
+  public: void set_default_style(const RenderStyle& style) {
+    default_style_ = style;
+  }
   public: bool dirty() const { return dirty_; }
   public: float height() const { return rect_.height(); }
   public: float left() const { return rect_.left; }
   public: const std::list<TextLine*>& lines() const { return lines_; }
   public: const gfx::RectF& rect() const { return rect_; }
   public: float right() const { return rect_.right; }
+  public: const text::Buffer* text_buffer() const { return text_buffer_; }
   public: float top() const { return rect_.top; }
   public: float width() const { return rect_.width(); }
 

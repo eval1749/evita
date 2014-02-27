@@ -89,8 +89,7 @@ class ScreenTextBlock::RenderContext {
   private: mutable std::vector<gfx::RectF> skip_rects_;
 
   public: RenderContext(const ScreenTextBlock* screen_text_block,
-                        const TextBlock* format_text_block,
-                        gfx::ColorF bgcolor);
+                        const TextBlock* format_text_block);
   public: ~RenderContext() = default;
 
   private: void Copy(float dst_top, float dst_bottom, float src_top) const;
@@ -114,8 +113,9 @@ class ScreenTextBlock::RenderContext {
 
 ScreenTextBlock::RenderContext::RenderContext(
     const ScreenTextBlock* screen_text_block,
-    const TextBlock* format_text_block, gfx::ColorF bgcolor)
-    : bgcolor_(bgcolor),  format_lines_(format_text_block->lines()),
+    const TextBlock* format_text_block)
+    : bgcolor_(format_text_block->default_style().bgcolor()),
+      format_lines_(format_text_block->lines()),
       gfx_(screen_text_block->gfx_), rect_(screen_text_block->rect_),
       screen_text_block_(screen_text_block),
       screen_lines_(screen_text_block->lines_) {
@@ -378,8 +378,8 @@ ScreenTextBlock::ScreenTextBlock()
 ScreenTextBlock::~ScreenTextBlock() {
 }
 
-void ScreenTextBlock::Render(const TextBlock* text_block, gfx::ColorF bgcolor) {
-  RenderContext render_context(this, text_block, bgcolor);
+void ScreenTextBlock::Render(const TextBlock* text_block) {
+  RenderContext render_context(this, text_block);
   dirty_ = render_context.Render();
   if (!dirty_)
     return;

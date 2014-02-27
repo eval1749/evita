@@ -33,7 +33,7 @@ class ScreenTextBlock : public gfx::Graphics::Observer {
 
   public: bool dirty() const { return dirty_; }
 
-  public: void Render(const TextBlock* text_block, gfx::ColorF bgcolor);
+  public: void Render(const TextBlock* text_block);
   public: void Reset();
   public: void SetGraphics(const gfx::Graphics* gfx);
   public: void SetRect(const gfx::RectF& rect);

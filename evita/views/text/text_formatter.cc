@@ -169,6 +169,8 @@ void TextFormatter::Format() {
     }
   }
 
+  auto& style = text_block_->text_buffer()->GetDefaultStyle();
+  text_block_->set_default_style(RenderStyle(style, nullptr));
   text_block_->Finish();
 }
 

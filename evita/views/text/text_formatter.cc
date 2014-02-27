@@ -47,6 +47,12 @@ RenderStyle GetRenderStyle(const gfx::Graphics& gfx,
   return RenderStyle(style, GetFont(gfx, style));
 }
 
+css::Style SelectionStyle(text::Buffer* buffer, const Selection& selection) {
+  return buffer->style_resolver()->ResolveWithoutDefaults(
+      selection.active ? css::StyleSelector::active_selection() :
+                         css::StyleSelector::inactive_selection());
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -61,10 +67,14 @@ class TextFormatter::EnumCI {
   private: text::Buffer* m_pBuffer;
   private: text::Interval* m_pInterval;
   private: char16 m_rgwch[80];
+  private: const Selection& selection_;
+  private: const css::Style selection_style_;
 
-  public: EnumCI(text::Buffer *pBuffer, Posn lPosn)
-      : m_pBuffer(pBuffer),
-        m_lPosn(lPosn) {
+  public: EnumCI(text::Buffer* buffer, Posn lPosn, const Selection& selection)
+      : m_pBuffer(buffer),
+        m_lPosn(lPosn),
+        selection_(selection),
+        selection_style_(SelectionStyle(buffer, selection)) {
     m_pInterval = m_pBuffer->GetIntervalAt(m_lPosn);
     DCHECK(m_pInterval);
     fill();
@@ -103,6 +113,9 @@ class TextFormatter::EnumCI {
     return m_pInterval->GetStyle();
   }
 
+  public: RenderStyle MakeRenderStyle(const css::Style& style,
+                                      Font* font) const;
+
   public: void Next() {
     if (AtEnd())
       return;
@@ -116,15 +129,19 @@ class TextFormatter::EnumCI {
         m_pInterval = pNext;
     }
   }
+
+  DISALLOW_COPY_AND_ASSIGN(EnumCI);
+
 };
 
-namespace {
-css::Style SelectionStyle(text::Buffer* buffer, const Selection& selection) {
-  return buffer->style_resolver()->ResolveWithoutDefaults(
-      selection.active ? css::StyleSelector::active_selection() :
-                         css::StyleSelector::inactive_selection());
+RenderStyle TextFormatter::EnumCI::MakeRenderStyle(
+    const css::Style& style, Font* font) const {
+  if (m_lPosn < selection_.start || m_lPosn >= selection_.end)
+    return RenderStyle(style, font);
+  css::Style style_with_selection(style);
+  style_with_selection.OverrideBy(selection_style_);
+  return RenderStyle(style_with_selection, font);
 }
-}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -135,10 +152,9 @@ TextFormatter::TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
                              const Selection& selection)
     : default_render_style_(GetRenderStyle(gfx, buffer->GetDefaultStyle())),
       default_style_(buffer->GetDefaultStyle()),
-      m_gfx(gfx), selection_(selection),
-      selection_style_(SelectionStyle(buffer, selection)),
+      m_gfx(gfx),
       text_block_(text_block),
-      m_oEnumCI(new EnumCI(buffer, lStart)) {
+      m_oEnumCI(new EnumCI(buffer, lStart, selection)) {
   DCHECK(!text_block_->rect().empty());
 }
 
@@ -253,10 +269,7 @@ TextLine* TextFormatter::FormatLine() {
 //
 Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
   auto const lPosn = m_oEnumCI->GetPosn();
-  auto style = m_oEnumCI->GetStyle();
-
-  if (lPosn >= selection_.start && lPosn < selection_.end)
-    style.OverrideBy(selection_style_);
+  auto& style = m_oEnumCI->GetStyle();
 
   if (0x09 == wch) {
     auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
@@ -268,8 +281,9 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
     if (pPrev && x2 + cxM > text_block_->right())
       return nullptr;
 
-    return new MarkerCell(RenderStyle(style, pFont), cx,
-        AlignHeightToPixel(m_gfx, pFont->height()), lPosn, TextMarker::Tab);
+    auto const height = AlignHeightToPixel(m_gfx, pFont->height());
+    return new MarkerCell(m_oEnumCI->MakeRenderStyle(style, pFont), cx, height,
+                          lPosn, TextMarker::Tab);
   }
 
   auto const pFont = wch < 0x20 ?
@@ -298,12 +312,12 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
       return nullptr;
 
     auto const height = AlignHeightToPixel(m_gfx, pFont->height());
-    return new UnicodeCell(RenderStyle(style, pFont), cxUni, height, lPosn,
-                           string);
+    return new UnicodeCell(m_oEnumCI->MakeRenderStyle(style, pFont), cxUni,
+                           height, lPosn, string);
   }
 
+  auto render_style = m_oEnumCI->MakeRenderStyle(style, pFont);
   auto const cx = AlignWidthToPixel(m_gfx, pFont->GetCharWidth(wch));
-  RenderStyle render_style(style, pFont);
   if (pPrev) {
     auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
     if (x + cx + cxM > text_block_->right()) {
@@ -322,19 +336,16 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
 }
 
 Cell* TextFormatter::formatMarker(TextMarker marker_name) {
-  auto const lPosn = m_oEnumCI->GetPosn();
   auto style = m_oEnumCI->GetStyle();
   style.OverrideBy(m_oEnumCI->style_resolver()->Resolve(
       css::StyleSelector::end_of_line_marker()));
 
-  if (lPosn >= selection_.start && lPosn < selection_.end)
-    style.OverrideBy(selection_style_);
-
   auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
   auto const width = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('x'));
   auto const height = AlignHeightToPixel(m_gfx, pFont->height());
-  return new MarkerCell(RenderStyle(style, pFont), width, height,
-                        m_oEnumCI->GetPosn(), marker_name);
+  return new MarkerCell(m_oEnumCI->MakeRenderStyle(style, pFont),
+                        width, height, m_oEnumCI->GetPosn(),
+                        marker_name);
 }
 
 } // namespace rendering

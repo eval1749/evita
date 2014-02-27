@@ -30,8 +30,6 @@ class TextFormatter {
   private: RenderStyle default_render_style_;
   private: css::Style default_style_;
   private: const gfx::Graphics& m_gfx;
-  private: const Selection& selection_;
-  private: const css::Style selection_style_;
   private: TextBlock* const text_block_;
   private: std::unique_ptr<EnumCI> m_oEnumCI;
 

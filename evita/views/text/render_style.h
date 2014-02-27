@@ -29,8 +29,8 @@ class RenderStyle {
   public: bool operator==(const RenderStyle& other) const;
   public: bool operator!=(const RenderStyle& other) const;
 
-  public: gfx::ColorF bgcolor() const { return bgcolor_; }
-  public: gfx::ColorF color() const { return color_; }
+  public: const gfx::ColorF& bgcolor() const { return bgcolor_; }
+  public: const gfx::ColorF& color() const { return color_; }
   public: Font* font() const { return font_; }
   public: css::TextDecoration text_decoration() const {
     return text_decoration_;

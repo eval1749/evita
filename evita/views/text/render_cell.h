@@ -45,6 +45,8 @@ class Cell : public common::Castable {
 
   protected: const RenderStyle& style() const { return style_; }
 
+  protected: void FillOverlay(const gfx::Graphics& gfx,
+                              const gfx::RectF& rect) const;
   protected: void FillBackground(const gfx::Graphics& gfx,
                                  const gfx::RectF& rect) const;
   public: float GetHeight() const { return m_cy; }

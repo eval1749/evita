@@ -10,6 +10,8 @@
 #include "evita/css/style_selector.h"
 #include "evita/css/style_sheet.h"
 
+#define USE_SELETION_OVERLAY 1
+
 namespace css {
 
 namespace {
@@ -48,14 +50,21 @@ StyleSheet* GetDefaultStyleSheet() {
 
   // We use Vista's highlight color.
   Style active_selection;
-  active_selection.set_color(Color(255, 255, 255));
-  active_selection.set_bgcolor(Color(51, 153, 255));
+  #if USE_SELETION_OVERLAY
+    active_selection.set_bgcolor(Color(51, 153, 255, 0.3f));
+  #else
+    active_selection.set_color(Color(255, 255, 255));
+    active_selection.set_bgcolor(Color(51, 153, 255));
+  #endif
   default_style_sheet.AddRule(StyleSelector::active_selection(),
                               active_selection);
-
   Style inactive_selection;
-  inactive_selection.set_color(Color(67, 78, 84));
-  inactive_selection.set_bgcolor(Color(191, 205, 219));
+  #if USE_SELETION_OVERLAY
+    inactive_selection.set_bgcolor(Color(191, 205, 219, 0.3f));
+  #else
+    inactive_selection.set_color(Color(67, 78, 84));
+    inactive_selection.set_bgcolor(Color(191, 205, 219));
+  #endif
   default_style_sheet.AddRule(StyleSelector::inactive_selection(),
                               inactive_selection);
 

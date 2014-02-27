@@ -69,6 +69,15 @@ void Cell::FillBackground(const gfx::Graphics& gfx,
            style_.bgcolor());
 }
 
+void Cell::FillOverlay(const gfx::Graphics& gfx,
+                       const gfx::RectF& rect) const {
+  if (style_.overlay_color().alpha() == 0.0f)
+    return;
+  FillRect(gfx, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
+                           ::ceilf(rect.bottom)),
+           style_.overlay_color());
+}
+
 // rendering::Cell
 bool Cell::Equal(const Cell* other) const {
   return other->class_name() == class_name() && other->m_cx == m_cx &&
@@ -244,6 +253,7 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
       break;
     }
   }
+  FillOverlay(gfx, rect);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -385,6 +395,7 @@ void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
       break;
   }
   #endif
+  FillOverlay(gfx, rect);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -418,6 +429,7 @@ void UnicodeCell::Render(const gfx::Graphics& gfx,
   gfx.DrawRectangle(text_brush,
                     gfx::RectF(rect.left, rect.top,
                                rect.right - 1, rect.bottom - 1));
+  FillOverlay(gfx, rect);
 }
 
 } // namespace rendering

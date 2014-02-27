@@ -138,9 +138,14 @@ RenderStyle TextFormatter::EnumCI::MakeRenderStyle(
     const css::Style& style, Font* font) const {
   if (m_lPosn < selection_.start || m_lPosn >= selection_.end)
     return RenderStyle(style, font);
-  css::Style style_with_selection(style);
-  style_with_selection.OverrideBy(selection_style_);
-  return RenderStyle(style_with_selection, font);
+  if (selection_style_.bgcolor().alpha() == 1.0f) {
+    css::Style style_with_selection(style);
+    style_with_selection.OverrideBy(selection_style_);
+    return RenderStyle(style_with_selection, font);
+  }
+  auto render_style = RenderStyle(style, font);
+  render_style.set_overlay_color(selection_style_.bgcolor());
+  return render_style;
 }
 
 //////////////////////////////////////////////////////////////////////

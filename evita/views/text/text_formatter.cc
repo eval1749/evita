@@ -118,6 +118,14 @@ class TextFormatter::EnumCI {
   }
 };
 
+namespace {
+css::Style SelectionStyle(text::Buffer* buffer, const Selection& selection) {
+  return buffer->style_resolver()->ResolveWithoutDefaults(
+      selection.active ? css::StyleSelector::active_selection() :
+                         css::StyleSelector::inactive_selection());
+}
+}  // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 // TextFormatter
@@ -127,8 +135,9 @@ TextFormatter::TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
                              const Selection& selection)
     : default_render_style_(GetRenderStyle(gfx, buffer->GetDefaultStyle())),
       default_style_(buffer->GetDefaultStyle()),
-      m_gfx(gfx),
-      selection_(selection), text_block_(text_block),
+      m_gfx(gfx), selection_(selection),
+      selection_style_(SelectionStyle(buffer, selection)),
+      text_block_(text_block),
       m_oEnumCI(new EnumCI(buffer, lStart)) {
   DCHECK(!text_block_->rect().empty());
 }
@@ -244,13 +253,8 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
   auto const lPosn = m_oEnumCI->GetPosn();
   auto style = m_oEnumCI->GetStyle();
 
-  if (lPosn >= selection_.start && lPosn < selection_.end) {
-    auto& selection_style = m_oEnumCI->style_resolver()->
-        ResolveWithoutDefaults(selection_.active ?
-            css::StyleSelector::active_selection() :
-            css::StyleSelector::inactive_selection());
-    style.OverrideBy(selection_style);
-  }
+  if (lPosn >= selection_.start && lPosn < selection_.end)
+    style.OverrideBy(selection_style_);
 
   if (0x09 == wch) {
     auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
@@ -321,13 +325,8 @@ Cell* TextFormatter::formatMarker(TextMarker marker_name) {
   style.OverrideBy(m_oEnumCI->style_resolver()->Resolve(
       css::StyleSelector::end_of_line_marker()));
 
-  if (lPosn >= selection_.start && lPosn < selection_.end) {
-    auto& selection_style = m_oEnumCI->style_resolver()->
-        ResolveWithoutDefaults(selection_.active ?
-            css::StyleSelector::active_selection() :
-            css::StyleSelector::inactive_selection());
-    style.OverrideBy(selection_style);
-  }
+  if (lPosn >= selection_.start && lPosn < selection_.end)
+    style.OverrideBy(selection_style_);
 
   auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
   auto const width = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('x'));

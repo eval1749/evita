@@ -18,6 +18,9 @@ ColorF::ColorF(const ColorF& other)
   : D2D1::ColorF(other.r, other.g, other.b, other.a) {
 }
 
+ColorF::ColorF() : ColorF(0.0f, 0.0f, 0.0f, 0.0f) {
+}
+
 ColorF::~ColorF() {
 }
 

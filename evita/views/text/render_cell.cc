@@ -335,16 +335,8 @@ Posn TextCell::MapXToPosn(const gfx::Graphics& gfx, float x) const {
 }
 
 bool TextCell::Merge(const RenderStyle& style, float width) {
-  if (this->style().font() != style.font())
+  if (this->style() != style)
     return false;
-  if (this->style().bgcolor() != style.bgcolor())
-    return false;
-  if (this->style().color() != style.color())
-    return false;
-  if (this->style().text_decoration() !=
-        style.text_decoration()) {
-    return false;
-  }
   m_cx += width;
   m_lEnd += 1;
   return true;

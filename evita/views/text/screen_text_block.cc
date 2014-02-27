@@ -260,6 +260,8 @@ bool ScreenTextBlock::RenderContext::Render() {
       DCHECK_GE(last_format_line->rect().bottom, rect_.bottom);
   }
 
+  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
+
   auto const dirty_line_start = FindFirstMismatch();
   if (dirty_line_start != format_lines_.end()) {
     auto const clean_line_start = FindLastMatch();
@@ -268,7 +270,6 @@ bool ScreenTextBlock::RenderContext::Render() {
         (clean_line_start == format_lines_.end() ? rect_.bottom :
             (*clean_line_start)->rect().top);
     #endif
-    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
     for (auto dirty_line_runner = dirty_line_start;
          dirty_line_runner != clean_line_start;
          ++dirty_line_runner) {

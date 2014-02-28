@@ -104,22 +104,6 @@ class Buffer : public BufferCore, public FileFeatures {
   public: Buffer(const base::string16& name, Mode* mode);
   public: virtual ~Buffer();
 
-  public: bool operator==(const Buffer& other) const {
-    return this == &other;
-  }
-
-  public: bool operator==(const Buffer* other) const {
-    return this == other;
-  }
-
-  public: bool operator!=(const Buffer& other) const {
-    return this != &other;
-  }
-
-  public: bool operator!=(const Buffer* other) const {
-    return this != other;
-  }
-
   public: const base::string16& name() const { return name_; }
   public: RangeSet* ranges() const { return ranges_.get(); }
 

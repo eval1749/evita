@@ -85,20 +85,4 @@ TEST_F(BufferTest, InsertBefore) {
     "The range at insertion position should be push back.";
 }
 
-TEST_F(BufferTest, OperatorEqual) {
-  std::unique_ptr<text::Buffer> other_buffer;
-  auto& buffer_ref = *buffer();
-  EXPECT_TRUE(buffer_ref == buffer());
-  EXPECT_TRUE(buffer_ref == buffer_ref);
-  EXPECT_FALSE(buffer_ref == *other_buffer);
-}
-
-TEST_F(BufferTest, OperatorNotEqual) {
-  std::unique_ptr<text::Buffer> other_buffer;
-  auto& buffer_ref = *buffer();
-  EXPECT_FALSE(buffer_ref != buffer());
-  EXPECT_FALSE(buffer_ref != buffer_ref);
-  EXPECT_TRUE(buffer_ref != *other_buffer);
-}
-
 }  // namespace

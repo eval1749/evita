@@ -57,10 +57,10 @@ css::Style SelectionStyle(text::Buffer* buffer, const Selection& selection) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// EnumCI
+// TextScanner
 //  Enumerator for characters and interval
 //
-class TextFormatter::EnumCI {
+class TextFormatter::TextScanner {
   private: Posn m_lBufEnd;
   private: Posn m_lBufStart;
   private: Posn m_lPosn;
@@ -70,7 +70,8 @@ class TextFormatter::EnumCI {
   private: const Selection& selection_;
   private: const css::Style selection_style_;
 
-  public: EnumCI(text::Buffer* buffer, Posn lPosn, const Selection& selection)
+  public: TextScanner(text::Buffer* buffer, Posn lPosn,
+                      const Selection& selection)
       : m_pBuffer(buffer),
         m_lPosn(lPosn),
         selection_(selection),
@@ -130,11 +131,11 @@ class TextFormatter::EnumCI {
     }
   }
 
-  DISALLOW_COPY_AND_ASSIGN(EnumCI);
+  DISALLOW_COPY_AND_ASSIGN(TextScanner);
 
 };
 
-RenderStyle TextFormatter::EnumCI::MakeRenderStyle(
+RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
     const css::Style& style, Font* font) const {
   if (m_lPosn < selection_.start || m_lPosn >= selection_.end)
     return RenderStyle(style, font);
@@ -159,7 +160,7 @@ TextFormatter::TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
       default_style_(buffer->GetDefaultStyle()),
       m_gfx(gfx),
       text_block_(text_block),
-      m_oEnumCI(new EnumCI(buffer, lStart, selection)) {
+      text_scanner_(new TextScanner(buffer, lStart, selection)) {
   DCHECK(!text_block_->rect().empty());
 }
 
@@ -199,7 +200,7 @@ void TextFormatter::Format() {
 TextLine* TextFormatter::FormatLine() {
   DCHECK(!text_block_->rect().empty());
   auto const pLine = new TextLine();
-  pLine->set_start(m_oEnumCI->GetPosn());
+  pLine->set_start(text_scanner_->GetPosn());
 
   auto x = text_block_->left();
   auto descent = 0.0f;
@@ -217,16 +218,16 @@ TextLine* TextFormatter::FormatLine() {
   }
 
   for (;;) {
-    if (m_oEnumCI->AtEnd()) {
+    if (text_scanner_->AtEnd()) {
       pCell = formatMarker(TextMarker::EndOfDocument);
       break;
     }
 
-    auto const wch = m_oEnumCI->GetChar();
+    auto const wch = text_scanner_->GetChar();
 
     if (wch == 0x0A) {
       pCell = formatMarker(TextMarker::EndOfLine);
-      m_oEnumCI->Next();
+      text_scanner_->Next();
       break;
     }
 
@@ -238,7 +239,7 @@ TextLine* TextFormatter::FormatLine() {
       break;
     }
 
-    m_oEnumCI->Next();
+    text_scanner_->Next();
 
     if (pLine->last_cell() == pCell) {
       x -= cx;
@@ -273,8 +274,8 @@ TextLine* TextFormatter::FormatLine() {
 // TextFormatter::formatChar
 //
 Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
-  auto const lPosn = m_oEnumCI->GetPosn();
-  auto& style = m_oEnumCI->GetStyle();
+  auto const lPosn = text_scanner_->GetPosn();
+  auto& style = text_scanner_->GetStyle();
 
   if (0x09 == wch) {
     auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
@@ -287,7 +288,7 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
       return nullptr;
 
     auto const height = AlignHeightToPixel(m_gfx, pFont->height());
-    return new MarkerCell(m_oEnumCI->MakeRenderStyle(style, pFont), cx, height,
+    return new MarkerCell(text_scanner_->MakeRenderStyle(style, pFont), cx, height,
                           lPosn, TextMarker::Tab);
   }
 
@@ -317,11 +318,11 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
       return nullptr;
 
     auto const height = AlignHeightToPixel(m_gfx, pFont->height());
-    return new UnicodeCell(m_oEnumCI->MakeRenderStyle(style, pFont), cxUni,
+    return new UnicodeCell(text_scanner_->MakeRenderStyle(style, pFont), cxUni,
                            height, lPosn, string);
   }
 
-  auto render_style = m_oEnumCI->MakeRenderStyle(style, pFont);
+  auto render_style = text_scanner_->MakeRenderStyle(style, pFont);
   auto const cx = AlignWidthToPixel(m_gfx, pFont->GetCharWidth(wch));
   if (pPrev) {
     auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
@@ -341,15 +342,15 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
 }
 
 Cell* TextFormatter::formatMarker(TextMarker marker_name) {
-  auto style = m_oEnumCI->GetStyle();
-  style.OverrideBy(m_oEnumCI->style_resolver()->Resolve(
+  auto style = text_scanner_->GetStyle();
+  style.OverrideBy(text_scanner_->style_resolver()->Resolve(
       css::StyleSelector::end_of_line_marker()));
 
   auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
   auto const width = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('x'));
   auto const height = AlignHeightToPixel(m_gfx, pFont->height());
-  return new MarkerCell(m_oEnumCI->MakeRenderStyle(style, pFont),
-                        width, height, m_oEnumCI->GetPosn(),
+  return new MarkerCell(text_scanner_->MakeRenderStyle(style, pFont),
+                        width, height, text_scanner_->GetPosn(),
                         marker_name);
 }
 

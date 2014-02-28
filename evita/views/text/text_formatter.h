@@ -25,13 +25,13 @@ class TextLine;
 enum class TextMarker;
 
 class TextFormatter {
-  private: class EnumCI;
+  private: class TextScanner;
 
   private: RenderStyle default_render_style_;
   private: css::Style default_style_;
   private: const gfx::Graphics& m_gfx;
   private: TextBlock* const text_block_;
-  private: std::unique_ptr<EnumCI> m_oEnumCI;
+  private: std::unique_ptr<TextScanner> text_scanner_;
 
   public: TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
                         text::Buffer* buffer, Posn start,

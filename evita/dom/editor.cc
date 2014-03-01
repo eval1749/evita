@@ -77,23 +77,25 @@ class EditorClass : public v8_glue::WrapperInfo {
       result->Set(gin::StringToV8(isolate, "exception"),
           try_catch.Exception());
       auto const message = try_catch.Message();
-      result->Set(gin::StringToV8(isolate, "stackTrace"),
-          message->GetStackTrace().IsEmpty() ? v8::Array::New(isolate, 0) :
-            message->GetStackTrace()->AsArray());
-      result->Set(gin::StringToV8(isolate, "stackTraceString"),
-          try_catch.StackTrace().IsEmpty() ?
-              gin::ConvertToV8(isolate, base::string16()) :
-              try_catch.StackTrace());
-      result->Set(gin::StringToV8(isolate, "lineNumber"),
-          gin::ConvertToV8(isolate, message->GetLineNumber()));
-      result->Set(gin::StringToV8(isolate, "start"),
-          gin::ConvertToV8(isolate, message->GetStartPosition()));
-      result->Set(gin::StringToV8(isolate, "end"),
-          gin::ConvertToV8(isolate, message->GetEndPosition()));
-      result->Set(gin::StringToV8(isolate, "startColumn"),
-          gin::ConvertToV8(isolate, message->GetStartColumn()));
-      result->Set(gin::StringToV8(isolate, "endColumn"),
-          gin::ConvertToV8(isolate, message->GetEndColumn()));
+      if (!message.IsEmpty()) {
+        result->Set(gin::StringToV8(isolate, "stackTrace"),
+            message->GetStackTrace().IsEmpty() ? v8::Array::New(isolate, 0) :
+              message->GetStackTrace()->AsArray());
+        result->Set(gin::StringToV8(isolate, "stackTraceString"),
+            try_catch.StackTrace().IsEmpty() ?
+                gin::ConvertToV8(isolate, base::string16()) :
+                try_catch.StackTrace());
+        result->Set(gin::StringToV8(isolate, "lineNumber"),
+            gin::ConvertToV8(isolate, message->GetLineNumber()));
+        result->Set(gin::StringToV8(isolate, "start"),
+            gin::ConvertToV8(isolate, message->GetStartPosition()));
+        result->Set(gin::StringToV8(isolate, "end"),
+            gin::ConvertToV8(isolate, message->GetEndPosition()));
+        result->Set(gin::StringToV8(isolate, "startColumn"),
+            gin::ConvertToV8(isolate, message->GetStartColumn()));
+        result->Set(gin::StringToV8(isolate, "endColumn"),
+            gin::ConvertToV8(isolate, message->GetEndColumn()));
+      }
     } else {
       result->Set(gin::StringToV8(isolate, "value"), run_value);
     }

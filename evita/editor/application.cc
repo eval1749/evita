@@ -32,12 +32,9 @@
 #define APP_VERSION L"5.0"
 
 
-UINT g_nDropTargetMsg;
-
 HINSTANCE g_hInstance;
 HINSTANCE g_hResource;
 HWND g_hwndActiveDialog;
-UINT g_TabBand__TabDragMsg;
 
 namespace {
 class MessagePump : public base::MessagePumpForUI {

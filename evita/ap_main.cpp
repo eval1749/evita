@@ -20,7 +20,6 @@
 #include "base/logging.h"
 #include "evita/editor/application.h"
 #include "evita/io/io_manager.h"
-#include "evita/views/tab_strip.h"
 
 #define SINGLE_INSTANCE_NAME L"D47A7677-9F8E-467c-BABE-8ABDE8D58476" 
 
@@ -135,8 +134,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
           return 1;
       }
   }
-
-    g_TabBand__TabDragMsg = ::RegisterWindowMessage(TabBand__TabDragMsgStr);
 
   return MainLoop();
 }

@@ -52,7 +52,6 @@
 #include "evita/vi_Style.h"
 #include "evita/vi_TextEditWindow.h"
 
-extern uint g_nDropTargetMsg;
 extern HINSTANCE g_hInstance;
 extern HINSTANCE g_hResource;
 
@@ -626,18 +625,6 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       }
       return 0;
     }
-
-    default:
-      if (uMsg == g_TabBand__TabDragMsg) {
-        return onTabDrag(
-            static_cast<TabBandDragAndDrop>(wParam),
-            reinterpret_cast<HWND>(lParam));
-      }
-
-      // Handle a message from BufferListPane.
-      if (g_nDropTargetMsg && g_nDropTargetMsg == uMsg)
-        return reinterpret_cast<LRESULT>(GetActivePane());
-      break;
   }
 
   return Widget::OnMessage(uMsg, wParam, lParam);
@@ -663,60 +650,6 @@ void Frame::OnPaint(const gfx::Rect rect) {
                       rect);
   gfx_->DrawRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
                       rect, 2.0f);
-}
-
-bool Frame::onTabDrag(TabBandDragAndDrop const eAction,
-                      HWND const hwndTabBand) {
-  auto const pFrom = views::FrameList::instance()->FindFrameByHwnd(
-      ::GetParent(hwndTabBand));
-
-  if (!pFrom) {
-    // We should not be here.
-    return false;
-  }
-
-  auto const pPane = pFrom->GetActivePane();
-  if (!pPane) {
-    // Why is pPane nullptr?
-    return false;
-  }
-
-  auto source_window_id = pPane->window_id();
-  if (source_window_id == views::kInvalidWindowId) {
-    auto const edit_pane = pPane->as<EditPane>();
-    if (!edit_pane)
-      return false;
-    auto const active_window = edit_pane->GetActiveWindow();
-    if (!active_window)
-      return false;
-    source_window_id = active_window->window_id();
-    if (source_window_id == views::kInvalidWindowId)
-      return false;
-  }
-
-  switch (eAction) {
-    case kDrop:
-      if (this == pFrom)
-        break;
-      Application::instance()->view_event_handler()->DidDropWidget(
-          source_window_id,
-          window_id());
-      break;
-
-    case kHover:
-      break;
-
-    case kThrow:
-      Application::instance()->view_event_handler()->DidDropWidget(
-          source_window_id,
-          views::kInvalidWindowId);
-      break;
-
-    default:
-      CAN_NOT_HAPPEN();
-  }
-
-  return true;
 }
 
 /// <summary>
@@ -885,4 +818,26 @@ void Frame::DidClickTabCloseButton(int tab_index) {
     pane->DestroyWidget();
 
   LOG(ERROR) << "There is no tab[" << tab_index << "]";
+}
+
+void Frame::DidThrowTab(LPARAM lParam) {
+  auto const pane = reinterpret_cast<Pane*>(lParam);
+  auto const edit_pane = pane->as<EditPane>();
+  if (!edit_pane)
+    return;
+  Application::instance()->view_event_handler()->DidDropWidget(
+      edit_pane->GetActiveWindow()->window_id(),
+      views::kInvalidWindowId);
+}
+
+void Frame::OnDropTab(LPARAM lParam) {
+  auto const pane = reinterpret_cast<Pane*>(lParam);
+  if (pane->parent_node() == this)
+    return;
+  auto const edit_pane = pane->as<EditPane>();
+  if (!edit_pane)
+    return;
+  Application::instance()->view_event_handler()->DidDropWidget(
+      edit_pane->GetActiveWindow()->window_id(),
+      window_id());
 }

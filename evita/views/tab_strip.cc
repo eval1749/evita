@@ -16,7 +16,9 @@
 #include "evita/gfx_base.h"
 #include "evita/li_util.h"
 #include "evita/ui/events/event.h"
+#include "evita/views/frame_list.h"
 #include "evita/views/tab_strip_delegate.h"
+#include "evita/vi_Frame.h"
 
 namespace {
 
@@ -505,64 +507,8 @@ class ListButton : public Element {
   }
 }; // ListButton
 
-//////////////////////////////////////////////////////////////////////
-//
 // Cursor for Tab Drag
-//
-static HCURSOR s_hDragTabCursor;
-
-// Window Message for Tab Dragging.
-static uint s_nTagDragMsg;
-
-// Send TabDragMsg to window which can handle it.
-static HWND handleTabDragAndDrop(
-    HWND const hwndTabStripImpl,
-    POINT const ptClient,
-    TabBandDragAndDrop const eAction) {
-  auto ptScreen = ptClient;
-  if (!::ClientToScreen(hwndTabStripImpl, &ptScreen)) {
-    return nullptr;
-  }
-
-  auto hwnd = ::WindowFromPoint(ptScreen);
-  if (!hwnd) {
-    return nullptr;
-  }
-
-  if (s_nTagDragMsg == 0) {
-    s_nTagDragMsg = ::RegisterWindowMessage(TabBand__TabDragMsgStr);
-    if (s_nTagDragMsg == 0) {
-      DVLOG(0) << "Failed RegisterWindowMessage " << TabBand__TabDragMsgStr;
-      return nullptr;
-    }
-  }
-
-  do {
-    auto const iAnswer = ::SendMessage(
-      hwnd,
-      s_nTagDragMsg,
-      eAction,
-      reinterpret_cast<LPARAM>(hwndTabStripImpl));
-
-    if (iAnswer) {
-      return hwnd;
-    }
-
-    hwnd = ::GetParent(hwnd);
-  } while (hwnd);
-
-  if (eAction == kDrop) {
-    auto const hwnd = ::GetParent(hwndTabStripImpl);
-    auto const iAnswer = ::SendMessage(
-        hwnd,
-        s_nTagDragMsg,
-        kThrow,
-        reinterpret_cast<LPARAM>(hwndTabStripImpl));
-    return iAnswer ? hwnd : nullptr;
-  }
-
-  return nullptr;
-}
+HCURSOR s_hDragTabCursor;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -1047,6 +993,8 @@ class TabStrip::TabStripImpl : public Element {
     }
   }
 
+  private: void DropTab(Item* item, const POINT& point);
+
   private: void InsertTab(int iItem, const TCITEM* pTcItem) {
     auto const pNewItem = new Item(this, iItem, pTcItem);
     if (!pNewItem) {
@@ -1160,7 +1108,7 @@ class TabStrip::TabStripImpl : public Element {
       stopDrag();
 
       if (!pInsertBefore) {
-        handleTabDragAndDrop(m_hwnd, pt, kDrop);
+        DropTab(pDragItem, pt);
 
       } else {
         if (pDragItem != pInsertBefore) {
@@ -1302,17 +1250,7 @@ class TabStrip::TabStripImpl : public Element {
         nullptr :
         pHover->DynamicCast<Item>();
 
-      auto hCursor = s_hDragTabCursor;
-
-      if (!pInsertBefore) {
-        #if 0
-        if (handleTabDragAndDrop(m_hwnd, pt, kHover) == nullptr) {
-          hCursor = ::LoadCursor(nullptr, MAKEINTRESOURCE(IDC_NO));
-        }
-        #endif
-      }
-
-      ::SetCursor(hCursor);
+      ::SetCursor(s_hDragTabCursor);
 
       if (pInsertBefore != m_pInsertBefore) {
         ::InvalidateRect(m_hwnd, nullptr, false);
@@ -1464,6 +1402,23 @@ void TabStrip::TabStripImpl::DidCreateNativeWindow() {
         0,
         reinterpret_cast<LPARAM>(&ti));
   }
+}
+
+// Send TabDragMsg to window which can handle it.
+void TabStrip::TabStripImpl::DropTab(Item* item, const POINT& ptClient) {
+  auto ptScreen = ptClient;
+  if (!::ClientToScreen(m_hwnd, &ptScreen))
+    return;
+
+  for (auto hwnd = ::WindowFromPoint(ptScreen); hwnd;
+       hwnd = ::GetParent(hwnd)) {
+    if (auto const frame = FrameList::instance()->FindFrameByHwnd(hwnd)) {
+      static_cast<TabStripDelegate*>(frame)->OnDropTab(item->m_lParam);
+      return;
+    }
+  }
+
+  delegate_->DidThrowTab(item->m_lParam);
 }
 
 bool TabStrip::TabStripImpl::GetTab(int tab_index, TCITEM* pTcItem) const {

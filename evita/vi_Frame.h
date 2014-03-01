@@ -125,7 +125,6 @@ private: virtual void DidResize() override;
   public: virtual bool OnIdle(uint) override;
   private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;
-  private: bool onTabDrag(TabBandDragAndDrop, HWND);
 
   // [R]
   public: void Realize();
@@ -148,6 +147,8 @@ private: virtual void DidResize() override;
   // views::TabStripDelegate
   private: virtual void DidClickTabCloseButton(int tab_index) override;
   private: virtual void DidChangeTabSelection(int new_selected_index) override;
+  private: virtual void DidThrowTab(LPARAM lParam);
+  private: virtual void OnDropTab(LPARAM lParam);
 
   DISALLOW_COPY_AND_ASSIGN(Frame);
 };

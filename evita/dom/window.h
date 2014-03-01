@@ -63,8 +63,8 @@ class Window : public v8_glue::Scriptable<Window, EventTarget>,
   public: void Destroy();
   public: virtual void DidDestroyWindow();
   public: virtual void DidRealizeWindow();
+  public: void DidRequestFocus();
   public: void DidResize(int left, int top, int right, int bottom);
-  public: void DidSetFocus();
   public: void Focus();
   public: static Window* FromWindowId(WindowId window_id);
   public: bool IsDescendantOf(Window* other) const;

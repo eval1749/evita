@@ -378,17 +378,17 @@ void Frame::DidResize() {
   }
 }
 
-void Frame::DidSetFocus() {
+void Frame::DidRequestFocus() {
   if (!m_pActivePane) {
     m_pActivePane = m_oPanes.GetFirst();
     if (!m_pActivePane)
       return;
   }
-  m_pActivePane->SetFocus();
+  m_pActivePane->RequestFocus();
   FOR_EACH_OBSERVER(views::FrameObserver, observers_, DidActiveFrame(this));
 }
 
-void Frame::DidSetFocusOnChild(views::Window* window) {
+void Frame::DidRequestFocusOnChild(views::Window* window) {
   auto const pane = GetContainingPane(this, window);
   if (!pane) {
     DVLOG(0) << "Frame::DidSetFolcusOnChild: No pane contains " << window;

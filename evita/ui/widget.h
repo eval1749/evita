@@ -89,8 +89,8 @@ class Widget
   protected: virtual void DidRealize();
   protected: virtual void DidRealizeChildWidget(const Widget& widget);
   protected: virtual void DidRemoveChildWidget(const Widget& widget);
+  protected: virtual void DidRequestFocus();
   protected: virtual void DidResize();
-  protected: virtual void DidSetFocus();
   protected: virtual void DidShow();
   private: void DispatchPaintMessage();
 
@@ -127,6 +127,7 @@ class Widget
   // TODO(yosi) Widget::RealizeWidget() should be pure virtual.
   public: virtual void RealizeWidget();
   public: void ReleaseCapture();
+  public: virtual void RequestFocus();
   public: void ResizeTo(const Rect& rect);
 
   // [S]
@@ -134,7 +135,6 @@ class Widget
   protected: void SchedulePaintInRect(const Rect& rect);
   public: void SetCapture();
   private: bool SetCursor();
-  public: virtual void SetFocus();
   public: void SetParentWidget(Widget* new_parent);
   public: virtual void Show();
 

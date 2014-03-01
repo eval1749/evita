@@ -191,7 +191,7 @@ void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {
     DVLOG(0) << "FocusWindow: no such widget " << window_id;
     return;
   }
-  widget->SetFocus();
+  widget->RequestFocus();
 }
 
 void ViewDelegateImpl::GetFilenameForLoad(

@@ -34,7 +34,7 @@ void ContentWindow::Activate() {
   #if DEBUG_FOCUS
     DEBUG_WIDGET_PRINTF("focus=%d show=%d\n", has_focus(), is_shown());
   #endif
-  SetFocus();
+  RequestFocus();
 }
 
 }  // namespace views

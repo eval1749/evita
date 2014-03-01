@@ -164,11 +164,11 @@ void EventHandler::DidResizeWidget(WindowId window_id, int left, int top,
   window->DidResize(left, top, right, bottom);
 }
 
-void EventHandler::DidSetFocus(WindowId window_id) {
+void EventHandler::DidRequestFocus(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)
     return;
-  window->DidSetFocus();
+  window->DidRequestFocus();
   DispatchEvent(window, new FocusEvent(L"focus", FocusEventInit()));
 }
 

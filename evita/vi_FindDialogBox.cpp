@@ -107,7 +107,7 @@ INT_PTR FindDialogBox::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
       auto const wp = reinterpret_cast<WINDOWPOS*>(lParam);
       if (wp->flags & SWP_HIDEWINDOW) {
         views::FrameList::instance()->active_frame()->GetActivePane()->
-            SetFocus();
+            RequestFocus();
         return TRUE;
       }
       break;

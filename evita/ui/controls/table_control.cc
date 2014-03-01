@@ -166,7 +166,7 @@ class TableControl::TableControlModel {
   public: void DidKillFocus();
   public: void DidRemoveRow(int row_id);
   public: void DidResize(const gfx::RectF& rect);
-  public: void DidSetFocus();
+  public: void DidRequestFocus();
   public: void Draw(gfx::Graphics* gfx) const;
   private: void DrawHeaderRow(gfx::Graphics* gfx, gfx::PointF left_top) const;
   private: void DrawRow(gfx::Graphics* gfx, const Row* row) const;
@@ -262,7 +262,7 @@ void TableControl::TableControlModel::DidResize(const gfx::RectF& rect) {
   rect_ = rect;
 }
 
-void TableControl::TableControlModel::DidSetFocus() {
+void TableControl::TableControlModel::DidRequestFocus() {
   has_focus_ = true;
   if (selection_.empty() && rows_.size()) {
     selection_.CollapseTo(0);
@@ -529,13 +529,13 @@ void TableControl::DidKillFocus() {
   UpdateViewIfNeeded();
 }
 
-void TableControl::DidResize() {
-  model_->DidResize(gfx::RectF(rect()));
+void TableControl::DidRequestFocus() {
+  model_->DidRequestFocus();
   UpdateViewIfNeeded();
 }
 
-void TableControl::DidSetFocus() {
-  model_->DidSetFocus();
+void TableControl::DidResize() {
+  model_->DidResize(gfx::RectF(rect()));
   UpdateViewIfNeeded();
 }
 

@@ -19,7 +19,7 @@ class CommandWindow : public views::Window {
   protected: virtual ~CommandWindow();
 
   // ui::Widget
-  protected: void virtual DidSetFocus() override;
+  protected: void virtual DidRequestFocus() override;
 
   DISALLOW_COPY_AND_ASSIGN(CommandWindow);
 };

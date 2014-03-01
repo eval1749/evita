@@ -29,7 +29,7 @@ class EventHandler : public ViewEventHandler {
   private: virtual void DidRealizeWidget(WindowId window_id) override;
   private: virtual void DidResizeWidget(WindowId window_id, int left, int top,
                                        int right, int bottom) override;
-  private: virtual void DidSetFocus(WindowId window_id) override;
+  private: virtual void DidRequestFocus(WindowId window_id) override;
   private: virtual void DidStartHost() override;
   private: virtual void DispatchFormEvent(const ApiFormEvent& event) override;
   private: virtual void DispatchKeyboardEvent(

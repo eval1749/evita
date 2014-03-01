@@ -231,11 +231,11 @@ void TextEditWindow::DidRealize() {
   text_renderer_->SetGraphics(m_gfx);
 }
 
-void TextEditWindow::DidSetFocus() {
+void TextEditWindow::DidRequestFocus() {
   ASSERT(has_focus());
   // Note: It is OK to set focus to hidden window.
   caret_->Take(*m_gfx);
-  ParentClass::DidSetFocus();
+  ParentClass::DidRequestFocus();
 }
 
 void TextEditWindow::DidShow() {

@@ -163,10 +163,10 @@ void Widget::DidRealizeChildWidget(const Widget&) {
 void Widget::DidRemoveChildWidget(const Widget&) {
 }
 
-void Widget::DidResize() {
+void Widget::DidRequestFocus() {
 }
 
-void Widget::DidSetFocus() {
+void Widget::DidResize() {
 }
 
 void Widget::DidShow() {
@@ -387,6 +387,28 @@ void Widget::ReleaseCapture() {
   ::ReleaseCapture();
 }
 
+void Widget::RequestFocus() {
+  DCHECK(!will_focus_widget);
+  #if DEBUG_FOCUS
+    DVLOG_WIDGET(0) << " focus_hwnd=" << ::GetFocus() <<
+        " focus=" << focus_widget;
+  #endif
+  // This wieget might be hidden during creating window.
+  auto& host = GetHostWidget();
+  if (::GetFocus() == *host.native_window()) {
+    if (focus_widget == this)
+      return;
+    auto const last_focus_widget = focus_widget;
+    focus_widget = this;
+    if (last_focus_widget)
+      last_focus_widget->DidKillFocus();
+    focus_widget->DidRequestFocus();
+    return;
+  }
+  will_focus_widget = this;
+  ::SetFocus(*host.native_window());
+}
+
 void Widget::ResizeTo(const Rect& rect) {
   DCHECK(state_ >= kNotRealized);
 
@@ -439,28 +461,6 @@ bool Widget::SetCursor() {
     return false;
   ::SetCursor(hCursor);
   return true;
-}
-
-void Widget::SetFocus() {
-  DCHECK(!will_focus_widget);
-  #if DEBUG_FOCUS
-    DVLOG_WIDGET(0) << " focus_hwnd=" << ::GetFocus() <<
-        " focus=" << focus_widget;
-  #endif
-  // This wieget might be hidden during creating window.
-  auto& host = GetHostWidget();
-  if (::GetFocus() == *host.native_window()) {
-    if (focus_widget == this)
-      return;
-    auto const last_focus_widget = focus_widget;
-    focus_widget = this;
-    if (last_focus_widget)
-      last_focus_widget->DidKillFocus();
-    focus_widget->DidSetFocus();
-    return;
-  }
-  will_focus_widget = this;
-  ::SetFocus(*host.native_window());
 }
 
 void Widget::SetParentWidget(Widget* new_parent) {
@@ -597,7 +597,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       #endif
       focus_widget = will_focus_widget ? will_focus_widget : this;
       will_focus_widget = nullptr;
-      focus_widget->DidSetFocus();
+      focus_widget->DidRequestFocus();
       return 0;
 
     case WM_WINDOWPOSCHANGED: {

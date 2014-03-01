@@ -255,15 +255,15 @@ void TableView::DidRealize() {
   Redraw();
 }
 
+void TableView::DidRequestFocus() {
+  Redraw();
+  ContentWindow::DidRequestFocus();
+  control_->RequestFocus();
+}
+
 void TableView::DidResize() {
   ContentWindow::DidResize();
   control_->ResizeTo(rect());
-}
-
-void TableView::DidSetFocus() {
-  Redraw();
-  ContentWindow::DidSetFocus();
-  control_->SetFocus();
 }
 
 bool TableView::OnIdle(uint32) {

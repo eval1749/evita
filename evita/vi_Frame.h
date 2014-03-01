@@ -95,9 +95,9 @@ class Frame final : public views::Window,
   private: virtual void DidDestroyWidget() override;
   private: virtual void DidRemoveChildWidget(
       const Widget& widget) override;
-  private: virtual void DidResize() override;
-  private: virtual void DidSetFocus() override;
-  public: void DidSetFocusOnChild(views::Window* window);
+private: virtual void DidRequestFocus() override;
+public: void DidRequestFocusOnChild(views::Window* window);
+private: virtual void DidResize() override;
 
   // [G]
   public: Pane* GetActivePane();

@@ -79,8 +79,8 @@ class TableView
 
   // ui::Widget
   private: virtual void DidRealize() override;
+  private: virtual void DidRequestFocus() override;
   private: virtual void DidResize() override;
-  private: virtual void DidSetFocus() override;
   private: virtual bool OnIdle(uint32 idle_count) override;
   private: virtual void Show() override;
 

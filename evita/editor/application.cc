@@ -147,7 +147,9 @@ void Application::Run() {
 
 // TryDoIdle() returns true if more works are needed.
 bool Application::TryDoIdle() {
-  UI_DOM_AUTO_LOCK_SCOPE();
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  if (!lock_scope.locked())
+    return true;
   if (!OnIdle(static_cast<uint>(idle_count_)))
     return false;
   auto const status = ::GetQueueStatus(QS_ALLEVENTS);

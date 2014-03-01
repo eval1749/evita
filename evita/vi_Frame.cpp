@@ -525,6 +525,12 @@ void Frame::onDropFiles(HDROP const hDrop) {
 ///   Idle processing
 /// </summary>
 bool Frame::OnIdle(uint const nCount) {
+  UI_ASSERT_DOM_LOCKED();
+  if (!pending_update_rect_.empty()) {
+    gfx::Rect rect;
+    std::swap(pending_update_rect_, rect);
+    SchedulePaintInRect(rect);
+  }
   auto const more = Widget::OnIdle(nCount);
   if (nCount || !m_pActivePane)
     return more;
@@ -650,8 +656,15 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
 
 void Frame::OnPaint(const gfx::Rect rect) {
   if (!editor::DomLock::instance()->locked()) {
-    UI_DOM_AUTO_LOCK_SCOPE();
-    OnPaint(rect);
+    UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+    if (lock_scope.locked()) {
+      OnPaint(rect);
+    } else {
+      // TODO(yosi) Should we have list of dirty rectangles rather than
+      // bounding dirty rectangles?
+      DVLOG(0) << "Pending paint " << rect;
+      pending_update_rect_.Unite(rect);
+    }
     return;
   }
 

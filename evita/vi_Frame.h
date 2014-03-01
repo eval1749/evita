@@ -62,6 +62,7 @@ class Frame final : public views::Window,
   private: Panes m_oPanes;
   private: std::unique_ptr<views::MessageView> message_view_;
   private: ObserverList<views::FrameObserver> observers_;
+  private: gfx::Rect pending_update_rect_;
   private: views::TabStrip* tab_strip_;
   private: std::unique_ptr<views::TitleBar> title_bar_;
   private: base::string16 tooltip_;

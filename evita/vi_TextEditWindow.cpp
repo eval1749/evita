@@ -33,7 +33,6 @@
 #include "evita/dom/selection.h"
 #include "evita/dom/text_window.h"
 #include "evita/text/range.h"
-#include "evita/ui/events/event.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/text/render_selection.h"
@@ -415,11 +414,6 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
     #endif // SUPPORT_IME
   }
   return ParentClass::OnMessage(uMsg, wParam, lParam);
-}
-
-void TextEditWindow::OnMouseWheel(const ui::MouseWheelEvent& event) {
-  UI_DOM_AUTO_LOCK_SCOPE();
-  SmallScroll(0, event.delta() > 0 ? -2 : 2);
 }
 
 void TextEditWindow::onVScroll(uint nCode) {

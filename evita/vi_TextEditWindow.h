@@ -145,8 +145,6 @@ class TextEditWindow
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
   private: virtual bool OnIdle(uint) override;
   private: virtual LRESULT OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam);
-  private: virtual void OnMouseWheel(
-      const ui::MouseWheelEvent& event) override;
   private: void onVScroll(uint);
 
   // [R]

@@ -251,6 +251,14 @@ global.TextWindow.prototype.clone = function() {
     stopControllers(window);
   }
 
+  /**
+   * @param {!TextWindow} window
+   * @param {!WheelEvent} event
+   */
+  function handleWheel(window, event) {
+    window.scroll(event.deltaY > 0 ? -2 : 2);
+  }
+
   /** @param {!TextWindow} window */
   function selectWord(window) {
     var selection = window.selection;
@@ -311,6 +319,9 @@ global.TextWindow.prototype.clone = function() {
         break;
       case Event.Names.MOUSEUP:
         handleMouseUp(this, /** @type {!MouseEvent} */(event));
+        break;
+      case Event.Names.WHEEL:
+        handleWheel(this, /** @type {!WheelEvent} */(event));
         break;
       default:
         Window.handleEvent(event);

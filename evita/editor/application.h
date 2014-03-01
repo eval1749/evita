@@ -70,10 +70,6 @@ class Application : public common::Singleton<Application> {
   // [O]
   public: bool OnIdle(uint hint);
 
-  // [P]
-  public: void PostDomTask(const tracked_objects::Location& from_here,
-                           const base::Closure& task);
-
   // [Q]
   public: void Quit();
 

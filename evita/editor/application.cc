@@ -129,16 +129,6 @@ void Application::Quit() {
   message_loop_->QuitWhenIdle();
 }
 
-static void RunTaskWithinDomLock(const base::Closure& task) {
-  UI_DOM_AUTO_LOCK_SCOPE();
-  task.Run();
-}
-
-void Application::PostDomTask(const tracked_objects::Location& from_here,
-                              const base::Closure& task) {
-  message_loop_->PostTask(from_here, base::Bind(RunTaskWithinDomLock, task));
-}
-
 void Application::Run() {
   DoIdle();
   base::RunLoop run_loop;

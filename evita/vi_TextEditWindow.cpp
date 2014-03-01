@@ -205,15 +205,12 @@ void TextEditWindow::DidChangeHierarchy() {
   m_gfx = &frame().gfx();
   text_renderer_->SetGraphics(m_gfx);
   auto const parent_hwnd = AssociatedHwnd();
-  if (auto const hwnd = m_oHoriScrollBar.GetHwnd())
-    ::SetParent(hwnd, parent_hwnd);
   if (auto const hwnd = m_oVertScrollBar.GetHwnd())
     ::SetParent(hwnd, parent_hwnd);
 }
 
 void TextEditWindow::DidHide() {
   // Note: It is OK that hidden window have focus.
-  m_oHoriScrollBar.ShowWindow(SW_HIDE);
   m_oVertScrollBar.ShowWindow(SW_HIDE);
 }
 
@@ -238,7 +235,6 @@ void TextEditWindow::DidRequestFocus() {
 }
 
 void TextEditWindow::DidShow() {
-  m_oHoriScrollBar.ShowWindow(SW_SHOW);
   m_oVertScrollBar.ShowWindow(SW_SHOW);
 }
 

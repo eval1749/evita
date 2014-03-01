@@ -320,15 +320,6 @@ bool Buffer::Load(const base::string16& file_name,
   return true;
 }
 
-namespace {
-void DummyCallback(const domapi::LoadFileCallbackData&) {
-}
-}
-
-bool Buffer::Load(const base::string16& file_name) {
-  return Load(file_name, base::Bind(DummyCallback));
-}
-
 bool Buffer::Save(const base::string16& filename, int const nCodePage,
     NewlineMode const eNewline,
     const dom::ViewDelegate::SaveFileCallback& callback) {

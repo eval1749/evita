@@ -56,6 +56,8 @@ class Window : public ui::Widget {
   protected: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
   protected: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   protected: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
+  protected: virtual void OnMouseWheel(
+      const ui::MouseWheelEvent& event) override;
   protected: virtual void WillDestroyWidget() override;
 
   DISALLOW_COPY_AND_ASSIGN(Window);

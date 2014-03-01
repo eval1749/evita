@@ -220,6 +220,25 @@ void Window::OnMouseReleased(const ui::MouseEvent& event) {
   DispatchMouseEvent(event);
 }
 
+void Window::OnMouseWheel(const ui::MouseWheelEvent& event) {
+  domapi::WheelEvent api_event;
+  api_event.alt_key = event.alt_key();
+  api_event.button = static_cast<domapi::MouseButton>(event.button());
+  api_event.buttons = event.buttons();
+  api_event.client_x = event.location().x;
+  api_event.client_y = event.location().y;
+  api_event.control_key = event.control_key();
+  api_event.event_type = ConvertEventType(event);
+  api_event.shift_key = event.shift_key();
+  api_event.target_id = window_id();
+  api_event.delta_mode = 0;
+  api_event.delta_x = 0.0;
+  api_event.delta_y = event.delta();
+  api_event.delta_z = 0.0;
+  Application::instance()->view_event_handler()->DispatchWheelEvent(
+      api_event);
+}
+
 void Window::DidRealize() {
   // TODO(yosi) Until we manage all widgets by WindowId, we don't call
   // ViewEventHandler for unmanaged widget.

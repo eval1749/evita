@@ -14,6 +14,7 @@
 namespace domapi {
 struct KeyboardEvent;
 struct MouseEvent;
+struct WheelEvent;
 };
 
 namespace text {
@@ -47,6 +48,8 @@ class ViewEventHandler {
   public: virtual void DispatchKeyboardEvent(
       const domapi::KeyboardEvent& event) = 0;
   public: virtual void DispatchMouseEvent(const domapi::MouseEvent& event) = 0;
+  public: virtual void DispatchWheelEvent(
+      const domapi::WheelEvent& event) = 0;
   public: virtual void OpenFile(WindowId window_id,
                                 const base::string16& filename) = 0;
   public: virtual void QueryClose(WindowId window_id) = 0;

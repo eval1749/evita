@@ -36,6 +36,8 @@ class EventHandler : public ViewEventHandler {
       const domapi::KeyboardEvent& event) override;
   private: virtual void DispatchMouseEvent(
       const domapi::MouseEvent& event) override;
+  private: virtual void DispatchWheelEvent(
+      const domapi::WheelEvent& event) override;
   private: virtual void OpenFile(WindowId window_id,
                                  const base::string16& filename) override;
   private: virtual void QueryClose(WindowId window_id) override;

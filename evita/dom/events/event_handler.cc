@@ -12,6 +12,7 @@
 #include "evita/dom/events/keyboard_event.h"
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
+#include "evita/dom/events/wheel_event.h"
 #include "evita/dom/events/window_event.h"
 #include "evita/dom/events/window_event_init.h"
 #include "evita/dom/lock.h"
@@ -201,6 +202,14 @@ void EventHandler::DispatchMouseEvent(const domapi::MouseEvent& api_event) {
   if (!window)
     return;
   DispatchEvent(window, new MouseEvent(api_event));
+}
+
+void EventHandler::DispatchWheelEvent(
+    const domapi::WheelEvent& api_event) {
+  auto const window = EventTarget::FromEventTargetId(api_event.target_id);
+  if (!window)
+    return;
+  DispatchEvent(window, new WheelEvent(api_event));
 }
 
 void EventHandler::OpenFile(WindowId window_id,

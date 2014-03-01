@@ -304,6 +304,8 @@ DEFINE_VIEW_EVENT_HANDLER_1(DispatchFormEvent, const ApiFormEvent&)
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchKeyboardEvent,
     const domapi::KeyboardEvent&)
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchMouseEvent, const domapi::MouseEvent&)
+DEFINE_VIEW_EVENT_HANDLER_1(DispatchWheelEvent,
+    const domapi::WheelEvent&)
 DEFINE_VIEW_EVENT_HANDLER_2(OpenFile, WindowId, const base::string16&)
 DEFINE_VIEW_EVENT_HANDLER_1(QueryClose, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(RunCallback, base::Closure)

@@ -28,6 +28,11 @@ metaKey
 button
 buttons
 relatedTarget
+### heelEvent constructor
+deltaMode
+deltaX
+deltaY
+deltaZ
 ### 3.4 KeyboardEvent
 altKey
 code

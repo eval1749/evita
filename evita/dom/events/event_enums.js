@@ -16,7 +16,8 @@ Event.Names = {
   MOUSEMOVE: 'mousemove',
   MOUSEUP: 'mouseup',
   QUERYCLOSE: 'queryclose',
-  SAVE: 'save'
+  SAVE: 'save',
+  WHEEL: 'wheel'
 };
 
 /** @enum */

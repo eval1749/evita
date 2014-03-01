@@ -60,6 +60,13 @@ struct MouseEvent {
   dom::WindowId target_id;
 };
 
+struct WheelEvent : MouseEvent {
+  int delta_mode;
+  double delta_x;
+  double delta_y;
+  double delta_z;
+};
+
 }  // namespace domapi
 
 #endif //!defined(INCLUDE_evita_dom_public_api_event_h)

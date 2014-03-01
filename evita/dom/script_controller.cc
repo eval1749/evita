@@ -139,8 +139,6 @@ ScriptController::ScriptController(ViewDelegate* view_delegate,
       view_delegate_(view_delegate) {
   view_delegate_->RegisterViewEventHandler(event_handler_.get());
   v8::V8::InitializeICU();
-  auto const isolate = isolate_holder_.isolate();
-  isolate->Enter();
 
   // When call TerminateExecution(), assertion failure is occured at
   // |OptimizedFrame::Summarize| in "v8/src/frame.cc" with opcode == REGISTER.
@@ -160,7 +158,6 @@ ScriptController::ScriptController(ViewDelegate* view_delegate,
 }
 
 ScriptController::~ScriptController() {
-  isolate_holder_.isolate()->Exit();
   script_controller = nullptr;
 }
 
@@ -233,10 +230,10 @@ ScriptController* ScriptController::Start(ViewDelegate* view_delegate,
   SuppressMessageBoxScope suppress_messagebox_scope;
   script_controller = new ScriptController(view_delegate, io_deleage);
   auto const isolate = script_controller->isolate();
-  v8::HandleScope handle_scope(isolate);
+  auto const runner = new v8_glue::Runner(isolate, script_controller);
+  script_controller->runner_.reset(runner);
+  v8_glue::Runner::Scope runner_scope(runner);
   v8Strings::Init(isolate);
-  script_controller->runner_.reset(
-      new v8_glue::Runner(isolate, script_controller));
   return script_controller;
 }
 

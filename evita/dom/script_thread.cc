@@ -215,6 +215,20 @@ void ScriptThread::RegisterViewEventHandler(
       base::Unretained(this)));
 }
 
+void ScriptThread::ScrollTextWindow(WindowId window_id, int direction,
+                                    base::WaitableEvent* null_event) {
+  DCHECK(!null_event);
+  DCHECK_CALLED_ON_SCRIPT_THREAD();
+  if (!host_message_loop_)
+    return;
+  base::WaitableEvent event(true, false);
+  DOM_AUTO_UNLOCK_SCOPE();
+  host_message_loop_->PostTask(FROM_HERE, base::Bind(
+      &ViewDelegate::ScrollTextWindow, base::Unretained(view_delegate_),
+      window_id, direction, base::Unretained(&event)));
+  event.Wait();
+}
+
 // ViewEventHandler
 #define DEFINE_VIEW_EVENT_HANDLER_0(name) \
   void ScriptThread::name() { \

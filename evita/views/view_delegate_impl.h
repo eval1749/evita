@@ -64,6 +64,9 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void SaveFile(dom::Document* document,
                                  const base::string16& filename,
                                  const SaveFileCallback& callback) override;
+  private: virtual void ScrollTextWindow(dom::WindowId window_id,
+                                         int direction,
+                                         base::WaitableEvent* event) override;
   private: virtual void SetCapture(dom::WindowId window_id) override;
   private: virtual void ShowDialogBox(
       dom::DialogBoxId dialog_box_id) override;

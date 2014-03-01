@@ -142,7 +142,9 @@ ScriptController::ScriptController(ViewDelegate* view_delegate,
   auto const isolate = isolate_holder_.isolate();
   isolate->Enter();
 
-  v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
+  // When call TerminateExecution(), assertion failure is occured at
+  // |OptimizedFrame::Summarize| in "v8/src/frame.cc" with opcode == REGISTER.
+  // v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
   v8::V8::AddMessageListener(MessageCallback);
   v8::V8::AddGCPrologueCallback(GcPrologueCallback);
   v8::V8::AddGCEpilogueCallback(GcEpilogueCallback);
@@ -276,25 +278,34 @@ v8::Handle<v8::ObjectTemplate> ScriptController::GetGlobalTemplate(
 
 void ScriptController::UnhandledException(v8_glue::Runner*,
                                           const v8::TryCatch& try_catch) {
+  base::string16 text;
   auto const error = try_catch.Exception();
   auto const message = try_catch.Message();
-  auto text = base::StringPrintf(
-      L"Exeption: %ls\n"
-      L"Source: %ls\n"
-      L"Source name: %ls(%d)\n",
-      V8ToString(error).c_str(), V8ToString(message->GetSourceLine()).c_str(),
-      V8ToString(message->GetScriptResourceName()).c_str(),
-      message->GetLineNumber());
-  auto const stack_trace = message->GetStackTrace();
-  if (!stack_trace.IsEmpty()) {
-    text += L"Stack trace:\n";
-    auto const length = static_cast<size_t>(stack_trace->GetFrameCount());
-    for (auto index = 0u; index < length; ++index) {
-      auto const frame = stack_trace->GetFrame(index);
-      text += base::StringPrintf(L"  at %ls (%ls(%d))\n",
-          V8ToString(frame->GetFunctionName()).c_str(),
-          V8ToString(frame->GetScriptName()).c_str(), frame->GetLineNumber());
+  if (!message.IsEmpty()) {
+    text = base::StringPrintf(
+            L"Exeption: %ls\n"
+            L"Source: %ls\n"
+            L"Source name: %ls(%d)\n",
+            V8ToString(error).c_str(),
+            V8ToString(message->GetSourceLine()).c_str(),
+            V8ToString(message->GetScriptResourceName()).c_str(),
+            message->GetLineNumber());
+    auto const stack_trace = message->GetStackTrace();
+    if (!stack_trace.IsEmpty()) {
+      text += L"Stack trace:\n";
+      auto const length = static_cast<size_t>(stack_trace->GetFrameCount());
+      for (auto index = 0u; index < length; ++index) {
+        auto const frame = stack_trace->GetFrame(index);
+        text += base::StringPrintf(L"  at %ls (%ls(%d))\n",
+            V8ToString(frame->GetFunctionName()).c_str(),
+            V8ToString(frame->GetScriptName()).c_str(),
+            frame->GetLineNumber());
+      }
     }
+  }  if (try_catch.HasTerminated()) {
+    text = L"Scripe execution is terminated.";
+  } else if (message.IsEmpty()) {
+    text =  L"No details";
   }
 
   if (!started_) {

@@ -15,6 +15,8 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/public/api_event.h"
 #include "evita/dom/script_controller.h"
+#include "evita/ui/events/event.h"
+#include "v8/include/v8-debug.h"
 
 #define DCHECK_CALLED_ON_NON_SCRIPT_THREAD() \
   DCHECK(!ScriptThread::instance()->CalledOnValidThread())
@@ -301,8 +303,22 @@ DEFINE_VIEW_EVENT_HANDLER_1(DidRequestFocus, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_5(DidResizeWidget, WindowId, int, int, int, int)
 DEFINE_VIEW_EVENT_HANDLER_0(DidStartHost)
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchFormEvent, const ApiFormEvent&)
-DEFINE_VIEW_EVENT_HANDLER_1(DispatchKeyboardEvent,
-    const domapi::KeyboardEvent&)
+
+void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {
+  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
+  DCHECK(view_event_handler_);
+  if (event.key_code == (static_cast<int>(ui::KeyCode::Pause) |
+                         static_cast<int>(ui::Modifier::Control)) &&
+      event.control_key) {
+    auto const isolate = ScriptController::instance()->isolate();
+    v8::V8::TerminateExecution(isolate);
+    return;
+  }
+
+  PostTask(FROM_HERE, base::Bind(&ViewEventHandler::DispatchKeyboardEvent,
+           base::Unretained(view_event_handler_), event));
+}
+
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchMouseEvent, const domapi::MouseEvent&)
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchWheelEvent,
     const domapi::WheelEvent&)

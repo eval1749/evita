@@ -16,6 +16,7 @@
 #include "evita/views/content_window.h"
 #include "evita/li_util.h"
 #include "evita/gfx_base.h"
+#include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/command_window.h"
 
 class Caret;
@@ -35,6 +36,7 @@ class TextRenderer;
 namespace ui {
 class KeyboardEvent;
 class MouseWheelEvent;
+class ScrollBar;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -46,7 +48,7 @@ class MouseWheelEvent;
 // A range contains the start position of window.
 //
 class TextEditWindow
-    : public views::ContentWindow {
+    : public views::ContentWindow, public ui::ScrollBarObserver {
   DECLARE_CASTABLE_CLASS(TextEditWindow, views::ContentWindow);
 
   private: typedef common::win::Point Point;
@@ -67,7 +69,7 @@ class TextEditWindow
   #endif // SUPPORT_IME
   private: Range* m_pViewRange;
   private: std::unique_ptr<TextRenderer> text_renderer_;
-  private: std::unique_ptr<ScrollBar> vertical_scroll_bar_;
+  private: ui::ScrollBar* const vertical_scroll_bar_;
 
   // ctor/dtor
   public: explicit TextEditWindow(const dom::TextWindow& window);
@@ -114,7 +116,6 @@ class TextEditWindow
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
   private: virtual bool OnIdle(uint) override;
   private: virtual LRESULT OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam);
-  private: void onVScroll(uint);
 
   // [R]
   private: virtual void Redraw() override;
@@ -137,6 +138,12 @@ class TextEditWindow
   private: size_t setReconvert(RECONVERTSTRING*, Posn start, Posn end);
   private: BOOL showImeCaret(SIZE, POINT);
   #endif // SUPPORT_IME
+
+  private: virtual void DidClickLineDown() override;
+  private: virtual void DidClickLineUp() override;
+  private: virtual void DidClickPageDown() override;
+  private: virtual void DidClickPageUp() override;
+  private: virtual void DidMoveThumb(int value) override;
 
   // ui::Widget
   private: virtual void DidResize() override;

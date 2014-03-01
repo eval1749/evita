@@ -33,6 +33,7 @@
 #include "evita/dom/selection.h"
 #include "evita/dom/text_window.h"
 #include "evita/text/range.h"
+#include "evita/ui/controls/scroll_bar.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/text/render_selection.h"
@@ -44,7 +45,6 @@
 #include "evita/vi_Selection.h"
 
 extern HWND g_hwndActiveDialog;
-extern HINSTANCE g_hInstance;
 
 namespace {
 class RenderSelection : public views::rendering::Selection {
@@ -67,101 +67,6 @@ RenderSelection::RenderSelection(::Selection* selection)
 
 //////////////////////////////////////////////////////////////////////
 //
-// TextEditWindow::ScrollBar
-//
-class TextEditWindow::ScrollBar {
-  private: typedef common::win::Rect Rect;
-
-  public: enum class Type {
-    Horizonal,
-    Vertical,
-  };
-
-  private: HWND hwnd_;
-  private: Window* owner_;
-  private: Rect rect_;
-  private: Type type_;
-
-  public: ScrollBar(Type type, Window* owner);
-  public: ~ScrollBar();
-
-  public: const Rect& rect() const { return rect_; }
-
-  public: void DidChangeHierarchy();
-  public: bool GetInfo(SCROLLINFO* pInfo);
-  public: void Hide();
-  public: void Realize();
-  public: void ResizeTo(const Rect& rect);
-  public: void SetInfo(SCROLLINFO* pInfo, bool fRedraw);
-  public: void Show();
-};
-
-TextEditWindow::ScrollBar::ScrollBar(Type type, Window* owner)
-    : hwnd_(nullptr), owner_(owner), type_(type) {
-}
-
-TextEditWindow::ScrollBar::~ScrollBar() {
-  if (hwnd_)
-    ::DestroyWindow(hwnd_);
-}
-
-void TextEditWindow::ScrollBar::DidChangeHierarchy() {
-  if (!hwnd_)
-    return;
-  ::SetParent(hwnd_, owner_->AssociatedHwnd());
-}
-
-bool TextEditWindow::ScrollBar::GetInfo(SCROLLINFO* pInfo) {
-  return hwnd_ && ::GetScrollInfo(hwnd_, SB_CTL, pInfo);
-}
-
-void TextEditWindow::ScrollBar::Hide() {
-  if (!hwnd_)
-    return;
-  ::ShowWindow(hwnd_, SW_HIDE);
-}
-
-void TextEditWindow::ScrollBar::Realize() {
-  DCHECK(!hwnd_);
-  hwnd_ = ::CreateWindowExW(
-      0,
-      L"SCROLLBAR",
-      L"",
-      static_cast<DWORD>(WS_CHILD | WS_VISIBLE |
-                         (type_ == Type::Vertical ? SBS_VERT : SBS_HORZ)),
-      0, 0, 0, 0,
-      owner_->AssociatedHwnd(),
-      nullptr, // menu
-      g_hInstance,
-      nullptr);
-
-  ::SetWindowLongPtr(hwnd_, GWLP_USERDATA,
-                     reinterpret_cast<LONG_PTR>(owner_));
-}
-
-void TextEditWindow::ScrollBar::ResizeTo(const Rect& rect) {
-  rect_ = rect;
-  if (!hwnd_)
-    return;
-  DCHECK(!rect.empty());
-  ::SetWindowPos(hwnd_, nullptr, rect.left, rect.top, rect.width(),
-                 rect.height(), SWP_NOZORDER);
-}
-
-void TextEditWindow::ScrollBar::SetInfo(SCROLLINFO* pInfo, bool fRedraw) {
-  if (!hwnd_)
-    return;
-  ::SetScrollInfo(hwnd_, SB_CTL, pInfo, fRedraw);
-}
-
-void TextEditWindow::ScrollBar::Show() {
-  if (!hwnd_)
-    return;
-  ::ShowWindow(hwnd_, SW_SHOW);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
 // TextEditWindow
 //
 TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
@@ -178,8 +83,9 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
         m_lImeStart(0),
       #endif // SUPPORT_IME
       m_pViewRange(text_window.view_range()->text_range()),
-      vertical_scroll_bar_(std::make_unique<ScrollBar>(
-          ScrollBar::Type::Vertical, this)) {
+      vertical_scroll_bar_(new ui::ScrollBar(ui::ScrollBar::Type::Vertical,
+                                             this)) {
+  AppendChild(vertical_scroll_bar_);
 }
 
 TextEditWindow::~TextEditWindow() {
@@ -286,9 +192,9 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
 }
 
 void TextEditWindow::DidChangeHierarchy() {
+  ParentClass::DidChangeHierarchy();
   m_gfx = &frame().gfx();
   text_renderer_->SetGraphics(m_gfx);
-  vertical_scroll_bar_->DidChangeHierarchy();
 }
 
 void TextEditWindow::DidHide() {
@@ -307,7 +213,6 @@ void TextEditWindow::DidRealize() {
   ASSERT(frame);
   m_gfx = &frame->gfx();
   text_renderer_->SetGraphics(m_gfx);
-  vertical_scroll_bar_->Realize();
 }
 
 void TextEditWindow::DidRequestFocus() {
@@ -450,10 +355,6 @@ bool TextEditWindow::OnIdle(uint count) {
 
 LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
   switch (uMsg) {
-    case WM_VSCROLL:
-      onVScroll(LOWORD(wParam));
-      return 0;
-
     #if SUPPORT_IME
     case WM_IME_COMPOSITION:
       onImeComposition(lParam);
@@ -490,49 +391,6 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
     #endif // SUPPORT_IME
   }
   return ParentClass::OnMessage(uMsg, wParam, lParam);
-}
-
-void TextEditWindow::onVScroll(uint nCode) {
-  UI_DOM_AUTO_LOCK_SCOPE();
-
-  switch (nCode) {
-    case SB_ENDSCROLL: // 8
-      break;
-
-    case SB_LINEDOWN: // 1
-      SmallScroll(0, 1);
-      break;
-
-    case SB_LINEUP: // 0
-      SmallScroll(0, -1);
-      break;
-
-    case SB_PAGEDOWN: // 3
-      LargeScroll(0, 1);
-      break;
-
-    case SB_PAGEUP: // 2
-      LargeScroll(0, -1);
-      break;
-
-    case SB_THUMBPOSITION: // 4
-      return;
-
-    case SB_THUMBTRACK: { // 5
-      SCROLLINFO oInfo;
-      oInfo.cbSize = sizeof(oInfo);
-      oInfo.fMask = SIF_ALL;
-      if (vertical_scroll_bar_->GetInfo(&oInfo)) {
-        auto const lStart = StartOfLine(oInfo.nTrackPos);
-        text_renderer_->Format(lStart);
-        Render();
-      }
-      break;
-    }
-
-    default:
-      return;
-  }
 }
 
 void TextEditWindow::Redraw() {
@@ -718,22 +576,13 @@ void TextEditWindow::updateScrollBar() {
     return;
 
   auto const lBufEnd = text_renderer_->GetBuffer()->GetEnd() + 1;
-
-  SCROLLINFO oInfo;
-  oInfo.cbSize = sizeof(oInfo);
-  oInfo.fMask = SIF_POS | SIF_RANGE | SIF_PAGE | SIF_DISABLENOSCROLL;
-  oInfo.nPage = static_cast<uint>(text_renderer_->GetEnd() -
-                                        text_renderer_->GetStart());
-  oInfo.nMin = 0;
-  oInfo.nMax = lBufEnd;
-  oInfo.nPos = text_renderer_->GetStart();
-
-  if (static_cast<Count>(oInfo.nPage) >= lBufEnd) {
-    // Current screen shows entire buffer. We disable scroll bar.
-    oInfo.nMax = 0;
-  }
-
-  vertical_scroll_bar_->SetInfo(&oInfo, true);
+  ui::ScrollBar::Data data;
+  data.minimum = 0;
+  data.thumb_size = text_renderer_->GetEnd() - text_renderer_->GetStart();
+  data.thumb_value = text_renderer_->GetStart();
+  // Current screen shows entire buffer. We disable scroll bar.
+  data.maximum = data.thumb_size < lBufEnd ? lBufEnd : 0;
+  vertical_scroll_bar_->SetData(data);
 }
 
 static std::vector<base::string16> ComposeStatusBarTexts(
@@ -1082,6 +931,33 @@ BOOL TextEditWindow::showImeCaret(SIZE sz, POINT pt) {
 }
 
 #endif // SUPPORT_IME
+
+void TextEditWindow::DidClickLineDown() {
+  UI_DOM_AUTO_LOCK_SCOPE();
+  SmallScroll(0, 1);
+}
+
+void TextEditWindow::DidClickLineUp() {
+  UI_DOM_AUTO_LOCK_SCOPE();
+  SmallScroll(0, -1);
+}
+
+void TextEditWindow::DidClickPageDown() {
+  UI_DOM_AUTO_LOCK_SCOPE();
+  LargeScroll(0, 1);
+}
+
+void TextEditWindow::DidClickPageUp() {
+  UI_DOM_AUTO_LOCK_SCOPE();
+  LargeScroll(0, -1);
+}
+
+void TextEditWindow::DidMoveThumb(int value) {
+  UI_DOM_AUTO_LOCK_SCOPE();
+  auto const start = StartOfLine(value);
+  text_renderer_->Format(start);
+  Render();
+}
 
 // ui::Widget
 void TextEditWindow::DidResize() {

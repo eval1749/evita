@@ -14,122 +14,13 @@
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "evita/gfx_base.h"
+#include "evita/li_util.h"
 #include "evita/ui/events/event.h"
 #include "evita/views/tab_strip_delegate.h"
 
 namespace {
 
 static HINSTANCE g_hInstance;
-
-template<class Item_>
-class DoubleLinkedList_;
-
-template<class Item_>
-class DoubleLinkedNode_ {
-  friend class DoubleLinkedList_<Item_>;
-
-  private: Item_* m_pNext;
-  private: Item_* m_pPrev;
-
-  public: DoubleLinkedNode_() :
-    m_pNext(nullptr),
-    m_pPrev(nullptr) {}
-
-  public: Item_* GetNext() const { return m_pNext; }
-  public: Item_* GetPrev() const { return m_pPrev; }
-}; // DoubleLinkedNode_
-
-template<class Item_>
-class DoubleLinkedList_ {
-  protected: typedef DoubleLinkedList_<Item_> List_;
-
-  private: Item_* m_pFirst;
-  private: Item_* m_pLast;
-
-  public: DoubleLinkedList_()
-    : m_pFirst(nullptr),
-      m_pLast(nullptr) {}
-
-  // [A]
-  public: Item_* Append(Item_* pItem) {
-    pItem->m_pNext = nullptr;
-    pItem->m_pPrev = m_pLast;
-
-    if (!m_pFirst) {
-      m_pFirst = pItem;
-    }
-
-    if (m_pLast) {
-      m_pLast->m_pNext = pItem;
-    }
-
-    return m_pLast = pItem;
-  }
-
-  // [D]
-  public: Item_* Delete(Item_* pItem) {
-    auto const pNext = pItem->m_pNext;
-    auto const pPrev = pItem->m_pPrev;
-    if (!pNext) {
-      m_pLast = pPrev;
-    } else {
-      pNext->m_pPrev = pPrev;
-    }
-
-    if (!pPrev) {
-      m_pFirst = pNext;
-    } else {
-      pPrev->m_pNext = pNext;
-    }
-
-    pItem->m_pNext = nullptr;
-    pItem->m_pPrev = nullptr;
-
-    return pItem;
-  }
-
-  // [E]
-  public: class Enum {
-    private: Item_* m_pRunner;
-    public: Enum(List_* p) : m_pRunner(p->m_pFirst) {}
-    public: Enum(const List_* p) : m_pRunner(p->m_pFirst) {}
-    public: bool AtEnd() const { return m_pRunner == nullptr; }
-    public: Item_* Get() { return m_pRunner; }
-
-    public: void Next() {
-      ASSERT(!AtEnd());
-      m_pRunner = m_pRunner->m_pNext;
-    }
-  }; // Enum
-
-  // [G]
-  public: Item_* GetFirst() const { return m_pFirst; }
-  public: Item_* GetLast()  const { return m_pLast; }
-
-  // [I]
-  public: Item_* InsertBefore(Item_* pItem, Item_* pRefItem) {
-    if (!pRefItem) {
-      return Append(pItem);
-    }
-
-    auto const pPrev = pRefItem->m_pPrev;
-    if (!pPrev) {
-      m_pFirst = pItem;
-    } else {
-      pPrev->m_pNext = pItem;
-    }
-
-    pItem->m_pPrev = pPrev;
-    pItem->m_pNext = pRefItem;
-
-    pRefItem->m_pPrev = pItem;
-    return pItem;
-  }
-
-  public: bool IsEmpty() const {
-    return m_pFirst == nullptr;
-  }
-}; // DoubleLinkedList_
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -1189,7 +1080,10 @@ class TabStrip::TabStripImpl : public Element {
 
     m_cItems += 1;
 
-    m_oElements.InsertBefore(pNewItem, pRefItem);
+    if (pRefItem)
+      m_oElements.InsertBefore(pNewItem, pRefItem);
+    else
+      m_oElements.Append(pNewItem);
 
     if (m_hwndToolTips) {
       TOOLINFO ti;

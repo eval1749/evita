@@ -155,8 +155,7 @@ ScriptController::ScriptController(ViewDelegate* view_delegate,
   char flags[] =
       "--use_strict"
       " --harmony"
-      " --harmony_typeof"
-      " --trace_exception";
+      " --harmony_typeof";
   v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
 }
 

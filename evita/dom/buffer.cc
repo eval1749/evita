@@ -36,4 +36,8 @@ bool Buffer::OnIdle(uint) {
   return GetMode()->DoColor(500);
 }
 
+void Buffer::FinishIo(uint const) {
+  m_eState = State_Ready;
+}
+
 }  // namespace dom

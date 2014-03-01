@@ -19,6 +19,8 @@
         '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/common/common.gyp:common',
         'dom',
+        # TODO(yosi) We should not have "editor" dependency on
+        # "evita_dom_unittests".
         'editor',
         '<(DEPTH)/testing/gtest.gyp:gtest',
         '<(DEPTH)/testing/gmock.gyp:gmock',

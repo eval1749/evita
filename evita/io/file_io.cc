@@ -288,10 +288,6 @@ class SaveRequest : public FileIoRequest {
   DISALLOW_COPY_AND_ASSIGN(SaveRequest);
 };
 
-void Buffer::FinishIo(uint const) {
-  m_eState = State_Ready;
-}
-
 //  Start loading from file. This consists following steps:
 //      o Set not ready
 //      o Discard undo log
@@ -368,15 +364,6 @@ bool Buffer::Save(const base::string16& filename, int const nCodePage,
   }
 
     return true;
-}
-
-//  Markes the buffer visited to specified file.
-void text::Buffer::SetFile(
-    const base::string16& filename,
-    base::Time last_write_time) {
-  filename_ =  filename;
-  last_write_time_ = last_write_time;
-  m_nSaveTick = m_nCharTick;
 }
 
 uint FileRequest::openForLoad() {

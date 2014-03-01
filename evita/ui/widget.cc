@@ -332,6 +332,9 @@ LRESULT Widget::OnNotify(NMHDR*) {
 void Widget::OnPaint(const Rect) {
 }
 
+void Widget::OnScroll(int) {
+}
+
 void Widget::Realize(const Rect& rect) {
   DCHECK(parent_node());
   DCHECK(container_widget().is_realized());
@@ -599,6 +602,13 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       will_focus_widget = nullptr;
       focus_widget->DidRequestFocus();
       return 0;
+
+    case WM_VSCROLL: {
+      auto const widget = reinterpret_cast<Widget*>(::GetWindowLongPtr(
+          reinterpret_cast<HWND>(lParam), GWLP_ID));
+      widget->OnScroll(static_cast<int>(LOWORD(wParam)));
+      return 0;
+    }
 
     case WM_WINDOWPOSCHANGED: {
       // DefWindowProc sents WM_SIZE and WM_MOVE, so handling

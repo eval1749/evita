@@ -118,6 +118,9 @@ class Widget
   protected: virtual void OnMouseWheel(const MouseWheelEvent& event);
   protected: virtual LRESULT OnNotify(NMHDR* nmhdr);
   public: virtual void OnPaint(const Rect rect);
+  // TODO(yosi) |ui::Widget::OnScroll| is used for handling |WM_VSCROLL|, Once
+  // we implement scroll bar, we should remove this.
+  protected: virtual void OnScroll(int request);
 
   // [R]
   // Realize widget, one of container must be realized with native widnow.

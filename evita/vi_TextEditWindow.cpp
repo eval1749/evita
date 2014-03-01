@@ -44,6 +44,7 @@
 #include "evita/vi_Selection.h"
 
 extern HWND g_hwndActiveDialog;
+extern HINSTANCE g_hInstance;
 
 namespace {
 class RenderSelection : public views::rendering::Selection {
@@ -68,45 +69,95 @@ RenderSelection::RenderSelection(::Selection* selection)
 //
 // TextEditWindow::ScrollBar
 //
-struct TextEditWindow::ScrollBar {
-  HWND m_hwnd;
-  int m_nBar;
+class TextEditWindow::ScrollBar {
+  private: typedef common::win::Rect Rect;
 
-  ScrollBar()
-      : m_hwnd(nullptr),
-        m_nBar(SB_CTL) {
-  }
+  public: enum class Type {
+    Horizonal,
+    Vertical,
+  };
 
-  ~ScrollBar();
+  private: HWND hwnd_;
+  private: Window* owner_;
+  private: Rect rect_;
+  private: Type type_;
 
-  bool GetInfo(SCROLLINFO* pInfo) {
-    return m_hwnd && ::GetScrollInfo(m_hwnd, m_nBar, pInfo);
-  }
+  public: ScrollBar(Type type, Window* owner);
+  public: ~ScrollBar();
 
-  HWND GetHwnd() const { return m_hwnd; }
+  public: const Rect& rect() const { return rect_; }
 
-  void Set(HWND hwnd, int nBar) {
-    m_hwnd = hwnd;
-    m_nBar = nBar;
-  }
-
-  void ShowWindow(int) const;
-
-  void SetInfo(SCROLLINFO* pInfo, bool fRedraw) {
-    if (!m_hwnd)
-      return;
-    ::SetScrollInfo(m_hwnd, m_nBar, pInfo, fRedraw);
-  }
+  public: void DidChangeHierarchy();
+  public: bool GetInfo(SCROLLINFO* pInfo);
+  public: void Hide();
+  public: void Realize();
+  public: void ResizeTo(const Rect& rect);
+  public: void SetInfo(SCROLLINFO* pInfo, bool fRedraw);
+  public: void Show();
 };
 
-TextEditWindow::ScrollBar::~ScrollBar() {
-  if (m_hwnd)
-    ::DestroyWindow(m_hwnd);
+TextEditWindow::ScrollBar::ScrollBar(Type type, Window* owner)
+    : hwnd_(nullptr), owner_(owner), type_(type) {
 }
 
-void TextEditWindow::ScrollBar::ShowWindow(int code) const {
-  if (m_hwnd)
-    ::ShowWindow(m_hwnd, code);
+TextEditWindow::ScrollBar::~ScrollBar() {
+  if (hwnd_)
+    ::DestroyWindow(hwnd_);
+}
+
+void TextEditWindow::ScrollBar::DidChangeHierarchy() {
+  if (!hwnd_)
+    return;
+  ::SetParent(hwnd_, owner_->AssociatedHwnd());
+}
+
+bool TextEditWindow::ScrollBar::GetInfo(SCROLLINFO* pInfo) {
+  return hwnd_ && ::GetScrollInfo(hwnd_, SB_CTL, pInfo);
+}
+
+void TextEditWindow::ScrollBar::Hide() {
+  if (!hwnd_)
+    return;
+  ::ShowWindow(hwnd_, SW_HIDE);
+}
+
+void TextEditWindow::ScrollBar::Realize() {
+  DCHECK(!hwnd_);
+  hwnd_ = ::CreateWindowExW(
+      0,
+      L"SCROLLBAR",
+      L"",
+      static_cast<DWORD>(WS_CHILD | WS_VISIBLE |
+                         (type_ == Type::Vertical ? SBS_VERT : SBS_HORZ)),
+      0, 0, 0, 0,
+      owner_->AssociatedHwnd(),
+      nullptr, // menu
+      g_hInstance,
+      nullptr);
+
+  ::SetWindowLongPtr(hwnd_, GWLP_USERDATA,
+                     reinterpret_cast<LONG_PTR>(owner_));
+}
+
+void TextEditWindow::ScrollBar::ResizeTo(const Rect& rect) {
+  rect_ = rect;
+  if (!hwnd_)
+    return;
+  DCHECK(!rect.empty());
+  ::SetWindowPos(hwnd_, nullptr, rect.left, rect.top, rect.width(),
+                 rect.height(), SWP_NOZORDER);
+}
+
+void TextEditWindow::ScrollBar::SetInfo(SCROLLINFO* pInfo, bool fRedraw) {
+  if (!hwnd_)
+    return;
+  ::SetScrollInfo(hwnd_, SB_CTL, pInfo, fRedraw);
+}
+
+void TextEditWindow::ScrollBar::Show() {
+  if (!hwnd_)
+    return;
+  ::ShowWindow(hwnd_, SW_SHOW);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -127,7 +178,8 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
         m_lImeStart(0),
       #endif // SUPPORT_IME
       m_pViewRange(text_window.view_range()->text_range()),
-      vertical_scroll_bar_(std::make_unique<ScrollBar>()) {
+      vertical_scroll_bar_(std::make_unique<ScrollBar>(
+          ScrollBar::Type::Vertical, this)) {
 }
 
 TextEditWindow::~TextEditWindow() {
@@ -236,14 +288,12 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
 void TextEditWindow::DidChangeHierarchy() {
   m_gfx = &frame().gfx();
   text_renderer_->SetGraphics(m_gfx);
-  auto const parent_hwnd = AssociatedHwnd();
-  if (auto const hwnd = vertical_scroll_bar_->GetHwnd())
-    ::SetParent(hwnd, parent_hwnd);
+  vertical_scroll_bar_->DidChangeHierarchy();
 }
 
 void TextEditWindow::DidHide() {
   // Note: It is OK that hidden window have focus.
-  vertical_scroll_bar_->ShowWindow(SW_HIDE);
+  vertical_scroll_bar_->Hide();
 }
 
 void TextEditWindow::DidKillFocus() {
@@ -257,6 +307,7 @@ void TextEditWindow::DidRealize() {
   ASSERT(frame);
   m_gfx = &frame->gfx();
   text_renderer_->SetGraphics(m_gfx);
+  vertical_scroll_bar_->Realize();
 }
 
 void TextEditWindow::DidRequestFocus() {
@@ -267,7 +318,7 @@ void TextEditWindow::DidRequestFocus() {
 }
 
 void TextEditWindow::DidShow() {
-  vertical_scroll_bar_->ShowWindow(SW_SHOW);
+  vertical_scroll_bar_->Show();
 }
 
 Posn TextEditWindow::EndOfLine(Posn lPosn) {
@@ -296,7 +347,9 @@ Buffer* TextEditWindow::GetBuffer() const {
   return GetSelection()->GetBuffer();
 }
 
-HCURSOR TextEditWindow::GetCursorAt(const Point&) const {
+HCURSOR TextEditWindow::GetCursorAt(const Point& point) const {
+  if (vertical_scroll_bar_->rect().Contains(point))
+    return ::LoadCursor(nullptr, IDC_ARROW);
   return ::LoadCursor(nullptr, IDC_IBEAM);
 }
 
@@ -305,11 +358,6 @@ Posn TextEditWindow::GetEnd() {
   UI_ASSERT_DOM_LOCKED();
   updateScreen();
   return text_renderer_->GetEnd();
-}
-
-HWND TextEditWindow::GetScrollBar(int which) const {
-  DCHECK_EQ(SB_VERT, which);
-  return vertical_scroll_bar_->GetHwnd();
 }
 
 //For Selection.MoveUp Screen
@@ -581,12 +629,6 @@ void TextEditWindow::Render() {
   #endif // SUPPORT_IME
 
   caret_->Update(caret_rect);
-}
-
-void TextEditWindow::SetScrollBar(HWND hwnd, int nBar) {
-  DCHECK_EQ(SB_VERT, nBar);
-  DCHECK(!vertical_scroll_bar_->m_hwnd);
-  vertical_scroll_bar_->Set(hwnd, SB_CTL);
 }
 
 int TextEditWindow::SmallScroll(int, int iDy) {
@@ -1043,7 +1085,14 @@ BOOL TextEditWindow::showImeCaret(SIZE sz, POINT pt) {
 
 // ui::Widget
 void TextEditWindow::DidResize() {
-  text_renderer_->SetRect(rect());
+  auto const scroll_bar_width = ::GetSystemMetrics(SM_CXVSCROLL);
+  auto text_block_rect = rect();
+  text_block_rect.right -= scroll_bar_width;
+  text_renderer_->SetRect(text_block_rect);
+
+  auto scroll_bar_rect = rect();
+  scroll_bar_rect.left = text_block_rect.right;
+  vertical_scroll_bar_->ResizeTo(scroll_bar_rect);
 }
 
 // views::ContentWindow

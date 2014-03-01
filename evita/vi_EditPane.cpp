@@ -130,12 +130,10 @@ class EditPane::LayoutBox : public EditPane::Box {
 };
 
 class EditPane::LeafBox final : public EditPane::Box {
-  private: HWND m_hwndVScrollBar;
   private: Window* m_pWindow;
 
   public: LeafBox(EditPane* edit_pane, LayoutBox* outer, Window* pWindow)
     : Box(edit_pane, outer),
-      m_hwndVScrollBar(nullptr),
       m_pWindow(pWindow) {
   }
 
@@ -676,12 +674,6 @@ EditPane::LeafBox::~LeafBox() {
     DEBUG_PRINTF("%p\n", this);
   #endif
   ASSERT(!m_pWindow);
-
-  if (m_hwndVScrollBar) {
-    ::SetWindowLongPtr(m_hwndVScrollBar, GWLP_USERDATA, 0);
-    ::DestroyWindow(m_hwndVScrollBar);
-    m_hwndVScrollBar = nullptr;
-  }
 }
 
 void EditPane::LeafBox::Destroy() {
@@ -690,9 +682,7 @@ void EditPane::LeafBox::Destroy() {
 
 void EditPane::LeafBox::DetachWindow() {
   m_pWindow = nullptr;
-  m_hwndVScrollBar = nullptr;
 }
-
 
 void EditPane::LeafBox::DrawSplitters(const gfx::Graphics& gfx) {
   m_pWindow->OnDraw(const_cast<gfx::Graphics*>(&gfx));
@@ -753,40 +743,8 @@ EditPane::HitTestResult EditPane::LeafBox::HitTest(Point pt) const {
 
 void EditPane::LeafBox::Realize(EditPane* edit_pane, const gfx::Rect& rect) {
   Box::Realize(edit_pane, rect);
-
-  Rect scroll_bar_rect(rect);
-  scroll_bar_rect.left = rect.right;
-  auto is_new_scroll_bar = false;
-  if (auto text_window = m_pWindow->as<TextEditWindow>()) {
-    auto const splitter_height = HasSibling() ? 0 : k_cySplitterBig;
-    auto const scroll_bar_width = ::GetSystemMetrics(SM_CXVSCROLL);
-    scroll_bar_rect.left -= scroll_bar_width;
-    scroll_bar_rect.top += splitter_height;
-    m_hwndVScrollBar = text_window->GetScrollBar(SB_VERT);
-    if (!m_hwndVScrollBar) {
-      m_hwndVScrollBar = ::CreateWindowExW(
-          0,
-          L"SCROLLBAR",
-          text_window->GetBuffer()->GetName().c_str(),
-          WS_CHILD | WS_VISIBLE | SBS_VERT,
-          0, 0, 0, 0,
-          edit_pane->AssociatedHwnd(),
-          nullptr, // menu
-          g_hInstance,
-          nullptr);
-
-      ::SetWindowLongPtr(m_hwndVScrollBar, GWLP_USERDATA,
-                         reinterpret_cast<LONG_PTR>(m_pWindow));
-      is_new_scroll_bar = true;
-    }
-  }
-
-  Rect window_rect(rect.left, rect.top, scroll_bar_rect.left, rect.bottom);
-  m_pWindow->Realize(window_rect);
-  if (is_new_scroll_bar)
-    m_pWindow->as<TextEditWindow>()->SetScrollBar(m_hwndVScrollBar, SB_VERT);
+  m_pWindow->Realize(rect);
   m_pWindow->Show();
-  // Resize scrollbar
   SetRect(rect);
 }
 
@@ -799,7 +757,6 @@ void EditPane::LeafBox::ReplaceWindow(Window* window) {
   DCHECK(!window->is_realized());
   auto const previous_window = m_pWindow;
   m_pWindow = window;
-  m_hwndVScrollBar = nullptr;
   edit_pane_->AppendChild(window);
   Realize(edit_pane_, rect());
   previous_window->DestroyWidget();
@@ -807,31 +764,7 @@ void EditPane::LeafBox::ReplaceWindow(Window* window) {
 
 void EditPane::LeafBox::SetRect(const gfx::Rect& rect) {
   Box::SetRect(rect);
-
-  #if DEBUG_SPLIT
-    DEBUG_PRINTF("%p %p %d+%d-%d+%d\n",
-        this,
-        m_pWindow,
-        rect.left, rect.top, rect.right, rect.bottom);
-  #endif
-
-  Rect scroll_bar_rect(rect);
-  scroll_bar_rect.left = rect.right;
-  if (m_hwndVScrollBar) {
-    auto const splitter_height = HasSibling() ? 0 : k_cySplitterBig;
-    auto const scroll_bar_width = ::GetSystemMetrics(SM_CXVSCROLL);
-    scroll_bar_rect.left -= scroll_bar_width;
-    scroll_bar_rect.top += splitter_height;
-    ::SetWindowPos(
-        m_hwndVScrollBar,
-        nullptr,
-        scroll_bar_rect.left, scroll_bar_rect.top,
-        scroll_bar_rect.width(),scroll_bar_rect.height(),
-        SWP_NOZORDER);
-  }
-
-  Rect window_rect(rect.left, rect.top, scroll_bar_rect.left, rect.bottom);
-  m_pWindow->ResizeTo(window_rect);
+  m_pWindow->ResizeTo(rect);
 }
 
 EditPane::VerticalLayoutBox::VerticalLayoutBox(EditPane* edit_pane,

@@ -53,7 +53,7 @@ class TextEditWindow
   private: typedef text::Range Range;
   private: typedef views::ContentWindow ParentClass;
   private: typedef views::TextRenderer TextRenderer;
-  private: struct ScrollBar;
+  private: class ScrollBar;
 
   private: std::unique_ptr<Caret> caret_;
   private: const gfx::Graphics* m_gfx;
@@ -121,7 +121,6 @@ class TextEditWindow
   private: void Render();
 
   // [S]
-  public: void SetScrollBar(HWND, int);
   public: int SmallScroll(int, int);
   public: Posn StartOfLine(Posn);
 

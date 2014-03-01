@@ -37,6 +37,7 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
   public: text::Posn MapPointToPosition(float x, float y);
   public: Point* MapPositionToPoint(text::Posn position);
   public: void Reconvert(text::Posn start, text::Posn end);
+  public: void Scroll(int direction);
 
   DISALLOW_COPY_AND_ASSIGN(TextWindow);
 };

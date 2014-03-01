@@ -47,7 +47,8 @@ class TextWindowWrapperInfo :
         .SetMethod("makeSelectionVisible", &TextWindow::MakeSelectionVisible)
         .SetMethod("mapPointToPosition_", &TextWindow::MapPointToPosition)
         .SetMethod("mapPositionToPoint_", &TextWindow::MapPositionToPoint)
-        .SetMethod("reconvert_", &TextWindow::Reconvert);
+        .SetMethod("reconvert_", &TextWindow::Reconvert)
+        .SetMethod("scroll", &TextWindow::Scroll);
   }
 
   DISALLOW_COPY_AND_ASSIGN(TextWindowWrapperInfo);
@@ -127,6 +128,11 @@ Point* TextWindow::MapPositionToPoint(text::Posn position) {
 void TextWindow::Reconvert(text::Posn start, text::Posn end) {
   ScriptController::instance()->view_delegate()->
       Reconvert(window_id(), start, end);
+}
+
+void TextWindow::Scroll(int direction) {
+  ScriptController::instance()->view_delegate()->
+      ScrollTextWindow(window_id(), direction, nullptr);
 }
 
 }  // namespace dom

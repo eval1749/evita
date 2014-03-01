@@ -48,3 +48,7 @@ TextWindow.prototype.reconvert_ = function(start, end) {};
  */
 TextWindow.prototype.range_;
 
+/**
+ * @param {number} direction
+ */
+TextWindow.prototype.scroll = function(direction) {};

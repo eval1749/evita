@@ -18,6 +18,7 @@
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/common/common.gyp:common',
+        '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
         'dom',
         # TODO(yosi) We should not have "editor" dependency on
         # "evita_dom_unittests".

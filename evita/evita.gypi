@@ -143,6 +143,7 @@
         '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/base/base.gyp:base_i18n',
         '<(DEPTH)/common/common.gyp:common',
+        '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
         'dom_jslib',
         'dom_unicode_lib_icu',
         'dom_v8_strings_cc',

@@ -42,6 +42,7 @@ struct COMMON_EXPORT Rect : RECT {
   }
 
   Rect Intersect(const Rect&) const;
+  void Unite(const Rect& other);
 };
 
 #define DEBUG_RECT_FORMAT "(%d,%d)+%dx%d"

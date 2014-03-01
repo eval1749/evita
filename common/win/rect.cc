@@ -13,5 +13,18 @@ Rect Rect::Intersect(const Rect& other) const {
               std::min(right, other.right), std::min(bottom, other.bottom));
 }
 
+void Rect::Unite(const Rect& other) {
+  if (other.empty())
+    return;
+  if (empty()) {
+    *this = other;
+    return;
+  }
+  left = std::min(left, other.left);
+  top = std::min(top, other.top);
+  right = std::max(right, other.right);
+  bottom = std::max(bottom, other.bottom);
+}
+
 } // namespace win
 } // namespace common

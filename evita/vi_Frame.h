@@ -138,7 +138,6 @@ private: virtual void DidResize() override;
 
   // [U]
   private: void updateTitleBar();
-  private: static void UpdateTitleBarTask(views::WindowId window_id);
   private: void UpdateTooltip(NMTTDISPINFO*);
 
   // [W]

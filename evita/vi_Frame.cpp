@@ -277,8 +277,6 @@ void Frame::DidChangeTabSelection(int selected_index) {
   m_pActivePane = pane;
   pane->Show();
   pane->Activate();
-  Application::instance()->PostDomTask(FROM_HERE,
-      base::Bind(&Frame::UpdateTitleBarTask, window_id()));
   #if DEBUG_FOCUS
     DEBUG_WIDGET_PRINTF("End selected_index=%d"
         " cur=" DEBUG_WIDGET_FORMAT
@@ -829,16 +827,6 @@ void Frame::updateTitleBar() {
   m_pActivePane->UpdateStatusBar();
 }
 
-
-void Frame::UpdateTitleBarTask(views::WindowId window_id) {
-  auto const window = views::Window::FromWindowId(window_id);
-  if (!window)
-    return;
-  auto const frame = window->as<Frame>();
-  if (!frame)
-    return;
-  frame->updateTitleBar();
-}
 
 void Frame::UpdateTooltip(NMTTDISPINFO* const pDisp) {
   auto const pPane = getPaneFromTab(static_cast<int>(pDisp->hdr.idFrom));

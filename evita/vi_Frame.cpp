@@ -627,17 +627,6 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       return 0;
     }
 
-    case WM_VSCROLL: {
-      auto const hwnd_scrollbar = reinterpret_cast<HWND>(lParam);
-      auto const widget = reinterpret_cast<Widget*>(
-        ::GetWindowLongPtr(hwnd_scrollbar, GWLP_USERDATA));
-      if (widget) {
-        widget->OnMessage(uMsg, wParam, lParam);
-        return 0;
-      }
-      break;
-    }
-
     default:
       if (uMsg == g_TabBand__TabDragMsg) {
         return onTabDrag(

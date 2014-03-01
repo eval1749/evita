@@ -53,42 +53,11 @@ class TextEditWindow
   private: typedef text::Range Range;
   private: typedef views::ContentWindow ParentClass;
   private: typedef views::TextRenderer TextRenderer;
-
-  private: struct ScrollBar {
-    HWND m_hwnd;
-    int m_nBar;
-
-    ScrollBar()
-        : m_hwnd(nullptr),
-          m_nBar(SB_CTL) {
-    }
-
-    ~ScrollBar();
-
-    bool GetInfo(SCROLLINFO* pInfo) {
-      return m_hwnd && ::GetScrollInfo(m_hwnd, m_nBar, pInfo);
-    }
-
-    HWND GetHwnd() const { return m_hwnd; }
-
-    void Set(HWND hwnd, int nBar) {
-      m_hwnd = hwnd;
-      m_nBar = nBar;
-    }
-
-    void ShowWindow(int) const;
-
-    void SetInfo(SCROLLINFO* pInfo, bool fRedraw) {
-      if (!m_hwnd)
-        return;
-      ::SetScrollInfo(m_hwnd, m_nBar, pInfo, fRedraw);
-    }
-  };
+  private: struct ScrollBar;
 
   private: std::unique_ptr<Caret> caret_;
   private: const gfx::Graphics* m_gfx;
   private: Posn m_lCaretPosn;
-  private: ScrollBar m_oVertScrollBar;
   // TODO(yosi): Manage life time of selection.
   private: Selection* selection_;
   #if SUPPORT_IME
@@ -98,6 +67,7 @@ class TextEditWindow
   #endif // SUPPORT_IME
   private: Range* m_pViewRange;
   private: std::unique_ptr<TextRenderer> text_renderer_;
+  private: std::unique_ptr<ScrollBar> vertical_scroll_bar_;
 
   // ctor/dtor
   public: explicit TextEditWindow(const dom::TextWindow& window);

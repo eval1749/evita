@@ -68,6 +68,37 @@ RenderSelection::RenderSelection(::Selection* selection)
 //
 // TextEditWindow::ScrollBar
 //
+struct TextEditWindow::ScrollBar {
+  HWND m_hwnd;
+  int m_nBar;
+
+  ScrollBar()
+      : m_hwnd(nullptr),
+        m_nBar(SB_CTL) {
+  }
+
+  ~ScrollBar();
+
+  bool GetInfo(SCROLLINFO* pInfo) {
+    return m_hwnd && ::GetScrollInfo(m_hwnd, m_nBar, pInfo);
+  }
+
+  HWND GetHwnd() const { return m_hwnd; }
+
+  void Set(HWND hwnd, int nBar) {
+    m_hwnd = hwnd;
+    m_nBar = nBar;
+  }
+
+  void ShowWindow(int) const;
+
+  void SetInfo(SCROLLINFO* pInfo, bool fRedraw) {
+    if (!m_hwnd)
+      return;
+    ::SetScrollInfo(m_hwnd, m_nBar, pInfo, fRedraw);
+  }
+};
+
 TextEditWindow::ScrollBar::~ScrollBar() {
   if (m_hwnd)
     ::DestroyWindow(m_hwnd);
@@ -95,7 +126,8 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
         m_lImeEnd(0),
         m_lImeStart(0),
       #endif // SUPPORT_IME
-      m_pViewRange(text_window.view_range()->text_range()) {
+      m_pViewRange(text_window.view_range()->text_range()),
+      vertical_scroll_bar_(std::make_unique<ScrollBar>()) {
 }
 
 TextEditWindow::~TextEditWindow() {
@@ -205,13 +237,13 @@ void TextEditWindow::DidChangeHierarchy() {
   m_gfx = &frame().gfx();
   text_renderer_->SetGraphics(m_gfx);
   auto const parent_hwnd = AssociatedHwnd();
-  if (auto const hwnd = m_oVertScrollBar.GetHwnd())
+  if (auto const hwnd = vertical_scroll_bar_->GetHwnd())
     ::SetParent(hwnd, parent_hwnd);
 }
 
 void TextEditWindow::DidHide() {
   // Note: It is OK that hidden window have focus.
-  m_oVertScrollBar.ShowWindow(SW_HIDE);
+  vertical_scroll_bar_->ShowWindow(SW_HIDE);
 }
 
 void TextEditWindow::DidKillFocus() {
@@ -235,7 +267,7 @@ void TextEditWindow::DidRequestFocus() {
 }
 
 void TextEditWindow::DidShow() {
-  m_oVertScrollBar.ShowWindow(SW_SHOW);
+  vertical_scroll_bar_->ShowWindow(SW_SHOW);
 }
 
 Posn TextEditWindow::EndOfLine(Posn lPosn) {
@@ -277,7 +309,7 @@ Posn TextEditWindow::GetEnd() {
 
 HWND TextEditWindow::GetScrollBar(int which) const {
   DCHECK_EQ(SB_VERT, which);
-  return m_oVertScrollBar.GetHwnd();
+  return vertical_scroll_bar_->GetHwnd();
 }
 
 //For Selection.MoveUp Screen
@@ -442,7 +474,7 @@ void TextEditWindow::onVScroll(uint nCode) {
       SCROLLINFO oInfo;
       oInfo.cbSize = sizeof(oInfo);
       oInfo.fMask = SIF_ALL;
-      if (m_oVertScrollBar.GetInfo(&oInfo)) {
+      if (vertical_scroll_bar_->GetInfo(&oInfo)) {
         auto const lStart = StartOfLine(oInfo.nTrackPos);
         text_renderer_->Format(lStart);
         Render();
@@ -553,8 +585,8 @@ void TextEditWindow::Render() {
 
 void TextEditWindow::SetScrollBar(HWND hwnd, int nBar) {
   DCHECK_EQ(SB_VERT, nBar);
-  DCHECK(!m_oVertScrollBar.m_hwnd);
-  m_oVertScrollBar.Set(hwnd, SB_CTL);
+  DCHECK(!vertical_scroll_bar_->m_hwnd);
+  vertical_scroll_bar_->Set(hwnd, SB_CTL);
 }
 
 int TextEditWindow::SmallScroll(int, int iDy) {
@@ -659,7 +691,7 @@ void TextEditWindow::updateScrollBar() {
     oInfo.nMax = 0;
   }
 
-  m_oVertScrollBar.SetInfo(&oInfo, true);
+  vertical_scroll_bar_->SetInfo(&oInfo, true);
 }
 
 static std::vector<base::string16> ComposeStatusBarTexts(

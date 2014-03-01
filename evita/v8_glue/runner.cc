@@ -19,7 +19,8 @@ const int kMaxCallDepth = 20;
 // Runner::EscapableHandleScope
 //
 Runner::EscapableHandleScope::EscapableHandleScope(Runner* runner)
-    : isolate_scope_(runner->isolate()),
+    : isolate_locker_(runner->isolate()),
+      isolate_scope_(runner->isolate()),
       handle_scope_(runner->isolate()),
       context_scope_(runner->context()),
       runner_(runner) {
@@ -39,7 +40,8 @@ Runner::EscapableHandleScope::~EscapableHandleScope() {
 // Runner::Scope
 //
 Runner::Scope::Scope(Runner* runner)
-    : isolate_scope_(runner->isolate()),
+    : isolate_locker_(runner->isolate()),
+      isolate_scope_(runner->isolate()),
       handle_scope_(runner->isolate()),
       context_scope_(runner->context()),
       runner_(runner) {

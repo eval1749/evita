@@ -20,6 +20,7 @@ class Runner : public gin::ContextHolder {
   public: typedef std::vector<v8::Handle<v8::Value>> Args;
 
   public: class EscapableHandleScope {
+    private: v8::Locker isolate_locker_;
     private: v8::Isolate::Scope isolate_scope_;
     private: v8::EscapableHandleScope handle_scope_;
     private: v8::Context::Scope context_scope_;
@@ -37,6 +38,7 @@ class Runner : public gin::ContextHolder {
   friend class EscapableHandleScope;
 
   public: class Scope {
+    private: v8::Locker isolate_locker_;
     private: v8::Isolate::Scope isolate_scope_;
     private: v8::HandleScope handle_scope_;
     private: v8::Context::Scope context_scope_;

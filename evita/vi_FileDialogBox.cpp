@@ -11,7 +11,7 @@
 //
 #include "evita/vi_FileDialogBox.h"
 
-#include "evita/editor/dialog_box.h"
+#include "evita/editor/modal_message_loop_scope.h"
 
 // FileDialogBox ctor
 FileDialogBox::FileDialogBox()

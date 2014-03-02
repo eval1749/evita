@@ -14,7 +14,6 @@
 //#include "base/strings/string_number_conversions.h"
 #include "base/time/time.h"
 #include "evita/dom/script_thread.h"
-#include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/io/io_thread.h"
 #include "evita/views/frame_list.h"

@@ -432,7 +432,7 @@
 
         'ctrl_TitleBar.cpp',
         'editor/application.cc',
-        'editor/dialog_box.cc',
+        'editor/modal_message_loop_scope.cc',
         'editor/dom_lock.cc',
         'gfx_base.cpp',
         'gfx/color_f.cc',

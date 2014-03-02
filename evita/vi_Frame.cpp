@@ -36,7 +36,6 @@
 #include "evita/text/modes/mode.h"
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"
-#include "evita/editor/dialog_box.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/view_event_handler.h"

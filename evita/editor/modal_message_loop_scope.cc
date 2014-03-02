@@ -1,7 +1,7 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/editor/dialog_box.h"
+#include "evita/editor/modal_message_loop_scope.h"
 
 #include "base/logging.h"
 // L4 C4100: 'identifier' : unreferenced formal parameter

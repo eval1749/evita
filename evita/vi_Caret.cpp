@@ -66,7 +66,6 @@ void Caret::BackingStore::Save(const gfx::Graphics& gfx,
 //
 Caret::Caret()
   : backing_store_(new BackingStore()),
-    blink_timer_(this, &Caret::Blink),
     gfx_(nullptr),
     shown_(false),
     should_blink_(false),
@@ -77,9 +76,14 @@ Caret::~Caret() {
   DCHECK(!taken_);
 }
 
-void Caret::Blink(common::RepeatingTimer<Caret>*) {
+void Caret::Blink() {
   if (!taken_ || !should_blink_ || !rect_)
     return;
+  auto const now = base::Time::Now();
+  auto const delta = now - last_blink_time_;
+  if (delta < base::TimeDelta::FromMilliseconds(kBlinkInterval))
+    return;
+  last_blink_time_ = now;
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   if (shown_)
     Hide();
@@ -89,7 +93,6 @@ void Caret::Blink(common::RepeatingTimer<Caret>*) {
 
 void Caret::Give() {
   DCHECK(taken_);
-  blink_timer_.Stop();
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   Hide();
   taken_ = false;
@@ -124,7 +127,6 @@ void Caret::Show() {
 void Caret::Take(const gfx::Graphics& gfx) {
   taken_ = true;
   gfx_ = &gfx;
-  blink_timer_.Start(kBlinkInterval);
   if (!rect_)
     return;
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);

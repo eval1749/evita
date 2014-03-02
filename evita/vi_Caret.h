@@ -11,7 +11,7 @@
 #if !defined(INCLUDE_listener_winapp_visual_caret_h)
 #define INCLUDE_listener_winapp_visual_caret_h
 
-#include "common/timer/timer.h"
+#include "base/time/time.h"
 #include "gfx/rect_f.h"
 #include "evita/li_util.h"
 #include <memory>
@@ -27,7 +27,7 @@ class Caret {
   private: class BackingStore;
 
   private: const std::unique_ptr<BackingStore> backing_store_;
-  private: common::RepeatingTimer<Caret> blink_timer_;
+  private: base::Time last_blink_time_;
   private: const gfx::Graphics* gfx_;
   private: gfx::RectF rect_;
   private: bool shown_;
@@ -36,7 +36,7 @@ class Caret {
 
   public: Caret();
   public: ~Caret();
-  private: void Blink(common::RepeatingTimer<Caret>*);
+  public: void Blink();
   public: void Hide();
   public: void Give();
   public: void Reset();

@@ -346,6 +346,7 @@ void TextEditWindow::OnDraw(gfx::Graphics*) {
 }
 
 bool TextEditWindow::OnIdle(uint count) {
+  caret_->Blink();
   auto const more = GetBuffer()->OnIdle(count);
 
   if (is_shown())

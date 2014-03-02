@@ -60,8 +60,22 @@ Form::Form() {
 Form::~Form() {
 }
 
+FormControl* Form::control(int control_id) const {
+  auto const it = controls_.find(control_id);
+  return it == controls_.end() ? nullptr : it->second;
+}
+
+std::vector<FormControl*> Form::controls() const {
+  std::vector<FormControl*> controls(controls_.size());
+  controls.resize(0);
+  for (const auto& it : controls_) {
+    controls.push_back(it.second);
+  }
+  return std::move(controls);
+}
+
 void Form::AddFormControl(FormControl* control) {
-  controls_.push_back(control);
+  controls_[control->control_id()] = control;
   control->form_ = this;
 }
 

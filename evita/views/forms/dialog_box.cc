@@ -4,7 +4,6 @@
 
 #include "evita/views/forms/dialog_box.h"
 
-#include <unordered_map>
 #include <utility>
 
 #include "base/logging.h"
@@ -35,38 +34,11 @@ DialogBox* creating_dialog_box;
 
 //////////////////////////////////////////////////////////////////////
 //
-// DialogBox::DialogBox::Model
-//
-class DialogBox::Model {
-  private: std::unordered_map<int, dom::EventTargetId> id_map_;
-  public: Model() = default;
-  public: ~Model() = default;
-  public: dom::EventTargetId event_target_id_of(int control_id) const;
-  public: void Build(const dom::Form* form);
-};
-
-dom::EventTargetId DialogBox::Model::event_target_id_of(
-    int control_id) const {
-  auto present = id_map_.find(control_id);
-  return present == id_map_.end() ? dom::kInvalidEventTargetId :
-      present->second;
-}
-
-void DialogBox::Model::Build(const dom::Form* form) {
-  UI_DOM_AUTO_LOCK_SCOPE();
-  for (auto control : form->controls()) {
-    id_map_[control->control_id()] = control->event_target_id();
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
-//
 // DialogBox
 //
 DialogBox::DialogBox(dom::Form* form)
     : dialog_box_id_(form->dialog_box_id()),
-      form_(form),
-      model_(new Model()) {
+      form_(form) {
   DialogBoxSet::instance()->Register(this);
 }
 
@@ -107,10 +79,7 @@ INT_PTR CALLBACK DialogBox::DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 
 void DialogBox::DispatchFormEvent(const base::string16& type, int control_id,
                                   const base::string16& value) {
-  auto const event_target_id = model_->event_target_id_of(control_id);
-  if (event_target_id == dom::kInvalidEventTargetId)
-    return;
-  domapi::FormEvent event {event_target_id, type, value};
+  domapi::FormEvent event {dialog_box_id_, control_id, type, value};
   Application::instance()->view_event_handler()->DispatchFormEvent(event);
 }
 
@@ -190,7 +159,6 @@ INT_PTR DialogBox::onMessage(UINT, WPARAM, LPARAM) {
 }
 
 void DialogBox::Realize() {
-  model_->Build(form_);
   creating_dialog_box = this;
   hwnd_ = ::CreateDialogParam(
       g_hInstance,

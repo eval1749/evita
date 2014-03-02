@@ -68,6 +68,7 @@ Runner::Runner(v8::Isolate* isoalte, RunnerDelegate* delegate)
       in_scope_(false),
       #endif
       weak_factory_(this) {
+  v8::Locker locker_scope(isolate());
   v8::Isolate::Scope isolate_scope(isolate());
   v8::HandleScope handle_scope(isolate());
   auto const context = v8::Context::New(isolate(), nullptr,

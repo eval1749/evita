@@ -32,7 +32,6 @@ class DialogBox {
   private: DialogBoxId dialog_box_id_;
   private: gc::Member<dom::Form> form_;
   private: HWND hwnd_;
-  private: std::unique_ptr<Model> model_;
 
   protected: DialogBox(dom::Form* form);
   public: virtual ~DialogBox();

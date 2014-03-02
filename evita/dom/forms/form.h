@@ -6,6 +6,7 @@
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/public/dialog_box_id.h"
 
+#include <unordered_map>
 #include <vector>
 
 namespace dom {
@@ -15,14 +16,13 @@ class FormControl;
 class Form : public v8_glue::Scriptable<Form, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(Form);
 
-  private: std::vector<FormControl*> controls_;
+  private: std::unordered_map<int, FormControl*> controls_;
 
   public: Form();
   public: virtual ~Form();
 
-  public: const std::vector<FormControl*>& controls() const {
-    return controls_;
-  }
+  public: FormControl* control(int control_id) const;
+  public: std::vector<FormControl*> controls() const;
   public: domapi::DialogBoxId dialog_box_id() const {
     return event_target_id();
   }

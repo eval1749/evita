@@ -38,6 +38,7 @@ enum class MouseButton {
 
 struct FormEvent {
   dom::EventTargetId target_id;
+  int control_id;
   base::string16 type;
   base::string16 data;
 };

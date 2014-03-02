@@ -5,6 +5,8 @@
 
 #include "evita/dom/forms/form.h"
 #include "evita/dom/mock_view_impl.h"
+#include "evita/dom/public/api_event.h"
+#include "evita/dom/view_event_handler.h"
 #include "gmock/gmock.h"
 
 namespace {
@@ -39,18 +41,32 @@ TEST_F(FormTest, add) {
 
 TEST_F(FormTest, realize) {
   EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
-  EXPECT_CALL(*mock_view_impl(), RealizeDialogBox(_));
+  EXPECT_CALL(*mock_view_impl(), RealizeDialogBox(Eq(1)));
   EXPECT_SCRIPT_VALID("var sample = new Form();"
                       "sample.realize();");
 }
 
 TEST_F(FormTest, show) {
   EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
-  EXPECT_CALL(*mock_view_impl(), ShowDialogBox(_));
-  EXPECT_CALL(*mock_view_impl(), RealizeDialogBox(_));
+  EXPECT_CALL(*mock_view_impl(), RealizeDialogBox(Eq(1)));
+  EXPECT_CALL(*mock_view_impl(), ShowDialogBox(Eq(1)));
   EXPECT_SCRIPT_VALID("var sample = new Form();"
                       "sample.realize();"
                       "sample.show();");
+}
+
+TEST_F(FormTest, DispatchFormEvent) {
+  EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
+  EXPECT_SCRIPT_VALID("var sample = new Form();"
+                      "var text_field = new TextFieldControl(123);"
+                      "sample.add(text_field);");
+  domapi::FormEvent form_event;
+  form_event.target_id = 1;
+  form_event.control_id = 123;
+  form_event.type = L"change";
+  form_event.data = L"foo";
+  view_event_handler()->DispatchFormEvent(form_event);
+  EXPECT_SCRIPT_EQ("foo", "text_field.value");
 }
 
 }  // namespace

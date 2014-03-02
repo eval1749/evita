@@ -15,6 +15,8 @@
 #include "evita/dom/events/wheel_event.h"
 #include "evita/dom/events/window_event.h"
 #include "evita/dom/events/window_event_init.h"
+#include "evita/dom/forms/form.h"
+#include "evita/dom/forms/form_control.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/public/api_event.h"
 #include "evita/dom/script_controller.h"
@@ -178,15 +180,25 @@ void EventHandler::DidStartHost() {
 }
 
 void EventHandler::DispatchFormEvent(const domapi::FormEvent& raw_event) {
-  auto const target = EventTarget::FromEventTargetId(
-      raw_event.target_id);
+  auto const form_id = raw_event.target_id;
+  auto const target = EventTarget::FromEventTargetId(raw_event.target_id);
   if (!target)
     return;
+  auto const form = target->as<Form>();
+  if (!form) {
+    DVLOG(0) << "Event target " << form_id << " isn't a From.";
+    return;
+  }
+  auto const control = form->control(raw_event.control_id);
+  if (!control) {
+    DVLOG(0) <<  "Form " << form_id << " doesn't have control " <<
+        raw_event.control_id;
+  }
   FormEventInit init_dict;
   init_dict.set_bubbles(true);
   init_dict.set_cancelable(false);
   init_dict.set_data(raw_event.data);
-  DispatchEvent(target, new FormEvent(raw_event.type, init_dict));
+  DispatchEvent(control, new FormEvent(raw_event.type, init_dict));
 }
 
 void EventHandler::DispatchKeyboardEvent(

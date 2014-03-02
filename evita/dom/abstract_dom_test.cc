@@ -123,10 +123,11 @@ void AbstractDomTest::SetUp() {
   script_controller_ = dom::ScriptController::StartForTesting(
     mock_view_impl_.get(), mock_io_delegate_.get());
 
-  auto const isolate = v8::Isolate::GetCurrent();
-  v8::HandleScope handle_scope(isolate);
-  runner_.reset(new v8_glue::Runner(isolate, this));
-  ScriptController::instance()->set_testing_runner(runner_.get());
+  auto const isolate = script_controller_->isolate();
+  auto const runner = new v8_glue::Runner(isolate, this);
+  runner_.reset(runner);
+  ScriptController::instance()->set_testing_runner(runner);
+  v8_glue::Runner::Scope runner_scope(runner);
   ScriptController::instance()->DidStartHost();
 }
 

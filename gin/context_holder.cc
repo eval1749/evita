@@ -14,6 +14,7 @@ ContextHolder::ContextHolder(v8::Isolate* isolate)
 }
 
 ContextHolder::~ContextHolder() {
+  v8::Locker locker(isolate());
   v8::HandleScope handle_scope(isolate());
   v8::Handle<v8::Context> context = this->context();
 

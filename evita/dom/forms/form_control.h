@@ -19,8 +19,16 @@ class FormControl : public v8_glue::Scriptable<FormControl, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(FormControl);
   friend class Form; // for updating form_
 
+  protected: class HandlingFormEventScope {
+    private: FormControl* control_;
+    public: HandlingFormEventScope(FormControl* control);
+    public: ~HandlingFormEventScope();
+  };
+  friend class HandlingFormEventScope;
+
   private: FormResourceId control_id_;
   private: gc::Member<Form> form_;
+  private: bool handling_form_event_;
   private: base::string16 name_;
 
   protected: FormControl(int control_id, const base::string16& name);
@@ -30,7 +38,10 @@ class FormControl : public v8_glue::Scriptable<FormControl, EventTarget> {
 
   public: FormResourceId control_id() const { return control_id_; }
   public: Form* form() const { return form_.get(); }
+  protected: bool handling_form_event() const { return handling_form_event_; }
   public: const base::string16& name() const { return name_; }
+
+  public: void DispatchChangeEvent();
 
   DISALLOW_COPY_AND_ASSIGN(FormControl);
 };

@@ -3,6 +3,8 @@
 
 #include "evita/dom/forms/form_control.h"
 
+#include "evita/dom/events/event.h"
+#include "evita/dom/events/event_init.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
@@ -38,12 +40,27 @@ class FormControlClass :
 
 //////////////////////////////////////////////////////////////////////
 //
+// FormControl::HandlingFormEventScope
+//
+FormControl::HandlingFormEventScope::HandlingFormEventScope(
+    FormControl* control) : control_(control) {
+  DCHECK(!control_->handling_form_event_);
+  control_->handling_form_event_ = true;
+}
+
+FormControl::HandlingFormEventScope::~HandlingFormEventScope() {
+  DCHECK(control_->handling_form_event_);
+  control_->handling_form_event_ = false;
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // FormControl
 //
 DEFINE_SCRIPTABLE_OBJECT(FormControl, FormControlClass);
 
 FormControl::FormControl(FormResourceId control_id, const base::string16& name)
-    : control_id_(control_id), name_(name) {
+    : control_id_(control_id), handling_form_event_(false), name_(name) {
 }
 
 FormControl::FormControl(FormResourceId control_id)
@@ -54,6 +71,16 @@ FormControl::FormControl() : FormControl(kInvalidFormResourceId) {
 }
 
 FormControl::~FormControl() {
+}
+
+void FormControl::DispatchChangeEvent() {
+  if (!handling_form_event_ && form_) {
+    form_->DidChangeFormControl(this);
+  }
+  EventInit init_dict;
+  init_dict.set_bubbles(true);
+  init_dict.set_cancelable(false);
+  DispatchEvent(new Event(L"change", init_dict));
 }
 
 }  // namespace dom

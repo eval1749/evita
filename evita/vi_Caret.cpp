@@ -127,10 +127,6 @@ void Caret::Show() {
 void Caret::Take(const gfx::Graphics& gfx) {
   taken_ = true;
   gfx_ = &gfx;
-  if (!rect_)
-    return;
-  gfx::Graphics::DrawingScope drawing_scope(*gfx_);
-  Show();
 }
 
 void Caret::Update(const gfx::RectF& new_rect) {

@@ -17,7 +17,7 @@ class TextFieldControl
   public: virtual ~TextFieldControl();
 
   public: const base::string16& value() const { return value_; }
-  public: void set_value(const base::string16& value) { value_ = value; }
+  public: void set_value(const base::string16& value);
 
   // EventTarget
   private: virtual bool DispatchEvent(Event* event) override;

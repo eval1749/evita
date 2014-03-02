@@ -60,12 +60,24 @@ TextFieldControl::TextFieldControl(FormResourceId control_id)
 TextFieldControl::~TextFieldControl() {
 }
 
+void TextFieldControl::set_value(const base::string16& new_value) {
+  if (value_ == new_value)
+    return;
+  // TODO(yosi) Dispatch |beforeinput| and |input| event.
+  value_ = new_value;
+  DispatchChangeEvent();
+}
+
 bool TextFieldControl::DispatchEvent(Event* event) {
   CR_DEFINE_STATIC_LOCAL(base::string16, kChangeEvent, (L"change"));
 
   if (auto const form_event = event->as<FormEvent>()) {
-    if (event->type() == kChangeEvent)
-      value_ = form_event->data();
+    HandlingFormEventScope scope(this);
+    if (event->type() == kChangeEvent) {
+      auto& new_value = form_event->data();
+      set_value(new_value);
+    }
+    return false;;
   }
 
   return FormControl::DispatchEvent(event);

@@ -29,7 +29,7 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void ComputeOnTextWindow(dom::WindowId window_id,
       dom::TextWindowCompute* data, base::WaitableEvent* event) override;
   private: virtual void CreateDialogBox(
-      dom::DialogBoxId dialog_box_id) override;
+      domapi::DialogBoxId dialog_box_id) override;
   private: virtual void CreateEditorWindow(
       const dom::EditorWindow* window) override;
   private: virtual void CreateTableWindow(
@@ -69,7 +69,7 @@ class ViewDelegateImpl : public dom::ViewDelegate {
                                          base::WaitableEvent* event) override;
   private: virtual void SetCapture(dom::WindowId window_id) override;
   private: virtual void ShowDialogBox(
-      dom::DialogBoxId dialog_box_id) override;
+      domapi::DialogBoxId dialog_box_id) override;
   private: virtual void SplitHorizontally(dom::WindowId left_window,
       dom::WindowId new_right_window) override;
   private: virtual void SplitVertically(dom::WindowId above_window,

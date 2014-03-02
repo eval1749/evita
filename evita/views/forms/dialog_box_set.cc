@@ -17,9 +17,9 @@ DialogBoxSet::DialogBoxSet() {
 DialogBoxSet::~DialogBoxSet() {
 }
 
-void DialogBoxSet::DidDestroyDomDialog(dom::DialogBoxId dialog_box_id) {
+void DialogBoxSet::DidDestroyDomDialog(domapi::DialogBoxId dialog_box_id) {
   ASSERT_CALLED_ON_UI_THREAD();
-  DCHECK_NE(dom::kInvalidDialogBoxId, dialog_box_id);
+  DCHECK_NE(domapi::kInvalidDialogBoxId, dialog_box_id);
   auto it = map_.find(dialog_box_id);
   if (it == map_.end()) {
     DVLOG(0) << "Why we don't have a dialog for DialogBoxId " <<
@@ -29,25 +29,25 @@ void DialogBoxSet::DidDestroyDomDialog(dom::DialogBoxId dialog_box_id) {
   map_.erase(it);
 }
 
-DialogBox* DialogBoxSet::Find(dom::DialogBoxId dialog_box_id) {
+DialogBox* DialogBoxSet::Find(domapi::DialogBoxId dialog_box_id) {
   ASSERT_CALLED_ON_UI_THREAD();
-  DCHECK_NE(dom::kInvalidDialogBoxId, dialog_box_id);
+  DCHECK_NE(domapi::kInvalidDialogBoxId, dialog_box_id);
   auto it = map_.find(dialog_box_id);
   return it == map_.end() ? nullptr : it->second;
 }
 
-dom::DialogBoxId DialogBoxSet::Register(DialogBox* dialog) {
+domapi::DialogBoxId DialogBoxSet::Register(DialogBox* dialog) {
   ASSERT_CALLED_ON_UI_THREAD();
   auto const dialog_box_id = dialog->dialog_box_id();
-  DCHECK_NE(dom::kInvalidDialogBoxId, dialog_box_id);
+  DCHECK_NE(domapi::kInvalidDialogBoxId, dialog_box_id);
   DCHECK_EQ(0u, map_.count(dialog_box_id));
   map_[dialog_box_id] = dialog;
   return dialog_box_id;
 }
 
-void DialogBoxSet::Unregister(dom::DialogBoxId dialog_box_id) {
+void DialogBoxSet::Unregister(domapi::DialogBoxId dialog_box_id) {
   ASSERT_CALLED_ON_UI_THREAD();
-  DCHECK_NE(dom::kInvalidDialogBoxId, dialog_box_id);
+  DCHECK_NE(domapi::kInvalidDialogBoxId, dialog_box_id);
   auto const it = map_.find(dialog_box_id);
   if (it != map_.end())
     map_.erase(it);

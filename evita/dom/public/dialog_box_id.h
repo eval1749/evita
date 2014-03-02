@@ -5,11 +5,11 @@
 
 #include "evita/dom/events/event_target_id.h"
 
-namespace dom {
+namespace domapi {
 
-typedef EventTargetId DialogBoxId;
-const DialogBoxId kInvalidDialogBoxId = kInvalidEventTargetId;
+typedef dom::EventTargetId DialogBoxId;
+const DialogBoxId kInvalidDialogBoxId = dom::kInvalidEventTargetId;
 
-}  // namespace dom
+}  // namespace domapi
 
 #endif //!defined(INCLUDE_evita_dom_forms_dialog_box_id_h)

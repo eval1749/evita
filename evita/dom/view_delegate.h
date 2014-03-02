@@ -7,7 +7,7 @@
 
 #include "base/callback_forward.h"
 #include "base/strings/string16.h"
-#include "evita/dom/forms/dialog_box_id.h"
+#include "evita/dom/public/dialog_box_id.h"
 #include "evita/dom/window_id.h"
 #include "evita/dom/window_id.h"
 
@@ -29,8 +29,6 @@ class Form;
 class TextWindow;
 class ViewEventHandler;
 class Window;
-
-typedef EventTargetId DialogBoxId;
 
 struct TextWindowCompute {
   // Note: Value of |WindowCompute::Method| must match with JavaScript.
@@ -77,7 +75,7 @@ class ViewDelegate {
   public: virtual void ComputeOnTextWindow(WindowId window_id,
                                          TextWindowCompute* data,
                                          base::WaitableEvent* event) = 0;
-  public: virtual void CreateDialogBox(DialogBoxId dialog_box_id) = 0;
+  public: virtual void CreateDialogBox(domapi::DialogBoxId dialog_box_id) = 0;
   public: virtual void CreateEditorWindow(const EditorWindow* window) = 0;
   public: virtual void CreateTableWindow(WindowId window_id,
                                          Document* document) = 0;
@@ -113,7 +111,7 @@ class ViewDelegate {
   public: virtual void ScrollTextWindow(WindowId windowId, int direction,
                                         base::WaitableEvent* event) = 0;
   public: virtual void SetCapture(WindowId window_id) = 0;
-  public: virtual void ShowDialogBox(DialogBoxId dialog_box_id) = 0;
+  public: virtual void ShowDialogBox(domapi::DialogBoxId dialog_box_id) = 0;
   public: virtual void SplitHorizontally(WindowId left_window_id,
                                          WindowId new_right_window_id) = 0;
   public: virtual void SplitVertically(WindowId above_window_id,

@@ -155,7 +155,7 @@ void ViewDelegateImpl::ComputeOnTextWindow(dom::WindowId window_id,
   }
 }
 
-void ViewDelegateImpl::CreateDialogBox(dom::DialogBoxId dialog_box_id) {
+void ViewDelegateImpl::CreateDialogBox(domapi::DialogBoxId dialog_box_id) {
   new FindDialogBox(dialog_box_id);
 }
 
@@ -346,7 +346,7 @@ void ViewDelegateImpl::SaveFile(dom::Document* document,
   buffer->Save(filename, code_page, newline_mode, callback);
 }
 
-void ViewDelegateImpl::ShowDialogBox(dom::DialogBoxId dialog_box_id) {
+void ViewDelegateImpl::ShowDialogBox(domapi::DialogBoxId dialog_box_id) {
   auto const dialog_box = DialogBoxSet::instance()->Find(dialog_box_id);
   if (!dialog_box)
     return;

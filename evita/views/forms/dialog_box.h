@@ -8,10 +8,10 @@
 #include <memory>
 
 #include "base/strings/string16.h"
-#include "evita/dom/forms/dialog_box_id.h"
+#include "evita/dom/public/dialog_box_id.h"
 
-typedef dom::DialogBoxId DialogBoxId;
-const DialogBoxId kInvalidDialogBoxId = dom::kInvalidDialogBoxId;
+typedef domapi::DialogBoxId DialogBoxId;
+const DialogBoxId kInvalidDialogBoxId = domapi::kInvalidDialogBoxId;
 
 namespace dom {
 class Form;

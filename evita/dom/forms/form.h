@@ -4,7 +4,7 @@
 #define INCLUDE_evita_dom_forms_form_h
 
 #include "evita/dom/events/event_target.h"
-#include "evita/dom/forms/dialog_box_id.h"
+#include "evita/dom/public/dialog_box_id.h"
 
 #include <vector>
 
@@ -23,7 +23,9 @@ class Form : public v8_glue::Scriptable<Form, EventTarget> {
   public: const std::vector<FormControl*>& controls() const {
     return controls_;
   }
-  public: DialogBoxId dialog_box_id() const { return event_target_id(); }
+  public: domapi::DialogBoxId dialog_box_id() const {
+    return event_target_id();
+  }
 
   public: void AddFormControl(FormControl* control);
   public: void Realize();

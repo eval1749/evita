@@ -66,7 +66,8 @@ class ScriptThread final : public domapi::IoDelegate,
     WindowId new_parent_window_id) override;
   private: virtual void ComputeOnTextWindow(WindowId window_id,
       TextWindowCompute* data, base::WaitableEvent* event) override;
-  private: virtual void CreateDialogBox(DialogBoxId dialog_box_id) override;
+  private: virtual void CreateDialogBox(
+      domapi::DialogBoxId dialog_box_id) override;
   private: virtual void CreateEditorWindow(
       const EditorWindow* window) override;
   private: virtual void CreateTableWindow(
@@ -103,7 +104,8 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void ScrollTextWindow(WindowId window_id, int direction,
                                          base::WaitableEvent* event) override;
   private: virtual void SetCapture(WindowId window_id) override;
-  private: virtual void ShowDialogBox(DialogBoxId dialog_box_id) override;
+  private: virtual void ShowDialogBox(
+      domapi::DialogBoxId dialog_box_id) override;
 
   // ViewEventHandler
   private: virtual void AppendTextToBuffer(text::Buffer* buffer,

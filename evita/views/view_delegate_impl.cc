@@ -275,8 +275,7 @@ void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
     DVLOG(0) << "MakeSelectionVisible: not TextWidget " << window_id;
     return;
   }
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  DCHECK(lock_scope.locked());
+  UI_DOM_AUTO_LOCK_SCOPE();
   text_widget->MakeSelectionVisible();
 }
 
@@ -321,8 +320,7 @@ void ViewDelegateImpl::Reconvert(WindowId window_id, text::Posn start,
     DVLOG(0) << "WindowId " << window_id << " should be TextEditWindow.";
     return;
   }
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  DCHECK(lock_scope.locked());
+  UI_DOM_AUTO_LOCK_SCOPE();
   text_window->Reconvert(start, end);
 }
 

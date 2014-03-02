@@ -826,7 +826,7 @@ void Frame::OnDropTab(LPARAM lParam) {
 }
 
 // views::Window
-bool Frame::OnIdle(int const nCount) {
+bool Frame::OnIdle(int const hint) {
   DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
   static bool busy;
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
@@ -849,22 +849,8 @@ bool Frame::OnIdle(int const nCount) {
     std::swap(pending_update_rect_, rect);
     SchedulePaintInRect(rect);
   }
-  auto const more = Window::OnIdle(nCount);
-  if (nCount || !m_pActivePane)
-    return more;
-
-  auto const edit_pane = m_pActivePane->as<EditPane>();
-  if (!edit_pane)
-    return more;
-
-  auto const window = edit_pane->GetActiveWindow();
-  if (!window || !window->has_focus())
-    return more;
-
-  auto const text_edit_window = window->as<TextEditWindow>();
-  if (!text_edit_window)
-    return more;
-
-  updateTitleBar();
+  auto const more = Window::OnIdle(hint);
+  if (!hint)
+    updateTitleBar();
   return more;
 }

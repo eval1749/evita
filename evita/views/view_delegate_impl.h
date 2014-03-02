@@ -28,8 +28,7 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       dom::WindowId new_parent_id) override;
   private: virtual void ComputeOnTextWindow(dom::WindowId window_id,
       dom::TextWindowCompute* data, base::WaitableEvent* event) override;
-  private: virtual void CreateDialogBox(
-      domapi::DialogBoxId dialog_box_id) override;
+  private: virtual void CreateDialogBox(dom::Form* form) override;
   private: virtual void CreateEditorWindow(
       const dom::EditorWindow* window) override;
   private: virtual void CreateTableWindow(
@@ -56,7 +55,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       MessageBoxCallback callback) override;
   public: virtual void Reconvert(dom::WindowId window_id, text::Posn start,
                                  text::Posn end) override;
-  private: virtual void RealizeDialogBox(const dom::Form* form) override;
+  private: virtual void RealizeDialogBox(
+      domapi::DialogBoxId dialog_box) override;
   private: virtual void RealizeWindow(dom::WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(
       dom::ViewEventHandler* event_handler) override;

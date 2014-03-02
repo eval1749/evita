@@ -54,8 +54,7 @@ class FormClass :
 DEFINE_SCRIPTABLE_OBJECT(Form, FormClass);
 
 Form::Form() {
-  ScriptController::instance()->view_delegate()->CreateDialogBox(
-      dialog_box_id());
+  ScriptController::instance()->view_delegate()->CreateDialogBox(this);
 }
 
 Form::~Form() {
@@ -67,7 +66,8 @@ void Form::AddFormControl(FormControl* control) {
 }
 
 void Form::Realize() {
-  ScriptController::instance()->view_delegate()->RealizeDialogBox(this);
+  ScriptController::instance()->view_delegate()->RealizeDialogBox(
+      dialog_box_id());
 }
 
 void Form::Show() {

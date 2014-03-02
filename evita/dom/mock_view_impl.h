@@ -32,7 +32,7 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD3(ComputeOnTextWindow, void(WindowId,
                                        TextWindowCompute*,
                                        base::WaitableEvent*));
-  MOCK_METHOD1(CreateDialogBox, void(domapi::DialogBoxId));
+  MOCK_METHOD1(CreateDialogBox, void(Form*));
   MOCK_METHOD1(CreateEditorWindow, void(const EditorWindow*));
   MOCK_METHOD2(CreateTableWindow, void(WindowId, Document*));
   MOCK_METHOD1(CreateTextWindow, void(const TextWindow*));
@@ -57,7 +57,7 @@ class MockViewImpl : public dom::ViewDelegate {
   public: virtual void SaveFile(Document* document,
                                 const base::string16& filename,
                                 const SaveFileCallback& callback) override;
-  MOCK_METHOD1(RealizeDialogBox, void(const Form*));
+  MOCK_METHOD1(RealizeDialogBox, void(domapi::DialogBoxId));
   MOCK_METHOD1(RealizeWindow, void(WindowId));
   MOCK_METHOD1(RegisterViewEventHandler, void(ViewEventHandler*));
   MOCK_METHOD1(ReleaseCapture, void(WindowId));

@@ -66,8 +66,7 @@ class ScriptThread final : public domapi::IoDelegate,
     WindowId new_parent_window_id) override;
   private: virtual void ComputeOnTextWindow(WindowId window_id,
       TextWindowCompute* data, base::WaitableEvent* event) override;
-  private: virtual void CreateDialogBox(
-      domapi::DialogBoxId dialog_box_id) override;
+  private: virtual void CreateDialogBox(dom::Form* form) override;
   private: virtual void CreateEditorWindow(
       const EditorWindow* window) override;
   private: virtual void CreateTableWindow(
@@ -93,7 +92,8 @@ class ScriptThread final : public domapi::IoDelegate,
       MessageBoxCallback callback) override;
   private: virtual void Reconvert(WindowId window_id, text::Posn start,
                                   text::Posn end) override;
-  private: virtual void RealizeDialogBox(const Form* form) override;
+  private: virtual void RealizeDialogBox(
+      domapi::DialogBoxId dialog_box_id) override;
   private: virtual void RealizeWindow(WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) override;

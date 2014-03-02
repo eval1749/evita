@@ -145,7 +145,7 @@ void ScriptThread:: QueryFileStatus(const base::string16& filename,
 
 DEFINE_VIEW_DELEGATE_2(AddWindow, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(ChangeParentWindow, WindowId, WindowId)
-DEFINE_VIEW_DELEGATE_1(CreateDialogBox, domapi::DialogBoxId)
+DEFINE_VIEW_DELEGATE_1(CreateDialogBox, Form*)
 DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
 DEFINE_VIEW_DELEGATE_2(CreateTableWindow, WindowId, Document*)
 DEFINE_VIEW_DELEGATE_1(CreateTextWindow, const TextWindow*)
@@ -162,7 +162,7 @@ DEFINE_VIEW_DELEGATE_5(MessageBox, WindowId, const base::string16&,
                        const::base::string16&, int,
                        MessageBoxCallback)
 DEFINE_VIEW_DELEGATE_3(Reconvert, WindowId, text::Posn, text::Posn);
-DEFINE_VIEW_DELEGATE_1(RealizeDialogBox, const Form*)
+DEFINE_VIEW_DELEGATE_1(RealizeDialogBox, domapi::DialogBoxId)
 DEFINE_VIEW_DELEGATE_1(RealizeWindow, WindowId)
 DEFINE_VIEW_DELEGATE_1(ReleaseCapture, WindowId)
 DEFINE_VIEW_DELEGATE_3(SaveFile, Document*, const base::string16&,

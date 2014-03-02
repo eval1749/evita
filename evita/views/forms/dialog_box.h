@@ -9,6 +9,7 @@
 
 #include "base/strings/string16.h"
 #include "evita/dom/public/dialog_box_id.h"
+#include "evita/gc/member.h"
 
 typedef domapi::DialogBoxId DialogBoxId;
 const DialogBoxId kInvalidDialogBoxId = domapi::kInvalidDialogBoxId;
@@ -29,10 +30,11 @@ class DialogBox {
   private: class Model;
 
   private: DialogBoxId dialog_box_id_;
+  private: gc::Member<dom::Form> form_;
   private: HWND hwnd_;
   private: std::unique_ptr<Model> model_;
 
-  protected: DialogBox(DialogBoxId dialog_box_id);
+  protected: DialogBox(dom::Form* form);
   public: virtual ~DialogBox();
 
   public: operator HWND() const { return hwnd_; }
@@ -52,7 +54,7 @@ class DialogBox {
   protected: virtual INT_PTR onMessage(UINT message, WPARAM wParam,
                                        LPARAM lParam);
   protected: virtual void onOk();
-  public: void Realize(const dom::Form* form);
+  public: void Realize();
   public: int SetCheckBox(int item_id, bool checked);
   public: void Show();
 

@@ -75,7 +75,7 @@ class ViewDelegate {
   public: virtual void ComputeOnTextWindow(WindowId window_id,
                                          TextWindowCompute* data,
                                          base::WaitableEvent* event) = 0;
-  public: virtual void CreateDialogBox(domapi::DialogBoxId dialog_box_id) = 0;
+  public: virtual void CreateDialogBox(Form* form) = 0;
   public: virtual void CreateEditorWindow(const EditorWindow* window) = 0;
   public: virtual void CreateTableWindow(WindowId window_id,
                                          Document* document) = 0;
@@ -100,7 +100,7 @@ class ViewDelegate {
       MessageBoxCallback callback) = 0;
   public: virtual void Reconvert(WindowId window_id, text::Posn start,
                                  text::Posn end) = 0;
-  public: virtual void RealizeDialogBox(const Form* form) = 0;
+  public: virtual void RealizeDialogBox(domapi::DialogBoxId dialog_box_id) = 0;
   public: virtual void RealizeWindow(WindowId window_id) = 0;
   public: virtual void RegisterViewEventHandler(
       ViewEventHandler* event_handler) = 0;

@@ -49,8 +49,8 @@ Selection* GetActiveSelection() {
 //
 // FindDialogBox
 //
-FindDialogBox::FindDialogBox(DialogBoxId dialog_box_id)
-    : DialogBox(dialog_box_id),
+FindDialogBox::FindDialogBox(dom::Form* form)
+    : DialogBox(form),
       direction_(kDirectionDown),
       replace_in_(kReplaceInWhole) {
 }

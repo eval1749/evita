@@ -63,8 +63,9 @@ void DialogBox::Model::Build(const dom::Form* form) {
 //
 // DialogBox
 //
-DialogBox::DialogBox(DialogBoxId dialog_box_id)
-    : dialog_box_id_(dialog_box_id),
+DialogBox::DialogBox(dom::Form* form)
+    : dialog_box_id_(form->dialog_box_id()),
+      form_(form),
       model_(new Model()) {
   DialogBoxSet::instance()->Register(this);
 }
@@ -188,8 +189,8 @@ INT_PTR DialogBox::onMessage(UINT, WPARAM, LPARAM) {
   return 0;
 }
 
-void DialogBox::Realize(const dom::Form* form) {
-  model_->Build(form);
+void DialogBox::Realize() {
+  model_->Build(form_);
   creating_dialog_box = this;
   hwnd_ = ::CreateDialogParam(
       g_hInstance,

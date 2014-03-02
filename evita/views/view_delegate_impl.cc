@@ -155,8 +155,8 @@ void ViewDelegateImpl::ComputeOnTextWindow(dom::WindowId window_id,
   }
 }
 
-void ViewDelegateImpl::CreateDialogBox(domapi::DialogBoxId dialog_box_id) {
-  new FindDialogBox(dialog_box_id);
+void ViewDelegateImpl::CreateDialogBox(dom::Form* form) {
+  new FindDialogBox(form);
 }
 
 void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
@@ -313,11 +313,13 @@ void ViewDelegateImpl::Reconvert(WindowId window_id, text::Posn start,
   text_window->Reconvert(start, end);
 }
 
-void ViewDelegateImpl::RealizeDialogBox(const dom::Form* form) {
-  auto const dialog_box = DialogBoxSet::instance()->Find(form->event_target_id());
-  if (!dialog_box)
+void ViewDelegateImpl::RealizeDialogBox(domapi::DialogBoxId dialog_box_id) {
+  auto const dialog_box = DialogBoxSet::instance()->Find(dialog_box_id);
+  if (!dialog_box) {
+    DVLOG(0) << "No such dialog box " << dialog_box_id;
     return;
-  dialog_box->Realize(form);
+  }
+  dialog_box->Realize();
 }
 
 void ViewDelegateImpl::RealizeWindow(dom::WindowId window_id) {

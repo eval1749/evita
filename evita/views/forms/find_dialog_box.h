@@ -27,7 +27,7 @@ class FindDialogBox final : public DialogBox {
   private: Direction direction_;
   private: ReplaceIn replace_in_;
 
-  public: FindDialogBox(DialogBoxId dialog_box_id);
+  public: FindDialogBox(dom::Form* form);
   public: virtual ~FindDialogBox();
 
   private: void UpdateUI(bool activate = false);

@@ -10,7 +10,6 @@
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/wrapper_info.h"
-#include "evita/vi_Selection.h"
 
 namespace dom {
 

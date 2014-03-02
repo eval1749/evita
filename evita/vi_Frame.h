@@ -99,6 +99,7 @@ class Frame final : public views::Window,
   private: virtual void DidRequestFocus() override;
   public: void DidRequestFocusOnChild(views::Window* window);
   private: virtual void DidResize() override;
+  private: void DrawForResize();
 
   // [G]
   public: Pane* GetActivePane();

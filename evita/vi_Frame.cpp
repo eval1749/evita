@@ -350,29 +350,14 @@ void Frame::DidResize() {
     message_view_->SetMessage(text);
   }
 
-  gfx_->Resize(rect());
   {
-    gfx::Graphics::DrawingScope drawing_scope(*gfx_);
-
-    // We need to call |ID2D1RenderTarget::Clear()| to reset alpha value of
-    // pixels.
-    (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::White));
-
-    // To avoid script destroys Pane's, we lock DOM.
     const auto rc = GetPaneRect();
-    if (editor::DomLock::instance()->locked()) {
-      for (auto& pane: m_oPanes) {
-        pane.ResizeTo(rc);
-        pane.OnDraw(&*gfx_);
-      }
-    } else {
-      UI_DOM_AUTO_LOCK_SCOPE();
-      for (auto& pane: m_oPanes) {
-        pane.ResizeTo(rc);
-        pane.OnDraw(&*gfx_);
-      }
+    for (auto& pane: m_oPanes) {
+      pane.ResizeTo(rc);
     }
   }
+  gfx_->Resize(rect());
+  DrawForResize();
 }
 
 void Frame::DidRequestFocus() {
@@ -409,6 +394,31 @@ void Frame::DidRequestFocusOnChild(views::Window* window) {
   auto const tab_index = getTabFromPane(pane);
   if (tab_index >= 0)
     DidChangeTabSelection(tab_index);
+}
+
+// Note: We should call |ID2D1RenderTarget::Clear()| to reset alpha component
+// of pixels.
+void Frame::DrawForResize() {
+  gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+
+  // To avoid script destroys Pane's, we lock DOM.
+  if (editor::DomLock::instance()->locked()) {
+    (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::White));
+    for (auto& pane: m_oPanes) {
+      pane.OnDraw(&*gfx_);
+    }
+    return;
+  }
+
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  if (lock_scope.locked()) {
+    (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::White));
+    for (auto& pane: m_oPanes) {
+      pane.OnDraw(&*gfx_);
+    }
+    return;
+  }
+  (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::LightGray));
 }
 
 Frame* Frame::FindFrame(const ui::Widget& widget) {

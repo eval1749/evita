@@ -119,7 +119,7 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void DidResizeWidget(WindowId window_id, int left, int top,
                                         int right, int bottom) override;
   private: virtual void DidStartHost() override;
-  private: virtual void DispatchFormEvent(const ApiFormEvent& event) override;
+  private: virtual void DispatchFormEvent(const domapi::FormEvent& event) override;
   private: virtual void DispatchKeyboardEvent(
       const domapi::KeyboardEvent& event) override;
   private: virtual void DispatchMouseEvent(

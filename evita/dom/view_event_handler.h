@@ -12,6 +12,7 @@
 #include "evita/dom/window_id.h"
 
 namespace domapi {
+struct FormEvent;
 struct KeyboardEvent;
 struct MouseEvent;
 struct WheelEvent;
@@ -22,12 +23,6 @@ class Buffer;
 }
 
 namespace dom {
-
-struct ApiFormEvent {
-  EventTargetId target_id;
-  base::string16 type;
-  base::string16 data;
-};
 
 class ViewEventHandler {
   public: ViewEventHandler() = default;
@@ -44,7 +39,7 @@ class ViewEventHandler {
                                        int right, int bottom) = 0;
   public: virtual void DidRequestFocus(WindowId window_id) = 0;
   public: virtual void DidStartHost() = 0;
-  public: virtual void DispatchFormEvent(const ApiFormEvent& event) = 0;
+  public: virtual void DispatchFormEvent(const domapi::FormEvent& event) = 0;
   public: virtual void DispatchKeyboardEvent(
       const domapi::KeyboardEvent& event) = 0;
   public: virtual void DispatchMouseEvent(const domapi::MouseEvent& event) = 0;

@@ -177,7 +177,7 @@ void EventHandler::DidStartHost() {
   controller_->DidStartHost();
 }
 
-void EventHandler::DispatchFormEvent(const ApiFormEvent& raw_event) {
+void EventHandler::DispatchFormEvent(const domapi::FormEvent& raw_event) {
   auto const target = EventTarget::FromEventTargetId(
       raw_event.target_id);
   if (!target)

@@ -36,6 +36,12 @@ enum class MouseButton {
   Other2,
 };
 
+struct FormEvent {
+  dom::EventTargetId target_id;
+  base::string16 type;
+  base::string16 data;
+};
+
 struct KeyboardEvent {
   bool alt_key;
   bool control_key;

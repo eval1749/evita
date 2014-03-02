@@ -10,6 +10,7 @@
 #include "base/logging.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
+#include "evita/dom/public/api_event.h"
 #include "evita/dom/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
@@ -108,7 +109,7 @@ void DialogBox::DispatchFormEvent(const base::string16& type, int control_id,
   auto const event_target_id = model_->event_target_id_of(control_id);
   if (event_target_id == dom::kInvalidEventTargetId)
     return;
-  dom::ApiFormEvent event {event_target_id, type, value};
+  domapi::FormEvent event {event_target_id, type, value};
   Application::instance()->view_event_handler()->DispatchFormEvent(event);
 }
 

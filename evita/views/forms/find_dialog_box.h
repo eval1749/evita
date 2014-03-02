@@ -30,12 +30,11 @@ class FindDialogBox final : public DialogBox {
   public: FindDialogBox(dom::Form* form);
   public: virtual ~FindDialogBox();
 
-  private: void UpdateUI(bool activate = false);
-
   // views::DialogBox
   private: virtual int GetTemplate() const override;
   private: virtual void onCancel() override;
   private: virtual bool onCommand(WPARAM, LPARAM) override;
+  private: virtual bool OnIdle(int hint) override;
   private: virtual bool onInitDialog() override;
   private: virtual void onOk() override;
   private: virtual INT_PTR onMessage(UINT, WPARAM, LPARAM) override;

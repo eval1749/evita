@@ -7,8 +7,11 @@
 #include <utility>
 
 #include "base/logging.h"
+#include "evita/dom/forms/checkbox_control.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
+#include "evita/dom/forms/radio_button_control.h"
+#include "evita/dom/forms/text_field_control.h"
 #include "evita/dom/public/api_event.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
@@ -37,8 +40,8 @@ DialogBox* creating_dialog_box;
 // DialogBox
 //
 DialogBox::DialogBox(dom::Form* form)
-    : dialog_box_id_(form->dialog_box_id()),
-      form_(form) {
+    : dialog_box_id_(form->dialog_box_id()), dirty_(true), form_(form),
+      hwnd_(nullptr) {
   DialogBoxSet::instance()->Register(this);
 }
 
@@ -77,10 +80,25 @@ INT_PTR CALLBACK DialogBox::DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam,
   return dialog_box->onMessage(uMsg, wParam, lParam);
 }
 
+void DialogBox::DisableControl(int control_id) {
+  EnableControl(control_id, false);
+}
+
 void DialogBox::DispatchFormEvent(const base::string16& type, int control_id,
                                   const base::string16& value) {
   domapi::FormEvent event {dialog_box_id_, control_id, type, value};
   Application::instance()->view_event_handler()->DispatchFormEvent(event);
+}
+
+void DialogBox::EnableControl(int control_id, bool enable) {
+  auto const hwnd = GetDlgItem(control_id);
+  DCHECK(hwnd);
+  ::EnableWindow(hwnd, enable);
+}
+
+void DialogBox::FinishUpdateFromModel() {
+  DCHECK(dirty_);
+  dirty_ = false;
 }
 
 bool DialogBox::GetChecked(int item_id) const {
@@ -154,6 +172,10 @@ bool DialogBox::onCommand(WPARAM wParam, LPARAM lParam) {
   return false;
 }
 
+bool DialogBox::OnIdle(int) {
+  return false;
+}
+
 INT_PTR DialogBox::onMessage(UINT, WPARAM, LPARAM) {
   return 0;
 }
@@ -176,6 +198,55 @@ int DialogBox::SetCheckBox(int item_id, bool checked) {
 void DialogBox::Show() {
   ::ShowWindow(*this, SW_SHOW);
   ::SetActiveWindow(*this);
+}
+
+void DialogBox::UpdateCheckboxFromModel(int control_id) {
+  UI_ASSERT_DOM_LOCKED();
+  auto const control = form_->control(control_id);
+  if (!control) {
+    DVLOG(0) << "No such control " << control_id;
+    return;
+  }
+  auto const checkbox_control = control->as<dom::CheckboxControl>();
+  if (!checkbox_control) {
+    DVLOG(0) << "Control " << control_id << " isn't checkbox control.";
+    return;
+  }
+  auto const checked = checkbox_control->checked();
+  ::SendMessage(GetDlgItem(control_id), BM_SETCHECK,
+      static_cast<WPARAM>(checked ? BST_CHECKED : BST_UNCHECKED), 0);
+}
+
+void DialogBox::UpdateTextFromModel(int control_id) {
+  UI_ASSERT_DOM_LOCKED();
+  auto const control = form_->control(control_id);
+  if (!control) {
+    DVLOG(0) << "No such control " << control_id;
+    return;
+  }
+  auto const text_control = control->as<dom::TextFieldControl>();
+  if (!text_control) {
+    DVLOG(0) << "Control " << control_id << " isn't text field control.";
+    return;
+  }
+  ::SetWindowTextW(GetDlgItem(control_id), text_control->value().c_str());
+}
+
+void DialogBox::UpdateRadioButtonFromModel(int control_id) {
+  UI_ASSERT_DOM_LOCKED();
+  auto const control = form_->control(control_id);
+  if (!control) {
+    DVLOG(0) << "No such control " << control_id;
+    return;
+  }
+  auto const radio_button_control = control->as<dom::RadioButtonControl>();
+  if (!radio_button_control) {
+    DVLOG(0) << "Control " << control_id << " isn't radio_button control.";
+    return;
+  }
+  auto const checked = radio_button_control->checked();
+  ::SendMessage(GetDlgItem(control_id), BM_SETCHECK,
+      static_cast<WPARAM>(checked ? BST_CHECKED : BST_UNCHECKED), 0);
 }
 
 }  // namespace views

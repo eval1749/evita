@@ -30,6 +30,7 @@ class DialogBoxSet : public common::Singleton<DialogBoxSet> {
   public: ~DialogBoxSet();
 
   public: void DidDestroyDomDialog(domapi::DialogBoxId dialog_box_id);
+  public: bool DoIdle(int hint);
   public: DialogBox* Find(domapi::DialogBoxId dialog_box_id);
   public: domapi::DialogBoxId Register(DialogBox* dialog);
   public: void Unregister(domapi::DialogBoxId dialog_box_id);

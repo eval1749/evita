@@ -27,28 +27,34 @@ namespace views {
 // DialogBox
 //
 class DialogBox {
-  private: class Model;
-
   private: DialogBoxId dialog_box_id_;
+  private: bool dirty_;
   private: gc::Member<dom::Form> form_;
   private: HWND hwnd_;
 
   protected: DialogBox(dom::Form* form);
   public: virtual ~DialogBox();
 
-  public: operator HWND() const { return hwnd_; }
+  protected: operator HWND() const { return hwnd_; }
   public: DialogBoxId dialog_box_id() const { return dialog_box_id_; }
+  protected: bool dirty() const { return dirty_; }
+  protected: const dom::Form* form() const { return form_.get(); }
+  protected: bool realized() const { return hwnd_; }
 
   private: static INT_PTR CALLBACK DialogProc(HWND hwnd, UINT message,
                                               WPARAM wParam, LPARAM lParam);
+  protected: void DisableControl(int control_id);
   protected: void DispatchFormEvent(const base::string16& type, int control_id,
                                     const base::string16& value);
+  protected: void EnableControl(int control_id, bool enable);
+  protected: void FinishUpdateFromModel();
   protected: bool GetChecked(int control_id) const;
   protected: HWND GetDlgItem(int item_id) const;
   protected: base::string16 GetDlgItemText(int item_id) const;
   protected: virtual int GetTemplate() const = 0;
   protected: virtual void onCancel();
   protected: virtual bool onCommand(WPARAM wParam, LPARAM lParam);
+  public: virtual bool OnIdle(int hint);
   protected: virtual bool onInitDialog() = 0;
   protected: virtual INT_PTR onMessage(UINT message, WPARAM wParam,
                                        LPARAM lParam);
@@ -56,6 +62,9 @@ class DialogBox {
   public: void Realize();
   public: int SetCheckBox(int item_id, bool checked);
   public: void Show();
+  protected: void UpdateCheckboxFromModel(int control_id);
+  protected: void UpdateRadioButtonFromModel(int control_id);
+  protected: void UpdateTextFromModel(int control_id);
 
   DISALLOW_COPY_AND_ASSIGN(DialogBox);
 };

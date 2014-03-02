@@ -29,6 +29,15 @@ void DialogBoxSet::DidDestroyDomDialog(domapi::DialogBoxId dialog_box_id) {
   map_.erase(it);
 }
 
+bool DialogBoxSet::DoIdle(int hint) {
+  auto more = false;
+  for (auto& it : map_) {
+    if (it.second->OnIdle(hint))
+      more = true;
+  }
+  return more;
+}
+
 DialogBox* DialogBoxSet::Find(domapi::DialogBoxId dialog_box_id) {
   ASSERT_CALLED_ON_UI_THREAD();
   DCHECK_NE(domapi::kInvalidDialogBoxId, dialog_box_id);

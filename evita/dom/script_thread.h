@@ -73,6 +73,8 @@ class ScriptThread final : public domapi::IoDelegate,
       WindowId window_id, Document* document) override;
   private: virtual void CreateTextWindow(const TextWindow* window) override;
   private: virtual void DestroyWindow(WindowId window_id) override;
+  private: virtual void DidChangeFormContents(
+      domapi::DialogBoxId dialog_box_id) override;
   private: virtual void FocusWindow(WindowId window_id) override;
   private: virtual void GetFilenameForLoad(
       WindowId window_id, const base::string16& dir_path,

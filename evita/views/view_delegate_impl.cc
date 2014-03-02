@@ -186,6 +186,16 @@ void ViewDelegateImpl::DestroyWindow(dom::WindowId window_id) {
   widget->DestroyWidget();
 }
 
+void ViewDelegateImpl::DidChangeFormContents(
+    domapi::DialogBoxId dialog_box_id) {
+  auto const dialog_box = DialogBoxSet::instance()->Find(dialog_box_id);
+  if (!dialog_box) {
+    DVLOG(0) << "No such dialog box " << dialog_box_id;
+    return;
+  }
+  dialog_box->DidChangeFormContents();
+}
+
 void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {
   auto const widget = Window::FromWindowId(window_id);
   if (!widget) {

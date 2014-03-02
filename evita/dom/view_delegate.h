@@ -81,6 +81,8 @@ class ViewDelegate {
                                          Document* document) = 0;
   public: virtual void CreateTextWindow(const TextWindow* window) = 0;
   public: virtual void DestroyWindow(WindowId window_id) = 0;
+  public: virtual void DidChangeFormContents(
+      domapi::DialogBoxId dialog_box_id) = 0;
   public: virtual void FocusWindow(WindowId window_id) = 0;
   public: virtual void GetFilenameForLoad(
       WindowId window_id, const base::string16& dir_path,

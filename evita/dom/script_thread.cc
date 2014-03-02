@@ -150,6 +150,7 @@ DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
 DEFINE_VIEW_DELEGATE_2(CreateTableWindow, WindowId, Document*)
 DEFINE_VIEW_DELEGATE_1(CreateTextWindow, const TextWindow*)
 DEFINE_VIEW_DELEGATE_1(DestroyWindow, WindowId)
+DEFINE_VIEW_DELEGATE_1(DidChangeFormContents, domapi::DialogBoxId)
 DEFINE_VIEW_DELEGATE_1(FocusWindow, WindowId)
 DEFINE_VIEW_DELEGATE_3(GetFilenameForLoad, WindowId, const base::string16&,
                        ViewDelegate::GetFilenameForLoadCallback)

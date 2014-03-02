@@ -43,6 +43,7 @@ class DialogBox {
 
   private: static INT_PTR CALLBACK DialogProc(HWND hwnd, UINT message,
                                               WPARAM wParam, LPARAM lParam);
+  public: void DidChangeFormContents();
   protected: void DisableControl(int control_id);
   protected: void DispatchFormEvent(const base::string16& type, int control_id,
                                     const base::string16& value);

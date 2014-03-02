@@ -80,6 +80,10 @@ INT_PTR CALLBACK DialogBox::DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam,
   return dialog_box->onMessage(uMsg, wParam, lParam);
 }
 
+void DialogBox::DidChangeFormContents() {
+  dirty_ = true;
+}
+
 void DialogBox::DisableControl(int control_id) {
   EnableControl(control_id, false);
 }

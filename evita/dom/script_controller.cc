@@ -310,9 +310,10 @@ void ScriptController::UnhandledException(v8_glue::Runner*,
   }
 
   auto const isolate = runner()->isolate();
+  v8_glue::Runner::Scope runner_scope(runner());
   auto const console = runner_->GetGlobalProperty("console")->ToObject();
   auto const log = console->Get(gin::StringToV8(isolate, "log"));
-  runner_->Call(log, console, gin::StringToV8(isolate, text));
+  runner()->Call(log, console, gin::StringToV8(isolate, text));
 }
 
 }  // namespace dom

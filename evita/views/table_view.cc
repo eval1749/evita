@@ -110,13 +110,6 @@ void TableView::GetRowStates(const std::vector<base::string16>& keys,
   }
 }
 
-void TableView::RedrawWithinLock() {
-  auto new_model = UpdateModelIfNeeded();
-  if (!new_model)
-    return;
-  UpdateControl(std::move(new_model));
-}
-
 void TableView::UpdateControl(std::unique_ptr<TableViewModel> new_model) {
   if (*new_model->header_row() == *model_->header_row()) {
     NotifyModelChanges(control_, new_model.get(), model_.get());
@@ -233,12 +226,16 @@ void TableView::MakeSelectionVisible() {
 
 void TableView::Redraw() {
   // TableView::Redraw() is called from command.
-  if (editor::DomLock::instance()->locked()) {
-    RedrawWithinLock();
-  } else {
-    UI_DOM_AUTO_LOCK_SCOPE();
-    RedrawWithinLock();
+  if (!editor::DomLock::instance()->locked()) {
+    UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+    if (lock_scope.locked())
+      Redraw();
+    return;
   }
+  auto new_model = UpdateModelIfNeeded();
+  if (!new_model)
+    return;
+  UpdateControl(std::move(new_model));
 }
 
 void TableView::UpdateStatusBar() const {

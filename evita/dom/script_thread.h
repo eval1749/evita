@@ -141,9 +141,4 @@ class ScriptThread final : public domapi::IoDelegate,
 
 }  // namespace dom
 
-// TODO(yosi) We will remove this once we use |ViewDelegate| and
-// |domapi::ViewEventHandler|.
-#define ASSERT_CALLED_ON_SCRIPT_THREAD() \
-  DCHECK(dom::ScriptThread::instance()->CalledOnValidThread())
-
 #endif //!defined(INCLUDE_evita_dom_script_thread_h)

@@ -1,15 +1,19 @@
-// Copyright (C) 1996-2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-#include "evita/vi_FindDialogBox.h"
+#include "evita/views/forms/find_dialog_box.h"
 
 #include "base/logging.h"
+#include "evita/resource.h"
 #include "evita/text/range.h"
 #include "evita/views/frame_list.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_Selection.h"
 #include "evita/vi_TextEditWindow.h"
+
+namespace views {
 
 #define BEGIN_COMMAND_MAP switch (wParam) {
 #define END_COMMAND_MAP } return DialogBox::onCommand(wParam, lParam);
@@ -52,6 +56,40 @@ FindDialogBox::FindDialogBox(DialogBoxId dialog_box_id)
 }
 
 FindDialogBox::~FindDialogBox() {
+}
+
+/// <summary>Updates find dialog box controls.</summary>
+/// <param name="fActivate">True if dialog box is activated</param>
+void FindDialogBox::UpdateUI(bool fActivate) {
+  SetCheckBox(IDC_FIND_DOWN, kDirectionDown == direction_);
+  SetCheckBox(IDC_FIND_UP, kDirectionUp == direction_);
+
+  auto const cwch = ::GetWindowTextLength(GetDlgItem(IDC_FIND_WHAT));
+
+  ::EnableWindow(GetDlgItem(IDC_FIND_NEXT), cwch >= 1);
+  ::EnableWindow(GetDlgItem(IDC_FIND_PREVIOUS), cwch >= 1);
+  ::EnableWindow(GetDlgItem(IDC_FIND_WITH), cwch >= 1);
+  ::EnableWindow(GetDlgItem(IDC_FIND_REPLACE), cwch >= 1);
+  ::EnableWindow(GetDlgItem(IDC_FIND_REPLACE_ALL), cwch >= 1);
+
+ // If active selection covers mutliple lines, Search/Replace can be
+ // limited in selection.
+  if (auto const selection = GetActiveSelection()) {
+    auto const fHasNewline = selection->range()->FindFirstChar('\n') >= 0;
+    ::EnableWindow(GetDlgItem(IDC_FIND_SELECTION), fHasNewline);
+    ::EnableWindow(GetDlgItem(IDC_FIND_WHOLE_FILE), fHasNewline);
+
+    if (fActivate) {
+      replace_in_ = fHasNewline ? kReplaceInSelection : kReplaceInWhole;
+    }
+    SetCheckBox(IDC_FIND_SELECTION, kReplaceInSelection == replace_in_);
+    SetCheckBox(IDC_FIND_WHOLE_FILE, kReplaceInWhole == replace_in_);
+  }
+}
+
+// views::DialogBox
+int FindDialogBox::GetTemplate() const {
+  return IDD_FIND;
 }
 
 void FindDialogBox::onCancel() {
@@ -128,31 +166,4 @@ void FindDialogBox::onOk() {
             reinterpret_cast<LPARAM>(GetDlgItem(control_id)));
 }
 
-/// <summary>Updates find dialog box controls.</summary>
-/// <param name="fActivate">True if dialog box is activated</param>
-void FindDialogBox::UpdateUI(bool fActivate) {
-  SetCheckBox(IDC_FIND_DOWN, kDirectionDown == direction_);
-  SetCheckBox(IDC_FIND_UP, kDirectionUp == direction_);
-
-  auto const cwch = ::GetWindowTextLength(GetDlgItem(IDC_FIND_WHAT));
-
-  ::EnableWindow(GetDlgItem(IDC_FIND_NEXT), cwch >= 1);
-  ::EnableWindow(GetDlgItem(IDC_FIND_PREVIOUS), cwch >= 1);
-  ::EnableWindow(GetDlgItem(IDC_FIND_WITH), cwch >= 1);
-  ::EnableWindow(GetDlgItem(IDC_FIND_REPLACE), cwch >= 1);
-  ::EnableWindow(GetDlgItem(IDC_FIND_REPLACE_ALL), cwch >= 1);
-
- // If active selection covers mutliple lines, Search/Replace can be
- // limited in selection.
-  if (auto const selection = GetActiveSelection()) {
-    auto const fHasNewline = selection->range()->FindFirstChar('\n') >= 0;
-    ::EnableWindow(GetDlgItem(IDC_FIND_SELECTION), fHasNewline);
-    ::EnableWindow(GetDlgItem(IDC_FIND_WHOLE_FILE), fHasNewline);
-
-    if (fActivate) {
-      replace_in_ = fHasNewline ? kReplaceInSelection : kReplaceInWhole;
-    }
-    SetCheckBox(IDC_FIND_SELECTION, kReplaceInSelection == replace_in_);
-    SetCheckBox(IDC_FIND_WHOLE_FILE, kReplaceInWhole == replace_in_);
-  }
-}
+}  // namespace views

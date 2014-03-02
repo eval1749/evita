@@ -14,13 +14,13 @@
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/editor/modal_message_loop_scope.h"
-#include "evita/vi_EditPane.h"
-#include "evita/vi_FileDialogBox.h"
-#include "evita/vi_FindDialogBox.h"
-#include "evita/vi_Frame.h"
-#include "evita/vi_TextEditWindow.h"
+#include "evita/views/forms/file_dialog_box.h"
+#include "evita/views/forms/find_dialog_box.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/table_view.h"
+#include "evita/vi_EditPane.h"
+#include "evita/vi_Frame.h"
+#include "evita/vi_TextEditWindow.h"
 
 namespace views {
 

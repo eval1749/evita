@@ -1,17 +1,13 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_find_dialog_box_h)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#if !defined(INCLUDE_evita_views_forms_find_dialog_box_h)
 #define INCLUDE_evita_find_dialog_box_h
 
-#include "evita/IStringCursor.h"
-#include "evita/resource.h"
-#include "evita/vi_DialogBox.h"
+#include "evita/views/forms/dialog_box.h"
 
-class Selection;
-
-namespace text {
-class RegexMatcher;
-}
+namespace views {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -36,8 +32,8 @@ class FindDialogBox final : public DialogBox {
 
   private: void UpdateUI(bool activate = false);
 
-  // DialogBox
-  private: virtual int GetTemplate() const override { return IDD_FIND; }
+  // views::DialogBox
+  private: virtual int GetTemplate() const override;
   private: virtual void onCancel() override;
   private: virtual bool onCommand(WPARAM, LPARAM) override;
   private: virtual bool onInitDialog() override;
@@ -46,5 +42,7 @@ class FindDialogBox final : public DialogBox {
 
   DISALLOW_COPY_AND_ASSIGN(FindDialogBox);
 };
+
+}  // namespace views
 
 #endif //!defined(INCLUDE_evita_find_dialog_box_h)

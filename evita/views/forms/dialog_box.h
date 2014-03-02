@@ -1,7 +1,9 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_visual_dialog_h)
-#define INCLUDE_visual_dialog_h
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#if !defined(INCLUDE_evita_views_forms_dialog_box_h)
+#define INCLUDE_evita_views_forms_dialog_box_h
 
 #include <memory>
 
@@ -16,6 +18,8 @@ class Form;
 }
 
 #undef DialogBox
+
+namespace views {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -55,5 +59,7 @@ class DialogBox {
 
   DISALLOW_COPY_AND_ASSIGN(DialogBox);
 };
+
+}  // namespace views
 
 #endif //!defined(INCLUDE_visual_dialog_h)

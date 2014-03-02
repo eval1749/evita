@@ -1,7 +1,8 @@
-#include "precomp.h"
-// Copyright (C) 1996-2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#include "evita/vi_DialogBox.h"
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "evita/views/forms/dialog_box.h"
 
 #include <unordered_map>
 #include <utility>
@@ -17,6 +18,8 @@
 extern HINSTANCE g_hInstance;
 extern HINSTANCE g_hResource;
 extern HWND g_hwndActiveDialog;
+
+namespace views {
 
 namespace {
 
@@ -134,7 +137,6 @@ INT_PTR CALLBACK DialogBox::DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 
   switch (uMsg) {
     case WM_ACTIVATE:
-      DEBUG_PRINTF("WM_ACTIVATE %p wParam=%d\n", dialog_box, wParam);
       if (WA_INACTIVE == wParam)
         g_hwndActiveDialog = nullptr;
       else
@@ -261,3 +263,5 @@ void DialogBox::Show() {
   ::ShowWindow(*this, SW_SHOW);
   ::SetActiveWindow(*this);
 }
+
+}  // namespace views

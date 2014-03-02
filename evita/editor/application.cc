@@ -99,15 +99,13 @@ bool Application::CalledOnValidThread() const {
   return message_loop_.get() == base::MessageLoop::current();
 }
 
+// Note: We don't need to check ::GetStatus(QS_INPUT), becaue |DoIdle()| is
+// called after processing Windows message.
 void Application::DoIdle() {
   base::TimeDelta wait_time;
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  if (!lock_scope.locked()) {
-    // Script is still running == DOM may continue changing.
+  if (message_loop_->os_modal_loop()) {
     wait_time = base::TimeDelta::FromMilliseconds(100);
-  } else if (message_loop_->os_modal_loop()) {
-    wait_time = base::TimeDelta::FromMilliseconds(200);
-  } else if (TryDoIdle()) {
+  } else if (OnIdle(idle_count_)) {
     ++idle_count_;
     wait_time = base::TimeDelta::FromMilliseconds(1000 / 60);
   } else {
@@ -120,7 +118,7 @@ void Application::DoIdle() {
       wait_time);
 }
 
-bool Application::OnIdle(uint hint) {
+bool Application::OnIdle(int hint) {
   return views::FrameList::instance()->DoIdle(static_cast<int>(hint));
 }
 
@@ -133,17 +131,4 @@ void Application::Run() {
   DoIdle();
   base::RunLoop run_loop;
   run_loop.Run();
-}
-
-// TryDoIdle() returns true if more works are needed.
-bool Application::TryDoIdle() {
-  if (!OnIdle(static_cast<uint>(idle_count_)))
-    return false;
-  auto const status = ::GetQueueStatus(QS_ALLEVENTS);
-  #if DEBUG_IDLE
-  if (status) {
-    DVLOG(0) << "We have messages in queue, status=" << std::hex << status;
-  }
-  #endif
-  return status;
 }

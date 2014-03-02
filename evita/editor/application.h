@@ -68,16 +68,13 @@ class Application : public common::Singleton<Application> {
   public: const char16* GetTitle() const;
 
   // [O]
-  public: bool OnIdle(uint hint);
+  private: bool OnIdle(int hint);
 
   // [Q]
   public: void Quit();
 
   // [R]
   public: void Run();
-
-  // [T]
-  private: bool TryDoIdle();
 
   DISALLOW_COPY_AND_ASSIGN(Application);
 };

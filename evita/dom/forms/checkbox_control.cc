@@ -61,12 +61,24 @@ CheckboxControl::CheckboxControl(FormResourceId control_id)
 CheckboxControl::~CheckboxControl() {
 }
 
+void CheckboxControl::set_checked(bool new_checked) {
+  if (checked_ == new_checked)
+    return;
+  // TODO(yosi) Dispatch |beforeinput| and |input| event.
+  checked_ = new_checked;
+  DispatchChangeEvent();
+}
+
 bool CheckboxControl::DispatchEvent(Event* event) {
   CR_DEFINE_STATIC_LOCAL(base::string16, kChangeEvent, (L"change"));
 
   if (auto const form_event = event->as<FormEvent>()) {
-    if (event->type() == kChangeEvent)
-      checked_ = !form_event->data().empty();
+    HandlingFormEventScope scope(this);
+    if (event->type() == kChangeEvent) {
+      auto const new_checked = !form_event->data().empty();
+      set_checked(new_checked);
+    }
+    return false;
   }
 
   return FormControl::DispatchEvent(event);

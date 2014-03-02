@@ -19,7 +19,7 @@ class CheckboxControl
   public: virtual ~CheckboxControl();
 
   public: const bool checked() const { return checked_; }
-  public: void set_checked(bool checked) { checked_ = checked; }
+  public: void set_checked(bool checked);
 
   // EventTarget
   private: virtual bool DispatchEvent(Event* event) override;

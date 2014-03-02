@@ -18,7 +18,6 @@
 #include "evita/ui/widget_ostream.h"
 
 #define DEBUG_FOCUS 0
-#define DEBUG_IDLE 0
 #define DEBUG_MOUSE 0
 #define DEBUG_MOUSE_WHEEL 0
 #define DEBUG_RESIZE 0
@@ -262,18 +261,6 @@ void Widget::OnDraw(gfx::Graphics* gfx) {
     if (child->is_shown())
       child->OnDraw(gfx);
   }
-}
-
-bool Widget::OnIdle(int hint) {
-  #if DEBUG_IDLE
-    DEBUG_WIDGET_PRINTF("count=%d\n", hint);
-  #endif
-  auto more = false;
-  for (auto child : child_nodes()) {
-    if (child->OnIdle(hint))
-      more = true;
-  }
-  return more;
 }
 
 void Widget::OnKeyPressed(const KeyboardEvent&) {

@@ -81,8 +81,10 @@ class TableView
   private: virtual void DidRealize() override;
   private: virtual void DidRequestFocus() override;
   private: virtual void DidResize() override;
-  private: virtual bool OnIdle(int hint) override;
   private: virtual void Show() override;
+
+  // views::Window
+  private: virtual bool OnIdle(int hint) override;
 
   DISALLOW_COPY_AND_ASSIGN(TableView);
 };

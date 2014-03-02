@@ -530,52 +530,6 @@ void Frame::onDropFiles(HDROP const hDrop) {
   ::DragFinish(hDrop);
 }
 
-/// <summary>
-///   Idle processing
-/// </summary>
-bool Frame::OnIdle(int const nCount) {
-  DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
-  static bool busy;
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  if (!lock_scope.locked()) {
-    auto const now = base::Time::Now();
-    if (!busy) {
-      busy = true;
-      busy_start_at = now;
-    } else if (auto const delta = (now - busy_start_at).InSeconds()) {
-      message_view_->SetMessage(base::StringPrintf(
-        L"Script runs %ds. Ctrl+Break to terminate script.",
-        delta));
-    }
-    return true;
-  }
-
-  busy = false;
-  if (!pending_update_rect_.empty()) {
-    gfx::Rect rect;
-    std::swap(pending_update_rect_, rect);
-    SchedulePaintInRect(rect);
-  }
-  auto const more = Widget::OnIdle(nCount);
-  if (nCount || !m_pActivePane)
-    return more;
-
-  auto const edit_pane = m_pActivePane->as<EditPane>();
-  if (!edit_pane)
-    return more;
-
-  auto const window = edit_pane->GetActiveWindow();
-  if (!window || !window->has_focus())
-    return more;
-
-  auto const text_edit_window = window->as<TextEditWindow>();
-  if (!text_edit_window)
-    return more;
-
-  updateTitleBar();
-  return more;
-}
-
 LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
                          LPARAM const lParam) {
   switch (uMsg) {
@@ -869,4 +823,48 @@ void Frame::OnDropTab(LPARAM lParam) {
   Application::instance()->view_event_handler()->DidDropWidget(
       edit_pane->GetActiveWindow()->window_id(),
       window_id());
+}
+
+// views::Window
+bool Frame::OnIdle(int const nCount) {
+  DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
+  static bool busy;
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  if (!lock_scope.locked()) {
+    auto const now = base::Time::Now();
+    if (!busy) {
+      busy = true;
+      busy_start_at = now;
+    } else if (auto const delta = (now - busy_start_at).InSeconds()) {
+      message_view_->SetMessage(base::StringPrintf(
+        L"Script runs %ds. Ctrl+Break to terminate script.",
+        delta));
+    }
+    return true;
+  }
+
+  busy = false;
+  if (!pending_update_rect_.empty()) {
+    gfx::Rect rect;
+    std::swap(pending_update_rect_, rect);
+    SchedulePaintInRect(rect);
+  }
+  auto const more = Window::OnIdle(nCount);
+  if (nCount || !m_pActivePane)
+    return more;
+
+  auto const edit_pane = m_pActivePane->as<EditPane>();
+  if (!edit_pane)
+    return more;
+
+  auto const window = edit_pane->GetActiveWindow();
+  if (!window || !window->has_focus())
+    return more;
+
+  auto const text_edit_window = window->as<TextEditWindow>();
+  if (!text_edit_window)
+    return more;
+
+  updateTitleBar();
+  return more;
 }

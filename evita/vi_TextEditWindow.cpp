@@ -345,15 +345,6 @@ void TextEditWindow::OnDraw(gfx::Graphics*) {
   Redraw();
 }
 
-bool TextEditWindow::OnIdle(int hint) {
-  caret_->Blink();
-  auto const more = GetBuffer()->OnIdle(hint);
-
-  if (is_shown())
-    Redraw();
-  return more;
-}
-
 LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
   switch (uMsg) {
     #if SUPPORT_IME
@@ -976,4 +967,14 @@ void TextEditWindow::DidResize() {
 int TextEditWindow::GetIconIndex() const {
   return views::IconCache::instance()->GetIconForFileName(
       GetBuffer()->GetName());
+}
+
+// views::Window
+bool TextEditWindow::OnIdle(int hint) {
+  caret_->Blink();
+  auto const more = GetBuffer()->OnIdle(hint);
+
+  if (is_shown())
+    Redraw();
+  return more;
 }

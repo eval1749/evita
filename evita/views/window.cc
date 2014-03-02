@@ -5,6 +5,7 @@
 
 #include <unordered_map>
 
+#include "common/tree/child_nodes.h"
 #include "evita/editor/application.h"
 #include "evita/dom/public/api_event.h"
 #include "evita/dom/view_event_handler.h"
@@ -195,6 +196,17 @@ void Window::DispatchMouseEvent(const ui::MouseEvent& event) {
   api_event.target_id = window_id();
   Application::instance()->view_event_handler()->DispatchMouseEvent(
       api_event);
+}
+
+bool Window::OnIdle(int hint) {
+  auto more = false;
+  for (auto child : child_nodes()) {
+    if (auto const window = child->as<Window>()) {
+      if (window->OnIdle(hint))
+        more = true;
+    }
+  }
+  return more;
 }
 
 void Window::UpdateActiveTick() {

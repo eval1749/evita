@@ -47,6 +47,9 @@ class Window : public ui::Widget {
   // [F]
   public: static Window* FromWindowId(WindowId window_id);
 
+  // [O]
+  public: virtual bool OnIdle(int hint);
+
   // [U]
   public: void UpdateActiveTick();
 

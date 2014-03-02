@@ -266,6 +266,12 @@ void TableView::DidResize() {
   control_->ResizeTo(rect());
 }
 
+void TableView::Show() {
+  ContentWindow::Show();
+  Redraw();
+}
+
+// views::Window
 bool TableView::OnIdle(int) {
   if (!is_shown())
     return false;
@@ -274,11 +280,6 @@ bool TableView::OnIdle(int) {
     return false;
   UpdateControl(std::move(new_model));
   return false;
-}
-
-void TableView::Show() {
-  ContentWindow::Show();
-  Redraw();
 }
 
 }  // namespace views

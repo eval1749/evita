@@ -123,7 +123,6 @@ class Frame final : public views::Window,
 
   // [O]
   private: void onDropFiles(HDROP);
-  public: virtual bool OnIdle(int hint) override;
   private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;
 
@@ -150,6 +149,9 @@ class Frame final : public views::Window,
   private: virtual void DidChangeTabSelection(int new_selected_index) override;
   private: virtual void DidThrowTab(LPARAM lParam);
   private: virtual void OnDropTab(LPARAM lParam);
+
+  // views::Window
+  public: virtual bool OnIdle(int hint) override;
 
   DISALLOW_COPY_AND_ASSIGN(Frame);
 };

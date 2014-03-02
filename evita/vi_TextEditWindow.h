@@ -114,7 +114,6 @@ class TextEditWindow
 
   // [O]
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
-  private: virtual bool OnIdle(int hint) override;
   private: virtual LRESULT OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam);
 
   // [R]
@@ -150,6 +149,9 @@ class TextEditWindow
 
   // views::ContentWindow
   private: virtual int GetIconIndex() const override;
+
+  // views::Window
+  private: virtual bool OnIdle(int hint) override;
 
   DISALLOW_COPY_AND_ASSIGN(TextEditWindow);
 };

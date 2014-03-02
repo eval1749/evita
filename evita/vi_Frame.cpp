@@ -38,7 +38,7 @@
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/buffer.h"
-#include "evita/dom/view_event_handler.h"
+#include "evita/dom/public/view_event_handler.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/frame_observer.h"
 #include "evita/views/icon_cache.h"

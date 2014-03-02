@@ -46,7 +46,7 @@ v8::Isolate* AbstractDomTest::isolate() const {
   return runner_->isolate();
 }
 
-ViewEventHandler* AbstractDomTest::view_event_handler() const {
+domapi::ViewEventHandler* AbstractDomTest::view_event_handler() const {
   return script_controller_->event_handler();
 }
 

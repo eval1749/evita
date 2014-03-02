@@ -11,8 +11,8 @@
 #include "base/callback_forward.h"
 #include "base/location.h"
 #include "evita/dom/public/io_delegate.h"
+#include "evita/dom/public/view_event_handler.h"
 #include "evita/dom/view_delegate.h"
-#include "evita/dom/view_event_handler.h"
 
 namespace base {
 class MessageLoop;
@@ -27,13 +27,13 @@ class TextWindow;
 
 class ScriptThread final : public domapi::IoDelegate,
                            public ViewDelegate,
-                           public ViewEventHandler {
+                           public domapi::ViewEventHandler {
   private: base::MessageLoop* host_message_loop_;
   private: domapi::IoDelegate* io_delegate_;
   private: base::MessageLoop* io_message_loop_;
   private: std::unique_ptr<base::Thread> thread_;
   private: ViewDelegate* view_delegate_;
-  private: ViewEventHandler* view_event_handler_;
+  private: domapi::ViewEventHandler* view_event_handler_;
 
   private: ScriptThread(base::MessageLoop* host_message_loop,
                         ViewDelegate* view_delegate,
@@ -96,7 +96,7 @@ class ScriptThread final : public domapi::IoDelegate,
       domapi::DialogBoxId dialog_box_id) override;
   private: virtual void RealizeWindow(WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(
-      ViewEventHandler* event_handler) override;
+      domapi::ViewEventHandler* event_handler) override;
   private: virtual void ReleaseCapture(WindowId window_id) override;
   private: virtual void SaveFile(Document* document,
                                  const base::string16& filename,
@@ -107,7 +107,7 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void ShowDialogBox(
       domapi::DialogBoxId dialog_box_id) override;
 
-  // ViewEventHandler
+  // domapi::ViewEventHandler
   private: virtual void AppendTextToBuffer(text::Buffer* buffer,
                                            const base::string16& text) override;
   private: virtual void DidDestroyWidget(WindowId window_id) override;
@@ -141,7 +141,8 @@ class ScriptThread final : public domapi::IoDelegate,
 
 }  // namespace dom
 
-// TODO(yosi) We will remove this once we use ViewDelegate and ViewEventHandler.
+// TODO(yosi) We will remove this once we use |ViewDelegate| and
+// |domapi::ViewEventHandler|.
 #define ASSERT_CALLED_ON_SCRIPT_THREAD() \
   DCHECK(dom::ScriptThread::instance()->CalledOnValidThread())
 

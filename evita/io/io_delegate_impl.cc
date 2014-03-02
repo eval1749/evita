@@ -11,7 +11,7 @@
 #include "base/message_loop/message_pump_win.h"
 #pragma warning(pop)
 #include "base/time/time.h"
-#include "evita/dom/view_event_handler.h"
+#include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
 
 #define DVLOG_WIN32_ERROR(level, name) \

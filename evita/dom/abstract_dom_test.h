@@ -16,12 +16,15 @@
 #include "evita/v8_glue/script_callback.h"
 #include "evita/v8_glue/v8.h"
 
+namespace domapi {
+class ViewEventHandler;
+}
+
 namespace dom {
 
 class MockIoDelegate;
 class MockViewImpl;
 class ScriptController;
-class ViewEventHandler;
 
 class AbstractDomTest : public v8_glue::RunnerDelegate,
                         public ::testing::Test {
@@ -52,7 +55,7 @@ class AbstractDomTest : public v8_glue::RunnerDelegate,
     return mock_view_impl_.get();
   }
   protected: v8_glue::Runner* runner() const { return runner_.get(); }
-  protected: ViewEventHandler* view_event_handler() const;
+  protected: domapi::ViewEventHandler* view_event_handler() const;
 
   protected: template<typename... Params>
       bool Call(const base::StringPiece& name, Params... params);

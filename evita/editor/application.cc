@@ -90,7 +90,7 @@ const base::string16& Application::version() const {
   return version;
 }
 
-dom::ViewEventHandler* Application::view_event_handler() const {
+domapi::ViewEventHandler* Application::view_event_handler() const {
   return view_delegate_impl_->event_handler();
 }
 

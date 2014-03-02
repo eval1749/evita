@@ -1,7 +1,9 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_view_event_handler_h)
-#define INCLUDE_evita_dom_view_event_handler_h
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#if !defined(INCLUDE_evita_dom_public_view_event_handler_h)
+#define INCLUDE_evita_dom_public_view_event_handler_h
 
 #include <string>
 #include <vector>
@@ -11,22 +13,21 @@
 #include "evita/dom/events/event_target_id.h"
 #include "evita/dom/window_id.h"
 
-namespace domapi {
-struct FormEvent;
-struct KeyboardEvent;
-struct MouseEvent;
-struct WheelEvent;
-};
-
 namespace text {
 class Buffer;
 }
 
-namespace dom {
+namespace domapi {
+
+struct FormEvent;
+struct KeyboardEvent;
+struct MouseEvent;
+struct WheelEvent;
+using dom::WindowId;
 
 class ViewEventHandler {
-  public: ViewEventHandler() = default;
-  public: virtual ~ViewEventHandler() = default;
+  public: ViewEventHandler();
+  public: virtual ~ViewEventHandler();
 
   public: virtual void AppendTextToBuffer(text::Buffer* buffer,
                                           const base::string16& text) = 0;
@@ -39,12 +40,10 @@ class ViewEventHandler {
                                        int right, int bottom) = 0;
   public: virtual void DidRequestFocus(WindowId window_id) = 0;
   public: virtual void DidStartHost() = 0;
-  public: virtual void DispatchFormEvent(const domapi::FormEvent& event) = 0;
-  public: virtual void DispatchKeyboardEvent(
-      const domapi::KeyboardEvent& event) = 0;
-  public: virtual void DispatchMouseEvent(const domapi::MouseEvent& event) = 0;
-  public: virtual void DispatchWheelEvent(
-      const domapi::WheelEvent& event) = 0;
+  public: virtual void DispatchFormEvent(const FormEvent& event) = 0;
+  public: virtual void DispatchKeyboardEvent(const KeyboardEvent& event) = 0;
+  public: virtual void DispatchMouseEvent(const MouseEvent& event) = 0;
+  public: virtual void DispatchWheelEvent(const WheelEvent& event) = 0;
   public: virtual void OpenFile(WindowId window_id,
                                 const base::string16& filename) = 0;
   public: virtual void QueryClose(WindowId window_id) = 0;
@@ -54,6 +53,6 @@ class ViewEventHandler {
   DISALLOW_COPY_AND_ASSIGN(ViewEventHandler);
 };
 
-}  // namespace dom
+}  // namespace domapi
 
-#endif //!defined(INCLUDE_evita_dom_view_event_handler_h)
+#endif //!defined(INCLUDE_evita_dom_public_view_event_handler_h)

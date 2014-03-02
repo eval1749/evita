@@ -3,7 +3,7 @@
 #if !defined(INCLUDE_evita_dom_events_event_handler_h)
 #define INCLUDE_evita_dom_events_event_handler_h
 
-#include "evita/dom/view_event_handler.h"
+#include "evita/dom/public/view_event_handler.h"
 
 namespace dom {
 
@@ -11,7 +11,7 @@ class Event;
 class EventTarget;
 class ScriptController;
 
-class EventHandler : public ViewEventHandler {
+class EventHandler : public domapi::ViewEventHandler {
   private: ScriptController* controller_;
 
   public: EventHandler(ScriptController* controller);
@@ -19,7 +19,7 @@ class EventHandler : public ViewEventHandler {
 
   private: void DispatchEvent(EventTarget* event_target, Event* event);
 
-  // ViewEventHandler
+  // domapi::ViewEventHandler
   private: virtual void AppendTextToBuffer(text::Buffer* buffer,
                                            const base::string16& text) override;
   private: virtual void DidDestroyWidget(WindowId window_id) override;

@@ -19,7 +19,7 @@
 #include "common/win/size.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/view_delegate.h"
-#include "evita/dom/view_event_handler.h"
+#include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/io/io_delegate_impl.h"
 #include "evita/views/window_id.h"

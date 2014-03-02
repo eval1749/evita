@@ -10,7 +10,7 @@
 #include "evita/dom/editor_window.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/text_window.h"
-#include "evita/dom/view_event_handler.h"
+#include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/editor/modal_message_loop_scope.h"
@@ -332,7 +332,7 @@ void ViewDelegateImpl::RealizeWindow(dom::WindowId window_id) {
 }
 
 void ViewDelegateImpl::RegisterViewEventHandler(
-    dom::ViewEventHandler* event_handler) {
+    domapi::ViewEventHandler* event_handler) {
   DCHECK(!event_handler_);
   event_handler_ = event_handler;
   event_handler_->DidStartHost();

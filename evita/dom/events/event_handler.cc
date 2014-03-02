@@ -110,7 +110,7 @@ void EventHandler::DispatchEvent(EventTarget* event_target, Event* event) {
   runner->Call(js_method, js_target, event->GetWrapper(isolate));
 }
 
-// ViewEventHandler
+// domapi::ViewEventHandler
 void EventHandler::AppendTextToBuffer(text::Buffer* buffer,
                                       const base::string16& text) {
   DOM_AUTO_LOCK_SCOPE();
@@ -122,7 +122,6 @@ void EventHandler::AppendTextToBuffer(text::Buffer* buffer,
     buffer->SetReadOnly(true);
 }
 
-// ViewEventHandler
 void EventHandler::DidDestroyWidget(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)

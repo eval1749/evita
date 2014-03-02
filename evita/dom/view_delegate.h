@@ -18,6 +18,7 @@ class WaitableEvent;
 namespace domapi {
 struct LoadFileCallbackData;
 struct SaveFileCallbackData;
+class ViewEventHandler;
 }
 
 namespace dom {
@@ -27,7 +28,6 @@ class Document;
 class EditorWindow;
 class Form;
 class TextWindow;
-class ViewEventHandler;
 class Window;
 
 struct TextWindowCompute {
@@ -103,7 +103,7 @@ class ViewDelegate {
   public: virtual void RealizeDialogBox(domapi::DialogBoxId dialog_box_id) = 0;
   public: virtual void RealizeWindow(WindowId window_id) = 0;
   public: virtual void RegisterViewEventHandler(
-      ViewEventHandler* event_handler) = 0;
+      domapi::ViewEventHandler* event_handler) = 0;
   public: virtual void ReleaseCapture(WindowId window_id) = 0;
   public: virtual void SaveFile(Document* document,
                                 const base::string16& filename,

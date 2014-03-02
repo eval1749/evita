@@ -5,19 +5,15 @@
 
 #include "evita/dom/view_delegate.h"
 
-namespace dom {
-class ViewEventHandler;
-}
-
 namespace views {
 
 class ViewDelegateImpl : public dom::ViewDelegate {
-  private: dom::ViewEventHandler* event_handler_;
+  private: domapi::ViewEventHandler* event_handler_;
 
   public: ViewDelegateImpl();
   public: virtual ~ViewDelegateImpl();
 
-  public: dom::ViewEventHandler* event_handler() const {
+  public: domapi::ViewEventHandler* event_handler() const {
     return event_handler_;
   }
 
@@ -59,7 +55,7 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       domapi::DialogBoxId dialog_box) override;
   private: virtual void RealizeWindow(dom::WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(
-      dom::ViewEventHandler* event_handler) override;
+      domapi::ViewEventHandler* event_handler) override;
   private: virtual void ReleaseCapture(dom::WindowId window_id) override;
   private: virtual void SaveFile(dom::Document* document,
                                  const base::string16& filename,

@@ -13,7 +13,7 @@
 #include "base/callback.h"
 #pragma warning(pop)
 #include "base/strings/string16.h"
-#include "evita/dom/view_event_handler.h"
+#include "evita/dom/public/view_event_handler.h"
 #include "evita/v8_glue/isolate_holder.h"
 #include "evita/v8_glue/runner_delegate.h"
 #include "evita/v8_glue/scoped_persistent.h"

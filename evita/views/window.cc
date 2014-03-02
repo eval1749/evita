@@ -8,7 +8,7 @@
 #include "common/tree/child_nodes.h"
 #include "evita/editor/application.h"
 #include "evita/dom/public/api_event.h"
-#include "evita/dom/view_event_handler.h"
+#include "evita/dom/public/view_event_handler.h"
 #include "evita/ui/events/event.h"
 #include "evita/views/window_set.h"
 
@@ -79,7 +79,7 @@ class WindowIdMapper : public common::Singleton<WindowIdMapper> {
   }
 };
 
-dom::ViewEventHandler* view_event_handler() {
+domapi::ViewEventHandler* view_event_handler() {
   return Application::instance()->view_event_handler();
 }
 
@@ -253,7 +253,7 @@ void Window::OnMouseWheel(const ui::MouseWheelEvent& event) {
 
 void Window::DidRealize() {
   // TODO(yosi) Until we manage all widgets by WindowId, we don't call
-  // ViewEventHandler for unmanaged widget.
+  // |domapi::ViewEventHandler| for unmanaged widget.
   if (window_id_ != views::kInvalidWindowId) {
     view_event_handler()->DidRealizeWidget(window_id_);
     view_event_handler()->DidResizeWidget(window_id_, rect().left, rect().top,

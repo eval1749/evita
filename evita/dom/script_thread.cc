@@ -206,7 +206,7 @@ void ScriptThread::GetTableRowStates(WindowId window_id,
 }
 
 void ScriptThread::RegisterViewEventHandler(
-    ViewEventHandler* event_handler) {
+    domapi::ViewEventHandler* event_handler) {
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   if (!host_message_loop_)
     return;
@@ -231,7 +231,7 @@ void ScriptThread::ScrollTextWindow(WindowId window_id, int direction,
   event.Wait();
 }
 
-// ViewEventHandler
+// domapi::ViewEventHandler
 #define DEFINE_VIEW_EVENT_HANDLER_0(name) \
   void ScriptThread::name() { \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD(); \

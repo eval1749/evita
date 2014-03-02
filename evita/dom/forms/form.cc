@@ -79,6 +79,11 @@ void Form::AddFormControl(FormControl* control) {
   control->form_ = this;
 }
 
+void Form::DidChangeFormControl(FormControl*) {
+  ScriptController::instance()->view_delegate()->DidChangeFormContents(
+      dialog_box_id());
+}
+
 void Form::Realize() {
   ScriptController::instance()->view_delegate()->RealizeDialogBox(
       dialog_box_id());

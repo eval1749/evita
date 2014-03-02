@@ -28,6 +28,7 @@ class Form : public v8_glue::Scriptable<Form, EventTarget> {
   }
 
   public: void AddFormControl(FormControl* control);
+  public: void DidChangeFormControl(FormControl* control);
   public: void Realize();
   public: void Show();
 

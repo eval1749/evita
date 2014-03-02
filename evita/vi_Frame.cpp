@@ -590,6 +590,10 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       DEBUG_PRINTF("WM_DROPFILES\n");
       break;
 
+    case WM_EXITSIZEMOVE:
+      message_view_->SetMessage(base::string16());
+      break;
+
     case WM_GETMINMAXINFO: {
       auto pMinMax = reinterpret_cast<MINMAXINFO*>(lParam);
       pMinMax->ptMinTrackSize.x = 200;

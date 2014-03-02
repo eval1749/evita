@@ -107,7 +107,7 @@ class Widget
   // Note: We expose |OnDraw| for real time content resizing during toplevel
   // window resizing.
   public: virtual void OnDraw(gfx::Graphics* gfx);
-  public: virtual bool OnIdle(uint32_t idle_count);
+  public: virtual bool OnIdle(int hint);
   protected: virtual void OnKeyPressed(const KeyboardEvent& event);
   protected: virtual void OnKeyReleased(const KeyboardEvent& event);
   public: virtual LRESULT OnMessage(uint32_t uMsg, WPARAM wParam,

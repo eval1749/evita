@@ -114,7 +114,7 @@ class TextEditWindow
 
   // [O]
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
-  private: virtual bool OnIdle(uint) override;
+  private: virtual bool OnIdle(int hint) override;
   private: virtual LRESULT OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam);
 
   // [R]

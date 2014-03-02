@@ -123,7 +123,7 @@ class Frame final : public views::Window,
 
   // [O]
   private: void onDropFiles(HDROP);
-  public: virtual bool OnIdle(uint) override;
+  public: virtual bool OnIdle(int hint) override;
   private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;
 

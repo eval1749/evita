@@ -81,7 +81,7 @@ class TableView
   private: virtual void DidRealize() override;
   private: virtual void DidRequestFocus() override;
   private: virtual void DidResize() override;
-  private: virtual bool OnIdle(uint32 idle_count) override;
+  private: virtual bool OnIdle(int hint) override;
   private: virtual void Show() override;
 
   DISALLOW_COPY_AND_ASSIGN(TableView);

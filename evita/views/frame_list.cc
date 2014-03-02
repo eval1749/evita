@@ -31,7 +31,7 @@ Frame* FrameList::FindFrameByHwnd(HWND hwnd) const {
 bool FrameList::DoIdle(int hint) {
   auto need_more = false;
   for (auto frame: frames_) {
-    if (frame->OnIdle(static_cast<uint32_t>(hint)))
+    if (frame->OnIdle(hint))
       need_more = true;
   }
   return need_more;

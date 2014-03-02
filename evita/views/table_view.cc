@@ -266,7 +266,7 @@ void TableView::DidResize() {
   control_->ResizeTo(rect());
 }
 
-bool TableView::OnIdle(uint32) {
+bool TableView::OnIdle(int) {
   if (!is_shown())
     return false;
   auto new_model = UpdateModelIfNeeded();

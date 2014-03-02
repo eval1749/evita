@@ -17,7 +17,7 @@ Buffer::Buffer(const base::string16& name, text::Mode* mode)
 Buffer::~Buffer() {
 }
 
-bool Buffer::OnIdle(uint) {
+bool Buffer::OnIdle(int) {
   #if DEBUG_STYLE
   {
     DEBUG_PRINTF(L"%p\n", this);

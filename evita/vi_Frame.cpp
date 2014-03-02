@@ -533,7 +533,7 @@ void Frame::onDropFiles(HDROP const hDrop) {
 /// <summary>
 ///   Idle processing
 /// </summary>
-bool Frame::OnIdle(uint const nCount) {
+bool Frame::OnIdle(int const nCount) {
   DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
   static bool busy;
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);

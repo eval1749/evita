@@ -264,13 +264,13 @@ void Widget::OnDraw(gfx::Graphics* gfx) {
   }
 }
 
-bool Widget::OnIdle(uint32_t idle_count) {
+bool Widget::OnIdle(int hint) {
   #if DEBUG_IDLE
-    DEBUG_WIDGET_PRINTF("count=%d\n", idle_count);
+    DEBUG_WIDGET_PRINTF("count=%d\n", hint);
   #endif
   auto more = false;
   for (auto child : child_nodes()) {
-    if (child->OnIdle(idle_count))
+    if (child->OnIdle(hint))
       more = true;
   }
   return more;

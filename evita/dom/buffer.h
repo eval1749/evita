@@ -32,7 +32,7 @@ class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
                     const dom::ViewDelegate::LoadFileCallback& callback);
 
   // [O]
-  public: bool OnIdle(uint);
+  public: bool OnIdle(int hint);
 
   // [S]
   public: bool Save(const base::string16& filename,

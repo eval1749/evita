@@ -648,7 +648,6 @@ void Frame::OnPaint(const gfx::Rect rect) {
     } else {
       // TODO(yosi) Should we have list of dirty rectangles rather than
       // bounding dirty rectangles?
-      DVLOG(0) << "Pending paint " << rect;
       pending_update_rect_.Unite(rect);
     }
     return;

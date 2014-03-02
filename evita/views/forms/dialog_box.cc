@@ -8,12 +8,12 @@
 #include <utility>
 
 #include "base/logging.h"
-#include "common/memory/singleton.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/views/forms/dialog_box_set.h"
 
 extern HINSTANCE g_hInstance;
 extern HINSTANCE g_hResource;
@@ -22,57 +22,6 @@ extern HWND g_hwndActiveDialog;
 namespace views {
 
 namespace {
-
-//////////////////////////////////////////////////////////////////////
-//
-// DialogBoxIdMapper
-//
-// This class represents mapping from widget id to DOM Dialog object.
-//
-class DialogBoxIdMapper : public common::Singleton<DialogBoxIdMapper> {
-  friend class common::Singleton<DialogBoxIdMapper>;
-
-  private: typedef DialogBoxId DialogBoxId;
-
-  private: std::unordered_map<DialogBoxId, DialogBox*> map_;
-
-  private: DialogBoxIdMapper() = default;
-  public: ~DialogBoxIdMapper() = default;
-
-  public: void DidDestroyDomDialog(DialogBoxId dialog_box_id) {
-    ASSERT_CALLED_ON_UI_THREAD();
-    DCHECK_NE(kInvalidDialogBoxId, dialog_box_id);
-    auto it = map_.find(dialog_box_id);
-    if (it == map_.end()) {
-      DVLOG(0) << "Why we don't have a dialog for DialogBoxId " <<
-          dialog_box_id << " in DialogBoxIdMap?";
-      return;
-    }
-    map_.erase(it);
-  }
-
-  public: DialogBox* Find(DialogBoxId dialog_box_id) {
-    ASSERT_CALLED_ON_UI_THREAD();
-    DCHECK_NE(kInvalidDialogBoxId, dialog_box_id);
-    auto it = map_.find(dialog_box_id);
-    return it == map_.end() ? nullptr : it->second;
-  }
-
-  public: DialogBoxId Register(DialogBox* dialog) {
-    ASSERT_CALLED_ON_UI_THREAD();
-    auto const dialog_box_id = dialog->dialog_box_id();
-    DCHECK_NE(kInvalidDialogBoxId, dialog_box_id);
-    DCHECK_EQ(0u, map_.count(dialog_box_id));
-    map_[dialog_box_id] = dialog;
-    return dialog_box_id;
-  }
-
-  public: void Unregister(DialogBoxId dialog_box_id) {
-    ASSERT_CALLED_ON_UI_THREAD();
-    DCHECK_NE(kInvalidDialogBoxId, dialog_box_id);
-    map_[dialog_box_id] = nullptr;
-  }
-};
 
 bool IsCheckBoxOrRadioButton(HWND hwnd){
   auto const style = ::GetWindowLong(hwnd, GWL_STYLE);
@@ -116,11 +65,11 @@ void DialogBox::Model::Build(const dom::Form* form) {
 DialogBox::DialogBox(DialogBoxId dialog_box_id)
     : dialog_box_id_(dialog_box_id),
       model_(new Model()) {
-  DialogBoxIdMapper::instance()->Register(this);
+  DialogBoxSet::instance()->Register(this);
 }
 
 DialogBox::~DialogBox() {
-  DialogBoxIdMapper::instance()->Unregister(dialog_box_id_);
+  DialogBoxSet::instance()->Unregister(dialog_box_id_);
 }
 
 INT_PTR CALLBACK DialogBox::DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam,
@@ -162,11 +111,6 @@ void DialogBox::DispatchFormEvent(const base::string16& type, int control_id,
   dom::ApiFormEvent event {event_target_id, type, value};
   Application::instance()->view_event_handler()->DispatchFormEvent(event);
 }
-
-DialogBox* DialogBox::FromDialogBoxId(DialogBoxId dialog_box_id) {
-  return DialogBoxIdMapper::instance()->Find(dialog_box_id);
-}
-
 
 bool DialogBox::GetChecked(int item_id) const {
   return BST_CHECKED == ::SendMessage(GetDlgItem(item_id), BM_GETCHECK, 0, 0);

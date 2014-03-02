@@ -42,7 +42,6 @@ class DialogBox {
                                               WPARAM wParam, LPARAM lParam);
   protected: void DispatchFormEvent(const base::string16& type, int control_id,
                                     const base::string16& value);
-  public: static DialogBox* FromDialogBoxId(DialogBoxId dialog_box_id);
   protected: bool GetChecked(int control_id) const;
   protected: HWND GetDlgItem(int item_id) const;
   protected: base::string16 GetDlgItemText(int item_id) const;

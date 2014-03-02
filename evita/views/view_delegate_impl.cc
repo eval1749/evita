@@ -14,6 +14,7 @@
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/editor/modal_message_loop_scope.h"
+#include "evita/views/forms/dialog_box_set.h"
 #include "evita/views/forms/file_dialog_box.h"
 #include "evita/views/forms/find_dialog_box.h"
 #include "evita/views/frame_list.h"
@@ -313,7 +314,7 @@ void ViewDelegateImpl::Reconvert(WindowId window_id, text::Posn start,
 }
 
 void ViewDelegateImpl::RealizeDialogBox(const dom::Form* form) {
-  auto const dialog_box = DialogBox::FromDialogBoxId(form->event_target_id());
+  auto const dialog_box = DialogBoxSet::instance()->Find(form->event_target_id());
   if (!dialog_box)
     return;
   dialog_box->Realize(form);
@@ -346,7 +347,7 @@ void ViewDelegateImpl::SaveFile(dom::Document* document,
 }
 
 void ViewDelegateImpl::ShowDialogBox(dom::DialogBoxId dialog_box_id) {
-  auto const dialog_box = DialogBox::FromDialogBoxId(dialog_box_id);
+  auto const dialog_box = DialogBoxSet::instance()->Find(dialog_box_id);
   if (!dialog_box)
     return;
   dialog_box->Show();

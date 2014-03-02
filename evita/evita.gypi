@@ -453,6 +453,7 @@
         'vi_Caret.cpp',
         'vi_EditPane.cpp',
         'views/forms/dialog_box.cc',
+        'views/forms/dialog_box_set.cc',
         'views/forms/file_dialog_box.cc',
         'views/forms/find_dialog_box.cc',
         'vi_Frame.cpp',

@@ -39,6 +39,7 @@ class FormClass :
     builder
         .SetProperty("controls", &Form::controls)
         .SetMethod("add", &Form::AddFormControl)
+        .SetMethod("control", &Form::control)
         .SetMethod("realize", &Form::Realize)
         .SetMethod("show", &Form::Show);
   }

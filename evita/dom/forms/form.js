@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/**
+ * @param {number} control_id
+ * @return {!FormControl}
+ */
 Form.prototype.get = function(control_id) {
-  var present = null;
-  this.controls.forEach(function(control) {
-    if (control.controlId == control_id)
-      present = control;
-  });
-  if (!present)
+  var control = this.control(control_id);
+  if (!control)
     throw 'No such control ' + control_id + ' in form.';
-  return /** @type {!FormControl} */(present);
+  return /** @type {!FormControl} */(control);
 };

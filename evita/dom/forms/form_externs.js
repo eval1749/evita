@@ -18,6 +18,12 @@ Form.prototype.add = function(control) {};
 Form.prototype.addEventListener = function(type, listener, opt_capture) {};
 
 /**
+ * @param {number} control_id
+ * @return {?FormControl}
+ */
+Form.prototype.control = function(control_id) {};
+
+/**
  * @param {!Event} event
  */
 Form.prototype.dispatchEvent = function(event) {};

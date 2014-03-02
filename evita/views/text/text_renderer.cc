@@ -298,10 +298,15 @@ bool TextRenderer::ScrollToPosn(Posn lPosn) {
 
 bool TextRenderer::ScrollUp() {
   DCHECK(gfx_);
-  // Note: We should scroll up if page shows end of buffer. Since,
-  // the last line may not be fully visible.
+  text_block_->EnsureLinePoints();
+  if (text_block_->IsShowEndOfDocument())
+    return false;
 
   if (!text_block_->DiscardFirstLine())
+    return false;
+
+  text_block_->EnsureLinePoints();
+  if (text_block_->IsShowEndOfDocument())
     return false;
 
   TextFormatter oFormatter(*gfx_, text_block_.get(), m_pBuffer,

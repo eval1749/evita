@@ -79,6 +79,13 @@ void TextBlock::InvalidateLines(text::Posn offset) {
     Reset();
 }
 
+bool TextBlock::IsShowEndOfDocument() const {
+  DCHECK(!dirty_);
+  DCHECK(!dirty_line_point_);
+  return GetLast()->GetEnd() > text_buffer_->GetEnd() &&
+         GetLast()->bottom() <= rect_.bottom;
+}
+
 void TextBlock::Prepend(TextLine* line) {
   DCHECK_LT(line->GetHeight(), 100.0f);
   lines_.push_front(line);

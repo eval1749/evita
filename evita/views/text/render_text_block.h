@@ -56,6 +56,7 @@ class TextBlock : public text::BufferMutationObserver {
   public: float GetHeight() const { return m_cy; }
   public: TextLine* GetLast() const { return lines_.back(); }
   private: void InvalidateLines(text::Posn offset);
+  public: bool IsShowEndOfDocument() const;
   public: void Prepend(TextLine*);
   public: void Reset();
   public: void SetRect(const gfx::RectF& rect);

@@ -100,21 +100,24 @@ bool Application::CalledOnValidThread() const {
 }
 
 void Application::DoIdle() {
-  #if DEBUG_IDLE
-    DVLOG(0) << "idle_count_=" << idle_count_ <<
-        " running=" << message_loop_->is_running() <<
-        " modal=" << message_loop_->os_modal_loop();
-  #endif
-  if (!message_loop_->os_modal_loop() && TryDoIdle()) {
+  base::TimeDelta wait_time;
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  if (!lock_scope.locked()) {
+    // Script is still running == DOM may continue changing.
+    wait_time = base::TimeDelta::FromMilliseconds(100);
+  } else if (message_loop_->os_modal_loop()) {
+    wait_time = base::TimeDelta::FromMilliseconds(200);
+  } else if (TryDoIdle()) {
     ++idle_count_;
-    message_loop_->PostTask(FROM_HERE, base::Bind(&Application::DoIdle,
-                                                  base::Unretained(this)));
+    wait_time = base::TimeDelta::FromMilliseconds(1000 / 60);
   } else {
+    // Nothing to do.
     idle_count_= 0;
-    message_loop_->PostNonNestableDelayedTask(FROM_HERE,
-        base::Bind(&Application::DoIdle, base::Unretained(this)),
-        base::TimeDelta::FromMilliseconds(1000 / 60));
+    wait_time = base::TimeDelta::FromMilliseconds(1000 / 60);
   }
+  message_loop_->PostNonNestableDelayedTask(FROM_HERE,
+      base::Bind(&Application::DoIdle, base::Unretained(this)),
+      wait_time);
 }
 
 bool Application::OnIdle(uint hint) {
@@ -134,9 +137,6 @@ void Application::Run() {
 
 // TryDoIdle() returns true if more works are needed.
 bool Application::TryDoIdle() {
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  if (!lock_scope.locked())
-    return true;
   if (!OnIdle(static_cast<uint>(idle_count_)))
     return false;
   auto const status = ::GetQueueStatus(QS_ALLEVENTS);

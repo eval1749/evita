@@ -17,6 +17,7 @@
 namespace base {
 class MessageLoop;
 class Thread;
+class WaitableEvent;
 }
 
 namespace dom {
@@ -34,8 +35,10 @@ class ScriptThread final : public domapi::IoDelegate,
   private: std::unique_ptr<base::Thread> thread_;
   private: ViewDelegate* view_delegate_;
   private: domapi::ViewEventHandler* view_event_handler_;
+  private: base::WaitableEvent* const waitable_event_;
 
-  private: ScriptThread(base::MessageLoop* host_message_loop,
+  private: ScriptThread(base::WaitableEvent* waitable_event,
+                        base::MessageLoop* host_message_loop,
                         ViewDelegate* view_delegate,
                         base::MessageLoop* io_message_loop,
                         domapi::IoDelegate* io_delegate);
@@ -50,7 +53,8 @@ class ScriptThread final : public domapi::IoDelegate,
   public: void PostTask(const tracked_objects::Location& from_here,
                         const base::Closure& task);
 
-  public: static void Start(base::MessageLoop* host_message_loop,
+  public: static void Start(base::WaitableEvent* waitable_event,
+                            base::MessageLoop* host_message_loop,
                             ViewDelegate* view_delegate,
                             base::MessageLoop* io_message_loop,
                             domapi::IoDelegate* io_delegate);

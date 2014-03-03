@@ -4,6 +4,12 @@
 /** @expose @type{number} */
 FormControl.prototype.controlId;
 
+/** @expose @type {?Form} */
+FormControl.prototype.form;
+
+/** @expose @type {string} */
+FormControl.prototype.name;
+
 /**
  * @param {string} type
  * @param {!EventListener} listener

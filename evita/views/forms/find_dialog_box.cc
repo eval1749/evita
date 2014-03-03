@@ -59,6 +59,89 @@ bool FindDialogBox::onInitDialog() {
   return false;
 }
 
+bool FindDialogBox::OnIdle(int) {
+  if (!realized())
+    return false;
+
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  if (!lock_scope.locked()) {
+    // Note: We keep text fields enabled not to interrupt user input.
+
+    // Use
+    DisableControl(IDC_FIND_EXACT);
+    DisableControl(IDC_FIND_WORD);
+    DisableControl(IDC_FIND_REGEX);
+
+    // Checkboxes
+    DisableControl(IDC_FIND_CASE);
+    DisableControl(IDC_FIND_ALLDOCS);
+    DisableControl(IDC_FIND_PRESERVE);
+
+    // Direction
+    DisableControl(IDC_FIND_DIRECTION);
+    DisableControl(IDC_FIND_UP);
+    DisableControl(IDC_FIND_DOWN);
+
+    // Replace In
+    DisableControl(IDC_FIND_REPLACE_IN);
+    DisableControl(IDC_FIND_SELECTION);
+    DisableControl(IDC_FIND_WHOLE_FILE);
+
+    // buttons
+    DisableControl(IDC_FIND_NEXT);
+    DisableControl(IDC_FIND_PREVIOUS);
+    DisableControl(IDC_FIND_REPLACE);
+    DisableControl(IDC_FIND_REPLACE_ALL);
+    return true;
+  }
+
+  if (dirty()) {
+    UpdateTextFromModel(IDC_FIND_WHAT);
+    UpdateTextFromModel(IDC_FIND_WITH);
+
+    UpdateCheckboxFromModel(IDC_FIND_CASE);
+    UpdateCheckboxFromModel(IDC_FIND_PRESERVE);
+    UpdateCheckboxFromModel(IDC_FIND_ALLDOCS);
+
+    UpdateRadioButtonFromModel(IDC_FIND_EXACT);
+    UpdateRadioButtonFromModel(IDC_FIND_WORD);
+    UpdateRadioButtonFromModel(IDC_FIND_REGEX);
+
+    UpdateRadioButtonFromModel(IDC_FIND_UP);
+    UpdateRadioButtonFromModel(IDC_FIND_DOWN);
+
+    UpdateRadioButtonFromModel(IDC_FIND_SELECTION);
+    UpdateRadioButtonFromModel(IDC_FIND_WHOLE_FILE);
+
+    FinishUpdateFromModel();
+  }
+
+  EnableControl(IDC_FIND_WHAT, true);
+
+  auto const can_find = !GetDlgItemText(IDC_FIND_WHAT).empty();
+  EnableControl(IDC_FIND_NEXT, can_find);
+  EnableControl(IDC_FIND_PREVIOUS, can_find);
+  EnableControl(IDC_FIND_WORD, can_find);
+  EnableControl(IDC_FIND_CASE, can_find);
+  EnableControl(IDC_FIND_REGEX, can_find);
+  EnableControl(IDC_FIND_ALLDOCS, can_find);
+  EnableControl(IDC_FIND_DIRECTION, can_find);
+  EnableControl(IDC_FIND_UP, can_find);
+  EnableControl(IDC_FIND_DOWN, can_find);
+  EnableControl(IDC_FIND_EXACT, can_find);
+  EnableControl(IDC_FIND_WITH, can_find);
+
+  auto const can_replace = !GetDlgItemText(IDC_FIND_WITH).empty();
+  EnableControl(IDC_FIND_REPLACE, can_replace);
+  EnableControl(IDC_FIND_REPLACE_ALL, can_replace);
+  EnableControl(IDC_FIND_PRESERVE, can_replace);
+  EnableControl(IDC_FIND_REPLACE_IN, can_replace);
+  EnableControl(IDC_FIND_SELECTION, can_replace);
+  EnableControl(IDC_FIND_WHOLE_FILE, can_replace);
+
+  return false;
+}
+
 INT_PTR FindDialogBox::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
   switch (uMsg) {
     case WM_ACTIVATE:

@@ -4,7 +4,9 @@
 
 #include "evita/views/forms/dialog_box.h"
 
+#include <ostream>
 #include <utility>
+#include <vector>
 
 #include "base/logging.h"
 #include "evita/dom/forms/checkbox_control.h"
@@ -26,10 +28,54 @@ namespace views {
 
 namespace {
 
-bool IsCheckBoxOrRadioButton(HWND hwnd){
-  auto const style = ::GetWindowLong(hwnd, GWL_STYLE);
-  auto const type = style & BS_TYPEMASK;
-  return type == BS_AUTOCHECKBOX || type == BS_AUTORADIOBUTTON;
+enum class ControlType {
+  Unknown,
+  Button,
+  Checkbox,
+  ComboBox,
+  RadioButton,
+  TextField,
+};
+
+std::ostream& operator<<(std::ostream& ostream, ControlType type) {
+  switch (type) {
+    case ControlType::Button:
+      return ostream << "Button";
+    case ControlType::Checkbox:
+      return ostream << "Checkbox";
+    case ControlType::ComboBox:
+      return ostream << "ComboBox";
+    case ControlType::RadioButton:
+      return ostream << "RadioButton";
+    case ControlType::TextField:
+      return ostream << "TextField";
+    case ControlType::Unknown:
+      return ostream << "Unknown";
+  }
+  return ostream << "ControlType(" << static_cast<int>(type) << ")";
+}
+
+ControlType GetControlType(HWND hwnd) {
+  base::string16 class_name(100, '?');
+  auto const class_name_length = ::GetClassName(hwnd, &class_name[0],
+      static_cast<int>(class_name.length()));
+  class_name.resize(static_cast<size_t>(class_name_length));
+  if (class_name == L"Button") {
+    auto const style = ::GetWindowLong(hwnd, GWL_STYLE);
+    auto const type = style & BS_TYPEMASK;
+    if (type == BS_CHECKBOX || type == BS_AUTOCHECKBOX)
+      return ControlType::Checkbox;
+    if (type == BS_RADIOBUTTON || type == BS_AUTORADIOBUTTON)
+      return ControlType::RadioButton;
+    if (type == BS_3STATE || type == BS_AUTO3STATE)
+      return ControlType::Checkbox;
+    return ControlType::Button;
+  }
+  if (class_name == L"ComboBox")
+    return ControlType::ComboBox;
+  if (class_name == L"Edit")
+    return ControlType::TextField;
+  return ControlType::Unknown;
 }
 
 base::string16 GetWindowText(HWND hwnd) {
@@ -43,6 +89,35 @@ base::string16 GetWindowText(HWND hwnd) {
   DCHECK_EQ(length, length2);
   text.resize(static_cast<size_t>(length2));
   return std::move(text);
+}
+
+std::vector<std::pair<HWND, int>> ListControls(HWND hwnd) {
+  class ChildWindowEnumerator {
+    private: std::vector<std::pair<HWND, int>> children_;
+    private: HWND hwnd_;
+
+    public: ChildWindowEnumerator(HWND hwnd) : hwnd_(hwnd) {
+    }
+
+    public: ~ChildWindowEnumerator() = default;
+
+    private: static BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam) {
+      auto const self = reinterpret_cast<ChildWindowEnumerator*>(lParam);
+      if (::GetParent(hwnd) != self->hwnd_)
+        return TRUE;
+      auto const control_id = static_cast<int>(::GetWindowLong(hwnd, GWL_ID));
+      if (control_id != -1)
+        self->children_.push_back(std::pair<HWND, int>(hwnd, control_id));
+      return TRUE;
+    }
+
+    public: std::vector<std::pair<HWND, int>> Run() {
+      ::EnumChildWindows(hwnd_, EnumChildProc, reinterpret_cast<LPARAM>(this));
+      return std::move(children_);
+    }
+  };
+  ChildWindowEnumerator enumerator(hwnd);
+  return enumerator.Run();
 }
 
 DialogBox* creating_dialog_box;
@@ -140,41 +215,53 @@ void DialogBox::onCancel() {
 
 bool DialogBox::onCommand(WPARAM wParam, LPARAM lParam) {
   auto const hwnd = reinterpret_cast<HWND>(lParam);
-  base::string16 class_name(100, '?');
-  auto const class_name_length = ::GetClassName(hwnd, &class_name[0],
-      static_cast<int>(class_name.length()));
-  class_name.resize(static_cast<size_t>(class_name_length));
   auto const code = HIWORD(wParam);
   auto const control_id = LOWORD(wParam);
+  auto const control_type = GetControlType(hwnd);
 
-  if (class_name == L"Button") {
-    if (IsCheckBoxOrRadioButton(hwnd)) {
+  switch (control_type) {
+    case ControlType::Button:
+      if (code == BN_CLICKED)
+        DispatchFormEvent(L"click", control_id, base::string16());
+      break;
+    case ControlType::Checkbox:
+    case ControlType::RadioButton:
       if (code == BN_CLICKED) {
         DispatchFormEvent(L"change", control_id,
                           Button_GetCheck(hwnd) == BST_CHECKED ? L"1" :
                           base::string16());
       }
-      return false;
-    }
-
-    if (code == BN_CLICKED) {
-      DispatchFormEvent(L"click", control_id, base::string16());
-      return false;
-    }
-    return false;
+      break;
+    case ControlType::ComboBox:
+      if (code == CBN_EDITCHANGE)
+          DispatchFormEvent(L"change", control_id, GetDlgItemText(control_id));
+      break;
   }
-
-  if (class_name == L"ComboBox") {
-    if (code == CBN_EDITCHANGE) {
-        DispatchFormEvent(L"change", control_id, GetDlgItemText(control_id));
-        return false;
-    }
-  }
-
   return false;
 }
 
 bool DialogBox::OnIdle(int) {
+  if (!realized() || !dirty_)
+    return false;
+
+  const auto controls = ListControls(hwnd_);
+
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  if (!lock_scope.locked()) {
+    // Note: We keep focus control enabled not to interrupt user input.
+    auto const focus_hwnd = ::GetFocus();
+    auto const focus_parent_hwnd = ::GetParent(focus_hwnd);
+    for (auto pair : controls) {
+      if (pair.first != focus_hwnd &&  pair.first != focus_parent_hwnd)
+        ::EnableWindow(pair.first, false);
+    }
+    dirty_ = true;
+    return true;
+  }
+
+  for (auto pair : controls) {
+    UpdateControlFromModel(pair.first, pair.second);
+  }
   return false;
 }
 
@@ -202,53 +289,50 @@ void DialogBox::Show() {
   ::SetActiveWindow(*this);
 }
 
-void DialogBox::UpdateCheckboxFromModel(int control_id) {
+void DialogBox::UpdateControlFromModel(HWND hwnd, int control_id) {
   UI_ASSERT_DOM_LOCKED();
   auto const control = form_->control(control_id);
   if (!control) {
-    DVLOG(0) << "No such control " << control_id;
+    DVLOG(1) << "No such control " << control_id;
     return;
   }
-  auto const checkbox_control = control->as<dom::CheckboxControl>();
-  if (!checkbox_control) {
-    DVLOG(0) << "Control " << control_id << " isn't checkbox control.";
-    return;
+  auto const control_type = GetControlType(hwnd);
+  switch (control_type) {
+    case ControlType::Button:
+      // TODO(yosi): Should we support button label?
+      break;
+    case ControlType::Checkbox: {
+      auto const checkbox_control = control->as<dom::CheckboxControl>();
+      if (!checkbox_control) {
+        DVLOG(0) << "Control " << control_id << " isn't checkbox control.";
+        break;
+      }
+      auto const checked = checkbox_control->checked();
+      Button_SetCheck(hwnd, checked ? BST_CHECKED : BST_UNCHECKED);
+      break;
+    }
+    case ControlType::ComboBox:
+    case ControlType::TextField:
+      if (auto const text_control = control->as<dom::TextFieldControl>()) {
+        if (GetWindowText(hwnd) != text_control->value())
+          ::SetWindowTextW(hwnd, text_control->value().c_str());
+      }
+      break;
+    case ControlType::RadioButton: {
+      auto const radio_button_control = control->as<dom::RadioButtonControl>();
+      if (!radio_button_control) {
+        DVLOG(0) << "Control " << control_id << " isn't radio_button control.";
+        break;
+      }
+      auto const checked = radio_button_control->checked();
+      Button_SetCheck(hwnd, checked ? BST_CHECKED : BST_UNCHECKED);
+      break;
+    }
+    default:
+      DVLOG(0) << "Ignore unknown control type " << control_type;
+      break;
   }
-  auto const checked = checkbox_control->checked();
-  ::SendMessage(GetDlgItem(control_id), BM_SETCHECK,
-      static_cast<WPARAM>(checked ? BST_CHECKED : BST_UNCHECKED), 0);
-}
-
-void DialogBox::UpdateTextFromModel(int control_id) {
-  UI_ASSERT_DOM_LOCKED();
-  auto const control = form_->control(control_id);
-  if (!control) {
-    DVLOG(0) << "No such control " << control_id;
-    return;
-  }
-  auto const text_control = control->as<dom::TextFieldControl>();
-  if (!text_control) {
-    DVLOG(0) << "Control " << control_id << " isn't text field control.";
-    return;
-  }
-  ::SetWindowTextW(GetDlgItem(control_id), text_control->value().c_str());
-}
-
-void DialogBox::UpdateRadioButtonFromModel(int control_id) {
-  UI_ASSERT_DOM_LOCKED();
-  auto const control = form_->control(control_id);
-  if (!control) {
-    DVLOG(0) << "No such control " << control_id;
-    return;
-  }
-  auto const radio_button_control = control->as<dom::RadioButtonControl>();
-  if (!radio_button_control) {
-    DVLOG(0) << "Control " << control_id << " isn't radio_button control.";
-    return;
-  }
-  auto const checked = radio_button_control->checked();
-  ::SendMessage(GetDlgItem(control_id), BM_SETCHECK,
-      static_cast<WPARAM>(checked ? BST_CHECKED : BST_UNCHECKED), 0);
+  ::EnableWindow(hwnd, !control->disabled());
 }
 
 }  // namespace views

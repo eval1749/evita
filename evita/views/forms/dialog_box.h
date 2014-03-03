@@ -37,7 +37,6 @@ class DialogBox {
 
   protected: operator HWND() const { return hwnd_; }
   public: DialogBoxId dialog_box_id() const { return dialog_box_id_; }
-  protected: bool dirty() const { return dirty_; }
   protected: const dom::Form* form() const { return form_.get(); }
   protected: bool realized() const { return hwnd_; }
 
@@ -63,9 +62,7 @@ class DialogBox {
   public: void Realize();
   public: int SetCheckBox(int item_id, bool checked);
   public: void Show();
-  protected: void UpdateCheckboxFromModel(int control_id);
-  protected: void UpdateRadioButtonFromModel(int control_id);
-  protected: void UpdateTextFromModel(int control_id);
+  private: void UpdateControlFromModel(HWND hwnd, int control_id);
 
   DISALLOW_COPY_AND_ASSIGN(DialogBox);
 };

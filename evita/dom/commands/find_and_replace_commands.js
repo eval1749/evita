@@ -257,32 +257,55 @@
     // TODO(yosi) |global.findForm| is only for debugging purpose.
     global.findForm = form;
 
+    function addAsDisabled(control) {
+      form.add(control);
+      control.disabled = true;
+    }
+
     form.add(new TextFieldControl(ControlId.WHAT));
-    form.add(new TextFieldControl(ControlId.WITH));
+    addAsDisabled(new TextFieldControl(ControlId.WITH));
 
-    form.add(new CheckboxControl(ControlId.ALLDOCS));
-    form.add(new CheckboxControl(ControlId.CASE));
-    form.add(new CheckboxControl(ControlId.PRESERVE));
+    addAsDisabled(new CheckboxControl(ControlId.ALLDOCS));
+    addAsDisabled(new CheckboxControl(ControlId.CASE));
+    addAsDisabled(new CheckboxControl(ControlId.PRESERVE));
 
-    form.add(new RadioButtonControl('use', ControlId.EXACT));
-    form.add(new RadioButtonControl('use', ControlId.WORD));
-    form.add(new RadioButtonControl('use', ControlId.REGEX));
+    addAsDisabled(new RadioButtonControl('use', ControlId.EXACT));
+    addAsDisabled(new RadioButtonControl('use', ControlId.WORD));
+    addAsDisabled(new RadioButtonControl('use', ControlId.REGEX));
 
-    form.add(new RadioButtonControl('direction', ControlId.UP));
-    form.add(new RadioButtonControl('direction', ControlId.DOWN));
+    addAsDisabled(new RadioButtonControl('direction', ControlId.UP));
+    addAsDisabled(new RadioButtonControl('direction', ControlId.DOWN));
 
-    form.add(new RadioButtonControl('where', ControlId.WHOLE_FILE));
-    form.add(new RadioButtonControl('where', ControlId.SELECTION));
+    addAsDisabled(new RadioButtonControl('where', ControlId.WHOLE_FILE));
+    addAsDisabled(new RadioButtonControl('where', ControlId.SELECTION));
 
-    form.add(new ButtonControl(ControlId.NEXT));
-    form.add(new ButtonControl(ControlId.PREVIOUS));
-    form.add(new ButtonControl(ControlId.REPLACE));
-    form.add(new ButtonControl(ControlId.REPLACE_ALL));
+    addAsDisabled(new ButtonControl(ControlId.NEXT));
+    addAsDisabled(new ButtonControl(ControlId.PREVIOUS));
+    addAsDisabled(new ButtonControl(ControlId.REPLACE));
+    addAsDisabled(new ButtonControl(ControlId.REPLACE_ALL));
 
     form.get(ControlId.EXACT).checked = true;
     form.get(ControlId.PRESERVE).checked = true;
     form.get(ControlId.UP).checked = true;
     form.get(ControlId.WHOLE_FILE).checked = true;
+
+    form.get(ControlId.WHAT).addEventListener('change', function() {
+      var can_find = form.get(ControlId.WITH).value != '';
+      form.get(ControlId.NEXT).disabled = !can_find;
+      form.get(ControlId.PREVIOUS).disabled = !can_find;
+
+      // Use
+      form.get(ControlId.EXACT).disabled = !can_find;
+      form.get(ControlId.WORD).disabled = !can_find;
+      form.get(ControlId.REGEX).disabled = !can_find;
+    });
+
+    form.get(ControlId.WITH).addEventListener('change', function() {
+      var can_replace = form.get(ControlId.WITH).value != '';
+      form.get(ControlId.REPLACE).disabled = !can_replace;
+      form.get(ControlId.REPLACE_ALL).disabled = !can_replace;
+      form.get(ControlId.PRESERVE).disabled = !can_replace;
+    });
 
     form.get(ControlId.NEXT).addEventListener('click', function() {
       if (!Window.focus)

@@ -17,6 +17,7 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/io/io_manager.h"
 #include "evita/io/io_thread.h"
+#include "evita/metrics/time_scope.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/forms/dialog_box_set.h"
 #include "evita/views/frame_list.h"
@@ -103,6 +104,8 @@ bool Application::CalledOnValidThread() const {
 // Note: We don't need to check ::GetStatus(QS_INPUT), becaue |DoIdle()| is
 // called after processing Windows message.
 void Application::DoIdle() {
+  METRICS_TIME_SCOPE();
+
   base::TimeDelta wait_time;
   if (message_loop_->os_modal_loop()) {
     wait_time = base::TimeDelta::FromMilliseconds(100);

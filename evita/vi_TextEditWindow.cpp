@@ -629,6 +629,8 @@ css::Style* g_pImeStyleTargetNotConverted;
 
 #define GCS_COMPSTRATTR (GCS_COMPSTR | GCS_COMPATTR | GCS_CURSORPOS)
 
+namespace {
+
 class Imc {
   private: HWND m_hwnd;
   private: HIMC m_himc;
@@ -642,6 +644,18 @@ class Imc {
 
   public: operator HIMC() const { return m_himc; }
 };
+
+Posn ReplaceSelection(Selection* selection, const base::char16* text,
+                      size_t length) {
+  auto const range = selection->range();
+  range->SetText(base::string16(text, length));
+  auto const end = range->GetEnd();
+  range->SetStart(end);
+  selection->SetStartIsActive(false);
+  return end;
+}
+
+}  // namespace
 
 void TextEditWindow::onImeComposition(LPARAM lParam) {
   if (!editor::DomLock::instance()->locked()) {
@@ -674,10 +688,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
 
     // Insert result string into buffer
     if (cwch >= 1) {
-      range->SetText(base::string16(rgwch, cwch));
-      range->Collapse(Collapse_End);
-      GetSelection()->SetStartIsActive(false);
-      m_lImeEnd = GetSelection()->GetEnd();
+      m_lImeEnd = ReplaceSelection(GetSelection(), rgwch, cwch);
       m_lImeStart = m_lImeEnd;
     }
   }
@@ -711,11 +722,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
     uint32 rgnClause[100];
     ::ImmGetCompositionString(imc, GCS_COMPCLAUSE, rgnClause,
                               sizeof(rgnClause));
-
-    range->SetText(base::string16(rgwch, cwch));
-    range->Collapse(Collapse_End);
-    GetSelection()->SetStartIsActive(false);
-    m_lImeEnd = GetSelection()->GetEnd();
+    m_lImeEnd = ReplaceSelection(GetSelection(), rgwch, cwch);
     range->SetRange(m_lImeStart + lCursor, m_lImeStart + lCursor);
 
     if (!g_pImeStyleInput) {

@@ -32,6 +32,19 @@ bool IsCheckBoxOrRadioButton(HWND hwnd){
   return type == BS_AUTOCHECKBOX || type == BS_AUTORADIOBUTTON;
 }
 
+base::string16 GetWindowText(HWND hwnd) {
+  auto const length = ::GetWindowTextLength(hwnd);
+  if (!length)
+    return base::string16();
+  // +1 for terminating zero.
+  base::string16 text(static_cast<size_t>(length + 1), '?');
+  auto const length2 = ::GetWindowTextW(hwnd, &text[0],
+                                        static_cast<int>(text.length()));
+  DCHECK_EQ(length, length2);
+  text.resize(static_cast<size_t>(length2));
+  return std::move(text);
+}
+
 DialogBox* creating_dialog_box;
 }  // namespace
 
@@ -114,17 +127,7 @@ HWND DialogBox::GetDlgItem(int item_id) const {
 }
 
 base::string16 DialogBox::GetDlgItemText(int item_id) const {
-  auto const hwnd = GetDlgItem(item_id);
-  auto const length = ::GetWindowTextLength(hwnd);
-  if (!length)
-    return base::string16();
-  // +1 for terminating zero.
-  base::string16 text(static_cast<size_t>(length + 1), '?');
-  auto const length2 = ::GetWindowTextW(hwnd, &text[0],
-                                        static_cast<int>(text.length()));
-  DCHECK_EQ(length, length2);
-  text.resize(static_cast<size_t>(length2));
-  return std::move(text);
+  return std::move(GetWindowText(GetDlgItem(item_id)));
 }
 
 void DialogBox::onOk() {

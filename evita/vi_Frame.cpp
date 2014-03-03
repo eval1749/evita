@@ -721,6 +721,8 @@ void Frame::ShowMessage(MessageLevel level,
 ///   Updates title bar to display active buffer.
 /// </summary>
 void Frame::updateTitleBar() {
+  if (!m_pActivePane)
+    return;
   auto const title = m_pActivePane->GetTitle();
   auto const tab_index = getTabFromPane(m_pActivePane);
   if (tab_index >= 0) {

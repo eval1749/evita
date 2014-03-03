@@ -35,9 +35,6 @@ class Range {
   // [E]
   private: Posn ensurePosn(Posn) const;
 
-  // [F]
-  public: Posn FindFirstChar(char16) const;
-
   // [G]
   public: Buffer* GetBuffer() const { return m_pBuffer; }
   public: Posn GetEnd() const { return m_lEnd; }

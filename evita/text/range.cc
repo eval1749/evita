@@ -172,14 +172,6 @@ Posn Range::ensurePosn(Posn lPosn) const {
   return lPosn;
 }
 
-Posn Range::FindFirstChar(char16 wchFind) const {
-  foreach (Buffer::EnumChar, oEnum, this) {
-    if (oEnum.Get() == wchFind)
-        return oEnum.GetPosn();
-  }
-    return -1;
-}
-
 // FIXME 2007-07-18 yosi We should stop if counter reaches zero.
 void Range::GetInformation(Information* out_oInfo, Count n) const {
   Count k = n;

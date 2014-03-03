@@ -162,12 +162,7 @@ bool DialogBox::onCommand(WPARAM wParam, LPARAM lParam) {
   }
 
   if (class_name == L"ComboBox") {
-    switch (code) {
-      // Note: It seems CBN_EDITCHANGE isn't sent.
-      case CBN_EDITCHANGE:
-      case CBN_EDITUPDATE:
-      case CBN_SELCHANGE:
-      case CBN_SELENDCANCEL:
+    if (code == CBN_EDITCHANGE) {
         DispatchFormEvent(L"change", control_id, GetDlgItemText(control_id));
         return false;
     }

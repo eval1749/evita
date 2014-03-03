@@ -33,12 +33,6 @@ class Interval;
 
 }  // namespace text
 
-enum CollapseWhich
-{
-    Collapse_End   = 0,
-    Collapse_Start = 1,
-}; // Collapse
-
 enum
 {
     Count_Backward =  -1 << 28,

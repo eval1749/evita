@@ -29,7 +29,6 @@ class Range {
   public: ~Range();
 
   // [C]
-  public: void Collapse(CollapseWhich = Collapse_Start);
   public: Count Copy();
 
   // [E]

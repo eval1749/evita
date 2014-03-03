@@ -107,19 +107,6 @@ Range::~Range() {
     m_pBuffer->ranges()->RemoveRange(this);
 }
 
-void Range::Collapse(CollapseWhich eCollapse) {
-  switch (eCollapse) {
-  case Collapse_End:
-    m_lStart = m_lEnd;
-    break;
-  case Collapse_Start:
-    m_lEnd = m_lStart;
-    break;
-  default:
-    NOTREACHED();
-  }
-}
-
 Count Range::Copy() {
   if (m_lStart == m_lEnd)
     return 0;

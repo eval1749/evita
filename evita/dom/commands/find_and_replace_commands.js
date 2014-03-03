@@ -103,7 +103,7 @@
     try {
       return new Editor.RegExp(search_text, {
         backward: backward,
-        ignoreCase: !form.get(ControlId.CASE).checked,
+        ignoreCase: shouldIgnoreCase(form, search_text),
         matchExact: form.get(ControlId.EXACT).checked,
         matchWord: form.get(ControlId.WORD).checked,
         multiline: form.get(ControlId.REGEX).checked
@@ -146,7 +146,7 @@
       return regexp;
     }
 
-    if (form.get(ControlId.SELECTION).checked && range.text.indexOf('\n') >= 0)
+    if (shouldFindInSelection(form, range))
       return finish(range.match_(regexp));
 
     var end = document.length;
@@ -174,7 +174,7 @@
     var selection = window.selection;
     var range = selection.range;
     var document = range.document;
-    var matches = form.get(ControlId.SELECTION) && !range.collapsed ?
+    var matches = shouldFindInSelection(form, range) ?
         document.match_(regexp, range.start, range.end) :
         document.match_(regexp, 0, document.length);
     if (!matches) {
@@ -185,9 +185,10 @@
     range.collapseTo(matches[0].start);
     range.end = matches[0].end;
     var new_text = form.get(ControlId.WITH).value;
+    var case_preserve = shouldPreserveCase(form, new_text);
     if (!regexp.matchExact)
       new_text = parseReplacement(document, new_text, matches);
-    if (form.get(ControlId.PRESERVE).checked)
+    if (case_preserve)
       new_text = caseReplace(new_text, range.analyzeCase());
     range.text = new_text;
     selection.startIsActive = false;
@@ -209,11 +210,12 @@
     var selection = window.selection;
     var selection_range = selection.range;
     var replace_range = new Range(selection_range);
-    if (selection_range.collapsed) {
+    if (!shouldFindInSelection(form, replace_range)) {
       replace_range.start = 0;
       replace_range.end = document.length;
     }
-    var case_preserve = form.get(ControlId.PRESERVE).checked;
+    var replace_text = form.get(ControlId.WITH).value;
+    var case_preserve = shouldPreserveCase(form, replace_text);
     var num_replaced = 0;
     var range = new Range(document);
     document.undoGroup('replace all', function() {
@@ -225,7 +227,7 @@
         ++num_replaced;
         range.collapseTo(matches[0].start);
         range.end = matches[0].end;
-        var new_text = form.get(ControlId.WITH).value;
+        var new_text = replace_text;
         if (!regexp.matchExact)
           new_text = parseReplacement(document, new_text, matches);
         if (case_preserve)
@@ -310,6 +312,21 @@
 
     form.realize();
     return form;
+  }
+
+  /**
+   * @param {string} text
+   * @return {boolean}
+   */
+  function hasUpperCase(text) {
+    for (var i = 0; i < text.length; ++i) {
+      var data = Unicode.UCD[text.charCodeAt(i)];
+      if (data.category == Unicode.Category.Lu ||
+          data.category == Unicode.Category.Lt) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -552,6 +569,42 @@
 
   function showFindFormCommand() {
     ensureForm().show();
+  }
+
+  /**
+   * @param {!Form} form
+   * @param {!Range} range
+   * @return {boolean}
+   */
+  function shouldFindInSelection(form, range) {
+    if (range.collapsed)
+      return false;
+    var document = range.document;
+    for (var offset = range.start; offset < range.end; ++offset) {
+      if (document.charCodeAt_(offset) == Unicode.LF)
+        return true;
+    }
+    return form.get(ControlId.SELECTION).checked;
+  }
+
+  /**
+   * @param {!Form} form
+   * @param {string} text
+   */
+  function shouldIgnoreCase(form, text) {
+    if (hasUpperCase(text))
+      return false;
+    return !form.get(ControlId.CASE).checked;
+  }
+
+  /**
+   * @param {!Form} form
+   * @param {string} text
+   */
+  function shouldPreserveCase(form, text) {
+    if (hasUpperCase(text))
+      return false;
+    return form.get(ControlId.PRESERVE).checked;
   }
 
   Editor.bindKey(TextWindow, 'Ctrl+F', showFindFormCommand);

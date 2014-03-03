@@ -30,6 +30,8 @@ class FormControlClass :
       ObjectTemplateBuilder& builder) override {
     builder
         .SetProperty("controlId", &FormControl::control_id)
+        .SetProperty("disabled", &FormControl::disabled,
+                                 &FormControl::set_disabled)
         .SetProperty("form", &FormControl::form)
         .SetProperty("name", &FormControl::name);
   }
@@ -60,7 +62,8 @@ FormControl::HandlingFormEventScope::~HandlingFormEventScope() {
 DEFINE_SCRIPTABLE_OBJECT(FormControl, FormControlClass);
 
 FormControl::FormControl(FormResourceId control_id, const base::string16& name)
-    : control_id_(control_id), handling_form_event_(false), name_(name) {
+    : control_id_(control_id), disabled_(false), handling_form_event_(false),
+      name_(name) {
 }
 
 FormControl::FormControl(FormResourceId control_id)
@@ -71,6 +74,14 @@ FormControl::FormControl() : FormControl(kInvalidFormResourceId) {
 }
 
 FormControl::~FormControl() {
+}
+
+void FormControl::set_disabled(bool new_disabled) {
+  if (disabled_ == new_disabled)
+    return;
+  disabled_ = new_disabled;
+  if (form_)
+    form_->DidChangeFormControl(this);
 }
 
 void FormControl::DispatchChangeEvent() {

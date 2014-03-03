@@ -4,6 +4,9 @@
 /** @expose @type{number} */
 FormControl.prototype.controlId;
 
+/** @expose @type {boolean} */
+FormControl.prototype.disabled;
+
 /** @expose @type {?Form} */
 FormControl.prototype.form;
 

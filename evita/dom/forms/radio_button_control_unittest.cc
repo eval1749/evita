@@ -23,7 +23,9 @@ class RadioButtonControlTest : public dom::AbstractDomTest {
 TEST_F(RadioButtonControlTest, ctor) {
   EXPECT_SCRIPT_VALID("var sample = new RadioButtonControl('foo', 123);");
   EXPECT_SCRIPT_EQ("123", "sample.controlId");
+  EXPECT_SCRIPT_FALSE("sample.disabled");
   EXPECT_SCRIPT_EQ("false", "sample.checked");
+  EXPECT_SCRIPT_FALSE("sample.checked");
 }
 
 TEST_F(RadioButtonControlTest, dispatchEvent) {
@@ -91,6 +93,17 @@ TEST_F(RadioButtonControlTest, set_checked) {
   EXPECT_SCRIPT_EQ("true", "sample2.checked");
   EXPECT_SCRIPT_EQ("2", "sample1.changed");
   EXPECT_SCRIPT_EQ("1", "sample2.changed");
+}
+
+TEST_F(RadioButtonControlTest, set_disabled) {
+  EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
+  EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
+  EXPECT_SCRIPT_VALID(
+      "var form = new Form();"
+      "var sample = new RadioButtonControl('foo', 123);"
+      "form.add(sample);"
+      "sample.disabled = true;");
+  EXPECT_SCRIPT_TRUE("sample.disabled");
 }
 
 }  // namespace

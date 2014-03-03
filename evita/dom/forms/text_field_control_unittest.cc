@@ -24,6 +24,7 @@ class TextFieldControlTest : public dom::AbstractDomTest {
 TEST_F(TextFieldControlTest, ctor) {
   EXPECT_SCRIPT_VALID("var sample = new TextFieldControl(123);");
   EXPECT_SCRIPT_EQ("123", "sample.controlId");
+  EXPECT_SCRIPT_FALSE("sample.disabled");
   EXPECT_SCRIPT_EQ("", "sample.value");
 }
 
@@ -43,6 +44,17 @@ TEST_F(TextFieldControlTest, dispatchEvent) {
   EXPECT_SCRIPT_VALID("sample.dispatchEvent(new FormEvent('change'))");
   EXPECT_SCRIPT_EQ("2", "changed") <<
       "UI doesn't change value, but event was dispatched.";
+}
+
+TEST_F(TextFieldControlTest, set_disabled) {
+  EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
+  EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
+  EXPECT_SCRIPT_VALID(
+      "var form = new Form();"
+      "var sample = new TextFieldControl(123);"
+      "form.add(sample);"
+      "sample.disabled = true;");
+  EXPECT_SCRIPT_TRUE("sample.disabled");
 }
 
 TEST_F(TextFieldControlTest, set_value) {

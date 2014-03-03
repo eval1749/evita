@@ -27,6 +27,7 @@ class FormControl : public v8_glue::Scriptable<FormControl, EventTarget> {
   friend class HandlingFormEventScope;
 
   private: FormResourceId control_id_;
+  private: bool disabled_;
   private: gc::Member<Form> form_;
   private: bool handling_form_event_;
   private: base::string16 name_;
@@ -37,6 +38,8 @@ class FormControl : public v8_glue::Scriptable<FormControl, EventTarget> {
   public: virtual ~FormControl();
 
   public: FormResourceId control_id() const { return control_id_; }
+  public: bool disabled() const { return disabled_; }
+  public: void set_disabled(bool new_disabled);
   public: Form* form() const { return form_.get(); }
   protected: bool handling_form_event() const { return handling_form_event_; }
   public: const base::string16& name() const { return name_; }

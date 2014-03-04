@@ -17,6 +17,7 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/io/io_manager.h"
 #include "evita/io/io_thread.h"
+#include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/forms/dialog_box_set.h"
@@ -105,11 +106,14 @@ bool Application::CalledOnValidThread() const {
 void Application::DoIdle() {
   base::TimeDelta wait_time;
   if (message_loop_->os_modal_loop()) {
+    METRICS_COUNT("os_modal_loop");
     wait_time = base::TimeDelta::FromMilliseconds(100);
   } else if (OnIdle(idle_count_)) {
+    METRICS_COUNT("OnIdle");
     ++idle_count_;
     wait_time = base::TimeDelta::FromMilliseconds(1000 / 60);
   } else {
+    METRICS_COUNT("nothing");
     // Nothing to do.
     idle_count_= 0;
     wait_time = base::TimeDelta::FromMilliseconds(1000 / 60);

@@ -4,6 +4,7 @@
 #include "evita/gc/collector.h"
 
 #include "base/logging.h"
+#include "base/synchronization/lock.h"
 #include "evita/gc/collectable.h"
 #include "evita/gc/visitor.h"
 
@@ -43,11 +44,23 @@ class CollectorVisitor : public Visitor {
 };
 }  // namespace
 
+//////////////////////////////////////////////////////////////////////
+//
+// Collector
+//
+Collector::Collector() : lock_(new base::Lock()) {
+}
+
+Collector::~Collector() {
+}
+
 void Collector::AddToLiveSet(Collectable* collectable) {
+  base::AutoLock lock_scope(*lock_);
   live_set_.insert(collectable);
 }
 
 void Collector::AddToRootSet(Visitable* visitable) {
+  base::AutoLock lock_scope(*lock_);
   root_set_.insert(visitable);
 }
 
@@ -71,6 +84,7 @@ void Collector::CollectGarbage() {
 }
 
 void Collector::RemoveFromRootSet(Visitable* visitable) {
+  base::AutoLock lock_scope(*lock_);
   auto const count = root_set_.erase(visitable);
   CHECK_EQ(1u, count);
 }

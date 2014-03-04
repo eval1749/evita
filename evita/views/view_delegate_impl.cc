@@ -63,8 +63,7 @@ Frame* GetFrameForMessage(dom::WindowId window_id) {
 }  // namespace
 
 ViewDelegateImpl::ViewDelegateImpl()
-    : event_handler_(nullptr),
-      waitable_event_(new base::WaitableEvent(false, false)) {
+    : event_handler_(nullptr) {
 }
 
 ViewDelegateImpl::~ViewDelegateImpl() {

@@ -5,27 +5,16 @@
 
 #include "evita/dom/view_delegate.h"
 
-#include <memory>
-
-namespace base {
-class WaitableEvent;
-}
-
 namespace views {
 
 class ViewDelegateImpl : public dom::ViewDelegate {
   private: domapi::ViewEventHandler* event_handler_;
-  private: std::unique_ptr<base::WaitableEvent> waitable_event_;
 
   public: ViewDelegateImpl();
   public: virtual ~ViewDelegateImpl();
 
   public: domapi::ViewEventHandler* event_handler() const {
     return event_handler_;
-  }
-
-  public: base::WaitableEvent* waitable_event() const {
-    return waitable_event_.get();
   }
 
   // ViewDelegate

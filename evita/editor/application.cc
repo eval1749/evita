@@ -74,8 +74,7 @@ Application::Application()
       message_loop_(new base::MessageLoop(make_scoped_ptr(new MessagePump()))),
       view_delegate_impl_(new views::ViewDelegateImpl()) {
   io_manager_->Start();
-  dom::ScriptThread::Start(view_delegate_impl_->waitable_event(),
-                           message_loop_.get(), view_delegate_impl_.get(),
+  dom::ScriptThread::Start(message_loop_.get(), view_delegate_impl_.get(),
                            io_manager_->message_loop(),
                            io_manager_->io_delegate());
 }

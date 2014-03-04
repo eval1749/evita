@@ -30,8 +30,7 @@ namespace {
 ScriptThread* script_thread;
 }  // namespace
 
-ScriptThread::ScriptThread(base::WaitableEvent* waitable_event,
-                           base::MessageLoop* host_message_loop,
+ScriptThread::ScriptThread(base::MessageLoop* host_message_loop,
                            ViewDelegate* view_delegate,
                            base::MessageLoop* io_message_loop,
                            domapi::IoDelegate* io_delegate)
@@ -40,8 +39,7 @@ ScriptThread::ScriptThread(base::WaitableEvent* waitable_event,
       io_message_loop_(io_message_loop),
       thread_(new base::Thread("script_thread")),
       view_delegate_(view_delegate),
-      view_event_handler_(nullptr),
-      waitable_event_(waitable_event) {
+      view_event_handler_(nullptr) {
   thread_->Start();
 }
 
@@ -68,14 +66,12 @@ void ScriptThread::PostTask(const tracked_objects::Location& from_here,
   thread_->message_loop()->PostTask(from_here, task);
 }
 
-void ScriptThread::Start(base::WaitableEvent* waitable_event,
-                         base::MessageLoop* host_message_loop,
+void ScriptThread::Start(base::MessageLoop* host_message_loop,
                          ViewDelegate* view_delegate,
                          base::MessageLoop* io_message_loop,
                          domapi::IoDelegate* io_delegate) {
   DCHECK(!script_thread);
-  script_thread = new ScriptThread(waitable_event,
-                                   host_message_loop, view_delegate,
+  script_thread = new ScriptThread(host_message_loop, view_delegate,
                                    io_message_loop, io_delegate);
   script_thread->PostTask(FROM_HERE,
       base::Bind(base::IgnoreResult(&ScriptController::Start),

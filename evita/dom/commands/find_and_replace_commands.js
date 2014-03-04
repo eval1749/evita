@@ -292,6 +292,8 @@
     form.get(ControlId.WHAT).addEventListener('change', function() {
       var can_find = form.get(ControlId.WHAT).value != '';
 
+      form.get(ControlId.CASE).disabled = !can_find;
+
       // Find buttons
       form.get(ControlId.NEXT).disabled = !can_find;
       form.get(ControlId.PREVIOUS).disabled = !can_find;
@@ -310,6 +312,11 @@
     form.get(ControlId.WITH).addEventListener('change', function() {
       var can_replace = form.get(ControlId.WITH).value != '';
       form.get(ControlId.PRESERVE).disabled = !can_replace;
+
+      // TODO(yosi) We should update find dialog box when selection is changed.
+      // Replace in
+      form.get(ControlId.SELECTION).disabled = !can_replace;
+      form.get(ControlId.WHOLE_FILE).disabled = !can_replace;
     });
 
     form.get(ControlId.NEXT).addEventListener('click', function() {

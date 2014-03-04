@@ -268,23 +268,6 @@ DEFINE_VIEW_DELEGATE_1(ShowDialogBox, domapi::DialogBoxId)
 DEFINE_VIEW_DELEGATE_2(SplitHorizontally, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(SplitVertically, WindowId, WindowId)
 
-void ScriptThread::ComputeOnTextWindow(WindowId window_id,
-                                     TextWindowCompute* data,
-                                     base::WaitableEvent* null_event) {
-  DCHECK(!null_event);
-  DCHECK(data);
-  DCHECK_CALLED_ON_SCRIPT_THREAD();
-  if (!host_message_loop_)
-    return;
-  base::WaitableEvent event(true, false);
-  DOM_AUTO_UNLOCK_SCOPE();
-  host_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &ViewDelegate::ComputeOnTextWindow,
-      base::Unretained(view_delegate_), window_id,
-      base::Unretained(data), base::Unretained(&event)));
-  event.Wait();
-}
-
 #define DEFINE_SYNC_VIEW_DELEGATE_2(name, return_type, type1, type2) \
   return_type ScriptThread::name(type1 p1, type2 p2) { \
     DCHECK_CALLED_ON_SCRIPT_THREAD(); \
@@ -307,6 +290,8 @@ void ScriptThread::ComputeOnTextWindow(WindowId window_id,
           host_message_loop_, waitable_event_.get()); \
   }
 
+DEFINE_SYNC_VIEW_DELEGATE_2(ComputeOnTextWindow, text::Posn,
+                            WindowId, const TextWindowCompute&);
 DEFINE_SYNC_VIEW_DELEGATE_2(GetTableRowStates, std::vector<int>, WindowId,
                             const std::vector<base::string16>&)
 DEFINE_SYNC_VIEW_DELEGATE_3(MapPointToPosition, text::Posn,

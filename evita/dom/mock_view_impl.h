@@ -30,9 +30,8 @@ class MockViewImpl : public dom::ViewDelegate {
   // ViewDelegate
   MOCK_METHOD2(AddWindow, void(WindowId, WindowId));
   MOCK_METHOD2(ChangeParentWindow, void(WindowId, WindowId));
-  MOCK_METHOD3(ComputeOnTextWindow, void(WindowId,
-                                       TextWindowCompute*,
-                                       base::WaitableEvent*));
+  MOCK_METHOD2(ComputeOnTextWindow,
+      text::Posn(WindowId, const TextWindowCompute&));
   MOCK_METHOD1(CreateDialogBox, void(Form*));
   MOCK_METHOD1(CreateEditorWindow, void(const EditorWindow*));
   MOCK_METHOD2(CreateTableWindow, void(WindowId, Document*));

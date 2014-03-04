@@ -4,7 +4,6 @@
 #include "evita/views/view_delegate_impl.h"
 
 #include "base/logging.h"
-#include "base/synchronization/waitable_event.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
 #include "evita/dom/editor_window.h"
@@ -27,19 +26,6 @@
 namespace views {
 
 namespace {
-
-class WaitableEventScope {
-  private: base::WaitableEvent* event_;
-
-  public: WaitableEventScope(base::WaitableEvent* event) : event_(event) {
-    DCHECK(!event->IsSignaled());
-  }
-  public: ~WaitableEventScope() {
-    event_->Signal();
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(WaitableEventScope);
-};
 
 Window* FromWindowId(const char* name, dom::WindowId window_id) {
   auto const window = Window::FromWindowId(window_id);
@@ -100,47 +86,44 @@ void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
   window->SetParentWidget(new_parent);
 }
 
-void ViewDelegateImpl::ComputeOnTextWindow(dom::WindowId window_id,
-                                         dom::TextWindowCompute* data,
-                                         base::WaitableEvent* event) {
-  WaitableEventScope waitable_event_scope(event);
+text::Posn ViewDelegateImpl::ComputeOnTextWindow(
+    dom::WindowId window_id, const dom::TextWindowCompute& data) {
   auto const window = FromWindowId("ComputeOnTextWindow", window_id)->
       as<TextEditWindow>();
   if (!window)
-    return;
+    return -1;
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
-  switch (data->method) {
+  switch (data.method) {
     case dom::TextWindowCompute::Method::EndOfWindow:
-      data->position = window->GetEnd();
-      break;
+      return window->GetEnd();
     case dom::TextWindowCompute::Method::EndOfWindowLine:
-      data->position = window->EndOfLine(data->position);
-      break;
+      return window->EndOfLine(data.position);
     case dom::TextWindowCompute::Method::MoveScreen: {
-      gfx::PointF point(data->x, data->y);
-      text::Posn position = data->position;
-      window->ComputeMotion(Unit_Screen, data->count, point, &position);
-      data->position = position;
-      break;
+      gfx::PointF point(data.x, data.y);
+      text::Posn position = data.position;
+      window->ComputeMotion(Unit_Screen, data.count, point, &position);
+      return position;
     }
     case dom::TextWindowCompute::Method::MoveWindow: {
-      gfx::PointF point(data->x, data->y);
-      window->ComputeMotion(Unit_Window, data->count, point, &data->position);
-      break;
+      gfx::PointF point(data.x, data.y);
+      text::Posn position = data.position;
+      window->ComputeMotion(Unit_Window, data.count, point, &position);
+      return position;
     }
     case dom::TextWindowCompute::Method::MoveWindowLine: {
-      gfx::PointF point(data->x, data->y);
-      window->ComputeMotion(Unit_WindowLine, data->count, point,
-                            &data->position);
-      break;
+      gfx::PointF point(data.x, data.y);
+      text::Posn position = data.position;
+      window->ComputeMotion(Unit_WindowLine, data.count, point, &position);
+      return position;
     }
     case dom::TextWindowCompute::Method::StartOfWindow:
-      data->position = window->GetStart();
+      return window->GetStart();
       break;
     case dom::TextWindowCompute::Method::StartOfWindowLine:
-      data->position = window->StartOfLine(data->position);
-      break;
+      return window->StartOfLine(data.position);
+    default:
+      return -1;
   }
 }
 

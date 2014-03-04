@@ -85,20 +85,8 @@ text::Posn TextWindow::ComputeMotion(int method,
   data.position = opt_position.get(0);
   data.x = opt_point.is_supplied ? opt_point.value->x() : 0.0f;
   data.y = opt_point.is_supplied ? opt_point.value->y() : 0.0f;
-  ScriptController::instance()->view_delegate()->ComputeOnTextWindow(
-    id(), &data, nullptr);
-  switch (data.method) {
-    case TextWindowCompute::Method::EndOfWindow:
-    case TextWindowCompute::Method::EndOfWindowLine:
-    case TextWindowCompute::Method::MoveScreen:
-    case TextWindowCompute::Method::MoveWindow:
-    case TextWindowCompute::Method::MoveWindowLine:
-    case TextWindowCompute::Method::StartOfWindow:
-    case TextWindowCompute::Method::StartOfWindowLine:
-      return data.position;
-  }
-  ScriptController::instance()->ThrowError("Invalid method.");
-  return 0;
+  return ScriptController::instance()->view_delegate()->ComputeOnTextWindow(
+      id(), data);
 }
 
 void TextWindow::MakeSelectionVisible() {

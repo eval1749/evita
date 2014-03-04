@@ -66,8 +66,8 @@ class ScriptThread final : public domapi::IoDelegate,
                                   WindowId child_id) override;
   public: virtual void ChangeParentWindow(WindowId window_id,
     WindowId new_parent_window_id) override;
-  private: virtual void ComputeOnTextWindow(WindowId window_id,
-      TextWindowCompute* data, base::WaitableEvent* event) override;
+  private: virtual text::Posn ComputeOnTextWindow(
+      WindowId window_id, const TextWindowCompute& data) override;
   private: virtual void CreateDialogBox(dom::Form* form) override;
   private: virtual void CreateEditorWindow(
       const EditorWindow* window) override;

@@ -11,10 +11,6 @@
 #include "evita/dom/window_id.h"
 #include "evita/dom/window_id.h"
 
-namespace base {
-class WaitableEvent;
-}
-
 namespace domapi {
 class FloatPoint;
 struct LoadFileCallbackData;
@@ -73,9 +69,8 @@ class ViewDelegate {
   public: virtual void AddWindow(WindowId parent_id, WindowId child_id) = 0;
   public: virtual void ChangeParentWindow(WindowId window_id,
                                           WindowId new_parent_window_id) = 0;
-  public: virtual void ComputeOnTextWindow(WindowId window_id,
-                                         TextWindowCompute* data,
-                                         base::WaitableEvent* event) = 0;
+  public: virtual text::Posn ComputeOnTextWindow(
+      WindowId window_id, const TextWindowCompute& data) = 0;
   public: virtual void CreateDialogBox(Form* form) = 0;
   public: virtual void CreateEditorWindow(const EditorWindow* window) = 0;
   public: virtual void CreateTableWindow(WindowId window_id,

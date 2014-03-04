@@ -3,6 +3,8 @@
 
 #include "evita/views/view_delegate_impl.h"
 
+#include <sstream>
+
 #include "base/logging.h"
 #include "evita/dom/buffer.h"
 #include "evita/dom/document.h"
@@ -14,6 +16,7 @@
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/editor/modal_message_loop_scope.h"
+#include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/views/forms/dialog_box_set.h"
 #include "evita/views/forms/file_dialog_box.h"
@@ -210,7 +213,27 @@ void ViewDelegateImpl::GetFilenameForSave(
 base::string16 ViewDelegateImpl::GetMetrics(const base::string16& name) {
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
-  return metrics::HistogramSet::instance()->GetJson(name);
+
+  base::string16 delimiter = L"";
+  const base::string16 comma = L",\n";
+
+  std::basic_ostringstream<base::char16> ostream;
+  ostream << '{';
+
+  auto const times = metrics::HistogramSet::instance()->GetJson(name);
+  if (!times.empty()) {
+    ostream << delimiter << L"\"times\": " << times;
+    delimiter = comma;
+  }
+
+  auto const counter = metrics::CounterSet::instance()->GetJson(name);
+  if (!counter.empty()) {
+    ostream << delimiter << L"\"counters\": " << counter;
+    delimiter = comma;
+  }
+
+  ostream << '}';
+  return ostream.str();
 }
 
 std::vector<int> ViewDelegateImpl::GetTableRowStates(WindowId window_id,

@@ -89,7 +89,6 @@ text::Posn TextWindow::ComputeMotion(int method,
   switch (data.method) {
     case TextWindowCompute::Method::EndOfWindow:
     case TextWindowCompute::Method::EndOfWindowLine:
-    case TextWindowCompute::Method::MapPointToPosition:
     case TextWindowCompute::Method::MoveScreen:
     case TextWindowCompute::Method::MoveWindow:
     case TextWindowCompute::Method::MoveWindowLine:
@@ -107,13 +106,8 @@ void TextWindow::MakeSelectionVisible() {
 }
 
 text::Posn TextWindow::MapPointToPosition(float x, float y) {
-  TextWindowCompute data;
-  data.method = TextWindowCompute::Method::MapPointToPosition;
-  data.x = x;
-  data.y = y;
-  ScriptController::instance()->view_delegate()->ComputeOnTextWindow(
-    id(), &data, nullptr);
-  return data.position;
+  return ScriptController::instance()->view_delegate()->MapPointToPosition(
+    id(), x, y);
 }
 
 Point* TextWindow::MapPositionToPoint(text::Posn position) {

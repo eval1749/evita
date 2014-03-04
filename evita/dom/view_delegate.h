@@ -35,7 +35,7 @@ struct TextWindowCompute {
   enum class Method {
     EndOfWindow,
     EndOfWindowLine,
-    MapPointToPosition,
+    MapPointToPositionShoultNotUse,
     MapPositionToPoint,
     MoveScreen,
     MoveWindow,
@@ -96,6 +96,8 @@ class ViewDelegate {
                                 const base::string16& filename,
                                 LoadFileCallback callback) = 0;
   public: virtual void MakeSelectionVisible(WindowId window_id) = 0;
+  public: virtual text::Posn MapPointToPosition(WindowId window_id,
+                                                float x, float y) = 0;
   public: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) = 0;

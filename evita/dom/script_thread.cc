@@ -295,6 +295,17 @@ std::vector<int> ScriptThread::GetTableRowStates(WindowId window_id,
         host_message_loop_, waitable_event_.get()));
 }
 
+text::Posn ScriptThread::MapPointToPosition(WindowId window_id,
+                                            float x, float y) {
+  DCHECK_CALLED_ON_SCRIPT_THREAD();
+  if (!host_message_loop_)
+    return 0;
+  return DoSynchronousCall(base::Bind(&ViewDelegate::MapPointToPosition,
+                                      base::Unretained(view_delegate_),
+                                      window_id, x, y),
+                           host_message_loop_, waitable_event_.get());
+}
+
 void ScriptThread::RegisterViewEventHandler(
     domapi::ViewEventHandler* event_handler) {
   DCHECK_CALLED_ON_SCRIPT_THREAD();

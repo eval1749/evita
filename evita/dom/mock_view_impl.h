@@ -50,6 +50,7 @@ class MockViewImpl : public dom::ViewDelegate {
   public: void LoadFile(Document* document, const base::string16& filename,
                         LoadFileCallback callback);
   MOCK_METHOD1(MakeSelectionVisible, void(WindowId));
+  MOCK_METHOD3(MapPointToPosition, text::Posn(WindowId, float x, float y));
   public: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;

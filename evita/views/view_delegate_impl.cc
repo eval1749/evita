@@ -116,9 +116,6 @@ void ViewDelegateImpl::ComputeOnTextWindow(dom::WindowId window_id,
     case dom::TextWindowCompute::Method::EndOfWindowLine:
       data->position = window->EndOfLine(data->position);
       break;
-    case dom::TextWindowCompute::Method::MapPointToPosition:
-     data->position = window->MapPointToPosn(gfx::PointF(data->x, data->y));
-      break;
    case dom::TextWindowCompute::Method::MapPositionToPoint: {
       const auto rect = window->MapPosnToPoint(data->position);
       if (rect) {
@@ -276,6 +273,16 @@ void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
   }
   UI_DOM_AUTO_LOCK_SCOPE();
   text_widget->MakeSelectionVisible();
+}
+
+text::Posn ViewDelegateImpl::MapPointToPosition(WindowId window_id,
+                                                float x, float y) {
+  UI_ASSERT_DOM_LOCKED();
+  auto const window = FromWindowId("ComputeOnTextWindow", window_id)->
+      as<TextEditWindow>();
+  if (!window)
+    return 0;
+  return window->MapPointToPosn(gfx::PointF(x, y));
 }
 
 void ViewDelegateImpl::MessageBox(dom::WindowId window_id,

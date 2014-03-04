@@ -441,6 +441,7 @@
         'gfx/point_f.cc',
         'gfx/size_f.cc',
         'gfx/rect_f.cc',
+        'metrics/counter.cc',
         'metrics/time_scope.cc',
         'views/frame_list.cc',
         'views/frame_observer.cc',

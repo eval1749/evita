@@ -6,6 +6,7 @@
 #include <memory>
 #include <unordered_set>
 
+#include "base/strings/string16.h"
 #include "common/memory/singleton.h"
 
 namespace base {
@@ -37,6 +38,7 @@ class Collector : public common::Singleton<Collector> {
   public: void AddToRootSet(Visitable* visitable);
   public: void AddToLiveSet(Collectable* collectable);
   public: void CollectGarbage();
+  public: base::string16 GetJson(const base::string16& name) const;
   public: void RemoveFromRootSet(Visitable* visitable);
 
   DISALLOW_COPY_AND_ASSIGN(Collector);

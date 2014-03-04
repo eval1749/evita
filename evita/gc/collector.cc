@@ -3,10 +3,16 @@
 
 #include "evita/gc/collector.h"
 
+#include <sstream>
+#include <unordered_map>
+
 #include "base/logging.h"
+#include "base/strings/utf_string_conversions.h"
 #include "base/synchronization/lock.h"
+#include "common/strings/string_piece.h"
 #include "evita/gc/collectable.h"
 #include "evita/gc/visitor.h"
+#include "evita/editor/dom_lock.h"
 
 namespace gc {
 
@@ -42,6 +48,23 @@ class CollectorVisitor : public Visitor {
 
   DISALLOW_COPY_AND_ASSIGN(CollectorVisitor);
 };
+
+void MapToJson(std::basic_ostringstream<base::char16>& ostream,
+               const base::StringPiece& map_name,
+               const std::unordered_map<base::StringPiece, int> map) {
+  const base::string16 comma = L",\n";
+  base::string16 delimiter = L"";
+
+  ostream << '"' << base::ASCIIToUTF16(map_name) << L"\": [";
+  for (auto key_value : map) {
+    ostream << delimiter;
+    ostream << L"{\"key\": \"" << base::ASCIIToUTF16(key_value.first) <<
+        L"\", \"value\": " << key_value.second << '}';
+    delimiter = comma;
+  }
+  ostream << ']';
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -81,6 +104,40 @@ void Collector::CollectGarbage() {
  }
 
  live_set_ = live_set;
+}
+
+base::string16 Collector::GetJson(const base::string16& name) const {
+  UI_ASSERT_DOM_LOCKED();
+  if (name != L"all")
+    return base::string16();
+
+  std::unordered_map<base::StringPiece, int> live_map;
+  for (auto const collectable : live_set_) {
+    base::StringPiece key(collectable->visitable_class_name());
+    auto it = live_map.find(key);
+    if (it == live_map.end())
+      live_map[key] = 1;
+    else
+      ++it->second;
+  }
+
+  std::unordered_map<base::StringPiece, int> root_map;
+  for (auto const visitable : root_set_) {
+    base::StringPiece key(visitable->visitable_class_name());
+    auto it = root_map.find(key);
+    if (it == root_map.end())
+      root_map[key] = 1;
+    else
+      ++it->second;
+  }
+
+  std::basic_ostringstream<base::char16> ostream;
+  ostream << '{';
+  MapToJson(ostream, "live", live_map);
+  ostream << L",\n";
+  MapToJson(ostream, "root", root_map);
+  ostream << '}';
+  return ostream.str();
 }
 
 void Collector::RemoveFromRootSet(Visitable* visitable) {

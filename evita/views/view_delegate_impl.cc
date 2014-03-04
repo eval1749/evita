@@ -16,6 +16,7 @@
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/editor/modal_message_loop_scope.h"
+#include "evita/gc/collector.h"
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/views/forms/dialog_box_set.h"
@@ -226,9 +227,15 @@ base::string16 ViewDelegateImpl::GetMetrics(const base::string16& name) {
     delimiter = comma;
   }
 
-  auto const counter = metrics::CounterSet::instance()->GetJson(name);
-  if (!counter.empty()) {
-    ostream << delimiter << L"\"counters\": " << counter;
+  auto const counters = metrics::CounterSet::instance()->GetJson(name);
+  if (!counters.empty()) {
+    ostream << delimiter << L"\"counters\": " << counters;
+    delimiter = comma;
+  }
+
+  auto const objects = gc::Collector::instance()->GetJson(name);
+  if (!objects.empty()) {
+    ostream << delimiter << L"\"objects\": " << objects;
     delimiter = comma;
   }
 

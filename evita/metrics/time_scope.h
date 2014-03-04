@@ -9,18 +9,9 @@
 #include <string>
 #include <unordered_map>
 
-#include "base/strings/string_piece.h"
 #include "base/time/time.h"
 #include "common/memory/singleton.h"
-
-namespace std {
-template<>
-struct hash<base::StringPiece> {
-  std::size_t operator()(const base::StringPiece& sp) const {
-    HASH_STRING_PIECE(base::StringPiece, sp);
-  }
-};
-}  // namespace std
+#include "common/strings/string_piece.h"
 
 namespace metrics {
 
@@ -62,4 +53,4 @@ class TimeScope {
 #define METRICS_TIME_SCOPE() \
     ::metrics::TimeScope metrics_time_scope_ ## __LINE__(__FUNCTION__)
 
-#endif //!defined(INCLUDE_visual_dialog_h)
+#endif //!defined(INCLUDE_evita_metrics_time_scope_h)

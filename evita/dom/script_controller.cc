@@ -140,13 +140,6 @@ ScriptController::ScriptController(ViewDelegate* view_delegate,
   view_delegate_->RegisterViewEventHandler(event_handler_.get());
   v8::V8::InitializeICU();
 
-  // When call TerminateExecution(), assertion failure is occured at
-  // |OptimizedFrame::Summarize| in "v8/src/frame.cc" with opcode == REGISTER.
-  // v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
-  v8::V8::AddMessageListener(MessageCallback);
-  v8::V8::AddGCPrologueCallback(GcPrologueCallback);
-  v8::V8::AddGCEpilogueCallback(GcEpilogueCallback);
-
   // See v8/src/flag-definitions.h
   // Note: |EnsureV8Initialized()| in "gin/isolate_holder.cc" also sets
   // flags.
@@ -233,6 +226,12 @@ ScriptController* ScriptController::Start(ViewDelegate* view_delegate,
   auto const runner = new v8_glue::Runner(isolate, script_controller);
   script_controller->runner_.reset(runner);
   v8_glue::Runner::Scope runner_scope(runner);
+  // When call TerminateExecution(), assertion failure is occured at
+  // |OptimizedFrame::Summarize| in "v8/src/frame.cc" with opcode == REGISTER.
+  // v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
+  v8::V8::AddMessageListener(MessageCallback);
+  v8::V8::AddGCPrologueCallback(GcPrologueCallback);
+  v8::V8::AddGCEpilogueCallback(GcEpilogueCallback);
   v8Strings::Init(isolate);
   return script_controller;
 }

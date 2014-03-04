@@ -51,6 +51,10 @@ class EditorClass : public v8_glue::WrapperInfo {
             runner->GetWeakPtr(), callback));
   }
 
+  private: static base::string16 GetMetrics(const base::string16& name) {
+    return ScriptController::instance()->view_delegate()->GetMetrics(name);
+  }
+
   private: static void MessageBox(v8_glue::Nullable<Window> maybe_window,
                                  const base::string16& message, int flags,
                                  const base::string16& title,
@@ -152,6 +156,7 @@ class EditorClass : public v8_glue::WrapperInfo {
       .SetMethod("getFilenameForLoad_", &EditorClass::GetFilenameForLoad)
       .SetMethod("getFilenameForSave_", &EditorClass::GetFilenameForSave)
       .SetMethod("messageBox_", &EditorClass::MessageBox)
+      .SetMethod("metrics", &EditorClass::GetMetrics)
       .SetMethod("runScript", &EditorClass::RunScript)
       .SetProperty("version", &EditorClass::version)
       .Build();

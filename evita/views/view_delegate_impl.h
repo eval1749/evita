@@ -41,6 +41,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void GetFilenameForSave(
       dom::WindowId window_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) override;
+  private: virtual base::string16 GetMetrics(
+      const base::string16& name) override;
   private: virtual std::vector<int> GetTableRowStates(
       dom::WindowId window_id,
       const std::vector<base::string16>& keys) override;

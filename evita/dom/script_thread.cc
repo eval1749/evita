@@ -268,6 +268,17 @@ DEFINE_VIEW_DELEGATE_1(ShowDialogBox, domapi::DialogBoxId)
 DEFINE_VIEW_DELEGATE_2(SplitHorizontally, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(SplitVertically, WindowId, WindowId)
 
+#define DEFINE_SYNC_VIEW_DELEGATE_1(name, return_type, type1) \
+  return_type ScriptThread::name(type1 p1) { \
+    DCHECK_CALLED_ON_SCRIPT_THREAD(); \
+    if (!host_message_loop_) \
+      return return_type(); \
+    return DoSynchronousCall( \
+          base::Bind(&ViewDelegate::name, \
+                     base::Unretained(view_delegate_), p1), \
+          host_message_loop_, waitable_event_.get()); \
+  }
+
 #define DEFINE_SYNC_VIEW_DELEGATE_2(name, return_type, type1, type2) \
   return_type ScriptThread::name(type1 p1, type2 p2) { \
     DCHECK_CALLED_ON_SCRIPT_THREAD(); \
@@ -292,6 +303,7 @@ DEFINE_VIEW_DELEGATE_2(SplitVertically, WindowId, WindowId)
 
 DEFINE_SYNC_VIEW_DELEGATE_2(ComputeOnTextWindow, text::Posn,
                             WindowId, const TextWindowCompute&);
+DEFINE_SYNC_VIEW_DELEGATE_1(GetMetrics, base::string16, const base::string16&)
 DEFINE_SYNC_VIEW_DELEGATE_2(GetTableRowStates, std::vector<int>, WindowId,
                             const std::vector<base::string16>&)
 DEFINE_SYNC_VIEW_DELEGATE_3(MapPointToPosition, text::Posn,

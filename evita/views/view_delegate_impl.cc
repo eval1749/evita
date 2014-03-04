@@ -206,6 +206,12 @@ void ViewDelegateImpl::GetFilenameForSave(
                                          base::string16(params.m_wsz)));
 }
 
+base::string16 ViewDelegateImpl::GetMetrics(const base::string16&) {
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  DCHECK(lock_scope.locked());
+  return L"{\"dummy\": 1}";
+}
+
 std::vector<int> ViewDelegateImpl::GetTableRowStates(WindowId window_id,
     const std::vector<base::string16>& keys) {
   auto const widget = FromWindowId("GetTableRowStates", window_id);

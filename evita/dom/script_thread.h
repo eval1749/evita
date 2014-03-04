@@ -81,6 +81,8 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void GetFilenameForLoad(
       WindowId window_id, const base::string16& dir_path,
       GetFilenameForLoadCallback callback) override;
+  private: virtual base::string16 GetMetrics(
+      const base::string16& name) override;
   private: virtual void GetFilenameForSave(
       WindowId window_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) override;

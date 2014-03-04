@@ -80,6 +80,12 @@ Editor.messageBox = function(window, message, flags, opt_title) {};
 Editor.messageBox_ = function(window, message, flags, title, callback) {};
 
 /**
+ * @param {string} name
+ * @return {string}
+ */
+Editor.metrics = function(name) {};
+
+/**
  * @param {string} spec
  * @return {number} key code.
 */

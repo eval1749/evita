@@ -86,6 +86,7 @@ class ViewDelegate {
   public: virtual void GetFilenameForSave(
       WindowId window_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) = 0;
+  public: virtual base::string16 GetMetrics(const base::string16& name) = 0;
   public: virtual std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) = 0;
   public: virtual void LoadFile(Document* document,

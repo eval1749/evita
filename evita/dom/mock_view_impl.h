@@ -45,6 +45,7 @@ class MockViewImpl : public dom::ViewDelegate {
   public: virtual void GetFilenameForSave(WindowId window_id,
     const base::string16& dir_path,
     GetFilenameForSaveCallback callback) override;
+  MOCK_METHOD1(GetMetrics, base::string16(const base::string16&));
   public: std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;
   public: void LoadFile(Document* document, const base::string16& filename,

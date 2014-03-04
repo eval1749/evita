@@ -226,6 +226,7 @@
         'dom/window_ostream.cc',
 
         'dom/public/io_delegate.cc',
+        'dom/public/float_point.cc',
         'dom/public/view_event_handler.cc',
 
         '<(SHARED_INTERMEDIATE_DIR)/v8_strings.cc',

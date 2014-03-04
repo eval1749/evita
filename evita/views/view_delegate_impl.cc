@@ -92,6 +92,7 @@ text::Posn ViewDelegateImpl::ComputeOnTextWindow(
       as<TextEditWindow>();
   if (!window)
     return -1;
+  gfx::PointF point(data.x, data.y);
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
   switch (data.method) {
@@ -99,27 +100,17 @@ text::Posn ViewDelegateImpl::ComputeOnTextWindow(
       return window->GetEnd();
     case dom::TextWindowCompute::Method::EndOfWindowLine:
       return window->EndOfLine(data.position);
-    case dom::TextWindowCompute::Method::MoveScreen: {
-      gfx::PointF point(data.x, data.y);
-      text::Posn position = data.position;
-      window->ComputeMotion(Unit_Screen, data.count, point, &position);
-      return position;
-    }
-    case dom::TextWindowCompute::Method::MoveWindow: {
-      gfx::PointF point(data.x, data.y);
-      text::Posn position = data.position;
-      window->ComputeMotion(Unit_Window, data.count, point, &position);
-      return position;
-    }
-    case dom::TextWindowCompute::Method::MoveWindowLine: {
-      gfx::PointF point(data.x, data.y);
-      text::Posn position = data.position;
-      window->ComputeMotion(Unit_WindowLine, data.count, point, &position);
-      return position;
-    }
+    case dom::TextWindowCompute::Method::MoveScreen:
+      return window->ComputeMotion(Unit_Screen, data.count, point,
+                                   data.position);
+    case dom::TextWindowCompute::Method::MoveWindow:
+      return window->ComputeMotion(Unit_Window, data.count, point,
+                                   data.position);
+    case dom::TextWindowCompute::Method::MoveWindowLine:
+      return window->ComputeMotion(Unit_WindowLine, data.count, point,
+                                   data.position);
     case dom::TextWindowCompute::Method::StartOfWindow:
       return window->GetStart();
-      break;
     case dom::TextWindowCompute::Method::StartOfWindowLine:
       return window->StartOfLine(data.position);
     default:

@@ -123,15 +123,14 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
   }
 }
 
-Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
-                                    const gfx::PointF& pt,
-                                    Posn* inout_lPosn)  {
+text::Posn TextEditWindow::ComputeMotion(
+    Unit eUnit, Count n, const gfx::PointF& pt, text::Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
   switch (eUnit) {
     case Unit_WindowLine:
       if (n > 0) {
         auto const lBufEnd = GetBuffer()->GetEnd();
-        auto lGoal = *inout_lPosn;
+        auto lGoal = lPosn;
         auto k = 0;
         for (k = 0; k < n; ++k) {
           lGoal = EndOfLine(lGoal);
@@ -139,13 +138,12 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
             break;
           ++lGoal;
         }
-        *inout_lPosn = computeGoalX(pt.x, std::min(lGoal, lBufEnd));
-        return k;
-      } else if (n < 0) {
+        return computeGoalX(pt.x, std::min(lGoal, lBufEnd));
+      }
+      if (n < 0) {
         n = -n;
-
         auto const lBufStart = GetBuffer()->GetStart();
-        auto lStart = *inout_lPosn;
+        auto lStart = lPosn;
         auto k = 0;
         for (k = 0; k < n; ++k) {
           lStart = StartOfLine(lStart);
@@ -154,41 +152,34 @@ Count TextEditWindow::ComputeMotion(Unit eUnit, Count n,
           --lStart;
         }
 
-        *inout_lPosn = computeGoalX(pt.x, std::max(lStart, lBufStart));
-        return k;
+        return computeGoalX(pt.x, std::max(lStart, lBufStart));
       }
-      return 0;
+      return lPosn;
 
     case Unit_Screen: {
       auto k = LargeScroll(0, n, false);
       if (k > 0) {
         auto const lStart = text_renderer_->GetStart();
         m_pViewRange->SetRange(lStart, lStart);
-        *inout_lPosn = MapPointToPosn(pt);
-      } else if (n > 0) {
-        *inout_lPosn = std::min(GetEnd(), GetBuffer()->GetEnd());
-        k = 1;
-      } else if (n < 0) {
-        *inout_lPosn = GetStart();
-        k = 1;
+        return MapPointToPosn(pt);
       }
-      return k;
+      if (n > 0)
+        return std::min(GetEnd(), GetBuffer()->GetEnd());
+      if (n < 0)
+        return GetStart();
+      return lPosn;
     }
 
     case Unit_Window:
-      if (n > 0) {
-        *inout_lPosn = std::min(GetEnd(), GetBuffer()->GetEnd());
-        return 1;
-      }
-      if (n < 0) {
-        *inout_lPosn = GetStart();
-        return 1;
-      }
-      return 0;
+      if (n > 0)
+        return std::min(GetEnd(), GetBuffer()->GetEnd());
+      if (n < 0)
+        return GetStart();
+      return lPosn;
   }
 
   LOG(ERROR) << "Unsupported unit " << eUnit;
-  return 0;
+  return lPosn;
 }
 
 void TextEditWindow::DidChangeHierarchy() {

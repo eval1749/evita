@@ -78,7 +78,8 @@ class TextEditWindow
   private: bool is_selection_active() const;
 
   // [C]
-  public: Count ComputeMotion(Unit, Count, const gfx::PointF&, Posn*);
+  public: text::Posn ComputeMotion(
+      Unit unit, Count count, const gfx::PointF& point, text::Posn position);
   private: Posn computeGoalX(float, Posn);
 
   // [D]

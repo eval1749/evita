@@ -10,6 +10,7 @@
 #include "evita/dom/editor_window.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/text_window.h"
+#include "evita/dom/public/float_point.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
@@ -116,16 +117,6 @@ void ViewDelegateImpl::ComputeOnTextWindow(dom::WindowId window_id,
     case dom::TextWindowCompute::Method::EndOfWindowLine:
       data->position = window->EndOfLine(data->position);
       break;
-   case dom::TextWindowCompute::Method::MapPositionToPoint: {
-      const auto rect = window->MapPosnToPoint(data->position);
-      if (rect) {
-        data->x = rect.left;
-        data->y = rect.top;
-      } else {
-        data->x = data->y = -1.0f;
-      }
-      break;
-    }
     case dom::TextWindowCompute::Method::MoveScreen: {
       gfx::PointF point(data->x, data->y);
       text::Posn position = data->position;
@@ -285,6 +276,19 @@ text::Posn ViewDelegateImpl::MapPointToPosition(WindowId window_id,
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
   return window->MapPointToPosn(gfx::PointF(x, y));
+}
+
+domapi::FloatPoint ViewDelegateImpl::MapPositionToPoint(
+    WindowId window_id, text::Posn position) {
+  auto const window = FromWindowId("ComputeOnTextWindow", window_id)->
+      as<TextEditWindow>();
+  if (!window)
+    return domapi::FloatPoint(-1.0f, -1.0f);
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  DCHECK(lock_scope.locked());
+  auto const rect = window->MapPosnToPoint(position);
+  return rect ? domapi::FloatPoint(rect.left, rect.top) :
+                domapi::FloatPoint(-1.0f, -1.0f);
 }
 
 void ViewDelegateImpl::MessageBox(dom::WindowId window_id,

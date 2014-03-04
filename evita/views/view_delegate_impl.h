@@ -50,6 +50,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void MakeSelectionVisible(dom::WindowId window_id) override;
   private: virtual text::Posn MapPointToPosition(dom::WindowId window_id,
                                                  float x, float y) override;
+  private: virtual domapi::FloatPoint MapPositionToPoint(
+      dom::WindowId window_id, text::Posn position);
   private: virtual void MessageBox(dom::WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;

@@ -92,6 +92,8 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void MakeSelectionVisible(WindowId window_id) override;
   private: virtual text::Posn MapPointToPosition(WindowId window_id,
                                                  float x, float y) override;
+  private: virtual domapi::FloatPoint MapPositionToPoint(
+      WindowId window_id, text::Posn position);
   private: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;

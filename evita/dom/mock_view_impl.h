@@ -10,6 +10,7 @@
 #include "gmock/gmock.h"
 #pragma warning(pop)
 #include "evita/dom/public/api_callback.h"
+#include "evita/dom/public/float_point.h"
 #include "evita/dom/view_delegate.h"
 
 namespace dom {
@@ -51,6 +52,8 @@ class MockViewImpl : public dom::ViewDelegate {
                         LoadFileCallback callback);
   MOCK_METHOD1(MakeSelectionVisible, void(WindowId));
   MOCK_METHOD3(MapPointToPosition, text::Posn(WindowId, float x, float y));
+  MOCK_METHOD2(MapPositionToPoint,
+               domapi::FloatPoint(WindowId, text::Posn));
   public: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;

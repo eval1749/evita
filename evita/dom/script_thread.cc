@@ -14,6 +14,7 @@
 #pragma warning(pop)
 #include "evita/dom/lock.h"
 #include "evita/dom/public/api_event.h"
+#include "evita/dom/public/float_point.h"
 #include "evita/dom/script_controller.h"
 #include "evita/ui/events/event.h"
 #include "v8/include/v8-debug.h"
@@ -284,27 +285,35 @@ void ScriptThread::ComputeOnTextWindow(WindowId window_id,
   event.Wait();
 }
 
-std::vector<int> ScriptThread::GetTableRowStates(WindowId window_id,
-    const std::vector<base::string16>& keys) {
-  DCHECK_CALLED_ON_SCRIPT_THREAD();
-  if (!host_message_loop_)
-    return std::vector<int>();
-  return std::move(DoSynchronousCall(
-        base::Bind(&ViewDelegate::GetTableRowStates,
-                   base::Unretained(view_delegate_), window_id, keys),
-        host_message_loop_, waitable_event_.get()));
-}
+#define DEFINE_SYNC_VIEW_DELEGATE_2(name, return_type, type1, type2) \
+  return_type ScriptThread::name(type1 p1, type2 p2) { \
+    DCHECK_CALLED_ON_SCRIPT_THREAD(); \
+    if (!host_message_loop_) \
+      return return_type(); \
+    return DoSynchronousCall( \
+          base::Bind(&ViewDelegate::name, \
+                     base::Unretained(view_delegate_), p1, p2), \
+          host_message_loop_, waitable_event_.get()); \
+  }
 
-text::Posn ScriptThread::MapPointToPosition(WindowId window_id,
-                                            float x, float y) {
-  DCHECK_CALLED_ON_SCRIPT_THREAD();
-  if (!host_message_loop_)
-    return 0;
-  return DoSynchronousCall(base::Bind(&ViewDelegate::MapPointToPosition,
-                                      base::Unretained(view_delegate_),
-                                      window_id, x, y),
-                           host_message_loop_, waitable_event_.get());
-}
+#define DEFINE_SYNC_VIEW_DELEGATE_3(name, return_type, type1, type2, type3) \
+  return_type ScriptThread::name(type1 p1, type2 p2, type3 p3) { \
+    DCHECK_CALLED_ON_SCRIPT_THREAD(); \
+    if (!host_message_loop_) \
+      return return_type(); \
+    return DoSynchronousCall( \
+          base::Bind(&ViewDelegate::name, \
+                     base::Unretained(view_delegate_), p1, p2, p3), \
+          host_message_loop_, waitable_event_.get()); \
+  }
+
+DEFINE_SYNC_VIEW_DELEGATE_2(GetTableRowStates, std::vector<int>, WindowId,
+                            const std::vector<base::string16>&)
+DEFINE_SYNC_VIEW_DELEGATE_3(MapPointToPosition, text::Posn,
+                            WindowId, float, float)
+DEFINE_SYNC_VIEW_DELEGATE_2(MapPositionToPoint, domapi::FloatPoint,
+                            WindowId, text::Posn)
+
 
 void ScriptThread::RegisterViewEventHandler(
     domapi::ViewEventHandler* event_handler) {

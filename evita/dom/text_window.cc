@@ -7,6 +7,7 @@
 #include "evita/dom/converter.h"
 #include "evita/dom/document.h"
 #include "evita/dom/point.h"
+#include "evita/dom/public/float_point.h"
 #include "evita/dom/range.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/text_selection.h"
@@ -111,12 +112,9 @@ text::Posn TextWindow::MapPointToPosition(float x, float y) {
 }
 
 Point* TextWindow::MapPositionToPoint(text::Posn position) {
-  TextWindowCompute data;
-  data.method = TextWindowCompute::Method::MapPositionToPoint;
-  data.position = position;
-  ScriptController::instance()->view_delegate()->ComputeOnTextWindow(
-    id(), &data, nullptr);
-  return new Point(data.x, data.y);
+  auto const point = ScriptController::instance()->view_delegate()->
+      MapPositionToPoint(id(), position);
+  return new Point(point.x(), point.y());
 }
 
 void TextWindow::Reconvert(text::Posn start, text::Posn end) {

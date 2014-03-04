@@ -27,9 +27,59 @@
 namespace dom {
 
 namespace {
+
+//////////////////////////////////////////////////////////////////////
+//
+// SynchronousCaller
+// Run task on another thread and wait for task done.
+//
+template<typename Result, typename... Params>
+class SynchronousCaller {
+  private: base::Callback<Result(Params...)> task_;
+  private: base::WaitableEvent* event_;
+  private: Result result_;
+
+  public: SynchronousCaller(const base::Callback<Result(Params...)>& task,
+                            base::WaitableEvent* event)
+    : event_(event), task_(task) {
+  }
+
+  public: ~SynchronousCaller() = default;
+
+  public: Result Call(base::MessageLoop* message_loop) {
+    DCHECK_CALLED_ON_SCRIPT_THREAD();
+    event_->Reset();
+    DOM_AUTO_UNLOCK_SCOPE();
+    message_loop->PostTask(FROM_HERE, base::Bind(
+        &SynchronousCaller::RunTask, base::Unretained(this)));
+    event_->Wait();
+    return result_;
+  }
+
+  private: void RunTask() {
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
+    result_ = task_.Run();
+    event_->Signal();
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(SynchronousCaller);
+};
+
+template<typename Result, typename... Params>
+Result DoSynchronousCall(const base::Callback<Result(Params...)>& task,
+                         base::MessageLoop* message_loop,
+                         base::WaitableEvent* event) {
+  SynchronousCaller<Result, Params...> caller(task, event);
+  return caller.Call(message_loop);
+}
+
 ScriptThread* script_thread;
 }  // namespace
 
+//////////////////////////////////////////////////////////////////////
+//
+// ScriptThread
+//
 ScriptThread::ScriptThread(base::MessageLoop* host_message_loop,
                            ViewDelegate* view_delegate,
                            base::MessageLoop* io_message_loop,
@@ -39,7 +89,8 @@ ScriptThread::ScriptThread(base::MessageLoop* host_message_loop,
       io_message_loop_(io_message_loop),
       thread_(new base::Thread("script_thread")),
       view_delegate_(view_delegate),
-      view_event_handler_(nullptr) {
+      view_event_handler_(nullptr),
+      waitable_event_(new base::WaitableEvent(true, false)) {
   thread_->Start();
 }
 
@@ -190,20 +241,15 @@ void ScriptThread::ComputeOnTextWindow(WindowId window_id,
   event.Wait();
 }
 
-void ScriptThread::GetTableRowStates(WindowId window_id,
-    const std::vector<base::string16>& keys, int* states,
-    base::WaitableEvent* null_event) {
-  DCHECK(!null_event);
+std::vector<int> ScriptThread::GetTableRowStates(WindowId window_id,
+    const std::vector<base::string16>& keys) {
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   if (!host_message_loop_)
-    return;
-  base::WaitableEvent event(true, false);
-  DOM_AUTO_UNLOCK_SCOPE();
-  host_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &ViewDelegate::GetTableRowStates,
-      base::Unretained(view_delegate_), window_id, keys,
-      base::Unretained(states), base::Unretained(&event)));
-  event.Wait();
+    return std::vector<int>();
+  return std::move(DoSynchronousCall(
+        base::Bind(&ViewDelegate::GetTableRowStates,
+                   base::Unretained(view_delegate_), window_id, keys),
+        host_message_loop_, waitable_event_.get()));
 }
 
 void ScriptThread::RegisterViewEventHandler(

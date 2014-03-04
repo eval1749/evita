@@ -37,13 +37,13 @@ void MockViewImpl::GetFilenameForSave(WindowId,
   callback.Run(dir_path + L"/foo.bar");
 }
 
-void MockViewImpl::GetTableRowStates(WindowId,
-    const std::vector<base::string16>& keys, int* states,
-    base::WaitableEvent*) {
+std::vector<int> MockViewImpl::GetTableRowStates(WindowId,
+    const std::vector<base::string16>& keys) {
+  std::vector<int> states;
   for (auto index = 0u; index < keys.size(); ++index) {
-    *states = index;
-    ++states;
+    states.push_back(index);
   }
+  return std::move(states);
 }
 
 void MockViewImpl::LoadFile(Document*, const base::string16&,

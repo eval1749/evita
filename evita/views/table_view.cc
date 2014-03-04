@@ -93,21 +93,15 @@ TableView::~TableView() {
   document_->buffer()->RemoveObserver(this);
 }
 
-void TableView::GetRowStates(const std::vector<base::string16>& keys,
-                             int* states) const {
-  std::unordered_map<const TableViewModel::Row*, int> row_index_map;
-  auto state_index = 0;
+std::vector<int> TableView::GetRowStates(
+    const std::vector<base::string16>& keys) const {
+  std::vector<int> states;
   for (auto key : keys) {
-    if (auto const row = model_->FindRow(key))
-      row_index_map[row] = state_index;
-    else
-      DVLOG(0) << "No such row: " << key;
-    ++state_index;
+    auto const row = model_->FindRow(key);
+    auto const state = row ? control_->GetRowState(row->row_id()) : 0;
+    states.push_back(state);
   }
-
-  for (auto pair : row_index_map) {
-    states[pair.second] = control_->GetRowState(pair.first->row_id());
-  }
+  return std::move(states);
 }
 
 void TableView::UpdateControl(std::unique_ptr<TableViewModel> new_model) {

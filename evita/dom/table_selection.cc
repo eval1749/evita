@@ -62,10 +62,8 @@ TableSelection::~TableSelection() {
 
 std::vector<int> TableSelection::GetRowStates(
     const std::vector<base::string16>& keys) const {
-  std::vector<int> states(keys.size());
-  ScriptController::instance()->view_delegate()->
-      GetTableRowStates(window()->window_id(), keys, &states[0], nullptr);
-  return states;
+  return ScriptController::instance()->view_delegate()->
+      GetTableRowStates(window()->window_id(), keys);
 }
 
 }  // namespace dom

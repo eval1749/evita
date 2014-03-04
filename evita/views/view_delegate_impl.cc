@@ -244,17 +244,16 @@ void ViewDelegateImpl::GetFilenameForSave(
                                          base::string16(params.m_wsz)));
 }
 
-void ViewDelegateImpl::GetTableRowStates(WindowId window_id,
-    const std::vector<base::string16>& keys, int* states,
-    base::WaitableEvent* event) {
-  WaitableEventScope waitable_event_scope(event);
+std::vector<int> ViewDelegateImpl::GetTableRowStates(WindowId window_id,
+    const std::vector<base::string16>& keys) {
+  UI_ASSERT_DOM_LOCKED();
   auto const widget = FromWindowId("GetTableRowStates", window_id);
   if (!widget)
-    return;
+    return std::vector<int>();
   auto const table_view = widget->as<views::TableView>();
   if (!table_view)
-    return;
-  table_view->GetRowStates(keys, states);
+    return std::vector<int>();
+  return std::move(table_view->GetRowStates(keys));
 }
 
 void ViewDelegateImpl::LoadFile(dom::Document* document,

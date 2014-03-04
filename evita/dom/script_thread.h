@@ -17,6 +17,7 @@
 namespace base {
 class MessageLoop;
 class Thread;
+class WaitableEvent;
 }
 
 namespace dom {
@@ -34,6 +35,7 @@ class ScriptThread final : public domapi::IoDelegate,
   private: std::unique_ptr<base::Thread> thread_;
   private: ViewDelegate* view_delegate_;
   private: domapi::ViewEventHandler* view_event_handler_;
+  private: std::unique_ptr<base::WaitableEvent> waitable_event_;
 
   private: ScriptThread(base::MessageLoop* host_message_loop,
                         ViewDelegate* view_delegate,
@@ -82,9 +84,8 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void GetFilenameForSave(
       WindowId window_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) override;
-  private: virtual void GetTableRowStates(WindowId window_id,
-      const std::vector<base::string16>& keys, int* states,
-      base::WaitableEvent* event) override;
+  private: virtual std::vector<int> GetTableRowStates(WindowId window_id,
+      const std::vector<base::string16>& keys) override;
   private: virtual void LoadFile(Document* document,
                                  const base::string16& filename,
                                  LoadFileCallback callback) override;

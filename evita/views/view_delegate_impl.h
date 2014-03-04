@@ -41,9 +41,9 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void GetFilenameForSave(
       dom::WindowId window_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) override;
-  private: virtual void GetTableRowStates(dom::WindowId window_id,
-      const std::vector<base::string16>& keys, int* states,
-      base::WaitableEvent* event) override;
+  private: virtual std::vector<int> GetTableRowStates(
+      dom::WindowId window_id,
+      const std::vector<base::string16>& keys) override;
   private: virtual void LoadFile(dom::Document* document,
                                  const base::string16& filename,
                                  LoadFileCallback callback) override;

@@ -47,8 +47,8 @@ class TableView
   public: virtual ~TableView();
 
   private: bool DrawIfNeeded();
-  public: void GetRowStates(const std::vector<base::string16>& keys,
-                            int* states) const;
+  public: std::vector<int> GetRowStates(
+      const std::vector<base::string16>& keys) const;
   private: std::unique_ptr<TableViewModel> UpdateModelIfNeeded();
   private: void UpdateControl(std::unique_ptr<TableViewModel> new_model);
 

@@ -243,13 +243,14 @@ void ViewDelegateImpl::GetFilenameForSave(
 
 std::vector<int> ViewDelegateImpl::GetTableRowStates(WindowId window_id,
     const std::vector<base::string16>& keys) {
-  UI_ASSERT_DOM_LOCKED();
   auto const widget = FromWindowId("GetTableRowStates", window_id);
   if (!widget)
     return std::vector<int>();
   auto const table_view = widget->as<views::TableView>();
   if (!table_view)
     return std::vector<int>();
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  DCHECK(lock_scope.locked());
   return std::move(table_view->GetRowStates(keys));
 }
 
@@ -277,11 +278,12 @@ void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
 
 text::Posn ViewDelegateImpl::MapPointToPosition(WindowId window_id,
                                                 float x, float y) {
-  UI_ASSERT_DOM_LOCKED();
   auto const window = FromWindowId("ComputeOnTextWindow", window_id)->
       as<TextEditWindow>();
   if (!window)
     return 0;
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  DCHECK(lock_scope.locked());
   return window->MapPointToPosn(gfx::PointF(x, y));
 }
 
@@ -380,7 +382,6 @@ void ViewDelegateImpl::ReleaseCapture(dom::WindowId window_id) {
 }
 
 void ViewDelegateImpl::ScrollTextWindow(WindowId window_id, int direction) {
-  UI_ASSERT_DOM_LOCKED();
   auto const window = FromWindowId("ScrollTextWindow", window_id);
   if (!window)
     return;
@@ -388,6 +389,8 @@ void ViewDelegateImpl::ScrollTextWindow(WindowId window_id, int direction) {
   if (!text_window) {
     DVLOG(0) << "ScrollTextWindow expects TextEditWindow.";
   }
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  DCHECK(lock_scope.locked());
   text_window->SmallScroll(0, direction);
 }
 

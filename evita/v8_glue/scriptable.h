@@ -104,6 +104,7 @@ struct Converter<T*, typename std::enable_if<
 }  // namespace gin
 
 #define DECLARE_SCRIPTABLE_OBJECT(name) \
+  DECLARE_COLLECTABLE_OBJECT(name) \
   public: static v8_glue::WrapperInfo* static_wrapper_info(); \
   public: static const char* scriptable_class_name() { return #name; } \
   private:

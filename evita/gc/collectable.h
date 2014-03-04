@@ -35,12 +35,23 @@ class AbstractCollectable : public Visitable {
 
 template<typename T>
 class Collectable : public internal::AbstractCollectable {
+
   protected: Collectable() = default;
   protected: virtual ~Collectable() = default;
+
   DISALLOW_COPY_AND_ASSIGN(Collectable);
 };
 
 }  // namespace gc
+
+#define DECLARE_COLLECTABLE_OBJECT(name) \
+  DECLARE_VISITABLE_OBJECT(name)
+
+#define DECLARE_VISITABLE_OBJECT(name) \
+  private: virtual const char* visitable_class_name() const override { \
+    return #name; \
+  } \
+  private:
 
 #include <ostream>
 

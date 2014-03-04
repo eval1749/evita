@@ -10,7 +10,11 @@ class Visitor;
 class Visitable {
   public: Visitable() = default;
   public: ~Visitable() = default;
+
+  public: virtual const char* visitable_class_name() const = 0;
+
   public: virtual void Accept(Visitor* visitor);
+
   DISALLOW_COPY_AND_ASSIGN(Visitable);
 };
 

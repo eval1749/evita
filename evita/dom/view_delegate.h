@@ -109,8 +109,8 @@ class ViewDelegate {
   public: virtual void SaveFile(Document* document,
                                 const base::string16& filename,
                                 const SaveFileCallback& callback) = 0;
-  public: virtual void ScrollTextWindow(WindowId windowId, int direction,
-                                        base::WaitableEvent* event) = 0;
+  public: /* synchronous */ virtual void ScrollTextWindow(WindowId windowId,
+                                                          int direction) = 0;
   public: virtual void SetCapture(WindowId window_id) = 0;
   public: virtual void ShowDialogBox(domapi::DialogBoxId dialog_box_id) = 0;
   public: virtual void SplitHorizontally(WindowId left_window_id,

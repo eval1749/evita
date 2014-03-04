@@ -61,7 +61,7 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD1(RealizeWindow, void(WindowId));
   MOCK_METHOD1(RegisterViewEventHandler, void(domapi::ViewEventHandler*));
   MOCK_METHOD1(ReleaseCapture, void(WindowId));
-  MOCK_METHOD3(ScrollTextWindow, void(WindowId, int, base::WaitableEvent*));
+  MOCK_METHOD2(ScrollTextWindow, void(WindowId, int));
   MOCK_METHOD1(SetCapture, void(WindowId));
   MOCK_METHOD1(ShowDialogBox, void(domapi::DialogBoxId));
   MOCK_METHOD2(SplitHorizontally, void(WindowId, WindowId));

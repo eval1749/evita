@@ -73,6 +73,49 @@ Result DoSynchronousCall(const base::Callback<Result(Params...)>& task,
   return caller.Call(message_loop);
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// SynchronousRunner
+// Run task on another thread and wait for task done.
+//
+template<typename... Params>
+class SynchronousRunner {
+  private: base::Callback<void(Params...)> task_;
+  private: base::WaitableEvent* event_;
+
+  public: SynchronousRunner(const base::Callback<void(Params...)>& task,
+                            base::WaitableEvent* event)
+    : event_(event), task_(task) {
+  }
+
+  public: ~SynchronousRunner() = default;
+
+  public: void Run(base::MessageLoop* message_loop) {
+    DCHECK_CALLED_ON_SCRIPT_THREAD();
+    event_->Reset();
+    DOM_AUTO_UNLOCK_SCOPE();
+    message_loop->PostTask(FROM_HERE, base::Bind(
+        &SynchronousRunner::RunTask, base::Unretained(this)));
+    event_->Wait();
+  }
+
+  private: void RunTask() {
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
+    task_.Run();
+    event_->Signal();
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(SynchronousRunner);
+};
+
+template<typename... Params>
+void RunSynchronously(const base::Callback<void(Params...)>& task,
+                      base::MessageLoop* message_loop,
+                      base::WaitableEvent* event) {
+  SynchronousRunner<Params...> caller(task, event);
+  caller.Run(message_loop);
+}
+
 ScriptThread* script_thread;
 }  // namespace
 
@@ -264,18 +307,13 @@ void ScriptThread::RegisterViewEventHandler(
       base::Unretained(this)));
 }
 
-void ScriptThread::ScrollTextWindow(WindowId window_id, int direction,
-                                    base::WaitableEvent* null_event) {
-  DCHECK(!null_event);
+void ScriptThread::ScrollTextWindow(WindowId window_id, int direction) {
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   if (!host_message_loop_)
     return;
-  base::WaitableEvent event(true, false);
-  DOM_AUTO_UNLOCK_SCOPE();
-  host_message_loop_->PostTask(FROM_HERE, base::Bind(
+  RunSynchronously(base::Bind(
       &ViewDelegate::ScrollTextWindow, base::Unretained(view_delegate_),
-      window_id, direction, base::Unretained(&event)));
-  event.Wait();
+      window_id, direction), host_message_loop_, waitable_event_.get());
 }
 
 // domapi::ViewEventHandler

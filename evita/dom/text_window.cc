@@ -132,7 +132,7 @@ void TextWindow::Reconvert(text::Posn start, text::Posn end) {
 
 void TextWindow::Scroll(int direction) {
   ScriptController::instance()->view_delegate()->
-      ScrollTextWindow(window_id(), direction, nullptr);
+      ScrollTextWindow(window_id(), direction);
 }
 
 }  // namespace dom

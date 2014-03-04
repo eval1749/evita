@@ -104,8 +104,8 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void SaveFile(Document* document,
                                  const base::string16& filename,
                                  const SaveFileCallback& callback) override;
-  private: virtual void ScrollTextWindow(WindowId window_id, int direction,
-                                         base::WaitableEvent* event) override;
+  private: virtual void ScrollTextWindow(WindowId window_id,
+                                         int direction) override;
   private: virtual void SetCapture(WindowId window_id) override;
   private: virtual void ShowDialogBox(
       domapi::DialogBoxId dialog_box_id) override;

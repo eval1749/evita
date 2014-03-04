@@ -63,8 +63,7 @@ class ViewDelegateImpl : public dom::ViewDelegate {
                                  const base::string16& filename,
                                  const SaveFileCallback& callback) override;
   private: virtual void ScrollTextWindow(dom::WindowId window_id,
-                                         int direction,
-                                         base::WaitableEvent* event) override;
+                                         int direction) override;
   private: virtual void SetCapture(dom::WindowId window_id) override;
   private: virtual void ShowDialogBox(
       domapi::DialogBoxId dialog_box_id) override;

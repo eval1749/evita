@@ -372,9 +372,8 @@ void ViewDelegateImpl::ReleaseCapture(dom::WindowId window_id) {
   window->ReleaseCapture();
 }
 
-void ViewDelegateImpl::ScrollTextWindow(WindowId window_id, int direction,
-                                        base::WaitableEvent* event) {
-  WaitableEventScope waitable_event_scope(event);
+void ViewDelegateImpl::ScrollTextWindow(WindowId window_id, int direction) {
+  UI_ASSERT_DOM_LOCKED();
   auto const window = FromWindowId("ScrollTextWindow", window_id);
   if (!window)
     return;
@@ -382,8 +381,6 @@ void ViewDelegateImpl::ScrollTextWindow(WindowId window_id, int direction,
   if (!text_window) {
     DVLOG(0) << "ScrollTextWindow expects TextEditWindow.";
   }
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  DCHECK(lock_scope.locked());
   text_window->SmallScroll(0, direction);
 }
 

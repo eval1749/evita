@@ -249,7 +249,8 @@ void TableView::DidRealize() {
 void TableView::DidRequestFocus() {
   Redraw();
   ContentWindow::DidRequestFocus();
-  control_->RequestFocus();
+  if (control_)
+    control_->RequestFocus();
 }
 
 void TableView::DidResize() {

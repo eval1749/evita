@@ -47,6 +47,7 @@ class HistogramSet : public common::Singleton<HistogramSet> {
   public: ~HistogramSet();
 
   public: Histogram* GetOrCreate(const base::StringPiece& name);
+  public: base::string16 GetJson(const base::string16& name) const;
 };
 
 class TimeScope {

@@ -14,6 +14,7 @@
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/editor/modal_message_loop_scope.h"
+#include "evita/metrics/time_scope.h"
 #include "evita/views/forms/dialog_box_set.h"
 #include "evita/views/forms/file_dialog_box.h"
 #include "evita/views/forms/find_dialog_box.h"
@@ -206,10 +207,10 @@ void ViewDelegateImpl::GetFilenameForSave(
                                          base::string16(params.m_wsz)));
 }
 
-base::string16 ViewDelegateImpl::GetMetrics(const base::string16&) {
+base::string16 ViewDelegateImpl::GetMetrics(const base::string16& name) {
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
-  return L"{\"dummy\": 1}";
+  return metrics::HistogramSet::instance()->GetJson(name);
 }
 
 std::vector<int> ViewDelegateImpl::GetTableRowStates(WindowId window_id,

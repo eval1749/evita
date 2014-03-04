@@ -4,6 +4,11 @@
 
 #include "evita/metrics/time_scope.h"
 
+#include <sstream>
+
+#include "base/strings/utf_string_conversions.h"
+#include "evita/editor/dom_lock.h"
+
 namespace metrics {
 
 Histogram::Histogram(const base::StringPiece& name) : name_(name) {
@@ -33,6 +38,30 @@ Histogram* HistogramSet::GetOrCreate(const base::StringPiece& name) {
   auto const histogram = new Histogram(name);
   map_[name] = histogram;
   return histogram;
+}
+
+base::string16 HistogramSet::GetJson(const base::string16& name) const {
+  UI_ASSERT_DOM_LOCKED();
+  if (name != L"all")
+    return base::string16();
+  std::basic_ostringstream<base::char16> ostream;
+  ostream << '{';
+  const base::string16 comma = L",\n";
+  base::string16 delimiter = L"";
+  for (auto it : map_) {
+    ostream << delimiter << '"' << base::ASCIIToUTF16(it.first) << L"\": [";
+    base::string16 delimiter2 = L"";
+    for (auto key_value : it.second->data()) {
+      ostream << delimiter2;
+      ostream << L"{\"key\": " << key_value.first << L", " <<
+          L"\"value\": " << key_value.second << '}';
+      delimiter2 = comma;
+    }
+    ostream << ']';
+    delimiter = comma;
+  }
+  ostream << '}';
+  return ostream.str();
 }
 
 TimeScope::TimeScope(const base::StringPiece& name)

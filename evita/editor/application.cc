@@ -103,8 +103,6 @@ bool Application::CalledOnValidThread() const {
 // Note: We don't need to check ::GetStatus(QS_INPUT), becaue |DoIdle()| is
 // called after processing Windows message.
 void Application::DoIdle() {
-  METRICS_TIME_SCOPE();
-
   base::TimeDelta wait_time;
   if (message_loop_->os_modal_loop()) {
     wait_time = base::TimeDelta::FromMilliseconds(100);
@@ -122,6 +120,7 @@ void Application::DoIdle() {
 }
 
 bool Application::OnIdle(int hint) {
+  METRICS_TIME_SCOPE();
   auto more = views::FrameList::instance()->DoIdle(hint);
   if (views::DialogBoxSet::instance()->DoIdle(hint))
    more = true;

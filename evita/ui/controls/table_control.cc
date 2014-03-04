@@ -529,6 +529,11 @@ void TableControl::DidKillFocus() {
   UpdateViewIfNeeded();
 }
 
+void TableControl::DidRealize() {
+  model_->DidResize(gfx::RectF(rect()));
+  UpdateViewIfNeeded();
+}
+
 void TableControl::DidRequestFocus() {
   model_->DidRequestFocus();
   UpdateViewIfNeeded();

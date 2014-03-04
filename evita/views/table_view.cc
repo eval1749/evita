@@ -260,7 +260,8 @@ void TableView::DidRequestFocus() {
 
 void TableView::DidResize() {
   ContentWindow::DidResize();
-  control_->ResizeTo(rect());
+  if (control_)
+    control_->ResizeTo(rect());
 }
 
 void TableView::Show() {

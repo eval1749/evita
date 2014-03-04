@@ -52,6 +52,7 @@ class TableControl :
   // Widget
   private: virtual void DidKillFocus() override;
   private: virtual void DidRequestFocus() override;
+  private: virtual void DidRealize() override;
   private: virtual void DidResize() override;
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
   private: virtual void OnKeyPressed(const KeyboardEvent& event) override;

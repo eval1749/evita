@@ -168,8 +168,11 @@ TEST_F(TextPositionTest, moveBracket) {
   EXPECT_SCRIPT_EQ("(foo ##^( bar) baz", "backward('(foo ##( bar)^ baz')");
 
   // mismatched
-  EXPECT_SCRIPT_EQ("(^foo] bar", "backward('(foo]^ bar')");
-  EXPECT_SCRIPT_EQ("|^(foo| (bar |baz)|", "backward('|(foo| (bar |baz)^|')");
+  EXPECT_SCRIPT_EQ("(foo]^ bar", "backward('(foo]^ bar')") <<
+    "We don't move caret for mismatched right bracket.";
+  EXPECT_SCRIPT_EQ("|^(foo| (bar |baz)|",
+                   "backward('|(foo| (bar |baz)^|')") <<
+    "We don't care mismatched left bracket in different character syntax.";
 
   // nested parenthesis
   EXPECT_SCRIPT_EQ("^((foo))", "backward('^((foo))')");

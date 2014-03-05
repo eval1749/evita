@@ -40,7 +40,7 @@
    */
   function moveBackwardBracket(position) {
     /** @type {Array.<BracketMatchData>} */ var bracket_stack = [];
-    // reset when we reache at racket.
+    // reset when we reache at bracket.
     /**  @type {number} */ var bracket_char_syntax = -1;
     /** @type {number} */ var start_offset = position.offset;
 
@@ -74,8 +74,7 @@
         var last_bracket = bracket_stack.pop();
         if (last_bracket.data.pair != position.charCode()) {
           // We reach at mismatched left bracket.
-          position.move(Unit.CHARACTER);
-          return;
+          break;
         }
 
         if (!bracket_stack.length) {

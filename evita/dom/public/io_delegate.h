@@ -10,15 +10,33 @@
 
 namespace domapi {
 
+struct IoHandle;
+
 class IoDelegate {
   public: typedef base::Callback<
+      void(uint32_t num_transfered, int error_code)> FileIoCallback;
+
+  public: typedef base::Callback<
       void(const domapi::QueryFileStatusCallbackData&)> QueryFileStatusCallback;
+
+  public: typedef base::Callback<void(IoHandle* handle, int error_code)>
+      OpenFileCallback;
 
   protected: IoDelegate();
   public: virtual ~IoDelegate();
 
+  public: virtual void CloseFile(IoHandle* io_handle) = 0;
+  public: virtual void OpenFile(const base::string16& filename,
+                                const base::string16& mode,
+                                const OpenFileCallback& callback) = 0;
   public: virtual void QueryFileStatus(const base::string16& filename,
       const QueryFileStatusCallback& callback) = 0;
+  public: virtual void ReadFile(IoHandle* io_handle, uint8_t* buffer,
+                                size_t num_read,
+                                const FileIoCallback& callback) = 0;
+  public: virtual void WriteFile(IoHandle* io_handle, uint8_t* buffer,
+                                 size_t num_write,
+                                 const FileIoCallback& callback) = 0;
 
   DISALLOW_COPY_AND_ASSIGN(IoDelegate);
 };

@@ -58,8 +58,19 @@ class ScriptThread final : public domapi::IoDelegate,
                             domapi::IoDelegate* io_delegate);
 
   // IoDelegate
+  // domapi::IoDelegate
+  private: virtual void CloseFile(domapi::IoHandle* io_handle);
+  private: virtual void OpenFile(const base::string16& filename,
+                                 const base::string16& mode,
+                                 const OpenFileCallback& callback) override;
   private: virtual void QueryFileStatus(const base::string16& filename,
       const QueryFileStatusCallback& callback) override;
+  private: virtual void ReadFile(domapi::IoHandle* io_handle,
+                                 uint8_t* buffer, size_t num_read,
+                                 const FileIoCallback& callback) override;
+  private: virtual void WriteFile(domapi::IoHandle* io_handle,
+                                  uint8_t* buffer, size_t num_write,
+                                  const FileIoCallback& callback) override;
 
   // ViewDelegate
   private: virtual void AddWindow(WindowId parent_id,

@@ -88,7 +88,8 @@
     // Force color newly inserted characters.
     // Note: If we are in long comment, parenthesis matching may not work.
     range.document.doColor_(100);
-    if (selection.move(Unit.BRACKET, -1) == start) {
+    selection.move(Unit.BRACKET, -1);
+    if (range.start == start) {
       range.collapseTo(end);
       selection.window.status = Strings.IDS_NO_MATCHING_PAREN;
       return;

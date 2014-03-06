@@ -8,6 +8,9 @@ var Os;
 /** @expose @type{!Object} */
 Os.File;
 
+/** @expose @constructor */
+Os.File.Error
+
 /**
  * @expose
  * @typedef {{
@@ -19,6 +22,22 @@ Os.File;
  * }}
  */
 Os.File.Info;
+
+/**
+ * @expose
+ * @param {string} file_name
+ * @param {string=} opt_mode
+ * @return {!Promise.<!Os.FileHandle>}
+ */
+Os.File.open = function(file_name, opt_mode) {};
+
+/**
+ * @expose
+ * @param {string} file_name
+ * @param {string} mode
+ * @param {!function(*)} callback
+ */
+Os.File.open_ = function(file_name, mode, callback) {};
 
 /**
  * @expose

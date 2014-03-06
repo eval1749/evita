@@ -7,6 +7,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/strings/string16.h"
 #include "evita/dom/converter.h"
+#include "evita/dom/os/file_handle.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/script_controller.h"
 #include "evita/v8_glue/converter.h"
@@ -17,9 +18,47 @@
 
 namespace dom {
 
-namespace os {
-namespace file {
 namespace {
+
+//////////////////////////////////////////////////////////////////////
+//
+// OpenFileCallback
+//
+class OpenFileCallback : public base::RefCounted<OpenFileCallback> {
+  private: v8_glue::ScopedPersistent<v8::Function> function_;
+  private: base::WeakPtr<v8_glue::Runner> runner_;
+
+  public: OpenFileCallback(v8_glue::Runner* runner,
+                          v8::Handle<v8::Function> function)
+    : function_(runner->isolate(), function), runner_(runner->GetWeakPtr()) {
+  }
+
+  public: void Run(domapi::IoHandle* handle, int error_code) {
+    if (!runner_)
+      return;
+    v8_glue::Runner::Scope runner_scope(runner_.get());
+    auto const isolate = runner_->isolate();
+    auto const function = function_.NewLocal(isolate);
+    if (error_code) {
+      runner_->Call(function, v8::Undefined(isolate),
+                    v8::Integer::New(isolate, error_code));
+    } else {
+      runner_->Call(function, v8::Undefined(isolate),
+                    (new FileHandle(handle))->GetWrapper(isolate));
+    }
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(OpenFileCallback);
+};
+
+void OpenFile(const base::string16& file_name, const base::string16& mode,
+              v8::Handle<v8::Function> callback) {
+  auto const runner = ScriptController::instance()->runner();
+  auto const file_io_callback = make_scoped_refptr(
+      new OpenFileCallback(runner, callback));
+  ScriptController::instance()->io_delegate()->OpenFile(file_name, mode,
+      base::Bind(&OpenFileCallback::Run, file_io_callback));
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -74,9 +113,15 @@ void QueryFileStatus(const base::string16& filename,
 
 }  // namespace
 
+namespace os {
+namespace file {
+
 v8::Handle<v8::ObjectTemplate> CreateObjectTemplate(v8::Isolate* isolate) {
   gin::ObjectTemplateBuilder builder(isolate);
-  return builder.SetMethod("stat_", &QueryFileStatus).Build();
+  return builder
+      .SetMethod("open_", &OpenFile)
+      .SetMethod("stat_", &QueryFileStatus)
+      .Build();
 }
 
 }  // namespace file

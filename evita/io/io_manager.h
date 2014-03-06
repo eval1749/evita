@@ -38,22 +38,11 @@ class IoManager : public common::win::NativeWindow, public domapi::IoDelegate {
   public: domapi::IoDelegate* io_delegate() const;
   public: base::MessageLoop* message_loop() const;
 
-  public: void RegisterIoHandler(HANDLE handle, void* io_handler);
   public: void Start();
 
   // domapi::IoDelegate
-  private: virtual void CloseFile(domapi::IoHandle* io_handle);
-  private: virtual void OpenFile(const base::string16& filename,
-                                 const base::string16& mode,
-                                 const OpenFileCallback& callback) override;
   private: virtual void QueryFileStatus(const base::string16& filename,
-      const QueryFileStatusCallback& callback) override;
-  private: virtual void ReadFile(domapi::IoHandle* io_handle, uint8_t* buffer,
-                                 size_t num_read,
-                                 const FileIoCallback& callback) override;
-  private: virtual void WriteFile(domapi::IoHandle* io_handle, uint8_t* buffer,
-                                  size_t num_write,
-                                  const FileIoCallback& callback) override;
+      const QueryFileStatusCallback& callback);
 
   // common::win::NativeWindow
   private: virtual LRESULT WindowProc(UINT, WPARAM, LPARAM) override;

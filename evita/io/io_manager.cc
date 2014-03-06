@@ -59,12 +59,6 @@ base::MessageLoop* IoManager::message_loop() const {
   return io_thread_->message_loop();
 }
 
-void IoManager::RegisterIoHandler(HANDLE handle, void* io_handler) {
-  DCHECK(handle);
-  DCHECK(io_handler);
-  // TODO(yosi) NYI MessagePumpForIO::RegisterIoHandler
-}
-
 void IoManager::Start() {
   CreateWindowEx(0, 0, L"IoManager", HWND_MESSAGE, common::win::Point(),
                  common::win::Size());
@@ -74,41 +68,11 @@ void IoManager::Start() {
 }
 
 // domapi::IoDelegate
-void IoManager::CloseFile(domapi::IoHandle* io_handle) {
-  message_loop()->PostTask(FROM_HERE, base::Bind(
-      &IoDelegate::CloseFile, base::Unretained(io_delegate_.get()),
-      base::Unretained(io_handle)));
-}
-
-void IoManager::OpenFile(const base::string16& file_name,
-                         const base::string16& mode,
-                         const OpenFileCallback& callback) {
-  message_loop()->PostTask(FROM_HERE, base::Bind(
-      &IoDelegate::OpenFile, base::Unretained(io_delegate_.get()),
-      file_name, mode, callback));
-}
-
 void IoManager::QueryFileStatus(const base::string16& filename,
                                 const QueryFileStatusCallback& callback) {
   message_loop()->PostTask(FROM_HERE, base::Bind(
       &IoDelegate::QueryFileStatus, base::Unretained(io_delegate_.get()),
       filename, callback));
-}
-
-void IoManager::ReadFile(domapi::IoHandle* io_handle, uint8_t* buffer,
-                         size_t num_read, const FileIoCallback& callback) {
-  message_loop()->PostTask(FROM_HERE, base::Bind(
-      &IoDelegate::ReadFile, base::Unretained(io_delegate_.get()),
-      base::Unretained(io_handle), base::Unretained(buffer), num_read,
-      callback));
-}
-
-void IoManager::WriteFile(domapi::IoHandle* io_handle, uint8_t* buffer,
-                          size_t num_read, const FileIoCallback& callback) {
-  message_loop()->PostTask(FROM_HERE, base::Bind(
-      &IoDelegate::WriteFile, base::Unretained(io_delegate_.get()),
-      base::Unretained(io_handle), base::Unretained(buffer), num_read,
-      callback));
 }
 
 // common::win::NativeWindow

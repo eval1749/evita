@@ -175,41 +175,11 @@ void ScriptThread::Start(base::MessageLoop* host_message_loop,
 }
 
 // IoDelegate
-void ScriptThread::CloseFile(domapi::IoHandle* io_handle) {
-  io_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &IoDelegate::CloseFile, base::Unretained(io_delegate_),
-      base::Unretained(io_handle)));
-}
-
-void ScriptThread::OpenFile(const base::string16& file_name,
-                         const base::string16& mode,
-                         const OpenFileCallback& callback) {
-  io_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &IoDelegate::OpenFile, base::Unretained(io_delegate_),
-      file_name, mode, callback));
-}
-
 void ScriptThread:: QueryFileStatus(const base::string16& filename,
     const QueryFileStatusCallback& callback) {
   io_message_loop_->PostTask(FROM_HERE, base::Bind(
       &domapi::IoDelegate::QueryFileStatus, base::Unretained(io_delegate_),
       filename, callback));
-}
-
-void ScriptThread::ReadFile(domapi::IoHandle* io_handle, uint8_t* buffer,
-                         size_t num_read, const FileIoCallback& callback) {
-  io_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &IoDelegate::ReadFile, base::Unretained(io_delegate_),
-      base::Unretained(io_handle), base::Unretained(buffer), num_read,
-      callback));
-}
-
-void ScriptThread::WriteFile(domapi::IoHandle* io_handle, uint8_t* buffer,
-                          size_t num_read, const FileIoCallback& callback) {
-  io_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &IoDelegate::WriteFile, base::Unretained(io_delegate_),
-      base::Unretained(io_handle), base::Unretained(buffer), num_read,
-      callback));
 }
 
 // ViewDelegate

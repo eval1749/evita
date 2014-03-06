@@ -23,16 +23,8 @@ class MockIoDelegate : public domapi::IoDelegate {
       const domapi::QueryFileStatusCallbackData& data);
 
   // domapi::IoDelegate
-  MOCK_METHOD1(CloseFile, void(domapi::IoHandle*));
-  MOCK_METHOD3(OpenFile, void(const base::string16&, const base::string16&,
-                              const OpenFileCallback&));
   private: void QueryFileStatus(const base::string16& filename,
       const QueryFileStatusCallback& callback) override;
-  public:
-  MOCK_METHOD4(ReadFile, void(domapi::IoHandle*, uint8_t*, size_t,
-               const FileIoCallback&));
-  MOCK_METHOD4(WriteFile, void(domapi::IoHandle*, uint8_t*, size_t,
-               const FileIoCallback&));
 };
 
 }  // namespace dom

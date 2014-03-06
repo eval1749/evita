@@ -28,7 +28,7 @@ using Buffer = dom::Buffer;
 //
 // IoManager
 //
-class IoManager : public common::win::NativeWindow, public domapi::IoDelegate {
+class IoManager : public common::win::NativeWindow {
   private: std::unique_ptr<domapi::IoDelegate> io_delegate_;
   private: std::unique_ptr<base::Thread> io_thread_;
 
@@ -38,11 +38,8 @@ class IoManager : public common::win::NativeWindow, public domapi::IoDelegate {
   public: domapi::IoDelegate* io_delegate() const;
   public: base::MessageLoop* message_loop() const;
 
+  public: void RegisterIoHandler(HANDLE handle, void* io_handler);
   public: void Start();
-
-  // domapi::IoDelegate
-  private: virtual void QueryFileStatus(const base::string16& filename,
-      const QueryFileStatusCallback& callback);
 
   // common::win::NativeWindow
   private: virtual LRESULT WindowProc(UINT, WPARAM, LPARAM) override;

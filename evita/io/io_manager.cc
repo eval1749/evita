@@ -59,20 +59,18 @@ base::MessageLoop* IoManager::message_loop() const {
   return io_thread_->message_loop();
 }
 
+void IoManager::RegisterIoHandler(HANDLE handle, void* io_handler) {
+  DCHECK(handle);
+  DCHECK(io_handler);
+  // TODO(yosi) NYI MessagePumpForIO::RegisterIoHandler
+}
+
 void IoManager::Start() {
   CreateWindowEx(0, 0, L"IoManager", HWND_MESSAGE, common::win::Point(),
                  common::win::Size());
   DCHECK(*this);
   io_thread_->StartWithOptions(
       base::Thread::Options(base::MessageLoop::TYPE_IO, 0));
-}
-
-// domapi::IoDelegate
-void IoManager::QueryFileStatus(const base::string16& filename,
-                                const QueryFileStatusCallback& callback) {
-  message_loop()->PostTask(FROM_HERE, base::Bind(
-      &IoDelegate::QueryFileStatus, base::Unretained(io_delegate_.get()),
-      filename, callback));
 }
 
 // common::win::NativeWindow

@@ -14,7 +14,7 @@ class Time;
 #include "evita/dom/view_delegate.h"
 
 namespace base {
-class MessageLoop;
+class MessageLoopForIO;
 class Thread;
 }
 
@@ -36,7 +36,7 @@ class IoManager : public common::win::NativeWindow {
   public: virtual ~IoManager();
 
   public: domapi::IoDelegate* io_delegate() const;
-  public: base::MessageLoop* message_loop() const;
+  public: base::MessageLoopForIO* message_loop() const;
 
   public: void RegisterIoHandler(HANDLE handle, void* io_handler);
   public: void Start();

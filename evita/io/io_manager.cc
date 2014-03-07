@@ -9,6 +9,10 @@
 #include "base/bind.h"
 #include "base/callback.h"
 #pragma warning(pop)
+#pragma warning(push)
+#pragma warning(disable: 4100 4625 4626)
+#include "base/message_loop/message_loop.h"
+#pragma warning(pop)
 #include "base/strings/string16.h"
 #pragma warning(push)
 #pragma warning(disable: 4100 4625 4626)
@@ -55,14 +59,15 @@ domapi::IoDelegate* IoManager::io_delegate() const {
   return io_delegate_.get();
 }
 
-base::MessageLoop* IoManager::message_loop() const {
-  return io_thread_->message_loop();
+base::MessageLoopForIO* IoManager::message_loop() const {
+  return static_cast<base::MessageLoopForIO*>(io_thread_->message_loop());
 }
 
 void IoManager::RegisterIoHandler(HANDLE handle, void* io_handler) {
   DCHECK(handle);
   DCHECK(io_handler);
-  // TODO(yosi) NYI MessagePumpForIO::RegisterIoHandler
+  message_loop()->RegisterIOHandler(handle,
+      reinterpret_cast<base::MessageLoopForIO::IOHandler*>(io_handler));
 }
 
 void IoManager::Start() {

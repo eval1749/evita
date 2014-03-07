@@ -11,6 +11,7 @@
 #include "base/message_loop/message_pump_win.h"
 #pragma warning(pop)
 #include "base/time/time.h"
+#include "common/win/scoped_handle.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/io/io_manager.h"
@@ -18,61 +19,19 @@
 #define DVLOG_WIN32_ERROR(level, name) \
   DVLOG(level) << name ": " << this << " " << file_name << " err=" << dwError
 
-namespace common {
-namespace win {
-class GenericScopedHandle {
-  private: HANDLE handle_;
-
-  public: GenericScopedHandle(const GenericScopedHandle& other) = delete;
-  public: GenericScopedHandle(GenericScopedHandle&& other)
-      : handle_(other.handle_) {
-    other.handle_ = INVALID_HANDLE_VALUE;
-  }
-  public: GenericScopedHandle(HANDLE handle) : handle_(handle) {
-  }
-  public: GenericScopedHandle() : GenericScopedHandle(INVALID_HANDLE_VALUE) {
-  }
-  public: ~GenericScopedHandle() {
-    if (handle_ != INVALID_HANDLE_VALUE)
-      ::CloseHandle(handle_);
-  }
-
-  public: operator bool() const { return is_valid(); }
-
-  public: GenericScopedHandle& operator=(const GenericScopedHandle&) = delete;
-  public: GenericScopedHandle& operator=(GenericScopedHandle&& other) {
-    DCHECK_EQ(INVALID_HANDLE_VALUE, handle_);
-    handle_ = other.handle_;
-    other.handle_ = INVALID_HANDLE_VALUE;
-    return *this;
-  }
-
-  public: HANDLE get() const { return handle_; }
-  public: bool is_valid() const { return handle_ != INVALID_HANDLE_VALUE; }
-
-  public: HANDLE release() {
-    DCHECK(is_valid());
-    auto const handle = handle_;
-    handle_ = INVALID_HANDLE_VALUE;
-    return handle;
-  }
-};
-}  // namespace win
-}  // namespace common
-
 namespace io {
 
 namespace {
 const DWORD kHugeFileSize = 1u << 28;
 
 domapi::IoHandle* FileHandleToDomIoHandle(HANDLE handle) {
+  DCHECK_NE(INVALID_HANDLE_VALUE, handle);
   return reinterpret_cast<domapi::IoHandle*>(handle);
 }
 
 HANDLE DomIoHandleToFileHandle(domapi::IoHandle* handle) {
   return reinterpret_cast<HANDLE>(handle);
 }
-
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -184,6 +143,7 @@ IoDelegateImpl::IoHandler::IoContextImpl*
     IoDelegateImpl::IoHandler::CreateIoContext(
         const domapi::IoDelegate::FileIoCallback& callback) {
   auto const context = new IoContextImpl();
+  context->overlapped = {0};
   context->handler = this;
   context->callback = callback;
   return context;
@@ -225,8 +185,9 @@ void IoDelegateImpl::IoHandler::WriteFile(HANDLE file_handle, void* buffer,
 void IoDelegateImpl::IoHandler::OnIOCompleted(IOContext* context,
                                               DWORD bytes_transfered,
                                               DWORD error) {
-  static_cast<IoContextImpl*>(context)->callback.Run(
-      static_cast<int>(bytes_transfered), static_cast<int>(error));
+  Application::instance()->view_event_handler()->RunCallback(
+      base::Bind(static_cast<IoContextImpl*>(context)->callback,
+                 static_cast<int>(bytes_transfered), static_cast<int>(error)));
   delete context;
 }
 
@@ -251,7 +212,7 @@ void IoDelegateImpl::OpenFile(const base::string16& file_name,
                               const base::string16& mode,
                               const OpenFileCallback& callback) {
   CreateFileParams params(mode);
-  common::win::GenericScopedHandle handle = ::CreateFileW(file_name.c_str(),
+  common::win::scoped_handle handle = ::CreateFileW(file_name.c_str(),
       params.access, params.share_mode, nullptr, params.creation,
       FILE_FLAG_OVERLAPPED, nullptr);
   if (!handle) {

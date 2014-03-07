@@ -11,10 +11,38 @@
 #include "evita/dom/script_controller.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
+#include "evita/v8_glue/optional.h"
+#include "evita/v8_glue/promise_callback.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/script_callback.h"
 #include "gin/array_buffer.h"
 #include "v8_strings.h"
+
+namespace dom {
+namespace os {
+struct FileError {
+  int error_code;
+  FileError(int error_code) : error_code(error_code) {
+  }
+};
+}  // namespace os
+}  // namespace dom
+
+namespace gin {
+template<>
+struct Converter<dom::os::FileError> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+                                    const dom::os::FileError& error) {
+    auto const runner = v8_glue::Runner::current_runner(isolate);
+    auto const os_file_error_ctor = runner->global()->
+        Get(dom::v8Strings::Os.Get(isolate))->ToObject()->
+        Get(dom::v8Strings::File.Get(isolate))->ToObject()->
+        Get(dom::v8Strings::Error.Get(isolate));
+    return runner->CallAsConstructor(os_file_error_ctor,
+        v8::Integer::New(isolate, error.error_code));
+  }
+};
+}  // namespace gin
 
 namespace dom {
 namespace os {
@@ -39,10 +67,9 @@ class FileClass : public v8_glue::WrapperInfo {
     return nullptr;
   }
 
-  private: static void OpenFile(const base::string16& file_name,
-                                const base::string16& mode,
-                                v8::Handle<v8::Function> callback);
-
+  private: static v8::Handle<v8::Object> OpenFile(
+      const base::string16& file_name,
+      v8_glue::Optional<base::string16> opt_mode);
   private: static void QueryFileStatus(const base::string16& filename,
                                         v8::Handle<v8::Function> callback);
 
@@ -52,7 +79,7 @@ class FileClass : public v8_glue::WrapperInfo {
     auto const templ = v8_glue::CreateConstructorTemplate(isolate,
         &FileClass::NewFile);
   return v8_glue::FunctionTemplateBuilder(isolate, templ)
-      .SetMethod("open_", &FileClass::OpenFile)
+      .SetMethod("open", &FileClass::OpenFile)
       .SetMethod("stat_", &FileClass::QueryFileStatus)
       .Build();
   }
@@ -99,28 +126,17 @@ class FileIoCallback : public base::RefCounted<FileIoCallback> {
 //
 // OpenFileCallback
 //
-class OpenFileCallback : public base::RefCounted<OpenFileCallback> {
-  private: v8_glue::ScopedPersistent<v8::Function> function_;
-  private: base::WeakPtr<v8_glue::Runner> runner_;
-
-  public: OpenFileCallback(v8_glue::Runner* runner,
-                          v8::Handle<v8::Function> function)
-    : function_(runner->isolate(), function), runner_(runner->GetWeakPtr()) {
+class OpenFileCallback : public v8_glue::PromiseCallback {
+  public: OpenFileCallback(v8_glue::Runner* runner)
+    : v8_glue::PromiseCallback(runner) {
   }
 
   public: void Run(domapi::IoHandle* handle, int error_code) {
-    if (!runner_)
-      return;
-    v8_glue::Runner::Scope runner_scope(runner_.get());
-    auto const isolate = runner_->isolate();
-    auto const function = function_.NewLocal(isolate);
     if (error_code) {
-      runner_->Call(function, v8::Undefined(isolate),
-                    v8::Integer::New(isolate, error_code));
-    } else {
-      runner_->Call(function, v8::Undefined(isolate),
-                    (new File(handle))->GetWrapper(isolate));
+      Reject(FileError(error_code));
+      return;
     }
+    Resolve(new File(handle));
   }
 
   DISALLOW_COPY_AND_ASSIGN(OpenFileCallback);
@@ -167,14 +183,16 @@ class QueryFileStatusCallback
   DISALLOW_COPY_AND_ASSIGN(QueryFileStatusCallback);
 };
 
-void FileClass::OpenFile(const base::string16& file_name,
-                         const base::string16& mode,
-                         v8::Handle<v8::Function> callback) {
+v8::Handle<v8::Object> FileClass::OpenFile(const base::string16& file_name,
+    v8_glue::Optional<base::string16> opt_mode) {
   auto const runner = ScriptController::instance()->runner();
+  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
   auto const file_io_callback = make_scoped_refptr(
-      new OpenFileCallback(runner, callback));
-  ScriptController::instance()->io_delegate()->OpenFile(file_name, mode,
+      new OpenFileCallback(runner));
+  ScriptController::instance()->io_delegate()->OpenFile(file_name,
+      opt_mode.is_supplied ? opt_mode.value : base::string16(),
       base::Bind(&OpenFileCallback::Run, file_io_callback));
+  return runner_scope.Escape(file_io_callback->GetPromise(runner->isolate()));
 }
 
 void FileClass::QueryFileStatus(const base::string16& filename,

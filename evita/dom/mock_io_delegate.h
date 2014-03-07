@@ -15,17 +15,21 @@ namespace dom {
 
 class MockIoDelegate : public domapi::IoDelegate {
   private: domapi::QueryFileStatusCallbackData data_;
+  private: int error_code_;
+  private: domapi::IoHandle* io_handle_;
 
   public: MockIoDelegate();
   public: virtual ~MockIoDelegate();
 
+  public: void SetOpenFileCallbackData(domapi::IoHandle* io_handle,
+                                       int error_code);
   public: void SetQueryFileStatusCallbackData(
       const domapi::QueryFileStatusCallbackData& data);
 
   // domapi::IoDelegate
   MOCK_METHOD1(CloseFile, void(domapi::IoHandle*));
-  MOCK_METHOD3(OpenFile, void(const base::string16&, const base::string16&,
-                              const OpenFileCallback&));
+  public: void OpenFile(const base::string16&, const base::string16&,
+                        const OpenFileCallback&);
   private: void QueryFileStatus(const base::string16& filename,
       const QueryFileStatusCallback& callback) override;
   public:

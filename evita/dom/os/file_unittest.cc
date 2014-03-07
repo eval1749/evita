@@ -19,6 +19,24 @@ class OsFileTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(OsFileTest);
 };
 
+TEST_F(OsFileTest, OsFile_open_failed) {
+  mock_io_delegate()->SetOpenFileCallbackData(nullptr, 123);
+  EXPECT_SCRIPT_VALID(
+    "var reason;"
+    "Os.File.open('foo.js').catch(function(x) { reason = x; });");
+  EXPECT_SCRIPT_TRUE("reason instanceof Os.File.Error");
+  EXPECT_SCRIPT_EQ("123", "reason.winLastError");
+}
+
+TEST_F(OsFileTest, OsFile_open_succeeded) {
+  mock_io_delegate()->SetOpenFileCallbackData(
+      reinterpret_cast<domapi::IoHandle*>(123), 0);
+  EXPECT_SCRIPT_VALID(
+    "var file;"
+    "Os.File.open('foo.js').then(function(x) { file = x });");
+  EXPECT_SCRIPT_TRUE("file instanceof Os.File");
+}
+
 TEST_F(OsFileTest, OsFile_stat_) {
   domapi::QueryFileStatusCallbackData data;
   data.error_code = 123;

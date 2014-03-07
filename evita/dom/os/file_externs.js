@@ -40,14 +40,6 @@ Os.File.open = function(file_name, opt_mode) {};
 /**
  * @expose
  * @param {string} file_name
- * @param {string} mode
- * @param {!function(*)} callback
- */
-Os.File.open_ = function(file_name, mode, callback) {};
-
-/**
- * @expose
- * @param {string} file_name
  * @return {!Promise.<!Os.File.Info>}
  */
 Os.File.stat = function(file_name) {};

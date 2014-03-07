@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/os_file.h"
+#include "evita/dom/os/file.h"
 
 #include "base/memory/ref_counted.h"
 #include "base/strings/string16.h"

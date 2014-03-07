@@ -42,8 +42,8 @@
         'dom/js_console_externs.js',
         'dom/key_names_externs.js',
         'dom/modes/modes_externs.js',
+        'dom/os/file_externs.js',
         'dom/os/file_handle_externs.js',
-        'dom/os_file_externs.js',
         'dom/point_externs.js',
         'dom/range_externs.js',
         'dom/regexp_externs.js',
@@ -79,8 +79,8 @@
         'dom/forms/text_field_control.js',
 
         'dom/modes/modes.js',
+        'dom/os/file.js',
         'dom/os/file_handle.js',
-        'dom/os_file.js',
         'dom/range.js',
         'dom/regexp.js',
         'dom/style.js',
@@ -209,7 +209,7 @@
         'dom/modes/python_mode.cc',
         'dom/modes/xml_mode.cc',
 
-        'dom/os_file.cc',
+        'dom/os/file.cc',
         'dom/os/file_handle.cc',
 
         'dom/point.cc',

@@ -61,20 +61,6 @@ Os.File.prototype.read = function(buffer) {};
 /**
  * @expose
  * @param {!ArrayBufferView} buffer
- * @param {!function(number, number)} callback
- */
-Os.File.prototype.read_ = function(buffer, callback) {};
-
-/**
- * @expose
- * @param {!ArrayBufferView} buffer
  * @return {!Promise.<number|!Os.File.Error>}
  */
 Os.File.prototype.write = function(buffer) {};
-
-/**
- * @expose
- * @param {!ArrayBufferView} buffer
- * @param {!function(number, number)} callback
- */
-Os.File.prototype.write_ = function(buffer, callback) {};

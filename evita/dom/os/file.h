@@ -28,10 +28,10 @@ class File : public v8_glue::Scriptable<File> {
   public: virtual ~File();
 
   public: void Close();
-  public: void Read(const gin::ArrayBufferView& array_buffer_view,
-                    v8::Handle<v8::Function> callback);
-  public: void Write(const gin::ArrayBufferView& array_buffer_view,
-                     v8::Handle<v8::Function> callback);
+  public: v8::Handle<v8::Object> Read(
+      const gin::ArrayBufferView& array_buffer_view);
+  public: v8::Handle<v8::Object> Write(
+      const gin::ArrayBufferView& array_buffer_view);
 
   DISALLOW_COPY_AND_ASSIGN(File);
 };

@@ -10,10 +10,17 @@
 
 namespace dom {
 
-MockIoDelegate::MockIoDelegate() : error_code_(0), io_handle_(nullptr) {
+MockIoDelegate::MockIoDelegate()
+    : error_code_(0), io_handle_(nullptr), num_transferred_(0) {
 }
 
 MockIoDelegate::~MockIoDelegate() {
+}
+
+void MockIoDelegate::SetFileIoCallbackData(int num_transferred,
+                                           int error_code) {
+  num_transferred_ = num_transferred;
+  error_code_ = error_code;
 }
 
 void MockIoDelegate::SetOpenFileCallbackData(domapi::IoHandle* io_handle,
@@ -36,6 +43,16 @@ void MockIoDelegate::OpenFile(const base::string16&,
 void MockIoDelegate::QueryFileStatus(const base::string16&,
     const QueryFileStatusCallback& callback) {
   callback.Run(data_);
+}
+
+void MockIoDelegate::ReadFile(domapi::IoHandle*, void*, size_t,
+                              const FileIoCallback& callback) {
+  callback.Run(num_transferred_, error_code_);
+}
+
+void MockIoDelegate::WriteFile(domapi::IoHandle*, void*, size_t,
+                              const FileIoCallback& callback) {
+  callback.Run(num_transferred_, error_code_);
 }
 
 }  // namespace dom

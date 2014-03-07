@@ -59,4 +59,74 @@ TEST_F(OsFileTest, OsFile_stat_) {
   EXPECT_SCRIPT_EQ("false", "result.readonly");
 }
 
+TEST_F(OsFileTest, OsFile_read_failed) {
+  mock_io_delegate()->SetOpenFileCallbackData(
+      reinterpret_cast<domapi::IoHandle*>(123), 0);
+  EXPECT_SCRIPT_VALID(
+    "var file;"
+    "Os.File.open('foo.js').then(function(x) { file = x });");
+  EXPECT_SCRIPT_TRUE("file instanceof Os.File");
+
+  mock_io_delegate()->SetFileIoCallbackData(0, 123);
+  EXPECT_SCRIPT_VALID(
+    "var reason;"
+    "var arrayBuffer = new ArrayBuffer(10);"
+    "var arrayView = new Uint8Array(arrayBuffer);"
+    "file.read(arrayView).catch(function(x) { reason = x; });");
+  EXPECT_SCRIPT_TRUE("reason instanceof Os.File.Error");
+  EXPECT_SCRIPT_EQ("123", "reason.winLastError");
+}
+
+TEST_F(OsFileTest, OsFile_read_succeeded) {
+  mock_io_delegate()->SetOpenFileCallbackData(
+      reinterpret_cast<domapi::IoHandle*>(123), 0);
+  EXPECT_SCRIPT_VALID(
+    "var file;"
+    "Os.File.open('foo.js').then(function(x) { file = x });");
+  EXPECT_SCRIPT_TRUE("file instanceof Os.File");
+
+  mock_io_delegate()->SetFileIoCallbackData(123, 0);
+  EXPECT_SCRIPT_VALID(
+    "var transferred;"
+    "var arrayBuffer = new ArrayBuffer(10);"
+    "var arrayView = new Uint8Array(arrayBuffer);"
+    "file.read(arrayView).then(function(x) { transferred = x; });");
+  EXPECT_SCRIPT_EQ("123", "transferred");
+}
+
+TEST_F(OsFileTest, OsFile_write_failed) {
+  mock_io_delegate()->SetOpenFileCallbackData(
+      reinterpret_cast<domapi::IoHandle*>(123), 0);
+  EXPECT_SCRIPT_VALID(
+    "var file;"
+    "Os.File.open('foo.js').then(function(x) { file = x });");
+  EXPECT_SCRIPT_TRUE("file instanceof Os.File");
+
+  mock_io_delegate()->SetFileIoCallbackData(0, 123);
+  EXPECT_SCRIPT_VALID(
+    "var reason;"
+    "var arrayBuffer = new ArrayBuffer(10);"
+    "var arrayView = new Uint8Array(arrayBuffer);"
+    "file.write(arrayView).catch(function(x) { reason = x; });");
+  EXPECT_SCRIPT_TRUE("reason instanceof Os.File.Error");
+  EXPECT_SCRIPT_EQ("123", "reason.winLastError");
+}
+
+TEST_F(OsFileTest, OsFile_write_succeeded) {
+  mock_io_delegate()->SetOpenFileCallbackData(
+      reinterpret_cast<domapi::IoHandle*>(123), 0);
+  EXPECT_SCRIPT_VALID(
+    "var file;"
+    "Os.File.open('foo.js').then(function(x) { file = x });");
+  EXPECT_SCRIPT_TRUE("file instanceof Os.File");
+
+  mock_io_delegate()->SetFileIoCallbackData(123, 0);
+  EXPECT_SCRIPT_VALID(
+    "var transferred;"
+    "var arrayBuffer = new ArrayBuffer(10);"
+    "var arrayView = new Uint8Array(arrayBuffer);"
+    "file.write(arrayView).then(function(x) { transferred = x; });");
+  EXPECT_SCRIPT_EQ("123", "transferred");
+}
+
 }  // namespace

@@ -7,11 +7,25 @@
 #include "common/temporary_change_value.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner_delegate.h"
+#include "evita/v8_glue/per_isolate_data.h"
 
 namespace v8_glue {
 
 namespace {
 const int kMaxCallDepth = 20;
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// Runner::CurrentRunnerScope
+//
+Runner::CurrentRunnerScope::CurrentRunnerScope(Runner* runner)
+    : isolate_(runner->isolate()) {
+  PerIsolateData::From(isolate_)->set_current_runner(runner);
+}
+
+Runner::CurrentRunnerScope::~CurrentRunnerScope() {
+  PerIsolateData::From(isolate_)->set_current_runner(nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -23,6 +37,7 @@ Runner::EscapableHandleScope::EscapableHandleScope(Runner* runner)
       isolate_scope_(runner->isolate()),
       handle_scope_(runner->isolate()),
       context_scope_(runner->context()),
+      current_runner_scope_(runner),
       runner_(runner) {
   #if defined(_DEBUG)
     ++runner->in_scope_;
@@ -44,6 +59,7 @@ Runner::Scope::Scope(Runner* runner)
       isolate_scope_(runner->isolate()),
       handle_scope_(runner->isolate()),
       context_scope_(runner->context()),
+      current_runner_scope_(runner),
       runner_(runner) {
   #if defined(_DEBUG)
     ++runner->in_scope_;
@@ -80,6 +96,10 @@ Runner::Runner(v8::Isolate* isoalte, RunnerDelegate* delegate)
 }
 
 Runner::~Runner() {
+}
+
+Runner* Runner::current_runner(v8::Isolate* isolate) {
+  return PerIsolateData::From(isolate)->current_runner();
 }
 
 v8::Handle<v8::Object> Runner::global() const {

@@ -19,11 +19,19 @@ class RunnerDelegate;
 class Runner : public gin::ContextHolder {
   public: typedef std::vector<v8::Handle<v8::Value>> Args;
 
+  private: class CurrentRunnerScope {
+    private: v8::Isolate* isolate_;
+
+    public: CurrentRunnerScope(Runner* runner);
+    public: ~CurrentRunnerScope();
+  };
+
   public: class EscapableHandleScope {
     private: v8::Locker isolate_locker_;
     private: v8::Isolate::Scope isolate_scope_;
     private: v8::EscapableHandleScope handle_scope_;
     private: v8::Context::Scope context_scope_;
+    private: CurrentRunnerScope current_runner_scope_;
     private: Runner* runner_;
 
     public: explicit EscapableHandleScope(Runner* runner);
@@ -42,6 +50,7 @@ class Runner : public gin::ContextHolder {
     private: v8::Isolate::Scope isolate_scope_;
     private: v8::HandleScope handle_scope_;
     private: v8::Context::Scope context_scope_;
+    private: CurrentRunnerScope current_runner_scope_;
     private: Runner* runner_;
 
     public: explicit Scope(Runner* runner);
@@ -61,6 +70,7 @@ class Runner : public gin::ContextHolder {
   public: explicit Runner(v8::Isolate* isolate, RunnerDelegate* delegate);
   public: ~Runner();
 
+  public: static Runner* current_runner(v8::Isolate* isolate);
   public: v8::Handle<v8::Object> global() const;
 
   public: v8::Handle<v8::Value> Call(v8::Handle<v8::Value> callee,

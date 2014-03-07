@@ -10,6 +10,7 @@ namespace v8_glue {
 
 PerIsolateData::PerIsolateData(v8::Isolate* isolate)
     : construct_mode_(kCreateNewObject),
+      current_runner_(nullptr),
       isolate_(isolate) {
   isolate_->SetData(gin::kEmbedderEvita, this);
 }

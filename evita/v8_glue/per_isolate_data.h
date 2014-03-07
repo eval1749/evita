@@ -21,9 +21,12 @@ enum ConstructorMode {
   kCreateNewObject,
 };
 
+class Runner;
+
 class PerIsolateData {
   private: ConstructorMode construct_mode_;
   private: v8::Isolate* isolate_;
+  private: Runner* current_runner_;
 
   public: PerIsolateData(v8::Isolate* isolate);
   public: ~PerIsolateData();
@@ -37,6 +40,9 @@ class PerIsolateData {
   public: void set_construct_mode(ConstructorMode construct_mode) {
     construct_mode_ = construct_mode;
   }
+
+  public: Runner* current_runner() const { return current_runner_; }
+  public: void set_current_runner(Runner* runner) { current_runner_ = runner; }
 
   public: static PerIsolateData* From(v8::Isolate* isolate);
 

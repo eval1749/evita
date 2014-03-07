@@ -37,7 +37,6 @@
 #include "evita/dom/modes/python_mode.h"
 #include "evita/dom/modes/xml_mode.h"
 #include "evita/dom/os/file.h"
-#include "evita/dom/os/file_handle.h"
 #include "evita/dom/point.h"
 #include "evita/dom/range.h"
 #include "evita/dom/regexp.h"
@@ -136,9 +135,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     auto const os_templ = v8::ObjectTemplate::New(isolate);
     templ->Set(gin::StringToV8(isolate, "Os"), os_templ);
     os_templ->Set(gin::StringToV8(isolate, "File"),
-                  os::file::CreateObjectTemplate(isolate));
-    os_templ->Set(gin::StringToV8(isolate, "FileHandle"),
-                  FileHandle::static_wrapper_info()->
+                  os::File::static_wrapper_info()->
                       GetOrCreateConstructorTemplate(isolate));
 
     // Unicode

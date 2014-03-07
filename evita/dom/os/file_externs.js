@@ -5,11 +5,17 @@
 /** @expose @type{!Object} */
 var Os;
 
-/** @expose @type{!Object} */
-Os.File;
+/**
+ * @expose
+ * @constructor
+ */
+Os.File = function() {};
 
-/** @expose @constructor */
-Os.File.Error
+/** @expose
+ *  @constructor
+ *  @param {number} winLastError
+ */
+Os.File.Error = function(winLastError) {};
 
 /**
  * @expose
@@ -27,7 +33,7 @@ Os.File.Info;
  * @expose
  * @param {string} file_name
  * @param {string=} opt_mode
- * @return {!Promise.<!Os.FileHandle>}
+ * @return {!Promise.<!Os.File>}
  */
 Os.File.open = function(file_name, opt_mode) {};
 
@@ -52,3 +58,31 @@ Os.File.stat = function(file_name) {};
  * @param {!function(!Os.File.Info)} callback
  */
 Os.File.stat_ = function(file_name, callback) {};
+
+/**
+ * @expose
+ * @param {!ArrayBufferView} buffer
+ * @return {!Promise.<number|!Os.File.Error>}
+ */
+Os.File.prototype.read = function(buffer) {};
+
+/**
+ * @expose
+ * @param {!ArrayBufferView} buffer
+ * @param {!function(number, number)} callback
+ */
+Os.File.prototype.read_ = function(buffer, callback) {};
+
+/**
+ * @expose
+ * @param {!ArrayBufferView} buffer
+ * @return {!Promise.<number|!Os.File.Error>}
+ */
+Os.File.prototype.write = function(buffer) {};
+
+/**
+ * @expose
+ * @param {!ArrayBufferView} buffer
+ * @param {!function(number, number)} callback
+ */
+Os.File.prototype.write_ = function(buffer, callback) {};

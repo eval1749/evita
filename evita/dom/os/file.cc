@@ -7,18 +7,93 @@
 #include "base/memory/ref_counted.h"
 #include "base/strings/string16.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/os/file_handle.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/script_controller.h"
 #include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/object_template_builder.h"
+#include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/script_callback.h"
+#include "gin/array_buffer.h"
 #include "v8_strings.h"
 
 namespace dom {
+namespace os {
 
 namespace {
+
+//////////////////////////////////////////////////////////////////////
+//
+// FileClass
+//
+class FileClass : public v8_glue::WrapperInfo {
+  private: typedef v8_glue::WrapperInfo BaseClass;
+
+  public: FileClass(const char* name)
+      : BaseClass(name) {
+  }
+  public: ~FileClass() = default;
+
+  private: static File* NewFile() {
+    ScriptController::instance()->ThrowError(
+        "Cannot create an instance of File.");
+    return nullptr;
+  }
+
+  private: static void OpenFile(const base::string16& file_name,
+                                const base::string16& mode,
+                                v8::Handle<v8::Function> callback);
+
+  private: static void QueryFileStatus(const base::string16& filename,
+                                        v8::Handle<v8::Function> callback);
+
+  // v8_glue::WrapperInfo
+  protected: virtual v8::Handle<v8::FunctionTemplate>
+      CreateConstructorTemplate(v8::Isolate* isolate) override {
+    auto const templ = v8_glue::CreateConstructorTemplate(isolate,
+        &FileClass::NewFile);
+  return v8_glue::FunctionTemplateBuilder(isolate, templ)
+      .SetMethod("open_", &FileClass::OpenFile)
+      .SetMethod("stat_", &FileClass::QueryFileStatus)
+      .Build();
+  }
+
+  private: virtual void SetupInstanceTemplate(
+      ObjectTemplateBuilder& builder) override {
+    builder
+        .SetMethod("close", &File::Close)
+        .SetMethod("read_", &File::Read)
+        .SetMethod("write_", &File::Write);
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(FileClass);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// FileIoCallback
+//
+class FileIoCallback : public base::RefCounted<FileIoCallback> {
+  private: v8_glue::ScopedPersistent<v8::Function> function_;
+  private: base::WeakPtr<v8_glue::Runner> runner_;
+
+  public: FileIoCallback(v8_glue::Runner* runner,
+                          v8::Handle<v8::Function> function)
+    : function_(runner->isolate(), function), runner_(runner->GetWeakPtr()) {
+  }
+
+  public: void Run(int num_transfered, int error_code) {
+    if (!runner_)
+      return;
+    v8_glue::Runner::Scope runner_scope(runner_.get());
+    auto const isolate = runner_->isolate();
+    auto const function = function_.NewLocal(isolate);
+    runner_->Call(function, v8::Undefined(isolate),
+                  v8::Integer::New(isolate, num_transfered),
+                  v8::Integer::New(isolate, error_code));
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(FileIoCallback);
+};
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -44,21 +119,12 @@ class OpenFileCallback : public base::RefCounted<OpenFileCallback> {
                     v8::Integer::New(isolate, error_code));
     } else {
       runner_->Call(function, v8::Undefined(isolate),
-                    (new FileHandle(handle))->GetWrapper(isolate));
+                    (new File(handle))->GetWrapper(isolate));
     }
   }
 
   DISALLOW_COPY_AND_ASSIGN(OpenFileCallback);
 };
-
-void OpenFile(const base::string16& file_name, const base::string16& mode,
-              v8::Handle<v8::Function> callback) {
-  auto const runner = ScriptController::instance()->runner();
-  auto const file_io_callback = make_scoped_refptr(
-      new OpenFileCallback(runner, callback));
-  ScriptController::instance()->io_delegate()->OpenFile(file_name, mode,
-      base::Bind(&OpenFileCallback::Run, file_io_callback));
-}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -101,8 +167,18 @@ class QueryFileStatusCallback
   DISALLOW_COPY_AND_ASSIGN(QueryFileStatusCallback);
 };
 
-void QueryFileStatus(const base::string16& filename,
-                     v8::Handle<v8::Function> callback) {
+void FileClass::OpenFile(const base::string16& file_name,
+                         const base::string16& mode,
+                         v8::Handle<v8::Function> callback) {
+  auto const runner = ScriptController::instance()->runner();
+  auto const file_io_callback = make_scoped_refptr(
+      new OpenFileCallback(runner, callback));
+  ScriptController::instance()->io_delegate()->OpenFile(file_name, mode,
+      base::Bind(&OpenFileCallback::Run, file_io_callback));
+}
+
+void FileClass::QueryFileStatus(const base::string16& filename,
+                                v8::Handle<v8::Function> callback) {
   auto const runner = ScriptController::instance()->runner();
   auto const query_file_status_callback = make_scoped_refptr(
       new QueryFileStatusCallback(runner, callback));
@@ -113,17 +189,46 @@ void QueryFileStatus(const base::string16& filename,
 
 }  // namespace
 
-namespace os {
-namespace file {
+//////////////////////////////////////////////////////////////////////
+//
+// File
+//
+DEFINE_SCRIPTABLE_OBJECT(File, FileClass);
 
-v8::Handle<v8::ObjectTemplate> CreateObjectTemplate(v8::Isolate* isolate) {
-  gin::ObjectTemplateBuilder builder(isolate);
-  return builder
-      .SetMethod("open_", &OpenFile)
-      .SetMethod("stat_", &QueryFileStatus)
-      .Build();
+File::File(domapi::IoHandle* handle)
+    : closed_(false), handle_(handle) {
 }
 
-}  // namespace file
+File::~File() {
+  Close();
+}
+
+void File::Close() {
+  if (closed_)
+    return;
+  closed_ = true;
+  ScriptController::instance()->io_delegate()->CloseFile(handle_);
+}
+
+void File::Read(const gin::ArrayBufferView& array_buffer_view,
+                      v8::Handle<v8::Function> callback) {
+  auto const runner = ScriptController::instance()->runner();
+  auto const file_io_callback = make_scoped_refptr(
+      new FileIoCallback(runner, callback));
+  ScriptController::instance()->io_delegate()->ReadFile(
+      handle_, array_buffer_view.bytes(), array_buffer_view.num_bytes(),
+      base::Bind(&FileIoCallback::Run, file_io_callback));
+}
+
+void File::Write(const gin::ArrayBufferView& array_buffer_view,
+                       v8::Handle<v8::Function> callback) {
+  auto const runner = ScriptController::instance()->runner();
+  auto const file_io_callback = make_scoped_refptr(
+      new FileIoCallback(runner, callback));
+  ScriptController::instance()->io_delegate()->WriteFile(
+      handle_, array_buffer_view.bytes(), array_buffer_view.num_bytes(),
+      base::Bind(&FileIoCallback::Run, file_io_callback));
+}
+
 }  // namespace os
 }  // namespace dom

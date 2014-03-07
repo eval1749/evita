@@ -24,7 +24,7 @@
       if (value instanceof Os.FileHandle)
         deferred.resolve(value);
       else
-        deferred.reject(value);
+        deferred.reject(Os.File.Error(value));
     });
     return deferred.promise;
   };
@@ -37,7 +37,7 @@
     var deferred = Promise.defer();
     Os.File.stat_(file_name, function(info) {
       if (info.errorCode)
-        deferred.reject(info.errorCode);
+        deferred.reject(Os.File.Error(info.errorCode));
       else
         deferred.resolve(info);
     });

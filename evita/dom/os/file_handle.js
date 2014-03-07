@@ -12,7 +12,7 @@
     var deferred = Promise.defer();
     this.read_(array_buffer_view, function(num_transfered, error_code) {
       if (error_code)
-        deferred.reject(error_code)
+        deferred.reject(new Os.File.Error(error_code))
       else
         deferred.resolve(num_transfered)
     });
@@ -28,7 +28,7 @@
     var deferred = Promise.defer();
     this.write_(array_buffer_view, function(num_transfered, error_code) {
       if (error_code)
-        deferred.reject(error_code)
+        deferred.reject(new Os.File.Error(error_code))
       else
         deferred.resolve(num_transfered)
     });

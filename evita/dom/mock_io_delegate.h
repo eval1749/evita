@@ -37,7 +37,7 @@ class MockIoDelegate : public domapi::IoDelegate {
   public: void ReadFile(domapi::IoHandle* io_handle, void* buffer,
                         size_t num_read, const FileIoCallback& callback);
   public: void WriteFile(domapi::IoHandle* io_handle, void* buffer,
-                         size_t num_read, const FileIoCallback& callback);
+                         size_t num_write, const FileIoCallback& callback);
 };
 
 }  // namespace dom

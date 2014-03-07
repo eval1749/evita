@@ -103,7 +103,6 @@ class FileIoCallback : public v8_glue::PromiseCallback {
   public: FileIoCallback(v8_glue::Runner* runner)
     : v8_glue::PromiseCallback(runner) {
   }
-
   public: ~FileIoCallback() = default;
 
   public: void Run(int num_transfered, int error_code) {
@@ -125,6 +124,7 @@ class OpenFileCallback : public v8_glue::PromiseCallback {
   public: OpenFileCallback(v8_glue::Runner* runner)
     : v8_glue::PromiseCallback(runner) {
   }
+  public: ~OpenFileCallback() = default;
 
   public: void Run(domapi::IoHandle* handle, int error_code) {
     if (error_code) {

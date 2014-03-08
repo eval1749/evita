@@ -175,42 +175,42 @@ void ScriptThread::Start(base::MessageLoop* host_message_loop,
 }
 
 // IoDelegate
-void ScriptThread::CloseFile(domapi::IoContextId context_id) {
-  io_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &IoDelegate::CloseFile, base::Unretained(io_delegate_),
-      context_id));
-}
+#define DEFINE_IO_DELEGATE_1(name, type1) \
+  void ScriptThread::name(type1 p1) { \
+    io_message_loop_->PostTask(FROM_HERE, base::Bind( \
+        &IoDelegate::name, base::Unretained(io_delegate_), p1)); \
+  }
 
-void ScriptThread::OpenFile(const base::string16& file_name,
-                         const base::string16& mode,
-                         const OpenFileCallback& callback) {
-  io_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &IoDelegate::OpenFile, base::Unretained(io_delegate_),
-      file_name, mode, callback));
-}
+#define DEFINE_IO_DELEGATE_2(name, type1, type2) \
+  void ScriptThread::name(type1 p1, type2 p2) { \
+    io_message_loop_->PostTask(FROM_HERE, base::Bind( \
+        &IoDelegate::name, base::Unretained(io_delegate_), p1, p2)); \
+  }
 
-void ScriptThread:: QueryFileStatus(const base::string16& filename,
-    const QueryFileStatusCallback& callback) {
-  io_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &domapi::IoDelegate::QueryFileStatus, base::Unretained(io_delegate_),
-      filename, callback));
-}
+#define DEFINE_IO_DELEGATE_3(name, type1, type2, type3) \
+  void ScriptThread::name(type1 p1, type2 p2, type3 p3) { \
+    io_message_loop_->PostTask(FROM_HERE, base::Bind( \
+        &IoDelegate::name, base::Unretained(io_delegate_), p1, p2, p3)); \
+  }
 
-void ScriptThread::ReadFile(domapi::IoContextId context_id, void* buffer,
-                         size_t num_read, const FileIoCallback& callback) {
-  io_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &IoDelegate::ReadFile, base::Unretained(io_delegate_),
-      context_id, base::Unretained(buffer), num_read,
-      callback));
-}
+#define DEFINE_IO_DELEGATE_4(name, type1, type2, type3, type4) \
+  void ScriptThread::name(type1 p1, type2 p2, type3 p3, type4 p4) { \
+    io_message_loop_->PostTask(FROM_HERE, base::Bind( \
+        &IoDelegate::name, base::Unretained(io_delegate_), p1, p2, p3, p4)); \
+  }
 
-void ScriptThread::WriteFile(domapi::IoContextId context_id, void* buffer,
-                          size_t num_read, const FileIoCallback& callback) {
-  io_message_loop_->PostTask(FROM_HERE, base::Bind(
-      &IoDelegate::WriteFile, base::Unretained(io_delegate_),
-      context_id, base::Unretained(buffer), num_read,
-      callback));
-}
+DEFINE_IO_DELEGATE_1(CloseFile, domapi::IoContextId)
+DEFINE_IO_DELEGATE_2(NewProcess, const base::string16&,
+                     const domapi::NewProcessCallback&)
+DEFINE_IO_DELEGATE_3(OpenFile, const base::string16&,
+                     const base::string16&,
+                     const domapi::OpenFileCallback&)
+DEFINE_IO_DELEGATE_2(QueryFileStatus, const base::string16&,
+                     const domapi::QueryFileStatusCallback&)
+DEFINE_IO_DELEGATE_4(ReadFile, domapi::IoContextId, void*, size_t,
+                     const domapi::FileIoCallback&)
+DEFINE_IO_DELEGATE_4(WriteFile, domapi::IoContextId, void*, size_t,
+                     const domapi::FileIoCallback&)
 
 // ViewDelegate
 #define DEFINE_VIEW_DELEGATE_1(name, type1) \

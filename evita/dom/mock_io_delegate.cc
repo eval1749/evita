@@ -36,22 +36,22 @@ void MockIoDelegate::SetQueryFileStatusCallbackData(
 
 // domapi::IoDelegate
 void MockIoDelegate::OpenFile(const base::string16&,
-    const base::string16&, const OpenFileCallback& callback) {
+    const base::string16&, const domapi::OpenFileCallback& callback) {
   callback.Run(context_id_, error_code_);
 }
 
 void MockIoDelegate::QueryFileStatus(const base::string16&,
-    const QueryFileStatusCallback& callback) {
+    const domapi::QueryFileStatusCallback& callback) {
   callback.Run(data_);
 }
 
 void MockIoDelegate::ReadFile(domapi::IoContextId, void*, size_t,
-                              const FileIoCallback& callback) {
+                              const domapi::FileIoCallback& callback) {
   callback.Run(num_transferred_, error_code_);
 }
 
 void MockIoDelegate::WriteFile(domapi::IoContextId, void*, size_t,
-                              const FileIoCallback& callback) {
+                              const domapi::FileIoCallback& callback) {
   callback.Run(num_transferred_, error_code_);
 }
 

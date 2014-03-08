@@ -8,30 +8,31 @@
 #include "evita/dom/public/io_delegate.h"
 
 #include <memory>
+#include <unordered_map>
 
 namespace io {
 
-class IoDelegateImpl : public domapi::IoDelegate {
-  private: class IoHandler;
+class IoContext;
 
-  private: std::unique_ptr<IoHandler> io_handler_;
+class IoDelegateImpl : public domapi::IoDelegate {
+  private: std::unordered_map<domapi::IoContextId, IoContext*> context_map_;
 
   public: IoDelegateImpl();
   public: virtual ~IoDelegateImpl();
 
   // domapi::IoDelegate
   private: virtual void CloseFile(domapi::IoContextId context_id);
+  private: virtual void NewProcess(const base::string16& command_line,
+        const domapi::NewProcessCallback& callback) override;
   private: virtual void OpenFile(const base::string16& filename,
-                                 const base::string16& mode,
-                                 const OpenFileCallback& callback) override;
+      const base::string16& mode,
+      const domapi::OpenFileCallback& callback) override;
   private: virtual void QueryFileStatus(const base::string16& filename,
-      const QueryFileStatusCallback& callback) override;
+      const domapi::QueryFileStatusCallback& callback) override;
   private: virtual void ReadFile(domapi::IoContextId context_id, void* buffer,
-                                 size_t num_read,
-                                 const FileIoCallback& callback) override;
+      size_t num_read, const domapi::FileIoCallback& callback) override;
   private: virtual void WriteFile(domapi::IoContextId context_id, void* buffer,
-                                  size_t num_write,
-                                  const FileIoCallback& callback) override;
+      size_t num_write, const domapi::FileIoCallback& callback) override;
 
   DISALLOW_COPY_AND_ASSIGN(IoDelegateImpl);
 };

@@ -488,9 +488,12 @@
       'sources': [
         'precomp.cpp',
 
-        'io/io_delegate_impl.cc',
         'io/file_io.cc',
+        'io/file_io_context.cc',
+        'io/io_context.cc',
+        'io/io_delegate_impl.cc',
         'io/io_manager.cc',
+        'io/process_io_context.cc',
       ], # sources
     }, # io
     {

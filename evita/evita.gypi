@@ -32,6 +32,7 @@
         'dom/editor_window_externs.js',
 
         'dom/encoding/text_decoder_externs.js',
+        'dom/encoding/text_encoder_externs.js',
 
         'dom/forms/button_control_externs.js',
         'dom/forms/checkbox_control_externs.js',
@@ -70,6 +71,7 @@
         'dom/editor.js',
         'dom/editor_window.js',
         'dom/encoding/text_decoder.js',
+        'dom/encoding/text_encoder.js',
         'dom/errors.js',
         'dom/file_path.js',
 
@@ -164,6 +166,7 @@
         'dom/editor.cc',
         'dom/editor_window.cc',
         'dom/encoding/text_decoder.cc',
+        'dom/encoding/text_encoder.cc',
 
         'dom/events/document_event.cc',
         'dom/events/document_event_init.cc',

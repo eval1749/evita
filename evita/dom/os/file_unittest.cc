@@ -37,9 +37,20 @@ TEST_F(OsFileTest, OsFile_open_succeeded) {
   EXPECT_SCRIPT_TRUE("file instanceof Os.File");
 }
 
-TEST_F(OsFileTest, OsFile_stat_) {
+TEST_F(OsFileTest, OsFile_stat_failed) {
   domapi::QueryFileStatusCallbackData data;
   data.error_code = 123;
+  mock_io_delegate()->SetQueryFileStatusCallbackData(data);
+  EXPECT_SCRIPT_VALID(
+    "var result;"
+    "Os.File.stat('foo').catch(function(x) { result = x; });");
+  EXPECT_SCRIPT_TRUE("result instanceof Os.File.Error");
+  EXPECT_SCRIPT_EQ("123", "result.winLastError");
+}
+
+TEST_F(OsFileTest, OsFile_stat_succeeded) {
+  domapi::QueryFileStatusCallbackData data;
+  data.error_code = 0;
   data.file_size = 456;
   data.is_directory = true;
   data.is_symlink = true;
@@ -48,11 +59,7 @@ TEST_F(OsFileTest, OsFile_stat_) {
   mock_io_delegate()->SetQueryFileStatusCallbackData(data);
   EXPECT_SCRIPT_VALID(
     "var result;"
-    "function callback(data) {"
-    "   result = data;"
-    "}"
-    "Os.File.stat_('foo', callback);");
-  EXPECT_SCRIPT_EQ("123", "result.errorCode");
+    "Os.File.stat('foo').then(function(x) { result = x; });");
   EXPECT_SCRIPT_EQ("true", "result.isDir");
   EXPECT_SCRIPT_EQ("true", "result.isSymLink");
   EXPECT_SCRIPT_EQ("123456", "result.lastModificationDate.valueOf()");

@@ -42,6 +42,26 @@ struct Converter<dom::os::FileError> {
         v8::Integer::New(isolate, error.error_code));
   }
 };
+template<>
+struct Converter<domapi::QueryFileStatusCallbackData> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+        const domapi::QueryFileStatusCallbackData& data) {
+    auto const js_data = v8::Object::New(isolate);
+    js_data->Set(dom::v8Strings::errorCode.Get(isolate),
+                 gin::ConvertToV8(isolate, data.error_code));
+    js_data->Set(dom::v8Strings::isDir.Get(isolate),
+                 gin::ConvertToV8(isolate, data.is_directory));
+    js_data->Set(dom::v8Strings::isSymLink.Get(isolate),
+                 gin::ConvertToV8(isolate, data.is_symlink));
+    js_data->Set(dom::v8Strings::lastModificationDate.Get(isolate),
+                 gin::ConvertToV8(isolate, data.last_write_time));
+    js_data->Set(dom::v8Strings::readonly.Get(isolate),
+                 gin::ConvertToV8(isolate, data.readonly));
+    js_data->Set(dom::v8Strings::size.Get(isolate),
+                 gin::ConvertToV8(isolate, data.file_size));
+    return js_data;
+  }
+};
 }  // namespace gin
 
 namespace dom {
@@ -70,8 +90,8 @@ class FileClass : public v8_glue::WrapperInfo {
   private: static v8::Handle<v8::Object> OpenFile(
       const base::string16& file_name,
       v8_glue::Optional<base::string16> opt_mode);
-  private: static void QueryFileStatus(const base::string16& filename,
-                                        v8::Handle<v8::Function> callback);
+  private: static v8::Handle<v8::Object> QueryFileStatus(
+      const base::string16& filename);
 
   // v8_glue::WrapperInfo
   protected: virtual v8::Handle<v8::FunctionTemplate>
@@ -80,7 +100,7 @@ class FileClass : public v8_glue::WrapperInfo {
         &FileClass::NewFile);
   return v8_glue::FunctionTemplateBuilder(isolate, templ)
       .SetMethod("open", &FileClass::OpenFile)
-      .SetMethod("stat_", &FileClass::QueryFileStatus)
+      .SetMethod("stat", &FileClass::QueryFileStatus)
       .Build();
   }
 
@@ -141,38 +161,19 @@ class OpenFileCallback : public v8_glue::PromiseCallback {
 //
 // QueryFileStatusCallback
 //
-class QueryFileStatusCallback
-    : public base::RefCounted<QueryFileStatusCallback> {
-  private: v8_glue::ScopedPersistent<v8::Function> function_;
-  private: base::WeakPtr<v8_glue::Runner> runner_;
-
-  public: QueryFileStatusCallback(v8_glue::Runner* runner,
-                                  v8::Handle<v8::Function> function)
-      : function_(runner->isolate(), function), runner_(runner->GetWeakPtr()) {
+class QueryFileStatusCallback : public v8_glue::PromiseCallback {
+  public: QueryFileStatusCallback(v8_glue::Runner* runner)
+    : v8_glue::PromiseCallback(runner) {
   }
 
   public: ~QueryFileStatusCallback() = default;
 
   public: void Run(const domapi::QueryFileStatusCallbackData& data) {
-    if (!runner_)
+    if (data.error_code) {
+      Reject(FileError(data.error_code));
       return;
-    v8_glue::Runner::Scope runner_scope(runner_.get());
-    auto const isolate = runner_->isolate();
-    auto const function = function_.NewLocal(isolate);
-    auto const js_data = v8::Object::New(isolate);
-    js_data->Set(v8Strings::errorCode.Get(isolate),
-                 gin::ConvertToV8(isolate, data.error_code));
-    js_data->Set(v8Strings::isDir.Get(isolate),
-                 gin::ConvertToV8(isolate, data.is_directory));
-    js_data->Set(v8Strings::isSymLink.Get(isolate),
-                 gin::ConvertToV8(isolate, data.is_symlink));
-    js_data->Set(v8Strings::lastModificationDate.Get(isolate),
-                 gin::ConvertToV8(isolate, data.last_write_time));
-    js_data->Set(v8Strings::readonly.Get(isolate),
-                 gin::ConvertToV8(isolate, data.readonly));
-    runner_->Call(function, v8::Undefined(isolate), js_data);
-    js_data->Set(v8Strings::size.Get(isolate),
-                 gin::ConvertToV8(isolate, data.file_size));
+    }
+    Resolve(data);
   }
 
   DISALLOW_COPY_AND_ASSIGN(QueryFileStatusCallback);
@@ -190,14 +191,16 @@ v8::Handle<v8::Object> FileClass::OpenFile(const base::string16& file_name,
   return runner_scope.Escape(file_io_callback->GetPromise(runner->isolate()));
 }
 
-void FileClass::QueryFileStatus(const base::string16& filename,
-                                v8::Handle<v8::Function> callback) {
+v8::Handle<v8::Object> FileClass::QueryFileStatus(
+    const base::string16& file_name) {
   auto const runner = ScriptController::instance()->runner();
-  auto const query_file_status_callback = make_scoped_refptr(
-      new QueryFileStatusCallback(runner, callback));
+  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
+  auto const stat_callback = make_scoped_refptr(
+      new QueryFileStatusCallback(runner));
   ScriptController::instance()->io_delegate()->QueryFileStatus(
-      filename, base::Bind(&QueryFileStatusCallback::Run,
-                           query_file_status_callback));
+      file_name, base::Bind(&QueryFileStatusCallback::Run,
+                            stat_callback));
+  return runner_scope.Escape(stat_callback->GetPromise(runner->isolate()));
 }
 
 }  // namespace

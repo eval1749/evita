@@ -11,19 +11,4 @@
       this.winLastError = winLastError;
     }
   })();
-
-  /**
-   * @param {string} file_name
-   * @return {!Promise.<!Os.File.Info>}
-   */
-  Os.File.stat = function(file_name) {
-    var deferred = Promise.defer();
-    Os.File.stat_(file_name, function(info) {
-      if (info.errorCode)
-        deferred.reject(new Os.File.Error(info.errorCode));
-      else
-        deferred.resolve(info);
-    });
-    return deferred.promise;
-  };
 })();

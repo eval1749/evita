@@ -46,13 +46,6 @@ Os.File.stat = function(file_name) {};
 
 /**
  * @expose
- * @param {string} file_name
- * @param {!function(!Os.File.Info)} callback
- */
-Os.File.stat_ = function(file_name, callback) {};
-
-/**
- * @expose
  * @param {!ArrayBufferView} buffer
  * @return {!Promise.<number|!Os.File.Error>}
  */

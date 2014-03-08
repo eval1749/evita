@@ -70,12 +70,12 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
   {
     v8::HandleScope handle_scope(isolate);
 
-    auto templ = v8::ObjectTemplate::New(isolate);
+    auto global_templ = v8::ObjectTemplate::New(isolate);
 
     auto context = v8::Context::New(isolate);
     v8::Context::Scope context_scope(context);
 
-    #define INSTALL(name) v8_glue::Installer<name>::Run(isolate, templ);
+    #define INSTALL(name) v8_glue::Installer<name>::Run(isolate, global_templ)
   
     // Note: super class must be installed before subclass.
     INSTALL(Event);
@@ -131,23 +131,29 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
       INSTALL(OneShotTimer);
       INSTALL(RepeatingTimer);
 
+    #define INSTALL_IN(templ, name) \
+        templ->Set(gin::StringToV8(isolate, #name), \
+                   name::static_wrapper_info()-> \
+                      GetOrCreateConstructorTemplate(isolate))
+
     // Editor
-    editor_templ->Set(gin::StringToV8(isolate, "RegExp"),
-                      RegExp::static_wrapper_info()->
-                          GetOrCreateConstructorTemplate(isolate));
+    INSTALL_IN(editor_templ, RegExp);
 
     // Os
     auto const os_templ = v8::ObjectTemplate::New(isolate);
-    templ->Set(gin::StringToV8(isolate, "Os"), os_templ);
-    os_templ->Set(gin::StringToV8(isolate, "File"),
-                  os::File::static_wrapper_info()->
-                      GetOrCreateConstructorTemplate(isolate));
+    global_templ->Set(gin::StringToV8(isolate, "Os"), os_templ);
+    typedef os::AbstractFile AbstractFile;
+    typedef os::File File;
+    INSTALL_IN(os_templ, AbstractFile);
+    INSTALL_IN(os_templ, File);
 
     // Unicode
-    v8::Handle<v8::Object> js_unicode = v8::Object::New(isolate);
-    templ->Set(gin::StringToV8(isolate, "Unicode"), 
-               internal::GetUnicodeObject(isolate));
-    object_template_.Reset(isolate, templ);
+    auto const js_unicode = v8::Object::New(isolate);
+    global_templ->Set(gin::StringToV8(isolate, "Unicode"),
+                      internal::GetUnicodeObject(isolate));
+
+    // Global template is ready now.
+    object_template_.Reset(isolate, global_templ);
   }
 
   return object_template_.NewLocal(isolate);

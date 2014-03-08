@@ -26,6 +26,11 @@ void RunCallback(const domapi::FileIoCallback& callback, DWORD num_transferred,
                    static_cast<int>(last_error)));
 }
 
+void RunCallback(const domapi::CloseFileCallback& callback, DWORD last_error) {
+    Application::instance()->view_event_handler()->RunCallback(
+        base::Bind(callback, static_cast<int>(last_error)));
+}
+
 void RunCallback(const domapi::NewProcessCallback& callback,
                  DWORD last_error) {
     Application::instance()->view_event_handler()->RunCallback(
@@ -47,16 +52,35 @@ ProcessIoContext::ProcessIoContext(domapi::IoContextId context_id,
 ProcessIoContext::~ProcessIoContext() {
 }
 
-void ProcessIoContext::CloseProcess() {
-  if (read_pipe_.is_valid())
-    ::CloseHandle(read_pipe_.release());
-  if (write_pipe_.is_valid())
-    ::CloseHandle(write_pipe_.release());
+void ProcessIoContext::CloseProcess(
+    const domapi::CloseFileCallback& callback) {
+  if (read_pipe_.is_valid()) {
+    if (!::CloseHandle(read_pipe_.get())) {
+        auto const last_error = ::GetLastError();
+        DVLOG_WIN32_ERROR(0, "CloseHandle", last_error);
+        RunCallback(callback, last_error);
+        return;
+    }
+    read_pipe_.release();
+  }
+  if (write_pipe_.is_valid()) {
+    if (!::CloseHandle(write_pipe_.get())) {
+        auto const last_error = ::GetLastError();
+        DVLOG_WIN32_ERROR(0, "CloseHandle", last_error);
+        RunCallback(callback, last_error);
+        return;
+    }
+    write_pipe_.release();
+  }
   auto const value = ::WaitForSingleObject(process_.get(), INFINITE);
   if (value == WAIT_FAILED) {
     auto const last_error = ::GetLastError();
     DVLOG_WIN32_ERROR(0, "WaitSingleObject", last_error);
+    RunCallback(callback, last_error);
+    return;
   }
+  process_.release();
+  RunCallback(callback, 0);
 }
 
 void ProcessIoContext::ReadFromProcess(
@@ -134,9 +158,9 @@ void ProcessIoContext::WriteToProcess(
 }
 
 // io::IoContext
-void ProcessIoContext::Close() {
+void ProcessIoContext::Close(const domapi::CloseFileCallback& callback) {
   gateway_thread_->message_loop()->PostTask(FROM_HERE, base::Bind(
-      &ProcessIoContext::CloseProcess, base::Unretained(this)));
+      &ProcessIoContext::CloseProcess, base::Unretained(this), callback));
 }
 
 void ProcessIoContext::Read(void* buffer, size_t num_read,

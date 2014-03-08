@@ -21,6 +21,7 @@ struct QueryFileStatusCallbackData {
   bool readonly;
 };
 
+typedef base::Callback<void(int error_code)> CloseFileCallback;
 typedef base::Callback<void(int num_transfered, int error_code)>
     FileIoCallback;
 typedef base::Callback<void(IoContextId process_id, int error_code)>

@@ -16,7 +16,8 @@ class IoDelegate {
   protected: IoDelegate();
   public: virtual ~IoDelegate();
 
-  public: virtual void CloseFile(IoContextId context_id) = 0;
+  public: virtual void CloseFile(IoContextId context_id,
+                                 const CloseFileCallback& callback) = 0;
   public: virtual void NewProcess(const base::string16& command_line,
                                   const NewProcessCallback& callbacK) = 0;
   public: virtual void OpenFile(const base::string16& filename,

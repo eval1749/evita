@@ -175,12 +175,6 @@ void ScriptThread::Start(base::MessageLoop* host_message_loop,
 }
 
 // IoDelegate
-#define DEFINE_IO_DELEGATE_1(name, type1) \
-  void ScriptThread::name(type1 p1) { \
-    io_message_loop_->PostTask(FROM_HERE, base::Bind( \
-        &IoDelegate::name, base::Unretained(io_delegate_), p1)); \
-  }
-
 #define DEFINE_IO_DELEGATE_2(name, type1, type2) \
   void ScriptThread::name(type1 p1, type2 p2) { \
     io_message_loop_->PostTask(FROM_HERE, base::Bind( \
@@ -199,7 +193,8 @@ void ScriptThread::Start(base::MessageLoop* host_message_loop,
         &IoDelegate::name, base::Unretained(io_delegate_), p1, p2, p3, p4)); \
   }
 
-DEFINE_IO_DELEGATE_1(CloseFile, domapi::IoContextId)
+DEFINE_IO_DELEGATE_2(CloseFile, domapi::IoContextId,
+                     const domapi::CloseFileCallback&)
 DEFINE_IO_DELEGATE_2(NewProcess, const base::string16&,
                      const domapi::NewProcessCallback&)
 DEFINE_IO_DELEGATE_3(OpenFile, const base::string16&,

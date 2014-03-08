@@ -87,12 +87,21 @@ void FileIoContext::OnIOCompleted(IOContext*,
 }
 
 // io::IoContext
-void FileIoContext::Close() {
+void FileIoContext::Close(const domapi::CloseFileCallback& callback) {
   if (file_handle_.is_valid()) {
-    ::CloseHandle(file_handle_.release());
+    if (!::CloseHandle(file_handle_.get())) {
+      auto const last_error = ::GetLastError();
+      DVLOG(0) << "CloseHandle error=" << last_error;
+      Application::instance()->view_event_handler()->RunCallback(
+          base::Bind(callback, static_cast<int>(last_error)));
+      return;
+    }
+    file_handle_.release();
   }
   if (!running_)
     delete this;
+  Application::instance()->view_event_handler()->RunCallback(
+      base::Bind(callback, 0));
 }
 
 void FileIoContext::Read(void* buffer, size_t num_read,

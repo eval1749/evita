@@ -29,7 +29,8 @@ class MockIoDelegate : public domapi::IoDelegate {
       const domapi::QueryFileStatusCallbackData& data);
 
   // domapi::IoDelegate
-  MOCK_METHOD1(CloseFile, void(domapi::IoContextId));
+  MOCK_METHOD2(CloseFile, void(domapi::IoContextId,
+                               const domapi::CloseFileCallback&));
   MOCK_METHOD2(NewProcess, void(const base::string16&,
                                 const domapi::NewProcessCallback&));
   public: void OpenFile(const base::string16&, const base::string16&,

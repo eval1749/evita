@@ -35,7 +35,8 @@ class FileIoContext : private base::MessagePumpForIO::IOContext,
       IOContext* context, DWORD bytes_transfered, DWORD error) override;
 
   // io::IoContext
-  private: virtual void Close() override;
+  private: virtual void Close(
+      const domapi::CloseFileCallback& callback) override;
   private: virtual void Read(void* buffer, size_t num_read,
                              const domapi::FileIoCallback& callback) override;
   private: virtual void Write(void* buffer, size_t num_write,

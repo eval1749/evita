@@ -30,7 +30,7 @@ class ProcessIoContext : public IoContext {
                   const domapi::NewProcessCallback& callback);
   public: ~ProcessIoContext();
 
-  private: void CloseProcess();
+  private: void CloseProcess(const domapi::CloseFileCallback& callback);
   private: void ReadFromProcess(void* buffer, size_t num_read,
                                 const domapi::FileIoCallback& callback);
   private: void StartProcess(domapi::IoContextId context_id,
@@ -40,7 +40,8 @@ class ProcessIoContext : public IoContext {
                                const domapi::FileIoCallback& callback);
 
   // io::IoContext
-  private: virtual void Close() override;
+  private: virtual void Close(
+      const domapi::CloseFileCallback& callback) override;
   private: virtual void Read(void* buffer, size_t num_read,
                              const domapi::FileIoCallback& callback) override;
   private: virtual void Write(void* buffer, size_t num_write,

@@ -90,12 +90,13 @@ IoDelegateImpl::~IoDelegateImpl() {
 }
 
 // domapi::IoDelegate
-void IoDelegateImpl::CloseFile(domapi::IoContextId context_id) {
+void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
+                               const domapi::CloseFileCallback& callback) {
   auto const it = context_map_.find(context_id);
   if (it == context_map_.end()) {
     return;
   }
-  it->second->Close();
+  it->second->Close(callback);
   context_map_.erase(it);
 }
 

@@ -46,6 +46,12 @@ Os.File.stat = function(file_name) {};
 
 /**
  * @expose
+ * @return {!Promise.<number|!Os.File.Error>}
+ */
+Os.File.prototype.close = function() {};
+
+/**
+ * @expose
  * @param {!ArrayBufferView} buffer
  * @return {!Promise.<number|!Os.File.Error>}
  */

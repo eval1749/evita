@@ -75,6 +75,27 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 //
+// CloseFileCallback
+//
+class CloseFileCallback : public v8_glue::PromiseCallback {
+  public: CloseFileCallback(v8_glue::Runner* runner)
+    : v8_glue::PromiseCallback(runner) {
+  }
+  public: ~CloseFileCallback() = default;
+
+  public: void Run(int error_code) {
+    if (error_code) {
+      Reject(FileError(error_code));
+      return;
+    }
+    Resolve(0);
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(CloseFileCallback);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
 // FileClass
 //
 class FileClass : public v8_glue::WrapperInfo {
@@ -215,19 +236,20 @@ v8::Handle<v8::Object> FileClass::QueryFileStatus(
 //
 DEFINE_SCRIPTABLE_OBJECT(File, FileClass);
 
-File::File(domapi::IoContextId context_id)
-    : closed_(false), context_id_(context_id) {
+File::File(domapi::IoContextId context_id) : context_id_(context_id) {
 }
 
 File::~File() {
   Close();
 }
 
-void File::Close() {
-  if (closed_)
-    return;
-  closed_ = true;
-  ScriptController::instance()->io_delegate()->CloseFile(context_id_);
+v8::Handle<v8::Object> File::Close() {
+  auto const runner = ScriptController::instance()->runner();
+  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
+  auto const callback = make_scoped_refptr(new CloseFileCallback(runner));
+  ScriptController::instance()->io_delegate()->CloseFile(context_id_,
+      base::Bind(&CloseFileCallback::Run, callback));
+  return runner_scope.Escape(callback->GetPromise(runner->isolate()));
 }
 
 v8::Handle<v8::Object> File::Read(

@@ -13,7 +13,7 @@ class IoContext {
   public: IoContext();
   public: virtual ~IoContext();
 
-  public: virtual void Close() = 0;
+  public: virtual void Close(const domapi::CloseFileCallback& callback) = 0;
   public: virtual void Read(void* buffer, size_t num_read,
                             const domapi::FileIoCallback& callback) = 0;
   public: virtual void Write(void* buffer, size_t num_write,

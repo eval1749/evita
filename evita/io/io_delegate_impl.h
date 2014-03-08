@@ -21,7 +21,8 @@ class IoDelegateImpl : public domapi::IoDelegate {
   public: virtual ~IoDelegateImpl();
 
   // domapi::IoDelegate
-  private: virtual void CloseFile(domapi::IoContextId context_id);
+  private: virtual void CloseFile(domapi::IoContextId context_id,
+        const domapi::CloseFileCallback& callback) override;
   private: virtual void NewProcess(const base::string16& command_line,
         const domapi::NewProcessCallback& callback) override;
   private: virtual void OpenFile(const base::string16& filename,

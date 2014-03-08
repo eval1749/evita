@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_common_win_scoped_handle_h)
 #define INCLUDE_common_win_scoped_handle_h
 
+#include "base/logging.h"
+
 namespace common {
 namespace win {
 class scoped_handle {
@@ -28,13 +30,17 @@ class scoped_handle {
 
   public: scoped_handle& operator=(const scoped_handle&) = delete;
   public: scoped_handle& operator=(scoped_handle&& other) {
-    DCHECK_EQ(INVALID_HANDLE_VALUE, handle_);
+    DCHECK(!is_valid());
     handle_ = other.handle_;
     other.handle_ = INVALID_HANDLE_VALUE;
     return *this;
   }
 
   public: HANDLE get() const { return handle_; }
+  public: HANDLE* location() {
+    DCHECK(!is_valid());
+    return &handle_;
+  }
   public: bool is_valid() const { return handle_ != INVALID_HANDLE_VALUE; }
 
   public: HANDLE release() {
@@ -42,6 +48,11 @@ class scoped_handle {
     auto const handle = handle_;
     handle_ = INVALID_HANDLE_VALUE;
     return handle;
+  }
+
+  public: void reset(HANDLE new_handle) {
+    DCHECK(!is_valid());
+    handle_ = new_handle;
   }
 };
 }  // namespace win

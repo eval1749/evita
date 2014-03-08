@@ -22,8 +22,8 @@ class ProcessIoContext : public IoContext {
   private: domapi::IoContextId context_id_;
   private: std::unique_ptr<base::Thread> gateway_thread_;
   private: common::win::scoped_handle process_;
-  private: common::win::scoped_handle read_pipe_;
-  private: common::win::scoped_handle write_pipe_;
+  private: common::win::scoped_handle stdin_write_;
+  private: common::win::scoped_handle stdout_read_;
 
   public: ProcessIoContext(domapi::IoContextId context_id,
                   const base::string16& command_line,

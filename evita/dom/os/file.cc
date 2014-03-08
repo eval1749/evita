@@ -18,30 +18,7 @@
 #include "gin/array_buffer.h"
 #include "v8_strings.h"
 
-namespace dom {
-namespace os {
-struct FileError {
-  int error_code;
-  FileError(int error_code) : error_code(error_code) {
-  }
-};
-}  // namespace os
-}  // namespace dom
-
 namespace gin {
-template<>
-struct Converter<dom::os::FileError> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    const dom::os::FileError& error) {
-    auto const runner = v8_glue::Runner::current_runner(isolate);
-    auto const os_file_error_ctor = runner->global()->
-        Get(dom::v8Strings::Os.Get(isolate))->ToObject()->
-        Get(dom::v8Strings::File.Get(isolate))->ToObject()->
-        Get(dom::v8Strings::Error.Get(isolate));
-    return runner->CallAsConstructor(os_file_error_ctor,
-        v8::Integer::New(isolate, error.error_code));
-  }
-};
 template<>
 struct Converter<domapi::QueryFileStatusCallbackData> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
@@ -75,31 +52,10 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 //
-// CloseFileCallback
-//
-class CloseFileCallback : public v8_glue::PromiseCallback {
-  public: CloseFileCallback(v8_glue::Runner* runner)
-    : v8_glue::PromiseCallback(runner) {
-  }
-  public: ~CloseFileCallback() = default;
-
-  public: void Run(int error_code) {
-    if (error_code) {
-      Reject(FileError(error_code));
-      return;
-    }
-    Resolve(0);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(CloseFileCallback);
-};
-
-//////////////////////////////////////////////////////////////////////
-//
 // FileClass
 //
-class FileClass : public v8_glue::WrapperInfo {
-  private: typedef v8_glue::WrapperInfo BaseClass;
+class FileClass :
+  public v8_glue::DerivedWrapperInfo<File, AbstractFile> {
 
   public: FileClass(const char* name)
       : BaseClass(name) {
@@ -129,36 +85,7 @@ class FileClass : public v8_glue::WrapperInfo {
       .Build();
   }
 
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetMethod("close", &File::Close)
-        .SetMethod("read", &File::Read)
-        .SetMethod("write", &File::Write);
-  }
-
   DISALLOW_COPY_AND_ASSIGN(FileClass);
-};
-
-//////////////////////////////////////////////////////////////////////
-//
-// FileIoCallback
-//
-class FileIoCallback : public v8_glue::PromiseCallback {
-  public: FileIoCallback(v8_glue::Runner* runner)
-    : v8_glue::PromiseCallback(runner) {
-  }
-  public: ~FileIoCallback() = default;
-
-  public: void Run(int num_transfered, int error_code) {
-    if (error_code) {
-      Reject(FileError(error_code));
-      return;
-    }
-    Resolve(num_transfered);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(FileIoCallback);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -236,44 +163,11 @@ v8::Handle<v8::Object> FileClass::QueryFileStatus(
 //
 DEFINE_SCRIPTABLE_OBJECT(File, FileClass);
 
-File::File(domapi::IoContextId context_id) : context_id_(context_id) {
+File::File(domapi::IoContextId context_id)
+    : ScriptableBase(context_id) {
 }
 
 File::~File() {
-  Close();
-}
-
-v8::Handle<v8::Object> File::Close() {
-  auto const runner = ScriptController::instance()->runner();
-  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
-  auto const callback = make_scoped_refptr(new CloseFileCallback(runner));
-  ScriptController::instance()->io_delegate()->CloseFile(context_id_,
-      base::Bind(&CloseFileCallback::Run, callback));
-  return runner_scope.Escape(callback->GetPromise(runner->isolate()));
-}
-
-v8::Handle<v8::Object> File::Read(
-    const gin::ArrayBufferView& array_buffer_view) {
-  auto const runner = ScriptController::instance()->runner();
-  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
-  auto const file_io_callback = make_scoped_refptr(
-      new FileIoCallback(runner));
-  ScriptController::instance()->io_delegate()->ReadFile(
-      context_id_, array_buffer_view.bytes(), array_buffer_view.num_bytes(),
-      base::Bind(&FileIoCallback::Run, file_io_callback));
-  return runner_scope.Escape(file_io_callback->GetPromise(runner->isolate()));
-}
-
-v8::Handle<v8::Object> File::Write(
-    const gin::ArrayBufferView& array_buffer_view) {
-  auto const runner = ScriptController::instance()->runner();
-  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
-  auto const file_io_callback = make_scoped_refptr(
-      new FileIoCallback(runner));
-  ScriptController::instance()->io_delegate()->WriteFile(
-      context_id_, array_buffer_view.bytes(), array_buffer_view.num_bytes(),
-      base::Bind(&FileIoCallback::Run, file_io_callback));
-  return runner_scope.Escape(file_io_callback->GetPromise(runner->isolate()));
 }
 
 }  // namespace os

@@ -214,6 +214,7 @@
         'dom/modes/python_mode.cc',
         'dom/modes/xml_mode.cc',
 
+        'dom/os/abstract_file.cc',
         'dom/os/file.cc',
 
         'dom/point.cc',

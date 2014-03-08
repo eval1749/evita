@@ -7,6 +7,7 @@
 #include "evita/dom/document_window.h"
 #include "evita/dom/editor.h"
 #include "evita/dom/editor_window.h"
+#include "evita/dom/encoding/text_decoder.h"
 #include "evita/dom/events/document_event.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/event_target.h"
@@ -121,6 +122,8 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     INSTALL(Selection);
         INSTALL(TableSelection);
         INSTALL(TextSelection);
+
+    INSTALL(TextDecoder);
 
     INSTALL(Timer);
       INSTALL(OneShotTimer);

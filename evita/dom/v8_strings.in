@@ -105,6 +105,12 @@ name
 start
 sticky
 
+# TextDecoderOptions
+fatal
+
+# TextDecodeOptions
+stream
+
 # TextDeocration
 none
 greenwave

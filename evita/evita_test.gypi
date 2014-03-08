@@ -54,6 +54,7 @@
         'dom/document_unittest.cc',
         'dom/editor_unittest.cc',
         'dom/editor_window_unittest.cc',
+        'dom/encoding/text_decoder_unittest.cc',
         'dom/errors_unittest.cc',
         'dom/events/document_event_unittest.cc',
         'dom/events/event_handler_unittest.cc',

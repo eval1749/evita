@@ -37,6 +37,13 @@ var Iterable;
  */
 var ArrayBuffer = function(byteLength) {};
 
+/**
+ * @param {*} value
+ * @return boolean
+ */
+ArrayBuffer.prototype.isValue = function(value){};
+
+
 //////////////////////////////////////////////////////////////////////
 //
 // ArrayBufferView
@@ -44,7 +51,222 @@ var ArrayBuffer = function(byteLength) {};
 /**
  * @constructor
  */
-var ArrayBufferView = function() {};
+function ArrayBufferView() {}
+
+/** @type {!ArrayBuffer} */
+ArrayBufferView.prototype.buffer;
+
+/** @type {number} */
+ArrayBufferView.prototype.byteLength;
+
+/** @type {number} */
+ArrayBufferView.prototype.byteOffset;
+
+//////////////////////////////////////////////////////////////////////
+//
+// TypedArray
+//
+/**
+ * @constructor
+ * @extends {ArrayBufferView}
+ */
+function TypedArray() {}
+
+/** @type {number} */
+TypedArray.BYTES_PER_ELEMENT;
+
+/** @type {number} */
+TypedArray.prototype.length;
+
+/**
+ * @param {!TypedArray} array
+ * @param {number=} opt_offset
+ */
+TypedArray.prototype.set = function(array, opt_offset) {};
+
+//////////////////////////////////////////////////////////////////////
+//
+// Float32Array
+//
+/** @const @type {number} */
+Float32Array.BYTES_PER_ELEMENT = 4;
+
+/**
+ * @constructor
+ * @extends {TypedArray}
+ * @param {number|!TypedArray|!ArrayBuffer} thing
+ * @param {number=} opt_offset
+ * @param {number=} opt_length
+ */
+function Float32Array(thing, opt_offset, opt_length) {}
+
+/**
+ * @param {number} begin
+ * @param {number=} opt_end
+ * @return {!Float32Array}
+ */
+Float32Array.prototype.subarray = function(begin, opt_end) {};
+
+//////////////////////////////////////////////////////////////////////
+//
+// Float64Array
+//
+/** @const @type {number} */
+Float64Array.BYTES_PER_ELEMENT = 8;
+
+/**
+ * @constructor
+ * @extends {TypedArray}
+ * @param {number|!TypedArray|!ArrayBuffer} thing
+ * @param {number=} opt_offset
+ * @param {number=} opt_length
+ */
+function Float64Array(thing, opt_offset, opt_length) {}
+
+/**
+ * @param {number} begin
+ * @param {number=} opt_end
+ * @return {!Float64Array}
+ */
+Float64Array.prototype.subarray = function(begin, opt_end) {};
+
+//////////////////////////////////////////////////////////////////////
+//
+// Int16Array
+//
+/** @const @type {number} */
+Int16Array.BYTES_PER_ELEMENT = 2;
+
+/**
+ * @constructor
+ * @extends {TypedArray}
+ * @param {number|!TypedArray|!ArrayBuffer} thing
+ * @param {number=} opt_offset
+ * @param {number=} opt_length
+ */
+function Int16Array(thing, opt_offset, opt_length) {}
+
+/**
+ * @param {number} begin
+ * @param {number=} opt_end
+ * @return {!Int16Array}
+ */
+Int16Array.prototype.subarray = function(begin, opt_end) {};
+
+//////////////////////////////////////////////////////////////////////
+//
+// Int32Array
+//
+/** @const @type {number} */
+Int32Array.BYTES_PER_ELEMENT = 4;
+
+/**
+ * @constructor
+ * @extends {TypedArray}
+ * @param {number|!TypedArray|!ArrayBuffer} thing
+ * @param {number=} opt_offset
+ * @param {number=} opt_length
+ */
+function Int32Array(thing, opt_offset, opt_length) {}
+
+/**
+ * @param {number} begin
+ * @param {number=} opt_end
+ * @return {!Int32Array}
+ */
+Int32Array.prototype.subarray = function(begin, opt_end) {};
+
+//////////////////////////////////////////////////////////////////////
+//
+// Uint16Array
+//
+/** @const @type {number} */
+Uint16Array.BYTES_PER_ELEMENT = 2;
+
+/**
+ * @constructor
+ * @extends {TypedArray}
+ * @param {number|!TypedArray|!ArrayBuffer} thing
+ * @param {number=} opt_offset
+ * @param {number=} opt_length
+ */
+function Uint16Array(thing, opt_offset, opt_length) {}
+
+/**
+ * @param {number} begin
+ * @param {number=} opt_end
+ * @return {!Uint16Array}
+ */
+Uint16Array.prototype.subarray = function(begin, opt_end) {};
+
+//////////////////////////////////////////////////////////////////////
+//
+// Uint32Array
+//
+/** @const @type {number} */
+Uint32Array.BYTES_PER_ELEMENT = 4;
+
+/**
+ * @constructor
+ * @extends {TypedArray}
+ * @param {number|!TypedArray|!ArrayBuffer} thing
+ * @param {number=} opt_offset
+ * @param {number=} opt_length
+ */
+function Uint32Array(thing, opt_offset, opt_length) {}
+
+/**
+ * @param {number} begin
+ * @param {number=} opt_end
+ * @return {!Uint32Array}
+ */
+Uint32Array.prototype.subarray = function(begin, opt_end) {};
+
+//////////////////////////////////////////////////////////////////////
+//
+// Uint8Array
+//
+/** @const @type {number} */
+Uint8Array.BYTES_PER_ELEMENT = 1;
+
+/**
+ * @constructor
+ * @extends {TypedArray}
+ * @param {number|!TypedArray|!ArrayBuffer} thing
+ * @param {number=} opt_offset
+ * @param {number=} opt_length
+ */
+function Uint8Array(thing, opt_offset, opt_length) {}
+
+/**
+ * @param {number} begin
+ * @param {number=} opt_end
+ * @return {!Uint8Array}
+ */
+Uint8Array.prototype.subarray = function(begin, opt_end) {};
+
+//////////////////////////////////////////////////////////////////////
+//
+// Uint8ClampedArray
+//
+/** @const @type {number} */
+Uint8ClampedArray.BYTES_PER_ELEMENT = 1;
+
+/**
+ * @constructor
+ * @extends {TypedArray}
+ * @param {number|!TypedArray|!ArrayBuffer} thing
+ * @param {number=} opt_offset
+ * @param {number=} opt_length
+ */
+function Uint8ClampedArray(thing, opt_offset, opt_length) {}
+
+/**
+ * @param {number} begin
+ * @param {number=} opt_end
+ * @return {!Uint8ClampedArray}
+ */
+Uint8ClampedArray.prototype.subarray = function(begin, opt_end) {};
 
 //////////////////////////////////////////////////////////////////////
 //

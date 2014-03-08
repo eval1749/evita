@@ -539,6 +539,7 @@
         4530,
       ],
       'sources': [
+        'v8_glue/array_buffer_view.cc',
         'v8_glue/constructor_template.cc',
         'v8_glue/converter.cc',
         'v8_glue/function_template_builder.cc',

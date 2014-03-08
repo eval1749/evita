@@ -39,6 +39,7 @@
 #include "evita/dom/modes/python_mode.h"
 #include "evita/dom/modes/xml_mode.h"
 #include "evita/dom/os/file.h"
+#include "evita/dom/os/process.h"
 #include "evita/dom/point.h"
 #include "evita/dom/range.h"
 #include "evita/dom/regexp.h"
@@ -144,8 +145,10 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     global_templ->Set(gin::StringToV8(isolate, "Os"), os_templ);
     typedef os::AbstractFile AbstractFile;
     typedef os::File File;
+    typedef os::Process Process;
     INSTALL_IN(os_templ, AbstractFile);
     INSTALL_IN(os_templ, File);
+    INSTALL_IN(os_templ, Process);
 
     // Unicode
     auto const js_unicode = v8::Object::New(isolate);

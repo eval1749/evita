@@ -35,6 +35,11 @@ void MockIoDelegate::SetQueryFileStatusCallbackData(
 }
 
 // domapi::IoDelegate
+void MockIoDelegate::NewProcess(const base::string16&,
+    const domapi::NewProcessCallback& callback) {
+  callback.Run(context_id_, error_code_);
+}
+
 void MockIoDelegate::OpenFile(const base::string16&,
     const base::string16&, const domapi::OpenFileCallback& callback) {
   callback.Run(context_id_, error_code_);

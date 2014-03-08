@@ -31,18 +31,18 @@ class MockIoDelegate : public domapi::IoDelegate {
   // domapi::IoDelegate
   MOCK_METHOD2(CloseFile, void(domapi::IoContextId,
                                const domapi::CloseFileCallback&));
-  MOCK_METHOD2(NewProcess, void(const base::string16&,
-                                const domapi::NewProcessCallback&));
-  public: void OpenFile(const base::string16&, const base::string16&,
-                        const domapi::OpenFileCallback&);
-  private: void QueryFileStatus(const base::string16& filename,
+  public: virtual void NewProcess(const base::string16&,
+      const domapi::NewProcessCallback&) override;
+  public: virtual void OpenFile(const base::string16&, const base::string16&,
+                        const domapi::OpenFileCallback&) override;
+  private: virtual void QueryFileStatus(const base::string16& filename,
       const domapi::QueryFileStatusCallback& callback) override;
-  public: void ReadFile(domapi::IoContextId context_id, void* buffer,
+  public: virtual void ReadFile(domapi::IoContextId context_id, void* buffer,
                         size_t num_read,
-                        const domapi::FileIoCallback& callback);
-  public: void WriteFile(domapi::IoContextId context_id, void* buffer,
+                        const domapi::FileIoCallback& callback) override;
+  public: virtual void WriteFile(domapi::IoContextId context_id, void* buffer,
                          size_t num_write,
-                         const domapi::FileIoCallback& callback);
+                         const domapi::FileIoCallback& callback) override;
 };
 
 }  // namespace dom

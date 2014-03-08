@@ -79,6 +79,7 @@
         'dom/mock_io_delegate.cc',
         'dom/mock_view_impl.cc',
         'dom/os/file_unittest.cc',
+        'dom/os/process_unittest.cc',
         'dom/modes/modes_unittest.cc',
         'dom/point_unittest.cc',
         'dom/polyfill_unittest.cc',

@@ -46,6 +46,7 @@
         'dom/key_names_externs.js',
         'dom/modes/modes_externs.js',
         'dom/os/file_externs.js',
+        'dom/os/process_externs.js',
         'dom/point_externs.js',
         'dom/range_externs.js',
         'dom/regexp_externs.js',
@@ -84,6 +85,7 @@
 
         'dom/modes/modes.js',
         'dom/os/file.js',
+        'dom/os/process.js',
         'dom/range.js',
         'dom/regexp.js',
         'dom/style.js',
@@ -216,6 +218,7 @@
 
         'dom/os/abstract_file.cc',
         'dom/os/file.cc',
+        'dom/os/process.cc',
 
         'dom/point.cc',
         'dom/range.cc',

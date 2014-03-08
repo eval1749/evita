@@ -150,12 +150,12 @@ class OpenFileCallback : public v8_glue::PromiseCallback {
   }
   public: ~OpenFileCallback() = default;
 
-  public: void Run(domapi::IoHandle* handle, int error_code) {
+  public: void Run(domapi::IoContextId context_id, int error_code) {
     if (error_code) {
       Reject(FileError(error_code));
       return;
     }
-    Resolve(new File(handle));
+    Resolve(new File(context_id));
   }
 
   DISALLOW_COPY_AND_ASSIGN(OpenFileCallback);
@@ -215,8 +215,8 @@ v8::Handle<v8::Object> FileClass::QueryFileStatus(
 //
 DEFINE_SCRIPTABLE_OBJECT(File, FileClass);
 
-File::File(domapi::IoHandle* handle)
-    : closed_(false), handle_(handle) {
+File::File(domapi::IoContextId context_id)
+    : closed_(false), context_id_(context_id) {
 }
 
 File::~File() {
@@ -227,7 +227,7 @@ void File::Close() {
   if (closed_)
     return;
   closed_ = true;
-  ScriptController::instance()->io_delegate()->CloseFile(handle_);
+  ScriptController::instance()->io_delegate()->CloseFile(context_id_);
 }
 
 v8::Handle<v8::Object> File::Read(
@@ -237,7 +237,7 @@ v8::Handle<v8::Object> File::Read(
   auto const file_io_callback = make_scoped_refptr(
       new FileIoCallback(runner));
   ScriptController::instance()->io_delegate()->ReadFile(
-      handle_, array_buffer_view.bytes(), array_buffer_view.num_bytes(),
+      context_id_, array_buffer_view.bytes(), array_buffer_view.num_bytes(),
       base::Bind(&FileIoCallback::Run, file_io_callback));
   return runner_scope.Escape(file_io_callback->GetPromise(runner->isolate()));
 }
@@ -249,7 +249,7 @@ v8::Handle<v8::Object> File::Write(
   auto const file_io_callback = make_scoped_refptr(
       new FileIoCallback(runner));
   ScriptController::instance()->io_delegate()->WriteFile(
-      handle_, array_buffer_view.bytes(), array_buffer_view.num_bytes(),
+      context_id_, array_buffer_view.bytes(), array_buffer_view.num_bytes(),
       base::Bind(&FileIoCallback::Run, file_io_callback));
   return runner_scope.Escape(file_io_callback->GetPromise(runner->isolate()));
 }

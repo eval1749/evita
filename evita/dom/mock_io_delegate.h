@@ -16,27 +16,27 @@ namespace dom {
 class MockIoDelegate : public domapi::IoDelegate {
   private: domapi::QueryFileStatusCallbackData data_;
   private: int error_code_;
-  private: domapi::IoHandle* io_handle_;
+  private: domapi::IoContextId context_id_;
   private: int num_transferred_;
 
   public: MockIoDelegate();
   public: virtual ~MockIoDelegate();
 
   public: void SetFileIoCallbackData(int num_transferred, int error_code);
-  public: void SetOpenFileCallbackData(domapi::IoHandle* io_handle,
+  public: void SetOpenFileCallbackData(domapi::IoContextId context_id,
                                        int error_code);
   public: void SetQueryFileStatusCallbackData(
       const domapi::QueryFileStatusCallbackData& data);
 
   // domapi::IoDelegate
-  MOCK_METHOD1(CloseFile, void(domapi::IoHandle*));
+  MOCK_METHOD1(CloseFile, void(domapi::IoContextId));
   public: void OpenFile(const base::string16&, const base::string16&,
                         const OpenFileCallback&);
   private: void QueryFileStatus(const base::string16& filename,
       const QueryFileStatusCallback& callback) override;
-  public: void ReadFile(domapi::IoHandle* io_handle, void* buffer,
+  public: void ReadFile(domapi::IoContextId context_id, void* buffer,
                         size_t num_read, const FileIoCallback& callback);
-  public: void WriteFile(domapi::IoHandle* io_handle, void* buffer,
+  public: void WriteFile(domapi::IoContextId context_id, void* buffer,
                          size_t num_write, const FileIoCallback& callback);
 };
 

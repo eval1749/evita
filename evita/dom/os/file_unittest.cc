@@ -20,7 +20,7 @@ class OsFileTest : public dom::AbstractDomTest {
 };
 
 TEST_F(OsFileTest, OsFile_open_failed) {
-  mock_io_delegate()->SetOpenFileCallbackData(nullptr, 123);
+  mock_io_delegate()->SetOpenFileCallbackData(domapi::IoContextId(), 123);
   EXPECT_SCRIPT_VALID(
     "var reason;"
     "Os.File.open('foo.js').catch(function(x) { reason = x; });");
@@ -30,7 +30,7 @@ TEST_F(OsFileTest, OsFile_open_failed) {
 
 TEST_F(OsFileTest, OsFile_open_succeeded) {
   mock_io_delegate()->SetOpenFileCallbackData(
-      reinterpret_cast<domapi::IoHandle*>(123), 0);
+      domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var file;"
     "Os.File.open('foo.js').then(function(x) { file = x });");
@@ -69,7 +69,7 @@ TEST_F(OsFileTest, OsFile_stat_succeeded) {
 
 TEST_F(OsFileTest, OsFile_read_failed) {
   mock_io_delegate()->SetOpenFileCallbackData(
-      reinterpret_cast<domapi::IoHandle*>(123), 0);
+      domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var file;"
     "Os.File.open('foo.js').then(function(x) { file = x });");
@@ -87,7 +87,7 @@ TEST_F(OsFileTest, OsFile_read_failed) {
 
 TEST_F(OsFileTest, OsFile_read_succeeded) {
   mock_io_delegate()->SetOpenFileCallbackData(
-      reinterpret_cast<domapi::IoHandle*>(123), 0);
+      domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var file;"
     "Os.File.open('foo.js').then(function(x) { file = x });");
@@ -104,7 +104,7 @@ TEST_F(OsFileTest, OsFile_read_succeeded) {
 
 TEST_F(OsFileTest, OsFile_write_failed) {
   mock_io_delegate()->SetOpenFileCallbackData(
-      reinterpret_cast<domapi::IoHandle*>(123), 0);
+      domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var file;"
     "Os.File.open('foo.js').then(function(x) { file = x });");
@@ -122,7 +122,7 @@ TEST_F(OsFileTest, OsFile_write_failed) {
 
 TEST_F(OsFileTest, OsFile_write_succeeded) {
   mock_io_delegate()->SetOpenFileCallbackData(
-      reinterpret_cast<domapi::IoHandle*>(123), 0);
+      domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var file;"
     "Os.File.open('foo.js').then(function(x) { file = x });");

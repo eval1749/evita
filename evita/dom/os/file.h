@@ -5,6 +5,7 @@
 #if !defined(INCLUDE_evita_dom_os_file_h)
 #define INCLUDE_evita_dom_os_file_h
 
+#include "evita/dom/public/io_context_id.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace domapi {
@@ -22,9 +23,9 @@ class File : public v8_glue::Scriptable<File> {
   DECLARE_SCRIPTABLE_OBJECT(File);
 
   private: bool closed_;
-  private: domapi::IoHandle* handle_;
+  private: domapi::IoContextId context_id_;
 
-  public: File(domapi::IoHandle* handle);
+  public: File(domapi::IoContextId context_id);
   public: virtual ~File();
 
   public: void Close();

@@ -175,10 +175,10 @@ void ScriptThread::Start(base::MessageLoop* host_message_loop,
 }
 
 // IoDelegate
-void ScriptThread::CloseFile(domapi::IoHandle* io_handle) {
+void ScriptThread::CloseFile(domapi::IoContextId context_id) {
   io_message_loop_->PostTask(FROM_HERE, base::Bind(
       &IoDelegate::CloseFile, base::Unretained(io_delegate_),
-      base::Unretained(io_handle)));
+      context_id));
 }
 
 void ScriptThread::OpenFile(const base::string16& file_name,
@@ -196,19 +196,19 @@ void ScriptThread:: QueryFileStatus(const base::string16& filename,
       filename, callback));
 }
 
-void ScriptThread::ReadFile(domapi::IoHandle* io_handle, void* buffer,
+void ScriptThread::ReadFile(domapi::IoContextId context_id, void* buffer,
                          size_t num_read, const FileIoCallback& callback) {
   io_message_loop_->PostTask(FROM_HERE, base::Bind(
       &IoDelegate::ReadFile, base::Unretained(io_delegate_),
-      base::Unretained(io_handle), base::Unretained(buffer), num_read,
+      context_id, base::Unretained(buffer), num_read,
       callback));
 }
 
-void ScriptThread::WriteFile(domapi::IoHandle* io_handle, void* buffer,
+void ScriptThread::WriteFile(domapi::IoContextId context_id, void* buffer,
                           size_t num_read, const FileIoCallback& callback) {
   io_message_loop_->PostTask(FROM_HERE, base::Bind(
       &IoDelegate::WriteFile, base::Unretained(io_delegate_),
-      base::Unretained(io_handle), base::Unretained(buffer), num_read,
+      context_id, base::Unretained(buffer), num_read,
       callback));
 }
 

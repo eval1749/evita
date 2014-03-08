@@ -64,13 +64,15 @@ class TextDecoderClass : public v8_glue::WrapperInfo {
   }
 
   private: static TextDecoder* NewTextDecoder(
-      const base::string16& label,
+      v8_glue::Optional<base::string16> opt_label,
       v8_glue::Optional<TextDecoderOptions> opt_options) {
-    if (opt_options.is_supplied)
-      return new TextDecoder(label, opt_options.value);
     TextDecoderOptions options;
     options.fatal = false;
-    return new TextDecoder(label, options);
+    if (!opt_label.is_supplied)
+      return new TextDecoder(L"utf-8", options);
+    if (opt_options.is_supplied)
+      return new TextDecoder(opt_label.value, opt_options.value);
+    return new TextDecoder(opt_label.value, options);
   }
 
   private: virtual void SetupInstanceTemplate(

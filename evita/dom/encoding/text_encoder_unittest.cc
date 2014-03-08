@@ -20,6 +20,9 @@ TEST_F(TextEncoderTest, ctor) {
   EXPECT_SCRIPT_VALID("var encoder = new TextEncoder('foo');");
   EXPECT_SCRIPT_EQ("utf-8", "encoder.encoding");
 
+  EXPECT_SCRIPT_VALID("var encoder1 = new TextEncoder();");
+  EXPECT_SCRIPT_EQ("utf-8", "encoder.encoding");
+
   EXPECT_SCRIPT_VALID("var encoder2 = new TextEncoder('utf-8');");
   EXPECT_SCRIPT_EQ("utf-8", "encoder2.encoding");
 }

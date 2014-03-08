@@ -49,8 +49,10 @@ class TextEncoderClass : public v8_glue::WrapperInfo {
         &TextEncoderClass::NewTextEncoder);
   }
 
-  private: static TextEncoder* NewTextEncoder(const base::string16& label) {
-    return new TextEncoder(label);
+  private: static TextEncoder* NewTextEncoder(
+      v8_glue::Optional<base::string16> opt_label) {
+    return new TextEncoder(opt_label.is_supplied ? opt_label.value :
+                                                   L"utf-8");
   }
 
   private: virtual void SetupInstanceTemplate(

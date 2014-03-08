@@ -27,6 +27,12 @@ struct Converter<base::string16> {
                      base::string16* out);
 };
 
+template<>
+struct Converter<v8::Handle<v8::Uint8Array>> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+                                    v8::Handle<v8::Uint8Array> value);
+};
+
 template<typename T>
 struct Converter<v8::Maybe<T>> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,

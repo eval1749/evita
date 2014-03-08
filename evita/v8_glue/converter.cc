@@ -45,6 +45,11 @@ bool Converter<base::string16>::FromV8(Isolate*, Handle<Value> val,
   return true;
 }
 
+v8::Handle<v8::Value> Converter<v8::Handle<v8::Uint8Array>>::ToV8(
+    v8::Isolate*, v8::Handle<v8::Uint8Array> value) {
+  return value.As<Value>();
+}
+
 Handle<String> StringToV8(v8::Isolate* isolate,
                          const base::string16& string) {
   return Converter<base::string16>::ToV8(isolate, string).As<v8::String>();

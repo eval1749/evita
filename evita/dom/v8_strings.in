@@ -45,7 +45,9 @@ shiftKey
 errorCode
 
 # FilePath
-errorCode
+Os
+File
+Info
 size
 isDir
 isSymLink

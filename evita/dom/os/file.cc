@@ -46,9 +46,13 @@ template<>
 struct Converter<domapi::QueryFileStatusCallbackData> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
         const domapi::QueryFileStatusCallbackData& data) {
-    auto const js_data = v8::Object::New(isolate);
-    js_data->Set(dom::v8Strings::errorCode.Get(isolate),
-                 gin::ConvertToV8(isolate, data.error_code));
+    auto const runner = v8_glue::Runner::current_runner(isolate);
+    auto const os_file_info_ctor = runner->global()->
+        Get(dom::v8Strings::Os.Get(isolate))->ToObject()->
+        Get(dom::v8Strings::File.Get(isolate))->ToObject()->
+        Get(dom::v8Strings::Info.Get(isolate));
+    auto const js_data = runner->CallAsConstructor(os_file_info_ctor)->
+        ToObject();
     js_data->Set(dom::v8Strings::isDir.Get(isolate),
                  gin::ConvertToV8(isolate, data.is_directory));
     js_data->Set(dom::v8Strings::isSymLink.Get(isolate),

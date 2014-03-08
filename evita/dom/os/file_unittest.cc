@@ -60,6 +60,7 @@ TEST_F(OsFileTest, OsFile_stat_succeeded) {
   EXPECT_SCRIPT_VALID(
     "var result;"
     "Os.File.stat('foo').then(function(x) { result = x; });");
+  EXPECT_SCRIPT_TRUE("result instanceof Os.File.Info");
   EXPECT_SCRIPT_EQ("true", "result.isDir");
   EXPECT_SCRIPT_EQ("true", "result.isSymLink");
   EXPECT_SCRIPT_EQ("123456", "result.lastModificationDate.valueOf()");

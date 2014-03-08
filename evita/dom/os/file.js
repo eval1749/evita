@@ -11,4 +11,11 @@
       this.winLastError = winLastError;
     }
   })();
+
+  /**
+   * @constructor
+   */
+  Os.File.Info = (function() {
+    return function Info() {};
+  })();
 })();

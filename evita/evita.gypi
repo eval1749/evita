@@ -221,6 +221,7 @@
         'dom/os/process.cc',
 
         'dom/point.cc',
+        'dom/promise_deferred.cc',
         'dom/range.cc',
         'dom/regexp.cc',
         'dom/regexp_init.cc',

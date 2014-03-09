@@ -52,14 +52,32 @@ ProcessIoContext::ProcessIoContext(domapi::IoContextId context_id,
 ProcessIoContext::~ProcessIoContext() {
 }
 
-void ProcessIoContext::CloseProcess(
+void ProcessIoContext::CloseAndWaitProcess(
     const domapi::CloseFileCallback& callback) {
+  if (auto const last_error = CloseProcess()) {
+    RunCallback(callback, last_error);
+    return;
+  }
+
+  if (process_.is_valid()) {
+    auto const value = ::WaitForSingleObject(process_.get(), INFINITE);
+    if (value == WAIT_FAILED) {
+      auto const last_error = ::GetLastError();
+      DVLOG_WIN32_ERROR(0, "WaitSingleObject", last_error);
+      RunCallback(callback, last_error);
+      return;
+    }
+    process_.release();
+  }
+  RunCallback(callback, 0);
+}
+
+DWORD ProcessIoContext::CloseProcess() {
   if (stdout_read_.is_valid()) {
     if (!::CloseHandle(stdout_read_.get())) {
         auto const last_error = ::GetLastError();
         DVLOG_WIN32_ERROR(0, "CloseHandle", last_error);
-        RunCallback(callback, last_error);
-        return;
+        return last_error;
     }
     stdout_read_.release();
   }
@@ -67,21 +85,13 @@ void ProcessIoContext::CloseProcess(
     if (!::CloseHandle(stdin_write_.get())) {
         auto const last_error = ::GetLastError();
         DVLOG_WIN32_ERROR(0, "CloseHandle", last_error);
-        RunCallback(callback, last_error);
-        return;
+        return last_error;
     }
     stdin_write_.release();
   }
-  gateway_thread_->message_loop()->QuitWhenIdle();
-  auto const value = ::WaitForSingleObject(process_.get(), INFINITE);
-  if (value == WAIT_FAILED) {
-    auto const last_error = ::GetLastError();
-    DVLOG_WIN32_ERROR(0, "WaitSingleObject", last_error);
-    RunCallback(callback, last_error);
-    return;
-  }
-  process_.release();
-  RunCallback(callback, 0);
+  if (gateway_thread_->IsRunning())
+    gateway_thread_->message_loop()->QuitWhenIdle();
+  return 0;
 }
 
 void ProcessIoContext::ReadFromProcess(
@@ -92,6 +102,8 @@ void ProcessIoContext::ReadFromProcess(
   if (!succeeded) {
     auto const last_error = ::GetLastError();
     DVLOG_WIN32_ERROR(0, "ReadFile", last_error);
+    if (last_error == ERROR_BROKEN_PIPE)
+      CloseProcess();
     RunCallback(callback, 0, last_error);
     return;
   }
@@ -183,6 +195,8 @@ void ProcessIoContext::WriteToProcess(
   if (!succeeded) {
     auto const last_error = ::GetLastError();
     DVLOG_WIN32_ERROR(0, "WriteFile", last_error);
+    if (last_error == ERROR_BROKEN_PIPE)
+      CloseProcess();
     RunCallback(callback, 0, last_error);
     return;
   }
@@ -196,7 +210,8 @@ void ProcessIoContext::Close(const domapi::CloseFileCallback& callback) {
     return;
   }
   gateway_thread_->message_loop()->PostTask(FROM_HERE, base::Bind(
-      &ProcessIoContext::CloseProcess, base::Unretained(this), callback));
+      &ProcessIoContext::CloseAndWaitProcess,
+      base::Unretained(this), callback));
 }
 
 void ProcessIoContext::Read(void* buffer, size_t num_read,

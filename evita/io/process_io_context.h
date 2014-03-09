@@ -30,7 +30,8 @@ class ProcessIoContext : public IoContext {
                   const domapi::NewProcessCallback& callback);
   public: ~ProcessIoContext();
 
-  private: void CloseProcess(const domapi::CloseFileCallback& callback);
+  private: void CloseAndWaitProcess(const domapi::CloseFileCallback& callback);
+  private: DWORD CloseProcess();
   private: void ReadFromProcess(void* buffer, size_t num_read,
                                 const domapi::FileIoCallback& callback);
   private: void StartProcess(domapi::IoContextId context_id,

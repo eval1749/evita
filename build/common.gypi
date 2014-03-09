@@ -18,6 +18,9 @@
     'component%': '<(component)',
     'target_arch%': '<(target_arch)',
 
+    # For hunspell
+    'gcc_version': '48',
+
     # Relative path to icu.gyp from this file.
     'icu_gyp_path%': '<(DEPTH)/third_party/icu/icu.gyp',
     'icu_use_data_file_flag%': 0,

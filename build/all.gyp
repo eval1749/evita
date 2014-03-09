@@ -12,8 +12,9 @@
         '../common/common.gyp:*',
         '../evita/evita.gyp:*',
         '../gin/gin.gyp:*',
+        '../third_party/hunspell/hunspell.gyp:*',
         '../v8/tools/gyp/v8.gyp:*',
       ], # dependencies
-    } # ALl
+    } # All
   ], # target
 }

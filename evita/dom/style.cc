@@ -173,11 +173,12 @@ bool EqualNames(v8::Handle<v8::Value> name1, v8::Handle<v8::String> name2) {
 }
 
 void InvalidStyleAttributeValue(v8::Isolate* isolate,
-                                v8::Handle<v8::String> attr_name) {
+                                v8::Handle<v8::String> attr_name,
+                                v8::Handle<v8::Value> attr_value) {
   ScriptController::instance()->ThrowException(v8::Exception::Error(
       gin::StringToV8(isolate, base::StringPrintf(
-          L"Invalid value for style attribute '%ls'",
-          V8ToString(attr_name).c_str()))));
+          L"Style propery '%ls' doesn't take '%ls'.",
+          V8ToString(attr_name).c_str(), V8ToString(attr_value).c_str()))));
 }
 }
 
@@ -251,7 +252,7 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
         changed = true; \
         continue; \
       } \
-      InvalidStyleAttributeValue(isolate, attr_name); \
+      InvalidStyleAttributeValue(isolate, attr_name, js_value); \
       return; \
    } \
 

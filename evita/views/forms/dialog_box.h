@@ -69,4 +69,4 @@ class DialogBox {
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_visual_dialog_h)
+#endif //!defined(INCLUDE_evita_views_forms_dialog_box_h)

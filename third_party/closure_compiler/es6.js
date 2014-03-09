@@ -178,6 +178,29 @@ Int32Array.prototype.subarray = function(begin, opt_end) {};
 
 //////////////////////////////////////////////////////////////////////
 //
+// Int8Array
+//
+/** @const @type {number} */
+Int8Array.BYTES_PER_ELEMENT = 2;
+
+/**
+ * @constructor
+ * @extends {TypedArray}
+ * @param {number|!TypedArray|!ArrayBuffer} thing
+ * @param {number=} opt_offset
+ * @param {number=} opt_length
+ */
+function Int8Array(thing, opt_offset, opt_length) {}
+
+/**
+ * @param {number} begin
+ * @param {number=} opt_end
+ * @return {!Int8Array}
+ */
+Int8Array.prototype.subarray = function(begin, opt_end) {};
+
+//////////////////////////////////////////////////////////////////////
+//
 // Uint16Array
 //
 /** @const @type {number} */

@@ -95,6 +95,36 @@
       ],
     }, # evita_dom_test
     {
+      'target_name': 'evita_spellchecker_unittests',
+      'type': 'executable',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        '<(DEPTH)/base/base.gyp:run_all_unittests',
+        '<(DEPTH)/testing/gtest.gyp:gtest',
+        '<(DEPTH)/evita/evita.gyp:spellchecker',
+      ], # dependencies
+      'include_dirs+' : [
+        '<(DEPTH)/testing/gtest/include/',
+      ], # include_dirs
+      'msvs_settings': {
+        'VCLinkerTool': {
+          'AdditionalDependencies': [
+            'gdi32.lib',
+            'comdlg32.lib',
+            'advapi32.lib',
+            'shell32.lib',
+            'ole32.lib',
+            'oleaut32.lib',
+            'uuid.lib',
+          ], # AdditionalDependencies
+        }, # VCLinkerTool
+      }, # msvs_settings
+      'sources': [
+        'precomp.cpp',
+        'spellchecker/hunspell_engine_unittest.cc',
+      ],
+    }, # evita_spellchecker_test
+    {
       'target_name': 'evita_text_unittests',
       'type': 'executable',
       'dependencies': [

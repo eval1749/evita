@@ -502,6 +502,39 @@
       ], # sources
     }, # io
     {
+      'target_name': 'spellchecker',
+      'type': 'static_library',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        '<(DEPTH)/third_party/hunspell/hunspell.gyp:hunspell',
+      ], # dependencies
+      'defines': [ 'HUNSPELL_CHROME_CLIENT' ],
+      'msvs_precompiled_header': '',
+      'msvs_precompiled_source': '',
+      'msvs_disabled_warnings': [
+        # L4 warning C4127: conditional expression is constant
+        # For DCHECK_XX(x)
+        4127,
+        # L1 warning  C4251: 'identifier' : class 'type' needs to have
+        # dll-interface to be used by clients of class 'type2'
+        # Example: std::unique_ptr<T>
+        4251,
+        # L1 warning C4350: behavior change: 'member1' called instead of
+        # 'member2' An rvalue cannot be bound to a non-const reference. In
+        # previous versions of Visual C++, it was possible to bind an rvalue
+        # to a non-const reference in a direct initialization. This code now
+        # gives a warning.
+        4530,
+        # L3 warning C4800: type' : forcing value to bool 'true' or 'false'
+        # (performance warning)
+        4800,
+      ],
+      'sources': [
+        'spellchecker/hunspell_engine.cc',
+        'spellchecker/spelling_engine.cc',
+      ], # sources
+    }, # spellchecker
+    {
       'target_name': 'ui',
       'type': 'static_library',
       'dependencies': [
@@ -575,6 +608,7 @@
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
         'dom',
+        'spellchecker',
         'ui',
       ],
       'sources': [

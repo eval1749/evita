@@ -178,7 +178,12 @@ EndUndoStep::~EndUndoStep() {
 }
 
 // UndoStep
-bool EndUndoStep::TryMerge(const Buffer*, const UndoStep*) {
+bool EndUndoStep::TryMerge(const Buffer*, const UndoStep* undo_step) {
+  if (auto const begin = undo_step->as<BeginUndoStep>()) {
+    // Remove empty undo group.
+    DCHECK_EQ(name(), begin->name());
+    return true;
+  }
   return false;
 }
 

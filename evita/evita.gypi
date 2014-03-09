@@ -453,6 +453,7 @@
         'gfx/color_f.cc',
         'gfx/point_f.cc',
         'gfx/size_f.cc',
+        'gfx/stroke_style.cc',
         'gfx/rect_f.cc',
         'metrics/counter.cc',
         'metrics/time_scope.cc',

@@ -39,7 +39,10 @@ template<class T> class ComPtr {
   public: operator T*() const { return ptr_; }
   public: operator bool() const { return ptr_; }
   public: T* operator->() const { return ptr_; }
-  public: T** operator&() { return &ptr_; }
+  public: T** operator&() {
+    DCHECK(!ptr_) << "Leak COM interface";
+    return &ptr_;
+  }
   public: bool operator!() const { return !ptr_; }
 
   public: bool operator==(const ComPtr& other) const {

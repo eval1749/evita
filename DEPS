@@ -24,6 +24,9 @@ deps = {
   "src/tools/gyp":
     (Var("googlecode_url") % "gyp") + "/trunk@1857",
 
+  "src/third_party/hunspell":
+    "/trunk/deps/third_party/hunspell@206172",
+
   "src/third_party/icu":
     "/trunk/deps/third_party/icu46@246118",
 

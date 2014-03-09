@@ -17,6 +17,8 @@ deps = {
         Var('git_url') + '/external/googletest.git@74de57c951aedebc5dfe26a27604353432392b98',
     'src/third_party/cygwin':
         Var('git_url') + '/chromium/deps/cygwin.git@c89e446b273697fadf3a10ff1007a97c0b7de6df',
+    'src/third_party/hunspell':
+        Var('git_url') + '/chromium/deps/hunspell.git@37403978cd939a2b396a5d49944af54623e4795e',
     'src/third_party/icu':
         Var('git_url') + '/chromium/deps/icu46.git@e49b610806e6ba6063384ffd7f45d5b7cd561e65',
     'src/tools/deps2git':

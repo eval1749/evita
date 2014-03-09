@@ -22,3 +22,6 @@
 [submodule "v8"]
 	path = v8
 	url = https://chromium.googlesource.com/external/v8
+[submodule "third_party/hunspell"]
+	path = third_party/hunspell
+	url = https://chromium.googlesource.com/chromium/deps/hunspell/

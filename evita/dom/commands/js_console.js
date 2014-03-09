@@ -466,7 +466,7 @@ JsConsole.prototype.evalLastLine = function() {
               stackFrame.column + ')';
         }).join('');
     }
-    this.emit('Exception: ' + result.stackTraceString);
+    this.emit('\x2F*\nException: ' + result.stackTraceString + '\n*\x2F');
   } else {
     this.emit(JsConsole.stringify(result.value));
   }

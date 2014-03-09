@@ -5,6 +5,7 @@
 #include "evita/views/text/render_cell.h"
 
 #include "base/logging.h"
+#include "evita/gfx/stroke_style.h"
 #include "evita/views/text/render_style.h"
 
 namespace views {
@@ -32,6 +33,30 @@ void DrawText(const gfx::Graphics& gfx, const Font& font,
 inline void DrawVLine(const gfx::Graphics& gfx, const gfx::Brush& brush,
                       float x, float sy, float ey) {
   DrawLine(gfx, brush, x, sy, x, ey);
+}
+
+void DrawWave(const gfx::Graphics& gfx, const gfx::Brush& brush, float sx,
+              float ex, float y) {
+  CR_DEFINE_STATIC_LOCAL(gfx::StrokeStyle, dash_style1, ());
+  CR_DEFINE_STATIC_LOCAL(gfx::StrokeStyle, dash_style2, ());
+  if (!dash_style1.is_realized()) {
+    auto const dash_size = 2.0f;
+
+    dash_style1.set_dash_style(gfx::DashStyle::Custom);
+    dash_style1.set_dashes({dash_size, dash_size});
+    dash_style1.Realize();
+
+    dash_style2.set_dash_style(gfx::DashStyle::Custom);
+    dash_style2.set_dashes({dash_size, dash_size});
+    dash_style2.set_dash_offset(dash_size);
+    dash_style2.Realize();
+  }
+
+  auto const stroke_width = 1.0f;
+  gfx->DrawLine(gfx::PointF(sx, y + 1), gfx::PointF(ex, y + 1), brush,
+                stroke_width, dash_style1);
+  gfx->DrawLine(gfx::PointF(sx, y + 2), gfx::PointF(ex, y + 2), brush,
+                stroke_width, dash_style2);
 }
 
 inline void FillRect(const gfx::Graphics& gfx, const gfx::RectF& rect,
@@ -348,42 +373,42 @@ void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
   gfx::Brush text_brush(gfx, style().color());
   DrawText(gfx, *style().font(), text_brush, rect, characters_);
 
-  auto const y = rect.bottom - m_iDescent -
-                 (style().text_decoration() !=
-                      css::TextDecoration::None ? 1 : 0);
+  auto const baseline = rect.bottom - m_iDescent;
+
   #if SUPPORT_IME
   switch (style().text_decoration()) {
     case css::TextDecoration::ImeInput:
-      // TODO: We should use dotted line. It was PS_DOT.
-      DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 3);
+      DrawWave(gfx, text_brush, rect.left, rect.right, baseline + 1);
       break;
 
     case css::TextDecoration::ImeInactiveA:
-      DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 3);
+      DrawHLine(gfx, text_brush, rect.left, rect.right, baseline + 1);
       break;
 
     case css::TextDecoration::ImeInactiveB:
-      DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 3);
+      DrawHLine(gfx, text_brush, rect.left, rect.right, baseline + 1);
       break;
 
     case css::TextDecoration::ImeActive:
-      DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 3);
-      DrawHLine(gfx, text_brush, rect.left, rect.right - 4, y + 2);
+      DrawHLine(gfx, text_brush, rect.left, rect.right, baseline + 1);
+      DrawHLine(gfx, text_brush, rect.left, rect.right, baseline + 2);
       break;
 
     case css::TextDecoration::None:
       break;
 
     case css::TextDecoration::GreenWave:
-      // TODO: Implement TextDecoration::RedWave
+      DrawWave(gfx, gfx::Brush(gfx, gfx::ColorF::Green), rect.left,
+               rect.right, baseline + 1);
       break;
 
     case css::TextDecoration::RedWave:
-      // TODO: Implement TextDecoration::RedWave
+      DrawWave(gfx, gfx::Brush(gfx, gfx::ColorF::Red), rect.left,
+               rect.right, baseline + 1);
       break;
 
     case css::TextDecoration::Underline:
-      // TODO: Implement TextDecoration::Underline
+      DrawHLine(gfx, text_brush, rect.left, rect.right, baseline + 1);
       break;
   }
   #endif

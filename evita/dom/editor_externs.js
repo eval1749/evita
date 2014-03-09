@@ -24,6 +24,12 @@ Editor.bindKey = function(window_class, key_combination, command,
                           opt_description) {};
 
 /**
+ * @param {string} word_to_check
+ * @return {!Promise.<boolean>}
+ */
+Editor.checkSpelling = function(word_to_check) {};
+
+/**
  * @param {?Window} window.
  * @param {!string} filename.
  * @return {Promise.<string>}
@@ -50,6 +56,12 @@ Editor.getFilenameForSave = function(window, filename) {};
  * @param {function(!string)} callback
  */
 Editor.getFilenameForSave_ = function(window, filename, callback) {};
+
+/**
+ * @param {string} wrong_word
+ * @return {!Promise.<Array.<string>>}
+ */
+Editor.GetSpellingSuggestions = function(wrong_word) {};
 
 /** @type {Map.<string, Map.<number,function(number=)>>} */
 Editor.key_binding_map_map_;

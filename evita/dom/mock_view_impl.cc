@@ -8,7 +8,7 @@
 
 namespace dom {
 
-MockViewImpl::MockViewImpl() {
+MockViewImpl::MockViewImpl() : check_spelling_result_(false) {
 }
 
 MockViewImpl::~MockViewImpl() {
@@ -25,6 +25,11 @@ void MockViewImpl::SetSaveFileCallbackData(
 }
 
 // dom::ViewDelegate
+void MockViewImpl::CheckSpelling(const base::string16&,
+    const CheckSpellingDeferred& deferred) {
+  deferred.resolve.Run(check_spelling_result_);
+}
+
 void MockViewImpl::GetFilenameForLoad(WindowId,
                                       const base::string16& dir_path,
                                       GetFilenameForLoadCallback callback) {
@@ -35,6 +40,11 @@ void MockViewImpl::GetFilenameForSave(WindowId,
                                       const base::string16& dir_path,
                                       GetFilenameForSaveCallback callback) {
   callback.Run(dir_path + L"/foo.bar");
+}
+
+void MockViewImpl::GetSpellingSuggestions(const base::string16&,
+    const GetSpellingSuggestionsDeferred& deferred) {
+  deferred.resolve.Run(spelling_suggestions_);
 }
 
 std::vector<int> MockViewImpl::GetTableRowStates(WindowId,

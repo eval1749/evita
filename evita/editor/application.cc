@@ -11,7 +11,6 @@
 #include "base/run_loop.h"
 #pragma warning(pop)
 #include "base/strings/string16.h"
-//#include "base/strings/string_number_conversions.h"
 #include "base/time/time.h"
 #include "evita/dom/script_thread.h"
 #include "evita/editor/dom_lock.h"
@@ -19,6 +18,7 @@
 #include "evita/io/io_thread.h"
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
+#include "evita/spellchecker/spelling_engine.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/forms/dialog_box_set.h"
 #include "evita/views/frame_list.h"
@@ -78,6 +78,9 @@ Application::Application()
   dom::ScriptThread::Start(message_loop_.get(), view_delegate_impl_.get(),
                            io_manager_->message_loop(),
                            io_manager_->io_delegate());
+  io_manager_->message_loop()->PostTask(FROM_HERE, base::Bind(
+      base::IgnoreResult(&spellchecker::SpellingEngine::EnsureInitialized),
+      base::Unretained(spellchecker::SpellingEngine::GetSpellingEngine())));
 }
 
 Application::~Application() {

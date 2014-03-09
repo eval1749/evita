@@ -3,6 +3,8 @@
 #if !defined(INCLUDE_evita_dom_mock_view_impl_h)
 #define INCLUDE_evita_dom_mock_view_impl_h
 
+#include <vector>
+
 #include "base/basictypes.h"
 #include "base/callback.h"
 #pragma warning(push)
@@ -16,12 +18,21 @@
 namespace dom {
 
 class MockViewImpl : public dom::ViewDelegate {
+  private: bool check_spelling_result_;
+  private: std::vector<base::string16> spelling_suggestions_;
   private: domapi::LoadFileCallbackData load_file_callback_data_;
   private: domapi::SaveFileCallbackData save_file_callback_data_;
 
   public: MockViewImpl();
   public: virtual ~MockViewImpl();
 
+  public: void set_check_spelling_result(bool result) {
+    check_spelling_result_ = result;
+  }
+  public: void set_spelling_suggestions(
+      const std::vector<base::string16>& spelling_suggestions) {
+    spelling_suggestions_ = spelling_suggestions;
+  }
   public: void SetLoadFileCallbackData(
       const domapi::LoadFileCallbackData& data);
   public: void SetSaveFileCallbackData(
@@ -30,6 +41,8 @@ class MockViewImpl : public dom::ViewDelegate {
   // ViewDelegate
   MOCK_METHOD2(AddWindow, void(WindowId, WindowId));
   MOCK_METHOD2(ChangeParentWindow, void(WindowId, WindowId));
+  public: virtual void CheckSpelling(const base::string16& word_to_check,
+      const CheckSpellingDeferred& deferred) override;
   MOCK_METHOD2(ComputeOnTextWindow,
       text::Posn(WindowId, const TextWindowCompute&));
   MOCK_METHOD1(CreateDialogBox, void(Form*));
@@ -46,6 +59,9 @@ class MockViewImpl : public dom::ViewDelegate {
     const base::string16& dir_path,
     GetFilenameForSaveCallback callback) override;
   MOCK_METHOD1(GetMetrics, base::string16(const base::string16&));
+  public: virtual void GetSpellingSuggestions(
+      const base::string16& wrong_word,
+      const GetSpellingSuggestionsDeferred& deferred) override;
   public: std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;
   public: void LoadFile(Document* document, const base::string16& filename,

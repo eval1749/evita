@@ -265,6 +265,8 @@ DEFINE_IO_DELEGATE_4(WriteFile, domapi::IoContextId, void*, size_t,
 
 DEFINE_VIEW_DELEGATE_2(AddWindow, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(ChangeParentWindow, WindowId, WindowId)
+DEFINE_VIEW_DELEGATE_2(CheckSpelling, const base::string16&,
+    const CheckSpellingDeferred&)
 DEFINE_VIEW_DELEGATE_1(CreateDialogBox, Form*)
 DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
 DEFINE_VIEW_DELEGATE_2(CreateTableWindow, WindowId, Document*)
@@ -276,6 +278,8 @@ DEFINE_VIEW_DELEGATE_3(GetFilenameForLoad, WindowId, const base::string16&,
                        ViewDelegate::GetFilenameForLoadCallback)
 DEFINE_VIEW_DELEGATE_3(GetFilenameForSave, WindowId, const base::string16&,
                        ViewDelegate::GetFilenameForSaveCallback)
+DEFINE_VIEW_DELEGATE_2(GetSpellingSuggestions, const base::string16&,
+    const GetSpellingSuggestionsDeferred&)
 DEFINE_VIEW_DELEGATE_3(LoadFile, Document*, const base::string16&,
                        LoadFileCallback)
 DEFINE_VIEW_DELEGATE_1(MakeSelectionVisible, WindowId)

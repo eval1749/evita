@@ -3,8 +3,10 @@
 
 #include "evita/dom/editor.h"
 
+#include "base/bind.h"
 #include "base/callback.h"
 #include "evita/gc/local.h"
+#include "evita/dom/promise_deferred.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/window.h"
@@ -12,6 +14,7 @@
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/optional.h"
+#include "evita/v8_glue/promise_callback.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/script_callback.h"
 
@@ -30,6 +33,9 @@ class EditorClass : public v8_glue::WrapperInfo {
       : v8_glue::WrapperInfo(name) {
   }
   public: ~EditorClass() = default;
+
+  private: static v8::Handle<v8::Value> CheckSpelling(
+      const base::string16& word_to_check);
 
   private: static void GetFilenameForLoad(Window* window,
                                           const base::string16& dir_path,
@@ -54,6 +60,9 @@ class EditorClass : public v8_glue::WrapperInfo {
   private: static base::string16 GetMetrics(const base::string16& name) {
     return ScriptController::instance()->view_delegate()->GetMetrics(name);
   }
+
+  private: static  v8::Handle<v8::Value> GetSpellingSuggestions(
+      const base::string16& wrong_word);
 
   private: static void MessageBox(v8_glue::Nullable<Window> maybe_window,
                                  const base::string16& message, int flags,
@@ -153,8 +162,11 @@ class EditorClass : public v8_glue::WrapperInfo {
     auto templ = v8_glue::CreateConstructorTemplate(isolate,
         &EditorClass::NewEditor);
     return v8_glue::FunctionTemplateBuilder(isolate, templ)
+      .SetMethod("checkSpelling", &EditorClass::CheckSpelling)
       .SetMethod("getFilenameForLoad_", &EditorClass::GetFilenameForLoad)
       .SetMethod("getFilenameForSave_", &EditorClass::GetFilenameForSave)
+      .SetMethod("getSpellingSuggestions",
+          &EditorClass::GetSpellingSuggestions)
       .SetMethod("messageBox_", &EditorClass::MessageBox)
       .SetMethod("metrics", &EditorClass::GetMetrics)
       .SetMethod("runScript", &EditorClass::RunScript)
@@ -164,6 +176,26 @@ class EditorClass : public v8_glue::WrapperInfo {
 
   DISALLOW_COPY_AND_ASSIGN(EditorClass);
 };
+
+v8::Handle<v8::Value> EditorClass::CheckSpelling(
+    const base::string16& word_to_check) {
+  auto const promise_deferred = PromiseDeferred::Call(base::Bind(
+      &ViewDelegate::CheckSpelling,
+      base::Unretained(ScriptController::instance()->view_delegate()),
+      word_to_check));
+  auto const isolate = ScriptController::instance()->isolate();
+  return gin::ConvertToV8(isolate, promise_deferred.get());
+}
+
+v8::Handle<v8::Value> EditorClass::GetSpellingSuggestions(
+    const base::string16& wrong_word) {
+  auto const promise_deferred = PromiseDeferred::Call(base::Bind(
+      &ViewDelegate::GetSpellingSuggestions,
+      base::Unretained(ScriptController::instance()->view_delegate()),
+      wrong_word));
+  auto const isolate = ScriptController::instance()->isolate();
+  return gin::ConvertToV8(isolate, promise_deferred.get());
+}
 
 }  // namespace
 

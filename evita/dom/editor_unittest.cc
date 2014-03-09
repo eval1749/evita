@@ -23,6 +23,21 @@ class EditorTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(EditorTest);
 };
 
+TEST_F(EditorTest, checkSpelling) {
+  EXPECT_SCRIPT_VALID(
+      "var result;"
+      "function checkSpelling(word) {"
+      "  Editor.checkSpelling(word).then(function(x) { result = x; });"
+      "}");
+  mock_view_impl()->set_check_spelling_result(true);
+  EXPECT_SCRIPT_VALID("checkSpelling('word')");
+  EXPECT_SCRIPT_TRUE("result");
+
+  mock_view_impl()->set_check_spelling_result(false);
+  EXPECT_SCRIPT_VALID("checkSpelling('wrod')");
+  EXPECT_SCRIPT_FALSE("result");
+}
+
 TEST_F(EditorTest, getFilenameForLoad) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
   EXPECT_SCRIPT_VALID(
@@ -43,6 +58,17 @@ TEST_F(EditorTest, getFilenameForSave) {
       "  filename = x;"
       "});");
   EXPECT_SCRIPT_EQ("dir/foo.bar", "filename");
+}
+
+TEST_F(EditorTest, getSpellingSuggestions) {
+  EXPECT_SCRIPT_VALID(
+      "var result;"
+      "function getSpellingSuggestions(word) {"
+      "  Editor.getSpellingSuggestions(word).then(function(x) { result = x; });"
+      "}");
+  mock_view_impl()->set_spelling_suggestions({L"word", L"sword"});
+  EXPECT_SCRIPT_VALID("getSpellingSuggestions('word')");
+  EXPECT_SCRIPT_EQ("word, sword", "result.join(', ')");
 }
 
 TEST_F(EditorTest, localizeText) {

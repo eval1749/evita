@@ -60,6 +60,7 @@ global.JsConsole = (function() {
 
 /** @interface */
 JsConsole.Visitor = function() {};
+
   /** @param {number} index */
 JsConsole.Visitor.prototype.visitArrayElement = function(index) {};
 
@@ -86,6 +87,9 @@ JsConsole.Visitor.prototype.visitKey = function(key, index) {};
 
   /** @param {string} string */
 JsConsole.Visitor.prototype.visitString = function(string) {};
+
+/** @param {!TypedArray} array */
+JsConsole.Visitor.prototype.visitTypedArray = function(array) {};
 
   /** @param {!Object} object */
 JsConsole.Visitor.prototype.visitVisited = function(object) {};
@@ -120,6 +124,7 @@ JsConsole.Labeler = function() {
   this.visitFunction = doNothing;
   this.visitKey = doNothing;
   this.visitString = doNothing;
+  this.visitTypedArray = doNothing;
   this.visitVisited = function(value) {
     if (label_map.has(value))
       return;
@@ -247,6 +252,24 @@ JsConsole.stringify = function(value, MAX_LEVEL, MAX_LENGTH) {
       return visitor.endArray(array, array.length >= MAX_LENGTH);
     }
 
+    // TODO(yosi) Once v8 provide |TypedArray| class, we can replace this
+    // |isTypedArray()|.
+    function isTypedArray(object) {
+      return object instanceof Float32Array ||
+             object instanceof Float64Array ||
+             object instanceof Int16Array ||
+             object instanceof Int32Array ||
+             object instanceof Int8Array ||
+             object instanceof Uint16Array ||
+             object instanceof Uint32Array ||
+             object instanceof Uint8Array ||
+             object instanceof Uint8ClampedArray;
+    }
+
+    if (isTypedArray(object)) {
+      return visitor.visitTypedArray(/** @type{!TypedArray}*/(object));
+    }
+
     if (object instanceof Date)
       return visitor.visitDate(/** @type{!Date} */(object));
 
@@ -340,6 +363,9 @@ JsConsole.stringify = function(value, MAX_LEVEL, MAX_LENGTH) {
         }
       }
       this.emit('"');
+    };
+    this.visitTypedArray = function(array) {
+      this.emit('#{', array.constructor.name, ' ', array.length, '}');
     };
     this.visitVisited = function(value) {
       var label = labeler.labelOf(value);

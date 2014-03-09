@@ -264,7 +264,8 @@ TextLine* TextFormatter::FormatLine() {
   ascent  = std::max(pCell->GetHeight() - pCell->GetDescent(), ascent);
 
   pLine->Fix(text_block_->left(), text_block_->top() + text_block_->GetHeight(),
-             ascent, descent);
+             AlignHeightToPixel(m_gfx, ascent),
+             AlignHeightToPixel(m_gfx, descent));
 
   return pLine;
 }

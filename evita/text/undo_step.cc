@@ -88,7 +88,12 @@ BeginUndoStep::~BeginUndoStep() {
 }
 
 // UndoStep
-bool BeginUndoStep::TryMerge(const Buffer*, const UndoStep*) {
+bool BeginUndoStep::TryMerge(const Buffer*, const UndoStep* new_undo_step) {
+  if (auto const end = new_undo_step->as<EndUndoStep>()) {
+    // Remove empty undo group.
+    DCHECK_EQ(name(), end->name());
+    return true;
+  }
   return false;
 }
 
@@ -178,12 +183,7 @@ EndUndoStep::~EndUndoStep() {
 }
 
 // UndoStep
-bool EndUndoStep::TryMerge(const Buffer*, const UndoStep* undo_step) {
-  if (auto const begin = undo_step->as<BeginUndoStep>()) {
-    // Remove empty undo group.
-    DCHECK_EQ(name(), begin->name());
-    return true;
-  }
+bool EndUndoStep::TryMerge(const Buffer*, const UndoStep*) {
   return false;
 }
 

@@ -62,6 +62,7 @@ class TextBlock : public text::BufferMutationObserver {
   public: void SetRect(const gfx::RectF& rect);
 
   // text::BufferMutationObserver
+  private: virtual void DidChangeStyle(Posn offset, size_t length) override;
   private: virtual void DidDeleteAt(Posn offset, size_t length) override;
   private: virtual void DidInsertAt(Posn offset, size_t length) override;
 

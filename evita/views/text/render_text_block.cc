@@ -110,6 +110,10 @@ void TextBlock::SetRect(const gfx::RectF& rect) {
 }
 
 // text::BufferMutationObserver
+void TextBlock::DidChangeStyle(Posn offset, size_t) {
+  InvalidateLines(offset);
+}
+
 void TextBlock::DidDeleteAt(Posn offset, size_t) {
   InvalidateLines(offset);
 }

@@ -1,70 +1,54 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - edit interval
-// listener/winapp/ed_interval.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_Interval.h#2 $
-//
-#if !defined(INCLUDE_edit_interval_h)
-#define INCLUDE_edit_interval_h
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#if !defined(INCLUDE_evita_text_interval_h)
+#define INCLUDE_evita_text_interval_h
 
 #include "evita/ed_BinTree.h"
 #include "evita/css/style.h"
 #include "evita/li_util.h"
 
-namespace text
-{
+namespace text {
 
 class IntervalSet;
 
+class Interval : public BinaryTree<Interval>::NodeBase,
+                 public DoubleLinkedNode_<Interval> {
+  friend class Buffer;
+  friend class IntervalSet;
 
-/// <summary>
-///   An interval on buffer. An interval object contains style and syntax
-///   information.
-/// </summary>
-class Interval  :
-    public BinaryTree<Interval>::NodeBase,
-    public DoubleLinkedNode_<Interval>
-{
-    friend class Buffer;
-    friend class IntervalSet;
+  private: Posn m_lEnd;
+  private: Posn m_lStart;
+  private: int m_nZ;
+  private: css::Style m_Style;
 
-    private: Posn           m_lEnd;
-    private: Posn           m_lStart;
-    private: int            m_nZ;
-    private: css::Style    m_Style;
+  public: Interval(Posn lStart, Posn lEnd, int nZ = 9);
+  public: ~Interval();
 
-    // ctor
-    public: Interval(Posn lStart, Posn lEnd, int nZ = 9);
+  // [C]
+  public: bool CanMerge(const Interval*) const;
 
-    // [C]
-    public: bool CanMerge(const Interval*) const;
+  public: int Compare(const Interval* pThat) const {
+    return m_lStart - pThat->m_lStart;
+  }
 
-    public: int Compare(const Interval* pThat) const
-    {
-        return m_lStart - pThat->m_lStart;
-    } // Compare
+  public: bool Contains(Posn lPosn) const {
+    return lPosn >= m_lStart && lPosn < m_lEnd;
+  }
 
-    public: bool Contains(Posn lPosn) const
-    {
-        return lPosn >= m_lStart && lPosn < m_lEnd;
-    } // Contains
+  // [G]
+  public: Posn GetEnd() const { return m_lEnd; }
+  public: Posn GetStart() const { return m_lStart; }
+  public: const css::Style& GetStyle() const { return m_Style; }
 
-    // [G]
-    public: Posn      GetEnd()   const { return m_lEnd; }
-    public: Posn      GetStart() const { return m_lStart; }
-    public: const css::Style& GetStyle() const { return m_Style; }
+  // [I]
+  public: bool IsEmpty() const { return m_lStart == m_lEnd; }
 
-    // [I]
-    public: bool IsEmpty() const { return m_lStart == m_lEnd; }
-
-    // [S]
-    public: void SetStyle(const css::Style&);
-}; // Interval
+  // [S]
+  public: void SetStyle(const css::Style&);
+};
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_edit_interval_h)
+#endif //!defined(INCLUDE_evita_text_interval_h)

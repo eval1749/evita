@@ -110,10 +110,3 @@ v8::Local<v8::Object> PromiseDeferred::GetPromise(v8::Isolate* isolate) const {
 }
 
 }  // namespace dom
-
-namespace gin {
-v8::Handle<v8::Value> Converter<dom::PromiseDeferred*>::ToV8(
-    v8::Isolate* isolate, dom::PromiseDeferred* promise_deferred) {
-  return promise_deferred->GetPromise(isolate);
-}
-}   // namespace gin

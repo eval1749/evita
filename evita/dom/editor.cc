@@ -34,7 +34,7 @@ class EditorClass : public v8_glue::WrapperInfo {
   }
   public: ~EditorClass() = default;
 
-  private: static v8::Handle<v8::Value> CheckSpelling(
+  private: static v8::Handle<v8::Promise> CheckSpelling(
       const base::string16& word_to_check);
 
   private: static void GetFilenameForLoad(Window* window,
@@ -61,7 +61,7 @@ class EditorClass : public v8_glue::WrapperInfo {
     return ScriptController::instance()->view_delegate()->GetMetrics(name);
   }
 
-  private: static  v8::Handle<v8::Value> GetSpellingSuggestions(
+  private: static  v8::Handle<v8::Promise> GetSpellingSuggestions(
       const base::string16& wrong_word);
 
   private: static void MessageBox(v8_glue::Nullable<Window> maybe_window,
@@ -177,24 +177,20 @@ class EditorClass : public v8_glue::WrapperInfo {
   DISALLOW_COPY_AND_ASSIGN(EditorClass);
 };
 
-v8::Handle<v8::Value> EditorClass::CheckSpelling(
+v8::Handle<v8::Promise> EditorClass::CheckSpelling(
     const base::string16& word_to_check) {
-  auto const promise_deferred = PromiseDeferred::Call(base::Bind(
+  return PromiseDeferred::Call(base::Bind(
       &ViewDelegate::CheckSpelling,
       base::Unretained(ScriptController::instance()->view_delegate()),
       word_to_check));
-  auto const isolate = ScriptController::instance()->isolate();
-  return gin::ConvertToV8(isolate, promise_deferred.get());
 }
 
-v8::Handle<v8::Value> EditorClass::GetSpellingSuggestions(
+v8::Handle<v8::Promise> EditorClass::GetSpellingSuggestions(
     const base::string16& wrong_word) {
-  auto const promise_deferred = PromiseDeferred::Call(base::Bind(
+  return PromiseDeferred::Call(base::Bind(
       &ViewDelegate::GetSpellingSuggestions,
       base::Unretained(ScriptController::instance()->view_delegate()),
       wrong_word));
-  auto const isolate = ScriptController::instance()->isolate();
-  return gin::ConvertToV8(isolate, promise_deferred.get());
 }
 
 }  // namespace

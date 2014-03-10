@@ -33,7 +33,7 @@ class PromiseDeferred : public base::RefCounted<PromiseDeferred> {
   protected: v8_glue::Runner* runner() const { return runner_.get(); }
 
   public: template<typename ResolveType, typename RejectType>
-    static scoped_refptr<PromiseDeferred> Call(
+    static v8::Handle<v8::Promise> Call(
         const base::Callback<
             void(const domapi::Deferred<ResolveType, RejectType>&)> closure);
 
@@ -47,10 +47,10 @@ class PromiseDeferred : public base::RefCounted<PromiseDeferred> {
 };
 
 template<typename T, typename U>
-scoped_refptr<PromiseDeferred> PromiseDeferred::Call(
+v8::Handle<v8::Promise> PromiseDeferred::Call(
     const base::Callback<void(const domapi::Deferred<T, U>&)> closure) {
   auto const runner = ScriptController::instance()->runner();
-  v8_glue::Runner::Scope runner_scope(runner);
+  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
 
   auto const promise_deferred =
       make_scoped_refptr(new PromiseDeferred(runner));
@@ -61,7 +61,7 @@ scoped_refptr<PromiseDeferred> PromiseDeferred::Call(
   deferred.resolve = base::Bind(&PromiseDeferred::Resolve<T>,
                                 promise_deferred);
   closure.Run(deferred);
-  return promise_deferred;
+  return runner_scope.Escape(promise_deferred->GetPromise(runner->isolate()));
 }
 
 template<typename T>
@@ -81,13 +81,5 @@ void PromiseDeferred::Resolve(T value) {
 }
 
 }  // namespace dom
-
-namespace gin {
-template<>
-struct Converter<dom::PromiseDeferred*> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    dom::PromiseDeferred* promise_deferred);
-};
-}  // namespace gin
 
 #endif //!defined(INCLUDE_evita_dom_promise_deferred_h)

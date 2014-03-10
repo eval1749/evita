@@ -29,4 +29,13 @@
 
 #define END_V8_INCLUDE __pragma(warning(pop))
 
+BEGIN_V8_INCLUDE
+#include "v8/include/v8.h"
+END_V8_INCLUDE
+
+namespace v8 {
+// For marking functions which return |Promise|.
+typedef Object Promise;
+}
+
 #endif //!defined(INCLUDE_evita_v8_glue_v8_glue_h)

@@ -4,7 +4,7 @@
 #define INCLUDE_evita_v8_glue_converter_h
 
 #include "base/strings/string16.h"
-#include "evita/v8_glue/v8_glue.h"
+#include "evita/v8_glue/v8.h"
 BEGIN_V8_INCLUDE
 #include "gin/converter.h"
 END_V8_INCLUDE

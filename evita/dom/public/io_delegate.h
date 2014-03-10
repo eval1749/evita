@@ -22,7 +22,7 @@ class IoDelegate {
   public: virtual void OpenProcess(const base::string16& command_line,
                                    const OpenProcessDeferred& deferred) = 0;
   public: virtual void QueryFileStatus(const base::string16& filename,
-      const QueryFileStatusCallback& callback) = 0;
+      const QueryFileStatusDeferred& deferred) = 0;
   public: virtual void ReadFile(IoContextId context_id, void* buffer,
                                 size_t num_read,
                                 const FileIoDeferred& deferred) = 0;

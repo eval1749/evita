@@ -13,6 +13,7 @@
 #include "base/message_loop/message_pump_win.h"
 #pragma warning(pop)
 #include "base/time/time.h"
+#include "common/win/scoped_handle.h"
 #include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_context_id.h"
 #include "evita/dom/public/io_error.h"
@@ -30,62 +31,27 @@ namespace io {
 namespace {
 const DWORD kHugeFileSize = 1u << 28;
 
-//////////////////////////////////////////////////////////////////////
-//
-// QueryFileStatusHandler
-//
-class QueryFileStatusHandler {
-  private: domapi::QueryFileStatusCallbackData data_;
-  private: HANDLE find_handle_;
+class scoped_find_handle {
+  private: HANDLE handle_;
 
-  public: QueryFileStatusHandler(const base::string16& file_name);
-  public: ~QueryFileStatusHandler();
-
-  public: const domapi::QueryFileStatusCallbackData& data() const {
-    return data_;
+  public: scoped_find_handle(HANDLE handle) : handle_(handle) {
   }
 
-  DISALLOW_COPY_AND_ASSIGN(QueryFileStatusHandler);
+  public: ~scoped_find_handle() {
+    if (is_valid())
+      ::FindClose(handle_);
+  }
+
+  public: bool is_valid() const { return handle_ != INVALID_HANDLE_VALUE; }
+
+  DISALLOW_COPY_AND_ASSIGN(scoped_find_handle);
 };
-
-QueryFileStatusHandler::QueryFileStatusHandler(
-    const base::string16& file_name) {
-  data_ = {0};
-
-  WIN32_FIND_DATAW find_data;
-  find_handle_ = ::FindFirstFileW(file_name.c_str(), &find_data);
-  if (find_handle_ == INVALID_HANDLE_VALUE) {
-    auto const dwError = ::GetLastError();
-    DVLOG_WIN32_ERROR(0, "FindFirstFileW");
-    data_.error_code = static_cast<int>(dwError);
-    return;
-  }
-
-  if (find_data.nFileSizeHigh || find_data.nFileSizeLow > kHugeFileSize) {
-    data_.error_code = static_cast<int>(ERROR_NOT_ENOUGH_MEMORY);
-    return ;
-  }
-
-  data_.error_code = 0;
-  data_.file_size = static_cast<int>(find_data.nFileSizeLow);
-  data_.is_directory = find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
-  data_.is_symlink = find_data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT;
-  data_.last_write_time = base::Time::FromFileTime(find_data.ftLastWriteTime);
-  data_.readonly = find_data.dwFileAttributes & FILE_ATTRIBUTE_READONLY;
-}
-
-QueryFileStatusHandler::~QueryFileStatusHandler() {
-  if (find_handle_ != INVALID_HANDLE_VALUE) {
-    ::FindClose(find_handle_);
-  }
-}
 
 void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
              domapi::FileId context_id) {
   Application::instance()->view_event_handler()->RunCallback(
       base::Bind(resolve , context_id));
 }
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -129,10 +95,31 @@ void IoDelegateImpl::OpenProcess(const base::string16& command_line,
 }
 
 void IoDelegateImpl::QueryFileStatus(const base::string16& file_name,
-    const domapi::QueryFileStatusCallback& callback) {
-  QueryFileStatusHandler handler(file_name);
+    const domapi::QueryFileStatusDeferred& deferred) {
+  WIN32_FIND_DATAW find_data;
+  scoped_find_handle find_handle = ::FindFirstFileW(file_name.c_str(),
+                                                    &find_data);
+  if (!find_handle.is_valid()) {
+    auto const last_error = ::GetLastError();
+    DVLOG(0) << "FindFirstFileW error=" << last_error;
+    Reject(deferred.reject, last_error);
+    return;
+  }
+
+  if (find_data.nFileSizeHigh || find_data.nFileSizeLow > kHugeFileSize) {
+    Reject(deferred.reject, ERROR_NOT_ENOUGH_MEMORY);
+    return;
+  }
+
+  domapi::FileStatus data = {0};
+  data.file_size = static_cast<int>(find_data.nFileSizeLow);
+  data.is_directory = find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+  data.is_symlink = find_data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT;
+  data.last_write_time = base::Time::FromFileTime(find_data.ftLastWriteTime);
+  data.readonly = find_data.dwFileAttributes & FILE_ATTRIBUTE_READONLY;
+
   Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(callback, handler.data()));
+      base::Bind(deferred.resolve , data));
 }
 
 void IoDelegateImpl::ReadFile(domapi::IoContextId context_id, void* buffer,

@@ -201,7 +201,7 @@ DEFINE_IO_DELEGATE_3(OpenFile, const base::string16&,
 DEFINE_IO_DELEGATE_2(OpenProcess, const base::string16&,
                      const domapi::OpenProcessDeferred&)
 DEFINE_IO_DELEGATE_2(QueryFileStatus, const base::string16&,
-                     const domapi::QueryFileStatusCallback&)
+                     const domapi::QueryFileStatusDeferred&)
 DEFINE_IO_DELEGATE_4(ReadFile, domapi::IoContextId, void*, size_t,
                      const domapi::FileIoDeferred&)
 DEFINE_IO_DELEGATE_4(WriteFile, domapi::IoContextId, void*, size_t,

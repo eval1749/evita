@@ -16,8 +16,7 @@ class IoContextId;
 struct IoError;
 class ProcessId;
 
-struct QueryFileStatusCallbackData {
-  int error_code;
+struct FileStatus {
   int file_size;
   bool is_directory;
   bool is_symlink;
@@ -28,8 +27,7 @@ struct QueryFileStatusCallbackData {
 typedef Deferred<int, IoError> FileIoDeferred;
 typedef Deferred<FileId, IoError> OpenFileDeferred;
 typedef Deferred<ProcessId, IoError> OpenProcessDeferred;
-typedef base::Callback<void(const domapi::QueryFileStatusCallbackData&)>
-    QueryFileStatusCallback;
+typedef Deferred<FileStatus, IoError> QueryFileStatusDeferred;
 
 }  // namespace domapi
 

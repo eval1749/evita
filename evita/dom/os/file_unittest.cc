@@ -38,9 +38,8 @@ TEST_F(OsFileTest, OsFile_open_succeeded) {
 }
 
 TEST_F(OsFileTest, OsFile_stat_failed) {
-  domapi::QueryFileStatusCallbackData data;
-  data.error_code = 123;
-  mock_io_delegate()->SetQueryFileStatusCallbackData(data);
+  domapi::FileStatus data;
+  mock_io_delegate()->SetFileStatus(data, 123);
   EXPECT_SCRIPT_VALID(
     "var result;"
     "Os.File.stat('foo').catch(function(x) { result = x; });");
@@ -49,14 +48,12 @@ TEST_F(OsFileTest, OsFile_stat_failed) {
 }
 
 TEST_F(OsFileTest, OsFile_stat_succeeded) {
-  domapi::QueryFileStatusCallbackData data;
-  data.error_code = 0;
-  data.file_size = 456;
+  domapi::FileStatus data;
   data.is_directory = true;
   data.is_symlink = true;
   data.last_write_time = base::Time::FromJsTime(123456.0);
   data.readonly = false;
-  mock_io_delegate()->SetQueryFileStatusCallbackData(data);
+  mock_io_delegate()->SetFileStatus(data, 0);
   EXPECT_SCRIPT_VALID(
     "var result;"
     "Os.File.stat('foo').then(function(x) { result = x; });");

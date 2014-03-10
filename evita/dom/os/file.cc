@@ -13,7 +13,6 @@
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/optional.h"
-#include "evita/v8_glue/promise_callback.h"
 #include "evita/v8_glue/runner.h"
 #include "gin/array_buffer.h"
 #include "v8_strings.h"
@@ -28,9 +27,9 @@ struct Converter<domapi::FileId> {
 };
 
 template<>
-struct Converter<domapi::QueryFileStatusCallbackData> {
+struct Converter<domapi::FileStatus> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-        const domapi::QueryFileStatusCallbackData& data) {
+        const domapi::FileStatus& data) {
     auto const runner = v8_glue::Runner::current_runner(isolate);
     auto const os_file_info_ctor = runner->global()->
         Get(dom::v8Strings::Os.Get(isolate))->ToObject()->
@@ -96,28 +95,6 @@ class FileClass :
   DISALLOW_COPY_AND_ASSIGN(FileClass);
 };
 
-//////////////////////////////////////////////////////////////////////
-//
-// QueryFileStatusCallback
-//
-class QueryFileStatusCallback : public v8_glue::PromiseCallback {
-  public: QueryFileStatusCallback(v8_glue::Runner* runner)
-    : v8_glue::PromiseCallback(runner) {
-  }
-
-  public: ~QueryFileStatusCallback() = default;
-
-  public: void Run(const domapi::QueryFileStatusCallbackData& data) {
-    if (data.error_code) {
-      Reject(FileError(data.error_code));
-      return;
-    }
-    Resolve(data);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(QueryFileStatusCallback);
-};
-
 v8::Handle<v8::Promise> FileClass::OpenFile(const base::string16& file_name,
     v8_glue::Optional<base::string16> opt_mode) {
   return PromiseDeferred::Call(base::Bind(
@@ -126,16 +103,12 @@ v8::Handle<v8::Promise> FileClass::OpenFile(const base::string16& file_name,
       file_name, opt_mode.is_supplied ? opt_mode.value : base::string16()));
 }
 
-v8::Handle<v8::Object> FileClass::QueryFileStatus(
+v8::Handle<v8::Promise> FileClass::QueryFileStatus(
     const base::string16& file_name) {
-  auto const runner = ScriptController::instance()->runner();
-  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
-  auto const stat_callback = make_scoped_refptr(
-      new QueryFileStatusCallback(runner));
-  ScriptController::instance()->io_delegate()->QueryFileStatus(
-      file_name, base::Bind(&QueryFileStatusCallback::Run,
-                            stat_callback));
-  return runner_scope.Escape(stat_callback->GetPromise(runner->isolate()));
+  return PromiseDeferred::Call(base::Bind(
+      &domapi::IoDelegate::QueryFileStatus,
+      base::Unretained(ScriptController::instance()->io_delegate()),
+      file_name));
 }
 
 }  // namespace

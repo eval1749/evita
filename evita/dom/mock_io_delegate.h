@@ -15,9 +15,9 @@
 namespace dom {
 
 class MockIoDelegate : public domapi::IoDelegate {
-  private: domapi::QueryFileStatusCallbackData data_;
-  private: int error_code_;
   private: domapi::IoContextId context_id_;
+  private: int error_code_;
+  private: domapi::FileStatus file_status_;
   private: int num_transferred_;
 
   public: MockIoDelegate();
@@ -26,8 +26,7 @@ class MockIoDelegate : public domapi::IoDelegate {
   public: void SetFileIoDeferredData(int num_transferred, int error_code);
   public: void SetOpenFileDeferredData(domapi::IoContextId context_id,
                                        int error_code);
-  public: void SetQueryFileStatusCallbackData(
-      const domapi::QueryFileStatusCallbackData& data);
+  public: void SetFileStatus(const domapi::FileStatus& data, int error_code);
 
   // domapi::IoDelegate
   MOCK_METHOD2(CloseFile, void(domapi::IoContextId,
@@ -38,7 +37,7 @@ class MockIoDelegate : public domapi::IoDelegate {
   public: virtual void OpenProcess(const base::string16& command_line,
       const domapi::OpenProcessDeferred&) override;
   private: virtual void QueryFileStatus(const base::string16& filename,
-      const domapi::QueryFileStatusCallback& callback) override;
+      const domapi::QueryFileStatusDeferred& deferred) override;
   public: virtual void ReadFile(domapi::IoContextId context_id, void* buffer,
                         size_t num_read,
                         const domapi::FileIoDeferred& deferred) override;

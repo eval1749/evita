@@ -20,8 +20,8 @@ MockIoDelegate::~MockIoDelegate() {
 
 void MockIoDelegate::SetFileIoDeferredData(int num_transferred,
                                            int error_code) {
-  num_transferred_ = num_transferred;
   error_code_ = error_code;
+  num_transferred_ = num_transferred;
 }
 
 void MockIoDelegate::SetOpenFileDeferredData(domapi::IoContextId context_id,
@@ -30,9 +30,10 @@ void MockIoDelegate::SetOpenFileDeferredData(domapi::IoContextId context_id,
   error_code_ = error_code;
 }
 
-void MockIoDelegate::SetQueryFileStatusCallbackData(
-    const domapi::QueryFileStatusCallbackData& data) {
-  data_ = data;
+void MockIoDelegate::SetFileStatus(const domapi::FileStatus& file_status,
+                                   int error_code) {
+  error_code_ = error_code;
+  file_status_ = file_status;
 }
 
 // domapi::IoDelegate
@@ -53,8 +54,11 @@ void MockIoDelegate::OpenProcess(const base::string16&,
 }
 
 void MockIoDelegate::QueryFileStatus(const base::string16&,
-    const domapi::QueryFileStatusCallback& callback) {
-  callback.Run(data_);
+    const domapi::QueryFileStatusDeferred& deferred) {
+  if (error_code_)
+    deferred.reject.Run(domapi::IoError(error_code_));
+  else
+    deferred.resolve.Run(file_status_);
 }
 
 void MockIoDelegate::ReadFile(domapi::IoContextId, void*, size_t,

@@ -5,7 +5,7 @@
 #if !defined(INCLUDE_evita_dom_public_deferred_h)
 #define INCLUDE_evita_dom_public_deferred_h
 
-#include "base/callback.h"
+#include "base/callback_forward.h"
 
 namespace domapi {
 

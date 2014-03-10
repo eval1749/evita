@@ -33,22 +33,10 @@ class AbstractFile : public v8_glue::Scriptable<AbstractFile> {
   DISALLOW_COPY_AND_ASSIGN(AbstractFile);
 };
 
-struct FileError {
-  int error_code;
-  FileError(int error_code) : error_code(error_code) {
-  }
-};
-
 }  // namespace os
 }  // namespace dom
 
 namespace gin {
-template<>
-struct Converter<dom::os::FileError> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    const dom::os::FileError& error);
-};
-
 template<>
 struct Converter<domapi::IoError> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,

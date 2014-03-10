@@ -14,7 +14,6 @@
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/optional.h"
-#include "evita/v8_glue/promise_callback.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/script_callback.h"
 #include "gin/array_buffer.h"

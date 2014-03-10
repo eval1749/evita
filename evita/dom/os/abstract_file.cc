@@ -7,7 +7,9 @@
 #include "base/memory/ref_counted.h"
 #include "base/strings/string16.h"
 #include "evita/dom/converter.h"
+#include "evita/dom/promise_deferred.h"
 #include "evita/dom/public/io_delegate.h"
+#include "evita/dom/public/io_error.h"
 #include "evita/dom/script_controller.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
@@ -29,33 +31,23 @@ v8::Handle<v8::Value> Converter<dom::os::FileError>::ToV8(
   return runner->CallAsConstructor(os_file_error_ctor,
       v8::Integer::New(isolate, error.error_code));
 }
+
+v8::Handle<v8::Value> Converter<domapi::IoError>::ToV8(
+    v8::Isolate* isolate, const domapi::IoError& error) {
+  auto const runner = v8_glue::Runner::current_runner(isolate);
+  auto const os_file_error_ctor = runner->global()->
+      Get(dom::v8Strings::Os.Get(isolate))->ToObject()->
+      Get(dom::v8Strings::File.Get(isolate))->ToObject()->
+      Get(dom::v8Strings::Error.Get(isolate));
+  return runner->CallAsConstructor(os_file_error_ctor,
+      v8::Integer::New(isolate, error.error_code));
+}
 }  // namespace gin
 
 namespace dom {
 namespace os {
 
 namespace {
-
-//////////////////////////////////////////////////////////////////////
-//
-// CloseFileCallback
-//
-class CloseFileCallback : public v8_glue::PromiseCallback {
-  public: CloseFileCallback(v8_glue::Runner* runner)
-    : v8_glue::PromiseCallback(runner) {
-  }
-  public: ~CloseFileCallback() = default;
-
-  public: void Run(int error_code) {
-    if (error_code) {
-      Reject(FileError(error_code));
-      return;
-    }
-    Resolve(0);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(CloseFileCallback);
-};
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -93,27 +85,6 @@ class AbstractFileClass : public v8_glue::WrapperInfo {
   DISALLOW_COPY_AND_ASSIGN(AbstractFileClass);
 };
 
-//////////////////////////////////////////////////////////////////////
-//
-// FileIoCallback
-//
-class FileIoCallback : public v8_glue::PromiseCallback {
-  public: FileIoCallback(v8_glue::Runner* runner)
-    : v8_glue::PromiseCallback(runner) {
-  }
-  public: ~FileIoCallback() = default;
-
-  public: void Run(int num_transfered, int error_code) {
-    if (error_code) {
-      Reject(FileError(error_code));
-      return;
-    }
-    Resolve(num_transfered);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(FileIoCallback);
-};
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -130,37 +101,27 @@ AbstractFile::~AbstractFile() {
   Close();
 }
 
-v8::Handle<v8::Object> AbstractFile::Close() {
-  auto const runner = ScriptController::instance()->runner();
-  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
-  auto const callback = make_scoped_refptr(new CloseFileCallback(runner));
-  ScriptController::instance()->io_delegate()->CloseFile(context_id_,
-      base::Bind(&CloseFileCallback::Run, callback));
-  return runner_scope.Escape(callback->GetPromise(runner->isolate()));
+v8::Handle<v8::Promise> AbstractFile::Close() {
+  return PromiseDeferred::Call(base::Bind(
+      &domapi::IoDelegate::CloseFile,
+      base::Unretained(ScriptController::instance()->io_delegate()),
+      context_id_));
 }
 
-v8::Handle<v8::Object> AbstractFile::Read(
+v8::Handle<v8::Promise> AbstractFile::Read(
     const gin::ArrayBufferView& array_buffer_view) {
-  auto const runner = ScriptController::instance()->runner();
-  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
-  auto const file_io_callback = make_scoped_refptr(
-      new FileIoCallback(runner));
-  ScriptController::instance()->io_delegate()->ReadFile(
-      context_id_, array_buffer_view.bytes(), array_buffer_view.num_bytes(),
-      base::Bind(&FileIoCallback::Run, file_io_callback));
-  return runner_scope.Escape(file_io_callback->GetPromise(runner->isolate()));
+  return PromiseDeferred::Call(base::Bind(
+      &domapi::IoDelegate::ReadFile,
+      base::Unretained(ScriptController::instance()->io_delegate()),
+      context_id_, array_buffer_view.bytes(), array_buffer_view.num_bytes()));
 }
 
-v8::Handle<v8::Object> AbstractFile::Write(
+v8::Handle<v8::Promise> AbstractFile::Write(
     const gin::ArrayBufferView& array_buffer_view) {
-  auto const runner = ScriptController::instance()->runner();
-  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
-  auto const file_io_callback = make_scoped_refptr(
-      new FileIoCallback(runner));
-  ScriptController::instance()->io_delegate()->WriteFile(
-      context_id_, array_buffer_view.bytes(), array_buffer_view.num_bytes(),
-      base::Bind(&FileIoCallback::Run, file_io_callback));
-  return runner_scope.Escape(file_io_callback->GetPromise(runner->isolate()));
+  return PromiseDeferred::Call(base::Bind(
+      &domapi::IoDelegate::WriteFile,
+      base::Unretained(ScriptController::instance()->io_delegate()),
+      context_id_, array_buffer_view.bytes(), array_buffer_view.num_bytes()));
 }
 
 }  // namespace os

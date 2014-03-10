@@ -11,6 +11,8 @@
 namespace domapi {
 
 class IoContextId;
+struct IoError;
+template<typename ResolveType, typename RejectType> struct Deferred;
 
 struct QueryFileStatusCallbackData {
   int error_code;
@@ -21,9 +23,7 @@ struct QueryFileStatusCallbackData {
   bool readonly;
 };
 
-typedef base::Callback<void(int error_code)> CloseFileCallback;
-typedef base::Callback<void(int num_transfered, int error_code)>
-    FileIoCallback;
+typedef Deferred<int, IoError> FileIoDeferred;
 typedef base::Callback<void(IoContextId process_id, int error_code)>
     NewProcessCallback;
 typedef base::Callback<void(IoContextId context_id, int error_code)>

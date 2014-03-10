@@ -4,9 +4,10 @@
 
 #include "evita/dom/mock_io_delegate.h"
 
-#include "evita/dom/public/io_callback.h"
-
 #include "base/callback.h"
+#include "evita/dom/public/deferred.h"
+#include "evita/dom/public/io_callback.h"
+#include "evita/dom/public/io_error.h"
 
 namespace dom {
 
@@ -17,7 +18,7 @@ MockIoDelegate::MockIoDelegate()
 MockIoDelegate::~MockIoDelegate() {
 }
 
-void MockIoDelegate::SetFileIoCallbackData(int num_transferred,
+void MockIoDelegate::SetFileIoDeferredData(int num_transferred,
                                            int error_code) {
   num_transferred_ = num_transferred;
   error_code_ = error_code;
@@ -51,13 +52,19 @@ void MockIoDelegate::QueryFileStatus(const base::string16&,
 }
 
 void MockIoDelegate::ReadFile(domapi::IoContextId, void*, size_t,
-                              const domapi::FileIoCallback& callback) {
-  callback.Run(num_transferred_, error_code_);
+                              const domapi::FileIoDeferred& deferred) {
+  if (error_code_)
+    deferred.reject.Run(domapi::IoError(error_code_));
+  else
+    deferred.resolve.Run(num_transferred_);
 }
 
 void MockIoDelegate::WriteFile(domapi::IoContextId, void*, size_t,
-                              const domapi::FileIoCallback& callback) {
-  callback.Run(num_transferred_, error_code_);
+                              const domapi::FileIoDeferred& deferred) {
+  if (error_code_)
+    deferred.reject.Run(domapi::IoError(error_code_));
+  else
+    deferred.resolve.Run(num_transferred_);
 }
 
 }  // namespace dom

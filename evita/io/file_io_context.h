@@ -11,6 +11,7 @@
 #include "base/message_loop/message_pump_win.h"
 #pragma warning(pop)
 #include "common/win/scoped_handle.h"
+#include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_context_id.h"
 #include "evita/io/io_context.h"
 
@@ -19,7 +20,7 @@ namespace io {
 class FileIoContext : private base::MessagePumpForIO::IOContext,
                       private base::MessagePumpForIO::IOHandler,
                       public IoContext {
-  private: domapi::FileIoCallback callback_;
+  private: domapi::FileIoDeferred deferred_;
   private: common::win::scoped_handle file_handle_;
   private: bool running_;
 
@@ -36,11 +37,11 @@ class FileIoContext : private base::MessagePumpForIO::IOContext,
 
   // io::IoContext
   private: virtual void Close(
-      const domapi::CloseFileCallback& callback) override;
+      const domapi::FileIoDeferred& deferred) override;
   private: virtual void Read(void* buffer, size_t num_read,
-                             const domapi::FileIoCallback& callback) override;
+                             const domapi::FileIoDeferred& deferred) override;
   private: virtual void Write(void* buffer, size_t num_write,
-                             const domapi::FileIoCallback& callback) override;
+                             const domapi::FileIoDeferred& deferred) override;
 
   DISALLOW_COPY_AND_ASSIGN(FileIoContext);
 };

@@ -60,7 +60,7 @@ class ScriptThread final : public domapi::IoDelegate,
   // IoDelegate
   // domapi::IoDelegate
   private: virtual void CloseFile(domapi::IoContextId context_id,
-      const domapi::CloseFileCallback& callback) override;
+      const domapi::FileIoDeferred& deferred) override;
   private: virtual void NewProcess(const base::string16& command_line,
       const domapi::NewProcessCallback& callbacK) override;
   private: virtual void OpenFile(const base::string16& filename,
@@ -70,10 +70,10 @@ class ScriptThread final : public domapi::IoDelegate,
       const domapi::QueryFileStatusCallback& callback) override;
   private: virtual void ReadFile(domapi::IoContextId context_id,
       void* buffer, size_t num_read,
-      const domapi::FileIoCallback& callback) override;
+      const domapi::FileIoDeferred& deferred) override;
   private: virtual void WriteFile(domapi::IoContextId context_id,
       void* buffer, size_t num_write,
-      const domapi::FileIoCallback& callback) override;
+      const domapi::FileIoDeferred& deferred) override;
 
   // ViewDelegate
   private: virtual void AddWindow(WindowId parent_id,

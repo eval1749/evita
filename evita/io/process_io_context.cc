@@ -5,13 +5,15 @@
 #include "evita/io/process_io_context.h"
 
 #include "base/bind.h"
-//#include "base/callback.h"
 #pragma warning(push)
 #pragma warning(disable: 4100 4625 4626)
 #include "base/threading/thread.h"
 #pragma warning(pop)
+#include "evita/dom/public/deferred.h"
+#include "evita/dom/public/io_error.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
+#include "evita/io/io_context_utils.h"
 
 #define DVLOG_WIN32_ERROR(level, name, last_error) \
   DVLOG(level) << name ": " << this << " err=" << last_error
@@ -19,24 +21,13 @@
 namespace io {
 
 namespace {
-void RunCallback(const domapi::FileIoCallback& callback, DWORD num_transferred,
-                 DWORD last_error) {
-    Application::instance()->view_event_handler()->RunCallback(
-        base::Bind(callback, static_cast<int>(num_transferred),
-                   static_cast<int>(last_error)));
-}
-
-void RunCallback(const domapi::CloseFileCallback& callback, DWORD last_error) {
-    Application::instance()->view_event_handler()->RunCallback(
-        base::Bind(callback, static_cast<int>(last_error)));
-}
-
 void RunCallback(const domapi::NewProcessCallback& callback,
                  DWORD last_error) {
     Application::instance()->view_event_handler()->RunCallback(
         base::Bind(callback, domapi::IoContextId(),
                    static_cast<int>(last_error)));
 }
+
 }  // namespace
 
 ProcessIoContext::ProcessIoContext(domapi::IoContextId context_id,
@@ -53,9 +44,9 @@ ProcessIoContext::~ProcessIoContext() {
 }
 
 void ProcessIoContext::CloseAndWaitProcess(
-    const domapi::CloseFileCallback& callback) {
+    const domapi::FileIoDeferred& deferred) {
   if (auto const last_error = CloseProcess()) {
-    RunCallback(callback, last_error);
+    Reject(deferred.reject, last_error);
     return;
   }
 
@@ -64,12 +55,12 @@ void ProcessIoContext::CloseAndWaitProcess(
     if (value == WAIT_FAILED) {
       auto const last_error = ::GetLastError();
       DVLOG_WIN32_ERROR(0, "WaitSingleObject", last_error);
-      RunCallback(callback, last_error);
+      Reject(deferred.reject, last_error);
       return;
     }
     process_.release();
   }
-  RunCallback(callback, 0);
+  Resolve(deferred.resolve, 0u);
 }
 
 DWORD ProcessIoContext::CloseProcess() {
@@ -95,7 +86,7 @@ DWORD ProcessIoContext::CloseProcess() {
 }
 
 void ProcessIoContext::ReadFromProcess(
-    void* buffer, size_t num_read, const domapi::FileIoCallback& callback) {
+    void* buffer, size_t num_read, const domapi::FileIoDeferred& deferred) {
   DWORD read;
   auto const succeeded = ::ReadFile(stdout_read_.get(), buffer, num_read,
                                     &read, nullptr);
@@ -104,10 +95,10 @@ void ProcessIoContext::ReadFromProcess(
     DVLOG_WIN32_ERROR(0, "ReadFile", last_error);
     if (last_error == ERROR_BROKEN_PIPE)
       CloseProcess();
-    RunCallback(callback, 0, last_error);
+    Reject(deferred.reject, last_error);
     return;
   }
-  RunCallback(callback, read, 0);
+  Resolve(deferred.resolve, read);
 }
 
 void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
@@ -188,7 +179,7 @@ void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
 }
 
 void ProcessIoContext::WriteToProcess(
-    void* buffer, size_t num_write, const domapi::FileIoCallback& callback) {
+    void* buffer, size_t num_write, const domapi::FileIoDeferred& deferred) {
   DWORD written;
   auto const succeeded = ::WriteFile(stdin_write_.get(), buffer, num_write,
                                      &written, nullptr);
@@ -197,38 +188,38 @@ void ProcessIoContext::WriteToProcess(
     DVLOG_WIN32_ERROR(0, "WriteFile", last_error);
     if (last_error == ERROR_BROKEN_PIPE)
       CloseProcess();
-    RunCallback(callback, 0, last_error);
+    Reject(deferred.reject, last_error);
     return;
   }
-  RunCallback(callback, written, 0);
+  Resolve(deferred.resolve, written);
 }
 
 // io::IoContext
-void ProcessIoContext::Close(const domapi::CloseFileCallback& callback) {
+void ProcessIoContext::Close(const domapi::FileIoDeferred& deferred) {
   if (!gateway_thread_->IsRunning()) {
-    RunCallback(callback, ERROR_INVALID_HANDLE);
+    Reject(deferred.reject, ERROR_INVALID_HANDLE);
     return;
   }
   gateway_thread_->message_loop()->PostTask(FROM_HERE, base::Bind(
       &ProcessIoContext::CloseAndWaitProcess,
-      base::Unretained(this), callback));
+      base::Unretained(this), deferred));
 }
 
 void ProcessIoContext::Read(void* buffer, size_t num_read,
-                            const domapi::FileIoCallback& callback) {
+                            const domapi::FileIoDeferred& deferred) {
   if (!gateway_thread_->IsRunning() || !stdout_read_.is_valid()) {
-    RunCallback(callback, 0, ERROR_INVALID_HANDLE);
+    Reject(deferred.reject, ERROR_INVALID_HANDLE);
     return;
   }
   gateway_thread_->message_loop()->PostTask(FROM_HERE, base::Bind(
       &ProcessIoContext::ReadFromProcess, base::Unretained(this),
-      base::Unretained(buffer), num_read, callback));
+      base::Unretained(buffer), num_read, deferred));
 }
 
 void ProcessIoContext::Write(void* buffer, size_t num_write,
-                             const domapi::FileIoCallback& callback) {
+                             const domapi::FileIoDeferred& deferred) {
   if (!gateway_thread_->IsRunning() || !stdin_write_.is_valid()) {
-    RunCallback(callback, 0, ERROR_INVALID_HANDLE);
+    Reject(deferred.reject, ERROR_INVALID_HANDLE);
     return;
   }
 
@@ -240,14 +231,14 @@ void ProcessIoContext::Write(void* buffer, size_t num_write,
     auto const last_error = ::GetLastError();
     if (last_error != ERROR_NOT_FOUND) {
       DVLOG_WIN32_ERROR(0, "CancelSynchronousIo", last_error);
-      RunCallback(callback, 0, last_error);
+      Reject(deferred.reject, last_error);
       return;
     }
   }
 
   gateway_thread_->message_loop()->PostTask(FROM_HERE, base::Bind(
       &ProcessIoContext::WriteToProcess, base::Unretained(this),
-      base::Unretained(buffer), num_write, callback));
+      base::Unretained(buffer), num_write, deferred));
 }
 
 }  // namespace io

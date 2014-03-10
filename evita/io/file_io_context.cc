@@ -7,6 +7,7 @@
 #include "base/bind.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
+#include "evita/io/io_context_utils.h"
 #include "evita/io/io_manager.h"
 
 namespace io {
@@ -52,12 +53,6 @@ HANDLE OpenFile(const base::string16& file_name,
   return handle.release();
 }
 
-void RunCallback(const domapi::FileIoCallback& callback, DWORD num_transferred,
-                 DWORD last_error) {
-    Application::instance()->view_event_handler()->RunCallback(
-        base::Bind(callback, static_cast<int>(num_transferred),
-                   static_cast<int>(last_error)));
-}
 }  // namespace
 
 FileIoContext::FileIoContext(const base::string16& file_name,
@@ -80,39 +75,39 @@ void FileIoContext::OnIOCompleted(IOContext*,
                                   DWORD error) {
   overlapped.Offset += bytes_transfered;
   running_ = false;
-  RunCallback(callback_, bytes_transfered,
-              error == ERROR_HANDLE_EOF ? 0 : error);
+  if (!error || error == ERROR_HANDLE_EOF)
+    Resolve(deferred_.resolve, bytes_transfered);
+  else
+    Reject(deferred_.reject, error);
   if (!file_handle_.is_valid())
     delete this;
 }
 
 // io::IoContext
-void FileIoContext::Close(const domapi::CloseFileCallback& callback) {
+void FileIoContext::Close(const domapi::FileIoDeferred& deferred) {
   if (file_handle_.is_valid()) {
     if (!::CloseHandle(file_handle_.get())) {
       auto const last_error = ::GetLastError();
       DVLOG(0) << "CloseHandle error=" << last_error;
-      Application::instance()->view_event_handler()->RunCallback(
-          base::Bind(callback, static_cast<int>(last_error)));
+      Reject(deferred.reject, last_error);
       return;
     }
     file_handle_.release();
   }
   if (!running_)
     delete this;
-  Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(callback, 0));
+  Resolve(deferred.resolve, 0u);
 }
 
 void FileIoContext::Read(void* buffer, size_t num_read,
-                         const domapi::FileIoCallback& callback) {
+                         const domapi::FileIoDeferred& deferred) {
 if (running_) {
-    RunCallback(callback, 0, ERROR_BUSY);
+    Reject(deferred.reject, ERROR_BUSY);
     return;
   }
 
   running_ = true;
-  callback_ = callback;
+  deferred_ = deferred;
   DWORD read;
   auto const succeeded = ::ReadFile(file_handle_.get(), buffer, num_read,
                                     &read, &overlapped);
@@ -126,14 +121,14 @@ if (running_) {
 }
 
 void FileIoContext::Write(void* buffer, size_t num_write,
-                          const domapi::FileIoCallback& callback) {
+                          const domapi::FileIoDeferred& deferred) {
   if (running_) {
-    RunCallback(callback, 0, ERROR_BUSY);
+    Reject(deferred.reject, ERROR_BUSY);
     return;
   }
 
   running_ = true;
-  callback_ = callback;
+  deferred_ = deferred;
   DWORD written;
   auto const succeeded = ::WriteFile(file_handle_.get(), buffer, num_write,
                                      &written, &overlapped);

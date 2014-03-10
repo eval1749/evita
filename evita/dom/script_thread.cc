@@ -194,7 +194,7 @@ void ScriptThread::Start(base::MessageLoop* host_message_loop,
   }
 
 DEFINE_IO_DELEGATE_2(CloseFile, domapi::IoContextId,
-                     const domapi::CloseFileCallback&)
+                     const domapi::FileIoDeferred&)
 DEFINE_IO_DELEGATE_2(NewProcess, const base::string16&,
                      const domapi::NewProcessCallback&)
 DEFINE_IO_DELEGATE_3(OpenFile, const base::string16&,
@@ -203,9 +203,9 @@ DEFINE_IO_DELEGATE_3(OpenFile, const base::string16&,
 DEFINE_IO_DELEGATE_2(QueryFileStatus, const base::string16&,
                      const domapi::QueryFileStatusCallback&)
 DEFINE_IO_DELEGATE_4(ReadFile, domapi::IoContextId, void*, size_t,
-                     const domapi::FileIoCallback&)
+                     const domapi::FileIoDeferred&)
 DEFINE_IO_DELEGATE_4(WriteFile, domapi::IoContextId, void*, size_t,
-                     const domapi::FileIoCallback&)
+                     const domapi::FileIoDeferred&)
 
 // ViewDelegate
 #define DEFINE_VIEW_DELEGATE_1(name, type1) \

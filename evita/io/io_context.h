@@ -13,11 +13,11 @@ class IoContext {
   public: IoContext();
   public: virtual ~IoContext();
 
-  public: virtual void Close(const domapi::CloseFileCallback& callback) = 0;
+  public: virtual void Close(const domapi::FileIoDeferred& deferred) = 0;
   public: virtual void Read(void* buffer, size_t num_read,
-                            const domapi::FileIoCallback& callback) = 0;
+                            const domapi::FileIoDeferred& deferred) = 0;
   public: virtual void Write(void* buffer, size_t num_write,
-                            const domapi::FileIoCallback& callback) = 0;
+                            const domapi::FileIoDeferred& deferred) = 0;
 };
 
 }  // namespace io

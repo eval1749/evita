@@ -10,14 +10,12 @@
 
 namespace domapi {
 
-class IoContextId;
-
 class IoDelegate {
   protected: IoDelegate();
   public: virtual ~IoDelegate();
 
   public: virtual void CloseFile(IoContextId context_id,
-                                 const CloseFileCallback& callback) = 0;
+                                 const FileIoDeferred& deferred) = 0;
   public: virtual void NewProcess(const base::string16& command_line,
                                   const NewProcessCallback& callbacK) = 0;
   public: virtual void OpenFile(const base::string16& filename,
@@ -27,10 +25,10 @@ class IoDelegate {
       const QueryFileStatusCallback& callback) = 0;
   public: virtual void ReadFile(IoContextId context_id, void* buffer,
                                 size_t num_read,
-                                const FileIoCallback& callback) = 0;
+                                const FileIoDeferred& deferred) = 0;
   public: virtual void WriteFile(IoContextId context_id, void* buffer,
                                  size_t num_write,
-                                 const FileIoCallback& callback) = 0;
+                                 const FileIoDeferred& deferred) = 0;
 
   DISALLOW_COPY_AND_ASSIGN(IoDelegate);
 };

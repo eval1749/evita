@@ -45,7 +45,7 @@ TEST_F(OsProcessTest, OsProcess_read_failed) {
     "Os.Process.open('foo.js').then(function(x) { process = x });");
   EXPECT_SCRIPT_TRUE("process instanceof Os.Process");
 
-  mock_io_delegate()->SetFileIoCallbackData(0, 123);
+  mock_io_delegate()->SetFileIoDeferredData(0, 123);
   EXPECT_SCRIPT_VALID(
     "var reason;"
     "var arrayBuffer = new ArrayBuffer(10);"
@@ -63,7 +63,7 @@ TEST_F(OsProcessTest, OsProcess_read_succeeded) {
     "Os.Process.open('foo.js').then(function(x) { process = x });");
   EXPECT_SCRIPT_TRUE("process instanceof Os.Process");
 
-  mock_io_delegate()->SetFileIoCallbackData(123, 0);
+  mock_io_delegate()->SetFileIoDeferredData(123, 0);
   EXPECT_SCRIPT_VALID(
     "var transferred;"
     "var arrayBuffer = new ArrayBuffer(10);"
@@ -80,7 +80,7 @@ TEST_F(OsProcessTest, OsProcess_write_failed) {
     "Os.Process.open('foo.js').then(function(x) { process = x });");
   EXPECT_SCRIPT_TRUE("process instanceof Os.Process");
 
-  mock_io_delegate()->SetFileIoCallbackData(0, 123);
+  mock_io_delegate()->SetFileIoDeferredData(0, 123);
   EXPECT_SCRIPT_VALID(
     "var reason;"
     "var arrayBuffer = new ArrayBuffer(10);"
@@ -98,7 +98,7 @@ TEST_F(OsProcessTest, OsProcess_write_succeeded) {
     "Os.Process.open('foo.js').then(function(x) { process = x });");
   EXPECT_SCRIPT_TRUE("process instanceof Os.Process");
 
-  mock_io_delegate()->SetFileIoCallbackData(123, 0);
+  mock_io_delegate()->SetFileIoDeferredData(123, 0);
   EXPECT_SCRIPT_VALID(
     "var transferred;"
     "var arrayBuffer = new ArrayBuffer(10);"

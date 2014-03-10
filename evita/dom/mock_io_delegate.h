@@ -5,6 +5,7 @@
 #if !defined(INCLUDE_evita_dom_mock_io_delegate_h)
 #define INCLUDE_evita_dom_mock_io_delegate_h
 
+#include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_delegate.h"
 #pragma warning(push)
 #pragma warning(disable: 4365 4628)
@@ -22,7 +23,7 @@ class MockIoDelegate : public domapi::IoDelegate {
   public: MockIoDelegate();
   public: virtual ~MockIoDelegate();
 
-  public: void SetFileIoCallbackData(int num_transferred, int error_code);
+  public: void SetFileIoDeferredData(int num_transferred, int error_code);
   public: void SetOpenFileCallbackData(domapi::IoContextId context_id,
                                        int error_code);
   public: void SetQueryFileStatusCallbackData(
@@ -30,7 +31,7 @@ class MockIoDelegate : public domapi::IoDelegate {
 
   // domapi::IoDelegate
   MOCK_METHOD2(CloseFile, void(domapi::IoContextId,
-                               const domapi::CloseFileCallback&));
+                               const domapi::FileIoDeferred& deferred));
   public: virtual void NewProcess(const base::string16&,
       const domapi::NewProcessCallback&) override;
   public: virtual void OpenFile(const base::string16&, const base::string16&,
@@ -39,10 +40,10 @@ class MockIoDelegate : public domapi::IoDelegate {
       const domapi::QueryFileStatusCallback& callback) override;
   public: virtual void ReadFile(domapi::IoContextId context_id, void* buffer,
                         size_t num_read,
-                        const domapi::FileIoCallback& callback) override;
+                        const domapi::FileIoDeferred& deferred) override;
   public: virtual void WriteFile(domapi::IoContextId context_id, void* buffer,
                          size_t num_write,
-                         const domapi::FileIoCallback& callback) override;
+                         const domapi::FileIoDeferred& deferred) override;
 };
 
 }  // namespace dom

@@ -6,6 +6,7 @@
 #define INCLUDE_evita_dom_os_abstract_file_h
 
 #include "evita/dom/public/io_context_id.h"
+#include "evita/dom/public/io_error.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace gin {
@@ -23,7 +24,7 @@ class AbstractFile : public v8_glue::Scriptable<AbstractFile> {
   protected: AbstractFile(domapi::IoContextId context_id);
   protected: virtual ~AbstractFile();
 
-  public: v8::Handle<v8::Object> Close();
+  public: v8::Handle<v8::Promise> Close();
   public: v8::Handle<v8::Object> Read(
       const gin::ArrayBufferView& array_buffer_view);
   public: v8::Handle<v8::Object> Write(
@@ -46,6 +47,12 @@ template<>
 struct Converter<dom::os::FileError> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
                                     const dom::os::FileError& error);
+};
+
+template<>
+struct Converter<domapi::IoError> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+                                    const domapi::IoError& error);
 };
 }  // namespace gin
 

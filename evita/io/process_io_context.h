@@ -30,23 +30,23 @@ class ProcessIoContext : public IoContext {
                   const domapi::NewProcessCallback& callback);
   public: ~ProcessIoContext();
 
-  private: void CloseAndWaitProcess(const domapi::CloseFileCallback& callback);
+  private: void CloseAndWaitProcess(const domapi::FileIoDeferred& deferred);
   private: DWORD CloseProcess();
   private: void ReadFromProcess(void* buffer, size_t num_read,
-                                const domapi::FileIoCallback& callback);
+                                const domapi::FileIoDeferred& deferred);
   private: void StartProcess(domapi::IoContextId context_id,
                              const base::string16& command_line,
                              const domapi::NewProcessCallback& callback);
   private: void WriteToProcess(void* buffer, size_t num_read,
-                               const domapi::FileIoCallback& callback);
+                               const domapi::FileIoDeferred& deferred);
 
   // io::IoContext
   private: virtual void Close(
-      const domapi::CloseFileCallback& callback) override;
+      const domapi::FileIoDeferred& deferred) override;
   private: virtual void Read(void* buffer, size_t num_read,
-                             const domapi::FileIoCallback& callback) override;
+                             const domapi::FileIoDeferred& deferred) override;
   private: virtual void Write(void* buffer, size_t num_write,
-                             const domapi::FileIoCallback& callback) override;
+                             const domapi::FileIoDeferred& deferred) override;
 
   DISALLOW_COPY_AND_ASSIGN(ProcessIoContext);
 };

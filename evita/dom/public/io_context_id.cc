@@ -41,6 +41,28 @@ IoContextId IoContextId::New() {
   return IoContextId(static_value);
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// FileId
+//
+FileId::FileId(IoContextId context_id)
+    : IoContextId(context_id) {
+}
+
+FileId::~FileId() {
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// ProcessId
+//
+ProcessId::ProcessId(IoContextId context_id)
+    : IoContextId(context_id) {
+}
+
+ProcessId::~ProcessId() {
+}
+
 }  // namespace domapi
 
 namespace std {

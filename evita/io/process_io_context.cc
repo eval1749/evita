@@ -20,24 +20,20 @@
 
 namespace io {
 
-namespace {
-void RunCallback(const domapi::NewProcessCallback& callback,
-                 DWORD last_error) {
-    Application::instance()->view_event_handler()->RunCallback(
-        base::Bind(callback, domapi::IoContextId(),
-                   static_cast<int>(last_error)));
+void Resolve(const base::Callback<void(domapi::ProcessId)>& resolve,
+             domapi::ProcessId context_id) {
+  Application::instance()->view_event_handler()->RunCallback(
+      base::Bind(resolve , context_id));
 }
-
-}  // namespace
 
 ProcessIoContext::ProcessIoContext(domapi::IoContextId context_id,
                  const base::string16& command_line,
-                 const domapi::NewProcessCallback& callback)
+                 const domapi::NewProcessDeferred& deferred)
     : gateway_thread_(new base::Thread("process")) {
   gateway_thread_->Start();
   gateway_thread_->message_loop()->PostTask(FROM_HERE,
     base::Bind(&ProcessIoContext::StartProcess,
-               base::Unretained(this), context_id, command_line, callback));
+               base::Unretained(this), context_id, command_line, deferred));
 }
 
 ProcessIoContext::~ProcessIoContext() {
@@ -103,7 +99,7 @@ void ProcessIoContext::ReadFromProcess(
 
 void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
     const base::string16& command_line,
-    const domapi::NewProcessCallback& callback) {
+    const domapi::NewProcessDeferred& deferred) {
   SECURITY_ATTRIBUTES security_attributes = {0};
   security_attributes.nLength = sizeof(security_attributes);
   security_attributes.bInheritHandle = true;
@@ -113,13 +109,13 @@ void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
                     &security_attributes, 0)) {
     auto const last_error = ::GetLastError();
     DVLOG_WIN32_ERROR(0, "CreatePipe", last_error);
-    RunCallback(callback, last_error);
+    Reject(deferred.reject, last_error);
     return;
   }
   if (!::SetHandleInformation(stdin_write.get(), HANDLE_FLAG_INHERIT, 0)) {
     auto const last_error = ::GetLastError();
     DVLOG_WIN32_ERROR(0, "SetHandleInformation", last_error);
-    RunCallback(callback, last_error);
+    Reject(deferred.reject, last_error);
     return;
   }
   common::win::scoped_handle stdout_read;
@@ -128,13 +124,13 @@ void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
                     &security_attributes, 0)) {
     auto const last_error = ::GetLastError();
     DVLOG_WIN32_ERROR(0, "CreatePipe", last_error);
-    RunCallback(callback, last_error);
+    Reject(deferred.reject, last_error);
     return;
   }
   if (!::SetHandleInformation(stdout_read.get(), HANDLE_FLAG_INHERIT, 0)) {
     auto const last_error = ::GetLastError();
     DVLOG_WIN32_ERROR(0, "SetHandleInformation", last_error);
-    RunCallback(callback, last_error);
+    Reject(deferred.reject, last_error);
     return;
   }
 
@@ -164,14 +160,13 @@ void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
   if (!succeeded) {
     auto const last_error = ::GetLastError();
     DVLOG_WIN32_ERROR(0, "CreateProcessW", last_error);
-    RunCallback(callback, last_error);
+    Reject(deferred.reject, last_error);
     return;
   }
   ::ResumeThread(process_info.hThread);
   process_.reset(process_info.hProcess);
   ::CloseHandle(process_info.hThread);
-  Application::instance()->view_event_handler()->RunCallback(
-    base::Bind(callback, context_id, 0));
+  Resolve(deferred.resolve, domapi::ProcessId(context_id));
   stdin_read.release();
   stdin_write_.reset(stdin_write.release());
   stdout_write.release();

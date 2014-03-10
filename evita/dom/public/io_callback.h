@@ -10,9 +10,11 @@
 
 namespace domapi {
 
+template<typename ResolveType, typename RejectType> struct Deferred;
+class FileId;
 class IoContextId;
 struct IoError;
-template<typename ResolveType, typename RejectType> struct Deferred;
+class ProcessId;
 
 struct QueryFileStatusCallbackData {
   int error_code;
@@ -24,10 +26,8 @@ struct QueryFileStatusCallbackData {
 };
 
 typedef Deferred<int, IoError> FileIoDeferred;
-typedef base::Callback<void(IoContextId process_id, int error_code)>
-    NewProcessCallback;
-typedef base::Callback<void(IoContextId context_id, int error_code)>
-    OpenFileCallback;
+typedef Deferred<ProcessId, IoError> NewProcessDeferred;
+typedef Deferred<FileId, IoError> OpenFileDeferred;
 typedef base::Callback<void(const domapi::QueryFileStatusCallbackData&)>
     QueryFileStatusCallback;
 

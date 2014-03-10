@@ -20,7 +20,7 @@ class OsProcessTest : public dom::AbstractDomTest {
 };
 
 TEST_F(OsProcessTest, OsProcess_open_failed) {
-  mock_io_delegate()->SetOpenFileCallbackData(domapi::IoContextId(), 123);
+  mock_io_delegate()->SetOpenFileDeferredData(domapi::IoContextId(), 123);
   EXPECT_SCRIPT_VALID(
     "var reason;"
     "Os.Process.open('foo.js').catch(function(x) { reason = x; });");
@@ -29,7 +29,7 @@ TEST_F(OsProcessTest, OsProcess_open_failed) {
 }
 
 TEST_F(OsProcessTest, OsProcess_open_succeeded) {
-  mock_io_delegate()->SetOpenFileCallbackData(
+  mock_io_delegate()->SetOpenFileDeferredData(
       domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var process;"
@@ -38,7 +38,7 @@ TEST_F(OsProcessTest, OsProcess_open_succeeded) {
 }
 
 TEST_F(OsProcessTest, OsProcess_read_failed) {
-  mock_io_delegate()->SetOpenFileCallbackData(
+  mock_io_delegate()->SetOpenFileDeferredData(
       domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var process;"
@@ -56,7 +56,7 @@ TEST_F(OsProcessTest, OsProcess_read_failed) {
 }
 
 TEST_F(OsProcessTest, OsProcess_read_succeeded) {
-  mock_io_delegate()->SetOpenFileCallbackData(
+  mock_io_delegate()->SetOpenFileDeferredData(
       domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var process;"
@@ -73,7 +73,7 @@ TEST_F(OsProcessTest, OsProcess_read_succeeded) {
 }
 
 TEST_F(OsProcessTest, OsProcess_write_failed) {
-  mock_io_delegate()->SetOpenFileCallbackData(
+  mock_io_delegate()->SetOpenFileDeferredData(
       domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var process;"
@@ -91,7 +91,7 @@ TEST_F(OsProcessTest, OsProcess_write_failed) {
 }
 
 TEST_F(OsProcessTest, OsProcess_write_succeeded) {
-  mock_io_delegate()->SetOpenFileCallbackData(
+  mock_io_delegate()->SetOpenFileDeferredData(
       domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var process;"

@@ -26,7 +26,7 @@ class FileIoContext : private base::MessagePumpForIO::IOContext,
 
   public: FileIoContext(const base::string16& file_name,
                         const base::string16& mode,
-                        const domapi::OpenFileCallback& callback);
+                        const domapi::OpenFileDeferred& deferred);
   public: virtual ~FileIoContext();
 
   public: bool is_valid() const { return file_handle_.is_valid(); }

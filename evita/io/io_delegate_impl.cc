@@ -80,6 +80,12 @@ QueryFileStatusHandler::~QueryFileStatusHandler() {
   }
 }
 
+void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
+             domapi::FileId context_id) {
+  Application::instance()->view_event_handler()->RunCallback(
+      base::Bind(resolve , context_id));
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -104,23 +110,22 @@ void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
 }
 
 void IoDelegateImpl::NewProcess(const base::string16& command_line,
-                                const domapi::NewProcessCallback& callback) {
+                                const domapi::NewProcessDeferred& deferred) {
   auto const process_id = domapi::IoContextId::New();
   auto const process = new ProcessIoContext(process_id, command_line,
-                                            callback);
+                                            deferred);
   context_map_[process_id] = process;
 }
 
 void IoDelegateImpl::OpenFile(const base::string16& file_name,
                               const base::string16& mode,
-                              const domapi::OpenFileCallback& callback) {
-  auto file = std::make_unique<FileIoContext>(file_name, mode, callback);
+                              const domapi::OpenFileDeferred& deferred) {
+  auto file = std::make_unique<FileIoContext>(file_name, mode, deferred);
   if (!file->is_valid())
     return;
   auto const file_id = domapi::IoContextId::New();
   context_map_[file_id] = file.release();
-  Application::instance()->view_event_handler()->RunCallback(
-        base::Bind(callback, file_id, 0));
+  Resolve(deferred.resolve, domapi::FileId(file_id));
 }
 
 void IoDelegateImpl::QueryFileStatus(const base::string16& file_name,

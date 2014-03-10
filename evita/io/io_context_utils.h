@@ -6,6 +6,7 @@
 #define INCLUDE_evita_io_io_context_utils_h
 
 #include "base/callback_forward.h"
+#include "evita/dom/public/io_context_id.h"
 #include "evita/dom/public/io_error.h"
 
 namespace io {

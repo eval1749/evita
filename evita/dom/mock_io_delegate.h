@@ -24,7 +24,7 @@ class MockIoDelegate : public domapi::IoDelegate {
   public: virtual ~MockIoDelegate();
 
   public: void SetFileIoDeferredData(int num_transferred, int error_code);
-  public: void SetOpenFileCallbackData(domapi::IoContextId context_id,
+  public: void SetOpenFileDeferredData(domapi::IoContextId context_id,
                                        int error_code);
   public: void SetQueryFileStatusCallbackData(
       const domapi::QueryFileStatusCallbackData& data);
@@ -33,9 +33,9 @@ class MockIoDelegate : public domapi::IoDelegate {
   MOCK_METHOD2(CloseFile, void(domapi::IoContextId,
                                const domapi::FileIoDeferred& deferred));
   public: virtual void NewProcess(const base::string16&,
-      const domapi::NewProcessCallback&) override;
+      const domapi::NewProcessDeferred&) override;
   public: virtual void OpenFile(const base::string16&, const base::string16&,
-                        const domapi::OpenFileCallback&) override;
+                        const domapi::OpenFileDeferred&) override;
   private: virtual void QueryFileStatus(const base::string16& filename,
       const domapi::QueryFileStatusCallback& callback) override;
   public: virtual void ReadFile(domapi::IoContextId context_id, void* buffer,

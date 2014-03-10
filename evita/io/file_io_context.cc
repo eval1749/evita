@@ -37,7 +37,7 @@ struct CreateFileParams {
 
 HANDLE OpenFile(const base::string16& file_name,
                 const base::string16& mode,
-                const domapi::OpenFileCallback& callback) {
+                const domapi::OpenFileDeferred& deferred) {
   CreateFileParams params(mode);
   common::win::scoped_handle handle = ::CreateFileW(file_name.c_str(),
       params.access, params.share_mode, nullptr, params.creation,
@@ -45,9 +45,7 @@ HANDLE OpenFile(const base::string16& file_name,
   if (!handle) {
     auto const last_error = ::GetLastError();
     DVLOG(0) << "CreateFileW " << file_name << " error=" << last_error;
-    Application::instance()->view_event_handler()->RunCallback(
-        base::Bind(callback, domapi::IoContextId(),
-                   static_cast<int>(last_error)));
+    Reject(deferred.reject, last_error);
     return INVALID_HANDLE_VALUE;
   }
   return handle.release();
@@ -55,10 +53,16 @@ HANDLE OpenFile(const base::string16& file_name,
 
 }  // namespace
 
+void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
+             domapi::FileId context_id) {
+  Application::instance()->view_event_handler()->RunCallback(
+      base::Bind(resolve , context_id));
+}
+
 FileIoContext::FileIoContext(const base::string16& file_name,
                              const base::string16& mode,
-                             const domapi::OpenFileCallback& callback)
-    : file_handle_(OpenFile(file_name, mode, callback)),
+                             const domapi::OpenFileDeferred& deferred)
+    : file_handle_(OpenFile(file_name, mode, deferred)),
       running_(false) {
   if (!file_handle_.is_valid())
     return;

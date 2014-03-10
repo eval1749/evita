@@ -27,7 +27,7 @@ class ProcessIoContext : public IoContext {
 
   public: ProcessIoContext(domapi::IoContextId context_id,
                   const base::string16& command_line,
-                  const domapi::NewProcessCallback& callback);
+                  const domapi::NewProcessDeferred& deferred);
   public: ~ProcessIoContext();
 
   private: void CloseAndWaitProcess(const domapi::FileIoDeferred& deferred);
@@ -36,7 +36,7 @@ class ProcessIoContext : public IoContext {
                                 const domapi::FileIoDeferred& deferred);
   private: void StartProcess(domapi::IoContextId context_id,
                              const base::string16& command_line,
-                             const domapi::NewProcessCallback& callback);
+                             const domapi::NewProcessDeferred& deferred);
   private: void WriteToProcess(void* buffer, size_t num_read,
                                const domapi::FileIoDeferred& deferred);
 

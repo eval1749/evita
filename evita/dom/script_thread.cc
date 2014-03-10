@@ -196,10 +196,10 @@ void ScriptThread::Start(base::MessageLoop* host_message_loop,
 DEFINE_IO_DELEGATE_2(CloseFile, domapi::IoContextId,
                      const domapi::FileIoDeferred&)
 DEFINE_IO_DELEGATE_2(NewProcess, const base::string16&,
-                     const domapi::NewProcessCallback&)
+                     const domapi::NewProcessDeferred&)
 DEFINE_IO_DELEGATE_3(OpenFile, const base::string16&,
                      const base::string16&,
-                     const domapi::OpenFileCallback&)
+                     const domapi::OpenFileDeferred&)
 DEFINE_IO_DELEGATE_2(QueryFileStatus, const base::string16&,
                      const domapi::QueryFileStatusCallback&)
 DEFINE_IO_DELEGATE_4(ReadFile, domapi::IoContextId, void*, size_t,

@@ -27,6 +27,16 @@ class IoContextId {
   public: static IoContextId New();
 };
 
+class FileId : public IoContextId {
+  public: explicit FileId(IoContextId context_id);
+  public: ~FileId();
+};
+
+class ProcessId : public IoContextId{
+  public: explicit ProcessId(IoContextId context_id);
+  public: ~ProcessId();
+};
+
 }  // namespace domapi
 
 namespace std {

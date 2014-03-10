@@ -7,6 +7,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/strings/string16.h"
 #include "evita/dom/converter.h"
+#include "evita/dom/promise_deferred.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/script_controller.h"
 #include "evita/v8_glue/converter.h"
@@ -14,11 +15,18 @@
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/promise_callback.h"
 #include "evita/v8_glue/runner.h"
-#include "evita/v8_glue/script_callback.h"
 #include "gin/array_buffer.h"
 #include "v8_strings.h"
 
 namespace gin {
+template<>
+struct Converter<domapi::FileId> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+      domapi::FileId context_id) {
+    return gin::ConvertToV8(isolate, new dom::os::File(context_id));
+  }
+};
+
 template<>
 struct Converter<domapi::QueryFileStatusCallbackData> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
@@ -90,27 +98,6 @@ class FileClass :
 
 //////////////////////////////////////////////////////////////////////
 //
-// OpenFileCallback
-//
-class OpenFileCallback : public v8_glue::PromiseCallback {
-  public: OpenFileCallback(v8_glue::Runner* runner)
-    : v8_glue::PromiseCallback(runner) {
-  }
-  public: ~OpenFileCallback() = default;
-
-  public: void Run(domapi::IoContextId context_id, int error_code) {
-    if (error_code) {
-      Reject(FileError(error_code));
-      return;
-    }
-    Resolve(new File(context_id));
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(OpenFileCallback);
-};
-
-//////////////////////////////////////////////////////////////////////
-//
 // QueryFileStatusCallback
 //
 class QueryFileStatusCallback : public v8_glue::PromiseCallback {
@@ -131,16 +118,12 @@ class QueryFileStatusCallback : public v8_glue::PromiseCallback {
   DISALLOW_COPY_AND_ASSIGN(QueryFileStatusCallback);
 };
 
-v8::Handle<v8::Object> FileClass::OpenFile(const base::string16& file_name,
+v8::Handle<v8::Promise> FileClass::OpenFile(const base::string16& file_name,
     v8_glue::Optional<base::string16> opt_mode) {
-  auto const runner = ScriptController::instance()->runner();
-  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
-  auto const file_io_callback = make_scoped_refptr(
-      new OpenFileCallback(runner));
-  ScriptController::instance()->io_delegate()->OpenFile(file_name,
-      opt_mode.is_supplied ? opt_mode.value : base::string16(),
-      base::Bind(&OpenFileCallback::Run, file_io_callback));
-  return runner_scope.Escape(file_io_callback->GetPromise(runner->isolate()));
+  return PromiseDeferred::Call(base::Bind(
+      &domapi::IoDelegate::OpenFile,
+      base::Unretained(ScriptController::instance()->io_delegate()),
+      file_name, opt_mode.is_supplied ? opt_mode.value : base::string16()));
 }
 
 v8::Handle<v8::Object> FileClass::QueryFileStatus(

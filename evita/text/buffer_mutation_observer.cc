@@ -12,6 +12,9 @@ BufferMutationObserver::BufferMutationObserver() {
 BufferMutationObserver::~BufferMutationObserver() {
 }
 
+void BufferMutationObserver::DidChangeStyle(Posn, size_t) {
+}
+
 void BufferMutationObserver::DidDeleteAt(Posn, size_t) {
 }
 

@@ -58,9 +58,17 @@ void Buffer::SetStyle(Posn lStart, Posn lEnd, const css::Style& style) {
     lStart = 0;
   if (lEnd > GetEnd())
     lEnd = GetEnd();
-  if (lStart >= lEnd)
+  if (lStart == lEnd)
     return;
+  DCHECK_LT(lStart, lEnd);
+  SetStyleInternal(lStart, lEnd, style);
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
+    DidChangeStyle(lStart, static_cast<size_t>(lEnd - lStart)));
+}
 
+void Buffer::SetStyleInternal(Posn lStart, Posn lEnd,
+                              const css::Style& style) {
+  DCHECK_LT(lStart, lEnd);
   // To improve performance, we don't check contents of |style|.
   // This may be enough for syntax coloring.
   m_nModfTick += 1;

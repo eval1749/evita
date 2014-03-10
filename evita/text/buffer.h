@@ -172,6 +172,7 @@ class Buffer : public BufferCore, public FileFeatures {
   }
   public: bool SetReadOnly(bool f) { return m_fReadOnly = f; }
   public: void SetStyle(Posn, Posn, const css::Style& style_values);
+  private: void SetStyleInternal(Posn, Posn, const css::Style& style_values);
   public: void StartUndoGroup(const base::string16& name);
 
   // [T]

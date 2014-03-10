@@ -13,6 +13,7 @@ class BufferMutationObserver {
   public: BufferMutationObserver();
   public: virtual ~BufferMutationObserver();
 
+  public: virtual void DidChangeStyle(Posn offset, size_t length);
   public: virtual void DidDeleteAt(Posn offset, size_t length);
   public: virtual void DidInsertAt(Posn offset, size_t length);
   public: virtual void DidInsertBefore(Posn offset, size_t length);

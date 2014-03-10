@@ -109,14 +109,6 @@ void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
   context_map_.erase(it);
 }
 
-void IoDelegateImpl::NewProcess(const base::string16& command_line,
-                                const domapi::NewProcessDeferred& deferred) {
-  auto const process_id = domapi::IoContextId::New();
-  auto const process = new ProcessIoContext(process_id, command_line,
-                                            deferred);
-  context_map_[process_id] = process;
-}
-
 void IoDelegateImpl::OpenFile(const base::string16& file_name,
                               const base::string16& mode,
                               const domapi::OpenFileDeferred& deferred) {
@@ -126,6 +118,14 @@ void IoDelegateImpl::OpenFile(const base::string16& file_name,
   auto const file_id = domapi::IoContextId::New();
   context_map_[file_id] = file.release();
   Resolve(deferred.resolve, domapi::FileId(file_id));
+}
+
+void IoDelegateImpl::OpenProcess(const base::string16& command_line,
+                                const domapi::OpenProcessDeferred& deferred) {
+  auto const process_id = domapi::IoContextId::New();
+  auto const process = new ProcessIoContext(process_id, command_line,
+                                            deferred);
+  context_map_[process_id] = process;
 }
 
 void IoDelegateImpl::QueryFileStatus(const base::string16& file_name,

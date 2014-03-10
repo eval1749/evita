@@ -26,8 +26,8 @@ struct QueryFileStatusCallbackData {
 };
 
 typedef Deferred<int, IoError> FileIoDeferred;
-typedef Deferred<ProcessId, IoError> NewProcessDeferred;
 typedef Deferred<FileId, IoError> OpenFileDeferred;
+typedef Deferred<ProcessId, IoError> OpenProcessDeferred;
 typedef base::Callback<void(const domapi::QueryFileStatusCallbackData&)>
     QueryFileStatusCallback;
 

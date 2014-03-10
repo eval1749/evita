@@ -23,11 +23,11 @@ class IoDelegateImpl : public domapi::IoDelegate {
   // domapi::IoDelegate
   private: virtual void CloseFile(domapi::IoContextId context_id,
         const domapi::FileIoDeferred& deferred) override;
-  private: virtual void NewProcess(const base::string16& command_line,
-        const domapi::NewProcessDeferred& deferred) override;
   private: virtual void OpenFile(const base::string16& filename,
       const base::string16& mode,
       const domapi::OpenFileDeferred& deferred) override;
+  private: virtual void OpenProcess(const base::string16& command_line,
+        const domapi::OpenProcessDeferred& deferred) override;
   private: virtual void QueryFileStatus(const base::string16& filename,
       const domapi::QueryFileStatusCallback& callback) override;
   private: virtual void ReadFile(domapi::IoContextId context_id, void* buffer,

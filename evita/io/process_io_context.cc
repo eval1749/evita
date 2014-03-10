@@ -28,7 +28,7 @@ void Resolve(const base::Callback<void(domapi::ProcessId)>& resolve,
 
 ProcessIoContext::ProcessIoContext(domapi::IoContextId context_id,
                  const base::string16& command_line,
-                 const domapi::NewProcessDeferred& deferred)
+                 const domapi::OpenProcessDeferred& deferred)
     : gateway_thread_(new base::Thread("process")) {
   gateway_thread_->Start();
   gateway_thread_->message_loop()->PostTask(FROM_HERE,
@@ -99,7 +99,7 @@ void ProcessIoContext::ReadFromProcess(
 
 void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
     const base::string16& command_line,
-    const domapi::NewProcessDeferred& deferred) {
+    const domapi::OpenProcessDeferred& deferred) {
   SECURITY_ATTRIBUTES security_attributes = {0};
   security_attributes.nLength = sizeof(security_attributes);
   security_attributes.bInheritHandle = true;

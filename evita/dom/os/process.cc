@@ -70,7 +70,7 @@ class ProcessClass :
 v8::Handle<v8::Promise> ProcessClass::OpenProcess(
     const base::string16& command_line) {
   return PromiseDeferred::Call(base::Bind(
-      &domapi::IoDelegate::NewProcess,
+      &domapi::IoDelegate::OpenProcess,
       base::Unretained(ScriptController::instance()->io_delegate()),
       command_line));
 }

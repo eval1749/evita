@@ -25,11 +25,17 @@ namespace text {
 //
 // Interval
 //
+Interval::Interval(const Interval& other)
+    : m_lEnd(other.m_lEnd),
+      m_lStart(other.m_lStart),
+      m_nZ(other.m_nZ),
+      m_Style(other.m_Style) {
+}
+
 Interval::Interval(Posn lStart, Posn lEnd, int nZ)
     : m_lEnd(lEnd),
       m_lStart(lStart),
-      m_nZ(nZ),
-      m_Style(*css::Style::Default()) {
+      m_nZ(nZ) {
 }
 
 Interval::~Interval() {
@@ -61,116 +67,38 @@ void Buffer::SetStyle(Posn lStart, Posn lEnd, const css::Style& style) {
   if (lStart == lEnd)
     return;
   DCHECK_LT(lStart, lEnd);
+  // To improve performance, we don't check contents of |style|.
+  // This may be enough for syntax coloring.
+  m_nModfTick += 1;
   SetStyleInternal(lStart, lEnd, style);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
     DidChangeStyle(lStart, static_cast<size_t>(lEnd - lStart)));
 }
 
-void Buffer::SetStyleInternal(Posn lStart, Posn lEnd,
-                              const css::Style& style) {
-  DCHECK_LT(lStart, lEnd);
-  // To improve performance, we don't check contents of |style|.
-  // This may be enough for syntax coloring.
-  m_nModfTick += 1;
-
-  // Get interval pHead containing lStart.
-  auto const pHead = GetIntervalAt(lStart);
-
-  auto const lHeadEnd = pHead->GetEnd();
-  auto const lHeadStart = pHead->GetStart();
-
-  if (lHeadStart == lStart && lHeadEnd == lEnd) {
-    // pHead: ---s......e---
-    // Range: ---s......e---
-    pHead->SetStyle(style);
-    tryMergeInterval(pHead);
-    return;
-  }
-
-  if (lHeadEnd < lEnd) {
-    // pHead: --s...e----
-    // Range: ----s.....e----
-    SetStyle(lStart, lHeadEnd, style);
-    SetStyle(lHeadEnd, lEnd, style);
-    return;
-  }
-
-  // New style is compatibile with existing one.
-  Interval oIntv(lStart, lEnd);
-  oIntv.SetStyle(style);
-  if (oIntv.CanMerge(pHead))
-    return;
-
-  if (lHeadStart == lStart) {
-    // pHead: ---s........e---
-    // pTail: --------s...e---
-    // Range: ---s....e-------
-    pHead->m_lStart = lEnd;
-    if (auto const pPrev = pHead->GetPrev()) {
-      if (oIntv.CanMerge(pPrev)) {
-        pPrev->m_lEnd = lEnd;
-        return;
-      }
+void Buffer::SetStyleInternal(Posn start, Posn end, const css::Style& style) {
+  DCHECK_LT(start, end);
+  auto offset = start;
+  while (offset < end) {
+    auto const interval = GetIntervalAt(offset);
+    DCHECK_LE(interval->GetStart(), offset);
+    auto const target = interval->GetStart() == offset ? interval :
+        intervals_->SplitAt(interval, offset);
+    if (target->GetEnd() == end) {
+      target->SetStyle(style);
+      tryMergeInterval(target);
+      break;
     }
 
-    auto const pIntv = new Interval(lStart, lEnd);
-    pIntv->SetStyle(style);
-
-    intervals_->InsertBefore(pIntv, pHead);
-
-    DCHECK_EQ(pHead->GetPrev(), pIntv);
-    DCHECK_EQ(pIntv->GetNext(), pHead);
-    #if DEBUG_INTERVAL
-      DCHECK_EQ(pIntv, GetIntervalAt(pIntv->GetStart()));
-    #endif
-    return;
-  }
-
-  if (lHeadEnd == lEnd) {
-    // pHead: ---s........e---
-    // Range: -------s....e---
-    pHead->m_lEnd = lStart;
-
-    if (auto const pNext = pHead->GetNext()) {
-      if (oIntv.CanMerge(pNext)) {
-        pNext->m_lStart = lStart;
-        return;
-      }
+    if (target->GetEnd() > end) {
+      intervals_->SplitAt(target, end);
+      target->SetStyle(style);
+      tryMergeInterval(target);
+      break;
     }
 
-    auto const pIntv = new Interval(lStart, lEnd);
-    pIntv->SetStyle(style);
-    intervals_->InsertAfter(pIntv, pHead);
-    DCHECK_EQ(pHead->GetNext(), pIntv);
-    DCHECK_EQ(pIntv->GetPrev(), pHead);
-    #if DEBUG_INTERVAL
-      DCHECK_EQ(pIntv, GetIntervalAt(pIntv->GetStart()));
-    #endif
-    return;
+    target->SetStyle(style);
+    offset = tryMergeInterval(target)->GetEnd();
   }
-
-  // pHead: ---s...........e---
-  // pTail: ----------s....e---
-  // Range: -----s....e--------
-  pHead->m_lEnd = lStart;
-
-  auto const pTail = new Interval(lEnd, lHeadEnd);
-  pTail->SetStyle(pHead->GetStyle());
-  intervals_->InsertAfter(pTail, pHead);
-  DCHECK_EQ(pHead->GetNext(), pTail);
-  DCHECK_EQ(pTail->GetPrev(), pHead);
-  #if DEBUG_INTERVAL
-    DCHECK_EQ(pTail, GetIntervalAt(pTail->GetStart()));
-  #endif
-
-  auto const pIntv = new Interval(lStart, lEnd);
-  pIntv->SetStyle(style);
-  intervals_->InsertAfter(pIntv, pHead);
-  DCHECK_EQ(pHead->GetNext(), pIntv);
-  DCHECK_EQ(pIntv->GetPrev(), pHead);
-  #if DEBUG_INTERVAL
-    DCHECK_EQ(pIntv, GetIntervalAt(pIntv->GetStart()));
-  #endif
 }
 
 Interval* Buffer::tryMergeInterval(Interval* pIntv) {

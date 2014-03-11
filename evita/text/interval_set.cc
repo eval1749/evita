@@ -51,8 +51,18 @@ void IntervalSet::InsertBefore(Interval* interval, Interval* ref) {
 }
 
 void IntervalSet::RemoveInterval(Interval* interval) {
-    list_.Delete(interval);
-    tree_.Delete(interval);
+  list_.Delete(interval);
+  tree_.Delete(interval);
+}
+
+Interval* IntervalSet::SplitAt(Interval* interval, Posn offset) {
+  DCHECK_GT(offset, interval->GetStart());
+  DCHECK_LT(offset, interval->GetEnd());
+  auto const new_interval = new Interval(*interval);
+  interval->m_lEnd = offset;
+  new_interval->m_lStart = offset;
+  InsertAfter(new_interval, interval);
+  return new_interval;
 }
 
 // BufferMutationObserver

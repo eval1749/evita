@@ -29,6 +29,8 @@ class IntervalSet : public BufferMutationObserver {
   public: void InsertAfter(Interval* interval, Interval* ref_interval);
   public: void InsertBefore(Interval* interval, Interval* ref_interval);
   public: void RemoveInterval(Interval* interval);
+  // Split |interval| at |offset| and return new interval starts at |offset|.
+  public: Interval* SplitAt(Interval* interval, Posn offset);
 
   // BufferMutationObserver
   private: virtual void DidDeleteAt(Posn offset, size_t length) override;

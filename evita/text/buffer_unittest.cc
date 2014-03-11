@@ -85,4 +85,21 @@ TEST_F(BufferTest, InsertBefore) {
     "The range at insertion position should be push back.";
 }
 
+TEST_F(BufferTest, SetStyle) {
+  buffer()->InsertBefore(0, L"foo bar baz");
+
+  // Set all text font size to 30.
+  css::Style style_font_size_30;
+  style_font_size_30.set_font_size(30);
+  buffer()->SetStyle(0, buffer()->GetEnd(), style_font_size_30);
+
+  // Color "bar" to red.
+  css::Style style_color_red;
+  style_color_red.set_color(css::Color(0xCC, 0, 0));
+  buffer()->SetStyle(4, 7, style_color_red);
+
+  EXPECT_EQ(30, buffer()->GetStyleAt(4).font_size()) <<
+      "Set color doesn't affect font size.";
+}
+
 }  // namespace

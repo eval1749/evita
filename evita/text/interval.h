@@ -23,6 +23,7 @@ class Interval : public BinaryTree<Interval>::NodeBase,
   private: int m_nZ;
   private: css::Style m_Style;
 
+  public: Interval(const Interval& other);
   public: Interval(Posn lStart, Posn lEnd, int nZ = 9);
   public: ~Interval();
 
@@ -47,6 +48,8 @@ class Interval : public BinaryTree<Interval>::NodeBase,
 
   // [S]
   public: void SetStyle(const css::Style&);
+
+  DISALLOW_ASSIGN(Interval);
 };
 
 }  // namespace text

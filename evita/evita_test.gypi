@@ -153,6 +153,7 @@
         'precomp.cpp',
         'css/style_sheet_unittest.cc',
         'text/buffer_unittest.cc',
+        'text/marker_set_unittest.cc',
         'text/undo_stack_unittest.cc',
       ],
     }, # evita_text_test

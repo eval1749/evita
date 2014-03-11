@@ -276,9 +276,13 @@ TextLine* TextFormatter::FormatLine() {
 //
 Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
   auto const lPosn = text_scanner_->GetPosn();
-  auto& style = text_scanner_->GetStyle();
+  auto style = text_scanner_->GetStyle();
+  style.Merge(text_scanner_->style_resolver()->Resolve(
+    css::StyleSelector::defaults()));
 
   if (0x09 == wch) {
+    style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
+        css::StyleSelector::end_of_file_marker()));
     auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
     auto const cxTab = AlignWidthToPixel(m_gfx, pFont->GetCharWidth(' ')) *
                           k_nTabWidth;
@@ -344,7 +348,9 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
 
 Cell* TextFormatter::formatMarker(TextMarker marker_name) {
   auto style = text_scanner_->GetStyle();
-  style.OverrideBy(text_scanner_->style_resolver()->Resolve(
+  style.Merge(text_scanner_->style_resolver()->Resolve(
+    css::StyleSelector::defaults()));
+  style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
       css::StyleSelector::end_of_line_marker()));
 
   auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');

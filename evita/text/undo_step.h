@@ -157,7 +157,6 @@ class InsertUndoStep : public TextUndoStep {
   DISALLOW_COPY_AND_ASSIGN(InsertUndoStep);
 };
 
-
 }  // namespace text
 
 #endif // !defined(INCLUDE_evita_text_undo_step_h)

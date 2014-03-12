@@ -18,27 +18,37 @@
 
 namespace text {
 
+class MarkerSet;
+
 class MarkerSet : public BufferMutationObserver {
-  private: Marker empty_marker_;
-  private: std::set<Marker*> markers_;
+  private: typedef std::set<Marker*> MarkerSetImpl;
+  private: class ChangeMarkerScope;
+
+  private: MarkerSetImpl markers_;
   private: ObserverList<MarkerSetObserver> observers_;
 
   public: MarkerSet();
   public: virtual ~MarkerSet();
 
+  private: MarkerSetImpl::iterator lower_bound(Posn offset);
+  private: MarkerSetImpl::iterator upper_bound(Posn offset);
+
   public: void AddObserver(MarkerSetObserver* observer);
   public: void Clear();
-  public: const Marker& GetMarkerAt(Posn offset);
-  private: void MergeMarkersIfPossible(Marker* marker);
+  public: Marker GetMarkerAt(Posn offset);
   private: void NotifyChange(Posn start, Posn end);
+  public: void InsertMarker(Posn start, Posn end, int type);
   public: void RemoveMarker(Posn start, Posn end);
+  private: bool RemoveMarkerImpl(Posn start, Posn end,
+                                 const MarkerSetImpl::iterator& iterator);
   public: void RemoveObserver(MarkerSetObserver* observer);
-  public: void SetMarker(Posn start, Posn end, int type);
   private: Marker* SplitMarkerAt(Marker* marker, Posn offset);
 
   // BufferMutationObserver
   private: virtual void DidDeleteAt(Posn offset, size_t length) override;
   private: virtual void DidInsertAt(Posn offset, size_t length) override;
+
+  // MarkerSetObserver
 
   DISALLOW_COPY_AND_ASSIGN(MarkerSet);
 };

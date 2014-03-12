@@ -6,6 +6,7 @@
 #define INCLUDE_evita_text_marker_h
 
 #include <functional>
+#include <ostream>
 #include "base/basictypes.h"
 
 namespace text {
@@ -15,20 +16,25 @@ class MarkerSet;
 class Marker {
   friend class MarkerSet;
 
-  public: static int None = 0;
+  public: static const int None = 0;
   private: Posn end_;
   private: Posn start_;
   private: int type_;
 
-  public: Marker(Type type, Posn start, Posn end);
+  public: Marker(int type, Posn start, Posn end);
+  public: Marker(const Marker& other);
   private: Marker(Posn start);
   private: Marker();
   public: ~Marker();
 
+  public: bool operator==(const Marker& other) const;
+  public: bool operator!=(const Marker& other) const;
+
+  public: Posn end() const { return end_; }
   public: Posn start() const { return start_; }
   public: int type() const { return type_; }
 
-  DISALLOW_COPY_AND_ASSIGN(Marker);
+  DISALLOW_ASSIGN(Marker);
 };
 
 }  // namespace text
@@ -40,6 +46,9 @@ struct less<text::Marker*> {
     return x->start() < y->start();
   }
 };
-}  // namespace
+
+ostream& operator<<(ostream& ostream, const text::Marker& marker);
+ostream& operator<<(ostream& ostream, const text::Marker* marker);
+}  // namespace std
 
 #endif // !defined(INCLUDE_evita_text_marker_h)

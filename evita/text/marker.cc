@@ -4,12 +4,18 @@
 
 #include "evita/text/marker.h"
 
+#include "base/logging.h"
+
 namespace text {
 
 Marker::Marker(int type, Posn start, Posn end)
     : end_(end), start_(start), type_(type) {
-  DCHECK_NE(Marker::None, type);
+  DCHECK_NE(None, type);
   DCHECK_LT(start, end);
+}
+
+Marker::Marker(const Marker& other)
+    : end_(other.end_), start_(other.start_), type_(other.type_) {
 }
 
 Marker::Marker(Posn offset)
@@ -22,4 +28,26 @@ Marker::Marker() : Marker(0) {
 Marker::~Marker() {
 }
 
+bool Marker::operator==(const Marker& other) const {
+  return type_ == other.type_ && start_ == other.start_ && end_ == other.end_;
+}
+
+bool Marker::operator!=(const Marker& other) const {
+  return !operator==(other);
+}
+
 }  // namespace text
+
+namespace std {
+ostream& operator<<(ostream& ostream, const text::Marker& marker) {
+  return ostream << "text::Marker(" << marker.type() << ", [" <<
+      marker.start() << ", " << marker.end() << "])";
+}
+
+ostream& operator<<(ostream& ostream, const text::Marker* marker) {
+  if (!marker)
+    return ostream << "NullMarker";
+  return ostream << *marker;
+}
+
+}  // namespace std

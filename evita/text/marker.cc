@@ -8,7 +8,7 @@
 
 namespace text {
 
-Marker::Marker(int type, Posn start, Posn end)
+Marker::Marker(Posn start, Posn end, int type)
     : end_(end), start_(start), type_(type) {
   DCHECK_NE(None, type);
   DCHECK_LT(start, end);

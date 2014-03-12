@@ -21,10 +21,10 @@ class Marker {
   private: Posn start_;
   private: int type_;
 
-  public: Marker(int type, Posn start, Posn end);
+  public: Marker(Posn start, Posn end, int type);
   public: Marker(const Marker& other);
   private: Marker(Posn start);
-  private: Marker();
+  public: Marker();
   public: ~Marker();
 
   public: bool operator==(const Marker& other) const;
@@ -43,7 +43,7 @@ namespace std {
 template<>
 struct less<text::Marker*> {
   bool operator() (const text::Marker* x, const text::Marker* y) const {
-    return x->start() < y->start();
+    return x->end() < y->end();
   }
 };
 

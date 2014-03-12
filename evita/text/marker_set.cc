@@ -4,37 +4,40 @@
 
 #include "evita/text/marker_set.h"
 
+#include <vector>
+
 #include "base/logging.h"
 
 namespace text {
 
 //////////////////////////////////////////////////////////////////////
 //
-// ChangeMarkerScope
+// MarkerSet::ChangeScope
 //
-class MarkerSet::ChangeMarkerScope {
+class MarkerSet::ChangeScope {
   private: MarkerSetImpl* markers_;
   private: std::vector<Marker*> markers_to_remove_;
 
-  public: ChangeMarkerScope(MarkerSetImpl* markers);
-  public: ~ChangeMarkerScope();
+  public: ChangeScope(MarkerSetImpl* markers);
+  public: ~ChangeScope();
 
   public: void Remove(Marker* marker);
 
-  DISALLOW_COPY_AND_ASSIGN(ChangeMarkerScope);
+  DISALLOW_COPY_AND_ASSIGN(ChangeScope);
 };
 
-MarkerSet::ChangeMarkerScope::ChangeMarkerScope(MarkerSetImpl* markers)
+MarkerSet::ChangeScope::ChangeScope(MarkerSetImpl* markers)
     : markers_(markers) {
 }
 
-MarkerSet::ChangeMarkerScope::~ChangeMarkerScope() {
-  for (auto marker : markers_to_remove_) {
+MarkerSet::ChangeScope::~ChangeScope() {
+  for (auto const marker : markers_to_remove_) {
     markers_->erase(marker);
+    delete marker;
   }
 }
 
-void MarkerSet::ChangeMarkerScope::Remove(Marker* marker) {
+void MarkerSet::ChangeScope::Remove(Marker* marker) {
   markers_to_remove_.push_back(marker);
 }
 
@@ -51,11 +54,6 @@ MarkerSet::~MarkerSet() {
 MarkerSet::MarkerSetImpl::iterator MarkerSet::lower_bound(Posn offset) {
   Marker marker(offset);
   return markers_.lower_bound(&marker);
-}
-
-MarkerSet::MarkerSetImpl::iterator MarkerSet::upper_bound(Posn offset) {
-  Marker marker(offset);
-  return markers_.upper_bound(&marker);
 }
 
 void MarkerSet::AddObserver(MarkerSetObserver* observer) {
@@ -77,169 +75,153 @@ void MarkerSet::Clear() {
 Marker MarkerSet::GetMarkerAt(Posn offset) {
   if (markers_.empty())
     return Marker();
-  auto const left = lower_bound(offset);
-  if (left != markers_.end()) {
-    return offset < (*left)->start_ || offset >= (*left)->end_ ?
-        Marker() : **left;
-  }
-  auto const right = markers_.rbegin();
-  return offset < (*right)->start_ || offset >= (*right)->end_ ?
-        Marker() : **right;
+  auto const present = lower_bound(offset + 1);
+  if (present == markers_.end())
+    return Marker();
+  DCHECK_LT(offset, (*present)->end_);
+  return offset >= (*present)->start_ ? **present : Marker();
 }
 
 void MarkerSet::InsertMarker(Posn start, Posn end, int type) {
   DCHECK_LT(start, end);
   RemoveMarker(start, end);
-  if (type == Marker::None)
-    return;
+
+  auto const after = lower_bound(end);
+  auto const can_merge_after = after != markers_.end() &&
+      (*after)->type_ == type && (*after)->start_ == end;
+  auto const before = lower_bound(start);
+  auto const can_merge_before = before != markers_.end() &&
+      (*before)->type_ == type && (*before)->end_ == start;
+
+  ChangeScope change_scope(&markers_);
   NotifyChange(start, end);
-
-  auto const left = lower_bound(start);
-  auto const right = upper_bound(end);
-  if (left != markers_.end() && (*left)->type_ == type &&
-      (*left)->end_ == start) {
-    if (right != markers_.end() && (*right)->type_ == type &&
-        (*right)->start_ == end) {
-      (*left)->end_ = (*right)->end_;
-      markers_.erase(right);
-      delete *right;
-      return;
-    }
-    (*left)->end_ = end;
+  if (can_merge_after && can_merge_before) {
+    (*before)->end_ = (*after)->end_;
+    change_scope.Remove(*after);
     return;
   }
-
-  if (right != markers_.end() && (*right)->type_ == type &&
-      (*right)->start_ == end) {
-    (*right)->start_ = start;
+  if (can_merge_after) {
+    (*after)->start_ = start;
     return;
   }
+  if (can_merge_before) {
+    (*before)->end_ = end;
+    return;
+  }
+  markers_.insert(new Marker(start, end, type));
+}
 
-  markers_.insert(new Marker(type, start, end));
+void MarkerSet::NotifyChange(Posn start, Posn end) {
+  FOR_EACH_OBSERVER(MarkerSetObserver, observers_,
+      DidChangeMarker(start, end));
 }
 
 void MarkerSet::RemoveMarker(Posn start, Posn end) {
   DCHECK_LT(start, end);
   if (markers_.empty())
     return;
-  if (RemoveMarkerImpl(start, end, lower_bound(start)))
-    return;
-  if (RemoveMarkerImpl(start, end, upper_bound(start)))
-    return;
-  if (RemoveMarkerImpl(start, end, lower_bound(end)))
-    return;
-  if (RemoveMarkerImpl(start, end, upper_bound(end)))
-    return;
-}
 
-bool MarkerSet::RemoveMarkerImpl(Posn start, Posn end,
-                                 const MarkerSetImpl::iterator& iterator) {
-  DCHECK_LT(start, end);
-  if (iterator == markers_.end())
-    return false;
+  ChangeScope change_scope(&markers_);
 
-  ChangeMarkerScope change_marker_scope(&markers_);
+  auto offset = start;
+  auto runner = lower_bound(offset + 1);
+  while (offset < end) {
+    if (runner == markers_.end() || (*runner)->start_ >= end)
+      return;
 
-  auto runner = iterator;
-  while (runner != markers_.end() && (*runner)->end_ < start) {
-    ++runner;
-  }
+    auto const runner_end = (*runner)->end_;
+    auto const runner_start = (*runner)->start_;
+    auto const runner_type = (*runner)->type_;
 
-  while (runner != markers_.end() && (*runner)->end_ < end) {
-    if ((*runner)->start_ < start) {
-      // before: --ooooooo-----
-      // remove: -----xxxxxxx--
-      // after:  --ooo--------
-      NotifyChange(start, (*runner)->end_);
-      (*runner)->end_ = start;
-    } else {
-      // before: ----oooo-----
-      // remove: --xxxxxxxx---
-      // after:  -------------
-      NotifyChange((*runner)->start_, (*runner)->end_);
-      change_marker_scope.Remove(*runner);
-    }
-    ++runner;
-  }
+    if (runner_end >= end) {
+      if (runner_start <= offset) {
+        // before: --xxxxxxxx--
+        // new:    ----____----
+        // after:  --xx____xx--
+        NotifyChange(offset, end);
+        (*runner)->start_ = end;
+        if (runner_start < offset)
+          markers_.insert(new Marker(runner_start, offset, runner_type));
+        return;
+      }
 
-  if (runner == markers_.end())
-    return true;
-
-  if ((*runner)->end_ == end) {
-    if ((*runner)->start_ < start) {
-      // before: --oooooooo---
-      // remove: ------xxxx--
-      // after:  --oooo---
+      // before: ----xxxx--
+      // new:    --____----
+      // after:  ----__xx--
+      if (runner_end == end)
+        change_scope.Remove(*runner);
+      else
+        (*runner)->start_ = end;
       NotifyChange(start, end);
-      (*runner)->end_ = start;
-      return true;
+      return;
     }
-    // before: -----oooo--
-    // remove: --xxxxxxx--
-    // after:  -----------
-    NotifyChange((*runner)->start_, end);
-    change_marker_scope.Remove(*runner);
-    return true;
-  }
 
-  if ((*runner)->start_ < start) {
-    // before: --ooooooooo--
-    // remove: ----xxxxx----
-    // after:  --oo-----oo--
-    NotifyChange(start, end);
-    auto const right = SplitMarkerAt(*runner, start);
-    right->start_ = end;
-    return true;
-  }
+    if (runner_start < offset) {
+      // before: --xxxxx??--
+      // new:    ----_____--
+      // after:  --xx___??--
+      NotifyChange(offset, runner_end);
+      (*runner)->end_ = offset;
+    } else if (runner_start == offset) {
+      // before: --xxxx??--
+      // new:    --_____--
+      // after:  --____??--
+      NotifyChange(offset, runner_end);
+      change_scope.Remove(*runner);
+    } else {
+      // before: ----xxxx??--
+      // new:    --________--
+      // after:  ----____??--
+      NotifyChange(offset, runner_end);
+      change_scope.Remove(*runner);
+    }
 
-  // before: ----oooooo--
-  // remove: --xxxxx-----
-  // after:  -------ooo--
-  NotifyChange((*runner)->start_, end);
-  (*runner)->start_ = end;
-  return true;
+    offset = (*runner)->end_;
+    ++runner;
+  }
 }
 
 void MarkerSet::RemoveObserver(MarkerSetObserver* observer) {
   observers_.RemoveObserver(observer);
 }
 
-Marker* MarkerSet::SplitMarkerAt(Marker* marker, Posn offset) {
-  DCHECK_GT(offset, marker->start_);
-  DCHECK_LT(offset, marker->end_);
-  auto const new_marker = new Marker(marker->type_, offset, marker->end_);
-  markers_.insert(new_marker);
-  return new_marker;
-}
-
 // BufferMutationObserver
 void MarkerSet::DidDeleteAt(Posn offset, size_t length) {
-  for (auto* marker : markers_) {
+  ChangeScope change_scope(&markers_);
+  for (auto runner = lower_bound(offset + 1); runner != markers_.end();
+       ++runner) {
+    auto const marker = *runner;
     if (marker->start_ > offset) {
       marker->start_ = std::max(static_cast<Posn>(marker->start_ - length),
                                 offset);
     }
     if (marker->end_ > offset) {
-      marker->end_ = std::max(static_cast<Posn>(marker->end_ - length),
+      marker->end_ = std::max(static_cast<Posn>(marker->start_ - length),
                               offset);
     }
+    if (marker->start_ == marker->end_)
+      change_scope.Remove(marker);
   }
 }
 
 void MarkerSet::DidInsertAt(Posn offset, size_t length) {
-  for (auto* marker : markers_) {
+  for (auto runner = lower_bound(offset + 1); runner != markers_.end();
+       ++runner) {
+    auto const marker = *runner;
     if (marker->start_ > offset)
       marker->start_ += length;
-    if (marker->end_ > offset)
-      marker->end_ += length;
+    marker->end_ += length;
   }
 }
 
-// MarkerSetObserver
-void MarkerSet::NotifyChange(Posn start, Posn end) {
-  DCHECK_LT(start, end);
-  FOR_EACH_OBSERVER(MarkerSetObserver, observers_,
-      DidChangeMarker(start, end));
+void MarkerSet::DidInsertBefore(Posn offset, size_t length) {
+  for (auto runner = lower_bound(offset + 1); runner != markers_.end();
+       ++runner) {
+    auto const marker = *runner;
+    if (marker->start_ >= offset)
+      marker->start_ += length;
+    marker->end_ += length;
+  }
 }
 
 }  // namespace text

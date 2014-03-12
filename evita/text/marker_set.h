@@ -22,7 +22,7 @@ class MarkerSet;
 
 class MarkerSet : public BufferMutationObserver {
   private: typedef std::set<Marker*> MarkerSetImpl;
-  private: class ChangeMarkerScope;
+  private: class ChangeScope;
 
   private: MarkerSetImpl markers_;
   private: ObserverList<MarkerSetObserver> observers_;
@@ -31,7 +31,6 @@ class MarkerSet : public BufferMutationObserver {
   public: virtual ~MarkerSet();
 
   private: MarkerSetImpl::iterator lower_bound(Posn offset);
-  private: MarkerSetImpl::iterator upper_bound(Posn offset);
 
   public: void AddObserver(MarkerSetObserver* observer);
   public: void Clear();
@@ -39,14 +38,12 @@ class MarkerSet : public BufferMutationObserver {
   private: void NotifyChange(Posn start, Posn end);
   public: void InsertMarker(Posn start, Posn end, int type);
   public: void RemoveMarker(Posn start, Posn end);
-  private: bool RemoveMarkerImpl(Posn start, Posn end,
-                                 const MarkerSetImpl::iterator& iterator);
   public: void RemoveObserver(MarkerSetObserver* observer);
-  private: Marker* SplitMarkerAt(Marker* marker, Posn offset);
 
   // BufferMutationObserver
   private: virtual void DidDeleteAt(Posn offset, size_t length) override;
   private: virtual void DidInsertAt(Posn offset, size_t length) override;
+  private: virtual void DidInsertBefore(Posn offset, size_t length) override;
 
   // MarkerSetObserver
 

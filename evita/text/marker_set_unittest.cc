@@ -10,6 +10,9 @@
 
 namespace {
 
+using text::Marker;
+using text::MarkerSet;
+
 class MarkerSetTest : public ::testing::Test {
   protected: enum Spelling {
     None,
@@ -17,88 +20,173 @@ class MarkerSetTest : public ::testing::Test {
     Misspelled,
   };
 
-  private: text::MarkerSet marker_set_;
+  private: MarkerSet marker_set_;
 
   protected: MarkerSetTest() {
   }
   public: virtual ~MarkerSetTest() {
   }
 
-  protected: text::MarkerSet* marker_set() { return &marker_set_; }
+  protected: MarkerSet* marker_set() { return &marker_set_; }
 
-  protected: text::Marker GetAt(Posn offset) {
+  protected: void RemoveMarker(text::Posn start, text::Posn end) {
+    marker_set()->RemoveMarker(start, end);
+  }
+
+  protected: Marker GetAt(Posn offset) {
     return marker_set_.GetMarkerAt(offset);
   }
 
-  protected: void Insert(text::Posn start, text::Posn end, int type) {
+  protected: void InsertMarker(text::Posn start, text::Posn end, int type) {
     marker_set()->InsertMarker(start, end, type);
   }
 
   DISALLOW_COPY_AND_ASSIGN(MarkerSetTest);
 };
 
+TEST_F(MarkerSetTest, DeleteMarker_cover) {
+  // before: --CC--
+  // insert: -____--
+  // after:  -____--
+  InsertMarker(150, 250, Correct);
+  RemoveMarker(100, 300);
+  EXPECT_EQ(Marker(), GetAt(100));
+  EXPECT_EQ(Marker(), GetAt(125));
+  EXPECT_EQ(Marker(), GetAt(150));
+  EXPECT_EQ(Marker(), GetAt(225));
+  EXPECT_EQ(Marker(), GetAt(250));
+}
+
+TEST_F(MarkerSetTest, DeleteMarker_cross_left) {
+  // before: ---CC--
+  // insert: --__---
+  // after:  --__C--
+  InsertMarker(200, 300, Correct);
+  RemoveMarker(150, 250);
+  EXPECT_EQ(Marker(), GetAt(150));
+  EXPECT_EQ(Marker(250, 300, Correct), GetAt(250));
+}
+
+TEST_F(MarkerSetTest, DeleteMarker_cross_right) {
+  // before: --CCCC----
+  // insert: ----____--
+  // after:  --CC__----
+  InsertMarker(100, 250, Correct);
+  RemoveMarker(200, 300);
+  EXPECT_EQ(Marker(100, 200, Correct), GetAt(150));
+  EXPECT_EQ(Marker(), GetAt(200));
+  EXPECT_EQ(Marker(), GetAt(250));
+}
+
+TEST_F(MarkerSetTest, DeleteMarker_disjoint) {
+  // before: --CC--
+  // insert: ------__--
+  // after:  --CC------
+  InsertMarker(100, 200, Correct);
+  RemoveMarker(300, 400);
+  EXPECT_EQ(Marker(100, 200, Correct), GetAt(150));
+  EXPECT_EQ(Marker(), GetAt(350));
+}
+
+TEST_F(MarkerSetTest, DeleteMarker_split) {
+  // before: -CCCCCC--
+  // insert: ---__--
+  // after:  -CC__CC--
+  InsertMarker(200, 400, Correct);
+  RemoveMarker(250, 350);
+  EXPECT_EQ(Marker(), GetAt(199));
+  EXPECT_EQ(Marker(200, 250, Correct), GetAt(200));
+  EXPECT_EQ(Marker(200, 250, Correct), GetAt(225));
+  EXPECT_EQ(Marker(), GetAt(300));
+  EXPECT_EQ(Marker(), GetAt(349));
+  EXPECT_EQ(Marker(350, 400, Correct), GetAt(350));
+  EXPECT_EQ(Marker(350, 400, Correct), GetAt(399));
+  EXPECT_EQ(Marker(), GetAt(400));
+}
+
 TEST_F(MarkerSetTest, GetMarkerAt) {
-  Insert(5, 10, Correct);
-  EXPECT_EQ(None, marker_set()->GetMarkerAt(0).type());
-  EXPECT_EQ(None, marker_set()->GetMarkerAt(4).type());
-  EXPECT_EQ(Correct, marker_set()->GetMarkerAt(5).type());
-  EXPECT_EQ(Correct, marker_set()->GetMarkerAt(9).type());
-  EXPECT_EQ(None, marker_set()->GetMarkerAt(10).type());
-  EXPECT_EQ(None, marker_set()->GetMarkerAt(11).type());
+  InsertMarker(5, 10, Correct);
+  EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(0));
+  EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(4));
+  EXPECT_EQ(Marker(5, 10, Correct), marker_set()->GetMarkerAt(5));
+  EXPECT_EQ(Marker(5, 10, Correct), marker_set()->GetMarkerAt(9));
+  EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(10));
+  EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(11));
 }
 
 TEST_F(MarkerSetTest, InsertMarker_cover) {
   // before: --CC--
   // insert: -MMMM--
   // after:  -MMMM--
-  Insert(150, 250, Correct);
-  Insert(100, 300, Misspelled);
-  EXPECT_EQ(text::Marker(Misspelled, 100, 300), GetAt(150));
-  EXPECT_EQ(text::Marker(Misspelled, 100, 300), GetAt(250));
+  InsertMarker(150, 250, Correct);
+  InsertMarker(100, 300, Misspelled);
+  EXPECT_EQ(Marker(100, 300, Misspelled), GetAt(100));
+  EXPECT_EQ(Marker(100, 300, Misspelled), GetAt(125));
+  EXPECT_EQ(Marker(100, 300, Misspelled), GetAt(150));
+  EXPECT_EQ(Marker(100, 300, Misspelled), GetAt(225));
+  EXPECT_EQ(Marker(100, 300, Misspelled), GetAt(250));
 }
 
 TEST_F(MarkerSetTest, InsertMarker_cross_left) {
   // before: ---MM--
   // insert: --CC---
   // after:  --CCM--
-  Insert(200, 300, Correct);
-  Insert(150, 250, Misspelled);
-  EXPECT_EQ(text::Marker(Misspelled, 150, 250), GetAt(150));
-  EXPECT_EQ(text::Marker(Correct, 250, 300), GetAt(250));
+  InsertMarker(200, 300, Correct);
+  InsertMarker(150, 250, Misspelled);
+  EXPECT_EQ(Marker(150, 250, Misspelled), GetAt(150));
+  EXPECT_EQ(Marker(250, 300, Correct), GetAt(250));
 }
 
 TEST_F(MarkerSetTest, InsertMarker_cross_right) {
-  // before: --MMMM---
-  // insert: ----CCC--
-  // after:  --MMCCC--
-  Insert(100, 250, Misspelled);
-  Insert(200, 300, Correct);
-  EXPECT_EQ(text::Marker(Misspelled, 100, 200), GetAt(150));
-  EXPECT_EQ(text::Marker(Correct, 200, 300), GetAt(200));
-  EXPECT_EQ(text::Marker(Misspelled, 200, 300), GetAt(250));
+  // before: --MMMM----
+  // insert: ----CCCC--
+  // after:  --MMCCCC--
+  InsertMarker(100, 250, Misspelled);
+  InsertMarker(200, 300, Correct);
+  EXPECT_EQ(Marker(100, 200, Misspelled), GetAt(150));
+  EXPECT_EQ(Marker(200, 300, Correct), GetAt(200));
+  EXPECT_EQ(Marker(200, 300, Correct), GetAt(250));
 }
 
 TEST_F(MarkerSetTest, InsertMarker_disjoint) {
   // before: --CC--
   // insert: ------CC--
   // after:  --CC--CC--
-  Insert(100, 200, Correct);
-  Insert(300, 400, Correct);
-  EXPECT_EQ(text::Marker(Correct, 100, 200), GetAt(150));
-  EXPECT_EQ(text::Marker(Correct, 100, 200), GetAt(350));
+  InsertMarker(100, 200, Correct);
+  InsertMarker(300, 400, Correct);
+  EXPECT_EQ(Marker(100, 200, Correct), GetAt(150));
+  EXPECT_EQ(Marker(300, 400, Correct), GetAt(350));
+}
+
+TEST_F(MarkerSetTest, InsertMarker_merge) {
+  // before: --CC--CC--CC--
+  // insert: --MMMMMMMMMM--
+  // after:  --MMMMMMMMMM--
+  InsertMarker(10, 20, Correct);
+  InsertMarker(40, 60, Correct);
+  InsertMarker(80, 90, Correct);
+  InsertMarker(10, 90, Misspelled);
+  EXPECT_EQ(Marker(10, 90, Misspelled), GetAt(10));
+  EXPECT_EQ(Marker(10, 90, Misspelled), GetAt(20));
+  EXPECT_EQ(Marker(10, 90, Misspelled), GetAt(30));
+  EXPECT_EQ(Marker(10, 90, Misspelled), GetAt(89));
+  EXPECT_EQ(Marker(), GetAt(90));
 }
 
 TEST_F(MarkerSetTest, InsertMarker_split) {
-  // before: -MMMM--
-  // insert: --CC--
-  // after:  -MCCM--
-  Insert(100, 300, Misspelled);
-  Insert(150, 250, Correct);
-  EXPECT_EQ(text::Marker(Misspelled, 100, 150), GetAt(100));
-  EXPECT_EQ(text::Marker(Misspelled, 100, 150), GetAt(125));
-  EXPECT_EQ(text::Marker(Correct, 150, 250), GetAt(150));
-  EXPECT_EQ(text::Marker(Correct, 150, 250), GetAt(200));
-  EXPECT_EQ(text::Marker(Misspelled, 250, 300), GetAt(250));
+  // before: --CCCCCC--
+  // insert: ----MM----
+  // after:  --CCMMCC--
+  InsertMarker(200, 400, Correct);
+  InsertMarker(250, 350, Misspelled);
+  EXPECT_EQ(Marker(), GetAt(199));
+  EXPECT_EQ(Marker(200, 250, Correct), GetAt(200));
+  EXPECT_EQ(Marker(200, 250, Correct), GetAt(225));
+  EXPECT_EQ(Marker(250, 350, Misspelled), GetAt(300));
+  EXPECT_EQ(Marker(250, 350, Misspelled), GetAt(349));
+  EXPECT_EQ(Marker(350, 400, Correct), GetAt(350));
+  EXPECT_EQ(Marker(350, 400, Correct), GetAt(399));
+  EXPECT_EQ(Marker(), GetAt(400));
 }
 
 }  // namespace

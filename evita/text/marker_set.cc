@@ -140,54 +140,57 @@ void MarkerSet::RemoveMarker(Posn start, Posn end) {
     if (runner == markers_.end() || (*runner)->start_ >= end)
       return;
 
-    auto const runner_end = (*runner)->end_;
-    auto const runner_start = (*runner)->start_;
-    auto const runner_type = (*runner)->type_;
+    auto const marker = *runner;
 
-    if (runner_end >= end) {
-      if (runner_start <= offset) {
+    if (marker->end_ >= end) {
+      if (marker->start_ <= offset) {
         // before: --xxxxxxxx--
         // new:    ----____----
         // after:  --xx____xx--
         NotifyChange(offset, end);
-        (*runner)->start_ = end;
-        if (runner_start < offset)
-          markers_.insert(new Marker(runner_start, offset, runner_type));
+        if (marker->end_ == end) {
+          change_scope.Remove(marker);
+          return;
+        }
+
+        if (marker->start_ < offset)
+           markers_.insert(new Marker(marker->start_, offset, marker->type_));
+        marker->start_ = end;
         return;
       }
 
       // before: ----xxxx--
       // new:    --____----
       // after:  ----__xx--
-      if (runner_end == end)
-        change_scope.Remove(*runner);
-      else
-        (*runner)->start_ = end;
       NotifyChange(start, end);
+      if (marker->end_ == end)
+        change_scope.Remove(marker);
+      else
+        marker->start_ = end;
       return;
     }
 
-    if (runner_start < offset) {
+    if (marker->start_ < offset) {
       // before: --xxxxx??--
       // new:    ----_____--
       // after:  --xx___??--
-      NotifyChange(offset, runner_end);
-      (*runner)->end_ = offset;
-    } else if (runner_start == offset) {
+      NotifyChange(offset, marker->end_);
+      marker->end_ = offset;
+    } else if (marker->start_ == offset) {
       // before: --xxxx??--
       // new:    --_____--
       // after:  --____??--
-      NotifyChange(offset, runner_end);
-      change_scope.Remove(*runner);
+      NotifyChange(offset, marker->end_);
+      change_scope.Remove(marker);
     } else {
       // before: ----xxxx??--
       // new:    --________--
       // after:  ----____??--
-      NotifyChange(offset, runner_end);
-      change_scope.Remove(*runner);
+      NotifyChange(offset, marker->end_);
+      change_scope.Remove(marker);
     }
 
-    offset = (*runner)->end_;
+    offset = marker->end_;
     ++runner;
   }
 }

@@ -95,6 +95,12 @@ TEST_F(MarkerSetTest, DeleteMarker_disjoint) {
   EXPECT_EQ(Marker(), GetAt(350));
 }
 
+TEST_F(MarkerSetTest, DeleteMarker_same) {
+  InsertMarker(100, 200, Correct);
+  RemoveMarker(100, 200);
+  EXPECT_EQ(Marker(), marker_set()->GetLowerBoundMarker(100));
+}
+
 TEST_F(MarkerSetTest, DeleteMarker_split) {
   // before: -CCCCCC--
   // insert: ---__--

@@ -22,6 +22,14 @@ class BufferMutationObserver {
   DISALLOW_COPY_AND_ASSIGN(BufferMutationObserver);
 };
 
+class BufferMutationObservee {
+  public: BufferMutationObservee();
+  public: virtual ~BufferMutationObservee();
+
+  public: virtual void AddObserver(BufferMutationObserver* observer) = 0;
+  public: virtual void RemoveObserver(BufferMutationObserver* observer) = 0;
+};
+
 }   // text
 
 #endif //!defined(INCLUDE_evita_text_buffer_mutation_observer_h)

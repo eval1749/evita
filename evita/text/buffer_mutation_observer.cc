@@ -6,6 +6,10 @@
 
 namespace text {
 
+//////////////////////////////////////////////////////////////////////
+//
+// BufferMutationObserver
+//
 BufferMutationObserver::BufferMutationObserver() {
 }
 
@@ -26,6 +30,16 @@ void BufferMutationObserver::DidInsertBefore(Posn offset, size_t length) {
 }
 
 void BufferMutationObserver::WillDeleteAt(Posn, size_t) {
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// BufferMutationObservee
+//
+BufferMutationObservee::BufferMutationObservee() {
+}
+
+BufferMutationObservee::~BufferMutationObservee() {
 }
 
 }  // namespace text

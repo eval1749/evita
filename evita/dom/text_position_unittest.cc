@@ -75,7 +75,7 @@ TEST_F(TextPositionTest, moveBracket) {
     "  var char_syntax = 0;"
     "  function finish(advance) {"
     "    range.end = pos.offset + advance;"
-    "    range.style({charSyntax: char_syntax, color: color});"
+    "    range.setStyle({charSyntax: char_syntax, color: color});"
     "    range.collapseTo(range.end);"
     "    state = 'NORMAL';"
     "    color = 0;"

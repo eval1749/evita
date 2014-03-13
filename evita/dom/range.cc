@@ -65,7 +65,7 @@ class RangeClass : public v8_glue::WrapperInfo {
         .SetMethod("insertBefore", &Range::InsertBefore)
         .SetMethod("paste", &Range::PasteFromClipboard)
         .SetMethod("setSpelling", &Range::SetSpelling)
-        .SetMethod("style", &Range::SetStyle);
+        .SetMethod("setStyle", &Range::SetStyle);
   }
 
   DISALLOW_COPY_AND_ASSIGN(RangeClass);

@@ -126,6 +126,11 @@ Range.prototype.replace = function(regexp, replacement) {};
 Range.prototype.setSpelling = function(spelling) {};
 
 /**
+ * @param {!Object} style_dict
+ */
+Range.prototype.setStyle = function(style_dict) {};
+
+/**
  * @param {Unit} unit
  * @param {Alter=} opt_alter, default is Alter.MOVE.
  * @return {!Range}

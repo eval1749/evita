@@ -39,6 +39,10 @@ class MarkerSet : public BufferMutationObserver {
   public: void InsertMarker(Posn start, Posn end, int type);
   public: void RemoveMarker(Posn start, Posn end);
   public: void RemoveObserver(MarkerSetObserver* observer);
+  // Split specified marker into atmost two markers by excluding range start,
+  // end(exclusive).
+  private: void MarkerSet::SplitMarker(Marker* marker, Posn start, Posn end);
+  private: void MarkerSet::TryMerge(Marker* marker, Marker* following);
 
   // BufferMutationObserver
   private: virtual void DidDeleteAt(Posn offset, size_t length) override;

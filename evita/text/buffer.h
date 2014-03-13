@@ -16,6 +16,8 @@
 
 #include "evita/IStringCursor.h"
 #include "evita/ed_BufferCore.h"
+#include "evita/text/buffer_mutation_observer.h"
+#include "evita/text/marker_set_observer.h"
 
 namespace css {
 class Style;
@@ -25,12 +27,13 @@ class StyleResolver;
 namespace text {
 
 class Buffer;
-class BufferMutationObserver;
 class Interval;
 class IntervalSet;
 class Mode;
 class Range;
 class RangeSet;
+class Marker;
+class MarkerSet;
 class UndoStack;
 
 /// <summary>
@@ -73,9 +76,13 @@ class FileFeatures {
 /// <summary>
 /// Represents text buffer.
 /// </summary>
-class Buffer : public BufferCore, public FileFeatures {
+class Buffer : public BufferCore,
+               public BufferMutationObservee,
+               public FileFeatures,
+               public MarkerSetObserver {
   private: ObserverList<BufferMutationObserver> observers_;
   private: std::unique_ptr<IntervalSet> intervals_;
+  private: std::unique_ptr<MarkerSet> spelling_markers_;
   private: std::unique_ptr<RangeSet> ranges_;
   private: Mode* m_pMode;
   private: std::unique_ptr<css::StyleResolver> style_resolver_;
@@ -106,12 +113,13 @@ class Buffer : public BufferCore, public FileFeatures {
 
   public: const base::string16& name() const { return name_; }
   public: RangeSet* ranges() const { return ranges_.get(); }
+  public: MarkerSet* spelling_markers() const {
+    return spelling_markers_.get();
+  }
 
   public: const css::StyleResolver* style_resolver() const {
     return style_resolver_.get();
   }
-
-  public: void AddObserver(BufferMutationObserver* observer);
 
   // [C]
   public: bool CanRedo() const;
@@ -156,7 +164,6 @@ class Buffer : public BufferCore, public FileFeatures {
 
   // [R]
   public: Posn Redo(Posn, Count = 1);
-  public: void RemoveObserver(BufferMutationObserver* observer);
 
   // [S]
   public: void SetFile(const base::string16& filename,
@@ -181,6 +188,15 @@ class Buffer : public BufferCore, public FileFeatures {
   // [U]
   public: Posn Undo(Posn, Count = 1);
   private: void UpdateChangeTick();
+
+  // BufferMutationObservee
+  public: virtual void AddObserver(
+      BufferMutationObserver* observer) override;
+  public: virtual void RemoveObserver(
+      BufferMutationObserver* observer) override;
+
+  // MarkerSetObserver
+  private: virtual void DidChangeMarker(Posn start, Posn end) override;
 
   /// <summary>
   /// Buffer character enumerator

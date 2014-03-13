@@ -12,6 +12,7 @@
 #include "evita/css/style_resolver.h"
 #include "evita/text/interval.h"
 #include "evita/text/interval_set.h"
+#include "evita/text/marker_set.h"
 #include "evita/text/range.h"
 #include "evita/text/range_set.h"
 #include "evita/text/modes/mode.h"
@@ -23,6 +24,7 @@ Buffer::Buffer(const base::string16& name, Mode* mode)
     : intervals_(new IntervalSet(this)),
       ranges_(new RangeSet(this)),
       m_pMode(mode),
+      spelling_markers_(new MarkerSet(this)),
       style_resolver_(std::make_unique<css::StyleResolver>()),
       undo_stack_(new UndoStack(this)),
       m_eState(State_Ready),
@@ -32,9 +34,11 @@ Buffer::Buffer(const base::string16& name, Mode* mode)
       m_nSaveTick(1),
       name_(name) {
   mode->set_buffer(this);
+  spelling_markers_->AddObserver(this);
 }
 
 Buffer::~Buffer() {
+  spelling_markers_->RemoveObserver(this);
 }
 
 void Buffer::AddObserver(BufferMutationObserver* observer) {
@@ -196,6 +200,13 @@ void Buffer::UpdateChangeTick() {
   if (m_nCharTick < m_nSaveTick)
     m_nCharTick = m_nSaveTick;
   ++m_nCharTick;
+}
+
+// MarkerSetObserver
+void Buffer::DidChangeMarker(Posn start, Posn end) {
+  DCHECK_LT(start, end);
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
+    DidChangeStyle(start, static_cast<size_t>(end - start)));
 }
 
 //////////////////////////////////////////////////////////////////////

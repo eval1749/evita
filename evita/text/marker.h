@@ -27,6 +27,8 @@ class Marker {
   public: Marker();
   public: ~Marker();
 
+  public: Marker& operator=(const Marker& other);
+
   public: bool operator==(const Marker& other) const;
   public: bool operator!=(const Marker& other) const;
 
@@ -34,7 +36,7 @@ class Marker {
   public: Posn start() const { return start_; }
   public: int type() const { return type_; }
 
-  DISALLOW_ASSIGN(Marker);
+  public: bool Contains(Posn offset) const;
 };
 
 }  // namespace text

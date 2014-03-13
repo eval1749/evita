@@ -28,12 +28,23 @@ Marker::Marker() : Marker(0) {
 Marker::~Marker() {
 }
 
+Marker& Marker::operator=(const Marker& other) {
+  end_ = other.end_;
+  start_ = other.start_;
+  type_ = other.type_;
+  return *this;
+}
+
 bool Marker::operator==(const Marker& other) const {
   return type_ == other.type_ && start_ == other.start_ && end_ == other.end_;
 }
 
 bool Marker::operator!=(const Marker& other) const {
   return !operator==(other);
+}
+
+bool Marker::Contains(Posn offset) const {
+  return offset >= start_ && offset < end_;
 }
 
 }  // namespace text

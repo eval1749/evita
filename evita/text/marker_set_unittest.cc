@@ -121,6 +121,15 @@ TEST_F(MarkerSetTest, GetMarkerAt) {
   EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(11));
 }
 
+TEST_F(MarkerSetTest, GetLowerBoundMarker) {
+  InsertMarker(5, 10, Correct);
+  EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(0));
+  EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(4));
+  EXPECT_EQ(Marker(5, 10, Correct), marker_set()->GetMarkerAt(5));
+  EXPECT_EQ(Marker(5, 10, Correct), marker_set()->GetMarkerAt(9));
+  EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(10));
+}
+
 TEST_F(MarkerSetTest, InsertMarker_cover) {
   // before: --CC--
   // insert: -MMMM--

@@ -10,8 +10,14 @@
 
 namespace {
 
+using text::BufferMutationObserver;
 using text::Marker;
 using text::MarkerSet;
+
+class MockBufferMutationObservee : public text::BufferMutationObservee {
+  private: virtual void AddObserver(BufferMutationObserver*) override {}
+  private: virtual void RemoveObserver(BufferMutationObserver*) override {}
+};
 
 class MarkerSetTest : public ::testing::Test {
   protected: enum Spelling {
@@ -20,9 +26,10 @@ class MarkerSetTest : public ::testing::Test {
     Misspelled,
   };
 
+  private: MockBufferMutationObservee mutation_observee_;
   private: MarkerSet marker_set_;
 
-  protected: MarkerSetTest() {
+  protected: MarkerSetTest() : marker_set_(&mutation_observee_) {
   }
   public: virtual ~MarkerSetTest() {
   }

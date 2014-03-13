@@ -25,9 +25,10 @@ class MarkerSet : public BufferMutationObserver {
   private: class ChangeScope;
 
   private: MarkerSetImpl markers_;
+  private: BufferMutationObservee* const mutation_observee_;
   private: ObserverList<MarkerSetObserver> observers_;
 
-  public: MarkerSet();
+  public: MarkerSet(BufferMutationObservee* provider);
   public: virtual ~MarkerSet();
 
   private: MarkerSetImpl::iterator lower_bound(Posn offset);

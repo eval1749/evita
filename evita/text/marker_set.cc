@@ -45,10 +45,13 @@ void MarkerSet::ChangeScope::Remove(Marker* marker) {
 //
 // MarkerSet
 //
-MarkerSet::MarkerSet() {
+MarkerSet::MarkerSet(BufferMutationObservee* mutation_observee)
+    : mutation_observee_(mutation_observee) {
+  mutation_observee_->AddObserver(this);
 }
 
 MarkerSet::~MarkerSet() {
+  mutation_observee_->RemoveObserver(this);
 }
 
 MarkerSet::MarkerSetImpl::iterator MarkerSet::lower_bound(Posn offset) {
@@ -85,6 +88,8 @@ Marker MarkerSet::GetMarkerAt(Posn offset) {
 void MarkerSet::InsertMarker(Posn start, Posn end, int type) {
   DCHECK_LT(start, end);
   RemoveMarker(start, end);
+  if (!type)
+    return;
 
   auto const after = lower_bound(end);
   auto const can_merge_after = after != markers_.end() &&

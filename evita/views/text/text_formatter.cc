@@ -8,8 +8,11 @@
 #include "evita/css/style.h"
 #include "evita/css/style_resolver.h"
 #include "evita/css/style_selector.h"
+#include "evita/dom/spelling.h"
 #include "evita/text/buffer.h"
 #include "evita/text/interval.h"
+#include "evita/text/marker.h"
+#include "evita/text/marker_set.h"
 #include "evita/views/text/render_cell.h"
 #include "evita/views/text/render_style.h"
 #include "evita/views/text/render_selection.h"
@@ -66,6 +69,7 @@ class TextFormatter::TextScanner {
   private: Posn m_lPosn;
   private: text::Buffer* m_pBuffer;
   private: text::Interval* m_pInterval;
+  private: mutable const text::Marker* marker_;
   private: char16 m_rgwch[80];
   private: const Selection& selection_;
   private: const css::Style selection_style_;
@@ -74,6 +78,7 @@ class TextFormatter::TextScanner {
                       const Selection& selection)
       : m_pBuffer(buffer),
         m_lPosn(lPosn),
+        marker_(nullptr),
         selection_(selection),
         selection_style_(SelectionStyle(buffer, selection)) {
     m_pInterval = m_pBuffer->GetIntervalAt(m_lPosn);
@@ -81,6 +86,7 @@ class TextFormatter::TextScanner {
     fill();
   }
 
+  public: dom::Spelling spelling() const;
   public: const css::StyleResolver* style_resolver() const {
     return m_pBuffer->style_resolver();
   }
@@ -134,6 +140,13 @@ class TextFormatter::TextScanner {
   DISALLOW_COPY_AND_ASSIGN(TextScanner);
 
 };
+
+dom::Spelling TextFormatter::TextScanner::spelling() const {
+  if (!marker_ || m_lPosn >= marker_->end())
+    marker_ = m_pBuffer->spelling_markers()->GetLowerBoundMarker(m_lPosn);
+  return marker_ && marker_->Contains(m_lPosn) ?
+      static_cast<dom::Spelling>(marker_->type()) : dom::Spelling::None;
+}
 
 RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
     const css::Style& style, Font* font) const {
@@ -279,6 +292,15 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
   auto style = text_scanner_->GetStyle();
   style.Merge(text_scanner_->style_resolver()->Resolve(
     css::StyleSelector::defaults()));
+
+  switch (text_scanner_->spelling()) {
+    case dom::Spelling::Misspelled:
+      style.set_text_decoration(css::TextDecoration::RedWave);
+      break;
+    case dom::Spelling::BadGrammar:
+      style.set_text_decoration(css::TextDecoration::GreenWave);
+      break;
+  }
 
   if (0x09 == wch) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(

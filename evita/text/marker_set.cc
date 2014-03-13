@@ -75,20 +75,20 @@ void MarkerSet::Clear() {
   NotifyChange(start, end);
 }
 
-Marker MarkerSet::GetMarkerAt(Posn offset) const {
+const Marker* MarkerSet::GetMarkerAt(Posn offset) const {
   auto const marker = GetLowerBoundMarker(offset);
-  return marker.Contains(offset) ? marker : Marker();
+  return marker && marker->Contains(offset) ? marker : nullptr;
 }
 
-Marker MarkerSet::GetLowerBoundMarker(Posn offset) const {
+const Marker* MarkerSet::GetLowerBoundMarker(Posn offset) const {
   if (markers_.empty())
-    return Marker();
+    return nullptr;
   Marker marker(offset + 1);
   auto const present = markers_.lower_bound(&marker);
   if (present == markers_.end())
-    return Marker();
+    return nullptr;
   DCHECK_LT(offset, (*present)->end_);
-  return **present;
+  return *present;
 }
 
 void MarkerSet::InsertMarker(Posn start, Posn end, int type) {

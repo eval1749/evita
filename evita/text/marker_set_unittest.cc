@@ -41,7 +41,8 @@ class MarkerSetTest : public ::testing::Test {
   }
 
   protected: Marker GetAt(Posn offset) {
-    return marker_set_.GetMarkerAt(offset);
+    auto const marker = marker_set_.GetMarkerAt(offset);
+    return marker ? *marker : Marker();
   }
 
   protected: void InsertMarker(text::Posn start, text::Posn end, int type) {
@@ -98,7 +99,8 @@ TEST_F(MarkerSetTest, DeleteMarker_disjoint) {
 TEST_F(MarkerSetTest, DeleteMarker_same) {
   InsertMarker(100, 200, Correct);
   RemoveMarker(100, 200);
-  EXPECT_EQ(Marker(), marker_set()->GetLowerBoundMarker(100));
+  auto const marker = marker_set()->GetLowerBoundMarker(100);
+  EXPECT_EQ(Marker(), marker ? *marker : Marker());
 }
 
 TEST_F(MarkerSetTest, DeleteMarker_split) {
@@ -119,21 +121,21 @@ TEST_F(MarkerSetTest, DeleteMarker_split) {
 
 TEST_F(MarkerSetTest, GetMarkerAt) {
   InsertMarker(5, 10, Correct);
-  EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(0));
-  EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(4));
-  EXPECT_EQ(Marker(5, 10, Correct), marker_set()->GetMarkerAt(5));
-  EXPECT_EQ(Marker(5, 10, Correct), marker_set()->GetMarkerAt(9));
-  EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(10));
-  EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(11));
+  EXPECT_EQ(Marker(), GetAt(0));
+  EXPECT_EQ(Marker(), GetAt(4));
+  EXPECT_EQ(Marker(5, 10, Correct), GetAt(5));
+  EXPECT_EQ(Marker(5, 10, Correct), GetAt(9));
+  EXPECT_EQ(Marker(), GetAt(10));
+  EXPECT_EQ(Marker(), GetAt(11));
 }
 
 TEST_F(MarkerSetTest, GetLowerBoundMarker) {
   InsertMarker(5, 10, Correct);
-  EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(0));
-  EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(4));
-  EXPECT_EQ(Marker(5, 10, Correct), marker_set()->GetMarkerAt(5));
-  EXPECT_EQ(Marker(5, 10, Correct), marker_set()->GetMarkerAt(9));
-  EXPECT_EQ(Marker(), marker_set()->GetMarkerAt(10));
+  EXPECT_EQ(Marker(), GetAt(0));
+  EXPECT_EQ(Marker(), GetAt(4));
+  EXPECT_EQ(Marker(5, 10, Correct), GetAt(5));
+  EXPECT_EQ(Marker(5, 10, Correct), GetAt(9));
+  EXPECT_EQ(Marker(), GetAt(10));
 }
 
 TEST_F(MarkerSetTest, InsertMarker_cover) {

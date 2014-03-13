@@ -35,8 +35,8 @@ class MarkerSet : public BufferMutationObserver {
 
   public: void AddObserver(MarkerSetObserver* observer);
   public: void Clear();
-  public: Marker GetMarkerAt(Posn offset) const;
-  public: Marker GetLowerBoundMarker(Posn offset) const;
+  public: const Marker* GetMarkerAt(Posn offset) const;
+  public: const Marker* GetLowerBoundMarker(Posn offset) const;
   private: void NotifyChange(Posn start, Posn end);
   public: void InsertMarker(Posn start, Posn end, int type);
   public: void RemoveMarker(Posn start, Posn end);

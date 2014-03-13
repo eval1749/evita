@@ -7,6 +7,7 @@
 #include "evita/dom/converter.h"
 #include "evita/dom/document.h"
 #include "evita/dom/regexp.h"
+#include "evita/text/marker_set.h"
 #include "evita/text/range.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
@@ -63,6 +64,7 @@ class RangeClass : public v8_glue::WrapperInfo {
         .SetMethod("copy", &Range::CopyToClipboard)
         .SetMethod("insertBefore", &Range::InsertBefore)
         .SetMethod("paste", &Range::PasteFromClipboard)
+        .SetMethod("setSpelling", &Range::SetSpelling)
         .SetMethod("style", &Range::SetStyle);
   }
 
@@ -141,6 +143,11 @@ void Range::PasteFromClipboard() {
   if (!document_->CheckCanChange())
     return;
   range_->Paste();
+}
+
+void Range::SetSpelling(int spelling) const {
+  document_->buffer()->spelling_markers()->InsertMarker(
+    range_->GetStart(), range_->GetEnd(), spelling);
 }
 
 }  // namespace dom

@@ -53,6 +53,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: v8::Handle<v8::Object> properties() const;
   public: bool read_only() const;
   public: void set_read_only(bool read_only) const;
+  public: int spelling_at(text::Posn offset) const;
   public: v8::Handle<v8::Object> style_at(text::Posn position) const;
 
   public: bool CheckCanChange() const;

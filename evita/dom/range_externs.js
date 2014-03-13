@@ -121,6 +121,11 @@ Range.prototype.paste = function() {};
 Range.prototype.replace = function(regexp, replacement) {};
 
 /**
+ * @param {number} spelling
+ */
+Range.prototype.setSpelling = function(spelling) {};
+
+/**
  * @param {Unit} unit
  * @param {Alter=} opt_alter, default is Alter.MOVE.
  * @return {!Range}

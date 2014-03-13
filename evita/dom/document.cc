@@ -19,7 +19,10 @@
 #include "evita/dom/public/api_callback.h"
 #include "evita/dom/regexp.h"
 #include "evita/dom/script_controller.h"
+#include "evita/dom/spelling.h"
 #include "evita/dom/view_delegate.h"
+#include "evita/text/marker.h"
+#include "evita/text/marker_set.h"
 #include "evita/text/modes/mode.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
@@ -188,6 +191,7 @@ class DocumentClass : public v8_glue::WrapperInfo {
         .SetMethod("save_", &Document::Save)
         .SetMethod("slice", &Document::Slice)
         .SetMethod("startUndoGroup_", &Document::StartUndoGroup)
+        .SetMethod("spellingAt", &Document::spelling_at)
         .SetMethod("styleAt", &Document::style_at)
         .SetMethod("undo", &Document::Undo);
   }
@@ -344,6 +348,13 @@ bool Document::read_only() const {
 
 void Document::set_read_only(bool read_only) const {
   buffer_->SetReadOnly(read_only);
+}
+
+int Document::spelling_at(text::Posn offset) const {
+  if (!IsValidPosition(offset))
+    return 0;
+  auto const marker = buffer_->spelling_markers()->GetMarkerAt(offset);
+  return marker ? marker->type() : static_cast<int>(Spelling::None);
 }
 
 bool Document::CheckCanChange() const {

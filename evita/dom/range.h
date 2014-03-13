@@ -40,6 +40,7 @@ class Range : public v8_glue::Scriptable<Range> {
   public: void CopyToClipboard() const;
   public: Range* InsertBefore(const base::string16& text);
   public: void PasteFromClipboard();
+  public: void SetSpelling(int spelling) const;
   public: void SetStyle(v8::Handle<v8::Object> style_dict) const;
 
   DISALLOW_COPY_AND_ASSIGN(Range);

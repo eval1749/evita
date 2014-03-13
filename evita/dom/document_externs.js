@@ -197,6 +197,12 @@ Document.prototype.slice = function(start, opt_end) {};
 Document.prototype.startUndoGroup_ = function(name) {};
 
 /**
+ * @param {!TextOffset} offset
+ * @return {number}
+ */
+Document.prototype.spellingAt = function(offset) {};
+
+/**
  * @param {!TextOffset} position
  * @return {!Style}
  */

@@ -4,6 +4,11 @@
 #include <string>
 
 #include "base/basictypes.h"
+#pragma warning(push)
+#pragma warning(disable: 4100 4625 4626)
+#include "base/message_loop/message_loop.h"
+#pragma warning(pop)
+#include "base/run_loop.h"
 #include "base/strings/utf_string_conversions.h"
 #include "gmock/gmock.h"
 #include "evita/dom/abstract_dom_test.h"
@@ -48,6 +53,44 @@ TEST_F(DocumentTest, Constructor) {
                    "var sample2 = new Document('.bar'); sample2.name");
   EXPECT_SCRIPT_EQ(".bar (3)",
                    "var sample2 = new Document('.bar'); sample2.name");
+}
+
+TEST_F(DocumentTest, Document_addObserver) {
+  base::MessageLoop message_loop;
+  EXPECT_SCRIPT_VALID(
+      "var result_doc, result_type;"
+      "function callback(type, doc) {"
+      "  result_doc = doc;"
+      "  result_type = type;"
+      "}"
+      "Document.addObserver(callback);"
+      "var doc1 = new Document('addObserver');");
+  {
+    base::RunLoop run_loop;
+    run_loop.RunUntilIdle();
+  }
+  EXPECT_SCRIPT_TRUE("result_doc === doc1");
+  EXPECT_SCRIPT_EQ("add", "result_type") <<
+      "The observer gets 'add' notification.";
+
+  EXPECT_SCRIPT_VALID("Document.remove(doc1)");
+  {
+    base::RunLoop run_loop;
+    run_loop.RunUntilIdle();
+  }
+  EXPECT_SCRIPT_TRUE("result_doc === doc1");
+  EXPECT_SCRIPT_EQ("remove", "result_type") <<
+      "The observer gets 'remove' notification.";
+
+  EXPECT_SCRIPT_VALID("Document.removeObserver(callback)");
+  EXPECT_SCRIPT_VALID("var doc2 = new Document('addObserver2')");
+  {
+    base::RunLoop run_loop;
+    run_loop.RunUntilIdle();
+  }
+  EXPECT_SCRIPT_TRUE("result_doc === doc1");
+  EXPECT_SCRIPT_EQ("remove", "result_type") <<
+      "The observer doesn't get notification.";
 }
 
 TEST_F(DocumentTest, Document_list) {

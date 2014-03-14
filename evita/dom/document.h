@@ -35,7 +35,7 @@ class Document : public v8_glue::Scriptable<Document> {
   // C++.
   private: v8_glue::ScopedPersistent<v8::Object> properties_;
 
-  public: explicit Document(const base::string16& name, Mode* mode);
+  private: explicit Document(const base::string16& name, Mode* mode);
   public: virtual ~Document();
 
   public: const Buffer* buffer() const { return buffer_.get(); }
@@ -66,6 +66,7 @@ class Document : public v8_glue::Scriptable<Document> {
   public: void Load(const base::string16& filename,
                     v8::Handle<v8::Function> callback);
   public: v8::Handle<v8::Value> Match(RegExp* regexp, int start, int end);
+  public: static Document* New(const base::string16& name, Mode* mode);
   public: Posn Redo(Posn position);
   public: void RenameTo(const base::string16& new_name);
   public: static void ResetForTesting();

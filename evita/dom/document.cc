@@ -25,6 +25,7 @@
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
+#include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/script_callback.h"
@@ -47,10 +48,17 @@ class DocumentClass : public v8_glue::WrapperInfo {
   public: DocumentClass(const char* name);
   public: virtual ~DocumentClass();
 
+  private: static std::vector<Document*> list();
+
+  private: static void AddObserver(v8::Handle<v8::Function> function);
+  private: static v8_glue::Nullable<Document> Find(const base::string16& name);
+
   private: static Document* GetOrNew(const base::string16& name,
                                      v8_glue::Optional<Mode*> opt_mode);
   private: static Document* NewDocument(const base::string16& name,
                                         v8_glue::Optional<Mode*> opt_mode);
+  private: static void RemoveDocument(Document* document);
+  private: static void RemoveObserver(v8::Handle<v8::Function> function);
 
   // v8_glue::WrapperInfo
   private: virtual v8::Handle<v8::FunctionTemplate>
@@ -69,9 +77,21 @@ DocumentClass::DocumentClass(const char* name)
 DocumentClass::~DocumentClass() {
 }
 
+std::vector<Document*> DocumentClass::list() {
+  return DocumentSet::instance()->list();
+}
+
+void DocumentClass::AddObserver(v8::Handle<v8::Function> function) {
+  DocumentSet::instance()->AddObserver(function);
+}
+
+v8_glue::Nullable<Document> DocumentClass::Find(const base::string16& name) {
+  return DocumentSet::instance()->Find(name);
+}
+
 Document* DocumentClass::GetOrNew(const base::string16& name,
-                                 v8_glue::Optional<Mode*> opt_mode) {
-  if (auto const document = DocumentSet::StaticFind(name))
+                                  v8_glue::Optional<Mode*> opt_mode) {
+  if (auto const document = DocumentSet::instance()->Find(name))
     return document;
   return NewDocument(name, opt_mode);
 }
@@ -79,7 +99,7 @@ Document* DocumentClass::GetOrNew(const base::string16& name,
 Document* DocumentClass::NewDocument(const base::string16& name,
                                      v8_glue::Optional<Mode*> opt_mode) {
   if (opt_mode.is_supplied)
-    return new Document(name, opt_mode.value);
+    return Document::New(name, opt_mode.value);
 
   // Get mode by |Mode.chooseModeByFileName()|.
   auto const runner = ScriptController::instance()->runner();
@@ -96,7 +116,15 @@ Document* DocumentClass::NewDocument(const base::string16& name,
         v8Strings::Mode.Get(isolate)));
     return nullptr;
   }
-  return new Document(name, mode);
+  return Document::New(name, mode);
+}
+
+void DocumentClass::RemoveDocument(Document* document) {
+  DocumentSet::instance()->Unregister(document);
+}
+
+void DocumentClass::RemoveObserver(v8::Handle<v8::Function> function) {
+  DocumentSet::instance()->RemoveObserver(function);
 }
 
 // v8_glue::WrapperInfo
@@ -105,10 +133,12 @@ v8::Handle<v8::FunctionTemplate> DocumentClass::CreateConstructorTemplate(
   auto templ = v8_glue::CreateConstructorTemplate(isolate,
       &DocumentClass::NewDocument);
   return v8_glue::FunctionTemplateBuilder(isolate, templ)
-      .SetProperty("list", &DocumentSet::StaticList)
-      .SetMethod("find", &DocumentSet::StaticFind)
-      .SetMethod("getOrNew", &GetOrNew)
-      .SetMethod("remove", &DocumentSet::StaticRemove)
+      .SetProperty("list", &DocumentClass::list)
+      .SetMethod("addObserver", &DocumentClass::AddObserver)
+      .SetMethod("find", &DocumentClass::Find)
+      .SetMethod("getOrNew", &DocumentClass::GetOrNew)
+      .SetMethod("remove", &DocumentClass::RemoveDocument)
+      .SetMethod("removeObserver", &DocumentClass::RemoveObserver)
       .Build();
 }
 
@@ -227,7 +257,6 @@ Document::Document(const base::string16& name, Mode* mode)
       mode_(mode),
       properties_(v8::Isolate::GetCurrent(),
                   NewMap(v8::Isolate::GetCurrent())) {
-  DocumentSet::instance()->Register(this);
 }
 
 Document::~Document() {
@@ -357,18 +386,18 @@ v8::Handle<v8::Value> Document::Match(RegExp* regexp, int start, int end) {
   return regexp->ExecuteOnDocument(this, start, end);
 }
 
+Document* Document::New(const base::string16& name, Mode* mode) {
+  auto const document = new Document(name, mode);
+  DocumentSet::instance()->Register(document);
+  return document;
+}
+
 Posn Document::Redo(Posn position) {
   return buffer_->Redo(position);
 }
 
 void Document::RenameTo(const base::string16& new_name) {
-  if (name() == new_name)
-   return;
-  auto& list = *DocumentSet::instance();
-  auto new_unique_name = list.MakeUniqueName(new_name);
-  list.Unregister(this);
-  buffer_->SetName(new_unique_name);
-  list.Register(this);
+  DocumentSet::instance()->RenameDocument(this, new_name);
 }
 
 void Document::ResetForTesting() {

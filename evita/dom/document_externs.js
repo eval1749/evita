@@ -18,6 +18,16 @@ Document.Obsolete = {
 };
 
 /**
+ * @typedef {!function(string, !Document)}
+ */
+var Document.Observer;
+
+/**
+ * @param {!Document.Observer} observer
+ */
+Document.addObserver = function(observer) {};
+
+/**
  * @param {string} name
  * @return {?Document}
  */
@@ -45,6 +55,11 @@ Document.open = function(filename) {};
  * @param {!Document} document
  */
 Document.remove = function(document) {};
+
+/**
+ * @param {!Document.Observer} observer
+ */
+Document.removeObserver = function(observer) {};
 
 /** @expose  @type {string} */
 Document.prototype.filename;

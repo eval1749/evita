@@ -63,141 +63,178 @@ class DocumentList : public common::Singleton<DocumentList> {
   private: DocumentList() = default;
   public: ~DocumentList() = default;
 
-  private: std::vector<Document*> list() const {
-    std::vector<Document*> list(map_.size());
-    list.resize(0);
-    for (const auto& pair : map_) {
-      list.push_back(pair.second);
-    }
-    return std::move(list);
-  }
+  private: std::vector<Document*> list() const;
 
-  public: Document* Find(const base::string16 name) const {
-    auto it = map_.find(name);
-    return it == map_.end() ? nullptr : it->second;
-  }
-  public: base::string16 MakeUniqueName(const base::string16& name) {
-    if (!Find(name))
-      return name;
-    const auto pair = SplitByDot(name);
-    auto candidate = name;
-    for (auto n = 2; Find(candidate); ++ n) {
-      candidate = pair.first + L" (" + base::IntToString16(n) + L")" +
-        pair.second;
-    }
-    return candidate;
-  }
-  public: void Register(Document* document) {
-    CHECK(!Find(document->name()));
-    map_[document->name()] = document;
-  }
-  public: void ResetForTesting() {
-    map_.clear();
-  }
-  public: static std::vector<Document*> StaticList() {
-    return instance()->list();
-  }
+  public: Document* Find(const base::string16 name) const;
+  public: base::string16 MakeUniqueName(const base::string16& name);
+  public: void Register(Document* document);
+  public: void ResetForTesting();
+  public: static std::vector<Document*> StaticList();
   public: static v8_glue::Nullable<Document> StaticFind(
-      const base::string16& name) {
-    return instance()->Find(name);
-  }
-  public: static void StaticRemove(Document* document) {
-    instance()->Unregister(document);
-  }
-  public: void Unregister(Document* document) {
-    auto it = map_.find(document->name());
-    if (it == map_.end()) {
-      // We called |Document.remove()| for |document|.
-      return;
-    }
-    map_.erase(it);
-  }
+      const base::string16& name);
+  public: static void StaticRemove(Document* document);
+  public: void Unregister(Document* document);
 
   DISALLOW_COPY_AND_ASSIGN(DocumentList);
 };
+
+std::vector<Document*> DocumentList::list() const {
+  std::vector<Document*> list(map_.size());
+  list.resize(0);
+  for (const auto& pair : map_) {
+    list.push_back(pair.second);
+  }
+  return std::move(list);
+}
+
+Document* DocumentList::Find(const base::string16 name) const {
+  auto it = map_.find(name);
+  return it == map_.end() ? nullptr : it->second;
+}
+
+base::string16 DocumentList::MakeUniqueName(const base::string16& name) {
+  if (!Find(name))
+    return name;
+  const auto pair = SplitByDot(name);
+  auto candidate = name;
+  for (auto n = 2; Find(candidate); ++ n) {
+    candidate = pair.first + L" (" + base::IntToString16(n) + L")" +
+      pair.second;
+  }
+  return candidate;
+}
+
+void DocumentList::Register(Document* document) {
+  CHECK(!Find(document->name()));
+  map_[document->name()] = document;
+}
+
+void DocumentList::ResetForTesting() {
+  map_.clear();
+}
+
+std::vector<Document*> DocumentList::StaticList() {
+  return instance()->list();
+}
+
+v8_glue::Nullable<Document> DocumentList::StaticFind(
+    const base::string16& name) {
+  return instance()->Find(name);
+}
+
+void DocumentList::StaticRemove(Document* document) {
+  instance()->Unregister(document);
+}
+
+void DocumentList::Unregister(Document* document) {
+  auto it = map_.find(document->name());
+  if (it == map_.end()) {
+    // We called |Document.remove()| for |document|.
+    return;
+  }
+  map_.erase(it);
+}
 
 //////////////////////////////////////////////////////////////////////
 //
 // DocumentClass
 //
 class DocumentClass : public v8_glue::WrapperInfo {
-  public: DocumentClass(const char* name)
-      : v8_glue::WrapperInfo(name) {
-  }
-  public: ~DocumentClass() = default;
-
-  protected: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    auto templ = v8_glue::CreateConstructorTemplate(isolate,
-        &DocumentClass::NewDocument);
-    return v8_glue::FunctionTemplateBuilder(isolate, templ)
-        .SetMethod("find", &DocumentList::StaticFind)
-        .SetMethod("getOrNew", &GetOrNew)
-        .SetProperty("list", &DocumentList::StaticList)
-        .SetMethod("remove", &DocumentList::StaticRemove)
-        .Build();
-  }
+  public: DocumentClass(const char* name);
+  public: virtual ~DocumentClass();
 
   private: static Document* GetOrNew(const base::string16& name,
-                                     v8_glue::Optional<Mode*> opt_mode) {
-    if (auto const document = DocumentList::StaticFind(name))
-      return document;
-    return NewDocument(name, opt_mode);
-  }
-
+                                     v8_glue::Optional<Mode*> opt_mode);
   private: static Document* NewDocument(const base::string16& name,
-                                        v8_glue::Optional<Mode*> opt_mode) {
-    if (opt_mode.is_supplied)
-      return new Document(name, opt_mode.value);
+                                        v8_glue::Optional<Mode*> opt_mode);
 
-    // Get mode by |Mode.chooseModeByFileName()|.
-    auto const runner = ScriptController::instance()->runner();
-    auto const isolate = runner->isolate();
-    auto const js_mode_class = runner->global()->Get(
-        v8Strings::Mode.Get(isolate));
-    auto const js_choose = js_mode_class->ToObject()->Get(
-        v8Strings::chooseModeByFileName.Get(isolate));
-    auto const js_name = gin::StringToV8(isolate, name);
-    auto const js_mode = runner->Call(js_choose, js_mode_class, js_name);
-    Mode* mode;
-    if (!gin::ConvertFromV8(isolate, js_mode, &mode)) {
-      ScriptController::instance()->ThrowException(v8::Exception::TypeError(
-          v8Strings::Mode.Get(isolate)));
-      return nullptr;
-    }
-    return new Document(name, mode);
-  }
+  // v8_glue::WrapperInfo
+  private: virtual v8::Handle<v8::FunctionTemplate>
+      CreateConstructorTemplate(v8::Isolate* isolate) override;
 
   private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("filename", &Document::filename, &Document::set_filename)
-        .SetProperty("lastWriteTime", &Document::last_write_time,
-                     &Document::set_last_write_time)
-        .SetProperty("length", &Document::length)
-        .SetProperty("mode", &Document::mode, &Document::set_mode)
-        .SetProperty("modified", &Document::modified)
-        .SetProperty("name", &Document::name)
-        .SetProperty("properties", &Document::properties)
-        .SetProperty("readonly", &Document::read_only,
-                     &Document::set_read_only)
-        .SetMethod("charCodeAt_", &Document::charCodeAt)
-        .SetMethod("doColor_", &Document::DoColor)
-        .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
-        .SetMethod("load_", &Document::Load)
-        .SetMethod("match_", &Document::Match)
-        .SetMethod("redo", &Document::Redo)
-        .SetMethod("renameTo", &Document::RenameTo)
-        .SetMethod("save_", &Document::Save)
-        .SetMethod("slice", &Document::Slice)
-        .SetMethod("startUndoGroup_", &Document::StartUndoGroup)
-        .SetMethod("spellingAt", &Document::spelling_at)
-        .SetMethod("styleAt", &Document::style_at)
-        .SetMethod("undo", &Document::Undo);
-  }
+      ObjectTemplateBuilder& builder) override;
 
   DISALLOW_COPY_AND_ASSIGN(DocumentClass);
 };
+
+DocumentClass::DocumentClass(const char* name)
+    : v8_glue::WrapperInfo(name) {
+}
+
+DocumentClass::~DocumentClass() {
+}
+
+Document* DocumentClass::GetOrNew(const base::string16& name,
+                                 v8_glue::Optional<Mode*> opt_mode) {
+  if (auto const document = DocumentList::StaticFind(name))
+    return document;
+  return NewDocument(name, opt_mode);
+}
+
+Document* DocumentClass::NewDocument(const base::string16& name,
+                                     v8_glue::Optional<Mode*> opt_mode) {
+  if (opt_mode.is_supplied)
+    return new Document(name, opt_mode.value);
+
+  // Get mode by |Mode.chooseModeByFileName()|.
+  auto const runner = ScriptController::instance()->runner();
+  auto const isolate = runner->isolate();
+  auto const js_mode_class = runner->global()->Get(
+      v8Strings::Mode.Get(isolate));
+  auto const js_choose = js_mode_class->ToObject()->Get(
+      v8Strings::chooseModeByFileName.Get(isolate));
+  auto const js_name = gin::StringToV8(isolate, name);
+  auto const js_mode = runner->Call(js_choose, js_mode_class, js_name);
+  Mode* mode;
+  if (!gin::ConvertFromV8(isolate, js_mode, &mode)) {
+    ScriptController::instance()->ThrowException(v8::Exception::TypeError(
+        v8Strings::Mode.Get(isolate)));
+    return nullptr;
+  }
+  return new Document(name, mode);
+}
+
+// v8_glue::WrapperInfo
+v8::Handle<v8::FunctionTemplate> DocumentClass::CreateConstructorTemplate(
+    v8::Isolate* isolate) {
+  auto templ = v8_glue::CreateConstructorTemplate(isolate,
+      &DocumentClass::NewDocument);
+  return v8_glue::FunctionTemplateBuilder(isolate, templ)
+      .SetProperty("list", &DocumentList::StaticList)
+      .SetMethod("find", &DocumentList::StaticFind)
+      .SetMethod("getOrNew", &GetOrNew)
+      .SetMethod("remove", &DocumentList::StaticRemove)
+      .Build();
+}
+
+void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
+  builder
+      .SetProperty("filename", &Document::filename, &Document::set_filename)
+      .SetProperty("lastWriteTime", &Document::last_write_time,
+                   &Document::set_last_write_time)
+      .SetProperty("length", &Document::length)
+      .SetProperty("mode", &Document::mode, &Document::set_mode)
+      .SetProperty("modified", &Document::modified)
+      .SetProperty("name", &Document::name)
+      .SetProperty("properties", &Document::properties)
+      .SetProperty("readonly", &Document::read_only,
+                   &Document::set_read_only)
+      .SetMethod("charCodeAt_", &Document::charCodeAt)
+      .SetMethod("doColor_", &Document::DoColor)
+      .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
+      .SetMethod("load_", &Document::Load)
+      .SetMethod("match_", &Document::Match)
+      .SetMethod("redo", &Document::Redo)
+      .SetMethod("renameTo", &Document::RenameTo)
+      .SetMethod("save_", &Document::Save)
+      .SetMethod("slice", &Document::Slice)
+      .SetMethod("startUndoGroup_", &Document::StartUndoGroup)
+      .SetMethod("spellingAt", &Document::spelling_at)
+      .SetMethod("styleAt", &Document::style_at)
+      .SetMethod("undo", &Document::Undo);
+}
+
 
 //////////////////////////////////////////////////////////////////////
 //

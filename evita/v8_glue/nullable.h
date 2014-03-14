@@ -7,6 +7,7 @@
 #include <type_traits>
 
 #include "base/logging.h"
+#include "evita/v8_glue/converter.h"
 
 namespace v8_glue {
 class AbstractScriptable;

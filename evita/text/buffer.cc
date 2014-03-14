@@ -25,7 +25,7 @@ Buffer::Buffer(const base::string16& name, Mode* mode)
       ranges_(new RangeSet(this)),
       m_pMode(mode),
       spelling_markers_(new MarkerSet(this)),
-      style_resolver_(std::make_unique<css::StyleResolver>()),
+      style_resolver_(new css::StyleResolver()),
       undo_stack_(new UndoStack(this)),
       m_eState(State_Ready),
       m_fReadOnly(false),

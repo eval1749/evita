@@ -165,6 +165,7 @@
         'dom/buffer.cc',
         'dom/converter.cc',
         'dom/document.cc',
+        'dom/document_set.cc',
         'dom/document_window.cc',
         'dom/editor.cc',
         'dom/editor_window.cc',

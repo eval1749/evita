@@ -53,15 +53,15 @@ v8::Handle<v8::Object> NewMap(v8::Isolate* isolate) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// DocumentList
+// DocumentSet
 //
-class DocumentList : public common::Singleton<DocumentList> {
-  friend class common::Singleton<DocumentList>;
+class DocumentSet : public common::Singleton<DocumentSet> {
+  friend class common::Singleton<DocumentSet>;
 
   private: std::unordered_map<base::string16, Document*> map_;
 
-  private: DocumentList() = default;
-  public: ~DocumentList() = default;
+  private: DocumentSet() = default;
+  public: ~DocumentSet() = default;
 
   private: std::vector<Document*> list() const;
 
@@ -75,10 +75,10 @@ class DocumentList : public common::Singleton<DocumentList> {
   public: static void StaticRemove(Document* document);
   public: void Unregister(Document* document);
 
-  DISALLOW_COPY_AND_ASSIGN(DocumentList);
+  DISALLOW_COPY_AND_ASSIGN(DocumentSet);
 };
 
-std::vector<Document*> DocumentList::list() const {
+std::vector<Document*> DocumentSet::list() const {
   std::vector<Document*> list(map_.size());
   list.resize(0);
   for (const auto& pair : map_) {
@@ -87,12 +87,12 @@ std::vector<Document*> DocumentList::list() const {
   return std::move(list);
 }
 
-Document* DocumentList::Find(const base::string16 name) const {
+Document* DocumentSet::Find(const base::string16 name) const {
   auto it = map_.find(name);
   return it == map_.end() ? nullptr : it->second;
 }
 
-base::string16 DocumentList::MakeUniqueName(const base::string16& name) {
+base::string16 DocumentSet::MakeUniqueName(const base::string16& name) {
   if (!Find(name))
     return name;
   const auto pair = SplitByDot(name);
@@ -104,29 +104,29 @@ base::string16 DocumentList::MakeUniqueName(const base::string16& name) {
   return candidate;
 }
 
-void DocumentList::Register(Document* document) {
+void DocumentSet::Register(Document* document) {
   CHECK(!Find(document->name()));
   map_[document->name()] = document;
 }
 
-void DocumentList::ResetForTesting() {
+void DocumentSet::ResetForTesting() {
   map_.clear();
 }
 
-std::vector<Document*> DocumentList::StaticList() {
+std::vector<Document*> DocumentSet::StaticList() {
   return instance()->list();
 }
 
-v8_glue::Nullable<Document> DocumentList::StaticFind(
+v8_glue::Nullable<Document> DocumentSet::StaticFind(
     const base::string16& name) {
   return instance()->Find(name);
 }
 
-void DocumentList::StaticRemove(Document* document) {
+void DocumentSet::StaticRemove(Document* document) {
   instance()->Unregister(document);
 }
 
-void DocumentList::Unregister(Document* document) {
+void DocumentSet::Unregister(Document* document) {
   auto it = map_.find(document->name());
   if (it == map_.end()) {
     // We called |Document.remove()| for |document|.
@@ -167,7 +167,7 @@ DocumentClass::~DocumentClass() {
 
 Document* DocumentClass::GetOrNew(const base::string16& name,
                                  v8_glue::Optional<Mode*> opt_mode) {
-  if (auto const document = DocumentList::StaticFind(name))
+  if (auto const document = DocumentSet::StaticFind(name))
     return document;
   return NewDocument(name, opt_mode);
 }
@@ -201,10 +201,10 @@ v8::Handle<v8::FunctionTemplate> DocumentClass::CreateConstructorTemplate(
   auto templ = v8_glue::CreateConstructorTemplate(isolate,
       &DocumentClass::NewDocument);
   return v8_glue::FunctionTemplateBuilder(isolate, templ)
-      .SetProperty("list", &DocumentList::StaticList)
-      .SetMethod("find", &DocumentList::StaticFind)
+      .SetProperty("list", &DocumentSet::StaticList)
+      .SetMethod("find", &DocumentSet::StaticFind)
       .SetMethod("getOrNew", &GetOrNew)
-      .SetMethod("remove", &DocumentList::StaticRemove)
+      .SetMethod("remove", &DocumentSet::StaticRemove)
       .Build();
 }
 
@@ -318,16 +318,16 @@ class SaveFileCallback : public base::RefCounted<SaveFileCallback> {
 DEFINE_SCRIPTABLE_OBJECT(Document, DocumentClass)
 
 Document::Document(const base::string16& name, Mode* mode)
-    : buffer_(new Buffer(DocumentList::instance()->MakeUniqueName(name),
+    : buffer_(new Buffer(DocumentSet::instance()->MakeUniqueName(name),
                          mode->text_mode())),
       mode_(mode),
       properties_(v8::Isolate::GetCurrent(),
                   NewMap(v8::Isolate::GetCurrent())) {
-  DocumentList::instance()->Register(this);
+  DocumentSet::instance()->Register(this);
 }
 
 Document::~Document() {
-  DocumentList::instance()->Unregister(this);
+  DocumentSet::instance()->Unregister(this);
 }
 
 base::char16 Document::charCodeAt(text::Posn position) const {
@@ -425,7 +425,7 @@ void Document::EndUndoGroup(const base::string16& name) {
 }
 
 Document* Document::Find(const base::string16& name) {
-  return DocumentList::instance()->Find(name);
+  return DocumentSet::instance()->Find(name);
 }
 
 bool Document::IsValidPosition(text::Posn position) const {
@@ -460,7 +460,7 @@ Posn Document::Redo(Posn position) {
 void Document::RenameTo(const base::string16& new_name) {
   if (name() == new_name)
    return;
-  auto& list = *DocumentList::instance();
+  auto& list = *DocumentSet::instance();
   auto new_unique_name = list.MakeUniqueName(new_name);
   list.Unregister(this);
   buffer_->SetName(new_unique_name);
@@ -468,7 +468,7 @@ void Document::RenameTo(const base::string16& new_name) {
 }
 
 void Document::ResetForTesting() {
-  DocumentList::instance()->ResetForTesting();
+  DocumentSet::instance()->ResetForTesting();
 }
 
 void Document::Save(const base::string16& filename,

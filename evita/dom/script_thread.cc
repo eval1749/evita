@@ -5,11 +5,10 @@
 
 #pragma warning(push)
 #pragma warning(disable: 4100 4625 4626)
+#include "base/bind.h"
+#include "base/callback.h"
 #include "base/message_loop/message_loop.h"
-#pragma warning(pop)
 #include "base/synchronization/waitable_event.h"
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 #include "base/threading/thread.h"
 #pragma warning(pop)
 #include "evita/dom/lock.h"

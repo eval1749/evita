@@ -45,6 +45,7 @@
         'dom/js_console_externs.js',
         'dom/key_names_externs.js',
         'dom/modes/modes_externs.js',
+        'dom/modes/mutation_observer_externs.js',
         'dom/os/file_externs.js',
         'dom/os/process_externs.js',
         'dom/point_externs.js',
@@ -215,6 +216,11 @@
         'dom/modes/plain_text_mode.cc',
         'dom/modes/python_mode.cc',
         'dom/modes/xml_mode.cc',
+
+        'dom/mutation_observer.cc',
+        'dom/mutation_observer_controller.cc',
+        'dom/mutation_observer_init.cc',
+        'dom/mutation_record.cc',
 
         'dom/os/abstract_file.cc',
         'dom/os/file.cc',

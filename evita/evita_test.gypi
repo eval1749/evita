@@ -78,6 +78,7 @@
         'dom/file_path_unittest.cc',
         'dom/mock_io_delegate.cc',
         'dom/mock_view_impl.cc',
+        'dom/mutation_observer_unittest.cc',
         'dom/os/file_unittest.cc',
         'dom/os/process_unittest.cc',
         'dom/modes/modes_unittest.cc',

@@ -85,6 +85,9 @@ italic
 normal
 bold
 
+# MutationObserverInit
+summary
+
 # Os.File.Error
 Os
 File

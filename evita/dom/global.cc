@@ -38,6 +38,8 @@
 #include "evita/dom/modes/plain_text_mode.h"
 #include "evita/dom/modes/python_mode.h"
 #include "evita/dom/modes/xml_mode.h"
+#include "evita/dom/mutation_observer.h"
+#include "evita/dom/mutation_record.h"
 #include "evita/dom/os/file.h"
 #include "evita/dom/os/process.h"
 #include "evita/dom/point.h"
@@ -120,6 +122,9 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
       INSTALL(PlainTextMode);
       INSTALL(PythonMode);
       INSTALL(XmlMode);
+
+    INSTALL(MutationObserver);
+    INSTALL(MutationRecord);
 
     INSTALL(Selection);
         INSTALL(TableSelection);

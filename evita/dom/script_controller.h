@@ -7,11 +7,8 @@
 #include <memory>
 #include <vector>
 
-#pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
-#include "base/bind.h"
-#include "base/callback.h"
-#pragma warning(pop)
+#include "base/callback_forward.h"
+#include "base/location.h"
 #include "base/strings/string16.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/v8_glue/isolate_holder.h"

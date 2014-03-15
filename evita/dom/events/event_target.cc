@@ -6,6 +6,12 @@
 #include <list>
 #include <unordered_map>
 
+#pragma warning(push)
+#pragma warning(disable: 4100 4625 4626)
+#include "base/bind.h"
+#include "base/callback.h"
+#include "base/message_loop/message_loop.h"
+#pragma warning(pop)
 #include "common/adoptors/reverse.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/script_controller.h"
@@ -212,6 +218,18 @@ void EventTarget::RemoveEventListener(const base::string16& type,
                                       v8::Handle<v8::Object> listener,
                                       Optional<bool> capture) {
   event_listener_map_->Remove(type, listener, capture.get(false));
+}
+
+void EventTarget::ScheduleDispatchEvent(Event* event) {
+  auto const message_loop = base::MessageLoop::current();
+  if (!message_loop) {
+    // All unit tests except for explicitly construct |base::MessageLoop|
+    // don't have message loop.
+    return;
+  }
+  message_loop->PostTask(FROM_HERE, base::Bind(
+      base::IgnoreResult(&EventTarget::DispatchEvent), base::Unretained(this),
+      base::Unretained(event)));
 }
 
 }  // namespace dom

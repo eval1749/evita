@@ -37,6 +37,7 @@ class EventTarget : public v8_glue::Scriptable<EventTarget> {
   public: void RemoveEventListener(const base::string16& type,
                                    v8::Handle<v8::Object> callback,
                                    Optional<bool> capture);
+  public: void ScheduleDispatchEvent(Event* event);
 
   DISALLOW_COPY_AND_ASSIGN(EventTarget);
 };

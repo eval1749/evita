@@ -52,8 +52,6 @@ using namespace rendering;
 TextRenderer::TextRenderer(text::Buffer* buffer)
     : gfx_(nullptr),
       m_pBuffer(buffer),
-      m_lStart(0),
-      m_lEnd(0),
       screen_text_block_(new ScreenTextBlock()),
       text_block_(new TextBlock(buffer)) {
 }
@@ -62,7 +60,7 @@ TextRenderer::~TextRenderer() {
 }
 
 TextLine* TextRenderer::FindLine(Posn lPosn) const {
-  if (lPosn < m_lStart || lPosn > m_lEnd)
+  if (lPosn < GetStart() || lPosn > GetEnd())
     return nullptr;
 
   for (auto const line : text_block_->lines()) {
@@ -74,15 +72,22 @@ TextLine* TextRenderer::FindLine(Posn lPosn) const {
   return nullptr;
 }
 
+text::Posn TextRenderer::GetEnd() const {
+  DCHECK(!text_block_->dirty());
+  return text_block_->GetLast()->GetEnd();
+}
+
+text::Posn TextRenderer::GetStart() const {
+  DCHECK(!text_block_->dirty());
+  return text_block_->GetFirst()->GetStart();
+}
+
 void TextRenderer::Format(Posn lStart) {
   DCHECK(gfx_);
   text_block_->Reset();
-  m_lStart = lStart;
-
   TextFormatter oFormatter(*gfx_, text_block_.get(), m_pBuffer, lStart,
                            selection_);
   oFormatter.Format();
-  m_lEnd = text_block_->GetLast()->GetEnd();
 }
 
 TextLine* TextRenderer::FormatLine(Posn lStart) {
@@ -93,9 +98,9 @@ TextLine* TextRenderer::FormatLine(Posn lStart) {
 }
 
 bool TextRenderer::isPosnVisible(Posn lPosn) const {
-  if (lPosn < m_lStart)
+  if (lPosn < GetStart())
     return false;
-  if (lPosn >= m_lEnd)
+  if (lPosn >= GetEnd())
     return false;
 
   auto y = text_block_->top();
@@ -148,7 +153,7 @@ Posn TextRenderer::MapPointToPosn(gfx::PointF pt) const {
 //
 gfx::RectF TextRenderer::MapPosnToPoint(Posn lPosn) const {
   DCHECK(gfx_);
-  if (lPosn < m_lStart || lPosn > m_lEnd)
+  if (lPosn < GetStart() || lPosn > GetEnd())
     return gfx::RectF();
 
   auto y = text_block_->top();
@@ -211,7 +216,7 @@ void TextRenderer::Reset() {
 
 bool TextRenderer::ScrollDown() {
   DCHECK(gfx_);
-  if (!m_lStart)
+  if (!GetStart())
     return false;
   if (text_block_->GetHeight() >= text_block_->height() &&
       !text_block_->DiscardLastLine()) {
@@ -219,7 +224,7 @@ bool TextRenderer::ScrollDown() {
     return false;
   }
 
-  auto const lGoal  = m_lStart - 1;
+  auto const lGoal  = GetStart() - 1;
   auto const lStart = m_pBuffer->ComputeStartOfLine(lGoal);
   TextFormatter formatter(*gfx_, text_block_.get(), m_pBuffer, lStart, selection_);
 
@@ -235,9 +240,6 @@ bool TextRenderer::ScrollDown() {
     if (!text_block_->DiscardLastLine())
       break;
   }
-
-  m_lStart = text_block_->GetFirst()->GetStart();
-  m_lEnd = text_block_->GetLast()->GetEnd();
   return true;
 }
 
@@ -249,7 +251,7 @@ bool TextRenderer::ScrollToPosn(Posn lPosn) {
   auto const cLines = pageLines();
   auto const cLines2 = std::max(cLines / 2, 1);
 
-  if (lPosn > m_lStart) {
+  if (lPosn > GetStart()) {
     for (auto k = 0; k < cLines2; k++) {
         if (!ScrollUp())
           return k;
@@ -314,8 +316,6 @@ bool TextRenderer::ScrollUp() {
 
   auto const line = oFormatter.FormatLine();
   text_block_->Append(line);
-  m_lStart = text_block_->GetFirst()->GetStart();
-  m_lEnd = text_block_->GetLast()->GetEnd();
   return true;
 }
 
@@ -349,7 +349,7 @@ bool TextRenderer::ShouldFormat(const Selection& selection,
     }
 
     if (!fSelection) {
-        if (lSelEnd < m_lStart || lSelStart > m_lEnd) {
+        if (lSelEnd < GetStart() || lSelStart > GetEnd()) {
             #if DEBUG_DIRTY
                 DEBUG_PRINTF("%p: clean with selection in outside.\n", this);
             #endif // DEBUG_DIRTY
@@ -365,7 +365,7 @@ bool TextRenderer::ShouldFormat(const Selection& selection,
 
   if (!fSelection) {
     // TextRenderer doesn't contain selection.
-    if (selection_.end < m_lStart || selection_.start > m_lEnd) {
+    if (selection_.end < GetStart() || selection_.start > GetEnd()) {
         if (lSelStart == lSelEnd) {
             #if DEBUG_DIRTY
                 DEBUG_PRINTF("%p: clean with selection.\n", this);
@@ -373,7 +373,7 @@ bool TextRenderer::ShouldFormat(const Selection& selection,
             return false;
         }
 
-        if (lSelEnd < m_lStart || lSelStart > m_lEnd)
+        if (lSelEnd < GetStart() || lSelStart > GetEnd())
             return false;
         #if DEBUG_DIRTY
             DEBUG_PRINTF("%p: Need to show selection.\n", this);

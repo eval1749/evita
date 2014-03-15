@@ -39,8 +39,6 @@ class TextRenderer {
 
   private: const gfx::Graphics* gfx_;
   private: text::Buffer* const m_pBuffer;
-  private: Posn m_lStart;
-  private: Posn m_lEnd;
   private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
   private: Selection selection_;
   private: std::unique_ptr<TextBlock> text_block_;
@@ -55,8 +53,8 @@ class TextRenderer {
 
   // [G]
   public: text::Buffer* GetBuffer() const { return m_pBuffer; }
-  public: Posn GetStart() const { return m_lStart; }
-  public: Posn GetEnd() const { return m_lEnd; }
+  public: Posn GetStart() const;
+  public: Posn GetEnd() const;
 
   // [I]
   private: bool isPosnVisible(Posn) const;

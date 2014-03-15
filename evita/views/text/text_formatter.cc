@@ -8,7 +8,6 @@
 #include "evita/css/style.h"
 #include "evita/css/style_resolver.h"
 #include "evita/css/style_selector.h"
-#include "evita/dom/spelling.h"
 #include "evita/text/buffer.h"
 #include "evita/text/interval.h"
 #include "evita/text/marker.h"
@@ -18,6 +17,7 @@
 #include "evita/views/text/render_selection.h"
 #include "evita/views/text/render_text_block.h"
 #include "evita/views/text/render_text_line.h"
+#include "evita/text/spelling.h"
 
 namespace views {
 namespace rendering {
@@ -86,7 +86,7 @@ class TextFormatter::TextScanner {
     fill();
   }
 
-  public: dom::Spelling spelling() const;
+  public: text::Spelling spelling() const;
   public: const css::StyleResolver* style_resolver() const {
     return m_pBuffer->style_resolver();
   }
@@ -141,11 +141,11 @@ class TextFormatter::TextScanner {
 
 };
 
-dom::Spelling TextFormatter::TextScanner::spelling() const {
+text::Spelling TextFormatter::TextScanner::spelling() const {
   if (!marker_ || m_lPosn >= marker_->end())
     marker_ = m_pBuffer->spelling_markers()->GetLowerBoundMarker(m_lPosn);
   return marker_ && marker_->Contains(m_lPosn) ?
-      static_cast<dom::Spelling>(marker_->type()) : dom::Spelling::None;
+      static_cast<text::Spelling>(marker_->type()) : text::Spelling::None;
 }
 
 RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
@@ -294,10 +294,10 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
     css::StyleSelector::defaults()));
 
   switch (text_scanner_->spelling()) {
-    case dom::Spelling::Misspelled:
+    case text::Spelling::Misspelled:
       style.set_text_decoration(css::TextDecoration::RedWave);
       break;
-    case dom::Spelling::BadGrammar:
+    case text::Spelling::BadGrammar:
       style.set_text_decoration(css::TextDecoration::GreenWave);
       break;
   }

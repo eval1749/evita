@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_spelling_h)
-#define INCLUDE_evita_dom_spelling_h
+#if !defined(INCLUDE_evita_text_spelling_h)
+#define INCLUDE_evita_text_spelling_h
 
-namespace dom {
+namespace text {
 
 enum class Spelling {
   None,
@@ -14,6 +14,6 @@ enum class Spelling {
   BadGrammar,
 };
 
-}  // namespace dom
+}  // namespace text
 
-#endif // !defined(INCLUDE_evita_dom_spelling_h)
+#endif // !defined(INCLUDE_evita_text_spelling_h)

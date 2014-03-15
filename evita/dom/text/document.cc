@@ -17,11 +17,11 @@
 #include "evita/dom/public/api_callback.h"
 #include "evita/dom/text/regexp.h"
 #include "evita/dom/script_controller.h"
-#include "evita/dom/spelling.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/text/marker.h"
 #include "evita/text/marker_set.h"
 #include "evita/text/modes/mode.h"
+#include "evita/text/spelling.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
@@ -326,7 +326,7 @@ int Document::spelling_at(text::Posn offset) const {
   if (!IsValidPosition(offset))
     return 0;
   auto const marker = buffer_->spelling_markers()->GetMarkerAt(offset);
-  return marker ? marker->type() : static_cast<int>(Spelling::None);
+  return marker ? marker->type() : static_cast<int>(text::Spelling::None);
 }
 
 bool Document::CheckCanChange() const {

@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_events_event_handler_h)
-#define INCLUDE_evita_dom_events_event_handler_h
+#if !defined(INCLUDE_evita_dom_events_view_event_handler_impl_h)
+#define INCLUDE_evita_dom_events_view_event_handler_impl_h
 
 #include "evita/dom/public/view_event_handler.h"
 
@@ -11,11 +11,11 @@ class Event;
 class EventTarget;
 class ScriptController;
 
-class EventHandler : public domapi::ViewEventHandler {
+class ViewEventHandlerImpl : public domapi::ViewEventHandler {
   private: ScriptController* controller_;
 
-  public: EventHandler(ScriptController* controller);
-  public: ~EventHandler();
+  public: ViewEventHandlerImpl(ScriptController* controller);
+  public: ~ViewEventHandlerImpl();
 
   private: void DispatchEvent(EventTarget* event_target, Event* event);
 
@@ -45,9 +45,9 @@ class EventHandler : public domapi::ViewEventHandler {
   private: virtual void RunCallback(base::Closure callback) override;
   private: virtual void WillDestroyHost() override;
 
-  DISALLOW_COPY_AND_ASSIGN(EventHandler);
+  DISALLOW_COPY_AND_ASSIGN(ViewEventHandlerImpl);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_events_event_handler_h)
+#endif //!defined(INCLUDE_evita_dom_events_view_event_handler_impl_h)

@@ -30,8 +30,8 @@ class Runner;
 
 namespace dom {
 
-class EventHandler;
 class ViewDelegate;
+class ViewEventHandlerImpl;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -48,7 +48,7 @@ class SuppressMessageBoxScope {
 //
 class ScriptController : public v8_glue::RunnerDelegate {
   private: v8_glue::IsolateHolder isolate_holder_;
-  private: std::unique_ptr<EventHandler> event_handler_;
+  private: std::unique_ptr<ViewEventHandlerImpl> event_handler_;
   private: domapi::IoDelegate* io_delegate_;
   private: std::unique_ptr<v8_glue::Runner> runner_;
   private: bool started_;
@@ -60,7 +60,9 @@ class ScriptController : public v8_glue::RunnerDelegate {
                             domapi::IoDelegate* io_deleage);
   public: ~ScriptController();
 
-  public: EventHandler* event_handler() const { return event_handler_.get(); }
+  public: ViewEventHandlerImpl* event_handler() const {
+    return event_handler_.get();
+  }
   public: static ScriptController* instance();
   public: domapi::IoDelegate* io_delegate() const { return io_delegate_; }
   public: v8::Isolate* isolate() const;

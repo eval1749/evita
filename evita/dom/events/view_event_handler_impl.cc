@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/events/event_handler.h"
+#include "evita/dom/events/view_event_handler_impl.h"
 
 #include "evita/dom/editor_window.h"
 #include "evita/dom/events/focus_event.h"
@@ -89,15 +89,15 @@ v8::Handle<v8::Object> ToMethodObject(v8::Isolate* isolate,
 }
 }  // namespace
 
-EventHandler::EventHandler(ScriptController* controller)
+ViewEventHandlerImpl::ViewEventHandlerImpl(ScriptController* controller)
     : controller_(controller) {
 }
 
-EventHandler::~EventHandler() {
+ViewEventHandlerImpl::~ViewEventHandlerImpl() {
 }
 
 // Call |handleEvent| function in the class of event target.
-void EventHandler::DispatchEvent(EventTarget* event_target, Event* event) {
+void ViewEventHandlerImpl::DispatchEvent(EventTarget* event_target, Event* event) {
   DOM_AUTO_LOCK_SCOPE();
   if (!event_target->DispatchEvent(event))
     return;
@@ -119,7 +119,7 @@ void EventHandler::DispatchEvent(EventTarget* event_target, Event* event) {
 }
 
 // domapi::ViewEventHandler
-void EventHandler::AppendTextToBuffer(text::Buffer* buffer,
+void ViewEventHandlerImpl::AppendTextToBuffer(text::Buffer* buffer,
                                       const base::string16& text) {
   DOM_AUTO_LOCK_SCOPE();
   auto const readonly = buffer->IsReadOnly();
@@ -130,14 +130,14 @@ void EventHandler::AppendTextToBuffer(text::Buffer* buffer,
     buffer->SetReadOnly(true);
 }
 
-void EventHandler::DidDestroyWidget(WindowId window_id) {
+void ViewEventHandlerImpl::DidDestroyWidget(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)
     return;
   window->DidDestroyWindow();
 }
 
-void EventHandler::DidDropWidget(WindowId source_id,
+void ViewEventHandlerImpl::DidDropWidget(WindowId source_id,
                                  WindowId target_id) {
   auto const source_window = FromWindowId(source_id);
   if (!source_window)
@@ -152,21 +152,21 @@ void EventHandler::DidDropWidget(WindowId source_id,
   DispatchEvent(target_window, new WindowEvent(L"dropwindow", init_dict));
 }
 
-void EventHandler::DidKillFocus(WindowId window_id) {
+void ViewEventHandlerImpl::DidKillFocus(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)
     return;
   DispatchEvent(window, new FocusEvent(L"blur", FocusEventInit()));
 }
 
-void EventHandler::DidRealizeWidget(WindowId window_id) {
+void ViewEventHandlerImpl::DidRealizeWidget(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)
     return;
   window->DidRealizeWindow();
 }
 
-void EventHandler::DidResizeWidget(WindowId window_id, int left, int top,
+void ViewEventHandlerImpl::DidResizeWidget(WindowId window_id, int left, int top,
                                    int right, int bottom) {
   auto const window = FromWindowId(window_id);
   if (!window)
@@ -174,7 +174,7 @@ void EventHandler::DidResizeWidget(WindowId window_id, int left, int top,
   window->DidResize(left, top, right, bottom);
 }
 
-void EventHandler::DidRequestFocus(WindowId window_id) {
+void ViewEventHandlerImpl::DidRequestFocus(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)
     return;
@@ -182,11 +182,11 @@ void EventHandler::DidRequestFocus(WindowId window_id) {
   DispatchEvent(window, new FocusEvent(L"focus", FocusEventInit()));
 }
 
-void EventHandler::DidStartHost() {
+void ViewEventHandlerImpl::DidStartHost() {
   controller_->DidStartHost();
 }
 
-void EventHandler::DispatchFormEvent(const domapi::FormEvent& raw_event) {
+void ViewEventHandlerImpl::DispatchFormEvent(const domapi::FormEvent& raw_event) {
   auto const form_id = raw_event.target_id;
   auto const target = FromEventTargetId(raw_event.target_id);
   if (!target)
@@ -208,7 +208,7 @@ void EventHandler::DispatchFormEvent(const domapi::FormEvent& raw_event) {
   DispatchEvent(control, new FormEvent(raw_event.type, init_dict));
 }
 
-void EventHandler::DispatchKeyboardEvent(
+void ViewEventHandlerImpl::DispatchKeyboardEvent(
     const domapi::KeyboardEvent& api_event) {
   auto const window = FromEventTargetId(api_event.target_id);
   if (!window)
@@ -216,14 +216,15 @@ void EventHandler::DispatchKeyboardEvent(
   DispatchEvent(window, new KeyboardEvent(api_event));
 }
 
-void EventHandler::DispatchMouseEvent(const domapi::MouseEvent& api_event) {
+void ViewEventHandlerImpl::DispatchMouseEvent(
+    const domapi::MouseEvent& api_event) {
   auto const window = FromEventTargetId(api_event.target_id);
   if (!window)
     return;
   DispatchEvent(window, new MouseEvent(api_event));
 }
 
-void EventHandler::DispatchWheelEvent(
+void ViewEventHandlerImpl::DispatchWheelEvent(
     const domapi::WheelEvent& api_event) {
   auto const window = FromEventTargetId(api_event.target_id);
   if (!window)
@@ -231,12 +232,12 @@ void EventHandler::DispatchWheelEvent(
   DispatchEvent(window, new WheelEvent(api_event));
 }
 
-void EventHandler::OpenFile(WindowId window_id,
+void ViewEventHandlerImpl::OpenFile(WindowId window_id,
                             const base::string16& filename){
   controller_->OpenFile(window_id, filename);
 }
 
-void EventHandler::QueryClose(WindowId window_id) {
+void ViewEventHandlerImpl::QueryClose(WindowId window_id) {
   auto const window = Window::FromWindowId(window_id);
   if (!window)
     return;
@@ -247,12 +248,12 @@ void EventHandler::QueryClose(WindowId window_id) {
   DispatchEvent(window, new UiEvent(L"queryclose", init_dict));
 }
 
-void EventHandler::RunCallback(base::Closure callback) {
+void ViewEventHandlerImpl::RunCallback(base::Closure callback) {
   DOM_AUTO_LOCK_SCOPE();
   callback.Run();
 }
 
-void EventHandler::WillDestroyHost() {
+void ViewEventHandlerImpl::WillDestroyHost() {
   controller_->WillDestroyHost();
 }
 

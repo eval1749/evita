@@ -2,7 +2,7 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 #include "evita/dom/abstract_dom_test.h"
-#include "evita/dom/events/event_handler.h"
+#include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/mock_view_impl.h"
 #pragma warning(push)
 #pragma warning(disable: 4625 4626 4365)
@@ -13,16 +13,16 @@ namespace {
 
 using ::testing::_;
 
-class EventHandlerTest : public dom::AbstractDomTest {
-  protected: EventHandlerTest() {
+class ViewEventHandlerImplTest : public dom::AbstractDomTest {
+  protected: ViewEventHandlerImplTest() {
   }
-  public: virtual ~EventHandlerTest() {
+  public: virtual ~ViewEventHandlerImplTest() {
   }
 
-  DISALLOW_COPY_AND_ASSIGN(EventHandlerTest);
+  DISALLOW_COPY_AND_ASSIGN(ViewEventHandlerImplTest);
 };
 
-TEST_F(EventHandlerTest, DidDropWidget) {
+TEST_F(ViewEventHandlerImplTest, DidDropWidget) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_)).Times(2);
   EXPECT_SCRIPT_VALID(
       "var result, target;"
@@ -37,7 +37,7 @@ TEST_F(EventHandlerTest, DidDropWidget) {
   EXPECT_SCRIPT_TRUE("target == editorWindow");
 }
 
-TEST_F(EventHandlerTest, DidDropWidget_InvalidWindowId) {
+TEST_F(ViewEventHandlerImplTest, DidDropWidget_InvalidWindowId) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_)).Times(2);
   EXPECT_SCRIPT_VALID(
       "var result, target;"
@@ -51,7 +51,7 @@ TEST_F(EventHandlerTest, DidDropWidget_InvalidWindowId) {
   EXPECT_SCRIPT_EQ("2", "target.id");
 }
 
-TEST_F(EventHandlerTest, QueryClose) {
+TEST_F(ViewEventHandlerImplTest, QueryClose) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
   EXPECT_SCRIPT_VALID(
       "var result, target;"

@@ -58,7 +58,6 @@
         'dom/encoding/text_encoder_unittest.cc',
         'dom/errors_unittest.cc',
         'dom/events/document_event_unittest.cc',
-        'dom/events/event_handler_unittest.cc',
         'dom/events/event_target_unittest.cc',
         'dom/events/event_unittest.cc',
         'dom/events/focus_event_unittest.cc',
@@ -67,6 +66,7 @@
         'dom/events/mouse_event_unittest.cc',
         'dom/events/wheel_event_unittest.cc',
         'dom/events/ui_event_unittest.cc',
+        'dom/events/view_event_handler_impl_unittest.cc',
         'dom/events/window_event_unittest.cc',
 
         'dom/forms/button_control_unittest.cc',

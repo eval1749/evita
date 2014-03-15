@@ -5,7 +5,7 @@
 
 #include "base/logging.h"
 #include "base/strings/utf_string_conversions.h"
-#include "evita/dom/events/event_handler.h"
+#include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/global.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/mock_io_delegate.h"

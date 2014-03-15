@@ -12,7 +12,7 @@
 #include "base/strings/stringprintf.h"
 #include "evita/dom/document.h"
 #include "evita/dom/editor_window.h"
-#include "evita/dom/events/event_handler.h"
+#include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/global.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/view_delegate.h"
@@ -131,7 +131,7 @@ SuppressMessageBoxScope::~SuppressMessageBoxScope() {
 //
 ScriptController::ScriptController(ViewDelegate* view_delegate,
                                    domapi::IoDelegate* io_delegate)
-    : event_handler_(new EventHandler(this)),
+    : event_handler_(new ViewEventHandlerImpl(this)),
       io_delegate_(io_delegate),
       started_(false),
       testing_(false),

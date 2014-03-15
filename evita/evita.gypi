@@ -45,7 +45,7 @@
         'dom/js_console_externs.js',
         'dom/key_names_externs.js',
         'dom/modes/modes_externs.js',
-        'dom/modes/mutation_observer_externs.js',
+        'dom/mutation_observer_externs.js',
         'dom/os/file_externs.js',
         'dom/os/process_externs.js',
         'dom/point_externs.js',

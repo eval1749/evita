@@ -20,7 +20,7 @@ Document.Obsolete = {
 /**
  * @typedef {!function(string, !Document)}
  */
-var Document.Observer;
+Document.Observer;
 
 /**
  * @param {!Document.Observer} observer

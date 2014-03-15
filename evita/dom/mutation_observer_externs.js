@@ -7,13 +7,13 @@
  */
 function MutationRecord() {}
 
-/** @type {!Docuemnt} */
+/** @type {!Document} */
 MutationRecord.prototype.document;
 
 /** @type {number} */
 MutationRecord.prototype.offset;
 
-/** @type {type} */
+/** @type {string} */
 MutationRecord.prototype.type;
 
 /**

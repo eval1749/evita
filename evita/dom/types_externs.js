@@ -29,20 +29,20 @@ var Document = function(name, opt_mode) {};
 var Editor = function() {};
 
 /**
- * @interface
+ * @constructor
  */
 var EventTarget = function() {};
 
 /**
  * @constructor
- * @implements {EventTarget}
+ * @extends {EventTarget}
  * @param {number} control_id
  */
 var FormControl = function(control_id) {};
 
 /**
  * @constructor
- * @implements {EventTarget}
+ * @extends {EventTarget}
  */
 var Window = function() {};
 
@@ -81,7 +81,7 @@ var FilePath;
 
 /**
  * @constructor
- * @implements {EventTarget}
+ * @extends {EventTarget}
  */
 var Form = function() {};
 
@@ -147,7 +147,7 @@ var TextPosition = function(document, offset) {};
 var Range = function(document_or_range, opt_start, opt_end) {};
 
 /**
- * @interface
+ * @constructor
  */
 var Selection = function() {};
 
@@ -179,7 +179,7 @@ var TextWindow = function(range) {};
 
 /**
  * @constructor
- * @implements {Selection}
+ * @extends {Selection}
  * You can't create |TableSelection| object dirctory. You can obtain
  * |TableSelection| object via |TextWindow.prototype.selection|.
  */
@@ -187,7 +187,7 @@ var TableSelection = function() {};
 
 /**
  * @constructor
- * @implements {Selection}
+ * @extends {Selection}
  * You can't create |TextSelection| object dirctory. You can obtain
  * |TextSelection| object via |TextWindow.prototype.selection|.
  */

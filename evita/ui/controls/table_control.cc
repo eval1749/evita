@@ -193,7 +193,7 @@ TableControl::TableControlModel::TableControlModel(
       model_(model),
       row_height_(24.0f),
       selection_(model->GetRowCount()),
-      text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", 12)) {
+      text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", 14)) {
   {
     common::ComPtr<IDWriteInlineObject> inline_object;
     COM_VERIFY(gfx::FactorySet::instance()->dwrite().

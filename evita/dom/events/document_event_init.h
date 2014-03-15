@@ -14,6 +14,7 @@ class Window;
 class DocumentEventInit : public EventInit {
   private: gc::Member<Window> view_;
 
+  public: explicit DocumentEventInit(Window* view);
   public: DocumentEventInit();
   public: virtual ~DocumentEventInit();
 

@@ -10,9 +10,12 @@
 
 namespace dom {
 
-DocumentEventInit::DocumentEventInit() {
+DocumentEventInit::DocumentEventInit(Window* view) : view_(view){
   set_bubbles(true);
   set_cancelable(false);
+}
+
+DocumentEventInit::DocumentEventInit() : DocumentEventInit(nullptr) {
 }
 
 DocumentEventInit::~DocumentEventInit() {

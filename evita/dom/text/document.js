@@ -155,15 +155,24 @@
         if (position == document.length)
           return position;
         var word_class = wordClassAt(document, position);
-        if (word_class == WordClass.BLANK)
-          return position;
-        for (;;) {
+        if (word_class == WordClass.BLANK) {
+          if (position &&
+              wordClassAt(document, position - 1) != WordClass.BLANK) {
+            // We're already at end of word.
+            return position;
+          }
+          // Skil blanks
+          while (position < document.length) {
+            word_class = wordClassAt(document, position);
+            if (word_class != WordClass.BLANK)
+              break;
+            ++position;
+          }
+        }
+        while (position < document.length) {
+          if (wordClassAt(document, position) != word_class)
+            break;
           ++position;
-          if (position == document.length)
-            return position;
-          var word_class2 = wordClassAt(document, position);
-          if (word_class != word_class2)
-            return position;
         }
         return position;
       }

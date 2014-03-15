@@ -4,6 +4,7 @@
 
 #include "evita/views/text/render_text_block.h"
 
+#include "evita/dom/lock.h"
 #include "evita/text/buffer.h"
 #include "evita/views/text/render_text_line.h"
 
@@ -111,14 +112,17 @@ void TextBlock::SetRect(const gfx::RectF& rect) {
 
 // text::BufferMutationObserver
 void TextBlock::DidChangeStyle(Posn offset, size_t) {
+  ASSERT_DOM_LOCKED();
   InvalidateLines(offset);
 }
 
 void TextBlock::DidDeleteAt(Posn offset, size_t) {
+  ASSERT_DOM_LOCKED();
   InvalidateLines(offset);
 }
 
 void TextBlock::DidInsertAt(Posn offset, size_t) {
+  ASSERT_DOM_LOCKED();
   InvalidateLines(offset);
 }
 

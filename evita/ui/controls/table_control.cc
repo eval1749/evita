@@ -260,6 +260,7 @@ void TableControl::TableControlModel::DidRemoveRow(int row_id) {
 
 void TableControl::TableControlModel::DidResize(const gfx::RectF& rect) {
   rect_ = rect;
+  dirty_rect_ = rect_;
 }
 
 void TableControl::TableControlModel::DidRequestFocus() {

@@ -32,14 +32,18 @@ float CellWidth(const TableViewModel::Cell& cell) {
 }
 
 std::vector<ui::TableColumn> BuildColumns(const TableViewModel::Row* row) {
+  // TODO(yosi) We should specify minium/maximum column width from model.
+  auto min_width = 200.0f;
+  auto max_width = 300.0f;
   std::vector<ui::TableColumn> columns;
   for (auto& cell : row->cells()) {
     ui::TableColumn column;
     column.alignment = ui::TableColumn::Alignment::Left;
     column.column_id = static_cast<int>(columns.size());
     column.text = cell.text();
-    column.width = CellWidth(cell);
+    column.width = std::max(std::min(CellWidth(cell), max_width), min_width);
     columns.push_back(column);
+    min_width = 0.0f;
   }
   return std::move(columns);
 }
@@ -132,6 +136,7 @@ void TableView::UpdateControl(std::unique_ptr<TableViewModel> new_model) {
   if (control_)
     return;
 
+  // Adjust column width by contents
   for (auto row : model_->rows()) {
     auto column_runner = columns_.begin();
     for (auto& cell : row->cells()) {
@@ -139,9 +144,19 @@ void TableView::UpdateControl(std::unique_ptr<TableViewModel> new_model) {
       ++column_runner;
     }
   }
+
+  // Extend the right most column to fill window.
+  auto width = 0.0f;
+  for (auto& column : columns_) {
+    width += column.width;
+  }
+  if (width < rect().width())
+    columns_.back().width = rect().width() - width;
+
   control_ = new ui::TableControl(columns_, this, this);
   AppendChild(control_);
   control_->Realize(rect());
+  control_->Show();
 }
 
 std::unique_ptr<TableViewModel> TableView::UpdateModelIfNeeded() {
@@ -219,13 +234,7 @@ void TableView::MakeSelectionVisible() {
 }
 
 void TableView::Redraw() {
-  // TableView::Redraw() is called from command.
-  if (!editor::DomLock::instance()->locked()) {
-    UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-    if (lock_scope.locked())
-      Redraw();
-    return;
-  }
+  UI_ASSERT_DOM_LOCKED();
   auto new_model = UpdateModelIfNeeded();
   if (!new_model)
     return;
@@ -237,31 +246,14 @@ void TableView::UpdateStatusBar() const {
     base::StringPrintf(L"%d documents", GetRowCount())
   };
   Frame::FindFrame(*this)->SetStatusBar(texts);
-  
 }
 
 // ui::Widget
-void TableView::DidRealize() {
-  ContentWindow::DidRealize();
-  Redraw();
-}
-
-void TableView::DidRequestFocus() {
-  Redraw();
-  ContentWindow::DidRequestFocus();
-  if (control_)
-    control_->RequestFocus();
-}
-
+// Resize |ui::TableControl| to cover all client area.
 void TableView::DidResize() {
   ContentWindow::DidResize();
   if (control_)
     control_->ResizeTo(rect());
-}
-
-void TableView::Show() {
-  ContentWindow::Show();
-  Redraw();
 }
 
 // views::Window
@@ -269,9 +261,10 @@ bool TableView::OnIdle(int) {
   if (!is_shown())
     return false;
   auto new_model = UpdateModelIfNeeded();
-  if (!new_model)
-    return false;
-  UpdateControl(std::move(new_model));
+  if (new_model)
+    UpdateControl(std::move(new_model));
+  if (has_focus())
+    control_->RequestFocus();
   return false;
 }
 

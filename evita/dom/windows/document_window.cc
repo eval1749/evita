@@ -4,6 +4,8 @@
 #include "evita/dom/windows/document_window.h"
 
 #include "base/bind.h"
+#include "evita/dom/events/document_event.h"
+#include "evita/dom/events/document_event_init.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/windows/selection.h"
 #include "evita/v8_glue/converter.h"
@@ -50,6 +52,19 @@ DocumentWindow::~DocumentWindow() {
 
 Document* DocumentWindow::document() const {
   return selection_->document();
+}
+
+// Window
+void DocumentWindow::DidDestroyWindow() {
+  Window::DidDestroyWindow();
+  selection_->document()->ScheduleDispatchEvent(
+      new DocumentEvent(L"detach", DocumentEventInit(this)));
+}
+
+void DocumentWindow::DidRealizeWindow() {
+  Window::DidRealizeWindow();
+  selection_->document()->ScheduleDispatchEvent(
+      new DocumentEvent(L"attach", DocumentEventInit(this)));
 }
 
 }  // namespace dom

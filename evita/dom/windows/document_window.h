@@ -24,6 +24,10 @@ class DocumentWindow : public v8_glue::Scriptable<DocumentWindow, Window> {
   public: Document* document() const;
   public: Selection* selection() const { return selection_; }
 
+  // Window
+  private: virtual void DidDestroyWindow() override;
+  private: virtual void DidRealizeWindow() override;
+
   DISALLOW_COPY_AND_ASSIGN(DocumentWindow);
 };
 

@@ -13,6 +13,7 @@ enum class EventType {
   Click,
   DblClick,
   Focus,
+  Form,
   KeyDown,
   KeyUp,
   Load,
@@ -36,35 +37,35 @@ enum class MouseButton {
   Other2,
 };
 
-struct FormEvent {
+struct Event {
+  EventType event_type;
   dom::EventTargetId target_id;
+};
+
+struct FormEvent : Event {
   int control_id;
   base::string16 type;
   base::string16 data;
 };
 
-struct KeyboardEvent {
+struct KeyboardEvent : Event {
   bool alt_key;
   bool control_key;
-  EventType event_type;
   int key_code;
   int location;
   int repeat;
   bool meta_key;
   bool shift_key;
-  dom::WindowId target_id;
 };
 
-struct MouseEvent {
+struct MouseEvent : Event {
   bool alt_key;
   MouseButton button;
   int buttons;
   int client_x;
   int client_y;
   bool control_key;
-  EventType event_type;
   bool shift_key;
-  dom::WindowId target_id;
 };
 
 struct WheelEvent : MouseEvent {

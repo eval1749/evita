@@ -178,7 +178,12 @@ void DialogBox::DisableControl(int control_id) {
 
 void DialogBox::DispatchFormEvent(const base::string16& type, int control_id,
                                   const base::string16& value) {
-  domapi::FormEvent event {dialog_box_id_, control_id, type, value};
+  domapi::FormEvent event;
+  event.event_type = domapi::EventType::Form;
+  event.target_id = dialog_box_id_;
+  event.control_id = control_id;
+  event.type = type;
+  event.data = value;
   Application::instance()->view_event_handler()->DispatchFormEvent(event);
 }
 

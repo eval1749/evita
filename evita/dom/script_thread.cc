@@ -12,7 +12,7 @@
 #include "base/threading/thread.h"
 #pragma warning(pop)
 #include "evita/dom/lock.h"
-#include "evita/dom/public/api_event.h"
+#include "evita/dom/public/view_event.h"
 #include "evita/dom/public/float_point.h"
 #include "evita/dom/script_controller.h"
 #include "evita/ui/events/event.h"

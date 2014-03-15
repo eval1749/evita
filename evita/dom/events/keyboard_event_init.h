@@ -5,7 +5,7 @@
 
 #include "evita/dom/events/ui_event_init.h"
 
-#include "evita/dom/public/api_event.h"
+#include "evita/dom/public/view_event.h"
 
 namespace domapi {
 struct KeyboardEvent;

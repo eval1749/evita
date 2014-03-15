@@ -14,7 +14,7 @@
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/forms/radio_button_control.h"
 #include "evita/dom/forms/text_field_control.h"
-#include "evita/dom/public/api_event.h"
+#include "evita/dom/public/view_event.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"

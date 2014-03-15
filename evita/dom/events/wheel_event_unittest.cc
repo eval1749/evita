@@ -5,7 +5,7 @@
 #include "evita/dom/abstract_dom_test.h"
 
 #include "evita/dom/events/wheel_event.h"
-#include "evita/dom/public/api_event.h"
+#include "evita/dom/public/view_event.h"
 
 namespace {
 

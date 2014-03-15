@@ -1,7 +1,9 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_public_api_event_h)
-#define INCLUDE_evita_dom_public_api_event_h
+// Copyright (c) 2013-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#if !defined(INCLUDE_evita_dom_public_view_event_h)
+#define INCLUDE_evita_dom_public_view_event_h
 
 #include "evita/dom/window_id.h"
 
@@ -77,4 +79,4 @@ struct WheelEvent : MouseEvent {
 
 }  // namespace domapi
 
-#endif //!defined(INCLUDE_evita_dom_public_api_event_h)
+#endif //!defined(INCLUDE_evita_dom_public_view_event_h)

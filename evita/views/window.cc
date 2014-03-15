@@ -7,7 +7,7 @@
 
 #include "common/tree/child_nodes.h"
 #include "evita/editor/application.h"
-#include "evita/dom/public/api_event.h"
+#include "evita/dom/public/view_event.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/ui/events/event.h"
 #include "evita/views/window_set.h"

@@ -19,7 +19,7 @@
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/lock.h"
-#include "evita/dom/public/api_event.h"
+#include "evita/dom/public/view_event.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/window.h"
 #include "evita/gc/local.h"

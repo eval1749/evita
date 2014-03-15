@@ -19,10 +19,11 @@ namespace ui {
 
 namespace {
 
-gfx::ColorF RgbToColorF(int red, int green, int blue) {
+gfx::ColorF RgbToColorF(int red, int green, int blue, float alpha) {
   return gfx::ColorF(static_cast<float>(red) / 255,
                      static_cast<float>(green) / 255,
-                     static_cast<float>(blue) / 255);
+                     static_cast<float>(blue) / 255,
+                     alpha);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -190,9 +191,9 @@ TableControl::TableControlModel::TableControlModel(
     const TableModel* model)
     : has_focus_(false),
       model_(model),
-      row_height_(20.0f),
+      row_height_(24.0f),
       selection_(model->GetRowCount()),
-      text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", row_height_ - 6)) {
+      text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", 12)) {
   {
     common::ComPtr<IDWriteInlineObject> inline_object;
     COM_VERIFY(gfx::FactorySet::instance()->dwrite().
@@ -348,12 +349,9 @@ void TableControl::TableControlModel::DrawHeaderRow(gfx::Graphics* gfx,
 
 void TableControl::TableControlModel::DrawRow(gfx::Graphics* gfx,
                                               const Row* row) const {
-  auto const bgcolor = row->selected() ?
-      has_focus_ ? RgbToColorF(51, 153, 255) : RgbToColorF(191, 205, 219) :
-      gfx::ColorF(gfx::ColorF::White);
-  auto const color = row->selected() ?
-      has_focus_ ? gfx::ColorF(gfx::ColorF::White) : RgbToColorF(67, 78, 84) :
-      gfx::ColorF(gfx::ColorF::Black);
+  auto const kPadding = 2.0f;
+  auto const bgcolor = gfx::ColorF(gfx::ColorF::White);
+  auto const color = gfx::ColorF(gfx::ColorF::Black);
   gfx->FillRectangle(gfx::Brush(*gfx, bgcolor), row->rect());
   gfx::Brush textBrush(*gfx, color);
   gfx::PointF cell_left_top(row->rect().left_top());
@@ -364,10 +362,23 @@ void TableControl::TableControlModel::DrawRow(gfx::Graphics* gfx,
     auto const width = column_index == columns_.size() ?
         rect_.width() - cell_left_top.x : column->width();
     gfx::RectF rect(cell_left_top, gfx::SizeF(width, row_height_));
+    rect.left += kPadding;
+    rect.top += kPadding;
+    rect.right -= kPadding;
+    rect.bottom -= kPadding;
     (*gfx)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
                      *text_format_, rect, textBrush);
     cell_left_top.x += column->width();
-
+  }
+  if (row->selected()) {
+    gfx->FillRectangle(gfx::Brush(*gfx, has_focus_ ?
+                                   RgbToColorF(51, 153, 255, 0.3f) :
+                                   RgbToColorF(191, 205, 191, 0.3f)),
+                       row->rect());
+    gfx->DrawRectangle(gfx::Brush(*gfx, has_focus_ ?
+                                  RgbToColorF(51, 153, 255, 0.5f) :
+                                  RgbToColorF(191, 205, 191, 0.5f)),
+                       row->rect());
   }
 }
 

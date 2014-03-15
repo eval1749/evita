@@ -33,6 +33,7 @@ class EventTarget : public v8_glue::Scriptable<EventTarget> {
                                 Optional<bool> capture);
   public: virtual EventPath BuildEventPath() const;
   public: virtual bool DispatchEvent(Event* event);
+  private: void DispatchEventWithInLock(Event* event);
   private: void InvokeEventListeners(Event* event);
   public: void RemoveEventListener(const base::string16& type,
                                    v8::Handle<v8::Object> callback,

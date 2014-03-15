@@ -13,6 +13,7 @@
 #include "base/message_loop/message_loop.h"
 #pragma warning(pop)
 #include "common/adoptors/reverse.h"
+#include "evita/dom/lock.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/script_controller.h"
 #include "evita/v8_glue/converter.h"
@@ -187,6 +188,12 @@ bool EventTarget::DispatchEvent(Event* event) {
   return !event->default_prevented();
 }
 
+void EventTarget::DispatchEventWithInLock(Event* event) {
+  // We should prevent UI thread to access DOM.
+  DOM_AUTO_LOCK_SCOPE();
+  DispatchEvent(event);
+}
+
 void EventTarget::InvokeEventListeners(Event* event) {
   auto listeners = event_listener_map_->Find(event->type());
   if (!listeners)
@@ -228,7 +235,7 @@ void EventTarget::ScheduleDispatchEvent(Event* event) {
     return;
   }
   message_loop->PostTask(FROM_HERE, base::Bind(
-      base::IgnoreResult(&EventTarget::DispatchEvent), base::Unretained(this),
+      &EventTarget::DispatchEventWithInLock, base::Unretained(this),
       base::Unretained(event)));
 }
 

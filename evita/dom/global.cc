@@ -17,6 +17,7 @@
 #include "evita/dom/events/keyboard_event.h"
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
+#include "evita/dom/events/view_event_target.h"
 #include "evita/dom/events/wheel_event.h"
 #include "evita/dom/events/window_event.h"
 #include "evita/dom/forms/button_control.h"
@@ -98,17 +99,18 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
 
     INSTALL(EventTarget);
       INSTALL(Document);
-      INSTALL(Form);
-      INSTALL(FormControl);
-        INSTALL(ButtonControl);
-        INSTALL(CheckboxControl);
-        INSTALL(RadioButtonControl);
-        INSTALL(TextFieldControl);
-      INSTALL(Window);
-        INSTALL(DocumentWindow);
-          INSTALL(TableWindow);
-          INSTALL(TextWindow);
-        INSTALL(EditorWindow);
+      INSTALL(ViewEventTarget);
+        INSTALL(Form);
+        INSTALL(FormControl);
+          INSTALL(ButtonControl);
+          INSTALL(CheckboxControl);
+          INSTALL(RadioButtonControl);
+          INSTALL(TextFieldControl);
+        INSTALL(Window);
+          INSTALL(DocumentWindow);
+            INSTALL(TableWindow);
+            INSTALL(TextWindow);
+          INSTALL(EditorWindow);
 
     INSTALL(Mode);
       INSTALL(ConfigMode);

@@ -4,7 +4,6 @@
 #include "evita/dom/events/event_handler.h"
 
 #include "evita/dom/editor_window.h"
-#include "evita/dom/events/event_target.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/focus_event_init.h"
 #include "evita/dom/events/form_event.h"
@@ -12,6 +11,8 @@
 #include "evita/dom/events/keyboard_event.h"
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
+#include "evita/dom/events/view_event_target.h"
+#include "evita/dom/events/view_event_target_set.h"
 #include "evita/dom/events/wheel_event.h"
 #include "evita/dom/events/window_event.h"
 #include "evita/dom/events/window_event_init.h"
@@ -39,6 +40,13 @@ base::string16 V8ToString(v8::Handle<v8::Value> value) {
     return base::string16();
   return base::string16(reinterpret_cast<base::char16*>(*string_value),
                         static_cast<size_t>(string_value.length()));
+}
+
+ViewEventTarget* FromEventTargetId(EventTargetId event_target_id) {
+  auto const target = ViewEventTargetSet::instance()->Find(event_target_id);
+  if (!target)
+    DVLOG(0) << "No such event target " << event_target_id;
+  return target;
 }
 
 Window* FromWindowId(WindowId window_id) {
@@ -180,7 +188,7 @@ void EventHandler::DidStartHost() {
 
 void EventHandler::DispatchFormEvent(const domapi::FormEvent& raw_event) {
   auto const form_id = raw_event.target_id;
-  auto const target = EventTarget::FromEventTargetId(raw_event.target_id);
+  auto const target = FromEventTargetId(raw_event.target_id);
   if (!target)
     return;
   auto const form = target->as<Form>();
@@ -202,14 +210,14 @@ void EventHandler::DispatchFormEvent(const domapi::FormEvent& raw_event) {
 
 void EventHandler::DispatchKeyboardEvent(
     const domapi::KeyboardEvent& api_event) {
-  auto const window = EventTarget::FromEventTargetId(api_event.target_id);
+  auto const window = FromEventTargetId(api_event.target_id);
   if (!window)
     return;
   DispatchEvent(window, new KeyboardEvent(api_event));
 }
 
 void EventHandler::DispatchMouseEvent(const domapi::MouseEvent& api_event) {
-  auto const window = EventTarget::FromEventTargetId(api_event.target_id);
+  auto const window = FromEventTargetId(api_event.target_id);
   if (!window)
     return;
   DispatchEvent(window, new MouseEvent(api_event));
@@ -217,7 +225,7 @@ void EventHandler::DispatchMouseEvent(const domapi::MouseEvent& api_event) {
 
 void EventHandler::DispatchWheelEvent(
     const domapi::WheelEvent& api_event) {
-  auto const window = EventTarget::FromEventTargetId(api_event.target_id);
+  auto const window = FromEventTargetId(api_event.target_id);
   if (!window)
     return;
   DispatchEvent(window, new WheelEvent(api_event));

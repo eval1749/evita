@@ -3,7 +3,7 @@
 #if !defined(INCLUDE_evita_dom_forms_form_h)
 #define INCLUDE_evita_dom_forms_form_h
 
-#include "evita/dom/events/event_target.h"
+#include "evita/dom/events/view_event_target.h"
 #include "evita/dom/public/dialog_box_id.h"
 
 #include <unordered_map>
@@ -13,7 +13,7 @@ namespace dom {
 
 class FormControl;
 
-class Form : public v8_glue::Scriptable<Form, EventTarget> {
+class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(Form);
 
   private: std::unordered_map<int, FormControl*> controls_;

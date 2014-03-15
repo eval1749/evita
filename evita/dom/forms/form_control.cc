@@ -19,7 +19,7 @@ namespace {
 // FormControlClass
 //
 class FormControlClass :
-    public v8_glue::DerivedWrapperInfo<FormControl, EventTarget> {
+    public v8_glue::DerivedWrapperInfo<FormControl, ViewEventTarget> {
 
   public: FormControlClass(const char* name)
       : BaseClass(name) {

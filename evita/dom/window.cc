@@ -13,6 +13,7 @@
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants.h"
 #include "evita/dom/events/event.h"
+#include "evita/dom/events/view_event_target_set.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/window_ostream.h"
@@ -58,7 +59,7 @@ namespace dom {
 
 namespace {
 class WindowWrapperInfo :
-    public v8_glue::DerivedWrapperInfo<Window, EventTarget> {
+    public v8_glue::DerivedWrapperInfo<Window, ViewEventTarget> {
 
   public: explicit WindowWrapperInfo(const char* name)
       : BaseClass(name) {
@@ -367,7 +368,7 @@ void Window::RemoveWindow(Window* window) {
 }
 
 void Window::ResetForTesting() {
-  EventTarget::ResetForTesting();
+  ViewEventTargetSet::instance()->ResetForTesting();
   global_focus_tick = 0;
   WindowIdMapper::instance()->ResetForTesting();
 }

@@ -3,7 +3,7 @@
 #if !defined(INCLUDE_evita_dom_forms_form_control_h)
 #define INCLUDE_evita_dom_forms_form_control_h
 
-#include "evita/dom/events/event_target.h"
+#include "evita/dom/events/view_event_target.h"
 
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
@@ -15,7 +15,7 @@ const FormResourceId kInvalidFormResourceId = -1;
 
 class Form;
 
-class FormControl : public v8_glue::Scriptable<FormControl, EventTarget> {
+class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(FormControl);
   friend class Form; // for updating form_
 

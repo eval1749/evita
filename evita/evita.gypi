@@ -190,6 +190,8 @@
         'dom/events/wheel_event_init.cc',
         'dom/events/ui_event.cc',
         'dom/events/ui_event_init.cc',
+        'dom/events/view_event_target.cc',
+        'dom/events/view_event_target_set.cc',
         'dom/events/window_event.cc',
         'dom/events/window_event_init.cc',
 

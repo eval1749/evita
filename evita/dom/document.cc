@@ -19,7 +19,6 @@
 #include "evita/dom/script_controller.h"
 #include "evita/dom/spelling.h"
 #include "evita/dom/view_delegate.h"
-#include "evita/dom/events/event_target_id.h"
 #include "evita/text/marker.h"
 #include "evita/text/marker_set.h"
 #include "evita/text/modes/mode.h"
@@ -255,8 +254,7 @@ class SaveFileCallback : public base::RefCounted<SaveFileCallback> {
 DEFINE_SCRIPTABLE_OBJECT(Document, DocumentClass)
 
 Document::Document(const base::string16& name, Mode* mode)
-    : ScriptableBase(kInvalidEventTargetId),
-      buffer_(new Buffer(DocumentSet::instance()->MakeUniqueName(name),
+    : buffer_(new Buffer(DocumentSet::instance()->MakeUniqueName(name),
                          mode->text_mode())),
       mode_(mode),
       properties_(v8::Isolate::GetCurrent(),

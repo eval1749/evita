@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "base/strings/string16.h"
-#include "evita/dom/selection.h"
+#include "evita/dom/windows/selection.h"
 #include "evita/gc/member.h"
 #include "evita/v8_glue/scriptable.h"
 

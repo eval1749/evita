@@ -11,7 +11,7 @@
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
-#include "evita/dom/window.h"
+#include "evita/dom/windows/window.h"
 #include "evita/v8_glue/converter.h"
 
 namespace {

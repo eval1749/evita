@@ -3,7 +3,7 @@
 #if !defined(INCLUDE_evita_dom_text_selection_h)
 #define INCLUDE_evita_dom_text_selection_h
 
-#include "evita/dom/selection.h"
+#include "evita/dom/windows/selection.h"
 #include "evita/gc/member.h"
 #include "evita/v8_glue/scriptable.h"
 

@@ -3,7 +3,7 @@
 #if !defined(INCLUDE_evita_dom_text_window_h)
 #define INCLUDE_evita_dom_text_window_h
 
-#include "evita/dom/document_window.h"
+#include "evita/dom/windows/document_window.h"
 
 #include "evita/gc/member.h"
 #include "evita/v8_glue/either.h"

@@ -9,7 +9,7 @@
 #include "evita/dom/promise_deferred.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
-#include "evita/dom/window.h"
+#include "evita/dom/windows/window.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/nullable.h"

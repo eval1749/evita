@@ -3,7 +3,7 @@
 
 #include "evita/dom/events/view_event_handler_impl.h"
 
-#include "evita/dom/editor_window.h"
+#include "evita/dom/windows/editor_window.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/focus_event_init.h"
 #include "evita/dom/events/form_event.h"
@@ -20,7 +20,7 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/script_controller.h"
-#include "evita/dom/window.h"
+#include "evita/dom/windows/window.h"
 #include "evita/gc/local.h"
 #include "evita/text/buffer.h"
 #include "evita/v8_glue/converter.h"

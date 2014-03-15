@@ -6,7 +6,7 @@
 #include "evita/dom/converter.h"
 #include "evita/dom/events/form_event_init.h"
 #include "evita/dom/public/view_event.h"
-#include "evita/dom/window.h"
+#include "evita/dom/windows/window.h"
 #include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {

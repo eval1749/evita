@@ -16,10 +16,10 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\commander_externs.js ^
   %externs_dir%\console_externs.js ^
   %externs_dir%\document_externs.js ^
-  %externs_dir%\document_window_externs.js ^
   %externs_dir%\encoding\text_decoder_externs.js ^
   %externs_dir%\encoding\text_encoder_externs.js ^
   %externs_dir%\errors_externs.js ^
+^
   %externs_dir%\events\document_event_externs.js ^
   %externs_dir%\events\event_externs.js ^
   %externs_dir%\events\event_target_externs.js ^
@@ -29,32 +29,37 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\events\mouse_event_externs.js ^
   %externs_dir%\events\ui_event_externs.js ^
   %externs_dir%\events\wheel_event_externs.js ^
+^
   %externs_dir%\forms\button_control_externs.js ^
   %externs_dir%\forms\checkbox_control_externs.js ^
   %externs_dir%\forms\form_externs.js ^
   %externs_dir%\forms\form_control_externs.js ^
   %externs_dir%\forms\radio_button_control_externs.js ^
   %externs_dir%\forms\text_field_control_externs.js ^
+^
   %externs_dir%\editor_externs.js ^
-  %externs_dir%\editor_window_externs.js ^
   %externs_dir%\file_path_externs.js ^
   %externs_dir%\js_console_externs.js ^
   %externs_dir%\key_names_externs.js ^
   %externs_dir%\modes\modes_externs.js ^
   %externs_dir%\os\file_externs.js ^
   %externs_dir%\os\process_externs.js ^
-  %externs_dir%\point_externs.js ^
   %externs_dir%\range_externs.js ^
   %externs_dir%\regexp_externs.js ^
   %externs_dir%\selection_externs.js ^
   %externs_dir%\style_externs.js ^
-  %externs_dir%\table_selection_externs.js ^
-  %externs_dir%\table_window_externs.js ^
-  %externs_dir%\text_position_externs.js ^
-  %externs_dir%\text_selection_externs.js ^
-  %externs_dir%\text_window_externs.js ^
   %externs_dir%\timer_externs.js ^
-  %externs_dir%\window_externs.js ^
+^
+  %externs_dir%\windows\document_window_externs.js ^
+  %externs_dir%\windows\editor_window_externs.js ^
+  %externs_dir%\windows\point_externs.js ^
+  %externs_dir%\windows\table_selection_externs.js ^
+  %externs_dir%\windows\table_window_externs.js ^
+  %externs_dir%\windows\text_position_externs.js ^
+  %externs_dir%\windows\text_selection_externs.js ^
+  %externs_dir%\windows\text_window_externs.js ^
+  %externs_dir%\windows\window_externs.js ^
+^
   %externs_dir%\jslib\editors_externs.js ^
   %externs_dir%\jslib\windows_externs.js
 

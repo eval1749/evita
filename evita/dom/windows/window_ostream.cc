@@ -1,8 +1,8 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/window.h"
-#include "evita/dom/window_ostream.h"
+#include "evita/dom/windows/window.h"
+#include "evita/dom/windows/window_ostream.h"
 
 namespace dom {
 namespace internal {

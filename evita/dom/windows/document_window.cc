@@ -1,11 +1,11 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/document_window.h"
+#include "evita/dom/windows/document_window.h"
 
 #include "base/bind.h"
 #include "evita/dom/document.h"
-#include "evita/dom/selection.h"
+#include "evita/dom/windows/selection.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/wrapper_info.h"
 

@@ -1,7 +1,7 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/editor_window.h"
+#include "evita/dom/windows/editor_window.h"
 
 #include <unordered_set>
 #include <utility>

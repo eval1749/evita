@@ -1,11 +1,11 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/table_window.h"
+#include "evita/dom/windows/table_window.h"
 
 #include "evita/dom/document.h"
 #include "evita/dom/range.h"
-#include "evita/dom/table_selection.h"
+#include "evita/dom/windows/table_selection.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/converter.h"

@@ -1,16 +1,16 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/text_window.h"
+#include "evita/dom/windows/text_window.h"
 
 #include "base/bind.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/document.h"
-#include "evita/dom/point.h"
+#include "evita/dom/windows/point.h"
 #include "evita/dom/public/float_point.h"
 #include "evita/dom/range.h"
 #include "evita/dom/script_controller.h"
-#include "evita/dom/text_selection.h"
+#include "evita/dom/windows/text_selection.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/wrapper_info.h"

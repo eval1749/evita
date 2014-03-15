@@ -2,7 +2,7 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 #include "evita/dom/abstract_dom_test.h"
-#include "evita/dom/point.h"
+#include "evita/dom/windows/point.h"
 
 namespace {
 

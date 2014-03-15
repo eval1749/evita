@@ -9,8 +9,8 @@
 #include "base/strings/string16.h"
 #include "evita/dom/public/dialog_box_id.h"
 #include "evita/dom/public/deferred.h"
-#include "evita/dom/window_id.h"
-#include "evita/dom/window_id.h"
+#include "evita/dom/windows/window_id.h"
+#include "evita/dom/windows/window_id.h"
 
 namespace domapi {
 class FloatPoint;

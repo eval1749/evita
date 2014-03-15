@@ -1,11 +1,11 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/selection.h"
+#include "evita/dom/windows/selection.h"
 
 #include "evita/dom/converter.h"
 #include "evita/dom/document.h"
-#include "evita/dom/document_window.h"
+#include "evita/dom/windows/document_window.h"
 #include "evita/dom/script_controller.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"

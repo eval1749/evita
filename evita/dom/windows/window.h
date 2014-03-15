@@ -8,7 +8,7 @@
 
 #include "common/tree/node.h"
 #include "evita/dom/events/view_event_target.h"
-#include "evita/dom/window_id.h"
+#include "evita/dom/windows/window_id.h"
 #include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/scriptable.h"
 

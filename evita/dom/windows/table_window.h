@@ -3,7 +3,7 @@
 #if !defined(INCLUDE_evita_dom_table_window_h)
 #define INCLUDE_evita_dom_table_window_h
 
-#include "evita/dom/document_window.h"
+#include "evita/dom/windows/document_window.h"
 
 #include "evita/gc/member.h"
 

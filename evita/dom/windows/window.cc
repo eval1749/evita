@@ -1,7 +1,7 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/window.h"
+#include "evita/dom/windows/window.h"
 
 #include <algorithm>
 #include <unordered_map>
@@ -16,7 +16,7 @@
 #include "evita/dom/events/view_event_target_set.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
-#include "evita/dom/window_ostream.h"
+#include "evita/dom/windows/window_ostream.h"
 #include "evita/gc/weak_ptr.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"

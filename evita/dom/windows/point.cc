@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/point.h"
+#include "evita/dom/windows/point.h"
 
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"

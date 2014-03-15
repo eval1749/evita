@@ -4,7 +4,7 @@
 #include "evita/dom/events/ui_event_init.h"
 
 #include "evita/dom/converter.h"
-#include "evita/dom/window.h"
+#include "evita/dom/windows/window.h"
 #include "evita/v8_glue/nullable.h"
 #include "v8_strings.h"
 

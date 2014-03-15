@@ -67,6 +67,15 @@
     return wordClassOf(document.charCodeAt_(position));
   }
 
+  /**
+   * @param {!Document} document
+   * @param {number} position
+   * @return {WordClass|null}
+   */
+  function wordClassBefore(document, position) {
+    return wordClassOf(document.charCodeAt_(position - 1));
+  }
+
   /** @enum{number} */
   global.Document.Obsolete = {
     CHECKING: -2,
@@ -157,7 +166,7 @@
         var word_class = wordClassAt(document, position);
         if (word_class == WordClass.BLANK) {
           if (position &&
-              wordClassAt(document, position - 1) != WordClass.BLANK) {
+              wordClassBefore(document, position) != WordClass.BLANK) {
             // We're already at end of word.
             return position;
           }
@@ -311,22 +320,22 @@
       case Unit.WORD: {
         if (!position)
           return position;
-        var word_class = wordClassAt(document, position - 1);
+        var word_class = wordClassBefore(document, position);
         if (word_class == WordClass.BLANK) {
           if (position < document.length &&
-              wordClassAt(document, position) == WordClass.WORD) {
+              wordClassAt(document, position) != WordClass.BLANK) {
             // We are at start of word.
             return position;
           }
-          while (position){
-            --position;
-            if (wordClassAt(document, position) != WordClass.WORD)
+          // Skil blanks
+          while (position) {
+            word_class = wordClassBefore(document, position);
+            if (word_class != WordClass.BLANK)
               break;
+            --position;
           }
         }
-        while (position) {
-         if (wordClassAt(document, position - 1) != WordClass.WORD)
-           break;
+        while (position && wordClassBefore(document, position) == word_class) {
          --position;
         }
         return position;

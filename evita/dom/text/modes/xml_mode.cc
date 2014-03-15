@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/modes/plain_text_mode.h"
+#include "evita/dom/text/modes/xml_mode.h"
 
 #include "evita/dom/text/document.h"
-#include "evita/text/modes/plain_text_mode.h"
+#include "evita/text/modes/xml_mode.h"
 #include "evita/v8_glue/converter.h"
 
 namespace dom {
@@ -13,26 +13,25 @@ namespace dom {
 namespace {
 //////////////////////////////////////////////////////////////////////
 //
-// PlainTextModeClass
+// XmlModeClass
 //
-class PlainTextModeClass
-    : public v8_glue::DerivedWrapperInfo<PlainTextMode, Mode> {
-  public: PlainTextModeClass(const char* name)
+class XmlModeClass : public v8_glue::DerivedWrapperInfo<XmlMode, Mode> {
+  public: XmlModeClass(const char* name)
       : BaseClass(name) {
   }
-  public: ~PlainTextModeClass() = default;
+  public: ~XmlModeClass() = default;
 
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate,
-        &PlainTextModeClass::NewPlainTextMode);
+        &XmlModeClass::NewXmlMode);
   }
 
-  private: static PlainTextMode* NewPlainTextMode() {
-    return new PlainTextMode();
+  private: static XmlMode* NewXmlMode() {
+    return new XmlMode();
   }
 
-  DISALLOW_COPY_AND_ASSIGN(PlainTextModeClass);
+  DISALLOW_COPY_AND_ASSIGN(XmlModeClass);
 };
 }  // namespace
 
@@ -40,13 +39,13 @@ class PlainTextModeClass
 //
 // Mode
 //
-DEFINE_SCRIPTABLE_OBJECT(PlainTextMode, PlainTextModeClass);
+DEFINE_SCRIPTABLE_OBJECT(XmlMode, XmlModeClass);
 
-PlainTextMode::PlainTextMode()
-    : ScriptableBase(new text::PlainTextMode()) {
+XmlMode::XmlMode()
+    : ScriptableBase(new text::XmlMode()) {
 }
 
-PlainTextMode::~PlainTextMode() {
+XmlMode::~XmlMode() {
 }
 
 }  // namespace dom

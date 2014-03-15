@@ -5,7 +5,7 @@
 #if !defined(INCLUDE_evita_dom_modes_java_mode_h)
 #define INCLUDE_evita_dom_modes_java_mode_h
 
-#include "evita/dom/modes/mode.h"
+#include "evita/dom/text/modes/mode.h"
 
 namespace dom {
 

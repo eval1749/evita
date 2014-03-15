@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/modes/cxx_mode.h"
+#include "evita/dom/text/modes/cxx_mode.h"
 
 #include "evita/dom/text/document.h"
 #include "evita/text/modes/cxx_mode.h"

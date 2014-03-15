@@ -13,7 +13,7 @@
 #include "evita/dom/text/buffer.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/text/document_set.h"
-#include "evita/dom/modes/mode.h"
+#include "evita/dom/text/modes/mode.h"
 #include "evita/dom/public/api_callback.h"
 #include "evita/dom/text/regexp.h"
 #include "evita/dom/script_controller.h"

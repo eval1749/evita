@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/modes/lisp_mode.h"
+#include "evita/dom/text/modes/config_mode.h"
 
 #include "evita/dom/text/document.h"
-#include "evita/text/modes/lisp_mode.h"
+#include "evita/text/modes/config_mode.h"
 #include "evita/v8_glue/converter.h"
 
 namespace dom {
@@ -13,25 +13,25 @@ namespace dom {
 namespace {
 //////////////////////////////////////////////////////////////////////
 //
-// LispModeClass
+// ConfigModeClass
 //
-class LispModeClass : public v8_glue::DerivedWrapperInfo<LispMode, Mode> {
-  public: LispModeClass(const char* name)
+class ConfigModeClass : public v8_glue::DerivedWrapperInfo<ConfigMode, Mode> {
+  public: ConfigModeClass(const char* name)
       : BaseClass(name) {
   }
-  public: ~LispModeClass() = default;
+  public: ~ConfigModeClass() = default;
 
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate,
-        &LispModeClass::NewLispMode);
+        &ConfigModeClass::NewConfigMode);
   }
 
-  private: static LispMode* NewLispMode() {
-    return new LispMode();
+  private: static ConfigMode* NewConfigMode() {
+    return new ConfigMode();
   }
 
-  DISALLOW_COPY_AND_ASSIGN(LispModeClass);
+  DISALLOW_COPY_AND_ASSIGN(ConfigModeClass);
 };
 }  // namespace
 
@@ -39,13 +39,13 @@ class LispModeClass : public v8_glue::DerivedWrapperInfo<LispMode, Mode> {
 //
 // Mode
 //
-DEFINE_SCRIPTABLE_OBJECT(LispMode, LispModeClass);
+DEFINE_SCRIPTABLE_OBJECT(ConfigMode, ConfigModeClass);
 
-LispMode::LispMode()
-    : ScriptableBase(new text::LispMode()) {
+ConfigMode::ConfigMode()
+    : ScriptableBase(new text::ConfigMode()) {
 }
 
-LispMode::~LispMode() {
+ConfigMode::~ConfigMode() {
 }
 
 }  // namespace dom

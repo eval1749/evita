@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/modes/xml_mode.h"
+#include "evita/dom/text/modes/python_mode.h"
 
 #include "evita/dom/text/document.h"
-#include "evita/text/modes/xml_mode.h"
+#include "evita/text/modes/python_mode.h"
 #include "evita/v8_glue/converter.h"
 
 namespace dom {
@@ -13,25 +13,25 @@ namespace dom {
 namespace {
 //////////////////////////////////////////////////////////////////////
 //
-// XmlModeClass
+// PythonModeClass
 //
-class XmlModeClass : public v8_glue::DerivedWrapperInfo<XmlMode, Mode> {
-  public: XmlModeClass(const char* name)
+class PythonModeClass : public v8_glue::DerivedWrapperInfo<PythonMode, Mode> {
+  public: PythonModeClass(const char* name)
       : BaseClass(name) {
   }
-  public: ~XmlModeClass() = default;
+  public: ~PythonModeClass() = default;
 
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate,
-        &XmlModeClass::NewXmlMode);
+        &PythonModeClass::NewPythonMode);
   }
 
-  private: static XmlMode* NewXmlMode() {
-    return new XmlMode();
+  private: static PythonMode* NewPythonMode() {
+    return new PythonMode();
   }
 
-  DISALLOW_COPY_AND_ASSIGN(XmlModeClass);
+  DISALLOW_COPY_AND_ASSIGN(PythonModeClass);
 };
 }  // namespace
 
@@ -39,13 +39,13 @@ class XmlModeClass : public v8_glue::DerivedWrapperInfo<XmlMode, Mode> {
 //
 // Mode
 //
-DEFINE_SCRIPTABLE_OBJECT(XmlMode, XmlModeClass);
+DEFINE_SCRIPTABLE_OBJECT(PythonMode, PythonModeClass);
 
-XmlMode::XmlMode()
-    : ScriptableBase(new text::XmlMode()) {
+PythonMode::PythonMode()
+    : ScriptableBase(new text::PythonMode()) {
 }
 
-XmlMode::~XmlMode() {
+PythonMode::~PythonMode() {
 }
 
 }  // namespace dom

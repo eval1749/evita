@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/modes/python_mode.h"
+#include "evita/dom/text/modes/mason_mode.h"
 
 #include "evita/dom/text/document.h"
-#include "evita/text/modes/python_mode.h"
+#include "evita/text/modes/mason_mode.h"
 #include "evita/v8_glue/converter.h"
 
 namespace dom {
@@ -13,25 +13,25 @@ namespace dom {
 namespace {
 //////////////////////////////////////////////////////////////////////
 //
-// PythonModeClass
+// MasonModeClass
 //
-class PythonModeClass : public v8_glue::DerivedWrapperInfo<PythonMode, Mode> {
-  public: PythonModeClass(const char* name)
+class MasonModeClass : public v8_glue::DerivedWrapperInfo<MasonMode, Mode> {
+  public: MasonModeClass(const char* name)
       : BaseClass(name) {
   }
-  public: ~PythonModeClass() = default;
+  public: ~MasonModeClass() = default;
 
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate,
-        &PythonModeClass::NewPythonMode);
+        &MasonModeClass::NewMasonMode);
   }
 
-  private: static PythonMode* NewPythonMode() {
-    return new PythonMode();
+  private: static MasonMode* NewMasonMode() {
+    return new MasonMode();
   }
 
-  DISALLOW_COPY_AND_ASSIGN(PythonModeClass);
+  DISALLOW_COPY_AND_ASSIGN(MasonModeClass);
 };
 }  // namespace
 
@@ -39,13 +39,13 @@ class PythonModeClass : public v8_glue::DerivedWrapperInfo<PythonMode, Mode> {
 //
 // Mode
 //
-DEFINE_SCRIPTABLE_OBJECT(PythonMode, PythonModeClass);
+DEFINE_SCRIPTABLE_OBJECT(MasonMode, MasonModeClass);
 
-PythonMode::PythonMode()
-    : ScriptableBase(new text::PythonMode()) {
+MasonMode::MasonMode()
+    : ScriptableBase(new text::MasonMode()) {
 }
 
-PythonMode::~PythonMode() {
+MasonMode::~MasonMode() {
 }
 
 }  // namespace dom

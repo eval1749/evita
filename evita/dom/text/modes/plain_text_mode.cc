@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/modes/java_mode.h"
+#include "evita/dom/text/modes/plain_text_mode.h"
 
 #include "evita/dom/text/document.h"
-#include "evita/text/modes/java_mode.h"
+#include "evita/text/modes/plain_text_mode.h"
 #include "evita/v8_glue/converter.h"
 
 namespace dom {
@@ -13,25 +13,26 @@ namespace dom {
 namespace {
 //////////////////////////////////////////////////////////////////////
 //
-// JavaModeClass
+// PlainTextModeClass
 //
-class JavaModeClass : public v8_glue::DerivedWrapperInfo<JavaMode, Mode> {
-  public: JavaModeClass(const char* name)
+class PlainTextModeClass
+    : public v8_glue::DerivedWrapperInfo<PlainTextMode, Mode> {
+  public: PlainTextModeClass(const char* name)
       : BaseClass(name) {
   }
-  public: ~JavaModeClass() = default;
+  public: ~PlainTextModeClass() = default;
 
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate,
-        &JavaModeClass::NewJavaMode);
+        &PlainTextModeClass::NewPlainTextMode);
   }
 
-  private: static JavaMode* NewJavaMode() {
-    return new JavaMode();
+  private: static PlainTextMode* NewPlainTextMode() {
+    return new PlainTextMode();
   }
 
-  DISALLOW_COPY_AND_ASSIGN(JavaModeClass);
+  DISALLOW_COPY_AND_ASSIGN(PlainTextModeClass);
 };
 }  // namespace
 
@@ -39,13 +40,13 @@ class JavaModeClass : public v8_glue::DerivedWrapperInfo<JavaMode, Mode> {
 //
 // Mode
 //
-DEFINE_SCRIPTABLE_OBJECT(JavaMode, JavaModeClass);
+DEFINE_SCRIPTABLE_OBJECT(PlainTextMode, PlainTextModeClass);
 
-JavaMode::JavaMode()
-    : ScriptableBase(new text::JavaMode()) {
+PlainTextMode::PlainTextMode()
+    : ScriptableBase(new text::PlainTextMode()) {
 }
 
-JavaMode::~JavaMode() {
+PlainTextMode::~PlainTextMode() {
 }
 
 }  // namespace dom

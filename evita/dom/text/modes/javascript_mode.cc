@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/modes/haskell_mode.h"
+#include "evita/dom/text/modes/javascript_mode.h"
 
 #include "evita/dom/text/document.h"
-#include "evita/text/modes/haskell_mode.h"
+#include "evita/text/modes/javascript_mode.h"
 #include "evita/v8_glue/converter.h"
 
 namespace dom {
@@ -13,25 +13,26 @@ namespace dom {
 namespace {
 //////////////////////////////////////////////////////////////////////
 //
-// HaskellModeClass
+// JavaScriptModeClass
 //
-class HaskellModeClass : public v8_glue::DerivedWrapperInfo<HaskellMode, Mode> {
-  public: HaskellModeClass(const char* name)
+class JavaScriptModeClass
+    : public v8_glue::DerivedWrapperInfo<JavaScriptMode, Mode> {
+  public: JavaScriptModeClass(const char* name)
       : BaseClass(name) {
   }
-  public: ~HaskellModeClass() = default;
+  public: ~JavaScriptModeClass() = default;
 
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate,
-        &HaskellModeClass::NewHaskellMode);
+        &JavaScriptModeClass::NewJavaScriptMode);
   }
 
-  private: static HaskellMode* NewHaskellMode() {
-    return new HaskellMode();
+  private: static JavaScriptMode* NewJavaScriptMode() {
+    return new JavaScriptMode();
   }
 
-  DISALLOW_COPY_AND_ASSIGN(HaskellModeClass);
+  DISALLOW_COPY_AND_ASSIGN(JavaScriptModeClass);
 };
 }  // namespace
 
@@ -39,13 +40,13 @@ class HaskellModeClass : public v8_glue::DerivedWrapperInfo<HaskellMode, Mode> {
 //
 // Mode
 //
-DEFINE_SCRIPTABLE_OBJECT(HaskellMode, HaskellModeClass);
+DEFINE_SCRIPTABLE_OBJECT(JavaScriptMode, JavaScriptModeClass);
 
-HaskellMode::HaskellMode()
-    : ScriptableBase(new text::HaskellMode()) {
+JavaScriptMode::JavaScriptMode()
+    : ScriptableBase(new text::JavaScriptMode()) {
 }
 
-HaskellMode::~HaskellMode() {
+JavaScriptMode::~JavaScriptMode() {
 }
 
 }  // namespace dom

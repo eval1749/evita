@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/modes/config_mode.h"
+#include "evita/dom/text/modes/perl_mode.h"
 
 #include "evita/dom/text/document.h"
-#include "evita/text/modes/config_mode.h"
+#include "evita/text/modes/perl_mode.h"
 #include "evita/v8_glue/converter.h"
 
 namespace dom {
@@ -13,25 +13,25 @@ namespace dom {
 namespace {
 //////////////////////////////////////////////////////////////////////
 //
-// ConfigModeClass
+// PerlModeClass
 //
-class ConfigModeClass : public v8_glue::DerivedWrapperInfo<ConfigMode, Mode> {
-  public: ConfigModeClass(const char* name)
+class PerlModeClass : public v8_glue::DerivedWrapperInfo<PerlMode, Mode> {
+  public: PerlModeClass(const char* name)
       : BaseClass(name) {
   }
-  public: ~ConfigModeClass() = default;
+  public: ~PerlModeClass() = default;
 
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate,
-        &ConfigModeClass::NewConfigMode);
+        &PerlModeClass::NewPerlMode);
   }
 
-  private: static ConfigMode* NewConfigMode() {
-    return new ConfigMode();
+  private: static PerlMode* NewPerlMode() {
+    return new PerlMode();
   }
 
-  DISALLOW_COPY_AND_ASSIGN(ConfigModeClass);
+  DISALLOW_COPY_AND_ASSIGN(PerlModeClass);
 };
 }  // namespace
 
@@ -39,13 +39,13 @@ class ConfigModeClass : public v8_glue::DerivedWrapperInfo<ConfigMode, Mode> {
 //
 // Mode
 //
-DEFINE_SCRIPTABLE_OBJECT(ConfigMode, ConfigModeClass);
+DEFINE_SCRIPTABLE_OBJECT(PerlMode, PerlModeClass);
 
-ConfigMode::ConfigMode()
-    : ScriptableBase(new text::ConfigMode()) {
+PerlMode::PerlMode()
+    : ScriptableBase(new text::PerlMode()) {
 }
 
-ConfigMode::~ConfigMode() {
+PerlMode::~PerlMode() {
 }
 
 }  // namespace dom

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/modes/javascript_mode.h"
+#include "evita/dom/text/modes/java_mode.h"
 
 #include "evita/dom/text/document.h"
-#include "evita/text/modes/javascript_mode.h"
+#include "evita/text/modes/java_mode.h"
 #include "evita/v8_glue/converter.h"
 
 namespace dom {
@@ -13,26 +13,25 @@ namespace dom {
 namespace {
 //////////////////////////////////////////////////////////////////////
 //
-// JavaScriptModeClass
+// JavaModeClass
 //
-class JavaScriptModeClass
-    : public v8_glue::DerivedWrapperInfo<JavaScriptMode, Mode> {
-  public: JavaScriptModeClass(const char* name)
+class JavaModeClass : public v8_glue::DerivedWrapperInfo<JavaMode, Mode> {
+  public: JavaModeClass(const char* name)
       : BaseClass(name) {
   }
-  public: ~JavaScriptModeClass() = default;
+  public: ~JavaModeClass() = default;
 
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate,
-        &JavaScriptModeClass::NewJavaScriptMode);
+        &JavaModeClass::NewJavaMode);
   }
 
-  private: static JavaScriptMode* NewJavaScriptMode() {
-    return new JavaScriptMode();
+  private: static JavaMode* NewJavaMode() {
+    return new JavaMode();
   }
 
-  DISALLOW_COPY_AND_ASSIGN(JavaScriptModeClass);
+  DISALLOW_COPY_AND_ASSIGN(JavaModeClass);
 };
 }  // namespace
 
@@ -40,13 +39,13 @@ class JavaScriptModeClass
 //
 // Mode
 //
-DEFINE_SCRIPTABLE_OBJECT(JavaScriptMode, JavaScriptModeClass);
+DEFINE_SCRIPTABLE_OBJECT(JavaMode, JavaModeClass);
 
-JavaScriptMode::JavaScriptMode()
-    : ScriptableBase(new text::JavaScriptMode()) {
+JavaMode::JavaMode()
+    : ScriptableBase(new text::JavaMode()) {
 }
 
-JavaScriptMode::~JavaScriptMode() {
+JavaMode::~JavaMode() {
 }
 
 }  // namespace dom

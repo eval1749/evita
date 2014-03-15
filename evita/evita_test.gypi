@@ -81,7 +81,7 @@
         'dom/text/mutation_observer_unittest.cc',
         'dom/os/file_unittest.cc',
         'dom/os/process_unittest.cc',
-        'dom/modes/modes_unittest.cc',
+        'dom/text/modes/modes_unittest.cc',
         'dom/windows/point_unittest.cc',
         'dom/polyfill_unittest.cc',
         'dom/text/range_unittest.cc',

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/modes/perl_mode.h"
+#include "evita/dom/text/modes/lisp_mode.h"
 
 #include "evita/dom/text/document.h"
-#include "evita/text/modes/perl_mode.h"
+#include "evita/text/modes/lisp_mode.h"
 #include "evita/v8_glue/converter.h"
 
 namespace dom {
@@ -13,25 +13,25 @@ namespace dom {
 namespace {
 //////////////////////////////////////////////////////////////////////
 //
-// PerlModeClass
+// LispModeClass
 //
-class PerlModeClass : public v8_glue::DerivedWrapperInfo<PerlMode, Mode> {
-  public: PerlModeClass(const char* name)
+class LispModeClass : public v8_glue::DerivedWrapperInfo<LispMode, Mode> {
+  public: LispModeClass(const char* name)
       : BaseClass(name) {
   }
-  public: ~PerlModeClass() = default;
+  public: ~LispModeClass() = default;
 
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate,
-        &PerlModeClass::NewPerlMode);
+        &LispModeClass::NewLispMode);
   }
 
-  private: static PerlMode* NewPerlMode() {
-    return new PerlMode();
+  private: static LispMode* NewLispMode() {
+    return new LispMode();
   }
 
-  DISALLOW_COPY_AND_ASSIGN(PerlModeClass);
+  DISALLOW_COPY_AND_ASSIGN(LispModeClass);
 };
 }  // namespace
 
@@ -39,13 +39,13 @@ class PerlModeClass : public v8_glue::DerivedWrapperInfo<PerlMode, Mode> {
 //
 // Mode
 //
-DEFINE_SCRIPTABLE_OBJECT(PerlMode, PerlModeClass);
+DEFINE_SCRIPTABLE_OBJECT(LispMode, LispModeClass);
 
-PerlMode::PerlMode()
-    : ScriptableBase(new text::PerlMode()) {
+LispMode::LispMode()
+    : ScriptableBase(new text::LispMode()) {
 }
 
-PerlMode::~PerlMode() {
+LispMode::~LispMode() {
 }
 
 }  // namespace dom

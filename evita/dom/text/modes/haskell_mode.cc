@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/modes/mason_mode.h"
+#include "evita/dom/text/modes/haskell_mode.h"
 
 #include "evita/dom/text/document.h"
-#include "evita/text/modes/mason_mode.h"
+#include "evita/text/modes/haskell_mode.h"
 #include "evita/v8_glue/converter.h"
 
 namespace dom {
@@ -13,25 +13,25 @@ namespace dom {
 namespace {
 //////////////////////////////////////////////////////////////////////
 //
-// MasonModeClass
+// HaskellModeClass
 //
-class MasonModeClass : public v8_glue::DerivedWrapperInfo<MasonMode, Mode> {
-  public: MasonModeClass(const char* name)
+class HaskellModeClass : public v8_glue::DerivedWrapperInfo<HaskellMode, Mode> {
+  public: HaskellModeClass(const char* name)
       : BaseClass(name) {
   }
-  public: ~MasonModeClass() = default;
+  public: ~HaskellModeClass() = default;
 
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate,
-        &MasonModeClass::NewMasonMode);
+        &HaskellModeClass::NewHaskellMode);
   }
 
-  private: static MasonMode* NewMasonMode() {
-    return new MasonMode();
+  private: static HaskellMode* NewHaskellMode() {
+    return new HaskellMode();
   }
 
-  DISALLOW_COPY_AND_ASSIGN(MasonModeClass);
+  DISALLOW_COPY_AND_ASSIGN(HaskellModeClass);
 };
 }  // namespace
 
@@ -39,13 +39,13 @@ class MasonModeClass : public v8_glue::DerivedWrapperInfo<MasonMode, Mode> {
 //
 // Mode
 //
-DEFINE_SCRIPTABLE_OBJECT(MasonMode, MasonModeClass);
+DEFINE_SCRIPTABLE_OBJECT(HaskellMode, HaskellModeClass);
 
-MasonMode::MasonMode()
-    : ScriptableBase(new text::MasonMode()) {
+HaskellMode::HaskellMode()
+    : ScriptableBase(new text::HaskellMode()) {
 }
 
-MasonMode::~MasonMode() {
+HaskellMode::~HaskellMode() {
 }
 
 }  // namespace dom

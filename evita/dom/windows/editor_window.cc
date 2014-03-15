@@ -112,6 +112,7 @@ void EditorWindow::ResetForTesting() {
 
 // Window
 void EditorWindow::DidDestroyWindow() {
+  Window::DidDestroyWindow();
   EditorWindowList::instance()->Unregister(this);
 }
 

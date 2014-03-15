@@ -555,9 +555,6 @@ void TextEditWindow::updateScreen() {
 }
 
 void TextEditWindow::updateScrollBar() {
-  if (!text_renderer_->GetBuffer())
-    return;
-
   auto const lBufEnd = text_renderer_->GetBuffer()->GetEnd() + 1;
   ui::ScrollBar::Data data;
   data.minimum = 0;

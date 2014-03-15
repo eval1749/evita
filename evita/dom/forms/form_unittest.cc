@@ -61,9 +61,9 @@ TEST_F(FormTest, DispatchFormEvent) {
                       "var text_field = new TextFieldControl(123);"
                       "sample.add(text_field);");
   domapi::FormEvent form_event;
+  form_event.event_type = domapi::EventType::FormChange;
   form_event.target_id = 1;
   form_event.control_id = 123;
-  form_event.type = L"change";
   form_event.data = L"foo";
   view_event_handler()->DispatchFormEvent(form_event);
   EXPECT_SCRIPT_EQ("foo", "text_field.value");

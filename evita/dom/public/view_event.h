@@ -15,7 +15,8 @@ enum class EventType {
   Click,
   DblClick,
   Focus,
-  Form,
+  FormChange,
+  FormClick,
   KeyDown,
   KeyUp,
   Load,
@@ -46,7 +47,6 @@ struct Event {
 
 struct FormEvent : Event {
   int control_id;
-  base::string16 type;
   base::string16 data;
 };
 

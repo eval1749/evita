@@ -7,7 +7,6 @@
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/focus_event_init.h"
 #include "evita/dom/events/form_event.h"
-#include "evita/dom/events/form_event_init.h"
 #include "evita/dom/events/keyboard_event.h"
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
@@ -186,7 +185,8 @@ void ViewEventHandlerImpl::DidStartHost() {
   controller_->DidStartHost();
 }
 
-void ViewEventHandlerImpl::DispatchFormEvent(const domapi::FormEvent& raw_event) {
+void ViewEventHandlerImpl::DispatchFormEvent(
+    const domapi::FormEvent& raw_event) {
   auto const form_id = raw_event.target_id;
   auto const target = FromEventTargetId(raw_event.target_id);
   if (!target)
@@ -201,11 +201,7 @@ void ViewEventHandlerImpl::DispatchFormEvent(const domapi::FormEvent& raw_event)
     DVLOG(0) <<  "Form " << form_id << " doesn't have control " <<
         raw_event.control_id;
   }
-  FormEventInit init_dict;
-  init_dict.set_bubbles(true);
-  init_dict.set_cancelable(false);
-  init_dict.set_data(raw_event.data);
-  DispatchEvent(control, new FormEvent(raw_event.type, init_dict));
+  DispatchEvent(control, new FormEvent(raw_event));
 }
 
 void ViewEventHandlerImpl::DispatchKeyboardEvent(

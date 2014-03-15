@@ -5,11 +5,16 @@
 
 #include "evita/dom/events/event_init.h"
 
+namespace domapi {
+struct FormEvent;
+}
+
 namespace dom {
 
 class FormEventInit : public EventInit {
   private: base::string16 data_;
 
+  public: explicit FormEventInit(const domapi::FormEvent& event);
   public: FormEventInit();
   public: virtual ~FormEventInit();
 

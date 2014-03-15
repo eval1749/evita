@@ -4,10 +4,17 @@
 #include "evita/dom/events/form_event_init.h"
 
 #include "evita/dom/converter.h"
+#include "evita/dom/public/view_event.h"
 #include "evita/v8_glue/nullable.h"
 #include "v8_strings.h"
 
 namespace dom {
+
+FormEventInit::FormEventInit(const domapi::FormEvent& event)
+    : data_(event.data) {
+  set_bubbles(true);
+  set_cancelable(false);
+}
 
 FormEventInit::FormEventInit() {
 }

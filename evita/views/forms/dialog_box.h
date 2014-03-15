@@ -18,6 +18,10 @@ namespace dom {
 class Form;
 }
 
+namespace domapi {
+enum class EventType;
+}
+
 #undef DialogBox
 
 namespace views {
@@ -44,7 +48,8 @@ class DialogBox {
                                               WPARAM wParam, LPARAM lParam);
   public: void DidChangeFormContents();
   protected: void DisableControl(int control_id);
-  protected: void DispatchFormEvent(const base::string16& type, int control_id,
+  protected: void DispatchFormEvent(domapi::EventType event_type,
+                                    int control_id,
                                     const base::string16& value);
   protected: void EnableControl(int control_id, bool enable);
   protected: void FinishUpdateFromModel();

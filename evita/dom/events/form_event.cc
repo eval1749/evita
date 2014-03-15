@@ -5,6 +5,7 @@
 
 #include "evita/dom/converter.h"
 #include "evita/dom/events/form_event_init.h"
+#include "evita/dom/public/view_event.h"
 #include "evita/dom/window.h"
 #include "evita/v8_glue/wrapper_info.h"
 
@@ -44,6 +45,16 @@ class FormEventClass :
 
   DISALLOW_COPY_AND_ASSIGN(FormEventClass);
 };
+
+base::string16 ConvertEventType(const domapi::FormEvent& event) {
+  if (event.event_type == domapi::EventType::FormChange)
+    return L"change";
+  if (event.event_type == domapi::EventType::FormClick)
+    return L"click";
+  NOTREACHED();
+  return base::string16();
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -51,6 +62,10 @@ class FormEventClass :
 // FormEvent
 //
 DEFINE_SCRIPTABLE_OBJECT(FormEvent, FormEventClass);
+
+FormEvent::FormEvent(const domapi::FormEvent& event)
+    : FormEvent(ConvertEventType(event), FormEventInit(event)) {
+}
 
 FormEvent::FormEvent(const base::string16& type,
                      const FormEventInit& init_dict)

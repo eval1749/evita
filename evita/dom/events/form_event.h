@@ -7,6 +7,10 @@
 #include "evita/dom/events/event.h"
 #include "evita/v8_glue/nullable.h"
 
+namespace domapi {
+struct FormEvent;
+}
+
 namespace dom {
 
 class FormEventInit;
@@ -17,6 +21,7 @@ class FormEvent : public v8_glue::Scriptable<FormEvent, Event> {
 
   private: base::string16 data_;
 
+  public: explicit FormEvent(const domapi::FormEvent& event);
   public: FormEvent(const base::string16& type,
                     const FormEventInit& init_dict);
   public: virtual ~FormEvent();

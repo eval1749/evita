@@ -176,13 +176,12 @@ void DialogBox::DisableControl(int control_id) {
   EnableControl(control_id, false);
 }
 
-void DialogBox::DispatchFormEvent(const base::string16& type, int control_id,
+void DialogBox::DispatchFormEvent(domapi::EventType event_type, int control_id,
                                   const base::string16& value) {
   domapi::FormEvent event;
-  event.event_type = domapi::EventType::Form;
+  event.event_type = event_type;
   event.target_id = dialog_box_id_;
   event.control_id = control_id;
-  event.type = type;
   event.data = value;
   Application::instance()->view_event_handler()->DispatchFormEvent(event);
 }
@@ -227,19 +226,21 @@ bool DialogBox::onCommand(WPARAM wParam, LPARAM lParam) {
   switch (control_type) {
     case ControlType::Button:
       if (code == BN_CLICKED)
-        DispatchFormEvent(L"click", control_id, base::string16());
+        DispatchFormEvent(domapi::EventType::FormClick, control_id,
+                          base::string16());
       break;
     case ControlType::Checkbox:
     case ControlType::RadioButton:
       if (code == BN_CLICKED) {
-        DispatchFormEvent(L"change", control_id,
+        DispatchFormEvent(domapi::EventType::FormChange, control_id,
                           Button_GetCheck(hwnd) == BST_CHECKED ? L"1" :
                           base::string16());
       }
       break;
     case ControlType::ComboBox:
       if (code == CBN_EDITCHANGE)
-          DispatchFormEvent(L"change", control_id, GetDlgItemText(control_id));
+          DispatchFormEvent(domapi::EventType::FormChange, control_id,
+                            GetDlgItemText(control_id));
       break;
   }
   return false;

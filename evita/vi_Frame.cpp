@@ -34,7 +34,7 @@
 #include "common/win/native_window.h"
 #include "evita/css/style.h"
 #include "evita/ctrl_TitleBar.h"
-#include "evita/dom/buffer.h"
+#include "evita/dom/text/buffer.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/mutation_observer_controller.h"
+#include "evita/dom/text/mutation_observer_controller.h"
 
 #include <unordered_set>
 #include <vector>
@@ -15,10 +15,10 @@
 #pragma warning(pop)
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
-#include "evita/dom/buffer.h"
-#include "evita/dom/document.h"
-#include "evita/dom/mutation_observer.h"
-#include "evita/dom/mutation_record.h"
+#include "evita/dom/text/buffer.h"
+#include "evita/dom/text/document.h"
+#include "evita/dom/text/mutation_observer.h"
+#include "evita/dom/text/mutation_record.h"
 #include "evita/text/buffer.h"
 #include "evita/text/buffer_mutation_observer.h"
 

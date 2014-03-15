@@ -13,7 +13,7 @@
 #include "base/callback.h"
 #include "base/logging.h"
 #include "base/time/time.h"
-#include "evita/dom/buffer.h"
+#include "evita/dom/text/buffer.h"
 #include "evita/dom/public/api_callback.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"

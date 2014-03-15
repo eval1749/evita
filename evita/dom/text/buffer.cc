@@ -1,6 +1,6 @@
 // Copyright (C) 1996-2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#include "evita/dom/buffer.h"
+#include "evita/dom/text/buffer.h"
 
 #include "evita/text/modes/mode.h"
 

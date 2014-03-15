@@ -8,8 +8,8 @@
 
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
-#include "evita/dom/buffer.h"
-#include "evita/dom/document.h"
+#include "evita/dom/text/buffer.h"
+#include "evita/dom/text/document.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/ui/base/table_model_observer.h"
 #include "evita/ui/controls/table_control.h"

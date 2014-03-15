@@ -6,8 +6,8 @@
 #include <sstream>
 
 #include "base/logging.h"
-#include "evita/dom/buffer.h"
-#include "evita/dom/document.h"
+#include "evita/dom/text/buffer.h"
+#include "evita/dom/text/document.h"
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/windows/text_window.h"

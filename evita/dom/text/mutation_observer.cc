@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/mutation_observer.h"
+#include "evita/dom/text/mutation_observer.h"
 
 #include <vector>
 
 #include "evita/dom/converter.h"
-#include "evita/dom/document.h"
-#include "evita/dom/mutation_observer_controller.h"
-#include "evita/dom/mutation_observer_init.h"
-#include "evita/dom/mutation_record.h"
+#include "evita/dom/text/document.h"
+#include "evita/dom/text/mutation_observer_controller.h"
+#include "evita/dom/text/mutation_observer_init.h"
+#include "evita/dom/text/mutation_record.h"
 #include "evita/dom/script_controller.h"
 #include "evita/ed_defs.h"
 #include "evita/v8_glue/runner.h"

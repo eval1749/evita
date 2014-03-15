@@ -5,7 +5,7 @@
 
 #include "base/strings/string16.h"
 #include "evita/editor/application.h"
-#include "evita/dom/buffer.h"
+#include "evita/dom/text/buffer.h"
 #include "evita/text/range.h"
 #include "evita/vi_TextEditWindow.h"
 

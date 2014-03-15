@@ -4,7 +4,7 @@
 
 #include "evita/dom/modes/lisp_mode.h"
 
-#include "evita/dom/document.h"
+#include "evita/dom/text/document.h"
 #include "evita/text/modes/lisp_mode.h"
 #include "evita/v8_glue/converter.h"
 

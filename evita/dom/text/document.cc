@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/document.h"
+#include "evita/dom/text/document.h"
 
 #include <utility>
 
@@ -10,12 +10,12 @@
 #include "base/memory/ref_counted.h"
 #include "base/strings/stringprintf.h"
 #include "evita/editor/application.h"
-#include "evita/dom/buffer.h"
+#include "evita/dom/text/buffer.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/document_set.h"
+#include "evita/dom/text/document_set.h"
 #include "evita/dom/modes/mode.h"
 #include "evita/dom/public/api_callback.h"
-#include "evita/dom/regexp.h"
+#include "evita/dom/text/regexp.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/spelling.h"
 #include "evita/dom/view_delegate.h"

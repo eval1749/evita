@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/mutation_record.h"
+#include "evita/dom/text/mutation_record.h"
 
 #include "evita/dom/converter.h"
-#include "evita/dom/document.h"
+#include "evita/dom/text/document.h"
 #include "evita/v8_glue/per_isolate_data.h"
 
 namespace dom {

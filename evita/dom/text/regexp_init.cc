@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/regexp_init.h"
+#include "evita/dom/text/regexp_init.h"
 
 #include "evita/dom/converter.h"
 #include "v8_strings.h"

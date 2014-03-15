@@ -4,7 +4,7 @@
 
 #include "evita/dom/modes/perl_mode.h"
 
-#include "evita/dom/document.h"
+#include "evita/dom/text/document.h"
 #include "evita/text/modes/perl_mode.h"
 #include "evita/v8_glue/converter.h"
 

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/regexp.h"
+#include "evita/dom/text/regexp.h"
 
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
-#include "evita/dom/buffer.h"
-#include "evita/dom/document.h"
-#include "evita/dom/range.h"
-#include "evita/dom/regexp_init.h"
+#include "evita/dom/text/buffer.h"
+#include "evita/dom/text/document.h"
+#include "evita/dom/text/range.h"
+#include "evita/dom/text/regexp_init.h"
 #include "evita/dom/script_controller.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"

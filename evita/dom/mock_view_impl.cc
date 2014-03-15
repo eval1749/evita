@@ -4,7 +4,7 @@
 #include "evita/dom/mock_view_impl.h"
 
 #include "base/synchronization/waitable_event.h"
-#include "evita/dom/document.h"
+#include "evita/dom/text/document.h"
 
 namespace dom {
 

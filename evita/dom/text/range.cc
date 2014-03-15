@@ -1,12 +1,12 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/range.h"
+#include "evita/dom/text/range.h"
 
-#include "evita/dom/buffer.h"
+#include "evita/dom/text/buffer.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/document.h"
-#include "evita/dom/regexp.h"
+#include "evita/dom/text/document.h"
+#include "evita/dom/text/regexp.h"
 #include "evita/text/marker_set.h"
 #include "evita/text/range.h"
 #include "evita/v8_glue/constructor_template.h"

@@ -6,9 +6,9 @@
 
 #include "base/strings/stringprintf.h"
 #include "common/memory/singleton.h"
-#include "evita/dom/buffer.h"
-#include "evita/dom/document.h"
-#include "evita/dom/range.h"
+#include "evita/dom/text/buffer.h"
+#include "evita/dom/text/document.h"
+#include "evita/dom/text/range.h"
 #include "evita/dom/script_controller.h"
 #include "evita/css/style.h"
 #include "evita/text/range.h"

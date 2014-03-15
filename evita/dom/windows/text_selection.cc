@@ -4,8 +4,8 @@
 #include "evita/dom/windows/text_selection.h"
 
 #include "evita/dom/converter.h"
-#include "evita/dom/document.h"
-#include "evita/dom/range.h"
+#include "evita/dom/text/document.h"
+#include "evita/dom/text/range.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/windows/text_window.h"
 #include "evita/v8_glue/constructor_template.h"

@@ -3,8 +3,8 @@
 
 #include "evita/dom/windows/table_window.h"
 
-#include "evita/dom/document.h"
-#include "evita/dom/range.h"
+#include "evita/dom/text/document.h"
+#include "evita/dom/text/range.h"
 #include "evita/dom/windows/table_selection.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"

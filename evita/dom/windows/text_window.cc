@@ -5,10 +5,10 @@
 
 #include "base/bind.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/document.h"
+#include "evita/dom/text/document.h"
 #include "evita/dom/windows/point.h"
 #include "evita/dom/public/float_point.h"
-#include "evita/dom/range.h"
+#include "evita/dom/text/range.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/windows/text_selection.h"
 #include "evita/dom/view_delegate.h"

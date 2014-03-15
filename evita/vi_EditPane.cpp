@@ -22,7 +22,7 @@
 #include "evita/text/modes/mode.h"
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"
-#include "evita/dom/buffer.h"
+#include "evita/dom/text/buffer.h"
 #include "evita/resource.h"
 #include "evita/ui/events/event.h"
 #include "evita/ui/widget_ostream.h"

@@ -218,16 +218,10 @@ bool TextRenderer::ScrollDown() {
   DCHECK(gfx_);
   if (!GetStart())
     return false;
-  if (text_block_->GetHeight() >= text_block_->height() &&
-      !text_block_->DiscardLastLine()) {
-    // This page shows only one line.
-    return false;
-  }
-
-  auto const lGoal  = GetStart() - 1;
+  auto const lGoal = GetStart() - 1;
   auto const lStart = m_pBuffer->ComputeStartOfLine(lGoal);
-  TextFormatter formatter(*gfx_, text_block_.get(), m_pBuffer, lStart, selection_);
-
+  TextFormatter formatter(*gfx_, text_block_.get(), m_pBuffer, lStart,
+                          selection_);
   for (;;) {
     auto const line = formatter.FormatLine();
     if (lGoal < line->GetEnd()) {
@@ -236,10 +230,12 @@ bool TextRenderer::ScrollDown() {
     }
   }
 
-  while (text_block_->GetHeight() > text_block_->height()) {
-    if (!text_block_->DiscardLastLine())
-      break;
+  // Discard lines outside of screen.
+  text_block_->EnsureLinePoints();
+  while (text_block_->GetLast()->top() >= text_block_->height()) {
+    text_block_->DiscardLastLine();
   }
+
   return true;
 }
 

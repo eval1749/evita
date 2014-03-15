@@ -187,9 +187,13 @@ class EventTarget::EventListenerMap {
 //
 DEFINE_SCRIPTABLE_OBJECT(EventTarget, EventTargeClass);
 
-EventTarget::EventTarget()
+EventTarget::EventTarget(int event_target_id)
     : event_listener_map_(new EventListenerMap()),
-      event_target_id_(EventTargetIdMapper::instance()->Register(this)) {
+      event_target_id_(event_target_id) {
+}
+
+EventTarget::EventTarget()
+    : EventTarget(EventTargetIdMapper::instance()->Register(this)) {
 }
 
 EventTarget::~EventTarget() {

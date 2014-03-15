@@ -19,6 +19,7 @@
 #include "evita/dom/script_controller.h"
 #include "evita/dom/spelling.h"
 #include "evita/dom/view_delegate.h"
+#include "evita/dom/events/event_target_id.h"
 #include "evita/text/marker.h"
 #include "evita/text/marker_set.h"
 #include "evita/text/modes/mode.h"
@@ -40,11 +41,13 @@ v8::Handle<v8::Object> NewMap(v8::Isolate* isolate) {
       Get(v8Strings::Map.Get(isolate))->ToObject()->
           CallAsConstructor(0, nullptr)->ToObject();
 }
+
 //////////////////////////////////////////////////////////////////////
 //
 // DocumentClass
 //
-class DocumentClass : public v8_glue::WrapperInfo {
+class DocumentClass
+    : public v8_glue::DerivedWrapperInfo<Document, EventTarget> {
   public: DocumentClass(const char* name);
   public: virtual ~DocumentClass();
 
@@ -71,7 +74,7 @@ class DocumentClass : public v8_glue::WrapperInfo {
 };
 
 DocumentClass::DocumentClass(const char* name)
-    : v8_glue::WrapperInfo(name) {
+    : BaseClass(name) {
 }
 
 DocumentClass::~DocumentClass() {
@@ -252,7 +255,8 @@ class SaveFileCallback : public base::RefCounted<SaveFileCallback> {
 DEFINE_SCRIPTABLE_OBJECT(Document, DocumentClass)
 
 Document::Document(const base::string16& name, Mode* mode)
-    : buffer_(new Buffer(DocumentSet::instance()->MakeUniqueName(name),
+    : ScriptableBase(kInvalidEventTargetId),
+      buffer_(new Buffer(DocumentSet::instance()->MakeUniqueName(name),
                          mode->text_mode())),
       mode_(mode),
       properties_(v8::Isolate::GetCurrent(),

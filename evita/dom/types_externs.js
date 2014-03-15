@@ -18,6 +18,7 @@ var Mode = function() {};
 
 /**
  * @constructor
+ * @extends {EventTarget}
  * @param {string} name
  * @param {!Mode=} opt_mode
  */

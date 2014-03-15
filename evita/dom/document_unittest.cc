@@ -146,6 +146,17 @@ TEST_F(DocumentTest, charCodeAt_) {
   EXPECT_SCRIPT_EQ("111", "doc.charCodeAt_(1)");
 }
 
+TEST_F(DocumentTest, dispatchEvent) {
+  EXPECT_SCRIPT_VALID(
+      "var doc = new Document('dispatchEvent');"
+      "var event_type;"
+      "doc.addEventListener('foo', function(e) { event_type = e.type; });");
+
+  EXPECT_SCRIPT_VALID("doc.dispatchEvent(new Event('foo'));");
+  EXPECT_SCRIPT_EQ("foo", "event_type") <<
+      "Instances of Document is an event target.";
+}
+
 TEST_F(DocumentTest, length) {
   EXPECT_SCRIPT_VALID("var doc = new Document('length');");
   EXPECT_SCRIPT_EQ("0", "doc.length");

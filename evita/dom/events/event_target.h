@@ -33,6 +33,7 @@ class EventTarget : public v8_glue::Scriptable<EventTarget> {
   private: int event_target_id_;
   private: std::unique_ptr<EventListenerMap> event_listener_map_;
 
+  protected: explicit EventTarget(int event_target_id);
   protected: EventTarget();
   protected: virtual ~EventTarget();
 

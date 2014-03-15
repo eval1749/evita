@@ -8,6 +8,7 @@
 
 #include "base/strings/string16.h"
 #include "base/time/time.h"
+#include "evita/dom/events/event_target.h"
 #include "evita/gc/member.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/scriptable.h"
@@ -24,7 +25,7 @@ class RegExp;
 //
 // Document
 //
-class Document : public v8_glue::Scriptable<Document> {
+class Document : public v8_glue::Scriptable<Document, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(Document);
 
   private: std::unique_ptr<Buffer> buffer_;

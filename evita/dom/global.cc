@@ -91,13 +91,13 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
           INSTALL(WheelEvent);
       INSTALL(WindowEvent);
 
-    INSTALL(Document);
     auto const editor_templ = INSTALL(Editor);
     INSTALL(FilePath);
     INSTALL(Point);
     INSTALL(Range);
 
     INSTALL(EventTarget);
+      INSTALL(Document);
       INSTALL(Form);
       INSTALL(FormControl);
         INSTALL(ButtonControl);

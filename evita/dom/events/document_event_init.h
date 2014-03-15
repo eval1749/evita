@@ -5,16 +5,20 @@
 
 #include "evita/dom/events/event_init.h"
 
+#include "evita/gc/member.h"
+
 namespace dom {
 
+class Window;
+
 class DocumentEventInit : public EventInit {
-  private: int error_code_;
+  private: gc::Member<Window> view_;
 
   public: DocumentEventInit();
   public: virtual ~DocumentEventInit();
 
-  public: int error_code() const { return error_code_; }
-  public: void set_error_code(int error_code) { error_code_ = error_code; }
+  public: Window* view() const { return view_.get(); }
+  public: void set_view(Window* view) { view_ = view; }
 
   private: virtual HandleResult HandleKeyValue(
       v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) override;

@@ -5,6 +5,7 @@
 
 #include "evita/dom/converter.h"
 #include "evita/dom/events/document_event_init.h"
+#include "evita/dom/windows/window.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/wrapper_info.h"
 
@@ -39,7 +40,7 @@ class DocumentEventClass :
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetProperty("errorCode", &DocumentEvent::error_code);
+        .SetProperty("view", &DocumentEvent::view);
   }
 
   DISALLOW_COPY_AND_ASSIGN(DocumentEventClass);
@@ -54,7 +55,7 @@ DEFINE_SCRIPTABLE_OBJECT(DocumentEvent, DocumentEventClass);
 
 DocumentEvent::DocumentEvent(const base::string16& type,
                      const DocumentEventInit& init_dict)
-    : ScriptableBase(type, init_dict), error_code_(init_dict.error_code()) {
+    : ScriptableBase(type, init_dict), view_(init_dict.view()) {
 }
 
 DocumentEvent::~DocumentEvent() {

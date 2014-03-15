@@ -5,6 +5,7 @@
 
 #include "base/strings/string16.h"
 #include "evita/dom/events/event.h"
+#include "evita/gc/member.h"
 
 namespace dom {
 
@@ -14,13 +15,13 @@ class Window;
 class DocumentEvent : public v8_glue::Scriptable<DocumentEvent, Event> {
   DECLARE_SCRIPTABLE_OBJECT(DocumentEvent)
 
-  private: int error_code_;
+  private: gc::Member<Window> view_;
 
   public: DocumentEvent(const base::string16& type,
                     const DocumentEventInit& init_dict);
   public: virtual ~DocumentEvent();
 
-  public: int error_code() const { return error_code_; }
+  public: v8_glue::Nullable<Window> view() const { return view_.get(); }
 
   DISALLOW_COPY_AND_ASSIGN(DocumentEvent);
 };

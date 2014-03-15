@@ -237,7 +237,7 @@ bool TextRenderer::ScrollDown() {
 
   // Discard lines outside of screen.
   text_block_->EnsureLinePoints();
-  while (text_block_->GetLast()->top() >= text_block_->height()) {
+  while (text_block_->GetLast()->top() >= text_block_->bottom()) {
     text_block_->DiscardLastLine();
   }
 

@@ -498,18 +498,27 @@ TEST_F(RangeTest, set_start_end) {
 
 TEST_F(RangeTest, startOf) {
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('startOf');"
-      "var range = new Range(doc);"
-                   //01234567890
-      "range.text = 'foo bar baz';"
-      "function test(x) {"
-      "  range.end = x;"
-      "  range.start = x;"
-      "  range.startOf(Unit.WORD);"
-      "  return range.start;"
-      "}");
-  EXPECT_SCRIPT_EQ("0", "test(2)");
-  EXPECT_SCRIPT_EQ("4", "test(5)");
+    "var doc = new Document('startOf');"
+    "var range = new Range(doc);"
+    "function testIt(sample, unit) {"
+    "  range.collapseTo(0);"
+    "  range.end = doc.length;"
+    "  var result = sample.replace(/[|]/g, '');"
+    "  range.text = result;"
+    "  range.collapseTo(sample.indexOf('|'));"
+    "  range.startOf(unit);"
+    "  var caret = range.start;"
+    "  return result.substr(0, caret) + '|' + result.substr(caret);"
+    "}");
+  EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('|foo bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('f|oo bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('fo|o bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('foo| bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo |bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo bar|  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo bar | baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar  |baz", "testIt('foo bar  baz|', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar  |baz ", "testIt('foo bar  baz |', Unit.WORD)");
 }
 
 TEST_F(RangeTest, text) {

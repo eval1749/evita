@@ -302,14 +302,23 @@
       case Unit.WORD: {
         if (!position)
           return position;
-        var word_class = wordClassAt(document, position);
-        if (word_class == WordClass.BLANK)
-          return position;
+        var word_class = wordClassAt(document, position - 1);
+        if (word_class == WordClass.BLANK) {
+          if (position < document.length &&
+              wordClassAt(document, position) == WordClass.WORD) {
+            // We are at start of word.
+            return position;
+          }
+          while (position){
+            --position;
+            if (wordClassAt(document, position) != WordClass.WORD)
+              break;
+          }
+        }
         while (position) {
-          --position;
-          var word_class2 = wordClassAt(document, position);
-          if (word_class != word_class2)
-            return position + 1;
+         if (wordClassAt(document, position - 1) != WordClass.WORD)
+           break;
+         --position;
         }
         return position;
       }

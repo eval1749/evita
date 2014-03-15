@@ -207,13 +207,17 @@ TEST_F(TextSelectionTest, startOf) {
   EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('|foo bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('f|oo bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('fo|o bar  baz', Unit.WORD)");
-  EXPECT_SCRIPT_EQ("foo| bar  baz", "testIt('foo| bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('foo| bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo |bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo b|ar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo ba|r  baz', Unit.WORD)");
-  EXPECT_SCRIPT_EQ("foo bar|  baz", "testIt('foo bar|  baz', Unit.WORD)");
-  EXPECT_SCRIPT_EQ("foo bar | baz", "testIt('foo bar | baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo bar|  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo bar | baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar  |baz", "testIt('foo bar  |baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar  |baz", "testIt('foo bar  b|az', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar  |baz", "testIt('foo bar  ba|z', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar  |baz", "testIt('foo bar  baz|', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar  |baz ", "testIt('foo bar  baz |', Unit.WORD)");
 }
 
 TEST_F(TextSelectionTest, startOfExtend) {
@@ -233,13 +237,17 @@ TEST_F(TextSelectionTest, startOfExtend) {
   EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('|foo bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("|f^oo bar  baz", "testIt('f|oo bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("|fo^o bar  baz", "testIt('fo|o bar  baz', Unit.WORD)");
-  EXPECT_SCRIPT_EQ("foo| bar  baz", "testIt('foo| bar  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("|foo^ bar  baz", "testIt('foo| bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo |bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo |b^ar  baz", "testIt('foo b|ar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo |ba^r  baz", "testIt('foo ba|r  baz', Unit.WORD)");
-  EXPECT_SCRIPT_EQ("foo bar|  baz", "testIt('foo bar|  baz', Unit.WORD)");
-  EXPECT_SCRIPT_EQ("foo bar | baz", "testIt('foo bar | baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo |bar^  baz", "testIt('foo bar|  baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo |bar ^ baz", "testIt('foo bar | baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar  |baz", "testIt('foo bar  |baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar  |b^az", "testIt('foo bar  b|az', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar  |ba^z", "testIt('foo bar  ba|z', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar  |baz^", "testIt('foo bar  baz|', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar  |baz ^", "testIt('foo bar  baz |', Unit.WORD)");
 }
 
 TEST_F(TextSelectionTest, Realize) {

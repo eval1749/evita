@@ -47,8 +47,8 @@ Set.prototype.keys = function() {
   return this.keys_;
 };
 
-Set.prototype.set = (function() {
-  var original_set = Set.prototype.set;
+Set.prototype.add = (function() {
+  var original_set = Set.prototype.add;
   return function (key, value) {
     if (!this.keys_)
       this.keys_ = [key];

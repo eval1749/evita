@@ -14,6 +14,7 @@
 #include "base/message_loop/message_loop.h"
 #pragma warning(pop)
 #include "base/strings/string_number_conversions.h"
+#include "evita/dom/lock.h"
 #include "evita/dom/text/buffer.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/text/document.h"
@@ -121,8 +122,9 @@ base::string16 DocumentSet::MakeUniqueName(const base::string16& name) {
   return candidate;
 }
 
-void DocumentSet::NotifyObserver(const base::string16& type,
-                                 Document* document) {
+void DocumentSet::NotifyObserverWithInLock(const base::string16& type,
+                                           Document* document) {
+  DOM_AUTO_LOCK_SCOPE();
   std::vector<Observer*> observers(observers_);
   auto const runner = ScriptController::instance()->runner();
   v8_glue::Runner::Scope runner_scope(runner);
@@ -179,7 +181,7 @@ void DocumentSet::ScheduleNotifyObserver(const base::string16& type,
     return;
   }
   message_loop->PostTask(FROM_HERE, base::Bind(
-      &DocumentSet::NotifyObserver, base::Unretained(this), type,
+      &DocumentSet::NotifyObserverWithInLock, base::Unretained(this), type,
       base::Unretained(document)));
 }
 

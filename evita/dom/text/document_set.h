@@ -31,7 +31,8 @@ class DocumentSet : public common::Singleton<DocumentSet> {
   public: void AddObserver(v8::Handle<v8::Function> callback);
   public: Document* Find(const base::string16 name) const;
   public: base::string16 MakeUniqueName(const base::string16& name);
-  private: void NotifyObserver(const base::string16& type, Document* document);
+  private: void NotifyObserverWithInLock(const base::string16& type,
+                                         Document* document);
   public: void Register(Document* document);
   public: void RemoveObserver(v8::Handle<v8::Function> callback);
   public: void RenameDocument(Document* document,

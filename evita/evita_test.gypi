@@ -86,7 +86,7 @@
         'dom/polyfill_unittest.cc',
         'dom/text/range_unittest.cc',
         'dom/text/regexp_unittest.cc',
-        'dom/style_unittest.cc',
+        'dom/css/style_unittest.cc',
         'dom/windows/table_selection_unittest.cc',
         'dom/text/text_position_unittest.cc',
         'dom/windows/text_selection_unittest.cc',

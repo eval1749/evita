@@ -45,12 +45,17 @@ Font* GetFont(const gfx::Graphics& gfx, const css::Style& style) {
   return FontSet::Get(gfx, style)->FindFont(gfx, 'x');
 }
 
+const css::Style& GetDefaultStyle(const TextBlock* text_block) {
+  return text_block->text_buffer()->GetDefaultStyle();
+}
+
 RenderStyle GetRenderStyle(const gfx::Graphics& gfx,
                            const css::Style& style) {
   return RenderStyle(style, GetFont(gfx, style));
 }
 
-css::Style SelectionStyle(text::Buffer* buffer, const Selection& selection) {
+css::Style SelectionStyle(const text::Buffer* buffer,
+                          const Selection& selection) {
   return buffer->style_resolver()->ResolveWithoutDefaults(
       selection.active ? css::StyleSelector::active_selection() :
                          css::StyleSelector::inactive_selection());
@@ -67,14 +72,14 @@ class TextFormatter::TextScanner {
   private: Posn m_lBufEnd;
   private: Posn m_lBufStart;
   private: Posn m_lPosn;
-  private: text::Buffer* m_pBuffer;
+  private: const text::Buffer* m_pBuffer;
   private: text::Interval* m_pInterval;
   private: mutable const text::Marker* marker_;
   private: char16 m_rgwch[80];
   private: const Selection& selection_;
   private: const css::Style selection_style_;
 
-  public: TextScanner(text::Buffer* buffer, Posn lPosn,
+  public: TextScanner(const text::Buffer* buffer, Posn lPosn,
                       const Selection& selection)
       : m_pBuffer(buffer),
         m_lPosn(lPosn),
@@ -167,13 +172,13 @@ RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
 // TextFormatter
 //
 TextFormatter::TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
-                             text::Buffer* buffer, Posn lStart,
-                             const Selection& selection)
-    : default_render_style_(GetRenderStyle(gfx, buffer->GetDefaultStyle())),
-      default_style_(buffer->GetDefaultStyle()),
+                             const Selection& selection, Posn lStart)
+    : default_render_style_(GetRenderStyle(gfx, GetDefaultStyle(text_block))),
+      default_style_(GetDefaultStyle(text_block)),
       m_gfx(gfx),
       text_block_(text_block),
-      text_scanner_(new TextScanner(buffer, lStart, selection)) {
+      text_scanner_(new TextScanner(text_block->text_buffer(), lStart,
+                                    selection)) {
   DCHECK(!text_block_->rect().empty());
 }
 

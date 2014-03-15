@@ -34,8 +34,7 @@ class TextFormatter {
   private: std::unique_ptr<TextScanner> text_scanner_;
 
   public: TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
-                        text::Buffer* buffer, Posn start,
-                        const Selection& selection);
+                        const Selection& selection, Posn start);
   public: ~TextFormatter();
 
   public: void Format();

@@ -90,15 +90,13 @@ text::Posn TextRenderer::GetVisibleEnd() const {
 void TextRenderer::Format(Posn lStart) {
   DCHECK(gfx_);
   text_block_->Reset();
-  TextFormatter oFormatter(*gfx_, text_block_.get(), m_pBuffer, lStart,
-                           selection_);
+  TextFormatter oFormatter(*gfx_, text_block_.get(), selection_, lStart);
   oFormatter.Format();
 }
 
 TextLine* TextRenderer::FormatLine(Posn lStart) {
   DCHECK(gfx_);
-  TextFormatter oFormatter(*gfx_, text_block_.get(), m_pBuffer, lStart,
-                           selection_);
+  TextFormatter oFormatter(*gfx_, text_block_.get(), selection_, lStart);
   return oFormatter.FormatLine();
 }
 
@@ -225,8 +223,7 @@ bool TextRenderer::ScrollDown() {
     return false;
   auto const lGoal = GetStart() - 1;
   auto const lStart = m_pBuffer->ComputeStartOfLine(lGoal);
-  TextFormatter formatter(*gfx_, text_block_.get(), m_pBuffer, lStart,
-                          selection_);
+  TextFormatter formatter(*gfx_, text_block_.get(), selection_, lStart);
   for (;;) {
     auto const line = formatter.FormatLine();
     if (lGoal < line->GetEnd()) {
@@ -312,8 +309,8 @@ bool TextRenderer::ScrollUp() {
   if (text_block_->IsShowEndOfDocument())
     return false;
 
-  TextFormatter oFormatter(*gfx_, text_block_.get(), m_pBuffer,
-                           text_block_->GetLast()->GetEnd(), selection_);
+  TextFormatter oFormatter(*gfx_, text_block_.get(), selection_,
+                           text_block_->GetLast()->GetEnd());
 
   auto const line = oFormatter.FormatLine();
   text_block_->Append(line);

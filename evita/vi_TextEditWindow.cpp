@@ -558,7 +558,8 @@ void TextEditWindow::updateScrollBar() {
   auto const lBufEnd = text_renderer_->GetBuffer()->GetEnd() + 1;
   ui::ScrollBar::Data data;
   data.minimum = 0;
-  data.thumb_size = text_renderer_->GetEnd() - text_renderer_->GetStart();
+  data.thumb_size = text_renderer_->GetVisibleEnd() -
+        text_renderer_->GetStart();
   data.thumb_value = text_renderer_->GetStart();
   // Current screen shows entire buffer. We disable scroll bar.
   data.maximum = data.thumb_size < lBufEnd ? lBufEnd : 0;

@@ -55,6 +55,9 @@ class TextRenderer {
   public: text::Buffer* GetBuffer() const { return m_pBuffer; }
   public: Posn GetStart() const;
   public: Posn GetEnd() const;
+  // Returns fully visible end offset or end of line position if there is only
+  // one line.
+  public: Posn GetVisibleEnd() const;
 
   // [I]
   private: bool isPosnVisible(Posn) const;

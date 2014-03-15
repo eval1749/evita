@@ -73,6 +73,17 @@ void TextBlock::Finish() {
   dirty_line_point_ = dirty_;
 }
 
+text::Posn TextBlock::GetVisibleEnd() const {
+  DCHECK(!dirty_);
+  DCHECK(!dirty_line_point_);
+  for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
+    auto const line = *it;
+    if (line->rect().bottom <= rect_.height())
+      return line->GetEnd();
+  }
+  return lines_.front()->GetEnd();
+}
+
 void TextBlock::InvalidateLines(text::Posn offset) {
   if (dirty_)
     return;

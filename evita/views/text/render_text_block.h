@@ -55,6 +55,7 @@ class TextBlock : public text::BufferMutationObserver {
   public: TextLine* GetFirst() const { return lines_.front(); }
   public: float GetHeight() const { return m_cy; }
   public: TextLine* GetLast() const { return lines_.back(); }
+  public: text::Posn GetVisibleEnd() const;
   private: void InvalidateLines(text::Posn offset);
   public: bool IsShowEndOfDocument() const;
   public: void Prepend(TextLine*);

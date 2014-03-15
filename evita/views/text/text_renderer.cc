@@ -82,6 +82,11 @@ text::Posn TextRenderer::GetStart() const {
   return text_block_->GetFirst()->GetStart();
 }
 
+text::Posn TextRenderer::GetVisibleEnd() const {
+  DCHECK(!text_block_->dirty());
+  return text_block_->GetVisibleEnd();
+}
+
 void TextRenderer::Format(Posn lStart) {
   DCHECK(gfx_);
   text_block_->Reset();

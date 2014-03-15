@@ -3,6 +3,11 @@
 
 (function() {
   /**
+   * @type {?Document}
+   */
+  var document_list_document = null;
+
+  /**
    * @param {!TableSelection} selection
    * @param {number} state_mask
    * @return {!Object.<string, number>}
@@ -36,7 +41,7 @@
       need_update = true;
     });
     if (need_update)
-      createDocumentList();
+      ensureDocumentList();
   }
 
   /**
@@ -58,13 +63,51 @@
       ++open_count;
     });
     if (open_count)
-      createDocumentList();
+      ensureDocumentList();
   }
 
   /**
    * @return {!Document}
    */
-  function createDocumentList() {
+  function ensureDocumentList() {
+    if (document_list_document)
+      return document_list_document;
+    var document = new Document('*document list*');
+    document.bindKey('Delete', closeSelectedDocuments);
+    document.bindKey('Enter', openSelectedDocuments);
+    Document.list.forEach(function(document) {
+      document.addEventListener('attach', updateDocumentList);
+      document.addEventListener('detach', updateDocumentList);
+    });
+    Document.addObserver(function(type, document) {
+      document.addEventListener('attach', updateDocumentList);
+      document.addEventListener('detach', updateDocumentList);
+      updateDocumentList();
+    });
+    document_list_document = document;
+    updateDocumentList();
+    return document;
+  }
+
+  var OBSOLETE_MARK_MAP = {};
+  OBSOLETE_MARK_MAP[Document.Obsolete.NO] = '-';
+  OBSOLETE_MARK_MAP[Document.Obsolete.CHECKING] = '.';
+  OBSOLETE_MARK_MAP[Document.Obsolete.IGNORE] = '%';
+  OBSOLETE_MARK_MAP[Document.Obsolete.UNKNOWN] = '?';
+  OBSOLETE_MARK_MAP[Document.Obsolete.YES] = '*';
+
+  function updateDocumentList() {
+    var document_window_count_map = new Map();
+    EditorWindow.list.forEach(function(editorWindow) {
+      editorWindow.children.forEach(function(window) {
+        if (!(window instanceof DocumentWindow))
+          return;
+        var document = window.document;
+        var count = document_window_count_map.get(document);
+        document_window_count_map.set(document, count ?  count + 1 : 1);
+      });
+    });
+
     /**
      * @param {!Document} document
      * @return {!string}
@@ -72,57 +115,25 @@
     function stateString(document) {
       return [
         document.modified ? '*' : '-',
-        // TODO(yosi) Should be document.readonly ? '%' : '-'
-        '?',
-        // TODO(yosi) Should be document.state == 'ready' ? '-' : '!'
-        '?',
-        document.listWindows().length
+        document.readonly ? '%' : '-',
+        document.filename ? OBSOLETE_MARK_MAP[document.obsolete] : '-',
+        (function(count) { return count > 9 ? 'm' : (count || '-'); })(
+            document_window_count_map.get(document))
       ].join('');
     }
 
-    /** @return {!Document} */
-    function getOrNew() {
-      /** @const @type {string} */ var NAME = '*document list*';
-      var present = Document.find(NAME);
-      if (present)
-        return present;
-      var document = new Document(NAME);
-      document.bindKey('Delete', closeSelectedDocuments);
-      document.bindKey('Enter', openSelectedDocuments);
-      return document;
-    }
-
-    var document = getOrNew();
+    var document = ensureDocumentList();
     var range = new Range(document, 0, document.length);
     range.text = '';
     range.text = 'Name\tSize\tState\t\Saved At\tFile\n';
-    /**
-      * Compare document names.
-      * @param {!Document} a
-      * @param {!Document} b
-      * @return {number}
-      */
-    function compareDocument(a, b) {
-      var a_name = a.name;
-      var b_name = b.name;
-      var is_a_star = a_name.charAt(0) == '*';
-      var is_b_star = b_name.charAt(0) == '*';
-      if (is_a_star && is_b_star)
-        return a_name.localeCompare(b.name);
-      if (is_a_star)
-        return 1;
-      if (is_b_star)
-        return -1;
-      return a_name.localeCompare(b_name);
-    }
-    // TODO(yosi) Once TableView support sorting, we don't need to sort here.
-    Document.list.sort(compareDocument).forEach(function(document) {
+    Document.list.forEach(function(document) {
       range.collapseTo(range.end);
       var fields = [
         document.name,
         document.length,
         stateString(document),
-        (new Date()).toLocaleString(), // saved at
+        document.lastWriteTime.valueOf() ?
+            document.lastWriteTime.toLocaleString() : '-',
         document.filename
       ];
       range.text = fields.join('\t') + '\n';
@@ -134,7 +145,7 @@
    * @this {!Window}
    */
   function listDocumentCommand() {
-    var document = createDocumentList();
+    var document = ensureDocumentList();
     var window = this.parent.children.find(function(window) {
       if (!(window instanceof TableWindow))
         return false;

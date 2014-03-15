@@ -25,7 +25,7 @@ Map.prototype.set = (function() {
   return function (key, value) {
     if (!this.keys_)
       this.keys_ = [key];
-    else
+    else if (!this.has(key))
       this.keys_.push(key);
     original_set.call(this, key, value);
   };
@@ -52,7 +52,7 @@ Set.prototype.add = (function() {
   return function (key, value) {
     if (!this.keys_)
       this.keys_ = [key];
-    else
+    else if (!this.has(key))
       this.keys_.push(key);
     original_set.call(this, key, value);
   };

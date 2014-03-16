@@ -372,7 +372,8 @@ void Document::Load(const base::string16& filename,
   auto const runner = ScriptController::instance()->runner();
   auto const load_callback = make_scoped_refptr(
       new LoadFileCallback(runner, this, callback));
-  buffer()->Load(filename, base::Bind(&LoadFileCallback::Run, load_callback));
+  ScriptController::instance()->view_delegate()->LoadFile(this, filename,
+      base::Bind(&LoadFileCallback::Run, load_callback));
 }
 
 v8::Handle<v8::Value> Document::Match(RegExp* regexp, int start, int end) {
@@ -402,12 +403,8 @@ void Document::Save(const base::string16& filename,
   auto const runner = ScriptController::instance()->runner();
   auto const save_callback = make_scoped_refptr(
       new SaveFileCallback(runner, this, callback));
-  auto const code_page = buffer()->GetCodePage() ?
-      static_cast<int>(buffer()->GetCodePage()) : 932;
-  auto const newline_mode = buffer()->GetNewline() == NewlineMode_Detect ?
-        NewlineMode_CrLf : buffer()->GetNewline();
-  buffer()->Save(filename, code_page, newline_mode,
-                 base::Bind(&SaveFileCallback::Run, save_callback));
+  ScriptController::instance()->view_delegate()->SaveFile(this, filename,
+      base::Bind(&SaveFileCallback::Run, save_callback));
 }
 
 base::string16 Document::Slice(int start, v8_glue::Optional<int> opt_end) {

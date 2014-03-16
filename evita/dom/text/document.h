@@ -13,6 +13,10 @@
 #include "evita/v8_glue/scriptable.h"
 #include "evita/v8_glue/scoped_persistent.h"
 
+namespace text {
+struct LineAndColumn;
+}
+
 namespace dom {
 
 class Buffer;
@@ -68,6 +72,7 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: void DoColor(int hint);
   public: void EndUndoGroup(const base::string16& name);
   public: static Document* Find(const base::string16& name);
+  public: text::LineAndColumn GetLineAndColumn(text::Posn offset) const;
   public: bool IsValidPosition(text::Posn position) const;
   public: void Load(const base::string16& filename,
                     v8::Handle<v8::Function> callback);

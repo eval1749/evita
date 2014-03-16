@@ -32,6 +32,21 @@
 #include "evita/v8_glue/wrapper_info.h"
 #include "v8_strings.h"
 
+namespace gin {
+template<>
+struct Converter<text::LineAndColumn> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+      text::LineAndColumn& line_and_column) {
+    auto const result = v8::Object::New(isolate);
+    result->Set(gin::StringToV8(isolate, "column"),
+                v8::Integer::New(isolate, line_and_column.column));
+    result->Set(gin::StringToV8(isolate, "lineNumber"),
+                v8::Integer::New(isolate, line_and_column.line_number));
+    return result;
+  }
+};
+}  // namespace gin
+
 namespace dom {
 
 namespace {
@@ -162,6 +177,7 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
       .SetMethod("charCodeAt_", &Document::charCodeAt)
       .SetMethod("doColor_", &Document::DoColor)
       .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
+      .SetMethod("getLineAndColumn_", &Document::GetLineAndColumn)
       .SetMethod("load_", &Document::Load)
       .SetMethod("match_", &Document::Match)
       .SetMethod("redo", &Document::Redo)
@@ -375,6 +391,12 @@ void Document::EndUndoGroup(const base::string16& name) {
 
 Document* Document::Find(const base::string16& name) {
   return DocumentSet::instance()->Find(name);
+}
+
+text::LineAndColumn Document::GetLineAndColumn(text::Posn offset) const {
+  if (!IsValidPosition(offset))
+    return buffer_->GetLineAndColumn(0);
+  return buffer_->GetLineAndColumn(offset);
 }
 
 bool Document::IsValidPosition(text::Posn position) const {

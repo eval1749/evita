@@ -158,6 +158,12 @@ Document.prototype.endUndoGroup_ = function(name) {};
 Document.prototype.forceClose = function() {};
 
 /**
+ * @param {number} offset
+ * @return {{column: number, lineNumber: number}}
+ */
+Document.prototype.getLineAndColumn_ = function(offset) {};
+
+/**
  * @return {Array.<!DocumentWindow>}
  */
 Document.prototype.listWindows = function() {};

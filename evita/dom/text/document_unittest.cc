@@ -164,6 +164,24 @@ TEST_F(DocumentTest, dispatchEvent) {
       "Instances of Document is an event target.";
 }
 
+TEST_F(DocumentTest, getLineAndColumn) {
+  EXPECT_SCRIPT_VALID(
+      "var doc = new Document('getLineAndColumn');"
+      "var range = new Range(doc);"
+      "range.text = '01\\n02\\n03\\n04\\n';"
+      "function testIt(offset) {"
+      "  var result = doc.getLineAndColumn_(offset);"
+      "  return result.lineNumber + ',' + result.column;"
+      "}");
+  EXPECT_SCRIPT_EQ("1,0", "testIt(0)");
+  EXPECT_SCRIPT_EQ("1,1", "testIt(1)");
+  EXPECT_SCRIPT_EQ("1,2", "testIt(2)");
+  EXPECT_SCRIPT_EQ("2,0", "testIt(3)");
+  EXPECT_SCRIPT_EQ("2,1", "testIt(4)");
+  EXPECT_SCRIPT_EQ("RangeError: Invalid position 100, valid range is [0, 12]",
+                   "testIt(100)");
+}
+
 TEST_F(DocumentTest, length) {
   EXPECT_SCRIPT_VALID("var doc = new Document('length');");
   EXPECT_SCRIPT_EQ("0", "doc.length");

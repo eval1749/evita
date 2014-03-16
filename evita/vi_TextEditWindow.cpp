@@ -33,6 +33,7 @@
 #include "evita/dom/text/range.h"
 #include "evita/dom/windows/selection.h"
 #include "evita/dom/windows/text_window.h"
+#include "evita/metrics/time_scope.h"
 #include "evita/text/range.h"
 #include "evita/ui/controls/scroll_bar.h"
 #include "evita/views/frame_list.h"
@@ -583,7 +584,10 @@ static std::vector<base::string16> ComposeStatusBarTexts(
   // FIXME 2007-07-18 yosi We should use lazy evaluation object for
   // computing line number of column or cache.
   text::Range::Information oInfo;
-  selection->range()->GetInformation(&oInfo);
+  {
+    METRICS_TIME_SCOPE();
+    selection->range()->GetInformation(&oInfo);
+  }
 
   return {
     buffer->IsNotReady() ? L"Busy" : has_focus ? L"Ready" : L"",

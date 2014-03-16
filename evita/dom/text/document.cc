@@ -18,6 +18,7 @@
 #include "evita/dom/text/regexp.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
+#include "evita/metrics/time_scope.h"
 #include "evita/text/marker.h"
 #include "evita/text/marker_set.h"
 #include "evita/text/modes/mode.h"
@@ -396,6 +397,7 @@ Document* Document::Find(const base::string16& name) {
 text::LineAndColumn Document::GetLineAndColumn(text::Posn offset) const {
   if (!IsValidPosition(offset))
     return buffer_->GetLineAndColumn(0);
+  METRICS_TIME_SCOPE();
   return buffer_->GetLineAndColumn(offset);
 }
 

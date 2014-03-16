@@ -97,14 +97,14 @@ namespace text {
 Range::Range(Buffer* pBuffer, Posn lStart, Posn lEnd)
     : m_lEnd(lEnd),
       m_lStart(lStart),
-      m_pBuffer(pBuffer) {
-  DCHECK(m_pBuffer->IsValidRange(m_lStart, m_lEnd));
-  m_pBuffer->ranges()->AddRange(this);
+      buffer_(pBuffer) {
+  DCHECK(buffer_->IsValidRange(m_lStart, m_lEnd));
+  buffer_->ranges()->AddRange(this);
 }
 
 Range::~Range() {
-  if (m_pBuffer)
-    m_pBuffer->ranges()->RemoveRange(this);
+  if (buffer_)
+    buffer_->ranges()->RemoveRange(this);
 }
 
 Count Range::Copy() {
@@ -113,7 +113,7 @@ Count Range::Copy() {
 
   Count cwch = 0;
   for (Posn lPosn = m_lStart; lPosn < m_lEnd; lPosn += 1) {
-    auto const wch = m_pBuffer->GetCharAt(lPosn);
+    auto const wch = buffer_->GetCharAt(lPosn);
     if (wch == 0x0A)
       ++cwch;
     ++cwch;
@@ -130,7 +130,7 @@ Count Range::Copy() {
     if (!pwch)
       return 0;
     for (Posn lPosn = m_lStart; lPosn < m_lEnd; lPosn += 1) {
-      auto const wch = m_pBuffer->GetCharAt(lPosn);
+      auto const wch = buffer_->GetCharAt(lPosn);
       if (wch == 0x0A)
         *pwch++ = 0x0D;
       *pwch++ = wch;
@@ -154,8 +154,8 @@ Count Range::Copy() {
 Posn Range::ensurePosn(Posn lPosn) const {
   if (lPosn < 0)
     return 0;
-  if (lPosn > m_pBuffer->GetEnd())
-    return m_pBuffer->GetEnd();
+  if (lPosn > buffer_->GetEnd())
+    return buffer_->GetEnd();
   return lPosn;
 }
 
@@ -164,22 +164,22 @@ void Range::GetInformation(Information* out_oInfo, Count n) const {
   Count k = n;
   out_oInfo->m_lLineNum = 1;
   for (Posn lPosn = 0; lPosn < m_lStart; lPosn++) {
-    if (m_pBuffer->GetCharAt(lPosn) == 0x0A)
+    if (buffer_->GetCharAt(lPosn) == 0x0A)
       ++out_oInfo->m_lLineNum;
   }
 
   out_oInfo->m_fLineNum = k > 0;
-  auto const lLineStart = m_pBuffer->ComputeStartOfLine(m_lStart);
+  auto const lLineStart = buffer_->ComputeStartOfLine(m_lStart);
   out_oInfo->m_fColumn = (m_lStart - lLineStart) < n;
   out_oInfo->m_lColumn = m_lStart - lLineStart;
 }
 
 base::string16 Range::GetText() const {
-  return m_pBuffer->GetText(m_lStart, m_lEnd);
+  return buffer_->GetText(m_lStart, m_lEnd);
 }
 
 void Range::Paste() {
-  if (m_pBuffer->IsReadOnly())
+  if (buffer_->IsReadOnly())
     return;
 
   Clipboard oClipboard;
@@ -195,7 +195,7 @@ void Range::Paste() {
 
   UndoBlock oUndo(this, L"Range.Paste");
 
-  m_pBuffer->Delete(m_lStart, m_lEnd);
+  buffer_->Delete(m_lStart, m_lEnd);
 
   auto lPosn = m_lStart;
   auto pwchStart = pwsz;
@@ -212,7 +212,7 @@ void Range::Paste() {
           case 0x0A: {
             pwsz[-1] = 0x0A;
             Count k = static_cast<Count>(pwsz - pwchStart);
-            m_pBuffer->Insert(lPosn, pwchStart, k);
+            buffer_->Insert(lPosn, pwchStart, k);
             lPosn += k;
             eState = Start;
             pwchStart = pwsz + 1;
@@ -237,7 +237,7 @@ void Range::Paste() {
 
   if (Start != eState) {
     auto const k = static_cast<Count>(pwsz - pwchStart);
-    m_pBuffer->Insert(lPosn, pwchStart, k);
+    buffer_->Insert(lPosn, pwchStart, k);
     lPosn += k;
   }
 
@@ -265,18 +265,18 @@ Posn Range::SetStart(Posn lPosn) {
 }
 
 void Range::SetText(const base::string16& text) {
-  if (m_pBuffer->IsReadOnly()) {
+  if (buffer_->IsReadOnly()) {
     // TODO: We should throw read only buffer exception.
     return;
   }
 
   if (m_lStart == m_lEnd) {
     UndoBlock oUndo(this, L"Range.SetText");
-    m_pBuffer->Insert(m_lStart, text.data(), static_cast<Count>(text.length()));
+    buffer_->Insert(m_lStart, text.data(), static_cast<Count>(text.length()));
   } else {
     UndoBlock oUndo(this, L"Range.SetText");
-    m_pBuffer->Delete(m_lStart, m_lEnd);
-    m_pBuffer->Insert(m_lStart, text.data(), static_cast<Count>(text.length()));
+    buffer_->Delete(m_lStart, m_lEnd);
+    buffer_->Insert(m_lStart, text.data(), static_cast<Count>(text.length()));
   }
 
   m_lEnd = ensurePosn(static_cast<Posn>(m_lStart + text.length()));

@@ -23,12 +23,12 @@ class Range {
 
   private: Posn m_lStart;
   private: Posn m_lEnd;
-  private: Buffer* m_pBuffer;
+  private: Buffer* buffer_;
 
   public: Range(Buffer*, Posn, Posn);
   public: ~Range();
 
-  public: Buffer* buffer() const { return m_pBuffer; }
+  public: Buffer* buffer() const { return buffer_; }
 
   // [C]
   public: Count Copy();

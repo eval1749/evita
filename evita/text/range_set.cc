@@ -17,7 +17,7 @@ RangeSet::RangeSet(Buffer* buffer) {
 
 RangeSet::~RangeSet() {
   for (auto* range : ranges_) {
-    range->m_pBuffer = nullptr;
+    range->buffer_ = nullptr;
   }
 }
 

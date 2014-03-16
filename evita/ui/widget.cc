@@ -69,7 +69,8 @@ UINT_PTR Widget::child_window_id() const {
 }
 
 bool Widget::has_active_focus() {
-  DCHECK_EQ(!!::GetFocus(), we_have_active_focus);
+  // When modeless dialog has focus, ::GetFocus() returns it, but
+  // we_have_active_focus is false.
   return we_have_active_focus;
 }
 

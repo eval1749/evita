@@ -25,6 +25,8 @@ const auto kMarkerWidth = 4.0f;
 std::unique_ptr<gfx::Bitmap> CopyFromRenderTarget(const gfx::Graphics* gfx,
                                                   const gfx::RectF rect) {
   auto bitmap = std::make_unique<gfx::Bitmap>(*gfx);
+  if (!*bitmap)
+    return std::unique_ptr<gfx::Bitmap>();
   auto const rect_u = gfx::RectU(static_cast<uint32_t>(rect.left),
                                  static_cast<uint32_t>(rect.top),
                                  static_cast<uint32_t>(rect.right),
@@ -386,14 +388,17 @@ void ScreenTextBlock::Render(const TextBlock* text_block) {
     return;
 
   Reset();
-  // TODO(yosi) We should use existing TextLine's in ScreenTextBlock.
-  for (auto line : text_block->lines()) {
-    lines_.push_back(line->Copy());
-  }
   bitmap_ = CopyFromRenderTarget(gfx_, gfx::RectF(
-      gfx::PointF(rect_.left, lines_.front()->rect().top),
-      gfx::SizeF(rect_.width(), lines_.back()->rect().bottom)));
-
+      gfx::PointF(rect_.left, text_block->lines().front()->rect().top),
+      gfx::SizeF(rect_.width(), text_block->lines().back()->rect().bottom)));
+  // Event if we can't get bitmap from render target, screen is up-to-date,
+  // but we render all lines next time.
+  if (bitmap_) {
+    // TODO(yosi) We should use existing TextLine's in ScreenTextBlock.
+    for (auto line : text_block->lines()) {
+      lines_.push_back(line->Copy());
+    }
+  }
   render_context.Finish();
   dirty_ = false;
 }

@@ -146,9 +146,9 @@ DynamicAbbrevExpander.prototype.findCandidate = function(current_word) {
   var cursor = this.cursor;
   var origin_end = cursor.end;
   var origin_start = cursor.start;
-  for (var count = 0; count < 40; ++count) {
+  // Try current direction and opposite direction to find a candidate.
+  for (var count = 0; count < 2; ++count) {
     if (findWordStartsWith(this.prefix, cursor, this.direction)) {
-      //cursor.moveEnd(Unit.WORD).moveEndWhile(' \t\n', -1);
       cursor.endOf(Unit.WORD, Alter.EXTEND);
       if (cursor.end == origin_end || cursor.start == origin_start)
         return false;
@@ -159,7 +159,7 @@ DynamicAbbrevExpander.prototype.findCandidate = function(current_word) {
       return true;
     }
 
-    // Continue find a word in oposite direction.
+    // Continue find a candiate in oposite direction.
     this.direction = -this.direction;
     if (this.direction> 0)
       cursor.collapseTo(this.last_selection_range.end);

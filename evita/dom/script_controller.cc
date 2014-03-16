@@ -133,7 +133,7 @@ ScriptController::ScriptController(ViewDelegate* view_delegate,
                                    domapi::IoDelegate* io_delegate)
     : event_handler_(new ViewEventHandlerImpl(this)),
       io_delegate_(io_delegate),
-      started_(false),
+      state_(domapi::ScriptHostState::Stopped),
       testing_(false),
       testing_runner_(nullptr),
       view_delegate_(view_delegate) {
@@ -185,7 +185,9 @@ void ScriptController::DidStartHost() {
   if (testing_)
     return;
   runner()->Run(L"editors.start([]);", L"__start__");
-  started_ = true;
+  if (state_ == domapi::ScriptHostState::Stopped)
+    state_ = domapi::ScriptHostState::Running;
+  view_delegate_->DidStartScriptHost(state_);
 }
 
 void ScriptController::OpenFile(WindowId window_id,
@@ -303,8 +305,9 @@ void ScriptController::UnhandledException(v8_glue::Runner*,
     text =  L"No details";
   }
 
-  if (!started_) {
+  if (state_ != domapi::ScriptHostState::Running) {
     ::MessageBoxW(nullptr, text.c_str(), L"Evita Startup Error", MB_ICONERROR);
+    state_ = domapi::ScriptHostState::Error;
     return;
   }
 

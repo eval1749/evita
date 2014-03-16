@@ -30,6 +30,7 @@ class Buffer;
 using Buffer = dom::Buffer;
 
 namespace domapi {
+enum class ScriptHostState;
 class ViewEventHandler;
 }
 
@@ -63,6 +64,7 @@ class Application : public common::Singleton<Application> {
   public: bool CalledOnValidThread() const;
 
   // [D]
+  public: void DidStartScriptHost(domapi::ScriptHostState state);
   private: void DoIdle();
 
   // [G]

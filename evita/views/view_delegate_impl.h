@@ -36,6 +36,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void DestroyWindow(dom::WindowId window_id) override;
   private: virtual void DidChangeFormContents(
       domapi::DialogBoxId dialog_box_id) override;
+  private: virtual void DidStartScriptHost(
+      domapi::ScriptHostState state) override;
   private: virtual void FocusWindow(dom::WindowId window_id) override;
   private: virtual void GetFilenameForLoad(
       dom::WindowId window_id, const base::string16& dir_path,

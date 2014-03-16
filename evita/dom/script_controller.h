@@ -10,6 +10,7 @@
 #include "base/callback_forward.h"
 #include "base/location.h"
 #include "base/strings/string16.h"
+#include "evita/dom/public/script_host_state.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/v8_glue/isolate_holder.h"
 #include "evita/v8_glue/runner_delegate.h"
@@ -51,7 +52,7 @@ class ScriptController : public v8_glue::RunnerDelegate {
   private: std::unique_ptr<ViewEventHandlerImpl> event_handler_;
   private: domapi::IoDelegate* io_delegate_;
   private: std::unique_ptr<v8_glue::Runner> runner_;
-  private: bool started_;
+  private: domapi::ScriptHostState state_;
   private: bool testing_;
   private: v8_glue::Runner* testing_runner_;
   private: ViewDelegate* view_delegate_;

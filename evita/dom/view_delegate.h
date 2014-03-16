@@ -9,6 +9,7 @@
 #include "base/strings/string16.h"
 #include "evita/dom/public/dialog_box_id.h"
 #include "evita/dom/public/deferred.h"
+#include "evita/dom/public/script_host_state.h"
 #include "evita/dom/windows/window_id.h"
 #include "evita/dom/windows/window_id.h"
 
@@ -27,6 +28,7 @@ class EditorWindow;
 class Form;
 class TextWindow;
 class Window;
+using domapi::ScriptHostState;
 
 struct TextWindowCompute {
   // Note: Value of |WindowCompute::Method| must match with JavaScript.
@@ -87,6 +89,10 @@ class ViewDelegate {
   public: virtual void DestroyWindow(WindowId window_id) = 0;
   public: virtual void DidChangeFormContents(
       domapi::DialogBoxId dialog_box_id) = 0;
+
+  // |DidStartScriptHost| is called when script host execute editor start
+  // script.
+  public: virtual void DidStartScriptHost(ScriptHostState state) = 0;
   public: virtual void FocusWindow(WindowId window_id) = 0;
   public: virtual void GetFilenameForLoad(
       WindowId window_id, const base::string16& dir_path,

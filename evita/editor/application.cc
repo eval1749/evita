@@ -104,6 +104,13 @@ bool Application::CalledOnValidThread() const {
   return message_loop_.get() == base::MessageLoop::current();
 }
 
+void Application::DidStartScriptHost(domapi::ScriptHostState state) {
+  if (state != domapi::ScriptHostState::Running) {
+    // TODO(yosi) We should set exit code other than EXIT_SUCCESS.
+    Application::instance()->Quit();
+  }
+}
+
 // Note: We don't need to check ::GetStatus(QS_INPUT), becaue |DoIdle()| is
 // called after processing Windows message.
 void Application::DoIdle() {

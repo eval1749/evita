@@ -285,17 +285,17 @@ void Range::SetText(const base::string16& text) {
 Buffer::EnumChar::EnumChar(const Range* pRange)
     : m_lEnd(pRange->GetEnd()),
       m_lPosn(pRange->GetStart()),
-      m_pBuffer(pRange->GetBuffer()) {
+      m_pBuffer(pRange->buffer()) {
 }
 
 Buffer::EnumCharRev::EnumCharRev(const Range* pRange)
     : m_lStart(pRange->GetStart()),
       m_lPosn(pRange->GetEnd()),
-      m_pBuffer(pRange->GetBuffer()) {
+      m_pBuffer(pRange->buffer()) {
 }
 
 UndoBlock::UndoBlock(Range* range, const base::string16& name)
-    : UndoBlock(range->GetBuffer(), name) {
+    : UndoBlock(range->buffer(), name) {
 }
 
 }  // namespace text

@@ -75,8 +75,8 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
       caret_(new Caret()),
       m_gfx(nullptr),
       m_lCaretPosn(-1),
-      text_renderer_(new TextRenderer(text_window.view_range()->text_range()->
-                                        GetBuffer())),
+      text_renderer_(new TextRenderer(
+          text_window.view_range()->text_range()->buffer())),
       selection_(text_window.view_selection()),
       #if SUPPORT_IME
         m_fImeTarget(false),

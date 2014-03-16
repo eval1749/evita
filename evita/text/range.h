@@ -28,6 +28,8 @@ class Range {
   public: Range(Buffer*, Posn, Posn);
   public: ~Range();
 
+  public: Buffer* buffer() const { return m_pBuffer; }
+
   // [C]
   public: Count Copy();
 
@@ -35,7 +37,6 @@ class Range {
   private: Posn ensurePosn(Posn) const;
 
   // [G]
-  public: Buffer* GetBuffer() const { return m_pBuffer; }
   public: Posn GetEnd() const { return m_lEnd; }
   public: void GetInformation(Information*, Count = Count_Max) const;
   public: Posn GetStart() const { return m_lStart; }

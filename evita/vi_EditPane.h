@@ -16,6 +16,10 @@
 
 class Frame;
 
+namespace text {
+class Buffer;
+}
+
 namespace ui {
 class MouseEvent;
 }
@@ -23,12 +27,6 @@ class MouseEvent;
 namespace views {
 class ContentWindow;
 }
-
-namespace dom {
-class Buffer;
-}
-
-using Buffer = dom::Buffer;
 
 // EditPane is a container of multiple ContentWindow windows and layouts
 // them vertically with draggable splitter.
@@ -91,7 +89,7 @@ class EditPane final : public Pane {
   private: LeafBox* GetActiveLeafBox() const;
   public: virtual HCURSOR GetCursorAt(const Point&) const override;
   public: Window* GetActiveWindow() const;
-  public: Buffer* GetBuffer() const;
+  public: text::Buffer* GetBuffer() const;
 
   public: Window* GetFirstWindow() const;
   public: Window* GetLastWindow() const;

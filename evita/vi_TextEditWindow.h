@@ -25,8 +25,11 @@ class TextRenderer;
 class Selection;
 
 namespace dom {
-class Buffer;
 class TextWindow;
+}
+
+namespace text {
+class Buffer;
 }
 
 namespace views {
@@ -95,7 +98,7 @@ class TextEditWindow
   public: Posn EndOfLine(Posn);
 
   // [G]
-  public: dom::Buffer* GetBuffer() const;
+  public: text::Buffer* GetBuffer() const;
   private: virtual HCURSOR GetCursorAt(const Point&) const override;
   public: HWND GetScrollBar(int which) const;
   // TODO(yosi): We should not expose TextEdintWindow::GetTitle(). We export

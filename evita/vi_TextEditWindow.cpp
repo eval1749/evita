@@ -241,7 +241,7 @@ Posn TextEditWindow::EndOfLine(Posn lPosn) {
   }
 }
 
-Buffer* TextEditWindow::GetBuffer() const {
+text::Buffer* TextEditWindow::GetBuffer() const {
   return GetSelection()->GetBuffer();
 }
 
@@ -569,7 +569,7 @@ void TextEditWindow::updateScrollBar() {
 }
 
 static std::vector<base::string16> ComposeStatusBarTexts(
-    dom::Buffer* buffer, Selection* selection, bool has_focus) {
+    const text::Buffer* buffer, Selection* selection, bool has_focus) {
   static const char16* const k_rgwszNewline[4] = {
     L"--",
     L"LF",

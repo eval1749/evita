@@ -16,16 +16,14 @@
 
 #include "base/logging.h"
 #include "base/memory/ref_counted.h"
-#include "evita/views/content_window.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/text/modes/mode.h"
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"
-#include "evita/dom/text/buffer.h"
 #include "evita/resource.h"
 #include "evita/ui/events/event.h"
 #include "evita/ui/widget_ostream.h"
+#include "evita/views/content_window.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_TextEditWindow.h"
 
@@ -1170,7 +1168,7 @@ EditPane::Window* EditPane::GetActiveWindow() const {
   return pBox ? pBox->GetWindow() : nullptr;
 }
 
-Buffer* EditPane::GetBuffer() const {
+text::Buffer* EditPane::GetBuffer() const {
   auto const window = GetActiveWindow();
   if (!window)
     return nullptr;

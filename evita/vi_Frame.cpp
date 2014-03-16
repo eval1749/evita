@@ -34,11 +34,11 @@
 #include "common/win/native_window.h"
 #include "evita/css/style.h"
 #include "evita/ctrl_TitleBar.h"
-#include "evita/dom/text/buffer.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/text/buffer.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/frame_observer.h"
 #include "evita/views/icon_cache.h"
@@ -484,11 +484,11 @@ Rect Frame::GetPaneRect() const {
 }
 
 namespace {
-base::string16 MaybeBufferFilename(const Buffer& buffer) {
+base::string16 MaybeBufferFilename(const text::Buffer& buffer) {
   return buffer.GetFileName().empty() ? L"No file" : buffer.GetFileName();
 }
 
-base::string16 MaybeBufferSaveTime(const Buffer& buffer){
+base::string16 MaybeBufferSaveTime(const text::Buffer& buffer){
   if (buffer.GetFileName().empty())
     return L"Not saved";
  
@@ -504,7 +504,7 @@ base::string16 MaybeBufferSaveTime(const Buffer& buffer){
       exploded_time.second);
 }
 
-base::string16 ModifiedDisplayText(const Buffer& buffer) {
+base::string16 ModifiedDisplayText(const text::Buffer& buffer) {
  if (!buffer.IsModified())
     return L"Not modified";
  return buffer.GetNoSave() ? L"Modified" : L"Not saved";

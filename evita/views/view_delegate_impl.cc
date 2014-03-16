@@ -393,7 +393,7 @@ void ViewDelegateImpl::RegisterViewEventHandler(
     domapi::ViewEventHandler* event_handler) {
   DCHECK(!event_handler_);
   event_handler_ = event_handler;
-  event_handler_->DidStartHost();
+  event_handler_->DidStartViewHost();
 }
 void ViewDelegateImpl::SaveFile(dom::Document* document,
                                 const base::string16& filename,

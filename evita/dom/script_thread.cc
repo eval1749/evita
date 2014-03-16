@@ -433,7 +433,7 @@ DEFINE_VIEW_EVENT_HANDLER_1(DidKillFocus, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidRealizeWidget, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidRequestFocus, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_5(DidResizeWidget, WindowId, int, int, int, int)
-DEFINE_VIEW_EVENT_HANDLER_0(DidStartHost)
+DEFINE_VIEW_EVENT_HANDLER_0(DidStartViewHost)
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchFormEvent, const domapi::FormEvent&)
 
 void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {

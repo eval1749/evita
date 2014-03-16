@@ -71,7 +71,7 @@ class ScriptController : public v8_glue::RunnerDelegate {
   public: void set_testing_runner(v8_glue::Runner* runner);
   public: ViewDelegate* view_delegate() const;
 
-  public: void DidStartHost();
+  public: void DidStartViewHost();
   public: void OpenFile(WindowId window_id,
                         const base::string16& filename);
   public: void ResetForTesting();

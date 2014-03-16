@@ -176,7 +176,7 @@ ViewDelegate* ScriptController::view_delegate() const {
   return view_delegate_;
 }
 
-void ScriptController::DidStartHost() {
+void ScriptController::DidStartViewHost() {
   // We should prevent UI thread to access DOM.
   DOM_AUTO_LOCK_SCOPE();
   v8_glue::Runner::Scope runner_scope(runner());

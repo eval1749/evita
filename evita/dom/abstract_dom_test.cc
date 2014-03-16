@@ -128,7 +128,7 @@ void AbstractDomTest::SetUp() {
   runner_.reset(runner);
   ScriptController::instance()->set_testing_runner(runner);
   v8_glue::Runner::Scope runner_scope(runner);
-  ScriptController::instance()->DidStartHost();
+  ScriptController::instance()->DidStartViewHost();
 }
 
 void AbstractDomTest::TearDown() {

@@ -191,8 +191,8 @@ void ViewEventHandlerImpl::DidRequestFocus(WindowId window_id) {
   DispatchEventWithInLock(window, new FocusEvent(L"focus", FocusEventInit()));
 }
 
-void ViewEventHandlerImpl::DidStartHost() {
-  controller_->DidStartHost();
+void ViewEventHandlerImpl::DidStartViewHost() {
+  controller_->DidStartViewHost();
 }
 
 void ViewEventHandlerImpl::DispatchFormEvent(

@@ -42,12 +42,16 @@ Runner::EscapableHandleScope::EscapableHandleScope(Runner* runner)
   #if defined(_DEBUG)
     ++runner->in_scope_;
   #endif
+  try_catch_.SetCaptureMessage(true);
+  try_catch_.SetVerbose(true);
 }
 
 Runner::EscapableHandleScope::~EscapableHandleScope() {
   #if defined(_DEBUG)
     --runner_->in_scope_;
   #endif
+  if (try_catch_.HasCaught())
+    runner_->delegate_->UnhandledException(runner_, try_catch_);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -64,12 +68,16 @@ Runner::Scope::Scope(Runner* runner)
   #if defined(_DEBUG)
     ++runner->in_scope_;
   #endif
+  try_catch_.SetCaptureMessage(true);
+  try_catch_.SetVerbose(true);
 }
 
 Runner::Scope::~Scope() {
   #if defined(_DEBUG)
     --runner_->in_scope_;
   #endif
+  if (try_catch_.HasCaught())
+    runner_->delegate_->UnhandledException(runner_, try_catch_);
 }
 
 //////////////////////////////////////////////////////////////////////

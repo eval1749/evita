@@ -99,9 +99,9 @@ class Buffer : public BufferCore,
 
   // Asynchronous Operation Support
   public: enum State {
-    State_Save,
     State_Ready,
     State_Load,
+    State_Save,
   };
 
   protected: State m_eState;
@@ -116,6 +116,7 @@ class Buffer : public BufferCore,
   public: MarkerSet* spelling_markers() const {
     return spelling_markers_.get();
   }
+  public: State state() const { return m_eState; }
 
   public: const css::StyleResolver* style_resolver() const {
     return style_resolver_.get();

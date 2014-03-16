@@ -47,9 +47,7 @@
     var editorWindow = this.parent;
     Editor.getFilenameForLoad(this, this.selection.document.filename)
         .then(function(filename) {
-          // TODO(yosi) When editorWindow has a window for filename, we should
-          // activate it.
-          windows.newTextWindow(editorWindow, openFile(filename));
+          windows.activate(editorWindow, openFile(filename));
         });
   });
 

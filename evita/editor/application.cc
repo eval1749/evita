@@ -123,6 +123,10 @@ void Application::DidHandleViewIdelEvent(int) {
 }
 
 void Application::DispatchViewIdelEvent() {
+  #if DEBUG_IDLE
+    DVLOG(0) << "view_idle_count_=" << view_idle_count_ << " active_focus=" <<
+            ui::Widget::has_active_focus();
+  #endif
   if (view_idle_count_) {
     ++view_idle_count_;
   } if (ui::Widget::has_active_focus()) {

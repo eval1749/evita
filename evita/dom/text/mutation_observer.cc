@@ -64,7 +64,7 @@ class MutationObserver::Tracker {
   public: ~Tracker();
 
   public: bool has_records() const {
-    return minimum_change_offset_ != ::Posn_Max;
+    return minimum_change_offset_ != text::Posn_Max;
   }
 
   public: void Reset();
@@ -80,7 +80,7 @@ MutationObserver::Tracker::~Tracker() {
 }
 
 void MutationObserver::Tracker::Reset() {
-  minimum_change_offset_ = ::Posn_Max;
+  minimum_change_offset_ = text::Posn_Max;
 }
 
 std::vector<MutationRecord*> MutationObserver::Tracker::TakeRecords() {

@@ -26,6 +26,7 @@ namespace text
 
 typedef long Count;
 typedef long Posn;
+const Posn Posn_Max = 1 << 28;
 
 class Buffer;
 class Range;
@@ -38,8 +39,6 @@ enum
     Count_Backward =  -1 << 28,
     Count_Forward  =  +1 << 28,
     Count_Max      = Count_Forward,
-
-    Posn_Max       = Count_Max,
 };
 
 //////////////////////////////////////////////////////////////////////

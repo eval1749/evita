@@ -228,11 +228,11 @@ Posn TextEditWindow::EndOfLine(Posn lPosn) {
       return pLine->GetEnd() - 1;
   }
 
-  auto const lBufEnd = selection_->GetBuffer()->GetEnd();
+  auto const lBufEnd = GetBuffer()->GetEnd();
   if (lPosn >= lBufEnd)
     return lBufEnd;
 
-  auto lStart = selection_->GetBuffer()->ComputeStartOfLine(lPosn);
+  auto lStart = GetBuffer()->ComputeStartOfLine(lPosn);
   for (;;) {
     auto const pLine = text_renderer_->FormatLine(lStart);
     lStart = pLine->GetEnd();
@@ -242,7 +242,7 @@ Posn TextEditWindow::EndOfLine(Posn lPosn) {
 }
 
 text::Buffer* TextEditWindow::GetBuffer() const {
-  return GetSelection()->GetBuffer();
+  return text_renderer_->GetBuffer();
 }
 
 HCURSOR TextEditWindow::GetCursorAt(const Point& point) const {
@@ -274,7 +274,7 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
     // Scroll Down -- place top line out of window.
     iDy = -iDy;
 
-    auto const lBufStart = selection_->GetBuffer()->GetStart();
+    auto const lBufStart = GetBuffer()->GetStart();
     for (k = 0; k < iDy; ++k) {
       auto const lStart = text_renderer_->GetStart();
       if (lStart == lBufStart)
@@ -288,7 +288,7 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
     }
   } else if (iDy > 0) {
     // Scroll Up -- format page from page end.
-    const Posn lBufEnd = selection_->GetBuffer()->GetEnd();
+    const Posn lBufEnd = GetBuffer()->GetEnd();
     for (k = 0; k < iDy; ++k) {
       auto const lStart = text_renderer_->GetEnd();
       if (lStart >= lBufEnd)
@@ -304,7 +304,7 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
 
 base::string16 TextEditWindow::GetTitle() const {
   return GetBuffer()->GetFileName().empty() || !GetBuffer()->IsModified() ?
-      GetBuffer()->name(): GetBuffer()->name() + L"*";
+      GetBuffer()->name() : GetBuffer()->name() + L"*";
 }
 
 void TextEditWindow::MakeSelectionVisible() {
@@ -481,7 +481,7 @@ int TextEditWindow::SmallScroll(int, int iDy) {
   if (iDy < 0) {
     iDy = -iDy;
 
-    auto const lBufStart = selection_->GetBuffer()->GetStart();
+    auto const lBufStart = GetBuffer()->GetStart();
     auto lStart = text_renderer_->GetStart();
     int k;
     for (k = 0; k < iDy; ++k) {
@@ -498,7 +498,7 @@ int TextEditWindow::SmallScroll(int, int iDy) {
   }
 
   if (iDy > 0) {
-    auto const lBufEnd = selection_->GetBuffer()->GetEnd();
+    auto const lBufEnd = GetBuffer()->GetEnd();
     int k;
     for (k = 0; k < iDy; ++k) {
       if (text_renderer_->GetEnd() >= lBufEnd) {
@@ -532,7 +532,7 @@ Posn TextEditWindow::StartOfLine(Posn lPosn) {
       return pLine->GetStart();
   }
 
-  auto lStart = selection_->GetBuffer()->ComputeStartOfLine(lPosn);
+  auto lStart = GetBuffer()->ComputeStartOfLine(lPosn);
   if (!lStart)
     return 0;
 

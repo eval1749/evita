@@ -306,9 +306,6 @@ bool Buffer::Load(const base::string16& file_name,
       static_cast<int>(m_nCodePage),
       NewlineMode_Detect);
 
-  // We'll set read-only flag from file attributes.
-  SetReadOnly(false);
-  Delete(0, GetEnd());
   m_eState = State_Load;
 
   if (!pLoad->Start()) {

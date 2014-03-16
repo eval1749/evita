@@ -369,6 +369,9 @@ bool Document::IsValidPosition(text::Posn position) const {
 
 void Document::Load(const base::string16& filename,
                     v8::Handle<v8::Function> callback) {
+  // We'll set read-only flag from file attributes.
+  buffer()->SetReadOnly(false);
+  buffer()->Delete(0, buffer()->GetEnd());
   auto const runner = ScriptController::instance()->runner();
   auto const load_callback = make_scoped_refptr(
       new LoadFileCallback(runner, this, callback));

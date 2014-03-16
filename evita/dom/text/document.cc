@@ -369,7 +369,6 @@ bool Document::IsValidPosition(text::Posn position) const {
 
 void Document::Load(const base::string16& filename,
                     v8::Handle<v8::Function> callback) {
-  buffer()->StartLoad();
   auto const runner = ScriptController::instance()->runner();
   auto const load_callback = make_scoped_refptr(
       new LoadFileCallback(runner, this, callback));

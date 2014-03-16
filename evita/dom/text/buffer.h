@@ -35,7 +35,6 @@ class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
   public: bool Save(const base::string16& filename,
                     int code_page, NewlineMode newline_mode,
                     const dom::ViewDelegate::SaveFileCallback& callback);
-  public: void StartLoad();
 
   DISALLOW_COPY_AND_ASSIGN(Buffer);
 };

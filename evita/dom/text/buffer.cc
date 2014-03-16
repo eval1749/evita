@@ -15,11 +15,4 @@ void Buffer::FinishIo(uint const) {
   m_eState = State_Ready;
 }
 
-void Buffer::StartLoad() {
-  // We'll set read-only flag from file attributes.
-  SetReadOnly(false);
-  Delete(0, GetEnd());
-  m_eState = State_Load;
-}
-
 }  // namespace dom

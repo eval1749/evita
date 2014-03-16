@@ -21,11 +21,11 @@ class Range {
       Count m_lColumn;
   }; // Information
 
-  private: Posn m_lStart;
-  private: Posn m_lEnd;
   private: Buffer* buffer_;
+  private: Posn end_;
+  private: Posn start_;
 
-  public: Range(Buffer*, Posn, Posn);
+  public: Range(Buffer* buffer, Posn start, Posn end);
   public: ~Range();
 
   public: Buffer* buffer() const { return buffer_; }
@@ -37,9 +37,9 @@ class Range {
   private: Posn ensurePosn(Posn) const;
 
   // [G]
-  public: Posn GetEnd() const { return m_lEnd; }
+  public: Posn GetEnd() const { return end_; }
   public: void GetInformation(Information*, Count = Count_Max) const;
-  public: Posn GetStart() const { return m_lStart; }
+  public: Posn GetStart() const { return start_; }
   public: base::string16 GetText() const;
 
   // [P]

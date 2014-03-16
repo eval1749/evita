@@ -15,7 +15,7 @@
 template<class T>
 class Global {
   private: HGLOBAL m_h;
-  private: T*      m_p;
+  private: T* m_p;
 
   public: Global() : m_h(nullptr), m_p(nullptr) {
   }
@@ -56,7 +56,7 @@ class Global {
   }
 };
 
-//  Smart handle for Windows clipboard
+// Smart handle for Windows clipboard
 class Clipboard {
   private: bool m_fSucceeded;
   private: mutable HANDLE m_hGlobal;
@@ -95,10 +95,10 @@ class Clipboard {
 namespace text {
 
 Range::Range(Buffer* pBuffer, Posn lStart, Posn lEnd)
-    : m_lEnd(lEnd),
-      m_lStart(lStart),
+    : end_(lEnd),
+      start_(lStart),
       buffer_(pBuffer) {
-  DCHECK(buffer_->IsValidRange(m_lStart, m_lEnd));
+  DCHECK(buffer_->IsValidRange(start_, end_));
   buffer_->ranges()->AddRange(this);
 }
 
@@ -108,11 +108,11 @@ Range::~Range() {
 }
 
 Count Range::Copy() {
-  if (m_lStart == m_lEnd)
+  if (start_ == end_)
     return 0;
 
   Count cwch = 0;
-  for (Posn lPosn = m_lStart; lPosn < m_lEnd; lPosn += 1) {
+  for (Posn lPosn = start_; lPosn < end_; lPosn += 1) {
     auto const wch = buffer_->GetCharAt(lPosn);
     if (wch == 0x0A)
       ++cwch;
@@ -129,7 +129,7 @@ Count Range::Copy() {
     auto pwch = oGlobal.Lock();
     if (!pwch)
       return 0;
-    for (Posn lPosn = m_lStart; lPosn < m_lEnd; lPosn += 1) {
+    for (Posn lPosn = start_; lPosn < end_; lPosn += 1) {
       auto const wch = buffer_->GetCharAt(lPosn);
       if (wch == 0x0A)
         *pwch++ = 0x0D;
@@ -163,19 +163,19 @@ Posn Range::ensurePosn(Posn lPosn) const {
 void Range::GetInformation(Information* out_oInfo, Count n) const {
   Count k = n;
   out_oInfo->m_lLineNum = 1;
-  for (Posn lPosn = 0; lPosn < m_lStart; lPosn++) {
+  for (Posn lPosn = 0; lPosn < start_; lPosn++) {
     if (buffer_->GetCharAt(lPosn) == 0x0A)
       ++out_oInfo->m_lLineNum;
   }
 
   out_oInfo->m_fLineNum = k > 0;
-  auto const lLineStart = buffer_->ComputeStartOfLine(m_lStart);
-  out_oInfo->m_fColumn = (m_lStart - lLineStart) < n;
-  out_oInfo->m_lColumn = m_lStart - lLineStart;
+  auto const lLineStart = buffer_->ComputeStartOfLine(start_);
+  out_oInfo->m_fColumn = (start_ - lLineStart) < n;
+  out_oInfo->m_lColumn = start_ - lLineStart;
 }
 
 base::string16 Range::GetText() const {
-  return buffer_->GetText(m_lStart, m_lEnd);
+  return buffer_->GetText(start_, end_);
 }
 
 void Range::Paste() {
@@ -195,9 +195,9 @@ void Range::Paste() {
 
   UndoBlock oUndo(this, L"Range.Paste");
 
-  buffer_->Delete(m_lStart, m_lEnd);
+  buffer_->Delete(start_, end_);
 
-  auto lPosn = m_lStart;
+  auto lPosn = start_;
   auto pwchStart = pwsz;
   enum { Start, Normal, Cr } eState = Start;
   while (*pwsz) {
@@ -241,27 +241,27 @@ void Range::Paste() {
     lPosn += k;
   }
 
-  m_lStart = lPosn;
-  m_lEnd   = lPosn;
+  start_ = lPosn;
+  end_ = lPosn;
 }
 
 Posn Range::SetEnd(Posn lPosn) {
-  SetRange(m_lStart, lPosn);
-  return m_lEnd;
+  SetRange(start_, lPosn);
+  return end_;
 }
 
 void Range::SetRange(Posn lStart, Posn lEnd) {
   lStart = ensurePosn(lStart);
-  lEnd   = ensurePosn(lEnd);
+  lEnd = ensurePosn(lEnd);
   if (lStart > lEnd)
     swap(lStart, lEnd);
-  m_lStart = lStart;
-  m_lEnd   = lEnd;
+  start_ = lStart;
+  end_ = lEnd;
 }
 
 Posn Range::SetStart(Posn lPosn) {
-  SetRange(lPosn, m_lEnd);
-  return m_lStart;
+  SetRange(lPosn, end_);
+  return start_;
 }
 
 void Range::SetText(const base::string16& text) {
@@ -270,16 +270,16 @@ void Range::SetText(const base::string16& text) {
     return;
   }
 
-  if (m_lStart == m_lEnd) {
+  if (start_ == end_) {
     UndoBlock oUndo(this, L"Range.SetText");
-    buffer_->Insert(m_lStart, text.data(), static_cast<Count>(text.length()));
+    buffer_->Insert(start_, text.data(), static_cast<Count>(text.length()));
   } else {
     UndoBlock oUndo(this, L"Range.SetText");
-    buffer_->Delete(m_lStart, m_lEnd);
-    buffer_->Insert(m_lStart, text.data(), static_cast<Count>(text.length()));
+    buffer_->Delete(start_, end_);
+    buffer_->Insert(start_, text.data(), static_cast<Count>(text.length()));
   }
 
-  m_lEnd = ensurePosn(static_cast<Posn>(m_lStart + text.length()));
+  end_ = ensurePosn(static_cast<Posn>(start_ + text.length()));
 }
 
 Buffer::EnumChar::EnumChar(const Range* pRange)

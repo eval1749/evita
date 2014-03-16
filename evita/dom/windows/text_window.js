@@ -168,6 +168,21 @@ global.TextWindow.prototype.clone = function() {
 
   /**
    * @param {!TextWindow} window
+   * @param {!UiEvent} event
+   */
+  function handleIdle(window, event) {
+    var lastIdleTimeStamp = window.lastIdleTimeStamp_;
+    if (lastIdleTimeStamp) {
+      var duration_sec = event.timeStamp - lastIdleTimeStamp;
+      var duration_ms = Math.floor(duration_sec * 1000);
+      window.status = 'Idle ' + event.detail + ' ' + duration_ms + 'ms';
+    }
+    window.lastIdleTimeStamp_ = event.timeStamp;
+    window.document.doColor_(300);
+  }
+
+  /**
+   * @param {!TextWindow} window
    * @param {!MouseEvent} event
    */
   function handleMouseDown(window, event) {
@@ -310,6 +325,9 @@ global.TextWindow.prototype.clone = function() {
         break;
       case Event.Names.FOCUS:
         handleFocus(this);
+        break;
+      case Event.Names.IDLE:
+        handleIdle(this, /** @type {!UiEvent} */(event));
         break;
       case Event.Names.MOUSEDOWN:
         handleMouseDown(this, /** @type {!MouseEvent} */(event));

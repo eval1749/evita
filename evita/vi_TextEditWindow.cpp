@@ -970,11 +970,10 @@ int TextEditWindow::GetIconIndex() const {
 }
 
 // views::Window
-bool TextEditWindow::OnIdle(int hint) {
+bool TextEditWindow::OnIdle(int) {
+  if (!is_shown())
+    return false;
   caret_->Blink();
-  auto const more = buffer()->OnIdle(hint);
-
-  if (is_shown())
-    Redraw();
-  return more;
+  Redraw();
+  return false;
 }

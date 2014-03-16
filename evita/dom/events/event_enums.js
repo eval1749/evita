@@ -9,6 +9,7 @@ Event.Names = {
   DBLCLICK: 'dblclick',
   DROPWINDOW: 'dropwindow',
   FOCUS: 'focus',
+  IDLE: 'idle',
   KEYDOWN: 'keydown',
   KEYUP: 'keyup',
   LOAD: 'load',

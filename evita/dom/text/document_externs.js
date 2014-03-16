@@ -61,6 +61,9 @@ Document.remove = function(document) {};
  */
 Document.removeObserver = function(observer) {};
 
+/** @type {number} */
+Document.prototype.codePage;
+
 /** @expose  @type {string} */
 Document.prototype.filename;
 
@@ -85,6 +88,9 @@ Document.prototype.modified;
 /** @expose  @type {string} */
 Document.prototype.name;
 
+/** @type {number} */
+Document.prototype.newline;
+
 /** @expose @type {number} */
 Document.prototype.obsolete;
 
@@ -93,6 +99,9 @@ Document.prototype.properties;
 
 /** @expose  @type {boolean} */
 Document.prototype.readonly;
+
+/** @type {number} */
+Document.prototype.state;
 
 /**
  * @param {string} key_combination.

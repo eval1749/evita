@@ -146,6 +146,13 @@ TEST_F(DocumentTest, charCodeAt_) {
   EXPECT_SCRIPT_EQ("111", "doc.charCodeAt_(1)");
 }
 
+TEST_F(DocumentTest, codePage) {
+  EXPECT_SCRIPT_VALID("var doc = new Document('codePage');");
+  EXPECT_SCRIPT_EQ("65001", "doc.codePage") << "Default code page is UTF-8";
+  EXPECT_SCRIPT_VALID("doc.codePage = 932;") << "Set code page to Shift_JIS";
+  EXPECT_SCRIPT_EQ("932", "doc.codePage");
+}
+
 TEST_F(DocumentTest, dispatchEvent) {
   EXPECT_SCRIPT_VALID(
       "var doc = new Document('dispatchEvent');"
@@ -246,6 +253,14 @@ TEST_F(DocumentTest, name) {
   EXPECT_SCRIPT_EQ("baz", "var sample1 = new Document('baz'); sample1.name");
 }
 
+TEST_F(DocumentTest, newline) {
+  EXPECT_SCRIPT_VALID("var doc = new Document('newline');");
+  // See |NewlineMode| in "evita/ed_defs.h"
+  EXPECT_SCRIPT_EQ("0", "doc.newline") << "Default newline is detect.";
+  EXPECT_SCRIPT_VALID("doc.newline = 1;") << "Set newline to LF.";
+  EXPECT_SCRIPT_EQ("1", "doc.newline");
+}
+
 TEST_F(DocumentTest, parseFileProperties) {
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"
@@ -324,6 +339,12 @@ TEST_F(DocumentTest, slice) {
   EXPECT_SCRIPT_EQ("3456", "doc.slice(-7, -3)");
   EXPECT_SCRIPT_EQ("", "doc.slice(100)");
   EXPECT_SCRIPT_EQ("56789", "doc.slice(5, 100)");
+}
+
+TEST_F(DocumentTest, state) {
+  EXPECT_SCRIPT_VALID("var doc = new Document('state');");
+  // See |text::Buffer::State| for |enum| fields.
+  EXPECT_SCRIPT_EQ("0", "doc.state");
 }
 
 TEST_F(DocumentTest, undo) {

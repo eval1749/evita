@@ -146,6 +146,7 @@ v8::Handle<v8::FunctionTemplate> DocumentClass::CreateConstructorTemplate(
 
 void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
   builder
+      .SetProperty("codePage", &Document::code_page, &Document::set_code_page)
       .SetProperty("filename", &Document::filename, &Document::set_filename)
       .SetProperty("lastWriteTime", &Document::last_write_time,
                    &Document::set_last_write_time)
@@ -153,9 +154,11 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
       .SetProperty("mode", &Document::mode, &Document::set_mode)
       .SetProperty("modified", &Document::modified)
       .SetProperty("name", &Document::name)
+      .SetProperty("newline", &Document::newline, &Document::set_newline)
       .SetProperty("properties", &Document::properties)
       .SetProperty("readonly", &Document::read_only,
                    &Document::set_read_only)
+      .SetProperty("state", &Document::state)
       .SetMethod("charCodeAt_", &Document::charCodeAt)
       .SetMethod("doColor_", &Document::DoColor)
       .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
@@ -170,7 +173,6 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
       .SetMethod("styleAt", &Document::style_at)
       .SetMethod("undo", &Document::Undo);
 }
-
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -265,6 +267,14 @@ Document::~Document() {
   DocumentSet::instance()->Unregister(this);
 }
 
+int Document::code_page() const {
+  return static_cast<int>(buffer_->GetCodePage());
+}
+
+void Document::set_code_page(int code_page) {
+  buffer_->SetCodePage(static_cast<uint32_t>(code_page));
+}
+
 base::char16 Document::charCodeAt(text::Posn position) const {
   if (position >= 0 && position < length())
     return buffer_->GetCharAt(position);
@@ -310,6 +320,14 @@ const base::string16& Document::name() const {
   return buffer_->name();
 }
 
+int Document::newline() const {
+  return buffer_->GetNewline();
+}
+
+void Document::set_newline(int newline) {
+  buffer_->SetNewline(static_cast<NewlineMode>(newline));
+}
+
 v8::Handle<v8::Object> Document::properties() const {
   return properties_.NewLocal(v8::Isolate::GetCurrent());
 }
@@ -327,6 +345,10 @@ int Document::spelling_at(text::Posn offset) const {
     return 0;
   auto const marker = buffer_->spelling_markers()->GetMarkerAt(offset);
   return marker ? marker->type() : static_cast<int>(text::Spelling::None);
+}
+
+int Document::state() const {
+  return buffer_->state();
 }
 
 bool Document::CheckCanChange() const {

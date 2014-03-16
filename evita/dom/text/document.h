@@ -40,6 +40,9 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: const Buffer* buffer() const { return buffer_.get(); }
   public: Buffer* buffer() { return buffer_.get(); }
   public: base::char16 charCodeAt(text::Posn position) const;
+  // Returns code page used for I/O.
+  public: int code_page() const;
+  public: void set_code_page(int code_page);
   public: const base::string16& filename() const;
   public: void set_filename(const base::string16& filename);
   public: base::Time last_write_time() const;
@@ -49,10 +52,16 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: void set_mode(Mode* mode);
   public: bool modified() const;
   public: const base::string16& name() const;
+  // Returns newline type, CR, CRLF, LF, used for I/O.
+  public: int newline() const;
+  public: void set_newline(int newline);
+
   public: v8::Handle<v8::Object> properties() const;
   public: bool read_only() const;
   public: void set_read_only(bool read_only) const;
   public: int spelling_at(text::Posn offset) const;
+  // Returns document state, load, ready, or save.
+  public: int state() const;
   public: v8::Handle<v8::Object> style_at(text::Posn position) const;
 
   public: bool CheckCanChange() const;

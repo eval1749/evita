@@ -34,6 +34,7 @@ namespace {
 Widget* capture_widget;
 Widget* focus_widget;
 Widget* will_focus_widget;
+bool we_have_active_focus;
 }  // namespace
 
 using ui::EventType;
@@ -65,6 +66,11 @@ UINT_PTR Widget::child_window_id() const {
   DCHECK(native_window());
   DCHECK(parent_node());
   return reinterpret_cast<UINT_PTR>(native_window());
+}
+
+bool Widget::has_active_focus() {
+  DCHECK_EQ(!!::GetFocus(), we_have_active_focus);
+  return we_have_active_focus;
 }
 
 bool Widget::has_focus() const {
@@ -545,6 +551,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
         focus_widget = nullptr;
         widget->DidKillFocus();
       }
+      we_have_active_focus = false;
       return 0;
 
     case WM_NCDESTROY:
@@ -574,6 +581,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       focus_widget = will_focus_widget ? will_focus_widget : this;
       will_focus_widget = nullptr;
       focus_widget->DidRequestFocus();
+      we_have_active_focus = true;
       return 0;
 
     case WM_VSCROLL: {

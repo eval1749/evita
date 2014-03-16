@@ -36,6 +36,16 @@ class Marker;
 class MarkerSet;
 class UndoStack;
 
+//////////////////////////////////////////////////////////////////////
+//
+// LineAndColumn
+// This structure contains line number and column number information.
+//
+struct LineAndColumn {
+  int column;
+  int line_number;
+};
+
 /// <summary>
 // Represents file related properties.
 /// </summary>
@@ -80,6 +90,7 @@ class Buffer : public BufferCore,
                public BufferMutationObservee,
                public FileFeatures,
                public MarkerSetObserver {
+
   private: ObserverList<BufferMutationObserver> observers_;
   private: std::unique_ptr<IntervalSet> intervals_;
   private: std::unique_ptr<MarkerSet> spelling_markers_;
@@ -138,6 +149,7 @@ class Buffer : public BufferCore,
   // [G]
   public: const css::Style& GetDefaultStyle() const;
   public: Interval* GetIntervalAt(Posn) const;
+  public: LineAndColumn GetLineAndColumn(Posn offset) const;
   public: Mode* GetMode() const { return m_pMode; }
   public: Count GetModfTick() const { return m_nModfTick; }
   public: const base::string16& GetName() const { return name_; }

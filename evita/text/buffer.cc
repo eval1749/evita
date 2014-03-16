@@ -116,6 +116,23 @@ const css::Style& Buffer::GetDefaultStyle() const {
   return GetIntervalAt(GetEnd())->GetStyle();
 }
 
+LineAndColumn Buffer::GetLineAndColumn(Posn offset) const {
+  DCHECK(IsValidPosn(offset)) << "offset=" << offset << " length=" << GetEnd();
+  LineAndColumn result;
+  result.line_number = 1;
+  result.column = 0;
+  // TODO(yosi) Should we have line number cache?
+  auto line_start = 0;
+  for (auto runner = 0; runner < offset; ++runner) {
+    if (GetCharAt(runner) == 0x0A) {
+      line_start = runner + 1;
+      ++result.line_number;
+    }
+  }
+  result.column = offset - line_start;
+  return result;
+}
+
 const css::Style& Buffer::GetStyleAt(Posn lPosn) const {
   return GetIntervalAt(lPosn)->GetStyle();
 }

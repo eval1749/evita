@@ -14,6 +14,36 @@
 
 namespace {
 
+struct LineAndColumn : text::LineAndColumn {
+  LineAndColumn(int line_number, int column) {
+    this->column = column;
+    this->line_number = line_number;
+  }
+
+  LineAndColumn(const text::LineAndColumn other) {
+    column = other.column;
+    line_number = other.line_number;
+  }
+
+  bool operator==(const LineAndColumn& other) const {
+    return column == other.column && line_number == other.line_number;
+  }
+
+  bool operator!=(const LineAndColumn& other) const {
+    return !operator==(other);
+  }
+};
+
+}  // namespace
+
+namespace std {
+ostream& operator<<(ostream& ostream, const LineAndColumn& line_and_column) {
+  return ostream << "(" << line_and_column.line_number << ", " <<
+      line_and_column.column << ")";
+}
+}  // namespace std
+
+namespace {
 class BufferTest : public ::testing::Test {
   private: std::unique_ptr<text::Buffer> buffer_;
 
@@ -27,6 +57,14 @@ class BufferTest : public ::testing::Test {
 
   DISALLOW_COPY_AND_ASSIGN(BufferTest);
 };
+
+TEST_F(BufferTest, GetLineAndColumn) {
+  buffer()->Insert(0, L"01\n02\n03\04\05\n");
+  EXPECT_EQ(LineAndColumn(1, 0), buffer()->GetLineAndColumn(0));
+  EXPECT_EQ(LineAndColumn(1, 1), buffer()->GetLineAndColumn(1));
+  EXPECT_EQ(LineAndColumn(1, 2), buffer()->GetLineAndColumn(2));
+  EXPECT_EQ(LineAndColumn(2, 0), buffer()->GetLineAndColumn(3));
+}
 
 TEST_F(BufferTest, InsertAt) {
   buffer()->InsertBefore(0, L"abc");

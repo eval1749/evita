@@ -4,7 +4,6 @@
 #define INCLUDE_evita_dom_document_h
 
 #include <memory>
-#include <unordered_set>
 
 #include "base/strings/string16.h"
 #include "base/time/time.h"
@@ -30,7 +29,6 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
 
   private: std::unique_ptr<Buffer> buffer_;
   private: gc::Member<Mode> mode_;
-  private: std::unordered_set<Range*> ranges_;
   // TODO(yosi) When we set |properties| with |v8::Object::Set()|, it doesn't
   // appeared in JavaScript. I'm not sure why. So, we hold |properties| in
   // C++.
@@ -58,8 +56,6 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: v8::Handle<v8::Object> style_at(text::Posn position) const;
 
   public: bool CheckCanChange() const;
-  public: void DidCreateRange(Range* range);
-  public: void DidDestroyRange(Range* range);
   public: void DoColor(int hint);
   public: void EndUndoGroup(const base::string16& name);
   public: static Document* Find(const base::string16& name);

@@ -343,14 +343,6 @@ bool Document::CheckCanChange() const {
   return true;
 }
 
-void Document::DidCreateRange(Range* range) {
-  ranges_.insert(range);
-}
-
-void Document::DidDestroyRange(Range* range) {
-  ranges_.erase(range);
-}
-
 void Document::DoColor(int hint) {
   buffer_->GetMode()->DoColor(hint);
 }

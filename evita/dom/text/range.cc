@@ -84,7 +84,6 @@ Range::Range(Document* document, text::Posn start, text::Posn end)
 }
 
 Range::~Range() {
-  document_->DidDestroyRange(this);
 }
 
 bool Range::collapsed() const {

@@ -162,6 +162,9 @@ class Buffer : public BufferCore,
     return !m_fNoSave && IsModified();
   }
 
+  // [O]
+  public: bool OnIdle(int hint);
+
   // [R]
   public: Posn Redo(Posn, Count = 1);
 

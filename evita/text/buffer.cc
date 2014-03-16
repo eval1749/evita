@@ -162,6 +162,12 @@ bool Buffer::IsNotReady() const {
   return m_eState != State_Ready;
 }
 
+bool Buffer::OnIdle(int) {
+  // Note: If we decrase number for coloring amount, we'll see
+  // more redisplay.
+  return GetMode()->DoColor(500);
+}
+
 Posn Buffer::Redo(Posn lPosn, Count n) {
   if (IsReadOnly())
     return -1;

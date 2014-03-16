@@ -96,6 +96,7 @@ class ScriptThread final : public domapi::IoDelegate,
       domapi::DialogBoxId dialog_box_id) override;
   private: virtual void DidStartScriptHost(
       domapi::ScriptHostState state) override;
+  private: virtual void DidHandleViewIdelEvent(int hint) override;
   private: virtual void FocusWindow(WindowId window_id) override;
   private: virtual void GetFilenameForLoad(
       WindowId window_id, const base::string16& dir_path,
@@ -155,6 +156,7 @@ class ScriptThread final : public domapi::IoDelegate,
       const domapi::KeyboardEvent& event) override;
   private: virtual void DispatchMouseEvent(
       const domapi::MouseEvent& event) override;
+  private: void DispatchViewIdleEvent(int hint) override;
   private: virtual void DispatchWheelEvent(
       const domapi::WheelEvent& event) override;
   private: virtual void OpenFile(WindowId window_id,

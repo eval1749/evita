@@ -43,11 +43,13 @@ class ViewDelegateImpl;
 }
 
 class Application : public common::Singleton<Application> {
-  private: int idle_count_;
-  private: bool is_quit_;
   private: std::unique_ptr<editor::DomLock> dom_lock_;
+  private: int idle_count_;
   private: std::unique_ptr<IoManager> io_manager_;
+  private: bool is_quit_;
   private: std::unique_ptr<base::MessageLoop> message_loop_;
+  private: int view_idle_count_;
+  private: int view_idle_hint_;
   private: std::unique_ptr<views::ViewDelegateImpl> view_delegate_impl_;
 
   // ctor/dtor
@@ -65,6 +67,8 @@ class Application : public common::Singleton<Application> {
 
   // [D]
   public: void DidStartScriptHost(domapi::ScriptHostState state);
+  public: void DidHandleViewIdelEvent(int hint);
+  private: void DispatchViewIdelEvent();
   private: void DoIdle();
 
   // [G]

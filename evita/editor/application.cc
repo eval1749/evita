@@ -19,6 +19,7 @@
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/spellchecker/spelling_engine.h"
+#include "evita/ui/widget.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/forms/dialog_box_set.h"
 #include "evita/views/frame_list.h"
@@ -69,10 +70,12 @@ class MessagePump : public base::MessagePumpForUI {
 //
 Application::Application()
     : idle_count_(0),
-      is_quit_(false),
+            is_quit_(false),
       dom_lock_(new editor::DomLock()),
       io_manager_(new IoManager()),
       message_loop_(new base::MessageLoop(make_scoped_ptr(new MessagePump()))),
+      view_idle_count_(0),
+      view_idle_hint_(0),
       view_delegate_impl_(new views::ViewDelegateImpl()) {
   io_manager_->Start();
   dom::ScriptThread::Start(message_loop_.get(), view_delegate_impl_.get(),
@@ -108,7 +111,29 @@ void Application::DidStartScriptHost(domapi::ScriptHostState state) {
   if (state != domapi::ScriptHostState::Running) {
     // TODO(yosi) We should set exit code other than EXIT_SUCCESS.
     Application::instance()->Quit();
+    return;
   }
+  DoIdle();
+  DispatchViewIdelEvent();
+}
+
+void Application::DidHandleViewIdelEvent(int) {
+  view_idle_hint_ = view_idle_count_;
+  view_idle_count_ = 0;
+}
+
+void Application::DispatchViewIdelEvent() {
+  if (view_idle_count_) {
+    ++view_idle_count_;
+  } if (ui::Widget::has_active_focus()) {
+    view_event_handler()->DispatchViewIdleEvent(view_idle_hint_);
+    view_idle_count_ = 1;
+  } else {
+    ++view_idle_hint_;
+  }
+  message_loop_->PostNonNestableDelayedTask(FROM_HERE,
+      base::Bind(&Application::DispatchViewIdelEvent, base::Unretained(this)),
+      base::TimeDelta::FromMilliseconds(100));
 }
 
 // Note: We don't need to check ::GetStatus(QS_INPUT), becaue |DoIdle()| is
@@ -147,7 +172,6 @@ void Application::Quit() {
 }
 
 void Application::Run() {
-  DoIdle();
   base::RunLoop run_loop;
   run_loop.Run();
 }

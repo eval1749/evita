@@ -43,6 +43,7 @@ class ViewEventHandler {
   public: virtual void DispatchFormEvent(const FormEvent& event) = 0;
   public: virtual void DispatchKeyboardEvent(const KeyboardEvent& event) = 0;
   public: virtual void DispatchMouseEvent(const MouseEvent& event) = 0;
+  public: virtual void DispatchViewIdleEvent(int hint) = 0;
   public: virtual void DispatchWheelEvent(const WheelEvent& event) = 0;
   public: virtual void OpenFile(WindowId window_id,
                                 const base::string16& filename) = 0;

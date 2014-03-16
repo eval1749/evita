@@ -177,6 +177,10 @@ void ViewDelegateImpl::DidStartScriptHost(domapi::ScriptHostState state) {
   Application::instance()->DidStartScriptHost(state);
 }
 
+void ViewDelegateImpl::DidHandleViewIdelEvent(int hint) {
+  Application::instance()->DidHandleViewIdelEvent(hint);
+}
+
 void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {
   auto const widget = Window::FromWindowId(window_id);
   if (!widget) {

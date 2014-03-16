@@ -10,6 +10,7 @@
 #include "evita/dom/events/keyboard_event.h"
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
+#include "evita/dom/events/ui_event_init.h"
 #include "evita/dom/events/view_event_target.h"
 #include "evita/dom/events/view_event_target_set.h"
 #include "evita/dom/events/wheel_event.h"
@@ -20,6 +21,7 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/script_controller.h"
+#include "evita/dom/view_delegate.h"
 #include "evita/dom/windows/window.h"
 #include "evita/gc/local.h"
 #include "evita/text/buffer.h"
@@ -95,11 +97,12 @@ ViewEventHandlerImpl::ViewEventHandlerImpl(ScriptController* controller)
 ViewEventHandlerImpl::~ViewEventHandlerImpl() {
 }
 
-// Call |handleEvent| function in the class of event target.
-void ViewEventHandlerImpl::DispatchEvent(EventTarget* event_target, Event* event) {
-  DOM_AUTO_LOCK_SCOPE();
+void ViewEventHandlerImpl::DispatchEvent(EventTarget* event_target,
+                                         Event* event) {
   if (!event_target->DispatchEvent(event))
     return;
+
+  // Call |handleEvent| function in the class of event target.
   auto const runner = controller_->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
@@ -115,6 +118,12 @@ void ViewEventHandlerImpl::DispatchEvent(EventTarget* event_target, Event* event
     return;
 
   runner->Call(js_method, js_target, event->GetWrapper(isolate));
+}
+
+void ViewEventHandlerImpl::DispatchEventWithInLock(
+    EventTarget* event_target, Event* event) {
+  DOM_AUTO_LOCK_SCOPE();
+  DispatchEvent(event_target, event);
 }
 
 // domapi::ViewEventHandler
@@ -137,7 +146,7 @@ void ViewEventHandlerImpl::DidDestroyWidget(WindowId window_id) {
 }
 
 void ViewEventHandlerImpl::DidDropWidget(WindowId source_id,
-                                 WindowId target_id) {
+                                         WindowId target_id) {
   auto const source_window = FromWindowId(source_id);
   if (!source_window)
     return;
@@ -148,14 +157,15 @@ void ViewEventHandlerImpl::DidDropWidget(WindowId source_id,
   init_dict.set_bubbles(false);
   init_dict.set_cancelable(false);
   init_dict.set_source_window(source_window);
-  DispatchEvent(target_window, new WindowEvent(L"dropwindow", init_dict));
+  DispatchEventWithInLock(target_window,
+                          new WindowEvent(L"dropwindow", init_dict));
 }
 
 void ViewEventHandlerImpl::DidKillFocus(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)
     return;
-  DispatchEvent(window, new FocusEvent(L"blur", FocusEventInit()));
+  DispatchEventWithInLock(window, new FocusEvent(L"blur", FocusEventInit()));
 }
 
 void ViewEventHandlerImpl::DidRealizeWidget(WindowId window_id) {
@@ -178,7 +188,7 @@ void ViewEventHandlerImpl::DidRequestFocus(WindowId window_id) {
   if (!window)
     return;
   window->DidRequestFocus();
-  DispatchEvent(window, new FocusEvent(L"focus", FocusEventInit()));
+  DispatchEventWithInLock(window, new FocusEvent(L"focus", FocusEventInit()));
 }
 
 void ViewEventHandlerImpl::DidStartHost() {
@@ -201,7 +211,7 @@ void ViewEventHandlerImpl::DispatchFormEvent(
     DVLOG(0) <<  "Form " << form_id << " doesn't have control " <<
         raw_event.control_id;
   }
-  DispatchEvent(control, new FormEvent(raw_event));
+  DispatchEventWithInLock(control, new FormEvent(raw_event));
 }
 
 void ViewEventHandlerImpl::DispatchKeyboardEvent(
@@ -209,7 +219,7 @@ void ViewEventHandlerImpl::DispatchKeyboardEvent(
   auto const window = FromEventTargetId(api_event.target_id);
   if (!window)
     return;
-  DispatchEvent(window, new KeyboardEvent(api_event));
+  DispatchEventWithInLock(window, new KeyboardEvent(api_event));
 }
 
 void ViewEventHandlerImpl::DispatchMouseEvent(
@@ -217,7 +227,31 @@ void ViewEventHandlerImpl::DispatchMouseEvent(
   auto const window = FromEventTargetId(api_event.target_id);
   if (!window)
     return;
-  DispatchEvent(window, new MouseEvent(api_event));
+  DispatchEventWithInLock(window, new MouseEvent(api_event));
+}
+
+void ViewEventHandlerImpl::DispatchViewIdleEvent(int hint) {
+  {
+    DOM_AUTO_LOCK_SCOPE();
+    auto const runner = ScriptController::instance()->runner();
+    auto const isolate = runner->isolate();
+    v8_glue::Runner::Scope runner_scope(runner);
+    auto const window_class = runner->global()->
+        Get(v8Strings::Window.Get(isolate));
+    auto const focus_window = window_class->ToObject()->
+        Get(v8Strings::focus.Get(isolate));
+    auto event_target = static_cast<EventTarget*>(nullptr);
+    if (gin::ConvertFromV8(isolate, focus_window, &event_target)) {
+      UiEventInit init_dict;
+      init_dict.set_bubbles(true);
+      init_dict.set_cancelable(true);
+      init_dict.set_detail(hint);
+      DispatchEvent(event_target, new UiEvent(L"idle", init_dict));
+    }
+  }
+  // TODO(yosi) We should ask view host to stop dispatching idle event, if
+  // idle event handler throws an exception.
+  ScriptController::instance()->view_delegate()->DidHandleViewIdelEvent(hint);
 }
 
 void ViewEventHandlerImpl::DispatchWheelEvent(
@@ -225,7 +259,7 @@ void ViewEventHandlerImpl::DispatchWheelEvent(
   auto const window = FromEventTargetId(api_event.target_id);
   if (!window)
     return;
-  DispatchEvent(window, new WheelEvent(api_event));
+  DispatchEventWithInLock(window, new WheelEvent(api_event));
 }
 
 void ViewEventHandlerImpl::OpenFile(WindowId window_id,
@@ -241,7 +275,7 @@ void ViewEventHandlerImpl::QueryClose(WindowId window_id) {
   init_dict.set_bubbles(false);
   init_dict.set_cancelable(true);
   init_dict.set_view(window);
-  DispatchEvent(window, new UiEvent(L"queryclose", init_dict));
+  DispatchEventWithInLock(window, new UiEvent(L"queryclose", init_dict));
 }
 
 void ViewEventHandlerImpl::RunCallback(base::Closure callback) {

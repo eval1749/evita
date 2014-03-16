@@ -93,6 +93,9 @@ class ViewDelegate {
   // |DidStartScriptHost| is called when script host execute editor start
   // script.
   public: virtual void DidStartScriptHost(ScriptHostState state) = 0;
+
+  // |DidHandleViewIdelEvent| is called when "idle" event handler returns.
+  public: virtual void DidHandleViewIdelEvent(int hint) = 0;
   public: virtual void FocusWindow(WindowId window_id) = 0;
   public: virtual void GetFilenameForLoad(
       WindowId window_id, const base::string16& dir_path,

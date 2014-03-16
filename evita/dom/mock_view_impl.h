@@ -52,6 +52,7 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD1(DestroyWindow, void(WindowId));
   MOCK_METHOD1(DidChangeFormContents, void(domapi::DialogBoxId));
   MOCK_METHOD1(DidStartScriptHost, void(ScriptHostState));
+  MOCK_METHOD1(DidHandleViewIdelEvent, void(int));
   MOCK_METHOD1(FocusWindow, void(WindowId));
   public: virtual void GetFilenameForLoad(WindowId window_id,
     const base::string16& dir_path,

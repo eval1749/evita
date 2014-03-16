@@ -18,6 +18,8 @@ class ViewEventHandlerImpl : public domapi::ViewEventHandler {
   public: ~ViewEventHandlerImpl();
 
   private: void DispatchEvent(EventTarget* event_target, Event* event);
+  private: void DispatchEventWithInLock(EventTarget* event_target,
+                                        Event* event);
 
   // domapi::ViewEventHandler
   private: virtual void AppendTextToBuffer(text::Buffer* buffer,
@@ -37,6 +39,7 @@ class ViewEventHandlerImpl : public domapi::ViewEventHandler {
       const domapi::KeyboardEvent& event) override;
   private: virtual void DispatchMouseEvent(
       const domapi::MouseEvent& event) override;
+  private: void DispatchViewIdleEvent(int hint) override;
   private: virtual void DispatchWheelEvent(
       const domapi::WheelEvent& event) override;
   private: virtual void OpenFile(WindowId window_id,

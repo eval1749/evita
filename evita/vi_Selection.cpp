@@ -6,9 +6,8 @@
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
 
-Selection::Selection(text::Buffer* buffer, text::Range* range)
+Selection::Selection(text::Range* range)
     : m_fStartIsActive(false),
-      m_pBuffer(buffer),
       m_pRange(range) {
 }
 

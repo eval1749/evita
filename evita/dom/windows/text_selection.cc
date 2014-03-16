@@ -4,8 +4,6 @@
 #include "evita/dom/windows/text_selection.h"
 
 #include "evita/dom/converter.h"
-// TODO(yosi) We should not use |dom::Buffer|.
-#include "evita/dom/text/buffer.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/script_controller.h"
@@ -62,8 +60,7 @@ DEFINE_SCRIPTABLE_OBJECT(TextSelection, TextSelectionClass);
 TextSelection::TextSelection(TextWindow* text_window, Range* range)
     : ScriptableBase(text_window, range->document()),
       range_(new Range(range->document(), range->start(), range->end())),
-      view_selection_(new ::Selection(range->document()->buffer(),
-                                      range_->text_range())) {
+      view_selection_(new ::Selection(range_->text_range())) {
 }
 
 TextSelection::~TextSelection() {

@@ -14,16 +14,14 @@ class Buffer;
 
 class Selection {
   private: bool m_fStartIsActive;
-  private: text::Buffer* m_pBuffer;
   private: text::Range* m_pRange;
 
-  public: Selection(text::Buffer* buffer, text::Range* range);
+  public: Selection(text::Range* range);
   public: ~Selection();
 
   public: text::Range* range() const { return m_pRange; }
 
   // [G]
-  public: text::Buffer* GetBuffer() const { return m_pBuffer; }
   public: Posn GetEnd() const;
   public: Posn GetStart() const;
 

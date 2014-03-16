@@ -4,6 +4,7 @@
 #include "evita/dom/windows/text_selection.h"
 
 #include "evita/dom/converter.h"
+#include "evita/dom/text/buffer.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/script_controller.h"

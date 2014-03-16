@@ -3,13 +3,10 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #include "evita/vi_Selection.h"
 
-#include "base/strings/string16.h"
-#include "evita/editor/application.h"
-#include "evita/dom/text/buffer.h"
+#include "evita/text/buffer.h"
 #include "evita/text/range.h"
-#include "evita/vi_TextEditWindow.h"
 
-Selection::Selection(dom::Buffer* buffer, text::Range* range)
+Selection::Selection(text::Buffer* buffer, text::Range* range)
     : m_fStartIsActive(false),
       m_pBuffer(buffer),
       m_pRange(range) {

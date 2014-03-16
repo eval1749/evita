@@ -7,26 +7,23 @@
 
 class TextEditWindow;
 
-namespace dom {
-class Buffer;
-}
-
 namespace text {
 class Range;
+class Buffer;
 }
 
 class Selection {
   private: bool m_fStartIsActive;
-  private: dom::Buffer* m_pBuffer;
+  private: text::Buffer* m_pBuffer;
   private: text::Range* m_pRange;
 
-  public: Selection(dom::Buffer* buffer, text::Range* range);
+  public: Selection(text::Buffer* buffer, text::Range* range);
   public: ~Selection();
 
   public: text::Range* range() const { return m_pRange; }
 
   // [G]
-  public: dom::Buffer* GetBuffer() const { return m_pBuffer; }
+  public: text::Buffer* GetBuffer() const { return m_pBuffer; }
   public: Posn GetEnd() const;
   public: Posn GetStart() const;
 

@@ -191,11 +191,13 @@ void TextEditWindow::DidChangeHierarchy() {
 void TextEditWindow::DidHide() {
   // Note: It is OK that hidden window have focus.
   vertical_scroll_bar_->Hide();
+  text_renderer_->Reset();
 }
 
 void TextEditWindow::DidKillFocus() {
   ParentClass::DidKillFocus();
   caret_->Give();
+  text_renderer_->Reset();
 }
 
 void TextEditWindow::DidRealize() {

@@ -77,6 +77,7 @@ class TableView
   private: virtual void UpdateStatusBar() const override;
 
   // ui::Widget
+  private: virtual void DidRealize() override;
   private: virtual void DidResize() override;
 
   // views::Window

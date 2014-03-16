@@ -91,7 +91,6 @@ TableView::TableView(WindowId window_id, dom::Document* document)
       document_(document),
       model_(new TableViewModel()),
       should_update_model_(true) {
-  document_->buffer()->AddObserver(this);
 }
 
 TableView::~TableView() {
@@ -250,6 +249,11 @@ void TableView::UpdateStatusBar() const {
 }
 
 // ui::Widget
+void TableView::DidRealize() {
+  ContentWindow::DidRealize();
+  document_->buffer()->AddObserver(this);
+}
+
 // Resize |ui::TableControl| to cover all client area.
 void TableView::DidResize() {
   ContentWindow::DidResize();

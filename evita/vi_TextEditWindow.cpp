@@ -92,6 +92,10 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
 TextEditWindow::~TextEditWindow() {
 }
 
+text::Buffer* TextEditWindow::buffer() const {
+  return text_renderer_->GetBuffer();
+}
+
 bool TextEditWindow::is_selection_active() const {
   if (has_focus())
     return true;
@@ -114,7 +118,7 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
       return line->MapXToPosn(*m_gfx, xGoal);
   }
 
-  auto lStart = GetBuffer()->ComputeStartOfLine(lGoal);
+  auto lStart = buffer()->ComputeStartOfLine(lGoal);
   for (;;) {
     auto const pLine = text_renderer_->FormatLine(lStart);
     auto const lEnd = pLine->GetEnd();
@@ -130,7 +134,7 @@ text::Posn TextEditWindow::ComputeMotion(
   switch (eUnit) {
     case Unit_WindowLine:
       if (n > 0) {
-        auto const lBufEnd = GetBuffer()->GetEnd();
+        auto const lBufEnd = buffer()->GetEnd();
         auto lGoal = lPosn;
         auto k = 0;
         for (k = 0; k < n; ++k) {
@@ -143,7 +147,7 @@ text::Posn TextEditWindow::ComputeMotion(
       }
       if (n < 0) {
         n = -n;
-        auto const lBufStart = GetBuffer()->GetStart();
+        auto const lBufStart = buffer()->GetStart();
         auto lStart = lPosn;
         auto k = 0;
         for (k = 0; k < n; ++k) {
@@ -165,7 +169,7 @@ text::Posn TextEditWindow::ComputeMotion(
         return MapPointToPosn(pt);
       }
       if (n > 0)
-        return std::min(GetEnd(), GetBuffer()->GetEnd());
+        return std::min(GetEnd(), buffer()->GetEnd());
       if (n < 0)
         return GetStart();
       return lPosn;
@@ -173,7 +177,7 @@ text::Posn TextEditWindow::ComputeMotion(
 
     case Unit_Window:
       if (n > 0)
-        return std::min(GetEnd(), GetBuffer()->GetEnd());
+        return std::min(GetEnd(), buffer()->GetEnd());
       if (n < 0)
         return GetStart();
       return lPosn;
@@ -229,21 +233,17 @@ Posn TextEditWindow::EndOfLine(Posn lPosn) {
       return pLine->GetEnd() - 1;
   }
 
-  auto const lBufEnd = GetBuffer()->GetEnd();
+  auto const lBufEnd = buffer()->GetEnd();
   if (lPosn >= lBufEnd)
     return lBufEnd;
 
-  auto lStart = GetBuffer()->ComputeStartOfLine(lPosn);
+  auto lStart = buffer()->ComputeStartOfLine(lPosn);
   for (;;) {
     auto const pLine = text_renderer_->FormatLine(lStart);
     lStart = pLine->GetEnd();
     if (lPosn < lStart)
       return lStart - 1;
   }
-}
-
-text::Buffer* TextEditWindow::GetBuffer() const {
-  return text_renderer_->GetBuffer();
 }
 
 HCURSOR TextEditWindow::GetCursorAt(const Point& point) const {
@@ -275,7 +275,7 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
     // Scroll Down -- place top line out of window.
     iDy = -iDy;
 
-    auto const lBufStart = GetBuffer()->GetStart();
+    auto const lBufStart = buffer()->GetStart();
     for (k = 0; k < iDy; ++k) {
       auto const lStart = text_renderer_->GetStart();
       if (lStart == lBufStart)
@@ -289,7 +289,7 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
     }
   } else if (iDy > 0) {
     // Scroll Up -- format page from page end.
-    const Posn lBufEnd = GetBuffer()->GetEnd();
+    const Posn lBufEnd = buffer()->GetEnd();
     for (k = 0; k < iDy; ++k) {
       auto const lStart = text_renderer_->GetEnd();
       if (lStart >= lBufEnd)
@@ -304,8 +304,8 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
 }
 
 base::string16 TextEditWindow::GetTitle() const {
-  return GetBuffer()->GetFileName().empty() || !GetBuffer()->IsModified() ?
-      GetBuffer()->name() : GetBuffer()->name() + L"*";
+  return buffer()->GetFileName().empty() || !buffer()->IsModified() ?
+      buffer()->name() : buffer()->name() + L"*";
 }
 
 void TextEditWindow::MakeSelectionVisible() {
@@ -315,7 +315,7 @@ void TextEditWindow::MakeSelectionVisible() {
 
 Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
   updateScreen();
-  return std::min(text_renderer_->MapPointToPosn(pt), GetBuffer()->GetEnd());
+  return std::min(text_renderer_->MapPointToPosn(pt), buffer()->GetEnd());
 }
 
 // Description:
@@ -395,7 +395,7 @@ void TextEditWindow::Redraw() {
   } else {
     lCaretPosn = m_lCaretPosn == -1 ? lSelStart : m_lCaretPosn;
 
-    Posn lEnd = GetBuffer()->GetEnd();
+    Posn lEnd = buffer()->GetEnd();
     if (lSelStart == lEnd && lSelEnd == lEnd)
       lCaretPosn = lEnd;
   }
@@ -482,7 +482,7 @@ int TextEditWindow::SmallScroll(int, int iDy) {
   if (iDy < 0) {
     iDy = -iDy;
 
-    auto const lBufStart = GetBuffer()->GetStart();
+    auto const lBufStart = buffer()->GetStart();
     auto lStart = text_renderer_->GetStart();
     int k;
     for (k = 0; k < iDy; ++k) {
@@ -499,7 +499,7 @@ int TextEditWindow::SmallScroll(int, int iDy) {
   }
 
   if (iDy > 0) {
-    auto const lBufEnd = GetBuffer()->GetEnd();
+    auto const lBufEnd = buffer()->GetEnd();
     int k;
     for (k = 0; k < iDy; ++k) {
       if (text_renderer_->GetEnd() >= lBufEnd) {
@@ -533,7 +533,7 @@ Posn TextEditWindow::StartOfLine(Posn lPosn) {
       return pLine->GetStart();
   }
 
-  auto lStart = GetBuffer()->ComputeStartOfLine(lPosn);
+  auto lStart = buffer()->ComputeStartOfLine(lPosn);
   if (!lStart)
     return 0;
 
@@ -558,7 +558,7 @@ void TextEditWindow::updateScreen() {
 }
 
 void TextEditWindow::updateScrollBar() {
-  auto const lBufEnd = text_renderer_->GetBuffer()->GetEnd() + 1;
+  auto const lBufEnd = buffer()->GetEnd() + 1;
   ui::ScrollBar::Data data;
   data.minimum = 0;
   data.thumb_size = text_renderer_->GetVisibleEnd() -
@@ -603,7 +603,7 @@ static std::vector<base::string16> ComposeStatusBarTexts(
 }
 
 void TextEditWindow::UpdateStatusBar() const {
-  frame().SetStatusBar(ComposeStatusBarTexts(GetBuffer(), GetSelection(),
+  frame().SetStatusBar(ComposeStatusBarTexts(buffer(), GetSelection(),
                                              has_focus()));
 }
 
@@ -785,7 +785,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
 
         ++iClause;
         Posn lNext = static_cast<Posn>(m_lImeStart + rgnClause[iClause]);
-        GetBuffer()->SetStyle(lPosn, lNext, *pStyle);
+        buffer()->SetStyle(lPosn, lNext, *pStyle);
         lPosn = lNext;
       }
   }
@@ -897,7 +897,7 @@ size_t TextEditWindow::setReconvert(RECONVERTSTRING* p, Posn lStart,
 
   auto const pwch = reinterpret_cast<char16*>(
       reinterpret_cast<char*>(p) + p->dwStrOffset);
-  GetBuffer()->GetText(pwch, lStart, lEnd);
+  buffer()->GetText(pwch, lStart, lEnd);
   pwch[cwch] = 0;
   return cb;
 }
@@ -966,13 +966,13 @@ void TextEditWindow::DidResize() {
 // views::ContentWindow
 int TextEditWindow::GetIconIndex() const {
   return views::IconCache::instance()->GetIconForFileName(
-      GetBuffer()->GetName());
+      buffer()->GetName());
 }
 
 // views::Window
 bool TextEditWindow::OnIdle(int hint) {
   caret_->Blink();
-  auto const more = GetBuffer()->OnIdle(hint);
+  auto const more = buffer()->OnIdle(hint);
 
   if (is_shown())
     Redraw();

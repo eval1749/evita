@@ -78,6 +78,7 @@ class TextEditWindow
   public: explicit TextEditWindow(const dom::TextWindow& window);
   public: virtual ~TextEditWindow();
 
+  public: text::Buffer* buffer() const;
   private: bool is_selection_active() const;
 
   // [C]
@@ -98,7 +99,6 @@ class TextEditWindow
   public: Posn EndOfLine(Posn);
 
   // [G]
-  public: text::Buffer* GetBuffer() const;
   private: virtual HCURSOR GetCursorAt(const Point&) const override;
   public: HWND GetScrollBar(int which) const;
   // TODO(yosi): We should not expose TextEdintWindow::GetTitle(). We export

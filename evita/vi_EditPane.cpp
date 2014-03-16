@@ -1173,7 +1173,7 @@ text::Buffer* EditPane::GetBuffer() const {
   if (!window)
     return nullptr;
   if (auto const text_edit_window = window->as<TextEditWindow>())
-    return text_edit_window->GetBuffer();
+    return text_edit_window->buffer();
   return nullptr;
 }
 

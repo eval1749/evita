@@ -204,7 +204,7 @@
 
         'dom/file_path.cc',
         'dom/global.cc',
-        'dom/init_dict.cc',
+        'dom/dictionary.cc',
         'dom/lock.cc',
 
         'dom/text/modes/mode.cc',

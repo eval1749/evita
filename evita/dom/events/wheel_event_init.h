@@ -30,7 +30,7 @@ class WheelEventInit : public MouseEventInit {
   public: double delta_y() const { return delta_y_; }
   public: double delta_z() const { return delta_z_; }
 
-  // InitDict
+  // Dictionary
   private: virtual HandleResult HandleKeyValue(
       v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) override;
 

@@ -4,7 +4,7 @@
 #define INCLUDE_evita_dom_events_ui_event_h
 
 #include "evita/dom/events/event.h"
-#include "evita/dom/init_dict.h"
+#include "evita/dom/dictionary.h"
 #include "evita/v8_glue/nullable.h"
 
 namespace dom {

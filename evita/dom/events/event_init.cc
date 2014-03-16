@@ -16,7 +16,7 @@ EventInit::EventInit() : bubbles_(false), cancelable_(false) {
 EventInit::~EventInit() {
 }
 
-InitDict::HandleResult EventInit::HandleKeyValue(
+Dictionary::HandleResult EventInit::HandleKeyValue(
     v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) {
   if (key->Equals(v8Strings::bubbles.Get(isolate()))) {
     return gin::ConvertFromV8(isolate(), value, &bubbles_) ?

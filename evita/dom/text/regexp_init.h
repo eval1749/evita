@@ -5,11 +5,11 @@
 #if !defined(INCLUDE_evita_dom_regexp_init_h)
 #define INCLUDE_evita_dom_regexp_init_h
 
-#include "evita/dom/init_dict.h"
+#include "evita/dom/dictionary.h"
 
 namespace dom {
 
-class RegExpInit : public InitDict {
+class RegExpInit : public Dictionary {
   private: bool backward_;
   private: bool global_;
   private: bool ignore_case_;

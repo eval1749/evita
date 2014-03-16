@@ -22,7 +22,7 @@ FormEventInit::FormEventInit() {
 FormEventInit::~FormEventInit() {
 }
 
-InitDict::HandleResult FormEventInit::HandleKeyValue(
+Dictionary::HandleResult FormEventInit::HandleKeyValue(
     v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) {
   if (key->Equals(v8Strings::data.Get(isolate()))) {
     return gin::ConvertFromV8(isolate(), value, &data_) ?

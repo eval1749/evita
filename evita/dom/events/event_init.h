@@ -3,11 +3,11 @@
 #if !defined(INCLUDE_evita_dom_events_event_init_h)
 #define INCLUDE_evita_dom_events_event_init_h
 
-#include "evita/dom/init_dict.h"
+#include "evita/dom/dictionary.h"
 
 namespace dom {
 
-class EventInit : public InitDict {
+class EventInit : public Dictionary {
   private: bool bubbles_;
   private: bool cancelable_;
 

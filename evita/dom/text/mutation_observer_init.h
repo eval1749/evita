@@ -6,11 +6,11 @@
 #define INCLUDE_evita_dom_mutation_observer_init_h
 
 #include "evita/dom/converter.h"
-#include "evita/dom/init_dict.h"
+#include "evita/dom/dictionary.h"
 
 namespace dom {
 
-class MutationObserverInit final : public InitDict {
+class MutationObserverInit final : public Dictionary {
   private: bool summary_;
 
   public: MutationObserverInit();

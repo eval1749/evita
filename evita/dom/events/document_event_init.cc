@@ -21,7 +21,7 @@ DocumentEventInit::DocumentEventInit() : DocumentEventInit(nullptr) {
 DocumentEventInit::~DocumentEventInit() {
 }
 
-InitDict::HandleResult DocumentEventInit::HandleKeyValue(
+Dictionary::HandleResult DocumentEventInit::HandleKeyValue(
     v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) {
   if (key->Equals(v8Strings::view.Get(isolate()))) {
     v8_glue::Nullable<Window> maybe_view;

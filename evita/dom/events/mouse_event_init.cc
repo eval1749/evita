@@ -40,7 +40,7 @@ MouseEventInit::MouseEventInit()
 MouseEventInit::~MouseEventInit() {
 }
 
-InitDict::HandleResult MouseEventInit::HandleKeyValue(
+Dictionary::HandleResult MouseEventInit::HandleKeyValue(
     v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) {
 
   if (key->Equals(v8Strings::altKey.Get(isolate()))) {

@@ -16,7 +16,7 @@ UiEventInit::UiEventInit() : detail_(0) {
 UiEventInit::~UiEventInit() {
 }
 
-InitDict::HandleResult UiEventInit::HandleKeyValue(
+Dictionary::HandleResult UiEventInit::HandleKeyValue(
     v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) {
   if (key->Equals(v8Strings::detail.Get(isolate()))) {
     return gin::ConvertFromV8(isolate(), value, &detail_) ?

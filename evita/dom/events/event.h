@@ -6,7 +6,7 @@
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
-#include "evita/dom/init_dict.h"
+#include "evita/dom/dictionary.h"
 #include "evita/dom/time_stamp.h"
 #include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/scriptable.h"

@@ -18,7 +18,7 @@ FocusEventInit::FocusEventInit() {
 FocusEventInit::~FocusEventInit() {
 }
 
-InitDict::HandleResult FocusEventInit::HandleKeyValue(
+Dictionary::HandleResult FocusEventInit::HandleKeyValue(
     v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) {
 
   if (key->Equals(v8Strings::relatedTarget.Get(isolate()))) {

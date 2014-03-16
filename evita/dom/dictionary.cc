@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/init_dict.h"
+#include "evita/dom/dictionary.h"
 
 #include "base/strings/stringprintf.h"
 #include "evita/dom/script_controller.h"
@@ -12,17 +12,17 @@ namespace dom {
 
 base::string16 V8ToString(v8::Handle<v8::Value> value);
 
-InitDict::InitDict() {
+Dictionary::Dictionary() {
 }
 
-InitDict::~InitDict() {
+Dictionary::~Dictionary() {
 }
 
-v8::Isolate* InitDict::isolate() const {
+v8::Isolate* Dictionary::isolate() const {
   return v8::Isolate::GetCurrent();
 }
 
-bool InitDict::Init(v8::Handle<v8::Object> dict) {
+bool Dictionary::Init(v8::Handle<v8::Object> dict) {
   if (dict.IsEmpty())
     return true;
   auto const runner = ScriptController::instance()->runner();

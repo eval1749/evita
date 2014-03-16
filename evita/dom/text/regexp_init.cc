@@ -17,7 +17,7 @@ RegExpInit::RegExpInit()
 RegExpInit::~RegExpInit() {
 }
 
-InitDict::HandleResult RegExpInit::HandleKeyValue(
+Dictionary::HandleResult RegExpInit::HandleKeyValue(
     v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) {
   if (key->Equals(v8Strings::backward.Get(isolate()))) {
     return gin::ConvertFromV8(isolate(), value, &backward_) ?

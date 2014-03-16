@@ -15,7 +15,7 @@ MutationObserverInit::MutationObserverInit() : summary_(false) {
 MutationObserverInit::~MutationObserverInit() {
 }
 
-InitDict::HandleResult MutationObserverInit::HandleKeyValue(
+Dictionary::HandleResult MutationObserverInit::HandleKeyValue(
     v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) {
   if (key->Equals(v8Strings::summary.Get(isolate()))) {
     return gin::ConvertFromV8(isolate(), value, &summary_) ?

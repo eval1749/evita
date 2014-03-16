@@ -38,7 +38,7 @@ KeyboardEventInit::KeyboardEventInit()
 KeyboardEventInit::~KeyboardEventInit() {
 }
 
-InitDict::HandleResult KeyboardEventInit::HandleKeyValue(
+Dictionary::HandleResult KeyboardEventInit::HandleKeyValue(
     v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) {
 
   if (key->Equals(v8Strings::altKey.Get(isolate()))) {

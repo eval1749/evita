@@ -16,7 +16,7 @@ WindowEventInit::WindowEventInit() {
 WindowEventInit::~WindowEventInit() {
 }
 
-InitDict::HandleResult WindowEventInit::HandleKeyValue(
+Dictionary::HandleResult WindowEventInit::HandleKeyValue(
     v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) {
   if (key->Equals(v8Strings::sourceWindow.Get(isolate()))) {
     v8_glue::Nullable<Window> maybe_window;

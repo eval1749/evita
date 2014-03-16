@@ -22,27 +22,25 @@ v8::Isolate* Dictionary::isolate() const {
   return v8::Isolate::GetCurrent();
 }
 
-bool Dictionary::Init(v8::Handle<v8::Object> dict) {
+bool Dictionary::Init(v8::Isolate* isolate, v8::Handle<v8::Value> dict) {
   if (dict.IsEmpty())
     return true;
-  auto const runner = ScriptController::instance()->runner();
-  v8_glue::Runner::Scope runner_scope(runner);
-  auto const isolate = runner->isolate();
-
-  auto const keys = dict->GetPropertyNames();
+  if (!dict->IsObject())
+    return false;
+  auto const keys = dict->ToObject()->GetPropertyNames();
   auto const keys_length = keys->Length();
   for (auto index = 0u; index < keys_length; ++index) {
     auto key = keys->Get(index);
-    auto const value = dict->Get(key);
+    auto const value = dict->ToObject()->Get(key);
     auto const result = HandleKeyValue(key, value);
     switch (result) {
       case HandleResult::CanNotConvert:
-        runner->isolate()->ThrowException(v8::Exception::TypeError(
+        isolate->ThrowException(v8::Exception::TypeError(
             gin::StringToV8(isolate, base::StringPrintf(L"Bad value for %ls",
                 V8ToString(key).c_str()))));
         return false;
       case HandleResult::NotFound:
-        runner->isolate()->ThrowException(v8::Exception::TypeError(
+        isolate->ThrowException(v8::Exception::TypeError(
             gin::StringToV8(isolate, base::StringPrintf(L"Invalid key: %ls",
                 V8ToString(key).c_str()))));
         return false;

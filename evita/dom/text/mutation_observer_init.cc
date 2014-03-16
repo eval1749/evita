@@ -25,13 +25,3 @@ Dictionary::HandleResult MutationObserverInit::HandleKeyValue(
 }
 
 }  // namespace dom
-
-namespace gin {
-bool Converter<dom::MutationObserverInit>::FromV8(
-    v8::Isolate*, v8::Handle<v8::Value> val,
-    dom::MutationObserverInit* out) {
-  if (!val->IsObject())
-    return false;
-  return out->Init(val->ToObject());
-}
-} // namespace gin

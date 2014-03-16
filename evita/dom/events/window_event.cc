@@ -29,11 +29,8 @@ class WindowEventClass :
   }
 
   private: static WindowEvent* NewWindowEvent(const base::string16& type,
-      v8_glue::Optional<v8::Handle<v8::Object>> opt_dict) {
-    WindowEventInit init_dict;
-    if (!init_dict.Init(opt_dict.value))
-      return nullptr;
-    return new WindowEvent(type, init_dict);
+      v8_glue::Optional<WindowEventInit> opt_dict) {
+    return new WindowEvent(type, opt_dict.value);
   }
 
   private: virtual void SetupInstanceTemplate(

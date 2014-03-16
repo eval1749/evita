@@ -36,10 +36,9 @@ class KeyboardEventInit : public UiEventInit {
   public: bool repeat() const { return repeat_; }
   public: bool shift_key() const { return shift_key_; }
 
+  // dom::Dictionary
   private: virtual HandleResult HandleKeyValue(
       v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) override;
-
-  DISALLOW_COPY_AND_ASSIGN(KeyboardEventInit);
 };
 
 }  // namespace dom

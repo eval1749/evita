@@ -30,11 +30,8 @@ class EventClass : public v8_glue::WrapperInfo {
   }
 
   private: static Event* NewEvent(const base::string16& type,
-      v8_glue::Optional<v8::Handle<v8::Object>> opt_dict) {
-    EventInit init_dict;
-    if (!init_dict.Init(opt_dict.value))
-      return nullptr;
-    return new Event(type, init_dict);
+      v8_glue::Optional<EventInit> opt_dict) {
+    return new Event(type, opt_dict.value);
   }
 
   private: virtual void SetupInstanceTemplate(

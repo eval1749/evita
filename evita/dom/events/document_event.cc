@@ -30,11 +30,8 @@ class DocumentEventClass :
   }
 
   private: static DocumentEvent* NewDocumentEvent(const base::string16& type,
-      v8_glue::Optional<v8::Handle<v8::Object>> opt_dict) {
-    DocumentEventInit init_dict;
-    if (!init_dict.Init(opt_dict.value))
-      return nullptr;
-    return new DocumentEvent(type, init_dict);
+      v8_glue::Optional<DocumentEventInit> opt_dict) {
+    return new DocumentEvent(type, opt_dict.value);
   }
 
   private: virtual void SetupInstanceTemplate(

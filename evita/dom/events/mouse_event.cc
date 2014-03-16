@@ -29,11 +29,8 @@ class MouseEventClass :
   }
 
   private: static MouseEvent* NewMouseEvent(const base::string16& type,
-      v8_glue::Optional<v8::Handle<v8::Object>> opt_dict) {
-    MouseEventInit init_dict;
-    if (!init_dict.Init(opt_dict.value))
-      return nullptr;
-    return new MouseEvent(type, init_dict);
+      v8_glue::Optional<MouseEventInit> opt_dict) {
+    return new MouseEvent(type, opt_dict.value);
   }
 
   private: virtual void SetupInstanceTemplate(

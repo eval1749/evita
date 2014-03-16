@@ -25,10 +25,9 @@ class WindowEventInit : public EventInit {
     source_window_ = source_window;
   }
 
+  // dom::Dictionary
   private: virtual HandleResult HandleKeyValue(
       v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) override;
-
-  DISALLOW_COPY_AND_ASSIGN(WindowEventInit);
 };
 
 }  // namespace dom

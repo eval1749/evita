@@ -29,11 +29,8 @@ class KeyboardEventClass :
   }
 
   private: static KeyboardEvent* NewKeyboardEvent(const base::string16& type,
-      v8_glue::Optional<v8::Handle<v8::Object>> opt_dict) {
-    KeyboardEventInit init_dict;
-    if (!init_dict.Init(opt_dict.value))
-      return nullptr;
-    return new KeyboardEvent(type, init_dict);
+      v8_glue::Optional<KeyboardEventInit> opt_dict) {
+    return new KeyboardEvent(type, opt_dict.value);
   }
 
   private: virtual void SetupInstanceTemplate(

@@ -21,10 +21,9 @@ class FormEventInit : public EventInit {
   public: const base::string16& data() const { return data_; }
   public: void set_data(const base::string16& data) { data_ = data; }
 
+  // dom::Dictionary
   private: virtual HandleResult HandleKeyValue(
       v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) override;
-
-  DISALLOW_COPY_AND_ASSIGN(FormEventInit);
 };
 
 }  // namespace dom

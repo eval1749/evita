@@ -380,13 +380,9 @@ class RegExp::RegExpClass : public v8_glue::WrapperInfo {
   }
 
   private: static RegExp* NewRegex(const base::string16 source,
-      v8_glue::Optional<v8::Handle<v8::Object>> opt_dict) {
-    RegExpInit init_dict;
-    if (!init_dict.Init(opt_dict.value))
-      return nullptr;
-
+      v8_glue::Optional<RegExpInit> opt_dict) {
     RegExp::Compiler compiler;
-    auto const regex = compiler.Compile(source, init_dict);
+    auto const regex = compiler.Compile(source, opt_dict.value);
     if (!regex) {
       auto const error_info = compiler.error_info();
       ScriptController::instance()->ThrowError(base::StringPrintf(
@@ -395,7 +391,7 @@ class RegExp::RegExpClass : public v8_glue::WrapperInfo {
       return nullptr;
     }
 
-    return new RegExp(regex, source, init_dict);
+    return new RegExp(regex, source, opt_dict.value);
   }
 
   private: virtual void SetupInstanceTemplate(

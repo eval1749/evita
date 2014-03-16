@@ -29,11 +29,8 @@ class UiEventClass :
   }
 
   private: static UiEvent* NewUiEvent(const base::string16& type,
-      v8_glue::Optional<v8::Handle<v8::Object>> opt_dict) {
-    UiEventInit init_dict;
-    if (!init_dict.Init(opt_dict.value))
-      return nullptr;
-    return new UiEvent(type, init_dict);
+      v8_glue::Optional<UiEventInit> opt_dict) {
+    return new UiEvent(type, opt_dict.value);
   }
 
   private: virtual void SetupInstanceTemplate(

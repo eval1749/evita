@@ -21,8 +21,6 @@ class EventInit : public Dictionary {
 
   protected: virtual HandleResult HandleKeyValue(
       v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) override;
-
-  DISALLOW_COPY_AND_ASSIGN(EventInit);
 };
 
 }  // namespace dom

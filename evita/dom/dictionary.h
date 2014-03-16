@@ -6,7 +6,7 @@
 #define INCLUDE_evita_dom_dictionary_h
 
 #include "base/basictypes.h"
-#include "evita/v8_glue/v8.h"
+#include "evita/v8_glue/converter.h"
 
 namespace dom {
 
@@ -24,11 +24,21 @@ class Dictionary {
 
   protected: virtual HandleResult HandleKeyValue(
       v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) = 0;
-  public: bool Init(v8::Handle<v8::Object> dict);
-
-  DISALLOW_COPY_AND_ASSIGN(Dictionary);
+  public: bool Init(v8::Isolate* isolate, v8::Handle<v8::Value> dict);
 };
 
 }  // namespace dom
+
+namespace gin {
+template<typename T>
+struct Converter<T, typename
+    std::enable_if<std::is_base_of<dom::Dictionary, T>::value>::type>
+{
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
+                     T* out) {
+    return out->Init(isolate, val->ToObject());
+  }
+};
+}  // namespace gin
 
 #endif //!defined(INCLUDE_evita_dom_dictionary_h)

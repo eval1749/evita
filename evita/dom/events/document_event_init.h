@@ -21,10 +21,9 @@ class DocumentEventInit : public EventInit {
   public: Window* view() const { return view_.get(); }
   public: void set_view(Window* view) { view_ = view; }
 
+  // dom::Dictionary
   private: virtual HandleResult HandleKeyValue(
       v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) override;
-
-  DISALLOW_COPY_AND_ASSIGN(DocumentEventInit);
 };
 
 }  // namespace dom

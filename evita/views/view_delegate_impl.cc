@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "base/logging.h"
+// TODO(yosi) We should not use |dom::Buffer| outside DOM.
 #include "evita/dom/text/buffer.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/windows/editor_window.h"

@@ -13,7 +13,7 @@
 #include <utility>
 
 #include "evita/gfx_base.h"
-#include "evita/dom/text/buffer.h"
+#include "evita/text/buffer.h"
 #include "evita/views/text/render_cell.h"
 #include "evita/views/text/render_text_block.h"
 #include "evita/views/text/render_text_line.h"

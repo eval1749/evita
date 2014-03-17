@@ -28,14 +28,11 @@ namespace text {
 Interval::Interval(const Interval& other)
     : m_lEnd(other.m_lEnd),
       m_lStart(other.m_lStart),
-      m_nZ(other.m_nZ),
       m_Style(other.m_Style) {
 }
 
-Interval::Interval(Posn lStart, Posn lEnd, int nZ)
-    : m_lEnd(lEnd),
-      m_lStart(lStart),
-      m_nZ(nZ) {
+Interval::Interval(Posn lStart, Posn lEnd)
+    : m_lEnd(lEnd), m_lStart(lStart) {
 }
 
 Interval::~Interval() {

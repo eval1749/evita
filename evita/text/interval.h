@@ -20,11 +20,10 @@ class Interval : public BinaryTree<Interval>::NodeBase,
 
   private: Posn m_lEnd;
   private: Posn m_lStart;
-  private: int m_nZ;
   private: css::Style m_Style;
 
   public: Interval(const Interval& other);
-  public: Interval(Posn lStart, Posn lEnd, int nZ = 9);
+  public: Interval(Posn lStart, Posn lEnd);
   public: ~Interval();
 
   // [C]

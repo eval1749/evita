@@ -436,6 +436,10 @@ Cell* UnicodeCell::Copy() const {
   return new UnicodeCell(*this);
 }
 
+bool UnicodeCell::Merge(const RenderStyle&, float) {
+  return false;
+}
+
 void UnicodeCell::Render(const gfx::Graphics& gfx,
                          const gfx::RectF& rect) const {
   FillBackground(gfx, rect);

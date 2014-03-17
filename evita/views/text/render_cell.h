@@ -166,6 +166,7 @@ class UnicodeCell final : public TextCell {
 
   // rendering::Cell
   private: virtual Cell* Copy() const override;
+  private: virtual bool Merge(const RenderStyle& style, float width) override;
   private: virtual void Render(const gfx::Graphics& gfx,
                                const gfx::RectF& rect) const override;
 };

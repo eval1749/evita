@@ -329,6 +329,8 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
       FontSet::Get(m_gfx, style)->FindFont(m_gfx, wch);
 
   if (!pFont) {
+    style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
+        css::StyleSelector::end_of_file_marker()));
     auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'u');
     base::string16 string;
 

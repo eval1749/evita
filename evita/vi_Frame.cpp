@@ -437,12 +437,6 @@ Pane* Frame::GetActivePane() {
   return pActive;
 }
 
-int Frame::GetCxStatusBar() const {
-  auto const cx = rect().right - rect().left -
-      ::GetSystemMetrics(SM_CXVSCROLL);  // remove size grip
-  return cx;
-}
-
 static Pane* getPaneAt(views::TabStrip* tab_strip, int const index) {
   TCITEM tab_item;
   tab_item.mask = TCIF_PARAM;

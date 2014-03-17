@@ -103,7 +103,6 @@ class Frame final : public views::Window,
 
   // [G]
   public: Pane* GetActivePane();
-  public: int GetCxStatusBar() const;
 
   public: Pane* GetFirstPane() const { return m_oPanes.GetFirst(); }
   public: Pane* GetLastPane() const { return m_oPanes.GetLast(); }

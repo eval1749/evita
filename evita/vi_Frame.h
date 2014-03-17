@@ -129,7 +129,6 @@ class Frame final : public views::Window,
   // [R]
   public: void Realize();
   public: void virtual RealizeWidget() override;
-  public: void ResetMessages();
 
   // [S]
   public: void SetStatusBar(std::vector<base::string16> texts);

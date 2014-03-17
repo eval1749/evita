@@ -681,13 +681,6 @@ void Frame::RealizeWidget() {
 }
 
 /// <summary>
-///   Remove all messages in status bar.
-/// </summary>
-void Frame::ResetMessages() {
-  message_view_->SetMessage(base::string16());
-}
-
-/// <summary>
 ///   Set status bar formatted message on specified part.
 /// </summary>
 void Frame::SetStatusBar(const std::vector<base::string16> texts) {

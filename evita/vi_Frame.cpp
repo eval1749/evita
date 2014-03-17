@@ -746,7 +746,7 @@ void Frame::WillRemoveChildWidget(const Widget& widget) {
 
 // views::TabStripDelegate
 void Frame::DidClickTabCloseButton(int tab_index) {
-  if (GetFirstPane() == GetLastPane()) {
+  if (m_oPanes.GetFirst() == m_oPanes.GetLast()) {
     // If this window has only one pane, we destroy this window.
     Application::instance()->view_event_handler()->QueryClose(
         window_id());

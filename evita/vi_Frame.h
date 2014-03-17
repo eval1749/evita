@@ -90,9 +90,6 @@ class Frame final : public views::Window,
 
   // [G]
   public: Pane* GetActivePane();
-
-  public: Pane* GetFirstPane() const { return m_oPanes.GetFirst(); }
-  public: Pane* GetLastPane() const { return m_oPanes.GetLast(); }
   private: Pane* getPaneFromTab(int) const;
   public: gfx::Rect GetPaneRect() const;
   private: int getTabFromPane(Pane*) const;

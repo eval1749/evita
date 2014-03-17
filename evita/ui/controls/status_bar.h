@@ -20,6 +20,7 @@ class StatusBar {
   private: HWND hwnd_;
   private: bool is_simple_mode_;
   private: std::vector<int> part_rights_;
+  private: std::vector<int> column_widths_;
   private: std::vector<base::string16> part_texts_;
   private: common::win::Rect rect_;
   private: base::string16 simple_text_;

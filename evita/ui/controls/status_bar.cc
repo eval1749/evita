@@ -46,8 +46,8 @@ void StatusBar::ResizeTo(const common::win::Rect& rect) {
 }
 
 static int PartWidth(const base::string16& text) {
-  auto const kCharWidth = 8;
-  auto const kMarginWidth = 4;
+  auto const kCharWidth = 7;
+  auto const kMarginWidth = 6;
   return static_cast<int>(text.length() * kCharWidth + kMarginWidth);
 }
 
@@ -67,12 +67,23 @@ void StatusBar::Set(const std::vector<base::string16>& new_texts) {
   SetSimpleMode(false);
   if (new_texts == part_texts_)
     return;
-  std::vector<int> new_rights(new_texts.size());
+
+  auto const num_columns = new_texts.size();
+  if (column_widths_.size() != num_columns) {
+    column_widths_.clear();
+    column_widths_.resize(num_columns);
+  }
+  for (auto index = 0u; index < num_columns; ++index) {
+    column_widths_[index] = std::max(PartWidth(new_texts[index]),
+                                     column_widths_[index]);
+  }
+
+  std::vector<int> new_rights(num_columns);
   auto const size_grip_width = ::GetSystemMetrics(SM_CXVSCROLL);
   auto right = rect_.right - size_grip_width;
-  for (auto index = new_texts.size();  index > 0; --index) {
+  for (auto index = num_columns;  index > 0; --index) {
     new_rights[index - 1] = right;
-    right -= PartWidth(new_texts[index - 1]);
+    right -= column_widths_[index - 1];
   }
 
   if (part_rights_ != new_rights) {
@@ -81,8 +92,8 @@ void StatusBar::Set(const std::vector<base::string16>& new_texts) {
         reinterpret_cast<LPARAM>(new_rights.data()));
   }
 
-  part_texts_.resize(new_texts.size());
-  for (auto index = 0u; index < new_texts.size();  ++index) {
+  part_texts_.resize(num_columns);
+  for (auto index = 0u; index < num_columns;  ++index) {
     if (part_rights_[index] == new_rights[index] &&
         part_texts_[index] == new_texts[index]) {
       continue;

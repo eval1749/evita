@@ -83,20 +83,9 @@ class Frame final : public views::Window,
   private: void AddTab(Pane*);
   public: void AddWindow(views::ContentWindow*);
 
-  // [C]
-  private: virtual void CreateNativeWindow() const override;
-
   // [D]
-  private: virtual void DidAddChildWidget(
-      const Widget& widget) override;
   public: void DidActivatePane(Pane*);
-  private: virtual void DidCreateNativeWindow() override;
-  private: virtual void DidDestroyWidget() override;
-  private: virtual void DidRemoveChildWidget(
-      const Widget& widget) override;
-  private: virtual void DidRequestFocus() override;
   public: void DidRequestFocusOnChild(views::Window* window);
-  private: virtual void DidResize() override;
   private: void DrawForResize();
 
   // [G]
@@ -113,8 +102,6 @@ class Frame final : public views::Window,
 
   // [O]
   private: void onDropFiles(HDROP);
-  private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
-  private: virtual void OnPaint(const gfx::Rect paint_rect) override;
 
   // [R]
   public: void virtual RealizeWidget() override;
@@ -127,7 +114,18 @@ class Frame final : public views::Window,
   private: void updateTitleBar();
   private: void UpdateTooltip(NMTTDISPINFO*);
 
-  // [W]
+  // ui::Widget
+  private: virtual void CreateNativeWindow() const override;
+  private: virtual void DidAddChildWidget(
+      const Widget& widget) override;
+  private: virtual void DidCreateNativeWindow() override;
+  private: virtual void DidDestroyWidget() override;
+  private: virtual void DidRemoveChildWidget(
+      const Widget& widget) override;
+  private: virtual void DidRequestFocus() override;
+  private: virtual void DidResize() override;
+  private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
+  private: virtual void OnPaint(const gfx::Rect paint_rect) override;
   private: virtual void WillDestroyWidget() override;
   private: virtual void WillRemoveChildWidget(const Widget& widget) override;
 

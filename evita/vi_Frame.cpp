@@ -1,14 +1,7 @@
-#include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - winapp - Frame Window
-// listener/winapp/vi_Frame.cpp
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Frame.cpp#5 $
-//
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #define DEBUG_DROPFILES 0
 #define DEBUG_FOCUS     0
 #define DEBUG_PAINT     0
@@ -122,6 +115,10 @@ Pane* GetContainingPane(Frame* frame, views::Window* window) {
 
 } // namespace
 
+//////////////////////////////////////////////////////////////////////
+//
+// Frame
+//
 Frame::Frame(views::WindowId window_id)
     : views::Window(ui::NativeWindow::Create(*this), window_id),
       gfx_(new gfx::Graphics()),
@@ -281,90 +278,6 @@ void Frame::DidChangeTabSelection(int selected_index) {
   #endif
 }
 
-void Frame::DidCreateNativeWindow() {
-  views::FrameList::instance()->AddFrame(this);
-  ::DragAcceptFiles(*native_window(), TRUE);
-
-  message_view_->Realize(*native_window());
-  title_bar_->Realize(*native_window());
-
-  CompositionState::Update(*native_window());
-  gfx_->Init(*native_window());
-
-
-  // TODO(yosi) How do we detemine height of TabStrip?
-  m_cyTabBand = tab_strip_->GetPreferreSize().cy;
-  tab_strip_->ResizeTo(Rect(0, 0, rect().width(), m_cyTabBand));
-
-  auto const pane_rect = GetPaneRect();
-  for (auto& pane: m_oPanes) {
-    pane.ResizeTo(pane_rect);
-  }
-
-  Widget::DidCreateNativeWindow();
-
-  tab_strip_->SetIconList(views::IconCache::instance()->image_list());
-
-  for (auto& pane: m_oPanes) {
-    AddTab(&pane);
-  }
-
-  if (m_oPanes.GetFirst())
-    m_oPanes.GetFirst()->Activate();
-}
-
-void Frame::DidDestroyWidget() {
-  delete this;
-}
-
-void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
-  auto const pane = const_cast<Pane*>(widget.as<Pane>());
-  if (!pane)
-    return;
-  m_oPanes.Delete(pane);
-  if (m_oPanes.IsEmpty())
-    DestroyWidget();
-}
-
-void Frame::DidResize() {
-  {
-    auto tab_strip_rect = rect();
-    tab_strip_rect.bottom = tab_strip_rect.top + m_cyTabBand;
-    tab_strip_->ResizeTo(tab_strip_rect);
-  }
-
-  // Status bar shows:
-  //    message, code page, newline, line num, column, char, ins/ovr
-  {
-    auto status_bar_rect = rect();
-    status_bar_rect.top = rect().bottom - message_view_->height();
-    message_view_->ResizeTo(status_bar_rect);
-    auto const text = base::StringPrintf(L"Resizing... %dx%d",
-        rect().right - rect().left,
-        rect().bottom - rect().top);
-    message_view_->SetMessage(text);
-  }
-
-  {
-    const auto rc = GetPaneRect();
-    for (auto& pane: m_oPanes) {
-      pane.ResizeTo(rc);
-    }
-  }
-  gfx_->Resize(rect());
-  DrawForResize();
-}
-
-void Frame::DidRequestFocus() {
-  if (!m_pActivePane) {
-    m_pActivePane = m_oPanes.GetFirst();
-    if (!m_pActivePane)
-      return;
-  }
-  m_pActivePane->RequestFocus();
-  FOR_EACH_OBSERVER(views::FrameObserver, observers_, DidActiveFrame(this));
-}
-
 void Frame::DidRequestFocusOnChild(views::Window* window) {
   auto const pane = GetContainingPane(this, window);
   if (!pane) {
@@ -519,6 +432,197 @@ void Frame::onDropFiles(HDROP const hDrop) {
   ::DragFinish(hDrop);
 }
 
+void Frame::RealizeWidget() {
+  RealizeTopLevelWidget();
+}
+
+/// <summary>
+///   Set status bar formatted message on specified part.
+/// </summary>
+void Frame::SetStatusBar(const std::vector<base::string16> texts) {
+  message_view_->SetStatus(texts);
+}
+
+void Frame::ShowMessage(MessageLevel, const base::string16& text) const {
+  message_view_->SetMessage(text);
+}
+
+// [U]
+/// <summary>
+///   Updates title bar to display active buffer.
+/// </summary>
+void Frame::updateTitleBar() {
+  if (!m_pActivePane)
+    return;
+  auto const title = m_pActivePane->GetTitle();
+  auto const tab_index = getTabFromPane(m_pActivePane);
+  if (tab_index >= 0) {
+    TCITEM tab_item = {0};
+    tab_item.mask = TCIF_TEXT;
+    tab_item.pszText = const_cast<LPWSTR>(title.c_str());
+    if (auto const edit_pane = m_pActivePane->as<EditPane>()) {
+      if (auto const active_window = edit_pane->GetActiveWindow()) {
+        tab_item.iImage = active_window->GetIconIndex();
+        if (tab_item.iImage != -1)
+          tab_item.mask |= TCIF_IMAGE;
+      }
+    }
+    tab_strip_->SetTab(tab_index, &tab_item);
+  }
+
+  auto const window_title = title + L" - " + Application::instance()->title();
+  title_bar_->SetText(window_title);
+  m_pActivePane->UpdateStatusBar();
+}
+
+void Frame::UpdateTooltip(NMTTDISPINFO* const pDisp) {
+  auto const pPane = getPaneFromTab(static_cast<int>(pDisp->hdr.idFrom));
+  if (!pPane) {
+    tooltip_ = base::string16();
+    return;
+  }
+
+  auto const pEdit = pPane->as<EditPane>();
+  if (!pEdit) {
+    tooltip_ = pPane->GetName();
+    return;
+  }
+
+  auto const pBuffer = pEdit->GetBuffer();
+  if (!pBuffer) {
+    tooltip_ = pPane->GetName();
+    return;
+  }
+
+  std::basic_ostringstream<base::char16> tooltip;
+  tooltip << "Name:" << pBuffer->name() << "\r\n" <<
+    "File: " << MaybeBufferFilename(*pBuffer) << "\r\n" <<
+    "Save: " << MaybeBufferSaveTime(*pBuffer) << "\r\n" <<
+    ModifiedDisplayText(*pBuffer);
+  tooltip_ = std::move(tooltip.str());
+}
+
+// ui::Widget
+void Frame::CreateNativeWindow() const {
+  int const cColumns = 83;
+  int const cRows    = 40;
+
+  // Note: WS_EX_COMPOSITED posts WM_PAINT many times.
+  // Note: WS_EX_LAYERED doesn't show window with Win7+.
+  DWORD dwExStyle =
+      WS_EX_APPWINDOW
+      | WS_EX_NOPARENTNOTIFY
+      | WS_EX_WINDOWEDGE;
+
+  DWORD dwStyle =
+    WS_OVERLAPPEDWINDOW
+    | WS_CLIPCHILDREN
+    | WS_VISIBLE;
+
+  CompositionState::Update();
+  if (CompositionState::IsEnabled())
+    dwStyle |= WS_EX_COMPOSITED | WS_EX_LAYERED;
+
+  auto& font = *FontSet::Get(*css::Style::Default())->FindFont('x');
+  gfx::SizeF size(font.GetCharWidth('M') * cColumns,
+                  font.height() * cRows);
+  gfx::RectF rect(gfx::PointF(), gfx::FactorySet::AlignToPixel(size));
+  Rect rc(rect);
+  ::AdjustWindowRectEx(&rc, dwStyle, TRUE, dwExStyle);
+  rc.right += ::GetSystemMetrics(SM_CXVSCROLL) + 10;
+
+  Rect rcWork;
+  ::SystemParametersInfo(SPI_GETWORKAREA, 0, &rcWork, 0);
+
+  native_window()->CreateWindowEx(
+      dwExStyle, dwStyle, L"", nullptr,
+      gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
+      gfx::Size(rc.width(), rcWork.height() * 4 / 5));
+}
+
+void Frame::DidCreateNativeWindow() {
+  views::FrameList::instance()->AddFrame(this);
+  ::DragAcceptFiles(*native_window(), TRUE);
+
+  message_view_->Realize(*native_window());
+  title_bar_->Realize(*native_window());
+
+  CompositionState::Update(*native_window());
+  gfx_->Init(*native_window());
+
+  // TODO(yosi) How do we detemine height of TabStrip?
+  m_cyTabBand = tab_strip_->GetPreferreSize().cy;
+  tab_strip_->ResizeTo(Rect(0, 0, rect().width(), m_cyTabBand));
+
+  auto const pane_rect = GetPaneRect();
+  for (auto& pane: m_oPanes) {
+    pane.ResizeTo(pane_rect);
+  }
+
+  Widget::DidCreateNativeWindow();
+
+  tab_strip_->SetIconList(views::IconCache::instance()->image_list());
+
+  for (auto& pane: m_oPanes) {
+    AddTab(&pane);
+  }
+
+  if (m_oPanes.GetFirst())
+    m_oPanes.GetFirst()->Activate();
+}
+
+void Frame::DidDestroyWidget() {
+  delete this;
+}
+
+void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
+  auto const pane = const_cast<Pane*>(widget.as<Pane>());
+  if (!pane)
+    return;
+  m_oPanes.Delete(pane);
+  if (m_oPanes.IsEmpty())
+    DestroyWidget();
+}
+
+void Frame::DidRequestFocus() {
+  if (!m_pActivePane) {
+    m_pActivePane = m_oPanes.GetFirst();
+    if (!m_pActivePane)
+      return;
+  }
+  m_pActivePane->RequestFocus();
+  FOR_EACH_OBSERVER(views::FrameObserver, observers_, DidActiveFrame(this));
+}
+
+void Frame::DidResize() {
+  {
+    auto tab_strip_rect = rect();
+    tab_strip_rect.bottom = tab_strip_rect.top + m_cyTabBand;
+    tab_strip_->ResizeTo(tab_strip_rect);
+  }
+
+  // Status bar shows:
+  //    message, code page, newline, line num, column, char, ins/ovr
+  {
+    auto status_bar_rect = rect();
+    status_bar_rect.top = rect().bottom - message_view_->height();
+    message_view_->ResizeTo(status_bar_rect);
+    auto const text = base::StringPrintf(L"Resizing... %dx%d",
+        rect().right - rect().left,
+        rect().bottom - rect().top);
+    message_view_->SetMessage(text);
+  }
+
+  {
+    const auto rc = GetPaneRect();
+    for (auto& pane: m_oPanes) {
+      pane.ResizeTo(rc);
+    }
+  }
+  gfx_->Resize(rect());
+  DrawForResize();
+}
+
 LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
                          LPARAM const lParam) {
   switch (uMsg) {
@@ -622,117 +726,6 @@ void Frame::OnPaint(const gfx::Rect rect) {
                       rect);
   gfx_->DrawRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
                       rect, 2.0f);
-}
-
-/// <summary>
-///   Realize this frame.
-/// </summary>
-void Frame::CreateNativeWindow() const {
-  int const cColumns = 83;
-  int const cRows    = 40;
-
-  // Note: WS_EX_COMPOSITED posts WM_PAINT many times.
-  // Note: WS_EX_LAYERED doesn't show window with Win7+.
-  DWORD dwExStyle =
-      WS_EX_APPWINDOW
-      | WS_EX_NOPARENTNOTIFY
-      | WS_EX_WINDOWEDGE;
-
-  DWORD dwStyle =
-    WS_OVERLAPPEDWINDOW
-    | WS_CLIPCHILDREN
-    | WS_VISIBLE;
-
-  CompositionState::Update();
-  if (CompositionState::IsEnabled())
-    dwStyle |= WS_EX_COMPOSITED | WS_EX_LAYERED;
-
-  auto& font = *FontSet::Get(*css::Style::Default())->FindFont('x');
-  gfx::SizeF size(font.GetCharWidth('M') * cColumns,
-                  font.height() * cRows);
-  gfx::RectF rect(gfx::PointF(), gfx::FactorySet::AlignToPixel(size));
-  Rect rc(rect);
-  ::AdjustWindowRectEx(&rc, dwStyle, TRUE, dwExStyle);
-  rc.right += ::GetSystemMetrics(SM_CXVSCROLL) + 10;
-
-  Rect rcWork;
-  ::SystemParametersInfo(SPI_GETWORKAREA, 0, &rcWork, 0);
-
-  native_window()->CreateWindowEx(
-      dwExStyle, dwStyle, L"", nullptr,
-      gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
-      gfx::Size(rc.width(), rcWork.height() * 4 / 5));
-}
-
-void Frame::RealizeWidget() {
-  RealizeTopLevelWidget();
-}
-
-/// <summary>
-///   Set status bar formatted message on specified part.
-/// </summary>
-void Frame::SetStatusBar(const std::vector<base::string16> texts) {
-  message_view_->SetStatus(texts);
-}
-
-void Frame::ShowMessage(MessageLevel, const base::string16& text) const {
-  message_view_->SetMessage(text);
-}
-
-// [U]
-/// <summary>
-///   Updates title bar to display active buffer.
-/// </summary>
-void Frame::updateTitleBar() {
-  if (!m_pActivePane)
-    return;
-  auto const title = m_pActivePane->GetTitle();
-  auto const tab_index = getTabFromPane(m_pActivePane);
-  if (tab_index >= 0) {
-    TCITEM tab_item = {0};
-    tab_item.mask = TCIF_TEXT;
-    tab_item.pszText = const_cast<LPWSTR>(title.c_str());
-    if (auto const edit_pane = m_pActivePane->as<EditPane>()) {
-      if (auto const active_window = edit_pane->GetActiveWindow()) {
-        tab_item.iImage = active_window->GetIconIndex();
-        if (tab_item.iImage != -1)
-          tab_item.mask |= TCIF_IMAGE;
-      }
-    }
-    tab_strip_->SetTab(tab_index, &tab_item);
-  }
-
-  auto const window_title = title + L" - " + Application::instance()->title();
-  title_bar_->SetText(window_title);
-  m_pActivePane->UpdateStatusBar();
-}
-
-
-void Frame::UpdateTooltip(NMTTDISPINFO* const pDisp) {
-  auto const pPane = getPaneFromTab(static_cast<int>(pDisp->hdr.idFrom));
-  if (!pPane) {
-    tooltip_ = base::string16();
-    return;
-  }
-
-  auto const pEdit = pPane->as<EditPane>();
-  if (!pEdit) {
-    tooltip_ = pPane->GetName();
-    return;
-  }
-
-  auto const pBuffer = pEdit->GetBuffer();
-  if (!pBuffer) {
-    tooltip_ = pPane->GetName();
-    return;
-  }
-
-  std::basic_ostringstream<base::char16> tooltip;
-  tooltip << "Name:" << pBuffer->name() << "\r\n" <<
-    "File: " << MaybeBufferFilename(*pBuffer) << "\r\n" <<
-    "Save: " << MaybeBufferSaveTime(*pBuffer) << "\r\n" <<
-    ModifiedDisplayText(*pBuffer);
-  tooltip_ = std::move(tooltip.str());
 }
 
 void Frame::WillDestroyWidget() {

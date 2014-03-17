@@ -46,8 +46,9 @@ void StatusBar::ResizeTo(const common::win::Rect& rect) {
 }
 
 static int PartWidth(const base::string16& text) {
-  auto const kCharWidth = 10;
-  return static_cast<int>(text.length() * kCharWidth + 10);
+  auto const kCharWidth = 8;
+  auto const kMarginWidth = 4;
+  return static_cast<int>(text.length() * kCharWidth + kMarginWidth);
 }
 
 void StatusBar::Set(const std::vector<base::string16>& new_texts) {
@@ -67,7 +68,8 @@ void StatusBar::Set(const std::vector<base::string16>& new_texts) {
   if (new_texts == part_texts_)
     return;
   std::vector<int> new_rights(new_texts.size());
-  auto right = rect_.right;
+  auto const size_grip_width = ::GetSystemMetrics(SM_CXVSCROLL);
+  auto right = rect_.right - size_grip_width;
   for (auto index = new_texts.size();  index > 0; --index) {
     new_rights[index - 1] = right;
     right -= PartWidth(new_texts[index - 1]);

@@ -114,9 +114,6 @@ class Frame final : public views::Window,
   // [F]
   public: static Frame* FindFrame(const Widget& widget);
 
-  // [H]
-  private: bool hasFocus() const;
-
   // [O]
   private: void onDropFiles(HDROP);
   private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;

@@ -117,10 +117,6 @@ class Frame final : public views::Window,
   // [H]
   private: bool hasFocus() const;
 
-  public: bool HasMultiplePanes() const {
-    return GetFirstPane() != GetLastPane();
-  }
-
   // [O]
   private: void onDropFiles(HDROP);
   private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;

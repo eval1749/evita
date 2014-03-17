@@ -75,8 +75,6 @@ class Frame final : public views::Window,
   public: operator HWND() const;
 
   public: gfx::Graphics& gfx() const { return *gfx_; }
-  public: const Panes& panes() const { return m_oPanes; }
-  public: Panes& panes() { return m_oPanes; }
 
   // [A]
   public: bool Activate();

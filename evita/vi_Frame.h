@@ -134,7 +134,6 @@ class Frame final : public views::Window,
   // [S]
   public: void SetStatusBar(std::vector<base::string16> texts);
   public: void ShowMessage(MessageLevel, const base::string16& text) const;
-  public: void ShowMessage(MessageLevel, uint32_t string_id, ...) const;
 
   // [U]
   private: void updateTitleBar();

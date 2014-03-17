@@ -698,24 +698,6 @@ void Frame::ShowMessage(MessageLevel, const base::string16& text) const {
   message_view_->SetMessage(text);
 }
 
-/// <summary>
-///   Display specified message on status bar.
-/// </summary>
-void Frame::ShowMessage(MessageLevel level,
-                        uint32_t const format_id, ...) const {
-  DCHECK(format_id);
-  base::char16 format[1024];
-  ::LoadString(g_hResource, format_id, format, arraysize(format));
-
-  base::string16 text;
-  va_list args;
-  va_start(args, format_id);
-  base::StringAppendV(&text, format, args);
-  va_end(args);
-
-  ShowMessage(level, text);
-}
-
 // [U]
 /// <summary>
 ///   Updates title bar to display active buffer.

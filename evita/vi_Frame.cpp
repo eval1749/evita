@@ -122,8 +122,6 @@ Pane* GetContainingPane(Frame* frame, views::Window* window) {
 
 } // namespace
 
-extern uint g_TabBand__TabDragMsg;
-
 Frame::Frame(views::WindowId window_id)
     : views::Window(ui::NativeWindow::Create(*this), window_id),
       gfx_(new gfx::Graphics()),

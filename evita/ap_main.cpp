@@ -28,7 +28,6 @@ const char16* k_pwszTitle = L"Evita Common Lisp Listner";
 extern HINSTANCE   g_hInstance;
 extern HINSTANCE   g_hResource;
 extern HWND        g_hwndActiveDialog;
-extern uint        g_TabBand__TabDragMsg;
 
 static void NoReturn fatalExit(const char16*);
 

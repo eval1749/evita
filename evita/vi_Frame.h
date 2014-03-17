@@ -117,7 +117,6 @@ class Frame final : public views::Window,
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;
 
   // [R]
-  public: void Realize();
   public: void virtual RealizeWidget() override;
 
   // [S]

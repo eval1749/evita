@@ -664,10 +664,6 @@ void Frame::CreateNativeWindow() const {
       gfx::Size(rc.width(), rcWork.height() * 4 / 5));
 }
 
-void Frame::Realize() {
-  RealizeTopLevelWidget();
-}
-
 void Frame::RealizeWidget() {
   RealizeTopLevelWidget();
 }

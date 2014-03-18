@@ -472,6 +472,7 @@
         'metrics/time_scope.cc',
         'views/frame_list.cc',
         'views/frame_observer.cc',
+        'views/tab_data_set.cc',
         'views/tab_strip.cc',
         'views/tab_strip_delegate.cc',
         'views/text/render_cell.cc',

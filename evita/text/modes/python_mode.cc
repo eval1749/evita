@@ -22,42 +22,22 @@ namespace text {
 static const char16*
 k_rgpwszPythonKeyword[] = {
   // Keywords
-  L"False",
-  L"None",
-  L"True",
-  L"and",
-  L"as",
-  L"assert",
-  L"break",
-  L"class",
-  L"continue",
-  L"def",
-  L"del",
-  L"elif",
-  L"else",
-  L"except",
-  L"finally",
-  L"for",
-  L"from",
-  L"global",
-  L"if",
-  L"import",
-  L"in",
-  L"is",
-  L"lambda",
-  L"nonlocal",
-  L"not",
-  L"or",
-  L"pass",
-  L"raise",
-  L"return",
-  L"try",
-  L"while",
-  L"with",
-  L"yield",
+  L"and", L"as", L"assert", L"break", L"class",
+  L"continue", L"def", L"del", L"elif", L"else", L"except", L"exec",
+  L"finally", L"for", L"from", L"global", L"if", L"import", L"in", L"is",
+  L"lambda", L"not", L"or", L"pass" L"print", L"raise", L"return", L"try",
+  L"while", L"with", L"yield",
+  // Reserved classes of identifiers
+  L"_*", L"__*__", L"__*", L"__builtin__",
+  // Built-in Constants
+  L"Ellipsis", L"False", L"None", L"NotImplemented", L"True", L"__debug__",
+  // Built-in Types
+  L"complex", L"float", L"int", L"long",
+  L"str", L"unicode", L"list", L"tuple", L"bytearray", L"xrange",
+  L"set", L"frozenset", L"dict",
 };
 
-// Cxx mode character syntax
+// Python mode character syntax
 static const uint
 k_rgnPythonCharSyntax[0x80 - 0x20] = {
   CharSyntax::Syntax_Whitespace,          // 0x20

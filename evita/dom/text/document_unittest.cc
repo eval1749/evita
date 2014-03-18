@@ -14,6 +14,7 @@
 #include "evita/dom/abstract_dom_test.h"
 #include "evita/dom/text/buffer.h"
 #include "evita/dom/text/document.h"
+#include "evita/dom/text/document_set.h"
 #include "evita/dom/file_path.h"
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/script_controller.h"
@@ -109,7 +110,7 @@ TEST_F(DocumentTest, Document_list) {
 
 TEST_F(DocumentTest, Document_open) {
   EXPECT_SCRIPT_VALID("var a = Document.open('foo');");
-  auto const document = dom::Document::Find(L"foo");
+  auto const document = dom::DocumentSet::instance()->Find(L"foo");
   auto const absoulte_filename = dom::FilePath::FullPath(L"foo");
   document->buffer()->SetFile(absoulte_filename, base::Time());
   EXPECT_SCRIPT_VALID("var b = Document.open('foo');"

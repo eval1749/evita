@@ -390,10 +390,6 @@ void Document::EndUndoGroup(const base::string16& name) {
   buffer_->EndUndoGroup(name);
 }
 
-Document* Document::Find(const base::string16& name) {
-  return DocumentSet::instance()->Find(name);
-}
-
 text::LineAndColumn Document::GetLineAndColumn(text::Posn offset) const {
   if (!IsValidPosition(offset))
     return buffer_->GetLineAndColumn(0);
@@ -441,10 +437,6 @@ Posn Document::Redo(Posn position) {
 
 void Document::RenameTo(const base::string16& new_name) {
   DocumentSet::instance()->RenameDocument(this, new_name);
-}
-
-void Document::ResetForTesting() {
-  DocumentSet::instance()->ResetForTesting();
 }
 
 void Document::Save(const base::string16& filename,

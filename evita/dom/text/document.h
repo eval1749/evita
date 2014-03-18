@@ -71,7 +71,6 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: bool CheckCanChange() const;
   public: void DoColor(int hint);
   public: void EndUndoGroup(const base::string16& name);
-  public: static Document* Find(const base::string16& name);
   public: text::LineAndColumn GetLineAndColumn(text::Posn offset) const;
   public: bool IsValidPosition(text::Posn position) const;
   public: void Load(const base::string16& filename,
@@ -80,7 +79,6 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: static Document* New(const base::string16& name, Mode* mode);
   public: Posn Redo(Posn position);
   public: void RenameTo(const base::string16& new_name);
-  public: static void ResetForTesting();
   public: void Save(const base::string16& filename,
                     v8::Handle<v8::Function> callback);
   public: base::string16 Slice(int start, v8_glue::Optional<int> opt_end);

@@ -10,7 +10,7 @@
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
-#include "evita/dom/text/document.h"
+#include "evita/dom/text/document_set.h"
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/global.h"
@@ -209,7 +209,7 @@ void ScriptController::OpenFile(WindowId window_id,
 }
 
 void ScriptController::ResetForTesting() {
-  Document::ResetForTesting();
+  DocumentSet::instance()->ResetForTesting();
   EditorWindow::ResetForTesting();
   Window::ResetForTesting();
 }

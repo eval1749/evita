@@ -10,6 +10,7 @@
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/ui/events/event.h"
+#include "evita/views/tab_data_set.h"
 #include "evita/views/window_set.h"
 
 namespace views {
@@ -150,6 +151,7 @@ WindowSet Window::all_windows() {
 }
 
 void Window::DidDestroyDomWindow() {
+  TabDataSet::instance()->RemoveTabData(window_id_);
   WindowIdMapper::instance()->DidDestroyDomWindow(window_id_);
 }
 

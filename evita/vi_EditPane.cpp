@@ -1221,6 +1221,10 @@ base::string16 EditPane::GetTitle() {
   return window ? window->GetTitle() : base::string16();
 }
 
+views::Window* EditPane::GetWindow() const {
+  return GetActiveWindow();
+}
+
 void EditPane::OnDraw(gfx::Graphics* gfx) {
   root_box_->DrawSplitters(*gfx);
 }

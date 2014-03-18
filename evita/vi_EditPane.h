@@ -90,6 +90,7 @@ class EditPane final : public Pane {
   public: virtual HCURSOR GetCursorAt(const Point&) const override;
   public: Window* GetActiveWindow() const;
   public: text::Buffer* GetBuffer() const;
+  public: virtual views::Window* GetWindow() const override;
 
   public: Window* GetFirstWindow() const;
   public: Window* GetLastWindow() const;

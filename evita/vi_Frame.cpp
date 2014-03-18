@@ -27,6 +27,7 @@
 #include "common/win/native_window.h"
 #include "evita/css/style.h"
 #include "evita/ctrl_TitleBar.h"
+#include "evita/dom/public/tab_data.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"
@@ -36,6 +37,7 @@
 #include "evita/views/frame_observer.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/message_view.h"
+#include "evita/views/tab_data_set.h"
 #include "evita/views/tab_strip.h"
 #include "evita/views/window_set.h"
 #include "evita/vi_EditPane.h"
@@ -52,6 +54,7 @@ static int const kPaddingTop = 0;
 static int const k_edge_size = 0;
 
 using common::win::Rect;
+using namespace views;
 
 namespace {
 
@@ -160,19 +163,24 @@ void Frame::AddPane(Pane* const pane) {
 void Frame::AddTab(Pane* const pane) {
   ASSERT(is_realized());
   ASSERT(pane->is_realized());
+  auto const window = pane->GetWindow();
+  auto const tab_data = TabDataSet::instance()->GetTabData(
+      window->window_id());
   TCITEM tab_item;
   tab_item.mask = TCIF_TEXT | TCIF_PARAM;
-  auto const name = pane->GetTitle();
-  tab_item.pszText = const_cast<LPWSTR>(name.c_str());
+  tab_item.pszText = tab_data ? const_cast<LPWSTR>(tab_data->title.c_str()) :
+                                L"?";
   tab_item.lParam = reinterpret_cast<LPARAM>(pane);
+  tab_item.iImage = tab_data ? tab_data->icon : -1;
 
-  if (auto const edit_pane = pane->as<EditPane>()) {
-    if (auto const active_window = edit_pane->GetActiveWindow()) {
-      tab_item.iImage = active_window->GetIconIndex();
-      if (tab_item.iImage != -1)
-        tab_item.mask |= TCIF_IMAGE;
-    }
+  // TODO(yosi) We should not use magic value -2 for tab_data->icon.
+  if (tab_item.iImage == -2 && tab_data) {
+    tab_item.iImage = views::IconCache::instance()->GetIconForFileName(
+        tab_data->title);
   }
+
+  if (tab_item.iImage >= 0)
+    tab_item.mask |= TCIF_IMAGE;
 
   auto const new_tab_item_index = tab_strip_->number_of_tabs();
   tab_strip_->InsertTab(new_tab_item_index, &tab_item);
@@ -454,19 +462,22 @@ void Frame::ShowMessage(MessageLevel, const base::string16& text) const {
 void Frame::updateTitleBar() {
   if (!m_pActivePane)
     return;
-  auto const title = m_pActivePane->GetTitle();
+  auto const window = m_pActivePane->GetWindow();
+  if (!window)
+    return;
+  auto const tab_data = TabDataSet::instance()->GetTabData(
+      window->window_id());
+  if (!tab_data)
+    return;
+  auto& title = tab_data->title;
   auto const tab_index = getTabFromPane(m_pActivePane);
   if (tab_index >= 0) {
     TCITEM tab_item = {0};
     tab_item.mask = TCIF_TEXT;
     tab_item.pszText = const_cast<LPWSTR>(title.c_str());
-    if (auto const edit_pane = m_pActivePane->as<EditPane>()) {
-      if (auto const active_window = edit_pane->GetActiveWindow()) {
-        tab_item.iImage = active_window->GetIconIndex();
-        if (tab_item.iImage != -1)
-          tab_item.mask |= TCIF_IMAGE;
-      }
-    }
+    tab_item.iImage = tab_data->icon;
+    if (tab_item.iImage >= 0)
+      tab_item.mask |= TCIF_IMAGE;
     tab_strip_->SetTab(tab_index, &tab_item);
   }
 
@@ -475,12 +486,22 @@ void Frame::updateTitleBar() {
 }
 
 void Frame::UpdateTooltip(NMTTDISPINFO* const pDisp) {
+  tooltip_ = base::string16();
   auto const pPane = getPaneFromTab(static_cast<int>(pDisp->hdr.idFrom));
-  if (!pPane) {
-    tooltip_ = base::string16();
+  if (!pPane)
     return;
-  }
 
+  auto const window = pPane->GetWindow();
+  if (!window)
+    return;
+
+  auto const tab_data = TabDataSet::instance()->GetTabData(
+      window->window_id());
+  if (!tab_data)
+    return;
+  tooltip_ = tab_data->tooltip;
+
+#if 0
   auto const pEdit = pPane->as<EditPane>();
   if (!pEdit) {
     tooltip_ = pPane->GetName();
@@ -499,6 +520,7 @@ void Frame::UpdateTooltip(NMTTDISPINFO* const pDisp) {
     "Save: " << MaybeBufferSaveTime(*pBuffer) << "\r\n" <<
     ModifiedDisplayText(*pBuffer);
   tooltip_ = std::move(tooltip.str());
+#endif
 }
 
 // ui::Widget

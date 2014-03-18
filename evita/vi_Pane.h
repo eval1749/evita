@@ -33,6 +33,9 @@ class Pane : public CommandWindow, public ChildNode_<Frame, Pane> {
   public: Frame* GetFrame() const { return m_pParent; }
   public: const base::string16 GetName() const { return name_; }
   public: virtual base::string16 GetTitle() = 0;
+  public: virtual Window* GetWindow() const {
+      return const_cast<Pane*>(this);
+  }
 
   DISALLOW_COPY_AND_ASSIGN(Pane);
 };

@@ -181,6 +181,7 @@ global.TextWindow.prototype.clone = function() {
       }
     }
     window.lastIdleTimeStamp_ = event.timeStamp;
+    updateStatusBar(window);
     window.document.doColor_(300);
   }
 
@@ -312,6 +313,37 @@ global.TextWindow.prototype.clone = function() {
     if (window.dragController_)
       window.dragController_.stop();
   }
+
+  /** @const @type {!Array.<string>} */
+  var DOCUMENT_STATE_TEXTS = [
+    'Ready', 'Loading...', 'Saving...',
+  ];
+
+  /**
+   * Updates status bar with TextWindow.
+   * @param {!TextWindow} window
+   */
+  function updateStatusBar(window) {
+    var document = window.document;
+    var selection = window.selection;
+    var text_offset = selection.active;
+    var line_and_column = document.getLineAndColumn_(text_offset);
+    var new_texts = [
+      DOCUMENT_STATE_TEXTS[document.state],
+      document.mode.name,
+      'CP' + document.codePage,
+      'Ln ' + line_and_column.lineNumber,
+      'Col ' + line_and_column.column,
+      'Ch ' + text_offset,
+      document.readOnly ? 'R/O' : 'INS',
+    ];
+
+    // We call |setStatusBar()| only if status bar contents are changed.
+    if (window.statusBarTexts_ == new_texts)
+      return;
+    window.statusBarTexts_ = new_texts;
+    window.parent.setStatusBar(new_texts);
+  };
 
   /**
    * Default event handler.

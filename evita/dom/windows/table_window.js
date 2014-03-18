@@ -15,14 +15,47 @@
   }
 
   /**
+   * Dispalys number of selected rows in status bar.
+   * @param {!TableWindow} window
+   */
+  function handleIdle(window) {
+    // TODO(yosi) We should not count selected rows every time, we should
+    // count when selection changed, e.g. handle "selectionchange" event.
+    /**
+     * @param {!TableSelection} selection
+     * @return {number}
+     */
+    function countSelectedRows(selection) {
+      var keys = Document.list.map(function(document) {
+        return document.name;
+      });
+      var selected_keys = selection.getRowStates(keys).filter(
+          function(state) {
+            return state & TableViewRowState.SELECTED;
+          });
+      return selected_keys.length;
+    }
+    var selection = window.selection;
+    var num_selected = countSelectedRows(selection);
+    if (selection.lastSelectedRowCount_ == num_selected)
+      return;
+    selection.lastSelectedRowCount_ = num_selected;
+    window.parent.setStatusBar([num_selected + ' documents']);
+  }
+
+  /**
    * Default event handler.
    * @this {!TableWindow}
    * @param {!Event} event.
    */
   TableWindow.handleEvent = function(event) {
-    if (event.type == 'dblclick') {
-      handleDoubleClick(this, /** @type{!MouseEvent}*/(event));
-      return;
+    switch (event.type) {
+      case Event.Names.DBLCLICK:
+        handleDoubleClick(this, /** @type{!MouseEvent}*/(event));
+        break;
+      case Event.Names.IDLE:
+        handleIdle(this);
+        break;
     }
     Window.handleEvent(event);
   }

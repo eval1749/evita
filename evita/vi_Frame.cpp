@@ -472,7 +472,6 @@ void Frame::updateTitleBar() {
 
   auto const window_title = title + L" - " + Application::instance()->title();
   title_bar_->SetText(window_title);
-  m_pActivePane->UpdateStatusBar();
 }
 
 void Frame::UpdateTooltip(NMTTDISPINFO* const pDisp) {

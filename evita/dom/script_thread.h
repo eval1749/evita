@@ -138,6 +138,8 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void SetCapture(WindowId window_id) override;
   private: virtual void SetStatusBar(WindowId window_id,
       const std::vector<base::string16>& texts) override;
+  private: virtual void SetTabData(WindowId window_id,
+                                   const domapi::TabData& tab_data) override;
   private: virtual void ShowDialogBox(
       domapi::DialogBoxId dialog_box_id) override;
 

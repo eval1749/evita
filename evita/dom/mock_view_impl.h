@@ -13,6 +13,7 @@
 #pragma warning(pop)
 #include "evita/dom/public/api_callback.h"
 #include "evita/dom/public/float_point.h"
+#include "evita/dom/public/tab_data.h"
 #include "evita/dom/view_delegate.h"
 
 namespace dom {
@@ -87,6 +88,7 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD1(SetCapture, void(WindowId));
   MOCK_METHOD2(SetStatusBar,
       void(WindowId, const std::vector<base::string16>&));
+  MOCK_METHOD2(SetTabData, void(WindowId, const domapi::TabData&));
   MOCK_METHOD1(ShowDialogBox, void(domapi::DialogBoxId));
   MOCK_METHOD2(SplitHorizontally, void(WindowId, WindowId));
   MOCK_METHOD2(SplitVertically, void(WindowId, WindowId));

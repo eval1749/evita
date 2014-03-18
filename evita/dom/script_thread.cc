@@ -12,8 +12,9 @@
 #include "base/threading/thread.h"
 #pragma warning(pop)
 #include "evita/dom/lock.h"
-#include "evita/dom/public/view_event.h"
 #include "evita/dom/public/float_point.h"
+#include "evita/dom/public/tab_data.h"
+#include "evita/dom/public/view_event.h"
 #include "evita/dom/script_controller.h"
 #include "evita/ui/events/event.h"
 #include "v8/include/v8-debug.h"
@@ -296,6 +297,7 @@ DEFINE_VIEW_DELEGATE_3(SaveFile, Document*, const base::string16&,
 DEFINE_VIEW_DELEGATE_1(SetCapture, WindowId)
 DEFINE_VIEW_DELEGATE_2(SetStatusBar, WindowId,
     const std::vector<base::string16>&)
+DEFINE_VIEW_DELEGATE_2(SetTabData, WindowId, const domapi::TabData&)
 DEFINE_VIEW_DELEGATE_1(ShowDialogBox, domapi::DialogBoxId)
 DEFINE_VIEW_DELEGATE_2(SplitHorizontally, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(SplitVertically, WindowId, WindowId)

@@ -26,6 +26,7 @@
 #include "evita/views/forms/find_dialog_box.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/table_view.h"
+#include "evita/views/tab_data_set.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_TextEditWindow.h"
@@ -451,6 +452,11 @@ void ViewDelegateImpl::SetStatusBar(dom::WindowId window_id,
     return;
   }
   frame->SetStatusBar(texts);
+}
+
+void ViewDelegateImpl::SetTabData(dom::WindowId window_id,
+                                  const domapi::TabData& tab_data) {
+  TabDataSet::instance()->SetTabData(window_id, tab_data);
 }
 
 void ViewDelegateImpl::SplitHorizontally(dom::WindowId left_window_id,

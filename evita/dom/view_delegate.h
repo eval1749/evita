@@ -17,6 +17,7 @@ namespace domapi {
 class FloatPoint;
 struct LoadFileCallbackData;
 struct SaveFileCallbackData;
+struct TabData;
 class ViewEventHandler;
 }
 
@@ -136,6 +137,8 @@ class ViewDelegate {
   // Set text contents of status bar of specified top level window.
   public: virtual void SetStatusBar(WindowId window_id,
       const std::vector<base::string16>& texts) = 0;
+  public: virtual void SetTabData(WindowId window_id,
+                                  const domapi::TabData& tab_data) = 0;
   public: virtual void ShowDialogBox(domapi::DialogBoxId dialog_box_id) = 0;
   public: virtual void SplitHorizontally(WindowId left_window_id,
                                          WindowId new_right_window_id) = 0;

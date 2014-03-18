@@ -34,9 +34,6 @@ class Pane : public CommandWindow, public ChildNode_<Frame, Pane> {
   public: const base::string16 GetName() const { return name_; }
   public: virtual base::string16 GetTitle() = 0;
 
-  // [U]
-  public: virtual void UpdateStatusBar() {}
-
   DISALLOW_COPY_AND_ASSIGN(Pane);
 };
 

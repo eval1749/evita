@@ -131,9 +131,6 @@ class TextEditWindow
   // [U]
   private: void updateScreen();
   private: void updateScrollBar();
-  // TODO(yosi): We should not expose TextEdintWindow::UpdateStatusBar(). We
-  // export this for EditPane.
-  public: virtual void UpdateStatusBar() const override;
 
   #if SUPPORT_IME
   private: void onImeComposition(LPARAM);

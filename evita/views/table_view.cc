@@ -241,13 +241,6 @@ void TableView::Redraw() {
   UpdateControl(std::move(new_model));
 }
 
-void TableView::UpdateStatusBar() const {
-  std::vector<base::string16> texts {
-    base::StringPrintf(L"%d documents", GetRowCount())
-  };
-  Frame::FindFrame(*this)->SetStatusBar(texts);
-}
-
 // ui::Widget
 void TableView::DidRealize() {
   ContentWindow::DidRealize();

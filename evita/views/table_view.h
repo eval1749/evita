@@ -74,7 +74,6 @@ class TableView
   private: virtual base::string16 GetTitle() const;
   private: virtual void MakeSelectionVisible() override;
   private: virtual void Redraw() override;
-  private: virtual void UpdateStatusBar() const override;
 
   // ui::Widget
   private: virtual void DidRealize() override;

@@ -116,9 +116,6 @@ class EditPane final : public Pane {
   public: void SplitVertically(Window* above_window,
                                Window* new_below_window);
 
-  // [U]
-  public: virtual void UpdateStatusBar() override;
-
   // [W]
   private: virtual void WillDestroyWidget() override;
   private: virtual void WillRemoveChildWidget(const Widget& child) override;

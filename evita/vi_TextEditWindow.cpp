@@ -570,47 +570,6 @@ void TextEditWindow::updateScrollBar() {
   vertical_scroll_bar_->SetData(data);
 }
 
-static std::vector<base::string16> ComposeStatusBarTexts(
-    const text::Buffer* buffer, Selection* selection, bool has_focus) {
-  static const char16* const k_rgwszNewline[4] = {
-    L"--",
-    L"LF",
-    L"CR",
-    L"CRLF",
-  };
-
-  UI_ASSERT_DOM_LOCKED();
-
-  // FIXME 2007-07-18 yosi We should use lazy evaluation object for
-  // computing line number of column or cache.
-  text::Range::Information oInfo;
-  {
-    METRICS_TIME_SCOPE();
-    selection->range()->GetInformation(&oInfo);
-  }
-
-  return {
-    buffer->IsNotReady() ? L"Busy" : has_focus ? L"Ready" : L"",
-    buffer->GetMode()->GetName(),
-    base::StringPrintf(L"CP%u", buffer->GetCodePage()),
-    k_rgwszNewline[buffer->GetNewline()],
-    base::StringPrintf(L"Ln %d%ls", oInfo.m_lLineNum,
-                       oInfo.m_fLineNum ? L"" : L"+"),
-    base::StringPrintf(L"Cn %d%ls", oInfo.m_lColumn,
-                       oInfo.m_fColumn ? L"" : L"+"),
-    base::StringPrintf(L"Ch %d", selection->IsStartActive() ?
-        selection->GetStart() : selection->GetEnd()),
-    // FIXME 2007-07-25 yosi@msn.com We need to show "OVR" if
-    // we are in overwrite mode.
-    base::StringPrintf(buffer->IsReadOnly() ? L"R/O" : L"INS"),
-  };
-}
-
-void TextEditWindow::UpdateStatusBar() const {
-  frame().SetStatusBar(ComposeStatusBarTexts(buffer(), GetSelection(),
-                                             has_focus()));
-}
-
 #if SUPPORT_IME
 
 // See Also Caret::Show for moving candidate window.

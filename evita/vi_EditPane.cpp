@@ -1289,10 +1289,6 @@ void EditPane::SplitVertically(Window* above_window,
   above_box->outer()->Split(above_box, new_below_window, height / 2);
 }
 
-void EditPane::UpdateStatusBar() {
-  GetActiveWindow()->UpdateStatusBar();
-}
-
 void EditPane::WillDestroyWidget() {
   Pane::WillDestroyWidget();
   m_eState = State_Destroyed;

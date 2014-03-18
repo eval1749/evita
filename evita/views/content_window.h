@@ -39,11 +39,6 @@ class ContentWindow : public CommandWindow {
   // [R]
   public: virtual void Redraw() = 0;
 
-  // [U]
-  // TODO(yosi): We should pass StatusBar object to
-  // ContentWindow::UpdateStatusBar.
-  public: virtual void UpdateStatusBar() const = 0;
-
   DISALLOW_COPY_AND_ASSIGN(ContentWindow);
 };
 

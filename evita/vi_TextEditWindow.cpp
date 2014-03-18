@@ -22,7 +22,6 @@
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
 #include "common/timer/timer.h"
-#include "evita/text/modes/mode.h"
 #include "evita/css/style.h"
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"

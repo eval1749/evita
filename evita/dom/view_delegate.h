@@ -133,6 +133,9 @@ class ViewDelegate {
   public: /* synchronous */ virtual void ScrollTextWindow(WindowId windowId,
                                                           int direction) = 0;
   public: virtual void SetCapture(WindowId window_id) = 0;
+  // Set text contents of status bar of specified top level window.
+  public: virtual void SetStatusBar(WindowId window_id,
+      const std::vector<base::string16>& texts) = 0;
   public: virtual void ShowDialogBox(domapi::DialogBoxId dialog_box_id) = 0;
   public: virtual void SplitHorizontally(WindowId left_window_id,
                                          WindowId new_right_window_id) = 0;

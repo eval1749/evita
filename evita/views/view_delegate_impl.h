@@ -79,6 +79,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void ScrollTextWindow(dom::WindowId window_id,
                                          int direction) override;
   private: virtual void SetCapture(dom::WindowId window_id) override;
+  private: virtual void SetStatusBar(dom::WindowId window_id,
+      const std::vector<base::string16>& texts) override;
   private: virtual void ShowDialogBox(
       domapi::DialogBoxId dialog_box_id) override;
   private: virtual void SplitHorizontally(dom::WindowId left_window,

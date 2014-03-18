@@ -440,6 +440,19 @@ void ViewDelegateImpl::SetCapture(dom::WindowId window_id) {
   window->SetCapture();
 }
 
+void ViewDelegateImpl::SetStatusBar(dom::WindowId window_id,
+                                    const std::vector<base::string16>& texts) {
+  auto const window = FromWindowId("SetStatusBar", window_id);
+  if (!window)
+    return;
+  auto const frame = window->as<Frame>();
+  if (!frame) {
+    DVLOG(0) << "Window " << window_id << " should be Frame window.";
+    return;
+  }
+  frame->SetStatusBar(texts);
+}
+
 void ViewDelegateImpl::SplitHorizontally(dom::WindowId left_window_id,
     dom::WindowId new_right_window_id) {
   auto const left_window = Window::FromWindowId(left_window_id);

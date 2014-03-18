@@ -85,6 +85,8 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD1(ReleaseCapture, void(WindowId));
   MOCK_METHOD2(ScrollTextWindow, void(WindowId, int));
   MOCK_METHOD1(SetCapture, void(WindowId));
+  MOCK_METHOD2(SetStatusBar,
+      void(WindowId, const std::vector<base::string16>&));
   MOCK_METHOD1(ShowDialogBox, void(domapi::DialogBoxId));
   MOCK_METHOD2(SplitHorizontally, void(WindowId, WindowId));
   MOCK_METHOD2(SplitVertically, void(WindowId, WindowId));

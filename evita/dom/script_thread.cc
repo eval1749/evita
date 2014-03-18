@@ -294,6 +294,8 @@ DEFINE_VIEW_DELEGATE_1(ReleaseCapture, WindowId)
 DEFINE_VIEW_DELEGATE_3(SaveFile, Document*, const base::string16&,
                        const SaveFileCallback&)
 DEFINE_VIEW_DELEGATE_1(SetCapture, WindowId)
+DEFINE_VIEW_DELEGATE_2(SetStatusBar, WindowId,
+    const std::vector<base::string16>&)
 DEFINE_VIEW_DELEGATE_1(ShowDialogBox, domapi::DialogBoxId)
 DEFINE_VIEW_DELEGATE_2(SplitHorizontally, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(SplitVertically, WindowId, WindowId)

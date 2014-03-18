@@ -84,8 +84,7 @@ class EditorWindowWrapperInfo :
 
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
-    BaseClass::SetupInstanceTemplate(builder);
-    // TODO(yosi) Add EditorWindow properties.
+    builder.SetMethod("setStatusBar", &EditorWindow::SetStatusBar);
   }
 
   DISALLOW_COPY_AND_ASSIGN(EditorWindowWrapperInfo);
@@ -108,6 +107,11 @@ EditorWindow::~EditorWindow() {
 
 void EditorWindow::ResetForTesting() {
   EditorWindowList::instance()->ResetForTesting();
+}
+
+void EditorWindow::SetStatusBar(const std::vector<base::string16>& texts) {
+  ScriptController::instance()->view_delegate()->SetStatusBar(
+      window_id(), texts);
 }
 
 // Window

@@ -3,3 +3,8 @@
 
 /** @type {Array.<EditorWindow>} */
 EditorWindow.list;
+
+/**
+ * @param {!Array.<string>} texts
+ */
+EditorWindow.prototype.setStatusBar = function(texts) {};

@@ -4,8 +4,8 @@
 
 namespace dom {
 
-Buffer::Buffer(const base::string16& name, text::Mode* mode)
-    : text::Buffer(name, mode) {
+Buffer::Buffer(const base::string16& name)
+    : text::Buffer(name) {
 }
 
 Buffer::~Buffer() {

@@ -8,7 +8,6 @@
 #pragma warning(pop)
 
 #include "evita/text/buffer.h"
-#include "evita/text/modes/plain_text_mode.h"
 #include "evita/text/range.h"
 
 namespace {
@@ -17,7 +16,7 @@ class UndoStackTest : public ::testing::Test {
   private: std::unique_ptr<text::Buffer> buffer_;
 
   protected: UndoStackTest()
-      : buffer_(new text::Buffer(L"*test*", new text::PlainTextMode())) {
+      : buffer_(new text::Buffer(L"*test*")) {
   }
   public: virtual ~UndoStackTest() {
   }

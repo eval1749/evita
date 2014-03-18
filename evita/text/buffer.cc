@@ -15,15 +15,13 @@
 #include "evita/text/marker_set.h"
 #include "evita/text/range.h"
 #include "evita/text/range_set.h"
-#include "evita/text/modes/mode.h"
 #include "evita/text/undo_stack.h"
 
 namespace text {
 
-Buffer::Buffer(const base::string16& name, Mode* mode)
+Buffer::Buffer(const base::string16& name)
     : intervals_(new IntervalSet(this)),
       ranges_(new RangeSet(this)),
-      m_pMode(mode),
       spelling_markers_(new MarkerSet(this)),
       style_resolver_(new css::StyleResolver()),
       undo_stack_(new UndoStack(this)),
@@ -33,7 +31,6 @@ Buffer::Buffer(const base::string16& name, Mode* mode)
       m_nModfTick(1),
       m_nSaveTick(1),
       name_(name) {
-  mode->set_buffer(this);
   spelling_markers_->AddObserver(this);
 }
 
@@ -196,11 +193,6 @@ void text::Buffer::SetFile(
   filename_ =  filename;
   last_write_time_ = last_write_time;
   m_nSaveTick = m_nCharTick;
-}
-
-void Buffer::SetMode(Mode* mode) {
-  m_pMode = mode;
-  m_pMode->set_buffer(this);
 }
 
 void Buffer::StartUndoGroup(const base::string16& name) {

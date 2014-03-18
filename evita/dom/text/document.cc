@@ -273,11 +273,11 @@ class SaveFileCallback : public base::RefCounted<SaveFileCallback> {
 DEFINE_SCRIPTABLE_OBJECT(Document, DocumentClass)
 
 Document::Document(const base::string16& name, Mode* mode)
-    : buffer_(new Buffer(DocumentSet::instance()->MakeUniqueName(name),
-                         mode->text_mode())),
+    : buffer_(new Buffer(DocumentSet::instance()->MakeUniqueName(name))),
       mode_(mode),
       properties_(v8::Isolate::GetCurrent(),
                   NewMap(v8::Isolate::GetCurrent())) {
+  mode->text_mode()->set_buffer(buffer_.get());
 }
 
 Document::~Document() {
@@ -326,7 +326,7 @@ text::Posn Document::length() const {
 
 void Document::set_mode(Mode* mode) {
   mode_ = mode;
-  buffer_->SetMode(mode_->text_mode());
+  mode->text_mode()->set_buffer(buffer_.get());
 }
 
 bool Document::modified() const {
@@ -383,7 +383,7 @@ bool Document::CheckCanChange() const {
 }
 
 void Document::DoColor(int hint) {
-  buffer_->GetMode()->DoColor(hint);
+  mode_->DoColor(hint);
 }
 
 void Document::EndUndoGroup(const base::string16& name) {

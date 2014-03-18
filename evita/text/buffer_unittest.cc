@@ -9,7 +9,6 @@
 
 #include "evita/css/style.h"
 #include "evita/text/buffer.h"
-#include "evita/text/modes/plain_text_mode.h"
 #include "evita/text/range.h"
 
 namespace {
@@ -48,7 +47,7 @@ class BufferTest : public ::testing::Test {
   private: std::unique_ptr<text::Buffer> buffer_;
 
   protected: BufferTest()
-      : buffer_(new text::Buffer(L"*test*", new text::PlainTextMode())) {
+      : buffer_(new text::Buffer(L"*test*")) {
   }
   public: virtual ~BufferTest() {
   }

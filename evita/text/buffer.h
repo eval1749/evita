@@ -29,7 +29,6 @@ namespace text {
 class Buffer;
 class Interval;
 class IntervalSet;
-class Mode;
 class Range;
 class RangeSet;
 class Marker;
@@ -95,7 +94,6 @@ class Buffer : public BufferCore,
   private: std::unique_ptr<IntervalSet> intervals_;
   private: std::unique_ptr<MarkerSet> spelling_markers_;
   private: std::unique_ptr<RangeSet> ranges_;
-  private: Mode* m_pMode;
   private: std::unique_ptr<css::StyleResolver> style_resolver_;
   private: std::unique_ptr<UndoStack> undo_stack_;
 
@@ -119,7 +117,7 @@ class Buffer : public BufferCore,
   protected: base::string16 name_;
 
   // ctor/dtor
-  public: Buffer(const base::string16& name, Mode* mode);
+  public: Buffer(const base::string16& name);
   public: virtual ~Buffer();
 
   public: const base::string16& name() const { return name_; }
@@ -150,7 +148,6 @@ class Buffer : public BufferCore,
   public: const css::Style& GetDefaultStyle() const;
   public: Interval* GetIntervalAt(Posn) const;
   public: LineAndColumn GetLineAndColumn(Posn offset) const;
-  public: Mode* GetMode() const { return m_pMode; }
   public: Count GetModfTick() const { return m_nModfTick; }
   public: const base::string16& GetName() const { return name_; }
   public: Posn GetStart() const { return 0; }
@@ -181,8 +178,6 @@ class Buffer : public BufferCore,
   // [S]
   public: void SetFile(const base::string16& filename,
                        base::Time last_write_time);
-
-  public: void SetMode(Mode*);
 
   public: void SetName(const base::string16& new_name) {
     name_ = new_name;

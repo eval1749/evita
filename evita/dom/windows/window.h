@@ -20,8 +20,8 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
   DECLARE_SCRIPTABLE_OBJECT(Window)
 
   private: typedef common::tree::Node<Window> Node;
-  private: class WindowIdMapper;
-  friend class WindowIdMapper;
+  private: class WindowSet;
+  friend class WindowSet;
 
   public: enum class State {
     Destroyed = -2,

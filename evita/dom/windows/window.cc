@@ -115,21 +115,21 @@ int global_focus_tick;
 
 //////////////////////////////////////////////////////////////////////
 //
-// Window::WindowIdMapper
+// Window::WindowSet
 //
 // This class represents mapping from widget id to DOM Window object.
 //
-// WindowIdMapper resets Window::window_id() when corresponding widget is
+// WindowSet resets Window::window_id() when corresponding widget is
 // destroyed.
-class Window::WindowIdMapper : public common::Singleton<WindowIdMapper> {
-  friend class common::Singleton<WindowIdMapper>;
+class Window::WindowSet : public common::Singleton<WindowSet> {
+  friend class common::Singleton<WindowSet>;
 
   private: typedef WindowId WindowId;
 
   private: std::unordered_map<WindowId, gc::WeakPtr<Window>> map_;
 
-  private: WindowIdMapper() = default;
-  public: ~WindowIdMapper() = default;
+  private: WindowSet() = default;
+  public: ~WindowSet() = default;
 
   public: void DidDestroyWidget(WindowId window_id) {
     DCHECK_NE(kInvalidWindowId, window_id);
@@ -165,7 +165,7 @@ class Window::WindowIdMapper : public common::Singleton<WindowIdMapper> {
     map_.erase(window_id);
   }
 
-  DISALLOW_COPY_AND_ASSIGN(WindowIdMapper);
+  DISALLOW_COPY_AND_ASSIGN(WindowSet);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -176,13 +176,13 @@ DEFINE_SCRIPTABLE_OBJECT(Window, WindowWrapperInfo)
 
 Window::Window()
     : state_(State::NotRealized) {
-  WindowIdMapper::instance()->Register(this);
+  WindowSet::instance()->Register(this);
 }
 
 Window::~Window() {
   if (window_id() == kInvalidWindowId)
     return;
-  WindowIdMapper::instance()->Unregister(window_id());
+  WindowSet::instance()->Unregister(window_id());
   ScriptController::instance()->view_delegate()->DestroyWindow(window_id());
 }
 
@@ -255,7 +255,7 @@ void Window::Destroy() {
 }
 
 void Window::DidDestroyWindow() {
-  WindowIdMapper::instance()->DidDestroyWidget(window_id());
+  WindowSet::instance()->DidDestroyWidget(window_id());
 }
 
 // Possible state transitions:
@@ -318,7 +318,7 @@ void Window::Focus() {
 
 Window* Window::FromWindowId(WindowId window_id) {
   DCHECK_NE(kInvalidWindowId, window_id);
-  return WindowIdMapper::instance()->Find(window_id);
+  return WindowSet::instance()->Find(window_id);
 }
 
 bool Window::IsDescendantOf(Window* other) const {
@@ -370,7 +370,7 @@ void Window::RemoveWindow(Window* window) {
 void Window::ResetForTesting() {
   ViewEventTargetSet::instance()->ResetForTesting();
   global_focus_tick = 0;
-  WindowIdMapper::instance()->ResetForTesting();
+  WindowSet::instance()->ResetForTesting();
 }
 
 static bool CheckSplitParameter(Window* ref_window, Window* new_window) {

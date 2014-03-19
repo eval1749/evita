@@ -23,6 +23,7 @@ class ContentWindow : public CommandWindow {
                 std::unique_ptr<common::win::NativeWindow>&&);
   protected: explicit ContentWindow(views::WindowId window_id);
   protected: ContentWindow();
+  public: virtual ~ContentWindow();
 
   public: Frame& frame() const;
 

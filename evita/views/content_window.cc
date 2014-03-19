@@ -21,6 +21,9 @@ ContentWindow::ContentWindow()
     : ContentWindow(views::kInvalidWindowId) {
 }
 
+ContentWindow::~ContentWindow() {
+}
+
 Frame& ContentWindow::frame() const {
   for (auto runner = static_cast<const Widget*>(this); runner;
        runner = &runner->container_widget()) {

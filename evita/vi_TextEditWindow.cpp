@@ -920,12 +920,6 @@ void TextEditWindow::DidResize() {
   vertical_scroll_bar_->ResizeTo(scroll_bar_rect);
 }
 
-// views::ContentWindow
-int TextEditWindow::GetIconIndex() const {
-  return views::IconCache::instance()->GetIconForFileName(
-      buffer()->GetName());
-}
-
 // views::Window
 bool TextEditWindow::OnIdle(int) {
   if (!is_shown())

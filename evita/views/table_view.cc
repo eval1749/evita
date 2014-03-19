@@ -190,11 +190,6 @@ void TableView::DidInsertAt(Posn, size_t) {
   should_update_model_ = true;
 }
 
-// views::ContentWindow
-int TableView::GetIconIndex() const {
-  return IconCache::instance()->GetIconForFileName(L"foo.txt");
-}
-
 // ui::TableControlObserver
 void TableView::OnKeyPressed(const ui::KeyboardEvent& event) {
   ContentWindow::OnKeyPressed(event);

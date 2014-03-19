@@ -145,9 +145,6 @@ class TextEditWindow
   // ui::Widget
   private: virtual void DidResize() override;
 
-  // views::ContentWindow
-  private: virtual int GetIconIndex() const override;
-
   // views::Window
   private: virtual bool OnIdle(int hint) override;
 

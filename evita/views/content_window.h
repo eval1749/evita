@@ -29,9 +29,6 @@ class ContentWindow : public CommandWindow {
   // [A]
   public: void Activate();
 
-  // [G]
-  public: virtual int GetIconIndex() const = 0;
-
   // [M]
   public: virtual void MakeSelectionVisible() = 0;
 

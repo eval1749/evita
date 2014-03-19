@@ -56,9 +56,6 @@ class TableView
   private: virtual void DidDeleteAt(Posn offset, size_t length) override;
   private: virtual void DidInsertAt(Posn offset, size_t length) override;
 
-  // views::ContentWindow
-  private: virtual int GetIconIndex() const override;
-
   // ui::TableControlObserver
   private: virtual void OnKeyPressed(const ui::KeyboardEvent&) override;
   private: virtual void OnMousePressed(const ui::MouseEvent&) override;

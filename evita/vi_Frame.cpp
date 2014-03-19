@@ -21,7 +21,6 @@
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
-#include "base/time/time.h"
 #include "common/tree/ancestors_or_self.h"
 #include "common/tree/child_nodes.h"
 #include "common/win/native_window.h"
@@ -32,7 +31,7 @@
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/text/buffer.h"
+#include "evita/views/content_window.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/frame_observer.h"
 #include "evita/views/icon_cache.h"
@@ -42,7 +41,6 @@
 #include "evita/views/window_set.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Style.h"
-#include "evita/vi_TextEditWindow.h"
 
 extern HINSTANCE g_hInstance;
 extern HINSTANCE g_hResource;
@@ -394,34 +392,6 @@ Rect Frame::GetPaneRect() const {
                   kPaddingBottom);
 }
 
-namespace {
-base::string16 MaybeBufferFilename(const text::Buffer& buffer) {
-  return buffer.GetFileName().empty() ? L"No file" : buffer.GetFileName();
-}
-
-base::string16 MaybeBufferSaveTime(const text::Buffer& buffer){
-  if (buffer.GetFileName().empty())
-    return L"Not saved";
- 
-  // FIXME 2007-08-05 We should use localized date time format.
-  base::Time::Exploded exploded_time;
-  buffer.GetLastWriteTime().LocalExplode(&exploded_time);
-  return base::StringPrintf(L"%02d/%02d/%d %02d:%02d:%02d",
-      exploded_time.month,
-      exploded_time.day_of_month,
-      exploded_time.year,
-      exploded_time.hour,
-      exploded_time.minute,
-      exploded_time.second);
-}
-
-base::string16 ModifiedDisplayText(const text::Buffer& buffer) {
- if (!buffer.IsModified())
-    return L"Not modified";
- return buffer.GetNoSave() ? L"Modified" : L"Not saved";
-}
-}
-
 void Frame::onDropFiles(HDROP const hDrop) {
   uint nIndex = 0;
   for (;;) {
@@ -502,27 +472,6 @@ void Frame::UpdateTooltip(NMTTDISPINFO* const pDisp) {
   if (!tab_data)
     return;
   tooltip_ = tab_data->tooltip;
-
-#if 0
-  auto const pEdit = pPane->as<EditPane>();
-  if (!pEdit) {
-    tooltip_ = pPane->GetName();
-    return;
-  }
-
-  auto const pBuffer = pEdit->GetBuffer();
-  if (!pBuffer) {
-    tooltip_ = pPane->GetName();
-    return;
-  }
-
-  std::basic_ostringstream<base::char16> tooltip;
-  tooltip << "Name:" << pBuffer->name() << "\r\n" <<
-    "File: " << MaybeBufferFilename(*pBuffer) << "\r\n" <<
-    "Save: " << MaybeBufferSaveTime(*pBuffer) << "\r\n" <<
-    ModifiedDisplayText(*pBuffer);
-  tooltip_ = std::move(tooltip.str());
-#endif
 }
 
 // ui::Widget
@@ -624,8 +573,7 @@ void Frame::DidResize() {
     tab_strip_->ResizeTo(tab_strip_rect);
   }
 
-  // Status bar shows:
-  //    message, code page, newline, line num, column, char, ins/ovr
+  // Display resizing information.
   {
     auto status_bar_rect = rect();
     status_bar_rect.top = rect().bottom - message_view_->height();

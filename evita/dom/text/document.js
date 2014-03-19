@@ -461,6 +461,7 @@
         }
       });
       document.doColor_(Math.min(document.length, 1024 * 8));
+      document.dispatchEvent(new DocumentEvent('load'));
       return deferred.promise;
     }).catch(function(exception) {
       console.log('load.catch', exception, 'during loading', filename,
@@ -550,6 +551,7 @@
                         MessageBox.ICONINFORMATION);
       document.lastStatusCheckTime_ = new Date();
       document.obsolete = Document.Obsolete.NO;
+      document.dispatchEvent(new DocumentEvent('save'));
       return deferred.promise;
     }).catch(function(reason) {
       console.log('Failed to save', document, 'to', filename);

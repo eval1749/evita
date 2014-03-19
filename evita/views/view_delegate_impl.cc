@@ -294,13 +294,13 @@ void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
     DVLOG(0) << "MakeSelectionVisible: no such widget " << window_id;
     return;
   }
-  auto const text_widget = widget->as<TextEditWindow>();
-  if (!text_widget) {
-    DVLOG(0) << "MakeSelectionVisible: not TextWidget " << window_id;
+  auto const content_window = widget->as<ContentWindow>();
+  if (!content_window) {
+    DVLOG(0) << "MakeSelectionVisible: not ContentWindow" << window_id;
     return;
   }
   UI_DOM_AUTO_LOCK_SCOPE();
-  text_widget->MakeSelectionVisible();
+  content_window->MakeSelectionVisible();
 }
 
 text::Posn ViewDelegateImpl::MapPointToPosition(WindowId window_id,

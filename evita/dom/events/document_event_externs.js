@@ -11,6 +11,7 @@ var DocumentEventInit = function(init_dict) {};
 
 /**
  * @constructor
+ * @extends {Event}
  * @param {string} type
  * @param {!DocumentEventInit=} opt_init
  */

@@ -19,7 +19,7 @@ Event.prototype.eventPhase;
 /** @expose @type{number} */
 Event.prototype.timeStamp;
 
-/** @expose @type{?Window} */
+/** @expose @type{?EventTarget} */
 Event.prototype.target;
 
 /** @expose @type{string} */

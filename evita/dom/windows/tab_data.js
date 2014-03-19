@@ -4,20 +4,28 @@
 
 /**
  * @constructor
- * @param {!DocumentState} doc_state
+ * @param {!DocumentState=} opt_state
  */
-global.TabData = function (doc_state) {
+global.TabData = function (opt_state) {
+  if (!arguments.length) {
+    this.icon = 0;
+    this.state = 0;
+    this.title = '';
+    this.tooltip = '';
+    return;
+  }
+  var state = /** @type{!DocumentState} */(opt_state);
   var tooltip_texts = [
-    'Name: ' + doc_state.name,
-    'File: ' + (doc_state.filename ? doc_state.filename : 'no file'),
-    'Save: ' + (doc_state.lastWriteTime.valueOf() ?
-        doc_state.lastWriteTime.toLocaleString() : 'never saved'),
-    doc_state.modified ? (doc_state.filename ? 'Not saved' : 'Modified') :
+    'Name: ' + state.name,
+    'File: ' + (state.filename ? state.filename : 'no file'),
+    'Save: ' + (state.lastWriteTime.valueOf() ?
+        state.lastWriteTime.toLocaleString() : 'never saved'),
+    state.modified ? (state.filename ? 'Not saved' : 'Modified') :
         'Not modified',
   ];
-  this.icon = doc_state.icon;
-  this.state = doc_state.state;
-  this.title = doc_state.name;
+  this.icon = state.icon;
+  this.state = state.state;
+  this.title = state.name;
   this.tooltip =  tooltip_texts.join('\n');
 };
 
@@ -28,8 +36,7 @@ global.TabData = function (doc_state) {
   var tabStateMap = new Map();
 
   /**
-   * TODO(yosi) Once we have "attach" document event, we should remove
-   * |TabData.get()|.
+   * For testing purpose only.
    * @param {!Window} window
    * @return {?TabData}
    */
@@ -38,22 +45,19 @@ global.TabData = function (doc_state) {
   };
 
   /**
-   * TODO(yosi) Once we have "attach" document event, we should remove
-   * |TabData.update()|.
+   * This function is called when document is attached to window.
+   *
    * @param {!Window} window
-   * @param {!Document} document
-   * @return {?TabData}
+   * @param {!DocumentState} state
    */
-  global.TabData.update = function(window, document) {
-    var state = DocumentState.get(document);
-    if (!state)
+  global.TabData.update = function(window, state) {
+    if (!(window instanceof DocumentWindow))
       return;
     updateTabData(window, state);
   };
 
   /**
    * @param {!DocumentWindow} window
-   * @param {!DocumentState} state
    */
   function updateTabData(window, state) {
     var tab_state = tabStateMap.get(window);
@@ -63,6 +67,13 @@ global.TabData = function (doc_state) {
     tabStateMap.set(window, state);
   }
 
+  /**
+   * Updates tab data for windows attached to |document| with new |state| when
+   * |DocumentState| is changed.
+   *
+   * @param {!Document} document
+   * @param {!DocumentState} state
+   */
   DocumentState.addObserver(function(document, state) {
     document.listWindows().forEach(function(window) {
       updateTabData(window, state);

@@ -75,6 +75,20 @@ global.DocumentState.prototype.equals = function(other) {
   };
 
   /**
+   * Set initial tab data for |TextWindow|.
+   * @param {!DocumentEvent} event
+   */
+  function didAttachWindow(event) {
+    if (!(event.view instanceof TextWindow))
+      return;
+    var document = /** @type{!Document} */(event.target);
+    var state = documentStateMap.get(document);
+    if (!state)
+      return;
+    TabData.update(event.view, state);
+  }
+
+  /**
    * @param {!DocumentEvent} event
    */
   function didDocumentLoadSave(event) {
@@ -92,6 +106,7 @@ global.DocumentState.prototype.equals = function(other) {
   function startTracking(document) {
     console.log('DocumentState startTracking', document);
     documentStateMap.set(document, new DocumentState(document));
+    document.addEventListener('attach', didAttachWindow);
     document.addEventListener('load', didDocumentLoadSave);
     document.addEventListener('save', didDocumentLoadSave);
   }

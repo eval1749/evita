@@ -185,11 +185,6 @@ global.TextWindow.prototype.clone = function() {
     var document = window.document;
     DocumentState.update(document);
     document.doColor_(300);
-
-    // TODO(yosi) Once we have "attach" document event, we should remove
-    // |TabData.get()| and |TabData.update()|.
-    if (!TabData.get(window))
-      TabData.update(window, document);
   }
 
   /**

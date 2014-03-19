@@ -4,9 +4,15 @@
 
 /**
  * @constructor
- * @param {!DocumentState} documentState
+ * @param {!DocumentState=} opt_state
  */
-function TabData(documentState) {}
+function TabData(opt_state) {}
+
+/**
+ * @param {!DocumentWindow} window
+ * @param {!DocumentState} state
+ */
+TabData.update = function(window, state) {};
 
 /** @type {number} */
 TabData.prototype.icon;
@@ -14,8 +20,8 @@ TabData.prototype.icon;
 /** @type {number} */
 TabData.prototype.state;
 
-/** @type {number} */
+/** @type {string} */
 TabData.prototype.title;
 
-/** @type {number} */
+/** @type {string} */
 TabData.prototype.tooltip;

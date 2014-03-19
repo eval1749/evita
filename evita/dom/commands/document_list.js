@@ -157,14 +157,12 @@
       return;
     }
     var table_window = new TableWindow(document);
-    Editor.setTabData(table_window, {
-      // TODO(yosi) We should use the icon for document list instead of default
-      // icon.
-      icon: 0,
-      state: 0,
-      title: 'Document List',
-      tooltip: '',
-    });
+    var tab_data = new TabData();
+    tab_data.icon = 0;
+    tab_data.state = 0;
+    tab_data.title = 'Document List';
+    tab_data.tooltip = '';
+    Editor.setTabData(table_window, tab_data);
     this.parent.appendChild(table_window);
   }
 

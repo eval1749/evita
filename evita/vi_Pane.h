@@ -23,7 +23,7 @@ class Pane : public CommandWindow, public ChildNode_<Frame, Pane> {
   // ctor
   protected: Pane(std::unique_ptr<common::win::NativeWindow>&&);
   protected: Pane();
-  public: ~Pane();
+  public: virtual ~Pane();
 
   // [A]
   public: virtual void Activate();

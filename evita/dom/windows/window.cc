@@ -9,7 +9,6 @@
 #include "base/bind.h"
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
-#include "common/memory/singleton.h"
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants.h"
 #include "evita/dom/events/event.h"
@@ -17,6 +16,7 @@
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/windows/window_ostream.h"
+#include "evita/dom/windows/window_set.h"
 #include "evita/gc/weak_ptr.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
@@ -112,61 +112,6 @@ const v8::PropertyAttribute kDefaultPropertyAttribute =
 
 int global_focus_tick;
 }  // namespace
-
-//////////////////////////////////////////////////////////////////////
-//
-// Window::WindowSet
-//
-// This class represents mapping from widget id to DOM Window object.
-//
-// WindowSet resets Window::window_id() when corresponding widget is
-// destroyed.
-class Window::WindowSet : public common::Singleton<WindowSet> {
-  friend class common::Singleton<WindowSet>;
-
-  private: typedef WindowId WindowId;
-
-  private: std::unordered_map<WindowId, gc::WeakPtr<Window>> map_;
-
-  private: WindowSet() = default;
-  public: ~WindowSet() = default;
-
-  public: void DidDestroyWidget(WindowId window_id) {
-    DCHECK_NE(kInvalidWindowId, window_id);
-    auto it = map_.find(window_id);
-    if (it == map_.end()) {
-      DVLOG(0) << "Why we don't have a widget for WindowId " << window_id <<
-        " in WindowIdMap?";
-      return;
-    }
-    auto const window = it->second.get();
-    DCHECK_NE(State::Destroyed, window->state_);
-    window->state_ = State::Destroyed;
-    if (auto const parent = window->parent_node()) {
-      parent->RemoveChild(window);
-    }
-  }
-
-  public: Window* Find(WindowId window_id) {
-    auto it = map_.find(window_id);
-    return it == map_.end() ? nullptr : it->second.get();
-  }
-
-  public: void Register(Window* window) {
-    map_[window->window_id()] = window;
-  }
-
-  public: void ResetForTesting() {
-    map_.clear();
-  }
-
-  public: void Unregister(WindowId window_id) {
-    DCHECK_NE(kInvalidWindowId, window_id);
-    map_.erase(window_id);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(WindowSet);
-};
 
 //////////////////////////////////////////////////////////////////////
 //

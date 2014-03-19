@@ -14,14 +14,15 @@
 
 namespace dom {
 
+class WindowSet;
+
 // |Window| is correspond to |Widget| in DOM world.
 class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
                public common::tree::Node<Window> {
   DECLARE_SCRIPTABLE_OBJECT(Window)
+  friend class WindowSet;
 
   private: typedef common::tree::Node<Window> Node;
-  private: class WindowSet;
-  friend class WindowSet;
 
   public: enum class State {
     Destroyed = -2,

@@ -246,6 +246,7 @@
         'dom/time_stamp.cc',
         'dom/windows/window.cc',
         'dom/windows/window_ostream.cc',
+        'dom/windows/window_set.cc',
 
         'dom/public/io_context_id.cc',
         'dom/public/io_delegate.cc',

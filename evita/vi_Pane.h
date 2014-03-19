@@ -18,8 +18,6 @@ class Pane : public CommandWindow, public ChildNode_<Frame, Pane> {
 
   DECLARE_CASTABLE_CLASS(Pane, CommandWindow);
 
-  private: const base::string16 name_;
-
   // ctor
   protected: Pane(std::unique_ptr<common::win::NativeWindow>&&);
   protected: Pane();
@@ -31,7 +29,6 @@ class Pane : public CommandWindow, public ChildNode_<Frame, Pane> {
   // [G]
   public: virtual HCURSOR GetCursorAt(const common::win::Point&) const;
   public: Frame* GetFrame() const { return m_pParent; }
-  public: const base::string16 GetName() const { return name_; }
   public: virtual Window* GetWindow() const {
       return const_cast<Pane*>(this);
   }

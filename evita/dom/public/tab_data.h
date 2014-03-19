@@ -19,10 +19,10 @@ struct TabData {
     Steal,
   };
 
-  base::string16 title;
-  base::string16 tooltip;
   int icon;
   State state;
+  base::string16 title;
+  base::string16 tooltip;
 };
 
 }  // namespace domapi

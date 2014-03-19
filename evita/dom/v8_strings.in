@@ -108,6 +108,12 @@ name
 start
 sticky
 
+# TabData
+icon
+state
+title
+tooltip
+
 # TextDecoderOptions
 fatal
 

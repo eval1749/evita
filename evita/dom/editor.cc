@@ -6,6 +6,7 @@
 #include "base/bind.h"
 #include "base/callback.h"
 #include "evita/gc/local.h"
+#include "evita/dom/public/tab_data.h"
 #include "evita/dom/promise_deferred.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
@@ -16,6 +17,36 @@
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/script_callback.h"
+#include "v8_strings.h"
+
+namespace gin {
+template<>
+struct Converter<domapi::TabData> {
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
+                     domapi::TabData* out) {
+    if (val.IsEmpty() || !val->IsObject())
+      return false;
+    auto const obj = val->ToObject();
+    if (!ConvertFromV8(isolate, obj->Get(dom::v8Strings::icon.Get(isolate)),
+                       &out->icon)) {
+      return false;
+    }
+    if (!ConvertFromV8(isolate, obj->Get(dom::v8Strings::state.Get(isolate)),
+                       &out->state)) {
+      return false;
+    }
+    if (!ConvertFromV8(isolate, obj->Get(dom::v8Strings::title.Get(isolate)),
+                       &out->title)) {
+      return false;
+    }
+    if (!ConvertFromV8(isolate, obj->Get(dom::v8Strings::tooltip.Get(isolate)),
+                       &out->tooltip)) {
+      return false;
+    }
+    return true;
+  }
+};
+}  // namespace gin
 
 namespace dom {
 
@@ -151,6 +182,9 @@ class EditorClass : public v8_glue::WrapperInfo {
         try_catch));
   }
 
+  private: static void SetTabData(Window* window,
+                                  const domapi::TabData tab_data);
+
   private: static base::string16 version() {
     return kVersion;
   }
@@ -169,6 +203,7 @@ class EditorClass : public v8_glue::WrapperInfo {
       .SetMethod("messageBox_", &EditorClass::MessageBox)
       .SetMethod("metrics", &EditorClass::GetMetrics)
       .SetMethod("runScript", &EditorClass::RunScript)
+      .SetMethod("setTabData", &EditorClass::SetTabData)
       .SetProperty("version", &EditorClass::version)
       .Build();
   }
@@ -190,6 +225,11 @@ v8::Handle<v8::Promise> EditorClass::GetSpellingSuggestions(
       &ViewDelegate::GetSpellingSuggestions,
       base::Unretained(ScriptController::instance()->view_delegate()),
       wrong_word));
+}
+
+void EditorClass::SetTabData(Window* window, const domapi::TabData tab_data) {
+  ScriptController::instance()->view_delegate()->SetTabData(
+      window->window_id(), tab_data);
 }
 
 }  // namespace

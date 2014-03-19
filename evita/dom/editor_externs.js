@@ -104,6 +104,12 @@ Editor.metrics = function(name) {};
 Editor.parseKeyCombination = function(spec) {};
 
 /**
+ * @param {!Window} window
+ * @param {!TabData} tabData
+ */
+Editor.setTabData = function(window, tabData) {};
+
+/**
  * @typedef {{
  *  column: number,
  *  functionName: string,

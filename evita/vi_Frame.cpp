@@ -446,7 +446,9 @@ void Frame::updateTitleBar() {
     tab_strip_->SetTab(tab_index, &tab_item);
   }
 
-  auto const window_title = title + L" - " + Application::instance()->title();
+  auto const window_title = title +
+      (tab_data->state == domapi::TabData::State::Modified ? L" * " : L" - ") +
+      Application::instance()->title();
   title_bar_->SetText(window_title);
 }
 

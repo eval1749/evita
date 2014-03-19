@@ -161,23 +161,13 @@ void Frame::AddPane(Pane* const pane) {
 void Frame::AddTab(Pane* const pane) {
   ASSERT(is_realized());
   ASSERT(pane->is_realized());
-  auto const window = pane->GetWindow();
-  auto const tab_data = TabDataSet::instance()->GetTabData(
-      window->window_id());
+  // Set dummy tab label. Actual tab label will be set later in
+  // |Frame::updateTitleBar|.
   TCITEM tab_item;
   tab_item.mask = TCIF_IMAGE| TCIF_TEXT | TCIF_PARAM;
-  tab_item.pszText = tab_data ? const_cast<LPWSTR>(tab_data->title.c_str()) :
-                                L"?";
+  tab_item.pszText = L"?";
   tab_item.lParam = reinterpret_cast<LPARAM>(pane);
-  tab_item.iImage = tab_data ? tab_data->icon : -1;
-
-  // TODO(yosi) We should not use magic value -2 for tab_data->icon.
-  if (tab_item.iImage == -2 && tab_data) {
-    tab_item.iImage = views::IconCache::instance()->GetIconForFileName(
-        tab_data->title);
-  }
-  tab_item.iImage = std::max(tab_item.iImage, 0);
-
+  tab_item.iImage = 0;
   auto const new_tab_item_index = tab_strip_->number_of_tabs();
   tab_strip_->InsertTab(new_tab_item_index, &tab_item);
   tab_strip_->SelectTab(new_tab_item_index);
@@ -441,9 +431,12 @@ void Frame::updateTitleBar() {
   auto const tab_index = getTabFromPane(m_pActivePane);
   if (tab_index >= 0) {
     TCITEM tab_item = {0};
-    tab_item.mask = TCIF_IMAGE | TCIF_TEXT;
+    tab_item.mask = TCIF_IMAGE | TCIF_STATE | TCIF_TEXT;
     tab_item.pszText = const_cast<LPWSTR>(title.c_str());
     tab_item.iImage = tab_data->icon;
+    tab_item.dwState = static_cast<DWORD>(
+        tab_data->state == domapi::TabData::State::Modified);
+    tab_item.dwStateMask = 1;
     // TODO(yosi) We should not use magic value -2 for tab_data->icon.
     if (tab_item.iImage == -2) {
       tab_item.iImage = views::IconCache::instance()->GetIconForFileName(

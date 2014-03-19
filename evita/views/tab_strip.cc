@@ -357,6 +357,15 @@ class Item : public Element {
     drawContent(gfx);
     if (HasCloseBox())
         m_closeBox.Draw(gfx);
+    if (m_rgfState) {
+      auto const marker_height = 4;
+      auto const marker_width = 4;
+      DCHECK_GT(m_rc.right - m_rc.left, marker_width);
+      gfx.FillRectangle(
+          gfx::Brush(gfx, gfx::ColorF(219.0f / 255, 74.0f / 255, 56.0f / 255)),
+          gfx::Rect(gfx::Point(m_rc.right - marker_width, m_rc.top),
+                    gfx::Size(marker_width, marker_height)));
+    }
   }
 
   private: void drawContent(const gfx::Graphics& gfx) const {
@@ -427,7 +436,7 @@ class Item : public Element {
     if (pTcItem->mask & TCIF_STATE) {
       auto const old_state = m_rgfState;
       m_rgfState &= ~pTcItem->dwStateMask;
-      m_rgfState |= pTcItem->dwState | pTcItem->dwStateMask;
+      m_rgfState |= pTcItem->dwState & pTcItem->dwStateMask;
       if (m_rgfState != old_state)
         changed = true;
     }

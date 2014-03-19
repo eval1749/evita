@@ -167,7 +167,7 @@ void Frame::AddTab(Pane* const pane) {
   auto const tab_data = TabDataSet::instance()->GetTabData(
       window->window_id());
   TCITEM tab_item;
-  tab_item.mask = TCIF_TEXT | TCIF_PARAM;
+  tab_item.mask = TCIF_IMAGE| TCIF_TEXT | TCIF_PARAM;
   tab_item.pszText = tab_data ? const_cast<LPWSTR>(tab_data->title.c_str()) :
                                 L"?";
   tab_item.lParam = reinterpret_cast<LPARAM>(pane);
@@ -178,9 +178,7 @@ void Frame::AddTab(Pane* const pane) {
     tab_item.iImage = views::IconCache::instance()->GetIconForFileName(
         tab_data->title);
   }
-
-  if (tab_item.iImage >= 0)
-    tab_item.mask |= TCIF_IMAGE;
+  tab_item.iImage = std::max(tab_item.iImage, 0);
 
   auto const new_tab_item_index = tab_strip_->number_of_tabs();
   tab_strip_->InsertTab(new_tab_item_index, &tab_item);
@@ -473,11 +471,15 @@ void Frame::updateTitleBar() {
   auto const tab_index = getTabFromPane(m_pActivePane);
   if (tab_index >= 0) {
     TCITEM tab_item = {0};
-    tab_item.mask = TCIF_TEXT;
+    tab_item.mask = TCIF_IMAGE | TCIF_TEXT;
     tab_item.pszText = const_cast<LPWSTR>(title.c_str());
     tab_item.iImage = tab_data->icon;
-    if (tab_item.iImage >= 0)
-      tab_item.mask |= TCIF_IMAGE;
+    // TODO(yosi) We should not use magic value -2 for tab_data->icon.
+    if (tab_item.iImage == -2) {
+      tab_item.iImage = views::IconCache::instance()->GetIconForFileName(
+          tab_data->title);
+    }
+    tab_item.iImage = std::max(tab_item.iImage, 0);
     tab_strip_->SetTab(tab_index, &tab_item);
   }
 

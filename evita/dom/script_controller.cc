@@ -11,12 +11,13 @@
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
 #include "evita/dom/text/document_set.h"
-#include "evita/dom/windows/editor_window.h"
 #include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/global.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/view_delegate.h"
+#include "evita/dom/windows/editor_window.h"
 #include "evita/dom/windows/window.h"
+#include "evita/dom/windows/window_set.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/per_isolate_data.h"
 #include "evita/v8_glue/runner.h"
@@ -47,7 +48,7 @@ v8::Handle<v8::Value> GetOpenFileHandler(v8_glue::Runner* runner,
   if (window_id == kInvalidWindowId)
     return runner->global()->Get(gin::StringToV8(isolate, "editor"));
 
-  auto const window = Window::FromWindowId(window_id);
+  auto const window = WindowSet::instance()->Find(window_id);
   if (!window) {
     DVLOG(0) << "OpenFile: No suche window " << window_id;
     return v8::Handle<v8::Value>();

@@ -3,7 +3,6 @@
 
 #include "evita/dom/events/view_event_handler_impl.h"
 
-#include "evita/dom/windows/editor_window.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/focus_event_init.h"
 #include "evita/dom/events/form_event.h"
@@ -22,7 +21,9 @@
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
+#include "evita/dom/windows/editor_window.h"
 #include "evita/dom/windows/window.h"
+#include "evita/dom/windows/window_set.h"
 #include "evita/gc/local.h"
 #include "evita/text/buffer.h"
 #include "evita/v8_glue/converter.h"
@@ -52,7 +53,7 @@ ViewEventTarget* FromEventTargetId(EventTargetId event_target_id) {
 
 Window* FromWindowId(WindowId window_id) {
   DCHECK_NE(kInvalidWindowId, window_id);
-  auto const window = Window::FromWindowId(window_id);
+  auto const window = WindowSet::instance()->Find(window_id);
   if (!window)
     DVLOG(0) << "No such window " << window_id << ".";
   return window;
@@ -268,7 +269,7 @@ void ViewEventHandlerImpl::OpenFile(WindowId window_id,
 }
 
 void ViewEventHandlerImpl::QueryClose(WindowId window_id) {
-  auto const window = Window::FromWindowId(window_id);
+  auto const window = WindowSet::instance()->Find(window_id);
   if (!window)
     return;
   UiEventInit init_dict;

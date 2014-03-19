@@ -33,6 +33,7 @@ void WindowSet::DidDestroyWidget(WindowId window_id) {
 }
 
 Window* WindowSet::Find(WindowId window_id) const {
+  DCHECK_NE(kInvalidWindowId, window_id);
   auto it = map_.find(window_id);
   return it == map_.end() ? nullptr : it->second.get();
 }

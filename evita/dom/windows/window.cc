@@ -261,11 +261,6 @@ void Window::Focus() {
   ScriptController::instance()->view_delegate()->FocusWindow(window_id());
 }
 
-Window* Window::FromWindowId(WindowId window_id) {
-  DCHECK_NE(kInvalidWindowId, window_id);
-  return WindowSet::instance()->Find(window_id);
-}
-
 bool Window::IsDescendantOf(Window* other) const {
   for (auto descendant : common::tree::descendants(other)) {
     if (descendant == this)

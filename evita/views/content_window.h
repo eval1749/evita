@@ -31,7 +31,6 @@ class ContentWindow : public CommandWindow {
 
   // [G]
   public: virtual int GetIconIndex() const = 0;
-  public: virtual base::string16 GetTitle() const = 0;
 
   // [M]
   public: virtual void MakeSelectionVisible() = 0;

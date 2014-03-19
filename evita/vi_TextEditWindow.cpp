@@ -303,11 +303,6 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
   return k;
 }
 
-base::string16 TextEditWindow::GetTitle() const {
-  return buffer()->GetFileName().empty() || !buffer()->IsModified() ?
-      buffer()->name() : buffer()->name() + L"*";
-}
-
 void TextEditWindow::MakeSelectionVisible() {
   m_lCaretPosn = -1;
   Redraw();

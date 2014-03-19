@@ -1216,11 +1216,6 @@ EditPane::Window* EditPane::GetLastWindow() const {
   CAN_NOT_HAPPEN();
 }
 
-base::string16 EditPane::GetTitle() {
-  auto const window = GetActiveWindow();
-  return window ? window->GetTitle() : base::string16();
-}
-
 views::Window* EditPane::GetWindow() const {
   return GetActiveWindow();
 }

@@ -95,8 +95,6 @@ class EditPane final : public Pane {
   public: Window* GetFirstWindow() const;
   public: Window* GetLastWindow() const;
 
-  private: virtual base::string16 GetTitle() override;
-
   // [I]
   public: bool IsRealized() const {
     return m_eState == State_Realized;

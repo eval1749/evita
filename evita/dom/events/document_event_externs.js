@@ -16,3 +16,6 @@ var DocumentEventInit = function(init_dict) {};
  * @param {!DocumentEventInit=} opt_init
  */
 var DocumentEvent = function(type, opt_init) {};
+
+/** @type {?Window} */
+DocumentEvent.prototype.view;

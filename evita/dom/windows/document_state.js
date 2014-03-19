@@ -4,20 +4,46 @@
 
 /**
  * @constructor
- * @param {!Document} document
+ * @param {!Document|!DocumentState} document_or_state
  */
-global.DocumentState = function(document) {
-  this.filename = document.filename;
-  // TODO(yosi) We should specify |DocumentState.prototype.icon| from
-  // IconSet.
-  this.icon = -2;
-  this.lastWriteTime = document.lastWriteTime;
-  this.modified = document.modified;
-  this.name = document.name;
-  this.state = document.state;
+global.DocumentState = function(document_or_state) {
+  if (document_or_state instanceof Document) {
+    var document = /** @type {!Document} */(document_or_state);
+    this.filename = document.filename;
+    // TODO(yosi) We should specify |DocumentState.prototype.icon| from
+    // IconSet.
+    this.icon = -2;
+    this.lastWriteTime = document.lastWriteTime;
+    this.modified = document.modified;
+    this.name = document.name;
+    this.state = document.state;
+    return;
+  }
+
+  if (document_or_state instanceof DocumentState) {
+    var state = document_or_state;
+    this.filename = state.filename;
+    this.icon = state.icon;
+    this.lastWriteTime = state.lastWriteTime;
+    this.modified = state.modified;
+    this.name = state.name;
+    this.state = state.state;
+    return;
+  }
+
+  throw new TypeError('Expect Document or DocumentState');
 };
 
 /**
+ * @this {!DocumentState}
+ * @return {!DocumentState}
+ */
+global.DocumentState.prototype.clone = function() {
+  return new DocumentState(this);
+};
+
+/**
+ * @this {!DocumentState}
  * @param {!DocumentState} other
  * @return {boolean}
  */
@@ -25,6 +51,7 @@ global.DocumentState.prototype.equals = function(other) {
   return this.filename == other.filename &&
          this.icon == other.icon &&
          this.lastWriteTime == other.lastWriteTime &&
+         this.modified == other.modified &&
          this.name == other.name &&
          this.state == other.state;
 };
@@ -69,6 +96,7 @@ global.DocumentState.prototype.equals = function(other) {
       return;
     if (state.modified == document.modified)
       return;
+    state.modified = document.modified;
     observers.forEach(function(observer) {
       observer.call(this, document, state);
     });

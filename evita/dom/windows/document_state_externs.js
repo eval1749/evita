@@ -4,9 +4,9 @@
 
 /**
  * @constructor
- * @param {!Document} document
+ * @param {!Document|!DocumentState} document_or_state
  */
-function DocumentState(document) {}
+function DocumentState(document_or_state) {}
 
 /**
  * @typedef {function(!Document, !DocumentState)}
@@ -38,6 +38,9 @@ DocumentState.prototype.name;
 
 /** @type {number} */
 DocumentState.prototype.state;
+
+/** @return {!DocumentState} */
+DocumentState.prototype.clone = function() {};
 
 /**
  * @param {!DocumentState} other

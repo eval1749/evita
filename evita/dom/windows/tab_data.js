@@ -24,7 +24,7 @@ global.TabData = function (opt_state) {
         'Not modified',
   ];
   this.icon = state.icon;
-  this.state = state.state;
+  this.state = state.modified ? 1 : 0;
   this.title = state.name;
   this.tooltip =  tooltip_texts.join('\n');
 };
@@ -59,12 +59,12 @@ global.TabData = function (opt_state) {
   /**
    * @param {!DocumentWindow} window
    */
-  function updateTabData(window, state) {
+  function updateTabData(window, new_state) {
     var tab_state = tabStateMap.get(window);
-    if (tab_state && tab_state.equals(state))
+    if (tab_state && tab_state.equals(new_state))
       return;
-    Editor.setTabData(window, new TabData(state));
-    tabStateMap.set(window, state);
+    Editor.setTabData(window, new TabData(new_state));
+    tabStateMap.set(window, new_state.clone());
   }
 
   /**

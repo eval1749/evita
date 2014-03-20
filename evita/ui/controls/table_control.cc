@@ -3,6 +3,7 @@
 
 #include "evita/ui/controls/table_control.h"
 
+#include <algorithm>
 #include <list>
 #include <unordered_map>
 #include <vector>
@@ -139,6 +140,21 @@ void Row::UpdateState(int new_state, int state_mask) {
   state_ &= ~state_mask;
   state_ |= new_state;
 }
+
+struct RowCompare {
+  const TableModel* model_;
+  int column_id_;
+
+  RowCompare(const TableModel* model, int column_id)
+      : column_id_(column_id), model_(model) {
+  }
+
+  bool operator() (const Row* a, const Row* b) const {
+    auto const a_text = model_->GetCellText(a->row_id(), column_id_);
+    auto const b_text = model_->GetCellText(b->row_id(), column_id_);
+    return a_text < b_text;
+  }
+};
 
 }  // namespace
 
@@ -297,8 +313,13 @@ void TableControl::TableControlModel::Draw(gfx::Graphics* gfx) const {
 
   left_top.y += kTopMargin;
 
-  // Rows
-  for (auto row : rows_) {
+  // Sort rows
+  std::vector<Row*> sorted_rows(rows_.begin(), rows_.end());
+  std::sort(sorted_rows.begin(), sorted_rows.end(),
+            RowCompare(model_, columns_[0]->column_id()));
+
+  // Draw rows
+  for (auto row : sorted_rows) {
     row->set_rect(gfx::RectF(left_top.x, left_top.y,
                              rect_.right, left_top.y + row_height_));
     DrawRow(gfx, row);

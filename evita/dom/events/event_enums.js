@@ -4,9 +4,11 @@
 
 /** @enum{string} */
 Event.Names = {
+  ATTACH: 'attach', // DocumentEvent
   BLUR: 'blur',
   CLICK: 'click',
   DBLCLICK: 'dblclick',
+  DETACH: 'detach', // DocumentEvent
   DROPWINDOW: 'dropwindow',
   FOCUS: 'focus',
   IDLE: 'idle',

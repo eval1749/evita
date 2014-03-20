@@ -1,9 +1,10 @@
-dictionary EventInit {
-  boolean bubbles = false;
+dictionary EventInit : Foo {
+  int bubbles = 123;
   boolean cancelable = false;
+  short foo;
 };
 
-[Constructor(DOMString typeArg, optional EventInit eventInitDict]
+[Constructor(DOMString typeArg, optional EventInit eventInitDict)]
 interface Event {
   // DOM PhaseType
   const unsigned short NONE = 0;

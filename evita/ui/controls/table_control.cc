@@ -98,7 +98,7 @@ DWRITE_TEXT_ALIGNMENT Column::alignment() const {
 //
 // Row
 //
-class Row : public Item{
+class Row : public Item {
   DECLARE_CASTABLE_CLASS(Row, Item);
 
   public: enum RowState {

@@ -17,13 +17,18 @@ MutationRecord.prototype.offset;
 MutationRecord.prototype.type;
 
 /**
+ * @typedef {!function(!Array.<!MutationRecord>, !MutationObserver)}
+ */
+var MutationCallback;
+
+/**
  * @typedef {Object}
  */
 var MutationObserverInit;
 
 /**
  * @constructor
- * @param {!function(!MutationRecord)} callback
+ * @param {MutationCallback} callback
  */
 function MutationObserver(callback) {}
 

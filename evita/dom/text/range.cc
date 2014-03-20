@@ -5,6 +5,7 @@
 
 #include "evita/dom/text/buffer.h"
 #include "evita/dom/converter.h"
+#include "evita/dom/script_controller.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/regexp.h"
 #include "evita/text/marker_set.h"
@@ -145,6 +146,11 @@ void Range::PasteFromClipboard() {
 }
 
 void Range::SetSpelling(int spelling) const {
+  if (collapsed()) {
+    ScriptController::instance()->ThrowError(
+      "Can't set spelling for collapsed range.");
+    return;
+  }
   document_->buffer()->spelling_markers()->InsertMarker(
     range_->GetStart(), range_->GetEnd(), spelling);
 }

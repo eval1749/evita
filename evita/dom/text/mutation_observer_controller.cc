@@ -15,6 +15,7 @@
 #pragma warning(pop)
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
+#include "evita/dom/lock.h"
 #include "evita/dom/text/buffer.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/mutation_observer.h"
@@ -83,6 +84,7 @@ void MutationObserverController::Tracker::NotifyObservers(
     observers.push_back(observer);
   }
   scoped_refptr<Tracker> protect(tracker.get());
+  DOM_AUTO_LOCK_SCOPE();
   for (auto observer : observers) {
     observer->DidMutateDocument(tracker->document_);
   }

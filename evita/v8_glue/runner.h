@@ -32,7 +32,6 @@ class Runner : public gin::ContextHolder {
     private: v8::EscapableHandleScope handle_scope_;
     private: v8::Context::Scope context_scope_;
     private: CurrentRunnerScope current_runner_scope_;
-    private: v8::TryCatch try_catch_;
     private: Runner* runner_;
 
     public: explicit EscapableHandleScope(Runner* runner);
@@ -52,7 +51,6 @@ class Runner : public gin::ContextHolder {
     private: v8::HandleScope handle_scope_;
     private: v8::Context::Scope context_scope_;
     private: CurrentRunnerScope current_runner_scope_;
-    private: v8::TryCatch try_catch_;
     private: Runner* runner_;
 
     public: explicit Scope(Runner* runner);

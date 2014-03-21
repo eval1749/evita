@@ -67,7 +67,7 @@ void MessageBox(const base::string16& message, int flags) {
   if (suppress_message_box)
     return;
   ScriptController::instance()->view_delegate()->MessageBox(kInvalidWindowId,
-    message, L"System Message", flags, base::Bind(MessageBoxCallback));
+    message, L"Evita System Message", flags, base::Bind(MessageBoxCallback));
 }
 
 void GcEpilogueCallback(v8::GCType type, v8::GCCallbackFlags flags) {
@@ -229,9 +229,7 @@ ScriptController* ScriptController::Start(ViewDelegate* view_delegate,
   auto const runner = new v8_glue::Runner(isolate, script_controller);
   script_controller->runner_.reset(runner);
   v8_glue::Runner::Scope runner_scope(runner);
-  // When call TerminateExecution(), assertion failure is occured at
-  // |OptimizedFrame::Summarize| in "v8/src/frame.cc" with opcode == REGISTER.
-  // v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
+  v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
   v8::V8::AddMessageListener(MessageCallback);
   v8::V8::AddGCPrologueCallback(GcPrologueCallback);
   v8::V8::AddGCEpilogueCallback(GcEpilogueCallback);

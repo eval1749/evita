@@ -320,23 +320,18 @@
       case Unit.WORD: {
         if (!position)
           return position;
-        var word_class = wordClassBefore(document, position);
-        if (word_class == WordClass.BLANK) {
-          if (position < document.length &&
-              wordClassAt(document, position) != WordClass.BLANK) {
-            // We are at start of word.
+        var word_class = position == document.length ?
+            WordClass.BLANK : wordClassAt(document, position);
+        // Find character class of word.
+        while (word_class == WordClass.BLANK) {
+          --position;
+          if (!position)
             return position;
-          }
-          // Skil blanks
-          while (position) {
-            word_class = wordClassBefore(document, position);
-            if (word_class != WordClass.BLANK)
-              break;
-            --position;
-          }
+          word_class = wordClassAt(document, position);
         }
-        while (position && wordClassBefore(document, position) == word_class) {
-         --position;
+        // Skip word
+        while (position && wordClassAt(document, position - 1) == word_class) {
+          --position;
         }
         return position;
       }

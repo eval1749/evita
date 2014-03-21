@@ -525,6 +525,12 @@ TEST_F(RangeTest, startOf) {
   EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo bar | baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar  |baz", "testIt('foo bar  baz|', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar  |baz ", "testIt('foo bar  baz |', Unit.WORD)");
+
+  EXPECT_SCRIPT_EQ("|++foo", "testIt('+|+foo', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("++|foo", "testIt('++|foo', Unit.WORD)");
+
+  EXPECT_SCRIPT_EQ("foo bar|++", "testIt('foo bar|++', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo bar|++", "testIt('foo bar+|+', Unit.WORD)");
 }
 
 TEST_F(RangeTest, text) {

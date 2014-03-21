@@ -39,7 +39,7 @@ var SpellChecker = function(document) {
 }
 
 /** @const @type {number} */
-SpellChecker.CHECK_INTERVAL_LIMIT = 100;
+SpellChecker.CHECK_INTERVAL_LIMIT = 1000;
 
 /** @const @type {number} */
 SpellChecker.CHECK_INTERVAL_MS = 200;
@@ -137,14 +137,17 @@ SpellChecker.prototype.didBlurWindow = function(event) {
 // names, we don't check character syntax.
 //
 SpellChecker.prototype.didFireTimer = function() {
+  var start_at = Date.now();
+
   var range = this.range;
   var document = range.document;
 
   function getHottestOffset() {
-    // If document isn't modified, document is just loaded or undo initial
-    // change.
-    if (!document.modified)
+    if (!document.modified) {
+      // If document isn't modified, document is just loaded or undo initial
+      // change.
       return -1;
+    }
     if (!(Window.focus instanceof TextWindow))
       return -1;
     if (Window.focus.document != document)
@@ -152,6 +155,8 @@ SpellChecker.prototype.didFireTimer = function() {
     var range = Window.focus.selection.range;
     return range.collapsed ? range.start : -1;
   }
+
+  var hottest_offset = getHottestOffset();
 
   /**
    * @param {!Range} range
@@ -163,6 +168,10 @@ SpellChecker.prototype.didFireTimer = function() {
         length > SpellChecker.MAX_WORD_LENGTH) {
       return false;
     }
+    if (hottest_offset >= range.start && hottest_offset <= range.end) {
+      // The word is still changing, we ignore it.
+      return false;
+    }
     var category = Unicode.UCD[document.charCodeAt_(range.start)].category;
     // TODO(yosi) When we support spell checking other than English, we
     // should make other Unicode general categories are valid.
@@ -170,7 +179,6 @@ SpellChecker.prototype.didFireTimer = function() {
   }
 
   var checked = 0;
-  var hottest_offset = getHottestOffset();
 
   /**
    * @param {!SpellChecker} spellChecker
@@ -185,10 +193,6 @@ SpellChecker.prototype.didFireTimer = function() {
     while (checked < SpellChecker.CHECK_INTERVAL_LIMIT && range.start < end) {
       range.endOf(Unit.WORD, Alter.EXTEND);
       range.setSpelling(Spelling.NONE);
-      if (hottest_offset >= range.start && hottest_offset <= range.end) {
-        // The word is still changing, we ignore it, e.g. |enum|, |instanceof|.
-        break;
-      }
       checked += range.end - range.start;
       if (range.end == document.length) {
         // Word seems not to be completed yet. Spell checker will sleep
@@ -214,16 +218,19 @@ SpellChecker.prototype.didFireTimer = function() {
 
   if (this.hotOffset < document.length)
     this.hotOffset = scan(this, this.hotOffset, document.length);
-
   this.coldOffset = scan(this, this.coldOffset, this.coldEnd);
+
+  var duration = Date.now() - start_at;
+
   var rest = document.length - this.hotOffset + this.coldEnd - this.coldOffset;
   if (rest > 0) {
     var percent_done = 100 - Math.floor(rest * 100 / document.length);
-    Window.focus.status = 'Checking spelling... ' + percent_done + '% done' +
-        ' ' + this.num_checking;
+    Window.focus.status = 'Checking spelling ' + percent_done + '% done' +
+        ' ' + duration + 'ms' +
+        ' pending:' + this.num_checking;
   } else {
     this.timer.stop();
-    Window.focus.status = 'Spell checking is done.';
+    Window.focus.status = 'Spell checking is done. ' + duration + 'ms';
   }
 };
 
@@ -233,11 +240,14 @@ SpellChecker.prototype.didFocusWindow = function() {
 };
 
 /**
- * Mark all |word| in document with |mark|.
  * @param {string} word
  * @param {Spelling} mark
+ *
+ * Mark first |word| without misspelled marker in document with |mark|.
  */
 SpellChecker.prototype.markWord = function(word, mark) {
+  if (mark == Spelling.CORRECT)
+    return;
   var regex = new Editor.RegExp(word, {
     ignoreCase: false,
     matchExact: true,
@@ -252,9 +262,12 @@ SpellChecker.prototype.markWord = function(word, mark) {
       break;
     var match = matches[0];
     range.collapseTo(match.start);
-    range.end = match.end;
-    // TODO(yosi) We should not mark for word in source code.
-    range.setSpelling(mark);
+    if (document.spellingAt(match.start) != mark) {
+      range.end = match.end;
+      // TODO(yosi) We should not mark for word in source code.
+      range.setSpelling(mark);
+      break;
+    }
     runner = match.end;
   }
 };

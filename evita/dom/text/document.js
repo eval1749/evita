@@ -23,6 +23,8 @@
       var word_class = name.charAt(0);
       if (word_class == 'L' || word_class == 'N')
         return 'w';
+      if (word_class == 'S')
+        return 'P';
       return word_class;
     }
     var map = new Map();

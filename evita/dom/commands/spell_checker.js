@@ -25,6 +25,7 @@ var SpellChecker = function(document) {
   this.mutationObserver = new MutationObserver(
       this.mutationCallback.bind(this));
   this.mutationObserver.observe(document, {summary: true});
+  this.num_checking = 0;
   this.range = new Range(document);
   this.timer = new RepeatingTimer();
 
@@ -43,7 +44,13 @@ SpellChecker.CHECK_INTERVAL_LIMIT = 100;
 /** @const @type {number} */
 SpellChecker.CHECK_INTERVAL_MS = 200;
 
+/** @const @type {number} */
+SpellChecker.MAX_CHECKING = 10;
+
+/** @const @type {number} */
 SpellChecker.MAX_WORD_LENGTH = 20;
+
+/** @const @type {number} */
 SpellChecker.MIN_WORD_LENGTH = 3;
 
 /** @const @type {string} */
@@ -53,10 +60,6 @@ SpellChecker.PROPERTY = 'SpellChecker';
 SpellChecker.RE_WORD = new RegExp('^[A-Za-z][a-z]{' +
     (SpellChecker.MIN_WORD_LENGTH - 1) + ',' +
     (SpellChecker.MAX_WORD_LENGTH - 1) + '}$');
-
-/**
- * @enum {string}
- */
 
 /**
  * @typedef{{
@@ -80,6 +83,9 @@ SpellChecker.prototype.hotOffset;
 /** @type {!MutationObserver} */
 SpellChecker.prototype.mutationObserver;
 
+/** * @type {number} */
+SpellChecker.num_checking;
+
 /** @type {!Range} */
 SpellChecker.prototype.range;
 
@@ -89,11 +95,14 @@ SpellChecker.prototype.timer;
 // Checks then mark word as correct or misspelled.
 SpellChecker.prototype.checkSpelling = function(word_to_check) {
   var spellChecker = this;
+  ++spellChecker.num_checking;
   SpellChecker.checkSpelling(word_to_check).then(function (result) {
+    --spellChecker.num_checking;
     if (!result || result.busy)
       return;
     spellChecker.markWord(result.word, result.spelling);
   }).catch(console.log);
+  return spellChecker.num_checking < SpellChecker.MAX_CHECKING;
 };
 
 // Cleanup resources used by spell checker.
@@ -132,12 +141,32 @@ SpellChecker.prototype.didFireTimer = function() {
   var document = range.document;
 
   function getHottestOffset() {
+    // If document isn't modified, document is just loaded or undo initial
+    // change.
+    if (!document.modified)
+      return -1;
     if (!(Window.focus instanceof TextWindow))
       return -1;
     if (Window.focus.document != document)
       return -1;
     var range = Window.focus.selection.range;
     return range.collapsed ? range.start : -1;
+  }
+
+  /**
+   * @param {!Range} range
+   * @return {boolean}
+   */
+  function isCheckableWord(range) {
+    var length = range.end - range.start;
+    if (length < SpellChecker.MIN_WORD_LENGTH ||
+        length > SpellChecker.MAX_WORD_LENGTH) {
+      return false;
+    }
+    var category = Unicode.UCD[document.charCodeAt_(range.start)].category;
+    // TODO(yosi) When we support spell checking other than English, we
+    // should make other Unicode general categories are valid.
+    return category == 'Lu' || category == 'Ll';
   }
 
   var checked = 0;
@@ -149,6 +178,8 @@ SpellChecker.prototype.didFireTimer = function() {
    * @param {number} end
    */
   function scan(spellChecker, start, end) {
+    if (spellChecker.num_checking >= SpellChecker.MAX_CHECKING)
+      return;
     range.collapseTo(start);
     range.startOf(Unit.WORD);
     while (checked < SpellChecker.CHECK_INTERVAL_LIMIT && range.start < end) {
@@ -160,14 +191,15 @@ SpellChecker.prototype.didFireTimer = function() {
       }
       checked += range.end - range.start;
       if (range.end == document.length) {
-        // Word seems not to be completed yet.
+        // Word seems not to be completed yet. Spell checker will sleep
+        // until document is changed.
+        return range.end;
+      }
+
+      // To reduce garbage collection, we check word in |range| is whether
+      // suitable for checking spelling or not.
+      if (isCheckableWord(range) && !spellChecker.checkSpelling(range.text))
         break;
-      }
-      var length = range.end - range.start;
-      if (length >= SpellChecker.MIN_WORD_LENGTH &&
-          length <= SpellChecker.MAX_WORD_LENGTH) {
-        spellChecker.checkSpelling(range.text);
-      }
 
       // Move to next word.
       // <#>include     => #|include
@@ -184,8 +216,15 @@ SpellChecker.prototype.didFireTimer = function() {
     this.hotOffset = scan(this, this.hotOffset, document.length);
 
   this.coldOffset = scan(this, this.coldOffset, this.coldEnd);
-  if (this.hotOffset == document.length && this.coldOffset >= this.coldEnd)
+  var rest = document.length - this.hotOffset + this.coldEnd - this.coldOffset;
+  if (rest > 0) {
+    var percent_done = 100 - Math.floor(rest * 100 / document.length);
+    Window.focus.status = 'Checking spelling... ' + percent_done + '% done' +
+        ' ' + this.num_checking;
+  } else {
     this.timer.stop();
+    Window.focus.status = 'Spell checking is done.';
+  }
 };
 
 // Spell checking is started when window is focused.

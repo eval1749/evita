@@ -110,7 +110,7 @@ SpellChecker.prototype.didChangeSelection = function(event) {
 
 // Check spelling in hot range and cold range.
 //        |...........|...................|
-// offset 0           minium change       document.length
+// offset 0           minimum change      document.length
 //            cold          hot
 SpellChecker.prototype.didFireTimer = function() {
   var range = this.range;
@@ -171,7 +171,7 @@ SpellChecker.prototype.didFocusWindow = function() {
  */
 SpellChecker.prototype.markWord = function(word, mark) {
   var regex = new Editor.RegExp(word, {
-    ignoreCase: true,
+    ignoreCase: false,
     matchExact: true,
     matchWord: true,
   });

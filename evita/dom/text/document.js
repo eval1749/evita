@@ -55,10 +55,12 @@
   /**
    * @param {number} char_code
    * @return {WordClass|null}
+   *
+   * Note: We should not treat TAB and LF as blank. If we do so,
+   * |Ctrl+Backspace| at start of line, removes newline at end of the previous
+   * line.
    */
   function wordClassOf(char_code) {
-    if (char_code == 0x09 || char_code == 0x0A)
-      return WordClass.BLANK;
     return WORD_CLASS_MAP.get(Unicode.UCD[char_code].category);
   }
 

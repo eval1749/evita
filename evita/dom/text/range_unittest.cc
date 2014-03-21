@@ -234,7 +234,7 @@ TEST_F(RangeTest, delete) {
   EXPECT_SCRIPT_EQ("foo | baz", "testIt('foo |bar| baz', Unit.CHARACTER)");
 }
 
-TEST_F(RangeTest, endOf) {
+TEST_F(RangeTest,  endOf) {
   EXPECT_SCRIPT_VALID(
     "function testIt(sample, unit) {"
     "  return doTest2(sample, function(range) {"
@@ -251,10 +251,6 @@ TEST_F(RangeTest, endOf) {
   EXPECT_SCRIPT_EQ("foo bar  baz|", "testIt('foo bar  baz|', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar  baz |", "testIt('foo bar  baz |', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar  baz  |", "testIt('foo bar  baz | ', Unit.WORD)");
-
-  // \t and \n are whitespace.
-  EXPECT_SCRIPT_EQ("foo \\t bar| baz", "testIt('foo |\\t bar baz', Unit.WORD)");
-  EXPECT_SCRIPT_EQ("foo \\n bar| baz", "testIt('foo |\\n bar baz', Unit.WORD)");
 }
 
 TEST_F(RangeTest, insertBefore) {
@@ -537,10 +533,6 @@ TEST_F(RangeTest, startOf) {
   EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo bar | baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar  |baz", "testIt('foo bar  baz|', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar  |baz ", "testIt('foo bar  baz |', Unit.WORD)");
-
-  // \t and \n are whitespace.
-  EXPECT_SCRIPT_EQ("foo |bar\\t baz", "testIt('foo bar\\t| baz', Unit.WORD)");
-  EXPECT_SCRIPT_EQ("foo |bar\\n baz", "testIt('foo bar\\n| baz', Unit.WORD)");
 
   EXPECT_SCRIPT_EQ("|++foo", "testIt('+|+foo', Unit.WORD)");
   EXPECT_SCRIPT_EQ("++|foo", "testIt('++|foo', Unit.WORD)");

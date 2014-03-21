@@ -132,7 +132,6 @@ global.DocumentState.prototype.equals = function(other) {
    * @param {!Document} document
    */
   function startTracking(document) {
-    console.log('DocumentState startTracking', document);
     documentStateMap.set(document, new DocumentState(document));
     document.addEventListener('attach', didAttachWindow);
     document.addEventListener('load', didDocumentLoadSave);

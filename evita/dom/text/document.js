@@ -55,6 +55,8 @@
    * @return {WordClass|null}
    */
   function wordClassOf(char_code) {
+    if (char_code == 0x09 || char_code == 0x0A)
+      return WordClass.BLANK;
     return WORD_CLASS_MAP.get(Unicode.UCD[char_code].category);
   }
 

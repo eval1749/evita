@@ -33,7 +33,8 @@ class RangeTest : public dom::AbstractDomTest {
     dom::AbstractDomTest::SetUp();
     EXPECT_SCRIPT_VALID(
       "var doc = new Document('sample');"
-      "var range = new Range(doc);"
+      "var range = new Range(doc);");
+    EXPECT_SCRIPT_VALID(
       "function doTest(sample, sampler) {"
       "  range.start = 0;"
       "  range.end = doc.length;"
@@ -55,6 +56,27 @@ class RangeTest : public dom::AbstractDomTest {
       "  return result.substr(0, start) + '|' +"
       "         result.substring(start, end) + '|' +"
       "         result.substr(end);"
+      "}");
+  EXPECT_SCRIPT_VALID(
+      "function doTest2(sample, sampler) {"
+      "  range.collapseTo(0);"
+      "  range.end = doc.length;"
+      "  var source = sample;"
+      "  source = source.replace(/\\\\n/g, '\\n');"
+      "  source = source.replace(/\\\\t/g, '\\t');"
+      "  var caret = source.indexOf('|');"
+      "  source = source.replace(/[|]/g, '');"
+      "  range.text = source;"
+      "  range.collapseTo(caret);"
+      "  sampler(range);"
+      "  caret = range.start;"
+      "  range.start = 0;"
+      "  range.end = range.document.length;"
+      "  var result = range.text;"
+      "  result = result.substr(0, caret) + '|' + result.substr(caret);"
+      "  result = result.replace(/\\n/g, '\\\\n');"
+      "  result = result.replace(/\\t/g, '\\\\t');"
+      "  return result;"
       "}");
   }
 
@@ -214,17 +236,10 @@ TEST_F(RangeTest, delete) {
 
 TEST_F(RangeTest, endOf) {
   EXPECT_SCRIPT_VALID(
-    "var doc = new Document('endOf');"
-    "var range = new Range(doc);"
     "function testIt(sample, unit) {"
-    "  range.collapseTo(0);"
-    "  range.end = doc.length;"
-    "  var result = sample.replace(/[|]/g, '');"
-    "  range.text = result;"
-    "  range.collapseTo(sample.indexOf('|'));"
-    "  range.endOf(unit);"
-    "  var caret = range.start;"
-    "  return result.substr(0, caret) + '|' + result.substr(caret);"
+    "  return doTest2(sample, function(range) {"
+    "   range.endOf(unit);"
+    "  });"
     "}");
   EXPECT_SCRIPT_EQ("foo| bar  baz", "testIt('|foo bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo| bar  baz", "testIt('f|oo bar  baz', Unit.WORD)");
@@ -236,6 +251,10 @@ TEST_F(RangeTest, endOf) {
   EXPECT_SCRIPT_EQ("foo bar  baz|", "testIt('foo bar  baz|', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar  baz |", "testIt('foo bar  baz |', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar  baz  |", "testIt('foo bar  baz | ', Unit.WORD)");
+
+  // \t and \n are whitespace.
+  EXPECT_SCRIPT_EQ("foo \\t bar| baz", "testIt('foo |\\t bar baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo \\n bar| baz", "testIt('foo |\\n bar baz', Unit.WORD)");
 }
 
 TEST_F(RangeTest, insertBefore) {
@@ -504,17 +523,10 @@ TEST_F(RangeTest, set_start_end) {
 
 TEST_F(RangeTest, startOf) {
   EXPECT_SCRIPT_VALID(
-    "var doc = new Document('startOf');"
-    "var range = new Range(doc);"
     "function testIt(sample, unit) {"
-    "  range.collapseTo(0);"
-    "  range.end = doc.length;"
-    "  var result = sample.replace(/[|]/g, '');"
-    "  range.text = result;"
-    "  range.collapseTo(sample.indexOf('|'));"
-    "  range.startOf(unit);"
-    "  var caret = range.start;"
-    "  return result.substr(0, caret) + '|' + result.substr(caret);"
+    "  return doTest2(sample, function(range) {"
+    "   range.startOf(unit);"
+    "  });"
     "}");
   EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('|foo bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('f|oo bar  baz', Unit.WORD)");
@@ -525,6 +537,10 @@ TEST_F(RangeTest, startOf) {
   EXPECT_SCRIPT_EQ("foo |bar  baz", "testIt('foo bar | baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar  |baz", "testIt('foo bar  baz|', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo bar  |baz ", "testIt('foo bar  baz |', Unit.WORD)");
+
+  // \t and \n are whitespace.
+  EXPECT_SCRIPT_EQ("foo |bar\\t baz", "testIt('foo bar\\t| baz', Unit.WORD)");
+  EXPECT_SCRIPT_EQ("foo |bar\\n baz", "testIt('foo bar\\n| baz', Unit.WORD)");
 
   EXPECT_SCRIPT_EQ("|++foo", "testIt('+|+foo', Unit.WORD)");
   EXPECT_SCRIPT_EQ("++|foo", "testIt('++|foo', Unit.WORD)");

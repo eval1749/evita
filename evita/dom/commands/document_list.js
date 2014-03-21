@@ -36,8 +36,8 @@
         return;
       document.close();
       // TODO(yosi) We should handle Document event rather than using
-      // |need_update| variable. Because |close()| is asynchronus operation
-      // and document may not be closed yet or cancled.
+      // |need_update| variable. Because |close()| is asynchronous operation
+      // and document may not be closed yet or canceled.
       need_update = true;
     });
     if (need_update)

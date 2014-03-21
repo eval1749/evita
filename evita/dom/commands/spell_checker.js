@@ -52,9 +52,9 @@ SpellChecker.MIN_WORD_LENGTH = 3;
 SpellChecker.PROPERTY = 'SpellChecker';
 
 /** @const @type {!RegExp} */
-SpellChecker.RE_WORD = new RegExp('^[a-z]{' +
-    SpellChecker.MIN_WORD_LENGTH +
-    ',' + SpellChecker.MAX_WORD_LENGTH + '}$');
+SpellChecker.RE_WORD = new RegExp('^[A-Za-z][a-z]{' +
+    (SpellChecker.MIN_WORD_LENGTH - 1) + ',' +
+    (SpellChecker.MAX_WORD_LENGTH - 1) + '}$');
 
 /**
  * @enum {string}
@@ -112,22 +112,41 @@ SpellChecker.prototype.didChangeSelection = function(event) {
 //        |...........|...................|
 // offset 0           minimum change      document.length
 //            cold          hot
+//
+// To reduce misspelling in source code, e.g. function name, and variable
+// names, we don't check character syntax.
+//
 SpellChecker.prototype.didFireTimer = function() {
   var range = this.range;
   var document = range.document;
+
+  function getHottestOffset() {
+    if (!(Window.focus instanceof TextWindow))
+      return -1;
+    if (Window.focus.document != document)
+      return -1;
+    var range = Window.focus.selection.range;
+    return range.collapsed ? range.start : -1;
+  }
+
   var checked = 0;
+  var hottest_offset = getHottestOffset();
 
   /**
    * @param {!SpellChecker} spellChecker
    * @param {number} start
    * @param {number} end
    */
-  function check(spellChecker, start, end) {
+  function scan(spellChecker, start, end) {
     range.collapseTo(start);
     range.startOf(Unit.WORD);
     while (checked < SpellChecker.CHECK_INTERVAL_LIMIT && range.start < end) {
       range.endOf(Unit.WORD, Alter.EXTEND);
       range.setSpelling(Spelling.NONE);
+      if (hottest_offset >= range.start && hottest_offset <= range.end) {
+        // The word is still changing, we ignore it, e.g. |enum|, |instanceof|.
+        break;
+      }
       checked += range.end - range.start;
       if (range.end == document.length) {
         // Word seems not to be completed yet.
@@ -136,26 +155,24 @@ SpellChecker.prototype.didFireTimer = function() {
       var length = range.end - range.start;
       if (length >= SpellChecker.MIN_WORD_LENGTH &&
           length <= SpellChecker.MAX_WORD_LENGTH) {
-        // TODO(yosi) We should exclude a word just typing.
-        // TODO(yosi) We should ignore a word in source code.
         spellChecker.checkSpelling(range.text);
       }
 
       // Move to next word.
       // <#>include     => #|include
       // foo<;>\n   bar => foo;\n  |bar
-      var start = range.start;
-      range.collapseTo(start);
+      var word_start = range.start;
+      range.collapseTo(word_start);
       range.move(Unit.WORD);
-      checked += range.end - start;
+      checked += range.end - word_start;
     }
     return range.start;
   }
 
   if (this.hotOffset < document.length)
-    this.hotOffset = check(this, this.hotOffset, document.length);
+    this.hotOffset = scan(this, this.hotOffset, document.length);
 
-  this.coldOffset = check(this, this.coldOffset, this.coldEnd);
+  this.coldOffset = scan(this, this.coldOffset, this.coldEnd);
   if (this.hotOffset == document.length && this.coldOffset >= this.coldEnd)
     this.timer.stop();
 };
@@ -237,8 +254,7 @@ SpellChecker.checkSpelling = (function() {
   return function(word_to_check) {
     if (!SpellChecker.RE_WORD.test(word_to_check))
       return Promise.cast(null);
-    var word = word_to_check.toLowerCase();
-    var result = wordStateMap.get(word);
+    var result = wordStateMap.get(word_to_check);
     if (result) {
       result.lastUsedTime = new Date();
       return Promise.cast(result);
@@ -246,15 +262,16 @@ SpellChecker.checkSpelling = (function() {
     var state = {
       busy: true,
       lastUsedTime: new Date(),
-      word: word,
+      word: word_to_check,
     };
-    wordStateMap.set(word, state);
-    var promise = Editor.checkSpelling(word).then(function(is_correct) {
-      state.busy = false;
-      state.lastUsedTime = new Date(),
-      state.spelling = is_correct ? Spelling.CORRECT : Spelling.MISSPELLED;
-      return state;
-    });
+    wordStateMap.set(word_to_check, state);
+    var promise = Editor.checkSpelling(word_to_check).then(
+        function(is_correct) {
+          state.busy = false;
+          state.lastUsedTime = new Date(),
+          state.spelling = is_correct ? Spelling.CORRECT : Spelling.MISSPELLED;
+          return state;
+        });
     return /** @type {!Promise.<SpellChecker.SpellingResult>} */(promise);
   };
 })();

@@ -34,8 +34,6 @@ var SpellChecker = function(document) {
         spellChecker.didBlurWindow.bind(spellChecker));
     event.view.addEventListener(Event.Names.FOCUS,
         spellChecker.didFocusWindow.bind(spellChecker));
-    event.view.addEventListener('selectionchange',
-        spellChecker.didChangeSelection.bind(spellChecker));
   });
 }
 
@@ -88,6 +86,7 @@ SpellChecker.prototype.range;
 /** @type {!RepeatingTimer} */
 SpellChecker.prototype.timer;
 
+// Checks then mark word as correct or misspelled.
 SpellChecker.prototype.checkSpelling = function(word_to_check) {
   var spellChecker = this;
   SpellChecker.checkSpelling(word_to_check).then(function (result) {
@@ -97,23 +96,35 @@ SpellChecker.prototype.checkSpelling = function(word_to_check) {
   }).catch(console.log);
 };
 
+// Cleanup resources used by spell checker.
 SpellChecker.prototype.destroy = function() {
   this.timer.stop();
 };
 
+// Spell checker is stopped when window loses focus.
 SpellChecker.prototype.didBlurWindow = function(event) {
   this.timer.stop();
 };
 
-SpellChecker.prototype.didChangeSelection = function(event) {
-};
-
-// Check spelling in hot range and cold range.
-//        |...........|...................|
-// offset 0           minimum change      document.length
-//            cold          hot
+// Check spelling in hot region and cold region. When we check all words in
+// cold region, |coldOffset| >= |coldEnd|, we check all the words in the
+// document.
 //
-// To reduce misspelling in source code, e.g. function name, and variable
+// Cold and hot regions are updated in mutation observer callback by using
+// minimum changed offset.
+//
+//  * Cold region: |coldOffset| to |coldEnd|.
+//  * Hot region: |hotOffset| to end of document.
+//
+//
+//         |...........|....................|
+//  offset 0           minimum change       document.length
+//         === cold === ======= hot ========
+//
+// Word scanner, |scan()|, stops hot word which contains caret not to check
+// spell incomplete word.
+//
+// Note: To reduce misspelling in source code, e.g. function name, and variable
 // names, we don't check character syntax.
 //
 SpellChecker.prototype.didFireTimer = function() {
@@ -177,6 +188,7 @@ SpellChecker.prototype.didFireTimer = function() {
     this.timer.stop();
 };
 
+// Spell checking is started when window is focused.
 SpellChecker.prototype.didFocusWindow = function() {
   this.startTimeIfNeeded();
 };
@@ -239,47 +251,49 @@ SpellChecker.prototype.startTimeIfNeeded = function() {
   this.timer.start(SpellChecker.CHECK_INTERVAL_MS, this.didFireTimer, this);
 };
 
-  /** @type {!Map.<string, SpellChecker.SpellingResult>} */
-  var wordStateMap = new Map();
+/**
+ * @type {!Map.<string, SpellChecker.SpellingResult>}
+ *
+ * Note: We expose |SpellChecker.wordStateMap| for debugging and testing
+ * purpose.
+ */
+SpellChecker.wordStateMap = new Map();
 
 /**
  * @param {string} word_to_check
  * @return {!Promise.<SpellChecker.SpellingResult>}
  */
-SpellChecker.checkSpelling = (function() {
-  /**
-   * @param {string} word_to_check
-   * @return {!Promise.<SpellChecker.SpellingResult>}
-   */
-  return function(word_to_check) {
-    if (!SpellChecker.RE_WORD.test(word_to_check))
-      return Promise.cast(null);
-    var result = wordStateMap.get(word_to_check);
-    if (result) {
-      result.lastUsedTime = new Date();
-      return Promise.cast(result);
-    }
-    var state = {
-      busy: true,
-      lastUsedTime: new Date(),
-      word: word_to_check,
-    };
-    wordStateMap.set(word_to_check, state);
-    var promise = Editor.checkSpelling(word_to_check).then(
-        function(is_correct) {
-          state.busy = false;
-          state.lastUsedTime = new Date(),
-          state.spelling = is_correct ? Spelling.CORRECT : Spelling.MISSPELLED;
-          return state;
-        });
-    return /** @type {!Promise.<SpellChecker.SpellingResult>} */(promise);
+SpellChecker.checkSpelling = function(word_to_check) {
+  if (!SpellChecker.RE_WORD.test(word_to_check))
+    return Promise.cast(null);
+  var result = SpellChecker.wordStateMap.get(word_to_check);
+  if (result) {
+    result.lastUsedTime = new Date();
+    return Promise.cast(result);
+  }
+  var state = {
+    busy: true,
+    lastUsedTime: new Date(),
+    word: word_to_check,
   };
-})();
+  SpellChecker.wordStateMap.set(word_to_check, state);
+  var promise = Editor.checkSpelling(word_to_check).then(
+      function(is_correct) {
+        state.busy = false;
+        state.lastUsedTime = new Date(),
+        state.spelling = is_correct ? Spelling.CORRECT : Spelling.MISSPELLED;
+        return state;
+      });
+  return /** @type {!Promise.<SpellChecker.SpellingResult>} */(promise);
+};
 
-// Install/uninstall spell checker to/from document.
+// When document is created/destructed, we install/uninstall spell checker
+// to/from document.
 Document.addObserver(function(action, document) {
   /** @param {!Document} document */
   function installSpellChecker(document) {
+    // TODO(yosi) We should have generic way to disable spell checking for
+    // document.
     if (document.name == '*javascript*')
       return;
     var spellChecker = new SpellChecker(document);

@@ -14,6 +14,7 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\types_externs.js ^
   %externs_dir%\bracket_externs.js ^
   %externs_dir%\commander_externs.js ^
+  %externs_dir%\commands\spell_checker_externs.js ^
   %externs_dir%\console_externs.js ^
   %externs_dir%\css\style_externs.js ^
   %externs_dir%\encoding\text_decoder_externs.js ^
@@ -43,6 +44,7 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\timer_externs.js ^
   %externs_dir%\text\document_externs.js ^
   %externs_dir%\text\modes\modes_externs.js ^
+  %externs_dir%\text\mutation_observer_externs.js ^
   %externs_dir%\text\range_externs.js ^
   %externs_dir%\text\regexp_externs.js ^
   %externs_dir%\text\text_position_externs.js ^

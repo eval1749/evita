@@ -210,7 +210,7 @@ void MarkerSet::DidDeleteAt(Posn offset, size_t length) {
                                 offset);
     }
     if (marker->end_ > offset) {
-      marker->end_ = std::max(static_cast<Posn>(marker->start_ - length),
+      marker->end_ = std::max(static_cast<Posn>(marker->end_ - length),
                               offset);
     }
     if (marker->start_ == marker->end_)

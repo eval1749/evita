@@ -22,6 +22,7 @@
 #include "evita/ui/widget.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/forms/dialog_box_set.h"
+#include "evita/views/forms/form_window.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/view_delegate_impl.h"
 
@@ -165,8 +166,8 @@ void Application::DoIdle() {
 bool Application::OnIdle(int hint) {
   METRICS_TIME_SCOPE();
   auto more = views::FrameList::instance()->DoIdle(hint);
-  if (views::DialogBoxSet::instance()->DoIdle(hint))
-   more = true;
+  more |= views::DialogBoxSet::instance()->DoIdle(hint);
+  more |= views::FormWindow::DoIdle(hint);
   return more;
 }
 

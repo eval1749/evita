@@ -53,6 +53,7 @@ class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   public: void SetRect(float left, float top, float width, float height);
 
   public: void DispatchChangeEvent();
+  protected: void NotifyControlChange();
 
   DISALLOW_COPY_AND_ASSIGN(FormControl);
 };

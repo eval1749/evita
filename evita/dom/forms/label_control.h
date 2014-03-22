@@ -19,7 +19,7 @@ class LabelControl
   public: virtual ~LabelControl();
 
   public: base::string16 text() const { return text_; }
-  public: void set_text(const base::string16& text) { text_ = text; }
+  public: void set_text(const base::string16& text);
 
   DISALLOW_COPY_AND_ASSIGN(LabelControl);
 };

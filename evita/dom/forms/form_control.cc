@@ -85,8 +85,7 @@ void FormControl::set_disabled(bool new_disabled) {
   if (disabled_ == new_disabled)
     return;
   disabled_ = new_disabled;
-  if (form_)
-    form_->DidChangeFormControl(this);
+  NotifyControlChange();
 }
 
 void FormControl::SetRect(float left, float top, float width, float height) {
@@ -94,18 +93,22 @@ void FormControl::SetRect(float left, float top, float width, float height) {
   if (rect_ == new_rect)
     return;
   rect_ = new_rect;
-  if (form_)
-    form_->DidChangeFormControl(this);
+  NotifyControlChange();
 }
 
 void FormControl::DispatchChangeEvent() {
-  if (!handling_form_event_ && form_) {
-    form_->DidChangeFormControl(this);
-  }
+  if (!handling_form_event_ && form_)
+    NotifyControlChange();
   EventInit init_dict;
   init_dict.set_bubbles(true);
   init_dict.set_cancelable(false);
   DispatchEvent(new Event(L"change", init_dict));
+}
+
+void FormControl::NotifyControlChange() {
+  if (!form_)
+    return;
+  form_->DidChangeFormControl(this);
 }
 
 }  // namespace dom

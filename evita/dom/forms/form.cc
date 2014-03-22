@@ -83,6 +83,8 @@ void Form::AddFormControl(FormControl* control) {
 }
 
 void Form::DidChangeFormControl(FormControl*) {
+  if (name_ != L"FindDialogBox")
+    return;
   ScriptController::instance()->view_delegate()->DidChangeFormContents(
       dialog_box_id());
 }

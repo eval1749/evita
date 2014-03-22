@@ -581,6 +581,7 @@
         'ui/events/event.cc',
         'ui/events/event_ostream.cc',
 
+        'ui/controls/label_control.cc',
         'ui/controls/scroll_bar.cc',
         'ui/controls/scroll_bar_observer.cc',
         'ui/controls/status_bar.cc',

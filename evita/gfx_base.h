@@ -141,12 +141,14 @@ class TextFormat : public SimpleObject_<IDWriteTextFormat> {
   private: const scoped_refptr<FactorySet> factory_set_;
   public: TextFormat(const base::string16& font_face_name, float font_size);
   public: TextFormat(const LOGFONT& log_font);
-  public: std::unique_ptr<TextLayout> CreateLayout(const char16*, int) const;
+  public: std::unique_ptr<TextLayout> CreateLayout(
+      const base::string16& text, const SizeF& size) const;
   DISALLOW_COPY_AND_ASSIGN(TextFormat);
 };
 
 class TextLayout : public SimpleObject_<IDWriteTextLayout> {
-  public: TextLayout(const LOGFONT& log_font);
+  public: TextLayout(IDWriteTextLayout* text_layout);
+  public: ~TextLayout();
   public: SIZE GetMetrics() const;
   DISALLOW_COPY_AND_ASSIGN(TextLayout);
 };

@@ -501,4 +501,24 @@ TextFormat::TextFormat(const LOGFONT& log_font)
       factory_set_(FactorySet::instance()) {
 }
 
+std::unique_ptr<TextLayout> TextFormat::CreateLayout(
+      const base::string16& text, const SizeF& size) const {
+  common::ComPtr<IDWriteTextLayout> text_layout;
+  COM_VERIFY(FactorySet::instance()->dwrite().CreateTextLayout(
+    text.data(), static_cast<UINT32>(text.length()), *this, size.width,
+    size.height, &text_layout));
+  return std::make_unique<TextLayout>(text_layout.release());
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// TextLayout
+//
+TextLayout::TextLayout(IDWriteTextLayout* text_layout)
+    : SimpleObject_(text_layout) {
+}
+
+TextLayout::~TextLayout() {
+}
+
 } // namespace gfx

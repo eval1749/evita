@@ -584,6 +584,7 @@
 
         'ui/controls/checkbox_control.cc',
         'ui/controls/label_control.cc',
+        'ui/controls/radio_button_control.cc',
         'ui/controls/scroll_bar.cc',
         'ui/controls/scroll_bar_observer.cc',
         'ui/controls/status_bar.cc',

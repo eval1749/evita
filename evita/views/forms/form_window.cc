@@ -16,9 +16,11 @@
 #include "evita/dom/forms/form_observer.h"
 #include "evita/dom/forms/checkbox_control.h"
 #include "evita/dom/forms/label_control.h"
+#include "evita/dom/forms/radio_button_control.h"
 #include "evita/dom/lock.h"
 #include "evita/ui/controls/checkbox_control.h"
 #include "evita/ui/controls/label_control.h"
+#include "evita/ui/controls/radio_button_control.h"
 #include "evita/ui/root_widget.h"
 
 #define WIN32_VERIFY(exp) { \
@@ -150,11 +152,60 @@ void LabelImporter::UpdateWidget(ui::Widget* widget) {
   SetRect(label_, label_widget);
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// RadioButtonImporter
+//
+class RadioButtonImporter : public ControlImporter {
+  private: const dom::RadioButtonControl* const radio_button_;
+
+  public: RadioButtonImporter(const dom::RadioButtonControl* radio_button);
+  public: virtual ~RadioButtonImporter() = default;
+
+  private: ui::RadioButtonControl::Style ComputeStyle() const;
+
+  // ControlImporter
+  private: virtual ui::Widget* CreateWidget() override;
+  private: virtual void UpdateWidget(ui::Widget* widget) override;
+
+  DISALLOW_COPY_AND_ASSIGN(RadioButtonImporter);
+};
+
+RadioButtonImporter::RadioButtonImporter(
+    const dom::RadioButtonControl* radio_button)
+    : radio_button_(radio_button) {
+}
+
+ui::RadioButtonControl::Style
+    RadioButtonImporter::ComputeStyle() const {
+  // TODO(yosi) We should get radio_button style from |dom::FormControl|.
+  ui::RadioButtonControl::Style style;
+  style.bgcolor = gfx::ColorF(1, 1, 1);
+  style.color = gfx::ColorF(gfx::ColorF::LightGray); // #D3D3D3
+  return style;
+}
+
+ui::Widget* RadioButtonImporter::CreateWidget() {
+  auto const widget = new ui::RadioButtonControl(radio_button_->checked(),
+                                                 ComputeStyle());
+  SetRect(radio_button_, widget);
+  return widget;
+}
+
+void RadioButtonImporter::UpdateWidget(ui::Widget* widget) {
+  auto const radio_button_widget = widget->as<ui::RadioButtonControl>();
+  radio_button_widget->set_style(ComputeStyle());
+  radio_button_widget->set_checked(radio_button_->checked());
+  SetRect(radio_button_, radio_button_widget);
+}
+
 ControlImporter* ControlImporter::Create(const dom::FormControl* control) {
   if (auto const checkbox = control->as<dom::CheckboxControl>())
     return new CheckboxImporter(checkbox);
   if (auto const label = control->as<dom::LabelControl>())
     return new LabelImporter(label);
+  if (auto const radio_button = control->as<dom::RadioButtonControl>())
+    return new RadioButtonImporter(radio_button);
   NOTREACHED();
   return nullptr;
 }

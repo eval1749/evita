@@ -37,7 +37,6 @@ TEST_F(ButtonControlTest, dispatchEvent) {
 }
 
 TEST_F(ButtonControlTest, set_disabled) {
-  EXPECT_CALL(*mock_view_impl(), CreateFindDialogBox(_));
   EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
   EXPECT_SCRIPT_VALID(
       "var form = new Form('form1');"

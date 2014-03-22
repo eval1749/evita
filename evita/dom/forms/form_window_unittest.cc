@@ -5,11 +5,8 @@
 #include "evita/dom/abstract_dom_test.h"
 
 #include "evita/dom/mock_view_impl.h"
-#include "gmock/gmock.h"
 
 namespace {
-
-using ::testing::_;
 
 class FormWindowTest : public dom::AbstractDomTest {
   protected: FormWindowTest() {
@@ -21,8 +18,6 @@ class FormWindowTest : public dom::AbstractDomTest {
 };
 
 TEST_F(FormWindowTest, ctor) {
-  EXPECT_CALL(*mock_view_impl(), CreateFindDialogBox(_));
-
   EXPECT_SCRIPT_VALID(
       "var form = new Form('form1');"
       "var sample = new FormWindow(form);");

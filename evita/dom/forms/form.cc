@@ -56,7 +56,8 @@ class FormClass :
 DEFINE_SCRIPTABLE_OBJECT(Form, FormClass);
 
 Form::Form(const base::string16& name) : name_(name) {
-  ScriptController::instance()->view_delegate()->CreateFindDialogBox(this);
+  if (name == L"FindDialogBox")
+    ScriptController::instance()->view_delegate()->CreateFindDialogBox(this);
 }
 
 Form::~Form() {
@@ -87,11 +88,19 @@ void Form::DidChangeFormControl(FormControl*) {
 }
 
 void Form::Realize() {
+  if (name_ != L"FindDialogBox") {
+    ScriptController::instance()->ThrowError("Requires Find form");
+    return;
+  }
   ScriptController::instance()->view_delegate()->RealizeDialogBox(
       dialog_box_id());
 }
 
 void Form::Show() {
+  if (name_ != L"FindDialogBox") {
+    ScriptController::instance()->ThrowError("Requires Find form");
+    return;
+  }
   ScriptController::instance()->view_delegate()->ShowDialogBox(
       dialog_box_id());
 }

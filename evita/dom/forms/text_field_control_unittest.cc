@@ -47,7 +47,6 @@ TEST_F(TextFieldControlTest, dispatchEvent) {
 }
 
 TEST_F(TextFieldControlTest, set_disabled) {
-  EXPECT_CALL(*mock_view_impl(), CreateFindDialogBox(_));
   EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
   EXPECT_SCRIPT_VALID(
       "var form = new Form('form1');"
@@ -58,7 +57,6 @@ TEST_F(TextFieldControlTest, set_disabled) {
 }
 
 TEST_F(TextFieldControlTest, set_value) {
-  EXPECT_CALL(*mock_view_impl(), CreateFindDialogBox(_));
   EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
   EXPECT_SCRIPT_VALID(
       "var form = new Form('form1');"

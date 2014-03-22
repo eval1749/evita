@@ -27,15 +27,30 @@ namespace views {
 // FormWindow
 //
 class FormWindow : public views::Window {
+  DECLARE_CASTABLE_CLASS(FormWindow, views::Window);
+
+  private: class FormViewModel;
+
+  private: bool dirty_;
   private: gc::Member<const dom::Form> form_;
   private: private: std::unique_ptr<gfx::Graphics> gfx_;
+  private: private: std::unique_ptr<FormViewModel> model_;
+  private: gfx::Rect pending_update_rect_;
 
   public: FormWindow(views::WindowId window_id, const dom::Form* form);
   public: virtual ~FormWindow();
 
+  public: void DidChangeFormContents();
+  public: static bool DoIdle(int hint);
+  private: bool OnIdle(int hint);
+
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;
   private: virtual void DidCreateNativeWindow() override;
+  private: virtual void DidResize() override;
+  private: virtual LRESULT OnMessage(uint32_t message, WPARAM wParam,
+                                     LPARAM lParam) override;
+  private: virtual void OnPaint(const gfx::Rect paint_rect) override;
 
   DISALLOW_COPY_AND_ASSIGN(FormWindow);
 };

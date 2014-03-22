@@ -4,8 +4,18 @@
 
 #include "evita/views/forms/form_window.h"
 
+#include <unordered_map>
+#include <unordered_set>
+
 #include "base/logging.h"
+#include "common/tree/child_nodes.h"
+#include "evita/editor/dom_lock.h"
 #include "evita/gfx_base.h"
+#include "evita/dom/forms/form.h"
+#include "evita/dom/forms/form_control.h"
+#include "evita/dom/forms/label_control.h"
+#include "evita/ui/controls/label_control.h"
+#include "evita/ui/root_widget.h"
 
 #define WIN32_VERIFY(exp) { \
   if (!(exp)) { \
@@ -16,13 +26,181 @@
 
 namespace views {
 
+namespace {
+//////////////////////////////////////////////////////////////////////
+//
+// ControlImporter
+//
+class ControlImporter {
+  protected: ControlImporter() = default;
+  public: virtual ~ControlImporter() = default;
+
+  public: static ControlImporter* Create(const dom::FormControl* control);
+
+  public: virtual ui::Widget* CreateWidget() = 0;
+  protected: void SetRect(const dom::FormControl* control, ui::Widget* widget);
+  public: virtual void UpdateWidget(ui::Widget* widget) = 0;
+
+  DISALLOW_COPY_AND_ASSIGN(ControlImporter);
+};
+
+void ControlImporter::SetRect(const dom::FormControl* control,
+                              ui::Widget* widget) {
+  gfx::Rect rect(
+      gfx::Point(static_cast<int>(control->client_left()),
+                 static_cast<int>(control->client_top())),
+      gfx::Size(static_cast<int>(control->client_width()),
+                static_cast<int>(control->client_height())));
+  widget->ResizeTo(rect);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// LabelImporter
+//
+class LabelImporter : public ControlImporter {
+  private: const dom::LabelControl* const label_;
+
+  public: LabelImporter(const dom::LabelControl* label);
+  public: virtual ~LabelImporter() = default;
+
+  private: ui::LabelControl::LabelStyle ComputeLabelStyle() const;
+
+  // ControlImporter
+  private: virtual ui::Widget* CreateWidget() override;
+  private: virtual void UpdateWidget(ui::Widget* widget) override;
+
+  DISALLOW_COPY_AND_ASSIGN(LabelImporter);
+};
+
+LabelImporter::LabelImporter(const dom::LabelControl* label)
+    : label_(label) {
+}
+
+ui::LabelControl::LabelStyle LabelImporter::ComputeLabelStyle() const {
+  // TODO(yosi) We should get label style from |dom::FormControl|.
+  ui::LabelControl::LabelStyle style;
+  style.bgcolor = gfx::ColorF(1, 1, 1);
+  style.color = gfx::ColorF(0, 0, 0);
+  style.font_family = L"MS Shell Dlg 2";
+  style.font_size = 13;
+  return style;
+}
+
+ui::Widget* LabelImporter::CreateWidget() {
+  auto const widget = new ui::LabelControl(label_->text(), ComputeLabelStyle());
+  SetRect(label_, widget);
+  return widget;
+}
+
+void LabelImporter::UpdateWidget(ui::Widget* widget) {
+  auto const label_widget = widget->as<ui::LabelControl>();
+  label_widget->set_style(ComputeLabelStyle());
+  label_widget->set_text(label_->text());
+  SetRect(label_, label_widget);
+}
+
+ControlImporter* ControlImporter::Create(const dom::FormControl* control) {
+  if (auto const label = control->as<dom::LabelControl>())
+    return new LabelImporter(label);
+  NOTREACHED();
+  return nullptr;
+}
+
+}  // namespace
+
+//////////////////////////////////////////////////////////////////////
+//
+// FormWindow::FormViewModel
+//
+class FormWindow::FormViewModel {
+  private: const dom::Form* const form_;
+  private: std::unordered_map<dom::EventTargetId, ui::Widget*> map_;
+  private: FormWindow* const window_;
+
+  public: FormViewModel(const dom::Form* form, FormWindow* window);
+  public: ~FormViewModel();
+
+  public: void Update();
+
+  DISALLOW_COPY_AND_ASSIGN(FormViewModel);
+};
+
+FormWindow::FormViewModel::FormViewModel(const dom::Form* form,
+                                         FormWindow* window)
+    : form_(form), window_(window) {
+}
+
+FormWindow::FormViewModel::~FormViewModel() {
+}
+
+void FormWindow::FormViewModel::Update() {
+  std::unordered_set<ui::Widget*> children_to_remove;
+  while (auto const child = window_->first_child()) {
+    window_->RemoveChild(child);
+    children_to_remove.insert(child);
+  }
+  for (auto control : form_->controls()) {
+    std::unique_ptr<ControlImporter> importer(
+        ControlImporter::Create(control));
+    auto const it = map_.find(control->event_target_id());
+    if (it == map_.end()) {
+      auto const widget = importer->CreateWidget();
+      map_[control->event_target_id()] = widget;
+      window_->AppendChild(widget);
+      continue;
+    }
+    auto const widget = it->second;
+    importer->UpdateWidget(widget);
+    window_->AppendChild(widget);
+    window_->SchedulePaintInRect(widget->rect());
+    children_to_remove.erase(widget);
+  }
+  for (auto child : children_to_remove) {
+    window_->SchedulePaintInRect(child->rect());
+    child->DestroyWidget();
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// FormWindow
+//
 FormWindow::FormWindow(WindowId window_id, const dom::Form* form)
     : views::Window(ui::NativeWindow::Create(*this), window_id),
+      dirty_(true),
       form_(form),
-      gfx_(new gfx::Graphics()) {
+      gfx_(new gfx::Graphics()),
+      model_(new FormViewModel(form, this)) {
 }
 
 FormWindow::~FormWindow() {
+}
+
+void FormWindow::DidChangeFormContents() {
+  dirty_ = true;
+}
+
+bool FormWindow::OnIdle(int) {
+  if (!is_realized())
+    return false;
+
+  if (!pending_update_rect_.empty()) {
+    gfx::Rect rect;
+    std::swap(pending_update_rect_, rect);
+    SchedulePaintInRect(rect);
+  }
+
+  if (!dirty_)
+    return false;
+
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  if (!lock_scope.locked())
+    return true;
+
+  model_->Update();
+  dirty_ = false;
+  return false;
 }
 
 // ui::Widget
@@ -47,6 +225,51 @@ void FormWindow::DidCreateNativeWindow() {
  //CSS.
   ::SetLayeredWindowAttributes(*native_window(), RGB(0, 0, 0), 80 * 255 / 100,
                                LWA_ALPHA);
+  gfx_->Init(*native_window());
+  Widget::DidCreateNativeWindow();
+}
+
+void FormWindow::DidResize() {
+  gfx_->Resize(rect());
+  gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::White));
+}
+
+bool FormWindow::DoIdle(int hint) {
+  bool more = false;
+  for (auto widget : ui::RootWidget::instance()->child_nodes()) {
+    if (auto form_window = widget->as<views::FormWindow>())
+      more |= form_window->OnIdle(hint);
+  }
+  return more;
+}
+
+LRESULT FormWindow::OnMessage(uint32_t const uMsg, WPARAM const wParam,
+                              LPARAM const lParam) {
+  return Widget::OnMessage(uMsg, wParam, lParam);
+}
+
+void FormWindow::OnPaint(const gfx::Rect rect) {
+  if (!editor::DomLock::instance()->locked()) {
+    UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+    if (lock_scope.locked()) {
+      OnPaint(rect);
+    } else {
+      // TODO(yosi) Should we have list of dirty rectangles rather than
+      // bounding dirty rectangles?
+      pending_update_rect_.Unite(rect);
+    }
+    return;
+  }
+
+  gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  for (auto child : child_nodes()) {
+    child->OnDraw(&*gfx_);
+  }
+  gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
+                      rect);
+  gfx_->DrawRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
+                      rect, 2.0f);
 }
 
 }  // namespace views

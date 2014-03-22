@@ -29,11 +29,16 @@ class FormControlClass :
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
+        .SetProperty("clientHeight", &FormControl::client_height)
+        .SetProperty("clientLeft", &FormControl::client_left)
+        .SetProperty("clientTop", &FormControl::client_top)
+        .SetProperty("clientWidth", &FormControl::client_width)
         .SetProperty("controlId", &FormControl::control_id)
         .SetProperty("disabled", &FormControl::disabled,
                                  &FormControl::set_disabled)
         .SetProperty("form", &FormControl::form)
-        .SetProperty("name", &FormControl::name);
+        .SetProperty("name", &FormControl::name)
+        .SetMethod("setRect", &FormControl::SetRect);
   }
 
   DISALLOW_COPY_AND_ASSIGN(FormControlClass);
@@ -80,6 +85,15 @@ void FormControl::set_disabled(bool new_disabled) {
   if (disabled_ == new_disabled)
     return;
   disabled_ = new_disabled;
+  if (form_)
+    form_->DidChangeFormControl(this);
+}
+
+void FormControl::SetRect(float left, float top, float width, float height) {
+  gfx::RectF new_rect(left, top, left + width, top + height);
+  if (rect_ == new_rect)
+    return;
+  rect_ = new_rect;
   if (form_)
     form_->DidChangeFormControl(this);
 }

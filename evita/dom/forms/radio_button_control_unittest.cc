@@ -103,4 +103,13 @@ TEST_F(RadioButtonControlTest, set_disabled) {
   EXPECT_SCRIPT_TRUE("sample.disabled");
 }
 
+TEST_F(RadioButtonControlTest, setRect) {
+  EXPECT_SCRIPT_VALID("var sample = new RadioButtonControl('foo', 123);");
+  EXPECT_SCRIPT_VALID("sample.setRect(1, 2, 3, 4)");
+  EXPECT_SCRIPT_EQ("4", "sample.clientHeight");
+  EXPECT_SCRIPT_EQ("1", "sample.clientLeft");
+  EXPECT_SCRIPT_EQ("2", "sample.clientTop");
+  EXPECT_SCRIPT_EQ("3", "sample.clientWidth");
+}
+
 }  // namespace

@@ -2,6 +2,18 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 /** @expose @type{number} */
+FormControl.prototype.clientHeight;
+
+/** @expose @type{number} */
+FormControl.prototype.clientLeft;
+
+/** @expose @type{number} */
+FormControl.prototype.clientTop;
+
+/** @expose @type{number} */
+FormControl.prototype.clientWidth;
+
+/** @expose @type{number} */
 FormControl.prototype.controlId;
 
 /** @expose @type {boolean} */

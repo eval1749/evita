@@ -25,6 +25,10 @@ TEST_F(ButtonControlTest, ctor) {
   EXPECT_SCRIPT_VALID("var sample = new ButtonControl(123);");
   EXPECT_SCRIPT_EQ("123", "sample.controlId");
   EXPECT_SCRIPT_FALSE("sample.disabled");
+  EXPECT_SCRIPT_EQ("0", "sample.clientHeight");
+  EXPECT_SCRIPT_EQ("0", "sample.clientLeft");
+  EXPECT_SCRIPT_EQ("0", "sample.clientTop");
+  EXPECT_SCRIPT_EQ("0", "sample.clientWidth");
 }
 
 TEST_F(ButtonControlTest, dispatchEvent) {
@@ -44,6 +48,15 @@ TEST_F(ButtonControlTest, set_disabled) {
       "form.add(sample);"
       "sample.disabled = true;");
   EXPECT_SCRIPT_TRUE("sample.disabled");
+}
+
+TEST_F(ButtonControlTest, setRect) {
+  EXPECT_SCRIPT_VALID("var sample = new ButtonControl(123);");
+  EXPECT_SCRIPT_VALID("sample.setRect(1, 2, 3, 4)");
+  EXPECT_SCRIPT_EQ("4", "sample.clientHeight");
+  EXPECT_SCRIPT_EQ("1", "sample.clientLeft");
+  EXPECT_SCRIPT_EQ("2", "sample.clientTop");
+  EXPECT_SCRIPT_EQ("3", "sample.clientWidth");
 }
 
 }  // namespace

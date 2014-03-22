@@ -7,6 +7,7 @@
 
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
+#include "evita/gfx/rect_f.h"
 
 namespace dom {
 
@@ -31,18 +32,25 @@ class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   private: gc::Member<Form> form_;
   private: bool handling_form_event_;
   private: base::string16 name_;
+  private: gfx::RectF rect_;
 
   protected: FormControl(int control_id, const base::string16& name);
   protected: explicit FormControl(int control_id);
   protected: FormControl();
   public: virtual ~FormControl();
 
+  public: float client_height() const { return rect_.height(); }
+  public: float client_left() const { return rect_.left; }
+  public: float client_top() const { return rect_.top; }
+  public: float client_width() const { return rect_.width(); }
   public: FormResourceId control_id() const { return control_id_; }
   public: bool disabled() const { return disabled_; }
   public: void set_disabled(bool new_disabled);
   public: Form* form() const { return form_.get(); }
   protected: bool handling_form_event() const { return handling_form_event_; }
   public: const base::string16& name() const { return name_; }
+
+  public: void SetRect(float left, float top, float width, float height);
 
   public: void DispatchChangeEvent();
 

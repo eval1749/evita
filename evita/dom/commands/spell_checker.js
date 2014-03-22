@@ -184,10 +184,11 @@ SpellChecker.prototype.didFireTimer = function() {
    * @param {!SpellChecker} spellChecker
    * @param {number} start
    * @param {number} end
+   * @return {number} Text offset for next scanning.
    */
   function scan(spellChecker, start, end) {
     if (spellChecker.num_checking >= SpellChecker.MAX_CHECKING)
-      return;
+      return end;
     range.collapseTo(start);
     range.startOf(Unit.WORD);
     while (checked < SpellChecker.CHECK_INTERVAL_LIMIT && range.start < end) {

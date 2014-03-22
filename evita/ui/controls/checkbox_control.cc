@@ -31,18 +31,14 @@ void CheckboxControl::set_checked(bool new_checked) {
 void CheckboxControl::OnDraw(gfx::Graphics* gfx) {
   if (rect().empty())
     return;
-  auto const width = 13.0f;
-  auto const height = 13.0f;
+  auto const size = 12.0f;
   gfx::RectF box_rect(
-      gfx::PointF(rect().left + (rect().width() - width) / 2,
-                  rect().top + (rect().height() - height) / 2),
-      gfx::SizeF(width, height));
+      gfx::PointF(rect().left + (rect().width() - size) / 2,
+                  rect().top + (rect().height() - size) / 2),
+      gfx::SizeF(size, size));
   gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect());
   gfx::Brush gray_brush(*gfx, gfx::ColorF::DarkGray);
-  auto const alias_mode = (*gfx)->GetAntialiasMode();
-  (*gfx)->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
   gfx->DrawRectangle(gray_brush, box_rect);
-  (*gfx)->SetAntialiasMode(alias_mode);
   if (checked_) {
     gfx::Brush black_brush(*gfx, gfx::ColorF(0, 0, 0));
     (*gfx)->DrawLine(gfx::PointF(box_rect.left + 3, box_rect.top + 6),

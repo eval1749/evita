@@ -66,6 +66,7 @@ SpellChecker.RE_WORD = new RegExp('^[A-Za-z][a-z]{' +
  *  busy: boolean,
  *  lastUsedTime: !Date,
  *  spelling: !Spelling,
+ *  useCount: number,
  *  word: string
  * }}
  */
@@ -322,11 +323,13 @@ SpellChecker.checkSpelling = function(word_to_check) {
   var result = SpellChecker.wordStateMap.get(word_to_check);
   if (result) {
     result.lastUsedTime = new Date();
+    ++result.useCount;
     return Promise.cast(result);
   }
   var state = {
     busy: true,
     lastUsedTime: new Date(),
+    useCount: 1,
     word: word_to_check,
   };
   SpellChecker.wordStateMap.set(word_to_check, state);

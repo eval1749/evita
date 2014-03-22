@@ -72,6 +72,7 @@
         'dom/forms/button_control_unittest.cc',
         'dom/forms/checkbox_control_unittest.cc',
         'dom/forms/form_unittest.cc',
+        'dom/forms/form_window_unittest.cc',
         'dom/forms/radio_button_control_unittest.cc',
         'dom/forms/text_field_control_unittest.cc',
 

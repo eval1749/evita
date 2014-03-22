@@ -116,8 +116,6 @@ v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
     return v8::Handle<v8::Value>();
   delegate_->WillRunScript(this);
   v8::TryCatch try_catch;
-  try_catch.SetCaptureMessage(true);
-  try_catch.SetVerbose(true);
   auto const value = callee->ToObject()->CallAsFunction(receiver,
       static_cast<int>(args.size()),
       const_cast<v8::Handle<v8::Value>*>(args.data()));
@@ -134,8 +132,6 @@ v8::Handle<v8::Value> Runner::CallAsConstructor(
   #endif
   delegate_->WillRunScript(this);
   v8::TryCatch try_catch;
-  try_catch.SetCaptureMessage(true);
-  try_catch.SetVerbose(true);
   auto const value = callee->ToObject()->CallAsConstructor(
       static_cast<int>(args.size()),
       const_cast<v8::Handle<v8::Value>*>(args.data()));
@@ -172,8 +168,6 @@ v8::Handle<v8::Value> Runner::Run(const base::string16& script_text,
     DCHECK(in_scope_);
   #endif
   v8::TryCatch try_catch;
-  try_catch.SetCaptureMessage(true);
-  try_catch.SetVerbose(true);
   auto const script = v8::Script::New(
       gin::StringToV8(isolate(), script_text)->ToString(),
       gin::StringToV8(isolate(), script_name)->ToString());
@@ -191,8 +185,6 @@ v8::Handle<v8::Value> Runner::Run(v8::Handle<v8::Script> script) {
     return v8::Handle<v8::Value>();
   delegate_->WillRunScript(this);
   v8::TryCatch try_catch;
-  try_catch.SetCaptureMessage(true);
-  try_catch.SetVerbose(true);
   auto const value = script->Run();
   delegate_->DidRunScript(this);
   if (try_catch.HasCaught())

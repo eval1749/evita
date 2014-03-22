@@ -163,8 +163,6 @@ class EditorClass : public v8_glue::WrapperInfo {
     auto const isolate = runner->isolate();
     v8_glue::Runner::EscapableHandleScope runner_scope(runner);
     v8::TryCatch try_catch;
-    try_catch.SetCaptureMessage(true);
-    try_catch.SetVerbose(true);
     auto const script = v8::Script::New(
         gin::StringToV8(isolate, script_text)->ToString(),
         gin::StringToV8(isolate, file_name)

@@ -68,8 +68,6 @@ std::string AbstractDomTest::EvalScript(const base::StringPiece& script_text,
                                  v8::Integer::New(isolate, line_number),
                                  v8::Integer::New(isolate, 0));
   v8::TryCatch try_catch;
-  try_catch.SetCaptureMessage(true);
-  try_catch.SetVerbose(true);
   auto const script = v8::Script::New(gin::StringToV8(isolate, script_text),
                                       &script_origin);
   if (script.IsEmpty()) {
@@ -97,8 +95,6 @@ bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
                                  v8::Integer::New(isolate, line_number),
                                  v8::Integer::New(isolate, 0));
   v8::TryCatch try_catch;
-  try_catch.SetCaptureMessage(true);
-  try_catch.SetVerbose(true);
   auto const script = v8::Script::New(gin::StringToV8(isolate, script_text),
                                       &script_origin);
   if (script.IsEmpty()) {

@@ -13,7 +13,9 @@
 #include "evita/gfx_base.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
+#include "evita/dom/forms/form_observer.h"
 #include "evita/dom/forms/label_control.h"
+#include "evita/dom/lock.h"
 #include "evita/ui/controls/label_control.h"
 #include "evita/ui/root_widget.h"
 
@@ -113,28 +115,39 @@ ControlImporter* ControlImporter::Create(const dom::FormControl* control) {
 //
 // FormWindow::FormViewModel
 //
-class FormWindow::FormViewModel {
+class FormWindow::FormViewModel : public dom::FormObserver {
+  private: bool dirty_;
   private: const dom::Form* const form_;
   private: std::unordered_map<dom::EventTargetId, ui::Widget*> map_;
   private: FormWindow* const window_;
 
   public: FormViewModel(const dom::Form* form, FormWindow* window);
-  public: ~FormViewModel();
+  public: virtual ~FormViewModel();
+
+  public: bool dirty() const { return dirty_; }
 
   public: void Update();
+
+  // dom::FormObserver
+  private: virtual void DidChangeForm() override;
 
   DISALLOW_COPY_AND_ASSIGN(FormViewModel);
 };
 
 FormWindow::FormViewModel::FormViewModel(const dom::Form* form,
                                          FormWindow* window)
-    : form_(form), window_(window) {
+    : dirty_(true), form_(form), window_(window) {
+  form_->AddObserver(this);
 }
 
 FormWindow::FormViewModel::~FormViewModel() {
+  form_->RemoveObserver(this);
 }
 
 void FormWindow::FormViewModel::Update() {
+  UI_ASSERT_DOM_LOCKED();
+  if (!dirty_)
+    return;
   std::unordered_set<ui::Widget*> children_to_remove;
   while (auto const child = window_->first_child()) {
     window_->RemoveChild(child);
@@ -160,6 +173,13 @@ void FormWindow::FormViewModel::Update() {
     window_->SchedulePaintInRect(child->rect());
     child->DestroyWidget();
   }
+  dirty_ = false;
+}
+
+// dom::FormObserver
+void FormWindow::FormViewModel::DidChangeForm() {
+  ASSERT_DOM_LOCKED();
+  dirty_ = true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -168,17 +188,11 @@ void FormWindow::FormViewModel::Update() {
 //
 FormWindow::FormWindow(WindowId window_id, const dom::Form* form)
     : views::Window(ui::NativeWindow::Create(*this), window_id),
-      dirty_(true),
-      form_(form),
-      gfx_(new gfx::Graphics()),
+      form_(form), gfx_(new gfx::Graphics()),
       model_(new FormViewModel(form, this)) {
 }
 
 FormWindow::~FormWindow() {
-}
-
-void FormWindow::DidChangeFormContents() {
-  dirty_ = true;
 }
 
 bool FormWindow::OnIdle(int) {
@@ -191,7 +205,7 @@ bool FormWindow::OnIdle(int) {
     SchedulePaintInRect(rect);
   }
 
-  if (!dirty_)
+  if (!model_->dirty())
     return false;
 
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
@@ -199,7 +213,6 @@ bool FormWindow::OnIdle(int) {
     return true;
 
   model_->Update();
-  dirty_ = false;
   return false;
 }
 

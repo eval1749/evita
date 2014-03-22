@@ -4,6 +4,7 @@
 #include "evita/dom/forms/form.h"
 
 #include "evita/dom/forms/form_control.h"
+#include "evita/dom/forms/form_observer.h"
 #include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/converter.h"
@@ -82,11 +83,17 @@ void Form::AddFormControl(FormControl* control) {
   control->form_ = this;
 }
 
+void Form::AddObserver(FormObserver* observer) const {
+  observers_.AddObserver(observer);
+}
+
 void Form::DidChangeFormControl(FormControl*) {
-  if (name_ != L"FindDialogBox")
+  if (name_ == L"FindDialogBox") {
+    ScriptController::instance()->view_delegate()->DidChangeFormContents(
+        dialog_box_id());
     return;
-  ScriptController::instance()->view_delegate()->DidChangeFormContents(
-      dialog_box_id());
+  }
+  FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 
 void Form::Realize() {
@@ -96,6 +103,10 @@ void Form::Realize() {
   }
   ScriptController::instance()->view_delegate()->RealizeDialogBox(
       dialog_box_id());
+}
+
+void Form::RemoveObserver(FormObserver* observer) const {
+  observers_.RemoveObserver(observer);
 }
 
 void Form::Show() {

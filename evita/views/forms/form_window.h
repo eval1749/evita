@@ -31,7 +31,6 @@ class FormWindow : public views::Window {
 
   private: class FormViewModel;
 
-  private: bool dirty_;
   private: gc::Member<const dom::Form> form_;
   private: private: std::unique_ptr<gfx::Graphics> gfx_;
   private: private: std::unique_ptr<FormViewModel> model_;
@@ -40,7 +39,6 @@ class FormWindow : public views::Window {
   public: FormWindow(views::WindowId window_id, const dom::Form* form);
   public: virtual ~FormWindow();
 
-  public: void DidChangeFormContents();
   public: static bool DoIdle(int hint);
   private: bool OnIdle(int hint);
 

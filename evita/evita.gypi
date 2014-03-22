@@ -209,6 +209,7 @@
         'dom/forms/checkbox_control.cc',
         'dom/forms/form.cc',
         'dom/forms/form_control.cc',
+        'dom/forms/form_observer.cc',
         'dom/forms/form_window.cc',
         'dom/forms/label_control.cc',
         'dom/forms/radio_button_control.cc',

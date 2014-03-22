@@ -85,6 +85,7 @@
         'dom/forms/checkbox_control.js',
         'dom/forms/form.js',
         'dom/forms/form_control.js',
+        'dom/forms/form_window.js',
         'dom/forms/radio_button_control.js',
         'dom/forms/text_field_control.js',
 
@@ -497,6 +498,7 @@
         'views/forms/dialog_box_set.cc',
         'views/forms/file_dialog_box.cc',
         'views/forms/find_dialog_box.cc',
+        'views/forms/form_window.cc',
         'vi_Frame.cpp',
         'vi_Pane.cpp',
         'vi_Selection.cpp',

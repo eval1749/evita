@@ -269,6 +269,7 @@ DEFINE_VIEW_DELEGATE_2(CheckSpelling, const base::string16&,
     const CheckSpellingDeferred&)
 DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
 DEFINE_VIEW_DELEGATE_1(CreateFindDialogBox, Form*)
+DEFINE_VIEW_DELEGATE_2(CreateFormWindow, WindowId, const Form*)
 DEFINE_VIEW_DELEGATE_2(CreateTableWindow, WindowId, Document*)
 DEFINE_VIEW_DELEGATE_1(CreateTextWindow, const TextWindow*)
 DEFINE_VIEW_DELEGATE_1(DestroyWindow, WindowId)

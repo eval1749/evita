@@ -84,6 +84,7 @@ class ViewDelegate {
       WindowId window_id, const TextWindowCompute& data) = 0;
   public: virtual void CreateEditorWindow(const EditorWindow* window) = 0;
   public: virtual void CreateFindDialogBox(Form* form) = 0;
+  public: virtual void CreateFormWindow(WindowId, const Form* form) = 0;
   public: virtual void CreateTableWindow(WindowId window_id,
                                          Document* document) = 0;
   public: virtual void CreateTextWindow(const TextWindow* window) = 0;

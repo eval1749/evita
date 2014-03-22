@@ -8,6 +8,9 @@
 
 namespace {
 
+using ::testing::Eq;
+using ::testing::_;
+
 class FormWindowTest : public dom::AbstractDomTest {
   protected: FormWindowTest() {
   }
@@ -18,6 +21,7 @@ class FormWindowTest : public dom::AbstractDomTest {
 };
 
 TEST_F(FormWindowTest, ctor) {
+  EXPECT_CALL(*mock_view_impl(), CreateFormWindow(Eq(2), _));
   EXPECT_SCRIPT_VALID(
       "var form = new Form('form1');"
       "var sample = new FormWindow(form);");

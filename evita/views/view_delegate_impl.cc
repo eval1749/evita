@@ -24,6 +24,7 @@
 #include "evita/views/forms/dialog_box_set.h"
 #include "evita/views/forms/file_dialog_box.h"
 #include "evita/views/forms/find_dialog_box.h"
+#include "evita/views/forms/form_window.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/table_view.h"
 #include "evita/views/tab_data_set.h"
@@ -140,6 +141,11 @@ void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
 
 void ViewDelegateImpl::CreateFindDialogBox(dom::Form* form) {
   new FindDialogBox(form);
+}
+
+void ViewDelegateImpl::CreateFormWindow(dom::WindowId window_id,
+                                        const dom::Form* form) {
+  new FormWindow(window_id, form);
 }
 
 void ViewDelegateImpl::CreateTableWindow(dom::WindowId window_id,
@@ -387,7 +393,10 @@ void ViewDelegateImpl::RealizeWindow(dom::WindowId window_id) {
   if (!widget)
     return;
   DCHECK_EQ(window_id, widget->window_id());
-  widget->RealizeWidget();
+  if (widget->parent_node())
+    widget->RealizeWidget();
+  else
+    widget->RealizeTopLevelWidget();
 }
 
 void ViewDelegateImpl::RegisterViewEventHandler(

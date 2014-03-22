@@ -5,6 +5,7 @@
 #include "evita/dom/forms/form_window.h"
 
 #include "evita/dom/forms/form.h"
+#include "evita/dom/script_controller.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
@@ -55,6 +56,8 @@ class FormWindowClass :
 DEFINE_SCRIPTABLE_OBJECT(FormWindow, FormWindowClass);
 
 FormWindow::FormWindow(Form* form) : form_(form) {
+  ScriptController::instance()->view_delegate()->CreateFormWindow(
+      window_id(), form);
 }
 
 FormWindow::~FormWindow() {

@@ -8,6 +8,23 @@
 
 namespace ui {
 
+//////////////////////////////////////////////////////////////////////
+//
+// LabelControl::LabelStyle
+//
+bool LabelControl::LabelStyle::operator==(const LabelStyle& other) const {
+  return bgcolor == other.bgcolor && color == other.color &&
+         font_family == other.font_family && font_size == other.font_size;
+}
+
+bool LabelControl::LabelStyle::operator!=(const LabelStyle& other) const {
+  return !operator==(other);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// LabelControl::Renderer
+//
 class LabelControl::Renderer {
   private: gfx::RectF rect_;
   private: LabelStyle style_;
@@ -46,6 +63,7 @@ void LabelControl::Renderer::Render(gfx::Graphics* gfx) const {
   gfx::Brush text_brush(*gfx, style_.color);
   (*gfx)->DrawTextLayout(rect_.left_top(), *text_layout_, text_brush,
                          D2D1_DRAW_TEXT_OPTIONS_CLIP);
+  gfx->Flush();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -59,13 +77,17 @@ LabelControl::LabelControl(const base::string16& text, const LabelStyle& style)
 LabelControl::~LabelControl() {
 }
 
-void LabelControl::set_style(const LabelStyle& style) {
-  style_ = style;
+void LabelControl::set_style(const LabelStyle& new_style) {
+  if (style_ == new_style)
+    return;
+  style_ = new_style;
   renderer_.reset();
 }
 
-void LabelControl::set_text(const base::string16& text) {
-  text_ = text;
+void LabelControl::set_text(const base::string16& new_text) {
+  if (text_ == new_text)
+    return;
+  text_ = new_text;
   renderer_.reset();
 }
 

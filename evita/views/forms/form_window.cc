@@ -14,8 +14,10 @@
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/forms/form_observer.h"
+#include "evita/dom/forms/checkbox_control.h"
 #include "evita/dom/forms/label_control.h"
 #include "evita/dom/lock.h"
+#include "evita/ui/controls/checkbox_control.h"
 #include "evita/ui/controls/label_control.h"
 #include "evita/ui/root_widget.h"
 
@@ -54,6 +56,52 @@ void ControlImporter::SetRect(const dom::FormControl* control,
       gfx::Size(static_cast<int>(control->client_width()),
                 static_cast<int>(control->client_height())));
   widget->ResizeTo(rect);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// CheckboxImporter
+//
+class CheckboxImporter : public ControlImporter {
+  private: const dom::CheckboxControl* const checkbox_;
+
+  public: CheckboxImporter(const dom::CheckboxControl* checkbox);
+  public: virtual ~CheckboxImporter() = default;
+
+  private: ui::CheckboxControl::Style ComputeStyle() const;
+
+  // ControlImporter
+  private: virtual ui::Widget* CreateWidget() override;
+  private: virtual void UpdateWidget(ui::Widget* widget) override;
+
+  DISALLOW_COPY_AND_ASSIGN(CheckboxImporter);
+};
+
+CheckboxImporter::CheckboxImporter(const dom::CheckboxControl* checkbox)
+    : checkbox_(checkbox) {
+}
+
+ui::CheckboxControl::Style
+    CheckboxImporter::ComputeStyle() const {
+  // TODO(yosi) We should get checkbox style from |dom::FormControl|.
+  ui::CheckboxControl::Style style;
+  style.bgcolor = gfx::ColorF(1, 1, 1);
+  style.color = gfx::ColorF(gfx::ColorF::LightGray); // #D3D3D3
+  return style;
+}
+
+ui::Widget* CheckboxImporter::CreateWidget() {
+  auto const widget = new ui::CheckboxControl(checkbox_->checked(),
+                                              ComputeStyle());
+  SetRect(checkbox_, widget);
+  return widget;
+}
+
+void CheckboxImporter::UpdateWidget(ui::Widget* widget) {
+  auto const checkbox_widget = widget->as<ui::CheckboxControl>();
+  checkbox_widget->set_style(ComputeStyle());
+  checkbox_widget->set_checked(checkbox_->checked());
+  SetRect(checkbox_, checkbox_widget);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -103,6 +151,8 @@ void LabelImporter::UpdateWidget(ui::Widget* widget) {
 }
 
 ControlImporter* ControlImporter::Create(const dom::FormControl* control) {
+  if (auto const checkbox = control->as<dom::CheckboxControl>())
+    return new CheckboxImporter(checkbox);
   if (auto const label = control->as<dom::LabelControl>())
     return new LabelImporter(label);
   NOTREACHED();

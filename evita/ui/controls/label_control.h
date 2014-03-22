@@ -20,6 +20,9 @@ class LabelControl : public ui::Widget {
     gfx::ColorF color;
     base::string16 font_family;
     float font_size;
+
+    bool operator==(const LabelStyle& other) const;
+    bool operator!=(const LabelStyle& other) const;
   };
   private: class Renderer;
 

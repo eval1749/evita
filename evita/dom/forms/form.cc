@@ -56,7 +56,7 @@ class FormClass :
 DEFINE_SCRIPTABLE_OBJECT(Form, FormClass);
 
 Form::Form(const base::string16& name) : name_(name) {
-  ScriptController::instance()->view_delegate()->CreateDialogBox(this);
+  ScriptController::instance()->view_delegate()->CreateFindDialogBox(this);
 }
 
 Form::~Form() {

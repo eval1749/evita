@@ -21,7 +21,7 @@ class FormWindowTest : public dom::AbstractDomTest {
 };
 
 TEST_F(FormWindowTest, ctor) {
-  EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
+  EXPECT_CALL(*mock_view_impl(), CreateFindDialogBox(_));
 
   EXPECT_SCRIPT_VALID(
       "var form = new Form('form1');"

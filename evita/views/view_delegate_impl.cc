@@ -133,13 +133,13 @@ text::Posn ViewDelegateImpl::ComputeOnTextWindow(
   }
 }
 
-void ViewDelegateImpl::CreateDialogBox(dom::Form* form) {
-  new FindDialogBox(form);
-}
-
 void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
   DCHECK(window);
   new Frame(window->window_id());
+}
+
+void ViewDelegateImpl::CreateFindDialogBox(dom::Form* form) {
+  new FindDialogBox(form);
 }
 
 void ViewDelegateImpl::CreateTableWindow(dom::WindowId window_id,

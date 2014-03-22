@@ -85,9 +85,9 @@ class ScriptThread final : public domapi::IoDelegate,
         const CheckSpellingDeferred& deferred) override;
   private: virtual text::Posn ComputeOnTextWindow(
       WindowId window_id, const TextWindowCompute& data) override;
-  private: virtual void CreateDialogBox(dom::Form* form) override;
   private: virtual void CreateEditorWindow(
       const EditorWindow* window) override;
+  private: virtual void CreateFindDialogBox(dom::Form* form) override;
   private: virtual void CreateTableWindow(
       WindowId window_id, Document* document) override;
   private: virtual void CreateTextWindow(const TextWindow* window) override;

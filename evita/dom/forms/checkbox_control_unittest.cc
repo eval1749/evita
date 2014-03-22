@@ -46,7 +46,7 @@ TEST_F(CheckboxControlTest, dispatchEvent) {
 }
 
 TEST_F(CheckboxControlTest, set_value) {
-  EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
+  EXPECT_CALL(*mock_view_impl(), CreateFindDialogBox(_));
   EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
   EXPECT_SCRIPT_VALID(
       "var form = new Form('form1');"
@@ -62,7 +62,7 @@ TEST_F(CheckboxControlTest, set_value) {
 }
 
 TEST_F(CheckboxControlTest, set_disabled) {
-  EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
+  EXPECT_CALL(*mock_view_impl(), CreateFindDialogBox(_));
   EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
   EXPECT_SCRIPT_VALID(
       "var form = new Form('form1');"

@@ -26,9 +26,9 @@ class ViewDelegateImpl : public dom::ViewDelegate {
         const CheckSpellingDeferred& deferred) override;
   private: virtual text::Posn ComputeOnTextWindow(dom::WindowId window_id,
       const dom::TextWindowCompute& data) override;
-  private: virtual void CreateDialogBox(dom::Form* form) override;
   private: virtual void CreateEditorWindow(
       const dom::EditorWindow* window) override;
+  private: virtual void CreateFindDialogBox(dom::Form* form) override;
   private: virtual void CreateTableWindow(
       dom::WindowId window_id, dom::Document* document) override;
   private: virtual void CreateTextWindow(

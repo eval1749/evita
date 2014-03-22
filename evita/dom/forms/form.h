@@ -3,6 +3,7 @@
 #if !defined(INCLUDE_evita_dom_forms_form_h)
 #define INCLUDE_evita_dom_forms_form_h
 
+#include "base/strings/string16.h"
 #include "evita/dom/events/view_event_target.h"
 #include "evita/dom/public/dialog_box_id.h"
 
@@ -17,8 +18,9 @@ class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(Form);
 
   private: std::unordered_map<int, FormControl*> controls_;
+  private: const base::string16 name_;
 
-  public: Form();
+  public: Form(const base::string16& name);
   public: virtual ~Form();
 
   public: FormControl* control(int control_id) const;
@@ -26,6 +28,7 @@ class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
   public: domapi::DialogBoxId dialog_box_id() const {
     return event_target_id();
   }
+  public: const base::string16& name() const { return name_; }
 
   public: void AddFormControl(FormControl* control);
   public: void DidChangeFormControl(FormControl* control);

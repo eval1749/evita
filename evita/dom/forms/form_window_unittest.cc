@@ -24,7 +24,7 @@ TEST_F(FormWindowTest, ctor) {
   EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
 
   EXPECT_SCRIPT_VALID(
-      "var form = new Form();"
+      "var form = new Form('form1');"
       "var sample = new FormWindow(form);");
   EXPECT_SCRIPT_TRUE("sample instanceof Window");
   EXPECT_SCRIPT_TRUE("sample.form === form");

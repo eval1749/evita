@@ -82,12 +82,6 @@ var FilePath;
 
 /**
  * @constructor
- * @extends {EventTarget}
- */
-var Form = function() {};
-
-/**
- * @constructor
  */
 var JsConsole = function() {};
 

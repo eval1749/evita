@@ -40,7 +40,7 @@ TEST_F(ButtonControlTest, set_disabled) {
   EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
   EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
   EXPECT_SCRIPT_VALID(
-      "var form = new Form();"
+      "var form = new Form('form1');"
       "var sample = new ButtonControl(123);"
       "form.add(sample);"
       "sample.disabled = true;");

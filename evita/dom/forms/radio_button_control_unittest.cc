@@ -31,7 +31,7 @@ TEST_F(RadioButtonControlTest, ctor) {
 TEST_F(RadioButtonControlTest, dispatchEvent) {
   EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
   EXPECT_SCRIPT_VALID(
-      "var form1 = new Form();"
+      "var form1 = new Form('form1');"
       "var sample1 = new RadioButtonControl('foo', 123);"
       "var sample2 = new RadioButtonControl('foo', 124);"
       "form1.add(sample1);"
@@ -65,7 +65,7 @@ TEST_F(RadioButtonControlTest, set_checked) {
   EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
   EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1))).Times(3);
   EXPECT_SCRIPT_VALID(
-      "var form1 = new Form();"
+      "var form1 = new Form('form1');"
       "var sample1 = new RadioButtonControl('foo', 123);"
       "var sample2 = new RadioButtonControl('foo', 124);"
       "form1.add(sample1);"
@@ -99,7 +99,7 @@ TEST_F(RadioButtonControlTest, set_disabled) {
   EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
   EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
   EXPECT_SCRIPT_VALID(
-      "var form = new Form();"
+      "var form = new Form('form1');"
       "var sample = new RadioButtonControl('foo', 123);"
       "form.add(sample);"
       "sample.disabled = true;");

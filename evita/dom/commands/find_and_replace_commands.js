@@ -253,7 +253,7 @@
   function ensureForm() {
     if (form)
       return form;
-    form = new Form();
+    form = new Form('FindDialogBox');
     // TODO(yosi) |global.findForm| is only for debugging purpose.
     global.findForm = form;
 

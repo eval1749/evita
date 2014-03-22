@@ -25,14 +25,15 @@ class FormTest : public dom::AbstractDomTest {
 
 TEST_F(FormTest, ctor) {
   EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
-  EXPECT_SCRIPT_VALID("var sample = new Form();");
+  EXPECT_SCRIPT_VALID("var sample = new Form('sample');");
   EXPECT_SCRIPT_TRUE("sample instanceof EventTarget");
   EXPECT_SCRIPT_EQ("0", "sample.controls.length");
+  EXPECT_SCRIPT_EQ("sample", "sample.name");
 }
 
 TEST_F(FormTest, add) {
   EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
-  EXPECT_SCRIPT_VALID("var sample = new Form();"
+  EXPECT_SCRIPT_VALID("var sample = new Form('sample');"
                       "var text_field = new TextFieldControl(123);"
                       "sample.add(text_field);");
   EXPECT_SCRIPT_EQ("1", "sample.controls.length");
@@ -42,7 +43,7 @@ TEST_F(FormTest, add) {
 TEST_F(FormTest, realize) {
   EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
   EXPECT_CALL(*mock_view_impl(), RealizeDialogBox(Eq(1)));
-  EXPECT_SCRIPT_VALID("var sample = new Form();"
+  EXPECT_SCRIPT_VALID("var sample = new Form('sample');"
                       "sample.realize();");
 }
 
@@ -50,14 +51,14 @@ TEST_F(FormTest, show) {
   EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
   EXPECT_CALL(*mock_view_impl(), RealizeDialogBox(Eq(1)));
   EXPECT_CALL(*mock_view_impl(), ShowDialogBox(Eq(1)));
-  EXPECT_SCRIPT_VALID("var sample = new Form();"
+  EXPECT_SCRIPT_VALID("var sample = new Form('sample');"
                       "sample.realize();"
                       "sample.show();");
 }
 
 TEST_F(FormTest, DispatchFormEvent) {
   EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
-  EXPECT_SCRIPT_VALID("var sample = new Form();"
+  EXPECT_SCRIPT_VALID("var sample = new Form('sample');"
                       "var text_field = new TextFieldControl(123);"
                       "sample.add(text_field);");
   domapi::FormEvent form_event;

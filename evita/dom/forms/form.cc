@@ -30,14 +30,15 @@ class FormClass :
         &FormClass::NewForm);
   }
 
-  private: static Form* NewForm() {
-    return new Form();
+  private: static Form* NewForm(const base::string16& name) {
+    return new Form(name);
   }
 
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
         .SetProperty("controls", &Form::controls)
+        .SetProperty("name", &Form::name)
         .SetMethod("add", &Form::AddFormControl)
         .SetMethod("control", &Form::control)
         .SetMethod("realize", &Form::Realize)
@@ -54,7 +55,7 @@ class FormClass :
 //
 DEFINE_SCRIPTABLE_OBJECT(Form, FormClass);
 
-Form::Form() {
+Form::Form(const base::string16& name) : name_(name) {
   ScriptController::instance()->view_delegate()->CreateDialogBox(this);
 }
 

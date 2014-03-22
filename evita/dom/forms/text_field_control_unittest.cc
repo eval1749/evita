@@ -50,7 +50,7 @@ TEST_F(TextFieldControlTest, set_disabled) {
   EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
   EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
   EXPECT_SCRIPT_VALID(
-      "var form = new Form();"
+      "var form = new Form('form1');"
       "var sample = new TextFieldControl(123);"
       "form.add(sample);"
       "sample.disabled = true;");
@@ -61,7 +61,7 @@ TEST_F(TextFieldControlTest, set_value) {
   EXPECT_CALL(*mock_view_impl(), CreateDialogBox(_));
   EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
   EXPECT_SCRIPT_VALID(
-      "var form = new Form();"
+      "var form = new Form('form1');"
       "var sample = new TextFieldControl(123);"
       "form.add(sample);"
       "var changed = 0;"

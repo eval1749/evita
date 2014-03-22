@@ -585,6 +585,17 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       we_have_active_focus = true;
       return 0;
 
+    case WM_SIZE:
+      #if DEBUG_RESIZE
+        DVLOG_WIDGET(0) << "WM_SIZE " << wParam << " " <<
+            LOWORD(lParam) << "x" << HIWORD(lParam);
+      #endif
+      if (wParam != SIZE_MAXHIDE && wParam != SIZE_MINIMIZED) {
+        ::GetClientRect(*native_window_.get(), &rect_);
+        DidResize();
+      }
+      return 0;
+
     case WM_VSCROLL: {
       auto const widget = reinterpret_cast<Widget*>(::GetWindowLongPtr(
           reinterpret_cast<HWND>(lParam), GWLP_ID));
@@ -652,11 +663,11 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
         }
       }
 
-      if (!(wp->flags & 0x10000000) && (wp->flags & SWP_NOSIZE))
+      if (wp->flags & SWP_NOSIZE)
         return 0;
 
       if (::IsIconic(*native_window_.get())) {
-        // We don't take care miminize window.
+        // We don't care minimize window.
         return 0;
       }
 

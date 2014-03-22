@@ -25,6 +25,7 @@
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/forms/form_window.h"
+#include "evita/dom/forms/label_control.h"
 #include "evita/dom/forms/radio_button_control.h"
 #include "evita/dom/forms/text_field_control.h"
 #include "evita/dom/file_path.h"
@@ -105,6 +106,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
         INSTALL(FormControl);
           INSTALL(ButtonControl);
           INSTALL(CheckboxControl);
+          INSTALL(LabelControl);
           INSTALL(RadioButtonControl);
           INSTALL(TextFieldControl);
         INSTALL(Window);

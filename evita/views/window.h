@@ -32,7 +32,6 @@ class Window : public ui::Widget {
   protected: ~Window();
 
   public: int active_tick() const { return active_tick_; }
-  public: static WindowSet all_windows();
   public: WindowId window_id() const { return window_id_; }
 
   // [D]

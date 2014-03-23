@@ -22,16 +22,12 @@ class WaitableEvent;
 
 namespace dom {
 
-class EditorWindow;
-struct EvaluateResult;
-class TextWindow;
-
 class ScriptThread final : public domapi::IoDelegate,
                            public ViewDelegate,
                            public domapi::ViewEventHandler {
   private: domapi::IoDelegate* io_delegate_;
   private: base::MessageLoop* io_message_loop_;
-  private: std::unique_ptr<base::Thread> thread_;
+  private: std::unique_ptr<base::Thread> const thread_;
   private: ViewDelegate* view_delegate_;
   private: domapi::ViewEventHandler* view_event_handler_;
   private: base::MessageLoop* view_message_loop_;
@@ -41,7 +37,7 @@ class ScriptThread final : public domapi::IoDelegate,
                         ViewDelegate* view_delegate,
                         base::MessageLoop* io_message_loop,
                         domapi::IoDelegate* io_delegate);
-  public: ~ScriptThread();
+  public: virtual ~ScriptThread();
 
   public: static ScriptThread* instance();
 

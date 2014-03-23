@@ -337,8 +337,8 @@ void FormWindow::CreateNativeWindow() const {
   auto const dwExStyle = WS_EX_LAYERED | WS_EX_TOOLWINDOW;
   auto const dwStyle = WS_POPUP | WS_CAPTION | WS_SYSMENU |WS_VISIBLE;
   // TODO(yosi) We should retrieve size of |FormWindow| from |form|.
-  Rect contentRect(0, 0, 400, 240);
-  Rect windowRect(contentRect);
+  gfx::Rect contentRect(0, 0, 400, 240);
+  gfx::Rect windowRect(contentRect);
   bool has_menu = false;
   WIN32_VERIFY(::AdjustWindowRectEx(&windowRect, dwStyle, has_menu, dwExStyle));
 

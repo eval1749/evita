@@ -7,8 +7,11 @@
 
 #include "base/strings/string16.h"
 #include "evita/li_util.h"
-#include "evita/views/command_window.h"
-#include "evita/views/window.h"
+#include "evita/ui/widget.h"
+
+namespace views {
+class Window;
+}
 
 class Frame;
 

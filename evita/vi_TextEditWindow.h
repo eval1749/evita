@@ -13,11 +13,10 @@
 
 #include <memory>
 
-#include "evita/views/content_window.h"
 #include "evita/li_util.h"
 #include "evita/gfx_base.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
-#include "evita/views/command_window.h"
+#include "evita/views/content_window.h"
 
 class Caret;
 class EditPane;

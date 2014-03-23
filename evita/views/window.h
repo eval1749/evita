@@ -4,6 +4,7 @@
 #define INCLUDE_evita_views_window_h
 
 #include "evita/ui/widget.h"
+#include "evita/views/event_source.h"
 #include "evita/views/window_id.h"
 
 namespace ui {
@@ -17,7 +18,7 @@ typedef common::win::Point Point;
 typedef common::win::Rect Rect;
 class WindowSet;
 
-class Window : public ui::Widget {
+class Window : public ui::Widget, protected EventSource {
   DECLARE_CASTABLE_CLASS(Window, Widget);
 
   private: int active_tick_;
@@ -29,7 +30,7 @@ class Window : public ui::Widget {
       std::unique_ptr<NativeWindow>&& native_window,
       WindowId window_id = kInvalidWindowId);
   protected: explicit Window(WindowId window_id = kInvalidWindowId);
-  protected: ~Window();
+  protected: virtual ~Window();
 
   public: int active_tick() const { return active_tick_; }
   public: WindowId window_id() const { return window_id_; }
@@ -40,8 +41,6 @@ class Window : public ui::Widget {
   protected: virtual void DidRealize() override;
   protected: virtual void DidResize() override;
   protected: virtual void DidSetFocus() override;
-  protected: void DispatchKeyboardEvent(const ui::KeyboardEvent& event);
-  protected: void DispatchMouseEvent(const ui::MouseEvent& event);
 
   // [F]
   public: static Window* FromWindowId(WindowId window_id);

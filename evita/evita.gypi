@@ -648,6 +648,7 @@
       'sources': [
         'precomp.cpp',
 
+        'views/event_source.cc',
         'views/icon_cache.cc',
         'views/view_delegate_impl.cc',
         'views/window.cc',

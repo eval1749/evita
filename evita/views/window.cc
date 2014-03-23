@@ -76,39 +76,6 @@ domapi::ViewEventHandler* view_event_handler() {
   return Application::instance()->view_event_handler();
 }
 
-domapi::EventType ConvertEventType(const ui::KeyboardEvent event) {
-  auto const event_type = event.event_type();
-  if (event_type == ui::EventType::KeyPressed)
-    return domapi::EventType::KeyDown;
-
-  if (event_type == ui::EventType::KeyReleased)
-    return domapi::EventType::KeyUp;
-
-  return domapi::EventType::Invalid;
-}
-
-domapi::EventType ConvertEventType(const ui::MouseEvent event) {
-  auto const event_type = event.event_type();
-  if (event_type == ui::EventType::MousePressed) {
-    if (!event.click_count())
-      return domapi::EventType::MouseDown;
-    if (event.click_count() == 1)
-      return domapi::EventType::Click;
-    return domapi::EventType::DblClick;
-  }
-
-  if (event_type == ui::EventType::MouseReleased)
-    return domapi::EventType::MouseUp;
-
-  if (event_type == ui::EventType::MouseMoved)
-    return domapi::EventType::MouseMove;
-
-  if (event_type == ui::EventType::MouseWheel)
-    return domapi::EventType::Wheel;
-
-  return domapi::EventType::Invalid;
-}
-
 int static_active_tick;
 
 }  // namespace
@@ -121,6 +88,7 @@ int static_active_tick;
 Window::Window(std::unique_ptr<NativeWindow>&& native_window,
                WindowId window_id)
     : Widget(std::move(native_window)),
+      EventSource(window_id),
       active_tick_(0),
       window_id_(window_id) {
   if (window_id != views::kInvalidWindowId)
@@ -147,45 +115,6 @@ void Window::DidKillFocus() {
   Widget::DidKillFocus();
   if (window_id_ != views::kInvalidWindowId)
     view_event_handler()->DidKillFocus(window_id_);
-}
-
-void Window::DispatchKeyboardEvent(const ui::KeyboardEvent& event) {
-  domapi::KeyboardEvent api_event;
-  api_event.alt_key = false;
-  api_event.control_key = event.control_key();
-  api_event.event_type = ConvertEventType(event);
-  api_event.key_code = event.raw_key_code();
-  api_event.meta_key = false;
-  api_event.repeat = event.repeat();
-  api_event.shift_key = event.shift_key();
-  api_event.target_id = window_id();
-  Application::instance()->view_event_handler()->DispatchKeyboardEvent(
-      api_event);
-}
-
-void Window::DispatchMouseEvent(const ui::MouseEvent& event) {
-  #define MUST_EQUAL(name) \
-    static_assert(static_cast<int>(domapi::MouseButton::name) == \
-                  ui::MouseEvent::k ## name, \
-                  "Button name " # name " must be equal.")
-  MUST_EQUAL(Left);
-  MUST_EQUAL(Middle);
-  MUST_EQUAL(Right);
-  MUST_EQUAL(Other1);
-  MUST_EQUAL(Other2);
-
-  domapi::MouseEvent api_event;
-  api_event.alt_key = event.alt_key();
-  api_event.button = static_cast<domapi::MouseButton>(event.button());
-  api_event.buttons = event.buttons();
-  api_event.client_x = event.location().x;
-  api_event.client_y = event.location().y;
-  api_event.control_key = event.control_key();
-  api_event.event_type = ConvertEventType(event);
-  api_event.shift_key = event.shift_key();
-  api_event.target_id = window_id();
-  Application::instance()->view_event_handler()->DispatchMouseEvent(
-      api_event);
 }
 
 bool Window::OnIdle(int hint) {
@@ -223,22 +152,7 @@ void Window::OnMouseReleased(const ui::MouseEvent& event) {
 }
 
 void Window::OnMouseWheel(const ui::MouseWheelEvent& event) {
-  domapi::WheelEvent api_event;
-  api_event.alt_key = event.alt_key();
-  api_event.button = static_cast<domapi::MouseButton>(event.button());
-  api_event.buttons = event.buttons();
-  api_event.client_x = event.location().x;
-  api_event.client_y = event.location().y;
-  api_event.control_key = event.control_key();
-  api_event.event_type = ConvertEventType(event);
-  api_event.shift_key = event.shift_key();
-  api_event.target_id = window_id();
-  api_event.delta_mode = 0;
-  api_event.delta_x = 0.0;
-  api_event.delta_y = event.delta();
-  api_event.delta_z = 0.0;
-  Application::instance()->view_event_handler()->DispatchWheelEvent(
-      api_event);
+  DispatchWheelEvent(event);
 }
 
 void Window::DidRealize() {

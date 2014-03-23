@@ -4,6 +4,7 @@
 
 #include "evita/views/event_source.h"
 
+#include "base/logging.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"

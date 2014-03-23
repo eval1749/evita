@@ -346,6 +346,11 @@ void Widget::Realize(const Rect& rect) {
   }
 
   DidRealize();
+  if (parent_node()->is_shown()) {
+    shown_ = 1;
+    DidShow();
+    SchedulePaint();
+  }
   container_widget().DidRealizeChildWidget(*this);
 }
 
@@ -371,6 +376,11 @@ void Widget::RealizeWidget() {
   }
 
   DidRealize();
+  if (parent_node()->is_shown()) {
+    shown_ = 1;
+    DidShow();
+    SchedulePaint();
+  }
   container_widget().DidRealizeChildWidget(*this);
 }
 
@@ -467,9 +477,13 @@ void Widget::SetParentWidget(Widget* new_parent) {
   }
   new_parent->AppendChild(this);
   if (new_parent->is_realized()) {
-    if (auto const window = native_window())
-      ::SetParent(*window, new_parent->AssociatedHwnd());
-    DidChangeHierarchy();
+    if (is_realized()) {
+      if (auto const window = native_window())
+        ::SetParent(*window, new_parent->AssociatedHwnd());
+      DidChangeHierarchy();
+    } else {
+      RealizeWidget();
+    }
   }
   if (old_parent)
     old_parent->DidRemoveChildWidget(*this);

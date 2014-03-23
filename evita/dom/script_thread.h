@@ -47,17 +47,13 @@ class ScriptThread final : public domapi::IoDelegate,
 
   public: bool CalledOnValidThread() const;
   private: bool CalledOnScriptThread() const;
-
-  // TODO(yosi) we will make ScriptThread::PostTask() private.
-  public: void PostTask(const tracked_objects::Location& from_here,
-                        const base::Closure& task);
-
+  private: void PostTask(const tracked_objects::Location& from_here,
+                         const base::Closure& task);
   public: static void Start(base::MessageLoop* host_message_loop,
                             ViewDelegate* view_delegate,
                             base::MessageLoop* io_message_loop,
                             domapi::IoDelegate* io_delegate);
 
-  // IoDelegate
   // domapi::IoDelegate
   private: virtual void CloseFile(domapi::IoContextId context_id,
       const domapi::FileIoDeferred& deferred) override;

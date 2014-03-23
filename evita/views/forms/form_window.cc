@@ -9,6 +9,7 @@
 
 #include "base/logging.h"
 #include "common/tree/child_nodes.h"
+#include "common/win/win32_verify.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/gfx_base.h"
 #include "evita/dom/forms/form.h"
@@ -22,17 +23,12 @@
 #include "evita/ui/controls/label_control.h"
 #include "evita/ui/controls/radio_button_control.h"
 #include "evita/ui/root_widget.h"
-
-#define WIN32_VERIFY(exp) { \
-  if (!(exp)) { \
-    auto const last_error = ::GetLastError(); \
-    DVLOG(0) << "Win32 API failure: " #exp << " error=" << last_error; \
-  } \
-}
+#include "evita/ui/system_metrics.h"
 
 namespace views {
 
 namespace {
+
 //////////////////////////////////////////////////////////////////////
 //
 // ControlImporter
@@ -85,10 +81,9 @@ CheckboxImporter::CheckboxImporter(const dom::CheckboxControl* checkbox)
 
 ui::CheckboxControl::Style
     CheckboxImporter::ComputeStyle() const {
-  // TODO(yosi) We should get checkbox style from |dom::FormControl|.
   ui::CheckboxControl::Style style;
-  style.bgcolor = gfx::ColorF(1, 1, 1);
-  style.color = gfx::ColorF(gfx::ColorF::LightGray); // #D3D3D3
+  style.bgcolor = ui::SystemMetrics::instance()->bgcolor();
+  style.color = ui::SystemMetrics::instance()->color();
   return style;
 }
 
@@ -130,10 +125,9 @@ LabelImporter::LabelImporter(const dom::LabelControl* label)
 }
 
 ui::LabelControl::LabelStyle LabelImporter::ComputeLabelStyle() const {
-  // TODO(yosi) We should get label style from |dom::FormControl|.
   ui::LabelControl::LabelStyle style;
-  style.bgcolor = gfx::ColorF(1, 1, 1);
-  style.color = gfx::ColorF(0, 0, 0);
+  style.bgcolor = ui::SystemMetrics::instance()->bgcolor();
+  style.color = ui::SystemMetrics::instance()->color();
   style.font_family = L"MS Shell Dlg 2";
   style.font_size = 13;
   return style;
@@ -178,10 +172,9 @@ RadioButtonImporter::RadioButtonImporter(
 
 ui::RadioButtonControl::Style
     RadioButtonImporter::ComputeStyle() const {
-  // TODO(yosi) We should get radio_button style from |dom::FormControl|.
   ui::RadioButtonControl::Style style;
-  style.bgcolor = gfx::ColorF(1, 1, 1);
-  style.color = gfx::ColorF(gfx::ColorF::LightGray); // #D3D3D3
+  style.bgcolor = ui::SystemMetrics::instance()->bgcolor();
+  style.color = ui::SystemMetrics::instance()->color();
   return style;
 }
 
@@ -216,7 +209,7 @@ ControlImporter* ControlImporter::Create(const dom::FormControl* control) {
 //
 // FormWindow::FormViewModel
 //
-class FormWindow::FormViewModel : public dom::FormObserver {
+class FormWindow::FormViewModel final : private dom::FormObserver  {
   private: bool dirty_;
   private: const dom::Form* const form_;
   private: std::unordered_map<dom::EventTargetId, ui::Widget*> map_;
@@ -296,6 +289,15 @@ FormWindow::FormWindow(WindowId window_id, const dom::Form* form)
 FormWindow::~FormWindow() {
 }
 
+bool FormWindow::DoIdle(int hint) {
+  bool more = false;
+  for (auto widget : ui::RootWidget::instance()->child_nodes()) {
+    if (auto form_window = widget->as<views::FormWindow>())
+      more |= form_window->OnIdle(hint);
+  }
+  return more;
+}
+
 bool FormWindow::OnIdle(int) {
   if (!is_realized())
     return false;
@@ -315,6 +317,19 @@ bool FormWindow::OnIdle(int) {
 
   model_->Update();
   return false;
+}
+
+// ui::SystemMetricsObserver
+void FormWindow::DidChangeIconFont() {
+  SchedulePaint();
+}
+
+void FormWindow::DidChangeSystemColor() {
+  SchedulePaint();
+}
+
+void FormWindow::DidChangeSystemMetrics() {
+  SchedulePaint();
 }
 
 // ui::Widget
@@ -343,19 +358,18 @@ void FormWindow::DidCreateNativeWindow() {
   Widget::DidCreateNativeWindow();
 }
 
+void FormWindow::DidDestroyWidget() {
+  ui::SystemMetrics::instance()->RemoveObserver(this);
+}
+
+void FormWindow::DidRealize() {
+  ui::SystemMetrics::instance()->AddObserver(this);
+}
+
 void FormWindow::DidResize() {
   gfx_->Resize(rect());
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::White));
-}
-
-bool FormWindow::DoIdle(int hint) {
-  bool more = false;
-  for (auto widget : ui::RootWidget::instance()->child_nodes()) {
-    if (auto form_window = widget->as<views::FormWindow>())
-      more |= form_window->OnIdle(hint);
-  }
-  return more;
 }
 
 LRESULT FormWindow::OnMessage(uint32_t const uMsg, WPARAM const wParam,

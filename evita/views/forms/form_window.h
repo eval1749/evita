@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "evita/gc/member.h"
+#include "evita/ui/system_metrics_observer.h"
 
 namespace dom {
 class Form;
@@ -26,7 +27,8 @@ namespace views {
 //
 // FormWindow
 //
-class FormWindow : public views::Window {
+class FormWindow final : public views::Window,
+                         private ui::SystemMetricsObserver {
   DECLARE_CASTABLE_CLASS(FormWindow, views::Window);
 
   private: class FormViewModel;
@@ -42,9 +44,16 @@ class FormWindow : public views::Window {
   public: static bool DoIdle(int hint);
   private: bool OnIdle(int hint);
 
+  // ui::SystemMetricsObserver
+  private: virtual void DidChangeIconFont() override;
+  private: virtual void DidChangeSystemColor() override;
+  private: virtual void DidChangeSystemMetrics() override;
+
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;
   private: virtual void DidCreateNativeWindow() override;
+  private: virtual void DidDestroyWidget() override;
+  private: virtual void DidRealize() override;
   private: virtual void DidResize() override;
   private: virtual LRESULT OnMessage(uint32_t message, WPARAM wParam,
                                      LPARAM lParam) override;

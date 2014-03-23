@@ -4,12 +4,8 @@
 
 #include "evita/dom/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
-#include "gmock/gmock.h"
 
 namespace {
-
-using ::testing::Eq;
-using ::testing::_;
 
 class RadioButtonControlTest : public dom::AbstractDomTest {
   protected: RadioButtonControlTest() {
@@ -61,7 +57,6 @@ TEST_F(RadioButtonControlTest, dispatchEvent) {
 }
 
 TEST_F(RadioButtonControlTest, set_checked) {
-  EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1))).Times(3);
   EXPECT_SCRIPT_VALID(
       "var form1 = new Form('form1');"
       "var sample1 = new RadioButtonControl('foo', 123);"
@@ -94,7 +89,6 @@ TEST_F(RadioButtonControlTest, set_checked) {
 }
 
 TEST_F(RadioButtonControlTest, set_disabled) {
-  EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
   EXPECT_SCRIPT_VALID(
       "var form = new Form('form1');"
       "var sample = new RadioButtonControl('foo', 123);"

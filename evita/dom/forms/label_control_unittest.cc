@@ -5,12 +5,8 @@
 #include "evita/dom/abstract_dom_test.h"
 
 #include "evita/dom/mock_view_impl.h"
-#include "gmock/gmock.h"
 
 namespace {
-
-using ::testing::Eq;
-using ::testing::_;
 
 class LabelControlTest : public dom::AbstractDomTest {
   protected: LabelControlTest() {
@@ -41,7 +37,6 @@ TEST_F(LabelControlTest, dispatchEvent) {
 }
 
 TEST_F(LabelControlTest, set_disabled) {
-  EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
   EXPECT_SCRIPT_VALID(
       "var form = new Form('form1');"
       "var sample = new LabelControl('foo');"

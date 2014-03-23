@@ -5,12 +5,8 @@
 
 #include "evita/dom/forms/text_field_control.h"
 #include "evita/dom/mock_view_impl.h"
-#include "gmock/gmock.h"
 
 namespace {
-
-using ::testing::Eq;
-using ::testing::_;
 
 class TextFieldControlTest : public dom::AbstractDomTest {
   protected: TextFieldControlTest() {
@@ -47,7 +43,6 @@ TEST_F(TextFieldControlTest, dispatchEvent) {
 }
 
 TEST_F(TextFieldControlTest, set_disabled) {
-  EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
   EXPECT_SCRIPT_VALID(
       "var form = new Form('form1');"
       "var sample = new TextFieldControl(123);"
@@ -57,7 +52,6 @@ TEST_F(TextFieldControlTest, set_disabled) {
 }
 
 TEST_F(TextFieldControlTest, set_value) {
-  EXPECT_CALL(*mock_view_impl(), DidChangeFormContents(Eq(1)));
   EXPECT_SCRIPT_VALID(
       "var form = new Form('form1');"
       "var sample = new TextFieldControl(123);"

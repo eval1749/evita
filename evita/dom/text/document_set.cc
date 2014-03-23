@@ -154,6 +154,7 @@ void DocumentSet::RemoveObserver(v8::Handle<v8::Function> callback) {
 
 void DocumentSet::ResetForTesting() {
   map_.clear();
+  observers_.clear();
 }
 
 void DocumentSet::RenameDocument(Document* document,

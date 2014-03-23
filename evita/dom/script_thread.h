@@ -29,12 +29,12 @@ class TextWindow;
 class ScriptThread final : public domapi::IoDelegate,
                            public ViewDelegate,
                            public domapi::ViewEventHandler {
-  private: base::MessageLoop* host_message_loop_;
   private: domapi::IoDelegate* io_delegate_;
   private: base::MessageLoop* io_message_loop_;
   private: std::unique_ptr<base::Thread> thread_;
   private: ViewDelegate* view_delegate_;
   private: domapi::ViewEventHandler* view_event_handler_;
+  private: base::MessageLoop* view_message_loop_;
   private: std::unique_ptr<base::WaitableEvent> waitable_event_;
 
   private: ScriptThread(base::MessageLoop* host_message_loop,

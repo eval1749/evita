@@ -16,7 +16,7 @@
 #include "evita/dom/text/document_set.h"
 #include "evita/dom/file_path.h"
 #include "evita/dom/mock_view_impl.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 
 namespace {

@@ -15,7 +15,7 @@
 #include "common/adoptors/reverse.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/events/event.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/scoped_persistent.h"
@@ -35,7 +35,7 @@ class EventTargeClass : public v8_glue::WrapperInfo {
   public: ~EventTargeClass() = default;
 
   private: static EventTarget* NewEventTarget() {
-    ScriptController::instance()->ThrowError("Can't create EventTarget.");
+    ScriptHost::instance()->ThrowError("Can't create EventTarget.");
     return nullptr;
   }
 
@@ -156,7 +156,7 @@ EventTarget::EventPath EventTarget::BuildEventPath() const {
 bool EventTarget::DispatchEvent(Event* event) {
   if (event->dispatched() || event->event_phase() != Event::kNone ||
       event->type().empty()) {
-    ScriptController::instance()->ThrowError("InvalidStateError");
+    ScriptHost::instance()->ThrowError("InvalidStateError");
     return false;
   }
 
@@ -210,7 +210,7 @@ void EventTarget::InvokeEventListeners(Event* event) {
         continue;
     }
 
-    auto const runner = ScriptController::instance()->runner();
+    auto const runner = ScriptHost::instance()->runner();
     auto const isolate = runner->isolate();
     v8_glue::Runner::Scope runner_scope(runner);
     auto const callee = GetCallee(isolate,
@@ -228,7 +228,7 @@ void EventTarget::RemoveEventListener(const base::string16& type,
 }
 
 void EventTarget::ScheduleDispatchEvent(Event* event) {
-  ScriptController::instance()->PostTask(FROM_HERE, base::Bind(
+  ScriptHost::instance()->PostTask(FROM_HERE, base::Bind(
       &EventTarget::DispatchEventWithInLock, base::Unretained(this),
       base::Unretained(event)));
 }

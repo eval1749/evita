@@ -9,7 +9,7 @@
 #include "base/strings/string16.h"
 #include "evita/dom/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/windows/window.h"
 #include "evita/v8_glue/converter.h"

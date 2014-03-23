@@ -6,7 +6,7 @@
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/windows/table_selection.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/wrapper_info.h"
@@ -48,7 +48,7 @@ DEFINE_SCRIPTABLE_OBJECT(TableWindow, TableWindowClass);
 
 TableWindow::TableWindow(Document* document)
     : ScriptableBase(new TableSelection(this, document)) {
-  ScriptController::instance()->view_delegate()->CreateTableWindow(
+  ScriptHost::instance()->view_delegate()->CreateTableWindow(
       window_id(), document);
 }
 

@@ -6,7 +6,7 @@
 #include "evita/dom/converter.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/range.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/windows/text_window.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
@@ -35,7 +35,7 @@ class TextSelectionClass :
   }
 
   private: static TextSelection* NewTextSelection() {
-    ScriptController::instance()->ThrowError("Can't create selection.");
+    ScriptHost::instance()->ThrowError("Can't create selection.");
     return nullptr;
   }
 

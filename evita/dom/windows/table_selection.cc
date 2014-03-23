@@ -4,7 +4,7 @@
 #include "evita/dom/windows/table_selection.h"
 
 #include "evita/dom/converter.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/windows/table_window.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/constructor_template.h"
@@ -33,7 +33,7 @@ class TableSelectionClass :
   }
 
   private: static TableSelection* NewTableSelection() {
-    ScriptController::instance()->ThrowError("Can't create selection.");
+    ScriptHost::instance()->ThrowError("Can't create selection.");
     return nullptr;
   }
 
@@ -62,7 +62,7 @@ TableSelection::~TableSelection() {
 
 std::vector<int> TableSelection::GetRowStates(
     const std::vector<base::string16>& keys) const {
-  return ScriptController::instance()->view_delegate()->
+  return ScriptHost::instance()->view_delegate()->
       GetTableRowStates(window()->window_id(), keys);
 }
 

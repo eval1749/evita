@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 
 #include "base/bind.h"
 #pragma warning(push)
@@ -67,7 +67,7 @@ void MessageBox(const base::string16& message, int flags) {
   DVLOG(0) << message;
   if (suppress_message_box)
     return;
-  ScriptController::instance()->view_delegate()->MessageBox(kInvalidWindowId,
+  ScriptHost::instance()->view_delegate()->MessageBox(kInvalidWindowId,
     message, L"Evita System Message", flags, base::Bind(MessageBoxCallback));
 }
 
@@ -111,7 +111,7 @@ void MessageCallback(v8::Handle<v8::Message> message,
   MessageBox(text, MB_ICONERROR);
 }
 
-ScriptController* script_controller;
+ScriptHost* script_host;
 
 }   // namespace
 
@@ -129,9 +129,9 @@ SuppressMessageBoxScope::~SuppressMessageBoxScope() {
 
 //////////////////////////////////////////////////////////////////////
 //
-// ScriptController
+// ScriptHost
 //
-ScriptController::ScriptController(ViewDelegate* view_delegate,
+ScriptHost::ScriptHost(ViewDelegate* view_delegate,
                                    domapi::IoDelegate* io_delegate)
     : event_handler_(new ViewEventHandlerImpl(this)),
       io_delegate_(io_delegate),
@@ -153,34 +153,34 @@ ScriptController::ScriptController(ViewDelegate* view_delegate,
   v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
 }
 
-ScriptController::~ScriptController() {
-  script_controller = nullptr;
+ScriptHost::~ScriptHost() {
+  script_host = nullptr;
 }
 
-ScriptController* ScriptController::instance() {
-  DCHECK(script_controller);
-  return script_controller;
+ScriptHost* ScriptHost::instance() {
+  DCHECK(script_host);
+  return script_host;
 }
 
-v8::Isolate* ScriptController::isolate() const {
-  return const_cast<ScriptController*>(this)->isolate_holder_.isolate();
+v8::Isolate* ScriptHost::isolate() const {
+  return const_cast<ScriptHost*>(this)->isolate_holder_.isolate();
 }
 
-v8_glue::Runner* ScriptController::runner() const {
+v8_glue::Runner* ScriptHost::runner() const {
   DCHECK_EQ(message_loop_for_script_, base::MessageLoop::current());
   return testing_runner_ ? testing_runner_ : runner_.get();
 }
 
-void ScriptController::set_testing_runner(v8_glue::Runner* runner) {
+void ScriptHost::set_testing_runner(v8_glue::Runner* runner) {
   testing_runner_ = runner;
 }
 
-ViewDelegate* ScriptController::view_delegate() const {
+ViewDelegate* ScriptHost::view_delegate() const {
   DCHECK(view_delegate_);
   return view_delegate_;
 }
 
-void ScriptController::DidStartViewHost() {
+void ScriptHost::DidStartViewHost() {
   // We should prevent UI thread to access DOM.
   DOM_AUTO_LOCK_SCOPE();
   v8_glue::Runner::Scope runner_scope(runner());
@@ -194,7 +194,7 @@ void ScriptController::DidStartViewHost() {
   view_delegate_->DidStartScriptHost(state_);
 }
 
-void ScriptController::OpenFile(WindowId window_id,
+void ScriptHost::OpenFile(WindowId window_id,
                                 const base::string16& filename){
   v8_glue::Runner::Scope runner_scope(runner());
   auto const isolate = runner()->isolate();
@@ -212,76 +212,76 @@ void ScriptController::OpenFile(WindowId window_id,
   runner()->Call(open_file, js_handler, js_filename);
 }
 
-void ScriptController::ResetForTesting() {
+void ScriptHost::ResetForTesting() {
   DocumentSet::instance()->ResetForTesting();
   EditorWindow::ResetForTesting();
   Window::ResetForTesting();
 }
 
-void ScriptController::PostTask(const tracked_objects::Location& from_here,
+void ScriptHost::PostTask(const tracked_objects::Location& from_here,
                                 const base::Closure& task) {
   DCHECK_EQ(message_loop_for_script_, base::MessageLoop::current());
   message_loop_for_script_->PostTask(from_here, task);
 }
 
-ScriptController* ScriptController::Start(ViewDelegate* view_delegate,
+ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
                                           domapi::IoDelegate* io_deleage) {
   // Node: Useing Application::instance() starts thread. So, we don't
-  // start |ScriptController| in testing. Although, we should remove
+  // start |ScriptHost| in testing. Although, we should remove
   // all |Application::instance()| in DOM world.
-  if (script_controller && script_controller->testing_)
-    return script_controller;
-  DCHECK(!script_controller);
+  if (script_host && script_host->testing_)
+    return script_host;
+  DCHECK(!script_host);
   SuppressMessageBoxScope suppress_messagebox_scope;
-  script_controller = new ScriptController(view_delegate, io_deleage);
-  auto const isolate = script_controller->isolate();
-  auto const runner = new v8_glue::Runner(isolate, script_controller);
-  script_controller->runner_.reset(runner);
+  script_host = new ScriptHost(view_delegate, io_deleage);
+  auto const isolate = script_host->isolate();
+  auto const runner = new v8_glue::Runner(isolate, script_host);
+  script_host->runner_.reset(runner);
   v8_glue::Runner::Scope runner_scope(runner);
   v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
   v8::V8::AddMessageListener(MessageCallback);
   v8::V8::AddGCPrologueCallback(GcPrologueCallback);
   v8::V8::AddGCEpilogueCallback(GcEpilogueCallback);
   v8Strings::Init(isolate);
-  return script_controller;
+  return script_host;
 }
 
-ScriptController* ScriptController::StartForTesting(
+ScriptHost* ScriptHost::StartForTesting(
     ViewDelegate* view_delegate, domapi::IoDelegate* io_delegate) {
-  if (!script_controller) {
+  if (!script_host) {
     Start(view_delegate, io_delegate)->testing_ = true;
   } else {
     // In testing, view_delegate is gmock'ed object. Each test case passes
     // newly constructed one.
-    script_controller->io_delegate_ = io_delegate;
-    script_controller->view_delegate_ = view_delegate;
-    script_controller->ResetForTesting();
+    script_host->io_delegate_ = io_delegate;
+    script_host->view_delegate_ = view_delegate;
+    script_host->ResetForTesting();
   }
   suppress_message_box = 1;
-  return script_controller;
+  return script_host;
 }
 
-void ScriptController::ThrowError(const std::string& message) {
+void ScriptHost::ThrowError(const std::string& message) {
   auto isolate = isolate_holder_.isolate();
   isolate->ThrowException(v8::Exception::Error(
       gin::StringToV8(isolate, message)));
 }
 
-void ScriptController::ThrowException(v8::Handle<v8::Value> exception) {
+void ScriptHost::ThrowException(v8::Handle<v8::Value> exception) {
   auto isolate = isolate_holder_.isolate();
   isolate->ThrowException(exception);
 }
 
-void ScriptController::WillDestroyHost() {
+void ScriptHost::WillDestroyHost() {
   view_delegate_ = nullptr;
 }
 
-v8::Handle<v8::ObjectTemplate> ScriptController::GetGlobalTemplate(
+v8::Handle<v8::ObjectTemplate> ScriptHost::GetGlobalTemplate(
     v8_glue::Runner* runner) {
   return Global::instance()->object_template(runner->isolate());
 }
 
-void ScriptController::UnhandledException(v8_glue::Runner*,
+void ScriptHost::UnhandledException(v8_glue::Runner*,
                                           const v8::TryCatch& try_catch) {
   base::string16 text;
   auto const error = try_catch.Exception();

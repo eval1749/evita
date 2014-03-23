@@ -4,7 +4,7 @@
 
 #include "evita/dom/encoding/text_encoder.h"
 
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/v8_glue/array_buffer_view.h"
 #include "evita/v8_glue/converter.h"
 #include "v8_strings.h"
@@ -124,7 +124,7 @@ const base::string16& TextEncoder::encoding() const {
 v8::Handle<v8::Uint8Array> TextEncoder::Encode(
     v8_glue::Optional<base::string16> opt_input,
     v8_glue::Optional<TextEncodeOptions> opt_options) {
-  auto const isolate = ScriptController::instance()->isolate();
+  auto const isolate = ScriptHost::instance()->isolate();
   if (!opt_input.is_supplied)
     return encoder_->Encode(isolate, base::string16(), false);
   auto const is_stream = opt_options.is_supplied && opt_options.value.stream;

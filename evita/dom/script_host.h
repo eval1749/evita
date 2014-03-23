@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_script_controller_h)
-#define INCLUDE_evita_dom_script_controller_h
+#if !defined(INCLUDE_evita_dom_script_host_h)
+#define INCLUDE_evita_dom_script_host_h
 
 #include <string>
 #include <memory>
@@ -46,9 +46,9 @@ class SuppressMessageBoxScope {
 
 //////////////////////////////////////////////////////////////////////
 //
-// ScriptController
+// ScriptHost
 //
-class ScriptController : public v8_glue::RunnerDelegate {
+class ScriptHost : public v8_glue::RunnerDelegate {
   private: v8_glue::IsolateHolder isolate_holder_;
   private: std::unique_ptr<ViewEventHandlerImpl> event_handler_;
   private: domapi::IoDelegate* io_delegate_;
@@ -61,14 +61,14 @@ class ScriptController : public v8_glue::RunnerDelegate {
   private: v8_glue::Runner* testing_runner_;
   private: ViewDelegate* view_delegate_;
 
-  private: ScriptController(ViewDelegate* view_delegate,
-                            domapi::IoDelegate* io_deleage);
-  public: ~ScriptController();
+  private: ScriptHost(ViewDelegate* view_delegate,
+                      domapi::IoDelegate* io_deleage);
+  public: ~ScriptHost();
 
   public: ViewEventHandlerImpl* event_handler() const {
     return event_handler_.get();
   }
-  public: static ScriptController* instance();
+  public: static ScriptHost* instance();
   public: domapi::IoDelegate* io_delegate() const { return io_delegate_; }
   public: v8::Isolate* isolate() const;
   public: v8_glue::Runner* runner() const;
@@ -81,9 +81,9 @@ class ScriptController : public v8_glue::RunnerDelegate {
   public: void PostTask(const tracked_objects::Location& from_here,
                         const base::Closure& task);
   public: void ResetForTesting();
-  public: static ScriptController* Start(ViewDelegate* view_delegate,
+  public: static ScriptHost* Start(ViewDelegate* view_delegate,
                                          domapi::IoDelegate* io_delegate);
-  public: static ScriptController* StartForTesting(
+  public: static ScriptHost* StartForTesting(
       ViewDelegate* view_delegate, domapi::IoDelegate* io_delegate);
   public: void ThrowError(const std::string& message);
   public: void ThrowException(v8::Handle<v8::Value> exception);
@@ -95,9 +95,9 @@ class ScriptController : public v8_glue::RunnerDelegate {
   private: virtual void UnhandledException(v8_glue::Runner* runner,
                                            const v8::TryCatch& try_catch);
 
-  DISALLOW_COPY_AND_ASSIGN(ScriptController);
+  DISALLOW_COPY_AND_ASSIGN(ScriptHost);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_script_controller_h)
+#endif //!defined(INCLUDE_evita_dom_script_host_h)

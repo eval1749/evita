@@ -8,7 +8,7 @@
 #include "evita/gc/local.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/promise_deferred.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/windows/window.h"
 #include "evita/v8_glue/converter.h"
@@ -70,8 +70,8 @@ class EditorClass : public v8_glue::WrapperInfo {
   private: static void GetFilenameForLoad(Window* window,
                                           const base::string16& dir_path,
                                           v8::Handle<v8::Function> callback) {
-    auto const runner = ScriptController::instance()->runner();
-    ScriptController::instance()->view_delegate()->GetFilenameForLoad(
+    auto const runner = ScriptHost::instance()->runner();
+    ScriptHost::instance()->view_delegate()->GetFilenameForLoad(
         window->window_id(), dir_path,
         v8_glue::ScriptCallback<ViewDelegate::GetFilenameForLoadCallback>::New(
             runner->GetWeakPtr(), callback));
@@ -80,15 +80,15 @@ class EditorClass : public v8_glue::WrapperInfo {
   private: static void GetFilenameForSave(Window* window,
                                           const base::string16& dir_path,
                                           v8::Handle<v8::Function> callback) {
-    auto const runner = ScriptController::instance()->runner();
-    ScriptController::instance()->view_delegate()->GetFilenameForSave(
+    auto const runner = ScriptHost::instance()->runner();
+    ScriptHost::instance()->view_delegate()->GetFilenameForSave(
         window->window_id(), dir_path,
         v8_glue::ScriptCallback<ViewDelegate::GetFilenameForSaveCallback>::New(
             runner->GetWeakPtr(), callback));
   }
 
   private: static base::string16 GetMetrics(const base::string16& name) {
-    return ScriptController::instance()->view_delegate()->GetMetrics(name);
+    return ScriptHost::instance()->view_delegate()->GetMetrics(name);
   }
 
   private: static  v8::Handle<v8::Promise> GetSpellingSuggestions(
@@ -98,8 +98,8 @@ class EditorClass : public v8_glue::WrapperInfo {
                                  const base::string16& message, int flags,
                                  const base::string16& title,
                                  v8::Handle<v8::Function> callback) {
-    auto const runner = ScriptController::instance()->runner();
-    ScriptController::instance()->view_delegate()->MessageBox(
+    auto const runner = ScriptHost::instance()->runner();
+    ScriptHost::instance()->view_delegate()->MessageBox(
         maybe_window ? maybe_window->window_id() : kInvalidWindowId,
         message, title, flags,
         v8_glue::ScriptCallback<ViewDelegate::MessageBoxCallback>::New(
@@ -107,7 +107,7 @@ class EditorClass : public v8_glue::WrapperInfo {
   }
 
   private: static Editor* NewEditor() {
-    ScriptController::instance()->ThrowError(
+    ScriptHost::instance()->ThrowError(
         "Cannot create an instance of Editor.");
     return nullptr;
   }
@@ -159,7 +159,7 @@ class EditorClass : public v8_glue::WrapperInfo {
   private: static v8::Handle<v8::Object> RunScriptInternal(
       const base::string16& script_text,
       const base::string16& file_name) {
-    auto const runner = ScriptController::instance()->runner();
+    auto const runner = ScriptHost::instance()->runner();
     auto const isolate = runner->isolate();
     v8_glue::Runner::EscapableHandleScope runner_scope(runner);
     v8::TryCatch try_catch;
@@ -213,7 +213,7 @@ v8::Handle<v8::Promise> EditorClass::CheckSpelling(
     const base::string16& word_to_check) {
   return PromiseDeferred::Call(base::Bind(
       &ViewDelegate::CheckSpelling,
-      base::Unretained(ScriptController::instance()->view_delegate()),
+      base::Unretained(ScriptHost::instance()->view_delegate()),
       word_to_check));
 }
 
@@ -221,12 +221,12 @@ v8::Handle<v8::Promise> EditorClass::GetSpellingSuggestions(
     const base::string16& wrong_word) {
   return PromiseDeferred::Call(base::Bind(
       &ViewDelegate::GetSpellingSuggestions,
-      base::Unretained(ScriptController::instance()->view_delegate()),
+      base::Unretained(ScriptHost::instance()->view_delegate()),
       wrong_word));
 }
 
 void EditorClass::SetTabData(Window* window, const domapi::TabData tab_data) {
-  ScriptController::instance()->view_delegate()->SetTabData(
+  ScriptHost::instance()->view_delegate()->SetTabData(
       window->window_id(), tab_data);
 }
 

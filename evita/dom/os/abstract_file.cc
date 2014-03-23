@@ -10,7 +10,7 @@
 #include "evita/dom/promise_deferred.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/public/io_error.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/optional.h"
@@ -50,7 +50,7 @@ class AbstractFileClass : public v8_glue::WrapperInfo {
   public: ~AbstractFileClass() = default;
 
   private: static File* NewFile() {
-    ScriptController::instance()->ThrowError(
+    ScriptHost::instance()->ThrowError(
         "Cannot create an instance of File.");
     return nullptr;
   }
@@ -92,7 +92,7 @@ AbstractFile::~AbstractFile() {
 v8::Handle<v8::Promise> AbstractFile::Close() {
   return PromiseDeferred::Call(base::Bind(
       &domapi::IoDelegate::CloseFile,
-      base::Unretained(ScriptController::instance()->io_delegate()),
+      base::Unretained(ScriptHost::instance()->io_delegate()),
       context_id_));
 }
 
@@ -100,7 +100,7 @@ v8::Handle<v8::Promise> AbstractFile::Read(
     const gin::ArrayBufferView& array_buffer_view) {
   return PromiseDeferred::Call(base::Bind(
       &domapi::IoDelegate::ReadFile,
-      base::Unretained(ScriptController::instance()->io_delegate()),
+      base::Unretained(ScriptHost::instance()->io_delegate()),
       context_id_, array_buffer_view.bytes(), array_buffer_view.num_bytes()));
 }
 
@@ -108,7 +108,7 @@ v8::Handle<v8::Promise> AbstractFile::Write(
     const gin::ArrayBufferView& array_buffer_view) {
   return PromiseDeferred::Call(base::Bind(
       &domapi::IoDelegate::WriteFile,
-      base::Unretained(ScriptController::instance()->io_delegate()),
+      base::Unretained(ScriptHost::instance()->io_delegate()),
       context_id_, array_buffer_view.bytes(), array_buffer_view.num_bytes()));
 }
 

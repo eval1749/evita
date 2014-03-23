@@ -5,7 +5,7 @@
 
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/forms/form_observer.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/wrapper_info.h"
@@ -58,7 +58,7 @@ DEFINE_SCRIPTABLE_OBJECT(Form, FormClass);
 
 Form::Form(const base::string16& name) : name_(name) {
   if (name == L"FindDialogBox")
-    ScriptController::instance()->view_delegate()->CreateFindDialogBox(this);
+    ScriptHost::instance()->view_delegate()->CreateFindDialogBox(this);
 }
 
 Form::~Form() {
@@ -89,7 +89,7 @@ void Form::AddObserver(FormObserver* observer) const {
 
 void Form::DidChangeFormControl(FormControl*) {
   if (name_ == L"FindDialogBox") {
-    ScriptController::instance()->view_delegate()->DidChangeFormContents(
+    ScriptHost::instance()->view_delegate()->DidChangeFormContents(
         dialog_box_id());
     return;
   }
@@ -98,10 +98,10 @@ void Form::DidChangeFormControl(FormControl*) {
 
 void Form::Realize() {
   if (name_ != L"FindDialogBox") {
-    ScriptController::instance()->ThrowError("Requires Find form");
+    ScriptHost::instance()->ThrowError("Requires Find form");
     return;
   }
-  ScriptController::instance()->view_delegate()->RealizeDialogBox(
+  ScriptHost::instance()->view_delegate()->RealizeDialogBox(
       dialog_box_id());
 }
 
@@ -111,10 +111,10 @@ void Form::RemoveObserver(FormObserver* observer) const {
 
 void Form::Show() {
   if (name_ != L"FindDialogBox") {
-    ScriptController::instance()->ThrowError("Requires Find form");
+    ScriptHost::instance()->ThrowError("Requires Find form");
     return;
   }
-  ScriptController::instance()->view_delegate()->ShowDialogBox(
+  ScriptHost::instance()->view_delegate()->ShowDialogBox(
       dialog_box_id());
 }
 

@@ -9,12 +9,12 @@ namespace dom {
 
 class Event;
 class EventTarget;
-class ScriptController;
+class ScriptHost;
 
 class ViewEventHandlerImpl : public domapi::ViewEventHandler {
-  private: ScriptController* controller_;
+  private: ScriptHost* controller_;
 
-  public: ViewEventHandlerImpl(ScriptController* controller);
+  public: ViewEventHandlerImpl(ScriptHost* controller);
   public: ~ViewEventHandlerImpl();
 
   private: void DispatchEvent(EventTarget* event_target, Event* event);

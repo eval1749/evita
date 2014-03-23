@@ -4,7 +4,7 @@
 #include "evita/dom/dictionary.h"
 
 #include "base/strings/stringprintf.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
 

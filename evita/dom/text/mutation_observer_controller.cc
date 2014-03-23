@@ -16,7 +16,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
 #include "evita/dom/lock.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/text/buffer.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/mutation_observer.h"
@@ -104,7 +104,7 @@ void MutationObserverController::Tracker::ScheduleNotification() {
   if (is_schedule_notification_)
     return;
   is_schedule_notification_ = true;
-  ScriptController::instance()->PostTask(FROM_HERE,
+  ScriptHost::instance()->PostTask(FROM_HERE,
       base::Bind(&Tracker::NotifyObservers, GetWeakPtr()));
 }
 

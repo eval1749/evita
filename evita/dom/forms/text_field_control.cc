@@ -5,7 +5,7 @@
 
 #include "evita/dom/events/form_event.h"
 #include "evita/dom/forms/form_control.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/wrapper_info.h"

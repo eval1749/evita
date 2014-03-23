@@ -24,7 +24,7 @@ namespace dom {
 
 class MockIoDelegate;
 class MockViewImpl;
-class ScriptController;
+class ScriptHost;
 
 class AbstractDomTest : public v8_glue::RunnerDelegate,
                         public ::testing::Test {
@@ -41,8 +41,8 @@ class AbstractDomTest : public v8_glue::RunnerDelegate,
   private: std::unique_ptr<MockViewImpl> mock_view_impl_;
   private: std::unique_ptr<v8_glue::Runner> runner_;
 
-  // Note: ScriptController is a singleton.
-  private: ScriptController* script_controller_;
+  // Note: ScriptHost is a singleton.
+  private: ScriptHost* script_host_;
 
   protected: AbstractDomTest();
   protected: virtual ~AbstractDomTest();

@@ -16,7 +16,7 @@
 #include "evita/dom/text/modes/mode.h"
 #include "evita/dom/public/api_callback.h"
 #include "evita/dom/text/regexp.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/text/marker.h"
@@ -120,7 +120,7 @@ Document* DocumentClass::NewDocument(const base::string16& name,
     return Document::New(name, opt_mode.value);
 
   // Get mode by |Mode.chooseModeByFileName()|.
-  auto const runner = ScriptController::instance()->runner();
+  auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   auto const js_mode_class = runner->global()->Get(
       v8Strings::Mode.Get(isolate));
@@ -130,7 +130,7 @@ Document* DocumentClass::NewDocument(const base::string16& name,
   auto const js_mode = runner->Call(js_choose, js_mode_class, js_name);
   Mode* mode;
   if (!gin::ConvertFromV8(isolate, js_mode, &mode)) {
-    ScriptController::instance()->ThrowException(v8::Exception::TypeError(
+    ScriptHost::instance()->ThrowException(v8::Exception::TypeError(
         v8Strings::Mode.Get(isolate)));
     return nullptr;
   }
@@ -300,7 +300,7 @@ base::char16 Document::charCodeAt(text::Posn position) const {
     gin::StringToV8(isolate, base::StringPrintf(
       "Bad index %d, valid index is [%d, %d]",
       position, 0, buffer_->GetEnd() - 1)));
-  ScriptController::instance()->ThrowException(error);
+  ScriptHost::instance()->ThrowException(error);
   return 0;
 }
 
@@ -370,13 +370,13 @@ int Document::state() const {
 
 bool Document::CheckCanChange() const {
   if (buffer_->IsReadOnly()) {
-    auto const runner = ScriptController::instance()->runner();
+    auto const runner = ScriptHost::instance()->runner();
     auto const isolate = runner->isolate();
     v8_glue::Runner::Scope runner_scope(runner);
     auto const ctor = runner->global()->Get(
         v8Strings::DocumentReadOnly.Get(isolate));
     auto const error = runner->CallAsConstructor(ctor, GetWrapper(isolate));
-    ScriptController::instance()->ThrowException(error);
+    ScriptHost::instance()->ThrowException(error);
     return false;
   }
   return true;
@@ -405,7 +405,7 @@ bool Document::IsValidPosition(text::Posn position) const {
     gin::StringToV8(isolate, base::StringPrintf(
       "Invalid position %d, valid range is [%d, %d]",
       position, 0, buffer_->GetEnd())));
-  ScriptController::instance()->ThrowException(error);
+  ScriptHost::instance()->ThrowException(error);
   return false;
 }
 
@@ -414,10 +414,10 @@ void Document::Load(const base::string16& filename,
   // We'll set read-only flag from file attributes.
   buffer()->SetReadOnly(false);
   buffer()->Delete(0, buffer()->GetEnd());
-  auto const runner = ScriptController::instance()->runner();
+  auto const runner = ScriptHost::instance()->runner();
   auto const load_callback = make_scoped_refptr(
       new LoadFileCallback(runner, this, callback));
-  ScriptController::instance()->view_delegate()->LoadFile(this, filename,
+  ScriptHost::instance()->view_delegate()->LoadFile(this, filename,
       base::Bind(&LoadFileCallback::Run, load_callback));
 }
 
@@ -441,10 +441,10 @@ void Document::RenameTo(const base::string16& new_name) {
 
 void Document::Save(const base::string16& filename,
                     v8::Handle<v8::Function> callback) {
-  auto const runner = ScriptController::instance()->runner();
+  auto const runner = ScriptHost::instance()->runner();
   auto const save_callback = make_scoped_refptr(
       new SaveFileCallback(runner, this, callback));
-  ScriptController::instance()->view_delegate()->SaveFile(this, filename,
+  ScriptHost::instance()->view_delegate()->SaveFile(this, filename,
       base::Bind(&SaveFileCallback::Run, save_callback));
 }
 

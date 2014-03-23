@@ -9,7 +9,7 @@
 #include "evita/dom/converter.h"
 #include "evita/dom/promise_deferred.h"
 #include "evita/dom/public/io_delegate.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/optional.h"
@@ -46,7 +46,7 @@ class ProcessClass :
   public: ~ProcessClass() = default;
 
   private: static Process* NewProcess() {
-    ScriptController::instance()->ThrowError(
+    ScriptHost::instance()->ThrowError(
         "Cannot create an instance of Process.");
     return nullptr;
   }
@@ -71,7 +71,7 @@ v8::Handle<v8::Promise> ProcessClass::OpenProcess(
     const base::string16& command_line) {
   return PromiseDeferred::Call(base::Bind(
       &domapi::IoDelegate::OpenProcess,
-      base::Unretained(ScriptController::instance()->io_delegate()),
+      base::Unretained(ScriptHost::instance()->io_delegate()),
       command_line));
 }
 

@@ -7,7 +7,7 @@
 #include "evita/dom/converter.h"
 #include "evita/dom/events/event_init.h"
 #include "evita/dom/events/event_target.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/v8_glue/optional.h"
 #include "v8_strings.h"
 

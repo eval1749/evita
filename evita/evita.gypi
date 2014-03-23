@@ -248,7 +248,7 @@
         'dom/text/regexp.cc',
         'dom/text/regexp_init.cc',
         'dom/windows/selection.cc',
-        'dom/script_controller.cc',
+        'dom/script_host.cc',
         'dom/script_thread.cc',
         'dom/css/style.cc',
         'dom/windows/table_window.cc',

@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "common/memory/singleton.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
@@ -99,7 +99,7 @@ DEFINE_SCRIPTABLE_OBJECT(EditorWindow, EditorWindowWrapperInfo);
 
 EditorWindow::EditorWindow() {
   EditorWindowList::instance()->Register(this);
-  ScriptController::instance()->view_delegate()->CreateEditorWindow(this);
+  ScriptHost::instance()->view_delegate()->CreateEditorWindow(this);
 }
 
 EditorWindow::~EditorWindow() {
@@ -110,7 +110,7 @@ void EditorWindow::ResetForTesting() {
 }
 
 void EditorWindow::SetStatusBar(const std::vector<base::string16>& texts) {
-  ScriptController::instance()->view_delegate()->SetStatusBar(
+  ScriptHost::instance()->view_delegate()->SetStatusBar(
       window_id(), texts);
 }
 

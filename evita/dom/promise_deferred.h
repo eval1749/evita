@@ -49,7 +49,7 @@ class PromiseDeferred : public base::RefCounted<PromiseDeferred> {
 template<typename T, typename U>
 v8::Handle<v8::Promise> PromiseDeferred::Call(
     const base::Callback<void(const domapi::Deferred<T, U>&)> closure) {
-  auto const runner = ScriptController::instance()->runner();
+  auto const runner = ScriptHost::instance()->runner();
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
 
   auto const promise_deferred =

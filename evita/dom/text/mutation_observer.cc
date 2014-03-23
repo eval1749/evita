@@ -11,7 +11,7 @@
 #include "evita/dom/text/mutation_observer_controller.h"
 #include "evita/dom/text/mutation_observer_init.h"
 #include "evita/dom/text/mutation_record.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/ed_defs.h"
 #include "evita/v8_glue/runner.h"
 
@@ -130,7 +130,7 @@ void MutationObserver::DidMutateDocument(Document* document) {
     return;
   if (!tracker->has_records())
     return;
-  auto const runner = ScriptController::instance()->runner();
+  auto const runner = ScriptHost::instance()->runner();
   v8_glue::Runner::Scope runner_scope(runner);
   auto const isolate = runner->isolate();
   runner->Call(callback_.NewLocal(isolate), v8::Undefined(isolate),

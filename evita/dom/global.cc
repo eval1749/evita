@@ -48,7 +48,7 @@
 #include "evita/dom/windows/point.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/text/regexp.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/windows/selection.h"
 #include "evita/dom/windows/table_selection.h"
 #include "evita/dom/windows/table_window.h"

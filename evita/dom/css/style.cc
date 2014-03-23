@@ -9,7 +9,7 @@
 #include "evita/dom/text/buffer.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/range.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/css/style.h"
 #include "evita/text/range.h"
 #include "evita/v8_glue/converter.h"
@@ -175,7 +175,7 @@ bool EqualNames(v8::Handle<v8::Value> name1, v8::Handle<v8::String> name2) {
 void InvalidStyleAttributeValue(v8::Isolate* isolate,
                                 v8::Handle<v8::String> attr_name,
                                 v8::Handle<v8::Value> attr_value) {
-  ScriptController::instance()->ThrowException(v8::Exception::Error(
+  ScriptHost::instance()->ThrowException(v8::Exception::Error(
       gin::StringToV8(isolate, base::StringPrintf(
           L"Style propery '%ls' doesn't take '%ls'.",
           V8ToString(attr_name).c_str(), V8ToString(attr_value).c_str()))));
@@ -187,7 +187,7 @@ v8::Handle<v8::Object> Document::style_at(text::Posn position) const {
     return v8::Handle<v8::Object>();
   const auto& style_values = buffer_->GetStyleAt(position);
 
-  auto const runner = ScriptController::instance()->runner();
+  auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
 
@@ -236,7 +236,7 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
   css::Style style_values;
   bool changed = false;
 
-  auto const runner = ScriptController::instance()->runner();
+  auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
 
@@ -270,7 +270,7 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
     LOAD_DICT_VALUE(css::FontWeight, fontWeight, font_weight);
     LOAD_DICT_VALUE(css::TextDecoration, textDecoration, text_decoration)
 
-    ScriptController::instance()->ThrowException(v8::Exception::Error(
+    ScriptHost::instance()->ThrowException(v8::Exception::Error(
         gin::StringToV8(isolate, base::StringPrintf(
             L"Invalid style attribute name '%ls'",
             V8ToString(name).c_str()))));

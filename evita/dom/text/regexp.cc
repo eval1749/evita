@@ -10,7 +10,7 @@
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/text/regexp_init.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/wrapper_info.h"
@@ -385,7 +385,7 @@ class RegExp::RegExpClass : public v8_glue::WrapperInfo {
     auto const regex = compiler.Compile(source, opt_dict.value);
     if (!regex) {
       auto const error_info = compiler.error_info();
-      ScriptController::instance()->ThrowError(base::StringPrintf(
+      ScriptHost::instance()->ThrowError(base::StringPrintf(
           "Failed to compile regex with error code %d at offset %d",
           error_info.error_code, error_info.offset));
       return nullptr;
@@ -431,7 +431,7 @@ RegExp::~RegExp() {
 
 v8::Handle<v8::Value> RegExp::ExecuteOnDocument(Document* document, int start,
                                                int end) {
-  auto const runner = ScriptController::instance()->runner();
+  auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   BufferMatcher matcher(regex_.get(), document->buffer(), start, end);
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
@@ -443,7 +443,7 @@ v8::Handle<v8::Value> RegExp::ExecuteOnDocument(Document* document, int start,
 
 v8::Local<v8::Value> RegExp::MakeMatchArray(
     const std::vector<Match>& matches) {
-  auto const runner = ScriptController::instance()->runner();
+  auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   auto const js_matches = v8::Array::New(isolate,
                                           static_cast<int>(matches.size()));

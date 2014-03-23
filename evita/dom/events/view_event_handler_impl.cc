@@ -19,7 +19,7 @@
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/public/view_event.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/windows/window.h"
@@ -91,7 +91,7 @@ v8::Handle<v8::Object> ToMethodObject(v8::Isolate* isolate,
 }
 }  // namespace
 
-ViewEventHandlerImpl::ViewEventHandlerImpl(ScriptController* controller)
+ViewEventHandlerImpl::ViewEventHandlerImpl(ScriptHost* controller)
     : controller_(controller) {
 }
 
@@ -234,7 +234,7 @@ void ViewEventHandlerImpl::DispatchMouseEvent(
 void ViewEventHandlerImpl::DispatchViewIdleEvent(int hint) {
   {
     DOM_AUTO_LOCK_SCOPE();
-    auto const runner = ScriptController::instance()->runner();
+    auto const runner = ScriptHost::instance()->runner();
     auto const isolate = runner->isolate();
     v8_glue::Runner::Scope runner_scope(runner);
     auto const window_class = runner->global()->
@@ -252,7 +252,7 @@ void ViewEventHandlerImpl::DispatchViewIdleEvent(int hint) {
   }
   // TODO(yosi) We should ask view host to stop dispatching idle event, if
   // idle event handler throws an exception.
-  ScriptController::instance()->view_delegate()->DidHandleViewIdelEvent(hint);
+  ScriptHost::instance()->view_delegate()->DidHandleViewIdelEvent(hint);
 }
 
 void ViewEventHandlerImpl::DispatchWheelEvent(

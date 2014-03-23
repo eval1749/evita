@@ -18,7 +18,7 @@
 #include "evita/dom/text/buffer.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/text/document.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/scoped_persistent.h"
 
@@ -126,7 +126,7 @@ void DocumentSet::NotifyObserverWithInLock(const base::string16& type,
                                            Document* document) {
   DOM_AUTO_LOCK_SCOPE();
   std::vector<Observer*> observers(observers_);
-  auto const runner = ScriptController::instance()->runner();
+  auto const runner = ScriptHost::instance()->runner();
   v8_glue::Runner::Scope runner_scope(runner);
   for (auto const observer : observers) {
     observer->Notify(runner, type, document);
@@ -175,7 +175,7 @@ void DocumentSet::RenameDocument(Document* document,
 
 void DocumentSet::ScheduleNotifyObserver(const base::string16& type,
                                          Document* document) {
-  ScriptController::instance()->PostTask(FROM_HERE, base::Bind(
+  ScriptHost::instance()->PostTask(FROM_HERE, base::Bind(
       &DocumentSet::NotifyObserverWithInLock, base::Unretained(this), type,
       base::Unretained(document)));
 }

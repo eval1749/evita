@@ -15,7 +15,7 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/mock_io_delegate.h"
 #include "evita/dom/mock_view_impl.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 
 namespace dom {
 
@@ -41,7 +41,7 @@ AbstractDomTest::RunnerScope::~RunnerScope() {
 AbstractDomTest::AbstractDomTest()
       : mock_io_delegate_(new MockIoDelegate()),
         mock_view_impl_(new MockViewImpl()),
-        script_controller_(nullptr) {
+        script_host_(nullptr) {
 }
 
 AbstractDomTest::~AbstractDomTest() {
@@ -52,7 +52,7 @@ v8::Isolate* AbstractDomTest::isolate() const {
 }
 
 domapi::ViewEventHandler* AbstractDomTest::view_event_handler() const {
-  return script_controller_->event_handler();
+  return script_host_->event_handler();
 }
 
 bool AbstractDomTest::DoCall(const base::StringPiece& name,
@@ -123,15 +123,15 @@ void AbstractDomTest::SetUp() {
   EXPECT_CALL(*mock_view_impl_, RegisterViewEventHandler(_))
     .Times(number_of_called == 1 ? 1 : 0);
 
-  script_controller_ = dom::ScriptController::StartForTesting(
+  script_host_ = dom::ScriptHost::StartForTesting(
     mock_view_impl_.get(), mock_io_delegate_.get());
 
-  auto const isolate = script_controller_->isolate();
+  auto const isolate = script_host_->isolate();
   auto const runner = new v8_glue::Runner(isolate, this);
   runner_.reset(runner);
-  ScriptController::instance()->set_testing_runner(runner);
+  ScriptHost::instance()->set_testing_runner(runner);
   v8_glue::Runner::Scope runner_scope(runner);
-  ScriptController::instance()->DidStartViewHost();
+  ScriptHost::instance()->DidStartViewHost();
 }
 
 void AbstractDomTest::TearDown() {
@@ -157,7 +157,7 @@ v8::Handle<v8::ObjectTemplate> AbstractDomTest::GetGlobalTemplate(
     v8_glue::Runner* runner) {
   DCHECK(!runner_.get());
   auto const templ =
-    static_cast<v8_glue::RunnerDelegate*>(ScriptController::instance())->
+    static_cast<v8_glue::RunnerDelegate*>(ScriptHost::instance())->
         GetGlobalTemplate(runner);
 
   auto const isolate = runner->isolate();

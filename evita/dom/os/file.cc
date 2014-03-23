@@ -9,7 +9,7 @@
 #include "evita/dom/converter.h"
 #include "evita/dom/promise_deferred.h"
 #include "evita/dom/public/io_delegate.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/optional.h"
@@ -70,7 +70,7 @@ class FileClass :
   public: ~FileClass() = default;
 
   private: static File* NewFile() {
-    ScriptController::instance()->ThrowError(
+    ScriptHost::instance()->ThrowError(
         "Cannot create an instance of File.");
     return nullptr;
   }
@@ -99,7 +99,7 @@ v8::Handle<v8::Promise> FileClass::OpenFile(const base::string16& file_name,
     v8_glue::Optional<base::string16> opt_mode) {
   return PromiseDeferred::Call(base::Bind(
       &domapi::IoDelegate::OpenFile,
-      base::Unretained(ScriptController::instance()->io_delegate()),
+      base::Unretained(ScriptHost::instance()->io_delegate()),
       file_name, opt_mode.is_supplied ? opt_mode.value : base::string16()));
 }
 
@@ -107,7 +107,7 @@ v8::Handle<v8::Promise> FileClass::QueryFileStatus(
     const base::string16& file_name) {
   return PromiseDeferred::Call(base::Bind(
       &domapi::IoDelegate::QueryFileStatus,
-      base::Unretained(ScriptController::instance()->io_delegate()),
+      base::Unretained(ScriptHost::instance()->io_delegate()),
       file_name));
 }
 

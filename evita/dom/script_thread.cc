@@ -15,7 +15,7 @@
 #include "evita/dom/public/float_point.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/public/view_event.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/ui/events/event.h"
 #include "v8/include/v8-debug.h"
 
@@ -157,7 +157,7 @@ void ScriptThread::Start(base::MessageLoop* view_message_loop,
   auto const script_thread = new ScriptThread(view_message_loop, view_delegate,
                                               io_message_loop, io_delegate);
   PostScriptTask(FROM_HERE, base::Bind(
-      base::IgnoreResult(&ScriptController::Start),
+      base::IgnoreResult(&ScriptHost::Start),
       base::Unretained(script_thread),
       base::Unretained(script_thread)));
 }
@@ -435,7 +435,7 @@ void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {
   if (event.key_code == (static_cast<int>(ui::KeyCode::Pause) |
                          static_cast<int>(ui::Modifier::Control)) &&
       event.control_key) {
-    auto const isolate = ScriptController::instance()->isolate();
+    auto const isolate = ScriptHost::instance()->isolate();
     v8::V8::TerminateExecution(isolate);
     return;
   }

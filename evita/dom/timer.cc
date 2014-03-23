@@ -9,7 +9,7 @@
 #include "base/timer/timer.h"
 #include "common/memory/singleton.h"
 #include "evita/dom/lock.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/function_template_builder.h"
@@ -138,7 +138,7 @@ bool Timer::is_running() const {
 }
 
 void Timer::DidFireTimer() {
-  auto const runner = ScriptController::instance()->runner();
+  auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
   auto const callback = callback_.NewLocal(isolate);

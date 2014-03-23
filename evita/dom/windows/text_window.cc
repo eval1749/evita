@@ -9,7 +9,7 @@
 #include "evita/dom/windows/point.h"
 #include "evita/dom/public/float_point.h"
 #include "evita/dom/text/range.h"
-#include "evita/dom/script_controller.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/windows/text_selection.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/converter.h"
@@ -65,7 +65,7 @@ DEFINE_SCRIPTABLE_OBJECT(TextWindow, TextWindowWrapperInfo);
 TextWindow::TextWindow(Range* selection_range)
     : ScriptableBase(new TextSelection(this, selection_range)),
       view_range_(new Range(selection_range->document(), 0, 0)) {
-  ScriptController::instance()->view_delegate()->CreateTextWindow(this);
+  ScriptHost::instance()->view_delegate()->CreateTextWindow(this);
 }
 
 TextWindow::~TextWindow() {
@@ -85,33 +85,33 @@ text::Posn TextWindow::ComputeMotion(int method,
   data.position = opt_position.get(0);
   data.x = opt_point.is_supplied ? opt_point.value->x() : 0.0f;
   data.y = opt_point.is_supplied ? opt_point.value->y() : 0.0f;
-  return ScriptController::instance()->view_delegate()->ComputeOnTextWindow(
+  return ScriptHost::instance()->view_delegate()->ComputeOnTextWindow(
       id(), data);
 }
 
 void TextWindow::MakeSelectionVisible() {
-  ScriptController::instance()->view_delegate()->MakeSelectionVisible(
+  ScriptHost::instance()->view_delegate()->MakeSelectionVisible(
       window_id());
 }
 
 text::Posn TextWindow::MapPointToPosition(float x, float y) {
-  return ScriptController::instance()->view_delegate()->MapPointToPosition(
+  return ScriptHost::instance()->view_delegate()->MapPointToPosition(
     id(), x, y);
 }
 
 Point* TextWindow::MapPositionToPoint(text::Posn position) {
-  auto const point = ScriptController::instance()->view_delegate()->
+  auto const point = ScriptHost::instance()->view_delegate()->
       MapPositionToPoint(id(), position);
   return new Point(point.x(), point.y());
 }
 
 void TextWindow::Reconvert(text::Posn start, text::Posn end) {
-  ScriptController::instance()->view_delegate()->
+  ScriptHost::instance()->view_delegate()->
       Reconvert(window_id(), start, end);
 }
 
 void TextWindow::Scroll(int direction) {
-  ScriptController::instance()->view_delegate()->
+  ScriptHost::instance()->view_delegate()->
       ScrollTextWindow(window_id(), direction);
 }
 

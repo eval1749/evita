@@ -76,6 +76,8 @@ FormControl::FormControl(FormResourceId control_id)
 }
 
 FormControl::FormControl() : FormControl(kInvalidFormResourceId) {
+  DCHECK_EQ(kInvalidFormResourceId, control_id_);
+  control_id_ = event_target_id();
 }
 
 FormControl::~FormControl() {

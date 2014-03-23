@@ -51,11 +51,7 @@ class LabelControlClass :
 //
 DEFINE_SCRIPTABLE_OBJECT(LabelControl, LabelControlClass);
 
-// TODO(yosi) Once we get rid control_id, we should remove this.
-static int label_control_id;
-
-LabelControl::LabelControl(const base::string16& text)
-    : ScriptableBase(++label_control_id), text_(text) {
+LabelControl::LabelControl(const base::string16& text) : text_(text) {
 }
 
 LabelControl::~LabelControl() {

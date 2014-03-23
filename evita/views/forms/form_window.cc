@@ -254,7 +254,7 @@ void FormWindow::FormViewModel::Update() {
     if (it == map_.end()) {
       auto const widget = importer->CreateWidget();
       map_[control->event_target_id()] = widget;
-      window_->AppendChild(widget);
+      widget->SetParentWidget(window_);
       continue;
     }
     auto const widget = it->second;
@@ -360,16 +360,19 @@ void FormWindow::DidCreateNativeWindow() {
 
 void FormWindow::DidDestroyWidget() {
   ui::SystemMetrics::instance()->RemoveObserver(this);
+  Window::DidDestroyWidget();
 }
 
 void FormWindow::DidRealize() {
   ui::SystemMetrics::instance()->AddObserver(this);
+  Window::DidRealize();
 }
 
 void FormWindow::DidResize() {
   gfx_->Resize(rect());
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::White));
+  Window::DidResize();
 }
 
 LRESULT FormWindow::OnMessage(uint32_t const uMsg, WPARAM const wParam,
@@ -391,9 +394,7 @@ void FormWindow::OnPaint(const gfx::Rect rect) {
   }
 
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
-  for (auto child : child_nodes()) {
-    child->OnDraw(&*gfx_);
-  }
+  Window::OnDraw(gfx_.get());
   gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
                       rect);
   gfx_->DrawRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),

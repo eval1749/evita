@@ -8,17 +8,8 @@
 
 namespace views {
 
-ContentWindow::ContentWindow(
-    std::unique_ptr<common::win::NativeWindow>&& native_window)
-    : CommandWindow(std::move(native_window)) {
-}
-
 ContentWindow::ContentWindow(views::WindowId window_id)
     : CommandWindow(window_id) {
-}
-
-ContentWindow::ContentWindow()
-    : ContentWindow(views::kInvalidWindowId) {
 }
 
 ContentWindow::~ContentWindow() {

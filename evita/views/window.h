@@ -27,8 +27,7 @@ class Window : public ui::Widget, protected EventSource {
   // TODO(yosi): We allow window_id as optional until we export all widgets
   // to DOM.
   protected: Window(
-      std::unique_ptr<NativeWindow>&& native_window,
-      WindowId window_id = kInvalidWindowId);
+      std::unique_ptr<NativeWindow>&& native_window, WindowId window_id);
   protected: explicit Window(WindowId window_id = kInvalidWindowId);
   protected: virtual ~Window();
 

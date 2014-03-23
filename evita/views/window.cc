@@ -91,8 +91,8 @@ Window::Window(std::unique_ptr<NativeWindow>&& native_window,
       EventSource(window_id),
       active_tick_(0),
       window_id_(window_id) {
-  if (window_id != views::kInvalidWindowId)
-    WindowIdMapper::instance()->Register(this);
+  DCHECK_NE(views::kInvalidWindowId, window_id_);
+  WindowIdMapper::instance()->Register(this);
 }
 
 Window::Window(WindowId window_id)
@@ -100,10 +100,8 @@ Window::Window(WindowId window_id)
 }
 
 Window::~Window() {
-  if (window_id_ != views::kInvalidWindowId) {
-    WindowIdMapper::instance()->Unregister(window_id_);
-    view_event_handler()->DidDestroyWidget(window_id_);
-  }
+  WindowIdMapper::instance()->Unregister(window_id_);
+  view_event_handler()->DidDestroyWidget(window_id_);
 }
 
 void Window::DidDestroyDomWindow() {
@@ -113,8 +111,7 @@ void Window::DidDestroyDomWindow() {
 
 void Window::DidKillFocus() {
   Widget::DidKillFocus();
-  if (window_id_ != views::kInvalidWindowId)
-    view_event_handler()->DidKillFocus(window_id_);
+  view_event_handler()->DidKillFocus(window_id_);
 }
 
 bool Window::OnIdle(int hint) {
@@ -150,13 +147,9 @@ void Window::OnMouseWheel(const ui::MouseWheelEvent& event) {
 }
 
 void Window::DidRealize() {
-  // TODO(yosi) Until we manage all widgets by WindowId, we don't call
-  // |domapi::ViewEventHandler| for unmanaged widget.
-  if (window_id_ != views::kInvalidWindowId) {
-    view_event_handler()->DidRealizeWidget(window_id_);
-    view_event_handler()->DidResizeWidget(window_id_, rect().left, rect().top,
-                                          rect().right, rect().bottom);
-  }
+  view_event_handler()->DidRealizeWidget(window_id_);
+  view_event_handler()->DidResizeWidget(window_id_, rect().left, rect().top,
+                                        rect().right, rect().bottom);
   Widget::DidRealize();
 }
 
@@ -171,8 +164,7 @@ void Window::DidSetFocus() {
   ++static_active_tick;
   active_tick_ = static_active_tick;
   Widget::DidSetFocus();
-  if (window_id_ != views::kInvalidWindowId)
-    view_event_handler()->DidSetFocus(window_id_);
+  view_event_handler()->DidSetFocus(window_id_);
 }
 
 Window* Window::FromWindowId(WindowId window_id) {

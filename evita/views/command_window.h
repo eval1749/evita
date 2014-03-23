@@ -13,8 +13,6 @@
 class CommandWindow : public views::Window {
   DECLARE_CASTABLE_CLASS(CommandWindow, views::Window);
 
-  protected: explicit CommandWindow(
-      std::unique_ptr<ui::NativeWindow>&& native_window);
   protected: explicit CommandWindow(views::WindowId window_id);
   protected: virtual ~CommandWindow();
 

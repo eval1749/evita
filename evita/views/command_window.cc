@@ -5,11 +5,6 @@
 
 #include "evita/vi_Frame.h"
 
-CommandWindow::CommandWindow(
-    std::unique_ptr<ui::NativeWindow>&& native_window)
-    : views::Window(std::move(native_window)) {
-}
-
 CommandWindow::CommandWindow(views::WindowId window_id)
     : views::Window(window_id) {
 }

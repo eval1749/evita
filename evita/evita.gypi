@@ -592,6 +592,8 @@
         'ui/controls/table_control_observer.cc',
 
         'ui/root_widget.cc',
+        'ui/system_metrics.cc',
+        'ui/system_metrics_observer.cc',
         'ui/widget.cc',
         'ui/widget_ostream.cc',
       ], # sources

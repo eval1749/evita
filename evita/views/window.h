@@ -48,9 +48,6 @@ class Window : public ui::Widget, protected EventSource {
   // [O]
   public: virtual bool OnIdle(int hint);
 
-  // [U]
-  public: void UpdateActiveTick();
-
   // ui::Widget
   protected: virtual void OnKeyPressed(
       const ui::KeyboardEvent& event) override;

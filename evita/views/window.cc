@@ -128,12 +128,6 @@ bool Window::OnIdle(int hint) {
   return more;
 }
 
-void Window::UpdateActiveTick() {
-  DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
-  ++static_active_tick;
-  active_tick_ = static_active_tick;
-}
-
 // ui::Wiget
 void Window::OnKeyPressed(const ui::KeyboardEvent& event) {
   DispatchKeyboardEvent(event);
@@ -173,7 +167,9 @@ void Window::DidResize() {
 }
 
 void Window::DidSetFocus() {
-  UpdateActiveTick();
+  DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
+  ++static_active_tick;
+  active_tick_ = static_active_tick;
   Widget::DidSetFocus();
   if (window_id_ != views::kInvalidWindowId)
     view_event_handler()->DidSetFocus(window_id_);

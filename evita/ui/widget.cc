@@ -15,6 +15,7 @@
 #include "evita/ui/events/event.h"
 #include "evita/ui/events/event_ostream.h"
 #include "evita/ui/root_widget.h"
+#include "evita/ui/system_metrics.h"
 #include "evita/ui/widget_ostream.h"
 
 #define DEBUG_FOCUS 0
@@ -585,6 +586,17 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       we_have_active_focus = true;
       return 0;
 
+    case WM_SETTINGCHANGE:
+      switch (wParam) {
+        case SPI_SETICONTITLELOGFONT:
+          SystemMetrics::instance()->NotifyChangeIconFont();
+          break;
+        case SPI_SETNONCLIENTMETRICS:
+          SystemMetrics::instance()->NotifyChangeSystemMetrics();
+          break;
+      }
+      return 0;
+
     case WM_SIZE:
       #if DEBUG_RESIZE
         DVLOG_WIDGET(0) << "WM_SIZE " << wParam << " " <<
@@ -594,6 +606,10 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
         ::GetClientRect(*native_window_.get(), &rect_);
         DidResize();
       }
+      return 0;
+
+    case WM_SYSCOLORCHANGE:
+      SystemMetrics::instance()->NotifyChangeSystemColor();
       return 0;
 
     case WM_VSCROLL: {

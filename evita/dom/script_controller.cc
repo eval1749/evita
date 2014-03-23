@@ -218,6 +218,12 @@ void ScriptController::ResetForTesting() {
   Window::ResetForTesting();
 }
 
+void ScriptController::PostTask(const tracked_objects::Location& from_here,
+                                const base::Closure& task) {
+  DCHECK_EQ(message_loop_for_script_, base::MessageLoop::current());
+  message_loop_for_script_->PostTask(from_here, task);
+}
+
 ScriptController* ScriptController::Start(ViewDelegate* view_delegate,
                                           domapi::IoDelegate* io_deleage) {
   // Node: Useing Application::instance() starts thread. So, we don't

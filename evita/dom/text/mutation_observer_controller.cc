@@ -104,7 +104,7 @@ void MutationObserverController::Tracker::ScheduleNotification() {
   if (is_schedule_notification_)
     return;
   is_schedule_notification_ = true;
-  ScriptController::instance()->message_loop()->PostTask(FROM_HERE,
+  ScriptController::instance()->PostTask(FROM_HERE,
       base::Bind(&Tracker::NotifyObservers, GetWeakPtr()));
 }
 

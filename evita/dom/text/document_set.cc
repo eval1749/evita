@@ -175,7 +175,7 @@ void DocumentSet::RenameDocument(Document* document,
 
 void DocumentSet::ScheduleNotifyObserver(const base::string16& type,
                                          Document* document) {
-  ScriptController::instance()->message_loop()->PostTask(FROM_HERE, base::Bind(
+  ScriptController::instance()->PostTask(FROM_HERE, base::Bind(
       &DocumentSet::NotifyObserverWithInLock, base::Unretained(this), type,
       base::Unretained(document)));
 }

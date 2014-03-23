@@ -71,9 +71,6 @@ class ScriptController : public v8_glue::RunnerDelegate {
   public: static ScriptController* instance();
   public: domapi::IoDelegate* io_delegate() const { return io_delegate_; }
   public: v8::Isolate* isolate() const;
-  public: base::MessageLoop* message_loop() const {
-    return message_loop_for_script_;
-  }
   public: v8_glue::Runner* runner() const;
   public: void set_testing_runner(v8_glue::Runner* runner);
   public: ViewDelegate* view_delegate() const;
@@ -81,6 +78,8 @@ class ScriptController : public v8_glue::RunnerDelegate {
   public: void DidStartViewHost();
   public: void OpenFile(WindowId window_id,
                         const base::string16& filename);
+  public: void PostTask(const tracked_objects::Location& from_here,
+                        const base::Closure& task);
   public: void ResetForTesting();
   public: static ScriptController* Start(ViewDelegate* view_delegate,
                                          domapi::IoDelegate* io_delegate);

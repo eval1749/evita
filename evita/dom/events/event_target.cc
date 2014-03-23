@@ -228,7 +228,7 @@ void EventTarget::RemoveEventListener(const base::string16& type,
 }
 
 void EventTarget::ScheduleDispatchEvent(Event* event) {
-  ScriptController::instance()->message_loop()->PostTask(FROM_HERE, base::Bind(
+  ScriptController::instance()->PostTask(FROM_HERE, base::Bind(
       &EventTarget::DispatchEventWithInLock, base::Unretained(this),
       base::Unretained(event)));
 }

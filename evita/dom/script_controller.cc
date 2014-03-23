@@ -3,9 +3,10 @@
 
 #include "evita/dom/script_controller.h"
 
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 #include "base/bind.h"
+#pragma warning(push)
+#pragma warning(disable: 4100 4625 4626)
+#include "base/message_loop/message_loop.h"
 #pragma warning(pop)
 #include "base/logging.h"
 #include "base/strings/string16.h"
@@ -134,6 +135,7 @@ ScriptController::ScriptController(ViewDelegate* view_delegate,
                                    domapi::IoDelegate* io_delegate)
     : event_handler_(new ViewEventHandlerImpl(this)),
       io_delegate_(io_delegate),
+      message_loop_for_script_(base::MessageLoop::current()),
       state_(domapi::ScriptHostState::Stopped),
       testing_(false),
       testing_runner_(nullptr),
@@ -165,6 +167,7 @@ v8::Isolate* ScriptController::isolate() const {
 }
 
 v8_glue::Runner* ScriptController::runner() const {
+  DCHECK_EQ(message_loop_for_script_, base::MessageLoop::current());
   return testing_runner_ ? testing_runner_ : runner_.get();
 }
 

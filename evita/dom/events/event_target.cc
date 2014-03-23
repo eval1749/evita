@@ -228,13 +228,7 @@ void EventTarget::RemoveEventListener(const base::string16& type,
 }
 
 void EventTarget::ScheduleDispatchEvent(Event* event) {
-  auto const message_loop = base::MessageLoop::current();
-  if (!message_loop) {
-    // All unit tests except for explicitly construct |base::MessageLoop|
-    // don't have message loop.
-    return;
-  }
-  message_loop->PostTask(FROM_HERE, base::Bind(
+  ScriptController::instance()->message_loop()->PostTask(FROM_HERE, base::Bind(
       &EventTarget::DispatchEventWithInLock, base::Unretained(this),
       base::Unretained(event)));
 }

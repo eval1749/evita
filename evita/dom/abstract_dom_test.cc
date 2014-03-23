@@ -4,6 +4,10 @@
 #include "evita/dom/abstract_dom_test.h"
 
 #include "base/logging.h"
+#pragma warning(push)
+#pragma warning(disable: 4100 4625 4626)
+#include "base/message_loop/message_loop.h"
+#pragma warning(pop)
 #include "base/strings/utf_string_conversions.h"
 #include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/global.h"
@@ -112,6 +116,8 @@ bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
 void AbstractDomTest::SetUp() {
   static int number_of_called;
   ++number_of_called;
+
+  DEFINE_STATIC_LOCAL(base::MessageLoop, message_loop, ());
 
   EXPECT_CALL(*mock_view_impl_, RegisterViewEventHandler(_))
     .Times(number_of_called == 1 ? 1 : 0);

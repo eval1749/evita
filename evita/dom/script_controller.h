@@ -18,7 +18,8 @@
 #include "evita/v8_glue/v8.h"
 
 namespace base {
-template<typename T> class Callback;
+//template<typename T> class Callback;
+class MessageLoop;
 }
 
 namespace domapi {
@@ -51,6 +52,9 @@ class ScriptController : public v8_glue::RunnerDelegate {
   private: v8_glue::IsolateHolder isolate_holder_;
   private: std::unique_ptr<ViewEventHandlerImpl> event_handler_;
   private: domapi::IoDelegate* io_delegate_;
+  // A |MessageLoop| where script runs on. We don't allow to run script other
+  // than this message loop.
+  private: base::MessageLoop* message_loop_for_script_;
   private: std::unique_ptr<v8_glue::Runner> runner_;
   private: domapi::ScriptHostState state_;
   private: bool testing_;
@@ -67,6 +71,9 @@ class ScriptController : public v8_glue::RunnerDelegate {
   public: static ScriptController* instance();
   public: domapi::IoDelegate* io_delegate() const { return io_delegate_; }
   public: v8::Isolate* isolate() const;
+  public: base::MessageLoop* message_loop() const {
+    return message_loop_for_script_;
+  }
   public: v8_glue::Runner* runner() const;
   public: void set_testing_runner(v8_glue::Runner* runner);
   public: ViewDelegate* view_delegate() const;

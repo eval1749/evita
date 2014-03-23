@@ -6,9 +6,8 @@
 #include "base/basictypes.h"
 #pragma warning(push)
 #pragma warning(disable: 4100 4625 4626)
-#include "base/message_loop/message_loop.h"
-#pragma warning(pop)
 #include "base/run_loop.h"
+#pragma warning(pop)
 #include "gmock/gmock.h"
 #include "evita/dom/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
@@ -69,8 +68,6 @@ TEST_F(TextWindowTest, realize) {
       "function event_handler(x) { event = x; }"
       "doc.addEventListener('attach', event_handler);"
       "doc.addEventListener('detach', event_handler);");
-
-  base::MessageLoop message_loop;
 
   // The document receives "attach" event when |TextWindow| is realized.
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));

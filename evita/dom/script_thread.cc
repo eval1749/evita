@@ -20,14 +20,16 @@
 #include "v8/include/v8-debug.h"
 
 #define DCHECK_CALLED_ON_NON_SCRIPT_THREAD() \
-  DCHECK(!ScriptThread::instance()->CalledOnValidThread())
+  DCHECK_NE(script_thread->message_loop(), base::MessageLoop::current())
 
 #define DCHECK_CALLED_ON_SCRIPT_THREAD() \
-  DCHECK(ScriptThread::instance()->CalledOnValidThread())
+  DCHECK_EQ(script_thread->message_loop(), base::MessageLoop::current())
 
 namespace dom {
 
 namespace {
+
+base::Thread* script_thread;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -117,7 +119,12 @@ void RunSynchronously(const base::Callback<void(Params...)>& task,
   caller.Run(message_loop);
 }
 
-ScriptThread* script_thread;
+void PostScriptTask(const tracked_objects::Location& from_here,
+                            const base::Closure& task) {
+  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
+  script_thread->message_loop()->PostTask(from_here, task);
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -130,48 +137,29 @@ ScriptThread::ScriptThread(base::MessageLoop* view_message_loop,
                            domapi::IoDelegate* io_delegate)
     : io_delegate_(io_delegate),
       io_message_loop_(io_message_loop),
-      thread_(new base::Thread("script_thread")),
       view_delegate_(view_delegate),
       view_event_handler_(nullptr),
       view_message_loop_(view_message_loop),
       waitable_event_(new base::WaitableEvent(true, false)) {
-  thread_->Start();
+  DCHECK(!script_thread);
+  script_thread = new base::Thread("script_thread");
+  script_thread->Start();
 }
 
 ScriptThread::~ScriptThread() {
   script_thread = nullptr;
 }
 
-ScriptThread* ScriptThread::instance() {
-  DCHECK(script_thread);
-  return script_thread;
-}
-
-bool ScriptThread::CalledOnValidThread() const {
-  return CalledOnScriptThread();
-}
-
-bool ScriptThread::CalledOnScriptThread() const {
-  return base::MessageLoop::current() == thread_->message_loop();
-}
-
-void ScriptThread::PostTask(const tracked_objects::Location& from_here,
-                            const base::Closure& task) {
-  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
-  thread_->message_loop()->PostTask(from_here, task);
-}
-
 void ScriptThread::Start(base::MessageLoop* view_message_loop,
                          ViewDelegate* view_delegate,
                          base::MessageLoop* io_message_loop,
                          domapi::IoDelegate* io_delegate) {
-  DCHECK(!script_thread);
-  script_thread = new ScriptThread(view_message_loop, view_delegate,
-                                   io_message_loop, io_delegate);
-  script_thread->PostTask(FROM_HERE,
-      base::Bind(base::IgnoreResult(&ScriptController::Start),
-                                    base::Unretained(script_thread),
-                                    base::Unretained(script_thread)));
+  auto const script_thread = new ScriptThread(view_message_loop, view_delegate,
+                                              io_message_loop, io_delegate);
+  PostScriptTask(FROM_HERE, base::Bind(
+      base::IgnoreResult(&ScriptController::Start),
+      base::Unretained(script_thread),
+      base::Unretained(script_thread)));
 }
 
 // IoDelegate
@@ -373,7 +361,7 @@ void ScriptThread::ScrollTextWindow(WindowId window_id, int direction) {
   void ScriptThread::name() { \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD(); \
     DCHECK(view_event_handler_); \
-    PostTask(FROM_HERE, base::Bind( \
+    PostScriptTask(FROM_HERE, base::Bind( \
         &ViewEventHandler::name, \
         base::Unretained(view_event_handler_))); \
   }
@@ -382,7 +370,7 @@ void ScriptThread::ScrollTextWindow(WindowId window_id, int direction) {
   void ScriptThread::name(type1 param1) { \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD(); \
     DCHECK(view_event_handler_); \
-    PostTask(FROM_HERE, base::Bind( \
+    PostScriptTask(FROM_HERE, base::Bind( \
         &ViewEventHandler::name, \
         base::Unretained(view_event_handler_), \
         param1)); \
@@ -392,7 +380,7 @@ void ScriptThread::ScrollTextWindow(WindowId window_id, int direction) {
   void ScriptThread::name(type1 param1, type2 param2) { \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD(); \
     DCHECK(view_event_handler_); \
-    PostTask(FROM_HERE, base::Bind( \
+    PostScriptTask(FROM_HERE, base::Bind( \
         &ViewEventHandler::name, \
         base::Unretained(view_event_handler_), \
         param1, param2)); \
@@ -402,7 +390,7 @@ void ScriptThread::ScrollTextWindow(WindowId window_id, int direction) {
   void ScriptThread::name(type1 param1, type2 param2, type3 param3) { \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD(); \
     DCHECK(view_event_handler_); \
-    PostTask(FROM_HERE, base::Bind( \
+    PostScriptTask(FROM_HERE, base::Bind( \
         &ViewEventHandler::name, \
         base::Unretained(view_event_handler_), \
         param1, param2, param3)); \
@@ -413,7 +401,7 @@ void ScriptThread::ScrollTextWindow(WindowId window_id, int direction) {
                           type4 param4) { \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD(); \
     DCHECK(view_event_handler_); \
-    PostTask(FROM_HERE, base::Bind( \
+    PostScriptTask(FROM_HERE, base::Bind( \
         &ViewEventHandler::name, \
         base::Unretained(view_event_handler_), \
         param1, param2, param3, param4)); \
@@ -424,7 +412,7 @@ void ScriptThread::ScrollTextWindow(WindowId window_id, int direction) {
                           type4 param4, type5 param5) { \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD(); \
     DCHECK(view_event_handler_); \
-    PostTask(FROM_HERE, base::Bind( \
+    PostScriptTask(FROM_HERE, base::Bind( \
         &ViewEventHandler::name, \
         base::Unretained(view_event_handler_), \
         param1, param2, param3, param4, param5)); \
@@ -452,7 +440,7 @@ void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {
     return;
   }
 
-  PostTask(FROM_HERE, base::Bind(&ViewEventHandler::DispatchKeyboardEvent,
+  PostScriptTask(FROM_HERE, base::Bind(&ViewEventHandler::DispatchKeyboardEvent,
            base::Unretained(view_event_handler_), event));
 }
 
@@ -469,7 +457,7 @@ void ScriptThread::WillDestroyHost() {
   DCHECK(view_event_handler_);
   view_delegate_ = nullptr;
   view_message_loop_ = nullptr;
-  PostTask(FROM_HERE, base::Bind(
+  PostScriptTask(FROM_HERE, base::Bind(
       &ViewEventHandler::WillDestroyHost,
       base::Unretained(view_event_handler_)));
 }

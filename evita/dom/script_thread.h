@@ -9,14 +9,12 @@
 
 #include "base/basictypes.h"
 #include "base/callback_forward.h"
-#include "base/location.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/dom/view_delegate.h"
 
 namespace base {
 class MessageLoop;
-class Thread;
 class WaitableEvent;
 }
 
@@ -27,7 +25,6 @@ class ScriptThread final : public domapi::IoDelegate,
                            public domapi::ViewEventHandler {
   private: domapi::IoDelegate* io_delegate_;
   private: base::MessageLoop* io_message_loop_;
-  private: std::unique_ptr<base::Thread> const thread_;
   private: ViewDelegate* view_delegate_;
   private: domapi::ViewEventHandler* view_event_handler_;
   private: base::MessageLoop* view_message_loop_;
@@ -39,12 +36,6 @@ class ScriptThread final : public domapi::IoDelegate,
                         domapi::IoDelegate* io_delegate);
   public: virtual ~ScriptThread();
 
-  public: static ScriptThread* instance();
-
-  public: bool CalledOnValidThread() const;
-  private: bool CalledOnScriptThread() const;
-  private: void PostTask(const tracked_objects::Location& from_here,
-                         const base::Closure& task);
   public: static void Start(base::MessageLoop* host_message_loop,
                             ViewDelegate* view_delegate,
                             base::MessageLoop* io_message_loop,

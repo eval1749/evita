@@ -10,7 +10,7 @@
 
 #include "base/callback_forward.h"
 #include "base/strings/string16.h"
-#include "evita/dom/events/event_target_id.h"
+#include "evita/dom/public/event_target_id.h"
 #include "evita/dom/windows/window_id.h"
 
 namespace text {

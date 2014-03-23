@@ -17,15 +17,15 @@ class ViewEventTarget
 
   friend class ViewEventTargetSet;
 
-  private: EventTargetId event_target_id_;
+  private: domapi::EventTargetId event_target_id_;
 
   protected: ViewEventTarget();
   protected: virtual ~ViewEventTarget();
 
-  public: EventTargetId event_target_id() const {
+  public: domapi::EventTargetId event_target_id() const {
       return event_target_id_;
   }
-  public: EventTargetId id() const { return event_target_id(); }
+  public: domapi::EventTargetId id() const { return event_target_id(); }
 
   DISALLOW_COPY_AND_ASSIGN(ViewEventTarget);
 };

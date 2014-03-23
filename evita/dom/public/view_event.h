@@ -42,7 +42,7 @@ enum class MouseButton {
 
 struct Event {
   EventType event_type;
-  dom::EventTargetId target_id;
+  EventTargetId target_id;
 };
 
 struct FormEvent : Event {

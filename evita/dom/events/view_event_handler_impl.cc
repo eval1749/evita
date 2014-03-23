@@ -44,7 +44,7 @@ base::string16 V8ToString(v8::Handle<v8::Value> value) {
                         static_cast<size_t>(string_value.length()));
 }
 
-ViewEventTarget* FromEventTargetId(EventTargetId event_target_id) {
+ViewEventTarget* FromEventTargetId(domapi::EventTargetId event_target_id) {
   auto const target = ViewEventTargetSet::instance()->Find(event_target_id);
   if (!target)
     DVLOG(0) << "No such event target " << event_target_id;

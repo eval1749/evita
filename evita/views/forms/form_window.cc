@@ -212,7 +212,7 @@ ControlImporter* ControlImporter::Create(const dom::FormControl* control) {
 class FormWindow::FormViewModel final : private dom::FormObserver  {
   private: bool dirty_;
   private: const dom::Form* const form_;
-  private: std::unordered_map<dom::EventTargetId, ui::Widget*> map_;
+  private: std::unordered_map<domapi::EventTargetId, ui::Widget*> map_;
   private: FormWindow* const window_;
 
   public: FormViewModel(const dom::Form* form, FormWindow* window);

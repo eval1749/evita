@@ -14,8 +14,9 @@ ViewEventTargetSet::ViewEventTargetSet() : next_event_target_id_(1) {
 ViewEventTargetSet::~ViewEventTargetSet() {
 }
 
-void ViewEventTargetSet::DidDestroyWidget(EventTargetId event_target_id) {
-  DCHECK_NE(kInvalidEventTargetId, event_target_id);
+void ViewEventTargetSet::DidDestroyWidget(
+    domapi::EventTargetId event_target_id) {
+  DCHECK_NE(domapi::kInvalidEventTargetId, event_target_id);
   auto it = map_.find(event_target_id);
   if (it == map_.end()) {
     DVLOG(0) << "Why we don't have a widget for EventTargetId " <<
@@ -23,16 +24,17 @@ void ViewEventTargetSet::DidDestroyWidget(EventTargetId event_target_id) {
     return;
   }
   auto const event_target = it->second.get();
-  event_target->event_target_id_ = kInvalidEventTargetId;
+  event_target->event_target_id_ = domapi::kInvalidEventTargetId;
 }
 
 ViewEventTarget* ViewEventTargetSet::Find(
-    EventTargetId event_target_id) const {
+    domapi::EventTargetId event_target_id) const {
   auto it = map_.find(event_target_id);
   return it == map_.end() ? nullptr : it->second.get();
 }
 
-EventTargetId ViewEventTargetSet::Register(ViewEventTarget* event_target) {
+domapi::EventTargetId ViewEventTargetSet::Register(
+    ViewEventTarget* event_target) {
   auto event_target_id = next_event_target_id_;
   map_[event_target_id] = event_target;
   ++next_event_target_id_;
@@ -44,8 +46,8 @@ void ViewEventTargetSet::ResetForTesting() {
   map_.clear();
 }
 
-void ViewEventTargetSet::Unregister(EventTargetId event_target_id) {
-  DCHECK_NE(kInvalidEventTargetId, event_target_id);
+void ViewEventTargetSet::Unregister(domapi::EventTargetId event_target_id) {
+  DCHECK_NE(domapi::kInvalidEventTargetId, event_target_id);
   map_.erase(event_target_id);
 }
 

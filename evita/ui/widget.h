@@ -90,8 +90,8 @@ class Widget
   protected: virtual void DidRealize();
   protected: virtual void DidRealizeChildWidget(const Widget& widget);
   protected: virtual void DidRemoveChildWidget(const Widget& widget);
-  protected: virtual void DidRequestFocus();
   protected: virtual void DidResize();
+  protected: virtual void DidSetFocus();
   protected: virtual void DidShow();
   private: void DispatchPaintMessage();
 

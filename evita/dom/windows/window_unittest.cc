@@ -207,7 +207,7 @@ TEST_F(WindowTest, focusTick_) {
   EXPECT_SCRIPT_VALID("var sample = new SampleWindow();");
   EXPECT_SCRIPT_EQ("0", "sample.focusTick_");
   EXPECT_TRUE("Window.focus == null");
-  view_event_handler()->DidRequestFocus(1);
+  view_event_handler()->DidSetFocus(1);
   EXPECT_SCRIPT_TRUE("Window.focus == sample");
   EXPECT_SCRIPT_EQ("1", "sample.focusTick_");
 }

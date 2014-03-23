@@ -170,10 +170,10 @@ void Widget::DidRealizeChildWidget(const Widget&) {
 void Widget::DidRemoveChildWidget(const Widget&) {
 }
 
-void Widget::DidRequestFocus() {
+void Widget::DidResize() {
 }
 
-void Widget::DidResize() {
+void Widget::DidSetFocus() {
 }
 
 void Widget::DidShow() {
@@ -396,7 +396,7 @@ void Widget::RequestFocus() {
     focus_widget = this;
     if (last_focus_widget)
       last_focus_widget->DidKillFocus();
-    focus_widget->DidRequestFocus();
+    focus_widget->DidSetFocus();
     return;
   }
   will_focus_widget = this;
@@ -582,7 +582,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       #endif
       focus_widget = will_focus_widget ? will_focus_widget : this;
       will_focus_widget = nullptr;
-      focus_widget->DidRequestFocus();
+      focus_widget->DidSetFocus();
       we_have_active_focus = true;
       return 0;
 

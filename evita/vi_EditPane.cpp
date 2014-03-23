@@ -1145,16 +1145,16 @@ void EditPane::DidRemoveChildWidget(const Widget&) {
   DestroyWidget();
 }
 
-void EditPane::DidRequestFocus() {
-  if (auto const widget = GetActiveWindow())
-    widget->RequestFocus();
-}
-
 void EditPane::DidResize() {
   #if DEBUG_RESIZE
     DEBUG_WIDGET_PRINTF(DEBUG_RECT_FORMAT "\n", DEBUG_RECT_ARG(rect()));
   #endif
   root_box_->SetRect(rect());
+}
+
+void EditPane::DidSetFocus() {
+  if (auto const widget = GetActiveWindow())
+    widget->RequestFocus();
 }
 
 // Returns the last active Box.

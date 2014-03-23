@@ -39,8 +39,8 @@ class Window : public ui::Widget {
   public: void DidDestroyDomWindow();
   protected: virtual void DidKillFocus() override;
   protected: virtual void DidRealize() override;
-  protected: virtual void DidRequestFocus() override;
   protected: virtual void DidResize() override;
+  protected: virtual void DidSetFocus() override;
   protected: void DispatchKeyboardEvent(const ui::KeyboardEvent& event);
   protected: void DispatchMouseEvent(const ui::MouseEvent& event);
 

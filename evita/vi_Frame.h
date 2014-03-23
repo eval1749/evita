@@ -85,7 +85,7 @@ class Frame final : public views::Window,
 
   // [D]
   public: void DidActivatePane(Pane*);
-  public: void DidRequestFocusOnChild(views::Window* window);
+  public: void DidSetFocusOnChild(views::Window* window);
   private: void DrawForResize();
 
   // [G]
@@ -119,9 +119,9 @@ class Frame final : public views::Window,
   private: virtual void DidDestroyWidget() override;
   private: virtual void DidRemoveChildWidget(
       const Widget& widget) override;
-  private: virtual void DidRequestFocus() override;
   private: virtual void DidResize() override;
-  private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
+private: virtual void DidSetFocus() override;
+private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;
   private: virtual void WillDestroyWidget() override;
   private: virtual void WillRemoveChildWidget(const Widget& widget) override;

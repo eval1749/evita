@@ -219,22 +219,6 @@ void Window::DidRealizeWindow() {
   }
 }
 
-void Window::DidRequestFocus() {
-  ++global_focus_tick;
-
-  // Update |Window.focus| and |Window.prototype.focusTick_|
-  auto const runner = ScriptHost::instance()->runner();
-  auto const isolate = runner->isolate();
-  v8_glue::Runner::Scope runner_scope(runner);
-  auto const instance = GetWrapper(isolate);
-  auto const klass = runner->global()->Get(v8Strings::Window.Get(isolate));
-  instance->Set(v8Strings::focusTick_.Get(isolate),
-                v8::Integer::New(isolate, global_focus_tick),
-                kDefaultPropertyAttribute);
-  klass->ToObject()->Set(v8Strings::focus.Get(isolate), instance,
-                         kDefaultPropertyAttribute);
-}
-
 void Window::DidResize(int left, int top, int right, int bottom) {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
@@ -248,6 +232,22 @@ void Window::DidResize(int left, int top, int right, int bottom) {
   SET_PROP(top);
   SET_PROP(right);
   SET_PROP(bottom);
+}
+
+void Window::DidSetFocus() {
+  ++global_focus_tick;
+
+  // Update |Window.focus| and |Window.prototype.focusTick_|
+  auto const runner = ScriptHost::instance()->runner();
+  auto const isolate = runner->isolate();
+  v8_glue::Runner::Scope runner_scope(runner);
+  auto const instance = GetWrapper(isolate);
+  auto const klass = runner->global()->Get(v8Strings::Window.Get(isolate));
+  instance->Set(v8Strings::focusTick_.Get(isolate),
+    v8::Integer::New(isolate, global_focus_tick),
+    kDefaultPropertyAttribute);
+  klass->ToObject()->Set(v8Strings::focus.Get(isolate), instance,
+    kDefaultPropertyAttribute);
 }
 
 void Window::Focus() {

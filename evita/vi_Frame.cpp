@@ -272,7 +272,7 @@ void Frame::DidChangeTabSelection(int selected_index) {
   #endif
 }
 
-void Frame::DidRequestFocusOnChild(views::Window* window) {
+void Frame::DidSetFocusOnChild(views::Window* window) {
   auto const pane = GetContainingPane(this, window);
   if (!pane) {
     DVLOG(0) << "Frame::DidSetFolcusOnChild: No pane contains " << window;
@@ -551,16 +551,6 @@ void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
     DestroyWidget();
 }
 
-void Frame::DidRequestFocus() {
-  if (!m_pActivePane) {
-    m_pActivePane = m_oPanes.GetFirst();
-    if (!m_pActivePane)
-      return;
-  }
-  m_pActivePane->RequestFocus();
-  FOR_EACH_OBSERVER(views::FrameObserver, observers_, DidActiveFrame(this));
-}
-
 void Frame::DidResize() {
   {
     auto tab_strip_rect = rect();
@@ -587,6 +577,16 @@ void Frame::DidResize() {
   }
   gfx_->Resize(rect());
   DrawForResize();
+}
+
+void Frame::DidSetFocus() {
+  if (!m_pActivePane) {
+    m_pActivePane = m_oPanes.GetFirst();
+    if (!m_pActivePane)
+      return;
+  }
+  m_pActivePane->RequestFocus();
+  FOR_EACH_OBSERVER(views::FrameObserver, observers_, DidActiveFrame(this));
 }
 
 LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,

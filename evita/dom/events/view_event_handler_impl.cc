@@ -184,11 +184,11 @@ void ViewEventHandlerImpl::DidResizeWidget(WindowId window_id, int left, int top
   window->DidResize(left, top, right, bottom);
 }
 
-void ViewEventHandlerImpl::DidRequestFocus(WindowId window_id) {
+void ViewEventHandlerImpl::DidSetFocus(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)
     return;
-  window->DidRequestFocus();
+  window->DidSetFocus();
   DispatchEventWithInLock(window, new FocusEvent(L"focus", FocusEventInit()));
 }
 

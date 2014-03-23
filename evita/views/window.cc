@@ -264,17 +264,17 @@ void Window::DidRealize() {
   Widget::DidRealize();
 }
 
-void Window::DidRequestFocus() {
-  UpdateActiveTick();
-  Widget::DidRequestFocus();
-  if (window_id_ != views::kInvalidWindowId)
-    view_event_handler()->DidRequestFocus(window_id_);
-}
-
 void Window::DidResize() {
   Widget::DidResize();
   view_event_handler()->DidResizeWidget(window_id_, rect().left, rect().top,
                                         rect().right, rect().bottom);
+}
+
+void Window::DidSetFocus() {
+  UpdateActiveTick();
+  Widget::DidSetFocus();
+  if (window_id_ != views::kInvalidWindowId)
+    view_event_handler()->DidSetFocus(window_id_);
 }
 
 Window* Window::FromWindowId(WindowId window_id) {

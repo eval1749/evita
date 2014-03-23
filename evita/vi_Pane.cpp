@@ -7,12 +7,8 @@
 #include "common/win/native_window.h"
 #include "evita/vi_Frame.h"
 
-Pane::Pane(std::unique_ptr<common::win::NativeWindow>&& native_window)
-    : CommandWindow(std::move(native_window)) {
-}
-
 Pane::Pane()
-    : Pane(std::move(std::unique_ptr<common::win::NativeWindow>())) {
+    : ui::Widget(), active_tick_(0) {
 }
 
 Pane::~Pane() {
@@ -22,6 +18,8 @@ void Pane::Activate() {
   GetFrame()->DidActivatePane(this);
 }
 
-HCURSOR Pane::GetCursorAt(const common::win::Point&) const {
-  return nullptr;
+void Pane::UpdateActiveTick() {
+  DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
+  ++static_active_tick;
+  active_tick_ = static_active_tick;
 }

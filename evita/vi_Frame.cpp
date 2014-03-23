@@ -148,7 +148,6 @@ void Frame::AddObserver(views::FrameObserver* observer) {
 
 void Frame::AddPane(Pane* const pane) {
   ASSERT(!!pane);
-  ASSERT(!pane->GetFrame());
   ASSERT(!pane->is_realized());
   m_oPanes.Append(this, pane);
   AppendChild(pane);
@@ -186,8 +185,7 @@ void Frame::AddWindow(views::ContentWindow* window) {
     }
   }
 
-  std::unique_ptr<EditPane> new_pane(new EditPane(window));
-  AddPane(new_pane.release());
+  AddPane(new EditPane(window));
 }
 
 void Frame::DidActivatePane(Pane* const pane) {
@@ -771,8 +769,15 @@ bool Frame::OnIdle(int const hint) {
     std::swap(pending_update_rect_, rect);
     SchedulePaintInRect(rect);
   }
-  auto const more = Window::OnIdle(hint);
+  auto const active_pane = GetActivePane();
+  if (!active_pane)
+    return false;
   if (!hint)
     updateTitleBar();
+  auto more = false;
+  for (auto child : active_pane->child_nodes()) {
+    if (auto const window = child->as<Window>())
+      more |= window->OnIdle(hint);
+  }
   return more;
 }

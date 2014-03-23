@@ -12,26 +12,25 @@
 
 class Frame;
 
-class Pane : public CommandWindow, public ChildNode_<Frame, Pane> {
-  protected: typedef ui::Widget Widget;
-  protected: typedef ui::Widget Widget;
+class Pane : public ui::Widget, public ChildNode_<Frame, Pane> {
+  DECLARE_CASTABLE_CLASS(Pane, Widget);
 
-  DECLARE_CASTABLE_CLASS(Pane, CommandWindow);
+  private: int active_tick_;
 
-  // ctor
-  protected: Pane(std::unique_ptr<common::win::NativeWindow>&&);
   protected: Pane();
   public: virtual ~Pane();
+
+  public: int active_tick() const { return active_tick_; }
 
   // [A]
   public: virtual void Activate();
 
   // [G]
-  public: virtual HCURSOR GetCursorAt(const common::win::Point&) const;
-  public: Frame* GetFrame() const { return m_pParent; }
-  public: virtual Window* GetWindow() const {
-      return const_cast<Pane*>(this);
-  }
+  protected: Frame* GetFrame() const { return m_pParent; }
+  public: virtual views::Window* GetWindow() const { return nullptr; }
+
+  // [U]
+  public: void UpdateActiveTick();
 
   DISALLOW_COPY_AND_ASSIGN(Pane);
 };

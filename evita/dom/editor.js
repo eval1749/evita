@@ -55,9 +55,9 @@
       return Editor.getFilenameForSave(null, document.filename).then(
         function(filename) {
           if (!filename.length)
-            return Promise.cast(DialogItemId.CANCEL);
+            return Promise.resolve(DialogItemId.CANCEL);
           document.save(filename);
-          return Promise.cast(DialogItemId.YES);
+          return Promise.resolve(DialogItemId.YES);
         });
     }
 
@@ -67,14 +67,14 @@
      */
     function confirmForExit(document) {
       if (!document.needSave())
-        return Promise.cast(true);
+        return Promise.resolve(true);
       return Editor.messageBox(null,
         Editor.localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
         MessageBox.ICONWARNING | MessageBox.YESNOCANCEL).then(function(code) {
           switch (code) {
             case DialogItemId.CANCEL:
             case DialogItemId.NO:
-              return Promise.cast(code);
+              return Promise.resolve(code);
             case DialogItemId.YES:
               return interactiveSave(document);
            }

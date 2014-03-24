@@ -319,12 +319,12 @@ SpellChecker.wordStateMap = new Map();
  */
 SpellChecker.checkSpelling = function(word_to_check) {
   if (!SpellChecker.RE_WORD.test(word_to_check))
-    return Promise.cast(null);
+    return Promise.resolve(null);
   var result = SpellChecker.wordStateMap.get(word_to_check);
   if (result) {
     result.lastUsedTime = new Date();
     ++result.useCount;
-    return Promise.cast(result);
+    return Promise.resolve(result);
   }
   var state = {
     busy: true,

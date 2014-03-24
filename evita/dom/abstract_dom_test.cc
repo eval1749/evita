@@ -73,8 +73,8 @@ std::string AbstractDomTest::EvalScript(const base::StringPiece& script_text,
                                  v8::Integer::New(isolate, line_number),
                                  v8::Integer::New(isolate, 0));
   v8::TryCatch try_catch;
-  auto const script = v8::Script::New(gin::StringToV8(isolate, script_text),
-                                      &script_origin);
+  auto const script = v8::Script::Compile(
+      gin::StringToV8(isolate, script_text), &script_origin);
   if (script.IsEmpty()) {
     UnhandledException(runner_.get(), try_catch);
     return exception_;
@@ -100,8 +100,8 @@ bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
                                  v8::Integer::New(isolate, line_number),
                                  v8::Integer::New(isolate, 0));
   v8::TryCatch try_catch;
-  auto const script = v8::Script::New(gin::StringToV8(isolate, script_text),
-                                      &script_origin);
+  auto const script = v8::Script::Compile(
+      gin::StringToV8(isolate, script_text), &script_origin);
   if (script.IsEmpty()) {
     UnhandledException(runner_.get(), try_catch);
     return false;

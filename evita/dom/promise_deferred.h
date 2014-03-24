@@ -33,7 +33,7 @@ class PromiseDeferred : public base::RefCounted<PromiseDeferred> {
   protected: v8_glue::Runner* runner() const { return runner_.get(); }
 
   public: template<typename ResolveType, typename RejectType>
-    static v8::Handle<v8::Promise> Call(
+    static v8::Handle<v8_glue::Promise> Call(
         const base::Callback<
             void(const domapi::Deferred<ResolveType, RejectType>&)> closure);
 
@@ -47,7 +47,7 @@ class PromiseDeferred : public base::RefCounted<PromiseDeferred> {
 };
 
 template<typename T, typename U>
-v8::Handle<v8::Promise> PromiseDeferred::Call(
+v8::Handle<v8_glue::Promise> PromiseDeferred::Call(
     const base::Callback<void(const domapi::Deferred<T, U>&)> closure) {
   auto const runner = ScriptHost::instance()->runner();
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);

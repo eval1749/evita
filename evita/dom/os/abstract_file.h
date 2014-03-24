@@ -24,7 +24,7 @@ class AbstractFile : public v8_glue::Scriptable<AbstractFile> {
   protected: AbstractFile(domapi::IoContextId context_id);
   protected: virtual ~AbstractFile();
 
-  public: v8::Handle<v8::Promise> Close();
+  public: v8::Handle<v8_glue::Promise> Close();
   public: v8::Handle<v8::Object> Read(
       const gin::ArrayBufferView& array_buffer_view);
   public: v8::Handle<v8::Object> Write(

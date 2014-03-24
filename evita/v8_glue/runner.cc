@@ -168,9 +168,11 @@ v8::Handle<v8::Value> Runner::Run(const base::string16& script_text,
     DCHECK(in_scope_);
   #endif
   v8::TryCatch try_catch;
-  auto const script = v8::Script::New(
-      gin::StringToV8(isolate(), script_text)->ToString(),
+  v8::ScriptOrigin script_origin(
       gin::StringToV8(isolate(), script_name)->ToString());
+  auto const script = v8::Script::Compile(
+      gin::StringToV8(isolate(), script_text)->ToString(),
+      &script_origin);
   if (try_catch.HasCaught())
     delegate_->UnhandledException(this, try_catch);
   return Run(script);

@@ -51,7 +51,7 @@ class ProcessClass :
     return nullptr;
   }
 
-  private: static v8::Handle<v8::Promise> OpenProcess(
+  private: static v8::Handle<v8_glue::Promise> OpenProcess(
       const base::string16& command_line);
 
   // v8_glue::WrapperInfo
@@ -67,7 +67,7 @@ class ProcessClass :
   DISALLOW_COPY_AND_ASSIGN(ProcessClass);
 };
 
-v8::Handle<v8::Promise> ProcessClass::OpenProcess(
+v8::Handle<v8_glue::Promise> ProcessClass::OpenProcess(
     const base::string16& command_line) {
   return PromiseDeferred::Call(base::Bind(
       &domapi::IoDelegate::OpenProcess,

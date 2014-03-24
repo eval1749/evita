@@ -64,7 +64,7 @@ class EditorClass : public v8_glue::WrapperInfo {
   }
   public: ~EditorClass() = default;
 
-  private: static v8::Handle<v8::Promise> CheckSpelling(
+  private: static v8::Handle<v8_glue::Promise> CheckSpelling(
       const base::string16& word_to_check);
 
   private: static void GetFilenameForLoad(Window* window,
@@ -91,7 +91,7 @@ class EditorClass : public v8_glue::WrapperInfo {
     return ScriptHost::instance()->view_delegate()->GetMetrics(name);
   }
 
-  private: static  v8::Handle<v8::Promise> GetSpellingSuggestions(
+  private: static  v8::Handle<v8_glue::Promise> GetSpellingSuggestions(
       const base::string16& wrong_word);
 
   private: static void MessageBox(v8_glue::Nullable<Window> maybe_window,
@@ -163,10 +163,11 @@ class EditorClass : public v8_glue::WrapperInfo {
     auto const isolate = runner->isolate();
     v8_glue::Runner::EscapableHandleScope runner_scope(runner);
     v8::TryCatch try_catch;
-    auto const script = v8::Script::New(
+    v8::ScriptOrigin script_origin(
+        gin::StringToV8(isolate, file_name)->ToString());
+    auto const script = v8::Script::Compile(
         gin::StringToV8(isolate, script_text)->ToString(),
-        gin::StringToV8(isolate, file_name)
-            ->ToString());
+        &script_origin);
     if (script.IsEmpty()) {
       return runner_scope.Escape(NewRunScriptResult(isolate,
           v8::Handle<v8::Value>(), try_catch));
@@ -209,7 +210,7 @@ class EditorClass : public v8_glue::WrapperInfo {
   DISALLOW_COPY_AND_ASSIGN(EditorClass);
 };
 
-v8::Handle<v8::Promise> EditorClass::CheckSpelling(
+v8::Handle<v8_glue::Promise> EditorClass::CheckSpelling(
     const base::string16& word_to_check) {
   return PromiseDeferred::Call(base::Bind(
       &ViewDelegate::CheckSpelling,
@@ -217,7 +218,7 @@ v8::Handle<v8::Promise> EditorClass::CheckSpelling(
       word_to_check));
 }
 
-v8::Handle<v8::Promise> EditorClass::GetSpellingSuggestions(
+v8::Handle<v8_glue::Promise> EditorClass::GetSpellingSuggestions(
     const base::string16& wrong_word) {
   return PromiseDeferred::Call(base::Bind(
       &ViewDelegate::GetSpellingSuggestions,

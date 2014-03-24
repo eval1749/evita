@@ -33,9 +33,10 @@ BEGIN_V8_INCLUDE
 #include "v8/include/v8.h"
 END_V8_INCLUDE
 
-namespace v8 {
+namespace v8_glue {
+// TODO(yosi) We should use "real" |v8::Promise|.
 // For marking functions which return |Promise|.
-typedef Object Promise;
+typedef v8::Object Promise;
 }
 
 #endif //!defined(INCLUDE_evita_v8_glue_v8_glue_h)

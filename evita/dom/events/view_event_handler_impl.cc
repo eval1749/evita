@@ -118,7 +118,16 @@ void ViewEventHandlerImpl::DispatchEvent(EventTarget* event_target,
   if (js_method.IsEmpty())
     return;
 
-  runner->Call(js_method, js_target, event->GetWrapper(isolate));
+  // TODO(yosi) Turning off micro task runining during creating wrapper, mame
+  // |Editor.checkSpelling('foo').then(console.log)| to work.
+  // Othewise |console.log| executed as micro task gets storage object which
+  // doesn't have |v8_glue::WrapperInfo| at zeroth internal field.
+  // See "985a73d2cce5", same thing is happened in spell checker with
+  // |Editor.RegExp| object.
+  v8::V8::SetAutorunMicrotasks(isolate, false);
+  auto const js_event = event->GetWrapper(isolate);
+  v8::V8::SetAutorunMicrotasks(isolate, true);
+  runner->Call(js_method, js_target, js_event);
 }
 
 void ViewEventHandlerImpl::DispatchEventWithInLock(

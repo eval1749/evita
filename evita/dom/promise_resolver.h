@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_promise_deferred_h)
-#define INCLUDE_evita_dom_promise_deferred_h
+#if !defined(INCLUDE_evita_dom_promise_resolver_h)
+#define INCLUDE_evita_dom_promise_resolver_h
 
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
@@ -16,16 +16,16 @@ namespace dom {
 
 //////////////////////////////////////////////////////////////////////
 //
-// PromiseDeferred
-// Teh instance of |PromiseDeferred| keeps a JavaScript object of
+// PromiseResolver
+// The instance of |PromiseResolver| keeps a JavaScript object of
 // |Promise.defer()| during asynchronous call.
 //
-class PromiseDeferred : public base::RefCounted<PromiseDeferred> {
-  private: v8_glue::ScopedPersistent<v8::Promise::Resolver> deferred_;
+class PromiseResolver : public base::RefCounted<PromiseResolver> {
+  private: v8_glue::ScopedPersistent<v8::Promise::Resolver> resolver_;
   private: base::WeakPtr<v8_glue::Runner> runner_;
 
-  public: PromiseDeferred(v8_glue::Runner* runner);
-  public: ~PromiseDeferred();
+  public: PromiseResolver(v8_glue::Runner* runner);
+  public: ~PromiseResolver();
 
   protected: v8_glue::Runner* runner() const { return runner_.get(); }
 
@@ -40,29 +40,29 @@ class PromiseDeferred : public base::RefCounted<PromiseDeferred> {
   public: template<typename T> void Reject(T reason);
   public: template<typename T> void Resolve(T value);
 
-  DISALLOW_COPY_AND_ASSIGN(PromiseDeferred);
+  DISALLOW_COPY_AND_ASSIGN(PromiseResolver);
 };
 
 template<typename T, typename U>
-v8::Handle<v8::Promise> PromiseDeferred::Call(
+v8::Handle<v8::Promise> PromiseResolver::Call(
     const base::Callback<void(const domapi::Deferred<T, U>&)> closure) {
   auto const runner = ScriptHost::instance()->runner();
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
 
-  auto const promise_deferred =
-      make_scoped_refptr(new PromiseDeferred(runner));
+  auto const promise_resolver =
+      make_scoped_refptr(new PromiseResolver(runner));
 
   domapi::Deferred<T, U> deferred;
-  deferred.reject = base::Bind(&PromiseDeferred::Reject<U>,
-                               promise_deferred);
-  deferred.resolve = base::Bind(&PromiseDeferred::Resolve<T>,
-                                promise_deferred);
+  deferred.reject = base::Bind(&PromiseResolver::Reject<U>,
+                               promise_resolver);
+  deferred.resolve = base::Bind(&PromiseResolver::Resolve<T>,
+                                promise_resolver);
   closure.Run(deferred);
-  return runner_scope.Escape(promise_deferred->GetPromise(runner->isolate()));
+  return runner_scope.Escape(promise_resolver->GetPromise(runner->isolate()));
 }
 
 template<typename T>
-void PromiseDeferred::Reject(T reason) {
+void PromiseResolver::Reject(T reason) {
   if (!runner_)
     return;
   v8_glue::Runner::Scope runner_scope(runner_.get());
@@ -70,7 +70,7 @@ void PromiseDeferred::Reject(T reason) {
 }
 
 template<typename T>
-void PromiseDeferred::Resolve(T value) {
+void PromiseResolver::Resolve(T value) {
   if (!runner_)
     return;
   v8_glue::Runner::Scope runner_scope(runner_.get());
@@ -79,4 +79,4 @@ void PromiseDeferred::Resolve(T value) {
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_promise_deferred_h)
+#endif //!defined(INCLUDE_evita_dom_promise_resolver_h)

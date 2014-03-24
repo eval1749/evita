@@ -7,7 +7,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/strings/string16.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/promise_deferred.h"
+#include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/script_host.h"
 #include "evita/v8_glue/converter.h"
@@ -69,7 +69,7 @@ class ProcessClass :
 
 v8::Handle<v8::Promise> ProcessClass::OpenProcess(
     const base::string16& command_line) {
-  return PromiseDeferred::Call(base::Bind(
+  return PromiseResolver::Call(base::Bind(
       &domapi::IoDelegate::OpenProcess,
       base::Unretained(ScriptHost::instance()->io_delegate()),
       command_line));

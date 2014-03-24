@@ -7,7 +7,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/strings/string16.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/promise_deferred.h"
+#include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/public/io_error.h"
 #include "evita/dom/script_host.h"
@@ -90,7 +90,7 @@ AbstractFile::~AbstractFile() {
 }
 
 v8::Handle<v8::Promise> AbstractFile::Close() {
-  return PromiseDeferred::Call(base::Bind(
+  return PromiseResolver::Call(base::Bind(
       &domapi::IoDelegate::CloseFile,
       base::Unretained(ScriptHost::instance()->io_delegate()),
       context_id_));
@@ -98,7 +98,7 @@ v8::Handle<v8::Promise> AbstractFile::Close() {
 
 v8::Handle<v8::Promise> AbstractFile::Read(
     const gin::ArrayBufferView& array_buffer_view) {
-  return PromiseDeferred::Call(base::Bind(
+  return PromiseResolver::Call(base::Bind(
       &domapi::IoDelegate::ReadFile,
       base::Unretained(ScriptHost::instance()->io_delegate()),
       context_id_, array_buffer_view.bytes(), array_buffer_view.num_bytes()));
@@ -106,7 +106,7 @@ v8::Handle<v8::Promise> AbstractFile::Read(
 
 v8::Handle<v8::Promise> AbstractFile::Write(
     const gin::ArrayBufferView& array_buffer_view) {
-  return PromiseDeferred::Call(base::Bind(
+  return PromiseResolver::Call(base::Bind(
       &domapi::IoDelegate::WriteFile,
       base::Unretained(ScriptHost::instance()->io_delegate()),
       context_id_, array_buffer_view.bytes(), array_buffer_view.num_bytes()));

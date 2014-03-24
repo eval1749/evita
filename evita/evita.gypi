@@ -243,7 +243,7 @@
         'dom/os/process.cc',
 
         'dom/windows/point.cc',
-        'dom/promise_deferred.cc',
+        'dom/promise_resolver.cc',
         'dom/text/range.cc',
         'dom/text/regexp.cc',
         'dom/text/regexp_init.cc',

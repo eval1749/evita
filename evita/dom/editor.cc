@@ -7,7 +7,7 @@
 #include "base/callback.h"
 #include "evita/gc/local.h"
 #include "evita/dom/public/tab_data.h"
-#include "evita/dom/promise_deferred.h"
+#include "evita/dom/promise_resolver.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/windows/window.h"
@@ -212,7 +212,7 @@ class EditorClass : public v8_glue::WrapperInfo {
 
 v8::Handle<v8::Promise> EditorClass::CheckSpelling(
     const base::string16& word_to_check) {
-  return PromiseDeferred::Call(base::Bind(
+  return PromiseResolver::Call(base::Bind(
       &ViewDelegate::CheckSpelling,
       base::Unretained(ScriptHost::instance()->view_delegate()),
       word_to_check));
@@ -220,7 +220,7 @@ v8::Handle<v8::Promise> EditorClass::CheckSpelling(
 
 v8::Handle<v8::Promise> EditorClass::GetSpellingSuggestions(
     const base::string16& wrong_word) {
-  return PromiseDeferred::Call(base::Bind(
+  return PromiseResolver::Call(base::Bind(
       &ViewDelegate::GetSpellingSuggestions,
       base::Unretained(ScriptHost::instance()->view_delegate()),
       wrong_word));

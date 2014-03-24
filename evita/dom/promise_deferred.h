@@ -5,13 +5,12 @@
 #if !defined(INCLUDE_evita_dom_promise_deferred_h)
 #define INCLUDE_evita_dom_promise_deferred_h
 
-#include <memory>
-
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
 #include "evita/dom/public/deferred.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
+#include "evita/v8_glue/scoped_persistent.h"
 
 namespace dom {
 
@@ -22,9 +21,7 @@ namespace dom {
 // |Promise.defer()| during asynchronous call.
 //
 class PromiseDeferred : public base::RefCounted<PromiseDeferred> {
-  private: class DeferredImpl;
-
-  private: std::unique_ptr<DeferredImpl> deferred_;
+  private: v8_glue::ScopedPersistent<v8::Promise::Resolver> deferred_;
   private: base::WeakPtr<v8_glue::Runner> runner_;
 
   public: PromiseDeferred(v8_glue::Runner* runner);

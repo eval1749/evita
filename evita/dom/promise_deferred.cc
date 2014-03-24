@@ -8,44 +8,17 @@
 
 namespace dom {
 
-#define DEFINE_STATIC_V8_STRING(name) \
-  CR_DEFINE_STATIC_LOCAL(v8::Eternal<v8::String>, name, \
-                         (isolate, NewString(isolate, #name)))
-
-namespace {
-
-static v8::Local<v8::String> NewString(v8::Isolate* isolate,
-                                        const char* string) {
-  return v8::String::NewFromOneByte(isolate,
-                                    reinterpret_cast<const uint8_t*>(string));
-}
-
-v8::Local<v8::Object> NewDeferred(v8_glue::Runner* runner) {
-  auto const isolate = runner->isolate();
-  v8::EscapableHandleScope handle_scope(isolate);
-  DEFINE_STATIC_V8_STRING(Promise);
-  DEFINE_STATIC_V8_STRING(defer);
-  auto const promise = runner->global()->Get(Promise.Get(isolate))->ToObject();
-  auto const promise_defer = promise->Get(defer.Get(isolate));
-  DCHECK(!promise_defer.IsEmpty() && promise_defer->IsFunction());
-  auto const defered = runner->Call(promise_defer, promise);
-  DCHECK(!defered.IsEmpty() && defered->IsObject());
-  return handle_scope.Escape(defered->ToObject());
-}
-
-}  // namespace
-
 //////////////////////////////////////////////////////////////////////
 //
 // PromiseDeferred::DeferredImpl
 //
 class PromiseDeferred::DeferredImpl {
-  private: v8_glue::ScopedPersistent<v8::Object> deferred_;
+  private: v8_glue::ScopedPersistent<v8::Promise::Resolver> deferred_;
 
   public: DeferredImpl(v8_glue::Runner* runner);
   public: ~DeferredImpl();
 
-  public: v8::Local<v8::Object> GetPromise(v8::Isolate* isoalte) const;
+  public: v8::Local<v8::Promise> GetPromise(v8::Isolate* isolate) const;
   public: void Reject(v8_glue::Runner* runner, v8::Handle<v8::Value> reason);
   public: void Resolve(v8_glue::Runner* runner, v8::Handle<v8::Value> value);
 
@@ -53,35 +26,31 @@ class PromiseDeferred::DeferredImpl {
 };
 
 PromiseDeferred::DeferredImpl::DeferredImpl(v8_glue::Runner* runner)
-    : deferred_(runner->isolate(), NewDeferred(runner)) {
+    : deferred_(runner->isolate(),
+                v8::Promise::Resolver::New(runner->isolate())) {
 }
 
 PromiseDeferred::DeferredImpl::~DeferredImpl() {
 }
 
-v8::Local<v8::Object> PromiseDeferred::DeferredImpl::GetPromise(
+v8::Local<v8::Promise> PromiseDeferred::DeferredImpl::GetPromise(
     v8::Isolate* isolate) const {
   auto const deferred = deferred_.NewLocal(isolate);
-  DEFINE_STATIC_V8_STRING(promise);
-  return v8::Local<v8::Object>(deferred->Get(promise.Get(isolate))->ToObject());
+  return deferred->GetPromise();
 }
 
 void PromiseDeferred::DeferredImpl::Reject(v8_glue::Runner* runner,
-                                    v8::Handle<v8::Value> reason) {
+                                           v8::Handle<v8::Value> reason) {
   auto const isolate = runner->isolate();
-  DEFINE_STATIC_V8_STRING(reject);
   auto const deferred = deferred_.NewLocal(isolate);
-  runner->Call(deferred->Get(reject.Get(isolate))->ToObject(),
-               v8::Undefined(isolate), reason);
+  deferred->Reject(reason);
 }
 
 void PromiseDeferred::DeferredImpl::Resolve(v8_glue::Runner* runner,
-                                     v8::Handle<v8::Value> value) {
+                                            v8::Handle<v8::Value> value) {
   auto const isolate = runner->isolate();
-  DEFINE_STATIC_V8_STRING(resolve);
   auto const deferred = deferred_.NewLocal(isolate);
-  runner->Call(deferred->Get(resolve.Get(isolate)),
-               v8::Undefined(isolate), value);
+  deferred->Resolve(value);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -105,7 +74,7 @@ void PromiseDeferred::DoResolve(v8::Handle<v8::Value> reason) {
   deferred_->Resolve(runner_.get(), reason);
 }
 
-v8::Local<v8::Object> PromiseDeferred::GetPromise(v8::Isolate* isolate) const {
+v8::Local<v8::Promise> PromiseDeferred::GetPromise(v8::Isolate* isolate) const {
   return deferred_->GetPromise(isolate);
 }
 

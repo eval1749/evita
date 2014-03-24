@@ -24,10 +24,10 @@ class AbstractFile : public v8_glue::Scriptable<AbstractFile> {
   protected: AbstractFile(domapi::IoContextId context_id);
   protected: virtual ~AbstractFile();
 
-  public: v8::Handle<v8_glue::Promise> Close();
-  public: v8::Handle<v8::Object> Read(
+  public: v8::Handle<v8::Promise> Close();
+  public: v8::Handle<v8::Promise> Read(
       const gin::ArrayBufferView& array_buffer_view);
-  public: v8::Handle<v8::Object> Write(
+  public: v8::Handle<v8::Promise> Write(
       const gin::ArrayBufferView& array_buffer_view);
 
   DISALLOW_COPY_AND_ASSIGN(AbstractFile);

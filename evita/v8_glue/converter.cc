@@ -55,4 +55,9 @@ Handle<String> StringToV8(v8::Isolate* isolate,
   return Converter<base::string16>::ToV8(isolate, string).As<v8::String>();
 }
 
+v8::Handle<v8::Value> Converter<v8::Handle<v8::Promise>>::ToV8(
+    v8::Isolate*, v8::Handle<v8::Promise> value) {
+  return value.As<Value>();
+}
+
 }  // namespace gin

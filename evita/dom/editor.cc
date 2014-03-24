@@ -64,7 +64,7 @@ class EditorClass : public v8_glue::WrapperInfo {
   }
   public: ~EditorClass() = default;
 
-  private: static v8::Handle<v8_glue::Promise> CheckSpelling(
+  private: static v8::Handle<v8::Promise> CheckSpelling(
       const base::string16& word_to_check);
 
   private: static void GetFilenameForLoad(Window* window,
@@ -91,7 +91,7 @@ class EditorClass : public v8_glue::WrapperInfo {
     return ScriptHost::instance()->view_delegate()->GetMetrics(name);
   }
 
-  private: static  v8::Handle<v8_glue::Promise> GetSpellingSuggestions(
+  private: static  v8::Handle<v8::Promise> GetSpellingSuggestions(
       const base::string16& wrong_word);
 
   private: static void MessageBox(v8_glue::Nullable<Window> maybe_window,
@@ -210,7 +210,7 @@ class EditorClass : public v8_glue::WrapperInfo {
   DISALLOW_COPY_AND_ASSIGN(EditorClass);
 };
 
-v8::Handle<v8_glue::Promise> EditorClass::CheckSpelling(
+v8::Handle<v8::Promise> EditorClass::CheckSpelling(
     const base::string16& word_to_check) {
   return PromiseDeferred::Call(base::Bind(
       &ViewDelegate::CheckSpelling,
@@ -218,7 +218,7 @@ v8::Handle<v8_glue::Promise> EditorClass::CheckSpelling(
       word_to_check));
 }
 
-v8::Handle<v8_glue::Promise> EditorClass::GetSpellingSuggestions(
+v8::Handle<v8::Promise> EditorClass::GetSpellingSuggestions(
     const base::string16& wrong_word) {
   return PromiseDeferred::Call(base::Bind(
       &ViewDelegate::GetSpellingSuggestions,

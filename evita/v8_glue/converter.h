@@ -50,6 +50,14 @@ struct Converter<v8::Maybe<T>> {
   }
 };
 
+
+// v8::Promise
+template<>
+struct Converter<v8::Handle<v8::Promise>> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+                                    v8::Handle<v8::Promise> promise);
+};
+
 // Converter for enum:bool types as int.
 // Note: I'm not sure how to get base type of |enum|.
 template<typename T>

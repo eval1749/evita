@@ -75,10 +75,10 @@ class FileClass :
     return nullptr;
   }
 
-  private: static v8::Handle<v8::Object> OpenFile(
+  private: static v8::Handle<v8::Promise> OpenFile(
       const base::string16& file_name,
       v8_glue::Optional<base::string16> opt_mode);
-  private: static v8::Handle<v8::Object> QueryFileStatus(
+  private: static v8::Handle<v8::Promise> QueryFileStatus(
       const base::string16& filename);
 
   // v8_glue::WrapperInfo
@@ -95,7 +95,7 @@ class FileClass :
   DISALLOW_COPY_AND_ASSIGN(FileClass);
 };
 
-v8::Handle<v8_glue::Promise> FileClass::OpenFile(const base::string16& file_name,
+v8::Handle<v8::Promise> FileClass::OpenFile(const base::string16& file_name,
     v8_glue::Optional<base::string16> opt_mode) {
   return PromiseDeferred::Call(base::Bind(
       &domapi::IoDelegate::OpenFile,
@@ -103,7 +103,7 @@ v8::Handle<v8_glue::Promise> FileClass::OpenFile(const base::string16& file_name
       file_name, opt_mode.is_supplied ? opt_mode.value : base::string16()));
 }
 
-v8::Handle<v8_glue::Promise> FileClass::QueryFileStatus(
+v8::Handle<v8::Promise> FileClass::QueryFileStatus(
     const base::string16& file_name) {
   return PromiseDeferred::Call(base::Bind(
       &domapi::IoDelegate::QueryFileStatus,

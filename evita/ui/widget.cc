@@ -32,10 +32,12 @@
 namespace ui {
 
 namespace {
+
 Widget* capture_widget;
 Widget* focus_widget;
 Widget* will_focus_widget;
 bool we_have_active_focus;
+
 }  // namespace
 
 using ui::EventType;
@@ -45,7 +47,8 @@ using ui::EventType;
 // Widget
 //
 Widget::Widget(std::unique_ptr<NativeWindow>&& native_window)
-    : native_window_(std::move(native_window)),
+    : hover_(nullptr),
+      native_window_(std::move(native_window)),
       shown_(0),
       state_(kNotRealized) {
 }
@@ -182,6 +185,25 @@ void Widget::DidShow() {
   }
 }
 
+void Widget::DispatchMouseExited() {
+  auto const hover = hover_;
+  if (!hover)
+    return;
+  hover_ = nullptr;
+  Point screen_point;
+  if (!::GetCursorPos(&screen_point)) {
+    DVLOG_WIDGET(0) << "GetCursorPos error=" << ::GetLastError();
+    return;
+  }
+  Point client_point = screen_point;
+  if (!::MapWindowPoints(HWND_DESKTOP, *native_window(), &client_point, 1)) {
+    DVLOG_WIDGET(0) << "MapWindowPoints error=" << ::GetLastError();
+    return;
+  }
+  MouseEvent event(EventType::MouseExited, screen_point, client_point);
+  hover->OnMouseExited(event);
+}
+
 void Widget::DispatchPaintMessage() {
   Rect exposed_rect;
   if (!::GetUpdateRect(*native_window(), &exposed_rect, false))
@@ -277,6 +299,12 @@ void Widget::OnKeyPressed(const KeyboardEvent&) {
 void Widget::OnKeyReleased(const KeyboardEvent&) {
 }
 
+void Widget::OnMouseExited(const MouseEvent&) {
+}
+
+void Widget::OnMouseMoved(const MouseEvent&) {
+}
+
 void Widget::OnMousePressed(const MouseEvent&) {
 }
 
@@ -315,9 +343,6 @@ LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
   if (native_window_)
     return native_window_->DefWindowProc(message, wParam, lParam);
   return container_widget().OnMessage(message, wParam, lParam);
-}
-
-void Widget::OnMouseMoved(const MouseEvent&) {
 }
 
 void Widget::OnPaint(const Rect) {
@@ -570,6 +595,11 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       we_have_active_focus = false;
       return 0;
 
+    case WM_MOUSELEAVE:
+    case WM_NCMOUSELEAVE:
+      DispatchMouseExited();
+      return 0;
+
     case WM_NCDESTROY:
       DCHECK(native_window_);
       // NativeWidget will be deleted by itself.
@@ -729,27 +759,41 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
 
     // Note: We send WM_MOUSEWHEEL message to a widget under mouse pointer
     // rather than active widget.
-    Point point(MAKEPOINTS(lParam));
+    Point client_point(MAKEPOINTS(lParam));
     if (message == WM_MOUSEWHEEL) {
       WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *native_window(),
-                                     &point, 1));
+                                     &client_point, 1));
     }
 
-    if (auto child = GetWidgetAt(point)) {
-      #if DEBUG_MOUSE_WHEEL
-        if (message == WM_MOUSEWHEEL) {
-          DVLOG_WIDGET(0) << "WM_MOUSEWHEEL " << child << " at " <<
-              point << " in " << child->rect();
-        }
-      #endif
-      return child->OnMessage(message, wParam, lParam);
-    }
-
-    #if DEBUG_MOUSE_WHEEL
-      if (message == WM_MOUSEWHEEL) {
-        DVLOG_WIDGET(0) << "WM_MOUSEWHEEL " << this << " at " << point;
+    auto const child = GetWidgetAt(client_point);
+    auto const target = child ? child : this;
+    if (message == WM_MOUSEMOVE || message == WM_NCMOUSEMOVE) {
+      if (!hover_) {
+        TRACKMOUSEEVENT track;
+        track.cbSize = sizeof(track);
+        track.dwFlags = static_cast<DWORD>(
+            message == WM_NCMOUSEMOVE ? TME_NONCLIENT | TME_LEAVE : TME_LEAVE);
+        track.hwndTrack = *native_window();
+        if (::TrackMouseEvent(&track))
+          hover_ = target;
+        else
+          DVLOG(0) << "TrackMouseEvent last_error=" << ::GetLastError();
+      } else if (hover_ != target) {
+        Point screen_point(client_point);
+        WIN32_VERIFY(::MapWindowPoints(*native_window(), HWND_DESKTOP,
+                                       &screen_point, 1));
+        MouseEvent event(EventType::MouseExited, screen_point, client_point);
+        hover_->OnMouseExited(event);
+        hover_ = target;
       }
+    }
+    #if DEBUG_MOUSE_WHEEL
+        if (message == WM_MOUSEWHEEL) {
+          DVLOG_WIDGET(0) << "WM_MOUSEWHEEL " << target << " at " <<
+              point << " in " << target->rect();
+        }
     #endif
+    return target->OnMessage(message, wParam, lParam);
   }
 
   return OnMessage(message, wParam, lParam);

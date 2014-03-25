@@ -42,6 +42,7 @@ class Widget
     kRealized,
   };
 
+  private: Widget* hover_;
   private: std::unique_ptr<NativeWindow> native_window_;
   private: Rect rect_;
   private: int shown_;
@@ -93,6 +94,7 @@ class Widget
   protected: virtual void DidResize();
   protected: virtual void DidSetFocus();
   protected: virtual void DidShow();
+  private: void DispatchMouseExited();
   private: void DispatchPaintMessage();
 
   // [G]
@@ -112,6 +114,7 @@ class Widget
   protected: virtual void OnKeyReleased(const KeyboardEvent& event);
   public: virtual LRESULT OnMessage(uint32_t uMsg, WPARAM wParam,
                                     LPARAM lParam);
+  protected: virtual void OnMouseExited(const MouseEvent& event);
   protected: virtual void OnMouseMoved(const MouseEvent& event);
   protected: virtual void OnMousePressed(const MouseEvent& event);
   protected: virtual void OnMouseReleased(const MouseEvent& event);

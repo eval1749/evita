@@ -111,6 +111,18 @@ KeyboardEvent KeyboardEvent::Create(uint32_t message, WPARAM wParam,
 //
 // MouseEvent
 //
+MouseEvent::MouseEvent(EventType event_type, const Point& screen_point,
+                       const Point& client_point)
+    : Event(event_type),
+      alt_key_(false),
+      button_(0),
+      buttons_(0),
+      client_point_(client_point),
+      control_key_(false),
+      screen_point_(screen_point),
+      shift_key_(false) {
+}
+
 MouseEvent::MouseEvent(EventType event_type, Button button, int click_count,
                        uint32_t flags, const Point& point)
     : Event(event_type),

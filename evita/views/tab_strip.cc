@@ -602,7 +602,6 @@ class TabStrip::TabStripImpl : public Element {
   private: int m_cxMinTab;
   private: TabStripDelegate* delegate_;
   private: Drag m_eDrag;
-  private: bool m_fMouseTracking;
   private: HMENU m_hTabListMenu;
   private: HWND m_hwnd;
   private: HWND m_hwndToolTips;
@@ -1165,7 +1164,6 @@ class TabStrip::TabStripImpl : public Element {
             m_pHover);
         #endif // DEBUG_HOVER
 
-        m_fMouseTracking = false;
         UpdateHover(nullptr);
         return 0;
       }
@@ -1224,19 +1222,6 @@ class TabStrip::TabStripImpl : public Element {
     auto const pHover = hitTest(pt);
 
     if (!m_pDragItem) {
-      // Hover
-      if (!m_fMouseTracking) {
-        TRACKMOUSEEVENT oTrack;
-        oTrack.cbSize = sizeof(oTrack);
-        oTrack.dwFlags = TME_LEAVE;
-        oTrack.hwndTrack = m_hwnd;
-
-        if (!::TrackMouseEvent(&oTrack)) {
-          return;
-        }
-
-        m_fMouseTracking = true;
-      }
       UpdateHover(pHover);
     } else {
       if (::GetCapture() != m_hwnd) {
@@ -1345,7 +1330,6 @@ TabStrip::TabStripImpl::TabStripImpl(HWND hwnd, TabStripDelegate* delegate)
       m_cxMinTab(k_cxMinTab),
       delegate_(delegate),
       m_eDrag(Drag_None),
-      m_fMouseTracking(false),
       m_hTabListMenu(nullptr),
       m_hwnd(hwnd),
       m_hwndToolTips(nullptr),

@@ -17,6 +17,8 @@ enum class EventType {
   Invalid,
   KeyPressed,
   KeyReleased,
+  // Note: We don't have MouseEntered event, because Windows doesn't have it.
+  MouseExit,
   MouseMoved,
   MousePressed,
   MouseReleased,
@@ -112,6 +114,8 @@ class MouseEvent : public Event {
   private: Point screen_point_;
   private: bool shift_key_;
 
+  public: MouseEvent(EventType type, const Point& screen_point,
+                     const Point& client_point);
   protected: MouseEvent(EventType type, Button button, int click_count,
                         uint32_t flags, const Point& point);
   private: MouseEvent(EventType type, Button button, int click_count,

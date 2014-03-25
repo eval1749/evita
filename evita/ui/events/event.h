@@ -18,7 +18,7 @@ enum class EventType {
   KeyPressed,
   KeyReleased,
   // Note: We don't have MouseEntered event, because Windows doesn't have it.
-  MouseExit,
+  MouseExited,
   MouseMoved,
   MousePressed,
   MouseReleased,

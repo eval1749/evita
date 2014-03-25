@@ -33,21 +33,32 @@ void CheckboxControl::OnDraw(gfx::Graphics* gfx) {
   if (rect().empty())
     return;
   auto const size = 12.0f;
-  gfx::RectF box_rect(
+  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect());
+
+  gfx::RectF frame_rect(
       gfx::PointF(rect().left + (rect().width() - size) / 2,
                   rect().top + (rect().height() - size) / 2),
       gfx::SizeF(size, size));
-  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect());
-  gfx::Brush gray_brush(*gfx, gfx::ColorF::DarkGray);
-  gfx->DrawRectangle(gray_brush, box_rect);
+
+  if (hover()) {
+    gfx::Brush frame_brush(*gfx, style_.highlight);
+    (*gfx)->DrawRectangle(frame_rect, frame_brush);
+  } else {
+    auto const antialias_mode = (*gfx)->GetAntialiasMode();
+    //(*gfx)->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
+    gfx::Brush frame_brush(*gfx, style_.shadow);
+    (*gfx)->DrawRectangle(frame_rect, frame_brush);
+    (*gfx)->SetAntialiasMode(antialias_mode);
+  }
+
   if (checked_) {
     gfx::Brush black_brush(*gfx, gfx::ColorF(0, 0, 0));
-    (*gfx)->DrawLine(gfx::PointF(box_rect.left + 3, box_rect.top + 6),
-                     gfx::PointF(box_rect.left + 6, box_rect.bottom - 3),
+    (*gfx)->DrawLine(gfx::PointF(frame_rect.left + 3, frame_rect.top + 6),
+                     gfx::PointF(frame_rect.left + 6, frame_rect.bottom - 3),
                      black_brush,
                      2.0f);
-    (*gfx)->DrawLine(gfx::PointF(box_rect.left + 6, box_rect.top + 9),
-                     gfx::PointF(box_rect.right - 3, box_rect.top + 3),
+    (*gfx)->DrawLine(gfx::PointF(frame_rect.left + 6, frame_rect.top + 9),
+                     gfx::PointF(frame_rect.right - 3, frame_rect.top + 3),
                      black_brush,
                      2.0f);
   }

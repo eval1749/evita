@@ -14,7 +14,7 @@
 
 namespace ui {
 
-class LabelControl : public Control {
+class LabelControl final : public Control {
   public: struct LabelStyle {
     gfx::ColorF bgcolor;
     gfx::ColorF color;
@@ -34,6 +34,7 @@ class LabelControl : public Control {
                        const base::string16& text, const LabelStyle& style);
   public: virtual ~LabelControl();
 
+  public: virtual bool focusable() const override;
   public: const LabelStyle& style() const { return style_; }
   public: void set_style(const LabelStyle& style);
   public: base::string16 text() const { return text_; }

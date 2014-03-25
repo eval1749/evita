@@ -12,11 +12,16 @@ namespace ui {
 //
 // Control
 //
-Control::Control(ControlController* controller) : controller_(controller) {
+Control::Control(ControlController* controller)
+    : controller_(controller), hover_(false) {
 }
 
 Control::~Control() {
   DCHECK(!controller_);
+}
+
+bool Control::focusable() const {
+  return true;
 }
 
 void Control::OnKeyPressed(const KeyboardEvent& event) {
@@ -29,9 +34,23 @@ void Control::OnKeyReleased(const KeyboardEvent& event) {
   controller_->OnKeyReleased(this, event);
 }
 
+void Control::OnMouseExited(const MouseEvent& event) {
+  controller_->OnMouseExited(this, event);
+  if (!hover_ || !focusable())
+    return;
+  DVLOG(0) << "End Hover " << this;
+  hover_ = false;
+  SchedulePaint();
+}
+
 void Control::OnMouseMoved(const MouseEvent& event) {
   DCHECK(controller_);
   controller_->OnMouseMoved(this, event);
+  if (hover_ || !focusable())
+    return;
+  DVLOG(0) << "Start Hover " << this;
+  hover_ = true;
+  SchedulePaint();
 }
 
 void Control::OnMousePressed(const MouseEvent& event) {

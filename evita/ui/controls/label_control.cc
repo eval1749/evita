@@ -78,6 +78,10 @@ LabelControl::LabelControl(ControlController* controller,
 LabelControl::~LabelControl() {
 }
 
+bool LabelControl::focusable() const {
+  return false;
+}
+
 void LabelControl::set_style(const LabelStyle& new_style) {
   if (style_ == new_style)
     return;

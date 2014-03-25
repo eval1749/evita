@@ -85,6 +85,9 @@ ui::CheckboxControl::Style
   ui::CheckboxControl::Style style;
   style.bgcolor = ui::SystemMetrics::instance()->bgcolor();
   style.color = ui::SystemMetrics::instance()->color();
+  style.highlight = ui::SystemMetrics::instance()->highlight();
+  style.hotlight = ui::SystemMetrics::instance()->hotlight();
+  style.shadow = ui::SystemMetrics::instance()->shadow();
   return style;
 }
 
@@ -179,6 +182,9 @@ ui::RadioButtonControl::Style
   ui::RadioButtonControl::Style style;
   style.bgcolor = ui::SystemMetrics::instance()->bgcolor();
   style.color = ui::SystemMetrics::instance()->color();
+  style.highlight = ui::SystemMetrics::instance()->highlight();
+  style.hotlight = ui::SystemMetrics::instance()->hotlight();
+  style.shadow = ui::SystemMetrics::instance()->shadow();
   return style;
 }
 
@@ -355,8 +361,8 @@ void FormWindow::CreateNativeWindow() const {
 }
 
 void FormWindow::DidCreateNativeWindow() {
- // TODO(yosi) We should get default value of form window transparency from
- //CSS.
+  // TODO(yosi) We should get default value of form window transparency from
+  //CSS.
   ::SetLayeredWindowAttributes(*native_window(), RGB(0, 0, 0), 80 * 255 / 100,
                                LWA_ALPHA);
   gfx_->Init(*native_window());

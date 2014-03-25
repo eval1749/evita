@@ -22,6 +22,9 @@ void ControlController::OnKeyPressed(Control*, const KeyboardEvent&) {
 void ControlController::OnKeyReleased(Control*, const KeyboardEvent&) {
 }
 
+void ControlController::OnMouseExited(Control*, const MouseEvent&) {
+}
+
 void ControlController::OnMouseMoved(Control*, const MouseEvent&) {
 }
 

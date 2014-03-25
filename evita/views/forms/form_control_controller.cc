@@ -18,7 +18,7 @@ FormControlController::FormControlController(
 FormControlController::~FormControlController() {
 }
 
-void FormControlController::OnKeyPressed(ui::Control*, 
+void FormControlController::OnKeyPressed(ui::Control*,
                                          const ui::KeyboardEvent& event) {
   DispatchKeyboardEvent(event);
 }

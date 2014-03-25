@@ -11,12 +11,7 @@
 
 namespace ui {
 
-class RadioButtonControl : public Control {
-  public: struct Style {
-    gfx::ColorF bgcolor;
-    gfx::ColorF color;
-  };
-
+class RadioButtonControl final : public Control {
   private: bool checked_;
   private: Style style_;
 

@@ -22,6 +22,8 @@ class ControlController {
                                     const KeyboardEvent& event);
   public: virtual void OnKeyReleased(Control* control,
                                      const KeyboardEvent& event);
+  public: virtual void OnMouseExited(Control* control,
+                                     const MouseEvent& event);
   public: virtual void OnMouseMoved(Control* control,
                                     const MouseEvent& event);
   public: virtual void OnMousePressed(Control* control,

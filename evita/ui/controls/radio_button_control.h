@@ -5,16 +5,13 @@
 #if !defined(INCLUDE_evita_ui_controls_radio_button_control_h)
 #define INCLUDE_evita_ui_controls_radio_button_control_h
 
-#include "evita/ui/widget.h"
+#include "evita/ui/controls/control.h"
 
-#include <memory>
-
-#include "base/strings/string16.h"
 #include "evita/gfx_base.h"
 
 namespace ui {
 
-class RadioButtonControl : public ui::Widget {
+class RadioButtonControl : public Control {
   public: struct Style {
     gfx::ColorF bgcolor;
     gfx::ColorF color;
@@ -23,7 +20,8 @@ class RadioButtonControl : public ui::Widget {
   private: bool checked_;
   private: Style style_;
 
-  public: RadioButtonControl(bool checked, const Style& style);
+  public: RadioButtonControl(ControlController* controller,
+                             bool checked, const Style& style);
   public: virtual ~RadioButtonControl();
 
   public: const Style& style() const { return style_; }

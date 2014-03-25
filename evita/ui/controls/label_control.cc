@@ -70,8 +70,9 @@ void LabelControl::Renderer::Render(gfx::Graphics* gfx) const {
 //
 // LabelControl
 //
-LabelControl::LabelControl(const base::string16& text, const LabelStyle& style)
-    : style_(style), text_(text) {
+LabelControl::LabelControl(ControlController* controller,
+                           const base::string16& text, const LabelStyle& style)
+    : Control(controller), style_(style), text_(text) {
 }
 
 LabelControl::~LabelControl() {

@@ -12,8 +12,9 @@ namespace ui {
 //
 // RadioButtonControl
 //
-RadioButtonControl::RadioButtonControl(bool checked, const Style& style)
-    : checked_(checked), style_(style) {
+RadioButtonControl::RadioButtonControl(ControlController* controller,
+                                       bool checked, const Style& style)
+    : Control(controller), checked_(checked), style_(style) {
 }
 
 RadioButtonControl::~RadioButtonControl() {

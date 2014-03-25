@@ -502,6 +502,7 @@
         'views/forms/dialog_box_set.cc',
         'views/forms/file_dialog_box.cc',
         'views/forms/find_dialog_box.cc',
+        'views/forms/form_control_controller.cc',
         'views/forms/form_window.cc',
         'vi_Frame.cpp',
         'vi_Pane.cpp',
@@ -583,6 +584,8 @@
         'ui/events/event_ostream.cc',
 
         'ui/controls/checkbox_control.cc',
+        'ui/controls/control.cc',
+        'ui/controls/control_controller.cc',
         'ui/controls/label_control.cc',
         'ui/controls/radio_button_control.cc',
         'ui/controls/scroll_bar.cc',

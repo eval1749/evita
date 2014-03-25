@@ -5,16 +5,13 @@
 #if !defined(INCLUDE_evita_ui_controls_checkbox_control_h)
 #define INCLUDE_evita_ui_controls_checkbox_control_h
 
-#include "evita/ui/widget.h"
+#include "evita/ui/controls/control.h"
 
-#include <memory>
-
-#include "base/strings/string16.h"
 #include "evita/gfx_base.h"
 
 namespace ui {
 
-class CheckboxControl : public ui::Widget {
+class CheckboxControl : public Control {
   public: struct Style {
     gfx::ColorF bgcolor;
     gfx::ColorF color;
@@ -23,7 +20,8 @@ class CheckboxControl : public ui::Widget {
   private: bool checked_;
   private: Style style_;
 
-  public: CheckboxControl(bool checked, const Style& style);
+  public: CheckboxControl(ControlController* controller,
+                          bool checked, const Style& style);
   public: virtual ~CheckboxControl();
 
   public: const Style& style() const { return style_; }

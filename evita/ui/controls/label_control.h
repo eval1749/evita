@@ -5,7 +5,7 @@
 #if !defined(INCLUDE_evita_ui_controls_label_control_h)
 #define INCLUDE_evita_ui_controls_label_control_h
 
-#include "evita/ui/widget.h"
+#include "evita/ui/controls/control.h"
 
 #include <memory>
 
@@ -14,7 +14,7 @@
 
 namespace ui {
 
-class LabelControl : public ui::Widget {
+class LabelControl : public Control {
   public: struct LabelStyle {
     gfx::ColorF bgcolor;
     gfx::ColorF color;
@@ -30,7 +30,8 @@ class LabelControl : public ui::Widget {
   private: LabelStyle style_;
   private: base::string16 text_;
 
-  public: LabelControl(const base::string16& text, const LabelStyle& style);
+  public: LabelControl(ControlController* controller,
+                       const base::string16& text, const LabelStyle& style);
   public: virtual ~LabelControl();
 
   public: const LabelStyle& style() const { return style_; }

@@ -12,8 +12,9 @@ namespace ui {
 //
 // CheckboxControl
 //
-CheckboxControl::CheckboxControl(bool checked, const Style& style)
-    : checked_(checked), style_(style) {
+CheckboxControl::CheckboxControl(ControlController* controller,
+                                 bool checked, const Style& style)
+    : Control(controller), checked_(checked), style_(style) {
 }
 
 CheckboxControl::~CheckboxControl() {

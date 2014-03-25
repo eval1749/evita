@@ -24,6 +24,7 @@
 #include "evita/ui/controls/radio_button_control.h"
 #include "evita/ui/root_widget.h"
 #include "evita/ui/system_metrics.h"
+#include "evita/views/forms/form_control_controller.h"
 
 namespace views {
 
@@ -88,8 +89,9 @@ ui::CheckboxControl::Style
 }
 
 ui::Widget* CheckboxImporter::CreateWidget() {
-  auto const widget = new ui::CheckboxControl(checkbox_->checked(),
-                                              ComputeStyle());
+  auto const widget = new ui::CheckboxControl(
+      new FormControlController(checkbox_->event_target_id()),
+      checkbox_->checked(), ComputeStyle());
   SetRect(checkbox_, widget);
   return widget;
 }
@@ -134,7 +136,9 @@ ui::LabelControl::LabelStyle LabelImporter::ComputeLabelStyle() const {
 }
 
 ui::Widget* LabelImporter::CreateWidget() {
-  auto const widget = new ui::LabelControl(label_->text(), ComputeLabelStyle());
+  auto const widget = new ui::LabelControl(
+      new FormControlController(label_->event_target_id()),
+      label_->text(), ComputeLabelStyle());
   SetRect(label_, widget);
   return widget;
 }
@@ -179,8 +183,9 @@ ui::RadioButtonControl::Style
 }
 
 ui::Widget* RadioButtonImporter::CreateWidget() {
-  auto const widget = new ui::RadioButtonControl(radio_button_->checked(),
-                                                 ComputeStyle());
+  auto const widget = new ui::RadioButtonControl(
+      new FormControlController(radio_button_->event_target_id()),
+      radio_button_->checked(), ComputeStyle());
   SetRect(radio_button_, widget);
   return widget;
 }

@@ -50,6 +50,8 @@ class RadioButtonControlClass :
 
 RadioButtonControl* FindCheckedRadioButton(const Form* form,
                                            const base::string16& name) {
+  if (!form)
+    return nullptr;
   for (auto control : form->controls()) {
     auto const radio_button = control->as<RadioButtonControl>();
     if (radio_button && radio_button->name() == name &&

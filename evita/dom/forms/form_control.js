@@ -6,4 +6,13 @@
  * @param {!Event} event
  * Default event handler.
  */
-FormControl.handleEvent = function(event) {};
+FormControl.handleEvent = function(event) {
+    switch (event.type) {
+      case Event.Names.IDLE:
+      case Event.Names.MOUSEMOVE:
+        break;
+      default:
+        console.log('FormControl.handleEvent', event);
+        break;
+    }
+};

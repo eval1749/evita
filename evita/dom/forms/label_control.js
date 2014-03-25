@@ -6,6 +6,6 @@
  * @param {!Event} event
  * Default event handler.
  */
-ButtonControl.handleEvent = function(event) {
+LabelControl.handleEvent = function(event) {
   FormControl.handleEvent(event);
 };

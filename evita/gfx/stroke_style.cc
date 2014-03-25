@@ -41,6 +41,11 @@ void StrokeStyle::set_dash_offset(float offset) {
   properties_.dashOffset = offset;
 }
 
+void StrokeStyle::set_line_join(LineJoin line_join) {
+  DCHECK(!is_realized());
+  properties_.lineJoin = static_cast<D2D1_LINE_JOIN>(line_join);
+}
+
 void StrokeStyle::Realize() {
   DCHECK(!is_realized());
   COM_VERIFY(FactorySet::instance()->d2d1().CreateStrokeStyle(

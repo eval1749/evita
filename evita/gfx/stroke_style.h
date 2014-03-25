@@ -21,6 +21,13 @@ enum class DashStyle {
   Custom = D2D1_DASH_STYLE_CUSTOM,
 };
 
+enum class LineJoin {
+  Miter = D2D1_LINE_JOIN_MITER,
+  Bevel = D2D1_LINE_JOIN_BEVEL,
+  Round = D2D1_LINE_JOIN_ROUND,
+  MiterOrBevel = D2D1_LINE_JOIN_MITER_OR_BEVEL,
+};
+
 class StrokeStyle {
   private: std::vector<float> dashes_;
   private: common::ComPtr<ID2D1StrokeStyle> platform_style_;
@@ -35,6 +42,7 @@ class StrokeStyle {
   public: void set_dashes(const std::vector<float>& dashes);
   public: void set_dash_offset(float offset);
   public: void set_dash_style(DashStyle dash_style);
+  public: void set_line_join(LineJoin line_join);
 
   public: void Realize();
 

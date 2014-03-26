@@ -14,8 +14,12 @@ ColorF::ColorF(D2D1::ColorF::Enum name, float a)
   : D2D1::ColorF(name, a) {
 }
 
+ColorF::ColorF(const ColorF& color, float alpha)
+  : ColorF(color.r, color.g, color.b, alpha) {
+}
+
 ColorF::ColorF(const ColorF& other)
-  : D2D1::ColorF(other.r, other.g, other.b, other.a) {
+  : ColorF(other.r, other.g, other.b, other.a) {
 }
 
 ColorF::ColorF() : ColorF(0.0f, 0.0f, 0.0f, 0.0f) {

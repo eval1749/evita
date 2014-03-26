@@ -14,6 +14,7 @@ namespace gfx {
 class ColorF : public D2D1::ColorF {
   public: ColorF(float r, float g, float b, float a = 1.0f);
   public: ColorF(D2D1::ColorF::Enum name, float a = 1.0f);
+  public: ColorF(const ColorF& other, float a);
   public: ColorF(const ColorF& other);
   public: ColorF();
   public: ~ColorF();

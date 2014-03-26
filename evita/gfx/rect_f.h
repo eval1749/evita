@@ -62,13 +62,24 @@ class Rect_ : public BaseType {
     return rc;
   }
 
+  public: operator bool() const { return !empty(); }
+  public: bool operator!() const { return empty(); }
+
+  public: Rect_ operator+(const SizeType& size) const;
+  public: Rect_ operator-(const SizeType& size) const;
+
+  public: Rect_ operator+(const UnitType& scalar) const {
+    return operator+(SizeType(scalar, scalar));
+  }
+
+  public: Rect_ operator-(const UnitType& scalar) const {
+    return operator-(SizeType(scalar, scalar));
+  }
+
   public: Rect_ operator*(const SizeType& size) const {
     return Rect_(left * size.width, top * size.height,
                  right * size.width, bottom * size.height);
   }
-
-  public: operator bool() const { return !empty(); }
-  public: bool operator!() const { return empty(); }
 
   public: Rect_& operator*=(const SizeType& size) {
     left *= size.width;
@@ -88,6 +99,12 @@ class Rect_ : public BaseType {
            right != other.right || bottom != other.bottom;
   }
 
+  public: bool operator<(const Rect_& other) const;
+  public: bool operator<=(const Rect_& other) const;
+  public: bool operator>(const Rect_& other) const;
+  public: bool operator>=(const Rect_& other) const;
+
+  public: UnitType area() const { return width() * hieght(); }
   public: UnitType height() const { return bottom - top; }
 
   public: bool empty() const {
@@ -110,6 +127,48 @@ class Rect_ : public BaseType {
   public: bool Contains(PointF point) const;
   public: void Unite(const Rect_& other);
 };
+
+// Rect_ inline functions
+
+template<typename BaseType, typename PointType, typename SizeType>
+Rect_<BaseType, PointType, SizeType>
+    Rect_<BaseType, PointType, SizeType>::operator+(
+        const SizeType& size) const {
+  return Rect_(left - size.width, top - size.height,
+               right + size.width, bottom + size.height);
+}
+
+template<typename BaseType, typename PointType, typename SizeType>
+Rect_<BaseType, PointType, SizeType>
+    Rect_<BaseType, PointType, SizeType>::operator-(
+        const SizeType& size) const {
+  return Rect_(left + size.width, top + size.height,
+               right - size.width, bottom - size.height);
+}
+
+template<typename BaseType, typename PointType, typename SizeType>
+bool Rect_<BaseType, PointType, SizeType>::operator<(
+    const Rect_& other) const {
+  return area() < other.area();
+}
+
+template<typename BaseType, typename PointType, typename SizeType>
+bool Rect_<BaseType, PointType, SizeType>::operator<=(
+    const Rect_& other) const {
+  return area() <= other.area();
+}
+
+template<typename BaseType, typename PointType, typename SizeType>
+bool Rect_<BaseType, PointType, SizeType>::operator>(
+    const Rect_& other) const {
+  return area() > other.area();
+}
+
+template<typename BaseType, typename PointType, typename SizeType>
+bool Rect_<BaseType, PointType, SizeType>::operator>=(
+    const Rect_& other) const {
+  return area() >= other.area();
+}
 
 template<typename BaseType, typename PointType, typename SizeType>
 bool Rect_<BaseType, PointType, SizeType>::Contains(PointF point) const {

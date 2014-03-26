@@ -57,16 +57,22 @@ void SystemMetrics::UpdateColors() {
   gray_text_ = GetSysColorF(COLOR_GRAYTEXT);
   highlight_ = GetSysColorF(COLOR_HIGHLIGHT);
   hotlight_ = GetSysColorF(COLOR_HOTLIGHT);
-  //shadow_ = GetSysColorF(COLOR_3DDKSHADOW);
-  shadow_ = GetSysColorF(COLOR_BTNSHADOW);
+  shadow_ = GetSysColorF(COLOR_3DDKSHADOW);
 }
 
 void SystemMetrics::UpdateTextFormat() {
+#if 0
   LOGFONT log_font;
   WIN32_VERIFY(::SystemParametersInfo(SPI_GETICONTITLELOGFONT,
                                       sizeof(log_font), &log_font, 0));
   font_family_ = log_font.lfFaceName;
-  font_size_ = static_cast<float>(log_font.lfHeight) * 96.0f / 72.0f;
+  auto const height_pt = log_font.lfHeight < 0 ? -log_font.lfHeight :
+      log_font.lfHeight;
+  font_size_ = static_cast<float>(height_pt) * 96.0f / 72.0f;
+#else
+  font_family_ = L"MS Shell Dlg 2";
+  font_size_ = 12.0f;
+#endif
 }
 
 }  // namespace ui

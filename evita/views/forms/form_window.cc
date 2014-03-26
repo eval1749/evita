@@ -15,16 +15,20 @@
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/forms/form_observer.h"
+#include "evita/dom/forms/button_control.h"
 #include "evita/dom/forms/checkbox_control.h"
 #include "evita/dom/forms/label_control.h"
 #include "evita/dom/forms/radio_button_control.h"
 #include "evita/dom/lock.h"
+#include "evita/ui/controls/button_control.h"
 #include "evita/ui/controls/checkbox_control.h"
 #include "evita/ui/controls/label_control.h"
 #include "evita/ui/controls/radio_button_control.h"
 #include "evita/ui/root_widget.h"
 #include "evita/ui/system_metrics.h"
 #include "evita/views/forms/form_control_controller.h"
+
+#define DEBUG_PAINT _DEBUG
 
 namespace views {
 
@@ -70,6 +74,42 @@ void ControlImporter::SetRect(const dom::FormControl* control,
       gfx::Size(static_cast<int>(control->client_width()),
                 static_cast<int>(control->client_height())));
   widget->ResizeTo(rect);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// ButtonImporter
+//
+class ButtonImporter : public ControlImporter {
+  private: const dom::ButtonControl* const button_;
+
+  public: ButtonImporter(const dom::ButtonControl* checkbox);
+  public: virtual ~ButtonImporter() = default;
+
+  // ControlImporter
+  private: virtual ui::Widget* CreateWidget() override;
+  private: virtual void UpdateWidget(ui::Widget* widget) override;
+
+  DISALLOW_COPY_AND_ASSIGN(ButtonImporter);
+};
+
+ButtonImporter::ButtonImporter(const dom::ButtonControl* button)
+    : button_(button) {
+}
+
+ui::Widget* ButtonImporter::CreateWidget() {
+  auto const widget = new ui::ButtonControl(
+      new FormControlController(button_->event_target_id()),
+      button_->text(), ComputeStyle());
+  SetRect(button_, widget);
+  return widget;
+}
+
+void ButtonImporter::UpdateWidget(ui::Widget* widget) {
+  auto const button_widget = widget->as<ui::ButtonControl>();
+  button_widget->set_style(ComputeStyle());
+  button_widget->set_text(button_->text());
+  SetRect(button_, button_widget);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -182,13 +222,16 @@ void RadioButtonImporter::UpdateWidget(ui::Widget* widget) {
 }
 
 ControlImporter* ControlImporter::Create(const dom::FormControl* control) {
+  if (auto const button = control->as<dom::ButtonControl>())
+    return new ButtonImporter(button);
   if (auto const checkbox = control->as<dom::CheckboxControl>())
     return new CheckboxImporter(checkbox);
   if (auto const label = control->as<dom::LabelControl>())
     return new LabelImporter(label);
   if (auto const radio_button = control->as<dom::RadioButtonControl>())
     return new RadioButtonImporter(radio_button);
-  NOTREACHED();
+  NOTREACHED() << "Unsupported form control " <<
+      control->wrapper_info()->class_name();
   return nullptr;
 }
 
@@ -247,8 +290,8 @@ void FormWindow::FormViewModel::Update() {
       continue;
     }
     auto const widget = it->second;
-    importer->UpdateWidget(widget);
     window_->AppendChild(widget);
+    importer->UpdateWidget(widget);
     window_->SchedulePaintInRect(widget->rect());
     children_to_remove.erase(widget);
   }
@@ -360,7 +403,7 @@ void FormWindow::DidRealize() {
 void FormWindow::DidResize() {
   gfx_->Resize(rect());
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
-  (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::White));
+  (*gfx_)->Clear(ui::SystemMetrics::instance()->bgcolor());
   Window::DidResize();
 }
 
@@ -383,11 +426,19 @@ void FormWindow::OnPaint(const gfx::Rect rect) {
   }
 
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  auto const bgcolor = ui::SystemMetrics::instance()->bgcolor();
+  // TODO(yosi) We should fill background of form window excluding controls
+  gfx_->FillRectangle(gfx::Brush(*gfx_, bgcolor), rect);
   Window::OnDraw(gfx_.get());
+
+  // Render paint rectangle for debugging.
+#if DEBUG_PAINT
+  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, gfx::RectF(rect));
   gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
                       rect);
   gfx_->DrawRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
                       rect, 2.0f);
+#endif
 }
 
 }  // namespace views

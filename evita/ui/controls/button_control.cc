@@ -16,6 +16,7 @@ class ButtonControl::Renderer {
   private: gfx::RectF rect_;
   private: Style style_;
   private: std::unique_ptr<gfx::TextLayout> text_layout_;
+  private: gfx::SizeF text_size_;
 
   public: Renderer(const base::string16& text, const Style& style,
                    const gfx::RectF& rect);
@@ -37,10 +38,6 @@ std::unique_ptr<gfx::TextLayout> CreateTextLayout(const base::string16& text,
   text_format->SetTrimming(&trimming, inline_object);
   return text_format.CreateLayout(text, size);
 }
-
-gfx::ColorF MakeColorWithAlpha(const gfx::ColorF color, float alpha) {
-  return gfx::ColorF(color.red(), color.green(), color.blue(), alpha);
-}
 }  // namespace
 
 ButtonControl::Renderer::Renderer(const base::string16& text,
@@ -48,6 +45,11 @@ ButtonControl::Renderer::Renderer(const base::string16& text,
                                   const gfx::RectF& rect)
     : rect_(rect), style_(style),
       text_layout_(CreateTextLayout(text, style, rect.size())) {
+  DWRITE_TEXT_METRICS metrics;
+  COM_VERIFY((*text_layout_)->GetMetrics(&metrics));
+  // Event after trimming of |text_|, it may not fit into line. Although,
+  // DCHECK_EQ(1u, metrics.lineCount);
+  text_size_ = gfx::SizeF(metrics.width, metrics.height);
 }
 
 ButtonControl::Renderer::~Renderer() {
@@ -55,16 +57,19 @@ ButtonControl::Renderer::~Renderer() {
 
 void ButtonControl::Renderer::Render(gfx::Graphics* gfx,
                                      Control::State state) const {
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, rect_);
-  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect_);
-  gfx->DrawRectangle(gfx::Brush(*gfx, style_.shadow), rect_);
+  if (!rect_)
+    return;
 
-  auto const max_width = (*text_layout_)->GetMaxWidth();
-  auto const max_height = (*text_layout_)->GetMaxHeight();
-  gfx::PointF origin(rect_.left + (rect_.width() - max_width) / 2.0f,
-                     rect_.top + (rect_.height() - max_height) / 2.0f);
-  gfx::Brush text_brush(*gfx, state == State::Disabled ?
-      style_.gray_text : style_.color);
+  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect_);
+
+  auto frame_rect = rect_;
+  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
+  gfx->DrawRectangle(gfx::Brush(*gfx, style_.shadow), frame_rect);
+
+  auto const offset = (frame_rect.size() - text_size_) / 2.0f;
+  gfx::PointF origin(frame_rect.left_top() + offset);
+  gfx::Brush text_brush(*gfx, state == State::Disabled ? style_.gray_text :
+                                                         style_.color);
   (*gfx)->DrawTextLayout(origin, *text_layout_, text_brush,
                          D2D1_DRAW_TEXT_OPTIONS_CLIP);
 
@@ -74,13 +79,15 @@ void ButtonControl::Renderer::Render(gfx::Graphics* gfx,
       break;
     case Control::State::Highlight:
       gfx->FillRectangle(
-          gfx::Brush(*gfx, MakeColorWithAlpha(style_.highlight, 0.3f)),
-          rect_);
+          gfx::Brush(*gfx, gfx::ColorF(style_.highlight, 0.5f)),
+          frame_rect);
+      gfx->DrawRectangle(gfx::Brush(*gfx, style_.highlight), frame_rect);
       break;
     case Control::State::Hover:
-      gfx->DrawRectangle(
-          gfx::Brush(*gfx, MakeColorWithAlpha(style_.highlight, 0.3f)),
-          rect_);
+      gfx->FillRectangle(
+          gfx::Brush(*gfx, gfx::ColorF(style_.highlight, 0.1f)),
+          frame_rect);
+      gfx->DrawRectangle(gfx::Brush(*gfx, style_.highlight), frame_rect);
       break;
   }
   gfx->Flush();

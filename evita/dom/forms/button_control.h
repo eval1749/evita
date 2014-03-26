@@ -13,10 +13,13 @@ class ButtonControl
     : public v8_glue::Scriptable<ButtonControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(ButtonControl);
 
-  private: bool checked_;
+  private: base::string16 text_;
 
-  public: ButtonControl(FormResourceId control_id);
+  public: explicit ButtonControl(FormResourceId control_id);
   public: virtual ~ButtonControl();
+
+  public: const base::string16& text() const { return text_; }
+  public: void set_text(const base::string16& text);
 
   DISALLOW_COPY_AND_ASSIGN(ButtonControl);
 };

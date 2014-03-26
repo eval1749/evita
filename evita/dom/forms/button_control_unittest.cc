@@ -43,6 +43,13 @@ TEST_F(ButtonControlTest, set_disabled) {
   EXPECT_SCRIPT_TRUE("sample.disabled");
 }
 
+TEST_F(ButtonControlTest, set_text) {
+  EXPECT_SCRIPT_VALID(
+      "var sample = new ButtonControl(123);"
+      "sample.text = 'foo';");
+  EXPECT_SCRIPT_EQ("foo", "sample.text");
+}
+
 TEST_F(ButtonControlTest, setRect) {
   EXPECT_SCRIPT_VALID("var sample = new ButtonControl(123);");
   EXPECT_SCRIPT_VALID("sample.setRect(1, 2, 3, 4)");

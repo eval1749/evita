@@ -37,6 +37,12 @@ class ButtonControlClass :
     return new ButtonControl(control_id);
   }
 
+  private: virtual void SetupInstanceTemplate(
+      ObjectTemplateBuilder& builder) override {
+    builder.SetProperty("text",
+        &ButtonControl::text, &ButtonControl::set_text);
+  }
+
   DISALLOW_COPY_AND_ASSIGN(ButtonControlClass);
 };
 }  // namespace
@@ -52,6 +58,13 @@ ButtonControl::ButtonControl(FormResourceId control_id)
 }
 
 ButtonControl::~ButtonControl() {
+}
+
+void ButtonControl::set_text(const base::string16& new_text) {
+  if (text_ == new_text)
+    return;
+  text_ = new_text;
+  NotifyControlChange();
 }
 
 }  // namespace dom

@@ -8,3 +8,6 @@
  * @param {number} control_id
  */
 var ButtonControl = function(control_id) {};
+
+/** @type {string} */
+ButtonControl.prototype.text;

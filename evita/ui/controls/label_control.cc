@@ -10,27 +10,14 @@ namespace ui {
 
 //////////////////////////////////////////////////////////////////////
 //
-// LabelControl::LabelStyle
-//
-bool LabelControl::LabelStyle::operator==(const LabelStyle& other) const {
-  return bgcolor == other.bgcolor && color == other.color &&
-         font_family == other.font_family && font_size == other.font_size;
-}
-
-bool LabelControl::LabelStyle::operator!=(const LabelStyle& other) const {
-  return !operator==(other);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
 // LabelControl::Renderer
 //
 class LabelControl::Renderer {
   private: gfx::RectF rect_;
-  private: LabelStyle style_;
+  private: Style style_;
   private: std::unique_ptr<gfx::TextLayout> text_layout_;
 
-  public: Renderer(const base::string16& text, const LabelStyle& style,
+  public: Renderer(const base::string16& text, const Style& style,
                    const gfx::RectF& rect);
   public: ~Renderer();
 
@@ -41,14 +28,14 @@ class LabelControl::Renderer {
 
 namespace {
 std::unique_ptr<gfx::TextLayout> CreateTextLayout(const base::string16& text,
-    const LabelControl::LabelStyle& style, const gfx::SizeF& size) {
+    const LabelControl::Style& style, const gfx::SizeF& size) {
   gfx::TextFormat text_format(style.font_family, style.font_size);
   return text_format.CreateLayout(text, size);
 }
 }  // namespace
 
 LabelControl::Renderer::Renderer(const base::string16& text,
-                                 const LabelStyle& style,
+                                 const Style& style,
                                  const gfx::RectF& rect)
     : rect_(rect), style_(style),
       text_layout_(CreateTextLayout(text, style, rect.size())) {
@@ -71,7 +58,7 @@ void LabelControl::Renderer::Render(gfx::Graphics* gfx) const {
 // LabelControl
 //
 LabelControl::LabelControl(ControlController* controller,
-                           const base::string16& text, const LabelStyle& style)
+                           const base::string16& text, const Style& style)
     : Control(controller), style_(style), text_(text) {
 }
 
@@ -82,7 +69,7 @@ bool LabelControl::focusable() const {
   return false;
 }
 
-void LabelControl::set_style(const LabelStyle& new_style) {
+void LabelControl::set_style(const Style& new_style) {
   if (style_ == new_style)
     return;
   style_ = new_style;

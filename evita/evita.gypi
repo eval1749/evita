@@ -583,6 +583,7 @@
         'ui/events/event.cc',
         'ui/events/event_ostream.cc',
 
+        'ui/controls/button_control.cc',
         'ui/controls/checkbox_control.cc',
         'ui/controls/control.cc',
         'ui/controls/control_controller.cc',

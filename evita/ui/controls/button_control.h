@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_controls_label_control_h)
-#define INCLUDE_evita_ui_controls_label_control_h
+#if !defined(INCLUDE_evita_ui_controls_button_control_h)
+#define INCLUDE_evita_ui_controls_button_control_h
 
 #include "evita/ui/controls/control.h"
 
@@ -14,18 +14,17 @@
 
 namespace ui {
 
-class LabelControl final : public Control {
+class ButtonControl final : public Control {
   private: class Renderer;
 
   private: std::unique_ptr<Renderer> renderer_;
   private: Style style_;
   private: base::string16 text_;
 
-  public: LabelControl(ControlController* controller,
+  public: ButtonControl(ControlController* controller,
                        const base::string16& text, const Style& style);
-  public: virtual ~LabelControl();
+  public: virtual ~ButtonControl();
 
-  public: virtual bool focusable() const override;
   public: const Style& style() const { return style_; }
   public: void set_style(const Style& style);
   public: base::string16 text() const { return text_; }
@@ -35,9 +34,9 @@ class LabelControl final : public Control {
   private: virtual void DidResize() override;
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
 
-  DISALLOW_COPY_AND_ASSIGN(LabelControl);
+  DISALLOW_COPY_AND_ASSIGN(ButtonControl);
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_controls_label_control_h)
+#endif //!defined(INCLUDE_evita_ui_controls_button_control_h)

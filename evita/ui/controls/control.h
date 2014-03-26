@@ -13,23 +13,38 @@ namespace ui {
 class ControlController;
 
 class Control : public ui::Widget {
+  public: enum class State {
+    Normal,
+    Disabled,
+    Highlight,
+    Hover,
+  };
   public: struct Style {
     gfx::ColorF bgcolor;
     gfx::ColorF color;
+    base::string16 font_family;
+    float font_size;
+    gfx::ColorF gray_text;
     gfx::ColorF highlight;
     gfx::ColorF hotlight;
     gfx::ColorF shadow;
+
+    bool operator==(const Style& other) const;
+    bool operator!=(const Style& other) const;
   };
 
   private: ControlController* controller_;
-  private: bool hover_;
+  private: State state_;
 
   public: Control(ControlController* controller);
   public: virtual ~Control();
 
+  public: bool disabled() const { return state_ == State::Disabled; }
+  public: void set_disabled(bool new_disabled);
   public: virtual bool focusable() const;
   public: ControlController* controller() const { return controller_; }
-  protected: bool hover() const { return hover_; }
+  protected: bool hover() const { return state_ == State::Hover; }
+  protected: State state() const { return state_; }
 
   // ui::Widget
   protected: virtual void OnKeyPressed(const KeyboardEvent& event) override;

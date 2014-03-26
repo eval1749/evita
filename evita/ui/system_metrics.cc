@@ -54,7 +54,7 @@ void SystemMetrics::UpdateColors() {
   bgcolor_ = GetSysColorF(COLOR_WINDOW);
   border_color_ = GetSysColorF(COLOR_3DDKSHADOW);
   color_ = GetSysColorF(COLOR_WINDOWTEXT);
-  gray_ = GetSysColorF(COLOR_GRAYTEXT);
+  gray_text_ = GetSysColorF(COLOR_GRAYTEXT);
   highlight_ = GetSysColorF(COLOR_HIGHLIGHT);
   hotlight_ = GetSysColorF(COLOR_HOTLIGHT);
   //shadow_ = GetSysColorF(COLOR_3DDKSHADOW);

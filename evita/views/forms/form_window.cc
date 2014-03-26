@@ -40,12 +40,27 @@ class ControlImporter {
 
   public: static ControlImporter* Create(const dom::FormControl* control);
 
+  protected: ui::Control::Style ComputeStyle() const;
   public: virtual ui::Widget* CreateWidget() = 0;
   protected: void SetRect(const dom::FormControl* control, ui::Widget* widget);
   public: virtual void UpdateWidget(ui::Widget* widget) = 0;
 
   DISALLOW_COPY_AND_ASSIGN(ControlImporter);
 };
+
+
+ui::Control::Style ControlImporter::ComputeStyle() const {
+  ui::CheckboxControl::Style style;
+  style.bgcolor = ui::SystemMetrics::instance()->bgcolor();
+  style.color = ui::SystemMetrics::instance()->color();
+  style.font_family = ui::SystemMetrics::instance()->font_family();
+  style.font_size = ui::SystemMetrics::instance()->font_size();
+  style.gray_text = ui::SystemMetrics::instance()->gray_text();
+  style.highlight = ui::SystemMetrics::instance()->highlight();
+  style.hotlight = ui::SystemMetrics::instance()->hotlight();
+  style.shadow = ui::SystemMetrics::instance()->shadow();
+  return style;
+}
 
 void ControlImporter::SetRect(const dom::FormControl* control,
                               ui::Widget* widget) {
@@ -67,8 +82,6 @@ class CheckboxImporter : public ControlImporter {
   public: CheckboxImporter(const dom::CheckboxControl* checkbox);
   public: virtual ~CheckboxImporter() = default;
 
-  private: ui::CheckboxControl::Style ComputeStyle() const;
-
   // ControlImporter
   private: virtual ui::Widget* CreateWidget() override;
   private: virtual void UpdateWidget(ui::Widget* widget) override;
@@ -78,17 +91,6 @@ class CheckboxImporter : public ControlImporter {
 
 CheckboxImporter::CheckboxImporter(const dom::CheckboxControl* checkbox)
     : checkbox_(checkbox) {
-}
-
-ui::CheckboxControl::Style
-    CheckboxImporter::ComputeStyle() const {
-  ui::CheckboxControl::Style style;
-  style.bgcolor = ui::SystemMetrics::instance()->bgcolor();
-  style.color = ui::SystemMetrics::instance()->color();
-  style.highlight = ui::SystemMetrics::instance()->highlight();
-  style.hotlight = ui::SystemMetrics::instance()->hotlight();
-  style.shadow = ui::SystemMetrics::instance()->shadow();
-  return style;
 }
 
 ui::Widget* CheckboxImporter::CreateWidget() {
@@ -116,8 +118,6 @@ class LabelImporter : public ControlImporter {
   public: LabelImporter(const dom::LabelControl* label);
   public: virtual ~LabelImporter() = default;
 
-  private: ui::LabelControl::LabelStyle ComputeLabelStyle() const;
-
   // ControlImporter
   private: virtual ui::Widget* CreateWidget() override;
   private: virtual void UpdateWidget(ui::Widget* widget) override;
@@ -129,26 +129,17 @@ LabelImporter::LabelImporter(const dom::LabelControl* label)
     : label_(label) {
 }
 
-ui::LabelControl::LabelStyle LabelImporter::ComputeLabelStyle() const {
-  ui::LabelControl::LabelStyle style;
-  style.bgcolor = ui::SystemMetrics::instance()->bgcolor();
-  style.color = ui::SystemMetrics::instance()->color();
-  style.font_family = L"MS Shell Dlg 2";
-  style.font_size = 13;
-  return style;
-}
-
 ui::Widget* LabelImporter::CreateWidget() {
   auto const widget = new ui::LabelControl(
       new FormControlController(label_->event_target_id()),
-      label_->text(), ComputeLabelStyle());
+      label_->text(), ComputeStyle());
   SetRect(label_, widget);
   return widget;
 }
 
 void LabelImporter::UpdateWidget(ui::Widget* widget) {
   auto const label_widget = widget->as<ui::LabelControl>();
-  label_widget->set_style(ComputeLabelStyle());
+  label_widget->set_style(ComputeStyle());
   label_widget->set_text(label_->text());
   SetRect(label_, label_widget);
 }
@@ -163,8 +154,6 @@ class RadioButtonImporter : public ControlImporter {
   public: RadioButtonImporter(const dom::RadioButtonControl* radio_button);
   public: virtual ~RadioButtonImporter() = default;
 
-  private: ui::RadioButtonControl::Style ComputeStyle() const;
-
   // ControlImporter
   private: virtual ui::Widget* CreateWidget() override;
   private: virtual void UpdateWidget(ui::Widget* widget) override;
@@ -175,17 +164,6 @@ class RadioButtonImporter : public ControlImporter {
 RadioButtonImporter::RadioButtonImporter(
     const dom::RadioButtonControl* radio_button)
     : radio_button_(radio_button) {
-}
-
-ui::RadioButtonControl::Style
-    RadioButtonImporter::ComputeStyle() const {
-  ui::RadioButtonControl::Style style;
-  style.bgcolor = ui::SystemMetrics::instance()->bgcolor();
-  style.color = ui::SystemMetrics::instance()->color();
-  style.highlight = ui::SystemMetrics::instance()->highlight();
-  style.hotlight = ui::SystemMetrics::instance()->hotlight();
-  style.shadow = ui::SystemMetrics::instance()->shadow();
-  return style;
 }
 
 ui::Widget* RadioButtonImporter::CreateWidget() {

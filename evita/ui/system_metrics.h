@@ -24,7 +24,7 @@ class SystemMetrics : public common::Singleton<SystemMetrics> {
   private: gfx::ColorF border_color_;
   private: gfx::ColorF color_;
   private: base::string16 font_family_;
-  private: gfx::ColorF gray_;
+  private: gfx::ColorF gray_text_;
   private: gfx::ColorF highlight_;
   private: gfx::ColorF hotlight_;
   private: gfx::ColorF shadow_;
@@ -38,7 +38,7 @@ class SystemMetrics : public common::Singleton<SystemMetrics> {
   public: gfx::ColorF border_color() const { return border_color_; }
   public: gfx::ColorF color() const { return color_; }
   public: const base::string16& font_family() const { return font_family_; }
-  public: gfx::ColorF gray() const { return gray_; }
+  public: gfx::ColorF gray_text() const { return gray_text_; }
   public: gfx::ColorF highlight() const { return highlight_; }
   public: gfx::ColorF hotlight() const { return hotlight_; }
   public: gfx::ColorF shadow() const { return shadow_; }

@@ -7,13 +7,28 @@
 #include "evita/ui/controls/control_controller.h"
 
 namespace ui {
+//////////////////////////////////////////////////////////////////////
+//
+// Control::Style
+//
+bool Control::Style::operator==(const Style& other) const {
+  return bgcolor == other.bgcolor && color == other.color &&
+         font_family == other.font_family && font_size == other.font_size &&
+         gray_text == other.gray_text && highlight == other.highlight &&
+         hotlight == other.hotlight &&
+         shadow == other.shadow;
+}
+
+bool Control::Style::operator!=(const Style& other) const {
+  return !operator==(other);
+}
 
 //////////////////////////////////////////////////////////////////////
 //
 // Control
 //
 Control::Control(ControlController* controller)
-    : controller_(controller), hover_(false) {
+    : controller_(controller), state_(State::Normal) {
 }
 
 Control::~Control() {
@@ -21,7 +36,14 @@ Control::~Control() {
 }
 
 bool Control::focusable() const {
-  return true;
+  return !disabled();
+}
+
+void Control::set_disabled(bool new_disabled) {
+  if (disabled() == new_disabled)
+    return;
+  state_ = new_disabled ? State::Disabled : State::Normal;
+  SchedulePaint();
 }
 
 void Control::OnKeyPressed(const KeyboardEvent& event) {
@@ -36,20 +58,18 @@ void Control::OnKeyReleased(const KeyboardEvent& event) {
 
 void Control::OnMouseExited(const MouseEvent& event) {
   controller_->OnMouseExited(this, event);
-  if (!hover_ || !focusable())
+  if (state_ != State::Hover || !focusable())
     return;
-  DVLOG(0) << "End Hover " << this;
-  hover_ = false;
+  state_ = State::Normal;
   SchedulePaint();
 }
 
 void Control::OnMouseMoved(const MouseEvent& event) {
   DCHECK(controller_);
   controller_->OnMouseMoved(this, event);
-  if (hover_ || !focusable())
+  if (state_ == State::Normal || !focusable())
     return;
-  DVLOG(0) << "Start Hover " << this;
-  hover_ = true;
+  state_ = State::Hover;
   SchedulePaint();
 }
 

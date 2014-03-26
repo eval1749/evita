@@ -30,7 +30,15 @@ struct COMMON_EXPORT Rect : RECT {
     left = rc.left; right = rc.right; top = rc.top; bottom = rc.bottom;
   }
 
+  bool operator==(const Rect& other) const;
+  bool operator!=(const Rect& other) const;
+  bool operator<(const Rect& other) const;
+  bool operator<=(const Rect& other) const;
+  bool operator>(const Rect& other) const;
+  bool operator>=(const Rect& other) const;
+
   operator bool() const { return !empty(); }
+  int area() const { return width() * height(); }
   bool empty() const { return width() <= 0 || height() <= 0; }
   int height() const { return bottom - top; }
   Point left_top() const { return Point(left, top); }
@@ -44,6 +52,33 @@ struct COMMON_EXPORT Rect : RECT {
   Rect Intersect(const Rect&) const;
   void Unite(const Rect& other);
 };
+
+// Rect inline functions
+
+inline bool Rect::operator==(const Rect& other) const {
+  return left == other.left && top == other.top &&
+         right == other.right && bottom == other.bottom;
+}
+
+inline bool Rect::operator!=(const Rect& other) const {
+  return !operator==(other);
+}
+
+inline bool Rect::operator<(const Rect& other) const {
+  return area() < other.area();
+}
+
+inline bool Rect::operator<=(const Rect& other) const {
+  return area() <= other.area();
+}
+
+inline bool Rect::operator>(const Rect& other) const {
+  return area() > other.area();
+}
+
+inline bool Rect::operator>=(const Rect& other) const {
+  return area() >= other.area();
+}
 
 #define DEBUG_RECT_FORMAT "(%d,%d)+%dx%d"
 #define DEBUG_RECT_ARG(mp_rect) \

@@ -30,26 +30,19 @@ void CheckboxControl::set_checked(bool new_checked) {
 
 // ui::Widget
 void CheckboxControl::OnDraw(gfx::Graphics* gfx) {
-  if (rect().empty())
+  if (!rect())
     return;
-  auto const size = 12.0f;
-  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect());
 
-  gfx::RectF frame_rect(
-      gfx::PointF(rect().left + (rect().width() - size) / 2,
-                  rect().top + (rect().height() - size) / 2),
-      gfx::SizeF(size, size));
+  auto const rect = gfx::RectF(this->rect());
+  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect);
 
-  if (hover()) {
-    gfx::Brush frame_brush(*gfx, style_.highlight);
-    (*gfx)->DrawRectangle(frame_rect, frame_brush);
-  } else {
-    auto const antialias_mode = (*gfx)->GetAntialiasMode();
-    //(*gfx)->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
-    gfx::Brush frame_brush(*gfx, style_.shadow);
-    (*gfx)->DrawRectangle(frame_rect, frame_brush);
-    (*gfx)->SetAntialiasMode(antialias_mode);
-  }
+  auto const frame_size = gfx::SizeF(12.0f, 12.0f);
+  auto const offset = (rect.size() - frame_size) / 2;
+  gfx::RectF frame_rect(rect.left_top() + offset, frame_size);
+  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
+
+  gfx::Brush frame_brush(*gfx, style_.shadow);
+  (*gfx)->DrawRectangle(frame_rect, frame_brush);
 
   if (checked_) {
     gfx::Brush black_brush(*gfx, gfx::ColorF(0, 0, 0));
@@ -61,6 +54,23 @@ void CheckboxControl::OnDraw(gfx::Graphics* gfx) {
                      gfx::PointF(frame_rect.right - 3, frame_rect.top + 3),
                      black_brush,
                      2.0f);
+  }
+  switch (state()) {
+    case Control::State::Disabled:
+    case Control::State::Normal:
+      break;
+    case Control::State::Highlight:
+      gfx->FillRectangle(
+          gfx::Brush(*gfx, gfx::ColorF(style_.highlight, 0.5f)),
+          frame_rect);
+      gfx->DrawRectangle(gfx::Brush(*gfx, style_.highlight), frame_rect);
+      break;
+    case Control::State::Hover:
+      gfx->FillRectangle(
+          gfx::Brush(*gfx, gfx::ColorF(style_.hotlight, 0.1f)),
+          frame_rect);
+      gfx->DrawRectangle(gfx::Brush(*gfx, style_.hotlight), frame_rect);
+      break;
   }
   gfx->Flush();
 }

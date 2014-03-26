@@ -44,9 +44,26 @@ void RadioButtonControl::OnDraw(gfx::Graphics* gfx) {
   (*gfx)->DrawEllipse(ellipse, frame_brush);
 
   if (checked_) {
-    ellipse.radiusX = ellipse.radiusY = size / 2 - 4;
+    D2D1_ELLIPSE ellipse2;
+    ellipse2.point = ellipse.point;
+    ellipse2.radiusX = ellipse2.radiusY = size / 2 - 3;
     gfx::Brush black_brush(*gfx, style_.color);
-    (*gfx)->FillEllipse(ellipse, black_brush);
+    (*gfx)->FillEllipse(ellipse2, black_brush);
+  }
+  switch (state()) {
+    case Control::State::Disabled:
+    case Control::State::Normal:
+      break;
+    case Control::State::Highlight:
+      (*gfx)->FillEllipse(ellipse,
+          gfx::Brush(*gfx, gfx::ColorF(style_.highlight, 0.5)));
+      (*gfx)->DrawEllipse(ellipse, gfx::Brush(*gfx, style_.highlight));
+      break;
+    case Control::State::Hover:
+      (*gfx)->FillEllipse(ellipse,
+          gfx::Brush(*gfx, gfx::ColorF(style_.hotlight, 0.1f)));
+      (*gfx)->DrawEllipse(ellipse, gfx::Brush(*gfx, style_.highlight));
+      break;
   }
   gfx->Flush();
 }

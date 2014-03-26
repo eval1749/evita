@@ -67,7 +67,7 @@ void Control::OnMouseExited(const MouseEvent& event) {
 void Control::OnMouseMoved(const MouseEvent& event) {
   DCHECK(controller_);
   controller_->OnMouseMoved(this, event);
-  if (state_ == State::Normal || !focusable())
+  if (state_ == State::Hover || !focusable())
     return;
   state_ = State::Hover;
   SchedulePaint();

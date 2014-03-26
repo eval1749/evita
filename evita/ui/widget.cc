@@ -450,6 +450,10 @@ void Widget::ResizeTo(const Rect& rect) {
     ::SetWindowPos(*native_window_.get(), nullptr, rect.left, rect.top,
                    rect.width(), rect.height(), SWP_NOACTIVATE);
   } else {
+    if (rect_ > rect && parent_node()) {
+      // TODO(yosi) We should schedule paint reveal rectangles only.
+      parent_node()->SchedulePaintInRect(rect_);
+    }
     rect_ = rect;
     DidResize();
   }

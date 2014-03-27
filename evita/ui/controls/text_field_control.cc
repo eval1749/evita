@@ -87,7 +87,8 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx,
     case Control::State::Normal:
       break;
     case Control::State::Highlight:
-      gfx->DrawRectangle(gfx::Brush(*gfx, style_.highlight), frame_rect);
+      gfx->DrawRectangle(gfx::Brush(*gfx, gfx::ColorF(style_.highlight, 0.5f)),
+                         frame_rect - 1.0f, 2.0f);
       break;
     case Control::State::Hover:
       gfx->DrawRectangle(gfx::Brush(*gfx, style_.hotlight), frame_rect);

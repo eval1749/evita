@@ -46,17 +46,39 @@ void Control::set_disabled(bool new_disabled) {
   SchedulePaint();
 }
 
+// ui::WIdget
+void Control::DidKillFocus() {
+  if (disabled())
+    return;
+  state_ = State::Normal;
+  SchedulePaint();
+}
+
+void Control::DidSetFocus() {
+  if (disabled())
+    return;
+  state_ = State::Highlight;
+  SchedulePaint();
+}
+
 void Control::OnKeyPressed(const KeyboardEvent& event) {
   DCHECK(controller_);
+  if (disabled())
+    return;
   controller_->OnKeyPressed(this, event);
 }
 
 void Control::OnKeyReleased(const KeyboardEvent& event) {
   DCHECK(controller_);
+  if (disabled())
+    return;
   controller_->OnKeyReleased(this, event);
 }
 
 void Control::OnMouseExited(const MouseEvent& event) {
+  DCHECK(controller_);
+  if (disabled())
+    return;
   controller_->OnMouseExited(this, event);
   if (state_ != State::Hover || !focusable())
     return;
@@ -66,8 +88,10 @@ void Control::OnMouseExited(const MouseEvent& event) {
 
 void Control::OnMouseMoved(const MouseEvent& event) {
   DCHECK(controller_);
+  if (disabled())
+    return;
   controller_->OnMouseMoved(this, event);
-  if (state_ == State::Hover || !focusable())
+  if (state_ != State::Normal || !focusable())
     return;
   state_ = State::Hover;
   SchedulePaint();
@@ -75,16 +99,22 @@ void Control::OnMouseMoved(const MouseEvent& event) {
 
 void Control::OnMousePressed(const MouseEvent& event) {
   DCHECK(controller_);
+  if (disabled())
+    return;
   controller_->OnMousePressed(this, event);
 }
 
 void Control::OnMouseReleased(const MouseEvent& event) {
   DCHECK(controller_);
+  if (disabled())
+    return;
   controller_->OnMouseReleased(this, event);
 }
 
 void Control::OnMouseWheel(const MouseWheelEvent& event) {
   DCHECK(controller_);
+  if (disabled())
+    return;
   controller_->OnMouseWheel(this, event);
 }
 

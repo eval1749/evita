@@ -30,7 +30,7 @@
 #include "evita/ui/system_metrics.h"
 #include "evita/views/forms/form_control_controller.h"
 
-#define DEBUG_PAINT _DEBUG
+#define DEBUG_PAINT 0
 
 namespace views {
 
@@ -296,6 +296,7 @@ class FormWindow::FormViewModel final : private dom::FormObserver  {
 
   public: bool dirty() const { return dirty_; }
 
+  // Update DOM form control map
   public: void Update();
 
   // dom::FormObserver
@@ -316,8 +317,7 @@ FormWindow::FormViewModel::~FormViewModel() {
 
 void FormWindow::FormViewModel::Update() {
   UI_ASSERT_DOM_LOCKED();
-  if (!dirty_)
-    return;
+  DCHECK(dirty_);
   std::unordered_set<ui::Widget*> children_to_remove;
   while (auto const child = window_->first_child()) {
     window_->RemoveChild(child);
@@ -392,7 +392,25 @@ bool FormWindow::OnIdle(int) {
     return true;
 
   model_->Update();
+  UpdateFocusControlIfNeeded();
   return false;
+}
+
+// Set first focusable control if no control has focus.
+void FormWindow::UpdateFocusControlIfNeeded() {
+  auto focusable = static_cast<ui::Control*>(nullptr);
+  for (auto const child : child_nodes()) {
+    auto const control = child->as<ui::Control>();
+    if (!control)
+      continue;
+    if (control->has_focus())
+      return;
+    if (!focusable && control->focusable())
+      focusable = control;
+  }
+  if (!focusable)
+    return;
+  focusable->RequestFocus();
 }
 
 // ui::SystemMetricsObserver
@@ -449,6 +467,11 @@ void FormWindow::DidResize() {
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   (*gfx_)->Clear(ui::SystemMetrics::instance()->bgcolor());
   Window::DidResize();
+}
+
+// Set first focusable control if no control has focus.
+void FormWindow::DidSetFocus() {
+  UpdateFocusControlIfNeeded();
 }
 
 LRESULT FormWindow::OnMessage(uint32_t const uMsg, WPARAM const wParam,

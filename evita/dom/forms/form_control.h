@@ -55,6 +55,9 @@ class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   public: void DispatchChangeEvent();
   protected: void NotifyControlChange();
 
+  // dom::EventTarget
+  private: virtual EventPath BuildEventPath() const override;
+
   DISALLOW_COPY_AND_ASSIGN(FormControl);
 };
 

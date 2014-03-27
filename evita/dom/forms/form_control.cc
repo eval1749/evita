@@ -113,4 +113,9 @@ void FormControl::NotifyControlChange() {
   form_->DidChangeFormControl(this);
 }
 
+// dom::EventTarget
+EventTarget::EventPath FormControl::BuildEventPath() const {
+  return form_ ? EventPath {form_} : EventPath();
+}
+
 }  // namespace dom

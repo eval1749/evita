@@ -14,6 +14,8 @@
 #pragma warning(pop)
 #include "base/strings/string16.h"
 #include "evita/dom/public/dialog_box_id.h"
+#include "evita/gc/member.h"
+#include "evita/v8_glue/nullable.h"
 
 namespace dom {
 
@@ -24,6 +26,7 @@ class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(Form);
 
   private: std::unordered_map<int, FormControl*> controls_;
+  private: gc::Member<FormControl> focus_control_;
   private: const base::string16 name_;
   private: mutable ObserverList<FormObserver> observers_;
 
@@ -35,6 +38,9 @@ class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
   public: domapi::DialogBoxId dialog_box_id() const {
     return event_target_id();
   }
+  public: FormControl* focus_control() const { return focus_control_.get(); }
+  public: void set_focus_control(
+      v8_glue::Nullable<FormControl> new_focus_control);
   public: const base::string16& name() const { return name_; }
 
   public: void AddFormControl(FormControl* control);

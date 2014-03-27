@@ -13,6 +13,9 @@ function Form(name) {}
 /** @expose @type {Array.<!FormControl>} */
 Form.prototype.controls;
 
+/** @expose @type {?FormControl} */
+Form.prototype.focusControl;
+
 /** @expose @type {string} */
 Form.prototype.name;
 

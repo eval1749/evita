@@ -27,6 +27,7 @@ TEST_F(FormTest, ctor) {
   EXPECT_SCRIPT_TRUE("sample instanceof EventTarget");
   EXPECT_SCRIPT_EQ("0", "sample.controls.length");
   EXPECT_SCRIPT_EQ("sample", "sample.name");
+  EXPECT_SCRIPT_TRUE("sample.focusControl == null");
 }
 
 TEST_F(FormTest, add) {
@@ -35,6 +36,17 @@ TEST_F(FormTest, add) {
                       "sample.add(text_field);");
   EXPECT_SCRIPT_EQ("1", "sample.controls.length");
   EXPECT_SCRIPT_TRUE("sample.controls[0] === text_field");
+}
+
+TEST_F(FormTest, focusControl) {
+  EXPECT_SCRIPT_VALID("var sample = new Form('sample');"
+                      "var button = new ButtonControl(123);"
+                      "sample.focusControl = button");
+  EXPECT_SCRIPT_TRUE("sample.focusControl == button");
+  EXPECT_SCRIPT_VALID("sample.focusControl = null") <<
+      "Set null to Form.protected.focusControl means the form doesn't have"
+      " focus control.";
+  EXPECT_SCRIPT_TRUE("sample.focusControl == null");
 }
 
 TEST_F(FormTest, realize) {

@@ -39,6 +39,8 @@ class FormClass :
       ObjectTemplateBuilder& builder) override {
     builder
         .SetProperty("controls", &Form::controls)
+        .SetProperty("focusControl", &Form::focus_control,
+                                     &Form::set_focus_control)
         .SetProperty("name", &Form::name)
         .SetMethod("add", &Form::AddFormControl)
         .SetMethod("control", &Form::control)
@@ -76,6 +78,14 @@ std::vector<FormControl*> Form::controls() const {
     controls.push_back(it.second);
   }
   return std::move(controls);
+}
+
+void Form::set_focus_control(
+    v8_glue::Nullable<FormControl> new_focus_control) {
+  if (focus_control_ == new_focus_control)
+    return;
+  focus_control_ = new_focus_control;
+  FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 
 void Form::AddFormControl(FormControl* control) {

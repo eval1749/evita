@@ -10,16 +10,6 @@
 
 namespace dom {
 
-namespace {
-int ConvertClickCount(const domapi::KeyboardEvent& event) {
-  if (event.event_type == domapi::EventType::Click)
-    return 1;
-  if (event.event_type == domapi::EventType::DblClick)
-    return 2;
-  return 0;
-}
-}  // namespace
-
 KeyboardEventInit::KeyboardEventInit(const domapi::KeyboardEvent& event)
     : alt_key_(event.alt_key), ctrl_key_(event.control_key),
       key_code_(event.key_code), location_(event.location),

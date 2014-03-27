@@ -19,11 +19,13 @@
 #include "evita/dom/forms/checkbox_control.h"
 #include "evita/dom/forms/label_control.h"
 #include "evita/dom/forms/radio_button_control.h"
+#include "evita/dom/forms/text_field_control.h"
 #include "evita/dom/lock.h"
 #include "evita/ui/controls/button_control.h"
 #include "evita/ui/controls/checkbox_control.h"
 #include "evita/ui/controls/label_control.h"
 #include "evita/ui/controls/radio_button_control.h"
+#include "evita/ui/controls/text_field_control.h"
 #include "evita/ui/root_widget.h"
 #include "evita/ui/system_metrics.h"
 #include "evita/views/forms/form_control_controller.h"
@@ -221,6 +223,46 @@ void RadioButtonImporter::UpdateWidget(ui::Widget* widget) {
   SetRect(radio_button_, radio_button_widget);
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// TextFieldImporter
+//
+class TextFieldImporter : public ControlImporter {
+  private: const dom::TextFieldControl* const text_field_;
+
+  public: TextFieldImporter(const dom::TextFieldControl* text_field);
+  public: virtual ~TextFieldImporter() = default;
+
+  // ControlImporter
+  private: virtual ui::Widget* CreateWidget() override;
+  private: virtual void UpdateWidget(ui::Widget* widget) override;
+
+  DISALLOW_COPY_AND_ASSIGN(TextFieldImporter);
+};
+
+TextFieldImporter::TextFieldImporter(const dom::TextFieldControl* text_field)
+    : text_field_(text_field) {
+}
+
+ui::Widget* TextFieldImporter::CreateWidget() {
+  auto const widget = new ui::TextFieldControl(
+      new FormControlController(text_field_->event_target_id()),
+      text_field_->value(), ComputeStyle());
+  SetRect(text_field_, widget);
+  return widget;
+}
+
+void TextFieldImporter::UpdateWidget(ui::Widget* widget) {
+  auto const text_field_widget = widget->as<ui::TextFieldControl>();
+  text_field_widget->set_style(ComputeStyle());
+  text_field_widget->set_text(text_field_->value());
+  SetRect(text_field_, text_field_widget);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// ControlImporter
+//
 ControlImporter* ControlImporter::Create(const dom::FormControl* control) {
   if (auto const button = control->as<dom::ButtonControl>())
     return new ButtonImporter(button);
@@ -230,6 +272,8 @@ ControlImporter* ControlImporter::Create(const dom::FormControl* control) {
     return new LabelImporter(label);
   if (auto const radio_button = control->as<dom::RadioButtonControl>())
     return new RadioButtonImporter(radio_button);
+  if (auto const text_field = control->as<dom::TextFieldControl>())
+    return new TextFieldImporter(text_field);
   NOTREACHED() << "Unsupported form control " <<
       control->wrapper_info()->class_name();
   return nullptr;

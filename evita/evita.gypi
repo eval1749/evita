@@ -597,6 +597,7 @@
         'ui/controls/status_bar.cc',
         'ui/controls/table_control.cc',
         'ui/controls/table_control_observer.cc',
+        'ui/controls/text_field_control.cc',
 
         'ui/root_widget.cc',
         'ui/system_metrics.cc',

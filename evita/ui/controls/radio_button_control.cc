@@ -56,13 +56,15 @@ void RadioButtonControl::OnDraw(gfx::Graphics* gfx) {
       break;
     case Control::State::Highlight:
       (*gfx)->FillEllipse(ellipse,
-          gfx::Brush(*gfx, gfx::ColorF(style_.highlight, 0.5)));
-      (*gfx)->DrawEllipse(ellipse, gfx::Brush(*gfx, style_.highlight));
+          gfx::Brush(*gfx, gfx::ColorF(style_.highlight, 0.1)));
+      (*gfx)->DrawEllipse(ellipse,
+          gfx::Brush(*gfx, style_.highlight));
       break;
     case Control::State::Hover:
       (*gfx)->FillEllipse(ellipse,
           gfx::Brush(*gfx, gfx::ColorF(style_.hotlight, 0.1f)));
-      (*gfx)->DrawEllipse(ellipse, gfx::Brush(*gfx, style_.highlight));
+      (*gfx)->DrawEllipse(ellipse,
+          gfx::Brush(*gfx, style_.hotlight));
       break;
   }
   gfx->Flush();

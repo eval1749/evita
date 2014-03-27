@@ -79,15 +79,15 @@ void ButtonControl::Renderer::Render(gfx::Graphics* gfx,
       break;
     case Control::State::Highlight:
       gfx->FillRectangle(
-          gfx::Brush(*gfx, gfx::ColorF(style_.highlight, 0.5f)),
+          gfx::Brush(*gfx, gfx::ColorF(style_.highlight, 0.1f)),
           frame_rect);
       gfx->DrawRectangle(gfx::Brush(*gfx, style_.highlight), frame_rect);
       break;
     case Control::State::Hover:
       gfx->FillRectangle(
-          gfx::Brush(*gfx, gfx::ColorF(style_.highlight, 0.1f)),
+          gfx::Brush(*gfx, gfx::ColorF(style_.hotlight, 0.1f)),
           frame_rect);
-      gfx->DrawRectangle(gfx::Brush(*gfx, style_.highlight), frame_rect);
+      gfx->DrawRectangle(gfx::Brush(*gfx, style_.hotlight), frame_rect);
       break;
   }
   gfx->Flush();

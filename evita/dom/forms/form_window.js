@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 (function() {
   /**
    * Default event handler.
@@ -9,14 +10,7 @@
    * @param {!Event} event.
    */
   FormWindow.handleEvent = function(event) {
-    switch (event.type) {
-      case Event.Names.IDLE:
-      case Event.Names.MOUSEMOVE:
-        break;
-      default:
-        console.log('FormWindow.handleEvent', event);
-        break;
-    }
+    Form.handleEvent.call(this.form, event);
     Window.handleEvent(event);
   };
 })();

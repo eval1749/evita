@@ -8,3 +8,9 @@
  * @param {string} text
  */
 function LabelControl(text) {}
+
+/**
+ * @override
+ * @return {boolean}
+ */
+LabelControl.prototype.canFocus = function() {};

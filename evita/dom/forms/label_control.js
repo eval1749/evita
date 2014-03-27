@@ -3,6 +3,13 @@
 // found in the LICENSE file.
 
 /**
+ * @return {boolean}
+ */
+global.LabelControl.prototype.canFocus = function() {
+  return false;
+};
+
+/**
  * @param {!Event} event
  * Default event handler.
  */

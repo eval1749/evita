@@ -34,6 +34,11 @@ FormControl.prototype.addEventListener = function(type, listener,
                                                   opt_capture) {};
 
 /**
+ * @return {boolean}
+ */
+FormControl.prototype.canFocus = function() {};
+
+/**
  * @param {!Event} event
  */
 FormControl.prototype.dispatchEvent = function(event) {};

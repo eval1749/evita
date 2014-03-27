@@ -47,7 +47,7 @@ class ControlImporter {
   public: static ControlImporter* Create(const dom::FormControl* control);
 
   protected: ui::Control::Style ComputeStyle() const;
-  public: virtual ui::Widget* CreateWidget() = 0;
+  public: virtual ui::Control* CreateWidget() = 0;
   protected: void SetRect(const dom::FormControl* control, ui::Widget* widget);
   public: virtual void UpdateWidget(ui::Widget* widget) = 0;
 
@@ -89,7 +89,7 @@ class ButtonImporter : public ControlImporter {
   public: virtual ~ButtonImporter() = default;
 
   // ControlImporter
-  private: virtual ui::Widget* CreateWidget() override;
+  private: virtual ui::Control* CreateWidget() override;
   private: virtual void UpdateWidget(ui::Widget* widget) override;
 
   DISALLOW_COPY_AND_ASSIGN(ButtonImporter);
@@ -99,7 +99,7 @@ ButtonImporter::ButtonImporter(const dom::ButtonControl* button)
     : button_(button) {
 }
 
-ui::Widget* ButtonImporter::CreateWidget() {
+ui::Control* ButtonImporter::CreateWidget() {
   auto const widget = new ui::ButtonControl(
       new FormControlController(button_->event_target_id()),
       button_->text(), ComputeStyle());
@@ -125,7 +125,7 @@ class CheckboxImporter : public ControlImporter {
   public: virtual ~CheckboxImporter() = default;
 
   // ControlImporter
-  private: virtual ui::Widget* CreateWidget() override;
+  private: virtual ui::Control* CreateWidget() override;
   private: virtual void UpdateWidget(ui::Widget* widget) override;
 
   DISALLOW_COPY_AND_ASSIGN(CheckboxImporter);
@@ -135,7 +135,7 @@ CheckboxImporter::CheckboxImporter(const dom::CheckboxControl* checkbox)
     : checkbox_(checkbox) {
 }
 
-ui::Widget* CheckboxImporter::CreateWidget() {
+ui::Control* CheckboxImporter::CreateWidget() {
   auto const widget = new ui::CheckboxControl(
       new FormControlController(checkbox_->event_target_id()),
       checkbox_->checked(), ComputeStyle());
@@ -161,7 +161,7 @@ class LabelImporter : public ControlImporter {
   public: virtual ~LabelImporter() = default;
 
   // ControlImporter
-  private: virtual ui::Widget* CreateWidget() override;
+  private: virtual ui::Control* CreateWidget() override;
   private: virtual void UpdateWidget(ui::Widget* widget) override;
 
   DISALLOW_COPY_AND_ASSIGN(LabelImporter);
@@ -171,7 +171,7 @@ LabelImporter::LabelImporter(const dom::LabelControl* label)
     : label_(label) {
 }
 
-ui::Widget* LabelImporter::CreateWidget() {
+ui::Control* LabelImporter::CreateWidget() {
   auto const widget = new ui::LabelControl(
       new FormControlController(label_->event_target_id()),
       label_->text(), ComputeStyle());
@@ -197,7 +197,7 @@ class RadioButtonImporter : public ControlImporter {
   public: virtual ~RadioButtonImporter() = default;
 
   // ControlImporter
-  private: virtual ui::Widget* CreateWidget() override;
+  private: virtual ui::Control* CreateWidget() override;
   private: virtual void UpdateWidget(ui::Widget* widget) override;
 
   DISALLOW_COPY_AND_ASSIGN(RadioButtonImporter);
@@ -208,7 +208,7 @@ RadioButtonImporter::RadioButtonImporter(
     : radio_button_(radio_button) {
 }
 
-ui::Widget* RadioButtonImporter::CreateWidget() {
+ui::Control* RadioButtonImporter::CreateWidget() {
   auto const widget = new ui::RadioButtonControl(
       new FormControlController(radio_button_->event_target_id()),
       radio_button_->checked(), ComputeStyle());
@@ -234,7 +234,7 @@ class TextFieldImporter : public ControlImporter {
   public: virtual ~TextFieldImporter() = default;
 
   // ControlImporter
-  private: virtual ui::Widget* CreateWidget() override;
+  private: virtual ui::Control* CreateWidget() override;
   private: virtual void UpdateWidget(ui::Widget* widget) override;
 
   DISALLOW_COPY_AND_ASSIGN(TextFieldImporter);
@@ -244,7 +244,7 @@ TextFieldImporter::TextFieldImporter(const dom::TextFieldControl* text_field)
     : text_field_(text_field) {
 }
 
-ui::Widget* TextFieldImporter::CreateWidget() {
+ui::Control* TextFieldImporter::CreateWidget() {
   auto const widget = new ui::TextFieldControl(
       new FormControlController(text_field_->event_target_id()),
       text_field_->value(), ComputeStyle());
@@ -288,7 +288,7 @@ ControlImporter* ControlImporter::Create(const dom::FormControl* control) {
 class FormWindow::FormViewModel final : private dom::FormObserver  {
   private: bool dirty_;
   private: const dom::Form* const form_;
-  private: std::unordered_map<domapi::EventTargetId, ui::Widget*> map_;
+  private: std::unordered_map<domapi::EventTargetId, ui::Control*> map_;
   private: FormWindow* const window_;
 
   public: FormViewModel(const dom::Form* form, FormWindow* window);
@@ -318,11 +318,22 @@ FormWindow::FormViewModel::~FormViewModel() {
 void FormWindow::FormViewModel::Update() {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(dirty_);
-  std::unordered_set<ui::Widget*> children_to_remove;
+  std::unordered_set<ui::Control*> controls_to_remove;
+
+  // Temporary remove controls from window.
+  auto current_focus = static_cast<ui::Control*>(nullptr);
   while (auto const child = window_->first_child()) {
-    window_->RemoveChild(child);
-    children_to_remove.insert(child);
+    auto const control = child->as<ui::Control>();
+    if (!control)
+      continue;
+    if (control->has_focus())
+      current_focus = control;
+    window_->RemoveChild(control);
+    controls_to_remove.insert(control);
   }
+
+  // Get or create control from DOM form.
+  auto new_focus = static_cast<ui::Control*>(nullptr);
   for (auto control : form_->controls()) {
     std::unique_ptr<ControlImporter> importer(
         ControlImporter::Create(control));
@@ -331,15 +342,27 @@ void FormWindow::FormViewModel::Update() {
       auto const widget = importer->CreateWidget();
       map_[control->event_target_id()] = widget;
       widget->SetParentWidget(window_);
+      if (control == form_->focus_control())
+        new_focus = widget;
       continue;
     }
     auto const widget = it->second;
     window_->AppendChild(widget);
     importer->UpdateWidget(widget);
     window_->SchedulePaintInRect(widget->rect());
-    children_to_remove.erase(widget);
+    controls_to_remove.erase(widget);
+    if (control == form_->focus_control())
+      new_focus = widget;
   }
-  for (auto child : children_to_remove) {
+
+  // Move focus if needed
+  if (new_focus && new_focus != current_focus &&
+      (current_focus || window_->has_focus())) {
+    new_focus->RequestFocus();
+  }
+
+  // Destroy removed controls
+  for (auto child : controls_to_remove) {
     window_->SchedulePaintInRect(child->rect());
     child->DestroyWidget();
   }
@@ -392,25 +415,7 @@ bool FormWindow::OnIdle(int) {
     return true;
 
   model_->Update();
-  UpdateFocusControlIfNeeded();
   return false;
-}
-
-// Set first focusable control if no control has focus.
-void FormWindow::UpdateFocusControlIfNeeded() {
-  auto focusable = static_cast<ui::Control*>(nullptr);
-  for (auto const child : child_nodes()) {
-    auto const control = child->as<ui::Control>();
-    if (!control)
-      continue;
-    if (control->has_focus())
-      return;
-    if (!focusable && control->focusable())
-      focusable = control;
-  }
-  if (!focusable)
-    return;
-  focusable->RequestFocus();
 }
 
 // ui::SystemMetricsObserver
@@ -467,11 +472,6 @@ void FormWindow::DidResize() {
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   (*gfx_)->Clear(ui::SystemMetrics::instance()->bgcolor());
   Window::DidResize();
-}
-
-// Set first focusable control if no control has focus.
-void FormWindow::DidSetFocus() {
-  UpdateFocusControlIfNeeded();
 }
 
 LRESULT FormWindow::OnMessage(uint32_t const uMsg, WPARAM const wParam,

@@ -47,7 +47,6 @@ class FormWindow final : public views::Window,
 
   public: static bool DoIdle(int hint);
   private: bool OnIdle(int hint);
-  private: void UpdateFocusControlIfNeeded();
 
   // ui::SystemMetricsObserver
   private: virtual void DidChangeIconFont() override;
@@ -60,7 +59,6 @@ class FormWindow final : public views::Window,
   private: virtual void DidDestroyWidget() override;
   private: virtual void DidRealize() override;
   private: virtual void DidResize() override;
-  private: virtual void DidSetFocus() override;
   private: virtual LRESULT OnMessage(uint32_t message, WPARAM wParam,
                                      LPARAM lParam) override;
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;

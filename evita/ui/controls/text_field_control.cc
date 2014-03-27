@@ -9,7 +9,10 @@
 namespace ui {
 
 namespace {
-auto const margin_size = 2.0f;
+auto const padding_bottom = 1.0f;
+auto const padding_left = 5.0f;
+auto const padding_right = 5.0f;
+auto const padding_top = 1.0f;
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -19,14 +22,17 @@ auto const margin_size = 2.0f;
 class TextFieldControl::Renderer {
   private: gfx::RectF rect_;
   private: Style style_;
-  private: std::unique_ptr<gfx::TextLayout> text_layout_;
+  private: gfx::RectF layout_rect_;
   private: gfx::SizeF text_size_;
+  private: std::unique_ptr<gfx::TextLayout> text_layout_;
 
   public: Renderer(const base::string16& text, const Style& style,
                    const gfx::RectF& rect);
   public: ~Renderer();
 
-  public: void Render(gfx::Graphics* gfx, Control::State state) const;
+  public: void Render(gfx::Graphics* gfx, bool has_focus,
+                      const Selection& selection,
+                      Control::State state) const;
 
   DISALLOW_COPY_AND_ASSIGN(Renderer);
 };
@@ -40,10 +46,14 @@ std::unique_ptr<gfx::TextLayout> CreateTextLayout(const base::string16& text,
 }  // namespace
 
 TextFieldControl::Renderer::Renderer(const base::string16& text,
-                                  const Style& style,
-                                  const gfx::RectF& rect)
+                                     const Style& style,
+                                     const gfx::RectF& rect)
     : rect_(rect), style_(style),
-      text_layout_(CreateTextLayout(text, style, rect.size() - margin_size)) {
+      layout_rect_(rect.left + padding_left,
+                 rect.top + padding_top,
+                 rect.right - padding_right,
+                 rect.bottom - padding_bottom),
+      text_layout_(CreateTextLayout(text, style, layout_rect_.size())) {
   DWRITE_TEXT_METRICS metrics;
   COM_VERIFY((*text_layout_)->GetMetrics(&metrics));
   // Event after trimming of |text_|, it may not fit into line. Although,
@@ -54,29 +64,66 @@ TextFieldControl::Renderer::Renderer(const base::string16& text,
 TextFieldControl::Renderer::~Renderer() {
 }
 
-void TextFieldControl::Renderer::Render(gfx::Graphics* gfx,
-                                     Control::State state) const {
+void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
+                                        const Selection& selection,
+                                        Control::State state) const {
   if (!rect_)
     return;
 
   gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect_);
 
+  // Render frame
   const auto frame_rect = rect_;
   gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
   gfx->DrawRectangle(gfx::Brush(*gfx, style_.shadow), frame_rect);
 
-  {
+  // Render text
     auto const offset = (frame_rect.size() - text_size_) / 2.0f;
-    gfx::PointF text_origin(frame_rect.left + margin_size,
-                            frame_rect.top + offset.height);
+    gfx::PointF text_origin(layout_rect_.left,
+                            layout_rect_.top + offset.height);
+  {
     gfx::Brush text_brush(*gfx, state == State::Disabled ? style_.gray_text :
                                                            style_.color);
-    const auto text_rect = rect_ - margin_size;
-    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, text_rect);
+    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, layout_rect_);
     (*gfx)->DrawTextLayout(text_origin, *text_layout_, text_brush,
                            D2D1_DRAW_TEXT_OPTIONS_CLIP);
   }
 
+  // Render selection
+  if (selection.start != selection.end) {
+    DWRITE_HIT_TEST_METRICS metrics;
+    uint32_t num_metrics = 0;
+    COM_VERIFY((*text_layout_)->HitTestTextRange(
+        static_cast<uint32_t>(selection.start),
+        static_cast<uint32_t>(selection.end - selection.start),
+        text_origin.x, text_origin.y,
+        &metrics, 1u, &num_metrics));
+    if (num_metrics == 1) {
+      auto const fill_color = has_focus ? style_.highlight : style_.gray_text;
+      gfx->FillRectangle(
+        gfx::Brush(*gfx, gfx::ColorF(fill_color, 0.3f)),
+        gfx::RectF(gfx::PointF(metrics.left, metrics.top),
+                   gfx::SizeF(metrics.width, metrics.height)));
+    }
+  }
+
+  // Render caret
+  if (has_focus) {
+    auto caret_x = 0.0f;
+    auto caret_y = 0.0f;
+    DWRITE_HIT_TEST_METRICS metrics;
+    auto use_start = selection.start == selection.end ||
+                     selection.start_is_active;
+    COM_VERIFY((*text_layout_)->HitTestTextPosition(
+        static_cast<uint32_t>(use_start ? selection.start : selection.end - 1),
+        !use_start, &caret_x, &caret_y, &metrics));
+    const auto caret_left_top = gfx::PointF(caret_x, caret_y) + text_origin;
+    (*gfx)->DrawLine(caret_left_top,
+                     caret_left_top + gfx::SizeF(0.0f, metrics.height),
+                     gfx::Brush(*gfx, gfx::ColorF(style_.color)));
+  }
+
+  // Render state
   switch (state) {
     case Control::State::Disabled:
       gfx->FillRectangle(
@@ -99,14 +146,35 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx,
 
 //////////////////////////////////////////////////////////////////////
 //
+// TextFieldControl::Selection
+//
+bool TextFieldControl::Selection::operator==(const Selection& other) const {
+  return end == other.end && start == other.start &&
+         start_is_active == other.start_is_active;
+}
+
+bool TextFieldControl::Selection::operator!=(const Selection& other) const {
+  return !operator==(other);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // TextFieldControl
 //
 TextFieldControl::TextFieldControl(ControlController* controller,
-                           const base::string16& text, const Style& style)
-    : Control(controller), style_(style), text_(text) {
+                                   const Selection& selection,
+                                   const base::string16& text,
+                                   const Style& style)
+    : Control(controller), selection_(selection), style_(style), text_(text) {
 }
 
 TextFieldControl::~TextFieldControl() {
+}
+
+void TextFieldControl::set_selection(const Selection& new_selection) {
+  if (selection_ == new_selection)
+    return;
+  selection_ = new_selection;
 }
 
 void TextFieldControl::set_style(const Style& new_style) {
@@ -131,7 +199,7 @@ void TextFieldControl::DidResize() {
 void TextFieldControl::OnDraw(gfx::Graphics* gfx) {
   if (!renderer_)
     renderer_ = std::make_unique<Renderer>(text_, style_, gfx::RectF(rect()));
-  renderer_->Render(gfx, state());
+  renderer_->Render(gfx, has_focus(), selection_, state());
 }
 
 }  // namespace ui

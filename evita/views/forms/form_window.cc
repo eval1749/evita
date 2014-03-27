@@ -20,6 +20,7 @@
 #include "evita/dom/forms/label_control.h"
 #include "evita/dom/forms/radio_button_control.h"
 #include "evita/dom/forms/text_field_control.h"
+#include "evita/dom/forms/text_field_selection.h"
 #include "evita/dom/lock.h"
 #include "evita/ui/controls/button_control.h"
 #include "evita/ui/controls/checkbox_control.h"
@@ -233,6 +234,8 @@ class TextFieldImporter : public ControlImporter {
   public: TextFieldImporter(const dom::TextFieldControl* text_field);
   public: virtual ~TextFieldImporter() = default;
 
+  private: ui::TextFieldControl::Selection ImportSelection() const;
+
   // ControlImporter
   private: virtual ui::Control* CreateWidget() override;
   private: virtual void UpdateWidget(ui::Widget* widget) override;
@@ -244,16 +247,27 @@ TextFieldImporter::TextFieldImporter(const dom::TextFieldControl* text_field)
     : text_field_(text_field) {
 }
 
+ui::TextFieldControl::Selection TextFieldImporter::ImportSelection() const {
+  ui::TextFieldControl::Selection selection;
+  auto const dom_selection = text_field_->selection();
+  selection.end = dom_selection->end();
+  selection.start = dom_selection->start();
+  selection.start_is_active = dom_selection->start_is_active();
+  return selection;
+}
+
 ui::Control* TextFieldImporter::CreateWidget() {
   auto const widget = new ui::TextFieldControl(
       new FormControlController(text_field_->event_target_id()),
-      text_field_->value(), ComputeStyle());
+                                ImportSelection(), text_field_->value(),
+                                ComputeStyle());
   SetRect(text_field_, widget);
   return widget;
 }
 
 void TextFieldImporter::UpdateWidget(ui::Widget* widget) {
   auto const text_field_widget = widget->as<ui::TextFieldControl>();
+  text_field_widget->set_selection(ImportSelection());
   text_field_widget->set_style(ComputeStyle());
   text_field_widget->set_text(text_field_->value());
   SetRect(text_field_, text_field_widget);

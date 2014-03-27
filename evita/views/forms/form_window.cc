@@ -287,6 +287,7 @@ ControlImporter* ControlImporter::Create(const dom::FormControl* control) {
 //
 class FormWindow::FormViewModel final : private dom::FormObserver  {
   private: bool dirty_;
+  private: ui::Control* focus_control_;
   private: const dom::Form* const form_;
   private: std::unordered_map<domapi::EventTargetId, ui::Control*> map_;
   private: FormWindow* const window_;
@@ -295,6 +296,7 @@ class FormWindow::FormViewModel final : private dom::FormObserver  {
   public: virtual ~FormViewModel();
 
   public: bool dirty() const { return dirty_; }
+  public: ui::Control* focus_control() const { return focus_control_; }
 
   // Update DOM form control map
   public: void Update();
@@ -307,7 +309,7 @@ class FormWindow::FormViewModel final : private dom::FormObserver  {
 
 FormWindow::FormViewModel::FormViewModel(const dom::Form* form,
                                          FormWindow* window)
-    : dirty_(true), form_(form), window_(window) {
+    : dirty_(true), focus_control_(nullptr), form_(form), window_(window) {
   form_->AddObserver(this);
 }
 
@@ -333,7 +335,7 @@ void FormWindow::FormViewModel::Update() {
   }
 
   // Get or create control from DOM form.
-  auto new_focus = static_cast<ui::Control*>(nullptr);
+  focus_control_ = static_cast<ui::Control*>(nullptr);
   for (auto control : form_->controls()) {
     std::unique_ptr<ControlImporter> importer(
         ControlImporter::Create(control));
@@ -343,7 +345,7 @@ void FormWindow::FormViewModel::Update() {
       map_[control->event_target_id()] = widget;
       widget->SetParentWidget(window_);
       if (control == form_->focus_control())
-        new_focus = widget;
+        focus_control_ = widget;
       continue;
     }
     auto const widget = it->second;
@@ -352,13 +354,13 @@ void FormWindow::FormViewModel::Update() {
     window_->SchedulePaintInRect(widget->rect());
     controls_to_remove.erase(widget);
     if (control == form_->focus_control())
-      new_focus = widget;
+      focus_control_ = widget;
   }
 
   // Move focus if needed
-  if (new_focus && new_focus != current_focus &&
+  if (focus_control_ && focus_control_ != current_focus &&
       (current_focus || window_->has_focus())) {
-    new_focus->RequestFocus();
+    focus_control_->RequestFocus();
   }
 
   // Destroy removed controls
@@ -472,6 +474,15 @@ void FormWindow::DidResize() {
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   (*gfx_)->Clear(ui::SystemMetrics::instance()->bgcolor());
   Window::DidResize();
+}
+
+void FormWindow::DidSetFocus() {
+  Window::DidSetFocus();
+  if (!model_)
+    return;
+  DVLOG(0) << "set focus to " << model_->focus_control();
+  if (auto const focus_control = model_->focus_control())
+    focus_control->RequestFocus();
 }
 
 LRESULT FormWindow::OnMessage(uint32_t const uMsg, WPARAM const wParam,

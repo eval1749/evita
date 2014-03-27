@@ -76,6 +76,7 @@
         'dom/forms/label_control_unittest.cc',
         'dom/forms/radio_button_control_unittest.cc',
         'dom/forms/text_field_control_unittest.cc',
+        'dom/forms/text_field_selection_unittest.cc',
 
         'dom/file_path_unittest.cc',
         'dom/mock_io_delegate.cc',

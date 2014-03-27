@@ -28,6 +28,7 @@
 #include "evita/dom/forms/label_control.h"
 #include "evita/dom/forms/radio_button_control.h"
 #include "evita/dom/forms/text_field_control.h"
+#include "evita/dom/forms/text_field_selection.h"
 #include "evita/dom/file_path.h"
 #include "evita/dom/text/modes/config_mode.h"
 #include "evita/dom/text/modes/cxx_mode.h"
@@ -115,6 +116,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
             INSTALL(TextWindow);
           INSTALL(EditorWindow);
           INSTALL(FormWindow);
+    INSTALL(TextFieldSelection);
 
     INSTALL(Mode);
       INSTALL(ConfigMode);

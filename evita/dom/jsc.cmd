@@ -36,6 +36,7 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\forms\form_window_externs.js ^
   %externs_dir%\forms\radio_button_control_externs.js ^
   %externs_dir%\forms\text_field_control_externs.js ^
+  %externs_dir%\forms\text_field_selection_externs.js ^
   %externs_dir%\editor_externs.js ^
   %externs_dir%\file_path_externs.js ^
   %externs_dir%\js_console_externs.js ^

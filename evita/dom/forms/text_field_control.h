@@ -5,19 +5,27 @@
 
 #include "evita/dom/forms/form_control.h"
 
+#include "evita/gc/member.h"
+
 namespace dom {
+
+class TextFieldSelection;
 
 class TextFieldControl
     : public v8_glue::Scriptable<TextFieldControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(TextFieldControl);
 
   private: base::string16 value_;
+  private: gc::Member<TextFieldSelection> selection_;
 
   public: TextFieldControl(FormResourceId control_id);
   public: virtual ~TextFieldControl();
 
+  public: TextFieldSelection* selection() const { return selection_.get(); }
   public: const base::string16& value() const { return value_; }
   public: void set_value(const base::string16& value);
+
+  public: void DidChangeSelection();
 
   // EventTarget
   private: virtual bool DispatchEvent(Event* event) override;

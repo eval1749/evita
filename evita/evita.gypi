@@ -43,6 +43,7 @@
         'dom/forms/label_control_externs.js',
         'dom/forms/radio_button_control_externs.js',
         'dom/forms/text_field_control_externs.js',
+        'dom/forms/text_field_selection_externs.js',
 
         'dom/file_path_externs.js',
         'dom/js_console_externs.js',
@@ -90,6 +91,7 @@
         'dom/forms/label_control.js',
         'dom/forms/radio_button_control.js',
         'dom/forms/text_field_control.js',
+        'dom/forms/text_field_selection.js',
 
         'dom/text/modes/modes.js',
         'dom/os/file.js',
@@ -214,6 +216,7 @@
         'dom/forms/label_control.cc',
         'dom/forms/radio_button_control.cc',
         'dom/forms/text_field_control.cc',
+        'dom/forms/text_field_selection.cc',
 
         'dom/file_path.cc',
         'dom/global.cc',

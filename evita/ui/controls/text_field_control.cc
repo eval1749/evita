@@ -30,18 +30,22 @@ class TextFieldControl::Renderer {
                    const gfx::RectF& rect);
   public: ~Renderer();
 
+  private: gfx::PointF ComputeTextOrigin(const Selection& selection) const;
   public: void Render(gfx::Graphics* gfx, bool has_focus,
                       const Selection& selection,
                       Control::State state) const;
+  private: void RenderCaret(gfx::Graphics* gfx,
+                            const gfx::RectF& caret_rect) const;
 
   DISALLOW_COPY_AND_ASSIGN(Renderer);
 };
 
 namespace {
 std::unique_ptr<gfx::TextLayout> CreateTextLayout(const base::string16& text,
-    const TextFieldControl::Style& style, const gfx::SizeF& size) {
+    const TextFieldControl::Style& style, float height) {
   gfx::TextFormat text_format(style.font_family, style.font_size);
-  return text_format.CreateLayout(text, size);
+  const auto kHugeWidth = 1e6f;
+  return text_format.CreateLayout(text, gfx::SizeF(kHugeWidth, height));
 }
 }  // namespace
 
@@ -53,15 +57,36 @@ TextFieldControl::Renderer::Renderer(const base::string16& text,
                  rect.top + padding_top,
                  rect.right - padding_right,
                  rect.bottom - padding_bottom),
-      text_layout_(CreateTextLayout(text, style, layout_rect_.size())) {
+      text_layout_(CreateTextLayout(text, style, layout_rect_.height())) {
   DWRITE_TEXT_METRICS metrics;
   COM_VERIFY((*text_layout_)->GetMetrics(&metrics));
-  // Event after trimming of |text_|, it may not fit into line. Although,
-  // DCHECK_EQ(1u, metrics.lineCount);
+  DCHECK_EQ(1u, metrics.lineCount);
   text_size_ = gfx::SizeF(metrics.width, metrics.height);
 }
 
 TextFieldControl::Renderer::~Renderer() {
+}
+
+gfx::PointF TextFieldControl::Renderer::ComputeTextOrigin(
+    const Selection& selection) const {
+  auto const offset = (rect_.size() - text_size_) / 2.0f;
+  auto const text_origin_top = layout_rect_.top + offset.height;
+  if (text_size_.width <= layout_rect_.width()) {
+    // We can display whole text in |text_layout_|.
+    return gfx::PointF(layout_rect_.left, text_origin_top);
+  }
+
+  auto use_start = selection.start == selection.end ||
+                   selection.start_is_active;
+  auto caret_x = 0.0f;
+  auto caret_y = 0.0f;
+  DWRITE_HIT_TEST_METRICS metrics = {0};
+  COM_VERIFY((*text_layout_)->HitTestTextPosition(
+      static_cast<uint32_t>(use_start ? selection.start : selection.end - 1),
+      !use_start, &caret_x, &caret_y, &metrics));
+  if (caret_x <= layout_rect_.width())
+    return gfx::PointF(layout_rect_.left, text_origin_top);
+  return gfx::PointF(layout_rect_.width() - caret_x, text_origin_top);
 }
 
 void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
@@ -78,9 +103,7 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
   gfx->DrawRectangle(gfx::Brush(*gfx, style_.shadow), frame_rect);
 
   // Render text
-    auto const offset = (frame_rect.size() - text_size_) / 2.0f;
-    gfx::PointF text_origin(layout_rect_.left,
-                            layout_rect_.top + offset.height);
+  const auto text_origin = ComputeTextOrigin(selection);
   {
     gfx::Brush text_brush(*gfx, state == State::Disabled ? style_.gray_text :
                                                            style_.color);
@@ -89,8 +112,21 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
                            D2D1_DRAW_TEXT_OPTIONS_CLIP);
   }
 
-  // Render selection
-  if (selection.start != selection.end) {
+  // Render caret or selection range
+  if (selection.start == selection.end) {
+    if (has_focus) {
+      auto caret_x = 0.0f;
+      auto caret_y = 0.0f;
+      auto const is_trailing = false;
+      DWRITE_HIT_TEST_METRICS metrics;
+      COM_VERIFY((*text_layout_)->HitTestTextPosition(
+          static_cast<uint32_t>(selection.start), is_trailing,
+          &caret_x, &caret_y, &metrics));
+      const auto caret_left_top = gfx::PointF(caret_x, caret_y) + text_origin;
+      RenderCaret(gfx, gfx::RectF(caret_left_top,
+                                  gfx::SizeF(1.0f, metrics.height)));
+    }
+  } else {
     DWRITE_HIT_TEST_METRICS metrics;
     uint32_t num_metrics = 0;
     COM_VERIFY((*text_layout_)->HitTestTextRange(
@@ -98,29 +134,20 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
         static_cast<uint32_t>(selection.end - selection.start),
         text_origin.x, text_origin.y,
         &metrics, 1u, &num_metrics));
-    if (num_metrics == 1) {
-      auto const fill_color = has_focus ? style_.highlight : style_.gray_text;
-      gfx->FillRectangle(
-        gfx::Brush(*gfx, gfx::ColorF(fill_color, 0.3f)),
-        gfx::RectF(gfx::PointF(metrics.left, metrics.top),
-                   gfx::SizeF(metrics.width, metrics.height)));
+    DCHECK_EQ(1u, num_metrics);
+    auto const fill_color = has_focus ? style_.highlight : style_.gray_text;
+    const auto range_rect = gfx::RectF(
+        gfx::PointF(metrics.left, metrics.top),
+        gfx::SizeF(metrics.width, metrics.height));
+    gfx->FillRectangle(gfx::Brush(*gfx, gfx::ColorF(fill_color, 0.3f)),
+                       range_rect);
+    if (has_focus) {
+      RenderCaret(gfx, gfx::RectF(
+          selection.start_is_active ?
+              range_rect.left_top() :
+              gfx::PointF(range_rect.right, range_rect.top),
+          gfx::SizeF(1.0f, metrics.height)));
     }
-  }
-
-  // Render caret
-  if (has_focus) {
-    auto caret_x = 0.0f;
-    auto caret_y = 0.0f;
-    DWRITE_HIT_TEST_METRICS metrics;
-    auto use_start = selection.start == selection.end ||
-                     selection.start_is_active;
-    COM_VERIFY((*text_layout_)->HitTestTextPosition(
-        static_cast<uint32_t>(use_start ? selection.start : selection.end - 1),
-        !use_start, &caret_x, &caret_y, &metrics));
-    const auto caret_left_top = gfx::PointF(caret_x, caret_y) + text_origin;
-    (*gfx)->DrawLine(caret_left_top,
-                     caret_left_top + gfx::SizeF(0.0f, metrics.height),
-                     gfx::Brush(*gfx, gfx::ColorF(style_.color)));
   }
 
   // Render state
@@ -142,6 +169,14 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
       break;
   }
   gfx->Flush();
+}
+
+void TextFieldControl::Renderer::RenderCaret(
+    gfx::Graphics* gfx, const gfx::RectF& caret_rect) const {
+  // TODO(yosi) We should ask global caret controller for blinking caret.
+  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, caret_rect);
+  gfx::Brush caret_brush(*gfx, gfx::ColorF(style_.color));
+  (*gfx)->DrawRectangle(caret_rect, caret_brush);
 }
 
 //////////////////////////////////////////////////////////////////////

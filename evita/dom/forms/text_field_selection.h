@@ -17,29 +17,22 @@ class TextFieldSelection : public v8_glue::Scriptable<TextFieldSelection> {
   DECLARE_SCRIPTABLE_OBJECT(TextFieldSelection);
 
   private: gc::Member<TextFieldControl> control_;
-  private: int end_;
-  private: int start_;
-  private: bool start_is_active_;
+  private: int anchor_offset_;
+  private: int focus_offset_;
 
   public: TextFieldSelection(TextFieldControl* control);
   public: virtual ~TextFieldSelection();
 
   public: TextFieldControl* control() const { return control_.get(); }
-  public: int end() const { return end_; }
-  public: void set_end(int new_end);
-  public: int start() const { return start_; }
-  public: void set_start(int new_start);
-  public: bool start_is_active() const { return start_is_active_; }
-  public: void set_start_is_active(bool new_start_is_active);
+  public: int anchor_offset() const { return anchor_offset_; }
+  public: void set_anchor_offset(int new_anchor_offset);
+  public: int focus_offset() const { return focus_offset_; }
+  public: void set_focus_offset(int new_focus_offset);
 
   // Called when value of text field control changed.
   public: void DidChangeValue();
 
-  // API for changing range of selection.
-  public: void SetRange(int start, int end,
-                        v8_glue::Optional<bool> opt_start_is_actie);
-
-  private: bool ValidateOffset(int offset);
+  private: int NormalizeOffset(int offset) const;
 
   DISALLOW_COPY_AND_ASSIGN(TextFieldSelection);
 };

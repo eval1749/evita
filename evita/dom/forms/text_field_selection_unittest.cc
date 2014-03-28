@@ -19,30 +19,38 @@ TEST_F(TextFieldSelectionTest, ctor) {
   EXPECT_SCRIPT_VALID("var sample = new TextFieldControl(123);"
                       "var selection = sample.selection;");
   EXPECT_SCRIPT_TRUE("selection instanceof TextFieldSelection");
-  EXPECT_SCRIPT_EQ("0", "selection.end");
-  EXPECT_SCRIPT_EQ("0", "selection.start");
-  EXPECT_SCRIPT_EQ("false", "selection.startIsActive");
+  EXPECT_SCRIPT_EQ("0", "selection.anchorOffset");
+  EXPECT_SCRIPT_EQ("0", "selection.focusOffset");
 }
 
-TEST_F(TextFieldSelectionTest, setRange) {
+TEST_F(TextFieldSelectionTest, collapseTo) {
   EXPECT_SCRIPT_VALID("var sample = new TextFieldControl(123);"
                       "sample.value = '0123456789';"
                       "var selection = sample.selection;"
-                      "selection.setRange(4, 7, true)");
-  EXPECT_SCRIPT_EQ("7", "selection.end");
-  EXPECT_SCRIPT_EQ("4", "selection.start");
-  EXPECT_SCRIPT_EQ("true", "selection.startIsActive");
+                      "selection.collapseTo(3)");
+  EXPECT_SCRIPT_EQ("3,3",
+      "selection.anchorOffset + ',' + selection.focusOffset");
+  EXPECT_SCRIPT_VALID("selection.focusOffset = 5; selection.collapseTo(8);");
+  EXPECT_SCRIPT_EQ("8,8",
+      "selection.anchorOffset+ ',' + selection.focusOffset");
+}
 
-  EXPECT_SCRIPT_EQ("5", "selection.start = 5; selection.start");
-  EXPECT_SCRIPT_EQ("8", "selection.end = 8; selection.end");
-  EXPECT_SCRIPT_EQ("false", "selection.startIsActive= false;"
-                            "selection.startIsActive");
+TEST_F(TextFieldSelectionTest, expandTo) {
+  EXPECT_SCRIPT_VALID(
+      "var sample = new TextFieldControl(123);"
+      "sample.value = '0123456789';"
+      "var selection = sample.selection;"
+      "function testIt(anchorOffset, focusOffset, offset) {"
+      "  selection.anchorOffset = anchorOffset;"
+      "  selection.focsuOffset = focusOffset;"
+      "  selection.extendTo(offset);"
+      "  return selection.anchorOffset + ',' + selection.focusOffset;"
+      "}");
+  EXPECT_SCRIPT_EQ("4,2", "testIt(4, 4, 2)") << "Extend to left";
+  EXPECT_SCRIPT_EQ("4,8", "testIt(4, 4, 8)") << "Extend to right";
 
-  EXPECT_SCRIPT_EQ("4", "selection.end = 4; selection.start") <<
-      "Collapse to start if end is less than start.";
-
-  EXPECT_SCRIPT_EQ("7", "selection.start = 7; selection.end") <<
-      "Collapse to end if start is grater than start.";
+  EXPECT_SCRIPT_EQ("4,2", "testIt(4, 6, 2)") << "Extend to left";
+  EXPECT_SCRIPT_EQ("4,8", "testIt(4, 6, 8)") << "Extend to right";
 }
 
 }  // namespace

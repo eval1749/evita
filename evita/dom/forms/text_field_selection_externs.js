@@ -8,13 +8,19 @@
 function TextFieldSelection() {}
 
 /** @type {number} */
-TextFieldSelection.prototype.end;
+TextFieldSelection.prototype.anchorOffset;
 
 /** @type {number} */
-TextFieldSelection.prototype.start;
+TextFieldSelection.prototype.focusOffset;
 
-/** @type {boolean} */
-TextFieldSelection.prototype.startIsActive;
+/** @return {boolean} */
+TextFieldSelection.prototype.collapsed = function() {};
+
+/** @param {number} offset */
+TextFieldSelection.prototype.collapseTo = function(offset) {};
+
+/** @param {number} offset */
+TextFieldSelection.prototype.extendTo = function(offset) {};
 
 /**
  * @param {number} start

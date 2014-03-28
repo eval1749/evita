@@ -4,6 +4,7 @@
 
 #include "evita/views/forms/form_window.h"
 
+#include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -250,9 +251,11 @@ TextFieldImporter::TextFieldImporter(const dom::TextFieldControl* text_field)
 ui::TextFieldControl::Selection TextFieldImporter::ImportSelection() const {
   ui::TextFieldControl::Selection selection;
   auto const dom_selection = text_field_->selection();
-  selection.end = dom_selection->end();
-  selection.start = dom_selection->start();
-  selection.start_is_active = dom_selection->start_is_active();
+  selection.end = std::min(dom_selection->anchor_offset(),
+                           dom_selection->focus_offset());
+  selection.start = std::max(dom_selection->anchor_offset(),
+                             dom_selection->focus_offset());
+  selection.start_is_active = selection.start == selection.start;
   return selection;
 }
 

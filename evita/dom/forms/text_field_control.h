@@ -21,6 +21,7 @@ class TextFieldControl
   public: TextFieldControl(FormResourceId control_id);
   public: virtual ~TextFieldControl();
 
+  public: size_t length() const { return value_.length(); }
   public: TextFieldSelection* selection() const { return selection_.get(); }
   public: const base::string16& value() const { return value_; }
   public: void set_value(const base::string16& value);

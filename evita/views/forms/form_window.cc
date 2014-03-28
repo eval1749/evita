@@ -251,11 +251,8 @@ TextFieldImporter::TextFieldImporter(const dom::TextFieldControl* text_field)
 ui::TextFieldControl::Selection TextFieldImporter::ImportSelection() const {
   ui::TextFieldControl::Selection selection;
   auto const dom_selection = text_field_->selection();
-  selection.end = std::min(dom_selection->anchor_offset(),
-                           dom_selection->focus_offset());
-  selection.start = std::max(dom_selection->anchor_offset(),
-                             dom_selection->focus_offset());
-  selection.start_is_active = selection.start == selection.start;
+  selection.anchor_offset= static_cast<size_t>(dom_selection->anchor_offset());
+  selection.focus_offset= static_cast<size_t>(dom_selection->focus_offset());
   return selection;
 }
 

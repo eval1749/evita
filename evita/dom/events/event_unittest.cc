@@ -42,4 +42,16 @@ TEST_F(EventTest, initEvent) {
   EXPECT_SCRIPT_EQ("foo", "event.type");
 }
 
+TEST_F(EventTest, preventDefault) {
+  EXPECT_SCRIPT_VALID(
+    "function testIt(cancelable) {"
+    "   var event = new Event('foo', {cancelable: cancelable});"
+    "   event.preventDefault();"
+    "   return event.defaultPrevented;"
+    "}");
+  EXPECT_SCRIPT_TRUE("testIt(true)");
+  EXPECT_SCRIPT_FALSE("testIt(false)") <<
+      "We can't prevent default if event isn't cancelable.";
+}
+
 }  // namespace

@@ -31,3 +31,6 @@ Event.prototype.type;
  * @param {boolean} cancelable
  */
 Event.prototype.initEvent = function(type, bubbles, cancelable) {};
+
+/** @type {function()} */
+Event.prototype.preventDefault = function() {}

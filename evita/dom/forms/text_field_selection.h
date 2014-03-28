@@ -23,6 +23,7 @@ class TextFieldSelection : public v8_glue::Scriptable<TextFieldSelection> {
   public: TextFieldSelection(TextFieldControl* control);
   public: virtual ~TextFieldSelection();
 
+  public: bool collapsed() const { return anchor_offset_ == focus_offset_; }
   public: TextFieldControl* control() const { return control_.get(); }
   public: int anchor_offset() const { return anchor_offset_; }
   public: void set_anchor_offset(int new_anchor_offset);

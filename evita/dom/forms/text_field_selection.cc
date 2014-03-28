@@ -37,6 +37,7 @@ class TextFieldSelectionClass : public v8_glue::WrapperInfo {
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
+        .SetProperty("collapsed", &TextFieldSelection::collapsed)
         .SetProperty("control", &TextFieldSelection::control)
         .SetProperty("anchorOffset", &TextFieldSelection::anchor_offset,
             &TextFieldSelection::set_anchor_offset)

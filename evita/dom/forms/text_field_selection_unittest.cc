@@ -20,6 +20,7 @@ TEST_F(TextFieldSelectionTest, ctor) {
                       "var selection = sample.selection;");
   EXPECT_SCRIPT_TRUE("selection instanceof TextFieldSelection");
   EXPECT_SCRIPT_EQ("0", "selection.anchorOffset");
+  EXPECT_SCRIPT_EQ("true", "selection.collapsed");
   EXPECT_SCRIPT_EQ("0", "selection.end");
   EXPECT_SCRIPT_EQ("0", "selection.focusOffset");
   EXPECT_SCRIPT_EQ("0", "selection.start");
@@ -54,6 +55,7 @@ TEST_F(TextFieldSelectionTest, extendTo) {
 
   EXPECT_SCRIPT_EQ("4,2 2,4", "testIt(4, 6, 2)") << "Extend to left";
   EXPECT_SCRIPT_EQ("4,8 4,8", "testIt(4, 6, 8)") << "Extend to right";
+  EXPECT_SCRIPT_FALSE("selection.collapsed");
 }
 
 }  // namespace

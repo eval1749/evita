@@ -109,7 +109,9 @@ global.Form.prototype.get = function(control_id) {
       case Event.Names.MOUSEMOVE:
         break;
       case Event.Names.KEYDOWN:
-        handleKeyDown(this, /** @type {!KeyboardEvent} */(event));
+        if (!event.defaultPrevented)
+          handleKeyDown(this, /** @type {!KeyboardEvent} */(event));
+        break;
       default:
         console.log('Form.handleEvent', event);
         break;

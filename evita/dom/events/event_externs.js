@@ -7,10 +7,10 @@ Event.prototype.bubbles;
 /** @expose @type{boolean} */
 Event.prototype.cancelable;
 
-/** @expose @type{?Window} */
+/** @expose @type{?EventTarget} */
 Event.prototype.current_target;
 
-/** @expose @type{?Window} */
+/** @expose @type{boolean} */
 Event.prototype.defaultPrevented;
 
 /** @expose @type{Event.PhaseType} */

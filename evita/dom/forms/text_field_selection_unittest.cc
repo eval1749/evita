@@ -20,7 +20,9 @@ TEST_F(TextFieldSelectionTest, ctor) {
                       "var selection = sample.selection;");
   EXPECT_SCRIPT_TRUE("selection instanceof TextFieldSelection");
   EXPECT_SCRIPT_EQ("0", "selection.anchorOffset");
+  EXPECT_SCRIPT_EQ("0", "selection.end");
   EXPECT_SCRIPT_EQ("0", "selection.focusOffset");
+  EXPECT_SCRIPT_EQ("0", "selection.start");
 }
 
 TEST_F(TextFieldSelectionTest, collapseTo) {
@@ -35,7 +37,7 @@ TEST_F(TextFieldSelectionTest, collapseTo) {
       "selection.anchorOffset+ ',' + selection.focusOffset");
 }
 
-TEST_F(TextFieldSelectionTest, expandTo) {
+TEST_F(TextFieldSelectionTest, extendTo) {
   EXPECT_SCRIPT_VALID(
       "var sample = new TextFieldControl(123);"
       "sample.value = '0123456789';"
@@ -44,13 +46,14 @@ TEST_F(TextFieldSelectionTest, expandTo) {
       "  selection.anchorOffset = anchorOffset;"
       "  selection.focsuOffset = focusOffset;"
       "  selection.extendTo(offset);"
-      "  return selection.anchorOffset + ',' + selection.focusOffset;"
+      "  return selection.anchorOffset + ',' + selection.focusOffset +"
+      "         ' ' + selection.start + ',' + selection.end;"
       "}");
-  EXPECT_SCRIPT_EQ("4,2", "testIt(4, 4, 2)") << "Extend to left";
-  EXPECT_SCRIPT_EQ("4,8", "testIt(4, 4, 8)") << "Extend to right";
+  EXPECT_SCRIPT_EQ("4,2 2,4", "testIt(4, 4, 2)") << "Extend to left";
+  EXPECT_SCRIPT_EQ("4,8 4,8", "testIt(4, 4, 8)") << "Extend to right";
 
-  EXPECT_SCRIPT_EQ("4,2", "testIt(4, 6, 2)") << "Extend to left";
-  EXPECT_SCRIPT_EQ("4,8", "testIt(4, 6, 8)") << "Extend to right";
+  EXPECT_SCRIPT_EQ("4,2 2,4", "testIt(4, 6, 2)") << "Extend to left";
+  EXPECT_SCRIPT_EQ("4,8 4,8", "testIt(4, 6, 8)") << "Extend to right";
 }
 
 }  // namespace

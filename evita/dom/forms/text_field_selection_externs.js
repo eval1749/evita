@@ -10,8 +10,17 @@ function TextFieldSelection() {}
 /** @type {number} */
 TextFieldSelection.prototype.anchorOffset;
 
+/** @type {!TextFieldControl} */
+TextFieldSelection.prototype.control;
+
+/** @type {number} */
+TextFieldSelection.prototype.end;
+
 /** @type {number} */
 TextFieldSelection.prototype.focusOffset;
+
+/** @type {number} */
+TextFieldSelection.prototype.start;
 
 /** @return {boolean} */
 TextFieldSelection.prototype.collapsed = function() {};

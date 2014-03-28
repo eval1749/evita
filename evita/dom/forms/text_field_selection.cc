@@ -40,8 +40,10 @@ class TextFieldSelectionClass : public v8_glue::WrapperInfo {
         .SetProperty("control", &TextFieldSelection::control)
         .SetProperty("anchorOffset", &TextFieldSelection::anchor_offset,
             &TextFieldSelection::set_anchor_offset)
+        .SetProperty("end", &TextFieldSelection::end)
         .SetProperty("focusOffset", &TextFieldSelection::focus_offset,
-            &TextFieldSelection::set_focus_offset);
+            &TextFieldSelection::set_focus_offset)
+        .SetProperty("start", &TextFieldSelection::start);
   }
 
   DISALLOW_COPY_AND_ASSIGN(TextFieldSelectionClass);
@@ -70,12 +72,20 @@ void TextFieldSelection::set_anchor_offset(int anchor_offset) {
   control_->DidChangeSelection();
 }
 
+int TextFieldSelection::end() const {
+  return std::max(anchor_offset_, focus_offset_);
+}
+
 void TextFieldSelection::set_focus_offset(int focus_offset) {
   auto const new_focus_offset = NormalizeOffset(focus_offset);
   if (focus_offset_ == new_focus_offset)
     return;
   focus_offset_ = new_focus_offset;
   control_->DidChangeSelection();
+}
+
+int TextFieldSelection::start() const {
+  return std::min(anchor_offset_, focus_offset_);
 }
 
 void TextFieldSelection::DidChangeValue() {

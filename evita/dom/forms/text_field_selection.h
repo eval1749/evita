@@ -26,8 +26,10 @@ class TextFieldSelection : public v8_glue::Scriptable<TextFieldSelection> {
   public: TextFieldControl* control() const { return control_.get(); }
   public: int anchor_offset() const { return anchor_offset_; }
   public: void set_anchor_offset(int new_anchor_offset);
+  public: int end() const;
   public: int focus_offset() const { return focus_offset_; }
   public: void set_focus_offset(int new_focus_offset);
+  public: int start() const;
 
   // Called when value of text field control changed.
   public: void DidChangeValue();

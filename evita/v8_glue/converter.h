@@ -3,6 +3,8 @@
 #if !defined(INCLUDE_evita_v8_glue_converter_h)
 #define INCLUDE_evita_v8_glue_converter_h
 
+#include <vector>
+
 #include "base/strings/string16.h"
 #include "evita/v8_glue/v8.h"
 BEGIN_V8_INCLUDE
@@ -10,6 +12,15 @@ BEGIN_V8_INCLUDE
 END_V8_INCLUDE
 
 namespace gin {
+
+// std::vecotr<uint_8>
+template<>
+struct Converter<std::vector<uint8_t>> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+                                    const std::vector<uint8_t>& vector);
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
+                     std::vector<uint8_t>* out);
+};
 
 template<>
 struct Converter<base::char16> {

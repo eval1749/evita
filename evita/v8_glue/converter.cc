@@ -3,12 +3,35 @@
 
 #include "evita/v8_glue/converter.h"
 
+#include "gin/array_buffer.h"
+
 namespace gin {
 
 using v8::Handle;
 using v8::Isolate;
 using v8::String;
 using v8::Value;
+
+v8::Handle<v8::Value> Converter<std::vector<uint8_t>>::ToV8(
+    v8::Isolate* isolate, const std::vector<uint8_t>& vector) {
+  auto const array_buffer = v8::ArrayBuffer::New(isolate, vector.size());
+  auto const data = v8::Uint8Array::New(array_buffer, 0, vector.size());
+  gin::ArrayBufferView view;
+  ::memcpy(view.bytes(), vector.data(), vector.size());
+  return data;
+}
+
+bool Converter<std::vector<uint8_t>>::FromV8(v8::Isolate* isolate,
+                                             v8::Handle<v8::Value> val,
+                                             std::vector<uint8_t>* out) {
+  gin::ArrayBufferView view;
+  if (!ConvertFromV8(isolate, val, &view))
+    return false;
+  std::vector<uint8_t> vector(view.num_bytes());
+  ::memcpy(&vector[0], view.bytes(), view.num_bytes());
+  *out = vector;
+  return true;
+}
 
 Handle<Value> Converter<base::char16>::ToV8(Isolate* isolate,
                                               base::char16 val) {

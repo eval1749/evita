@@ -212,16 +212,23 @@ void ScriptHost::OpenFile(WindowId window_id,
   runner()->Call(open_file, js_handler, js_filename);
 }
 
-void ScriptHost::ResetForTesting() {
-  DocumentSet::instance()->ResetForTesting();
-  EditorWindow::ResetForTesting();
-  Window::ResetForTesting();
+void ScriptHost::PlatformError(const char* name) {
+  auto const error = ::GetLastError();
+  DVLOG(0) << "PlatformError " << name << " erorr=" << error;
+  // TODO(yosi) Shoulw be Win32Error.
+  instance()->ThrowError(base::StringPrintf("%s error=%d", name, error));
 }
 
 void ScriptHost::PostTask(const tracked_objects::Location& from_here,
                                 const base::Closure& task) {
   DCHECK_EQ(message_loop_for_script_, base::MessageLoop::current());
   message_loop_for_script_->PostTask(from_here, task);
+}
+
+void ScriptHost::ResetForTesting() {
+  DocumentSet::instance()->ResetForTesting();
+  EditorWindow::ResetForTesting();
+  Window::ResetForTesting();
 }
 
 ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,

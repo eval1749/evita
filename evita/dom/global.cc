@@ -7,6 +7,9 @@
 #include "evita/dom/windows/document_window.h"
 #include "evita/dom/editor.h"
 #include "evita/dom/windows/editor_window.h"
+#include "evita/dom/clipboard/data_transfer.h"
+#include "evita/dom/clipboard/data_transfer_item.h"
+#include "evita/dom/clipboard/data_transfer_item_list.h"
 #include "evita/dom/encoding/text_decoder.h"
 #include "evita/dom/encoding/text_encoder.h"
 #include "evita/dom/events/document_event.h"
@@ -83,6 +86,11 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     v8::Context::Scope context_scope(context);
 
     #define INSTALL(name) v8_glue::Installer<name>::Run(isolate, global_templ)
+
+    // Clipboard
+    INSTALL(DataTransfer);
+    INSTALL(DataTransferItem);
+    INSTALL(DataTransferItemList);
   
     // Note: super class must be installed before subclass.
     INSTALL(Event);

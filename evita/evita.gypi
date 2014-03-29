@@ -181,6 +181,13 @@
         'dom/windows/document_window.cc',
         'dom/editor.cc',
         'dom/windows/editor_window.cc',
+
+        'dom/clipboard/clipboard.cc',
+        'dom/clipboard/data_transfer.cc',
+        'dom/clipboard/data_transfer_data.cc',
+        'dom/clipboard/data_transfer_item.cc',
+        'dom/clipboard/data_transfer_item_list.cc',
+
         'dom/encoding/text_decoder.cc',
         'dom/encoding/text_encoder.cc',
 

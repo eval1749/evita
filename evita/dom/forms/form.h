@@ -27,9 +27,11 @@ class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
 
   private: std::unordered_map<int, FormControl*> controls_;
   private: gc::Member<FormControl> focus_control_;
+  private: float height_;
   private: const base::string16 name_;
   private: mutable ObserverList<FormObserver> observers_;
   private: base::string16 title_;
+  private: float width_;
 
   public: Form(const base::string16& name);
   public: virtual ~Form();
@@ -42,9 +44,13 @@ class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
   public: FormControl* focus_control() const { return focus_control_.get(); }
   public: void set_focus_control(
       v8_glue::Nullable<FormControl> new_focus_control);
+  public: float height() const { return height_; }
+  public: void set_height(float new_height);
   public: const base::string16& name() const { return name_; }
   public: const base::string16& title() const { return title_; }
   public: void set_title(const base::string16& new_title);
+  public: float width() const { return width_; }
+  public: void set_width(float new_width);
 
   public: void AddFormControl(FormControl* control);
   public: void AddObserver(FormObserver* observer) const;

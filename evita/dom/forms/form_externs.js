@@ -16,11 +16,17 @@ Form.prototype.controls;
 /** @expose @type {?FormControl} */
 Form.prototype.focusControl;
 
+/** @expose @type {number} */
+Form.prototype.height;
+
 /** @expose @type {string} */
 Form.prototype.name;
 
 /** @expose @type {string} */
 Form.prototype.title;
+
+/** @expose @type {number} */
+Form.prototype.width;
 
 /**
  * @param {!FormControl} control

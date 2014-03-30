@@ -25,10 +25,12 @@ class FormTest : public dom::AbstractDomTest {
 TEST_F(FormTest, ctor) {
   EXPECT_SCRIPT_VALID("var sample = new Form('sample');");
   EXPECT_SCRIPT_TRUE("sample instanceof EventTarget");
+  EXPECT_SCRIPT_EQ("0", "sample.height");
   EXPECT_SCRIPT_EQ("0", "sample.controls.length");
   EXPECT_SCRIPT_EQ("sample", "sample.name");
   EXPECT_SCRIPT_TRUE("sample.focusControl == null");
   EXPECT_SCRIPT_TRUE("sample.title == ''");
+  EXPECT_SCRIPT_EQ("0", "sample.width");
 }
 
 TEST_F(FormTest, add) {
@@ -48,6 +50,12 @@ TEST_F(FormTest, focusControl) {
       "Set null to Form.protected.focusControl means the form doesn't have"
       " focus control.";
   EXPECT_SCRIPT_TRUE("sample.focusControl == null");
+}
+
+TEST_F(FormTest, height) {
+  EXPECT_SCRIPT_VALID("var sample = new Form('sample');"
+                      "sample.height = 123");
+  EXPECT_SCRIPT_EQ("123", "sample.height");
 }
 
 TEST_F(FormTest, title) {
@@ -70,6 +78,12 @@ TEST_F(FormTest, show) {
   EXPECT_SCRIPT_VALID("var sample = new Form('FindDialogBox');"
                       "sample.realize();"
                       "sample.show();");
+}
+
+TEST_F(FormTest, width) {
+  EXPECT_SCRIPT_VALID("var sample = new Form('sample');"
+                      "sample.width = 123");
+  EXPECT_SCRIPT_EQ("123", "sample.width");
 }
 
 TEST_F(FormTest, DispatchFormEvent) {

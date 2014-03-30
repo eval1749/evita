@@ -41,8 +41,10 @@ class FormClass :
         .SetProperty("controls", &Form::controls)
         .SetProperty("focusControl", &Form::focus_control,
                                      &Form::set_focus_control)
+        .SetProperty("height", &Form::height, &Form::set_height)
         .SetProperty("name", &Form::name)
         .SetProperty("title", &Form::title, &Form::set_title)
+        .SetProperty("width", &Form::width, &Form::set_width)
         .SetMethod("add", &Form::AddFormControl)
         .SetMethod("control", &Form::control)
         .SetMethod("realize", &Form::Realize)
@@ -59,7 +61,8 @@ class FormClass :
 //
 DEFINE_SCRIPTABLE_OBJECT(Form, FormClass);
 
-Form::Form(const base::string16& name) : name_(name) {
+Form::Form(const base::string16& name)
+    : height_(0.0f), name_(name), width_(0.0f) {
   if (name == L"FindDialogBox")
     ScriptHost::instance()->view_delegate()->CreateFindDialogBox(this);
 }
@@ -89,10 +92,24 @@ void Form::set_focus_control(
   FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 
+void Form::set_height(float new_height) {
+  if (height_ == new_height)
+    return;
+  height_ = new_height;
+  FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
+}
+
 void Form::set_title(const base::string16& new_title) {
   if (title_ == new_title)
     return;
   title_ = new_title;
+  FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
+}
+
+void Form::set_width(float new_width) {
+  if (width_ == new_width)
+    return;
+  width_ = new_width;
   FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 

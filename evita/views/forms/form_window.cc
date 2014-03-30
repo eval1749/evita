@@ -31,6 +31,8 @@
 #include "evita/ui/root_widget.h"
 #include "evita/ui/system_metrics.h"
 #include "evita/views/forms/form_control_controller.h"
+#include "evita/views/frame_list.h"
+#include "evita/vi_Frame.h"
 
 #define DEBUG_PAINT 0
 
@@ -307,6 +309,7 @@ class FormWindow::FormViewModel final : private dom::FormObserver  {
   private: ui::Control* focus_control_;
   private: const dom::Form* const form_;
   private: std::unordered_map<domapi::EventTargetId, ui::Control*> map_;
+  private: gfx::Size size_;
   private: base::string16 title_;
   private: FormWindow* const window_;
 
@@ -315,6 +318,7 @@ class FormWindow::FormViewModel final : private dom::FormObserver  {
 
   public: bool dirty() const { return dirty_; }
   public: ui::Control* focus_control() const { return focus_control_; }
+  public: const gfx::Size& size() const { return size_; }
   public: const base::string16& title() const { return title_; }
 
   // Update DOM form control map
@@ -340,6 +344,8 @@ void FormWindow::FormViewModel::Update() {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(dirty_);
 
+  size_ = gfx::Size(static_cast<int>(form_->width()),
+                    static_cast<int>(form_->height()));
   title_ = form_->title();
 
   // Temporary remove controls from window.
@@ -419,15 +425,17 @@ FormWindow::~FormWindow() {
 bool FormWindow::DoIdle(int hint) {
   bool more = false;
   for (auto widget : ui::RootWidget::instance()->child_nodes()) {
-    if (auto form_window = widget->as<views::FormWindow>())
-      more |= form_window->OnIdle(hint);
+    auto form_window = widget->as<views::FormWindow>();
+    if (!form_window || !form_window->is_realized() || !form_window->is_shown())
+      continue;
+    more |= form_window->OnIdle(hint);
   }
   return more;
 }
 
 bool FormWindow::OnIdle(int) {
-  if (!is_realized())
-    return false;
+  DCHECK(is_realized());
+  DCHECK(is_shown());
 
   if (!pending_update_rect_.empty()) {
     gfx::Rect rect;
@@ -443,6 +451,32 @@ bool FormWindow::OnIdle(int) {
     return true;
 
   model_->Update();
+
+  if (form_size_ != model_->size()) {
+    auto const first_time = form_size_.empty();
+    form_size_ = model_->size();
+    gfx::Rect windowRect;
+    if (first_time) {
+      ::GetWindowRect(FrameList::instance()->active_frame()->AssociatedHwnd(),
+                      &windowRect);
+      windowRect.left = windowRect.left +
+          (windowRect.width() - form_size_.cx) / 2;
+      windowRect.top = windowRect.top +
+          (windowRect.height() - form_size_.cy) / 2;
+    } else {
+      ::GetWindowRect(AssociatedHwnd(), &windowRect);
+    }
+    windowRect.right = windowRect.left + form_size_.cx;
+    windowRect.bottom = windowRect.top + form_size_.cy;
+    auto const dwExStyle = static_cast<DWORD>(
+        ::GetWindowLong(AssociatedHwnd(), GWL_EXSTYLE));
+    auto const dwStyle = static_cast<DWORD>(
+        ::GetWindowLong(AssociatedHwnd(), GWL_STYLE));
+    bool has_menu = false;
+    WIN32_VERIFY(::AdjustWindowRectEx(&windowRect, dwStyle, has_menu,
+                                      dwExStyle));
+    ResizeTo(windowRect);
+  }
 
   if (title_ != model_->title()) {
     title_ = model_->title();
@@ -468,17 +502,10 @@ void FormWindow::DidChangeSystemMetrics() {
 // ui::Widget
 void FormWindow::CreateNativeWindow() const {
   auto const dwExStyle = WS_EX_LAYERED | WS_EX_TOOLWINDOW;
-  auto const dwStyle = WS_POPUP | WS_CAPTION | WS_SYSMENU |WS_VISIBLE;
-  // TODO(yosi) We should retrieve size of |FormWindow| from |form|.
-  gfx::Rect contentRect(0, 0, 400, 240);
-  gfx::Rect windowRect(contentRect);
-  bool has_menu = false;
-  WIN32_VERIFY(::AdjustWindowRectEx(&windowRect, dwStyle, has_menu, dwExStyle));
-
-  native_window()->CreateWindowEx(
-      dwExStyle, dwStyle, L"?", nullptr,
-      gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
-      windowRect.size());
+  auto const dwStyle = WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE;
+  native_window()->CreateWindowEx(dwExStyle, dwStyle, L"Loading...", nullptr,
+                                  gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
+                                  gfx::Size());
 }
 
 void FormWindow::DidCreateNativeWindow() {

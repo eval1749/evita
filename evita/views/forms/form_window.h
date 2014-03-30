@@ -19,6 +19,7 @@ class Form;
 namespace gfx {
 class Graphics;
 using common::win::Rect;
+using common::win::Size;
 }
 
 namespace ui {
@@ -37,6 +38,7 @@ class FormWindow final : public views::Window,
 
   private: class FormViewModel;
 
+  private: gfx::Size form_size_;
   private: private: const std::unique_ptr<gfx::Graphics> gfx_;
   private: private: const std::unique_ptr<FormViewModel> model_;
   private: gfx::Rect pending_update_rect_;

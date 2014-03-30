@@ -114,8 +114,10 @@ void Form::set_width(float new_width) {
 }
 
 void Form::AddFormControl(FormControl* control) {
+  // TODO(yosi) Check |control| isn't in |controls_|.
   controls_[control->control_id()] = control;
   control->form_ = this;
+  FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 
 void Form::AddObserver(FormObserver* observer) const {

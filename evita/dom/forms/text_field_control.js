@@ -27,6 +27,15 @@ var TextFieldEditCommand;
   TextFieldControl.bindKey = bindKey;
 
   /**
+   * @param {string} key_combination
+   * @return {!TextFieldEditCommand}
+   */
+  function keyBindingOf(key_combination) {
+    var key_code = Editor.parseKeyCombination(key_combination);
+    return keymap.get(key_code) || function(x) {};
+  }
+
+  /**
    * @param {!TextFieldSelection} selection
    * @return {number}
    */
@@ -133,6 +142,33 @@ var TextFieldEditCommand;
     selection.collapseTo(previousWord(selection));
   });
 
+  bindKey('Ctrl+C', function(selection) {
+    if (selection.collapsed)
+      return;
+    var items = DataTransfer.items;
+    items.clear();
+    items.add(selection.text.replace(/\n/g, '\r\n'), 'text/plain');
+  });
+
+  bindKey('Ctrl+V', function(selection) {
+    var items = DataTransfer.items;
+    if (!items.length)
+      return;
+    var item = items.get(0);
+    if (item.kind != 'string')
+      return;
+    selection.text = item.getAsString().replace(/\r\n/g, '\n');
+  });
+
+  bindKey('Ctrl+X', function(selection) {
+    if (selection.collapsed)
+      return;
+    var items = DataTransfer.items;
+    items.clear();
+    items.add(selection.text.replace(/\n/g, '\r\n'), 'text/plain');
+    selection.text = '';
+  });
+
   bindKey('Delete', function(selection) {
     var control = selection.control;
     var text = control.value;
@@ -164,6 +200,10 @@ var TextFieldEditCommand;
   bindKey('Shift+Ctrl+ArrowLeft', function(selection) {
     selection.extendTo(previousWord(selection));
   });
+
+  bindKey('Shift+Ctrl+Delete', keyBindingOf('Ctrl+C'));
+  bindKey('Shift+Delete', keyBindingOf('Ctrl+X'));
+  bindKey('Shift+Insert', keyBindingOf('Ctrl+V'));
 
   bindKey('Shift+End', function(selection) {
     selection.focusOffset = MAX_OFFSET;

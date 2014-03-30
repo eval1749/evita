@@ -50,7 +50,7 @@ class ControlImporter {
 
   protected: ui::Control::Style ComputeStyle() const;
   public: virtual ui::Control* CreateWidget() = 0;
-  protected: void SetRect(const dom::FormControl* control, ui::Widget* widget);
+  protected: void Update(const dom::FormControl* control, ui::Widget* widget);
   public: virtual void UpdateWidget(ui::Widget* widget) = 0;
 
   DISALLOW_COPY_AND_ASSIGN(ControlImporter);
@@ -70,14 +70,17 @@ ui::Control::Style ControlImporter::ComputeStyle() const {
   return style;
 }
 
-void ControlImporter::SetRect(const dom::FormControl* control,
-                              ui::Widget* widget) {
+void ControlImporter::Update(const dom::FormControl* control,
+                             ui::Widget* widget) {
   gfx::Rect rect(
       gfx::Point(static_cast<int>(control->client_left()),
                  static_cast<int>(control->client_top())),
       gfx::Size(static_cast<int>(control->client_width()),
                 static_cast<int>(control->client_height())));
   widget->ResizeTo(rect);
+
+  if (auto const control_widget = widget->as<ui::Control>())
+    control_widget->set_disabled(control->disabled());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -105,7 +108,7 @@ ui::Control* ButtonImporter::CreateWidget() {
   auto const widget = new ui::ButtonControl(
       new FormControlController(button_->event_target_id()),
       button_->text(), ComputeStyle());
-  SetRect(button_, widget);
+  Update(button_, widget);
   return widget;
 }
 
@@ -113,7 +116,7 @@ void ButtonImporter::UpdateWidget(ui::Widget* widget) {
   auto const button_widget = widget->as<ui::ButtonControl>();
   button_widget->set_style(ComputeStyle());
   button_widget->set_text(button_->text());
-  SetRect(button_, button_widget);
+  Update(button_, button_widget);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -141,15 +144,15 @@ ui::Control* CheckboxImporter::CreateWidget() {
   auto const widget = new ui::CheckboxControl(
       new FormControlController(checkbox_->event_target_id()),
       checkbox_->checked(), ComputeStyle());
-  SetRect(checkbox_, widget);
+  Update(checkbox_, widget);
   return widget;
 }
 
 void CheckboxImporter::UpdateWidget(ui::Widget* widget) {
   auto const checkbox_widget = widget->as<ui::CheckboxControl>();
-  checkbox_widget->set_style(ComputeStyle());
   checkbox_widget->set_checked(checkbox_->checked());
-  SetRect(checkbox_, checkbox_widget);
+  checkbox_widget->set_style(ComputeStyle());
+  Update(checkbox_, checkbox_widget);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -177,7 +180,7 @@ ui::Control* LabelImporter::CreateWidget() {
   auto const widget = new ui::LabelControl(
       new FormControlController(label_->event_target_id()),
       label_->text(), ComputeStyle());
-  SetRect(label_, widget);
+  Update(label_, widget);
   return widget;
 }
 
@@ -185,7 +188,7 @@ void LabelImporter::UpdateWidget(ui::Widget* widget) {
   auto const label_widget = widget->as<ui::LabelControl>();
   label_widget->set_style(ComputeStyle());
   label_widget->set_text(label_->text());
-  SetRect(label_, label_widget);
+  Update(label_, label_widget);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -214,15 +217,15 @@ ui::Control* RadioButtonImporter::CreateWidget() {
   auto const widget = new ui::RadioButtonControl(
       new FormControlController(radio_button_->event_target_id()),
       radio_button_->checked(), ComputeStyle());
-  SetRect(radio_button_, widget);
+  Update(radio_button_, widget);
   return widget;
 }
 
 void RadioButtonImporter::UpdateWidget(ui::Widget* widget) {
   auto const radio_button_widget = widget->as<ui::RadioButtonControl>();
-  radio_button_widget->set_style(ComputeStyle());
   radio_button_widget->set_checked(radio_button_->checked());
-  SetRect(radio_button_, radio_button_widget);
+  radio_button_widget->set_style(ComputeStyle());
+  Update(radio_button_, radio_button_widget);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -261,7 +264,7 @@ ui::Control* TextFieldImporter::CreateWidget() {
       new FormControlController(text_field_->event_target_id()),
                                 ImportSelection(), text_field_->value(),
                                 ComputeStyle());
-  SetRect(text_field_, widget);
+  Update(text_field_, widget);
   return widget;
 }
 
@@ -270,7 +273,7 @@ void TextFieldImporter::UpdateWidget(ui::Widget* widget) {
   text_field_widget->set_selection(ImportSelection());
   text_field_widget->set_style(ComputeStyle());
   text_field_widget->set_text(text_field_->value());
-  SetRect(text_field_, text_field_widget);
+  Update(text_field_, text_field_widget);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -350,28 +353,34 @@ void FormWindow::FormViewModel::Update() {
 
   // Get or create control from DOM form.
   focus_control_ = static_cast<ui::Control*>(nullptr);
+  auto focusable = static_cast<ui::Control*>(nullptr);
   for (auto control : form_->controls()) {
     std::unique_ptr<ControlImporter> importer(
         ControlImporter::Create(control));
     auto const it = map_.find(control->event_target_id());
+    auto widget = static_cast<ui::Control*>(nullptr);
     if (it == map_.end()) {
-      auto const widget = importer->CreateWidget();
+      widget = importer->CreateWidget();
       map_[control->event_target_id()] = widget;
       widget->SetParentWidget(window_);
+    } else {
+      widget = it->second;
+      window_->AppendChild(widget);
+      importer->UpdateWidget(widget);
+      window_->SchedulePaintInRect(widget->rect());
+      controls_to_remove.erase(widget);
+    }
+    if (widget->focusable()) {
+      if (!focusable)
+        focusable = widget;
       if (control == form_->focus_control())
         focus_control_ = widget;
-      continue;
     }
-    auto const widget = it->second;
-    window_->AppendChild(widget);
-    importer->UpdateWidget(widget);
-    window_->SchedulePaintInRect(widget->rect());
-    controls_to_remove.erase(widget);
-    if (control == form_->focus_control())
-      focus_control_ = widget;
   }
 
   // Move focus if needed
+  if (!focus_control_)
+    focus_control_ = focusable;
   if (focus_control_ && focus_control_ != current_focus &&
       (current_focus || window_->has_focus())) {
     focus_control_->RequestFocus();

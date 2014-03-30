@@ -507,6 +507,8 @@ std::unique_ptr<TextLayout> TextFormat::CreateLayout(
   COM_VERIFY(FactorySet::instance()->dwrite().CreateTextLayout(
     text.data(), static_cast<UINT32>(text.length()), *this, size.width,
     size.height, &text_layout));
+  if (!text_layout)
+    return std::unique_ptr<TextLayout>();
   return std::make_unique<TextLayout>(text_layout.release());
 }
 

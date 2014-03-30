@@ -56,6 +56,7 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual std::vector<int> GetTableRowStates(
       dom::WindowId window_id,
       const std::vector<base::string16>& keys) override;
+  private: virtual void HideWindow(dom::WindowId window_id) override;
   private: virtual void LoadFile(dom::Document* document,
                                  const base::string16& filename,
                                  LoadFileCallback callback) override;
@@ -87,6 +88,7 @@ class ViewDelegateImpl : public dom::ViewDelegate {
                                    const domapi::TabData& tab_data) override;
   private: virtual void ShowDialogBox(
       domapi::DialogBoxId dialog_box_id) override;
+  private: virtual void ShowWindow(dom::WindowId window_id) override;
   private: virtual void SplitHorizontally(dom::WindowId left_window,
       dom::WindowId new_right_window) override;
   private: virtual void SplitVertically(dom::WindowId above_window,

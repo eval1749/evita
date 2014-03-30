@@ -271,6 +271,7 @@ DEFINE_VIEW_DELEGATE_3(GetFilenameForSave, WindowId, const base::string16&,
                        ViewDelegate::GetFilenameForSaveCallback)
 DEFINE_VIEW_DELEGATE_2(GetSpellingSuggestions, const base::string16&,
     const GetSpellingSuggestionsDeferred&)
+DEFINE_VIEW_DELEGATE_1(HideWindow, WindowId)
 DEFINE_VIEW_DELEGATE_3(LoadFile, Document*, const base::string16&,
                        LoadFileCallback)
 DEFINE_VIEW_DELEGATE_1(MakeSelectionVisible, WindowId)
@@ -288,6 +289,7 @@ DEFINE_VIEW_DELEGATE_2(SetStatusBar, WindowId,
     const std::vector<base::string16>&)
 DEFINE_VIEW_DELEGATE_2(SetTabData, WindowId, const domapi::TabData&)
 DEFINE_VIEW_DELEGATE_1(ShowDialogBox, domapi::DialogBoxId)
+DEFINE_VIEW_DELEGATE_1(ShowWindow, WindowId)
 DEFINE_VIEW_DELEGATE_2(SplitHorizontally, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(SplitVertically, WindowId, WindowId)
 

@@ -94,10 +94,12 @@ class WindowWrapperInfo :
         .SetMethod("changeParent", &Window::ChangeParentWindow)
         .SetMethod("destroy", &Window::Destroy)
         .SetMethod("focus", &Window::Focus)
+        .SetMethod("hide", &Window::Hide)
         .SetMethod("releaseCapture", &Window::ReleaseCapture)
         .SetMethod("realize", &Window::Realize)
         .SetMethod("removeChild", &Window::RemoveWindow)
         .SetMethod("setCapture", &Window::SetCapture)
+        .SetMethod("show", &Window::Show)
         .SetMethod("splitHorizontally", &Window::SplitHorizontally)
         .SetMethod("splitVertically", &Window::SplitVertically);
   }
@@ -259,6 +261,15 @@ void Window::Focus() {
   ScriptHost::instance()->view_delegate()->FocusWindow(window_id());
 }
 
+void Window::Hide() {
+  if (state_ != State::Realized && state_ != State::Realizing) {
+    ScriptHost::instance()->ThrowError(
+        "You can't hide unrealized window.");
+    return;
+  }
+  ScriptHost::instance()->view_delegate()->HideWindow(window_id());
+}
+
 bool Window::IsDescendantOf(Window* other) const {
   for (auto descendant : common::tree::descendants(other)) {
     if (descendant == this)
@@ -361,6 +372,15 @@ void Window::SetCapture() {
     return;
   }
   ScriptHost::instance()->view_delegate()->SetCapture(window_id());
+}
+
+void Window::Show() {
+  if (state_ != State::Realized && state_ != State::Realizing) {
+    ScriptHost::instance()->ThrowError(
+        "You can't show unrealized window.");
+    return;
+  }
+  ScriptHost::instance()->view_delegate()->ShowWindow(window_id());
 }
 
 void Window::SplitHorizontally(Window* new_right_window) {

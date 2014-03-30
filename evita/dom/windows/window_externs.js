@@ -85,6 +85,9 @@ Window.prototype.addEventListener = function(type, listener, opt_capture) {};
  */
 Window.prototype.dispatchEvent = function(event) {};
 
+/** @type {!function()} */
+Window.prototype.hide = function() {};
+
 /**
  * @param {string} type
  * @param {!EventListener} listener
@@ -92,6 +95,9 @@ Window.prototype.dispatchEvent = function(event) {};
  */
 Window.prototype.removeEventListener = function(type, listener,
                                                 opt_capture) {};
+
+/** @type {!function()} */
+Window.prototype.show = function() {};
 
 /** @param {!Window} new_right_window */
 Window.prototype.splitHorizontally = function(new_right_window) {};

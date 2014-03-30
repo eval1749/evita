@@ -287,6 +287,13 @@ std::vector<int> ViewDelegateImpl::GetTableRowStates(WindowId window_id,
   return std::move(table_view->GetRowStates(keys));
 }
 
+void ViewDelegateImpl::HideWindow(dom::WindowId window_id) {
+  auto const window = FromWindowId("HideWindow", window_id);
+  if (!window)
+    return;
+  window->Hide();
+}
+
 void ViewDelegateImpl::LoadFile(dom::Document* document,
                                 const base::string16& filename,
                                 LoadFileCallback callback) {
@@ -421,6 +428,13 @@ void ViewDelegateImpl::ShowDialogBox(domapi::DialogBoxId dialog_box_id) {
   if (!dialog_box)
     return;
   dialog_box->Show();
+}
+
+void ViewDelegateImpl::ShowWindow(dom::WindowId window_id) {
+  auto const window = FromWindowId("ShowWindow", window_id);
+  if (!window)
+    return;
+  window->Show();
 }
 
 void ViewDelegateImpl::ReleaseCapture(dom::WindowId window_id) {

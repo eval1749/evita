@@ -96,6 +96,7 @@ class ScriptThread final : public domapi::IoDelegate,
       const GetSpellingSuggestionsDeferred& deferred) override;
   private: virtual std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;
+  private: virtual void HideWindow(WindowId window_id) override;
   private: virtual void LoadFile(Document* document,
                                  const base::string16& filename,
                                  LoadFileCallback callback) override;
@@ -127,6 +128,11 @@ class ScriptThread final : public domapi::IoDelegate,
                                    const domapi::TabData& tab_data) override;
   private: virtual void ShowDialogBox(
       domapi::DialogBoxId dialog_box_id) override;
+  private: virtual void ShowWindow(WindowId window_id) override;
+  private: virtual void SplitHorizontally(WindowId left_window_id,
+      WindowId new_right_window_id) override;
+  private: virtual void SplitVertically(WindowId above_window_id,
+      WindowId new_below_window_id) override;
 
   // domapi::ViewEventHandler
   private: virtual void AppendTextToBuffer(text::Buffer* buffer,
@@ -153,10 +159,6 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void QueryClose(WindowId window_id) override;
   private: virtual void RunCallback(base::Closure callback) override;
   private: virtual void WillDestroyHost() override;
-  private: virtual void SplitHorizontally(WindowId left_window_id,
-      WindowId new_right_window_id) override;
-  private: virtual void SplitVertically(WindowId above_window_id,
-      WindowId new_below_window_id) override;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptThread);
 };

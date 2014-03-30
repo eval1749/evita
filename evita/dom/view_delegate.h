@@ -111,6 +111,7 @@ class ViewDelegate {
       const GetSpellingSuggestionsDeferred& callback) = 0;
   public: virtual std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) = 0;
+  public: virtual void HideWindow(WindowId window_id) = 0;
   public: virtual void LoadFile(Document* document,
                                 const base::string16& filename,
                                 LoadFileCallback callback) = 0;
@@ -141,6 +142,7 @@ class ViewDelegate {
   public: virtual void SetTabData(WindowId window_id,
                                   const domapi::TabData& tab_data) = 0;
   public: virtual void ShowDialogBox(domapi::DialogBoxId dialog_box_id) = 0;
+  public: virtual void ShowWindow(WindowId window_id) = 0;
   public: virtual void SplitHorizontally(WindowId left_window_id,
                                          WindowId new_right_window_id) = 0;
   public: virtual void SplitVertically(WindowId above_window_id,

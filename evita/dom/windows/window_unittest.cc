@@ -229,6 +229,17 @@ TEST_F(WindowTest, Realize) {
   EXPECT_SCRIPT_EQ("realized", "sample1.state");
 }
 
+TEST_F(WindowTest, show) {
+  EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
+  EXPECT_SCRIPT_VALID("var sample1 = new SampleWindow(); sample1.realize()");
+
+  EXPECT_CALL(*mock_view_impl(), HideWindow(Eq(1)));
+  EXPECT_SCRIPT_VALID("sample1.hide()");
+
+  EXPECT_CALL(*mock_view_impl(), ShowWindow(Eq(1)));
+  EXPECT_SCRIPT_VALID("sample1.show()");
+}
+
 TEST_F(WindowTest, splitHorizontally) {
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(1), Eq(4)));
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(2), Eq(5)));

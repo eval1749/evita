@@ -68,12 +68,14 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
   public: void DidResize(int left, int top, int right, int bottom);
   public: void DidSetFocus();
   public: void Focus();
+  public: void Hide();
   public: bool IsDescendantOf(Window* other) const;
   public: void ReleaseCapture();
   public: void Realize();
   public: void RemoveWindow(Window* window);
   public: static void ResetForTesting();
   public: void SetCapture();
+  public: void Show();
   public: void SplitHorizontally(Window* new_right_window);
   public: void SplitVertically(Window* new_below_window);
 

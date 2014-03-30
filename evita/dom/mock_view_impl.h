@@ -68,6 +68,7 @@ class MockViewImpl : public dom::ViewDelegate {
       const GetSpellingSuggestionsDeferred& deferred) override;
   public: std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;
+  MOCK_METHOD1(HideWindow, void(WindowId));
   public: void LoadFile(Document* document, const base::string16& filename,
                         LoadFileCallback callback);
   MOCK_METHOD1(MakeSelectionVisible, void(WindowId));
@@ -91,6 +92,7 @@ class MockViewImpl : public dom::ViewDelegate {
       void(WindowId, const std::vector<base::string16>&));
   MOCK_METHOD2(SetTabData, void(WindowId, const domapi::TabData&));
   MOCK_METHOD1(ShowDialogBox, void(domapi::DialogBoxId));
+  MOCK_METHOD1(ShowWindow, void(WindowId));
   MOCK_METHOD2(SplitHorizontally, void(WindowId, WindowId));
   MOCK_METHOD2(SplitVertically, void(WindowId, WindowId));
 

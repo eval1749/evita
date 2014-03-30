@@ -172,17 +172,20 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
   if (!rect_)
     return;
 
-  if (!text_layout_)
-    UpdateTextLayout();
-
-  MakeSelectionVisible();
-
   gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect_);
 
   // Render frame
   const auto frame_rect = rect_;
   gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
   gfx->DrawRectangle(gfx::Brush(*gfx, style_.shadow), frame_rect);
+
+  if (!text_layout_) {
+    UpdateTextLayout();
+    if (!text_layout_)
+      return;
+  }
+
+  MakeSelectionVisible();
 
   // Render text
   {
@@ -288,6 +291,8 @@ void TextFieldControl::Renderer::ResizeTo(const gfx::RectF& new_rect) {
 void TextFieldControl::Renderer::UpdateTextLayout() {
   DCHECK(!text_layout_);
   text_layout_ = CreateTextLayout(text_, style_, view_rect_.height());
+  if (!text_layout_)
+    return;
   DWRITE_TEXT_METRICS metrics;
   COM_VERIFY((*text_layout_)->GetMetrics(&metrics));
   DCHECK_EQ(1u, metrics.lineCount);

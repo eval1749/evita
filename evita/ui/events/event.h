@@ -47,6 +47,7 @@ enum class Modifier {
   None = 0,
   Control = 0x200,
   Shift = 0x400,
+  Alt = 0x800,
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -73,10 +74,13 @@ class KeyboardEvent : public Event {
   private: int raw_key_code_;
   private: bool repeat_;
 
-  private: KeyboardEvent(EventType type, LPARAM lParam);
-  private: KeyboardEvent();
+  public: KeyboardEvent(EventType type, int key_code, bool repeat);
+  public: KeyboardEvent();
   public: ~KeyboardEvent();
 
+  public: const bool alt_key() const {
+    return raw_key_code_ & static_cast<int>(Modifier::Alt);
+  }
   public: const bool control_key() const {
     return raw_key_code_ & static_cast<int>(Modifier::Control);
   }
@@ -88,8 +92,9 @@ class KeyboardEvent : public Event {
     return raw_key_code_ & static_cast<int>(Modifier::Shift);
   }
 
-  public: static KeyboardEvent Create(uint32_t message, WPARAM wParam,
-                                      LPARAM lParam);
+  public: static EventType ConvertToEventType(uint32_t message);
+  public: static int ConvertToKeyCode(WPARAM wParam);
+  public: static bool ConvertToRepeat(LPARAM lParam);
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -279,6 +279,37 @@ Widget* Widget::GetWidgetAt(const Point& point) const {
   return nullptr;
 }
 
+LRESULT Widget::HandleKeyboardMessage(uint32_t message, WPARAM wParam,
+                                      LPARAM lParam) {
+  if (message == WM_CHAR) {
+    KeyboardEvent event(EventType::KeyPressed, static_cast<int>(wParam),
+                        KeyboardEvent::ConvertToRepeat(lParam));
+    OnKeyPressed(event);
+    return 0;
+  }
+
+  KeyboardEvent event(KeyboardEvent::ConvertToEventType(message),
+                      KeyboardEvent::ConvertToKeyCode(wParam),
+                      KeyboardEvent::ConvertToRepeat(lParam));
+
+  if (message == WM_KEYDOWN && event.raw_key_code() <= 0xFF) {
+    // We use WM_CHAR for graphic key down.
+    return OnMessage(message, wParam, lParam);
+  }
+
+  if (event.event_type() == EventType::KeyPressed) {
+    OnKeyPressed(event);
+    return 0;
+  }
+
+  if (event.event_type() == EventType::KeyReleased) {
+    OnKeyReleased(event);
+    return 0;
+  }
+
+  return OnMessage(message, wParam, lParam);
+}
+
 void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
                                 LPARAM lParam) {
   Point client_point(MAKEPOINTS(lParam));
@@ -703,6 +734,15 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       SystemMetrics::instance()->NotifyChangeSystemColor();
       return 0;
 
+    case WM_SYSCOMMAND:
+     if ((wParam & 0xFFF0) == SC_KEYMENU) {
+       // TODO(yosi) When we support menu, we should redirect |SC_KEYMENU| to
+       // menu for menu shortcut.
+       // We use Alt+Key for |accesskey|.
+       return 0;
+     }
+     break;
+
     case WM_VSCROLL: {
       auto const widget = reinterpret_cast<Widget*>(::GetWindowLongPtr(
           reinterpret_cast<HWND>(lParam), GWLP_ID));
@@ -785,19 +825,11 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
   }
 
   if (focus_widget) {
-    if (message >= WM_KEYFIRST && message <= WM_KEYLAST ||
-        message >= WM_IME_STARTCOMPOSITION && message<= WM_IME_KEYLAST) {
-      auto event = KeyboardEvent::Create(message, wParam, lParam);
-      if (event.event_type() == EventType::KeyPressed) {
-        focus_widget->OnKeyPressed(event);
-        return 0;
-      }
-      if (event.event_type() == EventType::KeyReleased) {
-        focus_widget->OnKeyReleased(event);
-        return 0;
-      }
+    if (message >= WM_KEYFIRST && message <= WM_KEYLAST)
+      return focus_widget->HandleKeyboardMessage(message, wParam, lParam);
+
+    if (message >= WM_IME_STARTCOMPOSITION && message<= WM_IME_KEYLAST)
       return focus_widget->OnMessage(message, wParam, lParam);
-    }
   }
 
   if (message >= WM_MOUSEFIRST && message <= WM_MOUSELAST) {

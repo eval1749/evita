@@ -105,7 +105,10 @@ class Widget
   private: Widget* GetWidgetAt(const Point& point) const;
 
   // [H]
-  private: void HandleMouseMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam);
+  private: LRESULT HandleKeyboardMessage(uint32_t message, WPARAM wParam,
+                                         LPARAM lParam);
+  private: void HandleMouseMessage(uint32_t message, WPARAM wParam,
+                                   LPARAM lParam);
   public: virtual void Hide();
 
   // [O]

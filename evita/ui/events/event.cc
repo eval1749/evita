@@ -36,6 +36,8 @@ class KeyCodeMapper : public common::Singleton<KeyCodeMapper> {
 int KeyCodeMapper::Map(int virtual_key_code) {
   if (VK_CONTROL == virtual_key_code)
     return 0;
+  if (VK_MENU== virtual_key_code)
+    return 0;
   if (VK_SHIFT == virtual_key_code)
     return 0;
 
@@ -48,15 +50,13 @@ int KeyCodeMapper::Map(int virtual_key_code) {
      key_code = virtual_key_code | 0x100;
   }
 
-  if (::GetKeyState(VK_CONTROL) < 0) {
+  if (::GetKeyState(VK_MENU) < 0)
+    key_code |= static_cast<int>(Modifier::Alt);
+  if (::GetKeyState(VK_CONTROL) < 0)
     key_code |= static_cast<int>(Modifier::Control);
-  } else if (key_code <= 0xFF) {
-    // For graphics key, we use WM_CHAR.
-    return 0;
-  }
-
   if (::GetKeyState(VK_SHIFT) < 0)
     key_code |= static_cast<int>(Modifier::Shift);
+
   return key_code;
 }
 
@@ -187,34 +187,37 @@ Event::~Event() {
 //
 // KeyboardEvent
 //
-KeyboardEvent::KeyboardEvent(EventType event_type, LPARAM lParam)
-    : Event(event_type), raw_key_code_(0),
-      repeat_(HIWORD(lParam) & KF_REPEAT) {
+KeyboardEvent::KeyboardEvent(EventType event_type, int raw_key_code,
+                             bool repeat)
+    : Event(event_type), raw_key_code_(raw_key_code), repeat_(repeat) {
 }
 
 KeyboardEvent::KeyboardEvent()
-    : KeyboardEvent(EventType::Invalid, 0) {
+    : KeyboardEvent(EventType::Invalid, 0, false) {
 }
 
 KeyboardEvent::~KeyboardEvent() {
 }
 
-KeyboardEvent KeyboardEvent::Create(uint32_t message, WPARAM wParam,
-                                    LPARAM lParam) {
-  if (message == WM_CHAR) {
-    auto event = KeyboardEvent(EventType::KeyPressed, lParam);
-    event.raw_key_code_ = static_cast<int>(wParam);
-    return event.raw_key_code_ < 0x20 ? KeyboardEvent() : event;
+EventType KeyboardEvent::ConvertToEventType(uint32_t message) {
+  switch (message) {
+    case WM_CHAR:
+    case WM_KEYDOWN:
+    case WM_SYSKEYDOWN:
+      return EventType::KeyPressed;
+    case WM_KEYUP:
+    case WM_SYSKEYUP:
+      return EventType::KeyReleased;
   }
+  return EventType::Invalid;
+}
 
-  if (message == WM_KEYDOWN) {
-    auto event = KeyboardEvent(EventType::KeyPressed, lParam);
-    event.raw_key_code_ = KeyCodeMapper::instance()->
-        Map(static_cast<int>(wParam));
-    return event.raw_key_code_ ? event : KeyboardEvent();
-  }
+int KeyboardEvent::ConvertToKeyCode(WPARAM wParam) {
+  return KeyCodeMapper::instance()->Map(static_cast<int>(wParam));
+}
 
-  return KeyboardEvent();
+bool KeyboardEvent::ConvertToRepeat(LPARAM lParam) {
+  return HIWORD(lParam) & KF_REPEAT;
 }
 
 //////////////////////////////////////////////////////////////////////

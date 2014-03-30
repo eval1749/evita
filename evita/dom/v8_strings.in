@@ -132,9 +132,9 @@ imeinactive2
 
 # Window
 Window
-bottom
+clientHeight
+clientLeft
+clientTop
+clientWidth
 focus
 focusTick_
-left
-right
-top

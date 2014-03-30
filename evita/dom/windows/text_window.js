@@ -254,9 +254,9 @@ global.TextWindow.prototype.clone = function() {
       autoscroller = new Autoscroller(window);
       window.autoscroller_ = autoscroller;
     }
-    if (event.clientY < window.top)
+    if (event.clientY < window.clientTop)
       autoscroller.start(-1);
-    else if (event.clientY > window.bottom)
+    else if (event.clientY > window.clientTop + window.clientHeight)
       autoscroller.start(1);
     else
       autoscroller.stop();

@@ -9,11 +9,20 @@ Window.focus;
  */
 Window.handleEvent = function(event) {};
 
-/** @type {number} */
-Window.prototype.bottom;
-
 /** @type {Array.<!Window>} */
 Window.prototype.children;
+
+/** @type {number} */
+Window.prototype.clientHeight;
+
+/** @type {number} */
+Window.prototype.clientLeft;
+
+/** @type {number} */
+Window.prototype.clientTop;
+
+/** @type {number} */
+Window.prototype.clientWidth;
 
 /** @type {Window} */
 Window.prototype.firstChild;
@@ -27,9 +36,6 @@ Window.prototype.id;
 /** @type {Window} */
 Window.prototype.lastChild;
 
-/** @type {number} */
-Window.prototype.left;
-
 /** @type {Window} */
 Window.prototype.nextSibling;
 
@@ -39,9 +45,6 @@ Window.prototype.parent;
 /** @type {Window} */
 Window.prototype.previousSibling;
 
-/** @type {number} */
-Window.prototype.right;
-
 /** @type {string} */
 Window.prototype.state;
 
@@ -50,9 +53,6 @@ Window.prototype.state;
  * setter displays status text in status bar if possible.
  */
 Window.prototype.status;
-
-/** @type {number} */
-Window.prototype.top;
 
 /** @param {!Window} window */
 Window.prototype.appendChild = function(window) {};

@@ -221,7 +221,8 @@ void Window::DidRealizeWindow() {
   }
 }
 
-void Window::DidResize(int left, int top, int right, int bottom) {
+void Window::DidResize(int clientLeft, int clientTop,
+                       int clientRight, int clientBottom) {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
@@ -230,10 +231,12 @@ void Window::DidResize(int left, int top, int right, int bottom) {
     instance->Set(v8Strings::name.Get(isolate), \
                   v8::Integer::New(isolate, name), \
                   kDefaultPropertyAttribute)
-  SET_PROP(left);
-  SET_PROP(top);
-  SET_PROP(right);
-  SET_PROP(bottom);
+  auto const clientWidth = clientRight - clientLeft;
+  auto const clientHeight = clientBottom - clientTop;
+    SET_PROP(clientLeft);
+  SET_PROP(clientTop);
+  SET_PROP(clientWidth);
+  SET_PROP(clientHeight);
 }
 
 void Window::DidSetFocus() {

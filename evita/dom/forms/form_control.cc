@@ -29,16 +29,19 @@ class FormControlClass :
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetProperty("clientHeight", &FormControl::client_height)
-        .SetProperty("clientLeft", &FormControl::client_left)
-        .SetProperty("clientTop", &FormControl::client_top)
-        .SetProperty("clientWidth", &FormControl::client_width)
+        .SetProperty("clientHeight", &FormControl::client_height,
+                                     &FormControl::set_client_height)
+        .SetProperty("clientLeft", &FormControl::client_left,
+                                     &FormControl::set_client_left)
+        .SetProperty("clientTop", &FormControl::client_top,
+                                     &FormControl::set_client_top)
+        .SetProperty("clientWidth", &FormControl::client_width,
+                                     &FormControl::set_client_width)
         .SetProperty("controlId", &FormControl::control_id)
         .SetProperty("disabled", &FormControl::disabled,
                                  &FormControl::set_disabled)
         .SetProperty("form", &FormControl::form)
-        .SetProperty("name", &FormControl::name)
-        .SetMethod("setRect", &FormControl::SetRect);
+        .SetProperty("name", &FormControl::name);
   }
 
   DISALLOW_COPY_AND_ASSIGN(FormControlClass);
@@ -83,18 +86,38 @@ FormControl::FormControl() : FormControl(kInvalidFormResourceId) {
 FormControl::~FormControl() {
 }
 
+void FormControl::set_client_height(float new_height) {
+  if (rect_.height() == new_height)
+    return;
+  rect_.bottom = rect_.top + new_height;
+  NotifyControlChange();
+}
+
+void FormControl::set_client_left(float new_left) {
+  if (rect_.left == new_left)
+    return;
+  rect_.left = new_left;
+  NotifyControlChange();
+}
+
+void FormControl::set_client_top(float new_top) {
+  if (rect_.top == new_top)
+    return;
+  rect_.top = new_top;
+  NotifyControlChange();
+}
+
+void FormControl::set_client_width(float new_width) {
+  if (rect_.width() == new_width)
+    return;
+  rect_.right = rect_.left + new_width;
+  NotifyControlChange();
+}
+
 void FormControl::set_disabled(bool new_disabled) {
   if (disabled_ == new_disabled)
     return;
   disabled_ = new_disabled;
-  NotifyControlChange();
-}
-
-void FormControl::SetRect(float left, float top, float width, float height) {
-  gfx::RectF new_rect(left, top, left + width, top + height);
-  if (rect_ == new_rect)
-    return;
-  rect_ = new_rect;
   NotifyControlChange();
 }
 

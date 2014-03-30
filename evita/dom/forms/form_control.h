@@ -40,17 +40,19 @@ class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   public: virtual ~FormControl();
 
   public: float client_height() const { return rect_.height(); }
+  public: void set_client_height(float new_client_hieght);
   public: float client_left() const { return rect_.left; }
+  public: void set_client_left(float new_client_left);
   public: float client_top() const { return rect_.top; }
+  public: void set_client_top(float new_client_top);
   public: float client_width() const { return rect_.width(); }
+  public: void set_client_width(float new_client_width);
   public: FormResourceId control_id() const { return control_id_; }
   public: bool disabled() const { return disabled_; }
   public: void set_disabled(bool new_disabled);
   public: Form* form() const { return form_.get(); }
   protected: bool handling_form_event() const { return handling_form_event_; }
   public: const base::string16& name() const { return name_; }
-
-  public: void SetRect(float left, float top, float width, float height);
 
   public: void DispatchChangeEvent();
   protected: void NotifyControlChange();

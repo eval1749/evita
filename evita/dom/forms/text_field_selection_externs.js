@@ -22,6 +22,9 @@ TextFieldSelection.prototype.focusOffset;
 /** @type {number} */
 TextFieldSelection.prototype.start;
 
+/** @type {string} */
+TextFieldSelection.prototype.text;
+
 /** @return {boolean} */
 TextFieldSelection.prototype.collapsed = function() {};
 

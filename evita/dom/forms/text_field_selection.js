@@ -11,3 +11,39 @@ global.TextFieldSelection.prototype.collapseTo = function(offset) {
 global.TextFieldSelection.prototype.extendTo = function(offset) {
   this.focusOffset = offset;
 };
+
+Object.defineProperty(TextFieldSelection.prototype, 'text', {
+  /**
+   * @this {!TextFieldSelection}
+   * @return {string}
+   */
+  get: function() {
+    return this.collapsed ? '' :
+        this.control.value.substring(this.start, this.end);
+  },
+  /**
+   * @this {!TextFieldSelection}
+   * @param {string} new_text
+   */
+  set: function(new_text) {
+    var value = this.control.value;
+    if (this.collapsed) {
+      var offset = this.focusOffset;
+      this.control.value = value.substr(0, offset) + new_text +
+                           value.substr(offset);
+      this.focusOffset = offset + new_text.length;
+      return;
+    }
+    var start = this.start;
+    var end = this.end;
+    this.control.value = value.substr(0, start) + new_text + value.substr(end);
+    // Relocate anchorOffset and focusOffset
+    var diff = new_text.length - (end - start);
+    if (!diff)
+      return;
+    if (this.anchorOffset > start)
+      this.anchorOffset = Math.max(this.anchorOffset + diff, start);
+    if (this.focusOffset > start)
+      this.focusOffset = Math.max(this.focusOffset + diff, start);
+  },
+});

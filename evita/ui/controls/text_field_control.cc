@@ -199,9 +199,8 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
   switch (state) {
     case Control::State::Disabled:
       gfx->FillRectangle(
-          gfx::Brush(*gfx, gfx::ColorF(style_.gray_text, 0.5f)),
+          gfx::Brush(*gfx, gfx::ColorF(style_.shadow, 0.1f)),
           frame_rect);
-      gfx->DrawRectangle(gfx::Brush(*gfx, style_.color), frame_rect);
       break;
     case Control::State::Normal:
       break;

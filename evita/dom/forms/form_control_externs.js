@@ -1,6 +1,9 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
+/** @expose @type{string} */
+FormControl.prototype.accessKey;
+
 /** @expose @type{number} */
 FormControl.prototype.clientHeight;
 
@@ -42,6 +45,9 @@ FormControl.prototype.canFocus = function() {};
  * @param {!Event} event
  */
 FormControl.prototype.dispatchEvent = function(event) {};
+
+/** @type {!function()} */
+FormControl.prototype.focus = function() {};
 
 /**
  * @param {string} type

@@ -86,6 +86,8 @@ var TextFieldEditCommand;
    * @param {!KeyboardEvent} event
    */
   function handleKeyboardEvent(control, event) {
+    if (event.type != Event.Names.KEYDOWN)
+      return;
     var command = keymap.get(event.code);
     if (!command)
       return;

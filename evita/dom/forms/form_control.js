@@ -2,11 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/** @type {string} */
+global.FormControl.prototype.accessKey = '';
+
+
 /**
  * @return {boolean}
  */
 global.FormControl.prototype.canFocus = function() {
   return !this.disabled;
+};
+
+/** @type {!function()} */
+global.FormControl.prototype.focus = function() {
+  if (!this.form)
+    return;
+  this.form.focusControl = this;
 };
 
 /**

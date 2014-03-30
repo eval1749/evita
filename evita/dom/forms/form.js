@@ -75,6 +75,20 @@ global.Form.prototype.get = function(control_id) {
    * @param {!KeyboardEvent} event
    */
   function handleKeyDown(form, event) {
+    if (event.ctrlKey)
+      return;
+    if (event.altKey) {
+      var accessKey = String.fromCharCode(event.code & 0x1FF);
+      form.controls.forEach(function(control) {
+        if (control.accessKey == accessKey) {
+          if (control instanceof ButtonControl)
+            control.dispatchEvent(new MouseEvent('click'));
+          else
+            control.focus();
+        }
+      });
+      return;
+    }
     switch (event.code & 0x1FF) {
       case 0x109: // TAB
         if (event.shiftKey)

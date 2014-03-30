@@ -2,15 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/** @param {number} offset */
-global.TextFieldSelection.prototype.collapseTo = function(offset) {
-  this.anchorOffset = this.focusOffset = offset;
-};
+Object.defineProperty(TextFieldSelection.prototype, 'end', {
+  /**
+   * @this {!TextFieldSelection}
+   * @return {number}
+   */
+  get: function() {
+    return Math.max(this.anchorOffset, this.focusOffset);
+  }
+});
 
-/** @param {number} offset */
-global.TextFieldSelection.prototype.extendTo = function(offset) {
-  this.focusOffset = offset;
-};
+Object.defineProperty(TextFieldSelection.prototype, 'start', {
+  /**
+   * @this {!TextFieldSelection}
+   * @return {number}
+   */
+  get: function() {
+    return Math.min(this.anchorOffset, this.focusOffset);
+  }
+});
 
 Object.defineProperty(TextFieldSelection.prototype, 'text', {
   /**
@@ -47,3 +57,13 @@ Object.defineProperty(TextFieldSelection.prototype, 'text', {
       this.focusOffset = Math.max(this.focusOffset + diff, start);
   },
 });
+
+/** @param {number} offset */
+global.TextFieldSelection.prototype.collapseTo = function(offset) {
+  this.anchorOffset = this.focusOffset = offset;
+};
+
+/** @param {number} offset */
+global.TextFieldSelection.prototype.extendTo = function(offset) {
+  this.focusOffset = offset;
+};

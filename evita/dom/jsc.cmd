@@ -13,6 +13,9 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\unicode_enums.js ^
   %externs_dir%\types_externs.js ^
   %externs_dir%\bracket_externs.js ^
+  %externs_dir%\clipboard\data_transfer_externs.js ^
+  %externs_dir%\clipboard\data_transfer_item_externs.js ^
+  %externs_dir%\clipboard\data_transfer_item_list_externs.js ^
   %externs_dir%\commander_externs.js ^
   %externs_dir%\commands\spell_checker_externs.js ^
   %externs_dir%\console_externs.js ^

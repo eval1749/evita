@@ -66,17 +66,10 @@ var TextFieldEditCommand;
   function typeCharacter(charCode, selection) {
     var control = selection.control;
     var text = control.value;
-    if (selection.collapsed) {
-      control.value = text.substr(0, selection.focusOffset) +
-                      String.fromCharCode(charCode) +
-                      text.substr(selection.focusOffset);
-      selection.collapseTo(selection.focusOffset + 1);
-      return;
-    }
-    control.value = text.substr(0, selection.start) +
-                    String.fromCharCode(charCode) +
-                    text.substr(selection.end);
-    selection.collapseTo(selection.start + 1);
+    selection.text = String.fromCharCode(charCode);
+    if (selection.collapsed)
+      selection.collapseTo(selection.focusOffset);
+    selection.collapseTo(selection.start);
   }
 
   /**
@@ -122,16 +115,9 @@ var TextFieldEditCommand;
   bindKey('Backspace', function(selection) {
     var control = selection.control;
     var text = control.value;
-    if (selection.collapsed) {
-      var offset = selection.focusOffset;
-      if (!offset)
-        return;
-      control.value = text.substr(0, offset - 1) + text.substr(offset);
-      selection.collapseTo(offset - 1);
-      return;
-    }
-    control.value = text.substr(0, selection.start) +
-                    text.substr(selection.end);
+    if (selection.collapsed)
+      --selection.focusOffset;
+    selection.text = '';
   });
 
   bindKey('Ctrl+A', function(selection) {
@@ -150,13 +136,9 @@ var TextFieldEditCommand;
   bindKey('Delete', function(selection) {
     var control = selection.control;
     var text = control.value;
-    if (selection.collapsed) {
-      control.value = text.substr(0, selection.focusOffset) +
-                      text.substr(selection.focusOffset + 1);
-      return;
-    }
-    control.value = text.substr(0, selection.start) +
-                    text.substr(selection.end);
+    if (selection.collapsed)
+      ++selection.focusOffset;
+    selection.text = '';
   });
 
   bindKey('End', function(selection) {

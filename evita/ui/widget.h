@@ -101,9 +101,11 @@ class Widget
   public: virtual HCURSOR GetCursorAt(const Point& point) const;
   public: static Widget* GetFocusWidget();
   private: Widget& GetHostWidget() const;
+  private: Widget* GetMouseTarget(const Point& point) const;
   private: Widget* GetWidgetAt(const Point& point) const;
 
   // [H]
+  private: void HandleMouseMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam);
   public: virtual void Hide();
 
   // [O]

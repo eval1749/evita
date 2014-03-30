@@ -118,12 +118,9 @@ class MouseEvent : public Event {
   private: bool shift_key_;
   private: Widget* target_;
 
-  public: MouseEvent(EventType type, const Point& screen_point,
-                     const Point& client_point);
-  protected: MouseEvent(EventType type, Button button, uint32_t flags,
-                        const Point& point);
-  private: MouseEvent(EventType type, Button button, Widget* widget,
-                      WPARAM wParam, LPARAM lParam);
+  public: MouseEvent(EventType type, Button button, uint32_t flags,
+                     Widget* widget, const Point& client_point,
+                     const Point& screen_point);
   public: MouseEvent();
   public: ~MouseEvent();
 
@@ -142,9 +139,9 @@ class MouseEvent : public Event {
   public: bool shift_key() const { return shift_key_; }
   public: Widget* target() const { return target_; }
 
+  public: static Button ConvertToButton(uint32_t message, WPARAM wParam);
   private: static int ConvertToButtons(uint32_t flags);
-  public: static MouseEvent Create(Widget* widget, uint32_t message,
-                                   WPARAM wParam, LPARAM lParam);
+  public: static EventType ConvertToEventType(uint32_t message);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -156,7 +153,9 @@ class MouseWheelEvent : public MouseEvent {
 
   private: int delta_;
 
-  public: MouseWheelEvent(Widget* widget, WPARAM wParam, LPARAM lParam);
+  public: MouseWheelEvent(Widget* widget, const Point& client_point,
+                          const Point& screen_point, uint32_t flags,
+                          int delta);
   public: ~MouseWheelEvent();
 
   public: int delta() const { return delta_; }

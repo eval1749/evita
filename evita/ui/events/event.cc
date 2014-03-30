@@ -221,48 +221,29 @@ KeyboardEvent KeyboardEvent::Create(uint32_t message, WPARAM wParam,
 //
 // MouseEvent
 //
-MouseEvent::MouseEvent(EventType event_type, const Point& screen_point,
-                       const Point& client_point)
-    : Event(event_type),
-      alt_key_(false),
-      button_(0),
-      buttons_(0),
-      click_count_(0),
-      client_point_(client_point),
-      control_key_(false),
-      screen_point_(screen_point),
-      shift_key_(false),
-      target_(nullptr) {
-}
-
-MouseEvent::MouseEvent(EventType event_type, Button button,
-                       uint32_t flags, const Point& point)
+MouseEvent::MouseEvent(EventType event_type, Button button, uint32_t flags,
+                       Widget* widget, const Point& client_point,
+                       const Point& screen_point)
     : Event(event_type),
       alt_key_(false),
       button_(button),
       buttons_(ConvertToButtons(flags)),
       click_count_(0),
-      client_point_(point),
+      client_point_(client_point),
       control_key_(flags & MK_CONTROL),
-      screen_point_(point),
+      screen_point_(screen_point),
       shift_key_(flags & MK_SHIFT),
-      target_(nullptr) {
-}
-
-MouseEvent::MouseEvent(EventType event_type, Button button, Widget* widget,
-                       WPARAM wParam, LPARAM lParam)
-    : MouseEvent(event_type, button, GET_KEYSTATE_WPARAM(wParam),
-                 MAKEPOINTS(lParam)) {
-  WIN32_VERIFY(::MapWindowPoints(widget->AssociatedHwnd(), HWND_DESKTOP,
-                                 &screen_point_, 1));
-  target_ = widget;
-  MouseClickTracker::instance()->UpdateState(*this);
-  if (event_type == EventType::MouseReleased)
-    click_count_ = MouseClickTracker::instance()->click_count();
+      target_(widget) {
+  if (event_type == EventType::MousePressed ||
+      event_type == EventType::MouseReleased) {
+    MouseClickTracker::instance()->UpdateState(*this);
+    if (event_type == EventType::MouseReleased)
+      click_count_ = MouseClickTracker::instance()->click_count();
+  }
 }
 
 MouseEvent::MouseEvent()
-    : MouseEvent(EventType::Invalid, kNone, 0u, Point()) {
+    : MouseEvent(EventType::Invalid, kNone, 0u, nullptr, Point(), Point()) {
 }
 
 MouseEvent::~MouseEvent() {
@@ -283,82 +264,82 @@ int MouseEvent::ConvertToButtons(uint32_t flags) {
   return buttons;
 }
 
+MouseEvent::Button MouseEvent::ConvertToButton(uint32_t message,
+                                               WPARAM wParam) {
+  switch (message) {
+    // Left button
+    case WM_LBUTTONDBLCLK:
+    case WM_LBUTTONDOWN:
+    case WM_LBUTTONUP:
+        return kLeft;
+
+    // Middle button
+    case WM_MBUTTONDBLCLK:
+    case WM_MBUTTONDOWN:
+    case WM_MBUTTONUP:
+        return kMiddle;
+
+    // Move
+    case WM_MOUSEMOVE:
+      return kNone;
+
+    // Right button
+    case WM_RBUTTONDBLCLK:
+    case WM_RBUTTONDOWN:
+    case WM_RBUTTONUP:
+      return kRight;
+
+    // X button
+    case WM_XBUTTONDBLCLK:
+    case WM_XBUTTONDOWN:
+    case WM_XBUTTONUP:
+      if (HIWORD(wParam) == XBUTTON1)
+        return kOther1;
+      if (HIWORD(wParam) == XBUTTON2)
+        return kOther2;
+      break;
+  }
+  return kNone;
+}
+
 // Note: Windows sends message in below sequence for double click:
 //  1 WM_LBUTTONDOWN
 //  2 WM_LBUTTONUP
 //  3 WM_LBUTTONDBLCLK
 //  4 WM_LBUTTONUP
-MouseEvent MouseEvent::Create(Widget* widget, uint32_t message, WPARAM wParam,
-                              LPARAM lParam) {
+EventType MouseEvent::ConvertToEventType(uint32_t message) {
   switch (message) {
-    // Left button
     case WM_LBUTTONDBLCLK:
     case WM_LBUTTONDOWN:
-        return MouseEvent(EventType::MousePressed, kLeft, widget, wParam,
-                          lParam);
-    case WM_LBUTTONUP:
-        return MouseEvent(EventType::MouseReleased, kLeft, widget, wParam,
-                          lParam);
-
-    // Middle button
     case WM_MBUTTONDBLCLK:
     case WM_MBUTTONDOWN:
-        return MouseEvent(EventType::MousePressed, kMiddle, widget, wParam,
-                          lParam);
-    case WM_MBUTTONUP:
-        return MouseEvent(EventType::MouseReleased, kMiddle, widget, wParam,
-                          lParam);
-
-    // Move
-    case WM_MOUSEMOVE:
-      return MouseEvent(EventType::MouseMoved, kNone, widget, wParam,
-                        lParam);
-
-    // Right button
     case WM_RBUTTONDBLCLK:
     case WM_RBUTTONDOWN:
-        return MouseEvent(EventType::MousePressed, kRight, widget, wParam,
-                          lParam);
-    case WM_RBUTTONUP:
-        return MouseEvent(EventType::MouseReleased, kRight, widget, wParam,
-                          lParam);
-
-    // X button
     case WM_XBUTTONDBLCLK:
     case WM_XBUTTONDOWN:
-      if (HIWORD(wParam) == XBUTTON1) {
-        return MouseEvent(EventType::MousePressed, kOther1, widget,
-                          wParam, lParam);
-      }
-      if (HIWORD(wParam) == XBUTTON2) {
-        return MouseEvent(EventType::MousePressed, kOther2, widget,
-                          wParam, lParam);
-      }
-      break;
+        return EventType::MousePressed;
+
+    case WM_LBUTTONUP:
+    case WM_MBUTTONUP:
+    case WM_RBUTTONUP:
     case WM_XBUTTONUP:
-      if (HIWORD(wParam) == XBUTTON1) {
-        return MouseEvent(EventType::MouseReleased, kOther1, widget,
-                          wParam, lParam);
-      }
-      if (HIWORD(wParam) == XBUTTON2) {
-        return MouseEvent(EventType::MouseReleased, kOther2, widget,
-                          wParam, lParam);
-      }
-      break;
+      return EventType::MouseReleased;
+
+    case WM_MOUSEMOVE:
+      return EventType::MouseMoved;
   }
-  return MouseEvent();
+  return EventType::Invalid;
 }
 
 //////////////////////////////////////////////////////////////////////
 //
 // MouseWheelEvent
 //
-MouseWheelEvent::MouseWheelEvent(Widget* widget, WPARAM wParam, LPARAM lParam)
-    : MouseEvent(EventType::MouseWheel, kNone, GET_KEYSTATE_WPARAM(wParam),
-                 MAKEPOINTS(lParam)),
-      delta_(GET_WHEEL_DELTA_WPARAM(wParam)) {
-  WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, widget->AssociatedHwnd(),
-                                 &client_point_, 1));
+MouseWheelEvent::MouseWheelEvent(Widget* widget, const Point& client_point,
+                                 const Point& screen_point, uint32_t flags,
+                                 int delta)
+    : MouseEvent(EventType::MouseWheel, kNone, flags, widget, client_point,
+                 screen_point), delta_(delta) {
 }
 
 MouseWheelEvent::~MouseWheelEvent() {

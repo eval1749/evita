@@ -38,6 +38,8 @@ class Window : public ui::Widget, protected EventSource {
   // ui::Widget
   protected: virtual void OnKeyPressed(
       const ui::KeyboardEvent& event) override;
+  protected: virtual void OnKeyReleased(
+      const ui::KeyboardEvent& event) override;
   protected: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
   protected: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   protected: virtual void OnMouseReleased(const ui::MouseEvent& event) override;

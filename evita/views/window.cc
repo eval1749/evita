@@ -130,6 +130,10 @@ void Window::OnKeyPressed(const ui::KeyboardEvent& event) {
   DispatchKeyboardEvent(event);
 }
 
+void Window::OnKeyReleased(const ui::KeyboardEvent& event) {
+  DispatchKeyboardEvent(event);
+}
+
 void Window::OnMouseMoved(const ui::MouseEvent& event) {
   DispatchMouseEvent(event);
 }

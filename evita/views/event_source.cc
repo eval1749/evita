@@ -67,7 +67,7 @@ EventSource::~EventSource() {
 
 void EventSource::DispatchKeyboardEvent(const ui::KeyboardEvent& event) {
   domapi::KeyboardEvent api_event;
-  api_event.alt_key = false;
+  api_event.alt_key = event.alt_key();
   api_event.control_key = event.control_key();
   api_event.event_type = ConvertEventType(event);
   api_event.key_code = event.raw_key_code();

@@ -28,6 +28,7 @@ TEST_F(FormTest, ctor) {
   EXPECT_SCRIPT_EQ("0", "sample.controls.length");
   EXPECT_SCRIPT_EQ("sample", "sample.name");
   EXPECT_SCRIPT_TRUE("sample.focusControl == null");
+  EXPECT_SCRIPT_TRUE("sample.title == ''");
 }
 
 TEST_F(FormTest, add) {
@@ -47,6 +48,12 @@ TEST_F(FormTest, focusControl) {
       "Set null to Form.protected.focusControl means the form doesn't have"
       " focus control.";
   EXPECT_SCRIPT_TRUE("sample.focusControl == null");
+}
+
+TEST_F(FormTest, title) {
+  EXPECT_SCRIPT_VALID("var sample = new Form('sample');"
+                      "sample.title = 'foo'");
+  EXPECT_SCRIPT_EQ("foo", "sample.title");
 }
 
 TEST_F(FormTest, realize) {

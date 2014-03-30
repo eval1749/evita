@@ -19,6 +19,9 @@ Form.prototype.focusControl;
 /** @expose @type {string} */
 Form.prototype.name;
 
+/** @expose @type {string} */
+Form.prototype.title;
+
 /**
  * @param {!FormControl} control
  */

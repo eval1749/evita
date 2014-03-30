@@ -42,6 +42,7 @@ class FormClass :
         .SetProperty("focusControl", &Form::focus_control,
                                      &Form::set_focus_control)
         .SetProperty("name", &Form::name)
+        .SetProperty("title", &Form::title, &Form::set_title)
         .SetMethod("add", &Form::AddFormControl)
         .SetMethod("control", &Form::control)
         .SetMethod("realize", &Form::Realize)
@@ -85,6 +86,13 @@ void Form::set_focus_control(
   if (focus_control_ == new_focus_control)
     return;
   focus_control_ = new_focus_control;
+  FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
+}
+
+void Form::set_title(const base::string16& new_title) {
+  if (title_ == new_title)
+    return;
+  title_ = new_title;
   FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 

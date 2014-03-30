@@ -29,6 +29,7 @@ class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
   private: gc::Member<FormControl> focus_control_;
   private: const base::string16 name_;
   private: mutable ObserverList<FormObserver> observers_;
+  private: base::string16 title_;
 
   public: Form(const base::string16& name);
   public: virtual ~Form();
@@ -42,6 +43,8 @@ class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
   public: void set_focus_control(
       v8_glue::Nullable<FormControl> new_focus_control);
   public: const base::string16& name() const { return name_; }
+  public: const base::string16& title() const { return title_; }
+  public: void set_title(const base::string16& new_title);
 
   public: void AddFormControl(FormControl* control);
   public: void AddObserver(FormObserver* observer) const;

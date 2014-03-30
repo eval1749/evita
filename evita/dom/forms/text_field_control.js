@@ -78,7 +78,7 @@ var TextFieldEditCommand;
     selection.text = String.fromCharCode(charCode);
     if (selection.collapsed)
       selection.collapseTo(selection.focusOffset);
-    selection.collapseTo(selection.start);
+    selection.collapseTo(selection.end);
   }
 
   /**

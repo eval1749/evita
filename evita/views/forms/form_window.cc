@@ -307,6 +307,7 @@ class FormWindow::FormViewModel final : private dom::FormObserver  {
   private: ui::Control* focus_control_;
   private: const dom::Form* const form_;
   private: std::unordered_map<domapi::EventTargetId, ui::Control*> map_;
+  private: base::string16 title_;
   private: FormWindow* const window_;
 
   public: FormViewModel(const dom::Form* form, FormWindow* window);
@@ -314,6 +315,7 @@ class FormWindow::FormViewModel final : private dom::FormObserver  {
 
   public: bool dirty() const { return dirty_; }
   public: ui::Control* focus_control() const { return focus_control_; }
+  public: const base::string16& title() const { return title_; }
 
   // Update DOM form control map
   public: void Update();
@@ -337,9 +339,11 @@ FormWindow::FormViewModel::~FormViewModel() {
 void FormWindow::FormViewModel::Update() {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(dirty_);
-  std::unordered_set<ui::Control*> controls_to_remove;
+
+  title_ = form_->title();
 
   // Temporary remove controls from window.
+  std::unordered_set<ui::Control*> controls_to_remove;
   auto current_focus = static_cast<ui::Control*>(nullptr);
   while (auto const child = window_->first_child()) {
     auto const control = child->as<ui::Control>();
@@ -406,8 +410,7 @@ void FormWindow::FormViewModel::DidChangeForm() {
 //
 FormWindow::FormWindow(WindowId window_id, const dom::Form* form)
     : views::Window(ui::NativeWindow::Create(*this), window_id),
-      form_(form), gfx_(new gfx::Graphics()),
-      model_(new FormViewModel(form, this)) {
+      gfx_(new gfx::Graphics()), model_(new FormViewModel(form, this)) {
 }
 
 FormWindow::~FormWindow() {
@@ -440,6 +443,12 @@ bool FormWindow::OnIdle(int) {
     return true;
 
   model_->Update();
+
+  if (title_ != model_->title()) {
+    title_ = model_->title();
+    ::SetWindowTextW(AssociatedHwnd(), title_.c_str());
+  }
+
   return false;
 }
 
@@ -467,8 +476,7 @@ void FormWindow::CreateNativeWindow() const {
   WIN32_VERIFY(::AdjustWindowRectEx(&windowRect, dwStyle, has_menu, dwExStyle));
 
   native_window()->CreateWindowEx(
-      // TODO(yosi) We should specify window title of|FormWindow|.
-      dwExStyle, dwStyle, L"FormWindow", nullptr,
+      dwExStyle, dwStyle, L"?", nullptr,
       gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
       windowRect.size());
 }
@@ -503,7 +511,6 @@ void FormWindow::DidSetFocus() {
   Window::DidSetFocus();
   if (!model_)
     return;
-  DVLOG(0) << "set focus to " << model_->focus_control();
   if (auto const focus_control = model_->focus_control())
     focus_control->RequestFocus();
 }

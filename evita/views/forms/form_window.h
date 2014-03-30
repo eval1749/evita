@@ -37,10 +37,10 @@ class FormWindow final : public views::Window,
 
   private: class FormViewModel;
 
-  private: gc::Member<const dom::Form> form_;
-  private: private: std::unique_ptr<gfx::Graphics> gfx_;
-  private: private: std::unique_ptr<FormViewModel> model_;
+  private: private: const std::unique_ptr<gfx::Graphics> gfx_;
+  private: private: const std::unique_ptr<FormViewModel> model_;
   private: gfx::Rect pending_update_rect_;
+  private: base::string16 title_;
 
   public: FormWindow(views::WindowId window_id, const dom::Form* form);
   public: virtual ~FormWindow();

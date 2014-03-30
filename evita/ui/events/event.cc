@@ -3,8 +3,10 @@
 
 #include "evita/ui/events/event.h"
 
+#include <algorithm>
 #include <vector>
 
+#include "base/logging.h"
 #include "common/memory/singleton.h"
 #include "common/win/win32_verify.h"
 #include "evita/ui/widget.h"
@@ -58,13 +60,121 @@ int KeyCodeMapper::Map(int virtual_key_code) {
   return key_code;
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// MouseClickTracker
+//
+class MouseClickTracker : public common::Singleton<MouseClickTracker> {
+  DECLARE_SINGLETON_CLASS(MouseClickTracker);
+
+  // These values match the Windows defaults.
+  private: static const auto kDoubleClickTimeMS = 500;
+  private: static const auto kDoubleClickWidth = 4;
+  private: static const auto kDoubleClickHeight = 4;
+
+  private: enum class State {
+    Start,
+    Pressed,
+    PressedReleased,
+    PressedReleasedPressed,
+  };
+
+  private: int click_count_;
+  private: MouseEvent last_event_;
+  private: State state_;
+
+  private: MouseClickTracker();
+  public: ~MouseClickTracker();
+
+  public: int click_count() const { return click_count_; }
+  private: bool is_repeated_event(const MouseEvent& event) const;
+  private: bool is_same_location(const MouseEvent& event) const;
+  private: bool is_same_time(const MouseEvent& event) const;
+
+  public: void UpdateState(const MouseEvent& event);
+
+  DISALLOW_COPY_AND_ASSIGN(MouseClickTracker);
+};
+
+MouseClickTracker::MouseClickTracker()
+    : click_count_(0), state_(State::Start) {
+}
+
+MouseClickTracker::~MouseClickTracker() {
+}
+
+bool MouseClickTracker::is_repeated_event(const MouseEvent& event) const {
+  return is_same_location(event) && is_same_time(event);
+}
+
+bool MouseClickTracker::is_same_location(const MouseEvent& event) const {
+  if (last_event_.target() != event.target())
+    return false;
+  Rect rect(last_event_.screen_location().x - kDoubleClickWidth / 2,
+            last_event_.screen_location().y - kDoubleClickHeight / 2,
+            last_event_.screen_location().x + kDoubleClickWidth / 2,
+            last_event_.screen_location().y + kDoubleClickHeight / 2);
+  return rect.Contains(event.screen_location());
+}
+
+bool MouseClickTracker::is_same_time(const MouseEvent& event) const {
+  auto const diff = event.time_stamp() - last_event_.time_stamp();
+  return diff.InMilliseconds() <= kDoubleClickTimeMS;
+}
+
+void MouseClickTracker::UpdateState(const MouseEvent& event) {
+  if (event.event_type() != EventType::MousePressed &&
+      event.event_type() != EventType::MouseReleased) {
+    return;
+  }
+  click_count_ = 0;
+  auto const state = state_;
+  state_ = State::Start;
+  switch (state) {
+    case State::Start:
+      if (event.event_type() == EventType::MousePressed) {
+        last_event_ = event;
+        state_ = State::Pressed;
+      }
+      break;
+    case State::Pressed:
+      if (last_event_.target() != event.target())
+        return;
+      if (event.event_type() == EventType::MouseReleased) {
+        click_count_ = 1;
+        if (is_repeated_event(event))
+          state_ = State::PressedReleased;
+      }
+      break;
+    case State::PressedReleased:
+      if (event.event_type() == EventType::MousePressed) {
+        if (is_repeated_event(event)) {
+          state_ = State::PressedReleasedPressed;
+          break;
+        }
+        last_event_ = event;
+        state_ = State::Pressed;
+      }
+      break;
+    case State::PressedReleasedPressed:
+      if (last_event_.target() != event.target())
+        return;
+      if (event.event_type() == EventType::MouseReleased &&
+          is_repeated_event(event)) {
+        click_count_ = 2;
+      }
+      break;
+  }
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // Event
 //
-Event::Event(EventType event_type) : event_type_(event_type) {
+Event::Event(EventType event_type)
+    : event_type_(event_type), time_stamp_(base::Time::Now()) {
 }
 
 Event::Event() : Event(EventType::Invalid) {
@@ -117,35 +227,42 @@ MouseEvent::MouseEvent(EventType event_type, const Point& screen_point,
       alt_key_(false),
       button_(0),
       buttons_(0),
+      click_count_(0),
       client_point_(client_point),
       control_key_(false),
       screen_point_(screen_point),
-      shift_key_(false) {
+      shift_key_(false),
+      target_(nullptr) {
 }
 
-MouseEvent::MouseEvent(EventType event_type, Button button, int click_count,
+MouseEvent::MouseEvent(EventType event_type, Button button,
                        uint32_t flags, const Point& point)
     : Event(event_type),
       alt_key_(false),
       button_(button),
       buttons_(ConvertToButtons(flags)),
-      click_count_(click_count),
+      click_count_(0),
       client_point_(point),
       control_key_(flags & MK_CONTROL),
       screen_point_(point),
-      shift_key_(flags & MK_SHIFT) {
+      shift_key_(flags & MK_SHIFT),
+      target_(nullptr) {
 }
 
-MouseEvent::MouseEvent(EventType event_type, Button button, int click_count,
-                       Widget* widget, WPARAM wParam, LPARAM lParam)
-    : MouseEvent(event_type, button, click_count, GET_KEYSTATE_WPARAM(wParam),
+MouseEvent::MouseEvent(EventType event_type, Button button, Widget* widget,
+                       WPARAM wParam, LPARAM lParam)
+    : MouseEvent(event_type, button, GET_KEYSTATE_WPARAM(wParam),
                  MAKEPOINTS(lParam)) {
   WIN32_VERIFY(::MapWindowPoints(widget->AssociatedHwnd(), HWND_DESKTOP,
                                  &screen_point_, 1));
+  target_ = widget;
+  MouseClickTracker::instance()->UpdateState(*this);
+  if (event_type == EventType::MouseReleased)
+    click_count_ = MouseClickTracker::instance()->click_count();
 }
 
 MouseEvent::MouseEvent()
-    : MouseEvent(EventType::Invalid, kNone, 0, 0u, Point()) {
+    : MouseEvent(EventType::Invalid, kNone, 0u, Point()) {
 }
 
 MouseEvent::~MouseEvent() {
@@ -166,77 +283,65 @@ int MouseEvent::ConvertToButtons(uint32_t flags) {
   return buttons;
 }
 
-
+// Note: Windows sends message in below sequence for double click:
+//  1 WM_LBUTTONDOWN
+//  2 WM_LBUTTONUP
+//  3 WM_LBUTTONDBLCLK
+//  4 WM_LBUTTONUP
 MouseEvent MouseEvent::Create(Widget* widget, uint32_t message, WPARAM wParam,
                               LPARAM lParam) {
   switch (message) {
     // Left button
     case WM_LBUTTONDBLCLK:
-        return MouseEvent(EventType::MousePressed, kLeft, 2, widget, wParam,
-                          lParam);
     case WM_LBUTTONDOWN:
-        return MouseEvent(EventType::MousePressed, kLeft, 0, widget, wParam,
+        return MouseEvent(EventType::MousePressed, kLeft, widget, wParam,
                           lParam);
     case WM_LBUTTONUP:
-        return MouseEvent(EventType::MouseReleased, kLeft, 0, widget, wParam,
+        return MouseEvent(EventType::MouseReleased, kLeft, widget, wParam,
                           lParam);
 
     // Middle button
     case WM_MBUTTONDBLCLK:
-        return MouseEvent(EventType::MousePressed, kMiddle, 2, widget, wParam,
-                          lParam);
     case WM_MBUTTONDOWN:
-        return MouseEvent(EventType::MousePressed, kMiddle, 0, widget, wParam,
+        return MouseEvent(EventType::MousePressed, kMiddle, widget, wParam,
                           lParam);
     case WM_MBUTTONUP:
-        return MouseEvent(EventType::MouseReleased, kMiddle, 0, widget, wParam,
+        return MouseEvent(EventType::MouseReleased, kMiddle, widget, wParam,
                           lParam);
 
     // Move
     case WM_MOUSEMOVE:
-      return MouseEvent(EventType::MouseMoved, kNone, 0, widget, wParam,
+      return MouseEvent(EventType::MouseMoved, kNone, widget, wParam,
                         lParam);
 
     // Right button
     case WM_RBUTTONDBLCLK:
-        return MouseEvent(EventType::MousePressed, kRight, 2, widget, wParam,
-                          lParam);
     case WM_RBUTTONDOWN:
-        return MouseEvent(EventType::MousePressed, kRight, 0, widget, wParam,
+        return MouseEvent(EventType::MousePressed, kRight, widget, wParam,
                           lParam);
     case WM_RBUTTONUP:
-        return MouseEvent(EventType::MouseReleased, kRight, 0, widget, wParam,
+        return MouseEvent(EventType::MouseReleased, kRight, widget, wParam,
                           lParam);
 
     // X button
     case WM_XBUTTONDBLCLK:
-      if (HIWORD(wParam) == XBUTTON1) {
-        return MouseEvent(EventType::MousePressed, kOther1, 2, widget,
-                          wParam,
-                          lParam);
-      }
-      if (HIWORD(wParam) == XBUTTON2) {
-        return MouseEvent(EventType::MousePressed, kOther2, 2, widget,
-                          wParam, lParam);
-      }
-      break;
     case WM_XBUTTONDOWN:
       if (HIWORD(wParam) == XBUTTON1) {
-        return MouseEvent(EventType::MousePressed, kOther1, 0, widget,
+        return MouseEvent(EventType::MousePressed, kOther1, widget,
                           wParam, lParam);
       }
       if (HIWORD(wParam) == XBUTTON2) {
-        return MouseEvent(EventType::MousePressed, kOther2, 0, widget,
+        return MouseEvent(EventType::MousePressed, kOther2, widget,
                           wParam, lParam);
       }
       break;
     case WM_XBUTTONUP:
       if (HIWORD(wParam) == XBUTTON1) {
-        return MouseEvent(EventType::MouseReleased, kOther1, 0, widget,
+        return MouseEvent(EventType::MouseReleased, kOther1, widget,
                           wParam, lParam);
       }
       if (HIWORD(wParam) == XBUTTON2) {
-        return MouseEvent(EventType::MouseReleased, kOther2, 0, widget,
+        return MouseEvent(EventType::MouseReleased, kOther2, widget,
                           wParam, lParam);
       }
       break;
@@ -249,7 +354,7 @@ MouseEvent MouseEvent::Create(Widget* widget, uint32_t message, WPARAM wParam,
 // MouseWheelEvent
 //
 MouseWheelEvent::MouseWheelEvent(Widget* widget, WPARAM wParam, LPARAM lParam)
-    : MouseEvent(EventType::MouseWheel, kNone, 0, GET_KEYSTATE_WPARAM(wParam),
+    : MouseEvent(EventType::MouseWheel, kNone, GET_KEYSTATE_WPARAM(wParam),
                  MAKEPOINTS(lParam)),
       delta_(GET_WHEEL_DELTA_WPARAM(wParam)) {
   WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, widget->AssociatedHwnd(),

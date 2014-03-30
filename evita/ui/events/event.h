@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 
+#include "base/time/time.h"
 #include "common/win/rect.h"
 
 namespace ui {
@@ -54,12 +55,14 @@ enum class Modifier {
 //
 class Event {
   private: EventType event_type_;
+  private: base::Time time_stamp_;
 
   protected: explicit Event(EventType event_type);
   protected: Event();
   public: ~Event();
 
   public: EventType event_type() const { return event_type_; }
+  public: base::Time time_stamp() const { return time_stamp_; }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -113,14 +116,15 @@ class MouseEvent : public Event {
   private: bool control_key_;
   private: Point screen_point_;
   private: bool shift_key_;
+  private: Widget* target_;
 
   public: MouseEvent(EventType type, const Point& screen_point,
                      const Point& client_point);
-  protected: MouseEvent(EventType type, Button button, int click_count,
-                        uint32_t flags, const Point& point);
-  private: MouseEvent(EventType type, Button button, int click_count,
-                      Widget* widget, WPARAM wParam, LPARAM lParam);
-  private: MouseEvent();
+  protected: MouseEvent(EventType type, Button button, uint32_t flags,
+                        const Point& point);
+  private: MouseEvent(EventType type, Button button, Widget* widget,
+                      WPARAM wParam, LPARAM lParam);
+  public: MouseEvent();
   public: ~MouseEvent();
 
   public: bool alt_key() const { return alt_key_; }
@@ -134,7 +138,9 @@ class MouseEvent : public Event {
   public: bool is_other1_button() const { return button_ == kOther1; }
   public: bool is_other2_button() const { return button_ == kOther2; }
   public: Point location() const { return client_point_; }
+  public: Point screen_location() const { return screen_point_; }
   public: bool shift_key() const { return shift_key_; }
+  public: Widget* target() const { return target_; }
 
   private: static int ConvertToButtons(uint32_t flags);
   public: static MouseEvent Create(Widget* widget, uint32_t message,

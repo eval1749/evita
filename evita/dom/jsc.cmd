@@ -17,6 +17,7 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\clipboard\data_transfer_item_externs.js ^
   %externs_dir%\clipboard\data_transfer_item_list_externs.js ^
   %externs_dir%\commander_externs.js ^
+  %externs_dir%\commands\find_and_replace_externs.js ^
   %externs_dir%\commands\spell_checker_externs.js ^
   %externs_dir%\console_externs.js ^
   %externs_dir%\css\style_externs.js ^

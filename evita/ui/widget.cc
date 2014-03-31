@@ -553,10 +553,14 @@ void Widget::ResizeTo(const Rect& rect) {
 }
 
 void Widget::SchedulePaint() {
+  DCHECK(is_realized());
   SchedulePaintInRect(rect_);
 }
 
 void Widget::SchedulePaintInRect(const Rect& rect) {
+  DCHECK(is_realized());
+  DCHECK(!rect.empty());
+  // TODO(yosi) We should have |DCHECK(rect_.Contains(rect))|.
   ::InvalidateRect(AssociatedHwnd(), &rect, true);
 }
 
@@ -621,7 +625,8 @@ void Widget::Show() {
     ::ShowWindow(*native_window_.get(), SW_SHOW);
   } else if (shown_ == 1) {
     DidShow();
-    SchedulePaint();
+    if (!rect().empty())
+      SchedulePaint();
   }
 
   // Show child in bottom to top == pre-order.

@@ -43,7 +43,8 @@ void Control::set_disabled(bool new_disabled) {
   if (disabled() == new_disabled)
     return;
   state_ = new_disabled ? State::Disabled : State::Normal;
-  SchedulePaint();
+  if (is_realized())
+    SchedulePaint();
 }
 
 // ui::WIdget
@@ -58,7 +59,8 @@ void Control::DidSetFocus() {
   if (disabled())
     return;
   state_ = State::Highlight;
-  SchedulePaint();
+  if (is_realized())
+    SchedulePaint();
 }
 
 void Control::OnKeyPressed(const KeyboardEvent& event) {

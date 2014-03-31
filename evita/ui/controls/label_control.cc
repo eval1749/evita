@@ -14,6 +14,7 @@ namespace ui {
 //
 class LabelControl::Renderer {
   private: gfx::RectF rect_;
+  private: gfx::PointF text_origin_;
   private: Style style_;
   private: std::unique_ptr<gfx::TextLayout> text_layout_;
 
@@ -39,16 +40,24 @@ LabelControl::Renderer::Renderer(const base::string16& text,
                                  const gfx::RectF& rect)
     : rect_(rect), style_(style),
       text_layout_(CreateTextLayout(text, style, rect.size())) {
+  // TODO(yosi) We should share following code fragment with |ButtonControl|
+  // and |TextFieldControl|.
+  DWRITE_TEXT_METRICS metrics;
+  COM_VERIFY((*text_layout_)->GetMetrics(&metrics));
+  auto const text_size = gfx::SizeF(metrics.width, metrics.height);
+  // Render text at middle of control.
+  auto const offset = (rect_.size() - text_size) / 2.0f;
+  text_origin_ = gfx::PointF(rect_.left, rect_.top + offset.height);
 }
 
 LabelControl::Renderer::~Renderer() {
 }
 
 void LabelControl::Renderer::Render(gfx::Graphics* gfx) const {
+  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, rect_);
   gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect_);
-
   gfx::Brush text_brush(*gfx, style_.color);
-  (*gfx)->DrawTextLayout(rect_.left_top(), *text_layout_, text_brush,
+  (*gfx)->DrawTextLayout(text_origin_, *text_layout_, text_brush,
                          D2D1_DRAW_TEXT_OPTIONS_CLIP);
   gfx->Flush();
 }

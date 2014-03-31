@@ -45,8 +45,6 @@
 #include "evita/vi_Frame.h"
 #include "evita/vi_Selection.h"
 
-extern HWND g_hwndActiveDialog;
-
 namespace {
 class RenderSelection : public views::rendering::Selection {
   public: RenderSelection(::Selection* selection, bool is_active);
@@ -62,6 +60,18 @@ RenderSelection::RenderSelection(::Selection* selection, bool is_active) {
 
 RenderSelection::RenderSelection(::Selection* selection)
     : RenderSelection(selection, false) {
+}
+
+bool IsPopupWindow(HWND hwnd) {
+  while (hwnd) {
+    auto const dwStyle = static_cast<DWORD>(::GetWindowLong(hwnd, GWL_STYLE));
+    if (dwStyle & WS_POPUP)
+      return true;
+    if (!(dwStyle & WS_CHILD))
+      return false;
+    hwnd = ::GetParent(hwnd);
+  }
+  return false;
 }
 
 }  // namespace
@@ -100,7 +110,7 @@ bool TextEditWindow::is_selection_active() const {
   if (has_focus())
     return true;
 
-  if (!g_hwndActiveDialog)
+  if (!IsPopupWindow(::GetFocus()))
     return false;
 
   auto const edit_pane = views::FrameList::instance()->active_frame()->

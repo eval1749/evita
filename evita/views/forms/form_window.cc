@@ -79,6 +79,13 @@ void ControlImporter::Update(const dom::FormControl* control,
                  static_cast<int>(control->client_top())),
       gfx::Size(static_cast<int>(control->client_width()),
                 static_cast<int>(control->client_height())));
+  DCHECK(!rect.empty());
+  if (rect.empty()) {
+    // Because empty rectangle causes assertion in graphics rendering, we
+    // adjust control rectangle.
+    rect.right = rect.left + 1;
+    rect.bottom = rect.top + 1;
+  }
   widget->ResizeTo(rect);
 
   if (auto const control_widget = widget->as<ui::Control>())
@@ -383,6 +390,7 @@ void FormWindow::FormViewModel::Update() {
       window_->SchedulePaintInRect(widget->rect());
       controls_to_remove.erase(widget);
     }
+    DCHECK(!widget->rect().empty());
     if (widget->focusable()) {
       if (!focusable)
         focusable = widget;

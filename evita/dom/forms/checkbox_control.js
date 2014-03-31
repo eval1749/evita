@@ -7,5 +7,8 @@
  * Default event handler.
  */
 CheckboxControl.handleEvent = function(event) {
+  var checkbox = /** @type {!CheckboxConrol} */(event.target);
+  if (event.type == Event.Names.CLICK)
+    checkbox.checked = !checkbox.checked;
   FormControl.handleEvent(event);
 };

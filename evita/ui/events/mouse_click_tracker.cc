@@ -55,7 +55,6 @@ void MouseClickTracker::OnMousePressed(const MouseEvent& event) {
     state_ = State::Pressed;
     return;
   }
-  NOTREACHED();
 }
 
 void MouseClickTracker::OnMouseReleased(const MouseEvent& event) {

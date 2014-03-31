@@ -1554,7 +1554,7 @@ void TabStrip::OnMouseMoved(const ui::MouseEvent& event) {
 }
 
 void TabStrip::OnMousePressed(const ui::MouseEvent& event) {
-  if (event.is_left_button())
+  if (event.is_left_button() && !event.click_count())
     impl_->onLButtonDown(event.location());
 }
 

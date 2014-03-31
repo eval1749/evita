@@ -86,7 +86,7 @@ bool NativeWindow::CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
 
   // For child window, we need to assign unique id in parent window.
   // |ui::Widget::child_window_id()| exposes child window id.
-  auto const child_id = parent_hwnd && parent_hwnd != HWND_MESSAGE ?
+  auto const child_id = dwStyle & WS_CHILD ?
       reinterpret_cast<HMENU>(this) : static_cast<HMENU>(nullptr);
   auto const hwnd = ::CreateWindowEx(dwExStyle, MAKEINTATOM(s_window_class),
                                      title, dwStyle, left_top.x, left_top.y,

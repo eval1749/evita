@@ -96,14 +96,18 @@ void FormControl::set_client_height(float new_height) {
 void FormControl::set_client_left(float new_left) {
   if (rect_.left == new_left)
     return;
+  auto const width = rect_.width();
   rect_.left = new_left;
+  rect_.right = new_left + width;
   NotifyControlChange();
 }
 
 void FormControl::set_client_top(float new_top) {
   if (rect_.top == new_top)
     return;
+  auto const height = rect_.height();
   rect_.top = new_top;
+  rect_.bottom = new_top + height;
   NotifyControlChange();
 }
 

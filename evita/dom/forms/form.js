@@ -121,9 +121,9 @@ global.Form.prototype.get = function(control_id) {
       case Event.Names.KEYUP:
       case Event.Names.MOUSEDOWN:
       case Event.Names.MOUSEMOVE:
+      case Event.Names.MOUSEUP:
         break;
       case Event.Names.FOCUS:
-        console.log('Form.handleEvent', this, event);
         if (!this.focusControl)
           moveFocusToNext(this);
         break;

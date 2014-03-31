@@ -14,6 +14,7 @@
 #include "common/win/win32_verify.h"
 #include "evita/ui/events/event.h"
 #include "evita/ui/events/event_ostream.h"
+#include "evita/ui/events/mouse_click_tracker.h"
 #include "evita/ui/root_widget.h"
 #include "evita/ui/system_metrics.h"
 #include "evita/ui/widget_ostream.h"
@@ -200,7 +201,7 @@ void Widget::DispatchMouseExited() {
     DVLOG_WIDGET(0) << "MapWindowPoints error=" << ::GetLastError();
     return;
   }
-  MouseEvent event(EventType::MouseExited, MouseEvent::kNone, 0,
+  MouseEvent event(EventType::MouseExited, MouseEvent::kNone, 0u, 0,
                    hover, client_point, screen_point);
   hover->OnMouseExited(event);
 }
@@ -344,7 +345,7 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
       else
         DVLOG(0) << "TrackMouseEvent last_error=" << ::GetLastError();
     } else if (hover_ != target) {
-      MouseEvent event(EventType::MouseExited, MouseEvent::kNone, 0,
+      MouseEvent event(EventType::MouseExited, MouseEvent::kNone, 0u, 0,
                        hover_, client_point, screen_point);
       hover_->OnMouseExited(event);
       hover_ = target;
@@ -353,7 +354,7 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
 
   MouseEvent event(MouseEvent::ConvertToEventType(message),
                    MouseEvent::ConvertToButton(message, wParam),
-                   GET_KEYSTATE_WPARAM(wParam),
+                   GET_KEYSTATE_WPARAM(wParam), 0,
                    target, client_point, screen_point);
   if (event.event_type() == EventType::MouseMoved) {
     target->OnMouseMoved(event);
@@ -361,12 +362,29 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
   }
 
   if (event.event_type() == EventType::MousePressed) {
+    MouseClickTracker::instance()->OnMousePressed(event);
     target->OnMousePressed(event);
     return;
   }
 
   if (event.event_type() == EventType::MouseReleased) {
+    MouseClickTracker::instance()->OnMouseReleased(event);
     target->OnMouseReleased(event);
+    auto const click_count  = MouseClickTracker::instance()->click_count();
+    if (click_count >= 1) {
+      MouseEvent click_event(EventType::MousePressed,
+                             MouseEvent::ConvertToButton(message, wParam),
+                             GET_KEYSTATE_WPARAM(wParam), 1,
+                             target, client_point, screen_point);
+      target->OnMousePressed(click_event);
+    }
+    if (click_count >= 2) {
+      MouseEvent dblclick_event(EventType::MousePressed,
+                                MouseEvent::ConvertToButton(message, wParam),
+                                GET_KEYSTATE_WPARAM(wParam), 2,
+                                target, client_point, screen_point);
+      target->OnMousePressed(dblclick_event);
+    }
     return;
   }
 }

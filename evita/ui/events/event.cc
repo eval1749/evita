@@ -60,113 +60,6 @@ int KeyCodeMapper::Map(int virtual_key_code) {
   return key_code;
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// MouseClickTracker
-//
-class MouseClickTracker : public common::Singleton<MouseClickTracker> {
-  DECLARE_SINGLETON_CLASS(MouseClickTracker);
-
-  // These values match the Windows defaults.
-  private: static const auto kDoubleClickTimeMS = 500;
-  private: static const auto kDoubleClickWidth = 4;
-  private: static const auto kDoubleClickHeight = 4;
-
-  private: enum class State {
-    Start,
-    Pressed,
-    PressedReleased,
-    PressedReleasedPressed,
-  };
-
-  private: int click_count_;
-  private: MouseEvent last_event_;
-  private: State state_;
-
-  private: MouseClickTracker();
-  public: ~MouseClickTracker();
-
-  public: int click_count() const { return click_count_; }
-  private: bool is_repeated_event(const MouseEvent& event) const;
-  private: bool is_same_location(const MouseEvent& event) const;
-  private: bool is_same_time(const MouseEvent& event) const;
-
-  public: void UpdateState(const MouseEvent& event);
-
-  DISALLOW_COPY_AND_ASSIGN(MouseClickTracker);
-};
-
-MouseClickTracker::MouseClickTracker()
-    : click_count_(0), state_(State::Start) {
-}
-
-MouseClickTracker::~MouseClickTracker() {
-}
-
-bool MouseClickTracker::is_repeated_event(const MouseEvent& event) const {
-  return is_same_location(event) && is_same_time(event);
-}
-
-bool MouseClickTracker::is_same_location(const MouseEvent& event) const {
-  if (last_event_.target() != event.target())
-    return false;
-  Rect rect(last_event_.screen_location().x - kDoubleClickWidth / 2,
-            last_event_.screen_location().y - kDoubleClickHeight / 2,
-            last_event_.screen_location().x + kDoubleClickWidth / 2,
-            last_event_.screen_location().y + kDoubleClickHeight / 2);
-  return rect.Contains(event.screen_location());
-}
-
-bool MouseClickTracker::is_same_time(const MouseEvent& event) const {
-  auto const diff = event.time_stamp() - last_event_.time_stamp();
-  return diff.InMilliseconds() <= kDoubleClickTimeMS;
-}
-
-void MouseClickTracker::UpdateState(const MouseEvent& event) {
-  if (event.event_type() != EventType::MousePressed &&
-      event.event_type() != EventType::MouseReleased) {
-    return;
-  }
-  click_count_ = 0;
-  auto const state = state_;
-  state_ = State::Start;
-  switch (state) {
-    case State::Start:
-      if (event.event_type() == EventType::MousePressed) {
-        last_event_ = event;
-        state_ = State::Pressed;
-      }
-      break;
-    case State::Pressed:
-      if (last_event_.target() != event.target())
-        return;
-      if (event.event_type() == EventType::MouseReleased) {
-        click_count_ = 1;
-        if (is_repeated_event(event))
-          state_ = State::PressedReleased;
-      }
-      break;
-    case State::PressedReleased:
-      if (event.event_type() == EventType::MousePressed) {
-        if (is_repeated_event(event)) {
-          state_ = State::PressedReleasedPressed;
-          break;
-        }
-        last_event_ = event;
-        state_ = State::Pressed;
-      }
-      break;
-    case State::PressedReleasedPressed:
-      if (last_event_.target() != event.target())
-        return;
-      if (event.event_type() == EventType::MouseReleased &&
-          is_repeated_event(event)) {
-        click_count_ = 2;
-      }
-      break;
-  }
-}
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -225,28 +118,22 @@ bool KeyboardEvent::ConvertToRepeat(LPARAM lParam) {
 // MouseEvent
 //
 MouseEvent::MouseEvent(EventType event_type, Button button, uint32_t flags,
-                       Widget* widget, const Point& client_point,
-                       const Point& screen_point)
+                       int click_count, Widget* widget,
+                       const Point& client_point, const Point& screen_point)
     : Event(event_type),
       alt_key_(false),
       button_(button),
       buttons_(ConvertToButtons(flags)),
-      click_count_(0),
+      click_count_(click_count),
       client_point_(client_point),
       control_key_(flags & MK_CONTROL),
       screen_point_(screen_point),
       shift_key_(flags & MK_SHIFT),
       target_(widget) {
-  if (event_type == EventType::MousePressed ||
-      event_type == EventType::MouseReleased) {
-    MouseClickTracker::instance()->UpdateState(*this);
-    if (event_type == EventType::MouseReleased)
-      click_count_ = MouseClickTracker::instance()->click_count();
-  }
 }
 
 MouseEvent::MouseEvent()
-    : MouseEvent(EventType::Invalid, kNone, 0u, nullptr, Point(), Point()) {
+    : MouseEvent(EventType::Invalid, kNone, 0u, 0, nullptr, Point(), Point()) {
 }
 
 MouseEvent::~MouseEvent() {
@@ -341,7 +228,7 @@ EventType MouseEvent::ConvertToEventType(uint32_t message) {
 MouseWheelEvent::MouseWheelEvent(Widget* widget, const Point& client_point,
                                  const Point& screen_point, uint32_t flags,
                                  int delta)
-    : MouseEvent(EventType::MouseWheel, kNone, flags, widget, client_point,
+    : MouseEvent(EventType::MouseWheel, kNone, flags, 0, widget, client_point,
                  screen_point), delta_(delta) {
 }
 

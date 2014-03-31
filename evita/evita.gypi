@@ -595,6 +595,7 @@
 
         'ui/events/event.cc',
         'ui/events/event_ostream.cc',
+        'ui/events/mouse_click_tracker.cc',
 
         'ui/controls/button_control.cc',
         'ui/controls/checkbox_control.cc',

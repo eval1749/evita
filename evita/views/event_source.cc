@@ -100,19 +100,6 @@ void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
   api_event.shift_key = event.shift_key();
   api_event.target_id = event_target_id_;
   view_event_handler()->DispatchMouseEvent(api_event);
-
-  if (event.event_type() != ui::EventType::MouseReleased)
-    return;
-
-  if (event.click_count() >= 1) {
-    api_event.event_type = domapi::EventType::Click;
-    view_event_handler()->DispatchMouseEvent(api_event);
-  }
-
-  if (event.click_count() >= 2) {
-    api_event.event_type = domapi::EventType::DblClick;
-    view_event_handler()->DispatchMouseEvent(api_event);
-  }
 }
 
 void EventSource::DispatchWheelEvent(const ui::MouseWheelEvent& event) {

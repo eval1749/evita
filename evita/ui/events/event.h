@@ -124,8 +124,8 @@ class MouseEvent : public Event {
   private: Widget* target_;
 
   public: MouseEvent(EventType type, Button button, uint32_t flags,
-                     Widget* widget, const Point& client_point,
-                     const Point& screen_point);
+                     int click_count, Widget* widget,
+                     const Point& client_point, const Point& screen_point);
   public: MouseEvent();
   public: ~MouseEvent();
 

@@ -114,13 +114,18 @@ global.Form.prototype.get = function(control_id) {
    */
   Form.handleEvent = function(event) {
     switch (event.type) {
+      case Event.Names.BLUR:
+      case Event.Names.CLICK:
+      case Event.Names.DBLCLICK:
+      case Event.Names.IDLE:
+      case Event.Names.KEYUP:
+      case Event.Names.MOUSEDOWN:
+      case Event.Names.MOUSEMOVE:
+        break;
       case Event.Names.FOCUS:
         console.log('Form.handleEvent', this, event);
         if (!this.focusControl)
           moveFocusToNext(this);
-        break;
-      case Event.Names.IDLE:
-      case Event.Names.MOUSEMOVE:
         break;
       case Event.Names.KEYDOWN:
         if (!event.defaultPrevented)

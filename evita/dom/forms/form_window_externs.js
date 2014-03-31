@@ -4,6 +4,7 @@
 
 /**
  * @constructor
+ * @extends {Window}
  * @param {!Form} form
  */
 function FormWindow(form) {}

@@ -344,8 +344,11 @@ void FormWindow::FormViewModel::Update() {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(dirty_);
 
-  size_ = gfx::Size(static_cast<int>(form_->width()),
-                    static_cast<int>(form_->height()));
+  // Window size should not be zero.
+  auto const kMinHeight = 10;
+  auto const kMinWidth = 10;
+  size_ = gfx::Size(std::max(static_cast<int>(form_->width()), kMinWidth),
+                    std::max(static_cast<int>(form_->height()), kMinHeight));
   title_ = form_->title();
 
   // Temporary remove controls from window.

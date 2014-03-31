@@ -284,7 +284,8 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message, WPARAM wParam,
   if (message == WM_CHAR) {
     KeyboardEvent event(EventType::KeyPressed, static_cast<int>(wParam),
                         KeyboardEvent::ConvertToRepeat(lParam));
-    OnKeyPressed(event);
+    if (event.raw_key_code() >= 0x20)
+      OnKeyPressed(event);
     return 0;
   }
 

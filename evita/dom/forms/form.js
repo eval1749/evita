@@ -46,8 +46,10 @@ global.Form.prototype.get = function(control_id) {
       }
       return null;
     }
-    form.focusControl = findFocusable(controlIndex(form, form.focusControl)) ||
-                        findFocusable(-1);
+    var focusControl = findFocusable(controlIndex(form, form.focusControl)) ||
+                       findFocusable(-1);
+    if (focusControl)
+      focusControl.focus();
   }
 
   /**
@@ -66,8 +68,10 @@ global.Form.prototype.get = function(control_id) {
       }
       return null;
     }
-    form.focusControl = findFocusable(controlIndex(form, form.focusControl)) ||
-                        findFocusable(controls.length);
+    var focusControl = findFocusable(controlIndex(form, form.focusControl)) ||
+                       findFocusable(controls.length);
+    if (focusControl)
+      focusControl.focus();
   }
 
   /**

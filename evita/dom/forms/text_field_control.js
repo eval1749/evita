@@ -102,7 +102,7 @@ var TextFieldEditCommand;
   TextFieldControl.handleEvent = function(event) {
     switch (event.type) {
       case Event.Names.CLICK:
-        this.form.focusControl = this;
+        this.focus();
         break;
       case Event.Names.KEYDOWN:
         handleKeyDown(this, /** @type{!KeyboardEvent} */(event));

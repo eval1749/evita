@@ -8,7 +8,9 @@
  */
 RadioButtonControl.handleEvent = function(event) {
   var radio_button = /** @type {!RadioButtonControl} */(event.target);
-  if (event.type == Event.Names.CLICK)
+  if (event.type == Event.Names.CLICK) {
+    radio_button.focus();
     radio_button.checked = !radio_button.checked;
+  }
   FormControl.handleEvent(event);
 };

@@ -74,13 +74,6 @@ class Graphics;
 class TextFormat;
 class TextLayout;
 
-class Bitmap : public SimpleObject_<ID2D1Bitmap> {
-  public: Bitmap(const Graphics& gfx, HICON hIcon);
-  public: Bitmap(const Graphics& gfx, SizeU size);
-  public: explicit Bitmap(const Graphics& gfx);
-  DISALLOW_COPY_AND_ASSIGN(Bitmap);
-};
-
 class Brush : public SimpleObject_<ID2D1SolidColorBrush> {
   public: Brush(const Graphics& gfx, ColorF color);
   public: Brush(const Graphics& gfx, float red, float green, float blue,

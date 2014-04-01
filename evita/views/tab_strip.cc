@@ -13,6 +13,7 @@
 
 #include "base/logging.h"
 #include "base/strings/string16.h"
+#include "evita/gfx/bitmap.h"
 #include "evita/gfx/graphics.h"
 #include "evita/gfx/text_format.h"
 #include "evita/li_util.h"

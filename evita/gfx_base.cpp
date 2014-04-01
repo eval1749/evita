@@ -68,25 +68,6 @@ class NullFont : IDWriteFont {
 };
 #endif
 
-common::ComPtr<ID2D1Bitmap> CreateBitmap(const Graphics& gfx, HICON hIcon) {
-  common::ComPtr<IWICBitmap> icon;
-  COM_VERIFY(gfx::FactorySet::image().CreateBitmapFromHICON(
-      hIcon, &icon));
- common::ComPtr<IWICFormatConverter> converter;
- COM_VERIFY(gfx::FactorySet::image().
-    CreateFormatConverter(&converter));
- COM_VERIFY(converter->Initialize(
-      icon,
-      GUID_WICPixelFormat32bppPBGRA,
-      WICBitmapDitherTypeNone,
-      nullptr,
-      0,
-      WICBitmapPaletteTypeMedianCut));
-  common::ComPtr<ID2D1Bitmap> bitmap;
-  COM_VERIFY(gfx->CreateBitmapFromWicBitmap(converter, nullptr, &bitmap));
-  return std::move(bitmap);
-}
-
 ID2D1Factory& CreateD2D1Factory() {
   ID2D1Factory* factory;
   COM_VERIFY(::D2D1CreateFactory(
@@ -127,33 +108,6 @@ float MultipleOf(float x, float unit) {
 }
 
 } // namespace
-
-//////////////////////////////////////////////////////////////////////
-//
-// Bitmap
-//
-namespace {
-common::ComPtr<ID2D1Bitmap> CreateBitmap(const Graphics& gfx, SizeU size) {
-  common::ComPtr<ID2D1Bitmap> bitmap;
-  D2D1_BITMAP_PROPERTIES props;
-  props.pixelFormat = gfx->GetPixelFormat();
-  gfx->GetDpi(&props.dpiX, &props.dpiY);
-  COM_VERIFY(gfx->CreateBitmap(size, props, &bitmap));
-  return std::move(bitmap);
-}
-}
-
-Bitmap::Bitmap(const Graphics& gfx, HICON hIcon)
-    : SimpleObject_(CreateBitmap(gfx, hIcon)) {
-}
-
-Bitmap::Bitmap(const Graphics& gfx, SizeU size)
-    : SimpleObject_(CreateBitmap(gfx, size)) {
-}
-
-Bitmap::Bitmap(const Graphics& gfx)
-    : Bitmap(gfx, gfx->GetPixelSize()) {
-}
 
 //////////////////////////////////////////////////////////////////////
 //

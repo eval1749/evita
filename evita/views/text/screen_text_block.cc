@@ -5,6 +5,7 @@
 #include "evita/views/text/screen_text_block.h"
 
 #include "base/logging.h"
+#include "evita/gfx/bitmap.h"
 #include "evita/views/text/render_cell.h"
 #include "evita/views/text/render_selection.h"
 #include "evita/views/text/render_text_block.h"

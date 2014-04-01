@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "evita/gfx/bitmap.h"
 #include "evita/gfx/text_format.h"
 
 #define DEBUG_DRAW 0

@@ -82,17 +82,29 @@ global.Form.prototype.get = function(control_id) {
     if (event.ctrlKey)
       return;
     if (event.altKey) {
+      // Set focus to control which have matched access key for controls other
+      // than button, checkbox and radio button:
+      //  * button: dispatch "click" event.
+      //  * checkbox: toggle |checked| property.
+      //  * radio button: toggle |checked| property.
       var accessKey = String.fromCharCode(event.code & 0x1FF);
-      form.controls.forEach(function(control) {
-        if (control.accessKey == accessKey) {
-          if (control instanceof ButtonControl)
-            control.dispatchEvent(new MouseEvent('click'));
-          else
-            control.focus();
-        }
+      var control = form.controls.find(function(control) {
+        return control.accessKey == accessKey;
       });
+      if (!control || control.disabled)
+        return;
+      if (control instanceof ButtonControl) {
+        control.dispatchEvent(new MouseEvent('click'));
+        return;
+      }
+      control.focus();
+      if (control instanceof CheckboxControl)
+        control.checked = !control.checked;
+      else if (control instanceof RadioButtonControl)
+        control.checked = !control.checked;
       return;
     }
+    // Move focus to next/previous of current focus control.
     switch (event.code & 0x1FF) {
       case 0x109: // TAB
         if (event.shiftKey)

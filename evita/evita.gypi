@@ -498,6 +498,7 @@
         'gfx/rect_f.cc',
         'gfx/size_f.cc',
         'gfx/stroke_style.cc',
+        'gfx/text_format.cc',
         'gfx/text_layout.cc',
         'metrics/counter.cc',
         'metrics/time_scope.cc',

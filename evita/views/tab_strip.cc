@@ -13,7 +13,8 @@
 
 #include "base/logging.h"
 #include "base/strings/string16.h"
-#include "evita/gfx_base.h"
+#include "evita/gfx/graphics.h"
+#include "evita/gfx/text_format.h"
 #include "evita/li_util.h"
 #include "evita/ui/events/event.h"
 #include "evita/views/frame_list.h"

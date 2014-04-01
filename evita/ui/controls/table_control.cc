@@ -10,7 +10,8 @@
 
 #include "common/castable.h"
 #include "common/win/scoped_comptr.h"
-#include "evita/gfx_base.h"
+#include "evita/gfx/graphics.h"
+#include "evita/gfx/text_format.h"
 #include "evita/ui/base/selection_model.h"
 #include "evita/ui/base/table_model.h"
 #include "evita/ui/controls/table_control_observer.h"

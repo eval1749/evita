@@ -5,6 +5,7 @@
 #include "evita/ui/controls/button_control.h"
 
 #include "evita/gfx/graphics.h"
+#include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
 
 namespace ui {

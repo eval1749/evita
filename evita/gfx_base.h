@@ -137,15 +137,6 @@ class FontFace : public SimpleObject_<IDWriteFontFace> {
   DISALLOW_COPY_AND_ASSIGN(FontFace);
 };
 
-class TextFormat : public SimpleObject_<IDWriteTextFormat> {
-  private: const scoped_refptr<FactorySet> factory_set_;
-  public: TextFormat(const base::string16& font_face_name, float font_size);
-  public: TextFormat(const LOGFONT& log_font);
-  public: std::unique_ptr<TextLayout> CreateLayout(
-      const base::string16& text, const SizeF& size) const;
-  DISALLOW_COPY_AND_ASSIGN(TextFormat);
-};
-
 // Helper functions
 inline ColorF blackColor() {
   return ColorF(ColorF::Black);

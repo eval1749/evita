@@ -44,8 +44,7 @@ class FormClass :
         .SetProperty("height", &Form::height, &Form::set_height)
         .SetProperty("title", &Form::title, &Form::set_title)
         .SetProperty("width", &Form::width, &Form::set_width)
-        .SetMethod("add", &Form::AddFormControl)
-        .SetMethod("control", &Form::control);
+        .SetMethod("add", &Form::AddFormControl);
   }
 
   DISALLOW_COPY_AND_ASSIGN(FormClass);
@@ -64,18 +63,8 @@ Form::Form() : height_(0.0f), width_(0.0f) {
 Form::~Form() {
 }
 
-FormControl* Form::control(int control_id) const {
-  auto const it = controls_.find(control_id);
-  return it == controls_.end() ? nullptr : it->second;
-}
-
 std::vector<FormControl*> Form::controls() const {
-  std::vector<FormControl*> controls(controls_.size());
-  controls.resize(0);
-  for (const auto& it : controls_) {
-    controls.push_back(it.second);
-  }
-  return std::move(controls);
+  return controls_;
 }
 
 void Form::set_focus_control(
@@ -108,8 +97,12 @@ void Form::set_width(float new_width) {
 }
 
 void Form::AddFormControl(FormControl* control) {
-  // TODO(yosi) Check |control| isn't in |controls_|.
-  controls_[control->control_id()] = control;
+  if (control->form_) {
+    ScriptHost::instance()->ThrowError(
+        "Specified control is already added to form.");
+    return;
+  }
+  controls_.push_back(control);
   control->form_ = this;
   FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }

@@ -5,7 +5,6 @@
 
 #include "evita/dom/events/view_event_target.h"
 
-#include <unordered_map>
 #include <vector>
 
 #pragma warning(push)
@@ -24,7 +23,7 @@ class FormObserver;
 class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(Form);
 
-  private: std::unordered_map<int, FormControl*> controls_;
+  private: std::vector<FormControl*> controls_;
   private: gc::Member<FormControl> focus_control_;
   private: float height_;
   private: mutable ObserverList<FormObserver> observers_;
@@ -34,7 +33,6 @@ class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
   public: Form();
   public: virtual ~Form();
 
-  public: FormControl* control(int control_id) const;
   public: std::vector<FormControl*> controls() const;
   public: FormControl* focus_control() const { return focus_control_.get(); }
   public: void set_focus_control(

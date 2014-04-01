@@ -37,13 +37,8 @@ class Graphics : public Object, public DpiHandler {
 
   public: class DrawingScope {
     private: const Graphics& gfx_;
-    public: DrawingScope(const Graphics& gfx) : gfx_(gfx) {
-      gfx_.BeginDraw();
-    }
-    public: ~DrawingScope() {
-      // TODO: Should DrawingScope take mutable Graphics?
-      const_cast<Graphics&>(gfx_).EndDraw();
-    }
+    public: DrawingScope(const Graphics& gfx);
+    public: ~DrawingScope();
     DISALLOW_COPY_AND_ASSIGN(DrawingScope);
   };
   friend class DrawingScope;
@@ -68,12 +63,7 @@ class Graphics : public Object, public DpiHandler {
   // |drawing()| is for debugging.
   public: bool drawing() const { return batch_nesting_level_; }
   public: const FactorySet& factory_set() const { return *factory_set_; }
-
-  public: ID2D1RenderTarget& render_target() const {
-    DCHECK(render_target_) << "No ID2D1RenderTarget";
-    return *render_target_.get();
-  }
-
+  public: ID2D1RenderTarget& render_target() const;
   public: template<typename T> T* work() const { 
     return reinterpret_cast<T*>(work_); 
   }
@@ -94,43 +84,19 @@ class Graphics : public Object, public DpiHandler {
                           D2D1_BITMAP_INTERPOLATION_MODE mode =
                               D2D1_BITMAP_INTERPOLATION_MODE_LINEAR) const;
   public: void DrawLine(const Brush& brush, int sx, int sy, int ex, int ey,
-                        float strokeWidth = 1) const {
-    DCHECK(drawing());
-    render_target().DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
-                             strokeWidth);
-  }
-
+                        float strokeWidth = 1) const;
   public: void DrawLine(const Brush& brush,
                         float sx, float sy,
                         float ex, float ey,
-                        float strokeWidth = 1) const {
-    DCHECK(drawing());
-    render_target().DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
-                             strokeWidth);
-  }
-
+                        float strokeWidth = 1) const;
   public: void DrawRectangle(const Brush& brush, const RECT& rc,
-                             float strokeWidth = 1) const {
-    DrawRectangle(brush, RectF(rc), strokeWidth);
-  }
-
+                             float strokeWidth = 1) const;
   public: void DrawRectangle(const Brush& brush, const RectF& rect,
-                             float strokeWidth = 1) const {
-    DCHECK(drawing());
-    DCHECK(rect);
-    render_target().DrawRectangle(rect, brush, strokeWidth);
-  }
-
+                             float strokeWidth = 1) const;
   public: void DrawText(const TextFormat& text_format,
                         const Brush& brush,
                         const RECT& rc,
-                        const char16* pwch, size_t cwch) const {
-    DCHECK(drawing());
-    auto rect = RectF(rc);
-    DCHECK(rect);
-    render_target().DrawText(pwch, static_cast<uint32_t>(cwch), text_format,
-                             rect, brush);
-  }
+                        const char16* pwch, size_t cwch) const;
 
   // [E]
   // Returns true if succeeded.
@@ -138,25 +104,11 @@ class Graphics : public Object, public DpiHandler {
 
   // [F]
   public: void FillRectangle(const Brush& brush, int left, int top,
-                             int right, int bottom) const {
-    render_target().FillRectangle(RectF(left, top, right, bottom), brush);
-  }
-
+                             int right, int bottom) const;
   public: void FillRectangle(const Brush& brush, float left, float top,
-                             float right, float bottom) const {
-    FillRectangle(brush, RectF(left, top, right, bottom));
-  }
-
-  public: void FillRectangle(const Brush& brush, const RECT& rc) const {
-    FillRectangle(brush, RectF(rc));
-  }
-
-  public: void FillRectangle(const Brush& brush, const RectF& rect) const {
-    DCHECK(drawing());
-    DCHECK(rect);
-    render_target().FillRectangle(rect, brush);
-  }
-
+                             float right, float bottom) const;
+  public: void FillRectangle(const Brush& brush, const RECT& rc) const;
+  public: void FillRectangle(const Brush& brush, const RectF& rect) const;
   public: void Flush() const;
 
   // [I]

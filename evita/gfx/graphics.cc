@@ -4,7 +4,27 @@
 
 #include "evita/gfx/graphics.h"
 
+#include <utility>
+
+#define DEBUG_DRAW 0
+
+std::ostream& operator<<(std::ostream& ostream,
+                         D2D1_TEXT_ANTIALIAS_MODE mode) {
+  switch (mode) {
+    case D2D1_TEXT_ANTIALIAS_MODE_DEFAULT:
+      return ostream << "DEFAULT";
+    case D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE:
+      return ostream << "CLEARTYPE";
+    case D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE:
+      return ostream << "GRAYSCALE";
+    case D2D1_TEXT_ANTIALIAS_MODE_ALIASED:
+      return ostream << "ALIASED";
+  }
+  return ostream << "UNKNOWN_" << static_cast<int>(mode);
+}
+
 namespace gfx {
+
 //////////////////////////////////////////////////////////////////////
 //
 // Graphics
@@ -43,6 +63,11 @@ Graphics& Graphics::operator=(Graphics&& other) {
   hwnd_ = other.hwnd_;
   other.hwnd_ = nullptr;
   return *this;
+}
+
+ID2D1RenderTarget& Graphics::render_target() const {
+  DCHECK(render_target_) << "No ID2D1RenderTarget";
+  return *render_target_.get();
 }
 
 void Graphics::AddObserver(Observer* observer) {
@@ -90,6 +115,43 @@ void Graphics::DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
   render_target_->DrawBitmap(bitmap, dst_rect, opacity, mode, src_rect);
 }
 
+void Graphics::DrawLine(const Brush& brush, int sx, int sy, int ex, int ey,
+                        float strokeWidth) const {
+  DCHECK(drawing());
+  render_target().DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
+                           strokeWidth);
+}
+
+void Graphics::DrawLine(const Brush& brush, float sx, float sy,
+                        float ex, float ey, float strokeWidth) const {
+  DCHECK(drawing());
+  render_target().DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
+                           strokeWidth);
+}
+
+void Graphics::DrawRectangle(const Brush& brush, const RECT& rc,
+                             float strokeWidth) const {
+  DrawRectangle(brush, RectF(rc), strokeWidth);
+}
+
+void Graphics::DrawRectangle(const Brush& brush, const RectF& rect,
+                            float strokeWidth) const {
+  DCHECK(drawing());
+  DCHECK(rect);
+  render_target().DrawRectangle(rect, brush, strokeWidth);
+}
+
+void Graphics::DrawText(const TextFormat& text_format,
+                      const Brush& brush,
+                      const RECT& rc,
+                      const char16* pwch, size_t cwch) const {
+  DCHECK(drawing());
+  auto rect = RectF(rc);
+  DCHECK(rect);
+  render_target().DrawText(pwch, static_cast<uint32_t>(cwch), text_format,
+                           rect, brush);
+}
+
 bool Graphics::EndDraw() {
   #if DEBUG_DRAW
     DEBUG_PRINTF("%p nesting=%d\n", render_target_, batch_nesting_level_);
@@ -119,6 +181,26 @@ bool Graphics::EndDraw() {
   const_cast<Graphics*>(this)->render_target_.reset();
   const_cast<Graphics*>(this)->Reinitialize();
   return false;
+}
+
+void Graphics:: FillRectangle(const Brush& brush, int left, int top,
+                              int right, int bottom) const {
+  render_target().FillRectangle(RectF(left, top, right, bottom), brush);
+}
+
+void Graphics:: FillRectangle(const Brush& brush, float left, float top,
+                              float right, float bottom) const {
+  FillRectangle(brush, RectF(left, top, right, bottom));
+}
+
+void Graphics:: FillRectangle(const Brush& brush, const RECT& rc) const {
+  FillRectangle(brush, RectF(rc));
+}
+
+void Graphics:: FillRectangle(const Brush& brush, const RectF& rect) const {
+  DCHECK(drawing());
+  DCHECK(rect);
+  render_target().FillRectangle(rect, brush);
 }
 
 void Graphics::Flush() const {
@@ -185,6 +267,19 @@ Graphics::AxisAlignedClipScope::AxisAlignedClipScope(
 
 Graphics::AxisAlignedClipScope::~AxisAlignedClipScope() {
   gfx_->PopAxisAlignedClip();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// Graphics::DrawingScope
+//
+Graphics::DrawingScope::DrawingScope(const Graphics& gfx) : gfx_(gfx) {
+  gfx_.BeginDraw();
+}
+
+Graphics::DrawingScope::~DrawingScope() {
+  // TODO(yosi) Should DrawingScope take mutable Graphics?
+  const_cast<Graphics&>(gfx_).EndDraw();
 }
 
 //////////////////////////////////////////////////////////////////////

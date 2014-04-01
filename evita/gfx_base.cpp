@@ -15,23 +15,6 @@
 #pragma comment(lib, "dwrite.lib")
 #pragma comment(lib, "windowscodecs.lib")
 
-#define DEBUG_DRAW 0
-
-std::ostream& operator<<(std::ostream& ostream,
-                         D2D1_TEXT_ANTIALIAS_MODE mode) {
-  switch (mode) {
-    case D2D1_TEXT_ANTIALIAS_MODE_DEFAULT:
-      return ostream << "DEFAULT";
-    case D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE:
-      return ostream << "CLEARTYPE";
-    case D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE:
-      return ostream << "GRAYSCALE";
-    case D2D1_TEXT_ANTIALIAS_MODE_ALIASED:
-      return ostream << "ALIASED";
-  }
-  return ostream << "UNKNOWN_" << static_cast<int>(mode);
-}
-
 namespace gfx {
 
 namespace {

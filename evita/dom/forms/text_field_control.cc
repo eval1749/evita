@@ -47,6 +47,19 @@ class TextFieldControlClass :
 
   DISALLOW_COPY_AND_ASSIGN(TextFieldControlClass);
 };
+
+base::string16 EnsureSingleLine(const base::string16& text) {
+  auto last_char = 0;
+  for (auto index = 0u; index < text.size(); ++index){
+    if (text[index] == '\n') {
+      return last_char == '\r' ? text.substr(0, index - 1) :
+                                 text.substr(0, index);
+    }
+    last_char = text[index];
+  }
+  return text;
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -62,7 +75,8 @@ TextFieldControl::TextFieldControl(FormResourceId control_id)
 TextFieldControl::~TextFieldControl() {
 }
 
-void TextFieldControl::set_value(const base::string16& new_value) {
+void TextFieldControl::set_value(const base::string16& new_raw_value) {
+  auto const new_value = EnsureSingleLine(new_raw_value);
   if (value_ == new_value)
     return;
   // TODO(yosi) Dispatch |beforeinput| and |input| event.

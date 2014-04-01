@@ -5,15 +5,23 @@
 'use strict';
 
 (function() {
+  /** @param {!Range} range */
+  function copyToClipboard(range) {
+    var items = DataTransfer.items;
+    items.clear();
+    items.add(range.text.replace(/\n/g, '\r\n'), 'text/plain');
+  }
+
   /** @this {!TextWindow} window */
   function copyToClipboardCommand() {
-    this.selection.range.copy();
+    copyToClipboard(this.selection.range);
   }
 
   /** @this {!TextWindow} window */
   function cutToClipboardCommand() {
-    this.selection.range.copy();
-    this.selection.range.text = '';
+    var range = this.selection.range;
+    copyToClipboard(range);
+    range.text = '';
   }
 
   /**
@@ -54,7 +62,15 @@
    * @this {!TextWindow}
    */
   function pasteFromClipboardCommand() {
-    this.selection.range.paste();
+    var items = DataTransfer.items;
+    if (!items.length)
+      return;
+    var item = items.get(0);
+    if (item.kind != 'string')
+      return;
+    var range = this.selection.range;
+    range.text = item.getAsString().replace(/\r\n/g, '\n');
+    range.collapseTo(range.end);
   }
 
   /**

@@ -146,13 +146,6 @@ class TextFormat : public SimpleObject_<IDWriteTextFormat> {
   DISALLOW_COPY_AND_ASSIGN(TextFormat);
 };
 
-class TextLayout : public SimpleObject_<IDWriteTextLayout> {
-  public: TextLayout(IDWriteTextLayout* text_layout);
-  public: ~TextLayout();
-  public: SIZE GetMetrics() const;
-  DISALLOW_COPY_AND_ASSIGN(TextLayout);
-};
-
 // Helper functions
 inline ColorF blackColor() {
   return ColorF(ColorF::Black);

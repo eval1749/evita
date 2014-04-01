@@ -11,6 +11,8 @@
 #include <math.h>
 #include <utility>
 
+#include "gfx/text_layout.h"
+
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dwrite.lib")
 #pragma comment(lib, "windowscodecs.lib")
@@ -301,17 +303,6 @@ std::unique_ptr<TextLayout> TextFormat::CreateLayout(
   if (!text_layout)
     return std::unique_ptr<TextLayout>();
   return std::make_unique<TextLayout>(text_layout.release());
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// TextLayout
-//
-TextLayout::TextLayout(IDWriteTextLayout* text_layout)
-    : SimpleObject_(text_layout) {
-}
-
-TextLayout::~TextLayout() {
 }
 
 } // namespace gfx

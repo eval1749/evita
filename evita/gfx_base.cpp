@@ -104,32 +104,6 @@ IDWriteFactory& CreateDWriteFactory() {
   return *factory;
 }
 
-common::ComPtr<IDWriteFontFace> CreateFontFace(const char16* family_name) {
-  common::ComPtr<IDWriteFontCollection> font_collection;
-  COM_VERIFY(gfx::FactorySet::dwrite().
-      GetSystemFontCollection(&font_collection, false));
-
-  uint32 index;
-  BOOL exists;
-  COM_VERIFY(font_collection->FindFamilyName(family_name, &index, &exists));
-  if (!exists)
-   return CreateFontFace(L"Courier New");
-
-  common::ComPtr<IDWriteFontFamily> font_family;
-  COM_VERIFY(font_collection->GetFontFamily(index, &font_family));
-
-  common::ComPtr<IDWriteFont> font;
-  COM_VERIFY(font_family->GetFirstMatchingFont(
-    DWRITE_FONT_WEIGHT_NORMAL,
-    DWRITE_FONT_STRETCH_NORMAL,
-    DWRITE_FONT_STYLE_NORMAL, // normal, italic or oblique
-    &font));
-
-  common::ComPtr<IDWriteFontFace> font_face;
-  COM_VERIFY(font->CreateFontFace(&font_face));
-  return std::move(font_face);
-}
-
 IWICImagingFactory& CreateImageFactory() {
   IWICImagingFactory* factory;
   COM_VERIFY(::CoCreateInstance(
@@ -147,11 +121,6 @@ common::ComPtr<ID2D1SolidColorBrush> CreateSolidColorBrush(const Graphics& gfx,
   return brush;
 }
 
-DWRITE_FONT_METRICS GetFontMetrics(IDWriteFontFace* font) {
-  DWRITE_FONT_METRICS metrics;
-  font->GetMetrics(&metrics);
-  return metrics;
-}
 
 float MultipleOf(float x, float unit) {
   return ::ceilf(x / unit) * unit;
@@ -248,15 +217,6 @@ FactorySet::FactorySet()
   SizeF dpi;
   d2d1_factory_->GetDesktopDpi(&dpi.width, &dpi.height);
   UpdateDpi(dpi);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// FontSet
-//
-FontFace::FontFace(const char16* family_name)
-    : SimpleObject_(CreateFontFace(family_name)),
-      metrics_(GetFontMetrics(*this)) {
 }
 
 } // namespace gfx

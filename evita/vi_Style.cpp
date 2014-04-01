@@ -13,7 +13,8 @@
 
 #include <vector>
 
-#include "evita/gfx_base.h"
+#include "evita/gfx/graphics.h"
+#include "evita/gfx/font_face.h"
 #include "evita/css/style.h"
 
 namespace {

@@ -493,6 +493,7 @@
         'editor/dom_lock.cc',
         'gfx_base.cpp',
         'gfx/color_f.cc',
+        'gfx/font_face.cc',
         'gfx/graphics.cc',
         'gfx/point_f.cc',
         'gfx/rect_f.cc',

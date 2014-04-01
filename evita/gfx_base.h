@@ -130,13 +130,6 @@ class FactorySet : public base::RefCounted<FactorySet>,
   DISALLOW_COPY_AND_ASSIGN(FactorySet);
 };
 
-class FontFace : public SimpleObject_<IDWriteFontFace> {
-  private: const DWRITE_FONT_METRICS metrics_;
-  public: FontFace(const char16* family_name);
-  public: const DWRITE_FONT_METRICS& metrics() const { return metrics_; }
-  DISALLOW_COPY_AND_ASSIGN(FontFace);
-};
-
 // Helper functions
 inline ColorF blackColor() {
   return ColorF(ColorF::Black);

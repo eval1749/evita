@@ -15,8 +15,7 @@ class RadioButtonControl
 
   private: bool checked_;
 
-  public: RadioButtonControl(const base::string16& name,
-                             FormResourceId control_id);
+  public: explicit RadioButtonControl(const base::string16& name);
   public: virtual ~RadioButtonControl();
 
   public: const bool checked() const { return checked_; }

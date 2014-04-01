@@ -16,8 +16,7 @@ class ButtonControlTest : public dom::AbstractDomTest {
 };
 
 TEST_F(ButtonControlTest, ctor) {
-  EXPECT_SCRIPT_VALID("var sample = new ButtonControl(123);");
-  EXPECT_SCRIPT_EQ("123", "sample.controlId");
+  EXPECT_SCRIPT_VALID("var sample = new ButtonControl();");
   EXPECT_SCRIPT_FALSE("sample.disabled");
   EXPECT_SCRIPT_EQ("0", "sample.clientHeight");
   EXPECT_SCRIPT_EQ("0", "sample.clientLeft");
@@ -27,7 +26,7 @@ TEST_F(ButtonControlTest, ctor) {
 
 TEST_F(ButtonControlTest, dispatchEvent) {
   EXPECT_SCRIPT_VALID(
-      "var sample = new ButtonControl(123);"
+      "var sample = new ButtonControl();"
       "var clicked = false;"
       "sample.addEventListener('click', function() { clicked = true; });"
       "sample.dispatchEvent(new FormEvent('click'));");
@@ -37,14 +36,14 @@ TEST_F(ButtonControlTest, dispatchEvent) {
 TEST_F(ButtonControlTest, set_disabled) {
   EXPECT_SCRIPT_VALID(
       "var form = new Form();"
-      "var sample = new ButtonControl(123);"
+      "var sample = new ButtonControl();"
       "form.add(sample);"
       "sample.disabled = true;");
   EXPECT_SCRIPT_TRUE("sample.disabled");
 }
 
 TEST_F(ButtonControlTest, set_clientLeft) {
-  EXPECT_SCRIPT_VALID("var sample = new ButtonControl(123);"
+  EXPECT_SCRIPT_VALID("var sample = new ButtonControl();"
                       "sample.clientLeft = 1;"
                       "sample.clientTop = 2;"
                       "sample.clientWidth = 3;"
@@ -69,7 +68,7 @@ TEST_F(ButtonControlTest, set_clientLeft) {
 
 TEST_F(ButtonControlTest, set_text) {
   EXPECT_SCRIPT_VALID(
-      "var sample = new ButtonControl(123);"
+      "var sample = new ButtonControl();"
       "sample.text = 'foo';");
   EXPECT_SCRIPT_EQ("foo", "sample.text");
 }

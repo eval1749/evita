@@ -1,6 +1,12 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
+/**
+ * @constructor
+ * @extends {EventTarget}
+ */
+var FormControl = function() {};
+
 /** @expose @type{string} */
 FormControl.prototype.accessKey;
 
@@ -15,9 +21,6 @@ FormControl.prototype.clientTop;
 
 /** @expose @type{number} */
 FormControl.prototype.clientWidth;
-
-/** @expose @type{number} */
-FormControl.prototype.controlId;
 
 /** @expose @type {boolean} */
 FormControl.prototype.disabled;

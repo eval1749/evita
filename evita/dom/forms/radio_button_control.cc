@@ -34,8 +34,8 @@ class RadioButtonControlClass :
   }
 
   private: static RadioButtonControl* NewRadioButtonControl(
-      const base::string16& name, FormResourceId control_id) {
-    return new RadioButtonControl(name, control_id);
+      const base::string16& name) {
+    return new RadioButtonControl(name);
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -70,9 +70,8 @@ RadioButtonControl* FindCheckedRadioButton(const Form* form,
 //
 DEFINE_SCRIPTABLE_OBJECT(RadioButtonControl, RadioButtonControlClass);
 
-RadioButtonControl::RadioButtonControl(const base::string16& name,
-                                       FormResourceId control_id)
-    : ScriptableBase(control_id, name), checked_(false) {
+RadioButtonControl::RadioButtonControl(const base::string16& name)
+    : ScriptableBase(name), checked_(false) {
 }
 
 RadioButtonControl::~RadioButtonControl() {

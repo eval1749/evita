@@ -11,9 +11,6 @@
 
 namespace dom {
 
-typedef int FormResourceId;
-const FormResourceId kInvalidFormResourceId = -1;
-
 class Form;
 
 class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
@@ -27,15 +24,13 @@ class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   };
   friend class HandlingFormEventScope;
 
-  private: FormResourceId control_id_;
   private: bool disabled_;
   private: gc::Member<Form> form_;
   private: bool handling_form_event_;
   private: base::string16 name_;
   private: gfx::RectF rect_;
 
-  protected: FormControl(int control_id, const base::string16& name);
-  protected: explicit FormControl(int control_id);
+  protected: explicit FormControl(const base::string16& name);
   protected: FormControl();
   public: virtual ~FormControl();
 
@@ -47,7 +42,6 @@ class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   public: void set_client_top(float new_client_top);
   public: float client_width() const { return rect_.width(); }
   public: void set_client_width(float new_client_width);
-  public: FormResourceId control_id() const { return control_id_; }
   public: bool disabled() const { return disabled_; }
   public: void set_disabled(bool new_disabled);
   public: Form* form() const { return form_.get(); }

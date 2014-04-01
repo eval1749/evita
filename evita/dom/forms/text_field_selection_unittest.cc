@@ -16,7 +16,7 @@ class TextFieldSelectionTest : public dom::AbstractDomTest {
 };
 
 TEST_F(TextFieldSelectionTest, ctor) {
-  EXPECT_SCRIPT_VALID("var sample = new TextFieldControl(123);"
+  EXPECT_SCRIPT_VALID("var sample = new TextFieldControl();"
                       "var selection = sample.selection;");
   EXPECT_SCRIPT_TRUE("selection instanceof TextFieldSelection");
   EXPECT_SCRIPT_EQ("0", "selection.anchorOffset");
@@ -27,7 +27,7 @@ TEST_F(TextFieldSelectionTest, ctor) {
 }
 
 TEST_F(TextFieldSelectionTest, collapseTo) {
-  EXPECT_SCRIPT_VALID("var sample = new TextFieldControl(123);"
+  EXPECT_SCRIPT_VALID("var sample = new TextFieldControl();"
                       "sample.value = '0123456789';"
                       "var selection = sample.selection;"
                       "selection.collapseTo(3)");
@@ -40,7 +40,7 @@ TEST_F(TextFieldSelectionTest, collapseTo) {
 
 TEST_F(TextFieldSelectionTest, extendTo) {
   EXPECT_SCRIPT_VALID(
-      "var sample = new TextFieldControl(123);"
+      "var sample = new TextFieldControl();"
       "sample.value = '0123456789';"
       "var selection = sample.selection;"
       "function testIt(anchorOffset, focusOffset, offset) {"
@@ -60,7 +60,7 @@ TEST_F(TextFieldSelectionTest, extendTo) {
 
 TEST_F(TextFieldSelectionTest, set_text) {
   EXPECT_SCRIPT_VALID(
-      "var sample = new TextFieldControl(123);"
+      "var sample = new TextFieldControl();"
       "var selection = sample.selection;"
       "function testIt(anchorOffset, focusOffset, new_text) {"
       "  selection.control.value = '0123456789';"
@@ -81,7 +81,7 @@ TEST_F(TextFieldSelectionTest, set_text) {
 
 TEST_F(TextFieldSelectionTest, text) {
   EXPECT_SCRIPT_VALID(
-      "var sample = new TextFieldControl(123);"
+      "var sample = new TextFieldControl();"
       "sample.value = '0123456789';"
       "var selection = sample.selection;"
       "function testIt(anchorOffset, focusOffset) {"

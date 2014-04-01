@@ -17,7 +17,7 @@ class RadioButtonControlTest : public dom::AbstractDomTest {
 };
 
 TEST_F(RadioButtonControlTest, ctor) {
-  EXPECT_SCRIPT_VALID("var sample = new RadioButtonControl('foo', 123);");
+  EXPECT_SCRIPT_VALID("var sample = new RadioButtonControl('foo');");
   EXPECT_SCRIPT_EQ("123", "sample.controlId");
   EXPECT_SCRIPT_FALSE("sample.disabled");
   EXPECT_SCRIPT_EQ("false", "sample.checked");
@@ -27,8 +27,8 @@ TEST_F(RadioButtonControlTest, ctor) {
 TEST_F(RadioButtonControlTest, dispatchEvent) {
   EXPECT_SCRIPT_VALID(
       "var form1 = new Form();"
-      "var sample1 = new RadioButtonControl('foo', 123);"
-      "var sample2 = new RadioButtonControl('foo', 124);"
+      "var sample1 = new RadioButtonControl('foo');"
+      "var sample2 = new RadioButtonControl('foo');"
       "form1.add(sample1);"
       "form1.add(sample2);"
       "sample1.changed = 0;"
@@ -59,8 +59,8 @@ TEST_F(RadioButtonControlTest, dispatchEvent) {
 TEST_F(RadioButtonControlTest, set_checked) {
   EXPECT_SCRIPT_VALID(
       "var form1 = new Form();"
-      "var sample1 = new RadioButtonControl('foo', 123);"
-      "var sample2 = new RadioButtonControl('foo', 124);"
+      "var sample1 = new RadioButtonControl('foo');"
+      "var sample2 = new RadioButtonControl('foo');"
       "form1.add(sample1);"
       "form1.add(sample2);"
       "sample1.changed = 0;"
@@ -91,7 +91,7 @@ TEST_F(RadioButtonControlTest, set_checked) {
 TEST_F(RadioButtonControlTest, set_disabled) {
   EXPECT_SCRIPT_VALID(
       "var form = new Form();"
-      "var sample = new RadioButtonControl('foo', 123);"
+      "var sample = new RadioButtonControl('foo');"
       "form.add(sample);"
       "sample.disabled = true;");
   EXPECT_SCRIPT_TRUE("sample.disabled");
@@ -99,7 +99,7 @@ TEST_F(RadioButtonControlTest, set_disabled) {
 
 
 TEST_F(RadioButtonControlTest, set_clientLeft) {
-  EXPECT_SCRIPT_VALID("var sample = new RadioButtonControl('foo', 123);"
+  EXPECT_SCRIPT_VALID("var sample = new RadioButtonControl('foo');"
                       "sample.clientLeft = 1;"
                       "sample.clientTop = 2;"
                       "sample.clientWidth = 3;"

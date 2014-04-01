@@ -32,9 +32,8 @@ class TextFieldControlClass :
         &TextFieldControlClass::NewTextFieldControl);
   }
 
-  private: static TextFieldControl* NewTextFieldControl(
-      FormResourceId control_id) {
-    return new TextFieldControl(control_id);
+  private: static TextFieldControl* NewTextFieldControl() {
+    return new TextFieldControl();
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -68,8 +67,8 @@ base::string16 EnsureSingleLine(const base::string16& text) {
 //
 DEFINE_SCRIPTABLE_OBJECT(TextFieldControl, TextFieldControlClass);
 
-TextFieldControl::TextFieldControl(FormResourceId control_id)
-    : ScriptableBase(control_id), selection_(new TextFieldSelection(this)) {
+TextFieldControl::TextFieldControl()
+    : selection_(new TextFieldSelection(this)) {
 }
 
 TextFieldControl::~TextFieldControl() {

@@ -37,13 +37,6 @@ var EventTarget = function() {};
 /**
  * @constructor
  * @extends {EventTarget}
- * @param {number} control_id
- */
-var FormControl = function(control_id) {};
-
-/**
- * @constructor
- * @extends {EventTarget}
  */
 var Window = function() {};
 
@@ -157,13 +150,6 @@ var Style = function() {};
  * @param {Document} document
  */
 var TableWindow = function(document) {};
-
-/**
- * @constructor
- * @extends {FormControl}
- * @param {number} control_id
- */
-var TextFieldControl = function(control_id) {};
 
 /**
  * @constructor

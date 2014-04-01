@@ -37,7 +37,6 @@ class FormControlClass :
                                      &FormControl::set_client_top)
         .SetProperty("clientWidth", &FormControl::client_width,
                                      &FormControl::set_client_width)
-        .SetProperty("controlId", &FormControl::control_id)
         .SetProperty("disabled", &FormControl::disabled,
                                  &FormControl::set_disabled)
         .SetProperty("form", &FormControl::form)
@@ -69,18 +68,11 @@ FormControl::HandlingFormEventScope::~HandlingFormEventScope() {
 //
 DEFINE_SCRIPTABLE_OBJECT(FormControl, FormControlClass);
 
-FormControl::FormControl(FormResourceId control_id, const base::string16& name)
-    : control_id_(control_id), disabled_(false), handling_form_event_(false),
-      name_(name) {
+FormControl::FormControl(const base::string16& name)
+    : disabled_(false), handling_form_event_(false), name_(name) {
 }
 
-FormControl::FormControl(FormResourceId control_id)
-    : FormControl(control_id, base::string16()) {
-}
-
-FormControl::FormControl() : FormControl(kInvalidFormResourceId) {
-  DCHECK_EQ(kInvalidFormResourceId, control_id_);
-  control_id_ = event_target_id();
+FormControl::FormControl() : FormControl(base::string16()) {
 }
 
 FormControl::~FormControl() {

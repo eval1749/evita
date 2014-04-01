@@ -15,7 +15,7 @@ class ButtonControl
 
   private: base::string16 text_;
 
-  public: explicit ButtonControl(FormResourceId control_id);
+  public: ButtonControl();
   public: virtual ~ButtonControl();
 
   public: const base::string16& text() const { return text_; }

@@ -18,7 +18,7 @@ class TextFieldControl
   private: base::string16 value_;
   private: gc::Member<TextFieldSelection> selection_;
 
-  public: TextFieldControl(FormResourceId control_id);
+  public: TextFieldControl();
   public: virtual ~TextFieldControl();
 
   public: size_t length() const { return value_.length(); }

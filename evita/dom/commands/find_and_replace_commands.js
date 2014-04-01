@@ -100,7 +100,6 @@
 
     var control_left = PADDING_LEFT;
     var control_top = PADDING_TOP;
-    var dummy_id = 2000;
 
     function add(control, width) {
       control.clientLeft = control_left;
@@ -123,18 +122,18 @@
 
     // Text fields
     add(new LabelControl('Find what:'), 75);
-    find_what_text = add(new TextFieldControl(1), 265);
+    find_what_text = add(new TextFieldControl(), 265);
     find_what_text.accessKey = 'N';
     newline();
     add(new LabelControl('Replace with:'), 75);
-    replace_with_text = add(new TextFieldControl(2), 265);
+    replace_with_text = add(new TextFieldControl(), 265);
     replace_with_text.accessKey = 'P';
     replace_with_text.disabled = true;
     newline();
 
     // Checkboxes
     function addCheckbox(text, accessKey) {
-      var checkbox = new CheckboxControl(++dummy_id);
+      var checkbox = new CheckboxControl();
       checkbox.accessKey = accessKey;
       add(checkbox, 20);
       add(new LabelControl(text), text.length * 10);
@@ -155,7 +154,7 @@
     // Buttons
     CONTROL_HEIGHT = 26;
     function addButton(text, accessKey) {
-      var button = new ButtonControl(++dummy_id);
+      var button = new ButtonControl();
       button.accessKey = accessKey;
       button.text = text;
       add(button, 100);

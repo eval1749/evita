@@ -32,9 +32,8 @@ class ButtonControlClass :
         &ButtonControlClass::NewButtonControl);
   }
 
-  private: static ButtonControl* NewButtonControl(
-      FormResourceId control_id) {
-    return new ButtonControl(control_id);
+  private: static ButtonControl* NewButtonControl() {
+    return new ButtonControl();
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -53,8 +52,7 @@ class ButtonControlClass :
 //
 DEFINE_SCRIPTABLE_OBJECT(ButtonControl, ButtonControlClass);
 
-ButtonControl::ButtonControl(FormResourceId control_id)
-    : ScriptableBase(control_id) {
+ButtonControl::ButtonControl() {
 }
 
 ButtonControl::~ButtonControl() {

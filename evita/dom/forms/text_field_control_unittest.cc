@@ -18,7 +18,7 @@ class TextFieldControlTest : public dom::AbstractDomTest {
 };
 
 TEST_F(TextFieldControlTest, ctor) {
-  EXPECT_SCRIPT_VALID("var sample = new TextFieldControl(123);");
+  EXPECT_SCRIPT_VALID("var sample = new TextFieldControl();");
   EXPECT_SCRIPT_EQ("123", "sample.controlId");
   EXPECT_SCRIPT_FALSE("sample.disabled");
   EXPECT_SCRIPT_EQ("", "sample.value");
@@ -26,7 +26,7 @@ TEST_F(TextFieldControlTest, ctor) {
 
 TEST_F(TextFieldControlTest, dispatchEvent) {
   EXPECT_SCRIPT_VALID(
-      "var sample = new TextFieldControl(123);"
+      "var sample = new TextFieldControl();"
       "var changed = 0;"
       "sample.addEventListener('change', function() { ++changed; });"
       "var event = new FormEvent('change', {data: 'foo'});"
@@ -45,7 +45,7 @@ TEST_F(TextFieldControlTest, dispatchEvent) {
 TEST_F(TextFieldControlTest, set_disabled) {
   EXPECT_SCRIPT_VALID(
       "var form = new Form();"
-      "var sample = new TextFieldControl(123);"
+      "var sample = new TextFieldControl();"
       "form.add(sample);"
       "sample.disabled = true;");
   EXPECT_SCRIPT_TRUE("sample.disabled");
@@ -53,7 +53,7 @@ TEST_F(TextFieldControlTest, set_disabled) {
 
 
 TEST_F(TextFieldControlTest, set_clientLeft) {
-  EXPECT_SCRIPT_VALID("var sample = new TextFieldControl(123);"
+  EXPECT_SCRIPT_VALID("var sample = new TextFieldControl();"
                       "sample.clientLeft = 1;"
                       "sample.clientTop = 2;"
                       "sample.clientWidth = 3;"
@@ -79,7 +79,7 @@ TEST_F(TextFieldControlTest, set_clientLeft) {
 TEST_F(TextFieldControlTest, set_value) {
   EXPECT_SCRIPT_VALID(
       "var form = new Form();"
-      "var sample = new TextFieldControl(123);"
+      "var sample = new TextFieldControl();"
       "form.add(sample);"
       "var changed = 0;"
       "sample.addEventListener('change', function() { ++changed; });"

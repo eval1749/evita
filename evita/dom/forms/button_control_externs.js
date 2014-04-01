@@ -5,9 +5,8 @@
 /**
  * @constructor
  * @extends {FormControl}
- * @param {number} control_id
  */
-var ButtonControl = function(control_id) {};
+function ButtonControl() {}
 
 /** @type {string} */
 ButtonControl.prototype.text;

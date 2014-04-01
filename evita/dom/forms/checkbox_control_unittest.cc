@@ -17,8 +17,7 @@ class CheckboxControlTest : public dom::AbstractDomTest {
 };
 
 TEST_F(CheckboxControlTest, ctor) {
-  EXPECT_SCRIPT_VALID("var sample = new CheckboxControl(123);");
-  EXPECT_SCRIPT_EQ("123", "sample.controlId");
+  EXPECT_SCRIPT_VALID("var sample = new CheckboxControl();");
   EXPECT_SCRIPT_FALSE("sample.disabled");
   EXPECT_SCRIPT_EQ("false", "sample.checked");
   EXPECT_SCRIPT_FALSE("sample.checked");
@@ -26,7 +25,7 @@ TEST_F(CheckboxControlTest, ctor) {
 
 TEST_F(CheckboxControlTest, dispatchEvent) {
   EXPECT_SCRIPT_VALID(
-      "var sample = new CheckboxControl(123);"
+      "var sample = new CheckboxControl();"
       "var changed = 0;"
       "sample.addEventListener('change', function() { ++changed; });"
       "sample.dispatchEvent(new FormEvent('change', {data: 'on'}));");
@@ -44,7 +43,7 @@ TEST_F(CheckboxControlTest, dispatchEvent) {
 TEST_F(CheckboxControlTest, set_value) {
   EXPECT_SCRIPT_VALID(
       "var form = new Form();"
-      "var sample = new CheckboxControl(123);"
+      "var sample = new CheckboxControl();"
       "form.add(sample);"
       "var changed = 0;"
       "sample.addEventListener('change', function() { ++changed; });"
@@ -58,7 +57,7 @@ TEST_F(CheckboxControlTest, set_value) {
 TEST_F(CheckboxControlTest, set_disabled) {
   EXPECT_SCRIPT_VALID(
       "var form = new Form();"
-      "var sample = new CheckboxControl(123);"
+      "var sample = new CheckboxControl();"
       "form.add(sample);"
       "sample.disabled = true;");
   EXPECT_SCRIPT_TRUE("sample.disabled");
@@ -66,7 +65,7 @@ TEST_F(CheckboxControlTest, set_disabled) {
 
 
 TEST_F(CheckboxControlTest, set_clientLeft) {
-  EXPECT_SCRIPT_VALID("var sample = new CheckboxControl(123);"
+  EXPECT_SCRIPT_VALID("var sample = new CheckboxControl();"
                       "sample.clientLeft = 1;"
                       "sample.clientTop = 2;"
                       "sample.clientWidth = 3;"

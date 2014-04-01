@@ -34,7 +34,7 @@ TEST_F(FormTest, ctor) {
 
 TEST_F(FormTest, add) {
   EXPECT_SCRIPT_VALID("var sample = new Form();"
-                      "var text_field = new TextFieldControl(123);"
+                      "var text_field = new TextFieldControl();"
                       "sample.add(text_field);");
   EXPECT_SCRIPT_EQ("1", "sample.controls.length");
   EXPECT_SCRIPT_TRUE("sample.controls[0] === text_field");
@@ -42,7 +42,7 @@ TEST_F(FormTest, add) {
 
 TEST_F(FormTest, focusControl) {
   EXPECT_SCRIPT_VALID("var sample = new Form();"
-                      "var button = new ButtonControl(123);"
+                      "var button = new ButtonControl();"
                       "sample.focusControl = button");
   EXPECT_SCRIPT_TRUE("sample.focusControl == button");
   EXPECT_SCRIPT_VALID("sample.focusControl = null") <<

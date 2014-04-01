@@ -16,6 +16,11 @@ class FormControlController : public ui::ControlController,
   public: virtual ~FormControlController();
 
   // ui::ControlController
+  public: virtual void DidKillFocus(ui::Control* control,
+                                    ui::Widget* focused_widget) override;
+  public: virtual void DidRealize(ui::Control* control) override;
+  public: virtual void DidSetFocus(ui::Control* control,
+                                   ui::Widget* last_focused_widget) override;
   private: virtual void OnKeyPressed(ui::Control* control,
                                      const ui::KeyboardEvent& event) override;
   private: virtual void OnKeyReleased(ui::Control* control,

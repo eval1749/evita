@@ -25,6 +25,10 @@ class EventSource {
   protected: explicit EventSource(domapi::EventTargetId event_target_id);
   public: ~EventSource();
 
+  protected: domapi::EventTargetId event_target_id() const {
+    return event_target_id_;
+  }
+
   public: void DispatchFocusEvent(domapi::EventType event_type,
                                   domapi::EventTargetId related_target_id);
   public: void DispatchKeyboardEvent(const ui::KeyboardEvent& event);

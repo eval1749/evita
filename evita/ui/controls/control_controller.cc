@@ -16,6 +16,15 @@ ControlController::ControlController() {
 ControlController::~ControlController() {
 }
 
+void ControlController::DidKillFocus(Control*, Widget*) {
+}
+
+void ControlController::DidRealize(Control*) {
+}
+
+void ControlController::DidSetFocus(Control*, Widget*) {
+}
+
 void ControlController::OnKeyPressed(Control*, const KeyboardEvent&) {
 }
 

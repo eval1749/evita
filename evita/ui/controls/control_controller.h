@@ -13,11 +13,17 @@ class Control;
 class KeyboardEvent;
 class MouseEvent;
 class MouseWheelEvent;
+class Widget;
 
 class ControlController {
   protected: ControlController();
   public: virtual ~ControlController();
 
+  public: virtual void DidKillFocus(Control* control,
+                                    Widget* focused_widget);
+  public: virtual void DidRealize(Control* control);
+  public: virtual void DidSetFocus(Control* control,
+                                   Widget* last_focused_widget);
   public: virtual void OnKeyPressed(Control* control,
                                     const KeyboardEvent& event);
   public: virtual void OnKeyReleased(Control* control,

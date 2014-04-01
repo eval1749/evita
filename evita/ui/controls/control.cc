@@ -48,19 +48,27 @@ void Control::set_disabled(bool new_disabled) {
 }
 
 // ui::WIdget
-void Control::DidKillFocus(ui::Widget*) {
+void Control::DidKillFocus(ui::Widget* focused_widget) {
+  Widget::DidKillFocus(focused_widget);
   if (disabled())
     return;
   state_ = State::Normal;
   SchedulePaint();
+  controller_->DidKillFocus(this, focused_widget);
 }
 
-void Control::DidSetFocus(ui::Widget*) {
+void Control::DidRealize() {
+  controller_->DidRealize(this);
+}
+
+void Control::DidSetFocus(ui::Widget* last_focused_widget) {
+  Widget::DidSetFocus(last_focused_widget);
   if (disabled())
     return;
   state_ = State::Highlight;
   if (is_realized())
     SchedulePaint();
+  controller_->DidSetFocus(this, last_focused_widget);
 }
 
 void Control::OnKeyPressed(const KeyboardEvent& event) {

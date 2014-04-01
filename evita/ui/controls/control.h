@@ -13,6 +13,8 @@ namespace ui {
 class ControlController;
 
 class Control : public ui::Widget {
+  DECLARE_CASTABLE_CLASS(Control, Widget);
+
   public: enum class State {
     Normal,
     Disabled,
@@ -48,6 +50,7 @@ class Control : public ui::Widget {
 
   // ui::Widget
   protected: virtual void DidKillFocus(ui::Widget* focused_window) override;
+  protected: virtual void DidRealize() override;
   protected: virtual void DidSetFocus(ui::Widget* last_focused) override;
   protected: virtual void OnKeyPressed(const KeyboardEvent& event) override;
   protected: virtual void OnKeyReleased(const KeyboardEvent& event) override;

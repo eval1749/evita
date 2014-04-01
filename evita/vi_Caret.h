@@ -12,7 +12,7 @@
 #define INCLUDE_listener_winapp_visual_caret_h
 
 #include "base/time/time.h"
-#include "gfx/rect_f.h"
+#include "evita/gfx/rect_f.h"
 #include "evita/li_util.h"
 #include <memory>
 
@@ -44,7 +44,6 @@ class Caret {
   public: void ShouldBlink() { should_blink_ = true; }
   // TODO: We should pass Widget to Caret::Take() instead of gfx::Graphics.
   public: void Take(const gfx::Graphics& gfx);
-  private: static void CALLBACK TimerProc(HWND, UINT, UINT_PTR, DWORD);
   public: void Update(const gfx::RectF& rect);
 
   DISALLOW_COPY_AND_ASSIGN(Caret);

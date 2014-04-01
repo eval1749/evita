@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 /**
+ * @this {!CheckboxControl}
  * @param {!Event} event
  * Default event handler.
  */
 CheckboxControl.handleEvent = function(event) {
-  var checkbox = /** @type {!CheckboxConrol} */(event.target);
+  var checkbox = /** @type {!CheckboxControl} */(event.target);
   if (event.type == Event.Names.CLICK)
     checkbox.checked = !checkbox.checked;
   FormControl.handleEvent(event);

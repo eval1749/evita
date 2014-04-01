@@ -7,7 +7,7 @@
  * Default event handler for RadioButtonControl.
  */
 RadioButtonControl.handleEvent = function(event) {
-  var radio_button = /** @type {!RadioButtonConrol} */(event.target);
+  var radio_button = /** @type {!RadioButtonControl} */(event.target);
   if (event.type == Event.Names.CLICK)
     radio_button.checked = !radio_button.checked;
   FormControl.handleEvent(event);

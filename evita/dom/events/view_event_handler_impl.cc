@@ -212,25 +212,6 @@ void ViewEventHandlerImpl::DispatchFocusEvent(
       event_init));
 }
 
-void ViewEventHandlerImpl::DispatchFormEvent(
-    const domapi::FormEvent& raw_event) {
-  auto const form_id = raw_event.target_id;
-  auto const target = FromEventTargetId(raw_event.target_id);
-  if (!target)
-    return;
-  auto const form = target->as<Form>();
-  if (!form) {
-    DVLOG(0) << "Event target " << form_id << " isn't a From.";
-    return;
-  }
-  auto const control = form->control(raw_event.control_id);
-  if (!control) {
-    DVLOG(0) <<  "Form " << form_id << " doesn't have control " <<
-        raw_event.control_id;
-  }
-  DispatchEventWithInLock(control, new FormEvent(raw_event));
-}
-
 void ViewEventHandlerImpl::DispatchKeyboardEvent(
     const domapi::KeyboardEvent& api_event) {
   auto const window = FromEventTargetId(api_event.target_id);

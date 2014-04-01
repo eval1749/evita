@@ -33,8 +33,6 @@ class ViewEventHandlerImpl : public domapi::ViewEventHandler {
   private: virtual void DidStartViewHost() override;
   private: virtual void DispatchFocusEvent(
       const domapi::FocusEvent& event) override;
-  private: virtual void DispatchFormEvent(
-      const domapi::FormEvent& event) override;
   private: virtual void DispatchKeyboardEvent(
       const domapi::KeyboardEvent& event) override;
   private: virtual void DispatchMouseEvent(

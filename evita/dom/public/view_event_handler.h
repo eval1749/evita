@@ -40,7 +40,6 @@ class ViewEventHandler {
                                        int right, int bottom) = 0;
   public: virtual void DidStartViewHost() = 0;
   public: virtual void DispatchFocusEvent(const FocusEvent& event) = 0;
-  public: virtual void DispatchFormEvent(const FormEvent& event) = 0;
   public: virtual void DispatchKeyboardEvent(const KeyboardEvent& event) = 0;
   public: virtual void DispatchMouseEvent(const MouseEvent& event) = 0;
   public: virtual void DispatchViewIdleEvent(int hint) = 0;

@@ -7,7 +7,6 @@
 
 #include "base/callback_forward.h"
 #include "base/strings/string16.h"
-#include "evita/dom/public/dialog_box_id.h"
 #include "evita/dom/public/deferred.h"
 #include "evita/dom/public/script_host_state.h"
 #include "evita/dom/windows/window_id.h"

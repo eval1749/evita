@@ -13,7 +13,6 @@
 #include "base/observer_list.h"
 #pragma warning(pop)
 #include "base/strings/string16.h"
-#include "evita/dom/public/dialog_box_id.h"
 #include "evita/gc/member.h"
 #include "evita/v8_glue/nullable.h"
 
@@ -37,9 +36,6 @@ class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
 
   public: FormControl* control(int control_id) const;
   public: std::vector<FormControl*> controls() const;
-  public: domapi::DialogBoxId dialog_box_id() const {
-    return event_target_id();
-  }
   public: FormControl* focus_control() const { return focus_control_.get(); }
   public: void set_focus_control(
       v8_glue::Nullable<FormControl> new_focus_control);

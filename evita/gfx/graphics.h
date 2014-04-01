@@ -5,6 +5,7 @@
 #if !defined(INCLUDE_evita_gfx_graphics_h)
 #define INCLUDE_evita_gfx_graphics_h
 
+#include "base/strings/string16.h"
 #include "evita/gfx_base.h"
 
 namespace gfx {
@@ -96,7 +97,7 @@ class Graphics : public Object, public DpiHandler {
   public: void DrawText(const TextFormat& text_format,
                         const Brush& brush,
                         const RECT& rc,
-                        const char16* pwch, size_t cwch) const;
+                        const base::char16* pwch, size_t cwch) const;
 
   // [E]
   // Returns true if succeeded.

@@ -553,9 +553,14 @@ void FormWindow::DidSetFocus() {
     focus_control->RequestFocus();
 }
 
-LRESULT FormWindow::OnMessage(uint32_t const uMsg, WPARAM const wParam,
+LRESULT FormWindow::OnMessage(uint32_t const message, WPARAM const wParam,
                               LPARAM const lParam) {
-  return Widget::OnMessage(uMsg, wParam, lParam);
+  if (message == WM_CLOSE) {
+    // TODO(yosi) Should we dispatch "close" event to JavaScript?
+    Hide();
+    return 0;
+  }
+  return Widget::OnMessage(message, wParam, lParam);
 }
 
 void FormWindow::OnPaint(const gfx::Rect rect) {

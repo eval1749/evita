@@ -165,7 +165,8 @@ var TextFieldEditCommand;
     var item = items.get(0);
     if (item.kind != 'string')
       return;
-    selection.text = item.getAsString().replace(/\r\n/g, '\n');
+    selection.text = item.getAsString();
+    selection.collapseTo(selection.end);
   });
 
   bindKey('Ctrl+X', function(selection) {

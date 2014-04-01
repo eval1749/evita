@@ -88,11 +88,19 @@ class Widget
   protected: virtual void DidDestroyNativeWindow();
   protected: virtual void DidHide();
   protected: virtual void DidKillFocus(ui::Widget* focused_window);
+
+  // Called when widget, which has native window, loses native focus. This is
+  // good time to restore caret background image.
+  protected: virtual void DidKillNativeFocus();
   protected: virtual void DidRealize();
   protected: virtual void DidRealizeChildWidget(const Widget& widget);
   protected: virtual void DidRemoveChildWidget(const Widget& widget);
   protected: virtual void DidResize();
   protected: virtual void DidSetFocus(ui::Widget* last_focused);
+
+  // Called when widget, which has native window, get native focus. This is
+  // good time to prepare caret rendering.
+  protected: virtual void DidSetNativeFocus();
   protected: virtual void DidShow();
   private: void DispatchMouseExited();
   private: void DispatchPaintMessage();

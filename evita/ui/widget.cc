@@ -162,6 +162,14 @@ void Widget::DidHide() {
 void Widget::DidKillFocus(ui::Widget*) {
 }
 
+void Widget::DidKillNativeFocus() {
+  if (auto widget = focus_widget) {
+    focus_widget = nullptr;
+    widget->DidKillFocus(will_focus_widget);
+  }
+  we_have_active_focus = false;
+}
+
 void Widget::DidRealize() {
   for (auto const child : child_nodes()) {
     child->RealizeWidget();
@@ -180,6 +188,14 @@ void Widget::DidResize() {
 }
 
 void Widget::DidSetFocus(ui::Widget*) {
+}
+
+void Widget::DidSetNativeFocus() {
+  auto const last_focused_widget = focus_widget;
+  focus_widget = will_focus_widget ? will_focus_widget : this;
+  will_focus_widget = nullptr;
+  focus_widget->DidSetFocus(last_focused_widget);
+  we_have_active_focus = true;
 }
 
 void Widget::DidShow() {
@@ -692,11 +708,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
             " cur=" << focus_widget <<
             " will=" << will_focus_widget;
       #endif
-      if (auto widget = focus_widget) {
-        focus_widget = nullptr;
-        widget->DidKillFocus(will_focus_widget);
-      }
-      we_have_active_focus = false;
+      DidKillNativeFocus();
       return 0;
 
     case WM_MOUSELEAVE:
@@ -728,11 +740,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
             " cur=" << focus_widget <<
             " will=" << will_focus_widget;
       #endif
-      auto const last_focused_widget = focus_widget;
-      focus_widget = will_focus_widget ? will_focus_widget : this;
-      will_focus_widget = nullptr;
-      focus_widget->DidSetFocus(last_focused_widget);
-      we_have_active_focus = true;
+      DidSetNativeFocus();
       return 0;
     }
 

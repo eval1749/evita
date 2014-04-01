@@ -171,7 +171,9 @@ void Widget::DidRealize() {
 void Widget::DidRealizeChildWidget(const Widget&) {
 }
 
-void Widget::DidRemoveChildWidget(const Widget&) {
+void Widget::DidRemoveChildWidget(const Widget& child) {
+  if (&child == hover_)
+    hover_ = nullptr;
 }
 
 void Widget::DidResize() {

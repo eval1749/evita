@@ -1152,7 +1152,7 @@ void EditPane::DidResize() {
   root_box_->SetRect(rect());
 }
 
-void EditPane::DidSetFocus() {
+void EditPane::DidSetFocus(ui::Widget*) {
   if (auto const widget = GetActiveWindow())
     widget->RequestFocus();
 }

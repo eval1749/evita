@@ -91,7 +91,7 @@ class TextEditWindow
   private: virtual void DidHide() override;
   private: virtual void DidKillFocus() override;
   private: virtual void DidRealize() override;
-  private: virtual void DidSetFocus() override;
+  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void DidShow() override;
 
   // [E]

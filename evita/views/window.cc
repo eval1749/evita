@@ -163,11 +163,11 @@ void Window::DidResize() {
                                         rect().right, rect().bottom);
 }
 
-void Window::DidSetFocus() {
+void Window::DidSetFocus(ui::Widget* last_focused) {
   DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
   ++static_active_tick;
   active_tick_ = static_active_tick;
-  Widget::DidSetFocus();
+  Widget::DidSetFocus(last_focused);
   view_event_handler()->DidSetFocus(window_id_);
 }
 

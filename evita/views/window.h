@@ -31,7 +31,7 @@ class Window : public ui::Widget, protected EventSource {
   protected: virtual void DidKillFocus() override;
   protected: virtual void DidRealize() override;
   protected: virtual void DidResize() override;
-  protected: virtual void DidSetFocus() override;
+  protected: virtual void DidSetFocus(ui::Widget* last_focused) override;
   public: static Window* FromWindowId(WindowId window_id);
   public: virtual bool OnIdle(int hint);
 

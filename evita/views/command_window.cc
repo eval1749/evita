@@ -13,8 +13,8 @@ CommandWindow::~CommandWindow() {
 }
 
 // ui::Widget
-void CommandWindow::DidSetFocus() {
-  Window::DidSetFocus();
+void CommandWindow::DidSetFocus(ui::Widget* widget) {
+  Window::DidSetFocus(widget);
   auto const frame = Frame::FindFrame(*this);
   frame->DidSetFocusOnChild(this);
 }

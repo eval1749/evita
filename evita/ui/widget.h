@@ -92,7 +92,7 @@ class Widget
   protected: virtual void DidRealizeChildWidget(const Widget& widget);
   protected: virtual void DidRemoveChildWidget(const Widget& widget);
   protected: virtual void DidResize();
-  protected: virtual void DidSetFocus();
+  protected: virtual void DidSetFocus(ui::Widget* last_focused);
   protected: virtual void DidShow();
   private: void DispatchMouseExited();
   private: void DispatchPaintMessage();

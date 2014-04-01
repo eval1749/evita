@@ -120,7 +120,7 @@ class Frame final : public views::Window,
   private: virtual void DidRemoveChildWidget(
       const Widget& widget) override;
   private: virtual void DidResize() override;
-private: virtual void DidSetFocus() override;
+private: virtual void DidSetFocus(ui::Widget* last_focused) override;
 private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;
   private: virtual void WillDestroyWidget() override;

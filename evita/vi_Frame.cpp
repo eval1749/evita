@@ -577,7 +577,7 @@ void Frame::DidResize() {
   DrawForResize();
 }
 
-void Frame::DidSetFocus() {
+void Frame::DidSetFocus(ui::Widget*) {
   if (!m_pActivePane) {
     m_pActivePane = m_oPanes.GetFirst();
     if (!m_pActivePane)

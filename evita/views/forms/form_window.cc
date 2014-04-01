@@ -545,8 +545,8 @@ void FormWindow::DidResize() {
   Window::DidResize();
 }
 
-void FormWindow::DidSetFocus() {
-  Window::DidSetFocus();
+void FormWindow::DidSetFocus(ui::Widget* last_focused) {
+  Window::DidSetFocus(last_focused);
   if (!model_)
     return;
   if (auto const focus_control = model_->focus_control())

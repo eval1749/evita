@@ -55,7 +55,7 @@ void Control::DidKillFocus() {
   SchedulePaint();
 }
 
-void Control::DidSetFocus() {
+void Control::DidSetFocus(ui::Widget*) {
   if (disabled())
     return;
   state_ = State::Highlight;

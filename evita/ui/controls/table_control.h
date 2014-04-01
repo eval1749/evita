@@ -53,7 +53,7 @@ class TableControl :
   private: virtual void DidKillFocus() override;
   private: virtual void DidRealize() override;
   private: virtual void DidResize() override;
-  private: virtual void DidSetFocus() override;
+  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
   private: virtual void OnKeyPressed(const KeyboardEvent& event) override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;

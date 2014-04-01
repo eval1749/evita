@@ -179,7 +179,7 @@ void Widget::DidRemoveChildWidget(const Widget& child) {
 void Widget::DidResize() {
 }
 
-void Widget::DidSetFocus() {
+void Widget::DidSetFocus(ui::Widget*) {
 }
 
 void Widget::DidShow() {
@@ -526,7 +526,7 @@ void Widget::RequestFocus() {
     focus_widget = this;
     if (last_focus_widget)
       last_focus_widget->DidKillFocus();
-    focus_widget->DidSetFocus();
+    focus_widget->DidSetFocus(last_focus_widget);
     return;
   }
   will_focus_widget = this;
@@ -721,18 +721,20 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
         return true;
       break;
 
-    case WM_SETFOCUS:
+    case WM_SETFOCUS: {
       #if DEBUG_FOCUS
         DVLOG_WIDGET(0) << "WM_SETFOCUS" <<
             " wParam=" << reinterpret_cast<HWND>(wParam) <<
             " cur=" << focus_widget <<
             " will=" << will_focus_widget;
       #endif
+      auto const last_focused_widget = focus_widget;
       focus_widget = will_focus_widget ? will_focus_widget : this;
       will_focus_widget = nullptr;
-      focus_widget->DidSetFocus();
+      focus_widget->DidSetFocus(last_focused_widget);
       we_have_active_focus = true;
       return 0;
+    }
 
     case WM_SETTINGCHANGE:
       switch (wParam) {

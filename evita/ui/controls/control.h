@@ -48,7 +48,7 @@ class Control : public ui::Widget {
 
   // ui::Widget
   protected: virtual void DidKillFocus() override;
-  protected: virtual void DidSetFocus() override;
+  protected: virtual void DidSetFocus(ui::Widget* last_focused) override;
   protected: virtual void OnKeyPressed(const KeyboardEvent& event) override;
   protected: virtual void OnKeyReleased(const KeyboardEvent& event) override;
   protected: virtual void OnMouseExited(const MouseEvent& event) override;

@@ -516,7 +516,6 @@
         'views/forms/dialog_box.cc',
         'views/forms/dialog_box_set.cc',
         'views/forms/file_dialog_box.cc',
-        'views/forms/find_dialog_box.cc',
         'views/forms/form_control_controller.cc',
         'views/forms/form_window.cc',
         'vi_Frame.cpp',

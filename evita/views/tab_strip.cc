@@ -1156,18 +1156,6 @@ class TabStrip::TabStripImpl : public Element {
             m_compositionEnabled = false;
         break;
 
-      case WM_MOUSELEAVE: {
-        #if DEBUG_HOVER
-          DEBUG_PRINTF("WM_MOUSELEAVE %p hover=%ls.%p\n",
-            this,
-            m_pHover ? m_pHover->GetClass() : L"null",
-            m_pHover);
-        #endif // DEBUG_HOVER
-
-        UpdateHover(nullptr);
-        return 0;
-      }
-
       case WM_NCHITTEST: {
         POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
         if (::ScreenToClient(m_hwnd, &pt)) {
@@ -1533,7 +1521,6 @@ LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
       SelectTab(static_cast<int>(LOWORD(wParam)));
       return 0;
     case WM_DWMCOMPOSITIONCHANGED:
-    case WM_MOUSELEAVE:
     case WM_NCHITTEST:
     case WM_NCLBUTTONDOWN:
     case WM_NCLBUTTONUP:
@@ -1547,6 +1534,10 @@ LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
   }
 
   return ui::Widget::OnMessage(uMsg, wParam, lParam);
+}
+
+void TabStrip::OnMouseExited(const ui::MouseEvent&) {
+  impl_->UpdateHover(nullptr);
 }
 
 void TabStrip::OnMouseMoved(const ui::MouseEvent& event) {

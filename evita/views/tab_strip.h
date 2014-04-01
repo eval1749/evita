@@ -51,6 +51,7 @@ class TabStrip : public ui::Widget {
   private: virtual void DidResize() override;
   private: virtual LRESULT OnMessage(uint32_t uMsg, WPARAM wParam,
                                      LPARAM lParam) override;
+  private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
   private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;

@@ -46,9 +46,6 @@ Range.prototype.analyzeCase = function() {};
  */
 Range.prototype.collapseTo = function(position) {};
 
-/** @type {function()} */
-Range.prototype.copy = function() {};
-
 /**
  * @param {Unit} unit
  * @param {number=} opt_count, defualt is one.
@@ -109,9 +106,6 @@ Range.prototype.moveStartWhile = function(char_set, opt_count) {};
  * @param {!string} text
  */
 Range.prototype.insertBefore = function(text) {};
-
-/** @type {function()} */
-Range.prototype.paste = function() {};
 
 /**
  * @param {!Editor.RegExp} regexp

@@ -62,9 +62,7 @@ class RangeClass : public v8_glue::WrapperInfo {
         .SetProperty("start", &Range::start, &Range::set_start)
         .SetProperty("text", &Range::text, &Range::set_text)
         .SetMethod("collapseTo", &Range::CollapseTo)
-        .SetMethod("copy", &Range::CopyToClipboard)
         .SetMethod("insertBefore", &Range::InsertBefore)
-        .SetMethod("paste", &Range::PasteFromClipboard)
         .SetMethod("setSpelling", &Range::SetSpelling)
         .SetMethod("setStyle", &Range::SetStyle);
   }
@@ -128,21 +126,11 @@ Range* Range::CollapseTo(Posn position) {
   return this;
 }
 
-void Range::CopyToClipboard() const {
-  range_->Copy();
-}
-
 Range* Range::InsertBefore(const base::string16& text) {
   if (!document_->CheckCanChange())
     return this;
   document_->buffer()->InsertBefore(start(), text);
   return this;
-}
-
-void Range::PasteFromClipboard() {
-  if (!document_->CheckCanChange())
-    return;
-  range_->Paste();
 }
 
 void Range::SetSpelling(int spelling) const {

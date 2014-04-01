@@ -36,7 +36,7 @@ TEST_F(ButtonControlTest, dispatchEvent) {
 
 TEST_F(ButtonControlTest, set_disabled) {
   EXPECT_SCRIPT_VALID(
-      "var form = new Form('form1');"
+      "var form = new Form();"
       "var sample = new ButtonControl(123);"
       "form.add(sample);"
       "sample.disabled = true;");

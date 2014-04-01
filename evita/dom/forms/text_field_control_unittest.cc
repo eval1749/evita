@@ -44,7 +44,7 @@ TEST_F(TextFieldControlTest, dispatchEvent) {
 
 TEST_F(TextFieldControlTest, set_disabled) {
   EXPECT_SCRIPT_VALID(
-      "var form = new Form('form1');"
+      "var form = new Form();"
       "var sample = new TextFieldControl(123);"
       "form.add(sample);"
       "sample.disabled = true;");
@@ -78,7 +78,7 @@ TEST_F(TextFieldControlTest, set_clientLeft) {
 
 TEST_F(TextFieldControlTest, set_value) {
   EXPECT_SCRIPT_VALID(
-      "var form = new Form('form1');"
+      "var form = new Form();"
       "var sample = new TextFieldControl(123);"
       "form.add(sample);"
       "var changed = 0;"

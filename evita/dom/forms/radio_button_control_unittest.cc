@@ -26,7 +26,7 @@ TEST_F(RadioButtonControlTest, ctor) {
 
 TEST_F(RadioButtonControlTest, dispatchEvent) {
   EXPECT_SCRIPT_VALID(
-      "var form1 = new Form('form1');"
+      "var form1 = new Form();"
       "var sample1 = new RadioButtonControl('foo', 123);"
       "var sample2 = new RadioButtonControl('foo', 124);"
       "form1.add(sample1);"
@@ -58,7 +58,7 @@ TEST_F(RadioButtonControlTest, dispatchEvent) {
 
 TEST_F(RadioButtonControlTest, set_checked) {
   EXPECT_SCRIPT_VALID(
-      "var form1 = new Form('form1');"
+      "var form1 = new Form();"
       "var sample1 = new RadioButtonControl('foo', 123);"
       "var sample2 = new RadioButtonControl('foo', 124);"
       "form1.add(sample1);"
@@ -90,7 +90,7 @@ TEST_F(RadioButtonControlTest, set_checked) {
 
 TEST_F(RadioButtonControlTest, set_disabled) {
   EXPECT_SCRIPT_VALID(
-      "var form = new Form('form1');"
+      "var form = new Form();"
       "var sample = new RadioButtonControl('foo', 123);"
       "form.add(sample);"
       "sample.disabled = true;");

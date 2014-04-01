@@ -90,7 +90,7 @@
     if (form_window)
       return;
 
-    form = new Form('DummyName');
+    form = new Form();
 
     var BUTTON_MARGIN = 5;
     var CONTROL_HEIGHT = 26;

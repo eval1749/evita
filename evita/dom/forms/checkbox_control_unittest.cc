@@ -43,7 +43,7 @@ TEST_F(CheckboxControlTest, dispatchEvent) {
 
 TEST_F(CheckboxControlTest, set_value) {
   EXPECT_SCRIPT_VALID(
-      "var form = new Form('form1');"
+      "var form = new Form();"
       "var sample = new CheckboxControl(123);"
       "form.add(sample);"
       "var changed = 0;"
@@ -57,7 +57,7 @@ TEST_F(CheckboxControlTest, set_value) {
 
 TEST_F(CheckboxControlTest, set_disabled) {
   EXPECT_SCRIPT_VALID(
-      "var form = new Form('form1');"
+      "var form = new Form();"
       "var sample = new CheckboxControl(123);"
       "form.add(sample);"
       "sample.disabled = true;");

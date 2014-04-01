@@ -23,7 +23,7 @@ class FormWindowTest : public dom::AbstractDomTest {
 TEST_F(FormWindowTest, ctor) {
   EXPECT_CALL(*mock_view_impl(), CreateFormWindow(Eq(2), _));
   EXPECT_SCRIPT_VALID(
-      "var form = new Form('form1');"
+      "var form = new Form();"
       "var sample = new FormWindow(form);");
   EXPECT_SCRIPT_TRUE("sample instanceof Window");
   EXPECT_SCRIPT_TRUE("sample.form === form");

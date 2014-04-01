@@ -5,9 +5,8 @@
 /**
  * @constructor
  * @extends {EventTarget}
- * @param {string} name
  */
-function Form(name) {}
+function Form() {}
 
 
 /** @expose @type {Array.<!FormControl>} */
@@ -18,9 +17,6 @@ Form.prototype.focusControl;
 
 /** @expose @type {number} */
 Form.prototype.height;
-
-/** @expose @type {string} */
-Form.prototype.name;
 
 /** @expose @type {string} */
 Form.prototype.title;
@@ -57,13 +53,9 @@ Form.prototype.dispatchEvent = function(event) {};
  */
 Form.prototype.get = function(control_id) {};
 
-Form.prototype.realize = function() {};
-
 /**
  * @param {string} type
  * @param {!EventListener} listener
  * @param {boolean=} opt_capture
  */
 Form.prototype.removeEventListener = function(type, listener, opt_capture) {};
-
-Form.prototype.show = function() {};

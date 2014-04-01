@@ -38,7 +38,7 @@ TEST_F(LabelControlTest, dispatchEvent) {
 
 TEST_F(LabelControlTest, set_disabled) {
   EXPECT_SCRIPT_VALID(
-      "var form = new Form('form1');"
+      "var form = new Form();"
       "var sample = new LabelControl('foo');"
       "form.add(sample);"
       "sample.disabled = true;");

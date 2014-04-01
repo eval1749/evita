@@ -31,8 +31,8 @@ class FormClass :
         &FormClass::NewForm);
   }
 
-  private: static Form* NewForm(const base::string16& name) {
-    return new Form(name);
+  private: static Form* NewForm() {
+    return new Form();
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -42,13 +42,10 @@ class FormClass :
         .SetProperty("focusControl", &Form::focus_control,
                                      &Form::set_focus_control)
         .SetProperty("height", &Form::height, &Form::set_height)
-        .SetProperty("name", &Form::name)
         .SetProperty("title", &Form::title, &Form::set_title)
         .SetProperty("width", &Form::width, &Form::set_width)
         .SetMethod("add", &Form::AddFormControl)
-        .SetMethod("control", &Form::control)
-        .SetMethod("realize", &Form::Realize)
-        .SetMethod("show", &Form::Show);
+        .SetMethod("control", &Form::control);
   }
 
   DISALLOW_COPY_AND_ASSIGN(FormClass);
@@ -61,10 +58,7 @@ class FormClass :
 //
 DEFINE_SCRIPTABLE_OBJECT(Form, FormClass);
 
-Form::Form(const base::string16& name)
-    : height_(0.0f), name_(name), width_(0.0f) {
-  if (name == L"FindDialogBox")
-    ScriptHost::instance()->view_delegate()->CreateFindDialogBox(this);
+Form::Form() : height_(0.0f), width_(0.0f) {
 }
 
 Form::~Form() {
@@ -125,34 +119,11 @@ void Form::AddObserver(FormObserver* observer) const {
 }
 
 void Form::DidChangeFormControl(FormControl*) {
-  if (name_ == L"FindDialogBox") {
-    ScriptHost::instance()->view_delegate()->DidChangeFormContents(
-        dialog_box_id());
-    return;
-  }
   FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
-}
-
-void Form::Realize() {
-  if (name_ != L"FindDialogBox") {
-    ScriptHost::instance()->ThrowError("Requires Find form");
-    return;
-  }
-  ScriptHost::instance()->view_delegate()->RealizeDialogBox(
-      dialog_box_id());
 }
 
 void Form::RemoveObserver(FormObserver* observer) const {
   observers_.RemoveObserver(observer);
-}
-
-void Form::Show() {
-  if (name_ != L"FindDialogBox") {
-    ScriptHost::instance()->ThrowError("Requires Find form");
-    return;
-  }
-  ScriptHost::instance()->view_delegate()->ShowDialogBox(
-      dialog_box_id());
 }
 
 }  // namespace dom

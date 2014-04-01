@@ -85,7 +85,7 @@ var TextFieldEditCommand;
    * @param {!TextFieldControl} control
    * @param {!KeyboardEvent} event
    */
-  function handleKeyboardEvent(control, event) {
+  function handleKeyDown(control, event) {
     if (event.type != Event.Names.KEYDOWN)
       return;
     var command = keymap.get(event.code);
@@ -100,8 +100,14 @@ var TextFieldEditCommand;
    * Default event handler.
    */
   TextFieldControl.handleEvent = function(event) {
-    if (event instanceof KeyboardEvent)
-      handleKeyboardEvent(this, event);
+    switch (event.type) {
+      case Event.Names.CLICK:
+        this.form.focusControl = this;
+        break;
+      case Event.Names.KEYDOWN:
+        handleKeyDown(this, /** @type{!KeyboardEvent} */(event));
+        break;
+    }
     FormControl.handleEvent(event);
   };
 

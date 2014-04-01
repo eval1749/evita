@@ -89,7 +89,7 @@ class TextEditWindow
   public: void DidChangeFrame();
   private: virtual void DidChangeHierarchy() override;
   private: virtual void DidHide() override;
-  private: virtual void DidKillFocus() override;
+  private: virtual void DidKillFocus(ui::Widget* focused_window) override;
   private: virtual void DidRealize() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void DidShow() override;

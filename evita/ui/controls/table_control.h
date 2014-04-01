@@ -50,7 +50,7 @@ class TableControl :
   private: virtual void DidRemoveRow(int row_id) override;
 
   // Widget
-  private: virtual void DidKillFocus() override;
+  private: virtual void DidKillFocus(ui::Widget* focused_window) override;
   private: virtual void DidRealize() override;
   private: virtual void DidResize() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;

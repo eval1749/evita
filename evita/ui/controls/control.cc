@@ -48,7 +48,7 @@ void Control::set_disabled(bool new_disabled) {
 }
 
 // ui::WIdget
-void Control::DidKillFocus() {
+void Control::DidKillFocus(ui::Widget*) {
   if (disabled())
     return;
   state_ = State::Normal;

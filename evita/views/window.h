@@ -28,7 +28,7 @@ class Window : public ui::Widget, protected EventSource {
   public: WindowId window_id() const { return window_id_; }
 
   public: void DidDestroyDomWindow();
-  protected: virtual void DidKillFocus() override;
+  protected: virtual void DidKillFocus(ui::Widget* focused_window) override;
   protected: virtual void DidRealize() override;
   protected: virtual void DidResize() override;
   protected: virtual void DidSetFocus(ui::Widget* last_focused) override;

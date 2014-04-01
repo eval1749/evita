@@ -180,7 +180,7 @@ class TableControl::TableControlModel {
 
   public: void DidAddRow(int row_id);
   public: void DidChangeRow(int row_id);
-  public: void DidKillFocus();
+  public: void DidKillFocus(ui::Widget* focused_window);
   public: void DidRemoveRow(int row_id);
   public: void DidResize(const gfx::RectF& rect);
   public: void DidSetFocus(ui::Widget* last_focused);
@@ -254,7 +254,7 @@ void TableControl::TableControlModel::DidChangeRow(int row_id) {
   dirty_rect_.Unite(row->rect());
 }
 
-void TableControl::TableControlModel::DidKillFocus() {
+void TableControl::TableControlModel::DidKillFocus(ui::Widget*) {
   has_focus_ = false;
   MakeSelectionViewDirty();
 }
@@ -557,8 +557,8 @@ void TableControl::DidRemoveRow(int row_id) {
 }
 
 // Widget
-void TableControl::DidKillFocus() {
-  model_->DidKillFocus();
+void TableControl::DidKillFocus(ui::Widget* focus_widget) {
+  model_->DidKillFocus(focus_widget);
   UpdateViewIfNeeded();
 }
 

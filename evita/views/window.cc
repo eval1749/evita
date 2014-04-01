@@ -109,8 +109,8 @@ void Window::DidDestroyDomWindow() {
   WindowIdMapper::instance()->DidDestroyDomWindow(window_id_);
 }
 
-void Window::DidKillFocus() {
-  Widget::DidKillFocus();
+void Window::DidKillFocus(ui::Widget* focused_window) {
+  Widget::DidKillFocus(focused_window);
   view_event_handler()->DidKillFocus(window_id_);
 }
 

@@ -209,8 +209,8 @@ void TextEditWindow::DidHide() {
   text_renderer_->Reset();
 }
 
-void TextEditWindow::DidKillFocus() {
-  ParentClass::DidKillFocus();
+void TextEditWindow::DidKillFocus(ui::Widget* focused_widget) {
+  ParentClass::DidKillFocus(focused_widget);
   caret_->Give();
   text_renderer_->Reset();
 }

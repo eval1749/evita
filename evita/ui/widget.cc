@@ -116,7 +116,7 @@ void Widget::DestroyWidget() {
     ReleaseCapture();
   if (focus_widget == this) {
     focus_widget = nullptr;
-    DidKillFocus();
+    DidKillFocus(nullptr);
   }
   while (first_child()) {
     first_child()->DestroyWidget();
@@ -159,7 +159,7 @@ void Widget::DidDestroyWidget() {
 void Widget::DidHide() {
 }
 
-void Widget::DidKillFocus() {
+void Widget::DidKillFocus(ui::Widget*) {
 }
 
 void Widget::DidRealize() {
@@ -525,7 +525,7 @@ void Widget::RequestFocus() {
     auto const last_focus_widget = focus_widget;
     focus_widget = this;
     if (last_focus_widget)
-      last_focus_widget->DidKillFocus();
+      last_focus_widget->DidKillFocus(this);
     focus_widget->DidSetFocus(last_focus_widget);
     return;
   }
@@ -694,7 +694,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       #endif
       if (auto widget = focus_widget) {
         focus_widget = nullptr;
-        widget->DidKillFocus();
+        widget->DidKillFocus(will_focus_widget);
       }
       we_have_active_focus = false;
       return 0;

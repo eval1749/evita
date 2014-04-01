@@ -12,7 +12,6 @@ var TextFieldEditCommand;
   /** @type {!Map.<number, !TextFieldEditCommand>} */
   var keymap = new Map();
 
-
   /**
    * @param {string} key_combination
    * @param {!TextFieldEditCommand} command
@@ -76,8 +75,6 @@ var TextFieldEditCommand;
     var control = selection.control;
     var text = control.value;
     selection.text = String.fromCharCode(charCode);
-    if (selection.collapsed)
-      selection.collapseTo(selection.focusOffset);
     selection.collapseTo(selection.end);
   }
 
@@ -103,6 +100,11 @@ var TextFieldEditCommand;
     switch (event.type) {
       case Event.Names.CLICK:
         this.focus();
+        break;
+      case Event.Names.FOCUS:
+        console.log('TextFieldControl.handleEvent', event);
+        this.selection.collapseTo(0);
+        this.selection.extendTo(this.value.length);
         break;
       case Event.Names.KEYDOWN:
         handleKeyDown(this, /** @type{!KeyboardEvent} */(event));

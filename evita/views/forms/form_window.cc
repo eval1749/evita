@@ -454,8 +454,10 @@ bool FormWindow::OnIdle(int) {
     SchedulePaintInRect(rect);
   }
 
-  if (!model_->dirty())
+  if (!model_->dirty()) {
+    TransferFocusIfNeeded();
     return false;
+  }
 
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   if (!lock_scope.locked())
@@ -489,12 +491,23 @@ bool FormWindow::OnIdle(int) {
     ResizeTo(windowRect);
   }
 
+  TransferFocusIfNeeded();
+
   if (title_ != model_->title()) {
     title_ = model_->title();
     ::SetWindowTextW(AssociatedHwnd(), title_.c_str());
   }
 
   return false;
+}
+
+void FormWindow::TransferFocusIfNeeded() {
+  auto const focus_control = model_->focus_control();
+  if (!focus_control)
+    return;
+  if (!has_focus())
+    return;
+  focus_control->RequestFocus();
 }
 
 // ui::SystemMetricsObserver
@@ -543,14 +556,6 @@ void FormWindow::DidResize() {
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   (*gfx_)->Clear(ui::SystemMetrics::instance()->bgcolor());
   Window::DidResize();
-}
-
-void FormWindow::DidSetFocus(ui::Widget* last_focused) {
-  Window::DidSetFocus(last_focused);
-  if (!model_)
-    return;
-  if (auto const focus_control = model_->focus_control())
-    focus_control->RequestFocus();
 }
 
 LRESULT FormWindow::OnMessage(uint32_t const message, WPARAM const wParam,

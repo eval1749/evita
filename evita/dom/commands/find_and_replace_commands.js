@@ -212,6 +212,11 @@
 
     updateUiByFindWhat();
     form_window = new FormWindow(form);
+
+    // Set focus on |find_what_text| control when find dialog box is activated.
+    form_window.addEventListener(Event.Names.FOCUS, function() {
+      find_what_text.focus();
+    });
     form_window.realize();
     // TODO(yosi) |global.findForm| is only for debugging purpose.
     global.findFormWindow = form_window;

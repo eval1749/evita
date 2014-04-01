@@ -183,11 +183,11 @@ TEST_F(WindowTest, DidResize) {
   EXPECT_SCRIPT_EQ("0", "sample.bottom");
 
   view_event_handler()->DidResizeWidget(static_cast<dom::WindowId>(1),
-                                        11, 22, 33, 44);
-  EXPECT_SCRIPT_EQ("11", "sample.left");
-  EXPECT_SCRIPT_EQ("22", "sample.top");
-  EXPECT_SCRIPT_EQ("33", "sample.right");
-  EXPECT_SCRIPT_EQ("44", "sample.bottom");
+                                        11, 22, 33 + 11, 44 + 22);
+  EXPECT_SCRIPT_EQ("11", "sample.clientLeft");
+  EXPECT_SCRIPT_EQ("22", "sample.clientTop");
+  EXPECT_SCRIPT_EQ("33", "sample.clientWidth");
+  EXPECT_SCRIPT_EQ("44", "sample.clientHeight");
 }
 
 TEST_F(WindowTest, focus) {

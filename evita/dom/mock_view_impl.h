@@ -47,12 +47,10 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD2(ComputeOnTextWindow,
       text::Posn(WindowId, const TextWindowCompute&));
   MOCK_METHOD1(CreateEditorWindow, void(const EditorWindow*));
-  MOCK_METHOD1(CreateFindDialogBox, void(Form*));
   MOCK_METHOD2(CreateFormWindow, void(WindowId, const Form*));
   MOCK_METHOD2(CreateTableWindow, void(WindowId, Document*));
   MOCK_METHOD1(CreateTextWindow, void(const TextWindow*));
   MOCK_METHOD1(DestroyWindow, void(WindowId));
-  MOCK_METHOD1(DidChangeFormContents, void(domapi::DialogBoxId));
   MOCK_METHOD1(DidStartScriptHost, void(ScriptHostState));
   MOCK_METHOD1(DidHandleViewIdelEvent, void(int));
   MOCK_METHOD1(FocusWindow, void(WindowId));
@@ -82,7 +80,6 @@ class MockViewImpl : public dom::ViewDelegate {
   public: virtual void SaveFile(Document* document,
                                 const base::string16& filename,
                                 const SaveFileCallback& callback) override;
-  MOCK_METHOD1(RealizeDialogBox, void(domapi::DialogBoxId));
   MOCK_METHOD1(RealizeWindow, void(WindowId));
   MOCK_METHOD1(RegisterViewEventHandler, void(domapi::ViewEventHandler*));
   MOCK_METHOD1(ReleaseCapture, void(WindowId));
@@ -91,7 +88,6 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD2(SetStatusBar,
       void(WindowId, const std::vector<base::string16>&));
   MOCK_METHOD2(SetTabData, void(WindowId, const domapi::TabData&));
-  MOCK_METHOD1(ShowDialogBox, void(domapi::DialogBoxId));
   MOCK_METHOD1(ShowWindow, void(WindowId));
   MOCK_METHOD2(SplitHorizontally, void(WindowId, WindowId));
   MOCK_METHOD2(SplitVertically, void(WindowId, WindowId));

@@ -28,7 +28,6 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       const dom::TextWindowCompute& data) override;
   private: virtual void CreateEditorWindow(
       const dom::EditorWindow* window) override;
-  private: virtual void CreateFindDialogBox(dom::Form* form) override;
   private: virtual void CreateFormWindow(dom::WindowId window_id,
                                          const dom::Form* form) override;
   private: virtual void CreateTableWindow(
@@ -36,8 +35,6 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void CreateTextWindow(
       const dom::TextWindow* window) override;
   private: virtual void DestroyWindow(dom::WindowId window_id) override;
-  private: virtual void DidChangeFormContents(
-      domapi::DialogBoxId dialog_box_id) override;
   private: virtual void DidStartScriptHost(
       domapi::ScriptHostState state) override;
   private: virtual void DidHandleViewIdelEvent(int hint) override;
@@ -70,8 +67,6 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       MessageBoxCallback callback) override;
   public: virtual void Reconvert(dom::WindowId window_id, text::Posn start,
                                  text::Posn end) override;
-  private: virtual void RealizeDialogBox(
-      domapi::DialogBoxId dialog_box) override;
   private: virtual void RealizeWindow(dom::WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(
       domapi::ViewEventHandler* event_handler) override;
@@ -86,8 +81,6 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       const std::vector<base::string16>& texts) override;
   private: virtual void SetTabData(dom::WindowId window_id,
                                    const domapi::TabData& tab_data) override;
-  private: virtual void ShowDialogBox(
-      domapi::DialogBoxId dialog_box_id) override;
   private: virtual void ShowWindow(dom::WindowId window_id) override;
   private: virtual void SplitHorizontally(dom::WindowId left_window,
       dom::WindowId new_right_window) override;

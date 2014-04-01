@@ -21,9 +21,7 @@
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/spellchecker/spelling_engine.h"
-#include "evita/views/forms/dialog_box_set.h"
 #include "evita/views/forms/file_dialog_box.h"
-#include "evita/views/forms/find_dialog_box.h"
 #include "evita/views/forms/form_window.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/table_view.h"
@@ -139,10 +137,6 @@ void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
   new Frame(window->window_id());
 }
 
-void ViewDelegateImpl::CreateFindDialogBox(dom::Form* form) {
-  new FindDialogBox(form);
-}
-
 void ViewDelegateImpl::CreateFormWindow(dom::WindowId window_id,
                                         const dom::Form* form) {
   new FormWindow(window_id, form);
@@ -168,16 +162,6 @@ void ViewDelegateImpl::DestroyWindow(dom::WindowId window_id) {
   }
   widget->DidDestroyDomWindow();
   widget->DestroyWidget();
-}
-
-void ViewDelegateImpl::DidChangeFormContents(
-    domapi::DialogBoxId dialog_box_id) {
-  auto const dialog_box = DialogBoxSet::instance()->Find(dialog_box_id);
-  if (!dialog_box) {
-    DVLOG(0) << "No such dialog box " << dialog_box_id;
-    return;
-  }
-  dialog_box->DidChangeFormContents();
 }
 
 void ViewDelegateImpl::DidStartScriptHost(domapi::ScriptHostState state) {
@@ -385,15 +369,6 @@ void ViewDelegateImpl::Reconvert(WindowId window_id, text::Posn start,
   text_window->Reconvert(start, end);
 }
 
-void ViewDelegateImpl::RealizeDialogBox(domapi::DialogBoxId dialog_box_id) {
-  auto const dialog_box = DialogBoxSet::instance()->Find(dialog_box_id);
-  if (!dialog_box) {
-    DVLOG(0) << "No such dialog box " << dialog_box_id;
-    return;
-  }
-  dialog_box->Realize();
-}
-
 void ViewDelegateImpl::RealizeWindow(dom::WindowId window_id) {
   DCHECK_NE(dom::kInvalidWindowId, window_id);
   auto const widget = Window::FromWindowId(window_id);
@@ -421,13 +396,6 @@ void ViewDelegateImpl::SaveFile(dom::Document* document,
   auto const newline_mode = buffer->GetNewline() == NewlineMode_Detect ?
         NewlineMode_CrLf : buffer->GetNewline();
   buffer->Save(filename, code_page, newline_mode, callback);
-}
-
-void ViewDelegateImpl::ShowDialogBox(domapi::DialogBoxId dialog_box_id) {
-  auto const dialog_box = DialogBoxSet::instance()->Find(dialog_box_id);
-  if (!dialog_box)
-    return;
-  dialog_box->Show();
 }
 
 void ViewDelegateImpl::ShowWindow(dom::WindowId window_id) {

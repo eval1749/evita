@@ -83,14 +83,11 @@ class ViewDelegate {
   public: virtual text::Posn ComputeOnTextWindow(
       WindowId window_id, const TextWindowCompute& data) = 0;
   public: virtual void CreateEditorWindow(const EditorWindow* window) = 0;
-  public: virtual void CreateFindDialogBox(Form* form) = 0;
   public: virtual void CreateFormWindow(WindowId, const Form* form) = 0;
   public: virtual void CreateTableWindow(WindowId window_id,
                                          Document* document) = 0;
   public: virtual void CreateTextWindow(const TextWindow* window) = 0;
   public: virtual void DestroyWindow(WindowId window_id) = 0;
-  public: virtual void DidChangeFormContents(
-      domapi::DialogBoxId dialog_box_id) = 0;
 
   // |DidStartScriptHost| is called when script host execute editor start
   // script.
@@ -125,7 +122,6 @@ class ViewDelegate {
       MessageBoxCallback callback) = 0;
   public: virtual void Reconvert(WindowId window_id, text::Posn start,
                                  text::Posn end) = 0;
-  public: virtual void RealizeDialogBox(domapi::DialogBoxId dialog_box_id) = 0;
   public: virtual void RealizeWindow(WindowId window_id) = 0;
   public: virtual void RegisterViewEventHandler(
       domapi::ViewEventHandler* event_handler) = 0;
@@ -141,7 +137,6 @@ class ViewDelegate {
       const std::vector<base::string16>& texts) = 0;
   public: virtual void SetTabData(WindowId window_id,
                                   const domapi::TabData& tab_data) = 0;
-  public: virtual void ShowDialogBox(domapi::DialogBoxId dialog_box_id) = 0;
   public: virtual void ShowWindow(WindowId window_id) = 0;
   public: virtual void SplitHorizontally(WindowId left_window_id,
                                          WindowId new_right_window_id) = 0;

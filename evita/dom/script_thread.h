@@ -70,15 +70,12 @@ class ScriptThread final : public domapi::IoDelegate,
       WindowId window_id, const TextWindowCompute& data) override;
   private: virtual void CreateEditorWindow(
       const EditorWindow* window) override;
-  private: virtual void CreateFindDialogBox(dom::Form* form) override;
   private: virtual void CreateFormWindow(WindowId window_id,
                                          const Form* form) override;
   private: virtual void CreateTableWindow(
       WindowId window_id, Document* document) override;
   private: virtual void CreateTextWindow(const TextWindow* window) override;
   private: virtual void DestroyWindow(WindowId window_id) override;
-  private: virtual void DidChangeFormContents(
-      domapi::DialogBoxId dialog_box_id) override;
   private: virtual void DidStartScriptHost(
       domapi::ScriptHostState state) override;
   private: virtual void DidHandleViewIdelEvent(int hint) override;
@@ -110,8 +107,6 @@ class ScriptThread final : public domapi::IoDelegate,
       MessageBoxCallback callback) override;
   private: virtual void Reconvert(WindowId window_id, text::Posn start,
                                   text::Posn end) override;
-  private: virtual void RealizeDialogBox(
-      domapi::DialogBoxId dialog_box_id) override;
   private: virtual void RealizeWindow(WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(
       domapi::ViewEventHandler* event_handler) override;
@@ -126,8 +121,6 @@ class ScriptThread final : public domapi::IoDelegate,
       const std::vector<base::string16>& texts) override;
   private: virtual void SetTabData(WindowId window_id,
                                    const domapi::TabData& tab_data) override;
-  private: virtual void ShowDialogBox(
-      domapi::DialogBoxId dialog_box_id) override;
   private: virtual void ShowWindow(WindowId window_id) override;
   private: virtual void SplitHorizontally(WindowId left_window_id,
       WindowId new_right_window_id) override;

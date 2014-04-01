@@ -256,12 +256,10 @@ DEFINE_VIEW_DELEGATE_2(ChangeParentWindow, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(CheckSpelling, const base::string16&,
     const CheckSpellingDeferred&)
 DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
-DEFINE_VIEW_DELEGATE_1(CreateFindDialogBox, Form*)
 DEFINE_VIEW_DELEGATE_2(CreateFormWindow, WindowId, const Form*)
 DEFINE_VIEW_DELEGATE_2(CreateTableWindow, WindowId, Document*)
 DEFINE_VIEW_DELEGATE_1(CreateTextWindow, const TextWindow*)
 DEFINE_VIEW_DELEGATE_1(DestroyWindow, WindowId)
-DEFINE_VIEW_DELEGATE_1(DidChangeFormContents, domapi::DialogBoxId)
 DEFINE_VIEW_DELEGATE_1(DidStartScriptHost, domapi::ScriptHostState)
 DEFINE_VIEW_DELEGATE_1(DidHandleViewIdelEvent, int);
 DEFINE_VIEW_DELEGATE_1(FocusWindow, WindowId)
@@ -279,7 +277,6 @@ DEFINE_VIEW_DELEGATE_5(MessageBox, WindowId, const base::string16&,
                        const::base::string16&, int,
                        MessageBoxCallback)
 DEFINE_VIEW_DELEGATE_3(Reconvert, WindowId, text::Posn, text::Posn);
-DEFINE_VIEW_DELEGATE_1(RealizeDialogBox, domapi::DialogBoxId)
 DEFINE_VIEW_DELEGATE_1(RealizeWindow, WindowId)
 DEFINE_VIEW_DELEGATE_1(ReleaseCapture, WindowId)
 DEFINE_VIEW_DELEGATE_3(SaveFile, Document*, const base::string16&,
@@ -288,7 +285,6 @@ DEFINE_VIEW_DELEGATE_1(SetCapture, WindowId)
 DEFINE_VIEW_DELEGATE_2(SetStatusBar, WindowId,
     const std::vector<base::string16>&)
 DEFINE_VIEW_DELEGATE_2(SetTabData, WindowId, const domapi::TabData&)
-DEFINE_VIEW_DELEGATE_1(ShowDialogBox, domapi::DialogBoxId)
 DEFINE_VIEW_DELEGATE_1(ShowWindow, WindowId)
 DEFINE_VIEW_DELEGATE_2(SplitHorizontally, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(SplitVertically, WindowId, WindowId)

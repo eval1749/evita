@@ -23,6 +23,7 @@
 #include "evita/dom/forms/text_field_control.h"
 #include "evita/dom/forms/text_field_selection.h"
 #include "evita/dom/lock.h"
+#include "evita/ui/caret.h"
 #include "evita/ui/controls/button_control.h"
 #include "evita/ui/controls/checkbox_control.h"
 #include "evita/ui/controls/label_control.h"
@@ -454,6 +455,11 @@ bool FormWindow::OnIdle(int) {
     SchedulePaintInRect(rect);
   }
 
+  {
+    gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+    ui::Caret::instance()->Blink(gfx_.get());
+  }
+
   if (!model_->dirty()) {
     TransferFocusIfNeeded();
     return false;
@@ -546,6 +552,12 @@ void FormWindow::DidDestroyWidget() {
   Window::DidDestroyWidget();
 }
 
+void FormWindow::DidKillNativeFocus() {
+  gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  ui::Caret::instance()->Give(gfx_.get());
+  Window::DidKillNativeFocus();
+}
+
 void FormWindow::DidRealize() {
   ui::SystemMetrics::instance()->AddObserver(this);
   Window::DidRealize();
@@ -556,6 +568,12 @@ void FormWindow::DidResize() {
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   (*gfx_)->Clear(ui::SystemMetrics::instance()->bgcolor());
   Window::DidResize();
+}
+
+void FormWindow::DidSetNativeFocus() {
+  gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  ui::Caret::instance()->Take(gfx_.get());
+  Window::DidSetNativeFocus();
 }
 
 LRESULT FormWindow::OnMessage(uint32_t const message, WPARAM const wParam,

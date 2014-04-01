@@ -43,7 +43,9 @@ class TextFieldControl final : public Control {
   public: void set_text(const base::string16& text);
 
   // ui::Widget
+  private: virtual void DidKillFocus(ui::Widget* focused_window) override;
   private: virtual void DidResize() override;
+  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
 
   DISALLOW_COPY_AND_ASSIGN(TextFieldControl);

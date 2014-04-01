@@ -7,6 +7,7 @@
 #include "evita/gfx/graphics.h"
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
+#include "evita/ui/caret.h"
 
 namespace ui {
 
@@ -58,7 +59,7 @@ class TextFieldControl::Renderer {
                       Control::State state);
   private: void RenderCaret(gfx::Graphics* gfx,
                             const gfx::RectF& caret_rect) const;
-  private: void RenderSelection(gfx::Graphics* gfx, bool has_focus);
+  private: void RenderSelection(gfx::Graphics* gfx);
   private: void ResetTextLayout();
   private: void ResetViewPort();
   public: void ResizeTo(const gfx::RectF& rect);
@@ -175,12 +176,17 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
   if (!rect_)
     return;
 
+  if (has_focus)
+    Caret::instance()->Hide();
+
   gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect_);
 
   // Render frame
   const auto frame_rect = rect_;
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
-  gfx->DrawRectangle(gfx::Brush(*gfx, style_.shadow), frame_rect);
+  {
+    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
+    gfx->DrawRectangle(gfx::Brush(*gfx, style_.shadow), frame_rect);
+  }
 
   if (!text_layout_) {
     UpdateTextLayout();
@@ -199,9 +205,11 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
                            D2D1_DRAW_TEXT_OPTIONS_CLIP);
   }
 
-  RenderSelection(gfx, has_focus);
+  if (has_focus)
+    RenderSelection(gfx);
 
   // Render state
+  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, rect_);
   switch (state) {
     case Control::State::Disabled:
       gfx->FillRectangle(
@@ -223,18 +231,12 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
 
 void TextFieldControl::Renderer::RenderCaret(
     gfx::Graphics* gfx, const gfx::RectF& caret_rect) const {
-  // TODO(yosi) We should ask global caret controller for blinking caret.
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, caret_rect);
-  gfx::Brush caret_brush(*gfx, gfx::ColorF(style_.color));
-  (*gfx)->DrawRectangle(caret_rect, caret_brush);
+  Caret::instance()->Update(gfx, caret_rect);
 }
 
-void TextFieldControl::Renderer::RenderSelection(gfx::Graphics* gfx,
-                                                 bool has_focus) {
+void TextFieldControl::Renderer::RenderSelection(gfx::Graphics* gfx) {
   const auto text_origin = this->text_origin();
   if (selection_.collapsed()) {
-    if (!has_focus)
-      return;
     auto caret_x = 0.0f;
     auto caret_y = 0.0f;
     auto const is_trailing = false;
@@ -255,14 +257,12 @@ void TextFieldControl::Renderer::RenderSelection(gfx::Graphics* gfx,
       text_origin.x, text_origin.y,
       &metrics, 1u, &num_metrics));
   DCHECK_EQ(1u, num_metrics);
-  auto const fill_color = has_focus ? style_.highlight : style_.gray_text;
+  auto const fill_color = style_.highlight;
   const auto range_rect = gfx::RectF(
       gfx::PointF(metrics.left, metrics.top),
       gfx::SizeF(metrics.width, metrics.height));
   gfx->FillRectangle(gfx::Brush(*gfx, gfx::ColorF(fill_color, 0.3f)),
                      range_rect);
-  if (!has_focus)
-    return;
   RenderCaret(gfx, gfx::RectF(
       selection_.focus_offset < selection_.anchor_offset ?
           range_rect.left_top() :
@@ -364,9 +364,20 @@ void TextFieldControl::set_text(const base::string16& new_text) {
 }
 
 // ui::Widget
+void TextFieldControl::DidKillFocus(ui::Widget* focused_widget) {
+  Caret::instance()->StopBlinking();
+  Control::DidKillFocus(focused_widget);
+}
+
 void TextFieldControl::DidResize() {
   renderer_->ResizeTo(gfx::RectF(rect()));
 }
+
+void TextFieldControl::DidSetFocus(ui::Widget* last_focused_widget) {
+  Caret::instance()->StartBlinking();
+  Control::DidSetFocus(last_focused_widget);
+}
+
 
 void TextFieldControl::OnDraw(gfx::Graphics* gfx) {
   renderer_->Render(gfx, has_focus(), state());

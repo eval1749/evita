@@ -163,12 +163,20 @@ DataTransferData* TextFormat::FromClipboard(HANDLE handle) const {
   ScopedGlobalLock<uint8_t> lock_scope(handle);
   auto const bytes = lock_scope.bytes();
   auto num_bytes = lock_scope.num_bytes();
-  if (!bytes || num_bytes < 2)
+  if (!bytes || num_bytes & 1)
     return nullptr;
-  if (!bytes[num_bytes - 2] && !bytes[num_bytes - 1])
-    num_bytes -= 2;
-  base::string16 string(num_bytes / 2, '?');
-  ::memcpy(&string[0], bytes, num_bytes);
+  // Since, "cmd.exe" puts text with "\0\a\0" into clipboard, we ignore
+  // characters after '\0'.
+  auto const chars = reinterpret_cast<const base::char16*>(bytes);
+  auto const num_chars = num_bytes / 2;
+  auto const end_of_chars = chars + num_chars;
+  auto runner = chars;
+  while (runner < end_of_chars) {
+    if(!*runner)
+      break;
+    ++runner;
+  }
+  base::string16 string(chars, static_cast<size_t>(runner - chars));
   return new DataTransferStringData(string);
 }
 

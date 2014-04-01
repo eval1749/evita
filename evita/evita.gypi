@@ -513,8 +513,6 @@
         'views/text/text_renderer.cc',
         'vi_Caret.cpp',
         'vi_EditPane.cpp',
-        'views/forms/dialog_box.cc',
-        'views/forms/dialog_box_set.cc',
         'views/forms/file_dialog_box.cc',
         'views/forms/form_control_controller.cc',
         'views/forms/form_window.cc',

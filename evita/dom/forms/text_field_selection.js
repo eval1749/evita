@@ -46,15 +46,14 @@ Object.defineProperty(TextFieldSelection.prototype, 'text', {
     }
     var start = this.start;
     var end = this.end;
+    var end_is_focus = end == this.focusOffset;
     this.control.value = value.substr(0, start) + new_text + value.substr(end);
     // Relocate anchorOffset and focusOffset
-    var diff = new_text.length - (end - start);
-    if (!diff)
-      return;
-    if (this.anchorOffset > start)
-      this.anchorOffset = Math.max(this.anchorOffset + diff, start);
-    if (this.focusOffset > start)
-      this.focusOffset = Math.max(this.focusOffset + diff, start);
+    var new_end = new_text.length + start;
+    if (end_is_focus)
+      this.focusOffset = new_end;
+    else
+      this.anchorOffset = new_end;
   },
 });
 

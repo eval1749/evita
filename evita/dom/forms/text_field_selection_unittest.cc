@@ -76,6 +76,7 @@ TEST_F(TextFieldSelectionTest, set_text) {
   EXPECT_SCRIPT_EQ("012389 4,4", "testIt(4, 8, '')") << "range";
   EXPECT_SCRIPT_EQ("0123foobar89 10,4", "testIt(8, 4, 'foobar')") << "range";
   EXPECT_SCRIPT_EQ("012389 4,4", "testIt(8, 4, '')") << "range";
+  EXPECT_SCRIPT_EQ("x 0,1", "testIt(0, 10, 'x')") << "range";
 }
 
 TEST_F(TextFieldSelectionTest, text) {

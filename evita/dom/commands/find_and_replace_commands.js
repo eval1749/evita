@@ -133,20 +133,22 @@
     newline();
 
     // Checkboxes
-    function addCheckbox(text) {
+    function addCheckbox(text, accessKey) {
       var checkbox = new CheckboxControl(++dummy_id);
+      checkbox.accessKey = accessKey;
       add(checkbox, 20);
       add(new LabelControl(text), text.length * 10);
       return checkbox;
     }
     CONTROL_HEIGHT = 20;
-    match_case_checkbox = addCheckbox('Match case');
+    match_case_checkbox = addCheckbox('Match case', 'C');
     newline();
-    match_whole_word_checkbox = addCheckbox('Match whole word');
+    match_whole_word_checkbox = addCheckbox('Match whole word', 'W');
     newline();
-    use_regexp_checkbox = addCheckbox('Use regular expression');
+    use_regexp_checkbox = addCheckbox('Use regular expression', 'E');
     newline();
-    case_preserve_replace_checkbox = addCheckbox('Case preserve replacement');
+    case_preserve_replace_checkbox = addCheckbox('Case preserve replacement',
+                                                 'M');
     case_preserve_replace_checkbox.checked = true;
     newline();
 

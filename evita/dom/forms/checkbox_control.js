@@ -9,9 +9,11 @@
  */
 CheckboxControl.handleEvent = function(event) {
   var checkbox = /** @type {!CheckboxControl} */(event.target);
-  if (event.type == Event.Names.CLICK) {
-    checkbox.focus();
-    checkbox.checked = !checkbox.checked;
+  switch (event.type) {
+    case Event.Names.CLICK:
+      checkbox.checked = !checkbox.checked;
+      checkbox.focus();
+      break;
   }
   FormControl.handleEvent(event);
 };

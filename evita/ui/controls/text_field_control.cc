@@ -103,6 +103,7 @@ void TextFieldControl::Renderer::set_style(const Style& new_style) {
 void TextFieldControl::Renderer::set_text(const base::string16& new_text) {
   if (text_ == new_text)
     return;
+  DCHECK_EQ(base::string16::npos, new_text.find('\n'));
   for (auto offset = 0u; offset < clean_offset_; ++offset) {
     if (offset == text_.size() || offset == new_text.size() ||
         text_[offset] != new_text[offset]) {

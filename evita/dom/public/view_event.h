@@ -45,6 +45,10 @@ struct Event {
   EventTargetId target_id;
 };
 
+struct FocusEvent : Event {
+  EventTargetId related_target_id;
+};
+
 struct FormEvent : Event {
   int control_id;
   base::string16 data;

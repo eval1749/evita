@@ -424,11 +424,10 @@ DEFINE_VIEW_EVENT_HANDLER_2(AppendTextToBuffer, text::Buffer*,
                             const base::string16&)
 DEFINE_VIEW_EVENT_HANDLER_1(DidDestroyWidget, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_2(DidDropWidget, WindowId, WindowId)
-DEFINE_VIEW_EVENT_HANDLER_1(DidKillFocus, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidRealizeWidget, WindowId)
-DEFINE_VIEW_EVENT_HANDLER_1(DidSetFocus, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_5(DidResizeWidget, WindowId, int, int, int, int)
 DEFINE_VIEW_EVENT_HANDLER_0(DidStartViewHost)
+DEFINE_VIEW_EVENT_HANDLER_1(DispatchFocusEvent, const domapi::FocusEvent&)
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchFormEvent, const domapi::FormEvent&)
 
 void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {

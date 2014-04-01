@@ -59,6 +59,12 @@ Window* FromWindowId(WindowId window_id) {
   return window;
 }
 
+ViewEventTarget* MaybeEventTarget(domapi::EventTargetId event_target_id) {
+  if (event_target_id == domapi::kInvalidEventTargetId)
+    return nullptr;
+  return FromEventTargetId(event_target_id);
+}
+
 Window* NewOrFromWindowId(WindowId window_id) {
   return window_id == kInvalidWindowId ? new EditorWindow() :
       FromWindowId(window_id);
@@ -171,13 +177,6 @@ void ViewEventHandlerImpl::DidDropWidget(WindowId source_id,
                           new WindowEvent(L"dropwindow", init_dict));
 }
 
-void ViewEventHandlerImpl::DidKillFocus(WindowId window_id) {
-  auto const window = FromWindowId(window_id);
-  if (!window)
-    return;
-  DispatchEventWithInLock(window, new FocusEvent(L"blur", FocusEventInit()));
-}
-
 void ViewEventHandlerImpl::DidRealizeWidget(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)
@@ -193,16 +192,24 @@ void ViewEventHandlerImpl::DidResizeWidget(WindowId window_id, int left, int top
   window->DidResize(left, top, right, bottom);
 }
 
-void ViewEventHandlerImpl::DidSetFocus(WindowId window_id) {
-  auto const window = FromWindowId(window_id);
-  if (!window)
-    return;
-  window->DidSetFocus();
-  DispatchEventWithInLock(window, new FocusEvent(L"focus", FocusEventInit()));
-}
-
 void ViewEventHandlerImpl::DidStartViewHost() {
   controller_->DidStartViewHost();
+}
+
+void ViewEventHandlerImpl::DispatchFocusEvent(
+    const domapi::FocusEvent& api_event) {
+  auto const target = FromEventTargetId(api_event.target_id);
+  if (!target)
+    return;
+  if (api_event.event_type == domapi::EventType::Focus) {
+    if (auto const window = target->as<Window>())
+      window->DidSetFocus();
+  }
+  FocusEventInit event_init;
+  event_init.set_related_target(MaybeEventTarget(api_event.related_target_id));
+  DispatchEventWithInLock(target, new FocusEvent(
+      api_event.event_type == domapi::EventType::Blur ? L"blur" : L"focus",
+      event_init));
 }
 
 void ViewEventHandlerImpl::DispatchFormEvent(

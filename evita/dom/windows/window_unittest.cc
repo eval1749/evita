@@ -9,6 +9,7 @@
 #include "base/strings/string16.h"
 #include "evita/dom/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
+#include "evita/dom/public/view_event.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/windows/window.h"
@@ -207,7 +208,11 @@ TEST_F(WindowTest, focusTick_) {
   EXPECT_SCRIPT_VALID("var sample = new SampleWindow();");
   EXPECT_SCRIPT_EQ("0", "sample.focusTick_");
   EXPECT_TRUE("Window.focus == null");
-  view_event_handler()->DidSetFocus(1);
+  domapi::FocusEvent focus_event;
+  focus_event.event_type = domapi::EventType::Focus;
+  focus_event.target_id = 1;
+  focus_event.related_target_id = domapi::kInvalidEventTargetId;
+  view_event_handler()->DispatchFocusEvent(focus_event);
   EXPECT_SCRIPT_TRUE("Window.focus == sample");
   EXPECT_SCRIPT_EQ("1", "sample.focusTick_");
 }

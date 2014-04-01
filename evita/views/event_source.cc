@@ -65,6 +65,17 @@ EventSource::EventSource(domapi::EventTargetId event_target_id)
 EventSource::~EventSource() {
 }
 
+void EventSource::DispatchFocusEvent(domapi::EventType event_type,
+                                     domapi::EventTargetId related_target_id) {
+  DCHECK(event_type == domapi::EventType::Blur ||
+         event_type == domapi::EventType::Focus);
+  domapi::FocusEvent api_event;
+  api_event.event_type = event_type;
+  api_event.related_target_id = related_target_id;
+  api_event.target_id = event_target_id_;
+  view_event_handler()->DispatchFocusEvent(api_event);
+}
+
 void EventSource::DispatchKeyboardEvent(const ui::KeyboardEvent& event) {
   domapi::KeyboardEvent api_event;
   api_event.alt_key = event.alt_key();

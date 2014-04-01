@@ -76,6 +76,13 @@ domapi::ViewEventHandler* view_event_handler() {
   return Application::instance()->view_event_handler();
 }
 
+domapi::EventTargetId MaybeEventTarget(ui::Widget* widget) {
+  if (!widget)
+    return domapi::kInvalidEventTargetId;
+  auto const window = widget->as<Window>();
+  return window ? window->window_id() : domapi::kInvalidEventTargetId;
+}
+
 int static_active_tick;
 
 }  // namespace
@@ -111,7 +118,7 @@ void Window::DidDestroyDomWindow() {
 
 void Window::DidKillFocus(ui::Widget* focused_window) {
   Widget::DidKillFocus(focused_window);
-  view_event_handler()->DidKillFocus(window_id_);
+  DispatchFocusEvent(domapi::EventType::Blur, MaybeEventTarget(focused_window));
 }
 
 bool Window::OnIdle(int hint) {
@@ -168,7 +175,7 @@ void Window::DidSetFocus(ui::Widget* last_focused) {
   ++static_active_tick;
   active_tick_ = static_active_tick;
   Widget::DidSetFocus(last_focused);
-  view_event_handler()->DidSetFocus(window_id_);
+  DispatchFocusEvent(domapi::EventType::Focus, MaybeEventTarget(last_focused));
 }
 
 Window* Window::FromWindowId(WindowId window_id) {

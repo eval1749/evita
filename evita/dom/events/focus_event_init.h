@@ -21,6 +21,10 @@ class FocusEventInit : public UiEventInit {
     return related_target_.get();
   }
 
+  public: void set_related_target(EventTarget* target) {
+    related_target_ = target;
+  }
+
   // dom::Dictionary
   private: virtual HandleResult HandleKeyValue(
       v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) override;

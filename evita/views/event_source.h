@@ -7,6 +7,10 @@
 
 #include "evita/dom/public/event_target_id.h"
 
+namespace domapi {
+enum class EventType;
+}
+
 namespace ui {
 class KeyboardEvent;
 class MouseEvent;
@@ -21,6 +25,8 @@ class EventSource {
   protected: explicit EventSource(domapi::EventTargetId event_target_id);
   public: ~EventSource();
 
+  public: void DispatchFocusEvent(domapi::EventType event_type,
+                                  domapi::EventTargetId related_target_id);
   public: void DispatchKeyboardEvent(const ui::KeyboardEvent& event);
   public: void DispatchMouseEvent(const ui::MouseEvent& event);
   public: void DispatchWheelEvent(const ui::MouseWheelEvent& event);

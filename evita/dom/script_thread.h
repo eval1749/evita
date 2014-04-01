@@ -140,13 +140,14 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void DidDestroyWidget(WindowId window_id) override;
   private: virtual void DidDropWidget(WindowId source_id,
                                       WindowId target_id) override;
-  private: virtual void DidKillFocus(WindowId window_id) override;
   private: virtual void DidRealizeWidget(WindowId window_id) override;
   private: virtual void DidResizeWidget(WindowId window_id, int left, int top,
                                         int right, int bottom) override;
-  private: virtual void DidSetFocus(WindowId window_id) override;
   private: virtual void DidStartViewHost() override;
-  private: virtual void DispatchFormEvent(const domapi::FormEvent& event) override;
+  private: virtual void DispatchFocusEvent(
+      const domapi::FocusEvent& event) override;
+  private: virtual void DispatchFormEvent(
+      const domapi::FormEvent& event) override;
   private: virtual void DispatchKeyboardEvent(
       const domapi::KeyboardEvent& event) override;
   private: virtual void DispatchMouseEvent(

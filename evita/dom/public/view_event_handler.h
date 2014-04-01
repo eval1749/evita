@@ -19,6 +19,7 @@ class Buffer;
 
 namespace domapi {
 
+struct FocusEvent;
 struct FormEvent;
 struct KeyboardEvent;
 struct MouseEvent;
@@ -34,12 +35,11 @@ class ViewEventHandler {
   public: virtual void DidDestroyWidget(WindowId window_id) = 0;
   public: virtual void DidDropWidget(WindowId source_id,
                                      WindowId target_id)  = 0;
-  public: virtual void DidKillFocus(WindowId window_id) = 0;
   public: virtual void DidRealizeWidget(WindowId window_id) = 0;
   public: virtual void DidResizeWidget(WindowId window_id, int left, int top,
                                        int right, int bottom) = 0;
-  public: virtual void DidSetFocus(WindowId window_id) = 0;
   public: virtual void DidStartViewHost() = 0;
+  public: virtual void DispatchFocusEvent(const FocusEvent& event) = 0;
   public: virtual void DispatchFormEvent(const FormEvent& event) = 0;
   public: virtual void DispatchKeyboardEvent(const KeyboardEvent& event) = 0;
   public: virtual void DispatchMouseEvent(const MouseEvent& event) = 0;

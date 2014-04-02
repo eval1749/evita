@@ -64,23 +64,20 @@ void Caret::BackingStore::Save(const gfx::Graphics* gfx,
 // Caret
 //
 Caret::Caret()
-  : gfx_(nullptr),
-    shown_(false),
-    stop_blinking_(false),
-    taken_(false) {
+  : gfx_(nullptr), shown_(false), stop_blinking_(false) {
 }
 
 Caret::~Caret() {
-  DCHECK(!taken_);
+  DCHECK(!gfx_);
 }
 
 void Caret::Blink(const gfx::Graphics* gfx) {
-  if (!taken_ || !rect_)
+  if (gfx_ != gfx || !rect_)
     return;
   if (stop_blinking_) {
     if (!shown_) {
       gfx::Graphics::DrawingScope drawing_scope(*gfx_);
-      Hide(gfx);
+      Hide(gfx_);
     }
     backing_store_.reset();
     return;
@@ -92,24 +89,21 @@ void Caret::Blink(const gfx::Graphics* gfx) {
   last_blink_time_ = now;
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   if (shown_)
-    Hide(gfx);
+    Hide(gfx_);
   else
-    Show(gfx);
+    Show(gfx_);
 }
 
 void Caret::Give(const gfx::Graphics* gfx) {
   DCHECK_EQ(gfx_, gfx);
-  DCHECK(taken_);
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   Hide(gfx);
-  taken_ = false;
   const_cast<gfx::Graphics*>(gfx_)->RemoveObserver(this);
   gfx_ = nullptr;
 }
 
 void Caret::Hide(const gfx::Graphics* gfx) {
-  DCHECK_EQ(gfx_, gfx);
-  if (!taken_ || !shown_)
+  if (gfx_ != gfx || !shown_)
     return;
   if (backing_store_)
     backing_store_->Restore(gfx_);
@@ -117,7 +111,8 @@ void Caret::Hide(const gfx::Graphics* gfx) {
 }
 
 void Caret::Hide() {
-  if (!taken_ || !shown_)
+  DCHECK(gfx_);
+  if (!shown_)
     return;
   shown_ = false;
 }
@@ -125,7 +120,6 @@ void Caret::Hide() {
 void Caret::Show(const gfx::Graphics* gfx) {
   DCHECK_EQ(gfx_, gfx);
   DCHECK(rect_);
-  DCHECK(taken_);
   if (shown_)
     return;
   if (!backing_store_)
@@ -148,18 +142,15 @@ void Caret::StartBlinking() {
 
 void Caret::Take(const gfx::Graphics* gfx) {
   DCHECK(!gfx_);
-  taken_ = true;
   gfx_ = gfx;
   const_cast<gfx::Graphics*>(gfx_)->AddObserver(this);
 }
 
 void Caret::Update(const gfx::Graphics* gfx, const gfx::RectF& new_rect) {
+  if (gfx_ != gfx)
+    return;
   DCHECK(new_rect);
   DCHECK(!shown_);
-  if (!taken_) {
-    rect_ = new_rect;
-    return;
-  }
   stop_blinking_ = false;
   if (rect_ != new_rect) {
     if (!rect_.empty()) {

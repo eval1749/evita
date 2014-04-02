@@ -29,7 +29,6 @@ class Caret : public common::Singleton<Caret>,
   private: gfx::RectF rect_;
   private: bool shown_;
   private: bool stop_blinking_;
-  private: bool taken_;
 
   public: Caret();
   public: ~Caret();

@@ -17,32 +17,25 @@ SOURCE = """\
 // Specify /EHsc
 #pragma warning(disable: 4127 4350 4365 4530)
 #include "base/basictypes.h"
-#include "base/strings/utf_string_conversions.h"
-#include "evita/v8_glue/runner.h"
+#include "evita/dom/static_script_source.h"
 
 namespace dom {
 namespace internal {
 
 namespace {
-struct ScriptSouce {
-  const char* file_name;
-  const char* script_text;
-};
-const ScriptSouce entries[] = {
+const StaticScriptSource entries[] = {
 %(entries)s
 };
 }  // namespace
 
-bool GetJsLibFiles(v8_glue::Runner* runner) {
-  for (auto index = 0u; index < arraysize(entries); ++index) {
-    auto entry = &entries[index];
-    auto result = runner->Run(
-        base::ASCIIToUTF16(entry->script_text),
-        base::ASCIIToUTF16(entry->file_name));
-    if (result.IsEmpty())
-      return false;
+const std::vector<StaticScriptSource>& GetJsLibSources() {
+  CR_DEFINE_STATIC_LOCAL(std::vector<StaticScriptSource>, sources, ());
+  if (sources.empty()) {
+    for (auto index = 0u; index < arraysize(entries); ++index) {
+      sources.push_back(entries[index]);
+    }
   }
-  return true;
+  return sources;
 }
 
 }  // namespace internal

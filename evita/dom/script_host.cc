@@ -11,10 +11,12 @@
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
+#include "base/strings/utf_string_conversions.h"
 #include "evita/dom/text/document_set.h"
 #include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/global.h"
 #include "evita/dom/lock.h"
+#include "evita/dom/static_script_source.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/windows/window.h"
@@ -24,10 +26,6 @@
 #include "evita/v8_glue/runner.h"
 
 namespace dom {
-
-namespace internal {
-bool GetJsLibFiles(v8_glue::Runner* runner);
-}  // namespace internal
 
 namespace v8Strings {
 void Init(v8::Isolate* isolate);
@@ -182,10 +180,16 @@ ViewDelegate* ScriptHost::view_delegate() const {
 
 void ScriptHost::DidStartViewHost() {
   // We should prevent UI thread to access DOM.
+  auto const script_sources = internal::GetJsLibSources();
   DOM_AUTO_LOCK_SCOPE();
   v8_glue::Runner::Scope runner_scope(runner());
-  if (!internal::GetJsLibFiles(runner()))
-    return;
+  for (const auto& script_source : script_sources) {
+    auto const result = runner()->Run(
+        base::ASCIIToUTF16(script_source.script_text),
+        base::ASCIIToUTF16(script_source.file_name));
+    if (result.IsEmpty())
+      return;
+  }
   if (testing_)
     return;
   runner()->Run(L"editors.start([]);", L"__start__");

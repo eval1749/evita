@@ -6,12 +6,14 @@
 Event.Names = {
   ATTACH: 'attach', // DocumentEvent
   BLUR: 'blur',
+  CHANGE: 'change',
   CLICK: 'click',
   DBLCLICK: 'dblclick',
   DETACH: 'detach', // DocumentEvent
   DROPWINDOW: 'dropwindow',
   FOCUS: 'focus',
   IDLE: 'idle',
+  INPUT: 'input',
   KEYDOWN: 'keydown',
   KEYUP: 'keyup',
   LOAD: 'load',

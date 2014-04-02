@@ -179,9 +179,11 @@ ViewDelegate* ScriptHost::view_delegate() const {
 }
 
 void ScriptHost::DidStartViewHost() {
-  // We should prevent UI thread to access DOM.
+ if (testing_)
+    return;
   auto const script_sources = internal::GetJsLibSources();
-  DOM_AUTO_LOCK_SCOPE();
+  // We should prevent UI thread to access DOM.
+   DOM_AUTO_LOCK_SCOPE();
   v8_glue::Runner::Scope runner_scope(runner());
   for (const auto& script_source : script_sources) {
     auto const result = runner()->Run(
@@ -190,8 +192,6 @@ void ScriptHost::DidStartViewHost() {
     if (result.IsEmpty())
       return;
   }
-  if (testing_)
-    return;
   runner()->Run(L"editors.start([]);", L"__start__");
   if (state_ == domapi::ScriptHostState::Stopped)
     state_ = domapi::ScriptHostState::Running;

@@ -328,7 +328,7 @@ global.TextWindow.prototype.clone = function() {
   function updateStatusBar(window) {
     var document = window.document;
     var selection = window.selection;
-    var text_offset = selection.active;
+    var text_offset = selection.focusOffset;
     var line_and_column = document.getLineAndColumn_(text_offset);
     var new_texts = [
       DOCUMENT_STATE_TEXTS[document.state],

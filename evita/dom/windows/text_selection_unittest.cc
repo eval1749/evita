@@ -57,7 +57,7 @@ class TextSelectionTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(TextSelectionTest);
 };
 
-TEST_F(TextSelectionTest, active) {
+TEST_F(TextSelectionTest, focusOffset) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
   EXPECT_SCRIPT_VALID(
       "var doc = new Document('foo');"
@@ -65,9 +65,9 @@ TEST_F(TextSelectionTest, active) {
       "var text_window = new TextWindow(range);"
       "var sample = text_window.selection;"
       "sample.range.text = 'foo';");
-  EXPECT_SCRIPT_EQ("3", "sample.active");
+  EXPECT_SCRIPT_EQ("3", "sample.focusOffset");
   EXPECT_SCRIPT_VALID("sample.startIsActive = true;");
-  EXPECT_SCRIPT_EQ("0", "sample.active");
+  EXPECT_SCRIPT_EQ("0", "sample.focusOffset");
 }
 
 TEST_F(TextSelectionTest, endKey) {

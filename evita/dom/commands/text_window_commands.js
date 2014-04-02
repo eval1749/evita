@@ -468,7 +468,7 @@
    */
   Editor.bindKey(TextWindow, 'Ctrl+Y', function() {
     var selection = this.selection;
-    var position = selection.document.redo(selection.active);
+    var position = selection.document.redo(selection.focusOffset);
     if (position < 0) {
       Editor.messageBox(this,
           Editor.localizeText(Strings.IDS_NO_MORE_REDO),
@@ -483,7 +483,7 @@
    */
   Editor.bindKey(TextWindow, 'Ctrl+Z', function() {
     var selection = this.selection;
-    var position = selection.document.undo(selection.active);
+    var position = selection.document.undo(selection.focusOffset);
     if (position < 0) {
       Editor.messageBox(this,
           Editor.localizeText(Strings.IDS_NO_MORE_UNDO),

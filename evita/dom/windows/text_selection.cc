@@ -42,7 +42,8 @@ class TextSelectionClass :
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetProperty("active", &TextSelection::active)
+        .SetProperty("anchorOffset", &TextSelection::anchor_offset)
+        .SetProperty("focusOffset", &TextSelection::focus_offset)
         .SetProperty("range", &TextSelection::range)
         .SetProperty("startIsActive", &TextSelection::start_is_active,
                      &TextSelection::set_start_is_active);
@@ -66,7 +67,11 @@ TextSelection::TextSelection(TextWindow* text_window, Range* range)
 TextSelection::~TextSelection() {
 }
 
-Posn TextSelection::active() const {
+Posn TextSelection::anchor_offset() const {
+  return start_is_active() ? range_->end() : range_->start();
+}
+
+Posn TextSelection::focus_offset() const {
   return start_is_active() ? range_->start() : range_->end();
 }
 

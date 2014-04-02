@@ -8,10 +8,13 @@
  */
 
 /** @expose @type {!TextOffset} */
-TextSelection.prototype.active;
+TextSelection.prototype.anchorOffset;
 
 /** @expose @type {!Document} */
 TextSelection.prototype.document;
+
+/** @expose @type {!TextOffset} */
+TextSelection.prototype.focusOffset;
 
 /**
  * @param {Unit} unit

@@ -28,7 +28,8 @@ class TextSelection : public v8_glue::Scriptable<TextSelection, Selection> {
   public: TextSelection(TextWindow* text_window, Range* range);
   public: virtual ~TextSelection();
 
-  public: Posn active() const;
+  public: Posn anchor_offset() const;
+  public: Posn focus_offset() const;
   public: Range* range() const { return range_.get(); }
   public: bool start_is_active() const;
   public: void set_start_is_active(bool start_is_active);

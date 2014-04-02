@@ -164,7 +164,8 @@ Object.defineProperties(TextFieldControl.prototype, {
         handleKeyDown(this, /** @type{!KeyboardEvent} */(event));
         break;
     }
-    FormControl.handleEvent(event);
+    if (!event.defaultPrevented)
+      FormControl.handleEvent(event);
   };
 
   //////////////////////////////////////////////////////////////////////

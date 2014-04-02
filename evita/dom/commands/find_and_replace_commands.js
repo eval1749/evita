@@ -178,8 +178,6 @@
       replace_with_text.disabled = !can_find;
     }
 
-    // TODO(yosi) We should handle both "change" and "input".
-    find_what_text.addEventListener('change', updateUiByFindWhat);
     find_what_text.addEventListener('input', updateUiByFindWhat);
 
     find_what_text.addEventListener('keydown', function(event) {

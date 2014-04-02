@@ -27,6 +27,8 @@ Object.defineProperties(TextFieldControl.prototype, {
         return;
       // TODO(yosi) We should record old value for undo/redo.
       this.value_ = new_value;
+      this.selection.anchorOffset = 0;
+      this.selection.focusOffset = new_value.length;
     }
   },
 });

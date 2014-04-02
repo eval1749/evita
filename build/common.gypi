@@ -163,6 +163,10 @@
             'LinkTimeCodeGeneration': 'true', # /LTCG
           }, # VCLibrarianTool
           'VCLinkerTool': {
+            'AdditionalDependencies': [
+              'dbghelp.lib',
+              'psapi.lib',
+            ], # AdditionalDependencies
             'EnableCOMDATFolding': 2,
             'GenerateMapFile': 'true',
             'LargeAddressAware': 2,

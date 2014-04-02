@@ -34,3 +34,9 @@ Event.prototype.initEvent = function(type, bubbles, cancelable) {};
 
 /** @type {function()} */
 Event.prototype.preventDefault = function() {}
+
+/** @type {function()} */
+Event.prototype.stopImmediatePropagation = function() {}
+
+/** @type {function()} */
+Event.prototype.stopPropagation = function() {}

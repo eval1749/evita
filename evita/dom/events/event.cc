@@ -45,7 +45,10 @@ class EventClass : public v8_glue::WrapperInfo {
         .SetProperty("timeStamp", &Event::time_stamp)
         .SetProperty("target", &Event::target)
         .SetProperty("type", &Event::type)
-        .SetMethod("preventDefault", &Event::PreventDefault);
+        .SetMethod("preventDefault", &Event::PreventDefault)
+        .SetMethod("stopImmediatePropagation",
+            &Event::StopImmediatePropagation)
+        .SetMethod("stopPropagation", &Event::StopPropagation);
   }
 
     DISALLOW_COPY_AND_ASSIGN(EventClass);

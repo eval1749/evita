@@ -182,7 +182,7 @@ Object.defineProperties(TextFieldControl.prototype, {
     if (selection.collapsed)
       selection.collapseTo(selection.focusOffset + 1);
     else
-      selection.collapseTo(selection.start);
+      selection.collapseTo(selection.end);
   });
 
   bindKey('Backspace', function(selection) {

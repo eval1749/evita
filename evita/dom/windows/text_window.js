@@ -318,7 +318,12 @@ global.TextWindow.prototype.clone = function() {
 
   /** @const @type {!Array.<string>} */
   var DOCUMENT_STATE_TEXTS = [
-    'Ready', 'Loading...', 'Saving...',
+    'Ready', 'Loading...', 'Saving...'
+  ];
+
+  /** @const @type {!Array.<string>} */
+  var NEWLINE_MODES = [
+    '--', 'LF', 'CR', 'CRLF'
   ];
 
   /**
@@ -334,6 +339,7 @@ global.TextWindow.prototype.clone = function() {
       DOCUMENT_STATE_TEXTS[document.state],
       document.mode.name,
       'CP' + document.codePage,
+      NEWLINE_MODES[document.newline],
       'Ln ' + line_and_column.lineNumber,
       'Col ' + line_and_column.column,
       'Ch ' + text_offset,

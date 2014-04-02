@@ -3,6 +3,56 @@
 // found in the LICENSE file.
 
 (function() {
+  /**
+   * @constructor
+   * @param {!TextFieldControl} control
+   */
+  function TextFieldLogger(control) {
+    this.control = control;
+    this.cursor = 0;
+    this.texts = [];
+  }
+
+  /** @const @type {number} */
+  TextFieldLogger.MAX_ENTRIES = 7;
+
+  /**
+   * @param {string} value
+   */
+  TextFieldLogger.prototype.add = function(value) {
+    var length = this.texts.length;
+    if (length && this.texts[length - 1] == value)
+      return;
+    if (length >= TextFieldLogger.MAX_ENTRIES)
+      this.texts.shift();
+    this.texts.push(value);
+    this.cursor = this.texts.length;
+  };
+
+  TextFieldLogger.prototype.resetCursor = function() {
+    this.cursor = this.texts.length;
+  };
+
+  /**
+   * @param {number} direction
+   */
+  TextFieldLogger.prototype.retrieve = function(direction) {
+    var length = this.texts.length;
+    if (!length)
+      return;
+    var new_cursor = this.cursor + direction;
+    if (new_cursor < 0 || new_cursor >= length)
+      return;
+    var control = this.control;
+    if (this.cursor == length) {
+      this.add(control.value);
+      --this.cursor;
+    }
+    this.cursor = new_cursor;
+    control.value = this.texts[this.cursor];
+    control.selection.collapseTo(control.value.length);
+  };
+
   /** @type {?CheckboxControl} */
   var case_preserve_replace_checkbox;
 
@@ -169,6 +219,7 @@
     find_next_button = addButton('Find Next', 'F');
 
     function updateUiByFindWhat() {
+      find_what_text.logger.resetCursor();
       var can_find = find_what_text.value != '';
       find_next_button.disabled = !can_find;
       find_previous_button.disabled = !can_find;
@@ -176,21 +227,20 @@
       replace_all_button.disabled = !can_find;
       replace_with_text.disabled = !can_find;
     }
+    find_what_text.addEventListener(Event.Names.INPUT, updateUiByFindWhat);
 
-    find_what_text.addEventListener('input', updateUiByFindWhat);
+    function setupTextField(text_field) {
+      text_field.addEventListener(Event.Names.CHANGE, function() {
+        text_field.logger.add(text_field.value);
+      });
+      text_field.addEventListener(Event.Names.KEYDOWN, handleTextFieldKeyDown);
+      text_field.logger = new TextFieldLogger(text_field);
+    }
 
-    find_what_text.addEventListener('keydown', function(event) {
-      if (event.code == 0x10D)
-        doFindNext(/** @type {!FormWindow} */(form_window));
-      else if (event.code == 0x11B)
-        form_window.hide();
-    });
-    replace_with_text.addEventListener('keydown', function(event) {
-      if (event.code == 0x10D)
-        doFindNext(/** @type {!FormWindow} */(form_window));
-      else if (event.code == 0x11B)
-        form_window.hide();
-    });
+    setupTextField(find_what_text);
+    setupTextField(replace_with_text);
+
+    form.addEventListener(Event.Names.KEYDOWN, handleGlobalKeyDown);
 
     function installButton(button, handler) {
       button.addEventListener('click', function(event) {
@@ -234,6 +284,39 @@
       });
     });
     return text_window;
+  }
+
+  /**
+   * @param {!KeyboardEvent} event
+   */
+  function handleGlobalKeyDown(event) {
+    switch (event.code) {
+      case 0x10D: // Enter
+        doFindNext(/** @type {!FormWindow} */(form_window));
+        break;
+      case 0x11B: // Escape
+        form_window.hide();
+        break;
+    }
+  }
+
+  /**
+   * @param {!KeyboardEvent} event
+   */
+  function handleTextFieldKeyDown(event) {
+    var text_field = /** @type {!TextFieldControl} */(event.target);
+    switch (event.code) {
+      case 0x126: // arrowUp
+        text_field.logger.retrieve(-1);
+        event.stopPropagation();
+        event.preventDefault();
+        break;
+      case 0x128: // arrowDown
+        text_field.logger.retrieve(1);
+        event.stopPropagation();
+        event.preventDefault();
+        break;
+    }
   }
 
   /**

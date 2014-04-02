@@ -5,6 +5,32 @@
 /** @typedef {function(!TextFieldSelection)} */
 var TextFieldEditCommand;
 
+Object.defineProperties(TextFieldControl.prototype, {
+  lastChangeEventValue_: {
+    value: '',
+    writable: true
+  },
+  value: {
+    /**
+     * @this {!TextFieldControl}
+     * @return {string}
+     */
+    get: function() {
+      return this.value_;
+    },
+    /**
+     * @this {!TextFieldControl}
+     * @param {string} new_value
+     */
+    set: function(new_value) {
+      if (this.value_ == new_value)
+        return;
+      // TODO(yosi) We should record old value for undo/redo.
+      this.value_ = new_value;
+    }
+  },
+});
+
 (function() {
   /** @const @type {number} */
   var MAX_OFFSET = 1 << 28;
@@ -19,6 +45,17 @@ var TextFieldEditCommand;
   function bindKey(key_combination, command) {
     var key_code = Editor.parseKeyCombination(key_combination);
     keymap.set(key_code, command);
+  }
+
+  /**
+   * @param {!TextFieldControl} control
+   */
+  function dispatchChangeEventIfNeeded(control) {
+    var value = control.value_;
+    if (control.lastChangeEventValue_ == value)
+      return;
+    control.lastChangeEventValue_ = value;
+    control.dispatchEvent(new FormEvent(Event.Names.CHANGE, {data: value}));
   }
 
   // TODO(yosi) Once we finish debugging of TextFieldControl editor, we should
@@ -68,13 +105,27 @@ var TextFieldEditCommand;
   }
 
   /**
+   * @param {!TextFieldSelection} selection
+   */
+  function SetSelectionText(selection, new_text) {
+    var control = selection.control;
+    var old_value = control.value;
+    selection.text = new_text;
+    var value = control.value;
+    if (value == old_value)
+      return;
+    var event = new FormEvent(Event.Names.INPUT, {data: value});
+    selection.control.dispatchEvent(event);
+  }
+
+  /**
    * @param {number} charCode
    * @param {!TextFieldSelection} selection
    */
   function typeCharacter(charCode, selection) {
     var control = selection.control;
     var text = control.value;
-    selection.text = String.fromCharCode(charCode);
+    SetSelectionText(selection, String.fromCharCode(charCode));
     selection.collapseTo(selection.end);
   }
 
@@ -93,11 +144,15 @@ var TextFieldEditCommand;
   }
 
   /**
+   * @this {!TextFieldControl}
    * @param {!Event} event
    * Default event handler.
    */
   TextFieldControl.handleEvent = function(event) {
     switch (event.type) {
+      case Event.Names.BLUR:
+        dispatchChangeEventIfNeeded(this);
+        break;
       case Event.Names.CLICK:
         this.focus();
         break;
@@ -136,7 +191,7 @@ var TextFieldEditCommand;
     var text = control.value;
     if (selection.collapsed)
       --selection.focusOffset;
-    selection.text = '';
+    SetSelectionText(selection, '');
   });
 
   bindKey('Ctrl+A', function(selection) {
@@ -167,7 +222,7 @@ var TextFieldEditCommand;
     var item = items.get(0);
     if (item.kind != 'string')
       return;
-    selection.text = item.getAsString();
+    SetSelectionText(selection, item.getAsString());
     selection.collapseTo(selection.end);
   });
 
@@ -177,7 +232,7 @@ var TextFieldEditCommand;
     var items = DataTransfer.items;
     items.clear();
     items.add(selection.text.replace(/\n/g, '\r\n'), 'text/plain');
-    selection.text = '';
+    SetSelectionText(selection, '');
   });
 
   bindKey('Delete', function(selection) {
@@ -185,7 +240,7 @@ var TextFieldEditCommand;
     var text = control.value;
     if (selection.collapsed)
       ++selection.focusOffset;
-    selection.text = '';
+    SetSelectionText(selection, '');
   });
 
   bindKey('End', function(selection) {

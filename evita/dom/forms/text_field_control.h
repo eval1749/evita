@@ -24,12 +24,12 @@ class TextFieldControl
   public: size_t length() const { return value_.length(); }
   public: TextFieldSelection* selection() const { return selection_.get(); }
   public: const base::string16& value() const { return value_; }
-  public: void set_value(const base::string16& value);
+
+  // API: Set |value| property to the first line, excluding newline character,
+  // of |new_value|.
+  public: void set_value(const base::string16& new_value);
 
   public: void DidChangeSelection();
-
-  // EventTarget
-  private: virtual bool DispatchEvent(Event* event) override;
 
   DISALLOW_COPY_AND_ASSIGN(TextFieldControl);
 };

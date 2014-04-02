@@ -40,7 +40,7 @@ class TextFieldControlClass :
       ObjectTemplateBuilder& builder) override {
     builder
         .SetProperty("selection", &TextFieldControl::selection)
-        .SetProperty("value", &TextFieldControl::value,
+        .SetProperty("value_", &TextFieldControl::value,
             &TextFieldControl::set_value);
   }
 
@@ -74,34 +74,19 @@ TextFieldControl::TextFieldControl()
 TextFieldControl::~TextFieldControl() {
 }
 
+// This function is used for implementing setter of |value| property.
+// Caller should dispatch "input" event.
 void TextFieldControl::set_value(const base::string16& new_raw_value) {
   auto const new_value = EnsureSingleLine(new_raw_value);
   if (value_ == new_value)
     return;
-  // TODO(yosi) Dispatch |beforeinput| and |input| event.
   value_ = new_value;
   selection_->DidChangeValue();
-  DispatchChangeEvent();
+  NotifyControlChange();
 }
 
 void TextFieldControl::DidChangeSelection() {
   NotifyControlChange();
-}
-
-// dom::FormControl
-bool TextFieldControl::DispatchEvent(Event* event) {
-  CR_DEFINE_STATIC_LOCAL(base::string16, kChangeEvent, (L"change"));
-
-  if (auto const form_event = event->as<FormEvent>()) {
-    HandlingFormEventScope scope(this);
-    if (event->type() == kChangeEvent) {
-      auto& new_value = form_event->data();
-      set_value(new_value);
-    }
-    return false;;
-  }
-
-  return FormControl::DispatchEvent(event);
 }
 
 }  // namespace dom

@@ -7,8 +7,22 @@
  */
 function TextFieldControl() {}
 
+/**
+ * @type{string}
+ */
+TextFieldControl.prototype.lastChangeEventValue_;
+
 /** @type {!TextFieldSelection} */
 TextFieldControl.prototype.selection;
 
-/** @expose @type{string} */
+/**
+ * @type{string}
+ */
 TextFieldControl.prototype.value;
+
+/**
+ * @type{string}
+ * Set |value| property of |TextFieldControl| without dispatching "change"
+ * event.
+ */
+TextFieldControl.prototype.value_;

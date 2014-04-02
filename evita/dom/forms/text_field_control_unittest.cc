@@ -19,7 +19,6 @@ class TextFieldControlTest : public dom::AbstractDomTest {
 
 TEST_F(TextFieldControlTest, ctor) {
   EXPECT_SCRIPT_VALID("var sample = new TextFieldControl();");
-  EXPECT_SCRIPT_EQ("123", "sample.controlId");
   EXPECT_SCRIPT_FALSE("sample.disabled");
   EXPECT_SCRIPT_EQ("", "sample.value");
 }

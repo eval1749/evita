@@ -18,7 +18,6 @@ class RadioButtonControlTest : public dom::AbstractDomTest {
 
 TEST_F(RadioButtonControlTest, ctor) {
   EXPECT_SCRIPT_VALID("var sample = new RadioButtonControl('foo');");
-  EXPECT_SCRIPT_EQ("123", "sample.controlId");
   EXPECT_SCRIPT_FALSE("sample.disabled");
   EXPECT_SCRIPT_EQ("false", "sample.checked");
   EXPECT_SCRIPT_FALSE("sample.checked");

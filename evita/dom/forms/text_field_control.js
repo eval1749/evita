@@ -157,7 +157,6 @@ Object.defineProperties(TextFieldControl.prototype, {
         this.focus();
         break;
       case Event.Names.FOCUS:
-        console.log('TextFieldControl.handleEvent', event);
         this.selection.collapseTo(0);
         this.selection.extendTo(this.value.length);
         break;

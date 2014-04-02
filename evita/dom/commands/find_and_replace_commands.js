@@ -44,7 +44,6 @@
    */
   function doFindNext(window) {
     var text_window = ensureTextWindow(window);
-    console.log('doFindNext', text_window);
     if (!text_window)
       return;
     FindAndReplace.find(text_window, find_what_text.value,
@@ -181,7 +180,6 @@
     find_what_text.addEventListener('input', updateUiByFindWhat);
 
     find_what_text.addEventListener('keydown', function(event) {
-      console.log('keydown', event.code.toString(16));
       if (event.code == 0x10D)
         doFindNext(/** @type {!FormWindow} */(form_window));
       else if (event.code == 0x11B)
@@ -196,7 +194,6 @@
 
     function installButton(button, handler) {
       button.addEventListener('click', function(event) {
-        console.log('button click', event);
         if (!Window.focus)
           return;
         handler(/**@type{!Window}*/(Window.focus));

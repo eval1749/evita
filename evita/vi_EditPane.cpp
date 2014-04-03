@@ -1233,7 +1233,8 @@ void EditPane::OnMouseMoved(const ui::MouseEvent& event) {
 }
 
 void EditPane::OnMousePressed(const ui::MouseEvent& event) {
-  if (!event.is_left_button() && event.click_count() != 1)
+  // We start splitter dragging when left button pressed.
+  if (!event.is_left_button() || event.click_count())
     return;
   auto const point = event.location();
   auto const result = root_box_->HitTest(point);

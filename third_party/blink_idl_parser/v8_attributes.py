@@ -123,6 +123,7 @@ def generate_attribute(interface, attribute):
         'per_context_enabled_function': v8_utilities.per_context_enabled_function_name(attribute),  # [PerContextEnabled]
         'property_attributes': property_attributes(attribute),
         'put_forwards': 'PutForwards' in extended_attributes,
+        'ref_ptr': 'RefPtrWillBeRawPtr' if idl_type.is_will_be_garbage_collected else 'RefPtr',
         'reflect_empty': extended_attributes.get('ReflectEmpty'),
         'reflect_invalid': extended_attributes.get('ReflectInvalid', ''),
         'reflect_missing': extended_attributes.get('ReflectMissing'),
@@ -168,22 +169,18 @@ def generate_getter(interface, attribute, contents):
     if (idl_type.is_nullable or
         base_idl_type == 'EventHandler' or
         'CachedAttribute' in extended_attributes or
+        'ReflectOnly' in extended_attributes or
         contents['is_getter_raises_exception']):
         contents['cpp_value_original'] = cpp_value
-        cpp_value = 'jsValue'
+        cpp_value = 'v8Value'
         # EventHandler has special handling
         if base_idl_type != 'EventHandler' and idl_type.is_interface_type:
             release = True
 
-    if 'ReflectOnly' in extended_attributes:
-        contents['cpp_value_original'] = cpp_value
-        # FIXME: rename to jsValue
-        cpp_value = 'resultValue'
-
     def v8_set_return_value_statement(for_main_world=False):
         if contents['is_keep_alive_for_gc']:
             return 'v8SetReturnValue(info, wrapper)'
-        return idl_type.v8_set_return_value(cpp_value, extended_attributes=extended_attributes, script_wrappable='imp', release=release, for_main_world=for_main_world)
+        return idl_type.v8_set_return_value(cpp_value, extended_attributes=extended_attributes, script_wrappable='impl', release=release, for_main_world=for_main_world)
 
     contents.update({
         'cpp_value': cpp_value,
@@ -200,7 +197,7 @@ def getter_expression(interface, attribute, contents):
     arguments.extend(v8_utilities.call_with_arguments(attribute))
     if ('ImplementedBy' in attribute.extended_attributes and
         not attribute.is_static):
-        arguments.append('*imp')
+        arguments.append('*impl')
     if attribute.idl_type.is_nullable:
         arguments.append('isNull')
     if contents['is_getter_raises_exception']:
@@ -283,7 +280,7 @@ def generate_setter(interface, attribute, contents):
 
     contents.update({
         'cpp_setter': setter_expression(interface, attribute, contents),
-        'v8_value_to_local_cpp_value': attribute.idl_type.v8_value_to_local_cpp_value(extended_attributes, 'jsValue', 'cppValue'),
+        'v8_value_to_local_cpp_value': attribute.idl_type.v8_value_to_local_cpp_value(extended_attributes, 'v8Value', 'cppValue'),
     })
 
 
@@ -296,7 +293,7 @@ def setter_expression(interface, attribute, contents):
 
     if ('ImplementedBy' in extended_attributes and
         not attribute.is_static):
-        arguments.append('*imp')
+        arguments.append('*impl')
     idl_type = attribute.idl_type
     if idl_type.base_type == 'EventHandler':
         getter_name = scoped_name(interface, attribute, cpp_name(attribute))
@@ -305,9 +302,9 @@ def setter_expression(interface, attribute, contents):
         if (interface.name in ['Window', 'WorkerGlobalScope'] and
             attribute.name == 'onerror'):
             includes.add('bindings/v8/V8ErrorHandler.h')
-            arguments.append('V8EventListenerList::findOrCreateWrapper<V8ErrorHandler>(jsValue, true, info.GetIsolate())')
+            arguments.append('V8EventListenerList::findOrCreateWrapper<V8ErrorHandler>(v8Value, true, info.GetIsolate())')
         else:
-            arguments.append('V8EventListenerList::getEventListener(jsValue, true, ListenerFindOrCreate)')
+            arguments.append('V8EventListenerList::getEventListener(v8Value, true, ListenerFindOrCreate)')
     elif idl_type.is_interface_type and not idl_type.array_type:
         # FIXME: should be able to eliminate WTF::getPtr in most or all cases
         arguments.append('WTF::getPtr(cppValue)')

@@ -71,6 +71,9 @@ def generate_method(interface, method):
     if is_custom_element_callbacks:
         includes.add('core/dom/custom/CustomElementCallbackDispatcher.h')
 
+    has_event_listener_argument = any(
+        argument for argument in arguments
+        if argument.idl_type.name == 'EventListener')
     is_check_security_for_frame = (
         'CheckSecurity' in interface.extended_attributes and
         'DoNotCheckSecurity' not in extended_attributes)
@@ -90,13 +93,14 @@ def generate_method(interface, method):
                  'ReadOnly', 'RuntimeEnabled', 'Unforgeable'])),
         'function_template': function_template(),
         'idl_type': idl_type.base_type,
+        'has_event_listener_argument': has_event_listener_argument,
         'has_exception_state':
+            has_event_listener_argument or
             is_raises_exception or
             is_check_security_for_frame or
             any(argument for argument in arguments
                 if argument.idl_type.name == 'SerializedScriptValue' or
-                   argument.idl_type.is_integer_type) or
-            name in ['addEventListener', 'removeEventListener', 'dispatchEvent'],
+                   argument.idl_type.is_integer_type),
         'is_call_with_execution_context': has_extended_attribute_value(method, 'CallWith', 'ExecutionContext'),
         'is_call_with_script_arguments': is_call_with_script_arguments,
         'is_call_with_script_state': is_call_with_script_state,
@@ -146,6 +150,9 @@ def generate_argument(interface, method, argument, index):
         'cpp_value': this_cpp_value,
         'enum_validation_expression': idl_type.enum_validation_expression,
         'has_default': 'Default' in extended_attributes,
+        'has_event_listener_argument': any(
+            argument_so_far for argument_so_far in method.arguments[:index]
+            if argument_so_far.idl_type.name == 'EventListener'),
         'idl_type_object': idl_type,
         # Dictionary is special-cased, but arrays and sequences shouldn't be
         'idl_type': not idl_type.array_or_sequence_type and idl_type.base_type,
@@ -172,6 +179,13 @@ def generate_argument(interface, method, argument, index):
 def cpp_value(interface, method, number_of_arguments):
     def cpp_argument(argument):
         idl_type = argument.idl_type
+        if idl_type.name == 'EventListener':
+            if (interface.name == 'EventTarget' and
+                method.name == 'removeEventListener'):
+                # FIXME: remove this special case by moving get() into
+                # EventTarget::removeEventListener
+                return '%s.get()' % argument.name
+            return argument.name
         if (idl_type.is_callback_interface or
             idl_type.name in ['NodeFilter', 'XPathNSResolver']):
             # FIXME: remove this special case
@@ -183,7 +197,7 @@ def cpp_value(interface, method, number_of_arguments):
     cpp_arguments = v8_utilities.call_with_arguments(method)
     if ('ImplementedBy' in method.extended_attributes and
         not method.is_static):
-        cpp_arguments.append('*imp')
+        cpp_arguments.append('*impl')
     cpp_arguments.extend(cpp_argument(argument) for argument in arguments)
     this_union_arguments = method.idl_type.union_arguments
     if this_union_arguments:
@@ -210,7 +224,7 @@ def v8_set_return_value(interface_name, method, cpp_value, for_main_world=False)
         cpp_value = 'result'  # use local variable for value
         release = idl_type.release
 
-    script_wrappable = 'imp' if inherits_interface(interface_name, 'Node') else ''
+    script_wrappable = 'impl' if inherits_interface(interface_name, 'Node') else ''
     return idl_type.v8_set_return_value(cpp_value, extended_attributes, script_wrappable=script_wrappable, release=release, for_main_world=for_main_world)
 
 

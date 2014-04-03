@@ -21,11 +21,14 @@ global.Spelling = {
 var SpellChecker = function(document) {
   this.coldEnd = document.length;
   this.coldOffset = 0;
+  this.freeRanges = new Array(SpellChecker.MAX_CHECKING);
+  for (var i = 0; i < this.freeRanges.length; ++i) {
+    this.freeRanges[i] = new Range(document);
+  }
   this.hotOffset = document.length;
   this.mutationObserver = new MutationObserver(
       this.mutationCallback.bind(this));
   this.mutationObserver.observe(document, {summary: true});
-  this.num_checking = 0;
   this.range = new Range(document);
   this.timer = new RepeatingTimer();
 
@@ -72,11 +75,20 @@ SpellChecker.RE_WORD = new RegExp('^[A-Za-z][a-z]{' +
  */
 SpellChecker.SpellingResult
 
+/** * @type {number} */
+SpellChecker.num_checking;
+
 /** @type {number} */
 SpellChecker.prototype.coldEnd;
 
 /** @type {number} */
 SpellChecker.prototype.coldOffset;
+
+/**
+ * @type {!Array.<!Range>}
+ * List of ranges can be used for checking spelling.
+ */
+SpellChecker.prototype.freeRanges;
 
 /** @type {number} */
 SpellChecker.prototype.hotOffset;
@@ -84,26 +96,38 @@ SpellChecker.prototype.hotOffset;
 /** @type {!MutationObserver} */
 SpellChecker.prototype.mutationObserver;
 
-/** * @type {number} */
-SpellChecker.num_checking;
-
-/** @type {!Range} */
+/**
+ * @type {!Range}
+ * A Range object for scanning document.
+ */
 SpellChecker.prototype.range;
 
 /** @type {!RepeatingTimer} */
 SpellChecker.prototype.timer;
 
-// Checks then mark word as correct or misspelled.
-SpellChecker.prototype.checkSpelling = function(word_to_check) {
+/**
+ * @param {!Range} word_range
+ * Checks then mark word as correct or misspelled.
+ */
+SpellChecker.prototype.checkSpelling = function(word_range) {
   var spellChecker = this;
-  ++spellChecker.num_checking;
+  if (!spellChecker.freeRanges.length ||
+      SpellChecker.num_checking >= SpellChecker.MAX_CHECKING) {
+    return false;
+  }
+  ++SpellChecker.num_checking;
+
+  var marker_range = spellChecker.freeRanges.pop();
+  marker_range.collapseTo(word_range.start);
+  marker_range.end = word_range.end;
+  var word_to_check = marker_range.text;
   SpellChecker.checkSpelling(word_to_check).then(function (result) {
-    --spellChecker.num_checking;
-    if (!result || result.busy)
-      return;
-    spellChecker.markWord(result.word, result.spelling);
+    --SpellChecker.num_checking;
+    if (result && !result.busy && result.word == marker_range.text)
+      spellChecker.markWord(marker_range, result.spelling);
+    spellChecker.freeRanges.push(marker_range);
   }).catch(console.log);
-  return spellChecker.num_checking < SpellChecker.MAX_CHECKING;
+  return true;
 };
 
 // Cleanup resources used by spell checker.
@@ -138,8 +162,6 @@ SpellChecker.prototype.didBlurWindow = function(event) {
 // names, we don't check character syntax.
 //
 SpellChecker.prototype.didFireTimer = function() {
-  var start_at = Date.now();
-
   var range = this.range;
   var document = range.document;
 
@@ -179,7 +201,7 @@ SpellChecker.prototype.didFireTimer = function() {
     return category == 'Lu' || category == 'Ll';
   }
 
-  var checked = 0;
+  var num_checked = 0;
 
   /**
    * @param {!SpellChecker} spellChecker
@@ -188,24 +210,28 @@ SpellChecker.prototype.didFireTimer = function() {
    * @return {number} Text offset for next scanning.
    */
   function scan(spellChecker, start, end) {
-    if (spellChecker.num_checking >= SpellChecker.MAX_CHECKING)
-      return end;
+    if (SpellChecker.num_checking >= SpellChecker.MAX_CHECKING)
+      return start;
     range.collapseTo(start);
     range.startOf(Unit.WORD);
-    while (checked < SpellChecker.CHECK_INTERVAL_LIMIT && range.start < end) {
+    while (num_checked < SpellChecker.CHECK_INTERVAL_LIMIT &&
+           range.start < end && spellChecker.freeRanges.length) {
+      var restart_offset = range.start;
       range.endOf(Unit.WORD, Alter.EXTEND);
       range.setSpelling(Spelling.NONE);
-      checked += range.end - range.start;
       if (range.end == document.length) {
         // Word seems not to be completed yet. Spell checker will sleep
         // until document is changed.
+        num_checked += range.end - range.start;
         return range.end;
       }
 
-      // To reduce garbage collection, we check word in |range| is whether
+      // To reduce garbage collection, we check word in |word_range| is whether
       // suitable for checking spelling or not.
-      if (isCheckableWord(range) && !spellChecker.checkSpelling(range.text))
-        break;
+      if (isCheckableWord(range) && !spellChecker.checkSpelling(range))
+        return restart_offset;
+
+      num_checked += range.end - range.start;
 
       // Move to next word.
       // <#>include     => #|include
@@ -213,7 +239,6 @@ SpellChecker.prototype.didFireTimer = function() {
       var word_start = range.start;
       range.collapseTo(word_start);
       range.move(Unit.WORD);
-      checked += range.end - word_start;
     }
     return range.start;
   }
@@ -222,18 +247,10 @@ SpellChecker.prototype.didFireTimer = function() {
     this.hotOffset = scan(this, this.hotOffset, document.length);
   this.coldOffset = scan(this, this.coldOffset, this.coldEnd);
 
-  var duration = Date.now() - start_at;
-
   var rest = document.length - this.hotOffset + this.coldEnd - this.coldOffset;
-  if (rest > 0) {
-    var percent_done = 100 - Math.floor(rest * 100 / document.length);
-    Window.focus.status = 'Checking spelling ' + percent_done + '% done' +
-        ' ' + duration + 'ms' +
-        ' pending:' + this.num_checking;
-  } else {
-    this.timer.stop();
-    Window.focus.status = 'Spell checking is done. ' + duration + 'ms';
-  }
+  if (rest > 0)
+    return;
+  this.timer.stop();
 };
 
 // Spell checking is started when window is focused.
@@ -242,36 +259,16 @@ SpellChecker.prototype.didFocusWindow = function() {
 };
 
 /**
- * @param {string} word
+ * @param {!Range} word_range
  * @param {Spelling} mark
  *
  * Mark first |word| without misspelled marker in document with |mark|.
  */
-SpellChecker.prototype.markWord = function(word, mark) {
+SpellChecker.prototype.markWord = function(word_range, mark) {
   if (mark == Spelling.CORRECT)
     return;
-  var regex = new Editor.RegExp(word, {
-    ignoreCase: false,
-    matchExact: true,
-    matchWord: true,
-  });
-  var range = this.range;
-  var document = range.document;
-  var runner = 0;
-  for (;;) {
-    var matches = document.match_(regex, runner, document.length);
-    if (!matches)
-      break;
-    var match = matches[0];
-    range.collapseTo(match.start);
-    if (document.spellingAt(match.start) != mark) {
-      range.end = match.end;
-      // TODO(yosi) We should not mark for word in source code.
-      range.setSpelling(mark);
-      break;
-    }
-    runner = match.end;
-  }
+  // TODO(yosi) We should not mark for word in source code.
+  word_range.setSpelling(mark);
 };
 
 /**

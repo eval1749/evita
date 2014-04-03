@@ -78,11 +78,11 @@
         '<(DEPTH)/base/base.gyp:base_i18n',
         '<(DEPTH)/common/common.gyp:common',
         '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
-        '<(DEPTH)/evita/evita.gyp:text',
-        '<(DEPTH)/evita/evita.gyp:v8_glue',
         'dom_jslib',
         'dom_unicode_lib_icu',
         'dom_v8_strings_cc',
+        'text',
+        'v8_glue',
       ],
       'include_dirs+': [ '<(SHARED_INTERMEDIATE_DIR)/' ],
       'sources': [

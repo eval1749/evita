@@ -12,6 +12,10 @@
 #include "base/strings/string16.h"
 #include "evita/v8_glue/optional.h"
 
+namespace encodings {
+class Decoder;
+}
+
 namespace gin {
 class ArrayBufferView;
 }
@@ -29,11 +33,10 @@ struct TextDecodeOptions {
 class TextDecoder : public v8_glue::Scriptable<TextDecoder> {
   DECLARE_SCRIPTABLE_OBJECT(TextDecoder);
 
-  private: class Decoder;
+  private: std::unique_ptr<encodings::Decoder> decoder_;
+  private: bool fatal_;
 
-  private: std::unique_ptr<Decoder> decoder_;
-
-  public: TextDecoder(const base::string16& label,
+  public: TextDecoder(encodings::Decoder* decoder,
                       const TextDecoderOptions& options);
   public: virtual ~TextDecoder();
 

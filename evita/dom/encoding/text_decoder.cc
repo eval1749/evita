@@ -4,6 +4,10 @@
 
 #include "evita/dom/encoding/text_decoder.h"
 
+#include "base/strings/stringprintf.h"
+#include "evita/dom/script_host.h"
+#include "evita/text/encodings/decoder.h"
+#include "evita/text/encodings/encodings.h"
 #include "evita/v8_glue/array_buffer_view.h"
 #include "evita/v8_glue/converter.h"
 #include "v8_strings.h"
@@ -68,11 +72,20 @@ class TextDecoderClass : public v8_glue::WrapperInfo {
       v8_glue::Optional<TextDecoderOptions> opt_options) {
     TextDecoderOptions options;
     options.fatal = false;
-    if (!opt_label.is_supplied)
-      return new TextDecoder(L"utf-8", options);
+    if (!opt_label.is_supplied) {
+      return new TextDecoder(encodings::Encodings::instance()->
+                                GetDecoder(L"utf-8"), options);
+    }
+    auto const decoder = encodings::Encodings::instance()->GetDecoder(
+        opt_label.value);
+    if (!decoder) {
+      ScriptHost::instance()->ThrowError(base::StringPrintf(
+        "No such encoding '%ls'", opt_label.value));
+      return nullptr;
+    }
     if (opt_options.is_supplied)
-      return new TextDecoder(opt_label.value, opt_options.value);
-    return new TextDecoder(opt_label.value, options);
+      return new TextDecoder(decoder, opt_options.value);
+    return new TextDecoder(decoder, options);
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -88,64 +101,39 @@ class TextDecoderClass : public v8_glue::WrapperInfo {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TextDecoder::Decoder
-//
-class TextDecoder::Decoder {
-  private: base::string16 encoding_;
-  private: bool fatal_;
-
-  public: Decoder(const base::string16&, bool fatal);
-  public: ~Decoder();
-
-  public: const string16& encoding() const { return encoding_; }
-
-  public: base::string16 Decode(const void* bytes, size_t num_bytes,
-                                bool is_stream);
-};
-
-TextDecoder::Decoder::Decoder(const base::string16&, bool fatal)
-    : encoding_(L"utf-8"), fatal_(fatal) {
-}
-
-TextDecoder::Decoder::~Decoder() {
-}
-
-base::string16 TextDecoder::Decoder::Decode(const void* bytes, size_t num_bytes,
-                                            bool) {
-  auto const start = reinterpret_cast<const uint8_t*>(bytes);
-  auto const end = start + num_bytes;
-  base::string16 text(num_bytes, static_cast<base::char16>('?'));
-  for (auto runner = start; runner < end; ++runner)
-    text[static_cast<size_t>(runner - start)] = *runner;
-  return std::move(text);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
 // TextDecoder
 //
 DEFINE_SCRIPTABLE_OBJECT(TextDecoder, TextDecoderClass);
 
-TextDecoder::TextDecoder(const base::string16& label,
+TextDecoder::TextDecoder(encodings::Decoder* decoder,
                          const TextDecoderOptions& options)
-    : decoder_(new Decoder(label, options.fatal)) {
+    : decoder_(decoder), fatal_(options.fatal) {
 }
 
 TextDecoder::~TextDecoder() {
 }
 
 const base::string16& TextDecoder::encoding() const {
-  return decoder_->encoding();
+  return decoder_->name();
 }
 
 base::string16 TextDecoder::Decode(
     v8_glue::Optional<gin::ArrayBufferView*> opt_input,
     v8_glue::Optional<TextDecodeOptions> opt_options) {
-  if (!opt_input.is_supplied)
-    return decoder_->Decode(nullptr, 0, false);
+  if (!opt_input.is_supplied) {
+    auto const result = decoder_->Decode(nullptr, 0, false);
+    if (!result.left && fatal_)
+      ScriptHost::instance()->ThrowError("EncodingError");
+    return result.right;
+  }
   auto const input = opt_input.value;
   auto const is_stream = opt_options.is_supplied && opt_options.value.stream;
-  return decoder_->Decode(input->bytes(), input->num_bytes(), is_stream);
+  auto const result = decoder_->Decode(
+      reinterpret_cast<const uint8_t*>(input->bytes()), input->num_bytes(),
+      is_stream);
+  if (!result.left && fatal_)
+    ScriptHost::instance()->ThrowError("EncodingError");
+  return result.right;
 }
 
 }  // namespace dom

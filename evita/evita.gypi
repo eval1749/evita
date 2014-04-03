@@ -4,6 +4,7 @@
 {
   'includes': [
     'dom/dom.gypi',
+    'text/encodings/encodings.gypi',
    ], # includes
 
   'targets': [
@@ -46,6 +47,7 @@
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/regex/regex.gyp:regex_lib',
+        'encodings',
       ], # dependencies
       'sources': [
         'precomp.cpp',

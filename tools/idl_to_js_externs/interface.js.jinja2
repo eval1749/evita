@@ -112,7 +112,11 @@ var {{enumeration.name}} = {
  * This property is read only.
 {% endif %}
  */
+{% if attribute.is_static %}
+{{interface_name}}.{{attribute.name}};
+{% else %}
 {{interface_name}}.prototype.{{attribute.name}};
+{% endif %}
 
 {% endfor %}
 {#
@@ -122,7 +126,7 @@ var {{enumeration.name}} = {
 {{     emit_function(interface_name, method.name, method.parameters,
                      method.return_type, kind='static') }}
 {% endfor %}
-{% for method in methods if not method.is_static %}
+{% for method in methods if not method.is_static and method.name %}
 {{     emit_function(interface_name, method.name, method.parameters,
                      method.return_type, kind='instance') }}
 {% endfor %}

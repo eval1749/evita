@@ -40,7 +40,6 @@ class IdlCompilerJS(IdlCompiler):
 def main():
     options, idl_filename = parse_options()
     idl_compiler = IdlCompilerJS(options.output_directory,
-                                 options.idl_attributes_file,
                                  interfaces_info_filename=options.interfaces_info_file,
                                  only_if_changed=options.write_file_only_if_changed)
     idl_compiler.compile_file(idl_filename)

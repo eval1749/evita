@@ -1,0 +1,13 @@
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+//  Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+interface DataTransfer {
+  // attribute DOMString dropEffect;
+  // attribute DOMString effectAllowed;
+
+  readonly attribute DataTransferItemList items;
+  static readonly attribute DataTransferItemList items;
+
+  // void setDragImage(Element image, long x, long y);
+};

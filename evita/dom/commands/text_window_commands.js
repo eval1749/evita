@@ -7,7 +7,7 @@
 (function() {
   /** @param {!Range} range */
   function copyToClipboard(range) {
-    var items = DataTransfer.items;
+    var items = DataTransfer.clipboard.items;
     items.clear();
     items.add(range.text.replace(/\n/g, '\r\n'), 'text/plain');
   }
@@ -62,7 +62,7 @@
    * @this {!TextWindow}
    */
   function pasteFromClipboardCommand() {
-    var items = DataTransfer.items;
+    var items = DataTransfer.clipboard.items;
     if (!items.length)
       return;
     var item = items.get(0);

@@ -21,12 +21,15 @@ class DataTransferClass : public v8_glue::WrapperInfo {
   public: DataTransferClass(const char* name);
   public: virtual ~DataTransferClass();
 
-  private: static DataTransferItemList* GetItems();
+  private: static DataTransfer* clipboard();
+
   private: static DataTransfer* NewDataTransfer();
 
   // v8_glue::WrapperInfo
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override;
+  private: virtual void SetupInstanceTemplate(
+      ObjectTemplateBuilder& builder) override;
 
   DISALLOW_COPY_AND_ASSIGN(DataTransferClass);
 };
@@ -38,8 +41,8 @@ DataTransferClass::DataTransferClass(const char* name)
 DataTransferClass::~DataTransferClass() {
 }
 
-DataTransferItemList* DataTransferClass::GetItems() {
-  return new DataTransferItemList();
+DataTransfer* DataTransferClass::clipboard() {
+  return new DataTransfer();
 }
 
 DataTransfer* DataTransferClass::NewDataTransfer() {
@@ -53,8 +56,14 @@ v8::Handle<v8::FunctionTemplate> DataTransferClass::CreateConstructorTemplate(
   auto templ = v8_glue::CreateConstructorTemplate(isolate,
       &DataTransferClass::NewDataTransfer);
   return v8_glue::FunctionTemplateBuilder(isolate, templ)
-      .SetProperty("items", &DataTransferClass::GetItems)
+      .SetProperty("clipboard", &DataTransferClass::clipboard)
       .Build();
+}
+
+void DataTransferClass:: SetupInstanceTemplate(
+      ObjectTemplateBuilder& builder) {
+  builder
+      .SetProperty("items", &DataTransfer::items);
 }
 
 }  // namespace
@@ -69,6 +78,10 @@ DataTransfer::DataTransfer() {
 }
 
 DataTransfer::~DataTransfer() {
+}
+
+DataTransferItemList* DataTransfer::items() {
+  return new DataTransferItemList();
 }
 
 }  // namespace dom

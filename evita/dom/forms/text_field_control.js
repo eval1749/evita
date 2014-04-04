@@ -212,13 +212,13 @@ Object.defineProperties(TextFieldControl.prototype, {
   bindKey('Ctrl+C', function(selection) {
     if (selection.collapsed)
       return;
-    var items = DataTransfer.items;
+    var items = DataTransfer.clipboard.items;
     items.clear();
     items.add(selection.text.replace(/\n/g, '\r\n'), 'text/plain');
   });
 
   bindKey('Ctrl+V', function(selection) {
-    var items = DataTransfer.items;
+    var items = DataTransfer.clipboard.items;
     if (!items.length)
       return;
     var item = items.get(0);
@@ -231,7 +231,7 @@ Object.defineProperties(TextFieldControl.prototype, {
   bindKey('Ctrl+X', function(selection) {
     if (selection.collapsed)
       return;
-    var items = DataTransfer.items;
+    var items = DataTransfer.clipboard.items;
     items.clear();
     items.add(selection.text.replace(/\n/g, '\r\n'), 'text/plain');
     SetSelectionText(selection, '');

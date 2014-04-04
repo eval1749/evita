@@ -7,7 +7,7 @@ interface DataTransfer {
   // attribute DOMString effectAllowed;
 
   readonly attribute DataTransferItemList items;
-  static readonly attribute DataTransferItemList items;
+  static readonly attribute DataTransfer clipboard;
 
   // void setDragImage(Element image, long x, long y);
 };

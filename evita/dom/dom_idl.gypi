@@ -10,6 +10,12 @@
       'clipboard/DataTransferItemList.idl',
     ], # idl_files
 
+    'generated_js_externs_files': [
+      '<(js_externs_dir)/DataTransfer_externs.js',
+      '<(js_externs_dir)/DataTransferItem_externs.js',
+      '<(js_externs_dir)/DataTransferItemList_externs.js',
+    ], # generated_js_externs_files
+
     'static_js_externs_files': [
       'errors_externs.js',
       'types_externs.js',
@@ -97,6 +103,8 @@
         'inputs': [
           '<(DEPTH)/tools/idl_to_js_externs/aggregate_js_externs.py',
           '<(idl_file_list)',
+          '<@(generated_js_externs_files)',
+          '<@(static_js_externs_files)',
         ], # inputs
         'outputs': [
           '<(js_externs_dir)/evita_js_externs.js',

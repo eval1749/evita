@@ -10,6 +10,12 @@
       'clipboard/DataTransferItemList.idl',
     ], # idl_files
 
+    'generated_glue_files': [
+      '<(glue_dir)/DataTransfer.cc',
+      '<(glue_dir)/DataTransferItem.cc',
+      '<(glue_dir)/DataTransferItemList.cc',
+    ],
+
     'generated_js_externs_files': [
       '<(js_externs_dir)/DataTransfer_externs.js',
       '<(js_externs_dir)/DataTransferItem_externs.js',
@@ -78,8 +84,10 @@
     ], # static_js_externs_files
 
     # Computed variables
+    'glue_dir': '<(SHARED_INTERMEDIATE_DIR)/evita/bindings',
     'idl_file_list': '<|(idl_file.txt <@(idl_files))',
-    'js_externs_dir': '<(SHARED_INTERMEDIATE_DIR)/evita',
+    'idl_work_dir': '<(SHARED_INTERMEDIATE_DIR)/evita',
+    'js_externs_dir': '<(SHARED_INTERMEDIATE_DIR)/evita/js_externs',
     'static_file_list': '<|(static_js_externs.txt <@(static_js_externs_files))',
 
     'conditions': [
@@ -93,13 +101,13 @@
 
   'targets': [
     {
-      'target_name': 'dom_aggregate_js_externs',
+      'target_name': 'dom_aggregate_js_extern_files',
       'type': 'none',
       'dependencies': [
-        'dom_idl_js_externs',
+        'dom_generated_js_extern_files',
       ],
       'actions': [{
-        'action_name': 'dom_aggregate_js_externs',
+        'action_name': 'dom_aggregate_js_extern_files',
         'inputs': [
           '<(DEPTH)/tools/idl_to_js_externs/aggregate_js_externs.py',
           '<(idl_file_list)',
@@ -120,9 +128,56 @@
       }], # actions
     },
 
+    # DOM bindings library
+    {
+      'target_name': 'dom_aggregate_glue_files',
+      'type': 'static_library',
+      'dependencies': [
+        'dom_generated_glue_files',
+      ], # dependencies
+      'include_dirs+': [ '<(SHARED_INTERMEDIATE_DIR)/evita/bindings' ],
+      'sources': [
+        '../precomp.cpp',
+        '<@(generated_glue_files)',
+      ], # sources
+    },
+
+    # Generate glue C++ source code and header file from IDL file.
+    {
+      'target_name': 'dom_generated_glue_files',
+      'type': 'none',
+      'dependencies': [
+        'dom_interfaces_info',
+      ],
+      'sources': [ '<@(idl_files)' ],
+      'rules': [{
+        'rule_name': 'dom_idl_to_glue_file',
+        'extension': 'idl',
+        'msvs_external_rule': 1,
+        'inputs': [
+          'bindings/idl_to_glue.py',
+          'bindings/interface.cc',
+          'bindings/interface.h',
+          '<(idl_work_dir)/InterfacesInfo.pickle',
+        ], # inputs
+        'outputs': [
+          '<(glue_dir)/<(RULE_INPUT_ROOT).cc',
+          '<(glue_dir)/<(RULE_INPUT_ROOT).h',
+        ],
+        'action': [
+          'python',
+          '<(DEPTH)/evita/dom/bindings/idl_to_glue.py',
+          '--output-dir', '<(glue_dir)',
+          '--interfaces-info', '<(idl_work_dir)/InterfacesInfo.pickle',
+          '--write-file-only-if-changed', '<@(write_file_only_if_changed)',
+          '<(RULE_INPUT_PATH)',
+        ], # action
+      }], # rules
+    }, # 'dom_generated_glue_files'
+
     # Generate JavaScript Externs from IDL files.
     {
-      'target_name': 'dom_idl_js_externs',
+      'target_name': 'dom_generated_js_extern_files',
       'type': 'none',
       'dependencies': [
         'dom_interfaces_info',
@@ -134,7 +189,7 @@
         'msvs_external_rule': 1,
         'inputs': [
           '<(DEPTH)/tools/idl_to_js_externs/idl_to_js_externs.py',
-          '<(js_externs_dir)/InterfacesInfo.pickle',
+          '<(idl_work_dir)/InterfacesInfo.pickle',
         ], # inputs
         'outputs': [
           '<(js_externs_dir)/<(RULE_INPUT_ROOT)_externs.js',
@@ -143,12 +198,14 @@
           'python',
           '<(DEPTH)/tools/idl_to_js_externs/idl_to_js_externs.py',
           '--output-dir', '<(js_externs_dir)',
-          '--interfaces-info', '<(js_externs_dir)/InterfacesInfo.pickle',
+          '--interfaces-info', '<(idl_work_dir)/InterfacesInfo.pickle',
           '--write-file-only-if-changed', '<@(write_file_only_if_changed)',
           '<(RULE_INPUT_PATH)',
         ], # action
       }], # rules
-    }, # 'dom_idl_js_externs'
+    }, # 'dom_generated_js_extern_files'
+
+    # Interfaces information for IDL compiler
     {
       'target_name': 'dom_interfaces_info',
       'type': 'none',
@@ -158,13 +215,13 @@
           '<(DEPTH)/third_party/blink_idl_parser/compute_interfaces_info.py',
         ],
         'outputs': [
-          '<(js_externs_dir)/InterfacesInfo.pickle',
+          '<(idl_work_dir)/InterfacesInfo.pickle',
         ],
         'action': [
           'python',
           '<(DEPTH)/third_party/blink_idl_parser/compute_interfaces_info.py',
           '--idl-files-list', '<(idl_file_list)',
-          '--interfaces-info-file', '<(js_externs_dir)/InterfacesInfo.pickle',
+          '--interfaces-info-file', '<(idl_work_dir)/InterfacesInfo.pickle',
           '--write-file-only-if-changed', '<(write_file_only_if_changed)',
         ], # action
         'message': 'Computing global information about IDL files',

@@ -78,6 +78,7 @@
         '<(DEPTH)/base/base.gyp:base_i18n',
         '<(DEPTH)/common/common.gyp:common',
         '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
+        'dom_aggregate_glue_files',
         'dom_jslib',
         'dom_unicode_lib_icu',
         'dom_v8_strings_cc',
@@ -201,7 +202,7 @@
       'target_name': 'check_jslib',
       'type': 'none',
       'dependencies': [
-        'dom_aggregate_js_externs',
+        'dom_generated_js_extern_files',
       ], # dependencies
       'rules': [
         {

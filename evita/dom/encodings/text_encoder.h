@@ -12,6 +12,10 @@
 #include "base/strings/string16.h"
 #include "evita/v8_glue/optional.h"
 
+namespace encodings {
+class Encoder;
+}
+
 namespace gin {
 class ArrayBufferView;
 }
@@ -29,18 +33,19 @@ struct TextEncodeOptions {
 class TextEncoder : public v8_glue::Scriptable<TextEncoder> {
   DECLARE_SCRIPTABLE_OBJECT(TextEncoder);
 
-  private: class Encoder;
+  private: std::unique_ptr<encodings::Encoder> encoder_;
 
-  private: std::unique_ptr<Encoder> encoder_;
-
-  public: TextEncoder(const base::string16& label);
+  public: TextEncoder(encodings::Encoder* encoder);
   public: virtual ~TextEncoder();
 
   public: const base::string16& encoding() const;
 
-  public: v8::Handle<v8::Uint8Array> Encode(
+  public: std::vector<uint8_t> Encode(
       v8_glue::Optional<base::string16> opt_input,
       v8_glue::Optional<TextEncodeOptions> options);
+
+  public: static TextEncoder* NewTextEncoder(
+      v8_glue::Optional<base::string16> opt_label);
 
   DISALLOW_COPY_AND_ASSIGN(TextEncoder);
 };

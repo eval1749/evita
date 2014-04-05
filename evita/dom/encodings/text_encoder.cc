@@ -4,7 +4,10 @@
 
 #include "evita/dom/encodings/text_encoder.h"
 
+#include "base/strings/stringprintf.h"
 #include "evita/dom/script_host.h"
+#include "evita/text/encodings/encoder.h"
+#include "evita/text/encodings/encodings.h"
 #include "evita/v8_glue/array_buffer_view.h"
 #include "evita/v8_glue/converter.h"
 #include "v8_strings.h"
@@ -46,13 +49,7 @@ class TextEncoderClass : public v8_glue::WrapperInfo {
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate,
-        &TextEncoderClass::NewTextEncoder);
-  }
-
-  private: static TextEncoder* NewTextEncoder(
-      v8_glue::Optional<base::string16> opt_label) {
-    return new TextEncoder(opt_label.is_supplied ? opt_label.value :
-                                                   L"utf-8");
+        &TextEncoder::NewTextEncoder);
   }
 
   private: virtual void SetupInstanceTemplate(
@@ -68,67 +65,55 @@ class TextEncoderClass : public v8_glue::WrapperInfo {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TextEncoder::Encoder
-//
-class TextEncoder::Encoder {
-  private: base::string16 encoding_;
-
-  public: Encoder(const base::string16&);
-  public: ~Encoder();
-
-  public: const string16& encoding() const { return encoding_; }
-
-  public: v8::Handle<v8::Uint8Array> Encode(v8::Isolate* isolate,
-      const base::string16& input, bool is_stream);
-};
-
-TextEncoder::Encoder::Encoder(const base::string16&)
-    : encoding_(L"utf-8") {
-}
-
-TextEncoder::Encoder::~Encoder() {
-}
-
-v8::Handle<v8::Uint8Array> TextEncoder::Encoder::Encode(v8::Isolate* isolate,
-    const base::string16& input, bool) {
-  auto const output_size = input.length();
-  v8::EscapableHandleScope handle_scope(isolate);
-  auto const buffer = v8::ArrayBuffer::New(isolate, output_size);
-  auto const uint8_view = v8::Uint8Array::New(buffer, 0, output_size);
-  gin::ArrayBufferView buffer_view(isolate, uint8_view);
-  auto runner = reinterpret_cast<uint8_t*>(buffer_view.bytes());
-  for (auto char_code : input) {
-    *runner = static_cast<uint8_t>(char_code);
-    ++runner;
-  }
-  return handle_scope.Escape(uint8_view);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
 // TextEncoder
 //
 DEFINE_SCRIPTABLE_OBJECT(TextEncoder, TextEncoderClass);
 
-TextEncoder::TextEncoder(const base::string16& label)
-    : encoder_(new Encoder(label)) {
+TextEncoder::TextEncoder(encodings::Encoder* encoder) : encoder_(encoder) {
 }
 
 TextEncoder::~TextEncoder() {
 }
 
 const base::string16& TextEncoder::encoding() const {
-  return encoder_->encoding();
+  return encoder_->name();
 }
 
-v8::Handle<v8::Uint8Array> TextEncoder::Encode(
+static std::vector<uint8_t> DoEncode(encodings::Encoder* encoder,
+                                     const base::string16& string,
+                                     bool is_stream) {
+  auto const result = encoder->Encode(string, is_stream);
+  if (result.left) {
+    ScriptHost::instance()->ThrowError(base::StringPrintf(
+        "EncodingError: codePoint=0x%X", result.left));
+    return std::vector<uint8_t>();
+  }
+  return result.right;
+}
+
+std::vector<uint8_t> TextEncoder::Encode(
     v8_glue::Optional<base::string16> opt_input,
     v8_glue::Optional<TextEncodeOptions> opt_options) {
-  auto const isolate = ScriptHost::instance()->isolate();
   if (!opt_input.is_supplied)
-    return encoder_->Encode(isolate, base::string16(), false);
+    return DoEncode(encoder_.get(), base::string16(), false);
   auto const is_stream = opt_options.is_supplied && opt_options.value.stream;
-  return encoder_->Encode(isolate, opt_input.value, is_stream);
+  return DoEncode(encoder_.get(), opt_input.value, is_stream);
+}
+
+TextEncoder* TextEncoder::NewTextEncoder(
+      v8_glue::Optional<base::string16> opt_label) {
+  if (!opt_label.is_supplied) {
+    return new TextEncoder(encodings::Encodings::instance()->
+                                GetEncoder(L"utf-8"));
+  }
+  auto const encoder = encodings::Encodings::instance()->GetEncoder(
+      opt_label.value);
+  if (!encoder) {
+    ScriptHost::instance()->ThrowError(base::StringPrintf(
+        "No such encoding '%ls'", opt_label.value.c_str()));
+    return nullptr;
+  }
+  return new TextEncoder(encoder);
 }
 
 }  // namespace dom

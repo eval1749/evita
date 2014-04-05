@@ -3,20 +3,18 @@
 // found in the LICENSE file.
 
 /**
- * @constructor
+ * @typedef {{
+ *  fatal: boolean
+ * }}
  */
-function TextDecoderOptions() {}
-
-/** @type {boolean} */
-TextDecoderOptions.prototype.fatal;
+var TextDecoderOptions;
 
 /**
- * @constructor
+ * @typedef {{
+ *  stream: boolean
+ * }}
  */
-function TextDecodeOptions() {}
-
-/** @type {boolean} */
-TextDecodeOptions.prototype.stream;
+var TextDecodeOptions;
 
 /**
  * @constructor

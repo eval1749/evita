@@ -3,12 +3,11 @@
 // found in the LICENSE file.
 
 /**
- * @constructor
+ * @struct {
+ *  stream: boolean
+ * }
  */
-function TextEncodeOptions() {}
-
-/** @type {boolean} */
-TextEncodeOptions.prototype.stream;
+var TextEncodeOptions;
 
 /**
  * @constructor

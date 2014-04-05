@@ -45,8 +45,8 @@
       'editor_externs.js',
       'windows/editor_window_externs.js',
 
-      'encoding/text_decoder_externs.js',
-      'encoding/text_encoder_externs.js',
+      'encodings/text_decoder_externs.js',
+      'encodings/text_encoder_externs.js',
 
       'forms/button_control_externs.js',
       'forms/checkbox_control_externs.js',

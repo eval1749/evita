@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/encoding/text_encoder.h"
+#include "evita/dom/encodings/text_encoder.h"
 
 #include "evita/dom/script_host.h"
 #include "evita/v8_glue/array_buffer_view.h"

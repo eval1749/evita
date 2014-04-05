@@ -25,8 +25,8 @@
       'text/document.js',
       'editor.js',
       'windows/editor_window.js',
-      'encoding/text_decoder.js',
-      'encoding/text_encoder.js',
+      'encodings/text_decoder.js',
+      'encodings/text_encoder.js',
       'errors.js',
       'file_path.js',
 
@@ -103,8 +103,8 @@
         'clipboard/data_transfer_item.cc',
         'clipboard/data_transfer_item_list.cc',
 
-        'encoding/text_decoder.cc',
-        'encoding/text_encoder.cc',
+        'encodings/text_decoder.cc',
+        'encodings/text_encoder.cc',
 
         'events/document_event.cc',
         'events/document_event_init.cc',

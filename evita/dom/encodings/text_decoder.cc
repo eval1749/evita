@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/encoding/text_decoder.h"
+#include "evita/dom/encodings/text_decoder.h"
 
 #include "base/strings/stringprintf.h"
 #include "evita/dom/script_host.h"

@@ -11,18 +11,21 @@ python tools\razzle\closure_compiler.py ^
   %externs_dir%\events\event_enums.js ^
   %externs_dir%\strings_en_US.js ^
   %externs_dir%\unicode_enums.js ^
+  ..\out\Debug\gen\evita\js_externs\evita_js_externs.js
+exit /b
+  %externs_dir%\enums.js ^
+  %externs_dir%\events\event_enums.js ^
+  %externs_dir%\strings_en_US.js ^
+  %externs_dir%\unicode_enums.js ^
   %externs_dir%\types_externs.js ^
   %externs_dir%\bracket_externs.js ^
-  %externs_dir%\clipboard\data_transfer_externs.js ^
-  %externs_dir%\clipboard\data_transfer_item_externs.js ^
-  %externs_dir%\clipboard\data_transfer_item_list_externs.js ^
   %externs_dir%\commander_externs.js ^
   %externs_dir%\commands\find_and_replace_externs.js ^
   %externs_dir%\commands\spell_checker_externs.js ^
   %externs_dir%\console_externs.js ^
   %externs_dir%\css\style_externs.js ^
-  %externs_dir%\encoding\text_decoder_externs.js ^
-  %externs_dir%\encoding\text_encoder_externs.js ^
+  %externs_dir%\encodings\text_decoder_externs.js ^
+  %externs_dir%\encodings\text_encoder_externs.js ^
   %externs_dir%\errors_externs.js ^
   %externs_dir%\events\document_event_externs.js ^
   %externs_dir%\events\event_externs.js ^

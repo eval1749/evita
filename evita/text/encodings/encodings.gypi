@@ -15,6 +15,8 @@
       'sources': [
         'decoder.cc',
         'decoder.h',
+        'encoder.cc',
+        'encoder.h',
         'encodings.cc',
         'encodings.h',
         'euc_jp_decoder.cc',
@@ -23,6 +25,8 @@
         'shift_jis_decoder.h',
         'utf8_decoder.cc',
         'utf8_decoder.h',
+        'utf8_encoder.cc',
+        'utf8_encoder.h',
       ], # sources
     },
   ] # targets

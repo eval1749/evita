@@ -10,6 +10,7 @@
 #include "evita/text/encodings/euc_jp_decoder.h"
 #include "evita/text/encodings/shift_jis_decoder.h"
 #include "evita/text/encodings/utf8_decoder.h"
+#include "evita/text/encodings/utf8_encoder.h"
 
 namespace encodings {
 
@@ -38,7 +39,11 @@ class Encodings::Private {
 
 namespace {
 #define DEFINE_ENCODING(name) \
-  Decoder* New ## name ## Decoder() { return new name ## Decoder; }
+  Decoder* New ## name ## Decoder() { return new name ## Decoder; } \
+  Encoder* New ## name ## Encoder() { return new name ## Encoder; }
+
+#define EucJpEncoder Utf8Encoder
+#define ShiftJisEncoder Utf8Encoder
 
 DEFINE_ENCODING(EucJp)
 DEFINE_ENCODING(ShiftJis)
@@ -50,7 +55,7 @@ Encodings::Private::Private() {
       L"cseucpkdfmtjapanese",
       L"euc-jp",
       L"x-euc-jp"
-  }, &NewEucJpDecoder, nullptr);
+  }, &NewEucJpDecoder, &NewEucJpEncoder);
 
   Install(std::vector<const char16*> {
       L"csshiftjis",
@@ -60,13 +65,13 @@ Encodings::Private::Private() {
       L"sjis",
       L"windows-31j",
       L"x-sjis"
-  }, &NewShiftJisDecoder, nullptr);
+  }, &NewShiftJisDecoder, &NewShiftJisEncoder);
 
   Install(std::vector<const char16*> {
       L"unicode-1-1-utf-8",
       L"utf-8",
       L"utf8",
-  }, &NewUtf8Decoder, nullptr);
+  }, &NewUtf8Decoder, &NewUtf8Encoder);
 }
 
 Encodings::Private::~Private() {

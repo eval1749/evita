@@ -394,8 +394,7 @@ Promise.reject = function(value) {};
 Promise.resolve = function(value) {};
 
 /**
- * @template T
- * @param {!function(T=)} onRejected
+ * @param {!function(*)} onRejected
  * @return {!Promise}
  */
 Promise.prototype.catch = function(onRejected) {};

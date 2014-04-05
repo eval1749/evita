@@ -24,6 +24,11 @@ var TextDecodeOptions;
 function TextDecoder(opt_label, opt_options) {}
 
 /**
+ * @type {string}
+ */
+TextDecoder.prototype.encoding;
+
+/**
  * @param {!ArrayBufferView=} opt_input
  * @param {!TextDecodeOptions=} opt_options
  * @return {string}

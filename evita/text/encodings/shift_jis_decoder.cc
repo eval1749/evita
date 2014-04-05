@@ -15,11 +15,6 @@ namespace encodings {
 // ShiftJisDecoder::Private
 //
 class ShiftJisDecoder::Private {
-  private: enum class State {
-    LeadByte,
-    SecondByte,
-  };
-
   private: uint8_t bytes_[2];
 
   public: Private();

@@ -80,7 +80,7 @@ class TextDecoderClass : public v8_glue::WrapperInfo {
         opt_label.value);
     if (!decoder) {
       ScriptHost::instance()->ThrowError(base::StringPrintf(
-        "No such encoding '%ls'", opt_label.value));
+          "No such encoding '%ls'", opt_label.value.c_str()));
       return nullptr;
     }
     if (opt_options.is_supplied)

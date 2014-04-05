@@ -23,24 +23,6 @@ TEST_F(TextFieldControlTest, ctor) {
   EXPECT_SCRIPT_EQ("", "sample.value");
 }
 
-TEST_F(TextFieldControlTest, dispatchEvent) {
-  EXPECT_SCRIPT_VALID(
-      "var sample = new TextFieldControl();"
-      "var changed = 0;"
-      "sample.addEventListener('change', function() { ++changed; });"
-      "var event = new FormEvent('change', {data: 'foo'});"
-      "sample.dispatchEvent(event);");
-  EXPECT_SCRIPT_EQ("foo", "sample.value");
-  EXPECT_SCRIPT_EQ("1", "changed") << "UI changes value.";
-
-  EXPECT_SCRIPT_VALID("sample.dispatchEvent(new FormEvent('change'))");
-  EXPECT_SCRIPT_EQ("2", "changed") << "UI set empty value.";
-
-  EXPECT_SCRIPT_VALID("sample.dispatchEvent(new FormEvent('change'))");
-  EXPECT_SCRIPT_EQ("2", "changed") <<
-      "UI doesn't change value, but event was dispatched.";
-}
-
 TEST_F(TextFieldControlTest, set_disabled) {
   EXPECT_SCRIPT_VALID(
       "var form = new Form();"
@@ -80,13 +62,15 @@ TEST_F(TextFieldControlTest, set_value) {
       "var form = new Form();"
       "var sample = new TextFieldControl();"
       "form.add(sample);"
-      "var changed = 0;"
-      "sample.addEventListener('change', function() { ++changed; });"
+      "var num_changes = 0;"
+      "var num_inputs = 0;"
+      "sample.addEventListener('change', function() { ++num_changes; });"
+      "sample.addEventListener('input', function() { ++num_inputs; });"
       "sample.value = 'foo';");
-  EXPECT_SCRIPT_EQ("1", "changed") << "Script changes value.";
-
-  EXPECT_SCRIPT_VALID("sample.value = 'foo'");
-  EXPECT_SCRIPT_EQ("1", "changed") << "Script doesn't change value.";
+  EXPECT_SCRIPT_EQ("0", "num_changes") <<
+      "Change value from script doesn't dispatch 'change' event.";
+  EXPECT_SCRIPT_EQ("0", "num_inputs") <<
+      "Change value from script doesn't dispatch 'input' event.";
 }
 
 }  // namespace

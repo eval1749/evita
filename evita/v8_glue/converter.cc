@@ -16,7 +16,7 @@ v8::Handle<v8::Value> Converter<std::vector<uint8_t>>::ToV8(
     v8::Isolate* isolate, const std::vector<uint8_t>& vector) {
   auto const array_buffer = v8::ArrayBuffer::New(isolate, vector.size());
   auto const data = v8::Uint8Array::New(array_buffer, 0, vector.size());
-  gin::ArrayBufferView view;
+  gin::ArrayBufferView view(isolate, data);
   ::memcpy(view.bytes(), vector.data(), vector.size());
   return data;
 }

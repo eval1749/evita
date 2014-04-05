@@ -76,6 +76,11 @@ gin::ObjectTemplateBuilder WrapperInfo::CreateInstanceTemplateBuilder(
 WrapperInfo* WrapperInfo::From(v8::Handle<v8::Object> object) {
   if (object->InternalFieldCount() != gin::kNumberOfInternalFields)
     return nullptr;
+  // TODO(yosi) We get an unexpected object which doesn't have
+  // wrapper_info from a function invoked by |v8::V8::RunMicrotasks()|.
+  auto const value = object->GetInternalField(gin::kWrapperInfoIndex);
+  if (!value->IsInt32())
+    return nullptr;
   auto const info = static_cast<WrapperInfo*>(
       object->GetAlignedPointerFromInternalField(gin::kWrapperInfoIndex));
   return info->embedder() == gin::kEmbedderEvita ? info : nullptr;

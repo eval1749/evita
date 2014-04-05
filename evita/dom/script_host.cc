@@ -139,6 +139,7 @@ ScriptHost::ScriptHost(ViewDelegate* view_delegate,
       testing_runner_(nullptr),
       view_delegate_(view_delegate) {
   view_delegate_->RegisterViewEventHandler(event_handler_.get());
+  v8::V8::Initialize();
   v8::V8::InitializeICU();
 
   // See v8/src/flag-definitions.h
@@ -253,6 +254,14 @@ ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
   v8::V8::AddMessageListener(MessageCallback);
   v8::V8::AddGCPrologueCallback(GcPrologueCallback);
   v8::V8::AddGCEpilogueCallback(GcEpilogueCallback);
+  // TODO(yosi) Turning off micro task runining during creating wrapper, mame
+  // |Editor.checkSpelling('foo').then(console.log)| to work.
+  // Othewise |console.log| executed as micro task gets storage object which
+  // doesn't have |v8_glue::WrapperInfo| at zeroth internal field.
+  // See "985a73d2cce5", same thing is happened in spell checker with
+  // |Editor.RegExp| object.
+  // Note: We run micro tasks in |ViewEventHandlerImpl::DispatchViewIdleEvent|.
+  v8::V8::SetAutorunMicrotasks(isolate, false);
   v8Strings::Init(isolate);
   return script_host;
 }

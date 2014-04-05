@@ -16,18 +16,18 @@ class TextEncoderTest : public dom::AbstractDomTest {
 };
 
 TEST_F(TextEncoderTest, ctor) {
-  // TODO(yosi) Invlaid label should thorw |TypeError|.
-  EXPECT_SCRIPT_VALID("var encoder = new TextEncoder('foo');");
-  EXPECT_SCRIPT_EQ("utf-8", "encoder.encoding");
+  EXPECT_SCRIPT_EQ(
+      "Error: No such encoding 'foo'",
+      "var decoder = new TextEncoder('foo');");
 
   EXPECT_SCRIPT_VALID("var encoder1 = new TextEncoder();");
-  EXPECT_SCRIPT_EQ("utf-8", "encoder.encoding");
+  EXPECT_SCRIPT_EQ("utf-8", "encoder1.encoding");
 
   EXPECT_SCRIPT_VALID("var encoder2 = new TextEncoder('utf-8');");
   EXPECT_SCRIPT_EQ("utf-8", "encoder2.encoding");
 }
 
-TEST_F(TextEncoderTest, encode) {
+TEST_F(TextEncoderTest, encode_utf8_ascii) {
   EXPECT_SCRIPT_VALID(
     "var encoder = new TextEncoder('utf-8');"
     "var buffer = encoder.encode('abc');");
@@ -35,6 +35,19 @@ TEST_F(TextEncoderTest, encode) {
   EXPECT_SCRIPT_EQ("97", "buffer[0]");
   EXPECT_SCRIPT_EQ("98", "buffer[1]");
   EXPECT_SCRIPT_EQ("99", "buffer[2]");
+}
+
+TEST_F(TextEncoderTest, encode_utf8_kanji) {
+  EXPECT_SCRIPT_VALID(
+    "var encoder = new TextEncoder('utf-8');"
+    "var buffer = encoder.encode('\\u611B\\u60C5');");
+  EXPECT_SCRIPT_EQ("6", "buffer.length");
+  EXPECT_SCRIPT_EQ("230", "buffer[0]");
+  EXPECT_SCRIPT_EQ("132", "buffer[1]");
+  EXPECT_SCRIPT_EQ("155", "buffer[2]");
+  EXPECT_SCRIPT_EQ("230", "buffer[3]");
+  EXPECT_SCRIPT_EQ("131", "buffer[4]");
+  EXPECT_SCRIPT_EQ("133", "buffer[5]");
 }
 
 }  // namespace

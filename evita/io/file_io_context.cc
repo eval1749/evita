@@ -66,6 +66,8 @@ FileIoContext::FileIoContext(const base::string16& file_name,
       running_(false) {
   if (!file_handle_.is_valid())
     return;
+  overlapped = {0};
+  handler = this;
   Application::instance()->GetIoManager()->RegisterIoHandler(
       file_handle_.get(), this);
 }

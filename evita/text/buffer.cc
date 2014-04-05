@@ -195,6 +195,15 @@ void text::Buffer::SetFile(
   m_nSaveTick = m_nCharTick;
 }
 
+void text::Buffer::SetModified(bool new_modified) {
+  if (IsModified() == new_modified)
+    return;
+  if (new_modified)
+    UpdateChangeTick();
+  else
+    m_nSaveTick = m_nCharTick;
+}
+
 void Buffer::StartUndoGroup(const base::string16& name) {
   undo_stack_->BeginUndoGroup(name);
 }

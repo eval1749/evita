@@ -55,6 +55,7 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: Mode* mode() const { return mode_.get(); }
   public: void set_mode(Mode* mode);
   public: bool modified() const;
+  public: void set_modified(bool new_modified);
   public: const base::string16& name() const;
   // Returns newline type, CR, CRLF, LF, used for I/O.
   public: int newline() const;
@@ -69,6 +70,7 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: v8::Handle<v8::Object> style_at(text::Posn position) const;
 
   public: bool CheckCanChange() const;
+  public: void ClearUndo();
   public: void DoColor(int hint);
   public: void EndUndoGroup(const base::string16& name);
   public: text::LineAndColumn GetLineAndColumn(text::Posn offset) const;

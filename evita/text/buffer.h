@@ -185,6 +185,7 @@ class Buffer : public BufferCore,
   public: void SetNotModifiedForTesting() {
     m_nSaveTick = m_nCharTick;
   }
+  public: void SetModified(bool new_modifier);
   public: bool SetReadOnly(bool f) { return m_fReadOnly = f; }
   public: void SetStyle(Posn, Posn, const css::Style& style_values);
   private: void SetStyleInternal(Posn, Posn, const css::Style& style_values);

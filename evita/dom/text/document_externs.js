@@ -64,6 +64,9 @@ Document.removeObserver = function(observer) {};
 /** @type {number} */
 Document.prototype.codePage;
 
+/** @type {string} */
+Document.prototype.encoding;
+
 /** @expose  @type {string} */
 Document.prototype.filename;
 
@@ -115,6 +118,10 @@ Document.prototype.bindKey = function (key_combination, command) {};
  */
 Document.prototype.charCodeAt_ = function(index) {};
 
+/** @type {!function()} */
+Document.prototype.clearUndo = function() {};
+
+/** @type {!function()} */
 Document.prototype.close = function() {};
 
 /**

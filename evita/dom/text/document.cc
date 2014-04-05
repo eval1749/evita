@@ -168,7 +168,7 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
                    &Document::set_last_write_time)
       .SetProperty("length", &Document::length)
       .SetProperty("mode", &Document::mode, &Document::set_mode)
-      .SetProperty("modified", &Document::modified)
+      .SetProperty("modified", &Document::modified, &Document::set_modified)
       .SetProperty("name", &Document::name)
       .SetProperty("newline", &Document::newline, &Document::set_newline)
       .SetProperty("properties", &Document::properties)
@@ -176,6 +176,7 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
                    &Document::set_read_only)
       .SetProperty("state", &Document::state)
       .SetMethod("charCodeAt_", &Document::charCodeAt)
+      .SetMethod("clearUndo", &Document::ClearUndo)
       .SetMethod("doColor_", &Document::DoColor)
       .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
       .SetMethod("getLineAndColumn_", &Document::GetLineAndColumn)
@@ -333,6 +334,10 @@ bool Document::modified() const {
   return buffer_->IsModified();
 }
 
+void Document::set_modified(bool new_modified) {
+  buffer_->SetModified(new_modified);
+}
+
 const base::string16& Document::name() const {
   return buffer_->name();
 }
@@ -380,6 +385,10 @@ bool Document::CheckCanChange() const {
     return false;
   }
   return true;
+}
+
+void Document::ClearUndo(){
+  buffer_->ClearUndo();
 }
 
 void Document::DoColor(int hint) {

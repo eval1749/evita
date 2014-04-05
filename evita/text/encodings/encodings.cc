@@ -7,6 +7,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "base/logging.h"
 #include "evita/text/encodings/euc_jp_decoder.h"
 #include "evita/text/encodings/euc_jp_encoder.h"
 #include "evita/text/encodings/shift_jis_decoder.h"

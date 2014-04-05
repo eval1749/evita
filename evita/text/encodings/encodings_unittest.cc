@@ -43,6 +43,42 @@ class EncodingsTest : public ::testing::Test {
   DISALLOW_COPY_AND_ASSIGN(EncodingsTest);
 };
 
+TEST_F(EncodingsTest, EucJpDecoder) {
+  auto const decoder = Encodings::instance()->GetDecoder(L"euc-jp");
+  EXPECT_EQ(base::string16(L"ax"),
+            Decode(decoder, std::vector<uint8_t> { 0x61, 0x78 })) <<
+    "ASCII";
+  EXPECT_EQ(base::string16(L"\u611B"),
+            Decode(decoder, std::vector<uint8_t> { 0xB0, 0xA6 })) <<
+    "Kanji character";
+
+  EXPECT_EQ(base::string16(L"\uFF75"),
+            Decode(decoder, std::vector<uint8_t> { 0x8E, 0xB5 })) <<
+    "Half-width katakana character";
+}
+
+TEST_F(EncodingsTest, EucJpEncoder) {
+  auto const encoder = Encodings::instance()->GetEncoder(L"euc-jp");
+  EXPECT_EQ((std::vector<uint8_t> { 0x61, 0x78 }),
+            Encode(encoder, L"ax")) << "ASCII";
+  EXPECT_EQ((std::vector<uint8_t> { 0xB0, 0xA6 }),
+            Encode(encoder, base::string16(L"\u611B"))) << "Kanji";
+  EXPECT_EQ((std::vector<uint8_t> { 0x00, 0x01 }),
+            Encode(encoder, base::string16(L"\u0100"))) <<
+    "No translation";
+
+  // Half-width Katakana
+  EXPECT_EQ((std::vector<uint8_t> { 0x8E, 0xB5 }),
+            Encode(encoder, base::string16(L"\uFF75"))) <<
+    "Half-width Katakan";
+
+  // EUC-JP special code mapping
+  EXPECT_EQ((std::vector<uint8_t> { 0x5C }),
+            Encode(encoder, base::string16(L"\u00A5"))) << "backslash";
+  EXPECT_EQ((std::vector<uint8_t> { 0x7E }),
+            Encode(encoder, base::string16(L"\u203E"))) << "tilda";
+}
+
 TEST_F(EncodingsTest, ShiftJisDecoder) {
   auto const decoder = Encodings::instance()->GetDecoder(L"shift_jis");
   EXPECT_EQ(base::string16(L"ax"),

@@ -23,6 +23,8 @@
         'encodings.h',
         'euc_jp_decoder.cc',
         'euc_jp_decoder.h',
+        'euc_jp_encoder.cc',
+        'euc_jp_encoder.h',
         'shift_jis_decoder.cc',
         'shift_jis_decoder.h',
         'shift_jis_encoder.cc',

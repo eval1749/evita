@@ -34,20 +34,23 @@ Object.defineProperty(TextFieldSelection.prototype, 'text', {
   /**
    * @this {!TextFieldSelection}
    * @param {string} new_text
+   * Note: We call setter |TextFieldControl.prototype.value_| to change value
+   * of |TextFieldControl|. Because, setter |value| change selection to whole
+   * value.
    */
   set: function(new_text) {
     var value = this.control.value;
     if (this.collapsed) {
       var offset = this.focusOffset;
-      this.control.value = value.substr(0, offset) + new_text +
-                           value.substr(offset);
+      this.control.value_ = value.substr(0, offset) + new_text +
+                            value.substr(offset);
       this.focusOffset = offset + new_text.length;
       return;
     }
     var start = this.start;
     var end = this.end;
     var end_is_focus = end == this.focusOffset;
-    this.control.value = value.substr(0, start) + new_text + value.substr(end);
+    this.control.value_ = value.substr(0, start) + new_text + value.substr(end);
     // Relocate anchorOffset and focusOffset
     var new_end = new_text.length + start;
     if (end_is_focus)

@@ -32,9 +32,9 @@ class IdlCompilerGlue(IdlCompiler):
     def compile_file(self, idl_filename):
         interface_name = idl_filename_to_interface_name(idl_filename)
         cc_filename = os.path.join(self.output_directory,
-                                  '%s.cc' % interface_name)
+                                  '%sClass.cc' % interface_name)
         h_filename = os.path.join(self.output_directory,
-                                  '%s.h' % interface_name)
+                                  '%sClass.h' % interface_name)
         self.compile_and_write(idl_filename, (cc_filename, h_filename))
 
 

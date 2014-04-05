@@ -22,7 +22,9 @@ import jinja2
 import idl_types
 from idl_types import IdlType
 
-IDL_TO_Glue_TYPE_MAP = {
+referenced_interface_names = set()
+
+IDL_TO_GLUE_TYPE_MAP = {
     'DOMString': 'base::string16',
     'bool': 'bool',
     'byte': 'uint8_t',
@@ -43,6 +45,9 @@ class CodeGeneratorGlue(object):
         interfaces_info = interfaces_info or {}
         self.interfaces_info = interfaces_info
         self.jinja_env = initialize_jinja_env(cache_dir)
+        for interface_info in interfaces_info.values():
+            interface_info['include_path'] = fix_include_path(
+                interface_info['include_path'])
 
     def generate_code(self, definitions, interface_name):
         """Returns glue as text."""
@@ -87,7 +92,8 @@ def constant_context(constant):
 def constructor_context_list(interface):
     if not interface.constructors  and not interface.custom_constructors:
         return []
-    contents = function_context(interface.constructors + interface.custom_constructors)
+    contents = function_context(interface.constructors +
+               interface.custom_constructors)
     contents['parent_name'] = interface.parent
     return [contents]
 
@@ -102,11 +108,18 @@ def enumeration_context(enumeration):
     }
 
 
+def fix_include_path(path):
+    return os.path.join(os.path.dirname(path),
+        underscore(os.path.basename(path))).replace('\\', '/')
+
+
 def function_context(functions):
     parameters_list = [function.arguments for function in functions]
     max_arity = max(map(len, parameters_list))
-    normalized_parameters_list = [parameters + [None] * (max_arity - len(parameters))
-                                  for parameters in parameters_list]
+    normalized_parameters_list = [
+        parameters + [None] * (max_arity - len(parameters))
+        for parameters in parameters_list
+    ]
     parameters = [overloaded_parameter(overloaded_parameters)
                   for overloaded_parameters
                   in zip(*normalized_parameters_list)]
@@ -115,55 +128,55 @@ def function_context(functions):
     return {
         'is_static': functions[0].is_static,
         'name': functions[0].name,
+        'cpp_name': upper_camel_case(functions[0].name),
         'parameters': parameters,
         'return_type': union_type_string(return_type_strings),
     }
 
 
 def generate_template_context(definitions, interface_name, interfaces_info):
-        callback_context_list = sorted(
-            [callback_context(callback_function)
-             for callback_function in definitions.callback_functions.values()],
-            key=lambda context: context['name'])
+    callback_context_list = sorted(
+        [callback_context(callback_function)
+         for callback_function in definitions.callback_functions.values()],
+        key=lambda context: context['name'])
 
-        enumeration_context_list = sorted(
-            [enumeration_context(enumeration)
-             for enumeration in definitions.enumerations.values()],
-            key=lambda context: context['name'])
+    enumeration_context_list = sorted(
+        [enumeration_context(enumeration)
+         for enumeration in definitions.enumerations.values()],
+        key=lambda context: context['name'])
 
-        try:
-            interface = definitions.interfaces[interface_name]
-        except KeyError:
-            raise Exception('%s not in IDL definitions' % interface_name)
+    try:
+        interface = definitions.interfaces[interface_name]
+    except KeyError:
+        raise Exception('%s not in IDL definitions' % interface_name)
 
-        attribute_context_list = [attribute_context(attribute)
-                                  for attribute in interface.attributes]
-        constant_context_list = [constant_context(constant)
-                                 for constant in interface.constants]
+    attribute_context_list = [attribute_context(attribute)
+                              for attribute in interface.attributes]
+    constant_context_list = [constant_context(constant)
+                             for constant in interface.constants]
 
-        method_context_list = dict(
-            (name, function_context(list(functions)))
-            for name, functions in
-            groupby(interface.operations, lambda operation: operation.name)).values()
+    method_context_list = [function_context(list(functions))
+                           for name, functions in
+                           groupby(interface.operations,
+                                   lambda operation: operation.name)]
 
-        interface_info = interfaces_info[interface_name]
-        include_path = interface_info['include_path']
-        implement_h_path = os.path.join(
-            os.path.dirname(include_path),
-            underscore(os.path.basename(include_path))).replace('\\', '/')
+    referenced_interface_names.add(interface_name)
+    include_list = sorted([interfaces_info[name]['include_path']
+                           for name in referenced_interface_names
+                           if name in interfaces_info])
 
-        return {
-          'attributes': sort_context_list(attribute_context_list),
-          'callbacks': sort_context_list(callback_context_list),
-          'class_name': interface_name + 'Class',
-          'constants': sort_context_list(constant_context_list),
-          'constructors': constructor_context_list(interface),
-          'enumerations': enumeration_context_list,
-          'implement_h_path': implement_h_path,
-          'interfaces': interface_context_list(interface),
-          'interface_name': interface_name,
-          'methods': sort_context_list(method_context_list),
-        }
+    return {
+      'attributes': sort_context_list(attribute_context_list),
+      'callbacks': sort_context_list(callback_context_list),
+      'class_name': interface_name + 'Class',
+      'constants': sort_context_list(constant_context_list),
+      'constructors': constructor_context_list(interface),
+      'enumerations': enumeration_context_list,
+      'includes': include_list,
+      'interfaces': interface_context_list(interface),
+      'interface_name': interface_name,
+      'methods': sort_context_list(method_context_list),
+    }
 
 
 def initialize_jinja_env(cache_dir):
@@ -224,21 +237,16 @@ def type_string(idl_type):
     if idl_type.is_union_type:
         return union_type_string([type_string(member_type)
                                   for member_type in idl_type.member_types])
-    type_str = IDL_TO_Glue_TYPE_MAP.get(idl_type.base_type, idl_type.base_type)
+    type_str = IDL_TO_GLUE_TYPE_MAP.get(idl_type.base_type, idl_type.base_type)
     if type_str == 'void':
         return ''
+    referenced_interface_names.add(type_str)
     if idl_type.is_array or idl_type.is_sequence:
-        # FIXME Until we have |IdlArrayType| and |IdlSequenceType| which
-        # have element type nullability, we assume element type of array
-        # and sequence is nullable.
-        return type_string_with_nullable(
-            'Array.<%s>' % type_string_with_nullable(type_str, True),
-            idl_type.is_nullable)
-    return type_string_with_nullable(type_str, idl_type.is_nullable)
+        return 'const std::vector<%s>&' % type_str
+    if (idl_type.is_nullable):
+        return 'v8_glue::Nullable<%s>' % type_str
+    return type_str
 
-
-def type_string_with_nullable(type_string, is_nullable):
-    return '?' + type_string if is_nullable else '!' + type_string
 
 def underscore(text):
     result =''
@@ -258,3 +266,8 @@ def union_type_string(type_strings):
     type_string_list = list(set(type_strings))
     type_string_list.sort()
     return '|'.join(type_string_list)
+
+
+# Convert lower case cample, lowerCaseCamel, to upper case came, UpperCaseCamel
+def upper_camel_case(lower_camel_case):
+    return lower_camel_case[0].upper() + lower_camel_case[1:]

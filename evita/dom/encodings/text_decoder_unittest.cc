@@ -33,7 +33,7 @@ TEST_F(TextDecoderTest, ctor) {
   EXPECT_SCRIPT_EQ("utf-8", "decoder4.encoding");
 }
 
-TEST_F(TextDecoderTest, decode) {
+TEST_F(TextDecoderTest, decode_utf8_ascii) {
   EXPECT_SCRIPT_VALID(
     "var decoder = new TextDecoder('utf-8');"
     "var buffer = new Uint8Array(new ArrayBuffer(3));"
@@ -41,6 +41,18 @@ TEST_F(TextDecoderTest, decode) {
     "buffer[1] = 'abc'.charCodeAt(1);"
     "buffer[2] = 'abc'.charCodeAt(2);");
   EXPECT_SCRIPT_EQ("abc", "decoder.decode(buffer);");
+  EXPECT_SCRIPT_EQ("", "decoder.decode();");
+}
+
+TEST_F(TextDecoderTest, decode_utf8_kanji) {
+  EXPECT_SCRIPT_VALID(
+    "var decoder = new TextDecoder('utf-8');"
+    "var buffer = new Uint8Array(new ArrayBuffer(3));"
+    "buffer[0] = 230;"
+    "buffer[1] = 132;"
+    "buffer[2] = 155;");
+  EXPECT_SCRIPT_EQ("611b",
+                   "decoder.decode(buffer).charCodeAt(0).toString(16);");
   EXPECT_SCRIPT_EQ("", "decoder.decode();");
 }
 

@@ -13,10 +13,11 @@
     var document = Document.open(absolute_filename);
     if (!document.length) {
       document.load(absolute_filename).catch(function(error_code) {
+        console.log('Load error', error_code);
         Editor.messageBox(null, 'Failed to load ' + absolute_filename + '\n' +
             'error=' + error_code,
             MessageBox.ICONERROR);
-      });
+      }).catch(function(e) { console.log(e); });
     }
     return document;
   }

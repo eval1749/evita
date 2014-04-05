@@ -43,6 +43,24 @@ class EncodingsTest : public ::testing::Test {
   DISALLOW_COPY_AND_ASSIGN(EncodingsTest);
 };
 
+TEST_F(EncodingsTest, ShiftJisDecoder) {
+  auto const decoder = Encodings::instance()->GetDecoder(L"shift_jis");
+  EXPECT_EQ(base::string16(L"ax"),
+            Decode(decoder, std::vector<uint8_t> { 0x61, 0x78 }));
+  EXPECT_EQ(base::string16(L"\u611B"),
+            Decode(decoder, std::vector<uint8_t> { 0x88, 0xA4 }));
+}
+
+TEST_F(EncodingsTest, ShiftJisEncoder) {
+  auto const encoder = Encodings::instance()->GetEncoder(L"shift_jis");
+  EXPECT_EQ((std::vector<uint8_t> { 0x61, 0x78 }),
+            Encode(encoder, L"ax"));
+  EXPECT_EQ((std::vector<uint8_t> { 0x88, 0xA4 }),
+            Encode(encoder, base::string16(L"\u611B")));
+  EXPECT_EQ((std::vector<uint8_t> { 0x00, 0x01 }),
+            Encode(encoder, base::string16(L"\u0100")));
+}
+
 TEST_F(EncodingsTest, Utf8Decoder) {
   auto const decoder = Encodings::instance()->GetDecoder(L"utf-8");
   EXPECT_EQ(base::string16(L"ax"),

@@ -8,7 +8,9 @@
 #include <unordered_map>
 
 #include "evita/text/encodings/euc_jp_decoder.h"
+#include "evita/text/encodings/euc_jp_encoder.h"
 #include "evita/text/encodings/shift_jis_decoder.h"
+#include "evita/text/encodings/shift_jis_encoder.h"
 #include "evita/text/encodings/utf8_decoder.h"
 #include "evita/text/encodings/utf8_encoder.h"
 
@@ -41,9 +43,6 @@ namespace {
 #define DEFINE_ENCODING(name) \
   Decoder* New ## name ## Decoder() { return new name ## Decoder; } \
   Encoder* New ## name ## Encoder() { return new name ## Encoder; }
-
-#define EucJpEncoder Utf8Encoder
-#define ShiftJisEncoder Utf8Encoder
 
 DEFINE_ENCODING(EucJp)
 DEFINE_ENCODING(ShiftJis)

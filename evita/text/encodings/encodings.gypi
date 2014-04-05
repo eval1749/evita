@@ -10,9 +10,11 @@
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
       ],
-      'msvs_precompiled_header': '',
-      'msvs_precompiled_source': '',
+      'msvs_precompiled_header': '<(DEPTH)/build/precompile.h',
+      'msvs_precompiled_source': '<(DEPTH)/build/precompile.cc',
       'sources': [
+        '<(DEPTH)/build/precompile.cc',
+
         'decoder.cc',
         'decoder.h',
         'encoder.cc',
@@ -23,6 +25,8 @@
         'euc_jp_decoder.h',
         'shift_jis_decoder.cc',
         'shift_jis_decoder.h',
+        'shift_jis_encoder.cc',
+        'shift_jis_encoder.h',
         'utf8_decoder.cc',
         'utf8_decoder.h',
         'utf8_encoder.cc',

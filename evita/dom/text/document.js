@@ -4,18 +4,6 @@
 'use strict';
 
 (function() {
-  /**
-   * @param {string} absolute_filename
-   * @return {Document}
-   */
-  function findDocumentOnFile(absolute_filename) {
-    var canonical_filename = absolute_filename.toLocaleLowerCase();
-    return /** @type{Document} */ (Document.list.find(
-        function(document) {
-          return document.filename.toLocaleLowerCase() == canonical_filename;
-        }));
-  }
-
   /** @const @type {Map.<string, string>} */
   var WORD_CLASS_MAP = (function() {
     /** @param {string} name */
@@ -82,20 +70,6 @@
     return wordClassOf(document.charCodeAt_(position - 1));
   }
 
-  /** @enum{number} */
-  global.Document.Obsolete = {
-    CHECKING: -2,
-    UNKNOWN: -1,
-    NO: 0,
-    YES: 1,
-  };
-
-  /** @type {number} */
-  Document.prototype.lastStatTime_ = new Date(0);
-
-  /** @type {!Document.Obsolete} */
-  Document.prototype.obsolete = Document.Obsolete.UNKNOWN;
-
   /**
    * @this {!Document}
    * @param {string} key_combination.
@@ -109,32 +83,6 @@
       this.keymap = map;
     }
     map.set(key_code, command);
-  };
-
-  Document.prototype.close = function() {
-    var document = this;
-    if (!document.needSave()) {
-      document.forceClose();
-      return;
-    }
-    Editor.messageBox(null,
-        Editor.localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
-        MessageBox.ICONWARNING | MessageBox.YESNOCANCEL)
-      .then(function(response_code) {
-        switch (response_code) {
-          case DialogItemId.NO:
-            document.forceClose();
-            break;
-          case DialogItemId.YES:
-            Editor.getFilenameForSave(null, document.filename)
-              .then(function(filename) {
-                document.save(filename).then(function() {
-                  document.forceClose();
-                });
-              });
-            break;
-        }
-      });
   };
 
   /**
@@ -377,13 +325,6 @@
     return end;
   };
 
-  Document.prototype.forceClose = function() {
-    this.listWindows().forEach(function(window) {
-      window.destroy();
-    });
-    Document.remove(this);
-  };
-
   /**
    * @return {Array.<!DocumentWindow>}
    */
@@ -400,108 +341,6 @@
   };
 
   /**
-   * @param {string} filename A backing store file of document.
-   * @return {!Document} A Document bound to filename
-   */
-  Document.open = function(filename) {
-    var absolute_filename = FilePath.fullPath(filename);
-    var present = findDocumentOnFile(absolute_filename);
-    if (present)
-      return present;
-    var document = new Document(FilePath.basename(filename));
-    document.filename = absolute_filename;
-    return document;
-  };
-
-  /**
-   * @param {string=} opt_filename
-   * @return {!Promise.<number>}
-   */
-  Document.prototype.load = function(opt_filename) {
-    var document = this;
-    if (!arguments.length) {
-      if (document.filename == '')
-        throw 'Document isn\'t bound to file.';
-    } else {
-      var filename = /** @type{string} */(opt_filename);
-      var absolute_filename = FilePath.fullPath(filename);
-      var present = findDocumentOnFile(absolute_filename);
-      if (present && present !== this)
-        throw filename + ' is already bound to ' + present;
-      document.filename = absolute_filename;
-    }
-
-    var deferred = Promise.defer();
-    document.obsolete = Document.Obsolete.CHECKING;
-    Editor.messageBox(null, 'Loading ' + document.filename,
-                      MessageBox.ICONINFORMATION);
-    document.load_(document.filename, function(error_code) {
-      if (!error_code)
-        deferred.resolve(error_code);
-      else
-        deferred.reject(error_code);
-    });
-    return deferred.promise.then(function(error_code) {
-      Editor.messageBox(null, 'Loaded ' + document.filename,
-                        MessageBox.ICONINFORMATION);
-      console.log('load', document, 'error', error_code);
-      document.obsolete = Document.Obsolete.NO;
-      document.lastStatTime_ = new Date();
-      document.parseFileProperties();
-      var new_mode = Mode.chooseMode(document);
-      if (new_mode.name != document.mode.name) {
-        Editor.messageBox(null, 'Change mode to ' + new_mode.name,
-                          MessageBox.ICONINFORMATION);
-        document.mode = new_mode;
-      }
-      document.listWindows().forEach(function(window) {
-        if (window instanceof TextWindow) {
-          console.log('Reset selection offset', document, window);
-          window.selection.range.collapseTo(0);
-          window.makeSelectionVisible();
-        }
-      });
-      document.doColor_(Math.min(document.length, 1024 * 8));
-      document.dispatchEvent(new DocumentEvent('load'));
-      return deferred.promise;
-    }).catch(function(exception) {
-      console.log('load.catch', exception, 'during loading', filename,
-                  'into', document);
-      document.lastStatTime_ = new Date();
-      document.obsolete = Document.Obsolete.UNKNOWN;
-      return deferred.promise;
-    });
-  };
-
-  /**
-   * @return {boolean}
-   */
-  Document.prototype.needSave = function() {
-    // TODO: We should use |document.notForSave|.
-    return this.modified && !this.name.startsWith('*') &&
-           FilePath.isValidFilename(this.filename);
-  };
-
-  /**
-   * This function handles Emacs "File Variables" in the first line.
-   * TODO(yosi) Support "Local Variables: ... End:".
-   */
-  Document.prototype.parseFileProperties = function() {
-    var document = this;
-    var first_line = new Range(document);
-    first_line.endOf(Unit.LINE, Alter.EXTEND);
-    var file_vars_matches = /-\*-\s+(.+?)\s+-\*-/.exec(first_line.text);
-    if (!file_vars_matches)
-      return;
-    file_vars_matches[1].split(';').forEach(function(var_def) {
-      var matches = /^\s*([^:\s]+)\s*:\s*(.+?)\s*$/.exec(var_def);
-      if (!matches)
-        return;
-      document.properties.set(matches[1], matches[2]);
-    });
-  };
-
-  /**
    * @param {string} name
    * @param {function()} callback
    * @param {!Object=} opt_receiver
@@ -515,50 +354,5 @@
     } finally {
       document.endUndoGroup_(name);
     }
-  };
-
-  /**
-   * @param {string=} opt_filename
-   * @return {!Promise.<number>}
-   */
-  Document.prototype.save = function(opt_filename) {
-    var document = this;
-    if (!arguments.length) {
-      if (document.filename == '')
-        throw 'Document isn\'t bound to file.';
-    } else {
-      var filename = /** @type{string} */(opt_filename);
-      var absolute_filename = FilePath.fullPath(filename);
-      var present = findDocumentOnFile(absolute_filename);
-      if (present && present !== this)
-        throw filename + ' is already bound to ' + present;
-      document.filename = absolute_filename;
-    }
-
-    var deferred = Promise.defer();
-    var filename = document.filename;
-    document.obsolete = Document.Obsolete.CHECKING;
-    Editor.messageBox(null, 'Saving to ' + document.filename,
-                      MessageBox.ICONINFORMATION);
-    document.save_(filename, function(error_code) {
-      if (!error_code)
-        deferred.resolve(error_code);
-      else
-        deferred.reject(error_code);
-    });
-
-    return deferred.promise.then(function(error_code) {
-      Editor.messageBox(null, 'Saved to ' + filename,
-                        MessageBox.ICONINFORMATION);
-      document.lastStatusCheckTime_ = new Date();
-      document.obsolete = Document.Obsolete.NO;
-      document.dispatchEvent(new DocumentEvent('save'));
-      return deferred.promise;
-    }).catch(function(reason) {
-      console.log('Failed to save', document, 'to', filename);
-      document.lastStatusCheckTime_ = new Date();
-      document.obsolete = Document.Obsolete.UNKNOWN;
-      return deferred.promise;
-    });
   };
 })();

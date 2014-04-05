@@ -23,6 +23,7 @@
       'bracket.js',
       'commander.js',
       'text/document.js',
+      'text/document_file_io.js',
       'editor.js',
       'windows/editor_window.js',
       'encodings/text_decoder.js',

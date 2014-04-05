@@ -30,9 +30,6 @@ class Range {
 
   public: Buffer* buffer() const { return buffer_; }
 
-  // [C]
-  public: Count Copy();
-
   // [E]
   private: Posn ensurePosn(Posn) const;
 
@@ -41,9 +38,6 @@ class Range {
   public: void GetInformation(Information*, Count = Count_Max) const;
   public: Posn GetStart() const { return start_; }
   public: base::string16 GetText() const;
-
-  // [P]
-  public: void Paste();
 
   // [S]
   public: Posn SetEnd(Posn);

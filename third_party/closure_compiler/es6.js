@@ -366,7 +366,7 @@ Promise.all = function(iterable) {};
  * @param {*} value.
  * @return {!Promise}
  */
-Promise.cast = function(value) {};
+Promise.accept = function(value) {};
 
 /**
  * @param {*} value.
@@ -387,8 +387,9 @@ Promise.race = function(iterable) {};
 Promise.reject = function(value) {};
 
 /**
- * @param {*} value
- * @return {!Promise}
+ * @template T
+ * @param {T} value
+ * @return {!Promise.<T>}
  */
 Promise.resolve = function(value) {};
 
@@ -397,21 +398,13 @@ Promise.resolve = function(value) {};
  * @param {!function(T=)} onRejected
  * @return {!Promise}
  */
-Promise.prototype.catch= function(onRejected) {};
+Promise.prototype.catch = function(onRejected) {};
 
 /**
- * @template T
- * @param {!function(T)} onFulfilled.
- * @param {!function(*)=} onRejected
- * @return {!Promise.<T>}
- */
-Promise.prototype.chain = function(onRejected) {};
-
-/**
- * @template T
- * @param {!function(T)} onFulfilled.
+ * @template T, S
+ * @param {!function(T):S} onFulfilled.
  * @param {!function(*)=} opt_onRejected
- * @return {!Promise.<T>}
+ * @return {!Promise.<S>}
  */
 Promise.prototype.then = function(onFulfilled, opt_onRejected) {};
 

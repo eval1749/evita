@@ -6,8 +6,8 @@ interface DataTransfer {
   // attribute DOMString dropEffect;
   // attribute DOMString effectAllowed;
 
-  readonly attribute DataTransferItemList items;
   static readonly attribute DataTransfer clipboard;
+  readonly attribute DataTransferItemList items;
 
   // void setDragImage(Element image, long x, long y);
 };

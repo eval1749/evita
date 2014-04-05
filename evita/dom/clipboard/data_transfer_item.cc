@@ -8,75 +8,14 @@
 #include "evita/dom/converter.h"
 #include "evita/dom/script_host.h"
 
-
 namespace gin {
-template<>
-struct Converter<dom::DataTransferData::Kind> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    dom::DataTransferData::Kind kind) {
-    return StringToV8(isolate, dom::DataTransferData::KindToString(kind));
-  }
-};
+v8::Handle<v8::Value> Converter<dom::DataTransferData::Kind>::ToV8(
+    v8::Isolate* isolate, dom::DataTransferData::Kind kind) {
+  return StringToV8(isolate, dom::DataTransferData::KindToString(kind));
+}
 }  // namespace gin
 
 namespace dom {
-
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-//
-// DataTransferItemClass
-//
-class DataTransferItemClass : public v8_glue::WrapperInfo {
-  public: DataTransferItemClass(const char* name);
-  public: virtual ~DataTransferItemClass();
-
-  private: static DataTransferItem* NewDataTransferItem();
-
-  // v8_glue::WrapperInfo
-  private: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override;
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override;
-
-  DISALLOW_COPY_AND_ASSIGN(DataTransferItemClass);
-};
-
-DataTransferItemClass::DataTransferItemClass(const char* name)
-    : v8_glue::WrapperInfo(name) {
-}
-
-DataTransferItemClass::~DataTransferItemClass() {
-}
-
-DataTransferItem* DataTransferItemClass::NewDataTransferItem() {
-  return nullptr;
-}
-
-// v8_glue::WrapperInfo
-v8::Handle<v8::FunctionTemplate>
-    DataTransferItemClass::CreateConstructorTemplate(
-        v8::Isolate* isolate) {
-  return v8_glue::CreateConstructorTemplate(isolate,
-      &DataTransferItemClass::NewDataTransferItem);
-}
-
-void DataTransferItemClass:: SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) {
-  builder
-      .SetProperty("kind", &DataTransferItem::kind)
-      .SetProperty("type", &DataTransferItem::type)
-      .SetMethod("getAsBlob", &DataTransferItem::GetAsBlob)
-      .SetMethod("getAsString", &DataTransferItem::GetAsString);
-}
-
-}  // namespace
-
-//////////////////////////////////////////////////////////////////////
-//
-// DataTransferItem
-//
-DEFINE_SCRIPTABLE_OBJECT(DataTransferItem, DataTransferItemClass);
 
 DataTransferItem::DataTransferItem(const Clipboard::Format* format,
                                    DataTransferData* data)

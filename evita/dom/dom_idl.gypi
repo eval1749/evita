@@ -11,9 +11,9 @@
     ], # idl_files
 
     'generated_glue_files': [
-      '<(glue_dir)/DataTransfer.cc',
-      '<(glue_dir)/DataTransferItem.cc',
-      '<(glue_dir)/DataTransferItemList.cc',
+      '<(glue_dir)/DataTransferClass.cc',
+      '<(glue_dir)/DataTransferItemClass.cc',
+      '<(glue_dir)/DataTransferItemListClass.cc',
     ],
 
     'generated_js_externs_files': [
@@ -161,8 +161,8 @@
           '<(idl_work_dir)/InterfacesInfo.pickle',
         ], # inputs
         'outputs': [
-          '<(glue_dir)/<(RULE_INPUT_ROOT).cc',
-          '<(glue_dir)/<(RULE_INPUT_ROOT).h',
+          '<(glue_dir)/<(RULE_INPUT_ROOT)Class.cc',
+          '<(glue_dir)/<(RULE_INPUT_ROOT)Class.h',
         ],
         'action': [
           'python',
@@ -213,6 +213,7 @@
         'action_name': 'compute_dom_interfaces_info',
         'inputs': [
           '<(DEPTH)/third_party/blink_idl_parser/compute_interfaces_info.py',
+          '<@(idl_files)',
         ],
         'outputs': [
           '<(idl_work_dir)/InterfacesInfo.pickle',

@@ -12,86 +12,26 @@
 #include "evita/dom/script_host.h"
 
 namespace gin {
-template<>
-struct Converter<dom::DataTransferData*> {
-  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
-                     dom::DataTransferData** out) {
-    base::string16 string;
-    if (ConvertFromV8(isolate, val, &string)) {
-      *out = new dom::DataTransferStringData(string);
-      return true;
-    }
-
-    std::vector<uint8_t> data;
-    if (ConvertFromV8(isolate, val, &data)) {
-      *out = new dom::DataTransferBlobData(data.data(), data.size());
-      return true;
-    }
-
-    return false;
+bool Converter<dom::DataTransferData*>::FromV8(
+    v8::Isolate* isolate, v8::Handle<v8::Value> val,
+    dom::DataTransferData** out) {
+  base::string16 string;
+  if (ConvertFromV8(isolate, val, &string)) {
+    *out = new dom::DataTransferStringData(string);
+    return true;
   }
-};
+
+  std::vector<uint8_t> data;
+  if (ConvertFromV8(isolate, val, &data)) {
+    *out = new dom::DataTransferBlobData(data.data(), data.size());
+    return true;
+  }
+
+  return false;
+}
 }  // namespace gin
 
 namespace dom {
-
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-//
-// DataTransferItemListClass
-//
-class DataTransferItemListClass : public v8_glue::WrapperInfo {
-  public: DataTransferItemListClass(const char* name);
-  public: virtual ~DataTransferItemListClass();
-
-  private: static DataTransferItemList* NewDataTransferItemList();
-
-  // v8_glue::WrapperInfo
-  private: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override;
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override;
-
-  DISALLOW_COPY_AND_ASSIGN(DataTransferItemListClass);
-};
-
-DataTransferItemListClass::DataTransferItemListClass(const char* name)
-    : v8_glue::WrapperInfo(name) {
-}
-
-DataTransferItemListClass::~DataTransferItemListClass() {
-}
-
-DataTransferItemList* DataTransferItemListClass::NewDataTransferItemList() {
-  return new DataTransferItemList();
-}
-
-// v8_glue::WrapperInfo
-v8::Handle<v8::FunctionTemplate>
-    DataTransferItemListClass::CreateConstructorTemplate(
-        v8::Isolate* isolate) {
-  return v8_glue::CreateConstructorTemplate(isolate,
-      &DataTransferItemListClass::NewDataTransferItemList);
-}
-
-void DataTransferItemListClass:: SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) {
-  builder
-      .SetProperty("length", &DataTransferItemList::length)
-      .SetMethod("add", &DataTransferItemList::Add)
-      .SetMethod("clear", &DataTransferItemList::Clear)
-      .SetMethod("get", &DataTransferItemList::Get)
-      .SetMethod("remove", &DataTransferItemList::Remove);
-}
-
-}  // namespace
-
-//////////////////////////////////////////////////////////////////////
-//
-// DataTransferItemList
-//
-DEFINE_SCRIPTABLE_OBJECT(DataTransferItemList, DataTransferItemListClass);
 
 DataTransferItemList::DataTransferItemList() : fetched_(false) {
 }

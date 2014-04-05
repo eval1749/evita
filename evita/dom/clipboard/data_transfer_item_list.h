@@ -38,4 +38,12 @@ class DataTransferItemList : public v8_glue::Scriptable<DataTransferItemList> {
 
 }  // namespace dom
 
+namespace gin {
+template<>
+struct Converter<dom::DataTransferData*> {
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
+                     dom::DataTransferData** out);
+};
+}  // namespace gin
+
 #endif //!defined(INCLUDE_evita_dom_clipboard_data_transfer_item_list_h)

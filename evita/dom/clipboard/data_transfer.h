@@ -17,6 +17,7 @@ class DataTransfer : public v8_glue::Scriptable<DataTransfer> {
   public: DataTransfer();
   public: virtual ~DataTransfer();
 
+  public: static DataTransfer* clipboard();
   public: DataTransferItemList* items();
 
   DISALLOW_COPY_AND_ASSIGN(DataTransfer);

@@ -17,9 +17,8 @@ namespace encodings {
 class Utf8Decoder::Private {
   private: enum class State {
     FirstByte,
-    SecondByteOfTwoByteEncoding,
+    LastByte,
     SecondByteOfThreeByteEncoding,
-    ThirdByteOfThreeByteEncoding,
   };
 
   private: int char16_;
@@ -57,7 +56,7 @@ common::Either<bool, base::string16> Utf8Decoder::Private::Decode(
         }
         if (byte >= 0xC0 && byte <= 0xDF) {
           char16_ = (byte & 0x1F) << 6;
-          state_ = State::SecondByteOfTwoByteEncoding;
+          state_ = State::LastByte;
           break;
         }
         if (byte >= 0xE0 && byte <= 0xEF) {
@@ -66,7 +65,7 @@ common::Either<bool, base::string16> Utf8Decoder::Private::Decode(
           break;
         }
         return common::make_either(is_stream, output.str());
-      case State::SecondByteOfTwoByteEncoding:
+      case State::LastByte:
         if (byte >= 0x80 && byte <= 0xBF) {
           char16_ |= byte & 0x3F;
           output.sputc(static_cast<base::char16>(char16_));
@@ -77,15 +76,7 @@ common::Either<bool, base::string16> Utf8Decoder::Private::Decode(
       case State::SecondByteOfThreeByteEncoding:
         if (byte >= 0x80 && byte <= 0xBF) {
           char16_ |= (byte & 0x3F) << 6;
-          state_ = State::ThirdByteOfThreeByteEncoding;
-          break;
-        }
-        return common::make_either(is_stream, output.str());
-      case State::ThirdByteOfThreeByteEncoding:
-        if (byte >= 0x80 && byte <= 0xBF) {
-          char16_ = byte & 0x3F;
-          output.sputc(static_cast<base::char16>(char16_));
-          state_ = State::FirstByte;
+          state_ = State::LastByte;
           break;
         }
         return common::make_either(is_stream, output.str());

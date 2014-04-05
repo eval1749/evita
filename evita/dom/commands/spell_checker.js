@@ -312,11 +312,12 @@ SpellChecker.wordStateMap = new Map();
 
 /**
  * @param {string} word_to_check
- * @return {!Promise.<SpellChecker.SpellingResult>}
+ * @return {!Promise.<?SpellChecker.SpellingResult>}
  */
 SpellChecker.checkSpelling = function(word_to_check) {
   if (!SpellChecker.RE_WORD.test(word_to_check))
-    return Promise.resolve(null);
+    return /** @type {!Promise.<?SpellChecker.SpellingResult>} */(
+        Promise.resolve(null));
   var result = SpellChecker.wordStateMap.get(word_to_check);
   if (result) {
     result.lastUsedTime = new Date();
@@ -337,7 +338,7 @@ SpellChecker.checkSpelling = function(word_to_check) {
         state.spelling = is_correct ? Spelling.CORRECT : Spelling.MISSPELLED;
         return state;
       });
-  return /** @type {!Promise.<SpellChecker.SpellingResult>} */(promise);
+  return /** @type {!Promise.<?SpellChecker.SpellingResult>} */(promise);
 };
 
 // When document is created/destructed, we install/uninstall spell checker

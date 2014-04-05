@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 /**
- * @struct {
+ * @typedef {{
  *  stream: boolean
- * }
+ * }}
  */
 var TextEncodeOptions;
 

@@ -37,8 +37,6 @@ class WrapperInfo {
   public: gin::GinEmbedder embedder() const { return embedder_; }
   public: virtual WrapperInfo* inherit_from() const;
   public: bool is_descendant_or_self_of(const WrapperInfo* other) const;
-  public: virtual const char* singleton_name() const;
-  public: virtual AbstractScriptable* singleton() const;
   public: gin::WrapperInfo* gin_wrapper_info() {
     return const_cast<gin::WrapperInfo*>(
         reinterpret_cast<const gin::WrapperInfo*>(&embedder_));

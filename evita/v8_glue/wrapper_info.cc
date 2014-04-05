@@ -17,11 +17,11 @@
 namespace v8_glue {
 
 namespace {
-// Changes behavior of constructor call for singleton:
+// A callback for no constructor class:
 //  - Type() => throw "Cannot be called as function"
 //  - new Type() => throw "Cannot use with new operator" if not creating
 //    wrapper
-void ConstructorCallbackForSingletonClass(
+void ConstructorCallbackForNoConstructor(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
   auto const isolate = info.GetIsolate();
   if (!info.IsConstructCall()) {
@@ -36,15 +36,6 @@ void ConstructorCallbackForSingletonClass(
     return;
   }
 }
-
-void ConstructorCallbackForAbstractClass(
-    const v8::FunctionCallbackInfo<v8::Value>& info) {
-  auto const isolate = info.GetIsolate();
-  isolate->ThrowException(
-    // TODO(yosi) Provie abstract name in error message.
-    gin::StringToV8(isolate, "Cannot create instance for abstract class"));
-}
-
 }  // namespace
 
 WrapperInfo::WrapperInfo(const char* class_name)
@@ -64,21 +55,10 @@ bool WrapperInfo::is_descendant_or_self_of(const WrapperInfo* other) const {
   return false;
 }
 
-const char* WrapperInfo::singleton_name() const {
-  return nullptr;
-}
-
-AbstractScriptable* WrapperInfo::singleton() const {
-  return nullptr;
-}
-
 v8::Handle<v8::FunctionTemplate> WrapperInfo::CreateConstructorTemplate(
     v8::Isolate* isolate) {
   auto const templ = v8::FunctionTemplate::New(isolate);
-  if (singleton_name())
-    templ->SetCallHandler(ConstructorCallbackForSingletonClass);
-  else
-    templ->SetCallHandler(ConstructorCallbackForAbstractClass);
+  templ->SetCallHandler(ConstructorCallbackForNoConstructor);
   return templ;
 }
 
@@ -150,10 +130,6 @@ v8::Handle<v8::FunctionTemplate> WrapperInfo::Install(v8::Isolate* isolate,
                           v8::Handle<v8::ObjectTemplate> global) {
   auto constructor = GetOrCreateConstructorTemplate(isolate);
   global->Set(gin::StringToV8(isolate, class_name_), constructor);
-  if (auto const singleton = this->singleton()) {
-    global->Set(gin::StringToV8(isolate, singleton_name()),
-                singleton->GetWrapper(isolate));
-  }
   return constructor;
 }
 

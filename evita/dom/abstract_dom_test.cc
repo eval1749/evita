@@ -164,6 +164,7 @@ bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
     UnhandledException(runner_.get(), try_catch);
     return false;
   }
+  v8::V8::RunMicrotasks(isolate);
   return true;
 }
 

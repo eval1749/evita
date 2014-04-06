@@ -216,7 +216,6 @@ TEST_F(DocumentTest, load_succeeded) {
   mock_io_delegate()->SetFileStatus(file_status, 0);
 
   EXPECT_SCRIPT_VALID(
-    "console.log = log;"
     "var doc = new Document('foo');"
     "var promise = doc.load('foo.cc');");
   EXPECT_SCRIPT_TRUE("promise instanceof Promise");

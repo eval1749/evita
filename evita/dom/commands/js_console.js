@@ -24,7 +24,7 @@ global.JsConsole = (function() {
   function JsConsole() {
     // TODO(yosi) We should make |*javascript*| document with JavaScript
     // syntax coloring.
-    this.document = console.document_();
+    this.document = console.document;
     this.history_index = 0;
     this.history = [];
     this.lineNumber = 0;

@@ -6,7 +6,7 @@
  * @const @type{{
  *    DOCUMENT_NAME: string,
  *    clear: function(),
- *    document_: function(): !Document,
+ *    document: !Document,
  *    log: function(...),
  *    show: function(),
  *    update: function()

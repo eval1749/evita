@@ -104,3 +104,6 @@ Window.prototype.splitHorizontally = function(new_right_window) {};
 
 /** @param {!Window} new_below_window */
 Window.prototype.splitVertically = function(new_below_window) {};
+
+/** @type {!function()} */
+Window.prototype.update = function() {};

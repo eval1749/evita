@@ -128,6 +128,7 @@ class ViewDelegate {
   public: virtual void SaveFile(Document* document,
                                 const base::string16& filename,
                                 const SaveFileCallback& callback) = 0;
+
   public: /* synchronous */ virtual void ScrollTextWindow(WindowId windowId,
                                                           int direction) = 0;
   public: virtual void SetCapture(WindowId window_id) = 0;
@@ -141,6 +142,9 @@ class ViewDelegate {
                                          WindowId new_right_window_id) = 0;
   public: virtual void SplitVertically(WindowId above_window_id,
                                        WindowId new_below_window_id) = 0;
+
+  // Synchronous: Update window contents
+  public: virtual void UpdateWindow(WindowId window_id) = 0;
 
   DISALLOW_COPY_AND_ASSIGN(ViewDelegate);
 };

@@ -126,6 +126,7 @@ class ScriptThread final : public domapi::IoDelegate,
       WindowId new_right_window_id) override;
   private: virtual void SplitVertically(WindowId above_window_id,
       WindowId new_below_window_id) override;
+  private: virtual void UpdateWindow(WindowId window_id) override;
 
   // domapi::ViewEventHandler
   private: virtual void AppendTextToBuffer(text::Buffer* buffer,

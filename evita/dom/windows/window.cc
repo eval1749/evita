@@ -101,7 +101,8 @@ class WindowWrapperInfo :
         .SetMethod("setCapture", &Window::SetCapture)
         .SetMethod("show", &Window::Show)
         .SetMethod("splitHorizontally", &Window::SplitHorizontally)
-        .SetMethod("splitVertically", &Window::SplitVertically);
+        .SetMethod("splitVertically", &Window::SplitVertically)
+        .SetMethod("update", &Window::Update);
   }
 
   DISALLOW_COPY_AND_ASSIGN(WindowWrapperInfo);
@@ -400,6 +401,15 @@ void Window::SplitVertically(Window* new_below_window) {
   parent_node()->InsertAfter(new_below_window, this);
   ScriptHost::instance()->view_delegate()->SplitVertically(
     id(), new_below_window->id());
+}
+
+void Window::Update() {
+  if (state_ != State::Realized && state_ != State::Realizing) {
+    ScriptHost::instance()->ThrowError(
+        "You can't update unrealized window.");
+    return;
+  }
+  ScriptHost::instance()->view_delegate()->UpdateWindow(window_id());
 }
 
 }  // namespace dom

@@ -86,6 +86,7 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       dom::WindowId new_right_window) override;
   private: virtual void SplitVertically(dom::WindowId above_window,
       dom::WindowId new_below_window) override;
+  private: virtual void UpdateWindow(dom::WindowId window_id) override;
 
   DISALLOW_COPY_AND_ASSIGN(ViewDelegateImpl);
 };

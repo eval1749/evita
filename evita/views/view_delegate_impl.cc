@@ -480,4 +480,13 @@ void ViewDelegateImpl::SplitVertically(dom::WindowId above_window_id,
                           new_below_window->as<ContentWindow>());
 }
 
+void ViewDelegateImpl::UpdateWindow(dom::WindowId window_id) {
+  auto const window = FromWindowId("UpdateWindow", window_id);
+  if (!window)
+    return;
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  DCHECK(lock_scope.locked());
+  window->OnIdle(0);
+}
+
 }  // namespace views

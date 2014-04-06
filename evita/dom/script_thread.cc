@@ -354,6 +354,15 @@ void ScriptThread::ScrollTextWindow(WindowId window_id, int direction) {
       window_id, direction), view_message_loop_, waitable_event_.get());
 }
 
+void ScriptThread::UpdateWindow(WindowId window_id) {
+  DCHECK_CALLED_ON_SCRIPT_THREAD();
+  if (!view_message_loop_)
+    return;
+  RunSynchronously(base::Bind(&ViewDelegate::UpdateWindow,
+          base::Unretained(view_delegate_), window_id),
+      view_message_loop_, waitable_event_.get());
+}
+
 // domapi::ViewEventHandler
 #define DEFINE_VIEW_EVENT_HANDLER_0(name) \
   void ScriptThread::name() { \

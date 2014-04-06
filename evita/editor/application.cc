@@ -137,7 +137,7 @@ void Application::DispatchViewIdelEvent() {
   }
   message_loop_->PostNonNestableDelayedTask(FROM_HERE,
       base::Bind(&Application::DispatchViewIdelEvent, base::Unretained(this)),
-      base::TimeDelta::FromMilliseconds(100));
+      base::TimeDelta::FromMilliseconds(30));
 }
 
 // Note: We don't need to check ::GetQueueStatus (QS_INPUT), becaue |DoIdle()|

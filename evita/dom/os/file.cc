@@ -112,6 +112,12 @@ v8::Handle<v8::Promise> File::Open(const base::string16& file_name,
       file_name, opt_mode.is_supplied ? opt_mode.value : base::string16()));
 }
 
+v8::Handle<v8::Promise> File::Remove(const base::string16& file_name) {
+  return PromiseResolver::Call(base::Bind(
+      &domapi::IoDelegate::RemoveFile,
+      base::Unretained(ScriptHost::instance()->io_delegate()), file_name));
+}
+
 v8::Handle<v8::Promise> File::Stat(
     const base::string16& file_name) {
   return PromiseResolver::Call(base::Bind(

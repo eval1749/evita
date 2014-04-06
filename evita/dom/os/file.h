@@ -34,6 +34,11 @@ class File : public v8_glue::Scriptable<File, AbstractFile> {
   public: static v8::Handle<v8::Promise> Open(
       const base::string16& file_name,
       v8_glue::Optional<base::string16> opt_mode);
+
+  // Remove a existing |file_name|
+  public: static v8::Handle<v8::Promise> Remove(
+      const base::string16& file_name);
+
   public: static v8::Handle<v8::Promise> Stat(
       const base::string16& filename);
 

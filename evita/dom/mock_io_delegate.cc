@@ -24,14 +24,14 @@ void MockIoDelegate::SetFileIoDeferredData(int num_transferred,
   num_transferred_ = num_transferred;
 }
 
+void MockIoDelegate::SetIoResult(int error_code) {
+  error_code_ = error_code;
+}
+
 void MockIoDelegate::SetMakeTempFileName(const base::string16 file_name,
                                          int error_code) {
   error_code_ = error_code;
   temp_file_name_ = file_name;
-}
-
-void MockIoDelegate::SetMoveFile(int error_code) {
-  error_code_ = error_code;
 }
 
 void MockIoDelegate::SetOpenFileDeferredData(domapi::IoContextId context_id,
@@ -96,6 +96,14 @@ void MockIoDelegate::ReadFile(domapi::IoContextId, void*, size_t,
     deferred.reject.Run(domapi::IoError(error_code_));
   else
     deferred.resolve.Run(num_transferred_);
+}
+
+void MockIoDelegate::RemoveFile(const base::string16&,
+                                const domapi::IoResolver& resolver) {
+  if (error_code_)
+    resolver.reject.Run(domapi::IoError(error_code_));
+  else
+    resolver.resolve.Run(true);
 }
 
 void MockIoDelegate::WriteFile(domapi::IoContextId, void*, size_t,

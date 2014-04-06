@@ -39,6 +39,9 @@ class IoDelegateImpl : public domapi::IoDelegate {
       const domapi::QueryFileStatusDeferred& deferred) override;
   private: virtual void ReadFile(domapi::IoContextId context_id, void* buffer,
       size_t num_read, const domapi::FileIoDeferred& deferred) override;
+  private: virtual void RemoveFile(
+      const base::string16& file_name,
+      const domapi::IoResolver& resolver) override;
   private: virtual void WriteFile(domapi::IoContextId context_id, void* buffer,
       size_t num_write, const domapi::FileIoDeferred& deferred) override;
 

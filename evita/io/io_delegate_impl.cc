@@ -101,8 +101,8 @@ void IoDelegateImpl::MoveFile(const base::string16& src_path,
   auto const flags = options.no_overwrite ?
       MOVEFILE_WRITE_THROUGH :
       MOVEFILE_WRITE_THROUGH | MOVEFILE_REPLACE_EXISTING;
-  auto const succeeded = ::MoveFileEx(src_path.c_str(), dst_path.c_str(),
-                                      static_cast<DWORD>(flags));
+  auto const succeeded = ::MoveFileExW(src_path.c_str(), dst_path.c_str(),
+                                       static_cast<DWORD>(flags));
   if (!succeeded) {
     auto const last_error = ::GetLastError();
     DVLOG(0) << "MoveFileEx error=" << last_error;
@@ -170,6 +170,20 @@ void IoDelegateImpl::ReadFile(domapi::IoContextId context_id, void* buffer,
   }
   it->second->Read(buffer, num_read, deferred);
 }
+
+void IoDelegateImpl::RemoveFile(const base::string16& file_name,
+                                const domapi::IoResolver& resolver) {
+  auto const succeeded = ::DeleteFileW(file_name.c_str());
+  if (!succeeded) {
+    auto const last_error = ::GetLastError();
+    DVLOG(0) << "DeleteFileEx error=" << last_error;
+    Reject(resolver.reject, last_error);
+    return;
+  }
+  Application::instance()->view_event_handler()->RunCallback(
+      base::Bind(resolver.resolve, true));
+}
+
 
 void IoDelegateImpl::WriteFile(domapi::IoContextId context_id, void* buffer,
                                size_t num_write,

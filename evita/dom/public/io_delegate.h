@@ -40,6 +40,11 @@ class IoDelegate {
   public: virtual void ReadFile(IoContextId context_id, void* buffer,
                                 size_t num_read,
                                 const FileIoDeferred& deferred) = 0;
+  // Remove file
+  public: virtual void RemoveFile(
+      const base::string16& file_name,
+      const IoResolver& resolver) = 0;
+
   public: virtual void WriteFile(IoContextId context_id, void* buffer,
                                  size_t num_write,
                                  const FileIoDeferred& deferred) = 0;

@@ -25,9 +25,9 @@ class MockIoDelegate : public domapi::IoDelegate {
   public: virtual ~MockIoDelegate();
 
   public: void SetFileIoDeferredData(int num_transferred, int error_code);
+  public: void SetIoResult(int error_code);
   public: void SetMakeTempFileName(const base::string16 file_name,
                                    int error_code);
-  public: void SetMoveFile(int error_code);
   public: void SetFileStatus(const domapi::FileStatus& data, int error_code);
   public: void SetOpenFileDeferredData(domapi::IoContextId context_id,
                                        int error_code);
@@ -52,6 +52,8 @@ class MockIoDelegate : public domapi::IoDelegate {
   public: virtual void ReadFile(domapi::IoContextId context_id, void* buffer,
                         size_t num_read,
                         const domapi::FileIoDeferred& deferred) override;
+  public: virtual void RemoveFile(const base::string16& file_name,
+                                  const domapi::IoResolver& resolver) override;
   public: virtual void WriteFile(domapi::IoContextId context_id, void* buffer,
                          size_t num_write,
                          const domapi::FileIoDeferred& deferred) override;

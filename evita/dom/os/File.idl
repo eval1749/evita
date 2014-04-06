@@ -10,5 +10,6 @@ interface File : AbstractFile {
                       MoveFileOptions options);
   static Promise open(DOMString file_name);
   static Promise open(DOMString file_name, DOMString mode);
+  static Promise remove(DOMString file_name);
   static Promise stat(DOMString file_name);
 };

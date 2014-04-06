@@ -43,7 +43,7 @@ TEST_F(OsFileTest, OsFile_makeTempFileName_succeeded) {
 }
 
 TEST_F(OsFileTest, OsFile_move_failed) {
-  mock_io_delegate()->SetMoveFile(123);
+  mock_io_delegate()->SetIoResult(123);
   EXPECT_SCRIPT_VALID(
       "var result;"
       "function catcher(x) { result = x; }"
@@ -54,7 +54,7 @@ TEST_F(OsFileTest, OsFile_move_failed) {
 }
 
 TEST_F(OsFileTest, OsFile_move_succeeded) {
-  mock_io_delegate()->SetMoveFile(0);
+  mock_io_delegate()->SetIoResult(0);
   EXPECT_SCRIPT_VALID(
     "var result;"
     "function catcher(x) { result = x; }"
@@ -150,6 +150,29 @@ TEST_F(OsFileTest, OsFile_read_succeeded) {
     "var arrayView = new Uint8Array(arrayBuffer);"
     "file.read(arrayView).then(function(x) { transferred = x; });");
   EXPECT_SCRIPT_EQ("123", "transferred");
+}
+
+
+TEST_F(OsFileTest, OsFile_remove_failed) {
+  mock_io_delegate()->SetIoResult(123);
+  EXPECT_SCRIPT_VALID(
+      "var result;"
+      "function catcher(x) { result = x; }"
+      "var promise = Os.File.remove('foo').catch(catcher);");
+  EXPECT_SCRIPT_TRUE("promise instanceof Promise");
+  EXPECT_SCRIPT_TRUE("result instanceof Os.File.Error");
+  EXPECT_SCRIPT_EQ("123", "result.winLastError");
+}
+
+TEST_F(OsFileTest, OsFile_remove_succeeded) {
+  mock_io_delegate()->SetIoResult(0);
+  EXPECT_SCRIPT_VALID(
+    "var result;"
+    "function catcher(x) { result = x; }"
+    "var promise = Os.File.remove('foo').then(catcher);");
+  EXPECT_SCRIPT_TRUE("promise instanceof Promise");
+  EXPECT_SCRIPT_EQ("boolean", "typeof(result)");
+  EXPECT_SCRIPT_EQ("true", "result");
 }
 
 TEST_F(OsFileTest, OsFile_write_failed) {

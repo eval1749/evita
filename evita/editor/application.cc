@@ -118,6 +118,7 @@ void Application::DidStartScriptHost(domapi::ScriptHostState state) {
 }
 
 void Application::DidHandleViewIdelEvent(int) {
+  view_idle_time_scope_.reset();
   view_idle_hint_ = view_idle_count_;
   view_idle_count_ = 0;
 }
@@ -128,13 +129,18 @@ void Application::DispatchViewIdelEvent() {
             ui::Widget::has_active_focus();
   #endif
   if (view_idle_count_) {
+    // DOM is still processing "view idle" vent.
     METRICS_COUNT("view_idle_count");
     ++view_idle_count_;
   } if (ui::Widget::has_active_focus()) {
+    // We are active. Notify DOM to do something.
     METRICS_COUNT("view_idle_event");
-    view_event_handler()->DispatchViewIdleEvent(view_idle_hint_);
     view_idle_count_ = 1;
+    view_idle_time_scope_.reset(new ::metrics::TimeScope(
+        "Application::DispatchViewIdelEvent"));
+    view_event_handler()->DispatchViewIdleEvent(view_idle_hint_);
   } else {
+    // We are in active.
     METRICS_COUNT("view_idle_hint");
     ++view_idle_hint_;
   }

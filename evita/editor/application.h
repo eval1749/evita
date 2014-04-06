@@ -38,6 +38,10 @@ namespace editor {
 class DomLock;
 }
 
+namespace metrics {
+class TimeScope;
+}
+
 namespace views {
 class ViewDelegateImpl;
 }
@@ -48,6 +52,7 @@ class Application : public common::Singleton<Application> {
   private: std::unique_ptr<IoManager> io_manager_;
   private: bool is_quit_;
   private: std::unique_ptr<base::MessageLoop> message_loop_;
+  private: std::unique_ptr<metrics::TimeScope> view_idle_time_scope_;
   private: int view_idle_count_;
   private: int view_idle_hint_;
   private: std::unique_ptr<views::ViewDelegateImpl> view_delegate_impl_;

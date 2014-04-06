@@ -94,3 +94,8 @@ TreatReturnedNullStringAs=Null|Undefined
 TreatUndefinedAs=NullString
 URL
 Unforgeable
+
+# Evita extended attributes
+CppNamespace=*
+CppBaseClass=*
+JsNamespace=*

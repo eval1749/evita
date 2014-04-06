@@ -140,15 +140,21 @@ def generate_template_context(definitions, interface_name):
         except KeyError:
             raise Exception('%s not in IDL definitions' % interface_name)
 
+        if 'JsNamespace' in interface.extended_attributes:
+          namespace = interface.extended_attributes['JsNamespace'] + '.'
+        else:
+          namespace = '';
+
         attribute_context_list = [attribute_context(attribute)
                                   for attribute in interface.attributes]
         constant_context_list = [constant_context(constant)
                                  for constant in interface.constants]
 
-        method_context_list = dict(
-            (name, function_context(list(functions)))
+        method_context_list = [
+            function_context(list(functions))
             for name, functions in
-            groupby(interface.operations, lambda operation: operation.name)).values()
+            groupby(interface.operations, lambda operation: operation.name)
+        ]
 
         return {
           'attributes': sort_context_list(attribute_context_list),
@@ -157,8 +163,9 @@ def generate_template_context(definitions, interface_name):
           'constructors': constructor_context_list(interface),
           'enumerations': enumeration_context_list,
           'interfaces': interface_context_list(interface),
-          'interface_name': interface_name,
+          'interface_name': namespace + interface_name,
           'methods': sort_context_list(method_context_list),
+          'namespace': namespace,
         }
 
 

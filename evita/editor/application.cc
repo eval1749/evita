@@ -128,11 +128,14 @@ void Application::DispatchViewIdelEvent() {
             ui::Widget::has_active_focus();
   #endif
   if (view_idle_count_) {
+    METRICS_COUNT("view_idle_count");
     ++view_idle_count_;
   } if (ui::Widget::has_active_focus()) {
+    METRICS_COUNT("view_idle_event");
     view_event_handler()->DispatchViewIdleEvent(view_idle_hint_);
     view_idle_count_ = 1;
   } else {
+    METRICS_COUNT("view_idle_hint");
     ++view_idle_hint_;
   }
   message_loop_->PostNonNestableDelayedTask(FROM_HERE,

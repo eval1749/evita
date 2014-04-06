@@ -37,6 +37,11 @@ IDL_TO_JS_TYPE_MAP = {
     'unsigned short': 'number',
 }
 
+NAMESPACE_MAP = {
+    'AbstractFile': 'Os',
+    'File': 'Os',
+}
+
 
 NON_NULL_JS_TYPE_SET = frozenset([
     'boolean',
@@ -91,8 +96,10 @@ def constant_context(constant):
 def constructor_context_list(interface):
     if not interface.constructors  and not interface.custom_constructors:
         return []
-    contents = function_context(interface.constructors + interface.custom_constructors)
-    contents['parent_name'] = interface.parent
+    contents = function_context(interface.constructors +
+                                interface.custom_constructors)
+    print 'constructors_context_list', 'parent', interface.parent
+    contents['parent_name'] = parent_name(interface.parent)
     return [contents]
 
 
@@ -109,8 +116,9 @@ def enumeration_context(enumeration):
 def function_context(functions):
     parameters_list = [function.arguments for function in functions]
     max_arity = max(map(len, parameters_list))
-    normalized_parameters_list = [parameters + [None] * (max_arity - len(parameters))
-                                  for parameters in parameters_list]
+    normalized_parameters_list = [
+        parameters + [None] * (max_arity - len(parameters))
+        for parameters in parameters_list]
     parameters = [overloaded_parameter(overloaded_parameters)
                   for overloaded_parameters
                   in zip(*normalized_parameters_list)]
@@ -184,7 +192,8 @@ def initialize_jinja_env(cache_dir):
 def interface_context_list(interface):
     if interface.constructors or interface.custom_constructors:
         return []
-    return [{'name': interface.name, 'parent_name': interface.parent}]
+    return [{'name': interface.name,
+             'parent_name': parent_name(interface.parent)}]
 
 
 def overloaded_parameter(overloaded_parameters):
@@ -217,6 +226,11 @@ def parameter_name(name, is_optional):
 def parameter_type_string(parameter, is_optional):
     string = type_string(parameter.idl_type)
     return string + '=' if is_optional else string
+
+def parent_name(name):
+    if name in NAMESPACE_MAP:
+        return NAMESPACE_MAP[name] + '.' + name
+    return name
 
 
 def sort_context_list(context_list):

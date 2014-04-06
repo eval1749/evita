@@ -16,6 +16,12 @@ class IoDelegate {
 
   public: virtual void CloseFile(IoContextId context_id,
                                  const FileIoDeferred& deferred) = 0;
+
+  // Make temporary file and returns its name.
+  public: virtual void MakeTempFileName(
+      const base::string16& dir_name, const base::string16& prefix,
+      const domapi::MakeTempFileNameResolver& resolver) = 0;
+
   public: virtual void OpenFile(const base::string16& filename,
                                 const base::string16& mode,
                                 const OpenFileDeferred& deferred) = 0;

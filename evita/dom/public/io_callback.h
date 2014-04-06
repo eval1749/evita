@@ -25,6 +25,7 @@ struct FileStatus {
 };
 
 typedef Deferred<int, IoError> FileIoDeferred;
+typedef Deferred<base::string16, IoError> MakeTempFileNameResolver;
 typedef Deferred<FileId, IoError> OpenFileDeferred;
 typedef Deferred<ProcessId, IoError> OpenProcessDeferred;
 typedef Deferred<FileStatus, IoError> QueryFileStatusDeferred;

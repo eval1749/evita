@@ -16,6 +16,9 @@ class File : public v8_glue::Scriptable<File, AbstractFile> {
   public: File(domapi::IoContextId context_id);
   public: virtual ~File();
 
+  public: static v8::Handle<v8::Promise> MakeTempFileName(
+      const base::string16& dir_name, const base::string16& prefix);
+
   DISALLOW_COPY_AND_ASSIGN(File);
 };
 

@@ -75,6 +75,25 @@ void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
   context_map_.erase(it);
 }
 
+void IoDelegateImpl::MakeTempFileName(
+      const base::string16& dir_name, const base::string16& prefix,
+      const domapi::MakeTempFileNameResolver& resolver) {
+  base::string16 file_name(MAX_PATH, 0);
+  auto const unique_id = ::GetTempFileNameW(dir_name.c_str(), prefix.c_str(),
+                                            0, &file_name[0]);
+  if (!unique_id) {
+    auto const last_error = ::GetLastError();
+    DVLOG(0) << "GetTempFileNameW error=" << last_error;
+    Reject(resolver.reject, last_error);
+    return;
+  }
+  auto const nul_pos = file_name.find(static_cast<base::char16>(0));
+  if (nul_pos != base::string16::npos)
+    file_name.resize(nul_pos);
+  Application::instance()->view_event_handler()->RunCallback(
+      base::Bind(resolver.resolve, file_name));
+}
+
 void IoDelegateImpl::OpenFile(const base::string16& file_name,
                               const base::string16& mode,
                               const domapi::OpenFileDeferred& deferred) {

@@ -183,6 +183,9 @@ void ScriptThread::Start(base::MessageLoop* view_message_loop,
 
 DEFINE_IO_DELEGATE_2(CloseFile, domapi::IoContextId,
                      const domapi::FileIoDeferred&)
+DEFINE_IO_DELEGATE_3(MakeTempFileName, const base::string16&,
+                     const base::string16&,
+                     const domapi::MakeTempFileNameResolver&)
 DEFINE_IO_DELEGATE_3(OpenFile, const base::string16&,
                      const base::string16&,
                      const domapi::OpenFileDeferred&)

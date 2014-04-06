@@ -87,6 +87,7 @@ class FileClass :
     auto const templ = v8_glue::CreateConstructorTemplate(isolate,
         &FileClass::NewFile);
   return v8_glue::FunctionTemplateBuilder(isolate, templ)
+      .SetMethod("makeTempFileName", &File::MakeTempFileName)
       .SetMethod("open", &FileClass::OpenFile)
       .SetMethod("stat", &FileClass::QueryFileStatus)
       .Build();
@@ -124,6 +125,14 @@ File::File(domapi::IoContextId context_id)
 }
 
 File::~File() {
+}
+
+v8::Handle<v8::Promise> File::MakeTempFileName(const base::string16& dir_name,
+                                               const base::string16& prefix) {
+  return PromiseResolver::Call(base::Bind(
+      &domapi::IoDelegate::MakeTempFileName,
+      base::Unretained(ScriptHost::instance()->io_delegate()),
+      dir_name, prefix));
 }
 
 }  // namespace os

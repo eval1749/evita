@@ -31,7 +31,7 @@ struct CreateFileParams {
       return;
     }
     access = GENERIC_WRITE;
-    creation = CREATE_ALWAYS | TRUNCATE_EXISTING;
+    creation = CREATE_ALWAYS;
   }
 };
 

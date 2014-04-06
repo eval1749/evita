@@ -19,6 +19,29 @@ class OsFileTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(OsFileTest);
 };
 
+TEST_F(OsFileTest, OsFile_makeTempFileName_failed) {
+  mock_io_delegate()->SetMakeTempFileName(L"", 123);
+  EXPECT_SCRIPT_VALID(
+      "var result;"
+      "function catcher(x) { result = x; }"
+      "var promise = Os.File.makeTempFileName('foo', 'bar').catch(catcher);");
+  EXPECT_SCRIPT_TRUE("promise instanceof Promise");
+  EXPECT_SCRIPT_TRUE("result instanceof Os.File.Error");
+  EXPECT_SCRIPT_EQ("123", "result.winLastError");
+}
+
+TEST_F(OsFileTest, OsFile_makeTempFileName_succeeded) {
+  mock_io_delegate()->SetMakeTempFileName(L"xyz", 0);
+  EXPECT_SCRIPT_VALID(
+    "var result;"
+    "function catcher(x) { result = x; }"
+    "var promise = Os.File.makeTempFileName('foo', 'bar').then(catcher);");
+  EXPECT_SCRIPT_TRUE("promise instanceof Promise");
+  EXPECT_SCRIPT_EQ("string", "typeof(result)");
+  EXPECT_SCRIPT_EQ("foo", "FilePath.dirname(result)");
+  EXPECT_SCRIPT_EQ("barxyz", "FilePath.basename(result)");
+}
+
 TEST_F(OsFileTest, OsFile_open_failed) {
   mock_io_delegate()->SetOpenFileDeferredData(domapi::IoContextId(), 123);
   EXPECT_SCRIPT_VALID(

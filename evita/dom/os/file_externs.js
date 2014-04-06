@@ -31,6 +31,14 @@ Os.File.Info;
 
 /**
  * @expose
+ * @param {string} dir_name
+ * @param {string} prefix
+ * @return {string}
+ */
+Os.File.makeTempFileName = function(dir_name, prefix) {};
+
+/**
+ * @expose
  * @param {string} file_name
  * @param {string=} opt_mode
  * @return {!Promise.<!Os.File>}

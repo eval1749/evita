@@ -14,6 +14,7 @@
  *  - Promise
  *  - Set
  *  - String
+ *  - Symbol
  */
 
 /**
@@ -464,3 +465,6 @@ String.prototype.repeat = function(count) {};
  * @return {boolean}
  */
 String.prototype.startsWith = function(searchString, opt_position) {};
+
+/** @constructor */
+function Symbol() {}

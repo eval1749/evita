@@ -38,8 +38,12 @@ Object.defineProperties(console, {
      */
     value: function(var_args) {
       function stringify(value) {
-        if (typeof(value) == 'string')
-          return value;
+        switch (value) {
+          case 'string':
+            return value;
+          case 'symbol':
+            return value.toString();
+        }
 
         if (JsConsole.stringify)
           return JsConsole.stringify(value);

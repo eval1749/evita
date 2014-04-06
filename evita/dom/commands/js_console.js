@@ -85,8 +85,11 @@ JsConsole.Visitor.prototype.visitFunction = function(fun, level) {};
   /** @param {*} key @param {number} index */
 JsConsole.Visitor.prototype.visitKey = function(key, index) {};
 
-  /** @param {string} string */
+/** @param {string} string */
 JsConsole.Visitor.prototype.visitString = function(string) {};
+
+/** @param {!Symbol} symbol */
+JsConsole.Visitor.prototype.visitSymbol = function(symbol) {};
 
 /** @param {!TypedArray} array */
 JsConsole.Visitor.prototype.visitTypedArray = function(array) {};
@@ -124,6 +127,7 @@ JsConsole.Labeler = function() {
   this.visitFunction = doNothing;
   this.visitKey = doNothing;
   this.visitString = doNothing;
+  this.visitSymbol = doNothing;
   this.visitTypedArray = doNothing;
   this.visitVisited = function(value) {
     if (label_map.has(value))
@@ -226,6 +230,8 @@ JsConsole.stringify = function(value, MAX_LEVEL, MAX_LENGTH) {
         return visitor.visitAtom(value.toString());
       case 'string':
         return visitor.visitString(value);
+      case 'symbol':
+        return visitor.visitSymbol(/** @type{!Symbol} */(value));
     }
 
     var object = /** @type{!Object} */(value);
@@ -363,6 +369,9 @@ JsConsole.stringify = function(value, MAX_LEVEL, MAX_LENGTH) {
         }
       }
       this.emit('"');
+    };
+    this.visitSymbol = function(sym) {
+      this.emit(sym.toString());
     };
     this.visitTypedArray = function(array) {
       this.emit('#{', array.constructor.name, ' ', array.length, '}');

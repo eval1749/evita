@@ -132,10 +132,14 @@
    *    * |readonly|
    */
   function load(document, file_name) {
-    var opened_file;
+    var encoding = '';
+    var opened_file = null;
+    var newline = 0;
     // Remember |readonly| property for restoring on error.
     var readonly = document.readonly;
     document.readonly = true;
+    var range = new Range(document);
+    range.end = document.length;
     return Os.File.open(file_name).then(function(file) {
       opened_file = file;
       var detector = new EncodingDetector();
@@ -146,6 +150,19 @@
           if (num_bytes) {
             if (!detector.detect(data.subarray(0, num_bytes)))
               return Promise.reject(new Error('Bad encoding'));
+
+            // Display loading result
+            // Note: We may display text in wrong encoding.
+            document.readonly = false;
+            var decoder = detector.decoders[0];
+            var string = decoder.strings[decoder.strings.length - 1];
+            string = string.replace(/\r\n/g, '\n');
+            string = string.replace(/\r/g, '\n');
+            range.text = string;
+            range.collapseTo(range.end);
+            document.readonly = true;
+
+            // Read rest of contents.
             return readLoop();
           }
 
@@ -161,15 +178,22 @@
             var range = new Range(document);
             range.end = document.length;
             var newline = 0;
+            var has_cr = false;
             decoder.strings.forEach(function(string) {
               if (!newline) {
                 if (string.indexOf('\r\n') >= 0)
-                  newline = 2;
+                  newline = 3;
                 else if (string.indexOf('\n') >= 0)
                   newline = 1;
+                if (string.indexOf('\r') >= 0)
+                  has_cr = true;
               }
               document.readonly = false;
-              range.text = string.replace(/\r\n/g, '\n');
+              if (newline == 3)
+                string = string.replace(/\r\n/g, '\n');
+              if (has_cr)
+                string = string.replace(/\r/g, '\n');
+              range.text = string;
               document.readonly = true;
               range.collapseTo(range.end);
             });

@@ -49,7 +49,7 @@ exit /b
   %externs_dir%\file_path_externs.js ^
   %externs_dir%\js_console_externs.js ^
   %externs_dir%\key_names_externs.js ^
-  %externs_dir%\os\file_externs.js ^
+  %externs_dir%\os\os_externs.js ^
   %externs_dir%\os\process_externs.js ^
   %externs_dir%\timer_externs.js ^
   %externs_dir%\text\document_externs.js ^

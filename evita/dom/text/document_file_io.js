@@ -125,22 +125,23 @@
    * Load contents of |file_name| into |document|. The |document| is readonly
    * during reading file contents.
    *
-   * |load| function updates following properties when loading suceeded:
+   * |load| function updates following properties when loading succeeded:
    *    * |encoding|
    *    * |lastWriteTime|
    *    * |newline|
    *    * |readonly|
    */
   function load(document, file_name) {
-    var encoding = '';
-    var opened_file = null;
-    var newline = 0;
+    /** @type {string} */ var encoding = '';
+    /** @type {?Os.File} */ var opened_file = null;
+    /** @type {number} */ var newline = 0;
     // Remember |readonly| property for restoring on error.
-    var readonly = document.readonly;
+    /** @type {boolean} */ var readonly = document.readonly;
     document.readonly = true;
     var range = new Range(document);
     range.end = document.length;
-    return Os.File.open(file_name).then(function(file) {
+    return Os.File.open(file_name).then(function(x) {
+      var file = /** @type {!Os.File} */(x);
       opened_file = file;
       var detector = new EncodingDetector();
       function readLoop() {
@@ -168,7 +169,8 @@
 
           // Reading file contents is finished. Record file last write
           // time.
-          return Os.File.stat(file_name).then(function(file_info) {
+          return Os.File.stat(file_name).then(function(x) {
+            var file_info = /** @type {!Os.File.Info} */(x);
             file.close();
             var decoder = detector.decoders[0];
             if (!decoder)

@@ -8,6 +8,7 @@
       'clipboard/DataTransfer.idl',
       'clipboard/DataTransferItem.idl',
       'clipboard/DataTransferItemList.idl',
+      'os/File.idl',
     ], # idl_files
 
     'generated_glue_files': [
@@ -20,6 +21,7 @@
       '<(js_externs_dir)/DataTransfer_externs.js',
       '<(js_externs_dir)/DataTransferItem_externs.js',
       '<(js_externs_dir)/DataTransferItemList_externs.js',
+      '<(js_externs_dir)/File_externs.js',
     ], # generated_js_externs_files
 
     'static_js_externs_files': [
@@ -63,7 +65,7 @@
       'key_names_externs.js',
       'text/modes/modes_externs.js',
       'text/mutation_observer_externs.js',
-      'os/file_externs.js',
+      'os/os_externs.js',
       'os/process_externs.js',
       'windows/point_externs.js',
       'text/range_externs.js',

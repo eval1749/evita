@@ -96,6 +96,4 @@ URL
 Unforgeable
 
 # Evita extended attributes
-CppNamespace=*
-CppBaseClass=*
 JsNamespace=*

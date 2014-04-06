@@ -165,16 +165,33 @@ def generate_template_context(definitions, interface_name, interfaces_info):
                            for name in referenced_interface_names
                            if name in interfaces_info])
 
+    if interface.parent:
+        base_class_include = interfaces_info[interface.name]['include_path']
+    else:
+        base_class_include = None
+
+    need_class_template = \
+        any([attribute.is_static for attribute in interface.attributes]) or \
+        any([operation.is_static for operation in interface.operations])
+
+    need_instance_template = \
+        any([not attribute.is_static for attribute in interface.attributes]) or \
+        any([not operation.is_static for operation in interface.operations])
+
     return {
       'attributes': sort_context_list(attribute_context_list),
       'callbacks': sort_context_list(callback_context_list),
       'class_name': interface_name + 'Class',
+      'base_class_include': base_class_include,
       'constants': sort_context_list(constant_context_list),
       'constructors': constructor_context_list(interface),
       'enumerations': enumeration_context_list,
+      'need_class_template': need_class_template,
+      'need_instance_template': need_instance_template,
       'includes': include_list,
       'interfaces': interface_context_list(interface),
       'interface_name': interface_name,
+      'interface_parent': interface.parent,
       'methods': sort_context_list(method_context_list),
     }
 

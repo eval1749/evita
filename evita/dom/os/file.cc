@@ -22,7 +22,7 @@ template<>
 struct Converter<domapi::FileId> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
       domapi::FileId context_id) {
-    return gin::ConvertToV8(isolate, new dom::os::File(context_id));
+    return gin::ConvertToV8(isolate, new dom::File(context_id));
   }
 };
 
@@ -53,7 +53,6 @@ struct Converter<domapi::FileStatus> {
 }  // namespace gin
 
 namespace dom {
-namespace os {
 
 namespace {
 
@@ -135,5 +134,4 @@ v8::Handle<v8::Promise> File::MakeTempFileName(const base::string16& dir_name,
       dir_name, prefix));
 }
 
-}  // namespace os
 }  // namespace dom

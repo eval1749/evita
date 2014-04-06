@@ -14,7 +14,6 @@ class ArrayBufferView;
 }
 
 namespace dom {
-namespace os {
 
 class AbstractFile : public v8_glue::Scriptable<AbstractFile> {
   DECLARE_SCRIPTABLE_OBJECT(AbstractFile);
@@ -33,7 +32,6 @@ class AbstractFile : public v8_glue::Scriptable<AbstractFile> {
   DISALLOW_COPY_AND_ASSIGN(AbstractFile);
 };
 
-}  // namespace os
 }  // namespace dom
 
 namespace gin {

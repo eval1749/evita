@@ -22,14 +22,13 @@ template<>
 struct Converter<domapi::ProcessId> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
       domapi::ProcessId context_id) {
-    return gin::ConvertToV8(isolate, new dom::os::Process(context_id));
+    return gin::ConvertToV8(isolate, new dom::Process(context_id));
   }
 };
 }  // namespace gin
 
 
 namespace dom {
-namespace os {
 
 namespace {
 
@@ -90,5 +89,4 @@ Process::Process(domapi::IoContextId context_id)
 Process::~Process() {
 }
 
-}  // namespace os
 }  // namespace dom

@@ -33,7 +33,6 @@ v8::Handle<v8::Value> Converter<domapi::IoError>::ToV8(
 }  // namespace gin
 
 namespace dom {
-namespace os {
 
 namespace {
 
@@ -112,5 +111,4 @@ v8::Handle<v8::Promise> AbstractFile::Write(
       context_id_, array_buffer_view.bytes(), array_buffer_view.num_bytes()));
 }
 
-}  // namespace os
 }  // namespace dom

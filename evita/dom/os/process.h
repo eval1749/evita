@@ -8,7 +8,6 @@
 #include "evita/dom/os/abstract_file.h"
 
 namespace dom {
-namespace os {
 
 class Process : public v8_glue::Scriptable<Process, AbstractFile> {
   DECLARE_SCRIPTABLE_OBJECT(Process);
@@ -19,7 +18,6 @@ class Process : public v8_glue::Scriptable<Process, AbstractFile> {
   DISALLOW_COPY_AND_ASSIGN(Process);
 };
 
-}  // namespace os
 }  // namespace dom
 
 #endif //!defined(INCLUDE_evita_dom_os_process_h)

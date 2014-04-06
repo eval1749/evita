@@ -164,9 +164,6 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     // Os
     auto const os_templ = v8::ObjectTemplate::New(isolate);
     global_templ->Set(gin::StringToV8(isolate, "Os"), os_templ);
-    typedef os::AbstractFile AbstractFile;
-    typedef os::File File;
-    typedef os::Process Process;
     INSTALL_IN(os_templ, AbstractFile);
     INSTALL_IN(os_templ, File);
     INSTALL_IN(os_templ, Process);

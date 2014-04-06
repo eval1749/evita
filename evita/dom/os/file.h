@@ -8,7 +8,6 @@
 #include "evita/dom/os/abstract_file.h"
 
 namespace dom {
-namespace os {
 
 class File : public v8_glue::Scriptable<File, AbstractFile> {
   DECLARE_SCRIPTABLE_OBJECT(File);
@@ -22,7 +21,6 @@ class File : public v8_glue::Scriptable<File, AbstractFile> {
   DISALLOW_COPY_AND_ASSIGN(File);
 };
 
-}  // namespace os
 }  // namespace dom
 
 #endif //!defined(INCLUDE_evita_dom_os_file_h)

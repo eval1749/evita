@@ -15,6 +15,7 @@
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/document_set.h"
 #include "evita/dom/file_path.h"
+#include "evita/dom/mock_io_delegate.h"
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
@@ -189,9 +190,7 @@ TEST_F(DocumentTest, length) {
 }
 
 TEST_F(DocumentTest, load_failed) {
-  domapi::LoadFileCallbackData data;
-  data.error_code = 123;
-  mock_view_impl()->SetLoadFileCallbackData(data);
+  mock_io_delegate()->SetOpenFileDeferredData(domapi::IoContextId(), 123);
 
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"
@@ -204,13 +203,17 @@ TEST_F(DocumentTest, load_failed) {
 }
 
 TEST_F(DocumentTest, load_succeeded) {
-  domapi::LoadFileCallbackData data;
-  data.code_page = 123;
-  data.error_code = 0;
-  data.last_write_time = base::Time::FromJsTime(123456.0);
-  data.newline_mode = NewlineMode_Lf;
-  data.readonly = true;
-  mock_view_impl()->SetLoadFileCallbackData(data);
+  EXPECT_CALL(*mock_io_delegate(), CloseFile(_, _));
+
+  mock_io_delegate()->SetOpenFileDeferredData(domapi::IoContextId::New(), 0);
+
+  domapi::FileStatus file_status;
+  file_status.file_size = 123456;
+  file_status.is_directory = false;
+  file_status.is_symlink = false;
+  file_status.last_write_time = base::Time::FromJsTime(123456.0);
+  file_status.readonly = true;
+  mock_io_delegate()->SetFileStatus(file_status, 0);
 
   EXPECT_SCRIPT_VALID(
     "console.log = log;"
@@ -226,7 +229,7 @@ TEST_F(DocumentTest, load_succeeded) {
   EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
   EXPECT_SCRIPT_EQ("C++", "doc.mode.name");
   EXPECT_SCRIPT_EQ("0", "doc.obsolete");
-  EXPECT_SCRIPT_TRUE("doc.readonly");
+  EXPECT_SCRIPT_TRUE("doc.readonly") << "set readonly from file attribute";
 }
 
 TEST_F(DocumentTest, mode) {

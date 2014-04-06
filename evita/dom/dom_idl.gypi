@@ -8,6 +8,7 @@
       'clipboard/DataTransfer.idl',
       'clipboard/DataTransferItem.idl',
       'clipboard/DataTransferItemList.idl',
+      'os/AbstractFile.idl',
       'os/File.idl',
     ], # idl_files
 
@@ -15,6 +16,8 @@
       '<(glue_dir)/DataTransferClass.cc',
       '<(glue_dir)/DataTransferItemClass.cc',
       '<(glue_dir)/DataTransferItemListClass.cc',
+      '<(glue_dir)/AbstractFileClass.cc',
+      '<(glue_dir)/FileClass.cc',
     ],
 
     'generated_js_externs_files': [

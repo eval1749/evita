@@ -34,52 +34,10 @@ v8::Handle<v8::Value> Converter<domapi::IoError>::ToV8(
 
 namespace dom {
 
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-//
-// AbstractFileClass
-//
-class AbstractFileClass : public v8_glue::WrapperInfo {
-  private: typedef v8_glue::WrapperInfo BaseClass;
-
-  public: AbstractFileClass(const char* name)
-      : BaseClass(name) {
-  }
-  public: ~AbstractFileClass() = default;
-
-  private: static File* NewFile() {
-    ScriptHost::instance()->ThrowError(
-        "Cannot create an instance of File.");
-    return nullptr;
-  }
-
-  // v8_glue::WrapperInfo
-  protected: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate,
-        &AbstractFileClass::NewFile);
-  }
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetMethod("close", &AbstractFile::Close)
-        .SetMethod("read", &AbstractFile::Read)
-        .SetMethod("write", &AbstractFile::Write);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(AbstractFileClass);
-};
-
-}  // namespace
-
 //////////////////////////////////////////////////////////////////////
 //
 // File
 //
-DEFINE_SCRIPTABLE_OBJECT(AbstractFile, AbstractFileClass);
-
 AbstractFile::AbstractFile(domapi::IoContextId context_id)
     : context_id_(context_id) {
 }

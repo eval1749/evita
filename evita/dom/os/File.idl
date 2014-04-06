@@ -2,14 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-[CppNamespace=os, CppBaseClass=AbstractFile, JsNamespace=Os]
-interface File {
+[JsNamespace=Os]
+interface File : AbstractFile {
   static Promise makeTempFileName(DOMString dir_name, DOMString prefix);
   static Promise open(DOMString file_name);
   static Promise open(DOMString file_name, DOMString mode);
   static Promise stat(DOMString file_name);
-
-  void close();
-  Promise read(ArrayBufferView buffer);
-  Promise write(ArrayBufferView buffer);
 };

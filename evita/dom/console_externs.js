@@ -8,7 +8,8 @@
  *    clear: function(),
  *    document_: function(): !Document,
  *    log: function(...),
- *    show: function()
+ *    show: function(),
+ *    update: function()
  * }}
  */
 var console;

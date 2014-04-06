@@ -9,7 +9,8 @@
  *    clear: function(),
  *    document_: function(): !Document,
  *    log: function(...),
- *    show: function()
+ *    show: function(),
+ *    update: function()
  * }}
  */
 global.console = {
@@ -23,6 +24,7 @@ global.console = {
     var document = console.document_();
     var range = new Range(document, 0, document.length);
     range.text = '';
+    console.update();
   },
 
   /**
@@ -79,6 +81,7 @@ global.console = {
     document.readonly = false;
     range.insertBefore(message + '\n');
     document.readonly = readonly;
+    console.update();
   },
 
   /**
@@ -95,5 +98,11 @@ global.console = {
     var window = new TextWindow(new Range(console.document_()));
     editorWindow.appendChild(window);
     editorWindow.realize();
+  },
+
+  update: function() {
+    console.document_().listWindows().forEach(function(window) {
+      window.update();
+    });
   }
 };

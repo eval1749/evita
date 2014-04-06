@@ -23,9 +23,13 @@ class IoDelegateImpl : public domapi::IoDelegate {
   // domapi::IoDelegate
   private: virtual void CloseFile(domapi::IoContextId context_id,
         const domapi::FileIoDeferred& deferred) override;
-  public: virtual void MakeTempFileName(
+  private: virtual void MakeTempFileName(
       const base::string16& dir_name, const base::string16& prefix,
       const domapi::MakeTempFileNameResolver& resolver) override;
+  private: virtual void MoveFile(
+      const base::string16& src_path, const base::string16& dst_path,
+      const domapi::MoveFileOptions& options,
+      const domapi::IoResolver& resolver) override;
   private: virtual void OpenFile(const base::string16& filename,
       const base::string16& mode,
       const domapi::OpenFileDeferred& deferred) override;

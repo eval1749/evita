@@ -8,6 +8,8 @@
 #include "evita/dom/public/io_callback.h"
 #include "evita/dom/public/io_context_id.h"
 
+#undef MoveFile
+
 namespace domapi {
 
 class IoDelegate {
@@ -20,7 +22,13 @@ class IoDelegate {
   // Make temporary file and returns its name.
   public: virtual void MakeTempFileName(
       const base::string16& dir_name, const base::string16& prefix,
-      const domapi::MakeTempFileNameResolver& resolver) = 0;
+      const MakeTempFileNameResolver& resolver) = 0;
+
+  // Move file
+  public: virtual void MoveFile(
+      const base::string16& src_path, const base::string16& dst_path,
+      const MoveFileOptions& options,
+      const IoResolver& resolver) = 0;
 
   public: virtual void OpenFile(const base::string16& filename,
                                 const base::string16& mode,

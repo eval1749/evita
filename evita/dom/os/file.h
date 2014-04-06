@@ -11,6 +11,7 @@
 
 namespace domapi {
 struct FileStatus;
+struct MoveFileOptions;
 }
 
 namespace dom {
@@ -18,11 +19,18 @@ namespace dom {
 class File : public v8_glue::Scriptable<File, AbstractFile> {
   DECLARE_SCRIPTABLE_OBJECT(File);
 
-  public: File(domapi::IoContextId context_id);
+  public: explicit File(domapi::IoContextId context_id);
   public: virtual ~File();
 
   public: static v8::Handle<v8::Promise> MakeTempFileName(
       const base::string16& dir_name, const base::string16& prefix);
+
+  // Move |src_path| to |dst_path|
+  public: static v8::Handle<v8::Promise> Move(
+      const base::string16& src_path,
+      const base::string16& dst_path,
+      v8_glue::Optional<domapi::MoveFileOptions> opt_options);
+
   public: static v8::Handle<v8::Promise> Open(
       const base::string16& file_name,
       v8_glue::Optional<base::string16> opt_mode);
@@ -34,6 +42,8 @@ class File : public v8_glue::Scriptable<File, AbstractFile> {
 
 }  // namespace dom
 
+#include "evita/dom/public/io_callback.h"
+
 namespace gin {
 template<>
 struct Converter<domapi::FileId> {
@@ -44,7 +54,13 @@ struct Converter<domapi::FileId> {
 template<>
 struct Converter<domapi::FileStatus> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-        const domapi::FileStatus& data);
+      const domapi::FileStatus& data);
+};
+
+template<>
+struct Converter<domapi::MoveFileOptions> {
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
+      domapi::MoveFileOptions* out_options);
 };
 }  // namespace gin
 

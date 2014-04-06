@@ -66,6 +66,9 @@ Map
 Mode
 chooseModeByFileName
 
+# Os.File.move
+noOverwrite
+
 # Style
 Style
 backgroundColor

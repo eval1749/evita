@@ -24,3 +24,10 @@ Os.File.Error = function(winLastError) {};
  */
 Os.File.Info;
 
+/**
+ * @expose
+ * @typedef {{
+ *    noOverwrite: boolean
+ * }}
+ */
+var MoveFileOptions;

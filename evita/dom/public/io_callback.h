@@ -24,6 +24,13 @@ struct FileStatus {
   bool readonly;
 };
 
+struct MoveFileOptions {
+  bool no_overwrite;
+  MoveFileOptions() : no_overwrite(false) {
+  }
+};
+
+typedef Deferred<bool, IoError> IoResolver;
 typedef Deferred<int, IoError> FileIoDeferred;
 typedef Deferred<base::string16, IoError> MakeTempFileNameResolver;
 typedef Deferred<FileId, IoError> OpenFileDeferred;

@@ -94,6 +94,25 @@ void IoDelegateImpl::MakeTempFileName(
       base::Bind(resolver.resolve, file_name));
 }
 
+void IoDelegateImpl::MoveFile(const base::string16& src_path,
+                              const base::string16& dst_path,
+                              const domapi::MoveFileOptions& options,
+                              const domapi::IoResolver& resolver) {
+  auto const flags = options.no_overwrite ?
+      MOVEFILE_WRITE_THROUGH :
+      MOVEFILE_WRITE_THROUGH | MOVEFILE_REPLACE_EXISTING;
+  auto const succeeded = ::MoveFileEx(src_path.c_str(), dst_path.c_str(),
+                                      static_cast<DWORD>(flags));
+  if (!succeeded) {
+    auto const last_error = ::GetLastError();
+    DVLOG(0) << "MoveFileEx error=" << last_error;
+    Reject(resolver.reject, last_error);
+    return;
+  }
+  Application::instance()->view_event_handler()->RunCallback(
+      base::Bind(resolver.resolve, true));
+}
+
 void IoDelegateImpl::OpenFile(const base::string16& file_name,
                               const base::string16& mode,
                               const domapi::OpenFileDeferred& deferred) {

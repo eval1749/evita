@@ -4,7 +4,10 @@
 
 [JsNamespace=Os]
 interface File : AbstractFile {
-  static Promise makeTempFileName(DOMString dir_name, DOMString prefix);
+  static Promise makeTempFileName(DOMString dirName, DOMString prefix);
+  static Promise move(DOMString sourcePath, DOMString destPath);
+  static Promise move(DOMString sourcePath, DOMString destPath,
+                      MoveFileOptions options);
   static Promise open(DOMString file_name);
   static Promise open(DOMString file_name, DOMString mode);
   static Promise stat(DOMString file_name);

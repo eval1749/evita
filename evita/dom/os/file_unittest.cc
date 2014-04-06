@@ -42,6 +42,36 @@ TEST_F(OsFileTest, OsFile_makeTempFileName_succeeded) {
   EXPECT_SCRIPT_EQ("barxyz", "FilePath.basename(result)");
 }
 
+TEST_F(OsFileTest, OsFile_move_failed) {
+  mock_io_delegate()->SetMoveFile(123);
+  EXPECT_SCRIPT_VALID(
+      "var result;"
+      "function catcher(x) { result = x; }"
+      "var promise = Os.File.move('foo', 'bar').catch(catcher);");
+  EXPECT_SCRIPT_TRUE("promise instanceof Promise");
+  EXPECT_SCRIPT_TRUE("result instanceof Os.File.Error");
+  EXPECT_SCRIPT_EQ("123", "result.winLastError");
+}
+
+TEST_F(OsFileTest, OsFile_move_succeeded) {
+  mock_io_delegate()->SetMoveFile(0);
+  EXPECT_SCRIPT_VALID(
+    "var result;"
+    "function catcher(x) { result = x; }"
+    "var promise = Os.File.move('foo', 'bar').then(catcher);");
+  EXPECT_SCRIPT_TRUE("promise instanceof Promise");
+  EXPECT_SCRIPT_EQ("boolean", "typeof(result)");
+  EXPECT_SCRIPT_EQ("false", "result");
+
+  EXPECT_SCRIPT_VALID(
+    "promise = Os.File.move('foo', 'bar', {noOverwrite: true}).then(catcher);");
+  EXPECT_SCRIPT_EQ("true", "result");
+
+  EXPECT_SCRIPT_EQ("TypeError: Error processing argument 2.",
+    "promise = Os.File.move('foo', 'bar', {baz: true}).then(catcher);") <<
+    "Bad dictionary member";
+}
+
 TEST_F(OsFileTest, OsFile_open_failed) {
   mock_io_delegate()->SetOpenFileDeferredData(domapi::IoContextId(), 123);
   EXPECT_SCRIPT_VALID(

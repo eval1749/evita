@@ -30,6 +30,10 @@ void MockIoDelegate::SetMakeTempFileName(const base::string16 file_name,
   temp_file_name_ = file_name;
 }
 
+void MockIoDelegate::SetMoveFile(int error_code) {
+  error_code_ = error_code;
+}
+
 void MockIoDelegate::SetOpenFileDeferredData(domapi::IoContextId context_id,
                                              int error_code) {
   context_id_ = context_id;
@@ -50,6 +54,16 @@ void MockIoDelegate::MakeTempFileName(
     resolver.reject.Run(domapi::IoError(error_code_));
   else
     resolver.resolve.Run(dir_name + L"\\" + prefix + temp_file_name_);
+}
+
+void MockIoDelegate::MoveFile(const base::string16&,
+                              const base::string16&,
+                              const domapi::MoveFileOptions& options,
+                              const domapi::IoResolver& resolver) {
+  if (error_code_)
+    resolver.reject.Run(domapi::IoError(error_code_));
+  else
+    resolver.resolve.Run(options.no_overwrite);
 }
 
 void MockIoDelegate::OpenFile(const base::string16&,

@@ -4,12 +4,21 @@
 
 #include "evita/gfx/graphics.h"
 
+#include <d2d1_2helper.h>
+#pragma warning(push)
+#pragma warning(disable: 4061 4365 4917)
+#include <d3d11_1.h>
+#pragma warning(pop)
+
 #include <utility>
+
+#pragma comment(lib, "d3d11.lib")
 
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/text_format.h"
 
 #define DEBUG_DRAW 0
+#define USE_HWND_RENDER_TARGET 1
 
 std::ostream& operator<<(std::ostream& ostream,
                          D2D1_TEXT_ANTIALIAS_MODE mode) {
@@ -173,15 +182,25 @@ bool Graphics::EndDraw() {
     }
   } else {
       auto const hr = render_target_->EndDraw();
-      if (SUCCEEDED(hr))
+      if (SUCCEEDED(hr)) {
+        #if !USE_HWND_RENDER_TARGET
+          DXGI_PRESENT_PARAMETERS parameters = {0};
+          parameters.DirtyRectsCount = 0;
+          parameters.pDirtyRects = nullptr;
+          parameters.pScrollRect = nullptr;
+          parameters.pScrollOffset = nullptr;
+          COM_VERIFY(dxgi_swap_chain_->Present1(1, 0, &parameters));
+        #endif
         return true;
+      }
       if (hr == D2DERR_RECREATE_TARGET) {
         Debugger::Printf("Got D2DERR_RECREATE_TARGET\n", hr);
       } else {
         Debugger::Printf("ID2D1RenderTarget::EndDraw failed hr=0x%0X\n", hr);
       }
   }
-  const_cast<Graphics*>(this)->render_target_.reset();
+  dxgi_swap_chain_.reset();
+  render_target_.reset();
   const_cast<Graphics*>(this)->Reinitialize();
   return false;
 }
@@ -219,6 +238,7 @@ void Graphics::Init(HWND hwnd) {
   Reinitialize();
 }
 
+#if USE_HWND_RENDER_TARGET
 void Graphics::Reinitialize() {
   DCHECK(!render_target_);
   DCHECK(hwnd_);
@@ -246,17 +266,122 @@ void Graphics::Reinitialize() {
   render_target_->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
   FOR_EACH_OBSERVER(Observer, observers_, ShouldDiscardResources());
 }
+#else
+void Graphics::Reinitialize() {
+  DCHECK(!render_target_);
+  DCHECK(hwnd_);
+  Rect rc;
+  ::GetClientRect(hwnd_, &rc);
+  Resize(rc);
+  SizeF dpi;
+  render_target_->GetDpi(&dpi.width, &dpi.height);
+  UpdateDpi(dpi);
+  render_target_->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
+  FOR_EACH_OBSERVER(Observer, observers_, ShouldDiscardResources());
+}
+#endif
 
 void Graphics::RemoveObserver(Observer* observer) {
   observers_.RemoveObserver(observer);
 }
 
+#if USE_HWND_RENDER_TARGET
 void Graphics::Resize(const Rect& rc) const {
   SizeU size(rc.width(), rc.height());
   common::ComPtr<ID2D1HwndRenderTarget> hwnd_render_target;
   COM_VERIFY(hwnd_render_target.QueryFrom(render_target_));
   COM_VERIFY(hwnd_render_target->Resize(size));
 }
+#else
+void Graphics::Resize(const Rect& rect) const {
+  DCHECK(!rect.empty());
+  if (dxgi_swap_chain_)
+    return;
+
+  uint32_t creation_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+  D3D_FEATURE_LEVEL feature_levels[] = {
+      D3D_FEATURE_LEVEL_11_1,
+      D3D_FEATURE_LEVEL_11_0,
+      D3D_FEATURE_LEVEL_10_1,
+      D3D_FEATURE_LEVEL_10_0,
+      D3D_FEATURE_LEVEL_9_3,
+      D3D_FEATURE_LEVEL_9_2,
+      D3D_FEATURE_LEVEL_9_1,
+  };
+
+  common::ComPtr<ID3D11Device> device;
+  common::ComPtr<ID3D11DeviceContext> device_context;
+  D3D_FEATURE_LEVEL feature_level = D3D_FEATURE_LEVEL_9_1;
+  COM_VERIFY(::D3D11CreateDevice(
+      nullptr, // default adopter
+      D3D_DRIVER_TYPE_HARDWARE,
+      0,
+      creation_flags,
+      feature_levels, arraysize(feature_levels),
+      D3D11_SDK_VERSION,
+      &device,
+      &feature_level,
+      &device_context));
+
+  common::ComPtr<IDXGIDevice1> dxgi_device;
+  COM_VERIFY(dxgi_device.QueryFrom(device));
+
+  common::ComPtr<ID2D1Device> d2d_device;
+  COM_VERIFY(FactorySet::d2d1().CreateDevice(dxgi_device, &d2d_device));
+
+  common::ComPtr<ID2D1DeviceContext> d2d_device_context;
+  COM_VERIFY(d2d_device->CreateDeviceContext(
+      D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &d2d_device_context));
+
+ // Allocate a descriptor.
+  DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {0};
+  swapChainDesc.Width = 0;  // use automatic sizing
+  swapChainDesc.Height = 0;
+  swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; // this is the most common swapchain format
+  swapChainDesc.Stereo = false;
+  swapChainDesc.SampleDesc.Count = 1; // don't use multi-sampling
+  swapChainDesc.SampleDesc.Quality = 0;
+  swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  swapChainDesc.BufferCount = 2;  // use double buffering to enable flip
+  //swapChainDesc.Scaling = DXGI_SCALING_NONE; // win8 only
+  swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
+  swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL; // all apps must use this SwapEffect
+  swapChainDesc.Flags = 0;
+
+  common::ComPtr<IDXGIAdapter> dxgi_adapter;
+  dxgi_device->GetAdapter(&dxgi_adapter);
+
+  common::ComPtr<IDXGIFactory2> dxgi_factory;
+  dxgi_adapter->GetParent(IID_PPV_ARGS(&dxgi_factory));
+
+  COM_VERIFY(dxgi_factory->CreateSwapChainForHwnd(
+      device, hwnd_, &swapChainDesc, nullptr, nullptr, &dxgi_swap_chain_));
+
+  // Ensure that DXGI doesn't queue more than one frame at a time.
+  COM_VERIFY(dxgi_device->SetMaximumFrameLatency(1));
+
+  common::ComPtr<IDXGISurface> dxgi_back_buffer;
+  dxgi_swap_chain_->GetBuffer(0, IID_PPV_ARGS(&dxgi_back_buffer));
+
+  float dpiX, dpiY;
+  FactorySet::d2d1().GetDesktopDpi(&dpiX, &dpiY);
+
+  // Now we set up the Direct2D render target bitmap linked to the swap chain.
+  // Whenever we render to this bitmap, it is directly rendered to the
+  // swap chain associated with the window.
+  D2D1_BITMAP_PROPERTIES1 bitmapProperties = D2D1::BitmapProperties1(
+      D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+      D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE),
+      FactorySet::instance()->pixels_per_dip().width,
+      FactorySet::instance()->pixels_per_dip().height);
+  common::ComPtr<ID2D1Bitmap1> d2d_back_buffer;
+  COM_VERIFY(d2d_device_context->CreateBitmapFromDxgiSurface(
+      dxgi_back_buffer, &bitmapProperties, &d2d_back_buffer));
+
+  d2d_device_context->SetTarget(d2d_back_buffer);
+  render_target_.reset(d2d_device_context);
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////
 //

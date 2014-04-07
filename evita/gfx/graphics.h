@@ -8,6 +8,8 @@
 #include "base/strings/string16.h"
 #include "evita/gfx_base.h"
 
+interface IDXGISwapChain1;
+
 namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
@@ -23,10 +25,11 @@ class Graphics : public Object, public DpiHandler {
   };
 
   private: mutable int batch_nesting_level_;
+  private: mutable common::ComPtr<IDXGISwapChain1> dxgi_swap_chain_;
   private: scoped_refptr<FactorySet> factory_set_;
   private: HWND hwnd_;
   private: ObserverList<Observer> observers_;
-  private: common::ComPtr<ID2D1RenderTarget> render_target_;
+  private: mutable common::ComPtr<ID2D1RenderTarget> render_target_;
   private: mutable void* work_;
 
   public: class AxisAlignedClipScope {

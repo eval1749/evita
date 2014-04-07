@@ -10,14 +10,16 @@ namespace common {
 #if defined(_DEBUG)
 #define COM_VERIFY(expr) { \
   auto const macro_hr = (expr); \
-  if (FAILED(macro_hr)) \
-    LOG(0) << "hr=" << std::hex << macro_hr << " " <<  #expr; \
+  if (FAILED(macro_hr)) { \
+    DVLOG(ERROR) << "hr=" << std::hex << macro_hr << " " <<  #expr; \
+    NOTREACHED(); \
+  } \
 }
 #else
 #define COM_VERIFY(expr) { \
   auto const macro_hr = (expr); \
   if (FAILED(macro_hr)) \
-    LOG(0) << "hr=" << std::hex << macro_hr << " " <<  #expr; \
+    DVLOG(ERROR) << "hr=" << std::hex << macro_hr << " " << #expr; \
 }
 #endif
 

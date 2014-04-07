@@ -25,10 +25,12 @@ class Graphics : public Object, public DpiHandler {
   };
 
   private: mutable int batch_nesting_level_;
+  private: mutable Rect dirty_rect_;
   private: mutable common::ComPtr<IDXGISwapChain1> dxgi_swap_chain_;
   private: scoped_refptr<FactorySet> factory_set_;
   private: HWND hwnd_;
   private: ObserverList<Observer> observers_;
+  private: mutable Rect target_rect_;
   private: mutable common::ComPtr<ID2D1RenderTarget> render_target_;
   private: mutable void* work_;
 
@@ -64,6 +66,8 @@ class Graphics : public Object, public DpiHandler {
 
   public: Graphics& operator=(Graphics&& other);
 
+  public: void set_dirty_rect(const Rect& rect) const;
+  public: void set_dirty_rect(const RectF& rect) const;
   // |drawing()| is for debugging.
   public: bool drawing() const { return batch_nesting_level_; }
   public: const FactorySet& factory_set() const { return *factory_set_; }

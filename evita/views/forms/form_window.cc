@@ -499,6 +499,15 @@ bool FormWindow::OnIdle(int) {
 
   TransferFocusIfNeeded();
 
+  {
+    gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+    //gfx_->set_dirty_rect(rect);
+    auto const bgcolor = ui::SystemMetrics::instance()->bgcolor();
+    // TODO(yosi) We should fill background of form window excluding controls
+    gfx_->FillRectangle(gfx::Brush(*gfx_, bgcolor), rect());
+    Window::OnDraw(gfx_.get());
+  }
+
   if (title_ != model_->title()) {
     title_ = model_->title();
     ::SetWindowTextW(AssociatedHwnd(), title_.c_str());
@@ -600,6 +609,7 @@ void FormWindow::OnPaint(const gfx::Rect rect) {
   }
 
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  //gfx_->set_dirty_rect(rect);
   auto const bgcolor = ui::SystemMetrics::instance()->bgcolor();
   // TODO(yosi) We should fill background of form window excluding controls
   gfx_->FillRectangle(gfx::Brush(*gfx_, bgcolor), rect);

@@ -86,6 +86,7 @@ void Caret::Blink() {
     return;
   last_blink_time_ = now;
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  gfx_->set_dirty_rect(rect_);
   if (shown_)
     Hide();
   else
@@ -95,6 +96,7 @@ void Caret::Blink() {
 void Caret::Give() {
   DCHECK(taken_);
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  gfx_->set_dirty_rect(rect_);
   Hide();
   taken_ = false;
 }

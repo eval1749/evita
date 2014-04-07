@@ -685,6 +685,7 @@ void Frame::OnPaint(const gfx::Rect rect) {
   }
 
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  gfx_->set_dirty_rect(rect);
   OnDraw(&*gfx_);
   gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
                       rect);

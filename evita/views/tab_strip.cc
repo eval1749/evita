@@ -784,22 +784,19 @@ class TabStrip::TabStripImpl : public Element {
   // [D]
   private: void DidChangeTabSelection();
 
-  private: virtual void Draw(const gfx::Graphics& gfx) const override {
-    do {
-      gfx.BeginDraw();
-      gfx->SetTransform(D2D1::IdentityMatrix());
-      gfx->Clear(gfx::sysColor(COLOR_3DFACE,
-                               m_compositionEnabled ? 0.0f : 1.0f));
+  public: void Draw(const gfx::Graphics& gfx) const override {
+    gfx->SetTransform(D2D1::IdentityMatrix());
+    gfx->Clear(gfx::sysColor(COLOR_3DFACE,
+                             m_compositionEnabled ? 0.0f : 1.0f));
 
-      foreach (Elements::Enum, oEnum, &m_oElements) {
-        auto const element = oEnum.Get();
-        if (element->IsShow())
-          element->Draw(gfx);
-      }
+    foreach (Elements::Enum, oEnum, &m_oElements) {
+      auto const element = oEnum.Get();
+      if (element->IsShow())
+        element->Draw(gfx);
+    }
 
-      if (m_pInsertBefore)
-          drawInsertMarker(m_gfx, m_pInsertBefore->GetRect());
-    } while (!const_cast<gfx::Graphics&>(gfx).EndDraw());
+    if (m_pInsertBefore)
+        drawInsertMarker(m_gfx, m_pInsertBefore->GetRect());
   }
 
   private: static void drawInsertMarker(const gfx::Graphics& gfx, RECT* prc) {
@@ -1556,7 +1553,9 @@ void TabStrip::OnMouseReleased(const ui::MouseEvent& event) {
     impl_->onLButtonUp(event.location());
 }
 
-void TabStrip::OnPaint(const Rect) {
+void TabStrip::OnPaint(const Rect rect) {
+  gfx::Graphics::DrawingScope drawing_scope(impl_->m_gfx);
+  impl_->m_gfx.set_dirty_rect(rect);
   impl_->Draw(impl_->m_gfx);
 }
 

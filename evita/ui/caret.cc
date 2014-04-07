@@ -45,6 +45,7 @@ void Caret::BackingStore::Restore(const gfx::Graphics* gfx) {
 
 void Caret::BackingStore::Save(const gfx::Graphics* gfx,
                                const gfx::RectF& rect) {
+  DCHECK(gfx);
   DCHECK(!rect.empty());
   rect_ = gfx::RectF(::floorf(rect.left), ::floorf(rect.top),
                      ::ceilf(rect.right), ::ceilf(rect.bottom));
@@ -55,7 +56,17 @@ void Caret::BackingStore::Save(const gfx::Graphics* gfx,
   auto bitmap = std::make_unique<gfx::Bitmap>(*gfx, screen_rect.size());
   if (!bitmap || !*bitmap)
     return;
+#if 1
   COM_VERIFY((*bitmap)->CopyFromRenderTarget(nullptr, *gfx, &screen_rect));
+#else
+  common::ComPtr<ID2D1DeviceContext> context;
+  COM_VERIFY(context.QueryFrom(*gfx));
+  common::ComPtr<ID2D1Image> image;
+  context->GetTarget(&image);
+  common::ComPtr<ID2D1Bitmap> src_bitmap;
+  COM_VERIFY(src_bitmap.QueryFrom(image));
+  COM_VERIFY((*bitmap)->CopyFromBitmap(nullptr, src_bitmap, &screen_rect));
+#endif
   bitmap_ = std::move(bitmap);
 }
 
@@ -77,6 +88,7 @@ void Caret::Blink(const gfx::Graphics* gfx) {
   if (stop_blinking_) {
     if (!shown_) {
       gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+      gfx_->set_dirty_rect(rect_);
       Hide(gfx_);
     }
     backing_store_.reset();
@@ -88,6 +100,7 @@ void Caret::Blink(const gfx::Graphics* gfx) {
     return;
   last_blink_time_ = now;
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  gfx_->set_dirty_rect(rect_);
   if (shown_)
     Hide(gfx_);
   else
@@ -97,6 +110,7 @@ void Caret::Blink(const gfx::Graphics* gfx) {
 void Caret::Give(const gfx::Graphics* gfx) {
   DCHECK_EQ(gfx_, gfx);
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  gfx_->set_dirty_rect(rect_);
   Hide(gfx);
   const_cast<gfx::Graphics*>(gfx_)->RemoveObserver(this);
   gfx_ = nullptr;

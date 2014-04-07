@@ -762,7 +762,8 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       #endif
       if (wParam != SIZE_MAXHIDE && wParam != SIZE_MINIMIZED) {
         ::GetClientRect(*native_window_.get(), &rect_);
-        DidResize();
+        if (!rect_.empty())
+          DidResize();
       }
       return 0;
 

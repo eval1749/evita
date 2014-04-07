@@ -353,19 +353,23 @@ TextFieldControl::~TextFieldControl() {
 
 void TextFieldControl::set_selection(const Selection& new_selection) {
   renderer_->set_selection(new_selection);
+  SchedulePaint();
 }
 
 void TextFieldControl::set_style(const Style& new_style) {
   renderer_->set_style(new_style);
+  SchedulePaint();
 }
 
 void TextFieldControl::set_text(const base::string16& new_text) {
   renderer_->set_text(new_text);
+  SchedulePaint();
 }
 
 // ui::Widget
 void TextFieldControl::DidKillFocus(ui::Widget* focused_widget) {
   Caret::instance()->StopBlinking();
+  SchedulePaint();
   Control::DidKillFocus(focused_widget);
 }
 
@@ -375,6 +379,7 @@ void TextFieldControl::DidResize() {
 
 void TextFieldControl::DidSetFocus(ui::Widget* last_focused_widget) {
   Caret::instance()->StartBlinking();
+  SchedulePaint();
   Control::DidSetFocus(last_focused_widget);
 }
 

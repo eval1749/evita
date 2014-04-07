@@ -70,8 +70,15 @@ class NullFont : IDWriteFont {
 
 ID2D1Factory& CreateD2D1Factory() {
   ID2D1Factory* factory;
+  D2D1_FACTORY_OPTIONS options;
+#if _DEBUG
+  options.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
+#else
+  options.debugLevel = D2D1_DEBUG_LEVEL_NONE;
+#endif
   COM_VERIFY(::D2D1CreateFactory(
       D2D1_FACTORY_TYPE_SINGLE_THREADED,
+      options,
       &factory));
   return *factory;
 }

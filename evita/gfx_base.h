@@ -98,13 +98,13 @@ class FactorySet : public base::RefCounted<FactorySet>,
                    public DpiHandler,
                    public Object {
   friend class common::Singleton<FactorySet>;
-  private: common::ComPtr<ID2D1Factory> d2d1_factory_;
+  private: common::ComPtr<ID2D1Factory1> d2d1_factory_;
   private: common::ComPtr<IDWriteFactory> dwrite_factory_;
   private: common::ComPtr<IWICImagingFactory> image_factory_;
 
   private: FactorySet();
   public: ~FactorySet() = default;
-  public: static ID2D1Factory& d2d1() {
+  public: static ID2D1Factory1& d2d1() {
     return *instance()->d2d1_factory_;
   }
   public: static IDWriteFactory& dwrite() {

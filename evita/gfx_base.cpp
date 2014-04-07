@@ -68,8 +68,8 @@ class NullFont : IDWriteFont {
 };
 #endif
 
-ID2D1Factory& CreateD2D1Factory() {
-  ID2D1Factory* factory;
+ID2D1Factory1& CreateD2D1Factory() {
+  ID2D1Factory1* factory;
   D2D1_FACTORY_OPTIONS options;
 #if _DEBUG
   options.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;

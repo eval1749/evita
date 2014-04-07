@@ -9,7 +9,7 @@
 // warning C4917: 'declarator' : a GUID can only be associated with a class,
 // interface or namespace
 #pragma warning(disable: 4917)
-#include <d2d1.h>
+#include <d2d1_2.h>
 #pragma warning(pop)
 
 namespace gfx {

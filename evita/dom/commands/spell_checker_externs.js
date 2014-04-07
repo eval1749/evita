@@ -8,5 +8,6 @@
 var Spelling = {
   NONE: 0,
   CORRECT: 1,
-  MISSPELLED: 2
+  MISSPELLED: 2,
+  DEBUG: 3
 };

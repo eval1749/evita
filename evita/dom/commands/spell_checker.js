@@ -8,7 +8,8 @@
 global.Spelling = {
   NONE: 0,
   CORRECT: 1,
-  MISSPELLED: 2
+  MISSPELLED: 2,
+  DEBUG: 3 // green wave
 };
 
 /**
@@ -66,8 +67,8 @@ SpellChecker.RE_WORD = new RegExp('^[A-Za-z][a-z]{' +
 
 /**
  * @typedef{{
- *  busy: boolean,
  *  lastUsedTime: !Date,
+ *  promise: ?Promise,
  *  spelling: !Spelling,
  *  useCount: number,
  *  word: string
@@ -120,13 +121,21 @@ SpellChecker.prototype.checkSpelling = function(word_range) {
   var marker_range = spellChecker.freeRanges.pop();
   marker_range.collapseTo(word_range.start);
   marker_range.end = word_range.end;
+  // TODO(yosi) Mark checking word for debugging. Once, we finish debugging
+  // we should remove this.
+  marker_range.setSpelling(Spelling.DEBUG);
   var word_to_check = marker_range.text;
-  SpellChecker.checkSpelling(word_to_check).then(function (result) {
+  SpellChecker.checkSpelling(word_to_check).then(function(state) {
     --SpellChecker.num_checking;
-    if (result && !result.busy && result.word == marker_range.text)
-      spellChecker.markWord(marker_range, result.spelling);
+    if (!marker_range.collapsed) {
+      // TODO(yosi) This code remove debugger marker. We will remove this
+      // once finish debugger.
+      marker_range.setSpelling(Spelling.NONE);
+    }
+    if (state.word == marker_range.text)
+      spellChecker.markWord(marker_range, state.spelling);
     spellChecker.freeRanges.push(marker_range);
-  }).catch(console.log);
+  }).catch(function(e) { console.log(e.stack); });
   return true;
 };
 
@@ -198,7 +207,9 @@ SpellChecker.prototype.didFireTimer = function() {
     var category = Unicode.UCD[document.charCodeAt_(range.start)].category;
     // TODO(yosi) When we support spell checking other than English, we
     // should make other Unicode general categories are valid.
-    return category == 'Lu' || category == 'Ll';
+    if (category != 'Lu' && category != 'Ll')
+      return false;
+    return SpellChecker.RE_WORD.test(range.text)
   }
 
   var num_checked = 0;
@@ -265,8 +276,9 @@ SpellChecker.prototype.didFocusWindow = function() {
  * Mark first |word| without misspelled marker in document with |mark|.
  */
 SpellChecker.prototype.markWord = function(word_range, mark) {
-  if (mark == Spelling.CORRECT)
+  if (mark == Spelling.CORRECT) {
     return;
+  }
   // TODO(yosi) We should not mark for word in source code.
   word_range.setSpelling(mark);
 };
@@ -312,33 +324,31 @@ SpellChecker.wordStateMap = new Map();
 
 /**
  * @param {string} word_to_check
- * @return {!Promise.<?SpellChecker.SpellingResult>}
+ * @return {!Promise.<SpellChecker.SpellingResult>}
  */
 SpellChecker.checkSpelling = function(word_to_check) {
-  if (!SpellChecker.RE_WORD.test(word_to_check))
-    return /** @type {!Promise.<?SpellChecker.SpellingResult>} */(
-        Promise.resolve(null));
-  var result = SpellChecker.wordStateMap.get(word_to_check);
-  if (result) {
-    result.lastUsedTime = new Date();
-    ++result.useCount;
-    return Promise.resolve(result);
+  var present = SpellChecker.wordStateMap.get(word_to_check);
+  if (present) {
+    present.lastUsedTime = new Date();
+    ++present.useCount;
+    return present.promise ? present.promise : Promise.resolve(present);
   }
+
   var state = {
-    busy: true,
     lastUsedTime: new Date(),
+    promise: null,
     useCount: 1,
     word: word_to_check,
   };
   SpellChecker.wordStateMap.set(word_to_check, state);
-  var promise = Editor.checkSpelling(word_to_check).then(
-      function(is_correct) {
-        state.busy = false;
-        state.lastUsedTime = new Date(),
-        state.spelling = is_correct ? Spelling.CORRECT : Spelling.MISSPELLED;
-        return state;
-      });
-  return /** @type {!Promise.<?SpellChecker.SpellingResult>} */(promise);
+  state.promise = Editor.checkSpelling(word_to_check).then(
+    function(is_correct) {
+      state.lastUsedTime = new Date(),
+      state.promise = null;
+      state.spelling = is_correct ? Spelling.CORRECT : Spelling.MISSPELLED;
+      return state;
+    });
+  return state.promise;
 };
 
 // When document is created/destructed, we install/uninstall spell checker

@@ -11,10 +11,11 @@
 
 #include "base/strings/string16.h"
 #include "evita/gfx_base.h"
+#include "evita/ui/caret.h"
 
 namespace ui {
 
-class TextFieldControl final : public Control {
+class TextFieldControl final : public Control, public Caret::Owner {
   private: class Renderer;
   public: struct Selection {
     size_t anchor_offset;
@@ -41,6 +42,9 @@ class TextFieldControl final : public Control {
   public: void set_style(const Style& style);
   public: void set_selection(const Selection& new_selection);
   public: void set_text(const base::string16& text);
+
+  // ui::Caret::Owner
+  private: virtual void UpdateCaret(gfx::Graphics* gfx) override;
 
   // ui::Widget
   private: virtual void DidKillFocus(ui::Widget* focused_window) override;

@@ -176,9 +176,6 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
   if (!rect_)
     return;
 
-  if (has_focus)
-    Caret::instance()->Hide();
-
   gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect_);
 
   // Render frame
@@ -366,9 +363,14 @@ void TextFieldControl::set_text(const base::string16& new_text) {
   SchedulePaint();
 }
 
+// ui::Caret::Owner
+void TextFieldControl::UpdateCaret(gfx::Graphics* gfx) {
+  renderer_->Render(gfx, has_focus(), state());
+}
+
 // ui::Widget
 void TextFieldControl::DidKillFocus(ui::Widget* focused_widget) {
-  Caret::instance()->StopBlinking();
+  Caret::instance()->Give(this);
   SchedulePaint();
   Control::DidKillFocus(focused_widget);
 }
@@ -378,7 +380,7 @@ void TextFieldControl::DidResize() {
 }
 
 void TextFieldControl::DidSetFocus(ui::Widget* last_focused_widget) {
-  Caret::instance()->StartBlinking();
+  Caret::instance()->Take(this);
   SchedulePaint();
   Control::DidSetFocus(last_focused_widget);
 }

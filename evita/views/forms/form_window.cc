@@ -10,6 +10,7 @@
 
 #include "base/logging.h"
 #include "common/tree/child_nodes.h"
+#include "common/win/rect_ostream.h"
 #include "common/win/win32_verify.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/gfx_base.h"
@@ -449,15 +450,13 @@ bool FormWindow::OnIdle(int) {
   DCHECK(is_realized());
   DCHECK(is_shown());
 
-  if (!pending_update_rect_.empty()) {
+  if (pending_update_rect_.empty()) {
+    if (has_native_focus())
+      ui::Caret::instance()->Blink(gfx_.get());
+  } else {
     gfx::Rect rect;
     std::swap(pending_update_rect_, rect);
     SchedulePaintInRect(rect);
-  }
-
-  {
-    gfx::Graphics::DrawingScope drawing_scope(*gfx_);
-    ui::Caret::instance()->Blink(gfx_.get());
   }
 
   if (!model_->dirty()) {
@@ -499,15 +498,6 @@ bool FormWindow::OnIdle(int) {
 
   TransferFocusIfNeeded();
 
-  {
-    gfx::Graphics::DrawingScope drawing_scope(*gfx_);
-    //gfx_->set_dirty_rect(rect);
-    auto const bgcolor = ui::SystemMetrics::instance()->bgcolor();
-    // TODO(yosi) We should fill background of form window excluding controls
-    gfx_->FillRectangle(gfx::Brush(*gfx_, bgcolor), rect());
-    Window::OnDraw(gfx_.get());
-  }
-
   if (title_ != model_->title()) {
     title_ = model_->title();
     ::SetWindowTextW(AssociatedHwnd(), title_.c_str());
@@ -542,9 +532,11 @@ void FormWindow::DidChangeSystemMetrics() {
 void FormWindow::CreateNativeWindow() const {
   auto const dwExStyle = WS_EX_LAYERED | WS_EX_TOOLWINDOW;
   auto const dwStyle = WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE;
+  // Make |FormWindow| with non-zero size. |FormWindow::OnIdle| will set
+  // window size from DOM.
   native_window()->CreateWindowEx(dwExStyle, dwStyle, L"Loading...", nullptr,
                                   gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
-                                  gfx::Size());
+                                  gfx::Size(100, 100));
 }
 
 void FormWindow::DidCreateNativeWindow() {
@@ -561,12 +553,6 @@ void FormWindow::DidDestroyWidget() {
   Window::DidDestroyWidget();
 }
 
-void FormWindow::DidKillNativeFocus() {
-  gfx::Graphics::DrawingScope drawing_scope(*gfx_);
-  ui::Caret::instance()->Give(gfx_.get());
-  Window::DidKillNativeFocus();
-}
-
 void FormWindow::DidRealize() {
   ui::SystemMetrics::instance()->AddObserver(this);
   Window::DidRealize();
@@ -577,12 +563,6 @@ void FormWindow::DidResize() {
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   (*gfx_)->Clear(ui::SystemMetrics::instance()->bgcolor());
   Window::DidResize();
-}
-
-void FormWindow::DidSetNativeFocus() {
-  gfx::Graphics::DrawingScope drawing_scope(*gfx_);
-  ui::Caret::instance()->Take(gfx_.get());
-  Window::DidSetNativeFocus();
 }
 
 LRESULT FormWindow::OnMessage(uint32_t const message, WPARAM const wParam,

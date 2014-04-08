@@ -17,34 +17,28 @@ namespace ui {
 // Represents caret in per-thread queue. To blink caret, we must track
 // caret size. If we call CreateCaret, caret doesn't blink.
 // Note: Caret should be lived until timer is fired.
-class Caret : public common::Singleton<Caret>,
-              public gfx::Graphics::Observer {
+class Caret final : public common::Singleton<Caret> {
   DECLARE_SINGLETON_CLASS(Caret);
 
-  private: class BackingStore;
+  public: class Owner {
+    public: Owner();
+    public: virtual ~Owner();
 
-  private: std::unique_ptr<BackingStore> backing_store_;
+    public: virtual void UpdateCaret(gfx::Graphics* gfx) = 0;
+  };
+
   private: base::Time last_blink_time_;
-  private: const gfx::Graphics* gfx_;
   private: gfx::RectF rect_;
+  private: Owner* owner_;
   private: bool shown_;
-  private: bool stop_blinking_;
 
   public: Caret();
   public: ~Caret();
-  public: void Blink(const gfx::Graphics* gfx);
-  public: void Hide(const gfx::Graphics* gfx);
-  public: void Hide();
-  public: void Give(const gfx::Graphics* gfx);
-  private: void Show(const gfx::Graphics* gfx);
-  public: void StartBlinking();
-  public: void StopBlinking();
-  // TODO: We should pass Widget to Caret::Take() instead of gfx::Graphics.
-  public: void Take(const gfx::Graphics* gfx);
-  public: void Update(const gfx::Graphics* gfx, const gfx::RectF& rect);
 
-  // gfx::Graphics::Observer
-  private: void ShouldDiscardResources() override;
+  public: void Blink(gfx::Graphics* gfx);
+  public: void Give(Owner* owner);
+  public: void Take(Owner* owner);
+  public: void Update(gfx::Graphics* gfx, const gfx::RectF& rect);
 
   DISALLOW_COPY_AND_ASSIGN(Caret);
 };

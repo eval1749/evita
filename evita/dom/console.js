@@ -38,7 +38,7 @@ Object.defineProperties(console, {
      */
     value: function(var_args) {
       function stringify(value) {
-        switch (value) {
+        switch (typeof(value)) {
           case 'string':
             return value;
           case 'symbol':

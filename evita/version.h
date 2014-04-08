@@ -1,14 +1,13 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-//  evcl- Version Information.
-//  version.h
-//
-//  Copyright (C) 1996-2007 by Project Vogue.
-//  Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-//  @(#)$Id: //proj/evcl3/mainline/listener/winapp/version.h#1 $
-//
-#define MY_FileDescription  "Evita Common Lisp Listener\0"
-#define MY_InternalName     "evcl.exe\0"
-#define MY_OriginalFilename "evcl.exe\0"
-#define MY_ProductName      "Evita Common Lisp Listener\0"
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#define MY_InternalName     "evita.exe\0"
+#define MY_OriginalFilename "evita.exe\0"
+#if _DEBUG
+#define MY_FileDescription  "evita/debug 5.0\0"
+#define MY_ProductName      "evita/debug 5.0\0"
+#else
+#define MY_FileDescription  "evita 5.0\0"
+#define MY_ProductName      "evita 5.0\0"
+#endif

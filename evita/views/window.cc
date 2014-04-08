@@ -183,6 +183,7 @@ Window* Window::FromWindowId(WindowId window_id) {
 }
 
 void Window::WillDestroyWidget() {
+  Widget::WillDestroyWidget();
   active_tick_ = 0;
 }
 }  // namespace views

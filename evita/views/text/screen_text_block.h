@@ -22,9 +22,9 @@ class ScreenTextBlock : public gfx::Graphics::Observer {
   private: class RenderContext;
   friend class RenderContext;
 
-  private: std::unique_ptr<gfx::Bitmap> bitmap_;
   private: bool dirty_;
   private: const gfx::Graphics* gfx_;
+  private: bool has_screen_bitmap_;
   private: std::vector<TextLine*> lines_;
   private: gfx::RectF rect_;
 

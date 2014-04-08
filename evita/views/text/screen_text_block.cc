@@ -23,27 +23,6 @@ namespace {
 const auto kMarkerLeftMargin = 2.0f;
 const auto kMarkerWidth = 4.0f;
 
-std::unique_ptr<gfx::Bitmap> CopyFromRenderTarget(const gfx::Graphics* gfx,
-                                                  const gfx::RectF rect) {
-  auto bitmap = std::make_unique<gfx::Bitmap>(*gfx);
-  if (!*bitmap)
-    return std::unique_ptr<gfx::Bitmap>();
-  auto const rect_u = gfx::RectU(static_cast<uint32_t>(rect.left),
-                                 static_cast<uint32_t>(rect.top),
-                                 static_cast<uint32_t>(rect.right),
-                                 static_cast<uint32_t>(rect.bottom));
-  DCHECK_EQ(static_cast<float>(rect_u.width()), rect.width());
-  DCHECK_EQ(static_cast<float>(rect_u.height()), rect.height());
-  #if DEBUG_RENDER_TARGET
-    DVLOG(0) << "CopyFromRenderTarget " << rect;
-  #endif
-  auto const hr = (*bitmap)->CopyFromRenderTarget(nullptr, *gfx, &rect_u);
-  if (FAILED(hr)) {
-     return std::unique_ptr<gfx::Bitmap>();
-  }
-  return std::move(bitmap);
-}
-
 inline void FillRect(const gfx::Graphics& gfx, const gfx::RectF& rect,
                      gfx::ColorF color) {
   gfx::Brush fill_brush(gfx, color);
@@ -130,18 +109,13 @@ void ScreenTextBlock::RenderContext::Copy(float dst_top, float dst_bottom,
   DCHECK_GT(height, 0.0f);
   DCHECK_LE(src_top + height, rect_.bottom);
 
-  auto const bitmap_top = screen_lines_.front()->top();
-
   gfx::RectF dst_rect(rect_.left, dst_top, rect_.right, dst_top + height);
-  gfx::RectF src_rect(0.0f, src_top - bitmap_top,
-                      rect_.width(), src_top + height - bitmap_top);
+  gfx::RectF src_rect(rect_.left, src_top, rect_.right, src_top + height);
   DCHECK_EQ(dst_rect.size(), src_rect.size());
   #if DEBUG_DRAW
     DVLOG(0) << "Copy to " << dst_rect << " from " << src_rect.left_top();
   #endif
-  (*gfx_)->DrawBitmap(*screen_text_block_->bitmap_, dst_rect, 1.0f,
-                      D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
-                      src_rect);
+  gfx_->DrawBitmap(*gfx_->screen_bitmap(), dst_rect, src_rect);
 }
 
 void ScreenTextBlock::RenderContext::DrawDirtyRect(
@@ -312,19 +286,18 @@ void ScreenTextBlock::RenderContext::RestoreDirtyRect(
   marker_rect.right = marker_rect.left + kMarkerWidth;
   gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF::White), marker_rect);
   #if USE_OVERLAY
-    if (!screen_text_block_->bitmap_ || !*screen_text_block_->bitmap_)
+    if (!screen_text_block_->has_screen_bitmap_)
       return;
-    gfx_->DrawBitmap(*screen_text_block_->bitmap_,
-                     gfx::RectF(rect_.left, rect.top, rect_.right, rect.bottom),
-                     gfx::RectF(0.0f, rect.top - rect_.top, rect_.width(),
-                                rect.bottom - rect_.top));
+    auto const line_rect = gfx::RectF(gfx::PointF(rect_.left, rect.top),
+                                      gfx::SizeF(rect_.width(), rect.height()));
+    gfx_->DrawBitmap(*gfx_->screen_bitmap(), line_rect, line_rect);
   #endif
 }
 
 FormatLineIterator ScreenTextBlock::RenderContext::TryCopy(
     const FormatLineIterator& format_current,
     const FormatLineIterator& format_end) const {
-  if (!screen_text_block_->bitmap_)
+  if (!screen_text_block_->has_screen_bitmap_)
     return format_current;
 
   auto const screen_end = screen_lines_.end();
@@ -376,7 +349,7 @@ FormatLineIterator ScreenTextBlock::RenderContext::TryCopy(
 // ScreenTextBlock
 //
 ScreenTextBlock::ScreenTextBlock()
-    : dirty_(true), gfx_(nullptr) {
+    : dirty_(true), gfx_(nullptr), has_screen_bitmap_(false) {
 }
 
 ScreenTextBlock::~ScreenTextBlock() {
@@ -389,12 +362,10 @@ void ScreenTextBlock::Render(const TextBlock* text_block) {
     return;
 
   Reset();
-  bitmap_ = CopyFromRenderTarget(gfx_, gfx::RectF(
-      gfx::PointF(rect_.left, text_block->lines().front()->rect().top),
-      gfx::SizeF(rect_.width(), text_block->lines().back()->rect().bottom)));
+  has_screen_bitmap_ = gfx_->SaveScreenImage(rect_);
   // Event if we can't get bitmap from render target, screen is up-to-date,
   // but we render all lines next time.
-  if (bitmap_) {
+  if (has_screen_bitmap_) {
     // TODO(yosi) We should use existing TextLine's in ScreenTextBlock.
     for (auto line : text_block->lines()) {
       lines_.push_back(line->Copy());
@@ -410,7 +381,7 @@ void ScreenTextBlock::Reset() {
     delete line;
   }
   lines_.clear();
-  bitmap_.reset();
+  has_screen_bitmap_ = false;
 }
 
 void ScreenTextBlock::SetGraphics(const gfx::Graphics* gfx) {

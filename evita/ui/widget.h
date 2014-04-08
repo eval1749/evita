@@ -61,6 +61,7 @@ class Widget
   public: UINT_PTR child_window_id() const;
   public: static bool has_active_focus();
   public: bool has_focus() const;
+  public: bool has_native_focus() const;
   public: bool has_native_window() const { 
     return static_cast<bool>(native_window_);
   }

@@ -83,6 +83,10 @@ bool Widget::has_focus() const {
   return focus_widget == this;
 }
 
+bool Widget::has_native_focus() const {
+  return AssociatedHwnd() == ::GetFocus();
+}
+
 HWND Widget::AssociatedHwnd() const {
   for (auto runner : common::tree::ancestors_or_self(this)) {
     if (auto const window = runner->native_window_.get())

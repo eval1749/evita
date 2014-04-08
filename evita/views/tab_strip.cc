@@ -407,6 +407,7 @@ class Item : public Element {
     auto const icon_left_top = gfx::PointF(m_rcLabel.left, m_rc.top) +
                                icon_offset;
     gfx->DrawBitmap(bitmap, gfx::RectF(icon_left_top, icon_size));
+    ::DestroyIcon(hIcon);
   }
 
   // [H]
@@ -1344,6 +1345,7 @@ TabStrip::TabStripImpl::~TabStripImpl() {
     ::DestroyMenu(m_hTabListMenu);
   }
 }
+
 
 void TabStrip::TabStripImpl::DidChangeTabSelection() {
   delegate_->DidChangeTabSelection(m_pSelected ? m_pSelected->m_iItem : -1);

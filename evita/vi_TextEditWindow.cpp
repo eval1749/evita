@@ -427,8 +427,10 @@ void TextEditWindow::Redraw() {
       text_renderer_->Format(StartOfLine(lStart));
     } else if (!text_renderer_->ShouldRender()) {
       // The screen is clean.
-      if (!m_fImeTarget)
+      if (!m_fImeTarget) {
         caret_->ShouldBlink();
+        caret_->Blink();
+      }
       return;
     }
   }
@@ -935,7 +937,6 @@ void TextEditWindow::DidResize() {
 bool TextEditWindow::OnIdle(int) {
   if (!is_shown())
     return false;
-  caret_->Blink();
   Redraw();
   return false;
 }

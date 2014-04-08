@@ -469,4 +469,19 @@ void Graphics::Resize(const Rect& rect) const {
 }
 #endif
 
+bool Graphics::SaveScreenImage(const RectF& rect) const {
+  if (!screen_bitmap_)
+    screen_bitmap_ = std::make_unique<Bitmap>(*this);
+  const RectU source_rect(static_cast<uint32_t>(::floor(rect.left)),
+                          static_cast<uint32_t>(::floor(rect.top)),
+                          static_cast<uint32_t>(::ceil(rect.right)),
+                          static_cast<uint32_t>(::ceil(rect.bottom)));
+  const PointU dest_point(source_rect.left_top());
+  auto const hr = (*screen_bitmap_)->CopyFromRenderTarget(&dest_point,
+      render_target_, &source_rect);
+  if (FAILED(hr))
+    DVLOG(0) << "ID2D1Bitmap->CopyFromRenderTarget hr=" << std::hex << hr;
+  return SUCCEEDED(hr);
+}
+
 }  // namespace gfx

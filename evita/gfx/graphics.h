@@ -12,6 +12,8 @@ interface IDXGISwapChain1;
 
 namespace gfx {
 
+class Bitmap;
+
 //////////////////////////////////////////////////////////////////////
 //
 // Graphics
@@ -45,6 +47,7 @@ class Graphics : public Object, public DpiHandler {
   private: scoped_refptr<FactorySet> factory_set_;
   private: HWND hwnd_;
   private: ObserverList<Observer> observers_;
+  private: mutable std::unique_ptr<Bitmap> screen_bitmap_;
   private: mutable Rect target_rect_;
   private: mutable common::ComPtr<ID2D1RenderTarget> render_target_;
   private: mutable void* work_;
@@ -72,6 +75,7 @@ class Graphics : public Object, public DpiHandler {
   public: bool drawing() const { return batch_nesting_level_; }
   public: const FactorySet& factory_set() const { return *factory_set_; }
   public: ID2D1RenderTarget& render_target() const;
+  public: Bitmap* screen_bitmap() const { return screen_bitmap_.get(); }
   public: template<typename T> T* work() const { 
     return reinterpret_cast<T*>(work_); 
   }
@@ -126,6 +130,9 @@ class Graphics : public Object, public DpiHandler {
   private: void Reinitialize();
   public: void RemoveObserver(Observer* observer);
   public: void Resize(const Rect& rc) const;
+
+  // [S]
+  public: bool Graphics::SaveScreenImage(const RectF& rect) const;
 
   DISALLOW_COPY_AND_ASSIGN(Graphics);
 };

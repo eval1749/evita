@@ -24,6 +24,7 @@ TextBlock::~TextBlock() {
 }
 
 void TextBlock::Append(TextLine* pLine) {
+  ASSERT_DOM_LOCKED();
   DCHECK_LT(pLine->GetHeight(), 100.0f);
   if (!dirty_line_point_) {
     auto const last_line = lines_.back();
@@ -34,6 +35,7 @@ void TextBlock::Append(TextLine* pLine) {
 }
 
 bool TextBlock::DiscardFirstLine() {
+  ASSERT_DOM_LOCKED();
   if (lines_.empty())
     return false;
 
@@ -46,6 +48,7 @@ bool TextBlock::DiscardFirstLine() {
 }
 
 bool TextBlock::DiscardLastLine() {
+  ASSERT_DOM_LOCKED();
   if (lines_.empty())
     return false;
 
@@ -57,6 +60,7 @@ bool TextBlock::DiscardLastLine() {
 }
 
 void TextBlock::EnsureLinePoints() {
+  ASSERT_DOM_LOCKED();
   if (!dirty_line_point_)
     return;
   auto line_top = top();
@@ -69,11 +73,13 @@ void TextBlock::EnsureLinePoints() {
 }
 
 void TextBlock::Finish() {
+  ASSERT_DOM_LOCKED();
   dirty_ = lines_.empty();
   dirty_line_point_ = dirty_;
 }
 
 text::Posn TextBlock::GetVisibleEnd() const {
+  ASSERT_DOM_LOCKED();
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
   for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
@@ -85,6 +91,7 @@ text::Posn TextBlock::GetVisibleEnd() const {
 }
 
 void TextBlock::InvalidateLines(text::Posn offset) {
+  ASSERT_DOM_LOCKED();
   if (dirty_)
     return;
   if (GetFirst()->GetStart() >= offset || GetLast()->GetEnd() >= offset)
@@ -92,6 +99,7 @@ void TextBlock::InvalidateLines(text::Posn offset) {
 }
 
 bool TextBlock::IsShowEndOfDocument() const {
+  ASSERT_DOM_LOCKED();
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
   return GetLast()->GetEnd() > text_buffer_->GetEnd() &&
@@ -99,6 +107,7 @@ bool TextBlock::IsShowEndOfDocument() const {
 }
 
 void TextBlock::Prepend(TextLine* line) {
+  ASSERT_DOM_LOCKED();
   DCHECK_LT(line->GetHeight(), 100.0f);
   lines_.push_front(line);
   m_cy += line->GetHeight();
@@ -106,6 +115,7 @@ void TextBlock::Prepend(TextLine* line) {
 }
 
 void TextBlock::Reset() {
+  ASSERT_DOM_LOCKED();
   for (auto const line : lines_) {
     delete line;
   }
@@ -117,6 +127,7 @@ void TextBlock::Reset() {
 }
 
 void TextBlock::SetRect(const gfx::RectF& rect) {
+  ASSERT_DOM_LOCKED();
   rect_ = rect;
   Reset();
 }

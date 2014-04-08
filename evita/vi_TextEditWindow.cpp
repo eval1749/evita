@@ -923,6 +923,7 @@ void TextEditWindow::DidMoveThumb(int value) {
 // ui::Widget
 void TextEditWindow::DidResize() {
   views::ContentWindow::DidResize();
+  UI_DOM_AUTO_LOCK_SCOPE();
   auto const scroll_bar_width = ::GetSystemMetrics(SM_CXVSCROLL);
   auto text_block_rect = rect();
   text_block_rect.right -= scroll_bar_width;

@@ -136,9 +136,6 @@ void Caret::Show(const gfx::Graphics* gfx) {
   DCHECK(rect_);
   if (shown_)
     return;
-  if (!backing_store_)
-    backing_store_.reset(new BackingStore());
-  backing_store_->Save(gfx_, rect_);
   gfx::Brush fill_brush(*gfx_, gfx::ColorF::Black);
   gfx_->FillRectangle(fill_brush, rect_);
   shown_ = true;
@@ -173,6 +170,9 @@ void Caret::Update(const gfx::Graphics* gfx, const gfx::RectF& new_rect) {
     }
     rect_ = new_rect;
   }
+  if (!backing_store_)
+    backing_store_.reset(new BackingStore());
+  backing_store_->Save(gfx_, rect_);
   Show(gfx);
 }
 

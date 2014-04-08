@@ -40,6 +40,44 @@ namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
+// Graphics::AxisAlignedClipScope
+//
+Graphics::AxisAlignedClipScope::AxisAlignedClipScope(
+    const Graphics& gfx, const RectF& rect)
+    : gfx_(gfx) {
+  gfx_->PushAxisAlignedClip(rect, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+}
+
+Graphics::AxisAlignedClipScope::~AxisAlignedClipScope() {
+  gfx_->PopAxisAlignedClip();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// Graphics::DrawingScope
+//
+Graphics::DrawingScope::DrawingScope(const Graphics& gfx) : gfx_(gfx) {
+  gfx_.BeginDraw();
+  gfx_.set_dirty_rect(gfx_.target_rect_);
+}
+
+Graphics::DrawingScope::~DrawingScope() {
+  // TODO(yosi) Should DrawingScope take mutable Graphics?
+  const_cast<Graphics&>(gfx_).EndDraw();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// Graphics::Observer
+//
+Graphics::Observer::Observer() {
+}
+
+Graphics::Observer::~Observer() {
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // Graphics
 //
 Graphics::Graphics(ID2D1RenderTarget* render_target)
@@ -99,9 +137,6 @@ void Graphics::AddObserver(Observer* observer) {
 }
 
 void Graphics::BeginDraw() const {
-  #if DEBUG_DRAW
-    DEBUG_PRINTF("%p nesting=%d\n", render_target_, batch_nesting_level_);
-  #endif
   ASSERT(render_target_);
   if (!batch_nesting_level_)
     render_target_->BeginDraw();
@@ -177,9 +212,6 @@ void Graphics::DrawText(const TextFormat& text_format,
 }
 
 bool Graphics::EndDraw() {
-  #if DEBUG_DRAW
-    DEBUG_PRINTF("%p nesting=%d\n", render_target_, batch_nesting_level_);
-  #endif
   ASSERT(drawing());
   ASSERT(render_target_);
   --batch_nesting_level_;
@@ -188,9 +220,9 @@ bool Graphics::EndDraw() {
     if (SUCCEEDED(hr))
       return true;
     if (hr == D2DERR_RECREATE_TARGET) {
-      Debugger::Printf("Got D2DERR_RECREATE_TARGET\n", hr);
+      DVLOG(0) << "Graphics::End D2DERR_RECREATE_TARGET";
     } else {
-      Debugger::Printf("ID2D1RenderTarget::Flush failed hr=0x%0X\n", hr);
+      DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
     }
   } else {
       auto const hr = render_target_->EndDraw();
@@ -208,9 +240,9 @@ bool Graphics::EndDraw() {
         return true;
       }
       if (hr == D2DERR_RECREATE_TARGET) {
-        Debugger::Printf("Got D2DERR_RECREATE_TARGET\n", hr);
+        DVLOG(0) << "Graphics::End D2DERR_RECREATE_TARGET";
       } else {
-        Debugger::Printf("ID2D1RenderTarget::EndDraw failed hr=0x%0X\n", hr);
+        DVLOG(0) << "ID2D1RenderTarget::EndDraw: hr=" << std::hex << hr;
       }
   }
   dxgi_swap_chain_.reset();
@@ -219,21 +251,21 @@ bool Graphics::EndDraw() {
   return false;
 }
 
-void Graphics:: FillRectangle(const Brush& brush, int left, int top,
+void Graphics::FillRectangle(const Brush& brush, int left, int top,
                               int right, int bottom) const {
   render_target().FillRectangle(RectF(left, top, right, bottom), brush);
 }
 
-void Graphics:: FillRectangle(const Brush& brush, float left, float top,
+void Graphics::FillRectangle(const Brush& brush, float left, float top,
                               float right, float bottom) const {
   FillRectangle(brush, RectF(left, top, right, bottom));
 }
 
-void Graphics:: FillRectangle(const Brush& brush, const RECT& rc) const {
+void Graphics::FillRectangle(const Brush& brush, const RECT& rc) const {
   FillRectangle(brush, RectF(rc));
 }
 
-void Graphics:: FillRectangle(const Brush& brush, const RectF& rect) const {
+void Graphics::FillRectangle(const Brush& brush, const RectF& rect) const {
   DCHECK(drawing());
   DCHECK(rect);
   render_target().FillRectangle(rect, brush);
@@ -436,43 +468,5 @@ void Graphics::Resize(const Rect& rect) const {
   d2d_device_context->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
 }
 #endif
-
-//////////////////////////////////////////////////////////////////////
-//
-// Graphics::AxisAlignedClipScope
-//
-Graphics::AxisAlignedClipScope::AxisAlignedClipScope(
-    const Graphics& gfx, const RectF& rect)
-    : gfx_(gfx) {
-  gfx_->PushAxisAlignedClip(rect, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
-}
-
-Graphics::AxisAlignedClipScope::~AxisAlignedClipScope() {
-  gfx_->PopAxisAlignedClip();
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// Graphics::DrawingScope
-//
-Graphics::DrawingScope::DrawingScope(const Graphics& gfx) : gfx_(gfx) {
-  gfx_.BeginDraw();
-  gfx_.set_dirty_rect(gfx_.target_rect_);
-}
-
-Graphics::DrawingScope::~DrawingScope() {
-  // TODO(yosi) Should DrawingScope take mutable Graphics?
-  const_cast<Graphics&>(gfx_).EndDraw();
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// Graphics::Observer
-//
-Graphics::Observer::Observer() {
-}
-
-Graphics::Observer::~Observer() {
-}
 
 }  // namespace gfx

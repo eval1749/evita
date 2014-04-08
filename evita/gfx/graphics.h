@@ -24,16 +24,6 @@ class Graphics : public Object, public DpiHandler {
     public: virtual void ShouldDiscardResources() = 0;
   };
 
-  private: mutable int batch_nesting_level_;
-  private: mutable Rect dirty_rect_;
-  private: mutable common::ComPtr<IDXGISwapChain1> dxgi_swap_chain_;
-  private: scoped_refptr<FactorySet> factory_set_;
-  private: HWND hwnd_;
-  private: ObserverList<Observer> observers_;
-  private: mutable Rect target_rect_;
-  private: mutable common::ComPtr<ID2D1RenderTarget> render_target_;
-  private: mutable void* work_;
-
   public: class AxisAlignedClipScope {
     private: const Graphics& gfx_;
     public: AxisAlignedClipScope(const Graphics& gfx, const RectF& rect);
@@ -48,6 +38,16 @@ class Graphics : public Object, public DpiHandler {
     DISALLOW_COPY_AND_ASSIGN(DrawingScope);
   };
   friend class DrawingScope;
+
+  private: mutable int batch_nesting_level_;
+  private: mutable Rect dirty_rect_;
+  private: mutable common::ComPtr<IDXGISwapChain1> dxgi_swap_chain_;
+  private: scoped_refptr<FactorySet> factory_set_;
+  private: HWND hwnd_;
+  private: ObserverList<Observer> observers_;
+  private: mutable Rect target_rect_;
+  private: mutable common::ComPtr<ID2D1RenderTarget> render_target_;
+  private: mutable void* work_;
 
   private: Graphics(ID2D1RenderTarget* render_target);
   public: Graphics(Graphics&& other);

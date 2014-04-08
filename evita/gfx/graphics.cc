@@ -438,6 +438,7 @@ void Graphics::Resize(const Rect& rc) const {
 #else
 void Graphics::Resize(const Rect& rect) const {
   DCHECK(!rect.empty());
+  screen_bitmap_.reset();
   target_rect_ = rect;
 
   common::ComPtr<ID2D1DeviceContext> d2d_device_context;

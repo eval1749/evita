@@ -64,6 +64,8 @@ bool NativeWindow::CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
   DCHECK(!s_creating_window);
   s_creating_window = this;
 
+  DCHECK(parent_hwnd == HWND_MESSAGE || !size.empty());
+
   if (!s_window_class) {
     WNDCLASSEXW wc;
     wc.cbSize = sizeof(wc);

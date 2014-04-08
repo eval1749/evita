@@ -12,7 +12,9 @@
 #include "evita/views/text/render_text_line.h"
 
 #define DEBUG_DRAW 0
-#define DEBUG_RENDER_TARGET 0
+// USE_OVERLAY controls how redraw marker rendered. If USE_OVERLAY is true,
+// redraw marker is drawn as overlay rectangle, otherwise, redraw marker
+// is rendered at left border.
 #define USE_OVERLAY 1
 
 namespace views {
@@ -85,7 +87,7 @@ class ScreenTextBlock::RenderContext {
       TextLine* line) const;
   public: void Finish();
   public: bool Render();
-  private: void RestoreDirtyRect(const gfx::RectF& rect) const;
+  private: void RestoreSkipRect(const gfx::RectF& rect) const;
   public: FormatLineIterator TryCopy(
       const FormatLineIterator& format_line_start,
       const FormatLineIterator& format_line_end) const;
@@ -120,7 +122,7 @@ void ScreenTextBlock::RenderContext::Copy(float dst_top, float dst_bottom,
 
 void ScreenTextBlock::RenderContext::DrawDirtyRect(
     const gfx::RectF& rect, float red, float green, float blue) const {
-  RestoreDirtyRect(rect);
+  RestoreSkipRect(rect);
   #if USE_OVERLAY
     gfx_->FillRectangle(gfx::Brush(*gfx_, red, green, blue, 0.1f), rect);
     gfx_->DrawRectangle(gfx::Brush(*gfx_, red, green, blue, 0.5f), rect, 0.5f);
@@ -265,7 +267,7 @@ bool ScreenTextBlock::RenderContext::Render() {
     #if DEBUG_DRAW
       DVLOG(0) << "skip " << rect;
     #endif
-    RestoreDirtyRect(rect);
+    RestoreSkipRect(rect);
   }
 
   auto const dirty = !copy_rects_.empty() || !dirty_rects_.empty();
@@ -279,19 +281,17 @@ bool ScreenTextBlock::RenderContext::Render() {
   return dirty;
 }
 
-void ScreenTextBlock::RenderContext::RestoreDirtyRect(
+void ScreenTextBlock::RenderContext::RestoreSkipRect(
     const gfx::RectF& rect) const {
   auto marker_rect = rect;
   marker_rect.left += kMarkerLeftMargin;
   marker_rect.right = marker_rect.left + kMarkerWidth;
   gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF::White), marker_rect);
-  #if USE_OVERLAY
-    if (!screen_text_block_->has_screen_bitmap_)
-      return;
-    auto const line_rect = gfx::RectF(gfx::PointF(rect_.left, rect.top),
-                                      gfx::SizeF(rect_.width(), rect.height()));
-    gfx_->DrawBitmap(*gfx_->screen_bitmap(), line_rect, line_rect);
-  #endif
+  if (!screen_text_block_->has_screen_bitmap_)
+    return;
+  auto const line_rect = gfx::RectF(gfx::PointF(rect_.left, rect.top),
+                                    gfx::SizeF(rect_.width(), rect.height()));
+  gfx_->DrawBitmap(*gfx_->screen_bitmap(), line_rect, line_rect);
 }
 
 FormatLineIterator ScreenTextBlock::RenderContext::TryCopy(

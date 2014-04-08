@@ -14,60 +14,10 @@ static const auto kBlinkInterval = 500; // milliseconds
 
 //////////////////////////////////////////////////////////////////////
 //
-// BackingStore
-//
-class Caret::BackingStore {
-  private: std::unique_ptr<gfx::Bitmap> bitmap_;
-  private: void* render_target_;
-  private: gfx::RectF rect_;
-
-  public: BackingStore();
-  public: ~BackingStore();
-  public: void Restore(const gfx::Graphics& gfx);
-  public: void Save(const gfx::Graphics& gfx, const gfx::RectF& rect);
-
-  DISALLOW_COPY_AND_ASSIGN(BackingStore);
-};
-
-Caret::BackingStore::BackingStore()
-    : render_target_(nullptr) {
-}
-
-Caret::BackingStore::~BackingStore() {
-}
-
-void Caret::BackingStore::Restore(const gfx::Graphics& gfx) {
-  if (!rect_ || render_target_ != &*gfx || !bitmap_)
-    return;
-  DCHECK(bitmap_);
-  gfx->DrawBitmap(*bitmap_, rect_);
-  gfx->Flush();
-}
-
-void Caret::BackingStore::Save(const gfx::Graphics& gfx,
-                               const gfx::RectF& rect) {
-  DCHECK(!rect.empty());
-  rect_ = gfx::RectF(::floorf(rect.left), ::floorf(rect.top),
-                     ::ceilf(rect.right), ::ceilf(rect.bottom));
-  gfx::RectU screen_rect = gfx::RectU(static_cast<uint>(rect_.left),
-                                      static_cast<uint>(rect_.top),
-                                      static_cast<uint>(rect_.right),
-                                      static_cast<uint>(rect_.bottom));
-  auto bitmap = std::make_unique<gfx::Bitmap>(gfx, screen_rect.size());
-  if (!bitmap || !*bitmap)
-    return;
-  COM_VERIFY((*bitmap)->CopyFromRenderTarget(nullptr, gfx, &screen_rect));
-  bitmap_ = std::move(bitmap);
-  render_target_ = &*gfx;
-}
-
-//////////////////////////////////////////////////////////////////////
-//
 // Caret
 //
 Caret::Caret()
-  : backing_store_(new BackingStore()),
-    gfx_(nullptr),
+  : gfx_(nullptr),
     shown_(false),
     should_blink_(false),
     taken_(false) {
@@ -102,11 +52,10 @@ void Caret::Give() {
 }
 
 void Caret::Hide() {
-  if (!taken_)
+  if (!taken_ || !shown_ || rect_.empty())
     return;
-  if (!shown_)
-    return;
-  backing_store_->Restore(*gfx_);
+  if (gfx_->screen_bitmap())
+    gfx_->DrawBitmap(*gfx_->screen_bitmap(), rect_, rect_);
   shown_ = false;
 }
 
@@ -121,7 +70,6 @@ void Caret::Show() {
   DCHECK(taken_);
   if (shown_)
     return;
-  backing_store_->Save(*gfx_, rect_);
   gfx::Brush fill_brush(*gfx_, gfx::ColorF::Black);
   gfx_->FillRectangle(fill_brush, rect_);
   shown_ = true;

@@ -24,9 +24,6 @@ class Grapchis;
 // caret size. If we call CreateCaret, caret doesn't blink.
 // Note: Caret should be lived until timer is fired.
 class Caret {
-  private: class BackingStore;
-
-  private: const std::unique_ptr<BackingStore> backing_store_;
   private: base::Time last_blink_time_;
   private: const gfx::Graphics* gfx_;
   private: gfx::RectF rect_;

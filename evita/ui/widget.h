@@ -42,7 +42,6 @@ class Widget
     kRealized,
   };
 
-  private: Widget* hover_;
   private: std::unique_ptr<NativeWindow> native_window_;
   private: Rect rect_;
   private: int shown_;

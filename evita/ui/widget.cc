@@ -36,6 +36,7 @@ namespace {
 
 Widget* capture_widget;
 Widget* focus_widget;
+Widget* hover_widget;
 Widget* will_focus_widget;
 bool we_have_active_focus;
 
@@ -48,8 +49,7 @@ using ui::EventType;
 // Widget
 //
 Widget::Widget(std::unique_ptr<NativeWindow>&& native_window)
-    : hover_(nullptr),
-      native_window_(std::move(native_window)),
+    : native_window_(std::move(native_window)),
       shown_(0),
       state_(kNotRealized) {
 }
@@ -116,6 +116,8 @@ void Widget::DestroyWidget() {
   WillDestroyWidget();
   auto& parent_widget = container_widget();
   parent_widget.WillRemoveChildWidget(*this);
+  if (hover_widget == this)
+    hover_widget = nullptr;
   if (capture_widget == this)
     ReleaseCapture();
   if (focus_widget == this) {
@@ -183,9 +185,7 @@ void Widget::DidRealize() {
 void Widget::DidRealizeChildWidget(const Widget&) {
 }
 
-void Widget::DidRemoveChildWidget(const Widget& child) {
-  if (&child == hover_)
-    hover_ = nullptr;
+void Widget::DidRemoveChildWidget(const Widget&) {
 }
 
 void Widget::DidResize() {
@@ -209,10 +209,10 @@ void Widget::DidShow() {
 }
 
 void Widget::DispatchMouseExited() {
-  auto const hover = hover_;
+  auto const hover = hover_widget;
   if (!hover)
     return;
-  hover_ = nullptr;
+  hover_widget = nullptr;
   Point screen_point;
   if (!::GetCursorPos(&screen_point)) {
     DVLOG_WIDGET(0) << "GetCursorPos error=" << ::GetLastError();
@@ -356,21 +356,21 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
   WIN32_VERIFY(::MapWindowPoints(AssociatedHwnd(), HWND_DESKTOP,
                                  &screen_point, 1));
   if (message == WM_MOUSEMOVE || message == WM_NCMOUSEMOVE) {
-    if (!hover_) {
+    if (!hover_widget) {
       TRACKMOUSEEVENT track;
       track.cbSize = sizeof(track);
       track.dwFlags = static_cast<DWORD>(
           message == WM_NCMOUSEMOVE ? TME_NONCLIENT | TME_LEAVE : TME_LEAVE);
       track.hwndTrack = *native_window();
       if (::TrackMouseEvent(&track))
-        hover_ = target;
+        hover_widget = target;
       else
         DVLOG(0) << "TrackMouseEvent last_error=" << ::GetLastError();
-    } else if (hover_ != target) {
+    } else if (hover_widget != target) {
       MouseEvent event(EventType::MouseExited, MouseEvent::kNone, 0u, 0,
-                       hover_, client_point, screen_point);
-      hover_->OnMouseExited(event);
-      hover_ = target;
+                       hover_widget, client_point, screen_point);
+      hover_widget->OnMouseExited(event);
+      hover_widget = target;
     }
   }
 

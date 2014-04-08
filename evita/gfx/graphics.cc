@@ -117,7 +117,8 @@ Graphics& Graphics::operator=(Graphics&& other) {
 }
 
 void Graphics::set_dirty_rect(const Rect& new_dirty_rect) const {
-  dirty_rect_ = new_dirty_rect;
+  if (batch_nesting_level_ == 1)
+    dirty_rect_ = new_dirty_rect;
 }
 
 void Graphics::set_dirty_rect(const RectF& new_dirty_rect) const {

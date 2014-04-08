@@ -441,6 +441,7 @@ void TextEditWindow::Render() {
     return;
 
   gfx::Graphics::DrawingScope drawing_scope(*m_gfx);
+  m_gfx->set_dirty_rect(rect());
   caret_->Hide();
   text_renderer_->Render();
 

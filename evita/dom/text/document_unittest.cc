@@ -203,9 +203,9 @@ TEST_F(DocumentTest, load_failed) {
 }
 
 TEST_F(DocumentTest, load_succeeded) {
-  EXPECT_CALL(*mock_io_delegate(), CloseFile(_, _));
-
   mock_io_delegate()->SetOpenFileDeferredData(domapi::IoContextId::New(), 0);
+  mock_io_delegate()->SetFileIoDeferredData(123, 0);
+  mock_io_delegate()->SetFileIoDeferredData(0, 0);
 
   domapi::FileStatus file_status;
   file_status.file_size = 123456;
@@ -214,6 +214,8 @@ TEST_F(DocumentTest, load_succeeded) {
   file_status.last_write_time = base::Time::FromJsTime(123456.0);
   file_status.readonly = true;
   mock_io_delegate()->SetFileStatus(file_status, 0);
+
+  EXPECT_CALL(*mock_io_delegate(), CloseFile(_, _));
 
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"

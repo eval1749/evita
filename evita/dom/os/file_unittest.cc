@@ -63,6 +63,7 @@ TEST_F(OsFileTest, OsFile_move_succeeded) {
   EXPECT_SCRIPT_EQ("boolean", "typeof(result)");
   EXPECT_SCRIPT_EQ("false", "result");
 
+  mock_io_delegate()->SetIoResult(0);
   EXPECT_SCRIPT_VALID(
     "promise = Os.File.move('foo', 'bar', {noOverwrite: true}).then(catcher);");
   EXPECT_SCRIPT_EQ("true", "result");

@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_evita_dom_mock_io_delegate_h)
 #define INCLUDE_evita_dom_mock_io_delegate_h
 
+#include <deque>
+
 #include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_delegate.h"
 #pragma warning(push)
@@ -16,14 +18,15 @@ namespace dom {
 
 class MockIoDelegate : public domapi::IoDelegate {
   private: domapi::IoContextId context_id_;
-  private: int error_code_;
+  private: std::deque<int> error_codes_;
   private: domapi::FileStatus file_status_;
-  private: int num_transferred_;
+  private: std::deque<int> num_transferreds_;
   private: base::string16 temp_file_name_;
 
   public: MockIoDelegate();
   public: virtual ~MockIoDelegate();
 
+  private: int PopErrorCode();
   public: void SetFileIoDeferredData(int num_transferred, int error_code);
   public: void SetIoResult(int error_code);
   public: void SetMakeTempFileName(const base::string16 file_name,

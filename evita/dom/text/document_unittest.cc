@@ -31,11 +31,6 @@ class DocumentTest : public dom::AbstractDomTest {
   public: virtual ~DocumentTest() {
   }
 
-  protected: void RunMicrotasks() {
-    base::RunLoop run_loop;
-    run_loop.RunUntilIdle();
-  }
-
   DISALLOW_COPY_AND_ASSIGN(DocumentTest);
 };
 
@@ -327,57 +322,32 @@ TEST_F(DocumentTest, renameTo) {
   EXPECT_SCRIPT_EQ("bar", "doc.name");
 }
 
-TEST_F(DocumentTest, save_failed_open) {
-  mock_io_delegate()->SetOpenFileDeferredData(domapi::IoContextId(), 123);
+TEST_F(DocumentTest, save_failed) {
+  domapi::SaveFileCallbackData data;
+  data.error_code = 123;
+  data.last_write_time = base::Time::FromJsTime(123456.0);
+  mock_view_impl()->SetSaveFileCallbackData(data);
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"
     "doc.save('foo.cc');");
-  RunMicrotasks();
-}
-
-TEST_F(DocumentTest, save_failed_write) {
-  mock_io_delegate()->SetMakeTempFileName(L"foo.tmp", 0);
-  mock_io_delegate()->SetOpenFileDeferredData(domapi::IoContextId::New(), 0);
-  mock_io_delegate()->SetFileIoDeferredData(0, 123);
-  // File must be closed.
-  EXPECT_CALL(*mock_io_delegate(), CloseFile(_, _));
-
-  EXPECT_SCRIPT_VALID(
-    "var doc = new Document('foo');"
-    "doc.save('foo.cc');");
-  RunMicrotasks();
-  RunMicrotasks();
-  RunMicrotasks();
+  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
+  EXPECT_SCRIPT_EQ("-1", "doc.obsolete");
+  EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
 }
 
 TEST_F(DocumentTest, save_succeeded) {
-  mock_io_delegate()->SetMakeTempFileName(L"foo.tmp", 0);
-  mock_io_delegate()->SetOpenFileDeferredData(domapi::IoContextId::New(), 0);
-  mock_io_delegate()->SetFileIoDeferredData(100, 0);
-  domapi::FileStatus file_status;
-  file_status.file_size = 123456;
-  file_status.is_directory = false;
-  file_status.is_symlink = false;
-  file_status.last_write_time = base::Time::FromJsTime(123456.0);
-  file_status.readonly = true;
-  mock_io_delegate()->SetFileStatus(file_status, 0);
-  EXPECT_CALL(*mock_io_delegate(), CloseFile(_, _));
-
+  domapi::SaveFileCallbackData data;
+  data.error_code = 0;
+  data.last_write_time = base::Time::FromJsTime(123456.0);
+  mock_view_impl()->SetSaveFileCallbackData(data);
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"
-    "new Range(doc).text = 'foo\\nbar\\n';"
     "doc.save('foo.cc');");
-
-  RunMicrotasks();
-  RunMicrotasks();
-  RunMicrotasks();
-  RunMicrotasks();
-  RunMicrotasks();
-
   EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("123456", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_EQ("0", "doc.obsolete");
-  EXPECT_SCRIPT_TRUE("doc.lastStatTime_ != new Date(0)");
+  EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
 }
 
 TEST_F(DocumentTest, slice) {

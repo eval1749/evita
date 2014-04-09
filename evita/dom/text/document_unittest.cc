@@ -189,12 +189,13 @@ TEST_F(DocumentTest, length) {
   EXPECT_SCRIPT_EQ("6", "doc.length");
 }
 
-TEST_F(DocumentTest, load_failed) {
-  mock_io_delegate()->SetOpenFileDeferredData(domapi::IoContextId(), 123);
+TEST_F(DocumentTest, load_failed_open) {
+  mock_io_delegate()->SetOpenFileResult(domapi::IoContextId(), 123);
 
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"
-    "doc.load('foo.cc')");
+    "var promise = doc.load('foo.cc')");
+  EXPECT_SCRIPT_TRUE("promise instanceof Promise");
   EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
@@ -202,11 +203,33 @@ TEST_F(DocumentTest, load_failed) {
   EXPECT_SCRIPT_FALSE("doc.readonly");
 }
 
-TEST_F(DocumentTest, load_succeeded) {
-  mock_io_delegate()->SetOpenFileDeferredData(domapi::IoContextId::New(), 0);
-  mock_io_delegate()->SetFileIoDeferredData(123, 0);
-  mock_io_delegate()->SetFileIoDeferredData(0, 0);
+TEST_F(DocumentTest, load_failed_read) {
+  mock_io_delegate()->SetOpenFileResult(domapi::IoContextId::New(), 0);
+  mock_io_delegate()->SetCallResult("ReadFile", 0, 123);
+  mock_io_delegate()->SetCallResult("ReadFile", 123, 0);
+  mock_io_delegate()->SetCallResult("CloseFile", 0, 0);
 
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "var promise = doc.load('foo.cc')");
+  EXPECT_SCRIPT_TRUE("promise instanceof Promise");
+  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
+  EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
+  EXPECT_SCRIPT_TRUE("doc.obsolete == Document.Obsolete.UNKNOWN");
+  EXPECT_SCRIPT_FALSE("doc.readonly");
+  EXPECT_EQ(1, mock_io_delegate()->num_close_called());
+}
+
+TEST_F(DocumentTest, load_succeeded) {
+  std::vector<uint8_t> bytes {
+     102, 111, 111, 13, 10, // foo\r\n
+     98, 97, 114, 13, 10, // bar\r\n
+  };
+  mock_io_delegate()->set_bytes(bytes);
+  mock_io_delegate()->SetOpenFileResult(domapi::IoContextId::New(), 0);
+  mock_io_delegate()->SetCallResult("ReadFile", 0, bytes.size());
+  mock_io_delegate()->SetCallResult("ReadFile", 0, 0);
   domapi::FileStatus file_status;
   file_status.file_size = 123456;
   file_status.is_directory = false;
@@ -214,17 +237,16 @@ TEST_F(DocumentTest, load_succeeded) {
   file_status.last_write_time = base::Time::FromJsTime(123456.0);
   file_status.readonly = true;
   mock_io_delegate()->SetFileStatus(file_status, 0);
-
-  EXPECT_CALL(*mock_io_delegate(), CloseFile(_, _));
+  mock_io_delegate()->SetCallResult("CloseFile", 0, 0);
 
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"
     "var promise = doc.load('foo.cc');");
+  EXPECT_EQ(1, mock_io_delegate()->num_close_called());
   EXPECT_SCRIPT_TRUE("promise instanceof Promise");
-  EXPECT_SCRIPT_VALID(
-      "var error_code;"
-      "promise.then(function(x) { error_code = x; });");
-  EXPECT_SCRIPT_EQ("0", "error_code");
+  EXPECT_SCRIPT_EQ("utf-8", "doc.encoding");
+  EXPECT_SCRIPT_EQ("8", "doc.length");
+  EXPECT_SCRIPT_EQ("3", "doc.newline");
   EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("123456", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");

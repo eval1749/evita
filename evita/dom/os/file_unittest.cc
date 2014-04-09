@@ -43,7 +43,7 @@ TEST_F(OsFileTest, OsFile_makeTempFileName_succeeded) {
 }
 
 TEST_F(OsFileTest, OsFile_move_failed) {
-  mock_io_delegate()->SetIoResult(123);
+  mock_io_delegate()->SetCallResult("MoveFile", 123);
   EXPECT_SCRIPT_VALID(
       "var result;"
       "function catcher(x) { result = x; }"
@@ -54,7 +54,7 @@ TEST_F(OsFileTest, OsFile_move_failed) {
 }
 
 TEST_F(OsFileTest, OsFile_move_succeeded) {
-  mock_io_delegate()->SetIoResult(0);
+  mock_io_delegate()->SetCallResult("MoveFile", 0);
   EXPECT_SCRIPT_VALID(
     "var result;"
     "function catcher(x) { result = x; }"
@@ -63,7 +63,7 @@ TEST_F(OsFileTest, OsFile_move_succeeded) {
   EXPECT_SCRIPT_EQ("boolean", "typeof(result)");
   EXPECT_SCRIPT_EQ("false", "result");
 
-  mock_io_delegate()->SetIoResult(0);
+  mock_io_delegate()->SetCallResult("MoveFile", 0);
   EXPECT_SCRIPT_VALID(
     "promise = Os.File.move('foo', 'bar', {noOverwrite: true}).then(catcher);");
   EXPECT_SCRIPT_EQ("true", "result");
@@ -74,7 +74,7 @@ TEST_F(OsFileTest, OsFile_move_succeeded) {
 }
 
 TEST_F(OsFileTest, OsFile_open_failed) {
-  mock_io_delegate()->SetOpenFileDeferredData(domapi::IoContextId(), 123);
+  mock_io_delegate()->SetOpenFileResult(domapi::IoContextId(), 123);
   EXPECT_SCRIPT_VALID(
     "var reason;"
     "Os.File.open('foo.js').catch(function(x) { reason = x; });");
@@ -83,7 +83,7 @@ TEST_F(OsFileTest, OsFile_open_failed) {
 }
 
 TEST_F(OsFileTest, OsFile_open_succeeded) {
-  mock_io_delegate()->SetOpenFileDeferredData(
+  mock_io_delegate()->SetOpenFileResult(
       domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var file;"
@@ -119,14 +119,14 @@ TEST_F(OsFileTest, OsFile_stat_succeeded) {
 }
 
 TEST_F(OsFileTest, OsFile_read_failed) {
-  mock_io_delegate()->SetOpenFileDeferredData(
+  mock_io_delegate()->SetOpenFileResult(
       domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var file;"
     "Os.File.open('foo.js').then(function(x) { file = x });");
   EXPECT_SCRIPT_TRUE("file instanceof Os.File");
 
-  mock_io_delegate()->SetFileIoDeferredData(0, 123);
+  mock_io_delegate()->SetCallResult("ReadFile", 123);
   EXPECT_SCRIPT_VALID(
     "var reason;"
     "var arrayBuffer = new ArrayBuffer(10);"
@@ -137,14 +137,14 @@ TEST_F(OsFileTest, OsFile_read_failed) {
 }
 
 TEST_F(OsFileTest, OsFile_read_succeeded) {
-  mock_io_delegate()->SetOpenFileDeferredData(
+  mock_io_delegate()->SetOpenFileResult(
       domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var file;"
     "Os.File.open('foo.js').then(function(x) { file = x });");
   EXPECT_SCRIPT_TRUE("file instanceof Os.File");
 
-  mock_io_delegate()->SetFileIoDeferredData(123, 0);
+  mock_io_delegate()->SetCallResult("ReadFile", 0, 123);
   EXPECT_SCRIPT_VALID(
     "var transferred;"
     "var arrayBuffer = new ArrayBuffer(10);"
@@ -155,7 +155,7 @@ TEST_F(OsFileTest, OsFile_read_succeeded) {
 
 
 TEST_F(OsFileTest, OsFile_remove_failed) {
-  mock_io_delegate()->SetIoResult(123);
+  mock_io_delegate()->SetCallResult("RemoveFile", 123);
   EXPECT_SCRIPT_VALID(
       "var result;"
       "function catcher(x) { result = x; }"
@@ -166,7 +166,7 @@ TEST_F(OsFileTest, OsFile_remove_failed) {
 }
 
 TEST_F(OsFileTest, OsFile_remove_succeeded) {
-  mock_io_delegate()->SetIoResult(0);
+  mock_io_delegate()->SetCallResult("RemoveFile", 0);
   EXPECT_SCRIPT_VALID(
     "var result;"
     "function catcher(x) { result = x; }"
@@ -177,14 +177,14 @@ TEST_F(OsFileTest, OsFile_remove_succeeded) {
 }
 
 TEST_F(OsFileTest, OsFile_write_failed) {
-  mock_io_delegate()->SetOpenFileDeferredData(
+  mock_io_delegate()->SetOpenFileResult(
       domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var file;"
     "Os.File.open('foo.js').then(function(x) { file = x });");
   EXPECT_SCRIPT_TRUE("file instanceof Os.File");
 
-  mock_io_delegate()->SetFileIoDeferredData(0, 123);
+  mock_io_delegate()->SetCallResult("WriteFile", 123);
   EXPECT_SCRIPT_VALID(
     "var reason;"
     "var arrayBuffer = new ArrayBuffer(10);"
@@ -195,14 +195,14 @@ TEST_F(OsFileTest, OsFile_write_failed) {
 }
 
 TEST_F(OsFileTest, OsFile_write_succeeded) {
-  mock_io_delegate()->SetOpenFileDeferredData(
+  mock_io_delegate()->SetOpenFileResult(
       domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
     "var file;"
     "Os.File.open('foo.js').then(function(x) { file = x });");
   EXPECT_SCRIPT_TRUE("file instanceof Os.File");
 
-  mock_io_delegate()->SetFileIoDeferredData(123, 0);
+  mock_io_delegate()->SetCallResult("WriteFile", 0, 123);
   EXPECT_SCRIPT_VALID(
     "var transferred;"
     "var arrayBuffer = new ArrayBuffer(10);"

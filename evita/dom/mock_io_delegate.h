@@ -6,7 +6,9 @@
 #define INCLUDE_evita_dom_mock_io_delegate_h
 
 #include <deque>
+#include <vector>
 
+#include "base/strings/string_piece.h"
 #include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_delegate.h"
 #pragma warning(push)
@@ -17,27 +19,38 @@
 namespace dom {
 
 class MockIoDelegate : public domapi::IoDelegate {
+  private: struct CallResult {
+    int error_code;
+    base::StringPiece name;
+    int num_transferred;
+  };
+
+  private: std::vector<uint8_t> bytes_;
   private: domapi::IoContextId context_id_;
-  private: std::deque<int> error_codes_;
+  private: std::deque<CallResult> call_results_;
   private: domapi::FileStatus file_status_;
-  private: std::deque<int> num_transferreds_;
+  private: int num_close_called_;
   private: base::string16 temp_file_name_;
 
   public: MockIoDelegate();
   public: virtual ~MockIoDelegate();
 
-  private: int PopErrorCode();
-  public: void SetFileIoDeferredData(int num_transferred, int error_code);
-  public: void SetIoResult(int error_code);
+  public: int num_close_called() const { return num_close_called_; }
+  public: void set_bytes(const std::vector<uint8_t> new_bytes);
+
+  private: CallResult PopCallResult(const base::StringPiece& name);
+  public: void SetCallResult(const base::StringPiece& name, int error_code);
+  public: void SetCallResult(const base::StringPiece& name, int erorr_code,
+                             int num_transferred);
   public: void SetMakeTempFileName(const base::string16 file_name,
                                    int error_code);
   public: void SetFileStatus(const domapi::FileStatus& data, int error_code);
-  public: void SetOpenFileDeferredData(domapi::IoContextId context_id,
-                                       int error_code);
+  public: void SetOpenFileResult(domapi::IoContextId context_id,
+                                 int error_code);
 
   // domapi::IoDelegate
-  MOCK_METHOD2(CloseFile, void(domapi::IoContextId,
-                               const domapi::FileIoDeferred& deferred));
+  public: virtual void CloseFile(domapi::IoContextId,
+                                 const domapi::FileIoDeferred& deferred);
   public: virtual void MakeTempFileName(
       const base::string16& dir_name, const base::string16& prefix,
       const domapi::MakeTempFileNameResolver& resolver) override;

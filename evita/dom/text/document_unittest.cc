@@ -344,11 +344,9 @@ TEST_F(DocumentTest, renameTo) {
   EXPECT_SCRIPT_EQ("bar", "doc.name");
 }
 
-TEST_F(DocumentTest, save_failed) {
-  domapi::SaveFileCallbackData data;
-  data.error_code = 123;
-  data.last_write_time = base::Time::FromJsTime(123456.0);
-  mock_view_impl()->SetSaveFileCallbackData(data);
+TEST_F(DocumentTest, save_failed_open) {
+  mock_io_delegate()->SetMakeTempFileName(L"foo.tmp", 0);
+  mock_io_delegate()->SetOpenFileResult(domapi::IoContextId(), 123);
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"
     "doc.save('foo.cc');");
@@ -358,14 +356,70 @@ TEST_F(DocumentTest, save_failed) {
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
 }
 
-TEST_F(DocumentTest, save_succeeded) {
-  domapi::SaveFileCallbackData data;
-  data.error_code = 0;
-  data.last_write_time = base::Time::FromJsTime(123456.0);
-  mock_view_impl()->SetSaveFileCallbackData(data);
+TEST_F(DocumentTest, save_failed_encode) {
+  mock_io_delegate()->SetMakeTempFileName(L"foo.tmp", 0);
+  mock_io_delegate()->SetOpenFileResult(domapi::IoContextId::New(), 0);
+  mock_io_delegate()->SetCallResult("CloseFile", 0);
+  mock_io_delegate()->SetCallResult("RemoveFile", 0);
+
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"
+    "new Range(doc).text = 'f\\u0234o\\nbar\\n';"
+    "doc.encoding = 'shift_jis';"
     "doc.save('foo.cc');");
+  EXPECT_EQ(1, mock_io_delegate()->num_close_called());
+  EXPECT_EQ(1, mock_io_delegate()->num_remove_called());
+  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
+  EXPECT_SCRIPT_EQ("-1", "doc.obsolete");
+  EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
+}
+
+TEST_F(DocumentTest, save_failed_write) {
+  mock_io_delegate()->SetMakeTempFileName(L"foo.tmp", 0);
+  mock_io_delegate()->SetOpenFileResult(domapi::IoContextId::New(), 0);
+  mock_io_delegate()->SetCallResult("WriteFile", 123);
+  mock_io_delegate()->SetCallResult("CloseFile", 0);
+  mock_io_delegate()->SetCallResult("RemoveFile", 0);
+
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "new Range(doc).text = 'foo\\nbar\\n';"
+    "doc.save('foo.cc');");
+  EXPECT_EQ(1, mock_io_delegate()->num_close_called());
+  EXPECT_EQ(1, mock_io_delegate()->num_remove_called());
+  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
+  EXPECT_SCRIPT_EQ("-1", "doc.obsolete");
+  EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
+}
+
+TEST_F(DocumentTest, save_succeeded) {
+  std::vector<uint8_t> expected_bytes {
+     102, 111, 111, 13, 10, // foo\r\n
+     98, 97, 114, 13, 10, // bar\r\n
+  };
+  mock_io_delegate()->set_bytes(expected_bytes);
+  mock_io_delegate()->SetMakeTempFileName(L"foo.tmp", 0);
+  mock_io_delegate()->SetOpenFileResult(domapi::IoContextId::New(), 0);
+  mock_io_delegate()->SetCallResult("WriteFile", 0, expected_bytes.size());
+  mock_io_delegate()->SetCallResult("CloseFile", 0);
+  mock_io_delegate()->SetCallResult("MoveFile", 0);
+  domapi::FileStatus file_status;
+  file_status.file_size = 10;
+  file_status.is_directory = false;
+  file_status.is_symlink = false;
+  file_status.last_write_time = base::Time::FromJsTime(123456.0);
+  file_status.readonly = false;
+  mock_io_delegate()->SetFileStatus(file_status, 0);
+
+  EXPECT_SCRIPT_VALID(
+    "var doc = new Document('foo');"
+    "new Range(doc).text = 'foo\\nbar\\n';"
+    "doc.save('foo.cc');");
+  EXPECT_EQ(1, mock_io_delegate()->num_close_called());
+  EXPECT_EQ(expected_bytes, mock_io_delegate()->bytes());
+
   EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("123456", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_EQ("0", "doc.obsolete");

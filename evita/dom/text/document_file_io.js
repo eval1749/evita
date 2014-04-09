@@ -147,7 +147,6 @@
       function readLoop() {
         var data = new Uint8Array(1024 * 8);
         function handleRead(num_bytes) {
-          console.log('handleRead', num_bytes);
           if (num_bytes) {
             if (!detector.detect(data.subarray(0, num_bytes)))
               return Promise.reject(new Error('Bad encoding'));

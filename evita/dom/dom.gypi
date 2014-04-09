@@ -28,6 +28,8 @@
       'commander.js',
       'text/document.js',
       'text/document_file_io.js',
+      'text/document_file_load.js',
+      'text/document_file_save.js',
       'editor.js',
       'windows/editor_window.js',
       'encodings/text_decoder.js',

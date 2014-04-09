@@ -236,6 +236,13 @@ void ScriptHost::ResetForTesting() {
   Window::ResetForTesting();
 }
 
+// This function is called by |PromiseResolver::ScheduleRunMicrotasks|.
+void ScriptHost::RunMicrotasks() {
+  v8_glue::Runner::Scope runner_scope(runner());
+  DOM_AUTO_LOCK_SCOPE();
+  v8::V8::RunMicrotasks(runner()->isolate());
+}
+
 ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
                                           domapi::IoDelegate* io_deleage) {
   // Node: Useing Application::instance() starts thread. So, we don't

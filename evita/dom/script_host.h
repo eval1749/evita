@@ -82,6 +82,7 @@ class ScriptHost : public v8_glue::RunnerDelegate {
   public: void PostTask(const tracked_objects::Location& from_here,
                         const base::Closure& task);
   public: void ResetForTesting();
+  public: void RunMicrotasks();
   public: static ScriptHost* Start(ViewDelegate* view_delegate,
                                          domapi::IoDelegate* io_delegate);
   public: static ScriptHost* StartForTesting(

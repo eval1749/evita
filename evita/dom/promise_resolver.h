@@ -39,6 +39,7 @@ class PromiseResolver : public base::RefCounted<PromiseResolver> {
   public: v8::Local<v8::Promise> GetPromise(v8::Isolate* isoalte) const;
   public: template<typename T> void Reject(T reason);
   public: template<typename T> void Resolve(T value);
+  private: void ScheduleRunMicrotasks();
 
   DISALLOW_COPY_AND_ASSIGN(PromiseResolver);
 };
@@ -69,7 +70,7 @@ void PromiseResolver::Reject(T reason) {
   auto const isolate = runner_->isolate();
   DoReject(gin::ConvertToV8(isolate, reason));
   // We run micro tasks to process result from |Promise| rather than idle time.
-  v8::V8::RunMicrotasks(isolate);
+  ScheduleRunMicrotasks();
 }
 
 template<typename T>
@@ -80,7 +81,7 @@ void PromiseResolver::Resolve(T value) {
   auto const isolate = runner_->isolate();
   DoResolve(gin::ConvertToV8(isolate, value));
   // We run micro tasks to process result from |Promise| rather than idle time.
-  v8::V8::RunMicrotasks(isolate);
+  ScheduleRunMicrotasks();
 }
 
 }  // namespace dom

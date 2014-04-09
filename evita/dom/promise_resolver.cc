@@ -4,6 +4,14 @@
 
 #include "evita/dom/promise_resolver.h"
 
+#pragma warning(push)
+#pragma warning(disable: 4100 4625 4626)
+#include "base/bind.h"
+#include "base/callback.h"
+#include "base/message_loop/message_loop.h"
+#pragma warning(pop)
+#include "evita/dom/script_host.h"
+
 namespace dom {
 
 PromiseResolver::PromiseResolver(v8_glue::Runner* runner)
@@ -32,6 +40,11 @@ void PromiseResolver::DoResolve(v8::Handle<v8::Value> value) {
 v8::Local<v8::Promise> PromiseResolver::GetPromise(v8::Isolate* isolate) const {
   auto const resolver = resolver_.NewLocal(isolate);
   return resolver->GetPromise();
+}
+
+void PromiseResolver::ScheduleRunMicrotasks() {
+  base::MessageLoop::current()->PostTask(FROM_HERE, base::Bind(
+      &ScriptHost::RunMicrotasks, base::Unretained(ScriptHost::instance())));
 }
 
 }  // namespace dom

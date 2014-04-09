@@ -109,9 +109,15 @@ TEST_F(EncodingsTest, Utf8Decoder) {
             Decode(decoder, std::vector<uint8_t> {0x61, 0x78}));
   EXPECT_EQ(base::string16(L"\u611B"),
             Decode(decoder, std::vector<uint8_t> {0xE6, 0x84, 0x9B}));
+  base::string16 surrogate_pair(2, 0);
+  surrogate_pair[0] = 0xD842;  // U+20BB7
+  surrogate_pair[1] = 0xDFB7;
+  EXPECT_EQ(surrogate_pair,
+            Decode(decoder, std::vector<uint8_t> {0xF0, 0xA0, 0xAE, 0xB7})) <<
+      "UTF-16 surrogate D800..DBFF, DC00..DFFF";
   EXPECT_EQ(L"EncodingError",
             DecodeStream(decoder, std::vector<uint8_t>{0x41, 0xA9, 0x42})) <<
-    "Bad UTF-8 byte stream, it contains 0xA9.";
+      "Bad UTF-8 byte stream, it contains 0xA9.";
 }
 
 TEST_F(EncodingsTest, Utf8Encoder) {

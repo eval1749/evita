@@ -75,14 +75,10 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: void EndUndoGroup(const base::string16& name);
   public: text::LineAndColumn GetLineAndColumn(text::Posn offset) const;
   public: bool IsValidPosition(text::Posn position) const;
-  public: void Load(const base::string16& filename,
-                    v8::Handle<v8::Function> callback);
   public: v8::Handle<v8::Value> Match(RegExp* regexp, int start, int end);
   public: static Document* New(const base::string16& name, Mode* mode);
   public: Posn Redo(Posn position);
   public: void RenameTo(const base::string16& new_name);
-  public: void Save(const base::string16& filename,
-                    v8::Handle<v8::Function> callback);
   public: base::string16 Slice(int start, v8_glue::Optional<int> opt_end);
   public: void StartUndoGroup(const base::string16& name);
   public: Posn Undo(Posn position);

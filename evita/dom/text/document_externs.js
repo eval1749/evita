@@ -190,12 +190,6 @@ Document.prototype.listWindows = function() {};
 Document.prototype.load = function(opt_filename) {};
 
 /**
- * @param {string} filename
- * @param {function(number)} callback
- */
-Document.prototype.load_ = function(filename, callback) {};
-
-/**
  * @param {!Editor.RegExp} regexp
  * @param {number} start
  * @param {number} end
@@ -222,12 +216,6 @@ Document.prototype.renameTo = function(new_name) {}
  * @return {!Promise.<number>}
  */
 Document.prototype.save = function(opt_filename) {};
-
-/**
- * @param {string} filename
- * @param {function(number)} callback
- */
-Document.prototype.save_ = function(filename, callback) {};
 
 /**
  * @param {number} start

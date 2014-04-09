@@ -180,90 +180,15 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
       .SetMethod("doColor_", &Document::DoColor)
       .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
       .SetMethod("getLineAndColumn_", &Document::GetLineAndColumn)
-      .SetMethod("load_", &Document::Load)
       .SetMethod("match_", &Document::Match)
       .SetMethod("redo", &Document::Redo)
       .SetMethod("renameTo", &Document::RenameTo)
-      .SetMethod("save_", &Document::Save)
       .SetMethod("slice", &Document::Slice)
       .SetMethod("startUndoGroup_", &Document::StartUndoGroup)
       .SetMethod("spellingAt", &Document::spelling_at)
       .SetMethod("styleAt", &Document::style_at)
       .SetMethod("undo", &Document::Undo);
 }
-
-//////////////////////////////////////////////////////////////////////
-//
-// LoadFileCallback
-//
-class LoadFileCallback : public base::RefCounted<LoadFileCallback> {
-  private: gc::Member<Document> document_;
-  private: v8_glue::ScopedPersistent<v8::Function> function_;
-  private: base::WeakPtr<v8_glue::Runner> runner_;
-
-  public: LoadFileCallback(v8_glue::Runner* runner,
-                           Document* document,
-                           v8::Handle<v8::Function> function)
-    : document_(document), function_(runner->isolate(), function),
-      runner_(runner->GetWeakPtr()) {
-  }
-
-  public: void Run(const domapi::LoadFileCallbackData& data) {
-    auto const buffer = document_->buffer();
-    if (!data.error_code) {
-      buffer->SetCodePage(static_cast<uint32_t>(data.code_page));
-      buffer->SetNewline(data.newline_mode);
-      buffer->SetFile(buffer->GetFileName(), data.last_write_time);
-      buffer->SetReadOnly(data.readonly);
-      // Noet: There is no good reason to undo of file loading. Although, users
-      // can undo failure loading.
-      buffer->ClearUndo();
-    }
-    buffer->FinishIo(static_cast<uint32_t>(data.error_code));
-    if (!runner_)
-      return;
-    v8_glue::Runner::Scope runner_scope(runner_.get());
-    auto const isolate = runner_->isolate();
-    auto const function = function_.NewLocal(isolate);
-    runner_->Call(function, document_->GetWrapper(isolate),
-                  v8::Integer::New(isolate, data.error_code));
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(LoadFileCallback);
-};
-
-//////////////////////////////////////////////////////////////////////
-//
-// SaveFileCallback
-//
-class SaveFileCallback : public base::RefCounted<SaveFileCallback> {
-  private: gc::Member<Document> document_;
-  private: v8_glue::ScopedPersistent<v8::Function> function_;
-  private: base::WeakPtr<v8_glue::Runner> runner_;
-
-  public: SaveFileCallback(v8_glue::Runner* runner,
-                           Document* document,
-                           v8::Handle<v8::Function> function)
-    : document_(document), function_(runner->isolate(), function),
-      runner_(runner->GetWeakPtr()) {
-  }
-
-  public: void Run(const domapi::SaveFileCallbackData& data) {
-    auto const buffer = document_->buffer();
-    if (!data.error_code)
-      buffer->SetFile(buffer->GetFileName(), data.last_write_time);
-    buffer->FinishIo(static_cast<uint32_t>(data.error_code));
-    if (!runner_)
-      return;
-    v8_glue::Runner::Scope runner_scope(runner_.get());
-    auto const isolate = runner_->isolate();
-    auto const function = function_.NewLocal(isolate);
-    runner_->Call(function, document_->GetWrapper(isolate),
-                  v8::Integer::New(isolate, data.error_code));
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(SaveFileCallback);
-};
 
 }  // namespace
 
@@ -418,18 +343,6 @@ bool Document::IsValidPosition(text::Posn position) const {
   return false;
 }
 
-void Document::Load(const base::string16& filename,
-                    v8::Handle<v8::Function> callback) {
-  // We'll set read-only flag from file attributes.
-  buffer()->SetReadOnly(false);
-  buffer()->Delete(0, buffer()->GetEnd());
-  auto const runner = ScriptHost::instance()->runner();
-  auto const load_callback = make_scoped_refptr(
-      new LoadFileCallback(runner, this, callback));
-  ScriptHost::instance()->view_delegate()->LoadFile(this, filename,
-      base::Bind(&LoadFileCallback::Run, load_callback));
-}
-
 v8::Handle<v8::Value> Document::Match(RegExp* regexp, int start, int end) {
   return regexp->ExecuteOnDocument(this, start, end);
 }
@@ -446,15 +359,6 @@ Posn Document::Redo(Posn position) {
 
 void Document::RenameTo(const base::string16& new_name) {
   DocumentSet::instance()->RenameDocument(this, new_name);
-}
-
-void Document::Save(const base::string16& filename,
-                    v8::Handle<v8::Function> callback) {
-  auto const runner = ScriptHost::instance()->runner();
-  auto const save_callback = make_scoped_refptr(
-      new SaveFileCallback(runner, this, callback));
-  ScriptHost::instance()->view_delegate()->SaveFile(this, filename,
-      base::Bind(&SaveFileCallback::Run, save_callback));
 }
 
 base::string16 Document::Slice(int start, v8_glue::Optional<int> opt_end) {

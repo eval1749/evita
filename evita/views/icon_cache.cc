@@ -101,8 +101,11 @@ int IconCache::Intern(const base::string16& name) {
   if (it != map_.end())
     return it->second + 1;
 
-  if (auto const icon = LoadIconFromRegistry(name))
-    return AddIcon(name, icon) + 1;
+  if (auto const icon = LoadIconFromRegistry(name)) {
+    auto const index = AddIcon(name, icon) + 1;
+    ::DestroyIcon(icon);
+    return index;
+  }
 
   return 0;
 }

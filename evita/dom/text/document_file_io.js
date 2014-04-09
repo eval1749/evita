@@ -97,7 +97,7 @@
    * @param {string} absolute_filename
    * @return {Document}
    */
-  function findDocumentOnFile(absolute_filename) {
+  Document.findFile = function(absolute_filename) {
     var canonical_filename = absolute_filename.toLocaleLowerCase();
     return /** @type{Document} */ (Document.list.find(
         function(document) {
@@ -274,7 +274,7 @@
     } else {
       var filename = /** @type{string} */(opt_filename);
       var absolute_filename = FilePath.fullPath(filename);
-      var present = findDocumentOnFile(absolute_filename);
+      var present = Document.findFile(absolute_filename);
       if (present && present !== this)
         throw filename + ' is already bound to ' + present;
       document.filename = absolute_filename;
@@ -319,7 +319,7 @@
    */
   Document.open = function(filename) {
     var absolute_filename = FilePath.fullPath(filename);
-    var present = findDocumentOnFile(absolute_filename);
+    var present = Document.findFile(absolute_filename);
     if (present)
       return present;
     var document = new Document(FilePath.basename(filename));
@@ -367,7 +367,7 @@
     } else {
       var filename = /** @type{string} */(opt_filename);
       var absolute_filename = FilePath.fullPath(filename);
-      var present = findDocumentOnFile(absolute_filename);
+      var present = Document.findFile(absolute_filename);
       if (present && present !== this)
         throw filename + ' is already bound to ' + present;
       document.filename = absolute_filename;

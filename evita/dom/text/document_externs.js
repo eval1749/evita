@@ -32,6 +32,11 @@ Document.addObserver = function(observer) {};
  * @return {?Document}
  */
 Document.find = function(name) {};
+/**
+ * @param {string} absolute_file_name
+ * @return {?Document}
+ */
+Document.findFile = function(absolute_file_name) {};
 
 /**
  * @param {string} name

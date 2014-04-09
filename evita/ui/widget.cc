@@ -233,7 +233,7 @@ void Widget::DispatchPaintMessage() {
   if (!::GetUpdateRect(*native_window(), &exposed_rect, false))
     return;
   #if DEBUG_PAINT
-    DEBUG_WIDGET_PRINTF("Start " DEBUG_RECT_FORMAT "\n", 
+    DEBUG_WIDGET_PRINTF("Start " DEBUG_RECT_FORMAT "\n",
         DEBUG_RECT_ARG(exposed_rect));
   #endif
   OnPaint(exposed_rect);
@@ -316,7 +316,8 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message, WPARAM wParam,
                       KeyboardEvent::ConvertToKeyCode(wParam),
                       KeyboardEvent::ConvertToRepeat(lParam));
 
-  if (message == WM_KEYDOWN && event.raw_key_code() <= 0xFF) {
+  if (message == WM_KEYDOWN && event.key_code() <= 0x7E && !event.alt_key() &&
+      !event.control_key()) {
     // We use WM_CHAR for graphic key down.
     return OnMessage(message, wParam, lParam);
   }

@@ -54,9 +54,6 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       dom::WindowId window_id,
       const std::vector<base::string16>& keys) override;
   private: virtual void HideWindow(dom::WindowId window_id) override;
-  private: virtual void LoadFile(dom::Document* document,
-                                 const base::string16& filename,
-                                 LoadFileCallback callback) override;
   private: virtual void MakeSelectionVisible(dom::WindowId window_id) override;
   private: virtual text::Posn MapPointToPosition(dom::WindowId window_id,
                                                  float x, float y) override;
@@ -71,9 +68,6 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void RegisterViewEventHandler(
       domapi::ViewEventHandler* event_handler) override;
   private: virtual void ReleaseCapture(dom::WindowId window_id) override;
-  private: virtual void SaveFile(dom::Document* document,
-                                 const base::string16& filename,
-                                 const SaveFileCallback& callback) override;
   private: virtual void ScrollTextWindow(dom::WindowId window_id,
                                          int direction) override;
   private: virtual void SetCapture(dom::WindowId window_id) override;

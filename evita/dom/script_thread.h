@@ -104,9 +104,6 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;
   private: virtual void HideWindow(WindowId window_id) override;
-  private: virtual void LoadFile(Document* document,
-                                 const base::string16& filename,
-                                 LoadFileCallback callback) override;
   private: virtual void MakeSelectionVisible(WindowId window_id) override;
   private: virtual text::Posn MapPointToPosition(WindowId window_id,
                                                  float x, float y) override;
@@ -121,9 +118,6 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void RegisterViewEventHandler(
       domapi::ViewEventHandler* event_handler) override;
   private: virtual void ReleaseCapture(WindowId window_id) override;
-  private: virtual void SaveFile(Document* document,
-                                 const base::string16& filename,
-                                 const SaveFileCallback& callback) override;
   private: virtual void ScrollTextWindow(WindowId window_id,
                                          int direction) override;
   private: virtual void SetCapture(WindowId window_id) override;

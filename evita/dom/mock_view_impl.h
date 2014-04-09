@@ -21,8 +21,6 @@ namespace dom {
 class MockViewImpl : public dom::ViewDelegate {
   private: bool check_spelling_result_;
   private: std::vector<base::string16> spelling_suggestions_;
-  private: domapi::LoadFileCallbackData load_file_callback_data_;
-  private: domapi::SaveFileCallbackData save_file_callback_data_;
 
   public: MockViewImpl();
   public: virtual ~MockViewImpl();
@@ -34,10 +32,6 @@ class MockViewImpl : public dom::ViewDelegate {
       const std::vector<base::string16>& spelling_suggestions) {
     spelling_suggestions_ = spelling_suggestions;
   }
-  public: void SetLoadFileCallbackData(
-      const domapi::LoadFileCallbackData& data);
-  public: void SetSaveFileCallbackData(
-      const domapi::SaveFileCallbackData& data);
 
   // ViewDelegate
   MOCK_METHOD2(AddWindow, void(WindowId, WindowId));
@@ -67,8 +61,6 @@ class MockViewImpl : public dom::ViewDelegate {
   public: std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;
   MOCK_METHOD1(HideWindow, void(WindowId));
-  public: void LoadFile(Document* document, const base::string16& filename,
-                        LoadFileCallback callback);
   MOCK_METHOD1(MakeSelectionVisible, void(WindowId));
   MOCK_METHOD3(MapPointToPosition, text::Posn(WindowId, float x, float y));
   MOCK_METHOD2(MapPositionToPoint,
@@ -77,9 +69,6 @@ class MockViewImpl : public dom::ViewDelegate {
       const base::string16& message, const base::string16& title, int flags,
       MessageBoxCallback callback) override;
   MOCK_METHOD3(Reconvert, void(WindowId, text::Posn, text::Posn));
-  public: virtual void SaveFile(Document* document,
-                                const base::string16& filename,
-                                const SaveFileCallback& callback) override;
   MOCK_METHOD1(RealizeWindow, void(WindowId));
   MOCK_METHOD1(RegisterViewEventHandler, void(domapi::ViewEventHandler*));
   MOCK_METHOD1(ReleaseCapture, void(WindowId));

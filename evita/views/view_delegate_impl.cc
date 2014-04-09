@@ -6,9 +6,6 @@
 #include <sstream>
 
 #include "base/logging.h"
-// TODO(yosi) We should not use |dom::Buffer| outside DOM.
-#include "evita/dom/text/buffer.h"
-#include "evita/dom/text/document.h"
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/windows/text_window.h"
@@ -278,12 +275,6 @@ void ViewDelegateImpl::HideWindow(dom::WindowId window_id) {
   window->Hide();
 }
 
-void ViewDelegateImpl::LoadFile(dom::Document* document,
-                                const base::string16& filename,
-                                LoadFileCallback callback) {
-  document->buffer()->Load(filename.c_str(), callback);
-}
-
 void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
   DCHECK_NE(dom::kInvalidWindowId, window_id);
   auto const widget = Window::FromWindowId(window_id);
@@ -386,16 +377,6 @@ void ViewDelegateImpl::RegisterViewEventHandler(
   DCHECK(!event_handler_);
   event_handler_ = event_handler;
   event_handler_->DidStartViewHost();
-}
-void ViewDelegateImpl::SaveFile(dom::Document* document,
-                                const base::string16& filename,
-                                const SaveFileCallback& callback) {
-  auto const buffer = document->buffer();
-  auto const code_page = buffer->GetCodePage() ?
-      static_cast<int>(buffer->GetCodePage()) : 932;
-  auto const newline_mode = buffer->GetNewline() == NewlineMode_Detect ?
-        NewlineMode_CrLf : buffer->GetNewline();
-  buffer->Save(filename, code_page, newline_mode, callback);
 }
 
 void ViewDelegateImpl::ShowWindow(dom::WindowId window_id) {

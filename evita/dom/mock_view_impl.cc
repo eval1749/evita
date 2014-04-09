@@ -14,16 +14,6 @@ MockViewImpl::MockViewImpl() : check_spelling_result_(false) {
 MockViewImpl::~MockViewImpl() {
 }
 
-void MockViewImpl::SetLoadFileCallbackData(
-    const domapi::LoadFileCallbackData& data) {
-  load_file_callback_data_ = data;
-}
-
-void MockViewImpl::SetSaveFileCallbackData(
-    const domapi::SaveFileCallbackData& data) {
-  save_file_callback_data_ = data;
-}
-
 // dom::ViewDelegate
 void MockViewImpl::CheckSpelling(const base::string16&,
     const CheckSpellingDeferred& deferred) {
@@ -56,20 +46,10 @@ std::vector<int> MockViewImpl::GetTableRowStates(WindowId,
   return std::move(states);
 }
 
-void MockViewImpl::LoadFile(Document*, const base::string16&,
-                            LoadFileCallback callback) {
-  callback.Run(load_file_callback_data_);
-}
-
 void MockViewImpl::MessageBox(WindowId, const base::string16&,
                               const base::string16&, int flags,
                               MessageBoxCallback callback) {
   callback.Run(flags);
-}
-
-void MockViewImpl::SaveFile(Document*, const base::string16&,
-                            const SaveFileCallback& callback) {
-  callback.Run(save_file_callback_data_);
 }
 
 }  // namespace dom

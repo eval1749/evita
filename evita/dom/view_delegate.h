@@ -108,9 +108,6 @@ class ViewDelegate {
   public: virtual std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) = 0;
   public: virtual void HideWindow(WindowId window_id) = 0;
-  public: virtual void LoadFile(Document* document,
-                                const base::string16& filename,
-                                LoadFileCallback callback) = 0;
   public: virtual void MakeSelectionVisible(WindowId window_id) = 0;
   public: virtual text::Posn MapPointToPosition(WindowId window_id,
                                                 float x, float y) = 0;
@@ -125,10 +122,6 @@ class ViewDelegate {
   public: virtual void RegisterViewEventHandler(
       domapi::ViewEventHandler* event_handler) = 0;
   public: virtual void ReleaseCapture(WindowId window_id) = 0;
-  public: virtual void SaveFile(Document* document,
-                                const base::string16& filename,
-                                const SaveFileCallback& callback) = 0;
-
   public: /* synchronous */ virtual void ScrollTextWindow(WindowId windowId,
                                                           int direction) = 0;
   public: virtual void SetCapture(WindowId window_id) = 0;

@@ -16,6 +16,7 @@ namespace encodings {
 //
 class Utf8Decoder::Private {
   private: enum class State {
+    BadInput,
     FirstByte,
     LastByte,
     SecondByteOfThreeByteEncoding,
@@ -26,6 +27,11 @@ class Utf8Decoder::Private {
 
   public: Private();
   public: ~Private();
+
+  // |string| contains characters decoded so far. Caller may use it what's
+  // wrong in input data.
+  private: common::Either<bool, base::string16> BadInput(
+      const base::string16& string);
 
   public: common::Either<bool, base::string16> Decode(
       const uint8_t* bytes, size_t num_bytes, bool is_stream);
@@ -39,16 +45,29 @@ Utf8Decoder::Private::Private() : char16_(0), state_(State::FirstByte) {
 Utf8Decoder::Private::~Private() {
 }
 
+common::Either<bool, base::string16> Utf8Decoder::Private::BadInput(
+    const base::string16& string) {
+  state_ = State::BadInput;
+  return common::make_either(false, string);
+}
+
 // U+0000..U+007F 0xxxxxxx
 // U+0080..U+07FF 110xxxxx 10xxxxxx
 // U+0800..U+FFFF 1110xxxx 10xxxxxx 10xxxxxx
 common::Either<bool, base::string16> Utf8Decoder::Private::Decode(
       const uint8_t* bytes, size_t num_bytes, bool is_stream) {
+  if (!is_stream) {
+    // Reset decode stream when we start decoding.
+    state_ = State::FirstByte;
+  }
+
   std::basic_stringbuf<base::char16> output;
   auto const bytes_end = bytes + num_bytes;
   for (auto runner = bytes; runner < bytes_end; ++runner) {
     auto const byte = *runner;
     switch (state_) {
+      case State::BadInput:
+        return BadInput(base::string16());
       case State::FirstByte:
         if (byte <= 0x7E) {
           output.sputc(static_cast<base::char16>(byte));
@@ -64,7 +83,7 @@ common::Either<bool, base::string16> Utf8Decoder::Private::Decode(
           state_ = State::SecondByteOfThreeByteEncoding;
           break;
         }
-        return common::make_either(is_stream, output.str());
+        return BadInput(output.str());
       case State::LastByte:
         if (byte >= 0x80 && byte <= 0xBF) {
           char16_ |= byte & 0x3F;
@@ -72,14 +91,14 @@ common::Either<bool, base::string16> Utf8Decoder::Private::Decode(
           state_ = State::FirstByte;
           break;
         }
-        return common::make_either(is_stream, output.str());
+        return BadInput(output.str());
       case State::SecondByteOfThreeByteEncoding:
         if (byte >= 0x80 && byte <= 0xBF) {
           char16_ |= (byte & 0x3F) << 6;
           state_ = State::LastByte;
           break;
         }
-        return common::make_either(is_stream, output.str());
+        return BadInput(output.str());
       default:
         NOTREACHED();
         break;
@@ -87,6 +106,8 @@ common::Either<bool, base::string16> Utf8Decoder::Private::Decode(
   }
   if (is_stream)
     return common::make_either(true, output.str());
+
+  // We should not expect more bytes.
   auto const error = state_ == State::FirstByte;
   state_ = State::FirstByte;
   return common::make_either(error, output.str());

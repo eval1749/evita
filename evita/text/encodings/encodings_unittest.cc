@@ -27,7 +27,13 @@ class EncodingsTest : public ::testing::Test {
                                 const std::vector<uint8_t> bytes) {
     auto const result = decoder->Decode(bytes.data(), bytes.size(), false);
     return result.left ? result.right : L"";
- }
+  }
+
+  public: base::string16 DecodeStream(encodings::Decoder* decoder,
+                                const std::vector<uint8_t> bytes) {
+    auto const result = decoder->Decode(bytes.data(), bytes.size(), true);
+    return result.left ? result.right : L"EncodingError";
+  }
 
   public: std::vector<uint8_t> Encode(encodings::Encoder* encoder,
                                       const base::string16& string) {
@@ -103,6 +109,9 @@ TEST_F(EncodingsTest, Utf8Decoder) {
             Decode(decoder, std::vector<uint8_t> {0x61, 0x78}));
   EXPECT_EQ(base::string16(L"\u611B"),
             Decode(decoder, std::vector<uint8_t> {0xE6, 0x84, 0x9B}));
+  EXPECT_EQ(L"EncodingError",
+            DecodeStream(decoder, std::vector<uint8_t>{0x41, 0xA9, 0x42})) <<
+    "Bad UTF-8 byte stream, it contains 0xA9.";
 }
 
 TEST_F(EncodingsTest, Utf8Encoder) {

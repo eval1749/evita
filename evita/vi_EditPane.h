@@ -89,7 +89,6 @@ class EditPane final : public Pane {
   private: LeafBox* GetActiveLeafBox() const;
   public: virtual HCURSOR GetCursorAt(const Point&) const override;
   public: Window* GetActiveWindow() const;
-  public: text::Buffer* GetBuffer() const;
   public: virtual views::Window* GetWindow() const override;
 
   public: Window* GetFirstWindow() const;

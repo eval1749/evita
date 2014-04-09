@@ -1168,15 +1168,6 @@ EditPane::Window* EditPane::GetActiveWindow() const {
   return pBox ? pBox->GetWindow() : nullptr;
 }
 
-text::Buffer* EditPane::GetBuffer() const {
-  auto const window = GetActiveWindow();
-  if (!window)
-    return nullptr;
-  if (auto const text_edit_window = window->as<TextEditWindow>())
-    return text_edit_window->buffer();
-  return nullptr;
-}
-
 HCURSOR EditPane::GetCursorAt(const gfx::Point& point) const {
   auto const result = root_box_->HitTest(point);
   switch (result.type) {

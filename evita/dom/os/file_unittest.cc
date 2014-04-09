@@ -202,13 +202,16 @@ TEST_F(OsFileTest, OsFile_write_succeeded) {
     "Os.File.open('foo.js').then(function(x) { file = x });");
   EXPECT_SCRIPT_TRUE("file instanceof Os.File");
 
-  mock_io_delegate()->SetCallResult("WriteFile", 0, 123);
+  std::vector<uint8_t> expected_bytes {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  mock_io_delegate()->SetCallResult("WriteFile", 0, expected_bytes.size());
   EXPECT_SCRIPT_VALID(
     "var transferred;"
     "var arrayBuffer = new ArrayBuffer(10);"
     "var arrayView = new Uint8Array(arrayBuffer);"
+    "for (var i = 0; i < arrayView.length; ++i) arrayView[i] = i;"
     "file.write(arrayView).then(function(x) { transferred = x; });");
-  EXPECT_SCRIPT_EQ("123", "transferred");
+  EXPECT_SCRIPT_EQ("10", "transferred");
+  EXPECT_EQ(expected_bytes, mock_io_delegate()->bytes());
 }
 
 }  // namespace

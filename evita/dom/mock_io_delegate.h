@@ -6,6 +6,7 @@
 #define INCLUDE_evita_dom_mock_io_delegate_h
 
 #include <deque>
+#include <ostream>
 #include <vector>
 
 #include "base/strings/string_piece.h"
@@ -35,8 +36,9 @@ class MockIoDelegate : public domapi::IoDelegate {
   public: MockIoDelegate();
   public: virtual ~MockIoDelegate();
 
-  public: int num_close_called() const { return num_close_called_; }
+  public: const std::vector<uint8_t>& bytes() const { return bytes_; }
   public: void set_bytes(const std::vector<uint8_t> new_bytes);
+  public: int num_close_called() const { return num_close_called_; }
 
   private: CallResult PopCallResult(const base::StringPiece& name);
   public: void SetCallResult(const base::StringPiece& name, int error_code);

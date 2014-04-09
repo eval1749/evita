@@ -145,13 +145,16 @@ void MockIoDelegate::RemoveFile(const base::string16&,
     resolver.resolve.Run(true);
 }
 
-void MockIoDelegate::WriteFile(domapi::IoContextId, void*, size_t,
-                              const domapi::FileIoDeferred& deferred) {
+void MockIoDelegate::WriteFile(domapi::IoContextId,
+                               void* bytes, size_t num_bytes,
+                               const domapi::FileIoDeferred& deferred) {
   auto const result = PopCallResult("WriteFile");
   if (auto const error_code = result.error_code) {
     deferred.reject.Run(domapi::IoError(error_code));
     return;
   }
+  bytes_.resize(num_bytes);
+  ::memcpy(&bytes_[0], bytes, num_bytes);
   deferred.resolve.Run(result.num_transferred);
 }
 

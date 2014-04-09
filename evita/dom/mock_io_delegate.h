@@ -31,6 +31,7 @@ class MockIoDelegate : public domapi::IoDelegate {
   private: std::deque<CallResult> call_results_;
   private: domapi::FileStatus file_status_;
   private: int num_close_called_;
+  private: int num_remove_called_;
   private: base::string16 temp_file_name_;
 
   public: MockIoDelegate();
@@ -39,6 +40,7 @@ class MockIoDelegate : public domapi::IoDelegate {
   public: const std::vector<uint8_t>& bytes() const { return bytes_; }
   public: void set_bytes(const std::vector<uint8_t> new_bytes);
   public: int num_close_called() const { return num_close_called_; }
+  public: int num_remove_called() const { return num_remove_called_; }
 
   private: CallResult PopCallResult(const base::StringPiece& name);
   public: void SetCallResult(const base::StringPiece& name, int error_code);

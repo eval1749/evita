@@ -14,7 +14,8 @@
 
 namespace dom {
 
-MockIoDelegate::MockIoDelegate() : num_close_called_(0) {
+MockIoDelegate::MockIoDelegate()
+    : num_close_called_(0), num_remove_called_(0) {
 }
 
 MockIoDelegate::~MockIoDelegate() {
@@ -26,6 +27,7 @@ void MockIoDelegate::set_bytes(const std::vector<uint8_t> new_bytes) {
 
 MockIoDelegate::CallResult MockIoDelegate::PopCallResult(
     const base::StringPiece& name) {
+  DCHECK(call_results_.size()) << "Expect " << name;
   auto result = call_results_.front();
   DCHECK_EQ(name, result.name);
   call_results_.pop_front();
@@ -138,6 +140,7 @@ void MockIoDelegate::ReadFile(domapi::IoContextId,
 
 void MockIoDelegate::RemoveFile(const base::string16&,
                                 const domapi::IoResolver& resolver) {
+  ++num_remove_called_;
   auto const result = PopCallResult("RemoveFile");
   if (auto const error_code = result.error_code)
     resolver.reject.Run(domapi::IoError(error_code));

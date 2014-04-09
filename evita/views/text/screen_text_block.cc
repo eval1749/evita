@@ -269,12 +269,9 @@ bool ScreenTextBlock::RenderContext::Render() {
     #endif
     RestoreSkipRect(rect);
   }
+  FillBottom(format_lines_.back());
 
   auto const dirty = !copy_rects_.empty() || !dirty_rects_.empty();
-
-  if (dirty)
-    FillBottom(format_lines_.back());
-
   #if DEBUG_DRAW
     DVLOG(0) << "End rendering dirty=" << dirty;
   #endif

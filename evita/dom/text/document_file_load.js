@@ -116,7 +116,7 @@
       opened_file = file;
       var detector = new EncodingDetector();
       function readLoop() {
-        var data = new Uint8Array(1024 * 8);
+        var data = new Uint8Array(1024 * 64);
         function handleRead(num_bytes) {
           if (num_bytes) {
             if (!detector.detect(data.subarray(0, num_bytes)))

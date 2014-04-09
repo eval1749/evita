@@ -82,6 +82,9 @@ Document.prototype.lastWriteTime;
 /** @expose  @type {number} */
 Document.prototype.length;
 
+/** @expose  @type {!Generator.<string>} */
+Document.prototype.lines;
+
 /** @expose  @type {!Mode} */
 Document.prototype.mode;
 

@@ -16,6 +16,10 @@
       'unicode_enums.js',
       'windows/window_enums.js',
      ],
+     # JS source code files which use ES6 syntax, e.g. generators.
+     'js_es6_files': [
+       'text/document_es6.js',
+     ],
     'js_lib_files': [
       'polyfill.js',
       'key_names.js',
@@ -250,6 +254,7 @@
             '<(DEPTH)/evita/dom/make_get_jslib.py',
             '<@(js_defs_files)',
             '<@(js_lib_files)',
+            '<@(js_es6_files)',
           ], # inputs
           'outputs': [ '<(SHARED_INTERMEDIATE_DIR)/dom_jslib.cc' ],
           'action': [
@@ -258,6 +263,7 @@
             '<@(_outputs)',
             '<@(js_defs_files)',
             '<@(js_lib_files)',
+            '<@(js_es6_files)',
           ], # action
         }, # js2c
       ], # actions

@@ -9,6 +9,7 @@
  *
  * This file contains following ES6 classes:
  *  - Array
+ *  - Generator
  *  - Iterable
  *  - Map
  *  - Promise
@@ -27,6 +28,21 @@ Array.prototype.find = function(callback, this_arg) {};
 
 /** @typedef {Array} */
 var Iterable;
+
+//////////////////////////////////////////////////////////////////////
+//
+// Generator
+//
+/**
+ * @constructor
+ */
+function Generator() {}
+
+/**
+ * @template T
+ * @return {{done: boolean, value: T}}
+ */
+Generator.prototype.next = function() {};
 
 //////////////////////////////////////////////////////////////////////
 //

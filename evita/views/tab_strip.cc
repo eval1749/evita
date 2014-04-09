@@ -555,7 +555,6 @@ static void loadDragTabCursor() {
 
 }  // namespace
 
-
 namespace views {
 
 //////////////////////////////////////////////////////////////////////
@@ -1345,7 +1344,6 @@ TabStrip::TabStripImpl::~TabStripImpl() {
     ::DestroyMenu(m_hTabListMenu);
   }
 }
-
 
 void TabStrip::TabStripImpl::DidChangeTabSelection() {
   delegate_->DidChangeTabSelection(m_pSelected ? m_pSelected->m_iItem : -1);

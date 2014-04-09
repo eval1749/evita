@@ -36,7 +36,7 @@ class KeyCodeMapper : public common::Singleton<KeyCodeMapper> {
 int KeyCodeMapper::Map(int virtual_key_code) {
   if (VK_CONTROL == virtual_key_code)
     return 0;
-  if (VK_MENU== virtual_key_code)
+  if (VK_MENU == virtual_key_code)
     return 0;
   if (VK_SHIFT == virtual_key_code)
     return 0;

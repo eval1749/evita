@@ -23,7 +23,7 @@ class SelectionModel {
   public: void Add(int index);
   public: void Clear();
   public: void CollapseTo(int index);
-  public: void DidAddItem();
+  public: void DidAddItem(int index);
   public: void DidRemoveItem(int index);
   public: void Extend(int direction);
   public: void ExtendTo(int index);

@@ -30,11 +30,21 @@ void SelectionModel::CollapseTo(int index) {
   set_.insert(index);
 }
 
-void SelectionModel::DidAddItem() {
+void SelectionModel::DidAddItem(int index) {
+  if (anchor_ >= index)
+    ++anchor_;
+  if (focus_ >= index)
+    ++focus_;
   ++size_;
+  std::unordered_set<int> old_set(set_);
+  set_.clear();
+  for (auto member : old_set) {
+    set_.insert(member >= index ? member + 1 : member);
+  }
 }
 
 void SelectionModel::DidRemoveItem(int index) {
+  --size_;
   if (anchor_ >= index)
     anchor_ = std::max(anchor_ - 1, 0);
   if (focus_ >= index)

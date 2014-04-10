@@ -26,6 +26,13 @@ struct COMMON_EXPORT Rect : RECT {
     bottom = top + size.cy;
   }
 
+  Rect(const Point& left_top, const Point& right_bottom) {
+    left = left_top.x;
+    top = left_top.y;
+    right = right_bottom.x;
+    bottom = right_bottom.y;
+  }
+
   Rect(RECT rc) {
     left = rc.left; right = rc.right; top = rc.top; bottom = rc.bottom;
   }
@@ -42,6 +49,7 @@ struct COMMON_EXPORT Rect : RECT {
   bool empty() const { return width() <= 0 || height() <= 0; }
   int height() const { return bottom - top; }
   Point left_top() const { return Point(left, top); }
+  Point right_bottom() const { return Point(right, bottom); }
   int width() const { return right - left; }
   Size size() const { return Size(width(), height()); }
 

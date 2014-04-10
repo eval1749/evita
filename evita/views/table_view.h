@@ -39,7 +39,6 @@ class TableView
   private: ui::TableControl* control_;
   private: gc::Member<dom::Document> document_;
   private: std::unique_ptr<TableViewModel> model_;
-  private: std::vector<TableViewModel::Row*> rows_;
   private: std::unordered_map<int, TableViewModel::Row*> row_map_;
   private: bool should_update_model_;
 

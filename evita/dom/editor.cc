@@ -59,156 +59,57 @@ const base::char16 kVersion[] = L"5.0";
 // EditorClass
 //
 class EditorClass : public v8_glue::WrapperInfo {
-  public: EditorClass(const char* name)
-      : v8_glue::WrapperInfo(name) {
-  }
-  public: ~EditorClass() = default;
+  public: EditorClass(const char* name);
+  public: virtual ~EditorClass();
+
+  private: static base::string16 version();
 
   private: static v8::Handle<v8::Promise> CheckSpelling(
       const base::string16& word_to_check);
 
   private: static void GetFilenameForLoad(Window* window,
                                           const base::string16& dir_path,
-                                          v8::Handle<v8::Function> callback) {
-    auto const runner = ScriptHost::instance()->runner();
-    ScriptHost::instance()->view_delegate()->GetFilenameForLoad(
-        window->window_id(), dir_path,
-        v8_glue::ScriptCallback<ViewDelegate::GetFilenameForLoadCallback>::New(
-            runner->GetWeakPtr(), callback));
-  }
-
+                                          v8::Handle<v8::Function> callback);
   private: static void GetFilenameForSave(Window* window,
                                           const base::string16& dir_path,
-                                          v8::Handle<v8::Function> callback) {
-    auto const runner = ScriptHost::instance()->runner();
-    ScriptHost::instance()->view_delegate()->GetFilenameForSave(
-        window->window_id(), dir_path,
-        v8_glue::ScriptCallback<ViewDelegate::GetFilenameForSaveCallback>::New(
-            runner->GetWeakPtr(), callback));
-  }
-
-  private: static base::string16 GetMetrics(const base::string16& name) {
-    return ScriptHost::instance()->view_delegate()->GetMetrics(name);
-  }
-
+                                          v8::Handle<v8::Function> callback);
+  private: static base::string16 GetMetrics(const base::string16& name);
   private: static  v8::Handle<v8::Promise> GetSpellingSuggestions(
       const base::string16& wrong_word);
-
   private: static void MessageBox(v8_glue::Nullable<Window> maybe_window,
                                  const base::string16& message, int flags,
                                  const base::string16& title,
-                                 v8::Handle<v8::Function> callback) {
-    auto const runner = ScriptHost::instance()->runner();
-    ScriptHost::instance()->view_delegate()->MessageBox(
-        maybe_window ? maybe_window->window_id() : kInvalidWindowId,
-        message, title, flags,
-        v8_glue::ScriptCallback<ViewDelegate::MessageBoxCallback>::New(
-            runner->GetWeakPtr(), callback));
-  }
-
-  private: static Editor* NewEditor() {
-    ScriptHost::instance()->ThrowError(
-        "Cannot create an instance of Editor.");
-    return nullptr;
-  }
-
+                                 v8::Handle<v8::Function> callback);
+  private: static Editor* NewEditor();
   private: static v8::Local<v8::Object> NewRunScriptResult(
       v8::Isolate* isolate, v8::Handle<v8::Value> run_value,
-      const v8::TryCatch& try_catch) {
-    auto const result = v8::Object::New(isolate);
-    if (try_catch.HasCaught()) {
-      result->Set(gin::StringToV8(isolate, "exception"),
-          try_catch.Exception());
-      auto const message = try_catch.Message();
-      if (!message.IsEmpty()) {
-        result->Set(gin::StringToV8(isolate, "stackTrace"),
-            message->GetStackTrace().IsEmpty() ? v8::Array::New(isolate, 0) :
-              message->GetStackTrace()->AsArray());
-        result->Set(gin::StringToV8(isolate, "stackTraceString"),
-            try_catch.StackTrace().IsEmpty() ?
-                gin::ConvertToV8(isolate, base::string16()) :
-                try_catch.StackTrace());
-        result->Set(gin::StringToV8(isolate, "lineNumber"),
-            gin::ConvertToV8(isolate, message->GetLineNumber()));
-        result->Set(gin::StringToV8(isolate, "start"),
-            gin::ConvertToV8(isolate, message->GetStartPosition()));
-        result->Set(gin::StringToV8(isolate, "end"),
-            gin::ConvertToV8(isolate, message->GetEndPosition()));
-        result->Set(gin::StringToV8(isolate, "startColumn"),
-            gin::ConvertToV8(isolate, message->GetStartColumn()));
-        result->Set(gin::StringToV8(isolate, "endColumn"),
-            gin::ConvertToV8(isolate, message->GetEndColumn()));
-      }
-    } else {
-      result->Set(gin::StringToV8(isolate, "value"), run_value);
-    }
-    return result;
-  }
-
+      const v8::TryCatch& try_catch);
   private: static v8::Handle<v8::Object> RunScript(
       const base::string16& script_text,
-      v8_glue::Optional<base::string16> opt_file_name) {
-    auto const file_name = opt_file_name.get(L"__runscript__");
-    if (file_name == L"*javascript*") {
-      SuppressMessageBoxScope suppress_messagebox_scope;
-      return RunScriptInternal(script_text, file_name);
-    }
-    return RunScriptInternal(script_text, file_name);
-  }
-
+      v8_glue::Optional<base::string16> opt_file_name);
   private: static v8::Handle<v8::Object> RunScriptInternal(
       const base::string16& script_text,
-      const base::string16& file_name) {
-    auto const runner = ScriptHost::instance()->runner();
-    auto const isolate = runner->isolate();
-    v8_glue::Runner::EscapableHandleScope runner_scope(runner);
-    v8::TryCatch try_catch;
-    v8::ScriptOrigin script_origin(
-        gin::StringToV8(isolate, file_name)->ToString());
-    auto const script = v8::Script::Compile(
-        gin::StringToV8(isolate, script_text)->ToString(),
-        &script_origin);
-    if (script.IsEmpty()) {
-      return runner_scope.Escape(NewRunScriptResult(isolate,
-          v8::Handle<v8::Value>(), try_catch));
-    }
-    auto const run_value = script->Run();
-    if (run_value.IsEmpty()) {
-      return runner_scope.Escape(NewRunScriptResult(isolate,
-          v8::Handle<v8::Value>(), try_catch));
-    }
-    return runner_scope.Escape(NewRunScriptResult(isolate, run_value,
-        try_catch));
-  }
-
+      const base::string16& file_name);
   private: static void SetTabData(Window* window,
                                   const domapi::TabData tab_data);
 
-  private: static base::string16 version() {
-    return kVersion;
-  }
-
-  // WrapperInfo
+  // v8_glue::WrapperInfo
   protected: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    auto templ = v8_glue::CreateConstructorTemplate(isolate,
-        &EditorClass::NewEditor);
-    return v8_glue::FunctionTemplateBuilder(isolate, templ)
-      .SetMethod("checkSpelling", &EditorClass::CheckSpelling)
-      .SetMethod("getFilenameForLoad_", &EditorClass::GetFilenameForLoad)
-      .SetMethod("getFilenameForSave_", &EditorClass::GetFilenameForSave)
-      .SetMethod("getSpellingSuggestions",
-          &EditorClass::GetSpellingSuggestions)
-      .SetMethod("messageBox_", &EditorClass::MessageBox)
-      .SetMethod("metrics", &EditorClass::GetMetrics)
-      .SetMethod("runScript", &EditorClass::RunScript)
-      .SetMethod("setTabData", &EditorClass::SetTabData)
-      .SetProperty("version", &EditorClass::version)
-      .Build();
-  }
+      CreateConstructorTemplate(v8::Isolate* isolate) override;
 
   DISALLOW_COPY_AND_ASSIGN(EditorClass);
 };
+
+EditorClass::EditorClass(const char* name)
+    : v8_glue::WrapperInfo(name) {
+}
+
+EditorClass::~EditorClass() {
+}
+
+base::string16 EditorClass::version() {
+  return kVersion;
+}
 
 v8::Handle<v8::Promise> EditorClass::CheckSpelling(
     const base::string16& word_to_check) {
@@ -216,6 +117,34 @@ v8::Handle<v8::Promise> EditorClass::CheckSpelling(
       &ViewDelegate::CheckSpelling,
       base::Unretained(ScriptHost::instance()->view_delegate()),
       word_to_check));
+}
+
+// TODO(yosi) We should use |PromiseResolver| instead of |ScriptCallback| for
+// |EditorClass::GetFilenameForLoad()|.
+void EditorClass::GetFilenameForLoad(Window* window,
+                                     const base::string16& dir_path,
+                                     v8::Handle<v8::Function> callback) {
+  auto const runner = ScriptHost::instance()->runner();
+  ScriptHost::instance()->view_delegate()->GetFilenameForLoad(
+      window->window_id(), dir_path,
+      v8_glue::ScriptCallback<ViewDelegate::GetFilenameForLoadCallback>::New(
+          runner->GetWeakPtr(), callback));
+}
+
+// TODO(yosi) We should use |PromiseResolver| instead of |ScriptCallback| for
+// |EditorClass::GetFilenameForSave()|.
+void EditorClass::GetFilenameForSave(Window* window,
+                                     const base::string16& dir_path,
+                                     v8::Handle<v8::Function> callback) {
+  auto const runner = ScriptHost::instance()->runner();
+  ScriptHost::instance()->view_delegate()->GetFilenameForSave(
+      window->window_id(), dir_path,
+      v8_glue::ScriptCallback<ViewDelegate::GetFilenameForSaveCallback>::New(
+          runner->GetWeakPtr(), callback));
+}
+
+base::string16 EditorClass::GetMetrics(const base::string16& name) {
+  return ScriptHost::instance()->view_delegate()->GetMetrics(name);
 }
 
 v8::Handle<v8::Promise> EditorClass::GetSpellingSuggestions(
@@ -226,9 +155,117 @@ v8::Handle<v8::Promise> EditorClass::GetSpellingSuggestions(
       wrong_word));
 }
 
+// TODO(yosi) We should use |PromiseResolver| instead of |ScriptCallback| for
+// |EditorClass::MessageBox()|.
+void EditorClass::MessageBox(v8_glue::Nullable<Window> maybe_window,
+                             const base::string16& message, int flags,
+                             const base::string16& title,
+                             v8::Handle<v8::Function> callback) {
+  auto const runner = ScriptHost::instance()->runner();
+  ScriptHost::instance()->view_delegate()->MessageBox(
+      maybe_window ? maybe_window->window_id() : kInvalidWindowId,
+      message, title, flags,
+      v8_glue::ScriptCallback<ViewDelegate::MessageBoxCallback>::New(
+          runner->GetWeakPtr(), callback));
+}
+
+Editor* EditorClass::NewEditor() {
+  ScriptHost::instance()->ThrowError(
+      "Cannot create an instance of Editor.");
+  return nullptr;
+}
+
+v8::Local<v8::Object> EditorClass::NewRunScriptResult(
+    v8::Isolate* isolate, v8::Handle<v8::Value> run_value,
+    const v8::TryCatch& try_catch) {
+  auto const result = v8::Object::New(isolate);
+  if (try_catch.HasCaught()) {
+    result->Set(gin::StringToV8(isolate, "exception"),
+        try_catch.Exception());
+    auto const message = try_catch.Message();
+    if (!message.IsEmpty()) {
+      result->Set(gin::StringToV8(isolate, "stackTrace"),
+          message->GetStackTrace().IsEmpty() ? v8::Array::New(isolate, 0) :
+            message->GetStackTrace()->AsArray());
+      result->Set(gin::StringToV8(isolate, "stackTraceString"),
+          try_catch.StackTrace().IsEmpty() ?
+              gin::ConvertToV8(isolate, base::string16()) :
+              try_catch.StackTrace());
+      result->Set(gin::StringToV8(isolate, "lineNumber"),
+          gin::ConvertToV8(isolate, message->GetLineNumber()));
+      result->Set(gin::StringToV8(isolate, "start"),
+          gin::ConvertToV8(isolate, message->GetStartPosition()));
+      result->Set(gin::StringToV8(isolate, "end"),
+          gin::ConvertToV8(isolate, message->GetEndPosition()));
+      result->Set(gin::StringToV8(isolate, "startColumn"),
+          gin::ConvertToV8(isolate, message->GetStartColumn()));
+      result->Set(gin::StringToV8(isolate, "endColumn"),
+          gin::ConvertToV8(isolate, message->GetEndColumn()));
+    }
+  } else {
+    result->Set(gin::StringToV8(isolate, "value"), run_value);
+  }
+  return result;
+}
+
+v8::Handle<v8::Object> EditorClass::RunScript(
+    const base::string16& script_text,
+    v8_glue::Optional<base::string16> opt_file_name) {
+  auto const file_name = opt_file_name.get(L"__runscript__");
+  if (file_name == L"*javascript*") {
+    SuppressMessageBoxScope suppress_messagebox_scope;
+    return RunScriptInternal(script_text, file_name);
+  }
+  return RunScriptInternal(script_text, file_name);
+}
+
+v8::Handle<v8::Object> EditorClass::RunScriptInternal(
+    const base::string16& script_text,
+    const base::string16& file_name) {
+  auto const runner = ScriptHost::instance()->runner();
+  auto const isolate = runner->isolate();
+  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
+  v8::TryCatch try_catch;
+  v8::ScriptOrigin script_origin(
+      gin::StringToV8(isolate, file_name)->ToString());
+  auto const script = v8::Script::Compile(
+      gin::StringToV8(isolate, script_text)->ToString(),
+      &script_origin);
+  if (script.IsEmpty()) {
+    return runner_scope.Escape(NewRunScriptResult(isolate,
+        v8::Handle<v8::Value>(), try_catch));
+  }
+  auto const run_value = script->Run();
+  if (run_value.IsEmpty()) {
+    return runner_scope.Escape(NewRunScriptResult(isolate,
+        v8::Handle<v8::Value>(), try_catch));
+  }
+  return runner_scope.Escape(NewRunScriptResult(isolate, run_value,
+      try_catch));
+}
+
 void EditorClass::SetTabData(Window* window, const domapi::TabData tab_data) {
   ScriptHost::instance()->view_delegate()->SetTabData(
       window->window_id(), tab_data);
+}
+
+// v8_glue::WrapperInfo
+v8::Handle<v8::FunctionTemplate>
+    EditorClass::CreateConstructorTemplate(v8::Isolate* isolate) {
+  auto templ = v8_glue::CreateConstructorTemplate(isolate,
+      &EditorClass::NewEditor);
+  return v8_glue::FunctionTemplateBuilder(isolate, templ)
+    .SetMethod("checkSpelling", &EditorClass::CheckSpelling)
+    .SetMethod("getFilenameForLoad_", &EditorClass::GetFilenameForLoad)
+    .SetMethod("getFilenameForSave_", &EditorClass::GetFilenameForSave)
+    .SetMethod("getSpellingSuggestions",
+        &EditorClass::GetSpellingSuggestions)
+    .SetMethod("messageBox_", &EditorClass::MessageBox)
+    .SetMethod("metrics", &EditorClass::GetMetrics)
+    .SetMethod("runScript", &EditorClass::RunScript)
+    .SetMethod("setTabData", &EditorClass::SetTabData)
+    .SetProperty("version", &EditorClass::version)
+    .Build();
 }
 
 }  // namespace

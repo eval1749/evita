@@ -54,6 +54,63 @@ namespace {
 
 const base::char16 kVersion[] = L"5.0";
 
+v8::Local<v8::Object> NewRunScriptResult(v8::Isolate* isolate,
+                                         v8::Handle<v8::Value> run_value,
+                                         const v8::TryCatch& try_catch) {
+  auto const result = v8::Object::New(isolate);
+  if (try_catch.HasCaught()) {
+    result->Set(gin::StringToV8(isolate, "exception"),
+        try_catch.Exception());
+    auto const message = try_catch.Message();
+    if (!message.IsEmpty()) {
+      result->Set(gin::StringToV8(isolate, "stackTrace"),
+          message->GetStackTrace().IsEmpty() ? v8::Array::New(isolate, 0) :
+            message->GetStackTrace()->AsArray());
+      result->Set(gin::StringToV8(isolate, "stackTraceString"),
+          try_catch.StackTrace().IsEmpty() ?
+              gin::ConvertToV8(isolate, base::string16()) :
+              try_catch.StackTrace());
+      result->Set(gin::StringToV8(isolate, "lineNumber"),
+          gin::ConvertToV8(isolate, message->GetLineNumber()));
+      result->Set(gin::StringToV8(isolate, "start"),
+          gin::ConvertToV8(isolate, message->GetStartPosition()));
+      result->Set(gin::StringToV8(isolate, "end"),
+          gin::ConvertToV8(isolate, message->GetEndPosition()));
+      result->Set(gin::StringToV8(isolate, "startColumn"),
+          gin::ConvertToV8(isolate, message->GetStartColumn()));
+      result->Set(gin::StringToV8(isolate, "endColumn"),
+          gin::ConvertToV8(isolate, message->GetEndColumn()));
+    }
+  } else {
+    result->Set(gin::StringToV8(isolate, "value"), run_value);
+  }
+  return result;
+}
+
+v8::Handle<v8::Object> RunScriptInternal(const base::string16& script_text,
+                                         const base::string16& file_name) {
+  auto const runner = ScriptHost::instance()->runner();
+  auto const isolate = runner->isolate();
+  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
+  v8::TryCatch try_catch;
+  v8::ScriptOrigin script_origin(
+      gin::StringToV8(isolate, file_name)->ToString());
+  auto const script = v8::Script::Compile(
+      gin::StringToV8(isolate, script_text)->ToString(),
+      &script_origin);
+  if (script.IsEmpty()) {
+    return runner_scope.Escape(NewRunScriptResult(isolate,
+        v8::Handle<v8::Value>(), try_catch));
+  }
+  auto const run_value = script->Run();
+  if (run_value.IsEmpty()) {
+    return runner_scope.Escape(NewRunScriptResult(isolate,
+        v8::Handle<v8::Value>(), try_catch));
+  }
+  return runner_scope.Escape(NewRunScriptResult(isolate, run_value,
+      try_catch));
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // EditorClass
@@ -81,15 +138,9 @@ class EditorClass : public v8_glue::WrapperInfo {
                                  const base::string16& title,
                                  v8::Handle<v8::Function> callback);
   private: static Editor* NewEditor();
-  private: static v8::Local<v8::Object> NewRunScriptResult(
-      v8::Isolate* isolate, v8::Handle<v8::Value> run_value,
-      const v8::TryCatch& try_catch);
   private: static v8::Handle<v8::Object> RunScript(
       const base::string16& script_text,
       v8_glue::Optional<base::string16> opt_file_name);
-  private: static v8::Handle<v8::Object> RunScriptInternal(
-      const base::string16& script_text,
-      const base::string16& file_name);
   private: static void SetTabData(Window* window,
                                   const domapi::TabData tab_data);
 
@@ -175,39 +226,6 @@ Editor* EditorClass::NewEditor() {
   return nullptr;
 }
 
-v8::Local<v8::Object> EditorClass::NewRunScriptResult(
-    v8::Isolate* isolate, v8::Handle<v8::Value> run_value,
-    const v8::TryCatch& try_catch) {
-  auto const result = v8::Object::New(isolate);
-  if (try_catch.HasCaught()) {
-    result->Set(gin::StringToV8(isolate, "exception"),
-        try_catch.Exception());
-    auto const message = try_catch.Message();
-    if (!message.IsEmpty()) {
-      result->Set(gin::StringToV8(isolate, "stackTrace"),
-          message->GetStackTrace().IsEmpty() ? v8::Array::New(isolate, 0) :
-            message->GetStackTrace()->AsArray());
-      result->Set(gin::StringToV8(isolate, "stackTraceString"),
-          try_catch.StackTrace().IsEmpty() ?
-              gin::ConvertToV8(isolate, base::string16()) :
-              try_catch.StackTrace());
-      result->Set(gin::StringToV8(isolate, "lineNumber"),
-          gin::ConvertToV8(isolate, message->GetLineNumber()));
-      result->Set(gin::StringToV8(isolate, "start"),
-          gin::ConvertToV8(isolate, message->GetStartPosition()));
-      result->Set(gin::StringToV8(isolate, "end"),
-          gin::ConvertToV8(isolate, message->GetEndPosition()));
-      result->Set(gin::StringToV8(isolate, "startColumn"),
-          gin::ConvertToV8(isolate, message->GetStartColumn()));
-      result->Set(gin::StringToV8(isolate, "endColumn"),
-          gin::ConvertToV8(isolate, message->GetEndColumn()));
-    }
-  } else {
-    result->Set(gin::StringToV8(isolate, "value"), run_value);
-  }
-  return result;
-}
-
 v8::Handle<v8::Object> EditorClass::RunScript(
     const base::string16& script_text,
     v8_glue::Optional<base::string16> opt_file_name) {
@@ -217,31 +235,6 @@ v8::Handle<v8::Object> EditorClass::RunScript(
     return RunScriptInternal(script_text, file_name);
   }
   return RunScriptInternal(script_text, file_name);
-}
-
-v8::Handle<v8::Object> EditorClass::RunScriptInternal(
-    const base::string16& script_text,
-    const base::string16& file_name) {
-  auto const runner = ScriptHost::instance()->runner();
-  auto const isolate = runner->isolate();
-  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
-  v8::TryCatch try_catch;
-  v8::ScriptOrigin script_origin(
-      gin::StringToV8(isolate, file_name)->ToString());
-  auto const script = v8::Script::Compile(
-      gin::StringToV8(isolate, script_text)->ToString(),
-      &script_origin);
-  if (script.IsEmpty()) {
-    return runner_scope.Escape(NewRunScriptResult(isolate,
-        v8::Handle<v8::Value>(), try_catch));
-  }
-  auto const run_value = script->Run();
-  if (run_value.IsEmpty()) {
-    return runner_scope.Escape(NewRunScriptResult(isolate,
-        v8::Handle<v8::Value>(), try_catch));
-  }
-  return runner_scope.Escape(NewRunScriptResult(isolate, run_value,
-      try_catch));
 }
 
 void EditorClass::SetTabData(Window* window, const domapi::TabData tab_data) {

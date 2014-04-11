@@ -125,7 +125,11 @@
               return total_bytes;
             });
           }
-          var line_text = line.value.trimRight();
+          var line_text = line.value;
+          var length = line_text.length;
+          // Strip newline character
+          if (length && line_text.charCodeAt(length - 1) == 0x0A)
+            line_text = line_text.substr(0, length - 1);
           // Note: We've always add line separator, because some tools don't
           // work well without line separator.
           var bytes = encoder.encode(line_text + line_separator);

@@ -31,6 +31,8 @@ class TextFieldControl
 
   public: void DidChangeSelection();
 
+  public: int MapPointToOffset(float x, float y) const;
+
   DISALLOW_COPY_AND_ASSIGN(TextFieldControl);
 };
 

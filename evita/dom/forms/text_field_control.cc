@@ -41,7 +41,8 @@ class TextFieldControlClass :
     builder
         .SetProperty("selection", &TextFieldControl::selection)
         .SetProperty("value_", &TextFieldControl::value,
-            &TextFieldControl::set_value);
+            &TextFieldControl::set_value)
+        .SetMethod("mapPointToOffset", &TextFieldControl::MapPointToOffset);
   }
 
   DISALLOW_COPY_AND_ASSIGN(TextFieldControlClass);
@@ -87,6 +88,11 @@ void TextFieldControl::set_value(const base::string16& new_raw_value) {
 
 void TextFieldControl::DidChangeSelection() {
   NotifyControlChange();
+}
+
+int TextFieldControl::MapPointToOffset(float x, float y) const {
+  return ScriptHost::instance()->view_delegate()->MapPointToPosition(
+      event_target_id(), x, y);
 }
 
 }  // namespace dom

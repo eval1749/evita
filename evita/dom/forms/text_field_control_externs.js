@@ -26,3 +26,10 @@ TextFieldControl.prototype.value;
  * event.
  */
 TextFieldControl.prototype.value_;
+
+/**
+ * @param {number} x
+ * @param {number} y
+ * @return {number}
+ */
+TextFieldControl.prototype.mapPointToOffset = function(x, y) {};

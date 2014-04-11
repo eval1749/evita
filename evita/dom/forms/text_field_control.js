@@ -133,6 +133,19 @@ Object.defineProperties(TextFieldControl.prototype, {
 
   /**
    * @param {!TextFieldControl} control
+   * @param {!MouseEvent} event
+   */
+  function handleClick(control, event){
+    if (control.form.focusControl != control) {
+      control.focus();
+      return;
+    }
+    var offset = control.mapPointToOffset(event.clientX, event.clientY);
+    control.selection.collapseTo(offset);
+  }
+
+  /**
+   * @param {!TextFieldControl} control
    * @param {!KeyboardEvent} event
    */
   function handleKeyDown(control, event) {
@@ -156,7 +169,7 @@ Object.defineProperties(TextFieldControl.prototype, {
         dispatchChangeEventIfNeeded(this);
         break;
       case Event.Names.CLICK:
-        this.focus();
+        handleClick(this, /** @type{!MouseEvent} */(event));
         break;
       case Event.Names.FOCUS:
         this.selection.collapseTo(0);

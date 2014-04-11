@@ -12,6 +12,7 @@
 #include "evita/css/style_resolver.h"
 #include "evita/text/interval.h"
 #include "evita/text/interval_set.h"
+#include "evita/text/line_number_cache.h"
 #include "evita/text/marker_set.h"
 #include "evita/text/range.h"
 #include "evita/text/range_set.h"
@@ -21,6 +22,7 @@ namespace text {
 
 Buffer::Buffer(const base::string16& name)
     : intervals_(new IntervalSet(this)),
+      line_number_cache_(new LineNumberCache(this)),
       ranges_(new RangeSet(this)),
       spelling_markers_(new MarkerSet(this)),
       style_resolver_(new css::StyleResolver()),
@@ -115,18 +117,10 @@ const css::Style& Buffer::GetDefaultStyle() const {
 
 LineAndColumn Buffer::GetLineAndColumn(Posn offset) const {
   DCHECK(IsValidPosn(offset)) << "offset=" << offset << " length=" << GetEnd();
+  auto const line_number_result = line_number_cache_->Get(offset);
   LineAndColumn result;
-  result.line_number = 1;
-  result.column = 0;
-  // TODO(yosi) Should we have line number cache?
-  auto line_start = 0;
-  for (auto runner = 0; runner < offset; ++runner) {
-    if (GetCharAt(runner) == 0x0A) {
-      line_start = runner + 1;
-      ++result.line_number;
-    }
-  }
-  result.column = offset - line_start;
+  result.line_number = line_number_result.number;
+  result.column = offset - line_number_result.offset;
   return result;
 }
 

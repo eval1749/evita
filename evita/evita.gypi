@@ -67,6 +67,7 @@
         'text/buffer_mutation_observer.cc',
         'text/interval.cc',
         'text/interval_set.cc',
+        'text/line_number_cache.cc',
         'text/marker.cc',
         'text/marker_set.cc',
         'text/marker_set_observer.cc',

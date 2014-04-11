@@ -29,6 +29,7 @@ namespace text {
 class Buffer;
 class Interval;
 class IntervalSet;
+class LineNumberCache;
 class Range;
 class RangeSet;
 class Marker;
@@ -92,6 +93,7 @@ class Buffer : public BufferCore,
 
   private: ObserverList<BufferMutationObserver> observers_;
   private: std::unique_ptr<IntervalSet> intervals_;
+  private: std::unique_ptr<LineNumberCache> line_number_cache_;
   private: std::unique_ptr<MarkerSet> spelling_markers_;
   private: std::unique_ptr<RangeSet> ranges_;
   private: std::unique_ptr<css::StyleResolver> style_resolver_;

@@ -48,6 +48,7 @@ class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   protected: bool handling_form_event() const { return handling_form_event_; }
   public: const base::string16& name() const { return name_; }
 
+  public: void DidSetFocus();
   public: void DispatchChangeEvent();
   protected: void NotifyControlChange();
 

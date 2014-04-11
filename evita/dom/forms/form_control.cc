@@ -117,6 +117,12 @@ void FormControl::set_disabled(bool new_disabled) {
   NotifyControlChange();
 }
 
+void FormControl::DidSetFocus() {
+  if (!form_)
+    return;
+  form_->DidSetFocusToFormControl(this);
+}
+
 void FormControl::DispatchChangeEvent() {
   if (!handling_form_event_ && form_)
     NotifyControlChange();

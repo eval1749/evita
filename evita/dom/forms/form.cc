@@ -115,6 +115,10 @@ void Form::DidChangeFormControl(FormControl*) {
   FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 
+void Form::DidSetFocusToFormControl(FormControl* control) {
+  focus_control_ = control;
+}
+
 void Form::RemoveObserver(FormObserver* observer) const {
   observers_.RemoveObserver(observer);
 }

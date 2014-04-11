@@ -65,7 +65,6 @@ class Frame final : public views::Window,
   private: gfx::Rect pending_update_rect_;
   private: views::TabStrip* tab_strip_;
   private: std::unique_ptr<views::TitleBar> title_bar_;
-  private: base::string16 tooltip_;
   private: Pane* m_pActivePane;
 
   public: explicit Frame(views::WindowId window_id);
@@ -109,7 +108,6 @@ class Frame final : public views::Window,
 
   // [U]
   private: void updateTitleBar();
-  private: void UpdateTooltip(NMTTDISPINFO*);
 
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;
@@ -128,6 +126,7 @@ class Frame final : public views::Window,
   private: virtual void DidClickTabCloseButton(int tab_index) override;
   private: virtual void DidChangeTabSelection(int new_selected_index) override;
   private: virtual void DidThrowTab(LPARAM lParam);
+  private: virtual base::string16 GetTooltipTextForTab(int tab_index) override;
   private: virtual void OnDropTab(LPARAM lParam);
 
   // views::Window

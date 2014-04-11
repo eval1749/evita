@@ -450,23 +450,6 @@ void Frame::updateTitleBar() {
   title_bar_->SetText(window_title);
 }
 
-void Frame::UpdateTooltip(NMTTDISPINFO* const pDisp) {
-  tooltip_ = base::string16();
-  auto const pPane = getPaneFromTab(static_cast<int>(pDisp->hdr.idFrom));
-  if (!pPane)
-    return;
-
-  auto const window = pPane->GetWindow();
-  if (!window)
-    return;
-
-  auto const tab_data = TabDataSet::instance()->GetTabData(
-      window->window_id());
-  if (!tab_data)
-    return;
-  tooltip_ = tab_data->tooltip;
-}
-
 // ui::Widget
 void Frame::CreateNativeWindow() const {
   int const cColumns = 83;
@@ -653,19 +636,6 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
         }
       }
       break;
-
-    case WM_NOTIFY: {
-      auto const pNotify = reinterpret_cast<NMHDR*>(lParam);
-      // TODO(yosi) We should check TTN_NEEDTEXT is send by tooltip control.
-      if (TTN_NEEDTEXT == pNotify->code) {
-          auto const p = reinterpret_cast<NMTTDISPINFO*>(lParam);
-          ::SendMessage(p->hdr.hwndFrom, TTM_SETMAXTIPWIDTH, 0, 300);
-          UpdateTooltip(p);
-          p->lpszText = const_cast<LPWSTR>(tooltip_.c_str());
-          return 0;
-      }
-      return 0;
-    }
   }
 
   return Widget::OnMessage(uMsg, wParam, lParam);
@@ -732,6 +702,20 @@ void Frame::DidThrowTab(LPARAM lParam) {
   Application::instance()->view_event_handler()->DidDropWidget(
       edit_pane->GetActiveWindow()->window_id(),
       views::kInvalidWindowId);
+}
+
+base::string16 Frame::GetTooltipTextForTab(int tab_index) {
+  auto const pane = getPaneFromTab(static_cast<int>(tab_index));
+  if (!pane)
+    return base::string16();
+
+  auto const window = pane->GetWindow();
+  if (!window)
+    return base::string16();
+
+  auto const tab_data = TabDataSet::instance()->GetTabData(
+      window->window_id());
+  return tab_data ? tab_data->tooltip : base::string16();
 }
 
 void Frame::OnDropTab(LPARAM lParam) {

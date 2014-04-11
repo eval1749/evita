@@ -179,8 +179,8 @@ class Element : public DoubleLinkedNode_<Element> {
   }
 
   public: template<class T> T* StaticCast() {
-    ASSERT(Is<T>()); 
-    // warning C4946: reinterpret_cast used between related classes: 
+    ASSERT(Is<T>());
+    // warning C4946: reinterpret_cast used between related classes:
     // 'class1' and 'class2'
     #pragma warning(suppress: 4946)
     return reinterpret_cast<T*>(this);
@@ -617,6 +617,7 @@ class TabStrip::TabStripImpl : public Element {
   private: Item* m_pSelected;
   private: POINT m_ptDragStart;
   private: int m_xTab;
+  private: base::string16 tooltip_text_;
 
   public: TabStripImpl(HWND hwnd, TabStripDelegate* delegate);
   public: virtual ~TabStripImpl();
@@ -1175,22 +1176,6 @@ class TabStrip::TabStripImpl : public Element {
         // of tabs.
         return ::SendMessage(::GetParent(m_hwnd), uMsg, wParam, lParam);
 
-      case WM_NOTIFY: {
-        #if DEBUG_TOOLTIP
-        {
-          auto const p = reinterpret_cast<NMHDR*>(lParam);
-          DEBUG_PRINTF("WM_NOTIFY %p ctrl=%d code=%d\n",
-            this, wParam, p->code);
-        }
-        #endif
-
-        return ::SendMessage(
-            ::GetParent(m_hwnd),
-            WM_NOTIFY,
-            wParam,
-            lParam);
-      }
-
       case WM_SETTINGCHANGE:
         switch (wParam) {
           case SPI_SETICONTITLELOGFONT:
@@ -1240,6 +1225,8 @@ class TabStrip::TabStripImpl : public Element {
       m_pInsertBefore = pInsertBefore;
     }
   }
+
+  private: LRESULT OnNotify(NMHDR* nmhdr);
 
   // [R]
   private: void UpdateHover(Element* pHover) {
@@ -1434,6 +1421,20 @@ bool TabStrip::TabStripImpl::GetTab(int tab_index, TCITEM* pTcItem) const {
   return true;
 }
 
+LRESULT TabStrip::TabStripImpl::OnNotify(NMHDR* nmhdr) {
+  if (nmhdr->hwndFrom != m_hwndToolTips)
+    return 0;
+  if (nmhdr->code != TTN_NEEDTEXT)
+    return 0;
+  // Set width of tooltip
+  ::SendMessage(m_hwndToolTips, TTM_SETMAXTIPWIDTH, 0, 300);
+  auto const disp_info = reinterpret_cast<NMTTDISPINFO*>(nmhdr);
+  auto const tab_index = static_cast<int>(nmhdr->idFrom);
+  tooltip_text_ = delegate_->GetTooltipTextForTab(tab_index);
+  disp_info->lpszText = const_cast<LPWSTR>(tooltip_text_.c_str());
+  return 0;
+}
+
 void TabStrip::TabStripImpl::Redraw() {
   UpdateLayout();
   ::InvalidateRect(m_hwnd, nullptr, false);
@@ -1526,10 +1527,12 @@ LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
     case WM_NCMOUSEMOVE:
     case WM_NCRBUTTONDOWN:
     case WM_NCRBUTTONUP:
-    case WM_NOTIFY:
     case WM_SETTINGCHANGE:
     case WM_USER:
       return impl_->OnMessage(uMsg, wParam, lParam);
+
+    case WM_NOTIFY:
+      return impl_->OnNotify(reinterpret_cast<NMHDR*>(lParam));
   }
 
   return ui::Widget::OnMessage(uMsg, wParam, lParam);

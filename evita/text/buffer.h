@@ -288,8 +288,8 @@ class Buffer : public BufferCore,
     };
 
     public: EnumCharRev(Arg oArg)
-        : m_lPosn(oArg.m_lPosn), 
-          m_lStart(oArg.m_lStart), 
+        : m_lPosn(oArg.m_lPosn),
+          m_lStart(oArg.m_lStart),
           m_pBuffer(oArg.m_pBuffer) {
     }
 

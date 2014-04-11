@@ -138,6 +138,7 @@
         'vi_EditPane.cpp',
         'views/forms/file_dialog_box.cc',
         'views/forms/form_control_controller.cc',
+        'views/forms/form_control_set.cc',
         'views/forms/form_window.cc',
         'vi_Frame.cpp',
         'vi_Pane.cpp',

@@ -332,7 +332,7 @@ DEFINE_SYNC_VIEW_DELEGATE_1(GetMetrics, base::string16, const base::string16&)
 DEFINE_SYNC_VIEW_DELEGATE_2(GetTableRowStates, std::vector<int>, WindowId,
                             const std::vector<base::string16>&)
 DEFINE_SYNC_VIEW_DELEGATE_3(MapPointToPosition, text::Posn,
-                            WindowId, float, float)
+                            domapi::EventTargetId, float, float)
 DEFINE_SYNC_VIEW_DELEGATE_2(MapPositionToPoint, domapi::FloatPoint,
                             WindowId, text::Posn)
 

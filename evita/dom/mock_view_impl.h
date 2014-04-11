@@ -62,7 +62,8 @@ class MockViewImpl : public dom::ViewDelegate {
       const std::vector<base::string16>& keys) override;
   MOCK_METHOD1(HideWindow, void(WindowId));
   MOCK_METHOD1(MakeSelectionVisible, void(WindowId));
-  MOCK_METHOD3(MapPointToPosition, text::Posn(WindowId, float x, float y));
+  MOCK_METHOD3(MapPointToPosition,
+      text::Posn(domapi::EventTargetId, float x, float y));
   MOCK_METHOD2(MapPositionToPoint,
                domapi::FloatPoint(WindowId, text::Posn));
   public: virtual void MessageBox(WindowId window_id,

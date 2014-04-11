@@ -55,8 +55,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       const std::vector<base::string16>& keys) override;
   private: virtual void HideWindow(dom::WindowId window_id) override;
   private: virtual void MakeSelectionVisible(dom::WindowId window_id) override;
-  private: virtual text::Posn MapPointToPosition(dom::WindowId window_id,
-                                                 float x, float y) override;
+  private: virtual text::Posn MapPointToPosition(
+      domapi::EventTargetId event_target_id, float x, float y) override;
   private: virtual domapi::FloatPoint MapPositionToPoint(
       dom::WindowId window_id, text::Posn position);
   private: virtual void MessageBox(dom::WindowId window_id,

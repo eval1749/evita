@@ -105,8 +105,8 @@ class ScriptThread final : public domapi::IoDelegate,
       const std::vector<base::string16>& keys) override;
   private: virtual void HideWindow(WindowId window_id) override;
   private: virtual void MakeSelectionVisible(WindowId window_id) override;
-  private: virtual text::Posn MapPointToPosition(WindowId window_id,
-                                                 float x, float y) override;
+  private: virtual text::Posn MapPointToPosition(
+      domapi::EventTargetId event_target_id, float x, float y) override;
   private: virtual domapi::FloatPoint MapPositionToPoint(
       WindowId window_id, text::Posn position);
   private: virtual void MessageBox(WindowId window_id,

@@ -43,6 +43,8 @@ class TextFieldControl final : public Control, public Caret::Owner {
   public: void set_selection(const Selection& new_selection);
   public: void set_text(const base::string16& text);
 
+  public: int MapPointToOffset(const gfx::PointF& point) const;
+
   // ui::Caret::Owner
   private: virtual void UpdateCaret(gfx::Graphics* gfx) override;
 

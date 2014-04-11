@@ -109,8 +109,8 @@ class ViewDelegate {
       const std::vector<base::string16>& keys) = 0;
   public: virtual void HideWindow(WindowId window_id) = 0;
   public: virtual void MakeSelectionVisible(WindowId window_id) = 0;
-  public: virtual text::Posn MapPointToPosition(WindowId window_id,
-                                                float x, float y) = 0;
+  public: virtual text::Posn MapPointToPosition(
+      domapi::EventTargetId event_target_id, float x, float y) = 0;
   public: virtual domapi::FloatPoint MapPositionToPoint(
       WindowId window_id, text::Posn offset) = 0;
   public: virtual void MessageBox(WindowId window_id,

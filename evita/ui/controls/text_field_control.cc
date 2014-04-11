@@ -55,6 +55,7 @@ class TextFieldControl::Renderer {
   private: gfx::PointF text_origin() const;
 
   private: void MakeSelectionVisible();
+  public: int Renderer::MapPointToOffset(const gfx::PointF& point) const;
   public: void Render(gfx::Graphics* gfx, bool has_focus,
                       Control::State state);
   private: void RenderCaret(gfx::Graphics* gfx,
@@ -169,6 +170,18 @@ void TextFieldControl::Renderer::MakeSelectionVisible() {
       view_text_rect_.left, 0.0f,
       &is_trailing, &is_inside, &metrics));
   view_text_start_ = metrics.textPosition;
+}
+
+int TextFieldControl::Renderer::MapPointToOffset(
+    const gfx::PointF& window_point) const {
+  BOOL is_inside = false;
+  BOOL is_trailing = false;
+  DWRITE_HIT_TEST_METRICS metrics = {0};
+  auto const origin = text_origin();
+  auto point = window_point - origin;
+  COM_VERIFY((*text_layout_)->HitTestPoint(
+      point.x, point.y, &is_trailing, &is_inside, &metrics));
+  return static_cast<int>(metrics.textPosition + is_trailing);
 }
 
 void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
@@ -361,6 +374,10 @@ void TextFieldControl::set_style(const Style& new_style) {
 void TextFieldControl::set_text(const base::string16& new_text) {
   renderer_->set_text(new_text);
   SchedulePaint();
+}
+
+int TextFieldControl::MapPointToOffset(const gfx::PointF& point) const {
+  return renderer_->MapPointToOffset(point);
 }
 
 // ui::Caret::Owner

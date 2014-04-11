@@ -196,6 +196,8 @@ void ViewEventHandlerImpl::DispatchFocusEvent(
   if (api_event.event_type == domapi::EventType::Focus) {
     if (auto const window = target->as<Window>())
       window->DidSetFocus();
+    else if (auto const form_control = target->as<FormControl>())
+      form_control->DidSetFocus();
   }
   FocusEventInit event_init;
   event_init.set_related_target(MaybeEventTarget(api_event.related_target_id));

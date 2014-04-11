@@ -18,7 +18,9 @@
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/spellchecker/spelling_engine.h"
+#include "evita/ui/controls/text_field_control.h"
 #include "evita/views/forms/file_dialog_box.h"
+#include "evita/views/forms/form_control_set.h"
 #include "evita/views/forms/form_window.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/table_view.h"
@@ -291,15 +293,23 @@ void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
   content_window->MakeSelectionVisible();
 }
 
-text::Posn ViewDelegateImpl::MapPointToPosition(WindowId window_id,
-                                                float x, float y) {
-  auto const window = FromWindowId("ComputeOnTextWindow", window_id)->
-      as<TextEditWindow>();
-  if (!window)
-    return 0;
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  DCHECK(lock_scope.locked());
-  return window->MapPointToPosn(gfx::PointF(x, y));
+text::Posn ViewDelegateImpl::MapPointToPosition(
+    domapi::EventTargetId event_target_id, float x, float y) {
+  if (auto const window = Window::FromWindowId(event_target_id)) {
+    if (auto const text_window = window->as<TextEditWindow>()) {
+      UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+      DCHECK(lock_scope.locked());
+      return text_window->MapPointToPosn(gfx::PointF(x, y));
+    }
+  }
+
+  if (auto const control = FormControlSet::instance()->
+          MaybeControl(event_target_id)) {
+    if (auto const text_field = control->as<ui::TextFieldControl>())
+      return text_field->MapPointToOffset(gfx::PointF(x, y));
+  }
+
+  return 0;
 }
 
 domapi::FloatPoint ViewDelegateImpl::MapPositionToPoint(

@@ -324,7 +324,7 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
                           lPosn, TextMarker::Tab);
   }
 
-  auto const pFont = wch < 0x20 ?
+  auto const pFont = wch < 0x20 || wch == 0xFEFF ?
       nullptr :
       FontSet::Get(m_gfx, style)->FindFont(m_gfx, wch);
 

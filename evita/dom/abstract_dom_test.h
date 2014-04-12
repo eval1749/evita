@@ -13,7 +13,6 @@
 #pragma warning(pop)
 #include "evita/v8_glue/runner_delegate.h"
 #include "evita/v8_glue/runner.h"
-#include "evita/v8_glue/script_callback.h"
 #include "evita/v8_glue/v8.h"
 
 namespace domapi {
@@ -28,12 +27,32 @@ class ScriptHost;
 
 class AbstractDomTest : public v8_glue::RunnerDelegate,
                         public ::testing::Test {
-  protected: typedef v8_glue::internal::ScriptClosure::Argv Argv;
+  protected: typedef std::vector<v8::Handle<v8::Value>> Argv;
 
   protected: class RunnerScope {
     private: v8_glue::Runner::Scope runner_scope_;
     public: RunnerScope(AbstractDomTest* test);
     public: ~RunnerScope();
+  };
+
+  protected: class ScriptCallArguments {
+    private: Argv argv_;
+    private: v8::Isolate* isolate_;
+
+    public: ScriptCallArguments(v8::Isolate* isolate);
+    public: ~ScriptCallArguments();
+
+    public: const Argv& argv() const { return argv_; }
+
+    public:void Populate();
+
+    public: template<typename Arg1, typename... Args> void Populate(
+        const Arg1& arg1, const Args&... args) {
+      argv_.push_back(gin::Converter<Arg1>::ToV8(isolate_,  arg1));
+      Populate(args...);
+    }
+
+    DISALLOW_COPY_AND_ASSIGN(ScriptCallArguments);
   };
 
   private: std::string exception_;
@@ -81,7 +100,7 @@ class AbstractDomTest : public v8_glue::RunnerDelegate,
 template<typename... Params>
 bool AbstractDomTest::Call(const base::StringPiece& name, Params... params) {
   v8::HandleScope handle_scope(isolate());
-  v8_glue::internal::ScriptCallbackArguments args(isolate());
+  ScriptCallArguments args(isolate());
   args.Populate(params...);
   return DoCall(name, args.argv());
 }

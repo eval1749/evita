@@ -13,6 +13,7 @@
 #pragma warning(pop)
 #include "base/strings/utf_string_conversions.h"
 #include "common/memory/singleton.h"
+#include "evita/dom/converter.h"
 #include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/global.h"
 #include "evita/dom/lock.h"
@@ -28,6 +29,10 @@ using ::testing::_;
 base::string16 V8ToString(v8::Handle<v8::Value> value);
 
 namespace {
+//////////////////////////////////////////////////////////////////////
+//
+// StaticScript
+//
 class StaticScript : public common::Singleton<StaticScript> {
   DECLARE_SINGLETON_CLASS(StaticScript);
 
@@ -85,6 +90,21 @@ AbstractDomTest::RunnerScope::RunnerScope(AbstractDomTest* test)
 }
 
 AbstractDomTest::RunnerScope::~RunnerScope() {
+}
+
+
+//////////////////////////////////////////////////////////////////////
+//
+// AbstractDomTest::ScriptCallArguments
+//
+AbstractDomTest::ScriptCallArguments::ScriptCallArguments(v8::Isolate* isolate)
+    : isolate_(isolate) {
+}
+
+AbstractDomTest::ScriptCallArguments::~ScriptCallArguments() {
+}
+
+void AbstractDomTest::ScriptCallArguments::Populate() {
 }
 
 //////////////////////////////////////////////////////////////////////

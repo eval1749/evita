@@ -46,33 +46,12 @@ struct LineAndColumn {
   int line_number;
 };
 
-/// <summary>
-// Represents file related properties.
-/// </summary>
-class FileFeatures {
-  protected: bool m_fNoSave;
-  protected: base::string16 filename_;
-
-  // ctor
-  protected: FileFeatures()
-      : m_fNoSave(false) {
-  }
-
-  // [G]
-  public: const base::string16& GetFileName() const { return filename_; }
-
-  public: bool GetNoSave() const { return m_fNoSave; }
-
-  // [S]
-  public: bool SetNoSave(bool f) { return m_fNoSave = f; }
-};
-
-/// <summary>
-/// Represents text buffer.
-/// </summary>
+//////////////////////////////////////////////////////////////////////
+//
+// Buffer
+//
 class Buffer : public BufferCore,
                public BufferMutationObservee,
-               public FileFeatures,
                public MarkerSetObserver {
 
   private: ObserverList<BufferMutationObserver> observers_;
@@ -152,11 +131,6 @@ class Buffer : public BufferCore,
   }
 
   public: void InsertBefore(Posn position, const base::string16& text);
-
-  // [N]
-  public: bool NeedSave () const {
-    return !m_fNoSave && IsModified();
-  }
 
   // [R]
   public: Posn Redo(Posn, Count = 1);

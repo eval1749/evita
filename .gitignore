@@ -1,3 +1,45 @@
+*.gypcmd
+*.mk
+*.ncb
+*.opensdf
+*.props
+*.pyc
+*.rules
+*.sdf
+*.sln
+*.suo
+*.targets
+*.user
+*.vcproj
+*.vcxproj
+*.vcxproj.filters
+*.vpj
+*.vpw
+*.vpwhistu
+*.vtg
+*.xcodeproj
+*_proto.xml
+*_proto_cpp.xml
+*~
+!Android.mk
+.*.sw?
+.DS_Store
+.classpath
+.cproject
+.gdb_history
+.gdbinit
+.metadata
+.project
+.pydevproject
+# Settings directory for eclipse
+/.settings
+.checkstyle
+cscope.*
+Session.vim
+tags
+Thumbs.db
+v8.log
+
 # We should not add pattern |third_party/|. When we do so, |git submodule add|
 # fails.
 testing/gtest

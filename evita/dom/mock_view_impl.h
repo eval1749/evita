@@ -37,12 +37,12 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD1(DidStartScriptHost, void(ScriptHostState));
   MOCK_METHOD1(DidHandleViewIdelEvent, void(int));
   MOCK_METHOD1(FocusWindow, void(WindowId));
-  public: virtual void GetFilenameForLoad(WindowId window_id,
+  public: virtual void GetFileNameForLoad(WindowId window_id,
     const base::string16& dir_path,
-    const GetFilenameForLoadResolver& resolver) override;
-  public: virtual void GetFilenameForSave(WindowId window_id,
+    const GetFileNameForLoadResolver& resolver) override;
+  public: virtual void GetFileNameForSave(WindowId window_id,
     const base::string16& dir_path,
-    const GetFilenameForSaveResolver& resolver) override;
+    const GetFileNameForSaveResolver& resolver) override;
   MOCK_METHOD1(GetMetrics, base::string16(const base::string16&));
   MOCK_METHOD1(GetSwitch, domapi::SwitchValue(const base::string16& name));
   MOCK_METHOD0(GetSwitchNames, std::vector<base::string16>());

@@ -51,8 +51,8 @@ struct TextWindowCompute {
 };
 
 class ViewDelegate {
-  public: typedef domapi::Deferred<base::string16> GetFilenameForLoadResolver;
-  public: typedef domapi::Deferred<base::string16> GetFilenameForSaveResolver;
+  public: typedef domapi::Deferred<base::string16> GetFileNameForLoadResolver;
+  public: typedef domapi::Deferred<base::string16> GetFileNameForSaveResolver;
 
   public: typedef base::Callback<void(const domapi::LoadFileCallbackData&)>
       LoadFileCallback;
@@ -86,14 +86,14 @@ class ViewDelegate {
   public: virtual void FocusWindow(WindowId window_id) = 0;
 
   // Get file name for load by using open file modal dialog box.
-  public: virtual void GetFilenameForLoad(
+  public: virtual void GetFileNameForLoad(
       WindowId window_id, const base::string16& dir_path,
-      const GetFilenameForLoadResolver& resolver) = 0;
+      const GetFileNameForLoadResolver& resolver) = 0;
 
   // Get file name for save by using open file modal dialog box.
-  public: virtual void GetFilenameForSave(
+  public: virtual void GetFileNameForSave(
       WindowId window_id, const base::string16& dir_path,
-      const GetFilenameForSaveResolver& resolver) = 0;
+      const GetFileNameForSaveResolver& resolver) = 0;
 
   public: virtual base::string16 GetMetrics(const base::string16& name) = 0;
 

@@ -333,7 +333,7 @@
       return;
     }
 
-    Editor.getFilenameForSave(this, document.fileName)
+    Editor.getFileNameForSave(this, document.fileName)
         .then(function(filename) {
           document.save(filename);
         });

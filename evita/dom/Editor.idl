@@ -26,9 +26,9 @@ interface Editor {
   [ImplementedAs=JavaScript]
   static void forceExit();
 
-  static Promise/* string */ getFilenameForLoad(Window? window,
+  static Promise/* string */ getFileNameForLoad(Window? window,
                                                 DOMString file_name);
-  static Promise/* string */ getFilenameForSave(Window? window,
+  static Promise/* string */ getFileNameForSave(Window? window,
                                                 DOMString file_name);
   static Promise/* string[] */ getSpellingSuggestions(DOMString wrong_word);
 

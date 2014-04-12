@@ -37,12 +37,12 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       domapi::ScriptHostState state) override;
   private: virtual void DidHandleViewIdelEvent(int hint) override;
   private: virtual void FocusWindow(dom::WindowId window_id) override;
-  private: virtual void GetFilenameForLoad(
+  private: virtual void GetFileNameForLoad(
       dom::WindowId window_id, const base::string16& dir_path,
-      const GetFilenameForLoadResolver& resolver) override;
-  private: virtual void GetFilenameForSave(
+      const GetFileNameForLoadResolver& resolver) override;
+  private: virtual void GetFileNameForSave(
       dom::WindowId window_id, const base::string16& dir_path,
-      const GetFilenameForSaveResolver& resolver) override;
+      const GetFileNameForSaveResolver& resolver) override;
   private: virtual base::string16 GetMetrics(
       const base::string16& name) override;
   private: virtual domapi::SwitchValue GetSwitch(

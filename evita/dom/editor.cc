@@ -164,18 +164,18 @@ v8::Handle<v8::Promise> Editor::CheckSpelling(
       word_to_check));
 }
 
-v8::Handle<v8::Promise> Editor::GetFilenameForLoad(
+v8::Handle<v8::Promise> Editor::GetFileNameForLoad(
     v8_glue::Nullable<Window> window, const base::string16& dir_path) {
   return PromiseResolver::SlowCall(base::Bind(
-      &ViewDelegate::GetFilenameForLoad,
+      &ViewDelegate::GetFileNameForLoad,
       base::Unretained(ScriptHost::instance()->view_delegate()),
       window ? window->window_id() : dom::kInvalidWindowId, dir_path));
 }
 
-v8::Handle<v8::Promise> Editor::GetFilenameForSave(
+v8::Handle<v8::Promise> Editor::GetFileNameForSave(
     v8_glue::Nullable<Window> window, const base::string16& dir_path) {
   return PromiseResolver::SlowCall(base::Bind(
-      &ViewDelegate::GetFilenameForSave,
+      &ViewDelegate::GetFileNameForSave,
       base::Unretained(ScriptHost::instance()->view_delegate()),
       window ? window->window_id() : dom::kInvalidWindowId, dir_path));
 }

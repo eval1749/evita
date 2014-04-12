@@ -23,9 +23,9 @@ class Editor : public v8_glue::Scriptable<Editor> {
 
   public: static v8::Handle<v8::Promise> Editor::CheckSpelling(
       const base::string16& word_to_check);
-  public: static v8::Handle<v8::Promise> GetFilenameForLoad(
+  public: static v8::Handle<v8::Promise> GetFileNameForLoad(
       v8_glue::Nullable<Window> window, const base::string16& dir_path);
-  public: static v8::Handle<v8::Promise> GetFilenameForSave(
+  public: static v8::Handle<v8::Promise> GetFileNameForSave(
       v8_glue::Nullable<Window> window, const base::string16& dir_path);
   public: static base::string16 GetMetrics(const base::string16& name);
   public: static v8::Handle<v8::Promise> GetSpellingSuggestions(

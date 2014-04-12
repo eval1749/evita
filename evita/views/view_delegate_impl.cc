@@ -173,14 +173,14 @@ void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {
   widget->RequestFocus();
 }
 
-void ViewDelegateImpl::GetFilenameForLoad(
+void ViewDelegateImpl::GetFileNameForLoad(
     dom::WindowId window_id, const base::string16& dir_path,
-    const GetFilenameForLoadResolver& resolver) {
+    const GetFileNameForLoadResolver& resolver) {
   auto const widget = window_id == dom::kInvalidWindowId ?
         FrameList::instance()->active_frame() :
         Window::FromWindowId(window_id);
   if (!widget) {
-    DVLOG(0) << "GetFilenameForLoad: no such widget " << window_id;
+    DVLOG(0) << "GetFileNameForLoad: no such widget " << window_id;
     event_handler_->RunCallback(base::Bind(resolver.resolve, base::string16()));
     return;
   }
@@ -194,14 +194,14 @@ void ViewDelegateImpl::GetFilenameForLoad(
                                          base::string16(params.m_wsz)));
 }
 
-void ViewDelegateImpl::GetFilenameForSave(
+void ViewDelegateImpl::GetFileNameForSave(
     dom::WindowId window_id, const base::string16& dir_path,
-    const GetFilenameForSaveResolver& resolver) {
+    const GetFileNameForSaveResolver& resolver) {
   auto const widget = window_id == dom::kInvalidWindowId ?
         FrameList::instance()->active_frame() :
         Window::FromWindowId(window_id);
   if (!widget) {
-    DVLOG(0) << "GetFilenameForSave: no such widget " << window_id;
+    DVLOG(0) << "GetFileNameForSave: no such widget " << window_id;
     event_handler_->RunCallback(base::Bind(resolver.resolve, base::string16()));
     return;
   }

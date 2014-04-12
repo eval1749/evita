@@ -26,7 +26,7 @@ BEGIN
             VALUE "FileVersion", MY_FileVersion
             VALUE "InternalName", MY_InternalName
             VALUE "LegalCopyright", MY_LegalCopyright
-            VALUE "OriginalFilename", MY_OriginalFilename
+            VALUE "OriginalFileName", MY_OriginalFileName
             VALUE "ProductName", MY_ProductName
             VALUE "ProductVersion", MY_FileVersion
         END

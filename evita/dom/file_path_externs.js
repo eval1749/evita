@@ -27,4 +27,4 @@ FilePath.fullPath = function(filename) {};
  * @param {string} filename
  * @return {boolean}
  */
-FilePath.isValidFilename = function(filename) {};
+FilePath.isValidFileName = function(filename) {};

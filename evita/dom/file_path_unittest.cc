@@ -45,15 +45,15 @@ TEST_F(FilePathTest, fullPath) {
   EXPECT_SCRIPT_EQ(FullPath("foo.txt"), "FilePath.fullPath('foo.txt')");
 }
 
-TEST_F(FilePathTest, isValidFilename) {
-  EXPECT_SCRIPT_TRUE("FilePath.isValidFilename('c:/foo/bar.cc')");
-  EXPECT_SCRIPT_FALSE("FilePath.isValidFilename('c:/foo:/bar.cc')");
-  EXPECT_SCRIPT_FALSE("FilePath.isValidFilename('c:/foo/<bar>.cc')");
-  EXPECT_SCRIPT_FALSE("FilePath.isValidFilename('c:/foo/*.cc')");
-  EXPECT_SCRIPT_FALSE("FilePath.isValidFilename('c:/foo/bar.?')");
-  EXPECT_SCRIPT_FALSE("FilePath.isValidFilename('c:/foo/\"bar\".cc')");
-  EXPECT_SCRIPT_FALSE("FilePath.isValidFilename('/foo/bar.cc')");
-  EXPECT_SCRIPT_FALSE("FilePath.isValidFilename('foo/bar.cc')");
+TEST_F(FilePathTest, isValidFileName) {
+  EXPECT_SCRIPT_TRUE("FilePath.isValidFileName('c:/foo/bar.cc')");
+  EXPECT_SCRIPT_FALSE("FilePath.isValidFileName('c:/foo:/bar.cc')");
+  EXPECT_SCRIPT_FALSE("FilePath.isValidFileName('c:/foo/<bar>.cc')");
+  EXPECT_SCRIPT_FALSE("FilePath.isValidFileName('c:/foo/*.cc')");
+  EXPECT_SCRIPT_FALSE("FilePath.isValidFileName('c:/foo/bar.?')");
+  EXPECT_SCRIPT_FALSE("FilePath.isValidFileName('c:/foo/\"bar\".cc')");
+  EXPECT_SCRIPT_FALSE("FilePath.isValidFileName('/foo/bar.cc')");
+  EXPECT_SCRIPT_FALSE("FilePath.isValidFileName('foo/bar.cc')");
 }
 
 }  // namespace

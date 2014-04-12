@@ -38,23 +38,23 @@ TEST_F(EditorTest, checkSpelling) {
   EXPECT_SCRIPT_FALSE("result");
 }
 
-TEST_F(EditorTest, getFilenameForLoad) {
+TEST_F(EditorTest, getFileNameForLoad) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
   EXPECT_SCRIPT_VALID(
       "var filename;"
       "var window = new EditorWindow();"
-      "Editor.getFilenameForLoad(window, 'dir').then(function(x) {"
+      "Editor.getFileNameForLoad(window, 'dir').then(function(x) {"
       "  filename = x;"
       "});");
   EXPECT_SCRIPT_EQ("dir/foo.bar", "filename");
 }
 
-TEST_F(EditorTest, getFilenameForSave) {
+TEST_F(EditorTest, getFileNameForSave) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
   EXPECT_SCRIPT_VALID(
       "var filename;"
       "var window = new EditorWindow();"
-      "Editor.getFilenameForSave(window, 'dir').then(function(x) {"
+      "Editor.getFileNameForSave(window, 'dir').then(function(x) {"
       "  filename = x;"
       "});");
   EXPECT_SCRIPT_EQ("dir/foo.bar", "filename");

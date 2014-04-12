@@ -15,15 +15,15 @@ MockViewImpl::~MockViewImpl() {
 }
 
 // dom::ViewDelegate
-void MockViewImpl::GetFilenameForLoad(
+void MockViewImpl::GetFileNameForLoad(
     WindowId, const base::string16& dir_path,
-    const GetFilenameForLoadResolver& resolver) {
+    const GetFileNameForLoadResolver& resolver) {
   resolver.resolve.Run(dir_path + L"/foo.bar");
 }
 
-void MockViewImpl::GetFilenameForSave(
+void MockViewImpl::GetFileNameForSave(
     WindowId, const base::string16& dir_path,
-    const GetFilenameForSaveResolver& resolver) {
+    const GetFileNameForSaveResolver& resolver) {
   resolver.resolve.Run(dir_path + L"/foo.bar");
 }
 

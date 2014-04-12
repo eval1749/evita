@@ -51,7 +51,7 @@
             document.forceClose();
             break;
           case DialogItemId.YES:
-            Editor.getFilenameForSave(null, document.fileName)
+            Editor.getFileNameForSave(null, document.fileName)
               .then(function(filename) {
                 document.save(filename).then(function() {
                   document.forceClose();
@@ -92,7 +92,7 @@
   Document.prototype.needSave = function() {
     // TODO: We should use |document.notForSave|.
     return this.modified && !this.name.startsWith('*') &&
-           FilePath.isValidFilename(this.fileName);
+           FilePath.isValidFileName(this.fileName);
   };
 
   /**

@@ -37,7 +37,7 @@
    * @param {string} filename
    * @return {boolean}
    */
-  FilePath.isValidFilename = function(filename) {
+  FilePath.isValidFileName = function(filename) {
     var data = FilePath.split(filename);
     return !!data.winDrive && data.absolute &&
            data.components.every(function(component) {

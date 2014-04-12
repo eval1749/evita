@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #define MY_InternalName     "evita.exe\0"
-#define MY_OriginalFilename "evita.exe\0"
+#define MY_OriginalFileName "evita.exe\0"
 #if _DEBUG
 #define MY_FileDescription  "evita/debug 5.0\0"
 #define MY_ProductName      "evita/debug 5.0\0"

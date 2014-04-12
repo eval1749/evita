@@ -27,7 +27,7 @@ TEST_F(FocusEventTest, ctor) {
   EXPECT_SCRIPT_VALID_CALL("init", event->GetWrapper(isolate()));
   EXPECT_SCRIPT_TRUE("event.bubbles");
   EXPECT_SCRIPT_FALSE("event.cancelable");
-  EXPECT_SCRIPT_TRUE("event.current_target == null");
+  EXPECT_SCRIPT_TRUE("event.currentTarget == null");
   EXPECT_SCRIPT_FALSE("event.defaultPrevented");
   EXPECT_SCRIPT_TRUE("event.eventPhase == Event.PhaseType.NONE");
   EXPECT_SCRIPT_TRUE("event.timeStamp == 0");

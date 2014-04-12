@@ -18,7 +18,7 @@ TEST_F(UiEventTest, ctor) {
   EXPECT_SCRIPT_VALID("var event = new UiEvent('foo');");
   EXPECT_SCRIPT_FALSE("event.bubbles");
   EXPECT_SCRIPT_FALSE("event.cancelable");
-  EXPECT_SCRIPT_TRUE("event.current_target == null");
+  EXPECT_SCRIPT_TRUE("event.currentTarget == null");
   EXPECT_SCRIPT_FALSE("event.defaultPrevented");
   EXPECT_SCRIPT_TRUE("event.eventPhase == Event.PhaseType.NONE");
   EXPECT_SCRIPT_TRUE("event.timeStamp == 0");
@@ -39,7 +39,7 @@ TEST_F(UiEventTest, ctor_init_dict) {
       "});");
   EXPECT_SCRIPT_TRUE("event.bubbles");
   EXPECT_SCRIPT_TRUE("event.cancelable");
-  EXPECT_SCRIPT_TRUE("event.current_target == null");
+  EXPECT_SCRIPT_TRUE("event.currentTarget == null");
   EXPECT_SCRIPT_FALSE("event.defaultPrevented");
   EXPECT_SCRIPT_TRUE("event.eventPhase == Event.PhaseType.NONE");
   EXPECT_SCRIPT_TRUE("event.timeStamp == 0");

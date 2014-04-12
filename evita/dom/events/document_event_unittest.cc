@@ -28,7 +28,7 @@ TEST_F(DocumentEventTest, ctor) {
       "});");
   EXPECT_SCRIPT_TRUE("event.bubbles");
   EXPECT_SCRIPT_FALSE("event.cancelable");
-  EXPECT_SCRIPT_TRUE("event.current_target == null");
+  EXPECT_SCRIPT_TRUE("event.currentTarget == null");
   EXPECT_SCRIPT_FALSE("event.defaultPrevented");
   EXPECT_SCRIPT_TRUE("Event.PhaseType.NONE === event.eventPhase");
   EXPECT_SCRIPT_EQ("0", "event.timeStamp");

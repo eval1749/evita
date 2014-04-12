@@ -8,7 +8,7 @@ Event.prototype.bubbles;
 Event.prototype.cancelable;
 
 /** @expose @type{?EventTarget} */
-Event.prototype.current_target;
+Event.prototype.currentTarget;
 
 /** @expose @type{boolean} */
 Event.prototype.defaultPrevented;

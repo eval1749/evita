@@ -39,7 +39,7 @@ class EventClass : public v8_glue::WrapperInfo {
     builder
         .SetProperty("bubbles", &Event::bubbles)
         .SetProperty("cancelable", &Event::cancelable)
-        .SetProperty("current_target", &Event::current_target)
+        .SetProperty("currentTarget", &Event::current_target)
         .SetProperty("defaultPrevented", &Event::default_prevented)
         .SetProperty("eventPhase", &Event::event_phase)
         .SetProperty("timeStamp", &Event::time_stamp)

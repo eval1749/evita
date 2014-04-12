@@ -65,6 +65,8 @@ class Rect_ : public BaseType {
   public: operator bool() const { return !empty(); }
   public: bool operator!() const { return empty(); }
 
+  public: Rect_ operator+(const PointType& size) const;
+  public: Rect_ operator-(const PointType& size) const;
   public: Rect_ operator+(const SizeType& size) const;
   public: Rect_ operator-(const SizeType& size) const;
 
@@ -129,6 +131,22 @@ class Rect_ : public BaseType {
 };
 
 // Rect_ inline functions
+
+template<typename BaseType, typename PointType, typename SizeType>
+Rect_<BaseType, PointType, SizeType>
+    Rect_<BaseType, PointType, SizeType>::operator+(
+        const PointType& point) const {
+  return Rect_(left + point.x, top + point.y,
+               right + point.x, bottom + point.y);
+}
+
+template<typename BaseType, typename PointType, typename SizeType>
+Rect_<BaseType, PointType, SizeType>
+    Rect_<BaseType, PointType, SizeType>::operator-(
+        const PointType& point) const {
+  return Rect_(left + point.x, top + point.y,
+               right + point.x, bottom + point.y);
+}
 
 template<typename BaseType, typename PointType, typename SizeType>
 Rect_<BaseType, PointType, SizeType>

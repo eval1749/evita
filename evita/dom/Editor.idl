@@ -1,0 +1,68 @@
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+interface Editor {
+  static readonly attribute DOMString version;
+
+  [ImplementedAs=JavaScript]
+  static readonly attribute KeyBindingMapMap key_binding_map_map_;
+
+  [ImplementedAs=JavaScript]
+  static Window activeWindow();
+
+  [ImplementedAs=JavaScript]
+  static void bindKey(Function window_class, DOMString key_combination,
+                      Function command);
+  [ImplementedAs=JavaScript]
+  static void bindKey(Function window_class, DOMString key_combination,
+                     Function command, DOMString description);
+
+  static Promise/* string */ checkSpelling(DOMString word_to_check);
+
+  [ImplementedAs=JavaScript]
+  static void exit();
+
+  [ImplementedAs=JavaScript]
+  static void forceExit();
+
+  static Promise/* string */ getFilenameForLoad(Window? window,
+                                                DOMString file_name);
+  static Promise/* string */ getFilenameForSave(Window? window,
+                                                DOMString file_name);
+  static Promise/* string[] */ getSpellingSuggestions(DOMString wrong_word);
+
+  [ImplementedAs=JavaScript]
+  static DOMString localizeText(DOMString format_text);
+
+  [ImplementedAs=JavaScript]
+  static DOMString localizeText(DOMString format_text, StringDict opt_dict);
+
+  /**
+   * @param {Window?} window
+   * @param {string} message
+   * @param {number} flags
+   * @param {string=} opt_title
+   * @return {!Promise.<number>}
+   */
+  static Promise/** number */ messageBox(Window? window, DOMString message,
+                                         long flags);
+  static Promise/** long */ messageBox(Window? window, DOMString message,
+                                       long flags, DOMString title);
+
+  [ImplementedAs=GetMetrics]
+  static DOMString metrics(DOMString name);
+
+  [ImplementedAs=JavaScript]
+  static long parseKeyCombination(DOMString spec);
+
+  static void setTabData(Window window, TabData tabData);
+
+  /**
+   * @param {string} script_text
+   * @param {string=} opt_file_name
+   * @return {!RunScriptResult}
+   */
+  static RunScriptResult runScript(DOMString script_text);
+  static RunScriptResult runScript(DOMString script_text, DOMString file_name);
+};

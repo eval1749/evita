@@ -27,11 +27,6 @@ var Document = function(name, opt_mode) {};
 /**
  * @constructor
  */
-var Editor = function() {};
-
-/**
- * @constructor
- */
 var EventTarget = function() {};
 
 /**
@@ -321,6 +316,45 @@ var OneShotTimer = function() {};
  * @extends {Timer}
  */
 var RepeatingTimer = function() {};
+
+//////////////////////////////////////////////////////////////////////
+//
+// Editor.idl
+//
+/**
+ * @typedef {Map.<string, Map.<number,function(number=)>>}
+ */
+var KeyBindingMapMap;
+
+/**
+ * @typedef {{
+ *  column: number,
+ *  functionName: string,
+ *  lineNumber: number,
+ *  scriptName: string
+ * }}
+ */
+var StackFrame;
+
+/**
+ * @typedef {Object.<string, string>}
+ */
+var StringDict;
+
+/**
+ * @typedef {{
+ *  exception: Error,
+ *  value: *,
+ *  stackTrace: Array.<!StackFrame>,
+ *  stackTraceString: string,
+ *  lineNumber: number,
+ *  start: number,
+ *  end: number,
+ *  startColumn: number,
+ *  endColumn: number
+ * }}
+ */
+var RunScriptResult;
 
 //////////////////////////////////////////////////////////////////////
 //

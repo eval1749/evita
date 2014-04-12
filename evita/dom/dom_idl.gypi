@@ -8,15 +8,17 @@
       'clipboard/DataTransfer.idl',
       'clipboard/DataTransferItem.idl',
       'clipboard/DataTransferItemList.idl',
+      'Editor.idl',
       'os/AbstractFile.idl',
       'os/File.idl',
     ], # idl_files
 
     'generated_glue_files': [
+      '<(glue_dir)/AbstractFileClass.cc',
       '<(glue_dir)/DataTransferClass.cc',
       '<(glue_dir)/DataTransferItemClass.cc',
       '<(glue_dir)/DataTransferItemListClass.cc',
-      '<(glue_dir)/AbstractFileClass.cc',
+      '<(glue_dir)/EditorClass.cc',
       '<(glue_dir)/FileClass.cc',
     ],
 
@@ -24,6 +26,7 @@
       '<(js_externs_dir)/DataTransfer_externs.js',
       '<(js_externs_dir)/DataTransferItem_externs.js',
       '<(js_externs_dir)/DataTransferItemList_externs.js',
+      '<(js_externs_dir)/Editor_externs.js',
       '<(js_externs_dir)/File_externs.js',
     ], # generated_js_externs_files
 
@@ -47,7 +50,6 @@
       'events/wheel_event_externs.js',
       'events/ui_event_externs.js',
       'events/window_event_externs.js',
-      'editor_externs.js',
       'windows/editor_window_externs.js',
 
       'encodings/text_decoder_externs.js',
@@ -138,7 +140,10 @@
       'target_name': 'dom_aggregate_glue_files',
       'type': 'static_library',
       'dependencies': [
+        '<(DEPTH)/gin/gin.gyp:gin',
+        '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
         'dom_generated_glue_files',
+        'v8_glue',
       ], # dependencies
       'include_dirs+': [ '<(SHARED_INTERMEDIATE_DIR)/evita/bindings' ],
       'sources': [

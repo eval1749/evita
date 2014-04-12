@@ -5,22 +5,24 @@
 'use strict';
 
 (function() {
-  /**
-   * @return {?Window}
-   */
-  Editor.activeWindow = function() {
-    var active = null;
-    function mostRecentlyUsed(a, b) {
-      if (a && b)
-        return a.focusTick_ > b.focusTick_ ? a : b;
-      return a || b;
+  Object.defineProperty(Editor, 'activeWindow', {
+    /**
+     * @return {?Window}
+     */
+    value: function() {
+      var active = null;
+      function mostRecentlyUsed(a, b) {
+        if (a && b)
+          return a.focusTick_ > b.focusTick_ ? a : b;
+        return a || b;
+      }
+      function updateActiveWindow(previous, current) {
+        var newValue = mostRecentlyUsed(previous, current);
+        return current.children.reduce(updateActiveWindow, newValue);
+      }
+      return EditorWindow.list.reduce(updateActiveWindow, null);
     }
-    function updateActiveWindow(previous, current) {
-      var newValue = mostRecentlyUsed(previous, current);
-      return current.children.reduce(updateActiveWindow, newValue);
-    }
-    return EditorWindow.list.reduce(updateActiveWindow, null);
-  };
+  });
 
   /**
    * @param {Function} window_class

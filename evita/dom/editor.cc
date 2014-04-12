@@ -5,45 +5,39 @@
 
 #include "base/bind.h"
 #include "evita/dom/public/io_delegate.h"
-#include "evita/dom/public/tab_data.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/windows/window.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
-#include "evita/v8_glue/nullable.h"
-#include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/runner.h"
 #include "v8_strings.h"
 
 namespace gin {
-template<>
-struct Converter<domapi::TabData> {
-  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
-                     domapi::TabData* out) {
-    if (val.IsEmpty() || !val->IsObject())
-      return false;
-    auto const obj = val->ToObject();
-    if (!ConvertFromV8(isolate, obj->Get(dom::v8Strings::icon.Get(isolate)),
-                       &out->icon)) {
-      return false;
-    }
-    if (!ConvertFromV8(isolate, obj->Get(dom::v8Strings::state.Get(isolate)),
-                       &out->state)) {
-      return false;
-    }
-    if (!ConvertFromV8(isolate, obj->Get(dom::v8Strings::title.Get(isolate)),
-                       &out->title)) {
-      return false;
-    }
-    if (!ConvertFromV8(isolate, obj->Get(dom::v8Strings::tooltip.Get(isolate)),
-                       &out->tooltip)) {
-      return false;
-    }
-    return true;
+bool Converter<domapi::TabData>::FromV8(
+    v8::Isolate* isolate, v8::Handle<v8::Value> val, domapi::TabData* out) {
+  if (val.IsEmpty() || !val->IsObject())
+    return false;
+  auto const obj = val->ToObject();
+  if (!ConvertFromV8(isolate, obj->Get(dom::v8Strings::icon.Get(isolate)),
+                     &out->icon)) {
+    return false;
   }
-};
+  if (!ConvertFromV8(isolate, obj->Get(dom::v8Strings::state.Get(isolate)),
+                     &out->state)) {
+    return false;
+  }
+  if (!ConvertFromV8(isolate, obj->Get(dom::v8Strings::title.Get(isolate)),
+                     &out->title)) {
+    return false;
+  }
+  if (!ConvertFromV8(isolate, obj->Get(dom::v8Strings::tooltip.Get(isolate)),
+                     &out->tooltip)) {
+    return false;
+  }
+  return true;
+}
 }  // namespace gin
 
 namespace dom {
@@ -108,57 +102,23 @@ v8::Handle<v8::Object> RunScriptInternal(const base::string16& script_text,
   return runner_scope.Escape(NewRunScriptResult(isolate, run_value,
       try_catch));
 }
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
-// EditorClass
+// Editor
 //
-class EditorClass : public v8_glue::WrapperInfo {
-  public: EditorClass(const char* name);
-  public: virtual ~EditorClass();
-
-  private: static base::string16 version();
-
-  private: static v8::Handle<v8::Promise> CheckSpelling(
-      const base::string16& word_to_check);
-
-  private: static v8::Handle<v8::Promise> GetFilenameForLoad(
-      v8_glue::Nullable<Window> window, const base::string16& dir_path);
-  private: static v8::Handle<v8::Promise> GetFilenameForSave(
-      v8_glue::Nullable<Window> window, const base::string16& dir_path);
-  private: static base::string16 GetMetrics(const base::string16& name);
-  private: static v8::Handle<v8::Promise> GetSpellingSuggestions(
-      const base::string16& wrong_word);
-  private: static v8::Handle<v8::Promise> MessageBox(
-      v8_glue::Nullable<Window> maybe_window,
-      const base::string16& message, int flags,
-      v8_glue::Optional<base::string16> title);
-  private: static Editor* NewEditor();
-  private: static v8::Handle<v8::Object> RunScript(
-      const base::string16& script_text,
-      v8_glue::Optional<base::string16> opt_file_name);
-  private: static void SetTabData(Window* window,
-                                  const domapi::TabData tab_data);
-
-  // v8_glue::WrapperInfo
-  protected: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override;
-
-  DISALLOW_COPY_AND_ASSIGN(EditorClass);
-};
-
-EditorClass::EditorClass(const char* name)
-    : v8_glue::WrapperInfo(name) {
+Editor::Editor() {
 }
 
-EditorClass::~EditorClass() {
+Editor::~Editor() {
 }
 
-base::string16 EditorClass::version() {
+base::string16 Editor::version() {
   return kVersion;
 }
 
-v8::Handle<v8::Promise> EditorClass::CheckSpelling(
+v8::Handle<v8::Promise> Editor::CheckSpelling(
     const base::string16& word_to_check) {
   return PromiseResolver::SlowCall(base::Bind(
       &domapi::IoDelegate::CheckSpelling,
@@ -166,7 +126,7 @@ v8::Handle<v8::Promise> EditorClass::CheckSpelling(
       word_to_check));
 }
 
-v8::Handle<v8::Promise> EditorClass::GetFilenameForLoad(
+v8::Handle<v8::Promise> Editor::GetFilenameForLoad(
     v8_glue::Nullable<Window> window, const base::string16& dir_path) {
   return PromiseResolver::SlowCall(base::Bind(
       &ViewDelegate::GetFilenameForLoad,
@@ -174,7 +134,7 @@ v8::Handle<v8::Promise> EditorClass::GetFilenameForLoad(
       window ? window->window_id() : dom::kInvalidWindowId, dir_path));
 }
 
-v8::Handle<v8::Promise> EditorClass::GetFilenameForSave(
+v8::Handle<v8::Promise> Editor::GetFilenameForSave(
     v8_glue::Nullable<Window> window, const base::string16& dir_path) {
   return PromiseResolver::SlowCall(base::Bind(
       &ViewDelegate::GetFilenameForLoad,
@@ -182,11 +142,11 @@ v8::Handle<v8::Promise> EditorClass::GetFilenameForSave(
       window ? window->window_id() : dom::kInvalidWindowId, dir_path));
 }
 
-base::string16 EditorClass::GetMetrics(const base::string16& name) {
+base::string16 Editor::GetMetrics(const base::string16& name) {
   return ScriptHost::instance()->view_delegate()->GetMetrics(name);
 }
 
-v8::Handle<v8::Promise> EditorClass::GetSpellingSuggestions(
+v8::Handle<v8::Promise> Editor::GetSpellingSuggestions(
     const base::string16& wrong_word) {
   return PromiseResolver::SlowCall(base::Bind(
       &domapi::IoDelegate::GetSpellingSuggestions,
@@ -194,7 +154,7 @@ v8::Handle<v8::Promise> EditorClass::GetSpellingSuggestions(
       wrong_word));
 }
 
-v8::Handle<v8::Promise> EditorClass::MessageBox(
+v8::Handle<v8::Promise> Editor::MessageBox(
     v8_glue::Nullable<Window> maybe_window,
     const base::string16& message, int flags,
     v8_glue::Optional<base::string16> title) {
@@ -205,13 +165,13 @@ v8::Handle<v8::Promise> EditorClass::MessageBox(
       message, title.get(base::string16()), flags));
 }
 
-Editor* EditorClass::NewEditor() {
+Editor* Editor::NewEditor() {
   ScriptHost::instance()->ThrowError(
       "Cannot create an instance of Editor.");
   return nullptr;
 }
 
-v8::Handle<v8::Object> EditorClass::RunScript(
+v8::Handle<v8::Object> Editor::RunScript(
     const base::string16& script_text,
     v8_glue::Optional<base::string16> opt_file_name) {
   auto const file_name = opt_file_name.get(L"__runscript__");
@@ -222,42 +182,9 @@ v8::Handle<v8::Object> EditorClass::RunScript(
   return RunScriptInternal(script_text, file_name);
 }
 
-void EditorClass::SetTabData(Window* window, const domapi::TabData tab_data) {
+void Editor::SetTabData(Window* window, const domapi::TabData tab_data) {
   ScriptHost::instance()->view_delegate()->SetTabData(
       window->window_id(), tab_data);
-}
-
-// v8_glue::WrapperInfo
-v8::Handle<v8::FunctionTemplate>
-    EditorClass::CreateConstructorTemplate(v8::Isolate* isolate) {
-  auto templ = v8_glue::CreateConstructorTemplate(isolate,
-      &EditorClass::NewEditor);
-  return v8_glue::FunctionTemplateBuilder(isolate, templ)
-    .SetMethod("checkSpelling", &EditorClass::CheckSpelling)
-    .SetMethod("getFilenameForLoad", &EditorClass::GetFilenameForLoad)
-    .SetMethod("getFilenameForSave", &EditorClass::GetFilenameForSave)
-    .SetMethod("getSpellingSuggestions",
-        &EditorClass::GetSpellingSuggestions)
-    .SetMethod("messageBox", &EditorClass::MessageBox)
-    .SetMethod("metrics", &EditorClass::GetMetrics)
-    .SetMethod("runScript", &EditorClass::RunScript)
-    .SetMethod("setTabData", &EditorClass::SetTabData)
-    .SetProperty("version", &EditorClass::version)
-    .Build();
-}
-
-}  // namespace
-
-//////////////////////////////////////////////////////////////////////
-//
-// Editor
-//
-DEFINE_SCRIPTABLE_OBJECT(Editor, EditorClass);
-
-Editor::Editor() {
-}
-
-Editor::~Editor() {
 }
 
 }  // namespace dom

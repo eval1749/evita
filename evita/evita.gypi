@@ -109,6 +109,8 @@
         'editor/application.cc',
         'editor/modal_message_loop_scope.cc',
         'editor/dom_lock.cc',
+        'editor/switch_set.cc',
+        'editor/switch_set.h',
         'gfx/bitmap.cc',
         'gfx/color_f.cc',
         'gfx/font_face.cc',
@@ -292,6 +294,8 @@
 
         'views/event_source.cc',
         'views/icon_cache.cc',
+        'views/switches.h',
+        'views/switches.cc',
         'views/view_delegate_impl.cc',
         'views/window.cc',
         'views/window_set.cc',

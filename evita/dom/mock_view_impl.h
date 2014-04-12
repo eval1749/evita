@@ -45,6 +45,8 @@ class MockViewImpl : public dom::ViewDelegate {
     const base::string16& dir_path,
     const GetFilenameForSaveResolver& resolver) override;
   MOCK_METHOD1(GetMetrics, base::string16(const base::string16&));
+  MOCK_METHOD1(GetSwitch, domapi::SwitchValue(const base::string16& name));
+  MOCK_METHOD0(GetSwitchNames, std::vector<base::string16>());
   public: std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;
   MOCK_METHOD1(HideWindow, void(WindowId));
@@ -64,6 +66,8 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD1(SetCapture, void(domapi::EventTargetId));
   MOCK_METHOD2(SetStatusBar,
       void(WindowId, const std::vector<base::string16>&));
+  MOCK_METHOD2(SetSwitch, void(const base::string16&,
+                               const domapi::SwitchValue&));
   MOCK_METHOD2(SetTabData, void(WindowId, const domapi::TabData&));
   MOCK_METHOD1(ShowWindow, void(WindowId));
   MOCK_METHOD2(SplitHorizontally, void(WindowId, WindowId));

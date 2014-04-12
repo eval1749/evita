@@ -6,6 +6,7 @@
 
 #include "base/logging.h"
 #include "evita/gfx/bitmap.h"
+#include "evita/views/switches.h"
 #include "evita/views/text/render_cell.h"
 #include "evita/views/text/render_selection.h"
 #include "evita/views/text/render_text_block.h"
@@ -123,15 +124,18 @@ void ScreenTextBlock::RenderContext::Copy(float dst_top, float dst_bottom,
 void ScreenTextBlock::RenderContext::DrawDirtyRect(
     const gfx::RectF& rect, float red, float green, float blue) const {
   RestoreSkipRect(rect);
-  #if USE_OVERLAY
-    gfx_->FillRectangle(gfx::Brush(*gfx_, red, green, blue, 0.1f), rect);
-    gfx_->DrawRectangle(gfx::Brush(*gfx_, red, green, blue, 0.5f), rect, 0.5f);
-  #else
-    auto marker_rect = rect;
-    marker_rect.left += kMarkerLeftMargin;
-    marker_rect.right = marker_rect.left + kMarkerWidth;
-    gfx_->FillRectangle(gfx::Brush(*gfx_, red, green, blue), marker_rect);
-  #endif
+  if (views::switches::text_window_display_paint) {
+    #if USE_OVERLAY
+      gfx_->FillRectangle(gfx::Brush(*gfx_, red, green, blue, 0.1f), rect);
+      gfx_->DrawRectangle(gfx::Brush(*gfx_, red, green, blue, 0.5f), rect,
+                          0.5f);
+    #else
+      auto marker_rect = rect;
+      marker_rect.left += kMarkerLeftMargin;
+      marker_rect.right = marker_rect.left + kMarkerWidth;
+      gfx_->FillRectangle(gfx::Brush(*gfx_, red, green, blue), marker_rect);
+    #endif
+  }
 }
 
 void ScreenTextBlock::RenderContext::FillBottom(const TextLine* line) const {

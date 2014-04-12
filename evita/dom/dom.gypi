@@ -196,6 +196,8 @@
         'public/io_context_id.cc',
         'public/io_delegate.cc',
         'public/float_point.cc',
+        'public/switch_value.cc',
+        'public/switch_value.h',
         'public/view_event_handler.cc',
 
         '<(SHARED_INTERMEDIATE_DIR)/v8_strings.cc',

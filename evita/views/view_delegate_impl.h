@@ -45,6 +45,9 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       const GetFilenameForSaveResolver& resolver) override;
   private: virtual base::string16 GetMetrics(
       const base::string16& name) override;
+  private: virtual domapi::SwitchValue GetSwitch(
+      const base::string16& name) override;
+  private: virtual std::vector<base::string16> GetSwitchNames() override;
   private: virtual std::vector<int> GetTableRowStates(
       dom::WindowId window_id,
       const std::vector<base::string16>& keys) override;
@@ -70,6 +73,9 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       domapi::EventTargetId event_target_id) override;
   private: virtual void SetStatusBar(dom::WindowId window_id,
       const std::vector<base::string16>& texts) override;
+  private: virtual void SetSwitch(
+      const base::string16& name,
+      const domapi::SwitchValue& new_value) override;
   private: virtual void SetTabData(dom::WindowId window_id,
                                    const domapi::TabData& tab_data) override;
   private: virtual void ShowWindow(dom::WindowId window_id) override;

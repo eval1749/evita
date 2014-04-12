@@ -30,6 +30,12 @@ class Editor : public v8_glue::Scriptable<Editor> {
   public: static base::string16 GetMetrics(const base::string16& name);
   public: static v8::Handle<v8::Promise> GetSpellingSuggestions(
       const base::string16& wrong_word);
+  // Get global switch value.
+  public: static domapi::SwitchValue GetSwitch(const base::string16& name);
+
+  // Get global switch names.
+  public: static std::vector<base::string16> GetSwitchNames();
+
   public: static v8::Handle<v8::Promise> MessageBox(
       v8_glue::Nullable<Window> maybe_window,
       const base::string16& message, int flags,
@@ -38,6 +44,11 @@ class Editor : public v8_glue::Scriptable<Editor> {
   public: static v8::Handle<v8::Object> RunScript(
       const base::string16& script_text,
       v8_glue::Optional<base::string16> opt_file_name);
+
+  // Set global switch value.
+  public: static void SetSwitch(const base::string16& name,
+                                const domapi::SwitchValue& new_value);
+
   public: static void SetTabData(Window* window,
                                  const domapi::TabData tab_data);
 
@@ -47,6 +58,14 @@ class Editor : public v8_glue::Scriptable<Editor> {
 }  // namespace dom
 
 namespace gin {
+template<>
+struct Converter<domapi::SwitchValue> {
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
+                     domapi::SwitchValue* out);
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+                                    const domapi::SwitchValue& value);
+};
+
 template<>
 struct Converter<domapi::TabData> {
   static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,

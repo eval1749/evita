@@ -15,6 +15,44 @@
 #include "v8_strings.h"
 
 namespace gin {
+bool Converter<domapi::SwitchValue>::FromV8(
+    v8::Isolate* isolate, v8::Handle<v8::Value> val,
+    domapi::SwitchValue* out) {
+  if (val.IsEmpty())
+    return false;
+  bool bool_value;
+  if (ConvertFromV8(isolate, val, &bool_value)) {
+    *out = domapi::SwitchValue(bool_value);
+    return true;
+  }
+  int int_value;
+  if (ConvertFromV8(isolate, val, &int_value)) {
+    *out = domapi::SwitchValue(int_value);
+    return true;
+  }
+  base::string16 str_value;
+  if (ConvertFromV8(isolate, val, &str_value)) {
+    *out = domapi::SwitchValue(str_value);
+    return true;
+  }
+  return false;
+}
+
+v8::Handle<v8::Value> Converter<domapi::SwitchValue>::ToV8(
+    v8::Isolate* isolate, const domapi::SwitchValue& val) {
+  switch (val.type()) {
+    case domapi::SwitchValue::Type::Bool:
+        return ConvertToV8(isolate, val.bool_value());
+    case domapi::SwitchValue::Type::Int:
+        return ConvertToV8(isolate, val.int_value());
+    case domapi::SwitchValue::Type::String:
+        return ConvertToV8(isolate, val.string_value());
+    case domapi::SwitchValue::Type::Void:
+        break;
+  }
+  return v8::Undefined(isolate);
+}
+
 bool Converter<domapi::TabData>::FromV8(
     v8::Isolate* isolate, v8::Handle<v8::Value> val, domapi::TabData* out) {
   if (val.IsEmpty() || !val->IsObject())
@@ -154,6 +192,14 @@ v8::Handle<v8::Promise> Editor::GetSpellingSuggestions(
       wrong_word));
 }
 
+domapi::SwitchValue Editor::GetSwitch(const base::string16& name) {
+  return ScriptHost::instance()->view_delegate()->GetSwitch(name);
+}
+
+std::vector<base::string16>  Editor::GetSwitchNames() {
+  return ScriptHost::instance()->view_delegate()->GetSwitchNames();
+}
+
 v8::Handle<v8::Promise> Editor::MessageBox(
     v8_glue::Nullable<Window> maybe_window,
     const base::string16& message, int flags,
@@ -180,6 +226,11 @@ v8::Handle<v8::Object> Editor::RunScript(
     return RunScriptInternal(script_text, file_name);
   }
   return RunScriptInternal(script_text, file_name);
+}
+
+void Editor::SetSwitch(const base::string16& name,
+                       const domapi::SwitchValue& new_value) { 
+  return ScriptHost::instance()->view_delegate()->SetSwitch(name, new_value);
 }
 
 void Editor::SetTabData(Window* window, const domapi::TabData tab_data) {

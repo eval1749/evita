@@ -58,6 +58,14 @@ interface Editor {
 
   static void setTabData(Window window, TabData tabData);
 
+  static void setSwitch(DOMString name, SwitchValue new_value);
+
+  [ImplementedAs=GetSwitch]
+  static SwitchValue switch(DOMString name);
+
+  [ImplementedAs=GetSwitchNames]
+  static DOMString[] switcheNames();
+
   /**
    * @param {string} script_text
    * @param {string=} opt_file_name

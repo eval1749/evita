@@ -14,6 +14,7 @@
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/editor/modal_message_loop_scope.h"
+#include "evita/editor/switch_set.h"
 #include "evita/gc/collector.h"
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
@@ -246,6 +247,18 @@ base::string16 ViewDelegateImpl::GetMetrics(const base::string16& name) {
   return ostream.str();
 }
 
+domapi::SwitchValue ViewDelegateImpl::GetSwitch(const base::string16& name) {
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  DCHECK(lock_scope.locked());
+  return editor::SwitchSet::instance()->Get(name);
+}
+
+std::vector<base::string16> ViewDelegateImpl::GetSwitchNames() {
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  DCHECK(lock_scope.locked());
+  return editor::SwitchSet::instance()->names();
+}
+
 std::vector<int> ViewDelegateImpl::GetTableRowStates(WindowId window_id,
     const std::vector<base::string16>& keys) {
   auto const widget = FromWindowId("GetTableRowStates", window_id);
@@ -440,6 +453,13 @@ void ViewDelegateImpl::SetStatusBar(dom::WindowId window_id,
     return;
   }
   frame->SetStatusBar(texts);
+}
+
+void ViewDelegateImpl::SetSwitch(const base::string16& name,
+                                 const domapi::SwitchValue& new_value) {
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  DCHECK(lock_scope.locked());
+  editor::SwitchSet::instance()->Set(name, new_value);
 }
 
 void ViewDelegateImpl::SetTabData(dom::WindowId window_id,

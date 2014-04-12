@@ -293,6 +293,17 @@ DEFINE_VIEW_DELEGATE_1(ShowWindow, WindowId)
 DEFINE_VIEW_DELEGATE_2(SplitHorizontally, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(SplitVertically, WindowId, WindowId)
 
+#define DEFINE_SYNC_VIEW_DELEGATE_0(name, return_type) \
+  return_type ScriptThread::name() { \
+    DCHECK_CALLED_ON_SCRIPT_THREAD(); \
+    if (!view_message_loop_) \
+      return return_type(); \
+    return DoSynchronousCall( \
+          base::Bind(&ViewDelegate::name, \
+                     base::Unretained(view_delegate_)), \
+          view_message_loop_, waitable_event_.get()); \
+  }
+
 #define DEFINE_SYNC_VIEW_DELEGATE_1(name, return_type, type1) \
   return_type ScriptThread::name(type1 p1) { \
     DCHECK_CALLED_ON_SCRIPT_THREAD(); \
@@ -329,6 +340,9 @@ DEFINE_VIEW_DELEGATE_2(SplitVertically, WindowId, WindowId)
 DEFINE_SYNC_VIEW_DELEGATE_2(ComputeOnTextWindow, text::Posn,
                             WindowId, const TextWindowCompute&);
 DEFINE_SYNC_VIEW_DELEGATE_1(GetMetrics, base::string16, const base::string16&)
+DEFINE_SYNC_VIEW_DELEGATE_1(GetSwitch, domapi::SwitchValue,
+                            const base::string16&)
+DEFINE_SYNC_VIEW_DELEGATE_0(GetSwitchNames, std::vector<base::string16>)
 DEFINE_SYNC_VIEW_DELEGATE_2(GetTableRowStates, std::vector<int>, WindowId,
                             const std::vector<base::string16>&)
 DEFINE_SYNC_VIEW_DELEGATE_3(MapPointToPosition, text::Posn,
@@ -356,6 +370,16 @@ void ScriptThread::ScrollTextWindow(WindowId window_id, int direction) {
   RunSynchronously(base::Bind(
       &ViewDelegate::ScrollTextWindow, base::Unretained(view_delegate_),
       window_id, direction), view_message_loop_, waitable_event_.get());
+}
+
+void ScriptThread::SetSwitch(const base::string16& name,
+                             const domapi::SwitchValue& new_value) {
+  DCHECK_CALLED_ON_SCRIPT_THREAD();
+  if (!view_message_loop_)
+    return;
+  RunSynchronously(base::Bind(
+      &ViewDelegate::SetSwitch, base::Unretained(view_delegate_),
+      name, new_value), view_message_loop_, waitable_event_.get());
 }
 
 void ScriptThread::UpdateWindow(WindowId window_id) {

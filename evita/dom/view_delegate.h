@@ -9,6 +9,7 @@
 #include "base/strings/string16.h"
 #include "evita/dom/public/deferred.h"
 #include "evita/dom/public/script_host_state.h"
+#include "evita/dom/public/switch_value.h"
 #include "evita/dom/windows/window_id.h"
 #include "evita/dom/windows/window_id.h"
 
@@ -96,6 +97,14 @@ class ViewDelegate {
       const GetFilenameForSaveResolver& resolver) = 0;
 
   public: virtual base::string16 GetMetrics(const base::string16& name) = 0;
+
+  // Get switch bool value
+  public: virtual domapi::SwitchValue GetSwitch(
+      const base::string16& name) = 0;
+
+  // Get switch names
+  public: virtual std::vector<base::string16> GetSwitchNames() = 0;
+
   public: virtual std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) = 0;
   public: virtual void HideWindow(WindowId window_id) = 0;
@@ -129,6 +138,11 @@ class ViewDelegate {
   // Set text contents of status bar of specified top level window.
   public: virtual void SetStatusBar(WindowId window_id,
       const std::vector<base::string16>& texts) = 0;
+
+  // Set switch value
+  public: virtual void SetSwitch(const base::string16& name,
+                                 const domapi::SwitchValue& new_value) = 0;
+  
   public: virtual void SetTabData(WindowId window_id,
                                   const domapi::TabData& tab_data) = 0;
   public: virtual void ShowWindow(WindowId window_id) = 0;

@@ -101,6 +101,9 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void GetFilenameForSave(
       WindowId window_id, const base::string16& dir_path,
       const GetFilenameForSaveResolver& resolver) override;
+  private: virtual domapi::SwitchValue GetSwitch(
+      const base::string16& name) override;
+  private: virtual std::vector<base::string16> GetSwitchNames() override;
   private: virtual std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;
   private: virtual void HideWindow(WindowId window_id) override;
@@ -125,6 +128,9 @@ class ScriptThread final : public domapi::IoDelegate,
       domapi::EventTargetId event_target_id) override;
   private: virtual void SetStatusBar(WindowId window_id,
       const std::vector<base::string16>& texts) override;
+  private: virtual void SetSwitch(
+      const base::string16& name,
+      const domapi::SwitchValue& new_value) override;
   private: virtual void SetTabData(WindowId window_id,
                                    const domapi::TabData& tab_data) override;
   private: virtual void ShowWindow(WindowId window_id) override;

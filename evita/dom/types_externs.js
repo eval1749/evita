@@ -356,6 +356,9 @@ var StringDict;
  */
 var RunScriptResult;
 
+/** @typedef {boolean|number|string} */
+var SwitchValue;
+
 //////////////////////////////////////////////////////////////////////
 //
 // Unicode

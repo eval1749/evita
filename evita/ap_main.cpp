@@ -18,12 +18,15 @@
 #include "base/at_exit.h"
 #include "base/command_line.h"
 #include "base/logging.h"
+#include "base/strings/string_util.h"
 #include "evita/editor/application.h"
+#include "evita/editor/switch_set.h"
+#include "evita/views/switches.h"
 #include "evita/io/io_manager.h"
 
 #define SINGLE_INSTANCE_NAME L"D47A7677-9F8E-467c-BABE-8ABDE8D58476" 
 
-const char16* k_pwszTitle = L"Evita Common Lisp Listner";
+const char16* k_pwszTitle = L"Evita 5.0";
 
 extern HINSTANCE   g_hInstance;
 extern HINSTANCE   g_hResource;
@@ -132,6 +135,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
               MB_APPLMODAL | MB_ICONERROR);
           return 1;
       }
+  }
+
+  #if _DEBUG
+  views::switches::editor_window_display_paint = true;
+  views::switches::form_window_display_paint = false;
+  views::switches::text_window_display_paint = true;
+  #endif
+
+  auto const switch_set = editor::SwitchSet::instance();
+
+  switch_set->Register(views::switches::kEditorWindowDisplayPaint,
+                       &views::switches::editor_window_display_paint);
+  switch_set->Register(views::switches::kFormWindowDisplayPaint,
+                       &views::switches::form_window_display_paint);
+  switch_set->Register(views::switches::kTextWindowDisplayPaint,
+                       &views::switches::text_window_display_paint);
+
+  for (const auto& name : switch_set->names()) {
+    const auto value = switch_set->Get(name);
+    if (value.is_bool()) {
+      if (command_line->HasSwitch(UTF16ToASCII(name)))
+        switch_set->Set(name, domapi::SwitchValue(true));
+    }
   }
 
   return MainLoop();

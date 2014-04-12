@@ -36,6 +36,7 @@
 #include "evita/views/frame_observer.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/message_view.h"
+#include "evita/views/switches.h"
 #include "evita/views/tab_data_set.h"
 #include "evita/views/tab_strip.h"
 #include "evita/views/window_set.h"
@@ -657,10 +658,12 @@ void Frame::OnPaint(const gfx::Rect rect) {
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
   gfx_->set_dirty_rect(rect);
   OnDraw(&*gfx_);
-  gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
-                      rect);
-  gfx_->DrawRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
-                      rect, 2.0f);
+  if (views::switches::editor_window_display_paint){
+    gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
+                        rect);
+    gfx_->DrawRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
+                        rect, 2.0f);
+  }
 }
 
 void Frame::WillDestroyWidget() {

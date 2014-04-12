@@ -34,6 +34,7 @@
 #include "evita/ui/system_metrics.h"
 #include "evita/views/forms/form_control_controller.h"
 #include "evita/views/frame_list.h"
+#include "evita/views/switches.h"
 #include "evita/vi_Frame.h"
 
 #define DEBUG_PAINT 0
@@ -596,13 +597,13 @@ void FormWindow::OnPaint(const gfx::Rect rect) {
   Window::OnDraw(gfx_.get());
 
   // Render paint rectangle for debugging.
-#if DEBUG_PAINT
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, gfx::RectF(rect));
-  gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
-                      rect);
-  gfx_->DrawRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
-                      rect, 2.0f);
-#endif
+  if (views::switches::form_window_display_paint) {
+    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, gfx::RectF(rect));
+    gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
+                        rect);
+    gfx_->DrawRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
+                        rect, 2.0f);
+  }
 }
 
 }  // namespace views

@@ -6,7 +6,6 @@
 
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
-#include "evita/dom/text/buffer.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/text/regexp_init.h"
@@ -14,6 +13,7 @@
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/wrapper_info.h"
+#include "evita/text/buffer.h"
 #include "evita/text/range.h"
 #include "regex/IRegex.h"
 #include "v8_strings.h"

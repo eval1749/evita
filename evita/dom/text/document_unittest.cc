@@ -11,7 +11,6 @@
 #include "base/strings/utf_string_conversions.h"
 #include "gmock/gmock.h"
 #include "evita/dom/abstract_dom_test.h"
-#include "evita/dom/text/buffer.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/document_set.h"
 #include "evita/dom/file_path.h"
@@ -19,6 +18,7 @@
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
+#include "evita/text/buffer.h"
 
 namespace {
 

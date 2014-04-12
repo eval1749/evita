@@ -24,11 +24,6 @@ namespace base {
 class MessageLoop;
 }
 
-namespace dom {
-class Buffer;
-}
-using Buffer = dom::Buffer;
-
 namespace domapi {
 enum class ScriptHostState;
 class ViewEventHandler;

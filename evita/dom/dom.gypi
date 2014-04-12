@@ -96,7 +96,6 @@
       'sources': [
         '../precomp.cpp',
 
-        'text/buffer.cc',
         'converter.cc',
         'text/document.cc',
         'text/document_set.cc',

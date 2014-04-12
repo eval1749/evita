@@ -17,7 +17,6 @@
 #include "base/memory/weak_ptr.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/text/buffer.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/mutation_observer.h"
 #include "evita/dom/text/mutation_record.h"

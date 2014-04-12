@@ -23,7 +23,6 @@ class ViewEventHandler;
 
 namespace dom {
 
-class Buffer;
 class Document;
 class EditorWindow;
 class Form;

@@ -15,10 +15,10 @@
 #pragma warning(pop)
 #include "base/strings/string_number_conversions.h"
 #include "evita/dom/lock.h"
-#include "evita/dom/text/buffer.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/script_host.h"
+#include "evita/text/buffer.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/scoped_persistent.h"
 

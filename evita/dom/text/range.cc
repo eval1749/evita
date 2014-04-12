@@ -3,11 +3,11 @@
 
 #include "evita/dom/text/range.h"
 
-#include "evita/dom/text/buffer.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/regexp.h"
+#include "evita/text/buffer.h"
 #include "evita/text/marker_set.h"
 #include "evita/text/range.h"
 #include "evita/v8_glue/constructor_template.h"

@@ -4,7 +4,6 @@
 
 #include "evita/dom/text/modes/mode.h"
 
-#include "evita/dom/text/buffer.h"
 #include "evita/dom/text/document.h"
 #include "evita/text/modes/mode.h"
 #include "evita/v8_glue/converter.h"

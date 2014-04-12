@@ -7,10 +7,6 @@
 
 #include "base/time/time.h"
 
-namespace dom {
-class Buffer;
-}
-
 namespace domapi {
 
 struct LoadFileCallbackData {

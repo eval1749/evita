@@ -10,7 +10,6 @@
 #include "base/memory/ref_counted.h"
 #include "base/strings/stringprintf.h"
 #include "evita/editor/application.h"
-#include "evita/dom/text/buffer.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/text/document_set.h"
 #include "evita/dom/text/modes/mode.h"
@@ -19,6 +18,7 @@
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/metrics/time_scope.h"
+#include "evita/text/buffer.h"
 #include "evita/text/marker.h"
 #include "evita/text/marker_set.h"
 #include "evita/text/modes/mode.h"
@@ -198,7 +198,7 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
 DEFINE_SCRIPTABLE_OBJECT(Document, DocumentClass)
 
 Document::Document(const base::string16& name, Mode* mode)
-    : buffer_(new Buffer(DocumentSet::instance()->MakeUniqueName(name))),
+    : buffer_(new text::Buffer(DocumentSet::instance()->MakeUniqueName(name))),
       mode_(mode),
       properties_(v8::Isolate::GetCurrent(),
                   NewMap(v8::Isolate::GetCurrent())) {

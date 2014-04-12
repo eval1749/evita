@@ -8,10 +8,9 @@
 
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
-// TODO(yosi) We should not use |dom::Buffer|.
-#include "evita/dom/text/buffer.h"
 #include "evita/dom/text/document.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/text/buffer.h"
 #include "evita/ui/base/table_model_observer.h"
 #include "evita/ui/controls/table_control.h"
 #include "evita/views/icon_cache.h"

@@ -18,12 +18,6 @@ class MessageLoopForIO;
 class Thread;
 }
 
-namespace dom {
-class Buffer;
-}
-
-using Buffer = dom::Buffer;
-
 //////////////////////////////////////////////////////////////////////
 //
 // IoManager

@@ -14,12 +14,12 @@
 #include "evita/v8_glue/scoped_persistent.h"
 
 namespace text {
+class Buffer;
 struct LineAndColumn;
 }
 
 namespace dom {
 
-class Buffer;
 class Mode;
 class Range;
 class RegExp;
@@ -31,7 +31,7 @@ class RegExp;
 class Document : public v8_glue::Scriptable<Document, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(Document);
 
-  private: std::unique_ptr<Buffer> buffer_;
+  private: std::unique_ptr<text::Buffer> buffer_;
   private: base::string16 file_name_;
   private: gc::Member<Mode> mode_;
   // TODO(yosi) When we set |properties| with |v8::Object::Set()|, it doesn't
@@ -42,8 +42,8 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   private: explicit Document(const base::string16& name, Mode* mode);
   public: virtual ~Document();
 
-  public: const Buffer* buffer() const { return buffer_.get(); }
-  public: Buffer* buffer() { return buffer_.get(); }
+  public: const text::Buffer* buffer() const { return buffer_.get(); }
+  public: text::Buffer* buffer() { return buffer_.get(); }
   public: base::char16 charCodeAt(text::Posn position) const;
   // Returns code page used for I/O.
   public: int code_page() const;

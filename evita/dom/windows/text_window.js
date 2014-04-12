@@ -126,7 +126,7 @@ global.TextWindow.prototype.clone = function() {
   function handleFocus(window) {
     stopControllers(window);
     var document = window.document;
-    if (document.filename == '')
+    if (document.fileName == '')
       return;
     if (document.obsolete == Document.Obsolete.CHECKING) {
       window.status = 'Checking file status...';
@@ -138,7 +138,7 @@ global.TextWindow.prototype.clone = function() {
       return;
     }
     document.obsolete = Document.Obsolete.CHECKING;
-    Os.File.stat(document.filename).then(function(info) {
+    Os.File.stat(document.fileName).then(function(info) {
       document.lastStatTime_ = new Date();
       document.obsolete = info.lastModificationDate.valueOf() ==
                             document.lastWriteTime.valueOf() ?
@@ -160,7 +160,7 @@ global.TextWindow.prototype.clone = function() {
         reloadDocument(window, document);
       });
     }).catch(function(reason) {
-      console.log('Os.File.stat', document.filename, reason);
+      console.log('Os.File.stat', document.fileName, reason);
       document.lastStatTime_ = new Date();
       document.obsolete = Document.Obsolete.UNKNOWN;
     });

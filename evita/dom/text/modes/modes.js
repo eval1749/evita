@@ -100,8 +100,8 @@ Mode.chooseMode = function(document) {
     if (mode_ctor)
       return new mode_ctor();
   }
-  if (document.filename != '')
-    return Mode.chooseModeByFileName(document.filename);
+  if (document.fileName != '')
+    return Mode.chooseModeByFileName(document.fileName);
   return Mode.chooseModeByFileName(document.name);
 };
 

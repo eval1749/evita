@@ -328,12 +328,12 @@
    */
   Editor.bindKey(TextWindow, 'Ctrl+S', function(arg) {
     var document = this.selection.document;
-    if (!arg && document.filename != '') {
-      document.save(document.filename);
+    if (!arg && document.fileName != '') {
+      document.save(document.fileName);
       return;
     }
 
-    Editor.getFilenameForSave(this, document.filename)
+    Editor.getFilenameForSave(this, document.fileName)
         .then(function(filename) {
           document.save(filename);
         });

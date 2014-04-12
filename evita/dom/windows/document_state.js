@@ -9,7 +9,7 @@
 global.DocumentState = function(document_or_state) {
   if (document_or_state instanceof Document) {
     var document = /** @type {!Document} */(document_or_state);
-    this.filename = document.filename;
+    this.fileName = document.fileName;
     // TODO(yosi) We should specify |DocumentState.prototype.icon| from
     // IconSet.
     this.icon = -2;
@@ -22,7 +22,7 @@ global.DocumentState = function(document_or_state) {
 
   if (document_or_state instanceof DocumentState) {
     var state = document_or_state;
-    this.filename = state.filename;
+    this.fileName = state.fileName;
     this.icon = state.icon;
     this.lastWriteTime = state.lastWriteTime;
     this.modified = state.modified;
@@ -48,7 +48,7 @@ global.DocumentState.prototype.clone = function() {
  * @return {boolean}
  */
 global.DocumentState.prototype.equals = function(other) {
-  return this.filename == other.filename &&
+  return this.fileName == other.fileName &&
          this.icon == other.icon &&
          this.lastWriteTime == other.lastWriteTime &&
          this.modified == other.modified &&

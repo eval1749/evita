@@ -112,7 +112,7 @@ TEST_F(DocumentTest, Document_open) {
   auto const absoulte_filename = dom::FilePath::FullPath(L"foo");
   EXPECT_SCRIPT_VALID("var b = Document.open('foo');"
                       "var c = Document.open('bar');");
-  EXPECT_SCRIPT_EQ(base::UTF16ToUTF8(absoulte_filename), "a.filename");
+  EXPECT_SCRIPT_EQ(base::UTF16ToUTF8(absoulte_filename), "a.fileName");
   EXPECT_SCRIPT_TRUE("a === b");
   EXPECT_SCRIPT_TRUE("a !== c");
 }
@@ -187,7 +187,7 @@ TEST_F(DocumentTest, load_failed_open) {
     "var doc = new Document('foo');"
     "var promise = doc.load('foo.cc')");
   EXPECT_SCRIPT_TRUE("promise instanceof Promise");
-  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
   EXPECT_SCRIPT_TRUE("doc.obsolete == Document.Obsolete.UNKNOWN");
@@ -204,7 +204,7 @@ TEST_F(DocumentTest, load_failed_read) {
     "var doc = new Document('foo');"
     "var promise = doc.load('foo.cc')");
   EXPECT_SCRIPT_TRUE("promise instanceof Promise");
-  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
   EXPECT_SCRIPT_TRUE("doc.obsolete == Document.Obsolete.UNKNOWN");
@@ -238,7 +238,7 @@ TEST_F(DocumentTest, load_succeeded) {
   EXPECT_SCRIPT_EQ("utf-8", "doc.encoding");
   EXPECT_SCRIPT_EQ("8", "doc.length");
   EXPECT_SCRIPT_EQ("3", "doc.newline");
-  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("123456", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
   EXPECT_SCRIPT_EQ("C++", "doc.mode.name");
@@ -341,7 +341,7 @@ TEST_F(DocumentTest, save_failed_open) {
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"
     "doc.save('foo.cc');");
-  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_EQ("-1", "doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
@@ -360,7 +360,7 @@ TEST_F(DocumentTest, save_failed_encode) {
     "doc.save('foo.cc');");
   EXPECT_EQ(1, mock_io_delegate()->num_close_called());
   EXPECT_EQ(1, mock_io_delegate()->num_remove_called());
-  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_EQ("-1", "doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
@@ -379,7 +379,7 @@ TEST_F(DocumentTest, save_failed_write) {
     "doc.save('foo.cc');");
   EXPECT_EQ(1, mock_io_delegate()->num_close_called());
   EXPECT_EQ(1, mock_io_delegate()->num_remove_called());
-  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_EQ("-1", "doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
@@ -411,7 +411,7 @@ TEST_F(DocumentTest, save_succeeded) {
   EXPECT_EQ(1, mock_io_delegate()->num_close_called());
   EXPECT_EQ(expected_bytes, mock_io_delegate()->bytes());
 
-  EXPECT_SCRIPT_TRUE("doc.filename.endsWith('foo.cc')");
+  EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("123456", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_EQ("0", "doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");

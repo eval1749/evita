@@ -107,7 +107,7 @@
     // temporary file to actual file name as result of save operation.
     var should_remove = null;
 
-    var dir_path = FilePath.dirname(document.filename);
+    var dir_path = FilePath.dirname(document.fileName);
     return Os.File.makeTempFileName(dir_path, 'ed').then(function(temp_name) {
       return Os.File.open(temp_name, 'w').then(function(file) {
         should_close = file;
@@ -143,10 +143,10 @@
         // Finalize file saving
         return should_close.close().then(function() {
           should_close = null;
-          console.log('save', 'done', num_bytes, temp_name, document.filename);
-          return Os.File.move(temp_name, document.filename).then(function() {
+          console.log('save', 'done', num_bytes, temp_name, document.fileName);
+          return Os.File.move(temp_name, document.fileName).then(function() {
             should_remove = null;
-            return Os.File.stat(document.filename).then(function(result) {
+            return Os.File.stat(document.fileName).then(function(result) {
               var info = /** Os.File.Info */(result);
               document.lastStatTime_ = new Date();
               document.lastWriteTime = info.lastModificationDate;
@@ -177,7 +177,7 @@
   Document.prototype.save = function(opt_filename) {
     var document = this;
     if (!arguments.length) {
-      if (document.filename == '')
+      if (document.fileName == '')
         throw 'Document isn\'t bound to file.';
     } else {
       var filename = /** @type{string} */(opt_filename);
@@ -186,10 +186,10 @@
       var present = Document.findFile(absolute_filename);
       if (present && present !== this)
         throw filename + ' is already bound to ' + present;
-      document.filename = absolute_filename;
+      document.fileName = absolute_filename;
     }
 
-    var file_name = document.filename;
+    var file_name = document.fileName;
     Editor.messageBox(null, 'Saving to ' + file_name,
                       MessageBox.ICONINFORMATION);
     return save(document).then(function() {

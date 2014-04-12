@@ -70,7 +70,7 @@ Document.removeObserver = function(observer) {};
 Document.prototype.encoding;
 
 /** @expose  @type {string} */
-Document.prototype.filename;
+Document.prototype.fileName;
 
 /** @expose  @type {?Keymap} */
 Document.prototype.keymap;

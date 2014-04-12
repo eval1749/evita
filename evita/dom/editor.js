@@ -54,7 +54,7 @@
      * @return {Promise}
      */
     function interactiveSave(document) {
-      return Editor.getFilenameForSave(null, document.filename).then(
+      return Editor.getFilenameForSave(null, document.fileName).then(
         function(filename) {
           if (!filename.length)
             return Promise.resolve(DialogItemId.CANCEL);

@@ -17,10 +17,10 @@ global.TabData = function (opt_state) {
   var state = /** @type{!DocumentState} */(opt_state);
   var tooltip_texts = [
     'Name: ' + state.name,
-    'File: ' + (state.filename ? state.filename : 'no file'),
+    'File: ' + (state.fileName ? state.fileName : 'no file'),
     'Save: ' + (state.lastWriteTime.valueOf() ?
         state.lastWriteTime.toLocaleString() : 'never saved'),
-    state.modified ? (state.filename ? 'Not saved' : 'Modified') :
+    state.modified ? (state.fileName ? 'Not saved' : 'Modified') :
         'Not modified',
   ];
   this.icon = state.icon;

@@ -25,7 +25,7 @@ DocumentState.addObserver = function(callback) {};
 DocumentState.update = function(document) {};
 
 /** @type {string} */
-DocumentState.prototype.filename;
+DocumentState.prototype.fileName;
 
 /** @type {number} */
 DocumentState.prototype.icon;

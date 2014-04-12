@@ -161,7 +161,7 @@ v8::Handle<v8::FunctionTemplate> DocumentClass::CreateConstructorTemplate(
 
 void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
   builder
-      .SetProperty("filename", &Document::filename, &Document::set_filename)
+      .SetProperty("fileName", &Document::filename, &Document::set_filename)
       .SetProperty("lastWriteTime", &Document::last_write_time,
                    &Document::set_last_write_time)
       .SetProperty("length", &Document::length)

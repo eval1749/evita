@@ -33,7 +33,7 @@
       return;
     }
 
-    Editor.getFilenameForSave(this, this.selection.document.filename)
+    Editor.getFilenameForSave(this, this.selection.document.fileName)
         .then(function(filename) {
           var document = Document.open(filename);
           windows.newTextWindow(editorWindow, document)
@@ -46,7 +46,7 @@
    */
   Editor.bindKey(Window, 'Ctrl+O', function() {
     var editorWindow = this.parent;
-    Editor.getFilenameForLoad(this, this.selection.document.filename)
+    Editor.getFilenameForLoad(this, this.selection.document.fileName)
         .then(function(filename) {
           windows.activate(editorWindow, openFile(filename));
         });
@@ -128,7 +128,7 @@
       return;
     }
 
-    Editor.getFilenameForSave(this, this.selection.document.filename)
+    Editor.getFilenameForSave(this, this.selection.document.fileName)
         .then(function(filename) {
           var document = Document.open(filename);
           windows.newEditorWindow(document);
@@ -140,7 +140,7 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+Shift+O', function() {
-    Editor.getFilenameForLoad(this, this.selection.document.filename)
+    Editor.getFilenameForLoad(this, this.selection.document.fileName)
         .then(function(filename) {
           windows.newEditorWindow(openFile(filename));
         });

@@ -116,7 +116,7 @@
       return [
         document.modified ? '*' : '-',
         document.readonly ? '%' : '-',
-        document.filename ? OBSOLETE_MARK_MAP[document.obsolete] : '-',
+        document.fileName ? OBSOLETE_MARK_MAP[document.obsolete] : '-',
         (function(count) { return count > 9 ? 'm' : (count || '-'); })(
             document_window_count_map.get(document))
       ].join('');
@@ -134,7 +134,7 @@
         stateString(document),
         document.lastWriteTime.valueOf() ?
             document.lastWriteTime.toLocaleString() : '-',
-        document.filename
+        document.fileName
       ];
       range.text = fields.join('\t') + '\n';
     });

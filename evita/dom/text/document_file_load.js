@@ -200,7 +200,7 @@
   global.Document.prototype.load = function(opt_filename) {
     var document = this;
     if (!arguments.length) {
-      if (document.filename == '')
+      if (document.fileName == '')
         throw 'Document isn\'t bound to file.';
     } else {
       var filename = /** @type{string} */(opt_filename);
@@ -209,14 +209,14 @@
       var present = Document.findFile(absolute_filename);
       if (present && present !== this)
         throw filename + ' is already bound to ' + present;
-      document.filename = absolute_filename;
+      document.fileName = absolute_filename;
     }
 
     document.obsolete = Document.Obsolete.CHECKING;
-    Editor.messageBox(null, 'Loading ' + document.filename,
+    Editor.messageBox(null, 'Loading ' + document.fileName,
                       MessageBox.ICONINFORMATION);
-    return load(document, document.filename).then(function(length) {
-      Editor.messageBox(null, 'Loaded ' + document.filename,
+    return load(document, document.fileName).then(function(length) {
+      Editor.messageBox(null, 'Loaded ' + document.fileName,
                         MessageBox.ICONINFORMATION);
       document.obsolete = Document.Obsolete.NO;
       document.lastStatTime_ = new Date();

@@ -62,7 +62,13 @@ class CodeGeneratorGlue(object):
 
 
 def attribute_context(attribute):
+    if 'ImplementedAs' in attribute.extended_attributes:
+        cpp_name = attribute.extended_attributes['ImplementedAs']
+    else:
+        cpp_name = attribute.name
+
     return {
+        'cpp_name': cpp_name,
         'is_read_only': attribute.is_read_only,
         'is_static': attribute.is_static,
         'name': attribute.name,
@@ -125,10 +131,16 @@ def function_context(functions):
                   in zip(*normalized_parameters_list)]
     return_type_strings = [type_string(function.idl_type)
                            for function in functions if function.idl_type]
+
+    if 'ImplementedAs' in functions[0].extended_attributes:
+        cpp_name = functions[0].extended_attributes['ImplementedAs']
+    else:
+        cpp_name = upper_camel_case(functions[0].name)
+
     return {
         'is_static': functions[0].is_static,
         'name': functions[0].name,
-        'cpp_name': upper_camel_case(functions[0].name),
+        'cpp_name': cpp_name,
         'parameters': parameters,
         'return_type': union_type_string(return_type_strings),
     }
@@ -150,15 +162,18 @@ def generate_template_context(definitions, interface_name, interfaces_info):
     except KeyError:
         raise Exception('%s not in IDL definitions' % interface_name)
 
-    attribute_context_list = [attribute_context(attribute)
-                              for attribute in interface.attributes]
+    attribute_context_list = filter(
+        lambda context: context['cpp_name'] != 'JavaScript',
+        [attribute_context(attribute) for attribute in interface.attributes])
+
     constant_context_list = [constant_context(constant)
                              for constant in interface.constants]
 
-    method_context_list = [function_context(list(functions))
-                           for name, functions in
-                           groupby(interface.operations,
-                                   lambda operation: operation.name)]
+    method_context_list = filter(
+        lambda context: context['cpp_name'] != 'JavaScript',
+        [function_context(list(functions))
+         for name, functions in
+         groupby(interface.operations, lambda operation: operation.name)])
 
     referenced_interface_names.add(interface_name)
     include_list = sorted([interfaces_info[name]['include_path']

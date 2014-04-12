@@ -47,10 +47,10 @@ v8::Handle<v8::FunctionTemplate> {{class_name}}::CreateConstructorTemplate(
  #}
 {% for attribute in attributes if attribute.is_static %}
 {%   if attribute.is_read_only %}
-  builder.SetProperty("{{attribute.name}}", &{{interface_name}}::{{attribute.name}});
+  builder.SetProperty("{{attribute.name}}", &{{interface_name}}::{{attribute.cpp_name}});
 {%    else %}
-  builder.SetProperty("{{attribute.name}}", &{{interface_name}}::{{attribute.name}},
-                                            &{{interface_name}}::set_{{attribute.name}});
+  builder.SetProperty("{{attribute.name}}", &{{interface_name}}::{{attribute.cpp_name}},
+                                            &{{interface_name}}::set_{{attribute.cpp_name}});
 {%    endif %}
 {%  endfor %}
 {###############################
@@ -73,11 +73,11 @@ void {{class_name}}:: SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) {
 {% for attribute in attributes if not attribute.is_static %}
 {%   if attribute.is_read_only %}
-  builder.SetProperty("{{attribute.name}}", &{{interface_name}}::{{attribute.name}});
+  builder.SetProperty("{{attribute.name}}", &{{interface_name}}::{{attribute.cpp_name}});
 {%   else %}
   builder.SetProperty("{{attribute.name}}",
-      &{{interface_name}}::{{attribute.name}},
-      &{{interface_name}}::set_{{attribute.name}});
+      &{{interface_name}}::{{attribute.cpp_name}},
+      &{{interface_name}}::set_{{attribute.cpp_name}});
 {%   endif %}
 {%  endfor %}
 {% for method in methods if not method.is_static %}

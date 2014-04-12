@@ -17,7 +17,6 @@
 #include "evita/gc/collector.h"
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
-#include "evita/spellchecker/spelling_engine.h"
 #include "evita/ui/controls/text_field_control.h"
 #include "evita/views/forms/file_dialog_box.h"
 #include "evita/views/forms/form_control_set.h"
@@ -90,13 +89,6 @@ void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
   if (!new_parent)
     return;
   window->SetParentWidget(new_parent);
-}
-
-void ViewDelegateImpl::CheckSpelling(const base::string16& word_to_check,
-    const CheckSpellingResolver& deferred) {
-  event_handler_->RunCallback(base::Bind(deferred.resolve,
-      spellchecker::SpellingEngine::GetSpellingEngine()->
-          CheckSpelling(word_to_check)));
 }
 
 text::Posn ViewDelegateImpl::ComputeOnTextWindow(
@@ -248,13 +240,6 @@ base::string16 ViewDelegateImpl::GetMetrics(const base::string16& name) {
 
   ostream << '}';
   return ostream.str();
-}
-
-void ViewDelegateImpl::GetSpellingSuggestions(const base::string16& wrong_word,
-    const GetSpellingSuggestionsResolver& deferred) {
-  event_handler_->RunCallback(base::Bind(deferred.resolve,
-      spellchecker::SpellingEngine::GetSpellingEngine()->
-          GetSpellingSuggestions(wrong_word)));
 }
 
 std::vector<int> ViewDelegateImpl::GetTableRowStates(WindowId window_id,

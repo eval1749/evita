@@ -32,6 +32,8 @@ class MockIoDelegate : public domapi::IoDelegate {
   private: domapi::FileStatus file_status_;
   private: int num_close_called_;
   private: int num_remove_called_;
+  private: bool check_spelling_result_;
+  private: std::vector<base::string16> spelling_suggestions_;
   private: base::string16 temp_file_name_;
 
   public: MockIoDelegate();
@@ -41,6 +43,13 @@ class MockIoDelegate : public domapi::IoDelegate {
   public: void set_bytes(const std::vector<uint8_t> new_bytes);
   public: int num_close_called() const { return num_close_called_; }
   public: int num_remove_called() const { return num_remove_called_; }
+  public: void set_check_spelling_result(bool result) {
+    check_spelling_result_ = result;
+  }
+  public: void set_spelling_suggestions(
+      const std::vector<base::string16>& spelling_suggestions) {
+    spelling_suggestions_ = spelling_suggestions;
+  }
 
   private: CallResult PopCallResult(const base::StringPiece& name);
   public: void SetCallResult(const base::StringPiece& name, int error_code);
@@ -53,8 +62,13 @@ class MockIoDelegate : public domapi::IoDelegate {
                                  int error_code);
 
   // domapi::IoDelegate
+  public: virtual void CheckSpelling(const base::string16& word_to_check,
+      const CheckSpellingResolver& deferred) override;
   public: virtual void CloseFile(domapi::IoContextId,
                                  const domapi::FileIoDeferred& deferred);
+  public: virtual void GetSpellingSuggestions(
+      const base::string16& wrong_word,
+      const GetSpellingSuggestionsResolver& deferred) override;
   public: virtual void MakeTempFileName(
       const base::string16& dir_name, const base::string16& prefix,
       const domapi::MakeTempFileNameResolver& resolver) override;

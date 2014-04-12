@@ -181,8 +181,12 @@ void ScriptThread::Start(base::MessageLoop* view_message_loop,
         &IoDelegate::name, base::Unretained(io_delegate_), p1, p2, p3, p4)); \
   }
 
+DEFINE_IO_DELEGATE_2(CheckSpelling, const base::string16&,
+    const CheckSpellingResolver&)
 DEFINE_IO_DELEGATE_2(CloseFile, domapi::IoContextId,
                      const domapi::FileIoDeferred&)
+DEFINE_IO_DELEGATE_2(GetSpellingSuggestions, const base::string16&,
+    const GetSpellingSuggestionsResolver&)
 DEFINE_IO_DELEGATE_3(MakeTempFileName, const base::string16&,
                      const base::string16&,
                      const domapi::MakeTempFileNameResolver&)
@@ -261,8 +265,6 @@ DEFINE_IO_DELEGATE_4(WriteFile, domapi::IoContextId, void*, size_t,
 
 DEFINE_VIEW_DELEGATE_2(AddWindow, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(ChangeParentWindow, WindowId, WindowId)
-DEFINE_VIEW_DELEGATE_2(CheckSpelling, const base::string16&,
-    const CheckSpellingResolver&)
 DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
 DEFINE_VIEW_DELEGATE_2(CreateFormWindow, WindowId, const Form*)
 DEFINE_VIEW_DELEGATE_2(CreateTableWindow, WindowId, Document*)
@@ -275,8 +277,6 @@ DEFINE_VIEW_DELEGATE_3(GetFilenameForLoad, WindowId, const base::string16&,
                        ViewDelegate::GetFilenameForLoadCallback)
 DEFINE_VIEW_DELEGATE_3(GetFilenameForSave, WindowId, const base::string16&,
                        ViewDelegate::GetFilenameForSaveCallback)
-DEFINE_VIEW_DELEGATE_2(GetSpellingSuggestions, const base::string16&,
-    const GetSpellingSuggestionsResolver&)
 DEFINE_VIEW_DELEGATE_1(HideWindow, WindowId)
 DEFINE_VIEW_DELEGATE_1(MakeSelectionVisible, WindowId)
 DEFINE_VIEW_DELEGATE_5(MessageBox, WindowId, const base::string16&,

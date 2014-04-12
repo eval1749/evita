@@ -6,9 +6,9 @@
 #include "base/basictypes.h"
 #include "gmock/gmock.h"
 #include "evita/dom/abstract_dom_test.h"
+#include "evita/dom/mock_io_delegate.h"
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/view_delegate.h"
 
 namespace {
 
@@ -29,11 +29,11 @@ TEST_F(EditorTest, checkSpelling) {
       "function checkSpelling(word) {"
       "  Editor.checkSpelling(word).then(function(x) { result = x; });"
       "}");
-  mock_view_impl()->set_check_spelling_result(true);
+  mock_io_delegate()->set_check_spelling_result(true);
   EXPECT_SCRIPT_VALID("checkSpelling('word')");
   EXPECT_SCRIPT_TRUE("result");
 
-  mock_view_impl()->set_check_spelling_result(false);
+  mock_io_delegate()->set_check_spelling_result(false);
   EXPECT_SCRIPT_VALID("checkSpelling('wrod')");
   EXPECT_SCRIPT_FALSE("result");
 }
@@ -66,7 +66,7 @@ TEST_F(EditorTest, getSpellingSuggestions) {
       "function getSpellingSuggestions(word) {"
       "  Editor.getSpellingSuggestions(word).then(function(x) { result = x; });"
       "}");
-  mock_view_impl()->set_spelling_suggestions({L"word", L"sword"});
+  mock_io_delegate()->set_spelling_suggestions({L"word", L"sword"});
   EXPECT_SCRIPT_VALID("getSpellingSuggestions('word')");
   EXPECT_SCRIPT_EQ("word, sword", "result.join(', ')");
 }

@@ -6,6 +6,7 @@
 #include "base/bind.h"
 #include "base/callback.h"
 #include "evita/gc/local.h"
+#include "evita/dom/public/io_delegate.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/script_host.h"
@@ -165,8 +166,8 @@ base::string16 EditorClass::version() {
 v8::Handle<v8::Promise> EditorClass::CheckSpelling(
     const base::string16& word_to_check) {
   return PromiseResolver::SlowCall(base::Bind(
-      &ViewDelegate::CheckSpelling,
-      base::Unretained(ScriptHost::instance()->view_delegate()),
+      &domapi::IoDelegate::CheckSpelling,
+      base::Unretained(ScriptHost::instance()->io_delegate()),
       word_to_check));
 }
 
@@ -201,8 +202,8 @@ base::string16 EditorClass::GetMetrics(const base::string16& name) {
 v8::Handle<v8::Promise> EditorClass::GetSpellingSuggestions(
     const base::string16& wrong_word) {
   return PromiseResolver::SlowCall(base::Bind(
-      &ViewDelegate::GetSpellingSuggestions,
-      base::Unretained(ScriptHost::instance()->view_delegate()),
+      &domapi::IoDelegate::GetSpellingSuggestions,
+      base::Unretained(ScriptHost::instance()->io_delegate()),
       wrong_word));
 }
 

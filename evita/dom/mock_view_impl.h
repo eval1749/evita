@@ -25,19 +25,9 @@ class MockViewImpl : public dom::ViewDelegate {
   public: MockViewImpl();
   public: virtual ~MockViewImpl();
 
-  public: void set_check_spelling_result(bool result) {
-    check_spelling_result_ = result;
-  }
-  public: void set_spelling_suggestions(
-      const std::vector<base::string16>& spelling_suggestions) {
-    spelling_suggestions_ = spelling_suggestions;
-  }
-
   // ViewDelegate
   MOCK_METHOD2(AddWindow, void(WindowId, WindowId));
   MOCK_METHOD2(ChangeParentWindow, void(WindowId, WindowId));
-  public: virtual void CheckSpelling(const base::string16& word_to_check,
-      const CheckSpellingResolver& deferred) override;
   MOCK_METHOD2(ComputeOnTextWindow,
       text::Posn(WindowId, const TextWindowCompute&));
   MOCK_METHOD1(CreateEditorWindow, void(const EditorWindow*));
@@ -55,9 +45,6 @@ class MockViewImpl : public dom::ViewDelegate {
     const base::string16& dir_path,
     GetFilenameForSaveCallback callback) override;
   MOCK_METHOD1(GetMetrics, base::string16(const base::string16&));
-  public: virtual void GetSpellingSuggestions(
-      const base::string16& wrong_word,
-      const GetSpellingSuggestionsResolver& deferred) override;
   public: std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;
   MOCK_METHOD1(HideWindow, void(WindowId));

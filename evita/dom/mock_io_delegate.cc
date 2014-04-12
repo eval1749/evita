@@ -68,6 +68,11 @@ void MockIoDelegate::SetFileStatus(const domapi::FileStatus& file_status,
 }
 
 // domapi::IoDelegate
+void MockIoDelegate::CheckSpelling(const base::string16&,
+    const CheckSpellingResolver& deferred) {
+  deferred.resolve.Run(check_spelling_result_);
+}
+
 void MockIoDelegate::CloseFile(domapi::IoContextId,
                                const domapi::FileIoDeferred& resolver) {
   ++num_close_called_;
@@ -76,6 +81,11 @@ void MockIoDelegate::CloseFile(domapi::IoContextId,
     resolver.reject.Run(domapi::IoError(error_code));
   else
     resolver.resolve.Run(true);
+}
+
+void MockIoDelegate::GetSpellingSuggestions(const base::string16&,
+    const GetSpellingSuggestionsResolver& deferred) {
+  deferred.resolve.Run(spelling_suggestions_);
 }
 
 void MockIoDelegate::MakeTempFileName(

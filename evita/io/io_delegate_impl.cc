@@ -22,6 +22,7 @@
 #include "evita/io/file_io_context.h"
 #include "evita/io/io_context_utils.h"
 #include "evita/io/process_io_context.h"
+#include "evita/spellchecker/spelling_engine.h"
 
 #define DVLOG_WIN32_ERROR(level, name) \
   DVLOG(level) << name ": " << this << " " << file_name << " err=" << dwError
@@ -65,6 +66,14 @@ IoDelegateImpl::~IoDelegateImpl() {
 }
 
 // domapi::IoDelegate
+void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
+    const CheckSpellingResolver& deferred) {
+  Application::instance()->view_event_handler()->RunCallback(
+      base::Bind(deferred.resolve,
+          spellchecker::SpellingEngine::GetSpellingEngine()->
+              CheckSpelling(word_to_check)));
+}
+
 void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
                                const domapi::FileIoDeferred& deferred) {
   auto const it = context_map_.find(context_id);
@@ -73,6 +82,14 @@ void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
   }
   it->second->Close(deferred);
   context_map_.erase(it);
+}
+
+void IoDelegateImpl::GetSpellingSuggestions(const base::string16& wrong_word,
+    const GetSpellingSuggestionsResolver& deferred) {
+  Application::instance()->view_event_handler()->RunCallback(
+      base::Bind(deferred.resolve,
+          spellchecker::SpellingEngine::GetSpellingEngine()->
+              GetSpellingSuggestions(wrong_word)));
 }
 
 void IoDelegateImpl::MakeTempFileName(

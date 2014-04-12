@@ -22,8 +22,6 @@ class ViewDelegateImpl : public dom::ViewDelegate {
                                   dom::WindowId child_id) override;
   private: virtual void ChangeParentWindow(dom::WindowId window_id,
       dom::WindowId new_parent_id) override;
-  private: virtual void CheckSpelling(const base::string16& word_to_check,
-        const CheckSpellingResolver& deferred) override;
   private: virtual text::Posn ComputeOnTextWindow(dom::WindowId window_id,
       const dom::TextWindowCompute& data) override;
   private: virtual void CreateEditorWindow(
@@ -47,9 +45,6 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       GetFilenameForSaveCallback callback) override;
   private: virtual base::string16 GetMetrics(
       const base::string16& name) override;
-  private: virtual void GetSpellingSuggestions(
-      const base::string16& wrong_word,
-      const GetSpellingSuggestionsResolver& deferred) override;
   private: virtual std::vector<int> GetTableRowStates(
       dom::WindowId window_id,
       const std::vector<base::string16>& keys) override;

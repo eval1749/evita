@@ -42,8 +42,13 @@ class ScriptThread final : public domapi::IoDelegate,
                             domapi::IoDelegate* io_delegate);
 
   // domapi::IoDelegate
+  private: virtual void CheckSpelling(const base::string16& word_to_check,
+        const CheckSpellingResolver& deferred) override;
   private: virtual void CloseFile(domapi::IoContextId context_id,
       const domapi::FileIoDeferred& deferred) override;
+  private: virtual void GetSpellingSuggestions(
+      const base::string16& wrong_word,
+      const GetSpellingSuggestionsResolver& deferred) override;
   private: virtual void MakeTempFileName(
       const base::string16& dir_name, const base::string16& prefix,
       const domapi::MakeTempFileNameResolver& resolver) override;
@@ -74,8 +79,6 @@ class ScriptThread final : public domapi::IoDelegate,
                                   WindowId child_id) override;
   public: virtual void ChangeParentWindow(WindowId window_id,
     WindowId new_parent_window_id) override;
-  private: virtual void CheckSpelling(const base::string16& word_to_check,
-        const CheckSpellingResolver& deferred) override;
   private: virtual text::Posn ComputeOnTextWindow(
       WindowId window_id, const TextWindowCompute& data) override;
   private: virtual void CreateEditorWindow(
@@ -98,9 +101,6 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void GetFilenameForSave(
       WindowId window_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) override;
-  private: virtual void GetSpellingSuggestions(
-      const base::string16& wrong_word,
-      const GetSpellingSuggestionsResolver& deferred) override;
   private: virtual std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;
   private: virtual void HideWindow(WindowId window_id) override;

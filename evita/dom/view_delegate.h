@@ -51,16 +51,11 @@ struct TextWindowCompute {
 };
 
 class ViewDelegate {
-  public: typedef domapi::Deferred<bool> CheckSpellingResolver;
-
   public: typedef base::Callback<void(base::string16 filename)>
       GetFilenameForLoadCallback;
 
   public: typedef base::Callback<void(base::string16 filename)>
       GetFilenameForSaveCallback;
-
-  public: typedef domapi::Deferred<std::vector<base::string16>>
-      GetSpellingSuggestionsResolver;
 
   public: typedef base::Callback<void(const domapi::LoadFileCallbackData&)>
       LoadFileCallback;
@@ -77,8 +72,6 @@ class ViewDelegate {
   public: virtual void AddWindow(WindowId parent_id, WindowId child_id) = 0;
   public: virtual void ChangeParentWindow(WindowId window_id,
                                           WindowId new_parent_window_id) = 0;
-  public: virtual void CheckSpelling(const base::string16& word_to_check,
-        const CheckSpellingResolver& callback) = 0;
   public: virtual text::Posn ComputeOnTextWindow(
       WindowId window_id, const TextWindowCompute& data) = 0;
   public: virtual void CreateEditorWindow(const EditorWindow* window) = 0;
@@ -102,9 +95,6 @@ class ViewDelegate {
       WindowId window_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) = 0;
   public: virtual base::string16 GetMetrics(const base::string16& name) = 0;
-  public: virtual void GetSpellingSuggestions(
-      const base::string16& wrong_word,
-      const GetSpellingSuggestionsResolver& callback) = 0;
   public: virtual std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) = 0;
   public: virtual void HideWindow(WindowId window_id) = 0;

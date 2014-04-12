@@ -21,8 +21,13 @@ class IoDelegateImpl : public domapi::IoDelegate {
   public: virtual ~IoDelegateImpl();
 
   // domapi::IoDelegate
+  private: virtual void CheckSpelling(const base::string16& word_to_check,
+        const CheckSpellingResolver& deferred) override;
   private: virtual void CloseFile(domapi::IoContextId context_id,
         const domapi::FileIoDeferred& deferred) override;
+  private: virtual void GetSpellingSuggestions(
+      const base::string16& wrong_word,
+      const GetSpellingSuggestionsResolver& deferred) override;
   private: virtual void MakeTempFileName(
       const base::string16& dir_name, const base::string16& prefix,
       const domapi::MakeTempFileNameResolver& resolver) override;

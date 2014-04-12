@@ -5,6 +5,9 @@
 #if !defined(INCLUDE_evita_dom_public_io_delegate_h)
 #define INCLUDE_evita_dom_public_io_delegate_h
 
+#include <vector>
+
+#include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_callback.h"
 #include "evita/dom/public/io_context_id.h"
 
@@ -13,11 +16,25 @@
 namespace domapi {
 
 class IoDelegate {
+  public: typedef domapi::Deferred<bool> CheckSpellingResolver;
+
+  public: typedef domapi::Deferred<std::vector<base::string16>>
+      GetSpellingSuggestionsResolver;
+
   protected: IoDelegate();
   public: virtual ~IoDelegate();
 
+  // Check spelling of |word_to_check|.
+  public: virtual void CheckSpelling(const base::string16& word_to_check,
+        const CheckSpellingResolver& callback) = 0;
+
   public: virtual void CloseFile(IoContextId context_id,
                                  const FileIoDeferred& deferred) = 0;
+
+  // Returns list of suggested words for |wrong_word|.
+  public: virtual void GetSpellingSuggestions(
+      const base::string16& wrong_word,
+      const GetSpellingSuggestionsResolver& callback) = 0;
 
   // Make temporary file and returns its name.
   public: virtual void MakeTempFileName(

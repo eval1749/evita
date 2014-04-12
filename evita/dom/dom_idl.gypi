@@ -11,6 +11,7 @@
       'Editor.idl',
       'os/AbstractFile.idl',
       'os/File.idl',
+      'text/modes/Mode.idl',
     ], # idl_files
 
     'generated_glue_files': [
@@ -20,6 +21,7 @@
       '<(glue_dir)/DataTransferItemListClass.cc',
       '<(glue_dir)/EditorClass.cc',
       '<(glue_dir)/FileClass.cc',
+      '<(glue_dir)/ModeClass.cc',
     ],
 
     'generated_js_externs_files': [
@@ -28,6 +30,7 @@
       '<(js_externs_dir)/DataTransferItemList_externs.js',
       '<(js_externs_dir)/Editor_externs.js',
       '<(js_externs_dir)/File_externs.js',
+      '<(js_externs_dir)/Mode_externs.js',
     ], # generated_js_externs_files
 
     'static_js_externs_files': [

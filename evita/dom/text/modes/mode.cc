@@ -10,34 +10,10 @@
 
 namespace dom {
 
-namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// ModeClass
-//
-class ModeClass : public v8_glue::WrapperInfo {
-  public: ModeClass(const char* name)
-      : v8_glue::WrapperInfo(name) {
-  }
-  public: ~ModeClass() = default;
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("name", &Mode::name)
-        .SetMethod("doColor_", &Mode::DoColor);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(ModeClass);
-};
-}  // namespace
-
 //////////////////////////////////////////////////////////////////////
 //
 // Mode
 //
-DEFINE_SCRIPTABLE_OBJECT(Mode, ModeClass);
-
 Mode::Mode(text::Mode* text_mode)
     : mode_(text_mode) {
 }

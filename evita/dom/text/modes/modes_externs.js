@@ -2,26 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/** @expose @type {function(!Document): !Mode} */
-Mode.chooseMode;
+/** @typedef {!Map.<string, ModeDescription>} */
+var ExtensionToModeMap;
 
-/** @expose @type {function(string): !Mode} */
-Mode.chooseModeByName;
-
-/** @expose @type {!Mode} */
-Mode.defaultMode;
-
-/** @expose @type {!Map.<string, ModeDescription>} */
-Mode.extensionMap;
-
-/** @expose @type {!Map.<string, !Function>} */
-Mode.nameMap;
-
-/** @expose @type {string} */
-Mode.prototype.name;
-
-/** @expose @type {function(number)} */
-Mode.prototype.doCall_ = function(number) {};
+/** @typedef {!Map.<string, !Function>} */
+var NameToModeMap;
 
 /**
  * @constructor

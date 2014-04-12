@@ -1,0 +1,28 @@
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+interface Mode {
+  [ImplementedAs=JavaScript]
+  static readonly attribute Mode defaultMode;
+
+  [ImplementedAs=JavaScript]
+  static readonly attribute ExtensionToModeMap extensionMap;
+
+  [ImplementedAs=JavaScript]
+  static readonly attribute NameToModeMap fileNameMap;
+
+  [ImplementedAs=JavaScript]
+  static readonly attribute NameToModeMap nameMap;
+
+  [ImplementedAs=JavaScript]
+  static Mode chooseMode(Document document);
+
+  [ImplementedAs=JavaScript]
+  static Mode chooseModeByFileName(DOMString name);
+
+  readonly attribute DOMString name;
+
+  [ImplementedAs=DoColor]
+  void doColor_(long hint);
+};

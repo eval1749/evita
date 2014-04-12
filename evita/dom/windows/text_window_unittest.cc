@@ -71,6 +71,7 @@ TEST_F(TextWindowTest, realize) {
 
   // The document receives "attach" event when |TextWindow| is realized.
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
+  EXPECT_CALL(*mock_view_impl(), SetTabData(Eq(1), _));
   EXPECT_SCRIPT_VALID("sample.realize()");
   view_event_handler()->DidRealizeWidget(1);
   {

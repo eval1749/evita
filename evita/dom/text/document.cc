@@ -198,7 +198,7 @@ DEFINE_SCRIPTABLE_OBJECT(Document, DocumentClass)
 
 Document::Document(const base::string16& name, Mode* mode)
     : buffer_(new text::Buffer(DocumentSet::instance()->MakeUniqueName(name))),
-      mode_(mode),
+      mode_(mode), newline_(NewlineMode_Detect),
       properties_(v8::Isolate::GetCurrent(),
                   NewMap(v8::Isolate::GetCurrent())) {
   mode->text_mode()->set_buffer(buffer_.get());
@@ -257,12 +257,8 @@ const base::string16& Document::name() const {
   return buffer_->name();
 }
 
-int Document::newline() const {
-  return buffer_->GetNewline();
-}
-
 void Document::set_newline(int newline) {
-  buffer_->SetNewline(static_cast<NewlineMode>(newline));
+  newline_ = static_cast<NewlineMode>(newline);
 }
 
 v8::Handle<v8::Object> Document::properties() const {

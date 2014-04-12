@@ -35,6 +35,7 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   private: base::Time last_write_time_;
   private: base::string16 file_name_;
   private: gc::Member<Mode> mode_;
+  private: NewlineMode newline_;
   // TODO(yosi) When we set |properties| with |v8::Object::Set()|, it doesn't
   // appeared in JavaScript. I'm not sure why. So, we hold |properties| in
   // C++.
@@ -57,7 +58,7 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: void set_modified(bool new_modified);
   public: const base::string16& name() const;
   // Returns newline type, CR, CRLF, LF, used for I/O.
-  public: int newline() const;
+  public: int newline() const { return newline_; }
   public: void set_newline(int newline);
 
   public: v8::Handle<v8::Object> properties() const;

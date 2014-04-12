@@ -50,27 +50,20 @@ struct LineAndColumn {
 // Represents file related properties.
 /// </summary>
 class FileFeatures {
-  protected: NewlineMode m_eNewline;
   protected: bool m_fNoSave;
   protected: base::string16 filename_;
 
   // ctor
   protected: FileFeatures()
-      : m_eNewline(NewlineMode_Detect),
-        m_fNoSave(false) {
+      : m_fNoSave(false) {
   }
 
   // [G]
   public: const base::string16& GetFileName() const { return filename_; }
 
-  public: NewlineMode GetNewline() const { return m_eNewline; }
   public: bool GetNoSave() const { return m_fNoSave; }
 
   // [S]
-  public: NewlineMode SetNewline(NewlineMode eNewline) {
-    return m_eNewline = eNewline;
-  }
-
   public: bool SetNoSave(bool f) { return m_fNoSave = f; }
 };
 

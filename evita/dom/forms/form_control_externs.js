@@ -52,6 +52,9 @@ FormControl.prototype.dispatchEvent = function(event) {};
 /** @type {!function()} */
 FormControl.prototype.focus = function() {};
 
+/** @type {!function()} */
+FormControl.prototype.releaseCapture = function() {};
+
 /**
  * @param {string} type
  * @param {!EventListener} listener
@@ -59,3 +62,6 @@ FormControl.prototype.focus = function() {};
  */
 FormControl.prototype.removeEventListener = function(type, listener,
                                                      opt_capture) {};
+
+/** @type {!function()} */
+FormControl.prototype.setCapture = function() {};

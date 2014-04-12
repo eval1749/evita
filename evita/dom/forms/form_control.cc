@@ -40,7 +40,9 @@ class FormControlClass :
         .SetProperty("disabled", &FormControl::disabled,
                                  &FormControl::set_disabled)
         .SetProperty("form", &FormControl::form)
-        .SetProperty("name", &FormControl::name);
+        .SetProperty("name", &FormControl::name)
+        .SetMethod("releaseCapture", &FormControl::ReleaseCapture)
+        .SetMethod("setCapture", &FormControl::SetCapture);
   }
 
   DISALLOW_COPY_AND_ASSIGN(FormControlClass);
@@ -136,6 +138,14 @@ void FormControl::NotifyControlChange() {
   if (!form_)
     return;
   form_->DidChangeFormControl(this);
+}
+
+void FormControl::ReleaseCapture() {
+  ScriptHost::instance()->view_delegate()->ReleaseCapture(event_target_id());
+}
+
+void FormControl::SetCapture() {
+  ScriptHost::instance()->view_delegate()->SetCapture(event_target_id());
 }
 
 // dom::EventTarget

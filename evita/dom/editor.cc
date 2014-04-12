@@ -175,7 +175,7 @@ v8::Handle<v8::Promise> Editor::GetFilenameForLoad(
 v8::Handle<v8::Promise> Editor::GetFilenameForSave(
     v8_glue::Nullable<Window> window, const base::string16& dir_path) {
   return PromiseResolver::SlowCall(base::Bind(
-      &ViewDelegate::GetFilenameForLoad,
+      &ViewDelegate::GetFilenameForSave,
       base::Unretained(ScriptHost::instance()->view_delegate()),
       window ? window->window_id() : dom::kInvalidWindowId, dir_path));
 }

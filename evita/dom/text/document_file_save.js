@@ -150,6 +150,7 @@
               var info = /** Os.File.Info */(result);
               document.lastStatTime_ = new Date();
               document.lastWriteTime = info.lastModificationDate;
+              document.modified = false;
               document.obsolete = Document.Obsolete.NO;
               document.readonly = readonly;
               document.dispatchEvent(new DocumentEvent('save'));
@@ -193,7 +194,7 @@
     Editor.messageBox(null, 'Saving to ' + file_name,
                       MessageBox.ICONINFORMATION);
     return save(document).then(function() {
-      Editor.messageBox(null, 'Save to ' + file_name,
+      Editor.messageBox(null, 'Saved to ' + file_name,
                         MessageBox.ICONINFORMATION);
     }).catch(function(error) {
       console.log('Failed to save', document, 'to', file_name, error,

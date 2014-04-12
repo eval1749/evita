@@ -4,6 +4,7 @@
 
 #include "evita/text/modes/xml_mode.h"
 
+#include "base/strings/string_util.h"
 #include "evita/css/style.h"
 #include "evita/text/modes/char_syntax.h"
 #include "evita/text/modes/lexer.h"

@@ -13,6 +13,7 @@
 
 #include <vector>
 
+#include "base/strings/string_util.h"
 #include "evita/gfx/graphics.h"
 #include "evita/gfx/font_face.h"
 #include "evita/css/style.h"

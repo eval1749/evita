@@ -59,14 +59,4 @@ enum Unit
     Unit_Word,
 }; // Unit
 
-//////////////////////////////////////////////////////////////////////
-//
-// Utitlity Functions
-//
-inline bool IsWhitespace(char16 wch)
-{
-    if (0x20 == wch) return true;
-    return wch >= 0x09 && wch <= 0x0C;
-} // IsWhitespace
-
 #endif //!defined(INCLUDE_edit_defs_h)

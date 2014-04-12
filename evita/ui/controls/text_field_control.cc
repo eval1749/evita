@@ -264,13 +264,14 @@ void TextFieldControl::Renderer::RenderSelection(gfx::Graphics* gfx) {
   COM_VERIFY((*text_layout_)->HitTestTextRange(
       static_cast<uint32_t>(selection_.start()),
       static_cast<uint32_t>(selection_.end() - selection_.start()),
-      text_origin.x, text_origin.y,
+      0.0f, 0.0f,
       &metrics, 1u, &num_metrics));
   DCHECK_EQ(1u, num_metrics);
   auto const fill_color = style_.highlight;
   const auto range_rect = gfx::RectF(
-      gfx::PointF(metrics.left, metrics.top),
-      gfx::SizeF(metrics.width, metrics.height));
+      std::max(metrics.left, view_text_rect_.left), metrics.top,
+      std::min(metrics.left + metrics.width, view_text_rect_.right),
+      metrics.top + metrics.height) + text_origin;
   gfx->FillRectangle(gfx::Brush(*gfx, gfx::ColorF(fill_color, 0.3f)),
                      range_rect);
   RenderCaret(gfx, gfx::RectF(

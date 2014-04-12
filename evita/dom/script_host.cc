@@ -203,7 +203,7 @@ void ScriptHost::DidStartViewHost() {
 }
 
 void ScriptHost::OpenFile(WindowId window_id,
-                                const base::string16& filename){
+                                const base::string16& file_name){
   v8_glue::Runner::Scope runner_scope(runner());
   auto const isolate = runner()->isolate();
   auto const js_handler = GetOpenFileHandler(runner(), window_id);
@@ -215,9 +215,9 @@ void ScriptHost::OpenFile(WindowId window_id,
     DVLOG(0) << "OpenFile: window doesn't have callable open property.";
     return;
   }
-  v8::Handle<v8::Value> js_filename = gin::StringToV8(isolate, filename);
+  v8::Handle<v8::Value> js_file_name = gin::StringToV8(isolate, file_name);
   DOM_AUTO_LOCK_SCOPE();
-  runner()->Call(open_file, js_handler, js_filename);
+  runner()->Call(open_file, js_handler, js_file_name);
 }
 
 void ScriptHost::PlatformError(const char* name) {

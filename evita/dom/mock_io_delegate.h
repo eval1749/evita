@@ -81,7 +81,7 @@ class MockIoDelegate : public domapi::IoDelegate {
       const domapi::OpenFileDeferred&) override;
   public: virtual void OpenProcess(const base::string16& command_line,
       const domapi::OpenProcessDeferred&) override;
-  private: virtual void QueryFileStatus(const base::string16& filename,
+  private: virtual void QueryFileStatus(const base::string16& file_name,
       const domapi::QueryFileStatusDeferred& deferred) override;
   public: virtual void ReadFile(domapi::IoContextId context_id, void* buffer,
                         size_t num_read,

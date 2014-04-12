@@ -45,7 +45,7 @@ class ViewEventHandler {
   public: virtual void DispatchViewIdleEvent(int hint) = 0;
   public: virtual void DispatchWheelEvent(const WheelEvent& event) = 0;
   public: virtual void OpenFile(WindowId window_id,
-                                const base::string16& filename) = 0;
+                                const base::string16& file_name) = 0;
   public: virtual void QueryClose(WindowId window_id) = 0;
   public: virtual void RunCallback(base::Closure) = 0;
   public: virtual void WillDestroyHost() = 0;

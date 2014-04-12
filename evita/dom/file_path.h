@@ -13,7 +13,7 @@ class FilePath : v8_glue::Scriptable<FilePath> {
   public: FilePath();
   public: virtual ~FilePath();
 
-  public: static base::string16 FullPath(const base::string16& filename);
+  public: static base::string16 FullPath(const base::string16& file_name);
 
   DISALLOW_COPY_AND_ASSIGN(FilePath);
 };

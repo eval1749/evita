@@ -384,14 +384,14 @@ Rect Frame::GetPaneRect() const {
 void Frame::onDropFiles(HDROP const hDrop) {
   uint nIndex = 0;
   for (;;) {
-    base::string16 filename(MAX_PATH + 1, 0);
-    auto const length = ::DragQueryFile(hDrop, nIndex, &filename[0],
-                                        filename.size());
+    base::string16 file_name(MAX_PATH + 1, 0);
+    auto const length = ::DragQueryFile(hDrop, nIndex, &file_name[0],
+                                        file_name.size());
     if (!length)
       break;
-    filename.resize(length);
+    file_name.resize(length);
     Application::instance()->view_event_handler()->OpenFile(
-        window_id(), filename);
+        window_id(), file_name);
     nIndex += 1;
   }
   ::DragFinish(hDrop);

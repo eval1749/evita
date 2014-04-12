@@ -51,10 +51,10 @@ Document.getOrNew = function(name, opt_mode) {};
 Document.list;
 
 /**
- * @param {string} filename
+ * @param {string} file_name
  * @return {!Document}
  */
-Document.open = function(filename) {};
+Document.open = function(file_name) {};
 
 /**
  * @param {!Document} document
@@ -181,10 +181,10 @@ Document.prototype.getLineAndColumn_ = function(offset) {};
 Document.prototype.listWindows = function() {};
 
 /**
- * @param {string=} opt_filename
+ * @param {string=} opt_file_name
 * @return {!Promise.<number>}
 */
-Document.prototype.load = function(opt_filename) {};
+Document.prototype.load = function(opt_file_name) {};
 
 /**
  * @param {!Editor.RegExp} regexp
@@ -209,10 +209,10 @@ Document.prototype.redo = function(position) {}
 Document.prototype.renameTo = function(new_name) {}
 
 /**
- * @param {string=} opt_filename
+ * @param {string=} opt_file_name
  * @return {!Promise.<number>}
  */
-Document.prototype.save = function(opt_filename) {};
+Document.prototype.save = function(opt_file_name) {};
 
 /**
  * @param {number} start

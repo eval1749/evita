@@ -109,10 +109,10 @@ TEST_F(DocumentTest, Document_list) {
 
 TEST_F(DocumentTest, Document_open) {
   EXPECT_SCRIPT_VALID("var a = Document.open('foo');");
-  auto const absoulte_filename = dom::FilePath::FullPath(L"foo");
+  auto const absoulte_file_name = dom::FilePath::FullPath(L"foo");
   EXPECT_SCRIPT_VALID("var b = Document.open('foo');"
                       "var c = Document.open('bar');");
-  EXPECT_SCRIPT_EQ(base::UTF16ToUTF8(absoulte_filename), "a.fileName");
+  EXPECT_SCRIPT_EQ(base::UTF16ToUTF8(absoulte_file_name), "a.fileName");
   EXPECT_SCRIPT_TRUE("a === b");
   EXPECT_SCRIPT_TRUE("a !== c");
 }
@@ -256,8 +256,8 @@ TEST_F(DocumentTest, mode) {
 
 TEST_F(DocumentTest, mode_auto_mode) {
   EXPECT_SCRIPT_VALID(
-      "function testIt(filename) {"
-      "  return (new Document(filename)).mode.constructor.name;"
+      "function testIt(file_name) {"
+      "  return (new Document(file_name)).mode.constructor.name;"
       "}");
   EXPECT_SCRIPT_EQ("CxxMode", "testIt('foo.cc')");
   EXPECT_SCRIPT_EQ("CxxMode", "testIt('foo.cpp')");

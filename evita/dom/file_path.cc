@@ -48,11 +48,11 @@ FilePath::FilePath() {
 FilePath::~FilePath() {
 }
 
-base::string16 FilePath::FullPath(const base::string16& filename) {
+base::string16 FilePath::FullPath(const base::string16& file_name) {
   base::string16 full_name(MAX_PATH + 1, 0);
   char16* file_start = nullptr;
   auto const length = ::GetFullPathNameW(
-      filename.c_str(),
+      file_name.c_str(),
       full_name.length(),
       &full_name[0],
       &file_start);

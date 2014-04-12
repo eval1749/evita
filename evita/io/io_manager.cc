@@ -108,9 +108,9 @@ LRESULT IoManager::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
     case WM_COPYDATA: {
       auto const p = reinterpret_cast<COPYDATASTRUCT*>(lParam);
-      auto const filename = reinterpret_cast<base::char16*>(p->lpData);
+      auto const file_name = reinterpret_cast<base::char16*>(p->lpData);
       Application::instance()->view_event_handler()->OpenFile(
-          views::kInvalidWindowId, filename);
+          views::kInvalidWindowId, file_name);
       // TODO(yosi) Should we call |SetForegroundWindow|?
       return true;
     }

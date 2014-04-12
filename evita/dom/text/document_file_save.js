@@ -171,22 +171,22 @@
   }
 
   /**
-   * @param {string=} opt_filename
+   * @param {string=} opt_file_name
    * @return {!Promise}
    */
-  Document.prototype.save = function(opt_filename) {
+  Document.prototype.save = function(opt_file_name) {
     var document = this;
     if (!arguments.length) {
       if (document.fileName == '')
         throw 'Document isn\'t bound to file.';
     } else {
-      var filename = /** @type{string} */(opt_filename);
-      var absolute_filename = FilePath.fullPath(filename);
+      var file_name = /** @type{string} */(opt_file_name);
+      var absolute_file_name = FilePath.fullPath(file_name);
       // TODO(yosi) FilePath.fullPath() will return Promise.
-      var present = Document.findFile(absolute_filename);
+      var present = Document.findFile(absolute_file_name);
       if (present && present !== this)
-        throw filename + ' is already bound to ' + present;
-      document.fileName = absolute_filename;
+        throw file_name + ' is already bound to ' + present;
+      document.fileName = absolute_file_name;
     }
 
     var file_name = document.fileName;

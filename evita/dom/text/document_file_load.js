@@ -194,22 +194,22 @@
 
 
   /**
-   * @param {string=} opt_filename
+   * @param {string=} opt_file_name
    * @return {!Promise.<number>}
    */
-  global.Document.prototype.load = function(opt_filename) {
+  global.Document.prototype.load = function(opt_file_name) {
     var document = this;
     if (!arguments.length) {
       if (document.fileName == '')
         throw 'Document isn\'t bound to file.';
     } else {
-      var filename = /** @type{string} */(opt_filename);
+      var file_name = /** @type{string} */(opt_file_name);
       // TODO(yosi) FilePath.fullPath() will return Promise.
-      var absolute_filename = FilePath.fullPath(filename);
-      var present = Document.findFile(absolute_filename);
+      var absolute_file_name = FilePath.fullPath(file_name);
+      var present = Document.findFile(absolute_file_name);
       if (present && present !== this)
-        throw filename + ' is already bound to ' + present;
-      document.fileName = absolute_filename;
+        throw file_name + ' is already bound to ' + present;
+      document.fileName = absolute_file_name;
     }
 
     document.obsolete = Document.Obsolete.CHECKING;
@@ -237,7 +237,7 @@
       document.dispatchEvent(new DocumentEvent('load'));
       return Promise.resolve(length);
     }).catch(function(exception) {
-      console.log('load.catch', exception, 'during loading', filename,
+      console.log('load.catch', exception, 'during loading', file_name,
                   'into', document, exception.stack);
       document.lastStatTime_ = new Date();
       document.obsolete = Document.Obsolete.UNKNOWN;

@@ -47,12 +47,12 @@ class IoDelegate {
       const MoveFileOptions& options,
       const IoResolver& resolver) = 0;
 
-  public: virtual void OpenFile(const base::string16& filename,
+  public: virtual void OpenFile(const base::string16& file_name,
                                 const base::string16& mode,
                                 const OpenFileDeferred& deferred) = 0;
   public: virtual void OpenProcess(const base::string16& command_line,
                                    const OpenProcessDeferred& deferred) = 0;
-  public: virtual void QueryFileStatus(const base::string16& filename,
+  public: virtual void QueryFileStatus(const base::string16& file_name,
       const QueryFileStatusDeferred& deferred) = 0;
   public: virtual void ReadFile(IoContextId context_id, void* buffer,
                                 size_t num_read,

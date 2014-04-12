@@ -24,11 +24,11 @@ class FilePathTest : public dom::AbstractDomTest {
 };
 
 namespace {
-std::string FullPath(const std::string& filename) {
+std::string FullPath(const std::string& file_name) {
   std::string full_name(MAX_PATH + 1, 0);
   char* file_start = nullptr;
   auto const length = ::GetFullPathNameA(
-      filename.c_str(),
+      file_name.c_str(),
       full_name.length(),
       &full_name[0],
       &file_start);

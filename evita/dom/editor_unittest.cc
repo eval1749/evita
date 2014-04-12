@@ -41,23 +41,23 @@ TEST_F(EditorTest, checkSpelling) {
 TEST_F(EditorTest, getFileNameForLoad) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
   EXPECT_SCRIPT_VALID(
-      "var filename;"
+      "var file_name;"
       "var window = new EditorWindow();"
       "Editor.getFileNameForLoad(window, 'dir').then(function(x) {"
-      "  filename = x;"
+      "  file_name = x;"
       "});");
-  EXPECT_SCRIPT_EQ("dir/foo.bar", "filename");
+  EXPECT_SCRIPT_EQ("dir/foo.bar", "file_name");
 }
 
 TEST_F(EditorTest, getFileNameForSave) {
   EXPECT_CALL(*mock_view_impl(), CreateEditorWindow(_));
   EXPECT_SCRIPT_VALID(
-      "var filename;"
+      "var file_name;"
       "var window = new EditorWindow();"
       "Editor.getFileNameForSave(window, 'dir').then(function(x) {"
-      "  filename = x;"
+      "  file_name = x;"
       "});");
-  EXPECT_SCRIPT_EQ("dir/foo.bar", "filename");
+  EXPECT_SCRIPT_EQ("dir/foo.bar", "file_name");
 }
 
 TEST_F(EditorTest, getSpellingSuggestions) {

@@ -6,15 +6,15 @@
 
 (function() {
   /**
-   * @param {string} absolute_filename
+   * @param {string} absolute_file_name
    * @return {!Document}
    */
-  function openFile(absolute_filename) {
-    var document = Document.open(absolute_filename);
+  function openFile(absolute_file_name) {
+    var document = Document.open(absolute_file_name);
     if (!document.length) {
-      document.load(absolute_filename).catch(function(error_code) {
+      document.load(absolute_file_name).catch(function(error_code) {
         console.log('Load error', error_code);
-        Editor.messageBox(null, 'Failed to load ' + absolute_filename + '\n' +
+        Editor.messageBox(null, 'Failed to load ' + absolute_file_name + '\n' +
             'error=' + error_code,
             MessageBox.ICONERROR);
       }).catch(function(e) { console.log(e); });
@@ -34,8 +34,8 @@
     }
 
     Editor.getFileNameForSave(this, this.selection.document.fileName)
-        .then(function(filename) {
-          var document = Document.open(filename);
+        .then(function(file_name) {
+          var document = Document.open(file_name);
           windows.newTextWindow(editorWindow, document)
         });
   });
@@ -47,8 +47,8 @@
   Editor.bindKey(Window, 'Ctrl+O', function() {
     var editorWindow = this.parent;
     Editor.getFileNameForLoad(this, this.selection.document.fileName)
-        .then(function(filename) {
-          windows.activate(editorWindow, openFile(filename));
+        .then(function(file_name) {
+          windows.activate(editorWindow, openFile(file_name));
         });
   });
 
@@ -129,8 +129,8 @@
     }
 
     Editor.getFileNameForSave(this, this.selection.document.fileName)
-        .then(function(filename) {
-          var document = Document.open(filename);
+        .then(function(file_name) {
+          var document = Document.open(file_name);
           windows.newEditorWindow(document);
         });
   });
@@ -141,8 +141,8 @@
    */
   Editor.bindKey(Window, 'Ctrl+Shift+O', function() {
     Editor.getFileNameForLoad(this, this.selection.document.fileName)
-        .then(function(filename) {
-          windows.newEditorWindow(openFile(filename));
+        .then(function(file_name) {
+          windows.newEditorWindow(openFile(file_name));
         });
   });
 

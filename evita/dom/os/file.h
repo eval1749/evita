@@ -40,7 +40,7 @@ class File : public v8_glue::Scriptable<File, AbstractFile> {
       const base::string16& file_name);
 
   public: static v8::Handle<v8::Promise> Stat(
-      const base::string16& filename);
+      const base::string16& file_name);
 
   DISALLOW_COPY_AND_ASSIGN(File);
 };

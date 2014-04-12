@@ -41,7 +41,7 @@ class ViewEventHandlerImpl : public domapi::ViewEventHandler {
   private: virtual void DispatchWheelEvent(
       const domapi::WheelEvent& event) override;
   private: virtual void OpenFile(WindowId window_id,
-                                 const base::string16& filename) override;
+                                 const base::string16& file_name) override;
   private: virtual void QueryClose(WindowId window_id) override;
   private: virtual void RunCallback(base::Closure callback) override;
   private: virtual void WillDestroyHost() override;

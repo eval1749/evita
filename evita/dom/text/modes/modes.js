@@ -106,13 +106,13 @@ Mode.chooseMode = function(document) {
 };
 
 /**
- * @param {string} filename
+ * @param {string} file_name
  * @return {!Mode}
  */
-Mode.chooseModeByFileName = function(filename) {
-  var matches = /[.](.+)$/.exec(FilePath.basename(filename));
+Mode.chooseModeByFileName = function(file_name) {
+  var matches = /[.](.+)$/.exec(FilePath.basename(file_name));
   if (!matches) {
-    var mode_ctor = Mode.fileNameMap.get(FilePath.basename(filename));
+    var mode_ctor = Mode.fileNameMap.get(FilePath.basename(file_name));
     if (mode_ctor)
       return new mode_ctor();
     return new Mode.defaultMode.constructor();

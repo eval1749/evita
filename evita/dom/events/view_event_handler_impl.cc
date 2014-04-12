@@ -256,8 +256,8 @@ void ViewEventHandlerImpl::DispatchWheelEvent(
 }
 
 void ViewEventHandlerImpl::OpenFile(WindowId window_id,
-                            const base::string16& filename){
-  controller_->OpenFile(window_id, filename);
+                            const base::string16& file_name){
+  controller_->OpenFile(window_id, file_name);
 }
 
 void ViewEventHandlerImpl::QueryClose(WindowId window_id) {

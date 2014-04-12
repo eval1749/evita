@@ -26,8 +26,8 @@ TEST_F(ModesTest, chooseMode) {
 
 TEST_F(ModesTest, chooseModeByFileName) {
   EXPECT_SCRIPT_VALID(
-      "function testIt(filename) {"
-      "  return Mode.chooseModeByFileName(filename).name;"
+      "function testIt(file_name) {"
+      "  return Mode.chooseModeByFileName(file_name).name;"
       "}");
   EXPECT_SCRIPT_EQ("C++", "testIt('foo.cc')");
   EXPECT_SCRIPT_EQ("C++", "testIt('foo.cpp')");

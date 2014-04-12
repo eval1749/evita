@@ -47,8 +47,8 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: const text::Buffer* buffer() const { return buffer_.get(); }
   public: text::Buffer* buffer() { return buffer_.get(); }
   public: base::char16 charCodeAt(text::Posn position) const;
-  public: const base::string16& filename() const;
-  public: void set_filename(const base::string16& filename);
+  public: const base::string16& file_name() const;
+  public: void set_file_name(const base::string16& file_name);
   public: base::Time last_write_time() const;
   public: void set_last_write_time(base::Time last_write_time);
   public: text::Posn length() const;

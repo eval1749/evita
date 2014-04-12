@@ -160,7 +160,7 @@ v8::Handle<v8::FunctionTemplate> DocumentClass::CreateConstructorTemplate(
 
 void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
   builder
-      .SetProperty("fileName", &Document::filename, &Document::set_filename)
+      .SetProperty("fileName", &Document::file_name, &Document::set_file_name)
       .SetProperty("lastWriteTime", &Document::last_write_time,
                    &Document::set_last_write_time)
       .SetProperty("length", &Document::length)
@@ -219,11 +219,11 @@ base::char16 Document::charCodeAt(text::Posn position) const {
   return 0;
 }
 
-const base::string16& Document::filename() const {
+const base::string16& Document::file_name() const {
   return file_name_;
 }
 
-void Document::set_filename(const base::string16& file_name) {
+void Document::set_file_name(const base::string16& file_name) {
   file_name_ = file_name;
 }
 

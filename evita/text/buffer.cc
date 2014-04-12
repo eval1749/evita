@@ -180,15 +180,6 @@ void Buffer::RemoveObserver(BufferMutationObserver* observer) {
   observers_.RemoveObserver(observer);
 }
 
-//  Markes the buffer visited to specified file.
-void text::Buffer::SetFile(
-    const base::string16& filename,
-    base::Time last_write_time) {
-  filename_ =  filename;
-  last_write_time_ = last_write_time;
-  m_nSaveTick = m_nCharTick;
-}
-
 void text::Buffer::SetModified(bool new_modified) {
   if (IsModified() == new_modified)
     return;

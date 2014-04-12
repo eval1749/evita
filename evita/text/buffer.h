@@ -52,7 +52,6 @@ struct LineAndColumn {
 class FileFeatures {
   protected: NewlineMode m_eNewline;
   protected: bool m_fNoSave;
-  protected: base::Time last_write_time_;
   protected: uint m_nCodePage;
   protected: base::string16 filename_;
 
@@ -66,7 +65,6 @@ class FileFeatures {
   // [G]
   public: uint GetCodePage() const { return m_nCodePage; }
   public: const base::string16& GetFileName() const { return filename_; }
-  public: base::Time GetLastWriteTime() const { return last_write_time_; }
 
   public: NewlineMode GetNewline() const { return m_eNewline; }
   public: bool GetNoSave() const { return m_fNoSave; }
@@ -178,9 +176,6 @@ class Buffer : public BufferCore,
   public: Posn Redo(Posn, Count = 1);
 
   // [S]
-  public: void SetFile(const base::string16& filename,
-                       base::Time last_write_time);
-
   public: void SetName(const base::string16& new_name) {
     name_ = new_name;
   }

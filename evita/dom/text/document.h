@@ -32,6 +32,7 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(Document);
 
   private: std::unique_ptr<text::Buffer> buffer_;
+  private: base::Time last_write_time_;
   private: base::string16 file_name_;
   private: gc::Member<Mode> mode_;
   // TODO(yosi) When we set |properties| with |v8::Object::Set()|, it doesn't

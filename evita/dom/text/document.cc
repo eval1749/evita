@@ -238,11 +238,11 @@ void Document::set_filename(const base::string16& file_name) {
 }
 
 base::Time Document::last_write_time() const {
-  return buffer_->GetLastWriteTime();
+  return last_write_time_;
 }
 
 void Document::set_last_write_time(base::Time last_write_time) {
-  return buffer_->SetFile(file_name_, last_write_time);
+  last_write_time_ = last_write_time;
 }
 
 text::Posn Document::length() const {

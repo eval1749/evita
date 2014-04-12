@@ -109,9 +109,7 @@ TEST_F(DocumentTest, Document_list) {
 
 TEST_F(DocumentTest, Document_open) {
   EXPECT_SCRIPT_VALID("var a = Document.open('foo');");
-  auto const document = dom::DocumentSet::instance()->Find(L"foo");
   auto const absoulte_filename = dom::FilePath::FullPath(L"foo");
-  document->buffer()->SetFile(absoulte_filename, base::Time());
   EXPECT_SCRIPT_VALID("var b = Document.open('foo');"
                       "var c = Document.open('bar');");
   EXPECT_SCRIPT_EQ(base::UTF16ToUTF8(absoulte_filename), "a.filename");

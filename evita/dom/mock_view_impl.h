@@ -43,7 +43,7 @@ class MockViewImpl : public dom::ViewDelegate {
     const GetFilenameForLoadResolver& resolver) override;
   public: virtual void GetFilenameForSave(WindowId window_id,
     const base::string16& dir_path,
-    GetFilenameForSaveCallback callback) override;
+    const GetFilenameForSaveResolver& resolver) override;
   MOCK_METHOD1(GetMetrics, base::string16(const base::string16&));
   public: std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;

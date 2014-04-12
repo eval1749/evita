@@ -195,11 +195,13 @@ void ViewDelegateImpl::GetFilenameForLoad(
 
 void ViewDelegateImpl::GetFilenameForSave(
     dom::WindowId window_id, const base::string16& dir_path,
-    GetFilenameForSaveCallback callback) {
-  auto const widget = Window::FromWindowId(window_id);
+    const GetFilenameForSaveResolver& resolver) {
+  auto const widget = window_id == dom::kInvalidWindowId ?
+        FrameList::instance()->active_frame() :
+        Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "GetFilenameForSave: no such widget " << window_id;
-    event_handler_->RunCallback(base::Bind(callback, base::string16()));
+    event_handler_->RunCallback(base::Bind(resolver.resolve, base::string16()));
     return;
   }
   FileDialogBox::Param params;
@@ -208,7 +210,7 @@ void ViewDelegateImpl::GetFilenameForSave(
   FileDialogBox oDialog;
   if (!oDialog.GetSaveFileName(&params))
     return;
-  event_handler_->RunCallback(base::Bind(callback,
+  event_handler_->RunCallback(base::Bind(resolver.resolve,
                                          base::string16(params.m_wsz)));
 }
 

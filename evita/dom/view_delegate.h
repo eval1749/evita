@@ -52,9 +52,7 @@ struct TextWindowCompute {
 
 class ViewDelegate {
   public: typedef domapi::Deferred<base::string16> GetFilenameForLoadResolver;
-
-  public: typedef base::Callback<void(base::string16 filename)>
-      GetFilenameForSaveCallback;
+  public: typedef domapi::Deferred<base::string16> GetFilenameForSaveResolver;
 
   public: typedef base::Callback<void(const domapi::LoadFileCallbackData&)>
       LoadFileCallback;
@@ -93,9 +91,11 @@ class ViewDelegate {
       WindowId window_id, const base::string16& dir_path,
       const GetFilenameForLoadResolver& resolver) = 0;
 
+  // Get file name for save by using open file modal dialog box.
   public: virtual void GetFilenameForSave(
       WindowId window_id, const base::string16& dir_path,
-      GetFilenameForSaveCallback callback) = 0;
+      const GetFilenameForSaveResolver& resolver) = 0;
+
   public: virtual base::string16 GetMetrics(const base::string16& name) = 0;
   public: virtual std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) = 0;

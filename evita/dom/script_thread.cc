@@ -276,7 +276,7 @@ DEFINE_VIEW_DELEGATE_1(FocusWindow, WindowId)
 DEFINE_VIEW_DELEGATE_3(GetFilenameForLoad, WindowId, const base::string16&,
                        const GetFilenameForLoadResolver&)
 DEFINE_VIEW_DELEGATE_3(GetFilenameForSave, WindowId, const base::string16&,
-                       ViewDelegate::GetFilenameForSaveCallback)
+                       const GetFilenameForSaveResolver&)
 DEFINE_VIEW_DELEGATE_1(HideWindow, WindowId)
 DEFINE_VIEW_DELEGATE_1(MakeSelectionVisible, WindowId)
 DEFINE_VIEW_DELEGATE_5(MessageBox, WindowId, const base::string16&,

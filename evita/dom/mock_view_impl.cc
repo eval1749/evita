@@ -21,10 +21,10 @@ void MockViewImpl::GetFilenameForLoad(
   resolver.resolve.Run(dir_path + L"/foo.bar");
 }
 
-void MockViewImpl::GetFilenameForSave(WindowId,
-                                      const base::string16& dir_path,
-                                      GetFilenameForSaveCallback callback) {
-  callback.Run(dir_path + L"/foo.bar");
+void MockViewImpl::GetFilenameForSave(
+    WindowId, const base::string16& dir_path,
+    const GetFilenameForSaveResolver& resolver) {
+  resolver.resolve.Run(dir_path + L"/foo.bar");
 }
 
 std::vector<int> MockViewImpl::GetTableRowStates(WindowId,

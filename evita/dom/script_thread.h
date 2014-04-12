@@ -100,7 +100,7 @@ class ScriptThread final : public domapi::IoDelegate,
       const base::string16& name) override;
   private: virtual void GetFilenameForSave(
       WindowId window_id, const base::string16& dir_path,
-      GetFilenameForSaveCallback callback) override;
+      const GetFilenameForSaveResolver& resolver) override;
   private: virtual std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;
   private: virtual void HideWindow(WindowId window_id) override;

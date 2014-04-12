@@ -42,7 +42,7 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       const GetFilenameForLoadResolver& resolver) override;
   private: virtual void GetFilenameForSave(
       dom::WindowId window_id, const base::string16& dir_path,
-      GetFilenameForSaveCallback callback) override;
+      const GetFilenameForSaveResolver& resolver) override;
   private: virtual base::string16 GetMetrics(
       const base::string16& name) override;
   private: virtual std::vector<int> GetTableRowStates(

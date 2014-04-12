@@ -127,11 +127,10 @@ class EditorClass : public v8_glue::WrapperInfo {
 
   private: static v8::Handle<v8::Promise> GetFilenameForLoad(
       v8_glue::Nullable<Window> window, const base::string16& dir_path);
-  private: static void GetFilenameForSave(Window* window,
-                                          const base::string16& dir_path,
-                                          v8::Handle<v8::Function> callback);
+  private: static v8::Handle<v8::Promise> GetFilenameForSave(
+      v8_glue::Nullable<Window> window, const base::string16& dir_path);
   private: static base::string16 GetMetrics(const base::string16& name);
-  private: static  v8::Handle<v8::Promise> GetSpellingSuggestions(
+  private: static v8::Handle<v8::Promise> GetSpellingSuggestions(
       const base::string16& wrong_word);
   private: static void MessageBox(v8_glue::Nullable<Window> maybe_window,
                                  const base::string16& message, int flags,
@@ -178,16 +177,12 @@ v8::Handle<v8::Promise> EditorClass::GetFilenameForLoad(
       window ? window->window_id() : dom::kInvalidWindowId, dir_path));
 }
 
-// TODO(yosi) We should use |PromiseResolver| instead of |ScriptCallback| for
-// |EditorClass::GetFilenameForSave()|.
-void EditorClass::GetFilenameForSave(Window* window,
-                                     const base::string16& dir_path,
-                                     v8::Handle<v8::Function> callback) {
-  auto const runner = ScriptHost::instance()->runner();
-  ScriptHost::instance()->view_delegate()->GetFilenameForSave(
-      window->window_id(), dir_path,
-      v8_glue::ScriptCallback<ViewDelegate::GetFilenameForSaveCallback>::New(
-          runner->GetWeakPtr(), callback));
+v8::Handle<v8::Promise> EditorClass::GetFilenameForSave(
+    v8_glue::Nullable<Window> window, const base::string16& dir_path) {
+  return PromiseResolver::SlowCall(base::Bind(
+      &ViewDelegate::GetFilenameForLoad,
+      base::Unretained(ScriptHost::instance()->view_delegate()),
+      window ? window->window_id() : dom::kInvalidWindowId, dir_path));
 }
 
 base::string16 EditorClass::GetMetrics(const base::string16& name) {
@@ -246,7 +241,7 @@ v8::Handle<v8::FunctionTemplate>
   return v8_glue::FunctionTemplateBuilder(isolate, templ)
     .SetMethod("checkSpelling", &EditorClass::CheckSpelling)
     .SetMethod("getFilenameForLoad", &EditorClass::GetFilenameForLoad)
-    .SetMethod("getFilenameForSave_", &EditorClass::GetFilenameForSave)
+    .SetMethod("getFilenameForSave", &EditorClass::GetFilenameForSave)
     .SetMethod("getSpellingSuggestions",
         &EditorClass::GetSpellingSuggestions)
     .SetMethod("messageBox_", &EditorClass::MessageBox)

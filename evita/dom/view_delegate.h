@@ -51,8 +51,7 @@ struct TextWindowCompute {
 };
 
 class ViewDelegate {
-  public: typedef base::Callback<void(base::string16 filename)>
-      GetFilenameForLoadCallback;
+  public: typedef domapi::Deferred<base::string16> GetFilenameForLoadResolver;
 
   public: typedef base::Callback<void(base::string16 filename)>
       GetFilenameForSaveCallback;
@@ -88,9 +87,12 @@ class ViewDelegate {
   // |DidHandleViewIdelEvent| is called when "idle" event handler returns.
   public: virtual void DidHandleViewIdelEvent(int hint) = 0;
   public: virtual void FocusWindow(WindowId window_id) = 0;
+
+  // Get file name for load by using open file modal dialog box.
   public: virtual void GetFilenameForLoad(
       WindowId window_id, const base::string16& dir_path,
-      GetFilenameForLoadCallback callback) = 0;
+      const GetFilenameForLoadResolver& resolver) = 0;
+
   public: virtual void GetFilenameForSave(
       WindowId window_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) = 0;

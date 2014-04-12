@@ -174,11 +174,13 @@ void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {
 
 void ViewDelegateImpl::GetFilenameForLoad(
     dom::WindowId window_id, const base::string16& dir_path,
-    GetFilenameForLoadCallback callback) {
-  auto const widget = Window::FromWindowId(window_id);
+    const GetFilenameForLoadResolver& resolver) {
+  auto const widget = window_id == dom::kInvalidWindowId ?
+        FrameList::instance()->active_frame() :
+        Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "GetFilenameForLoad: no such widget " << window_id;
-    event_handler_->RunCallback(base::Bind(callback, base::string16()));
+    event_handler_->RunCallback(base::Bind(resolver.resolve, base::string16()));
     return;
   }
   FileDialogBox::Param params;
@@ -187,7 +189,7 @@ void ViewDelegateImpl::GetFilenameForLoad(
   FileDialogBox oDialog;
   if (!oDialog.GetOpenFileName(&params))
     return;
-  event_handler_->RunCallback(base::Bind(callback,
+  event_handler_->RunCallback(base::Bind(resolver.resolve,
                                          base::string16(params.m_wsz)));
 }
 

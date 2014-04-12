@@ -39,13 +39,6 @@ Editor.getFilenameForLoad = function(window, filename) {};
 /**
  * @param {?Window} window.
  * @param {!string} filename.
- * @param {function(!string)} callback
- */
-Editor.getFilenameForLoad_ = function(window, filename, callback) {};
-
-/**
- * @param {?Window} window.
- * @param {!string} filename.
  * @return {Promise.<string>}
  */
 Editor.getFilenameForSave = function(window, filename) {};

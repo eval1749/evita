@@ -15,10 +15,10 @@ MockViewImpl::~MockViewImpl() {
 }
 
 // dom::ViewDelegate
-void MockViewImpl::GetFilenameForLoad(WindowId,
-                                      const base::string16& dir_path,
-                                      GetFilenameForLoadCallback callback) {
-  callback.Run(dir_path + L"/foo.bar");
+void MockViewImpl::GetFilenameForLoad(
+    WindowId, const base::string16& dir_path,
+    const GetFilenameForLoadResolver& resolver) {
+  resolver.resolve.Run(dir_path + L"/foo.bar");
 }
 
 void MockViewImpl::GetFilenameForSave(WindowId,

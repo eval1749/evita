@@ -40,7 +40,7 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD1(FocusWindow, void(WindowId));
   public: virtual void GetFilenameForLoad(WindowId window_id,
     const base::string16& dir_path,
-    GetFilenameForLoadCallback callback) override;
+    const GetFilenameForLoadResolver& resolver) override;
   public: virtual void GetFilenameForSave(WindowId window_id,
     const base::string16& dir_path,
     GetFilenameForSaveCallback callback) override;

@@ -104,18 +104,6 @@
    * @param {string} dirname.
    * @return {Promise}
    */
-  Editor.getFilenameForLoad = function(window, dirname) {
-    var deferred = Promise.defer();
-    Editor.getFilenameForLoad_(window || Editor.activeWindow(), dirname,
-                               deferred.resolve);
-    return deferred.promise;
-  };
-
-  /**
-   * @param {?Window} window.
-   * @param {string} dirname.
-   * @return {Promise}
-   */
   Editor.getFilenameForSave = function(window, dirname) {
     var deferred = Promise.defer();
     Editor.getFilenameForSave_(window || Editor.activeWindow(), dirname,

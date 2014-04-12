@@ -125,9 +125,8 @@ class EditorClass : public v8_glue::WrapperInfo {
   private: static v8::Handle<v8::Promise> CheckSpelling(
       const base::string16& word_to_check);
 
-  private: static void GetFilenameForLoad(Window* window,
-                                          const base::string16& dir_path,
-                                          v8::Handle<v8::Function> callback);
+  private: static v8::Handle<v8::Promise> GetFilenameForLoad(
+      v8_glue::Nullable<Window> window, const base::string16& dir_path);
   private: static void GetFilenameForSave(Window* window,
                                           const base::string16& dir_path,
                                           v8::Handle<v8::Function> callback);
@@ -171,16 +170,12 @@ v8::Handle<v8::Promise> EditorClass::CheckSpelling(
       word_to_check));
 }
 
-// TODO(yosi) We should use |PromiseResolver| instead of |ScriptCallback| for
-// |EditorClass::GetFilenameForLoad()|.
-void EditorClass::GetFilenameForLoad(Window* window,
-                                     const base::string16& dir_path,
-                                     v8::Handle<v8::Function> callback) {
-  auto const runner = ScriptHost::instance()->runner();
-  ScriptHost::instance()->view_delegate()->GetFilenameForLoad(
-      window->window_id(), dir_path,
-      v8_glue::ScriptCallback<ViewDelegate::GetFilenameForLoadCallback>::New(
-          runner->GetWeakPtr(), callback));
+v8::Handle<v8::Promise> EditorClass::GetFilenameForLoad(
+    v8_glue::Nullable<Window> window, const base::string16& dir_path) {
+  return PromiseResolver::SlowCall(base::Bind(
+      &ViewDelegate::GetFilenameForLoad,
+      base::Unretained(ScriptHost::instance()->view_delegate()),
+      window ? window->window_id() : dom::kInvalidWindowId, dir_path));
 }
 
 // TODO(yosi) We should use |PromiseResolver| instead of |ScriptCallback| for
@@ -250,7 +245,7 @@ v8::Handle<v8::FunctionTemplate>
       &EditorClass::NewEditor);
   return v8_glue::FunctionTemplateBuilder(isolate, templ)
     .SetMethod("checkSpelling", &EditorClass::CheckSpelling)
-    .SetMethod("getFilenameForLoad_", &EditorClass::GetFilenameForLoad)
+    .SetMethod("getFilenameForLoad", &EditorClass::GetFilenameForLoad)
     .SetMethod("getFilenameForSave_", &EditorClass::GetFilenameForSave)
     .SetMethod("getSpellingSuggestions",
         &EditorClass::GetSpellingSuggestions)

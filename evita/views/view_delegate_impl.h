@@ -39,7 +39,7 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void FocusWindow(dom::WindowId window_id) override;
   private: virtual void GetFilenameForLoad(
       dom::WindowId window_id, const base::string16& dir_path,
-      GetFilenameForLoadCallback callback) override;
+      const GetFilenameForLoadResolver& resolver) override;
   private: virtual void GetFilenameForSave(
       dom::WindowId window_id, const base::string16& dir_path,
       GetFilenameForSaveCallback callback) override;

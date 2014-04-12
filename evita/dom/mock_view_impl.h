@@ -57,7 +57,7 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD1(GetMetrics, base::string16(const base::string16&));
   public: virtual void GetSpellingSuggestions(
       const base::string16& wrong_word,
-      const GetSpellingSuggestionsDeferred& deferred) override;
+      const GetSpellingSuggestionsResolver& deferred) override;
   public: std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;
   MOCK_METHOD1(HideWindow, void(WindowId));

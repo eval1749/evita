@@ -60,7 +60,7 @@ class ViewDelegate {
       GetFilenameForSaveCallback;
 
   public: typedef domapi::Deferred<std::vector<base::string16>>
-      GetSpellingSuggestionsDeferred;
+      GetSpellingSuggestionsResolver;
 
   public: typedef base::Callback<void(const domapi::LoadFileCallbackData&)>
       LoadFileCallback;
@@ -104,7 +104,7 @@ class ViewDelegate {
   public: virtual base::string16 GetMetrics(const base::string16& name) = 0;
   public: virtual void GetSpellingSuggestions(
       const base::string16& wrong_word,
-      const GetSpellingSuggestionsDeferred& callback) = 0;
+      const GetSpellingSuggestionsResolver& callback) = 0;
   public: virtual std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) = 0;
   public: virtual void HideWindow(WindowId window_id) = 0;

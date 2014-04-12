@@ -49,7 +49,7 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       const base::string16& name) override;
   private: virtual void GetSpellingSuggestions(
       const base::string16& wrong_word,
-      const GetSpellingSuggestionsDeferred& deferred) override;
+      const GetSpellingSuggestionsResolver& deferred) override;
   private: virtual std::vector<int> GetTableRowStates(
       dom::WindowId window_id,
       const std::vector<base::string16>& keys) override;

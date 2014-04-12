@@ -251,7 +251,7 @@ base::string16 ViewDelegateImpl::GetMetrics(const base::string16& name) {
 }
 
 void ViewDelegateImpl::GetSpellingSuggestions(const base::string16& wrong_word,
-    const GetSpellingSuggestionsDeferred& deferred) {
+    const GetSpellingSuggestionsResolver& deferred) {
   event_handler_->RunCallback(base::Bind(deferred.resolve,
       spellchecker::SpellingEngine::GetSpellingEngine()->
           GetSpellingSuggestions(wrong_word)));

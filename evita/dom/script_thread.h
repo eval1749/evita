@@ -100,7 +100,7 @@ class ScriptThread final : public domapi::IoDelegate,
       GetFilenameForSaveCallback callback) override;
   private: virtual void GetSpellingSuggestions(
       const base::string16& wrong_word,
-      const GetSpellingSuggestionsDeferred& deferred) override;
+      const GetSpellingSuggestionsResolver& deferred) override;
   private: virtual std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;
   private: virtual void HideWindow(WindowId window_id) override;

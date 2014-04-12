@@ -33,7 +33,7 @@ void MockViewImpl::GetFilenameForSave(WindowId,
 }
 
 void MockViewImpl::GetSpellingSuggestions(const base::string16&,
-    const GetSpellingSuggestionsDeferred& deferred) {
+    const GetSpellingSuggestionsResolver& deferred) {
   deferred.resolve.Run(spelling_suggestions_);
 }
 

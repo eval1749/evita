@@ -161,7 +161,6 @@
       'sources': [
         'precomp.cpp',
 
-        'io/file_io.cc',
         'io/file_io_context.cc',
         'io/io_context.cc',
         'io/io_context_utils.cc',

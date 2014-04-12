@@ -11,8 +11,4 @@ Buffer::Buffer(const base::string16& name)
 Buffer::~Buffer() {
 }
 
-void Buffer::FinishIo(uint const) {
-  m_eState = State_Ready;
-}
-
 }  // namespace dom

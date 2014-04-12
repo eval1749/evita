@@ -24,18 +24,6 @@ class Buffer : public text::Buffer, public DoubleLinkedNode_<Buffer> {
     filename_ = filename;
   }
 
-  // [F]
-  public: void FinishIo(uint);
-
-  // [L]
-  public: bool Load(const base::string16& filename,
-                    const dom::ViewDelegate::LoadFileCallback& callback);
-
-  // [S]
-  public: bool Save(const base::string16& filename,
-                    int code_page, NewlineMode newline_mode,
-                    const dom::ViewDelegate::SaveFileCallback& callback);
-
   DISALLOW_COPY_AND_ASSIGN(Buffer);
 };
 

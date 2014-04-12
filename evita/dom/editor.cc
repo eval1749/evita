@@ -164,7 +164,7 @@ base::string16 EditorClass::version() {
 
 v8::Handle<v8::Promise> EditorClass::CheckSpelling(
     const base::string16& word_to_check) {
-  return PromiseResolver::Call(base::Bind(
+  return PromiseResolver::SlowCall(base::Bind(
       &ViewDelegate::CheckSpelling,
       base::Unretained(ScriptHost::instance()->view_delegate()),
       word_to_check));
@@ -200,7 +200,7 @@ base::string16 EditorClass::GetMetrics(const base::string16& name) {
 
 v8::Handle<v8::Promise> EditorClass::GetSpellingSuggestions(
     const base::string16& wrong_word) {
-  return PromiseResolver::Call(base::Bind(
+  return PromiseResolver::SlowCall(base::Bind(
       &ViewDelegate::GetSpellingSuggestions,
       base::Unretained(ScriptHost::instance()->view_delegate()),
       wrong_word));

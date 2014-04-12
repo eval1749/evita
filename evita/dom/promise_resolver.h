@@ -20,38 +20,62 @@ namespace dom {
 // The instance of |PromiseResolver| keeps a JavaScript object of
 // |Promise.defer()| during asynchronous call.
 //
-class PromiseResolver : public base::RefCounted<PromiseResolver> {
+class PromiseResolver final : public base::RefCounted<PromiseResolver> {
+  private: enum class Type {
+    Fast,
+    Slow,
+  };
+
   private: v8_glue::ScopedPersistent<v8::Promise::Resolver> resolver_;
   private: base::WeakPtr<v8_glue::Runner> runner_;
+  private: Type type_;
 
-  public: PromiseResolver(v8_glue::Runner* runner);
+  private: PromiseResolver(Type type, v8_glue::Runner* runner);
   public: ~PromiseResolver();
 
-  protected: v8_glue::Runner* runner() const { return runner_.get(); }
+  private: v8_glue::Runner* runner() const { return runner_.get(); }
 
-  public: template<typename ResolveType, typename RejectType>
-    static v8::Handle<v8::Promise> Call(
+  private: template<typename ResolveType, typename RejectType>
+    static v8::Handle<v8::Promise> DoCall(
+        Type type,
         const base::Callback<
             void(const domapi::Deferred<ResolveType, RejectType>&)> closure);
 
   private: void DoReject(v8::Handle<v8::Value> reason);
   private: void DoResolve(v8::Handle<v8::Value> value);
+
+  public: template<typename ResolveType, typename RejectType>
+    static v8::Handle<v8::Promise> FastCall(
+        const base::Callback<
+            void(const domapi::Deferred<ResolveType, RejectType>&)> closure) {
+    return DoCall(Type::Fast, closure);
+  }
+
   public: v8::Local<v8::Promise> GetPromise(v8::Isolate* isoalte) const;
   public: template<typename T> void Reject(T reason);
   public: template<typename T> void Resolve(T value);
   private: void ScheduleRunMicrotasks();
 
+  public: template<typename ResolveType, typename RejectType>
+    static v8::Handle<v8::Promise> SlowCall(
+        const base::Callback<
+            void(const domapi::Deferred<ResolveType, RejectType>&)> closure) {
+    return DoCall(Type::Slow, closure);
+  }
+
+
   DISALLOW_COPY_AND_ASSIGN(PromiseResolver);
 };
 
 template<typename T, typename U>
-v8::Handle<v8::Promise> PromiseResolver::Call(
+v8::Handle<v8::Promise> PromiseResolver::DoCall(
+    Type type,
     const base::Callback<void(const domapi::Deferred<T, U>&)> closure) {
   auto const runner = ScriptHost::instance()->runner();
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
 
   auto const promise_resolver =
-      make_scoped_refptr(new PromiseResolver(runner));
+      make_scoped_refptr(new PromiseResolver(type, runner));
 
   domapi::Deferred<T, U> deferred;
   deferred.reject = base::Bind(&PromiseResolver::Reject<U>,

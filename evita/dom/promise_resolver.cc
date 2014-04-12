@@ -14,10 +14,10 @@
 
 namespace dom {
 
-PromiseResolver::PromiseResolver(v8_glue::Runner* runner)
+PromiseResolver::PromiseResolver(Type type, v8_glue::Runner* runner)
     : resolver_(runner->isolate(),
                 v8::Promise::Resolver::New(runner->isolate())),
-      runner_(runner->GetWeakPtr()) {
+      runner_(runner->GetWeakPtr()), type_(type) {
 }
 
 PromiseResolver::~PromiseResolver() {
@@ -43,6 +43,8 @@ v8::Local<v8::Promise> PromiseResolver::GetPromise(v8::Isolate* isolate) const {
 }
 
 void PromiseResolver::ScheduleRunMicrotasks() {
+  if (type_ != Type::Fast)
+    return;
   base::MessageLoop::current()->PostTask(FROM_HERE, base::Bind(
       &ScriptHost::RunMicrotasks, base::Unretained(ScriptHost::instance())));
 }

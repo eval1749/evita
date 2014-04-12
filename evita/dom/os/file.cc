@@ -88,7 +88,7 @@ File::~File() {
 
 v8::Handle<v8::Promise> File::MakeTempFileName(const base::string16& dir_name,
                                                const base::string16& prefix) {
-  return PromiseResolver::Call(base::Bind(
+  return PromiseResolver::FastCall(base::Bind(
       &domapi::IoDelegate::MakeTempFileName,
       base::Unretained(ScriptHost::instance()->io_delegate()),
       dir_name, prefix));
@@ -98,7 +98,7 @@ v8::Handle<v8::Promise> File::Move(
     const base::string16& src_path,
     const base::string16& dst_path,
     v8_glue::Optional<domapi::MoveFileOptions> opt_options) {
-  return PromiseResolver::Call(base::Bind(
+  return PromiseResolver::FastCall(base::Bind(
       &domapi::IoDelegate::MoveFile,
       base::Unretained(ScriptHost::instance()->io_delegate()),
       src_path, dst_path, opt_options.value));
@@ -106,21 +106,21 @@ v8::Handle<v8::Promise> File::Move(
 
 v8::Handle<v8::Promise> File::Open(const base::string16& file_name,
     v8_glue::Optional<base::string16> opt_mode) {
-  return PromiseResolver::Call(base::Bind(
+  return PromiseResolver::FastCall(base::Bind(
       &domapi::IoDelegate::OpenFile,
       base::Unretained(ScriptHost::instance()->io_delegate()),
       file_name, opt_mode.is_supplied ? opt_mode.value : base::string16()));
 }
 
 v8::Handle<v8::Promise> File::Remove(const base::string16& file_name) {
-  return PromiseResolver::Call(base::Bind(
+  return PromiseResolver::FastCall(base::Bind(
       &domapi::IoDelegate::RemoveFile,
       base::Unretained(ScriptHost::instance()->io_delegate()), file_name));
 }
 
 v8::Handle<v8::Promise> File::Stat(
     const base::string16& file_name) {
-  return PromiseResolver::Call(base::Bind(
+  return PromiseResolver::FastCall(base::Bind(
       &domapi::IoDelegate::QueryFileStatus,
       base::Unretained(ScriptHost::instance()->io_delegate()),
       file_name));

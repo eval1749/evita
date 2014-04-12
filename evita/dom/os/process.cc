@@ -68,7 +68,7 @@ class ProcessClass :
 
 v8::Handle<v8::Promise> ProcessClass::OpenProcess(
     const base::string16& command_line) {
-  return PromiseResolver::Call(base::Bind(
+  return PromiseResolver::FastCall(base::Bind(
       &domapi::IoDelegate::OpenProcess,
       base::Unretained(ScriptHost::instance()->io_delegate()),
       command_line));

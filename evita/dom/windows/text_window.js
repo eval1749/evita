@@ -338,7 +338,7 @@ global.TextWindow.prototype.clone = function() {
     var new_texts = [
       DOCUMENT_STATE_TEXTS[document.state],
       document.mode.name,
-      'CP' + document.codePage,
+      document.encoding ? document.encoding : 'n/a',
       NEWLINE_MODES[document.newline],
       'Ln ' + line_and_column.lineNumber,
       'Col ' + line_and_column.column,

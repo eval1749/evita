@@ -46,9 +46,6 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: const text::Buffer* buffer() const { return buffer_.get(); }
   public: text::Buffer* buffer() { return buffer_.get(); }
   public: base::char16 charCodeAt(text::Posn position) const;
-  // Returns code page used for I/O.
-  public: int code_page() const;
-  public: void set_code_page(int code_page);
   public: const base::string16& filename() const;
   public: void set_filename(const base::string16& filename);
   public: base::Time last_write_time() const;

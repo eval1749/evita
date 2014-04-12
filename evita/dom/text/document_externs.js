@@ -66,9 +66,6 @@ Document.remove = function(document) {};
  */
 Document.removeObserver = function(observer) {};
 
-/** @type {number} */
-Document.prototype.codePage;
-
 /** @type {string} */
 Document.prototype.encoding;
 

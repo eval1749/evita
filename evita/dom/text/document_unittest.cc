@@ -144,13 +144,6 @@ TEST_F(DocumentTest, charCodeAt_) {
   EXPECT_SCRIPT_EQ("111", "doc.charCodeAt_(1)");
 }
 
-TEST_F(DocumentTest, codePage) {
-  EXPECT_SCRIPT_VALID("var doc = new Document('codePage');");
-  EXPECT_SCRIPT_EQ("65001", "doc.codePage") << "Default code page is UTF-8";
-  EXPECT_SCRIPT_VALID("doc.codePage = 932;") << "Set code page to Shift_JIS";
-  EXPECT_SCRIPT_EQ("932", "doc.codePage");
-}
-
 TEST_F(DocumentTest, dispatchEvent) {
   EXPECT_SCRIPT_VALID(
       "var doc = new Document('dispatchEvent');"

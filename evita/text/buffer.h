@@ -52,28 +52,21 @@ struct LineAndColumn {
 class FileFeatures {
   protected: NewlineMode m_eNewline;
   protected: bool m_fNoSave;
-  protected: uint m_nCodePage;
   protected: base::string16 filename_;
 
   // ctor
   protected: FileFeatures()
       : m_eNewline(NewlineMode_Detect),
-        m_fNoSave(false),
-        m_nCodePage(CP_UTF8) {
+        m_fNoSave(false) {
   }
 
   // [G]
-  public: uint GetCodePage() const { return m_nCodePage; }
   public: const base::string16& GetFileName() const { return filename_; }
 
   public: NewlineMode GetNewline() const { return m_eNewline; }
   public: bool GetNoSave() const { return m_fNoSave; }
 
   // [S]
-  public: uint SetCodePage(uint const nCodePage) {
-    return m_nCodePage = nCodePage;
-  }
-
   public: NewlineMode SetNewline(NewlineMode eNewline) {
     return m_eNewline = eNewline;
   }

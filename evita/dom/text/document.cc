@@ -161,7 +161,6 @@ v8::Handle<v8::FunctionTemplate> DocumentClass::CreateConstructorTemplate(
 
 void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
   builder
-      .SetProperty("codePage", &Document::code_page, &Document::set_code_page)
       .SetProperty("filename", &Document::filename, &Document::set_filename)
       .SetProperty("lastWriteTime", &Document::last_write_time,
                    &Document::set_last_write_time)
@@ -207,14 +206,6 @@ Document::Document(const base::string16& name, Mode* mode)
 
 Document::~Document() {
   DocumentSet::instance()->Unregister(this);
-}
-
-int Document::code_page() const {
-  return static_cast<int>(buffer_->GetCodePage());
-}
-
-void Document::set_code_page(int code_page) {
-  buffer_->SetCodePage(static_cast<uint32_t>(code_page));
 }
 
 base::char16 Document::charCodeAt(text::Posn position) const {

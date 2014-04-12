@@ -275,7 +275,6 @@
         'v8_glue/runner.cc',
         'v8_glue/runner_delegate.cc',
         'v8_glue/scriptable.cc',
-        'v8_glue/script_callback.cc',
         'v8_glue/wrapper_info.cc',
       ], # sources
     }, # v8_glue

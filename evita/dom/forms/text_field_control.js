@@ -65,6 +65,33 @@ Object.defineProperties(TextFieldControl.prototype, {
   TextFieldControl.bindKey = bindKey;
 
   /**
+   * @param {!TextFieldControl} control
+   * @param {!MouseEvent} event
+   */
+  function handleClick(control, event){
+    if (control.form.focusControl != control) {
+      control.focus();
+      return;
+    }
+    var offset = control.mapPointToOffset(event.clientX, event.clientY);
+    control.selection.collapseTo(offset);
+  }
+
+  /**
+   * @param {!TextFieldControl} control
+   * @param {!KeyboardEvent} event
+   */
+  function handleKeyDown(control, event) {
+    if (event.type != Event.Names.KEYDOWN)
+      return;
+    var command = keymap.get(event.code);
+    if (!command)
+      return;
+    command(control.selection);
+    event.preventDefault();
+  }
+
+  /**
    * @param {string} key_combination
    * @return {!TextFieldEditCommand}
    */
@@ -109,7 +136,7 @@ Object.defineProperties(TextFieldControl.prototype, {
   /**
    * @param {!TextFieldSelection} selection
    */
-  function SetSelectionText(selection, new_text) {
+  function setSelectionText(selection, new_text) {
     var control = selection.control;
     var old_value = control.value;
     selection.text = new_text;
@@ -127,35 +154,8 @@ Object.defineProperties(TextFieldControl.prototype, {
   function typeCharacter(charCode, selection) {
     var control = selection.control;
     var text = control.value;
-    SetSelectionText(selection, String.fromCharCode(charCode));
+    setSelectionText(selection, String.fromCharCode(charCode));
     selection.collapseTo(selection.end);
-  }
-
-  /**
-   * @param {!TextFieldControl} control
-   * @param {!MouseEvent} event
-   */
-  function handleClick(control, event){
-    if (control.form.focusControl != control) {
-      control.focus();
-      return;
-    }
-    var offset = control.mapPointToOffset(event.clientX, event.clientY);
-    control.selection.collapseTo(offset);
-  }
-
-  /**
-   * @param {!TextFieldControl} control
-   * @param {!KeyboardEvent} event
-   */
-  function handleKeyDown(control, event) {
-    if (event.type != Event.Names.KEYDOWN)
-      return;
-    var command = keymap.get(event.code);
-    if (!command)
-      return;
-    command(control.selection);
-    event.preventDefault();
   }
 
   /**
@@ -206,7 +206,7 @@ Object.defineProperties(TextFieldControl.prototype, {
     var text = control.value;
     if (selection.collapsed)
       --selection.focusOffset;
-    SetSelectionText(selection, '');
+    setSelectionText(selection, '');
   });
 
   bindKey('Ctrl+A', function(selection) {
@@ -237,7 +237,7 @@ Object.defineProperties(TextFieldControl.prototype, {
     var item = items.get(0);
     if (item.kind != 'string')
       return;
-    SetSelectionText(selection, item.getAsString());
+    setSelectionText(selection, item.getAsString());
     selection.collapseTo(selection.end);
   });
 
@@ -247,7 +247,7 @@ Object.defineProperties(TextFieldControl.prototype, {
     var items = DataTransfer.clipboard.items;
     items.clear();
     items.add(selection.text.replace(/\n/g, '\r\n'), 'text/plain');
-    SetSelectionText(selection, '');
+    setSelectionText(selection, '');
   });
 
   bindKey('Delete', function(selection) {
@@ -255,7 +255,7 @@ Object.defineProperties(TextFieldControl.prototype, {
     var text = control.value;
     if (selection.collapsed)
       ++selection.focusOffset;
-    SetSelectionText(selection, '');
+    setSelectionText(selection, '');
   });
 
   bindKey('End', function(selection) {

@@ -39,6 +39,7 @@ Object.defineProperty(Mode, 'extensionMap', {
     map.set('htm', {mode: XmlMode, name: 'HTML Document'});
     map.set('html', {mode: XmlMode, name: 'HTML Document'});
     map.set('hxx', {mode: CxxMode, name: 'C++ Header'});
+    map.set('idl', {mode: CxxMode, name: 'Web IDL Source'});
     map.set('java', {mode: JavaMode, name: 'Java Source'});
     map.set('js', {mode: JavaScriptMode, name: 'JavaScript Source'});
     map.set('jsm', {mode: JavaScriptMode, name: 'JavaScript Module Source'});

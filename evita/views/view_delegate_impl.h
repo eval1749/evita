@@ -67,10 +67,12 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void RealizeWindow(dom::WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(
       domapi::ViewEventHandler* event_handler) override;
-  private: virtual void ReleaseCapture(dom::WindowId window_id) override;
+  private: virtual void ReleaseCapture(
+      domapi::EventTargetId event_target_id) override;
   private: virtual void ScrollTextWindow(dom::WindowId window_id,
                                          int direction) override;
-  private: virtual void SetCapture(dom::WindowId window_id) override;
+  private: virtual void SetCapture(
+      domapi::EventTargetId event_target_id) override;
   private: virtual void SetStatusBar(dom::WindowId window_id,
       const std::vector<base::string16>& texts) override;
   private: virtual void SetTabData(dom::WindowId window_id,

@@ -117,10 +117,12 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void RealizeWindow(WindowId window_id) override;
   private: virtual void RegisterViewEventHandler(
       domapi::ViewEventHandler* event_handler) override;
-  private: virtual void ReleaseCapture(WindowId window_id) override;
+  private: virtual void ReleaseCapture(
+      domapi::EventTargetId event_target_id) override;
   private: virtual void ScrollTextWindow(WindowId window_id,
                                          int direction) override;
-  private: virtual void SetCapture(WindowId window_id) override;
+  private: virtual void SetCapture(
+      domapi::EventTargetId event_target_id) override;
   private: virtual void SetStatusBar(WindowId window_id,
       const std::vector<base::string16>& texts) override;
   private: virtual void SetTabData(WindowId window_id,

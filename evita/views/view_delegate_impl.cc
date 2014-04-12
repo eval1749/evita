@@ -396,11 +396,19 @@ void ViewDelegateImpl::ShowWindow(dom::WindowId window_id) {
   window->Show();
 }
 
-void ViewDelegateImpl::ReleaseCapture(dom::WindowId window_id) {
-  auto const window = FromWindowId("ReleaseCapture", window_id);
-  if (!window)
+void ViewDelegateImpl::ReleaseCapture(domapi::EventTargetId event_target_id) {
+  if (auto const window = Window::FromWindowId(event_target_id)) {
+    window->ReleaseCapture();
     return;
-  window->ReleaseCapture();
+  }
+
+  if (auto const control = FormControlSet::instance()->
+          MaybeControl(event_target_id)) {
+    control->ReleaseCapture();
+    return;
+  }
+
+  DVLOG(0) << "ReleaseCapture: no such target " << event_target_id;
 }
 
 void ViewDelegateImpl::ScrollTextWindow(WindowId window_id, int direction) {
@@ -416,11 +424,20 @@ void ViewDelegateImpl::ScrollTextWindow(WindowId window_id, int direction) {
   text_window->SmallScroll(0, direction);
 }
 
-void ViewDelegateImpl::SetCapture(dom::WindowId window_id) {
-  auto const window = FromWindowId("SetCapture", window_id);
-  if (!window)
+
+void ViewDelegateImpl::SetCapture(domapi::EventTargetId event_target_id) {
+  if (auto const window = Window::FromWindowId(event_target_id)) {
+    window->SetCapture();
     return;
-  window->SetCapture();
+  }
+
+  if (auto const control = FormControlSet::instance()->
+          MaybeControl(event_target_id)) {
+    control->SetCapture();
+    return;
+  }
+
+  DVLOG(0) << "SetCapture: no such target " << event_target_id;
 }
 
 void ViewDelegateImpl::SetStatusBar(dom::WindowId window_id,

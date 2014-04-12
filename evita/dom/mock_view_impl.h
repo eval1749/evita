@@ -72,9 +72,9 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD3(Reconvert, void(WindowId, text::Posn, text::Posn));
   MOCK_METHOD1(RealizeWindow, void(WindowId));
   MOCK_METHOD1(RegisterViewEventHandler, void(domapi::ViewEventHandler*));
-  MOCK_METHOD1(ReleaseCapture, void(WindowId));
+  MOCK_METHOD1(ReleaseCapture, void(domapi::EventTargetId));
   MOCK_METHOD2(ScrollTextWindow, void(WindowId, int));
-  MOCK_METHOD1(SetCapture, void(WindowId));
+  MOCK_METHOD1(SetCapture, void(domapi::EventTargetId));
   MOCK_METHOD2(SetStatusBar,
       void(WindowId, const std::vector<base::string16>&));
   MOCK_METHOD2(SetTabData, void(WindowId, const domapi::TabData&));

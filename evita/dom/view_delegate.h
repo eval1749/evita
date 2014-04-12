@@ -121,10 +121,17 @@ class ViewDelegate {
   public: virtual void RealizeWindow(WindowId window_id) = 0;
   public: virtual void RegisterViewEventHandler(
       domapi::ViewEventHandler* event_handler) = 0;
-  public: virtual void ReleaseCapture(WindowId window_id) = 0;
+
+  // Release capture from window or form control.
+  public: virtual void ReleaseCapture(
+      domapi::EventTargetId event_target_id) = 0;
+
   public: /* synchronous */ virtual void ScrollTextWindow(WindowId windowId,
                                                           int direction) = 0;
-  public: virtual void SetCapture(WindowId window_id) = 0;
+  // Release capture from window or form control.
+  public: virtual void SetCapture(
+      domapi::EventTargetId event_target_id) = 0;
+
   // Set text contents of status bar of specified top level window.
   public: virtual void SetStatusBar(WindowId window_id,
       const std::vector<base::string16>& texts) = 0;

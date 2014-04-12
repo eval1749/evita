@@ -284,8 +284,8 @@ DEFINE_VIEW_DELEGATE_5(MessageBox, WindowId, const base::string16&,
                        MessageBoxCallback)
 DEFINE_VIEW_DELEGATE_3(Reconvert, WindowId, text::Posn, text::Posn);
 DEFINE_VIEW_DELEGATE_1(RealizeWindow, WindowId)
-DEFINE_VIEW_DELEGATE_1(ReleaseCapture, WindowId)
-DEFINE_VIEW_DELEGATE_1(SetCapture, WindowId)
+DEFINE_VIEW_DELEGATE_1(ReleaseCapture, domapi::EventTargetId)
+DEFINE_VIEW_DELEGATE_1(SetCapture, domapi::EventTargetId)
 DEFINE_VIEW_DELEGATE_2(SetStatusBar, WindowId,
     const std::vector<base::string16>&)
 DEFINE_VIEW_DELEGATE_2(SetTabData, WindowId, const domapi::TabData&)

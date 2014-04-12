@@ -106,7 +106,7 @@ class Widget
   private: void DispatchPaintMessage();
 
   // [G]
-  public: virtual HCURSOR GetCursorAt(const Point& point) const;
+  protected: virtual HCURSOR GetCursorAt(const Point& point) const;
   public: static Widget* GetFocusWidget();
   private: Widget& GetHostWidget() const;
   private: Widget* GetMouseTarget(const Point& point) const;

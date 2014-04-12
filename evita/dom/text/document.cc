@@ -230,11 +230,11 @@ base::char16 Document::charCodeAt(text::Posn position) const {
 }
 
 const base::string16& Document::filename() const {
-  return buffer_->GetFileName();
+  return file_name_;
 }
 
-void Document::set_filename(const base::string16& filename) {
-  return buffer_->set_filename(filename);
+void Document::set_filename(const base::string16& file_name) {
+  file_name_ = file_name;
 }
 
 base::Time Document::last_write_time() const {
@@ -242,7 +242,7 @@ base::Time Document::last_write_time() const {
 }
 
 void Document::set_last_write_time(base::Time last_write_time) {
-  return buffer_->SetFile(buffer_->GetFileName(), last_write_time);
+  return buffer_->SetFile(file_name_, last_write_time);
 }
 
 text::Posn Document::length() const {

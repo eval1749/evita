@@ -37,6 +37,36 @@ Object.defineProperties(TextFieldControl.prototype, {
   /** @const @type {number} */
   var MAX_OFFSET = 1 << 28;
 
+  /**
+   * @constructor
+   * @param {!TextFieldControl} control
+   */
+  function DragController(control) {
+    this.control = control;
+    this.dragging = false;
+  }
+
+  /** @type {!TextFieldControl} */
+  DragController.prototype.control;
+
+  /** @type {boolean} */
+  DragController.prototype.dragging;
+
+  /** @type {function()} */
+  DragController.prototype.stop = function() {
+    this.dragging = false;
+    this.control.releaseCapture();
+  };
+
+  /** @type {function()} */
+  DragController.prototype.start = function() {
+    this.dragging = true;
+    this.control.setCapture();
+  };
+
+  /** @type {?DragController} */
+  TextFieldControl.prototype.dragController_ = null;
+
   /** @type {!Map.<number, !TextFieldEditCommand>} */
   var keymap = new Map();
 
@@ -68,13 +98,14 @@ Object.defineProperties(TextFieldControl.prototype, {
    * @param {!TextFieldControl} control
    * @param {!MouseEvent} event
    */
-  function handleClick(control, event){
-    if (control.form.focusControl != control) {
-      control.focus();
+  function handleDblClick(control, event){
+    if (event.button || control.form.focusControl != control)
       return;
-    }
     var offset = control.mapPointToOffset(event.clientX, event.clientY);
+    if (offset < 0)
+      return;
     control.selection.collapseTo(offset);
+    selectWord(control);
   }
 
   /**
@@ -92,6 +123,53 @@ Object.defineProperties(TextFieldControl.prototype, {
   }
 
   /**
+   * @param {!TextFieldControl} control
+   * @param {!MouseEvent} event
+   */
+  function handleMouseDown(control, event) {
+    if (event.button)
+      return;
+    if (control.form.focusControl != control) {
+      control.focus();
+      return;
+    }
+    var offset = control.mapPointToOffset(event.clientX, event.clientY);
+    if (event.shiftKey)
+      control.selection.extendTo(offset);
+    else
+      control.selection.collapseTo(offset);
+    if (event.ctrlKey)
+      selectWord(control);
+    if (!control.dragController_)
+      control.dragController_ = new DragController(control)
+    control.dragController_.start();
+  }
+
+  /**
+   * @param {!TextFieldControl} control
+   * @param {!MouseEvent} event
+   */
+  function handleMouseMove(control, event) {
+    var dragController = control.dragController_;
+    if (!dragController || !dragController.dragging)
+      return;
+    var offset = control.mapPointToOffset(event.clientX, event.clientY);
+    if (offset < 0)
+      return;
+    control.selection.extendTo(offset);
+  }
+
+  /**
+   * @param {!TextFieldControl} control
+   * @param {!MouseEvent} event
+   */
+  function handleMouseUp(control, event) {
+    if (event.button)
+      return;
+    stopControllers(control);
+  }
+
+  /**
    * @param {string} key_combination
    * @return {!TextFieldEditCommand}
    */
@@ -102,16 +180,16 @@ Object.defineProperties(TextFieldControl.prototype, {
 
   /**
    * @param {!TextFieldSelection} selection
+   * @param {number} offset
    * @return {number}
    */
-  function nextWord(selection) {
+  function nextWord(selection, offset) {
     var text = selection.control.value;
     var max_offset = text.length;
-    var offset = selection.focusOffset;
-    while (offset < max_offset && text.charCodeAt(offset) != 0x20) {
+    while (offset < max_offset && text.charCodeAt(offset) != Unicode.SPACE) {
       ++offset;
     }
-    while (offset < max_offset && text.charCodeAt(offset) == 0x20) {
+    while (offset < max_offset && text.charCodeAt(offset) == Unicode.SPACE) {
       ++offset;
     }
     return offset;
@@ -119,18 +197,29 @@ Object.defineProperties(TextFieldControl.prototype, {
 
   /**
    * @param {!TextFieldSelection} selection
+   * @param {number} offset
    * @return {number}
    */
-  function previousWord(selection) {
+  function previousWord(selection, offset) {
     var text = selection.control.value;
-    var offset = selection.focusOffset - 1;
-    while (offset && text.charCodeAt(offset - 1) == 0x20) {
+    while (offset && text.charCodeAt(offset - 1) == Unicode.SPACE) {
       --offset;
     }
-    while (offset && text.charCodeAt(offset - 1) != 0x20) {
+    while (offset && text.charCodeAt(offset - 1) != Unicode.SPACE) {
       --offset;
     }
     return offset;
+  }
+
+  /**
+   * @param {!TextFieldControl} control
+   */
+  function selectWord(control) {
+    var selection = control.selection;
+    var start = previousWord(selection, selection.start);
+    var end = nextWord(selection, start);
+    selection.collapseTo(start);
+    selection.extendTo(end);
   }
 
   /**
@@ -145,6 +234,16 @@ Object.defineProperties(TextFieldControl.prototype, {
       return;
     var event = new FormEvent(Event.Names.INPUT, {data: value});
     selection.control.dispatchEvent(event);
+  }
+
+  /**
+   * @param {!TextFieldControl} control
+   */
+  function stopControllers(control) {
+    var dragController = control.dragController_;
+    if (!dragController)
+      return;
+    dragController.stop();
   }
 
   /**
@@ -168,8 +267,17 @@ Object.defineProperties(TextFieldControl.prototype, {
       case Event.Names.BLUR:
         dispatchChangeEventIfNeeded(this);
         break;
-      case Event.Names.CLICK:
-        handleClick(this, /** @type{!MouseEvent} */(event));
+      case Event.Names.DBLCLICK:
+        handleDblClick(this, /** @type{!MouseEvent} */(event));
+        break;
+      case Event.Names.MOUSEDOWN:
+        handleMouseDown(this, /** @type {!MouseEvent} */(event));
+        break;
+      case Event.Names.MOUSEMOVE:
+        handleMouseMove(this, /** @type {!MouseEvent} */(event));
+        break;
+      case Event.Names.MOUSEUP:
+        handleMouseUp(this, /** @type {!MouseEvent} */(event));
         break;
       case Event.Names.FOCUS:
         this.selection.collapseTo(0);
@@ -215,11 +323,11 @@ Object.defineProperties(TextFieldControl.prototype, {
   });
 
   bindKey('Ctrl+ArrowRight', function(selection) {
-    selection.collapseTo(nextWord(selection));
+    selection.collapseTo(nextWord(selection, selection.focusOffset));
   });
 
   bindKey('Ctrl+ArrowLeft', function(selection) {
-    selection.collapseTo(previousWord(selection));
+    selection.collapseTo(previousWord(selection, selection.focusOffset));
   });
 
   bindKey('Ctrl+C', function(selection) {
@@ -275,11 +383,11 @@ Object.defineProperties(TextFieldControl.prototype, {
   });
 
   bindKey('Shift+Ctrl+ArrowRight', function(selection) {
-    selection.extendTo(nextWord(selection));
+    selection.extendTo(nextWord(selection, selection.focusOffset));
   });
 
   bindKey('Shift+Ctrl+ArrowLeft', function(selection) {
-    selection.extendTo(previousWord(selection));
+    selection.extendTo(previousWord(selection, selection.focusOffset));
   });
 
   bindKey('Shift+Ctrl+Delete', keyBindingOf('Ctrl+C'));

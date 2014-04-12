@@ -316,7 +316,7 @@ domapi::FloatPoint ViewDelegateImpl::MapPositionToPoint(
 
 void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
-      MessageBoxCallback callback) {
+      const MessageBoxResolver& resolver) {
   auto const frame = GetFrameForMessage(window_id);
 
   auto const kButtonMask = 7;
@@ -330,7 +330,7 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
   if (!need_response && level != MessageLevel_Error) {
     if (frame)
       frame->ShowMessage(level, message);
-    event_handler_->RunCallback(base::Bind(callback, IDOK));
+    event_handler_->RunCallback(base::Bind(resolver.resolve, IDOK));
     return;
   }
 
@@ -342,7 +342,7 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
   editor::ModalMessageLoopScope modal_mesage_loop_scope;
   auto const response= ::MessageBoxW(hwnd, message.c_str(), title.c_str(),
                                      static_cast<UINT>(flags));
-  event_handler_->RunCallback(base::Bind(callback, response));
+  event_handler_->RunCallback(base::Bind(resolver.resolve, response));
 }
 
 void ViewDelegateImpl::Reconvert(WindowId window_id, text::Posn start,

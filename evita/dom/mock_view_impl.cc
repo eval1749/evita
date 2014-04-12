@@ -38,8 +38,8 @@ std::vector<int> MockViewImpl::GetTableRowStates(WindowId,
 
 void MockViewImpl::MessageBox(WindowId, const base::string16&,
                               const base::string16&, int flags,
-                              MessageBoxCallback callback) {
-  callback.Run(flags);
+                              const MessageBoxResolver& resolver) {
+  resolver.resolve.Run(flags);
 }
 
 }  // namespace dom

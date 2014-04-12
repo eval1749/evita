@@ -4,8 +4,6 @@
 #include "evita/dom/editor.h"
 
 #include "base/bind.h"
-#include "base/callback.h"
-#include "evita/gc/local.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/promise_resolver.h"
@@ -17,7 +15,6 @@
 #include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/runner.h"
-#include "evita/v8_glue/script_callback.h"
 #include "v8_strings.h"
 
 namespace gin {
@@ -132,10 +129,10 @@ class EditorClass : public v8_glue::WrapperInfo {
   private: static base::string16 GetMetrics(const base::string16& name);
   private: static v8::Handle<v8::Promise> GetSpellingSuggestions(
       const base::string16& wrong_word);
-  private: static void MessageBox(v8_glue::Nullable<Window> maybe_window,
-                                 const base::string16& message, int flags,
-                                 const base::string16& title,
-                                 v8::Handle<v8::Function> callback);
+  private: static v8::Handle<v8::Promise> MessageBox(
+      v8_glue::Nullable<Window> maybe_window,
+      const base::string16& message, int flags,
+      v8_glue::Optional<base::string16> title);
   private: static Editor* NewEditor();
   private: static v8::Handle<v8::Object> RunScript(
       const base::string16& script_text,
@@ -197,18 +194,15 @@ v8::Handle<v8::Promise> EditorClass::GetSpellingSuggestions(
       wrong_word));
 }
 
-// TODO(yosi) We should use |PromiseResolver| instead of |ScriptCallback| for
-// |EditorClass::MessageBox()|.
-void EditorClass::MessageBox(v8_glue::Nullable<Window> maybe_window,
-                             const base::string16& message, int flags,
-                             const base::string16& title,
-                             v8::Handle<v8::Function> callback) {
-  auto const runner = ScriptHost::instance()->runner();
-  ScriptHost::instance()->view_delegate()->MessageBox(
+v8::Handle<v8::Promise> EditorClass::MessageBox(
+    v8_glue::Nullable<Window> maybe_window,
+    const base::string16& message, int flags,
+    v8_glue::Optional<base::string16> title) {
+  return PromiseResolver::SlowCall(base::Bind(
+      &ViewDelegate::MessageBox,
+      base::Unretained(ScriptHost::instance()->view_delegate()),
       maybe_window ? maybe_window->window_id() : kInvalidWindowId,
-      message, title, flags,
-      v8_glue::ScriptCallback<ViewDelegate::MessageBoxCallback>::New(
-          runner->GetWeakPtr(), callback));
+      message, title.get(base::string16()), flags));
 }
 
 Editor* EditorClass::NewEditor() {
@@ -244,7 +238,7 @@ v8::Handle<v8::FunctionTemplate>
     .SetMethod("getFilenameForSave", &EditorClass::GetFilenameForSave)
     .SetMethod("getSpellingSuggestions",
         &EditorClass::GetSpellingSuggestions)
-    .SetMethod("messageBox_", &EditorClass::MessageBox)
+    .SetMethod("messageBox", &EditorClass::MessageBox)
     .SetMethod("metrics", &EditorClass::GetMetrics)
     .SetMethod("runScript", &EditorClass::RunScript)
     .SetMethod("setTabData", &EditorClass::SetTabData)

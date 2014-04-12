@@ -57,8 +57,7 @@ class ViewDelegate {
   public: typedef base::Callback<void(const domapi::LoadFileCallbackData&)>
       LoadFileCallback;
 
-  public: typedef base::Callback<void(int response_code)>
-      MessageBoxCallback;
+  public: typedef domapi::Deferred<int> MessageBoxResolver;
 
   public: typedef base::Callback<void(const domapi::SaveFileCallbackData&)>
       SaveFileCallback;
@@ -105,9 +104,12 @@ class ViewDelegate {
       domapi::EventTargetId event_target_id, float x, float y) = 0;
   public: virtual domapi::FloatPoint MapPositionToPoint(
       WindowId window_id, text::Posn offset) = 0;
+
+  // Popup message box dialog box and return response code.
   public: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
-      MessageBoxCallback callback) = 0;
+      const MessageBoxResolver& callback) = 0;
+
   public: virtual void Reconvert(WindowId window_id, text::Posn start,
                                  text::Posn end) = 0;
   public: virtual void RealizeWindow(WindowId window_id) = 0;

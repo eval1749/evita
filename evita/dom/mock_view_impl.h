@@ -55,7 +55,7 @@ class MockViewImpl : public dom::ViewDelegate {
                domapi::FloatPoint(WindowId, text::Posn));
   public: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
-      MessageBoxCallback callback) override;
+      const MessageBoxResolver& resolver) override;
   MOCK_METHOD3(Reconvert, void(WindowId, text::Posn, text::Posn));
   MOCK_METHOD1(RealizeWindow, void(WindowId));
   MOCK_METHOD1(RegisterViewEventHandler, void(domapi::ViewEventHandler*));

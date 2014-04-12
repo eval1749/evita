@@ -281,7 +281,7 @@ DEFINE_VIEW_DELEGATE_1(HideWindow, WindowId)
 DEFINE_VIEW_DELEGATE_1(MakeSelectionVisible, WindowId)
 DEFINE_VIEW_DELEGATE_5(MessageBox, WindowId, const base::string16&,
                        const::base::string16&, int,
-                       MessageBoxCallback)
+                       const MessageBoxResolver&)
 DEFINE_VIEW_DELEGATE_3(Reconvert, WindowId, text::Posn, text::Posn);
 DEFINE_VIEW_DELEGATE_1(RealizeWindow, WindowId)
 DEFINE_VIEW_DELEGATE_1(ReleaseCapture, domapi::EventTargetId)

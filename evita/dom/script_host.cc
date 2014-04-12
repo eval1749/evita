@@ -65,8 +65,11 @@ void MessageBox(const base::string16& message, int flags) {
   DVLOG(0) << message;
   if (suppress_message_box)
     return;
+  domapi::Deferred<int, int> resolver;
+  resolver.reject = base::Bind(MessageBoxCallback);
+  resolver.resolve = base::Bind(MessageBoxCallback);
   ScriptHost::instance()->view_delegate()->MessageBox(kInvalidWindowId,
-    message, L"Evita System Message", flags, base::Bind(MessageBoxCallback));
+    message, L"Evita System Message", flags, resolver);
 }
 
 void GcEpilogueCallback(v8::GCType type, v8::GCCallbackFlags flags) {

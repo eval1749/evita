@@ -117,21 +117,6 @@
   };
 
   /**
-   * @param {?Window} window.
-   * @param {string} message
-   * @param {number} flags
-   * @param {string=} opt_title
-   * @return {!Promise.<number>}
-   */
-  Editor.messageBox = function (window, message, flags, opt_title) {
-    var title = arguments.length >= 4 ? /** @type{string} */(opt_title) : '';
-    var deferred = Promise.defer();
-    Editor.messageBox_(window || Editor.activeWindow(), message, flags, title,
-                       deferred.resolve);
-    return /** @type{!Promise.<number>} */(deferred.promise);
-  };
-
-  /**
    * @param {string} spec.
    * @return {number} key code.
    * @suppress {globalThis}

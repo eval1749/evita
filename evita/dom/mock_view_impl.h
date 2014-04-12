@@ -37,7 +37,7 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD2(AddWindow, void(WindowId, WindowId));
   MOCK_METHOD2(ChangeParentWindow, void(WindowId, WindowId));
   public: virtual void CheckSpelling(const base::string16& word_to_check,
-      const CheckSpellingDeferred& deferred) override;
+      const CheckSpellingResolver& deferred) override;
   MOCK_METHOD2(ComputeOnTextWindow,
       text::Posn(WindowId, const TextWindowCompute&));
   MOCK_METHOD1(CreateEditorWindow, void(const EditorWindow*));

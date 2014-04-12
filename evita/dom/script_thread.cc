@@ -262,7 +262,7 @@ DEFINE_IO_DELEGATE_4(WriteFile, domapi::IoContextId, void*, size_t,
 DEFINE_VIEW_DELEGATE_2(AddWindow, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(ChangeParentWindow, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(CheckSpelling, const base::string16&,
-    const CheckSpellingDeferred&)
+    const CheckSpellingResolver&)
 DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
 DEFINE_VIEW_DELEGATE_2(CreateFormWindow, WindowId, const Form*)
 DEFINE_VIEW_DELEGATE_2(CreateTableWindow, WindowId, Document*)

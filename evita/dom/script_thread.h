@@ -75,7 +75,7 @@ class ScriptThread final : public domapi::IoDelegate,
   public: virtual void ChangeParentWindow(WindowId window_id,
     WindowId new_parent_window_id) override;
   private: virtual void CheckSpelling(const base::string16& word_to_check,
-        const CheckSpellingDeferred& deferred) override;
+        const CheckSpellingResolver& deferred) override;
   private: virtual text::Posn ComputeOnTextWindow(
       WindowId window_id, const TextWindowCompute& data) override;
   private: virtual void CreateEditorWindow(

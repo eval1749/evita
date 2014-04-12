@@ -23,7 +23,7 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void ChangeParentWindow(dom::WindowId window_id,
       dom::WindowId new_parent_id) override;
   private: virtual void CheckSpelling(const base::string16& word_to_check,
-        const CheckSpellingDeferred& deferred) override;
+        const CheckSpellingResolver& deferred) override;
   private: virtual text::Posn ComputeOnTextWindow(dom::WindowId window_id,
       const dom::TextWindowCompute& data) override;
   private: virtual void CreateEditorWindow(

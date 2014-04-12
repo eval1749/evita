@@ -51,7 +51,7 @@ struct TextWindowCompute {
 };
 
 class ViewDelegate {
-  public: typedef domapi::Deferred<bool> CheckSpellingDeferred;
+  public: typedef domapi::Deferred<bool> CheckSpellingResolver;
 
   public: typedef base::Callback<void(base::string16 filename)>
       GetFilenameForLoadCallback;
@@ -78,7 +78,7 @@ class ViewDelegate {
   public: virtual void ChangeParentWindow(WindowId window_id,
                                           WindowId new_parent_window_id) = 0;
   public: virtual void CheckSpelling(const base::string16& word_to_check,
-        const CheckSpellingDeferred& callback) = 0;
+        const CheckSpellingResolver& callback) = 0;
   public: virtual text::Posn ComputeOnTextWindow(
       WindowId window_id, const TextWindowCompute& data) = 0;
   public: virtual void CreateEditorWindow(const EditorWindow* window) = 0;

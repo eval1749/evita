@@ -16,7 +16,7 @@ MockViewImpl::~MockViewImpl() {
 
 // dom::ViewDelegate
 void MockViewImpl::CheckSpelling(const base::string16&,
-    const CheckSpellingDeferred& deferred) {
+    const CheckSpellingResolver& deferred) {
   deferred.resolve.Run(check_spelling_result_);
 }
 

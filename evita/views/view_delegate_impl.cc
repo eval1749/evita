@@ -93,7 +93,7 @@ void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
 }
 
 void ViewDelegateImpl::CheckSpelling(const base::string16& word_to_check,
-    const CheckSpellingDeferred& deferred) {
+    const CheckSpellingResolver& deferred) {
   event_handler_->RunCallback(base::Bind(deferred.resolve,
       spellchecker::SpellingEngine::GetSpellingEngine()->
           CheckSpelling(word_to_check)));

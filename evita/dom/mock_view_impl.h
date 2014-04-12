@@ -11,7 +11,6 @@
 #pragma warning(disable: 4365 4628)
 #include "gmock/gmock.h"
 #pragma warning(pop)
-#include "evita/dom/public/api_callback.h"
 #include "evita/dom/public/float_point.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/view_delegate.h"

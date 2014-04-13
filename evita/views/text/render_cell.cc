@@ -4,6 +4,7 @@
 
 #include "evita/views/text/render_cell.h"
 
+#include "base/at_exit.h"
 #include "base/logging.h"
 #include "evita/gfx/stroke_style.h"
 #include "evita/views/text/render_style.h"
@@ -12,6 +13,12 @@ namespace views {
 namespace rendering {
 
 namespace {
+
+// TODO(yosi) We should have Direct2D device in-dependent manager for
+// controlling life time of resouces.
+void DestroyStrokeStyleCallback(void* pointer) {
+  delete reinterpret_cast<gfx::StrokeStyle*>(pointer);
+}
 
 inline void DrawLine(const gfx::Graphics& gfx, const gfx::Brush& brush,
                      float sx, float sy, float ex, float ey) {
@@ -45,11 +52,15 @@ void DrawWave(const gfx::Graphics& gfx, const gfx::Brush& brush, float sx,
     dash_style1.set_dash_style(gfx::DashStyle::Custom);
     dash_style1.set_dashes({dash_size, dash_size});
     dash_style1.Realize();
+    base::AtExitManager::RegisterCallback(DestroyStrokeStyleCallback,
+                                          &dash_style1);
 
     dash_style2.set_dash_style(gfx::DashStyle::Custom);
     dash_style2.set_dashes({dash_size, dash_size});
     dash_style2.set_dash_offset(dash_size);
     dash_style2.Realize();
+    base::AtExitManager::RegisterCallback(DestroyStrokeStyleCallback,
+                                          &dash_style2);
   }
 
   auto const stroke_width = 1.0f;

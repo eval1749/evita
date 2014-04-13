@@ -504,7 +504,7 @@ void Frame::DidCreateNativeWindow() {
     pane.ResizeTo(pane_rect);
   }
 
-  Widget::DidCreateNativeWindow();
+  views::Window::DidCreateNativeWindow();
 
   tab_strip_->SetIconList(views::IconCache::instance()->image_list());
 
@@ -516,11 +516,8 @@ void Frame::DidCreateNativeWindow() {
     m_oPanes.GetFirst()->Activate();
 }
 
-void Frame::DidDestroyWidget() {
-  delete this;
-}
-
 void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
+  views::Window::DidRemoveChildWidget(widget);
   auto const pane = const_cast<Pane*>(widget.as<Pane>());
   if (!pane)
     return;
@@ -530,6 +527,7 @@ void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
 }
 
 void Frame::DidResize() {
+  views::Window::DidResize();
   {
     auto tab_strip_rect = rect();
     tab_strip_rect.bottom = tab_strip_rect.top + m_cyTabBand;
@@ -557,7 +555,8 @@ void Frame::DidResize() {
   DrawForResize();
 }
 
-void Frame::DidSetFocus(ui::Widget*) {
+void Frame::DidSetFocus(ui::Widget* widget) {
+  views::Window::DidSetFocus(widget);
   if (!m_pActivePane) {
     m_pActivePane = m_oPanes.GetFirst();
     if (!m_pActivePane)
@@ -668,6 +667,7 @@ void Frame::WillDestroyWidget() {
 }
 
 void Frame::WillRemoveChildWidget(const Widget& widget) {
+  views::Window::WillRemoveChildWidget(widget);
   if (!is_realized())
     return;
   auto const pane = const_cast<Pane*>(widget.as<Pane>());

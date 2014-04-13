@@ -15,8 +15,6 @@
 
 namespace domapi {
 class FloatPoint;
-struct LoadFileCallbackData;
-struct SaveFileCallbackData;
 struct TabData;
 class ViewEventHandler;
 }
@@ -53,14 +51,7 @@ struct TextWindowCompute {
 class ViewDelegate {
   public: typedef domapi::Deferred<base::string16> GetFileNameForLoadResolver;
   public: typedef domapi::Deferred<base::string16> GetFileNameForSaveResolver;
-
-  public: typedef base::Callback<void(const domapi::LoadFileCallbackData&)>
-      LoadFileCallback;
-
   public: typedef domapi::Deferred<int> MessageBoxResolver;
-
-  public: typedef base::Callback<void(const domapi::SaveFileCallbackData&)>
-      SaveFileCallback;
 
   public: ViewDelegate() = default;
   public: virtual ~ViewDelegate() = default;

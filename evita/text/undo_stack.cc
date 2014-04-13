@@ -8,7 +8,7 @@
 #include <ostream>
 
 #include "base/logging.h"
-#include "common/adoptors/reverse.h"
+#include "common/adopters/reverse.h"
 #include "common/memory/scoped_change.h"
 #include "evita/text/buffer.h"
 #include "evita/text/undo_step.h"
@@ -73,7 +73,7 @@ Posn UndoStack::Redo(Posn offset, Count count) {
   if (redo_steps_.empty())
     return -1;
 
-  for (const auto step : common::adoptors::reverse(redo_steps_)) {
+  for (const auto step : common::adopters::reverse(redo_steps_)) {
     DCHECK(!step->is<EndUndoStep>());
     if (step->is<BeginUndoStep>())
       continue;
@@ -113,7 +113,7 @@ Posn UndoStack::Undo(Posn offset, Count count) {
 
   common::ScopedChange<State> state_scope(state_, State::Undo);
 
-  for (const auto step : common::adoptors::reverse(undo_steps_)) {
+  for (const auto step : common::adopters::reverse(undo_steps_)) {
     DCHECK(!step->is<BeginUndoStep>());
     if (step->is<EndUndoStep>())
       continue;

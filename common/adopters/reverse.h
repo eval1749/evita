@@ -1,12 +1,12 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_common_adoptors_reverse_h)
-#define INCLUDE_common_adoptors_reverse_h
+#if !defined(INCLUDE_common_adopters_reverse_h)
+#define INCLUDE_common_adopters_reverse_h
 
 //#include <utility>
 
 namespace common {
-namespace adoptors {
+namespace adopters {
 
 namespace internal {
 
@@ -56,7 +56,7 @@ internal::ConstReverse<T> const_reverse(const T& x) {
   return internal::ConstReverse<T>(x);
 }
 
-} // namespace adoptors
+} // namespace adopters
 } // namespace common
 
-#endif //!defined(INCLUDE_common_adoptors_reverse_h)
+#endif //!defined(INCLUDE_common_adopters_reverse_h)

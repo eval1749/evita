@@ -12,7 +12,7 @@
 #include "base/callback.h"
 #include "base/message_loop/message_loop.h"
 #pragma warning(pop)
-#include "common/adoptors/reverse.h"
+#include "common/adopters/reverse.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/script_host.h"
@@ -177,7 +177,7 @@ bool EventTarget::DispatchEvent(Event* event) {
 
   if (event->bubbles()) {
     dispatch_scope.StartBubbling();
-    for (auto target : common::adoptors::reverse(event_path)) {
+    for (auto target : common::adopters::reverse(event_path)) {
       DCHECK(target != this);
       if (event->stop_propagation())
         break;

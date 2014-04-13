@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include "common/adoptors/reverse.h"
+#include "common/adopters/reverse.h"
 #include "common/tree/ancestors_or_self.h"
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants.h"
@@ -288,7 +288,7 @@ Widget* Widget::GetMouseTarget(const Point& point) const {
 
 Widget* Widget::GetWidgetAt(const Point& point) const {
   // On release build by MSVS2013, using reverse() causes AV.
-  // for (const auto& child: common::adoptors::reverse(child_nodes()))
+  // for (const auto& child: common::adopters::reverse(child_nodes()))
   for (auto runner = last_child(); runner;
        runner = runner->previous_sibling()) {
     auto const child = runner;
@@ -417,7 +417,7 @@ void Widget::Hide() {
     DEBUG_WIDGET_PRINTF("focus=%d show=%d\n", has_focus(), shown_);
   #endif
   // Hide widgets in top to bottom == post order.
-  for (auto child : common::adoptors::reverse(child_nodes())) {
+  for (auto child : common::adopters::reverse(child_nodes())) {
     child->Hide();
   }
   shown_ = 0;

@@ -19,8 +19,20 @@ struct COMMON_EXPORT Size : SIZE {
   }
 
   operator bool() const { return !empty(); }
+
+  bool operator==(const Size& other) const;
+  bool operator!=(const Size& other) const;
+
   bool empty() const { return cx <= 0 || cx <= 0; }
 };
+
+inline bool Size::operator==(const Size& other) const {
+  return cx == other.cx && cy == other.cy;
+}
+
+inline bool Size::operator!=(const Size& other) const {
+  return !operator==(other);
+}
 
 #define DEBUG_SIZE_FORMAT "%dx%d"
 #define DEBUG_SIZE_ARG(mp_size) \

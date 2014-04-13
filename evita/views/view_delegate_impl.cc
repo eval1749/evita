@@ -378,10 +378,7 @@ void ViewDelegateImpl::RealizeWindow(dom::WindowId window_id) {
   if (!widget)
     return;
   DCHECK_EQ(window_id, widget->window_id());
-  if (widget->parent_node())
-    widget->RealizeWidget();
-  else
-    widget->RealizeTopLevelWidget();
+  widget->RealizeWidget();
 }
 
 void ViewDelegateImpl::RegisterViewEventHandler(

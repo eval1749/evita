@@ -99,9 +99,6 @@ class Frame final : public views::Window,
   // [O]
   private: void onDropFiles(HDROP);
 
-  // [R]
-  public: void virtual RealizeWidget() override;
-
   // [S]
   public: void SetStatusBar(std::vector<base::string16> texts);
   public: void ShowMessage(MessageLevel, const base::string16& text) const;

@@ -397,10 +397,6 @@ void Frame::onDropFiles(HDROP const hDrop) {
   ::DragFinish(hDrop);
 }
 
-void Frame::RealizeWidget() {
-  RealizeTopLevelWidget();
-}
-
 /// <summary>
 ///   Set status bar formatted message on specified part.
 /// </summary>

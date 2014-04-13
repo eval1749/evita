@@ -495,20 +495,19 @@ void Widget::Realize(const Rect& rect) {
   container_widget().DidRealizeChildWidget(*this);
 }
 
-void Widget::RealizeTopLevelWidget() {
-  DCHECK(native_window_);
-  DCHECK(!is_realized());
-  RootWidget::instance()->AppendChild(this);
-  state_ = kRealized;
-  CreateNativeWindow();
-}
-
 // TODO(yosi) Widget::RealizeWidget() should be pure virutal.
 void Widget::RealizeWidget() {
-  DCHECK(parent_node());
-  DCHECK(parent_node()->is_realized());
   DCHECK(!is_realized());
+  if (!parent_node()) {
+    // Realize top-level widget with native window.
+    DCHECK(native_window_);
+    state_ = kRealized;
+    RootWidget::instance()->AppendChild(this);
+    CreateNativeWindow();
+    return;
+  }
 
+  DCHECK(parent_node()->is_realized());
   state_ = kRealized;
   if (native_window_) {
     // On WM_CREATE, we call DidCreateNativeWindow() instead of DidRealized().

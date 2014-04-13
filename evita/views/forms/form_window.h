@@ -47,6 +47,7 @@ class FormWindow final : public views::Window,
   public: FormWindow(views::WindowId window_id, const dom::Form* form);
   public: virtual ~FormWindow();
 
+  private: void DoRealizeWidget();
   public: static bool DoIdle(int hint);
   private: bool OnIdle(int hint);
   private: void TransferFocusIfNeeded();
@@ -65,6 +66,7 @@ class FormWindow final : public views::Window,
   private: virtual LRESULT OnMessage(uint32_t message, WPARAM wParam,
                                      LPARAM lParam) override;
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;
+  private: virtual void RealizeWidget() override;
 
   DISALLOW_COPY_AND_ASSIGN(FormWindow);
 };

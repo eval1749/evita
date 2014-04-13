@@ -173,6 +173,15 @@ void Application::DoIdle() {
 
 bool Application::OnIdle(int hint) {
   METRICS_TIME_SCOPE();
+  if (!tasks_within_dom_lock_.empty()) {
+    UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+    if (lock_scope.locked()) {
+      for (auto task : tasks_within_dom_lock_) {
+        task.Run();
+      }
+      tasks_within_dom_lock_.clear();
+    }
+  }
   auto more = views::FrameList::instance()->DoIdle(hint);
   more |= views::FormWindow::DoIdle(hint);
   return more;
@@ -181,6 +190,10 @@ bool Application::OnIdle(int hint) {
 void Application::Quit() {
   is_quit_ = true;
   message_loop_->QuitWhenIdle();
+}
+
+void Application::RegisterTaskWithinDomLock(const base::Closure& task) {
+  tasks_within_dom_lock_.push_back(task);
 }
 
 void Application::Run() {

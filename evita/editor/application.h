@@ -9,6 +9,10 @@
 // a base class copy constructor is inaccessible
 // L4 C4626: 'derived class' : assignment operator could not be generated
 // because a base class assignment operator is inaccessible
+
+#include <memory>
+#include <vector>
+
 #pragma warning(push)
 #pragma warning(disable: 4625 4626)
 #include "base/callback.h"
@@ -43,6 +47,7 @@ class ViewDelegateImpl;
 
 class Application : public common::Singleton<Application> {
   private: std::unique_ptr<editor::DomLock> dom_lock_;
+  private: std::vector<base::Closure> tasks_within_dom_lock_;
   private: int idle_count_;
   private: std::unique_ptr<IoManager> io_manager_;
   private: bool is_quit_;
@@ -81,7 +86,9 @@ class Application : public common::Singleton<Application> {
   // [Q]
   public: void Quit();
 
+
   // [R]
+  public: void RegisterTaskWithinDomLock(const base::Closure& task);
   public: void Run();
 
   DISALLOW_COPY_AND_ASSIGN(Application);

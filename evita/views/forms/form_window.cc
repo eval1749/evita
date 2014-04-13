@@ -24,6 +24,7 @@
 #include "evita/dom/forms/text_field_control.h"
 #include "evita/dom/forms/text_field_selection.h"
 #include "evita/dom/lock.h"
+#include "evita/editor/application.h"
 #include "evita/ui/caret.h"
 #include "evita/ui/controls/button_control.h"
 #include "evita/ui/controls/checkbox_control.h"
@@ -447,6 +448,16 @@ bool FormWindow::DoIdle(int hint) {
   return more;
 }
 
+void FormWindow::DoRealizeWidget() {
+  UI_ASSERT_DOM_LOCKED();
+  DCHECK(!is_realized());
+  DCHECK(form_size_.empty());
+  model_->Update();
+  form_size_ = model_->size();
+  title_ = model_->title();
+  views::Window::RealizeWidget();
+}
+
 bool FormWindow::OnIdle(int) {
   DCHECK(is_realized());
   DCHECK(is_shown());
@@ -472,38 +483,27 @@ bool FormWindow::OnIdle(int) {
   model_->Update();
 
   if (form_size_ != model_->size()) {
-    auto const first_time = form_size_.empty();
     form_size_ = model_->size();
-    gfx::Rect windowRect;
-    if (first_time) {
-      ::GetWindowRect(FrameList::instance()->active_frame()->AssociatedHwnd(),
-                      &windowRect);
-      windowRect.left = windowRect.left +
-          (windowRect.width() - form_size_.cx) / 2;
-      windowRect.top = windowRect.top +
-          (windowRect.height() - form_size_.cy) / 2;
-    } else {
-      ::GetWindowRect(AssociatedHwnd(), &windowRect);
-    }
-    windowRect.right = windowRect.left + form_size_.cx;
-    windowRect.bottom = windowRect.top + form_size_.cy;
-    auto const dwExStyle = static_cast<DWORD>(
+    gfx::Rect window_rect;
+    ::GetWindowRect(AssociatedHwnd(), &window_rect);
+    window_rect.right = window_rect.left + form_size_.cx;
+    window_rect.bottom = window_rect.top + form_size_.cy;
+    auto const extended_window_style = static_cast<DWORD>(
         ::GetWindowLong(AssociatedHwnd(), GWL_EXSTYLE));
-    auto const dwStyle = static_cast<DWORD>(
+    auto const window_style = static_cast<DWORD>(
         ::GetWindowLong(AssociatedHwnd(), GWL_STYLE));
-    bool has_menu = false;
-    WIN32_VERIFY(::AdjustWindowRectEx(&windowRect, dwStyle, has_menu,
-                                      dwExStyle));
-    ResizeTo(windowRect);
+    auto const has_menu = false;
+    WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style, has_menu,
+                                      extended_window_style));
+    ResizeTo(window_rect);
   }
-
-  TransferFocusIfNeeded();
 
   if (title_ != model_->title()) {
     title_ = model_->title();
     ::SetWindowTextW(AssociatedHwnd(), title_.c_str());
   }
 
+  TransferFocusIfNeeded();
   return false;
 }
 
@@ -531,13 +531,27 @@ void FormWindow::DidChangeSystemMetrics() {
 
 // ui::Widget
 void FormWindow::CreateNativeWindow() const {
-  auto const dwExStyle = WS_EX_LAYERED | WS_EX_TOOLWINDOW;
-  auto const dwStyle = WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE;
-  // Make |FormWindow| with non-zero size. |FormWindow::OnIdle| will set
-  // window size from DOM.
-  native_window()->CreateWindowEx(dwExStyle, dwStyle, L"Loading...", nullptr,
-                                  gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
-                                  gfx::Size(100, 100));
+  DCHECK(!form_size_.empty());
+  DCHECK(!title_.empty());
+
+  // Place form window at center of active window.
+  auto const extended_window_style = WS_EX_LAYERED | WS_EX_TOOLWINDOW;
+  auto const window_style = WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE;
+  gfx::Rect active_window_rect;
+  ::GetWindowRect(FrameList::instance()->active_frame()->AssociatedHwnd(),
+                  &active_window_rect);
+  auto window_rect = gfx::Rect(
+      gfx::Point(active_window_rect.left +
+                    (active_window_rect.width() - form_size_.cx) / 2,
+                 active_window_rect.top +
+                    (active_window_rect.height() - form_size_.cy) / 2),
+      form_size_);
+  auto const has_menu = false;
+  WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style, has_menu,
+                                    extended_window_style));
+  native_window()->CreateWindowEx(
+      extended_window_style, window_style, title_.c_str(), nullptr,
+      window_rect.left_top(), window_rect.size());
 }
 
 void FormWindow::DidCreateNativeWindow() {
@@ -561,8 +575,11 @@ void FormWindow::DidRealize() {
 
 void FormWindow::DidResize() {
   gfx_->Resize(rect());
-  gfx::Graphics::DrawingScope drawing_scope(*gfx_);
-  (*gfx_)->Clear(ui::SystemMetrics::instance()->bgcolor());
+  {
+    gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+    (*gfx_)->Clear(ui::SystemMetrics::instance()->bgcolor());
+  }
+  SchedulePaint();
   Window::DidResize();
 }
 
@@ -604,6 +621,15 @@ void FormWindow::OnPaint(const gfx::Rect rect) {
     gfx_->DrawRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
                         rect, 2.0f);
   }
+}
+
+void FormWindow::RealizeWidget() {
+  if (form_size_.empty()) {
+    Application::instance()->RegisterTaskWithinDomLock(
+        base::Bind(&FormWindow::DoRealizeWidget, base::Unretained(this)));
+    return;
+  }
+  views::Window::RealizeWidget();
 }
 
 }  // namespace views

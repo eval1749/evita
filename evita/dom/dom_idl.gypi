@@ -13,6 +13,7 @@
       'os/File.idl',
       'text/modes/Mode.idl',
       'windows/Point.idl',
+      'windows/Rect.idl',
     ], # idl_files
 
     'generated_glue_files': [
@@ -33,6 +34,7 @@
       '<(js_externs_dir)/File_externs.js',
       '<(js_externs_dir)/Mode_externs.js',
       '<(js_externs_dir)/Point_externs.js',
+      '<(js_externs_dir)/Rect_externs.js',
     ], # generated_js_externs_files
 
     'static_js_externs_files': [

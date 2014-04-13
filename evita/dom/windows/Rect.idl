@@ -1,0 +1,16 @@
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+//[Constructor(), Constructor(float x, float y, float width, float, height)]
+interface Rect {
+  attribute float x;
+  attribute float y;
+  attribute float width;
+  attribute float height;
+
+  readonly attribute float left;
+  readonly attribute float top;
+  readonly attribute float right;
+  readonly attribute float bottom;
+};

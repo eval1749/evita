@@ -86,6 +86,7 @@
         'dom/os/process_unittest.cc',
         'dom/text/modes/modes_unittest.cc',
         'dom/windows/point_unittest.cc',
+        'dom/windows/rect_unittest.cc',
         'dom/polyfill_unittest.cc',
         'dom/text/range_unittest.cc',
         'dom/text/regexp_unittest.cc',

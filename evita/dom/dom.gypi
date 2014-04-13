@@ -175,6 +175,7 @@
         'os/process.cc',
 
         'windows/point.cc',
+        'windows/rect.cc',
         'promise_resolver.cc',
         'text/range.cc',
         'text/regexp.cc',
@@ -196,6 +197,7 @@
         'public/io_context_id.cc',
         'public/io_delegate.cc',
         'public/float_point.cc',
+        'public/float_rect.cc',
         'public/switch_value.cc',
         'public/switch_value.h',
         'public/view_event_handler.cc',

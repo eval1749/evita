@@ -12,6 +12,7 @@
       'os/AbstractFile.idl',
       'os/File.idl',
       'text/modes/Mode.idl',
+      'windows/Point.idl',
     ], # idl_files
 
     'generated_glue_files': [
@@ -22,6 +23,7 @@
       '<(glue_dir)/EditorClass.cc',
       '<(glue_dir)/FileClass.cc',
       '<(glue_dir)/ModeClass.cc',
+      '<(glue_dir)/PointClass.cc',
     ],
 
     'generated_js_externs_files': [
@@ -31,6 +33,7 @@
       '<(js_externs_dir)/Editor_externs.js',
       '<(js_externs_dir)/File_externs.js',
       '<(js_externs_dir)/Mode_externs.js',
+      '<(js_externs_dir)/Point_externs.js',
     ], # generated_js_externs_files
 
     'static_js_externs_files': [
@@ -75,7 +78,6 @@
       'text/mutation_observer_externs.js',
       'os/os_externs.js',
       'os/process_externs.js',
-      'windows/point_externs.js',
       'text/range_externs.js',
       'text/regexp_externs.js',
       'windows/document_state_externs.js',

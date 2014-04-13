@@ -3,8 +3,7 @@
 #if !defined(INCLUDE_evita_dom_point_h)
 #define INCLUDE_evita_dom_point_h
 
-#include <memory>
-
+#include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/scriptable.h"
 #include "evita/v8_glue/scoped_persistent.h"
 
@@ -23,12 +22,15 @@ class Point : public v8_glue::Scriptable<Point> {
 
   public: Point(float x, float y);
   public: Point();
-  public: ~Point();
+  public: virtual ~Point();
 
   public: float x() const { return x_; }
   public: void set_x(float x) { x_ = x; }
   public: float y() const { return y_; }
   public: void set_y(float y) { y_ = y; }
+
+  public: static Point* NewPoint(v8_glue::Optional<float> opt_x,
+                                 v8_glue::Optional<float> opt_y);
 
   DISALLOW_COPY_AND_ASSIGN(Point);
 };

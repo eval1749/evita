@@ -17,7 +17,11 @@
 #include <memory>
 
 namespace gfx {
-class Grapchis;
+class Graphics;
+}
+
+namespace views {
+class Window;
 }
 
 // Represents caret in per-thread queue. To blink caret, we must track
@@ -25,23 +29,19 @@ class Grapchis;
 // Note: Caret should be lived until timer is fired.
 class Caret {
   private: base::Time last_blink_time_;
-  private: const gfx::Graphics* gfx_;
+  private: views::Window* owner_;
   private: gfx::RectF rect_;
   private: bool shown_;
-  private: bool should_blink_;
-  private: bool taken_;
 
   public: Caret();
   public: ~Caret();
-  public: void Blink();
-  public: void Hide();
-  public: void Give();
+  public: void Blink(const gfx::Graphics* gfx);
+  public: void Hide(const gfx::Graphics* gfx_);
+  public: void Give(views::Window* window, const gfx::Graphics* gfx);
   public: void Reset();
-  private: void Show();
-  public: void ShouldBlink() { should_blink_ = true; }
-  // TODO: We should pass Widget to Caret::Take() instead of gfx::Graphics.
-  public: void Take(const gfx::Graphics& gfx);
-  public: void Update(const gfx::RectF& rect);
+  private: void Show(const gfx::Graphics* gfx);
+  public: void Take(views::Window* owner);
+  public: void Update(const gfx::Graphics* gfx, const gfx::RectF& rect);
 
   DISALLOW_COPY_AND_ASSIGN(Caret);
 };

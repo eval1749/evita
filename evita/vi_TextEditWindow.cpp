@@ -210,7 +210,7 @@ void TextEditWindow::DidHide() {
 
 void TextEditWindow::DidKillFocus(ui::Widget* focused_widget) {
   ParentClass::DidKillFocus(focused_widget);
-  caret_->Give();
+  caret_->Give(this, m_gfx);
   text_renderer_->Reset();
 }
 
@@ -225,7 +225,7 @@ void TextEditWindow::DidRealize() {
 void TextEditWindow::DidSetFocus(ui::Widget* last_focused) {
   ASSERT(has_focus());
   // Note: It is OK to set focus to hidden window.
-  caret_->Take(*m_gfx);
+  caret_->Take(this);
   ParentClass::DidSetFocus(last_focused);
 }
 
@@ -426,10 +426,8 @@ void TextEditWindow::Redraw() {
       text_renderer_->Format(StartOfLine(lStart));
     } else if (!text_renderer_->ShouldRender()) {
       // The screen is clean.
-      if (!m_fImeTarget) {
-        caret_->ShouldBlink();
-        caret_->Blink();
-      }
+      if (!m_fImeTarget)
+        caret_->Blink(m_gfx);
       return;
     }
   }
@@ -443,7 +441,7 @@ void TextEditWindow::Render() {
 
   gfx::Graphics::DrawingScope drawing_scope(*m_gfx);
   m_gfx->set_dirty_rect(rect());
-  caret_->Hide();
+  caret_->Hide(m_gfx);
   text_renderer_->Render();
 
   {
@@ -452,26 +450,28 @@ void TextEditWindow::Render() {
     updateScrollBar();
   }
 
-  const auto rect = text_renderer_->MapPosnToPoint(m_lCaretPosn);
-  if (!rect) {
+  const auto char_rect = text_renderer_->MapPosnToPoint(m_lCaretPosn);
+  if (char_rect.empty()) {
     caret_->Reset();
     return;
   }
 
   auto const caret_width = std::max(::GetSystemMetrics(SM_CXBORDER), 2);
-  gfx::RectF caret_rect(rect.left_top(),
-                        gfx::SizeF(static_cast<float>(caret_width),
-                                   rect.height()));
+  gfx::RectF caret_rect(char_rect.left, char_rect.top,
+                        std::min(char_rect.left + caret_width,
+                                 static_cast<float>(rect().right)),
+                        std::min(char_rect.bottom,
+                                 static_cast<float>(rect().bottom)));
   #if SUPPORT_IME
     if (m_fImeTarget) {
       POINT pt = {
-        static_cast<int>(rect.left),
-        static_cast<int>(rect.top)
+        static_cast<int>(caret_rect.left),
+        static_cast<int>(caret_rect.top)
       };
 
       SIZE size = {
-        static_cast<int>(rect.width()),
-        static_cast<int>(rect.height())
+        static_cast<int>(caret_rect.width()),
+        static_cast<int>(caret_rect.height())
       };
 
       if (showImeCaret(size, pt))
@@ -479,7 +479,7 @@ void TextEditWindow::Render() {
     }
   #endif // SUPPORT_IME
 
-  caret_->Update(caret_rect);
+  caret_->Update(m_gfx, caret_rect);
 }
 
 int TextEditWindow::SmallScroll(int, int iDy) {

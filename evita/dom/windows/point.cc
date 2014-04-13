@@ -33,7 +33,7 @@ v8::Handle<v8::Value> Converter<domapi::FloatPoint>::ToV8(
       ConvertToV8(isolate, point.x()),
       ConvertToV8(isolate, point.y())
   };
-  return point_ctor->ToObject()->CallAsConstructor(2, argv);
+  return point_ctor->ToObject()->CallAsConstructor(arraysize(argv), argv);
 }
 
 }  // namespace gin

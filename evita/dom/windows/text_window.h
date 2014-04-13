@@ -5,6 +5,7 @@
 
 #include "evita/dom/windows/document_window.h"
 
+#include "evita/dom/windows/point.h"
 #include "evita/gc/member.h"
 #include "evita/v8_glue/either.h"
 #include "evita/v8_glue/optional.h"
@@ -13,7 +14,6 @@ class Selection;
 
 namespace dom {
 class Document;
-class Point;
 class Range;
 class Selection;
 
@@ -32,10 +32,11 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
 
   public: text::Posn ComputeMotion(int method,
       v8_glue::Optional<text::Posn> opt_position,
-      v8_glue::Optional<int> opt_count, v8_glue::Optional<Point*> opt_point);
+      v8_glue::Optional<int> opt_count,
+      v8_glue::Optional<domapi::FloatPoint> opt_point);
   public: void MakeSelectionVisible();
   public: text::Posn MapPointToPosition(float x, float y);
-  public: Point* MapPositionToPoint(text::Posn position);
+  public: domapi::FloatPoint MapPositionToPoint(text::Posn position);
   public: void Reconvert(text::Posn start, text::Posn end);
   public: void Scroll(int direction);
 

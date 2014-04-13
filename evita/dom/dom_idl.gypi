@@ -23,7 +23,6 @@
       '<(glue_dir)/EditorClass.cc',
       '<(glue_dir)/FileClass.cc',
       '<(glue_dir)/ModeClass.cc',
-      '<(glue_dir)/PointClass.cc',
     ],
 
     'generated_js_externs_files': [

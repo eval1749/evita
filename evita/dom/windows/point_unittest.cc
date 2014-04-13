@@ -25,8 +25,9 @@ TEST_F(PointTest, Wrapper) {
   RunnerScope runner_scope(this);
   EXPECT_SCRIPT_VALID("var point;"
                       "function init(x) { point = x; }");
-  auto const point = new dom::Point(1234.0f, 4567.0f);
-  EXPECT_SCRIPT_VALID_CALL("init", point->GetWrapper(isolate()));
+  domapi::FloatPoint point(1234.0f, 4567.0f);
+  EXPECT_SCRIPT_VALID_CALL("init",
+                           gin::ConvertToV8(isolate(), point));
   EXPECT_SCRIPT_EQ("1234", "point.x");
   EXPECT_SCRIPT_EQ("4567", "point.y");
 }

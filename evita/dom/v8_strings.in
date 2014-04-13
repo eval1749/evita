@@ -96,6 +96,11 @@ Os
 File
 Error
 
+# Point
+Point
+x
+y
+
 # Regex
 Editor
 Match

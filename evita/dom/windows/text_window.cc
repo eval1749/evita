@@ -78,13 +78,13 @@ TextWindow::~TextWindow() {
 text::Posn TextWindow::ComputeMotion(int method,
     v8_glue::Optional<text::Posn> opt_position,
     v8_glue::Optional<int> opt_count,
-    v8_glue::Optional<Point*> opt_point) {
+    v8_glue::Optional<domapi::FloatPoint> opt_point) {
   TextWindowCompute data;
   data.method = static_cast<TextWindowCompute::Method>(method);
   data.count = opt_count.get(1);
   data.position = opt_position.get(0);
-  data.x = opt_point.is_supplied ? opt_point.value->x() : 0.0f;
-  data.y = opt_point.is_supplied ? opt_point.value->y() : 0.0f;
+  data.x = opt_point.is_supplied ? opt_point.value.x() : 0.0f;
+  data.y = opt_point.is_supplied ? opt_point.value.y() : 0.0f;
   return ScriptHost::instance()->view_delegate()->ComputeOnTextWindow(
       id(), data);
 }
@@ -99,10 +99,9 @@ text::Posn TextWindow::MapPointToPosition(float x, float y) {
     id(), x, y);
 }
 
-Point* TextWindow::MapPositionToPoint(text::Posn position) {
-  auto const point = ScriptHost::instance()->view_delegate()->
+domapi::FloatPoint TextWindow::MapPositionToPoint(text::Posn position) {
+  return ScriptHost::instance()->view_delegate()->
       MapPositionToPoint(id(), position);
-  return new Point(point.x(), point.y());
 }
 
 void TextWindow::Reconvert(text::Posn start, text::Posn end) {

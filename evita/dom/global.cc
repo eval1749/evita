@@ -49,7 +49,6 @@
 #include "evita/dom/text/mutation_record.h"
 #include "evita/dom/os/file.h"
 #include "evita/dom/os/process.h"
-#include "evita/dom/windows/point.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/text/regexp.h"
 #include "evita/dom/script_host.h"
@@ -105,7 +104,6 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
 
     auto const editor_templ = INSTALL(Editor);
     INSTALL(FilePath);
-    INSTALL(Point);
     INSTALL(Range);
 
     INSTALL(EventTarget);

@@ -184,7 +184,7 @@
           document.readonly = true;
 
           // Color portion of text.
-          document.doColor_(Math.min(300, string.length));
+          document.doColor_(string.length);
           return promise;
         }
         return file.read(data).then(handleRead);
@@ -239,7 +239,7 @@
           window.makeSelectionVisible();
         }
       });
-      document.doColor_(Math.min(document.length, 1024 * 8));
+      document.doColor_(document.length);
       document.dispatchEvent(new DocumentEvent('load'));
       return Promise.resolve(length);
     }).catch(function(exception) {

@@ -115,70 +115,77 @@
       var file = /** @type {!Os.File} */(x);
       opened_file = file;
       var detector = new EncodingDetector();
-      function readLoop() {
-        var data = new Uint8Array(1024 * 64);
-        function handleRead(num_bytes) {
-          if (num_bytes) {
-            if (!detector.detect(data.subarray(0, num_bytes)))
-              return Promise.reject(new Error('Bad encoding'));
 
-            // Display loading result
-            // Note: We may display text in wrong encoding.
+      // Reading file contents is finished. Record file last write time.
+      function finishRead() {
+        return Os.File.stat(file_name).then(function(x) {
+          var file_info = /** @type {!Os.File.Info} */(x);
+          file.close();
+          var decoder = detector.decoders[0];
+          if (!decoder)
+            return Promise.reject(new Error('Bad encoding'));
+
+          // Inserts file contents into document with replacing CRLF to LF.
+          var range = new Range(document);
+          range.end = document.length;
+          var newline = 0;
+          var has_cr = false;
+          decoder.strings.forEach(function(string) {
+            if (!newline) {
+              if (string.indexOf('\r\n') >= 0)
+                newline = 3;
+              else if (string.indexOf('\n') >= 0)
+                newline = 1;
+              if (string.indexOf('\r') >= 0)
+                has_cr = true;
+            }
             document.readonly = false;
-            var decoder = detector.decoders[0];
-            var string = decoder.strings[decoder.strings.length - 1];
-            string = string.replace(/\r\n/g, '\n');
-            string = string.replace(/\r/g, '\n');
+            if (newline == 3)
+              string = string.replace(/\r\n/g, '\n');
+            if (has_cr)
+              string = string.replace(/\r/g, '\n');
             range.text = string;
-            range.collapseTo(range.end);
             document.readonly = true;
+            range.collapseTo(range.end);
+          });
 
-            // Read rest of contents.
-            return readLoop();
-          }
+          // Update document properties based on file.
+          document.encoding = decoder.encoding;
+          document.lastWriteTime = file_info.lastModificationDate;
+          document.modified = false;
+          document.newline = newline;
+          document.readonly = file_info.readonly || readonly;
+          document.clearUndo();
+          return Promise.accept(document.length);
+        }).catch(logErrorInPromise('load/open/stat'));
+      }
 
-          // Reading file contents is finished. Record file last write
-          // time.
-          return Os.File.stat(file_name).then(function(x) {
-            var file_info = /** @type {!Os.File.Info} */(x);
-            file.close();
-            var decoder = detector.decoders[0];
-            if (!decoder)
-              return Promise.reject(new Error('Bad encoding'));
+      function readLoop() {
+        var data = new Uint8Array(1024);
+        function handleRead(num_bytes) {
+          if (!num_bytes)
+            return finishRead();
 
-            // Inserts file contents into document with replacing CRLF to LF.
-            var range = new Range(document);
-            range.end = document.length;
-            var newline = 0;
-            var has_cr = false;
-            decoder.strings.forEach(function(string) {
-              if (!newline) {
-                if (string.indexOf('\r\n') >= 0)
-                  newline = 3;
-                else if (string.indexOf('\n') >= 0)
-                  newline = 1;
-                if (string.indexOf('\r') >= 0)
-                  has_cr = true;
-              }
-              document.readonly = false;
-              if (newline == 3)
-                string = string.replace(/\r\n/g, '\n');
-              if (has_cr)
-                string = string.replace(/\r/g, '\n');
-              range.text = string;
-              document.readonly = true;
-              range.collapseTo(range.end);
-            });
+          if (!detector.detect(data.subarray(0, num_bytes)))
+            return Promise.reject(new Error('Bad encoding'));
 
-            // Update document properties based on file.
-            document.encoding = decoder.encoding;
-            document.lastWriteTime = file_info.lastModificationDate;
-            document.modified = false;
-            document.newline = newline;
-            document.readonly = file_info.readonly || readonly;
-            document.clearUndo();
-            return Promise.accept(document.length);
-          }).catch(logErrorInPromise('load/open/stat'));
+          // Request read next block.
+          var promise = readLoop();
+
+          // Display loading result
+          // Note: We may display text in wrong encoding.
+          document.readonly = false;
+          var decoder = detector.decoders[0];
+          var string = decoder.strings[decoder.strings.length - 1];
+          string = string.replace(/\r\n/g, '\n');
+          string = string.replace(/\r/g, '\n');
+          range.text = string;
+          range.collapseTo(range.end);
+          document.readonly = true;
+
+          // Color portion of text.
+          document.doColor_(Math.min(300, string.length));
+          return promise;
         }
         return file.read(data).then(handleRead);
       }
@@ -191,7 +198,6 @@
       return Promise.reject(error);
     });
   }
-
 
   /**
    * @param {string=} opt_file_name

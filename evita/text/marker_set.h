@@ -33,21 +33,39 @@ class MarkerSet : public BufferMutationObserver {
 
   private: MarkerSetImpl::iterator lower_bound(Posn offset);
 
+  // Remove |observer|
   public: void AddObserver(MarkerSetObserver* observer);
-  public: void Clear();
+
+  // Remove all markers in this |MarkerSet|.
+  private: void Clear();
+
+  // Get marker at |offset|.
   public: const Marker* GetMarkerAt(Posn offset) const;
+
+  // Get marker starting at |offset| or after |offset|. This function is
+  // provided for reducing call for |GetMarkerAt()| on every position in
+  // document. See |TextFormatter::TextScanner::spelling()|.
   public: const Marker* GetLowerBoundMarker(Posn offset) const;
+
+  // Notify marker changes to observers.
   private: void NotifyChange(Posn start, Posn end);
+
+  // Insert marker from |start| to |end|, exclusive.
   public: void InsertMarker(Posn start, Posn end, int type);
-  public: void RemoveMarker(Posn start, Posn end);
+
+  // Remove marker from |start| to |end|, exclusive.
+  private: void RemoveMarker(Posn start, Posn end);
+  public: void RemoveMarkerForTesting(Posn start, Posn end) {
+    RemoveMarker(start, end);
+  }
+
+  // Remove |observer|
   public: void RemoveObserver(MarkerSetObserver* observer);
 
   // BufferMutationObserver
   private: virtual void DidDeleteAt(Posn offset, size_t length) override;
   private: virtual void DidInsertAt(Posn offset, size_t length) override;
   private: virtual void DidInsertBefore(Posn offset, size_t length) override;
-
-  // MarkerSetObserver
 
   DISALLOW_COPY_AND_ASSIGN(MarkerSet);
 };

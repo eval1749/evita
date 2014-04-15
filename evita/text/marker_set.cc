@@ -52,6 +52,7 @@ MarkerSet::MarkerSet(BufferMutationObservee* mutation_observee)
 
 MarkerSet::~MarkerSet() {
   mutation_observee_->RemoveObserver(this);
+  Clear();
 }
 
 MarkerSet::MarkerSetImpl::iterator MarkerSet::lower_bound(Posn offset) {
@@ -66,6 +67,8 @@ void MarkerSet::AddObserver(MarkerSetObserver* observer) {
 void MarkerSet::Clear() {
   if (markers_.empty())
     return;
+  // Remember minimum start offset and maximum end offset in this marker set
+  // for notification.
   auto const start = (*markers_.begin())->start_;
   auto const end = (*markers_.rbegin())->end_;
   for (auto marker : markers_) {

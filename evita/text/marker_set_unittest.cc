@@ -37,7 +37,7 @@ class MarkerSetTest : public ::testing::Test {
   protected: MarkerSet* marker_set() { return &marker_set_; }
 
   protected: void RemoveMarker(text::Posn start, text::Posn end) {
-    marker_set()->RemoveMarker(start, end);
+    marker_set()->RemoveMarkerForTesting(start, end);
   }
 
   protected: Marker GetAt(Posn offset) {

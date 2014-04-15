@@ -39,9 +39,14 @@ class Cell : public common::Castable {
   public: float m_cy;
   private: RenderStyle style_;
 
+
   public: Cell(const RenderStyle& style, float width, float height);
   public: explicit Cell(const Cell& other);
   public: virtual ~Cell();
+
+  public: float height() const { return m_cy; }
+  public: gfx::SizeF size() const;
+  public: float width() const { return m_cx; }
 
   protected: const RenderStyle& style() const { return style_; }
 
@@ -58,7 +63,7 @@ class Cell : public common::Castable {
   public: virtual Posn Fix(float iHeight, float);
   public: virtual float GetDescent() const;
   public: virtual uint Hash() const;
-  public: virtual float MapPosnToX(const gfx::Graphics&, Posn) const;
+  public: virtual gfx::RectF HitTestTextPosition(Posn position) const;
   public: virtual Posn MapXToPosn(const gfx::Graphics&, float) const;
   public: virtual bool Merge(const RenderStyle& style, float width);
   public: virtual void Render(const gfx::Graphics& gfx,
@@ -106,8 +111,7 @@ class MarkerCell final : public Cell {
   private: virtual Posn Fix(float iHeight, float iDescent) override;
   private: virtual float GetDescent() const override;
   private: virtual uint Hash() const override;
-  private: virtual float MapPosnToX(const gfx::Graphics&,
-                                    Posn lPosn) const override;
+  private: virtual gfx::RectF HitTestTextPosition(Posn lPosn) const override;
   private: virtual Posn MapXToPosn(const gfx::Graphics& gfx,
                                    float x) const override;
   private: virtual void Render(const gfx::Graphics& gfx,
@@ -143,8 +147,8 @@ class TextCell : public Cell {
   public: virtual Posn Fix(float iHeight, float iDescent) override;
   public: virtual float GetDescent() const override;
   public: virtual uint Hash() const override final;
-  public: virtual float MapPosnToX(const gfx::Graphics& gfx,
-                                   Posn lPosn) const override final;
+  public: virtual gfx::RectF HitTestTextPosition(
+      Posn position) const override final;
   public: virtual Posn MapXToPosn(const gfx::Graphics& gfx,
                                   float x) const override final;
   public: virtual bool Merge(const RenderStyle& style, float width) override;

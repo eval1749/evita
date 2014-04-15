@@ -98,6 +98,11 @@ Cell::Cell(const Cell& other)
 
 Cell::~Cell() {
 }
+
+gfx::SizeF Cell::size() const {
+  return gfx::SizeF(m_cx, m_cy);
+}
+
 void Cell::FillBackground(const gfx::Graphics& gfx,
                           const gfx::RectF& rect) const {
   FillRect(gfx, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
@@ -134,8 +139,8 @@ uint Cell::Hash() const {
   return nHash;
 }
 
-float Cell::MapPosnToX(const gfx::Graphics&, Posn) const {
-  return -1.0f;
+gfx::RectF Cell::HitTestTextPosition(Posn) const {
+  return gfx::RectF();
 }
 
 Posn Cell::MapXToPosn(const gfx::Graphics&, float) const {
@@ -225,12 +230,10 @@ uint MarkerCell::Hash() const {
   return nHash;
 }
 
-float MarkerCell::MapPosnToX(const gfx::Graphics&, Posn lPosn) const {
-  if (lPosn < m_lStart)
-    return -1.0f;
-  if (lPosn >= m_lEnd)
-    return -1.0f;
-  return 0.0f;
+gfx::RectF MarkerCell::HitTestTextPosition(Posn lPosn) const {
+  if (lPosn < m_lStart || lPosn >= m_lEnd)
+    return gfx::RectF();
+  return gfx::RectF(gfx::Point(), size());
 }
 
 Posn MarkerCell::MapXToPosn(const gfx::Graphics&, float) const {
@@ -274,6 +277,7 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
     case TextMarker::LineWrap: { // Draw ->
       auto const ex = xRight - 1;
       auto const w = std::max(m_iAscent / 6, 2.0f);
+
       auto const y = yTop + m_iAscent / 2;
       DrawHLine(gfx, stroke_brush, xLeft, ex, y);
       DrawLine(gfx, stroke_brush, ex - w, y - w, xRight, y);
@@ -346,16 +350,13 @@ uint TextCell::Hash() const {
   return (Cell::Hash() << 3) ^ std::hash<base::string16>()(characters_);
 }
 
-float TextCell::MapPosnToX(const gfx::Graphics& gfx, Posn lPosn) const {
-  if (lPosn < m_lStart)
-    return -1;
-  if (lPosn >= m_lEnd)
-    return -1;
-  auto const cwch = static_cast<size_t>(lPosn - m_lStart);
-  if (!cwch)
-    return 0;
-  auto const width = style().font()->GetTextWidth(characters_.data(), cwch);
-  return FloorWidthToPixel(gfx, width);
+gfx::RectF TextCell::HitTestTextPosition(Posn offset) const {
+  if (offset < m_lStart || offset >= m_lEnd)
+    return gfx::RectF();
+  auto const cwch = static_cast<size_t>(offset - m_lStart);
+  auto const left = style().font()->GetTextWidth(characters_.data(), cwch);
+  auto const right = style().font()->GetTextWidth(characters_.data(), cwch + 1);
+  return gfx::RectF(left, 0.0f, right, height());
 }
 
 Posn TextCell::MapXToPosn(const gfx::Graphics& gfx, float x) const {
@@ -454,6 +455,7 @@ bool UnicodeCell::Merge(const RenderStyle&, float) {
 void UnicodeCell::Render(const gfx::Graphics& gfx,
                          const gfx::RectF& rect) const {
   FillBackground(gfx, rect);
+
 
   gfx::Brush text_brush(gfx, style().color());
   DrawText(gfx, *style().font(), text_brush, rect, characters());

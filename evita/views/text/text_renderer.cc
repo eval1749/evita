@@ -106,24 +106,21 @@ TextLine* TextRenderer::FormatLine(Posn lStart) {
 // A TextRenderer object must be formatted with the latest buffer.
 //
 gfx::RectF TextRenderer::HitTestTextPosition(Posn lPosn) const {
-  DCHECK(gfx_);
   if (lPosn < GetStart() || lPosn > GetEnd())
     return gfx::RectF();
 
-  auto y = text_block_->top();
+  gfx::PointF left_top(0.0f, text_block_->top());
   for (auto const line : text_block_->lines()) {
     if (lPosn >= line->text_start() && lPosn < line->text_end()) {
-        auto x = text_block_->left();
+        left_top.x = text_block_->left();
         for (const auto cell : line->cells()) {
-          float cx = cell->MapPosnToX(*gfx_, lPosn);
-          if (cx >= 0) {
-            return gfx::RectF(gfx::PointF(x + cx, y),
-                              gfx::SizeF(cell->m_cx, cell->m_cy));
-          }
-          x += cell->m_cx;
+          auto const rect = cell->HitTestTextPosition(lPosn);
+          if (!rect.empty())
+            return gfx::RectF(rect.left_top() + left_top, rect.size());
+          left_top.x += cell->m_cx;
         }
     }
-    y += line->GetHeight();
+    left_top.y += line->GetHeight();
   }
   return gfx::RectF();
 }

@@ -1,0 +1,13 @@
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+interface EventTarget {
+  void addEventListener(DOMString type, EventListener callback,
+                        boolean capture);
+  void addEventListener(DOMString type, EventListener callback);
+  boolean dispatchEvent(Event event);
+  void removeEventListener(DOMString type, EventListener callback,
+                           boolean capture);
+  void removeEventListener(DOMString type, EventListener callback);
+};

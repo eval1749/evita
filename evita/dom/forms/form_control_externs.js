@@ -32,36 +32,15 @@ FormControl.prototype.form;
 FormControl.prototype.name;
 
 /**
- * @param {string} type
- * @param {!EventListener} listener
- * @param {boolean=} opt_capture
- */
-FormControl.prototype.addEventListener = function(type, listener,
-                                                  opt_capture) {};
-
-/**
  * @return {boolean}
  */
 FormControl.prototype.canFocus = function() {};
-
-/**
- * @param {!Event} event
- */
-FormControl.prototype.dispatchEvent = function(event) {};
 
 /** @type {!function()} */
 FormControl.prototype.focus = function() {};
 
 /** @type {!function()} */
 FormControl.prototype.releaseCapture = function() {};
-
-/**
- * @param {string} type
- * @param {!EventListener} listener
- * @param {boolean=} opt_capture
- */
-FormControl.prototype.removeEventListener = function(type, listener,
-                                                     opt_capture) {};
 
 /** @type {!function()} */
 FormControl.prototype.setCapture = function() {};

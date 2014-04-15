@@ -8,6 +8,7 @@
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
+#include "evita/dom/events/event.h"
 #include "evita/dom/public/event_target_id.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/scriptable.h"

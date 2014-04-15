@@ -73,28 +73,8 @@ Window.prototype.removeChild = function(window) {};
 /** @type {function()} */
 Window.prototype.setCapture = function() {};
 
-/**
- * @param {string} type
- * @param {!EventListener} listener
- * @param {boolean=} opt_capture
- */
-Window.prototype.addEventListener = function(type, listener, opt_capture) {};
-
-/**
- * @param {!Event} event
- */
-Window.prototype.dispatchEvent = function(event) {};
-
 /** @type {!function()} */
 Window.prototype.hide = function() {};
-
-/**
- * @param {string} type
- * @param {!EventListener} listener
- * @param {boolean=} opt_capture
- */
-Window.prototype.removeEventListener = function(type, listener,
-                                                opt_capture) {};
 
 /** @type {!function()} */
 Window.prototype.show = function() {};

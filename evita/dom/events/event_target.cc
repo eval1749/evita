@@ -21,35 +21,8 @@
 #include "evita/v8_glue/scoped_persistent.h"
 
 namespace dom {
+
 namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// EventTargeClass
-//
-class EventTargeClass : public v8_glue::WrapperInfo {
-  private: typedef v8_glue::WrapperInfo BaseClass;
-
-  public: EventTargeClass(const char* name)
-      : v8_glue::WrapperInfo(name) {
-  }
-  public: ~EventTargeClass() = default;
-
-  private: static EventTarget* NewEventTarget() {
-    ScriptHost::instance()->ThrowError("Can't create EventTarget.");
-    return nullptr;
-  }
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    BaseClass::SetupInstanceTemplate(builder);
-    builder
-      .SetMethod("addEventListener", &EventTarget::AddEventListener)
-      .SetMethod("dispatchEvent", &EventTarget::DispatchEvent)
-      .SetMethod("removeEventListener", &EventTarget::RemoveEventListener);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(EventTargeClass);
-};
 
 v8::Handle<v8::Object> GetCallee(v8::Isolate* isolate,
                                  v8::Handle<v8::Value> object) {
@@ -70,7 +43,7 @@ v8::Handle<v8::Object> GetCallee(v8::Isolate* isolate,
 //
 // EventTarget::EventListenerMap
 //
-class EventTarget::EventListenerMap {
+ class EventTarget::EventListenerMap {
   private: struct EventListener {
     bool capture;
     v8_glue::ScopedPersistent<v8::Object> callback;
@@ -134,8 +107,6 @@ class EventTarget::EventListenerMap {
 //
 // EventTarget
 //
-DEFINE_SCRIPTABLE_OBJECT(EventTarget, EventTargeClass);
-
 EventTarget::EventTarget()
     : event_listener_map_(new EventListenerMap()) {
 }

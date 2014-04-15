@@ -9,6 +9,7 @@
       'clipboard/DataTransferItem.idl',
       'clipboard/DataTransferItemList.idl',
       'Editor.idl',
+      'events/EventTarget.idl',
       'os/AbstractFile.idl',
       'os/File.idl',
       'text/modes/Mode.idl',
@@ -22,6 +23,7 @@
       '<(glue_dir)/DataTransferItemClass.cc',
       '<(glue_dir)/DataTransferItemListClass.cc',
       '<(glue_dir)/EditorClass.cc',
+      '<(glue_dir)/EventTargetClass.cc',
       '<(glue_dir)/FileClass.cc',
       '<(glue_dir)/ModeClass.cc',
     ],
@@ -49,7 +51,6 @@
       'windows/document_window_externs.js',
       'events/document_event_externs.js',
       'events/event_externs.js',
-      'events/event_target_externs.js',
       'events/focus_event_externs.js',
       'events/form_event_externs.js',
       'events/keyboard_event_externs.js',
@@ -209,6 +210,7 @@
         ], # inputs
         'outputs': [
           '<(js_externs_dir)/<(RULE_INPUT_ROOT)_externs.js',
+
         ],
         'action': [
           'python',

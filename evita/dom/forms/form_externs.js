@@ -27,22 +27,3 @@ Form.prototype.width;
  * @param {!FormControl} control
  */
 Form.prototype.add = function(control) {};
-
-/**
- * @param {string} type
- * @param {!EventListener} listener
- * @param {boolean=} opt_capture
- */
-Form.prototype.addEventListener = function(type, listener, opt_capture) {};
-
-/**
- * @param {!Event} event
- */
-Form.prototype.dispatchEvent = function(event) {};
-
-/**
- * @param {string} type
- * @param {!EventListener} listener
- * @param {boolean=} opt_capture
- */
-Form.prototype.removeEventListener = function(type, listener, opt_capture) {};

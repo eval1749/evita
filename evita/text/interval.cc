@@ -4,20 +4,8 @@
 
 #include "evita/text/interval.h"
 
-#include <algorithm>
-
 #include "base/logging.h"
 #include "evita/text/buffer.h"
-#include "evita/text/interval_set.h"
-
-#define DEBUG_INTERVAL _DEBUG
-
-// Returns random number for Treap.
-int TreapRandom() {
-  DEFINE_STATIC_LOCAL(uint32, s_nRandom, (::GetTickCount()));
-  s_nRandom = s_nRandom * 1664525 + 1013904223;
-  return static_cast<int>(s_nRandom & ((1<<28)-1)) & MAXINT;
-}
 
 namespace text {
 
@@ -26,13 +14,12 @@ namespace text {
 // Interval
 //
 Interval::Interval(const Interval& other)
-    : end_(other.end_),
-      start_(other.start_),
-      style_(other.style_) {
+    : RangeBase(other), style_(other.style_) {
+  DCHECK_LT(start(), end());
 }
 
-Interval::Interval(Posn start, Posn end)
-    : end_(end), start_(start) {
+Interval::Interval(Posn start, Posn end) : RangeBase(start, end) {
+  DCHECK_LT(start, end);
 }
 
 Interval::~Interval() {
@@ -40,14 +27,6 @@ Interval::~Interval() {
 
 void Interval::set_style(const css::Style& style) {
   style_.OverrideBy(style);
-}
-
-int Interval::Compare(const Interval* other) const {
-  return start_ - other->start_;
-}
-
-bool Interval::Contains(Posn offset) const {
-  return offset >= start_ && offset < end_;
 }
 
 }  // namespace text

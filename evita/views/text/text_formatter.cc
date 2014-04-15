@@ -135,10 +135,9 @@ class TextFormatter::TextScanner {
     if (m_lPosn >= m_lBufEnd)
       fill();
 
-    if (m_lPosn >= m_pInterval->end()) {
-      text::Interval* pNext = m_pInterval->GetNext();
-      if (pNext)
-        m_pInterval = pNext;
+    if (!m_pInterval->Contains(m_lPosn)) {
+      m_pInterval = m_pBuffer->GetIntervalAt(m_lPosn);
+      DCHECK(m_pInterval);
     }
   }
 

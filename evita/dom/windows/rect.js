@@ -23,12 +23,28 @@ global.Rect = (function() {
 })();
 
 Object.defineProperties(Rect.prototype, {
-  bottom: { get: function() { return this.y + this.height; } },
-  left: { get: function() { return this.x; } },
-  leftTop: { get: function() { return new Point(this.x, this.y); } },
-  right: { get: function() { return this.x + this.width; } },
-  rightBottom: {
-    get: function() { return new Point(this.right(), this.bottom()); }
+  bottom: {
+    /** @this {!Rect} @return {number} */
+    get: function() { return this.y + this.height; }
   },
-  top: { get: function() { return this.y; } },
+  left: {
+    /** @this {!Rect} @return {number} */
+    get: function() { return this.x; }
+  },
+  leftTop: {
+    /** @this {!Rect} @return {!Point} */
+    get: function() { return new Point(this.x, this.y); }
+  },
+  right: {
+    /** @this {!Rect} @return {number} */
+    get: function() { return this.x + this.width; }
+  },
+  rightBottom: {
+    /** @this {!Rect} @return {!Point} */
+    get: function() { return new Point(this.right, this.bottom); }
+  },
+  top: {
+    /** @this {!Rect} @return {number} */
+    get: function() { return this.y; }
+  },
 });

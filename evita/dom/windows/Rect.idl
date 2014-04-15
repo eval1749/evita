@@ -13,4 +13,7 @@ interface Rect {
   readonly attribute float top;
   readonly attribute float right;
   readonly attribute float bottom;
+
+  readonly attribute Point leftTop;
+  readonly attribute Point rightBottom;
 };

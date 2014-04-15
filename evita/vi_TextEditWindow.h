@@ -75,6 +75,7 @@ class TextEditWindow
 
   // ctor/dtor
   public: explicit TextEditWindow(const dom::TextWindow& window);
+
   public: virtual ~TextEditWindow();
 
   public: text::Buffer* buffer() const;
@@ -104,13 +105,15 @@ class TextEditWindow
   public: Selection* GetSelection() const { return &*selection_; }
   public: Posn GetStart();
 
+  // [H]
+  public: gfx::RectF HitTestTextPosition(Posn);
+
   // [L]
   public: int LargeScroll(int, int, bool = true);
 
   // [M]
   public: virtual void MakeSelectionVisible() override;
   public: Posn MapPointToPosn(const gfx::PointF point);
-  public: gfx::RectF MapPosnToPoint(Posn);
 
   // [O]
   private: virtual void OnDraw(gfx::Graphics* gfx) override;

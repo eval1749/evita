@@ -59,17 +59,20 @@ class TextRenderer {
   // one line.
   public: Posn GetVisibleEnd() const;
 
+  // [H]
+  public: gfx::RectF HitTestTextPosition(Posn) const;
+
   // [I]
   private: bool isPosnVisible(Posn) const;
 
   // [M]
   public: void MakePosnVisible(Posn);
   public: Posn MapPointToPosn(gfx::PointF) const;
-  public: gfx::RectF MapPosnToPoint(Posn) const;
 
   // [P]
   private: int pageLines() const;
   public: void Prepare(const Selection&);
+
 
   // [R]
   public: void Render();

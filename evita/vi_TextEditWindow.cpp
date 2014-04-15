@@ -274,6 +274,20 @@ Posn TextEditWindow::GetStart() {
   updateScreen();
   return text_renderer_->GetStart();
 }
+// Description:
+// Maps position specified buffer position and returns height
+// of caret, If specified buffer position isn't in window, this function
+// returns 0.
+gfx::RectF TextEditWindow::HitTestTextPosition(Posn lPosn) {
+  DCHECK_GE(lPosn, 0);
+  UI_ASSERT_DOM_LOCKED();
+  updateScreen();
+  for (;;) {
+    if (auto rect = text_renderer_->HitTestTextPosition(lPosn))
+      return rect;
+    text_renderer_->ScrollToPosn(lPosn);
+  }
+}
 
 int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
   UI_ASSERT_DOM_LOCKED();
@@ -320,21 +334,6 @@ void TextEditWindow::MakeSelectionVisible() {
 Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
   updateScreen();
   return std::min(text_renderer_->MapPointToPosn(pt), buffer()->GetEnd());
-}
-
-// Description:
-// Maps position specified buffer position and returns height
-// of caret, If specified buffer position isn't in window, this function
-// returns 0.
-gfx::RectF TextEditWindow::MapPosnToPoint(Posn lPosn) {
-  DCHECK_GE(lPosn, 0);
-  UI_ASSERT_DOM_LOCKED();
-  updateScreen();
-  for (;;) {
-    if (auto rect = text_renderer_->MapPosnToPoint(lPosn))
-      return rect;
-    text_renderer_->ScrollToPosn(lPosn);
-  }
 }
 
 void TextEditWindow::OnDraw(gfx::Graphics*) {
@@ -450,7 +449,7 @@ void TextEditWindow::Render() {
     updateScrollBar();
   }
 
-  const auto char_rect = text_renderer_->MapPosnToPoint(m_lCaretPosn);
+  const auto char_rect = text_renderer_->HitTestTextPosition(m_lCaretPosn);
   if (char_rect.empty()) {
     caret_->Reset();
     return;

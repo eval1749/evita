@@ -100,6 +100,34 @@ TextLine* TextRenderer::FormatLine(Posn lStart) {
   return oFormatter.FormatLine();
 }
 
+// Maps specified buffer position to window point and returns true. If
+// specified buffer point isn't in window, this function returns false.
+//
+// A TextRenderer object must be formatted with the latest buffer.
+//
+gfx::RectF TextRenderer::HitTestTextPosition(Posn lPosn) const {
+  DCHECK(gfx_);
+  if (lPosn < GetStart() || lPosn > GetEnd())
+    return gfx::RectF();
+
+  auto y = text_block_->top();
+  for (auto const line : text_block_->lines()) {
+    if (lPosn >= line->text_start() && lPosn < line->text_end()) {
+        auto x = text_block_->left();
+        for (const auto cell : line->cells()) {
+          float cx = cell->MapPosnToX(*gfx_, lPosn);
+          if (cx >= 0) {
+            return gfx::RectF(gfx::PointF(x + cx, y),
+                              gfx::SizeF(cell->m_cx, cell->m_cy));
+          }
+          x += cell->m_cx;
+        }
+    }
+    y += line->GetHeight();
+  }
+  return gfx::RectF();
+}
+
 bool TextRenderer::isPosnVisible(Posn lPosn) const {
   if (lPosn < GetStart())
     return false;
@@ -147,34 +175,6 @@ Posn TextRenderer::MapPointToPosn(gfx::PointF pt) const {
     return lPosn;
   }
   return GetEnd() - 1;
-}
-
-// Maps specified buffer position to window point and returns true. If
-// specified buffer point isn't in window, this function returns false.
-//
-// A TextRenderer object must be formatted with the latest buffer.
-//
-gfx::RectF TextRenderer::MapPosnToPoint(Posn lPosn) const {
-  DCHECK(gfx_);
-  if (lPosn < GetStart() || lPosn > GetEnd())
-    return gfx::RectF();
-
-  auto y = text_block_->top();
-  for (auto const line : text_block_->lines()) {
-    if (lPosn >= line->text_start() && lPosn < line->text_end()) {
-        auto x = text_block_->left();
-        for (const auto cell : line->cells()) {
-          float cx = cell->MapPosnToX(*gfx_, lPosn);
-          if (cx >= 0) {
-            return gfx::RectF(gfx::PointF(x + cx, y),
-                              gfx::SizeF(cell->m_cx, cell->m_cy));
-          }
-          x += cell->m_cx;
-        }
-    }
-    y += line->GetHeight();
-  }
-  return gfx::RectF();
 }
 
 // Returns number of lines to be displayed in this page when using

@@ -287,7 +287,7 @@ domapi::FloatRect ViewDelegateImpl::HitTestTextPosition(
     return domapi::FloatRect();
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
-  const auto rect = window->MapPosnToPoint(position);
+  const auto rect = window->HitTestTextPosition(position);
   return domapi::FloatRect(rect.left, rect.top, rect.width(), rect.height());
 }
 

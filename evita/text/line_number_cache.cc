@@ -19,6 +19,7 @@ LineNumberAndOffset MakeLineNumberAndOffset(Posn offset, int line_number) {
 
 LineNumberCache::LineNumberCache(Buffer* buffer) : buffer_(buffer) {
   buffer_->AddObserver(this);
+  map_[0] = 1;
 }
 
 LineNumberCache::~LineNumberCache() {
@@ -26,11 +27,9 @@ LineNumberCache::~LineNumberCache() {
 }
 
 LineNumberAndOffset LineNumberCache::Get(Posn offset) {
+  DCHECK(!map_.empty());
   if (!offset)
     return MakeLineNumberAndOffset(0, 1);
-  if (map_.empty())
-    return UpdateCache(0, 1, offset);
-
   auto it = map_.lower_bound(offset);
   if (it == map_.end()) {
     // offset is after cache.
@@ -46,6 +45,11 @@ LineNumberAndOffset LineNumberCache::Get(Posn offset) {
 }
 
 void LineNumberCache::InvalidateCache(Posn offset) {
+  if (!offset) {
+    map_.clear();
+    map_[0] = 1;
+    return;
+  }
   for (;;) {
    auto it = map_.lower_bound(offset);
    if (it == map_.end())
@@ -56,6 +60,7 @@ void LineNumberCache::InvalidateCache(Posn offset) {
 
 LineNumberAndOffset LineNumberCache::UpdateCache(
     Posn line_start_offset, int line_number, Posn goal_offset) {
+  DCHECK(!map_.empty());
   auto start_offset = line_start_offset;
   for (auto offset = line_start_offset; offset < goal_offset; ++offset) {
     if (buffer_->GetCharAt(offset) == 0x0A) {

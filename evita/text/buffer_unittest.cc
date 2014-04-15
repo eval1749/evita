@@ -60,6 +60,8 @@ class BufferTest : public ::testing::Test {
 TEST_F(BufferTest, GetLineAndColumn) {
   buffer()->Insert(0, L"01\n02\n03\04\05\n");
   EXPECT_EQ(LineAndColumn(1, 0), buffer()->GetLineAndColumn(0));
+  // Populate cache.
+  EXPECT_EQ(LineAndColumn(3, 0), buffer()->GetLineAndColumn(6));
   EXPECT_EQ(LineAndColumn(1, 1), buffer()->GetLineAndColumn(1));
   EXPECT_EQ(LineAndColumn(1, 2), buffer()->GetLineAndColumn(2));
   EXPECT_EQ(LineAndColumn(2, 0), buffer()->GetLineAndColumn(3));

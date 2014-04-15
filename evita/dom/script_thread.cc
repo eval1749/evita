@@ -12,7 +12,7 @@
 #include "base/threading/thread.h"
 #pragma warning(pop)
 #include "evita/dom/lock.h"
-#include "evita/dom/public/float_point.h"
+#include "evita/dom/public/float_rect.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/script_host.h"
@@ -345,10 +345,10 @@ DEFINE_SYNC_VIEW_DELEGATE_1(GetSwitch, domapi::SwitchValue,
 DEFINE_SYNC_VIEW_DELEGATE_0(GetSwitchNames, std::vector<base::string16>)
 DEFINE_SYNC_VIEW_DELEGATE_2(GetTableRowStates, std::vector<int>, WindowId,
                             const std::vector<base::string16>&)
+DEFINE_SYNC_VIEW_DELEGATE_2(HitTestTextPosition, domapi::FloatRect,
+                            WindowId, text::Posn)
 DEFINE_SYNC_VIEW_DELEGATE_3(MapPointToPosition, text::Posn,
                             domapi::EventTargetId, float, float)
-DEFINE_SYNC_VIEW_DELEGATE_2(MapPositionToPoint, domapi::FloatPoint,
-                            WindowId, text::Posn)
 
 
 void ScriptThread::RegisterViewEventHandler(

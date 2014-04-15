@@ -21,11 +21,6 @@ var Document = function(name, opt_mode) {};
 
 /**
  * @constructor
- */
-var EventTarget = function() {};
-
-/**
- * @constructor
  * @extends {EventTarget}
  */
 var Window = function() {};
@@ -58,7 +53,7 @@ var EventInit;
  */
 var Event = function(type, opt_init_dict) {};
 
-/** @typedef {Function|Object} Object which has |handleEvent(event)| */
+/** @typedef {!Function|!Object} Object which has |handleEvent(event)| */
 var EventListener;
 
 var FilePath;

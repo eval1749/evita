@@ -5,7 +5,7 @@
 
 #include "evita/dom/windows/document_window.h"
 
-#include "evita/dom/windows/point.h"
+#include "evita/dom/windows/rect.h"
 #include "evita/gc/member.h"
 #include "evita/v8_glue/either.h"
 #include "evita/v8_glue/optional.h"
@@ -34,9 +34,9 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
       v8_glue::Optional<text::Posn> opt_position,
       v8_glue::Optional<int> opt_count,
       v8_glue::Optional<domapi::FloatPoint> opt_point);
+  public: domapi::FloatRect HitTestTextPosition(text::Posn position);
   public: void MakeSelectionVisible();
   public: text::Posn MapPointToPosition(float x, float y);
-  public: domapi::FloatPoint MapPositionToPoint(text::Posn position);
   public: void Reconvert(text::Posn start, text::Posn end);
   public: void Scroll(int direction);
 

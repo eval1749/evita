@@ -52,11 +52,11 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       dom::WindowId window_id,
       const std::vector<base::string16>& keys) override;
   private: virtual void HideWindow(dom::WindowId window_id) override;
+  private: virtual domapi::FloatRect HitTestTextPosition(
+      dom::WindowId window_id, text::Posn position);
   private: virtual void MakeSelectionVisible(dom::WindowId window_id) override;
   private: virtual text::Posn MapPointToPosition(
       domapi::EventTargetId event_target_id, float x, float y) override;
-  private: virtual domapi::FloatPoint MapPositionToPoint(
-      dom::WindowId window_id, text::Posn position);
   private: virtual void MessageBox(dom::WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       const MessageBoxResolver& resolver) override;

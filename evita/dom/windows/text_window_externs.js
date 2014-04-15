@@ -20,6 +20,12 @@ TextWindow.prototype.compute_ = function(method, opt_position, opt_count,
  */
 TextWindow.prototype.selection;
 
+/**
+ * @param {!TextOffset} position
+ * @return {!Rect}
+ */
+TextWindow.prototype.hitTestTextPosition_ = function(position) {};
+
 /** @type {function()} */
 TextWindow.prototype.makeSelectionVisible = function() {};
 
@@ -29,12 +35,6 @@ TextWindow.prototype.makeSelectionVisible = function() {};
  * @return {!TextOffset}
  */
 TextWindow.prototype.mapPointToPosition_ = function(x, y) {};
-
-/**
- * @param {!TextOffset} position
- * @return {!Point}
- */
-TextWindow.prototype.mapPositionToPoint_ = function(position) {};
 
 /**
  * @param {!TextOffset} start

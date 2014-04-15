@@ -45,9 +45,9 @@ class TextWindowWrapperInfo :
     builder
         .SetProperty("range_", &TextWindow::view_range)
         .SetMethod("compute_", &TextWindow::ComputeMotion)
+        .SetMethod("hitTestTextPosition_", &TextWindow::HitTestTextPosition)
         .SetMethod("makeSelectionVisible", &TextWindow::MakeSelectionVisible)
         .SetMethod("mapPointToPosition_", &TextWindow::MapPointToPosition)
-        .SetMethod("mapPositionToPoint_", &TextWindow::MapPositionToPoint)
         .SetMethod("reconvert_", &TextWindow::Reconvert)
         .SetMethod("scroll", &TextWindow::Scroll);
   }
@@ -89,6 +89,11 @@ text::Posn TextWindow::ComputeMotion(int method,
       id(), data);
 }
 
+domapi::FloatRect TextWindow::HitTestTextPosition(text::Posn position) {
+  return ScriptHost::instance()->view_delegate()->
+      HitTestTextPosition(id(), position);
+}
+
 void TextWindow::MakeSelectionVisible() {
   ScriptHost::instance()->view_delegate()->MakeSelectionVisible(
       window_id());
@@ -97,11 +102,6 @@ void TextWindow::MakeSelectionVisible() {
 text::Posn TextWindow::MapPointToPosition(float x, float y) {
   return ScriptHost::instance()->view_delegate()->MapPointToPosition(
     id(), x, y);
-}
-
-domapi::FloatPoint TextWindow::MapPositionToPoint(text::Posn position) {
-  return ScriptHost::instance()->view_delegate()->
-      MapPositionToPoint(id(), position);
 }
 
 void TextWindow::Reconvert(text::Posn start, text::Posn end) {

@@ -84,7 +84,8 @@
                                           selection.range.end;
     if (selection.goal_position_ == focus && selection.goal_point_)
       return;
-    selection.goal_point_ = selection.window.mapPositionToPoint_(focus);
+    var rect = selection.window.hitTestTextPosition_(focus);
+    selection.goal_point_ = rect.leftTop;
     selection.goal_position_ = focus;
   }
 

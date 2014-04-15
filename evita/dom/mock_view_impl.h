@@ -11,7 +11,7 @@
 #pragma warning(disable: 4365 4628)
 #include "gmock/gmock.h"
 #pragma warning(pop)
-#include "evita/dom/public/float_point.h"
+#include "evita/dom/public/float_rect.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/view_delegate.h"
 
@@ -49,11 +49,11 @@ class MockViewImpl : public dom::ViewDelegate {
   public: std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) override;
   MOCK_METHOD1(HideWindow, void(WindowId));
+  MOCK_METHOD2(HitTestTextPosition,
+               domapi::FloatRect(WindowId, text::Posn));
   MOCK_METHOD1(MakeSelectionVisible, void(WindowId));
   MOCK_METHOD3(MapPointToPosition,
       text::Posn(domapi::EventTargetId, float x, float y));
-  MOCK_METHOD2(MapPositionToPoint,
-               domapi::FloatPoint(WindowId, text::Posn));
   public: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       const MessageBoxResolver& resolver) override;

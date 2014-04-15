@@ -279,6 +279,18 @@ void ViewDelegateImpl::HideWindow(dom::WindowId window_id) {
   window->Hide();
 }
 
+domapi::FloatRect ViewDelegateImpl::HitTestTextPosition(
+    WindowId window_id, text::Posn position) {
+  auto const window = FromWindowId("HitTestTextPosition", window_id)->
+      as<TextEditWindow>();
+  if (!window)
+    return domapi::FloatRect();
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  DCHECK(lock_scope.locked());
+  const auto rect = window->MapPosnToPoint(position);
+  return domapi::FloatRect(rect.left, rect.top, rect.width(), rect.height());
+}
+
 void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
   DCHECK_NE(dom::kInvalidWindowId, window_id);
   auto const widget = Window::FromWindowId(window_id);
@@ -312,19 +324,6 @@ text::Posn ViewDelegateImpl::MapPointToPosition(
   }
 
   return 0;
-}
-
-domapi::FloatPoint ViewDelegateImpl::MapPositionToPoint(
-    WindowId window_id, text::Posn position) {
-  auto const window = FromWindowId("ComputeOnTextWindow", window_id)->
-      as<TextEditWindow>();
-  if (!window)
-    return domapi::FloatPoint(-1.0f, -1.0f);
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  DCHECK(lock_scope.locked());
-  auto const rect = window->MapPosnToPoint(position);
-  return rect ? domapi::FloatPoint(rect.left, rect.top) :
-                domapi::FloatPoint(-1.0f, -1.0f);
 }
 
 void ViewDelegateImpl::MessageBox(dom::WindowId window_id,

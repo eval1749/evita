@@ -14,7 +14,7 @@
 #include "evita/dom/windows/window_id.h"
 
 namespace domapi {
-class FloatPoint;
+class FloatRect;
 struct TabData;
 class ViewEventHandler;
 }
@@ -34,7 +34,7 @@ struct TextWindowCompute {
     EndOfWindow,
     EndOfWindowLine,
     MapPointToPositionShoultNotUse,
-    MapPositionToPointShouldNotUse,
+    HitTestTextPositionShouldNotUse,
     MoveScreen,
     MoveWindow,
     MoveWindowLine,
@@ -98,12 +98,14 @@ class ViewDelegate {
   public: virtual std::vector<int> GetTableRowStates(WindowId window_id,
       const std::vector<base::string16>& keys) = 0;
   public: virtual void HideWindow(WindowId window_id) = 0;
+
+  // Get bounding rectangle of character at text offset.
+  public: virtual domapi::FloatRect HitTestTextPosition(
+      WindowId window_id, text::Posn offset) = 0;
+
   public: virtual void MakeSelectionVisible(WindowId window_id) = 0;
   public: virtual text::Posn MapPointToPosition(
       domapi::EventTargetId event_target_id, float x, float y) = 0;
-  public: virtual domapi::FloatPoint MapPositionToPoint(
-      WindowId window_id, text::Posn offset) = 0;
-
   // Popup message box dialog box and return response code.
   public: virtual void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,

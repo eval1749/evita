@@ -135,17 +135,6 @@ void ViewEventHandlerImpl::DispatchEventWithInLock(
 }
 
 // domapi::ViewEventHandler
-void ViewEventHandlerImpl::AppendTextToBuffer(text::Buffer* buffer,
-                                      const base::string16& text) {
-  DOM_AUTO_LOCK_SCOPE();
-  auto const readonly = buffer->IsReadOnly();
-  if (readonly)
-    buffer->SetReadOnly(false);
-  buffer->InsertBefore(buffer->GetEnd(), text);
-  if (readonly)
-    buffer->SetReadOnly(true);
-}
-
 void ViewEventHandlerImpl::DidDestroyWidget(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)

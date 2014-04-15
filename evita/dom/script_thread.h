@@ -141,8 +141,6 @@ class ScriptThread final : public domapi::IoDelegate,
   private: virtual void UpdateWindow(WindowId window_id) override;
 
   // domapi::ViewEventHandler
-  private: virtual void AppendTextToBuffer(text::Buffer* buffer,
-                                           const base::string16& text) override;
   private: virtual void DidDestroyWidget(WindowId window_id) override;
   private: virtual void DidDropWidget(WindowId source_id,
                                       WindowId target_id) override;

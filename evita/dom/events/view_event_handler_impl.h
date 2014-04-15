@@ -22,8 +22,6 @@ class ViewEventHandlerImpl : public domapi::ViewEventHandler {
                                         Event* event);
 
   // domapi::ViewEventHandler
-  private: virtual void AppendTextToBuffer(text::Buffer* buffer,
-                                           const base::string16& text) override;
   private: virtual void DidDestroyWidget(WindowId window_id) override;
   private: virtual void DidDropWidget(WindowId source_id,
                                       WindowId target_id) override;

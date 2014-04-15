@@ -30,8 +30,6 @@ class ViewEventHandler {
   public: ViewEventHandler();
   public: virtual ~ViewEventHandler();
 
-  public: virtual void AppendTextToBuffer(text::Buffer* buffer,
-                                          const base::string16& text) = 0;
   public: virtual void DidDestroyWidget(WindowId window_id) = 0;
   public: virtual void DidDropWidget(WindowId source_id,
                                      WindowId target_id)  = 0;

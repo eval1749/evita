@@ -453,8 +453,6 @@ void ScriptThread::UpdateWindow(WindowId window_id) {
         param1, param2, param3, param4, param5)); \
   }
 
-DEFINE_VIEW_EVENT_HANDLER_2(AppendTextToBuffer, text::Buffer*,
-                            const base::string16&)
 DEFINE_VIEW_EVENT_HANDLER_1(DidDestroyWidget, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_2(DidDropWidget, WindowId, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidRealizeWidget, WindowId)

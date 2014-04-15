@@ -27,8 +27,6 @@ class Interval : public BinaryTree<Interval>::NodeBase,
   public: ~Interval();
 
   // [C]
-  public: bool CanMerge(const Interval*) const;
-
   public: int Compare(const Interval* pThat) const {
     return m_lStart - pThat->m_lStart;
   }

@@ -145,11 +145,7 @@ class Buffer : public BufferCore,
   public: void SetModified(bool new_modifier);
   public: bool SetReadOnly(bool f) { return m_fReadOnly = f; }
   public: void SetStyle(Posn, Posn, const css::Style& style_values);
-  private: void SetStyleInternal(Posn, Posn, const css::Style& style_values);
   public: void StartUndoGroup(const base::string16& name);
-
-  // [T]
-  private: Interval* tryMergeInterval(Interval*);
 
   // [U]
   public: Posn Undo(Posn, Count = 1);

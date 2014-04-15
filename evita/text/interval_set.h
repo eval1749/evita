@@ -11,6 +11,10 @@
 #include "evita/li_util.h"
 #include "evita/text/buffer_mutation_observer.h"
 
+namespace css {
+class Style;
+}
+
 namespace text {
 
 class Interval;
@@ -26,11 +30,13 @@ class IntervalSet : public BufferMutationObserver {
   public: virtual ~IntervalSet();
 
   public: Interval* GetIntervalAt(Posn offset) const;
-  public: void InsertAfter(Interval* interval, Interval* ref_interval);
-  public: void InsertBefore(Interval* interval, Interval* ref_interval);
-  public: void RemoveInterval(Interval* interval);
+  private: void InsertAfter(Interval* interval, Interval* ref_interval);
+  private: void InsertBefore(Interval* interval, Interval* ref_interval);
+  private: void RemoveInterval(Interval* interval);
+  public: void SetStyle(Posn, Posn, const css::Style& style_values);
   // Split |interval| at |offset| and return new interval starts at |offset|.
-  public: Interval* SplitAt(Interval* interval, Posn offset);
+  private: Interval* SplitAt(Interval* interval, Posn offset);
+  private: Interval* TryMergeInterval(Interval*);
 
   // BufferMutationObserver
   private: virtual void DidDeleteAt(Posn offset, size_t length) override;

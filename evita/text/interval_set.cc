@@ -5,10 +5,19 @@
 #include "evita/text/interval_set.h"
 
 #include "base/logging.h"
+#include "evita/css/style.h"
 #include "evita/text/buffer.h"
 #include "evita/text/interval.h"
 
 namespace text {
+
+namespace {
+// Returns true if |interval1| and |interval12| can be merged. If two
+// intervals are mergeable, both intervals have equivalent styles.
+bool CanMergeIntervals(const Interval* interval1, const Interval* interval2) {
+  return interval1->GetStyle() == interval2->GetStyle();
+}
+}  // namespace
 
 IntervalSet::IntervalSet(Buffer* buffer) {
   buffer->AddObserver(this);
@@ -55,6 +64,32 @@ void IntervalSet::RemoveInterval(Interval* interval) {
   tree_.Delete(interval);
 }
 
+void IntervalSet::SetStyle(Posn start, Posn end, const css::Style& style) {
+  DCHECK_LT(start, end);
+  auto offset = start;
+  while (offset < end) {
+    auto const interval = GetIntervalAt(offset);
+    DCHECK_LE(interval->GetStart(), offset);
+    auto const target = interval->GetStart() == offset ? interval :
+        SplitAt(interval, offset);
+    if (target->GetEnd() == end) {
+      target->SetStyle(style);
+      TryMergeInterval(target);
+      break;
+    }
+
+    if (target->GetEnd() > end) {
+      SplitAt(target, end);
+      target->SetStyle(style);
+      TryMergeInterval(target);
+      break;
+    }
+
+    target->SetStyle(style);
+    offset = TryMergeInterval(target)->GetEnd();
+  }
+}
+
 Interval* IntervalSet::SplitAt(Interval* interval, Posn offset) {
   DCHECK_GT(offset, interval->GetStart());
   DCHECK_LT(offset, interval->GetEnd());
@@ -63,6 +98,35 @@ Interval* IntervalSet::SplitAt(Interval* interval, Posn offset) {
   new_interval->m_lStart = offset;
   InsertAfter(new_interval, interval);
   return new_interval;
+}
+
+Interval* IntervalSet::TryMergeInterval(Interval* pIntv) {
+  // Merge to previous
+  if (Interval* pPrev = pIntv->GetPrev()) {
+    DCHECK_EQ(pPrev->GetEnd(), pIntv->GetStart());
+    DCHECK_EQ(pPrev->GetNext(), pIntv);
+
+    if (CanMergeIntervals(pIntv, pPrev)) {
+        auto const lEnd = pIntv->GetEnd();
+        RemoveInterval(pIntv);
+        delete pIntv;
+        pIntv = pPrev;
+        pIntv->m_lEnd = lEnd;
+    }
+  }
+
+  // Absorb next
+  if (Interval* pNext = pIntv->GetNext()) {
+    DCHECK_EQ(pIntv->GetEnd(), pNext->GetStart());
+    if (CanMergeIntervals(pIntv, pNext)) {
+      auto const lEnd = pNext->GetEnd();
+      RemoveInterval(pNext);
+      delete pNext;
+      pIntv->m_lEnd = lEnd;
+    }
+  }
+
+  return pIntv;
 }
 
 // BufferMutationObserver
@@ -123,7 +187,7 @@ void IntervalSet::DidInsertBefore(Posn offset, size_t length) {
     // TODO(yosi) We should check head interval has default style or not
     // without creating Interval object.
     auto const interval = new Interval(0, head->GetStart());
-    if (interval->CanMerge(head)) {
+    if (CanMergeIntervals(interval, head)) {
       head->m_lStart = 0;
       delete interval;
     } else {

@@ -115,6 +115,10 @@ const css::Style& Buffer::GetDefaultStyle() const {
   return GetIntervalAt(GetEnd())->GetStyle();
 }
 
+Interval* Buffer::GetIntervalAt(Posn lPosn) const {
+  return intervals_->GetIntervalAt(std::min(lPosn, GetEnd()));
+}
+
 LineAndColumn Buffer::GetLineAndColumn(Posn offset) const {
   DCHECK(IsValidPosn(offset)) << "offset=" << offset << " length=" << GetEnd();
   auto const line_number_result = line_number_cache_->Get(offset);
@@ -187,6 +191,22 @@ void text::Buffer::SetModified(bool new_modified) {
     UpdateChangeTick();
   else
     m_nSaveTick = m_nCharTick;
+}
+
+void Buffer::SetStyle(Posn lStart, Posn lEnd, const css::Style& style) {
+  if (lStart < 0)
+    lStart = 0;
+  if (lEnd > GetEnd())
+    lEnd = GetEnd();
+  if (lStart == lEnd)
+    return;
+  DCHECK_LT(lStart, lEnd);
+  // To improve performance, we don't check contents of |style|.
+  // This may be enough for syntax coloring.
+  m_nModfTick += 1;
+  intervals_->SetStyle(lStart, lEnd, style);
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
+    DidChangeStyle(lStart, static_cast<size_t>(lEnd - lStart)));
 }
 
 void Buffer::StartUndoGroup(const base::string16& name) {

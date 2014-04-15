@@ -65,7 +65,7 @@ void TextLine::Fix(float left, float top, float ascent, float descent) {
     auto const lEnd = cell->Fix(height, descent);
     if (lEnd >= 0)
       m_lEnd = lEnd;
-    right += cell->GetWidth();
+    right += cell->width();
   }
   rect_.left = left;
   rect_.top = top;
@@ -89,11 +89,11 @@ Posn TextLine::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
   auto lPosn = GetEnd() - 1;
   for (const auto cell : cells_) {
     auto const x = xGoal - xCell;
-    xCell += cell->m_cx;
+    xCell += cell->width();
     auto const lMap = cell->MapXToPosn(gfx, x);
     if (lMap >= 0)
       lPosn = lMap;
-    if (x >= 0 && x < cell->m_cx)
+    if (x >= 0 && x < cell->width())
       break;
   }
   return lPosn;
@@ -102,8 +102,8 @@ Posn TextLine::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
 void TextLine::Render(const gfx::Graphics& gfx) const {
   auto x = rect_.left;
   for (auto cell : cells_) {
-    gfx::RectF rect(x, rect_.top, x + cell->m_cx,
-                    ::ceilf(rect_.top + cell->m_cy));
+    gfx::RectF rect(x, rect_.top, x + cell->width(),
+                    ::ceilf(rect_.top + cell->line_height()));
     cell->Render(gfx, rect);
     x = rect.right;
   }

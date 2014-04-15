@@ -86,21 +86,24 @@ float FloorWidthToPixel(const gfx::Graphics& gfx, float width) {
 //
 // Cell
 //
-Cell::Cell(const RenderStyle& style, float cx, float cy)
-    : m_cx(cx), m_cy(cy), style_(style) {
-  DCHECK_GE(cx, 1.0f);
-  DCHECK_GE(cy, 1.0f);
+Cell::Cell(const RenderStyle& style, float width, float height, float descent)
+    : descent_(descent), height_(height), line_height_(height), style_(style),
+      width_(width) {
+  DCHECK_GE(width, 1.0f);
+  DCHECK_GE(height, 1.0f);
 }
 
 Cell::Cell(const Cell& other)
-    : Cell(other.style_, other.m_cx, other.m_cy) {
+    : Cell(other.style_, other.width_, other.height_, other.descent_) {
+  line_descent_ = other.line_descent_;
+  line_height_ = other.line_height_;
 }
 
 Cell::~Cell() {
 }
 
-gfx::SizeF Cell::size() const {
-  return gfx::SizeF(m_cx, m_cy);
+float Cell::top() const {
+  return line_height() - line_descent() - height() + descent();
 }
 
 void Cell::FillBackground(const gfx::Graphics& gfx,
@@ -119,22 +122,25 @@ void Cell::FillOverlay(const gfx::Graphics& gfx,
            style_.overlay_color());
 }
 
-// rendering::Cell
-bool Cell::Equal(const Cell* other) const {
-  return other->class_name() == class_name() && other->m_cx == m_cx &&
-         other->m_cy == m_cy && other->style_ == style_;
+void Cell::IncrementWidth(float amount) {
+  width_ += amount;
 }
 
-Posn Cell::Fix(float iHeight, float) {
-  m_cy = iHeight;
+// rendering::Cell
+bool Cell::Equal(const Cell* other) const {
+  return other->class_name() == class_name() && other->width_ == width_ &&
+         other->line_height_ == line_height_ && other->style_ == style_;
+}
+
+Posn Cell::Fix(float line_height, float line_descent) {
+  line_descent_ = line_descent;
+  line_height_ = line_height;
   return -1;
 }
 
-float Cell::GetDescent() const { return 0; }
-
-uint Cell::Hash() const {
-  auto nHash = static_cast<uint>(m_cx);
-  nHash ^= static_cast<uint>(m_cy);
+uint32_t Cell::Hash() const {
+  auto nHash = static_cast<uint>(width_);
+  nHash ^= static_cast<uint>(line_height_);
   nHash ^= std::hash<RenderStyle>()(style_);
   return nHash;
 }
@@ -160,7 +166,7 @@ void Cell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
 // FillerCell
 //
 FillerCell::FillerCell(const RenderStyle& style, float width, float height)
-    : Cell(style, width, height) {
+    : Cell(style, width, height, 0.0f) {
 }
 
 FillerCell::FillerCell(const FillerCell& other)
@@ -181,20 +187,16 @@ Cell* FillerCell::Copy() const {
 
 MarkerCell::MarkerCell(const RenderStyle& style, float width, float height,
                        Posn lPosn, TextMarker marker_name)
-    : Cell(style, width, height),
-      m_lStart(lPosn),
-      m_lEnd(marker_name == TextMarker::LineWrap ? lPosn : lPosn + 1),
-      m_iAscent(height - style.font()->descent()),
-      m_iDescent(style.font()->descent()),
+    : Cell(style, width, height, style.font()->descent()),
+      start_(lPosn),
+      end_(marker_name == TextMarker::LineWrap ? lPosn : lPosn + 1),
       marker_name_(marker_name) {
 }
 
 MarkerCell::MarkerCell(const MarkerCell& other)
     : Cell(other),
-      m_lStart(other.m_lStart),
-      m_lEnd(other.m_lEnd),
-      m_iAscent(other.m_iAscent),
-      m_iDescent(other.m_iDescent),
+      start_(other.start_),
+      end_(other.end_),
       marker_name_(other.marker_name_) {
 }
 
@@ -213,17 +215,12 @@ bool MarkerCell::Equal(const Cell* other) const {
   return marker_name_ == marker_cell->marker_name_;
 }
 
-Posn MarkerCell::Fix(float iHeight, float iDescent) {
-  m_cy = iHeight;
-  m_iDescent = iDescent;
-  return m_lEnd;
+Posn MarkerCell::Fix(float line_height, float line_descent) {
+  Cell::Fix(line_height, line_descent);
+  return end_;
 }
 
-float MarkerCell::GetDescent() const {
-  return m_iDescent;
-}
-
-uint MarkerCell::Hash() const {
+uint32_t MarkerCell::Hash() const {
   auto nHash = Cell::Hash();
   nHash <<= 8;
   nHash ^= static_cast<int>(marker_name_);
@@ -231,32 +228,33 @@ uint MarkerCell::Hash() const {
 }
 
 gfx::RectF MarkerCell::HitTestTextPosition(Posn lPosn) const {
-  if (lPosn < m_lStart || lPosn >= m_lEnd)
+  if (lPosn < start_ || lPosn >= end_)
     return gfx::RectF();
-  return gfx::RectF(gfx::Point(), size());
+  return gfx::RectF(gfx::PointF(0.0f, top()), gfx::SizeF(width(), height()));
 }
 
 Posn MarkerCell::MapXToPosn(const gfx::Graphics&, float) const {
-  return m_lStart;
+  return start_;
 }
 
 void MarkerCell::Render(const gfx::Graphics& gfx,
                         const gfx::RectF& rect) const {
   Cell::Render(gfx, rect);
 
-  auto const yBottom = rect.bottom - m_iDescent;
-  auto const yTop = yBottom - m_iAscent;
+  auto const yBottom = rect.bottom - line_descent();
+  auto const yTop = yBottom - line_descent() - height() + descent();
   auto const xLeft = rect.left;
   auto const xRight = rect.right;
 
   gfx::Brush stroke_brush(gfx, style().color());
 
+  auto const ascent = height() - descent();
   switch (marker_name_) {
     case TextMarker::EndOfDocument: { // Draw <-
       // FIXME 2007-06-13 We should get internal leading from font.
       auto const iInternalLeading = 3;
-      auto const w = std::max(m_iAscent / 6, 2.0f);
-      auto const y = yBottom - (m_iAscent - iInternalLeading) / 2;
+      auto const w = std::max(ascent / 6, 2.0f);
+      auto const y = yBottom - (ascent - iInternalLeading) / 2;
       DrawHLine(gfx, stroke_brush, xLeft, xRight, y);
       DrawLine(gfx, stroke_brush, xLeft + w, y - w, xLeft, y);
       DrawLine(gfx, stroke_brush, xLeft + w, y + w, xLeft, y);
@@ -264,9 +262,9 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
     }
 
     case TextMarker::EndOfLine: { // Draw V
-      auto const y = yBottom - m_iAscent * 3 / 5;
-      auto const w = std::max(m_cx / 6, 2.0f);
-      auto const x = xLeft + m_cx / 2;
+      auto const y = yBottom - ascent * 3 / 5;
+      auto const w = std::max(width() / 6, 2.0f);
+      auto const x = xLeft + width() / 2;
       DrawVLine(gfx, stroke_brush, x, y, yBottom);
       DrawLine(gfx, stroke_brush, x - w, yBottom - w, x, yBottom);
       DrawLine(gfx, stroke_brush, x + w, yBottom - w, x, yBottom);
@@ -276,9 +274,9 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
 
     case TextMarker::LineWrap: { // Draw ->
       auto const ex = xRight - 1;
-      auto const w = std::max(m_iAscent / 6, 2.0f);
+      auto const w = std::max(ascent / 6, 2.0f);
 
-      auto const y = yTop + m_iAscent / 2;
+      auto const y = yTop + ascent / 2;
       DrawHLine(gfx, stroke_brush, xLeft, ex, y);
       DrawLine(gfx, stroke_brush, ex - w, y - w, xRight, y);
       DrawLine(gfx, stroke_brush, ex - w, y + w, xRight, y);
@@ -286,7 +284,7 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
     }
 
     case TextMarker::Tab: { // Draw |_|
-      auto const w = std::max(m_iAscent / 6, 2.0f);
+      auto const w = std::max(ascent / 6, 2.0f);
       DrawHLine(gfx, stroke_brush, xLeft + 2, xRight - 3, yBottom);
       DrawVLine(gfx, stroke_brush, xLeft + 2, yBottom, yBottom - w * 2);
       DrawVLine(gfx, stroke_brush, xRight - 3, yBottom, yBottom - w * 2);
@@ -302,18 +300,16 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
 //
 TextCell::TextCell(const RenderStyle& style, float width, float height,
                    Posn lPosn, const base::string16& characters)
-    : Cell(style, width, height),
-      m_iDescent(style.font()->descent()),
-      m_lStart(lPosn),
-      m_lEnd(lPosn + 1),
+    : Cell(style, width, height, style.font()->descent()),
+      start_(lPosn),
+      end_(lPosn + 1),
       characters_(characters) {
 }
 
 TextCell::TextCell(const TextCell& other)
     : Cell(other),
-      m_iDescent(other.m_iDescent),
-      m_lStart(other.m_lStart),
-      m_lEnd(other.m_lEnd),
+      start_(other.start_),
+      end_(other.end_),
       characters_(other.characters_) {
 }
 
@@ -335,59 +331,59 @@ bool TextCell::Equal(const Cell* other) const {
   return characters_ == other->as<TextCell>()->characters_;
 }
 
-Posn TextCell::Fix(float iHeight, float iDescent) {
-    ASSERT(m_lStart <= m_lEnd);
-    m_cy = iHeight;
-    m_iDescent = iDescent;
-    return m_lEnd;
+Posn TextCell::Fix(float line_height, float descent) {
+  Cell::Fix(line_height, descent);
+  DCHECK_LT(start_, end_);
+  return end_;
 }
 
-float TextCell::GetDescent() const {
-  return style().font()->descent();
-}
-
-uint TextCell::Hash() const {
+uint32_t TextCell::Hash() const {
   return (Cell::Hash() << 3) ^ std::hash<base::string16>()(characters_);
 }
 
 gfx::RectF TextCell::HitTestTextPosition(Posn offset) const {
-  if (offset < m_lStart || offset >= m_lEnd)
+  if (offset < start_ || offset >= end_)
     return gfx::RectF();
-  auto const cwch = static_cast<size_t>(offset - m_lStart);
+  auto const cwch = static_cast<size_t>(offset - start_);
   auto const left = style().font()->GetTextWidth(characters_.data(), cwch);
   auto const right = style().font()->GetTextWidth(characters_.data(), cwch + 1);
-  return gfx::RectF(left, 0.0f, right, height());
+  return gfx::RectF(gfx::PointF(left, top()),
+                    gfx::SizeF(right - left, height()));
 }
 
 Posn TextCell::MapXToPosn(const gfx::Graphics& gfx, float x) const {
-  if (x >= m_cx)
-    return m_lEnd;
+  if (x >= width())
+    return end_;
   for (auto k = 1u; k <= characters_.length(); ++k) {
     auto const cx = FloorWidthToPixel(gfx,
       style().font()->GetTextWidth(characters_.data(), k));
     if (x < cx)
-      return static_cast<Posn>(m_lStart + k - 1);
+      return static_cast<Posn>(start_ + k - 1);
   }
-  return m_lEnd;
+  return end_;
 }
 
 bool TextCell::Merge(const RenderStyle& style, float width) {
   if (this->style() != style)
     return false;
-  m_cx += width;
-  m_lEnd += 1;
+  IncrementWidth(width);
+  end_ += 1;
   return true;
 }
 
 void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
   DCHECK(!characters_.empty());
   FillBackground(gfx, rect);
+
   gfx::Brush text_brush(gfx, style().color());
-  DrawText(gfx, *style().font(), text_brush, rect, characters_);
 
-  auto const baseline = rect.bottom - m_iDescent;
+  gfx::RectF text_rect(rect);
+  text_rect.top = text_rect.bottom - line_descent() - height() + descent();
+  text_rect.bottom = text_rect.top + height();
+  DrawText(gfx, *style().font(), text_brush, text_rect, characters_);
 
-  #if SUPPORT_IME
+  auto const baseline = text_rect.bottom - descent();
+
   switch (style().text_decoration()) {
     case css::TextDecoration::ImeInput:
       DrawWave(gfx, text_brush, rect.left, rect.right, baseline + 1);
@@ -423,8 +419,8 @@ void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
       DrawHLine(gfx, text_brush, rect.left, rect.right, baseline + 1);
       break;
   }
-  #endif
-  FillOverlay(gfx, rect);
+
+  FillOverlay(gfx, text_rect);
 }
 
 //////////////////////////////////////////////////////////////////////

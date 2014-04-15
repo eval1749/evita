@@ -248,7 +248,7 @@ TextLine* TextFormatter::FormatLine() {
       break;
     }
 
-    auto const cx = pCell->m_cx;
+    auto const cx = pCell->width();
 
     pCell = formatChar(pCell, x, wch);
     if (!pCell) {
@@ -264,21 +264,21 @@ TextLine* TextFormatter::FormatLine() {
       pLine->AddCell(pCell);
     }
 
-    x += pCell->m_cx;
-    descent = std::max(pCell->GetDescent(), descent);
-    ascent  = std::max(pCell->GetHeight() - pCell->GetDescent(), ascent);
+    x += pCell->width();
+    descent = std::max(pCell->descent(), descent);
+    ascent  = std::max(pCell->height() - pCell->descent(), ascent);
   }
 
   // We have at least one cell.
   //   o end of buffer: End-Of-Buffer MarkerCell
   //   o end of line:   End-Of-Line MarkerCell
-  //   o wrapped line:  Warp MarkerCEll
+  //   o wrapped line:  Warp MarkerCell
   DCHECK(pCell);
   pLine->AddCell(pCell);
 
-  x += pCell->m_cx;
-  descent = std::max(pCell->GetDescent(), descent);
-  ascent  = std::max(pCell->GetHeight() - pCell->GetDescent(), ascent);
+  x += pCell->width();
+  descent = std::max(pCell->descent(), descent);
+  ascent  = std::max(pCell->height() - pCell->descent(), ascent);
 
   pLine->Fix(text_block_->left(), text_block_->top() + text_block_->GetHeight(),
              AlignHeightToPixel(m_gfx, ascent),

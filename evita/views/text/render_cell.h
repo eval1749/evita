@@ -35,18 +35,24 @@ class RenderStyle;
 class Cell : public common::Castable {
   DECLARE_CASTABLE_CLASS(Cell, Castable);
 
-  public: float m_cx;
-  public: float m_cy;
+  private: float descent_;
+  private: float height_;
+  private: float line_descent_;
+  private: float line_height_;
   private: RenderStyle style_;
+  private: float width_;
 
-
-  public: Cell(const RenderStyle& style, float width, float height);
+  protected: Cell(const RenderStyle& style, float width, float height,
+                  float descent);
   public: explicit Cell(const Cell& other);
   public: virtual ~Cell();
 
-  public: float height() const { return m_cy; }
-  public: gfx::SizeF size() const;
-  public: float width() const { return m_cx; }
+  public: float descent() const { return descent_; }
+  public: float height() const { return height_; }
+  protected: float line_descent() const { return line_descent_; }
+  public: float line_height() const { return line_height_; }
+  protected: float top() const;
+  public: float width() const { return width_; }
 
   protected: const RenderStyle& style() const { return style_; }
 
@@ -54,20 +60,18 @@ class Cell : public common::Castable {
                               const gfx::RectF& rect) const;
   protected: void FillBackground(const gfx::Graphics& gfx,
                                  const gfx::RectF& rect) const;
-  public: float GetHeight() const { return m_cy; }
-  public: float GetWidth() const { return m_cx; }
+  protected: void IncrementWidth(float amount);
 
   // rendering::Cell
   public: virtual Cell* Copy() const = 0;
   public: virtual bool Equal(const Cell* pCell) const;
-  public: virtual Posn Fix(float iHeight, float);
-  public: virtual float GetDescent() const;
-  public: virtual uint Hash() const;
+  public: virtual Posn Fix(float line_height, float line_descent);
+  public: virtual uint32_t Hash() const;
   public: virtual gfx::RectF HitTestTextPosition(Posn position) const;
   public: virtual Posn MapXToPosn(const gfx::Graphics&, float) const;
   public: virtual bool Merge(const RenderStyle& style, float width);
   public: virtual void Render(const gfx::Graphics& gfx,
-                               const gfx::RectF& rect) const;
+                              const gfx::RectF& rect) const;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -92,10 +96,8 @@ class FillerCell final : public Cell {
 class MarkerCell final : public Cell {
   DECLARE_CASTABLE_CLASS(MarkerCell, Cell);
 
-  private: Posn m_lStart;
-  private: Posn m_lEnd;
-  private: float m_iAscent;
-  private: float m_iDescent;
+  private: Posn start_;
+  private: Posn end_;
   private: TextMarker marker_name_;
 
   public: MarkerCell(const RenderStyle& style, float width, float height,
@@ -109,8 +111,7 @@ class MarkerCell final : public Cell {
   private: virtual Cell* Copy() const override;
   private: virtual bool Equal(const Cell* pCell) const override;
   private: virtual Posn Fix(float iHeight, float iDescent) override;
-  private: virtual float GetDescent() const override;
-  private: virtual uint Hash() const override;
+  private: virtual uint32_t Hash() const override;
   private: virtual gfx::RectF HitTestTextPosition(Posn lPosn) const override;
   private: virtual Posn MapXToPosn(const gfx::Graphics& gfx,
                                    float x) const override;
@@ -127,9 +128,8 @@ class TextCell : public Cell {
 
   private: float m_iDescent;
 
-  private: Posn m_lStart;
-  private: Posn m_lEnd;
-
+  private: Posn start_;
+  private: Posn end_;
   private: base::string16 characters_;
 
   public: TextCell(const RenderStyle& style, float width, float height,
@@ -145,8 +145,7 @@ class TextCell : public Cell {
   private: virtual Cell* Copy() const override;
   public: virtual bool Equal(const Cell* pCell) const override;
   public: virtual Posn Fix(float iHeight, float iDescent) override;
-  public: virtual float GetDescent() const override;
-  public: virtual uint Hash() const override final;
+  public: virtual uint32_t Hash() const override final;
   public: virtual gfx::RectF HitTestTextPosition(
       Posn position) const override final;
   public: virtual Posn MapXToPosn(const gfx::Graphics& gfx,

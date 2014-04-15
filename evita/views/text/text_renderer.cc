@@ -117,7 +117,7 @@ gfx::RectF TextRenderer::HitTestTextPosition(Posn lPosn) const {
           auto const rect = cell->HitTestTextPosition(lPosn);
           if (!rect.empty())
             return gfx::RectF(rect.left_top() + left_top, rect.size());
-          left_top.x += cell->m_cx;
+          left_top.x += cell->width();
         }
     }
     left_top.y += line->GetHeight();
@@ -162,11 +162,11 @@ Posn TextRenderer::MapPointToPosn(gfx::PointF pt) const {
     auto lPosn = line->GetEnd() - 1;
     for (const auto cell : line->cells()) {
       auto x = pt.x - xCell;
-      xCell += cell->m_cx;
+      xCell += cell->width();
       auto lMap = cell->MapXToPosn(*gfx_, x);
       if (lMap >= 0)
         lPosn = lMap;
-      if (x >= 0 && x < cell->m_cx)
+      if (x >= 0 && x < cell->width())
         break;
     }
     return lPosn;

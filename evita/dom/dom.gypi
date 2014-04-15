@@ -57,6 +57,7 @@
       'text/text_position.js',
       'windows/document_state.js',
       'windows/point.js',
+      'windows/rect.js',
       'windows/tab_data.js',
       'windows/text_selection.js',
       'windows/text_window.js',

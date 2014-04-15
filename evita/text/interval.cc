@@ -26,20 +26,41 @@ namespace text {
 // Interval
 //
 Interval::Interval(const Interval& other)
-    : m_lEnd(other.m_lEnd),
-      m_lStart(other.m_lStart),
-      m_Style(other.m_Style) {
+    : end_(other.end_),
+      start_(other.start_),
+      style_(other.style_) {
 }
 
-Interval::Interval(Posn lStart, Posn lEnd)
-    : m_lEnd(lEnd), m_lStart(lStart) {
+Interval::Interval(Posn start, Posn end)
+    : end_(end), start_(start) {
 }
 
 Interval::~Interval() {
 }
 
-void Interval::SetStyle(const css::Style& other) {
-  m_Style.OverrideBy(other);
+void Interval::set_style(const css::Style& style) {
+  style_.OverrideBy(style);
+}
+
+int Interval::Compare(const Interval* other) const {
+  return start_ - other->start_;
+}
+
+bool Interval::Contains(Posn offset) const {
+  return offset >= start_ && offset < end_;
 }
 
 }  // namespace text
+
+namespace std {
+ostream& operator<<(ostream& ostream, const text::Interval& interval) {
+  return ostream << "text::Interval(" << interval.start() << ", " <<
+      interval.end() << ")";
+}
+
+ostream& operator<<(ostream& ostream, const text::Interval* interval) {
+  if (!interval)
+    return ostream << "NullInterval";
+  return ostream << *interval;
+}
+}  // namespace std

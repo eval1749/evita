@@ -122,7 +122,7 @@ class TextFormatter::TextScanner {
     if (AtEnd())
       return m_pBuffer->GetDefaultStyle();
     DCHECK(m_pInterval);
-    return m_pInterval->GetStyle();
+    return m_pInterval->style();
   }
 
   public: RenderStyle MakeRenderStyle(const css::Style& style,
@@ -135,7 +135,7 @@ class TextFormatter::TextScanner {
     if (m_lPosn >= m_lBufEnd)
       fill();
 
-    if (m_lPosn >= m_pInterval->GetEnd()) {
+    if (m_lPosn >= m_pInterval->end()) {
       text::Interval* pNext = m_pInterval->GetNext();
       if (pNext)
         m_pInterval = pNext;

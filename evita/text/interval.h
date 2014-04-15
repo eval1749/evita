@@ -8,47 +8,40 @@
 #include "evita/ed_BinTree.h"
 #include "evita/css/style.h"
 #include "evita/li_util.h"
+#include "evita/text/interval_set.h"
 
 namespace text {
 
-class IntervalSet;
-
 class Interval : public BinaryTree<Interval>::NodeBase,
                  public DoubleLinkedNode_<Interval> {
-  friend class Buffer;
-  friend class IntervalSet;
+  friend class IntervalSet::Impl;
 
-  private: Posn m_lEnd;
-  private: Posn m_lStart;
-  private: css::Style m_Style;
+  private: Posn end_;
+  private: Posn start_;
+  private: css::Style style_;
 
   public: Interval(const Interval& other);
-  public: Interval(Posn lStart, Posn lEnd);
+  public: Interval(Posn start, Posn end);
   public: ~Interval();
 
-  // [C]
-  public: int Compare(const Interval* pThat) const {
-    return m_lStart - pThat->m_lStart;
-  }
+  public: Posn end() const { return end_; }
+  public: Posn start() const { return start_; }
+  public: const css::Style& style() const { return style_; }
+  public: void set_style(const css::Style& style);
 
-  public: bool Contains(Posn lPosn) const {
-    return lPosn >= m_lStart && lPosn < m_lEnd;
-  }
-
-  // [G]
-  public: Posn GetEnd() const { return m_lEnd; }
-  public: Posn GetStart() const { return m_lStart; }
-  public: const css::Style& GetStyle() const { return m_Style; }
-
-  // [I]
-  public: bool IsEmpty() const { return m_lStart == m_lEnd; }
-
-  // [S]
-  public: void SetStyle(const css::Style&);
+  public: int Compare(const Interval* other) const;
+  public: bool Contains(Posn offset) const;
 
   DISALLOW_ASSIGN(Interval);
 };
 
 }  // namespace text
+
+#include <ostream>
+
+namespace std {
+ostream& operator<<(ostream& ostream, const text::Interval& interval);
+ostream& operator<<(ostream& ostream, const text::Interval* interval);
+}  // namespace std
 
 #endif //!defined(INCLUDE_evita_text_interval_h)

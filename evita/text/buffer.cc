@@ -112,7 +112,7 @@ void Buffer::EndUndoGroup(const base::string16& name) {
 }
 
 const css::Style& Buffer::GetDefaultStyle() const {
-  return GetIntervalAt(GetEnd())->GetStyle();
+  return GetIntervalAt(GetEnd())->style();
 }
 
 Interval* Buffer::GetIntervalAt(Posn lPosn) const {
@@ -129,7 +129,7 @@ LineAndColumn Buffer::GetLineAndColumn(Posn offset) const {
 }
 
 const css::Style& Buffer::GetStyleAt(Posn lPosn) const {
-  return GetIntervalAt(lPosn)->GetStyle();
+  return GetIntervalAt(lPosn)->style();
 }
 
 Count Buffer::Insert(Posn lPosn, const char16* pwch, Count n) {

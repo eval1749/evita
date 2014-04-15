@@ -17,7 +17,7 @@ class Interval;
 
 class IntervalSet {
   // PImpl Idiom, see "interval_set.cc" for implementation.
-  private: class Impl;
+  public: class Impl;
   private: std::unique_ptr<Impl> impl_;
 
   public: IntervalSet(Buffer* buffer);

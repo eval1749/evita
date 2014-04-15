@@ -6,6 +6,9 @@
 
 #include "base/logging.h"
 #include "evita/css/style.h"
+#include "evita/ed_BinTree.h"
+#include "evita/li_util.h"
+#include "evita/text/buffer_mutation_observer.h"
 #include "evita/text/buffer.h"
 #include "evita/text/interval.h"
 
@@ -19,8 +22,40 @@ bool CanMergeIntervals(const Interval* interval1, const Interval* interval2) {
 }
 }  // namespace
 
-IntervalSet::IntervalSet(Buffer* buffer) {
-  buffer->AddObserver(this);
+//////////////////////////////////////////////////////////////////////
+//
+// IntervalSet::Impl
+//
+class IntervalSet::Impl : public BufferMutationObserver {
+  private: typedef DoubleLinkedList_<Interval> IntervalList;
+  private: typedef BinaryTree<Interval> IntervalTree;
+
+  private: Buffer* buffer_;
+  private: IntervalList list_;
+  private: IntervalTree tree_;
+
+  public: Impl(Buffer* buffer);
+  public: virtual ~Impl();
+
+  public: Interval* GetIntervalAt(Posn offset) const;
+  private: void InsertAfter(Interval* interval, Interval* ref_interval);
+  private: void InsertBefore(Interval* interval, Interval* ref_interval);
+  private: void RemoveInterval(Interval* interval);
+  public: void SetStyle(Posn, Posn, const css::Style& style_values);
+  // Split |interval| at |offset| and return new interval starts at |offset|.
+  private: Interval* SplitAt(Interval* interval, Posn offset);
+  private: Interval* TryMergeInterval(Interval*);
+
+  // BufferMutationObserver
+  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
+  private: virtual void DidInsertAt(Posn offset, size_t length) override;
+  private: virtual void DidInsertBefore(Posn offset, size_t length) override;
+
+  DISALLOW_COPY_AND_ASSIGN(Impl);
+};
+
+IntervalSet::Impl::Impl(Buffer* buffer) : buffer_(buffer) {
+  buffer_->AddObserver(this);
 
   {
     auto const interval = new Interval(0, 1);
@@ -30,14 +65,15 @@ IntervalSet::IntervalSet(Buffer* buffer) {
   }
 }
 
-IntervalSet::~IntervalSet() {
+IntervalSet::Impl::~Impl() {
+  buffer_->RemoveObserver(this);
   while (auto const interval = list_.GetFirst()) {
     list_.Delete(interval);
     delete interval;
   }
 }
 
-Interval* IntervalSet::GetIntervalAt(Posn offset) const {
+Interval* IntervalSet::Impl::GetIntervalAt(Posn offset) const {
   auto runner = tree_.GetRoot();
   while (runner) {
     if (runner->Contains(offset))
@@ -49,22 +85,23 @@ Interval* IntervalSet::GetIntervalAt(Posn offset) const {
   return runner;
 }
 
-void IntervalSet::InsertAfter(Interval* interval, Interval* ref) {
+void IntervalSet::Impl::InsertAfter(Interval* interval, Interval* ref) {
   list_.InsertAfter(interval, ref);
   tree_.Insert(interval);
 }
 
-void IntervalSet::InsertBefore(Interval* interval, Interval* ref) {
+void IntervalSet::Impl::InsertBefore(Interval* interval, Interval* ref) {
   list_.InsertBefore(interval, ref);
   tree_.Insert(interval);
 }
 
-void IntervalSet::RemoveInterval(Interval* interval) {
+void IntervalSet::Impl::RemoveInterval(Interval* interval) {
   list_.Delete(interval);
   tree_.Delete(interval);
 }
 
-void IntervalSet::SetStyle(Posn start, Posn end, const css::Style& style) {
+void IntervalSet::Impl::SetStyle(Posn start, Posn end,
+                                 const css::Style& style) {
   DCHECK_LT(start, end);
   auto offset = start;
   while (offset < end) {
@@ -90,7 +127,7 @@ void IntervalSet::SetStyle(Posn start, Posn end, const css::Style& style) {
   }
 }
 
-Interval* IntervalSet::SplitAt(Interval* interval, Posn offset) {
+Interval* IntervalSet::Impl::SplitAt(Interval* interval, Posn offset) {
   DCHECK_GT(offset, interval->GetStart());
   DCHECK_LT(offset, interval->GetEnd());
   auto const new_interval = new Interval(*interval);
@@ -100,7 +137,7 @@ Interval* IntervalSet::SplitAt(Interval* interval, Posn offset) {
   return new_interval;
 }
 
-Interval* IntervalSet::TryMergeInterval(Interval* pIntv) {
+Interval* IntervalSet::Impl::TryMergeInterval(Interval* pIntv) {
   // Merge to previous
   if (Interval* pPrev = pIntv->GetPrev()) {
     DCHECK_EQ(pPrev->GetEnd(), pIntv->GetStart());
@@ -130,7 +167,7 @@ Interval* IntervalSet::TryMergeInterval(Interval* pIntv) {
 }
 
 // BufferMutationObserver
-void IntervalSet::DidDeleteAt(Posn offset, size_t length) {
+void IntervalSet::Impl::DidDeleteAt(Posn offset, size_t length) {
   {
     auto interval = list_.GetLast();
     while (interval && interval->m_lEnd > offset) {
@@ -161,7 +198,7 @@ void IntervalSet::DidDeleteAt(Posn offset, size_t length) {
   }
 }
 
-void IntervalSet::DidInsertAt(Posn offset, size_t length) {
+void IntervalSet::Impl::DidInsertAt(Posn offset, size_t length) {
   auto interval = list_.GetLast();
   while (interval && interval->m_lEnd > offset) {
     if (interval->m_lStart > offset)
@@ -171,7 +208,7 @@ void IntervalSet::DidInsertAt(Posn offset, size_t length) {
   }
 }
 
-void IntervalSet::DidInsertBefore(Posn offset, size_t length) {
+void IntervalSet::Impl::DidInsertBefore(Posn offset, size_t length) {
   auto interval = list_.GetLast();
   while (interval && interval->m_lEnd >= offset) {
     if (interval->m_lStart >= offset)
@@ -195,6 +232,23 @@ void IntervalSet::DidInsertBefore(Posn offset, size_t length) {
       tree_.Insert(interval);
     }
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// IntervalSet
+IntervalSet::IntervalSet(Buffer* buffer) : impl_(new Impl(buffer)) {
+}
+
+IntervalSet::~IntervalSet() {
+}
+
+Interval* IntervalSet::GetIntervalAt(Posn offset) const {
+  return impl_->GetIntervalAt(offset);
+}
+
+void IntervalSet::SetStyle(Posn start, Posn end, const css::Style& style) {
+  return impl_->SetStyle(start, end, style);
 }
 
 }  // namespace text

@@ -48,6 +48,10 @@ int64 SysInfo::AmountOfAvailablePhysicalMemory() {
   return AmountOfMemory(&MEMORYSTATUSEX::ullAvailPhys);
 }
 
+int64 SysInfo::AmountOfVirtualMemory() {
+  return 0;
+}
+
 // static
 int64 SysInfo::AmountOfFreeDiskSpace(const FilePath& path) {
   base::ThreadRestrictions::AssertIOAllowed();

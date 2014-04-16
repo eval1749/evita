@@ -5,7 +5,7 @@
 vars = {
   "googlecode_url": "http://%s.googlecode.com/svn",
   "chromium_git": "https://chromium.googlesource.com",
-  "v8_revision": "20586",
+  "v8_revision": "20708",
 }
 
 deps = {
@@ -22,7 +22,7 @@ deps = {
     (Var("googlecode_url") % "googletest") + "/trunk@643",
 
   "src/tools/gyp":
-    (Var("googlecode_url") % "gyp") + "/trunk@1880",
+    (Var("googlecode_url") % "gyp") + "/trunk@1892",
 
   "src/third_party/hunspell":
     "/trunk/deps/third_party/hunspell@256272",
@@ -39,5 +39,6 @@ hooks = [
   {
     'pattern': '.',
     'action': ['src\\build\\gyp_evita.cmd']
+
   },
 ]

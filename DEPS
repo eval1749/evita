@@ -5,7 +5,7 @@
 vars = {
   "googlecode_url": "http://%s.googlecode.com/svn",
   "chromium_git": "https://chromium.googlesource.com",
-  "v8_revision": "20708",
+  "v8_revision": "20743",
 }
 
 deps = {
@@ -39,6 +39,7 @@ hooks = [
   {
     'pattern': '.',
     'action': ['src\\build\\gyp_evita.cmd']
+
 
   },
 ]

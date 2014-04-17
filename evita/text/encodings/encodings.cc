@@ -36,7 +36,7 @@ class Encodings::Private {
   public: ~Private();
 
   public: Encoding* GetEncoding(const base::string16& name) const;
-  private: void Install(std::vector<const char16*> names,
+  private: void Install(std::vector<const base::char16*> names,
                         NewDecoder new_decoder, NewEncoder new_encoder);
 };
 
@@ -51,13 +51,13 @@ DEFINE_ENCODING(Utf8)
 }  // namespace
 
 Encodings::Private::Private() {
-  Install(std::vector<const char16*> {
+  Install(std::vector<const base::char16*> {
       L"cseucpkdfmtjapanese",
       L"euc-jp",
       L"x-euc-jp"
   }, &NewEucJpDecoder, &NewEucJpEncoder);
 
-  Install(std::vector<const char16*> {
+  Install(std::vector<const base::char16*> {
       L"csshiftjis",
       L"ms_kanji",
       L"shift-jis",
@@ -67,7 +67,7 @@ Encodings::Private::Private() {
       L"x-sjis"
   }, &NewShiftJisDecoder, &NewShiftJisEncoder);
 
-  Install(std::vector<const char16*> {
+  Install(std::vector<const base::char16*> {
       L"unicode-1-1-utf-8",
       L"utf-8",
       L"utf8",
@@ -88,7 +88,7 @@ Encodings::Private::Encoding* Encodings::Private::GetEncoding(
   return it == map_.end() ? nullptr : it->second;
 }
 
-void Encodings::Private::Install(std::vector<const char16*> names,
+void Encodings::Private::Install(std::vector<const base::char16*> names,
                                  NewDecoder new_decoder,
                                  NewEncoder new_encoder) {
 

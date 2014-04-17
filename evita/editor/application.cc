@@ -37,32 +37,6 @@
 
 HINSTANCE g_hInstance;
 HINSTANCE g_hResource;
-HWND g_hwndActiveDialog;
-
-namespace {
-class MessagePump : public base::MessagePumpForUI {
-  private: class MessageFilter : public base::MessagePumpForUI::MessageFilter {
-    public: MessageFilter() = default;
-    public: ~MessageFilter() = default;
-
-    // base::MessagePumpForUI:::MessageFilter
-    private: virtual bool ProcessMessage(const MSG& msg) {
-      if (!g_hwndActiveDialog)
-        return false;
-      MSG message = msg;
-      return ::IsDialogMessage(g_hwndActiveDialog, &message);
-    }
-    DISALLOW_COPY_AND_ASSIGN(MessageFilter);
-  };
-
-  public: MessagePump() {
-    SetMessageFilter(make_scoped_ptr(new MessageFilter()));
-  }
-  public: ~MessagePump() = default;
-
-  DISALLOW_COPY_AND_ASSIGN(MessagePump);
-};
-}   // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -73,7 +47,7 @@ Application::Application()
             is_quit_(false),
       dom_lock_(new editor::DomLock()),
       io_manager_(new IoManager()),
-      message_loop_(new base::MessageLoop(make_scoped_ptr(new MessagePump()))),
+      message_loop_(new base::MessageLoop(base::MessageLoop::TYPE_UI)),
       view_idle_count_(0),
       view_idle_hint_(0),
       view_delegate_impl_(new views::ViewDelegateImpl()) {

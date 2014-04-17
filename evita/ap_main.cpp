@@ -30,7 +30,6 @@ const char16* k_pwszTitle = L"Evita 5.0";
 
 extern HINSTANCE   g_hInstance;
 extern HINSTANCE   g_hResource;
-extern HWND        g_hwndActiveDialog;
 
 static void NoReturn fatalExit(const char16*);
 

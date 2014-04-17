@@ -39,13 +39,13 @@ TEST_F(RangeTest, SetText) {
   range2->SetText(L"bar");
 
   EXPECT_EQ(0, range1->GetStart());
-  EXPECT_EQ(3, range1->GetEnd());
+  EXPECT_EQ(6, range1->GetEnd());
 
   EXPECT_EQ(3, range2->GetStart());
   EXPECT_EQ(6, range2->GetEnd());
 
   EXPECT_EQ(0, range3->GetStart());
-  EXPECT_EQ(3, range3->GetEnd());
+  EXPECT_EQ(6, range3->GetEnd());
 }
 
 }  // namespace

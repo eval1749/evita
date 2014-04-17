@@ -472,7 +472,8 @@ JsConsole.prototype.emit = function(text) {
 JsConsole.prototype.emitPrompt = function() {
   ++this.lineNumber;
   this.emit('\njs:' + this.lineNumber + '> ');
-  this.range.collapseTo(this.document.length);
+  // Off by one to keep |this.range.end| before user input.
+  this.range.collapseTo(this.document.length - 1);
   this.document.readonly = false;
 };
 

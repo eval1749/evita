@@ -78,15 +78,16 @@ void Range::SetText(const base::string16& text) {
     return;
   }
 
+  auto const start = start_;
   if (start_ == end_) {
     UndoBlock oUndo(this, L"Range.SetText");
-    buffer_->Insert(start_, text.data(), static_cast<Count>(text.length()));
+    buffer_->InsertBefore(start_, text);
   } else {
     UndoBlock oUndo(this, L"Range.SetText");
     buffer_->Delete(start_, end_);
-    buffer_->Insert(start_, text.data(), static_cast<Count>(text.length()));
+    buffer_->InsertBefore(start_, text);
   }
-
+  start_ = start;
   end_ = ensurePosn(static_cast<Posn>(start_ + text.length()));
 }
 

@@ -99,9 +99,12 @@ global.FindAndReplace = (function() {
     var regexp = createRegExp(window, search_text, find_options);
     if (!regexp)
       return null;
-    var document = window.document;
-    var range = window.selection.range;
+    /** @type{!Document} */var document = window.document;
+    /** @type{!Range} */var range = window.selection.range;
 
+    /**
+     * @param {?Array.<!Editor.RegExp.Match>} matches
+     */
     function finish(matches) {
       if (!matches) {
         window.status = Editor.localizeText(Strings.IDS_FIND_NOT_FOUND,
@@ -117,12 +120,12 @@ global.FindAndReplace = (function() {
       range.end = match.end;
       window.selection.startIsActive = regexp.backward;
       window.status = Editor.localizeText(Strings.IDS_FIND_FOUND,
-                                         {text: regexp.source});
+                                          {text: regexp.source});
       return regexp;
     }
 
     if (shouldFindInSelection(find_options, range))
-      return finish(range.match_(regexp));
+      return finish(document.match_(regexp, range.start, range.end));
 
     var end = document.length;
     if (regexp.backward) {

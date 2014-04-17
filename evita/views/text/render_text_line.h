@@ -52,6 +52,7 @@ class TextLine {
   public: Posn GetStart() const { return m_lStart; }
   public: float GetWidth() const { return rect_.width(); }
   public: uint Hash() const;
+  public: gfx::RectF HitTestTextPosition(Posn lPosn) const;
   public: Posn MapXToPosn(const gfx::Graphics&, float) const;
   public: void Render(const gfx::Graphics& gfx) const;
 };

@@ -84,6 +84,21 @@ uint TextLine::Hash() const {
   return m_nHash;
 }
 
+gfx::RectF TextLine::HitTestTextPosition(Posn offset) const {
+  if (offset < m_lStart || offset >= m_lEnd)
+    return gfx::RectF();
+
+  auto left_top = rect_.left_top();
+  for (const auto cell : cells_) {
+    auto const rect = cell->HitTestTextPosition(offset);
+    if (!rect.empty())
+      return gfx::RectF(left_top + rect.left_top(), rect.size());
+    left_top.x += cell->width();
+  }
+
+  return gfx::RectF();
+}
+
 Posn TextLine::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
   auto xCell = 0.0f;
   auto lPosn = GetEnd() - 1;

@@ -108,19 +108,10 @@ TextLine* TextRenderer::FormatLine(Posn lStart) {
 gfx::RectF TextRenderer::HitTestTextPosition(Posn lPosn) const {
   if (lPosn < GetStart() || lPosn > GetEnd())
     return gfx::RectF();
-
-  gfx::PointF left_top(0.0f, text_block_->top());
   for (auto const line : text_block_->lines()) {
-    if (lPosn >= line->text_start() && lPosn < line->text_end()) {
-        left_top.x = text_block_->left();
-        for (const auto cell : line->cells()) {
-          auto const rect = cell->HitTestTextPosition(lPosn);
-          if (!rect.empty())
-            return gfx::RectF(rect.left_top() + left_top, rect.size());
-          left_top.x += cell->width();
-        }
-    }
-    left_top.y += line->GetHeight();
+    auto const rect = line->HitTestTextPosition(lPosn);
+    if (!rect.empty())
+      return rect;
   }
   return gfx::RectF();
 }

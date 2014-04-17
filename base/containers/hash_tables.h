@@ -28,6 +28,9 @@
 #include "build/build_config.h"
 
 #if defined(COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4365)
+
 #include <hash_map>
 #include <hash_set>
 
@@ -140,7 +143,7 @@ inline std::size_t HashInts32(uint32 value1, uint32 value2) {
 
   hash64 = hash64 * odd_random + shift_random;
   std::size_t high_bits = static_cast<std::size_t>(
-      hash64 >> (sizeof(uint64) - sizeof(std::size_t)));
+      hash64 >> (8 * (sizeof(uint64) - sizeof(std::size_t))));
   return high_bits;
 }
 
@@ -175,7 +178,7 @@ inline std::size_t HashInts64(uint64 value1, uint64 value2) {
 
   hash64 = hash64 * odd_random + shift_random;
   std::size_t high_bits = static_cast<std::size_t>(
-      hash64 >> (sizeof(uint64) - sizeof(std::size_t)));
+      hash64 >> (8 * (sizeof(uint64) - sizeof(std::size_t))));
   return high_bits;
 }
 
@@ -184,8 +187,6 @@ inline std::size_t HashPair(Type1 value1, Type2 value2) { \
   return HashInts32(value1, value2); \
 }
 
-#pragma warning(push)
-#pragma warning(disable: 4365)
 DEFINE_32BIT_PAIR_HASH(int16, int16);
 DEFINE_32BIT_PAIR_HASH(int16, uint16);
 DEFINE_32BIT_PAIR_HASH(int16, int32);
@@ -230,7 +231,6 @@ DEFINE_64BIT_PAIR_HASH(uint64, int32);
 DEFINE_64BIT_PAIR_HASH(uint64, uint32);
 DEFINE_64BIT_PAIR_HASH(uint64, int64);
 DEFINE_64BIT_PAIR_HASH(uint64, uint64);
-#pragma warning(pop)
 
 #undef DEFINE_64BIT_PAIR_HASH
 }  // namespace base
@@ -246,6 +246,8 @@ template<typename Type1, typename Type2>
 inline std::size_t hash_value(const std::pair<Type1, Type2>& value) {
   return base::HashPair(value.first, value.second);
 }
+
+#pragma warning(pop)
 
 #elif defined(COMPILER_GCC)
 template<typename Type1, typename Type2>

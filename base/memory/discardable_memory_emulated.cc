@@ -5,13 +5,13 @@
 #include "base/memory/discardable_memory_emulated.h"
 
 #include "base/lazy_instance.h"
-#include "base/memory/discardable_memory_provider.h"
+#include "base/memory/discardable_memory_manager.h"
 
 namespace base {
 
 namespace {
 
-base::LazyInstance<internal::DiscardableMemoryProvider>::Leaky g_provider =
+base::LazyInstance<internal::DiscardableMemoryManager>::Leaky g_manager =
     LAZY_INSTANCE_INITIALIZER;
 
 }  // namespace
@@ -20,45 +20,56 @@ namespace internal {
 
 DiscardableMemoryEmulated::DiscardableMemoryEmulated(size_t size)
     : is_locked_(false) {
-  g_provider.Pointer()->Register(this, size);
+  g_manager.Pointer()->Register(this, size);
 }
 
 DiscardableMemoryEmulated::~DiscardableMemoryEmulated() {
   if (is_locked_)
     Unlock();
-  g_provider.Pointer()->Unregister(this);
+  g_manager.Pointer()->Unregister(this);
+}
+
+// static
+void DiscardableMemoryEmulated::RegisterMemoryPressureListeners() {
+  g_manager.Pointer()->RegisterMemoryPressureListener();
+}
+
+// static
+void DiscardableMemoryEmulated::UnregisterMemoryPressureListeners() {
+  g_manager.Pointer()->UnregisterMemoryPressureListener();
+}
+
+// static
+void DiscardableMemoryEmulated::PurgeForTesting() {
+  g_manager.Pointer()->PurgeAll();
 }
 
 bool DiscardableMemoryEmulated::Initialize() {
-  return Lock() == DISCARDABLE_MEMORY_PURGED;
+  return Lock() == DISCARDABLE_MEMORY_LOCK_STATUS_PURGED;
 }
 
-LockDiscardableMemoryStatus DiscardableMemoryEmulated::Lock() {
+DiscardableMemoryLockStatus DiscardableMemoryEmulated::Lock() {
   DCHECK(!is_locked_);
 
   bool purged = false;
-  memory_ = g_provider.Pointer()->Acquire(this, &purged);
+  memory_ = g_manager.Pointer()->Acquire(this, &purged);
   if (!memory_)
-    return DISCARDABLE_MEMORY_FAILED;
+    return DISCARDABLE_MEMORY_LOCK_STATUS_FAILED;
 
   is_locked_ = true;
-  return purged ? DISCARDABLE_MEMORY_PURGED : DISCARDABLE_MEMORY_SUCCESS;
+  return purged ? DISCARDABLE_MEMORY_LOCK_STATUS_PURGED
+                : DISCARDABLE_MEMORY_LOCK_STATUS_SUCCESS;
 }
 
 void DiscardableMemoryEmulated::Unlock() {
   DCHECK(is_locked_);
-  g_provider.Pointer()->Release(this, memory_.Pass());
+  g_manager.Pointer()->Release(this, memory_.Pass());
   is_locked_ = false;
 }
 
 void* DiscardableMemoryEmulated::Memory() const {
   DCHECK(memory_);
   return memory_.get();
-}
-
-// static
-void DiscardableMemoryEmulated::PurgeForTesting() {
-  g_provider.Pointer()->PurgeAll();
 }
 
 }  // namespace internal

@@ -46,10 +46,6 @@
 #include "base/test/test_support_ios.h"
 #endif
 
-#if defined(TOOLKIT_GTK)
-#include <gtk/gtk.h>
-#endif
-
 namespace {
 
 class MaybeTestDisabler : public testing::EmptyTestEventListener {
@@ -123,9 +119,7 @@ void TestSuite::PreInitialize(int argc, char** argv,
   // have the locale set. In the absence of such a call the "C" locale is the
   // default. In the gtk code (below) gtk_init() implicitly sets a locale.
   setlocale(LC_ALL, "");
-#elif defined(TOOLKIT_GTK)
-  gtk_init_check(&argc, &argv);
-#endif  // defined(TOOLKIT_GTK)
+#endif  // defined(OS_LINUX) && defined(USE_AURA)
 
   // On Android, AtExitManager is created in
   // testing/android/native_test_wrapper.cc before main() is called.
@@ -226,7 +220,23 @@ int TestSuite::Run() {
 
 // static
 void TestSuite::UnitTestAssertHandler(const std::string& str) {
-  RAW_LOG(FATAL, str.c_str());
+#if defined(OS_ANDROID)
+  // Correlating test stdio with logcat can be difficult, so we emit this
+  // helpful little hint about what was running.  Only do this for Android
+  // because other platforms don't separate out the relevant logs in the same
+  // way.
+  const ::testing::TestInfo* const test_info =
+      ::testing::UnitTest::GetInstance()->current_test_info();
+  if (test_info) {
+    LOG(ERROR) << "Currently running: " << test_info->test_case_name() << "."
+               << test_info->name();
+    fflush(stderr);
+  }
+#endif  // defined(OS_ANDROID)
+
+  // The logging system actually prints the message before calling the assert
+  // handler. Just exit now to avoid printing too many stack traces.
+  _exit(1);
 }
 
 void TestSuite::SuppressErrorDialogs() {

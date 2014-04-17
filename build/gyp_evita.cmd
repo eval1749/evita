@@ -51,10 +51,15 @@ if not "%defines%"=="" (
 : We modify allocator.gyp to remove circular dependency.
 : See http://crbug.com/35878.
 
+: Note: There are cycles in .gyp files:
+: Cycle: base\allocator\allocator.gyp -> base\base.gyp -> base\allocator\allocator.gyp
+: Cycle: base\base.gyp -> base\allocator\allocator.gyp -> base\base.gyp
+
 .\tools\gyp\gyp ^
     --format=%format% ^
     --generator-output=%outdir% ^
     --include build\common.gypi ^
+    --no-circular-check ^
     %defines% ^
   build\all.gyp
 

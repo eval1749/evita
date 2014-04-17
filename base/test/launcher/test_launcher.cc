@@ -14,6 +14,7 @@
 #include "base/environment.h"
 #include "base/file_util.h"
 #include "base/files/file_path.h"
+#include "base/files/scoped_file.h"
 #include "base/format_macros.h"
 #include "base/lazy_instance.h"
 #include "base/logging.h"
@@ -24,6 +25,7 @@
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
+#include "base/strings/stringize_macros.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/test/launcher/test_results_tracker.h"
@@ -49,6 +51,10 @@ const char kTestTotalShards[] = "GTEST_TOTAL_SHARDS";
 const char kTestShardIndex[] = "GTEST_SHARD_INDEX";
 
 namespace {
+
+// Global tag for test runs where the results are incomplete or unreliable
+// for any reason, e.g. early exit because of too many broken tests.
+const char kUnreliableResultsTag[] = "UNRELIABLE_RESULTS";
 
 // Maximum time of no output after which we print list of processes still
 // running. This deliberately doesn't use TestTimeouts (which is otherwise
@@ -239,16 +245,14 @@ void DoLaunchChildTestProcess(
   options.new_process_group = true;
 
   base::FileHandleMappingVector fds_mapping;
-  file_util::ScopedFD output_file_fd_closer;
+  base::ScopedFD output_file_fd;
 
   if (redirect_stdio) {
-    int output_file_fd = open(output_file.value().c_str(), O_RDWR);
-    CHECK_GE(output_file_fd, 0);
+    output_file_fd.reset(open(output_file.value().c_str(), O_RDWR));
+    CHECK(output_file_fd.is_valid());
 
-    output_file_fd_closer.reset(&output_file_fd);
-
-    fds_mapping.push_back(std::make_pair(output_file_fd, STDOUT_FILENO));
-    fds_mapping.push_back(std::make_pair(output_file_fd, STDERR_FILENO));
+    fds_mapping.push_back(std::make_pair(output_file_fd.get(), STDOUT_FILENO));
+    fds_mapping.push_back(std::make_pair(output_file_fd.get(), STDERR_FILENO));
     options.fds_to_remap = &fds_mapping;
   }
 #endif
@@ -259,10 +263,10 @@ void DoLaunchChildTestProcess(
 
   if (redirect_stdio) {
 #if defined(OS_WIN)
-  FlushFileBuffers(handle.Get());
-  handle.Close();
+    FlushFileBuffers(handle.Get());
+    handle.Close();
 #elif defined(OS_POSIX)
-  output_file_fd_closer.reset();
+    output_file_fd.reset();
 #endif
   }
 
@@ -330,17 +334,6 @@ TestLauncher::TestLauncher(TestLauncherDelegate* launcher_delegate,
     // --test-launcher-jobs flag.
     parallel_jobs_ = 1;
   }
-
-#if defined(USE_AURA) && defined(OS_LINUX) && !defined(OS_CHROMEOS)
-  // TODO(erg): Trying to parallelize tests on linux_aura makes things flaky
-  // because all shards share X11 state. http://crbug.com/326701
-  parallel_jobs_ = 1;
-
-  fprintf(stdout,
-          "Disabling parallelization due to the linux_aura flake. "
-          "http://crbug.com/326701\n");
-  fflush(stdout);
-#endif
 }
 
 TestLauncher::~TestLauncher() {
@@ -351,6 +344,10 @@ TestLauncher::~TestLauncher() {
 bool TestLauncher::Run(int argc, char** argv) {
   if (!Init())
     return false;
+
+  // Value of |cycles_| changes after each iteration. Keep track of the
+  // original value.
+  int requested_cycles = cycles_;
 
 #if defined(OS_POSIX)
   CHECK_EQ(0, pipe(g_shutdown_pipe));
@@ -384,7 +381,7 @@ bool TestLauncher::Run(int argc, char** argv) {
 
   MessageLoop::current()->Run();
 
-  if (cycles_ != 1)
+  if (requested_cycles != 1)
     results_tracker_.PrintSummaryOfAllIterations();
 
   MaybeSaveSummaryAsJSON();
@@ -451,6 +448,9 @@ void TestLauncher::OnTestFinished(const TestResult& result) {
     tests_to_retry_.insert(result.full_name);
   }
 
+  if (result.status == TestResult::TEST_UNKNOWN)
+    results_tracker_.AddGlobalTag(kUnreliableResultsTag);
+
   results_tracker_.AddTestResult(result);
 
   // TODO(phajdan.jr): Align counter (padding).
@@ -488,7 +488,7 @@ void TestLauncher::OnTestFinished(const TestResult& result) {
     test_broken_count_++;
   }
   size_t broken_threshold =
-      std::max(static_cast<size_t>(10), test_started_count_ / 10);
+      std::max(static_cast<size_t>(20), test_started_count_ / 10);
   if (test_broken_count_ >= broken_threshold) {
     fprintf(stdout, "Too many badly broken tests (%" PRIuS "), exiting now.\n",
             test_broken_count_);
@@ -499,65 +499,61 @@ void TestLauncher::OnTestFinished(const TestResult& result) {
 #endif  // defined(OS_POSIX)
 
     results_tracker_.AddGlobalTag("BROKEN_TEST_EARLY_EXIT");
+    results_tracker_.AddGlobalTag(kUnreliableResultsTag);
     MaybeSaveSummaryAsJSON();
 
     exit(1);
   }
 
-  if (test_finished_count_ == test_started_count_) {
-    if (!tests_to_retry_.empty()) {
-      if (retry_count_ < retry_limit_ &&
-          tests_to_retry_.size() < broken_threshold) {
-        retry_count_++;
+  if (test_finished_count_ != test_started_count_)
+    return;
 
-        std::vector<std::string> test_names(tests_to_retry_.begin(),
-                                            tests_to_retry_.end());
-
-        tests_to_retry_.clear();
-
-        size_t retry_started_count =
-            launcher_delegate_->RetryTests(this, test_names);
-        if (retry_started_count == 0) {
-          // Signal failure, but continue to run all requested test iterations.
-          // With the summary of all iterations at the end this is a good
-          // default.
-          run_result_ = false;
-
-          OnTestIterationFinished();
-        } else {
-          fprintf(stdout, "Retrying %" PRIuS " test%s (retry #%" PRIuS ")\n",
-                  retry_started_count,
-                  retry_started_count > 1 ? "s" : "",
-                  retry_count_);
-          fflush(stdout);
-
-          test_started_count_ += retry_started_count;
-        }
-      } else {
-        fprintf(stdout,
-                "Too many failing tests (%" PRIuS "), skipping retries.\n",
-                tests_to_retry_.size());
-        fflush(stdout);
-
-        results_tracker_.AddGlobalTag("BROKEN_TEST_SKIPPED_RETRIES");
-
-        OnTestIterationFinished();
-      }
-    } else {
-      OnTestIterationFinished();
-    }
+  if (tests_to_retry_.empty() || retry_count_ >= retry_limit_) {
+    OnTestIterationFinished();
+    return;
   }
+
+  if (tests_to_retry_.size() >= broken_threshold) {
+    fprintf(stdout,
+            "Too many failing tests (%" PRIuS "), skipping retries.\n",
+            tests_to_retry_.size());
+    fflush(stdout);
+
+    results_tracker_.AddGlobalTag("BROKEN_TEST_SKIPPED_RETRIES");
+    results_tracker_.AddGlobalTag(kUnreliableResultsTag);
+
+    OnTestIterationFinished();
+    return;
+  }
+
+  retry_count_++;
+
+  std::vector<std::string> test_names(tests_to_retry_.begin(),
+                                      tests_to_retry_.end());
+
+  tests_to_retry_.clear();
+
+  size_t retry_started_count = launcher_delegate_->RetryTests(this, test_names);
+  if (retry_started_count == 0) {
+    // Signal failure, but continue to run all requested test iterations.
+    // With the summary of all iterations at the end this is a good default.
+    run_result_ = false;
+
+    OnTestIterationFinished();
+    return;
+  }
+
+  fprintf(stdout, "Retrying %" PRIuS " test%s (retry #%" PRIuS ")\n",
+          retry_started_count,
+          retry_started_count > 1 ? "s" : "",
+          retry_count_);
+  fflush(stdout);
+
+  test_started_count_ += retry_started_count;
 }
 
 bool TestLauncher::Init() {
   const CommandLine* command_line = CommandLine::ForCurrentProcess();
-
-  if (command_line->HasSwitch(kGTestListTestsFlag)) {
-    // Child gtest processes would list tests instead of running tests.
-    // TODO(phajdan.jr): Restore support for the flag.
-    LOG(ERROR) << kGTestListTestsFlag << " is not supported.";
-    return false;
-  }
 
   // Initialize sharding. Command line takes precedence over legacy environment
   // variables.
@@ -691,6 +687,68 @@ bool TestLauncher::Init() {
     return 1;
   }
 
+#if defined(NDEBUG)
+  results_tracker_.AddGlobalTag("MODE_RELEASE");
+#else
+  results_tracker_.AddGlobalTag("MODE_DEBUG");
+#endif
+
+  // Operating systems (sorted alphabetically).
+  // Note that they can deliberately overlap, e.g. OS_LINUX is a subset
+  // of OS_POSIX.
+#if defined(OS_ANDROID)
+  results_tracker_.AddGlobalTag("OS_ANDROID");
+#endif
+
+#if defined(OS_BSD)
+  results_tracker_.AddGlobalTag("OS_BSD");
+#endif
+
+#if defined(OS_FREEBSD)
+  results_tracker_.AddGlobalTag("OS_FREEBSD");
+#endif
+
+#if defined(OS_IOS)
+  results_tracker_.AddGlobalTag("OS_IOS");
+#endif
+
+#if defined(OS_LINUX)
+  results_tracker_.AddGlobalTag("OS_LINUX");
+#endif
+
+#if defined(OS_MACOSX)
+  results_tracker_.AddGlobalTag("OS_MACOSX");
+#endif
+
+#if defined(OS_NACL)
+  results_tracker_.AddGlobalTag("OS_NACL");
+#endif
+
+#if defined(OS_OPENBSD)
+  results_tracker_.AddGlobalTag("OS_OPENBSD");
+#endif
+
+#if defined(OS_POSIX)
+  results_tracker_.AddGlobalTag("OS_POSIX");
+#endif
+
+#if defined(OS_SOLARIS)
+  results_tracker_.AddGlobalTag("OS_SOLARIS");
+#endif
+
+#if defined(OS_WIN)
+  results_tracker_.AddGlobalTag("OS_WIN");
+#endif
+
+  // CPU-related tags.
+#if defined(ARCH_CPU_32_BITS)
+  results_tracker_.AddGlobalTag("CPU_32_BITS");
+#endif
+
+#if defined(ARCH_CPU_64_BITS)
+  results_tracker_.AddGlobalTag("CPU_64_BITS");
+#endif
+
   return true;
 }
 
@@ -709,21 +767,22 @@ void TestLauncher::RunTests() {
       test_name.append(".");
       test_name.append(test_info->name());
 
-      // Skip disabled tests.
-      const CommandLine* command_line = CommandLine::ForCurrentProcess();
-      if (test_name.find("DISABLED") != std::string::npos &&
-          !command_line->HasSwitch(kGTestRunDisabledTestsFlag)) {
-        continue;
-      }
+      results_tracker_.AddTest(test_name);
 
-      std::string filtering_test_name =
-          launcher_delegate_->GetTestNameForFiltering(test_case, test_info);
+      const CommandLine* command_line = CommandLine::ForCurrentProcess();
+      if (test_name.find("DISABLED") != std::string::npos) {
+        results_tracker_.AddDisabledTest(test_name);
+
+        // Skip disabled tests unless explicitly requested.
+        if (!command_line->HasSwitch(kGTestRunDisabledTestsFlag))
+          continue;
+      }
 
       // Skip the test that doesn't match the filter (if given).
       if (!positive_test_filter_.empty()) {
         bool found = false;
         for (size_t k = 0; k < positive_test_filter_.size(); ++k) {
-          if (MatchPattern(filtering_test_name, positive_test_filter_[k])) {
+          if (MatchPattern(test_name, positive_test_filter_[k])) {
             found = true;
             break;
           }
@@ -734,7 +793,7 @@ void TestLauncher::RunTests() {
       }
       bool excluded = false;
       for (size_t k = 0; k < negative_test_filter_.size(); ++k) {
-        if (MatchPattern(filtering_test_name, negative_test_filter_[k])) {
+        if (MatchPattern(test_name, negative_test_filter_[k])) {
           excluded = true;
           break;
         }
@@ -781,7 +840,6 @@ void TestLauncher::RunTestIteration() {
   retry_count_ = 0;
   tests_to_retry_.clear();
   results_tracker_.OnTestIterationStarting();
-  launcher_delegate_->OnTestIterationStarting();
 
   MessageLoop::current()->PostTask(
       FROM_HERE, Bind(&TestLauncher::RunTests, Unretained(this)));
@@ -810,22 +868,19 @@ void TestLauncher::OnLaunchTestProcessFinished(
 }
 
 void TestLauncher::OnTestIterationFinished() {
-  // The current iteration is done.
-  fprintf(stdout, "%" PRIuS " test%s run\n",
-          test_finished_count_,
-          test_finished_count_ > 1 ? "s" : "");
-  fflush(stdout);
-
-  results_tracker_.PrintSummaryOfCurrentIteration();
-
   // When we retry tests, success is determined by having nothing more
   // to retry (everything eventually passed), as opposed to having
   // no failures at all.
-  if (!tests_to_retry_.empty()) {
+  if (tests_to_retry_.empty()) {
+    fprintf(stdout, "SUCCESS: all tests passed.\n");
+    fflush(stdout);
+  } else {
     // Signal failure, but continue to run all requested test iterations.
     // With the summary of all iterations at the end this is a good default.
     run_result_ = false;
   }
+
+  results_tracker_.PrintSummaryOfCurrentIteration();
 
   // Kick off the next iteration.
   MessageLoop::current()->PostTask(
@@ -917,6 +972,9 @@ CommandLine PrepareCommandLineForGTest(const CommandLine& command_line,
   // Strip out gtest_repeat flag - this is handled by the launcher process.
   switches.erase(kGTestRepeatFlag);
 
+  // Don't try to write the final XML report in child processes.
+  switches.erase(kGTestOutputFlag);
+
   for (CommandLine::SwitchMap::const_iterator iter = switches.begin();
        iter != switches.end(); ++iter) {
     new_command_line.AppendSwitchNative((*iter).first, (*iter).second);
@@ -967,6 +1025,13 @@ int LaunchChildTestProcessWithOptions(const CommandLine& command_line,
 
   new_options.job_handle = job_handle.Get();
 #endif  // defined(OS_WIN)
+
+#if defined(OS_LINUX)
+  // To prevent accidental privilege sharing to an untrusted child, processes
+  // are started with PR_SET_NO_NEW_PRIVS. Do not set that here, since this
+  // new child will be privileged and trusted.
+  new_options.allow_new_privs = true;
+#endif
 
   base::ProcessHandle process_handle;
 

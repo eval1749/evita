@@ -22,8 +22,6 @@ namespace base {
 //
 // TODO(akalin): Now that we have the *TaskRunner interfaces, we can
 // merge this with MessageLoopProxyImpl.
-#pragma warning(push)
-#pragma warning(disable: 4626)
 class BASE_EXPORT MessageLoopProxy : public SingleThreadTaskRunner {
  public:
   // Gets the MessageLoopProxy for the current message loop, creating one if
@@ -34,7 +32,6 @@ class BASE_EXPORT MessageLoopProxy : public SingleThreadTaskRunner {
   MessageLoopProxy();
   virtual ~MessageLoopProxy();
 };
-#pragma warning(pop)
 
 }  // namespace base
 

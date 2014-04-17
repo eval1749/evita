@@ -117,18 +117,6 @@ class UnitTestLauncherDelegate : public TestLauncherDelegate {
     FilePath output_file;
   };
 
-  virtual void OnTestIterationStarting() OVERRIDE {
-    // Nothing to do.
-  }
-
-  virtual std::string GetTestNameForFiltering(
-      const testing::TestCase* test_case,
-      const testing::TestInfo* test_info) OVERRIDE {
-    DCHECK(thread_checker_.CalledOnValidThread());
-
-    return std::string(test_case->name()) + "." + test_info->name();
-  }
-
   virtual bool ShouldRunTest(const testing::TestCase* test_case,
                              const testing::TestInfo* test_info) OVERRIDE {
     DCHECK(thread_checker_.CalledOnValidThread());
@@ -500,6 +488,7 @@ int LaunchUnitTestsInternal(int argc,
   }
 
   if (CommandLine::ForCurrentProcess()->HasSwitch(kGTestHelpFlag) ||
+      CommandLine::ForCurrentProcess()->HasSwitch(kGTestListTestsFlag) ||
       CommandLine::ForCurrentProcess()->HasSwitch(kSingleProcessTestsFlag) ||
       force_single_process) {
     return run_test_suite.Run();

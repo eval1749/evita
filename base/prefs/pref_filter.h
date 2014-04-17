@@ -24,12 +24,18 @@ class BASE_PREFS_EXPORT PrefFilter {
   // Observers are notified.
   // Changes made by a PrefFilter during FilterOnLoad do not result in
   // notifications to |PrefStore::Observer|s.
-  virtual void FilterOnLoad(base::DictionaryValue* pref_store_contents) = 0;
+  // Implementations should return true if they modify the dictionary, to allow
+  // the changes to be persisted.
+  virtual bool FilterOnLoad(base::DictionaryValue* pref_store_contents) = 0;
 
   // Receives notification when a pref store value is changed, before Observers
   // are notified.
-  virtual void FilterUpdate(const std::string& path,
-                            const base::Value* value) = 0;
+  virtual void FilterUpdate(const std::string& path) = 0;
+
+  // Receives notification when the pref store is about to serialize data
+  // contained in |pref_store_contents| to a string.
+  virtual void FilterSerializeData(
+      const base::DictionaryValue* pref_store_contents) = 0;
 };
 
 #endif  // BASE_PREFS_PREF_FILTER_H_

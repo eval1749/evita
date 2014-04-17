@@ -10,9 +10,6 @@
 #ifndef BASE_CALLBACK_H_
 #define BASE_CALLBACK_H_
 
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
-
 #include "base/callback_forward.h"
 #include "base/callback_internal.h"
 #include "base/template_util.h"
@@ -769,7 +766,5 @@ class Callback<R(A1, A2, A3, A4, A5, A6, A7)> : public internal::CallbackBase {
 typedef Callback<void(void)> Closure;
 
 }  // namespace base
-
-#pragma warning(pop)
 
 #endif  // BASE_CALLBACK_H

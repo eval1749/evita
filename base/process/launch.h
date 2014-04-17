@@ -7,7 +7,6 @@
 #ifndef BASE_PROCESS_LAUNCH_H_
 #define BASE_PROCESS_LAUNCH_H_
 
-#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -25,9 +24,9 @@
 #include "base/win/scoped_handle.h"
 #endif
 
-class CommandLine;
-
 namespace base {
+
+class CommandLine;
 
 #if defined(OS_WIN)
 typedef std::vector<HANDLE> HandlesToInheritVector;
@@ -102,7 +101,7 @@ struct BASE_EXPORT LaunchOptions {
   // Each element is an RLIMIT_* constant that should be raised to its
   // rlim_max.  This pointer is owned by the caller and must live through
   // the call to LaunchProcess().
-  const std::set<int>* maximize_rlimits;
+  const std::vector<int>* maximize_rlimits;
 
   // If true, start the process in a new process group, instead of
   // inheriting the parent's process group.  The pgid of the child process
@@ -112,6 +111,10 @@ struct BASE_EXPORT LaunchOptions {
 #if defined(OS_LINUX)
   // If non-zero, start the process using clone(), using flags as provided.
   int clone_flags;
+
+  // By default, child processes will have the PR_SET_NO_NEW_PRIVS bit set. If
+  // true, then this bit will not be set in the new child process.
+  bool allow_new_privs;
 #endif  // defined(OS_LINUX)
 
 #if defined(OS_CHROMEOS)
@@ -159,6 +162,16 @@ BASE_EXPORT bool LaunchProcess(const CommandLine& cmdline,
 BASE_EXPORT bool LaunchProcess(const string16& cmdline,
                                const LaunchOptions& options,
                                win::ScopedHandle* process_handle);
+
+// Launches a process with elevated privileges.  This does not behave exactly
+// like LaunchProcess as it uses ShellExecuteEx instead of CreateProcess to
+// create the process.  This means the process will have elevated privileges
+// and thus some common operations like OpenProcess will fail. The process will
+// be available through the |process_handle| argument.  Currently the only
+// supported LaunchOptions are |start_hidden| and |wait|.
+BASE_EXPORT bool LaunchElevatedProcess(const CommandLine& cmdline,
+                                       const LaunchOptions& options,
+                                       ProcessHandle* process_handle);
 
 #elif defined(OS_POSIX)
 // A POSIX-specific version of LaunchProcess that takes an argv array
@@ -233,6 +246,10 @@ BASE_EXPORT void RaiseProcessToHighPriority();
 // See http://crbug.com/20371/ for more details.
 void RestoreDefaultExceptionHandler();
 #endif  // defined(OS_MACOSX)
+
+// Creates a LaunchOptions object suitable for launching processes in a test
+// binary. This should not be called in production/released code.
+BASE_EXPORT LaunchOptions LaunchOptionsForTest();
 
 }  // namespace base
 

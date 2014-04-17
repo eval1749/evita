@@ -20,9 +20,7 @@
 #define ENABLE_THREAD_CHECKER 0
 #endif
 
-#if ENABLE_THREAD_CHECKER
 #include "base/threading/thread_checker_impl.h"
-#endif
 
 namespace base {
 
@@ -71,11 +69,8 @@ class ThreadCheckerDoNothing {
 //
 // In Release mode, CalledOnValidThread will always return true.
 #if ENABLE_THREAD_CHECKER
-#pragma warning(push)
-#pragma warning(disable: 4626)
 class ThreadChecker : public ThreadCheckerImpl {
 };
-#pragma warning(pop)
 #else
 class ThreadChecker : public ThreadCheckerDoNothing {
 };

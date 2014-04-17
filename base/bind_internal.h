@@ -10,9 +10,6 @@
 #ifndef BASE_BIND_INTERNAL_H_
 #define BASE_BIND_INTERNAL_H_
 
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
-
 #include "base/bind_helpers.h"
 #include "base/callback_internal.h"
 #include "base/memory/raw_scoped_refptr_mismatch_checker.h"
@@ -2534,6 +2531,8 @@ struct Invoker<7, StorageType, R(X1, X2, X3, X4, X5, X6, X7)> {
 template <typename Runnable, typename RunType, typename BoundArgsType>
 struct BindState;
 
+#pragma warning(push)
+#pragma warning(disable: 4625 4626)
 template <typename Runnable, typename RunType>
 struct BindState<Runnable, RunType, void()> : public BindStateBase {
   typedef Runnable RunnableType;
@@ -2785,10 +2784,8 @@ struct BindState<Runnable, RunType, void(P1, P2, P3, P4, P5, P6,
   P6 p6_;
   P7 p7_;
 };
-
+#pragma warning(pop)
 }  // namespace internal
 }  // namespace base
-
-#pragma warning(pop)
 
 #endif  // BASE_BIND_INTERNAL_H_

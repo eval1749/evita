@@ -267,11 +267,8 @@ void JsonPrefStore::CommitPendingWrite() {
 }
 
 void JsonPrefStore::ReportValueChanged(const std::string& key) {
-  if (pref_filter_) {
-    const base::Value* tmp = NULL;
-    prefs_->Get(key, &tmp);
-    pref_filter_->FilterUpdate(key, tmp);
-  }
+  if (pref_filter_)
+    pref_filter_->FilterUpdate(key);
 
   FOR_EACH_OBSERVER(PrefStore::Observer, observers_, OnPrefValueChanged(key));
 
@@ -317,8 +314,8 @@ void JsonPrefStore::OnFileRead(base::Value* value_owned,
       NOTREACHED() << "Unknown error: " << error;
   }
 
-  if (pref_filter_)
-    pref_filter_->FilterOnLoad(prefs_.get());
+  if (pref_filter_ && pref_filter_->FilterOnLoad(prefs_.get()))
+    writer_.ScheduleWrite(this);
 
   if (error_delegate_.get() && error != PREF_READ_ERROR_NONE)
     error_delegate_->OnError(error);
@@ -333,6 +330,9 @@ JsonPrefStore::~JsonPrefStore() {
 }
 
 bool JsonPrefStore::SerializeData(std::string* output) {
+  if (pref_filter_)
+    pref_filter_->FilterSerializeData(prefs_.get());
+
   JSONStringValueSerializer serializer(output);
   serializer.set_pretty_print(true);
   return serializer.Serialize(*prefs_);

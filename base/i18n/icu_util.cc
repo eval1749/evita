@@ -44,22 +44,21 @@
 namespace base {
 namespace i18n {
 
-#if 1
-// operator<< for wstring is defined in base/logging.h. However, it isn't
-// seend base::i18n namespace.
-inline std::ostream& operator<<(std::ostream& out, const std::wstring& wstr) {
-  return out << wstr.c_str();
-}
+namespace {
+
+#if !defined(NDEBUG)
+// Assert that we are not called more than once.  Even though calling this
+// function isn't harmful (ICU can handle it), being called twice probably
+// indicates a programming error.
+bool g_called_once = false;
+bool g_check_called_once = true;
 #endif
+}
 
 bool InitializeICU() {
-#ifndef NDEBUG
-  // Assert that we are not called more than once.  Even though calling this
-  // function isn't harmful (ICU can handle it), being called twice probably
-  // indicates a programming error.
-  static bool called_once = false;
-  DCHECK(!called_once);
-  called_once = true;
+#if !defined(NDEBUG)
+  DCHECK(!g_check_called_once || !g_called_once);
+  g_called_once = true;
 #endif
 
 #if (ICU_UTIL_DATA_IMPL == ICU_UTIL_DATA_SHARED)
@@ -98,11 +97,18 @@ bool InitializeICU() {
   CR_DEFINE_STATIC_LOCAL(base::MemoryMappedFile, mapped_file, ());
   if (!mapped_file.IsValid()) {
 #if !defined(OS_MACOSX)
+    FilePath data_path;
+#if defined(OS_WIN)
+    // The data file will be in the same directory as the current module.
+    bool path_ok = PathService::Get(base::DIR_MODULE, &data_path);
+#elif defined(OS_ANDROID)
+    bool path_ok = PathService::Get(base::DIR_ANDROID_APP_DATA, &data_path);
+#else
     // For now, expect the data file to be alongside the executable.
     // This is sufficient while we work on unit tests, but will eventually
     // likely live in a data directory.
-    FilePath data_path;
     bool path_ok = PathService::Get(base::DIR_EXE, &data_path);
+#endif
     DCHECK(path_ok);
     data_path = data_path.AppendASCII(ICU_UTIL_DATA_FILE_NAME);
 #else
@@ -115,13 +121,19 @@ bool InitializeICU() {
     }
 #endif  // OS check
     if (!mapped_file.Initialize(data_path)) {
-      DLOG(ERROR) << "Couldn't mmap " << data_path.value();
+      DLOG(ERROR) << "Couldn't mmap " << data_path.AsUTF8Unsafe();
       return false;
     }
   }
   UErrorCode err = U_ZERO_ERROR;
   udata_setCommonData(const_cast<uint8*>(mapped_file.data()), &err);
   return err == U_ZERO_ERROR;
+#endif
+}
+
+void AllowMultipleInitializeCallsForTesting() {
+#if !defined(NDEBUG)
+  g_check_called_once = false;
 #endif
 }
 

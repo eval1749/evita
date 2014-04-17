@@ -48,6 +48,7 @@ int64 SysInfo::AmountOfAvailablePhysicalMemory() {
   return AmountOfMemory(&MEMORYSTATUSEX::ullAvailPhys);
 }
 
+// static
 int64 SysInfo::AmountOfVirtualMemory() {
   return 0;
 }

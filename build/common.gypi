@@ -17,7 +17,6 @@
     'clang%': '<(clang)',
     'component%': '<(component)',
     'target_arch%': '<(target_arch)',
-
     # For hunspell
     'gcc_version': '48',
 
@@ -26,6 +25,7 @@
     'icu_use_data_file_flag%': 0,
     'os_posix': 0,
     'target_arch%': '<(target_arch)',
+    'use_custom_libcxx%': 0,
     'v8_enable_i18n_support': 1,
     'v8_optimized_debug%': '(<v8_optimized_debug)',
   }, # variables

@@ -18,7 +18,7 @@
 #include "base/at_exit.h"
 #include "base/command_line.h"
 #include "base/logging.h"
-#include "base/strings/string_util.h"
+#include "base/strings/utf_string_conversions.h"
 #include "evita/editor/application.h"
 #include "evita/editor/switch_set.h"
 #include "evita/views/switches.h"
@@ -154,7 +154,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
   for (const auto& name : switch_set->names()) {
     const auto value = switch_set->Get(name);
     if (value.is_bool()) {
-      if (command_line->HasSwitch(UTF16ToASCII(name)))
+      if (command_line->HasSwitch(base::UTF16ToASCII(name)))
         switch_set->Set(name, domapi::SwitchValue(true));
     }
   }

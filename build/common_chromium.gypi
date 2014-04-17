@@ -80,7 +80,9 @@
               'advapi32.lib',
               'dbghelp.lib',
               'dnsapi.lib',
+              'gdi32.lib', # CreateDIBSecion
               'msimg32.lib',
+              'netapi32.lib', # NetApiBufferFree
               'ole32.lib',
               'oleaut32.lib',
               'psapi.lib',

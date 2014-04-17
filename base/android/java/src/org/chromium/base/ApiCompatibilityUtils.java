@@ -4,18 +4,27 @@
 
 package org.chromium.base;
 
+import android.app.PendingIntent;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewTreeObserver;
+import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Utility class to use new APIs that were added after ICS (API level 14).
  */
 public class ApiCompatibilityUtils {
+
+    private static final String TAG = "ApiCompatibilityUtils";
 
     private ApiCompatibilityUtils() {
     }
@@ -31,6 +40,18 @@ public class ApiCompatibilityUtils {
         } else {
             // All layouts are LTR before JB MR1.
             return false;
+        }
+    }
+
+    /**
+     * @see Configuration#getLayoutDirection()
+     */
+    public static int getLayoutDirection(Configuration configuration) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return configuration.getLayoutDirection();
+        } else {
+            // All layouts are LTR before JB MR1.
+            return View.LAYOUT_DIRECTION_LTR;
         }
     }
 
@@ -157,6 +178,24 @@ public class ApiCompatibilityUtils {
     public static void setCompoundDrawablesRelative(TextView textView, Drawable start, Drawable top,
             Drawable end, Drawable bottom) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            // On JB MR1, setCompoundDrawablesRelative() is a no-op if the view has ever been
+            // measured: due to a bug, it doesn't call resetResolvedDrawables(). Unfortunately,
+            // resetResolvedDrawables() is a hidden method so we can't call it directly. Instead,
+            // we use reflection.
+            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                try {
+                    Method resetResolvedDrawables = TextView.class.getDeclaredMethod(
+                            "resetResolvedDrawables");
+                    resetResolvedDrawables.setAccessible(true);
+                    resetResolvedDrawables.invoke(textView);
+                } catch (NoSuchMethodException e) {
+                    Log.w(TAG, e);
+                } catch (IllegalAccessException e) {
+                    Log.w(TAG, e);
+                } catch (InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             textView.setCompoundDrawablesRelative(start, top, bottom, end);
         } else {
             textView.setCompoundDrawables(start, top, bottom, end);
@@ -236,6 +275,30 @@ public class ApiCompatibilityUtils {
             view.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
         } else {
             view.getViewTreeObserver().removeGlobalOnLayoutListener(listener);
+        }
+    }
+
+    /**
+     * @see android.widget.ImageView#setImageAlpha(int)
+     */
+    @SuppressWarnings("deprecation")
+    public static void setImageAlpha(ImageView iv, int alpha) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            iv.setImageAlpha(alpha);
+        } else {
+            iv.setAlpha(alpha);
+        }
+    }
+
+    /**
+     * @see android.app.PendingIntent#getCreatorPackage()
+     */
+    @SuppressWarnings("deprecation")
+    public static String getCreatorPackage(PendingIntent intent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return intent.getCreatorPackage();
+        } else {
+            return intent.getTargetPackage();
         }
     }
 }

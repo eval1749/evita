@@ -203,7 +203,6 @@ MarkerCell::MarkerCell(const MarkerCell& other)
 MarkerCell::~MarkerCell() {
 }
 
-
 // rendering::Cell
 Cell* MarkerCell::Copy() const {
   return new MarkerCell(*this);
@@ -238,61 +237,63 @@ Posn MarkerCell::MapXToPosn(const gfx::Graphics&, float) const {
   return start_;
 }
 
+// Render marker above baseline.
 void MarkerCell::Render(const gfx::Graphics& gfx,
                         const gfx::RectF& rect) const {
   Cell::Render(gfx, rect);
 
-  auto const yBottom = rect.bottom - line_descent();
-  auto const yTop = yBottom - line_descent() - height() + descent();
-  auto const xLeft = rect.left;
-  auto const xRight = rect.right;
-
-  gfx::Brush stroke_brush(gfx, style().color());
-
   auto const ascent = height() - descent();
+  auto const marker_rect = gfx::RectF(gfx::PointF(rect.left, rect.top + top()),
+                                      gfx::SizeF(width(), ascent));
+  gfx::Brush stroke_brush(gfx, style().color());
   switch (marker_name_) {
     case TextMarker::EndOfDocument: { // Draw <-
       // FIXME 2007-06-13 We should get internal leading from font.
       auto const iInternalLeading = 3;
       auto const w = std::max(ascent / 6, 2.0f);
-      auto const y = yBottom - (ascent - iInternalLeading) / 2;
-      DrawHLine(gfx, stroke_brush, xLeft, xRight, y);
-      DrawLine(gfx, stroke_brush, xLeft + w, y - w, xLeft, y);
-      DrawLine(gfx, stroke_brush, xLeft + w, y + w, xLeft, y);
+      auto const y = marker_rect.bottom - (ascent - iInternalLeading) / 2;
+      auto const sx = marker_rect.left;
+      auto const ex = marker_rect.right;
+      DrawHLine(gfx, stroke_brush, sx, ex, y);
+      DrawLine(gfx, stroke_brush, sx + w, y - w, sx, y);
+      DrawLine(gfx, stroke_brush, sx + w, y + w, sx, y);
       break;
     }
 
     case TextMarker::EndOfLine: { // Draw V
-      auto const y = yBottom - ascent * 3 / 5;
+      auto const ey = marker_rect.bottom;
+      auto const sy = ey - ascent * 3 / 5;
       auto const w = std::max(width() / 6, 2.0f);
-      auto const x = xLeft + width() / 2;
-      DrawVLine(gfx, stroke_brush, x, y, yBottom);
-      DrawLine(gfx, stroke_brush, x - w, yBottom - w, x, yBottom);
-      DrawLine(gfx, stroke_brush, x + w, yBottom - w, x, yBottom);
+      auto const x = marker_rect.left + width() / 2;
+      DrawVLine(gfx, stroke_brush, x, sy, ey);
+      DrawLine(gfx, stroke_brush, x - w, ey - w, x, ey);
+      DrawLine(gfx, stroke_brush, x + w, ey - w, x, ey);
       break;
     }
 
-
     case TextMarker::LineWrap: { // Draw ->
-      auto const ex = xRight - 1;
+      auto const sx = marker_rect.left;
+      auto const ex = marker_rect.right - 1;
+      auto const y = marker_rect.top + ascent / 2;
       auto const w = std::max(ascent / 6, 2.0f);
-
-      auto const y = yTop + ascent / 2;
-      DrawHLine(gfx, stroke_brush, xLeft, ex, y);
-      DrawLine(gfx, stroke_brush, ex - w, y - w, xRight, y);
-      DrawLine(gfx, stroke_brush, ex - w, y + w, xRight, y);
+      DrawHLine(gfx, stroke_brush, sx, ex, y);
+      DrawLine(gfx, stroke_brush, ex - w, y - w, ex, y);
+      DrawLine(gfx, stroke_brush, ex - w, y + w, ex, y);
       break;
     }
 
     case TextMarker::Tab: { // Draw |_|
+      auto const sx = marker_rect.left + 2;
+      auto const ex = marker_rect.right - 3;
+      auto const y = marker_rect.bottom;
       auto const w = std::max(ascent / 6, 2.0f);
-      DrawHLine(gfx, stroke_brush, xLeft + 2, xRight - 3, yBottom);
-      DrawVLine(gfx, stroke_brush, xLeft + 2, yBottom, yBottom - w * 2);
-      DrawVLine(gfx, stroke_brush, xRight - 3, yBottom, yBottom - w * 2);
+      DrawHLine(gfx, stroke_brush, sx, ex, y);
+      DrawVLine(gfx, stroke_brush, sx, y, y - w * 2);
+      DrawVLine(gfx, stroke_brush, ex, y, y - w * 2);
       break;
     }
   }
-  FillOverlay(gfx, rect);
+  FillOverlay(gfx, marker_rect);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -348,8 +349,8 @@ uint32_t TextCell::Hash() const {
 gfx::RectF TextCell::HitTestTextPosition(Posn offset) const {
   if (offset < start_ || offset > end_)
     return gfx::RectF();
-  auto const cwch = static_cast<size_t>(offset - start_);
-  auto const left = style().font()->GetTextWidth(characters_.data(), cwch);
+  auto const length = static_cast<size_t>(offset - start_);
+  auto const left = style().font()->GetTextWidth(characters_.data(), length);
   return gfx::RectF(gfx::PointF(left, top()),
                     gfx::SizeF(1.0f, height()));
 }
@@ -380,8 +381,8 @@ void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
 
   gfx::Brush text_brush(gfx, style().color());
 
-  gfx::RectF text_rect(rect);
-  text_rect.top = text_rect.bottom - line_descent() - height() + descent();
+  auto text_rect = rect;
+  text_rect.top = rect.top + top();
   text_rect.bottom = text_rect.top + height();
   DrawText(gfx, *style().font(), text_brush, text_rect, characters_);
 
@@ -454,7 +455,6 @@ bool UnicodeCell::Merge(const RenderStyle&, float) {
 void UnicodeCell::Render(const gfx::Graphics& gfx,
                          const gfx::RectF& rect) const {
   FillBackground(gfx, rect);
-
 
   gfx::Brush text_brush(gfx, style().color());
   DrawText(gfx, *style().font(), text_brush, rect, characters());

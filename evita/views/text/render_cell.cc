@@ -203,6 +203,7 @@ MarkerCell::MarkerCell(const MarkerCell& other)
 MarkerCell::~MarkerCell() {
 }
 
+
 // rendering::Cell
 Cell* MarkerCell::Copy() const {
   return new MarkerCell(*this);
@@ -341,14 +342,16 @@ uint32_t TextCell::Hash() const {
   return (Cell::Hash() << 3) ^ std::hash<base::string16>()(characters_);
 }
 
+// Returns bounds rectangle of caret at |offset|. Caret is placed before
+// character at |offset|. So, height of caret is height of character before
+// |offset|.
 gfx::RectF TextCell::HitTestTextPosition(Posn offset) const {
-  if (offset < start_ || offset >= end_)
+  if (offset < start_ || offset > end_)
     return gfx::RectF();
   auto const cwch = static_cast<size_t>(offset - start_);
   auto const left = style().font()->GetTextWidth(characters_.data(), cwch);
-  auto const right = style().font()->GetTextWidth(characters_.data(), cwch + 1);
   return gfx::RectF(gfx::PointF(left, top()),
-                    gfx::SizeF(right - left, height()));
+                    gfx::SizeF(1.0f, height()));
 }
 
 Posn TextCell::MapXToPosn(const gfx::Graphics& gfx, float x) const {

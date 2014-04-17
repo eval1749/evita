@@ -93,6 +93,7 @@ class FillerCell final : public Cell {
 //
 // MarkerCell
 //
+
 class MarkerCell final : public Cell {
   DECLARE_CASTABLE_CLASS(MarkerCell, Cell);
 
@@ -138,6 +139,8 @@ class TextCell : public Cell {
   public: virtual ~TextCell();
 
   public: const base::string16 characters() const { return characters_; }
+  public: Posn end() const { return end_; }
+  public: Posn start() const { return start_; }
 
   public: void AddChar(base::char16 char_code);
 
@@ -147,7 +150,7 @@ class TextCell : public Cell {
   public: virtual Posn Fix(float iHeight, float iDescent) override;
   public: virtual uint32_t Hash() const override final;
   public: virtual gfx::RectF HitTestTextPosition(
-      Posn position) const override final;
+      Posn position) const override;
   public: virtual Posn MapXToPosn(const gfx::Graphics& gfx,
                                   float x) const override final;
   public: virtual bool Merge(const RenderStyle& style, float width) override;
@@ -169,6 +172,7 @@ class UnicodeCell final : public TextCell {
 
   // rendering::Cell
   private: virtual Cell* Copy() const override;
+  private: virtual gfx::RectF HitTestTextPosition(Posn lPosn) const override;
   private: virtual bool Merge(const RenderStyle& style, float width) override;
   private: virtual void Render(const gfx::Graphics& gfx,
                                const gfx::RectF& rect) const override;

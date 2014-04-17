@@ -377,17 +377,14 @@ bool TextCell::Merge(const RenderStyle& style, float width) {
 
 void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
   DCHECK(!characters_.empty());
+  auto const text_rect = gfx::RectF(
+      gfx::PointF(rect.left, rect.top + top()), 
+      gfx::SizeF(rect.width(), height()));
   FillBackground(gfx, rect);
-
   gfx::Brush text_brush(gfx, style().color());
-
-  auto text_rect = rect;
-  text_rect.top = rect.top + top();
-  text_rect.bottom = text_rect.top + height();
   DrawText(gfx, *style().font(), text_brush, text_rect, characters_);
 
   auto const baseline = text_rect.bottom - descent();
-
   switch (style().text_decoration()) {
     case css::TextDecoration::ImeInput:
       DrawWave(gfx, text_brush, rect.left, rect.right, baseline + 1);
@@ -448,21 +445,28 @@ Cell* UnicodeCell::Copy() const {
   return new UnicodeCell(*this);
 }
 
+gfx::RectF UnicodeCell::HitTestTextPosition(Posn offset) const {
+  if (offset < start() || offset > end())
+    return gfx::RectF();
+  return gfx::RectF(gfx::PointF(width(), top()), gfx::SizeF(1.0f, height()));
+}
+
 bool UnicodeCell::Merge(const RenderStyle&, float) {
   return false;
 }
 
 void UnicodeCell::Render(const gfx::Graphics& gfx,
                          const gfx::RectF& rect) const {
+  auto const text_rect = gfx::RectF(
+      gfx::PointF(rect.left, rect.top + top()),
+      gfx::SizeF(rect.width(), height())) - gfx::SizeF(1, 1);
   FillBackground(gfx, rect);
-
+  gfx::Graphics::AxisAlignedClipScope clip_scope(gfx, text_rect);
   gfx::Brush text_brush(gfx, style().color());
-  DrawText(gfx, *style().font(), text_brush, rect, characters());
-
-  gfx.DrawRectangle(text_brush,
-                    gfx::RectF(rect.left, rect.top,
-                               rect.right - 1, rect.bottom - 1));
-  FillOverlay(gfx, rect);
+  DrawText(gfx, *style().font(), text_brush, text_rect - gfx::SizeF(1, 1),
+           characters());
+  gfx.DrawRectangle(text_brush, text_rect);
+  FillOverlay(gfx, text_rect);
 }
 
 } // namespace rendering

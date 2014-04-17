@@ -330,9 +330,8 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
   if (!pFont) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
-    auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'u');
+    auto const font = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'u');
     base::string16 string;
-
     if (wch < 0x20) {
       string.push_back('^');
       string.push_back(static_cast<base::char16>(wch + 0x40));
@@ -344,15 +343,13 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
       string.push_back(toxdigit((wch >> 0) & 15));
     }
 
-    auto const cxUni = 6.0f + AlignWidthToPixel(m_gfx,
-                                                pFont->GetTextWidth(string));
-    auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
-    if (pPrev && x + cxUni + cxM > text_block_->right())
+    auto const width = font->GetTextWidth(string) + 4;
+    auto const char_width = font->GetCharWidth('M');
+    if (pPrev && x + width + char_width > text_block_->right())
       return nullptr;
-
-    auto const height = AlignHeightToPixel(m_gfx, pFont->height());
-    return new UnicodeCell(text_scanner_->MakeRenderStyle(style, pFont), cxUni,
-                           height, lPosn, string);
+    auto const height = AlignHeightToPixel(m_gfx, font->height());
+    return new UnicodeCell(text_scanner_->MakeRenderStyle(style, font),
+                           width, height, lPosn, string);
   }
 
   auto render_style = text_scanner_->MakeRenderStyle(style, pFont);

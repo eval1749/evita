@@ -34,21 +34,6 @@ Posn Range::ensurePosn(Posn lPosn) const {
   return lPosn;
 }
 
-// FIXME 2007-07-18 yosi We should stop if counter reaches zero.
-void Range::GetInformation(Information* out_oInfo, Count n) const {
-  Count k = n;
-  out_oInfo->m_lLineNum = 1;
-  for (Posn lPosn = 0; lPosn < start_; lPosn++) {
-    if (buffer_->GetCharAt(lPosn) == 0x0A)
-      ++out_oInfo->m_lLineNum;
-  }
-
-  out_oInfo->m_fLineNum = k > 0;
-  auto const lLineStart = buffer_->ComputeStartOfLine(start_);
-  out_oInfo->m_fColumn = (start_ - lLineStart) < n;
-  out_oInfo->m_lColumn = start_ - lLineStart;
-}
-
 base::string16 Range::GetText() const {
   return buffer_->GetText(start_, end_);
 }

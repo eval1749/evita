@@ -35,7 +35,6 @@ class Range {
 
   // [G]
   public: Posn GetEnd() const { return end_; }
-  public: void GetInformation(Information*, Count = Count_Max) const;
   public: Posn GetStart() const { return start_; }
   public: base::string16 GetText() const;
 

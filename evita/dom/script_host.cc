@@ -350,8 +350,14 @@ void ScriptHost::UnhandledException(v8_glue::Runner*,
   }
 
   auto const isolate = runner()->isolate();
+  DVLOG(0) << text;
   v8_glue::Runner::Scope runner_scope(runner());
-  auto const console = runner_->GetGlobalProperty("console")->ToObject();
+  auto const js_console = runner_->GetGlobalProperty("console");
+  if (js_console.IsEmpty() || !js_console->IsObject()) {
+    DVLOG(0) << "No console object. Why?";
+    return;
+  }
+  auto const console = js_console->ToObject();
   auto const log = console->Get(gin::StringToV8(isolate, "log"));
   runner()->Call(log, console, gin::StringToV8(isolate, text));
 }

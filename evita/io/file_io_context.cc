@@ -5,6 +5,7 @@
 #include "evita/io/file_io_context.h"
 
 #include "base/bind.h"
+#include "base/logging.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/io/io_context_utils.h"
@@ -97,6 +98,7 @@ void FileIoContext::Close(const domapi::FileIoDeferred& deferred) {
       DVLOG(0) << "CloseHandle error=" << last_error;
       Reject(deferred.reject, last_error);
       return;
+
     }
     file_handle_.release();
   }
@@ -118,6 +120,7 @@ if (running_) {
   auto const succeeded = ::ReadFile(file_handle_.get(), buffer, num_read,
                                     &read, &overlapped);
   DCHECK(!succeeded);
+  __assume(!succeeded);
 
   auto const error = ::GetLastError();
   if (error == ERROR_IO_PENDING)
@@ -139,6 +142,7 @@ void FileIoContext::Write(void* buffer, size_t num_write,
   auto const succeeded = ::WriteFile(file_handle_.get(), buffer, num_write,
                                      &written, &overlapped);
   DCHECK(!succeeded);
+  __assume(!succeeded);
   auto const error = ::GetLastError();
   if (error == ERROR_IO_PENDING)
     return;

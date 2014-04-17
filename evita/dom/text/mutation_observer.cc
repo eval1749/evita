@@ -151,6 +151,7 @@ MutationObserver::Tracker* MutationObserver::GetTracker(
 void MutationObserver::Observe(Document* document,
                                const MutationObserverInit& options) {
   DCHECK(options.summary());
+  __assume(options.summary());
   tracker_map_[document] = new Tracker(document);
   MutationObserverController::instance()->Register(this, document);
 }
@@ -163,6 +164,7 @@ std::vector<MutationRecord*> MutationObserver::TakeRecords() {
      records.push_back(record);
    }
   }
+
   return records;
 }
 

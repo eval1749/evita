@@ -59,7 +59,7 @@ class DataTransferBlobData : public DataTransferData {
 class DataTransferStringData : public DataTransferData {
   private: const base::string16 data_;
 
-  public: DataTransferStringData(const string16& string);
+  public: DataTransferStringData(const base::string16& string);
   public: virtual ~DataTransferStringData();
 
   public: virtual const void* bytes() const override;

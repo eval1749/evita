@@ -58,7 +58,7 @@ std::unique_ptr<NativeWindow> NativeWindow::Create() {
 }
 
 bool NativeWindow::CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
-                                  const char16* title, HWND parent_hwnd, 
+                                  const base::char16* title, HWND parent_hwnd,
                                   const Point& left_top,
                                   const Size& size) {
   DCHECK(!s_creating_window);

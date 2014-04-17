@@ -124,8 +124,14 @@ global.FindAndReplace = (function() {
       return regexp;
     }
 
-    if (shouldFindInSelection(find_options, range))
-      return finish(document.match_(regexp, range.start, range.end));
+    if (shouldFindInSelection(find_options, range)) {
+      var matches = document.match_(regexp, range.start, range.end);
+      if (!matches)
+        return finish(matches);
+      var match = matches[0];
+      if (match.start != range.start || match.end != range.end)
+        return finish(matches);
+    }
 
     var end = document.length;
     if (regexp.backward) {

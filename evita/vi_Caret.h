@@ -36,8 +36,8 @@ class Caret {
   public: Caret();
   public: ~Caret();
   public: void Blink(const gfx::Graphics* gfx);
-  public: void Hide(const gfx::Graphics* gfx_);
   public: void Give(views::Window* window, const gfx::Graphics* gfx);
+  public: void Hide(const gfx::Graphics* gfx_);
   public: void Reset();
   private: void Show(const gfx::Graphics* gfx);
   public: void Take(views::Window* owner);

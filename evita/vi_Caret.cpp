@@ -78,7 +78,6 @@ void Caret::Take(views::Window* owner) {
 }
 
 void Caret::Update(const gfx::Graphics* gfx, const gfx::RectF& new_rect) {
-  DCHECK(!shown_);
   if (!owner_) {
     rect_ = new_rect;
     return;
@@ -87,5 +86,6 @@ void Caret::Update(const gfx::Graphics* gfx, const gfx::RectF& new_rect) {
     rect_ = new_rect;
     last_blink_time_ = base::Time::Now();
   }
+  shown_ = false;
   Show(gfx);
 }

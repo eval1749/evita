@@ -432,6 +432,7 @@ void TextEditWindow::Redraw() {
   }
 
   Render();
+
 }
 
 void TextEditWindow::Render() {
@@ -440,7 +441,6 @@ void TextEditWindow::Render() {
 
   gfx::Graphics::DrawingScope drawing_scope(*m_gfx);
   m_gfx->set_dirty_rect(rect());
-  caret_->Hide(m_gfx);
   text_renderer_->Render();
 
   {
@@ -558,6 +558,7 @@ void TextEditWindow::updateScreen() {
   if (!text_renderer_->ShouldFormat(selection))
     return;
   text_renderer_->Prepare(selection);
+
   Posn lStart = m_pViewRange->GetStart();
   lStart = StartOfLine(lStart);
   text_renderer_->Format(lStart);
@@ -757,6 +758,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
         lPosn = lNext;
       }
   }
+
 
   ////////////////////////////////////////////////////////////
   //

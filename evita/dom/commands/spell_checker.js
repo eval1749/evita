@@ -145,6 +145,7 @@ SpellChecker.prototype.destroy = function() {
 };
 
 // Spell checker is stopped when window loses focus.
+
 SpellChecker.prototype.didBlurWindow = function(event) {
   this.timer.stop();
 };
@@ -234,7 +235,7 @@ SpellChecker.prototype.didFireTimer = function() {
         // Word seems not to be completed yet. Spell checker will sleep
         // until document is changed.
         num_checked += range.end - range.start;
-        return range.end;
+        return restart_offset;
       }
 
       // To reduce garbage collection, we check word in |word_range| is whether

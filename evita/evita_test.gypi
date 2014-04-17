@@ -160,6 +160,7 @@
         'text/buffer_unittest.cc',
         'text/encodings/encodings_unittest.cc',
         'text/marker_set_unittest.cc',
+        'text/range_unittest.cc',
         'text/undo_stack_unittest.cc',
       ],
     }, # evita_text_test

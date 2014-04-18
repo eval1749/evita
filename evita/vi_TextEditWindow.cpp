@@ -433,6 +433,7 @@ void TextEditWindow::Redraw() {
 
   Render();
 
+
 }
 
 void TextEditWindow::Render() {
@@ -440,6 +441,7 @@ void TextEditWindow::Render() {
     return;
 
   gfx::Graphics::DrawingScope drawing_scope(*m_gfx);
+  Caret::Updater caret_updater(caret_.get());
   m_gfx->set_dirty_rect(rect());
   text_renderer_->Render();
 
@@ -451,7 +453,7 @@ void TextEditWindow::Render() {
 
   const auto char_rect = text_renderer_->HitTestTextPosition(m_lCaretPosn);
   if (char_rect.empty()) {
-    caret_->Reset();
+    caret_updater.Clear();
     return;
   }
 
@@ -478,7 +480,7 @@ void TextEditWindow::Render() {
     }
   #endif // SUPPORT_IME
 
-  caret_->Update(m_gfx, caret_rect);
+  caret_updater.Update(m_gfx, caret_rect);
 }
 
 int TextEditWindow::SmallScroll(int, int iDy) {

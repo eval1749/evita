@@ -28,6 +28,17 @@ class Window;
 // caret size. If we call CreateCaret, caret doesn't blink.
 // Note: Caret should be lived until timer is fired.
 class Caret {
+  public: class Updater {
+    private: Caret* caret_;
+
+    public: Updater(Caret* caret);
+    public: ~Updater();
+
+    public: void Clear();
+    public: void Update(const gfx::Graphics* gfx, const gfx::RectF& rect);
+  };
+  friend class Updater;
+
   private: base::Time last_blink_time_;
   private: views::Window* owner_;
   private: gfx::RectF rect_;
@@ -38,10 +49,9 @@ class Caret {
   public: void Blink(const gfx::Graphics* gfx);
   public: void Give(views::Window* window, const gfx::Graphics* gfx);
   public: void Hide(const gfx::Graphics* gfx_);
-  public: void Reset();
   private: void Show(const gfx::Graphics* gfx);
   public: void Take(views::Window* owner);
-  public: void Update(const gfx::Graphics* gfx, const gfx::RectF& rect);
+  private: void Update(const gfx::Graphics* gfx, const gfx::RectF& rect);
 
   DISALLOW_COPY_AND_ASSIGN(Caret);
 };

@@ -14,6 +14,26 @@ static const auto kBlinkInterval = 500; // milliseconds
 
 //////////////////////////////////////////////////////////////////////
 //
+// Caret::Updater
+//
+Caret::Updater::Updater(Caret* caret) : caret_(caret) {
+  caret_->shown_ = false;
+}
+
+Caret::Updater::~Updater() {
+}
+
+void Caret::Updater::Clear() {
+  caret_->rect_ = gfx::RectF();
+}
+
+void Caret::Updater::Update(const gfx::Graphics* gfx,
+                            const gfx::RectF& new_rect) {
+  caret_->Update(gfx, new_rect);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // Caret
 //
 Caret::Caret() : owner_(false), shown_(false) {
@@ -55,11 +75,6 @@ void Caret::Hide(const gfx::Graphics* gfx) {
   gfx->DrawBitmap(*gfx->screen_bitmap(), rect_, rect_);
 }
 
-void Caret::Reset() {
-  DCHECK(!shown_);
-  rect_ = gfx::RectF();
-}
-
 void Caret::Show(const gfx::Graphics* gfx) {
   DCHECK(owner_);
   if (shown_ || rect_.empty())
@@ -78,6 +93,7 @@ void Caret::Take(views::Window* owner) {
 }
 
 void Caret::Update(const gfx::Graphics* gfx, const gfx::RectF& new_rect) {
+  DCHECK(!shown_);
   if (!owner_) {
     rect_ = new_rect;
     return;
@@ -86,6 +102,5 @@ void Caret::Update(const gfx::Graphics* gfx, const gfx::RectF& new_rect) {
     rect_ = new_rect;
     last_blink_time_ = base::Time::Now();
   }
-  shown_ = false;
   Show(gfx);
 }

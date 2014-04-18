@@ -92,9 +92,9 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
         m_lImeEnd(0),
         m_lImeStart(0),
       #endif // SUPPORT_IME
-      m_pViewRange(text_window.view_range()->text_range()),
       vertical_scroll_bar_(new ui::ScrollBar(ui::ScrollBar::Type::Vertical,
-                                             this)) {
+                                             this)),
+      view_start_(0) {
   AppendChild(vertical_scroll_bar_);
 }
 
@@ -174,7 +174,7 @@ text::Posn TextEditWindow::ComputeMotion(
       auto k = LargeScroll(0, n, false);
       if (k > 0) {
         auto const lStart = text_renderer_->GetStart();
-        m_pViewRange->SetRange(lStart, lStart);
+        view_start_ = lStart;
         return MapPointToPosn(pt);
       }
       if (n > 0)
@@ -405,35 +405,30 @@ void TextEditWindow::Redraw() {
 
   DCHECK_GE(lCaretPosn, 0);
 
-  {
-    auto const lStart = m_pViewRange->GetStart();
-    if (text_renderer_->ShouldFormat(selection, selection_is_active)) {
-      text_renderer_->Prepare(selection);
-      text_renderer_->Format(StartOfLine(lStart));
+  if (text_renderer_->ShouldFormat(selection, selection_is_active)) {
+    text_renderer_->Prepare(selection);
+    text_renderer_->Format(StartOfLine(view_start_));
 
-      if (m_lCaretPosn != lCaretPosn) {
-        // FIXME 2007-05-12 Fill the page with lines.
-        text_renderer_->ScrollToPosn(lCaretPosn);
-        m_lCaretPosn = lCaretPosn;
-      }
-    } else if (m_lCaretPosn != lCaretPosn) {
-      text_renderer_->Prepare(selection);
+    if (m_lCaretPosn != lCaretPosn) {
+      // FIXME 2007-05-12 Fill the page with lines.
       text_renderer_->ScrollToPosn(lCaretPosn);
       m_lCaretPosn = lCaretPosn;
-    } else if (text_renderer_->GetStart() != lStart) {
-      text_renderer_->Prepare(selection);
-      text_renderer_->Format(StartOfLine(lStart));
-    } else if (!text_renderer_->ShouldRender()) {
-      // The screen is clean.
-      if (!m_fImeTarget)
-        caret_->Blink(m_gfx);
-      return;
     }
+  } else if (m_lCaretPosn != lCaretPosn) {
+    text_renderer_->Prepare(selection);
+    text_renderer_->ScrollToPosn(lCaretPosn);
+    m_lCaretPosn = lCaretPosn;
+  } else if (text_renderer_->GetStart() != view_start_) {
+    text_renderer_->Prepare(selection);
+    text_renderer_->Format(StartOfLine(view_start_));
+  } else if (!text_renderer_->ShouldRender()) {
+    // The screen is clean.
+    if (!m_fImeTarget)
+      caret_->Blink(m_gfx);
+    return;
   }
 
   Render();
-
-
 }
 
 void TextEditWindow::Render() {
@@ -445,11 +440,8 @@ void TextEditWindow::Render() {
   m_gfx->set_dirty_rect(rect());
   text_renderer_->Render();
 
-  {
-    auto const lStart = text_renderer_->GetStart();
-    m_pViewRange->SetRange(lStart, lStart);
-    updateScrollBar();
-  }
+  view_start_ = text_renderer_->GetStart();
+  updateScrollBar();
 
   const auto char_rect = text_renderer_->HitTestTextPosition(m_lCaretPosn);
   if (char_rect.empty()) {
@@ -560,10 +552,8 @@ void TextEditWindow::updateScreen() {
   if (!text_renderer_->ShouldFormat(selection))
     return;
   text_renderer_->Prepare(selection);
-
-  Posn lStart = m_pViewRange->GetStart();
-  lStart = StartOfLine(lStart);
-  text_renderer_->Format(lStart);
+  auto const line_start_ = StartOfLine(view_start_);
+  text_renderer_->Format(line_start_);
 }
 
 void TextEditWindow::updateScrollBar() {
@@ -761,7 +751,6 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
       }
   }
 
-
   ////////////////////////////////////////////////////////////
   //
   // We have already insert composed string. So, we don't
@@ -895,6 +884,21 @@ BOOL TextEditWindow::showImeCaret(SIZE sz, POINT pt) {
 
 #endif // SUPPORT_IME
 
+// text::BufferMutationObserver
+void TextEditWindow::DidDeleteAt(text::Posn offset, size_t length) {
+  if (view_start_ <= offset)
+    return;
+  view_start_ = std::max(static_cast<text::Posn>(view_start_ - length),
+                         offset);
+}
+
+void TextEditWindow::DidInsertAt(text::Posn offset, size_t length) {
+  if (view_start_ <= offset)
+    return;
+  view_start_ += length;
+}
+
+// ui::ScrollBarObserver
 void TextEditWindow::DidClickLineDown() {
   UI_DOM_AUTO_LOCK_SCOPE();
   SmallScroll(0, 1);

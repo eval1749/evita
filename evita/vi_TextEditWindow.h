@@ -15,6 +15,7 @@
 
 #include "evita/li_util.h"
 #include "evita/gfx_base.h"
+#include "evita/text/buffer_mutation_observer.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/content_window.h"
 
@@ -45,12 +46,9 @@ class ScrollBar;
 //
 // TextEditWindow
 //
-// Member Variables:
-// m_pViewRange
-// A range contains the start position of window.
-//
-class TextEditWindow
-    : public views::ContentWindow, public ui::ScrollBarObserver {
+class TextEditWindow : public text::BufferMutationObserver,
+                       public ui::ScrollBarObserver,
+                       public views::ContentWindow {
   DECLARE_CASTABLE_CLASS(TextEditWindow, views::ContentWindow);
 
   private: typedef common::win::Point Point;
@@ -69,12 +67,13 @@ class TextEditWindow
   private: Posn m_lImeStart;
   private: Posn m_lImeEnd;
   #endif // SUPPORT_IME
-  private: Range* m_pViewRange;
   private: std::unique_ptr<TextRenderer> text_renderer_;
   private: ui::ScrollBar* const vertical_scroll_bar_;
+  private: text::Posn view_start_;
 
   // ctor/dtor
   public: explicit TextEditWindow(const dom::TextWindow& window);
+
 
   public: virtual ~TextEditWindow();
 
@@ -138,6 +137,11 @@ class TextEditWindow
   private: BOOL showImeCaret(SIZE, POINT);
   #endif // SUPPORT_IME
 
+  // text::BufferMutationObserver
+  private: virtual void DidDeleteAt(text::Posn offset, size_t length) override;
+  private: virtual void DidInsertAt(text::Posn offset, size_t length) override;
+
+  // ui::ScrollBarObserver
   private: virtual void DidClickLineDown() override;
   private: virtual void DidClickLineUp() override;
   private: virtual void DidClickPageDown() override;

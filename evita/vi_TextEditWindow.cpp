@@ -95,9 +95,11 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
                                              this)),
       view_start_(0) {
   AppendChild(vertical_scroll_bar_);
+  buffer()->AddObserver(this);
 }
 
 TextEditWindow::~TextEditWindow() {
+  buffer()->RemoveObserver(this);
 }
 
 text::Buffer* TextEditWindow::buffer() const {

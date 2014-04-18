@@ -184,7 +184,6 @@ Cell* FillerCell::Copy() const {
 //
 // MarkerCell
 //
-
 MarkerCell::MarkerCell(const RenderStyle& style, float width, float height,
                        Posn lPosn, TextMarker marker_name)
     : Cell(style, width, height, style.font()->descent()),
@@ -244,14 +243,15 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
 
   auto const ascent = height() - descent();
   auto const marker_rect = gfx::RectF(gfx::PointF(rect.left, rect.top + top()),
-                                      gfx::SizeF(width(), ascent));
+                                      gfx::SizeF(width(), height()));
   gfx::Brush stroke_brush(gfx, style().color());
+  auto const baseline = marker_rect.bottom - descent();
   switch (marker_name_) {
     case TextMarker::EndOfDocument: { // Draw <-
       // FIXME 2007-06-13 We should get internal leading from font.
       auto const iInternalLeading = 3;
       auto const w = std::max(ascent / 6, 2.0f);
-      auto const y = marker_rect.bottom - (ascent - iInternalLeading) / 2;
+      auto const y = baseline - (ascent - iInternalLeading) / 2;
       auto const sx = marker_rect.left;
       auto const ex = marker_rect.right;
       DrawHLine(gfx, stroke_brush, sx, ex, y);
@@ -261,7 +261,7 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
     }
 
     case TextMarker::EndOfLine: { // Draw V
-      auto const ey = marker_rect.bottom;
+      auto const ey = baseline;
       auto const sy = ey - ascent * 3 / 5;
       auto const w = std::max(width() / 6, 2.0f);
       auto const x = marker_rect.left + width() / 2;
@@ -285,7 +285,7 @@ void MarkerCell::Render(const gfx::Graphics& gfx,
     case TextMarker::Tab: { // Draw |_|
       auto const sx = marker_rect.left + 2;
       auto const ex = marker_rect.right - 3;
-      auto const y = marker_rect.bottom;
+      auto const y = baseline;
       auto const w = std::max(ascent / 6, 2.0f);
       DrawHLine(gfx, stroke_brush, sx, ex, y);
       DrawVLine(gfx, stroke_brush, sx, y, y - w * 2);

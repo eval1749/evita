@@ -10,6 +10,7 @@
       'clipboard/DataTransferItemList.idl',
       'Editor.idl',
       'events/EventTarget.idl',
+      'events/ViewEventTarget.idl',
       'os/AbstractFile.idl',
       'os/File.idl',
       'text/modes/Mode.idl',
@@ -30,6 +31,7 @@
       '<(glue_dir)/ModeClass.cc',
       '<(glue_dir)/SelectionClass.cc',
       '<(glue_dir)/TableSelectionClass.cc',
+      '<(glue_dir)/ViewEventTargetClass.cc',
     ],
 
     'generated_js_externs_files': [
@@ -43,6 +45,7 @@
       '<(js_externs_dir)/Rect_externs.js',
       '<(js_externs_dir)/Selection_externs.js',
       '<(js_externs_dir)/TableSelection_externs.js',
+      '<(js_externs_dir)/ViewEventTarget_externs.js',
     ], # generated_js_externs_files
 
     'static_js_externs_files': [

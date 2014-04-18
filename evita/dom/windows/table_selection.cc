@@ -13,46 +13,10 @@
 
 namespace dom {
 
-namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// TableSelectionClass
-//
-class TableSelectionClass :
-    public v8_glue::DerivedWrapperInfo<TableSelection, Selection> {
-
-  public: TableSelectionClass(const char* name)
-      : BaseClass(name) {
-  }
-  public: ~TableSelectionClass() = default;
-
-  private: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate, 
-        &TableSelectionClass::NewTableSelection);
-  }
-
-  private: static TableSelection* NewTableSelection() {
-    ScriptHost::instance()->ThrowError("Can't create selection.");
-    return nullptr;
-  }
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetMethod("getRowStates", &TableSelection::GetRowStates);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(TableSelectionClass);
-};
-}  // namespace
-
 //////////////////////////////////////////////////////////////////////
 //
 // TableSelection
 //
-DEFINE_SCRIPTABLE_OBJECT(TableSelection, TableSelectionClass);
-
 TableSelection::TableSelection(TableWindow* table_window, Document* document)
     : ScriptableBase(table_window, document) {
 }

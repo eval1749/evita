@@ -43,7 +43,6 @@ class TextWindowWrapperInfo :
   private: virtual void SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) override {
     builder
-        .SetProperty("range_", &TextWindow::view_range)
         .SetMethod("compute_", &TextWindow::ComputeMotion)
         .SetMethod("hitTestTextPosition_", &TextWindow::HitTestTextPosition)
         .SetMethod("makeSelectionVisible", &TextWindow::MakeSelectionVisible)
@@ -63,8 +62,7 @@ class TextWindowWrapperInfo :
 DEFINE_SCRIPTABLE_OBJECT(TextWindow, TextWindowWrapperInfo);
 
 TextWindow::TextWindow(Range* selection_range)
-    : ScriptableBase(new TextSelection(this, selection_range)),
-      view_range_(new Range(selection_range->document(), 0, 0)) {
+    : ScriptableBase(new TextSelection(this, selection_range)) {
   ScriptHost::instance()->view_delegate()->CreateTextWindow(this);
 }
 

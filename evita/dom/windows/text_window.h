@@ -22,12 +22,9 @@ class Selection;
 class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
   DECLARE_SCRIPTABLE_OBJECT(TextWindow);
 
-  private: gc::Member<Range> view_range_;
-
   public: explicit TextWindow(Range* selection_range);
   public: virtual ~TextWindow();
 
-  public: Range* view_range() const { return view_range_; }
   public: ::Selection* view_selection() const;
 
   public: text::Posn ComputeMotion(int method,

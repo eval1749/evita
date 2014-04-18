@@ -115,7 +115,9 @@
     range.collapseTo(range.start);
     selection.document.readonly = true;
     // TODO(yosi) Should we share blink timer?
-    (new OneShotTimer()).start(range.start < this.range_.start ? 500 : 100,
+    var window_start = this.compute_(TextWindowComputeMethod.MOVE_WINDOW,
+                                     0, -1);
+    (new OneShotTimer()).start(range.start < window_start ? 500 : 100,
         function() {
           range.collapseTo(end);
           range.document.readonly = false;

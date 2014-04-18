@@ -658,6 +658,7 @@ void EditPane::LayoutBox::UpdateSplitters() {
     return;
   auto& gfx = edit_pane_->frame().gfx();
   gfx::Graphics::DrawingScope drawing_scope(gfx);
+  UI_DOM_AUTO_LOCK_SCOPE();
   DrawSplitters(gfx);
 }
 
@@ -1059,7 +1060,6 @@ EditPane::SplitterController::~SplitterController() {
 void EditPane::SplitterController::End(const gfx::Point& point) {
   if (m_eState == SplitterController::State_Drag ||
       m_eState == SplitterController::State_DragSingle) {
-    UI_DOM_AUTO_LOCK_SCOPE();
     m_pBox->outer()->StopSplitter(point, *m_pBox);
     Stop();
   }
@@ -1068,7 +1068,6 @@ void EditPane::SplitterController::End(const gfx::Point& point) {
 void EditPane::SplitterController::Move(const gfx::Point& point) {
   if (m_eState == SplitterController::State_Drag ||
       m_eState == SplitterController::State_DragSingle) {
-    UI_DOM_AUTO_LOCK_SCOPE();
     m_pBox->outer()->MoveSplitter(point, *m_pBox);
   }
 }

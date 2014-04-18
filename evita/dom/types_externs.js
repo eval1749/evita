@@ -122,11 +122,6 @@ var Range = function(document_or_range, opt_start, opt_end) {};
 /**
  * @constructor
  */
-var Selection = function() {};
-
-/**
- * @constructor
- */
 var Style = function() {};
 
 /**

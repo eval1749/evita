@@ -15,6 +15,7 @@
       'text/modes/Mode.idl',
       'windows/Point.idl',
       'windows/Rect.idl',
+      'windows/Selection.idl',
     ], # idl_files
 
     'generated_glue_files': [
@@ -26,6 +27,7 @@
       '<(glue_dir)/EventTargetClass.cc',
       '<(glue_dir)/FileClass.cc',
       '<(glue_dir)/ModeClass.cc',
+      '<(glue_dir)/SelectionClass.cc',
     ],
 
     'generated_js_externs_files': [
@@ -37,6 +39,7 @@
       '<(js_externs_dir)/Mode_externs.js',
       '<(js_externs_dir)/Point_externs.js',
       '<(js_externs_dir)/Rect_externs.js',
+      '<(js_externs_dir)/Selection_externs.js',
     ], # generated_js_externs_files
 
     'static_js_externs_files': [
@@ -83,7 +86,6 @@
       'text/range_externs.js',
       'text/regexp_externs.js',
       'windows/document_state_externs.js',
-      'windows/selection_externs.js',
       'css/style_externs.js',
       'windows/table_selection_externs.js',
       'windows/table_window_externs.js',

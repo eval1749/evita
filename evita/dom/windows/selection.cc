@@ -13,34 +13,10 @@
 
 namespace dom {
 
-namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// SelectionClass
-//
-class SelectionClass : public v8_glue::WrapperInfo {
-  public: SelectionClass(const char* name)
-      : v8_glue::WrapperInfo(name) {
-  }
-  public: ~SelectionClass() = default;
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("document", &Selection::document)
-        .SetProperty("window", &Selection::window);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(SelectionClass);
-};
-}  // namespace
-
 //////////////////////////////////////////////////////////////////////
 //
 // Selection
 //
-DEFINE_SCRIPTABLE_OBJECT(Selection, SelectionClass);
-
 Selection::Selection(DocumentWindow* document_window, Document* document)
     : document_(document), document_window_(document_window) {
 }

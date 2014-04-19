@@ -13,7 +13,7 @@ TextLine::TextLine(const TextLine& other)
     : m_nHash(other.m_nHash),
       m_lEnd(other.m_lEnd),
       m_lStart(other.m_lStart),
-      rect_(other.rect_) {
+      bounds_(other.bounds_) {
   for (auto cell : other.cells_) {
     cells_.push_back(cell->Copy());
   }
@@ -29,10 +29,10 @@ TextLine::~TextLine() {
 }
 
 void TextLine::set_left_top(const gfx::PointF& left_top) {
-  rect_.right = rect_.width() + left_top.x;
-  rect_.bottom = rect_.height() + left_top.y;
-  rect_.left = left_top.x;
-  rect_.top = left_top.y;
+  bounds_.right = bounds_.width() + left_top.x;
+  bounds_.bottom = bounds_.height() + left_top.y;
+  bounds_.left = left_top.x;
+  bounds_.top = left_top.y;
 }
 
 TextLine* TextLine::Copy() const {
@@ -67,10 +67,10 @@ void TextLine::Fix(float left, float top, float ascent, float descent) {
       m_lEnd = lEnd;
     right += cell->width();
   }
-  rect_.left = left;
-  rect_.top = top;
-  rect_.right = right;
-  rect_.bottom = top + height;
+  bounds_.left = left;
+  bounds_.top = top;
+  bounds_.right = right;
+  bounds_.bottom = top + height;
 }
 
 uint TextLine::Hash() const {
@@ -88,7 +88,7 @@ gfx::RectF TextLine::HitTestTextPosition(Posn offset) const {
   if (offset < m_lStart || offset >= m_lEnd)
     return gfx::RectF();
 
-  auto left_top = rect_.left_top();
+  auto left_top = bounds_.left_top();
   for (const auto cell : cells_) {
     auto const rect = cell->HitTestTextPosition(offset);
     if (!rect.empty())
@@ -115,10 +115,10 @@ Posn TextLine::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
 }
 
 void TextLine::Render(const gfx::Graphics& gfx) const {
-  auto x = rect_.left;
+  auto x = bounds_.left;
   for (auto cell : cells_) {
-    gfx::RectF rect(x, rect_.top, x + cell->width(),
-                    ::ceilf(rect_.top + cell->line_height()));
+    gfx::RectF rect(x, bounds_.top, x + cell->width(),
+                    ::ceilf(bounds_.top + cell->line_height()));
     cell->Render(gfx, rect);
     x = rect.right;
   }

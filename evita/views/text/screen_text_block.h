@@ -26,7 +26,7 @@ class ScreenTextBlock : public gfx::Graphics::Observer {
   private: const gfx::Graphics* gfx_;
   private: bool has_screen_bitmap_;
   private: std::vector<TextLine*> lines_;
-  private: gfx::RectF rect_;
+  private: gfx::RectF bounds_;
 
   public: ScreenTextBlock();
   public: ~ScreenTextBlock();

@@ -41,7 +41,7 @@ class Caret {
 
   private: base::Time last_blink_time_;
   private: views::Window* owner_;
-  private: gfx::RectF rect_;
+  private: gfx::RectF bounds_;
   private: bool shown_;
 
   public: Caret();

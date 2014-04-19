@@ -58,7 +58,7 @@ Graphics::AxisAlignedClipScope::~AxisAlignedClipScope() {
 //
 Graphics::DrawingScope::DrawingScope(const Graphics& gfx) : gfx_(gfx) {
   gfx_.BeginDraw();
-  gfx_.set_dirty_rect(gfx_.target_rect_);
+  gfx_.set_dirty_rect(gfx_.target_bounds_);
 }
 
 Graphics::DrawingScope::~DrawingScope() {
@@ -349,6 +349,7 @@ void Graphics::Reinitialize() {
       &feature_level,
       &device_context));
 
+
   common::ComPtr<IDXGIDevice1> dxgi_device;
   COM_VERIFY(dxgi_device.QueryFrom(device));
 
@@ -440,7 +441,7 @@ void Graphics::Resize(const Rect& rc) const {
 void Graphics::Resize(const Rect& rect) const {
   DCHECK(!rect.empty());
   screen_bitmap_.reset();
-  target_rect_ = rect;
+  target_bounds_ = rect;
 
   common::ComPtr<ID2D1DeviceContext> d2d_device_context;
   COM_VERIFY(d2d_device_context.QueryFrom(render_target_));

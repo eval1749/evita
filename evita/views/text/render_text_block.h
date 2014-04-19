@@ -24,26 +24,26 @@ class TextBlock : public text::BufferMutationObserver {
   private: bool dirty_line_point_;
   private: float m_cy;
   private: std::list<TextLine*> lines_;
-  private: gfx::RectF rect_;
+  private: gfx::RectF bounds_;
   private: text::Buffer* const text_buffer_;
 
   public: TextBlock(text::Buffer* buffer);
   public: ~TextBlock();
 
-  public: float bottom() const { return rect_.bottom; }
+  public: float bottom() const { return bounds_.bottom; }
   public: const RenderStyle& default_style() const { return default_style_; }
   public: void set_default_style(const RenderStyle& style) {
     default_style_ = style;
   }
   public: bool dirty() const { return dirty_; }
-  public: float height() const { return rect_.height(); }
-  public: float left() const { return rect_.left; }
+  public: float height() const { return bounds_.height(); }
+  public: float left() const { return bounds_.left; }
   public: const std::list<TextLine*>& lines() const { return lines_; }
-  public: const gfx::RectF& bounds() const { return rect_; }
-  public: float right() const { return rect_.right; }
+  public: const gfx::RectF& bounds() const { return bounds_; }
+  public: float right() const { return bounds_.right; }
   public: const text::Buffer* text_buffer() const { return text_buffer_; }
-  public: float top() const { return rect_.top; }
-  public: float width() const { return rect_.width(); }
+  public: float top() const { return bounds_.top; }
+  public: float width() const { return bounds_.width(); }
 
   public: void Append(TextLine*);
   // Returns true if discarded the first line.

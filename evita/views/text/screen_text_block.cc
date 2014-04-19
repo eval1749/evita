@@ -68,7 +68,7 @@ class ScreenTextBlock::RenderContext {
   private: mutable std::vector<gfx::RectF> dirty_rects_;
   private: const std::list<TextLine*>& format_lines_;
   private: const gfx::Graphics* gfx_;
-  private: const gfx::RectF rect_;
+  private: const gfx::RectF bounds_;
   private: const std::vector<TextLine*>& screen_lines_;
   private: const ScreenTextBlock* screen_text_block_;
   private: mutable std::vector<gfx::RectF> skip_rects_;
@@ -101,7 +101,7 @@ ScreenTextBlock::RenderContext::RenderContext(
     const TextBlock* format_text_block)
     : bgcolor_(format_text_block->default_style().bgcolor()),
       format_lines_(format_text_block->lines()),
-      gfx_(screen_text_block->gfx_), rect_(screen_text_block->rect_),
+      gfx_(screen_text_block->gfx_), bounds_(screen_text_block->bounds_),
       screen_text_block_(screen_text_block),
       screen_lines_(screen_text_block->lines_) {
 }
@@ -110,10 +110,10 @@ void ScreenTextBlock::RenderContext::Copy(float dst_top, float dst_bottom,
                                           float src_top) const {
   auto const height = dst_bottom - dst_top;
   DCHECK_GT(height, 0.0f);
-  DCHECK_LE(src_top + height, rect_.bottom);
+  DCHECK_LE(src_top + height, bounds_.bottom);
 
-  gfx::RectF dst_rect(rect_.left, dst_top, rect_.right, dst_top + height);
-  gfx::RectF src_rect(rect_.left, src_top, rect_.right, src_top + height);
+  gfx::RectF dst_rect(bounds_.left, dst_top, bounds_.right, dst_top + height);
+  gfx::RectF src_rect(bounds_.left, src_top, bounds_.right, src_top + height);
   DCHECK_EQ(dst_rect.size(), src_rect.size());
   #if DEBUG_DRAW
     DVLOG(0) << "Copy to " << dst_rect << " from " << src_rect.left_top();
@@ -139,7 +139,7 @@ void ScreenTextBlock::RenderContext::DrawDirtyRect(
 }
 
 void ScreenTextBlock::RenderContext::FillBottom(const TextLine* line) const {
-  gfx::RectF rect(rect_);;
+  gfx::RectF rect(bounds_);;
   rect.top = line->bottom();
   if (rect.empty())
     return;
@@ -148,8 +148,8 @@ void ScreenTextBlock::RenderContext::FillBottom(const TextLine* line) const {
 
 void ScreenTextBlock::RenderContext::FillRight(const TextLine* line) const {
   gfx::RectF rect(line->bounds());
-  rect.left  = rect_.left + line->GetWidth();
-  rect.right = rect_.right;
+  rect.left  = bounds_.left + line->GetWidth();
+  rect.right = bounds_.right;
   if (rect.empty())
     return;
   FillRect(*gfx_, rect, bgcolor_);
@@ -181,7 +181,7 @@ FormatLineIterator ScreenTextBlock::RenderContext::FindLastMatch() const {
        format_line_runner != format_lines_.crend();
        ++format_line_runner) {
     auto const format_line = (*format_line_runner);
-    if (format_line->top() >= rect_.bottom)
+    if (format_line->top() >= bounds_.bottom)
       continue;
     if (screen_line_runner == screen_lines_.crend())
       break;
@@ -207,7 +207,7 @@ std::vector<TextLine*>::const_iterator
     auto const screen_line = *runner;
     if (screen_line->Equal(format_line) &&
         (format_line->bounds().top == screen_line->bounds().top ||
-         screen_line->bounds().bottom <= rect_.bottom)) {
+         screen_line->bounds().bottom <= bounds_.bottom)) {
       return runner;
     }
   }
@@ -216,7 +216,7 @@ std::vector<TextLine*>::const_iterator
 
 void ScreenTextBlock::RenderContext::Finish() {
   // Draw dirty rectangles for debugging.
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
+  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, bounds_);
   for (auto rect : copy_rects_) {
     #if DEBUG_DRAW
       DVLOG(0) << "copy " << rect;
@@ -240,17 +240,17 @@ bool ScreenTextBlock::RenderContext::Render() {
     // TextBlock must cover whole screen area.
     auto const last_format_line = format_lines_.back();
     if (!last_format_line->cells().back()->is<MarkerCell>())
-      DCHECK_GE(last_format_line->bounds().bottom, rect_.bottom);
+      DCHECK_GE(last_format_line->bounds().bottom, bounds_.bottom);
   }
 
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
+  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, bounds_);
 
   auto const dirty_line_start = FindFirstMismatch();
   if (dirty_line_start != format_lines_.end()) {
     auto const clean_line_start = FindLastMatch();
     #if DEBUG_DRAW
       DVLOG(0) << "dirty " << (*dirty_line_start)->bounds().top << "," <<
-        (clean_line_start == format_lines_.end() ? rect_.bottom :
+        (clean_line_start == format_lines_.end() ? bounds_.bottom :
             (*clean_line_start)->bounds().top);
     #endif
     for (auto dirty_line_runner = dirty_line_start;
@@ -290,8 +290,8 @@ void ScreenTextBlock::RenderContext::RestoreSkipRect(
   gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF::White), marker_rect);
   if (!screen_text_block_->has_screen_bitmap_)
     return;
-  auto const line_rect = gfx::RectF(gfx::PointF(rect_.left, rect.top),
-                                    gfx::SizeF(rect_.width(), rect.height()));
+  auto const line_rect = gfx::RectF(gfx::PointF(bounds_.left, rect.top),
+                                    gfx::SizeF(bounds_.width(), rect.height()));
   gfx_->DrawBitmap(*gfx_->screen_bitmap(), line_rect, line_rect);
 }
 
@@ -327,7 +327,7 @@ FormatLineIterator ScreenTextBlock::RenderContext::TryCopy(
     while (format_runner != format_end && screen_runner != screen_end) {
       auto const format_line = *format_runner;
       auto const screen_line = *screen_runner;
-      if (screen_line->bounds().bottom > rect_.bottom ||
+      if (screen_line->bounds().bottom > bounds_.bottom ||
           !format_line->Equal(screen_line))
         break;
       if (skip)
@@ -363,7 +363,7 @@ void ScreenTextBlock::Render(const TextBlock* text_block) {
     return;
 
   Reset();
-  has_screen_bitmap_ = gfx_->SaveScreenImage(rect_);
+  has_screen_bitmap_ = gfx_->SaveScreenImage(bounds_);
   // Event if we can't get bitmap from render target, screen is up-to-date,
   // but we render all lines next time.
   if (has_screen_bitmap_) {
@@ -392,7 +392,7 @@ void ScreenTextBlock::SetGraphics(const gfx::Graphics* gfx) {
 
 void ScreenTextBlock::SetBounds(const gfx::RectF& rect) {
   Reset();
-  rect_ = rect;
+  bounds_ = rect;
 }
 
 // gfx::Graphics::Observer

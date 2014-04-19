@@ -22,14 +22,14 @@ class StatusBar {
   private: std::vector<int> part_rights_;
   private: std::vector<int> column_widths_;
   private: std::vector<base::string16> part_texts_;
-  private: common::win::Rect rect_;
+  private: common::win::Rect bounds_;
   private: base::string16 simple_text_;
 
   public: StatusBar();
   public: ~StatusBar();
 
   public: operator bool() const { return hwnd_; }
-  public: int height() const { return rect_.height(); }
+  public: int height() const { return bounds_.height(); }
 
   public: void Realize(HWND hwndParent);
   public: void SetBounds(const common::win::Rect& rect);

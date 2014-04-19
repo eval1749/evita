@@ -25,19 +25,19 @@ class TextLine {
   private: mutable uint m_nHash;
   private: Posn m_lStart;
   private: Posn m_lEnd;
-  private: gfx::RectF rect_;
+  private: gfx::RectF bounds_;
 
   private: TextLine(const TextLine& other);
   public: TextLine();
   public: ~TextLine();
 
-  public: float bottom() const { return rect_.bottom; }
+  public: float bottom() const { return bounds_.bottom; }
   public: const std::vector<Cell*>& cells() const { return cells_; }
   public: Cell* last_cell() const { return cells_.back(); }
-  public: float left() const { return rect_.left; }
-  public: const gfx::RectF& bounds() const { return rect_; }
-  public: float right() const { return rect_.right; }
-  public: float top() const { return rect_.top; }
+  public: float left() const { return bounds_.left; }
+  public: const gfx::RectF& bounds() const { return bounds_; }
+  public: float right() const { return bounds_.right; }
+  public: float top() const { return bounds_.top; }
   public: void set_left_top(const gfx::PointF& left_top);
   public: void set_start(Posn start) { m_lStart = start; }
   public: text::Posn text_end() const { return m_lEnd; }
@@ -48,9 +48,9 @@ class TextLine {
   public: bool Equal(const TextLine*) const;
   public: void Fix(float left, float top, float ascent, float dscent);
   public: Posn GetEnd() const { return m_lEnd; }
-  public: float GetHeight() const { return rect_.height(); }
+  public: float GetHeight() const { return bounds_.height(); }
   public: Posn GetStart() const { return m_lStart; }
-  public: float GetWidth() const { return rect_.width(); }
+  public: float GetWidth() const { return bounds_.width(); }
   public: uint Hash() const;
   public: gfx::RectF HitTestTextPosition(Posn lPosn) const;
   public: Posn MapXToPosn(const gfx::Graphics&, float) const;

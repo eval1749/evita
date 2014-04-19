@@ -23,8 +23,8 @@ auto const padding_top = 1.0f;
 // TextFieldControl::Renderer
 //
 //
-//                    |view_rect_|
-//  |text_| start ... |text_rect_| ... end
+//                    |view_bounds_|
+//  |text_| start ... |text_bounds_| ... end
 //                     ^
 //                     |view_text_start_|
 //
@@ -32,16 +32,16 @@ class TextFieldControl::Renderer {
   // Text range from 0 to |clean_offset_|, exclusive, of |text_| equals to
   // |text_layout_|.
   private: size_t clean_offset_;
-  private: gfx::RectF rect_;
+  private: gfx::RectF bounds_;
   private: Style style_;
   private: Selection selection_;
   private: base::string16 text_;
   private: std::unique_ptr<gfx::TextLayout> text_layout_;
   // Text dimension of all text in one line.
   private: gfx::SizeF text_size_;
-  private: gfx::RectF view_rect_;
+  private: gfx::RectF view_bounds_;
   // Rectangle of rendered text in |text_layout_| coordinate.
-  private: gfx::RectF view_text_rect_;
+  private: gfx::RectF view_text_bounds_;
   // Text offset of first character of rendered text.
   private: size_t view_text_start_;
 
@@ -122,17 +122,17 @@ void TextFieldControl::Renderer::set_text(const base::string16& new_text) {
 }
 
 gfx::PointF TextFieldControl::Renderer::text_origin() const {
-  return view_rect_.left_top() - view_text_rect_.left_top() +
-         gfx::SizeF(0.0f, (view_rect_.height() - text_size_.height) / 2);
+  return view_bounds_.left_top() - view_text_bounds_.left_top() +
+         gfx::SizeF(0.0f, (view_bounds_.height() - text_size_.height) / 2);
 }
 
 void TextFieldControl::Renderer::MakeSelectionVisible() {
-  DCHECK(view_text_rect_);
-  if (text_size_.width <= view_rect_.width()) {
-    // We can display whole text in |view_rect_|.
+  DCHECK(view_text_bounds_);
+  if (text_size_.width <= view_bounds_.width()) {
+    // We can display whole text in |view_bounds_|.
     view_text_start_ = 0;
-    view_text_rect_.left = 0.0f;
-    view_text_rect_.right = view_text_rect_.width();
+    view_text_bounds_.left = 0.0f;
+    view_text_bounds_.right = view_text_bounds_.width();
     return;
   }
 
@@ -144,22 +144,22 @@ void TextFieldControl::Renderer::MakeSelectionVisible() {
     COM_VERIFY((*text_layout_)->HitTestTextPosition(
         static_cast<uint32_t>(selection_.focus_offset), is_trailing,
         &caret_x, &caret_y, &metrics));
-    if (caret_x <= view_rect_.width()) {
+    if (caret_x <= view_bounds_.width()) {
       // Caret is in left most text part.
       view_text_start_ = 0;
-      view_text_rect_.left = 0.0f;
-      view_text_rect_.right = view_rect_.width();
+      view_text_bounds_.left = 0.0f;
+      view_text_bounds_.right = view_bounds_.width();
       return;
     }
     auto const caret = gfx::PointF(caret_x, caret_y);
-    if (view_text_rect_.Contains(caret)) {
+    if (view_text_bounds_.Contains(caret)) {
       // A character after caret is in view port.
       return;
     }
 
-    // Place caret at right edge of |view_rect_|.
-    view_text_rect_.left = caret_x - view_rect_.width();
-    view_text_rect_.right = caret_x;
+    // Place caret at right edge of |view_bounds_|.
+    view_text_bounds_.left = caret_x - view_bounds_.width();
+    view_text_bounds_.right = caret_x;
   }
 
   // Compute text offset of view port.
@@ -167,7 +167,7 @@ void TextFieldControl::Renderer::MakeSelectionVisible() {
   BOOL is_trailing = false;
   DWRITE_HIT_TEST_METRICS metrics = {0};
   COM_VERIFY((*text_layout_)->HitTestPoint(
-      view_text_rect_.left, 0.0f,
+      view_text_bounds_.left, 0.0f,
       &is_trailing, &is_inside, &metrics));
   view_text_start_ = metrics.textPosition;
 }
@@ -186,13 +186,13 @@ int TextFieldControl::Renderer::MapPointToOffset(
 
 void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
                                         Control::State state) {
-  if (!rect_)
+  if (!bounds_)
     return;
 
-  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect_);
+  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), bounds_);
 
   // Render frame
-  const auto frame_rect = rect_;
+  const auto frame_rect = bounds_;
   {
     gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
     gfx->DrawRectangle(gfx::Brush(*gfx, style_.shadow), frame_rect);
@@ -210,7 +210,7 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
   {
     gfx::Brush text_brush(*gfx, state == State::Disabled ? style_.gray_text :
                                                            style_.color);
-    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, view_rect_);
+    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, view_bounds_);
     (*gfx)->DrawTextLayout(text_origin(), *text_layout_, text_brush,
                            D2D1_DRAW_TEXT_OPTIONS_CLIP);
   }
@@ -219,7 +219,7 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
     RenderSelection(gfx);
 
   // Render state
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, rect_);
+  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, bounds_);
   switch (state) {
     case Control::State::Disabled:
       gfx->FillRectangle(
@@ -269,8 +269,8 @@ void TextFieldControl::Renderer::RenderSelection(gfx::Graphics* gfx) {
   DCHECK_EQ(1u, num_metrics);
   auto const fill_color = style_.highlight;
   const auto range_rect = gfx::RectF(
-      std::max(metrics.left, view_text_rect_.left), metrics.top,
-      std::min(metrics.left + metrics.width, view_text_rect_.right),
+      std::max(metrics.left, view_text_bounds_.left), metrics.top,
+      std::min(metrics.left + metrics.width, view_text_bounds_.right),
       metrics.top + metrics.height) + text_origin;
   gfx->FillRectangle(gfx::Brush(*gfx, gfx::ColorF(fill_color, 0.3f)),
                      range_rect);
@@ -288,15 +288,15 @@ void TextFieldControl::Renderer::ResetTextLayout() {
 
 void TextFieldControl::Renderer::ResetViewPort() {
   view_text_start_ = 0;
-  view_text_rect_ = gfx::RectF();
+  view_text_bounds_ = gfx::RectF();
 }
 
 void TextFieldControl::Renderer::SetBounds(const gfx::RectF& new_rect) {
-  if (rect_ == new_rect)
+  if (bounds_ == new_rect)
     return;
   ResetTextLayout();
-  rect_ = new_rect;
-  view_rect_ = gfx::RectF(new_rect.left + padding_left,
+  bounds_ = new_rect;
+  view_bounds_ = gfx::RectF(new_rect.left + padding_left,
                           new_rect.top + padding_top,
                           new_rect.right - padding_right,
                           new_rect.bottom - padding_bottom);
@@ -304,7 +304,7 @@ void TextFieldControl::Renderer::SetBounds(const gfx::RectF& new_rect) {
 
 void TextFieldControl::Renderer::UpdateTextLayout() {
   DCHECK(!text_layout_);
-  text_layout_ = CreateTextLayout(text_, style_, view_rect_.height());
+  text_layout_ = CreateTextLayout(text_, style_, view_bounds_.height());
   if (!text_layout_)
     return;
   DWRITE_TEXT_METRICS metrics;
@@ -312,9 +312,9 @@ void TextFieldControl::Renderer::UpdateTextLayout() {
   DCHECK_EQ(1u, metrics.lineCount);
   clean_offset_ = text_.size();
   text_size_ = gfx::SizeF(metrics.width, metrics.height);
-  view_text_rect_.top = 0.0f;
-  view_text_rect_.bottom = text_size_.height;
-  view_text_rect_.right = view_text_rect_.left + view_rect_.width();
+  view_text_bounds_.top = 0.0f;
+  view_text_bounds_.bottom = text_size_.height;
+  view_text_bounds_.right = view_text_bounds_.left + view_bounds_.width();
 }
 
 //////////////////////////////////////////////////////////////////////

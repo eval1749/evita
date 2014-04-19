@@ -24,7 +24,7 @@ Caret::Updater::~Updater() {
 }
 
 void Caret::Updater::Clear() {
-  caret_->rect_ = gfx::RectF();
+  caret_->bounds_ = gfx::RectF();
 }
 
 void Caret::Updater::Update(const gfx::Graphics* gfx,
@@ -44,7 +44,7 @@ Caret::~Caret() {
 }
 
 void Caret::Blink(const gfx::Graphics* gfx) {
-  if (!owner_ || rect_.empty())
+  if (!owner_ || bounds_.empty())
     return;
   auto const now = base::Time::Now();
   auto const delta = now - last_blink_time_;
@@ -64,27 +64,27 @@ void Caret::Give(views::Window* owner, const gfx::Graphics* gfx) {
 }
 
 void Caret::Hide(const gfx::Graphics* gfx) {
-  if (!owner_ || !shown_ || rect_.empty())
+  if (!owner_ || !shown_ || bounds_.empty())
     return;
   shown_ = false;
   if (!gfx->screen_bitmap())
     return;
   gfx::Graphics::DrawingScope drawing_scope(*gfx);
-  gfx->set_dirty_rect(rect_);
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, rect_);
-  gfx->DrawBitmap(*gfx->screen_bitmap(), rect_, rect_);
+  gfx->set_dirty_rect(bounds_);
+  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, bounds_);
+  gfx->DrawBitmap(*gfx->screen_bitmap(), bounds_, bounds_);
 }
 
 void Caret::Show(const gfx::Graphics* gfx) {
   DCHECK(owner_);
-  if (shown_ || rect_.empty())
+  if (shown_ || bounds_.empty())
     return;
   shown_ = true;
   gfx::Graphics::DrawingScope drawing_scope(*gfx);
-  gfx->set_dirty_rect(rect_);
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, rect_);
+  gfx->set_dirty_rect(bounds_);
+  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, bounds_);
   gfx::Brush fill_brush(*gfx, gfx::ColorF::Black);
-  gfx->FillRectangle(fill_brush, rect_);
+  gfx->FillRectangle(fill_brush, bounds_);
 }
 
 void Caret::Take(views::Window* owner) {
@@ -95,11 +95,11 @@ void Caret::Take(views::Window* owner) {
 void Caret::Update(const gfx::Graphics* gfx, const gfx::RectF& new_rect) {
   DCHECK(!shown_);
   if (!owner_) {
-    rect_ = new_rect;
+    bounds_ = new_rect;
     return;
   }
-  if (rect_ != new_rect) {
-    rect_ = new_rect;
+  if (bounds_ != new_rect) {
+    bounds_ = new_rect;
     last_blink_time_ = base::Time::Now();
   }
   Show(gfx);

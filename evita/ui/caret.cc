@@ -38,7 +38,7 @@ Caret::~Caret() {
 }
 
 void Caret::Blink(gfx::Graphics* gfx) {
-  if (!owner_ || !rect_)
+  if (!owner_ || !bounds_)
     return;
   auto const now = base::Time::Now();
   auto const delta = now - last_blink_time_;
@@ -47,37 +47,37 @@ void Caret::Blink(gfx::Graphics* gfx) {
   shown_ = !shown_;
   last_blink_time_ = now;
   gfx::Graphics::DrawingScope drawing_scope(*gfx);
-  gfx->set_dirty_rect(rect_);
+  gfx->set_dirty_rect(bounds_);
   owner_->UpdateCaret(gfx);
 }
 
 void Caret::Give(Owner* owner) {
   DCHECK_EQ(owner_, owner);
   owner_ = nullptr;
-  rect_ = gfx::RectF();
+  bounds_ = gfx::RectF();
 }
 
 void Caret::Take(Owner* owner) {
   DCHECK(!owner_);
   owner_ = owner;
-  rect_ = gfx::RectF();
+  bounds_ = gfx::RectF();
 }
 
 void Caret::Update(gfx::Graphics* gfx, const gfx::RectF& new_rect) {
   DCHECK(owner_);
   DCHECK(new_rect);
-  if (rect_ != new_rect) {
-    if (!rect_.empty()) {
+  if (bounds_ != new_rect) {
+    if (!bounds_.empty()) {
       // Don't blink caret while when caret is moved or resized.
       last_blink_time_ = base::Time::Now();
     }
-    rect_ = new_rect;
+    bounds_ = new_rect;
     shown_ = true;
   }
   if (!shown_)
     return;
   gfx::Brush fill_brush(*gfx, gfx::ColorF::Black);
-  gfx->FillRectangle(fill_brush, rect_);
+  gfx->FillRectangle(fill_brush, bounds_);
 }
 
 }  // namespace ui

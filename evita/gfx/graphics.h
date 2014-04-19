@@ -48,7 +48,7 @@ class Graphics : public Object, public DpiHandler {
   private: HWND hwnd_;
   private: ObserverList<Observer> observers_;
   private: mutable std::unique_ptr<Bitmap> screen_bitmap_;
-  private: mutable Rect target_rect_;
+  private: mutable Rect target_bounds_;
   private: mutable common::ComPtr<ID2D1RenderTarget> render_target_;
   private: mutable void* work_;
 
@@ -116,6 +116,7 @@ class Graphics : public Object, public DpiHandler {
 
   // [F]
   public: void FillRectangle(const Brush& brush, int left, int top,
+
                              int right, int bottom) const;
   public: void FillRectangle(const Brush& brush, float left, float top,
                              float right, float bottom) const;

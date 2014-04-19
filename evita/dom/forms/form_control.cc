@@ -81,34 +81,34 @@ FormControl::~FormControl() {
 }
 
 void FormControl::set_client_height(float new_height) {
-  if (rect_.height() == new_height)
+  if (bounds_.height() == new_height)
     return;
-  rect_.bottom = rect_.top + new_height;
+  bounds_.bottom = bounds_.top + new_height;
   NotifyControlChange();
 }
 
 void FormControl::set_client_left(float new_left) {
-  if (rect_.left == new_left)
+  if (bounds_.left == new_left)
     return;
-  auto const width = rect_.width();
-  rect_.left = new_left;
-  rect_.right = new_left + width;
+  auto const width = bounds_.width();
+  bounds_.left = new_left;
+  bounds_.right = new_left + width;
   NotifyControlChange();
 }
 
 void FormControl::set_client_top(float new_top) {
-  if (rect_.top == new_top)
+  if (bounds_.top == new_top)
     return;
-  auto const height = rect_.height();
-  rect_.top = new_top;
-  rect_.bottom = new_top + height;
+  auto const height = bounds_.height();
+  bounds_.top = new_top;
+  bounds_.bottom = new_top + height;
   NotifyControlChange();
 }
 
 void FormControl::set_client_width(float new_width) {
-  if (rect_.width() == new_width)
+  if (bounds_.width() == new_width)
     return;
-  rect_.right = rect_.left + new_width;
+  bounds_.right = bounds_.left + new_width;
   NotifyControlChange();
 }
 

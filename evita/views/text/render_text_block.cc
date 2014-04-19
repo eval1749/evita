@@ -84,7 +84,7 @@ text::Posn TextBlock::GetVisibleEnd() const {
   DCHECK(!dirty_line_point_);
   for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
     auto const line = *it;
-    if (line->bounds().bottom <= rect_.height())
+    if (line->bounds().bottom <= bounds_.height())
       return line->GetEnd();
   }
   return lines_.front()->GetEnd();
@@ -103,7 +103,7 @@ bool TextBlock::IsShowEndOfDocument() const {
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
   return GetLast()->GetEnd() > text_buffer_->GetEnd() &&
-         GetLast()->bottom() <= rect_.bottom;
+         GetLast()->bottom() <= bounds_.bottom;
 }
 
 void TextBlock::Prepend(TextLine* line) {
@@ -128,7 +128,7 @@ void TextBlock::Reset() {
 
 void TextBlock::SetBounds(const gfx::RectF& rect) {
   ASSERT_DOM_LOCKED();
-  rect_ = rect;
+  bounds_ = rect;
   Reset();
 }
 

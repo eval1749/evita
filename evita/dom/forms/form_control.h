@@ -28,19 +28,19 @@ class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   private: gc::Member<Form> form_;
   private: bool handling_form_event_;
   private: base::string16 name_;
-  private: gfx::RectF rect_;
+  private: gfx::RectF bounds_;
 
   protected: explicit FormControl(const base::string16& name);
   protected: FormControl();
   public: virtual ~FormControl();
 
-  public: float client_height() const { return rect_.height(); }
+  public: float client_height() const { return bounds_.height(); }
   public: void set_client_height(float new_client_hieght);
-  public: float client_left() const { return rect_.left; }
+  public: float client_left() const { return bounds_.left; }
   public: void set_client_left(float new_client_left);
-  public: float client_top() const { return rect_.top; }
+  public: float client_top() const { return bounds_.top; }
   public: void set_client_top(float new_client_top);
-  public: float client_width() const { return rect_.width(); }
+  public: float client_width() const { return bounds_.width(); }
   public: void set_client_width(float new_client_width);
   public: bool disabled() const { return disabled_; }
   public: void set_disabled(bool new_disabled);

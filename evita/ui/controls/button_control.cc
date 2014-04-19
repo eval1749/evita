@@ -15,7 +15,7 @@ namespace ui {
 // ButtonControl::Renderer
 //
 class ButtonControl::Renderer {
-  private: gfx::RectF rect_;
+  private: gfx::RectF bounds_;
   private: Style style_;
   private: std::unique_ptr<gfx::TextLayout> text_layout_;
   private: gfx::SizeF text_size_;
@@ -45,7 +45,7 @@ std::unique_ptr<gfx::TextLayout> CreateTextLayout(const base::string16& text,
 ButtonControl::Renderer::Renderer(const base::string16& text,
                                   const Style& style,
                                   const gfx::RectF& rect)
-    : rect_(rect), style_(style),
+    : bounds_(rect), style_(style),
       text_layout_(CreateTextLayout(text, style, rect.size())) {
   DWRITE_TEXT_METRICS metrics;
   COM_VERIFY((*text_layout_)->GetMetrics(&metrics));
@@ -59,12 +59,12 @@ ButtonControl::Renderer::~Renderer() {
 
 void ButtonControl::Renderer::Render(gfx::Graphics* gfx,
                                      Control::State state) const {
-  if (!rect_)
+  if (!bounds_)
     return;
 
-  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect_);
+  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), bounds_);
 
-  auto frame_rect = rect_;
+  auto frame_rect = bounds_;
   gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
   gfx->DrawRectangle(gfx::Brush(*gfx, style_.shadow), frame_rect);
 

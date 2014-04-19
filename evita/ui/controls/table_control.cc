@@ -34,13 +34,13 @@ gfx::ColorF RgbToColorF(int red, int green, int blue, float alpha) {
 class Item : public common::Castable {
   DECLARE_CASTABLE_CLASS(Item, common::Castable);
 
-  private: gfx::RectF rect_;
+  private: gfx::RectF bounds_;
 
   public: Item();
   public: virtual ~Item();
 
-  public: const gfx::RectF& bounds() const { return rect_; }
-  public: void set_rect(const gfx::RectF& rect) { rect_ = rect; }
+  public: const gfx::RectF& bounds() const { return bounds_; }
+  public: void set_rect(const gfx::RectF& rect) { bounds_ = rect; }
 
   public: Item* HitTest(const gfx::PointF& point) const;
 
@@ -54,7 +54,7 @@ Item::~Item() {
 }
 
 Item* Item::HitTest(const gfx::PointF& point) const {
-  return rect_.Contains(point) ? const_cast<Item*>(this) : nullptr;
+  return bounds_.Contains(point) ? const_cast<Item*>(this) : nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -164,10 +164,10 @@ struct RowCompare {
 //
 class TableControl::TableControlModel {
   private: std::vector<Column*> columns_;
-  private: gfx::RectF dirty_rect_;
+  private: gfx::RectF dirty_rects_;
   private: bool has_focus_;
   private: const TableModel* model_;
-  private: gfx::RectF rect_;
+  private: gfx::RectF bounds_;
   private: std::vector<Row*> rows_;
   private: std::unordered_map<int, Row*> row_map_;
   private: float row_height_;
@@ -253,7 +253,7 @@ TableControl::TableControlModel::~TableControlModel() {
 void TableControl::TableControlModel::AddDirtyRect(
     const gfx::RectF& dirty_rect) {
   DCHECK(!dirty_rect.empty());
-  dirty_rect_.Unite(dirty_rect);
+  dirty_rects_.Unite(dirty_rect);
 }
 
 void TableControl::TableControlModel::DidAddRow(int row_id) {
@@ -315,7 +315,7 @@ void TableControl::TableControlModel::DidRemoveRow(int row_id) {
 }
 
 void TableControl::TableControlModel::DidResize(const gfx::RectF& rect) {
-  rect_ = rect;
+  bounds_ = rect;
   UpdateLayout();
 }
 
@@ -334,8 +334,8 @@ void TableControl::TableControlModel::Draw(gfx::Graphics* gfx) const {
 
   // Fill top edge
   gfx->FillRectangle(fill_brush, gfx::RectF(
-      gfx::PointF(rect_.left, rect_.top),
-      gfx::SizeF(rect_.width(), columns_[0]->bounds().top - rect_.top)));
+      gfx::PointF(bounds_.left, bounds_.top),
+      gfx::SizeF(bounds_.width(), columns_[0]->bounds().top - bounds_.top)));
 
   DrawHeaderRow(gfx);
 
@@ -345,41 +345,41 @@ void TableControl::TableControlModel::Draw(gfx::Graphics* gfx) const {
     DrawRow(gfx, row);
     gfx->Flush();
     last_row = row;
-    if (row->bounds().bottom >= rect_.bottom)
+    if (row->bounds().bottom >= bounds_.bottom)
       break;
   }
 
   // Fill edge
   if (!last_row) {
     gfx->FillRectangle(fill_brush, gfx::RectF(
-        gfx::PointF(rect_.left, columns_[0]->bounds().bottom),
-        gfx::PointF(rect_.right, rect_.bottom)));
+        gfx::PointF(bounds_.left, columns_[0]->bounds().bottom),
+        gfx::PointF(bounds_.right, bounds_.bottom)));
     return;
   }
 
   // Fill between header and rows
   gfx->FillRectangle(fill_brush, gfx::RectF(
-      gfx::PointF(rect_.left, columns_.front()->bounds().bottom),
-      gfx::PointF(rect_.right, rows_.front()->bounds().top)));
+      gfx::PointF(bounds_.left, columns_.front()->bounds().bottom),
+      gfx::PointF(bounds_.right, rows_.front()->bounds().top)));
 
   // Fill left edge
   gfx->FillRectangle(fill_brush, gfx::RectF(
-    rect_.left, rect_.top,
+    bounds_.left, bounds_.top,
     last_row->bounds().left, last_row->bounds().bottom));
 
   // Fill right edge
   auto const right_edge = gfx::RectF(
     last_row->bounds().right, rows_.front()->bounds().top,
-    rect_.right, last_row->bounds().bottom);
+    bounds_.right, last_row->bounds().bottom);
   if (!right_edge.empty())
     gfx->FillRectangle(fill_brush, right_edge);
 
   // Fill bottom edge
-  if (last_row->bounds().bottom >= rect_.bottom)
+  if (last_row->bounds().bottom >= bounds_.bottom)
     return;
   gfx->FillRectangle(fill_brush, gfx::RectF(
-      rect_.left, last_row->bounds().bottom,
-      rect_.right, rect_.bottom));
+      bounds_.left, last_row->bounds().bottom,
+      bounds_.right, bounds_.bottom));
 }
 
 void TableControl::TableControlModel::DrawHeaderRow(gfx::Graphics* gfx) const {
@@ -413,7 +413,7 @@ void TableControl::TableControlModel::DrawRow(gfx::Graphics* gfx,
     auto const text = model_->GetCellText(row->row_id(), column->column_id());
     (*text_format_)->SetTextAlignment(column->alignment());
     auto const width = column_index == columns_.size() ?
-        rect_.width() - cell_left_top.x : column->width();
+        bounds_.width() - cell_left_top.x : column->width();
     gfx::RectF rect(cell_left_top, gfx::SizeF(width, row_height_));
     rect.left += kPadding;
     rect.top += kPadding;
@@ -516,8 +516,8 @@ void TableControl::TableControlModel::OnMousePressed(
 }
 
 gfx::RectF TableControl::TableControlModel::ResetDirtyRect() {
-  auto dirty_rect = dirty_rect_;
-  dirty_rect_ = gfx::RectF();
+  auto dirty_rect = dirty_rects_;
+  dirty_rects_ = gfx::RectF();
   return dirty_rect;
 }
 
@@ -539,7 +539,7 @@ void TableControl::TableControlModel::SortRows() {
 }
 
 void TableControl::TableControlModel::UpdateLayout() {
-  if (rect_.empty()) {
+  if (bounds_.empty()) {
     // Control isn't realized yet.
     return;
   }
@@ -548,7 +548,7 @@ void TableControl::TableControlModel::UpdateLayout() {
   auto const kMarginBetweenHeaderAndRow = 3.0f;
   auto const kTopMargin = 3.0f;
 
-  gfx::PointF left_top(rect_.left + kLeftMargin, rect_.top + kTopMargin);
+  gfx::PointF left_top(bounds_.left + kLeftMargin, bounds_.top + kTopMargin);
 
   // Layout columns
   auto column_index = 0u;
@@ -557,7 +557,7 @@ void TableControl::TableControlModel::UpdateLayout() {
     ++column_index;
     (*text_format_)->SetTextAlignment(column->alignment());
     auto const width = column_index == columns_.size() ?
-        rect_.width() - cell_left_top.x : column->width();
+        bounds_.width() - cell_left_top.x : column->width();
     gfx::RectF rect(cell_left_top, gfx::SizeF(width, row_height_));
     column->set_rect(rect);
     DCHECK(!column->bounds().empty());
@@ -568,12 +568,12 @@ void TableControl::TableControlModel::UpdateLayout() {
   left_top.y += row_height_ + kMarginBetweenHeaderAndRow;
   for (auto row : rows_) {
     row->set_rect(gfx::RectF(left_top.x, left_top.y,
-                             rect_.right, left_top.y + row_height_));
+                             bounds_.right, left_top.y + row_height_));
     DCHECK(!row->bounds().empty());
     left_top.y += row->bounds().height();
   }
 
-  dirty_rect_ = rect_;
+  dirty_rects_ = bounds_;
 }
 
 void TableControl::TableControlModel::UpdateSelectionView() {

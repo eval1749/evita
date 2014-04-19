@@ -60,7 +60,7 @@ class EditPane::Box : public DoubleLinkedNode_<EditPane::Box>,
     protected: EditPane* edit_pane_;
     private: bool is_removed_;
     private: LayoutBox* outer_;
-    private: Rect rect_;
+    private: Rect bounds_;
     protected: Box(EditPane*, LayoutBox*);
     public: virtual ~Box();
     public: bool is_removed() const { return is_removed_; }
@@ -68,8 +68,8 @@ class EditPane::Box : public DoubleLinkedNode_<EditPane::Box>,
     public: Box* next_sibling() const { return GetNext(); }
     public: Box* previous_sibling() const { return GetPrev(); }
     public: LayoutBox* outer() const { return outer_; }
-    public: const gfx::Rect& bounds() const { return rect_; }
-    public: Rect& bounds() { return rect_; }
+    public: const gfx::Rect& bounds() const { return bounds_; }
+    public: Rect& bounds() { return bounds_; }
     public: void set_outer(LayoutBox& outer) { outer_ = &outer; }
     public: virtual uint CountLeafBox() const = 0;
     public: virtual void Destroy() = 0;
@@ -257,7 +257,7 @@ EditPane::Box::~Box() {
 }
 
 void EditPane::Box::Realize(EditPane*, const gfx::Rect& rect) {
-  rect_ = rect;
+  bounds_ = rect;
 }
 
 void EditPane::Box::Removed() {
@@ -270,7 +270,7 @@ void EditPane::Box::Removed() {
 }
 
 void EditPane::Box::SetBounds(const gfx::Rect& rect) {
-  rect_ = rect;
+  bounds_ = rect;
 }
 
 // HorizontalLayoutBox

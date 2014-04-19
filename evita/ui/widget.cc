@@ -61,7 +61,7 @@ Widget::Widget()
 Widget::~Widget() {
   #if DEBUG_DESTROY
     DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        state_, shown_, DEBUG_RECT_ARG(rect_));
+        state_, shown_, DEBUG_RECT_ARG(bounds_));
   #endif
   DCHECK(!native_window_);
 }
@@ -102,7 +102,7 @@ void Widget::CreateNativeWindow() const {
 void Widget::DestroyWidget() {
   #if DEBUG_DESTROY
     DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        state_, shown_, DEBUG_RECT_ARG(rect_));
+        state_, shown_, DEBUG_RECT_ARG(bounds_));
   #endif
   if (state_ == kBeingDestroyed) {
     DCHECK(!native_window_);
@@ -149,7 +149,7 @@ void Widget::DidCreateNativeWindow() {
 void Widget::DidDestroyNativeWindow() {
   #if DEBUG_DESTROY
     DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        state_, shown_, DEBUG_RECT_ARG(rect_));
+        state_, shown_, DEBUG_RECT_ARG(bounds_));
   #endif
   DCHECK(!native_window_);
   // Since native window, which handles UI, is destroyed, this widget should
@@ -479,7 +479,7 @@ void Widget::Realize(const Rect& rect) {
   }
 
   state_ = kRealized;
-  rect_ = rect;
+  bounds_ = rect;
   if (native_window_) {
     // On WM_CREATE, we call DidCreateNativeWindow() instead of DidRealized().
     CreateNativeWindow();
@@ -555,13 +555,13 @@ void Widget::RequestFocus() {
 
 void Widget::SchedulePaint() {
   DCHECK(is_realized());
-  SchedulePaintInRect(rect_);
+  SchedulePaintInRect(bounds_);
 }
 
 void Widget::SchedulePaintInRect(const Rect& rect) {
   DCHECK(is_realized());
   DCHECK(!rect.empty());
-  // TODO(yosi) We should have |DCHECK(rect_.Contains(rect))|.
+  // TODO(yosi) We should have |DCHECK(bounds_.Contains(rect))|.
   ::InvalidateRect(AssociatedHwnd(), &rect, true);
 }
 
@@ -570,18 +570,18 @@ void Widget::SetBounds(const Rect& rect) {
 
 #if 0
   // TODO(yosi): We should enable this check.
-  if (rect == rect_)
+  if (rect == bounds_)
     return;
 #endif
   if (is_realized() && native_window_) {
     ::SetWindowPos(*native_window_.get(), nullptr, rect.left, rect.top,
                    rect.width(), rect.height(), SWP_NOACTIVATE);
   } else {
-    if (rect_ > rect && parent_node()) {
+    if (bounds_ > rect && parent_node()) {
       // TODO(yosi) We should schedule paint reveal rectangles only.
-      parent_node()->SchedulePaintInRect(rect_);
+      parent_node()->SchedulePaintInRect(bounds_);
     }
-    rect_ = rect;
+    bounds_ = rect;
     DidResize();
   }
 }
@@ -659,14 +659,14 @@ void Widget::Show() {
 void Widget::WillDestroyWidget() {
   #if DEBUG_DESTROY
     DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        state_, shown_, DEBUG_RECT_ARG(rect_));
+        state_, shown_, DEBUG_RECT_ARG(bounds_));
   #endif
 }
 
 void Widget::WillDestroyNativeWindow() {
   #if DEBUG_DESTROY
     DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        state_, shown_, DEBUG_RECT_ARG(rect_));
+        state_, shown_, DEBUG_RECT_ARG(bounds_));
   #endif
   std::vector<Widget*> non_native_children;
   for (auto const child : child_nodes()) {
@@ -696,7 +696,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
     case WM_CREATE:
       if (reinterpret_cast<CREATESTRUCT*>(lParam)->style & WS_VISIBLE)
         ++shown_;
-      ::GetClientRect(*native_window_.get(), &rect_);
+      ::GetClientRect(*native_window_.get(), &bounds_);
       DidCreateNativeWindow();
       return 0;
 
@@ -764,8 +764,8 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
             LOWORD(lParam) << "x" << HIWORD(lParam);
       #endif
       if (wParam != SIZE_MAXHIDE && wParam != SIZE_MINIMIZED) {
-        ::GetClientRect(*native_window_.get(), &rect_);
-        if (!rect_.empty())
+        ::GetClientRect(*native_window_.get(), &bounds_);
+        if (!bounds_.empty())
           DidResize();
       }
       return 0;
@@ -858,7 +858,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
         return 0;
       }
 
-      ::GetClientRect(*native_window_.get(), &rect_);
+      ::GetClientRect(*native_window_.get(), &bounds_);
       DidResize();
       return 0;
     }

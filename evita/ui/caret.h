@@ -28,7 +28,7 @@ class Caret final : public common::Singleton<Caret> {
   };
 
   private: base::Time last_blink_time_;
-  private: gfx::RectF rect_;
+  private: gfx::RectF bounds_;
   private: Owner* owner_;
   private: bool shown_;
 

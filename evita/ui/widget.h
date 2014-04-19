@@ -42,8 +42,8 @@ class Widget
     kRealized,
   };
 
+  private: Rect bounds_;
   private: std::unique_ptr<NativeWindow> native_window_;
-  private: Rect rect_;
   private: int shown_;
   private: State state_;
 
@@ -51,6 +51,7 @@ class Widget
   protected: Widget();
   protected: ~Widget();
 
+  public: const Rect& bounds() const { return bounds_; }
   public: Widget& container_widget() const {
     DCHECK(parent_node());
     return *parent_node();
@@ -69,7 +70,6 @@ class Widget
   protected: NativeWindow* native_window() const {
     return native_window_.get();
   }
-  public: const Rect& bounds() const { return rect_; }
 
   // [A]
   public: HWND AssociatedHwnd() const;

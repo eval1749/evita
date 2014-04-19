@@ -20,12 +20,6 @@ var global = {};
 var Document = function(name, opt_mode) {};
 
 /**
- * @constructor
- * @extends {Window}
- */
-var EditorWindow = function() {};
-
-/**
  * TODO(yosi) Until Closure compiler supports optional entries in @struct,
  * we use |Object|.
  * @typedef {Object}

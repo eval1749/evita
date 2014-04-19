@@ -26,13 +26,13 @@ namespace {
 class EditorWindowList : public common::Singleton<EditorWindowList> {
   friend class common::Singleton<EditorWindowList>;
 
-  private: typedef std::vector<EditorWindow*> List;
+  public: typedef std::vector<EditorWindow*> List;
   private: std::unordered_set<EditorWindow*> set_;
 
   private: EditorWindowList() = default;
   public: ~EditorWindowList() = default;
 
-  private: List list() const {
+  public: List list() const {
     List list(set_.size());
     list.resize(0);
     for (auto window : set_) {
@@ -47,47 +47,11 @@ class EditorWindowList : public common::Singleton<EditorWindowList> {
   public: void ResetForTesting() {
     set_.clear();
   }
-  public: static List StaticList() {
-    return instance()->list();
-  }
   public: void Unregister(EditorWindow* window) {
     set_.erase(window);
   }
 
   DISALLOW_COPY_AND_ASSIGN(EditorWindowList);
-};
-
-//////////////////////////////////////////////////////////////////////
-//
-// EditorWindowWrapperInfo
-//
-class EditorWindowWrapperInfo :
-    public v8_glue::DerivedWrapperInfo<EditorWindow, Window> {
-
-  public: explicit EditorWindowWrapperInfo(const char* name)
-      : BaseClass(name) {
-  }
-  public: ~EditorWindowWrapperInfo() = default;
-
-  private: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    auto templ = v8_glue::CreateConstructorTemplate(isolate,
-        &EditorWindowWrapperInfo::NewEditorWindow);
-    return v8_glue::FunctionTemplateBuilder(isolate, templ)
-        .SetProperty("list", &EditorWindowList::StaticList)
-        .Build();
-  }
-
-  private: static EditorWindow* NewEditorWindow() {
-    return new EditorWindow();
-  }
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder.SetMethod("setStatusBar", &EditorWindow::SetStatusBar);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(EditorWindowWrapperInfo);
 };
 }  // namespace
 
@@ -95,14 +59,22 @@ class EditorWindowWrapperInfo :
 //
 // EditorWindow
 //
-DEFINE_SCRIPTABLE_OBJECT(EditorWindow, EditorWindowWrapperInfo);
-
 EditorWindow::EditorWindow() {
   EditorWindowList::instance()->Register(this);
   ScriptHost::instance()->view_delegate()->CreateEditorWindow(this);
 }
 
 EditorWindow::~EditorWindow() {
+}
+
+// static
+EditorWindowList::List EditorWindow::list() {
+  return EditorWindowList::instance()->list();
+}
+
+// static
+EditorWindow* EditorWindow::NewEditorWindow() {
+  return new EditorWindow();
 }
 
 void EditorWindow::ResetForTesting() {

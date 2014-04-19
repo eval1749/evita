@@ -15,6 +15,10 @@ class EditorWindow : public v8_glue::Scriptable<EditorWindow, Window> {
   public: EditorWindow();
   public: virtual ~EditorWindow();
 
+  public: static std::vector<EditorWindow*> list();
+
+  public: static EditorWindow* NewEditorWindow();
+
   public: static void ResetForTesting();
 
   // Set status bar texts.

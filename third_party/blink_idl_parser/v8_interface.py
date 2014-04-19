@@ -39,8 +39,9 @@ import v8_attributes
 from v8_globals import includes
 import v8_methods
 import v8_types
+from v8_types import cpp_ptr_type, cpp_template_type
 import v8_utilities
-from v8_utilities import capitalize, conditional_string, cpp_name, has_extended_attribute_value, runtime_enabled_function_name
+from v8_utilities import capitalize, conditional_string, cpp_name, gc_type, has_extended_attribute_value, runtime_enabled_function_name
 
 
 INTERFACE_H_INCLUDES = frozenset([
@@ -127,18 +128,18 @@ def generate_interface(interface):
     for special_wrap_interface in special_wrap_for:
         v8_types.add_includes_for_interface(special_wrap_interface)
 
-    # [WillBeGarbageCollected]
-    is_will_be_garbage_collected = 'WillBeGarbageCollected' in extended_attributes
-
     # [Custom=Wrap], [SetWrapperReferenceFrom]
     has_visit_dom_wrapper = (
         has_extended_attribute_value(interface, 'Custom', 'VisitDOMWrapper') or
         reachable_node_function or
         set_wrapper_reference_to_list)
 
+    this_gc_type = gc_type(interface)
+
     template_contents = {
         'conditional_string': conditional_string(interface),  # [Conditional]
         'cpp_class': cpp_name(interface),
+        'gc_type': this_gc_type,
         'has_custom_legacy_call_as_function': has_extended_attribute_value(interface, 'Custom', 'LegacyCallAsFunction'),  # [Custom=LegacyCallAsFunction]
         'has_custom_to_v8': has_extended_attribute_value(interface, 'Custom', 'ToV8'),  # [Custom=ToV8]
         'has_custom_wrap': has_extended_attribute_value(interface, 'Custom', 'Wrap'),  # [Custom=Wrap]
@@ -152,15 +153,13 @@ def generate_interface(interface):
         'is_document': is_document,
         'is_event_target': inherits_interface(interface.name, 'EventTarget'),
         'is_exception': interface.is_exception,
-        'is_will_be_garbage_collected': is_will_be_garbage_collected,
         'is_node': inherits_interface(interface.name, 'Node'),
         'measure_as': v8_utilities.measure_as(interface),  # [MeasureAs]
         'parent_interface': parent_interface,
-        'pass_ref_ptr': 'PassRefPtrWillBeRawPtr'
-                        if is_will_be_garbage_collected else 'PassRefPtr',
+        'pass_cpp_type': cpp_template_type(
+            cpp_ptr_type('PassRefPtr', 'RawPtr', this_gc_type),
+            cpp_name(interface)),
         'reachable_node_function': reachable_node_function,
-        'ref_ptr': 'RefPtrWillBeRawPtr'
-                   if is_will_be_garbage_collected else 'RefPtr',
         'runtime_enabled_function': runtime_enabled_function_name(interface),  # [RuntimeEnabled]
         'set_wrapper_reference_to_list': set_wrapper_reference_to_list,
         'special_wrap_for': special_wrap_for,
@@ -287,7 +286,7 @@ def generate_constant(constant):
 
     extended_attributes = constant.extended_attributes
     return {
-        'cpp_class': extended_attributes.get('ImplementedBy'),
+        'cpp_class': extended_attributes.get('PartialInterfaceImplementedAs'),
         'name': constant.name,
         # FIXME: use 'reflected_name' as correct 'name'
         'reflected_name': extended_attributes.get('Reflect', constant.name),
@@ -301,18 +300,28 @@ def generate_constant(constant):
 ################################################################################
 
 def generate_overloads(methods):
-    generate_overloads_by_type(methods, is_static=False)  # Regular methods
-    generate_overloads_by_type(methods, is_static=True)
+    # Regular methods
+    generate_overloads_by_type([method for method in methods
+                                if not method['is_static']])
+    # Static methods
+    generate_overloads_by_type([method for method in methods
+                                if method['is_static']])
 
 
-def generate_overloads_by_type(methods, is_static):
-    # Generates |overloads| template values and modifies |methods| in place;
-    # |is_static| flag used (instead of partitioning list in 2) because need to
-    # iterate over original list of methods to modify in place
+def generate_overloads_by_type(methods):
+    """Generates |method.overload*| template values.
+
+    Modifies |method| in place for |method| in |methods|.
+    Called separately for static and non-static (regular) methods,
+    as these are overloaded separately.
+    Doesn't change the |methods| list itself (only the values, i.e. individual
+    methods), so ok to treat these separately.
+    """
+
+    # Once using Python 2.7, using collections.Counter
+    # method_counts = Counter(method['name'] for method in methods)
     method_counts = defaultdict(lambda: 0)
     for method in methods:
-        if method['is_static'] != is_static:
-            continue
         name = method['name']
         method_counts[name] += 1
 
@@ -320,15 +329,13 @@ def generate_overloads_by_type(methods, is_static):
     overloaded_method_counts = dict((name, count)
                                     for name, count in method_counts.iteritems()
                                     if count > 1)
+    overloaded_name_methods = [(method['name'], method) for method in methods
+                               if method['name'] in overloaded_method_counts]
 
     # Add overload information only to overloaded methods, so template code can
     # easily verify if a function is overloaded
     method_overloads = defaultdict(list)
-    for method in methods:
-        name = method['name']
-        if (method['is_static'] != is_static or
-            name not in overloaded_method_counts):
-            continue
+    for name, method in overloaded_name_methods:
         # Overload index includes self, so first append, then compute index
         method_overloads[name].append(method)
         method.update({
@@ -338,13 +345,10 @@ def generate_overloads_by_type(methods, is_static):
 
     # Resolution function is generated after last overloaded function;
     # package necessary information into |method.overloads| for that method.
-    for method in methods:
-        if (method['is_static'] != is_static or
-            'overload_index' not in method):
-            continue
-        name = method['name']
-        if method['overload_index'] != overloaded_method_counts[name]:
-            continue
+    last_overloaded_name_methods = [
+        (name, method) for name, method in overloaded_name_methods
+        if method['overload_index'] == overloaded_method_counts[name]]
+    for name, method in last_overloaded_name_methods:
         overloads = method_overloads[name]
         minimum_number_of_required_arguments = min(
             overload['number_of_required_arguments']
@@ -361,8 +365,7 @@ def overload_resolution_expression(method):
     # Expression is an OR of ANDs: each term in the OR corresponds to a
     # possible argument count for a given method, with type checks.
     # FIXME: Blink's overload resolution algorithm is incorrect, per:
-    # Implement WebIDL overload resolution algorithm.
-    # https://code.google.com/p/chromium/issues/detail?id=293561
+    # Implement WebIDL overload resolution algorithm.  http://crbug.com/293561
     #
     # Currently if distinguishing non-primitive type from primitive type,
     # (e.g., sequence<DOMString> from DOMString or Dictionary from double)
@@ -427,7 +430,10 @@ def overload_check_argument(index, argument):
     if idl_type.is_wrapper_type:
         type_check = 'V8{idl_type}::hasInstance({cpp_value}, info.GetIsolate())'.format(idl_type=idl_type.base_type, cpp_value=cpp_value)
         if idl_type.is_nullable:
-            type_check = ' || '.join(['%s->IsNull()' % cpp_value, type_check])
+            if argument['has_default']:
+                type_check = ' || '.join(['isUndefinedOrNull(%s)' % cpp_value, type_check])
+            else:
+                type_check = ' || '.join(['%s->IsNull()' % cpp_value, type_check])
         return type_check
     if idl_type.is_interface_type:
         # Non-wrapper types are just objects: we don't distinguish type
@@ -451,8 +457,11 @@ def overload_check_argument(index, argument):
 def generate_constructor(interface, constructor):
     return {
         'argument_list': constructor_argument_list(interface, constructor),
-        'arguments': [constructor_argument(argument, index)
+        'arguments': [constructor_argument(interface, constructor, argument, index)
                       for index, argument in enumerate(constructor.arguments)],
+        'cpp_type': cpp_template_type(
+            cpp_ptr_type('RefPtr', 'RawPtr', gc_type(interface)),
+            cpp_name(interface)),
         'has_exception_state':
             # [RaisesException=Constructor]
             interface.extended_attributes.get('RaisesException') == 'Constructor' or
@@ -460,6 +469,7 @@ def generate_constructor(interface, constructor):
                 if argument.idl_type.name == 'SerializedScriptValue' or
                    argument.idl_type.is_integer_type),
         'is_constructor': True,
+        'is_named_constructor': False,
         'is_variadic': False,  # Required for overload resolution
         'number_of_required_arguments':
             number_of_required_arguments(constructor),
@@ -484,13 +494,15 @@ def constructor_argument_list(interface, constructor):
     return arguments
 
 
-def constructor_argument(argument, index):
+def constructor_argument(interface, constructor, argument, index):
     idl_type = argument.idl_type
     return {
+        'cpp_value':
+            v8_methods.cpp_value(interface, constructor, index),
         'has_default': 'Default' in argument.extended_attributes,
-        'idl_type_object': idl_type,
         # Dictionary is special-cased, but arrays and sequences shouldn't be
         'idl_type': not idl_type.array_or_sequence_type and idl_type.base_type,
+        'idl_type_object': idl_type,
         'index': index,
         'is_optional': argument.is_optional,
         'is_strict_type_checking': False,  # Required for overload resolution
@@ -522,7 +534,10 @@ def generate_named_constructor(interface):
     idl_constructor = interface.constructors[0]
     constructor = generate_constructor(interface, idl_constructor)
     constructor['argument_list'].insert(0, '*document')
-    constructor['name'] = extended_attributes['NamedConstructor']
+    constructor.update({
+        'name': extended_attributes['NamedConstructor'],
+        'is_named_constructor': True,
+    })
     return constructor
 
 

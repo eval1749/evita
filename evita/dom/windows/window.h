@@ -44,7 +44,6 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
   public: v8_glue::Nullable<Window> first_child() const {
     return Node::first_child();
   }
-  public: WindowId id() const { return event_target_id(); }
   public: v8_glue::Nullable<Window> last_child() const {
     return Node::last_child();
   }
@@ -84,5 +83,13 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
 };
 
 }  // namespace dom
+
+namespace gin {
+template<>
+struct Converter<dom::Window::State> {
+  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
+                                    dom::Window::State state);
+};
+}  // namespace gin
 
 #endif //!defined(INCLUDE_evita_dom_windows_window_h)

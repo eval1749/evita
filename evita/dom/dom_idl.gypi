@@ -18,6 +18,7 @@
       'windows/Rect.idl',
       'windows/Selection.idl',
       'windows/TableSelection.idl',
+      'windows/Window.idl',
     ], # idl_files
 
     'generated_glue_files': [
@@ -32,6 +33,7 @@
       '<(glue_dir)/SelectionClass.cc',
       '<(glue_dir)/TableSelectionClass.cc',
       '<(glue_dir)/ViewEventTargetClass.cc',
+      '<(glue_dir)/WindowClass.cc',
     ],
 
     'generated_js_externs_files': [
@@ -46,6 +48,7 @@
       '<(js_externs_dir)/Selection_externs.js',
       '<(js_externs_dir)/TableSelection_externs.js',
       '<(js_externs_dir)/ViewEventTarget_externs.js',
+      '<(js_externs_dir)/Window_externs.js',
     ], # generated_js_externs_files
 
     'static_js_externs_files': [
@@ -99,7 +102,6 @@
       'windows/text_selection_externs.js',
       'windows/text_window_externs.js',
       'timer_externs.js',
-      'windows/window_externs.js',
       'jslib/editors_externs.js',
       'jslib/windows_externs.js',
     ], # static_js_externs_files
@@ -143,6 +145,7 @@
           '<(DEPTH)/tools/idl_to_js_externs/aggregate_js_externs.py',
           '<(js_externs_dir)/evita_js_externs.js',
           '<(DEPTH)/tools/idl_to_js_externs/header.js',
+
           '<(js_externs_dir)', '<(idl_file_list)',
           '<(DEPTH)/evita', '<(static_file_list)',
         ], # action

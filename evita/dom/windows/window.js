@@ -12,7 +12,13 @@
   }
 })();
 
-['left', 'right', 'top', 'bottom', 'focusTick_'].forEach(function(name) {
+[
+  'clientHeight',
+  'clientLeft',
+  'clientTop',
+  'clientWidth',
+  'focusTick_'
+].forEach(function(name) {
   Object.defineProperty(Window.prototype, name, {value: 0, writable: true});
 });
 

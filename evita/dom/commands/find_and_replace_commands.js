@@ -350,7 +350,7 @@
 
   function showFindFormCommand() {
     ensureForm();
-    if (form_window.state != 'realized')
+    if (form_window.state != Window.State.REALIZED)
       return;
     form_window.show();
     form_window.focus();

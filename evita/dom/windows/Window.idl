@@ -1,0 +1,80 @@
+// Copyright (c) 2013-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+interface Window : ViewEventTarget {
+  [ImplementedAs=JavaScript]
+  static readonly attribute Window focus;
+
+  [ImplementedAs=JavaScript]
+  static void handleEvent(Event event);
+
+  [ImplementedAs=child_windows]
+  readonly attribute Window[] children;
+
+  // Window bounds in client coordinate is represented by
+  //  * |clientLeft|, |clientTop| + |clientWidth| x |clientHeight|.
+  [ImplementedAs=JavaScript]
+  readonly attribute long clientHeight;
+
+  [ImplementedAs=JavaScript]
+  readonly attribute long clientLeft;
+
+  [ImplementedAs=JavaScript]
+  readonly attribute long clientTop;
+
+  [ImplementedAs=JavaScript]
+  readonly attribute long clientWidth;
+
+  // The first child window in child window list.
+  [ImplementedAs=first_child]
+  readonly attribute Window? firstChild;
+
+  // Focus tick count for internal use.
+  [ImplementedAs=JavaScript]
+  readonly attribute long focusTick_;
+
+  [ImplementedAs=window_id]
+  readonly attribute long id;
+
+  // The Last child window in child window list.
+  [ImplementedAs=last_child]
+  readonly attribute Window? lastChild;
+
+  // Next sibling window in child window list.
+  [ImplementedAs=next_sibling]
+  readonly attribute Window? nextSibling;
+
+  // A parent window
+  [ImplementedAs=parent_window]
+  readonly attribute Window? parent;
+
+  // Previous sibling window in child window list.
+  [ImplementedAs=previous_sibling]
+  readonly attribute Window? previousSibling;
+  readonly attribute DOMString state;
+
+  [ImplementedAs=JavaScript]
+  attribute DOMString status;
+
+  [ImplementedAs=AddWindow]
+  void appendChild(Window new_child);
+
+  [ImplementedAs=ChangeParentWindow]
+  void changeParent(Window new_parent);
+
+  void destroy();
+  void focus();
+  void hide();
+  void realize();
+  void releaseCapture();
+
+  [ImplementedAs=RemoveWindow]
+  void removeChild(Window child);
+
+  void setCapture();
+  void show();
+  void splitHorizontally(Window new_right_window);
+  void splitVertically(Window new_below_window);
+  void update();
+};

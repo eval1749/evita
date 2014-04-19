@@ -84,12 +84,12 @@ text::Posn TextWindow::ComputeMotion(int method,
   data.x = opt_point.is_supplied ? opt_point.value.x() : 0.0f;
   data.y = opt_point.is_supplied ? opt_point.value.y() : 0.0f;
   return ScriptHost::instance()->view_delegate()->ComputeOnTextWindow(
-      id(), data);
+      window_id(), data);
 }
 
 domapi::FloatRect TextWindow::HitTestTextPosition(text::Posn position) {
   return ScriptHost::instance()->view_delegate()->
-      HitTestTextPosition(id(), position);
+      HitTestTextPosition(window_id(), position);
 }
 
 void TextWindow::MakeSelectionVisible() {
@@ -99,7 +99,7 @@ void TextWindow::MakeSelectionVisible() {
 
 text::Posn TextWindow::MapPointToPosition(float x, float y) {
   return ScriptHost::instance()->view_delegate()->MapPointToPosition(
-    id(), x, y);
+    window_id(), x, y);
 }
 
 void TextWindow::Reconvert(text::Posn start, text::Posn end) {

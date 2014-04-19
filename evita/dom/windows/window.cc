@@ -42,72 +42,16 @@ const char* WindowStateString(dom::Window::State state) {
 
 namespace gin {
 
-template<>
-struct Converter<dom::Window::State> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    dom::Window::State state) {
-    return gin::StringToSymbol(isolate,
-                               dom::internal::WindowStateString(state));
-  }
-};
+v8::Handle<v8::Value> Converter<dom::Window::State>::ToV8(
+    v8::Isolate* isolate, dom::Window::State state) {
+  return gin::StringToSymbol(isolate, dom::internal::WindowStateString(state));
+}
 
 } // namespace gin
 
 namespace dom {
 
 namespace {
-class WindowWrapperInfo :
-    public v8_glue::DerivedWrapperInfo<Window, ViewEventTarget> {
-
-  public: explicit WindowWrapperInfo(const char* name)
-      : BaseClass(name) {
-  }
-  public: ~WindowWrapperInfo() = default;
-
-  protected: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    auto templ = v8_glue::CreateConstructorTemplate(isolate,
-        &WindowWrapperInfo::NewWindow);
-    return v8_glue::FunctionTemplateBuilder(isolate, templ)
-        .SetValue("focus", v8::Maybe<Window*>(false, nullptr))
-        .Build();
-  }
-
-  private: static Window* NewWindow() {
-    ScriptHost::instance()->ThrowError(
-        "You can't create Window instance.");
-    return nullptr;
-  }
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("children", &Window::child_windows)
-        .SetProperty("firstChild", &Window::first_child)
-        .SetProperty("id", &Window::id)
-        .SetProperty("lastChild", &Window::last_child)
-        .SetProperty("nextSibling", &Window::next_sibling)
-        .SetProperty("parent", &Window::parent_window)
-        .SetProperty("previousSibling", &Window::previous_sibling)
-        .SetProperty("state", &Window::state)
-        .SetMethod("appendChild", &Window::AddWindow)
-        .SetMethod("changeParent", &Window::ChangeParentWindow)
-        .SetMethod("destroy", &Window::Destroy)
-        .SetMethod("focus", &Window::Focus)
-        .SetMethod("hide", &Window::Hide)
-        .SetMethod("releaseCapture", &Window::ReleaseCapture)
-        .SetMethod("realize", &Window::Realize)
-        .SetMethod("removeChild", &Window::RemoveWindow)
-        .SetMethod("setCapture", &Window::SetCapture)
-        .SetMethod("show", &Window::Show)
-        .SetMethod("splitHorizontally", &Window::SplitHorizontally)
-        .SetMethod("splitVertically", &Window::SplitVertically)
-        .SetMethod("update", &Window::Update);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(WindowWrapperInfo);
-};
-
 const v8::PropertyAttribute kDefaultPropertyAttribute =
     static_cast<v8::PropertyAttribute>(v8::DontEnum | v8::DontDelete);
 
@@ -118,8 +62,6 @@ int global_focus_tick;
 //
 // Window
 //
-DEFINE_SCRIPTABLE_OBJECT(Window, WindowWrapperInfo)
-
 Window::Window()
     : state_(State::NotRealized) {
   WindowSet::instance()->Register(this);
@@ -143,19 +85,19 @@ std::vector<Window*> Window::child_windows() const {
 void Window::AddWindow(Window* window) {
   if (window == this) {
     ScriptHost::instance()->ThrowError(
-        base::StringPrintf("Can't add window(%d) to itself.", id()));
+        base::StringPrintf("Can't add window(%d) to itself.", window_id()));
     return;
   }
   if (window->parent_node()) {
     ScriptHost::instance()->ThrowError(
         base::StringPrintf("Window(%d) is already child of window(%d).",
-            window->id(), window->parent_node()->id()));
+            window->window_id(), window->parent_node()->window_id()));
     return;
   }
   if (IsDescendantOf(window)) {
     ScriptHost::instance()->ThrowError(
         base::StringPrintf("Window(%d) is parent or ancestor of window(%d).",
-            window->id(), id()));
+            window->window_id(), window_id()));
     return;
   }
   AppendChild(window);
@@ -243,6 +185,7 @@ void Window::DidResize(int clientLeft, int clientTop,
 void Window::DidSetFocus() {
   ++global_focus_tick;
 
+
   // Update |Window.focus| and |Window.prototype.focusTick_|
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
@@ -314,7 +257,7 @@ void Window::RemoveWindow(Window* window) {
   if (window->parent_node() != window) {
     ScriptHost::instance()->ThrowError(base::StringPrintf(
         "Can't remove window(%d) which isn't child of window(%d).",
-        window->id(), id()));
+        window->window_id(), window_id()));
     return;
   }
   parent_node()->RemoveChild(this);
@@ -392,7 +335,7 @@ void Window::SplitHorizontally(Window* new_right_window) {
     return;
   parent_node()->InsertAfter(new_right_window, this);
   ScriptHost::instance()->view_delegate()->SplitHorizontally(
-    id(), new_right_window->id());
+    window_id(), new_right_window->window_id());
 }
 
 void Window::SplitVertically(Window* new_below_window) {
@@ -400,7 +343,7 @@ void Window::SplitVertically(Window* new_below_window) {
     return;
   parent_node()->InsertAfter(new_below_window, this);
   ScriptHost::instance()->view_delegate()->SplitVertically(
-    id(), new_below_window->id());
+    window_id(), new_below_window->window_id());
 }
 
 void Window::Update() {

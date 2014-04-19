@@ -178,10 +178,10 @@ TEST_F(WindowTest, changeParent) {
 
 TEST_F(WindowTest, DidResize) {
   EXPECT_SCRIPT_VALID("var sample = new SampleWindow();");
-  EXPECT_SCRIPT_EQ("0", "sample.left");
-  EXPECT_SCRIPT_EQ("0", "sample.top");
-  EXPECT_SCRIPT_EQ("0", "sample.right");
-  EXPECT_SCRIPT_EQ("0", "sample.bottom");
+  EXPECT_SCRIPT_EQ("0", "sample.clientLeft");
+  EXPECT_SCRIPT_EQ("0", "sample.clientTop");
+  EXPECT_SCRIPT_EQ("0", "sample.clientWidth");
+  EXPECT_SCRIPT_EQ("0", "sample.clientHeight");
 
   view_event_handler()->DidResizeWidget(static_cast<dom::WindowId>(1),
                                         11, 22, 33 + 11, 44 + 22);

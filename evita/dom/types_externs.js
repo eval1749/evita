@@ -21,12 +21,6 @@ var Document = function(name, opt_mode) {};
 
 /**
  * @constructor
- * @extends {EventTarget}
- */
-var Window = function() {};
-
-/**
- * @constructor
  * @extends {Window}
  */
 var DocumentWindow = function() {};

@@ -25,7 +25,7 @@ class ViewEventTarget
   public: domapi::EventTargetId event_target_id() const {
       return event_target_id_;
   }
-  public: domapi::EventTargetId id() const { return event_target_id(); }
+  public: domapi::EventTargetId window_id() const { return event_target_id(); }
 
   DISALLOW_COPY_AND_ASSIGN(ViewEventTarget);
 };

@@ -126,7 +126,7 @@ void TextBlock::Reset() {
   m_cy = 0;
 }
 
-void TextBlock::SetRect(const gfx::RectF& rect) {
+void TextBlock::SetBounds(const gfx::RectF& rect) {
   ASSERT_DOM_LOCKED();
   rect_ = rect;
   Reset();

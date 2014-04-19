@@ -83,7 +83,7 @@ class TextRenderer {
   public: bool ScrollToPosn(Posn target_position);
   public: bool ScrollUp();
   public: void SetGraphics(const gfx::Graphics* gfx);
-  public: void SetRect(const Rect& rect);
+  public: void SetBounds(const Rect& rect);
   public: bool ShouldFormat(const Selection& selection,
                             bool check_selection_color = false) const;
   public: bool ShouldRender() const;

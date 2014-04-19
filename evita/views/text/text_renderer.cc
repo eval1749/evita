@@ -310,10 +310,10 @@ void TextRenderer::SetGraphics(const gfx::Graphics* gfx) {
   screen_text_block_->SetGraphics(gfx);
 }
 
-void TextRenderer::SetRect(const Rect& rect) {
+void TextRenderer::SetBounds(const Rect& rect) {
   gfx::RectF rectf(rect);
-  text_block_->SetRect(rectf);
-  screen_text_block_->SetRect(rectf);
+  text_block_->SetBounds(rectf);
+  screen_text_block_->SetBounds(rectf);
 }
 
 bool TextRenderer::ShouldFormat(const Selection& selection,

@@ -36,7 +36,7 @@ class ScreenTextBlock : public gfx::Graphics::Observer {
   public: void Render(const TextBlock* text_block);
   public: void Reset();
   public: void SetGraphics(const gfx::Graphics* gfx);
-  public: void SetRect(const gfx::RectF& rect);
+  public: void SetBounds(const gfx::RectF& rect);
 
   // gfx::Graphics::Observer
   private: void ShouldDiscardResources() override;

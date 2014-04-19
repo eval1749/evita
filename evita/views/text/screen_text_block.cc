@@ -390,7 +390,7 @@ void ScreenTextBlock::SetGraphics(const gfx::Graphics* gfx) {
   gfx_ = gfx;
 }
 
-void ScreenTextBlock::SetRect(const gfx::RectF& rect) {
+void ScreenTextBlock::SetBounds(const gfx::RectF& rect) {
   Reset();
   rect_ = rect;
 }

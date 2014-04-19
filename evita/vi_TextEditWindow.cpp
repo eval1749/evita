@@ -934,7 +934,7 @@ void TextEditWindow::DidResize() {
   auto const scroll_bar_width = ::GetSystemMetrics(SM_CXVSCROLL);
   auto text_block_rect = rect();
   text_block_rect.right -= scroll_bar_width;
-  text_renderer_->SetRect(text_block_rect);
+  text_renderer_->SetBounds(text_block_rect);
 
   auto scroll_bar_rect = rect();
   scroll_bar_rect.left = text_block_rect.right;

@@ -60,7 +60,7 @@ class TextBlock : public text::BufferMutationObserver {
   public: bool IsShowEndOfDocument() const;
   public: void Prepend(TextLine*);
   public: void Reset();
-  public: void SetRect(const gfx::RectF& rect);
+  public: void SetBounds(const gfx::RectF& rect);
 
   // text::BufferMutationObserver
   private: virtual void DidChangeStyle(Posn offset, size_t length) override;

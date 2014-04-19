@@ -37,7 +37,7 @@ void StatusBar::Realize(HWND hwndParent) {
   DCHECK(!rect_.empty());
 }
 
-void StatusBar::ResizeTo(const common::win::Rect& rect) {
+void StatusBar::SetBounds(const common::win::Rect& rect) {
   DCHECK(hwnd_);
   DCHECK(!rect.empty());
   rect_ = rect;

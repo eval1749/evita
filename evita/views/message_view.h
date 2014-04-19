@@ -31,7 +31,7 @@ class MessageView {
   public: int height() const;
 
   public: void Realize(HWND hwnd_parent);
-  public: void ResizeTo(const Rect& rect);
+  public: void SetBounds(const Rect& rect);
   public: void SetMessage(const base::string16& text);
   public: void SetStatus(const std::vector<base::string16>& texts);
 

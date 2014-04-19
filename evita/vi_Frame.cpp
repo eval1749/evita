@@ -213,7 +213,7 @@ void Frame::DidAddChildWidget(const ui::Widget& widget) {
     if (!is_realized())
       return;
     if (pane->is_realized())
-      pane->ResizeTo(GetPaneRect());
+      pane->SetBounds(GetPaneRect());
     else
       pane->Realize(GetPaneRect());
     AddTab(pane);
@@ -497,11 +497,11 @@ void Frame::DidCreateNativeWindow() {
 
   // TODO(yosi) How do we detemine height of TabStrip?
   m_cyTabBand = tab_strip_->GetPreferreSize().cy;
-  tab_strip_->ResizeTo(Rect(0, 0, rect().width(), m_cyTabBand));
+  tab_strip_->SetBounds(Rect(0, 0, rect().width(), m_cyTabBand));
 
   auto const pane_rect = GetPaneRect();
   for (auto& pane: m_oPanes) {
-    pane.ResizeTo(pane_rect);
+    pane.SetBounds(pane_rect);
   }
 
   views::Window::DidCreateNativeWindow();
@@ -531,14 +531,14 @@ void Frame::DidResize() {
   {
     auto tab_strip_rect = rect();
     tab_strip_rect.bottom = tab_strip_rect.top + m_cyTabBand;
-    tab_strip_->ResizeTo(tab_strip_rect);
+    tab_strip_->SetBounds(tab_strip_rect);
   }
 
   // Display resizing information.
   {
     auto status_bar_rect = rect();
     status_bar_rect.top = rect().bottom - message_view_->height();
-    message_view_->ResizeTo(status_bar_rect);
+    message_view_->SetBounds(status_bar_rect);
     auto const text = base::StringPrintf(L"Resizing... %dx%d",
         rect().right - rect().left,
         rect().bottom - rect().top);
@@ -548,7 +548,7 @@ void Frame::DidResize() {
   {
     const auto rc = GetPaneRect();
     for (auto& pane: m_oPanes) {
-      pane.ResizeTo(rc);
+      pane.SetBounds(rc);
     }
   }
   gfx_->Resize(rect());

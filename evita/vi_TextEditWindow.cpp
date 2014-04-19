@@ -938,7 +938,7 @@ void TextEditWindow::DidResize() {
 
   auto scroll_bar_rect = rect();
   scroll_bar_rect.left = text_block_rect.right;
-  vertical_scroll_bar_->ResizeTo(scroll_bar_rect);
+  vertical_scroll_bar_->SetBounds(scroll_bar_rect);
 }
 
 // views::Window

@@ -63,7 +63,7 @@ class TextFieldControl::Renderer {
   private: void RenderSelection(gfx::Graphics* gfx);
   private: void ResetTextLayout();
   private: void ResetViewPort();
-  public: void ResizeTo(const gfx::RectF& rect);
+  public: void SetBounds(const gfx::RectF& rect);
   private: void UpdateTextLayout();
 
   DISALLOW_COPY_AND_ASSIGN(Renderer);
@@ -291,7 +291,7 @@ void TextFieldControl::Renderer::ResetViewPort() {
   view_text_rect_ = gfx::RectF();
 }
 
-void TextFieldControl::Renderer::ResizeTo(const gfx::RectF& new_rect) {
+void TextFieldControl::Renderer::SetBounds(const gfx::RectF& new_rect) {
   if (rect_ == new_rect)
     return;
   ResetTextLayout();
@@ -394,7 +394,7 @@ void TextFieldControl::DidKillFocus(ui::Widget* focused_widget) {
 }
 
 void TextFieldControl::DidResize() {
-  renderer_->ResizeTo(gfx::RectF(rect()));
+  renderer_->SetBounds(gfx::RectF(rect()));
 }
 
 void TextFieldControl::DidSetFocus(ui::Widget* last_focused_widget) {

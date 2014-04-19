@@ -239,7 +239,7 @@ void TableView::DidRealize() {
 void TableView::DidResize() {
   ContentWindow::DidResize();
   if (control_)
-    control_->ResizeTo(rect());
+    control_->SetBounds(rect());
 }
 
 // views::Window

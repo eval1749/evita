@@ -32,7 +32,7 @@ class StatusBar {
   public: int height() const { return rect_.height(); }
 
   public: void Realize(HWND hwndParent);
-  public: void ResizeTo(const common::win::Rect& rect);
+  public: void SetBounds(const common::win::Rect& rect);
   public: void Set(const std::vector<base::string16>& texts);
   public: void Set(const base::string16& text);
   public: void SetPart(size_t part, const base::string16& text);

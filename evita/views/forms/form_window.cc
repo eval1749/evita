@@ -90,7 +90,7 @@ void ControlImporter::Update(const dom::FormControl* control,
     rect.right = rect.left + 1;
     rect.bottom = rect.top + 1;
   }
-  widget->ResizeTo(rect);
+  widget->SetBounds(rect);
 
   if (auto const control_widget = widget->as<ui::Control>())
     control_widget->set_disabled(control->disabled());
@@ -495,7 +495,7 @@ bool FormWindow::OnIdle(int) {
     auto const has_menu = false;
     WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style, has_menu,
                                       extended_window_style));
-    ResizeTo(window_rect);
+    SetBounds(window_rect);
   }
 
   if (title_ != model_->title()) {

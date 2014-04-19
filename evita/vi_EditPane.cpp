@@ -763,7 +763,7 @@ void EditPane::LeafBox::ReplaceWindow(Window* window) {
 
 void EditPane::LeafBox::SetBounds(const gfx::Rect& rect) {
   Box::SetBounds(rect);
-  m_pWindow->ResizeTo(rect);
+  m_pWindow->SetBounds(rect);
 }
 
 EditPane::VerticalLayoutBox::VerticalLayoutBox(EditPane* edit_pane,

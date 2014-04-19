@@ -474,7 +474,7 @@ void Widget::Realize(const Rect& rect) {
     if (auto const window = native_window())
       ::SetParent(*window, container_widget().AssociatedHwnd());
     DidChangeHierarchy();
-    ResizeTo(rect);
+    SetBounds(rect);
     return;
   }
 
@@ -553,7 +553,19 @@ void Widget::RequestFocus() {
   ::SetFocus(*host.native_window());
 }
 
-void Widget::ResizeTo(const Rect& rect) {
+void Widget::SchedulePaint() {
+  DCHECK(is_realized());
+  SchedulePaintInRect(rect_);
+}
+
+void Widget::SchedulePaintInRect(const Rect& rect) {
+  DCHECK(is_realized());
+  DCHECK(!rect.empty());
+  // TODO(yosi) We should have |DCHECK(rect_.Contains(rect))|.
+  ::InvalidateRect(AssociatedHwnd(), &rect, true);
+}
+
+void Widget::SetBounds(const Rect& rect) {
   DCHECK(state_ >= kNotRealized);
 
 #if 0
@@ -573,19 +585,6 @@ void Widget::ResizeTo(const Rect& rect) {
     DidResize();
   }
 }
-
-void Widget::SchedulePaint() {
-  DCHECK(is_realized());
-  SchedulePaintInRect(rect_);
-}
-
-void Widget::SchedulePaintInRect(const Rect& rect) {
-  DCHECK(is_realized());
-  DCHECK(!rect.empty());
-  // TODO(yosi) We should have |DCHECK(rect_.Contains(rect))|.
-  ::InvalidateRect(AssociatedHwnd(), &rect, true);
-}
-
 
 void Widget::SetCapture() {
   #if DEBUG_MOUSE

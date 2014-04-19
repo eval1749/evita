@@ -22,8 +22,8 @@ void MessageView::Realize(HWND hwnd_parent) {
   status_bar_->Realize(hwnd_parent);
 }
 
-void MessageView::ResizeTo(const Rect& rect) {
-  status_bar_->ResizeTo(rect);
+void MessageView::SetBounds(const Rect& rect) {
+  status_bar_->SetBounds(rect);
 }
 
 void MessageView::SetMessage(const base::string16& text) {

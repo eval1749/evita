@@ -144,11 +144,11 @@ class Widget
   public: virtual void RealizeWidget();
   public: void ReleaseCapture();
   public: virtual void RequestFocus();
-  public: void ResizeTo(const Rect& rect);
 
   // [S]
   protected: void SchedulePaint();
   protected: void SchedulePaintInRect(const Rect& rect);
+  public: void SetBounds(const Rect& rect);
   public: void SetCapture();
   private: bool SetCursor();
   public: void SetParentWidget(Widget* new_parent);

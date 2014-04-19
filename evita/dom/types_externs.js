@@ -23,12 +23,6 @@ var Document = function(name, opt_mode) {};
  * @constructor
  * @extends {Window}
  */
-var DocumentWindow = function() {};
-
-/**
- * @constructor
- * @extends {Window}
- */
 var EditorWindow = function() {};
 
 /**

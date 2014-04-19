@@ -14,36 +14,10 @@
 
 namespace dom {
 
-namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// DocumentWindowClass
-//
-class DocumentWindowClass :
-    public v8_glue::DerivedWrapperInfo<DocumentWindow, Window> {
-
-  public: DocumentWindowClass(const char* name)
-      : BaseClass(name) {
-  }
-  public: ~DocumentWindowClass() = default;
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("document", &DocumentWindow::document)
-        .SetProperty("selection", &DocumentWindow::selection);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(DocumentWindowClass);
-};
-}  // namespace
-
 //////////////////////////////////////////////////////////////////////
 //
 // DocumentWindow
 //
-DEFINE_SCRIPTABLE_OBJECT(DocumentWindow, DocumentWindowClass);
-
 DocumentWindow::DocumentWindow(Selection* selection)
     : selection_(selection) {
 }

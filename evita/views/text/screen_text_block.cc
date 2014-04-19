@@ -147,7 +147,7 @@ void ScreenTextBlock::RenderContext::FillBottom(const TextLine* line) const {
 }
 
 void ScreenTextBlock::RenderContext::FillRight(const TextLine* line) const {
-  gfx::RectF rect(line->rect());
+  gfx::RectF rect(line->bounds());
   rect.left  = rect_.left + line->GetWidth();
   rect.right = rect_.right;
   if (rect.empty())
@@ -164,11 +164,11 @@ FormatLineIterator ScreenTextBlock::RenderContext::FindFirstMismatch() const {
       return format_line_runner;
     auto const format_line = (*format_line_runner);
     auto const screen_line = (*screen_line_runner);
-    if (format_line->rect() != screen_line->rect() ||
+    if (format_line->bounds() != screen_line->bounds() ||
         !format_line->Equal(screen_line)) {
       return format_line_runner;
     }
-    AddRect(skip_rects_, format_line->rect());
+    AddRect(skip_rects_, format_line->bounds());
     ++screen_line_runner;
   }
   return format_lines_.cend();
@@ -186,11 +186,11 @@ FormatLineIterator ScreenTextBlock::RenderContext::FindLastMatch() const {
     if (screen_line_runner == screen_lines_.crend())
       break;
     auto const screen_line = (*screen_line_runner);
-    if (format_line->rect() != screen_line->rect() ||
+    if (format_line->bounds() != screen_line->bounds() ||
         !format_line->Equal(screen_line)) {
       break;
     }
-    AddRect(skip_rects_, format_line->rect());
+    AddRect(skip_rects_, format_line->bounds());
     format_last_match = format_line_runner;
     ++screen_line_runner;
   }
@@ -206,8 +206,8 @@ std::vector<TextLine*>::const_iterator
        ++runner) {
     auto const screen_line = *runner;
     if (screen_line->Equal(format_line) &&
-        (format_line->rect().top == screen_line->rect().top ||
-         screen_line->rect().bottom <= rect_.bottom)) {
+        (format_line->bounds().top == screen_line->bounds().top ||
+         screen_line->bounds().bottom <= rect_.bottom)) {
       return runner;
     }
   }
@@ -240,7 +240,7 @@ bool ScreenTextBlock::RenderContext::Render() {
     // TextBlock must cover whole screen area.
     auto const last_format_line = format_lines_.back();
     if (!last_format_line->cells().back()->is<MarkerCell>())
-      DCHECK_GE(last_format_line->rect().bottom, rect_.bottom);
+      DCHECK_GE(last_format_line->bounds().bottom, rect_.bottom);
   }
 
   gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, rect_);
@@ -249,9 +249,9 @@ bool ScreenTextBlock::RenderContext::Render() {
   if (dirty_line_start != format_lines_.end()) {
     auto const clean_line_start = FindLastMatch();
     #if DEBUG_DRAW
-      DVLOG(0) << "dirty " << (*dirty_line_start)->rect().top << "," <<
+      DVLOG(0) << "dirty " << (*dirty_line_start)->bounds().top << "," <<
         (clean_line_start == format_lines_.end() ? rect_.bottom :
-            (*clean_line_start)->rect().top);
+            (*clean_line_start)->bounds().top);
     #endif
     for (auto dirty_line_runner = dirty_line_start;
          dirty_line_runner != clean_line_start;
@@ -262,7 +262,7 @@ bool ScreenTextBlock::RenderContext::Render() {
       auto const format_line = *dirty_line_runner;
       format_line->Render(*gfx_);
       FillRight(format_line);
-      AddRect(dirty_rects_, format_line->rect());
+      AddRect(dirty_rects_, format_line->bounds());
     }
   }
 
@@ -315,9 +315,9 @@ FormatLineIterator ScreenTextBlock::RenderContext::TryCopy(
 
     auto const skip = dst_top == src_top;
     if (skip)
-      AddRect(skip_rects_, (*format_start)->rect());
+      AddRect(skip_rects_, (*format_start)->bounds());
     else
-      AddRect(copy_rects_, (*format_start)->rect());
+      AddRect(copy_rects_, (*format_start)->bounds());
 
     auto dst_bottom = (*format_start)->bottom();
     ++format_runner;
@@ -327,13 +327,13 @@ FormatLineIterator ScreenTextBlock::RenderContext::TryCopy(
     while (format_runner != format_end && screen_runner != screen_end) {
       auto const format_line = *format_runner;
       auto const screen_line = *screen_runner;
-      if (screen_line->rect().bottom > rect_.bottom ||
+      if (screen_line->bounds().bottom > rect_.bottom ||
           !format_line->Equal(screen_line))
         break;
       if (skip)
-        AddRect(skip_rects_, format_line->rect());
+        AddRect(skip_rects_, format_line->bounds());
       else
-        AddRect(copy_rects_, format_line->rect());
+        AddRect(copy_rects_, format_line->bounds());
       dst_bottom = format_line->bottom();
       ++format_runner;
       ++screen_runner;

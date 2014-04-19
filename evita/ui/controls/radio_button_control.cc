@@ -30,15 +30,15 @@ void RadioButtonControl::set_checked(bool new_checked) {
 
 // ui::Widget
 void RadioButtonControl::OnDraw(gfx::Graphics* gfx) {
-  if (rect().empty())
+  if (bounds().empty())
     return;
 
-  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect());
+  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), bounds());
 
   auto const size = 12.0f;
   D2D1_ELLIPSE ellipse;
-  ellipse.point = gfx::PointF(rect().left + rect().width() / 2,
-                              rect().top + rect().height() / 2);
+  ellipse.point = gfx::PointF(bounds().left + bounds().width() / 2,
+                              bounds().top + bounds().height() / 2);
   ellipse.radiusX = ellipse.radiusY = size / 2;
   gfx::Brush frame_brush(*gfx, hover() ? style_.hotlight : style_.shadow);
   (*gfx)->DrawEllipse(ellipse, frame_brush);

@@ -60,9 +60,9 @@ void ScrollBar::DidRealize() {
 void ScrollBar::DidResize() {
   if (!hwnd_)
     return;
-  DCHECK(!rect().empty());
-  ::SetWindowPos(hwnd_, nullptr, rect().left, rect().top, rect().width(),
-                 rect().height(), SWP_NOZORDER);
+  DCHECK(!bounds().empty());
+  ::SetWindowPos(hwnd_, nullptr, bounds().left, bounds().top, bounds().width(),
+                 bounds().height(), SWP_NOZORDER);
 }
 
 void ScrollBar::DidShow() {

@@ -374,10 +374,10 @@ int Frame::getTabFromPane(Pane* const pane) const {
 }
 
 Rect Frame::GetPaneRect() const {
-  return Rect(rect().left + k_edge_size + kPaddingLeft,
-              rect().top + m_cyTabBand + k_edge_size * 2 + kPaddingLeft,
-              rect().right - k_edge_size + kPaddingRight,
-              rect().bottom - message_view_->height() + k_edge_size +
+  return Rect(bounds().left + k_edge_size + kPaddingLeft,
+              bounds().top + m_cyTabBand + k_edge_size * 2 + kPaddingLeft,
+              bounds().right - k_edge_size + kPaddingRight,
+              bounds().bottom - message_view_->height() + k_edge_size +
                   kPaddingBottom);
 }
 
@@ -497,7 +497,7 @@ void Frame::DidCreateNativeWindow() {
 
   // TODO(yosi) How do we detemine height of TabStrip?
   m_cyTabBand = tab_strip_->GetPreferreSize().cy;
-  tab_strip_->SetBounds(Rect(0, 0, rect().width(), m_cyTabBand));
+  tab_strip_->SetBounds(Rect(0, 0, bounds().width(), m_cyTabBand));
 
   auto const pane_rect = GetPaneRect();
   for (auto& pane: m_oPanes) {
@@ -529,19 +529,19 @@ void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
 void Frame::DidResize() {
   views::Window::DidResize();
   {
-    auto tab_strip_rect = rect();
+    auto tab_strip_rect = bounds();
     tab_strip_rect.bottom = tab_strip_rect.top + m_cyTabBand;
     tab_strip_->SetBounds(tab_strip_rect);
   }
 
   // Display resizing information.
   {
-    auto status_bar_rect = rect();
-    status_bar_rect.top = rect().bottom - message_view_->height();
+    auto status_bar_rect = bounds();
+    status_bar_rect.top = bounds().bottom - message_view_->height();
     message_view_->SetBounds(status_bar_rect);
     auto const text = base::StringPrintf(L"Resizing... %dx%d",
-        rect().right - rect().left,
-        rect().bottom - rect().top);
+        bounds().right - bounds().left,
+        bounds().bottom - bounds().top);
     message_view_->SetMessage(text);
   }
 
@@ -551,7 +551,7 @@ void Frame::DidResize() {
       pane.SetBounds(rc);
     }
   }
-  gfx_->Resize(rect());
+  gfx_->Resize(bounds());
   DrawForResize();
 }
 

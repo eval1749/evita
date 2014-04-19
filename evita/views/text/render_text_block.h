@@ -39,7 +39,7 @@ class TextBlock : public text::BufferMutationObserver {
   public: float height() const { return rect_.height(); }
   public: float left() const { return rect_.left; }
   public: const std::list<TextLine*>& lines() const { return lines_; }
-  public: const gfx::RectF& rect() const { return rect_; }
+  public: const gfx::RectF& bounds() const { return rect_; }
   public: float right() const { return rect_.right; }
   public: const text::Buffer* text_buffer() const { return text_buffer_; }
   public: float top() const { return rect_.top; }

@@ -101,7 +101,7 @@ void LabelControl::DidResize() {
 
 void LabelControl::OnDraw(gfx::Graphics* gfx) {
   if (!renderer_)
-    renderer_ = std::make_unique<Renderer>(text_, style_, gfx::RectF(rect()));
+    renderer_ = std::make_unique<Renderer>(text_, style_, gfx::RectF(bounds()));
   renderer_->Render(gfx);
 }
 

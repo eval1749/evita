@@ -69,7 +69,7 @@ class Widget
   protected: NativeWindow* native_window() const {
     return native_window_.get();
   }
-  public: const Rect& rect() const { return rect_; }
+  public: const Rect& bounds() const { return rect_; }
 
   // [A]
   public: HWND AssociatedHwnd() const;

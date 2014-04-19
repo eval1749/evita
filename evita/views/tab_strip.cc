@@ -1497,21 +1497,21 @@ void TabStrip::SetTab(int tab_index, const TCITEM* tab_data) {
 void TabStrip::CreateNativeWindow() const {
   native_window()->CreateWindowEx(
       0, WS_CHILD | WS_VISIBLE, L"TabStrip", parent_node()->AssociatedHwnd(),
-      rect().left_top(),
-      rect().size());
+      bounds().left_top(),
+      bounds().size());
 }
 
 void TabStrip::DidCreateNativeWindow() {
   impl_.reset(new TabStripImpl(*native_window(), delegate_));
-  impl_->m_rc = rect();
+  impl_->m_rc = bounds();
   impl_->DidCreateNativeWindow();
 }
 
 void TabStrip::DidResize() {
   if (!impl_)
     return;
-  impl_->m_rc = rect();
-  impl_->m_gfx.Resize(rect());
+  impl_->m_rc = bounds();
+  impl_->m_gfx.Resize(bounds());
   impl_->Redraw();
 }
 

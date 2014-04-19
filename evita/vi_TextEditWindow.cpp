@@ -257,7 +257,7 @@ Posn TextEditWindow::EndOfLine(Posn lPosn) {
 }
 
 HCURSOR TextEditWindow::GetCursorAt(const Point& point) const {
-  if (vertical_scroll_bar_->rect().Contains(point))
+  if (vertical_scroll_bar_->bounds().Contains(point))
     return ::LoadCursor(nullptr, IDC_ARROW);
   return ::LoadCursor(nullptr, IDC_IBEAM);
 }
@@ -438,7 +438,7 @@ void TextEditWindow::Render() {
 
   gfx::Graphics::DrawingScope drawing_scope(*m_gfx);
   Caret::Updater caret_updater(caret_.get());
-  m_gfx->set_dirty_rect(rect());
+  m_gfx->set_dirty_rect(bounds());
   text_renderer_->Render();
 
   view_start_ = text_renderer_->GetStart();
@@ -453,9 +453,9 @@ void TextEditWindow::Render() {
   auto const caret_width = std::max(::GetSystemMetrics(SM_CXBORDER), 2);
   gfx::RectF caret_rect(char_rect.left, char_rect.top,
                         std::min(char_rect.left + caret_width,
-                                 static_cast<float>(rect().right)),
+                                 static_cast<float>(bounds().right)),
                         std::min(char_rect.bottom,
-                                 static_cast<float>(rect().bottom)));
+                                 static_cast<float>(bounds().bottom)));
   #if SUPPORT_IME
     if (m_fImeTarget) {
       POINT pt = {
@@ -932,11 +932,11 @@ void TextEditWindow::DidResize() {
   views::ContentWindow::DidResize();
   UI_DOM_AUTO_LOCK_SCOPE();
   auto const scroll_bar_width = ::GetSystemMetrics(SM_CXVSCROLL);
-  auto text_block_rect = rect();
+  auto text_block_rect = bounds();
   text_block_rect.right -= scroll_bar_width;
   text_renderer_->SetBounds(text_block_rect);
 
-  auto scroll_bar_rect = rect();
+  auto scroll_bar_rect = bounds();
   scroll_bar_rect.left = text_block_rect.right;
   vertical_scroll_bar_->SetBounds(scroll_bar_rect);
 }

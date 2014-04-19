@@ -245,7 +245,7 @@ void Widget::DispatchPaintMessage() {
    for (auto child : child_nodes()) {
     if (!child->is_shown() || child->has_native_window())
       continue;
-    auto const rect = exposed_rect.Intersect(child->rect());
+    auto const rect = exposed_rect.Intersect(child->bounds());
     if (rect) {
       #if DEBUG_PAINT
         DEBUG_WIDGET_PRINTF("Start " DEBUG_WIDGET_FORMAT " focus=%d "
@@ -294,7 +294,7 @@ Widget* Widget::GetWidgetAt(const Point& point) const {
     auto const child = runner;
     if (!child->is_shown())
       continue;
-    if (child->rect().Contains(point)) {
+    if (child->bounds().Contains(point)) {
       auto const child_child = child->GetWidgetAt(point);
       return child_child ? child_child : const_cast<Widget*>(child);
     }
@@ -646,7 +646,7 @@ void Widget::Show() {
     ::ShowWindow(*native_window_.get(), SW_SHOW);
   } else if (shown_ == 1) {
     DidShow();
-    if (!rect().empty())
+    if (!bounds().empty())
       SchedulePaint();
   }
 

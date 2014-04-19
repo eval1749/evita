@@ -30,10 +30,10 @@ void CheckboxControl::set_checked(bool new_checked) {
 
 // ui::Widget
 void CheckboxControl::OnDraw(gfx::Graphics* gfx) {
-  if (!rect())
+  if (!bounds())
     return;
 
-  auto const rect = gfx::RectF(this->rect());
+  auto const rect = gfx::RectF(this->bounds());
   gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect);
 
   auto const frame_size = gfx::SizeF(12.0f, 12.0f);

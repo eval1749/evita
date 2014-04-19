@@ -35,7 +35,7 @@ class TextLine {
   public: const std::vector<Cell*>& cells() const { return cells_; }
   public: Cell* last_cell() const { return cells_.back(); }
   public: float left() const { return rect_.left; }
-  public: const gfx::RectF& rect() const { return rect_; }
+  public: const gfx::RectF& bounds() const { return rect_; }
   public: float right() const { return rect_.right; }
   public: float top() const { return rect_.top; }
   public: void set_left_top(const gfx::PointF& left_top);

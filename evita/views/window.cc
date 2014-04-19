@@ -159,15 +159,15 @@ void Window::OnMouseWheel(const ui::MouseWheelEvent& event) {
 
 void Window::DidRealize() {
   view_event_handler()->DidRealizeWidget(window_id_);
-  view_event_handler()->DidResizeWidget(window_id_, rect().left, rect().top,
-                                        rect().right, rect().bottom);
+  view_event_handler()->DidResizeWidget(window_id_, bounds().left, bounds().top,
+                                        bounds().right, bounds().bottom);
   Widget::DidRealize();
 }
 
 void Window::DidResize() {
   Widget::DidResize();
-  view_event_handler()->DidResizeWidget(window_id_, rect().left, rect().top,
-                                        rect().right, rect().bottom);
+  view_event_handler()->DidResizeWidget(window_id_, bounds().left, bounds().top,
+                                        bounds().right, bounds().bottom);
 }
 
 void Window::DidSetFocus(ui::Widget* last_focused) {

@@ -178,17 +178,17 @@ TextFormatter::TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
       text_block_(text_block),
       text_scanner_(new TextScanner(text_block->text_buffer(), lStart,
                                     selection)) {
-  DCHECK(!text_block_->rect().empty());
+  DCHECK(!text_block_->bounds().empty());
 }
 
 TextFormatter::~TextFormatter() {
 }
 
 void TextFormatter::Format() {
-  DCHECK(!text_block_->rect().empty());
+  DCHECK(!text_block_->bounds().empty());
   for (;;) {
     auto const pLine = FormatLine();
-    DCHECK_GT(pLine->rect().height(), 0.0f);
+    DCHECK_GT(pLine->bounds().height(), 0.0f);
 
     text_block_->Append(pLine);
 
@@ -215,7 +215,7 @@ void TextFormatter::Format() {
 
 // Returns true if more contents is avaialble, otherwise returns false.
 TextLine* TextFormatter::FormatLine() {
-  DCHECK(!text_block_->rect().empty());
+  DCHECK(!text_block_->bounds().empty());
   auto const pLine = new TextLine();
   pLine->set_start(text_scanner_->GetPosn());
 

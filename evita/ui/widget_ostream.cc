@@ -8,7 +8,7 @@
 std::ostream& operator<<(std::ostream& out, const ui::Widget& widget) {
   out << "{" << widget.class_name() << "@" << std::hex <<
     reinterpret_cast<uintptr_t>(&widget) << " " <<
-    std::dec << widget.rect() << "}";
+    std::dec << widget.bounds() << "}";
   return out;
 }
 

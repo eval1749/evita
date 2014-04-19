@@ -146,12 +146,12 @@ void TableView::UpdateControl(std::unique_ptr<TableViewModel> new_model) {
   for (auto& column : columns_) {
     width += column.width;
   }
-  if (width < rect().width())
-    columns_.back().width = rect().width() - width;
+  if (width < bounds().width())
+    columns_.back().width = bounds().width() - width;
 
   control_ = new ui::TableControl(columns_, this, this);
   AppendChild(control_);
-  control_->Realize(rect());
+  control_->Realize(bounds());
   control_->Show();
 }
 
@@ -239,7 +239,7 @@ void TableView::DidRealize() {
 void TableView::DidResize() {
   ContentWindow::DidResize();
   if (control_)
-    control_->SetBounds(rect());
+    control_->SetBounds(bounds());
 }
 
 // views::Window

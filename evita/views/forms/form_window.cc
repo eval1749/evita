@@ -391,10 +391,10 @@ void FormWindow::FormViewModel::Update() {
       widget = it->second;
       window_->AppendChild(widget);
       importer->UpdateWidget(widget);
-      window_->SchedulePaintInRect(widget->rect());
+      window_->SchedulePaintInRect(widget->bounds());
       controls_to_remove.erase(widget);
     }
-    DCHECK(!widget->rect().empty());
+    DCHECK(!widget->bounds().empty());
     if (widget->focusable()) {
       if (!focusable)
         focusable = widget;
@@ -413,7 +413,7 @@ void FormWindow::FormViewModel::Update() {
 
   // Destroy removed controls
   for (auto child : controls_to_remove) {
-    window_->SchedulePaintInRect(child->rect());
+    window_->SchedulePaintInRect(child->bounds());
     child->DestroyWidget();
   }
   dirty_ = false;
@@ -574,7 +574,7 @@ void FormWindow::DidRealize() {
 }
 
 void FormWindow::DidResize() {
-  gfx_->Resize(rect());
+  gfx_->Resize(bounds());
   {
     gfx::Graphics::DrawingScope drawing_scope(*gfx_);
     (*gfx_)->Clear(ui::SystemMetrics::instance()->bgcolor());

@@ -181,7 +181,7 @@ void TextRenderer::Prepare(const Selection& selection) {
 
 void TextRenderer::Render() {
   DCHECK(gfx_);
-  DCHECK(!text_block_->rect().empty());
+  DCHECK(!text_block_->bounds().empty());
   text_block_->EnsureLinePoints();
   screen_text_block_->Render(text_block_.get());
 

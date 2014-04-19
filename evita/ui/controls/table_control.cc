@@ -39,7 +39,7 @@ class Item : public common::Castable {
   public: Item();
   public: virtual ~Item();
 
-  public: const gfx::RectF& rect() const { return rect_; }
+  public: const gfx::RectF& bounds() const { return rect_; }
   public: void set_rect(const gfx::RectF& rect) { rect_ = rect; }
 
   public: Item* HitTest(const gfx::PointF& point) const;
@@ -273,7 +273,7 @@ void TableControl::TableControlModel::DidChangeRow(int row_id) {
   auto row = GetRowById(row_id);
   if (!row)
     return;
-  AddDirtyRect(row->rect());
+  AddDirtyRect(row->bounds());
 }
 
 void TableControl::TableControlModel::DidKillFocus(ui::Widget*) {
@@ -298,10 +298,10 @@ void TableControl::TableControlModel::DidRemoveRow(int row_id) {
     if (row->row_id() == row_id) {
       row_pos = it;
       selection_.DidRemoveItem(index);
-      new_rect = row->rect();
+      new_rect = row->bounds();
       AddDirtyRect(new_rect);
     } else if (!new_rect.empty()) {
-      auto const next_new_rect = row->rect();
+      auto const next_new_rect = row->bounds();
       AddDirtyRect(next_new_rect);
       row->set_rect(new_rect);
       new_rect = next_new_rect;
@@ -335,7 +335,7 @@ void TableControl::TableControlModel::Draw(gfx::Graphics* gfx) const {
   // Fill top edge
   gfx->FillRectangle(fill_brush, gfx::RectF(
       gfx::PointF(rect_.left, rect_.top),
-      gfx::SizeF(rect_.width(), columns_[0]->rect().top - rect_.top)));
+      gfx::SizeF(rect_.width(), columns_[0]->bounds().top - rect_.top)));
 
   DrawHeaderRow(gfx);
 
@@ -345,53 +345,53 @@ void TableControl::TableControlModel::Draw(gfx::Graphics* gfx) const {
     DrawRow(gfx, row);
     gfx->Flush();
     last_row = row;
-    if (row->rect().bottom >= rect_.bottom)
+    if (row->bounds().bottom >= rect_.bottom)
       break;
   }
 
   // Fill edge
   if (!last_row) {
     gfx->FillRectangle(fill_brush, gfx::RectF(
-        gfx::PointF(rect_.left, columns_[0]->rect().bottom),
+        gfx::PointF(rect_.left, columns_[0]->bounds().bottom),
         gfx::PointF(rect_.right, rect_.bottom)));
     return;
   }
 
   // Fill between header and rows
   gfx->FillRectangle(fill_brush, gfx::RectF(
-      gfx::PointF(rect_.left, columns_.front()->rect().bottom),
-      gfx::PointF(rect_.right, rows_.front()->rect().top)));
+      gfx::PointF(rect_.left, columns_.front()->bounds().bottom),
+      gfx::PointF(rect_.right, rows_.front()->bounds().top)));
 
   // Fill left edge
   gfx->FillRectangle(fill_brush, gfx::RectF(
     rect_.left, rect_.top,
-    last_row->rect().left, last_row->rect().bottom));
+    last_row->bounds().left, last_row->bounds().bottom));
 
   // Fill right edge
   auto const right_edge = gfx::RectF(
-    last_row->rect().right, rows_.front()->rect().top,
-    rect_.right, last_row->rect().bottom);
+    last_row->bounds().right, rows_.front()->bounds().top,
+    rect_.right, last_row->bounds().bottom);
   if (!right_edge.empty())
     gfx->FillRectangle(fill_brush, right_edge);
 
   // Fill bottom edge
-  if (last_row->rect().bottom >= rect_.bottom)
+  if (last_row->bounds().bottom >= rect_.bottom)
     return;
   gfx->FillRectangle(fill_brush, gfx::RectF(
-      rect_.left, last_row->rect().bottom,
+      rect_.left, last_row->bounds().bottom,
       rect_.right, rect_.bottom));
 }
 
 void TableControl::TableControlModel::DrawHeaderRow(gfx::Graphics* gfx) const {
   gfx->FillRectangle(gfx::Brush(*gfx, gfx::ColorF::White),
-                     gfx::RectF(columns_.front()->rect().left_top(),
-                                columns_.back()->rect().right_bottom()));
+                     gfx::RectF(columns_.front()->bounds().left_top(),
+                                columns_.back()->bounds().right_bottom()));
   gfx::Brush textBrush(*gfx, gfx::ColorF::Black);
   gfx::Brush grayBrush(*gfx, gfx::ColorF::LightGray);
   auto column_index = 0u;
   for (auto column : columns_) {
     ++column_index;
-    auto const rect = column->rect();
+    auto const rect = column->bounds();
     auto const text = column->text();
     (*gfx)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
                      *text_format_, rect, textBrush);
@@ -405,9 +405,9 @@ void TableControl::TableControlModel::DrawRow(gfx::Graphics* gfx,
   auto const kPadding = 2.0f;
   auto const bgcolor = gfx::ColorF(gfx::ColorF::White);
   auto const color = gfx::ColorF(gfx::ColorF::Black);
-  gfx->FillRectangle(gfx::Brush(*gfx, bgcolor), row->rect());
+  gfx->FillRectangle(gfx::Brush(*gfx, bgcolor), row->bounds());
   gfx::Brush textBrush(*gfx, color);
-  gfx::PointF cell_left_top(row->rect().left_top());
+  gfx::PointF cell_left_top(row->bounds().left_top());
   auto column_index = 0u;
   for (auto column : columns_) {
     auto const text = model_->GetCellText(row->row_id(), column->column_id());
@@ -427,11 +427,11 @@ void TableControl::TableControlModel::DrawRow(gfx::Graphics* gfx,
     gfx->FillRectangle(gfx::Brush(*gfx, has_focus_ ?
                                    RgbToColorF(51, 153, 255, 0.3f) :
                                    RgbToColorF(191, 205, 191, 0.3f)),
-                       row->rect());
+                       row->bounds());
     gfx->DrawRectangle(gfx::Brush(*gfx, has_focus_ ?
                                   RgbToColorF(51, 153, 255, 0.5f) :
                                   RgbToColorF(191, 205, 191, 0.5f)),
-                       row->rect());
+                       row->bounds());
   }
 }
 
@@ -484,7 +484,7 @@ void TableControl::TableControlModel::MakeSelectionViewDirty() {
   for(auto row : rows_) {
     if (selection_.IsSelected(index)) {
       row->UpdateState(row->selected() ? Row::kSelected : 0, Row::kSelected);
-      AddDirtyRect(row->rect());
+      AddDirtyRect(row->bounds());
     }
     ++index;
   }
@@ -560,7 +560,7 @@ void TableControl::TableControlModel::UpdateLayout() {
         rect_.width() - cell_left_top.x : column->width();
     gfx::RectF rect(cell_left_top, gfx::SizeF(width, row_height_));
     column->set_rect(rect);
-    DCHECK(!column->rect().empty());
+    DCHECK(!column->bounds().empty());
     cell_left_top.x += column->width();
   }
 
@@ -569,8 +569,8 @@ void TableControl::TableControlModel::UpdateLayout() {
   for (auto row : rows_) {
     row->set_rect(gfx::RectF(left_top.x, left_top.y,
                              rect_.right, left_top.y + row_height_));
-    DCHECK(!row->rect().empty());
-    left_top.y += row->rect().height();
+    DCHECK(!row->bounds().empty());
+    left_top.y += row->bounds().height();
   }
 
   dirty_rect_ = rect_;
@@ -581,7 +581,7 @@ void TableControl::TableControlModel::UpdateSelectionView() {
   for(auto row : rows_) {
     if (row->selected() != selection_.IsSelected(index)) {
       row->UpdateState(row->selected() ? 0 : Row::kSelected, Row::kSelected);
-      AddDirtyRect(row->rect());
+      AddDirtyRect(row->bounds());
     }
     ++index;
   }
@@ -639,12 +639,12 @@ void TableControl::DidKillFocus(ui::Widget* focus_widget) {
 }
 
 void TableControl::DidRealize() {
-  model_->DidResize(gfx::RectF(rect()));
+  model_->DidResize(gfx::RectF(bounds()));
   UpdateViewIfNeeded();
 }
 
 void TableControl::DidResize() {
-  model_->DidResize(gfx::RectF(rect()));
+  model_->DidResize(gfx::RectF(bounds()));
   UpdateViewIfNeeded();
 }
 

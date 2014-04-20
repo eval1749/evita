@@ -236,9 +236,10 @@ v8::Handle<v8::FunctionTemplate>
  #}
 void {{class_name}}:: SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) {
-  auto const isolate = builder.isolate();
-  DCHECK(isolate);
 {% for attribute in attributes if not attribute.is_static %}
+{% if loop.first %}
+  auto const isolate = builder.isolate();
+{% endif %}
 {%   if attribute.is_read_only %}
   builder.GetTemplate()->SetAccessorProperty(gin::StringToSymbol(isolate, "{{attribute.name}}"),
       v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}));

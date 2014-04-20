@@ -53,6 +53,7 @@
       '<(js_externs_dir)/Editor_externs.js',
       '<(js_externs_dir)/EditorWindow_externs.js',
       '<(js_externs_dir)/File_externs.js',
+      '<(js_externs_dir)/FormWindow_externs.js',
       '<(js_externs_dir)/Mode_externs.js',
       '<(js_externs_dir)/Point_externs.js',
       '<(js_externs_dir)/Rect_externs.js',

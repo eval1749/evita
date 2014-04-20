@@ -6,10 +6,10 @@ interface FormControl : ViewEventTarget {
   [ImplementedAs=JavaScript] static void handleEvent(Event event);
 
   [ImplementedAs=JavaScript] attribute DOMString accessKey;
-  attribute long clientHeight;
-  attribute long clientLeft;
-  attribute long clientTop;
-  attribute long clientWidth;
+  attribute float clientHeight;
+  attribute float clientLeft;
+  attribute float clientTop;
+  attribute float clientWidth;
   attribute bool disabled;
   readonly attribute Form? form;
   readonly attribute DOMString name;

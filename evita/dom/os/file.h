@@ -16,30 +16,35 @@ struct MoveFileOptions;
 
 namespace dom {
 
-class File : public v8_glue::Scriptable<File, AbstractFile> {
+namespace bindings {
+class FileClass;
+}
+
+class File final : public v8_glue::Scriptable<File, AbstractFile> {
   DECLARE_SCRIPTABLE_OBJECT(File);
+  friend class bindings::FileClass;
 
   public: explicit File(domapi::IoContextId context_id);
   public: virtual ~File();
 
-  public: static v8::Handle<v8::Promise> MakeTempFileName(
+  private: static v8::Handle<v8::Promise> MakeTempFileName(
       const base::string16& dir_name, const base::string16& prefix);
 
   // Move |src_path| to |dst_path|
-  public: static v8::Handle<v8::Promise> Move(
+  private: static v8::Handle<v8::Promise> Move(
       const base::string16& src_path,
       const base::string16& dst_path,
       v8_glue::Optional<domapi::MoveFileOptions> opt_options);
 
-  public: static v8::Handle<v8::Promise> Open(
+  private: static v8::Handle<v8::Promise> Open(
       const base::string16& file_name,
       v8_glue::Optional<base::string16> opt_mode);
 
   // Remove a existing |file_name|
-  public: static v8::Handle<v8::Promise> Remove(
+  private: static v8::Handle<v8::Promise> Remove(
       const base::string16& file_name);
 
-  public: static v8::Handle<v8::Promise> Stat(
+  private: static v8::Handle<v8::Promise> Stat(
       const base::string16& file_name);
 
   DISALLOW_COPY_AND_ASSIGN(File);

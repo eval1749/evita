@@ -15,18 +15,23 @@ class ArrayBufferView;
 
 namespace dom {
 
+namespace bindings {
+class AbstractFileClass;
+}
+
 class AbstractFile : public v8_glue::Scriptable<AbstractFile> {
   DECLARE_SCRIPTABLE_OBJECT(AbstractFile);
+  friend class bindings::AbstractFileClass;
 
   private: domapi::IoContextId context_id_;
 
   protected: AbstractFile(domapi::IoContextId context_id);
   protected: virtual ~AbstractFile();
 
-  public: v8::Handle<v8::Promise> Close();
-  public: v8::Handle<v8::Promise> Read(
+  private: v8::Handle<v8::Promise> Close();
+  private: v8::Handle<v8::Promise> Read(
       const gin::ArrayBufferView& array_buffer_view);
-  public: v8::Handle<v8::Promise> Write(
+  private: v8::Handle<v8::Promise> Write(
       const gin::ArrayBufferView& array_buffer_view);
 
   DISALLOW_COPY_AND_ASSIGN(AbstractFile);

@@ -13,21 +13,26 @@ namespace dom {
 class Document;
 class DocumentWindow;
 
+namespace bindings {
+class SelectionClass;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // Selection
 //
 class Selection : public v8_glue::Scriptable<Selection> {
   DECLARE_SCRIPTABLE_OBJECT(Selection);
+  friend class bindings::SelectionClass;
 
   private: gc::Member<Document> document_;
   private: gc::Member<DocumentWindow> document_window_;
 
   protected: Selection(DocumentWindow* document_window, Document* document);
-  public: virtual ~Selection();
+  protected: virtual ~Selection();
 
   public: Document* document() const { return document_; }
-  public: DocumentWindow* window() const { return document_window_; }
+  protected: DocumentWindow* window() const { return document_window_; }
 
   DISALLOW_COPY_AND_ASSIGN(Selection);
 };

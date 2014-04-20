@@ -7,22 +7,26 @@
 
 namespace dom {
 
+namespace bindings {
+class EditorWindowClass;
+}
+
 // |dom::EditoWindow| corresponds to |editor::EditorWidget|, also known as
 // |Frame|.
-class EditorWindow : public v8_glue::Scriptable<EditorWindow, Window> {
+class EditorWindow final : public v8_glue::Scriptable<EditorWindow, Window> {
   DECLARE_SCRIPTABLE_OBJECT(EditorWindow);
+  friend class bindings::EditorWindowClass;
 
+  // TODO(yosi) We should not allow to create |EditorWindow| from C++.
   public: EditorWindow();
   public: virtual ~EditorWindow();
 
-  public: static std::vector<EditorWindow*> list();
-
-  public: static EditorWindow* NewEditorWindow();
+  private: static std::vector<EditorWindow*> list();
 
   public: static void ResetForTesting();
 
   // Set status bar texts.
-  public: void EditorWindow::SetStatusBar(
+  private: void EditorWindow::SetStatusBar(
       const std::vector<base::string16>& texts);
 
   // Window

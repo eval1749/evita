@@ -18,8 +18,13 @@ namespace dom {
 class Event;
 using v8_glue::Optional;
 
+namespace bindings {
+class EventTargetClass;
+}
+
 class EventTarget : public v8_glue::Scriptable<EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(EventTarget);
+  friend class bindings::EventTargetClass;
 
   public: typedef std::vector<EventTarget*> EventPath;
   private: class EventListenerMap;
@@ -29,16 +34,16 @@ class EventTarget : public v8_glue::Scriptable<EventTarget> {
   protected: EventTarget();
   protected: virtual ~EventTarget();
 
-  public: void AddEventListener(const base::string16& type,
+  private: void AddEventListener(const base::string16& type,
                                 v8::Handle<v8::Object> callback,
                                 Optional<bool> capture);
-  public: virtual EventPath BuildEventPath() const;
+  private: virtual EventPath BuildEventPath() const;
   public: virtual bool DispatchEvent(Event* event);
   private: void DispatchEventWithInLock(Event* event);
   private: void InvokeEventListeners(Event* event);
-  public: void RemoveEventListener(const base::string16& type,
-                                   v8::Handle<v8::Object> callback,
-                                   Optional<bool> capture);
+  private: void RemoveEventListener(const base::string16& type,
+                                    v8::Handle<v8::Object> callback,
+                                    Optional<bool> capture);
   public: void ScheduleDispatchEvent(Event* event);
 
   DISALLOW_COPY_AND_ASSIGN(EventTarget);

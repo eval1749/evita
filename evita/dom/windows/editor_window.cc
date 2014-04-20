@@ -72,11 +72,6 @@ EditorWindowList::List EditorWindow::list() {
   return EditorWindowList::instance()->list();
 }
 
-// static
-EditorWindow* EditorWindow::NewEditorWindow() {
-  return new EditorWindow();
-}
-
 void EditorWindow::ResetForTesting() {
   EditorWindowList::instance()->ResetForTesting();
 }

@@ -18,17 +18,23 @@ class Document;
 class Range;
 class TableWindow;
 
+namespace bindings {
+class TableSelectionClass;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // TableSelection
 //
-class TableSelection : public v8_glue::Scriptable<TableSelection, Selection> {
+class TableSelection final
+    : public v8_glue::Scriptable<TableSelection, Selection> {
   DECLARE_SCRIPTABLE_OBJECT(TableSelection);
+  friend class bindings::TableSelectionClass;
 
   public: TableSelection(TableWindow* table_window, Document* document);
   public: virtual ~TableSelection();
 
-  public: std::vector<int> GetRowStates(
+  private: std::vector<int> GetRowStates(
       const std::vector<base::string16>& keys) const;
 
   DISALLOW_COPY_AND_ASSIGN(TableSelection);
@@ -37,3 +43,4 @@ class TableSelection : public v8_glue::Scriptable<TableSelection, Selection> {
 } // namespace dom
 
 #endif //!defined(INCLUDE_evita_dom_table_selection_h)
+

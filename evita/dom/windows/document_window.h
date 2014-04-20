@@ -8,21 +8,27 @@
 #include "evita/gc/member.h"
 
 namespace dom {
+
 class Document;
 class Selection;
+
+namespace bindings {
+class DocumentWindowClass;
+}
 
 // The |DocumentWindow| is DOM world representative of UI world TextWidget, aka
 // TextEditWindow.
 class DocumentWindow : public v8_glue::Scriptable<DocumentWindow, Window> {
   DECLARE_SCRIPTABLE_OBJECT(DocumentWindow);
+  friend class bindings::DocumentWindowClass;
 
   private: gc::Member<Selection> selection_;
 
-  public: DocumentWindow(Selection* selection);
-  public: virtual ~DocumentWindow();
+  protected: DocumentWindow(Selection* selection);
+  protected: virtual ~DocumentWindow();
 
   public: Document* document() const;
-  public: Selection* selection() const { return selection_; }
+  protected: Selection* selection() const { return selection_; }
 
   // Window
   private: virtual void DidDestroyWindow() override;

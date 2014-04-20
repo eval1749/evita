@@ -13,8 +13,13 @@
 
 namespace dom {
 
+namespace bindings {
+class DataTransferItemClass;
+}
+
 class DataTransferItem : public v8_glue::Scriptable<DataTransferItem> {
   DECLARE_SCRIPTABLE_OBJECT(DataTransferItem)
+  friend class bindings::DataTransferItemClass;
 
   private: const std::unique_ptr<DataTransferData> data_;
   private: const Clipboard::Format* const format_;
@@ -29,8 +34,8 @@ class DataTransferItem : public v8_glue::Scriptable<DataTransferItem> {
   public: DataTransferData::Kind kind() const;
   public: const base::string16& type() const;
 
-  public: std::vector<uint8_t> GetAsBlob() const;
-  public: base::string16 GetAsString() const;
+  private: std::vector<uint8_t> GetAsBlob() const;
+  private: base::string16 GetAsString() const;
 
   DISALLOW_COPY_AND_ASSIGN(DataTransferItem);
 };

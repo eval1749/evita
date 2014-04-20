@@ -13,44 +13,49 @@
 
 namespace dom {
 
+namespace bindings {
+class EditorClass;
+}
+
 class Editor : public v8_glue::Scriptable<Editor> {
   DECLARE_SCRIPTABLE_OBJECT(Editor)
+  friend class bindings::EditorClass;
 
   private: Editor();
   public: virtual ~Editor();
 
-  public: static base::string16 version();
+  private: static base::string16 version();
 
-  public: static v8::Handle<v8::Promise> Editor::CheckSpelling(
+  private: static v8::Handle<v8::Promise> Editor::CheckSpelling(
       const base::string16& word_to_check);
-  public: static v8::Handle<v8::Promise> GetFileNameForLoad(
+  private: static v8::Handle<v8::Promise> GetFileNameForLoad(
       v8_glue::Nullable<Window> window, const base::string16& dir_path);
-  public: static v8::Handle<v8::Promise> GetFileNameForSave(
+  private: static v8::Handle<v8::Promise> GetFileNameForSave(
       v8_glue::Nullable<Window> window, const base::string16& dir_path);
-  public: static base::string16 GetMetrics(const base::string16& name);
-  public: static v8::Handle<v8::Promise> GetSpellingSuggestions(
+  private: static base::string16 GetMetrics(const base::string16& name);
+  private: static v8::Handle<v8::Promise> GetSpellingSuggestions(
       const base::string16& wrong_word);
   // Get global switch value.
-  public: static domapi::SwitchValue GetSwitch(const base::string16& name);
+  private: static domapi::SwitchValue GetSwitch(const base::string16& name);
 
   // Get global switch names.
-  public: static std::vector<base::string16> GetSwitchNames();
+  private: static std::vector<base::string16> GetSwitchNames();
 
-  public: static v8::Handle<v8::Promise> MessageBox(
+  private: static v8::Handle<v8::Promise> MessageBox(
       v8_glue::Nullable<Window> maybe_window,
       const base::string16& message, int flags,
       v8_glue::Optional<base::string16> title);
-  public: static Editor* NewEditor();
-  public: static v8::Handle<v8::Object> RunScript(
+  private: static Editor* NewEditor();
+  private: static v8::Handle<v8::Object> RunScript(
       const base::string16& script_text,
       v8_glue::Optional<base::string16> opt_file_name);
 
   // Set global switch value.
-  public: static void SetSwitch(const base::string16& name,
-                                const domapi::SwitchValue& new_value);
+  private: static void SetSwitch(const base::string16& name,
+                                 const domapi::SwitchValue& new_value);
 
-  public: static void SetTabData(Window* window,
-                                 const domapi::TabData tab_data);
+  private: static void SetTabData(Window* window,
+                                  const domapi::TabData tab_data);
 
   DISALLOW_COPY_AND_ASSIGN(Editor);
 };

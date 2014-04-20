@@ -11,9 +11,14 @@ namespace dom {
 
 class ViewEventTargetSet;
 
+namespace bindings {
+class ViewEventTargetClass;
+}
+
 class ViewEventTarget
     : public v8_glue::Scriptable<ViewEventTarget, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(ViewEventTarget);
+  friend class bindings::ViewEventTargetClass;
 
   friend class ViewEventTargetSet;
 

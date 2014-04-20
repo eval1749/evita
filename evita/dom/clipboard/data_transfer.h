@@ -9,16 +9,21 @@
 
 namespace dom {
 
+namespace bindings {
+class DataTransferClass;
+}
+
 class DataTransferItemList;
 
 class DataTransfer : public v8_glue::Scriptable<DataTransfer> {
   DECLARE_SCRIPTABLE_OBJECT(DataTransfer)
+  friend class bindings::DataTransferClass;
 
-  public: DataTransfer();
+  private: DataTransfer();
   public: virtual ~DataTransfer();
 
-  public: static DataTransfer* clipboard();
-  public: DataTransferItemList* items();
+  private: static DataTransfer* clipboard();
+  private: DataTransferItemList* items();
 
   DISALLOW_COPY_AND_ASSIGN(DataTransfer);
 };

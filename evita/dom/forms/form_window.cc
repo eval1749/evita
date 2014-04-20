@@ -25,11 +25,4 @@ FormWindow::FormWindow(Form* form) : FormWindow(form, FormWindowInit()) {
 FormWindow::~FormWindow() {
 }
 
-FormWindow* FormWindow::NewFormWindow(
-    Form* form, v8_glue::Optional<FormWindowInit> opt_init) {
-  if (opt_init.is_supplied)
-    return new FormWindow(form, opt_init.value);
-  return new FormWindow(form);
-}
-
 }  // namespace dom

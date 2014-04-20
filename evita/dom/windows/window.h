@@ -17,10 +17,15 @@ namespace dom {
 
 class WindowSet;
 
+namespace bindings {
+class WindowClass;
+}
+
 // |Window| is correspond to |Widget| in DOM world.
 class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
                public common::tree::Node<Window> {
   DECLARE_SCRIPTABLE_OBJECT(Window)
+  friend class bindings::WindowClass;
   friend class WindowSet;
 
   private: typedef common::tree::Node<Window> Node;
@@ -38,9 +43,9 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
   private: State state_;
 
   protected: Window();
-  public: virtual ~Window();
+  protected: virtual ~Window();
 
-  public: std::vector<Window*> child_windows() const;
+  private: std::vector<Window*> child_windows() const;
   public: v8_glue::Nullable<Window> first_child() const {
     return Node::first_child();
   }
@@ -59,25 +64,25 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
   public: State state() const { return state_; }
   public: WindowId window_id() const { return event_target_id(); }
 
-  public: void AddWindow(Window* window);
-  public: void ChangeParentWindow(Window* new_parent_window);
-  public: void Destroy();
+  private: void AddWindow(Window* window);
+  private: void ChangeParentWindow(Window* new_parent_window);
+  private: void Destroy();
   public: virtual void DidDestroyWindow();
   public: virtual void DidRealizeWindow();
   public: void DidResize(int left, int top, int right, int bottom);
   public: void DidSetFocus();
-  public: void Focus();
-  public: void Hide();
-  public: bool IsDescendantOf(Window* other) const;
-  public: void ReleaseCapture();
-  public: void Realize();
-  public: void RemoveWindow(Window* window);
+  private: void Focus();
+  private: void Hide();
+  private: bool IsDescendantOf(Window* other) const;
+  private: void ReleaseCapture();
+  private: void Realize();
+  private: void RemoveWindow(Window* window);
   public: static void ResetForTesting();
-  public: void SetCapture();
-  public: void Show();
-  public: void SplitHorizontally(Window* new_right_window);
-  public: void SplitVertically(Window* new_below_window);
-  public: void Update();
+  private: void SetCapture();
+  private: void Show();
+  private: void SplitHorizontally(Window* new_right_window);
+  private: void SplitVertically(Window* new_below_window);
+  private: void Update();
 
   DISALLOW_COPY_AND_ASSIGN(Window);
 };

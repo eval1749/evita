@@ -18,15 +18,21 @@ namespace dom {
 
 class Document;
 
+namespace bindings {
+class ModeClass;
+}
+
 class Mode : public v8_glue::Scriptable<Mode> {
   DECLARE_SCRIPTABLE_OBJECT(Mode);
+  friend class bindings::ModeClass;
+
   private: std::unique_ptr<text::Mode> mode_;
 
   protected: Mode(text::Mode* text_mode);
-  public: ~Mode();
+  public: virtual ~Mode();
 
   public: text::Mode* text_mode() const { return mode_.get(); }
-  public: base::string16 name() const;
+  private: base::string16 name() const;
 
   public: void DoColor(int hint);
 

@@ -289,6 +289,7 @@ static bool CheckSplitParameter(Window* ref_window, Window* new_window) {
   }
 
   if (new_window->parent_node()) {
+
     ScriptHost::instance()->ThrowError(
         "Can't split with child window.");
     return false;
@@ -309,7 +310,7 @@ void Window::ReleaseCapture() {
         "Can't release capture to unralized window.");
     return;
   }
-  ScriptHost::instance()->view_delegate()->ReleaseCapture(window_id());
+  ViewEventTarget::ReleaseCapture();
 }
 
 void Window::SetCapture() {
@@ -318,7 +319,7 @@ void Window::SetCapture() {
         "Can't set capture to unralized window.");
     return;
   }
-  ScriptHost::instance()->view_delegate()->SetCapture(window_id());
+  ViewEventTarget::SetCapture();
 }
 
 void Window::Show() {

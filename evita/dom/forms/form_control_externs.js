@@ -38,9 +38,3 @@ FormControl.prototype.canFocus = function() {};
 
 /** @type {!function()} */
 FormControl.prototype.focus = function() {};
-
-/** @type {!function()} */
-FormControl.prototype.releaseCapture = function() {};
-
-/** @type {!function()} */
-FormControl.prototype.setCapture = function() {};

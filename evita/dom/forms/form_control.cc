@@ -6,8 +6,6 @@
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/event_init.h"
 #include "evita/dom/forms/form.h"
-#include "evita/dom/script_host.h"
-#include "evita/dom/view_delegate.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/wrapper_info.h"
 
@@ -40,9 +38,7 @@ class FormControlClass :
         .SetProperty("disabled", &FormControl::disabled,
                                  &FormControl::set_disabled)
         .SetProperty("form", &FormControl::form)
-        .SetProperty("name", &FormControl::name)
-        .SetMethod("releaseCapture", &FormControl::ReleaseCapture)
-        .SetMethod("setCapture", &FormControl::SetCapture);
+        .SetProperty("name", &FormControl::name);
   }
 
   DISALLOW_COPY_AND_ASSIGN(FormControlClass);
@@ -138,14 +134,6 @@ void FormControl::NotifyControlChange() {
   if (!form_)
     return;
   form_->DidChangeFormControl(this);
-}
-
-void FormControl::ReleaseCapture() {
-  ScriptHost::instance()->view_delegate()->ReleaseCapture(event_target_id());
-}
-
-void FormControl::SetCapture() {
-  ScriptHost::instance()->view_delegate()->SetCapture(event_target_id());
 }
 
 // dom::EventTarget

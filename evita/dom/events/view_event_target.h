@@ -32,6 +32,9 @@ class ViewEventTarget
   }
   public: domapi::EventTargetId window_id() const { return event_target_id(); }
 
+  protected: void ReleaseCapture();
+  protected: void SetCapture();
+
   DISALLOW_COPY_AND_ASSIGN(ViewEventTarget);
 };
 

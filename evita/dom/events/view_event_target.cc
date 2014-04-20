@@ -5,6 +5,8 @@
 #include "evita/dom/events/view_event_target.h"
 
 #include "evita/dom/events/view_event_target_set.h"
+#include "evita/dom/view_delegate.h"
+#include "evita/dom/script_host.h"
 
 namespace dom {
 
@@ -17,6 +19,14 @@ ViewEventTarget::ViewEventTarget()
 }
 
 ViewEventTarget::~ViewEventTarget() {
+}
+
+void ViewEventTarget::ReleaseCapture() {
+  ScriptHost::instance()->view_delegate()->ReleaseCapture(event_target_id());
+}
+
+void ViewEventTarget::SetCapture() {
+  ScriptHost::instance()->view_delegate()->SetCapture(event_target_id());
 }
 
 }  // namespace dom

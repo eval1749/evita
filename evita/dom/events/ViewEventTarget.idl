@@ -3,4 +3,6 @@
 // found in the LICENSE file.
 
 interface ViewEventTarget : EventTarget {
+  void releaseCapture();
+  void setCapture();
 };

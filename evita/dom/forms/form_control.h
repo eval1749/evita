@@ -51,8 +51,6 @@ class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   public: void DidSetFocus();
   public: void DispatchChangeEvent();
   protected: void NotifyControlChange();
-  public: void ReleaseCapture();
-  public: void SetCapture();
 
   // dom::EventTarget
   private: virtual EventPath BuildEventPath() const override;

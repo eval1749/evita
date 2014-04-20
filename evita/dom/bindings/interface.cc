@@ -13,11 +13,16 @@ namespace bindings {
 {% if constructor.dispatch != 'none' %}
 {#
  # Example:
+ #  Type0 param0;
+ #  auto const arg0 = info[0];
+ #  if (!gin::ConvertFromV8(isolate, arg0, &param0)) {
+ #    ThrowArgumentError(isolate, arg0, 0);
+ #    return nullptr;
+ #  }
  #  Type1 param1;
- #  Type2 param2;
- #  if (!gin::GetNextArgument(&args, 0, false, &param1) ||
- #      !gin::GetNextArgument(&args, 0, false, &param2)) {
- #    args.ThrowWrror();
+ #  auto const arg1 = info[1];
+ #  if (!gin::ConvertFromV8(isolate, arg1, &param1)) {
+ #    ThrowArgumentError(isolate, arg1, 1);
  #    return nullptr;
  #  }
  #  return new Example(param1, param2);
@@ -25,22 +30,19 @@ namespace bindings {
 {% macro emit_signature(signature, indent='  ') %}
 {% if signature.parameters %}
 {%-  for parameter in signature.parameters %}
-{{indent}}{{parameter.return_type}} {{parameter.cpp_name}};
-{%   endfor %}
-{{indent}}if (
-{%-  for parameter in signature.parameters %}
-  {% if not loop.first %}{{indent + '    '}}{% endif -%}
-  !GetNextArgument(&args, 0, false, &{{parameter.cpp_name}})
-  {%- if not loop.last %}{{ ' ||\n' }}{% endif %}
-{%   endfor -%} ) {
-{{indent + '  '}}args.ThrowError();
-{{indent + '  '}}return nullptr;
+{{indent}}{{parameter.from_v8_type}} param{{ loop.index0 }};
+{{indent}}auto const arg{{ loop.index0 }} = info[{{ loop.index0 }}];
+{{indent}}if (!gin::ConvertFromV8(isolate, arg{{ loop.index0 }}, &param{{ loop.index0 }})) {
+{{indent}}  ThrowArgumentError(isolate, "{{parameter.type}}", arg{{ loop.index0 }}, {{ loop.index0 }});
+{{indent}}  return nullptr;
 {{indent}}}
+{% endfor %}
 {% endif %}
-{{indent}}return new {{interface_name}}({{ signature.parameters | map(attribute='cpp_name') | join(', ') }});
+{{indent}}return new {{interface_name}}(
+{%-  for parameter in signature.parameters %}
+  param{{ loop.index0 }}{% if not loop.last %}{{', '}}{% endif %}
+{%-  endfor %});
 {%- endmacro %}
-
-using gin::internal::GetNextArgument;
 {% endif %}
 
 //////////////////////////////////////////////////////////////////////
@@ -59,7 +61,8 @@ using gin::internal::GetNextArgument;
 }
 {% if constructor.dispatch != 'none' %}
 
-void {{class_name}}::Construct{{interface_name}}(const v8::FunctionCallbackInfo<v8::Value>& info) {
+void {{class_name}}::Construct{{interface_name}}(
+    const v8::FunctionCallbackInfo<v8::Value>& info) {
   if (!v8_glue::internal::IsValidConstructCall(info))
     return;
   v8_glue::internal::FinishConstructCall(info, New{{interface_name}}(info));
@@ -77,16 +80,16 @@ void {{class_name}}::Construct{{interface_name}}(const v8::FunctionCallbackInfo<
 {%-     endfor %})
 {% endfor %}
 //
-{{interface_name}}* {{class_name}}::New{{interface_name}}(const v8::FunctionCallbackInfo<v8::Value>& info) {
+{{interface_name}}* {{class_name}}::New{{interface_name}}(
+    const v8::FunctionCallbackInfo<v8::Value>& info) {
+  auto const isolate = info.GetIsolate();
 {% if constructor.dispatch == 'single' %}
-  gin::Arguments args(info);
-  if (info.Length() != {{constructor.signature.parameters|count}}) {
-    args.ThrowError();
+  if (info.Length() != {{constructor.min_arity}}) {
+    ThrowArityError(isolate, {{constructor.min_arity}}, {{constructor.min_arity}}, info.Length());
     return nullptr;
   }
 {{ emit_signature(constructor.signature) }}
 {% elif constructor.dispatch == 'arity' %}
-  gin::Arguments args(info);
   switch (info.Length()) {
 {%  for signature in constructor.signatures %}
     case {{ signature.parameters | count }}: {
@@ -94,7 +97,7 @@ void {{class_name}}::Construct{{interface_name}}(const v8::FunctionCallbackInfo<
     }
 {%  endfor %}
   }
-  args.ThrowError();
+  ThrowArityError(isolate, {{ constructor.min_arity }}, {{ constructor.max_arity }}, info.Length());
   return nullptr;
 {% else %}
 #error "Unsupported dispatch type {{constructor.dispatch}}"
@@ -102,6 +105,86 @@ void {{class_name}}::Construct{{interface_name}}(const v8::FunctionCallbackInfo<
 }
 
 {% endif %}
+{#############################################################
+ #
+ # Static attributes
+ #}
+{% for attribute in attributes if attribute.is_static %}
+{%  if loop.first %}
+// Static attributes
+{%  endif %}
+void {{class_name}}::Get_{{attribute.cpp_name}}(
+    const v8::FunctionCallbackInfo<v8::Value>& info) {
+  auto const isolate = info.GetIsolate();
+  if (info.Length() != 0) {
+    ThrowArityError(isolate, 0, 0, info.Length());
+    return;
+  }
+  info.GetReturnValue().Set(gin::ConvertToV8(isolate,
+      {{interface_name}}::{{attribute.cpp_name}}()));
+}
+
+{%  if not attribute.is_read_only %}
+void {{class_name}}::Set_{{attribute.cpp_name}}(
+    const v8::FunctionCallbackInfo<v8::Value>& info) {
+  auto const isolate = info.GetIsolate();
+  if (info.Length() != 1) {
+    ThrowArityError(isolate, 1, 1, info.Length());
+    return;
+  }
+  {{attribute.from_v8_type}} new_value;
+  if (!gin::ConvertFromV8(isolate, info[0], &new_value)) {
+    ThrowArgumentError(isolate, "{{attribute.type}}", info.info[0], 0);
+    return;
+  }
+  {{interface_name}}::set_{{attribute.cpp_name}}(new_value);
+}
+
+{%  endif %}
+{% endfor %}
+{#############################################################
+ #
+ # Attributes
+ #}
+{% for attribute in attributes if not attribute.is_static %}
+{%  if loop.first %}
+// Attributes
+{%  endif %}
+void {{class_name}}::Get_{{attribute.cpp_name}}(
+    const v8::FunctionCallbackInfo<v8::Value>& info) {
+  auto const isolate = info.GetIsolate();
+  {{interface_name}}* impl = nullptr;
+  if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
+    ThrowReceiverError(isolate, "{{interface_name}}", info.This());
+    return;
+  }
+  info.GetReturnValue().Set(gin::ConvertToV8(isolate,
+      impl->{{attribute.cpp_name}}()));
+}
+
+{%  if not attribute.is_read_only %}
+void {{class_name}}::Set_{{attribute.cpp_name}}(
+    const v8::FunctionCallbackInfo<v8::Value>& info) {
+  auto const isolate = info.GetIsolate();
+  if (info.Length() != 1) {
+    ThrowArityError(isolate, 1, 1, info.Length());
+    return;
+  }
+  {{interface_name}}* impl = nullptr;
+  if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
+    ThrowReceiverError(isolate, "{{interface_name}}", info.This());
+    return;
+  }
+  {{attribute.from_v8_type}} new_value;
+  if (!gin::ConvertFromV8(isolate, info[0], &new_value)) {
+    ThrowArgumentError(isolate, "{{attribute.type}}", info[0], 0);
+    return;
+  }
+  impl->set_{{attribute.cpp_name}}(new_value);
+}
+
+{%  endif %}
+{% endfor %}
 // v8_glue::WrapperInfo
 {% if has_static_member or constructor.dispatch != 'none' %}
 v8::Handle<v8::FunctionTemplate>
@@ -120,14 +203,16 @@ v8::Handle<v8::FunctionTemplate>
   auto builder = v8_glue::FunctionTemplateBuilder(isolate, templ);
 {###############################
  #
- # Static properties
+ # Static attributes
  #}
 {% for attribute in attributes if attribute.is_static %}
 {%   if attribute.is_read_only %}
-  builder.SetProperty("{{attribute.name}}", &{{interface_name}}::{{attribute.cpp_name}});
+  templ->SetAccessorProperty(gin::StringToSymbol(isolate, "{{attribute.name}}"),
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}));
 {%    else %}
-  builder.SetProperty("{{attribute.name}}", &{{interface_name}}::{{attribute.cpp_name}},
-                                            &{{interface_name}}::set_{{attribute.cpp_name}});
+  templ->SetAccessorProperty(gin::StringToSymbol(isolate, "{{attribute.name}}"),
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}),
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Set_{{attribute.cpp_name}}));
 {%    endif %}
 {%  endfor %}
 {###############################
@@ -151,13 +236,16 @@ v8::Handle<v8::FunctionTemplate>
  #}
 void {{class_name}}:: SetupInstanceTemplate(
       ObjectTemplateBuilder& builder) {
+  auto const isolate = builder.isolate();
+  DCHECK(isolate);
 {% for attribute in attributes if not attribute.is_static %}
 {%   if attribute.is_read_only %}
-  builder.SetProperty("{{attribute.name}}", &{{interface_name}}::{{attribute.cpp_name}});
+  builder.GetTemplate()->SetAccessorProperty(gin::StringToSymbol(isolate, "{{attribute.name}}"),
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}));
 {%   else %}
-  builder.SetProperty("{{attribute.name}}",
-      &{{interface_name}}::{{attribute.cpp_name}},
-      &{{interface_name}}::set_{{attribute.cpp_name}});
+  builder.GetTemplate()->SetAccessorProperty(gin::StringToSymbol(isolate, "{{attribute.name}}"),
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}),
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Set_{{attribute.cpp_name}}));
 {%   endif %}
 {%  endfor %}
 {% for method in methods if not method.is_static %}

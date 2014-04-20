@@ -56,6 +56,18 @@ class WrapperInfo {
   protected: virtual void SetupInstanceTemplate(
     ObjectTemplateBuilder& builder);
 
+  // Throw arity error in generated code from IDL.
+  protected: static void ThrowArityError(v8::Isolate* isolate,
+      int min_arity, int max_arity, int actual_arity);
+
+  // Throw argument type error in generated code from IDL.
+  protected: static void ThrowArgumentError(v8::Isolate* isolate,
+      const char* expected_type, v8::Handle<v8::Value> value, int index);
+
+  // Throw receiver type error in generated code from IDL.
+  protected: static void ThrowReceiverError(v8::Isolate* isolate,
+      const char* expected_type, v8::Handle<v8::Value> value);
+
   DISALLOW_COPY_AND_ASSIGN(WrapperInfo);
 };
 

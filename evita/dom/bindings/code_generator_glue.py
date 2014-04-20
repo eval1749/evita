@@ -60,16 +60,11 @@ class GlueType(object):
             return self.cpp_name + '*'
         return self.cpp_name
 
-    def getter(self, variable_name):
-        if self.is_collectable:
-            return variable_name + '.get()'
-        return variable_name
-
-    def parameter_str(self):
+    def from_v8_str(self):
         if self.idl_type.is_union_type:
             raise "Union type isn't supported."
         if self.idl_type.is_array or self.idl_type.is_sequence:
-            return 'const std::vector<%s>&' % self.cpp_name
+            return 'std::vector<%s>' % self.cpp_name
         if self.is_collectable:
             if self.idl_type.is_nullable:
                 global_has_nullable = True
@@ -77,9 +72,12 @@ class GlueType(object):
             return self.cpp_name + '*'
         if self.is_pointer:
             return self.cpp_name + '*'
-        if self.is_struct:
-            return 'const %s&' % self.cpp_name
         return self.cpp_name
+
+    def getter(self, variable_name):
+        if self.is_collectable:
+            return variable_name + '.get()'
+        return variable_name
 
     def return_str(self):
         if self.idl_type.is_union_type:
@@ -269,10 +267,11 @@ def attribute_context(attribute):
     glue_type = to_glue_type(attribute.idl_type)
     return {
         'cpp_name': cpp_name,
+        'from_v8_type': glue_type.from_v8_str(),
         'is_read_only': attribute.is_read_only,
         'is_static': attribute.is_static,
         'name': attribute.name,
-        'type': glue_type.parameter_str()
+        'type': glue_type.idl_type.base_type,
     }
 
 
@@ -281,7 +280,7 @@ def callback_context(callback):
         'parameters': [parameter_context(parameter)
                        for parameter in callback.arguments],
         'name': callback.name,
-        'type': parameter_type_string(callback.idl_type),
+        'type': callback.idl_type.str(),
     }
 
 
@@ -309,7 +308,8 @@ def constructor_parameter(parameter):
     return {
         'cpp_name': underscore(parameter.name),
         'declare_type': glue_type.declare_str(),
-        'return_type': glue_type.return_str(),
+        'from_v8_type': glue_type.from_v8_str(),
+        'type': glue_type.idl_type.base_type,
     }
 
 
@@ -358,11 +358,23 @@ def function_context(functions):
 def function_dispatch(signatures):
     if not signatures:
         return {'dispatch': 'none'}
+    max_arity = max([len(signature['parameters']) for signature in signatures])
+    min_arity = min([len(signature['parameters']) for signature in signatures])
     if len(signatures) == 1:
-        return {'dispatch': 'single', 'signature': signatures[0]}
+        return {
+            'dispatch': 'single',
+            'max_arity': max_arity,
+            'min_arity': min_arity,
+            'signature': signatures[0]
+        }
     if len(set([len(signature['parameters']) for signature in signatures])) == \
        len(signatures):
-        return {'dispatch': 'arity', 'signatures': signatures}
+        return {
+            'dispatch': 'arity',
+            'max_arity': max_arity,
+            'min_arity': min_arity,
+            'signatures': signatures
+        }
     raise Exception('NYI: type based dispatch')
 
 
@@ -405,6 +417,7 @@ def generate_interface_context(definitions, interface_name, interfaces_info):
         dictionary.name + '.h'
         for dictionary in definitions.dictionaries.values()
     ]
+    include_paths.append('base/logging.h')
     include_paths.append('evita/dom/converter.h')
     include_paths.append('evita/dom/script_host.h')
     include_paths.append('evita/v8_glue/function_template_builder.h')
@@ -505,8 +518,8 @@ def parameter_type_string(parameter, is_optional):
     if is_optional:
         global global_has_optional
         global_has_optional = True
-        return 'v8_glue::Optional<%s>' % glue_type.parameter_str()
-    return glue_type.parameter_str()
+        return 'v8_glue::Optional<%s>' % glue_type.from_v8_str()
+    return glue_type.from_v8_str()
 
 ######################################################################
 #

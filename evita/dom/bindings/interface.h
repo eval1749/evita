@@ -22,11 +22,54 @@ class {{class_name}} final :
   public: {{class_name}}(const char* name);
   public: virtual ~{{class_name}}();
 
+{#############################################################
+ #
+ # Constructor
+ #}
 {% if constructor.dispatch != 'none' %}
-  private: static void Construct{{interface_name}}(const v8::FunctionCallbackInfo<v8::Value>& info);
-  private: static {{interface_name}}* New{{interface_name}}(const v8::FunctionCallbackInfo<v8::Value>& info);
+  // Constructor
+  private: static void Construct{{interface_name}}(
+      const v8::FunctionCallbackInfo<v8::Value>& info);
+  private: static {{interface_name}}* New{{interface_name}}(
+      const v8::FunctionCallbackInfo<v8::Value>& info);
 {% endif %}
+{#############################################################
+ #
+ # Static attributes
+ #}
+{% for attribute in attributes if attribute.is_static %}
+{%  if loop.first %}
 
+  // Static attributes
+{%  endif %}
+  private: static void Get_{{attribute.cpp_name}}(
+      const v8::FunctionCallbackInfo<v8::Value>& info);
+{%  if not attribute.is_read_only %}
+  private: static void Set_{{attribute.cpp_name}}(
+      const v8::FunctionCallbackInfo<v8::Value>& info);
+{%  endif %}
+{% endfor %}
+{#############################################################
+ #
+ # Attributes
+ #}
+{% for attribute in attributes if not attribute.is_static %}
+{%  if loop.first %}
+
+  // Attributes
+{%  endif %}
+  private: static void Get_{{attribute.cpp_name}}(
+      const v8::FunctionCallbackInfo<v8::Value>& info);
+{%  if not attribute.is_read_only %}
+  private: static void Set_{{attribute.cpp_name}}(
+      const v8::FunctionCallbackInfo<v8::Value>& info);
+{%  endif %}
+{% endfor %}
+
+{#############################################################
+ #
+ # WrapperInfo
+ #}
   // v8_glue::WrapperInfo
 {% if has_static_member or constructor.dispatch != 'none' %}
   private: virtual v8::Handle<v8::FunctionTemplate>

@@ -98,10 +98,30 @@ def constructor_context_list(interface):
         return []
     contents = function_context(interface.constructors +
                                 interface.custom_constructors)
-    print 'constructors_context_list', 'parent', interface.parent
     contents['parent_name'] = parent_name(interface.parent)
+    contents['name'] = interface.name
     return [contents]
 
+
+def dictionary_context(dictionary):
+    return {
+        'members': [dictionary_member_context(member)
+                    for member in dictionary.members],
+        'name': dictionary.name,
+    }
+
+
+def dictionary_member_context(member):
+    if member.default_value:
+        idl_type = member.idl_type
+        idl_type.is_nullable = True
+    else:
+        idl_type = member.idl_type
+    return {
+        'default_value': member.default_value,
+        'name': member.name,
+        'type': type_string(idl_type),
+    }
 
 def enumeration_context(enumeration):
     # FIXME: Handle empty string value. We don't have way to express empty
@@ -133,16 +153,19 @@ def function_context(functions):
 
 
 def generate_template_context(definitions, interface_name):
-        callback_context_list = sorted(
-            [callback_context(callback_function)
-             for callback_function in definitions.callback_functions.values()],
-            key=lambda context: context['name'])
+        callback_context_list = [
+            callback_context(callback_function)
+            for callback_function in definitions.callback_functions.values()]
 
-        enumeration_context_list = sorted(
-            [enumeration_context(enumeration)
-             for enumeration in definitions.enumerations.values()],
-            key=lambda context: context['name'])
+        dictionary_context_list = [
+            dictionary_context(dictionary)
+            for dictionary in definitions.dictionaries.values()]
 
+        enumeration_context_list = [
+            enumeration_context(enumeration)
+            for enumeration in definitions.enumerations.values()]
+
+        # Interface members
         try:
             interface = definitions.interfaces[interface_name]
         except KeyError:
@@ -164,12 +187,14 @@ def generate_template_context(definitions, interface_name):
             groupby(interface.operations, lambda operation: operation.name)
         ]
 
+        # Context for tempaltes
         return {
           'attributes': sort_context_list(attribute_context_list),
           'callbacks': sort_context_list(callback_context_list),
           'constants': sort_context_list(constant_context_list),
           'constructors': constructor_context_list(interface),
-          'enumerations': enumeration_context_list,
+          'dictionaries': sort_context_list(dictionary_context_list),
+          'enumerations': sort_context_list(enumeration_context_list),
           'interfaces': interface_context_list(interface),
           'interface_name': namespace + interface_name,
           'methods': sort_context_list(method_context_list),

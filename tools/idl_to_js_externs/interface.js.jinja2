@@ -82,6 +82,18 @@ var {{enumeration.name}} = {
 {% for callback in callbacks %}
 {{    emit_function('', callback.name, callback.parameters) }}
 {% endfor %}
+{% for dictionary in dictionaries %}
+/**
+ * TODO(yosi) Once Closure compiler supports dictionary type, we generate it.
+ * Until then, we use |Object|.
+ * @typedef {Object}
+{%  for member in dictionary.members %}
+ *    {{member.name}}: {{member.type}}{% if not loop.last %},{% endif %}{{''}}
+{%  endfor %}
+ */
+var {{dictionary.name}};
+
+{% endfor %}
 {% for constructor in constructors %}
 {{     emit_function(constructor.parent_name, constructor.name,
                      constructor.parameters) }}

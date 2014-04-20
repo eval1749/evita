@@ -9,17 +9,23 @@
 
 namespace dom {
 
+namespace bindings {
+class ButtonControlClass;
+}
+
 class ButtonControl
     : public v8_glue::Scriptable<ButtonControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(ButtonControl);
+  friend class bindings::ButtonControlClass;
 
   private: base::string16 text_;
 
-  public: ButtonControl();
+  private: ButtonControl();
   public: virtual ~ButtonControl();
 
+  // Expose |text| for |view::FormWindow|.
   public: const base::string16& text() const { return text_; }
-  public: void set_text(const base::string16& text);
+  private: void set_text(const base::string16& text);
 
   DISALLOW_COPY_AND_ASSIGN(ButtonControl);
 };

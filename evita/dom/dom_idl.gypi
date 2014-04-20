@@ -11,6 +11,7 @@
       'Editor.idl',
       'events/EventTarget.idl',
       'events/ViewEventTarget.idl',
+      'forms/ButtonControl.idl',
       'forms/FormControl.idl',
       'forms/FormWindow.idl',
       'os/AbstractFile.idl',
@@ -27,6 +28,7 @@
 
     'generated_glue_files': [
       '<(glue_dir)/AbstractFileClass.cc',
+      '<(glue_dir)/ButtonControlClass.cc',
       '<(glue_dir)/DataTransferClass.cc',
       '<(glue_dir)/DataTransferItemClass.cc',
       '<(glue_dir)/DataTransferItemListClass.cc',
@@ -49,6 +51,7 @@
     ],
 
     'generated_js_externs_files': [
+      '<(js_externs_dir)/ButtonControl_externs.js',
       '<(js_externs_dir)/DataTransfer_externs.js',
       '<(js_externs_dir)/DataTransferItem_externs.js',
       '<(js_externs_dir)/DataTransferItemList_externs.js',
@@ -89,7 +92,6 @@
       'encodings/text_decoder_externs.js',
       'encodings/text_encoder_externs.js',
 
-      'forms/button_control_externs.js',
       'forms/checkbox_control_externs.js',
       'forms/form_externs.js',
       'forms/label_control_externs.js',

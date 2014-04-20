@@ -265,7 +265,7 @@ def attribute_context(attribute):
     if 'ImplementedAs' in attribute.extended_attributes:
         cpp_name = attribute.extended_attributes['ImplementedAs']
     else:
-        cpp_name = attribute.name
+        cpp_name = underscore(attribute.name)
     glue_type = to_glue_type(attribute.idl_type)
     return {
         'cpp_name': cpp_name,

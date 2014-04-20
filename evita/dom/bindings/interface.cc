@@ -4,14 +4,9 @@
 
 #include "{{class_name}}.h"
 
-{% for include in includes %}
-#include "{{include}}"
+{% for include_path in include_paths %}
+#include "{{include_path}}"
 {% endfor %}
-#include "evita/dom/converter.h"
-#include "evita/dom/script_host.h"
-#include "evita/v8_glue/function_template_builder.h"
-{# TODO(yosi) We should include "array_buffer.h" if needed #}
-#include "gin/array_buffer.h"
 
 namespace dom {
 namespace bindings {

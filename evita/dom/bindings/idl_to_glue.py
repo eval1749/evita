@@ -19,6 +19,7 @@ sys.path.insert(1, idl_compiler_path)
 from idl_compiler import idl_filename_to_interface_name, parse_options, \
                          IdlCompiler
 from code_generator_glue import CodeGeneratorGlue
+from utilities import write_file
 
 
 class IdlCompilerGlue(IdlCompiler):
@@ -31,18 +32,23 @@ class IdlCompilerGlue(IdlCompiler):
 
     def compile_file(self, idl_filename):
         interface_name = idl_filename_to_interface_name(idl_filename)
-        cc_filename = os.path.join(self.output_directory,
-                                  '%sClass.cc' % interface_name)
-        h_filename = os.path.join(self.output_directory,
-                                  '%sClass.h' % interface_name)
-        self.compile_and_write(idl_filename, (cc_filename, h_filename))
+        definitions = self.reader.read_idl_definitions(idl_filename)
+
+        files = self.code_generator.generate_code(
+            definitions, interface_name)
+
+        for file_data in files:
+            file_name = os.path.join(self.output_directory,
+                                     file_data['file_name'])
+            write_file(file_data['contents'], file_name, self.only_if_changed)
 
 
 def main():
     options, idl_filename = parse_options()
-    idl_compiler = IdlCompilerGlue(options.output_directory,
-                                 interfaces_info_filename=options.interfaces_info_file,
-                                 only_if_changed=options.write_file_only_if_changed)
+    idl_compiler = IdlCompilerGlue(
+        options.output_directory,
+        interfaces_info_filename=options.interfaces_info_file,
+        only_if_changed=options.write_file_only_if_changed)
     idl_compiler.compile_file(idl_filename)
 
 

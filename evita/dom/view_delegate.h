@@ -17,6 +17,13 @@ namespace domapi {
 class FloatRect;
 struct TabData;
 class ViewEventHandler;
+
+struct PopupWindowInit {
+  dom::WindowId owner_id;
+  int offset_x;
+  int offset_y;
+};
+
 }
 
 namespace dom {
@@ -24,6 +31,7 @@ namespace dom {
 class Document;
 class EditorWindow;
 class Form;
+class FormWindow;
 class TextWindow;
 class Window;
 using domapi::ScriptHostState;
@@ -62,7 +70,11 @@ class ViewDelegate {
   public: virtual text::Posn ComputeOnTextWindow(
       WindowId window_id, const TextWindowCompute& data) = 0;
   public: virtual void CreateEditorWindow(const EditorWindow* window) = 0;
-  public: virtual void CreateFormWindow(WindowId, const Form* form) = 0;
+
+  // Create Form window
+  public: virtual void CreateFormWindow(
+      WindowId window_id, Form* form, const domapi::PopupWindowInit& init) = 0;
+
   public: virtual void CreateTableWindow(WindowId window_id,
                                          Document* document) = 0;
   public: virtual void CreateTextWindow(const TextWindow* window) = 0;

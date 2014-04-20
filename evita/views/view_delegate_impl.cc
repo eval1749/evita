@@ -129,9 +129,20 @@ void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
   new Frame(window->window_id());
 }
 
-void ViewDelegateImpl::CreateFormWindow(dom::WindowId window_id,
-                                        const dom::Form* form) {
-  new FormWindow(window_id, form);
+void ViewDelegateImpl::CreateFormWindow(
+    dom::WindowId window_id, dom::Form* form,
+    const domapi::PopupWindowInit& init) {
+  if (init.owner_id == dom::kInvalidWindowId) {
+    new FormWindow(window_id, form);
+    return;
+  }
+  auto const owner = Window::FromWindowId(init.owner_id);
+  if (!owner) {
+    DVLOG(0) << "CreateFormWindow: no such window " << init.owner_id;
+    return;
+  }
+  new FormWindow(window_id, form, owner,
+                 gfx::Point(init.offset_x, init.offset_y));
 }
 
 void ViewDelegateImpl::CreateTableWindow(dom::WindowId window_id,
@@ -329,6 +340,7 @@ text::Posn ViewDelegateImpl::MapPointToPosition(
 void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
       const MessageBoxResolver& resolver) {
+
   auto const frame = GetFrameForMessage(window_id);
 
   auto const kButtonMask = 7;

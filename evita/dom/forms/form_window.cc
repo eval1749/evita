@@ -14,9 +14,15 @@ namespace dom {
 //
 // FormWindow
 //
-FormWindow::FormWindow(Form* form, const FormWindowInit&) : form_(form) {
+FormWindow::FormWindow(Form* form, const FormWindowInit& init)
+    : form_(form) {
+  domapi::PopupWindowInit window_init;
+  window_init.offset_x = init.offset_x();
+  window_init.offset_y = init.offset_y();
+  window_init.owner_id = init.owner() ? init.owner()->window_id() :
+                                        dom::kInvalidWindowId;
   ScriptHost::instance()->view_delegate()->CreateFormWindow(
-      window_id(), form);
+      window_id(), form, window_init);
 }
 
 FormWindow::FormWindow(Form* form) : FormWindow(form, FormWindowInit()) {

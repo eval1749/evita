@@ -18,6 +18,7 @@ class Form;
 
 namespace gfx {
 class Graphics;
+using common::win::Point;
 using common::win::Rect;
 using common::win::Size;
 }
@@ -41,10 +42,14 @@ class FormWindow final : public views::Window,
   private: gfx::Size form_size_;
   private: private: const std::unique_ptr<gfx::Graphics> gfx_;
   private: private: const std::unique_ptr<FormViewModel> model_;
+  private: gfx::Point offset_;
+  private: Window* owner_;
   private: gfx::Rect pending_update_rect_;
   private: base::string16 title_;
 
-  public: FormWindow(views::WindowId window_id, const dom::Form* form);
+  public: FormWindow(WindowId window_id, dom::Form* form, Window* owner,
+                     gfx::Point offset);
+  public: FormWindow(WindowId window_id, dom::Form* form);
   public: virtual ~FormWindow();
 
   private: void DoRealizeWidget();

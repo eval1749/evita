@@ -83,8 +83,9 @@ class ScriptThread final : public domapi::IoDelegate,
       WindowId window_id, const TextWindowCompute& data) override;
   private: virtual void CreateEditorWindow(
       const EditorWindow* window) override;
-  private: virtual void CreateFormWindow(WindowId window_id,
-                                         const Form* form) override;
+  private: virtual void CreateFormWindow(
+      WindowId window_id, Form* form,
+      const domapi::PopupWindowInit& init) override;
   private: virtual void CreateTableWindow(
       WindowId window_id, Document* document) override;
   private: virtual void CreateTextWindow(const TextWindow* window) override;

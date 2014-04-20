@@ -17,6 +17,7 @@
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/forms/form_observer.h"
+#include "evita/dom/forms/form_window.h"
 #include "evita/dom/forms/button_control.h"
 #include "evita/dom/forms/checkbox_control.h"
 #include "evita/dom/forms/label_control.h"
@@ -413,6 +414,7 @@ void FormWindow::FormViewModel::Update() {
 
   // Destroy removed controls
   for (auto child : controls_to_remove) {
+
     window_->SchedulePaintInRect(child->bounds());
     child->DestroyWidget();
   }
@@ -429,9 +431,16 @@ void FormWindow::FormViewModel::DidChangeForm() {
 //
 // FormWindow
 //
-FormWindow::FormWindow(WindowId window_id, const dom::Form* form)
+FormWindow::FormWindow(dom::WindowId window_id, dom::Form* form,
+                       Window* owner, gfx::Point offset)
     : views::Window(ui::NativeWindow::Create(*this), window_id),
-      gfx_(new gfx::Graphics()), model_(new FormViewModel(form, this)) {
+      gfx_(new gfx::Graphics()),
+      model_(new FormViewModel(form, this)),
+      offset_(offset), owner_(owner) {
+}
+
+FormWindow::FormWindow(dom::WindowId window_id, dom::Form* form)
+    : FormWindow(window_id, form, nullptr, gfx::Point()) {
 }
 
 FormWindow::~FormWindow() {
@@ -532,9 +541,25 @@ void FormWindow::DidChangeSystemMetrics() {
 // ui::Widget
 void FormWindow::CreateNativeWindow() const {
   DCHECK(!form_size_.empty());
-  DCHECK(!title_.empty());
 
-  // Place form window at center of active window.
+  if (title_.empty()) {
+    // Popup window
+    DCHECK(owner_);
+    auto const extended_window_style = WS_EX_LAYERED | WS_EX_TOOLWINDOW;
+    auto const window_style = WS_POPUPWINDOW | WS_VISIBLE;
+    auto const parent_hwnd = owner_->AssociatedHwnd();
+    auto screen_point = offset_;
+    if (!::MapWindowPoints(parent_hwnd, HWND_DESKTOP, &screen_point, 1)) {
+      DVLOG(0) << "MapWindowPoints error=%d" << ::GetLastError();
+      return;
+    }
+    native_window()->CreateWindowEx(
+      extended_window_style, window_style, L"popup",
+      parent_hwnd, screen_point, form_size_);
+    return;
+  }
+
+  // Place dialog window at center of active window.
   auto const extended_window_style = WS_EX_LAYERED | WS_EX_TOOLWINDOW;
   auto const window_style = WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE;
   gfx::Rect active_window_rect;

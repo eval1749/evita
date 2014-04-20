@@ -26,8 +26,9 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       const dom::TextWindowCompute& data) override;
   private: virtual void CreateEditorWindow(
       const dom::EditorWindow* window) override;
-  private: virtual void CreateFormWindow(dom::WindowId window_id,
-                                         const dom::Form* form) override;
+  private: virtual void CreateFormWindow(
+      dom::WindowId window_id, dom::Form* form,
+      const domapi::PopupWindowInit& init) override;
   private: virtual void CreateTableWindow(
       dom::WindowId window_id, dom::Document* document) override;
   private: virtual void CreateTextWindow(

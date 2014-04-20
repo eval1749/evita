@@ -22,11 +22,11 @@ class FormWindowClass;
 //
 // FormWindow
 //
-class FormWindow : public v8_glue::Scriptable<FormWindow, Window> {
+class FormWindow final : public v8_glue::Scriptable<FormWindow, Window> {
   DECLARE_SCRIPTABLE_OBJECT(FormWindow);
   friend class bindings::FormWindowClass;
 
-  private: gc::Member<dom::Form> form_;
+  private: gc::Member<Form> form_;
 
   private: FormWindow(Form* form, const FormWindowInit& init);
   private: FormWindow(Form* form);

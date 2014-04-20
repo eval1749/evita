@@ -6,44 +6,8 @@
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/event_init.h"
 #include "evita/dom/forms/form.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
-
-namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// FormControlClass
-//
-class FormControlClass :
-    public v8_glue::DerivedWrapperInfo<FormControl, ViewEventTarget> {
-
-  public: FormControlClass(const char* name)
-      : BaseClass(name) {
-  }
-  public: ~FormControlClass() = default;
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("clientHeight", &FormControl::client_height,
-                                     &FormControl::set_client_height)
-        .SetProperty("clientLeft", &FormControl::client_left,
-                                     &FormControl::set_client_left)
-        .SetProperty("clientTop", &FormControl::client_top,
-                                     &FormControl::set_client_top)
-        .SetProperty("clientWidth", &FormControl::client_width,
-                                     &FormControl::set_client_width)
-        .SetProperty("disabled", &FormControl::disabled,
-                                 &FormControl::set_disabled)
-        .SetProperty("form", &FormControl::form)
-        .SetProperty("name", &FormControl::name);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(FormControlClass);
-};
-}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -64,8 +28,6 @@ FormControl::HandlingFormEventScope::~HandlingFormEventScope() {
 //
 // FormControl
 //
-DEFINE_SCRIPTABLE_OBJECT(FormControl, FormControlClass);
-
 FormControl::FormControl(const base::string16& name)
     : disabled_(false), handling_form_event_(false), name_(name) {
 }

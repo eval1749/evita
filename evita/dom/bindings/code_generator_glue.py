@@ -37,14 +37,15 @@ KNOWN_INTERFACE_NAMES = {
 global_known_interface_names = set()
 
 class GlueType(object):
-    def __init__(self, idl_type, cpp_name, is_pointer=False,
-                 is_collectable=False, is_by_value=True):
+    def __init__(self, idl_type, cpp_name, is_by_value=True,
+                 is_collectable=False, is_pointer=False, is_struct=False):
         self.cpp_name = cpp_name
         self.idl_type = idl_type
         self.is_by_value = is_by_value
         self.is_collectable = is_collectable
         self.is_nullable = idl_type.is_nullable
         self.is_pointer = is_pointer
+        self.is_struct = is_struct
 
     def declare_str(self):
         if self.idl_type.is_union_type:
@@ -76,6 +77,8 @@ class GlueType(object):
             return self.cpp_name + '*'
         if self.is_pointer:
             return self.cpp_name + '*'
+        if self.is_struct:
+            return 'const %s&' % self.cpp_name
         return self.cpp_name
 
     def return_str(self):
@@ -105,6 +108,7 @@ IDL_TO_GLUE_TYPE_MAP = {
     'unsigned short': GlueType(IdlType('unsigned short'), 'uint16_t'),
 }
 
+# Map IDL type to Glue Type
 def to_glue_type(idl_type):
     type_name = idl_type.base_type
     if type_name in IDL_TO_GLUE_TYPE_MAP:
@@ -115,6 +119,8 @@ def to_glue_type(idl_type):
     if type_name in KNOWN_INTERFACE_NAMES:
         global_known_interface_names.add(type_name)
         return GlueType(idl_type, type_name, is_collectable=True)
+    if type_name in global_definitions.dictionaries:
+        return GlueType(idl_type, type_name, is_struct=True)
     return GlueType(idl_type, type_name)
 
 
@@ -296,13 +302,14 @@ def constructor_context_list(interface):
 
 def constructor_context(constructor):
     parameters = map(constructor_parameter, constructor.arguments)
-    return { 'parameters': parameters }
+    return {'parameters': parameters}
 
 def constructor_parameter(parameter):
     glue_type = to_glue_type(parameter.idl_type)
     return {
         'cpp_name': underscore(parameter.name),
         'declare_type': glue_type.declare_str(),
+        'return_type': glue_type.return_str(),
     }
 
 
@@ -348,6 +355,17 @@ def function_context(functions):
     }
 
 
+def function_dispatch(signatures):
+    if not signatures:
+        return {'dispatch': 'none'}
+    if len(signatures) == 1:
+        return {'dispatch': 'single', 'signature': signatures[0]}
+    if len(set([len(signature['parameters']) for signature in signatures])) == \
+       len(signatures):
+        return {'dispatch': 'arity', 'signatures': signatures}
+    raise Exception('NYI: type based dispatch')
+
+
 def generate_interface_context(definitions, interface_name, interfaces_info):
     callback_context_list = [
         callback_context(callback_function)
@@ -371,7 +389,7 @@ def generate_interface_context(definitions, interface_name, interfaces_info):
     constant_context_list = [constant_context(constant)
                              for constant in interface.constants]
 
-    constructors = constructor_context_list(interface)
+    constructor = function_dispatch(constructor_context_list(interface))
 
     method_context_list = filter(
         lambda context: context['cpp_name'] != 'JavaScript',
@@ -399,6 +417,9 @@ def generate_interface_context(definitions, interface_name, interfaces_info):
     if global_has_optional:
         include_paths.append('evita/v8_glue/optional.h')
 
+    if constructor['dispatch'] != 'none':
+        include_paths.append('evita/v8_glue/constructor_template.h')
+
     for name in global_known_interface_names:
         include_paths.append(KNOWN_INTERFACE_NAMES[name])
 
@@ -407,10 +428,10 @@ def generate_interface_context(definitions, interface_name, interfaces_info):
     else:
         base_class_include = None
 
-    need_class_template = \
+    has_static_member = \
         any([attribute.is_static for attribute in interface.attributes]) or \
         any([operation.is_static for operation in interface.operations]) or \
-        len(constructors) > 0
+        constructor['dispatch'] != 'none'
 
     need_instance_template = \
         any([not attribute.is_static for attribute in interface.attributes]) or \
@@ -422,9 +443,9 @@ def generate_interface_context(definitions, interface_name, interfaces_info):
       'class_name': interface_name + 'Class',
       'base_class_include': base_class_include,
       'constants': sort_context_list(constant_context_list),
-      'constructors': constructors,
+      'constructor': constructor,
       'enumerations': enumeration_context_list,
-      'need_class_template': need_class_template,
+      'has_static_member': has_static_member,
       'need_instance_template': need_instance_template,
       'include_paths': sorted(include_paths),
       'interfaces': interface_context_list(interface),

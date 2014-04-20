@@ -10,31 +10,113 @@
 
 namespace dom {
 namespace bindings {
+{% if constructor.dispatch != 'none' %}
+{#
+ # Example:
+ #  Type1 param1;
+ #  Type2 param2;
+ #  if (!gin::GetNextArgument(&args, 0, false, &param1) ||
+ #      !gin::GetNextArgument(&args, 0, false, &param2)) {
+ #    args.ThrowWrror();
+ #    return nullptr;
+ #  }
+ #  return new Example(param1, param2);
+ #}
+{% macro emit_signature(signature, indent='  ') %}
+{% if signature.parameters %}
+{%-  for parameter in signature.parameters %}
+{{indent}}{{parameter.return_type}} {{parameter.cpp_name}};
+{%   endfor %}
+{{indent}}if (
+{%-  for parameter in signature.parameters %}
+  {% if not loop.first %}{{indent + '    '}}{% endif -%}
+  !GetNextArgument(&args, 0, false, &{{parameter.cpp_name}})
+  {%- if not loop.last %}{{ ' ||\n' }}{% endif %}
+{%   endfor -%} ) {
+{{indent + '  '}}args.ThrowError();
+{{indent + '  '}}return nullptr;
+{{indent}}}
+{% endif %}
+{{indent}}return new {{interface_name}}({{ signature.parameters | map(attribute='cpp_name') | join(', ') }});
+{%- endmacro %}
 
-{{class_name}}::{{class_name}}(const char* name) : {{' '}}
+using gin::internal::GetNextArgument;
+{% endif %}
+
+//////////////////////////////////////////////////////////////////////
+//
+// {{class_name}}
+//
+{{class_name}}::{{class_name}}(const char* name)
 {%- if interface_parent -%}
-    BaseClass(name)
+{{ '\n  : BaseClass(name) ' }}
 {%- else -%}
-    v8_glue::WrapperInfo(name)
-{%- endif -%} {{' '}}{
+{{ '\n  : v8_glue::WrapperInfo(name) ' }}
+{%- endif -%} {
 }
 
 {{class_name}}::~{{class_name}}() {
 }
+{% if constructor.dispatch != 'none' %}
 
+void {{class_name}}::Construct{{interface_name}}(const v8::FunctionCallbackInfo<v8::Value>& info) {
+  if (!v8_glue::internal::IsValidConstructCall(info))
+    return;
+  v8_glue::internal::FinishConstructCall(info, New{{interface_name}}(info));
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// {{interface_name}} constructor dispatcher. This function calls one of
+// followings:
+{% for signature in constructor.signatures %}
+//   {{loop.index}} {{interface_name}}(
+{%-     for parameter in signature.parameters -%}
+         {{parameter.parameter_type}} {{parameter.cpp_name}}
+         {%- if not loop.last %}{{', '}}{% endif %}
+{%-     endfor %})
+{% endfor %}
+//
+{{interface_name}}* {{class_name}}::New{{interface_name}}(const v8::FunctionCallbackInfo<v8::Value>& info) {
+{% if constructor.dispatch == 'single' %}
+  gin::Arguments args(info);
+  if (info.Length() != {{constructor.signature.parameters|count}}) {
+    args.ThrowError();
+    return nullptr;
+  }
+{{ emit_signature(constructor.signature) }}
+{% elif constructor.dispatch == 'arity' %}
+  gin::Arguments args(info);
+  switch (info.Length()) {
+{%  for signature in constructor.signatures %}
+    case {{ signature.parameters | count }}: {
+{{    emit_signature(signature, indent='      ') }}
+    }
+{%  endfor %}
+  }
+  args.ThrowError();
+  return nullptr;
+{% else %}
+#error "Unsupported dispatch type {{constructor.dispatch}}"
+{% endif %}
+}
+
+{% endif %}
 // v8_glue::WrapperInfo
-{% if need_class_template %}
-{##############################################################
+{% if has_static_member or constructor.dispatch != 'none' %}
+v8::Handle<v8::FunctionTemplate>
+{{class_name}}::CreateConstructorTemplate(v8::Isolate* isolate) {
+{###############################
  #
- # Class template
+ # Constructor
  #}
-v8::Handle<v8::FunctionTemplate> {{class_name}}::CreateConstructorTemplate(
-    v8::Isolate* isolate) {
-{% if constructors %}
-  auto templ = v8_glue::CreateConstructorTemplate(isolate, &{{interface_name}}::New{{interface_name}});
+{% if constructor.dispatch != 'none' %}
+  auto templ = v8::FunctionTemplate::New(isolate,
+      &{{class_name}}::Construct{{interface_name}});
 {% else %}
   auto templ = v8_glue::WrapperInfo::CreateConstructorTemplate(isolate);
 {% endif %}
+{% if has_static_member %}
   auto builder = v8_glue::FunctionTemplateBuilder(isolate, templ);
 {###############################
  #
@@ -56,6 +138,9 @@ v8::Handle<v8::FunctionTemplate> {{class_name}}::CreateConstructorTemplate(
   builder.SetMethod("{{method.name}}", &{{interface_name}}::{{method.cpp_name}});
 {% endfor %}
   return builder.Build();
+{% else %}
+  return templ;
+{% endif %}
 }
 
 {% endif %}

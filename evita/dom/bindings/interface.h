@@ -13,7 +13,7 @@
 namespace dom {
 namespace bindings {
 
-class {{class_name}} :
+class {{class_name}} final :
 {%- if interface_parent -%}
     public v8_glue::DerivedWrapperInfo<{{interface_name}}, {{interface_parent}}>
 {%- else -%}
@@ -22,8 +22,13 @@ class {{class_name}} :
   public: {{class_name}}(const char* name);
   public: virtual ~{{class_name}}();
 
+{% if constructor.dispatch != 'none' %}
+  private: static void Construct{{interface_name}}(const v8::FunctionCallbackInfo<v8::Value>& info);
+  private: static {{interface_name}}* New{{interface_name}}(const v8::FunctionCallbackInfo<v8::Value>& info);
+{% endif %}
+
   // v8_glue::WrapperInfo
-{% if need_class_template %}
+{% if has_static_member or constructor.dispatch != 'none' %}
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override;
 {% endif %}

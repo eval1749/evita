@@ -59,7 +59,7 @@ class CodeGeneratorJS(object):
     def generate_code(self, definitions, interface_name):
         """Returns JS externs as text."""
 
-        externs_template = self.jinja_env.get_template('interface.js.jinja2')
+        externs_template = self.jinja_env.get_template('interface.js')
         template_context = generate_template_context(definitions, interface_name)
         externs_text = externs_template.render(template_context)
         return (externs_text,)

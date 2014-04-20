@@ -101,6 +101,7 @@ class IdlDefinitions(object):
     def __init__(self, node):
         """Args: node: AST root node, class == 'File'"""
         self.callback_functions = {}
+        self.dictionaries = {}
         self.enumerations = {}
         self.interfaces = {}
 
@@ -134,6 +135,9 @@ class IdlDefinitions(object):
             elif child_class == 'Implements':
                 # Implements is handled at the interface merging step
                 pass
+            elif child_class == 'Dictionary':
+                dictionary = IdlDictionary(child)
+                self.dictionaries[dictionary.name] = dictionary
             else:
                 raise ValueError('Unrecognized node class: %s' % child_class)
 
@@ -192,6 +196,40 @@ class IdlCallbackFunction(TypedObject):
         TypedObject.resolve_typedefs(self, typedefs)
         for argument in self.arguments:
             argument.resolve_typedefs(typedefs)
+
+
+################################################################################
+# Dictionary
+################################################################################
+
+class IdlDictionary(object):
+    def __init__(self, node):
+        self.parent = None
+        self.name = node.GetName()
+        self.members = []
+        for child in node.GetChildren():
+            if child.IsA('Inherit'):
+                self.parent = child.GetName()
+            elif child.IsA('Key'):
+                self.members.append(IdlDictionaryMember(child))
+            else:
+                print 'WARNING IdlDictionaryMember: Unexpected child node', child
+
+class IdlDictionaryMember(object):
+    def __init__(self, node):
+        self.default_value = None
+        self.extended_attributes = {}
+        self.idl_type = None
+        self.name = node.GetName()
+        for child in node.GetChildren():
+            if child.IsA('Type'):
+                self.idl_type = type_node_to_type(child)
+            elif child.IsA('Default'):
+                self.default_value = child.GetProperty('NAME')
+            elif child_class == 'ExtAttributes':
+                self.extended_attributes = ext_attributes_node_to_extended_attributes(child)
+            else:
+                print 'WARNING IdlDictionaryMember: Unexpected child node', child
 
 
 ################################################################################

@@ -203,9 +203,8 @@
     // Buttons
     CONTROL_HEIGHT = 26;
     function addButton(text, accessKey) {
-      var button = new ButtonControl();
+      var button = new ButtonControl(text);
       button.accessKey = accessKey;
-      button.text = text;
       add(button, 100);
       control_left += BUTTON_MARGIN;
       return button;

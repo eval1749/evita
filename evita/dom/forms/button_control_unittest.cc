@@ -16,17 +16,18 @@ class ButtonControlTest : public dom::AbstractDomTest {
 };
 
 TEST_F(ButtonControlTest, ctor) {
-  EXPECT_SCRIPT_VALID("var sample = new ButtonControl();");
+  EXPECT_SCRIPT_VALID("var sample = new ButtonControl('foo');");
   EXPECT_SCRIPT_FALSE("sample.disabled");
   EXPECT_SCRIPT_EQ("0", "sample.clientHeight");
   EXPECT_SCRIPT_EQ("0", "sample.clientLeft");
   EXPECT_SCRIPT_EQ("0", "sample.clientTop");
   EXPECT_SCRIPT_EQ("0", "sample.clientWidth");
+  EXPECT_SCRIPT_EQ("foo", "sample.text");
 }
 
 TEST_F(ButtonControlTest, dispatchEvent) {
   EXPECT_SCRIPT_VALID(
-      "var sample = new ButtonControl();"
+      "var sample = new ButtonControl('foo');"
       "var clicked = false;"
       "sample.addEventListener('click', function() { clicked = true; });"
       "sample.dispatchEvent(new FormEvent('click'));");
@@ -36,14 +37,14 @@ TEST_F(ButtonControlTest, dispatchEvent) {
 TEST_F(ButtonControlTest, set_disabled) {
   EXPECT_SCRIPT_VALID(
       "var form = new Form();"
-      "var sample = new ButtonControl();"
+      "var sample = new ButtonControl('foo');"
       "form.add(sample);"
       "sample.disabled = true;");
   EXPECT_SCRIPT_TRUE("sample.disabled");
 }
 
 TEST_F(ButtonControlTest, set_clientLeft) {
-  EXPECT_SCRIPT_VALID("var sample = new ButtonControl();"
+  EXPECT_SCRIPT_VALID("var sample = new ButtonControl('foo');"
                       "sample.clientLeft = 1;"
                       "sample.clientTop = 2;"
                       "sample.clientWidth = 3;"
@@ -68,9 +69,9 @@ TEST_F(ButtonControlTest, set_clientLeft) {
 
 TEST_F(ButtonControlTest, set_text) {
   EXPECT_SCRIPT_VALID(
-      "var sample = new ButtonControl();"
-      "sample.text = 'foo';");
-  EXPECT_SCRIPT_EQ("foo", "sample.text");
+      "var sample = new ButtonControl('foo');"
+      "sample.text = 'bar';");
+  EXPECT_SCRIPT_EQ("bar", "sample.text");
 }
 
 }  // namespace

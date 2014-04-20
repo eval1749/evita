@@ -12,7 +12,7 @@ namespace dom {
 //
 // ButtonControl
 //
-ButtonControl::ButtonControl() {
+ButtonControl::ButtonControl(const base::string16& text) : text_(text) {
 }
 
 ButtonControl::~ButtonControl() {

@@ -42,7 +42,7 @@ TEST_F(FormTest, add) {
 
 TEST_F(FormTest, focusControl) {
   EXPECT_SCRIPT_VALID("var sample = new Form();"
-                      "var button = new ButtonControl();"
+                      "var button = new ButtonControl('button');"
                       "sample.focusControl = button");
   EXPECT_SCRIPT_TRUE("sample.focusControl == button");
   EXPECT_SCRIPT_VALID("sample.focusControl = null") <<

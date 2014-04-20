@@ -20,7 +20,7 @@ class ButtonControl
 
   private: base::string16 text_;
 
-  private: ButtonControl();
+  private: ButtonControl(const base::string16& text);
   public: virtual ~ButtonControl();
 
   // Expose |text| for |view::FormWindow|.

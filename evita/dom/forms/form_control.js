@@ -24,7 +24,7 @@ global.FormControl.prototype.focus = function() {
  * @param {!Event} event
  * Default event handler.
  */
-FormControl.handleEvent = function(event) {
+global.FormControl.handleEvent = function(event) {
   // Redirect event to |Form.handleEvent| if control is associated to form.
   var control = /** @type {!FormControl} */(event.target);
   var form = control.form;

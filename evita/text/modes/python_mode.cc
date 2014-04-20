@@ -25,7 +25,7 @@ k_rgpwszPythonKeyword[] = {
   L"and", L"as", L"assert", L"break", L"class",
   L"continue", L"def", L"del", L"elif", L"else", L"except", L"exec",
   L"finally", L"for", L"from", L"global", L"if", L"import", L"in", L"is",
-  L"lambda", L"not", L"or", L"pass" L"print", L"raise", L"return", L"try",
+  L"lambda", L"not", L"or", L"pass", L"print", L"raise", L"return", L"try",
   L"while", L"with", L"yield",
   // Reserved classes of identifiers
   L"_*", L"__*__", L"__*", L"__builtin__",

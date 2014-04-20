@@ -59,6 +59,13 @@ data
 ### WindowEvent
 sourceWindow
 
+# FormWindowInit
+height
+offsetX
+offsetY
+owner
+height
+
 # Document
 Map
 

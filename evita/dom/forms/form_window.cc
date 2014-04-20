@@ -4,63 +4,32 @@
 
 #include "evita/dom/forms/form_window.h"
 
-#include "evita/dom/forms/form.h"
+#include "evita/bindings/FormWindowInit.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
-#include "evita/v8_glue/constructor_template.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/function_template_builder.h"
-#include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
-
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-//
-// FormWindowClass
-//
-class FormWindowClass :
-    public v8_glue::DerivedWrapperInfo<FormWindow, Window> {
-
-  public: explicit FormWindowClass(const char* name)
-      : BaseClass(name) {
-  }
-  public: ~FormWindowClass() = default;
-
-  private: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    auto templ = v8_glue::CreateConstructorTemplate(isolate,
-        &FormWindowClass::NewFormWindow);
-    return v8_glue::FunctionTemplateBuilder(isolate, templ)
-        .Build();
-  }
-
-  private: static FormWindow* NewFormWindow(Form* form) {
-    return new FormWindow(form);
-  }
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder.SetProperty("form", &FormWindow::form);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(FormWindowClass);
-};
-}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // FormWindow
 //
-DEFINE_SCRIPTABLE_OBJECT(FormWindow, FormWindowClass);
-
-FormWindow::FormWindow(Form* form) : form_(form) {
+FormWindow::FormWindow(Form* form, const FormWindowInit&) : form_(form) {
   ScriptHost::instance()->view_delegate()->CreateFormWindow(
       window_id(), form);
 }
 
+FormWindow::FormWindow(Form* form) : FormWindow(form, FormWindowInit()) {
+}
+
 FormWindow::~FormWindow() {
+}
+
+FormWindow* FormWindow::NewFormWindow(
+    Form* form, v8_glue::Optional<FormWindowInit> opt_init) {
+  if (opt_init.is_supplied)
+    return new FormWindow(form, opt_init.value);
+  return new FormWindow(form);
 }
 
 }  // namespace dom

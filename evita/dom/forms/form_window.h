@@ -8,10 +8,16 @@
 #include "evita/dom/windows/window.h"
 
 #include "evita/gc/member.h"
+#include "evita/v8_glue/optional.h"
 
 namespace dom {
 
 class Form;
+class FormWindowInit;
+
+namespace bindings {
+class FormWindowClass;
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -19,13 +25,18 @@ class Form;
 //
 class FormWindow : public v8_glue::Scriptable<FormWindow, Window> {
   DECLARE_SCRIPTABLE_OBJECT(FormWindow);
+  friend class bindings::FormWindowClass;
 
   private: gc::Member<dom::Form> form_;
 
-  public: FormWindow(Form* form);
+  private: FormWindow(Form* form, const FormWindowInit& init);
+  private: FormWindow(Form* form);
   public: virtual ~FormWindow();
 
   public: Form* form() const { return form_.get(); }
+
+  private: static FormWindow* NewFormWindow(
+      Form* form, v8_glue::Optional<FormWindowInit> opt_init);
 
   DISALLOW_COPY_AND_ASSIGN(FormWindow);
 };

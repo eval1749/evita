@@ -1,0 +1,19 @@
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+dictionary FormWindowInit {
+  long height = 0;
+  long offsetX = 0;
+  long offsetY = 0;
+  Window? owner;
+  long width = 0;
+};
+
+[
+  Constructor(Form form),
+  Constructor(Form form, FormWindowInit init)
+]
+interface FormWindow : Window {
+  readonly attribute Form form;
+};

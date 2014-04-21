@@ -8,6 +8,7 @@
 #include "evita/dom/converter.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/events/wheel_event_init.h"
+#include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {

@@ -32,6 +32,7 @@ global_interfaces_info = {}
 # TODO(yosi) Once all interfaces have IDL file. We should get rid of
 # |KNOWN_INTERFACE_NAMES|.
 KNOWN_INTERFACE_NAMES = {
+    'Event': 'evita/dom/events/event.h',
     'Form': 'evita/dom/forms/form.h',
 }
 global_known_interface_names = set()
@@ -60,6 +61,7 @@ class GlueType(object):
             return self.cpp_name + '*'
         return self.cpp_name
 
+    # Used for variable declaration of output parameter of |gin::ConvertFromV8|.
     def from_v8_str(self):
         if self.idl_type.is_union_type:
             raise Exception("Union type isn't supported.")
@@ -85,27 +87,63 @@ class GlueType(object):
             return self.cpp_name + '*'
         return self.cpp_name
 
-IDL_TO_GLUE_TYPE_MAP = {
-    'DOMString': GlueType(IdlType('DOMString'), 'base::string16',
-                          is_by_value=False),
-    'bool': GlueType(IdlType('bool'), 'bool'),
-    'byte': GlueType(IdlType('bool'), 'uint8_t'),
-    'double': GlueType(IdlType('double'), 'double'),
-    'float': GlueType(IdlType('float'), 'float'),
-    'long': GlueType(IdlType('long'), 'int'),
-    'long long': GlueType(IdlType('long long'), 'int64_t'),
-    'octet': GlueType(IdlType('octet'), 'int8t'),
-    'short': GlueType(IdlType('short'), 'int16_t'),
-    'unsigned long': GlueType(IdlType('unsigned long'), 'int'),
-    'unsigned long long': GlueType(IdlType('unsigned long long'), 'uint64_t'),
-    'unsigned short': GlueType(IdlType('unsigned short'), 'uint16_t'),
+    def to_v8_str(self):
+        if self.idl_type.is_union_type:
+            raise Exception("Union type isn't supported.")
+        if self.idl_type.is_array or self.idl_type.is_sequence:
+            return 'const std::vector<%s>&' % self.cpp_name
+        if self.is_collectable:
+            return self.cpp_name + '*'
+        if self.is_pointer:
+            return self.cpp_name + '*'
+        if not self.is_by_value:
+            return 'const %s&' % self.cpp_name
+        return self.cpp_name
+
+
+class CppType(object):
+    def __init__(self, cpp_name, is_by_value=True, is_collectable=False,
+                 is_pointer=False, is_struct=False):
+        self.cpp_name = cpp_name
+        self.is_by_value = is_by_value
+        self.is_collectable = is_collectable
+        self.is_pointer = is_pointer
+        self.is_struct = is_struct
+
+
+IDL_TO_CPP_TYPE_MAP = {
+    'ArrayBufferView': CppType('gin::ArrayBufferView', is_by_value=False),
+    'DataTransferData': CppType('DataTransferData', is_pointer=True),
+    'DOMString': CppType('base::string16', is_by_value=False),
+    # TODO(yosi) We should have "MoveFileOptions.idl".
+    'MoveFileOptions': CppType('domapi::MoveFileOptions', is_by_value=False),
+    # TODO(yosi) We should have "SwitchValue.idl".
+    'SwitchValue': CppType('domapi::SwitchValue', is_by_value=False),
+    # TODO(yosi) We should have "TabData.idl".
+    'TabData': CppType('domapi::TabData', is_by_value=False),
+    'boolean': CppType('bool'),
+    'byte': CppType('uint8_t'),
+    'double': CppType('double'),
+    'float': CppType('float'),
+    'long': CppType('int'),
+    'long long': CppType('int64_t'),
+    'octet': CppType('int8t'),
+    'short': CppType('int16_t'),
+    'unsigned long': CppType('int'),
+    'unsigned long long': CppType('uint64_t'),
+    'unsigned short': CppType('uint16_t'),
 }
 
 # Map IDL type to Glue Type
 def to_glue_type(idl_type):
     type_name = idl_type.base_type
-    if type_name in IDL_TO_GLUE_TYPE_MAP:
-        return IDL_TO_GLUE_TYPE_MAP[type_name]
+
+    if type_name in IDL_TO_CPP_TYPE_MAP:
+        cpp_type = IDL_TO_CPP_TYPE_MAP[type_name]
+        return GlueType(idl_type, cpp_type.cpp_name,
+                        is_by_value=cpp_type.is_by_value,
+                        is_pointer=cpp_type.is_pointer)
+
     if type_name in global_interfaces_info:
         global_referenced_interface_names.add(type_name)
         return GlueType(idl_type, type_name, is_collectable=True)
@@ -205,8 +243,6 @@ def dictionary_member_context(member):
         'type': member.idl_type.base_type,
     }
 
-    type_str = IDL_TO_GLUE_TYPE_MAP.get(idl_type.base_type, idl_type.base_type)
-
 
 def generate_dictionary_context(dictionary, interfaces_info):
     global global_has_nullable
@@ -294,17 +330,8 @@ def constructor_context_list(interface):
     return map(constructor_context, interface.constructors)
 
 def constructor_context(constructor):
-    parameters = map(constructor_parameter, constructor.arguments)
+    parameters = map(function_parameter, constructor.arguments)
     return {'parameters': parameters}
-
-def constructor_parameter(parameter):
-    glue_type = to_glue_type(parameter.idl_type)
-    return {
-        'cpp_name': underscore(parameter.name),
-        'declare_type': glue_type.declare_str(),
-        'from_v8_type': glue_type.from_v8_str(),
-        'type': glue_type.idl_type.base_type,
-    }
 
 
 def enumeration_context(enumeration):
@@ -323,33 +350,30 @@ def fix_include_path(path):
 
 
 def function_context(functions):
-    parameters_list = [function.arguments for function in functions]
-    max_arity = max(map(len, parameters_list))
-    normalized_parameters_list = [
-        parameters + [None] * (max_arity - len(parameters))
-        for parameters in parameters_list
-    ]
-    parameters = [overloaded_parameter(overloaded_parameters)
-                  for overloaded_parameters
-                  in zip(*normalized_parameters_list)]
-    return_type_strings = [to_glue_type(function.idl_type).return_str()
-                           for function in functions if function.idl_type]
-
     if 'ImplementedAs' in functions[0].extended_attributes:
         cpp_name = functions[0].extended_attributes['ImplementedAs']
     else:
         cpp_name = upper_camel_case(functions[0].name)
 
-    return {
-        'is_static': functions[0].is_static,
-        'name': functions[0].name,
-        'cpp_name': cpp_name,
-        'parameters': parameters,
-        'return_type': union_type_string(return_type_strings),
-    }
+    is_static = functions[0].is_static
+
+    signatures = [
+        {
+          'cpp_name': cpp_name,
+          'is_static': is_static,
+          'parameters': map(function_parameter, function.arguments),
+          'return_type': to_glue_type(function.idl_type).to_v8_str(),
+        }
+        for function in functions
+    ]
+    context = function_dispatcher(signatures)
+    context['cpp_name'] = cpp_name
+    context['is_static'] = is_static
+    context['name'] = functions[0].name
+    return context
 
 
-def function_dispatch(signatures):
+def function_dispatcher(signatures):
     if not signatures:
         return {'dispatch': 'none'}
     max_arity = max([len(signature['parameters']) for signature in signatures])
@@ -370,6 +394,16 @@ def function_dispatch(signatures):
             'signatures': signatures
         }
     raise Exception('NYI: type based dispatch')
+
+
+def function_parameter(parameter):
+    glue_type = to_glue_type(parameter.idl_type)
+    return {
+        'cpp_name': underscore(parameter.name),
+        #'declare_type': glue_type.declare_str(),
+        'from_v8_type': glue_type.from_v8_str(),
+        'type': glue_type.idl_type.base_type,
+    }
 
 
 def generate_interface_context(definitions, interface_name, interfaces_info):
@@ -395,7 +429,7 @@ def generate_interface_context(definitions, interface_name, interfaces_info):
     constant_context_list = [constant_context(constant)
                              for constant in interface.constants]
 
-    constructor = function_dispatch(constructor_context_list(interface))
+    constructor = function_dispatcher(constructor_context_list(interface))
 
     method_context_list = filter(
         lambda context: context['cpp_name'] != 'JavaScript',

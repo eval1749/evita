@@ -7,8 +7,6 @@
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/windows/window.h"
-#include "evita/v8_glue/nullable.h"
-#include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace dom {
@@ -29,9 +27,9 @@ class Editor : public v8_glue::Scriptable<Editor> {
   private: static v8::Handle<v8::Promise> Editor::CheckSpelling(
       const base::string16& word_to_check);
   private: static v8::Handle<v8::Promise> GetFileNameForLoad(
-      v8_glue::Nullable<Window> window, const base::string16& dir_path);
+      Window* window, const base::string16& dir_path);
   private: static v8::Handle<v8::Promise> GetFileNameForSave(
-      v8_glue::Nullable<Window> window, const base::string16& dir_path);
+      Window* window, const base::string16& dir_path);
   private: static base::string16 GetMetrics(const base::string16& name);
   private: static v8::Handle<v8::Promise> GetSpellingSuggestions(
       const base::string16& wrong_word);
@@ -41,21 +39,28 @@ class Editor : public v8_glue::Scriptable<Editor> {
   // Get global switch names.
   private: static std::vector<base::string16> GetSwitchNames();
 
+  // Show message box
   private: static v8::Handle<v8::Promise> MessageBox(
-      v8_glue::Nullable<Window> maybe_window,
+      Window* maybe_window,
       const base::string16& message, int flags,
-      v8_glue::Optional<base::string16> title);
-  private: static Editor* NewEditor();
+      const base::string16& title);
+  private: static v8::Handle<v8::Promise> MessageBox(
+      Window* maybe_window,
+      const base::string16& message, int flags);
+
+  // Run specified script
   private: static v8::Handle<v8::Object> RunScript(
       const base::string16& script_text,
-      v8_glue::Optional<base::string16> opt_file_name);
+      const base::string16& file_name);
+  private: static v8::Handle<v8::Object> RunScript(
+      const base::string16& script_text);
 
   // Set global switch value.
   private: static void SetSwitch(const base::string16& name,
                                  const domapi::SwitchValue& new_value);
 
   private: static void SetTabData(Window* window,
-                                  const domapi::TabData tab_data);
+                                  const domapi::TabData& tab_data);
 
   DISALLOW_COPY_AND_ASSIGN(Editor);
 };

@@ -116,8 +116,13 @@ EventTarget::~EventTarget() {
 
 void EventTarget::AddEventListener(const base::string16& type,
                             v8::Handle<v8::Object> listener,
-                            Optional<bool> capture) {
-  event_listener_map_->Add(type, listener, capture.get(false));
+                            bool capture) {
+  event_listener_map_->Add(type, listener, capture);
+}
+
+void EventTarget::AddEventListener(const base::string16& type,
+                                   v8::Handle<v8::Object> listener) {
+  AddEventListener(type, listener, false);
 }
 
 EventTarget::EventPath EventTarget::BuildEventPath() const {
@@ -170,6 +175,7 @@ void EventTarget::InvokeEventListeners(Event* event) {
   if (!listeners)
     return;
   auto listeners_copy = *listeners;
+
   for (auto listener : listeners_copy) {
     if (event->stop_immediate_propagation())
       return;
@@ -193,9 +199,14 @@ void EventTarget::InvokeEventListeners(Event* event) {
 }
 
 void EventTarget::RemoveEventListener(const base::string16& type,
-                                      v8::Handle<v8::Object> listener,
-                                      Optional<bool> capture) {
-  event_listener_map_->Remove(type, listener, capture.get(false));
+                                      EventListener listener,
+                                      bool capture) {
+  event_listener_map_->Remove(type, listener, capture);
+}
+
+void EventTarget::RemoveEventListener(const base::string16& type,
+                                      EventListener listener) {
+  RemoveEventListener(type, listener, false);
 }
 
 void EventTarget::ScheduleDispatchEvent(Event* event) {

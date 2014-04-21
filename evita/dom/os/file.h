@@ -7,8 +7,6 @@
 
 #include "evita/dom/os/abstract_file.h"
 
-#include "evita/v8_glue/optional.h"
-
 namespace domapi {
 struct FileStatus;
 struct MoveFileOptions;
@@ -34,11 +32,16 @@ class File final : public v8_glue::Scriptable<File, AbstractFile> {
   private: static v8::Handle<v8::Promise> Move(
       const base::string16& src_path,
       const base::string16& dst_path,
-      v8_glue::Optional<domapi::MoveFileOptions> opt_options);
+      const domapi::MoveFileOptions& options);
+  private: static v8::Handle<v8::Promise> Move(
+      const base::string16& src_path,
+      const base::string16& dst_path);
 
   private: static v8::Handle<v8::Promise> Open(
       const base::string16& file_name,
-      v8_glue::Optional<base::string16> opt_mode);
+      const base::string16& opt_mode);
+  private: static v8::Handle<v8::Promise> Open(
+      const base::string16& file_name);
 
   // Remove a existing |file_name|
   private: static v8::Handle<v8::Promise> Remove(

@@ -21,12 +21,12 @@ class {{class_name}} final :
 {%- endif %} {
   public: {{class_name}}(const char* name);
   public: virtual ~{{class_name}}();
-
 {#############################################################
  #
  # Constructor
  #}
 {% if constructor.dispatch != 'none' %}
+
   // Constructor
   private: static void Construct{{interface_name}}(
       const v8::FunctionCallbackInfo<v8::Value>& info);
@@ -51,12 +51,24 @@ class {{class_name}} final :
 {% endfor %}
 {#############################################################
  #
+ # Static methods
+ #}
+{% for method in methods if method.is_static %}
+{%  if loop.first %}
+
+  // Static methods
+{%  endif %}
+  private: static void {{method.cpp_name}}(
+      const v8::FunctionCallbackInfo<v8::Value>& info);
+{% endfor %}
+{#############################################################
+ #
  # Attributes
  #}
 {% for attribute in attributes if not attribute.is_static %}
 {%  if loop.first %}
 
-  // Attributes
+  // Instance attributes
 {%  endif %}
   private: static void Get_{{attribute.cpp_name}}(
       const v8::FunctionCallbackInfo<v8::Value>& info);
@@ -65,11 +77,23 @@ class {{class_name}} final :
       const v8::FunctionCallbackInfo<v8::Value>& info);
 {%  endif %}
 {% endfor %}
+{#############################################################
+ #
+ # Instance methods
+ #}
+{% for method in methods if not method.is_static %}
+{%  if loop.first %}
 
+  // Instance methods
+{%  endif %}
+  private: static void {{method.cpp_name}}(
+      const v8::FunctionCallbackInfo<v8::Value>& info);
+{% endfor %}
 {#############################################################
  #
  # WrapperInfo
  #}
+
   // v8_glue::WrapperInfo
 {% if has_static_member or constructor.dispatch != 'none' %}
   private: virtual v8::Handle<v8::FunctionTemplate>

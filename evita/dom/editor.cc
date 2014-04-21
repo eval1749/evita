@@ -165,7 +165,7 @@ v8::Handle<v8::Promise> Editor::CheckSpelling(
 }
 
 v8::Handle<v8::Promise> Editor::GetFileNameForLoad(
-    v8_glue::Nullable<Window> window, const base::string16& dir_path) {
+    Window* window, const base::string16& dir_path) {
   return PromiseResolver::SlowCall(base::Bind(
       &ViewDelegate::GetFileNameForLoad,
       base::Unretained(ScriptHost::instance()->view_delegate()),
@@ -173,7 +173,7 @@ v8::Handle<v8::Promise> Editor::GetFileNameForLoad(
 }
 
 v8::Handle<v8::Promise> Editor::GetFileNameForSave(
-    v8_glue::Nullable<Window> window, const base::string16& dir_path) {
+    Window* window, const base::string16& dir_path) {
   return PromiseResolver::SlowCall(base::Bind(
       &ViewDelegate::GetFileNameForSave,
       base::Unretained(ScriptHost::instance()->view_delegate()),
@@ -201,26 +201,24 @@ std::vector<base::string16>  Editor::GetSwitchNames() {
 }
 
 v8::Handle<v8::Promise> Editor::MessageBox(
-    v8_glue::Nullable<Window> maybe_window,
+    Window* maybe_window,
     const base::string16& message, int flags,
-    v8_glue::Optional<base::string16> title) {
+    const base::string16& title) {
   return PromiseResolver::SlowCall(base::Bind(
       &ViewDelegate::MessageBox,
       base::Unretained(ScriptHost::instance()->view_delegate()),
       maybe_window ? maybe_window->window_id() : kInvalidWindowId,
-      message, title.get(base::string16()), flags));
+      message, title, flags));
 }
 
-Editor* Editor::NewEditor() {
-  ScriptHost::instance()->ThrowError(
-      "Cannot create an instance of Editor.");
-  return nullptr;
+v8::Handle<v8::Promise> Editor::MessageBox(
+    Window* maybe_window, const base::string16& message, int flags) {
+  return MessageBox(maybe_window, message, flags, base::string16());
 }
 
 v8::Handle<v8::Object> Editor::RunScript(
     const base::string16& script_text,
-    v8_glue::Optional<base::string16> opt_file_name) {
-  auto const file_name = opt_file_name.get(L"__runscript__");
+    const base::string16& file_name) {
   if (file_name == L"*javascript*") {
     SuppressMessageBoxScope suppress_messagebox_scope;
     return RunScriptInternal(script_text, file_name);
@@ -228,12 +226,17 @@ v8::Handle<v8::Object> Editor::RunScript(
   return RunScriptInternal(script_text, file_name);
 }
 
+v8::Handle<v8::Object> Editor::RunScript(
+    const base::string16& script_text) {
+  return RunScript(script_text, L"__runscript__");
+}
+
 void Editor::SetSwitch(const base::string16& name,
                        const domapi::SwitchValue& new_value) { 
   return ScriptHost::instance()->view_delegate()->SetSwitch(name, new_value);
 }
 
-void Editor::SetTabData(Window* window, const domapi::TabData tab_data) {
+void Editor::SetTabData(Window* window, const domapi::TabData& tab_data) {
   ScriptHost::instance()->view_delegate()->SetTabData(
       window->window_id(), tab_data);
 }

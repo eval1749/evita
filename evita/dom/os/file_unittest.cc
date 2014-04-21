@@ -68,7 +68,7 @@ TEST_F(OsFileTest, OsFile_move_succeeded) {
     "promise = Os.File.move('foo', 'bar', {noOverwrite: true}).then(catcher);");
   EXPECT_SCRIPT_EQ("true", "result");
 
-  EXPECT_SCRIPT_EQ("TypeError: Error processing argument 2.",
+  EXPECT_SCRIPT_EQ("TypeError: Expect argument[2] as MoveFileOptions but [object Object]",
     "promise = Os.File.move('foo', 'bar', {baz: true}).then(catcher);") <<
     "Bad dictionary member";
 }
@@ -86,6 +86,7 @@ TEST_F(OsFileTest, OsFile_open_succeeded) {
   mock_io_delegate()->SetOpenFileResult(
       domapi::IoContextId::New(), 0);
   EXPECT_SCRIPT_VALID(
+
     "var file;"
     "Os.File.open('foo.js').then(function(x) { file = x });");
   EXPECT_SCRIPT_TRUE("file instanceof Os.File");

@@ -5,5 +5,5 @@
 // You can't create |TableSelection| object directly. You can obtain
 // |TableSelection| object via |TextWindow.prototype.selection|.
 interface TableSelection : Selection {
-  long[] getRowStates(string[] keys);
+  long[] getRowStates(DOMString[] keys);
 };

@@ -6,7 +6,8 @@ interface DataTransferItemList {
   readonly attribute unsigned long length;
   //getter DataTransferItem (unsigned long index);
   DataTransferItem get(unsigned long index);
-  DataTransferItem? add(DOMString data, DOMString type);
+  //DataTransferItem? add(DataTransferData data, DOMString type);
+  void add(DataTransferData data, DOMString type);
   void remove(unsigned long index);
   void clear();
 };

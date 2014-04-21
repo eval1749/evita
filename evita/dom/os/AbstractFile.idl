@@ -4,7 +4,7 @@
 
 [JsNamespace=Os]
 interface AbstractFile {
-  void close();
+  Promise close();
   Promise read(ArrayBufferView buffer);
   Promise write(ArrayBufferView buffer);
 };

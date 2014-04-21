@@ -49,7 +49,7 @@ class GlueType(object):
 
     def declare_str(self):
         if self.idl_type.is_union_type:
-            raise "Union type isn't supported."
+            raise Exception("Union type isn't supported.")
         if self.idl_type.is_array or self.idl_type.is_sequence:
             return 'std::vector<%s>' % self.cpp_name
         if self.is_collectable:
@@ -62,7 +62,7 @@ class GlueType(object):
 
     def from_v8_str(self):
         if self.idl_type.is_union_type:
-            raise "Union type isn't supported."
+            raise Exception("Union type isn't supported.")
         if self.idl_type.is_array or self.idl_type.is_sequence:
             return 'std::vector<%s>' % self.cpp_name
         if self.is_collectable:
@@ -74,14 +74,9 @@ class GlueType(object):
             return self.cpp_name + '*'
         return self.cpp_name
 
-    def getter(self, variable_name):
-        if self.is_collectable:
-            return variable_name + '.get()'
-        return variable_name
-
     def return_str(self):
         if self.idl_type.is_union_type:
-            raise "Union type isn't supported."
+            raise Exception("Union type isn't supported.")
         if self.idl_type.is_array or self.idl_type.is_sequence:
             return 'std::vector<%s>' % self.cpp_name
         if self.is_collectable:
@@ -202,7 +197,6 @@ def dictionary_member_context(member):
         'cpp_name': cpp_name,
         'declare_type': glue_type.declare_str(),
         'default_value': member.default_value,
-        'getter': glue_type.getter(cpp_name + '_'),
         'has_default_value': member.default_value != None,
         'is_nullable': member.idl_type.is_nullable,
         'name': member.name,

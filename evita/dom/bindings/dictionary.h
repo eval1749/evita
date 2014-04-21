@@ -29,7 +29,7 @@ class {{name}} : public {{parent_name or 'Dictionary'}} {
 
 {% for member in members %}
   // {{member.name}}
-  public: {{member.return_type}} {{member.cpp_name}}() const { return {{member.getter}}; }
+  public: {{member.return_type}} {{member.cpp_name}}() const { return {{member.cpp_name}}_; }
   public: void set_{{member.cpp_name}}({{member.parameter_type}} new_{{member.cpp_name}}) { {{member.cpp_name}}_ = new_{{member.cpp_name}}; }
 
 {% endfor %}

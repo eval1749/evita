@@ -47,8 +47,6 @@
       '<(glue_dir)/FormControlClass.h',
       '<(glue_dir)/FormWindowClass.cc',
       '<(glue_dir)/FormWindowClass.h',
-      '<(glue_dir)/FormWindowInit.cc',
-      '<(glue_dir)/FormWindowInit.h',
       '<(glue_dir)/EventTargetClass.cc',
       '<(glue_dir)/EventTargetClass.h',
       '<(glue_dir)/FileClass.cc',
@@ -137,6 +135,7 @@
     ], # static_js_externs_files
 
     # Computed variables
+
     'glue_dir': '<(SHARED_INTERMEDIATE_DIR)/evita/bindings',
     'idl_file_list': '<|(idl_file.txt <@(idl_files))',
     'idl_work_dir': '<(SHARED_INTERMEDIATE_DIR)/evita',
@@ -222,8 +221,6 @@
         'outputs': [
           '<(glue_dir)/<(RULE_INPUT_ROOT)Class.cc',
           '<(glue_dir)/<(RULE_INPUT_ROOT)Class.h',
-          '<(glue_dir)/<(RULE_INPUT_ROOT)Init.cc',
-          '<(glue_dir)/<(RULE_INPUT_ROOT)Init.h',
         ],
         'action': [
           'python',

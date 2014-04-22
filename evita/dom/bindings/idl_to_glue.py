@@ -31,11 +31,9 @@ class IdlCompilerGlue(IdlCompiler):
                                                 self.output_directory)
 
     def compile_file(self, idl_filename):
-        interface_name = idl_filename_to_interface_name(idl_filename)
         definitions = self.reader.read_idl_definitions(idl_filename)
 
-        files = self.code_generator.generate_code(
-            definitions, interface_name)
+        files = self.code_generator.generate_code(definitions)
 
         for file_data in files:
             file_name = os.path.join(self.output_directory,

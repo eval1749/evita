@@ -110,4 +110,8 @@ class {{class_name}} final :
 }  // namespace bindings
 }  // namespace dom
 
+{% for dictionary in dictionaries %}
+#include "./{{dictionary.name}}.h"
+{% endfor %}
+
 #endif //!defined(INCLUDE_gen_evita_bindings_{{class_name}}_h)

@@ -168,13 +168,13 @@ class CodeGeneratorGlue(object):
 
     def dictionary_context(self, dictionary):
         context = generate_dictionary_context(dictionary, self.interfaces_info)
-        return ('dictionary', context, dictionary.name, dictionary.name)
+        return ('dictionary', context, dictionary.name)
 
     def generate_contents(self, template_name, template_context):
         return self.jinja_env.get_template(template_name) \
             .render(template_context)
 
-    def generate_cc_h(self, template_name, template_context, name, file_name):
+    def generate_cc_h(self, template_name, template_context, file_name):
         return [
             {
                 'contents': self.generate_contents(
@@ -184,36 +184,24 @@ class CodeGeneratorGlue(object):
             for extension in ['.cc', '.h']
         ]
 
-    def generate_dummy_files_if_needed(self, definitions, interface_name):
-        if definitions.dictionaries:
-            return []
-        return [
-            {
-                'contents': '#error "should not use"\n',
-                'file_name': interface_name + 'Init' + extension,
-            }
-            for extension in ['.cc', '.h']
-        ]
-
-    def generate_code(self, definitions, interface_name):
+    def generate_code(self, definitions):
         global global_definitions
         global_definitions = definitions
         return list(chain(*[
-            self.generate_cc_h(template_name, template_context, name, type)
-            for (template_name, template_context, name, type) in
+            self.generate_cc_h(template_name, template_context, file_name)
+            for (template_name, template_context, file_name) in
             [self.dictionary_context(dictionary)
              for dictionary in definitions.dictionaries.values()] +
             # interface context must be generated after dictionary context
             # for include files.
-            [self.interface_context(definitions, interface_name)]
-        ])) + \
-        list(chain(self.generate_dummy_files_if_needed(definitions,
-                                                       interface_name)))
+            [self.interface_context(definitions, interface)
+             for interface in definitions.interfaces.values()]
+        ]))
 
-    def interface_context(self, definitions, interface_name):
+    def interface_context(self, definitions, interface):
         context = generate_interface_context(
-            definitions, interface_name, self.interfaces_info)
-        return ('interface', context, interface_name, interface_name + 'Class')
+            definitions, interface.name, self.interfaces_info)
+        return ('interface', context, interface.name + 'Class')
 
 ######################################################################
 #
@@ -485,6 +473,7 @@ def generate_interface_context(definitions, interface_name, interfaces_info):
       'base_class_include': base_class_include,
       'constants': sort_context_list(constant_context_list),
       'constructor': constructor,
+      'dictionaries': [{'name': dictionary.name} for dictionary in definitions.dictionaries.values()],
       'enumerations': enumeration_context_list,
       'has_static_member': has_static_member,
       'need_instance_template': need_instance_template,

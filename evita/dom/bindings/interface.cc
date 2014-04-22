@@ -117,6 +117,7 @@ void {{class_name}}::{{method.cpp_name}}(
 //
 {{class_name}}::{{class_name}}(const char* name)
 
+
 {%- if interface_parent -%}
 {{ '\n  : BaseClass(name) ' }}
 {%- else -%}
@@ -361,3 +362,7 @@ using namespace bindings;
 DEFINE_SCRIPTABLE_OBJECT({{interface_name}}, {{class_name}});
 
 }  // namespace dom
+
+{% for dictionary in dictionaries %}
+#include "./{{dictionary.name}}.cc"
+{% endfor %}

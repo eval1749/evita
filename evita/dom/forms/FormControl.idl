@@ -10,10 +10,10 @@ interface FormControl : ViewEventTarget {
   attribute float clientLeft;
   attribute float clientTop;
   attribute float clientWidth;
-  attribute bool disabled;
+  attribute boolean disabled;
   readonly attribute Form? form;
   readonly attribute DOMString name;
 
-  [ImplementedAs=JavaScript] bool canFocus();
+  [ImplementedAs=JavaScript] boolean canFocus();
   [ImplementedAs=JavaScript] void focus();
 };

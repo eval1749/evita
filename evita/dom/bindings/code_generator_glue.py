@@ -25,6 +25,7 @@ from idl_types import IdlType
 global_has_gc_member = False
 global_has_nullable = False
 global_has_optional = False
+global_referenced_dictionary_names = set()
 global_referenced_interface_names = set()
 global_definitions = {}
 global_interfaces_info = {}
@@ -34,6 +35,7 @@ global_interfaces_info = {}
 KNOWN_INTERFACE_NAMES = {
     'Event': 'evita/dom/events/event.h',
     'Form': 'evita/dom/forms/form.h',
+    'Document': 'evita/dom/text/document.h',
 }
 global_known_interface_names = set()
 
@@ -112,15 +114,27 @@ class CppType(object):
 
 
 IDL_TO_CPP_TYPE_MAP = {
-    'ArrayBufferView': CppType('gin::ArrayBufferView', is_by_value=False),
-    'DataTransferData': CppType('DataTransferData', is_pointer=True),
-    'DOMString': CppType('base::string16', is_by_value=False),
     # TODO(yosi) We should have "MoveFileOptions.idl".
     'MoveFileOptions': CppType('domapi::MoveFileOptions', is_by_value=False),
     # TODO(yosi) We should have "SwitchValue.idl".
     'SwitchValue': CppType('domapi::SwitchValue', is_by_value=False),
     # TODO(yosi) We should have "TabData.idl".
     'TabData': CppType('domapi::TabData', is_by_value=False),
+
+    # Glue specific types
+    'ArrayBufferView': CppType('gin::ArrayBufferView', is_by_value=False),
+    'DataTransferData': CppType('DataTransferData', is_pointer=True),
+    'EventListener': CppType('v8::Handle<v8::Object>'),
+    # For Editor.localizeText
+    'StringDict': CppType('v8::Handle<v8::Object>'),
+
+    # V8 types
+    'Function': CppType('v8::Handle<v8::Function>'),
+    'Object': CppType('v8::Handle<v8::Object>'),
+    'Promise': CppType('v8::Handle<v8::Promise>'),
+
+    # IDL types
+    'DOMString': CppType('base::string16', is_by_value=False),
     'boolean': CppType('bool'),
     'byte': CppType('uint8_t'),
     'double': CppType('double'),
@@ -132,10 +146,11 @@ IDL_TO_CPP_TYPE_MAP = {
     'unsigned long': CppType('int'),
     'unsigned long long': CppType('uint64_t'),
     'unsigned short': CppType('uint16_t'),
+    'void': CppType('void'),
 }
 
 # Map IDL type to Glue Type
-def to_glue_type(idl_type):
+def to_glue_type(idl_type, maybe_dictionary=True):
     type_name = idl_type.base_type
 
     if type_name in IDL_TO_CPP_TYPE_MAP:
@@ -151,6 +166,13 @@ def to_glue_type(idl_type):
         global_known_interface_names.add(type_name)
         return GlueType(idl_type, type_name, is_collectable=True)
     if type_name in global_definitions.dictionaries:
+        global_referenced_dictionary_names.add(type_name)
+        return GlueType(idl_type, type_name, is_struct=True)
+    if maybe_dictionary:
+        # TODO(yosi) Once we have "dictionary.pickle" which contains all
+        # dictiorines, we get rid of below assumption.
+        # Note: Assume unknown type as Dictionary.
+        global_referenced_dictionary_names.add(type_name)
         return GlueType(idl_type, type_name, is_struct=True)
     return GlueType(idl_type, type_name)
 
@@ -201,7 +223,7 @@ class CodeGeneratorGlue(object):
     def interface_context(self, definitions, interface):
         context = generate_interface_context(
             definitions, interface.name, self.interfaces_info)
-        return ('interface', context, interface.name + 'Class')
+        return ('interface', context, interface.name)
 
 ######################################################################
 #
@@ -217,7 +239,7 @@ def dictionary_member_context(member):
         global global_has_nullable
         global_has_nullable = True
 
-    glue_type = to_glue_type(member.idl_type)
+    glue_type = to_glue_type(member.idl_type, maybe_dictionary=False)
 
     return {
         'cpp_name': cpp_name,
@@ -236,12 +258,15 @@ def generate_dictionary_context(dictionary, interfaces_info):
     global global_has_nullable
     global_has_nullable = False
 
+    global global_referenced_dictionary_names
+    global_referenced_dictionary_names = set()
+
     global global_referenced_interface_names
     global_referenced_interface_names = set()
 
     member_context_list = map(dictionary_member_context, dictionary.members)
     if dictionary.parent:
-        base_class_include = '...TODO...'
+        base_class_include = dictionary_name_to_include_path(dictionary.parent)
     else:
         base_class_include = 'evita/dom/dictionary.h'
 
@@ -282,7 +307,7 @@ def attribute_context(attribute):
         cpp_name = attribute.extended_attributes['ImplementedAs']
     else:
         cpp_name = underscore(attribute.name)
-    glue_type = to_glue_type(attribute.idl_type)
+    glue_type = to_glue_type(attribute.idl_type, maybe_dictionary=False)
     return {
         'cpp_name': cpp_name,
         'from_v8_type': glue_type.from_v8_str(),
@@ -350,7 +375,8 @@ def function_context(functions):
           'cpp_name': cpp_name,
           'is_static': is_static,
           'parameters': map(function_parameter, function.arguments),
-          'return_type': to_glue_type(function.idl_type).to_v8_str(),
+          'return_type': to_glue_type(function.idl_type,
+                                      maybe_dictionary=False).to_v8_str(),
         }
         for function in functions
     ]
@@ -428,11 +454,9 @@ def generate_interface_context(definitions, interface_name, interfaces_info):
     global_referenced_interface_names.add(interface_name)
 
     include_paths = map(interface_name_to_include_path,
-                        global_referenced_interface_names)
-    include_paths += [
-        dictionary.name + '.h'
-        for dictionary in definitions.dictionaries.values()
-    ]
+                        global_referenced_interface_names) + \
+                    map(dictionary_name_to_include_path,
+                        global_referenced_dictionary_names)
     include_paths.append('base/logging.h')
     include_paths.append('evita/dom/converter.h')
     include_paths.append('evita/dom/script_host.h')
@@ -542,9 +566,14 @@ def parameter_type_string(parameter, is_optional):
 #
 # Common
 #
+def dictionary_name_to_include_path(dictionary_name):
+    return dictionary_name + '.h'
+
+
 def interface_name_to_include_path(interface_name):
     return global_interfaces_info[interface_name]['include_path']
-                           
+
+
 def sort_context_list(context_list):
     return sorted(context_list, key=lambda context: context['name'])
 

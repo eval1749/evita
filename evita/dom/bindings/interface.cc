@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "{{class_name}}.h"
+#include "{{interface_name}}.h"
 
 {% for include_path in include_paths %}
 #include "{{include_path}}"
@@ -116,6 +116,7 @@ void {{class_name}}::{{method.cpp_name}}(
 // {{class_name}}
 //
 {{class_name}}::{{class_name}}(const char* name)
+
 
 
 {%- if interface_parent -%}

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-[
-  Constructor(Form form),
-  Constructor(Form form, FormWindowInit init)
-]
-interface FormWindow : Window {
-  readonly attribute Form form;
+dictionary FormWindowInit {
+  long height = 0;
+  long offsetX = 0;
+  long offsetY = 0;
+  Window? owner;
+  long width = 0;
 };

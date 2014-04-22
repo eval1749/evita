@@ -4,7 +4,7 @@
 
 {
   'variables': {
-    'idl_files': [
+    'interface_idl_files': [
       'clipboard/DataTransfer.idl',
       'clipboard/DataTransferItem.idl',
       'clipboard/DataTransferItemList.idl',
@@ -26,41 +26,47 @@
       'windows/Window.idl',
     ], # idl_files
 
+    'dictionary_idl_files': [
+      'forms/FormWindowInit.idl',
+    ], # dictionary_idl_files
+
     'generated_glue_files': [
-      '<(glue_dir)/AbstractFileClass.cc',
-      '<(glue_dir)/AbstractFileClass.h',
-      '<(glue_dir)/ButtonControlClass.cc',
-      '<(glue_dir)/ButtonControlClass.h',
-      '<(glue_dir)/DataTransferClass.cc',
-      '<(glue_dir)/DataTransferClass.h',
-      '<(glue_dir)/DataTransferItemClass.cc',
-      '<(glue_dir)/DataTransferItemClass.h',
-      '<(glue_dir)/DataTransferItemListClass.cc',
-      '<(glue_dir)/DataTransferItemListClass.h',
-      '<(glue_dir)/DocumentWindowClass.cc',
-      '<(glue_dir)/DocumentWindowClass.h',
-      '<(glue_dir)/EditorClass.cc',
-      '<(glue_dir)/EditorClass.h',
-      '<(glue_dir)/EditorWindowClass.cc',
-      '<(glue_dir)/EditorWindowClass.h',
-      '<(glue_dir)/FormControlClass.cc',
-      '<(glue_dir)/FormControlClass.h',
-      '<(glue_dir)/FormWindowClass.cc',
-      '<(glue_dir)/FormWindowClass.h',
-      '<(glue_dir)/EventTargetClass.cc',
-      '<(glue_dir)/EventTargetClass.h',
-      '<(glue_dir)/FileClass.cc',
-      '<(glue_dir)/FileClass.h',
-      '<(glue_dir)/ModeClass.cc',
-      '<(glue_dir)/ModeClass.h',
-      '<(glue_dir)/SelectionClass.cc',
-      '<(glue_dir)/SelectionClass.h',
-      '<(glue_dir)/TableSelectionClass.cc',
-      '<(glue_dir)/TableSelectionClass.h',
-      '<(glue_dir)/ViewEventTargetClass.cc',
-      '<(glue_dir)/ViewEventTargetClass.h',
-      '<(glue_dir)/WindowClass.cc',
-      '<(glue_dir)/WindowClass.h',
+      '<(glue_dir)/AbstractFile.cc',
+      '<(glue_dir)/AbstractFile.h',
+      '<(glue_dir)/ButtonControl.cc',
+      '<(glue_dir)/ButtonControl.h',
+      '<(glue_dir)/DataTransfer.cc',
+      '<(glue_dir)/DataTransfer.h',
+      '<(glue_dir)/DataTransferItem.cc',
+      '<(glue_dir)/DataTransferItem.h',
+      '<(glue_dir)/DataTransferItemList.cc',
+      '<(glue_dir)/DataTransferItemList.h',
+      '<(glue_dir)/DocumentWindow.cc',
+      '<(glue_dir)/DocumentWindow.h',
+      '<(glue_dir)/Editor.cc',
+      '<(glue_dir)/Editor.h',
+      '<(glue_dir)/EditorWindow.cc',
+      '<(glue_dir)/EditorWindow.h',
+      '<(glue_dir)/FormControl.cc',
+      '<(glue_dir)/FormControl.h',
+      '<(glue_dir)/FormWindow.cc',
+      '<(glue_dir)/FormWindow.h',
+      '<(glue_dir)/FormWindowInit.cc',
+      '<(glue_dir)/FormWindowInit.h',
+      '<(glue_dir)/EventTarget.cc',
+      '<(glue_dir)/EventTarget.h',
+      '<(glue_dir)/File.cc',
+      '<(glue_dir)/File.h',
+      '<(glue_dir)/Mode.cc',
+      '<(glue_dir)/Mode.h',
+      '<(glue_dir)/Selection.cc',
+      '<(glue_dir)/Selection.h',
+      '<(glue_dir)/TableSelection.cc',
+      '<(glue_dir)/TableSelection.h',
+      '<(glue_dir)/ViewEventTarget.cc',
+      '<(glue_dir)/ViewEventTarget.h',
+      '<(glue_dir)/Window.cc',
+      '<(glue_dir)/Window.h',
     ],
 
     'generated_js_externs_files': [
@@ -75,6 +81,7 @@
       '<(js_externs_dir)/File_externs.js',
       '<(js_externs_dir)/FormControl_externs.js',
       '<(js_externs_dir)/FormWindow_externs.js',
+      '<(js_externs_dir)/FormWindowInit_externs.js',
       '<(js_externs_dir)/Mode_externs.js',
       '<(js_externs_dir)/Point_externs.js',
       '<(js_externs_dir)/Rect_externs.js',
@@ -137,6 +144,8 @@
     # Computed variables
 
     'glue_dir': '<(SHARED_INTERMEDIATE_DIR)/evita/bindings',
+    'interface_idl_file_list': '<|(interface_idl_file.txt <@(interface_idl_files))',
+    'idl_files': '<@(interface_idl_files) <@(dictionary_idl_files)',
     'idl_file_list': '<|(idl_file.txt <@(idl_files))',
     'idl_work_dir': '<(SHARED_INTERMEDIATE_DIR)/evita',
     'js_externs_dir': '<(SHARED_INTERMEDIATE_DIR)/evita/js_externs',
@@ -219,8 +228,8 @@
           '<(idl_work_dir)/InterfacesInfo.pickle',
         ], # inputs
         'outputs': [
-          '<(glue_dir)/<(RULE_INPUT_ROOT)Class.cc',
-          '<(glue_dir)/<(RULE_INPUT_ROOT)Class.h',
+          '<(glue_dir)/<(RULE_INPUT_ROOT).cc',
+          '<(glue_dir)/<(RULE_INPUT_ROOT).h',
         ],
         'action': [
           'python',
@@ -272,7 +281,7 @@
         'action_name': 'compute_dom_interfaces_info',
         'inputs': [
           '<(DEPTH)/third_party/blink_idl_parser/compute_interfaces_info.py',
-          '<@(idl_files)',
+          '<@(interface_idl_files)',
         ],
         'outputs': [
           '<(idl_work_dir)/InterfacesInfo.pickle',
@@ -280,7 +289,7 @@
         'action': [
           'python',
           '<(DEPTH)/third_party/blink_idl_parser/compute_interfaces_info.py',
-          '--idl-files-list', '<(idl_file_list)',
+          '--idl-files-list', '<(interface_idl_file_list)',
           '--interfaces-info-file', '<(idl_work_dir)/InterfacesInfo.pickle',
           '--write-file-only-if-changed', '<(write_file_only_if_changed)',
         ], # action

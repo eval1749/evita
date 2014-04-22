@@ -41,7 +41,7 @@ global.JsConsole = (function() {
       self.range.endOf(Unit.DOCUMENT, Alter.EXTEND);
       self.range.text = '';
       self.emitPrompt();
-      this.selection.range.collapseTo(self.range.end);
+      this.selection.range.collapseTo(self.document.length);
     });
     this.document.bindKey('Ctrl+ArrowUp', function() {
       self.backwardHistory();

@@ -9,10 +9,11 @@
 
 namespace domapi {
 struct FileStatus;
-struct MoveFileOptions;
 }
 
 namespace dom {
+
+class MoveFileOptions;
 
 namespace bindings {
 class FileClass;
@@ -32,7 +33,7 @@ class File final : public v8_glue::Scriptable<File, AbstractFile> {
   private: static v8::Handle<v8::Promise> Move(
       const base::string16& src_path,
       const base::string16& dst_path,
-      const domapi::MoveFileOptions& options);
+      const MoveFileOptions& options);
   private: static v8::Handle<v8::Promise> Move(
       const base::string16& src_path,
       const base::string16& dst_path);

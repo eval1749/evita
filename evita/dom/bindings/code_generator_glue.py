@@ -114,8 +114,6 @@ class CppType(object):
 
 
 IDL_TO_CPP_TYPE_MAP = {
-    # TODO(yosi) We should have "MoveFileOptions.idl".
-    'MoveFileOptions': CppType('domapi::MoveFileOptions', is_by_value=False),
     # TODO(yosi) We should have "SwitchValue.idl".
     'SwitchValue': CppType('domapi::SwitchValue', is_by_value=False),
     # TODO(yosi) We should have "TabData.idl".

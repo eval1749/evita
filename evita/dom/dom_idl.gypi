@@ -28,6 +28,7 @@
 
     'dictionary_idl_files': [
       'forms/FormWindowInit.idl',
+      'os/MoveFileOptions.idl',
     ], # dictionary_idl_files
 
     'generated_glue_files': [
@@ -59,6 +60,8 @@
       '<(glue_dir)/File.h',
       '<(glue_dir)/Mode.cc',
       '<(glue_dir)/Mode.h',
+      '<(glue_dir)/MoveFileOptions.cc',
+      '<(glue_dir)/MoveFileOptions.h',
       '<(glue_dir)/Selection.cc',
       '<(glue_dir)/Selection.h',
       '<(glue_dir)/TableSelection.cc',

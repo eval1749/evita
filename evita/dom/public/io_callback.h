@@ -26,8 +26,6 @@ struct FileStatus {
 
 struct MoveFileOptions {
   bool no_overwrite;
-  MoveFileOptions() : no_overwrite(false) {
-  }
 };
 
 typedef Deferred<bool, IoError> IoResolver;

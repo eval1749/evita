@@ -7,6 +7,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
+#include "evita/bindings/MoveFileOptions.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/io_delegate.h"
@@ -48,29 +49,6 @@ v8::Handle<v8::Value> Converter<domapi::FileStatus>::ToV8(
                gin::ConvertToV8(isolate, data.file_size));
   return js_data;
 }
-
-bool Converter<domapi::MoveFileOptions>::FromV8(
-    v8::Isolate* isolate, v8::Handle<v8::Value> value,
-    domapi::MoveFileOptions* out) {
-  if (value.IsEmpty() || !value->IsObject())
-    return false;
-  auto const dict = value->ToObject();
-  auto const names = dict->GetPropertyNames();
-  auto const num_names = names->Length();
-  auto const no_overwrite = dom::v8Strings::noOverwrite.Get(isolate);
-  for (auto index = 0u; index < num_names; ++index) {
-    auto const name = names->Get(index);
-    if (name->Equals(no_overwrite)) {
-      out->no_overwrite = dict->Get(name)->BooleanValue();
-    } else {
-      isolate->ThrowException(v8::Exception::Error(gin::StringToV8(isolate,
-          base::StringPrintf("Invalid dictionary member: %ls",
-            dom::V8ToString(name).c_str()))));
-      return false;
-    }
-  }
-  return true;
-}
 }  // namespace gin
 
 namespace dom {
@@ -97,17 +75,19 @@ v8::Handle<v8::Promise> File::MakeTempFileName(const base::string16& dir_name,
 v8::Handle<v8::Promise> File::Move(
     const base::string16& src_path,
     const base::string16& dst_path,
-    const domapi::MoveFileOptions& options) {
+    const MoveFileOptions& options) {
+  domapi::MoveFileOptions api_options;
+  api_options.no_overwrite = options.no_overwrite();
   return PromiseResolver::FastCall(base::Bind(
       &domapi::IoDelegate::MoveFile,
       base::Unretained(ScriptHost::instance()->io_delegate()),
-      src_path, dst_path, options));
+      src_path, dst_path, api_options));
 }
 
 v8::Handle<v8::Promise> File::Move(
     const base::string16& src_path,
     const base::string16& dst_path) {
-  return Move(src_path, dst_path, domapi::MoveFileOptions());
+  return Move(src_path, dst_path, MoveFileOptions());
 }
 
 v8::Handle<v8::Promise> File::Open(const base::string16& file_name,

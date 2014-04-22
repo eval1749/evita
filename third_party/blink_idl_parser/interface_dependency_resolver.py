@@ -82,6 +82,8 @@ class InterfaceDependencyResolver(object):
         Args:
             definitions: IdlDefinitions object, modified in place
         """
+        if len(definitions.interfaces) == 0:
+            return;
         target_interface = next(definitions.interfaces.itervalues())
         interface_name = target_interface.name
         interface_info = self.interfaces_info[interface_name]

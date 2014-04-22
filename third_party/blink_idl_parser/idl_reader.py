@@ -77,17 +77,19 @@ class IdlReader(object):
         # and the interface name must agree with the file's basename,
         # unless it is a partial interface.
         # (e.g., 'partial interface Foo' can be in FooBar.idl).
+        number_of_dictionaries = len(definitions.dictionaries)
         number_of_interfaces = len(definitions.interfaces)
-        if number_of_interfaces != 1:
+        if number_of_interfaces + number_of_dictionaries != 1:
             raise Exception(
-                'Expected exactly 1 interface in file {0}, but found {1}'
+                'Expected exactly 1 interface or directory in file {0}, but found {1}'
                 .format(idl_filename, number_of_interfaces))
-        interface = next(definitions.interfaces.itervalues())
-        idl_file_basename, _ = os.path.splitext(os.path.basename(idl_filename))
-        if not interface.is_partial and interface.name != idl_file_basename:
-            raise Exception(
-                'Interface name "{0}" disagrees with IDL file basename "{1}".'
-                .format(interface.name, idl_file_basename))
+        if number_of_interfaces == 1:
+            interface = next(definitions.interfaces.itervalues())
+            idl_file_basename, _ = os.path.splitext(os.path.basename(idl_filename))
+            if not interface.is_partial and interface.name != idl_file_basename:
+                raise Exception(
+                    'Interface name "{0}" disagrees with IDL file basename "{1}".'
+                    .format(interface.name, idl_file_basename))
 
         # Validate extended attributes
         if not self.extended_attribute_validator:

@@ -225,7 +225,7 @@ class IdlDictionaryMember(object):
             if child.IsA('Type'):
                 self.idl_type = type_node_to_type(child)
             elif child.IsA('Default'):
-                self.default_value = child.GetProperty('NAME')
+                self.default_value = child.GetProperty('VALUE')
             elif child_class == 'ExtAttributes':
                 self.extended_attributes = ext_attributes_node_to_extended_attributes(child)
             else:

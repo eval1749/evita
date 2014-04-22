@@ -1,10 +1,11 @@
-dictionary EventInit : Foo {
-  int bubbles = 123;
-  boolean cancelable = false;
-  short foo;
-};
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-[Constructor(DOMString typeArg, optional EventInit eventInitDict)]
+[
+  Constructor(DOMString typeArg, EventInit eventInitDict),
+  Constructor(DOMString typeArg)
+]
 interface Event {
   // DOM PhaseType
   const unsigned short NONE = 0;
@@ -12,11 +13,16 @@ interface Event {
   const unsigned short AT_TARGET = 2;
   const unsigned short BUBBLING_PHASE = 3;
 
-  readonly attribute DOMString type;
-  readonly attribute EventTarget target;
-  readonly attribute EventTarget currentTarget;
-  readonly attribute unsigned short eventPhase;
   readonly attribute boolean bubbles;
   readonly attribute boolean cancelable;
+  readonly attribute boolean defaultPrevented;
+  readonly attribute EventTarget currentTarget;
+  readonly attribute unsigned short eventPhase;
+  readonly attribute EventTarget target;
   readonly attribute DOMTimeStamp timeStamp;
+  readonly attribute DOMString type;
+
+  void preventDefault();
+  void stopImmediatePropagation();
+  void stopPropagation();
 };

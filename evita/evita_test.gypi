@@ -30,6 +30,7 @@
       'include_dirs+' : [
         '<(DEPTH)/testing/gmock/include/',
         '<(DEPTH)/testing/gtest/include/',
+        '<(SHARED_INTERMEDIATE_DIR)/',
       ], # include_dirs
       'msvs_disabled_warnings': [
         4365, 4625, 4626, 4628, 4826,

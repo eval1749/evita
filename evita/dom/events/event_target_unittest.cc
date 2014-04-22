@@ -5,6 +5,7 @@
 
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/event_target.h"
+#include "evita/v8_glue/nullable.h"
 
 namespace {
 
@@ -65,6 +66,7 @@ class SampleEventTargetClass :
       .SetProperty("handled", &SampleEventTarget::handled,
                    &SampleEventTarget::set_handled)
       .SetMethod("handleEvent", &SampleEventTarget::HandleEvent);
+
   }
 };
 

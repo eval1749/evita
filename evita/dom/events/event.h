@@ -6,9 +6,7 @@
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
-#include "evita/dom/dictionary.h"
 #include "evita/dom/time_stamp.h"
-#include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace dom {
@@ -16,10 +14,14 @@ namespace dom {
 class EventInit;
 class EventTarget;
 class TimeStamp;
-using v8_glue::Nullable;
+
+namespace bindings {
+class EventClass;
+}
 
 class Event : public v8_glue::Scriptable<Event> {
   DECLARE_SCRIPTABLE_OBJECT(Event);
+  friend class bindings::EventClass;
 
   public: enum PhaseType {
     kNone,
@@ -54,17 +56,18 @@ class Event : public v8_glue::Scriptable<Event> {
   private: base::string16 type_;
 
   public: Event(const base::string16& type, const EventInit& init_dict);
+  private: explicit Event(const base::string16& type);
   public: virtual ~Event();
 
   public: bool bubbles() const { return bubbles_; }
   public: bool cancelable() const { return cancelable_; }
-  public: Nullable<EventTarget> current_target() const {
+  public: EventTarget* current_target() const {
     return current_target_.get();
   }
   public: bool default_prevented() const { return default_prevented_; }
   public: bool dispatched() const { return dispatched_; }
   public: PhaseType event_phase() const { return event_phase_; }
-  public: Nullable<EventTarget> target() const { return target_.get(); }
+  public: EventTarget* target() const { return target_.get(); }
   public: bool stop_immediate_propagation() const {
     return stop_immediate_propagation_;
   }
@@ -73,10 +76,8 @@ class Event : public v8_glue::Scriptable<Event> {
   public: const base::string16& type() const { return type_; }
 
   public: void PreventDefault();
-  public: void StopImmediatePropagation() {
-    stop_immediate_propagation_ = true;
-  }
-  public: void StopPropagation() { stop_propagation_ = true; }
+  public: void StopImmediatePropagation();
+  public: void StopPropagation();
 
   DISALLOW_COPY_AND_ASSIGN(Event);
 };

@@ -4,7 +4,7 @@
 #include "evita/dom/forms/form_control.h"
 
 #include "evita/dom/events/event.h"
-#include "evita/dom/events/event_init.h"
+#include "evita/bindings/EventInit.h"
 #include "evita/dom/forms/form.h"
 
 namespace dom {

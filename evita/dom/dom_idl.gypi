@@ -9,6 +9,7 @@
       'clipboard/DataTransferItem.idl',
       'clipboard/DataTransferItemList.idl',
       'Editor.idl',
+      'events/Event.idl',
       'events/EventTarget.idl',
       'events/ViewEventTarget.idl',
       'forms/ButtonControl.idl',
@@ -27,6 +28,7 @@
     ], # idl_files
 
     'dictionary_idl_files': [
+      'events/EventInit.idl',
       'forms/FormWindowInit.idl',
       'os/MoveFileOptions.idl',
     ], # dictionary_idl_files
@@ -48,6 +50,10 @@
       '<(glue_dir)/Editor.h',
       '<(glue_dir)/EditorWindow.cc',
       '<(glue_dir)/EditorWindow.h',
+      '<(glue_dir)/Event.cc',
+      '<(glue_dir)/Event.h',
+      '<(glue_dir)/EventInit.cc',
+      '<(glue_dir)/EventInit.h',
       '<(glue_dir)/FormControl.cc',
       '<(glue_dir)/FormControl.h',
       '<(glue_dir)/FormWindow.cc',

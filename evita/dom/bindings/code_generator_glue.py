@@ -33,12 +33,13 @@ global_interfaces_info = {}
 # TODO(yosi) Once all interfaces have IDL file. We should get rid of
 # |KNOWN_INTERFACE_NAMES|.
 KNOWN_INTERFACE_NAMES = {
-    'Event': 'evita/dom/events/event.h',
     'Form': 'evita/dom/forms/form.h',
     'Document': 'evita/dom/text/document.h',
 }
+
 global_known_interface_names = set()
 
+# GlueType
 class GlueType(object):
     def __init__(self, idl_type, cpp_name, is_by_value=True,
                  is_collectable=False, is_pointer=False, is_struct=False):
@@ -238,11 +239,10 @@ def dictionary_member_context(member):
         global_has_nullable = True
 
     glue_type = to_glue_type(member.idl_type, maybe_dictionary=False)
-
     return {
         'cpp_name': cpp_name,
         'declare_type': glue_type.declare_str(),
-        'default_value': member.default_value,
+        'default_value': cpp_value(member.default_value),
         'has_default_value': member.default_value != None,
         'is_nullable': member.idl_type.is_nullable,
         'name': member.name,
@@ -288,7 +288,6 @@ def generate_dictionary_context(dictionary, interfaces_info):
         'base_class_include': base_class_include,
         'cc_include_paths': sorted(cc_include_paths),
         'class_references': sorted(class_references),
-        'has_gc_member': global_has_gc_member,
         'h_include_paths': sorted(h_include_paths),
         'members': sort_context_list(member_context_list),
         'name': dictionary.name,
@@ -326,9 +325,10 @@ def callback_context(callback):
 
 
 def constant_context(constant):
+    glue_type = to_glue_type(constant.idl_type, maybe_dictionary=False)
     return {
         'name': constant.name,
-        'type': parameter_type_string(constant.idl_type),
+        'type': glue_type.from_v8_str(),
         'value': constant.value,
     }
 
@@ -564,6 +564,11 @@ def parameter_type_string(parameter, is_optional):
 #
 # Common
 #
+def cpp_value(value):
+    if isinstance(value, bool):
+        return str(value).lower()
+    return str(value)
+
 def dictionary_name_to_include_path(dictionary_name):
     return dictionary_name + '.h'
 

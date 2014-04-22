@@ -11,6 +11,9 @@
 #include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
+
+class {{interface_name}};
+
 namespace bindings {
 
 class {{class_name}} final :

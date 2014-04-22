@@ -20,7 +20,7 @@ class WindowEvent : public v8_glue::Scriptable<WindowEvent, Event> {
                       const WindowEventInit& init_dict);
   public: virtual ~WindowEvent();
 
-  public: Nullable<Window> source_window() const {
+  public: v8_glue::Nullable<Window> source_window() const {
     return source_window_.get();
   }
 

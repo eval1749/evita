@@ -6,6 +6,7 @@
 #include "base/strings/string16.h"
 #include "evita/dom/events/event.h"
 #include "evita/gc/member.h"
+#include "evita/v8_glue/nullable.h"
 
 namespace dom {
 

@@ -23,7 +23,7 @@ class UiEvent : public v8_glue::Scriptable<UiEvent, Event> {
   public: virtual ~UiEvent();
 
   public: int detail() const { return detail_; }
-  public: Nullable<Window> view() const { return view_.get(); }
+  public: v8_glue::Nullable<Window> view() const { return view_.get(); }
 
   DISALLOW_COPY_AND_ASSIGN(UiEvent);
 };

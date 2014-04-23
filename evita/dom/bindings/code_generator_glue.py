@@ -485,8 +485,10 @@ def generate_interface_context(definitions, interface_name, interfaces_info):
         constructor['dispatch'] != 'none'
 
     need_instance_template = \
-        any([not attribute.is_static for attribute in interface.attributes]) or \
-        any([not operation.is_static for operation in interface.operations])
+        any([not attribute['is_static']
+             for attribute in attribute_context_list]) or \
+        any([not method['is_static']
+             for method in method_context_list])
 
     return {
       'attributes': sort_context_list(attribute_context_list),
@@ -495,7 +497,8 @@ def generate_interface_context(definitions, interface_name, interfaces_info):
       'base_class_include': base_class_include,
       'constants': sort_context_list(constant_context_list),
       'constructor': constructor,
-      'dictionaries': [{'name': dictionary.name} for dictionary in definitions.dictionaries.values()],
+      'dictionaries': [{'name': dictionary.name}
+                       for dictionary in definitions.dictionaries.values()],
       'enumerations': enumeration_context_list,
       'has_static_member': has_static_member,
       'need_instance_template': need_instance_template,

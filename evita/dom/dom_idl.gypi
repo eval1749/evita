@@ -16,6 +16,7 @@
       'forms/CheckboxControl.idl',
       'forms/FormControl.idl',
       'forms/FormWindow.idl',
+      'forms/LabelControl.idl',
       'forms/RadioButtonControl.idl',
       'os/AbstractFile.idl',
       'os/File.idl',
@@ -68,6 +69,8 @@
       '<(glue_dir)/EventTarget.h',
       '<(glue_dir)/File.cc',
       '<(glue_dir)/File.h',
+      '<(glue_dir)/LabelControl.cc',
+      '<(glue_dir)/LabelControl.h',
       '<(glue_dir)/Mode.cc',
       '<(glue_dir)/Mode.h',
       '<(glue_dir)/MoveFileOptions.cc',
@@ -98,6 +101,7 @@
       '<(js_externs_dir)/FormControl_externs.js',
       '<(js_externs_dir)/FormWindow_externs.js',
       '<(js_externs_dir)/FormWindowInit_externs.js',
+      '<(js_externs_dir)/LabelControl_externs.js',
       '<(js_externs_dir)/Mode_externs.js',
       '<(js_externs_dir)/Point_externs.js',
       '<(js_externs_dir)/Rect_externs.js',
@@ -131,7 +135,6 @@
       'encodings/text_encoder_externs.js',
 
       'forms/form_externs.js',
-      'forms/label_control_externs.js',
       'forms/text_field_control_externs.js',
       'forms/text_field_selection_externs.js',
 

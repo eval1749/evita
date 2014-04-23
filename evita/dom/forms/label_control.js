@@ -13,6 +13,6 @@ global.LabelControl.prototype.canFocus = function() {
  * @param {!Event} event
  * Default event handler.
  */
-LabelControl.handleEvent = function(event) {
+global.LabelControl.handleEvent = function(event) {
   FormControl.handleEvent(event);
 };

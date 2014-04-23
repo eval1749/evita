@@ -9,17 +9,22 @@
 
 namespace dom {
 
+namespace bindings {
+class LabelControlClass;
+}
+
 class LabelControl
     : public v8_glue::Scriptable<LabelControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(LabelControl);
+  friend class bindings::LabelControlClass;
 
   private: base::string16 text_;
 
-  public: LabelControl(const base::string16& text);
+  private: LabelControl(const base::string16& text);
   public: virtual ~LabelControl();
 
   public: base::string16 text() const { return text_; }
-  public: void set_text(const base::string16& text);
+  private: void set_text(const base::string16& text);
 
   DISALLOW_COPY_AND_ASSIGN(LabelControl);
 };

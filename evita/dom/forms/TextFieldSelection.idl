@@ -1,0 +1,31 @@
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+interface TextFieldSelection {
+  attribute long anchorOffset;
+  readonly attribute boolean collapsed;
+  readonly attribute TextFieldControl control;
+  [ImplementedAs=JavaScript]
+  readonly attribute long end;
+
+  attribute long focusOffset;
+
+  [ImplementedAs=JavaScript]
+  readonly attribute long start;
+
+  [ImplementedAs=JavaScript]
+  attribute DOMString text;
+
+  [ImplementedAs=JavaScript]
+  void collapseTo(long offset);
+
+  [ImplementedAs=JavaScript]
+  void extendTo(long offset);
+
+  [ImplementedAs=JavaScript]
+  void setRange(long start, long end);
+
+  [ImplementedAs=JavaScript]
+  void setRange(long start, long end, boolean startIsActive);
+};

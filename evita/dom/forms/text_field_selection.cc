@@ -6,55 +6,14 @@
 
 #include <algorithm>
 
-#include "base/strings/stringprintf.h"
 #include "evita/dom/forms/text_field_control.h"
-#include "evita/dom/script_host.h"
 
 namespace dom {
-namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// TextFieldSelectionClass
-//
-class TextFieldSelectionClass : public v8_glue::WrapperInfo {
-  public: TextFieldSelectionClass(const char* name)
-      : v8_glue::WrapperInfo(name) {
-  }
-  public: ~TextFieldSelectionClass() = default;
-
-  private: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate, 
-        &TextFieldSelectionClass::NewTextFieldSelection);
-  }
-
-  private: static TextFieldSelection* NewTextFieldSelection() {
-    ScriptHost::instance()->ThrowError("Can't create TextFieldSelection.");
-    return nullptr;
-  }
-
-  // v8_glue::WrapperClassInfo
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("collapsed", &TextFieldSelection::collapsed)
-        .SetProperty("control", &TextFieldSelection::control)
-        .SetProperty("anchorOffset", &TextFieldSelection::anchor_offset,
-            &TextFieldSelection::set_anchor_offset)
-        .SetProperty("focusOffset", &TextFieldSelection::focus_offset,
-            &TextFieldSelection::set_focus_offset);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(TextFieldSelectionClass);
-};
-}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // TextFieldSelection
 //
-DEFINE_SCRIPTABLE_OBJECT(TextFieldSelection, TextFieldSelectionClass);
-
 TextFieldSelection::TextFieldSelection(TextFieldControl* control)
     : ScriptableBase(), control_(control), anchor_offset_(0),
       focus_offset_(0) {

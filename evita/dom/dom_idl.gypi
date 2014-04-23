@@ -18,6 +18,7 @@
       'forms/FormWindow.idl',
       'forms/LabelControl.idl',
       'forms/RadioButtonControl.idl',
+      'forms/TextFieldSelection.idl',
       'os/AbstractFile.idl',
       'os/File.idl',
       'text/modes/Mode.idl',
@@ -81,6 +82,8 @@
       '<(glue_dir)/Selection.h',
       '<(glue_dir)/TableSelection.cc',
       '<(glue_dir)/TableSelection.h',
+      '<(glue_dir)/TextFieldSelection.cc',
+      '<(glue_dir)/TextFieldSelection.h',
       '<(glue_dir)/ViewEventTarget.cc',
       '<(glue_dir)/ViewEventTarget.h',
       '<(glue_dir)/Window.cc',
@@ -108,6 +111,7 @@
       '<(js_externs_dir)/RadioButtonControl_externs.js',
       '<(js_externs_dir)/Selection_externs.js',
       '<(js_externs_dir)/TableSelection_externs.js',
+      '<(js_externs_dir)/TextFieldSelection_externs.js',
       '<(js_externs_dir)/ViewEventTarget_externs.js',
       '<(js_externs_dir)/Window_externs.js',
     ], # generated_js_externs_files
@@ -136,7 +140,6 @@
 
       'forms/form_externs.js',
       'forms/text_field_control_externs.js',
-      'forms/text_field_selection_externs.js',
 
       'file_path_externs.js',
       'js_console_externs.js',

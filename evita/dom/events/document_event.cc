@@ -3,8 +3,9 @@
 
 #include "evita/dom/events/document_event.h"
 
+#include "evita/bindings/DocumentEventInit.h"
+#include "evita/bindings/EventInit.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/events/document_event_init.h"
 #include "evita/dom/windows/window.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/wrapper_info.h"
@@ -42,6 +43,14 @@ class DocumentEventClass :
 
   DISALLOW_COPY_AND_ASSIGN(DocumentEventClass);
 };
+
+EventInit ToEventInit(const DocumentEventInit& init_dict) {
+  EventInit event_init;
+  event_init.set_bubbles(init_dict.bubbles());
+  event_init.set_cancelable(init_dict.cancelable());
+  return event_init;
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -52,7 +61,7 @@ DEFINE_SCRIPTABLE_OBJECT(DocumentEvent, DocumentEventClass);
 
 DocumentEvent::DocumentEvent(const base::string16& type,
                      const DocumentEventInit& init_dict)
-    : ScriptableBase(type, init_dict), view_(init_dict.view()) {
+    : ScriptableBase(type, ToEventInit(init_dict)), view_(init_dict.view()) {
 }
 
 DocumentEvent::~DocumentEvent() {

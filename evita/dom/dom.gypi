@@ -115,7 +115,6 @@
         'encodings/text_encoder.cc',
 
         'events/document_event.cc',
-        'events/document_event_init.cc',
         'events/event.cc',
         'events/event_target.cc',
         'events/focus_event.cc',

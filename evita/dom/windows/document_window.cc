@@ -4,8 +4,8 @@
 #include "evita/dom/windows/document_window.h"
 
 #include "base/bind.h"
+#include "evita/bindings/DocumentEventInit.h"
 #include "evita/dom/events/document_event.h"
-#include "evita/dom/events/document_event_init.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/windows/selection.h"
@@ -32,14 +32,18 @@ Document* DocumentWindow::document() const {
 // Window
 void DocumentWindow::DidDestroyWindow() {
   Window::DidDestroyWindow();
+  DocumentEventInit init;
+  init.set_view(this);
   selection_->document()->ScheduleDispatchEvent(
-      new DocumentEvent(L"detach", DocumentEventInit(this)));
+      new DocumentEvent(L"detach", init));
 }
 
 void DocumentWindow::DidRealizeWindow() {
   Window::DidRealizeWindow();
+  DocumentEventInit init;
+  init.set_view(this);
   selection_->document()->ScheduleDispatchEvent(
-      new DocumentEvent(L"attach", DocumentEventInit(this)));
+      new DocumentEvent(L"attach", init));
 }
 
 }  // namespace dom

@@ -3,8 +3,8 @@
 
 #include "evita/dom/events/ui_event.h"
 
+#include "evita/bindings/UiEventInit.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/events/ui_event_init.h"
 #include "evita/dom/windows/window.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/wrapper_info.h"

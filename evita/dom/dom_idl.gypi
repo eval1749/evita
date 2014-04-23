@@ -40,6 +40,7 @@
       'encodings/TextDecoderOptions.idl',
       'encodings/TextEncodeOptions.idl',
       'events/EventInit.idl',
+      'events/UiEventInit.idl',
       'forms/FormWindowInit.idl',
       'os/MoveFileOptions.idl',
     ], # dictionary_idl_files
@@ -105,6 +106,8 @@
       '<(glue_dir)/TextFieldControl.h',
       '<(glue_dir)/TextFieldSelection.cc',
       '<(glue_dir)/TextFieldSelection.h',
+      '<(glue_dir)/UiEventInit.cc',
+      '<(glue_dir)/UiEventInit.h',
       '<(glue_dir)/ViewEventTarget.cc',
       '<(glue_dir)/ViewEventTarget.h',
       '<(glue_dir)/Window.cc',
@@ -121,6 +124,7 @@
       '<(js_externs_dir)/DocumentWindow_externs.js',
       '<(js_externs_dir)/Editor_externs.js',
       '<(js_externs_dir)/EditorWindow_externs.js',
+      '<(js_externs_dir)/Event_externs.js',
       '<(js_externs_dir)/File_externs.js',
       '<(js_externs_dir)/Form_externs.js',
       '<(js_externs_dir)/FormControl_externs.js',
@@ -133,6 +137,7 @@
       '<(js_externs_dir)/RadioButtonControl_externs.js',
       '<(js_externs_dir)/Selection_externs.js',
       '<(js_externs_dir)/TableSelection_externs.js',
+
       '<(js_externs_dir)/TextDecodeOptions_externs.js',
       '<(js_externs_dir)/TextDecoder_externs.js',
       '<(js_externs_dir)/TextDecoderOptions_externs.js',
@@ -140,6 +145,7 @@
       '<(js_externs_dir)/TextEncodeOptions_externs.js',
       '<(js_externs_dir)/TextFieldControl_externs.js',
       '<(js_externs_dir)/TextFieldSelection_externs.js',
+      '<(js_externs_dir)/UiEvent_externs.js',
       '<(js_externs_dir)/ViewEventTarget_externs.js',
       '<(js_externs_dir)/Window_externs.js',
     ], # generated_js_externs_files

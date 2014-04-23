@@ -3,13 +3,13 @@
 
 #include "evita/dom/events/view_event_handler_impl.h"
 
+#include "evita/bindings/UiEventInit.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/focus_event_init.h"
 #include "evita/dom/events/form_event.h"
 #include "evita/dom/events/keyboard_event.h"
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
-#include "evita/dom/events/ui_event_init.h"
 #include "evita/dom/events/view_event_target.h"
 #include "evita/dom/events/view_event_target_set.h"
 #include "evita/dom/events/wheel_event.h"

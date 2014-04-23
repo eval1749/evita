@@ -3,7 +3,7 @@
 #if !defined(INCLUDE_evita_dom_events_focus_event_init_h)
 #define INCLUDE_evita_dom_events_focus_event_init_h
 
-#include "evita/dom/events/ui_event_init.h"
+#include "evita/bindings/UiEventInit.h"
 
 #include "evita/gc/member.h"
 

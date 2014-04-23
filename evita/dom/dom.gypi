@@ -129,7 +129,6 @@
         'events/wheel_event.cc',
         'events/wheel_event_init.cc',
         'events/ui_event.cc',
-        'events/ui_event_init.cc',
         'events/view_event_handler_impl.cc',
         'events/view_event_target.cc',
         'events/view_event_target_set.cc',

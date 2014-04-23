@@ -5,46 +5,14 @@
 #include "evita/dom/encodings/text_decoder.h"
 
 #include "base/strings/stringprintf.h"
+#include "evita/bindings/TextDecodeOptions.h"
+#include "evita/bindings/TextDecoderOptions.h"
 #include "evita/dom/script_host.h"
 #include "evita/text/encodings/decoder.h"
 #include "evita/text/encodings/encodings.h"
 #include "evita/v8_glue/array_buffer_view.h"
 #include "evita/v8_glue/converter.h"
 #include "v8_strings.h"
-
-namespace gin {
-
-template<>
-struct Converter<dom::TextDecoderOptions> {
-  static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> value,
-                     dom::TextDecoderOptions* out) {
-    if (!value->IsObject())
-      return false;
-    auto const options = value->ToObject();
-    auto const fatal = options->Get(dom::v8Strings::fatal.Get(isolate));
-    if (!ConvertFromV8(isolate, fatal, &out->fatal))
-      return false;
-    return true;
-  }
-};
-
-template<>
-struct Converter<dom::TextDecodeOptions> {
-  static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> value,
-                     dom::TextDecodeOptions* out) {
-    if (!value->IsObject())
-      return false;
-    auto const options = value->ToObject();
-    auto const stream = options->Get(dom::v8Strings::stream.Get(isolate));
-    if (!ConvertFromV8(isolate, stream, &out->stream))
-      return false;
-    return true;
-  }
-};
-
-}  // namespace gin
 
 namespace dom {
 
@@ -71,7 +39,7 @@ class TextDecoderClass : public v8_glue::WrapperInfo {
       v8_glue::Optional<base::string16> opt_label,
       v8_glue::Optional<TextDecoderOptions> opt_options) {
     TextDecoderOptions options;
-    options.fatal = false;
+    options.set_fatal(false);
     if (!opt_label.is_supplied) {
       return new TextDecoder(encodings::Encodings::instance()->
                                 GetDecoder(L"utf-8"), options);
@@ -107,7 +75,7 @@ DEFINE_SCRIPTABLE_OBJECT(TextDecoder, TextDecoderClass);
 
 TextDecoder::TextDecoder(encodings::Decoder* decoder,
                          const TextDecoderOptions& options)
-    : decoder_(decoder), fatal_(options.fatal) {
+    : decoder_(decoder), fatal_(options.fatal()) {
 }
 
 TextDecoder::~TextDecoder() {
@@ -127,7 +95,7 @@ base::string16 TextDecoder::Decode(
     return result.right;
   }
   auto const input = opt_input.value;
-  auto const is_stream = opt_options.is_supplied && opt_options.value.stream;
+  auto const is_stream = opt_options.is_supplied && opt_options.value.stream();
   auto const result = decoder_->Decode(
       reinterpret_cast<const uint8_t*>(input->bytes()), input->num_bytes(),
       is_stream);

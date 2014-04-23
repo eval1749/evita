@@ -22,13 +22,8 @@ class ArrayBufferView;
 
 namespace dom {
 
-struct TextDecoderOptions {
-  bool fatal;
-};
-
-struct TextDecodeOptions {
-  bool stream;
-};
+class TextDecodeOptions;
+class TextDecoderOptions;
 
 class TextDecoder : public v8_glue::Scriptable<TextDecoder> {
   DECLARE_SCRIPTABLE_OBJECT(TextDecoder);

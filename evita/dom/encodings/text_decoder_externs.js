@@ -3,20 +3,6 @@
 // found in the LICENSE file.
 
 /**
- * @typedef {{
- *  fatal: boolean
- * }}
- */
-var TextDecoderOptions;
-
-/**
- * @typedef {{
- *  stream: boolean
- * }}
- */
-var TextDecodeOptions;
-
-/**
  * @constructor
  * @param {string=} opt_label
  * @param {!TextDecoderOptions=} opt_options

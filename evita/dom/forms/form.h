@@ -20,8 +20,13 @@ namespace dom {
 class FormControl;
 class FormObserver;
 
+namespace bindings {
+class FormClass;
+}
+
 class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(Form);
+  friend class bindings::FormClass;
 
   private: std::vector<FormControl*> controls_;
   private: gc::Member<FormControl> focus_control_;
@@ -30,21 +35,21 @@ class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
   private: base::string16 title_;
   private: float width_;
 
-  public: Form();
+  private: Form();
   public: virtual ~Form();
 
   public: std::vector<FormControl*> controls() const;
   public: FormControl* focus_control() const { return focus_control_.get(); }
-  public: void set_focus_control(
+  private: void set_focus_control(
       v8_glue::Nullable<FormControl> new_focus_control);
   public: float height() const { return height_; }
-  public: void set_height(float new_height);
+  private: void set_height(float new_height);
   public: const base::string16& title() const { return title_; }
-  public: void set_title(const base::string16& new_title);
+  private: void set_title(const base::string16& new_title);
   public: float width() const { return width_; }
-  public: void set_width(float new_width);
+  private: void set_width(float new_width);
 
-  public: void AddFormControl(FormControl* control);
+  private: void AddFormControl(FormControl* control);
   public: void AddObserver(FormObserver* observer) const;
   public: void DidChangeFormControl(FormControl* control);
   public: void DidSetFocusToFormControl(FormControl* control);

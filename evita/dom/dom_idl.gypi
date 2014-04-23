@@ -14,6 +14,7 @@
       'events/ViewEventTarget.idl',
       'forms/ButtonControl.idl',
       'forms/CheckboxControl.idl',
+      'forms/Form.idl',
       'forms/FormControl.idl',
       'forms/FormWindow.idl',
       'forms/LabelControl.idl',
@@ -61,6 +62,8 @@
       '<(glue_dir)/Event.h',
       '<(glue_dir)/EventInit.cc',
       '<(glue_dir)/EventInit.h',
+      '<(glue_dir)/Form.cc',
+      '<(glue_dir)/Form.h',
       '<(glue_dir)/FormControl.cc',
       '<(glue_dir)/FormControl.h',
       '<(glue_dir)/FormWindow.cc',
@@ -104,6 +107,7 @@
       '<(js_externs_dir)/Editor_externs.js',
       '<(js_externs_dir)/EditorWindow_externs.js',
       '<(js_externs_dir)/File_externs.js',
+      '<(js_externs_dir)/Form_externs.js',
       '<(js_externs_dir)/FormControl_externs.js',
       '<(js_externs_dir)/FormWindow_externs.js',
       '<(js_externs_dir)/FormWindowInit_externs.js',
@@ -141,8 +145,6 @@
 
       'encodings/text_decoder_externs.js',
       'encodings/text_encoder_externs.js',
-
-      'forms/form_externs.js',
 
       'file_path_externs.js',
       'js_console_externs.js',

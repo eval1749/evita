@@ -1,0 +1,19 @@
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[Constructor()]
+interface Form : ViewEventTarget {
+  readonly attribute FormControl[] controls;
+  attribute FormControl? focusControl;
+  attribute float height;
+  attribute float width;
+
+  // Title of form dialog box window. If title is empty, form is displayed in
+  // popup window.
+  attribute DOMString title;
+
+  // Add |new_control| to form.
+  [ImplementedAs=AddFormControl]
+  void add(FormControl new_control);
+};

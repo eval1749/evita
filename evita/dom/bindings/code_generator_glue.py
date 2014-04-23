@@ -33,7 +33,6 @@ global_interfaces_info = {}
 # TODO(yosi) Once all interfaces have IDL file. We should get rid of
 # |KNOWN_INTERFACE_NAMES|.
 KNOWN_INTERFACE_NAMES = {
-    'Form': 'evita/dom/forms/form.h',
     'Document': 'evita/dom/text/document.h',
 }
 

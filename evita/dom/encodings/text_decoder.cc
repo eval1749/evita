@@ -11,68 +11,13 @@
 #include "evita/text/encodings/decoder.h"
 #include "evita/text/encodings/encodings.h"
 #include "evita/v8_glue/array_buffer_view.h"
-#include "evita/v8_glue/converter.h"
-#include "v8_strings.h"
 
 namespace dom {
-
-namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// TextDecoderClass
-//
-class TextDecoderClass : public v8_glue::WrapperInfo {
-  private: typedef v8_glue::WrapperInfo BaseClass;
-
-  public: TextDecoderClass(const char* name)
-      : BaseClass(name) {
-  }
-  public: ~TextDecoderClass() = default;
-
-  private: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate,
-        &TextDecoderClass::NewTextDecoder);
-  }
-
-  private: static TextDecoder* NewTextDecoder(
-      v8_glue::Optional<base::string16> opt_label,
-      v8_glue::Optional<TextDecoderOptions> opt_options) {
-    TextDecoderOptions options;
-    options.set_fatal(false);
-    if (!opt_label.is_supplied) {
-      return new TextDecoder(encodings::Encodings::instance()->
-                                GetDecoder(L"utf-8"), options);
-    }
-    auto const decoder = encodings::Encodings::instance()->GetDecoder(
-        opt_label.value);
-    if (!decoder) {
-      ScriptHost::instance()->ThrowError(base::StringPrintf(
-          "No such encoding '%ls'", opt_label.value.c_str()));
-      return nullptr;
-    }
-    if (opt_options.is_supplied)
-      return new TextDecoder(decoder, opt_options.value);
-    return new TextDecoder(decoder, options);
-  }
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("encoding", &TextDecoder::encoding)
-        .SetMethod("decode", &TextDecoder::Decode);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(TextDecoderClass);
-};
-}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // TextDecoder
 //
-DEFINE_SCRIPTABLE_OBJECT(TextDecoder, TextDecoderClass);
-
 TextDecoder::TextDecoder(encodings::Decoder* decoder,
                          const TextDecoderOptions& options)
     : decoder_(decoder), fatal_(options.fatal()) {
@@ -85,23 +30,50 @@ const base::string16& TextDecoder::encoding() const {
   return decoder_->name();
 }
 
-base::string16 TextDecoder::Decode(
-    v8_glue::Optional<gin::ArrayBufferView*> opt_input,
-    v8_glue::Optional<TextDecodeOptions> opt_options) {
-  if (!opt_input.is_supplied) {
-    auto const result = decoder_->Decode(nullptr, 0, false);
-    if (!result.left && fatal_)
-      ScriptHost::instance()->ThrowError("EncodingError");
-    return result.right;
-  }
-  auto const input = opt_input.value;
-  auto const is_stream = opt_options.is_supplied && opt_options.value.stream();
+base::string16 TextDecoder::Decode(const gin::ArrayBufferView& input,
+                                   const TextDecodeOptions& options) {
   auto const result = decoder_->Decode(
-      reinterpret_cast<const uint8_t*>(input->bytes()), input->num_bytes(),
-      is_stream);
+      reinterpret_cast<const uint8_t*>(input.bytes()), input.num_bytes(),
+      options.stream());
   if (!result.left && fatal_)
     ScriptHost::instance()->ThrowError("EncodingError");
   return result.right;
+}
+
+base::string16 TextDecoder::Decode(const gin::ArrayBufferView& input) {
+  auto const result = decoder_->Decode(
+      reinterpret_cast<const uint8_t*>(input.bytes()), input.num_bytes(),
+      false);
+  if (!result.left && fatal_)
+    ScriptHost::instance()->ThrowError("EncodingError");
+  return result.right;
+}
+
+base::string16 TextDecoder::Decode() {
+  auto const result = decoder_->Decode(nullptr, 0, false);
+  if (!result.left && fatal_)
+    ScriptHost::instance()->ThrowError("EncodingError");
+  return result.right;
+}
+
+// static
+TextDecoder* TextDecoder::NewTextDecoder(const base::string16& label,
+                                         const TextDecoderOptions & options) {
+  auto const decoder = encodings::Encodings::instance()->GetDecoder(label);
+  if (!decoder) {
+    ScriptHost::instance()->ThrowError(base::StringPrintf(
+        "No such encoding '%ls'", label.c_str()));
+    return nullptr;
+  }
+  return new TextDecoder(decoder, options);
+}
+
+TextDecoder* TextDecoder::NewTextDecoder(const base::string16& label) {
+  return NewTextDecoder(label, TextDecoderOptions());
+}
+
+TextDecoder* TextDecoder::NewTextDecoder() {
+  return NewTextDecoder(L"utf-8");
 }
 
 }  // namespace dom

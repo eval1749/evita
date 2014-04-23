@@ -10,7 +10,6 @@
 #include <memory.h>
 
 #include "base/strings/string16.h"
-#include "evita/v8_glue/optional.h"
 
 namespace encodings {
 class Decoder;
@@ -25,21 +24,32 @@ namespace dom {
 class TextDecodeOptions;
 class TextDecoderOptions;
 
+namespace bindings {
+class TextDecoderClass;
+}
+
 class TextDecoder : public v8_glue::Scriptable<TextDecoder> {
   DECLARE_SCRIPTABLE_OBJECT(TextDecoder);
+  friend class bindings::TextDecoderClass;
 
   private: std::unique_ptr<encodings::Decoder> decoder_;
   private: bool fatal_;
 
-  public: TextDecoder(encodings::Decoder* decoder,
+  private: TextDecoder(encodings::Decoder* decoder,
                       const TextDecoderOptions& options);
   public: virtual ~TextDecoder();
 
-  public: const base::string16& encoding() const;
+  private: const base::string16& encoding() const;
 
-  public: base::string16 Decode(
-      v8_glue::Optional<gin::ArrayBufferView*> opt_input,
-      v8_glue::Optional<TextDecodeOptions> options);
+  private: base::string16 Decode();
+  private: base::string16 Decode(const gin::ArrayBufferView& input);
+  private: base::string16 Decode(const gin::ArrayBufferView& input,
+                                 const TextDecodeOptions& options);
+
+  public: static TextDecoder* NewTextDecoder();
+  public: static TextDecoder* NewTextDecoder(const base::string16& encoding);
+  public: static TextDecoder* NewTextDecoder(const base::string16& encoding,
+                                             const TextDecoderOptions& options);
 
   DISALLOW_COPY_AND_ASSIGN(TextDecoder);
 };

@@ -39,8 +39,8 @@ Dictionary::HandleResult {{name}}::HandleKeyValue(
   }
 {%  endif %}
 {% endfor %}
-{% if parent %}
-  return {{parent}}::HandleKeyValue(key, value);
+{% if parent_name %}
+  return {{parent_name}}::HandleKeyValue(key, value);
 {% else %}
   return HandleResult::NotFound;
 {% endif %}

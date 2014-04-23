@@ -574,6 +574,8 @@ def parameter_type_string(parameter, is_optional):
 # Common
 #
 def cpp_value(value):
+    if value == 'NULL':
+        return 'nullptr';
     if isinstance(value, bool):
         return str(value).lower()
     return str(value)

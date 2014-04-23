@@ -35,7 +35,7 @@ namespace bindings {
  #  }
  #  return new Example(param1, param2);
  #}
-{% macro emit_constructor_signature(signature, indent='  ') %}
+{% macro emit_constructor_signature(ctor_name, signature, indent='  ') %}
 {% if signature.parameters %}
 {%-  for parameter in signature.parameters %}
 {{indent}}{{parameter.from_v8_type}} param{{ loop.index0 }};
@@ -46,7 +46,7 @@ namespace bindings {
 {{indent}}}
 {% endfor %}
 {% endif %}
-{{indent}}return new {{interface_name}}({{ emit_arguments(signature) }});
+{{indent}}return {{ctor_name}}({{ emit_arguments(signature) }});
 {%- endmacro %}
 {#######################################################################
  #
@@ -90,6 +90,7 @@ void {{class_name}}::{{method.cpp_name}}(
  #}
 {%- macro emit_method_signature(signature, indent='  ') %}
 {% if signature.parameters %}
+
 {%-  for parameter in signature.parameters %}
 {{indent}}{{parameter.from_v8_type}} param{{ loop.index0 }};
 {{indent}}auto const arg{{ loop.index0 }} = info[{{ loop.index0 }}];
@@ -157,12 +158,12 @@ void {{class_name}}::Construct{{interface_name}}(
     ThrowArityError(isolate, {{constructor.min_arity}}, {{constructor.min_arity}}, info.Length());
     return nullptr;
   }
-{{ emit_constructor_signature(constructor.signature) }}
+{{ emit_constructor_signature(constructor.cpp_name, constructor.signature) }}
 {% elif constructor.dispatch == 'arity' %}
   switch (info.Length()) {
 {%  for signature in constructor.signatures %}
     case {{ signature.parameters | count }}: {
-{{    emit_constructor_signature(signature, indent='      ') }}
+{{    emit_constructor_signature(constructor.cpp_name, signature, indent='      ') }}
     }
 {%  endfor %}
   }

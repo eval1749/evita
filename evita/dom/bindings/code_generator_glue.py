@@ -335,13 +335,18 @@ def constant_context(constant):
 # We consolidate overloaded signatures into one function signature.
 # See URL.idl for example.
 def constructor_context_list(interface):
-    if not interface.constructors  and not interface.custom_constructors:
-        return []
-    return map(constructor_context, interface.constructors)
+    return [constructor_context(interface, constructor, is_custom=False)
+            for constructor in interface.constructors] + \
+           [constructor_context(interface, constructor, is_custom=True)
+            for constructor in interface.custom_constructors]
 
-def constructor_context(constructor):
+def constructor_context(interface, constructor, is_custom=False):
     parameters = map(function_parameter, constructor.arguments)
-    return {'parameters': parameters}
+    name = interface.name
+    return {
+        'cpp_name': name + '::New' + name if is_custom else 'new ' + name,
+        'parameters': parameters
+    }
 
 
 def enumeration_context(enumeration):
@@ -394,6 +399,7 @@ def function_dispatcher(signatures):
             'dispatch': 'single',
             'max_arity': max_arity,
             'min_arity': min_arity,
+            'cpp_name': signatures[0]['cpp_name'],
             'signature': signatures[0]
         }
     if len(set([len(signature['parameters']) for signature in signatures])) == \
@@ -402,6 +408,7 @@ def function_dispatcher(signatures):
             'dispatch': 'arity',
             'max_arity': max_arity,
             'min_arity': min_arity,
+            'cpp_name': signatures[0]['cpp_name'],
             'signatures': signatures
         }
     raise Exception('NYI: type based dispatch')

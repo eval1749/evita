@@ -19,7 +19,7 @@ sys.path.insert(1, idl_compiler_path)
 from idl_compiler import idl_filename_to_interface_name, parse_options, \
                          IdlCompiler
 from code_generator_js import CodeGeneratorJS
-
+from utilities import write_file
 
 class IdlCompilerJS(IdlCompiler):
     # It seems pylint doesn't recognize what IdlCompiler defined.
@@ -30,11 +30,14 @@ class IdlCompilerJS(IdlCompiler):
                                               self.output_directory)
 
     def compile_file(self, idl_filename):
-        interface_name = idl_filename_to_interface_name(idl_filename)
-        externs_filename = os.path.join(self.output_directory,
-                                        '%s_externs.js' % interface_name)
-        print 'compile_file', idl_filename, interface_name, externs_filename
-        self.compile_and_write(idl_filename, (externs_filename,))
+        definitions = self.reader.read_idl_definitions(idl_filename)
+
+        files = self.code_generator.generate_code(definitions)
+
+        for file_data in files:
+            file_name = os.path.join(self.output_directory,
+                                     file_data['file_name'])
+            write_file(file_data['contents'], file_name, self.only_if_changed)
 
 
 def main():

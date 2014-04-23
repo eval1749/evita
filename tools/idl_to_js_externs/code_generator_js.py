@@ -56,13 +56,29 @@ class CodeGeneratorJS(object):
         self.interfaces_info = interfaces_info
         self.jinja_env = initialize_jinja_env(cache_dir)
 
-    def generate_code(self, definitions, interface_name):
-        """Returns JS externs as text."""
+    def generate_code(self, definitions):
+        if len(definitions.interfaces) == 0:
+          return [self.generate_code_for_dictionary(dictionary)
+                  for dictionary in definitions.dictionaries.values()]
+        else:
+          return [self.generate_code_for_interface(interface, definitions)
+                  for interface in definitions.interfaces.values()]
 
-        externs_template = self.jinja_env.get_template('interface.js')
-        template_context = generate_template_context(definitions, interface_name)
-        externs_text = externs_template.render(template_context)
-        return (externs_text,)
+    def generate_code_for_dictionary(self, dictionary):
+        template = self.jinja_env.get_template('dictionary.js')
+        context = dictionary_context(dictionary)
+        return {
+            'contents': template.render(context),
+            'file_name': '%s_externs.js' % dictionary.name,
+        }
+
+    def generate_code_for_interface(self, interface, definitions):
+        template = self.jinja_env.get_template('interface.js')
+        context = interface_context(interface, definitions)
+        return {
+            'contents': template.render(context),
+            'file_name': '%s_externs.js' % interface.name,
+        }
 
 
 def attribute_context(attribute):
@@ -105,9 +121,9 @@ def constructor_context_list(interface):
 
 def dictionary_context(dictionary):
     return {
-        'members': [dictionary_member_context(member)
+        'dictionary_members': [dictionary_member_context(member)
                     for member in dictionary.members],
-        'name': dictionary.name,
+        'dictionary_name': dictionary.name,
     }
 
 
@@ -152,7 +168,19 @@ def function_context(functions):
     }
 
 
-def generate_template_context(definitions, interface_name):
+def initialize_jinja_env(cache_dir):
+    jinja_env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(templates_dir),
+        # Bytecode cache is not concurrency-safe unless pre-cached:
+        # if pre-cached this is read-only, but writing creates a race condition.
+        bytecode_cache=jinja2.FileSystemBytecodeCache(cache_dir),
+        keep_trailing_newline=True,  # newline-terminate generated files
+        lstrip_blocks=True,  # so can indent control flow tags
+        trim_blocks=True)
+    return jinja_env
+
+
+def interface_context(interface, definitions):
         callback_context_list = [
             callback_context(callback_function)
             for callback_function in definitions.callback_functions.values()]
@@ -164,12 +192,6 @@ def generate_template_context(definitions, interface_name):
         enumeration_context_list = [
             enumeration_context(enumeration)
             for enumeration in definitions.enumerations.values()]
-
-        # Interface members
-        try:
-            interface = definitions.interfaces[interface_name]
-        except KeyError:
-            raise Exception('%s not in IDL definitions' % interface_name)
 
         if 'JsNamespace' in interface.extended_attributes:
           namespace = interface.extended_attributes['JsNamespace'] + '.'
@@ -196,22 +218,10 @@ def generate_template_context(definitions, interface_name):
           'dictionaries': sort_context_list(dictionary_context_list),
           'enumerations': sort_context_list(enumeration_context_list),
           'interfaces': interface_context_list(interface),
-          'interface_name': namespace + interface_name,
+          'interface_name': namespace + interface.name,
           'methods': sort_context_list(method_context_list),
           'namespace': namespace,
         }
-
-
-def initialize_jinja_env(cache_dir):
-    jinja_env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(templates_dir),
-        # Bytecode cache is not concurrency-safe unless pre-cached:
-        # if pre-cached this is read-only, but writing creates a race condition.
-        bytecode_cache=jinja2.FileSystemBytecodeCache(cache_dir),
-        keep_trailing_newline=True,  # newline-terminate generated files
-        lstrip_blocks=True,  # so can indent control flow tags
-        trim_blocks=True)
-    return jinja_env
 
 
 def interface_context_list(interface):

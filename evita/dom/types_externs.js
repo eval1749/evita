@@ -19,22 +19,6 @@ var global = {};
  */
 var Document = function(name, opt_mode) {};
 
-/**
- * TODO(yosi) Until Closure compiler supports optional entries in @struct,
- * we use |Object|.
- * @typedef {Object}
- *   bubbles: boolean
- *   cancelable: boolean
- */
-var EventInit;
-
-/**
- * @constructor
- * @param {string} type
- * @param {EventInit=} opt_init_dict
- */
-var Event = function(type, opt_init_dict) {};
-
 /** @typedef {!Function|!Object} Object which has |handleEvent(event)| */
 var EventListener;
 
@@ -49,6 +33,7 @@ var JsConsole = function() {};
  * Note: Since, Closure compiler doesn't support recursive type, we use
  * |!Map| instead of |!Keymap|.
  * @typedef {Map.<number, !Function|!Map>}
+
 
  */
 var Keymap;

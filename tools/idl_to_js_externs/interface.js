@@ -87,11 +87,11 @@ var {{enumeration.name}} = {
  * TODO(yosi) Once Closure compiler supports dictionary type, we generate it.
  * Until then, we use |Object|.
  * @typedef {Object}
-{%  for member in dictionary.members %}
+{%  for member in dictionary.dictionary_members %}
  *    {{member.name}}: {{member.type}}{% if not loop.last %},{% endif %}{{''}}
 {%  endfor %}
  */
-var {{dictionary.name}};
+var {{dictionary.dictionary_name}};
 
 {% endfor %}
 {% for constructor in constructors %}

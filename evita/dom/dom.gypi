@@ -119,7 +119,6 @@
         'events/event.cc',
         'events/event_target.cc',
         'events/focus_event.cc',
-        'events/focus_event_init.cc',
         'events/form_event.cc',
         'events/form_event_init.cc',
         'events/keyboard_event.cc',
@@ -207,6 +206,7 @@
         '../gc/collector.cc',
         '../gc/visitable.cc',
       ], # sources
+
     }, # dom
     {
       'target_name': 'check_jslib',

@@ -3,8 +3,8 @@
 
 #include "evita/dom/abstract_dom_test.h"
 
+#include "evita/bindings/FocusEventInit.h"
 #include "evita/dom/events/focus_event.h"
-#include "evita/dom/events/focus_event_init.h"
 
 namespace {
 

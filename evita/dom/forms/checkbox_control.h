@@ -9,17 +9,22 @@
 
 namespace dom {
 
+namespace bindings {
+class CheckboxControlClass;
+}
+
 class CheckboxControl
     : public v8_glue::Scriptable<CheckboxControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(CheckboxControl);
+  friend class bindings::CheckboxControlClass;
 
   private: bool checked_;
 
-  public: CheckboxControl();
+  private: CheckboxControl();
   public: virtual ~CheckboxControl();
 
-  public: const bool checked() const { return checked_; }
-  public: void set_checked(bool checked);
+  public: bool checked() const { return checked_; }
+  private: void set_checked(bool checked);
 
   // EventTarget
   private: virtual bool DispatchEvent(Event* event) override;

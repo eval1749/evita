@@ -5,54 +5,13 @@
 #include "evita/dom/forms/checkbox_control.h"
 
 #include "evita/dom/events/form_event.h"
-#include "evita/dom/forms/form_control.h"
-#include "evita/dom/script_host.h"
-#include "evita/dom/view_delegate.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
-
-namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// CheckboxControlClass
-//
-class CheckboxControlClass :
-    public v8_glue::DerivedWrapperInfo<CheckboxControl, FormControl> {
-
-  public: CheckboxControlClass(const char* name)
-      : BaseClass(name) {
-  }
-  public: ~CheckboxControlClass() = default;
-
-  private: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate,
-        &CheckboxControlClass::NewCheckboxControl);
-  }
-
-  private: static CheckboxControl* NewCheckboxControl() {
-    return new CheckboxControl();
-  }
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("checked", &CheckboxControl::checked,
-            &CheckboxControl::set_checked);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(CheckboxControlClass);
-};
-}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // CheckboxControl
 //
-DEFINE_SCRIPTABLE_OBJECT(CheckboxControl, CheckboxControlClass);
-
 CheckboxControl::CheckboxControl() : checked_(false) {
 }
 

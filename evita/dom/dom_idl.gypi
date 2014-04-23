@@ -13,6 +13,7 @@
       'events/EventTarget.idl',
       'events/ViewEventTarget.idl',
       'forms/ButtonControl.idl',
+      'forms/CheckboxControl.idl',
       'forms/FormControl.idl',
       'forms/FormWindow.idl',
       'os/AbstractFile.idl',
@@ -38,6 +39,8 @@
       '<(glue_dir)/AbstractFile.h',
       '<(glue_dir)/ButtonControl.cc',
       '<(glue_dir)/ButtonControl.h',
+      '<(glue_dir)/CheckboxControl.cc',
+      '<(glue_dir)/CheckboxControl.h',
       '<(glue_dir)/DataTransfer.cc',
       '<(glue_dir)/DataTransfer.h',
       '<(glue_dir)/DataTransferItem.cc',
@@ -81,6 +84,7 @@
     'generated_js_externs_files': [
       '<(js_externs_dir)/AbstractFile_externs.js',
       '<(js_externs_dir)/ButtonControl_externs.js',
+      '<(js_externs_dir)/CheckboxControl_externs.js',
       '<(js_externs_dir)/DataTransfer_externs.js',
       '<(js_externs_dir)/DataTransferItem_externs.js',
       '<(js_externs_dir)/DataTransferItemList_externs.js',
@@ -122,7 +126,6 @@
       'encodings/text_decoder_externs.js',
       'encodings/text_encoder_externs.js',
 
-      'forms/checkbox_control_externs.js',
       'forms/form_externs.js',
       'forms/label_control_externs.js',
       'forms/radio_button_control_externs.js',
@@ -294,6 +297,7 @@
         ],
         'outputs': [
           '<(idl_work_dir)/InterfacesInfo.pickle',
+
         ],
         'action': [
           'python',

@@ -10,6 +10,7 @@
       'clipboard/DataTransferItemList.idl',
       'Editor.idl',
       'encodings/TextDecoder.idl',
+      'encodings/TextEncoder.idl',
       'events/Event.idl',
       'events/EventTarget.idl',
       'events/ViewEventTarget.idl',
@@ -96,6 +97,8 @@
       '<(glue_dir)/TextDecoder.cc',
       '<(glue_dir)/TextDecoderOptions.h',
       '<(glue_dir)/TextDecoderOptions.cc',
+      '<(glue_dir)/TextEncoder.h',
+      '<(glue_dir)/TextEncoder.cc',
       '<(glue_dir)/TextEncodeOptions.h',
       '<(glue_dir)/TextEncodeOptions.cc',
       '<(glue_dir)/TextFieldControl.cc',
@@ -133,6 +136,7 @@
       '<(js_externs_dir)/TextDecodeOptions_externs.js',
       '<(js_externs_dir)/TextDecoder_externs.js',
       '<(js_externs_dir)/TextDecoderOptions_externs.js',
+      '<(js_externs_dir)/TextEncoder_externs.js',
       '<(js_externs_dir)/TextEncodeOptions_externs.js',
       '<(js_externs_dir)/TextFieldControl_externs.js',
       '<(js_externs_dir)/TextFieldSelection_externs.js',
@@ -158,8 +162,6 @@
       'events/wheel_event_externs.js',
       'events/ui_event_externs.js',
       'events/window_event_externs.js',
-
-      'encodings/text_encoder_externs.js',
 
       'file_path_externs.js',
       'js_console_externs.js',

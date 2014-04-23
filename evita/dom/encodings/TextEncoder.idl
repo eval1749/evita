@@ -1,0 +1,15 @@
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+  CustomConstructor(),
+  CustomConstructor(DOMString label)
+]
+interface TextEncoder {
+  readonly attribute DOMString encoding;
+
+  Uint8Array encode();
+  Uint8Array encode(DOMString input);
+  Uint8Array encode(DOMString input, TextEncodeOptions options);
+};

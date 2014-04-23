@@ -10,36 +10,38 @@
 #include <memory.h>
 
 #include "base/strings/string16.h"
-#include "evita/v8_glue/optional.h"
 
 namespace encodings {
 class Encoder;
 }
 
-namespace gin {
-class ArrayBufferView;
-}
-
 namespace dom {
+
+namespace bindings {
+class TextEncoderClass;
+}
 
 class TextEncodeOptions;
 
 class TextEncoder : public v8_glue::Scriptable<TextEncoder> {
   DECLARE_SCRIPTABLE_OBJECT(TextEncoder);
+  friend class bindings::TextEncoderClass;
 
   private: std::unique_ptr<encodings::Encoder> encoder_;
 
-  public: TextEncoder(encodings::Encoder* encoder);
+  private: TextEncoder(encodings::Encoder* encoder);
   public: virtual ~TextEncoder();
 
-  public: const base::string16& encoding() const;
+  private: const base::string16& encoding() const;
 
-  public: std::vector<uint8_t> Encode(
-      v8_glue::Optional<base::string16> opt_input,
-      v8_glue::Optional<TextEncodeOptions> options);
+  private: std::vector<uint8_t> Encode(
+      const base::string16& input,
+      const TextEncodeOptions& options);
+  private: std::vector<uint8_t> Encode(const base::string16& input);
+  private: std::vector<uint8_t> Encode();
 
-  public: static TextEncoder* NewTextEncoder(
-      v8_glue::Optional<base::string16> opt_label);
+  private: static TextEncoder* NewTextEncoder(const base::string16& label);
+  private: static TextEncoder* NewTextEncoder();
 
   DISALLOW_COPY_AND_ASSIGN(TextEncoder);
 };

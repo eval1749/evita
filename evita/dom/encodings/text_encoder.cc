@@ -9,48 +9,13 @@
 #include "evita/dom/script_host.h"
 #include "evita/text/encodings/encoder.h"
 #include "evita/text/encodings/encodings.h"
-#include "evita/v8_glue/array_buffer_view.h"
-#include "evita/v8_glue/converter.h"
-#include "v8_strings.h"
 
 namespace dom {
-
-namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// TextEncoderClass
-//
-class TextEncoderClass : public v8_glue::WrapperInfo {
-  private: typedef v8_glue::WrapperInfo BaseClass;
-
-  public: TextEncoderClass(const char* name)
-      : BaseClass(name) {
-  }
-  public: ~TextEncoderClass() = default;
-
-  private: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate,
-        &TextEncoder::NewTextEncoder);
-  }
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("encoding", &TextEncoder::encoding)
-        .SetMethod("encode", &TextEncoder::Encode);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(TextEncoderClass);
-};
-}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // TextEncoder
 //
-DEFINE_SCRIPTABLE_OBJECT(TextEncoder, TextEncoderClass);
-
 TextEncoder::TextEncoder(encodings::Encoder* encoder) : encoder_(encoder) {
 }
 
@@ -74,28 +39,31 @@ static std::vector<uint8_t> DoEncode(encodings::Encoder* encoder,
 }
 
 std::vector<uint8_t> TextEncoder::Encode(
-    v8_glue::Optional<base::string16> opt_input,
-    v8_glue::Optional<TextEncodeOptions> opt_options) {
-  if (!opt_input.is_supplied)
-    return DoEncode(encoder_.get(), base::string16(), false);
-  auto const is_stream = opt_options.is_supplied && opt_options.value.stream();
-  return DoEncode(encoder_.get(), opt_input.value, is_stream);
+    const base::string16& input,
+    const TextEncodeOptions& options) {
+  return DoEncode(encoder_.get(), input, options.stream());
 }
 
-TextEncoder* TextEncoder::NewTextEncoder(
-      v8_glue::Optional<base::string16> opt_label) {
-  if (!opt_label.is_supplied) {
-    return new TextEncoder(encodings::Encodings::instance()->
-                                GetEncoder(L"utf-8"));
-  }
-  auto const encoder = encodings::Encodings::instance()->GetEncoder(
-      opt_label.value);
+std::vector<uint8_t> TextEncoder::Encode(const base::string16& input) {
+  return DoEncode(encoder_.get(), input, false);
+}
+
+std::vector<uint8_t> TextEncoder::Encode() {
+  return DoEncode(encoder_.get(), base::string16(), false);
+}
+
+TextEncoder* TextEncoder::NewTextEncoder(const base::string16& label) {
+  auto const encoder = encodings::Encodings::instance()->GetEncoder(label);
   if (!encoder) {
     ScriptHost::instance()->ThrowError(base::StringPrintf(
-        "No such encoding '%ls'", opt_label.value.c_str()));
+        "No such encoding '%ls'", label.c_str()));
     return nullptr;
   }
   return new TextEncoder(encoder);
+}
+
+TextEncoder* TextEncoder::NewTextEncoder() {
+  return NewTextEncoder(L"utf-8");
 }
 
 }  // namespace dom

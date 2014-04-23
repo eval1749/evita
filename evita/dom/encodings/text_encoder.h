@@ -22,13 +22,7 @@ class ArrayBufferView;
 
 namespace dom {
 
-struct TextEncoderOptions {
-  bool fatal;
-};
-
-struct TextEncodeOptions {
-  bool stream;
-};
+class TextEncodeOptions;
 
 class TextEncoder : public v8_glue::Scriptable<TextEncoder> {
   DECLARE_SCRIPTABLE_OBJECT(TextEncoder);

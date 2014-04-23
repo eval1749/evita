@@ -5,31 +5,13 @@
 #include "evita/dom/encodings/text_encoder.h"
 
 #include "base/strings/stringprintf.h"
+#include "evita/bindings/TextEncodeOptions.h"
 #include "evita/dom/script_host.h"
 #include "evita/text/encodings/encoder.h"
 #include "evita/text/encodings/encodings.h"
 #include "evita/v8_glue/array_buffer_view.h"
 #include "evita/v8_glue/converter.h"
 #include "v8_strings.h"
-
-namespace gin {
-
-template<>
-struct Converter<dom::TextEncodeOptions> {
-  static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> value,
-                     dom::TextEncodeOptions* out) {
-    if (!value->IsObject())
-      return false;
-    auto const options = value->ToObject();
-    auto const stream = options->Get(dom::v8Strings::stream.Get(isolate));
-    if (!ConvertFromV8(isolate, stream, &out->stream))
-      return false;
-    return true;
-  }
-};
-
-}  // namespace gin
 
 namespace dom {
 
@@ -96,7 +78,7 @@ std::vector<uint8_t> TextEncoder::Encode(
     v8_glue::Optional<TextEncodeOptions> opt_options) {
   if (!opt_input.is_supplied)
     return DoEncode(encoder_.get(), base::string16(), false);
-  auto const is_stream = opt_options.is_supplied && opt_options.value.stream;
+  auto const is_stream = opt_options.is_supplied && opt_options.value.stream();
   return DoEncode(encoder_.get(), opt_input.value, is_stream);
 }
 

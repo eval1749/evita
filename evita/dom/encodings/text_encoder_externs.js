@@ -3,13 +3,6 @@
 // found in the LICENSE file.
 
 /**
- * @typedef {{
- *  stream: boolean
- * }}
- */
-var TextEncodeOptions;
-
-/**
  * @constructor
  * @param {string=} opt_label
  */

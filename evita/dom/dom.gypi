@@ -119,7 +119,6 @@
         'events/event_target.cc',
         'events/focus_event.cc',
         'events/form_event.cc',
-        'events/form_event_init.cc',
         'events/keyboard_event.cc',
         'events/keyboard_event_init.cc',
         'events/mouse_event.cc',

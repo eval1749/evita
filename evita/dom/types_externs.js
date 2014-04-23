@@ -124,16 +124,6 @@ var UiEvent = function(type, opt_init_dict) {};
 var FocusEvent = function(type, opt_init_dict) {};
 
 /**
- * TODO(yosi) Until Closure compiler supports optional entries in @struct,
- * we use |Object|.
- * @typedef {Object}
- *   bubbles: boolean
- *   cancelable: boolean
- *   data: string
- */
-var FormEventInit;
-
-/**
  * @constructor
  * @extends {Event}
  * @param {string} type

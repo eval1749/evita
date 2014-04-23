@@ -3,8 +3,9 @@
 
 #include "evita/dom/events/form_event.h"
 
+#include "evita/bindings/EventInit.h"
+#include "evita/bindings/FormEventInit.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/events/form_event_init.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/windows/window.h"
 #include "evita/v8_glue/optional.h"
@@ -53,6 +54,19 @@ base::string16 ConvertEventType(const domapi::FormEvent& event) {
   return base::string16();
 }
 
+EventInit ToEventInit(const FormEventInit& init_dict) {
+  EventInit event_init;
+  event_init.set_bubbles(init_dict.bubbles());
+  event_init.set_cancelable(init_dict.cancelable());
+  return event_init;
+}
+
+FormEventInit ToFormEventInit(const domapi::FormEvent& event) {
+  FormEventInit init;
+  init.set_data(event.data);
+  return init;
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -62,12 +76,12 @@ base::string16 ConvertEventType(const domapi::FormEvent& event) {
 DEFINE_SCRIPTABLE_OBJECT(FormEvent, FormEventClass);
 
 FormEvent::FormEvent(const domapi::FormEvent& event)
-    : FormEvent(ConvertEventType(event), FormEventInit(event)) {
+    : FormEvent(ConvertEventType(event), ToFormEventInit(event)) {
 }
 
 FormEvent::FormEvent(const base::string16& type,
                      const FormEventInit& init_dict)
-    : ScriptableBase(type, init_dict), data_(init_dict.data()) {
+    : ScriptableBase(type, ToEventInit(init_dict)), data_(init_dict.data()) {
 }
 
 FormEvent::~FormEvent() {

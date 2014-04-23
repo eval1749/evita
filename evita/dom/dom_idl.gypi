@@ -18,6 +18,7 @@
       'forms/FormWindow.idl',
       'forms/LabelControl.idl',
       'forms/RadioButtonControl.idl',
+      'forms/TextFieldControl.idl',
       'forms/TextFieldSelection.idl',
       'os/AbstractFile.idl',
       'os/File.idl',
@@ -82,6 +83,8 @@
       '<(glue_dir)/Selection.h',
       '<(glue_dir)/TableSelection.cc',
       '<(glue_dir)/TableSelection.h',
+      '<(glue_dir)/TextFieldControl.cc',
+      '<(glue_dir)/TextFieldControl.h',
       '<(glue_dir)/TextFieldSelection.cc',
       '<(glue_dir)/TextFieldSelection.h',
       '<(glue_dir)/ViewEventTarget.cc',
@@ -111,6 +114,7 @@
       '<(js_externs_dir)/RadioButtonControl_externs.js',
       '<(js_externs_dir)/Selection_externs.js',
       '<(js_externs_dir)/TableSelection_externs.js',
+      '<(js_externs_dir)/TextFieldControl_externs.js',
       '<(js_externs_dir)/TextFieldSelection_externs.js',
       '<(js_externs_dir)/ViewEventTarget_externs.js',
       '<(js_externs_dir)/Window_externs.js',
@@ -139,7 +143,6 @@
       'encodings/text_encoder_externs.js',
 
       'forms/form_externs.js',
-      'forms/text_field_control_externs.js',
 
       'file_path_externs.js',
       'js_console_externs.js',

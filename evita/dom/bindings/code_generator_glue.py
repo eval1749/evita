@@ -35,7 +35,6 @@ global_interfaces_info = {}
 KNOWN_INTERFACE_NAMES = {
     'Form': 'evita/dom/forms/form.h',
     'Document': 'evita/dom/text/document.h',
-    'TextFieldControl': 'evita/dom/forms/text_field_control.h',
 }
 
 global_known_interface_names = set()

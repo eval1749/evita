@@ -11,14 +11,19 @@ namespace dom {
 
 class TextFieldSelection;
 
+namespace bindings {
+class TextFieldControlClass;
+}
+
 class TextFieldControl
     : public v8_glue::Scriptable<TextFieldControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(TextFieldControl);
+  friend class bindings::TextFieldControlClass;
 
   private: base::string16 value_;
   private: gc::Member<TextFieldSelection> selection_;
 
-  public: TextFieldControl();
+  private: TextFieldControl();
   public: virtual ~TextFieldControl();
 
   public: size_t length() const { return value_.length(); }
@@ -27,7 +32,7 @@ class TextFieldControl
 
   // API: Set |value| property to the first line, excluding newline character,
   // of |new_value|.
-  public: void set_value(const base::string16& new_value);
+  private: void set_value(const base::string16& new_value);
 
   public: void DidChangeSelection();
 

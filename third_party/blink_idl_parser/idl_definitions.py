@@ -208,12 +208,14 @@ class IdlDictionary(object):
         self.name = node.GetName()
         self.members = []
         for child in node.GetChildren():
-            if child.IsA('Inherit'):
+            child_class = child.GetClass()
+            if child_class == 'Inherit':
                 self.parent = child.GetName()
-            elif child.IsA('Key'):
+            elif child_class == 'Key':
                 self.members.append(IdlDictionaryMember(child))
             else:
-                print 'WARNING IdlDictionaryMember: Unexpected child node', child
+                raise ValueError('Unrecognized node class: %s' % child_class)
+
 
 class IdlDictionaryMember(object):
     def __init__(self, node):
@@ -222,14 +224,15 @@ class IdlDictionaryMember(object):
         self.idl_type = None
         self.name = node.GetName()
         for child in node.GetChildren():
-            if child.IsA('Type'):
+            child_class = child.GetClass()
+            if child_class == 'Type':
                 self.idl_type = type_node_to_type(child)
-            elif child.IsA('Default'):
+            elif child_class == 'Default':
                 self.default_value = child.GetProperty('VALUE')
             elif child_class == 'ExtAttributes':
                 self.extended_attributes = ext_attributes_node_to_extended_attributes(child)
             else:
-                print 'WARNING IdlDictionaryMember: Unexpected child node', child
+                raise ValueError('Unrecognized node class: %s' % child_class)
 
 
 ################################################################################

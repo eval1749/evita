@@ -9,17 +9,22 @@
 
 namespace dom {
 
+namespace bindings {
+class RadioButtonControlClass;
+}
+
 class RadioButtonControl
     : public v8_glue::Scriptable<RadioButtonControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(RadioButtonControl);
+  friend class bindings::RadioButtonControlClass;
 
   private: bool checked_;
 
-  public: explicit RadioButtonControl(const base::string16& name);
+  private: explicit RadioButtonControl(const base::string16& name);
   public: virtual ~RadioButtonControl();
 
-  public: const bool checked() const { return checked_; }
-  public: void set_checked(bool checked);
+  public: bool checked() const { return checked_; }
+  private: void set_checked(bool new_checked);
 
   // EventTarget
   private: virtual bool DispatchEvent(Event* event) override;

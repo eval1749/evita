@@ -6,7 +6,7 @@
  * @param {!Event} event
  * Default event handler for RadioButtonControl.
  */
-RadioButtonControl.handleEvent = function(event) {
+global.RadioButtonControl.handleEvent = function(event) {
   var radio_button = /** @type {!RadioButtonControl} */(event.target);
   switch (event.type) {
     case Event.Names.CLICK:

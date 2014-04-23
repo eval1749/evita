@@ -7,47 +7,10 @@
 #include "evita/dom/events/form_event.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
-#include "evita/dom/script_host.h"
-#include "evita/dom/view_delegate.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
 
 namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// RadioButtonControlClass
-//
-class RadioButtonControlClass :
-    public v8_glue::DerivedWrapperInfo<RadioButtonControl, FormControl> {
-
-  public: RadioButtonControlClass(const char* name)
-      : BaseClass(name) {
-  }
-  public: ~RadioButtonControlClass() = default;
-
-  private: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate,
-        &RadioButtonControlClass::NewRadioButtonControl);
-  }
-
-  private: static RadioButtonControl* NewRadioButtonControl(
-      const base::string16& name) {
-    return new RadioButtonControl(name);
-  }
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("checked", &RadioButtonControl::checked,
-            &RadioButtonControl::set_checked);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(RadioButtonControlClass);
-};
-
 RadioButtonControl* FindCheckedRadioButton(const Form* form,
                                            const base::string16& name) {
   if (!form)
@@ -61,15 +24,12 @@ RadioButtonControl* FindCheckedRadioButton(const Form* form,
   }
   return nullptr;
 }
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // RadioButtonControl
 //
-DEFINE_SCRIPTABLE_OBJECT(RadioButtonControl, RadioButtonControlClass);
-
 RadioButtonControl::RadioButtonControl(const base::string16& name)
     : ScriptableBase(name), checked_(false) {
 }

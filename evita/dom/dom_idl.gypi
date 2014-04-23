@@ -131,7 +131,7 @@
       '<(js_externs_dir)/Selection_externs.js',
       '<(js_externs_dir)/TableSelection_externs.js',
       '<(js_externs_dir)/TextDecodeOptions_externs.js',
-      #'<(js_externs_dir)/TextDecoder_externs.js',
+      '<(js_externs_dir)/TextDecoder_externs.js',
       '<(js_externs_dir)/TextDecoderOptions_externs.js',
       '<(js_externs_dir)/TextEncodeOptions_externs.js',
       '<(js_externs_dir)/TextFieldControl_externs.js',
@@ -159,7 +159,6 @@
       'events/ui_event_externs.js',
       'events/window_event_externs.js',
 
-      'encodings/text_decoder_externs.js',
       'encodings/text_encoder_externs.js',
 
       'file_path_externs.js',

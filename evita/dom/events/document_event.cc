@@ -44,13 +44,6 @@ class DocumentEventClass :
   DISALLOW_COPY_AND_ASSIGN(DocumentEventClass);
 };
 
-EventInit ToEventInit(const DocumentEventInit& init_dict) {
-  EventInit event_init;
-  event_init.set_bubbles(init_dict.bubbles());
-  event_init.set_cancelable(init_dict.cancelable());
-  return event_init;
-}
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -61,7 +54,7 @@ DEFINE_SCRIPTABLE_OBJECT(DocumentEvent, DocumentEventClass);
 
 DocumentEvent::DocumentEvent(const base::string16& type,
                      const DocumentEventInit& init_dict)
-    : ScriptableBase(type, ToEventInit(init_dict)), view_(init_dict.view()) {
+    : ScriptableBase(type, init_dict), view_(init_dict.view()) {
 }
 
 DocumentEvent::~DocumentEvent() {

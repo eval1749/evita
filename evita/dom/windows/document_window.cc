@@ -33,6 +33,7 @@ Document* DocumentWindow::document() const {
 void DocumentWindow::DidDestroyWindow() {
   Window::DidDestroyWindow();
   DocumentEventInit init;
+  init.set_bubbles(true);
   init.set_view(this);
   selection_->document()->ScheduleDispatchEvent(
       new DocumentEvent(L"detach", init));
@@ -41,6 +42,7 @@ void DocumentWindow::DidDestroyWindow() {
 void DocumentWindow::DidRealizeWindow() {
   Window::DidRealizeWindow();
   DocumentEventInit init;
+  init.set_bubbles(true);
   init.set_view(this);
   selection_->document()->ScheduleDispatchEvent(
       new DocumentEvent(L"attach", init));

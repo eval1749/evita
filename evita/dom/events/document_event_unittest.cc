@@ -26,7 +26,7 @@ TEST_F(DocumentEventTest, ctor) {
       "var event = new DocumentEvent('foo', {"
       "  view: window,"
       "});");
-  EXPECT_SCRIPT_TRUE("event.bubbles");
+  EXPECT_SCRIPT_FALSE("event.bubbles") << "default |bubbles| is false";
   EXPECT_SCRIPT_FALSE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.currentTarget == null");
   EXPECT_SCRIPT_FALSE("event.defaultPrevented");

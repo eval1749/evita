@@ -107,14 +107,6 @@ var TextWindow = function(range) {};
  */
 var TextSelection = function() {};
 
-/**
- * @constructor
- * @extends {Event}
- * @param {string} type
- * @param {WindowEventInit=} opt_init_dict
- */
-var WindowEvent = function(type, opt_init_dict) {};
-
 //////////////////////////////////////////////////////////////////////
 //
 // Timer

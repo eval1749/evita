@@ -21,6 +21,7 @@
       'events/MouseEvent.idl',
       'events/ViewEventTarget.idl',
       'events/WheelEvent.idl',
+      'events/WindowEvent.idl',
       'forms/ButtonControl.idl',
       'forms/CheckboxControl.idl',
       'forms/Form.idl',
@@ -161,6 +162,8 @@
       '<(glue_dir)/WheelEventInit.h',
       '<(glue_dir)/Window.cc',
       '<(glue_dir)/Window.h',
+      '<(glue_dir)/WindowEvent.cc',
+      '<(glue_dir)/WindowEvent.h',
       '<(glue_dir)/WindowEventInit.cc',
       '<(glue_dir)/WindowEventInit.h',
     ],
@@ -212,8 +215,9 @@
       '<(js_externs_dir)/UiEvent_externs.js',
       '<(js_externs_dir)/UiEventInit_externs.js',
       '<(js_externs_dir)/ViewEventTarget_externs.js',
-      '<(js_externs_dir)/Window_externs.js',
       '<(js_externs_dir)/WheelEventInit_externs.js',
+      '<(js_externs_dir)/Window_externs.js',
+      '<(js_externs_dir)/WindowEvent_externs.js',
       '<(js_externs_dir)/WindowEventInit_externs.js',
     ], # generated_js_externs_files
 
@@ -227,7 +231,6 @@
       'commands/spell_checker_externs.js',
       'console_externs.js',
       'text/document_externs.js',
-      'events/window_event_externs.js',
 
       'file_path_externs.js',
       'js_console_externs.js',

@@ -4,23 +4,28 @@
 #define INCLUDE_evita_dom_events_window_event_h
 
 #include "evita/dom/events/event.h"
-#include "evita/v8_glue/nullable.h"
 
 namespace dom {
 
 class Window;
 class WindowEventInit;
 
+namespace bindings {
+class WindowEventClass;
+}
+
 class WindowEvent : public v8_glue::Scriptable<WindowEvent, Event> {
   DECLARE_SCRIPTABLE_OBJECT(WindowEvent)
+  friend class bindings::WindowEventClass;
 
   private: gc::Member<Window> source_window_;
 
   public: WindowEvent(const base::string16& type,
                       const WindowEventInit& init_dict);
+  private: explicit WindowEvent(const base::string16& type);
   public: virtual ~WindowEvent();
 
-  public: Window* source_window() const {
+  private: Window* source_window() const {
     return source_window_.get();
   }
 

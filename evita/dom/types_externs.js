@@ -184,16 +184,6 @@ var MouseEventInit;
 var MouseEvent = function(type, opt_init_dict) {};
 
 /**
- * TODO(yosi) Until Closure compiler supports optional entries in @struct,
- * we use |Object|.
- * @typedef {Object}
- *   bubbles: boolean
- *   cancelable: boolean
- *   souceWindow: !Window
- */
-var WindowEventInit;
-
-/**
  * @constructor
  * @extends {Event}
  * @param {string} type

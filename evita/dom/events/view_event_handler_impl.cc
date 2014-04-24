@@ -5,6 +5,7 @@
 
 #include "evita/bindings/FocusEventInit.h"
 #include "evita/bindings/UiEventInit.h"
+#include "evita/bindings/WindowEventInit.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/form_event.h"
 #include "evita/dom/events/keyboard_event.h"
@@ -14,7 +15,6 @@
 #include "evita/dom/events/view_event_target_set.h"
 #include "evita/dom/events/wheel_event.h"
 #include "evita/dom/events/window_event.h"
-#include "evita/dom/events/window_event_init.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/lock.h"
@@ -144,6 +144,7 @@ void ViewEventHandlerImpl::DidDestroyWidget(WindowId window_id) {
 
 void ViewEventHandlerImpl::DidDropWidget(WindowId source_id,
                                          WindowId target_id) {
+
   auto const source_window = FromWindowId(source_id);
   if (!source_window)
     return;

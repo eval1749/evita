@@ -3,14 +3,16 @@
 
 #include "evita/dom/events/window_event.h"
 
+#include "evita/bindings/EventInit.h"
+#include "evita/bindings/WindowEventInit.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/events/window_event_init.h"
 #include "evita/dom/windows/window.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
 namespace {
+
 //////////////////////////////////////////////////////////////////////
 //
 // WindowEventClass
@@ -42,6 +44,14 @@ class WindowEventClass :
 
   DISALLOW_COPY_AND_ASSIGN(WindowEventClass);
 };
+
+EventInit ToEventInit(const WindowEventInit& init_dict) {
+  EventInit event_init;
+  event_init.set_bubbles(init_dict.bubbles());
+  event_init.set_cancelable(init_dict.cancelable());
+  return event_init;
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -52,7 +62,7 @@ DEFINE_SCRIPTABLE_OBJECT(WindowEvent, WindowEventClass);
 
 WindowEvent::WindowEvent(const base::string16& type,
                          const WindowEventInit& init_dict)
-  : ScriptableBase(type, init_dict),
+  : ScriptableBase(type, ToEventInit(init_dict)),
     source_window_(init_dict.source_window()) {
 }
 

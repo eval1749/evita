@@ -44,6 +44,7 @@
       'events/FocusEventInit.idl',
       'events/FormEventInit.idl',
       'events/UiEventInit.idl',
+      'events/WindowEventInit.idl',
       'forms/FormWindowInit.idl',
       'os/MoveFileOptions.idl',
     ], # dictionary_idl_files
@@ -121,6 +122,8 @@
       '<(glue_dir)/ViewEventTarget.h',
       '<(glue_dir)/Window.cc',
       '<(glue_dir)/Window.h',
+      '<(glue_dir)/WindowEventInit.cc',
+      '<(glue_dir)/WindowEventInit.h',
     ],
 
     'generated_js_externs_files': [
@@ -160,6 +163,7 @@
       '<(js_externs_dir)/UiEventInit_externs.js',
       '<(js_externs_dir)/ViewEventTarget_externs.js',
       '<(js_externs_dir)/Window_externs.js',
+      '<(js_externs_dir)/WindowEventInit_externs.js',
     ], # generated_js_externs_files
 
     'static_js_externs_files': [
@@ -244,6 +248,7 @@
           '<(DEPTH)/tools/idl_to_js_externs/aggregate_js_externs.py',
           '<(js_externs_dir)/evita_js_externs.js',
           '<(DEPTH)/tools/idl_to_js_externs/header.js',
+
 
           '<(js_externs_dir)', '<(idl_file_list)',
           '<(DEPTH)/evita', '<(static_file_list)',

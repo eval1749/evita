@@ -130,7 +130,6 @@
         'events/view_event_target.cc',
         'events/view_event_target_set.cc',
         'events/window_event.cc',
-        'events/window_event_init.cc',
 
         'forms/button_control.cc',
         'forms/checkbox_control.cc',

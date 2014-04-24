@@ -10,23 +10,3 @@ Editor.RegExp.Match = (function() {
   }
   return Match;
 })();
-
-/**
- * @param {*} target
- * @return {?Array.<string>}
- */
-global.Editor.RegExp.prototype.exec = function(target) {
-  if (target instanceof Range) {
-    var range = /** @type {!Range} */(target);
-    return range.match(this);
-  }
-
-  var string = target.toString();
-  var matches = this.exec_(string);
-  if (!matches)
-    return null;
-  var strings = [];
-  return matches.map(function(match) {
-    return string.substring(match.start, match.end);
-  });
-};

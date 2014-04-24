@@ -25,15 +25,3 @@ Editor.RegExp.prototype.source;
 
 /** @type {boolean} */
 Editor.RegExp.prototype.sticky;
-
-/**
- * @param {string|!Document|!Range} target
- * @return {?Array.<string>}
- */
-Editor.RegExp.prototype.exec = function(target) {};
-
-/**
- * @param {string|!Document|!Range} target
- * @return {?Array.<!Editor.RegExp.Match>}
- */
-Editor.RegExp.prototype.exec_ = function(target) {};

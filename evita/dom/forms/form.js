@@ -76,7 +76,7 @@
       //  * button: dispatch "click" event.
       //  * checkbox: toggle |checked| property.
       //  * radio button: toggle |checked| property.
-      var accessKey = String.fromCharCode(event.code & 0x1FF);
+      var accessKey = String.fromCharCode(event.keyCode & 0x1FF);
       var control = form.controls.find(function(control) {
         return control.accessKey == accessKey;
       });
@@ -94,7 +94,7 @@
       return;
     }
     // Move focus to next/previous of current focus control.
-    switch (event.code & 0x1FF) {
+    switch (event.keyCode & 0x1FF) {
       case 0x109: // TAB
         if (event.shiftKey)
           moveFocusToPrevious(form);
@@ -131,6 +131,7 @@
       case Event.Names.FOCUS:
         if (!this.focusControl)
           moveFocusToNext(this);
+
         break;
       case Event.Names.KEYDOWN:
         if (!event.defaultPrevented)

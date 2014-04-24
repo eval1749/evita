@@ -115,7 +115,7 @@ Object.defineProperties(TextFieldControl.prototype, {
   function handleKeyDown(control, event) {
     if (event.type != Event.Names.KEYDOWN)
       return;
-    var command = keymap.get(event.code);
+    var command = keymap.get(event.keyCode);
     if (!command)
       return;
     command(control.selection);
@@ -267,6 +267,7 @@ Object.defineProperties(TextFieldControl.prototype, {
       case Event.Names.BLUR:
         dispatchChangeEventIfNeeded(this);
         break;
+
       case Event.Names.DBLCLICK:
         handleDblClick(this, /** @type{!MouseEvent} */(event));
         break;

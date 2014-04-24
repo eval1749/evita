@@ -38,7 +38,7 @@ class KeyboardEventClass :
     builder
         .SetProperty("altKey", &KeyboardEvent::alt_key)
         .SetProperty("ctrlKey", &KeyboardEvent::ctrl_key)
-        .SetProperty("code", &KeyboardEvent::key_code)
+        .SetProperty("keyCode", &KeyboardEvent::key_code)
         .SetProperty("location", &KeyboardEvent::location)
         .SetProperty("metaKey", &KeyboardEvent::meta_key)
         .SetProperty("repeat", &KeyboardEvent::repeat)

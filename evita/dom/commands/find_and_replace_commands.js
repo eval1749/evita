@@ -289,7 +289,7 @@
    * @param {!KeyboardEvent} event
    */
   function handleGlobalKeyDown(event) {
-    switch (event.code) {
+    switch (event.keyCode) {
       case 0x10D: // Enter
         doFindNext(/** @type {!FormWindow} */(form_window));
         break;
@@ -304,7 +304,7 @@
    */
   function handleTextFieldKeyDown(event) {
     var text_field = /** @type {!TextFieldControl} */(event.target);
-    switch (event.code) {
+    switch (event.keyCode) {
       case 0x126: // arrowUp
         text_field.logger.retrieve(-1);
         event.stopPropagation();

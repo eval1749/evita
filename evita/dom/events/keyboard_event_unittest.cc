@@ -55,7 +55,7 @@ TEST_F(KeyboardEventTest, ctor_event) {
   EXPECT_SCRIPT_FALSE("event.metaKey");
   EXPECT_SCRIPT_FALSE("event.shiftKey");
 
-  EXPECT_SCRIPT_EQ("66", "event.code");
+  EXPECT_SCRIPT_EQ("66", "event.keyCode");
   EXPECT_SCRIPT_EQ("0", "event.location");
   EXPECT_SCRIPT_FALSE("event.repeat");
 }
@@ -91,7 +91,7 @@ TEST_F(KeyboardEventTest, ctor_init_dict) {
   EXPECT_SCRIPT_TRUE("event.metaKey");
   EXPECT_SCRIPT_TRUE("event.shiftKey");
 
-  EXPECT_SCRIPT_EQ("66", "event.code");
+  EXPECT_SCRIPT_EQ("66", "event.keyCode");
 
   EXPECT_SCRIPT_EQ("3", "event.location");
   EXPECT_SCRIPT_TRUE("event.repeat");

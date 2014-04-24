@@ -33,7 +33,7 @@ global.commander =
     handleEvent: {
       /** @type {function(!KeyboardEvent): boolean} */
       value: function(event) {
-        var code = event.code;
+        var code = event.keyCode;
         if (code == 0x2D) {
           if (this.sign_ || this.numDigits_)
             return false;
@@ -112,7 +112,7 @@ global.commander =
       return keymap && keymap instanceof Map ? keymap.get(code) : undefined;
     }
 
-    var code = event.code;
+    var code = event.keyCode;
     var present = get(keymap, code);
     if (present)
       return present;
@@ -150,7 +150,7 @@ global.commander =
 
   /** @param {!KeyboardEvent} event */
   function handleEventAsCommand(event) {
-    key_codes.push(event.code);
+    key_codes.push(event.keyCode);
     var binding = getKeyBinding(event);
     if (!binding) {
       handleUnboundKeySequence(event);
@@ -189,7 +189,7 @@ global.commander =
 
   /** @param {!KeyboardEvent} event */
   function handleEventAsQuote(event) {
-    var char_code = event.code;
+    var char_code = event.keyCode;
     if (char_code >= 0x240 && char_code <= 0x25F)
       char_code &= 0x1F;
     if (char_code >= 0x80) {

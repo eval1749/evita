@@ -45,13 +45,6 @@ class WindowEventClass :
   DISALLOW_COPY_AND_ASSIGN(WindowEventClass);
 };
 
-EventInit ToEventInit(const WindowEventInit& init_dict) {
-  EventInit event_init;
-  event_init.set_bubbles(init_dict.bubbles());
-  event_init.set_cancelable(init_dict.cancelable());
-  return event_init;
-}
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -62,7 +55,7 @@ DEFINE_SCRIPTABLE_OBJECT(WindowEvent, WindowEventClass);
 
 WindowEvent::WindowEvent(const base::string16& type,
                          const WindowEventInit& init_dict)
-  : ScriptableBase(type, ToEventInit(init_dict)),
+  : ScriptableBase(type, init_dict),
     source_window_(init_dict.source_window()) {
 }
 

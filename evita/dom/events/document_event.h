@@ -6,23 +6,29 @@
 #include "base/strings/string16.h"
 #include "evita/dom/events/event.h"
 #include "evita/gc/member.h"
-#include "evita/v8_glue/nullable.h"
 
 namespace dom {
 
 class DocumentEventInit;
-class Window;
+class DocumentWindow;
+
+namespace bindings {
+class DocumentEventClass;
+}
 
 class DocumentEvent : public v8_glue::Scriptable<DocumentEvent, Event> {
   DECLARE_SCRIPTABLE_OBJECT(DocumentEvent)
+  friend class bindings::DocumentEventClass;
 
-  private: gc::Member<Window> view_;
+  private: gc::Member<DocumentWindow> view_;
 
+  // Expose for|DocumentWindow|.
   public: DocumentEvent(const base::string16& type,
-                    const DocumentEventInit& init_dict);
+                        const DocumentEventInit& init_dict);
+  private: DocumentEvent(const base::string16& type);
   public: virtual ~DocumentEvent();
 
-  public: v8_glue::Nullable<Window> view() const { return view_.get(); }
+  private: DocumentWindow* view() const { return view_.get(); }
 
   DISALLOW_COPY_AND_ASSIGN(DocumentEvent);
 };

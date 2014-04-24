@@ -213,6 +213,8 @@ class IdlDictionary(object):
                 self.parent = child.GetName()
             elif child_class == 'Key':
                 self.members.append(IdlDictionaryMember(child))
+            elif child_class == 'ExtAttributes':
+                self.extended_attributes = ext_attributes_node_to_extended_attributes(child)
             else:
                 raise ValueError('Unrecognized node class: %s' % child_class)
 

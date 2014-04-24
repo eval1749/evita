@@ -12,7 +12,6 @@
 #include "evita/dom/script_host.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
-#include "evita/v8_glue/wrapper_info.h"
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
 #include "regex/IRegex.h"
@@ -363,60 +362,10 @@ bool RegExp::BufferMatcher::StringEqCs(const char16* pwchStart, int cwch,
   return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// RegExpClass
-//
-class RegExp::RegExpClass : public v8_glue::WrapperInfo {
-  public: RegExpClass(const char* name)
-      : v8_glue::WrapperInfo(name) {
-  }
-  public: ~RegExpClass() = default;
-
-  protected: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate,
-        &RegExpClass::NewRegex);
-  }
-
-  private: static RegExp* NewRegex(const base::string16 source,
-      v8_glue::Optional<RegExpInit> opt_dict) {
-    RegExp::Compiler compiler;
-    auto const regex = compiler.Compile(source, opt_dict.value);
-    if (!regex) {
-      auto const error_info = compiler.error_info();
-      ScriptHost::instance()->ThrowError(base::StringPrintf(
-          "Failed to compile regex with error code %d at offset %d",
-          error_info.error_code, error_info.offset));
-      return nullptr;
-    }
-
-    return new RegExp(regex, source, opt_dict.value);
-  }
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("backward", &RegExp::backward)
-        .SetProperty("global", &RegExp::global)
-        .SetProperty("ignoreCase", &RegExp::ignore_case)
-        .SetProperty("matchExact", &RegExp::match_exact)
-        .SetProperty("matchWord", &RegExp::match_word)
-        .SetProperty("multiline", &RegExp::multiline)
-        .SetProperty("source", &RegExp::source)
-        .SetProperty("sticky", &RegExp::sticky);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(RegExpClass);
-};
-
 //////////////////////////////////////////////////////////////////////
 //
 // Regex
 //
-DEFINE_SCRIPTABLE_OBJECT(RegExp, RegExp::RegExpClass);
-
 RegExp::RegExp(RegExpImpl* regex, const base::string16& source,
              const RegExpInit& init_dict)
     : backward_(init_dict.backward()), global_(init_dict.global()),
@@ -470,6 +419,25 @@ v8::Local<v8::Value> RegExp::MakeMatchArray(
   }
 
   return js_matches;
+}
+
+RegExp* RegExp::NewRegExp(const base::string16& source,
+                          const RegExpInit& options) {
+  RegExp::Compiler compiler;
+  auto const regex = compiler.Compile(source, options);
+  if (!regex) {
+    auto const error_info = compiler.error_info();
+    ScriptHost::instance()->ThrowError(base::StringPrintf(
+        "Failed to compile regex with error code %d at offset %d",
+        error_info.error_code, error_info.offset));
+    return nullptr;
+  }
+
+  return new RegExp(regex, source, options);
+}
+
+RegExp* RegExp::NewRegExp(const base::string16& source) {
+  return NewRegExp(source, RegExpInit());
 }
 
 }   // namespace dom

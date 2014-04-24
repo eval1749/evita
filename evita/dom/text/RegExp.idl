@@ -1,0 +1,19 @@
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+    CustomConstructor(DOMString source),
+    CustomConstructor(DOMString source, RegExpInit options),
+    JsNamespace=Editor,
+]
+interface RegExp {
+  readonly attribute boolean backward;
+  readonly attribute boolean global;
+  readonly attribute boolean ignoreCase;
+  readonly attribute boolean matchExact;
+  readonly attribute boolean matchWord;
+  readonly attribute boolean multiline;
+  readonly attribute DOMString source;
+  readonly attribute boolean sticky;
+};

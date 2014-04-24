@@ -39,13 +39,6 @@ var JsConsole = function() {};
 var Keymap;
 
 /**
- * @constructor
- * @param {string} source
- * @param {Editor.RegExpInit=} opt_init_dict
- */
-Editor.RegExp = function(source, opt_init_dict) {};
-
-/**
  * @typedef {{name: string, start: number, end: number}}
  */
 Editor.RegExp.Match;

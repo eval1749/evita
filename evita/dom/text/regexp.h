@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "base/strings/string16.h"
-#include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace dom {
@@ -17,21 +16,24 @@ namespace dom {
 class Document;
 class RegExpInit;
 
+namespace bindings {
+class RegExpClass;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // RegExp
 //
 class RegExp : public v8_glue::Scriptable<RegExp> {
   DECLARE_SCRIPTABLE_OBJECT(RegExp);
+  friend class bindings::RegExpClass;
 
   private: class BufferMatcher;
   private: class Compiler;
   private: struct Match;
-  public: class RegExpClass;
   private: class RegExpImpl;
 
   friend class BufferMatcher;
-  friend class RegExpClass;
   friend class RegExpCompiler;
 
   private: bool backward_;
@@ -44,23 +46,27 @@ class RegExp : public v8_glue::Scriptable<RegExp> {
   private: base::string16 source_;
   private: bool sticky_;
 
-  public: RegExp(RegExpImpl* regex, const base::string16& source,
-                const RegExpInit& init_dict);
+  private: RegExp(RegExpImpl* regex, const base::string16& source,
+                  const RegExpInit& init_dict);
   public: virtual ~RegExp();
 
-  public: bool backward() const { return backward_; }
-  public: bool global() const { return global_; }
-  public: bool ignore_case() const { return ignore_case_; }
-  public: bool match_exact() const { return match_exact_; }
-  public: bool match_word() const { return match_word_; }
-  public: bool multiline() const { return multiline_; }
-  public: const base::string16& source() const { return source_; }
-  public: bool sticky() const { return sticky_; }
+  private: bool backward() const { return backward_; }
+  private: bool global() const { return global_; }
+  private: bool ignore_case() const { return ignore_case_; }
+  private: bool match_exact() const { return match_exact_; }
+  private: bool match_word() const { return match_word_; }
+  private: bool multiline() const { return multiline_; }
+  private: const base::string16& source() const { return source_; }
+  private: bool sticky() const { return sticky_; }
 
   public: v8::Handle<v8::Value> ExecuteOnDocument(Document* document, int start,
                                                   int end);
   private: v8::Local<v8::Value> MakeMatchArray(
       const std::vector<Match>& matchs);
+
+  private: static RegExp* NewRegExp(const base::string16& source,
+                                    const RegExpInit& options);
+  private: static RegExp* NewRegExp(const base::string16& source);
 
   DISALLOW_COPY_AND_ASSIGN(RegExp);
 };

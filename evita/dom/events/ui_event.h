@@ -4,28 +4,30 @@
 #define INCLUDE_evita_dom_events_ui_event_h
 
 #include "evita/dom/events/event.h"
-#include "evita/dom/dictionary.h"
-#include "evita/v8_glue/nullable.h"
 
 namespace dom {
 
 class UiEventInit;
 class ViewEventTarget;
 
+namespace bindings {
+class UiEventClass;
+}
+
 class UiEvent : public v8_glue::Scriptable<UiEvent, Event> {
   DECLARE_SCRIPTABLE_OBJECT(UiEvent)
+  friend class bindings::UiEventClass;
 
   private: int detail_;
   private: gc::Member<ViewEventTarget> view_;
 
-  public: UiEvent(const base::string16& type,
-                  const UiEventInit& init_dict);
+  // Exposed for "idle" event.
+  public: UiEvent(const base::string16& type, const UiEventInit& init_dict);
+  private: UiEvent(const base::string16& type);
   public: virtual ~UiEvent();
 
   public: int detail() const { return detail_; }
-  public: v8_glue::Nullable<ViewEventTarget> view() const {
-    return view_.get();
-  }
+  public: ViewEventTarget* view() const { return view_.get(); }
 
   DISALLOW_COPY_AND_ASSIGN(UiEvent);
 };

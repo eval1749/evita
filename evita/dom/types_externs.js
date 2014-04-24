@@ -109,14 +109,6 @@ var TextSelection = function() {};
 
 /**
  * @constructor
- * @extends {Event}
- * @param {string} type
- * @param {UiEventInit=} opt_init_dict
- */
-var UiEvent = function(type, opt_init_dict) {};
-
-/**
- * @constructor
  * @extends {UiEvent}
  * @param {string} type
  * @param {FocusEventInit=} opt_init_dict

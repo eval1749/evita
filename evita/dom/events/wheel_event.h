@@ -13,27 +13,31 @@ struct WheelEvent;
 
 namespace dom {
 
-class EventHandler;
 class WheelEventInit;
-class Window;
+
+namespace bindings {
+class WheelEventClass;
+}
 
 class WheelEvent : public v8_glue::Scriptable<WheelEvent, MouseEvent> {
   DECLARE_SCRIPTABLE_OBJECT(WheelEvent);
+  friend class bindings::WheelEventClass;
 
   private: int delta_mode_;
   private: double delta_x_;
   private: double delta_y_;
   private: double delta_z_;
 
-  public: WheelEvent(const base::string16& type,
-                     const WheelEventInit& init_dict);
-  public: WheelEvent(const domapi::WheelEvent& api_event);
+  private: WheelEvent(const base::string16& type,
+                      const WheelEventInit& init_dict);
+  private: WheelEvent(const base::string16& type);
+  public: explicit WheelEvent(const domapi::WheelEvent& api_event);
   public: virtual ~WheelEvent();
 
-  public: int delta_mode() const { return delta_mode_; }
-  public: double delta_x() const { return delta_x_; }
-  public: double delta_y() const { return delta_y_; }
-  public: double delta_z() const { return delta_z_; }
+  private: int delta_mode() const { return delta_mode_; }
+  private: double delta_x() const { return delta_x_; }
+  private: double delta_y() const { return delta_y_; }
+  private: double delta_z() const { return delta_z_; }
 
   DISALLOW_COPY_AND_ASSIGN(WheelEvent);
 };

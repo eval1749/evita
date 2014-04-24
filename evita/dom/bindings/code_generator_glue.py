@@ -160,18 +160,25 @@ def to_glue_type(idl_type, maybe_dictionary=True):
     if type_name in global_interfaces_info:
         global_referenced_interface_names.add(type_name)
         return GlueType(idl_type, type_name, is_collectable=True)
+
     if type_name in KNOWN_INTERFACE_NAMES:
         global_known_interface_names.add(type_name)
         return GlueType(idl_type, type_name, is_collectable=True)
+
     if type_name in global_definitions.dictionaries:
         global_referenced_dictionary_names.add(type_name)
         return GlueType(idl_type, type_name, is_struct=True)
+
+    if type_name in global_definitions.callback_functions:
+        return GlueType(idl_type, 'v8::Handle<v8::Function>', is_struct=True)
+
     if maybe_dictionary:
         # TODO(yosi) Once we have "dictionary.pickle" which contains all
         # dictiorines, we get rid of below assumption.
         # Note: Assume unknown type as Dictionary.
         global_referenced_dictionary_names.add(type_name)
         return GlueType(idl_type, type_name, is_struct=True)
+
     return GlueType(idl_type, type_name)
 
 
@@ -315,11 +322,12 @@ def attribute_context(attribute):
 
 
 def callback_context(callback):
+    glue_type = to_glue_type(callback.idl_type, maybe_dictionary=False)
     return {
         'parameters': [parameter_context(parameter)
                        for parameter in callback.arguments],
         'name': callback.name,
-        'type': callback.idl_type.str(),
+        'type': glue_type.to_v8_str(),
     }
 
 

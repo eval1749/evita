@@ -6,28 +6,11 @@
 
 #include "evita/dom/converter.h"
 #include "evita/dom/events/event_target.h"
+#include "evita/dom/public/view_event.h"
 #include "evita/v8_glue/nullable.h"
 #include "v8_strings.h"
 
 namespace dom {
-
-namespace {
-int ConvertClickCount(const domapi::MouseEvent& event) {
-  if (event.event_type == domapi::EventType::Click)
-    return 1;
-  if (event.event_type == domapi::EventType::DblClick)
-    return 2;
-  return 0;
-}
-}  // namespace
-
-WheelEventInit::WheelEventInit(const domapi::WheelEvent& event)
-    : MouseEventInit(event), delta_mode_(event.delta_mode),
-      delta_x_(event.delta_x), delta_y_(event.delta_y),
-      delta_z_(event.delta_z) {
-  set_bubbles(true);
-  set_cancelable(true);
-}
 
 WheelEventInit::WheelEventInit()
     : delta_mode_(0), delta_x_(0.0), delta_y_(0.0), delta_z_(0.0) {

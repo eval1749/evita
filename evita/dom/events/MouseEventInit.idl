@@ -1,0 +1,17 @@
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+dictionary MouseEventInit : UiEventInit {
+  boolean altKey = false;
+  long button = 0;
+  long buttons = 0;
+  long clientX = 0;
+  long clientY = 0;
+  boolean ctrlKey = false;
+  boolean metaKey = false;
+  EventTarget? relatedTarget = null;
+  long screenX = 0;
+  long screenY = 0;
+  boolean shiftKey = false;
+};

@@ -121,7 +121,6 @@
         'events/form_event.cc',
         'events/keyboard_event.cc',
         'events/mouse_event.cc',
-        'events/mouse_event_init.cc',
         'events/wheel_event.cc',
         'events/wheel_event_init.cc',
         'events/ui_event.cc',

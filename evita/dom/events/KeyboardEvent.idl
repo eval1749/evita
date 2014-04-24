@@ -1,0 +1,19 @@
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+  Constructor(DOMString typeArg, KeyboardEventInit eventInitDict),
+  Constructor(DOMString typeArg)
+]
+interface KeyboardEvent : UiEvent {
+  readonly attribute boolean altKey;
+  //readonly attribute DOMString charCode;
+  readonly attribute boolean ctrlKey;
+  readonly attribute unsigned long keyCode;
+  readonly attribute unsigned long location;
+  readonly attribute boolean metaKey;
+  readonly attribute boolean repeat;
+  readonly attribute boolean shiftKey;
+  //readonly attribute unsigned long which;
+};

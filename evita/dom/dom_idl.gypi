@@ -50,6 +50,7 @@
       'events/WindowEventInit.idl',
       'forms/FormWindowInit.idl',
       'os/MoveFileOptions.idl',
+      'text/MutationObserverInit.idl',
     ], # dictionary_idl_files
 
     'generated_glue_files': [
@@ -103,6 +104,8 @@
       '<(glue_dir)/MouseEventInit.h',
       '<(glue_dir)/MoveFileOptions.cc',
       '<(glue_dir)/MoveFileOptions.h',
+      '<(glue_dir)/MutationObserverInit.cc',
+      '<(glue_dir)/MutationObserverInit.h',
       '<(glue_dir)/RadioButtonControl.cc',
       '<(glue_dir)/RadioButtonControl.h',
       '<(glue_dir)/Selection.cc',
@@ -159,6 +162,7 @@
       '<(js_externs_dir)/LabelControl_externs.js',
       '<(js_externs_dir)/Mode_externs.js',
       '<(js_externs_dir)/MouseEventInit_externs.js',
+      '<(js_externs_dir)/MutationObserverInit_externs.js',
       '<(js_externs_dir)/Point_externs.js',
       '<(js_externs_dir)/Rect_externs.js',
       '<(js_externs_dir)/RadioButtonControl_externs.js',

@@ -159,7 +159,6 @@
 
         'text/mutation_observer.cc',
         'text/mutation_observer_controller.cc',
-        'text/mutation_observer_init.cc',
         'text/mutation_record.cc',
 
         'os/abstract_file.cc',

@@ -6,10 +6,10 @@
 
 #include <vector>
 
+#include "evita/bindings/MutationObserverInit.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/mutation_observer_controller.h"
-#include "evita/dom/text/mutation_observer_init.h"
 #include "evita/dom/text/mutation_record.h"
 #include "evita/dom/script_host.h"
 #include "evita/ed_defs.h"

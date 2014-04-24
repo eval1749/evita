@@ -22,11 +22,6 @@ MutationRecord.prototype.type;
 var MutationCallback;
 
 /**
- * @typedef {Object}
- */
-var MutationObserverInit;
-
-/**
  * @constructor
  * @param {MutationCallback} callback
  */

@@ -3,20 +3,6 @@
 // found in the LICENSE file.
 
 /**
- * @constructor
- */
-function MutationRecord() {}
-
-/** @type {!Document} */
-MutationRecord.prototype.document;
-
-/** @type {number} */
-MutationRecord.prototype.offset;
-
-/** @type {string} */
-MutationRecord.prototype.type;
-
-/**
  * @typedef {!function(!Array.<!MutationRecord>, !MutationObserver)}
  */
 var MutationCallback;

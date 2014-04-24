@@ -13,8 +13,13 @@ namespace dom {
 
 class Document;
 
+namespace bindings {
+class MutationRecordClass;
+}
+
 class MutationRecord final : public v8_glue::Scriptable<MutationRecord> {
   DECLARE_SCRIPTABLE_OBJECT(MutationRecord);
+  friend class bindings::MutationRecordClass;
 
   private: gc::Member<Document> document_;
   private: base::string16 type_;
@@ -24,9 +29,9 @@ class MutationRecord final : public v8_glue::Scriptable<MutationRecord> {
                          text::Posn offset);
   public: virtual ~MutationRecord();
 
-  public: Document* document() const { return document_.get(); }
-  public: text::Posn offset() const { return offset_; }
-  public: const base::string16& type() const { return type_; }
+  private: Document* document() const { return document_.get(); }
+  private: text::Posn offset() const { return offset_; }
+  private: const base::string16& type() const { return type_; }
 
   DISALLOW_COPY_AND_ASSIGN(MutationRecord);
 };

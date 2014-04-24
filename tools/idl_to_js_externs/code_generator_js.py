@@ -35,6 +35,7 @@ IDL_TO_JS_TYPE_MAP = {
     'unsigned long': 'number',
     'unsigned long long': 'number',
     'unsigned short': 'number',
+    'RegExpInit': 'Editor.RegExpInit',
 }
 
 NAMESPACE_MAP = {

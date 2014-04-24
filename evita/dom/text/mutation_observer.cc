@@ -16,39 +16,6 @@
 #include "evita/v8_glue/runner.h"
 
 namespace dom {
-namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// MutationObserverClass
-//
-class MutationObserverClass : public v8_glue::WrapperInfo {
-  public: MutationObserverClass(const char* name)
-      : v8_glue::WrapperInfo(name) {
-  }
-  public: ~MutationObserverClass() = default;
-
-  protected: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate, 
-        &MutationObserverClass::NewMutationObserver);
-  }
-
-  private: static MutationObserver* NewMutationObserver(
-      v8::Handle<v8::Function> callback) {
-    return new MutationObserver(callback);
-  }
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetMethod("disconnet", &MutationObserver::Disconnect)
-        .SetMethod("observe", &MutationObserver::Observe)
-        .SetMethod("takeRecords", &MutationObserver::TakeRecords);
-  }
-
-    DISALLOW_COPY_AND_ASSIGN(MutationObserverClass);
-};
-}   // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -101,8 +68,6 @@ void MutationObserver::Tracker::Update(text::Posn offset) {
 //
 // MutationObserver
 //
-DEFINE_SCRIPTABLE_OBJECT(MutationObserver, MutationObserverClass);
-
 MutationObserver::MutationObserver(v8::Handle<v8::Function> callback)
     : callback_(v8::Isolate::GetCurrent(), callback) {
 }

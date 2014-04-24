@@ -17,25 +17,30 @@ class Document;
 class MutationObserverInit;
 class MutationRecord;
 
+namespace bindings {
+class MutationObserverClass;
+}
+
 class MutationObserver : public v8_glue::Scriptable<MutationObserver> {
   DECLARE_SCRIPTABLE_OBJECT(MutationObserver);
+  friend class bindings::MutationObserverClass;
 
   private: class Tracker;
 
   private: v8_glue::ScopedPersistent<v8::Function> callback_;
   private: std::unordered_map<Document*, Tracker*> tracker_map_;
 
-  public: MutationObserver(v8::Handle<v8::Function> callback);
+  private: MutationObserver(v8::Handle<v8::Function> callback);
   public: virtual ~MutationObserver();
 
   public: void DidDeleteAt(Document* document, Posn offset, size_t length);
   public: void DidInsertAt(Document* document, Posn offset, size_t length);
   public: void DidMutateDocument(Document* document);
-  public: void Disconnect();
+  private: void Disconnect();
   private: Tracker* GetTracker(Document* document) const;
-  public: void Observe(Document* document,
-                       const MutationObserverInit& options);
-  public: std::vector<MutationRecord*> TakeRecords();
+  private: void Observe(Document* document,
+                        const MutationObserverInit& options);
+  private: std::vector<MutationRecord*> TakeRecords();
 
   DISALLOW_COPY_AND_ASSIGN(MutationObserver);
 };

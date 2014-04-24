@@ -46,6 +46,7 @@
       'events/KeyboardEventInit.idl',
       'events/MouseEventInit.idl',
       'events/UiEventInit.idl',
+      'events/WheelEventInit.idl',
       'events/WindowEventInit.idl',
       'forms/FormWindowInit.idl',
       'os/MoveFileOptions.idl',
@@ -128,6 +129,8 @@
       '<(glue_dir)/ViewEventTarget.h',
       '<(glue_dir)/Window.cc',
       '<(glue_dir)/Window.h',
+      '<(glue_dir)/WheelEventInit.cc',
+      '<(glue_dir)/WheelEventInit.h',
       '<(glue_dir)/WindowEventInit.cc',
       '<(glue_dir)/WindowEventInit.h',
     ],
@@ -171,6 +174,7 @@
       '<(js_externs_dir)/UiEventInit_externs.js',
       '<(js_externs_dir)/ViewEventTarget_externs.js',
       '<(js_externs_dir)/Window_externs.js',
+      '<(js_externs_dir)/WheelEventInit_externs.js',
       '<(js_externs_dir)/WindowEventInit_externs.js',
     ], # generated_js_externs_files
 

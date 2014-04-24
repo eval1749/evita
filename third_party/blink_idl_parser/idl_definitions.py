@@ -204,9 +204,10 @@ class IdlCallbackFunction(TypedObject):
 
 class IdlDictionary(object):
     def __init__(self, node):
-        self.parent = None
+        self.extended_attributes = []
         self.name = node.GetName()
         self.members = []
+        self.parent = None
         for child in node.GetChildren():
             child_class = child.GetClass()
             if child_class == 'Inherit':

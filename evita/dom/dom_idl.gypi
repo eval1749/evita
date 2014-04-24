@@ -61,6 +61,7 @@
       'forms/FormWindowInit.idl',
       'os/MoveFileOptions.idl',
       'text/MutationObserverInit.idl',
+      'text/RegExpInit.idl',
     ], # dictionary_idl_files
 
     'generated_glue_files': [
@@ -132,6 +133,8 @@
       '<(glue_dir)/MutationRecord.h',
       '<(glue_dir)/RadioButtonControl.cc',
       '<(glue_dir)/RadioButtonControl.h',
+      '<(glue_dir)/RegExpInit.cc',
+      '<(glue_dir)/RegExpInit.h',
       '<(glue_dir)/Selection.cc',
       '<(glue_dir)/Selection.h',
       '<(glue_dir)/TableSelection.cc',
@@ -203,6 +206,7 @@
       '<(js_externs_dir)/Point_externs.js',
       '<(js_externs_dir)/Rect_externs.js',
       '<(js_externs_dir)/RadioButtonControl_externs.js',
+      '<(js_externs_dir)/RegExpInit_externs.js',
       '<(js_externs_dir)/Selection_externs.js',
       '<(js_externs_dir)/TableSelection_externs.js',
       '<(js_externs_dir)/TextDecodeOptions_externs.js',
@@ -294,8 +298,6 @@
           '<(DEPTH)/tools/idl_to_js_externs/aggregate_js_externs.py',
           '<(js_externs_dir)/evita_js_externs.js',
           '<(DEPTH)/tools/idl_to_js_externs/header.js',
-
-
           '<(js_externs_dir)', '<(idl_file_list)',
           '<(DEPTH)/evita', '<(static_file_list)',
         ], # action
@@ -372,7 +374,6 @@
         ], # inputs
         'outputs': [
           '<(js_externs_dir)/<(RULE_INPUT_ROOT)_externs.js',
-
         ],
         'action': [
           'python',

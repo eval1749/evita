@@ -39,18 +39,6 @@ var JsConsole = function() {};
 var Keymap;
 
 /**
- * @typedef {!Object}
- *  backward: boolean,
- *  global: boolean,
- *  ignoreCase: boolean,
- *  matchExact: boolean,
- *  matchWord: boolean,
- *  multiline: boolean,
- *  sticky: boolean,
- */
-Editor.RegExpInit;
-
-/**
  * @constructor
  * @param {string} source
  * @param {Editor.RegExpInit=} opt_init_dict

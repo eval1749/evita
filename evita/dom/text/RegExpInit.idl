@@ -1,0 +1,14 @@
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[JsNamespace=Editor]
+dictionary RegExpInit {
+  boolean backward = false;
+  boolean global = false;
+  boolean ignoreCase = false;
+  boolean matchExact = false;
+  boolean matchWord = false;
+  boolean multiline = false;
+  boolean sticky = false;
+};

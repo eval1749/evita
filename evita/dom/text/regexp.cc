@@ -6,9 +6,9 @@
 
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
+#include "evita/bindings/RegExpInit.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/range.h"
-#include "evita/dom/text/regexp_init.h"
 #include "evita/dom/script_host.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
@@ -268,6 +268,7 @@ bool RegExp::BufferMatcher::ForwardFindCharCi(char16 wchFind,
     if (CharEqCi(oEnum.Get(), wchFind)) {
       *inout_lPosn = oEnum.GetPosn();
       return true;
+
     }
   }
   return false;

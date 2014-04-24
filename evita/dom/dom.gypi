@@ -170,7 +170,6 @@
         'promise_resolver.cc',
         'text/range.cc',
         'text/regexp.cc',
-        'text/regexp_init.cc',
         'windows/selection.cc',
         'script_host.cc',
         'script_thread.cc',

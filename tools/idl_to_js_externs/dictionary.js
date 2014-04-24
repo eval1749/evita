@@ -31,4 +31,8 @@ var {{enumeration.name}} = {
  *    {{member.name}}: {{member.type}}{% if not loop.last %},{% endif %}{{''}}
 {%  endfor %}
  */
+{% if namespace %}
+{{namespace}}{{dictionary_name}};
+{% else %}
 var {{dictionary_name}};
+{% endif %}

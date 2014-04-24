@@ -120,10 +120,16 @@ def constructor_context_list(interface):
 
 
 def dictionary_context(dictionary):
+    if 'JsNamespace' in dictionary.extended_attributes:
+      namespace = dictionary.extended_attributes['JsNamespace'] + '.'
+    else:
+      namespace = '';
+
     return {
         'dictionary_members': [dictionary_member_context(member)
                     for member in dictionary.members],
         'dictionary_name': dictionary.name,
+        'namespace': namespace,
     }
 
 

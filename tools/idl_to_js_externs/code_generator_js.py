@@ -280,12 +280,7 @@ def type_string(idl_type):
     if type_str == 'void':
         return ''
     if idl_type.is_array or idl_type.is_sequence:
-        # FIXME Until we have |IdlArrayType| and |IdlSequenceType| which
-        # have element type nullability, we assume element type of array
-        # and sequence is nullable.
-        return type_string_with_nullable(
-            'Array.<%s>' % type_string_with_nullable(type_str, True),
-            idl_type.is_nullable)
+        return '!Array.<%s>' % type_string_with_nullable(type_str, idl_type.is_nullable)
     return type_string_with_nullable(type_str, idl_type.is_nullable)
 
 

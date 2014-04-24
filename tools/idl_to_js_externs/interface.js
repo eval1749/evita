@@ -58,6 +58,9 @@ function {{name}}({{emit_parameters(parameters)}}) {}
 {% macro emit_parameters(parameters) %}
 {{parameters | map(attribute='name') | join(', ')}}
 {%- endmacro %}
+{% macro emit_parameter_types(parameters) %}
+{{parameters | map(attribute='type') | join(', ')}}
+{%- endmacro %}
 {#
  # Enumeration
  # Example:
@@ -79,8 +82,20 @@ var {{enumeration.name}} = {
 };
 
 {% endfor %}
+{#
+ # Callback
+ # Example:
+ #  /**
+ #   * @typedef {!function(type1, type):type}
+ #   */
+ #  var MyCallback;
+ #}
 {% for callback in callbacks %}
-{{    emit_function('', callback.name, callback.parameters) }}
+/**
+ * @typedef {!function({{emit_parameter_types(callback.parameters)}}){% if callback.type %}:{{callback.type}}{% endif %}}
+ */
+var {{callback.name}};
+
 {% endfor %}
 {% for dictionary in dictionaries %}
 /**

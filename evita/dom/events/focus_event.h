@@ -11,16 +11,22 @@ namespace dom {
 class FocusEventInit;
 class Window;
 
+namespace bindings {
+class FocusEventClass;
+}
+
 class FocusEvent : public v8_glue::Scriptable<FocusEvent, UiEvent> {
   DECLARE_SCRIPTABLE_OBJECT(FocusEvent)
+  friend class bindings::FocusEventClass;
 
   private: gc::Member<EventTarget> related_target_;
 
   public: FocusEvent(const base::string16& type,
                      const FocusEventInit& init_dict);
+  private: FocusEvent(const base::string16& type);
   public: virtual ~FocusEvent();
 
-  public: v8_glue::Nullable<EventTarget> related_target() const {
+  private: EventTarget* related_target() const {
     return related_target_.get();
   }
 

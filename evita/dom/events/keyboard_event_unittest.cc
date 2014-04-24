@@ -67,7 +67,7 @@ TEST_F(KeyboardEventTest, ctor_init_dict) {
     "  cancelable: false,"
     "  detail: 3,"
     "  altKey: true, ctrlKey: false, metaKey: true, shiftKey: true,"
-    "  code: 66,"
+    "  keyCode: 66,"
     "  location: 3,"
     "  repeat: true"
     "});");
@@ -92,6 +92,7 @@ TEST_F(KeyboardEventTest, ctor_init_dict) {
   EXPECT_SCRIPT_TRUE("event.shiftKey");
 
   EXPECT_SCRIPT_EQ("66", "event.code");
+
   EXPECT_SCRIPT_EQ("3", "event.location");
   EXPECT_SCRIPT_TRUE("event.repeat");
 }

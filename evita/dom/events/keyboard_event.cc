@@ -3,8 +3,8 @@
 
 #include "evita/dom/events/keyboard_event.h"
 
+#include "evita/bindings/KeyboardEventInit.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/events/keyboard_event_init.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/wrapper_info.h"
 
@@ -56,6 +56,20 @@ base::string16 ConvertEventType(const domapi::KeyboardEvent& raw_event) {
   return base::string16();
 }
 
+KeyboardEventInit ToKeyboardEventInit(const domapi::KeyboardEvent& event) {
+  KeyboardEventInit init_dict;
+  init_dict.set_alt_key(event.alt_key);
+  init_dict.set_ctrl_key(event.control_key);
+  init_dict.set_key_code(event.key_code);
+  init_dict.set_location(event.location);
+  init_dict.set_meta_key(false);
+  init_dict.set_repeat(event.repeat);
+  init_dict.set_shift_key(event.shift_key);
+  init_dict.set_bubbles(true);
+  init_dict.set_cancelable(true);
+  return init_dict;
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -65,11 +79,11 @@ base::string16 ConvertEventType(const domapi::KeyboardEvent& raw_event) {
 DEFINE_SCRIPTABLE_OBJECT(KeyboardEvent, KeyboardEventClass);
 
 KeyboardEvent::KeyboardEvent(const domapi::KeyboardEvent& event)
-    : KeyboardEvent(ConvertEventType(event), KeyboardEventInit(event)) {
+    : KeyboardEvent(ConvertEventType(event), ToKeyboardEventInit(event)) {
 }
 
 KeyboardEvent::KeyboardEvent(const base::string16& type,
-                       const KeyboardEventInit& init_dict)
+                             const KeyboardEventInit& init_dict)
     : ScriptableBase(type, init_dict),
       alt_key_(init_dict.alt_key()), ctrl_key_(init_dict.ctrl_key()),
       key_code_(init_dict.key_code()), location_(init_dict.location()),

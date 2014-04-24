@@ -3,6 +3,6 @@
 // found in the LICENSE file.
 
 dictionary UiEventInit : EventInit {
- Window? view = null;
  long detail = 0;
+ ViewEventTarget? view = null;
 };

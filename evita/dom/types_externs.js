@@ -102,7 +102,7 @@ var TextWindow = function(range) {};
 /**
  * @constructor
  * @extends {Selection}
- * You can't create |TextSelection| object dirctory. You can obtain
+ * You can't create |TextSelection| object directly. You can obtain
  * |TextSelection| object via |TextWindow.prototype.selection|.
  */
 var TextSelection = function() {};

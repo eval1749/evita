@@ -111,14 +111,6 @@ var TextSelection = function() {};
  * @constructor
  * @extends {Event}
  * @param {string} type
- * @param {MouseEventInit=} opt_init_dict
- */
-var MouseEvent = function(type, opt_init_dict) {};
-
-/**
- * @constructor
- * @extends {Event}
- * @param {string} type
  * @param {WindowEventInit=} opt_init_dict
  */
 var WindowEvent = function(type, opt_init_dict) {};

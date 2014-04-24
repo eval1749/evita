@@ -16,16 +16,23 @@ namespace dom {
 class FormEventInit;
 class Window;
 
+namespace bindings {
+class FormEventClass;
+}
+
 class FormEvent : public v8_glue::Scriptable<FormEvent, Event> {
   DECLARE_SCRIPTABLE_OBJECT(FormEvent)
+  friend class bindings::FormEventClass;
 
   private: base::string16 data_;
 
   public: explicit FormEvent(const domapi::FormEvent& event);
-  public: FormEvent(const base::string16& type,
-                    const FormEventInit& init_dict);
+  private: FormEvent(const base::string16& type,
+                     const FormEventInit& init_dict);
+  private: FormEvent(const base::string16& type);
   public: virtual ~FormEvent();
 
+  // Expose for |CheckBoxControl|.
   public: const base::string16& data() const { return data_; }
 
   DISALLOW_COPY_AND_ASSIGN(FormEvent);

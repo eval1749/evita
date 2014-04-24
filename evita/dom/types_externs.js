@@ -108,14 +108,6 @@ var TextWindow = function(range) {};
 var TextSelection = function() {};
 
 /**
- * @constructor
- * @extends {Event}
- * @param {string} type
- * @param {FormEventInit=} opt_init_dict
- */
-var FormEvent = function(type, opt_init_dict) {};
-
-/**
  * @final
  * @constructor
  * @extends {Event}

@@ -68,13 +68,6 @@ var Style = function() {};
 
 /**
  * @constructor
- * @extends {DocumentWindow}
- * @param {Range} range
- */
-var TextWindow = function(range) {};
-
-/**
- * @constructor
  * @extends {Selection}
  * You can't create |TextSelection| object directly. You can obtain
  * |TextSelection| object via |TextWindow.prototype.selection|.

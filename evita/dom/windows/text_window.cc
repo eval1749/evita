@@ -4,63 +4,20 @@
 #include "evita/dom/windows/text_window.h"
 
 #include "base/bind.h"
-#include "evita/dom/converter.h"
 #include "evita/dom/text/document.h"
-#include "evita/dom/windows/point.h"
 #include "evita/dom/public/float_point.h"
+#include "evita/dom/public/float_rect.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/windows/text_selection.h"
 #include "evita/dom/view_delegate.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
-
-namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// TextWindowWrapperInfo
-//
-class TextWindowWrapperInfo :
-    public v8_glue::DerivedWrapperInfo<TextWindow, DocumentWindow> {
-
-  public: TextWindowWrapperInfo(const char* name)
-      : BaseClass(name) {
-  }
-  public: ~TextWindowWrapperInfo() = default;
-
-  private: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate,
-        &TextWindowWrapperInfo::NewTextWindow);
-  }
-
-  private: static TextWindow* NewTextWindow(Range* selection_range) {
-    return new TextWindow(selection_range);
-  }
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetMethod("compute_", &TextWindow::ComputeMotion)
-        .SetMethod("hitTestTextPosition_", &TextWindow::HitTestTextPosition)
-        .SetMethod("makeSelectionVisible", &TextWindow::MakeSelectionVisible)
-        .SetMethod("mapPointToPosition_", &TextWindow::MapPointToPosition)
-        .SetMethod("reconvert_", &TextWindow::Reconvert)
-        .SetMethod("scroll", &TextWindow::Scroll);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(TextWindowWrapperInfo);
-};
-}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // TextWindow
 //
-DEFINE_SCRIPTABLE_OBJECT(TextWindow, TextWindowWrapperInfo);
-
 TextWindow::TextWindow(Range* selection_range)
     : ScriptableBase(new TextSelection(this, selection_range)) {
   ScriptHost::instance()->view_delegate()->CreateTextWindow(this);
@@ -73,18 +30,29 @@ TextWindow::~TextWindow() {
   return static_cast<TextSelection*>(selection())->view_selection();
 }
 
-text::Posn TextWindow::ComputeMotion(int method,
-    v8_glue::Optional<text::Posn> opt_position,
-    v8_glue::Optional<int> opt_count,
-    v8_glue::Optional<domapi::FloatPoint> opt_point) {
+text::Posn TextWindow::ComputeMotion(int method, text::Posn position,
+                                     int count, const domapi::FloatPoint& point) {
   TextWindowCompute data;
   data.method = static_cast<TextWindowCompute::Method>(method);
-  data.count = opt_count.get(1);
-  data.position = opt_position.get(0);
-  data.x = opt_point.is_supplied ? opt_point.value.x() : 0.0f;
-  data.y = opt_point.is_supplied ? opt_point.value.y() : 0.0f;
+  data.count = count;
+  data.position = position;
+  data.x = point.x();
+  data.y = point.y();
   return ScriptHost::instance()->view_delegate()->ComputeOnTextWindow(
       window_id(), data);
+}
+
+text::Posn TextWindow::ComputeMotion(int method, text::Posn position,
+                                     int count) {
+  return ComputeMotion(method, position, count, domapi::FloatPoint());
+}
+
+text::Posn TextWindow::ComputeMotion(int method, text::Posn position) {
+  return ComputeMotion(method, position, 1, domapi::FloatPoint());
+}
+
+text::Posn TextWindow::ComputeMotion(int method) {
+  return ComputeMotion(method, 0, 1, domapi::FloatPoint());
 }
 
 domapi::FloatRect TextWindow::HitTestTextPosition(text::Posn position) {
@@ -100,6 +68,11 @@ void TextWindow::MakeSelectionVisible() {
 text::Posn TextWindow::MapPointToPosition(float x, float y) {
   return ScriptHost::instance()->view_delegate()->MapPointToPosition(
     window_id(), x, y);
+}
+
+// static
+TextWindow* TextWindow::NewTextWindow(Range* selection_range) {
+  return new TextWindow(selection_range);
 }
 
 void TextWindow::Reconvert(text::Posn start, text::Posn end) {

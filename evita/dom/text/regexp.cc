@@ -10,7 +10,6 @@
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/script_host.h"
-#include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"

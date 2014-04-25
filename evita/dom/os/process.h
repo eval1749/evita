@@ -5,7 +5,6 @@
 #if !defined(INCLUDE_evita_dom_os_process_h)
 #define INCLUDE_evita_dom_os_process_h
 
-#include "evita/dom/converter.h"
 #include "evita/dom/os/abstract_file.h"
 
 namespace dom {

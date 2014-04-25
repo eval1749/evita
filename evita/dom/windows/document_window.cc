@@ -9,8 +9,6 @@
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/windows/selection.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
 

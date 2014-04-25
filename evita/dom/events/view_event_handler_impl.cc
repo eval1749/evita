@@ -26,7 +26,6 @@
 #include "evita/dom/windows/window_set.h"
 #include "evita/gc/local.h"
 #include "evita/text/buffer.h"
-#include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
 #include "v8_strings.h"
 

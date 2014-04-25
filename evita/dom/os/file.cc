@@ -12,7 +12,6 @@
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/script_host.h"
-#include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/runner.h"
 #include "gin/array_buffer.h"

@@ -16,10 +16,7 @@
 #include "evita/dom/windows/window_ostream.h"
 #include "evita/dom/windows/window_set.h"
 #include "evita/gc/weak_ptr.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/runner.h"
-#include "evita/v8_glue/wrapper_info.h"
 #include "v8_strings.h"
 
 namespace dom {

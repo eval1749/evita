@@ -10,10 +10,6 @@
 #include "common/memory/singleton.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
-#include "evita/v8_glue/constructor_template.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/function_template_builder.h"
-#include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
 

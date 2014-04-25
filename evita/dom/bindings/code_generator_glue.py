@@ -133,6 +133,7 @@ IDL_TO_CPP_TYPE_MAP = {
 
     # IDL types
     'DOMString': CppType('base::string16', is_by_value=False),
+    'any': CppType('v8::Handle<v8::Value>'),
     'boolean': CppType('bool'),
     'byte': CppType('uint8_t'),
     'double': CppType('double'),

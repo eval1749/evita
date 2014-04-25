@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_timer_h)
-#define INCLUDE_evita_dom_timer_h
+#if !defined(INCLUDE_evita_dom_timers_timer_h)
+#define INCLUDE_evita_dom_timers_timer_h
 
 #include <memory>
 
@@ -42,24 +42,6 @@ class Timer : public v8_glue::Scriptable<Timer> {
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };
 
-class OneShotTimer : public v8_glue::Scriptable<OneShotTimer, Timer> {
-  DECLARE_SCRIPTABLE_OBJECT(OneShotTimer);
-
-  public: OneShotTimer();
-  public: ~OneShotTimer();
-
-  DISALLOW_COPY_AND_ASSIGN(OneShotTimer);
-};
-
-class RepeatingTimer : public v8_glue::Scriptable<RepeatingTimer, Timer> {
-  DECLARE_SCRIPTABLE_OBJECT(RepeatingTimer);
-
-  public: RepeatingTimer();
-  public: ~RepeatingTimer();
-
-  DISALLOW_COPY_AND_ASSIGN(RepeatingTimer);
-};
-
 } // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_timer_h)
+#endif //!defined(INCLUDE_evita_dom_timers_timer_h)

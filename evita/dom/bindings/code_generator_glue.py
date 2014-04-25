@@ -34,9 +34,15 @@ global_interfaces_info = {}
 # |KNOWN_INTERFACE_NAMES|.
 KNOWN_INTERFACE_NAMES = {
     'Document': 'evita/dom/text/document.h',
+    'Range': 'evita/dom/text/range.h',
 }
-
 global_known_interface_names = set()
+
+JS_INTERFACE_NAMES = {
+    'Point': 'evita/dom/windows/point.h',
+    'Rect': 'evita/dom/windows/rect.h',
+}
+global_js_interface_names = set()
 
 # GlueType
 class GlueType(object):
@@ -123,6 +129,10 @@ IDL_TO_CPP_TYPE_MAP = {
     'ArrayBufferView': CppType('gin::ArrayBufferView', is_by_value=False),
     'DataTransferData': CppType('DataTransferData', is_pointer=True),
     'EventListener': CppType('v8::Handle<v8::Object>'),
+    # For Window.prototype.compute_
+    'Point': CppType('domapi::FloatPoint'),
+    # For Window.prototype.compute_
+    'Rect': CppType('domapi::FloatRect'),
     # For Editor.localizeText
     'StringDict': CppType('v8::Handle<v8::Object>'),
 
@@ -153,6 +163,8 @@ def to_glue_type(idl_type, maybe_dictionary=True):
     type_name = idl_type.base_type
 
     if type_name in IDL_TO_CPP_TYPE_MAP:
+        if type_name in JS_INTERFACE_NAMES:
+            global_js_interface_names.add(type_name)
         cpp_type = IDL_TO_CPP_TYPE_MAP[type_name]
         return GlueType(idl_type, cpp_type.cpp_name,
                         is_by_value=cpp_type.is_by_value,
@@ -161,6 +173,7 @@ def to_glue_type(idl_type, maybe_dictionary=True):
     if type_name in global_interfaces_info:
         global_referenced_interface_names.add(type_name)
         return GlueType(idl_type, type_name, is_collectable=True)
+
 
     if type_name in KNOWN_INTERFACE_NAMES:
         global_known_interface_names.add(type_name)
@@ -194,20 +207,15 @@ class CodeGeneratorGlue(object):
             interface_info['include_path'] = fix_include_path(
                 interface_info['include_path'])
 
-    def dictionary_context(self, dictionary):
-        context = generate_dictionary_context(dictionary, self.interfaces_info)
-        return ('dictionary', context, dictionary.name)
+    def generate_contents(self, context, extension):
+        template_file_name = context['template_name'] + extension
+        return self.jinja_env.get_template(template_file_name).render(context)
 
-    def generate_contents(self, template_name, template_context):
-        return self.jinja_env.get_template(template_name) \
-            .render(template_context)
-
-    def generate_cc_h(self, template_name, template_context, file_name):
+    def generate_cc_h(self, context):
         return [
             {
-                'contents': self.generate_contents(
-                    template_name + extension, template_context),
-                'file_name': file_name + extension,
+                'contents':  self.generate_contents(context,  extension),
+                'file_name': context['output_name'] + extension,
             }
             for extension in ['.cc', '.h']
         ]
@@ -216,20 +224,16 @@ class CodeGeneratorGlue(object):
         global global_definitions
         global_definitions = definitions
         return list(chain(*[
-            self.generate_cc_h(template_name, template_context, file_name)
-            for (template_name, template_context, file_name) in
-            [self.dictionary_context(dictionary)
+            self.generate_cc_h(context)
+            for context in
+            [dictionary_context(dictionary)
              for dictionary in definitions.dictionaries.values()] +
             # interface context must be generated after dictionary context
             # for include files.
-            [self.interface_context(definitions, interface)
+            [interface_context(interface)
              for interface in definitions.interfaces.values()]
         ]))
 
-    def interface_context(self, definitions, interface):
-        context = generate_interface_context(
-            definitions, interface.name, self.interfaces_info)
-        return ('interface', context, interface.name)
 
 ######################################################################
 #
@@ -259,7 +263,7 @@ def dictionary_member_context(member):
     }
 
 
-def generate_dictionary_context(dictionary, interfaces_info):
+def dictionary_context(dictionary):
     global global_has_nullable
     global_has_nullable = False
 
@@ -283,6 +287,10 @@ def generate_dictionary_context(dictionary, interfaces_info):
         cc_include_paths.append('evita/v8_glue/nullable.h')
     cc_include_paths.append('../../v8_strings.h')
 
+    for name in global_js_interface_names:
+        class_references.append(name)
+        cc_include_paths.append(JS_INTERFACE_NAMES[name])
+
     for name in global_known_interface_names:
         class_references.append(name)
         cc_include_paths.append(KNOWN_INTERFACE_NAMES[name])
@@ -298,7 +306,9 @@ def generate_dictionary_context(dictionary, interfaces_info):
         'h_include_paths': sorted(h_include_paths),
         'members': sort_context_list(member_context_list),
         'name': dictionary.name,
+        'output_name': dictionary.name,
         'parent_name': dictionary.parent,
+        'template_name': 'dictionary',
     }
 
 
@@ -325,7 +335,7 @@ def attribute_context(attribute):
 def callback_context(callback):
     glue_type = to_glue_type(callback.idl_type, maybe_dictionary=False)
     return {
-        'parameters': [parameter_context(parameter)
+        'parameters': [parameter.name
                        for parameter in callback.arguments],
         'name': callback.name,
         'type': glue_type.to_v8_str(),
@@ -374,22 +384,36 @@ def fix_include_path(path):
 
 
 def function_context(functions):
+    # Make parameters list without optional parameters.
+    # Example: foo(T1 a, optional T2 b, optional T3 c)
+    # Output: [[T1 a], [T1 a, T2 b], [T1 a, T2 b, T3 c]]
+    parameters_list = []
+    for function in functions:
+        parameters = []
+        for parameter in function.arguments:
+            if parameter.is_optional:
+                parameters_list.append(list(parameters))
+            parameters.append(function_parameter(parameter))
+        parameters_list.append(parameters)
+    assert parameters_list
+
     if 'ImplementedAs' in functions[0].extended_attributes:
         cpp_name = functions[0].extended_attributes['ImplementedAs']
     else:
         cpp_name = upper_camel_case(functions[0].name)
 
     is_static = functions[0].is_static
+    return_glue_type = to_glue_type(function.idl_type, maybe_dictionary=False)
+    return_type = return_glue_type.to_v8_str()
 
     signatures = [
         {
           'cpp_name': cpp_name,
           'is_static': is_static,
-          'parameters': map(function_parameter, function.arguments),
-          'return_type': to_glue_type(function.idl_type,
-                                      maybe_dictionary=False).to_v8_str(),
+          'parameters': parameters,
+          'return_type': return_type,
         }
-        for function in functions
+        for parameters in parameters_list
     ]
     context = function_dispatcher(signatures)
     context['cpp_name'] = cpp_name
@@ -427,36 +451,37 @@ def function_parameter(parameter):
     glue_type = to_glue_type(parameter.idl_type)
     return {
         'cpp_name': underscore(parameter.name),
-        #'declare_type': glue_type.declare_str(),
         'from_v8_type': glue_type.from_v8_str(),
         'type': glue_type.idl_type.base_type,
     }
 
 
-def generate_interface_context(definitions, interface_name, interfaces_info):
+def interface_context(interface):
     callback_context_list = [
         callback_context(callback_function)
-        for callback_function in definitions.callback_functions.values()
+        for callback_function in global_definitions.callback_functions.values()
     ]
 
     enumeration_context_list =[
         enumeration_context(enumeration)
-        for enumeration in definitions.enumerations.values()
+        for enumeration in global_definitions.enumerations.values()
     ]
-
-    try:
-        interface = definitions.interfaces[interface_name]
-    except KeyError:
-        raise Exception('%s not in IDL definitions' % interface_name)
 
     attribute_context_list = filter(
         lambda context: context['cpp_name'] != 'JavaScript',
         [attribute_context(attribute) for attribute in interface.attributes])
 
-    constant_context_list = [constant_context(constant)
-                             for constant in interface.constants]
+    constant_context_list = [
+        constant_context(constant)
+        for constant in interface.constants
+    ]
 
     constructor = function_dispatcher(constructor_context_list(interface))
+
+    dictionaries = [
+        {'name': dictionary.name}
+        for dictionary in global_definitions.dictionaries.values()
+    ]
 
     method_context_list = filter(
         lambda context: context['cpp_name'] != 'JavaScript',
@@ -464,7 +489,7 @@ def generate_interface_context(definitions, interface_name, interfaces_info):
          for name, functions in
          groupby(interface.operations, lambda operation: operation.name)])
 
-    global_referenced_interface_names.add(interface_name)
+    global_referenced_interface_names.add(interface.name)
 
     include_paths = map(interface_name_to_include_path,
                         global_referenced_interface_names) + \
@@ -486,11 +511,15 @@ def generate_interface_context(definitions, interface_name, interfaces_info):
     if constructor['dispatch'] != 'none':
         include_paths.append('evita/v8_glue/constructor_template.h')
 
+    for name in global_js_interface_names:
+        include_paths.append(JS_INTERFACE_NAMES[name])
+
     for name in global_known_interface_names:
         include_paths.append(KNOWN_INTERFACE_NAMES[name])
 
     if interface.parent:
-        base_class_include = interfaces_info[interface.name]['include_path']
+        base_class_include = \
+            global_interfaces_info[interface.name]['include_path']
     else:
         base_class_include = None
 
@@ -508,75 +537,22 @@ def generate_interface_context(definitions, interface_name, interfaces_info):
     return {
       'attributes': sort_context_list(attribute_context_list),
       'callbacks': sort_context_list(callback_context_list),
-      'class_name': interface_name + 'Class',
+      'class_name': interface.name + 'Class',
       'base_class_include': base_class_include,
       'constants': sort_context_list(constant_context_list),
       'constructor': constructor,
-      'dictionaries': [{'name': dictionary.name}
-                       for dictionary in definitions.dictionaries.values()],
+      'dictionaries': dictionaries,
       'enumerations': enumeration_context_list,
       'has_static_member': has_static_member,
       'need_instance_template': need_instance_template,
       'include_paths': sorted(include_paths),
-      'interfaces': interface_context_list(interface),
-      'interface_name': interface_name,
+      'interface_name': interface.name,
       'interface_parent': interface.parent,
       'methods': sort_context_list(method_context_list),
+      'output_name': interface.name,
+      'template_name': 'interface',
     }
 
-
-def initialize_jinja_env(cache_dir):
-    jinja_env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(templates_dir),
-        # Bytecode cache is not concurrency-safe unless pre-cached:
-        # if pre-cached this is read-only, but writing creates a race condition.
-        bytecode_cache=jinja2.FileSystemBytecodeCache(cache_dir),
-        keep_trailing_newline=True,  # newline-terminate generated files
-        lstrip_blocks=True,  # so can indent control flow tags
-        trim_blocks=True)
-    return jinja_env
-
-
-def interface_context_list(interface):
-    if interface.constructors or interface.custom_constructors:
-        return []
-    return [{'name': interface.name, 'parent_name': interface.parent}]
-
-
-def overloaded_parameter(overloaded_parameters):
-    parameters = [parameter for parameter in overloaded_parameters
-                  if parameter]
-    is_optional = len(parameters) != len(overloaded_parameters) or \
-                  any(parameter.is_optional for parameter in parameters)
-    names = list(set([parameter.name for parameter in parameters]))
-    names.sort()
-    name = '_or_'.join(names)
-    parameter_type_strings = [parameter_type_string(parameter, is_optional)
-                              for parameter in parameters]
-    return {
-        'name': parameter_name(name, is_optional),
-        'type': union_type_string(parameter_type_strings),
-    }
-
-
-def parameter_context(parameter):
-    return {
-        'name': parameter_name(parameter.name, parameter.is_optional),
-        'type': parameter_type_string(parameter, parameter.is_optional),
-    }
-
-
-def parameter_name(name, is_optional):
-    return 'opt_' + name if is_optional else name
-
-
-def parameter_type_string(parameter, is_optional):
-    glue_type = to_glue_type(parameter.idl_type)
-    if is_optional:
-        global global_has_optional
-        global_has_optional = True
-        return 'v8_glue::Optional<%s>' % glue_type.from_v8_str()
-    return glue_type.from_v8_str()
 
 ######################################################################
 #
@@ -591,6 +567,18 @@ def cpp_value(value):
 
 def dictionary_name_to_include_path(dictionary_name):
     return dictionary_name + '.h'
+
+
+def initialize_jinja_env(cache_dir):
+    jinja_env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(templates_dir),
+        # Bytecode cache is not concurrency-safe unless pre-cached:
+        # if pre-cached this is read-only, but writing creates a race condition.
+        bytecode_cache=jinja2.FileSystemBytecodeCache(cache_dir),
+        keep_trailing_newline=True,  # newline-terminate generated files
+        lstrip_blocks=True,  # so can indent control flow tags
+        trim_blocks=True)
+    return jinja_env
 
 
 def interface_name_to_include_path(interface_name):

@@ -7,10 +7,15 @@
 
 namespace dom {
 
+namespace bindings {
+class OneShotTimerClass;
+}
+
 class OneShotTimer : public v8_glue::Scriptable<OneShotTimer, Timer> {
   DECLARE_SCRIPTABLE_OBJECT(OneShotTimer);
+  friend class bindings::OneShotTimerClass;
 
-  public: OneShotTimer();
+  private: OneShotTimer();
   public: ~OneShotTimer();
 
   DISALLOW_COPY_AND_ASSIGN(OneShotTimer);

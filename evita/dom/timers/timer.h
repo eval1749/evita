@@ -15,8 +15,13 @@ class Timer;
 
 namespace dom {
 
+namespace bindings {
+class TimerClass;
+}
+
 class Timer : public v8_glue::Scriptable<Timer> {
   DECLARE_SCRIPTABLE_OBJECT(Timer);
+  friend class bindings::TimerClass;
 
   protected: enum class Type {
     OneShot,
@@ -35,9 +40,10 @@ class Timer : public v8_glue::Scriptable<Timer> {
   private: void DidFireTimer();
 
   public: void Reset();
-  public: void Stop();
-  public: void Start(int delay_ms, v8::Handle<v8::Function> callback,
-                     v8_glue::Optional<v8::Handle<v8::Value>> receiver);
+  private: void Stop();
+  private: void Start(int delay_ms, v8::Handle<v8::Function> callback);
+  private: void Start(int delay_ms, v8::Handle<v8::Function> callback,
+                      v8::Handle<v8::Value> receiver);
 
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };

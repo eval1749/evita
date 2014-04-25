@@ -10,34 +10,11 @@
 #include "common/memory/singleton.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/script_host.h"
-#include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
-#include "evita/v8_glue/function_template_builder.h"
 
 namespace dom {
 
 namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// TimerClass
-//
-class TimerClass : public v8_glue::WrapperInfo {
-  public: TimerClass(const char* name)
-      : v8_glue::WrapperInfo(name) {
-  }
-  public: ~TimerClass() = default;
-
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    builder
-        .SetProperty("isRunning", &Timer::is_running)
-        .SetMethod("start", &Timer::Start)
-        .SetMethod("stop", &Timer::Stop);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(TimerClass);
-};
-
 //////////////////////////////////////////////////////////////////////
 //
 // TimerList
@@ -65,15 +42,12 @@ class TimerList : public common::Singleton<TimerList> {
     timers_.erase(it);
   }
 };
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // Timer
 //
-DEFINE_SCRIPTABLE_OBJECT(Timer, TimerClass)
-
 Timer::Timer(Type type)
     : timer_(new base::Timer(type == Type::Repeating,
                              type == Type::Repeating)) {
@@ -103,14 +77,18 @@ void Timer::Stop() {
 }
 
 void Timer::Start(int delay_ms, v8::Handle<v8::Function> callback,
-                  v8_glue::Optional<v8::Handle<v8::Value>> opt_receiver) {
+                  v8::Handle<v8::Value> receiver) {
   auto const isolate = v8::Isolate::GetCurrent();
   callback_.Reset(isolate, callback);
-  receiver_.Reset(isolate, opt_receiver.is_supplied ? opt_receiver.value :
-                                                      GetWrapper(isolate));
+  receiver_.Reset(isolate, receiver);
   TimerList::instance()->Register(this);
   timer_->Start(FROM_HERE, base::TimeDelta::FromMilliseconds(delay_ms),
                 base::Bind(&Timer::DidFireTimer, base::Unretained(this)));
+}
+
+void Timer::Start(int delay_ms, v8::Handle<v8::Function> callback) {
+  auto const isolate = v8::Isolate::GetCurrent();
+  Start(delay_ms, callback, GetWrapper(isolate));
 }
 
 }  // namespace dom

@@ -87,11 +87,6 @@ var TextSelection = function() {};
 //
 /**
  * @constructor
- */
-var Timer = function() {};
-
-/**
- * @constructor
  * @extends {Timer}
  */
 var OneShotTimer = function() {};
@@ -101,7 +96,6 @@ var OneShotTimer = function() {};
  * @extends {Timer}
  */
 var RepeatingTimer = function() {};
-
 
 //////////////////////////////////////////////////////////////////////
 //

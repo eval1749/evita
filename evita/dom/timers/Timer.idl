@@ -1,0 +1,13 @@
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+callback TimerCallback = void();
+
+interface Timer {
+  readonly attribute boolean isRunning;
+
+  void start(long delayMs, TimerCallback callback);
+  void start(long delayMs, TimerCallback callback, any receiver);
+  void stop();
+};

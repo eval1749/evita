@@ -48,6 +48,7 @@
       'windows/Selection.idl',
       'windows/TableSelection.idl',
       'windows/TableWindow.idl',
+      'windows/TextSelection.idl',
       'windows/TextWindow.idl',
       'windows/Window.idl',
     ], # idl_files
@@ -170,6 +171,8 @@
       '<(glue_dir)/TextFieldControl.h',
       '<(glue_dir)/TextFieldSelection.cc',
       '<(glue_dir)/TextFieldSelection.h',
+      '<(glue_dir)/TextSelection.h',
+      '<(glue_dir)/TextSelection.cc',
       '<(glue_dir)/TextWindow.h',
       '<(glue_dir)/TextWindow.cc',
       '<(glue_dir)/Timer.cc',
@@ -242,6 +245,7 @@
       '<(js_externs_dir)/TextEncodeOptions_externs.js',
       '<(js_externs_dir)/TextFieldControl_externs.js',
       '<(js_externs_dir)/TextFieldSelection_externs.js',
+      '<(js_externs_dir)/TextSelection_externs.js',
       '<(js_externs_dir)/TextWindow_externs.js',
       '<(js_externs_dir)/Timer_externs.js',
       '<(js_externs_dir)/UiEvent_externs.js',
@@ -274,7 +278,6 @@
       'css/style_externs.js',
       'windows/tab_data_externs.js',
       'text/text_position_externs.js',
-      'windows/text_selection_externs.js',
       'jslib/editors_externs.js',
       'jslib/windows_externs.js',
     ], # static_js_externs_files

@@ -15,12 +15,17 @@ class Document;
 class Range;
 class TextWindow;
 
+namespace bindings {
+class TextSelectionClass;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // TextSelection
 //
 class TextSelection : public v8_glue::Scriptable<TextSelection, Selection> {
   DECLARE_SCRIPTABLE_OBJECT(TextSelection);
+  friend class bindings::TextSelectionClass;
 
   private: gc::Member<Range> range_;
   private: ::Selection* view_selection_;

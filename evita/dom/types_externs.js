@@ -66,14 +66,6 @@ var Range = function(document_or_range, opt_start, opt_end) {};
  */
 var Style = function() {};
 
-/**
- * @constructor
- * @extends {Selection}
- * You can't create |TextSelection| object directly. You can obtain
- * |TextSelection| object via |TextWindow.prototype.selection|.
- */
-var TextSelection = function() {};
-
 //////////////////////////////////////////////////////////////////////
 //
 // Editor.idl

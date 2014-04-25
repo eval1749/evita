@@ -77,7 +77,7 @@
    */
   function updateGoalX(selection, unit) {
     if (unit != Unit.SCREEN && unit != Unit.WINDOW_LINE) {
-      selection.goal_point_ = undefined;
+      selection.goal_point_ = null;
       return;
     }
     var focus = selection.startIsActive ? selection.range.start :
@@ -91,7 +91,7 @@
 
   /**
    * @param {Unit} unit
-   * @param {Alter} opt_alter, default is Alter.MOVE
+   * @param {Alter=} opt_alter, default is Alter.MOVE
    * @return {!TextSelection}
    */
   TextSelection.prototype.endKey = function(unit, opt_alter) {

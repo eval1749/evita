@@ -35,7 +35,7 @@
           });
       return selected_keys.length;
     }
-    var selection = window.selection;
+    var selection = /** @type{!TableSelection}*/(window.selection);
     var num_selected = countSelectedRows(selection);
     if (selection.lastSelectedRowCount_ == num_selected)
       return;

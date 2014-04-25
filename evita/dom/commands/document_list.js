@@ -28,7 +28,8 @@
    * @this {TableWindow}
    */
   function closeSelectedDocuments() {
-    var result_set = queryRows(this.selection, TableViewRowState.SELECTED);
+    var selection = /** @type{!TableSelection}*/(this.selection);
+    var result_set = queryRows(selection, TableViewRowState.SELECTED);
     var need_update = false;
     Object.keys(result_set).forEach(function(name) {
       var document = Document.find(name);
@@ -48,7 +49,8 @@
    * @this {TableWindow}
    */
   function openSelectedDocuments() {
-    var result_set = queryRows(this.selection, TableViewRowState.SELECTED);
+    var selection = /** @type{!TableSelection}*/(this.selection);
+    var result_set = queryRows(selection, TableViewRowState.SELECTED);
     var parent = /** @type {!Window} */(this.parent);
     var open_count = 0;
     Object.keys(result_set).forEach(function(name) {

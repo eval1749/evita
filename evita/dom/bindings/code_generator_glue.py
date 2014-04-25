@@ -126,6 +126,7 @@ IDL_TO_CPP_TYPE_MAP = {
     'TabData': CppType('domapi::TabData', is_by_value=False),
 
     # Glue specific types
+    'Alter': CppType('Alter'),
     'ArrayBufferView': CppType('gin::ArrayBufferView', is_by_value=False),
     'DataTransferData': CppType('DataTransferData', is_pointer=True),
     'EventListener': CppType('v8::Handle<v8::Object>'),
@@ -135,6 +136,7 @@ IDL_TO_CPP_TYPE_MAP = {
     'Rect': CppType('domapi::FloatRect'),
     # For Editor.localizeText
     'StringDict': CppType('v8::Handle<v8::Object>'),
+    'Unit': CppType('Unit'),
 
     # V8 types
     'Function': CppType('v8::Handle<v8::Function>'),

@@ -69,13 +69,6 @@ var Style = function() {};
 /**
  * @constructor
  * @extends {DocumentWindow}
- * @param {Document} document
- */
-var TableWindow = function(document) {};
-
-/**
- * @constructor
- * @extends {DocumentWindow}
  * @param {Range} range
  */
 var TextWindow = function(range) {};
@@ -108,6 +101,7 @@ var OneShotTimer = function() {};
  * @extends {Timer}
  */
 var RepeatingTimer = function() {};
+
 
 //////////////////////////////////////////////////////////////////////
 //

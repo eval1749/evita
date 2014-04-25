@@ -8,14 +8,20 @@
 #include "evita/gc/member.h"
 
 namespace dom {
+
 class Document;
+
+namespace bindings {
+class TableWindowClass;
+}
 
 // The |TableWindow| is DOM world representative of UI world TextWidget, aka
 // TextEditWindow.
 class TableWindow : public v8_glue::Scriptable<TableWindow, DocumentWindow> {
   DECLARE_SCRIPTABLE_OBJECT(TableWindow);
+  friend class bindings::TableWindowClass;
 
-  public: TableWindow(Document* document);
+  private: TableWindow(Document* document);
   public: virtual ~TableWindow();
 
   DISALLOW_COPY_AND_ASSIGN(TableWindow);

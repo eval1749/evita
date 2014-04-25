@@ -43,6 +43,7 @@
       'windows/Rect.idl',
       'windows/Selection.idl',
       'windows/TableSelection.idl',
+      'windows/TableWindow.idl',
       'windows/Window.idl',
     ], # idl_files
 
@@ -142,6 +143,8 @@
       '<(glue_dir)/Selection.h',
       '<(glue_dir)/TableSelection.cc',
       '<(glue_dir)/TableSelection.h',
+      '<(glue_dir)/TableWindow.cc',
+      '<(glue_dir)/TableWindow.h',
       '<(glue_dir)/TextDecodeOptions.h',
       '<(glue_dir)/TextDecodeOptions.cc',
       '<(glue_dir)/TextDecoder.h',
@@ -213,6 +216,7 @@
       '<(js_externs_dir)/RegExpInit_externs.js',
       '<(js_externs_dir)/Selection_externs.js',
       '<(js_externs_dir)/TableSelection_externs.js',
+      '<(js_externs_dir)/TableWindow_externs.js',
       '<(js_externs_dir)/TextDecodeOptions_externs.js',
       '<(js_externs_dir)/TextDecoder_externs.js',
       '<(js_externs_dir)/TextDecoderOptions_externs.js',
@@ -249,7 +253,6 @@
       'text/range_externs.js',
       'windows/document_state_externs.js',
       'css/style_externs.js',
-      'windows/table_window_externs.js',
       'windows/tab_data_externs.js',
       'text/text_position_externs.js',
       'windows/text_selection_externs.js',

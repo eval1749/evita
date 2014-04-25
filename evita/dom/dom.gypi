@@ -178,7 +178,7 @@
         'windows/table_selection.cc',
         'windows/text_selection.cc',
         'windows/text_window.cc',
-        'timer.cc',
+        'timers/timer.cc',
         'time_stamp.cc',
         'windows/window.cc',
         'windows/window_ostream.cc',
@@ -344,3 +344,4 @@
     },
   ], # targets
 }
+

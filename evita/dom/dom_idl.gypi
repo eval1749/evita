@@ -260,7 +260,7 @@
       'text/text_position_externs.js',
       'windows/text_selection_externs.js',
       'windows/text_window_externs.js',
-      'timer_externs.js',
+      'timers/timer_externs.js',
       'jslib/editors_externs.js',
       'jslib/windows_externs.js',
     ], # static_js_externs_files

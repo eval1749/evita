@@ -57,7 +57,7 @@
 #include "evita/dom/windows/table_window.h"
 #include "evita/dom/windows/text_selection.h"
 #include "evita/dom/windows/text_window.h"
-#include "evita/dom/timer.h"
+#include "evita/dom/timers/timer.h"
 #include "evita/dom/windows/window.h"
 
 namespace dom {

@@ -7,10 +7,15 @@
 
 namespace dom {
 
+namespace bindings {
+class RepeatingTimerClass;
+}
+
 class RepeatingTimer : public v8_glue::Scriptable<RepeatingTimer, Timer> {
   DECLARE_SCRIPTABLE_OBJECT(RepeatingTimer);
+  friend class bindings::RepeatingTimerClass;
 
-  public: RepeatingTimer();
+  private: RepeatingTimer();
   public: ~RepeatingTimer();
 
   DISALLOW_COPY_AND_ASSIGN(RepeatingTimer);

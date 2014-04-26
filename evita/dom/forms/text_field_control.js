@@ -331,12 +331,24 @@ Object.defineProperties(TextFieldControl.prototype, {
     selection.collapseTo(previousWord(selection, selection.focusOffset));
   });
 
+  bindKey('Ctrl+Backspace', function(selection) {
+    if (selection.collapsed)
+      selection.extendTo(previousWord(selection, selection.focusOffset));
+    setSelectionText(selection, '');
+  });
+
   bindKey('Ctrl+C', function(selection) {
     if (selection.collapsed)
       return;
     var items = DataTransfer.clipboard.items;
     items.clear();
     items.add(selection.text.replace(/\n/g, '\r\n'), 'text/plain');
+  });
+
+  bindKey('Ctrl+Delete', function(selection) {
+    if (selection.collapsed)
+      selection.extendTo(nextWord(selection, selection.focusOffset));
+    setSelectionText(selection, '');
   });
 
   bindKey('Ctrl+Shift+ArrowRight', function(selection) {

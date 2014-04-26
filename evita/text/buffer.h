@@ -58,6 +58,7 @@ class Buffer : public BufferCore,
   private: std::unique_ptr<IntervalSet> intervals_;
   private: std::unique_ptr<LineNumberCache> line_number_cache_;
   private: std::unique_ptr<MarkerSet> spelling_markers_;
+  private: std::unique_ptr<MarkerSet> syntax_markers_;
   private: std::unique_ptr<RangeSet> ranges_;
   private: std::unique_ptr<css::StyleResolver> style_resolver_;
   private: std::unique_ptr<UndoStack> undo_stack_;
@@ -91,6 +92,9 @@ class Buffer : public BufferCore,
     return spelling_markers_.get();
   }
   public: State state() const { return m_eState; }
+  public: MarkerSet* syntax_markers() const {
+    return syntax_markers_.get();
+  }
 
   public: const css::StyleResolver* style_resolver() const {
     return style_resolver_.get();

@@ -5,6 +5,7 @@
 #include "evita/views/text/text_formatter.h"
 
 #include "base/logging.h"
+#include "common/memory/singleton.h"
 #include "evita/css/style.h"
 #include "evita/css/style_resolver.h"
 #include "evita/css/style_selector.h"
@@ -74,27 +75,31 @@ class TextFormatter::TextScanner {
   private: Posn m_lPosn;
   private: const text::Buffer* m_pBuffer;
   private: text::Interval* m_pInterval;
-  private: mutable const text::Marker* marker_;
   private: char16 m_rgwch[80];
   private: const Selection& selection_;
   private: const css::Style selection_style_;
+  private: mutable const text::Marker* spelling_marker_;
+  private: mutable const text::Marker* syntax_marker_;
 
   public: TextScanner(const text::Buffer* buffer, Posn lPosn,
                       const Selection& selection)
       : m_pBuffer(buffer),
         m_lPosn(lPosn),
-        marker_(nullptr),
         selection_(selection),
-        selection_style_(SelectionStyle(buffer, selection)) {
+        selection_style_(SelectionStyle(buffer, selection)),
+        spelling_marker_(nullptr),
+        syntax_marker_(nullptr) {
     m_pInterval = m_pBuffer->GetIntervalAt(m_lPosn);
     DCHECK(m_pInterval);
     fill();
   }
 
-  public: text::Spelling spelling() const;
+
+  public: const common::AtomicString& spelling() const;
   public: const css::StyleResolver* style_resolver() const {
     return m_pBuffer->style_resolver();
   }
+  public: const common::AtomicString& syntax() const;
 
   public: bool AtEnd() const {
     return m_lBufStart == m_lBufEnd;
@@ -145,11 +150,22 @@ class TextFormatter::TextScanner {
 
 };
 
-text::Spelling TextFormatter::TextScanner::spelling() const {
-  if (!marker_ || m_lPosn >= marker_->end())
-    marker_ = m_pBuffer->spelling_markers()->GetLowerBoundMarker(m_lPosn);
-  return marker_ && marker_->Contains(m_lPosn) ?
-      static_cast<text::Spelling>(marker_->type()) : text::Spelling::None;
+const common::AtomicString& TextFormatter::TextScanner::spelling() const {
+  if (!spelling_marker_ || m_lPosn >= spelling_marker_->end()) {
+    spelling_marker_ = m_pBuffer->spelling_markers()->
+        GetLowerBoundMarker(m_lPosn);
+  }
+  return spelling_marker_ && spelling_marker_->Contains(m_lPosn) ?
+      spelling_marker_->type() : common::AtomicString::Empty();
+}
+
+const common::AtomicString& TextFormatter::TextScanner::syntax() const {
+  if (!syntax_marker_ || m_lPosn >= syntax_marker_->end()) {
+    syntax_marker_ = m_pBuffer->syntax_markers()->
+        GetLowerBoundMarker(m_lPosn);
+  }
+  return syntax_marker_ && syntax_marker_->Contains(m_lPosn) ?
+      syntax_marker_->type() : common::AtomicString::Empty();
 }
 
 RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
@@ -294,17 +310,21 @@ TextLine* TextFormatter::FormatLine() {
 Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
   auto const lPosn = text_scanner_->GetPosn();
   auto style = text_scanner_->GetStyle();
+
+  auto const spelling = text_scanner_->spelling();
+  if (!spelling.empty()) {
+    style.Merge(text_scanner_->style_resolver()->
+        ResolveWithoutDefaults(spelling));
+  }
+
+  auto const syntax = text_scanner_->syntax();
+  if (!syntax.empty()) {
+    style.Merge(text_scanner_->style_resolver()->
+        ResolveWithoutDefaults(syntax));
+  }
+
   style.Merge(text_scanner_->style_resolver()->Resolve(
     css::StyleSelector::defaults()));
-
-  switch (text_scanner_->spelling()) {
-    case text::Spelling::Misspelled:
-      style.set_text_decoration(css::TextDecoration::RedWave);
-      break;
-    case text::Spelling::BadGrammar:
-      style.set_text_decoration(css::TextDecoration::GreenWave);
-      break;
-  }
 
   if (0x09 == wch) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
@@ -319,8 +339,8 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
       return nullptr;
 
     auto const height = AlignHeightToPixel(m_gfx, pFont->height());
-    return new MarkerCell(text_scanner_->MakeRenderStyle(style, pFont), cx, height,
-                          lPosn, TextMarker::Tab);
+    return new MarkerCell(text_scanner_->MakeRenderStyle(style, pFont), cx,
+                          height, lPosn, TextMarker::Tab);
   }
 
   auto const pFont = wch < 0x20 || wch == 0xFEFF ?

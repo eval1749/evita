@@ -8,9 +8,9 @@
 
 namespace text {
 
-Marker::Marker(Posn start, Posn end, int type)
+Marker::Marker(Posn start, Posn end, const common::AtomicString& type)
     : end_(end), start_(start), type_(type) {
-  DCHECK_NE(None, type);
+  DCHECK(!type.empty());
   DCHECK_LT(start, end);
 }
 
@@ -19,7 +19,8 @@ Marker::Marker(const Marker& other)
 }
 
 Marker::Marker(Posn offset)
-    : end_(offset), start_(offset), type_(Marker::None) {
+    : end_(offset), start_(offset), 
+      type_(common::AtomicString::Empty()) {
 }
 
 Marker::Marker() : Marker(0) {
@@ -51,7 +52,7 @@ bool Marker::Contains(Posn offset) const {
 
 namespace std {
 ostream& operator<<(ostream& ostream, const text::Marker& marker) {
-  return ostream << "text::Marker(" << marker.type() << ", [" <<
+  return ostream << "text::Marker(" << marker.type().get() << ", [" <<
       marker.start() << ", " << marker.end() << "])";
 }
 

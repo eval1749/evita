@@ -7,19 +7,28 @@
 namespace css {
 
 #define DEFINE_STYLE_SELECTOR(name) \
-  const base::string16& StyleSelector::name() { \
-    DEFINE_STATIC_LOCAL(base::string16, name, (L ## #name)); \
+  const common::AtomicString& StyleSelector::name() { \
+    DEFINE_STATIC_LOCAL(common::AtomicString, name, (L ## #name)); \
     return name; \
   }
 
 DEFINE_STYLE_SELECTOR(active_selection)
+DEFINE_STYLE_SELECTOR(bad_grammar)
 DEFINE_STYLE_SELECTOR(comment)
 DEFINE_STYLE_SELECTOR(defaults)
 DEFINE_STYLE_SELECTOR(end_of_file_marker)
 DEFINE_STYLE_SELECTOR(end_of_line_marker)
+DEFINE_STYLE_SELECTOR(html_attribute_name)
+DEFINE_STYLE_SELECTOR(html_attribute_value)
+DEFINE_STYLE_SELECTOR(html_comment)
+DEFINE_STYLE_SELECTOR(html_element_name)
+DEFINE_STYLE_SELECTOR(html_entity)
+DEFINE_STYLE_SELECTOR(identifier)
 DEFINE_STYLE_SELECTOR(inactive_selection)
 DEFINE_STYLE_SELECTOR(line_wrap_marker)
+DEFINE_STYLE_SELECTOR(literal)
 DEFINE_STYLE_SELECTOR(keyword)
+DEFINE_STYLE_SELECTOR(misspelled)
 DEFINE_STYLE_SELECTOR(normal)
 DEFINE_STYLE_SELECTOR(operators)
 DEFINE_STYLE_SELECTOR(string_literal)

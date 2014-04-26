@@ -7,7 +7,9 @@
 
 #include <functional>
 #include <ostream>
+
 #include "base/basictypes.h"
+#include "common/strings/atomic_string.h"
 
 namespace text {
 
@@ -16,14 +18,13 @@ class MarkerSet;
 class Marker {
   friend class MarkerSet;
 
-  public: static const int None = 0;
   private: Posn end_;
   private: Posn start_;
-  private: int type_;
+  private: common::AtomicString type_;
 
-  public: Marker(Posn start, Posn end, int type);
+  public: Marker(Posn start, Posn end, const common::AtomicString& type);
   public: Marker(const Marker& other);
-  private: Marker(Posn start);
+  private: explicit Marker(Posn start);
   public: Marker();
   public: ~Marker();
 
@@ -34,7 +35,7 @@ class Marker {
 
   public: Posn end() const { return end_; }
   public: Posn start() const { return start_; }
-  public: int type() const { return type_; }
+  public: const common::AtomicString& type() const { return type_; }
 
   public: bool Contains(Posn offset) const;
 };

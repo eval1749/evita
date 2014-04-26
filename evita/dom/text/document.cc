@@ -9,6 +9,7 @@
 #include "base/logging.h"
 #include "base/memory/ref_counted.h"
 #include "base/strings/stringprintf.h"
+#include "evita/css/style_selector.h"
 #include "evita/editor/application.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/text/document_set.h"
@@ -25,6 +26,7 @@
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
+
 #include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/runner.h"
@@ -184,6 +186,7 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
       .SetMethod("startUndoGroup_", &Document::StartUndoGroup)
       .SetMethod("spellingAt", &Document::spelling_at)
       .SetMethod("styleAt", &Document::style_at)
+      .SetMethod("syntaxAt", &Document::syntax_at)
       .SetMethod("undo", &Document::Undo);
 }
 
@@ -276,11 +279,26 @@ int Document::spelling_at(text::Posn offset) const {
   if (!IsValidPosition(offset))
     return 0;
   auto const marker = buffer_->spelling_markers()->GetMarkerAt(offset);
-  return marker ? marker->type() : static_cast<int>(text::Spelling::None);
+  if (!marker)
+    return 0;
+  if (*marker->type().get() == L"normal")
+    return 1;
+  if (*marker->type().get() == L"misspelled")
+    return 2;
+  if (*marker->type().get() == L"bad_grammar")
+    return 3;
+  return 0;
 }
 
 int Document::state() const {
   return buffer_->state();
+}
+
+const base::string16& Document::syntax_at(text::Posn offset) const {
+  if (!IsValidPosition(offset))
+    return common::AtomicString::Empty();
+  auto const marker = buffer_->syntax_markers()->GetMarkerAt(offset);
+  return marker ? marker->type() : css::StyleSelector::normal();
 }
 
 bool Document::CheckCanChange() const {

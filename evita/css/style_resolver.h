@@ -12,13 +12,17 @@
 #include "base/strings/string16.h"
 #include "evita/css/style_sheet_observer.h"
 
+namespace common {
+class AtomicString;
+}
+
 namespace css {
 
 class Style;
 class StyleSheet;
 
 class StyleResolver : private StyleSheetObserver {
-  private: typedef std::unordered_map<base::string16,
+  private: typedef std::unordered_map<const base::string16*,
                                       std::unique_ptr<Style>> StyleCache;
 
   private: mutable StyleCache partial_style_cache_;
@@ -32,9 +36,14 @@ class StyleResolver : private StyleSheetObserver {
   private: void ClearCache();
   private: void InvalidateCache(const StyleRule*rule);
   public: void RemoveStyleSheet(const StyleSheet* style_sheet);
+
   public: const Style& Resolve(const base::string16& selector) const;
+  public: const Style& Resolve(const common::AtomicString& selector) const;
+
   public: const Style& ResolveWithoutDefaults(
       const base::string16& selector) const;
+  public: const Style& ResolveWithoutDefaults(
+      const common::AtomicString& selector) const;
 
   // css::StyleSheetObserver
   private: virtual void DidAddRule(const StyleRule* rule) override;

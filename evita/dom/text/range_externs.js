@@ -93,6 +93,8 @@ Range.prototype.moveEndWhile = function(char_set, opt_count) {};
  * @param {number=} opt_count, defualt is one.
  * @return {!Range}
  */
+
+
 Range.prototype.moveStart = function(unit, opt_count) {};
 
 /**
@@ -125,6 +127,11 @@ Range.prototype.setSpelling = function(spelling) {};
 Range.prototype.setStyle = function(style_dict) {};
 
 /**
+ * @param {string} syntax
+ */
+Range.prototype.setSyntax = function(syntax) {};
+
+/**
  * @param {Unit} unit
  * @param {Alter=} opt_alter, default is Alter.MOVE.
  * @return {!Range}
@@ -136,6 +143,7 @@ Range.prototype.toLocaleLowerCase = function() {}
 
 /** @return {!Range} */
 Range.prototype.toLocaleUpperCase = function() {}
+
 
 /** @return {!Range} */
 Range.prototype.toLowerCase = function() {}

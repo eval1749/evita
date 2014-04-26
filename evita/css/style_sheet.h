@@ -15,12 +15,17 @@
 #include "base/strings/string16.h"
 #include "evita/css/style_sheet_observer.h"
 
+namespace common {
+class AtomicString;
+}
+
 namespace css {
 
 class Style;
 
 class StyleSheet {
-  private: typedef std::unordered_map<base::string16, std::unique_ptr<Style>>
+  private: typedef std::unordered_map<const base::string16*,
+                                      std::unique_ptr<Style>>
       StyleMap;
 
   private: ObserverList<StyleSheetObserver> observers_;
@@ -31,7 +36,10 @@ class StyleSheet {
 
   public: void AddObserver(StyleSheetObserver* observer) const;
   public: void AddRule(const base::string16& selector, const Style& style);
+  public: void AddRule(const common::AtomicString& selector,
+                       const Style& style);
   public: const Style* Find(const base::string16& selector) const;
+  public: const Style* Find(const common::AtomicString& selector) const;
   public: void RemoveObserver(StyleSheetObserver* observer) const;
 
   DISALLOW_COPY_AND_ASSIGN(StyleSheet);

@@ -3,6 +3,7 @@
 
 #include "evita/dom/text/range.h"
 
+#include "evita/css/style_selector.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/text/document.h"
@@ -10,6 +11,7 @@
 #include "evita/text/buffer.h"
 #include "evita/text/marker_set.h"
 #include "evita/text/range.h"
+#include "evita/text/spelling.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/either.h"
@@ -64,7 +66,8 @@ class RangeClass : public v8_glue::WrapperInfo {
         .SetMethod("collapseTo", &Range::CollapseTo)
         .SetMethod("insertBefore", &Range::InsertBefore)
         .SetMethod("setSpelling", &Range::SetSpelling)
-        .SetMethod("setStyle", &Range::SetStyle);
+        .SetMethod("setStyle", &Range::SetStyle)
+        .SetMethod("setSyntax", &Range::SetSyntax);
   }
 
   DISALLOW_COPY_AND_ASSIGN(RangeClass);
@@ -133,14 +136,39 @@ Range* Range::InsertBefore(const base::string16& text) {
   return this;
 }
 
-void Range::SetSpelling(int spelling) const {
+void Range::SetSpelling(int spelling_code) const {
+  struct Local {
+    static const common::AtomicString& MapToSpelling(int spelling_code) {
+      switch (spelling_code) {
+        case text::Spelling::None:
+          return common::AtomicString::Empty();
+        case text::Spelling::Corrected:
+          return css::StyleSelector::normal();
+        case text::Spelling::Misspelled:
+          return css::StyleSelector::misspelled();
+        case text::Spelling::BadGrammar:
+          return css::StyleSelector::bad_grammar();
+      }
+      return common::AtomicString::Empty();
+    }
+  };
   if (collapsed()) {
     ScriptHost::instance()->ThrowError(
       "Can't set spelling for collapsed range.");
     return;
   }
   document_->buffer()->spelling_markers()->InsertMarker(
-    range_->GetStart(), range_->GetEnd(), spelling);
+    range_->GetStart(), range_->GetEnd(), Local::MapToSpelling(spelling_code));
+}
+
+void Range::SetSyntax(const base::string16& syntax) const {
+  if (collapsed()) {
+    ScriptHost::instance()->ThrowError(
+      "Can't set syntax for collapsed range.");
+    return;
+  }
+  document_->buffer()->syntax_markers()->InsertMarker(
+    range_->GetStart(), range_->GetEnd(), common::AtomicString(syntax));
 }
 
 }  // namespace dom

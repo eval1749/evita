@@ -5,6 +5,7 @@
 #include "evita/css/style_resolver.h"
 
 #include "base/logging.h"
+#include "common/strings/atomic_string.h"
 #include "evita/css/style.h"
 #include "evita/css/style_rule.h"
 #include "evita/css/style_selector.h"
@@ -15,6 +16,14 @@
 namespace css {
 
 namespace {
+void InstallSyntaxColor(StyleSheet* style_sheet,
+                        const common::AtomicString& selector,
+                        const Color& color) {
+  Style style;
+  style.set_color(color);
+  style_sheet->AddRule(selector, style);
+}
+
 StyleSheet* GetDefaultStyleSheet() {
   DEFINE_STATIC_LOCAL(StyleSheet, default_style_sheet, ());
   if (default_style_sheet.Find(StyleSelector::defaults()))
@@ -68,6 +77,39 @@ StyleSheet* GetDefaultStyleSheet() {
   default_style_sheet.AddRule(StyleSelector::inactive_selection(),
                               inactive_selection);
 
+  // Spelling
+  Style red_wave;
+  red_wave.set_text_decoration(css::TextDecoration::RedWave);
+  default_style_sheet.AddRule(StyleSelector::misspelled(), red_wave);
+
+  Style green_wave;
+  green_wave.set_text_decoration(css::TextDecoration::GreenWave);
+  default_style_sheet.AddRule(StyleSelector::bad_grammar(), green_wave);
+
+  // Syntax
+  InstallSyntaxColor(&default_style_sheet,
+                     StyleSelector::comment(), Color(0, 128, 0));
+  InstallSyntaxColor(&default_style_sheet,
+                     StyleSelector::html_attribute_name(), Color(128, 0, 128));
+  InstallSyntaxColor(&default_style_sheet,
+                     StyleSelector::html_attribute_value(), Color(128, 0, 0));
+  InstallSyntaxColor(&default_style_sheet,
+                     StyleSelector::html_comment(), Color(0, 128, 0));
+  InstallSyntaxColor(&default_style_sheet,
+                     StyleSelector::html_element_name(), Color(128, 0, 0));
+  InstallSyntaxColor(&default_style_sheet,
+                     StyleSelector::html_element_name(), Color(0, 0, 128));
+  InstallSyntaxColor(&default_style_sheet,
+                     StyleSelector::identifier(), Color(0, 0, 0));
+  InstallSyntaxColor(&default_style_sheet,
+                     StyleSelector::keyword(), Color(0, 0, 255));
+  InstallSyntaxColor(&default_style_sheet,
+                     StyleSelector::literal(), Color(0, 0, 128));
+  InstallSyntaxColor(&default_style_sheet,
+                     StyleSelector::operators(), Color(0, 0, 128));
+  InstallSyntaxColor(&default_style_sheet,
+                     StyleSelector::string_literal(), Color(163, 21, 21));
+
   return &default_style_sheet;
 }
 }  // namespace
@@ -97,11 +139,11 @@ void StyleResolver::InvalidateCache(const StyleRule* rule) {
   if (rule->selector() == StyleSelector::defaults()) {
     ClearCache();
   } else {
-    auto it = style_cache_.find(rule->selector());
+    auto it = style_cache_.find(rule->selector().get());
     if (it != style_cache_.end())
       style_cache_.erase(it);
 
-    auto it2 = partial_style_cache_.find(rule->selector());
+    auto it2 = partial_style_cache_.find(rule->selector().get());
     if (it2 != partial_style_cache_.end())
       partial_style_cache_.erase(it);
   }
@@ -117,7 +159,12 @@ void StyleResolver::RemoveStyleSheet(const StyleSheet* style_sheet) {
 }
 
 const Style& StyleResolver::Resolve(const base::string16& selector) const {
-  auto const cache = style_cache_.find(selector);
+  return Resolve(common::AtomicString(selector));
+}
+
+const Style& StyleResolver::Resolve(
+    const common::AtomicString& selector) const {
+  auto const cache = style_cache_.find(selector.get());
   if (cache != style_cache_.end())
     return *cache->second;
 
@@ -126,13 +173,18 @@ const Style& StyleResolver::Resolve(const base::string16& selector) const {
     style.Merge(Resolve(StyleSelector::defaults()));
   auto new_style = std::make_unique<Style>(style);
   auto const new_style_ptr = new_style.get();
-  style_cache_[selector] = std::move(new_style);
+  style_cache_[selector.get()] = std::move(new_style);
   return *new_style_ptr;
 }
 
 const Style& StyleResolver::ResolveWithoutDefaults(
     const base::string16& selector) const {
-  auto const cache = partial_style_cache_.find(selector);
+  return ResolveWithoutDefaults(common::AtomicString(selector));
+}
+
+const Style& StyleResolver::ResolveWithoutDefaults(
+    const common::AtomicString& selector) const {
+  auto const cache = partial_style_cache_.find(selector.get());
   if (cache != partial_style_cache_.end())
     return *cache->second;
 
@@ -142,7 +194,7 @@ const Style& StyleResolver::ResolveWithoutDefaults(
       new_style->OverrideBy(*style);
   }
   auto const new_style_ptr = new_style.get();
-  style_cache_[selector] = std::move(new_style);
+  style_cache_[selector.get()] = std::move(new_style);
   return *new_style_ptr;
 }
 

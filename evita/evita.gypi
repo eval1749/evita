@@ -46,6 +46,7 @@
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
+        '<(DEPTH)/common/common.gyp:common',
         '<(DEPTH)/regex/regex.gyp:regex_lib',
         'encodings',
       ], # dependencies

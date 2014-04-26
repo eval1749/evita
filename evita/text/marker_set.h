@@ -16,6 +16,10 @@
 #include "evita/text/marker.h"
 #include "evita/text/marker_set_observer.h"
 
+namespace common {
+class AtomicString;
+}
+
 namespace text {
 
 class MarkerSet;
@@ -51,7 +55,8 @@ class MarkerSet : public BufferMutationObserver {
   private: void NotifyChange(Posn start, Posn end);
 
   // Insert marker from |start| to |end|, exclusive.
-  public: void InsertMarker(Posn start, Posn end, int type);
+  public: void InsertMarker(Posn start, Posn end,
+                            const common::AtomicString& type);
 
   // Remove marker from |start| to |end|, exclusive.
   private: void RemoveMarker(Posn start, Posn end);

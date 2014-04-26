@@ -26,6 +26,7 @@ Buffer::Buffer(const base::string16& name)
       ranges_(new RangeSet(this)),
       spelling_markers_(new MarkerSet(this)),
       style_resolver_(new css::StyleResolver()),
+      syntax_markers_(new MarkerSet(this)),
       undo_stack_(new UndoStack(this)),
       m_eState(State_Ready),
       m_fReadOnly(false),
@@ -34,10 +35,12 @@ Buffer::Buffer(const base::string16& name)
       m_nSaveTick(1),
       name_(name) {
   spelling_markers_->AddObserver(this);
+  syntax_markers_->AddObserver(this);
 }
 
 Buffer::~Buffer() {
   spelling_markers_->RemoveObserver(this);
+  syntax_markers_->RemoveObserver(this);
 }
 
 void Buffer::AddObserver(BufferMutationObserver* observer) {

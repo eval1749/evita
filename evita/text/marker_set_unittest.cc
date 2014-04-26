@@ -20,16 +20,16 @@ class MockBufferMutationObservee : public text::BufferMutationObservee {
 };
 
 class MarkerSetTest : public ::testing::Test {
-  protected: enum Spelling {
-    None,
-    Correct,
-    Misspelled,
-  };
+  protected: const common::AtomicString Correct;
+  protected: const common::AtomicString Misspelled;
 
   private: MockBufferMutationObservee mutation_observee_;
   private: MarkerSet marker_set_;
 
-  protected: MarkerSetTest() : marker_set_(&mutation_observee_) {
+  protected: MarkerSetTest()
+    : Correct(L"Correct"),
+      Misspelled(L"Misspelled"),
+      marker_set_(&mutation_observee_) {
   }
   public: virtual ~MarkerSetTest() {
   }
@@ -45,7 +45,8 @@ class MarkerSetTest : public ::testing::Test {
     return marker ? *marker : Marker();
   }
 
-  protected: void InsertMarker(text::Posn start, text::Posn end, int type) {
+  protected: void InsertMarker(text::Posn start, text::Posn end,
+                               const common::AtomicString& type) {
     marker_set()->InsertMarker(start, end, type);
   }
 
@@ -106,6 +107,7 @@ TEST_F(MarkerSetTest, DeleteMarker_same) {
 TEST_F(MarkerSetTest, DeleteMarker_split) {
   // before: -CCCCCC--
   // insert: ---__--
+
   // after:  -CC__CC--
   InsertMarker(200, 400, Correct);
   RemoveMarker(250, 350);

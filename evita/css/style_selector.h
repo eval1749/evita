@@ -5,7 +5,7 @@
 #if !defined(INCLUDE_evita_css_style_selector_h)
 #define INCLUDE_evita_css_style_selector_h
 
-#include "base/strings/string16.h"
+#include "common/strings/atomic_string.h"
 
 namespace css {
 
@@ -13,18 +13,27 @@ class StyleSelector {
   public: StyleSelector() = delete;
   public: ~StyleSelector() = delete;
 
-  public: static const base::string16& active_selection();
-  public: static const base::string16& comment();
-  public: static const base::string16& defaults();
-  public: static const base::string16& end_of_file_marker();
-  public: static const base::string16& end_of_line_marker();
-  public: static const base::string16& inactive_selection();
-  public: static const base::string16& line_wrap_marker();
-  public: static const base::string16& normal();
-  public: static const base::string16& keyword();
-  public: static const base::string16& operators();
-  public: static const base::string16& string_literal();
-  public: static const base::string16& tab_marker();
+  public: static const common::AtomicString& active_selection();
+  public: static const common::AtomicString& bad_grammar();
+  public: static const common::AtomicString& comment();
+  public: static const common::AtomicString& defaults();
+  public: static const common::AtomicString& end_of_file_marker();
+  public: static const common::AtomicString& end_of_line_marker();
+  public: static const common::AtomicString& html_attribute_name();
+  public: static const common::AtomicString& html_attribute_value();
+  public: static const common::AtomicString& html_comment();
+  public: static const common::AtomicString& html_element_name();
+  public: static const common::AtomicString& html_entity();
+  public: static const common::AtomicString& identifier();
+  public: static const common::AtomicString& inactive_selection();
+  public: static const common::AtomicString& keyword();
+  public: static const common::AtomicString& line_wrap_marker();
+  public: static const common::AtomicString& literal();
+  public: static const common::AtomicString& misspelled();
+  public: static const common::AtomicString& normal();
+  public: static const common::AtomicString& operators();
+  public: static const common::AtomicString& string_literal();
+  public: static const common::AtomicString& tab_marker();
 };
 
 }  // namespace css

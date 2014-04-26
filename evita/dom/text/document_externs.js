@@ -238,6 +238,12 @@ Document.prototype.spellingAt = function(offset) {};
  */
 Document.prototype.styleAt = function(position) {};
 
+/**
+ * @param {!TextOffset} offset
+ * @return {number}
+ */
+Document.prototype.syntaxAt = function(offset) {};
+
 /** @param {!TextOffset} position */
 Document.prototype.undo = function(position) {}
 

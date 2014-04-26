@@ -65,6 +65,8 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: bool read_only() const;
   public: void set_read_only(bool read_only) const;
   public: int spelling_at(text::Posn offset) const;
+  // Returns syntax at |ofset|.
+  public: const base::string16& syntax_at(text::Posn offset) const;
   // Returns document state, load, ready, or save.
   public: int state() const;
   public: v8::Handle<v8::Object> style_at(text::Posn position) const;

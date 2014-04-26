@@ -94,10 +94,11 @@ const Marker* MarkerSet::GetLowerBoundMarker(Posn offset) const {
   return *present;
 }
 
-void MarkerSet::InsertMarker(Posn start, Posn end, int type) {
+void MarkerSet::InsertMarker(Posn start, Posn end,
+                             const common::AtomicString& type) {
   DCHECK_LT(start, end);
   RemoveMarker(start, end);
-  if (!type)
+  if (type.empty())
     return;
 
   auto const after = lower_bound(end);

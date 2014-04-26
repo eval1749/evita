@@ -339,6 +339,16 @@ Object.defineProperties(TextFieldControl.prototype, {
     items.add(selection.text.replace(/\n/g, '\r\n'), 'text/plain');
   });
 
+  bindKey('Ctrl+Shift+ArrowRight', function(selection) {
+    selection.extendTo(nextWord(selection, selection.focusOffset));
+  });
+
+  bindKey('Ctrl+Shift+ArrowLeft', function(selection) {
+    selection.extendTo(previousWord(selection, selection.focusOffset));
+  });
+
+  bindKey('Ctrl+Shift+Delete', keyBindingOf('Ctrl+C'));
+
   bindKey('Ctrl+V', function(selection) {
     var items = DataTransfer.clipboard.items;
     if (!items.length)
@@ -371,6 +381,7 @@ Object.defineProperties(TextFieldControl.prototype, {
     selection.collapseTo(MAX_OFFSET);
   });
 
+
   bindKey('Home', function(selection) {
     selection.collapseTo(0);
   });
@@ -382,16 +393,6 @@ Object.defineProperties(TextFieldControl.prototype, {
   bindKey('Shift+ArrowRight', function(selection) {
     ++selection.focusOffset;
   });
-
-  bindKey('Shift+Ctrl+ArrowRight', function(selection) {
-    selection.extendTo(nextWord(selection, selection.focusOffset));
-  });
-
-  bindKey('Shift+Ctrl+ArrowLeft', function(selection) {
-    selection.extendTo(previousWord(selection, selection.focusOffset));
-  });
-
-  bindKey('Shift+Ctrl+Delete', keyBindingOf('Ctrl+C'));
   bindKey('Shift+Delete', keyBindingOf('Ctrl+X'));
   bindKey('Shift+Insert', keyBindingOf('Ctrl+V'));
 

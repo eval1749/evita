@@ -19,6 +19,8 @@
         '<(DEPTH)/base/base.gyp:base',
       ], # dependencies
       'sources': [
+        'strings/atomic_string.cc',
+        'strings/atomic_string.h',
         'timer/timer.cc',
         'win/native_window.cc',
         'win/point_ostream.cc',
@@ -45,8 +47,12 @@
         'castable_unittest.cc',
         'memory/ref_counted_unittest.cc',
         'memory/scoped_refptr_unittest.cc',
+        'strings/atomic_string_unittest.cc',
         'tree/node_unittest.cc',
       ], # sources
+      'msvs_disabled_warnings': [
+        4625, 4626, 4826,
+      ],
     }, # common_test
   ], # targets
 

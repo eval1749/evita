@@ -171,6 +171,7 @@
       '<(glue_dir)/TextFieldControl.h',
       '<(glue_dir)/TextFieldSelection.cc',
       '<(glue_dir)/TextFieldSelection.h',
+
       '<(glue_dir)/TextSelection.h',
       '<(glue_dir)/TextSelection.cc',
       '<(glue_dir)/TextWindow.h',
@@ -279,6 +280,7 @@
       'windows/tab_data_externs.js',
       'text/text_position_externs.js',
       'jslib/editors_externs.js',
+      'jslib/ordered_set_externs.js',
       'jslib/windows_externs.js',
     ], # static_js_externs_files
 

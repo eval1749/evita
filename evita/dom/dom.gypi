@@ -64,6 +64,7 @@
       'windows/window.js',
 
       'jslib/editors.js',
+      'jslib/ordered_set.js',
       'jslib/windows.js',
 
       'console.js',

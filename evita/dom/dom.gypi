@@ -47,6 +47,10 @@
       'forms/text_field_control.js',
       'forms/text_field_selection.js',
 
+      'lexers/lexer.js',
+      'lexers/cmd_lexer.js',
+      'lexers/config_lexer.js',
+
       'text/modes/modes.js',
       'os/file.js',
       'os/process.js',

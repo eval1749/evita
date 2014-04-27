@@ -164,6 +164,18 @@ v8::Handle<v8::Promise> Editor::CheckSpelling(
       word_to_check));
 }
 
+bool Editor::CollectGarbage(int hint) {
+  if (hint >= 1 && hint <= 1000)
+    return v8::V8::IdleNotification(hint);
+  v8::V8::LowMemoryNotification();
+  return false;
+}
+
+bool Editor::CollectGarbage() {
+  v8::V8::LowMemoryNotification();
+  return false;
+}
+
 v8::Handle<v8::Promise> Editor::GetFileNameForLoad(
     Window* window, const base::string16& dir_path) {
   return PromiseResolver::SlowCall(base::Bind(

@@ -20,6 +20,12 @@ interface Editor {
 
   static Promise/* string */ checkSpelling(DOMString word_to_check);
 
+  /*
+   * |hint| is 1 to 1000: |v8::V8::IdelNotification(|hint|)|
+   * otherwise call |v8::V8::LowMemoryNotification()|
+   */
+  static boolean collectGarbage(optional long hint);
+
   [ImplementedAs=JavaScript]
   static void exit();
 

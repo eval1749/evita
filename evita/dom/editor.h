@@ -26,6 +26,14 @@ class Editor : public v8_glue::Scriptable<Editor> {
 
   private: static v8::Handle<v8::Promise> Editor::CheckSpelling(
       const base::string16& word_to_check);
+
+  /*
+   * |hint| is 1 to 1000: |v8::V8::IdelNotification(|hint|)|
+   * otherwise call |v8::V8::LowMemoryNotification()|
+   */
+  private: static bool CollectGarbage(int hint);
+  private: static bool CollectGarbage();
+
   private: static v8::Handle<v8::Promise> GetFileNameForLoad(
       Window* window, const base::string16& dir_path);
   private: static v8::Handle<v8::Promise> GetFileNameForSave(

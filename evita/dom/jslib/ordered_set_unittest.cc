@@ -44,7 +44,11 @@ TEST_F(OrderedSetTest, all) {
       "set.forEach(function(data) { result.push(data) });");
   EXPECT_SCRIPT_EQ("0 5 10 15 20 25", "result.join(' ')");
 
-  EXPECT_SCRIPT_VALID("set.remove(set.find(10));");
+  EXPECT_SCRIPT_EQ("false", "set.remove(-1);");
+  EXPECT_SCRIPT_EQ("false", "set.remove(1);");
+  EXPECT_SCRIPT_EQ("false", "set.remove(11);");
+  EXPECT_SCRIPT_EQ("false", "set.remove(31);");
+  EXPECT_SCRIPT_EQ("true", "set.remove(10);");
   EXPECT_SCRIPT_EQ("5", "set.size");
   EXPECT_SCRIPT_EQ("null", "set.find(10)");
   EXPECT_SCRIPT_EQ("15", "set.lowerBound(10).data");

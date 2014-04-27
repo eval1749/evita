@@ -67,6 +67,6 @@ OrderedSet.prototype.lowerBound= function(data) {};
 
 /**
  * @template T
- * @param {!OrderedSetNode.<T>} node
+ * @param {T} data
  */
-OrderedSet.prototype.remove = function(node) {};
+OrderedSet.prototype.remove = function(data) {};

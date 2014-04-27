@@ -102,6 +102,7 @@ global.OrderedSet = (function() {
    * @this {!OrderedSetNode.<T>}
    * @return {?OrderedSetNode.<T>}
    */
+
   function previousNode() {
     var node = this;
     if (node.left_) {
@@ -301,41 +302,27 @@ global.OrderedSet = (function() {
   /**
    * @template T
    * @this {OrderedSet}
-   * @param {T} node
+   * @param {T} data
+   * @return {boolean}
    */
-  function remove(node) {
-    if (!this.root_)
-      throw new Error('Assertion failed: node is not in tree');
-    this.root_ = removeImpl(this.less_, this.root_, node);
-    if (this.root_)
-      this.root_.parent_ = null;
+  function remove(data) {
+    var node = this.find(data);
+    if (!node)
+      return false;
+    var parent = node.parent_;
+    var child = removeNode(node);
+    if (!parent)
+      this.root_ = child;
+    else if (parent.left_ == node)
+      parent.left_ = child;
+    else if (parent.right_ == node)
+      parent.right_ = child;
+    else
+      throw new Error('Tree is broken');
+    if (child)
+      child.parent_ = parent;
     --this.size_;
-  }
-
-  /**
-   * @template T
-   * @param {!function(T, T): boolean} less
-   * @param {!OrderedSetNode.<T>} parent
-   * @param {!OrderedSetNode.<T>} node
-   * @return {?OrderedSetNode.<T>}
-   */
-  function removeImpl(less, parent, node) {
-    if (parent == node)
-      return removeNode(parent);
-    if (less(node.data_, parent.data_)) {
-      if (!parent.left_)
-        throw new Error('Assertion failed: parent.left_');
-      parent.left_ = removeImpl(less, parent.left_, node);
-      if (parent.left_)
-        parent.left_.parent_ = parent;
-    } else {
-      if (!parent.right_)
-        throw new Error('Assertion failed: parent.left_');
-      parent.right_ = removeImpl(less, parent.right_, node);
-      if (parent.right_)
-        parent.right_.parent_ = parent;
-    }
-    return parent;
+    return true;
   }
 
   OrderedSet.prototype = Object.create(

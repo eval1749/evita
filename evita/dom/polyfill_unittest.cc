@@ -33,4 +33,24 @@ TEST_F(PolyfillTest, Array_find) {
   EXPECT_SCRIPT_TRUE("list.find(predicate(4)) == undefined");
 }
 
+TEST_F(PolyfillTest, Map_keys) {
+  EXPECT_SCRIPT_VALID(
+      "var map = new Map();"
+      "map.set('one', 1);"
+      "map.set('two', 2);"
+      "map.set('three', 2);"
+      "var keys = map.keys().sort();");
+  EXPECT_SCRIPT_EQ("one three two", "keys.join(' ')");
+}
+
+TEST_F(PolyfillTest, Set_keys) {
+  EXPECT_SCRIPT_VALID(
+      "var set = new Set();"
+      "set.add('one');"
+      "set.add('two');"
+      "set.add('three');"
+      "var keys = set.keys().sort();");
+  EXPECT_SCRIPT_EQ("one three two", "keys.join(' ')");
+}
+
 }  // namespace

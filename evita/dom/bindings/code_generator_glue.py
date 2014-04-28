@@ -69,6 +69,9 @@ class GlueType(object):
             return self.cpp_name + '*'
         return self.cpp_name
 
+    def display_str(self):
+        return self.idl_type.base_type
+
     # Used for variable declaration of output parameter of |gin::ConvertFromV8|.
     def from_v8_str(self):
         if self.idl_type.is_union_type:
@@ -77,6 +80,7 @@ class GlueType(object):
             return 'std::vector<%s>' % self.cpp_name
         if self.is_collectable:
             if self.idl_type.is_nullable:
+                global global_has_nullable
                 global_has_nullable = True
                 return 'v8_glue::Nullable<%s>' % self.cpp_name
             return self.cpp_name + '*'
@@ -96,17 +100,13 @@ class GlueType(object):
         return self.cpp_name
 
     def to_v8_str(self):
-        if self.idl_type.is_union_type:
-            raise Exception("Union type isn't supported.")
-        if self.idl_type.is_array or self.idl_type.is_sequence:
-            return 'const std::vector<%s>&' % self.cpp_name
-        if self.is_collectable:
-            return self.cpp_name + '*'
-        if self.is_pointer:
-            return self.cpp_name + '*'
-        if not self.is_by_value:
-            return 'const %s&' % self.cpp_name
-        return self.cpp_name
+        if self.cpp_name == 'void':
+            return self.cpp_name
+        if self.is_collectable and self.idl_type.is_nullable:
+            global global_has_nullable
+            global_has_nullable = True
+            return 'v8_glue::Nullable<%s>' % self.cpp_name
+        return 'auto'
 
 
 class CppType(object):
@@ -256,12 +256,13 @@ def dictionary_member_context(member):
         'cpp_name': cpp_name,
         'declare_type': glue_type.declare_str(),
         'default_value': cpp_value(member.default_value),
+        'display_type': glue_type.display_str(),
+        'from_v8_type': glue_type.from_v8_str(),
         'has_default_value': member.default_value != None,
         'is_nullable': member.idl_type.is_nullable,
         'name': member.name,
         'parameter_type': glue_type.return_str(),
         'return_type': glue_type.return_str(),
-        'type': member.idl_type.base_type,
     }
 
 
@@ -330,7 +331,7 @@ def attribute_context(attribute):
         'is_read_only': attribute.is_read_only,
         'is_static': attribute.is_static,
         'name': attribute.name,
-        'type': glue_type.idl_type.base_type,
+        'to_v8_type': glue_type.to_v8_str(),
     }
 
 
@@ -406,14 +407,14 @@ def function_context(functions):
 
     is_static = functions[0].is_static
     return_glue_type = to_glue_type(function.idl_type, maybe_dictionary=False)
-    return_type = return_glue_type.to_v8_str()
+    to_v8_type = return_glue_type.to_v8_str()
 
     signatures = [
         {
           'cpp_name': cpp_name,
           'is_static': is_static,
           'parameters': parameters,
-          'return_type': return_type,
+          'to_v8_type': to_v8_type,
         }
         for parameters in parameters_list
     ]
@@ -453,8 +454,8 @@ def function_parameter(parameter):
     glue_type = to_glue_type(parameter.idl_type)
     return {
         'cpp_name': underscore(parameter.name),
+        'display_type': glue_type.display_str(),
         'from_v8_type': glue_type.from_v8_str(),
-        'type': glue_type.idl_type.base_type,
     }
 
 

@@ -24,13 +24,13 @@ namespace bindings {
  #  Type0 param0;
  #  auto const arg0 = info[0];
  #  if (!gin::ConvertFromV8(isolate, arg0, &param0)) {
- #    ThrowArgumentError(isolate, arg0, 0);
+ #    ThrowArgumentError(isolate, "display_type", arg0, 0);
  #    return nullptr;
  #  }
  #  Type1 param1;
  #  auto const arg1 = info[1];
  #  if (!gin::ConvertFromV8(isolate, arg1, &param1)) {
- #    ThrowArgumentError(isolate, arg1, 1);
+ #    ThrowArgumentError(isolate, "display_type", arg1, 1);
  #    return nullptr;
  #  }
  #  return new Example(param1, param2);
@@ -41,7 +41,7 @@ namespace bindings {
 {{indent}}{{parameter.from_v8_type}} param{{ loop.index0 }};
 {{indent}}auto const arg{{ loop.index0 }} = info[{{ loop.index0 }}];
 {{indent}}if (!gin::ConvertFromV8(isolate, arg{{ loop.index0 }}, &param{{ loop.index0 }})) {
-{{indent}}  ThrowArgumentError(isolate, "{{parameter.type}}", arg{{ loop.index0 }}, {{ loop.index0 }});
+{{indent}}  ThrowArgumentError(isolate, "{{parameter.display_type}}", arg{{ loop.index0 }}, {{ loop.index0 }});
 {{indent}}  return nullptr;
 {{indent}}}
 {% endfor %}
@@ -95,7 +95,7 @@ void {{class_name}}::{{method.cpp_name}}(
 {{indent}}{{parameter.from_v8_type}} param{{ loop.index0 }};
 {{indent}}auto const arg{{ loop.index0 }} = info[{{ loop.index0 }}];
 {{indent}}if (!gin::ConvertFromV8(isolate, arg{{ loop.index0 }}, &param{{ loop.index0 }})) {
-{{indent}}  ThrowArgumentError(isolate, "{{parameter.type}}", arg{{ loop.index0 }}, {{ loop.index0 }});
+{{indent}}  ThrowArgumentError(isolate, "{{parameter.display_type}}", arg{{ loop.index0 }}, {{ loop.index0 }});
 {{indent}}  return;
 {{indent}}}
 {% endfor %}
@@ -105,11 +105,11 @@ void {{class_name}}::{{method.cpp_name}}(
 {% else %}
 {%   set callee = 'impl->' + signature.cpp_name %}
 {% endif %}
-{%- if signature.return_type == 'void' %}
+{%- if signature.to_v8_type == 'void' %}
 {{indent}}{{callee}}({{ emit_arguments(signature) }});
 {%- else %}
-{{indent}}info.GetReturnValue().Set(gin::ConvertToV8(isolate,
-{{indent}}    {{callee}}({{ emit_arguments(signature) }})));
+{{indent}}{{signature.to_v8_type}} value = {{callee}}({{ emit_arguments(signature) }});
+{{indent}}info.GetReturnValue().Set(gin::ConvertToV8(isolate, value));
 {%- endif %}
 {%- endmacro %}
 //////////////////////////////////////////////////////////////////////
@@ -190,8 +190,8 @@ void {{class_name}}::Get_{{attribute.cpp_name}}(
     ThrowArityError(isolate, 0, 0, info.Length());
     return;
   }
-  info.GetReturnValue().Set(gin::ConvertToV8(isolate,
-      {{interface_name}}::{{attribute.cpp_name}}()));
+  {{attribute.to_v8_type}} value = {{interface_name}}::{{attribute.cpp_name}}();
+  info.GetReturnValue().Set(gin::ConvertToV8(isolate, value));
 }
 
 {%  if not attribute.is_read_only %}
@@ -204,7 +204,7 @@ void {{class_name}}::Set_{{attribute.cpp_name}}(
   }
   {{attribute.from_v8_type}} new_value;
   if (!gin::ConvertFromV8(isolate, info[0], &new_value)) {
-    ThrowArgumentError(isolate, "{{attribute.type}}", info.info[0], 0);
+    ThrowArgumentError(isolate, "{{attribute.display_type}}", info.info[0], 0);
     return;
   }
   {{interface_name}}::set_{{attribute.cpp_name}}(new_value);
@@ -238,8 +238,8 @@ void {{class_name}}::Get_{{attribute.cpp_name}}(
     ThrowReceiverError(isolate, "{{interface_name}}", info.This());
     return;
   }
-  info.GetReturnValue().Set(gin::ConvertToV8(isolate,
-      impl->{{attribute.cpp_name}}()));
+  {{attribute.to_v8_type}} value = impl->{{interface_name}}::{{attribute.cpp_name}}();
+  info.GetReturnValue().Set(gin::ConvertToV8(isolate, value));
 }
 
 {%  if not attribute.is_read_only %}
@@ -257,7 +257,7 @@ void {{class_name}}::Set_{{attribute.cpp_name}}(
   }
   {{attribute.from_v8_type}} new_value;
   if (!gin::ConvertFromV8(isolate, info[0], &new_value)) {
-    ThrowArgumentError(isolate, "{{attribute.type}}", info[0], 0);
+    ThrowArgumentError(isolate, "{{attribute.display_type}}", info[0], 0);
     return;
   }
   impl->set_{{attribute.cpp_name}}(new_value);

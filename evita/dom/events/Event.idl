@@ -16,9 +16,9 @@ interface Event {
   readonly attribute boolean bubbles;
   readonly attribute boolean cancelable;
   readonly attribute boolean defaultPrevented;
-  readonly attribute EventTarget currentTarget;
+  readonly attribute EventTarget? currentTarget;
   readonly attribute unsigned short eventPhase;
-  readonly attribute EventTarget target;
+  readonly attribute EventTarget? target;
   readonly attribute DOMTimeStamp timeStamp;
   readonly attribute DOMString type;
 

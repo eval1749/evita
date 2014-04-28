@@ -4,7 +4,7 @@
 
 [Constructor]
 interface EditorWindow : Window {
-  static readonly attribute Window[] list;
+  static readonly attribute EditorWindow[] list;
 
   void setStatusBar(DOMString[] texts);
 };

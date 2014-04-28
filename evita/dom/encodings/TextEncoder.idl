@@ -3,13 +3,11 @@
 // found in the LICENSE file.
 
 [
-  CustomConstructor(),
-  CustomConstructor(DOMString label)
+  CustomConstructor(optional DOMString label)
 ]
 interface TextEncoder {
   readonly attribute DOMString encoding;
 
-  Uint8Array encode();
-  Uint8Array encode(DOMString input);
-  Uint8Array encode(DOMString input, TextEncodeOptions options);
+  Uint8Array encode(optional DOMString input,
+                    optional TextEncodeOptions options);
 };

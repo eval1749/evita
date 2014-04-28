@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 [
-  Constructor(Form form),
-  Constructor(Form form, FormWindowInit init)
+  Constructor(Form form, optional FormWindowInit init)
 ]
 interface FormWindow : Window {
   readonly attribute Form form;

@@ -3,14 +3,12 @@
 // found in the LICENSE file.
 
 [
-  CustomConstructor(),
-  CustomConstructor(DOMString label),
-  CustomConstructor(DOMString label, TextDecoderOptions options)
+  CustomConstructor(optional DOMString label,
+                    optional TextDecoderOptions options)
 ]
 interface TextDecoder {
   readonly attribute DOMString encoding;
 
-  DOMString decode();
-  DOMString decode(ArrayBufferView input);
-  DOMString decode(ArrayBufferView input, TextDecodeOptions options);
+  DOMString decode(optional ArrayBufferView input,
+                   optional TextDecodeOptions options);
 };

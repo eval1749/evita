@@ -145,7 +145,7 @@ void {{class_name}}::Construct{{interface_name}}(
 {% for signature in constructor.signatures %}
 //   {{loop.index}} {{interface_name}}(
 {%-     for parameter in signature.parameters -%}
-         {{parameter.parameter_type}} {{parameter.cpp_name}}
+         {{parameter.display_type}} {{parameter.cpp_name}}
          {%- if not loop.last %}{{', '}}{% endif %}
 {%-     endfor %})
 {% endfor %}

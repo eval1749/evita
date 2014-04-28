@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 [
-  Constructor(DOMString typeArg, KeyboardEventInit eventInitDict),
-  Constructor(DOMString typeArg)
+  Constructor(DOMString typeArg, optional KeyboardEventInit eventInitDict),
 ]
 interface KeyboardEvent : UiEvent {
   readonly attribute boolean altKey;

@@ -354,22 +354,24 @@ def constant_context(constant):
     }
 
 
-# We consolidate overloaded signatures into one function signature.
-# See URL.idl for example.
 def constructor_context_list(interface):
-    return [constructor_context(interface, constructor, is_custom=False)
-            for constructor in interface.constructors] + \
-           [constructor_context(interface, constructor, is_custom=True)
-            for constructor in interface.custom_constructors]
-
-def constructor_context(interface, constructor, is_custom=False):
-    parameters = map(function_parameter, constructor.arguments)
     name = interface.name
-    return {
-        'cpp_name': name + '::New' + name if is_custom else 'new ' + name,
-        'parameters': parameters
-    }
-
+    return [
+        # Using |new| operator
+        {
+            'cpp_name': 'new ' + name,
+            'parameters': parameters
+        }
+        for parameters in expand_parameters(interface.constructors)
+    ] + [
+        # Custom constructor. It is used for validating parameters and
+        # throw JavaScript exception for an invalid parameter.
+        {
+            'cpp_name': name + '::New' + name,
+            'parameters': parameters
+        }
+        for parameters in expand_parameters(interface.custom_constructors)
+    ]
 
 def enumeration_context(enumeration):
     # FIXME: Handle empty string value. We don't have way to express empty
@@ -387,17 +389,7 @@ def fix_include_path(path):
 
 
 def function_context(functions):
-    # Make parameters list without optional parameters.
-    # Example: foo(T1 a, optional T2 b, optional T3 c)
-    # Output: [[T1 a], [T1 a, T2 b], [T1 a, T2 b, T3 c]]
-    parameters_list = []
-    for function in functions:
-        parameters = []
-        for parameter in function.arguments:
-            if parameter.is_optional:
-                parameters_list.append(list(parameters))
-            parameters.append(function_parameter(parameter))
-        parameters_list.append(parameters)
+    parameters_list = expand_parameters(functions)
     assert parameters_list
 
     if 'ImplementedAs' in functions[0].extended_attributes:
@@ -406,7 +398,8 @@ def function_context(functions):
         cpp_name = upper_camel_case(functions[0].name)
 
     is_static = functions[0].is_static
-    return_glue_type = to_glue_type(function.idl_type, maybe_dictionary=False)
+    return_glue_type = to_glue_type(functions[0].idl_type,
+                                    maybe_dictionary=False)
     to_v8_type = return_glue_type.to_v8_str()
 
     signatures = [
@@ -568,9 +561,24 @@ def cpp_value(value):
         return str(value).lower()
     return str(value)
 
+
 def dictionary_name_to_include_path(dictionary_name):
     return dictionary_name + '.h'
 
+
+# Make parameters list without optional parameters.
+# Example: foo(T1 a, optional T2 b, optional T3 c)
+# Output: [[T1 a], [T1 a, T2 b], [T1 a, T2 b, T3 c]]
+def expand_parameters(functions):
+    parameters_list = []
+    for function in functions:
+        parameters = []
+        for parameter in function.arguments:
+            if parameter.is_optional:
+                parameters_list.append(list(parameters))
+            parameters.append(function_parameter(parameter))
+        parameters_list.append(parameters)
+    return parameters_list
 
 def initialize_jinja_env(cache_dir):
     jinja_env = jinja2.Environment(

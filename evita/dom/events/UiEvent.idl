@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 [
-  Constructor(DOMString typeArg, UiEventInit eventInitDict),
-  Constructor(DOMString typeArg)
+  Constructor(DOMString typeArg, optional UiEventInit eventInitDict),
 ]
 interface UiEvent : Event {
   readonly attribute long detail;

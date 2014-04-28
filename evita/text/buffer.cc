@@ -31,7 +31,6 @@ Buffer::Buffer(const base::string16& name)
       m_eState(State_Ready),
       m_fReadOnly(false),
       m_nCharTick(1),
-      m_nModfTick(1),
       m_nSaveTick(1),
       name_(name) {
   spelling_markers_->AddObserver(this);
@@ -101,7 +100,6 @@ Count Buffer::Delete(Posn lStart, Posn lEnd) {
       WillDeleteAt(lStart, static_cast<size_t>(length)));
 
   deleteChars(lStart, lEnd);
-  ++m_nModfTick;
 
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
       DidDeleteAt(lStart, static_cast<size_t>(length)));
@@ -147,7 +145,6 @@ Count Buffer::Insert(Posn lPosn, const char16* pwch, Count n) {
     return 0;
   lPosn = std::min(lPosn, GetEnd());
   insert(lPosn, pwch, n);
-  ++m_nModfTick;
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
       DidInsertAt(lPosn, static_cast<size_t>(n)));
   UpdateChangeTick();
@@ -165,7 +162,6 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
     return;
 
   insert(position, text.data(), static_cast<Count>(text_length));
-  ++m_nModfTick;
 
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
       DidInsertBefore(position, text_length));
@@ -206,7 +202,6 @@ void Buffer::SetStyle(Posn lStart, Posn lEnd, const css::Style& style) {
   DCHECK_LT(lStart, lEnd);
   // To improve performance, we don't check contents of |style|.
   // This may be enough for syntax coloring.
-  m_nModfTick += 1;
   intervals_->SetStyle(lStart, lEnd, style);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
     DidChangeStyle(lStart, static_cast<size_t>(lEnd - lStart)));

@@ -65,9 +65,6 @@ class Buffer : public BufferCore,
 
   private: bool m_fReadOnly;
 
-  // Redisplay
-  private: int m_nModfTick;
-
   // Modified?
   private: int m_nCharTick;
   private: int m_nSaveTick;
@@ -117,7 +114,6 @@ class Buffer : public BufferCore,
   public: const css::Style& GetDefaultStyle() const;
   public: Interval* GetIntervalAt(Posn) const;
   public: LineAndColumn GetLineAndColumn(Posn offset) const;
-  public: Count GetModfTick() const { return m_nModfTick; }
   public: const base::string16& GetName() const { return name_; }
   public: Posn GetStart() const { return 0; }
   public: const css::Style& GetStyleAt(Posn) const;

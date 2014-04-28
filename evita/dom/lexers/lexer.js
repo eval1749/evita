@@ -39,6 +39,7 @@ global.Lexer = (function() {
   function Lexer(document) {
     this.changedOffset = Count.FORWARD;
     this.count = 0;
+    this.debug_ = 0;
     this.mutationObserver_ = new MutationObserver(
         mutationCallback.bind(this));
     this.mutationObserver_.observe(document, {summary: true});
@@ -46,7 +47,19 @@ global.Lexer = (function() {
     this.scanOffset = 0;
     this.state = 0;
     this.syntax = '';
+    this.firstToken_ = null;
+    this.lastToken_ = null;
   }
+
+  Lexer.Token = (function() {
+    function Token(state, type) {
+      this.next_ = null;
+      this.previous_ = null;
+      this.state = state;
+      this.type = type;
+    }
+    return Token;
+  })();
 
   Object.defineProperties(Lexer.prototype, {
     adjustScanOffset: {value:
@@ -81,7 +94,7 @@ global.Lexer = (function() {
             break;
           --offset;
         }
-        if (this.debug > 2)
+        if (this.debug_ > 2)
           console.log('adjustScanOffset', 'offset', offset);
         this.state = 0;
         this.scanOffset = offset;
@@ -130,8 +143,9 @@ global.Lexer = (function() {
        */
       function() {
         this.range.end = this.scanOffset;
-        if (this.debug > 2)
+        if (this.debug_ > 2)
           console.log('finishToken', this.state, this.syntax, this.range);
+        this.lastToken_.end = this.range.end;
         var syntax = this.syntax;
         this.state = 0;
         this.syntax = '';
@@ -143,14 +157,23 @@ global.Lexer = (function() {
       /**
        * @this {!Lexer}
        * @param {number} state
-       * @param {string} syntax
+       * @param {string} type
        */
-      function(state, syntax) {
+      function(state, type) {
         this.range.collapseTo(this.scanOffset - 1);
-        if (this.debug > 2)
+        if (this.debug_ > 2)
           console.log('startToken', state, syntax, this.range);
         this.state = state;
-        this.syntax = syntax;
+        this.syntax = type;
+        var token = new Lexer.Token(state, type, this.range.start);
+        if (this.firstToken_)
+          this.firstToken_.next_ = token;
+        else
+          this.firstToken = token;
+        if (this.lastToken_)
+          this.lastToken_.next_ = token;
+        token.previous_ = this.lastToken_;
+        this.lastToken_ = this;
       }
    }
   });

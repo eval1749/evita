@@ -314,9 +314,11 @@ Uint8ClampedArray.prototype.subarray = function(begin, opt_end) {};
 //
 /**
  * @constructor
+ * @template K, V
  * @param {Iterable=} iterable
  */
 var Map = function(iterable) {};
+
 
 Map.prototype.clear = function() {};
 
@@ -324,6 +326,12 @@ Map.prototype.clear = function() {};
  * @param {*} key
  */
 Map.prototype.delete = function(key) {};
+
+/**
+ * @template K, V
+ * @param {!function(V, K, !Map.<K, V>)} callback
+ */
+Map.prototype.forEach = function(callback) {};
 
 /**
  * @template T
@@ -426,6 +434,7 @@ Promise.prototype.then = function(onFulfilled, opt_onRejected) {};
 
 /**
  * @constructor
+ * @template T
  * @param {!Iterable=} opt_iterable
  */
 var Set = function(opt_iterable) {};
@@ -445,6 +454,12 @@ Set.prototype.clear = function() {};
  * @return {boolean}
  */
 Set.prototype.delete = function(key) {};
+
+/**
+ * @template T
+ * @param {!function(T, T, !Set.<T>)} callback
+ */
+Set.prototype.forEach = function(callback) {};
 
 /**
  * @template T

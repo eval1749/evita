@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/** @typedef {!Map.<string, ModeDescription>} */
+/** @typedef {Object} */
+var ModeDescription;
+
+/** @typedef {!Map.<string, !ModeDescription>} */
 var ExtensionToModeMap;
 
 /** @typedef {!Map.<string, !Function>} */

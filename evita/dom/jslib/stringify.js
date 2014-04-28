@@ -119,6 +119,9 @@ Editor.stringify = (function() {
               desc['name'] = name;
               return desc;
             }).filter(function(desc) {
+              var name = desc['name'];
+              if (name.charCodeAt(name.length - 1) == Unicode.LOW_LINE)
+                return false;
               var value = desc['value'];
               if (remove_function && typeof(value) == 'function')
                 return false;

@@ -69,6 +69,7 @@
 
       'jslib/editors.js',
       'jslib/ordered_set.js',
+      'jslib/stringify.js',
       'jslib/windows.js',
 
       'console.js',
@@ -80,6 +81,8 @@
       'commands/spell_checker.js',
       'commands/text_window_commands.js',
       'commands/window_commands.js',
+
+      'jslib/install_stringify.js',
     ], # js_lib_files
    }, # variables
 

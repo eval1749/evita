@@ -37,33 +37,13 @@ Object.defineProperties(console, {
      * @param {...} var_args
      */
     value: function(var_args) {
-      function stringify(value) {
-        switch (typeof(value)) {
-          case 'string':
-            return value;
-          case 'symbol':
-            return value.toString();
-        }
-
-        if (JsConsole.stringify)
-          return JsConsole.stringify(value);
-
-        if (value === null)
-          return 'null';
-        if (value === undefined)
-          return 'undefined';
-        try {
-          return value.toString();
-        } catch (e) {
-          return 'Exception in toString: ' + e;
-        }
-      }
-
       var message = Array.prototype.slice.call(arguments, 0).map(function(arg) {
         try {
-          return stringify(arg);
+          if (typeof(arg) == 'string')
+            return arg;
+          return Editor.stringify(arg);
         } catch (e) {
-          return stringify(e);
+          return Editor.stringify(e);
         }
       }).join(' ');
       var document = console.document;

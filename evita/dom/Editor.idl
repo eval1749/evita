@@ -79,4 +79,7 @@ interface Editor {
    */
   static RunScriptResult runScript(DOMString script_text);
   static RunScriptResult runScript(DOMString script_text, DOMString file_name);
+
+  [ImplementedAs=JavaScript]
+  static DOMString stringify(any value);
 };

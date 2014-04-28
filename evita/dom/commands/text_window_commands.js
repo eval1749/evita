@@ -406,7 +406,7 @@
     var result = Editor.runScript(script_text, this.document.name);
     if (!result.exception) {
       if (result.value != undefined)
-        console.log(JsConsole.stringify(result.value));
+        console.log(result.value);
       return;
     }
     Editor.messageBox(this, result.stackTraceString, MessageBox.ICONERROR,

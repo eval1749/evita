@@ -15,16 +15,20 @@ global.OrderedSet = (function() {
   }
 
   /**
+   * @constructor
    * @template T
    * @param {T} data
    */
-  global.OrderedSetNode = function(data) {
-    this.data_ = data;
-    this.left_ = null;
-    this.parent_ = null;
-    this.priority_ = Math.random();
-    this.right_ = null;
-  }
+  global.OrderedSetNode = (function() {
+    function OrderedSetNode(data) {
+      this.data_ = data;
+      this.left_ = null;
+      this.parent_ = null;
+      this.priority_ = Math.random();
+      this.right_ = null;
+    }
+    return OrderedSetNode;
+  })();
 
   /**
    * @template T
@@ -102,6 +106,7 @@ global.OrderedSet = (function() {
    * @this {!OrderedSetNode.<T>}
    * @return {?OrderedSetNode.<T>}
    */
+
 
   function previousNode() {
     var node = this;

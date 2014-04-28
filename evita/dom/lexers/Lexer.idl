@@ -6,6 +6,7 @@
 interface Lexer {
   attribute long changeOffset;
   attribute long count;
+  attribute long debug;
   attribute MutationObserver mutationObserver_;
   attribute Range? range;
   attribute long scanOffset;

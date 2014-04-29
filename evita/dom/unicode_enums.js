@@ -24,6 +24,7 @@
   /** @const @type{number} */ Unicode.COMMA = 0x2C;
   /** @const @type{number} */ Unicode.HYPHEN_MINUS = 0x2D;
   /** @const @type{number} */ Unicode.FULL_STOP = 0x2E;
+  /** @const @type{number} */ Unicode.SOLIDUS = 0x2F;
   /** @const @type{number} */ Unicode.DIGIT_ZERO = 0x30;
   /** @const @type{number} */ Unicode.DIGIT_ONE = 0x31;
   /** @const @type{number} */ Unicode.DIGIT_TWO = 0x32;

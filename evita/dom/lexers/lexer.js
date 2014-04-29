@@ -12,6 +12,18 @@
  */
 global.Lexer = (function() {
   /**
+   * @param {!Iterable.<string>} keywords
+   * @return {!Set.<string>}
+   */
+  function makeKeywords(keywords) {
+    var keywordSet = new Set();
+    keywords.forEach(function(keyword) {
+      keywordSet.add(keyword);
+    });
+    return keywordSet;
+  }
+
+  /**
    * @this {!Lexer}
    * @param {!Array.<!MutationRecord>} mutations
    * @param {!MutationObserver} observer
@@ -34,29 +46,50 @@ global.Lexer = (function() {
   }
 
   /**
+   * @param {!Iterable.<string>} keywords
    * @param {!Document} document
    */
-  function Lexer(document) {
+  function Lexer(keywords, document) {
     this.changedOffset = Count.FORWARD;
     this.count = 0;
     this.debug_ = 0;
+    this.lastToken = null;
+    this.keywords = makeKeywords(keywords);
     this.mutationObserver_ = new MutationObserver(
         mutationCallback.bind(this));
     this.mutationObserver_.observe(document, {summary: true});
     this.range = new Range(document);
     this.scanOffset = 0;
     this.state = 0;
-    this.syntax = '';
-    this.firstToken_ = null;
-    this.lastToken_ = null;
+    this.tokens = new OrderedSet(function(a, b) {
+      return a.end < b.end;
+    });
   }
 
+  /**
+   * @param {!Array.<string>} keywords
+   * @return {!Set.<string>}
+   */
+  // TODO(yosi) Once |Set| constructor accept |Iterable|, we don't need to
+  // have |Lexer.makeKeywords|.
+  Lexer.makeKeyords_DEPRECATED = function(keywords) {
+    var set = new Set();
+    keywords.forEach(function(keyword) {
+      set.add(keyword);
+    });
+    return set;
+  };
+
+  /**
+   * @constructor
+   * @param {number} state
+   * @param {number} start
+   */
   Lexer.Token = (function() {
-    function Token(state, type) {
-      this.next_ = null;
-      this.previous_ = null;
+    function Token(state, start) {
+      this.end = start;
+      this.start = start;
       this.state = state;
-      this.type = type;
     }
     return Token;
   })();
@@ -65,42 +98,61 @@ global.Lexer = (function() {
     adjustScanOffset: {value:
       /**
        * @this {!Lexer}
-       * @param {number} maxCount
-       * @return {number} Return number of characters scanned.
        */
-      function(maxCount) {
-        updateChangedOffset(this, this.mutationObserver_.takeRecords());
+      function() {
+        if (!this.lastToken) {
+          if (this.tokens.size)
+            throw new Error('Assertion failed: !this.tokens.size');
+          return;
+        }
         var document = this.range.document;
-        var startOffset = Math.min(this.changedOffset, document.length);
+        var oldScanOffset = this.scanOffset;
+        var newScanOffset = Math.min(this.changedOffset, this.lastToken.end);
+        this.scanOffset = newScanOffset;
         this.changedOffset = Count.FORWARD;
-        this.count = maxCount;
-        if (this.scanOffset <= startOffset) {
-          // Modification is occurred after |this.scanOffset|, we can continue
-          // scanning with current state.
-          return 0;
+        if (!newScanOffset) {
+          // All tokens in token list are dirty.
+          console.log('All tokens are dirty');
+          this.lastToken = null;
+          this.state = 0;
+          this.tokens.clear();
+          if (oldScanOffset != newScanOffset)
+            this.didChangeScanOffset();
+          return;
         }
-        // Move backward until start of token.
-        var offset = startOffset;
-        var syntax = offset < document.length ? document.syntaxAt(offset) : '';
-        // Find last token.
-        while (offset && !syntax) {
-          --offset;
-          syntax = document.syntaxAt(offset);
+        var dummyToken = new Lexer.Token(0, newScanOffset);
+        var it = this.tokens.lowerBound(dummyToken);
+        if (!it) {
+          console.log('newScanOffset', newScanOffset, 'lexer', this);
+          this.tokens.forEach(function(token) {
+            console.log('Token', token);
+          });
+          throw new Error('Broken token list');
         }
-        // Move start of last token.
-        while (offset) {
-          var syntax2 = document.syntaxAt(offset - 1);
-          if (syntax != syntax2)
-            break;
-          --offset;
+        // Shrink last clean token
+        var lastToken = it.data;
+        lastToken.end = newScanOffset;
+        if (this.lastToken !== lastToken) {
+          this.lastToken = lastToken;
+          this.state = lastToken.state;
+
+          if (this.debug_ > 0)
+            console.log('restart from', newScanOffset, lastToken);
+
+          // Collect dirty tokens
+          var tokensToRemove = new Array();
+          for (it = it.next(); it; it = it.next()) {
+            tokensToRemove.push(it.data);
+          }
+          // Remove dirty tokens
+          tokensToRemove.forEach(function(token) {
+            this.tokens.remove(token);
+          }, this);
         }
-        if (this.debug_ > 2)
-          console.log('adjustScanOffset', 'offset', offset);
-        this.state = 0;
-        this.scanOffset = offset;
-        this.syntax = '';
-        this.didChangeScanOffset();
-        return startOffset - offset;
+        if (this.tokens.size < 4)
+            this.tokens.forEach(console.log);
+        if (oldScanOffset != newScanOffset)
+          this.didChangeScanOffset();
       }
     },
 
@@ -121,8 +173,7 @@ global.Lexer = (function() {
        * @this {!Lexer}
        */
       function() {
-        this.state = 0;
-        this.syntax = '';
+        // nothing to do
       }
     },
 
@@ -139,41 +190,73 @@ global.Lexer = (function() {
     finishToken: {value:
       /**
        * @this {!Lexer}
-       * @return string
+       * @return {!Lexer.Token}
        */
       function() {
-        this.range.end = this.scanOffset;
+        var lastToken = this.lastToken;
+        lastToken.end = this.scanOffset;
         if (this.debug_ > 2)
-          console.log('finishToken', this.state, this.syntax, this.range);
-        this.lastToken_.end = this.range.end;
-        var syntax = this.syntax;
+          console.log('finishlastToken', lastToken);
         this.state = 0;
-        this.syntax = '';
-        return syntax;
+        return lastToken;
       }
     },
+
+    restartToken: {value:
+      /**
+       * @this {!Lexer}
+       * @param {number} state
+       */
+      function(state) {
+        if (!state) {
+          console.log(this);
+          throw new Error('state must be non-zero.');
+        }
+        if (this.debug_ > 2)
+          console.log('restartToken', state, this.range);
+        this.state = state;
+        this.lastToken.state = state;
+      }
+   },
 
     startToken: {value:
       /**
        * @this {!Lexer}
        * @param {number} state
-       * @param {string} type
        */
-      function(state, type) {
-        this.range.collapseTo(this.scanOffset - 1);
+      function(state) {
+        if (!state) {
+          console.log(this);
+          throw new Error('state must be non-zero.');
+        }
+        this.range.collapseTo(this.scanOffset);
         if (this.debug_ > 2)
-          console.log('startToken', state, syntax, this.range);
+          console.log('startToken', state, this.range);
         this.state = state;
-        this.syntax = type;
-        var token = new Lexer.Token(state, type, this.range.start);
-        if (this.firstToken_)
-          this.firstToken_.next_ = token;
-        else
-          this.firstToken = token;
-        if (this.lastToken_)
-          this.lastToken_.next_ = token;
-        token.previous_ = this.lastToken_;
-        this.lastToken_ = this;
+
+        var lastToken = this.lastToken;
+        if (lastToken) {
+          if (lastToken.start == lastToken.end) {
+            if (lastToken.start != this.scanOffset) {
+              console.log('state', state, this);
+              throw new Error('Assertion failed:' +
+                  ' lastToken.start == this.scanOffset' +
+                  ' ' + lastToken.start + ' vs. ' + this.scanOffset);
+            }
+            lastToken.state = state;
+            return;
+          }
+          if (lastToken.end != this.scanOffset) {
+            console.log('state', state, this);
+            throw new Error('Assertion failed:'+
+              ' lastToken.end == this.scanOffset' +
+              ' ' + lastToken.end + ' vs. ' + this.scanOffset);
+          }
+        }
+
+        var token = new Lexer.Token(state, this.scanOffset);
+        this.tokens.add(token);
+        this.lastToken = token;
       }
    }
   });

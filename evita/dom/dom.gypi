@@ -48,8 +48,9 @@
       'forms/text_field_selection.js',
 
       'lexers/lexer.js',
-      'lexers/cmd_lexer.js',
-      'lexers/config_lexer.js',
+      #'lexers/cmd_lexer.js',
+      'lexers/cpp_lexer.js',
+      #'lexers/config_lexer.js',
 
       'text/modes/modes.js',
       'os/file.js',
@@ -244,6 +245,7 @@
       ], # 'rules'
       'sources': [ '<@(js_lib_files)', ],
     },
+
     {
       'target_name': 'dom_jslib',
       'type': 'static_library',

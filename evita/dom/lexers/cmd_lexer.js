@@ -65,7 +65,7 @@ global.CmdLexer = (function() {
         break;
       if (range.collapsed)
         continue;
-      if (this.debug > 0)
+      if (this.debug_ > 0)
         console.log('CmdLexer', syntax, range);
       if (syntax == 'cmd_newline')
         this.numberOfWords_ = 0;
@@ -100,6 +100,7 @@ global.CmdLexer = (function() {
       var charCode = document.charCodeAt_(lexer.scanOffset);
       ++lexer.scanOffset;
       switch (lexer.state) {
+
         case State.CIRCUMFLEX_ACCENT:
           lexer.state = State.ZERO;
           break;

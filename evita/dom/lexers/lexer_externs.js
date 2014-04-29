@@ -1,20 +1,28 @@
 /**
  * @constructor
+ * @param {Iterable.<string>} keywords
  * @param {!Document} document
  */
-function Lexer(document) {}
+function Lexer(keywords, document) {}
 
 /**
- * @type {{
- *  end: number,
- *  next_: ?Object,
- *  previous_: ?Object,
- *  state_: number,
- *  start: number,
- *  type: string
- * }}
+ * @constructor
+ * @param {number} state
+ * @param {number} start
  */
-Lexer.Token;
+Lexer.Token = function(state, start) {};
+
+/** @type {number} */
+Lexer.Token.prototype.end;
+
+/** @type {number} */
+Lexer.Token.prototype.start;
+
+/** @type {number} */
+Lexer.Token.prototype.state;
+
+/** @type {string} */
+Lexer.Token.prototype.type;
 
 /**
  * @type {number}
@@ -32,9 +40,19 @@ Lexer.prototype.count;
 Lexer.prototype.debug_;
 
 /**
+ * @type {!Set.<string>}
+ */
+Lexer.prototype.keywords;
+
+/**
  * @type {!MutationObserver}
  */
 Lexer.prototype.mutationObserver_;
+
+/**
+ * @type {?Lexer.Token}
+ */
+Lexer.prototype.lastToken;
 
 /**
  * @type {?Range}
@@ -52,15 +70,14 @@ Lexer.prototype.scanOffset;
 Lexer.prototype.state;
 
 /**
- * @type {string}
+ * @type {OrderedSet.<!Lexer.Token>}
  */
-Lexer.prototype.syntax;
+Lexer.prototype.tokens;
 
 /**
- * @param {number} hint
- * @return {number}
+ * @type {!function()}
  */
-Lexer.prototype.adjustScanOffset = function(hint) {};
+Lexer.prototype.adjustScanOffset = function() {};
 
 /**
  */
@@ -77,12 +94,16 @@ Lexer.prototype.didChangeScanOffset = function() {};
 Lexer.prototype.doColor = function(hint) {};
 
 /**
- * @return {string}
+ * @return {!Lexer.Token}
  */
 Lexer.prototype.finishToken = function() {};
 
 /**
  * @param {number} state
- * @param {string} syntax
  */
-Lexer.prototype.startToken = function(state, syntax) {};
+Lexer.prototype.restartToken = function(state) {};
+
+/**
+ * @param {number} state
+ */
+Lexer.prototype.startToken = function(state) {};

@@ -26,7 +26,9 @@
  */
 Array.prototype.find = function(callback, this_arg) {};
 
-/** @typedef {Array} */
+/**
+ * @typedef {Array|Map|Set}
+ */
 var Iterable;
 
 //////////////////////////////////////////////////////////////////////

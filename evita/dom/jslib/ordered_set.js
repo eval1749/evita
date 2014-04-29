@@ -211,7 +211,7 @@ global.OrderedSet = (function() {
 
   /**
    * @template T
-   * @this {OrderedSet.<T>}
+   * @this {!OrderedSet.<T>}
    * @param {T} data
    */
   function add(data) {
@@ -248,7 +248,7 @@ global.OrderedSet = (function() {
 
   /**
    * @template T
-   * @this {OrderedSet.<T>}
+   * @this {!OrderedSet.<T>}
    */
   function clear() {
     this.root_ = null;
@@ -257,7 +257,7 @@ global.OrderedSet = (function() {
 
   /**
    * @template T
-   * @this {OrderedSet.<T>}
+   * @this {!OrderedSet.<T>}
    * @param {T} data
    * @return {?OrderedSetNode.<T>}
    */
@@ -268,7 +268,7 @@ global.OrderedSet = (function() {
 
   /**
    * @template T
-   * @this {OrderedSet.<T>}
+   * @this {!OrderedSet.<T>}
    * @param {!function(T)} callback
    */
   function forEach(callback) {
@@ -286,7 +286,7 @@ global.OrderedSet = (function() {
 
   /**
    * @template T
-   * @this {OrderedSet.<T>}
+   * @this {!OrderedSet.<T>}
    * @param {T} data
    * @return {?OrderedSetNode.<T>}
    */
@@ -316,7 +316,37 @@ global.OrderedSet = (function() {
 
   /**
    * @template T
-   * @this {OrderedSet.<T>}
+   * @this {!OrderedSet.<T>}
+   * @return {T}
+   */
+  function maximum() {
+    var node = this.root_;
+    if (!node)
+      throw new Error('OrderedSet is empty.');
+    while (node.right_) {
+      node = node.right_;
+    }
+    return node.data;
+  }
+
+  /**
+   * @template T
+   * @this {!OrderedSet.<T>}
+   * @return {T}
+   */
+  function minimum() {
+    var node = this.root_;
+    if (!node)
+      throw new Error('OrderedSet is empty.');
+    while (node.left_) {
+      node = node.left_;
+    }
+    return node.data;
+  }
+
+  /**
+   * @template T
+   * @this {!OrderedSet.<T>}
    * @param {T} data
    * @return {boolean}
    */
@@ -340,6 +370,15 @@ global.OrderedSet = (function() {
     return true;
   }
 
+  /**
+   * @template T
+   * @this {!OrderedSet.<T>}
+   * @return {number}
+   */
+  function size() {
+    return this.size_;
+  }
+
   OrderedSet.prototype = Object.create(
       /** @type {!Object} */(Object.prototype), {
     Node: {value: OrderedSetNode},
@@ -350,13 +389,12 @@ global.OrderedSet = (function() {
     forEach: {value: forEach},
     less_: {writable: true},
     lowerBound: {value: lowerBound},
+    maximum : {get: maximum},
+    minimum : {get: minimum},
     remove: {value: remove},
     root_: {value: null, writable: true},
     size_: {value: 0, writable: true},
-    size: {get:
-      /** @this {!OrderedSet} @return {number} */
-      function() { return this.size_; }
-    }
+    size: {get: size}
   });
   return OrderedSet;
 })();

@@ -39,6 +39,9 @@ TEST_F(OrderedSetTest, all) {
   EXPECT_SCRIPT_EQ("null", "set.lowerBound(26)");
   EXPECT_SCRIPT_EQ("null", "set.lowerBound(30)");
 
+  EXPECT_SCRIPT_EQ("0", "set.minimum");
+  EXPECT_SCRIPT_EQ("25", "set.maximum");
+
   EXPECT_SCRIPT_VALID(
       "var result = [];"
       "set.forEach(function(data) { result.push(data) });");
@@ -52,6 +55,12 @@ TEST_F(OrderedSetTest, all) {
   EXPECT_SCRIPT_EQ("5", "set.size");
   EXPECT_SCRIPT_EQ("null", "set.find(10)");
   EXPECT_SCRIPT_EQ("15", "set.lowerBound(10).data");
+
+  EXPECT_SCRIPT_VALID("set.remove(0);");
+  EXPECT_SCRIPT_EQ("5", "set.minimum");
+
+  EXPECT_SCRIPT_VALID("set.remove(25);");
+  EXPECT_SCRIPT_EQ("20", "set.maximum");
 
   EXPECT_SCRIPT_VALID("set.clear()");
   EXPECT_SCRIPT_EQ("0", "set.size");

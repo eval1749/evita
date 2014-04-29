@@ -35,6 +35,18 @@ OrderedSetNode.prototype.previous = function() {};
 function OrderedSet(less) {}
 
 /**
+ * @template T
+ * @type {T}
+ */
+OrderedSet.prototype.maximum;
+
+/**
+ * @template T
+ * @type {T}
+ */
+OrderedSet.prototype.minimum;
+
+/**
  * @type {number}
  */
 OrderedSet.prototype.size;

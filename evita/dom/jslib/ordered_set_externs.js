@@ -46,6 +46,11 @@ OrderedSet.prototype.size;
 OrderedSet.prototype.add = function(data) {};
 
 /**
+ * @type {!function()}
+ */
+OrderedSet.prototype.clear = function() {};
+
+/**
  * @template T
  * @param {T} data
  * @return {?OrderedSetNode.<T>}

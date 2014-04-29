@@ -52,6 +52,9 @@ TEST_F(OrderedSetTest, all) {
   EXPECT_SCRIPT_EQ("5", "set.size");
   EXPECT_SCRIPT_EQ("null", "set.find(10)");
   EXPECT_SCRIPT_EQ("15", "set.lowerBound(10).data");
+
+  EXPECT_SCRIPT_VALID("set.clear()");
+  EXPECT_SCRIPT_EQ("0", "set.size");
 }
 
 }  // namespace

@@ -101,6 +101,7 @@ global.OrderedSet = (function() {
     return null;
   }
 
+
   /**
    * @template T
    * @this {!OrderedSetNode.<T>}
@@ -209,8 +210,8 @@ global.OrderedSet = (function() {
   OrderedSet.prototype.root_;
 
   /**
-   * @this {OrderedSet}
    * @template T
+   * @this {OrderedSet.<T>}
    * @param {T} data
    */
   function add(data) {
@@ -247,7 +248,16 @@ global.OrderedSet = (function() {
 
   /**
    * @template T
-   * @this {OrderedSet}
+   * @this {OrderedSet.<T>}
+   */
+  function clear() {
+    this.root_ = null;
+    this.size_ = 0;
+  }
+
+  /**
+   * @template T
+   * @this {OrderedSet.<T>}
    * @param {T} data
    * @return {?OrderedSetNode.<T>}
    */
@@ -258,7 +268,7 @@ global.OrderedSet = (function() {
 
   /**
    * @template T
-   * @this {OrderedSet}
+   * @this {OrderedSet.<T>}
    * @param {!function(T)} callback
    */
   function forEach(callback) {
@@ -276,7 +286,7 @@ global.OrderedSet = (function() {
 
   /**
    * @template T
-   * @this {OrderedSet}
+   * @this {OrderedSet.<T>}
    * @param {T} data
    * @return {?OrderedSetNode.<T>}
    */
@@ -306,7 +316,7 @@ global.OrderedSet = (function() {
 
   /**
    * @template T
-   * @this {OrderedSet}
+   * @this {OrderedSet.<T>}
    * @param {T} data
    * @return {boolean}
    */
@@ -334,6 +344,7 @@ global.OrderedSet = (function() {
       /** @type {!Object} */(Object.prototype), {
     Node: {value: OrderedSetNode},
     add: {value: add},
+    clear: {value: clear},
     constructor: {value: OrderedSet},
     find: {value: find},
     forEach: {value: forEach},

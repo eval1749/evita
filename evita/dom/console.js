@@ -9,6 +9,20 @@ Object.defineProperties(console, {
     value: '*javascript*'
   },
 
+  assert: {value:
+    /**
+     * @param {*} expression
+     * @param {*=} opt_message
+     */
+    function(expression, opt_message) {
+      if (expression)
+        return;
+      if (arguments.length >= 2)
+        throw new Error('Assertion failed: ' + opt_message);
+      throw new Error('Assertion failed');
+    }
+  },
+
   /*
    * Clear console log contents.
    */

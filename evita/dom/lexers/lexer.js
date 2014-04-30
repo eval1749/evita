@@ -101,13 +101,13 @@ global.Lexer = (function() {
        */
       function() {
         if (!this.lastToken) {
-          if (this.tokens.size)
-            throw new Error('Assertion failed: !this.tokens.size');
+          console.assert(!this.tokens.size);
           return;
         }
         var document = this.range.document;
         var oldScanOffset = this.scanOffset;
-        var newScanOffset = Math.min(this.changedOffset, this.lastToken.end);
+        var newScanOffset = Math.min(this.changedOffset, this.lastToken.end,
+                                     document.length);
         this.scanOffset = newScanOffset;
         this.changedOffset = Count.FORWARD;
         if (!newScanOffset) {
@@ -131,10 +131,10 @@ global.Lexer = (function() {
         }
         // Shrink last clean token
         var lastToken = it.data;
+        var oldLastTokenEnd = lastToken.end;
         lastToken.end = newScanOffset;
         if (this.lastToken !== lastToken) {
           this.lastToken = lastToken;
-          this.state = lastToken.state;
 
           if (this.debug_ > 0)
             console.log('restart from', newScanOffset, lastToken);
@@ -149,10 +149,11 @@ global.Lexer = (function() {
             this.tokens.remove(token);
           }, this);
         }
-        if (this.tokens.size < 4)
-            this.tokens.forEach(console.log);
+        if (oldLastTokenEnd != lastToken.end)
+          this.didShrinkLastToken(lastToken);
         if (oldScanOffset != newScanOffset)
           this.didChangeScanOffset();
+        this.state = lastToken.state;
       }
     },
 
@@ -173,6 +174,16 @@ global.Lexer = (function() {
        * @this {!Lexer}
        */
       function() {
+        // nothing to do
+      }
+    },
+
+    didShrinkLastToken: {value:
+      /**
+       * @this {!Lexer}
+       * @param {!Lexer.Token} token
+       */
+      function(token) {
         // nothing to do
       }
     },
@@ -208,10 +219,7 @@ global.Lexer = (function() {
        * @param {number} state
        */
       function(state) {
-        if (!state) {
-          console.log(this);
-          throw new Error('state must be non-zero.');
-        }
+        console.assert(state, 'state must not be zero.');
         if (this.debug_ > 2)
           console.log('restartToken', state, this.range);
         this.state = state;
@@ -225,10 +233,7 @@ global.Lexer = (function() {
        * @param {number} state
        */
       function(state) {
-        if (!state) {
-          console.log(this);
-          throw new Error('state must be non-zero.');
-        }
+        console.assert(state, 'state must not be zero.');
         this.range.collapseTo(this.scanOffset);
         if (this.debug_ > 2)
           console.log('startToken', state, this.range);
@@ -237,21 +242,11 @@ global.Lexer = (function() {
         var lastToken = this.lastToken;
         if (lastToken) {
           if (lastToken.start == lastToken.end) {
-            if (lastToken.start != this.scanOffset) {
-              console.log('state', state, this);
-              throw new Error('Assertion failed:' +
-                  ' lastToken.start == this.scanOffset' +
-                  ' ' + lastToken.start + ' vs. ' + this.scanOffset);
-            }
+            console.assert(lastToken.start == this.scanOffset);
             lastToken.state = state;
             return;
           }
-          if (lastToken.end != this.scanOffset) {
-            console.log('state', state, this);
-            throw new Error('Assertion failed:'+
-              ' lastToken.end == this.scanOffset' +
-              ' ' + lastToken.end + ' vs. ' + this.scanOffset);
-          }
+          console.assert(lastToken.end == this.scanOffset);
         }
 
         var token = new Lexer.Token(state, this.scanOffset);

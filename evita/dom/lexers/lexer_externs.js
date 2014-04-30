@@ -84,8 +84,14 @@ Lexer.prototype.adjustScanOffset = function() {};
 Lexer.prototype.detach = function() {};
 
 /**
+ * @type {!function()}
  */
 Lexer.prototype.didChangeScanOffset = function() {};
+
+/**
+ * @param {!Lexer.Token} token
+ */
+Lexer.prototype.didShrinkLastToken = function(token) {};
 
 /**
  * @param {number} hint

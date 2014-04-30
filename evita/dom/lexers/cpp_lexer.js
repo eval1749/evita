@@ -16,6 +16,7 @@ global.CppLexer = (function(keywords) {
     COLON_COLON: 201,
     LINE_COMMENT: 300,
     LINE_COMMENT_ESCAPE: 301,
+    LINE_COMMENT_START: 302,
     NEWLINE: 400,
     NUMBER_SIGN: 401,
     OPERATOR: 500,
@@ -40,6 +41,7 @@ global.CppLexer = (function(keywords) {
   StateToSyntax.set(State.COLON_COLON, 'operators');
   StateToSyntax.set(State.LINE_COMMENT, 'comment');
   StateToSyntax.set(State.LINE_COMMENT_ESCAPE, 'comment');
+  StateToSyntax.set(State.LINE_COMMENT_START, 'comment');
   StateToSyntax.set(State.NEWLINE, 'normal');
   StateToSyntax.set(State.NUMBER_SIGN, 'operators');
   StateToSyntax.set(State.OPERATOR, 'operators');
@@ -100,6 +102,28 @@ global.CppLexer = (function(keywords) {
     }
 
     return this.count;
+  }
+
+  /**
+   * @this {!CppLexer}
+   * @param {!Lexer.Token} token
+   */
+  function didShrinkLastToken(token) {
+    if (token.state == State.BLOCK_COMMENT_END) {
+      console.log('didShrinkLastToken bc end', token);
+      token.state = State.BLOCK_COMMENT_ASTERISK;
+      return;
+    }
+    if (token.state == State.BLOCK_COMMENT_START) {
+      console.log('didShrinkLastToken bc start', token);
+      token.state = State.SOLIDUS;
+      return;
+    }
+    if (token.state == State.LINE_COMMENT_START) {
+      console.log('didShrinkLastToken lc start', token);
+      token.state = State.SOLIDUS;
+      return;
+    }
   }
 
   /**
@@ -235,16 +259,31 @@ global.CppLexer = (function(keywords) {
 
         case State.BLOCK_COMMENT_ASTERISK:
           if (charCode == Unicode.ASTERISK) {
-            var token = lexer.finishToken();
-            lexer.startToken(State.BLOCK_COMMENT_ASTERISK);
             ++lexer.scanOffset;
-            return token;
+            break;
           }
 
           if (charCode == Unicode.SOLIDUS) {
-            var token = lexer.finishToken();
-            lexer.startToken(State.BLOCK_COMMENT_END);
             ++lexer.scanOffset;
+            lexer.restartToken(State.BLOCK_COMMENT_END);
+            var token = lexer.finishToken();
+           // Find matching BLOCK_COMMENT_START token.
+            var it = lexer.tokens.find(token);
+            var nestingCount = 0;
+            while (isBlockComment(it.data)) {
+              if (it.data.state == State.BLOCK_COMMENT_START) {
+                if (!nestingCount)
+                  throw new Error('Broken block comment');
+                --nestingCount;
+                if (!nestingCount)
+                  break;
+              } else if (it.data.state == State.BLOCK_COMMENT_END) {
+                ++nestingCount;
+              }
+              it = it.previous();
+            }
+            if (it.previous() && isBlockComment(it.previous().data))
+              lexer.startToken(State.BLOCK_COMMENT);
             return token;
           }
 
@@ -255,33 +294,13 @@ global.CppLexer = (function(keywords) {
             return token;
           }
 
-        case State.BLOCK_COMMENT_END: {
-          // Find matching BLOCK_COMMENT_START token.
-          var token = lexer.finishToken();
-          var it = lexer.tokens.find(token);
-          var nestingCount = 0;
-          while (isBlockComment(it.data)) {
-            if (it.data.state == State.BLOCK_COMMENT_START) {
-              if (!nestingCount)
-                throw new Error('Broken block comment');
-              --nestingCount;
-              if (!nestingCount)
-                break;
-            } else if (it.data.state == State.BLOCK_COMMENT_END) {
-              ++nestingCount;
-            }
-            it = it.previous();
-          }
-          if (it.previous() && isBlockComment(it.previous().data))
-            lexer.startToken(State.BLOCK_COMMENT);
-          return token;
-        }
-
         case State.BLOCK_COMMENT_SOLIDUS:
           if (charCode == Unicode.ASTERISK) {
-            lexer.state = lexer.restartToken(State.BLOCK_COMMENT_START);
+            lexer.restartToken(State.BLOCK_COMMENT_START);
             ++lexer.scanOffset;
-            return lexer.finishToken();
+            var token = lexer.finishToken();
+            lexer.startToken(State.BLOCK_COMMENT);
+            return token;
           }
 
           if (charCode != Unicode.SOLIDUS) {
@@ -346,7 +365,11 @@ global.CppLexer = (function(keywords) {
 
           ++lexer.scanOffset;
           if (charCode == Unicode.SOLIDUS) {
-            lexer.restartToken(State.LINE_COMMENT);
+            lexer.restartToken(State.LINE_COMMENT_START);
+            ++lexer.scanOffset;
+            var token = lexer.finishToken();
+            lexer.startToken(State.LINE_COMMENT);
+            return token;
           }
           break;
 
@@ -460,7 +483,8 @@ global.CppLexer = (function(keywords) {
 
   CppLexer.prototype = Object.create(Lexer.prototype, {
     constructor: {value: CppLexer},
-    doColor: {value: doColor},
+    didShrinkLastToken: {value: didShrinkLastToken },
+    doColor: {value: doColor}
   });
 
   return CppLexer;

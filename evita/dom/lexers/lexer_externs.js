@@ -106,6 +106,12 @@ Lexer.prototype.finishToken = function() {};
 
 /**
  * @param {number} state
+ * @return {!Lexer.Token}
+ */
+Lexer.prototype.finishTokenAs = function(state) {};
+
+/**
+ * @param {number} state
  */
 Lexer.prototype.restartToken = function(state) {};
 

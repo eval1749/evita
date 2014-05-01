@@ -120,24 +120,28 @@ global.Lexer = (function() {
             this.didChangeScanOffset();
           return;
         }
-        var dummyToken = new Lexer.Token(0, newScanOffset);
+        var dummyToken = new Lexer.Token(0, newScanOffset - 1);
         var it = this.tokens.lowerBound(dummyToken);
+        // TODO(yosi) We should use OrderedSet.upperBound
+        if (it && it.data.end == newScanOffset)
+          it = it.next();
         if (!it) {
-          console.log('newScanOffset', newScanOffset, 'lexer', this);
-          this.tokens.forEach(function(token) {
-            console.log('Token', token);
-          });
-          throw new Error('Broken token list');
+          // Document mutation is occurred after scanned range. We continue
+          // scanning from current position;
+          return;
         }
         // Shrink last clean token
         var lastToken = it.data;
         var oldLastTokenEnd = lastToken.end;
-        lastToken.end = newScanOffset;
+        if (oldLastTokenEnd != newScanOffset) {
+          this.tokens.remove(lastToken);
+          lastToken.end = newScanOffset;
+          this.tokens.add(lastToken);
+        }
         if (this.lastToken !== lastToken) {
-          this.lastToken = lastToken;
-
           if (this.debug_ > 0)
-            console.log('restart from', newScanOffset, lastToken);
+            console.log('restart from', newScanOffset, lastToken, 'was', this.lastToken);
+          this.lastToken = lastToken;
 
           // Collect dirty tokens
           var tokensToRemove = new Array();
@@ -210,6 +214,19 @@ global.Lexer = (function() {
           console.log('finishlastToken', lastToken);
         this.state = 0;
         return lastToken;
+      }
+    },
+
+    finishTokenAs: {value:
+      /**
+       * @this {!Lexer}
+       * @param {number} state
+       * @return {!Lexer.Token}
+       */
+      function(state) {
+        this.restartToken(state);
+        ++this.scanOffset;
+        return this.finishToken();
       }
     },
 

@@ -10,8 +10,7 @@ global.CppLexer = (function(keywords) {
     BLOCK_COMMENT: 100,
     BLOCK_COMMENT_ASTERISK: 101,
     BLOCK_COMMENT_END: 102,
-    BLOCK_COMMENT_SOLIDUS: 103,
-    BLOCK_COMMENT_START: 104,
+    BLOCK_COMMENT_START: 103,
     COLON: 200,
     COLON_COLON: 201,
     LINE_COMMENT: 300,
@@ -35,7 +34,6 @@ global.CppLexer = (function(keywords) {
   StateToSyntax.set(State.BLOCK_COMMENT, 'comment');
   StateToSyntax.set(State.BLOCK_COMMENT_ASTERISK, 'comment');
   StateToSyntax.set(State.BLOCK_COMMENT_END, 'comment');
-  StateToSyntax.set(State.BLOCK_COMMENT_SOLIDUS, 'comment');
   StateToSyntax.set(State.BLOCK_COMMENT_START, 'comment');
   StateToSyntax.set(State.COLON, 'operators');
   StateToSyntax.set(State.COLON_COLON, 'operators');
@@ -95,6 +93,7 @@ global.CppLexer = (function(keywords) {
       var syntax = StateToSyntax.get(token.state) || 'normal';
       if (syntax == 'identifier') {
         var word = extractWord(this, range, token);
+        console.log('doColor', '"' + word + '"');
         if (this.keywords.has(word))
           syntax = 'keyword';
       }
@@ -109,18 +108,24 @@ global.CppLexer = (function(keywords) {
    * @param {!Lexer.Token} token
    */
   function didShrinkLastToken(token) {
+    console.log('didShrinkLastToken', token);
     if (token.state == State.BLOCK_COMMENT_END) {
-      console.log('didShrinkLastToken bc end', token);
       token.state = State.BLOCK_COMMENT_ASTERISK;
       return;
     }
     if (token.state == State.BLOCK_COMMENT_START) {
-      console.log('didShrinkLastToken bc start', token);
+      token.state = State.SOLIDUS;
+      return;
+    }
+    if (token.state == State.COLON_COLON) {
+      token.state = State.COLON;
+      return;
+    }
+    if (token.state == State.LINE_COMMENT_START) {
       token.state = State.SOLIDUS;
       return;
     }
     if (token.state == State.LINE_COMMENT_START) {
-      console.log('didShrinkLastToken lc start', token);
       token.state = State.SOLIDUS;
       return;
     }
@@ -137,6 +142,8 @@ global.CppLexer = (function(keywords) {
   function extractWord(lexer, range, token) {
     var word = range.text;
     var it = lexer.tokens.find(token);
+    if (!it)
+      console.log('extractWord', token);
     do {
       it = it.previous();
     } while (it && it.data.state == State.SPACE);
@@ -246,14 +253,6 @@ global.CppLexer = (function(keywords) {
             ++lexer.scanOffset;
             return token;
           }
-
-          if (charCode == Unicode.SOLIDUS){
-            var token = lexer.finishToken();
-            lexer.startToken(State.BLOCK_COMMENT_SOLIDUS);
-            ++lexer.scanOffset;
-            return token;
-          }
-
           ++lexer.scanOffset;
           break;
 
@@ -263,29 +262,8 @@ global.CppLexer = (function(keywords) {
             break;
           }
 
-          if (charCode == Unicode.SOLIDUS) {
-            ++lexer.scanOffset;
-            lexer.restartToken(State.BLOCK_COMMENT_END);
-            var token = lexer.finishToken();
-           // Find matching BLOCK_COMMENT_START token.
-            var it = lexer.tokens.find(token);
-            var nestingCount = 0;
-            while (isBlockComment(it.data)) {
-              if (it.data.state == State.BLOCK_COMMENT_START) {
-                if (!nestingCount)
-                  throw new Error('Broken block comment');
-                --nestingCount;
-                if (!nestingCount)
-                  break;
-              } else if (it.data.state == State.BLOCK_COMMENT_END) {
-                ++nestingCount;
-              }
-              it = it.previous();
-            }
-            if (it.previous() && isBlockComment(it.previous().data))
-              lexer.startToken(State.BLOCK_COMMENT);
-            return token;
-          }
+          if (charCode == Unicode.SOLIDUS)
+            return lexer.finishTokenAs(State.BLOCK_COMMENT_END);
 
           {
             var token = lexer.finishToken();
@@ -294,32 +272,13 @@ global.CppLexer = (function(keywords) {
             return token;
           }
 
-        case State.BLOCK_COMMENT_SOLIDUS:
-          if (charCode == Unicode.ASTERISK) {
-            lexer.restartToken(State.BLOCK_COMMENT_START);
-            ++lexer.scanOffset;
-            var token = lexer.finishToken();
-            lexer.startToken(State.BLOCK_COMMENT);
-            return token;
-          }
-
-          if (charCode != Unicode.SOLIDUS) {
-            var token =lexer.finishToken();
-            lexer.startToken(State.BLOCK_COMMENT);
-            ++lexer.scanOffset;
-            return token;
-          }
-          ++lexer.scanOffset;
-          break;
-
         case State.BLOCK_COMMENT_START:
           lexer.startToken(State.BLOCK_COMMENT);
           break;
 
         case State.COLON:
           if (charCode == Unicode.COLON)
-            lexer.restartToken(State.COLON_COLON);
-          ++lexer.scanOffset;
+            return lexer.finishTokenAs(State.COLON_COLON);
           return lexer.finishToken();
 
         case State.LINE_COMMENT:
@@ -356,21 +315,17 @@ global.CppLexer = (function(keywords) {
 
         case State.SOLIDUS:
           if (charCode == Unicode.ASTERISK){
-            lexer.restartToken(State.BLOCK_COMMENT_START);
-            ++lexer.scanOffset;
-            var token = lexer.finishToken();
+            var token = lexer.finishTokenAs(State.BLOCK_COMMENT_START);
             lexer.startToken(State.BLOCK_COMMENT);
             return token;
           }
 
-          ++lexer.scanOffset;
           if (charCode == Unicode.SOLIDUS) {
-            lexer.restartToken(State.LINE_COMMENT_START);
-            ++lexer.scanOffset;
-            var token = lexer.finishToken();
+            var token = lexer.finishTokenAs(State.LINE_COMMENT_START);
             lexer.startToken(State.LINE_COMMENT);
             return token;
           }
+          ++lexer.scanOffset;
           break;
 
         case State.SPACE:

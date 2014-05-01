@@ -100,20 +100,21 @@ Lexer.prototype.didShrinkLastToken = function(token) {};
 Lexer.prototype.doColor = function(hint) {};
 
 /**
+ * @type {!function()}
+ */
+Lexer.prototype.extendToken = function() {};
+
+/**
+ * @param {number} next_state
  * @return {!Lexer.Token}
  */
-Lexer.prototype.finishToken = function() {};
+Lexer.prototype.finishToken = function(next_state) {};
 
 /**
  * @param {number} state
  * @return {!Lexer.Token}
  */
 Lexer.prototype.finishTokenAs = function(state) {};
-
-/**
- * @param {number} state
- */
-Lexer.prototype.restartToken = function(state) {};
 
 /**
  * @param {number} state

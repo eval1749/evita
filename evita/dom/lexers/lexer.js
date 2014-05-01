@@ -87,7 +87,7 @@ global.Lexer = (function() {
    */
   Lexer.Token = (function() {
     function Token(state, start) {
-      this.end = start;
+      this.end = start + 1;
       this.start = start;
       this.state = state;
     }
@@ -122,46 +122,55 @@ global.Lexer = (function() {
         }
         var dummyToken = new Lexer.Token(0, newScanOffset - 1);
         var it = this.tokens.lowerBound(dummyToken);
-        // TODO(yosi) We should use OrderedSet.upperBound
-        if (it && it.data.end == newScanOffset)
+        // TODO(yosi) We should use |OrderedSet.prototype.upperBound()|
+        if (it && it.data.end == newScanOffset - 1)
           it = it.next();
+
+        // Case 1: <ss|ss> middle of token
+        // Case 2: <|ssss> start of token
+        //
         if (!it) {
           // Document mutation is occurred after scanned range. We continue
           // scanning from current position;
+          this.state = 0;
+          console.log('adjustScanOffset', 'changed at end');
           return;
         }
-        // Shrink last clean token
         var lastToken = it.data;
-        var oldLastTokenEnd = lastToken.end;
-        if (oldLastTokenEnd != newScanOffset) {
-          this.tokens.remove(lastToken);
-          lastToken.end = newScanOffset;
-          this.tokens.add(lastToken);
-        }
+
+        // Remove dirty tokens
         if (this.lastToken !== lastToken) {
-          if (this.debug_ > 0)
-            console.log('restart from', newScanOffset, lastToken, 'was', this.lastToken);
+          if (this.debug_ > 1)
+            console.log('change lastToken', newScanOffset, lastToken, 'was', this.lastToken);
+
           this.lastToken = lastToken;
+          this.state = lastToken.state;
 
           // Collect dirty tokens
           var tokensToRemove = new Array();
           for (it = it.next(); it; it = it.next()) {
             tokensToRemove.push(it.data);
           }
-          // Remove dirty tokens
+          if (this.debug_ > 4)
+            console.log('tokensToRemove', tokensToRemove);
+          // Remove dirty tokens from set.
           tokensToRemove.forEach(function(token) {
             this.tokens.remove(token);
           }, this);
         }
-        if (oldLastTokenEnd != lastToken.end)
+
+        // Shrink last clean token
+        if (lastToken.end != newScanOffset) {
+          lastToken.end = newScanOffset;
           this.didShrinkLastToken(lastToken);
+          this.state = lastToken.state;
+        }
         if (oldScanOffset != newScanOffset)
           this.didChangeScanOffset();
-        this.state = lastToken.state;
       }
     },
 
-    debug: {value: 0, writable: true},
+    debug_: {value: 0, writable: true},
 
     detach: {value:
       /**
@@ -202,17 +211,32 @@ global.Lexer = (function() {
       }
     },
 
+    extendToken: {value:
+      /**
+       * @this {!Lexer}
+       */
+      function() {
+        ++this.scanOffset;
+        this.lastToken.end = this.scanOffset;
+      },
+    },
+
     finishToken: {value:
       /**
        * @this {!Lexer}
+       * @param {number} nextState
        * @return {!Lexer.Token}
        */
-      function() {
+      function(nextState) {
         var lastToken = this.lastToken;
-        lastToken.end = this.scanOffset;
+        if (!lastToken)
+          throw new Error('Assertion failed: lastToken != null');
         if (this.debug_ > 2)
-          console.log('finishlastToken', lastToken);
-        this.state = 0;
+          console.log('finishToken', lastToken);
+        if (!nextState)
+          this.state = 0;
+        else
+          this.startToken(nextState);
         return lastToken;
       }
     },
@@ -224,25 +248,16 @@ global.Lexer = (function() {
        * @return {!Lexer.Token}
        */
       function(state) {
-        this.restartToken(state);
-        ++this.scanOffset;
-        return this.finishToken();
+        console.assert(state, 'state must not be zero.');
+        var lastToken = this.lastToken;
+        this.extendToken();
+        if (this.debug_ > 2)
+          console.log('finishTokenAs', state, lastToken);
+        this.state = state;
+        lastToken.state = state;
+        return lastToken;
       }
     },
-
-    restartToken: {value:
-      /**
-       * @this {!Lexer}
-       * @param {number} state
-       */
-      function(state) {
-        console.assert(state, 'state must not be zero.');
-        if (this.debug_ > 2)
-          console.log('restartToken', state, this.range);
-        this.state = state;
-        this.lastToken.state = state;
-      }
-   },
 
     startToken: {value:
       /**
@@ -253,22 +268,14 @@ global.Lexer = (function() {
         console.assert(state, 'state must not be zero.');
         this.range.collapseTo(this.scanOffset);
         if (this.debug_ > 2)
-          console.log('startToken', state, this.range);
-        this.state = state;
-
-        var lastToken = this.lastToken;
-        if (lastToken) {
-          if (lastToken.start == lastToken.end) {
-            console.assert(lastToken.start == this.scanOffset);
-            lastToken.state = state;
-            return;
-          }
-          console.assert(lastToken.end == this.scanOffset);
-        }
-
+          console.log('startToken', state, this.scanOffset);
         var token = new Lexer.Token(state, this.scanOffset);
-        this.tokens.add(token);
+        if (this.debug_ > 0)
+          console.assert(!this.tokens.find(token));
         this.lastToken = token;
+        this.state = state;
+        this.tokens.add(token);
+        ++this.scanOffset;
       }
    }
   });

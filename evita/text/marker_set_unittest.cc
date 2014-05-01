@@ -217,6 +217,16 @@ TEST_F(MarkerSetTest, InsertMarker_merge) {
   EXPECT_EQ(Marker(), GetAt(90));
 }
 
+TEST_F(MarkerSetTest, InsertMarker_merge2) {
+ // before:  --CCCC-CCCC--
+  // insert: ------C------
+  // after:  --CCCCCCCC---
+  InsertMarker(0, 4, Correct);
+  InsertMarker(5, 9, Correct);
+  InsertMarker(4, 5, Correct);
+  EXPECT_EQ(Marker(0, 9, Correct), GetAt(1));
+ }
+
 TEST_F(MarkerSetTest, InsertMarker_split) {
   // before: --CCCCCC--
   // insert: ----MM----

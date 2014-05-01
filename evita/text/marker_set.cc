@@ -36,6 +36,7 @@ MarkerSet::ChangeScope::~ChangeScope() {
   for (auto const marker : markers_to_remove_) {
     markers_->erase(marker);
     delete marker;
+
   }
 }
 
@@ -127,8 +128,8 @@ void MarkerSet::InsertMarker(Posn start, Posn end,
   ChangeScope change_scope(&markers_);
   NotifyChange(start, end);
   if (can_merge_after && can_merge_before) {
-    (*before)->end_ = (*after)->end_;
-    change_scope.Remove(*after);
+    (*after)->start_ = (*before)->start_;
+    change_scope.Remove(*before);
     return;
   }
   if (can_merge_after) {
@@ -222,6 +223,7 @@ void MarkerSet::DidDeleteAt(Posn offset, size_t length) {
   }
 
 }
+
 
 void MarkerSet::DidInsertAt(Posn offset, size_t length) {
   for (auto runner = lower_bound(offset + 1); runner != markers_.end();

@@ -184,6 +184,24 @@ TEST_F(MarkerSetTest, InsertMarker_disjoint) {
   EXPECT_EQ(Marker(300, 400, Correct), GetAt(350));
 }
 
+TEST_F(MarkerSetTest, InsertMarker_existing) {
+  // before: --CCCCCCC--
+  // insert: ----CCCCC--
+  // after:  --CCCCCCC--
+  InsertMarker(10, 30, Correct);
+  InsertMarker(20, 30, Correct);
+  EXPECT_EQ(Marker(10, 30, Correct), GetAt(10));
+}
+
+TEST_F(MarkerSetTest, InsertMarker_extend) {
+  // before: --CCCCCCC----
+  // insert: ----CCCCCCC--
+  // after:  --CCCCCCCCC--
+  InsertMarker(10, 30, Correct);
+  InsertMarker(20, 40, Correct);
+  EXPECT_EQ(Marker(10, 40, Correct), GetAt(10));
+}
+
 TEST_F(MarkerSetTest, InsertMarker_merge) {
   // before: --CC--CC--CC--
   // insert: --MMMMMMMMMM--

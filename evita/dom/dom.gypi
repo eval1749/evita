@@ -53,6 +53,7 @@
       'lexers/config_lexer.js',
       'lexers/cpp_lexer.js',
       'lexers/idl_lexer.js',
+      'lexers/java_lexer.js',
       'lexers/javascript_lexer.js',
 
       'text/modes/modes.js',

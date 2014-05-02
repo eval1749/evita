@@ -49,4 +49,12 @@ function IdlLexer(document) {}
  * @param {!Document} document
  * @return {undefined}
  */
+function JavaLexer(document) {}
+
+/**
+ * @constructor
+ * @extends {ClikeLexer}
+ * @param {!Document} document
+ * @return {undefined}
+ */
 function JavaScriptLexer(document) {}

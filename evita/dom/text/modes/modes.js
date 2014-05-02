@@ -155,6 +155,7 @@ Object.defineProperty(Mode.prototype, 'lexer', {value: null, writable: true});
   {mode: CxxMode, lexer: CppLexer},
   {mode: ConfigMode, lexer: ConfigLexer},
   {mode: IdlMode, lexer: IdlLexer},
+  {mode: JavaMode, lexer: JavaLexer},
   {mode: JavaScriptMode, lexer: JavaScriptLexer},
 ].forEach(function(spec) {
   var ctor = spec.lexer;

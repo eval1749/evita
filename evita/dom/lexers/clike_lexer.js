@@ -68,6 +68,7 @@ global.ClikeLexer = (function() {
    */
   function ClikeLexer(document, options) {
     Lexer.call(this, options.keywords, document);
+    this.hasCpp = options.hasCpp;
   }
 
   /**
@@ -348,13 +349,6 @@ global.ClikeLexer = (function() {
             case Unicode.LF:
               lexer.startToken(State.NEWLINE);
               break;
-            case Unicode.NUMBER_SIGN:
-              if (!lexer.lastToken || lexer.lastToken.state == State.NEWLINE) {
-                lexer.startToken(State.NUMBER_SIGN);
-                return lexer.finishToken(State.ZERO);
-              }
-              lexer.startToken(State.OPERATOR);
-              break;
             case Unicode.QUOTATION_MARK:
               lexer.startToken(State.STRING2);
               break;
@@ -366,6 +360,16 @@ global.ClikeLexer = (function() {
               lexer.startToken(State.SPACE);
               break;
             default:
+              if (lexer.hasCpp && charCode == Unicode.NUMBER_SIGN) {
+                if (!lexer.lastToken ||
+                    lexer.lastToken.state == State.NEWLINE) {
+                  lexer.startToken(State.NUMBER_SIGN);
+                  return lexer.finishToken(State.ZERO);
+                }
+                lexer.startToken(State.OPERATOR);
+                break;
+              }
+
               if (isWordRest(charCode))
                 lexer.startToken(State.WORD);
               else

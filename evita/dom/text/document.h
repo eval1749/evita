@@ -73,7 +73,6 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
 
   public: bool CheckCanChange() const;
   public: void ClearUndo();
-  public: void DoColor(int hint);
   public: void EndUndoGroup(const base::string16& name);
   public: text::LineAndColumn GetLineAndColumn(text::Posn offset) const;
   public: bool IsValidPosition(text::Posn position) const;

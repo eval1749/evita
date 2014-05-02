@@ -326,6 +326,14 @@
   };
 
   /**
+   * @this {!Document}
+   * @param {number} hint
+   */
+  Document.prototype.doColor_ = function(hint) {
+    this.mode.doColor_(hint);
+  };
+
+  /**
    * @return {Array.<!DocumentWindow>}
    */
   Document.prototype.listWindows = function() {

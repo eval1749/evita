@@ -60,6 +60,7 @@ v8::Handle<v8::Object> NewMap(v8::Isolate* isolate) {
 //////////////////////////////////////////////////////////////////////
 //
 // DocumentClass
+
 //
 class DocumentClass
     : public v8_glue::DerivedWrapperInfo<Document, EventTarget> {
@@ -176,7 +177,6 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
       .SetProperty("state", &Document::state)
       .SetMethod("charCodeAt_", &Document::charCodeAt)
       .SetMethod("clearUndo", &Document::ClearUndo)
-      .SetMethod("doColor_", &Document::DoColor)
       .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
       .SetMethod("getLineAndColumn_", &Document::GetLineAndColumn)
       .SetMethod("match_", &Document::Match)
@@ -317,10 +317,6 @@ bool Document::CheckCanChange() const {
 
 void Document::ClearUndo(){
   buffer_->ClearUndo();
-}
-
-void Document::DoColor(int hint) {
-  mode_->DoColor(hint);
 }
 
 void Document::EndUndoGroup(const base::string16& name) {

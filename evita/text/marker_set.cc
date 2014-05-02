@@ -36,7 +36,6 @@ MarkerSet::ChangeScope::~ChangeScope() {
   for (auto const marker : markers_to_remove_) {
     markers_->erase(marker);
     delete marker;
-
   }
 }
 
@@ -149,6 +148,7 @@ void MarkerSet::NotifyChange(Posn start, Posn end) {
 }
 
 void MarkerSet::RemoveMarker(Posn start, Posn end) {
+
   DCHECK_LT(start, end);
   if (markers_.empty())
     return;
@@ -160,41 +160,33 @@ void MarkerSet::RemoveMarker(Posn start, Posn end) {
   while (offset < end) {
     if (runner == markers_.end() || (*runner)->start_ >= end)
       return;
-
     auto const marker = *runner;
-
-    if (marker->end_ >= end) {
-      if (marker->start_ <= offset) {
-        NotifyChange(offset, end);
-        if (marker->end_ == end) {
-          // before: --xxxxxx--
-          // new:    ----____--
-          // after:  --xx____--
-          change_scope.SetEnd(marker, offset);
-          return;
-        }
-
-        // before: --xxxxxxxx--
-        // new:    ----____----
-        // after:  --xx____xx--
-        if (marker->start_ < offset)
-           markers_.insert(new Marker(marker->start_, offset, marker->type_));
-        marker->start_ = end;
-        DCHECK_LT(marker->start_, marker->end_);
-        return;
-      }
-
-      // before: ----xxxx--
-      // new:    --____----
-      // after:  ----__xx--
-      NotifyChange(start, end);
+    if (offset <= marker->start_ && marker->end_ <= end) {
+      // marker: ----xxxx----
+      // runner: --________--
+      // after:  ------------
+      NotifyChange(marker->start_, marker->end_);
+      change_scope.Remove(marker);
+    } else if (offset <= marker->start_) {
+      // marker: ----xxxx----
+      // runner: --____------
+      // after:  ------xx----
+      NotifyChange(marker->start_, end);
       change_scope.SetStart(marker, end);
-      return;
+    } else if (marker->end_ <= end) {
+      // marker: --xxxx----
+      // runner: ----____--
+      // after:  --xx------
+      NotifyChange(offset, marker->end_);
+      change_scope.SetEnd(marker, offset);
+    } else {
+      // marker: --xxxxxx--
+      // runner: ----__----
+      // after:  --xx--xx--
+      NotifyChange(offset, end);
+      markers_.insert(new Marker(marker->start_, offset, marker->type_));
+      change_scope.SetStart(marker, end);
     }
-
-    NotifyChange(offset, marker->end_);
-    change_scope.SetEnd(marker, offset);
-
     offset = marker->end_;
     ++runner;
   }
@@ -221,9 +213,7 @@ void MarkerSet::DidDeleteAt(Posn offset, size_t length) {
     if (marker->start_ == marker->end_)
       change_scope.Remove(marker);
   }
-
 }
-
 
 void MarkerSet::DidInsertAt(Posn offset, size_t length) {
   for (auto runner = lower_bound(offset + 1); runner != markers_.end();

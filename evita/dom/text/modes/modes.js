@@ -134,3 +134,14 @@ Object.defineProperty(Mode, 'chooseModeByFileName', {
     return new description.mode();
   }
 });
+
+Object.defineProperty(Mode.prototype, 'doColor', {value:
+ /**
+  * @this {!Mode}
+  * @param {!Document} document
+  * @param {number} hint
+  */
+ function(document, hint) {
+   this.doColor_(hint);
+ }
+});

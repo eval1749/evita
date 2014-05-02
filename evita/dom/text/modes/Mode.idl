@@ -23,6 +23,9 @@ interface Mode {
 
   readonly attribute DOMString name;
 
+  [ImplementedAs=JavaScript]
+  void doColor(Document document, long hint);
+
   [ImplementedAs=DoColor]
   void doColor_(long hint);
 };

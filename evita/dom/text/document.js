@@ -330,7 +330,7 @@
    * @param {number} hint
    */
   Document.prototype.doColor_ = function(hint) {
-    this.mode.doColor_(hint);
+    this.mode.doColor(this, hint);
   };
 
   /**

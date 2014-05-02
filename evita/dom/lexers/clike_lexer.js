@@ -69,6 +69,7 @@ global.ClikeLexer = (function() {
   function ClikeLexer(document, options) {
     Lexer.call(this, options.keywords, document);
     this.hasCpp = options.hasCpp;
+    this.useColonColon = options.useColonColon;
   }
 
   /**
@@ -343,9 +344,6 @@ global.ClikeLexer = (function() {
             case Unicode.APOSTROPHE:
               lexer.startToken(State.STRING1);
               break;
-            case Unicode.COLON:
-              lexer.startToken(State.COLON);
-              break;
             case Unicode.LF:
               lexer.startToken(State.NEWLINE);
               break;
@@ -367,6 +365,11 @@ global.ClikeLexer = (function() {
                   return lexer.finishToken(State.ZERO);
                 }
                 lexer.startToken(State.OPERATOR);
+                break;
+              }
+
+              if (lexer.useColonColon && charCode == Unicode.COLON) {
+                lexer.startToken(State.COLON);
                 break;
               }
 

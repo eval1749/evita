@@ -19,6 +19,7 @@ global.CppLexer = (function(options) {
   return CppLexer;
 })({
   hasCpp: true,
+  useColonColon: true,
   keywords: [
   // C++ keywords
   'auto', 'bool', 'break', 'case', 'catch', 'char', 'class', 'const',

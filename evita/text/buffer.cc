@@ -113,7 +113,7 @@ void Buffer::EndUndoGroup(const base::string16& name) {
 }
 
 const css::Style& Buffer::GetDefaultStyle() const {
-  return GetIntervalAt(GetEnd())->style();
+  return *css::Style::Default();
 }
 
 Interval* Buffer::GetIntervalAt(Posn lPosn) const {

@@ -76,9 +76,7 @@ IntervalSet::Impl::Impl(Buffer* buffer) : buffer_(buffer) {
   buffer_->AddObserver(this);
 
   // Insert default style.
-  auto const interval = new Interval(0, 1);
-  interval->set_style(*css::Style::Default());
-  intervals_.insert(interval);
+  intervals_.insert(new Interval(0, 1));
 }
 
 IntervalSet::Impl::~Impl() {

@@ -33,6 +33,14 @@ function CppLexer(document) {}
  * @param {!Document} document
  * @return {undefined}
  */
+function ConfigLexer(document) {}
+
+/**
+ * @constructor
+ * @extends {ClikeLexer}
+ * @param {!Document} document
+ * @return {undefined}
+ */
 function IdlLexer(document) {}
 
 /**

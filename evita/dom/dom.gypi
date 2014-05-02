@@ -50,7 +50,7 @@
       'lexers/lexer.js',
       #'lexers/cmd_lexer.js',
       'lexers/clike_lexer.js',
-      #'lexers/config_lexer.js',
+      'lexers/config_lexer.js',
       'lexers/cpp_lexer.js',
       'lexers/idl_lexer.js',
       'lexers/javascript_lexer.js',

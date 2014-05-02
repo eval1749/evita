@@ -151,41 +151,23 @@ Object.defineProperty(Mode.prototype, 'doColor', {value:
 
 Object.defineProperty(Mode.prototype, 'lexer', {value: null, writable: true});
 
-Object.defineProperty(CxxMode.prototype, 'doColor', {value:
-   /**
-    * @this {!Mode}
-    * @param {!Document} document
-    * @param {number} hint
-    */
-   function(document, hint) {
-    if (!this.lexer)
-      this.lexer = new CppLexer(document);
-    this.lexer.doColor(hint);
-  }
-});
-
-Object.defineProperty(IdlMode.prototype, 'doColor', {value:
-   /**
-    * @this {!Mode}
-    * @param {!Document} document
-    * @param {number} hint
-    */
-   function(document, hint) {
-    if (!this.lexer)
-      this.lexer = new IdlLexer(document);
-    this.lexer.doColor(hint);
-  }
-});
-
-Object.defineProperty(JavaScriptMode.prototype, 'doColor', {value:
-   /**
-    * @this {!Mode}
-    * @param {!Document} document
-    * @param {number} hint
-    */
-   function(document, hint) {
-    if (!this.lexer)
-      this.lexer = new JavaScriptLexer(document);
-    this.lexer.doColor(hint);
-  }
+[
+  {mode: CxxMode, lexer: CppLexer},
+  {mode: ConfigMode, lexer: ConfigLexer},
+  {mode: IdlMode, lexer: IdlLexer},
+  {mode: JavaScriptMode, lexer: JavaScriptLexer},
+].forEach(function(spec) {
+  var ctor = spec.lexer;
+  Object.defineProperty(spec.mode.prototype, 'doColor', {value:
+    /**
+     * @this {!Mode}
+     * @param {!Document} document
+     * @param {number} hint
+     */
+    function(document, hint) {
+     if (!this.lexer)
+       this.lexer = new ctor(document);
+     this.lexer.doColor(hint);
+    }
+  });
 });

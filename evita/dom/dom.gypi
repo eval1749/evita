@@ -49,8 +49,9 @@
 
       'lexers/lexer.js',
       #'lexers/cmd_lexer.js',
-      'lexers/cpp_lexer.js',
+      'lexers/clike_lexer.js',
       #'lexers/config_lexer.js',
+      'lexers/cpp_lexer.js',
 
       'text/modes/modes.js',
       'os/file.js',

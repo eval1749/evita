@@ -172,6 +172,7 @@
       '<(glue_dir)/TextFieldSelection.cc',
       '<(glue_dir)/TextFieldSelection.h',
 
+
       '<(glue_dir)/TextSelection.h',
       '<(glue_dir)/TextSelection.cc',
       '<(glue_dir)/TextWindow.h',
@@ -273,6 +274,7 @@
       'js_console_externs.js',
       'key_names_externs.js',
       'lexers/lexer_externs.js',
+      'lexers/lexers_externs.js',
       'text/modes/modes_externs.js',
       'os/os_externs.js',
       'text/range_externs.js',

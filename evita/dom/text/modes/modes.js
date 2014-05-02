@@ -145,3 +145,18 @@ Object.defineProperty(Mode.prototype, 'doColor', {value:
    this.doColor_(hint);
  }
 });
+
+Object.defineProperty(Mode.prototype, 'lexer', {value: null, writable: true});
+
+Object.defineProperty(CxxMode.prototype, 'doColor', {value:
+   /**
+    * @this {!Mode}
+    * @param {!Document} document
+    * @param {number} hint
+    */
+   function(document, hint) {
+    if (!this.lexer)
+      this.lexer = new CppLexer(document);
+    this.lexer.doColor(hint);
+  }
+});

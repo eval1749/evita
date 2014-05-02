@@ -157,6 +157,7 @@ Object.defineProperty(Mode.prototype, 'lexer', {value: null, writable: true});
   {mode: IdlMode, lexer: IdlLexer},
   {mode: JavaMode, lexer: JavaLexer},
   {mode: JavaScriptMode, lexer: JavaScriptLexer},
+  {mode: PythonMode, lexer: PythonLexer},
 ].forEach(function(spec) {
   var ctor = spec.lexer;
   Object.defineProperty(spec.mode.prototype, 'doColor', {value:

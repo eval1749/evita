@@ -58,3 +58,11 @@ function JavaLexer(document) {}
  * @return {undefined}
  */
 function JavaScriptLexer(document) {}
+
+/**
+ * @constructor
+ * @extends {ClikeLexer}
+ * @param {!Document} document
+ * @return {undefined}
+ */
+function PythonLexer(document) {}

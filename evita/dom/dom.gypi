@@ -55,6 +55,7 @@
       'lexers/idl_lexer.js',
       'lexers/java_lexer.js',
       'lexers/javascript_lexer.js',
+      'lexers/python_lexer.js',
 
       'text/modes/modes.js',
       'os/file.js',

@@ -26,3 +26,11 @@ function CppLexer(document) {}
  * @return {undefined}
  */
 function IdlLexer(document) {}
+
+/**
+ * @constructor
+ * @extends {ClikeLexer}
+ * @param {!Document} document
+ * @return {undefined}
+ */
+function JavaScriptLexer(document) {}

@@ -176,3 +176,16 @@ Object.defineProperty(IdlMode.prototype, 'doColor', {value:
     this.lexer.doColor(hint);
   }
 });
+
+Object.defineProperty(JavaScriptMode.prototype, 'doColor', {value:
+   /**
+    * @this {!Mode}
+    * @param {!Document} document
+    * @param {number} hint
+    */
+   function(document, hint) {
+    if (!this.lexer)
+      this.lexer = new JavaScriptLexer(document);
+    this.lexer.doColor(hint);
+  }
+});

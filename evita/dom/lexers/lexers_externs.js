@@ -18,3 +18,11 @@ function ClikeLexer(keywords, document) {}
  * @return {undefined}
  */
 function CppLexer(document) {}
+
+/**
+ * @constructor
+ * @extends {ClikeLexer}
+ * @param {!Document} document
+ * @return {undefined}
+ */
+function IdlLexer(document) {}

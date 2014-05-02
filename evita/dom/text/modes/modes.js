@@ -14,6 +14,9 @@ global.PlainTextMode.keymap = new Map();
 global.PythonMode.keymap = new Map();
 global.XmlMode.keymap = new Map();
 
+function IdlMode() {
+}
+
 Object.defineProperty(Mode, 'defaultMode', {
   /** @type {!Mode} */
   value: new PlainTextMode()
@@ -39,7 +42,7 @@ Object.defineProperty(Mode, 'extensionMap', {
     map.set('htm', {mode: XmlMode, name: 'HTML Document'});
     map.set('html', {mode: XmlMode, name: 'HTML Document'});
     map.set('hxx', {mode: CxxMode, name: 'C++ Header'});
-    map.set('idl', {mode: CxxMode, name: 'Web IDL Source'});
+    map.set('idl', {mode: IdlMode, name: 'Web IDL Source'});
     map.set('java', {mode: JavaMode, name: 'Java Source'});
     map.set('js', {mode: JavaScriptMode, name: 'JavaScript Source'});
     map.set('jsm', {mode: JavaScriptMode, name: 'JavaScript Module Source'});
@@ -157,6 +160,19 @@ Object.defineProperty(CxxMode.prototype, 'doColor', {value:
    function(document, hint) {
     if (!this.lexer)
       this.lexer = new CppLexer(document);
+    this.lexer.doColor(hint);
+  }
+});
+
+Object.defineProperty(IdlMode.prototype, 'doColor', {value:
+   /**
+    * @this {!Mode}
+    * @param {!Document} document
+    * @param {number} hint
+    */
+   function(document, hint) {
+    if (!this.lexer)
+      this.lexer = new IdlLexer(document);
     this.lexer.doColor(hint);
   }
 });

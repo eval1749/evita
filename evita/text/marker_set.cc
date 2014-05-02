@@ -198,20 +198,32 @@ void MarkerSet::RemoveObserver(MarkerSetObserver* observer) {
 
 // BufferMutationObserver
 void MarkerSet::DidDeleteAt(Posn offset, size_t length) {
-  ChangeScope change_scope(&markers_);
-  for (auto runner = lower_bound(offset + 1); runner != markers_.end();
+  {
+    ChangeScope change_scope(&markers_);
+    for (auto runner = markers_.rbegin();
+         runner != markers_.rend() && (*runner)->end_ > offset;
+         ++runner) {
+      auto const marker = *runner;
+      auto const start = marker->start_ > offset ?
+          std::max(static_cast<Posn>(marker->start_ - length), offset) :
+          marker->start_;
+      auto const end = std::max(static_cast<Posn>(marker->end_ - length),
+                                offset);
+      if (start == end)
+        change_scope.Remove(marker);
+    }
+  }
+
+  for (auto runner = markers_.rbegin();
+       runner != markers_.rend() && (*runner)->end_ > offset;
        ++runner) {
     auto const marker = *runner;
     if (marker->start_ > offset) {
       marker->start_ = std::max(static_cast<Posn>(marker->start_ - length),
                                 offset);
     }
-    if (marker->end_ > offset) {
-      marker->end_ = std::max(static_cast<Posn>(marker->end_ - length),
-                              offset);
-    }
-    if (marker->start_ == marker->end_)
-      change_scope.Remove(marker);
+    marker->end_ = std::max(static_cast<Posn>(marker->end_ - length), offset);
+    DCHECK_LT(marker->start_, marker->end_);
   }
 }
 

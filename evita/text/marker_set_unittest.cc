@@ -36,6 +36,11 @@ class MarkerSetTest : public ::testing::Test {
 
   protected: MarkerSet* marker_set() { return &marker_set_; }
 
+  protected: void DidDeleteAt(text::Posn offset, size_t length) {
+    static_cast<text::BufferMutationObserver*>(marker_set())->DidDeleteAt(
+        offset, length);
+  }
+
   protected: void RemoveMarker(text::Posn start, text::Posn end) {
     marker_set()->RemoveMarkerForTesting(start, end);
   }
@@ -119,6 +124,15 @@ TEST_F(MarkerSetTest, DeleteMarker_split) {
   EXPECT_EQ(Marker(350, 400, Correct), GetAt(350));
   EXPECT_EQ(Marker(350, 400, Correct), GetAt(399));
   EXPECT_EQ(Marker(), GetAt(400));
+}
+
+TEST_F(MarkerSetTest, DidDeleteAt) {
+  // before: --"foo"x--
+  // delete: --"foo"---
+  InsertMarker(0, 5, Correct);
+  InsertMarker(5, 6, Misspelled);
+  DidDeleteAt(5, 1);
+  EXPECT_EQ(Marker(0, 5, Correct), GetAt(0));
 }
 
 TEST_F(MarkerSetTest, GetMarkerAt) {
@@ -232,6 +246,7 @@ TEST_F(MarkerSetTest, InsertMarker_split) {
   // insert: ----MM----
   // after:  --CCMMCC--
   InsertMarker(200, 400, Correct);
+
   InsertMarker(250, 350, Misspelled);
   EXPECT_EQ(Marker(), GetAt(199));
   EXPECT_EQ(Marker(200, 250, Correct), GetAt(200));

@@ -13,6 +13,7 @@ global.ClikeLexer = (function() {
     BLOCK_COMMENT_START: 103,
     COLON: 200,
     COLON_COLON: 201,
+    DOT: 202,
     LINE_COMMENT: 300,
     LINE_COMMENT_ESCAPE: 301,
     LINE_COMMENT_START: 302,
@@ -39,6 +40,7 @@ global.ClikeLexer = (function() {
   StateToSyntax.set(State.BLOCK_COMMENT_START, 'comment');
   StateToSyntax.set(State.COLON, 'operators');
   StateToSyntax.set(State.COLON_COLON, 'operators');
+  StateToSyntax.set(State.DOT, 'operators');
   StateToSyntax.set(State.LINE_COMMENT, 'comment');
   StateToSyntax.set(State.LINE_COMMENT_ESCAPE, 'comment');
   StateToSyntax.set(State.LINE_COMMENT_START, 'comment');
@@ -70,6 +72,7 @@ global.ClikeLexer = (function() {
     Lexer.call(this, options.keywords, document);
     this.hasCpp = options.hasCpp;
     this.useColonColon = options.useColonColon;
+    this.useDot = options.useDot;
   }
 
   /**
@@ -114,6 +117,10 @@ global.ClikeLexer = (function() {
       token.state = State.COLON;
       return;
     }
+    if (token.state == State.DOT) {
+      token.state = State.ZERO;
+      return;
+    }
     if (token.state == State.LINE_COMMENT_START) {
       token.state = State.SOLIDUS;
       return;
@@ -139,6 +146,21 @@ global.ClikeLexer = (function() {
 
     if (!it)
       return word;
+
+    if (it.data.state == State.DOT) {
+      range.start = it.data.start;
+      word = '.' + word;
+      if (lexer.keywords.has(word))
+        return word;
+      it = it.previous();
+      while (it && it.data.state == State.SPACE) {
+        it = it.previous();
+      }
+      if (!it || it.data.state != State.WORD)
+        return word;
+      var previous = range.document.slice(it.data.start, it.data.end);
+      return previous + word;
+    }
 
     if (it.data.state == State.NUMBER_SIGN) {
       range.start = it.data.start;
@@ -258,6 +280,7 @@ global.ClikeLexer = (function() {
           return lexer.finishToken(State.ZERO);
 
         case State.COLON_COLON:
+        case State.DOT:
           lexer.state = State.ZERO;
           break;
 
@@ -371,6 +394,11 @@ global.ClikeLexer = (function() {
               if (lexer.useColonColon && charCode == Unicode.COLON) {
                 lexer.startToken(State.COLON);
                 break;
+              }
+
+              if (lexer.useDot && charCode == Unicode.FULL_STOP) {
+                lexer.startToken(State.DOT);
+                return lexer.finishToken(State.ZERO);
               }
 
               if (isWordRest(charCode))

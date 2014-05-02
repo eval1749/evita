@@ -18,6 +18,7 @@ global.JavaScriptLexer = (function(options) {
 
   return JavaScriptLexer;
 })({
+  useDot: true,
   keywords: [
     'break',
     'case', 'catch', 'class', 'const', 'continue',

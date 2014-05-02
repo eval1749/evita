@@ -112,7 +112,8 @@ global.Lexer = (function() {
         this.changedOffset = Count.FORWARD;
         if (!newScanOffset) {
           // All tokens in token list are dirty.
-          console.log('All tokens are dirty');
+          if (this.debug_ > 0)
+            console.log('All tokens are dirty');
           this.lastToken = null;
           this.state = 0;
           this.tokens.clear();
@@ -133,7 +134,8 @@ global.Lexer = (function() {
           // Document mutation is occurred after scanned range. We continue
           // scanning from current position;
           this.state = 0;
-          console.log('adjustScanOffset', 'changed at end');
+          if (this.debug_ > 0)
+            console.log('adjustScanOffset', 'changed at end');
           return;
         }
         var lastToken = it.data;
@@ -258,6 +260,7 @@ global.Lexer = (function() {
         return lastToken;
       }
     },
+
 
     startToken: {value:
       /**

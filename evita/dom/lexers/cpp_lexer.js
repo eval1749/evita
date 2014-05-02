@@ -78,28 +78,17 @@ global.CppLexer = (function(keywords) {
       throw new Error("Can't use disconnected lexer.");
 
     this.adjustScanOffset();
-    var range = this.range;
-    var document = range.document;
-    var maxOffset = document.length;
+    var document = this.range.document;
+    var maxOffset = Math.min(this.scanOffset + maxCount, document.length);
     this.count = maxCount;
     while (this.scanOffset < maxOffset) {
       var token = nextToken(this);
       if (!token)
         break;
-      range.collapseTo(token.start);
-      range.end = token.end;
-      var syntax = StateToSyntax.get(token.state) || 'normal';
-      if (syntax == 'identifier') {
-        var word = extractWord(this, range, token);
-        console.log('doColor', '"' + word + '"');
-        if (this.keywords.has(word))
-          syntax = 'keyword';
-      }
-      if (this.debug_ > 4)
-        console.log('doColor', syntax, token);
-      range.setSyntax(syntax);
+      setSyntax(this, token);
+      if (this.lastToken != token)
+        setSyntax(this, /** @type {!Lexer.Token} */(this.lastToken));
     }
-
     return this.count;
   }
 
@@ -108,7 +97,8 @@ global.CppLexer = (function(keywords) {
    * @param {!Lexer.Token} token
    */
   function didShrinkLastToken(token) {
-    console.log('didShrinkLastToken', token);
+    if (this.debug_ > 1)
+      console.log('didShrinkLastToken', token);
     if (token.state == State.BLOCK_COMMENT_END) {
       token.state = State.BLOCK_COMMENT_ASTERISK;
       return;
@@ -132,14 +122,14 @@ global.CppLexer = (function(keywords) {
    * @param {!Range} range
    * @param {!Lexer.Token} token
    * @return {string}
+
    *
    * Extract CPP directive as '#" + word or namespace qualify identifier.
    */
   function extractWord(lexer, range, token) {
     var word = range.text;
     var it = lexer.tokens.find(token);
-    if (!it)
-      console.log('extractWord', token);
+    console.assert(it, token);
     do {
       it = it.previous();
     } while (it && it.data.state == State.SPACE);
@@ -176,7 +166,9 @@ global.CppLexer = (function(keywords) {
    * @return {boolean}
    */
   function isOperator(charCode) {
-    return !isWhitespace(charCode) && !isWordRest(charCode);
+    return !isWhitespace(charCode) && !isWordRest(charCode) &&
+           charCode != Unicode.APOSTROPHE &&
+           charCode != Unicode.QUOTATION_MARK;
   }
 
   /**
@@ -279,7 +271,7 @@ global.CppLexer = (function(keywords) {
 
         case State.LINE_COMMENT_START:
           if (charCode == Unicode.LF) {
-            this.state = State.ZERO;
+            lexer.state = State.ZERO;
             break;
           }
           if (charCode == Unicode.REVERSE_SOLIDUS)
@@ -386,6 +378,27 @@ global.CppLexer = (function(keywords) {
       }
     }
     return lexer.lastToken;
+  }
+
+  /**
+   * @param {!CppLexer} lexer
+   * @param {!Lexer.Token} token
+   */
+  function setSyntax(lexer, token) {
+    var range = lexer.range;
+    range.collapseTo(token.start);
+    range.end = token.end;
+    var syntax = StateToSyntax.get(token.state) || 'normal';
+    if (syntax == 'identifier') {
+      var word = extractWord(lexer, range, token);
+      if (lexer.debug_ > 5)
+        console.log('setSyntax', '"' + word + '"');
+      if (lexer.keywords.has(word))
+        syntax = 'keyword';
+    }
+    if (lexer.debug_ > 4)
+      console.log('setSyntax', syntax, token);
+    range.setSyntax(syntax);
   }
 
   CppLexer.prototype = Object.create(Lexer.prototype, {

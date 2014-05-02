@@ -3,13 +3,21 @@
 // found in the LICENSE file.
 
 /**
+ * @typedef {Object}
+ *  keywords: {Iterable.<string>} keywords
+ */
+var ClikeLexerOptions;
+
+/**
  * @constructor
  * @extends {Lexer}
- * @param {Iterable.<string>} keywords
  * @param {!Document} document
+ * TODO(yosi) We should use |ClikeLexerOptions| instead of |Object| for
+ * |options|.
+ * @param {!Object} options
  * @return {undefined}
  */
-function ClikeLexer(keywords, document) {}
+function ClikeLexer(document, options) {}
 
 /**
  * @constructor

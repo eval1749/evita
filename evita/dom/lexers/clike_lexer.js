@@ -63,11 +63,11 @@ global.ClikeLexer = (function() {
   /**
    * @constructor
    * @extends Lexer
-   * @param {Iterable.<string>} keywords
    * @param {!Document} document
+   * @param {!ClikeLexerOptions} options
    */
-  function ClikeLexer(keywords, document) {
-    Lexer.call(this, keywords, document);
+  function ClikeLexer(document, options) {
+    Lexer.call(this, options.keywords, document);
   }
 
   /**

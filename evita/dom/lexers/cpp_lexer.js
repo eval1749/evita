@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-global.CppLexer = (function(keywords) {
+global.CppLexer = (function(options) {
   /**
    * @constructor
    * @extends Lexer
    * @param {!Document} document
    */
   function CppLexer(document) {
-    ClikeLexer.call(this, keywords, document);
+    ClikeLexer.call(this, document, options);
   }
 
   CppLexer.prototype = Object.create(ClikeLexer.prototype, {
@@ -17,7 +17,8 @@ global.CppLexer = (function(keywords) {
   });
 
   return CppLexer;
-})([
+})({
+  keywords: [
   // C++ keywords
   'auto', 'bool', 'break', 'case', 'catch', 'char', 'class', 'const',
   'constexpr', 'const_cast', 'continue', 'decltype', 'default', 'delete',
@@ -145,4 +146,4 @@ global.CppLexer = (function(keywords) {
   // Vogue
   'gfx::Point', 'gfx::Rect', 'gfx::Size',
   'gfx::PointF', 'gfx::RectF', 'gfx::SizeF',
-]);
+]});

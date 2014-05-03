@@ -323,8 +323,7 @@ global.ClikeLexer = (function() {
             return lexer.finishTokenAs(State.BLOCK_COMMENT_START);
           if (charCode == Unicode.SOLIDUS)
             return lexer.finishTokenAs(State.LINE_COMMENT_START);
-          lexer.extendToken();
-          break;
+          return lexer.finishToken(State.ZERO);
 
         case State.SPACE:
           if (charCode != Unicode.SPACE && charCode != Unicode.TAB)

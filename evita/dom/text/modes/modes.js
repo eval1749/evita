@@ -14,9 +14,6 @@ global.PlainTextMode.keymap = new Map();
 global.PythonMode.keymap = new Map();
 global.XmlMode.keymap = new Map();
 
-function IdlMode() {
-}
-
 Object.defineProperty(Mode, 'defaultMode', {
   /** @type {!Mode} */
   value: new PlainTextMode()
@@ -42,7 +39,7 @@ Object.defineProperty(Mode, 'extensionMap', {
     map.set('htm', {mode: XmlMode, name: 'HTML Document'});
     map.set('html', {mode: XmlMode, name: 'HTML Document'});
     map.set('hxx', {mode: CxxMode, name: 'C++ Header'});
-    map.set('idl', {mode: IdlMode, name: 'Web IDL Source'});
+    map.set('idl', {mode: CxxMode, name: 'Web IDL Source'});
     map.set('java', {mode: JavaMode, name: 'Java Source'});
     map.set('js', {mode: JavaScriptMode, name: 'JavaScript Source'});
     map.set('jsm', {mode: JavaScriptMode, name: 'JavaScript Module Source'});
@@ -154,7 +151,7 @@ Object.defineProperty(Mode.prototype, 'lexer', {value: null, writable: true});
 [
   {mode: CxxMode, lexer: CppLexer},
   {mode: ConfigMode, lexer: ConfigLexer},
-  {mode: IdlMode, lexer: IdlLexer},
+  //{mode: IdlMode, lexer: IdlLexer},
   {mode: JavaMode, lexer: JavaLexer},
   {mode: JavaScriptMode, lexer: JavaScriptLexer},
   {mode: PythonMode, lexer: PythonLexer},

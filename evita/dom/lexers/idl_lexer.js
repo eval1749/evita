@@ -18,6 +18,7 @@ global.IdlLexer = (function(options) {
 
   return IdlLexer;
 })({
+  characters: ClikeLexer.newCharacters(),
   keywords: [
     'any', 'attribute',
     'boolean', 'byte',

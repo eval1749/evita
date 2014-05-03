@@ -9,6 +9,7 @@ global.ConfigLexer = (function() {
 
     LINE_COMMENT: 300,
     LINE_COMMENT_START: 301,
+    OTHER: 400,
     SPACE: 700,
     STRING1: 800,
     STRING1_END: 801,
@@ -16,7 +17,6 @@ global.ConfigLexer = (function() {
     STRING2: 810,
     STRING2_END: 811,
     STRING2_ESCAPE: 812,
-    WORD: 900
   };
 
   /** @const @type {!Map.<State, string>} */
@@ -31,12 +31,23 @@ global.ConfigLexer = (function() {
   stateToSyntax.set(State.STRING2, 'string_literal');
   stateToSyntax.set(State.STRING2_END, 'string_literal');
   stateToSyntax.set(State.STRING2_ESCAPE, 'string_literal');
-  stateToSyntax.set(State.WORD, 'normal');
+  stateToSyntax.set(State.OTHER, '');
 
   Object.keys(State).forEach(function(key) {
     if (!stateToSyntax.has(State[key]))
       throw new Error('stateToSyntax must have ' + key);
   });
+
+  /** @const @type {!Map.<number, !Symbol>} */
+  var CHARACTERS = (function() {
+    var attrs = new Map();
+    attrs.set(Unicode.LF, Lexer.WHITESPACE_CHAR);
+    attrs.set(Unicode.SPACE, Lexer.WHITESPACE_CHAR);
+    attrs.set(Unicode.TAB, Lexer.WHITESPACE_CHAR);
+    attrs.set(Unicode.APOSTROPHE, Lexer.STRING1_CHAR);
+    attrs.set(Unicode.QUOTATION_MARK, Lexer.STRING2_CHAR);
+    return attrs;
+  })();
 
   /**
    * @constructor
@@ -45,29 +56,10 @@ global.ConfigLexer = (function() {
    */
   function ConfigLexer(document) {
     Lexer.call(this, document, {
+      characters: CHARACTERS,
       keywords: [],
       stateToSyntax: stateToSyntax
     });
-  }
-
-  /**
-   * @param {number} charCode
-   * @return {boolean}
-   */
-  function isWhitespace(charCode) {
-    return charCode == Unicode.LF || charCode == Unicode.SPACE ||
-           charCode == Unicode.TAB;
-  }
-
-  /**
-   * @param {number} charCode
-   * @return {boolean}
-   */
-  function isWordRest(charCode) {
-    return !isWhitespace(charCode) &&
-           charCode != Unicode.APOSTROPHE &&
-           charCode != Unicode.NUMBER_SIGN &&
-           charCode != Unicode.QUOTATION_MARK;
   }
 
   /**
@@ -124,8 +116,8 @@ global.ConfigLexer = (function() {
         case State.STRING2_ESCAPE:
           return lexer.finishToken(State.STRING2);
 
-        case State.WORD:
-          if (!isWordRest(charCode))
+        case State.OTHER:
+          if (!this.isOther(charCode))
             return lexer.finishToken(State.ZERO);
           lexer.extendToken();
           break;
@@ -141,12 +133,14 @@ global.ConfigLexer = (function() {
             case Unicode.QUOTATION_MARK:
               lexer.startToken(State.STRING2);
               break;
+            case Unicode.LF:
             case Unicode.SPACE:
             case Unicode.TAB:
               lexer.startToken(State.SPACE);
               break;
             default:
-              lexer.startToken(State.WORD);
+              console.assert(lexer.isOther(charCode));
+              lexer.startToken(State.OTHER);
               break;
           }
           break;

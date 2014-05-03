@@ -19,6 +19,7 @@ global.JavaScriptLexer = (function(options) {
   return JavaScriptLexer;
 })({
   useDot: true,
+  characters: ClikeLexer.newCharacters(),
   keywords: [
     'break',
     'case', 'catch', 'class', 'const', 'continue',

@@ -4,7 +4,9 @@
 
 /**
  * @typedef {Object}
- *  keywords: {Iterable.<string>} keywords
+ *  characters: {!Map<number, !Symbol},
+ *  hasCpp: boolean,
+ *  keywords: {!Iterable.<string>} keywords
  */
 var ClikeLexerOptions;
 
@@ -18,6 +20,20 @@ var ClikeLexerOptions;
  * @return {undefined}
  */
 function ClikeLexer(document, options) {}
+
+/**
+ * @return {!Map.<number, number>}
+ */
+ClikeLexer.newCharacters = function() {};
+
+/** @const @type {!Symbol} */
+ClikeLexer.COLON_CHAR;
+
+/** @const @type {!Symbol} */
+ClikeLexer.DOT_CHAR;
+
+/** @const @type {!Symbol} */
+ClikeLexer.SLASH_CHAR;
 
 /**
  * @constructor

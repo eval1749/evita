@@ -20,6 +20,11 @@ global.CppLexer = (function(options) {
 })({
   hasCpp: true,
   useColonColon: true,
+  characters: (function() {
+    var attrs = ClikeLexer.newCharacters();
+    attrs.set(Unicode.COLON, Unicode.COLON);
+    return attrs;
+  })(),
   keywords: [
   // C++ keywords
   'auto',

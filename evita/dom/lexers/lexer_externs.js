@@ -4,6 +4,7 @@
 
 /**
  * @typedef {{
+ *  characters: !Map.<number, !Symbol>,
  *  keywords: !Iterable.<string>,
  *  stateToSyntax: !Map.<number, string>
  * }}
@@ -16,6 +17,24 @@ var LexerOptions;
  * @param {!LexerOptions} options
  */
 function Lexer(document, options) {}
+
+/** @const @type {!Symbol} */
+Lexer.OPERATOR_CHAR;
+
+/** @const @type {!Symbol} */
+Lexer.OTHER_CHAR;
+
+/** @const @type {!Symbol} */
+Lexer.STRING1_CHAR;
+
+/** @const @type {!Symbol} */
+Lexer.STRING2_CHAR;
+
+/** @const @type {!Symbol} */
+Lexer.WHITESPACE_CHAR;
+
+/** @const @type {!Symbol} */
+Lexer.WORD_CHAR;
 
 /**
  * @constructor
@@ -40,6 +59,11 @@ Lexer.Token.prototype.type;
  * @type {number}
  */
 Lexer.prototype.changeOffset;
+
+/**
+ * @type {!Map.<number, number>}
+ */
+Lexer.prototype.characters_;
 
 /**
  * @type {number}
@@ -139,6 +163,34 @@ Lexer.prototype.finishToken = function(next_state) {};
  * @return {!Lexer.Token}
  */
 Lexer.prototype.finishTokenAs = function(state) {};
+
+/**
+ * @this {!Lexer}
+ * @param {number} charCode
+ * @return {boolean}
+ */
+Lexer.prototype.isOperator = function(charCode) {};
+
+/**
+ * @this {!Lexer}
+ * @param {number} charCode
+ * @return {boolean}
+ */
+Lexer.prototype.isOther = function(charCode) {};
+
+/**
+ * @this {!Lexer}
+ * @param {number} charCode
+ * @return {boolean}
+ */
+Lexer.prototype.isWhitespace = function(charCode) {};
+
+/**
+ * @this {!Lexer}
+ * @param {number} charCode
+ * @return {boolean}
+ */
+Lexer.prototype.isWord = function(charCode) {};
 
 /**
  * @param {number} maxOffset

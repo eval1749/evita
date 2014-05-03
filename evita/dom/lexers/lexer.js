@@ -47,9 +47,10 @@ global.Lexer = (function() {
 
   /**
    * @param {!Document} document
-   * @param {!Object} options
+   * @param {!LexerOptions} options
    */
   function Lexer(document, options) {
+    this.characters_ = options.characters;
     this.changedOffset = Count.FORWARD;
     this.debug_ = 0;
     this.lastToken = null;
@@ -65,6 +66,13 @@ global.Lexer = (function() {
       return a.end < b.end;
     });
   }
+
+  Lexer.OPERATOR_CHAR = Symbol('operator');
+  Lexer.OTHER_CHAR = Symbol('other');
+  Lexer.WHITESPACE_CHAR = Symbol('whitespace');
+  Lexer.STRING1_CHAR = Symbol('string1');
+  Lexer.STRING2_CHAR = Symbol('string2');
+  Lexer.WORD_CHAR = Symbol('word');
 
   /**
    * @constructor
@@ -273,6 +281,50 @@ global.Lexer = (function() {
         this.state = state;
         lastToken.state = state;
         return lastToken;
+      }
+    },
+
+    isOperator: {value:
+      /**
+       * @this {!Lexer}
+       * @param {number} charCode
+       * @return {boolean}
+       */
+      function(charCode) {
+        return this.characters_.get(charCode) == Lexer.OPERATOR_CHAR;
+      }
+    },
+
+    isOther: {value:
+      /**
+       * @this {!Lexer}
+       * @param {number} charCode
+       * @return {boolean}
+       */
+      function(charCode) {
+        return !this.characters_.has(charCode);
+      }
+    },
+
+    isWhitespace: {value:
+      /**
+       * @this {!Lexer}
+       * @param {number} charCode
+       * @return {boolean}
+       */
+      function(charCode) {
+        return this.characters_.get(charCode) == Lexer.WHITESPACE_CHAR;
+      }
+    },
+
+    isWord: {value:
+      /**
+       * @this {!Lexer}
+       * @param {number} charCode
+       * @return {boolean}
+       */
+      function(charCode) {
+        return this.characters_.get(charCode) == Lexer.WORD_CHAR;
       }
     },
 

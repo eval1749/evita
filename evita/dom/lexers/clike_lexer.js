@@ -62,6 +62,43 @@ global.ClikeLexer = (function() {
       throw new Error('stateToSyntax must have ' + key);
   });
 
+  /** @const @type {!Map.<number, number>} */
+  var CHARACTERS = (function() {
+    var attrs = new Map();
+
+    attrs.set(Unicode.LF, Lexer.WHITESPACE_CHAR);
+    attrs.set(Unicode.SPACE, Lexer.WHITESPACE_CHAR);
+    attrs.set(Unicode.TAB, Lexer.WHITESPACE_CHAR);
+
+    for (var charCode = 0x21; charCode < 0x40; ++charCode) {
+      attrs.set(charCode, Lexer.OPERATOR_CHAR);
+    }
+
+    attrs.set(Unicode.FULL_STOP, ClikeLexer.DOT_CHAR);
+    attrs.set(Unicode.SOLIDUS, ClikeLexer.SLASH_CHAR);
+
+    // String literal
+    attrs.set(Unicode.APOSTROPHE, Lexer.STRING1_CHAR);
+    attrs.set(Unicode.QUOTATION_MARK, Lexer.STRING2_CHAR);
+
+    // Word [0-9a-zA-Z_]
+    for (var charCode = Unicode.DIGIT_ZERO;
+         charCode <= Unicode.DIGIT_NINE; ++charCode) {
+      attrs.set(charCode, Lexer.WORD_CHAR);
+    }
+    for (var charCode = Unicode.LATIN_CAPITAL_LETTER_A;
+         charCode <= Unicode.LATIN_CAPITAL_LETTER_Z; ++charCode) {
+      attrs.set(charCode, Lexer.WORD_CHAR);
+    }
+    for (var charCode = Unicode.LATIN_SMALL_LETTER_A;
+         charCode <= Unicode.LATIN_SMALL_LETTER_Z; ++charCode) {
+      attrs.set(charCode, Lexer.WORD_CHAR);
+    }
+    attrs.set(Unicode.LOW_LINE, Lexer.WORD_CHAR);
+
+    return attrs;
+  })();
+
   /**
    * @constructor
    * @extends Lexer
@@ -70,6 +107,7 @@ global.ClikeLexer = (function() {
    */
   function ClikeLexer(document, options) {
     Lexer.call(this, document, {
+      characters: options.characters,
       keywords: options.keywords,
       stateToSyntax: stateToSyntax
     });
@@ -168,53 +206,6 @@ global.ClikeLexer = (function() {
   }
 
   /**
-   * @param {number} charCode
-   * @return {boolean}
-   */
-  function isOperator(charCode) {
-    return !isWhitespace(charCode) && !isWordRest(charCode) &&
-           charCode != Unicode.APOSTROPHE &&
-           charCode != Unicode.QUOTATION_MARK;
-  }
-
-  /**
-   * @param {number} charCode
-   * @return {boolean}
-   */
-  function isWhitespace(charCode) {
-    return charCode == Unicode.LF || charCode == Unicode.SPACE ||
-           charCode == Unicode.TAB;
-  }
-
-  /**
-   * @param {number} charCode
-   * @return {boolean}
-   */
-  function isWordFirst(charCode) {
-    if (charCode >= Unicode.LATIN_CAPITAL_LETTER_A &&
-        charCode <= Unicode.LATIN_CAPITAL_LETTER_Z) {
-      return true;
-    }
-
-    if (charCode >= Unicode.LATIN_SMALL_LETTER_A &&
-        charCode <= Unicode.LATIN_SMALL_LETTER_Z) {
-      return true;
-    }
-
-    return charCode == Unicode.LOW_LINE;
-  }
-
-  /**
-   * @param {number} charCode
-   * @return {boolean}
-   */
-  function isWordRest(charCode) {
-    if (isWordFirst(charCode))
-      return true;
-    return charCode >= Unicode.DIGIT_ZERO && charCode <= Unicode.DIGIT_NINE;
-  }
-
-  /**
    * @this {!ClikeLexer}
    * @param {number} maxOffset
    * @return {?Lexer.Token}
@@ -284,13 +275,13 @@ global.ClikeLexer = (function() {
           break;
 
         case State.NEWLINE:
-          if (!isWhitespace(charCode))
+          if (!lexer.isWhitespace(charCode))
             return lexer.finishToken(State.ZERO);
           lexer.extendToken();
           break;
 
         case State.OPERATOR:
-          if (!isOperator(charCode))
+          if (!lexer.isOperator(charCode))
             return lexer.finishToken(State.ZERO);
           lexer.extendToken();
           break;
@@ -333,7 +324,7 @@ global.ClikeLexer = (function() {
           return lexer.finishToken(State.STRING2);
 
         case State.WORD:
-          if (!isWordRest(charCode))
+          if (!lexer.isWord(charCode))
             return lexer.finishToken(State.ZERO);
           lexer.extendToken();
           break;
@@ -377,7 +368,7 @@ global.ClikeLexer = (function() {
                 return lexer.finishToken(State.ZERO);
               }
 
-              if (isWordRest(charCode))
+              if (lexer.isWord(charCode))
                 lexer.startToken(State.WORD);
               else
                 lexer.startToken(State.OPERATOR);
@@ -391,6 +382,14 @@ global.ClikeLexer = (function() {
     }
     return lexer.lastToken;
   }
+
+  ClikeLexer.newCharacters = function() {
+    var attrs = new Map();
+    CHARACTERS.forEach(function(value, key) {
+      attrs.set(key, value);
+    });
+    return attrs;
+  };
 
   ClikeLexer.prototype = Object.create(Lexer.prototype, {
     constructor: {value: ClikeLexer},

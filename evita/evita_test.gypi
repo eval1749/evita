@@ -81,6 +81,7 @@
 
         'dom/file_path_unittest.cc',
         'dom/jslib/ordered_set_unittest.cc',
+        'dom/lexers/lexers_unittest.cc',
         'dom/mock_io_delegate.cc',
         'dom/mock_view_impl.cc',
         'dom/text/mutation_observer_unittest.cc',

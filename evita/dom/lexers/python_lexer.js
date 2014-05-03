@@ -9,7 +9,6 @@ global.PythonLexer = (function(keywords) {
 
     DOT: 202,
     LINE_COMMENT: 300,
-    LINE_COMMENT_START: 302,
     OPERATOR: 500,
     SPACE: 700,
     STRING1: 800,
@@ -26,7 +25,6 @@ global.PythonLexer = (function(keywords) {
   stateToSyntax.set(State.ZERO, '');
   stateToSyntax.set(State.DOT, 'operators');
   stateToSyntax.set(State.LINE_COMMENT, 'comment');
-  stateToSyntax.set(State.LINE_COMMENT_START, 'comment');
   stateToSyntax.set(State.OPERATOR, 'operators');
   stateToSyntax.set(State.SPACE, '');
   stateToSyntax.set(State.STRING1, 'string_literal');
@@ -42,6 +40,42 @@ global.PythonLexer = (function(keywords) {
       throw new Error('stateToSyntax must have ' + key);
   });
 
+  /** @const @type {!Map.<number, number>} */
+  var CHARACTERS = (function() {
+    var attrs = new Map();
+
+    attrs.set(Unicode.LF, Lexer.WHITESPACE_CHAR);
+    attrs.set(Unicode.SPACE, Lexer.WHITESPACE_CHAR);
+    attrs.set(Unicode.TAB, Lexer.WHITESPACE_CHAR);
+
+    for (var charCode = 0x21; charCode < 0x40; ++charCode) {
+      attrs.set(charCode, Lexer.OPERATOR_CHAR);
+    }
+
+    attrs.set(Unicode.FULL_STOP, ClikeLexer.DOT_CHAR);
+
+    // String literal
+    attrs.set(Unicode.APOSTROPHE, Lexer.STRING1_CHAR);
+    attrs.set(Unicode.QUOTATION_MARK, Lexer.STRING2_CHAR);
+
+    // Word [0-9a-zA-Z_]
+    for (var charCode = Unicode.DIGIT_ZERO;
+         charCode <= Unicode.DIGIT_NINE; ++charCode) {
+      attrs.set(charCode, Lexer.WORD_CHAR);
+    }
+    for (var charCode = Unicode.LATIN_CAPITAL_LETTER_A;
+         charCode <= Unicode.LATIN_CAPITAL_LETTER_Z; ++charCode) {
+      attrs.set(charCode, Lexer.WORD_CHAR);
+    }
+    for (var charCode = Unicode.LATIN_SMALL_LETTER_A;
+         charCode <= Unicode.LATIN_SMALL_LETTER_Z; ++charCode) {
+      attrs.set(charCode, Lexer.WORD_CHAR);
+    }
+    attrs.set(Unicode.LOW_LINE, Lexer.WORD_CHAR);
+
+    return attrs;
+  })();
+
   /**
    * @constructor
    * @extends Lexer
@@ -49,6 +83,7 @@ global.PythonLexer = (function(keywords) {
    */
   function PythonLexer(document) {
     Lexer.call(this, document, {
+      characters: CHARACTERS,
       keywords: keywords,
       stateToSyntax: stateToSyntax
     });
@@ -108,53 +143,6 @@ global.PythonLexer = (function(keywords) {
     return word;
   }
 
- /**
-   * @param {number} charCode
-   * @return {boolean}
-   */
-  function isOperator(charCode) {
-    return !isWhitespace(charCode) && !isWordRest(charCode) &&
-           charCode != Unicode.APOSTROPHE &&
-           charCode != Unicode.QUOTATION_MARK;
-  }
-
-  /**
-   * @param {number} charCode
-   * @return {boolean}
-   */
-  function isWhitespace(charCode) {
-    return charCode == Unicode.LF || charCode == Unicode.SPACE ||
-           charCode == Unicode.TAB;
-  }
-
-  /**
-   * @param {number} charCode
-   * @return {boolean}
-   */
-  function isWordFirst(charCode) {
-    if (charCode >= Unicode.LATIN_CAPITAL_LETTER_A &&
-        charCode <= Unicode.LATIN_CAPITAL_LETTER_Z) {
-      return true;
-    }
-
-    if (charCode >= Unicode.LATIN_SMALL_LETTER_A &&
-        charCode <= Unicode.LATIN_SMALL_LETTER_Z) {
-      return true;
-    }
-
-    return charCode == Unicode.LOW_LINE;
-  }
-
-  /**
-   * @param {number} charCode
-   * @return {boolean}
-   */
-  function isWordRest(charCode) {
-    if (isWordFirst(charCode))
-      return true;
-    return charCode >= Unicode.DIGIT_ZERO && charCode <= Unicode.DIGIT_NINE;
-  }
-
   /**
    * @this {!PythonLexer}
    * @param {number} maxOffset
@@ -164,7 +152,6 @@ global.PythonLexer = (function(keywords) {
     var lexer = this;
     var document = lexer.range.document;
     while (lexer.scanOffset < maxOffset) {
-      --lexer.count;
       var charCode = document.charCodeAt_(lexer.scanOffset);
       switch (lexer.state) {
         case State.LINE_COMMENT:
@@ -173,14 +160,8 @@ global.PythonLexer = (function(keywords) {
           lexer.extendToken();
           break;
 
-        case State.LINE_COMMENT_START:
-          if (charCode == Unicode.LF)
-            return lexer.finishToken(State.ZERO);
-          lexer.startToken(State.LINE_COMMENT);
-          break;
-
         case State.OPERATOR:
-          if (!isOperator(charCode))
+          if (!lexer.isOperator(charCode))
             return lexer.finishToken(State.ZERO);
           lexer.extendToken();
           break;
@@ -216,7 +197,7 @@ global.PythonLexer = (function(keywords) {
           return lexer.finishToken(State.STRING2);
 
         case State.WORD:
-          if (!isWordRest(charCode))
+          if (!lexer.isWord(charCode))
             return lexer.finishToken(State.ZERO);
           lexer.extendToken();
           break;
@@ -235,13 +216,13 @@ global.PythonLexer = (function(keywords) {
               lexer.startToken(State.SPACE);
               break;
             case Unicode.NUMBER_SIGN:
-              lexer.startToken(State.LINE_COMMENT_START);
+              lexer.startToken(State.LINE_COMMENT);
               break;
             case Unicode.QUOTATION_MARK:
               lexer.startToken(State.STRING2);
               break;
             default:
-              if (isWordRest(charCode))
+              if (lexer.isWord(charCode))
                 lexer.startToken(State.WORD);
               else
                 lexer.startToken(State.OPERATOR);

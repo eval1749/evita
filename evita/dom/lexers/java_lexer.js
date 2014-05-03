@@ -19,6 +19,12 @@ global.JavaLexer = (function(options) {
   return JavaLexer;
 })({
   useDot: true,
+  characters: (function() {
+    var attrs = ClikeLexer.newCharacters();
+    // Include '@' as word character for attribute identifier coloring.
+    attrs.set(Unicode.COMMERCIAL_AT, Lexer.WORD_CHAR);
+    return attrs;
+  })(),
   keywords: [
   'abstract', 'assert',
   'boolean', 'break', 'byte',

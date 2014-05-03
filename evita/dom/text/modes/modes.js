@@ -84,7 +84,7 @@
 
   /** @constructor @extends {Mode} @return {?} */
   function PythonMode() {
-    Mode.call(this, 'Python', PlainTextLexer);
+    Mode.call(this, 'Python', PythonLexer);
   }
   inheritMode(PythonMode);
 

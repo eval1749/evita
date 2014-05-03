@@ -44,7 +44,7 @@ global.CppLexer = (function(options) {
   'register', 'reinterpret_cast', 'return',
   'short', 'signed', 'sizeof', 'static', 'static_assert', 'static_cast',
   'struct', 'switch',
-  'template', 'try', 'typedef', 'typeid', 'typename',
+  'template', 'this', 'true', 'try', 'typedef', 'typeid', 'typename',
   'union', 'unsigned', 'using',
   'virtual', 'void', 'volatile',
   'while',

@@ -6,9 +6,6 @@
   /** @const @type {!RegExp} */
   var RE_CRLF = new RegExp('\r\n', 'g');
 
-  /** @const @type {!RegExp} */
-  var RE_CR = new RegExp('\r', 'g');
-
   /**
    * @constructor
    * @class A wrapper class of |TextDecoder| to keep decoded strings.
@@ -135,21 +132,16 @@
           var range = new Range(document);
           range.end = document.length;
           var newline = 0;
-          var has_cr = false;
           decoder.strings.forEach(function(string) {
             if (!newline) {
               if (string.indexOf('\r\n') >= 0)
                 newline = 3;
               else if (string.indexOf('\n') >= 0)
                 newline = 1;
-              if (string.indexOf('\r') >= 0)
-                has_cr = true;
             }
             document.readonly = false;
             if (newline == 3)
               string = string.replace(RE_CRLF, '\n');
-            if (has_cr)
-              string = string.replace(RE_CR, '\n');
             range.text = string;
             document.readonly = true;
             range.collapseTo(range.end);
@@ -184,7 +176,6 @@
           var decoder = detector.decoders[0];
           var string = decoder.strings[decoder.strings.length - 1];
           string = string.replace(RE_CRLF, '\n');
-          string = string.replace(RE_CR, '\n');
           range.text = string;
           range.collapseTo(range.end);
           document.readonly = true;

@@ -499,5 +499,9 @@ String.prototype.repeat = function(count) {};
  */
 String.prototype.startsWith = function(searchString, opt_position) {};
 
-/** @constructor */
-function Symbol() {}
+/**
+ * @constructor
+ * @param {string=} opt_name
+ * @return {!Symbol}
+ */
+function Symbol(opt_name) {}

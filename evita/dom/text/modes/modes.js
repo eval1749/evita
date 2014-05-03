@@ -117,13 +117,13 @@ Object.defineProperty(Mode, 'chooseMode', {
 
 Object.defineProperty(Mode, 'chooseModeByFileName', {
   /**
-   * @param {string} file_name
+   * @param {string} fileName
    * @return {!Mode}
    */
-  value: function(file_name) {
-    var matches = /[.](.+)$/.exec(FilePath.basename(file_name));
+  value: function(fileName) {
+    var matches = /[.](.+)$/.exec(FilePath.basename(fileName));
     if (!matches) {
-      var mode_ctor = Mode.fileNameMap.get(FilePath.basename(file_name));
+      var mode_ctor = Mode.fileNameMap.get(FilePath.basename(fileName));
       if (mode_ctor)
         return new mode_ctor();
       return new Mode.defaultMode.constructor();

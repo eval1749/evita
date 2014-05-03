@@ -55,10 +55,10 @@
      */
     function interactiveSave(document) {
       return Editor.getFileNameForSave(null, document.fileName).then(
-        function(file_name) {
-          if (!file_name.length)
+        function(fileName) {
+          if (!fileName.length)
             return Promise.resolve(DialogItemId.CANCEL);
-          document.save(file_name);
+          document.save(fileName);
           return Promise.resolve(DialogItemId.YES);
         });
     }

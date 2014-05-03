@@ -26,10 +26,10 @@
    * @return {Document}
    */
   Document.findFile = function(absoluteFileName) {
-    var canonical_file_name = absoluteFileName.toLocaleLowerCase();
+    var canonical_fileName = absoluteFileName.toLocaleLowerCase();
     return /** @type{Document} */ (Document.list.find(
         function(document) {
-          return document.fileName.toLocaleLowerCase() == canonical_file_name;
+          return document.fileName.toLocaleLowerCase() == canonical_fileName;
         }));
   }
 
@@ -52,8 +52,8 @@
             break;
           case DialogItemId.YES:
             Editor.getFileNameForSave(null, document.fileName)
-              .then(function(file_name) {
-                document.save(file_name).then(function() {
+              .then(function(fileName) {
+                document.save(fileName).then(function() {
                   document.forceClose();
                 });
               });
@@ -74,7 +74,7 @@
 
   /**
    * @param {string} fileName A backing store file of document.
-   * @return {!Document} A Document bound to file_name
+   * @return {!Document} A Document bound to fileName
    */
   Document.open = function(fileName) {
     var absoluteFileName = FilePath.fullPath(fileName);

@@ -172,35 +172,35 @@
   }
 
   /**
-   * @param {string=} opt_file_name
+   * @param {string=} opt_fileName
    * @return {!Promise}
    */
-  Document.prototype.save = function(opt_file_name) {
+  Document.prototype.save = function(opt_fileName) {
     var document = this;
     if (!arguments.length) {
       if (document.fileName == '')
         throw 'Document isn\'t bound to file.';
     } else {
-      var file_name = /** @type{string} */(opt_file_name);
-      var absolute_file_name = FilePath.fullPath(file_name);
+      var fileName = /** @type{string} */(opt_fileName);
+      var absoluteFileName = FilePath.fullPath(fileName);
       // TODO(yosi) FilePath.fullPath() will return Promise.
-      var present = Document.findFile(absolute_file_name);
+      var present = Document.findFile(absoluteFileName);
       if (present && present !== this)
-        throw file_name + ' is already bound to ' + present;
-      document.fileName = absolute_file_name;
+        throw fileName + ' is already bound to ' + present;
+      document.fileName = absoluteFileName;
     }
 
-    var file_name = document.fileName;
-    Editor.messageBox(null, 'Saving to ' + file_name,
+    var fileName = document.fileName;
+    Editor.messageBox(null, 'Saving to ' + fileName,
                       MessageBox.ICONINFORMATION);
     return save(document).then(function() {
-      Editor.messageBox(null, 'Saved to ' + file_name,
+      Editor.messageBox(null, 'Saved to ' + fileName,
                         MessageBox.ICONINFORMATION);
     }).catch(function(error) {
-      console.log('Failed to save', document, 'to', file_name, error,
+      console.log('Failed to save', document, 'to', fileName, error,
                   error.stack);
       Editor.messageBox(null, 'Failed to save\n' + document + '\n' +
-        'to ' + file_name + '\n' +
+        'to ' + fileName + '\n' +
         'reason: ' + error + '\n' + error['stack'],
         MessageBox.ICONERROR);
       throw error;

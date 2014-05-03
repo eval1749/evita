@@ -16,29 +16,29 @@
   /** @const */ var RE_COMPONENT_SEPARATOR = new RegExp('[/\\\\]');
 
   /**
-   * @param {string} file_name
-   * @return {string} A file_name part of pathname.
+   * @param {string} fileName
+   * @return {string} A fileName part of pathname.
    */
-  FilePath.basename = function(file_name) {
-    var matches = file_name.match(RE_BASENAME);
-    return matches ? matches[2] : file_name;
+  FilePath.basename = function(fileName) {
+    var matches = fileName.match(RE_BASENAME);
+    return matches ? matches[2] : fileName;
   };
 
   /**
-   * @param {string} file_name
-   * @return {string} the directory part of file_name.
+   * @param {string} fileName
+   * @return {string} the directory part of fileName.
    */
-  FilePath.dirname = function(file_name) {
-    var matches = file_name.match(RE_BASENAME);
-    return matches ? matches[1] : file_name;
+  FilePath.dirname = function(fileName) {
+    var matches = fileName.match(RE_BASENAME);
+    return matches ? matches[1] : fileName;
   };
 
   /**
-   * @param {string} file_name
+   * @param {string} fileName
    * @return {boolean}
    */
-  FilePath.isValidFileName = function(file_name) {
-    var data = FilePath.split(file_name);
+  FilePath.isValidFileName = function(fileName) {
+    var data = FilePath.split(fileName);
     return !!data.winDrive && data.absolute &&
            data.components.every(function(component) {
              return !RE_FILENAME_RESERVED_CHARACTERS.test(component);
@@ -54,11 +54,11 @@
   };
 
   /**
-   * @param {string} file_name
+   * @param {string} fileName
    * @return {string}
    */
-  FilePath.normalize = function(file_name) {
-    var data = FilePath.split(file_name);
+  FilePath.normalize = function(fileName) {
+    var data = FilePath.split(fileName);
     var work = data.components;
     var components = [];
     var parents = [];
@@ -82,12 +82,12 @@
   };
 
   /**
-   * @param {string} file_name
+   * @param {string} fileName
    * @return {{absolute: boolean, components: Array.<string>,
    *           winDrive: ?string}}
    */
-  FilePath.split = function(file_name) {
-    var matches = file_name.match(RE_PATHNAME);
+  FilePath.split = function(fileName) {
+    var matches = fileName.match(RE_PATHNAME);
     var drive = matches[1];
     return {
       absolute: !!matches[2],

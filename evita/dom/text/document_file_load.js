@@ -93,10 +93,10 @@
 
   /**
    * @param {!Document} document
-   * @param {string} file_name
+   * @param {string} fileName
    * @return {!Promise.<number|!Os.File.Error>}
    *
-   * Load contents of |file_name| into |document|. The |document| is readonly
+   * Load contents of |fileName| into |document|. The |document| is readonly
    * during reading file contents.
    *
    * |load| function updates following properties when loading succeeded:
@@ -105,7 +105,7 @@
    *    * |newline|
    *    * |readonly|
    */
-  function load(document, file_name) {
+  function load(document, fileName) {
     /** @type {string} */ var encoding = '';
     /** @type {?Os.File} */ var opened_file = null;
     /** @type {number} */ var newline = 0;
@@ -114,14 +114,14 @@
     document.readonly = true;
     var range = new Range(document);
     range.end = document.length;
-    return Os.File.open(file_name).then(function(x) {
+    return Os.File.open(fileName).then(function(x) {
       var file = /** @type {!Os.File} */(x);
       opened_file = file;
       var detector = new EncodingDetector();
 
       // Reading file contents is finished. Record file last write time.
       function finishRead() {
-        return Os.File.stat(file_name).then(function(x) {
+        return Os.File.stat(fileName).then(function(x) {
           var file_info = /** @type {!Os.File.Info} */(x);
           file.close();
           var decoder = detector.decoders[0];
@@ -197,23 +197,23 @@
   }
 
   /**
-   * @param {string=} opt_file_name
+   * @param {string=} opt_fileName
    * @return {!Promise.<number>}
    */
-  global.Document.prototype.load = function(opt_file_name) {
+  global.Document.prototype.load = function(opt_fileName) {
     var document = this;
     if (!arguments.length) {
       if (document.fileName == '')
         throw 'Document isn\'t bound to file.';
     } else {
-      var file_name = /** @type{string} */(opt_file_name);
+      var fileName = /** @type{string} */(opt_fileName);
       // TODO(yosi) FilePath.fullPath() will return Promise.
-      var absolute_file_name = FilePath.fullPath(file_name);
-      var present = Document.findFile(absolute_file_name);
+      var absoluteFileName = FilePath.fullPath(fileName);
+      var present = Document.findFile(absoluteFileName);
       if (present && present !== this)
-        throw file_name + ' is already bound to ' + present;
-      document.fileName = absolute_file_name;
-      var newMode = Mode.chooseModeByFileName(absolute_file_name);
+        throw fileName + ' is already bound to ' + present;
+      document.fileName = absoluteFileName;
+      var newMode = Mode.chooseModeByFileName(absoluteFileName);
       if (document.mode != newMode)
         document.mode = newMode;
     }
@@ -243,7 +243,7 @@
       document.dispatchEvent(new DocumentEvent('load'));
       return Promise.resolve(length);
     }).catch(function(exception) {
-      console.log('load.catch', exception, 'during loading', file_name,
+      console.log('load.catch', exception, 'during loading', fileName,
                   'into', document, exception.stack);
       document.lastStatTime_ = new Date();
       document.obsolete = Document.Obsolete.UNKNOWN;

@@ -336,8 +336,8 @@
     }
 
     Editor.getFileNameForSave(this, document.fileName)
-        .then(function(file_name) {
-          document.save(file_name);
+        .then(function(fileName) {
+          document.save(fileName);
         });
   });
 

@@ -55,12 +55,12 @@
 
   /**
    * Open file in window.
-   * @param {string} file_name.
+   * @param {string} fileName.
    *
    * This function handles drag-and-drop.
    */
-  EditorWindow.prototype.open = function(file_name) {
-     var document = Document.open(file_name);
+  EditorWindow.prototype.open = function(fileName) {
+     var document = Document.open(fileName);
      var window = this.children.find(function(present) {
        return present.document === document;
      });

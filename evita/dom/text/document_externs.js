@@ -40,10 +40,10 @@ Document.addObserver = function(observer) {};
  */
 Document.find = function(name) {};
 /**
- * @param {string} absolute_file_name
+ * @param {string} absoluteFileName
  * @return {?Document}
  */
-Document.findFile = function(absolute_file_name) {};
+Document.findFile = function(absoluteFileName) {};
 
 /**
  * @type {Array.<!Document>}
@@ -51,10 +51,10 @@ Document.findFile = function(absolute_file_name) {};
 Document.list;
 
 /**
- * @param {string} file_name
+ * @param {string} fileName
  * @return {!Document}
  */
-Document.open = function(file_name) {};
+Document.open = function(fileName) {};
 
 /**
  * @param {!Document} document
@@ -181,10 +181,10 @@ Document.prototype.getLineAndColumn_ = function(offset) {};
 Document.prototype.listWindows = function() {};
 
 /**
- * @param {string=} opt_file_name
+ * @param {string=} opt_fileName
 * @return {!Promise.<number>}
 */
-Document.prototype.load = function(opt_file_name) {};
+Document.prototype.load = function(opt_fileName) {};
 
 /**
  * @param {!Editor.RegExp} regexp
@@ -209,10 +209,10 @@ Document.prototype.redo = function(position) {}
 Document.prototype.renameTo = function(new_name) {}
 
 /**
- * @param {string=} opt_file_name
+ * @param {string=} opt_fileName
  * @return {!Promise.<number>}
  */
-Document.prototype.save = function(opt_file_name) {};
+Document.prototype.save = function(opt_fileName) {};
 
 /**
  * @param {number} start

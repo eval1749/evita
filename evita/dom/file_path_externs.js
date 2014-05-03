@@ -3,28 +3,28 @@
 
 /**
  * @expose
- * @param {string} file_name
+ * @param {string} fileName
  * @return {string}
  */
-FilePath.basename = function(file_name) {};
+FilePath.basename = function(fileName) {};
 
 /**
  * @expose
- * @param {string} file_name
+ * @param {string} fileName
  * @return {string}
  */
-FilePath.dirname = function(file_name) {};
+FilePath.dirname = function(fileName) {};
 
 /**
  * @expose
- * @param {string} file_name
+ * @param {string} fileName
  * @return {string}
  */
-FilePath.fullPath = function(file_name) {};
+FilePath.fullPath = function(fileName) {};
 
 /**
  * @expose
- * @param {string} file_name
+ * @param {string} fileName
  * @return {boolean}
  */
-FilePath.isValidFileName = function(file_name) {};
+FilePath.isValidFileName = function(fileName) {};

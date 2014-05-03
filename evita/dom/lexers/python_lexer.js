@@ -100,10 +100,6 @@ global.PythonLexer = (function(keywords) {
       token.state = State.ZERO;
       return;
     }
-    if (token.state == State.LINE_COMMENT_START) {
-      token.state = State.ZERO;
-      return;
-    }
   }
 
   /**

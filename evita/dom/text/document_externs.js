@@ -7,6 +7,14 @@
  */
 
 /**
+ * @constructor
+ * @extends {EventTarget}
+ * @param {string} name
+ * @param {!Mode=} opt_mode
+ */
+function Document(name, opt_mode) {}
+
+/**
  * @enum {number}
  */
 Document.Obsolete = {

@@ -55,12 +55,12 @@ v8::Handle<v8::Object> NewMap(v8::Isolate* isolate) {
       Get(v8Strings::Map.Get(isolate))->ToObject()->
           CallAsConstructor(0, nullptr)->ToObject();
 }
+}  // namespace
 
+namespace bindings {
 //////////////////////////////////////////////////////////////////////
 //
 // DocumentClass
-
-
 //
 class DocumentClass
     : public v8_glue::DerivedWrapperInfo<Document, EventTarget> {
@@ -72,8 +72,7 @@ class DocumentClass
   private: static void AddObserver(v8::Handle<v8::Function> function);
   private: static v8_glue::Nullable<Document> Find(const base::string16& name);
 
-  private: static Document* NewDocument(const base::string16& name,
-                                        v8_glue::Optional<Mode*> opt_mode);
+  private: static Document* NewDocument(const base::string16& name);
   private: static void RemoveDocument(Document* document);
   private: static void RemoveObserver(v8::Handle<v8::Function> function);
 
@@ -106,11 +105,7 @@ v8_glue::Nullable<Document> DocumentClass::Find(const base::string16& name) {
   return DocumentSet::instance()->Find(name);
 }
 
-Document* DocumentClass::NewDocument(const base::string16& name,
-                                     v8_glue::Optional<Mode*> opt_mode) {
-  if (opt_mode.is_supplied)
-    return Document::New(name, opt_mode.value);
-
+Document* DocumentClass::NewDocument(const base::string16& name) {
   // Get mode by |Mode.chooseModeByFileName()|.
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
@@ -120,13 +115,12 @@ Document* DocumentClass::NewDocument(const base::string16& name,
       v8Strings::chooseModeByFileName.Get(isolate));
   auto const js_name = gin::StringToV8(isolate, name);
   auto const js_mode = runner->Call(js_choose, js_mode_class, js_name);
-  Mode* mode;
-  if (!gin::ConvertFromV8(isolate, js_mode, &mode)) {
-    ScriptHost::instance()->ThrowException(v8::Exception::TypeError(
-        v8Strings::Mode.Get(isolate)));
-    return nullptr;
-  }
-  return Document::New(name, mode);
+  Mode* mode = nullptr;
+  gin::ConvertFromV8(isolate, js_mode, &mode);
+  auto const document = Document::New(name);
+  if (mode)
+    document->set_mode(mode);
+  return document;
 }
 
 void DocumentClass::RemoveDocument(Document* document) {
@@ -180,17 +174,18 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
       .SetMethod("undo", &Document::Undo);
 }
 
-}  // namespace
+}  // namespace bindings
 
 //////////////////////////////////////////////////////////////////////
 //
 // Document
 //
+using namespace bindings;
 DEFINE_SCRIPTABLE_OBJECT(Document, DocumentClass)
 
-Document::Document(const base::string16& name, Mode* mode)
+Document::Document(const base::string16& name)
     : buffer_(new text::Buffer(DocumentSet::instance()->MakeUniqueName(name))),
-      mode_(mode), newline_(NewlineMode_Detect),
+      newline_(NewlineMode_Detect),
       properties_(v8::Isolate::GetCurrent(),
                   NewMap(v8::Isolate::GetCurrent())) {
 }
@@ -334,8 +329,8 @@ v8::Handle<v8::Value> Document::Match(RegExp* regexp, int start, int end) {
   return regexp->ExecuteOnDocument(this, start, end);
 }
 
-Document* Document::New(const base::string16& name, Mode* mode) {
-  auto const document = new Document(name, mode);
+Document* Document::New(const base::string16& name) {
+  auto const document = new Document(name);
   DocumentSet::instance()->Register(document);
   return document;
 }

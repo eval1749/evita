@@ -10,6 +10,7 @@
 #include "evita/dom/events/event_target.h"
 #include "evita/gc/member.h"
 #include "evita/v8_glue/optional.h"
+#include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/scriptable.h"
 #include "evita/v8_glue/scoped_persistent.h"
 
@@ -24,12 +25,17 @@ class Mode;
 class Range;
 class RegExp;
 
+namespace bindings {
+class DocumentClass;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // Document
 //
 class Document : public v8_glue::Scriptable<Document, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(Document);
+  friend class bindings::DocumentClass;
 
   private: std::unique_ptr<text::Buffer> buffer_;
   private: base::Time last_write_time_;
@@ -41,7 +47,7 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   // C++.
   private: v8_glue::ScopedPersistent<v8::Object> properties_;
 
-  private: explicit Document(const base::string16& name, Mode* mode);
+  private: explicit Document(const base::string16& name);
   public: virtual ~Document();
 
   public: const text::Buffer* buffer() const { return buffer_.get(); }
@@ -52,7 +58,7 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: base::Time last_write_time() const;
   public: void set_last_write_time(base::Time last_write_time);
   public: text::Posn length() const;
-  public: Mode* mode() const { return mode_.get(); }
+  public: v8_glue::Nullable<Mode> mode() const { return mode_.get(); }
   public: void set_mode(Mode* mode);
   public: bool modified() const;
   public: void set_modified(bool new_modified);
@@ -77,7 +83,7 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: text::LineAndColumn GetLineAndColumn(text::Posn offset) const;
   public: bool IsValidPosition(text::Posn position) const;
   public: v8::Handle<v8::Value> Match(RegExp* regexp, int start, int end);
-  public: static Document* New(const base::string16& name, Mode* mode);
+  public: static Document* New(const base::string16& name);
   public: Posn Redo(Posn position);
   public: void RenameTo(const base::string16& new_name);
   public: base::string16 Slice(int start, v8_glue::Optional<int> opt_end);

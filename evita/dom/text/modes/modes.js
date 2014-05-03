@@ -142,7 +142,7 @@ Object.defineProperty(Mode.prototype, 'doColor', {value:
   * @param {number} hint
   */
  function(document, hint) {
-   this.doColor_(hint);
+   this.doColor_(document, hint);
  }
 });
 

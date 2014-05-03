@@ -25,7 +25,11 @@ base::string16 Mode::name() const {
   return mode_->GetName();
 }
 
-void Mode::DoColor(int hint) {
+void Mode::DoColor(Document* document, int hint) {
+  if (!document_) {
+    document_ = document;
+    mode_->set_buffer(document->buffer());
+  }
   mode_->DoColor(hint);
 }
 

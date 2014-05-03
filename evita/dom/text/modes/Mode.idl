@@ -27,5 +27,5 @@ interface Mode {
   void doColor(Document document, long hint);
 
   [ImplementedAs=DoColor]
-  void doColor_(long hint);
+  void doColor_(Document document, long hint);
 };

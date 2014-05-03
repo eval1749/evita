@@ -21,7 +21,6 @@
 #include "evita/text/buffer.h"
 #include "evita/text/marker.h"
 #include "evita/text/marker_set.h"
-#include "evita/text/modes/mode.h"
 #include "evita/text/spelling.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
@@ -60,6 +59,7 @@ v8::Handle<v8::Object> NewMap(v8::Isolate* isolate) {
 //////////////////////////////////////////////////////////////////////
 //
 // DocumentClass
+
 
 //
 class DocumentClass
@@ -203,7 +203,6 @@ Document::Document(const base::string16& name, Mode* mode)
       mode_(mode), newline_(NewlineMode_Detect),
       properties_(v8::Isolate::GetCurrent(),
                   NewMap(v8::Isolate::GetCurrent())) {
-  mode->text_mode()->set_buffer(buffer_.get());
 }
 
 Document::~Document() {
@@ -244,7 +243,6 @@ text::Posn Document::length() const {
 
 void Document::set_mode(Mode* mode) {
   mode_ = mode;
-  mode->text_mode()->set_buffer(buffer_.get());
 }
 
 bool Document::modified() const {

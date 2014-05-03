@@ -26,6 +26,7 @@ class Mode : public v8_glue::Scriptable<Mode> {
   DECLARE_SCRIPTABLE_OBJECT(Mode);
   friend class bindings::ModeClass;
 
+  private: gc::Member<Document> document_;
   private: std::unique_ptr<text::Mode> mode_;
 
   protected: Mode(text::Mode* text_mode);
@@ -34,7 +35,7 @@ class Mode : public v8_glue::Scriptable<Mode> {
   public: text::Mode* text_mode() const { return mode_.get(); }
   private: base::string16 name() const;
 
-  public: void DoColor(int hint);
+  public: void DoColor(Document* document, int hint);
 
   DISALLOW_COPY_AND_ASSIGN(Mode);
 };

@@ -46,39 +46,25 @@ global.Lexer = (function() {
   }
 
   /**
-   * @param {!Iterable.<string>} keywords
    * @param {!Document} document
+   * @param {!Object} options
    */
-  function Lexer(keywords, document) {
+  function Lexer(document, options) {
     this.changedOffset = Count.FORWARD;
-    this.count = 0;
     this.debug_ = 0;
     this.lastToken = null;
-    this.keywords = makeKeywords(keywords);
+    this.keywords = makeKeywords(options.keywords);
     this.mutationObserver_ = new MutationObserver(
         mutationCallback.bind(this));
     this.mutationObserver_.observe(document, {summary: true});
     this.range = new Range(document);
     this.scanOffset = 0;
     this.state = 0;
+    this.stateToSyntax_ = options.stateToSyntax;
     this.tokens = new OrderedSet(function(a, b) {
       return a.end < b.end;
     });
   }
-
-  /**
-   * @param {!Array.<string>} keywords
-   * @return {!Set.<string>}
-   */
-  // TODO(yosi) Once |Set| constructor accept |Iterable|, we don't need to
-  // have |Lexer.makeKeywords|.
-  Lexer.makeKeyords_DEPRECATED = function(keywords) {
-    var set = new Set();
-    keywords.forEach(function(keyword) {
-      set.add(keyword);
-    });
-    return set;
-  };
 
   /**
    * @constructor
@@ -142,9 +128,10 @@ global.Lexer = (function() {
 
         // Remove dirty tokens
         if (this.lastToken !== lastToken) {
-          if (this.debug_ > 1)
-            console.log('change lastToken', newScanOffset, lastToken, 'was', this.lastToken);
-
+          if (this.debug_ > 1) {
+            console.log('change lastToken', newScanOffset, lastToken, 'was',
+                        this.lastToken);
+          }
           this.lastToken = lastToken;
           this.state = lastToken.state;
 
@@ -206,10 +193,26 @@ global.Lexer = (function() {
     doColor: {value:
       /**
        * @this {!Lexer}
+       * @param {number} maxCount
        * @return number
        */
-      function(number) {
-        return 0;
+      function(maxCount) {
+        if (!this.range)
+          throw new Error("Can't use disconnected lexer.");
+
+        this.adjustScanOffset();
+        var document = this.range.document;
+        var maxOffset = Math.min(this.scanOffset + maxCount, document.length);
+        var startOffset = this.scanOffset;
+        while (this.scanOffset < maxOffset) {
+          var token = this.nextToken(maxOffset);
+          if (!token)
+            break;
+          this.setSyntax(token);
+          if (this.lastToken != token)
+            this.setSyntax(/** @type {!Lexer.Token} */(this.lastToken));
+        }
+        return maxCount - (this.scanOffset - startOffset);
       }
     },
 
@@ -221,6 +224,18 @@ global.Lexer = (function() {
         ++this.scanOffset;
         this.lastToken.end = this.scanOffset;
       },
+    },
+
+    extractWord: {value:
+      /**
+       * @this {!Lexer}
+       * @param {!Range} range
+       * @param {!Lexer.Token} token
+       * @return {string}
+       */
+      function(range, token) {
+        return range.text;
+      }
     },
 
     finishToken: {value:
@@ -261,6 +276,27 @@ global.Lexer = (function() {
       }
     },
 
+    setSyntax: {value:
+      /**
+       * @this {!Lexer}
+       * @param {!Lexer.Token} token
+       */
+      function setSyntax(token) {
+        var range = this.range;
+        range.collapseTo(token.start);
+        range.end = token.end;
+        var syntax = this.stateToSyntax_.get(token.state) || '';
+        if (syntax == 'identifier') {
+          var word = this.extractWord(range, token);
+          if (this.debug_ > 5)
+            console.log('setSyntax', '"' + word + '"');
+          syntax = this.keywords.has(word) ? 'keyword' : '';
+        }
+        if (this.debug_ > 4)
+          console.log('setSyntax', syntax, token);
+        range.setSyntax(syntax);
+      }
+    },
 
     startToken: {value:
       /**

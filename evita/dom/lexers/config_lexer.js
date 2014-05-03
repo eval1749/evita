@@ -20,22 +20,22 @@ global.ConfigLexer = (function() {
   };
 
   /** @const @type {!Map.<State, string>} */
-  var StateToSyntax = new Map();
-  StateToSyntax.set(State.ZERO, '');
-  StateToSyntax.set(State.LINE_COMMENT, 'comment');
-  StateToSyntax.set(State.LINE_COMMENT_START, 'comment');
-  StateToSyntax.set(State.SPACE, '');
-  StateToSyntax.set(State.STRING1, 'string_literal');
-  StateToSyntax.set(State.STRING1_END, 'string_literal');
-  StateToSyntax.set(State.STRING1_ESCAPE, 'string_literal');
-  StateToSyntax.set(State.STRING2, 'string_literal');
-  StateToSyntax.set(State.STRING2_END, 'string_literal');
-  StateToSyntax.set(State.STRING2_ESCAPE, 'string_literal');
-  StateToSyntax.set(State.WORD, 'identifier');
+  var stateToSyntax = new Map();
+  stateToSyntax.set(State.ZERO, '');
+  stateToSyntax.set(State.LINE_COMMENT, 'comment');
+  stateToSyntax.set(State.LINE_COMMENT_START, 'comment');
+  stateToSyntax.set(State.SPACE, '');
+  stateToSyntax.set(State.STRING1, 'string_literal');
+  stateToSyntax.set(State.STRING1_END, 'string_literal');
+  stateToSyntax.set(State.STRING1_ESCAPE, 'string_literal');
+  stateToSyntax.set(State.STRING2, 'string_literal');
+  stateToSyntax.set(State.STRING2_END, 'string_literal');
+  stateToSyntax.set(State.STRING2_ESCAPE, 'string_literal');
+  stateToSyntax.set(State.WORD, 'normal');
 
   Object.keys(State).forEach(function(key) {
-    if (!StateToSyntax.has(State[key]))
-      throw new Error('StateToSyntax must have ' + key);
+    if (!stateToSyntax.has(State[key]))
+      throw new Error('stateToSyntax must have ' + key);
   });
 
   /**
@@ -44,30 +44,10 @@ global.ConfigLexer = (function() {
    * @param {!Document} document
    */
   function ConfigLexer(document) {
-    Lexer.call(this, [], document);
-  }
-
-  /**
-   * @this {!ConfigLexer}
-   * @param {number} maxCount
-   */
-  function doColor(maxCount) {
-    if (!this.range)
-      throw new Error("Can't use disconnected lexer.");
-
-    this.adjustScanOffset();
-    var document = this.range.document;
-    var maxOffset = Math.min(this.scanOffset + maxCount, document.length);
-    this.count = maxCount;
-    while (this.scanOffset < maxOffset) {
-      var token = nextToken(this);
-      if (!token)
-        break;
-      setSyntax(this, token);
-      if (this.lastToken != token)
-        setSyntax(this, /** @type {!Lexer.Token} */(this.lastToken));
-    }
-    return this.count;
+    Lexer.call(this, document, {
+      keywords: [],
+      stateToSyntax: stateToSyntax
+    });
   }
 
   /**
@@ -91,18 +71,14 @@ global.ConfigLexer = (function() {
   }
 
   /**
-   * @param {!ConfigLexer} lexer
+   * @this {!ConfigLexer}
+   * @param {number} maxOffset
    * @return {?Lexer.Token}
    */
-  function nextToken(lexer) {
-    if (!lexer.count)
-      return null;
+  function nextToken(maxOffset) {
+    var lexer = this;
     var document = lexer.range.document;
-    var maxOffset = document.length;
-    if (lexer.scanOffset == maxOffset)
-      return null;
-    while (lexer.scanOffset < maxOffset && lexer.count) {
-      --lexer.count;
+    while (lexer.scanOffset < maxOffset) {
       var charCode = document.charCodeAt_(lexer.scanOffset);
       switch (lexer.state) {
         case State.LINE_COMMENT:
@@ -182,21 +158,9 @@ global.ConfigLexer = (function() {
     return lexer.lastToken;
   }
 
-  /**
-   * @param {!ConfigLexer} lexer
-   * @param {!Lexer.Token} token
-   */
-  function setSyntax(lexer, token) {
-    var range = lexer.range;
-    range.collapseTo(token.start);
-    range.end = token.end;
-    var syntax = StateToSyntax.get(token.state) || '';
-    range.setSyntax(syntax);
-  }
-
   ConfigLexer.prototype = Object.create(Lexer.prototype, {
     constructor: {value: ConfigLexer},
-    doColor: {value: doColor}
+    nextToken: {value: nextToken}
   });
 
   return ConfigLexer;

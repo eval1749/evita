@@ -32,34 +32,34 @@ global.ClikeLexer = (function() {
   };
 
   /** @const @type {!Map.<State, string>} */
-  var StateToSyntax = new Map();
-  StateToSyntax.set(State.ZERO, '');
-  StateToSyntax.set(State.BLOCK_COMMENT, 'comment');
-  StateToSyntax.set(State.BLOCK_COMMENT_ASTERISK, 'comment');
-  StateToSyntax.set(State.BLOCK_COMMENT_END, 'comment');
-  StateToSyntax.set(State.BLOCK_COMMENT_START, 'comment');
-  StateToSyntax.set(State.COLON, 'operators');
-  StateToSyntax.set(State.COLON_COLON, 'operators');
-  StateToSyntax.set(State.DOT, 'operators');
-  StateToSyntax.set(State.LINE_COMMENT, 'comment');
-  StateToSyntax.set(State.LINE_COMMENT_ESCAPE, 'comment');
-  StateToSyntax.set(State.LINE_COMMENT_START, 'comment');
-  StateToSyntax.set(State.NEWLINE, '');
-  StateToSyntax.set(State.NUMBER_SIGN, 'operators');
-  StateToSyntax.set(State.OPERATOR, 'operators');
-  StateToSyntax.set(State.SOLIDUS, 'operators');
-  StateToSyntax.set(State.SPACE, '');
-  StateToSyntax.set(State.STRING1, 'string_literal');
-  StateToSyntax.set(State.STRING1_END, 'string_literal');
-  StateToSyntax.set(State.STRING1_ESCAPE, 'string_literal');
-  StateToSyntax.set(State.STRING2, 'string_literal');
-  StateToSyntax.set(State.STRING2_END, 'string_literal');
-  StateToSyntax.set(State.STRING2_ESCAPE, 'string_literal');
-  StateToSyntax.set(State.WORD, 'identifier');
+  var stateToSyntax = new Map();
+  stateToSyntax.set(State.ZERO, '');
+  stateToSyntax.set(State.BLOCK_COMMENT, 'comment');
+  stateToSyntax.set(State.BLOCK_COMMENT_ASTERISK, 'comment');
+  stateToSyntax.set(State.BLOCK_COMMENT_END, 'comment');
+  stateToSyntax.set(State.BLOCK_COMMENT_START, 'comment');
+  stateToSyntax.set(State.COLON, 'operators');
+  stateToSyntax.set(State.COLON_COLON, 'operators');
+  stateToSyntax.set(State.DOT, 'operators');
+  stateToSyntax.set(State.LINE_COMMENT, 'comment');
+  stateToSyntax.set(State.LINE_COMMENT_ESCAPE, 'comment');
+  stateToSyntax.set(State.LINE_COMMENT_START, 'comment');
+  stateToSyntax.set(State.NEWLINE, '');
+  stateToSyntax.set(State.NUMBER_SIGN, 'operators');
+  stateToSyntax.set(State.OPERATOR, 'operators');
+  stateToSyntax.set(State.SOLIDUS, 'operators');
+  stateToSyntax.set(State.SPACE, '');
+  stateToSyntax.set(State.STRING1, 'string_literal');
+  stateToSyntax.set(State.STRING1_END, 'string_literal');
+  stateToSyntax.set(State.STRING1_ESCAPE, 'string_literal');
+  stateToSyntax.set(State.STRING2, 'string_literal');
+  stateToSyntax.set(State.STRING2_END, 'string_literal');
+  stateToSyntax.set(State.STRING2_ESCAPE, 'string_literal');
+  stateToSyntax.set(State.WORD, 'identifier');
 
   Object.keys(State).forEach(function(key) {
-    if (!StateToSyntax.has(State[key]))
-      throw new Error('StateToSyntax must have ' + key);
+    if (!stateToSyntax.has(State[key]))
+      throw new Error('stateToSyntax must have ' + key);
   });
 
   /**
@@ -69,33 +69,13 @@ global.ClikeLexer = (function() {
    * @param {!ClikeLexerOptions} options
    */
   function ClikeLexer(document, options) {
-    Lexer.call(this, options.keywords, document);
+    Lexer.call(this, document, {
+      keywords: options.keywords,
+      stateToSyntax: stateToSyntax
+    });
     this.hasCpp = options.hasCpp;
     this.useColonColon = options.useColonColon;
     this.useDot = options.useDot;
-  }
-
-  /**
-   * @this {!ClikeLexer}
-   * @param {number} maxCount
-   */
-  function doColor(maxCount) {
-    if (!this.range)
-      throw new Error("Can't use disconnected lexer.");
-
-    this.adjustScanOffset();
-    var document = this.range.document;
-    var maxOffset = Math.min(this.scanOffset + maxCount, document.length);
-    this.count = maxCount;
-    while (this.scanOffset < maxOffset) {
-      var token = nextToken(this);
-      if (!token)
-        break;
-      setSyntax(this, token);
-      if (this.lastToken != token)
-        setSyntax(this, /** @type {!Lexer.Token} */(this.lastToken));
-    }
-    return this.count;
   }
 
   /**
@@ -128,15 +108,15 @@ global.ClikeLexer = (function() {
   }
 
   /**
-   * @param {!ClikeLexer} lexer
+   * @this {!ClikeLexer}
    * @param {!Range} range
    * @param {!Lexer.Token} token
    * @return {string}
-
    *
    * Extract CPP directive as '#" + word or namespace qualify identifier.
    */
-  function extractWord(lexer, range, token) {
+  function extractWord(range, token) {
+    var lexer = this;
     var word = range.text;
     var it = lexer.tokens.find(token);
     console.assert(it, token);
@@ -148,10 +128,11 @@ global.ClikeLexer = (function() {
       return word;
 
     if (it.data.state == State.DOT) {
-      range.start = it.data.start;
       word = '.' + word;
-      if (lexer.keywords.has(word))
+      if (lexer.keywords.has(word)) {
+        range.start = it.data.start;
         return word;
+      }
       it = it.previous();
       while (it && it.data.state == State.SPACE) {
         it = it.previous();
@@ -234,18 +215,14 @@ global.ClikeLexer = (function() {
   }
 
   /**
-   * @param {!ClikeLexer} lexer
+   * @this {!ClikeLexer}
+   * @param {number} maxOffset
    * @return {?Lexer.Token}
    */
-  function nextToken(lexer) {
-    if (!lexer.count)
-      return null;
+  function nextToken(maxOffset) {
+    var lexer = this;
     var document = lexer.range.document;
-    var maxOffset = document.length;
-    if (lexer.scanOffset == maxOffset)
-      return null;
-    while (lexer.scanOffset < maxOffset && lexer.count) {
-      --lexer.count;
+    while (lexer.scanOffset < maxOffset) {
       var charCode = document.charCodeAt_(lexer.scanOffset);
       switch (lexer.state) {
         case State.BLOCK_COMMENT:
@@ -415,31 +392,11 @@ global.ClikeLexer = (function() {
     return lexer.lastToken;
   }
 
-  /**
-   * @param {!ClikeLexer} lexer
-   * @param {!Lexer.Token} token
-   */
-  function setSyntax(lexer, token) {
-    var range = lexer.range;
-    range.collapseTo(token.start);
-    range.end = token.end;
-    var syntax = StateToSyntax.get(token.state) || '';
-    if (syntax == 'identifier') {
-      var word = extractWord(lexer, range, token);
-      if (lexer.debug_ > 5)
-        console.log('setSyntax', '"' + word + '"');
-      if (lexer.keywords.has(word))
-        syntax = 'keyword';
-    }
-    if (lexer.debug_ > 4)
-      console.log('setSyntax', syntax, token);
-    range.setSyntax(syntax);
-  }
-
   ClikeLexer.prototype = Object.create(Lexer.prototype, {
     constructor: {value: ClikeLexer},
     didShrinkLastToken: {value: didShrinkLastToken },
-    doColor: {value: doColor}
+    extractWord: {value: extractWord},
+    nextToken: {value: nextToken}
   });
 
   return ClikeLexer;

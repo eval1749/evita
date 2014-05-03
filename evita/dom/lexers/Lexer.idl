@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-[ImplementedAs=JavaScript, Constructor(Document document)]
+[ImplementedAs=JavaScript, Constructor(Document document, object options)]
 interface Lexer {
   attribute long changeOffset;
-  attribute long count;
   attribute long debug;
   attribute MutationObserver mutationObserver_;
   attribute Range? range;
@@ -16,7 +15,10 @@ interface Lexer {
   long adjustScanOffset(long hint);
   void detach();
   void didChangeScanOffset();
+  DOMString extractWord(Range range, object token);
   long doColor(long hint);
   DOMString finishToken();
+  /* Lexer.Token */object nextToken(long maxOffset);
+  void setSyntax(/* Lexer.Token */ object token);
   void startToken(long state, DOMString syntax);
 };

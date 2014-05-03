@@ -1,9 +1,21 @@
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+/**
+ * @typedef {{
+ *  keywords: !Iterable.<string>,
+ *  stateToSyntax: !Map.<number, string>
+ * }}
+ */
+var LexerOptions;
+
 /**
  * @constructor
- * @param {Iterable.<string>} keywords
  * @param {!Document} document
+ * @param {!LexerOptions} options
  */
-function Lexer(keywords, document) {}
+function Lexer(document, options) {}
 
 /**
  * @constructor
@@ -70,6 +82,11 @@ Lexer.prototype.scanOffset;
 Lexer.prototype.state;
 
 /**
+ * @type {!Map.<number,string>}
+ */
+Lexer.prototype.stateToSyntax_;
+
+/**
  * @type {OrderedSet.<!Lexer.Token>}
  */
 Lexer.prototype.tokens;
@@ -105,6 +122,13 @@ Lexer.prototype.doColor = function(hint) {};
 Lexer.prototype.extendToken = function() {};
 
 /**
+ * @param {!Range} range
+ * @param {!Lexer.Token} token
+ * @return {string}
+ */
+Lexer.prototype.extractWord = function(range, token) {};
+
+/**
  * @param {number} next_state
  * @return {!Lexer.Token}
  */
@@ -115,6 +139,17 @@ Lexer.prototype.finishToken = function(next_state) {};
  * @return {!Lexer.Token}
  */
 Lexer.prototype.finishTokenAs = function(state) {};
+
+/**
+ * @param {number} maxOffset
+ * @return {?Lexer.Token}
+ */
+Lexer.prototype.nextToken = function(maxOffset) {};
+
+/**
+ * @param {Lexer.Token} token
+ */
+Lexer.prototype.setSyntax= function(token) {};
 
 /**
  * @param {number} state

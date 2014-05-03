@@ -4,7 +4,7 @@
 
 (function() {
   /** @const @type {!RegExp} */
-  var RE_CRLF = new RegExp('\r\n', 'g');
+  var RE_CR = new RegExp('\r', 'g');
 
   /**
    * @constructor
@@ -141,7 +141,7 @@
             }
             document.readonly = false;
             if (newline == 3)
-              string = string.replace(RE_CRLF, '\n');
+              string = string.replace(RE_CR, '');
             range.text = string;
             document.readonly = true;
             range.collapseTo(range.end);
@@ -175,7 +175,7 @@
           document.readonly = false;
           var decoder = detector.decoders[0];
           var string = decoder.strings[decoder.strings.length - 1];
-          string = string.replace(RE_CRLF, '\n');
+          string = string.replace(RE_CR, '');
           range.text = string;
           range.collapseTo(range.end);
           document.readonly = true;

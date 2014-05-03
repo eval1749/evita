@@ -38,5 +38,22 @@ global.IdlLexer = (function(options) {
     'void',
 
     // Reserved identifiers.
-    'constructor', 'prototype', 'toString'
+    'constructor', 'prototype', 'toString',
+
+    // Extended attributes for ECMAScript
+    'ArrayClass',
+    'Clamp',
+    'Constructor',
+    'EnforceRange',
+    'ImplicitThis',
+    'LenientThis',
+    'NamedConstructor', 'NamedPropertiesObject', 'NoInterfaceObject',
+    'OverrideBuiltins',
+    'PutForwards',
+    'Replaceable',
+    'TreatNonCallableAsNull', 'TreatNullAs', 'TreatUndefinedAs',
+    'Unforgeable',
+
+    // Extended attributes in Blink IDL
+    'ImplementedAs'
 ]});

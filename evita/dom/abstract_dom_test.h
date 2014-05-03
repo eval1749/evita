@@ -11,7 +11,6 @@
 #pragma warning(disable: 4365 4625 4626 4826)
 #include "gtest/gtest.h"
 #pragma warning(pop)
-#include "evita/v8_glue/runner_delegate.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/v8.h"
 
@@ -25,9 +24,10 @@ class MockIoDelegate;
 class MockViewImpl;
 class ScriptHost;
 
-class AbstractDomTest : public v8_glue::RunnerDelegate,
-                        public ::testing::Test {
+class AbstractDomTest : public ::testing::Test {
   protected: typedef std::vector<v8::Handle<v8::Value>> Argv;
+  private: class RunnerDelegate;
+  friend class RunnerDelegate;
 
   protected: class RunnerScope {
     private: v8_glue::Runner::Scope runner_scope_;
@@ -74,6 +74,7 @@ class AbstractDomTest : public v8_glue::RunnerDelegate,
     return mock_view_impl_.get();
   }
   protected: v8_glue::Runner* runner() const { return runner_.get(); }
+  protected: virtual bool shouldUseNewContext() const;
   protected: domapi::ViewEventHandler* view_event_handler() const;
 
   protected: template<typename... Params>
@@ -88,11 +89,8 @@ class AbstractDomTest : public v8_glue::RunnerDelegate,
   protected: virtual void SetUp() override;
   protected: virtual void TearDown() override;
 
-  // v8_glue::RunnerDelegate
-  private: virtual v8::Handle<v8::ObjectTemplate>
-      GetGlobalTemplate(v8_glue::Runner* runner) override;
-  private: virtual void UnhandledException(v8_glue::Runner* runner,
-      const v8::TryCatch& try_catch) override;
+  private: void UnhandledException(v8_glue::Runner* runner,
+                                   const v8::TryCatch& try_catch);
 
   DISALLOW_COPY_AND_ASSIGN(AbstractDomTest);
 };

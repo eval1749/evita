@@ -25,6 +25,15 @@ class TextWindowTest : public dom::AbstractDomTest {
   public: virtual ~TextWindowTest() {
   }
 
+  // AbstractDomTest
+  private: virtual bool shouldUseNewContext() const override {
+    // We need to have new context for |TextWindowTest.realize| to call
+    // |ViewDelegate::SetTabData| via |DocumentSet| observer.
+    // TODO(yosi) We should make |TextWindowTest.realize| to work within
+    // existing context.
+    return true;
+  }
+
   DISALLOW_COPY_AND_ASSIGN(TextWindowTest);
 };
 

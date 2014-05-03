@@ -143,7 +143,6 @@
         // Finalize file saving
         return should_close.close().then(function() {
           should_close = null;
-          console.log('save', 'done', num_bytes, temp_name, document.fileName);
           return Os.File.move(temp_name, document.fileName).then(function() {
             should_remove = null;
             return Os.File.stat(document.fileName).then(function(result) {

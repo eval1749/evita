@@ -38,10 +38,12 @@ Object.defineProperties(console, {
   document: {
     /** @type {!function(): !Document} */
     get: function() {
-      var document = Document.find(console.DOCUMENT_NAME);
-      if (document)
-        return document;
-      return new Document(console.DOCUMENT_NAME, new JavaScriptMode());
+      var present = Document.find(console.DOCUMENT_NAME);
+      if (present)
+        return present;
+      var document = new Document(console.DOCUMENT_NAME);
+      document.mode = new JavaScriptMode();
+      return document;
     }
   },
 

@@ -39,13 +39,6 @@ Document.find = function(name) {};
 Document.findFile = function(absolute_file_name) {};
 
 /**
- * @param {string} name
- * @param {!Mode=} opt_mode
- * @return {!Document}
- */
-Document.getOrNew = function(name, opt_mode) {};
-
-/**
  * @type {Array.<!Document>}
  */
 Document.list;

@@ -72,8 +72,6 @@ class DocumentClass
   private: static void AddObserver(v8::Handle<v8::Function> function);
   private: static v8_glue::Nullable<Document> Find(const base::string16& name);
 
-  private: static Document* GetOrNew(const base::string16& name,
-                                     v8_glue::Optional<Mode*> opt_mode);
   private: static Document* NewDocument(const base::string16& name,
                                         v8_glue::Optional<Mode*> opt_mode);
   private: static void RemoveDocument(Document* document);
@@ -106,13 +104,6 @@ void DocumentClass::AddObserver(v8::Handle<v8::Function> function) {
 
 v8_glue::Nullable<Document> DocumentClass::Find(const base::string16& name) {
   return DocumentSet::instance()->Find(name);
-}
-
-Document* DocumentClass::GetOrNew(const base::string16& name,
-                                  v8_glue::Optional<Mode*> opt_mode) {
-  if (auto const document = DocumentSet::instance()->Find(name))
-    return document;
-  return NewDocument(name, opt_mode);
 }
 
 Document* DocumentClass::NewDocument(const base::string16& name,
@@ -155,7 +146,6 @@ v8::Handle<v8::FunctionTemplate> DocumentClass::CreateConstructorTemplate(
       .SetProperty("list", &DocumentClass::list)
       .SetMethod("addObserver", &DocumentClass::AddObserver)
       .SetMethod("find", &DocumentClass::Find)
-      .SetMethod("getOrNew", &DocumentClass::GetOrNew)
       .SetMethod("remove", &DocumentClass::RemoveDocument)
       .SetMethod("removeObserver", &DocumentClass::RemoveObserver)
       .Build();

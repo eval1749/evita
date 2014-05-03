@@ -33,7 +33,7 @@ global.ClikeLexer = (function() {
 
   /** @const @type {!Map.<State, string>} */
   var StateToSyntax = new Map();
-  StateToSyntax.set(State.ZERO, 'normal');
+  StateToSyntax.set(State.ZERO, '');
   StateToSyntax.set(State.BLOCK_COMMENT, 'comment');
   StateToSyntax.set(State.BLOCK_COMMENT_ASTERISK, 'comment');
   StateToSyntax.set(State.BLOCK_COMMENT_END, 'comment');
@@ -44,11 +44,11 @@ global.ClikeLexer = (function() {
   StateToSyntax.set(State.LINE_COMMENT, 'comment');
   StateToSyntax.set(State.LINE_COMMENT_ESCAPE, 'comment');
   StateToSyntax.set(State.LINE_COMMENT_START, 'comment');
-  StateToSyntax.set(State.NEWLINE, 'normal');
+  StateToSyntax.set(State.NEWLINE, '');
   StateToSyntax.set(State.NUMBER_SIGN, 'operators');
   StateToSyntax.set(State.OPERATOR, 'operators');
   StateToSyntax.set(State.SOLIDUS, 'operators');
-  StateToSyntax.set(State.SPACE, 'normal');
+  StateToSyntax.set(State.SPACE, '');
   StateToSyntax.set(State.STRING1, 'string_literal');
   StateToSyntax.set(State.STRING1_END, 'string_literal');
   StateToSyntax.set(State.STRING1_ESCAPE, 'string_literal');
@@ -424,7 +424,7 @@ global.ClikeLexer = (function() {
     var range = lexer.range;
     range.collapseTo(token.start);
     range.end = token.end;
-    var syntax = StateToSyntax.get(token.state) || 'normal';
+    var syntax = StateToSyntax.get(token.state) || '';
     if (syntax == 'identifier') {
       var word = extractWord(lexer, range, token);
       if (lexer.debug_ > 5)

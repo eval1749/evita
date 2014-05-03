@@ -21,10 +21,10 @@ global.ConfigLexer = (function() {
 
   /** @const @type {!Map.<State, string>} */
   var StateToSyntax = new Map();
-  StateToSyntax.set(State.ZERO, 'normal');
+  StateToSyntax.set(State.ZERO, '');
   StateToSyntax.set(State.LINE_COMMENT, 'comment');
   StateToSyntax.set(State.LINE_COMMENT_START, 'comment');
-  StateToSyntax.set(State.SPACE, 'normal');
+  StateToSyntax.set(State.SPACE, '');
   StateToSyntax.set(State.STRING1, 'string_literal');
   StateToSyntax.set(State.STRING1_END, 'string_literal');
   StateToSyntax.set(State.STRING1_ESCAPE, 'string_literal');
@@ -190,7 +190,7 @@ global.ConfigLexer = (function() {
     var range = lexer.range;
     range.collapseTo(token.start);
     range.end = token.end;
-    var syntax = StateToSyntax.get(token.state) || 'normal';
+    var syntax = StateToSyntax.get(token.state) || '';
     range.setSyntax(syntax);
   }
 

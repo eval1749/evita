@@ -3,6 +3,12 @@
 // found in the LICENSE file.
 
 (function() {
+  /** @const @type {!RegExp} */
+  var RE_CRLF = new RegExp('\r\n', 'g');
+
+  /** @const @type {!RegExp} */
+  var RE_CR = new RegExp('\r', 'g');
+
   /**
    * @constructor
    * @class A wrapper class of |TextDecoder| to keep decoded strings.
@@ -141,9 +147,9 @@
             }
             document.readonly = false;
             if (newline == 3)
-              string = string.replace(/\r\n/g, '\n');
+              string = string.replace(RE_CRLF, '\n');
             if (has_cr)
-              string = string.replace(/\r/g, '\n');
+              string = string.replace(RE_CR, '\n');
             range.text = string;
             document.readonly = true;
             range.collapseTo(range.end);
@@ -177,8 +183,8 @@
           document.readonly = false;
           var decoder = detector.decoders[0];
           var string = decoder.strings[decoder.strings.length - 1];
-          string = string.replace(/\r\n/g, '\n');
-          string = string.replace(/\r/g, '\n');
+          string = string.replace(RE_CRLF, '\n');
+          string = string.replace(RE_CR, '\n');
           range.text = string;
           range.collapseTo(range.end);
           document.readonly = true;

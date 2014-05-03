@@ -69,10 +69,6 @@ height
 # Document
 Map
 
-# Mode
-Mode
-chooseModeByFileName
-
 # Os.File.move
 noOverwrite
 

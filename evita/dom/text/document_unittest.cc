@@ -251,8 +251,10 @@ TEST_F(DocumentTest, mode) {
 
 TEST_F(DocumentTest, mode_auto_mode) {
   EXPECT_SCRIPT_VALID(
-      "function testIt(file_name) {"
-      "  return (new Document(file_name)).mode.constructor.name;"
+      "function testIt(fileName) {"
+      "  var doc = new Document(fileName);"
+      "  doc.mode = Mode.chooseModeByFileName(fileName);"
+      "  return doc.mode.constructor.name;"
       "}");
   EXPECT_SCRIPT_EQ("CxxMode", "testIt('foo.cc')");
   EXPECT_SCRIPT_EQ("CxxMode", "testIt('foo.cpp')");

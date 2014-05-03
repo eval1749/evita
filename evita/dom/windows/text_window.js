@@ -337,7 +337,7 @@ global.TextWindow.prototype.clone = function() {
     var line_and_column = document.getLineAndColumn_(text_offset);
     var new_texts = [
       DOCUMENT_STATE_TEXTS[document.state],
-      document.mode.name,
+      document.mode ? document.mode.name : '--',
       document.encoding ? document.encoding : 'n/a',
       NEWLINE_MODES[document.newline],
       'Ln ' + line_and_column.lineNumber,

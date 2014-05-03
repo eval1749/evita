@@ -105,24 +105,6 @@ v8_glue::Nullable<Document> DocumentClass::Find(const base::string16& name) {
   return DocumentSet::instance()->Find(name);
 }
 
-Document* DocumentClass::NewDocument(const base::string16& name) {
-  // Get mode by |Mode.chooseModeByFileName()|.
-  auto const runner = ScriptHost::instance()->runner();
-  auto const isolate = runner->isolate();
-  auto const js_mode_class = runner->global()->Get(
-      v8Strings::Mode.Get(isolate));
-  auto const js_choose = js_mode_class->ToObject()->Get(
-      v8Strings::chooseModeByFileName.Get(isolate));
-  auto const js_name = gin::StringToV8(isolate, name);
-  auto const js_mode = runner->Call(js_choose, js_mode_class, js_name);
-  Mode* mode = nullptr;
-  gin::ConvertFromV8(isolate, js_mode, &mode);
-  auto const document = Document::New(name);
-  if (mode)
-    document->set_mode(mode);
-  return document;
-}
-
 void DocumentClass::RemoveDocument(Document* document) {
   DocumentSet::instance()->Unregister(document);
 }
@@ -135,7 +117,7 @@ void DocumentClass::RemoveObserver(v8::Handle<v8::Function> function) {
 v8::Handle<v8::FunctionTemplate> DocumentClass::CreateConstructorTemplate(
     v8::Isolate* isolate) {
   auto templ = v8_glue::CreateConstructorTemplate(isolate,
-      &DocumentClass::NewDocument);
+      &Document::New);
   return v8_glue::FunctionTemplateBuilder(isolate, templ)
       .SetProperty("list", &DocumentClass::list)
       .SetMethod("addObserver", &DocumentClass::AddObserver)

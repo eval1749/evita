@@ -87,7 +87,7 @@ Document.prototype.length;
 /** @expose  @type {!Generator.<string>} */
 Document.prototype.lines;
 
-/** @expose  @type {!Mode} */
+/** @expose  @type {?Mode} */
 Document.prototype.mode;
 
 /** @expose  @type {boolean} */

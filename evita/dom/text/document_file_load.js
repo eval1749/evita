@@ -213,6 +213,9 @@
       if (present && present !== this)
         throw file_name + ' is already bound to ' + present;
       document.fileName = absolute_file_name;
+      var newMode = Mode.chooseModeByFileName(absolute_file_name);
+      if (document.mode != newMode)
+        document.mode = newMode;
     }
 
     document.obsolete = Document.Obsolete.CHECKING;

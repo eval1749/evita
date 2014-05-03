@@ -22,11 +22,11 @@
   });
 
   /**
-   * @param {string} absolute_file_name
+   * @param {string} absoluteFileName
    * @return {Document}
    */
-  Document.findFile = function(absolute_file_name) {
-    var canonical_file_name = absolute_file_name.toLocaleLowerCase();
+  Document.findFile = function(absoluteFileName) {
+    var canonical_file_name = absoluteFileName.toLocaleLowerCase();
     return /** @type{Document} */ (Document.list.find(
         function(document) {
           return document.fileName.toLocaleLowerCase() == canonical_file_name;
@@ -73,16 +73,17 @@
   };
 
   /**
-   * @param {string} file_name A backing store file of document.
+   * @param {string} fileName A backing store file of document.
    * @return {!Document} A Document bound to file_name
    */
-  Document.open = function(file_name) {
-    var absolute_file_name = FilePath.fullPath(file_name);
-    var present = Document.findFile(absolute_file_name);
+  Document.open = function(fileName) {
+    var absoluteFileName = FilePath.fullPath(fileName);
+    var present = Document.findFile(absoluteFileName);
     if (present)
       return present;
-    var document = new Document(FilePath.basename(file_name));
-    document.fileName = absolute_file_name;
+    var document = new Document(FilePath.basename(fileName));
+    document.fileName = absoluteFileName;
+    document.mode = Mode.chooseModeByFileName(fileName);
     return document;
   };
 

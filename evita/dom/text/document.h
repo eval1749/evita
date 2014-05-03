@@ -10,7 +10,6 @@
 #include "evita/dom/events/event_target.h"
 #include "evita/gc/member.h"
 #include "evita/v8_glue/optional.h"
-#include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/scriptable.h"
 #include "evita/v8_glue/scoped_persistent.h"
 
@@ -21,7 +20,6 @@ struct LineAndColumn;
 
 namespace dom {
 
-class Mode;
 class Range;
 class RegExp;
 
@@ -40,7 +38,6 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   private: std::unique_ptr<text::Buffer> buffer_;
   private: base::Time last_write_time_;
   private: base::string16 file_name_;
-  private: gc::Member<Mode> mode_;
   private: NewlineMode newline_;
   // TODO(yosi) When we set |properties| with |v8::Object::Set()|, it doesn't
   // appeared in JavaScript. I'm not sure why. So, we hold |properties| in
@@ -58,8 +55,6 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: base::Time last_write_time() const;
   public: void set_last_write_time(base::Time last_write_time);
   public: text::Posn length() const;
-  public: v8_glue::Nullable<Mode> mode() const { return mode_.get(); }
-  public: void set_mode(Mode* mode);
   public: bool modified() const;
   public: void set_modified(bool new_modified);
   public: const base::string16& name() const;

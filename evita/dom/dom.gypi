@@ -57,6 +57,7 @@
       'lexers/javascript_lexer.js',
       'lexers/python_lexer.js',
 
+      'text/modes/mode.js',
       'text/modes/modes.js',
       'os/file.js',
       'os/process.js',
@@ -72,6 +73,7 @@
       'windows/text_selection.js',
       'windows/text_window.js',
       'windows/window.js',
+
 
       'jslib/editors.js',
       'jslib/ordered_set.js',
@@ -157,19 +159,6 @@
         'global.cc',
         'dictionary.cc',
         'lock.cc',
-
-        'text/modes/mode.cc',
-        'text/modes/config_mode.cc',
-        'text/modes/cxx_mode.cc',
-        'text/modes/haskell_mode.cc',
-        'text/modes/java_mode.cc',
-        'text/modes/javascript_mode.cc',
-        'text/modes/lisp_mode.cc',
-        'text/modes/mason_mode.cc',
-        'text/modes/perl_mode.cc',
-        'text/modes/plain_text_mode.cc',
-        'text/modes/python_mode.cc',
-        'text/modes/xml_mode.cc',
 
         'text/mutation_observer.cc',
         'text/mutation_observer_controller.cc',

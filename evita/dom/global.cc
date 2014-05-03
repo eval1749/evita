@@ -33,18 +33,6 @@
 #include "evita/dom/forms/text_field_control.h"
 #include "evita/dom/forms/text_field_selection.h"
 #include "evita/dom/file_path.h"
-#include "evita/dom/text/modes/config_mode.h"
-#include "evita/dom/text/modes/cxx_mode.h"
-#include "evita/dom/text/modes/haskell_mode.h"
-#include "evita/dom/text/modes/java_mode.h"
-#include "evita/dom/text/modes/javascript_mode.h"
-#include "evita/dom/text/modes/lisp_mode.h"
-#include "evita/dom/text/modes/mason_mode.h"
-#include "evita/dom/text/modes/mode.h"
-#include "evita/dom/text/modes/perl_mode.h"
-#include "evita/dom/text/modes/plain_text_mode.h"
-#include "evita/dom/text/modes/python_mode.h"
-#include "evita/dom/text/modes/xml_mode.h"
 #include "evita/dom/text/mutation_observer.h"
 #include "evita/dom/text/mutation_record.h"
 #include "evita/dom/os/file.h"
@@ -125,19 +113,6 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
           INSTALL(EditorWindow);
           INSTALL(FormWindow);
     INSTALL(TextFieldSelection);
-
-    INSTALL(Mode);
-      INSTALL(ConfigMode);
-      INSTALL(CxxMode);
-      INSTALL(HaskellMode);
-      INSTALL(JavaMode);
-      INSTALL(JavaScriptMode);
-      INSTALL(LispMode);
-      INSTALL(MasonMode);
-      INSTALL(PerlMode);
-      INSTALL(PlainTextMode);
-      INSTALL(PythonMode);
-      INSTALL(XmlMode);
 
     INSTALL(MutationObserver);
     INSTALL(MutationRecord);

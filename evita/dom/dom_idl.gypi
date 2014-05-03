@@ -125,8 +125,6 @@
       '<(glue_dir)/KeyboardEventInit.h',
       '<(glue_dir)/LabelControl.cc',
       '<(glue_dir)/LabelControl.h',
-      '<(glue_dir)/Mode.cc',
-      '<(glue_dir)/Mode.h',
       '<(glue_dir)/MouseEvent.cc',
       '<(glue_dir)/MouseEvent.h',
       '<(glue_dir)/MouseEventInit.cc',
@@ -171,6 +169,7 @@
       '<(glue_dir)/TextFieldControl.h',
       '<(glue_dir)/TextFieldSelection.cc',
       '<(glue_dir)/TextFieldSelection.h',
+
 
 
       '<(glue_dir)/TextSelection.h',

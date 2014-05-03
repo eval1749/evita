@@ -42,7 +42,7 @@ Object.defineProperties(console, {
       if (present)
         return present;
       var document = new Document(console.DOCUMENT_NAME);
-      document.mode = new JavaScriptMode();
+      document.mode = Mode.chooseModeByFileName('foo.js');
       return document;
     }
   },

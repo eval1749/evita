@@ -244,7 +244,7 @@ TEST_F(DocumentTest, load_succeeded) {
 TEST_F(DocumentTest, mode) {
   EXPECT_SCRIPT_VALID(
       "var doc = new Document('foo');"
-      "var mode = new PlainTextMode();"
+      "var mode = Mode.chooseModeByFileName('foo.txt');"
       "doc.mode = mode;");
   EXPECT_SCRIPT_TRUE("doc.mode === mode");
 }
@@ -256,9 +256,9 @@ TEST_F(DocumentTest, mode_auto_mode) {
       "  doc.mode = Mode.chooseModeByFileName(fileName);"
       "  return doc.mode.constructor.name;"
       "}");
-  EXPECT_SCRIPT_EQ("CxxMode", "testIt('foo.cc')");
-  EXPECT_SCRIPT_EQ("CxxMode", "testIt('foo.cpp')");
-  EXPECT_SCRIPT_EQ("CxxMode", "testIt('foo.h')");
+  EXPECT_SCRIPT_EQ("CppMode", "testIt('foo.cc')");
+  EXPECT_SCRIPT_EQ("CppMode", "testIt('foo.cpp')");
+  EXPECT_SCRIPT_EQ("CppMode", "testIt('foo.h')");
   EXPECT_SCRIPT_EQ("JavaMode", "testIt('foo.java')");
   EXPECT_SCRIPT_EQ("JavaScriptMode", "testIt('foo.js')");
 }

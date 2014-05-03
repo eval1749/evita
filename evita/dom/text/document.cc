@@ -13,7 +13,6 @@
 #include "evita/editor/application.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/text/document_set.h"
-#include "evita/dom/text/modes/mode.h"
 #include "evita/dom/text/regexp.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
@@ -133,7 +132,6 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
       .SetProperty("lastWriteTime", &Document::last_write_time,
                    &Document::set_last_write_time)
       .SetProperty("length", &Document::length)
-      .SetProperty("mode", &Document::mode, &Document::set_mode)
       .SetProperty("modified", &Document::modified, &Document::set_modified)
       .SetProperty("name", &Document::name)
       .SetProperty("newline", &Document::newline, &Document::set_newline)
@@ -206,10 +204,6 @@ void Document::set_last_write_time(base::Time last_write_time) {
 
 text::Posn Document::length() const {
   return buffer_->GetEnd();
-}
-
-void Document::set_mode(Mode* mode) {
-  mode_ = mode;
 }
 
 bool Document::modified() const {

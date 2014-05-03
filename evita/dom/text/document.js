@@ -70,6 +70,11 @@
     return wordClassOf(document.charCodeAt_(position - 1));
   }
 
+  Object.defineProperty(Document.prototype, 'mode', {
+    value: null,
+    writable: true
+  });
+
   /**
    * @this {!Document}
    * @param {string} key_combination.

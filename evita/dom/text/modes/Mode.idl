@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+[
+  ImplementedAs=JavaScript,
+  Constructor(DOMString name, Function lexerConstructor)
+]
 interface Mode {
   [ImplementedAs=JavaScript]
   static readonly attribute Mode defaultMode;
@@ -22,10 +26,8 @@ interface Mode {
   static Mode chooseModeByFileName(DOMString name);
 
   readonly attribute DOMString name;
+  readonly attribute Keymap keymap;
 
   [ImplementedAs=JavaScript]
-  void doColor(Document document, long hint);
-
-  [ImplementedAs=DoColor]
-  void doColor_(Document document, long hint);
+  long doColor(Document document, long hint);
 };

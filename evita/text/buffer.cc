@@ -28,7 +28,6 @@ Buffer::Buffer(const base::string16& name)
       style_resolver_(new css::StyleResolver()),
       syntax_markers_(new MarkerSet(this)),
       undo_stack_(new UndoStack(this)),
-      m_eState(State_Ready),
       m_fReadOnly(false),
       m_nCharTick(1),
       m_nSaveTick(1),
@@ -86,8 +85,6 @@ Posn Buffer::ComputeStartOfLine(Posn lPosn) const {
 Count Buffer::Delete(Posn lStart, Posn lEnd) {
   if (IsReadOnly())
     return 0;
-  if (IsNotReady())
-    return 0;
 
   lStart = std::max(lStart, static_cast<Posn>(0));
   lEnd   = std::min(lEnd, GetEnd());
@@ -138,8 +135,6 @@ Count Buffer::Insert(Posn lPosn, const char16* pwch, Count n) {
 
   if (IsReadOnly())
     return 0;
-  if (IsNotReady())
-    return 0;
 
   if (n <= 0)
     return 0;
@@ -155,7 +150,6 @@ Count Buffer::Insert(Posn lPosn, const char16* pwch, Count n) {
 void Buffer::InsertBefore(Posn position, const base::string16& text) {
   DCHECK(IsValidPosn(position));
   DCHECK(!IsReadOnly());
-  DCHECK_NE(State_Save, m_eState);
 
   auto const text_length = text.length();
   if (!text_length)
@@ -167,10 +161,6 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
       DidInsertBefore(position, text_length));
 
   UpdateChangeTick();
-}
-
-bool Buffer::IsNotReady() const {
-  return m_eState != State_Ready;
 }
 
 Posn Buffer::Redo(Posn lPosn, Count n) {

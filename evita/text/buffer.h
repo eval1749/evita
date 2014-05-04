@@ -69,14 +69,6 @@ class Buffer : public BufferCore,
   private: int m_nCharTick;
   private: int m_nSaveTick;
 
-  // Asynchronous Operation Support
-  public: enum State {
-    State_Ready,
-    State_Load,
-    State_Save,
-  };
-
-  protected: State m_eState;
   protected: base::string16 name_;
 
   // ctor/dtor
@@ -88,7 +80,6 @@ class Buffer : public BufferCore,
   public: MarkerSet* spelling_markers() const {
     return spelling_markers_.get();
   }
-  public: State state() const { return m_eState; }
   public: MarkerSet* syntax_markers() const {
     return syntax_markers_.get();
   }

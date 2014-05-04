@@ -69,13 +69,10 @@ class Buffer : public BufferCore,
   private: int m_nCharTick;
   private: int m_nSaveTick;
 
-  protected: base::string16 name_;
-
   // ctor/dtor
-  public: Buffer(const base::string16& name);
+  public: Buffer();
   public: virtual ~Buffer();
 
-  public: const base::string16& name() const { return name_; }
   public: RangeSet* ranges() const { return ranges_.get(); }
   public: MarkerSet* spelling_markers() const {
     return spelling_markers_.get();
@@ -105,7 +102,6 @@ class Buffer : public BufferCore,
   public: const css::Style& GetDefaultStyle() const;
   public: Interval* GetIntervalAt(Posn) const;
   public: LineAndColumn GetLineAndColumn(Posn offset) const;
-  public: const base::string16& GetName() const { return name_; }
   public: Posn GetStart() const { return 0; }
   public: const css::Style& GetStyleAt(Posn) const;
   public: UndoStack* GetUndo() const { return undo_stack_.get(); }
@@ -127,9 +123,6 @@ class Buffer : public BufferCore,
   public: Posn Redo(Posn, Count = 1);
 
   // [S]
-  public: void SetName(const base::string16& new_name) {
-    name_ = new_name;
-  }
   public: void SetNotModifiedForTesting() {
     m_nSaveTick = m_nCharTick;
   }

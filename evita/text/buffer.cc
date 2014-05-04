@@ -20,7 +20,7 @@
 
 namespace text {
 
-Buffer::Buffer(const base::string16& name)
+Buffer::Buffer()
     : intervals_(new IntervalSet(this)),
       line_number_cache_(new LineNumberCache(this)),
       ranges_(new RangeSet(this)),
@@ -30,8 +30,7 @@ Buffer::Buffer(const base::string16& name)
       undo_stack_(new UndoStack(this)),
       m_fReadOnly(false),
       m_nCharTick(1),
-      m_nSaveTick(1),
-      name_(name) {
+      m_nSaveTick(1) {
   spelling_markers_->AddObserver(this);
   syntax_markers_->AddObserver(this);
 }

@@ -36,6 +36,7 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   friend class bindings::DocumentClass;
 
   private: std::unique_ptr<text::Buffer> buffer_;
+  private: base::string16 name_;
 
   private: explicit Document(const base::string16& name);
   public: virtual ~Document();
@@ -47,6 +48,7 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: bool modified() const;
   public: void set_modified(bool new_modified);
   public: const base::string16& name() const;
+  public: void set_name(const base::string16& new_name);
   public: bool read_only() const;
   public: void set_read_only(bool read_only) const;
   // Returns spelling at |offset|.

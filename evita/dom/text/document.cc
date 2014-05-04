@@ -150,7 +150,8 @@ using namespace bindings;
 DEFINE_SCRIPTABLE_OBJECT(Document, DocumentClass)
 
 Document::Document(const base::string16& name)
-    : buffer_(new text::Buffer(DocumentSet::instance()->MakeUniqueName(name))) {
+    : buffer_(new text::Buffer()),
+      name_(DocumentSet::instance()->MakeUniqueName(name)) {
 }
 
 Document::~Document() {
@@ -182,7 +183,12 @@ void Document::set_modified(bool new_modified) {
 }
 
 const base::string16& Document::name() const {
-  return buffer_->name();
+  return name_;
+}
+
+void Document::set_name(const base::string16& new_name) {
+  DCHECK_NE(name_, new_name);
+  name_ = new_name;
 }
 
 bool Document::read_only() const {

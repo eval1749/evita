@@ -18,7 +18,7 @@ class RangeTest : public ::testing::Test {
   private: std::unique_ptr<text::Buffer> buffer_;
 
   protected: RangeTest()
-      : buffer_(new text::Buffer(L"*test*")) {
+      : buffer_(new text::Buffer()) {
   }
   public: virtual ~RangeTest() {
   }

@@ -164,12 +164,12 @@ void DocumentSet::RenameDocument(Document* document,
    return;
   auto const it = map_.find(old_name);
   if (it == map_.end()) {
-    document->buffer()->SetName(new_name);
+    document->set_name(new_name);
     return;
   }
   const auto new_unique_name = MakeUniqueName(new_name);
   map_.erase(it);
-  document->buffer()->SetName(new_unique_name);
+  document->set_name(new_unique_name);
   map_[new_unique_name] = document;
 }
 

@@ -16,7 +16,7 @@ class UndoStackTest : public ::testing::Test {
   private: std::unique_ptr<text::Buffer> buffer_;
 
   protected: UndoStackTest()
-      : buffer_(new text::Buffer(L"*test*")) {
+      : buffer_(new text::Buffer()) {
   }
   public: virtual ~UndoStackTest() {
   }

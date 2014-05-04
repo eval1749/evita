@@ -227,11 +227,11 @@
       document.obsolete = Document.Obsolete.NO;
       document.lastStatTime_ = new Date();
       document.parseFileProperties();
-      var new_mode = Mode.chooseMode(document);
-      if (new_mode.name != document.mode.name) {
-        Editor.messageBox(null, 'Change mode to ' + new_mode.name,
+      var newMode = Mode.chooseMode(document);
+      if (newMode.name != document.mode.name) {
+        Editor.messageBox(null, 'Change mode to ' + newMode.name,
                           MessageBox.ICONINFORMATION);
-        document.mode = new_mode;
+        document.mode = newMode;
       }
       document.listWindows().forEach(function(window) {
         if (window instanceof TextWindow) {

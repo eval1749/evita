@@ -133,9 +133,24 @@ global.DocumentState.prototype.equals = function(other) {
    */
   function startTracking(document) {
     documentStateMap.set(document, new DocumentState(document));
-    document.addEventListener('attach', didAttachWindow);
-    document.addEventListener('load', didDocumentLoadSave);
-    document.addEventListener('save', didDocumentLoadSave);
+    document.addEventListener(Event.Names.ATTACH, didAttachWindow);
+    document.addEventListener(Event.Names.BEFORELOAD, willLoadDocument);
+    document.addEventListener(Event.Names.LOAD, didDocumentLoadSave);
+    document.addEventListener(Event.Names.SAVE, didDocumentLoadSave);
+  }
+
+  /**
+   * @param {!DocumentEvent} event
+   */
+  function willLoadDocument(event) {
+    var document = /** @type{!Document} */(event.target);
+    var state = documentStateMap.get(document);
+    if (!state)
+      return;
+    state.state = 1;
+    observers.forEach(function(observer) {
+      observer.call(this, document, state);
+    });
   }
 
   Document.addObserver(function(type, document) {

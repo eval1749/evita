@@ -25,7 +25,7 @@ TEST_F(LexersTest, all) {
     "  var lastSyntax = '';"
     "  var count = 0;"
     "  for (var i = 0; i < doc.length; ++i) {"
-    "    var syntax = doc.syntaxAt(i).charAt(0);"
+    "    var syntax = symbolize(doc.syntaxAt(i));"
     "    if (count && syntax != lastSyntax) {"
     "      result += lastSyntax + count + ' ';"
     "      count = 0;"
@@ -35,6 +35,15 @@ TEST_F(LexersTest, all) {
     "  }"
     "  result += lastSyntax + count;"
     "  return result;"
+    "}"
+    "function symbolize(syntax) {"
+    "  if (syntax == 'html_attribute_value')"
+    "   return 'v';"
+    "  if (syntax == 'html_entity')"
+    "   return '&';"
+    "  if (syntax.startsWith('html_'))"
+    "   return syntax.charAt(5);"
+    "  return syntax.charAt(0);"
     "}");
 
   // ConfigLexer
@@ -95,6 +104,16 @@ TEST_F(LexersTest, all) {
         "'# foo',"
         "'if a1 == \\'s1\\':',"
         "'    a2 = \"s2\"',"
+    "])");
+
+  // XmlLexer
+  EXPECT_SCRIPT_EQ(
+    "c16 n2 e7 n1 a5 n1 v5 n1 a5 n1 v5 n5 &5 n6 e7 n1",
+    "doColor('foo.xml', ["
+        "'<!-- comment -->',"
+        "'<element attr1=\\'123\\' attr2=\"456\">',"
+        "'foo&amp;bar',"
+        "'</element>',"
     "])");
 }
 

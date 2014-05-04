@@ -90,7 +90,7 @@
 
   /** @constructor @extends {Mode} @return {?} */
   function XmlMode() {
-    Mode.call(this, 'XML', PlainTextLexer);
+    Mode.call(this, 'XML', XmlLexer);
   }
   inheritMode(XmlMode);
 

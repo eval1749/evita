@@ -56,6 +56,7 @@
       'lexers/java_lexer.js',
       'lexers/javascript_lexer.js',
       'lexers/python_lexer.js',
+      'lexers/xml_lexer.js',
 
       'text/modes/mode.js',
       'text/modes/modes.js',

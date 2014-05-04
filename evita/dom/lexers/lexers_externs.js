@@ -82,3 +82,11 @@ function JavaScriptLexer(document) {}
  * @return {undefined}
  */
 function PythonLexer(document) {}
+
+/**
+ * @constructor
+ * @extends {Lexer}
+ * @param {!Document} document
+ * @return {undefined}
+ */
+function XmlLexer(document) {}

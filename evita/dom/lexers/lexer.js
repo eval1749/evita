@@ -15,11 +15,19 @@ global.Lexer = (function() {
    * @this {!Lexer}
    */
   function didLoadDocument() {
+    setupMutationObserver(this);
     this.lastToken = null;
     this.scanOffset = 0;
     this.state = 0;
     this.tokens.clear();
     this.doColor(this.range.document.length);
+  }
+
+  /**
+   * @this {!Lexer}
+   */
+  function willLoadDocument() {
+    this.mutationObserver_.disconnect();
   }
 
   /**
@@ -47,6 +55,13 @@ global.Lexer = (function() {
 
   /**
    * @param {!Lexer} lexer
+   */
+  function setupMutationObserver(lexer) {
+    lexer.mutationObserver_.observe(lexer.range.document, {summary: true});
+  }
+
+  /**
+   * @param {!Lexer} lexer
    * @param {!Array.<!MutationRecord>} mutations
    */
   function updateChangedOffset(lexer, mutations) {
@@ -68,7 +83,6 @@ global.Lexer = (function() {
     this.keywords = makeKeywords(options.keywords);
     this.mutationObserver_ = new MutationObserver(
         mutationCallback.bind(this));
-    this.mutationObserver_.observe(document, {summary: true});
     this.range = new Range(document);
     this.scanOffset = 0;
     this.state = 0;
@@ -77,8 +91,17 @@ global.Lexer = (function() {
       return a.end < b.end;
     });
 
-    this.didLoadDocumentHandler_ = didLoadDocument.bind(this);
-    document.addEventListener('load', this.didLoadDocumentHandler_);
+    this.eventHandlers_ = new Map();
+    var handlerMap = {
+      beforeload: willLoadDocument,
+      load: didLoadDocument
+    };
+    Object.keys(handlerMap).forEach(function(eventType) {
+      var handler = handlerMap[eventType].bind(this);
+      this.eventHandlers_.set(eventType, handler);
+      document.addEventListener(eventType, handler);
+    });
+    setupMutationObserver(this);
   }
 
   Lexer.OPERATOR_CHAR = Symbol('operator');
@@ -190,8 +213,10 @@ global.Lexer = (function() {
       function() {
         if (!this.range)
           throw new Error(this + ' isn\'t attached to document.');
-        this.range.document.removeEventListener('load',
-                                                this.didLoadDocumentHandler_);
+        var document = this.range.document;
+        this.eventHandlers_.forEach(function(handler, eventType) {
+            document.removeEventListener(eventType, handler);
+        });
         this.mutationObserver_.disconnect();
         this.range = null;
       }

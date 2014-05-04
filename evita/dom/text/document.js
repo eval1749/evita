@@ -71,6 +71,12 @@
   }
 
   Object.defineProperties(Document.prototype, {
+    keymap: {get: /** @return {!Map} */function() {
+      if (!this.keymap_)
+        this.keymap_ = new Map();
+      return this.keymap_;
+    }},
+    keymap_: {value: null, writable: true},
     mode: {
       get: /** @return {?Mode} */ function() { return this.mode_; },
       set: /** @param {?Mode} mode */ function(mode) {
@@ -99,12 +105,7 @@
    */
   Document.prototype.bindKey = function (key_combination, command) {
     var key_code = Editor.parseKeyCombination(key_combination);
-    var map = this.keymap;
-    if (!map) {
-      map = new Map();
-      this.keymap = map;
-    }
-    map.set(key_code, command);
+    this.keymap.set(key_code, command);
   };
 
   /**

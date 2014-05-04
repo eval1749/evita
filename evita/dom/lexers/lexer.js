@@ -12,6 +12,17 @@
  */
 global.Lexer = (function() {
   /**
+   * @this {!Lexer}
+   */
+  function didLoadDocument() {
+    this.lastToken = null;
+    this.scanOffset = 0;
+    this.state = 0;
+    this.tokens.clear();
+    this.doColor(this.range.document.length);
+  }
+
+  /**
    * @param {!Iterable.<string>} keywords
    * @return {!Set.<string>}
    */
@@ -65,6 +76,9 @@ global.Lexer = (function() {
     this.tokens = new OrderedSet(function(a, b) {
       return a.end < b.end;
     });
+
+    this.didLoadDocumentHandler_ = didLoadDocument.bind(this);
+    document.addEventListener('load', this.didLoadDocumentHandler_);
   }
 
   Lexer.OPERATOR_CHAR = Symbol('operator');
@@ -174,6 +188,10 @@ global.Lexer = (function() {
        * @this {!Lexer}
        */
       function() {
+        if (!this.range)
+          throw new Error(this + ' isn\'t attached to document.');
+        this.range.document.removeEventListener('load',
+                                                this.didLoadDocumentHandler_);
         this.mutationObserver_.disconnect();
         this.range = null;
       }

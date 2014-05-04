@@ -239,7 +239,6 @@
           window.makeSelectionVisible();
         }
       });
-      document.doColor_(document.length);
       document.dispatchEvent(new DocumentEvent('load'));
       return Promise.resolve(length);
     }).catch(function(exception) {

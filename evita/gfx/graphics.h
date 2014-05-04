@@ -57,7 +57,7 @@ class Graphics : public Object, public DpiHandler {
   public: Graphics();
   public: ~Graphics();
 
-  public: operator bool() const {
+  public: explicit operator bool() const {
     return render_target_;
   }
   public: operator ID2D1RenderTarget*() const {

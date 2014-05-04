@@ -26,7 +26,7 @@ class scoped_handle {
       ::CloseHandle(handle_);
   }
 
-  public: operator bool() const { return is_valid(); }
+  public: explicit operator bool() const { return is_valid(); }
 
   public: scoped_handle& operator=(const scoped_handle&) = delete;
   public: scoped_handle& operator=(scoped_handle&& other) {

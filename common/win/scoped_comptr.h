@@ -39,7 +39,7 @@ template<class T> class ComPtr {
       ptr_->Release();
   }
   public: operator T*() const { return ptr_; }
-  public: operator bool() const { return ptr_; }
+  public: explicit operator bool() const { return ptr_; }
   public: T* operator->() const { return ptr_; }
   public: T** operator&() {
     DCHECK(!ptr_) << "Leak COM interface";

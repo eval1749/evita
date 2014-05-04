@@ -18,7 +18,7 @@ struct COMMON_EXPORT Size : SIZE {
     this->cy = cy;
   }
 
-  operator bool() const { return !empty(); }
+  explicit operator bool() const { return !empty(); }
 
   bool operator==(const Size& other) const;
   bool operator!=(const Size& other) const;

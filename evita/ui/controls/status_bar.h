@@ -28,7 +28,7 @@ class StatusBar {
   public: StatusBar();
   public: ~StatusBar();
 
-  public: operator bool() const { return hwnd_; }
+  public: explicit operator bool() const { return hwnd_; }
   public: int height() const { return bounds_.height(); }
 
   public: void Realize(HWND hwndParent);

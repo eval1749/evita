@@ -62,7 +62,7 @@ class Rect_ : public BaseType {
     return rc;
   }
 
-  public: operator bool() const { return !empty(); }
+  public: explicit operator bool() const { return !empty(); }
   public: bool operator!() const { return empty(); }
 
   public: Rect_ operator+(const PointType& size) const;

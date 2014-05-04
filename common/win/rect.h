@@ -44,7 +44,7 @@ struct COMMON_EXPORT Rect : RECT {
   bool operator>(const Rect& other) const;
   bool operator>=(const Rect& other) const;
 
-  operator bool() const { return !empty(); }
+  explicit operator bool() const { return !empty(); }
   int area() const { return width() * height(); }
   bool empty() const { return width() <= 0 || height() <= 0; }
   int height() const { return bottom - top; }

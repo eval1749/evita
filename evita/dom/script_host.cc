@@ -193,8 +193,10 @@ void ScriptHost::DidStartViewHost() {
     auto const result = runner()->Run(
         base::ASCIIToUTF16(script_source.script_text),
         base::ASCIIToUTF16(script_source.file_name));
-    if (result.IsEmpty())
+    if (result.IsEmpty()) {
+      view_delegate_->DidStartScriptHost(state_);
       return;
+    }
   }
   runner()->Run(L"editors.start([]);", L"__start__");
   if (state_ == domapi::ScriptHostState::Stopped)

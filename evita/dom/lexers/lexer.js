@@ -474,7 +474,7 @@ global.Lexer = (function() {
 
         case Lexer.State.STRING1:
           if (charCode == Unicode.APOSTROPHE)
-            return lexer.finishToken(Lexer.State.STRING2_END);
+            return lexer.finishToken(Lexer.State.STRING1_END);
           if (charCode == Unicode.REVERSE_SOLIDUS)
             return lexer.finishToken(Lexer.State.STRING1_ESCAPE);
           lexer.extendToken();
@@ -528,7 +528,7 @@ global.Lexer = (function() {
 
         default:
           console.log(lexer);
-          throw new Error('Invalid state ' + lexer.state);
+          throw new Error('Invalid state ' + lexer.state.toString());
        }
        return null;
      }

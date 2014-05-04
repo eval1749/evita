@@ -16,7 +16,7 @@ global.DocumentState = function(document_or_state) {
     this.lastWriteTime = document.lastWriteTime;
     this.modified = document.modified;
     this.name = document.name;
-    this.state = document.state;
+    this.state = 0;
     return;
   }
 

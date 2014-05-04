@@ -3,21 +3,23 @@
 // found in the LICENSE file.
 
 global.PythonLexer = (function(keywords) {
-  /** @enum{number} */
+  /** @enum{!Symbol} */
   var State = {
-    ZERO: 0, // State.ZERO must be zero.
+    ZERO: Lexer.State.ZERO,
 
-    DOT: 202,
-    LINE_COMMENT: 300,
-    OPERATOR: 500,
-    SPACE: 700,
-    STRING1: 800,
-    STRING1_END: 801,
-    STRING1_ESCAPE: 802,
-    STRING2: 810,
-    STRING2_END: 811,
-    STRING2_ESCAPE: 812,
-    WORD: 900
+    DOT: Symbol('.'),
+    LINE_COMMENT: Symbol('line_comment'),
+    NEWLINE: Symbol('newline'),
+    NUMBER_SIGN: Symbol('#'),
+    OPERATOR: Symbol('+'),
+    SPACE: Symbol('space'),
+    STRING1: Symbol('string1'),
+    STRING1_END: Symbol('string1_end'),
+    STRING1_ESCAPE: Symbol('string1_escape'),
+    STRING2: Symbol('string2'),
+    STRING2_END: Symbol('string2_end'),
+    STRING2_ESCAPE: Symbol('string2_escape'),
+    WORD: Symbol('word')
   };
 
   /** @const @type {!Map.<State, string>} */

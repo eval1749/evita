@@ -18,7 +18,7 @@ global.Lexer = (function() {
     setupMutationObserver(this);
     this.lastToken = null;
     this.scanOffset = 0;
-    this.state = 0;
+    this.state = Lexer.State.ZERO;
     this.tokens.clear();
     this.doColor(this.range.document.length);
   }
@@ -85,7 +85,7 @@ global.Lexer = (function() {
         mutationCallback.bind(this));
     this.range = new Range(document);
     this.scanOffset = 0;
-    this.state = 0;
+    this.state = Lexer.State.ZERO;
     this.stateToSyntax_ = options.stateToSyntax;
     this.tokens = new OrderedSet(function(a, b) {
       return a.end < b.end;
@@ -109,9 +109,11 @@ global.Lexer = (function() {
   Lexer.STRING2_CHAR = Symbol('string2');
   Lexer.WORD_CHAR = Symbol('word');
 
+  Lexer.State.ZERO = Symbol('zero');
+
   /**
    * @constructor
-   * @param {number} state
+   * @param {!Lexer.State} state
    * @param {number} start
    */
   Lexer.Token = (function() {
@@ -144,13 +146,13 @@ global.Lexer = (function() {
           if (this.debug_ > 0)
             console.log('All tokens are dirty');
           this.lastToken = null;
-          this.state = 0;
+          this.state = Lexer.State.ZERO;
           this.tokens.clear();
           if (oldScanOffset != newScanOffset)
             this.didChangeScanOffset();
           return;
         }
-        var dummyToken = new Lexer.Token(0, newScanOffset - 1);
+        var dummyToken = new Lexer.Token(Lexer.State.ZERO, newScanOffset - 1);
         var it = this.tokens.lowerBound(dummyToken);
         // TODO(yosi) We should use |OrderedSet.prototype.upperBound()|
         if (it && it.data.end == newScanOffset - 1)
@@ -162,7 +164,7 @@ global.Lexer = (function() {
         if (!it) {
           // Document mutation is occurred after scanned range. We continue
           // scanning from current position;
-          this.state = 0;
+          this.state = Lexer.State.ZERO;
           if (this.debug_ > 0)
             console.log('adjustScanOffset', 'changed at end');
           return;
@@ -290,7 +292,7 @@ global.Lexer = (function() {
     finishToken: {value:
       /**
        * @this {!Lexer}
-       * @param {number} nextState
+       * @param {!Lexer.State} nextState
        * @return {!Lexer.Token}
        */
       function(nextState) {
@@ -300,7 +302,7 @@ global.Lexer = (function() {
         if (this.debug_ > 2)
           console.log('finishToken', lastToken);
         if (!nextState)
-          this.state = 0;
+          this.state = Lexer.State.ZERO;
         else
           this.startToken(nextState);
         return lastToken;
@@ -310,7 +312,7 @@ global.Lexer = (function() {
     finishTokenAs: {value:
       /**
        * @this {!Lexer}
-       * @param {number} state
+       * @param {!Lexer.State} state
        * @return {!Lexer.Token}
        */
       function(state) {
@@ -394,7 +396,7 @@ global.Lexer = (function() {
     startToken: {value:
       /**
        * @this {!Lexer}
-       * @param {number} state
+       * @param {!Lexer.State} state
        */
       function(state) {
         console.assert(state, 'state must not be zero.');

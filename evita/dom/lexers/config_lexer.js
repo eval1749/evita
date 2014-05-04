@@ -3,27 +3,26 @@
 // found in the LICENSE file.
 
 global.ConfigLexer = (function() {
-  /** @enum{number} */
+  /** @enum{!Symbol} */
   var State = {
-    ZERO: 0, // State.ZERO must be zero.
+    ZERO: Lexer.State.ZERO,
 
-    LINE_COMMENT: 300,
-    LINE_COMMENT_START: 301,
-    OTHER: 400,
-    SPACE: 700,
-    STRING1: 800,
-    STRING1_END: 801,
-    STRING1_ESCAPE: 802,
-    STRING2: 810,
-    STRING2_END: 811,
-    STRING2_ESCAPE: 812,
+    LINE_COMMENT: Symbol('line_comment'),
+    OTHER: Symbol('other'),
+    SPACE: Symbol('space'),
+    STRING1: Symbol('string1'),
+    STRING1_END: Symbol('string1_end'),
+    STRING1_ESCAPE: Symbol('string1_escape'),
+    STRING2: Symbol('string2'),
+    STRING2_END: Symbol('string2_end'),
+    STRING2_ESCAPE: Symbol('string2_escape'),
   };
 
   /** @const @type {!Map.<State, string>} */
   var stateToSyntax = new Map();
   stateToSyntax.set(State.ZERO, '');
   stateToSyntax.set(State.LINE_COMMENT, 'comment');
-  stateToSyntax.set(State.LINE_COMMENT_START, 'comment');
+  stateToSyntax.set(State.OTHER, '');
   stateToSyntax.set(State.SPACE, '');
   stateToSyntax.set(State.STRING1, 'string_literal');
   stateToSyntax.set(State.STRING1_END, 'string_literal');
@@ -31,7 +30,6 @@ global.ConfigLexer = (function() {
   stateToSyntax.set(State.STRING2, 'string_literal');
   stateToSyntax.set(State.STRING2_END, 'string_literal');
   stateToSyntax.set(State.STRING2_ESCAPE, 'string_literal');
-  stateToSyntax.set(State.OTHER, '');
 
   Object.keys(State).forEach(function(key) {
     if (!stateToSyntax.has(State[key]))
@@ -79,13 +77,6 @@ global.ConfigLexer = (function() {
           lexer.extendToken();
           break;
 
-        case State.LINE_COMMENT_START:
-          if (charCode == Unicode.LF) {
-            lexer.state = State.ZERO;
-            break;
-          }
-          break;
-
         case State.SPACE:
           if (charCode != Unicode.SPACE && charCode != Unicode.TAB)
             return lexer.finishToken(State.ZERO);
@@ -128,8 +119,8 @@ global.ConfigLexer = (function() {
               lexer.startToken(State.STRING1);
               break;
             case Unicode.NUMBER_SIGN:
-              lexer.startToken(State.LINE_COMMENT_START);
-              return lexer.finishToken(State.LINE_COMMENT);
+              lexer.startToken(State.LINE_COMMENT);
+              break;
             case Unicode.QUOTATION_MARK:
               lexer.startToken(State.STRING2);
               break;

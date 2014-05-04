@@ -6,7 +6,7 @@
  * @typedef {{
  *  characters: !Map.<number, !Symbol>,
  *  keywords: !Iterable.<string>,
- *  stateToSyntax: !Map.<number, string>
+ *  stateToSyntax: !Map.<!Symbol, string>
  * }}
  */
 var LexerOptions;
@@ -36,9 +36,15 @@ Lexer.WHITESPACE_CHAR;
 /** @const @type {!Symbol} */
 Lexer.WORD_CHAR;
 
+/** @typedef {!Symbol} */
+Lexer.State;
+
+/** @const @type {!Lexer.State} */
+Lexer.State.ZERO;
+
 /**
  * @constructor
- * @param {number} state
+ * @param {!Lexer.State} state
  * @param {number} start
  */
 Lexer.Token = function(state, start) {};
@@ -49,7 +55,7 @@ Lexer.Token.prototype.end;
 /** @type {number} */
 Lexer.Token.prototype.start;
 
-/** @type {number} */
+/** @type {!Lexer.State} */
 Lexer.Token.prototype.state;
 
 /** @type {string} */
@@ -101,7 +107,7 @@ Lexer.prototype.range;
 Lexer.prototype.scanOffset;
 
 /**
- * @type {number}
+ * @type {!Symbol}
  */
 Lexer.prototype.state;
 
@@ -153,13 +159,13 @@ Lexer.prototype.extendToken = function() {};
 Lexer.prototype.extractWord = function(range, token) {};
 
 /**
- * @param {number} next_state
+ * @param {!Lexer.State} nextState
  * @return {!Lexer.Token}
  */
-Lexer.prototype.finishToken = function(next_state) {};
+Lexer.prototype.finishToken = function(nextState) {};
 
 /**
- * @param {number} state
+ * @param {!Lexer.State} state
  * @return {!Lexer.Token}
  */
 Lexer.prototype.finishTokenAs = function(state) {};
@@ -204,6 +210,6 @@ Lexer.prototype.nextToken = function(maxOffset) {};
 Lexer.prototype.setSyntax= function(token) {};
 
 /**
- * @param {number} state
+ * @param {!Lexer.State} state
  */
 Lexer.prototype.startToken = function(state) {};

@@ -3,32 +3,32 @@
 // found in the LICENSE file.
 
 global.ClikeLexer = (function() {
-  /** @enum{number} */
+  /** @enum{!Symbol} */
   var State = {
-    ZERO: 0, // State.ZERO must be zero.
+    ZERO: Lexer.State.ZERO,
 
-    BLOCK_COMMENT: 100,
-    BLOCK_COMMENT_ASTERISK: 101,
-    BLOCK_COMMENT_END: 102,
-    BLOCK_COMMENT_START: 103,
-    COLON: 200,
-    COLON_COLON: 201,
-    DOT: 202,
-    LINE_COMMENT: 300,
-    LINE_COMMENT_ESCAPE: 301,
-    LINE_COMMENT_START: 302,
-    NEWLINE: 400,
-    NUMBER_SIGN: 401,
-    OPERATOR: 500,
-    SOLIDUS: 600,
-    SPACE: 700,
-    STRING1: 800,
-    STRING1_END: 801,
-    STRING1_ESCAPE: 802,
-    STRING2: 810,
-    STRING2_END: 811,
-    STRING2_ESCAPE: 812,
-    WORD: 900
+    BLOCK_COMMENT: Symbol('block_comment'),
+    BLOCK_COMMENT_ASTERISK: Symbol('block_comment_asterisk'),
+    BLOCK_COMMENT_END: Symbol('block_comment_end'),
+    BLOCK_COMMENT_START: Symbol('block_comment_start'),
+    COLON: Symbol('::'),
+    COLON_COLON: Symbol('::'),
+    DOT: Symbol('.'),
+    LINE_COMMENT: Symbol('line_comment'),
+    LINE_COMMENT_ESCAPE: Symbol('line_comment_escape'),
+    LINE_COMMENT_START: Symbol('line_comment_end'),
+    NEWLINE: Symbol('newline'),
+    NUMBER_SIGN: Symbol('#'),
+    OPERATOR: Symbol('+'),
+    SOLIDUS: Symbol('/'),
+    SPACE: Symbol('space'),
+    STRING1: Symbol('string1'),
+    STRING1_END: Symbol('string1_end'),
+    STRING1_ESCAPE: Symbol('string1_escape'),
+    STRING2: Symbol('string2'),
+    STRING2_END: Symbol('string2_end'),
+    STRING2_ESCAPE: Symbol('string2_escape'),
+    WORD: Symbol('word')
   };
 
   /** @const @type {!Map.<State, string>} */

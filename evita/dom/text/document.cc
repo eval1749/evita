@@ -134,7 +134,6 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
       .SetProperty("length", &Document::length)
       .SetProperty("modified", &Document::modified, &Document::set_modified)
       .SetProperty("name", &Document::name)
-      .SetProperty("newline", &Document::newline, &Document::set_newline)
       .SetProperty("properties", &Document::properties)
       .SetProperty("readonly", &Document::read_only,
                    &Document::set_read_only)
@@ -164,7 +163,6 @@ DEFINE_SCRIPTABLE_OBJECT(Document, DocumentClass)
 
 Document::Document(const base::string16& name)
     : buffer_(new text::Buffer(DocumentSet::instance()->MakeUniqueName(name))),
-      newline_(NewlineMode_Detect),
       properties_(v8::Isolate::GetCurrent(),
                   NewMap(v8::Isolate::GetCurrent())) {
 }
@@ -215,10 +213,6 @@ void Document::set_modified(bool new_modified) {
 
 const base::string16& Document::name() const {
   return buffer_->name();
-}
-
-void Document::set_newline(int newline) {
-  newline_ = static_cast<NewlineMode>(newline);
 }
 
 v8::Handle<v8::Object> Document::properties() const {

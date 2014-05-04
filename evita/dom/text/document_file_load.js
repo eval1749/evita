@@ -108,7 +108,7 @@
   function load(document, fileName) {
     /** @type {string} */ var encoding = '';
     /** @type {?Os.File} */ var opened_file = null;
-    /** @type {number} */ var newline = 0;
+    /** @type {number} */ var newline = Newline.UNKNOWN;
     // Remember |readonly| property for restoring on error.
     /** @type {boolean} */ var readonly = document.readonly;
     document.readonly = true;
@@ -131,16 +131,16 @@
           // Inserts file contents into document with replacing CRLF to LF.
           var range = new Range(document);
           range.end = document.length;
-          var newline = 0;
+          var newline = Newline.UNKNOWN;
           decoder.strings.forEach(function(string) {
-            if (!newline) {
+            if (newline == Newline.UNKNOWN) {
               if (string.indexOf('\r\n') >= 0)
-                newline = 3;
+                newline = Newline.CRLF;
               else if (string.indexOf('\n') >= 0)
-                newline = 1;
+                newline = Newline.LF;
             }
             document.readonly = false;
-            if (newline == 3)
+            if (newline == Newline.CRLF)
               string = string.replace(RE_CR, '');
             range.text = string;
             document.readonly = true;

@@ -13,14 +13,6 @@
 
 #include "base/strings/string16.h"
 
-enum NewlineMode
-{
-    NewlineMode_Detect  = 0,
-    NewlineMode_Lf      = 1,
-    NewlineMode_Cr      = 2,
-    NewlineMode_CrLf    = 3,
-}; // Newline
-
 namespace text
 {
 

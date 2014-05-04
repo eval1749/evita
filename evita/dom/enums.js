@@ -70,12 +70,11 @@ var MessageBox = {
   SERVICE_NOTIFICATION: 0x200000
 };
 
-/** @enum{string} */
-var NewlineMode = {
-  CR: 'CR',
-  CRLF: 'CRLF',
-  LF: 'LF',
-  UNKNOWN: 'UNKNOWN'
+/** @enum{number} */
+var Newline = {
+  UNKNOWN: 0,
+  LF: 1,
+  CRLF: 3,
 };
 
 /** @enum{number} */

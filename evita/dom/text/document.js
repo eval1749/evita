@@ -82,6 +82,7 @@
       }
     },
     mode_: { value: null, writable: true },
+    newline: {value: 0, writable: true},
     state: { value: 0, writable: true }
   });
 

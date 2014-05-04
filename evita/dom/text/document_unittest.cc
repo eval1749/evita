@@ -296,7 +296,7 @@ TEST_F(DocumentTest, name) {
 
 TEST_F(DocumentTest, newline) {
   EXPECT_SCRIPT_VALID("var doc = new Document('newline');");
-  // See |NewlineMode| in "evita/ed_defs.h"
+  // See |Newline| in "evita/dom/enums.js"
   EXPECT_SCRIPT_EQ("0", "doc.newline") << "Default newline is detect.";
   EXPECT_SCRIPT_VALID("doc.newline = 1;") << "Set newline to LF.";
   EXPECT_SCRIPT_EQ("1", "doc.newline");

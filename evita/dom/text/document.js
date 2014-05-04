@@ -81,9 +81,15 @@
           mode.attach(this);
       }
     },
-    mode_: { value: null, writable: true },
+    mode_: {value: null, writable: true},
     newline: {value: 0, writable: true},
-    state: { value: 0, writable: true }
+    properties: {get: /** @return {!Map} */function() {
+      if (!this.properties_)
+        this.properties_ = new Map();
+      return this.properties_;
+    }},
+    properties_: {value: null, writable: true},
+    state: {value: 0, writable: true}
   });
 
   /**

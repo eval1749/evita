@@ -48,14 +48,6 @@ struct Converter<text::LineAndColumn> {
 
 namespace dom {
 
-namespace {
-v8::Handle<v8::Object> NewMap(v8::Isolate* isolate) {
-  return isolate->GetCurrentContext()->Global()->
-      Get(v8Strings::Map.Get(isolate))->ToObject()->
-          CallAsConstructor(0, nullptr)->ToObject();
-}
-}  // namespace
-
 namespace bindings {
 //////////////////////////////////////////////////////////////////////
 //
@@ -134,7 +126,6 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
       .SetProperty("length", &Document::length)
       .SetProperty("modified", &Document::modified, &Document::set_modified)
       .SetProperty("name", &Document::name)
-      .SetProperty("properties", &Document::properties)
       .SetProperty("readonly", &Document::read_only,
                    &Document::set_read_only)
       .SetMethod("charCodeAt_", &Document::charCodeAt)
@@ -162,9 +153,7 @@ using namespace bindings;
 DEFINE_SCRIPTABLE_OBJECT(Document, DocumentClass)
 
 Document::Document(const base::string16& name)
-    : buffer_(new text::Buffer(DocumentSet::instance()->MakeUniqueName(name))),
-      properties_(v8::Isolate::GetCurrent(),
-                  NewMap(v8::Isolate::GetCurrent())) {
+    : buffer_(new text::Buffer(DocumentSet::instance()->MakeUniqueName(name))) {
 }
 
 Document::~Document() {
@@ -213,10 +202,6 @@ void Document::set_modified(bool new_modified) {
 
 const base::string16& Document::name() const {
   return buffer_->name();
-}
-
-v8::Handle<v8::Object> Document::properties() const {
-  return properties_.NewLocal(v8::Isolate::GetCurrent());
 }
 
 bool Document::read_only() const {

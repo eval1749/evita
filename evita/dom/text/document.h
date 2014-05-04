@@ -38,10 +38,6 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   private: std::unique_ptr<text::Buffer> buffer_;
   private: base::Time last_write_time_;
   private: base::string16 file_name_;
-  // TODO(yosi) When we set |properties| with |v8::Object::Set()|, it doesn't
-  // appeared in JavaScript. I'm not sure why. So, we hold |properties| in
-  // C++.
-  private: v8_glue::ScopedPersistent<v8::Object> properties_;
 
   private: explicit Document(const base::string16& name);
   public: virtual ~Document();
@@ -57,7 +53,6 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: bool modified() const;
   public: void set_modified(bool new_modified);
   public: const base::string16& name() const;
-  public: v8::Handle<v8::Object> properties() const;
   public: bool read_only() const;
   public: void set_read_only(bool read_only) const;
   public: int spelling_at(text::Posn offset) const;

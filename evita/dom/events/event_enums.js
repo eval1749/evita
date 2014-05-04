@@ -5,6 +5,7 @@
 /** @enum{string} */
 Event.Names = {
   ATTACH: 'attach', // DocumentEvent
+  BEFORELOAD: 'beforeload',
   BLUR: 'blur',
   CHANGE: 'change',
   CLICK: 'click',

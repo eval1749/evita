@@ -221,7 +221,7 @@
     document.obsolete = Document.Obsolete.CHECKING;
     Editor.messageBox(null, 'Loading ' + document.fileName,
                       MessageBox.ICONINFORMATION);
-    document.dispatchEvent(new DocumentEvent('beforeload'));
+    document.dispatchEvent(new DocumentEvent(Event.Names.BEFORELOAD));
     return load(document, document.fileName).then(function(length) {
       Editor.messageBox(null, 'Loaded ' + document.fileName,
                         MessageBox.ICONINFORMATION);
@@ -240,14 +240,14 @@
           window.makeSelectionVisible();
         }
       });
-      document.dispatchEvent(new DocumentEvent('load'));
+      document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));
       return Promise.resolve(length);
     }).catch(function(exception) {
       console.log('load.catch', exception, 'during loading', fileName,
                   'into', document, exception.stack);
       document.lastStatTime_ = new Date();
       document.obsolete = Document.Obsolete.UNKNOWN;
-      document.dispatchEvent(new DocumentEvent('load'));
+      document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));
       return Promise.reject(exception);
     });
   };

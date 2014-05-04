@@ -92,15 +92,13 @@ global.Lexer = (function() {
     });
 
     this.eventHandlers_ = new Map();
-    var handlerMap = {
-      beforeload: willLoadDocument,
-      load: didLoadDocument
-    };
-    Object.keys(handlerMap).forEach(function(eventType) {
-      var handler = handlerMap[eventType].bind(this);
-      this.eventHandlers_.set(eventType, handler);
+    function installEventHandler(eventType, lexer, callback) {
+      var handler = callback.bind(lexer);
+      lexer.eventHandlers_.set(eventType, handler);
       document.addEventListener(eventType, handler);
-    });
+    }
+    installEventHandler(Event.Names.BEFORELOAD, this, willLoadDocument);
+    installEventHandler(Event.Names.LOAD, this, didLoadDocument);
     setupMutationObserver(this);
   }
 

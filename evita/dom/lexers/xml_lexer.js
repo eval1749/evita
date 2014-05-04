@@ -389,18 +389,9 @@ global.XmlLexer = (function(keywords) {
 
   return XmlLexer;
 })([
-  // Keywords
-  'and', 'as', 'assert', 'break', 'class',
-  'continue', 'def', 'del', 'elif', 'else', 'except', 'exec',
-  'finally', 'for', 'from', 'global', 'if', 'import', 'in', 'is',
-  'lambda', 'not', 'or', 'pass', 'print', 'raise', 'return', 'try',
-  'while', 'with', 'yield',
-  // Reserved classes of identifiers
-  '_*', '__*__', '__*', '__builtin__',
-  // Built-in Constants
-  'Ellipsis', 'False', 'None', 'NotImplemented', 'True', '__debug__',
-  // Built-in Types
-  'complex', 'float', 'int', 'long',
-  'str', 'unicode', 'list', 'tuple', 'bytearray', 'xrange',
-  'set', 'frozenset', 'dict',
+  'xi:include',
+  'xml:base',
+  'xml:lang',
+  'xmlns:',
+  'xml:space'
 ]);

@@ -96,7 +96,7 @@ SpellChecker.RE_WORD = new RegExp('^[A-Za-z][a-z]{' +
 SpellChecker.SpellingResult
 
 /** * @type {number} */
-SpellChecker.num_checking;
+SpellChecker.numberOfChecking;
 
 /** @type {number} */
 SpellChecker.prototype.coldEnd;
@@ -126,34 +126,34 @@ SpellChecker.prototype.range;
 SpellChecker.prototype.timer;
 
 /**
- * @param {!Range} word_range
+ * @param {!Range} wordRange
  * Checks then mark word as correct or misspelled.
  */
-SpellChecker.prototype.checkSpelling = function(word_range) {
+SpellChecker.prototype.checkSpelling = function(wordRange) {
   var spellChecker = this;
   if (!spellChecker.freeRanges.length ||
-      SpellChecker.num_checking >= SpellChecker.MAX_CHECKING) {
+      SpellChecker.numberOfChecking >= SpellChecker.MAX_CHECKING) {
     return false;
   }
-  ++SpellChecker.num_checking;
+  ++SpellChecker.numberOfChecking;
 
-  var marker_range = spellChecker.freeRanges.pop();
-  marker_range.collapseTo(word_range.start);
-  marker_range.end = word_range.end;
+  var markerRange = spellChecker.freeRanges.pop();
+  markerRange.collapseTo(wordRange.start);
+  markerRange.end = wordRange.end;
   // TODO(yosi) Mark checking word for debugging. Once, we finish debugging
   // we should remove this.
-  marker_range.setSpelling(Spelling.DEBUG);
-  var word_to_check = marker_range.text;
-  SpellChecker.checkSpelling(word_to_check).then(function(state) {
-    --SpellChecker.num_checking;
-    if (!marker_range.collapsed) {
+  markerRange.setSpelling(Spelling.DEBUG);
+  var wordToCheck = markerRange.text;
+  SpellChecker.checkSpelling(wordToCheck).then(function(state) {
+    --SpellChecker.numberOfChecking;
+    if (!markerRange.collapsed) {
       // TODO(yosi) This code remove debugger marker. We will remove this
       // once finish debugger.
-      marker_range.setSpelling(Spelling.NONE);
+      markerRange.setSpelling(Spelling.NONE);
     }
-    if (state.word == marker_range.text)
-      spellChecker.markWord(marker_range, state.spelling);
-    spellChecker.freeRanges.push(marker_range);
+    if (state.word == markerRange.text)
+      spellChecker.markWord(markerRange, state.spelling);
+    spellChecker.freeRanges.push(markerRange);
   }).catch(function(e) { console.log(e.stack); });
   return true;
 };
@@ -208,7 +208,7 @@ SpellChecker.prototype.didFireTimer = function() {
     return range.collapsed ? range.start : -1;
   }
 
-  var hottest_offset = getHottestOffset();
+  var hottestOffset = getHottestOffset();
 
   /**
    * @param {!Range} range
@@ -220,7 +220,7 @@ SpellChecker.prototype.didFireTimer = function() {
         length > SpellChecker.MAX_WORD_LENGTH) {
       return false;
     }
-    if (hottest_offset >= range.start && hottest_offset <= range.end) {
+    if (hottestOffset >= range.start && hottestOffset <= range.end) {
       // The word is still changing, we ignore it.
       return false;
     }
@@ -232,7 +232,7 @@ SpellChecker.prototype.didFireTimer = function() {
     return SpellChecker.RE_WORD.test(range.text)
   }
 
-  var num_checked = 0;
+  var numberOfChecked = 0;
 
   /**
    * @param {!SpellChecker} spellChecker
@@ -241,28 +241,28 @@ SpellChecker.prototype.didFireTimer = function() {
    * @return {number} Text offset for next scanning.
    */
   function scan(spellChecker, start, end) {
-    if (SpellChecker.num_checking >= SpellChecker.MAX_CHECKING)
+    if (SpellChecker.numberOfChecking >= SpellChecker.MAX_CHECKING)
       return start;
     range.collapseTo(start);
     range.startOf(Unit.WORD);
-    while (num_checked < SpellChecker.CHECK_INTERVAL_LIMIT &&
+    while (numberOfChecked < SpellChecker.CHECK_INTERVAL_LIMIT &&
            range.start < end && spellChecker.freeRanges.length) {
-      var restart_offset = range.start;
+      var restartOffset = range.start;
       range.endOf(Unit.WORD, Alter.EXTEND);
       range.setSpelling(Spelling.NONE);
       if (range.end == document.length) {
         // Word seems not to be completed yet. Spell checker will sleep
         // until document is changed.
-        num_checked += range.end - range.start;
-        return restart_offset;
+        numberOfChecked += range.end - range.start;
+        return restartOffset;
       }
 
-      // To reduce garbage collection, we check word in |word_range| is whether
+      // To reduce garbage collection, we check word in |wordRange| is whether
       // suitable for checking spelling or not.
       if (isCheckableWord(range) && !spellChecker.checkSpelling(range))
-        return restart_offset;
+        return restartOffset;
 
-      num_checked += range.end - range.start;
+      numberOfChecked += range.end - range.start;
 
       // Move to next word.
       // <#>include     => #|include
@@ -290,17 +290,17 @@ SpellChecker.prototype.didFocusWindow = function() {
 };
 
 /**
- * @param {!Range} word_range
+ * @param {!Range} wordRange
  * @param {Spelling} mark
  *
  * Mark first |word| without misspelled marker in document with |mark|.
  */
-SpellChecker.prototype.markWord = function(word_range, mark) {
+SpellChecker.prototype.markWord = function(wordRange, mark) {
   if (mark == Spelling.CORRECT) {
     return;
   }
   // TODO(yosi) We should not mark for word in source code.
-  word_range.setSpelling(mark);
+  wordRange.setSpelling(mark);
 };
 
 /**
@@ -343,11 +343,11 @@ SpellChecker.prototype.startTimeIfNeeded = function() {
 SpellChecker.wordStateMap = new Map();
 
 /**
- * @param {string} word_to_check
+ * @param {string} wordToCheck
  * @return {!Promise.<SpellChecker.SpellingResult>}
  */
-SpellChecker.checkSpelling = function(word_to_check) {
-  var present = SpellChecker.wordStateMap.get(word_to_check);
+SpellChecker.checkSpelling = function(wordToCheck) {
+  var present = SpellChecker.wordStateMap.get(wordToCheck);
   if (present) {
     present.lastUsedTime = new Date();
     ++present.useCount;
@@ -358,10 +358,10 @@ SpellChecker.checkSpelling = function(word_to_check) {
     lastUsedTime: new Date(),
     promise: null,
     useCount: 1,
-    word: word_to_check,
+    word: wordToCheck,
   };
-  SpellChecker.wordStateMap.set(word_to_check, state);
-  state.promise = Editor.checkSpelling(word_to_check).then(
+  SpellChecker.wordStateMap.set(wordToCheck, state);
+  state.promise = Editor.checkSpelling(wordToCheck).then(
     function(is_correct) {
       state.lastUsedTime = new Date(),
       state.promise = null;

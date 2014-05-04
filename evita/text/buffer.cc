@@ -221,13 +221,13 @@ void Buffer::DidChangeMarker(Posn start, Posn end) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// UndoBlock
+// ScopedUndoGroup
 //
-UndoBlock::~UndoBlock() {
+ScopedUndoGroup::~ScopedUndoGroup() {
   buffer_->EndUndoGroup(name_);
 }
 
-UndoBlock::UndoBlock(Buffer* buffer, const base::string16& name)
+ScopedUndoGroup::ScopedUndoGroup(Buffer* buffer, const base::string16& name)
     : buffer_(buffer), name_(name) {
   buffer->StartUndoGroup(name_);
 }

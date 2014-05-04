@@ -48,7 +48,7 @@ TEST_F(UndoStackTest, Delete) {
 
 TEST_F(UndoStackTest, Group) {
   {
-    text::UndoBlock undo_group(buffer(), L"test");
+    text::ScopedUndoGroup undo_group(buffer(), L"test");
     buffer()->Insert(0, L"foo");
     buffer()->Insert(1, L"bar");
   }
@@ -79,11 +79,11 @@ TEST_F(UndoStackTest, Insert) {
 
 TEST_F(UndoStackTest, Merge) {
   {
-    text::UndoBlock undo_group(buffer(), L"test");
+    text::ScopedUndoGroup undo_group(buffer(), L"test");
     buffer()->Insert(0, L"foo");
   }
   {
-    text::UndoBlock undo_group(buffer(), L"test");
+    text::ScopedUndoGroup undo_group(buffer(), L"test");
     buffer()->Insert(3, L"bar");
   }
   EXPECT_EQ(3, buffer()->Undo(6));

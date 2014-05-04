@@ -65,10 +65,10 @@ void Range::SetText(const base::string16& text) {
 
   auto const start = start_;
   if (start_ == end_) {
-    UndoBlock oUndo(this, L"Range.SetText");
+    ScopedUndoGroup oUndo(this, L"Range.SetText");
     buffer_->InsertBefore(start_, text);
   } else {
-    UndoBlock oUndo(this, L"Range.SetText");
+    ScopedUndoGroup oUndo(this, L"Range.SetText");
     buffer_->Delete(start_, end_);
     buffer_->InsertBefore(start_, text);
   }
@@ -88,8 +88,8 @@ Buffer::EnumCharRev::EnumCharRev(const Range* pRange)
       m_pBuffer(pRange->buffer()) {
 }
 
-UndoBlock::UndoBlock(Range* range, const base::string16& name)
-    : UndoBlock(range->buffer(), name) {
+ScopedUndoGroup::ScopedUndoGroup(Range* range, const base::string16& name)
+    : ScopedUndoGroup(range->buffer(), name) {
 }
 
 }  // namespace text

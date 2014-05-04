@@ -257,14 +257,14 @@ class Buffer : public BufferCore,
 /// Utility class for inserting begin/end undo operation. Instances are
 /// created on stack instead of heap.
 /// </summary>
-class UndoBlock {
+class ScopedUndoGroup {
   private: Buffer* buffer_;
   private: const base::string16 name_;
-  public: UndoBlock(Range* range, const base::string16& name);
-  public: UndoBlock(Buffer* buffer, const base::string16& name);
-  public: ~UndoBlock();
+  public: ScopedUndoGroup(Range* range, const base::string16& name);
+  public: ScopedUndoGroup(Buffer* buffer, const base::string16& name);
+  public: ~ScopedUndoGroup();
 
-  DISALLOW_COPY_AND_ASSIGN(UndoBlock);
+  DISALLOW_COPY_AND_ASSIGN(ScopedUndoGroup);
 };
 
 }  // namespace text

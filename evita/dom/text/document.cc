@@ -193,19 +193,11 @@ void Document::set_read_only(bool read_only) const {
   buffer_->SetReadOnly(read_only);
 }
 
-int Document::spelling_at(text::Posn offset) const {
+const base::string16& Document::spelling_at(text::Posn offset) const {
   if (!IsValidPosition(offset))
-    return 0;
+    return common::AtomicString::Empty();
   auto const marker = buffer_->spelling_markers()->GetMarkerAt(offset);
-  if (!marker)
-    return 0;
-  if (*marker->type().get() == L"normal")
-    return 1;
-  if (*marker->type().get() == L"misspelled")
-    return 2;
-  if (*marker->type().get() == L"bad_grammar")
-    return 3;
-  return 0;
+  return marker ? marker->type() : common::AtomicString::Empty();
 }
 
 const base::string16& Document::syntax_at(text::Posn offset) const {

@@ -472,13 +472,13 @@ TEST_F(RangeTest, setSpelling) {
       "range1.start = 4;"
       "range1.end = 7;"
       "range1.setSpelling(2);");
-  EXPECT_SCRIPT_EQ("0", "doc1.spellingAt(0)");
-  EXPECT_SCRIPT_EQ("0", "doc1.spellingAt(3)");
-  EXPECT_SCRIPT_EQ("2", "doc1.spellingAt(4)");
-  EXPECT_SCRIPT_EQ("2", "doc1.spellingAt(5)");
-  EXPECT_SCRIPT_EQ("2", "doc1.spellingAt(6)");
-  EXPECT_SCRIPT_EQ("0", "doc1.spellingAt(7)");
-  EXPECT_SCRIPT_EQ("0", "doc1.spellingAt(8)");
+  EXPECT_SCRIPT_EQ("", "doc1.spellingAt(0)");
+  EXPECT_SCRIPT_EQ("", "doc1.spellingAt(3)");
+  EXPECT_SCRIPT_EQ("misspelled", "doc1.spellingAt(4)");
+  EXPECT_SCRIPT_EQ("misspelled", "doc1.spellingAt(5)");
+  EXPECT_SCRIPT_EQ("misspelled", "doc1.spellingAt(6)");
+  EXPECT_SCRIPT_EQ("", "doc1.spellingAt(7)");
+  EXPECT_SCRIPT_EQ("", "doc1.spellingAt(8)");
 }
 
 TEST_F(RangeTest, set_start_end) {

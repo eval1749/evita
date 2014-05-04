@@ -228,7 +228,7 @@ Document.prototype.startUndoGroup_ = function(name) {};
 
 /**
  * @param {!TextOffset} offset
- * @return {number}
+ * @return {string}
  */
 Document.prototype.spellingAt = function(offset) {};
 

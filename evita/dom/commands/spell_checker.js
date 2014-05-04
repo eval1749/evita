@@ -22,15 +22,15 @@ global.Spelling = {
 function SpellChecker(document) {
   this.coldEnd = document.length;
   this.coldOffset = 0;
-  this.freeRanges = new Array(SpellChecker.MAX_CHECKING);
-  for (var i = 0; i < this.freeRanges.length; ++i) {
-    this.freeRanges[i] = new Range(document);
+  this.freeRanges_ = new Array(SpellChecker.MAX_CHECKING);
+  for (var i = 0; i < this.freeRanges_.length; ++i) {
+    this.freeRanges_[i] = new Range(document);
   }
   this.hotOffset = document.length;
-  this.mutationObserver = new MutationObserver(
+  this.mutationObserver_ = new MutationObserver(
       this.mutationCallback.bind(this));
-  this.range = new Range(document);
-  this.timer = new RepeatingTimer();
+  this.range_ = new Range(document);
+  this.timer_ = new RepeatingTimer();
 
   var spellChecker = this;
   document.addEventListener(Event.Names.ATTACH, function(event) {
@@ -41,13 +41,13 @@ function SpellChecker(document) {
   });
 
   function setupMutationObserver() {
-    spellChecker.mutationObserver.observe(document, {summary: true});
+    spellChecker.mutationObserver_.observe(document, {summary: true});
   }
 
   // Ignore document mutation during loading contents.
   document.addEventListener(Event.Names.BEFORELOAD, function() {
-    spellChecker.mutationObserver.disconnect();
-    spellChecker.timer.stop();
+    spellChecker.mutationObserver_.disconnect();
+    spellChecker.timer_.stop();
   });
 
   // Restart spell checking from start of document after loading.
@@ -108,22 +108,22 @@ SpellChecker.prototype.coldOffset;
  * @type {!Array.<!Range>}
  * List of ranges can be used for checking spelling.
  */
-SpellChecker.prototype.freeRanges;
+SpellChecker.prototype.freeRanges_;
 
 /** @type {number} */
 SpellChecker.prototype.hotOffset;
 
 /** @type {!MutationObserver} */
-SpellChecker.prototype.mutationObserver;
+SpellChecker.prototype.mutationObserver_;
 
 /**
  * @type {!Range}
  * A Range object for scanning document.
  */
-SpellChecker.prototype.range;
+SpellChecker.prototype.range_;
 
 /** @type {!RepeatingTimer} */
-SpellChecker.prototype.timer;
+SpellChecker.prototype.timer_;
 
 /**
  * @param {!Range} wordRange
@@ -131,13 +131,13 @@ SpellChecker.prototype.timer;
  */
 SpellChecker.prototype.checkSpelling = function(wordRange) {
   var spellChecker = this;
-  if (!spellChecker.freeRanges.length ||
+  if (!spellChecker.freeRanges_.length ||
       SpellChecker.numberOfChecking >= SpellChecker.MAX_CHECKING) {
     return false;
   }
   ++SpellChecker.numberOfChecking;
 
-  var markerRange = spellChecker.freeRanges.pop();
+  var markerRange = spellChecker.freeRanges_.pop();
   markerRange.collapseTo(wordRange.start);
   markerRange.end = wordRange.end;
   // TODO(yosi) Mark checking word for debugging. Once, we finish debugging
@@ -153,20 +153,20 @@ SpellChecker.prototype.checkSpelling = function(wordRange) {
     }
     if (state.word == markerRange.text)
       spellChecker.markWord(markerRange, state.spelling);
-    spellChecker.freeRanges.push(markerRange);
+    spellChecker.freeRanges_.push(markerRange);
   }).catch(function(e) { console.log(e.stack); });
   return true;
 };
 
 // Cleanup resources used by spell checker.
 SpellChecker.prototype.destroy = function() {
-  this.timer.stop();
+  this.timer_.stop();
 };
 
 // Spell checker is stopped when window loses focus.
 
 SpellChecker.prototype.didBlurWindow = function(event) {
-  this.timer.stop();
+  this.timer_.stop();
 };
 
 // Check spelling in hot region and cold region. When we check all words in
@@ -191,7 +191,7 @@ SpellChecker.prototype.didBlurWindow = function(event) {
 // names, we don't check character syntax.
 //
 SpellChecker.prototype.didFireTimer = function() {
-  var range = this.range;
+  var range = this.range_;
   var document = range.document;
 
   function getHottestOffset() {
@@ -246,7 +246,7 @@ SpellChecker.prototype.didFireTimer = function() {
     range.collapseTo(start);
     range.startOf(Unit.WORD);
     while (numberOfChecked < SpellChecker.CHECK_INTERVAL_LIMIT &&
-           range.start < end && spellChecker.freeRanges.length) {
+           range.start < end && spellChecker.freeRanges_.length) {
       var restartOffset = range.start;
       range.endOf(Unit.WORD, Alter.EXTEND);
       range.setSpelling(Spelling.NONE);
@@ -281,7 +281,7 @@ SpellChecker.prototype.didFireTimer = function() {
   var rest = document.length - this.hotOffset + this.coldEnd - this.coldOffset;
   if (rest > 0)
     return;
-  this.timer.stop();
+  this.timer_.stop();
 };
 
 // Spell checking is started when window is focused.
@@ -311,7 +311,7 @@ SpellChecker.prototype.markWord = function(wordRange, mark) {
  * Resets hot offset to minimal changed offset and kicks word scanner.
  */
 SpellChecker.prototype.mutationCallback = function(mutations, observer) {
-  var range = this.range;
+  var range = this.range_;
   var document = range.document;
   /** @type {number} */
   var min_offset = mutations.reduce(function(previousValue, mutation) {
@@ -329,9 +329,9 @@ SpellChecker.prototype.mutationCallback = function(mutations, observer) {
 };
 
 SpellChecker.prototype.startTimeIfNeeded = function() {
-  if (this.timer.isRunning)
+  if (this.timer_.isRunning)
     return;
-  this.timer.start(SpellChecker.CHECK_INTERVAL_MS, this.didFireTimer, this);
+  this.timer_.start(SpellChecker.CHECK_INTERVAL_MS, this.didFireTimer, this);
 };
 
 /**

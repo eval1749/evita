@@ -26,7 +26,6 @@ Range.prototype.end = 0;
 /** @expose @type {!TextOffset} */
 Range.prototype.start = 0;
 
-
 /** @expose @type {!string} */
 Range.prototype.text = '';
 
@@ -48,7 +47,7 @@ Range.prototype.collapseTo = function(position) {};
 
 /**
  * @param {Unit} unit
- * @param {number=} opt_count, defualt is one.
+ * @param {number=} opt_count, default is one.
  * @return {!Range}
  */
 Range.prototype.delete = function(unit, opt_count) {};
@@ -60,7 +59,6 @@ Range.prototype.delete = function(unit, opt_count) {};
  */
 Range.prototype.endOf = function(unit, opt_alter) {};
 
-
 /**
  * @param {!Editor.RegExp} regexp
  * @return {?Array.<string>}
@@ -69,14 +67,14 @@ Range.prototype.match = function(regexp) {};
 
 /**
  * @param {Unit} unit
- * @param {number=} opt_count, defualt is one.
+ * @param {number=} opt_count, default is one.
  * @return {!Range}
  */
 Range.prototype.move = function(unit, opt_count) {};
 
 /**
  * @param {Unit} unit
- * @param {number=} opt_count, defualt is one.
+ * @param {number=} opt_count, default is one.
  * @return {!Range}
  */
 Range.prototype.moveEnd = function(unit, opt_count) {};
@@ -90,10 +88,9 @@ Range.prototype.moveEndWhile = function(char_set, opt_count) {};
 
 /**
  * @param {Unit} unit
- * @param {number=} opt_count, defualt is one.
+ * @param {number=} opt_count, default is one.
  * @return {!Range}
  */
-
 
 Range.prototype.moveStart = function(unit, opt_count) {};
 
@@ -143,7 +140,6 @@ Range.prototype.toLocaleLowerCase = function() {}
 
 /** @return {!Range} */
 Range.prototype.toLocaleUpperCase = function() {}
-
 
 /** @return {!Range} */
 Range.prototype.toLowerCase = function() {}

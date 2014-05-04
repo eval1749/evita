@@ -5,7 +5,7 @@
 /**
  * @const @type{{
  *    DOCUMENT_NAME: string,
- *    assert: function(*, *=),
+ *    assert: function(*, ...),
  *    clear: function(),
  *    document: !Document,
  *    log: function(...),

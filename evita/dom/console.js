@@ -12,14 +12,19 @@ Object.defineProperties(console, {
   assert: {value:
     /**
      * @param {*} expression
-     * @param {*=} opt_message
+     * @param {...} args
      */
-    function(expression, opt_message) {
+    function(expression, args) {
       if (expression)
         return;
-      if (arguments.length >= 2)
-        throw new Error('Assertion failed: ' + opt_message);
-      throw new Error('Assertion failed');
+      if (arguments.length == 1)
+        throw new Error('Assertion failed');
+      var message = Array.prototype.slice.call(arguments, 1).map(function(arg) {
+        if (typeof(arg) == 'string')
+          return arg;
+        return Editor.stringify(arg);
+      }).join(' ');
+      throw new Error('Assertion failed: ' + message);
     }
   },
 

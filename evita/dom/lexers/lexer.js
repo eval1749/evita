@@ -109,7 +109,31 @@ global.Lexer = (function() {
   Lexer.STRING2_CHAR = Symbol('string2');
   Lexer.WORD_CHAR = Symbol('word');
 
+  Lexer.State = {};
+  Lexer.State.LINE_COMMENT = Symbol('line_comment');
+  Lexer.State.OPERATOR = Symbol('operator');
+  Lexer.State.OTHER = Symbol('other');
+  Lexer.State.SPACE = Symbol('space');
+  Lexer.State.STRING1 = Symbol('string1');
+  Lexer.State.STRING1_END = Symbol('string1_end');
+  Lexer.State.STRING1_ESCAPE = Symbol('string1_escape');
+  Lexer.State.STRING2 = Symbol('string2');
+  Lexer.State.STRING2_END = Symbol('string2_end');
+  Lexer.State.STRING2_ESCAPE = Symbol('string2_escape');
   Lexer.State.ZERO = Symbol('zero');
+
+  var stateToSyntax = new Map();
+  stateToSyntax.set(Lexer.State.LINE_COMMENT, 'comment');
+  stateToSyntax.set(Lexer.State.OPERATOR, 'operators');
+  stateToSyntax.set(Lexer.State.OTHER, '');
+  stateToSyntax.set(Lexer.State.SPACE, '');
+  stateToSyntax.set(Lexer.State.STRING1, 'string_literal');
+  stateToSyntax.set(Lexer.State.STRING1_END, 'string_literal');
+  stateToSyntax.set(Lexer.State.STRING1_ESCAPE, 'string_literal');
+  stateToSyntax.set(Lexer.State.STRING2, 'string_literal');
+  stateToSyntax.set(Lexer.State.STRING2_END, 'string_literal');
+  stateToSyntax.set(Lexer.State.STRING2_ESCAPE, 'string_literal');
+  stateToSyntax.set(Lexer.State.WORD, 'identifier');
 
   /**
    * @constructor
@@ -301,8 +325,8 @@ global.Lexer = (function() {
           throw new Error('Assertion failed: lastToken != null');
         if (this.debug_ > 2)
           console.log('finishToken', lastToken);
-        if (!nextState)
-          this.state = Lexer.State.ZERO;
+        if (nextState == Lexer.State.ZERO)
+          this.state = nextState;
         else
           this.startToken(nextState);
         return lastToken;
@@ -316,7 +340,7 @@ global.Lexer = (function() {
        * @return {!Lexer.Token}
        */
       function(state) {
-        console.assert(state, 'state must not be zero.');
+        console.assert(state != Lexer.State.ZERO, 'state must not be zero.');
         var lastToken = this.lastToken;
         this.extendToken();
         if (this.debug_ > 2)
@@ -380,7 +404,8 @@ global.Lexer = (function() {
         var range = this.range;
         range.collapseTo(token.start);
         range.end = token.end;
-        var syntax = this.stateToSyntax_.get(token.state) || '';
+        var syntax = this.stateToSyntax_.get(token.state) ||
+                     stateToSyntax.get(token.state) || '';
         if (syntax == 'identifier') {
           var word = this.extractWord(range, token);
           if (this.debug_ > 5)
@@ -399,7 +424,7 @@ global.Lexer = (function() {
        * @param {!Lexer.State} state
        */
       function(state) {
-        console.assert(state, 'state must not be zero.');
+        console.assert(state != Lexer.State.ZERO, 'state must not be zero.');
         this.range.collapseTo(this.scanOffset);
         if (this.debug_ > 2)
           console.log('startToken', state, this.scanOffset);
@@ -411,7 +436,103 @@ global.Lexer = (function() {
         this.tokens.add(token);
         ++this.scanOffset;
       }
-   }
+   },
+
+   updateState: {value:
+     /**
+      * @protected
+      * @this {!Lexer}
+      * @param {number} charCode
+      * @return {?Lexer.Token}
+      */
+     function(charCode) {
+       var lexer = this;
+       switch (lexer.state){
+        case Lexer.State.LINE_COMMENT:
+          if (charCode == Unicode.LF)
+            return lexer.finishToken(Lexer.State.ZERO);
+          lexer.extendToken();
+          break;
+
+        case Lexer.State.OPERATOR:
+          if (!lexer.isOperator(charCode))
+            return lexer.finishToken(Lexer.State.ZERO);
+          lexer.extendToken();
+          break;
+
+        case Lexer.State.OTHER:
+          if (!this.isOther(charCode))
+            return lexer.finishToken(Lexer.State.ZERO);
+          lexer.extendToken();
+          break;
+
+        case Lexer.State.SPACE:
+          if (charCode != Unicode.SPACE && charCode != Unicode.TAB)
+            return lexer.finishToken(Lexer.State.ZERO);
+          lexer.extendToken();
+          break;
+
+        case Lexer.State.STRING1:
+          if (charCode == Unicode.APOSTROPHE)
+            return lexer.finishToken(Lexer.State.STRING2_END);
+          if (charCode == Unicode.REVERSE_SOLIDUS)
+            return lexer.finishToken(Lexer.State.STRING1_ESCAPE);
+          lexer.extendToken();
+          break;
+        case Lexer.State.STRING1_END:
+          return lexer.finishToken(Lexer.State.ZERO);
+        case Lexer.State.STRING1_ESCAPE:
+          return lexer.finishToken(Lexer.State.STRING1);
+
+        case Lexer.State.STRING2:
+          if (charCode == Unicode.QUOTATION_MARK)
+            return lexer.finishToken(Lexer.State.STRING2_END);
+          if (charCode == Unicode.REVERSE_SOLIDUS)
+            return lexer.finishToken(Lexer.State.STRING2_ESCAPE);
+          lexer.extendToken();
+          break;
+        case Lexer.State.STRING2_END:
+          return lexer.finishToken(Lexer.State.ZERO);
+        case Lexer.State.STRING2_ESCAPE:
+          return lexer.finishToken(Lexer.State.STRING2);
+
+        case Lexer.State.WORD:
+          if (!lexer.isWord(charCode))
+            return lexer.finishToken(Lexer.State.ZERO);
+          lexer.extendToken();
+          break;
+
+        case Lexer.State.ZERO:
+          switch (charCode) {
+            case Unicode.APOSTROPHE:
+              lexer.startToken(Lexer.State.STRING1);
+              break;
+            case Unicode.LF:
+            case Unicode.SPACE:
+            case Unicode.TAB:
+              lexer.startToken(Lexer.State.SPACE);
+              break;
+            case Unicode.QUOTATION_MARK:
+              lexer.startToken(Lexer.State.STRING2);
+              break;
+            default:
+              if (lexer.isWord(charCode))
+                lexer.startToken(Lexer.State.WORD);
+              else if (lexer.isOperator(charCode))
+                lexer.startToken(Lexer.State.OPERATOR);
+              else
+                lexer.startToken(Lexer.State.OTHER);
+              break;
+          }
+          break;
+
+        default:
+          console.log(lexer);
+          throw new Error('Invalid state ' + lexer.state);
+       }
+       return null;
+     }
+   },
   });
 
   return Lexer;

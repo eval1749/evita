@@ -5,37 +5,12 @@
 global.PythonLexer = (function(keywords) {
   /** @enum{!Symbol} */
   var State = {
-    ZERO: Lexer.State.ZERO,
-
     DOT: Symbol('.'),
-    LINE_COMMENT: Symbol('line_comment'),
-    NEWLINE: Symbol('newline'),
-    NUMBER_SIGN: Symbol('#'),
-    OPERATOR: Symbol('+'),
-    SPACE: Symbol('space'),
-    STRING1: Symbol('string1'),
-    STRING1_END: Symbol('string1_end'),
-    STRING1_ESCAPE: Symbol('string1_escape'),
-    STRING2: Symbol('string2'),
-    STRING2_END: Symbol('string2_end'),
-    STRING2_ESCAPE: Symbol('string2_escape'),
-    WORD: Symbol('word')
   };
 
   /** @const @type {!Map.<State, string>} */
   var stateToSyntax = new Map();
-  stateToSyntax.set(State.ZERO, '');
   stateToSyntax.set(State.DOT, 'operators');
-  stateToSyntax.set(State.LINE_COMMENT, 'comment');
-  stateToSyntax.set(State.OPERATOR, 'operators');
-  stateToSyntax.set(State.SPACE, '');
-  stateToSyntax.set(State.STRING1, 'string_literal');
-  stateToSyntax.set(State.STRING1_END, 'string_literal');
-  stateToSyntax.set(State.STRING1_ESCAPE, 'string_literal');
-  stateToSyntax.set(State.STRING2, 'string_literal');
-  stateToSyntax.set(State.STRING2_END, 'string_literal');
-  stateToSyntax.set(State.STRING2_ESCAPE, 'string_literal');
-  stateToSyntax.set(State.WORD, 'identifier');
 
   Object.keys(State).forEach(function(key) {
     if (!stateToSyntax.has(State[key]))
@@ -80,7 +55,7 @@ global.PythonLexer = (function(keywords) {
 
   /**
    * @constructor
-   * @extends Lexer
+   * @extends {Lexer}
    * @param {!Document} document
    */
   function PythonLexer(document) {
@@ -99,7 +74,7 @@ global.PythonLexer = (function(keywords) {
     if (this.debug_ > 1)
       console.log('didShrinkLastToken', token);
     if (token.state == State.DOT) {
-      token.state = State.ZERO;
+      token.state = Lexer.State.ZERO;
       return;
     }
   }
@@ -117,7 +92,7 @@ global.PythonLexer = (function(keywords) {
     console.assert(it, token);
     do {
       it = it.previous();
-    } while (it && it.data.state == State.SPACE);
+    } while (it && it.data.state == Lexer.State.SPACE);
 
     if (!it)
       return word;
@@ -129,10 +104,10 @@ global.PythonLexer = (function(keywords) {
         return word;
       }
       it = it.previous();
-      while (it && it.data.state == State.SPACE) {
+      while (it && it.data.state == Lexer.State.SPACE) {
         it = it.previous();
       }
-      if (!it || it.data.state != State.WORD)
+      if (!it || it.data.state != Lexer.State.WORD)
         return word;
       var previous = range.document.slice(it.data.start, it.data.end);
       return previous + word;
@@ -151,86 +126,19 @@ global.PythonLexer = (function(keywords) {
     var document = lexer.range.document;
     while (lexer.scanOffset < maxOffset) {
       var charCode = document.charCodeAt_(lexer.scanOffset);
-      switch (lexer.state) {
-        case State.LINE_COMMENT:
-          if (charCode == Unicode.LF)
-            return lexer.finishToken(State.ZERO);
-          lexer.extendToken();
-          break;
-
-        case State.OPERATOR:
-          if (!lexer.isOperator(charCode))
-            return lexer.finishToken(State.ZERO);
-          lexer.extendToken();
-          break;
-
-        case State.SPACE:
-          if (charCode != Unicode.SPACE && charCode != Unicode.TAB)
-            return lexer.finishToken(State.ZERO);
-          lexer.extendToken();
-          break;
-
-        case State.STRING1:
-          if (charCode == Unicode.APOSTROPHE)
-            return lexer.finishToken(State.STRING2_END);
-          if (charCode == Unicode.REVERSE_SOLIDUS)
-            return lexer.finishToken(State.STRING1_ESCAPE);
-          lexer.extendToken();
-          break;
-        case State.STRING1_END:
-          return lexer.finishToken(State.ZERO);
-        case State.STRING1_ESCAPE:
-          return lexer.finishToken(State.STRING1);
-
-        case State.STRING2:
-          if (charCode == Unicode.QUOTATION_MARK)
-            return lexer.finishToken(State.STRING2_END);
-          if (charCode == Unicode.REVERSE_SOLIDUS)
-            return lexer.finishToken(State.STRING2_ESCAPE);
-          lexer.extendToken();
-          break;
-        case State.STRING2_END:
-          return lexer.finishToken(State.ZERO);
-        case State.STRING2_ESCAPE:
-          return lexer.finishToken(State.STRING2);
-
-        case State.WORD:
-          if (!lexer.isWord(charCode))
-            return lexer.finishToken(State.ZERO);
-          lexer.extendToken();
-          break;
-
-        case State.ZERO:
-          switch (charCode) {
-            case Unicode.APOSTROPHE:
-              lexer.startToken(State.STRING1);
-              break;
-            case Unicode.FULL_STOP:
-              lexer.startToken(State.DOT);
-              return lexer.finishToken(State.ZERO);
-            case Unicode.LF:
-            case Unicode.SPACE:
-            case Unicode.TAB:
-              lexer.startToken(State.SPACE);
-              break;
-            case Unicode.NUMBER_SIGN:
-              lexer.startToken(State.LINE_COMMENT);
-              break;
-            case Unicode.QUOTATION_MARK:
-              lexer.startToken(State.STRING2);
-              break;
-            default:
-              if (lexer.isWord(charCode))
-                lexer.startToken(State.WORD);
-              else
-                lexer.startToken(State.OPERATOR);
-              break;
-          }
-          break;
-        default:
-          console.log(lexer);
-          throw new Error('Invalid state ' + lexer.state);
+      if (lexer.state == Lexer.State.ZERO) {
+        switch (charCode) {
+          case Unicode.FULL_STOP:
+            lexer.startToken(State.DOT);
+            return lexer.finishToken(Lexer.State.ZERO);
+          case Unicode.NUMBER_SIGN:
+            lexer.startToken(Lexer.State.LINE_COMMENT);
+            continue;
+        }
       }
+      var token = this.updateState(charCode);
+      if (token)
+        return token;
     }
     return lexer.lastToken;
   }

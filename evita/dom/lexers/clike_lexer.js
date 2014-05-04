@@ -5,8 +5,6 @@
 global.ClikeLexer = (function() {
   /** @enum{!Symbol} */
   var State = {
-    ZERO: Lexer.State.ZERO,
-
     BLOCK_COMMENT: Symbol('block_comment'),
     BLOCK_COMMENT_ASTERISK: Symbol('block_comment_asterisk'),
     BLOCK_COMMENT_END: Symbol('block_comment_end'),
@@ -19,21 +17,11 @@ global.ClikeLexer = (function() {
     LINE_COMMENT_START: Symbol('line_comment_end'),
     NEWLINE: Symbol('newline'),
     NUMBER_SIGN: Symbol('#'),
-    OPERATOR: Symbol('+'),
     SOLIDUS: Symbol('/'),
-    SPACE: Symbol('space'),
-    STRING1: Symbol('string1'),
-    STRING1_END: Symbol('string1_end'),
-    STRING1_ESCAPE: Symbol('string1_escape'),
-    STRING2: Symbol('string2'),
-    STRING2_END: Symbol('string2_end'),
-    STRING2_ESCAPE: Symbol('string2_escape'),
-    WORD: Symbol('word')
   };
 
   /** @const @type {!Map.<State, string>} */
   var stateToSyntax = new Map();
-  stateToSyntax.set(State.ZERO, '');
   stateToSyntax.set(State.BLOCK_COMMENT, 'comment');
   stateToSyntax.set(State.BLOCK_COMMENT_ASTERISK, 'comment');
   stateToSyntax.set(State.BLOCK_COMMENT_END, 'comment');
@@ -46,16 +34,7 @@ global.ClikeLexer = (function() {
   stateToSyntax.set(State.LINE_COMMENT_START, 'comment');
   stateToSyntax.set(State.NEWLINE, '');
   stateToSyntax.set(State.NUMBER_SIGN, 'operators');
-  stateToSyntax.set(State.OPERATOR, 'operators');
   stateToSyntax.set(State.SOLIDUS, 'operators');
-  stateToSyntax.set(State.SPACE, '');
-  stateToSyntax.set(State.STRING1, 'string_literal');
-  stateToSyntax.set(State.STRING1_END, 'string_literal');
-  stateToSyntax.set(State.STRING1_ESCAPE, 'string_literal');
-  stateToSyntax.set(State.STRING2, 'string_literal');
-  stateToSyntax.set(State.STRING2_END, 'string_literal');
-  stateToSyntax.set(State.STRING2_ESCAPE, 'string_literal');
-  stateToSyntax.set(State.WORD, 'identifier');
 
   Object.keys(State).forEach(function(key) {
     if (!stateToSyntax.has(State[key]))
@@ -101,7 +80,7 @@ global.ClikeLexer = (function() {
 
   /**
    * @constructor
-   * @extends Lexer
+   * @extends {Lexer}
    * @param {!Document} document
    * @param {!ClikeLexerOptions} options
    */
@@ -136,7 +115,7 @@ global.ClikeLexer = (function() {
       return;
     }
     if (token.state == State.DOT) {
-      token.state = State.ZERO;
+      token.state = Lexer.State.ZERO;
       return;
     }
     if (token.state == State.LINE_COMMENT_START) {
@@ -160,7 +139,7 @@ global.ClikeLexer = (function() {
     console.assert(it, token);
     do {
       it = it.previous();
-    } while (it && it.data.state == State.SPACE);
+    } while (it && it.data.state == Lexer.State.SPACE);
 
     if (!it)
       return word;
@@ -172,10 +151,10 @@ global.ClikeLexer = (function() {
         return word;
       }
       it = it.previous();
-      while (it && it.data.state == State.SPACE) {
+      while (it && it.data.state == Lexer.State.SPACE) {
         it = it.previous();
       }
-      if (!it || it.data.state != State.WORD)
+      if (!it || it.data.state != Lexer.State.WORD)
         return word;
       var previous = range.document.slice(it.data.start, it.data.end);
       return previous + word;
@@ -194,8 +173,8 @@ global.ClikeLexer = (function() {
         it = it.previous();
         if (!it)
           return word;
-      } while (it.data.state == State.SPACE);
-      if (it.data.state != State.WORD)
+      } while (it.data.state == Lexer.State.SPACE);
+      if (it.data.state != Lexer.State.WORD)
         return word;
       var namespace = it.data;
       range.start = namespace.start;
@@ -232,7 +211,7 @@ global.ClikeLexer = (function() {
           return lexer.finishToken(State.BLOCK_COMMENT);
 
         case State.BLOCK_COMMENT_END:
-          lexer.state = State.ZERO;
+          lexer.state = Lexer.State.ZERO;
           break;
 
         case State.BLOCK_COMMENT_START:
@@ -245,16 +224,16 @@ global.ClikeLexer = (function() {
         case State.COLON:
           if (charCode == Unicode.COLON)
             return lexer.finishTokenAs(State.COLON_COLON);
-          return lexer.finishToken(State.ZERO);
+          return lexer.finishToken(Lexer.State.ZERO);
 
         case State.COLON_COLON:
         case State.DOT:
-          lexer.state = State.ZERO;
+          lexer.state = Lexer.State.ZERO;
           break;
 
         case State.LINE_COMMENT:
           if (charCode == Unicode.LF)
-            return lexer.finishToken(State.ZERO);
+            return lexer.finishToken(Lexer.State.ZERO);
           if (charCode == Unicode.REVERSE_SOLIDUS)
             return lexer.finishToken(State.LINE_COMMENT_ESCAPE);
           lexer.extendToken();
@@ -265,7 +244,7 @@ global.ClikeLexer = (function() {
 
         case State.LINE_COMMENT_START:
           if (charCode == Unicode.LF) {
-            lexer.state = State.ZERO;
+            lexer.state = Lexer.State.ZERO;
             break;
           }
           if (charCode == Unicode.REVERSE_SOLIDUS)
@@ -276,18 +255,12 @@ global.ClikeLexer = (function() {
 
         case State.NEWLINE:
           if (!lexer.isWhitespace(charCode))
-            return lexer.finishToken(State.ZERO);
+            return lexer.finishToken(Lexer.State.ZERO);
           lexer.extendToken();
           break;
 
         case State.NUMBER_SIGN:
-          lexer.state = State.ZERO;
-          break;
-
-        case State.OPERATOR:
-          if (!lexer.isOperator(charCode))
-            return lexer.finishToken(State.ZERO);
-          lexer.extendToken();
+          lexer.state = Lexer.State.ZERO;
           break;
 
         case State.SOLIDUS:
@@ -295,70 +268,24 @@ global.ClikeLexer = (function() {
             return lexer.finishTokenAs(State.BLOCK_COMMENT_START);
           if (charCode == Unicode.SOLIDUS)
             return lexer.finishTokenAs(State.LINE_COMMENT_START);
-          return lexer.finishToken(State.ZERO);
+          return lexer.finishToken(Lexer.State.ZERO);
 
-        case State.SPACE:
-          if (charCode != Unicode.SPACE && charCode != Unicode.TAB)
-            return lexer.finishToken(State.ZERO);
-          lexer.extendToken();
-          break;
-
-        case State.STRING1:
-          if (charCode == Unicode.APOSTROPHE)
-            return lexer.finishToken(State.STRING2_END);
-          if (charCode == Unicode.REVERSE_SOLIDUS)
-            return lexer.finishToken(State.STRING1_ESCAPE);
-          lexer.extendToken();
-          break;
-        case State.STRING1_END:
-          return lexer.finishToken(State.ZERO);
-        case State.STRING1_ESCAPE:
-          return lexer.finishToken(State.STRING1);
-
-        case State.STRING2:
-          if (charCode == Unicode.QUOTATION_MARK)
-            return lexer.finishToken(State.STRING2_END);
-          if (charCode == Unicode.REVERSE_SOLIDUS)
-            return lexer.finishToken(State.STRING2_ESCAPE);
-          lexer.extendToken();
-          break;
-        case State.STRING2_END:
-          return lexer.finishToken(State.ZERO);
-        case State.STRING2_ESCAPE:
-          return lexer.finishToken(State.STRING2);
-
-        case State.WORD:
-          if (!lexer.isWord(charCode))
-            return lexer.finishToken(State.ZERO);
-          lexer.extendToken();
-          break;
-
-        case State.ZERO:
+        case Lexer.State.ZERO:
           switch (charCode) {
-            case Unicode.APOSTROPHE:
-              lexer.startToken(State.STRING1);
-              break;
             case Unicode.LF:
               lexer.startToken(State.NEWLINE);
               break;
-            case Unicode.QUOTATION_MARK:
-              lexer.startToken(State.STRING2);
-              break;
             case Unicode.SOLIDUS:
               lexer.startToken(State.SOLIDUS);
-              break;
-            case Unicode.SPACE:
-            case Unicode.TAB:
-              lexer.startToken(State.SPACE);
               break;
             default:
               if (lexer.hasCpp && charCode == Unicode.NUMBER_SIGN) {
                 if (!lexer.lastToken ||
                     lexer.lastToken.state == State.NEWLINE) {
                   lexer.startToken(State.NUMBER_SIGN);
-                  return lexer.finishToken(State.ZERO);
+                  return lexer.finishToken(Lexer.State.ZERO);
                 }
-                lexer.startToken(State.OPERATOR);
+                lexer.startToken(Lexer.State.OPERATOR);
                 break;
               }
 
@@ -369,19 +296,23 @@ global.ClikeLexer = (function() {
 
               if (lexer.useDot && charCode == Unicode.FULL_STOP) {
                 lexer.startToken(State.DOT);
-                return lexer.finishToken(State.ZERO);
+                return lexer.finishToken(Lexer.State.ZERO);
               }
 
-              if (lexer.isWord(charCode))
-                lexer.startToken(State.WORD);
-              else
-                lexer.startToken(State.OPERATOR);
+              {
+                var token = this.updateState(charCode);
+                if (token)
+                  return token;
+              }
               break;
           }
           break;
-        default:
-          console.log(lexer);
-          throw new Error('Invalid state ' + lexer.state);
+        default: {
+          var token = this.updateState(charCode);
+          if (token)
+            return token;
+          break;
+        }
       }
     }
     return lexer.lastToken;

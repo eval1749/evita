@@ -40,6 +40,36 @@ Lexer.WORD_CHAR;
 Lexer.State;
 
 /** @const @type {!Lexer.State} */
+Lexer.State.LINE_COMMENT;
+
+/** @const @type {!Lexer.State} */
+Lexer.State.OPERATOR;
+
+/** @const @type {!Lexer.State} */
+Lexer.State.OTHER;
+
+/** @const @type {!Lexer.State} */
+Lexer.State.SPACE;
+
+/** @const @type {!Lexer.State} */
+Lexer.State.STRING1;
+
+/** @const @type {!Lexer.State} */
+Lexer.State.STRING1_END;
+
+/** @const @type {!Lexer.State} */
+Lexer.State.STRING1_ESCAPE;
+
+/** @const @type {!Lexer.State} */
+Lexer.State.STRING2;
+
+/** @const @type {!Lexer.State} */
+Lexer.State.STRING2_END;
+
+/** @const @type {!Lexer.State} */
+Lexer.State.STRING2_ESCAPE;
+
+/** @const @type {!Lexer.State} */
 Lexer.State.ZERO;
 
 /**
@@ -213,3 +243,12 @@ Lexer.prototype.setSyntax= function(token) {};
  * @param {!Lexer.State} state
  */
 Lexer.prototype.startToken = function(state) {};
+
+/**
+ * TODO(yosi) Once, Closure compiler recognizes |ClikeLexer| is subclass of
+ * |Lexer|, we enable |@protected|.
+ * protected
+ * @param {number} charCode
+ * @return {?Lexer.Token}
+ */
+Lexer.prototype.updateState = function(charCode) {};

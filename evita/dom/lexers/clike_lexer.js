@@ -102,25 +102,22 @@ global.ClikeLexer = (function() {
   function didShrinkLastToken(token) {
     if (this.debug_ > 1)
       console.log('didShrinkLastToken', token);
-    if (token.state == State.BLOCK_COMMENT_END) {
-      token.state = State.BLOCK_COMMENT_ASTERISK;
-      return;
-    }
-    if (token.state == State.BLOCK_COMMENT_START) {
-      token.state = State.SOLIDUS;
-      return;
-    }
-    if (token.state == State.COLON_COLON) {
-      token.state = State.COLON;
-      return;
-    }
-    if (token.state == State.DOT) {
-      token.state = Lexer.State.ZERO;
-      return;
-    }
-    if (token.state == State.LINE_COMMENT_START) {
-      token.state = State.SOLIDUS;
-      return;
+    switch (token.state) {
+      case State.BLOCK_COMMENT_END:
+        token.state = State.BLOCK_COMMENT_ASTERISK;
+        return;
+      case State.BLOCK_COMMENT_START:
+        token.state = State.SOLIDUS;
+        return;
+      case State.COLON_COLON:
+        token.state = State.COLON;
+        return;
+      case State.DOT:
+        token.state = Lexer.State.ZERO;
+        return;
+      case State.LINE_COMMENT_START:
+        token.state = State.SOLIDUS;
+        return;
     }
   }
 

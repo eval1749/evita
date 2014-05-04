@@ -280,6 +280,10 @@ global.ClikeLexer = (function() {
           lexer.extendToken();
           break;
 
+        case State.NUMBER_SIGN:
+          lexer.state = State.ZERO;
+          break;
+
         case State.OPERATOR:
           if (!lexer.isOperator(charCode))
             return lexer.finishToken(State.ZERO);
@@ -382,7 +386,7 @@ global.ClikeLexer = (function() {
     }
     return lexer.lastToken;
   }
-
+
   ClikeLexer.newCharacters = function() {
     var attrs = new Map();
     CHARACTERS.forEach(function(value, key) {

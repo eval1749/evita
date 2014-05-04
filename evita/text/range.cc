@@ -9,7 +9,7 @@
 #include "base/logging.h"
 #include "evita/text/buffer.h"
 #include "evita/text/range_set.h"
-#include "evita/text/undo_stack.h"
+#include "evita/text/scoped_undo_group.h"
 
 namespace text {
 
@@ -86,10 +86,6 @@ Buffer::EnumCharRev::EnumCharRev(const Range* pRange)
     : m_lStart(pRange->GetStart()),
       m_lPosn(pRange->GetEnd()),
       m_pBuffer(pRange->buffer()) {
-}
-
-ScopedUndoGroup::ScopedUndoGroup(Range* range, const base::string16& name)
-    : ScopedUndoGroup(range->buffer(), name) {
 }
 
 }  // namespace text

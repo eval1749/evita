@@ -219,17 +219,4 @@ void Buffer::DidChangeMarker(Posn start, Posn end) {
     DidChangeStyle(start, static_cast<size_t>(end - start)));
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// ScopedUndoGroup
-//
-ScopedUndoGroup::~ScopedUndoGroup() {
-  buffer_->EndUndoGroup(name_);
-}
-
-ScopedUndoGroup::ScopedUndoGroup(Buffer* buffer, const base::string16& name)
-    : buffer_(buffer), name_(name) {
-  buffer->StartUndoGroup(name_);
-}
-
 }  // namespace text

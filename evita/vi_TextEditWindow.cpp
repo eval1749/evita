@@ -33,6 +33,7 @@
 #include "evita/metrics/time_scope.h"
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
+#include "evita/text/scoped_undo_group.h"
 #include "evita/ui/controls/scroll_bar.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/icon_cache.h"

@@ -9,6 +9,7 @@
 
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
+#include "evita/text/scoped_undo_group.h"
 
 namespace {
 

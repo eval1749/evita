@@ -253,20 +253,6 @@ class Buffer : public BufferCore,
   DISALLOW_COPY_AND_ASSIGN(Buffer);
 };
 
-/// <summary>
-/// Utility class for inserting begin/end undo operation. Instances are
-/// created on stack instead of heap.
-/// </summary>
-class ScopedUndoGroup {
-  private: Buffer* buffer_;
-  private: const base::string16 name_;
-  public: ScopedUndoGroup(Range* range, const base::string16& name);
-  public: ScopedUndoGroup(Buffer* buffer, const base::string16& name);
-  public: ~ScopedUndoGroup();
-
-  DISALLOW_COPY_AND_ASSIGN(ScopedUndoGroup);
-};
-
 }  // namespace text
 
 #endif //!defined(INCLUDE_evita_text_buffer_h)

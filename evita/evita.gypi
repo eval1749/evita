@@ -78,6 +78,8 @@
         'text/range_set.cc',
         'text/range_set_base.cc',
         'text/range_set_base.h',
+        'text/scoped_undo_group.cc',
+        'text/scoped_undo_group.h',
         'text/undo_stack.cc',
         'text/undo_step.cc',
         'z_debug.cpp',

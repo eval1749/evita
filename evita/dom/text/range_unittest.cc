@@ -89,14 +89,14 @@ TEST_F(RangeTest, analyzeCase) {
       "  var doc = new Document('analyzeCase');"
       "  var range = new Range(doc);"
       "  range.text = sample;"
-      "  return range.analyzeCase();"
+      "  return range.analyzeCase().toString();"
       "}");
-  EXPECT_SCRIPT_EQ("CAPITALIZED_TEXT", "testIt('Foo::bar(baz)')");
-  EXPECT_SCRIPT_EQ("CAPITALIZED_WORDS", "testIt('Foo::Bar::Baz')");
-  EXPECT_SCRIPT_EQ("LOWER", "testIt('abcd')");
-  EXPECT_SCRIPT_EQ("MIXED", "testIt('0x25AD')");
-  EXPECT_SCRIPT_EQ("MIXED", "testIt('MiXed')");
-  EXPECT_SCRIPT_EQ("UPPER", "testIt('ABCD')");
+  EXPECT_SCRIPT_EQ("Symbol(CAPITALIZED_TEXT)", "testIt('Foo::bar(baz)')");
+  EXPECT_SCRIPT_EQ("Symbol(CAPITALIZED_WORDS)", "testIt('Foo::Bar::Baz')");
+  EXPECT_SCRIPT_EQ("Symbol(LOWER)", "testIt('abcd')");
+  EXPECT_SCRIPT_EQ("Symbol(MIXED)", "testIt('0x25AD')");
+  EXPECT_SCRIPT_EQ("Symbol(MIXED)", "testIt('MiXed')");
+  EXPECT_SCRIPT_EQ("Symbol(UPPER)", "testIt('ABCD')");
 }
 
 TEST_F(RangeTest, ctor) {

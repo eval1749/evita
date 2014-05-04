@@ -8,13 +8,18 @@
  * @externs
  */
 
-/** @enum {string} */
+/** @enum {!Symbol} */
 Range.Case = {
+  // "This is capitalized."
   CAPITALIZED_TEXT: 'CAPITALIZED_TEXT',
+  // "This Is Capitalized Words."
   CAPITALIZED_WORDS: 'CAPITALIZED_WORDS',
+  // "this is lower."
   LOWER: 'LOWER',
+  // "ThisIsMixed."
   MIXED: 'MIXED',
-  UPPER: 'UPPER'
+  // "THIS IS UPPER."
+  UPPER: 'UPPER',
 };
 
 /** @expose @type {!Document} */

@@ -4,29 +4,35 @@
 'use strict';
 
 (function() {
+  /** @enum{!Symbol} */
   global.Range.Case = {
-    CAPITALIZED_TEXT: 'CAPITALIZED_TEXT', // "This is capitalized."
-    CAPITALIZED_WORDS: 'CAPITALIZED_WORDS', // "This Is Capitalized Words."
-    LOWER: 'LOWER', // "this is lower."
-    MIXED: 'MIXED', // "ThisIsMixed."
-    UPPER: 'UPPER' // "THIS IS UPPER."
+    // "This is capitalized."
+    CAPITALIZED_TEXT: Symbol('CAPITALIZED_TEXT'),
+    // "This Is Capitalized Words."
+    CAPITALIZED_WORDS: Symbol('CAPITALIZED_WORDS'),
+    // "this is lower."
+    LOWER: Symbol('LOWER'),
+    // "ThisIsMixed."
+    MIXED: Symbol('MIXED'),
+    // "THIS IS UPPER."
+    UPPER: Symbol('UPPER'),
   };
 
   /**
    * @return {!Range.Case}
    */
   Range.prototype.analyzeCase = function() {
-    /** @enum{string} */
+    /** @enum{!Symbol} */
     var State = {
-      FIRST_CAP_IN_WORD: 'FIRST_CAP_IN_WORD',
-      FIRST_CAP_NOT_WORD: 'FIRST_CAP_NOT_WORD',
-      FIRST_CAP_SECOND: 'FIRST_CAP_SECOND',
-      LOWER: 'LOWER',
-      REST_CAP_IN_WORD: 'REST_CAP_IN_WORD',
-      REST_CAP_NOT_WORD: 'REST_CAP_NOT_WORD',
-      REST_CAP_REST: 'REST_CAP_REST',
-      START: 'START',
-      UPPER: 'UPPER',
+      FIRST_CAP_IN_WORD: Symbol('FIRST_CAP_IN_WORD'),
+      FIRST_CAP_NOT_WORD: Symbol('FIRST_CAP_NOT_WORD'),
+      FIRST_CAP_SECOND: Symbol('FIRST_CAP_SECOND'),
+      LOWER: Symbol('LOWER'),
+      REST_CAP_IN_WORD: Symbol('REST_CAP_IN_WORD'),
+      REST_CAP_NOT_WORD: Symbol('REST_CAP_NOT_WORD'),
+      REST_CAP_REST: Symbol('REST_CAP_REST'),
+      START: Symbol('START'),
+      UPPER: Symbol('UPPER'),
     };
     var document = this.document;
     var start = this.start;

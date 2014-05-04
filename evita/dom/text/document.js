@@ -71,12 +71,14 @@
   }
 
   Object.defineProperties(Document.prototype, {
+    fileName: {value: '', writable: true},
     keymap: {get: /** @return {!Map} */function() {
       if (!this.keymap_)
         this.keymap_ = new Map();
       return this.keymap_;
     }},
     keymap_: {value: null, writable: true},
+    lastWriteTime: {value: new Date(0), writable: true},
     mode: {
       get: /** @return {?Mode} */ function() { return this.mode_; },
       set: /** @param {?Mode} mode */ function(mode) {

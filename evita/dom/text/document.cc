@@ -120,9 +120,6 @@ v8::Handle<v8::FunctionTemplate> DocumentClass::CreateConstructorTemplate(
 
 void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
   builder
-      .SetProperty("fileName", &Document::file_name, &Document::set_file_name)
-      .SetProperty("lastWriteTime", &Document::last_write_time,
-                   &Document::set_last_write_time)
       .SetProperty("length", &Document::length)
       .SetProperty("modified", &Document::modified, &Document::set_modified)
       .SetProperty("name", &Document::name)
@@ -170,22 +167,6 @@ base::char16 Document::charCodeAt(text::Posn position) const {
       position, 0, buffer_->GetEnd() - 1)));
   ScriptHost::instance()->ThrowException(error);
   return 0;
-}
-
-const base::string16& Document::file_name() const {
-  return file_name_;
-}
-
-void Document::set_file_name(const base::string16& file_name) {
-  file_name_ = file_name;
-}
-
-base::Time Document::last_write_time() const {
-  return last_write_time_;
-}
-
-void Document::set_last_write_time(base::Time last_write_time) {
-  last_write_time_ = last_write_time;
 }
 
 text::Posn Document::length() const {

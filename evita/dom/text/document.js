@@ -70,9 +70,18 @@
     return wordClassOf(document.charCodeAt_(position - 1));
   }
 
-  Object.defineProperty(Document.prototype, 'mode', {
-    value: null,
-    writable: true
+  Object.defineProperties(Document.prototype, {
+    mode: {
+      get: /** @return {?Mode} */ function() { return this.mode_; },
+      set: /** @param {?Mode} mode */ function(mode) {
+        if (this.mode_)
+          this.mode_.detach()
+        this.mode_ = mode;
+        if (mode)
+          mode.attach(this);
+      }
+    },
+    mode_: { value: null, writable: true }
   });
 
   /**

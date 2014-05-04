@@ -14,8 +14,11 @@ interface Mode {
   static Mode chooseMode(Document document);
   static Mode chooseModeByFileName(DOMString name);
 
+  readonly attribute Document document;
   readonly attribute DOMString name;
   readonly attribute Keymap keymap;
 
+  void attach(Document document);
+  void detach();
   long doColor(Document document, long hint);
 };

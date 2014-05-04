@@ -17,6 +17,30 @@ global.Mode = (function() {
 })();
 
 Mode.prototype = Object.defineProperties(Mode.prototype, {
+  attach: {value:
+    /**
+     * @this {!Mode}
+     * @param {!Document} document
+     */
+    function(document) {
+      if (this.document_)
+        throw new Error(this + ' is already attached to ' + this.document_);
+      this.document_ = document;
+      this.lexer_ = new this.lexerConstructor_(document);
+    }
+  },
+  detach: {value:
+    /**
+     * @this {!Mode}
+     */
+    function() {
+      if (!this.document_)
+        throw new Error(this + ' is already attached to ' + this.document_);
+      this.lexer_.detach();
+    }
+  },
+  document: {get: function() { return this.document_; }},
+  document_: {value: null, writable: true},
   doColor: {value:
     /**
      * @this {!Mode}
@@ -25,8 +49,8 @@ Mode.prototype = Object.defineProperties(Mode.prototype, {
      * @return {number}
      */
     function(document, hint) {
-      if (!this.lexer_)
-        this.lexer_ = new this.lexerConstructor_(document);
+      if (!this.document_)
+        throw new Error(this + ' is detached.');
       return this.lexer_.doColor(hint);
     }
   },

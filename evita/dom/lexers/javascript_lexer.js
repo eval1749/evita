@@ -173,4 +173,7 @@ global.JavaScriptLexer = (function(options) {
     '.unwatch',
     '.valueOf',
     '.watch',
+
+    // Well-Known
+    'console.assert', 'console.clear', 'console.log',
 ]});

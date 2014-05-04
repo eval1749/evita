@@ -98,10 +98,10 @@ global.PythonLexer = (function(keywords) {
       return word;
 
     if (it.data.state == State.DOT) {
-      word = '.' + word;
-      if (lexer.keywords.has(word)) {
+      var dotWord = '.' + word;
+      if (lexer.keywords.has(dotWord)) {
         range.start = it.data.start;
-        return word;
+        return dotWord;
       }
       it = it.previous();
       while (it && it.data.state == Lexer.State.SPACE) {
@@ -109,8 +109,9 @@ global.PythonLexer = (function(keywords) {
       }
       if (!it || it.data.state != Lexer.State.WORD)
         return word;
+      range.start = it.data.start;
       var previous = range.document.slice(it.data.start, it.data.end);
-      return previous + word;
+      return previous + dotWord;
     }
 
     return word;

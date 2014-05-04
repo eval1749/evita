@@ -142,10 +142,10 @@ global.ClikeLexer = (function() {
       return word;
 
     if (it.data.state == State.DOT) {
-      word = '.' + word;
-      if (lexer.keywords.has(word)) {
+      var dotWord = '.' + word;
+      if (lexer.keywords.has(dotWord)) {
         range.start = it.data.start;
-        return word;
+        return dotWord;
       }
       it = it.previous();
       while (it && it.data.state == Lexer.State.SPACE) {
@@ -153,14 +153,14 @@ global.ClikeLexer = (function() {
       }
       if (!it || it.data.state != Lexer.State.WORD)
         return word;
+      range.start = it.data.start;
       var previous = range.document.slice(it.data.start, it.data.end);
-      return previous + word;
+      return previous + dotWord;
     }
 
     if (it.data.state == State.NUMBER_SIGN) {
       range.start = it.data.start;
-      word = '#' + word;
-      return word;
+      return '#' + word;
     }
 
     while (it && it.data.state == State.COLON_COLON) {

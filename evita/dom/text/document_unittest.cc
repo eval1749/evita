@@ -197,7 +197,12 @@ TEST_F(DocumentTest, load_failed_read) {
 
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"
+    "var beforeLoad, afterLoad;"
+    "doc.addEventListener('beforeload', function() { beforeLoad = true; });"
+    "doc.addEventListener('load', function() { afterLoad = true; });"
     "var promise = doc.load('foo.cc')");
+  EXPECT_SCRIPT_TRUE("beforeLoad");
+  EXPECT_SCRIPT_TRUE("afterLoad");
   EXPECT_SCRIPT_TRUE("promise instanceof Promise");
   EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
@@ -227,8 +232,13 @@ TEST_F(DocumentTest, load_succeeded) {
 
   EXPECT_SCRIPT_VALID(
     "var doc = new Document('foo');"
+    "var beforeLoad, afterLoad;"
+    "doc.addEventListener('beforeload', function() { beforeLoad = true; });"
+    "doc.addEventListener('load', function() { afterLoad = true; });"
     "var promise = doc.load('foo.cc');");
   EXPECT_EQ(1, mock_io_delegate()->num_close_called());
+  EXPECT_SCRIPT_TRUE("beforeLoad");
+  EXPECT_SCRIPT_TRUE("afterLoad");
   EXPECT_SCRIPT_TRUE("promise instanceof Promise");
   EXPECT_SCRIPT_EQ("utf-8", "doc.encoding");
   EXPECT_SCRIPT_EQ("8", "doc.length");

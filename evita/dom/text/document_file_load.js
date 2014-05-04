@@ -221,6 +221,7 @@
     document.obsolete = Document.Obsolete.CHECKING;
     Editor.messageBox(null, 'Loading ' + document.fileName,
                       MessageBox.ICONINFORMATION);
+    document.dispatchEvent(new DocumentEvent('beforeload'));
     return load(document, document.fileName).then(function(length) {
       Editor.messageBox(null, 'Loaded ' + document.fileName,
                         MessageBox.ICONINFORMATION);
@@ -246,6 +247,7 @@
                   'into', document, exception.stack);
       document.lastStatTime_ = new Date();
       document.obsolete = Document.Obsolete.UNKNOWN;
+      document.dispatchEvent(new DocumentEvent('load'));
       return Promise.reject(exception);
     });
   };

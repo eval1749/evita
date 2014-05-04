@@ -35,12 +35,6 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(Document);
   friend class bindings::DocumentClass;
 
-  public: enum class State {
-    Ready,
-    Load,
-    Save,
-  };
-
   private: std::unique_ptr<text::Buffer> buffer_;
   private: base::Time last_write_time_;
   private: base::string16 file_name_;
@@ -49,7 +43,6 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   // appeared in JavaScript. I'm not sure why. So, we hold |properties| in
   // C++.
   private: v8_glue::ScopedPersistent<v8::Object> properties_;
-  private: State state_;
 
   private: explicit Document(const base::string16& name);
   public: virtual ~Document();
@@ -75,9 +68,6 @@ class Document : public v8_glue::Scriptable<Document, EventTarget> {
   public: int spelling_at(text::Posn offset) const;
   // Returns syntax at |ofset|.
   public: const base::string16& syntax_at(text::Posn offset) const;
-  // Returns document state, load, ready, or save.
-  public: State state() const;
-  public: void set_state(State new_state);
   public: v8::Handle<v8::Object> style_at(text::Posn position) const;
 
   public: bool CheckCanChange() const;

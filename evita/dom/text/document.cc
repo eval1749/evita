@@ -138,7 +138,6 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
       .SetProperty("properties", &Document::properties)
       .SetProperty("readonly", &Document::read_only,
                    &Document::set_read_only)
-      .SetProperty("state", &Document::state, &Document::set_state)
       .SetMethod("charCodeAt_", &Document::charCodeAt)
       .SetMethod("clearUndo", &Document::ClearUndo)
       .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
@@ -167,8 +166,7 @@ Document::Document(const base::string16& name)
     : buffer_(new text::Buffer(DocumentSet::instance()->MakeUniqueName(name))),
       newline_(NewlineMode_Detect),
       properties_(v8::Isolate::GetCurrent(),
-                  NewMap(v8::Isolate::GetCurrent())),
-      state_(State::Ready) {
+                  NewMap(v8::Isolate::GetCurrent())) {
 }
 
 Document::~Document() {
@@ -248,14 +246,6 @@ int Document::spelling_at(text::Posn offset) const {
   if (*marker->type().get() == L"bad_grammar")
     return 3;
   return 0;
-}
-
-Document::State Document::state() const {
-  return state_;
-}
-
-void Document::set_state(State new_state) {
-  state_ = new_state;
 }
 
 const base::string16& Document::syntax_at(text::Posn offset) const {

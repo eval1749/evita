@@ -81,7 +81,8 @@
           mode.attach(this);
       }
     },
-    mode_: { value: null, writable: true }
+    mode_: { value: null, writable: true },
+    state: { value: 0, writable: true }
   });
 
   /**

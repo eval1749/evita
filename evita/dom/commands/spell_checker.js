@@ -19,7 +19,7 @@ global.Spelling = {
  * @constructor
  * @param {!Document} document
  */
-var SpellChecker = function(document) {
+function SpellChecker(document) {
   this.coldEnd = document.length;
   this.coldOffset = 0;
   this.freeRanges = new Array(SpellChecker.MAX_CHECKING);
@@ -29,7 +29,6 @@ var SpellChecker = function(document) {
   this.hotOffset = document.length;
   this.mutationObserver = new MutationObserver(
       this.mutationCallback.bind(this));
-  this.mutationObserver.observe(document, {summary: true});
   this.range = new Range(document);
   this.timer = new RepeatingTimer();
 
@@ -40,6 +39,26 @@ var SpellChecker = function(document) {
     event.view.addEventListener(Event.Names.FOCUS,
         spellChecker.didFocusWindow.bind(spellChecker));
   });
+
+  function setupMutationObserver() {
+    spellChecker.mutationObserver.observe(document, {summary: true});
+  }
+
+  // Ignore document mutation during loading contents.
+  document.addEventListener(Event.Names.BEFORELOAD, function() {
+    spellChecker.mutationObserver.disconnect();
+    spellChecker.timer.stop();
+  });
+
+  // Restart spell checking from start of document after loading.
+  document.addEventListener(Event.Names.LOAD, function() {
+    setupMutationObserver();
+    spellChecker.coldOffset = 0;
+    spellChecker.coldEnd = document.length;
+    spellChecker.hotOffset = 0;
+  });
+
+  setupMutationObserver();
 }
 
 /** @const @type {number} */

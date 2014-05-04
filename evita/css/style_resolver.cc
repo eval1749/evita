@@ -90,15 +90,15 @@ StyleSheet* GetDefaultStyleSheet() {
   InstallSyntaxColor(&default_style_sheet,
                      StyleSelector::comment(), Color(0, 128, 0));
   InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::html_attribute_name(), Color(128, 0, 128));
+                     StyleSelector::html_attribute_name(), Color(255, 0, 0));
   InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::html_attribute_value(), Color(128, 0, 0));
+                     StyleSelector::html_attribute_value(), Color(0, 0, 255));
   InstallSyntaxColor(&default_style_sheet,
                      StyleSelector::html_comment(), Color(0, 128, 0));
   InstallSyntaxColor(&default_style_sheet,
                      StyleSelector::html_element_name(), Color(128, 0, 0));
   InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::html_element_name(), Color(0, 0, 128));
+                     StyleSelector::html_entity(), Color(255, 0, 0));
   InstallSyntaxColor(&default_style_sheet,
                      StyleSelector::identifier(), Color(0, 0, 0));
   InstallSyntaxColor(&default_style_sheet,

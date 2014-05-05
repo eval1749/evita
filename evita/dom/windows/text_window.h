@@ -29,10 +29,14 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
   DECLARE_SCRIPTABLE_OBJECT(TextWindow);
   friend class bindings::TextWindowClass;
 
+  private: float zoom_;
+
   private: explicit TextWindow(Range* selection_range);
   public: virtual ~TextWindow();
 
   public: ::Selection* view_selection() const;
+  private: float zoom() const { return zoom_; }
+  private: void set_zoom(float new_zoom);
 
   private: text::Posn ComputeMotion(int method);
   private: text::Posn ComputeMotion(int method, text::Posn position);

@@ -25,6 +25,15 @@ class TextWindowTest : public dom::AbstractDomTest {
   public: virtual ~TextWindowTest() {
   }
 
+  DISALLOW_COPY_AND_ASSIGN(TextWindowTest);
+};
+
+class TextWindowSlowTest : public TextWindowTest {
+  protected: TextWindowSlowTest() {
+  }
+  public: virtual ~TextWindowSlowTest() {
+  }
+
   // AbstractDomTest
   private: virtual bool shouldUseNewContext() const override {
     // We need to have new context for |TextWindowTest.realize| to call
@@ -34,7 +43,7 @@ class TextWindowTest : public dom::AbstractDomTest {
     return true;
   }
 
-  DISALLOW_COPY_AND_ASSIGN(TextWindowTest);
+  DISALLOW_COPY_AND_ASSIGN(TextWindowSlowTest);
 };
 
 TEST_F(TextWindowTest, _ctor) {
@@ -68,7 +77,7 @@ TEST_F(TextWindowTest, makeSelectionVisible) {
       "sample.makeSelectionVisible();");
 }
 
-TEST_F(TextWindowTest, realize) {
+TEST_F(TextWindowSlowTest, realize) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
   EXPECT_SCRIPT_VALID(
       "var doc = new Document('foo');"
@@ -102,6 +111,19 @@ TEST_F(TextWindowTest, realize) {
   EXPECT_SCRIPT_TRUE("event instanceof DocumentEvent");
   EXPECT_SCRIPT_EQ("detach", "event.type");
   EXPECT_SCRIPT_TRUE("event.view === sample");
+}
+
+TEST_F(TextWindowTest, zoom) {
+  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
+  EXPECT_CALL(*mock_view_impl(), SetTextWindowZoom(Eq(1), Eq(1.5f)));
+  EXPECT_SCRIPT_VALID(
+      "var sample = new TextWindow(new Range(new Document('foo')));"
+      "sample.zoom = 1.5;");
+  EXPECT_SCRIPT_EQ("1.5", "sample.zoom");
+  EXPECT_SCRIPT_EQ("RangeError: TextWindow zoom must be greater than zero.",
+                   "sample.zoom = 0;");
+  EXPECT_SCRIPT_EQ("RangeError: TextWindow zoom must be greater than zero.",
+                   "sample.zoom = -1;");
 }
 
 }  // namespace

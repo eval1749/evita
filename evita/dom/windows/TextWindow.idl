@@ -4,6 +4,8 @@
 
 [Constructor(Range range)]
 interface TextWindow : DocumentWindow {
+  attribute float zoom;
+
   [ImplementedAs=ComputeMotion]
   long compute_(long method, optional long offset, optional long count,
                 optional Point point);

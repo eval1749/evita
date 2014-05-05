@@ -19,7 +19,7 @@ namespace dom {
 // TextWindow
 //
 TextWindow::TextWindow(Range* selection_range)
-    : ScriptableBase(new TextSelection(this, selection_range)) {
+    : ScriptableBase(new TextSelection(this, selection_range)), zoom_(1.0f) {
   ScriptHost::instance()->view_delegate()->CreateTextWindow(this);
 }
 
@@ -28,6 +28,21 @@ TextWindow::~TextWindow() {
 
 ::Selection* TextWindow::view_selection() const {
   return static_cast<TextSelection*>(selection())->view_selection();
+}
+
+void TextWindow::set_zoom(float new_zoom) {
+  if (zoom_ == new_zoom)
+    return;
+  if (new_zoom <= 0.0f) {
+    auto const isolate = ScriptHost::instance()->isolate();
+    ScriptHost::instance()->ThrowException(v8::Exception::RangeError(
+        gin::StringToV8(isolate,
+                        "TextWindow zoom must be greater than zero.")));
+    return;
+  }
+  zoom_ = new_zoom;
+  ScriptHost::instance()->view_delegate()->SetTextWindowZoom(
+      window_id(), zoom_);
 }
 
 text::Posn TextWindow::ComputeMotion(int method, text::Posn position,

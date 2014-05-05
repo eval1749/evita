@@ -31,18 +31,6 @@ global.Lexer = (function() {
   }
 
   /**
-   * @param {!Iterable.<string>} keywords
-   * @return {!Set.<string>}
-   */
-  function makeKeywords(keywords) {
-    var keywordSet = new Set();
-    keywords.forEach(function(keyword) {
-      keywordSet.add(keyword);
-    });
-    return keywordSet;
-  }
-
-  /**
    * @this {!Lexer}
    * @param {!Array.<!MutationRecord>} mutations
    * @param {!MutationObserver} observer
@@ -79,14 +67,15 @@ global.Lexer = (function() {
     this.characters_ = options.characters;
     this.changedOffset = Count.FORWARD;
     this.debug_ = 0;
+    this.keywords = options.keywords;
     this.lastToken = null;
-    this.keywords = makeKeywords(options.keywords);
+    // TODO(yosi) |maxChainWords_| should be part of |LexerOptions|.
+    this.maxChainWords_ = 3;
     this.mutationObserver_ = new MutationObserver(
         mutationCallback.bind(this));
     this.range = new Range(document);
     this.scanOffset = 0;
     this.state = Lexer.State.ZERO;
-    this.stateToSyntax_ = options.stateToSyntax;
     this.tokens = new OrderedSet(function(a, b) {
       return a.end < b.end;
     });
@@ -110,6 +99,7 @@ global.Lexer = (function() {
   Lexer.WORD_CHAR = Symbol('word');
 
   Lexer.State = {
+    DOT: Symbol('.'),
     LINE_COMMENT: Symbol('line_comment'),
     OPERATOR: Symbol('operator'),
     OTHER: Symbol('other'),
@@ -120,21 +110,9 @@ global.Lexer = (function() {
     STRING2: Symbol('string2'),
     STRING2_END: Symbol('string2_end'),
     STRING2_ESCAPE: Symbol('string2_escape'),
+    WORD: Symbol('word'),
     ZERO: Symbol('zero'),
   };
-
-  var stateToSyntax = new Map();
-  stateToSyntax.set(Lexer.State.LINE_COMMENT, 'comment');
-  stateToSyntax.set(Lexer.State.OPERATOR, 'operators');
-  stateToSyntax.set(Lexer.State.OTHER, '');
-  stateToSyntax.set(Lexer.State.SPACE, '');
-  stateToSyntax.set(Lexer.State.STRING1, 'string_literal');
-  stateToSyntax.set(Lexer.State.STRING1_END, 'string_literal');
-  stateToSyntax.set(Lexer.State.STRING1_ESCAPE, 'string_literal');
-  stateToSyntax.set(Lexer.State.STRING2, 'string_literal');
-  stateToSyntax.set(Lexer.State.STRING2_END, 'string_literal');
-  stateToSyntax.set(Lexer.State.STRING2_ESCAPE, 'string_literal');
-  stateToSyntax.set(Lexer.State.WORD, 'identifier');
 
   /**
    * @param {!Lexer} lexer
@@ -146,17 +124,22 @@ global.Lexer = (function() {
     var range = lexer.range;
     range.collapseTo(token.start);
     range.end = token.end;
-    var syntax = lexer.stateToSyntax_.get(token.state) ||
-                 stateToSyntax.get(token.state) || '';
-    if (syntax == 'identifier') {
-      var word = lexer.extractWord(range, token);
-      if (lexer.debug_ > 5)
-        console.log('setSyntax', '"' + word + '"');
-      syntax = lexer.keywords.has(word) ? 'keyword' : '';
-    }
+    var syntax = lexer.syntaxOfToken(range, token) || '';
     if (lexer.debug_ > 4)
-      console.log('setSyntax', syntax, token);
-    range.setSyntax(syntax);
+      console.log('setSyntax', '"' + syntax + '"', token);
+    range.setSyntax(syntax == 'identifier' ? '' : syntax);
+  }
+
+  /**
+   * @param {!Array.<string>} keywords
+   * @return {!Map.<string, string>}
+   */
+  Lexer.createKeywords = function(keywords) {
+    var map = new Map();
+    keywords.forEach(function(keyword) {
+      map.set(keyword, 'keyword');
+    });
+    return map;
   }
 
   /**
@@ -250,6 +233,32 @@ global.Lexer = (function() {
       }
     },
 
+    collectTokens: {value:
+      /**
+       * @this {!Lexer}
+       * @param {!OrderedSetNode.<!Lexer.Token>} itDelimiter
+       * @param {!Lexer.Token} token
+       * @return {!Array.<!Lexer.Token>}
+       */
+      function(itDelimiter, token) {
+        var delimiter = itDelimiter.data;
+        var tokens = [token];
+        var it = itDelimiter;
+        while (it && it.data.state == delimiter.state &&
+               tokens.length < this.maxChainWords_) {
+          tokens.unshift(it.data);
+          do {
+            it = it.previous();
+          } while (it && it.data.state == Lexer.State.SPACE);
+          if (!it || it.data.state != Lexer.State.WORD)
+            break;
+          tokens.unshift(it.data);
+          it = it.previous();
+        }
+        return tokens;
+      }
+    },
+
     debug_: {value: 0, writable: true},
 
     detach: {value:
@@ -304,9 +313,10 @@ global.Lexer = (function() {
         while (this.scanOffset < maxOffset) {
           this.nextToken(maxOffset);
         }
-        if (this.lastToken)
+        var count = this.scanOffset - startOffset;
+        if (count && this.lastToken)
           colorLastToken(this);
-        return maxCount - (this.scanOffset - startOffset);
+        return maxCount - count;
       }
     },
 
@@ -436,11 +446,76 @@ global.Lexer = (function() {
       }
    },
 
-   // Implements common tokens:
-   //   - string in single quote with backslash escaping
-   //   - string in double quote with backslash escaping
-   //   - line comment
-   updateState: {value:
+  syntaxOfToken: {value:
+    (function() {
+      var map = new Map();
+      map.set(Lexer.State.DOT, 'operators');
+      map.set(Lexer.State.LINE_COMMENT, 'comment');
+      map.set(Lexer.State.OPERATOR, 'operators');
+      map.set(Lexer.State.OTHER, '');
+      map.set(Lexer.State.SPACE, '');
+      map.set(Lexer.State.STRING1, 'string_literal');
+      map.set(Lexer.State.STRING1_END, 'string_literal');
+      map.set(Lexer.State.STRING1_ESCAPE, 'string_literal');
+      map.set(Lexer.State.STRING2, 'string_literal');
+      map.set(Lexer.State.STRING2_END, 'string_literal');
+      map.set(Lexer.State.STRING2_ESCAPE, 'string_literal');
+      map.set(Lexer.State.WORD, 'identifier');
+
+      /**
+       * @param {!Lexer.Token} token
+       * @param {!Range} range
+       * @return {string}
+       */
+      return function(range, token) {
+        return map.get(token.state);
+      }
+    })()
+  },
+
+  syntaxOfWord: {value:
+    /**
+     * @this {!Lexer}
+     * @param {string} word
+     * @return {string}
+     */
+    function(word) {
+      return this.keywords.has(word) ? 'keyword' : 'identifier';
+    }
+  },
+
+  syntaxOfTokens: {value:
+    /**
+     * @this {!Lexer} lexer
+     * @param {!Range} range
+     * @param {!Array.<!Lexer.Token>} tokens
+     * @param {string} delimiter
+     * @return {string}
+     */
+    function(range, tokens, delimiter) {
+      var lexer = this;
+      var document = range.document;
+      var words = tokens.map(function(token) {
+        return document.slice(token.start, token.end);
+      });
+      while (words.length) {
+        var syntax = lexer.keywords.get(words.join(''));
+        if (syntax) {
+          range.start = tokens[0].start;
+          return syntax;
+        }
+        words.shift();
+        tokens.shift();
+      }
+      return '';
+    }
+  },
+
+  // Implements common tokens:
+  //   - string in single quote with backslash escaping
+  //   - string in double quote with backslash escaping
+  //   - line comment
+  updateState: {value:
      /**
       * @protected
       * @this {!Lexer}
@@ -449,6 +524,9 @@ global.Lexer = (function() {
      function(charCode) {
        var lexer = this;
        switch (lexer.state){
+        case Lexer.State.DOT:
+          lexer.state = Lexer.State.ZERO;
+          break;
         case Lexer.State.LINE_COMMENT:
           if (charCode == Unicode.LF)
             lexer.endToken();

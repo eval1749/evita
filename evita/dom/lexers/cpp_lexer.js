@@ -25,7 +25,7 @@ global.CppLexer = (function(options) {
     attrs.set(Unicode.COLON, Unicode.COLON);
     return attrs;
   })(),
-  keywords: [
+  keywords: Lexer.createKeywords([
   // C++ keywords
   'auto',
   'bool', 'break',
@@ -165,4 +165,4 @@ global.CppLexer = (function(options) {
   // Vogue
   'gfx::Point', 'gfx::Rect', 'gfx::Size',
   'gfx::PointF', 'gfx::RectF', 'gfx::SizeF',
-]});
+])});

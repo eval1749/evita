@@ -5,17 +5,17 @@
 global.ConfigLexer = (function() {
   /** @const @type {!Map.<number, !Symbol>} */
   var CHARACTERS = (function() {
-    var attrs = new Map();
-    attrs.set(Unicode.LF, Lexer.WHITESPACE_CHAR);
-    attrs.set(Unicode.SPACE, Lexer.WHITESPACE_CHAR);
-    attrs.set(Unicode.TAB, Lexer.WHITESPACE_CHAR);
-    attrs.set(Unicode.APOSTROPHE, Lexer.STRING1_CHAR);
-    attrs.set(Unicode.QUOTATION_MARK, Lexer.STRING2_CHAR);
-    return attrs;
+    var map = new Map();
+    map.set(Unicode.LF, Lexer.WHITESPACE_CHAR);
+    map.set(Unicode.SPACE, Lexer.WHITESPACE_CHAR);
+    map.set(Unicode.TAB, Lexer.WHITESPACE_CHAR);
+    map.set(Unicode.APOSTROPHE, Lexer.STRING1_CHAR);
+    map.set(Unicode.QUOTATION_MARK, Lexer.STRING2_CHAR);
+    return map;
   })();
 
-  /** @const @type {!Map.<!Symbol, string>} */
-  var STATE_TO_SYNTAX = new Map();
+  /** @const @type {!Map.<string, string>} */
+  var KEYWORDS = Lexer.createKeywords([]);
 
   /**
    * @constructor
@@ -25,8 +25,7 @@ global.ConfigLexer = (function() {
   function ConfigLexer(document) {
     Lexer.call(this, document, {
       characters: CHARACTERS,
-      keywords: [],
-      stateToSyntax: STATE_TO_SYNTAX
+      keywords: KEYWORDS,
     });
   }
 

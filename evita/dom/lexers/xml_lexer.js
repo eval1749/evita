@@ -42,62 +42,65 @@ global.XmlLexer = (function(keywords) {
     TEXT: Symbol('text')
   };
 
-  /** @const @type {!Map.<XmlState, string>} */
-  var stateToSyntax = new Map();
-  stateToSyntax.set(XmlState.ATTRNAME, 'html_attribute_name');
-  stateToSyntax.set(XmlState.ATTRNAME_EQ, '');
-  stateToSyntax.set(XmlState.ATTRNAME_GT, '');
-  stateToSyntax.set(XmlState.ATTRNAME_SPACE, '');
+  /** @const @type {!Map.<!XmlState, string>} */
+  var STATE_TO_SYNTAX = (function() {
+    var map = new Map();
+    map.set(XmlState.ATTRNAME, 'html_attribute_name');
+    map.set(XmlState.ATTRNAME_EQ, '');
+    map.set(XmlState.ATTRNAME_GT, '');
+    map.set(XmlState.ATTRNAME_SPACE, '');
 
-  stateToSyntax.set(XmlState.ATTRVALUE, 'html_attribute_value');
-  stateToSyntax.set(XmlState.ATTRVALUE_END, 'html_attribute_value');
-  stateToSyntax.set(XmlState.ATTRVALUE_SPACE, '');
-  stateToSyntax.set(XmlState.ATTRVALUE1, 'html_attribute_value');
-  stateToSyntax.set(XmlState.ATTRVALUE2, 'html_attribute_value');
+    map.set(XmlState.ATTRVALUE, 'html_attribute_value');
+    map.set(XmlState.ATTRVALUE_END, 'html_attribute_value');
+    map.set(XmlState.ATTRVALUE_SPACE, '');
+    map.set(XmlState.ATTRVALUE1, 'html_attribute_value');
+    map.set(XmlState.ATTRVALUE2, 'html_attribute_value');
 
-  stateToSyntax.set(XmlState.CLOSETAG, '');
-  stateToSyntax.set(XmlState.CLOSETAG_SPACE, '');
+    map.set(XmlState.CLOSETAG, '');
+    map.set(XmlState.CLOSETAG_SPACE, '');
 
-  stateToSyntax.set(XmlState.COMMENT, 'comment');
-  stateToSyntax.set(XmlState.COMMENT_DASH, 'comment');
-  stateToSyntax.set(XmlState.COMMENT_DASH_DASH, 'comment');
-  stateToSyntax.set(XmlState.COMMENT_END, 'comment');
-  stateToSyntax.set(XmlState.COMMENT_START, 'comment');
+    map.set(XmlState.COMMENT, 'comment');
+    map.set(XmlState.COMMENT_DASH, 'comment');
+    map.set(XmlState.COMMENT_DASH_DASH, 'comment');
+    map.set(XmlState.COMMENT_END, 'comment');
+    map.set(XmlState.COMMENT_START, 'comment');
 
-  stateToSyntax.set(XmlState.ELEMENTNAME, 'html_element_name');
-  stateToSyntax.set(XmlState.ELEMENTNAME_SLASH, '');
+    map.set(XmlState.ELEMENTNAME, 'html_element_name');
+    map.set(XmlState.ELEMENTNAME_SLASH, '');
 
-  stateToSyntax.set(XmlState.ENTITYREF, 'html_entity');
-  stateToSyntax.set(XmlState.ENTITYREF_END, 'html_entity');
+    map.set(XmlState.ENTITYREF, 'html_entity');
+    map.set(XmlState.ENTITYREF_END, 'html_entity');
 
-  stateToSyntax.set(XmlState.GT, '');
+    map.set(XmlState.GT, '');
 
-  stateToSyntax.set(XmlState.LT, '');
-  stateToSyntax.set(XmlState.LT_BANG, '');
-  stateToSyntax.set(XmlState.LT_BANG_DASH, '');
+    map.set(XmlState.LT, '');
+    map.set(XmlState.LT_BANG, '');
+    map.set(XmlState.LT_BANG_DASH, '');
 
-  stateToSyntax.set(XmlState.TEXT, '');
+    map.set(XmlState.TEXT, '');
 
-  Object.keys(XmlState).forEach(function(key) {
-    if (!stateToSyntax.has(XmlState[key]))
-      throw new Error('stateToSyntax must have ' + key);
-  });
+    Object.keys(XmlState).forEach(function(key) {
+      if (!map.has(XmlState[key]))
+        throw new Error('map must have ' + key);
+    });
+    return map;
+  })();
 
   /** @const @type {!Map.<number, number>} */
   var CHARACTERS = (function() {
-    var attrs = new Map();
+    var map = new Map();
 
-    attrs.set(Unicode.LF, Lexer.WHITESPACE_CHAR);
-    attrs.set(Unicode.SPACE, Lexer.WHITESPACE_CHAR);
-    attrs.set(Unicode.TAB, Lexer.WHITESPACE_CHAR);
+    map.set(Unicode.LF, Lexer.WHITESPACE_CHAR);
+    map.set(Unicode.SPACE, Lexer.WHITESPACE_CHAR);
+    map.set(Unicode.TAB, Lexer.WHITESPACE_CHAR);
 
-    attrs.set(Unicode.AMPERSAND, Lexer.OPERATOR_CHAR);
-    attrs.set(Unicode.APOSTROPHE, Lexer.STRING1_CHAR);
-    attrs.set(Unicode.COLON, Lexer.WORD_CHAR);
-    attrs.set(Unicode.LESS_THAN_SIGN, Lexer.OPERATOR_CHAR);
-    attrs.set(Unicode.QUOTATION_MARK, Lexer.STRING2_CHAR);
+    map.set(Unicode.AMPERSAND, Lexer.OPERATOR_CHAR);
+    map.set(Unicode.APOSTROPHE, Lexer.STRING1_CHAR);
+    map.set(Unicode.COLON, Lexer.WORD_CHAR);
+    map.set(Unicode.LESS_THAN_SIGN, Lexer.OPERATOR_CHAR);
+    map.set(Unicode.QUOTATION_MARK, Lexer.STRING2_CHAR);
 
-    return attrs;
+    return map;
   })();
 
   /**
@@ -109,7 +112,6 @@ global.XmlLexer = (function(keywords) {
     Lexer.call(this, document, {
       characters: CHARACTERS,
       keywords: keywords,
-      stateToSyntax: stateToSyntax
     });
   }
 
@@ -160,16 +162,6 @@ global.XmlLexer = (function(keywords) {
         token.state = XmlState.LT_BANG;
         return;
     }
-  }
-
-  /**
-   * @this {!XmlLexer}
-   * @param {!Range} range
-   * @param {!Lexer.Token} token
-   * @return {string}
-   */
-  function extractWord(range, token) {
-    return range.text;
   }
 
   /**
@@ -436,18 +428,28 @@ global.XmlLexer = (function(keywords) {
     }
   }
 
+  /**
+   * @this {!XmlLexer}
+   * @param {!Lexer.Token} token
+   * @param {!Range} range
+   * @return {string}
+   */
+  function syntaxOfToken(range, token) {
+    return STATE_TO_SYNTAX.get(token.state) || '';
+  }
+
   XmlLexer.prototype = Object.create(Lexer.prototype, {
     constructor: {value: XmlLexer},
     didShrinkLastToken: {value: didShrinkLastToken },
-    extractWord: {value: extractWord},
-    nextToken: {value: nextToken}
+    nextToken: {value: nextToken},
+    syntaxOfToken: {value: syntaxOfToken}
   });
 
   return XmlLexer;
-})([
+})(Lexer.createKeywords([
   'xi:include',
   'xml:base',
   'xml:lang',
   'xmlns:',
   'xml:space'
-]);
+]));

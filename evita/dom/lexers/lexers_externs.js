@@ -6,7 +6,7 @@
  * @typedef {Object}
  *  characters: {!Map<number, !Symbol},
  *  hasCpp: boolean,
- *  keywords: {!Iterable.<string>} keywords
+ *  keywords: {!Set.<string>} keywords
  */
 var ClikeLexerOptions;
 

@@ -3,54 +3,40 @@
 // found in the LICENSE file.
 
 global.PythonLexer = (function(keywords) {
-  /** @enum{!Symbol} */
-  var State = {
-    DOT: Symbol('.'),
-  };
-
-  /** @const @type {!Map.<State, string>} */
-  var stateToSyntax = new Map();
-  stateToSyntax.set(State.DOT, 'operators');
-
-  Object.keys(State).forEach(function(key) {
-    if (!stateToSyntax.has(State[key]))
-      throw new Error('stateToSyntax must have ' + key);
-  });
-
   /** @const @type {!Map.<number, number>} */
   var CHARACTERS = (function() {
-    var attrs = new Map();
+    var map = new Map();
 
-    attrs.set(Unicode.LF, Lexer.WHITESPACE_CHAR);
-    attrs.set(Unicode.SPACE, Lexer.WHITESPACE_CHAR);
-    attrs.set(Unicode.TAB, Lexer.WHITESPACE_CHAR);
+    map.set(Unicode.LF, Lexer.WHITESPACE_CHAR);
+    map.set(Unicode.SPACE, Lexer.WHITESPACE_CHAR);
+    map.set(Unicode.TAB, Lexer.WHITESPACE_CHAR);
 
     for (var charCode = 0x21; charCode < 0x40; ++charCode) {
-      attrs.set(charCode, Lexer.OPERATOR_CHAR);
+      map.set(charCode, Lexer.OPERATOR_CHAR);
     }
 
-    attrs.set(Unicode.FULL_STOP, ClikeLexer.DOT_CHAR);
+    map.set(Unicode.FULL_STOP, Lexer.DOT_CHAR);
 
     // String literal
-    attrs.set(Unicode.APOSTROPHE, Lexer.STRING1_CHAR);
-    attrs.set(Unicode.QUOTATION_MARK, Lexer.STRING2_CHAR);
+    map.set(Unicode.APOSTROPHE, Lexer.STRING1_CHAR);
+    map.set(Unicode.QUOTATION_MARK, Lexer.STRING2_CHAR);
 
     // Word [0-9a-zA-Z_]
     for (var charCode = Unicode.DIGIT_ZERO;
          charCode <= Unicode.DIGIT_NINE; ++charCode) {
-      attrs.set(charCode, Lexer.WORD_CHAR);
+      map.set(charCode, Lexer.WORD_CHAR);
     }
     for (var charCode = Unicode.LATIN_CAPITAL_LETTER_A;
          charCode <= Unicode.LATIN_CAPITAL_LETTER_Z; ++charCode) {
-      attrs.set(charCode, Lexer.WORD_CHAR);
+      map.set(charCode, Lexer.WORD_CHAR);
     }
     for (var charCode = Unicode.LATIN_SMALL_LETTER_A;
          charCode <= Unicode.LATIN_SMALL_LETTER_Z; ++charCode) {
-      attrs.set(charCode, Lexer.WORD_CHAR);
+      map.set(charCode, Lexer.WORD_CHAR);
     }
-    attrs.set(Unicode.LOW_LINE, Lexer.WORD_CHAR);
+    map.set(Unicode.LOW_LINE, Lexer.WORD_CHAR);
 
-    return attrs;
+    return map;
   })();
 
   /**
@@ -61,8 +47,7 @@ global.PythonLexer = (function(keywords) {
   function PythonLexer(document) {
     Lexer.call(this, document, {
       characters: CHARACTERS,
-      keywords: keywords,
-      stateToSyntax: stateToSyntax
+      keywords: keywords
     });
   }
 
@@ -73,48 +58,10 @@ global.PythonLexer = (function(keywords) {
   function didShrinkLastToken(token) {
     if (this.debug_ > 1)
       console.log('didShrinkLastToken', token);
-    if (token.state == State.DOT) {
+    if (token.state == Lexer.State.DOT) {
       token.state = Lexer.State.ZERO;
       return;
     }
-  }
-
-  /**
-   * @this {!PythonLexer}
-   * @param {!Range} range
-   * @param {!Lexer.Token} token
-   * @return {string}
-   */
-  function extractWord(range, token) {
-    var lexer = this;
-    var word = range.text;
-    var it = lexer.tokens.find(token);
-    console.assert(it, token);
-    do {
-      it = it.previous();
-    } while (it && it.data.state == Lexer.State.SPACE);
-
-    if (!it)
-      return word;
-
-    if (it.data.state == State.DOT) {
-      var dotWord = '.' + word;
-      if (lexer.keywords.has(dotWord)) {
-        range.start = it.data.start;
-        return dotWord;
-      }
-      it = it.previous();
-      while (it && it.data.state == Lexer.State.SPACE) {
-        it = it.previous();
-      }
-      if (!it || it.data.state != Lexer.State.WORD)
-        return word;
-      range.start = it.data.start;
-      var previous = range.document.slice(it.data.start, it.data.end);
-      return previous + dotWord;
-    }
-
-    return word;
   }
 
   /**
@@ -129,7 +76,7 @@ global.PythonLexer = (function(keywords) {
       if (lexer.state == Lexer.State.ZERO) {
         switch (charCode) {
           case Unicode.FULL_STOP:
-            lexer.startToken(State.DOT);
+            lexer.startToken(Lexer.State.DOT);
             lexer.endToken();
             continue;
           case Unicode.NUMBER_SIGN:
@@ -141,15 +88,40 @@ global.PythonLexer = (function(keywords) {
     }
   }
 
+  /**
+   * @this {!PythonLexer}
+   * @param {!Lexer.Token} token
+   * @param {!Range} range
+   * @return {string}
+   */
+  function syntaxOfToken(range, token) {
+    if (token.state != Lexer.State.WORD)
+      return Lexer.prototype.syntaxOfToken.call(this, range, token);
+    var lexer = this;
+    var word = range.text;
+    var it = lexer.tokens.find(token);
+    console.assert(it, token);
+    do {
+      it = it.previous();
+    } while (it && it.data.state == Lexer.State.SPACE);
+
+    if (it && it.data.state == Lexer.State.DOT) {
+      var tokens = lexer.collectTokens(it, token);
+      return lexer.syntaxOfTokens(range, tokens);
+    }
+
+    return lexer.syntaxOfWord(word);
+  }
+
   PythonLexer.prototype = Object.create(Lexer.prototype, {
     constructor: {value: PythonLexer},
     didShrinkLastToken: {value: didShrinkLastToken },
-    extractWord: {value: extractWord},
-    nextToken: {value: nextToken}
+    nextToken: {value: nextToken},
+    syntaxOfToken: {value: syntaxOfToken}
   });
 
   return PythonLexer;
-})([
+})(Lexer.createKeywords([
   // Keywords
   'and', 'as', 'assert', 'break', 'class',
   'continue', 'def', 'del', 'elif', 'else', 'except', 'exec',
@@ -164,4 +136,7 @@ global.PythonLexer = (function(keywords) {
   'complex', 'float', 'int', 'long',
   'str', 'unicode', 'list', 'tuple', 'bytearray', 'xrange',
   'set', 'frozenset', 'dict',
-]);
+  // 5.13. Special Attributes
+  '__dict__', '__class__', '__bases__', '__name__', '__mro__',
+  '__subclasses__',
+]));

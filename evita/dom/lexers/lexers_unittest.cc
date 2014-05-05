@@ -41,6 +41,8 @@ TEST_F(LexersTest, all) {
     "   return 'v';"
     "  if (syntax == 'html_entity')"
     "   return '&';"
+    "  if (syntax == 'keyword2')"
+    "   return 'K';"
     "  if (syntax.startsWith('html_'))"
     "   return syntax.charAt(5);"
     "  return syntax.charAt(0);"
@@ -66,6 +68,14 @@ TEST_F(LexersTest, all) {
         "'  auto a2 = \"s2\";',"
     "])");
 
+  EXPECT_SCRIPT_EQ(
+    "n1 k15 o1 n1 o1 n4 o2 n10 o1 n1 o1 n1 k14",
+    "doColor('extended_keywords.cc', ['"
+        " std::unique_ptr<T>"
+        " std::vector_ptr<T>"
+        " base::string16"
+    "'])");
+
   // IdlLexer
   EXPECT_SCRIPT_EQ(
     "c9 n1 c6 n1 k9 n4 o1 n1 s4 o1 n3 k9 n4 o1 n1 s4 o1",
@@ -86,6 +96,16 @@ TEST_F(LexersTest, all) {
         "'  instanceof a2 = \"s2\";',"
     "])");
 
+  EXPECT_SCRIPT_EQ(
+    "n11 k4 o1 n4 k4 o1 n5 o2 n4 o1 n8 o2 n4 K10",
+    "doColor('extended_java.js', ['"
+        " @Override"
+        " this.foo"
+        " this.clone()"
+        " Foo.getClass()"
+        " Foo.prototype"
+    "'])");
+
   // JavaScriptLexer
   EXPECT_SCRIPT_EQ(
     "c9 n1 c6 n1 k2 n1 o1 n3 o1 n1 s4 o1 n3 k3 n4 o1 n1 s4 o1",
@@ -95,6 +115,17 @@ TEST_F(LexersTest, all) {
         "'if (a1 = \\'s1\\')',"
         "'  var a2 = \"s2\";',"
     "])");
+
+  EXPECT_SCRIPT_EQ(
+    "n1 k8 o1 n1 o1 n1 k4 o1 n4 k4 K7 n4 K7 n4 K10 n4 K9 o2",
+    "doColor('extended_keywords.js', ['"
+        " Math.sin(1)"
+        " this.foo"
+        " this.length"
+        " Foo.length"
+        " Foo.prototype"
+        " Foo.toString()"
+    "'])");
 
   // PythonLexer
   EXPECT_SCRIPT_EQ(

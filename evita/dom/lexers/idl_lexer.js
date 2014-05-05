@@ -19,7 +19,7 @@ global.IdlLexer = (function(options) {
   return IdlLexer;
 })({
   characters: ClikeLexer.newCharacters(),
-  keywords: [
+  keywords: Lexer.createKeywords([
     'any', 'attribute',
     'boolean', 'byte',
     'callback', 'const', 'creator',
@@ -57,4 +57,4 @@ global.IdlLexer = (function(options) {
 
     // Extended attributes in Blink IDL
     'ImplementedAs'
-]});
+])});

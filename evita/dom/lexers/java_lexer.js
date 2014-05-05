@@ -25,7 +25,7 @@ global.JavaLexer = (function(options) {
     attrs.set(Unicode.COMMERCIAL_AT, Lexer.WORD_CHAR);
     return attrs;
   })(),
-  keywords: [
+  keywords: Lexer.createKeywords([
   'abstract', 'assert',
   'boolean', 'break', 'byte',
   'case', 'catch', 'char', 'class', 'const', 'continue',
@@ -147,6 +147,7 @@ global.JavaLexer = (function(options) {
   'VirtualMachineError',
 
   // Methods of java.lang.Object
+  '.class',
   '.clone',
   '.equals',
   '.finalize',
@@ -161,4 +162,4 @@ global.JavaLexer = (function(options) {
   '@Deprecated',
   '@Override',
   '@SuppressWarnings',
-]});
+])});

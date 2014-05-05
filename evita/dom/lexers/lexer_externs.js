@@ -5,8 +5,7 @@
 /**
  * @typedef {{
  *  characters: !Map.<number, !Symbol>,
- *  keywords: !Iterable.<string>,
- *  stateToSyntax: !Map.<!Symbol, string>
+ *  keywords: !Map.<string, string>
  * }}
  */
 var LexerOptions;
@@ -17,6 +16,9 @@ var LexerOptions;
  * @param {!LexerOptions} options
  */
 function Lexer(document, options) {}
+
+/** @const @type {!Symbol} */
+Lexer.DOT_CHAR;
 
 /** @const @type {!Symbol} */
 Lexer.OPERATOR_CHAR;
@@ -38,6 +40,9 @@ Lexer.WORD_CHAR;
 
 /** @typedef {!Symbol} */
 Lexer.State;
+
+/** @const @type {!Lexer.State} */
+Lexer.State.DOT;
 
 /** @const @type {!Lexer.State} */
 Lexer.State.LINE_COMMENT;
@@ -92,6 +97,11 @@ Lexer.Token.prototype.state;
 Lexer.Token.prototype.type;
 
 /**
+ * @type {!function(!Array.<string>): !Map.<string, string>}
+ */
+Lexer.createKeywords;
+
+/**
  * @type {number}
  */
 Lexer.prototype.changeOffset;
@@ -112,9 +122,14 @@ Lexer.prototype.count;
 Lexer.prototype.debug_;
 
 /**
- * @type {!Set.<string>}
+ * @type {!Map.<string, string>}
  */
 Lexer.prototype.keywords;
+
+/**
+ * @type {number}
+ */
+Lexer.prototype.maxChainWords_;
 
 /**
  * @type {!MutationObserver}
@@ -142,11 +157,6 @@ Lexer.prototype.scanOffset;
 Lexer.prototype.state;
 
 /**
- * @type {!Map.<number,string>}
- */
-Lexer.prototype.stateToSyntax_;
-
-/**
  * @type {OrderedSet.<!Lexer.Token>}
  */
 Lexer.prototype.tokens;
@@ -157,6 +167,14 @@ Lexer.prototype.tokens;
 Lexer.prototype.adjustScanOffset = function() {};
 
 /**
+ * @param {OrderedSetNode.<!Lexer.Token>} itDelimiter
+ * @param {!Lexer.Token} token
+ * @return {!Array.<!Lexer.Token>}
+ */
+Lexer.prototype.collectTokens = function(itDelimiter, token) {};
+
+/**
+ * @type {!function()}
  */
 Lexer.prototype.detach = function() {};
 
@@ -241,6 +259,28 @@ Lexer.prototype.restartToken = function(newState) {};
  * @param {!Lexer.State} state
  */
 Lexer.prototype.startToken = function(state) {};
+
+/**
+ * @param {!Range} range
+ * @param {!Lexer.Token} token
+ * @return {string}
+ */
+Lexer.prototype.syntaxOfToken = function(range, token) {};
+
+/**
+ * @this {!Lexer}
+ * @param {string} word
+ * @return {string}
+ */
+Lexer.prototype.syntaxOfWord = function(word) {};
+
+/**
+ * @this {!Lexer}
+ * @param {!Range} range
+ * @param {!Array.<!Lexer.Token>} tokens
+ * @return {string}
+ */
+Lexer.prototype.syntaxOfTokens = function(range, tokens) {};
 
 /**
  * TODO(yosi) Once, Closure compiler recognizes |ClikeLexer| is subclass of

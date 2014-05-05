@@ -184,7 +184,6 @@ global.ClikeLexer = (function() {
   /**
    * @this {!ClikeLexer}
    * @param {number} maxOffset
-   * @return {?Lexer.Token}
    */
   function nextToken(maxOffset) {
     var lexer = this;
@@ -194,125 +193,123 @@ global.ClikeLexer = (function() {
       switch (lexer.state) {
         case State.BLOCK_COMMENT:
           if (charCode == Unicode.ASTERISK)
-            return lexer.finishToken(State.BLOCK_COMMENT_ASTERISK);
-          lexer.extendToken();
-          break;
+            lexer.finishToken(State.BLOCK_COMMENT_ASTERISK);
+          else
+            lexer.extendToken();
+          continue;
 
         case State.BLOCK_COMMENT_ASTERISK:
-          if (charCode == Unicode.ASTERISK) {
+          if (charCode == Unicode.ASTERISK)
             lexer.extendToken();
-            break;
-          }
-          if (charCode == Unicode.SOLIDUS)
-            return lexer.finishTokenAs(State.BLOCK_COMMENT_END);
-          return lexer.finishToken(State.BLOCK_COMMENT);
+          else if (charCode == Unicode.SOLIDUS)
+            lexer.restartToken(State.BLOCK_COMMENT_END);
+          else
+            lexer.finishToken(State.BLOCK_COMMENT);
+          continue;
 
         case State.BLOCK_COMMENT_END:
           lexer.state = Lexer.State.ZERO;
-          break;
+          continue;
 
         case State.BLOCK_COMMENT_START:
           if (charCode == Unicode.ASTERISK)
             lexer.startToken(State.BLOCK_COMMENT_ASTERISK);
           else
             lexer.startToken(State.BLOCK_COMMENT);
-          break;
+          continue;
 
         case State.COLON:
           if (charCode == Unicode.COLON)
-            return lexer.finishTokenAs(State.COLON_COLON);
-          return lexer.finishToken(Lexer.State.ZERO);
+            lexer.restartToken(State.COLON_COLON);
+          else
+            lexer.endToken();
+          continue;
 
         case State.COLON_COLON:
         case State.DOT:
           lexer.state = Lexer.State.ZERO;
-          break;
+          continue;
 
         case State.LINE_COMMENT:
           if (charCode == Unicode.LF)
-            return lexer.finishToken(Lexer.State.ZERO);
-          if (charCode == Unicode.REVERSE_SOLIDUS)
-            return lexer.finishToken(State.LINE_COMMENT_ESCAPE);
-          lexer.extendToken();
-          break;
+            lexer.endToken();
+          else if (charCode == Unicode.REVERSE_SOLIDUS)
+            lexer.finishToken(State.LINE_COMMENT_ESCAPE);
+          else
+            lexer.extendToken();
+          continue;
 
         case State.LINE_COMMENT_ESCAPE:
-          return lexer.finishToken(State.LINE_COMMENT);
+          lexer.finishToken(State.LINE_COMMENT);
+          continue;
 
         case State.LINE_COMMENT_START:
           if (charCode == Unicode.LF) {
             lexer.state = Lexer.State.ZERO;
-            break;
+            continue;
           }
           if (charCode == Unicode.REVERSE_SOLIDUS)
             lexer.startToken(State.LINE_COMMENT_ESCAPE);
           else
             lexer.startToken(State.LINE_COMMENT);
-          break;
+          continue;
 
         case State.NEWLINE:
-          if (!lexer.isWhitespace(charCode))
-            return lexer.finishToken(Lexer.State.ZERO);
-          lexer.extendToken();
-          break;
+          if (lexer.isWhitespace(charCode))
+            lexer.extendToken();
+          else
+            lexer.endToken();
+          continue;
 
         case State.NUMBER_SIGN:
           lexer.state = Lexer.State.ZERO;
-          break;
+          continue;
 
         case State.SOLIDUS:
           if (charCode == Unicode.ASTERISK)
-            return lexer.finishTokenAs(State.BLOCK_COMMENT_START);
-          if (charCode == Unicode.SOLIDUS)
-            return lexer.finishTokenAs(State.LINE_COMMENT_START);
-          return lexer.finishToken(Lexer.State.ZERO);
+            lexer.restartToken(State.BLOCK_COMMENT_START);
+          else if (charCode == Unicode.SOLIDUS)
+            lexer.restartToken(State.LINE_COMMENT_START);
+          else
+            lexer.endToken();
+          continue;
 
         case Lexer.State.ZERO:
           switch (charCode) {
             case Unicode.LF:
               lexer.startToken(State.NEWLINE);
-              break;
+              continue;
             case Unicode.SOLIDUS:
               lexer.startToken(State.SOLIDUS);
-              break;
+              continue;
             default:
               if (lexer.hasCpp && charCode == Unicode.NUMBER_SIGN) {
                 if (!lexer.lastToken ||
                     lexer.lastToken.state == State.NEWLINE) {
                   lexer.startToken(State.NUMBER_SIGN);
-                  return lexer.finishToken(Lexer.State.ZERO);
+                  lexer.endToken();
+                  continue;
                 }
                 lexer.startToken(Lexer.State.OPERATOR);
-                break;
+                continue;
               }
 
               if (lexer.useColonColon && charCode == Unicode.COLON) {
                 lexer.startToken(State.COLON);
-                break;
+                continue;
               }
 
               if (lexer.useDot && charCode == Unicode.FULL_STOP) {
                 lexer.startToken(State.DOT);
-                return lexer.finishToken(Lexer.State.ZERO);
-              }
-
-              {
-                var token = this.updateState(charCode);
-                if (token)
-                  return token;
+                lexer.endToken();
+                continue;
               }
               break;
           }
           break;
-        default: {
-          var token = this.updateState(charCode);
-          if (token)
-            return token;
-          break;
-        }
       }
+      this.updateState(charCode);
     }
-    return lexer.lastToken;
   }
 
   ClikeLexer.newCharacters = function() {

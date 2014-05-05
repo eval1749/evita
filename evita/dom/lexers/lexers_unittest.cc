@@ -115,6 +115,24 @@ TEST_F(LexersTest, all) {
         "'foo&amp;bar',"
         "'</element>',"
     "])");
+
+  // attribute variations
+  //  <input autofocus maxlength=10 />
+  EXPECT_SCRIPT_EQ(
+    "n1 e5 n1 a3 n1 a3 n1 v2 n1",
+    "doColor('foo.xml', ['<input abc xyz=10>'])");
+
+  // Malformed:  no space between attributes.
+  //  <abc def="123"ghi>
+  EXPECT_SCRIPT_EQ(
+    "n1 e3 n1 a3 n1 v5 a3 n1",
+    "doColor('foo.html', ['<abc def=\"123\"ghi>'])");
+
+  // Malformed: no ending quote
+  //  <abc def="123>ghi
+  EXPECT_SCRIPT_EQ(
+    "n1 e3 n1 a3 n1 v4 n4",
+    "doColor('foo.html', ['<abc def=\"123>ghi'])");
 }
 
 }  // namespace

@@ -2,15 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(yosi) Should we color entity reference in attribute value? VS2013
+// doesn't color.
+// TODO(yosi) NYI: <![CDATA[ ... ]]>
 global.XmlLexer = (function(keywords) {
   /** @enum{!Symbol} */
+  // ATTRVALUE_END and ENTITYREF_END make attribute value/entity reference
+  // coloring with backspace.
+  //
+  //  Before: ATTRNAME = ATTRVALUE ATTRVALUE_END CHAR
+  //  Action: hit backspace after CHAR
+  //  After: ATTRNAME = ATTRVALUE ATTRVALUE_END
+  //  Scanning starts from ATTRVALUE_END
   var XmlState = {
     ATTRNAME: Symbol('attrname'),
     ATTRNAME_EQ: Symbol('attrname='),
-    ATTRNAME_EQ_SPACE: Symbol('attrname=space'),
     ATTRNAME_GT: Symbol('attrname>'),
     ATTRNAME_SPACE: Symbol('attrname_space'),
     ATTRVALUE: Symbol('attrvalue'),
+    ATTRVALUE1: Symbol('string1'),
+    ATTRVALUE2: Symbol('string2'),
+    ATTRVALUE_END: Symbol('attrvalue_end'),
     ATTRVALUE_SPACE: Symbol('attrvalue_space'),
     CLOSETAG: Symbol('</'),
     CLOSETAG_SPACE: Symbol('</_space'),
@@ -21,16 +33,12 @@ global.XmlLexer = (function(keywords) {
     COMMENT_START: Symbol('<!--'),
     ELEMENTNAME: Symbol('element'),
     ELEMENTNAME_SLASH: Symbol('element/'),
-    ELEMENTNAME_SPACE: Symbol('element_space'),
     ENTITYREF: Symbol('&'),
+    ENTITYREF_END: Symbol('&;'),
     GT: Symbol('>'),
     LT: Symbol('<'),
     LT_BANG: Symbol('<!'),
     LT_BANG_DASH: Symbol('<!-'),
-    STRING1: Symbol('string1'),
-    STRING1_END: Symbol('string1_end'),
-    STRING2: Symbol('string2'),
-    STRING2_END: Symbol('string2_end'),
     TEXT: Symbol('text')
   };
 
@@ -38,30 +46,36 @@ global.XmlLexer = (function(keywords) {
   var stateToSyntax = new Map();
   stateToSyntax.set(XmlState.ATTRNAME, 'html_attribute_name');
   stateToSyntax.set(XmlState.ATTRNAME_EQ, '');
-  stateToSyntax.set(XmlState.ATTRNAME_EQ_SPACE, '');
   stateToSyntax.set(XmlState.ATTRNAME_GT, '');
   stateToSyntax.set(XmlState.ATTRNAME_SPACE, '');
-  stateToSyntax.set(XmlState.ATTRVALUE, 'string_literal');
+
+  stateToSyntax.set(XmlState.ATTRVALUE, 'html_attribute_value');
+  stateToSyntax.set(XmlState.ATTRVALUE_END, 'html_attribute_value');
   stateToSyntax.set(XmlState.ATTRVALUE_SPACE, '');
+  stateToSyntax.set(XmlState.ATTRVALUE1, 'html_attribute_value');
+  stateToSyntax.set(XmlState.ATTRVALUE2, 'html_attribute_value');
+
   stateToSyntax.set(XmlState.CLOSETAG, '');
   stateToSyntax.set(XmlState.CLOSETAG_SPACE, '');
+
   stateToSyntax.set(XmlState.COMMENT, 'comment');
   stateToSyntax.set(XmlState.COMMENT_DASH, 'comment');
   stateToSyntax.set(XmlState.COMMENT_DASH_DASH, 'comment');
   stateToSyntax.set(XmlState.COMMENT_END, 'comment');
   stateToSyntax.set(XmlState.COMMENT_START, 'comment');
+
   stateToSyntax.set(XmlState.ELEMENTNAME, 'html_element_name');
   stateToSyntax.set(XmlState.ELEMENTNAME_SLASH, '');
-  stateToSyntax.set(XmlState.ELEMENTNAME_SPACE, '');
+
   stateToSyntax.set(XmlState.ENTITYREF, 'html_entity');
+  stateToSyntax.set(XmlState.ENTITYREF_END, 'html_entity');
+
   stateToSyntax.set(XmlState.GT, '');
+
   stateToSyntax.set(XmlState.LT, '');
   stateToSyntax.set(XmlState.LT_BANG, '');
   stateToSyntax.set(XmlState.LT_BANG_DASH, '');
-  stateToSyntax.set(XmlState.STRING1, 'html_attribute_value');
-  stateToSyntax.set(XmlState.STRING1_END, 'html_attribute_value');
-  stateToSyntax.set(XmlState.STRING2, 'html_attribute_value');
-  stateToSyntax.set(XmlState.STRING2_END, 'html_attribute_value');
+
   stateToSyntax.set(XmlState.TEXT, '');
 
   Object.keys(XmlState).forEach(function(key) {
@@ -107,14 +121,21 @@ global.XmlLexer = (function(keywords) {
     if (this.debug_ > 1)
       console.log('didShrinkLastToken', token);
     switch (token.state) {
-      case XmlState.COMMENT_DASH:
-        token.state = XmlState.COMMENT;
-        return;
       case XmlState.COMMENT_DASH_DASH:
         token.state = XmlState.COMMENT_DASH;
         return;
       case XmlState.COMMENT_END:
-        token.state = XmlState.COMMENT_DASH_DASH;
+        switch (token.end - token.start) {
+          case 1:
+            token.state = XmlState.COMMENT_DASH;
+            break;
+          case 2:
+            token.state = XmlState.COMMENT_DASH_DASH;
+            break;
+          default:
+           console.assert(false, token);
+           break;
+        }
         return;
       case XmlState.COMMENT_START:
         switch (token.end - token.start) {
@@ -131,9 +152,6 @@ global.XmlLexer = (function(keywords) {
             console.assert(false, token);
             break;
         }
-        return;
-      case XmlState.ELEMENTNAME_SPACE:
-        token.state = XmlState.ELEMENTNAME;
         return;
       case XmlState.LT_BANG:
         token.state = XmlState.LT;
@@ -157,7 +175,6 @@ global.XmlLexer = (function(keywords) {
   /**
    * @this {!XmlLexer}
    * @param {number} maxOffset
-   * @return {?Lexer.Token}
    */
   function nextToken(maxOffset) {
     var lexer = this;
@@ -179,205 +196,244 @@ global.XmlLexer = (function(keywords) {
           }
           break;
 
+        ////////////////////////////////////////////////////////////
+        //
+        // ATTRNAME
+        //
         case XmlState.ATTRNAME:
           // attrName '=' | attrName '>' | attrName '/' | attrName space
           if (charCode == Unicode.EQUALS_SIGN)
-            return lexer.finishToken(XmlState.ATTRNAME_EQ);
-          if (charCode == Unicode.GREATER_THAN_SIGN)
-            return lexer.finishToken(XmlState.GT);
-          if (charCode == Unicode.SOLIDUS)
-            return lexer.finishToken(XmlState.ELEMENTNAME_SLASH);
-          if (lexer.isWhitespace(charCode))
-            return lexer.finishToken(XmlState.ATTRNAME_SPACE);
-          lexer.extendToken();
+            lexer.finishToken(XmlState.ATTRNAME_EQ);
+          else if (charCode == Unicode.GREATER_THAN_SIGN)
+            lexer.finishToken(XmlState.GT);
+          else if (charCode == Unicode.SOLIDUS)
+            lexer.finishToken(XmlState.ELEMENTNAME_SLASH);
+          else if (lexer.isWhitespace(charCode))
+            lexer.finishToken(XmlState.ATTRNAME_SPACE);
+          else
+            lexer.extendToken();
           continue;
         case XmlState.ATTRNAME_EQ:
           // attrName '=' '\'' | attrName '=' '"' | attrName '=' '>' |
           // attrName '=' '/' | attrName '=' space
           if (charCode == Unicode.GREATER_THAN_SIGN)
-            return lexer.finishToken(XmlState.GT);
-          if (charCode == Unicode.APOSTROPHE) {
-            lexer.startToken(XmlState.STRING1);
-            continue;
-          }
-          if (charCode == Unicode.QUOTATION_MARK) {
-            lexer.startToken(XmlState.STRING2);
-            continue;
-          }
-          if (charCode == Unicode.SOLIDUS)
-            return lexer.finishToken(XmlState.ELEMENTNAME_SLASH);
-          if (lexer.isWhitespace(charCode))
-            return lexer.finishToken(XmlState.ATTRNAME_EQ_SPACE);
-          lexer.startToken(XmlState.ATTRVALUE);
-          continue;
-        case XmlState.ATTRNAME_EQ_SPACE:
-          if (lexer.isWhitespace(charCode)) {
+            lexer.finishToken(XmlState.GT);
+          else if (charCode == Unicode.APOSTROPHE)
+            lexer.finishToken(XmlState.ATTRVALUE1);
+          else if (charCode == Unicode.QUOTATION_MARK)
+            lexer.finishToken(XmlState.ATTRVALUE2);
+          else if (charCode == Unicode.SOLIDUS)
+            lexer.finishToken(XmlState.ELEMENTNAME_SLASH);
+          else if (lexer.isWhitespace(charCode))
             lexer.extendToken();
-            continue;
-          }
-          lexer.startToken(XmlState.ATTRVALUE);
+          else
+            lexer.finishToken(XmlState.ATTRVALUE);
           continue;
         case XmlState.ATTRNAME_SPACE:
           // attrName space '=' | attrName space '>' | attrName space '/' |
           // attrName space space | attrName space attrName
           if (charCode == Unicode.EQUALS_SIGN)
-            return lexer.finishToken(XmlState.ATTRNAME_EQ);
-          if (charCode == Unicode.GREATER_THAN_SIGN)
-            return lexer.finishToken(XmlState.GT);
-          if (charCode == Unicode.SOLIDUS)
-            return lexer.finishToken(XmlState.ELEMENTNAME_SLASH);
-          if (lexer.isWhitespace(charCode)) {
+            lexer.finishToken(XmlState.ATTRNAME_EQ);
+          else if (charCode == Unicode.GREATER_THAN_SIGN)
+            lexer.finishToken(XmlState.GT);
+          else if (charCode == Unicode.SOLIDUS)
+            lexer.finishToken(XmlState.ELEMENTNAME_SLASH);
+          else if (lexer.isWhitespace(charCode))
             lexer.extendToken();
-            continue;
-          }
-          return lexer.finishToken(XmlState.ATTRNAME);
-
-        case XmlState.ATTRVALUE:
-          if (charCode == Unicode.GREATER_THAN_SIGN)
-            return lexer.finishToken(XmlState.GT);
-          if (charCode == Unicode.SOLIDUS)
-            return lexer.finishToken(XmlState.ELEMENTNAME_SLASH);
-          if (lexer.isWhitespace(charCode))
-            return lexer.finishToken(XmlState.ATTRVALUE_SPACE);
-          lexer.extendToken();
+          else
+            lexer.finishToken(XmlState.ATTRNAME);
           continue;
+
+        ////////////////////////////////////////////////////////////
+        //
+        // ATTRVALUE
+        //
+        case XmlState.ATTRVALUE:
+          // attribute value without quote
+          if (charCode == Unicode.GREATER_THAN_SIGN)
+            lexer.finishToken(XmlState.GT);
+          else if (charCode == Unicode.SOLIDUS)
+            lexer.finishToken(XmlState.ELEMENTNAME_SLASH);
+          else if (lexer.isWhitespace(charCode))
+            lexer.finishToken(XmlState.ATTRVALUE_SPACE);
+          else
+            lexer.extendToken();
+          continue;
+
+        case XmlState.ATTRVALUE1:
+          // Eat up to single-quote "'". ">" terminates attribute value.
+          if (charCode == Unicode.APOSTROPHE)
+            lexer.finishToken(XmlState.ATTRVALUE_END);
+          else if (charCode == Unicode.GREATER_THAN_SIGN)
+            lexer.finishToken(XmlState.GT);
+          else
+            lexer.extendToken();
+          continue;
+
+        case XmlState.ATTRVALUE2:
+          // Eat up to double-quote "\"". ">" terminates attribute value.
+          if (charCode == Unicode.QUOTATION_MARK)
+            lexer.finishToken(XmlState.ATTRVALUE_END);
+          else if (charCode == Unicode.GREATER_THAN_SIGN)
+            lexer.finishToken(XmlState.GT);
+          else
+            lexer.extendToken();
+          continue;
+
+        case XmlState.ATTRVALUE_END:
+          if (charCode == Unicode.GREATER_THAN_SIGN)
+            lexer.finishToken(XmlState.GT);
+          else if (lexer.isWhitespace(charCode))
+            lexer.finishToken(XmlState.ATTRVALUE_SPACE);
+          else
+            lexer.finishToken(XmlState.ATTRNAME);
+          continue;
+
         case XmlState.ATTRVALUE_SPACE:
           if (charCode == Unicode.GREATER_THAN_SIGN)
-            return lexer.finishToken(XmlState.GT);
-          if (charCode == Unicode.SOLIDUS)
+            lexer.finishToken(XmlState.GT);
+          else if (charCode == Unicode.SOLIDUS)
             return lexer.finishToken(XmlState.ELEMENTNAME_SLASH);
-          if (lexer.isWhitespace(charCode)) {
+          else if (lexer.isWhitespace(charCode))
             lexer.extendToken();
-            continue;
-          }
-          lexer.startToken(XmlState.ATTRNAME);
+          else
+            lexer.finishToken(XmlState.ATTRNAME);
           continue;
 
+        ////////////////////////////////////////////////////////////
+        //
+        // CLOSETAG
+        //
         case XmlState.CLOSETAG:
           if (charCode == Unicode.GREATER_THAN_SIGN)
-            return lexer.finishToken(XmlState.GT);
-          if (lexer.isWhitespace(charCode))
-            return lexer.finishToken(XmlState.CLOSETAG_SPACE);
-          lexer.startToken(XmlState.ELEMENTNAME);
+            lexer.finishToken(XmlState.GT);
+          else if (lexer.isWhitespace(charCode))
+            lexer.finishToken(XmlState.CLOSETAG_SPACE);
+          else
+            lexer.finishToken(XmlState.ELEMENTNAME);
           continue;
         case XmlState.CLOSETAG_SPACE:
           if (charCode == Unicode.GREATER_THAN_SIGN)
-            return lexer.finishToken(XmlState.GT);
-          if (lexer.isWhitespace(charCode))
+            lexer.finishToken(XmlState.GT);
+          else if (lexer.isWhitespace(charCode))
             lexer.extendToken();
           else
-            lexer.startToken(XmlState.ELEMENTNAME);
+            lexer.finishToken(XmlState.ELEMENTNAME);
           continue;
 
+        ////////////////////////////////////////////////////////////
+        //
+        // COMMENT
+        //    COMMENT_STAT "<!--"
+        //    COMMENT characters
+        //    COMMENT_DASH "-"
+        //    COMMENT_DASH_DASH "--"
+        //    COMMENT_END "-->"
+        //
         case XmlState.COMMENT:
           if (charCode == Unicode.HYPHEN_MINUS)
-            return lexer.finishToken(XmlState.COMMENT_DASH);
-          lexer.extendToken();
+            lexer.finishToken(XmlState.COMMENT_DASH);
+          else
+            lexer.extendToken();
           continue;
         case XmlState.COMMENT_DASH:
           if (charCode == Unicode.HYPHEN_MINUS)
-            return lexer.finishTokenAs(XmlState.COMMENT_DASH_DASH);
-          return lexer.finishToken(XmlState.COMMENT);
+            lexer.restartToken(XmlState.COMMENT_DASH_DASH);
+          else
+            lexer.finishToken(XmlState.COMMENT);
+            continue;
         case XmlState.COMMENT_DASH_DASH:
           if (charCode == Unicode.GREATER_THAN_SIGN)
-            return lexer.finishTokenAs(XmlState.COMMENT_END);
-          return lexer.finishToken(XmlState.COMMENT);
+            lexer.restartToken(XmlState.COMMENT_END);
+          else
+            lexer.finishToken(XmlState.COMMENT);
+          continue;
         case XmlState.COMMENT_END:
-          return lexer.finishToken(Lexer.State.ZERO);
+          lexer.endToken();
+          continue;
         case XmlState.COMMENT_START:
-          return lexer.finishToken(XmlState.COMMENT);
+          lexer.finishToken(XmlState.COMMENT);
+          continue;
 
+        ////////////////////////////////////////////////////////////
+        //
+        // ELEMENTNAME
+        //
         case XmlState.ELEMENTNAME:
           if (charCode == Unicode.GREATER_THAN_SIGN)
-            return lexer.finishToken(XmlState.GT);
-          if (charCode == Unicode.SOLIDUS)
-            return lexer.finishToken(XmlState.ELEMENTNAME_SLASH);
-          if (lexer.isWhitespace(charCode))
-            return lexer.finishToken(XmlState.ELEMENTNAME_SPACE);
-          lexer.extendToken();
+            lexer.finishToken(XmlState.GT);
+          else if (charCode == Unicode.SOLIDUS)
+            lexer.finishToken(XmlState.ELEMENTNAME_SLASH);
+          else if (lexer.isWhitespace(charCode))
+            lexer.finishToken(XmlState.ATTRVALUE_SPACE);
+          else
+            lexer.extendToken();
           continue;
         case XmlState.ELEMENTNAME_SLASH:
           if (charCode == Unicode.GREATER_THAN_SIGN)
-            return lexer.finishToken(XmlState.GT);
-          lexer.extendToken();
-          continue;
-        case XmlState.ELEMENTNAME_SPACE:
-        case XmlState.STRING1_END:
-        case XmlState.STRING2_END:
-          if (charCode == Unicode.GREATER_THAN_SIGN)
-            return lexer.finishToken(XmlState.GT);
-          if (charCode == Unicode.SOLIDUS)
-            return lexer.finishToken(XmlState.ELEMENTNAME_SLASH);
-          if (lexer.isWhitespace(charCode)) {
-            if (lexer.state == XmlState.ELEMENTNAME_SPACE)
-              lexer.extendToken();
-            else
-              lexer.startToken(XmlState.ELEMENTNAME_SPACE);
-          } else {
-            lexer.startToken(XmlState.ATTRNAME);
-          }
+            lexer.finishToken(XmlState.GT);
+          else
+            lexer.extendToken();
           continue;
 
+        ////////////////////////////////////////////////////////////
+        //
+        // ENTITYREF
+        //
         case XmlState.ENTITYREF:
           // Eat up to semicolon ";"
-          lexer.extendToken();
           if (charCode == Unicode.SEMICOLON)
-            return lexer.finishToken(Lexer.State.ZERO);
+            lexer.finishToken(XmlState.ENTITYREF_END);
+          else
+            lexer.extendToken();
           continue;
 
+        case XmlState.ENTITYREF_END:
         case XmlState.GT:
-          return lexer.finishToken(Lexer.State.ZERO);
+          lexer.endToken();
+          continue;
 
+        ////////////////////////////////////////////////////////////
+        //
+        // LT
+        //
         case XmlState.LT:
           if (charCode == Unicode.EXCLAMATION_MARK)
-            return lexer.finishTokenAs(XmlState.LT_BANG);
-          if (charCode == Unicode.GREATER_THAN_SIGN)
-            return lexer.finishToken(XmlState.GT);
-          if (charCode == Unicode.SOLIDUS)
-            return lexer.finishTokenAs(XmlState.CLOSETAG);
-          if (charCode == lexer.isWhitespace(charCode))
-            return lexer.finishToken(Lexer.State.ZERO);
-          lexer.startToken(XmlState.ELEMENTNAME);
+            lexer.restartToken(XmlState.LT_BANG);
+          else if (charCode == Unicode.GREATER_THAN_SIGN)
+            lexer.finishToken(XmlState.GT);
+          else if (charCode == Unicode.SOLIDUS)
+            lexer.restartToken(XmlState.CLOSETAG);
+          else if (charCode == lexer.isWhitespace(charCode))
+            lexer.endToken();
+          else
+            lexer.finishToken(XmlState.ELEMENTNAME);
           continue;
         case XmlState.LT_BANG:
           if (charCode == Unicode.HYPHEN_MINUS)
-            return lexer.finishTokenAs(XmlState.LT_BANG_DASH);
-          return lexer.finishToken(XmlState.ELEMENTNAME);
+            lexer.restartToken(XmlState.LT_BANG_DASH);
+          else
+            lexer.finishToken(XmlState.ELEMENTNAME);
+          continue;
         case XmlState.LT_BANG_DASH:
           if (charCode == Unicode.HYPHEN_MINUS)
-            return lexer.finishTokenAs(XmlState.COMMENT_START);
-          return lexer.finishToken(XmlState.ELEMENTNAME);
-
-        case XmlState.STRING1:
-          // Eat up to single-quote "'"
-          if (charCode == Unicode.APOSTROPHE ||
-              charCode == Unicode.GREATER_THAN_SIGN) {
-            return lexer.finishToken(XmlState.STRING1_END);
-          }
-          lexer.extendToken();
-          continue;
-
-        case XmlState.STRING2:
-          // Eat up to double-quote "'"
-          if (charCode == Unicode.QUOTATION_MARK ||
-              charCode == Unicode.GREATER_THAN_SIGN) {
-            return lexer.finishToken(XmlState.STRING2_END);
-          }
-          lexer.extendToken();
+            lexer.restartToken(XmlState.COMMENT_START);
+          else
+            lexer.finishToken(XmlState.ELEMENTNAME);
           continue;
 
         case XmlState.TEXT:
-          if (charCode == Unicode.AMPERSAND ||
-              charCode == Unicode.LESS_THAN_SIGN) {
-            return lexer.finishToken(Lexer.State.ZERO);
-          }
-          lexer.extendToken();
+          if (charCode == Unicode.AMPERSAND)
+            lexer.endToken();
+          else if (charCode == Unicode.LESS_THAN_SIGN)
+            lexer.endToken();
+          else
+            lexer.extendToken();
           continue;
       }
       console.log(lexer);
       throw new Error('Invalid state ' + lexer.state.toString());
     }
-    return lexer.lastToken;
   }
 
   XmlLexer.prototype = Object.create(Lexer.prototype, {

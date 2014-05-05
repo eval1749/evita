@@ -120,7 +120,6 @@ global.PythonLexer = (function(keywords) {
   /**
    * @this {!PythonLexer}
    * @param {number} maxOffset
-   * @return {?Lexer.Token}
    */
   function nextToken(maxOffset) {
     var lexer = this;
@@ -131,17 +130,15 @@ global.PythonLexer = (function(keywords) {
         switch (charCode) {
           case Unicode.FULL_STOP:
             lexer.startToken(State.DOT);
-            return lexer.finishToken(Lexer.State.ZERO);
+            lexer.endToken();
+            continue;
           case Unicode.NUMBER_SIGN:
             lexer.startToken(Lexer.State.LINE_COMMENT);
             continue;
         }
       }
-      var token = this.updateState(charCode);
-      if (token)
-        return token;
+      this.updateState(charCode);
     }
-    return lexer.lastToken;
   }
 
   PythonLexer.prototype = Object.create(Lexer.prototype, {

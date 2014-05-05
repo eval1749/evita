@@ -179,6 +179,11 @@ Lexer.prototype.doColor = function(hint) {};
 /**
  * @type {!function()}
  */
+Lexer.prototype.endToken = function() {};
+
+/**
+ * @type {!function()}
+ */
 Lexer.prototype.extendToken = function() {};
 
 /**
@@ -190,15 +195,8 @@ Lexer.prototype.extractWord = function(range, token) {};
 
 /**
  * @param {!Lexer.State} nextState
- * @return {!Lexer.Token}
  */
 Lexer.prototype.finishToken = function(nextState) {};
-
-/**
- * @param {!Lexer.State} state
- * @return {!Lexer.Token}
- */
-Lexer.prototype.finishTokenAs = function(state) {};
 
 /**
  * @this {!Lexer}
@@ -235,9 +233,9 @@ Lexer.prototype.isWord = function(charCode) {};
 Lexer.prototype.nextToken = function(maxOffset) {};
 
 /**
- * @param {Lexer.Token} token
+ * @param {!Lexer.State} newState
  */
-Lexer.prototype.setSyntax= function(token) {};
+Lexer.prototype.restartToken = function(newState) {};
 
 /**
  * @param {!Lexer.State} state
@@ -249,6 +247,5 @@ Lexer.prototype.startToken = function(state) {};
  * |Lexer|, we enable |@protected|.
  * protected
  * @param {number} charCode
- * @return {?Lexer.Token}
  */
 Lexer.prototype.updateState = function(charCode) {};

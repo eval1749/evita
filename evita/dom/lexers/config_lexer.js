@@ -33,7 +33,6 @@ global.ConfigLexer = (function() {
   /**
    * @this {!ConfigLexer}
    * @param {number} maxOffset
-   * @return {?Lexer.Token}
    */
   function nextToken(maxOffset) {
     var lexer = this;
@@ -44,11 +43,8 @@ global.ConfigLexer = (function() {
         lexer.startToken(Lexer.State.LINE_COMMENT);
         continue;
       }
-      var token = this.updateState(charCode);
-      if (token)
-        return token;
+      this.updateState(charCode);
     }
-    return lexer.lastToken;
   }
 
   ConfigLexer.prototype = Object.create(Lexer.prototype, {

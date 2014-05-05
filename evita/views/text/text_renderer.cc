@@ -53,7 +53,7 @@ TextRenderer::TextRenderer(text::Buffer* buffer)
     : gfx_(nullptr),
       m_pBuffer(buffer),
       screen_text_block_(new ScreenTextBlock()),
-      text_block_(new TextBlock(buffer)) {
+      text_block_(new TextBlock(buffer)), zoom_(1.0f) {
 }
 
 TextRenderer::~TextRenderer() {
@@ -90,13 +90,13 @@ text::Posn TextRenderer::GetVisibleEnd() const {
 void TextRenderer::Format(Posn lStart) {
   DCHECK(gfx_);
   text_block_->Reset();
-  TextFormatter oFormatter(*gfx_, text_block_.get(), selection_, lStart);
+  TextFormatter oFormatter(*gfx_, text_block_.get(), selection_, lStart, zoom_);
   oFormatter.Format();
 }
 
 TextLine* TextRenderer::FormatLine(Posn lStart) {
   DCHECK(gfx_);
-  TextFormatter oFormatter(*gfx_, text_block_.get(), selection_, lStart);
+  TextFormatter oFormatter(*gfx_, text_block_.get(), selection_, lStart, zoom_);
   return oFormatter.FormatLine();
 }
 
@@ -175,8 +175,9 @@ int TextRenderer::pageLines() const {
   return static_cast<int>(text_block_->height() / height);
 }
 
-void TextRenderer::Prepare(const Selection& selection) {
+void TextRenderer::Prepare(const Selection& selection, float zoom) {
   selection_ = selection;
+  zoom_ = zoom;
 }
 
 void TextRenderer::Render() {
@@ -211,7 +212,7 @@ bool TextRenderer::ScrollDown() {
     return false;
   auto const lGoal = GetStart() - 1;
   auto const lStart = m_pBuffer->ComputeStartOfLine(lGoal);
-  TextFormatter formatter(*gfx_, text_block_.get(), selection_, lStart);
+  TextFormatter formatter(*gfx_, text_block_.get(), selection_, lStart, zoom_);
   for (;;) {
     auto const line = formatter.FormatLine();
     if (lGoal < line->GetEnd()) {
@@ -298,7 +299,7 @@ bool TextRenderer::ScrollUp() {
     return false;
 
   TextFormatter oFormatter(*gfx_, text_block_.get(), selection_,
-                           text_block_->GetLast()->GetEnd());
+                           text_block_->GetLast()->GetEnd(), zoom_);
 
   auto const line = oFormatter.FormatLine();
   text_block_->Append(line);
@@ -316,9 +317,9 @@ void TextRenderer::SetBounds(const Rect& rect) {
   screen_text_block_->SetBounds(rectf);
 }
 
-bool TextRenderer::ShouldFormat(const Selection& selection,
+bool TextRenderer::ShouldFormat(const Selection& selection, float zoom,
                                 bool fSelection) const {
-  if (text_block_->dirty())
+  if (text_block_->dirty() || zoom_ != zoom)
     return true;
 
   // Buffer

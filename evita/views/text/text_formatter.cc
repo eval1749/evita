@@ -187,14 +187,17 @@ RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
 // TextFormatter
 //
 TextFormatter::TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
-                             const Selection& selection, Posn lStart)
+                             const Selection& selection, Posn lStart,
+                             float zoom)
     : default_render_style_(GetRenderStyle(gfx, GetDefaultStyle(text_block))),
       default_style_(GetDefaultStyle(text_block)),
       m_gfx(gfx),
       text_block_(text_block),
       text_scanner_(new TextScanner(text_block->text_buffer(), lStart,
-                                    selection)) {
+                                    selection)),
+      zoom_(zoom) {
   DCHECK(!text_block_->bounds().empty());
+  DCHECK_GT(zoom_, 0.0f);
 }
 
 TextFormatter::~TextFormatter() {
@@ -325,6 +328,7 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
 
   style.Merge(text_scanner_->style_resolver()->Resolve(
     css::StyleSelector::defaults()));
+  style.set_font_size(style.font_size() * zoom_);
 
   if (0x09 == wch) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
@@ -397,6 +401,7 @@ Cell* TextFormatter::formatMarker(TextMarker marker_name) {
     css::StyleSelector::defaults()));
   style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
       css::StyleSelector::end_of_line_marker()));
+  style.set_font_size(style.font_size() * zoom_);
 
   auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
   auto const width = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('x'));

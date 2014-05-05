@@ -42,6 +42,7 @@ class TextRenderer {
   private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
   private: Selection selection_;
   private: std::unique_ptr<TextBlock> text_block_;
+  private: float zoom_;
 
   public: TextRenderer(text::Buffer* buffer);
   public: ~TextRenderer();
@@ -71,7 +72,7 @@ class TextRenderer {
 
   // [P]
   private: int pageLines() const;
-  public: void Prepare(const Selection&);
+  public: void Prepare(const Selection& selection, float zoom);
 
 
   // [R]
@@ -85,6 +86,7 @@ class TextRenderer {
   public: void SetGraphics(const gfx::Graphics* gfx);
   public: void SetBounds(const Rect& rect);
   public: bool ShouldFormat(const Selection& selection,
+                            float zoom,
                             bool check_selection_color = false) const;
   public: bool ShouldRender() const;
 

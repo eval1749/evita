@@ -32,9 +32,10 @@ class TextFormatter {
   private: const gfx::Graphics& m_gfx;
   private: TextBlock* const text_block_;
   private: std::unique_ptr<TextScanner> text_scanner_;
+  private: float zoom_;
 
   public: TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
-                        const Selection& selection, Posn start);
+                        const Selection& selection, Posn start, float zoom);
   public: ~TextFormatter();
 
   public: void Format();

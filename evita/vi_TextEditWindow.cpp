@@ -124,7 +124,6 @@ void TextEditWindow::set_zoom(float new_zoom) {
   if (zoom_ == new_zoom)
     return;
   zoom_ = new_zoom;
-  text_renderer_->Reset();
 }
 
 Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
@@ -132,7 +131,7 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
     return lGoal;
 
   RenderSelection selection(selection_);
-  if (!text_renderer_->ShouldFormat(selection)) {
+  if (!text_renderer_->ShouldFormat(selection, zoom_)) {
     if (auto const line = text_renderer_->FindLine(lGoal))
       return line->MapXToPosn(*m_gfx, xGoal);
   }
@@ -246,7 +245,7 @@ void TextEditWindow::DidShow() {
 Posn TextEditWindow::EndOfLine(Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
   RenderSelection selection(selection_);
-  if (!text_renderer_->ShouldFormat(selection)) {
+  if (!text_renderer_->ShouldFormat(selection, zoom_)) {
     auto const pLine = text_renderer_->FindLine(lPosn);
     if (pLine)
       return pLine->GetEnd() - 1;
@@ -415,8 +414,8 @@ void TextEditWindow::Redraw() {
 
   DCHECK_GE(lCaretPosn, 0);
 
-  if (text_renderer_->ShouldFormat(selection, selection_is_active)) {
-    text_renderer_->Prepare(selection);
+  if (text_renderer_->ShouldFormat(selection, zoom_, selection_is_active)) {
+    text_renderer_->Prepare(selection, zoom_);
     text_renderer_->Format(StartOfLine(view_start_));
 
     if (m_lCaretPosn != lCaretPosn) {
@@ -425,11 +424,11 @@ void TextEditWindow::Redraw() {
       m_lCaretPosn = lCaretPosn;
     }
   } else if (m_lCaretPosn != lCaretPosn) {
-    text_renderer_->Prepare(selection);
+    text_renderer_->Prepare(selection, zoom_);
     text_renderer_->ScrollToPosn(lCaretPosn);
     m_lCaretPosn = lCaretPosn;
   } else if (text_renderer_->GetStart() != view_start_) {
-    text_renderer_->Prepare(selection);
+    text_renderer_->Prepare(selection, zoom_);
     text_renderer_->Format(StartOfLine(view_start_));
   } else if (!text_renderer_->ShouldRender()) {
     // The screen is clean.
@@ -537,7 +536,7 @@ Posn TextEditWindow::StartOfLine(Posn lPosn) {
     return 0;
 
   RenderSelection selection(selection_);
-  if (!text_renderer_->ShouldFormat(selection)) {
+  if (!text_renderer_->ShouldFormat(selection, zoom_)) {
     auto const pLine = text_renderer_->FindLine(lPosn);
     if (pLine)
       return pLine->GetStart();
@@ -559,9 +558,9 @@ Posn TextEditWindow::StartOfLine(Posn lPosn) {
 void TextEditWindow::updateScreen() {
   UI_ASSERT_DOM_LOCKED();
   RenderSelection selection(selection_, is_selection_active());
-  if (!text_renderer_->ShouldFormat(selection))
+  if (!text_renderer_->ShouldFormat(selection, zoom_))
     return;
-  text_renderer_->Prepare(selection);
+  text_renderer_->Prepare(selection, zoom_);
   auto const line_start_ = StartOfLine(view_start_);
   text_renderer_->Format(line_start_);
 }

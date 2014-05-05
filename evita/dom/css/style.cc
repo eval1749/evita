@@ -212,7 +212,7 @@ v8::Handle<v8::Object> Document::style_at(text::Posn position) const {
 
   if (style_values.has_font_size()) {
     js_style->Set(v8Strings::fontSize.Get(isolate),
-                  v8::Integer::New(isolate, style_values.font_size()));
+                  v8::Number::New(isolate, style_values.font_size()));
   }
 
   if (style_values.has_font_style()) {
@@ -265,7 +265,7 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
     LOAD_DICT_VALUE(css::Color, backgroundColor, bgcolor);
     LOAD_DICT_VALUE(int, charSyntax, syntax);
     LOAD_DICT_VALUE(css::Color, color, color);
-    LOAD_DICT_VALUE(int, fontSize, font_size);
+    LOAD_DICT_VALUE(css::FontSize, fontSize, font_size);
     LOAD_DICT_VALUE(css::FontStyle, fontStyle, font_style);
     LOAD_DICT_VALUE(css::FontWeight, fontWeight, font_weight);
     LOAD_DICT_VALUE(css::TextDecoration, textDecoration, text_decoration)

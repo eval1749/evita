@@ -12,7 +12,7 @@
 
 namespace css {
 
-typedef int FontSize;
+typedef float FontSize;
 
 enum class FontStyle {
   Normal,
@@ -59,7 +59,7 @@ class Style {
   private: Color bgcolor_;
   private: Color color_;
   private: base::string16 font_family_;
-  private: int font_size_;
+  private: FontSize font_size_;
   private: FontStyle font_style_;
   private: FontWeight font_weight_;
   private: Color marker_color_;

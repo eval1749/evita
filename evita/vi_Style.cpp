@@ -418,7 +418,7 @@ FontSet* FontSet::Get(const css::Style& style)
         LOGFONT oLogFont;
         ::ZeroMemory(&oLogFont, sizeof(oLogFont));
 
-        oLogFont.lfHeight = style.font_size();
+        oLogFont.lfHeight = static_cast<LONG>(style.font_size());
         oLogFont.lfWidth = 0;
         oLogFont.lfEscapement = 0;
         oLogFont.lfOrientation = 0;

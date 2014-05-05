@@ -59,7 +59,6 @@ void TextLine::AddCell(Cell* cell) {
 
 void TextLine::Fix(float left, float top, float ascent, float descent) {
   auto const height = ascent + descent;
-  DCHECK_LT(height, 100.0f);
   auto right = left;
   for (auto cell : cells_) {
     auto const lEnd = cell->Fix(height, descent);

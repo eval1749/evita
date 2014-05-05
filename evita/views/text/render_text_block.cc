@@ -25,7 +25,6 @@ TextBlock::~TextBlock() {
 
 void TextBlock::Append(TextLine* pLine) {
   ASSERT_DOM_LOCKED();
-  DCHECK_LT(pLine->GetHeight(), 100.0f);
   if (!dirty_line_point_) {
     auto const last_line = lines_.back();
     pLine->set_left_top(gfx::PointF(last_line->left(), last_line->bottom()));
@@ -108,7 +107,6 @@ bool TextBlock::IsShowEndOfDocument() const {
 
 void TextBlock::Prepend(TextLine* line) {
   ASSERT_DOM_LOCKED();
-  DCHECK_LT(line->GetHeight(), 100.0f);
   lines_.push_front(line);
   m_cy += line->GetHeight();
   dirty_line_point_ = true;

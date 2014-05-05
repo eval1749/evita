@@ -193,7 +193,17 @@ SpellChecker.prototype.didBlurWindow = function(event) {
 SpellChecker.prototype.didFireTimer = function() {
   var range = this.range_;
   var document = range.document;
+  var maxOffset = document.length;
 
+  // |didFireTimer| can be called before handling mutation callback, we should
+  // make sure offsets don't exceed |document.length|.
+  this.coldOffset = Math.min(this.coldOffset, maxOffset);
+  this.coldEnd = Math.min(this.coldEnd, maxOffset);
+
+  /**
+   * @return {number}
+   * Returns caret offset as hottest offset if window has focus.
+   */
   function getHottestOffset() {
     if (!document.modified) {
       // If document isn't modified, document is just loaded or undo initial
@@ -250,7 +260,7 @@ SpellChecker.prototype.didFireTimer = function() {
       var restartOffset = range.start;
       range.endOf(Unit.WORD, Alter.EXTEND);
       range.setSpelling(Spelling.NONE);
-      if (range.end == document.length) {
+      if (range.end == maxOffset) {
         // Word seems not to be completed yet. Spell checker will sleep
         // until document is changed.
         numberOfChecked += range.end - range.start;
@@ -274,11 +284,11 @@ SpellChecker.prototype.didFireTimer = function() {
     return range.start;
   }
 
-  if (this.hotOffset < document.length)
-    this.hotOffset = scan(this, this.hotOffset, document.length);
+  if (this.hotOffset < maxOffset)
+    this.hotOffset = scan(this, this.hotOffset, maxOffset);
   this.coldOffset = scan(this, this.coldOffset, this.coldEnd);
 
-  var rest = document.length - this.hotOffset + this.coldEnd - this.coldOffset;
+  var rest = maxOffset - this.hotOffset + this.coldEnd - this.coldOffset;
   if (rest > 0)
     return;
   this.timer_.stop();

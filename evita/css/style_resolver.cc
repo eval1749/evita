@@ -104,6 +104,8 @@ StyleSheet* GetDefaultStyleSheet() {
   InstallSyntaxColor(&default_style_sheet,
                      StyleSelector::keyword(), Color(0, 0, 255));
   InstallSyntaxColor(&default_style_sheet,
+                     StyleSelector::keyword2(), Color(0, 0, 192));
+  InstallSyntaxColor(&default_style_sheet,
                      StyleSelector::literal(), Color(0, 0, 128));
   InstallSyntaxColor(&default_style_sheet,
                      StyleSelector::operators(), Color(0, 0, 128));

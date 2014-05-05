@@ -79,6 +79,8 @@ class ViewDelegateImpl : public dom::ViewDelegate {
       const domapi::SwitchValue& new_value) override;
   private: virtual void SetTabData(dom::WindowId window_id,
                                    const domapi::TabData& tab_data) override;
+  private: virtual void SetTextWindowZoom(dom::WindowId window_id,
+                                         float zoom) override;
   private: virtual void ShowWindow(dom::WindowId window_id) override;
   private: virtual void SplitHorizontally(dom::WindowId left_window,
       dom::WindowId new_right_window) override;

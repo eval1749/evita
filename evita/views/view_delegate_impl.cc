@@ -399,6 +399,17 @@ void ViewDelegateImpl::RegisterViewEventHandler(
   event_handler_->DidStartViewHost();
 }
 
+void ViewDelegateImpl::SetTextWindowZoom(dom::WindowId window_id, float zoom) {
+  DCHECK_GT(zoom, 0.0f);
+  auto const window = FromWindowId("SetTextWindowZoom", window_id);
+  if (!window)
+    return;
+  auto const text_window = window->as<TextEditWindow>();
+  if (!text_window)
+    return;
+  text_window->set_zoom(zoom);
+}
+
 void ViewDelegateImpl::ShowWindow(dom::WindowId window_id) {
   auto const window = FromWindowId("ShowWindow", window_id);
   if (!window)

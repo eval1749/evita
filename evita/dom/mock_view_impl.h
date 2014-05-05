@@ -69,6 +69,7 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD2(SetSwitch, void(const base::string16&,
                                const domapi::SwitchValue&));
   MOCK_METHOD2(SetTabData, void(WindowId, const domapi::TabData&));
+  MOCK_METHOD2(SetTextWindowZoom, void(WindowId, float));
   MOCK_METHOD1(ShowWindow, void(WindowId));
   MOCK_METHOD2(SplitHorizontally, void(WindowId, WindowId));
   MOCK_METHOD2(SplitVertically, void(WindowId, WindowId));

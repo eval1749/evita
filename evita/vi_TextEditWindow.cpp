@@ -94,7 +94,7 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
       #endif // SUPPORT_IME
       vertical_scroll_bar_(new ui::ScrollBar(ui::ScrollBar::Type::Vertical,
                                              this)),
-      view_start_(0) {
+      view_start_(0), zoom_(1.0f) {
   AppendChild(vertical_scroll_bar_);
   buffer()->AddObserver(this);
 }
@@ -117,6 +117,14 @@ bool TextEditWindow::is_selection_active() const {
   auto const edit_pane = views::FrameList::instance()->active_frame()->
     GetActivePane()->as<EditPane>();
   return edit_pane && edit_pane->GetActiveWindow() == this;
+}
+
+void TextEditWindow::set_zoom(float new_zoom) {
+  DCHECK_GT(new_zoom, 0.0f);
+  if (zoom_ == new_zoom)
+    return;
+  zoom_ = new_zoom;
+  text_renderer_->Reset();
 }
 
 Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {

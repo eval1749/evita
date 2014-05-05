@@ -70,15 +70,16 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: std::unique_ptr<TextRenderer> text_renderer_;
   private: ui::ScrollBar* const vertical_scroll_bar_;
   private: text::Posn view_start_;
+  private: float zoom_;
 
   // ctor/dtor
   public: explicit TextEditWindow(const dom::TextWindow& window);
-
-
   public: virtual ~TextEditWindow();
 
   public: text::Buffer* buffer() const;
   private: bool is_selection_active() const;
+  public: float zoom() const { return zoom_; }
+  public: void set_zoom(float new_zoom);
 
   // [C]
   public: text::Posn ComputeMotion(

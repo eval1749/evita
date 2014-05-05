@@ -134,6 +134,8 @@ class ScriptThread final : public domapi::IoDelegate,
       const domapi::SwitchValue& new_value) override;
   private: virtual void SetTabData(WindowId window_id,
                                    const domapi::TabData& tab_data) override;
+  private: virtual void SetTextWindowZoom(WindowId window_id,
+                                          float zoom) override;
   private: virtual void ShowWindow(WindowId window_id) override;
   private: virtual void SplitHorizontally(WindowId left_window_id,
       WindowId new_right_window_id) override;

@@ -149,6 +149,9 @@ class ViewDelegate {
   
   public: virtual void SetTabData(WindowId window_id,
                                   const domapi::TabData& tab_data) = 0;
+  // Set |TextWindow| zoom factor.
+  public: virtual void SetTextWindowZoom(WindowId window_id, float zoom) = 0;
+
   public: virtual void ShowWindow(WindowId window_id) = 0;
   public: virtual void SplitHorizontally(WindowId left_window_id,
                                          WindowId new_right_window_id) = 0;

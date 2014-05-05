@@ -290,6 +290,7 @@ DEFINE_VIEW_DELEGATE_1(SetCapture, domapi::EventTargetId)
 DEFINE_VIEW_DELEGATE_2(SetStatusBar, WindowId,
     const std::vector<base::string16>&)
 DEFINE_VIEW_DELEGATE_2(SetTabData, WindowId, const domapi::TabData&)
+DEFINE_VIEW_DELEGATE_2(SetTextWindowZoom, WindowId, float)
 DEFINE_VIEW_DELEGATE_1(ShowWindow, WindowId)
 DEFINE_VIEW_DELEGATE_2(SplitHorizontally, WindowId, WindowId)
 DEFINE_VIEW_DELEGATE_2(SplitVertically, WindowId, WindowId)

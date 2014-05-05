@@ -267,8 +267,8 @@ SpellChecker.prototype.didFireTimer = function() {
       // Move to next word.
       // <#>include     => #|include
       // foo<;>\n   bar => foo;\n  |bar
-      var word_start = range.start;
-      range.collapseTo(word_start);
+      var wordStart = range.start;
+      range.collapseTo(wordStart);
       range.move(Unit.WORD);
     }
     return range.start;
@@ -314,17 +314,17 @@ SpellChecker.prototype.mutationCallback = function(mutations, observer) {
   var range = this.range_;
   var document = range.document;
   /** @type {number} */
-  var min_offset = mutations.reduce(function(previousValue, mutation) {
+  var minOffset = mutations.reduce(function(previousValue, mutation) {
     return Math.min(previousValue, mutation.offset);
   }, document.length);
-  this.coldOffset = Math.min(this.coldOffset, min_offset);
-  this.coldEnd = min_offset;
-  this.hotOffset = min_offset;
+  this.coldOffset = Math.min(this.coldOffset, minOffset);
+  this.coldEnd = minOffset;
+  this.hotOffset = minOffset;
 
-  var has_focus = document.listWindows().some(function(window) {
+  var hasFocus = document.listWindows().some(function(window) {
     return Window.focus == window;
   });
-  if (has_focus)
+  if (hasFocus)
     this.startTimeIfNeeded();
 };
 
@@ -362,10 +362,10 @@ SpellChecker.checkSpelling = function(wordToCheck) {
   };
   SpellChecker.wordStateMap.set(wordToCheck, state);
   state.promise = Editor.checkSpelling(wordToCheck).then(
-    function(is_correct) {
+    function(isCorrect) {
       state.lastUsedTime = new Date(),
       state.promise = null;
-      state.spelling = is_correct ? Spelling.CORRECT : Spelling.MISSPELLED;
+      state.spelling = isCorrect ? Spelling.CORRECT : Spelling.MISSPELLED;
       return state;
     });
   return state.promise;

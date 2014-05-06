@@ -184,18 +184,11 @@ global.Lexer = (function() {
         // TODO(yosi) We should use |OrderedSet.prototype.upperBound()|
         if (it && it.data.end == newScanOffset - 1)
           it = it.next();
+        console.log(it, this);
 
         // Case 1: <ss|ss> middle of token
         // Case 2: <|ssss> start of token
         //
-        if (!it) {
-          // Document mutation is occurred after scanned range. We continue
-          // scanning from current position;
-          this.state = Lexer.State.ZERO;
-          if (this.debug_ > 0)
-            console.log('adjustScanOffset', 'changed at end');
-          return;
-        }
         var lastToken = it.data;
 
         // Remove dirty tokens

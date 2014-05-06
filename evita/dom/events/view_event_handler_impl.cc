@@ -229,7 +229,7 @@ void ViewEventHandlerImpl::DispatchViewIdleEvent(int hint) {
       init_dict.set_detail(hint);
       DispatchEvent(event_target, new UiEvent(L"idle", init_dict));
     }
-    v8::V8::RunMicrotasks(isolate);
+    isolate->RunMicrotasks();
   }
   // TODO(yosi) We should ask view host to stop dispatching idle event, if
   // idle event handler throws an exception.

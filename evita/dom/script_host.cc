@@ -245,7 +245,7 @@ void ScriptHost::ResetForTesting() {
 void ScriptHost::RunMicrotasks() {
   v8_glue::Runner::Scope runner_scope(runner());
   DOM_AUTO_LOCK_SCOPE();
-  v8::V8::RunMicrotasks(runner()->isolate());
+  runner()->isolate()->RunMicrotasks();
 }
 
 ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
@@ -273,7 +273,7 @@ ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
   // See "985a73d2cce5", same thing is happened in spell checker with
   // |Editor.RegExp| object.
   // Note: We run micro tasks in |ViewEventHandlerImpl::DispatchViewIdleEvent|.
-  v8::V8::SetAutorunMicrotasks(isolate, false);
+  isolate->SetAutorunMicrotasks(false);
   v8Strings::Init(isolate);
   return script_host;
 }

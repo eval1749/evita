@@ -27,9 +27,9 @@
    * @return {!Bracket.Detail}
    */
   function bracketDataOf(position) {
-    var char_code = position.charCode();
+    var charCode = position.charCode();
     // TODO(yosi) We should get character syntax from mime type information.
-    return Bracket.DATA[char_code] || NOT_BRACKET;
+    return Bracket.DATA[charCode] || NOT_BRACKET;
   }
 
   /**
@@ -39,10 +39,10 @@
    * See also |moveForwardBracket()|.
    */
   function moveBackwardBracket(position) {
-    /** @type {Array.<BracketMatchData>} */ var bracket_stack = [];
-    // reset when we reache at bracket.
-    /**  @type {number} */ var bracket_char_syntax = -1;
-    /** @type {number} */ var start_offset = position.offset;
+    /** @type {Array.<BracketMatchData>} */ var bracketStack = [];
+    // reset when we reached at bracket.
+    /**  @type {string} */ var bracketCharSyntax = '?';
+    /** @type {number} */ var startOffset = position.offset;
 
     while (position.offset) {
       position.move(Unit.CHARACTER, -1);
@@ -50,51 +50,51 @@
       var bracket = bracketDataOf(position);
       if (bracket.type == Bracket.Type.NONE)
         continue;
-      if (bracket_char_syntax < 0)
-        bracket_char_syntax = position.charSyntax();
-      else if (position.charSyntax() != bracket_char_syntax)
+      if (bracketCharSyntax == '?')
+        bracketCharSyntax = position.charSyntax();
+      else if (position.charSyntax() != bracketCharSyntax)
         continue;
 
-      var current_offset = position.offset;
+      var currentOffset = position.offset;
       position.moveWhile(function() {
-        return this.charSyntax() == bracket_char_syntax &&
+        return this.charSyntax() == bracketCharSyntax &&
                bracketDataOf(this).type == Bracket.Type.ESCAPE;
       }, Count.BACKWARD);
-      if ((current_offset - position.offset) & 1)
+      if ((currentOffset - position.offset) & 1)
         continue;
 
-      var next_offset = position.offset;
-      position.offset = current_offset;
+      var nextOffset = position.offset;
+      position.offset = currentOffset;
 
       if (bracket.type == Bracket.Type.LEFT) {
-        if (!bracket_stack.length) {
+        if (!bracketStack.length) {
           // We reach at left bracket.
           return;
         }
-        var last_bracket = bracket_stack.pop();
-        if (last_bracket.data.pair != position.charCode()) {
+        var lastBracket = bracketStack.pop();
+        if (lastBracket.data.pair != position.charCode()) {
           // We reach at mismatched left bracket.
           break;
         }
 
-        if (!bracket_stack.length) {
+        if (!bracketStack.length) {
           // We reach at matched left bracket.
           return;
         }
-        position.offset = next_offset;
+        position.offset = nextOffset;
       } else if (bracket.type == Bracket.Type.RIGHT) {
-        if (!bracket_stack.length) {
-          if (position.offset != start_offset - 1) {
+        if (!bracketStack.length) {
+          if (position.offset != startOffset - 1) {
             // We found right bracket.
             position.move(Unit.CHARACTER);
             return;
           }
         }
-        bracket_stack.push({data: bracket, offset: position.offset});
-        position.offset = next_offset;
+        bracketStack.push({data: bracket, offset: position.offset});
+        position.offset = nextOffset;
       }
     }
-    position.offset = start_offset;
+    position.offset = startOffset;
   }
 
   /**
@@ -104,60 +104,60 @@
    * See also |moveBackwardBracket()|.
    */
   function moveForwardBracket(position) {
-    /** @type {Array.<BracketMatchData>} */ var bracket_stack = [];
-    // reset when we reache at racket.
-    /** @type {number} */ var bracket_char_syntax = -1;
-    /** @type {number} */ var start_offset = position.offset;
+    /** @type {Array.<BracketMatchData>} */ var bracketStack = [];
+    // reset when we reached at racket.
+    /** @type {string} */ var bracketCharSyntax = '?';
+    /** @type {number} */ var startOffset = position.offset;
 
     for (; position.offset < position.document.length;
          position.move(Unit.CHARACTER)) {
       var bracket = bracketDataOf(position);
       if (bracket.type == Bracket.Type.NONE)
         continue;
-      if (bracket_char_syntax < 0)
-        bracket_char_syntax = position.charSyntax();
-      else if (position.charSyntax() != bracket_char_syntax)
+      if (bracketCharSyntax == '?')
+        bracketCharSyntax = position.charSyntax();
+      else if (position.charSyntax() != bracketCharSyntax)
         continue;
       switch (bracket.type) {
         case Bracket.Type.ESCAPE: {
-          var current_offset = position.offset;
+          var currentOffset = position.offset;
           position.moveWhile(function() {
             return bracketDataOf(this).type == Bracket.Type.ESCAPE &&
-                   this.charSyntax() == bracket_char_syntax;
+                   this.charSyntax() == bracketCharSyntax;
           }, Count.FORWARD);
-          if (!((position.offset - current_offset) & 1))
+          if (!((position.offset - currentOffset) & 1))
             position.move(Unit.CHARACTER, -1);
           break;
         }
         case Bracket.Type.LEFT:
-          if (!bracket_stack.length) {
-            if (position.offset != start_offset) {
+          if (!bracketStack.length) {
+            if (position.offset != startOffset) {
               // We reach left bracket.
               return;
             }
-            bracket_stack.push({data: bracket, offset: position.offset});
+            bracketStack.push({data: bracket, offset: position.offset});
             break;
           }
 
-          if (bracket_stack.length == MAX_BRACKET_NESTING_LEVEL) {
+          if (bracketStack.length == MAX_BRACKET_NESTING_LEVEL) {
             // We found too many left bracket.
             return;
           }
-          bracket_stack.push({data: bracket, offset: position.offset});
+          bracketStack.push({data: bracket, offset: position.offset});
           break;
         case Bracket.Type.RIGHT:
-          if (!bracket_stack.length) {
+          if (!bracketStack.length) {
             // We reach right bracket.
             position.move(Unit.CHARACTER);
             return;
           }
-          var last_bracket = bracket_stack.pop();
-          if (last_bracket.data.pair != position.charCode()) {
+          var lastBracket = bracketStack.pop();
+          if (lastBracket.data.pair != position.charCode()) {
             // We reach mismatched right bracket.
             return;
           }
 
-          if (!bracket_stack.length) {
+          if (!bracketStack.length) {
             // We reach matched right bracket.
             position.move(Unit.CHARACTER);
             return;
@@ -165,10 +165,10 @@
           break;
       }
     }
-    if (bracket_stack.length)
-      position.offset = bracket_stack.pop().offset;
+    if (bracketStack.length)
+      position.offset = bracketStack.pop().offset;
     else
-      position.offset = start_offset;
+      position.offset = startOffset;
   }
 
   /**

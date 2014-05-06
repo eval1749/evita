@@ -87,43 +87,49 @@
   }
 
   /**
-   * Type character
+   * Type right bracket.
    * @this {!TextWindow}
    * @param {number} charCode
    * @param {number=} opt_count
    */
   function typeRightBracket(charCode, opt_count) {
     var count = arguments.length >= 2 ? /**@type{number}*/(opt_count) : 1;
-    var selection = this.selection;
+    var window = this;
+    var selection = window.selection;
     var range = selection.range;
     range.text = String.fromCharCode(charCode).repeat(count);
     range.collapseTo(range.end);
     var start = range.start;
     var end = range.end;
 
-    // Force color newly inserted characters.
-    // Note: If we are in long comment, parenthesis matching may not work.
-    range.document.doColor_(100);
-    selection.move(Unit.BRACKET, -1);
-    if (range.start == start) {
-      range.collapseTo(end);
-      selection.window.status = Strings.IDS_NO_MATCHING_PAREN;
-      return;
-    }
+    // TODO(yosi) Should we move matching bracket blinking into |TextWindow|
+    // idle processing?
+    new OneShotTimer().start(0, function() {
+      // Force color newly inserted characters.
+      // Note: If we are in long comment, parenthesis matching may not work.
+      range.document.doColor_(100);
+      selection.move(Unit.BRACKET, -1);
+      if (range.start == start) {
+        range.collapseTo(end);
+        selection.window.status = Strings.IDS_NO_MATCHING_PAREN;
+        return;
+      }
 
-    // Move caret to left bracket 100ms or 500ms if left bracket above window.
-    range.collapseTo(range.start);
-    selection.document.readonly = true;
-    // TODO(yosi) Should we share blink timer?
-    var windowStart = this.compute_(TextWindowComputeMethod.MOVE_WINDOW,
-                                     0, -1);
-    (new OneShotTimer()).start(range.start < windowStart ? 500 : 100,
-        function() {
-          range.collapseTo(end);
-          range.document.readonly = false;
-        });
+      // Move caret to left bracket 100ms or 500ms if left bracket above window.
+      range.collapseTo(range.start);
+      selection.document.readonly = true;
+      // TODO(yosi) Should we share blink timer?
+      var windowStart = window.compute_(TextWindowComputeMethod.MOVE_WINDOW,
+                                       0, -1);
+      new OneShotTimer().start(range.start < windowStart ? 500 : 100,
+          function() {
+            range.collapseTo(end);
+            range.document.readonly = false;
+          });
+    });
   }
 
+  // Install |TypeChar| commands.
   for (var charCode = 0x20; charCode < 0x7F; ++charCode) {
     Editor.bindKey(TextWindow, String.fromCharCode(charCode),
         makeTypeCharCommand(charCode),

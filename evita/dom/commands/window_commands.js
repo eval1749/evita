@@ -17,7 +17,7 @@
         Editor.messageBox(null, 'Failed to load ' + absoluteFileName + '\n' +
             'error=' + error_code,
             MessageBox.ICONERROR);
-      }).catch(function(e) { console.log(e); });
+      }).catch(JsConsole.errorHandler);
     }
     return document;
   }
@@ -37,7 +37,7 @@
         .then(function(fileName) {
           var document = Document.open(fileName);
           windows.newTextWindow(editorWindow, document)
-        });
+        }).catch(JsConsole.errorHandler);
   });
 
   /**
@@ -49,7 +49,7 @@
     Editor.getFileNameForLoad(this, this.selection.document.fileName)
         .then(function(fileName) {
           windows.activate(editorWindow, openFile(fileName));
-        });
+        }).catch(JsConsole.errorHandler);
   });
 
   /**
@@ -132,7 +132,7 @@
         .then(function(fileName) {
           var document = Document.open(fileName);
           windows.newEditorWindow(document);
-        });
+        }).catch(JsConsole.errorHandler);
   });
 
   /**
@@ -143,7 +143,7 @@
     Editor.getFileNameForLoad(this, this.selection.document.fileName)
         .then(function(fileName) {
           windows.newEditorWindow(openFile(fileName));
-        });
+        }).catch(JsConsole.errorHandler);
   });
 
   /**

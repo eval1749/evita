@@ -153,7 +153,7 @@ TEST_F(LexersTest, PythonLexer) {
 
 TEST_F(LexersTest, XmlLexer) {
   EXPECT_SCRIPT_EQ(
-    "c16 n2 e7 n1 a5 n1 v5 n1 a5 n1 v5 n5 &5 n6 e7 n1",
+    "c16 n1 k1 e7 n1 a5 n2 v3 n2 a5 n2 v3 n1 k1 n4 &5 n4 k2 e7 k1",
     "doColor('foo.xml', ["
         "'<!-- comment -->',"
         "'<element attr1=\\'123\\' attr2=\"456\">',"
@@ -161,10 +161,18 @@ TEST_F(LexersTest, XmlLexer) {
         "'</element>',"
     "])");
 
+  EXPECT_SCRIPT_EQ(
+    "k1 e2 k2",
+    "doColor('foo.xml', ['<br/>'])");
+
+  EXPECT_SCRIPT_EQ(
+    "k2 e3 n1 a7 n2 v3 n1 k2",
+    "doColor('foo.xml', ['<?xml version=\"1.0\"?>'])");
+
   // attribute variations
   //  <input autofocus maxlength=10 />
   EXPECT_SCRIPT_EQ(
-    "n1 e5 n1 a3 n1 a3 n1 v2 n1",
+    "k1 e5 n1 a3 n1 a3 n1 v2 k1",
     "doColor('foo.xml', ['<input abc xyz=10>'])");
 
   // Ampersand
@@ -175,13 +183,13 @@ TEST_F(LexersTest, XmlLexer) {
   // Malformed:  no space between attributes.
   //  <abc def="123"ghi>
   EXPECT_SCRIPT_EQ(
-    "n1 e3 n1 a3 n1 v5 a3 n1",
+    "k1 e3 n1 a3 n2 v3 n1 a3 k1",
     "doColor('foo.html', ['<abc def=\"123\"ghi>'])");
 
   // Malformed: no ending quote
   //  <abc def="123>ghi
   EXPECT_SCRIPT_EQ(
-    "n1 e3 n1 a3 n1 v4 n4",
+    "k1 e3 n1 a3 n2 v3 k1 n3",
     "doColor('foo.html', ['<abc def=\"123>ghi'])");
 }
 

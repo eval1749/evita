@@ -27,7 +27,7 @@ global.JsConsole = (function() {
     // TODO(yosi) We should make |*javascript*| document with JavaScript
     // syntax coloring.
     this.document = console.document;
-    this.history_index = 0;
+    this.historyIndex = 0;
     this.history = [];
     this.lineNumber = 0;
     this.range = new Range(this.document);
@@ -66,19 +66,19 @@ global.JsConsole.errorHandler = function(reason) {
 
 /**
  * @this {!JsConsole}
- * @param {Window} active_window
+ * @param {Window} activeWindow
  */
-global.JsConsole.prototype.activate = function(active_window) {
-  if (!active_window) {
+global.JsConsole.prototype.activate = function(activeWindow) {
+  if (!activeWindow) {
     this.newWindow();
     return;
   }
 
-  var active_editor_window = active_window instanceof EditorWindow ?
-    active_window : active_window.parent;
+  var activeEditor_window = activeWindow instanceof EditorWindow ?
+    activeWindow : activeWindow.parent;
   var document = this.document;
   var present = null;
-  active_editor_window.children.forEach(function(window) {
+  activeEditor_window.children.forEach(function(window) {
     if (window.document == document)
       present = window;
   });
@@ -89,9 +89,9 @@ global.JsConsole.prototype.activate = function(active_window) {
     return;
   }
 
-  var new_window = new TextWindow(new Range(document));
-  active_editor_window.appendChild(new_window);
-  new_window.selection.range.collapseTo(document.length);
+  var newWindow = new TextWindow(new Range(document));
+  activeEditor_window.appendChild(newWindow);
+  newWindow.selection.range.collapseTo(document.length);
 };
 
 /**
@@ -107,9 +107,9 @@ JsConsole.prototype.addToHistory_ = function(line) {
 };
 
 JsConsole.prototype.backwardHistory = function() {
-  if (this.history_index == this.history.length)
+  if (this.historyIndex == this.history.length)
     return;
-  ++this.history_index;
+  ++this.historyIndex;
   this.useHistory();
 };
 
@@ -162,7 +162,7 @@ JsConsole.prototype.evalLastLine = function() {
     return;
   }
   this.addToHistory_(line);
-  this.history_index = 0;
+  this.historyIndex = 0;
   range.collapseTo(range.end);
   range.text = '\n';
 
@@ -189,23 +189,23 @@ JsConsole.prototype.evalLastLine = function() {
 };
 
 JsConsole.prototype.forwardHistory = function() {
-  if (!this.history_index)
+  if (!this.historyIndex)
     return;
-  --this.history_index;
+  --this.historyIndex;
   this.useHistory();
 };
 
 JsConsole.prototype.newWindow = function() {
-  var editor_window = new EditorWindow();
-  var text_window = new TextWindow(new Range(this.document));
-  editor_window.appendChild(text_window);
-  editor_window.realize();
+  var editorWindow = new EditorWindow();
+  var textWindow = new TextWindow(new Range(this.document));
+  editorWindow.appendChild(textWindow);
+  editorWindow.realize();
 };
 
 JsConsole.prototype.useHistory = function() {
   var range = this.range;
   range.end = this.document.length;
-  range.text = this.history[this.history.length - this.history_index];
+  range.text = this.history[this.history.length - this.historyIndex];
 };
 
 (function() {
@@ -214,16 +214,16 @@ JsConsole.prototype.useHistory = function() {
    * @this {Window}
    */
   function switchToJsConsoleCommand() {
-    var active_window = this.selection.window;
+    var activeWindow = this.selection.window;
     if (JsConsole.instance) {
-      JsConsole.instance.activate(active_window);
+      JsConsole.instance.activate(activeWindow);
       return;
     }
     var instance = new JsConsole();
     JsConsole.instance = instance;
     instance.emit('\x2F/ JavaScript Console\n');
     instance.emitPrompt();
-    instance.activate(active_window);
+    instance.activate(activeWindow);
   }
 
   Editor.bindKey(Window, 'Ctrl+Shift+I', switchToJsConsoleCommand);

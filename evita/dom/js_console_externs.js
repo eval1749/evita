@@ -37,10 +37,10 @@ JsConsole.prototype.forwardHistory;
 JsConsole.prototype.history;
 
 /** @type {number} */
-JsConsole.prototype.history_index;
+JsConsole.prototype.historyIndex;
 
 /** @type {number} */
-JsConsole.prototype.line_number;
+JsConsole.prototype.lineNumber;
 
 /** @type {function()} */
 JsConsole.prototype.newWindow;

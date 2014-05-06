@@ -90,15 +90,50 @@ global.XmlLexer = (function(keywords) {
   var CHARACTERS = (function() {
     var map = new Map();
 
+    function setRange(type, min, max) {
+      for (var charCode = min; charCode <= max; ++charCode) {
+        map.set(charCode, type);
+      }
+    }
+
     map.set(Unicode.LF, Lexer.WHITESPACE_CHAR);
     map.set(Unicode.SPACE, Lexer.WHITESPACE_CHAR);
     map.set(Unicode.TAB, Lexer.WHITESPACE_CHAR);
 
     map.set(Unicode.AMPERSAND, Lexer.OPERATOR_CHAR);
     map.set(Unicode.APOSTROPHE, Lexer.STRING1_CHAR);
-    map.set(Unicode.COLON, Lexer.WORD_CHAR);
+    map.set(Unicode.COLON, Lexer.NAMESTART_CHAR);
     map.set(Unicode.LESS_THAN_SIGN, Lexer.OPERATOR_CHAR);
     map.set(Unicode.QUOTATION_MARK, Lexer.STRING2_CHAR);
+
+    // NameStartChar ::= [A-Z] | [a-z] | '_' | ':' | ...
+    setRange(Lexer.NAMESTART_CHAR,
+             Unicode.LATIN_CAPITAL_LETTER_A,
+             Unicode.LATIN_CAPITAL_LETTER_Z);
+    setRange(Lexer.NAMESTART_CHAR,
+             Unicode.LATIN_SMALL_LETTER_A,
+             Unicode.LATIN_SMALL_LETTER_Z);
+    map.set(Unicode.LOW_LINE, Lexer.NAMESTART_CHAR);
+    map.set(Unicode.COLON, Lexer.NAMESTART_CHAR);
+    setRange(Lexer.NAME_CHAR, 0x00C0, 0x00D6);
+    setRange(Lexer.NAME_CHAR, 0x00D8, 0x00F6);
+    setRange(Lexer.NAME_CHAR, 0x00F8, 0x02FF);
+    setRange(Lexer.NAME_CHAR, 0x0370, 0x037D);
+    setRange(Lexer.NAME_CHAR, 0x037F, 0x1FFF);
+    setRange(Lexer.NAME_CHAR, 0x200C, 0x200D);
+    setRange(Lexer.NAME_CHAR, 0x2070, 0x218F);
+    setRange(Lexer.NAME_CHAR, 0x2C00, 0x2FEF);
+    setRange(Lexer.NAME_CHAR, 0x3001, 0xD7FF);
+    setRange(Lexer.NAME_CHAR, 0xF900, 0xFDCF);
+    setRange(Lexer.NAME_CHAR, 0xFDF0, 0xFFFD);
+
+    // NameChar ::= [09-9] | '.' | '-' | ...
+    setRange(Lexer.NAME_CHAR, Unicode.DIGIT_ZERO, Unicode.DIGIT_NINE);
+    setRange(Lexer.NAME_CHAR, 0x0300, 0x036F);
+    setRange(Lexer.NAME_CHAR, 0x203F, 0x2040);
+    map.set(Unicode.FULL_STOP, Lexer.NAME_CHAR);
+    map.set(Unicode.HYPHEN_MINUS, Lexer.NAME_CHAR);
+    map.set(0xB7, Lexer.NAME_CHAR);
 
     return map;
   })();

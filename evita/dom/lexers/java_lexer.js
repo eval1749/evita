@@ -22,7 +22,7 @@ global.JavaLexer = (function(options) {
   characters: (function() {
     var attrs = ClikeLexer.newCharacters();
     // Include '@' as word character for attribute identifier coloring.
-    attrs.set(Unicode.COMMERCIAL_AT, Lexer.WORD_CHAR);
+    attrs.set(Unicode.COMMERCIAL_AT, Lexer.NAMESTART_CHAR);
     return attrs;
   })(),
   keywords: Lexer.createKeywords([

@@ -21,6 +21,12 @@ function Lexer(document, options) {}
 Lexer.DOT_CHAR;
 
 /** @const @type {!Symbol} */
+Lexer.NAMESTART_CHAR;
+
+/** @const @type {!Symbol} */
+Lexer.NAME_CHAR;
+
+/** @const @type {!Symbol} */
 Lexer.OPERATOR_CHAR;
 
 /** @const @type {!Symbol} */
@@ -34,9 +40,6 @@ Lexer.STRING2_CHAR;
 
 /** @const @type {!Symbol} */
 Lexer.WHITESPACE_CHAR;
-
-/** @const @type {!Symbol} */
-Lexer.WORD_CHAR;
 
 /** @typedef {!Symbol} */
 Lexer.State;
@@ -220,6 +223,20 @@ Lexer.prototype.feedCharacter = function(charCode) {};
  * @param {!Lexer.State} nextState
  */
 Lexer.prototype.finishToken = function(nextState) {};
+
+/**
+ * @this {!Lexer}
+ * @param {number} charCode
+ * @return {boolean}
+ */
+Lexer.prototype.isName = function(charCode) {};
+
+/**
+ * @this {!Lexer}
+ * @param {number} charCode
+ * @return {boolean}
+ */
+Lexer.prototype.isNameStart = function(charCode) {};
 
 /**
  * @this {!Lexer}

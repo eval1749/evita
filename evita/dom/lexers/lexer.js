@@ -91,12 +91,13 @@ global.Lexer = (function() {
     setupMutationObserver(this);
   }
 
+  Lexer.NAME_CHAR = Symbol('name');
+  Lexer.NAMESTART_CHAR = Symbol('nameStart');
   Lexer.OPERATOR_CHAR = Symbol('operator');
   Lexer.OTHER_CHAR = Symbol('other');
   Lexer.WHITESPACE_CHAR = Symbol('whitespace');
   Lexer.STRING1_CHAR = Symbol('string1');
   Lexer.STRING2_CHAR = Symbol('string2');
-  Lexer.WORD_CHAR = Symbol('word');
 
   Lexer.State = {
     DOT: Symbol('.'),
@@ -366,6 +367,29 @@ global.Lexer = (function() {
       }
     },
 
+    isName: {value:
+      /**
+       * @this {!Lexer}
+       * @param {number} charCode
+       * @return {boolean}
+       */
+      function(charCode) {
+        var type = this.characters_.get(charCode);
+        return type == Lexer.NAMESTART_CHAR || type == Lexer.NAME_CHAR;
+      }
+    },
+
+    isNameStart: {value:
+      /**
+       * @this {!Lexer}
+       * @param {number} charCode
+       * @return {boolean}
+       */
+      function(charCode) {
+        return this.characters_.get(charCode) == Lexer.NAMESTART_CHAR;
+      }
+    },
+
     isOperator: {value:
       /**
        * @this {!Lexer}
@@ -406,7 +430,8 @@ global.Lexer = (function() {
        * @return {boolean}
        */
       function(charCode) {
-        return this.characters_.get(charCode) == Lexer.WORD_CHAR;
+        var type = this.characters_.get(charCode);
+        return type == Lexer.NAMESTART_CHAR || type == Lexer.NAME_CHAR;
       }
     },
 

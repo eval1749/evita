@@ -7,14 +7,17 @@ global.ClikeLexer = (function() {
   var CHARACTERS = (function() {
     var map = new Map();
 
+    function setRange(type, min, max) {
+      for (var charCode = min; charCode <= max; ++charCode) {
+        map.set(charCode, type);
+      }
+    }
+
     map.set(Unicode.LF, Lexer.WHITESPACE_CHAR);
     map.set(Unicode.SPACE, Lexer.WHITESPACE_CHAR);
     map.set(Unicode.TAB, Lexer.WHITESPACE_CHAR);
 
-    for (var charCode = 0x21; charCode < 0x40; ++charCode) {
-      map.set(charCode, Lexer.OPERATOR_CHAR);
-    }
-
+    setRange(Lexer.OPERATOR_CHAR, 0x21, 0x3F);
     map.set(Unicode.FULL_STOP, Lexer.DOT_CHAR);
     map.set(Unicode.SOLIDUS, ClikeLexer.SLASH_CHAR);
 
@@ -22,20 +25,17 @@ global.ClikeLexer = (function() {
     map.set(Unicode.APOSTROPHE, Lexer.STRING1_CHAR);
     map.set(Unicode.QUOTATION_MARK, Lexer.STRING2_CHAR);
 
-    // Word [0-9a-zA-Z_]
-    for (var charCode = Unicode.DIGIT_ZERO;
-         charCode <= Unicode.DIGIT_NINE; ++charCode) {
-      map.set(charCode, Lexer.WORD_CHAR);
-    }
-    for (var charCode = Unicode.LATIN_CAPITAL_LETTER_A;
-         charCode <= Unicode.LATIN_CAPITAL_LETTER_Z; ++charCode) {
-      map.set(charCode, Lexer.WORD_CHAR);
-    }
-    for (var charCode = Unicode.LATIN_SMALL_LETTER_A;
-         charCode <= Unicode.LATIN_SMALL_LETTER_Z; ++charCode) {
-      map.set(charCode, Lexer.WORD_CHAR);
-    }
-    map.set(Unicode.LOW_LINE, Lexer.WORD_CHAR);
+    // NameStartChar ::= [a-zA-Z_]
+    setRange(Lexer.NAMESTART_CHAR,
+             Unicode.LATIN_CAPITAL_LETTER_A,
+             Unicode.LATIN_CAPITAL_LETTER_Z);
+    setRange(Lexer.NAMESTART_CHAR,
+             Unicode.LATIN_SMALL_LETTER_A,
+             Unicode.LATIN_SMALL_LETTER_Z);
+    map.set(Unicode.LOW_LINE, Lexer.NAMESTART_CHAR);
+
+    // NameChar ::= NameStart | [0-9]
+    setRange(Lexer.NAME_CHAR, Unicode.DIGIT_ZERO, Unicode.DIGIT_NINE);
 
     return map;
   })();

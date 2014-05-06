@@ -12,6 +12,7 @@
   }
   PlainTextLexer.prototype = Object.create(Lexer.prototype, {
     constructor: {value: PlainTextLexer},
+    detach: {value: function() {}},
     doColor: {value: function(hint) { return hint; }}
   });
 

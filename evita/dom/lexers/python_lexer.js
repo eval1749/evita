@@ -65,27 +65,22 @@ global.PythonLexer = (function(keywords) {
   }
 
   /**
-   * @this {!PythonLexer}
-   * @param {number} maxOffset
+   * @this {!ConfigLexer}
+   * @param {number} charCode
    */
-  function nextToken(maxOffset) {
-    var lexer = this;
-    var document = lexer.range.document;
-    while (lexer.scanOffset < maxOffset) {
-      var charCode = document.charCodeAt_(lexer.scanOffset);
-      if (lexer.state == Lexer.State.ZERO) {
-        switch (charCode) {
-          case Unicode.FULL_STOP:
-            lexer.startToken(Lexer.State.DOT);
-            lexer.endToken();
-            continue;
-          case Unicode.NUMBER_SIGN:
-            lexer.startToken(Lexer.State.LINE_COMMENT);
-            continue;
-        }
+  function feedCharacter(charCode) {
+    if (this.state == Lexer.State.ZERO) {
+      switch (charCode) {
+        case Unicode.FULL_STOP:
+          this.startToken(Lexer.State.DOT);
+          this.endToken();
+          return;
+        case Unicode.NUMBER_SIGN:
+          this.startToken(Lexer.State.LINE_COMMENT);
+          return;
       }
-      this.updateState(charCode);
     }
+    this.updateState(charCode);
   }
 
   /**
@@ -116,7 +111,7 @@ global.PythonLexer = (function(keywords) {
   PythonLexer.prototype = Object.create(Lexer.prototype, {
     constructor: {value: PythonLexer},
     didShrinkLastToken: {value: didShrinkLastToken },
-    nextToken: {value: nextToken},
+    feedCharacter: {value: feedCharacter},
     syntaxOfToken: {value: syntaxOfToken}
   });
 

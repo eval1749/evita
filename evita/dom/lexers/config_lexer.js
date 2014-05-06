@@ -31,24 +31,19 @@ global.ConfigLexer = (function() {
 
   /**
    * @this {!ConfigLexer}
-   * @param {number} maxOffset
+   * @param {number} charCode
    */
-  function nextToken(maxOffset) {
-    var lexer = this;
-    var document = lexer.range.document;
-    while (lexer.scanOffset < maxOffset) {
-      var charCode = document.charCodeAt_(lexer.scanOffset);
-      if (lexer.state == Lexer.State.ZERO && charCode == Unicode.NUMBER_SIGN) {
-        lexer.startToken(Lexer.State.LINE_COMMENT);
-        continue;
-      }
-      this.updateState(charCode);
+  function feedCharacter(charCode) {
+    if (this.state == Lexer.State.ZERO && charCode == Unicode.NUMBER_SIGN) {
+      this.startToken(Lexer.State.LINE_COMMENT);
+      return;
     }
+    this.updateState(charCode);
   }
 
   ConfigLexer.prototype = Object.create(Lexer.prototype, {
     constructor: {value: ConfigLexer},
-    nextToken: {value: nextToken}
+    feedCharacter: {value: feedCharacter}
   });
 
   return ConfigLexer;

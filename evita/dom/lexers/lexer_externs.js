@@ -212,6 +212,11 @@ Lexer.prototype.extendToken = function() {};
 Lexer.prototype.extractWord = function(range, token) {};
 
 /**
+ * @param {number} charCode
+ */
+Lexer.prototype.feedCharacter = function(charCode) {};
+
+/**
  * @param {!Lexer.State} nextState
  */
 Lexer.prototype.finishToken = function(nextState) {};

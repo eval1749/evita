@@ -311,7 +311,8 @@ global.Lexer = (function() {
         var maxOffset = Math.min(this.scanOffset + maxCount, document.length);
         var startOffset = this.scanOffset;
         while (this.scanOffset < maxOffset) {
-          this.nextToken(maxOffset);
+          var charCode = document.charCodeAt_(this.scanOffset);
+          this.feedCharacter(charCode);
         }
         var count = this.scanOffset - startOffset;
         if (count && this.lastToken)

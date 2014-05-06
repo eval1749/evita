@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/**
+ * @param {*} reason
+ */
+JsConsole.errorHandler = function(reason) {};
+
 /** @type {function(Window)} */
 JsConsole.prototype.activate;
 
@@ -16,6 +21,11 @@ JsConsole.prototype.emit;
 
 /** @type {function()} */
 JsConsole.prototype.emitPrompt;
+
+/**
+ * @param {*} reason
+ */
+JsConsole.prototype.errorHandler = function(reason) {};
 
 /** @type {function()} */
 JsConsole.prototype.evalLastLine;

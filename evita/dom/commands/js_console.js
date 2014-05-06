@@ -4,6 +4,8 @@
 
 'use strict';
 
+var $0;
+
 /**
  * The JavaScript Console.
  *
@@ -57,6 +59,10 @@ global.JsConsole = (function() {
 
 /** @type {number} */ JsConsole.MAX_HISTORY_LINES = 20;
 /** @type {?JsConsole} */ JsConsole.instance = null;
+
+global.JsConsole.errorHandler = function(reason) {
+  JsConsole.instance.errorHandler(reason);
+};
 
 /**
  * @this {!JsConsole}
@@ -126,6 +132,27 @@ JsConsole.prototype.emitPrompt = function() {
   this.document.readonly = false;
 };
 
+/**
+ * @this {!JsConsole}
+ * @param {*} reason
+ */
+global.JsConsole.prototype.errorHandler = function(reason) {
+  $0 = reason;
+  if (reason instanceof Error) {
+    var stack = reason['stack'];
+    if (stack) {
+      this.emit('\x2F*\n' + stack + '\n*\x2F\n');
+      return;
+    }
+    var message = reason['message'];
+    if (message) {
+      this.emit('\x2F*\nException: ' + message + '\n*\x2F\n');
+      return;
+    }
+  }
+  this.emit('JsConsole.errorHandler: ' + Editor.stringify(reason));
+};
+
 JsConsole.prototype.evalLastLine = function() {
   var range = this.range;
   range.end = this.document.length;
@@ -143,6 +170,7 @@ JsConsole.prototype.evalLastLine = function() {
   JsConsole.result = result;
   range.collapseTo(range.end);
   if (result.exception) {
+    $0 = result.exception;
     if (result.stackTraceString == '') {
       result.stackTraceString = result.exception +
         result.stackTrace.map(function(stackFrame) {
@@ -151,8 +179,10 @@ JsConsole.prototype.evalLastLine = function() {
               stackFrame.column + ')';
         }).join('');
     }
-    this.emit('\x2F*\nException: ' + result.stackTraceString + '\n*\x2F');
+    this.emit('\x2F*\nException: ' + result.stackTraceString + '\n*\x2F\n');
   } else {
+    if (result.value !== undefined)
+      $0 = result.value;
     this.emit(Editor.stringify(result.value));
   }
   this.emitPrompt();

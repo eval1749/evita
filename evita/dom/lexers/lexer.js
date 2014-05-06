@@ -226,7 +226,10 @@ global.Lexer = (function() {
         // Shrink last clean token
         if (lastToken.end != newScanOffset) {
           lastToken.end = newScanOffset;
+          var oldState = lastToken.oldState;
           this.didShrinkLastToken(lastToken);
+          if (lastToken.state != oldState)
+            colorLastToken(this);
           this.state = lastToken.state;
         }
         if (oldScanOffset != newScanOffset)

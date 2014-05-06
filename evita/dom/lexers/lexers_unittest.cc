@@ -153,6 +153,11 @@ TEST_F(LexersTest, all) {
     "n1 e5 n1 a3 n1 a3 n1 v2 n1",
     "doColor('foo.xml', ['<input abc xyz=10>'])");
 
+  // Ampersand
+  EXPECT_SCRIPT_EQ(
+    "n5 &5 n1 &6 n1 &8 n4",
+    "doColor('foo.html', ['& && &amp; &#123; &#xBEEF; foo'])");
+
   // Malformed:  no space between attributes.
   //  <abc def="123"ghi>
   EXPECT_SCRIPT_EQ(

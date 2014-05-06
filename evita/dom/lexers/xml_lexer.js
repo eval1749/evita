@@ -7,7 +7,7 @@
 // TODO(yosi) NYI: <![CDATA[ ... ]]>
 global.XmlLexer = (function(keywords) {
   /** @enum{!Symbol} */
-  // ATTRVALUE_END and ENTITYREF_END make attribute value/entity reference
+  // ATTRVALUE_END and AMPERSAND_END make attribute value/entity reference
   // coloring with backspace.
   //
   //  Before: ATTRNAME = ATTRVALUE ATTRVALUE_END CHAR
@@ -15,26 +15,38 @@ global.XmlLexer = (function(keywords) {
   //  After: ATTRNAME = ATTRVALUE ATTRVALUE_END
   //  Scanning starts from ATTRVALUE_END
   var XmlState = {
+    AMPERSAND: Symbol('&'),
+    AMPERSAND_END: Symbol('&;'),
+
     ATTRNAME: Symbol('attrname'),
     ATTRNAME_EQ: Symbol('attrname='),
     ATTRNAME_GT: Symbol('attrname>'),
     ATTRNAME_SPACE: Symbol('attrname_space'),
+
     ATTRVALUE: Symbol('attrvalue'),
     ATTRVALUE1: Symbol('string1'),
     ATTRVALUE2: Symbol('string2'),
     ATTRVALUE_END: Symbol('attrvalue_end'),
     ATTRVALUE_SPACE: Symbol('attrvalue_space'),
+
+    CHARREF_DIGIT: Symbol('&#d'),
+    CHARREF: Symbol('&#'),
+    CHARREF_XDIGIT: Symbol('&#x'),
+
     CLOSETAG: Symbol('</'),
     CLOSETAG_SPACE: Symbol('</_space'),
+
     COMMENT: Symbol('comment'),
     COMMENT_DASH: Symbol('comment-'),
     COMMENT_DASH_DASH: Symbol('comment--'),
     COMMENT_END: Symbol('-->'),
     COMMENT_START: Symbol('<!--'),
+
     ELEMENTNAME: Symbol('element'),
     ELEMENTNAME_SLASH: Symbol('element/'),
-    ENTITYREF: Symbol('&'),
-    ENTITYREF_END: Symbol('&;'),
+
+    ENTITYREF: Symbol('entityref'),
+
     GT: Symbol('>'),
     LT: Symbol('<'),
     LT_BANG: Symbol('<!'),
@@ -45,6 +57,8 @@ global.XmlLexer = (function(keywords) {
   /** @const @type {!Map.<!XmlState, string>} */
   var STATE_TO_SYNTAX = (function() {
     var map = new Map();
+    map.set(XmlState.AMPERSAND, '');
+
     map.set(XmlState.ATTRNAME, 'html_attribute_name');
     map.set(XmlState.ATTRNAME_EQ, '');
     map.set(XmlState.ATTRNAME_GT, '');
@@ -55,6 +69,10 @@ global.XmlLexer = (function(keywords) {
     map.set(XmlState.ATTRVALUE_SPACE, '');
     map.set(XmlState.ATTRVALUE1, 'html_attribute_value');
     map.set(XmlState.ATTRVALUE2, 'html_attribute_value');
+
+    map.set(XmlState.CHARREF, 'html_entity');
+    map.set(XmlState.CHARREF_DIGIT, 'html_entity');
+    map.set(XmlState.CHARREF_XDIGIT, 'html_entity');
 
     map.set(XmlState.CLOSETAG, '');
     map.set(XmlState.CLOSETAG_SPACE, '');
@@ -69,7 +87,7 @@ global.XmlLexer = (function(keywords) {
     map.set(XmlState.ELEMENTNAME_SLASH, '');
 
     map.set(XmlState.ENTITYREF, 'html_entity');
-    map.set(XmlState.ENTITYREF_END, 'html_entity');
+    map.set(XmlState.AMPERSAND_END, 'html_entity');
 
     map.set(XmlState.GT, '');
 
@@ -158,6 +176,9 @@ global.XmlLexer = (function(keywords) {
     if (this.debug_ > 1)
       console.log('didShrinkLastToken', token);
     switch (token.state) {
+      case XmlState.CHARREF:
+        token.state = XmlState.AMPERSAND;
+        break;
       case XmlState.COMMENT_DASH_DASH:
         token.state = XmlState.COMMENT_DASH;
         return;
@@ -190,6 +211,10 @@ global.XmlLexer = (function(keywords) {
             break;
         }
         return;
+      case XmlState.ENTITYREF:
+        if (token.end - token.start == 1)
+          token.state = XmlState.AMPERSAND;
+        break;
       case XmlState.LT_BANG:
         token.state = XmlState.LT;
         return;
@@ -208,7 +233,7 @@ global.XmlLexer = (function(keywords) {
       case Lexer.State.ZERO:
         switch (charCode) {
           case Unicode.AMPERSAND:
-            this.startToken(XmlState.ENTITYREF);
+            this.startToken(XmlState.AMPERSAND);
             return;
           case Unicode.LESS_THAN_SIGN:
             this.startToken(XmlState.LT);
@@ -218,6 +243,43 @@ global.XmlLexer = (function(keywords) {
             return;
         }
         break;
+
+      ////////////////////////////////////////////////////////////
+      //
+      // AMPERSAND
+      //
+      case XmlState.AMPERSAND:
+        if (charCode == Unicode.NUMBER_SIGN)
+          this.restartToken(XmlState.CHARREF);
+        else if (this.isNameStart(charCode))
+          this.restartToken(XmlState.ENTITYREF);
+        else
+          this.state = Lexer.State.ZERO;
+        return;
+
+      case XmlState.CHARREF:
+        if (charCode >= Unicode.DIGIT_ZERO && charCode <= Unicode.DIGIT_NINE)
+          this.finishToken(XmlState.CHARREF_DIGIT);
+        else if (charCode == Unicode.LATIN_SMALL_LETTER_X)
+          this.finishToken(XmlState.CHARREF_XDIGIT);
+        else
+          this.endToken();
+        return;
+
+      case XmlState.ENTITYREF:
+      case XmlState.CHARREF_DIGIT:
+      case XmlState.CHARREF_XDIGIT:
+        // Eat up to semicolon ";"
+        if (charCode == Unicode.SEMICOLON || !this.isName(charCode))
+          this.finishToken(XmlState.AMPERSAND_END);
+        else
+          this.extendToken();
+        return;
+
+      case XmlState.AMPERSAND_END:
+      case XmlState.GT:
+        this.endToken();
+        return;
 
       ////////////////////////////////////////////////////////////
       //
@@ -401,23 +463,6 @@ global.XmlLexer = (function(keywords) {
 
       ////////////////////////////////////////////////////////////
       //
-      // ENTITYREF
-      //
-      case XmlState.ENTITYREF:
-        // Eat up to semicolon ";"
-        if (charCode == Unicode.SEMICOLON)
-          this.finishToken(XmlState.ENTITYREF_END);
-        else
-          this.extendToken();
-        return;
-
-      case XmlState.ENTITYREF_END:
-      case XmlState.GT:
-        this.endToken();
-        return;
-
-      ////////////////////////////////////////////////////////////
-      //
       // LT
       //
       case XmlState.LT:
@@ -447,7 +492,7 @@ global.XmlLexer = (function(keywords) {
 
       case XmlState.TEXT:
         if (charCode == Unicode.AMPERSAND)
-          this.endToken();
+          this.finishToken(XmlState.AMPERSAND);
         else if (charCode == Unicode.LESS_THAN_SIGN)
           this.endToken();
         else

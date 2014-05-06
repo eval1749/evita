@@ -156,15 +156,15 @@ global.JsConsole.prototype.errorHandler = function(reason) {
 JsConsole.prototype.evalLastLine = function() {
   var range = this.range;
   range.end = this.document.length;
-  if (range.start == range.end) {
+  var line = range.text.trim();
+  if (line == '') {
     this.emitPrompt();
     return;
   }
-  var line = range.text;
   this.addToHistory_(line);
   this.history_index = 0;
   range.collapseTo(range.end);
-  range.insertBefore('\n');
+  range.text = '\n';
 
   var result = Editor.runScript(line, console.DOCUMENT_NAME);
   JsConsole.result = result;

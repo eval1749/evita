@@ -182,11 +182,6 @@ Lexer.prototype.collectTokens = function(itDelimiter, token) {};
 Lexer.prototype.detach = function() {};
 
 /**
- * @type {!function()}
- */
-Lexer.prototype.didChangeScanOffset = function() {};
-
-/**
  * @param {!Lexer.Token} token
  * @return {!Lexer.State}
  */
@@ -207,13 +202,6 @@ Lexer.prototype.endToken = function() {};
  * @type {!function()}
  */
 Lexer.prototype.extendToken = function() {};
-
-/**
- * @param {!Range} range
- * @param {!Lexer.Token} token
- * @return {string}
- */
-Lexer.prototype.extractWord = function(range, token) {};
 
 /**
  * @param {number} charCode

@@ -166,7 +166,6 @@ global.Lexer = (function() {
         if (!this.lastToken)
           return;
         var document = this.range.document;
-        var oldScanOffset = this.scanOffset;
         var newScanOffset = Math.min(this.changedOffset, this.lastToken.end,
                                      document.length);
         this.scanOffset = newScanOffset;
@@ -178,8 +177,6 @@ global.Lexer = (function() {
           this.lastToken = null;
           this.state = Lexer.State.ZERO;
           this.tokens.clear();
-          if (oldScanOffset != newScanOffset)
-            this.didChangeScanOffset();
           return;
         }
         var dummyToken = new Lexer.Token(Lexer.State.ZERO, newScanOffset - 1);
@@ -233,8 +230,6 @@ global.Lexer = (function() {
           }
           this.state = newState;
         }
-        if (oldScanOffset != newScanOffset)
-          this.didChangeScanOffset();
       }
     },
 
@@ -279,15 +274,6 @@ global.Lexer = (function() {
         });
         this.mutationObserver_.disconnect();
         this.range = null;
-      }
-    },
-
-    didChangeScanOffset: {value:
-      /**
-       * @this {!Lexer}
-       */
-      function() {
-        // nothing to do
       }
     },
 
@@ -344,18 +330,6 @@ global.Lexer = (function() {
         ++this.scanOffset;
         this.lastToken.end = this.scanOffset;
       },
-    },
-
-    extractWord: {value:
-      /**
-       * @this {!Lexer}
-       * @param {!Range} range
-       * @param {!Lexer.Token} token
-       * @return {string}
-       */
-      function(range, token) {
-        return range.text;
-      }
     },
 
     finishToken: {value:

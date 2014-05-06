@@ -161,12 +161,9 @@ Document::~Document() {
 base::char16 Document::charCodeAt(text::Posn position) const {
   if (position >= 0 && position < length())
     return buffer_->GetCharAt(position);
-  auto const isolate = v8::Isolate::GetCurrent();
-  auto const error = v8::Exception::RangeError(
-    gin::StringToV8(isolate, base::StringPrintf(
+  ScriptHost::instance()->ThrowRangeError(base::StringPrintf(
       "Bad index %d, valid index is [%d, %d]",
-      position, 0, buffer_->GetEnd() - 1)));
-  ScriptHost::instance()->ThrowException(error);
+      position, 0, buffer_->GetEnd() - 1));
   return 0;
 }
 
@@ -245,12 +242,9 @@ text::LineAndColumn Document::GetLineAndColumn(text::Posn offset) const {
 bool Document::IsValidPosition(text::Posn position) const {
   if (position >= 0 && position <= buffer_->GetEnd())
     return true;
-  auto const isolate = v8::Isolate::GetCurrent();
-  auto const error = v8::Exception::RangeError(
-    gin::StringToV8(isolate, base::StringPrintf(
+  ScriptHost::instance()->ThrowRangeError(base::StringPrintf(
       "Invalid position %d, valid range is [%d, %d]",
-      position, 0, buffer_->GetEnd())));
-  ScriptHost::instance()->ThrowException(error);
+      position, 0, buffer_->GetEnd()));
   return false;
 }
 

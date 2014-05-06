@@ -88,6 +88,7 @@ class ScriptHost : public v8_glue::RunnerDelegate {
   public: static ScriptHost* StartForTesting(
       ViewDelegate* view_delegate, domapi::IoDelegate* io_delegate);
   public: void ThrowError(const std::string& message);
+  public: void ThrowRangeError(const std::string& message);
   public: void ThrowException(v8::Handle<v8::Value> exception);
   public: void WillDestroyHost();
 

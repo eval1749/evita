@@ -113,11 +113,8 @@ bool DataTransferItemList::ValidateIndex(int index) const {
   FetchIfNeeded();
   if (index >= 0 && index < length())
     return true;
-  auto const isolate = ScriptHost::instance()->isolate();
-  auto const error = v8::Exception::RangeError(
-    gin::StringToV8(isolate, base::StringPrintf(
-      "Bad index %d, it must be less than %d", index, length())));
-  ScriptHost::instance()->ThrowException(error);
+  ScriptHost::instance()->ThrowRangeError(base::StringPrintf(
+      "Bad index %d, it must be less than %d", index, length()));
   return false;
 }
 

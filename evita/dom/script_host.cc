@@ -295,8 +295,12 @@ ScriptHost* ScriptHost::StartForTesting(
 
 void ScriptHost::ThrowError(const std::string& message) {
   auto isolate = isolate_holder_.isolate();
-  isolate->ThrowException(v8::Exception::Error(
-      gin::StringToV8(isolate, message)));
+  ThrowException(v8::Exception::Error(gin::StringToV8(isolate, message)));
+}
+
+void ScriptHost::ThrowRangeError(const std::string& message) {
+  auto isolate = isolate_holder_.isolate();
+  ThrowException(v8::Exception::RangeError(gin::StringToV8(isolate, message)));
 }
 
 void ScriptHost::ThrowException(v8::Handle<v8::Value> exception) {

@@ -34,10 +34,8 @@ void TextWindow::set_zoom(float new_zoom) {
   if (zoom_ == new_zoom)
     return;
   if (new_zoom <= 0.0f) {
-    auto const isolate = ScriptHost::instance()->isolate();
-    ScriptHost::instance()->ThrowException(v8::Exception::RangeError(
-        gin::StringToV8(isolate,
-                        "TextWindow zoom must be greater than zero.")));
+    ScriptHost::instance()->ThrowRangeError(
+        "TextWindow zoom must be greater than zero.");
     return;
   }
   zoom_ = new_zoom;

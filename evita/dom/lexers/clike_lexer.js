@@ -98,27 +98,24 @@ global.ClikeLexer = (function() {
   /**
    * @this {!ClikeLexer}
    * @param {!Lexer.Token} token
+   * @return {!Lexer.State}
    */
   function didShrinkLastToken(token) {
     if (this.debug_ > 1)
       console.log('didShrinkLastToken', token);
     switch (token.state) {
       case ClikeLexer.State.BLOCK_COMMENT_END:
-        token.state = ClikeLexer.State.BLOCK_COMMENT_ASTERISK;
-        return;
+        return ClikeLexer.State.BLOCK_COMMENT_ASTERISK;
       case ClikeLexer.State.BLOCK_COMMENT_START:
-        token.state = ClikeLexer.State.SOLIDUS;
-        return;
+        return ClikeLexer.State.SOLIDUS;
       case ClikeLexer.State.COLON_COLON:
-        token.state = ClikeLexer.State.COLON;
-        return;
+        return ClikeLexer.State.COLON;
       case Lexer.State.DOT:
-        token.state = Lexer.State.ZERO;
-        return;
+        return Lexer.State.ZERO;
       case ClikeLexer.State.LINE_COMMENT_START:
-        token.state = ClikeLexer.State.SOLIDUS;
-        return;
+        return ClikeLexer.State.SOLIDUS;
     }
+    return token.state;
   }
 
   /**

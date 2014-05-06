@@ -184,60 +184,52 @@ global.XmlLexer = (function(keywords) {
   /**
    * @this {!XmlLexer}
    * @param {!Lexer.Token} token
+   * @return {!Lexer.State}
    */
   function didShrinkLastToken(token) {
     if (this.debug_ > 1)
       console.log('didShrinkLastToken', token);
     switch (token.state) {
       case XmlLexer.State.CHARREF:
-        token.state = XmlLexer.State.AMPERSAND;
-        break;
+        return XmlLexer.State.AMPERSAND;
       case XmlLexer.State.COMMENT_DASH_DASH:
-        token.state = XmlLexer.State.COMMENT_DASH;
-        return;
+        return XmlLexer.State.COMMENT_DASH;
       case XmlLexer.State.COMMENT_END:
         switch (token.end - token.start) {
           case 1:
-            token.state = XmlLexer.State.COMMENT_DASH;
-            break;
+            return XmlLexer.State.COMMENT_DASH;
           case 2:
-            token.state = XmlLexer.State.COMMENT_DASH_DASH;
-            break;
+            return XmlLexer.State.COMMENT_DASH_DASH;
           default:
            console.assert(false, token);
            break;
         }
-        return;
+        break;
       case XmlLexer.State.COMMENT_START:
         switch (token.end - token.start) {
           case 1:
-            token.state = XmlLexer.State.LT;
-            break;
+            return XmlLexer.State.LT;
           case 2:
-            token.state = XmlLexer.State.LT_BANG;
-            break;
+            return XmlLexer.State.LT_BANG;
           case 3:
-            token.state = XmlLexer.State.LT_BANG_DASH;
-            break;
+            return XmlLexer.State.LT_BANG_DASH;
           default:
             console.assert(false, token);
             break;
         }
-        return;
+        break;
       case XmlLexer.State.EMPTYTAG_END:
-        return token.state = XmlLexer.State.SLASH;
-
+        return XmlLexer.State.SLASH;
       case XmlLexer.State.ENTITYREF:
         if (token.end - token.start == 1)
-          token.state = XmlLexer.State.AMPERSAND;
+          return XmlLexer.State.AMPERSAND;
         break;
       case XmlLexer.State.LT_BANG:
-        token.state = XmlLexer.State.LT;
-        return;
+        return XmlLexer.State.LT;
       case XmlLexer.State.LT_BANG_DASH:
-        token.state = XmlLexer.State.LT_BANG;
-        return;
+        return XmlLexer.State.LT_BANG;
     }
+    return token.state;
   }
 
   /**

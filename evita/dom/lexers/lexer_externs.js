@@ -188,6 +188,7 @@ Lexer.prototype.didChangeScanOffset = function() {};
 
 /**
  * @param {!Lexer.Token} token
+ * @return {!Lexer.State}
  */
 Lexer.prototype.didShrinkLastToken = function(token) {};
 

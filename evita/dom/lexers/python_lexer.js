@@ -54,14 +54,15 @@ global.PythonLexer = (function(keywords) {
   /**
    * @this {!PythonLexer}
    * @param {!Lexer.Token} token
+   * @return {!Lexer.State}
    */
   function didShrinkLastToken(token) {
     if (this.debug_ > 1)
       console.log('didShrinkLastToken', token);
     if (token.state == Lexer.State.DOT) {
-      token.state = Lexer.State.ZERO;
-      return;
+      return Lexer.State.ZERO;
     }
+    return token.state;
   }
 
   /**

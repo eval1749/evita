@@ -168,6 +168,7 @@
     /** @type {!NameToModeMap} */
     value: (function() {
         var map = new Map();
+        map.set('DEPS', PythonMode);
         map.set('Makefile', ConfigMode);
         map.set('autohandler', MasonMode);
         map.set('dhandler', MasonMode);

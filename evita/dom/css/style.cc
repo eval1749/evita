@@ -225,10 +225,6 @@ v8::Handle<v8::Object> Document::style_at(text::Posn position) const {
                   gin::ConvertToV8(isolate, style_values.font_weight()));
   }
 
-  if (style_values.has_syntax()) {
-    js_style->Set(v8Strings::charSyntax.Get(isolate),
-                  v8::Integer::New(isolate, style_values.syntax()));
-  }
   return runner_scope.Escape(js_style);
 }
 
@@ -263,7 +259,6 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
     if (name.IsEmpty())
       continue;
     LOAD_DICT_VALUE(css::Color, backgroundColor, bgcolor);
-    LOAD_DICT_VALUE(int, charSyntax, syntax);
     LOAD_DICT_VALUE(css::Color, color, color);
     LOAD_DICT_VALUE(css::FontSize, fontSize, font_size);
     LOAD_DICT_VALUE(css::FontStyle, fontStyle, font_style);

@@ -30,7 +30,6 @@ TEST_F(TextPositionTest, Basic) {
   EXPECT_SCRIPT_TRUE("pos.document == doc");
   EXPECT_SCRIPT_EQ("2", "pos.offset");
   EXPECT_SCRIPT_EQ("111", "pos.charCode()");
-  EXPECT_SCRIPT_EQ("0", "pos.charSyntax()");
 
   EXPECT_SCRIPT_EQ("RangeError: Invalid offset -1 for [object Document]",
                    "new TextPosition(doc, -1)");
@@ -72,14 +71,17 @@ TEST_F(TextPositionTest, moveBracket) {
     "  var range = new Range(document);"
     "  var state = 'NORMAL';"
     "  var color = 0;"
-    "  var char_syntax = 0;"
+    "  var charSyntax = 'normal';"
     "  function finish(advance) {"
     "    range.end = pos.offset + advance;"
-    "    range.setStyle({charSyntax: char_syntax, color: color});"
+    "    if (!range.collapsed) {"
+    "      range.setStyle({color: color});"
+    "      range.setSyntax(charSyntax);"
+    "    }"
     "    range.collapseTo(range.end);"
     "    state = 'NORMAL';"
     "    color = 0;"
-    "    char_syntax = 0;"
+    "    charSyntax = 'normal';"
     "  }"
     "  for (; pos.offset < document.length; pos.move(Unit.CHARACTER)) {"
     "    var char_code = pos.charCode();"
@@ -89,17 +91,17 @@ TEST_F(TextPositionTest, moveBracket) {
     "          finish(0);"
     "          state = 'STRING1';"
     "          color = 0x000080;"
-    "          char_syntax = 1;"
+    "          charSyntax = 'one';"
     "        } else if (char_code == Unicode.SOLIDUS) {"
     "          finish(0);"
     "          state = 'COMMENT_1';"
     "          color = 0x008000;"
-    "          char_syntax = 2;"
+    "          charSyntax = 'two';"
     "        } else if (char_code == Unicode.LEFT_CURLY_BRACKET ||"
     "                   char_code == Unicode.RIGHT_CURLY_BRACKET) {"
     "          finish(0);"
     "          color = 0;"
-    "          char_syntax = 3;"
+    "          charSyntax = 'three';"
     "          finish(1);"
     "          pos.move(Unit.CHARACTER);"
     "        }"

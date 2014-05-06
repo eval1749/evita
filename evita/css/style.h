@@ -37,8 +37,6 @@ enum class TextDecoration {
   #endif // SUPPORT_IME
 };
 
-typedef int Syntax;
-
 //////////////////////////////////////////////////////////////////////
 //
 // Style
@@ -52,8 +50,7 @@ class Style {
     Mask_FontStyle  = 1 << 4,
     Mask_FontWeight = 1 << 5,
     Mask_MarkerColor = 1 << 6,
-    Mask_Syntax     = 1 << 7,
-    Mask_TextDecoration = 1 << 8,
+    Mask_TextDecoration = 1 << 7,
   };
 
   private: Color bgcolor_;
@@ -64,7 +61,6 @@ class Style {
   private: FontWeight font_weight_;
   private: Color marker_color_;
   private: int masks_;
-  private: int syntax_;
   private: TextDecoration text_decoration_;
 
   public: Style(const Color& color, const Color& bgcolor);
@@ -102,10 +98,6 @@ class Style {
   public: Color marker_color() const;
   public: bool has_marker_color() const { return masks_ & Mask_MarkerColor; }
   public: void set_marker_color(Color marker_color);
-
-  public: Syntax syntax() const;
-  public: bool has_syntax() const { return masks_ & Mask_Syntax; }
-  public: void set_syntax(Syntax syntax);
 
   public: TextDecoration text_decoration() const;
   public: bool has_text_decoration() const {

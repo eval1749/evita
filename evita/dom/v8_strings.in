@@ -75,7 +75,6 @@ noOverwrite
 # Style
 Style
 backgroundColor
-charSyntax
 color
 fontFamily
 fontSize

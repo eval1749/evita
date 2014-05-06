@@ -34,8 +34,6 @@ StyleSheet* GetDefaultStyleSheet() {
   default_style.set_font_size(10);
   default_style.set_font_style(css::FontStyle::Normal);
   default_style.set_font_weight(css::FontWeight::Normal);
-  // TODO(yosi) We should move Style::syntax() to another place.
-  default_style.set_syntax(0);
   default_style.set_text_decoration(css::TextDecoration::None);
   default_style_sheet.AddRule(StyleSelector::defaults(), default_style);
 

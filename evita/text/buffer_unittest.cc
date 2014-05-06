@@ -73,11 +73,11 @@ TEST_F(BufferTest, InsertAt) {
   buffer()->InsertBefore(0, L"abc");
 
   css::Style style_values1;;
-  style_values1.set_syntax(1);
+  style_values1.set_text_decoration(css::TextDecoration::GreenWave);
   buffer()->SetStyle(1, 2, style_values1);
 
   css::Style style_values2;;
-  style_values2.set_syntax(2);
+  style_values2.set_text_decoration(css::TextDecoration::RedWave);
   buffer()->SetStyle(2, 3, style_values2);
 
   auto range = std::make_unique<text::Range>(buffer(), 2, 2);
@@ -87,9 +87,11 @@ TEST_F(BufferTest, InsertAt) {
   EXPECT_EQ(4, buffer()->GetEnd());
   EXPECT_EQ('X', buffer()->GetCharAt(2));
   EXPECT_EQ('c', buffer()->GetCharAt(3));
-  EXPECT_EQ(2, buffer()->GetStyleAt(2).syntax()) <<
+  EXPECT_EQ(css::TextDecoration::RedWave,
+            buffer()->GetStyleAt(2).text_decoration()) <<
       "The style of inserted text is the style of insertion position.";
-  EXPECT_EQ(2, buffer()->GetStyleAt(3).syntax()) <<
+  EXPECT_EQ(css::TextDecoration::RedWave,
+            buffer()->GetStyleAt(3).text_decoration()) <<
       "The style at insertion position isn't changed.";
   EXPECT_EQ(2, range->GetStart()) <<
     "The range at insertion position should not be moved.";
@@ -101,11 +103,11 @@ TEST_F(BufferTest, InsertBefore) {
   buffer()->InsertBefore(0, L"abc");
 
   css::Style style_values1;;
-  style_values1.set_syntax(1);
+  style_values1.set_text_decoration(css::TextDecoration::GreenWave);
   buffer()->SetStyle(1, 2, style_values1);
 
   css::Style style_values2;;
-  style_values2.set_syntax(2);
+  style_values2.set_text_decoration(css::TextDecoration::RedWave);
   buffer()->SetStyle(2, 3, style_values2);
 
   auto range = std::make_unique<text::Range>(buffer(), 2, 2);
@@ -115,10 +117,12 @@ TEST_F(BufferTest, InsertBefore) {
   EXPECT_EQ(4, buffer()->GetEnd());
   EXPECT_EQ('X', buffer()->GetCharAt(2));
   EXPECT_EQ('c', buffer()->GetCharAt(3));
-  EXPECT_EQ(1, buffer()->GetStyleAt(2).syntax()) <<
+  EXPECT_EQ(css::TextDecoration::GreenWave,
+            buffer()->GetStyleAt(2).text_decoration()) <<
       "The style of inserted text is inherited from styles before insertion"
       " position.";
-  EXPECT_EQ(2, buffer()->GetStyleAt(3).syntax()) <<
+  EXPECT_EQ(css::TextDecoration::RedWave,
+            buffer()->GetStyleAt(3).text_decoration()) <<
       "The style at insertion position isn't changed.";
   EXPECT_EQ(3, range->GetStart()) <<
     "The range at insertion position should be push back.";

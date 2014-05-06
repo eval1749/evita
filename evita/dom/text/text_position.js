@@ -191,9 +191,9 @@
     return this.document.charCodeAt_(this.offset);
   }
 
-  /** * @return {number} */
+  /** * @return {string} */
   global.TextPosition.prototype.charSyntax = function() {
-    return this.document.styleAt(this.offset).charSyntax || 0;
+    return this.document.syntaxAt(this.offset);
   }
 
   /**

@@ -5,7 +5,7 @@
 /** @type {function(): number} */
 TextPosition.prototype.charCode = function() {};
 
-/** @type {function(): number} */
+/** @type {function(): string} */
 TextPosition.prototype.charSyntax = function() {};
 
 /** @type {!Document} */

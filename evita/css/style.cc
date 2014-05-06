@@ -23,7 +23,6 @@ Style::Style(const Style& other)
       font_weight_(other.font_weight_),
       marker_color_(other.marker_color_),
       masks_(other.masks_),
-      syntax_(other.syntax_),
       text_decoration_(other.text_decoration_) {
 }
 
@@ -47,8 +46,6 @@ bool Style::operator==(const Style& other) const {
   if (has_font_weight() && font_weight_ != other.font_weight_)
     return false;
   if (has_marker_color() && marker_color_ != other.marker_color_)
-    return false;
-  if (has_syntax() && syntax_ != other.syntax_)
     return false;
   if (has_text_decoration() && text_decoration_ != other.text_decoration_)
     return false;
@@ -129,16 +126,6 @@ void Style::set_marker_color(Color color) {
   masks_ |= Mask_MarkerColor;
 }
 
-Syntax Style::syntax() const {
-  DCHECK(has_syntax());
-  return syntax_;
-}
-
-void Style::set_syntax(Syntax syntax) {
-  syntax_ = syntax;
-  masks_ |= Mask_Syntax;
-}
-
 TextDecoration Style::text_decoration() const {
   DCHECK(has_text_decoration());
   return text_decoration_;
@@ -170,7 +157,6 @@ Style* Style::Default() {
     default_style.set_font_size(10);
     default_style.set_font_style(FontStyle::Normal);
     default_style.set_font_weight(FontWeight::Normal);
-    default_style.set_syntax(0);
     default_style.set_text_decoration(TextDecoration::None);
   }
 
@@ -199,9 +185,6 @@ void Style::Merge(const Style& other) {
   if (!has_marker_color() && other.has_marker_color()) {
     set_marker_color(other.marker_color());
   }
-  if (!has_syntax() && other.has_syntax()) {
-    set_syntax(other.syntax());
-  }
   if (!has_text_decoration() && other.has_text_decoration()) {
     set_text_decoration(other.text_decoration());
   }
@@ -228,9 +211,6 @@ void Style::OverrideBy(const Style& other) {
   }
   if (other.has_marker_color()) {
     set_marker_color(other.marker_color());
-  }
-  if (other.has_syntax()) {
-    set_syntax(other.syntax());
   }
   if (other.has_text_decoration()) {
     set_text_decoration(other.text_decoration());
@@ -270,10 +250,6 @@ size_t hash<css::Style>::operator()(
   if (style.has_marker_color()) {
     result <<= 1;
     result ^= std::hash<css::Color>()(style.marker_color());
-  }
-  if (style.has_syntax()) {
-    result <<= 1;
-    result ^= std::hash<css::Syntax>()(style.syntax());
   }
   if (style.has_text_decoration()) {
     result <<= 1;

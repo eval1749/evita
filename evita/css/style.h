@@ -30,10 +30,10 @@ enum class TextDecoration {
   RedWave,
   Underline,
   #if SUPPORT_IME
-  ImeInput,        // dotted underline
-  ImeActive,       // 2 pixel underline
-  ImeInactiveA,    // 1 pixel underline
-  ImeInactiveB,    // 1 pixel underline
+  ImeInput, // dotted underline
+  ImeActive, // 2 pixel underline
+  ImeInactiveA, // 1 pixel underline
+  ImeInactiveB, // 1 pixel underline
   #endif // SUPPORT_IME
 };
 
@@ -44,10 +44,10 @@ enum class TextDecoration {
 class Style {
   private: enum Mask {
     Mask_BgColor = 1 << 0,
-    Mask_Color      = 1 << 1,
+    Mask_Color = 1 << 1,
     Mask_FontFamily = 1 << 2,
-    Mask_FontSize   = 1 << 3,
-    Mask_FontStyle  = 1 << 4,
+    Mask_FontSize = 1 << 3,
+    Mask_FontStyle = 1 << 4,
     Mask_FontWeight = 1 << 5,
     Mask_MarkerColor = 1 << 6,
     Mask_TextDecoration = 1 << 7,

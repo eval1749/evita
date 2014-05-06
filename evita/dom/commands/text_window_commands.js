@@ -40,20 +40,20 @@
   }
 
   /**
-   * @param {number} char_code
+   * @param {number} charCode
    */
-  function makeTypeCharCommand(char_code) {
-    return char_code == 0x29 || char_code == 0x5D || char_code == 0x7D ?
+  function makeTypeCharCommand(charCode) {
+    return charCode == 0x29 || charCode == 0x5D || charCode == 0x7D ?
       function(opt_count) {
         if (arguments.length)
-          typeRightBracket.call(this, char_code, opt_count);
+          typeRightBracket.call(this, charCode, opt_count);
         else
-          typeRightBracket.call(this, char_code);
+          typeRightBracket.call(this, charCode);
       } : function(opt_count) {
         if (arguments.length)
-          typeChar.call(this, char_code, opt_count);
+          typeChar.call(this, charCode, opt_count);
         else
-          typeChar.call(this, char_code);
+          typeChar.call(this, charCode);
       };
   }
 
@@ -76,27 +76,27 @@
   /**
    * Type character
    * @this {!TextWindow}
-   * @param {number} char_code
+   * @param {number} charCode
    * @param {number=} opt_count
    */
-  function typeChar(char_code, opt_count) {
+  function typeChar(charCode, opt_count) {
     var count = arguments.length >= 2 ? /**@type{number}*/(opt_count) : 1;
     var range = this.selection.range;
-    range.text = String.fromCharCode(char_code).repeat(count);
+    range.text = String.fromCharCode(charCode).repeat(count);
     range.collapseTo(range.end);
   }
 
   /**
    * Type character
    * @this {!TextWindow}
-   * @param {number} char_code
+   * @param {number} charCode
    * @param {number=} opt_count
    */
-  function typeRightBracket(char_code, opt_count) {
+  function typeRightBracket(charCode, opt_count) {
     var count = arguments.length >= 2 ? /**@type{number}*/(opt_count) : 1;
     var selection = this.selection;
     var range = selection.range;
-    range.text = String.fromCharCode(char_code).repeat(count);
+    range.text = String.fromCharCode(charCode).repeat(count);
     range.collapseTo(range.end);
     var start = range.start;
     var end = range.end;
@@ -115,19 +115,19 @@
     range.collapseTo(range.start);
     selection.document.readonly = true;
     // TODO(yosi) Should we share blink timer?
-    var window_start = this.compute_(TextWindowComputeMethod.MOVE_WINDOW,
+    var windowStart = this.compute_(TextWindowComputeMethod.MOVE_WINDOW,
                                      0, -1);
-    (new OneShotTimer()).start(range.start < window_start ? 500 : 100,
+    (new OneShotTimer()).start(range.start < windowStart ? 500 : 100,
         function() {
           range.collapseTo(end);
           range.document.readonly = false;
         });
   }
 
-  for (var char_code = 0x20; char_code < 0x7F; ++char_code) {
-    Editor.bindKey(TextWindow, String.fromCharCode(char_code),
-        makeTypeCharCommand(char_code),
-        'type character ' + String.fromCharCode(char_code));
+  for (var charCode = 0x20; charCode < 0x7F; ++charCode) {
+    Editor.bindKey(TextWindow, String.fromCharCode(charCode),
+        makeTypeCharCommand(charCode),
+        'type character ' + String.fromCharCode(charCode));
   }
 
   /**
@@ -170,23 +170,23 @@
     if (!text.length)
       return;
     /** @type {function(number, number): number} */
-    var fromDigitChar = function(char_code, base) {
-      if (char_code >= Unicode.DIGIT_ZERO &&
-          char_code <= Unicode.DIGIT_ZERO + Math.min(base, 9)) {
-        return char_code - Unicode.DIGIT_ZERO;
+    var fromDigitChar = function(charCode, base) {
+      if (charCode >= Unicode.DIGIT_ZERO &&
+          charCode <= Unicode.DIGIT_ZERO + Math.min(base, 9)) {
+        return charCode - Unicode.DIGIT_ZERO;
       }
 
       if (base < 10)
         return NaN;
 
-      if (char_code >= Unicode.LATIN_CAPITAL_LETTER_A &&
-          char_code <= Unicode.LATIN_CAPITAL_LETTER_A + base - 10) {
-        return char_code - Unicode.LATIN_CAPITAL_LETTER_A + 10;
+      if (charCode >= Unicode.LATIN_CAPITAL_LETTER_A &&
+          charCode <= Unicode.LATIN_CAPITAL_LETTER_A + base - 10) {
+        return charCode - Unicode.LATIN_CAPITAL_LETTER_A + 10;
       }
 
-      if (char_code >= Unicode.LATIN_SMALL_LETTER_A &&
-          char_code <= Unicode.LATIN_SMALL_LETTER_A + base - 10) {
-        return char_code - Unicode.LATIN_SMALL_LETTER_A + 10;
+      if (charCode >= Unicode.LATIN_SMALL_LETTER_A &&
+          charCode <= Unicode.LATIN_SMALL_LETTER_A + base - 10) {
+        return charCode - Unicode.LATIN_SMALL_LETTER_A + 10;
       }
 
       return NaN;
@@ -204,13 +204,13 @@
       }
       return value;
     };
-    var char_code = myParseInt(text, base);
-    if (isNaN(char_code)) {
+    var charCode = myParseInt(text, base);
+    if (isNaN(charCode)) {
       range.start = range.end - 1;
       range.text = ('000' + text.charCodeAt(text.length - 1).toString(16))
           .substr(-4);
     } else {
-      range.text = String.fromCharCode(char_code);
+      range.text = String.fromCharCode(charCode);
     }
     this.selection.range.collapseTo(range.end);
   }, 'Exchange Unicode code point and character\n');
@@ -315,8 +315,8 @@
     Editor.messageBox(this,
         Editor.localizeText(Strings.IDS_ASK_RELOAD, {name: document.name}),
         MessageBox.ICONQUESTION | MessageBox.YESNO)
-    .then(function(response_code) {
-      if (response_code != DialogItemId.YES)
+    .then(function(responseCode) {
+      if (responseCode != DialogItemId.YES)
         return;
       document.load().then(function() {
         selection.range.collapseTo(offset);
@@ -348,12 +348,12 @@
    * @this {!TextWindow}
    */
   Editor.bindKey(TextWindow, 'Ctrl+Shift+3', function() {
-    var text_window = new TextWindow(this.selection.range);
-    var editor_window = new EditorWindow();
-    editor_window.appendChild(text_window);
-    editor_window.realize();
-    text_window.makeSelectionVisible();
-    text_window.focus();
+    var textWindow = new TextWindow(this.selection.range);
+    var editorWindow = new EditorWindow();
+    editorWindow.appendChild(textWindow);
+    editorWindow.realize();
+    textWindow.makeSelectionVisible();
+    textWindow.focus();
   });
 
   /**
@@ -366,12 +366,12 @@
     // since result of this command isn't useful.
     if (current.children.length == 1)
       return;
-    var text_window = new TextWindow(this.selection.range);
-    var editor_window = new EditorWindow();
-    editor_window.appendChild(text_window);
-    editor_window.realize();
-    text_window.makeSelectionVisible();
-    text_window.focus();
+    var textWindow = new TextWindow(this.selection.range);
+    var editorWindow = new EditorWindow();
+    editorWindow.appendChild(textWindow);
+    editorWindow.realize();
+    textWindow.makeSelectionVisible();
+    textWindow.focus();
     current.destroy();
   });
 
@@ -399,11 +399,11 @@
    */
   function evalSelectionCommand() {
     var selection = this.selection;
-    var is_whole = selection.range.start == selection.range.end;
-    var script_text = is_whole ?
+    var isWhole = selection.range.start == selection.range.end;
+    var scriptText = isWhole ?
         (new Range(this.document, 0, this.document.length)).text :
         selection.range.text;
-    var result = Editor.runScript(script_text, this.document.name);
+    var result = Editor.runScript(scriptText, this.document.name);
     if (!result.exception) {
       if (result.value != undefined)
         console.log(result.value);
@@ -412,7 +412,7 @@
     Editor.messageBox(this, result.stackTraceString, MessageBox.ICONERROR,
                       'Evaluate Selection Command')
       .then(function(x) {
-        var offset = is_whole ? 0 : this.selection.range.start;
+        var offset = isWhole ? 0 : this.selection.range.start;
         selection.range.collapseTo(offset + result.start)
           .moveEnd(Unit.CHARACTER, result.end - result.start);
       });
@@ -519,13 +519,13 @@
     if (count <= 0)
       return;
     var selection = this.selection;
-    var leading_whitespaces = (new Range(selection.range)).startOf(Unit.LINE)
+    var leadingWhitespaces = (new Range(selection.range)).startOf(Unit.LINE)
         .moveEndWhile(' \t').text;
     selection.document.undoGroup('TypeEnter', function() {
       selection.range.moveStartWhile(' \t', Count.BACKWARD);
       selection.range.text = '\n'.repeat(count);
       selection.range.collapseTo(selection.range.end)
-          .moveEndWhile(' \t').text = leading_whitespaces;
+          .moveEndWhile(' \t').text = leadingWhitespaces;
       selection.range.collapseTo(selection.range.end);
     });
   }, 'type enter key\n' +
@@ -573,14 +573,14 @@
 
   /** @param {number=} opt_count */
   Editor.bindKey(TextWindow, 'Shift+Tab', function(opt_count) {
-    var tab_width = arguments.length >= 1 ? /** @type{number} */(opt_count) :
+    var tabWidth = arguments.length >= 1 ? /** @type{number} */(opt_count) :
                                           TAB_WIDTH;
     var range = this.selection.range;
     if (range.start == range.end) {
       // Move to previous tab stop
       range.startOf(Unit.LINE, Alter.EXTEND);
-      range.collapseTo(Math.floor((range.start - range.end - 1) / tab_width) *
-                       tab_width + range.end);
+      range.collapseTo(Math.floor((range.start - range.end - 1) / tabWidth) *
+                       tabWidth + range.end);
       return;
     }
     // Exapnd range to contain whole lines
@@ -588,50 +588,50 @@
     // Remove leading whitespaces
     range.document.undoGroup('Outdent', function() {
       var document = this;
-      var line_range = new Range(range);
-      line_range.collapseTo(line_range.start);
-      while (line_range.start < range.end) {
-        line_range.moveEndWhile(' ', tab_width);
-        if (line_range.end < document.length &&
-            line_range.end - line_range.start < tab_width &&
-            document.charCodeAt_(line_range.end) == 0x09) {
-          line_range.moveEnd(Unit.CHARACTER);
+      var lineRange = new Range(range);
+      lineRange.collapseTo(lineRange.start);
+      while (lineRange.start < range.end) {
+        lineRange.moveEndWhile(' ', tabWidth);
+        if (lineRange.end < document.length &&
+            lineRange.end - lineRange.start < tabWidth &&
+            document.charCodeAt_(lineRange.end) == 0x09) {
+          lineRange.moveEnd(Unit.CHARACTER);
         }
-        line_range.text = '';
-        line_range.endOf(Unit.LINE).move(Unit.CHARACTER);
+        lineRange.text = '';
+        lineRange.endOf(Unit.LINE).move(Unit.CHARACTER);
       }
-      range.end = line_range.start;
+      range.end = lineRange.start;
     });
   }, 'outdent\n' +
      'Remove leading whitespaces from lines in selection.');
 
   /** @param {number=} opt_count */
   Editor.bindKey(TextWindow, 'Tab', function(opt_count) {
-    var tab_width = arguments.length >= 1 ? /** @type{number} */(opt_count) :
+    var tabWidth = arguments.length >= 1 ? /** @type{number} */(opt_count) :
                                           TAB_WIDTH;
     var range = this.selection.range;
     if (range.start == range.end) {
       var current = range.start;
       range.startOf(Unit.LINE, Alter.EXTEND);
-      var num_spaces = tab_width - (current - range.start) % tab_width;
+      var numSpaces = tabWidth - (current - range.start) % tabWidth;
       range.start = range.end;
-      range.insertBefore(' '.repeat(num_spaces));
+      range.insertBefore(' '.repeat(numSpaces));
       return;
     }
 
     // Exapnd range to contain whole lines
     range.startOf(Unit.LINE, Alter.EXTEND);
     range.document.undoGroup('Indent', function() {
-      var line_range = new Range(range);
-      line_range.collapseTo(line_range.start);
-      while (line_range.start < range.end) {
-        var spaces = ' '.repeat(tab_width);
-        line_range.endOf(Unit.LINE, Alter.EXTEND);
-        if (line_range.start != line_range.end)
-          line_range.insertBefore(spaces);
-        line_range.move(Unit.CHARACTER);
+      var lineRange = new Range(range);
+      lineRange.collapseTo(lineRange.start);
+      while (lineRange.start < range.end) {
+        var spaces = ' '.repeat(tabWidth);
+        lineRange.endOf(Unit.LINE, Alter.EXTEND);
+        if (lineRange.start != lineRange.end)
+          lineRange.insertBefore(spaces);
+        lineRange.move(Unit.CHARACTER);
       }
-      range.end = line_range.start;
+      range.end = lineRange.start;
     });
     // Make selection contains spaces inserted at first line.
     range.startOf(Unit.LINE, Alter.EXTEND);

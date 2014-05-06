@@ -10,10 +10,15 @@ class LexersTest : public dom::AbstractDomTest {
   public: LexersTest() = default;
   public: ~LexersTest() = default;
 
+  // ::testing::Test
+  private: virtual void SetUp() override;
+
   DISALLOW_COPY_AND_ASSIGN(LexersTest);
 };
 
-TEST_F(LexersTest, all) {
+void LexersTest::SetUp() {
+  dom::AbstractDomTest::SetUp();
+
   EXPECT_SCRIPT_VALID(
     "function doColor(fileName, lines) {"
     "  var doc = new Document(fileName);"
@@ -35,7 +40,9 @@ TEST_F(LexersTest, all) {
     "  }"
     "  result += lastSyntax + count;"
     "  return result;"
-    "}"
+    "}");
+
+  EXPECT_SCRIPT_VALID(
     "function symbolize(syntax) {"
     "  if (syntax == 'html_attribute_value')"
     "   return 'v';"
@@ -47,8 +54,9 @@ TEST_F(LexersTest, all) {
     "   return syntax.charAt(5);"
     "  return syntax.charAt(0);"
     "}");
+}
 
-  // ConfigLexer
+TEST_F(LexersTest, ConfigLexer) {
   EXPECT_SCRIPT_EQ(
     "c5 n23",
     "doColor('foo.mk', ["
@@ -56,8 +64,9 @@ TEST_F(LexersTest, all) {
     "'all: object',"
     "'  echo foo',"
     "])");
+}
 
-  // CppLexer
+TEST_F(LexersTest, CppLexer) {
   EXPECT_SCRIPT_EQ(
     "c9 n1 c6 n1 k8 n1 o1 n3 o1 n1 k4 n4 o1 n1 s4 o1 n3 k4 n4 o1 n1 s4 o1",
     "doColor('foo.cc', ["
@@ -75,8 +84,9 @@ TEST_F(LexersTest, all) {
         " std::vector_ptr<T>"
         " base::string16"
     "'])");
+}
 
-  // IdlLexer
+TEST_F(LexersTest, IdlLexer) {
   EXPECT_SCRIPT_EQ(
     "c9 n1 c6 n1 k9 n4 o1 n1 s4 o1 n3 k9 n4 o1 n1 s4 o1",
     "doColor('foo.idl', ["
@@ -85,8 +95,9 @@ TEST_F(LexersTest, all) {
         "'attribute a1 = \\'s1\\';',"
         "'  interface a2 = \"s2\";',"
     "])");
+}
 
-  // JavaLexer
+TEST_F(LexersTest, JavaLexer) {
   EXPECT_SCRIPT_EQ(
     "c9 n1 c6 n1 k5 n4 o1 n1 s4 o1 n3 k10 n4 o1 n1 s4 o1",
     "doColor('foo.java', ["
@@ -105,8 +116,9 @@ TEST_F(LexersTest, all) {
         " Foo.getClass()"
         " Foo.prototype"
     "'])");
+}
 
-  // JavaScriptLexer
+TEST_F(LexersTest, JavaScriptLexer) {
   EXPECT_SCRIPT_EQ(
     "c9 n1 c6 n1 k2 n1 o1 n3 o1 n1 s4 o1 n3 k3 n4 o1 n1 s4 o1",
     "doColor('foo.js', ["
@@ -126,8 +138,9 @@ TEST_F(LexersTest, all) {
         " Foo.prototype"
         " Foo.toString()"
     "'])");
+}
 
-  // PythonLexer
+TEST_F(LexersTest, PythonLexer) {
   EXPECT_SCRIPT_EQ(
     "c5 n1 c5 n1 k2 n4 o2 n1 s4 o1 n8 o1 n1 s4",
     "doColor('foo.py', ["
@@ -136,8 +149,9 @@ TEST_F(LexersTest, all) {
         "'if a1 == \\'s1\\':',"
         "'    a2 = \"s2\"',"
     "])");
+}
 
-  // XmlLexer
+TEST_F(LexersTest, XmlLexer) {
   EXPECT_SCRIPT_EQ(
     "c16 n2 e7 n1 a5 n1 v5 n1 a5 n1 v5 n5 &5 n6 e7 n1",
     "doColor('foo.xml', ["

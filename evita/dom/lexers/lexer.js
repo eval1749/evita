@@ -184,7 +184,7 @@ global.Lexer = (function() {
         // TODO(yosi) We should use |OrderedSet.prototype.upperBound()|
         if (it && it.data.end == newScanOffset - 1)
           it = it.next();
-        console.log(it, this);
+        console.assert(it, this);
 
         // Case 1: <ss|ss> middle of token
         // Case 2: <|ssss> start of token

@@ -6,7 +6,7 @@
 #include <memory>
 
 #include "base/strings/string16.h"
-#include "evita/views/command_window.h"
+#include "evita/views/window.h"
 
 class Frame;
 
@@ -16,8 +16,8 @@ class MouseEvent;
 
 namespace views {
 
-class ContentWindow : public CommandWindow {
-  DECLARE_CASTABLE_CLASS(ContentWindow, CommandWindow);
+class ContentWindow : public Window {
+  DECLARE_CASTABLE_CLASS(ContentWindow, Window);
 
   protected: explicit ContentWindow(views::WindowId window_id);
   public: virtual ~ContentWindow();
@@ -32,6 +32,9 @@ class ContentWindow : public CommandWindow {
 
   // [R]
   public: virtual void Redraw() = 0;
+
+  // ui::Widget
+  protected: virtual void DidSetFocus(ui::Widget*) override;
 
   DISALLOW_COPY_AND_ASSIGN(ContentWindow);
 };

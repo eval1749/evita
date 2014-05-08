@@ -9,7 +9,7 @@
 namespace views {
 
 ContentWindow::ContentWindow(views::WindowId window_id)
-    : CommandWindow(window_id) {
+    : Window(window_id) {
 }
 
 ContentWindow::~ContentWindow() {
@@ -29,6 +29,13 @@ void ContentWindow::Activate() {
     DEBUG_WIDGET_PRINTF("focus=%d show=%d\n", has_focus(), is_shown());
   #endif
   RequestFocus();
+}
+
+// ui::Widget
+void ContentWindow::DidSetFocus(ui::Widget* widget) {
+  Window::DidSetFocus(widget);
+  auto const frame = Frame::FindFrame(*this);
+  frame->DidSetFocusOnChild(this);
 }
 
 }  // namespace views

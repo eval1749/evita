@@ -290,7 +290,6 @@
         'views/window.cc',
         'views/window_set.cc',
 
-        'views/command_window.cc',
         'views/content_window.cc',
         'views/message_view.cc',
         'views/table_view_model.cc',

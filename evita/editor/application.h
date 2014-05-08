@@ -21,7 +21,7 @@
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
 
-class CommandWindow;
+class ContentWindow;
 class IoManager;
 
 namespace base {

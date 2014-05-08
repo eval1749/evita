@@ -45,24 +45,13 @@ const std::vector<StaticScriptSource>& GetJsLibSources() {
 kMaxCharsInLine = 80
 kIndent = '  '
 
-def RemoveCommentsAndTrailingWhitespace(lines):
-  lines = re.sub(r'\s*//.*\n', '\n', lines) # end-of-line comments
-  lines = re.sub(re.compile(r'/\*.*?\*/', re.DOTALL), '', lines) # comments.
-  return lines
-
-def ToCString(lines):
+def ConvertToCString(script_text):
+  lines = script_text.split('\n')
   result = ''
-  line = kIndent
-  for line in lines.split('\n'):
-    line = re.sub(r'^\s+', '', line)
-    line = re.sub(r'^s+$', '', line)
-    if line == '':
-      continue
-    if len(result):
-      result += '\n'
+  for line in lines:
     line = re.sub(r'\\', '\\\\\\\\', line)
     line = re.sub(r'"', '\\"', line)
-    result += kIndent + '"' + line + '\\n"'
+    result += kIndent + '"' + line + '\\n"' + '\n'
   return result;
 
 def main():
@@ -74,12 +63,12 @@ def main():
   entries.append('{"(global)", "var global = this;"},');
 
   for input_file in sys.argv[2:]:
-    script_text = '\n'.join(open(input_file, 'rt').readlines())
-    script_text = RemoveCommentsAndTrailingWhitespace(script_text)
+    lines = open(input_file, 'rt').readlines()
+    script_text = ''.join(lines)
     script_text = minifier.JSMinify(script_text);
-    entries.append('{"%(file_name)s", %(script_text)s},' % {
+    entries.append('{"%(file_name)s", \n%(script_text)s},' % {
       'file_name': input_file,
-      'script_text': ToCString(script_text)
+      'script_text': ConvertToCString(script_text)
     })
 
   output = open(output_file, 'w');

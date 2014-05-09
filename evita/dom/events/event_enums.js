@@ -9,6 +9,10 @@ Event.Names = {
   BLUR: 'blur',
   CHANGE: 'change',
   CLICK: 'click',
+  COMPOSITIONCANCEL: 'compositioncancel',
+  COMPOSITIONEND: 'compositionend',
+  COMPOSITIONSTART: 'compositionstart',
+  COMPOSITIONUPDATE: 'compositionupdate',
   DBLCLICK: 'dblclick',
   DETACH: 'detach', // DocumentEvent
   DROPWINDOW: 'dropwindow',

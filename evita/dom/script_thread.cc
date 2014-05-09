@@ -14,6 +14,7 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/public/float_rect.h"
 #include "evita/dom/public/tab_data.h"
+#include "evita/dom/public/text_composition_event.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/script_host.h"
 #include "evita/ui/events/event.h"
@@ -478,6 +479,8 @@ void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {
 }
 
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchMouseEvent, const domapi::MouseEvent&)
+DEFINE_VIEW_EVENT_HANDLER_1(DispatchTextCompositionEvent,
+                            const domapi::TextCompositionEvent&)
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchViewIdleEvent, int)
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchWheelEvent,
     const domapi::WheelEvent&)

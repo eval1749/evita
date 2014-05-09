@@ -6,6 +6,7 @@
 #include "evita/bindings/FocusEventInit.h"
 #include "evita/bindings/UiEventInit.h"
 #include "evita/bindings/WindowEventInit.h"
+#include "evita/dom/events/composition_event.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/form_event.h"
 #include "evita/dom/events/keyboard_event.h"
@@ -18,6 +19,7 @@
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/lock.h"
+#include "evita/dom/public/text_composition_event.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
@@ -209,6 +211,15 @@ void ViewEventHandlerImpl::DispatchMouseEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new MouseEvent(api_event));
+}
+
+
+void ViewEventHandlerImpl::DispatchTextCompositionEvent(
+    const domapi::TextCompositionEvent& api_event) {
+  auto const window = FromEventTargetId(api_event.target_id);
+  if (!window)
+    return;
+  DispatchEventWithInLock(window, new CompositionEvent(api_event));
 }
 
 void ViewEventHandlerImpl::DispatchViewIdleEvent(int hint) {

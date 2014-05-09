@@ -23,6 +23,7 @@ struct FocusEvent;
 struct FormEvent;
 struct KeyboardEvent;
 struct MouseEvent;
+struct TextCompositionEvent;
 struct WheelEvent;
 using dom::WindowId;
 
@@ -40,6 +41,8 @@ class ViewEventHandler {
   public: virtual void DispatchFocusEvent(const FocusEvent& event) = 0;
   public: virtual void DispatchKeyboardEvent(const KeyboardEvent& event) = 0;
   public: virtual void DispatchMouseEvent(const MouseEvent& event) = 0;
+  public: virtual void DispatchTextCompositionEvent(
+      const TextCompositionEvent& event) = 0;
   public: virtual void DispatchViewIdleEvent(int hint) = 0;
   public: virtual void DispatchWheelEvent(const WheelEvent& event) = 0;
   public: virtual void OpenFile(WindowId window_id,

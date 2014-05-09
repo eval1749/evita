@@ -7,6 +7,10 @@ DocumentNotReady
 DocumentReadOnly
 
 # Event
+## CompositionEvent
+attributes
+caret
+
 ## EventInit
 bubbles
 cancelable

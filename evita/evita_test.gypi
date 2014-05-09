@@ -58,6 +58,7 @@
         'dom/encodings/text_decoder_unittest.cc',
         'dom/encodings/text_encoder_unittest.cc',
         'dom/errors_unittest.cc',
+        'dom/events/composition_event_unittest.cc',
         'dom/events/document_event_unittest.cc',
         'dom/events/event_target_unittest.cc',
         'dom/events/event_unittest.cc',

@@ -12,6 +12,7 @@
 #include "evita/dom/clipboard/data_transfer_item_list.h"
 #include "evita/dom/encodings/text_decoder.h"
 #include "evita/dom/encodings/text_encoder.h"
+#include "evita/dom/events/composition_event.h"
 #include "evita/dom/events/document_event.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/event_target.h"
@@ -86,6 +87,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
       INSTALL(DocumentEvent);
       INSTALL(FormEvent);
       INSTALL(UiEvent);
+        INSTALL(CompositionEvent);
         INSTALL(FocusEvent);
         INSTALL(KeyboardEvent);
         INSTALL(MouseEvent);

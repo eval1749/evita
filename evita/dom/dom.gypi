@@ -131,6 +131,8 @@
         'encodings/text_decoder.cc',
         'encodings/text_encoder.cc',
 
+        'events/composition_event.cc',
+        'events/composition_event.h',
         'events/document_event.cc',
         'events/event.cc',
         'events/event_target.cc',

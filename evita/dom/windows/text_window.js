@@ -120,6 +120,80 @@ global.TextWindow.prototype.clone = function() {
   /** @type {!DragController|undefined} */
   TextWindow.prototype.dragController_;
 
+  /** @type {!Range} */
+  TextWindow.prototype.textCompositionRange;
+
+  Object.defineProperty(TextWindow.prototype, 'textCompositionRange', {
+    value: null,
+    writable: true
+  });
+
+  /**
+   * @param {!TextWindow} window
+   * @param {!CompositionEvent} event
+   */
+  function handleCompositionEvent(window, event) {
+    console.log('handleCompositionEvent', event.type, 'caret', event.caret,
+        'attrs', event.attributes.length);
+    if (!window.textCompositionRange)
+      window.textCompositionRange = new Range(window.document);
+    var range = window.textCompositionRange;
+    var selection = window.selection;
+    var selectionRange = selection.range;
+    if (event.type == Event.Names.COMPOSITIONSTART)
+      range.collapseTo(selectionRange.start);
+    range.text = event.data;
+    if (event.type != Event.Names.COMPOSITIONUPDATE)
+      return;
+    var last_attr = 0;
+    var attrs = event.attributes;
+    var start = 0;
+    var selectionStart = -1;
+    var selectionEnd = -1;
+    function setStyle(start, end, attr) {
+      if (start == end)
+        return;
+      selectionRange.collapseTo(range.start+ start);
+      selectionRange.end = range.start + end;
+      console.log('handleCompositionEvent.setStyle', start, end, attr);
+      // ATTR_INPUT=0, ATTR_TARGET_CONVERTED=1, ATTR_CONVERTED=2,
+      // ATTR_TARGET_NOTCONVERTED=3, ATTR_INPUT_ERROR=4
+      // ATTR_FIXEDCONVERTED=5
+      switch (attr) {
+        case 0: // ATTR_INPUT
+          selectionRange.setStyle({textDecoration: 'imeinput'});
+          break;
+        case 1: // ATTR_TARGET_CONVERTED
+          if (selectionStart < 0)
+            selectionStart = start;
+          selectionEnd = end;
+          selectionRange.setStyle({textDecoration: 'imeinactive1'});
+          break;
+        case 2: // ATTR_CONVERTED
+          selectionRange.setStyle({textDecoration: 'imeinactive2'});
+          break;
+        case 3: // ATTR_TARGET_NOTCONVERTED
+          selectionRange.setStyle({textDecoration: 'imeactive'});
+          break;
+      }
+    }
+    for (var index = 0; index < attrs.length; ++index) {
+      var attr = attrs[index];
+      if (!index || last_attr != attr) {
+        setStyle(start, index, last_attr);
+        start = index;
+        last_attr = attr;
+      }
+    }
+    setStyle(start, attrs.length, last_attr);
+    if (selectionStart < 0) {
+      selectionRange.collapseTo(range.start + event.caret);
+    } else {
+      selectionRange.collapseTo(range.start + selectionStart);
+      selectionRange.end = range.start + selectionEnd;
+    }
+  }
+
   /**
    * @param {!TextWindow} window
    */
@@ -385,7 +459,10 @@ global.TextWindow.prototype.clone = function() {
         handleWheel(this, /** @type {!WheelEvent} */(event));
         break;
       default:
-        Window.handleEvent(event);
+        if (event instanceof CompositionEvent)
+          handleCompositionEvent(this, event);
+        else
+          Window.handleEvent(event);
         break;
     }
   };

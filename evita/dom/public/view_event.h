@@ -23,6 +23,10 @@ enum class EventType {
   MouseDown,
   MouseMove,
   MouseUp,
+  TextCompositionCancel,
+  TextCompositionEnd,
+  TextCompositionStart,
+  TextCompositionUpdate,
   Wheel,
 };
 

@@ -25,6 +25,11 @@ class StyleSelector {
   public: static const common::AtomicString& html_element_name();
   public: static const common::AtomicString& html_entity();
   public: static const common::AtomicString& identifier();
+  public: static const common::AtomicString& ime_inactive1();
+  public: static const common::AtomicString& ime_inactive2();
+  public: static const common::AtomicString& ime_input();
+  public: static const common::AtomicString& ime_active1();
+  public: static const common::AtomicString& ime_active2();
   public: static const common::AtomicString& inactive_selection();
   public: static const common::AtomicString& keyword();
   public: static const common::AtomicString& keyword2();

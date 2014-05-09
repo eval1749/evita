@@ -24,6 +24,14 @@ void InstallSyntaxColor(StyleSheet* style_sheet,
   style_sheet->AddRule(selector, style);
 }
 
+void InstallTextDecoration(StyleSheet* style_sheet,
+                           const common::AtomicString& selector,
+                           TextDecoration text_decoration) {
+  Style style;
+  style.set_text_decoration(text_decoration);
+  style_sheet->AddRule(selector, style);
+}
+
 StyleSheet* GetDefaultStyleSheet() {
   DEFINE_STATIC_LOCAL(StyleSheet, default_style_sheet, ());
   if (default_style_sheet.Find(StyleSelector::defaults()))
@@ -109,6 +117,27 @@ StyleSheet* GetDefaultStyleSheet() {
                      StyleSelector::operators(), Color(0, 0, 128));
   InstallSyntaxColor(&default_style_sheet,
                      StyleSelector::string_literal(), Color(163, 21, 21));
+
+  // IME
+  InstallTextDecoration(&default_style_sheet,
+                        StyleSelector::ime_inactive1(),
+                        TextDecoration::ImeInactiveA);
+  InstallTextDecoration(&default_style_sheet,
+                        StyleSelector::ime_inactive2(),
+                        TextDecoration::ImeInactiveB);
+  InstallTextDecoration(&default_style_sheet,
+                        StyleSelector::ime_input(),
+                        TextDecoration::ImeInput);
+  InstallTextDecoration(&default_style_sheet,
+                        StyleSelector::ime_active1(),
+                        TextDecoration::ImeActive);
+  {
+    Style style;
+    style.set_bgcolor(Color(51, 153, 255));
+    style.set_color(Color(255, 255, 255));
+    style.set_text_decoration(TextDecoration::None);
+    default_style_sheet.AddRule(StyleSelector::ime_active2(), style);
+  }
 
   return &default_style_sheet;
 }

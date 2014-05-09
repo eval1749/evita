@@ -22,16 +22,18 @@
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
 #include "common/timer/timer.h"
-#include "evita/css/style.h"
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/dom/public/text_composition_data.h"
+#include "evita/dom/public/view_event.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/windows/selection.h"
 #include "evita/dom/windows/text_window.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/text/buffer.h"
+#include "evita/text/marker_set.h"
 #include "evita/text/range.h"
 #include "evita/text/scoped_undo_group.h"
 #include "evita/ui/controls/scroll_bar.h"
@@ -379,6 +381,8 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
       break;
 
     case WM_IME_STARTCOMPOSITION:
+      DispatchTxetCompositionEvent(domapi::EventType::TextCompositionStart,
+                                   domapi::TextCompositionData());
       if (!m_fImeTarget) {
         UI_DOM_AUTO_LOCK_SCOPE();
         m_lImeStart = GetSelection()->GetStart();
@@ -584,13 +588,6 @@ void TextEditWindow::updateScrollBar() {
 #include <imm.h>
 #pragma comment(lib, "imm32.lib")
 
-css::Style* g_rgpImeStyleConverted[2];
-css::Style* g_pImeStyleInput;
-css::Style* g_pImeStyleTargetConverted;
-css::Style* g_pImeStyleTargetNotConverted;
-
-#define GCS_COMPSTRATTR (GCS_COMPSTR | GCS_COMPATTR | GCS_CURSORPOS)
-
 namespace {
 
 class Imc {
@@ -605,196 +602,83 @@ class Imc {
   }
 
   public: operator HIMC() const { return m_himc; }
+
+  public: std::vector<uint8_t> GetAttributes();
+  public: int GetCursorOffset();
+  public: base::string16 GetText(int index);
 };
 
-Posn ReplaceSelection(Selection* selection, const base::char16* text,
-                      size_t length) {
-  auto const range = selection->range();
-  range->SetText(base::string16(text, length));
-  auto const end = range->GetEnd();
-  range->SetStart(end);
-  selection->SetStartIsActive(false);
-  return end;
+std::vector<uint8_t> Imc::GetAttributes() {
+  auto const num_bytes = ::ImmGetCompositionString(m_himc, GCS_COMPATTR,
+                                                nullptr, 0);
+  if (num_bytes < 0) {
+    DVLOG(0) << "ImmGetCompositionString GCS_COMPATTR" << num_bytes;
+    return std::vector<uint8_t>();
+  }
+  if (!num_bytes)
+    return std::vector<uint8_t>();
+  std::vector<uint8_t> attributes(static_cast<size_t>(num_bytes), 0);
+  auto const result = ::ImmGetCompositionString(
+      m_himc, GCS_COMPATTR, &attributes[0], static_cast<DWORD>(num_bytes));
+  if (result < num_bytes)
+    return std::vector<uint8_t>();
+  return attributes;
+}
+
+int Imc::GetCursorOffset() {
+  return ::ImmGetCompositionString(m_himc, GCS_CURSORPOS, nullptr, 0);
+}
+
+base::string16 Imc::GetText(int index) {
+  auto const num_bytes = ::ImmGetCompositionString(
+      m_himc, static_cast<DWORD>(index), nullptr, 0);
+  if (num_bytes < 0) {
+    DVLOG(0) << "ImmGetCompositionString " << index << " " << num_bytes;
+    return base::string16();
+  }
+  if (!num_bytes)
+    return base::string16();
+  base::string16 text(static_cast<size_t>(num_bytes / sizeof(base::char16)), 0);
+  auto const result = ::ImmGetCompositionString(
+      m_himc, static_cast<DWORD>(index), &text[0],
+      static_cast<DWORD>(num_bytes));
+  if (result != num_bytes) {
+    DVLOG(0) << "ImmGetCompositionString " << result;
+    return base::string16();
+  }
+  return text;
 }
 
 }  // namespace
 
 void TextEditWindow::onImeComposition(LPARAM lParam) {
-  if (!editor::DomLock::instance()->locked()) {
-    UI_DOM_AUTO_LOCK_SCOPE();
-    onImeComposition(lParam);
-    return;
-  }
-
   Imc imc(AssociatedHwnd());
   if (!imc)
     return;
 
-  UI_ASSERT_DOM_LOCKED();
-  auto const range = GetSelection()->range();
-  text::ScopedUndoGroup oUndo(range, L"IME");
+  if (!lParam) {
+    domapi::TextCompositionData data;
+    data.text = imc.GetText(GCS_COMPSTR);
+    data.caret = static_cast<int>(data.text.length());
+    DispatchTxetCompositionEvent(
+        domapi::EventType::TextCompositionCancel, data);
+    return;
+  }
 
-  char16 rgwch[1024];
   // If IME has result string, we can insert it into buffer.
   if (lParam & GCS_RESULTSTR) {
-    // Remove previous composition string. If user inputs "Space",
-    // IME set GCS_RESULTSTR without composition.
-    if (m_lImeStart != m_lImeEnd) {
-      range->SetRange(m_lImeStart, m_lImeEnd);
-      range->SetText(base::string16());
-    }
-
-    // Get result string
-    auto const cwch = ::ImmGetCompositionString(
-        imc, GCS_RESULTSTR, rgwch, sizeof(rgwch)) / sizeof(char16);
-
-    // Insert result string into buffer
-    if (cwch >= 1) {
-      m_lImeEnd = ReplaceSelection(GetSelection(), rgwch, cwch);
-      m_lImeStart = m_lImeEnd;
-    }
+    domapi::TextCompositionData data;
+    data.text = imc.GetText(GCS_RESULTSTR);
+    data.caret = static_cast<int>(data.text.length());
+    DispatchTxetCompositionEvent(domapi::EventType::TextCompositionEnd, data);
+    return;
   }
 
-  // IME has composition string
-  if ((lParam & GCS_COMPSTRATTR) == GCS_COMPSTRATTR) {
-    // Remove previous composition string
-    if (m_lImeStart != m_lImeEnd) {
-        range->SetRange(m_lImeStart, m_lImeEnd);
-        range->SetText(base::string16());
-        m_lImeEnd = m_lImeStart;
-    }
-
-    // Get composition string
-    auto const cwch = ::ImmGetCompositionString(
-        imc, GCS_COMPSTR, rgwch, sizeof(rgwch)) / sizeof(char16);
-
-    // Get composition attributes
-    char rgbAttr[lengthof(rgwch)];
-    auto const cbAttr = ::ImmGetCompositionString(
-        imc, GCS_COMPATTR, rgbAttr, sizeof(rgbAttr));
-    if (cbAttr != static_cast<int>(cwch)) {
-      return;
-    }
-
-    auto const lCursor = ::ImmGetCompositionString(
-          imc, GCS_CURSORPOS, nullptr, 0);
-    if (lCursor < 0)
-      return;
-
-    uint32 rgnClause[100];
-    ::ImmGetCompositionString(imc, GCS_COMPCLAUSE, rgnClause,
-                              sizeof(rgnClause));
-    m_lImeEnd = ReplaceSelection(GetSelection(), rgwch, cwch);
-    range->SetRange(m_lImeStart + lCursor, m_lImeStart + lCursor);
-
-    if (!g_pImeStyleInput) {
-          // Converted[0]
-          g_rgpImeStyleConverted[0] = new css::Style();
-          g_rgpImeStyleConverted[0]->set_text_decoration(
-              css::TextDecoration::ImeInactiveA);
-
-          // Converted[1]
-          g_rgpImeStyleConverted[1] = new css::Style();
-          g_rgpImeStyleConverted[1]->set_text_decoration(
-              css::TextDecoration::ImeInactiveB);
-
-          // Input
-          g_pImeStyleInput = new css::Style();
-          g_pImeStyleInput->set_text_decoration(
-              css::TextDecoration::ImeInput);
-
-          // Target Converted
-          g_pImeStyleTargetConverted = new css::Style();
-          g_pImeStyleTargetConverted->set_text_decoration(
-              css::TextDecoration::ImeActive);
-
-          // Target Not Converted
-          g_pImeStyleTargetNotConverted = new css::Style();
-          g_pImeStyleTargetNotConverted->set_bgcolor(
-              css::Color(51, 153, 255));
-          g_pImeStyleTargetNotConverted->set_color(css::Color(255, 255, 255));
-          g_pImeStyleTargetNotConverted->set_text_decoration(
-              css::TextDecoration::None);
-      }
-
-      m_fImeTarget = false;
-      Posn lEnd = static_cast<Posn>(m_lImeStart + cwch);
-      Posn lPosn = m_lImeStart;
-      int iClause = 0;
-      int iConverted = 0;
-      while (lPosn < lEnd) {
-        const css::Style* pStyle;
-        switch (rgbAttr[lPosn - m_lImeStart]) {
-          case ATTR_INPUT:
-          case ATTR_INPUT_ERROR:
-            pStyle = g_pImeStyleInput;
-            iConverted = 0;
-            break;
-
-          case ATTR_TARGET_CONVERTED:
-            pStyle = g_pImeStyleTargetConverted;
-            m_fImeTarget = true;
-            iConverted = 0;
-            break;
-
-          case ATTR_TARGET_NOTCONVERTED:
-            pStyle = g_pImeStyleTargetNotConverted;
-            m_fImeTarget = true;
-            iConverted = 0;
-            break;
-
-          case ATTR_CONVERTED:
-            pStyle = g_rgpImeStyleConverted[iConverted];
-            iConverted = 1 - iConverted;
-            break;
-
-          default:
-            pStyle = g_pImeStyleInput;
-            break;
-        }
-
-        ++iClause;
-        Posn lNext = static_cast<Posn>(m_lImeStart + rgnClause[iClause]);
-        buffer()->SetStyle(lPosn, lNext, *pStyle);
-        lPosn = lNext;
-      }
-  }
-
-  ////////////////////////////////////////////////////////////
-  //
-  // We have already insert composed string. So, we don't
-  // need WM_IME_CHAR and WM_CHAR messages to insert
-  // composed string.
-  if (lParam & GCS_RESULTSTR)
-  {
-      m_fImeTarget = false;
-      return;
-  }
-
-  // Composition was canceled.
-  if (0 == lParam)
-  {
-      m_fImeTarget = false;
-
-      // Remove previous composition string
-      range->SetRange(m_lImeStart, m_lImeEnd);
-      range->SetText(base::string16());
-
-      // if (m_fCancelButLeave)
-      {
-          auto const cwch = ::ImmGetCompositionString(
-              imc,
-              GCS_COMPSTR,
-              rgwch,
-              sizeof(rgwch)) / sizeof(char16);
-          if (cwch >= 1)
-          {
-              range->SetText(base::string16(rgwch, cwch));
-          }
-      }
-
-      m_lImeEnd = m_lImeStart;
-  }
+  domapi::TextCompositionData data;
+  data.attributes = imc.GetAttributes();
+  data.caret = imc.GetCursorOffset();
+  data.text = imc.GetText(GCS_COMPSTR);
+  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionUpdate, data);
 }
 
 // Note:

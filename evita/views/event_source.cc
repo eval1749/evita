@@ -5,6 +5,7 @@
 #include "evita/views/event_source.h"
 
 #include "base/logging.h"
+#include "evita/dom/public/text_composition_event.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
@@ -111,6 +112,15 @@ void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
   api_event.shift_key = event.shift_key();
   api_event.target_id = event_target_id_;
   view_event_handler()->DispatchMouseEvent(api_event);
+}
+
+void EventSource::DispatchTxetCompositionEvent(
+      domapi::EventType event_type, const domapi::TextCompositionData& data) {
+  domapi::TextCompositionEvent event;
+  event.event_type = event_type;
+  event.target_id = event_target_id_;
+  event.data = data;
+  view_event_handler()->DispatchTextCompositionEvent(event);
 }
 
 void EventSource::DispatchWheelEvent(const ui::MouseWheelEvent& event) {

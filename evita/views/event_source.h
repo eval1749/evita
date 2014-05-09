@@ -9,6 +9,7 @@
 
 namespace domapi {
 enum class EventType;
+struct TextCompositionData;
 }
 
 namespace ui {
@@ -33,6 +34,8 @@ class EventSource {
                                   domapi::EventTargetId related_target_id);
   public: void DispatchKeyboardEvent(const ui::KeyboardEvent& event);
   public: void DispatchMouseEvent(const ui::MouseEvent& event);
+  public: void DispatchTxetCompositionEvent(
+      domapi::EventType event_type, const domapi::TextCompositionData& data);
   public: void DispatchWheelEvent(const ui::MouseWheelEvent& event);
 
   DISALLOW_COPY_AND_ASSIGN(EventSource);

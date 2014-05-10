@@ -483,7 +483,7 @@ void TextEditWindow::Render() {
         static_cast<int>(caret_rect.height())
       };
 
-      showImeCaret(size, pt);
+      SetCandidateWindow(size, pt);
     }
   #endif // SUPPORT_IME
 
@@ -585,33 +585,36 @@ void TextEditWindow::updateScrollBar() {
 
 #if SUPPORT_IME
 
-// See Also Caret::Show for moving candidate window.
-
 #include <imm.h>
 #pragma comment(lib, "imm32.lib")
 
 namespace {
 
-class Imc {
-  private: HWND m_hwnd;
-  private: HIMC m_himc;
+class InputMethodContext {
+  private: HIMC handle_;
+  private: HWND hwnd_;
 
-  public: Imc(HWND hwnd) : m_hwnd(hwnd), m_himc(::ImmGetContext(hwnd)) {}
+  public: InputMethodContext(HWND hwnd);
+  public: ~InputMethodContext();
 
-  public: ~Imc() {
-    if (m_himc)
-      ::ImmReleaseContext(m_hwnd, m_himc);
-  }
-
-  public: operator HIMC() const { return m_himc; }
+  public: operator HIMC() const { return handle_; }
 
   public: std::vector<uint8_t> GetAttributes();
   public: int GetCursorOffset();
   public: base::string16 GetText(int index);
 };
 
-std::vector<uint8_t> Imc::GetAttributes() {
-  auto const num_bytes = ::ImmGetCompositionString(m_himc, GCS_COMPATTR,
+InputMethodContext::InputMethodContext(HWND hwnd) :
+    handle_(::ImmGetContext(hwnd)), hwnd_(hwnd) {
+}
+
+InputMethodContext::~InputMethodContext() {
+  if (handle_)
+    ::ImmReleaseContext(hwnd_, handle_);
+}
+
+std::vector<uint8_t> InputMethodContext::GetAttributes() {
+  auto const num_bytes = ::ImmGetCompositionString(handle_, GCS_COMPATTR,
                                                 nullptr, 0);
   if (num_bytes < 0) {
     DVLOG(0) << "ImmGetCompositionString GCS_COMPATTR" << num_bytes;
@@ -621,19 +624,19 @@ std::vector<uint8_t> Imc::GetAttributes() {
     return std::vector<uint8_t>();
   std::vector<uint8_t> attributes(static_cast<size_t>(num_bytes), 0);
   auto const result = ::ImmGetCompositionString(
-      m_himc, GCS_COMPATTR, &attributes[0], static_cast<DWORD>(num_bytes));
+      handle_, GCS_COMPATTR, &attributes[0], static_cast<DWORD>(num_bytes));
   if (result < num_bytes)
     return std::vector<uint8_t>();
   return attributes;
 }
 
-int Imc::GetCursorOffset() {
-  return ::ImmGetCompositionString(m_himc, GCS_CURSORPOS, nullptr, 0);
+int InputMethodContext::GetCursorOffset() {
+  return ::ImmGetCompositionString(handle_, GCS_CURSORPOS, nullptr, 0);
 }
 
-base::string16 Imc::GetText(int index) {
+base::string16 InputMethodContext::GetText(int index) {
   auto const num_bytes = ::ImmGetCompositionString(
-      m_himc, static_cast<DWORD>(index), nullptr, 0);
+      handle_, static_cast<DWORD>(index), nullptr, 0);
   if (num_bytes < 0) {
     DVLOG(0) << "ImmGetCompositionString " << index << " " << num_bytes;
     return base::string16();
@@ -642,7 +645,7 @@ base::string16 Imc::GetText(int index) {
     return base::string16();
   base::string16 text(static_cast<size_t>(num_bytes / sizeof(base::char16)), 0);
   auto const result = ::ImmGetCompositionString(
-      m_himc, static_cast<DWORD>(index), &text[0],
+      handle_, static_cast<DWORD>(index), &text[0],
       static_cast<DWORD>(num_bytes));
   if (result != num_bytes) {
     DVLOG(0) << "ImmGetCompositionString " << result;
@@ -654,7 +657,7 @@ base::string16 Imc::GetText(int index) {
 }  // namespace
 
 void TextEditWindow::onImeComposition(LPARAM lParam) {
-  Imc imc(AssociatedHwnd());
+  InputMethodContext imc(AssociatedHwnd());
   if (!imc)
     return;
 
@@ -704,7 +707,7 @@ void TextEditWindow::Reconvert(Posn lStart, Posn lEnd) {
   auto const p = reinterpret_cast<RECONVERTSTRING*>(&buffer[0]);
   setReconvert(p, lStart, lEnd);
 
-  Imc imc(AssociatedHwnd());
+  InputMethodContext imc(AssociatedHwnd());
   fSucceeded = ::ImmSetCompositionString(
       imc,
       SCS_QUERYRECONVERTSTRING,
@@ -734,6 +737,24 @@ void TextEditWindow::Reconvert(Posn lStart, Posn lEnd) {
   }
 }
 
+// Set left top coordinate of IME candidate window.
+void TextEditWindow::SetCandidateWindow(SIZE sz, POINT pt) {
+  InputMethodContext imc(AssociatedHwnd());
+  if (!imc)
+    return;
+
+  CANDIDATEFORM param;
+  param.dwIndex = 0;
+  param.dwStyle = CFS_EXCLUDE;
+  param.ptCurrentPos.x = pt.x;
+  param.ptCurrentPos.y = pt.y + sz.cy;
+  param.rcArea.left = pt.x;
+  param.rcArea.top = pt.y;
+  param.rcArea.right = pt.x;
+  param.rcArea.bottom = pt.y + sz.cy;
+  WIN32_VERIFY(::ImmSetCandidateWindow(imc, &param));
+}
+
 size_t TextEditWindow::setReconvert(RECONVERTSTRING* p, Posn lStart,
                                   Posn lEnd) {
   ASSERT(lEnd >= lStart);
@@ -759,25 +780,6 @@ size_t TextEditWindow::setReconvert(RECONVERTSTRING* p, Posn lStart,
   buffer()->GetText(pwch, lStart, lEnd);
   pwch[cwch] = 0;
   return cb;
-}
-
-// Set left top coordinate of IME candiate window.
-BOOL TextEditWindow::showImeCaret(SIZE sz, POINT pt) {
-  Imc imc(AssociatedHwnd());
-  if (!imc)
-    return FALSE;
-
-  CANDIDATEFORM oCF;
-  oCF.dwIndex = 0;
-  oCF.dwStyle = CFS_EXCLUDE;
-  oCF.ptCurrentPos.x = pt.x;
-  oCF.ptCurrentPos.y = pt.y + sz.cy;
-  oCF.rcArea.left = pt.x;
-  oCF.rcArea.top = pt.y;
-  oCF.rcArea.right = pt.x;
-  oCF.rcArea.bottom = pt.y + sz.cy;
-
-  return ::ImmSetCandidateWindow(imc, &oCF);
 }
 
 #endif // SUPPORT_IME

@@ -134,8 +134,8 @@ class TextEditWindow : public text::BufferMutationObserver,
   #if SUPPORT_IME
   private: void onImeComposition(LPARAM);
   public: void Reconvert(Posn, Posn);
+  private: void SetCandidateWindow(SIZE, POINT);
   private: size_t setReconvert(RECONVERTSTRING*, Posn start, Posn end);
-  private: BOOL showImeCaret(SIZE, POINT);
   #endif // SUPPORT_IME
 
   // text::BufferMutationObserver

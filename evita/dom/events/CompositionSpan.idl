@@ -1,0 +1,18 @@
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+  Constructor(long start, long end, long data),
+]
+interface CompositionSpan {
+  const unsigned short ATTR_INPUT = 0;
+  const unsigned short ATTR_TARGET_CONVERTED = 1;
+  const unsigned short ATTR_CONVERTED = 2;
+  const unsigned short ATTR_TARGET_NOTCONVERTED = 3;
+  const unsigned short ATTR_INPUT_ERROR = 4;
+  const unsigned short ATTR_FIXEDCONVERTED = 5;
+  attribute long data;
+  attribute long end;
+  attribute long start;
+};

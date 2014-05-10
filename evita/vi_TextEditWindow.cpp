@@ -22,7 +22,6 @@
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
 #include "common/timer/timer.h"
-#include "common/win/win32_verify.h"
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
@@ -36,7 +35,8 @@
 #include "evita/text/buffer.h"
 #include "evita/text/marker_set.h"
 #include "evita/text/range.h"
-#include "evita/text/scoped_undo_group.h"
+#include "evita/ui/base/ime/text_composition.h"
+#include "evita/ui/base/ime/text_input_client.h"
 #include "evita/ui/controls/scroll_bar.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/icon_cache.h"
@@ -90,9 +90,6 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
       m_lCaretPosn(-1),
       text_renderer_(new TextRenderer(text_window.document()->buffer())),
       selection_(text_window.view_selection()),
-      #if SUPPORT_IME
-        has_composition_(false),
-      #endif // SUPPORT_IME
       vertical_scroll_bar_(new ui::ScrollBar(ui::ScrollBar::Type::Vertical,
                                              this)),
       view_start_(0), zoom_(1.0f) {
@@ -222,10 +219,9 @@ void TextEditWindow::DidKillFocus(ui::Widget* focused_widget) {
   ParentClass::DidKillFocus(focused_widget);
   caret_->Give(this, m_gfx);
   text_renderer_->Reset();
-  #if SUPPORT_IME
-  CommitTextComposition();
-  CancelTextComposition();
-  #endif
+  ui::TextInputClient::Get()->CommitComposition(this);
+  ui::TextInputClient::Get()->CancelComposition(this);
+  ui::TextInputClient::Get()->set_delegate(nullptr);
 }
 
 void TextEditWindow::DidRealize() {
@@ -240,6 +236,7 @@ void TextEditWindow::DidSetFocus(ui::Widget* last_focused) {
   ASSERT(has_focus());
   // Note: It is OK to set focus to hidden window.
   caret_->Take(this);
+  ui::TextInputClient::Get()->set_delegate(this);
   ParentClass::DidSetFocus(last_focused);
 }
 
@@ -356,48 +353,6 @@ void TextEditWindow::OnDraw(gfx::Graphics*) {
   Redraw();
 }
 
-LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
-  switch (uMsg) {
-    #if SUPPORT_IME
-    case WM_IME_COMPOSITION:
-      DVLOG(0) << "WM_IME_COMPOSITION lParam=" << std::hex << lParam;
-      onImeComposition(lParam);
-      return 0;
-
-    case WM_IME_ENDCOMPOSITION: {
-      DVLOG(0) << "WM_IME_ENDCOMPOSITION";
-      domapi::TextCompositionData data;
-      data.caret = 0;
-      DispatchTxetCompositionEvent(domapi::EventType::TextCompositionEnd,
-                                   data);
-      has_composition_ = false;
-      return 0;
-    }
-
-    case WM_IME_REQUEST:
-      DVLOG(0) << "WM_IME_REQUEST wParam=" << std::hex << wParam;
-      break;
-
-    case WM_IME_SETCONTEXT:
-      DVLOG(0) << "WM_IME_SETCONTEXT";
-      // We draw composition string instead of IME. So, we don't
-      // need default composition window.
-      lParam &= ~ISC_SHOWUICOMPOSITIONWINDOW;
-      break;
-
-    case WM_IME_STARTCOMPOSITION: {
-      DVLOG(0) << "WM_IME_STARTCOMPOSITION";
-      domapi::TextCompositionData data;
-      data.caret = 0;
-      DispatchTxetCompositionEvent(domapi::EventType::TextCompositionStart,
-                                   data);
-      return 0;
-    }
-    #endif // SUPPORT_IME
-  }
-  return ParentClass::OnMessage(uMsg, wParam, lParam);
-}
-
 void TextEditWindow::Redraw() {
   auto const selection_is_active = is_selection_active();
 
@@ -465,28 +420,14 @@ void TextEditWindow::Render() {
   }
 
   auto const caret_width = std::max(::GetSystemMetrics(SM_CXBORDER), 2);
-  gfx::RectF caret_rect(char_rect.left, char_rect.top,
-                        std::min(char_rect.left + caret_width,
-                                 static_cast<float>(bounds().right)),
-                        std::min(char_rect.bottom,
-                                 static_cast<float>(bounds().bottom)));
-  #if SUPPORT_IME
-    if (has_composition_) {
-      POINT pt = {
-        static_cast<int>(caret_rect.left),
-        static_cast<int>(caret_rect.top)
-      };
+  gfx::RectF caret_bounds(char_rect.left, char_rect.top,
+                          std::min(char_rect.left + caret_width,
+                                   static_cast<float>(bounds().right)),
+                          std::min(char_rect.bottom,
+                                   static_cast<float>(bounds().bottom)));
 
-      SIZE size = {
-        static_cast<int>(caret_rect.width()),
-        static_cast<int>(caret_rect.height())
-      };
-
-      SetCandidateWindow(size, pt);
-    }
-  #endif // SUPPORT_IME
-
-  caret_updater.Update(m_gfx, caret_rect);
+  ui::TextInputClient::Get()->set_caret_bounds(caret_bounds);
+  caret_updater.Update(m_gfx, caret_bounds);
 }
 
 int TextEditWindow::SmallScroll(int, int iDy) {
@@ -582,217 +523,6 @@ void TextEditWindow::updateScrollBar() {
   vertical_scroll_bar_->SetData(data);
 }
 
-#if SUPPORT_IME
-
-#include <imm.h>
-#pragma comment(lib, "imm32.lib")
-
-namespace {
-
-class InputMethodContext {
-  private: HIMC handle_;
-  private: HWND hwnd_;
-
-  public: InputMethodContext(HWND hwnd);
-  public: ~InputMethodContext();
-
-  public: operator HIMC() const { return handle_; }
-
-  public: std::vector<domapi::TextCompositionSpan> GetSpans();
-  public: int GetCursorOffset();
-  public: base::string16 GetText(int index);
-  public: bool SetComposition(int index, uint8_t* bytes, size_t num_bytes);
-
-  DISALLOW_COPY_AND_ASSIGN(InputMethodContext);
-};
-
-InputMethodContext::InputMethodContext(HWND hwnd) :
-    handle_(::ImmGetContext(hwnd)), hwnd_(hwnd) {
-}
-
-InputMethodContext::~InputMethodContext() {
-  if (handle_)
-    ::ImmReleaseContext(hwnd_, handle_);
-}
-
-std::vector<domapi::TextCompositionSpan> InputMethodContext::GetSpans() {
-  auto const num_bytes = ::ImmGetCompositionString(handle_, GCS_COMPATTR,
-                                                   nullptr, 0);
-  if (num_bytes < 0) {
-    DVLOG(0) << "ImmGetCompositionString GCS_COMPATTR" << num_bytes;
-    return std::vector<domapi::TextCompositionSpan>();
-  }
-  if (!num_bytes)
-    return std::vector<domapi::TextCompositionSpan>();
-  std::vector<uint8_t> attributes(static_cast<size_t>(num_bytes), 0);
-  auto const result = ::ImmGetCompositionString(
-      handle_, GCS_COMPATTR, &attributes[0], static_cast<DWORD>(num_bytes));
-  if (result < num_bytes)
-    return std::vector<domapi::TextCompositionSpan>();
-  std::vector<domapi::TextCompositionSpan> spans;
-  auto offset = 0;
-  for (auto const attribute : attributes) {
-    if (spans.empty() || spans.back().data != attribute) {
-      domapi::TextCompositionSpan span;
-      span.start = offset;
-      span.data = attribute;
-      spans.push_back(span);
-    }
-    ++offset;
-    spans.back().end = offset;
-  }
-  return std::move(spans);
-}
-
-int InputMethodContext::GetCursorOffset() {
-  return ::ImmGetCompositionString(handle_, GCS_CURSORPOS, nullptr, 0);
-}
-
-base::string16 InputMethodContext::GetText(int index) {
-  auto const num_bytes = ::ImmGetCompositionString(
-      handle_, static_cast<DWORD>(index), nullptr, 0);
-  if (num_bytes < 0) {
-    DVLOG(0) << "ImmGetCompositionString " << index << " " << num_bytes;
-    return base::string16();
-  }
-  if (!num_bytes)
-    return base::string16();
-  base::string16 text(static_cast<size_t>(num_bytes / sizeof(base::char16)), 0);
-  auto const result = ::ImmGetCompositionString(
-      handle_, static_cast<DWORD>(index), &text[0],
-      static_cast<DWORD>(num_bytes));
-  if (result != num_bytes) {
-    DVLOG(0) << "ImmGetCompositionString " << result;
-    return base::string16();
-  }
-  return text;
-}
-
-bool InputMethodContext::SetComposition(int index, uint8_t* bytes,
-                                        size_t num_bytes) {
-  if (!handle_)
-    return false;
-  auto const succeeded = ::ImmSetCompositionString(handle_,
-      static_cast<DWORD>(index), bytes, static_cast<DWORD>(num_bytes),
-      nullptr, 0);
-  if (!succeeded) {
-    DVLOG(0) << "ImmSetCompositionString " << index << " failed.";
-    return false;
-  }
-  return true;
-}
-
-}  // namespace
-
-void TextEditWindow::CancelTextComposition() {
-  if (!has_composition_)
-    return;
-  InputMethodContext imc(AssociatedHwnd());
-  if (!imc)
-    return;
-  DVLOG(0) << "CancelTextComposition " << has_composition_;
-  WIN32_VERIFY(::ImmNotifyIME(imc, NI_COMPOSITIONSTR, CPS_CANCEL, 0));
-}
-
-void TextEditWindow::CommitTextComposition() {
-  if (!has_composition_)
-    return;
-  InputMethodContext imc(AssociatedHwnd());
-  if (!imc)
-    return;
-  DVLOG(0) << "CommitTextComposition " << has_composition_;
-  WIN32_VERIFY(::ImmNotifyIME(imc, NI_COMPOSITIONSTR, CPS_COMPLETE, 0));
-  domapi::TextCompositionData data;
-  data.caret = imc.GetCursorOffset();
-  data.text = imc.GetText(GCS_RESULTSTR);
-  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionCommit,
-                               data);
-}
-
-void TextEditWindow::onImeComposition(LPARAM lParam) {
-  InputMethodContext imc(AssociatedHwnd());
-  if (!imc)
-    return;
-
-  domapi::TextCompositionData data;
-  data.caret = imc.GetCursorOffset();
-
-  if (!lParam) {
-    // Text composition is canceled.
-    has_composition_ = false;
-    domapi::TextCompositionData data;
-    data.text = imc.GetText(GCS_COMPSTR);
-    DispatchTxetCompositionEvent(
-        domapi::EventType::TextCompositionCancel, data);
-    return;
-  }
-
-  if (lParam & GCS_RESULTSTR) {
-    // Text composition is finished.
-    has_composition_ = false;
-    data.text = imc.GetText(GCS_RESULTSTR);
-    DispatchTxetCompositionEvent(
-        domapi::EventType::TextCompositionCommit, data);
-  }
-
-  has_composition_ = true;
-  data.spans = imc.GetSpans();
-  data.text = imc.GetText(GCS_COMPSTR);
-  DispatchTxetCompositionEvent(
-      domapi::EventType::TextCompositionUpdate, data);
-}
-
-// Note:
-// o IME2000 ignores string after newline.
-// o We should limit number of characters to be reconverted.
-//
-void TextEditWindow::Reconvert(const base::string16& text) {
-  if (text.empty())
-    return;
-
-  auto const num_text_bytes = sizeof(base::char16) * text.length();
-  std::vector<uint8_t> buffer(sizeof(RECONVERTSTRING) + num_text_bytes);
-  auto const reconvert = reinterpret_cast<RECONVERTSTRING*>(&buffer[0]);
-  reconvert->dwSize = static_cast<DWORD>(buffer.size());
-  reconvert->dwVersion = 0;
-  reconvert->dwStrLen = static_cast<DWORD>(text.length());
-  reconvert->dwStrOffset = sizeof(RECONVERTSTRING);
-  reconvert->dwCompStrLen = static_cast<DWORD>(text.length());
-  reconvert->dwCompStrOffset = 0;
-  reconvert->dwTargetStrLen = reconvert->dwCompStrLen;
-  reconvert->dwTargetStrOffset = reconvert->dwCompStrOffset;
-  auto reconvert_string = reinterpret_cast<base::char16*>(
-      &buffer[reconvert->dwStrOffset]);
-  ::memcpy(reconvert_string, text.data(), num_text_bytes);
-
-  InputMethodContext imc(AssociatedHwnd());
-  if (!imc.SetComposition(SCS_QUERYRECONVERTSTRING, &buffer[0], buffer.size()))
-    return;
-  // We'll have WM_IME_STARTCOMPOSITION and WM_IME_COMPOSITION if
-  // |SetComposition()| succeeded.
-  imc.SetComposition(SCS_SETRECONVERTSTRING, &buffer[0], buffer.size());
-}
-
-// Set left top coordinate of IME candidate window.
-void TextEditWindow::SetCandidateWindow(SIZE sz, POINT pt) {
-  InputMethodContext imc(AssociatedHwnd());
-  if (!imc)
-    return;
-
-  CANDIDATEFORM param;
-  param.dwIndex = 0;
-  param.dwStyle = CFS_EXCLUDE;
-  param.ptCurrentPos.x = pt.x;
-  param.ptCurrentPos.y = pt.y + sz.cy;
-  param.rcArea.left = pt.x;
-  param.rcArea.top = pt.y;
-  param.rcArea.right = pt.x;
-  param.rcArea.bottom = pt.y + sz.cy;
-  WIN32_VERIFY(::ImmSetCandidateWindow(imc, &param));
-}
-
-#endif // SUPPORT_IME
-
 // text::BufferMutationObserver
 void TextEditWindow::DidDeleteAt(text::Posn offset, size_t length) {
   if (view_start_ <= offset)
@@ -833,6 +563,50 @@ void TextEditWindow::DidMoveThumb(int value) {
   auto const start = StartOfLine(value);
   text_renderer_->Format(start);
   Render();
+}
+
+// ui::TextInputDelegate
+void TextEditWindow::DidCommitComposition(
+    const ui::TextComposition& composition) {
+  domapi::TextCompositionData data;
+  data.caret = composition.caret();
+  data.text = composition.text();
+  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionCommit,
+                               data);
+}
+
+void TextEditWindow::DidFinishComposition() {
+  domapi::TextCompositionData data;
+  data.caret = 0;
+  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionEnd,
+                               data);
+}
+ 
+void TextEditWindow::DidStartComposition() {
+  domapi::TextCompositionData data;
+  data.caret = 0;
+  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionStart,
+                               data);
+}
+ 
+void TextEditWindow::DidUpdateComposition(
+    const ui::TextComposition& composition) {
+  domapi::TextCompositionData data;
+  data.caret = composition.caret();
+  data.text = composition.text();
+  for (auto span : composition.spans()) {
+    domapi::TextCompositionSpan api_span;
+    api_span.start = span.start;
+    api_span.end = span.end;
+    api_span.data = static_cast<int>(span.type);
+    data.spans.push_back(api_span);
+  }
+  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionUpdate,
+                               data);
+}
+
+ui::Widget* TextEditWindow::GetClientWindow() {
+   return this;
 }
 
 // ui::Widget

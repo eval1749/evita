@@ -18,6 +18,7 @@
 #include "evita/gc/collector.h"
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
+#include "evita/ui/base/ime/text_input_client.h"
 #include "evita/ui/controls/text_field_control.h"
 #include "evita/views/forms/file_dialog_box.h"
 #include "evita/views/forms/form_control_set.h"
@@ -379,7 +380,7 @@ void ViewDelegateImpl::Reconvert(
     DVLOG(0) << "WindowId " << window_id << " should be TextEditWindow.";
     return;
   }
-  text_window->Reconvert(text);
+  ui::TextInputClient::Get()->Reconvert(text_window, text);
 }
 
 void ViewDelegateImpl::RealizeWindow(dom::WindowId window_id) {

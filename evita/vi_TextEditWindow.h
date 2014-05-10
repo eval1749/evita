@@ -16,6 +16,7 @@
 #include "evita/li_util.h"
 #include "evita/gfx_base.h"
 #include "evita/text/buffer_mutation_observer.h"
+#include "evita/ui/base/ime/text_input_delegate.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/content_window.h"
 
@@ -48,6 +49,7 @@ class ScrollBar;
 //
 class TextEditWindow : public text::BufferMutationObserver,
                        public ui::ScrollBarObserver,
+                       public ui::TextInputDelegate,
                        public views::ContentWindow {
   DECLARE_CASTABLE_CLASS(TextEditWindow, views::ContentWindow);
 
@@ -62,9 +64,6 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: Posn m_lCaretPosn;
   // TODO(yosi): Manage life time of selection.
   private: Selection* selection_;
-  #if SUPPORT_IME
-  private: bool has_composition_;
-  #endif // SUPPORT_IME
   private: std::unique_ptr<TextRenderer> text_renderer_;
   private: ui::ScrollBar* const vertical_scroll_bar_;
   private: text::Posn view_start_;
@@ -115,7 +114,6 @@ class TextEditWindow : public text::BufferMutationObserver,
 
   // [O]
   private: virtual void OnDraw(gfx::Graphics* gfx) override;
-  private: virtual LRESULT OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam);
 
   // [R]
   private: virtual void Redraw() override;
@@ -129,14 +127,6 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: void updateScreen();
   private: void updateScrollBar();
 
-  #if SUPPORT_IME
-  private: void CancelTextComposition();
-  private: void CommitTextComposition();
-  private: void onImeComposition(LPARAM);
-  public: void Reconvert(const base::string16& text);
-  private: void SetCandidateWindow(SIZE, POINT);
-  #endif // SUPPORT_IME
-
   // text::BufferMutationObserver
   private: virtual void DidDeleteAt(text::Posn offset, size_t length) override;
   private: virtual void DidInsertAt(text::Posn offset, size_t length) override;
@@ -147,6 +137,15 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: virtual void DidClickPageDown() override;
   private: virtual void DidClickPageUp() override;
   private: virtual void DidMoveThumb(int value) override;
+
+  // ui::TextInputDelegate
+  private: virtual void DidCommitComposition(
+      const ui::TextComposition& composition) override;
+  private: virtual void DidFinishComposition() override;
+  private: virtual void DidStartComposition() override;
+  private: virtual void DidUpdateComposition(
+      const ui::TextComposition& composition) override;
+  private: virtual Widget* GetClientWindow() override;
 
   // ui::Widget
   private: virtual void DidResize() override;

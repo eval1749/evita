@@ -19,6 +19,7 @@
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/spellchecker/spelling_engine.h"
+#include "evita/ui/base/ime/text_input_client_win.h"
 #include "evita/ui/widget.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/forms/form_window.h"
@@ -52,6 +53,7 @@ Application::Application()
       view_idle_hint_(0),
       view_delegate_impl_(new views::ViewDelegateImpl()) {
   io_manager_->Start();
+  ui::TextInputClientWin::instance()->Start();
   dom::ScriptThread::Start(message_loop_.get(), view_delegate_impl_.get(),
                            io_manager_->message_loop(),
                            io_manager_->io_delegate());

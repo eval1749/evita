@@ -12,6 +12,7 @@
 #include "common/win/point_ostream.h"
 #include "common/win/rect_ostream.h"
 #include "common/win/win32_verify.h"
+#include "evita/ui/base/ime/text_input_client_win.h"
 #include "evita/ui/events/event.h"
 #include "evita/ui/events/event_ostream.h"
 #include "evita/ui/events/mouse_click_tracker.h"
@@ -867,14 +868,19 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
   if (focus_widget) {
     if (message >= WM_KEYFIRST && message <= WM_KEYLAST)
       return focus_widget->HandleKeyboardMessage(message, wParam, lParam);
-
-    if (message >= WM_IME_STARTCOMPOSITION && message<= WM_IME_KEYLAST)
-      return focus_widget->OnMessage(message, wParam, lParam);
   }
 
   if (message >= WM_MOUSEFIRST && message <= WM_MOUSELAST) {
     HandleMouseMessage(message, wParam, lParam);
     return 0;
+  }
+
+  if (message >= WM_IME_STARTCOMPOSITION && message<= WM_IME_KEYLAST) {
+    auto result = TextInputClientWin::instance()->OnImeMessage(
+        message, wParam, lParam);
+    if (result.second)
+      return result.first;
+    return OnMessage(message, wParam, lParam);
   }
 
   return OnMessage(message, wParam, lParam);

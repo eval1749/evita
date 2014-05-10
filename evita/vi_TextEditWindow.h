@@ -132,6 +132,8 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: void updateScrollBar();
 
   #if SUPPORT_IME
+  private: void CancelTextComposition();
+  private: void CommitTextComposition();
   private: void onImeComposition(LPARAM);
   public: void Reconvert(Posn, Posn);
   private: void SetCandidateWindow(SIZE, POINT);

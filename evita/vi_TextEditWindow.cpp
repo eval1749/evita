@@ -224,6 +224,10 @@ void TextEditWindow::DidKillFocus(ui::Widget* focused_widget) {
   ParentClass::DidKillFocus(focused_widget);
   caret_->Give(this, m_gfx);
   text_renderer_->Reset();
+  #if SUPPORT_IME
+  CommitTextComposition();
+  CancelTextComposition();
+  #endif
 }
 
 void TextEditWindow::DidRealize() {
@@ -358,10 +362,12 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
   switch (uMsg) {
     #if SUPPORT_IME
     case WM_IME_COMPOSITION:
+      DVLOG(0) << "WM_IME_COMPOSITION lParam=" << std::hex << lParam;
       onImeComposition(lParam);
       return 0;
 
     case WM_IME_ENDCOMPOSITION: {
+      DVLOG(0) << "WM_IME_ENDCOMPOSITION";
       domapi::TextCompositionData data;
       data.caret = 0;
       DispatchTxetCompositionEvent(domapi::EventType::TextCompositionEnd,
@@ -371,6 +377,7 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
     }
 
     case WM_IME_REQUEST:
+      DVLOG(0) << "WM_IME_REQUEST wParam=" << std::hex << wParam;
       if (IMR_RECONVERTSTRING == wParam) {
           UI_DOM_AUTO_LOCK_SCOPE();
           return static_cast<LRESULT>(setReconvert(
@@ -381,12 +388,14 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
       break;
 
     case WM_IME_SETCONTEXT:
+      DVLOG(0) << "WM_IME_SETCONTEXT";
       // We draw composition string instead of IME. So, we don't
       // need default composition window.
       lParam &= ~ISC_SHOWUICOMPOSITIONWINDOW;
       break;
 
     case WM_IME_STARTCOMPOSITION: {
+      DVLOG(0) << "WM_IME_STARTCOMPOSITION";
       domapi::TextCompositionData data;
       data.caret = 0;
       DispatchTxetCompositionEvent(domapi::EventType::TextCompositionStart,
@@ -439,8 +448,7 @@ void TextEditWindow::Redraw() {
     text_renderer_->Format(StartOfLine(view_start_));
   } else if (!text_renderer_->ShouldRender()) {
     // The screen is clean.
-    if (!m_fImeTarget)
-      caret_->Blink(m_gfx);
+    caret_->Blink(m_gfx);
     return;
   }
 
@@ -655,6 +663,31 @@ base::string16 InputMethodContext::GetText(int index) {
 }
 
 }  // namespace
+
+void TextEditWindow::CancelTextComposition() {
+  if (!m_fImeTarget)
+    return;
+  InputMethodContext imc(AssociatedHwnd());
+  if (!imc)
+    return;
+  DVLOG(0) << "CancelTextComposition " << m_fImeTarget;
+  WIN32_VERIFY(::ImmNotifyIME(imc, NI_COMPOSITIONSTR, CPS_CANCEL, 0));
+}
+
+void TextEditWindow::CommitTextComposition() {
+  if (!m_fImeTarget)
+    return;
+  InputMethodContext imc(AssociatedHwnd());
+  if (!imc)
+    return;
+  DVLOG(0) << "CommitTextComposition " << m_fImeTarget;
+  WIN32_VERIFY(::ImmNotifyIME(imc, NI_COMPOSITIONSTR, CPS_COMPLETE, 0));
+  domapi::TextCompositionData data;
+  data.caret = imc.GetCursorOffset();
+  data.text = imc.GetText(GCS_RESULTSTR);
+  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionCommit,
+                               data);
+}
 
 void TextEditWindow::onImeComposition(LPARAM lParam) {
   InputMethodContext imc(AssociatedHwnd());

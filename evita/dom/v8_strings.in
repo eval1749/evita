@@ -8,8 +8,10 @@ DocumentReadOnly
 
 # Event
 ## CompositionEvent
-attributes
+end
 caret
+spans
+start
 
 ## EventInit
 bubbles

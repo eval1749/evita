@@ -6,7 +6,7 @@
   Constructor(DOMString typeArg, optional CompositionEventInit eventInitDict),
 ]
 interface CompositionEvent : UiEvent {
-  readonly attribute byte[] attributes;
   readonly attribute long caret;
   readonly attribute DOMString data;
+  readonly attribute CompositionSpan[] spans;
 };

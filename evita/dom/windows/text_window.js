@@ -155,10 +155,7 @@ global.TextWindow.prototype.clone = function() {
       return;
     range.text = event.data;
     var last_attr = 0;
-    var attrs = event.attributes;
     var start = 0;
-    var selectionStart = -1;
-    var selectionEnd = -1;
     function setStyle(start, end, attr) {
       if (start == end)
         return;
@@ -173,9 +170,6 @@ global.TextWindow.prototype.clone = function() {
           break;
         case 1: // ATTR_TARGET_CONVERTED
         case 3: // ATTR_TARGET_NOTCONVERTED
-          if (selectionStart < 0)
-            selectionStart = start;
-          selectionEnd = end;
           selectionRange.setStyle({backgroundColor: 0x3399FF, color: 0xFFFFFF});
           break;
         case 2: // ATTR_CONVERTED
@@ -183,15 +177,9 @@ global.TextWindow.prototype.clone = function() {
           break;
       }
     }
-    for (var index = 0; index < attrs.length; ++index) {
-      var attr = attrs[index];
-      if (!index || last_attr != attr) {
-        setStyle(start, index, last_attr);
-        start = index;
-        last_attr = attr;
-      }
-    }
-    setStyle(start, attrs.length, last_attr);
+    event.spans.forEach(function(span) {
+      setStyle(span.start, span.end, span.data);
+    });
     selectionRange.collapseTo(range.start + event.caret);
   }
 

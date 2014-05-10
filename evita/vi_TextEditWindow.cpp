@@ -607,7 +607,7 @@ class InputMethodContext {
 
   public: operator HIMC() const { return handle_; }
 
-  public: std::vector<uint8_t> GetAttributes();
+  public: std::vector<domapi::TextCompositionSpan> GetSpans();
   public: int GetCursorOffset();
   public: base::string16 GetText(int index);
 };
@@ -621,21 +621,33 @@ InputMethodContext::~InputMethodContext() {
     ::ImmReleaseContext(hwnd_, handle_);
 }
 
-std::vector<uint8_t> InputMethodContext::GetAttributes() {
+std::vector<domapi::TextCompositionSpan> InputMethodContext::GetSpans() {
   auto const num_bytes = ::ImmGetCompositionString(handle_, GCS_COMPATTR,
-                                                nullptr, 0);
+                                                   nullptr, 0);
   if (num_bytes < 0) {
     DVLOG(0) << "ImmGetCompositionString GCS_COMPATTR" << num_bytes;
-    return std::vector<uint8_t>();
+    return std::vector<domapi::TextCompositionSpan>();
   }
   if (!num_bytes)
-    return std::vector<uint8_t>();
+    return std::vector<domapi::TextCompositionSpan>();
   std::vector<uint8_t> attributes(static_cast<size_t>(num_bytes), 0);
   auto const result = ::ImmGetCompositionString(
       handle_, GCS_COMPATTR, &attributes[0], static_cast<DWORD>(num_bytes));
   if (result < num_bytes)
-    return std::vector<uint8_t>();
-  return attributes;
+    return std::vector<domapi::TextCompositionSpan>();
+  std::vector<domapi::TextCompositionSpan> spans;
+  auto offset = 0;
+  for (auto const attribute : attributes) {
+    if (spans.empty() || spans.back().data != attribute) {
+      domapi::TextCompositionSpan span;
+      span.start = offset;
+      span.data = attribute;
+      spans.push_back(span);
+    }
+    ++offset;
+    spans.back().end = offset;
+  }
+  return std::move(spans);
 }
 
 int InputMethodContext::GetCursorOffset() {
@@ -716,7 +728,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
   }
 
   m_fImeTarget = true;
-  data.attributes = imc.GetAttributes();
+  data.spans = imc.GetSpans();
   data.text = imc.GetText(GCS_COMPSTR);
   DispatchTxetCompositionEvent(
       domapi::EventType::TextCompositionUpdate, data);

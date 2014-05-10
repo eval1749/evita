@@ -11,10 +11,16 @@
 
 namespace domapi {
 
+struct TextCompositionSpan {
+  int start;
+  int end;
+  int data;
+};
+
 struct TextCompositionData {
-  std::vector<uint8_t> attributes;
   int caret;
   base::string16 text;
+  std::vector<TextCompositionSpan> spans;
 };
 
 }  // namespace domapi

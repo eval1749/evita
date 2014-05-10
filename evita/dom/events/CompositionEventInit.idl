@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 dictionary CompositionEventInit : UiEventInit {
-  byte[] attributes;
   long caret = 0;
   DOMString data;
+  CompositionSpan[] spans;
 };

@@ -36,9 +36,15 @@ CompositionEventInit ConvertToInitDict(
   init_dict.set_detail(0);
 
   // CompositionEventInit
-  init_dict.set_attributes(event.data.attributes);
   init_dict.set_caret(event.data.caret);
   init_dict.set_data(event.data.text);
+
+  std::vector<CompositionSpan*> spans(event.data.spans.size());
+  spans.resize(0);
+  for (auto span : event.data.spans) {
+    spans.push_back(new CompositionSpan(span.start, span.end, span.data));
+  }
+  init_dict.set_spans(spans);
 
   return init_dict;
 }
@@ -52,8 +58,9 @@ CompositionEventInit ConvertToInitDict(
 CompositionEvent::CompositionEvent(const base::string16& type,
                                    const CompositionEventInit& init_dict)
     : ScriptableBase(type, init_dict),
-      attributes_(init_dict.attributes()), caret_(init_dict.caret()),
-      data_(init_dict.data()) {
+      caret_(init_dict.caret()),
+      data_(init_dict.data()),
+      spans_(init_dict.spans()) {
 }
 
 CompositionEvent::CompositionEvent(const base::string16& type)

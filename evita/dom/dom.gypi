@@ -133,6 +133,8 @@
 
         'events/composition_event.cc',
         'events/composition_event.h',
+        'events/composition_span.cc',
+        'events/composition_span.h',
         'events/document_event.cc',
         'events/event.cc',
         'events/event_target.cc',

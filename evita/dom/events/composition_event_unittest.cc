@@ -27,7 +27,12 @@ TEST_F(CompositionEventTest, ctor_init_dict) {
   dom::CompositionEventInit init_dict;
   init_dict.set_bubbles(true);
   init_dict.set_cancelable(true);
-  init_dict.set_attributes(std::vector<uint8_t> {1, 2, 3});
+  std::vector<dom::CompositionSpan*> spans {
+    new dom::CompositionSpan(0, 1, 1),
+    new dom::CompositionSpan(1, 2, 2),
+    new dom::CompositionSpan(2, 3, 3),
+  };
+  init_dict.set_spans(spans);
   init_dict.set_caret(42);
   init_dict.set_data(L"foo");
   auto const event = new dom::CompositionEvent(L"compositionupdate", init_dict);
@@ -42,9 +47,10 @@ TEST_F(CompositionEventTest, ctor_init_dict) {
   EXPECT_SCRIPT_EQ("compositionupdate", "event.type");
   EXPECT_SCRIPT_EQ("0", "event.detail");
   EXPECT_SCRIPT_TRUE("event.view == null");
-  EXPECT_SCRIPT_VALID("var attrs = event.attributes;");
-  EXPECT_SCRIPT_EQ("3", "attrs.length");
-  EXPECT_SCRIPT_EQ("1 2 3", "attrs[0] + ' ' + attrs[1] + ' ' + attrs[2]");
+  EXPECT_SCRIPT_VALID("var spans = event.spans;");
+  EXPECT_SCRIPT_EQ("3", "spans.length");
+  EXPECT_SCRIPT_EQ("1 2 3",
+    "spans[0].data + ' ' + spans[1].data + ' ' + spans[2].data");
   EXPECT_SCRIPT_EQ("42", "event.caret");
   EXPECT_SCRIPT_EQ("foo", "event.data");
 }
@@ -53,8 +59,13 @@ TEST_F(CompositionEventTest, ctor_event) {
   RunnerScope runner_scope(this);
   domapi::TextCompositionEvent api_event;
   api_event.event_type = domapi::EventType::TextCompositionStart;
-  api_event.data.attributes = std::vector<uint8_t> {1, 2, 3};
+  std::vector<domapi::TextCompositionSpan> spans {
+    domapi::TextCompositionSpan {0, 1, 1},
+    domapi::TextCompositionSpan {1, 2, 2},
+    domapi::TextCompositionSpan {2, 3, 3},
+  };
   api_event.data.caret = 42;
+  api_event.data.spans = spans;
   api_event.data.text = L"foo";
   EXPECT_SCRIPT_VALID("var event;"
                       "function init(x) { event = x; }");
@@ -70,9 +81,10 @@ TEST_F(CompositionEventTest, ctor_event) {
   EXPECT_SCRIPT_EQ("compositionstart", "event.type");
   EXPECT_SCRIPT_EQ("0", "event.detail");
   EXPECT_SCRIPT_TRUE("event.view == null");
-  EXPECT_SCRIPT_VALID("var attrs = event.attributes;");
-  EXPECT_SCRIPT_EQ("3", "attrs.length");
-  EXPECT_SCRIPT_EQ("1 2 3", "attrs[0] + ' ' + attrs[1] + ' ' + attrs[2]");
+  EXPECT_SCRIPT_VALID("var spans = event.spans;");
+  EXPECT_SCRIPT_EQ("3", "spans.length");
+  EXPECT_SCRIPT_EQ("1 2 3",
+    "spans[0].data + ' ' + spans[1].data + ' ' + spans[2].data");
   EXPECT_SCRIPT_EQ("42", "event.caret");
   EXPECT_SCRIPT_EQ("foo", "event.data");
 }

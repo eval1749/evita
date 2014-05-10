@@ -3,6 +3,7 @@
 #if !defined(INCLUDE_evita_dom_events_composition_event_h)
 #define INCLUDE_evita_dom_events_composition_event_h
 
+#include "evita/dom/events/composition_span.h"
 #include "evita/dom/events/ui_event.h"
 
 #include <vector>
@@ -24,9 +25,9 @@ class CompositionEvent : public v8_glue::Scriptable<CompositionEvent, UiEvent> {
   DECLARE_SCRIPTABLE_OBJECT(CompositionEvent)
   friend class bindings::CompositionEventClass;
 
-  private: std::vector<uint8_t> attributes_;
   private: int caret_;
   private: base::string16 data_;
+  private: std::vector<CompositionSpan*> spans_;
 
   public: CompositionEvent(const base::string16& type,
                            const CompositionEventInit& init_dict);
@@ -34,9 +35,11 @@ class CompositionEvent : public v8_glue::Scriptable<CompositionEvent, UiEvent> {
   public: explicit CompositionEvent(const domapi::TextCompositionEvent& event);
   public: virtual ~CompositionEvent();
 
-  private: std::vector<uint8_t> attributes() const { return attributes_; }
   private: int caret() const { return caret_; }
   private: base::string16 data() const { return data_; }
+  private: std::vector<CompositionSpan*> spans() const {
+    return spans_;
+  }
 
   DISALLOW_COPY_AND_ASSIGN(CompositionEvent);
 };

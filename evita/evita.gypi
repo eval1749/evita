@@ -204,6 +204,15 @@
       'sources': [
         '<(DEPTH)/build/precompile.cc',
 
+        'ui/base/ime/text_composition.cc',
+        'ui/base/ime/text_composition.h',
+        'ui/base/ime/text_input_client.h',
+        'ui/base/ime/text_input_client.cc',
+        'ui/base/ime/text_input_client_win.h',
+        'ui/base/ime/text_input_client_win.cc',
+        'ui/base/ime/text_input_delegate.h',
+        'ui/base/ime/text_input_delegate.cc',
+
         'ui/base/selection_model.cc',
         'ui/base/table_model.cc',
         'ui/base/table_model_observer.cc',

@@ -55,12 +55,19 @@ class GlueType(object):
         self.is_nullable = idl_type.is_nullable
         self.is_pointer = is_pointer
         self.is_struct = is_struct
+        if self.idl_type.is_array or self.idl_type.is_sequence:
+            if is_collectable or is_pointer:
+                self.element_typestr = self.cpp_name + '*'
+            else:
+                self.element_typestr = self.cpp_name
+        else:
+            self.element_typestr = None
 
     def declare_str(self):
         if self.idl_type.is_union_type:
             raise Exception("Union type isn't supported.")
-        if self.idl_type.is_array or self.idl_type.is_sequence:
-            return 'std::vector<%s>' % self.cpp_name
+        if self.element_typestr:
+            return 'std::vector<%s>' % self.element_typestr
         if self.is_collectable:
             global global_has_gc_member
             global_has_gc_member = True
@@ -76,8 +83,8 @@ class GlueType(object):
     def from_v8_str(self):
         if self.idl_type.is_union_type:
             raise Exception("Union type isn't supported.")
-        if self.idl_type.is_array or self.idl_type.is_sequence:
-            return 'std::vector<%s>' % self.cpp_name
+        if self.element_typestr:
+            return 'std::vector<%s>' % self.element_typestr
         if self.is_collectable:
             if self.idl_type.is_nullable:
                 global global_has_nullable
@@ -91,8 +98,8 @@ class GlueType(object):
     def return_str(self):
         if self.idl_type.is_union_type:
             raise Exception("Union type isn't supported.")
-        if self.idl_type.is_array or self.idl_type.is_sequence:
-            return 'std::vector<%s>' % self.cpp_name
+        if self.element_typestr:
+            return 'std::vector<%s>' % self.element_typestr
         if self.is_collectable:
             return self.cpp_name + '*'
         if self.is_pointer:
@@ -175,7 +182,6 @@ def to_glue_type(idl_type, maybe_dictionary=True):
     if type_name in global_interfaces_info:
         global_referenced_interface_names.add(type_name)
         return GlueType(idl_type, type_name, is_collectable=True)
-
 
     if type_name in KNOWN_INTERFACE_NAMES:
         global_known_interface_names.add(type_name)

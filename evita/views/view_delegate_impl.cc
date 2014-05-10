@@ -369,8 +369,8 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
   event_handler_->RunCallback(base::Bind(resolver.resolve, response));
 }
 
-void ViewDelegateImpl::Reconvert(WindowId window_id, text::Posn start,
-                                 text::Posn end) {
+void ViewDelegateImpl::Reconvert(
+    WindowId window_id, const base::string16& text) {
   auto const window = FromWindowId("Reconvert", window_id);
   if (!window)
     return;
@@ -379,8 +379,7 @@ void ViewDelegateImpl::Reconvert(WindowId window_id, text::Posn start,
     DVLOG(0) << "WindowId " << window_id << " should be TextEditWindow.";
     return;
   }
-  UI_DOM_AUTO_LOCK_SCOPE();
-  text_window->Reconvert(start, end);
+  text_window->Reconvert(text);
 }
 
 void ViewDelegateImpl::RealizeWindow(dom::WindowId window_id) {

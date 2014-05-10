@@ -123,8 +123,8 @@ class ViewDelegate {
       const base::string16& message, const base::string16& title, int flags,
       const MessageBoxResolver& callback) = 0;
 
-  public: virtual void Reconvert(WindowId window_id, text::Posn start,
-                                 text::Posn end) = 0;
+  public: virtual void Reconvert(WindowId window_id,
+                                 const base::string16& text) = 0;
   public: virtual void RealizeWindow(WindowId window_id) = 0;
   public: virtual void RegisterViewEventHandler(
       domapi::ViewEventHandler* event_handler) = 0;

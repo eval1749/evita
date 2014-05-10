@@ -147,12 +147,13 @@
   });
 
   /**
-   * Reeconvert using IME.
+   * Reconvert text using IME.
    * @this {!TextWindow}
    */
   Editor.bindKey(TextWindow, 'Ctrl+,', function() {
     var range = this.selection.range;
-    this.reconvert_(range.start, range.end);
+    this.reconvert_(range.text);
+    range.text = '';
   }, 'Reconvert');
 
   /**

@@ -91,9 +91,7 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
       text_renderer_(new TextRenderer(text_window.document()->buffer())),
       selection_(text_window.view_selection()),
       #if SUPPORT_IME
-        m_fImeTarget(false),
-        m_lImeEnd(0),
-        m_lImeStart(0),
+        has_composition_(false),
       #endif // SUPPORT_IME
       vertical_scroll_bar_(new ui::ScrollBar(ui::ScrollBar::Type::Vertical,
                                              this)),
@@ -372,19 +370,12 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
       data.caret = 0;
       DispatchTxetCompositionEvent(domapi::EventType::TextCompositionEnd,
                                    data);
-      m_fImeTarget = false;
+      has_composition_ = false;
       return 0;
     }
 
     case WM_IME_REQUEST:
       DVLOG(0) << "WM_IME_REQUEST wParam=" << std::hex << wParam;
-      if (IMR_RECONVERTSTRING == wParam) {
-          UI_DOM_AUTO_LOCK_SCOPE();
-          return static_cast<LRESULT>(setReconvert(
-              reinterpret_cast<RECONVERTSTRING*>(lParam),
-              GetSelection()->GetStart(),
-              GetSelection()->GetEnd()));
-      }
       break;
 
     case WM_IME_SETCONTEXT:
@@ -480,7 +471,7 @@ void TextEditWindow::Render() {
                         std::min(char_rect.bottom,
                                  static_cast<float>(bounds().bottom)));
   #if SUPPORT_IME
-    if (m_fImeTarget) {
+    if (has_composition_) {
       POINT pt = {
         static_cast<int>(caret_rect.left),
         static_cast<int>(caret_rect.top)
@@ -610,6 +601,9 @@ class InputMethodContext {
   public: std::vector<domapi::TextCompositionSpan> GetSpans();
   public: int GetCursorOffset();
   public: base::string16 GetText(int index);
+  public: bool SetComposition(int index, uint8_t* bytes, size_t num_bytes);
+
+  DISALLOW_COPY_AND_ASSIGN(InputMethodContext);
 };
 
 InputMethodContext::InputMethodContext(HWND hwnd) :
@@ -674,25 +668,39 @@ base::string16 InputMethodContext::GetText(int index) {
   return text;
 }
 
+bool InputMethodContext::SetComposition(int index, uint8_t* bytes,
+                                        size_t num_bytes) {
+  if (!handle_)
+    return false;
+  auto const succeeded = ::ImmSetCompositionString(handle_,
+      static_cast<DWORD>(index), bytes, static_cast<DWORD>(num_bytes),
+      nullptr, 0);
+  if (!succeeded) {
+    DVLOG(0) << "ImmSetCompositionString " << index << " failed.";
+    return false;
+  }
+  return true;
+}
+
 }  // namespace
 
 void TextEditWindow::CancelTextComposition() {
-  if (!m_fImeTarget)
+  if (!has_composition_)
     return;
   InputMethodContext imc(AssociatedHwnd());
   if (!imc)
     return;
-  DVLOG(0) << "CancelTextComposition " << m_fImeTarget;
+  DVLOG(0) << "CancelTextComposition " << has_composition_;
   WIN32_VERIFY(::ImmNotifyIME(imc, NI_COMPOSITIONSTR, CPS_CANCEL, 0));
 }
 
 void TextEditWindow::CommitTextComposition() {
-  if (!m_fImeTarget)
+  if (!has_composition_)
     return;
   InputMethodContext imc(AssociatedHwnd());
   if (!imc)
     return;
-  DVLOG(0) << "CommitTextComposition " << m_fImeTarget;
+  DVLOG(0) << "CommitTextComposition " << has_composition_;
   WIN32_VERIFY(::ImmNotifyIME(imc, NI_COMPOSITIONSTR, CPS_COMPLETE, 0));
   domapi::TextCompositionData data;
   data.caret = imc.GetCursorOffset();
@@ -711,7 +719,7 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
 
   if (!lParam) {
     // Text composition is canceled.
-    m_fImeTarget = false;
+    has_composition_ = false;
     domapi::TextCompositionData data;
     data.text = imc.GetText(GCS_COMPSTR);
     DispatchTxetCompositionEvent(
@@ -721,13 +729,13 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
 
   if (lParam & GCS_RESULTSTR) {
     // Text composition is finished.
-    m_fImeTarget = false;
+    has_composition_ = false;
     data.text = imc.GetText(GCS_RESULTSTR);
     DispatchTxetCompositionEvent(
         domapi::EventType::TextCompositionCommit, data);
   }
 
-  m_fImeTarget = true;
+  has_composition_ = true;
   data.spans = imc.GetSpans();
   data.text = imc.GetText(GCS_COMPSTR);
   DispatchTxetCompositionEvent(
@@ -738,48 +746,31 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
 // o IME2000 ignores string after newline.
 // o We should limit number of characters to be reconverted.
 //
-void TextEditWindow::Reconvert(Posn lStart, Posn lEnd) {
-  UI_ASSERT_DOM_LOCKED();
-
-  BOOL fSucceeded;
-
-  auto const cb = setReconvert(nullptr, lStart, lEnd);
-  if (!cb)
+void TextEditWindow::Reconvert(const base::string16& text) {
+  if (text.empty())
     return;
 
-  std::vector<uint8_t> buffer(cb);
-
-  auto const p = reinterpret_cast<RECONVERTSTRING*>(&buffer[0]);
-  setReconvert(p, lStart, lEnd);
+  auto const num_text_bytes = sizeof(base::char16) * text.length();
+  std::vector<uint8_t> buffer(sizeof(RECONVERTSTRING) + num_text_bytes);
+  auto const reconvert = reinterpret_cast<RECONVERTSTRING*>(&buffer[0]);
+  reconvert->dwSize = static_cast<DWORD>(buffer.size());
+  reconvert->dwVersion = 0;
+  reconvert->dwStrLen = static_cast<DWORD>(text.length());
+  reconvert->dwStrOffset = sizeof(RECONVERTSTRING);
+  reconvert->dwCompStrLen = static_cast<DWORD>(text.length());
+  reconvert->dwCompStrOffset = 0;
+  reconvert->dwTargetStrLen = reconvert->dwCompStrLen;
+  reconvert->dwTargetStrOffset = reconvert->dwCompStrOffset;
+  auto reconvert_string = reinterpret_cast<base::char16*>(
+      &buffer[reconvert->dwStrOffset]);
+  ::memcpy(reconvert_string, text.data(), num_text_bytes);
 
   InputMethodContext imc(AssociatedHwnd());
-  fSucceeded = ::ImmSetCompositionString(
-      imc,
-      SCS_QUERYRECONVERTSTRING,
-      p,
-      cb,
-      nullptr,
-      0);
-  if (!fSucceeded) {
-    DVLOG(0) << "ImmSetCompositionString SCS_QUERYRECONVERTSTRING failed";
+  if (!imc.SetComposition(SCS_QUERYRECONVERTSTRING, &buffer[0], buffer.size()))
     return;
-  }
-
-  m_lImeStart = static_cast<Posn>(lStart + p->dwCompStrOffset / 2);
-  m_lImeEnd = static_cast<Posn>(m_lImeStart + p->dwCompStrLen);
-  m_fImeTarget = true;
-
-  fSucceeded = ::ImmSetCompositionString(
-      imc,
-      SCS_SETRECONVERTSTRING,
-      p,
-      cb,
-      nullptr,
-      0);
-  if (!fSucceeded) {
-    DVLOG(0) << "ImmSetCompositionString SCS_SETRECONVERTSTRING failed";
-    return;
-  }
+  // We'll have WM_IME_STARTCOMPOSITION and WM_IME_COMPOSITION if
+  // |SetComposition()| succeeded.
+  imc.SetComposition(SCS_SETRECONVERTSTRING, &buffer[0], buffer.size());
 }
 
 // Set left top coordinate of IME candidate window.
@@ -798,33 +789,6 @@ void TextEditWindow::SetCandidateWindow(SIZE sz, POINT pt) {
   param.rcArea.right = pt.x;
   param.rcArea.bottom = pt.y + sz.cy;
   WIN32_VERIFY(::ImmSetCandidateWindow(imc, &param));
-}
-
-size_t TextEditWindow::setReconvert(RECONVERTSTRING* p, Posn lStart,
-                                  Posn lEnd) {
-  ASSERT(lEnd >= lStart);
-  UI_ASSERT_DOM_LOCKED();
-  auto const cwch = lEnd - lStart;
-  if (!cwch)
-    return 0u;
-
-  auto const cb = sizeof(RECONVERTSTRING) + sizeof(char16) * (cwch + 1);
-  if (!p)
-    return cb;
-  p->dwSize = cb;
-  p->dwVersion = 0;
-  p->dwStrLen = static_cast<DWORD>(cwch);
-  p->dwStrOffset = sizeof(RECONVERTSTRING);
-  p->dwCompStrLen = static_cast<DWORD>(cwch); // # of characters
-  p->dwCompStrOffset = 0; // byte offset
-  p->dwTargetStrLen = p->dwCompStrLen;
-  p->dwTargetStrOffset = p->dwCompStrOffset;
-
-  auto const pwch = reinterpret_cast<char16*>(
-      reinterpret_cast<char*>(p) + p->dwStrOffset);
-  buffer()->GetText(pwch, lStart, lEnd);
-  pwch[cwch] = 0;
-  return cb;
 }
 
 #endif // SUPPORT_IME

@@ -19,7 +19,7 @@ interface TextWindow : DocumentWindow {
   long mapPointToPosition_(float x, float y);
 
   [ImplementedAs=Reconvert]
-  void reconvert_(long start, long end);
+  void reconvert_(DOMString text);
 
   void scroll(long direction);
 };

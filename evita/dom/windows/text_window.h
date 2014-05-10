@@ -48,7 +48,7 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
   private: void MakeSelectionVisible();
   private: TextWindow* NewTextWindow(Range* range);
   private: text::Posn MapPointToPosition(float x, float y);
-  private: void Reconvert(text::Posn start, text::Posn end);
+  private: void Reconvert(const base::string16& text);
   private: void Scroll(int direction);
 
   DISALLOW_COPY_AND_ASSIGN(TextWindow);

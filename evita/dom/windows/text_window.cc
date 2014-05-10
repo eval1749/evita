@@ -88,9 +88,8 @@ TextWindow* TextWindow::NewTextWindow(Range* selection_range) {
   return new TextWindow(selection_range);
 }
 
-void TextWindow::Reconvert(text::Posn start, text::Posn end) {
-  ScriptHost::instance()->view_delegate()->
-      Reconvert(window_id(), start, end);
+void TextWindow::Reconvert(const base::string16& text) {
+  ScriptHost::instance()->view_delegate()->Reconvert(window_id(), text);
 }
 
 void TextWindow::Scroll(int direction) {

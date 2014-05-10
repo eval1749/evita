@@ -63,9 +63,7 @@ class TextEditWindow : public text::BufferMutationObserver,
   // TODO(yosi): Manage life time of selection.
   private: Selection* selection_;
   #if SUPPORT_IME
-  private: bool m_fImeTarget;
-  private: Posn m_lImeStart;
-  private: Posn m_lImeEnd;
+  private: bool has_composition_;
   #endif // SUPPORT_IME
   private: std::unique_ptr<TextRenderer> text_renderer_;
   private: ui::ScrollBar* const vertical_scroll_bar_;
@@ -135,9 +133,8 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: void CancelTextComposition();
   private: void CommitTextComposition();
   private: void onImeComposition(LPARAM);
-  public: void Reconvert(Posn, Posn);
+  public: void Reconvert(const base::string16& text);
   private: void SetCandidateWindow(SIZE, POINT);
-  private: size_t setReconvert(RECONVERTSTRING*, Posn start, Posn end);
   #endif // SUPPORT_IME
 
   // text::BufferMutationObserver

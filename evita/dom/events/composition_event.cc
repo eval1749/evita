@@ -12,6 +12,8 @@ namespace {
 base::string16 ConvertEventType(const domapi::TextCompositionEvent& event) {
   if (event.event_type == domapi::EventType::TextCompositionCancel)
     return L"compositioncancel";
+  if (event.event_type == domapi::EventType::TextCompositionCommit)
+    return L"compositioncommit";
   if (event.event_type == domapi::EventType::TextCompositionEnd)
     return L"compositionend";
   if (event.event_type == domapi::EventType::TextCompositionStart)

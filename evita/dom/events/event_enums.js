@@ -10,6 +10,7 @@ Event.Names = {
   CHANGE: 'change',
   CLICK: 'click',
   COMPOSITIONCANCEL: 'compositioncancel',
+  COMPOSITIONCOMMIT: 'compositioncommit',
   COMPOSITIONEND: 'compositionend',
   COMPOSITIONSTART: 'compositionstart',
   COMPOSITIONUPDATE: 'compositionupdate',

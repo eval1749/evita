@@ -133,18 +133,27 @@ global.TextWindow.prototype.clone = function() {
    * @param {!CompositionEvent} event
    */
   function handleCompositionEvent(window, event) {
-    console.log('handleCompositionEvent', event.type, 'caret', event.caret,
-        'attrs', event.attributes.length);
     if (!window.textCompositionRange)
       window.textCompositionRange = new Range(window.document);
     var range = window.textCompositionRange;
     var selection = window.selection;
     var selectionRange = selection.range;
-    if (event.type == Event.Names.COMPOSITIONSTART)
+
+    if (event.type == Event.Names.COMPOSITIONSTART) {
       range.collapseTo(selectionRange.start);
-    range.text = event.data;
+      return;
+    }
+
+    if (event.type == Event.Names.COMPOSITIONCOMMIT) {
+      range.text = event.data;
+      range.collapseTo(range.end);
+      selectionRange.collapseTo(range.start);
+      return;
+    }
+
     if (event.type != Event.Names.COMPOSITIONUPDATE)
       return;
+    range.text = event.data;
     var last_attr = 0;
     var attrs = event.attributes;
     var start = 0;
@@ -155,7 +164,6 @@ global.TextWindow.prototype.clone = function() {
         return;
       selectionRange.collapseTo(range.start+ start);
       selectionRange.end = range.start + end;
-      console.log('handleCompositionEvent.setStyle', start, end, attr);
       // ATTR_INPUT=0, ATTR_TARGET_CONVERTED=1, ATTR_CONVERTED=2,
       // ATTR_TARGET_NOTCONVERTED=3, ATTR_INPUT_ERROR=4
       // ATTR_FIXEDCONVERTED=5
@@ -164,16 +172,14 @@ global.TextWindow.prototype.clone = function() {
           selectionRange.setStyle({textDecoration: 'imeinput'});
           break;
         case 1: // ATTR_TARGET_CONVERTED
+        case 3: // ATTR_TARGET_NOTCONVERTED
           if (selectionStart < 0)
             selectionStart = start;
           selectionEnd = end;
-          selectionRange.setStyle({textDecoration: 'imeinactive1'});
+          selectionRange.setStyle({backgroundColor: 0x3399FF, color: 0xFFFFFF});
           break;
         case 2: // ATTR_CONVERTED
           selectionRange.setStyle({textDecoration: 'imeinactive2'});
-          break;
-        case 3: // ATTR_TARGET_NOTCONVERTED
-          selectionRange.setStyle({textDecoration: 'imeactive'});
           break;
       }
     }
@@ -186,12 +192,7 @@ global.TextWindow.prototype.clone = function() {
       }
     }
     setStyle(start, attrs.length, last_attr);
-    if (selectionStart < 0) {
-      selectionRange.collapseTo(range.start + event.caret);
-    } else {
-      selectionRange.collapseTo(range.start + selectionStart);
-      selectionRange.end = range.start + selectionEnd;
-    }
+    selectionRange.collapseTo(range.start + event.caret);
   }
 
   /**

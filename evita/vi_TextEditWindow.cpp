@@ -22,6 +22,7 @@
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
 #include "common/timer/timer.h"
+#include "common/win/win32_verify.h"
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
@@ -360,9 +361,14 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
       onImeComposition(lParam);
       return 0;
 
-    case WM_IME_ENDCOMPOSITION:
+    case WM_IME_ENDCOMPOSITION: {
+      domapi::TextCompositionData data;
+      data.caret = 0;
+      DispatchTxetCompositionEvent(domapi::EventType::TextCompositionEnd,
+                                   data);
       m_fImeTarget = false;
       return 0;
+    }
 
     case WM_IME_REQUEST:
       if (IMR_RECONVERTSTRING == wParam) {
@@ -380,16 +386,13 @@ LRESULT TextEditWindow::OnMessage(uint uMsg, WPARAM wParam, LPARAM lParam) {
       lParam &= ~ISC_SHOWUICOMPOSITIONWINDOW;
       break;
 
-    case WM_IME_STARTCOMPOSITION:
+    case WM_IME_STARTCOMPOSITION: {
+      domapi::TextCompositionData data;
+      data.caret = 0;
       DispatchTxetCompositionEvent(domapi::EventType::TextCompositionStart,
-                                   domapi::TextCompositionData());
-      if (!m_fImeTarget) {
-        UI_DOM_AUTO_LOCK_SCOPE();
-        m_lImeStart = GetSelection()->GetStart();
-        m_lImeEnd = m_lImeStart;
-        m_fImeTarget = false;
-      }
+                                   data);
       return 0;
+    }
     #endif // SUPPORT_IME
   }
   return ParentClass::OnMessage(uMsg, wParam, lParam);
@@ -480,8 +483,7 @@ void TextEditWindow::Render() {
         static_cast<int>(caret_rect.height())
       };
 
-      if (showImeCaret(size, pt))
-        return;
+      showImeCaret(size, pt);
     }
   #endif // SUPPORT_IME
 
@@ -656,29 +658,32 @@ void TextEditWindow::onImeComposition(LPARAM lParam) {
   if (!imc)
     return;
 
+  domapi::TextCompositionData data;
+  data.caret = imc.GetCursorOffset();
+
   if (!lParam) {
+    // Text composition is canceled.
+    m_fImeTarget = false;
     domapi::TextCompositionData data;
     data.text = imc.GetText(GCS_COMPSTR);
-    data.caret = static_cast<int>(data.text.length());
     DispatchTxetCompositionEvent(
         domapi::EventType::TextCompositionCancel, data);
     return;
   }
 
-  // If IME has result string, we can insert it into buffer.
   if (lParam & GCS_RESULTSTR) {
-    domapi::TextCompositionData data;
+    // Text composition is finished.
+    m_fImeTarget = false;
     data.text = imc.GetText(GCS_RESULTSTR);
-    data.caret = static_cast<int>(data.text.length());
-    DispatchTxetCompositionEvent(domapi::EventType::TextCompositionEnd, data);
-    return;
+    DispatchTxetCompositionEvent(
+        domapi::EventType::TextCompositionCommit, data);
   }
 
-  domapi::TextCompositionData data;
+  m_fImeTarget = true;
   data.attributes = imc.GetAttributes();
-  data.caret = imc.GetCursorOffset();
   data.text = imc.GetText(GCS_COMPSTR);
-  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionUpdate, data);
+  DispatchTxetCompositionEvent(
+      domapi::EventType::TextCompositionUpdate, data);
 }
 
 // Note:

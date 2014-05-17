@@ -154,18 +154,17 @@ global.TextWindow.prototype.clone = function() {
     if (event.type != Event.Names.COMPOSITIONUPDATE)
       return;
     range.text = event.data;
-    var last_attr = 0;
-    var start = 0;
-    function setStyle(start, end, attr) {
+    // Decorate composition text.
+    event.spans.forEach(function(span) {
+      var start = span.start;
+      var end = span.end;
       if (start == end)
         return;
-      selectionRange.collapseTo(range.start+ start);
+      selectionRange.collapseTo(range.start + start);
       selectionRange.end = range.start + end;
-      // ATTR_INPUT=0, ATTR_TARGET_CONVERTED=1, ATTR_CONVERTED=2,
-      // ATTR_TARGET_NOTCONVERTED=3, ATTR_INPUT_ERROR=4
-      // ATTR_FIXEDCONVERTED=5
-      switch (attr) {
+      switch (span.data) {
         case 0: // ATTR_INPUT
+        case 4: // ATTR_INPUT_ERROR
           selectionRange.setStyle({textDecoration: 'imeinput'});
           break;
         case 1: // ATTR_TARGET_CONVERTED
@@ -173,12 +172,10 @@ global.TextWindow.prototype.clone = function() {
           selectionRange.setStyle({backgroundColor: 0x3399FF, color: 0xFFFFFF});
           break;
         case 2: // ATTR_CONVERTED
+        case 5: // ATTR_FIXEDCONVERTED
           selectionRange.setStyle({textDecoration: 'imeinactive2'});
           break;
       }
-    }
-    event.spans.forEach(function(span) {
-      setStyle(span.start, span.end, span.data);
     });
     selectionRange.collapseTo(range.start + event.caret);
   }

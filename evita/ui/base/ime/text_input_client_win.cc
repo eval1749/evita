@@ -135,6 +135,19 @@ TextInputClientWin::TextInputClientWin() {
 TextInputClientWin::~TextInputClientWin() {
 }
 
+void TextInputClientWin::DidChangeDelegate(TextInputDelegate* old_delegate) {
+  if (!delegate()) {
+    if (old_delegate) {
+      WIN32_VERIFY(::ImmAssociateContextEx(
+          old_delegate->GetClientWindow()->AssociatedHwnd(), nullptr,
+          IACE_IGNORENOCONTEXT));
+    }
+    return;
+  }
+  InputMethodContext imc(delegate());
+  WIN32_VERIFY(::ImmAssociateContextEx(GetHwnd(), imc, IACE_DEFAULT));
+}
+
 void TextInputClientWin::DidUpdateComposition(LPARAM lParam) {
   DCHECK(delegate());
 
@@ -167,6 +180,11 @@ void TextInputClientWin::DidUpdateComposition(LPARAM lParam) {
   delegate()->DidUpdateComposition(composition);
 }
 
+HWND TextInputClientWin::GetHwnd() const {
+  DCHECK(delegate());
+  return delegate()->GetClientWindow()->AssociatedHwnd();
+}
+
 std::pair<LRESULT, bool> TextInputClientWin::OnImeMessage(
       uint32_t message, WPARAM wParam, LPARAM lParam) {
   if (!delegate())
@@ -188,8 +206,7 @@ std::pair<LRESULT, bool> TextInputClientWin::OnImeMessage(
       // We draw composition string instead of IME. So, we don't
       // need default composition window.
       lParam &= ~ISC_SHOWUICOMPOSITIONWINDOW;
-      auto const hwnd = delegate()->GetClientWindow()->AssociatedHwnd();
-      return std::make_pair(::DefWindowProc(hwnd, message, wParam, lParam),
+      return std::make_pair(::DefWindowProc(GetHwnd(), message, wParam, lParam),
                             true);
     }
 

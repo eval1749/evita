@@ -18,6 +18,7 @@ class TextInputClientWin : public TextInputClient,
   public: ~TextInputClientWin();
 
   private: void DidUpdateComposition(LPARAM lParam);
+  private: HWND GetHwnd() const;
 
   public: std::pair<LRESULT, bool> OnImeMessage(
       uint32_t message, WPARAM wParam, LPARAM lParam);
@@ -30,6 +31,8 @@ class TextInputClientWin : public TextInputClient,
   private: virtual void CommitComposition(
       TextInputDelegate* requester) override;
   private: virtual void DidChangeCaretBounds() override;
+  private: virtual void DidChangeDelegate(
+      TextInputDelegate* old_delegate) override;
   private: virtual void Reconvert(
       TextInputDelegate* requester, const base::string16& text) override;
 

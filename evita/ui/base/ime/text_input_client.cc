@@ -27,6 +27,14 @@ void TextInputClient::set_caret_bounds(const gfx::RectF& new_bounds) {
   DidChangeCaretBounds();
 }
 
+void TextInputClient::set_delegate(TextInputDelegate* new_delegate) {
+  if (delegate_ == new_delegate)
+    return;
+  auto const old_delegate = delegate_;
+  delegate_ = new_delegate;
+  DidChangeDelegate(old_delegate);
+}
+
 // static
 TextInputClient* TextInputClient::Get() {
   return static_instance;

@@ -22,9 +22,7 @@ class TextInputClient {
   public: virtual ~TextInputClient();
 
   public: TextInputDelegate* delegate() const { return delegate_; }
-  public: void set_delegate(TextInputDelegate* new_delegate) {
-    delegate_ = new_delegate;
-  }
+  public: void set_delegate(TextInputDelegate* new_delegate);
   public: const gfx::RectF& caret_bounds() const { return caret_bounds_; }
   public: void set_caret_bounds(const gfx::RectF& new_bounds);
   public: bool has_composition() const { return has_composition_; }
@@ -36,6 +34,7 @@ class TextInputClient {
   public: virtual void CommitComposition(TextInputDelegate* requester) = 0;
   protected: virtual void DidChangeCaretBounds() = 0;
   public: static TextInputClient* Get();
+  protected: virtual void DidChangeDelegate(TextInputDelegate* old_delegate) = 0;
   public: virtual void Reconvert(TextInputDelegate* requester,
                                  const base::string16& text) = 0;
 

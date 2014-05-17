@@ -4,6 +4,7 @@
 
 #include "evita/ui/controls/control.h"
 
+#include "evita/ui/base/ime/text_input_client.h"
 #include "evita/ui/controls/control_controller.h"
 
 namespace ui {
@@ -28,7 +29,8 @@ bool Control::Style::operator!=(const Style& other) const {
 // Control
 //
 Control::Control(ControlController* controller)
-    : controller_(controller), state_(State::Normal) {
+    : controller_(controller), state_(State::Normal),
+      text_input_delegate_(nullptr) {
 }
 
 Control::~Control() {
@@ -47,12 +49,23 @@ void Control::set_disabled(bool new_disabled) {
     SchedulePaint();
 }
 
+void Control::set_text_input_delegate(TextInputDelegate* delegate) {
+  DCHECK(!text_input_delegate_);
+  text_input_delegate_ = delegate;
+}
+
 // ui::WIdget
 void Control::DidKillFocus(ui::Widget* focused_widget) {
   Widget::DidKillFocus(focused_widget);
-  if (disabled())
+  if (disabled()) {
     return;
+  }
   state_ = State::Normal;
+  if (text_input_delegate_) {
+    ui::TextInputClient::Get()->CommitComposition(text_input_delegate_);
+    ui::TextInputClient::Get()->CancelComposition(text_input_delegate_);
+    ui::TextInputClient::Get()->set_delegate(nullptr);
+  }
   SchedulePaint();
   controller_->DidKillFocus(this, focused_widget);
 }
@@ -66,8 +79,10 @@ void Control::DidSetFocus(ui::Widget* last_focused_widget) {
   if (disabled())
     return;
   state_ = State::Highlight;
-  if (is_realized())
+  if (is_realized()) {
+    ui::TextInputClient::Get()->set_delegate(text_input_delegate_);
     SchedulePaint();
+  }
   controller_->DidSetFocus(this, last_focused_widget);
 }
 

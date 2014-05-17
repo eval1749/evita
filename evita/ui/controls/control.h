@@ -11,6 +11,7 @@
 namespace ui {
 
 class ControlController;
+class TextInputDelegate;
 
 class Control : public ui::Widget {
   DECLARE_CASTABLE_CLASS(Control, Widget);
@@ -36,9 +37,10 @@ class Control : public ui::Widget {
   };
 
   private: ControlController* controller_;
+  private: TextInputDelegate* text_input_delegate_;
   private: State state_;
 
-  public: Control(ControlController* controller);
+  public: explicit Control(ControlController* controller);
   public: virtual ~Control();
 
   public: bool disabled() const { return state_ == State::Disabled; }
@@ -47,6 +49,7 @@ class Control : public ui::Widget {
   public: ControlController* controller() const { return controller_; }
   protected: bool hover() const { return state_ == State::Hover; }
   protected: State state() const { return state_; }
+  public: void set_text_input_delegate(TextInputDelegate* delegate);
 
   // ui::Widget
   protected: virtual void DidKillFocus(ui::Widget* focused_window) override;

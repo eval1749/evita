@@ -240,8 +240,9 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
 }
 
 void TextFieldControl::Renderer::RenderCaret(
-    gfx::Graphics* gfx, const gfx::RectF& caret_rect) const {
-  Caret::instance()->Update(gfx, caret_rect);
+    gfx::Graphics* gfx, const gfx::RectF& caret_bounds) const {
+  Caret::instance()->Update(gfx, caret_bounds);
+  ui::TextInputClient::Get()->set_caret_bounds(caret_bounds);
 }
 
 void TextFieldControl::Renderer::RenderSelection(gfx::Graphics* gfx) {

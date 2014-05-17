@@ -10,7 +10,6 @@
 
 #include "base/logging.h"
 #include "evita/gfx/bitmap.h"
-#include "evita/ui/base/ime/text_input_client.h"
 
 namespace ui {
 
@@ -68,7 +67,6 @@ void Caret::Update(gfx::Graphics* gfx, const gfx::RectF& new_rect) {
   DCHECK(owner_);
   DCHECK(new_rect);
   if (bounds_ != new_rect) {
-    ui::TextInputClient::Get()->set_caret_bounds(new_rect);
     if (!bounds_.empty()) {
       // Don't blink caret while when caret is moved or resized.
       last_blink_time_ = base::Time::Now();

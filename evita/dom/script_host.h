@@ -76,8 +76,6 @@ class ScriptHost : public v8_glue::RunnerDelegate {
   public: ViewDelegate* view_delegate() const;
 
   public: void DidStartViewHost();
-  public: void OpenFile(WindowId window_id,
-                        const base::string16& file_name);
   public: void PlatformError(const char* name);
   public: void PostTask(const tracked_objects::Location& from_here,
                         const base::Closure& task);

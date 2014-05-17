@@ -41,20 +41,6 @@ base::string16 V8ToString(v8::Handle<v8::Value> value) {
 
 namespace {
 
-v8::Handle<v8::Value> GetOpenFileHandler(v8_glue::Runner* runner,
-                                         WindowId window_id) {
-  auto const isolate = runner->isolate();
-  if (window_id == kInvalidWindowId)
-    return runner->global()->Get(gin::StringToV8(isolate, "editor"));
-
-  auto const window = WindowSet::instance()->Find(window_id);
-  if (!window) {
-    DVLOG(0) << "OpenFile: No suche window " << window_id;
-    return v8::Handle<v8::Value>();
-  }
-  return window->GetWrapper(isolate);
-}
-
 void MessageBoxCallback(int) {
 }
 
@@ -202,24 +188,6 @@ void ScriptHost::DidStartViewHost() {
   if (state_ == domapi::ScriptHostState::Stopped)
     state_ = domapi::ScriptHostState::Running;
   view_delegate_->DidStartScriptHost(state_);
-}
-
-void ScriptHost::OpenFile(WindowId window_id,
-                                const base::string16& file_name){
-  v8_glue::Runner::Scope runner_scope(runner());
-  auto const isolate = runner()->isolate();
-  auto const js_handler = GetOpenFileHandler(runner(), window_id);
-  if (js_handler.IsEmpty())
-    return;
-  auto const open_file = js_handler->ToObject()->Get(
-      gin::StringToV8(isolate, "open"));
-  if (!open_file->IsFunction()) {
-    DVLOG(0) << "OpenFile: window doesn't have callable open property.";
-    return;
-  }
-  v8::Handle<v8::Value> js_file_name = gin::StringToV8(isolate, file_name);
-  DOM_AUTO_LOCK_SCOPE();
-  runner()->Call(open_file, js_handler, js_file_name);
 }
 
 void ScriptHost::PlatformError(const char* name) {

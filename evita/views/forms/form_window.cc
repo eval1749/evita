@@ -274,10 +274,13 @@ ui::TextFieldControl::Selection TextFieldImporter::ImportSelection() const {
 }
 
 ui::Control* TextFieldImporter::CreateWidget() {
-  auto const widget = new ui::TextFieldControl(
-      new FormControlController(text_field_->event_target_id()),
-                                ImportSelection(), text_field_->value(),
-                                ComputeStyle());
+  auto const controller = new FormControlController(
+    text_field_->event_target_id());
+  auto const widget = new ui::TextFieldControl(controller,
+                                               ImportSelection(),
+                                               text_field_->value(),
+                                               ComputeStyle());
+  widget->set_text_input_delegate(controller);
   Update(text_field_, widget);
   return widget;
 }

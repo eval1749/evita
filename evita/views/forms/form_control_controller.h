@@ -5,12 +5,14 @@
 #if !defined(INCLUDE_evita_views_forms_form_control_controller_h)
 #define INCLUDE_evita_views_forms_form_control_controller_h
 
+#include "evita/ui/base/ime/text_input_delegate.h"
 #include "evita/ui/controls/control_controller.h"
 #include "evita/views/event_source.h"
 
 namespace views {
 
 class FormControlController : public ui::ControlController,
+                              public ui::TextInputDelegate,
                               protected EventSource {
   public: FormControlController(domapi::EventTargetId event_target_id);
   public: virtual ~FormControlController();
@@ -34,6 +36,15 @@ class FormControlController : public ui::ControlController,
   private: virtual void OnMouseWheel(ui::Control* control,
                                      const ui::MouseWheelEvent& event) override;
   private: virtual void WillDestroyControl(ui::Control* control) override;
+
+  // ui::TextInputDelegate
+  private: virtual void DidCommitComposition(
+      const ui::TextComposition& composition) override;
+  private: virtual void DidFinishComposition() override;
+  private: virtual void DidStartComposition() override;
+  private: virtual void DidUpdateComposition(
+      const ui::TextComposition& composition) override;
+  private: virtual ui::Widget* GetClientWindow() override;
 
   DISALLOW_COPY_AND_ASSIGN(FormControlController);
 };

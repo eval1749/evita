@@ -6,6 +6,7 @@
 
 #include "common/memory/singleton.h"
 #include "evita/dom/public/view_event.h"
+#include "evita/ui/base/ime/text_composition.h"
 #include "evita/ui/controls/control.h"
 #include "evita/views/forms/form_control_set.h"
 
@@ -73,6 +74,34 @@ void FormControlController::OnMouseWheel(ui::Control*,
 void FormControlController::WillDestroyControl(ui::Control* control) {
   FormControlSet::instance()->Unregister(control);
   delete this;
+}
+
+// ui::TextInputDelegate
+void FormControlController::DidCommitComposition(
+    const ui::TextComposition& composition) {
+  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionCommit,
+                               composition);
+}
+
+void FormControlController::DidFinishComposition() {
+  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionEnd,
+                               ui::TextComposition());
+}
+void FormControlController::DidStartComposition() {
+  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionStart,
+                               ui::TextComposition());
+}
+void FormControlController::DidUpdateComposition(
+    const ui::TextComposition& composition) {
+  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionUpdate,
+                               composition);
+}
+
+ui::Widget* FormControlController::GetClientWindow() {
+  auto const control = FormControlSet::instance()->MaybeControl(
+      event_target_id());
+  DCHECK(control);
+  return control;
 }
 
 }  // namespace views

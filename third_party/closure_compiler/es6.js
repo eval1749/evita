@@ -16,6 +16,8 @@
  *  - Set
  *  - String
  *  - Symbol
+ *  - WeakMap
+ *  - WeakSet
  */
 
 /**
@@ -505,3 +507,96 @@ String.prototype.startsWith = function(searchString, opt_position) {};
  * @return {!Symbol}
  */
 function Symbol(opt_name) {}
+
+//////////////////////////////////////////////////////////////////////
+//
+// WeakMap
+//
+/**
+ * @template KEY, VALUE
+ * @constructor
+ */
+function WeakMap() {}
+
+/**
+ * @template KEY, VALUE
+ * @this {WeakMap.<KEY, VALUE>}
+ */
+WeakMap.prototype.clear = function() {}
+
+/**
+ * @template KEY, VALUE
+ * @this {WeakMap.<KEY, VALUE>}
+ * @param {KEY} key
+ */
+WeakMap.prototype.delete = function(key) {}
+
+/**
+ * @template KEY, VALUE
+ * @this {WeakMap.<KEY, VALUE>}
+ * @param {KEY} key
+ * @return {VALUE|undefined}
+ */
+WeakMap.prototype.get = function(key) {}
+
+/**
+ * @template KEY, VALUE
+ * @this {WeakMap.<KEY, VALUE>}
+ * @param {KEY} key
+ * @return {boolean}
+ */
+WeakMap.prototype.has = function(key) {}
+
+/**
+ * @template KEY, VALUE
+ * @this {WeakMap.<KEY, VALUE>}
+ * @param {KEY} key
+ * @param {VALUE} value
+ */
+WeakMap.prototype.set = function(key, value) {}
+
+//////////////////////////////////////////////////////////////////////
+//
+// WeakSet
+//
+/**
+ * @template KEY
+ * @constructor
+ */
+function WeakSet() {}
+
+/**
+ * @template KEY
+ * @this {WeakSet.<KEY>}
+ * @param {KEY} key
+ */
+WeakSet.prototype.add = function(key) {}
+
+/**
+ * @template KEY
+ * @this {WeakSet.<KEY>}
+ */
+WeakSet.prototype.clear = function() {}
+
+/**
+ * @template KEY
+ * @this {WeakSet.<KEY>}
+ * @param {KEY} key
+ */
+WeakSet.prototype.delete = function(key) {}
+
+/**
+ * @template KEY
+ * @this {WeakSet.<KEY>}
+ * @param {KEY} key
+ * @return {KEY|undefined}
+ */
+WeakSet.prototype.get = function(key) {}
+
+/**
+ * @template KEY
+ * @this {WeakSet.<KEY>}
+ * @param {KEY} key
+ * @return {boolean}
+ */
+WeakSet.prototype.has = function(key) {}

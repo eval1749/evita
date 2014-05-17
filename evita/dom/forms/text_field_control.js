@@ -5,11 +5,16 @@
 /** @typedef {function(!TextFieldSelection)} */
 var TextFieldEditCommand;
 
+/** @type {number} */
+TextFieldControl.prototype.compositionStart_;
+
+/** @type {string} */
+TextFieldControl.prototype.compositionString_;
+
 Object.defineProperties(TextFieldControl.prototype, {
-  lastChangeEventValue_: {
-    value: '',
-    writable: true
-  },
+  compositionStart_: {value: 0, writable: true},
+  compositionString_: {value: '', writable: true},
+  lastChangeEventValue_: {value: '', writable: true},
   value: {
     /**
      * @this {!TextFieldControl}
@@ -93,6 +98,15 @@ Object.defineProperties(TextFieldControl.prototype, {
   // TODO(yosi) Once we finish debugging of TextFieldControl editor, we should
   // not expose |bindKey|.
   TextFieldControl.bindKey = bindKey;
+
+  /**
+   * @param {!TextFieldControl} control
+   * @param {!CompositionEvent} event
+   */
+  function handleCompositionUpdate(control, event) {
+    setCompoistionText(control, event.data);
+    control.selection.collapseTo(control.compositionStart_ + event.caret);
+  }
 
   /**
    * @param {!TextFieldControl} control
@@ -223,17 +237,44 @@ Object.defineProperties(TextFieldControl.prototype, {
   }
 
   /**
-   * @param {!TextFieldSelection} selection
+   * @param {!TextFieldControl} control
+   * @param {string} newText
    */
-  function setSelectionText(selection, new_text) {
-    var control = selection.control;
-    var old_value = control.value;
-    selection.text = new_text;
-    var value = control.value;
-    if (value == old_value)
-      return;
-    var event = new FormEvent(Event.Names.INPUT, {data: value});
-    selection.control.dispatchEvent(event);
+  function setCompoistionText(control, newText) {
+    var start = control.compositionStart_;
+    var maxOffset = control.value_.length;
+    if (start > maxOffset) {
+      control.compositionStart_ = maxOffset;
+      start = maxOffset;
+    }
+    var end = start + control.compositionString_.length;
+    setText(control, start, end, newText);
+  }
+
+  /**
+   * @param {!TextFieldSelection} selection
+   * @param {string} newText
+   */
+  function setSelectionText(selection, newText) {
+    var start = selection.start;
+    setText(selection.control, selection.start, selection.end, newText);
+    selection.collapseTo(start + newText.length);
+  }
+
+  /**
+   * @param {!TextFieldControl} control
+   * @param {string} newText
+   */
+  function setText(control, start, end, newText) {
+    var text = control.value_;
+    var compositionEnd = control.compositionStart_ +
+                         control.compositionString_.length;
+    var oldValue = control.value_;
+    var newValue = text.substr(0, start) + newText + text.substr(end);
+    control.compositionString_ = newText;
+    control.value_ = newValue;
+    var event = new FormEvent(Event.Names.INPUT, {data: newValue});
+    control.dispatchEvent(event);
   }
 
   /**
@@ -267,6 +308,21 @@ Object.defineProperties(TextFieldControl.prototype, {
       case Event.Names.BLUR:
         dispatchChangeEventIfNeeded(this);
         break;
+      case Event.Names.COMPOSITIONCOMMIT:
+        setCompoistionText(this, /** @type{!CompositionEvent} */(event).data);
+        this.selection.collapseTo(this.compositionStart_ +
+                                  this.compositionString_.length);
+        return;
+      case Event.Names.COMPOSITIONEND:
+        return;
+      case Event.Names.COMPOSITIONSTART:
+        this.selection.text = '';
+        this.compositionStart_ = this.selection.anchorOffset;
+        this.compositionString_ = '';
+        return;
+      case Event.Names.COMPOSITIONUPDATE:
+        handleCompositionUpdate(this, /** @type{!CompositionEvent} */(event));
+        return;
       case Event.Names.DBLCLICK:
         handleDblClick(this, /** @type{!MouseEvent} */(event));
         break;

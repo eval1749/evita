@@ -9,6 +9,7 @@
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
+#include "evita/ui/base/ime/text_composition.h"
 #include "evita/ui/events/event.h"
 
 namespace views {
@@ -115,7 +116,18 @@ void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
 }
 
 void EventSource::DispatchTxetCompositionEvent(
-      domapi::EventType event_type, const domapi::TextCompositionData& data) {
+      domapi::EventType event_type, const ui::TextComposition& composition) {
+  domapi::TextCompositionData data;
+  data.caret = composition.caret();
+  data.text = composition.text();
+  for (auto span : composition.spans()) {
+    domapi::TextCompositionSpan api_span;
+    api_span.start = span.start;
+    api_span.end = span.end;
+    api_span.data = static_cast<int>(span.type);
+    data.spans.push_back(api_span);
+  }
+
   domapi::TextCompositionEvent event;
   event.event_type = event_type;
   event.target_id = event_target_id_;

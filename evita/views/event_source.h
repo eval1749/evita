@@ -16,6 +16,7 @@ namespace ui {
 class KeyboardEvent;
 class MouseEvent;
 class MouseWheelEvent;
+class TextComposition;
 }
 
 namespace views {
@@ -35,7 +36,7 @@ class EventSource {
   public: void DispatchKeyboardEvent(const ui::KeyboardEvent& event);
   public: void DispatchMouseEvent(const ui::MouseEvent& event);
   public: void DispatchTxetCompositionEvent(
-      domapi::EventType event_type, const domapi::TextCompositionData& data);
+      domapi::EventType event_type, const ui::TextComposition& composition);
   public: void DispatchWheelEvent(const ui::MouseWheelEvent& event);
 
   DISALLOW_COPY_AND_ASSIGN(EventSource);

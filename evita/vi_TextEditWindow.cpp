@@ -568,41 +568,24 @@ void TextEditWindow::DidMoveThumb(int value) {
 // ui::TextInputDelegate
 void TextEditWindow::DidCommitComposition(
     const ui::TextComposition& composition) {
-  domapi::TextCompositionData data;
-  data.caret = composition.caret();
-  data.text = composition.text();
   DispatchTxetCompositionEvent(domapi::EventType::TextCompositionCommit,
-                               data);
+                               composition);
 }
 
 void TextEditWindow::DidFinishComposition() {
-  domapi::TextCompositionData data;
-  data.caret = 0;
   DispatchTxetCompositionEvent(domapi::EventType::TextCompositionEnd,
-                               data);
+                               ui::TextComposition());
 }
  
 void TextEditWindow::DidStartComposition() {
-  domapi::TextCompositionData data;
-  data.caret = 0;
   DispatchTxetCompositionEvent(domapi::EventType::TextCompositionStart,
-                               data);
+                               ui::TextComposition());
 }
  
 void TextEditWindow::DidUpdateComposition(
     const ui::TextComposition& composition) {
-  domapi::TextCompositionData data;
-  data.caret = composition.caret();
-  data.text = composition.text();
-  for (auto span : composition.spans()) {
-    domapi::TextCompositionSpan api_span;
-    api_span.start = span.start;
-    api_span.end = span.end;
-    api_span.data = static_cast<int>(span.type);
-    data.spans.push_back(api_span);
-  }
   DispatchTxetCompositionEvent(domapi::EventType::TextCompositionUpdate,
-                               data);
+                               composition);
 }
 
 ui::Widget* TextEditWindow::GetClientWindow() {

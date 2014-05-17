@@ -7,6 +7,7 @@
 #include "evita/gfx/graphics.h"
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
+#include "evita/ui/base/ime/text_input_client.h"
 #include "evita/ui/caret.h"
 
 namespace ui {

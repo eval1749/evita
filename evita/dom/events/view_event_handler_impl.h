@@ -12,9 +12,9 @@ class EventTarget;
 class ScriptHost;
 
 class ViewEventHandlerImpl : public domapi::ViewEventHandler {
-  private: ScriptHost* controller_;
+  private: ScriptHost* host_;
 
-  public: ViewEventHandlerImpl(ScriptHost* controller);
+  public: ViewEventHandlerImpl(ScriptHost* host);
   public: ~ViewEventHandlerImpl();
 
   private: void DispatchEvent(EventTarget* event_target, Event* event);

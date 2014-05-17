@@ -98,8 +98,8 @@ v8::Handle<v8::Object> ToMethodObject(v8::Isolate* isolate,
 }
 }  // namespace
 
-ViewEventHandlerImpl::ViewEventHandlerImpl(ScriptHost* controller)
-    : controller_(controller) {
+ViewEventHandlerImpl::ViewEventHandlerImpl(ScriptHost* host)
+    : host_(host) {
 }
 
 ViewEventHandlerImpl::~ViewEventHandlerImpl() {
@@ -111,7 +111,7 @@ void ViewEventHandlerImpl::DispatchEvent(EventTarget* event_target,
     return;
 
   // Call |handleEvent| function in the class of event target.
-  auto const runner = controller_->runner();
+  auto const runner = host_->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
 
@@ -176,7 +176,7 @@ void ViewEventHandlerImpl::DidResizeWidget(WindowId window_id, int left, int top
 }
 
 void ViewEventHandlerImpl::DidStartViewHost() {
-  controller_->DidStartViewHost();
+  host_->DidStartViewHost();
 }
 
 void ViewEventHandlerImpl::DispatchFocusEvent(
@@ -257,7 +257,7 @@ void ViewEventHandlerImpl::DispatchWheelEvent(
 
 void ViewEventHandlerImpl::OpenFile(WindowId window_id,
                             const base::string16& file_name){
-  controller_->OpenFile(window_id, file_name);
+  host_->OpenFile(window_id, file_name);
 }
 
 void ViewEventHandlerImpl::QueryClose(WindowId window_id) {
@@ -277,7 +277,7 @@ void ViewEventHandlerImpl::RunCallback(base::Closure callback) {
 }
 
 void ViewEventHandlerImpl::WillDestroyHost() {
-  controller_->WillDestroyHost();
+  host_->WillDestroyHost();
 }
 
 } // namespace dom

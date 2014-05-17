@@ -267,9 +267,15 @@ Object.defineProperties(TextFieldControl.prototype, {
       case Event.Names.BLUR:
         dispatchChangeEventIfNeeded(this);
         break;
-
       case Event.Names.DBLCLICK:
         handleDblClick(this, /** @type{!MouseEvent} */(event));
+        break;
+      case Event.Names.FOCUS:
+        this.selection.collapseTo(0);
+        this.selection.extendTo(this.value.length);
+        break;
+      case Event.Names.KEYDOWN:
+        handleKeyDown(this, /** @type{!KeyboardEvent} */(event));
         break;
       case Event.Names.MOUSEDOWN:
         handleMouseDown(this, /** @type {!MouseEvent} */(event));
@@ -279,13 +285,6 @@ Object.defineProperties(TextFieldControl.prototype, {
         break;
       case Event.Names.MOUSEUP:
         handleMouseUp(this, /** @type {!MouseEvent} */(event));
-        break;
-      case Event.Names.FOCUS:
-        this.selection.collapseTo(0);
-        this.selection.extendTo(this.value.length);
-        break;
-      case Event.Names.KEYDOWN:
-        handleKeyDown(this, /** @type{!KeyboardEvent} */(event));
         break;
     }
     if (!event.defaultPrevented)

@@ -147,6 +147,14 @@
   });
 
   /**
+   * Zoom-In
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Ctrl++', function() {
+    this.zoom *= 1.3;
+  });
+
+  /**
    * Reconvert text using IME.
    * @this {!TextWindow}
    */
@@ -155,6 +163,15 @@
     this.reconvert_(range.text);
     range.text = '';
   }, 'Reconvert');
+
+  /**
+   * Zoom-Out
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Ctrl+-', function() {
+    if (this.zoom > 0.1)
+    this.zoom /= 1.3;
+  });
 
   /**
    * Exchange Unicode character code point and character
@@ -221,6 +238,14 @@
     }
     this.selection.range.collapseTo(range.end);
   }, 'Exchange Unicode code point and character\n');
+
+  /**
+   * Zoom-In
+   * @this {!TextWindow}
+   */
+  Editor.bindKey(TextWindow, 'Ctrl+0', function() {
+    this.zoom = 1.0;
+  });
 
   /**
    * Select all contents

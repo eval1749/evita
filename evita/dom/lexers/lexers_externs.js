@@ -84,9 +84,24 @@ function JavaScriptLexer(document) {}
 function PythonLexer(document) {}
 
 /**
+ * @typedef {Object}
+ *   hasScript: boolean,
+ */
+var XmlLexerOptions;
+
+/**
  * @constructor
  * @extends {Lexer}
  * @param {!Document} document
+ * @param {!XmlLexerOptions} options
  * @return {undefined}
  */
-function XmlLexer(document) {}
+function XmlLexer(document, options) {}
+
+/**
+ * @constructor
+ * @extends {XmlLexer}
+ * @param {!Document} document
+ * @return {undefined}
+ */
+function HtmlLexer(document) {}

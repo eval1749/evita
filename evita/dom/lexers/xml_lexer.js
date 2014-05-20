@@ -63,12 +63,14 @@ global.XmlLexer = (function(keywords) {
    * @constructor
    * @extends {Lexer}
    * @param {!Document} document
+   * @param {!XmlLexerOptions} options
    */
-  function XmlLexer(document) {
+  function XmlLexer(document, options) {
     Lexer.call(this, document, {
       characters: CHARACTERS,
       keywords: keywords,
     });
+    this.hasScript = options.hasScript;
   }
 
   /** @enum{!Symbol} */

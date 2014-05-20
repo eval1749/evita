@@ -36,6 +36,12 @@
   inheritMode(CppMode);
 
   /** @constructor @extends {Mode} @return {?} */
+  function HtmlMode() {
+    Mode.call(this, 'HTML', HtmlLexer);
+  }
+  inheritMode(HtmlMode);
+
+  /** @constructor @extends {Mode} @return {?} */
   function IdlMode() {
     Mode.call(this, 'IDL', IdlLexer);
   }
@@ -117,8 +123,8 @@
       map.set('hs', {mode: HaskellMode, name: 'Haskell Source'});
       map.set('hsc', {mode: HaskellMode, name: 'Haskell Component Source'});
       map.set('hpp', {mode: CppMode, name: 'C++ Header'});
-      map.set('htm', {mode: XmlMode, name: 'HTML Document'});
-      map.set('html', {mode: XmlMode, name: 'HTML Document'});
+      map.set('htm', {mode: HtmlMode, name: 'HTML Document'});
+      map.set('html', {mode: HtmlMode, name: 'HTML Document'});
       map.set('hxx', {mode: CppMode, name: 'C++ Header'});
       map.set('idl', {mode: IdlMode, name: 'Web IDL Source'});
       map.set('java', {mode: JavaMode, name: 'Java Source'});
@@ -138,7 +144,7 @@
       map.set('stanza', {mode: ConfigMode, name: 'Config File'});
       map.set('t', {mode: PerlMode, name: 'Perl Test Source'});
       map.set('wsdl', {mode: XmlMode, name: 'WSDL Document'});
-      map.set('xhtml', {mode: XmlMode, name: 'XHTML Document'});
+      map.set('xhtml', {mode: HtmlMode, name: 'XHTML Document'});
       map.set('xml', {mode: XmlMode, name: 'XML Document'});
       map.set('xsd', {mode: XmlMode, name: 'XSD Document'});
       map.set('xsl', {mode: XmlMode, name: 'XSLT Document'});
@@ -153,6 +159,7 @@
       map.set('config', ConfigMode);
       map.set('c++', CppMode);
       map.set('haskell', HaskellMode);
+      map.set('html', HtmlMode);
       map.set('java', JavaMode);
       map.set('javascript', JavaScriptMode);
       map.set('lisp', LispMode);

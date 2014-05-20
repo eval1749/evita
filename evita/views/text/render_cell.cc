@@ -70,6 +70,29 @@ void DrawWave(const gfx::Graphics& gfx, const gfx::Brush& brush, float sx,
                 stroke_width, dash_style2);
 }
 
+void DrawWave(const gfx::Graphics& gfx, const gfx::Brush& brush,
+              const gfx::RectF& rect, float baseline) {
+  auto const height = rect.bottom - baseline - 2;
+  auto const pen_width = height / 4;
+  auto const wave = height - pen_width * 2;
+  if (wave <= 2) {
+    DrawWave(gfx, brush, rect.left, rect.right, baseline + 1);
+    return;
+  }
+  gfx::Graphics::AxisAlignedClipScope clip_scope(gfx, rect);
+  auto down = true;
+  for (auto x = rect.left; x < rect.right; x += wave) {
+    if (down) {
+      gfx.DrawLine(brush, x, baseline + pen_width, x + wave,
+                   rect.bottom - pen_width, pen_width);
+    } else {
+      gfx.DrawLine(brush, x, rect.bottom - pen_width, x + wave,
+                   baseline + pen_width, pen_width);
+    }
+    down = !down;
+  }
+}
+
 inline void FillRect(const gfx::Graphics& gfx, const gfx::RectF& rect,
                      gfx::ColorF color) {
   gfx::Brush fill_brush(gfx, color);
@@ -387,7 +410,7 @@ void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
   auto const baseline = text_rect.bottom - descent();
   switch (style().text_decoration()) {
     case css::TextDecoration::ImeInput:
-      DrawWave(gfx, text_brush, rect.left, rect.right, baseline + 1);
+      DrawWave(gfx, text_brush, rect, baseline);
       break;
 
     case css::TextDecoration::ImeInactiveA:
@@ -407,13 +430,11 @@ void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
       break;
 
     case css::TextDecoration::GreenWave:
-      DrawWave(gfx, gfx::Brush(gfx, gfx::ColorF::Green), rect.left,
-               rect.right, baseline + 1);
+      DrawWave(gfx, gfx::Brush(gfx, gfx::ColorF::Green), rect, baseline);
       break;
 
     case css::TextDecoration::RedWave:
-      DrawWave(gfx, gfx::Brush(gfx, gfx::ColorF::Red), rect.left,
-               rect.right, baseline + 1);
+      DrawWave(gfx, gfx::Brush(gfx, gfx::ColorF::Red), rect, baseline);
       break;
 
     case css::TextDecoration::Underline:

@@ -5,6 +5,8 @@
 'use strict';
 
 (function() {
+  /** @const @type {number} */ var ZOOM_STEP = 1.1;
+
   /** @param {!Range} range */
   function copyToClipboard(range) {
     var items = DataTransfer.clipboard.items;
@@ -151,7 +153,7 @@
    * @this {!TextWindow}
    */
   Editor.bindKey(TextWindow, 'Ctrl++', function() {
-    this.zoom *= 1.3;
+    this.zoom *= ZOOM_STEP;
   });
 
   /**
@@ -170,7 +172,7 @@
    */
   Editor.bindKey(TextWindow, 'Ctrl+-', function() {
     if (this.zoom > 0.1)
-    this.zoom /= 1.3;
+    this.zoom /= ZOOM_STEP;
   });
 
   /**

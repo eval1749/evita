@@ -86,6 +86,7 @@ function PythonLexer(document) {}
 /**
  * @typedef {Object}
  *   hasScript: boolean,
+ *   keywords: !Iterable
  */
 var XmlLexerOptions;
 
@@ -93,10 +94,12 @@ var XmlLexerOptions;
  * @constructor
  * @extends {Lexer}
  * @param {!Document} document
- * @param {!XmlLexerOptions} options
+ * TODO(yosi) We should use |XmlLexerOptions| instead of |Object| for
+ * |options|.
+ * @param {!Object=} opt_options
  * @return {undefined}
  */
-function XmlLexer(document, options) {}
+function XmlLexer(document, opt_options) {}
 
 /**
  * @constructor

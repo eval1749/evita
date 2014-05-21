@@ -5,7 +5,7 @@
 // TODO(yosi) Should we color entity reference in attribute value? VS2013
 // doesn't color.
 // TODO(yosi) NYI: <![CDATA[ ... ]]>
-global.XmlLexer = (function(keywords) {
+global.XmlLexer = (function(xmlOptions) {
 
   /** @const @type {!Map.<number, number>} */
   var CHARACTERS = (function() {
@@ -63,12 +63,13 @@ global.XmlLexer = (function(keywords) {
    * @constructor
    * @extends {Lexer}
    * @param {!Document} document
-   * @param {!XmlLexerOptions} options
+   * @param {!XmlLexerOptions=} opt_options
    */
-  function XmlLexer(document, options) {
+  function XmlLexer(document, opt_options) {
+    var options = arguments.length >= 2 ? opt_options : xmlOptions;
     Lexer.call(this, document, {
       characters: CHARACTERS,
-      keywords: keywords,
+      keywords: options.keywords,
     });
     this.hasScript = options.hasScript;
   }
@@ -576,10 +577,12 @@ global.XmlLexer = (function(keywords) {
   });
 
   return XmlLexer;
-})(Lexer.createKeywords([
-  'xi:include',
-  'xml:base',
-  'xml:lang',
-  'xmlns:',
-  'xml:space'
-]));
+})({
+  hasScript: false,
+  keywords: Lexer.createKeywords([
+      'xi:include',
+      'xml:base',
+      'xml:lang',
+      'xmlns:',
+      'xml:space'
+])});

@@ -430,7 +430,6 @@ global.Lexer = (function() {
        */
       function(state) {
         console.assert(state != Lexer.State.ZERO, 'state must not be zero.');
-        this.range.collapseTo(this.scanOffset);
         if (this.debug_ > 2)
           console.log('startToken', state, this.scanOffset);
         var token = new Lexer.Token(state, this.scanOffset);

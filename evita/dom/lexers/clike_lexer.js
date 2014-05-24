@@ -50,7 +50,7 @@ global.ClikeLexer = (function() {
     COLON_COLON: Symbol('::'),
     LINE_COMMENT: Symbol('line_comment'),
     LINE_COMMENT_ESCAPE: Symbol('line_comment_escape'),
-    LINE_COMMENT_START: Symbol('line_comment_end'),
+    LINE_COMMENT_START: Symbol('line_commend_start'),
     NEWLINE: Symbol('newline'),
     NUMBER_SIGN: Symbol('#'),
     SOLIDUS: Symbol('/'),

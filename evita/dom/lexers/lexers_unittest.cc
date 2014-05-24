@@ -97,6 +97,12 @@ TEST_F(LexersTest, IdlLexer) {
     "])");
 }
 
+TEST_F(LexersTest, HtmlLexer) {
+  EXPECT_SCRIPT_EQ(
+    "k1 e6 k1 n10 k2 e6 k2 e3 k1 n3 k2 e3 k1",
+    "doColor('foo.html', ['<script>var x = 12</script><div>foo</div>'])");
+}
+
 TEST_F(LexersTest, JavaLexer) {
   EXPECT_SCRIPT_EQ(
     "c9 n1 c6 n1 k5 n4 o1 n1 s4 o1 n3 k10 n4 o1 n1 s4 o1",

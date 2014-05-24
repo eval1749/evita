@@ -103,9 +103,6 @@ global.XmlLexer = (function(xmlOptions) {
     CHARREF: Symbol('&#'),
     CHARREF_XDIGIT: Symbol('&#x'),
 
-    CLOSETAG: Symbol('</'),
-    CLOSETAG_SPACE: Symbol('</_space'),
-
     COMMENT: Symbol('comment'),
     COMMENT_DASH: Symbol('comment-'),
     COMMENT_DASH_DASH: Symbol('comment--'),
@@ -116,6 +113,9 @@ global.XmlLexer = (function(xmlOptions) {
     ELEMENTTAG_END: Symbol('element>'),
 
     EMPTYTAG_END: Symbol('/>'),
+
+    ENDTAG: Symbol('</'),
+    ENDTAG_SPACE: Symbol('</_space'),
 
     ENTITYREF: Symbol('entityref'),
 
@@ -164,9 +164,6 @@ global.XmlLexer = (function(xmlOptions) {
     map.set(XmlLexer.State.CHARREF_DIGIT, 'html_entity');
     map.set(XmlLexer.State.CHARREF_XDIGIT, 'html_entity');
 
-    map.set(XmlLexer.State.CLOSETAG, 'keyword');
-    map.set(XmlLexer.State.CLOSETAG_SPACE, '');
-
     map.set(XmlLexer.State.COMMENT, 'comment');
     map.set(XmlLexer.State.COMMENT_DASH, 'comment');
     map.set(XmlLexer.State.COMMENT_DASH_DASH, 'comment');
@@ -177,6 +174,9 @@ global.XmlLexer = (function(xmlOptions) {
     map.set(XmlLexer.State.ELEMENTTAG_END, 'keyword');
 
     map.set(XmlLexer.State.EMPTYTAG_END, 'keyword');
+
+    map.set(XmlLexer.State.ENDTAG, 'keyword');
+    map.set(XmlLexer.State.ENDTAG_SPACE, '');
 
     map.set(XmlLexer.State.ENTITYREF, 'html_entity');
 
@@ -502,27 +502,6 @@ global.XmlLexer = (function(xmlOptions) {
 
       ////////////////////////////////////////////////////////////
       //
-      // CLOSETAG
-      //
-      case XmlLexer.State.CLOSETAG:
-        if (charCode == Unicode.GREATER_THAN_SIGN)
-          this.finishToken(XmlLexer.State.GT);
-        else if (this.isWhitespace(charCode))
-          this.finishToken(XmlLexer.State.CLOSETAG_SPACE);
-        else
-          this.finishToken(XmlLexer.State.ELEMENTNAME);
-        return;
-      case XmlLexer.State.CLOSETAG_SPACE:
-        if (charCode == Unicode.GREATER_THAN_SIGN)
-          this.finishToken(XmlLexer.State.GT);
-        else if (this.isWhitespace(charCode))
-          this.extendToken();
-        else
-          this.finishToken(XmlLexer.State.ELEMENTNAME);
-        return;
-
-      ////////////////////////////////////////////////////////////
-      //
       // COMMENT
       //    COMMENT_STAT "<!--"
       //    COMMENT characters
@@ -574,6 +553,27 @@ global.XmlLexer = (function(xmlOptions) {
 
       ////////////////////////////////////////////////////////////
       //
+      // ENDTAG
+      //
+      case XmlLexer.State.ENDTAG:
+        if (charCode == Unicode.GREATER_THAN_SIGN)
+          this.finishToken(XmlLexer.State.GT);
+        else if (this.isWhitespace(charCode))
+          this.finishToken(XmlLexer.State.ENDTAG_SPACE);
+        else
+          this.finishToken(XmlLexer.State.ELEMENTNAME);
+        return;
+      case XmlLexer.State.ENDTAG_SPACE:
+        if (charCode == Unicode.GREATER_THAN_SIGN)
+          this.finishToken(XmlLexer.State.GT);
+        else if (this.isWhitespace(charCode))
+          this.extendToken();
+        else
+          this.finishToken(XmlLexer.State.ELEMENTNAME);
+        return;
+
+      ////////////////////////////////////////////////////////////
+      //
       // LT
       //
       case XmlLexer.State.LT:
@@ -582,7 +582,7 @@ global.XmlLexer = (function(xmlOptions) {
         else if (charCode == Unicode.GREATER_THAN_SIGN)
           this.finishToken(XmlLexer.State.GT);
         else if (charCode == Unicode.SOLIDUS)
-          this.restartToken(XmlLexer.State.CLOSETAG);
+          this.restartToken(XmlLexer.State.ENDTAG);
         else if (this.isNameStart(charCode))
           this.finishToken(XmlLexer.State.ELEMENTNAME);
         else if (charCode == Unicode.QUESTION_MARK)

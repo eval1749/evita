@@ -177,6 +177,11 @@ Lexer.prototype.adjustScanOffset = function() {};
 Lexer.prototype.collectTokens = function(itDelimiter, token) {};
 
 /**
+ * @param {!Lexer.Token} token
+ */
+Lexer.prototype.colorToken = function(token) {};
+
+/**
  * @type {!function()}
  */
 Lexer.prototype.detach = function() {};

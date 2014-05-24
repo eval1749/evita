@@ -122,13 +122,7 @@ global.Lexer = (function() {
     var token = lexer.lastToken;
     if (!token)
       return;
-    var range = lexer.range;
-    range.collapseTo(token.start);
-    range.end = token.end;
-    var syntax = lexer.syntaxOfToken(range, token) || '';
-    if (lexer.debug_ > 4)
-      console.log('setSyntax', '"' + syntax + '"', token);
-    range.setSyntax(syntax == 'identifier' ? '' : syntax);
+    lexer.colorToken(token);
   }
 
   /**
@@ -249,6 +243,22 @@ global.Lexer = (function() {
           it = it.previous();
         }
         return tokens;
+      }
+    },
+
+    colorToken: {value:
+      /**
+       * @this {!Lexer}
+       * @param {!Lexer.Token} token
+       */
+      function(token) {
+        var range = this.range;
+        range.collapseTo(token.start);
+        range.end = token.end;
+        var syntax = this.syntaxOfToken(range, token) || '';
+        if (this.debug_ > 4)
+          console.log('setSyntax', '"' + syntax + '"', token);
+        range.setSyntax(syntax == 'identifier' ? '' : syntax);
       }
     },
 

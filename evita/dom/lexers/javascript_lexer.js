@@ -7,8 +7,11 @@ global.JavaScriptLexer = (function(options) {
    * @constructor
    * @extends Lexer
    * @param {!Document} document
+   * @param {!Lexer=} opt_parentLexer
    */
-  function JavaScriptLexer(document) {
+  function JavaScriptLexer(document, opt_parentLexer) {
+    this.parentLexer_ = arguments.length >= 2 ?
+        /** @type {!Lexer} */(opt_parentLexer) : null;
     ClikeLexer.call(this, document, options);
   }
 

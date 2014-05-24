@@ -71,9 +71,10 @@ function JavaLexer(document) {}
  * @constructor
  * @extends {ClikeLexer}
  * @param {!Document} document
+ * @param {!Lexer=} opt_parentLexer
  * @return {undefined}
  */
-function JavaScriptLexer(document) {}
+function JavaScriptLexer(document, opt_parentLexer) {}
 
 /**
  * @constructor
@@ -85,7 +86,6 @@ function PythonLexer(document) {}
 
 /**
  * @typedef {Object}
- *   hasScript: boolean,
  *   keywords: !Iterable
  */
 var XmlLexerOptions;
@@ -100,6 +100,11 @@ var XmlLexerOptions;
  * @return {undefined}
  */
 function XmlLexer(document, opt_options) {}
+
+/**
+ * @type {?Lexer}
+ */
+XmlLexer.prototype.scriptLexer_;
 
 /**
  * @constructor

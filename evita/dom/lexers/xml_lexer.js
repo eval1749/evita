@@ -71,7 +71,6 @@ global.XmlLexer = (function(xmlOptions) {
       characters: CHARACTERS,
       keywords: options.keywords,
     });
-    this.hasScript = options.hasScript;
   }
 
   /** @enum{!Symbol} */
@@ -211,9 +210,26 @@ global.XmlLexer = (function(xmlOptions) {
 
   /**
    * @this {!XmlLexer}
+   */
+  function adjustScanOffset() {
+    var changedOffset = this.changedOffset;
+    if (changedOffset == Count.FORWARD || !this.lastToken)
+      return;
+    Lexer.prototype.adjustScanOffset.call(this);
+    var scriptLexer = this.scriptLexer_;
+    if (!scriptLexer)
+      return;
+    scriptLexer.changedOffset = changedOffset;
+    scriptLexer.adjustScanOffset();
+  }
+
+  /**
+   * @this {!XmlLexer}
    * @param {!Lexer.Token} token
    */
   function colorToken(token) {
+    if (token.state == XmlLexer.State.SCRIPT)
+      return;
     if (token.state != XmlLexer.State.SCRIPT_END) {
       Lexer.prototype.colorToken.call(this, token);
       return;
@@ -239,6 +255,7 @@ global.XmlLexer = (function(xmlOptions) {
   function didShrinkLastToken(token) {
     if (this.debug_ > 1)
       console.log('didShrinkLastToken', token);
+
     switch (token.state) {
       case XmlLexer.State.CHARREF:
         return XmlLexer.State.AMPERSAND;
@@ -551,22 +568,9 @@ global.XmlLexer = (function(xmlOptions) {
           processElementTag(this, charCode, XmlLexer.State.ATTROTHER);
         return;
 
-      case XmlLexer.State.ELEMENTTAG_END: {
-        this.endToken();
-        if (!this.hasScript)
-          return;
-        var it = this.tokens.find(/** @type {!Lexer.Token} */(this.lastToken));
-        while (it.data.state != XmlLexer.State.ELEMENTNAME) {
-          it = it.previous();
-        }
-        var token = it.data;
-        var range = this.range;
-        range.collapseTo(token.start);
-        range.end = token.end;
-        if (range.text.toLowerCase() == 'script')
-          this.startToken(XmlLexer.State.SCRIPT);
+      case XmlLexer.State.ELEMENTTAG_END:
+        processElementTagEnd(this, charCode);
         return;
-      }
 
       ////////////////////////////////////////////////////////////
       //
@@ -610,10 +614,12 @@ global.XmlLexer = (function(xmlOptions) {
       // SCRIPT
       //
       case XmlLexer.State.SCRIPT:
-        if (charCode == Unicode.LESS_THAN_SIGN)
+        if (charCode == Unicode.LESS_THAN_SIGN) {
           this.finishToken(XmlLexer.State.SCRIPT_LT);
-        else
-          this.extendToken();
+          return;
+        }
+        feedCharToScriptLexer(this, charCode);
+        this.extendToken();
         return;
 
       case XmlLexer.State.SCRIPT_END:
@@ -621,87 +627,123 @@ global.XmlLexer = (function(xmlOptions) {
         return;
 
       case XmlLexer.State.SCRIPT_LT:
-        if (charCode == Unicode.LESS_THAN_SIGN)
-          this.finishToken(XmlLexer.State.SCRIPT_LT);
-        else if (charCode == Unicode.SOLIDUS)
+        if (charCode == Unicode.SOLIDUS) {
           this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH);
-        else
-          this.finishToken(XmlLexer.State.SCRIPT);
+          return;
+        }
+
+        feedCharToScriptLexer(this, Unicode.LESS_THAN_SIGN);
+        if (charCode == Unicode.LESS_THAN_SIGN) {
+          this.finishToken(XmlLexer.State.SCRIPT_LT);
+          return;
+        }
+        feedCharToScriptLexer(this, charCode);
+        this.finishToken(XmlLexer.State.SCRIPT);
         return;
 
       case XmlLexer.State.SCRIPT_LT_SLASH:
-        if (charCode == Unicode.LESS_THAN_SIGN)
+        if (charCode == Unicode.LATIN_CAPITAL_LETTER_S ||
+            charCode == Unicode.LATIN_SMALL_LETTER_S) {
+          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_S);
+          return;
+        }
+        feedStringToScriptLexer(this, '</');
+        if (charCode == Unicode.LESS_THAN_SIGN) {
           this.finishToken(XmlLexer.State.SCRIPT_LT);
-        else if (charCode == Unicode.LATIN_CAPITAL_LETTER_S)
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_S);
-        else if (charCode == Unicode.LATIN_SMALL_LETTER_S)
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_S);
-        else
-          this.finishToken(XmlLexer.State.SCRIPT);
+          return;
+        }
+        feedCharToScriptLexer(this, charCode);
+        this.finishToken(XmlLexer.State.SCRIPT);
         return;
 
       case XmlLexer.State.SCRIPT_LT_SLASH_S:
-        if (charCode == Unicode.LESS_THAN_SIGN)
+        if (charCode == Unicode.LATIN_CAPITAL_LETTER_C ||
+            charCode == Unicode.LATIN_SMALL_LETTER_C) {
+          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SC);
+          return;
+        }
+
+        feedStringToScriptLexer(this, '</S');
+        if (charCode == Unicode.LESS_THAN_SIGN) {
           this.finishToken(XmlLexer.State.SCRIPT_LT);
-        else if (charCode == Unicode.LATIN_CAPITAL_LETTER_C)
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SC);
-        else if (charCode == Unicode.LATIN_SMALL_LETTER_C)
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SC);
-        else
-          this.finishToken(XmlLexer.State.SCRIPT);
+          return;
+        }
+        feedCharToScriptLexer(this, charCode);
+        this.finishToken(XmlLexer.State.SCRIPT);
         return;
 
       case XmlLexer.State.SCRIPT_LT_SLASH_SC:
-        if (charCode == Unicode.LESS_THAN_SIGN)
+        if (charCode == Unicode.LATIN_CAPITAL_LETTER_R ||
+            charCode == Unicode.LATIN_SMALL_LETTER_R) {
+          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCR);
+          return;
+        }
+        feedStringToScriptLexer(this, '</SC');
+        if (charCode == Unicode.LESS_THAN_SIGN) {
           this.finishToken(XmlLexer.State.SCRIPT_LT);
-        else if (charCode == Unicode.LATIN_CAPITAL_LETTER_R)
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCR);
-        else if (charCode == Unicode.LATIN_SMALL_LETTER_R)
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCR);
-        else
-          this.finishToken(XmlLexer.State.SCRIPT);
+          return;
+        }
+        feedCharToScriptLexer(this, charCode);
+        this.finishToken(XmlLexer.State.SCRIPT);
         return;
 
       case XmlLexer.State.SCRIPT_LT_SLASH_SCR:
-        if (charCode == Unicode.LESS_THAN_SIGN)
+        if (charCode == Unicode.LATIN_CAPITAL_LETTER_I ||
+            charCode == Unicode.LATIN_SMALL_LETTER_I) {
+          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCRI);
+          return;
+        }
+        feedStringToScriptLexer(this, '</SCR');
+        if (charCode == Unicode.LESS_THAN_SIGN) {
           this.finishToken(XmlLexer.State.SCRIPT_LT);
-        else if (charCode == Unicode.LATIN_CAPITAL_LETTER_I)
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCRI);
-        else if (charCode == Unicode.LATIN_SMALL_LETTER_I)
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCRI);
-        else
-          this.finishToken(XmlLexer.State.SCRIPT);
+          return;
+        }
+        feedCharToScriptLexer(this, charCode);
+        this.finishToken(XmlLexer.State.SCRIPT);
         return;
 
       case XmlLexer.State.SCRIPT_LT_SLASH_SCRI:
-        if (charCode == Unicode.LESS_THAN_SIGN)
+        if (charCode == Unicode.LATIN_CAPITAL_LETTER_P ||
+            charCode == Unicode.LATIN_SMALL_LETTER_P) {
+          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCRIP);
+          return;
+        }
+        feedStringToScriptLexer(this, '</SCRI');
+        if (charCode == Unicode.LESS_THAN_SIGN) {
           this.finishToken(XmlLexer.State.SCRIPT_LT);
-        else if (charCode == Unicode.LATIN_CAPITAL_LETTER_P)
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCRIP);
-        else if (charCode == Unicode.LATIN_SMALL_LETTER_P)
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCRIP);
-        else
-          this.finishToken(XmlLexer.State.SCRIPT);
+          return;
+        }
+        feedCharToScriptLexer(this, charCode);
+        this.finishToken(XmlLexer.State.SCRIPT);
         return;
 
       case XmlLexer.State.SCRIPT_LT_SLASH_SCRIP:
-        if (charCode == Unicode.LESS_THAN_SIGN)
+        if (charCode == Unicode.LATIN_CAPITAL_LETTER_T ||
+            charCode == Unicode.LATIN_SMALL_LETTER_T) {
+          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCRIPT);
+          return;
+        }
+        feedStringToScriptLexer(this, '</SCRIP');
+        if (charCode == Unicode.LESS_THAN_SIGN) {
           this.finishToken(XmlLexer.State.SCRIPT_LT);
-        else if (charCode == Unicode.LATIN_CAPITAL_LETTER_T)
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCRIPT);
-        else if (charCode == Unicode.LATIN_SMALL_LETTER_T)
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCRIPT);
-        else
-          this.finishToken(XmlLexer.State.SCRIPT);
+          return;
+        }
+        feedCharToScriptLexer(this, charCode);
+        this.finishToken(XmlLexer.State.SCRIPT);
         return;
 
       case XmlLexer.State.SCRIPT_LT_SLASH_SCRIPT:
-        if (charCode == Unicode.LESS_THAN_SIGN)
-          this.finishToken(XmlLexer.State.SCRIPT_LT);
-        else if (charCode == Unicode.GREATER_THAN_SIGN)
+        if (charCode == Unicode.GREATER_THAN_SIGN) {
           this.restartToken(XmlLexer.State.SCRIPT_END);
-        else
-          this.finishToken(XmlLexer.State.SCRIPT);
+          return;
+        }
+        feedStringToScriptLexer(this, '</SCRIPT');
+        if (charCode == Unicode.LESS_THAN_SIGN) {
+          this.finishToken(XmlLexer.State.SCRIPT_LT);
+          return;
+        }
+        feedCharToScriptLexer(this, charCode);
+        this.finishToken(XmlLexer.State.SCRIPT);
         return;
 
       ////////////////////////////////////////////////////////////
@@ -737,6 +779,32 @@ global.XmlLexer = (function(xmlOptions) {
   /**
    * @param {!XmlLexer} lexer
    * @param {number} charCode
+   */
+  function feedCharToScriptLexer(lexer, charCode) {
+    var scriptLexer = lexer.scriptLexer_;
+    if (!scriptLexer)
+      return;
+    var offset = scriptLexer.scanOffset;
+    while (offset == scriptLexer.scanOffset) {
+      scriptLexer.feedCharacter(charCode);
+    }
+  }
+
+  /**
+   * @param {!XmlLexer} lexer
+   * @param {string} string
+   */
+  function feedStringToScriptLexer(lexer, string) {
+    if (!lexer.scriptLexer_)
+      return;
+    for (var i = 0; i < string.length; ++i) {
+      feedCharToScriptLexer(lexer, string.charCodeAt(i));
+    }
+  }
+
+  /**
+   * @param {!XmlLexer} lexer
+   * @param {number} charCode
    * @param {!XmlLexer.State} defaultState
    */
   function processElementTag(lexer, charCode, defaultState) {
@@ -753,6 +821,42 @@ global.XmlLexer = (function(xmlOptions) {
   }
 
   /**
+   * @param {!XmlLexer} lexer
+   * @param {number} charCode
+   *
+   * This function is called when |XmlLexer| gets a character after '<' in
+   * start-tag or end-tag. * If start-tag name is "script", we pass a character
+   * to script lexer unless a character is "<".
+   */
+  function processElementTagEnd(lexer, charCode) {
+    lexer.endToken();
+    var scriptLexer = lexer.scriptLexer_;
+    if (!scriptLexer)
+      return;
+    var it = lexer.tokens.find(/** @type {!Lexer.Token} */(lexer.lastToken));
+    while (it.data.state != XmlLexer.State.ELEMENTNAME) {
+      it = it.previous();
+    }
+    if (it.previous().data.state != XmlLexer.State.LT)
+      return;
+    var token = it.data;
+    var range = lexer.range;
+    range.collapseTo(token.start);
+    range.end = token.end;
+    if (range.text.toLowerCase() != 'script')
+      return;
+    // Handle script fragment after <script>
+    if (charCode == Unicode.LESS_THAN_SIGN) {
+      // Script fragment starts with "<".
+      lexer.startToken(XmlLexer.State.SCRIPT_LT);
+      return;
+    }
+    scriptLexer.scanOffset = lexer.scanOffset;
+    lexer.startToken(XmlLexer.State.SCRIPT);
+    feedCharToScriptLexer(lexer, charCode);
+  }
+
+  /**
    * @this {!XmlLexer}
    * @param {!Lexer.Token} token
    * @param {!Range} range
@@ -763,16 +867,17 @@ global.XmlLexer = (function(xmlOptions) {
   }
 
   XmlLexer.prototype = Object.create(Lexer.prototype, {
+    adjustScanOffset: {value:adjustScanOffset},
     colorToken: {value: colorToken},
     constructor: {value: XmlLexer},
-    didShrinkLastToken: {value: didShrinkLastToken },
+    didShrinkLastToken: {value: didShrinkLastToken},
     feedCharacter: {value: feedCharacter},
+    scriptLexer_: {value: null, writable: true},
     syntaxOfToken: {value: syntaxOfToken}
   });
 
   return XmlLexer;
 })({
-  hasScript: false,
   keywords: Lexer.createKeywords([
       'xi:include',
       'xml:base',

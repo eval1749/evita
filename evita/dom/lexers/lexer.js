@@ -71,8 +71,6 @@ global.Lexer = (function() {
     this.lastToken = null;
     // TODO(yosi) |maxChainWords_| should be part of |LexerOptions|.
     this.maxChainWords_ = 3;
-    this.mutationObserver_ = new MutationObserver(
-        mutationCallback.bind(this));
     this.range = new Range(document);
     this.scanOffset = 0;
     this.state = Lexer.State.ZERO;
@@ -80,6 +78,11 @@ global.Lexer = (function() {
       return a.end < b.end;
     });
 
+    if (this.parentLexer_)
+      return;
+
+    this.mutationObserver_ = new MutationObserver(
+        mutationCallback.bind(this));
     this.eventHandlers_ = new Map();
     function installEventHandler(eventType, lexer, callback) {
       var handler = callback.bind(lexer);
@@ -151,26 +154,33 @@ global.Lexer = (function() {
     return Token;
   })();
 
+  /**
+   * @param {!Lexer} lexer
+   */
+  function clearAllTokens(lexer) {
+    lexer.lastToken = null;
+    lexer.state = Lexer.State.ZERO;
+    lexer.tokens.clear();
+  }
+
   Object.defineProperties(Lexer.prototype, {
     adjustScanOffset: {value:
       /**
        * @this {!Lexer}
        */
       function() {
-        if (!this.lastToken)
+        if (!this.lastToken || this.changedOffset == Count.FORWARD)
           return;
         var document = this.range.document;
         var newScanOffset = Math.min(this.changedOffset, this.lastToken.end,
                                      document.length);
         this.scanOffset = newScanOffset;
         this.changedOffset = Count.FORWARD;
-        if (!newScanOffset) {
+        if (!newScanOffset || newScanOffset <= this.tokens.minimum.start) {
           // All tokens in token list are dirty.
           if (this.debug_ > 0)
-            console.log('All tokens are dirty');
-          this.lastToken = null;
-          this.state = Lexer.State.ZERO;
-          this.tokens.clear();
+            console.log('All tokens are dirty', this);
+          clearAllTokens(this);
           return;
         }
         var dummyToken = new Lexer.Token(Lexer.State.ZERO, newScanOffset - 1);
@@ -415,6 +425,8 @@ global.Lexer = (function() {
         return type == Lexer.NAMESTART_CHAR || type == Lexer.NAME_CHAR;
       }
     },
+
+    parentLexer_: {value: null, writable: true},
 
     restartToken: {value:
       /**

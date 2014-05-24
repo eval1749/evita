@@ -145,6 +145,11 @@ Lexer.prototype.mutationObserver_;
 Lexer.prototype.lastToken;
 
 /**
+ * @type {?Lexer}
+ */
+Lexer.prototype.parentLexer_;
+
+/**
  * @type {?Range}
  */
 Lexer.prototype.range;

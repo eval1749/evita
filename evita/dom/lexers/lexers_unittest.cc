@@ -99,8 +99,13 @@ TEST_F(LexersTest, IdlLexer) {
 
 TEST_F(LexersTest, HtmlLexer) {
   EXPECT_SCRIPT_EQ(
-    "k1 e6 k1 n10 k2 e6 k2 e3 k1 n3 k2 e3 k1",
-    "doColor('foo.html', ['<script>var x = 12</script><div>foo</div>'])");
+    "k1 e6 k1 n1 k3 n3 o1 n1 s5 o1 n1 k2 e6 k1 n1 k1 e3 k1 n3 k2 e3 k1",
+    "doColor('foo.html', ["
+    "'<script>',"
+    "'var x = \"foo\";',"
+    "'</script>',"
+    "'<div>foo</div>'"
+    "])");
 }
 
 TEST_F(LexersTest, JavaLexer) {

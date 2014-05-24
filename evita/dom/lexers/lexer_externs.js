@@ -175,11 +175,21 @@ Lexer.prototype.tokens;
 Lexer.prototype.adjustScanOffset = function() {};
 
 /**
+ * @type {!function()}
+ */
+Lexer.prototype.clear = function() {};
+
+/**
  * @param {OrderedSetNode.<!Lexer.Token>} itDelimiter
  * @param {!Lexer.Token} token
  * @return {!Array.<!Lexer.Token>}
  */
 Lexer.prototype.collectTokens = function(itDelimiter, token) {};
+
+/**
+ * @type {!function()}
+ */
+Lexer.prototype.colorLastToken = function() {};
 
 /**
  * @param {!Lexer.Token} token

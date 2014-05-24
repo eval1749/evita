@@ -16,10 +16,7 @@ global.Lexer = (function() {
    */
   function didLoadDocument() {
     setupMutationObserver(this);
-    this.lastToken = null;
-    this.scanOffset = 0;
-    this.state = Lexer.State.ZERO;
-    this.tokens.clear();
+    this.clear();
     this.doColor(this.range.document.length);
   }
 
@@ -119,13 +116,25 @@ global.Lexer = (function() {
   };
 
   /**
-   * @param {!Lexer} lexer
+   * @this {!Lexer}
    */
-  function colorLastToken(lexer) {
-    var token = lexer.lastToken;
+  function clear() {
+    if (this.debug_ > 0)
+      console.log('Lexer.clear', this);
+    this.lastToken = null;
+    this.scanOffset = 0;
+    this.state = Lexer.State.ZERO;
+    this.tokens.clear();
+  }
+
+  /**
+   * @this {!Lexer}
+   */
+  function colorLastToken() {
+    var token = this.lastToken;
     if (!token)
       return;
-    lexer.colorToken(token);
+    this.colorToken(token);
   }
 
   /**
@@ -154,15 +163,6 @@ global.Lexer = (function() {
     return Token;
   })();
 
-  /**
-   * @param {!Lexer} lexer
-   */
-  function clearAllTokens(lexer) {
-    lexer.lastToken = null;
-    lexer.state = Lexer.State.ZERO;
-    lexer.tokens.clear();
-  }
-
   Object.defineProperties(Lexer.prototype, {
     adjustScanOffset: {value:
       /**
@@ -174,40 +174,36 @@ global.Lexer = (function() {
         var document = this.range.document;
         var newScanOffset = Math.min(this.changedOffset, this.lastToken.end,
                                      document.length);
+        if (this.debug_ > 0)
+          console.log('adjustScanOffset', newScanOffset, this);
+
         this.scanOffset = newScanOffset;
         this.changedOffset = Count.FORWARD;
         if (!newScanOffset || newScanOffset <= this.tokens.minimum.start) {
           // All tokens in token list are dirty.
-          if (this.debug_ > 0)
-            console.log('All tokens are dirty', this);
-          clearAllTokens(this);
+          this.clear();
           return;
         }
+
         var dummyToken = new Lexer.Token(Lexer.State.ZERO, newScanOffset - 1);
         var it = this.tokens.lowerBound(dummyToken);
-        // TODO(yosi) We should use |OrderedSet.prototype.upperBound()|
-        if (it && it.data.end == newScanOffset - 1)
-          it = it.next();
-        console.assert(it, this);
+        console.assert(it, newScanOffset);
+
+        if (this.debug_ > 1)
+          console.log('restart from', it.data);
 
         // Case 1: <ss|ss> middle of token
-        // Case 2: <|ssss> start of token
-        //
+        // Case 2: ssss| end of token
         var lastToken = it.data;
+        it = it.next();
 
         // Remove dirty tokens
-        if (this.lastToken !== lastToken) {
-          if (this.debug_ > 1) {
-            console.log('change lastToken', newScanOffset, lastToken, 'was',
-                        this.lastToken);
-          }
-          this.lastToken = lastToken;
-          this.state = lastToken.state;
-
+        if (it) {
           // Collect dirty tokens
           var tokensToRemove = new Array();
-          for (it = it.next(); it; it = it.next()) {
+          while (it) {
             tokensToRemove.push(it.data);
+            it = it.next();
           }
           if (this.debug_ > 4)
             console.log('tokensToRemove', tokensToRemove);
@@ -217,19 +213,23 @@ global.Lexer = (function() {
           }, this);
         }
 
+        this.lastToken = lastToken;
+        this.state = lastToken.state;
+
         // Shrink last clean token
         if (lastToken.end != newScanOffset) {
+          console.assert(lastToken.start < newScanOffset, lastToken);
           lastToken.end = newScanOffset;
           var newState = this.didShrinkLastToken(lastToken);
           if (lastToken.state != newState) {
             lastToken.state = newState;
-            colorLastToken(this);
+            this.colorLastToken();
           }
           this.state = newState;
         }
       }
     },
-
+    clear: {value: clear},
     collectTokens: {value:
       /**
        * @this {!Lexer}
@@ -255,7 +255,7 @@ global.Lexer = (function() {
         return tokens;
       }
     },
-
+    colorLastToken: {value: colorLastToken},
     colorToken: {value:
       /**
        * @this {!Lexer}
@@ -320,7 +320,7 @@ global.Lexer = (function() {
         }
         var count = this.scanOffset - startOffset;
         if (count && this.lastToken)
-          colorLastToken(this);
+          this.colorLastToken();
         return maxCount - count;
       }
     },
@@ -330,7 +330,7 @@ global.Lexer = (function() {
        * @this {!Lexer}
        */
       function() {
-        colorLastToken(this);
+        this.colorLastToken();
         this.state = Lexer.State.ZERO;
       },
     },
@@ -353,7 +353,7 @@ global.Lexer = (function() {
       function(nextState) {
         if (this.debug_ > 2)
           console.log('finishToken', this.lastToken);
-        colorLastToken(this);
+        this.colorLastToken();
         this.startToken(nextState);
       }
     },
@@ -441,7 +441,7 @@ global.Lexer = (function() {
           console.log('restartToken', newState, this.lastToken);
         this.state = newState;
         this.lastToken.state = newState;
-        colorLastToken(this);
+        this.colorLastToken();
       }
     },
 

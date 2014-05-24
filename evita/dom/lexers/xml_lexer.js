@@ -109,13 +109,12 @@ global.XmlLexer = (function(xmlOptions) {
     COMMENT_END: Symbol('-->'),
     COMMENT_START: Symbol('<!--'),
 
-    ELEMENTNAME: Symbol('element'),
-    ELEMENTTAG_END: Symbol('element>'),
-
     EMPTYTAG_END: Symbol('/>'),
 
     ENDTAG: Symbol('</'),
-    ENDTAG_SPACE: Symbol('</_space'),
+    ENDTAG_NAME: Symbol('</name'),
+    ENDTAG_OTHER: Symbol('</other'),
+    ENDTAG_SPACE: Symbol('</space'),
 
     ENTITYREF: Symbol('entityref'),
 
@@ -137,6 +136,10 @@ global.XmlLexer = (function(xmlOptions) {
     SCRIPT_LT_SLASH_SCRIPT: Symbol('script</script'),
 
     SLASH: Symbol('element/'),
+
+    STARTTAG: Symbol('element'),
+    STARTTAG_END: Symbol('element>'),
+
     TEXT: Symbol('text')
   };
 
@@ -170,12 +173,11 @@ global.XmlLexer = (function(xmlOptions) {
     map.set(XmlLexer.State.COMMENT_END, 'comment');
     map.set(XmlLexer.State.COMMENT_START, 'comment');
 
-    map.set(XmlLexer.State.ELEMENTNAME, 'html_element_name');
-    map.set(XmlLexer.State.ELEMENTTAG_END, 'keyword');
-
     map.set(XmlLexer.State.EMPTYTAG_END, 'keyword');
 
     map.set(XmlLexer.State.ENDTAG, 'keyword');
+    map.set(XmlLexer.State.ENDTAG_NAME, 'html_element_name');
+    map.set(XmlLexer.State.ENDTAG_OTHER, '');
     map.set(XmlLexer.State.ENDTAG_SPACE, '');
 
     map.set(XmlLexer.State.ENTITYREF, 'html_entity');
@@ -199,6 +201,10 @@ global.XmlLexer = (function(xmlOptions) {
     map.set(XmlLexer.State.SCRIPT_LT_SLASH_SCRIPT, '');
 
     map.set(XmlLexer.State.SLASH, '');
+
+    map.set(XmlLexer.State.STARTTAG, 'html_element_name');
+    map.set(XmlLexer.State.STARTTAG_END, 'keyword');
+
     map.set(XmlLexer.State.TEXT, '');
 
     Object.keys(XmlLexer.State).forEach(function(key) {
@@ -221,6 +227,17 @@ global.XmlLexer = (function(xmlOptions) {
       return;
     scriptLexer.changedOffset = changedOffset;
     scriptLexer.adjustScanOffset();
+  }
+
+  /**
+   * @this {!XmlLexer}
+   */
+  function clear() {
+    Lexer.prototype.clear.call(this);
+    var scriptLexer = this.scriptLexer_;
+    if (!scriptLexer)
+      return;
+    scriptLexer.clear();
   }
 
   /**
@@ -400,7 +417,7 @@ global.XmlLexer = (function(xmlOptions) {
         else if (this.isWhitespace(charCode))
           this.finishToken(XmlLexer.State.ATTRNAME_SPACE);
         else
-          processElementTag(this, charCode, XmlLexer.State.ATTROTHER);
+          processStartTag(this, charCode, XmlLexer.State.ATTROTHER);
         return;
       case XmlLexer.State.ATTRNAME_EQ:
         // attrName '=' '\'' | attrName '=' '"' | attrName '=' space
@@ -411,7 +428,7 @@ global.XmlLexer = (function(xmlOptions) {
         else if (this.isWhitespace(charCode))
           this.extendToken();
         else
-          processElementTag(this, charCode, XmlLexer.State.ATTRVALUE);
+          processStartTag(this, charCode, XmlLexer.State.ATTRVALUE);
         return;
       case XmlLexer.State.ATTRNAME_SPACE:
         // attrName space '=' | attrName space attrName
@@ -422,7 +439,7 @@ global.XmlLexer = (function(xmlOptions) {
         else if (this.isWhitespace(charCode))
           this.extendToken();
         else
-          processElementTag(this, charCode, XmlLexer.State.ATTROTHER);
+          processStartTag(this, charCode, XmlLexer.State.ATTROTHER);
         return;
 
       ////////////////////////////////////////////////////////////
@@ -433,7 +450,7 @@ global.XmlLexer = (function(xmlOptions) {
         if (this.isWhitespace(charCode))
           this.finishToken(XmlLexer.State.ATTRVALUE_SPACE);
         else
-          processElementTag(this, charCode, XmlLexer.State.ATTROTHER);
+          processStartTag(this, charCode, XmlLexer.State.ATTROTHER);
         return;
 
       ////////////////////////////////////////////////////////////
@@ -445,7 +462,7 @@ global.XmlLexer = (function(xmlOptions) {
         if (this.isWhitespace(charCode))
           this.finishToken(XmlLexer.State.ATTRVALUE_SPACE);
         else
-          processElementTag(this, charCode, XmlLexer.State.ATTRVALUE);
+          processStartTag(this, charCode, XmlLexer.State.ATTRVALUE);
         return;
 
       case XmlLexer.State.ATTRVALUE1:
@@ -488,7 +505,7 @@ global.XmlLexer = (function(xmlOptions) {
         else if (this.isNameStart(charCode))
           this.finishToken(XmlLexer.State.ATTRNAME);
         else
-          processElementTag(this, charCode, XmlLexer.State.ATTROTHER);
+          processStartTag(this, charCode, XmlLexer.State.ATTROTHER);
         return;
 
       case XmlLexer.State.ATTRVALUE_SPACE:
@@ -497,7 +514,7 @@ global.XmlLexer = (function(xmlOptions) {
         else if (this.isNameStart(charCode))
            this.finishToken(XmlLexer.State.ATTRNAME);
         else
-          processElementTag(this, charCode, XmlLexer.State.ATTROTHER);
+          processStartTag(this, charCode, XmlLexer.State.ATTROTHER);
         return;
 
       ////////////////////////////////////////////////////////////
@@ -536,23 +553,6 @@ global.XmlLexer = (function(xmlOptions) {
 
       ////////////////////////////////////////////////////////////
       //
-      // ELEMENTNAME
-      //
-      case XmlLexer.State.ELEMENTNAME:
-        if (this.isName(charCode))
-          this.extendToken();
-        else if (this.isWhitespace(charCode))
-          this.finishToken(XmlLexer.State.ATTRVALUE_SPACE);
-        else
-          processElementTag(this, charCode, XmlLexer.State.ATTROTHER);
-        return;
-
-      case XmlLexer.State.ELEMENTTAG_END:
-        processElementTagEnd(this, charCode);
-        return;
-
-      ////////////////////////////////////////////////////////////
-      //
       // ENDTAG
       //
       case XmlLexer.State.ENDTAG:
@@ -560,16 +560,34 @@ global.XmlLexer = (function(xmlOptions) {
           this.finishToken(XmlLexer.State.GT);
         else if (this.isWhitespace(charCode))
           this.finishToken(XmlLexer.State.ENDTAG_SPACE);
+        else if (this.isNameStart(charCode))
+          this.finishToken(XmlLexer.State.ENDTAG_NAME);
         else
-          this.finishToken(XmlLexer.State.ELEMENTNAME);
+          this.finishToken(XmlLexer.State.ENDTAG_OTHER);
+        return;
+      case XmlLexer.State.ENDTAG_NAME:
+        if (charCode == Unicode.GREATER_THAN_SIGN)
+          this.finishToken(XmlLexer.State.GT);
+        else if (this.isName(charCode))
+          this.extendToken();
+        else
+          this.finishToken(XmlLexer.State.ENDTAG_OTHER);
+        return;
+      case XmlLexer.State.ENDTAG_OTHER:
+        if (charCode == Unicode.GREATER_THAN_SIGN)
+          this.finishToken(XmlLexer.State.GT);
+        else
+          this.extendToken();
         return;
       case XmlLexer.State.ENDTAG_SPACE:
         if (charCode == Unicode.GREATER_THAN_SIGN)
           this.finishToken(XmlLexer.State.GT);
         else if (this.isWhitespace(charCode))
           this.extendToken();
+        else if (this.isNameStart(charCode))
+          this.finishToken(XmlLexer.State.ENDTAG_NAME);
         else
-          this.finishToken(XmlLexer.State.ELEMENTNAME);
+          this.finishToken(XmlLexer.State.ENDTAG_OTHER);
         return;
 
       ////////////////////////////////////////////////////////////
@@ -584,7 +602,7 @@ global.XmlLexer = (function(xmlOptions) {
         else if (charCode == Unicode.SOLIDUS)
           this.restartToken(XmlLexer.State.ENDTAG);
         else if (this.isNameStart(charCode))
-          this.finishToken(XmlLexer.State.ELEMENTNAME);
+          this.finishToken(XmlLexer.State.STARTTAG);
         else if (charCode == Unicode.QUESTION_MARK)
           this.restartToken(XmlLexer.State.LT_QUESTION);
         else
@@ -604,7 +622,7 @@ global.XmlLexer = (function(xmlOptions) {
         return;
       case XmlLexer.State.LT_QUESTION:
         if (this.isNameStart(charCode))
-          this.finishToken(XmlLexer.State.ELEMENTNAME);
+          this.finishToken(XmlLexer.State.STARTTAG);
         else
           this.endToken();
         return;
@@ -623,7 +641,7 @@ global.XmlLexer = (function(xmlOptions) {
         return;
 
       case XmlLexer.State.SCRIPT_END:
-        this.endToken();
+        processScriptEnd(this);
         return;
 
       case XmlLexer.State.SCRIPT_LT:
@@ -756,7 +774,24 @@ global.XmlLexer = (function(xmlOptions) {
         else if (this.isWhitespace(charCode))
           this.finishToken(XmlLexer.State.ATTRVALUE_SPACE);
         else
-          processElementTag(this, charCode, XmlLexer.State.ATTROTHER);
+          processStartTag(this, charCode, XmlLexer.State.ATTROTHER);
+        return;
+
+      ////////////////////////////////////////////////////////////
+      //
+      // STARTTAG
+      //
+      case XmlLexer.State.STARTTAG:
+        if (this.isName(charCode))
+          this.extendToken();
+        else if (this.isWhitespace(charCode))
+          this.finishToken(XmlLexer.State.ATTRVALUE_SPACE);
+        else
+          processStartTag(this, charCode, XmlLexer.State.ATTROTHER);
+        return;
+
+      case XmlLexer.State.STARTTAG_END:
+        processStartTagEnd(this, charCode);
         return;
 
       ////////////////////////////////////////////////////////////
@@ -804,12 +839,23 @@ global.XmlLexer = (function(xmlOptions) {
 
   /**
    * @param {!XmlLexer} lexer
+   */
+  function processScriptEnd(lexer) {
+    lexer.endToken();
+    var scriptLexer = lexer.scriptLexer_;
+    if (!scriptLexer)
+      return;
+    scriptLexer.colorLastToken();
+  }
+
+  /**
+   * @param {!XmlLexer} lexer
    * @param {number} charCode
    * @param {!XmlLexer.State} defaultState
    */
-  function processElementTag(lexer, charCode, defaultState) {
+  function processStartTag(lexer, charCode, defaultState) {
     if (charCode == Unicode.GREATER_THAN_SIGN)
-      lexer.finishToken(XmlLexer.State.ELEMENTTAG_END);
+      lexer.finishToken(XmlLexer.State.STARTTAG_END);
     else if (charCode == Unicode.QUESTION_MARK)
       lexer.finishToken(XmlLexer.State.SLASH);
     else if (charCode == Unicode.SOLIDUS)
@@ -825,20 +871,18 @@ global.XmlLexer = (function(xmlOptions) {
    * @param {number} charCode
    *
    * This function is called when |XmlLexer| gets a character after '<' in
-   * start-tag or end-tag. * If start-tag name is "script", we pass a character
+   * start-tag. If start-tag name is "script", we pass a character
    * to script lexer unless a character is "<".
    */
-  function processElementTagEnd(lexer, charCode) {
+  function processStartTagEnd(lexer, charCode) {
     lexer.endToken();
     var scriptLexer = lexer.scriptLexer_;
     if (!scriptLexer)
       return;
     var it = lexer.tokens.find(/** @type {!Lexer.Token} */(lexer.lastToken));
-    while (it.data.state != XmlLexer.State.ELEMENTNAME) {
+    while (it.data.state != XmlLexer.State.STARTTAG) {
       it = it.previous();
     }
-    if (it.previous().data.state != XmlLexer.State.LT)
-      return;
     var token = it.data;
     var range = lexer.range;
     range.collapseTo(token.start);
@@ -868,6 +912,7 @@ global.XmlLexer = (function(xmlOptions) {
 
   XmlLexer.prototype = Object.create(Lexer.prototype, {
     adjustScanOffset: {value:adjustScanOffset},
+    clear: {value: clear},
     colorToken: {value: colorToken},
     constructor: {value: XmlLexer},
     didShrinkLastToken: {value: didShrinkLastToken},

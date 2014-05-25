@@ -373,7 +373,7 @@ global.XmlLexer = (function(xmlOptions) {
       case XmlLexer.State.AMPERSAND:
         if (charCode == Unicode.NUMBER_SIGN)
           this.restartToken(XmlLexer.State.CHARREF);
-        else if (this.isNameStart(charCode))
+        else if (this.isNameStartChar(charCode))
           this.restartToken(XmlLexer.State.ENTITYREF);
         else
           this.state = Lexer.State.ZERO;
@@ -392,7 +392,7 @@ global.XmlLexer = (function(xmlOptions) {
       case XmlLexer.State.CHARREF_DIGIT:
       case XmlLexer.State.CHARREF_XDIGIT:
         // Eat up to semicolon ";"
-        if (charCode == Unicode.SEMICOLON || !this.isName(charCode))
+        if (charCode == Unicode.SEMICOLON || !this.isNameChar(charCode))
           this.finishToken(XmlLexer.State.AMPERSAND_END);
         else
           this.extendToken();
@@ -412,9 +412,9 @@ global.XmlLexer = (function(xmlOptions) {
         // attrName '=' | attrName '>' | attrName '/' | attrName space
         if (charCode == Unicode.EQUALS_SIGN)
           this.finishToken(XmlLexer.State.ATTRNAME_EQ);
-        else if (this.isName(charCode))
+        else if (this.isNameChar(charCode))
           this.extendToken();
-        else if (this.isWhitespace(charCode))
+        else if (this.isWhitespaceChar(charCode))
           this.finishToken(XmlLexer.State.ATTRNAME_SPACE);
         else
           processStartTag(this, charCode, XmlLexer.State.ATTROTHER);
@@ -425,7 +425,7 @@ global.XmlLexer = (function(xmlOptions) {
           this.finishToken(XmlLexer.State.ATTRVALUE1_START);
         else if (charCode == Unicode.QUOTATION_MARK)
           this.finishToken(XmlLexer.State.ATTRVALUE2_START);
-        else if (this.isWhitespace(charCode))
+        else if (this.isWhitespaceChar(charCode))
           this.extendToken();
         else
           processStartTag(this, charCode, XmlLexer.State.ATTRVALUE);
@@ -434,9 +434,9 @@ global.XmlLexer = (function(xmlOptions) {
         // attrName space '=' | attrName space attrName
         if (charCode == Unicode.EQUALS_SIGN)
           this.finishToken(XmlLexer.State.ATTRNAME_EQ);
-        else if (this.isNameStart(charCode))
+        else if (this.isNameStartChar(charCode))
           this.finishToken(XmlLexer.State.ATTRNAME);
-        else if (this.isWhitespace(charCode))
+        else if (this.isWhitespaceChar(charCode))
           this.extendToken();
         else
           processStartTag(this, charCode, XmlLexer.State.ATTROTHER);
@@ -447,7 +447,7 @@ global.XmlLexer = (function(xmlOptions) {
       // ATTROTHER
       //
       case XmlLexer.State.ATTROTHER:
-        if (this.isWhitespace(charCode))
+        if (this.isWhitespaceChar(charCode))
           this.finishToken(XmlLexer.State.ATTRVALUE_SPACE);
         else
           processStartTag(this, charCode, XmlLexer.State.ATTROTHER);
@@ -459,7 +459,7 @@ global.XmlLexer = (function(xmlOptions) {
       //
       case XmlLexer.State.ATTRVALUE:
         // attribute value without quote
-        if (this.isWhitespace(charCode))
+        if (this.isWhitespaceChar(charCode))
           this.finishToken(XmlLexer.State.ATTRVALUE_SPACE);
         else
           processStartTag(this, charCode, XmlLexer.State.ATTRVALUE);
@@ -500,18 +500,18 @@ global.XmlLexer = (function(xmlOptions) {
         return;
 
       case XmlLexer.State.ATTRVALUE_END:
-        if (this.isWhitespace(charCode))
+        if (this.isWhitespaceChar(charCode))
           this.finishToken(XmlLexer.State.ATTRVALUE_SPACE);
-        else if (this.isNameStart(charCode))
+        else if (this.isNameStartChar(charCode))
           this.finishToken(XmlLexer.State.ATTRNAME);
         else
           processStartTag(this, charCode, XmlLexer.State.ATTROTHER);
         return;
 
       case XmlLexer.State.ATTRVALUE_SPACE:
-        if (this.isWhitespace(charCode))
+        if (this.isWhitespaceChar(charCode))
           this.extendToken();
-        else if (this.isNameStart(charCode))
+        else if (this.isNameStartChar(charCode))
            this.finishToken(XmlLexer.State.ATTRNAME);
         else
           processStartTag(this, charCode, XmlLexer.State.ATTROTHER);
@@ -558,9 +558,9 @@ global.XmlLexer = (function(xmlOptions) {
       case XmlLexer.State.ENDTAG:
         if (charCode == Unicode.GREATER_THAN_SIGN)
           this.finishToken(XmlLexer.State.GT);
-        else if (this.isWhitespace(charCode))
+        else if (this.isWhitespaceChar(charCode))
           this.finishToken(XmlLexer.State.ENDTAG_SPACE);
-        else if (this.isNameStart(charCode))
+        else if (this.isNameStartChar(charCode))
           this.finishToken(XmlLexer.State.ENDTAG_NAME);
         else
           this.finishToken(XmlLexer.State.ENDTAG_OTHER);
@@ -568,7 +568,7 @@ global.XmlLexer = (function(xmlOptions) {
       case XmlLexer.State.ENDTAG_NAME:
         if (charCode == Unicode.GREATER_THAN_SIGN)
           this.finishToken(XmlLexer.State.GT);
-        else if (this.isName(charCode))
+        else if (this.isNameChar(charCode))
           this.extendToken();
         else
           this.finishToken(XmlLexer.State.ENDTAG_OTHER);
@@ -582,9 +582,9 @@ global.XmlLexer = (function(xmlOptions) {
       case XmlLexer.State.ENDTAG_SPACE:
         if (charCode == Unicode.GREATER_THAN_SIGN)
           this.finishToken(XmlLexer.State.GT);
-        else if (this.isWhitespace(charCode))
+        else if (this.isWhitespaceChar(charCode))
           this.extendToken();
-        else if (this.isNameStart(charCode))
+        else if (this.isNameStartChar(charCode))
           this.finishToken(XmlLexer.State.ENDTAG_NAME);
         else
           this.finishToken(XmlLexer.State.ENDTAG_OTHER);
@@ -601,7 +601,7 @@ global.XmlLexer = (function(xmlOptions) {
           this.finishToken(XmlLexer.State.GT);
         else if (charCode == Unicode.SOLIDUS)
           this.restartToken(XmlLexer.State.ENDTAG);
-        else if (this.isNameStart(charCode))
+        else if (this.isNameStartChar(charCode))
           this.finishToken(XmlLexer.State.STARTTAG);
         else if (charCode == Unicode.QUESTION_MARK)
           this.restartToken(XmlLexer.State.LT_QUESTION);
@@ -621,7 +621,7 @@ global.XmlLexer = (function(xmlOptions) {
           this.endToken();
         return;
       case XmlLexer.State.LT_QUESTION:
-        if (this.isNameStart(charCode))
+        if (this.isNameStartChar(charCode))
           this.finishToken(XmlLexer.State.STARTTAG);
         else
           this.endToken();
@@ -771,7 +771,7 @@ global.XmlLexer = (function(xmlOptions) {
       case XmlLexer.State.SLASH:
         if (charCode == Unicode.GREATER_THAN_SIGN)
           this.restartToken(XmlLexer.State.EMPTYTAG_END);
-        else if (this.isWhitespace(charCode))
+        else if (this.isWhitespaceChar(charCode))
           this.finishToken(XmlLexer.State.ATTRVALUE_SPACE);
         else
           processStartTag(this, charCode, XmlLexer.State.ATTROTHER);
@@ -782,9 +782,9 @@ global.XmlLexer = (function(xmlOptions) {
       // STARTTAG
       //
       case XmlLexer.State.STARTTAG:
-        if (this.isName(charCode))
+        if (this.isNameChar(charCode))
           this.extendToken();
-        else if (this.isWhitespace(charCode))
+        else if (this.isWhitespaceChar(charCode))
           this.finishToken(XmlLexer.State.ATTRVALUE_SPACE);
         else
           processStartTag(this, charCode, XmlLexer.State.ATTROTHER);

@@ -238,42 +238,42 @@ Lexer.prototype.finishToken = function(nextState) {};
  * @param {number} charCode
  * @return {boolean}
  */
-Lexer.prototype.isName = function(charCode) {};
+Lexer.prototype.isNameChar = function(charCode) {};
 
 /**
  * @this {!Lexer}
  * @param {number} charCode
  * @return {boolean}
  */
-Lexer.prototype.isNameStart = function(charCode) {};
+Lexer.prototype.isNameStartChar = function(charCode) {};
 
 /**
  * @this {!Lexer}
  * @param {number} charCode
  * @return {boolean}
  */
-Lexer.prototype.isOperator = function(charCode) {};
+Lexer.prototype.isOperatorChar = function(charCode) {};
 
 /**
  * @this {!Lexer}
  * @param {number} charCode
  * @return {boolean}
  */
-Lexer.prototype.isOther = function(charCode) {};
+Lexer.prototype.isOtherChar = function(charCode) {};
 
 /**
  * @this {!Lexer}
  * @param {number} charCode
  * @return {boolean}
  */
-Lexer.prototype.isWhitespace = function(charCode) {};
+Lexer.prototype.isWhitespaceChar = function(charCode) {};
 
 /**
  * @this {!Lexer}
  * @param {number} charCode
  * @return {boolean}
  */
-Lexer.prototype.isWord = function(charCode) {};
+Lexer.prototype.isWordChar = function(charCode) {};
 
 /**
  * @param {number} maxOffset

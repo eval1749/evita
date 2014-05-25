@@ -342,7 +342,7 @@ global.Lexer = (function() {
    * @param {number} charCode
    * @return {boolean}
    */
-  function isName(charCode) {
+  function isNameChar(charCode) {
     var type = this.characters_.get(charCode);
     return type == Lexer.NAMESTART_CHAR || type == Lexer.NAME_CHAR;
   }
@@ -352,7 +352,7 @@ global.Lexer = (function() {
    * @param {number} charCode
    * @return {boolean}
    */
-  function isNameStart(charCode) {
+  function isNameStartChar(charCode) {
     return this.characters_.get(charCode) == Lexer.NAMESTART_CHAR;
   }
 
@@ -361,7 +361,7 @@ global.Lexer = (function() {
    * @param {number} charCode
    * @return {boolean}
    */
-  function isOperator(charCode) {
+  function isOperatorChar(charCode) {
     return this.characters_.get(charCode) == Lexer.OPERATOR_CHAR;
   }
 
@@ -370,7 +370,7 @@ global.Lexer = (function() {
    * @param {number} charCode
    * @return {boolean}
    */
-  function isOther(charCode) {
+  function isOtherChar(charCode) {
     return !this.characters_.has(charCode);
   }
 
@@ -379,7 +379,7 @@ global.Lexer = (function() {
    * @param {number} charCode
    * @return {boolean}
    */
-  function isWhitespace(charCode) {
+  function isWhitespaceChar(charCode) {
     return this.characters_.get(charCode) == Lexer.WHITESPACE_CHAR;
   }
 
@@ -388,7 +388,7 @@ global.Lexer = (function() {
    * @param {number} charCode
    * @return {boolean}
    */
-  function isWord(charCode) {
+  function isWordChar(charCode) {
     var type = this.characters_.get(charCode);
     return type == Lexer.NAMESTART_CHAR || type == Lexer.NAME_CHAR;
   }
@@ -506,14 +506,14 @@ global.Lexer = (function() {
        break;
 
      case Lexer.State.OPERATOR:
-       if (lexer.isOperator(charCode))
+       if (lexer.isOperatorChar(charCode))
          lexer.extendToken();
        else
          lexer.endToken();
        break;
 
      case Lexer.State.OTHER:
-       if (this.isOther(charCode))
+       if (this.isOtherChar(charCode))
          lexer.extendToken();
        else
          lexer.endToken();
@@ -557,7 +557,7 @@ global.Lexer = (function() {
        break;
 
      case Lexer.State.WORD:
-       if (lexer.isWord(charCode))
+       if (lexer.isWordChar(charCode))
          lexer.extendToken();
        else
          lexer.endToken();
@@ -577,9 +577,9 @@ global.Lexer = (function() {
            lexer.startToken(Lexer.State.STRING2);
            break;
          default:
-           if (lexer.isWord(charCode))
+           if (lexer.isWordChar(charCode))
              lexer.startToken(Lexer.State.WORD);
-           else if (lexer.isOperator(charCode))
+           else if (lexer.isOperatorChar(charCode))
              lexer.startToken(Lexer.State.OPERATOR);
            else
              lexer.startToken(Lexer.State.OTHER);
@@ -610,12 +610,12 @@ global.Lexer = (function() {
     endToken: {value: endToken},
     extendToken: {value: extendToken},
     finishToken: {value: finishToken},
-    isName: {value: isName},
-    isNameStart: {value: isNameStart},
-    isOperator: {value: isOperator},
-    isOther: {value: isOther},
-    isWhitespace: {value: isWhitespace},
-    isWord: {value: isWord},
+    isNameChar: {value: isNameChar},
+    isNameStartChar: {value: isNameStartChar},
+    isOperatorChar: {value: isOperatorChar},
+    isOtherChar: {value: isOtherChar},
+    isWhitespaceChar: {value: isWhitespaceChar},
+    isWordChar: {value: isWordChar},
     restartToken: {value: restartToken},
     startToken: {value: startToken},
     syntaxOfToken: {value: syntaxOfToken},

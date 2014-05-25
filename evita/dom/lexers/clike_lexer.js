@@ -187,7 +187,7 @@ global.ClikeLexer = (function() {
         return;
 
       case ClikeLexer.State.NEWLINE:
-        if (this.isWhitespace(charCode))
+        if (this.isWhitespaceChar(charCode))
           this.extendToken();
         else
           this.endToken();

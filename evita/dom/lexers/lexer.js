@@ -455,10 +455,9 @@ global.Lexer = (function() {
    * @this {!Lexer} lexer
    * @param {!Range} range
    * @param {!Array.<!Lexer.Token>} tokens
-   * @param {string} delimiter
    * @return {string}
    */
-  function syntaxOfTokens(range, tokens, delimiter) {
+  function syntaxOfTokens(range, tokens) {
     var lexer = this;
     var document = range.document;
     var words = tokens.map(function(token) {

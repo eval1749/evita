@@ -36,7 +36,7 @@ global.JsConsole = (function() {
     // JavaScript console specific key bindings.
     this.document.bindKey('Ctrl+ArrowDown', function() {
       self.forwardHistory();
-      this.selection.range.collapseTo(self.range.end);
+      this.selection.range.collapseTo(self.document.length);
     });
     this.document.bindKey('Ctrl+L', function() {
       self.range.startOf(Unit.DOCUMENT);
@@ -47,7 +47,7 @@ global.JsConsole = (function() {
     });
     this.document.bindKey('Ctrl+ArrowUp', function() {
       self.backwardHistory();
-      this.selection.range.collapseTo(self.range.end);
+      this.selection.range.collapseTo(self.document.length);
     });
     this.document.bindKey('Enter', function() {
       this.selection.range.collapseTo(self.document.length);
@@ -189,7 +189,7 @@ JsConsole.prototype.evalLastLine = function() {
 };
 
 JsConsole.prototype.forwardHistory = function() {
-  if (!this.historyIndex)
+  if (this.historyIndex <= 1)
     return;
   --this.historyIndex;
   this.useHistory();
@@ -205,7 +205,7 @@ JsConsole.prototype.newWindow = function() {
 JsConsole.prototype.useHistory = function() {
   var range = this.range;
   range.end = this.document.length;
-  range.text = this.history[this.history.length - this.historyIndex];
+  range.text = ' ' + this.history[this.history.length - this.historyIndex];
 };
 
 (function() {

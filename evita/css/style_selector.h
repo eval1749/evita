@@ -33,6 +33,7 @@ class StyleSelector {
   public: static const common::AtomicString& inactive_selection();
   public: static const common::AtomicString& keyword();
   public: static const common::AtomicString& keyword2();
+  public: static const common::AtomicString& label();
   public: static const common::AtomicString& line_wrap_marker();
   public: static const common::AtomicString& literal();
   public: static const common::AtomicString& misspelled();

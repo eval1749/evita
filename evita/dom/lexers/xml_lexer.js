@@ -67,11 +67,32 @@ global.XmlLexer = (function(xmlOptions) {
    */
   function XmlLexer(document, opt_options) {
     var options = arguments.length >= 2 ? opt_options : xmlOptions;
-    Lexer.call(this, document, {
+    var lexer = this;
+    Lexer.call(lexer, document, {
       characters: CHARACTERS,
-      keywords: options.keywords,
+      keywords: options['keywords'],
+    });
+    lexer.ignoreCase_ = Boolean(options.ignoreCase);
+    var childLexers = options['childLexers'] || {};
+    lexer.childLexerMap_ = new Map();
+    Object.keys(childLexers).forEach(function(tagName) {
+      /** @type {!function(!Document, !Lexer)} */
+      var ctor = childLexers[tagName];
+      var childLexer = Object.create(ctor.prototype);
+      ctor.call(childLexer, document, lexer);
+      lexer.childLexerMap_.set(tagName, childLexer);
     });
   }
+
+  /**
+   * @type {!Map.<string, !Lexer>}
+   */
+  XmlLexer.prototype.childLexerMap_;
+
+  /**
+   * @type {boolean}
+   */
+  XmlLexer.prototype.ignoreCase_;
 
   /** @enum{!Symbol} */
   // ATTRVALUE_END and AMPERSAND_END make attribute value/entity reference
@@ -128,12 +149,7 @@ global.XmlLexer = (function(xmlOptions) {
     SCRIPT_END: Symbol('</script>'),
     SCRIPT_LT: Symbol('script<'),
     SCRIPT_LT_SLASH: Symbol('script</'),
-    SCRIPT_LT_SLASH_S: Symbol('script</s'),
-    SCRIPT_LT_SLASH_SC: Symbol('script</sc'),
-    SCRIPT_LT_SLASH_SCR: Symbol('script</scr'),
-    SCRIPT_LT_SLASH_SCRI: Symbol('script</scri'),
-    SCRIPT_LT_SLASH_SCRIP: Symbol('script</scrip'),
-    SCRIPT_LT_SLASH_SCRIPT: Symbol('script</script'),
+    SCRIPT_LT_SLASH_NAME: Symbol('script</name'),
 
     SLASH: Symbol('element/'),
 
@@ -193,12 +209,7 @@ global.XmlLexer = (function(xmlOptions) {
     map.set(XmlLexer.State.SCRIPT_END, '');
     map.set(XmlLexer.State.SCRIPT_LT, '');
     map.set(XmlLexer.State.SCRIPT_LT_SLASH, '');
-    map.set(XmlLexer.State.SCRIPT_LT_SLASH_S, '');
-    map.set(XmlLexer.State.SCRIPT_LT_SLASH_SC, '');
-    map.set(XmlLexer.State.SCRIPT_LT_SLASH_SCR, '');
-    map.set(XmlLexer.State.SCRIPT_LT_SLASH_SCRI, '');
-    map.set(XmlLexer.State.SCRIPT_LT_SLASH_SCRIP, '');
-    map.set(XmlLexer.State.SCRIPT_LT_SLASH_SCRIPT, '');
+    map.set(XmlLexer.State.SCRIPT_LT_SLASH_NAME, '');
 
     map.set(XmlLexer.State.SLASH, '');
 
@@ -222,11 +233,10 @@ global.XmlLexer = (function(xmlOptions) {
     if (changedOffset == Count.FORWARD || !this.lastToken)
       return;
     Lexer.prototype.adjustScanOffset.call(this);
-    var scriptLexer = this.scriptLexer_;
-    if (!scriptLexer)
-      return;
-    scriptLexer.changedOffset = changedOffset;
-    scriptLexer.adjustScanOffset();
+    this.childLexerMap_.forEach(function(childLexer) {
+      childLexer.changedOffset = changedOffset;
+      childLexer.adjustScanOffset();
+    });
   }
 
   /**
@@ -234,10 +244,9 @@ global.XmlLexer = (function(xmlOptions) {
    */
   function clear() {
     Lexer.prototype.clear.call(this);
-    var scriptLexer = this.scriptLexer_;
-    if (!scriptLexer)
-      return;
-    scriptLexer.clear();
+    this.childLexerMap_.forEach(function(childLexer) {
+      childLexer.clear();
+    });
   }
 
   /**
@@ -257,9 +266,9 @@ global.XmlLexer = (function(xmlOptions) {
     range.end = token.start + 2;
     range.setSyntax('keyword');
     range.collapseTo(token.start + 2);
-    range.end = token.start + 8;
+    range.end = token.end - 1;
     range.setSyntax('html_element_name');
-    range.collapseTo(token.start + 8);
+    range.collapseTo(token.end - 1);
     range.end = token.end;
     range.setSyntax('keyword');
   }
@@ -314,32 +323,14 @@ global.XmlLexer = (function(xmlOptions) {
         return XmlLexer.State.LT_BANG;
       case XmlLexer.State.SCRIPT_END:
       case XmlLexer.State.SCRIPT_LT_SLASH:
-      case XmlLexer.State.SCRIPT_LT_SLASH_S:
-      case XmlLexer.State.SCRIPT_LT_SLASH_SC:
-      case XmlLexer.State.SCRIPT_LT_SLASH_SCR:
-      case XmlLexer.State.SCRIPT_LT_SLASH_SCRI:
-      case XmlLexer.State.SCRIPT_LT_SLASH_SCRIP:
-      case XmlLexer.State.SCRIPT_LT_SLASH_SCRIPT:
+      case XmlLexer.State.SCRIPT_LT_SLASH_NAME:
         switch (token.end - token.start) {
           case 1:
             return XmlLexer.State.SCRIPT_LT;
           case 2:
             return XmlLexer.State.SCRIPT_LT_SLASH;
-          case 3:
-            return XmlLexer.State.SCRIPT_LT_SLASH_S;
-          case 4:
-            return XmlLexer.State.SCRIPT_LT_SLASH_SC;
-          case 5:
-            return XmlLexer.State.SCRIPT_LT_SLASH_SCR;
-          case 6:
-            return XmlLexer.State.SCRIPT_LT_SLASH_SCRI;
-          case 7:
-            return XmlLexer.State.SCRIPT_LT_SLASH_SCRIP;
-          case 8:
-            return XmlLexer.State.SCRIPT_LT_SLASH_SCRIPT;
           default:
-            console.assert(false, token);
-            break;
+            return XmlLexer.State.SCRIPT_LT_SLASH_NAME;
         }
         break;
     }
@@ -660,9 +651,8 @@ global.XmlLexer = (function(xmlOptions) {
         return;
 
       case XmlLexer.State.SCRIPT_LT_SLASH:
-        if (charCode == Unicode.LATIN_CAPITAL_LETTER_S ||
-            charCode == Unicode.LATIN_SMALL_LETTER_S) {
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_S);
+        if (this.isNameStartChar(charCode)) {
+          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_NAME);
           return;
         }
         feedStringToScriptLexer(this, '</');
@@ -674,88 +664,24 @@ global.XmlLexer = (function(xmlOptions) {
         this.finishToken(XmlLexer.State.SCRIPT);
         return;
 
-      case XmlLexer.State.SCRIPT_LT_SLASH_S:
-        if (charCode == Unicode.LATIN_CAPITAL_LETTER_C ||
-            charCode == Unicode.LATIN_SMALL_LETTER_C) {
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SC);
+      case XmlLexer.State.SCRIPT_LT_SLASH_NAME:
+        if (this.isNameChar(charCode)) {
+          this.extendToken();
           return;
         }
 
-        feedStringToScriptLexer(this, '</S');
-        if (charCode == Unicode.LESS_THAN_SIGN) {
-          this.finishToken(XmlLexer.State.SCRIPT_LT);
-          return;
-        }
-        feedCharToScriptLexer(this, charCode);
-        this.finishToken(XmlLexer.State.SCRIPT);
-        return;
-
-      case XmlLexer.State.SCRIPT_LT_SLASH_SC:
-        if (charCode == Unicode.LATIN_CAPITAL_LETTER_R ||
-            charCode == Unicode.LATIN_SMALL_LETTER_R) {
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCR);
-          return;
-        }
-        feedStringToScriptLexer(this, '</SC');
-        if (charCode == Unicode.LESS_THAN_SIGN) {
-          this.finishToken(XmlLexer.State.SCRIPT_LT);
-          return;
-        }
-        feedCharToScriptLexer(this, charCode);
-        this.finishToken(XmlLexer.State.SCRIPT);
-        return;
-
-      case XmlLexer.State.SCRIPT_LT_SLASH_SCR:
-        if (charCode == Unicode.LATIN_CAPITAL_LETTER_I ||
-            charCode == Unicode.LATIN_SMALL_LETTER_I) {
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCRI);
-          return;
-        }
-        feedStringToScriptLexer(this, '</SCR');
-        if (charCode == Unicode.LESS_THAN_SIGN) {
-          this.finishToken(XmlLexer.State.SCRIPT_LT);
-          return;
-        }
-        feedCharToScriptLexer(this, charCode);
-        this.finishToken(XmlLexer.State.SCRIPT);
-        return;
-
-      case XmlLexer.State.SCRIPT_LT_SLASH_SCRI:
-        if (charCode == Unicode.LATIN_CAPITAL_LETTER_P ||
-            charCode == Unicode.LATIN_SMALL_LETTER_P) {
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCRIP);
-          return;
-        }
-        feedStringToScriptLexer(this, '</SCRI');
-        if (charCode == Unicode.LESS_THAN_SIGN) {
-          this.finishToken(XmlLexer.State.SCRIPT_LT);
-          return;
-        }
-        feedCharToScriptLexer(this, charCode);
-        this.finishToken(XmlLexer.State.SCRIPT);
-        return;
-
-      case XmlLexer.State.SCRIPT_LT_SLASH_SCRIP:
-        if (charCode == Unicode.LATIN_CAPITAL_LETTER_T ||
-            charCode == Unicode.LATIN_SMALL_LETTER_T) {
-          this.restartToken(XmlLexer.State.SCRIPT_LT_SLASH_SCRIPT);
-          return;
-        }
-        feedStringToScriptLexer(this, '</SCRIP');
-        if (charCode == Unicode.LESS_THAN_SIGN) {
-          this.finishToken(XmlLexer.State.SCRIPT_LT);
-          return;
-        }
-        feedCharToScriptLexer(this, charCode);
-        this.finishToken(XmlLexer.State.SCRIPT);
-        return;
-
-      case XmlLexer.State.SCRIPT_LT_SLASH_SCRIPT:
-        if (charCode == Unicode.GREATER_THAN_SIGN) {
+        if (charCode == Unicode.GREATER_THAN_SIGN && isEndOfScript(this)) {
           this.restartToken(XmlLexer.State.SCRIPT_END);
           return;
         }
-        feedStringToScriptLexer(this, '</SCRIPT');
+
+        {
+          var document = this.range.document;
+          var end = this.lastToken.end;
+          for (var offset = this.lastToken.start; offset < end; ++offset) {
+            feedCharToScriptLexer(this, document.charCodeAt_(offset));
+          }
+        }
         if (charCode == Unicode.LESS_THAN_SIGN) {
           this.finishToken(XmlLexer.State.SCRIPT_LT);
           return;
@@ -816,9 +742,10 @@ global.XmlLexer = (function(xmlOptions) {
    * @param {number} charCode
    */
   function feedCharToScriptLexer(lexer, charCode) {
-    var scriptLexer = lexer.scriptLexer_;
-    if (!scriptLexer)
+    var tokenData = lexer.tokenData;
+    if (!tokenData)
       return;
+    var scriptLexer = tokenData.scriptLexer;
     var offset = scriptLexer.scanOffset;
     while (offset == scriptLexer.scanOffset) {
       scriptLexer.feedCharacter(charCode);
@@ -830,11 +757,45 @@ global.XmlLexer = (function(xmlOptions) {
    * @param {string} string
    */
   function feedStringToScriptLexer(lexer, string) {
-    if (!lexer.scriptLexer_)
+    var tokenData = lexer.tokenData;
+    if (!tokenData)
       return;
+    var scriptLexer = tokenData.scriptLexer;
     for (var i = 0; i < string.length; ++i) {
-      feedCharToScriptLexer(lexer, string.charCodeAt(i));
+      scriptLexer.feedCharacter(string.charCodeAt(i));
     }
+  }
+
+  /**
+   * @param {!XmlLexer} lexer
+   * @param {!Lexer.Token} token
+   * @return {string}
+   */
+  function getTagNameFromToken(lexer, token) {
+    var range = lexer.range;
+    switch (token.state) {
+      case XmlLexer.State.SCRIPT_LT_SLASH_NAME:
+        range.collapseTo(token.start + 2);
+        break;
+      case XmlLexer.State.STARTTAG:
+        range.collapseTo(token.start);
+        break;
+      default:
+        console.log('getTagNameFromToken', token);
+        console.assert(false);
+    }
+    range.end = token.end;
+    return lexer.ignoreCase_ ? range.text.toLowerCase() : range.text;
+  }
+
+  /**
+   * @param {!XmlLexer} lexer
+   * @return {boolean}
+   */
+  function isEndOfScript(lexer) {
+    var lastToken = /** @type {!Lexer.Token}*/ (lexer.lastToken);
+    var tagName = getTagNameFromToken(lexer, lastToken);
+    return tagName == lexer.tokenData.scriptTagName;
   }
 
   /**
@@ -842,10 +803,14 @@ global.XmlLexer = (function(xmlOptions) {
    */
   function processScriptEnd(lexer) {
     lexer.endToken();
-    var scriptLexer = lexer.scriptLexer_;
-    if (!scriptLexer)
+    var tokenData = lexer.tokenData;
+    if (!tokenData)
       return;
-    scriptLexer.colorLastToken();
+    var scriptLexer = tokenData.scriptLexer;
+    lexer.tokenData = null;
+    // Remove tokens after "</script>".
+    scriptLexer.changedOffset = lexer.lastToken.start;
+    scriptLexer.adjustScanOffset();
   }
 
   /**
@@ -876,26 +841,30 @@ global.XmlLexer = (function(xmlOptions) {
    */
   function processStartTagEnd(lexer, charCode) {
     lexer.endToken();
-    var scriptLexer = lexer.scriptLexer_;
-    if (!scriptLexer)
+    if (!lexer.childLexerMap_.size)
       return;
     var it = lexer.tokens.find(/** @type {!Lexer.Token} */(lexer.lastToken));
     while (it.data.state != XmlLexer.State.STARTTAG) {
       it = it.previous();
     }
     var token = it.data;
-    var range = lexer.range;
-    range.collapseTo(token.start);
-    range.end = token.end;
-    if (range.text.toLowerCase() != 'script')
+    var tagName = getTagNameFromToken(lexer, token);
+    var childLexer = lexer.childLexerMap_.get(tagName);
+    if (!childLexer)
       return;
+
+    lexer.tokenData = {
+      scriptLexer: childLexer,
+      scriptTagName: tagName
+    };
+
     // Handle script fragment after <script>
     if (charCode == Unicode.LESS_THAN_SIGN) {
       // Script fragment starts with "<".
       lexer.startToken(XmlLexer.State.SCRIPT_LT);
       return;
     }
-    scriptLexer.scanOffset = lexer.scanOffset;
+    childLexer.scanOffset = lexer.scanOffset;
     lexer.startToken(XmlLexer.State.SCRIPT);
     feedCharToScriptLexer(lexer, charCode);
   }
@@ -911,13 +880,17 @@ global.XmlLexer = (function(xmlOptions) {
   }
 
   XmlLexer.prototype = Object.create(Lexer.prototype, {
+    // Properties
+    childLexerMap_: {writable: true},
+    ignoreCase_: {value: false, writable: true},
+
+    // Methods
     adjustScanOffset: {value:adjustScanOffset},
     clear: {value: clear},
     colorToken: {value: colorToken},
     constructor: {value: XmlLexer},
     didShrinkLastToken: {value: didShrinkLastToken},
     feedCharacter: {value: feedCharacter},
-    scriptLexer_: {value: null, writable: true},
     syntaxOfToken: {value: syntaxOfToken}
   });
 

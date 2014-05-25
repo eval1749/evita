@@ -86,6 +86,8 @@ function PythonLexer(document) {}
 
 /**
  * @typedef {Object}
+ *   childLexers: !Object
+ *   ignoreCase: boolean,
  *   keywords: !Iterable
  */
 var XmlLexerOptions;
@@ -100,11 +102,6 @@ var XmlLexerOptions;
  * @return {undefined}
  */
 function XmlLexer(document, opt_options) {}
-
-/**
- * @type {?Lexer}
- */
-XmlLexer.prototype.scriptLexer_;
 
 /**
  * @constructor

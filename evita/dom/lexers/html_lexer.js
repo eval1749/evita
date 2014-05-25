@@ -9,7 +9,6 @@ global.HtmlLexer = (function(options) {
    * @param {!Document} document
    */
   function HtmlLexer(document) {
-    this.scriptLexer_ = new JavaScriptLexer(document, this);
     XmlLexer.call(this, document, options);
   }
 
@@ -19,5 +18,9 @@ global.HtmlLexer = (function(options) {
 
   return HtmlLexer;
 })({
+  childLexers: {
+    script: JavaScriptLexer
+  },
+  ignoreCase: true,
   keywords: []
 });

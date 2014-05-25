@@ -87,6 +87,9 @@ Lexer.State.ZERO;
  */
 Lexer.Token = function(state, start) {};
 
+/** @type {?Object} */
+Lexer.Token.prototype.data;
+
 /** @type {number} */
 Lexer.Token.prototype.end;
 
@@ -163,6 +166,11 @@ Lexer.prototype.scanOffset;
  * @type {!Symbol}
  */
 Lexer.prototype.state;
+
+/**
+ * @type {?Object}
+ */
+Lexer.prototype.tokenData;
 
 /**
  * @type {OrderedSet.<!Lexer.Token>}

@@ -189,9 +189,6 @@ global.Lexer = (function() {
       }, this);
     }
 
-    this.lastToken = lastToken;
-    this.state = lastToken.state;
-
     // Shrink last clean token
     if (lastToken.end != newScanOffset) {
       console.assert(lastToken.start < newScanOffset, lastToken);
@@ -199,10 +196,13 @@ global.Lexer = (function() {
       var newState = this.didShrinkLastToken(lastToken);
       if (lastToken.state != newState) {
         lastToken.state = newState;
-        this.colorLastToken();
+        this.colorToken(lastToken);
       }
-      this.state = newState;
     }
+
+    this.lastToken = lastToken;
+    this.state = lastToken.state;
+    this.tokenData = lastToken.data;
   }
 
   /**
@@ -417,6 +417,7 @@ global.Lexer = (function() {
     if (this.debug_ > 2)
       console.log('startToken', state, this.scanOffset);
     var token = new Lexer.Token(state, this.scanOffset);
+    token.data = this.tokenData;
     if (this.debug_ > 0)
       console.assert(!this.tokens.find(token));
     this.lastToken = token;
@@ -597,6 +598,7 @@ global.Lexer = (function() {
     // Properties
     debug_: {value: 0, writable: true},
     parentLexer_: {value: null, writable: true},
+    tokenData: {value: null, writable: true},
 
     // Methods
     adjustScanOffset: {value: adjustScanOffset},

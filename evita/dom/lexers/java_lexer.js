@@ -44,6 +44,9 @@ global.JavaLexer = (function(options) {
   'void', 'volatile',
   'while',
 
+  // Reserved label
+  'default:',
+
   // Literals
   'false', 'null', 'true',
 

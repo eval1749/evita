@@ -41,6 +41,9 @@ global.JavaScriptLexer = (function(options) {
       'while', 'with',
       'yield',
 
+      // Reserved label
+      'default:',
+
       // Literals
       'false', 'null', 'true',
 

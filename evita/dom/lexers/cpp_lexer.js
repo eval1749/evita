@@ -49,6 +49,9 @@ global.CppLexer = (function(options) {
   'virtual', 'void', 'volatile',
   'while',
 
+  // Reserved label
+  'default:',
+
   // C Pre-Processor
   '#define',
   '#else',

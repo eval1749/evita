@@ -226,8 +226,10 @@ global.ClikeLexer = (function() {
               return;
             }
 
-            if (this.useColonColon && charCode == Unicode.COLON) {
+            if (charCode == Unicode.COLON) {
               this.startToken(ClikeLexer.State.COLON);
+              if (!this.useColonColon)
+                this.endToken();
               return;
             }
 
@@ -248,14 +250,40 @@ global.ClikeLexer = (function() {
    * @param {!Range} range
    * @param {!Lexer.Token} token
    * @return {string}
+   *
+   * Determine syntax for chained word, e.g. namespace.class.property, from
+   * right to left.
    */
   function syntaxOfToken(range, token) {
+    function isNsSeparator(it) {
+      if (!it)
+        return false;
+      var token = it.data;
+      return token.state == ClikeLexer.State.COLON_COLON ||
+             token.state == Lexer.State.DOT;
+    }
+
+    var lexer = this;
+
+    if (token.state == ClikeLexer.State.COLON) {
+      var it = lexer.tokens.find(token);
+      console.assert(it, token);
+      it = it.previous();
+      if (it && it.data.state == Lexer.State.WORD &&
+          !isNsSeparator(it.previous())) {
+        var syntax = lexer.syntaxOfTokens(range, [it.data, token]);
+        if (syntax)
+          return syntax;
+        range.start = it.data.start;
+        return 'label';
+      }
+    }
+
     if (token.state != Lexer.State.WORD) {
       return STATE_TO_SYNTAX.get(token.state) ||
              Lexer.prototype.syntaxOfToken.call(this, range, token);
     }
-    var lexer = this;
-    var document = range.document;
+
     var word = range.text;
     var it = lexer.tokens.find(token);
     console.assert(it, token);
@@ -263,18 +291,15 @@ global.ClikeLexer = (function() {
       it = it.previous();
     } while (it && it.data.state == Lexer.State.SPACE);
 
-    if (!it)
-      return lexer.syntaxOfWord(word);
+    if (it){
+      if (it.data.state == ClikeLexer.State.NUMBER_SIGN) {
+        return lexer.syntaxOfTokens(range, [it.data, token]);
+      }
 
-    var delimiter = it.data;
-    if (delimiter.state == ClikeLexer.State.NUMBER_SIGN) {
-      return lexer.syntaxOfTokens(range, [delimiter, token]);
-    }
-
-    if (delimiter.state == ClikeLexer.State.COLON_COLON ||
-        delimiter.state == Lexer.State.DOT) {
-      var tokens = lexer.collectTokens(it, token);
-      return lexer.syntaxOfTokens(range, tokens);
+      if (isNsSeparator(it)) {
+        var tokens = lexer.collectTokens(it, token);
+        return lexer.syntaxOfTokens(range, tokens);
+      }
     }
 
     return lexer.syntaxOfWord(word);

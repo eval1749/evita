@@ -5,7 +5,15 @@
 'use strict';
 
 (function() {
-  /** @const @type {number} */ var ZOOM_STEP = 1.1;
+  /** @const @type {Array.<number>} */
+  var ZOOM_STEPS = [
+    20, 30, 40, 50, 60, 70, 80, 90,
+    100, 110, 130, 150, 170,
+    200, 250,
+    300, 350,
+    400, 450,
+    500,
+  ];
 
   /** @param {!Range} range */
   function copyToClipboard(range) {
@@ -153,8 +161,13 @@
    * @this {!TextWindow}
    */
   Editor.bindKey(TextWindow, 'Ctrl++', function() {
-    this.zoom *= ZOOM_STEP;
-  });
+    var currentZoom = Math.round(this.zoom * 100);
+    var index = ZOOM_STEPS.findIndex(function(zoom) {
+      return zoom > currentZoom;
+    });
+    if (index >= 0)
+      this.zoom = ZOOM_STEPS[index] / 100;
+  }, 'Zoom In');
 
   /**
    * Reconvert text using IME.
@@ -171,9 +184,13 @@
    * @this {!TextWindow}
    */
   Editor.bindKey(TextWindow, 'Ctrl+-', function() {
-    if (this.zoom > 0.1)
-    this.zoom /= ZOOM_STEP;
-  });
+    var currentZoom = Math.round(this.zoom * 100);
+    var index = ZOOM_STEPS.findIndex(function(zoom) {
+      return zoom >= currentZoom;
+    });
+    if (index >= 1)
+      this.zoom = ZOOM_STEPS[index - 1] / 100;
+  }, 'Zoom out');
 
   /**
    * Exchange Unicode character code point and character

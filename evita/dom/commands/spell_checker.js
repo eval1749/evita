@@ -140,17 +140,9 @@ SpellChecker.prototype.checkSpelling = function(wordRange) {
   var markerRange = spellChecker.freeRanges_.pop();
   markerRange.collapseTo(wordRange.start);
   markerRange.end = wordRange.end;
-  // TODO(yosi) Mark checking word for debugging. Once, we finish debugging
-  // we should remove this.
-  markerRange.setSpelling(Spelling.DEBUG);
   var wordToCheck = markerRange.text;
   SpellChecker.checkSpelling(wordToCheck).then(function(state) {
     --SpellChecker.numberOfChecking;
-    if (!markerRange.collapsed) {
-      // TODO(yosi) This code remove debugger marker. We will remove this
-      // once finish debugger.
-      markerRange.setSpelling(Spelling.NONE);
-    }
     if (state.word == markerRange.text)
       spellChecker.markWord(markerRange, state.spelling);
     spellChecker.freeRanges_.push(markerRange);

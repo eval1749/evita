@@ -46,7 +46,7 @@ global.ClikeLexer = (function() {
     BLOCK_COMMENT_ASTERISK: Symbol('block_comment_asterisk'),
     BLOCK_COMMENT_END: Symbol('block_comment_end'),
     BLOCK_COMMENT_START: Symbol('block_comment_start'),
-    COLON: Symbol('::'),
+    COLON: Symbol(':'),
     COLON_COLON: Symbol('::'),
     LINE_COMMENT: Symbol('line_comment'),
     LINE_COMMENT_ESCAPE: Symbol('line_comment_escape'),

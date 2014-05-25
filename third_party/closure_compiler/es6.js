@@ -22,11 +22,28 @@
 
 /**
  * @template T
- * @param {function(T, number?, Array?): *} callback.
- * @param {Object=} this_arg
+ * @this {Array.<T>}
+ * @param {T} value
+ * @param {number=} opt_start
+ * @param {number=} opt_end
+ */
+Array.prototype.fill = function(value, opt_start, opt_end) {};
+
+/**
+ * @template T
+ * @param {function(T, number=, Array=): *} callback.
+ * @param {Object=} opt_thisArg
  * @return {T|null}
  */
-Array.prototype.find = function(callback, this_arg) {};
+Array.prototype.find = function(callback, opt_thisArg) {};
+
+/**
+ * @template T
+ * @param {function(T, number=, Array=): *} callback.
+ * @param {Object=} opt_thisArg
+ * @return {number}
+ */
+Array.prototype.findIndex = function(callback, opt_thisArg) {};
 
 /**
  * @typedef {Array|Map|Set}

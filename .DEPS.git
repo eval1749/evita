@@ -26,7 +26,7 @@ deps = {
     'src/tools/gyp':
         Var('git_url') + '/external/gyp.git@3efe68d8cf67fbdabe3ea719bbfbc3b59181c642',
     'src/v8':
-        Var('git_url') + '/external/v8.git@fb547e07aef43e02715c5d6c1530e84bb3cbba02',
+        Var('git_url') + '/external/v8.git@d06b9264b1c886fc80a100e9915cf8ae07fdb4e5',
 }
 
 deps_os = {

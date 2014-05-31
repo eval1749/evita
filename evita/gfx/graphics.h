@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_evita_gfx_graphics_h)
 #define INCLUDE_evita_gfx_graphics_h
 
+#include <vector>
+
 #include "base/strings/string16.h"
 #include "evita/gfx_base.h"
 
@@ -42,7 +44,7 @@ class Graphics : public Object, public DpiHandler {
   friend class DrawingScope;
 
   private: mutable int batch_nesting_level_;
-  private: mutable Rect dirty_rect_;
+  private: mutable std::vector<Rect> dirty_rects_;
   private: mutable common::ComPtr<IDXGISwapChain1> dxgi_swap_chain_;
   private: scoped_refptr<FactorySet> factory_set_;
   private: HWND hwnd_;

@@ -301,6 +301,7 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
 // of pixels.
 void Frame::DrawForResize() {
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  gfx_->set_dirty_rect(bounds());
 
   // To avoid script destroys Pane's, we lock DOM.
   if (editor::DomLock::instance()->locked()) {
@@ -651,7 +652,7 @@ void Frame::OnPaint(const gfx::Rect rect) {
   }
 
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
-  gfx_->set_dirty_rect(rect);
+  //gfx_->set_dirty_rect(bounds());
   OnDraw(&*gfx_);
   if (views::switches::editor_window_display_paint){
     gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),

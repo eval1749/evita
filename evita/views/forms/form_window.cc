@@ -605,6 +605,7 @@ void FormWindow::DidResize() {
   gfx_->Resize(bounds());
   {
     gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+    gfx_->set_dirty_rect(bounds());
     (*gfx_)->Clear(ui::SystemMetrics::instance()->bgcolor());
   }
   SchedulePaint();
@@ -635,7 +636,7 @@ void FormWindow::OnPaint(const gfx::Rect rect) {
   }
 
   gfx::Graphics::DrawingScope drawing_scope(*gfx_);
-  //gfx_->set_dirty_rect(rect);
+  gfx_->set_dirty_rect(rect);
   auto const bgcolor = ui::SystemMetrics::instance()->bgcolor();
   // TODO(yosi) We should fill background of form window excluding controls
   gfx_->FillRectangle(gfx::Brush(*gfx_, bgcolor), rect);

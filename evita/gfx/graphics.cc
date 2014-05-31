@@ -13,6 +13,7 @@
 #include <cmath>
 #include <utility>
 
+#include "common/win/rect_ostream.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/text_format.h"
 
@@ -58,7 +59,6 @@ Graphics::AxisAlignedClipScope::~AxisAlignedClipScope() {
 //
 Graphics::DrawingScope::DrawingScope(const Graphics& gfx) : gfx_(gfx) {
   gfx_.BeginDraw();
-  gfx_.set_dirty_rect(gfx_.target_bounds_);
 }
 
 Graphics::DrawingScope::~DrawingScope() {
@@ -116,9 +116,16 @@ Graphics& Graphics::operator=(Graphics&& other) {
   return *this;
 }
 
-void Graphics::set_dirty_rect(const Rect& new_dirty_rect) const {
-  if (batch_nesting_level_ == 1)
-    dirty_rect_ = new_dirty_rect;
+void Graphics::set_dirty_rect(const Rect& dirty_rect) const {
+  DCHECK(!dirty_rect.empty());
+  for (const auto& rect : dirty_rects_) {
+    Rect temp(rect);
+    temp.Unite(dirty_rect);
+    if (temp == rect || temp == dirty_rect)
+      return;
+    DCHECK(rect.Intersect(dirty_rect).empty());
+  }
+  dirty_rects_.push_back(dirty_rect);
 }
 
 void Graphics::set_dirty_rect(const RectF& new_dirty_rect) const {
@@ -229,13 +236,20 @@ bool Graphics::EndDraw() {
       auto const hr = render_target_->EndDraw();
       if (SUCCEEDED(hr)) {
         #if !USE_HWND_RENDER_TARGET
-          if (!dirty_rect_.empty()) {
+          if (dirty_rects_.empty()) {
+            DVLOG(0) << "Graphics::EndDraw: no dirty";
+          } else {
+            #if DEBUG_DRAW
+              DVLOG(0) << "Graphics::EndDraw: swap #dirty=" <<
+                  dirty_rects_.size() << " " << dirty_rects_[0];
+            #endif
             DXGI_PRESENT_PARAMETERS parameters = {0};
-            parameters.DirtyRectsCount = 1;
-            parameters.pDirtyRects = &dirty_rect_;
+            parameters.DirtyRectsCount = dirty_rects_.size();
+            parameters.pDirtyRects = dirty_rects_.data();
             parameters.pScrollRect = nullptr;
             parameters.pScrollOffset = nullptr;
             COM_VERIFY(dxgi_swap_chain_->Present1(1, 0, &parameters));
+            dirty_rects_.clear();
           }
         #endif
         return true;

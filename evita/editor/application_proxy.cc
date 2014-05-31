@@ -9,7 +9,7 @@
 #include "common/win/win32_verify.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
-#include "evita/editor/shell_handler.h"
+#include "evita/editor/application_proxy.h"
 
 namespace editor {
 

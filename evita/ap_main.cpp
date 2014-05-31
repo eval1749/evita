@@ -6,7 +6,7 @@
 #include "base/command_line.h"
 #include "base/logging.h"
 #include "common/win/native_window.h"
-#include "evita/editor/shell_handler.h"
+#include "evita/editor/application_proxy.h"
 
 extern HINSTANCE   g_hInstance;
 extern HINSTANCE   g_hResource;

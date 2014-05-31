@@ -99,10 +99,10 @@
 
         'ctrl_TitleBar.cpp',
         'editor/application.cc',
+        'editor/application_proxy.cc',
+        'editor/application_proxy.h',
         'editor/modal_message_loop_scope.cc',
         'editor/dom_lock.cc',
-        'editor/shell_handler.cc',
-        'editor/shell_handler.h',
         'editor/switch_set.cc',
         'editor/switch_set.h',
         'gfx/bitmap.cc',

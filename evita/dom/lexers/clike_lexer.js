@@ -279,6 +279,17 @@ global.ClikeLexer = (function() {
       }
     }
 
+    if (token.state == ClikeLexer.State.COLON_COLON) {
+      var it = lexer.tokens.find(token);
+      console.assert(it, token);
+      it = it.previous();
+      if (it && it.data.state == Lexer.State.WORD) {
+        // Override "label" syntax.
+        range.start = it.data.start;
+        return 'cpp_namespace_prefix';
+      }
+    }
+
     if (token.state != Lexer.State.WORD) {
       return STATE_TO_SYNTAX.get(token.state) ||
              Lexer.prototype.syntaxOfToken.call(this, range, token);

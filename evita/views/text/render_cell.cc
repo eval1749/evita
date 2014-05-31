@@ -72,24 +72,20 @@ void DrawWave(const gfx::Graphics& gfx, const gfx::Brush& brush, float sx,
 
 void DrawWave(const gfx::Graphics& gfx, const gfx::Brush& brush,
               const gfx::RectF& rect, float baseline) {
-  auto const height = rect.bottom - baseline - 2;
-  auto const pen_width = height / 4;
-  auto const wave = height - pen_width * 2;
+  auto const height = rect.bottom - baseline;
+  auto const pen_width = std::max(height / 4, 0.1f);
+  auto const wave = height - pen_width;
   if (wave <= 2) {
     DrawWave(gfx, brush, rect.left, rect.right, baseline + 1);
     return;
   }
   gfx::Graphics::AxisAlignedClipScope clip_scope(gfx, rect);
-  auto down = true;
   for (auto x = rect.left; x < rect.right; x += wave) {
-    if (down) {
-      gfx.DrawLine(brush, x, baseline + pen_width, x + wave,
-                   rect.bottom - pen_width, pen_width);
-    } else {
-      gfx.DrawLine(brush, x, rect.bottom - pen_width, x + wave,
-                   baseline + pen_width, pen_width);
-    }
-    down = !down;
+    auto const bottom = rect.bottom;
+    auto const top = baseline;
+    gfx.DrawLine(brush, x, top, x + wave, bottom, pen_width); // top to bottom
+    x += wave;
+    gfx.DrawLine(brush, x, bottom, x + wave, top, pen_width); // bottom to top
   }
 }
 

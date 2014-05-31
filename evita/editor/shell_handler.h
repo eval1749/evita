@@ -2,46 +2,42 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_editor_shell_handler_h)
-#define INCLUDE_evita_editor_shell_handler_h
+#if !defined(INCLUDE_evita_editor_application_proxy)
+#define INCLUDE_evita_editor_application_proxy
 
-#include "common/win/singleton_hwnd.h"
+#include <memory>
+
+#include "base/strings/string16.h"
+#include "common/memory/singleton.h"
 
 namespace editor {
 
-class ShellHandler : public common::Singleton<ShellHandler>,
-                     public common::win::SingletonHwnd::Observer {
-  DECLARE_SINGLETON_CLASS(ShellHandler);
+//////////////////////////////////////////////////////////////////////
+//
+// ApplicationProxy
+//
+class ApplicationProxy : public common::Singleton<ApplicationProxy> {
+  DECLARE_SINGLETON_CLASS(ApplicationProxy);
 
-  private: ShellHandler();
-  public: virtual ~ShellHandler();
+  private: class Channel;
+  private: class EventObject;
+  private: class ShellHandler;
 
-  public: void Start();
+  private: std::unique_ptr<Channel> channel_;
+  private: std::unique_ptr<EventObject> event_;
+  private: std::unique_ptr<ShellHandler> shell_handler_;
 
-  // common::win::SingletonHwnd::Observer
-  private: virtual void OnWndProc(HWND hwnd, UINT message, WPARAM wParam,
-                                  LPARAM lParam) override;
+  private: ApplicationProxy();
+  public: ~ApplicationProxy();
 
-  DISALLOW_COPY_AND_ASSIGN(ShellHandler);
+  public: void DidCopyData(const COPYDATASTRUCT* data);
+  public: void DidStartChannel(HWND channel_hwnd);
+  public: int Run();
+  public: void WillStartApplication();
+
+  DISALLOW_COPY_AND_ASSIGN(ApplicationProxy);
 };
 
 }  // namespace editor
 
-//////////////////////////////////////////////////////////////////////
-//
-// SharedArea
-//
-struct SharedArea {
-  HWND m_hwnd;
-  char16 m_wsz[1];
-}; // SharedArea
-
-const char16 k_wszFileMapping[] =
-    L"Local\\03002DEC-D63E-4551-9AE8-B88E8C586376";
-
-const DWORD k_cbFileMapping = 1024 * 64;
-
-extern HANDLE g_hEvent;
-extern bool g_fMultiple;
-
-#endif //!defined(INCLUDE_evita_editor_shell_handler_h)
+#endif //!defined(INCLUDE_evita_editor_application_proxy)

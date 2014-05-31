@@ -4,6 +4,7 @@
 #include "evita/editor/application.h"
 
 #include "base/bind.h"
+#include "base/command_line.h"
 #pragma warning(push)
 #pragma warning(disable: 4100 4625 4626)
 #include "base/message_loop/message_loop.h"
@@ -11,10 +12,12 @@
 #include "base/run_loop.h"
 #pragma warning(pop)
 #include "base/strings/string16.h"
+#include "base/strings/utf_string_conversions.h"
 #include "base/time/time.h"
 #include "evita/dom/script_thread.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/editor/shell_handler.h"
+#include "evita/editor/switch_set.h"
 #include "evita/io/io_manager.h"
 #include "evita/io/io_thread.h"
 #include "evita/metrics/counter.h"
@@ -25,6 +28,7 @@
 #include "evita/views/frame_list.h"
 #include "evita/views/forms/form_window.h"
 #include "evita/views/frame_list.h"
+#include "evita/views/switches.h"
 #include "evita/views/view_delegate_impl.h"
 
 #define DEBUG_IDLE 0
@@ -55,7 +59,6 @@ Application::Application()
       view_idle_count_(0),
       view_idle_hint_(0),
       view_delegate_impl_(new views::ViewDelegateImpl()) {
-  ShellHandler::instance()->Start();
   io_manager_->Start();
   ui::TextInputClientWin::instance()->Start();
   dom::ScriptThread::Start(message_loop_.get(), view_delegate_impl_.get(),
@@ -177,6 +180,45 @@ void Application::RegisterTaskWithinDomLock(const base::Closure& task) {
 }
 
 void Application::Run() {
+  {
+      INITCOMMONCONTROLSEX init_params;
+      init_params.dwSize = sizeof(init_params);
+      init_params.dwICC  = ICC_BAR_CLASSES;
+      if (!::InitCommonControlsEx(&init_params)) {
+          ::MessageBoxW(
+              nullptr,
+              L"InitCommonControlsEx",
+              APP_TITLE L" " APP_VERSION,
+              MB_APPLMODAL | MB_ICONERROR);
+          return;
+      }
+  }
+
+  #if _DEBUG
+  views::switches::editor_window_display_paint = true;
+  views::switches::form_window_display_paint = false;
+  views::switches::text_window_display_paint = true;
+  #endif
+
+  auto const switch_set = editor::SwitchSet::instance();
+
+  switch_set->Register(views::switches::kEditorWindowDisplayPaint,
+                       &views::switches::editor_window_display_paint);
+  switch_set->Register(views::switches::kFormWindowDisplayPaint,
+                       &views::switches::form_window_display_paint);
+  switch_set->Register(views::switches::kTextWindowDisplayPaint,
+                       &views::switches::text_window_display_paint);
+
+  auto const command_line = CommandLine::ForCurrentProcess();
+  for (const auto& name : switch_set->names()) {
+    const auto value = switch_set->Get(name);
+    if (value.is_bool()) {
+      if (command_line->HasSwitch(base::UTF16ToASCII(name)))
+        switch_set->Set(name, domapi::SwitchValue(true));
+    }
+  }
+
+  ApplicationProxy::instance()->WillStartApplication();
   base::RunLoop run_loop;
   run_loop.Run();
 }

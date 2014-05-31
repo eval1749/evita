@@ -30,7 +30,7 @@ class COMMON_EXPORT NativeWindow {
   protected: HWND hwnd_;
   private: MessageDelegate* message_delegate_;
 
-  private: explicit NativeWindow(const MessageDelegate& message_delegate);
+  private: explicit NativeWindow(MessageDelegate* message_delegate);
 
   // For MessageDelegate-less native window.
   protected: explicit NativeWindow();
@@ -64,7 +64,7 @@ class COMMON_EXPORT NativeWindow {
 
   // [C]
   public: static std::unique_ptr<NativeWindow> Create(
-      const MessageDelegate& message_delegate);
+      MessageDelegate* message_delegate);
   public: static std::unique_ptr<NativeWindow> Create();
   public: bool CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
                               const base::char16* title, HWND parent_hwnd,

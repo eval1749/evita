@@ -1445,7 +1445,7 @@ void TabStrip::TabStripImpl::Redraw() {
 // TabStrip
 //
 TabStrip::TabStrip(TabStripDelegate* delegate)
-    : ui::Widget(ui::NativeWindow::Create(*this)), delegate_(delegate) {
+    : ui::Widget(ui::NativeWindow::Create(this)), delegate_(delegate) {
 }
 
 TabStrip::~TabStrip() {

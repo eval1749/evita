@@ -29,7 +29,7 @@ SingletonHwnd::Observer::~Observer() {
 // SingletonHwnd
 //
 SingletonHwnd::SingletonHwnd()
-    : window_(NativeWindow::Create(*this)) {
+    : window_(NativeWindow::Create(this)) {
   if (!base::MessageLoopForUI::IsCurrent()) {
     DLOG(ERROR) << "Cannot create window on non-UI thread.";
     return;

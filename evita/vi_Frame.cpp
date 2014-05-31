@@ -122,7 +122,7 @@ Pane* GetContainingPane(Frame* frame, views::Window* window) {
 // Frame
 //
 Frame::Frame(views::WindowId window_id)
-    : views::Window(ui::NativeWindow::Create(*this), window_id),
+    : views::Window(ui::NativeWindow::Create(this), window_id),
       gfx_(new gfx::Graphics()),
       m_cyTabBand(0),
       message_view_(new views::MessageView()),

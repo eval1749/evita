@@ -436,7 +436,7 @@ void FormWindow::FormViewModel::DidChangeForm() {
 //
 FormWindow::FormWindow(dom::WindowId window_id, dom::Form* form,
                        Window* owner, gfx::Point offset)
-    : views::Window(ui::NativeWindow::Create(*this), window_id),
+    : views::Window(ui::NativeWindow::Create(this), window_id),
       gfx_(new gfx::Graphics()),
       model_(new FormViewModel(form, this)),
       offset_(offset), owner_(owner) {

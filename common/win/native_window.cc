@@ -30,9 +30,9 @@ MessageDelegate::~MessageDelegate() {
 //
 // NativeWindow
 //
-NativeWindow::NativeWindow(const MessageDelegate& message_delegate)
+NativeWindow::NativeWindow(MessageDelegate* message_delegate)
     : hwnd_(nullptr),
-      message_delegate_(const_cast<MessageDelegate*>(&message_delegate)) {
+      message_delegate_(message_delegate) {
 }
 
 NativeWindow::NativeWindow()
@@ -48,7 +48,7 @@ NativeWindow::~NativeWindow() {
 }
 
 std::unique_ptr<NativeWindow> NativeWindow::Create(
-    const MessageDelegate& message_delegate) {
+    MessageDelegate* message_delegate) {
   return std::move(std::unique_ptr<NativeWindow>(
       new NativeWindow(message_delegate)));
 }

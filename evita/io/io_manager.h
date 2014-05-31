@@ -5,24 +5,24 @@
 #if !defined(INCLUDE_evita_io_io_manager_h)
 #define INCLUDE_evita_io_io_manager_h
 
-namespace base {
-class Time;
-}
+#include <memory>
 
-#include "common/win/native_window.h"
-#include "evita/dom/public/io_delegate.h"
-#include "evita/dom/view_delegate.h"
+#include "base/basictypes.h"
 
 namespace base {
 class MessageLoopForIO;
 class Thread;
 }
 
+namespace domapi {
+class IoDelegate;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // IoManager
 //
-class IoManager : public common::win::NativeWindow {
+class IoManager {
   private: std::unique_ptr<domapi::IoDelegate> io_delegate_;
   private: std::unique_ptr<base::Thread> io_thread_;
 
@@ -35,27 +35,7 @@ class IoManager : public common::win::NativeWindow {
   public: void RegisterIoHandler(HANDLE handle, void* io_handler);
   public: void Start();
 
-  // common::win::NativeWindow
-  private: virtual LRESULT WindowProc(UINT, WPARAM, LPARAM) override;
-
   DISALLOW_COPY_AND_ASSIGN(IoManager);
 };
-
-//////////////////////////////////////////////////////////////////////
-//
-// SharedArea
-//
-struct SharedArea {
-  HWND m_hwnd;
-  char16 m_wsz[1];
-}; // SharedArea
-
-const char16 k_wszFileMapping[] =
-    L"Local\\03002DEC-D63E-4551-9AE8-B88E8C586376";
-
-const uint k_cbFileMapping = 1024 * 64;
-
-extern HANDLE g_hEvent;
-extern bool g_fMultiple;
 
 #endif //!defined(INCLUDE_evita_io_io_manager_h)

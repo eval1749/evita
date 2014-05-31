@@ -90,6 +90,7 @@
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
+        '<(DEPTH)/common/common.gyp:common',
         'io',
         'views',
       ],
@@ -100,6 +101,8 @@
         'editor/application.cc',
         'editor/modal_message_loop_scope.cc',
         'editor/dom_lock.cc',
+        'editor/shell_handler.cc',
+        'editor/shell_handler.h',
         'editor/switch_set.cc',
         'editor/switch_set.h',
         'gfx/bitmap.cc',

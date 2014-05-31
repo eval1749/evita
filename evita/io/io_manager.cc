@@ -70,50 +70,6 @@ void IoManager::RegisterIoHandler(HANDLE handle, void* io_handler) {
 }
 
 void IoManager::Start() {
-  CreateWindowEx(0, 0, L"IoManager", HWND_MESSAGE, common::win::Point(),
-                 common::win::Size());
-  DCHECK(*this);
   io_thread_->StartWithOptions(
       base::Thread::Options(base::MessageLoop::TYPE_IO, 0));
-}
-
-// common::win::NativeWindow
-LRESULT IoManager::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
-  switch (uMsg) {
-    case WM_CREATE: {
-      if (g_fMultiple)
-        break;
-      auto const hMapping = ::CreateFileMapping(
-          INVALID_HANDLE_VALUE, // hFile
-          nullptr, // lpAttributes
-          PAGE_READWRITE, // flProtect
-          0, // dwMaximumSizeHigh
-          k_cbFileMapping, // dwMaximumSizeLow
-          k_wszFileMapping); // lpName
-
-      DCHECK(hMapping);
-
-      auto const p = reinterpret_cast<SharedArea*>(::MapViewOfFile(
-          hMapping,
-          FILE_MAP_READ | FILE_MAP_WRITE,
-          0, // dwFileOffsetHigh
-          0, // dwFileOffsetLow
-          k_cbFileMapping));
-
-      if (p)
-        p->m_hwnd = *this;
-      ::SetEvent(g_hEvent);
-      break;
-    }
-
-    case WM_COPYDATA: {
-      auto const p = reinterpret_cast<COPYDATASTRUCT*>(lParam);
-      auto const file_name = reinterpret_cast<base::char16*>(p->lpData);
-      Application::instance()->view_event_handler()->OpenFile(
-          views::kInvalidWindowId, file_name);
-      // TODO(yosi) Should we call |SetForegroundWindow|?
-      return true;
-    }
-  }
-  return NativeWindow::WindowProc(uMsg, wParam, lParam);
 }

@@ -20,6 +20,7 @@
 #include "base/logging.h"
 #include "base/strings/utf_string_conversions.h"
 #include "evita/editor/application.h"
+#include "evita/editor/shell_handler.h"
 #include "evita/editor/switch_set.h"
 #include "evita/views/switches.h"
 #include "evita/io/io_manager.h"

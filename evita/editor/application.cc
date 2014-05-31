@@ -14,6 +14,7 @@
 #include "base/time/time.h"
 #include "evita/dom/script_thread.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/editor/shell_handler.h"
 #include "evita/io/io_manager.h"
 #include "evita/io/io_thread.h"
 #include "evita/metrics/counter.h"
@@ -35,6 +36,8 @@
 #endif
 #define APP_VERSION L"5.0"
 
+// TODO(yosi) We should move |Application| class into namespace |editor|.
+using namespace editor;
 
 HINSTANCE g_hInstance;
 HINSTANCE g_hResource;
@@ -52,6 +55,7 @@ Application::Application()
       view_idle_count_(0),
       view_idle_hint_(0),
       view_delegate_impl_(new views::ViewDelegateImpl()) {
+  ShellHandler::instance()->Start();
   io_manager_->Start();
   ui::TextInputClientWin::instance()->Start();
   dom::ScriptThread::Start(message_loop_.get(), view_delegate_impl_.get(),

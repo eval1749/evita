@@ -50,7 +50,7 @@ global.CppLexer = (function(options) {
   'while',
 
   // Reserved label
-  'default:',
+  'default:', 'protected:', 'private:', 'public:',
 
   // C Pre-Processor
   '#define',

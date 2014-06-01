@@ -354,6 +354,9 @@ void TextEditWindow::OnDraw(gfx::Graphics*) {
 }
 
 void TextEditWindow::Redraw() {
+  if (!is_shown())
+    return;
+
   auto const selection_is_active = is_selection_active();
 
   UI_ASSERT_DOM_LOCKED();
@@ -407,11 +410,15 @@ void TextEditWindow::Render() {
 
   gfx::Graphics::DrawingScope drawing_scope(*m_gfx);
   Caret::Updater caret_updater(caret_.get());
-  m_gfx->set_dirty_rect(bounds());
+  m_gfx->set_dirty_rect(gfx::Rect(
+      bounds().left_top(),
+      gfx::Size(bounds().width() - vertical_scroll_bar_->bounds().width(),
+                bounds().height())));
   text_renderer_->Render();
 
   view_start_ = text_renderer_->GetStart();
   updateScrollBar();
+  static_cast<Widget*>(vertical_scroll_bar_)->OnDraw(m_gfx);
 
   const auto char_rect = text_renderer_->HitTestTextPosition(m_lCaretPosn);
   if (char_rect.empty()) {

@@ -60,7 +60,7 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: class ScrollBar;
 
   private: std::unique_ptr<Caret> caret_;
-  private: const gfx::Graphics* m_gfx;
+  private: gfx::Graphics* m_gfx;
   private: Posn m_lCaretPosn;
   // TODO(yosi): Manage life time of selection.
   private: Selection* selection_;

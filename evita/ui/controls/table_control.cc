@@ -654,6 +654,7 @@ void TableControl::DidSetFocus(ui::Widget* widget) {
 }
 
 void TableControl::OnDraw(gfx::Graphics* gfx) {
+  gfx->set_dirty_rect(bounds());
   model_->Draw(gfx);
 }
 

@@ -13,6 +13,7 @@
 
 #include "base/logging.h"
 #include "base/strings/string16.h"
+#include "common/castable.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/text_format.h"
@@ -40,7 +41,9 @@ static void fillRect(const gfx::Canvas& gfx, int x, int y, int cx, int cy) {
 //
 // Element
 //
-class Element : public DoubleLinkedNode_<Element> {
+class Element : public common::Castable, public DoubleLinkedNode_<Element> {
+  DECLARE_CASTABLE_CLASS(Element, Castable);
+
   public: enum State {
     State_Normal,
     State_Selected,
@@ -62,12 +65,7 @@ class Element : public DoubleLinkedNode_<Element> {
   // [D]
   public: virtual void Draw(const gfx::Canvas&) const = 0;
 
-  public: template<class T> T* DynamicCast() {
-    return Is<T>() ? StaticCast<T>() : nullptr;
-  }
-
   // [G]
-  public: virtual const char16* GetClass() const = 0;
   public: bool GetHover() const { return m_fHover; }
   public: HIMAGELIST GetImageList() const;
   public: Element* GetNextShow() const;
@@ -81,10 +79,6 @@ class Element : public DoubleLinkedNode_<Element> {
 
   // [I]
   public: void Invalidate(HWND hwnd);
-
-  public: template<class T> bool Is() const
-    { return T::GetClass_() == GetClass(); }
-
   public: bool IsHover() const { return m_fHover; }
   public: bool IsSelected() const { return State_Selected == m_eState; }
   public: bool IsShow() const { return m_fShow; }
@@ -95,14 +89,6 @@ class Element : public DoubleLinkedNode_<Element> {
   public: Element* SetParent(Element* p);
   public: State SetState(State e);
   public: bool Show(bool f);
-
-  public: template<class T> T* StaticCast() {
-    ASSERT(Is<T>());
-    // warning C4946: reinterpret_cast used between related classes:
-    // 'class1' and 'class2'
-    #pragma warning(suppress: 4946)
-    return reinterpret_cast<T*>(this);
-  }
 
   // [U]
   protected: virtual void update();
@@ -218,18 +204,13 @@ enum TabStripImplDesignParams {
 // CloseBox
 //
 class CloseBox final : public Element {
-  public: static const char16*  GetClass_() { return L"CloseBox"; }
-
-  public: virtual const char16* GetClass() const override {
-    return GetClass_();
-  }
+  DECLARE_CASTABLE_CLASS(CloseBox, Element);
 
   public: enum Design {
     Height = 16,
     Width = 17,
-  }; // Desgin
+  };
 
-  // ctor
   public: CloseBox(Element* pParent);
   public: virtual ~CloseBox() = default;
 
@@ -303,11 +284,13 @@ void CloseBox::Draw(const gfx::Canvas& gfx) const {
 //  Represents tab item.
 //
 class Item final : public Element {
+  DECLARE_CASTABLE_CLASS(Item, Element);
+
   private: enum Design {
     k_cxCloseBoxMargin = 3,
     k_cyCloseBoxMargin = 9,
     k_cyDescent = 4,
-  }; // Design
+  };
 
   public: static const char16*  GetClass_() { return L"Item"; }
   public: virtual const char16* GetClass()  const { return GetClass_(); }
@@ -492,11 +475,7 @@ void Item::update() {
 // ListButton
 //
 class ListButton final : public Element {
-  public: static  const char16*  GetClass_() { return L"ListButton"; }
-
-  public: virtual const char16* GetClass()  const override {
-    return GetClass_();
-  }
+  DECLARE_CASTABLE_CLASS(ListButton, Element);
 
   public: ListButton(Element* pParent);
   public: virtual ~ListButton() = default;
@@ -597,6 +576,8 @@ namespace views {
 //    m_cxTab.
 //
 class TabStrip::TabStripImpl final : public Element {
+  DECLARE_CASTABLE_CLASS(TabStripImpl, Element);
+
   friend class TabStrip;
 
   private: enum Constants {
@@ -604,20 +585,14 @@ class TabStrip::TabStripImpl final : public Element {
     k_TabViewId,
     k_ScrollLeft,
     k_ScrollRight,
-  }; // Constatns
+  };
 
   private: enum Drag {
     Drag_None,
 
     Drag_Tab,
     Drag_Start,
-  }; // Drag
-
-  public: static const char16*  GetClass_() { return L"TabStripImpl"; }
-
-  public: virtual const char16* GetClass()  const override {
-    return GetClass_();
-  }
+  };
 
   private: typedef DoubleLinkedList_<Element> Elements;
 
@@ -752,13 +727,11 @@ void TabStrip::TabStripImpl::DeleteTab(int iDeleteItem) {
   bool fSelChanged = m_pSelected == pItem;
 
   if (fSelChanged) {
-    if (pItem->GetPrev()) {
-      m_pSelected = pItem->GetPrev()->DynamicCast<Item>();
-    }
+    if (pItem->GetPrev())
+      m_pSelected = pItem->GetPrev()->as<Item>();
 
-    if (m_pSelected == nullptr && pItem->GetNext()) {
-      m_pSelected = pItem->GetNext()->DynamicCast<Item>();
-    }
+    if (!m_pSelected && pItem->GetNext())
+      m_pSelected = pItem->GetNext()->as<Item>();
   }
 
   if (m_pHover == pItem) {
@@ -772,7 +745,7 @@ void TabStrip::TabStripImpl::DeleteTab(int iDeleteItem) {
   {
     int iItem = 0;
     foreach (Elements::Enum, oEnum, &m_oElements) {
-      Item* pItem = oEnum.Get()->DynamicCast<Item>();
+      Item* pItem = oEnum.Get()->as<Item>();
       if (!pItem) {
         continue;
       }
@@ -898,7 +871,7 @@ Item* TabStrip::TabStripImpl::findItem(int iItem) const {
   }
 
   foreach (Elements::Enum, oEnum, &m_oElements) {
-    auto const pItem = oEnum.Get()->DynamicCast<Item>();
+    auto const pItem = oEnum.Get()->as<Item>();
     if (!pItem) {
       continue;
     }
@@ -913,7 +886,7 @@ Item* TabStrip::TabStripImpl::findItem(int iItem) const {
 
 Item* TabStrip::TabStripImpl::findItemFromPoint(POINT pt) const {
   foreach (Elements::Enum, oEnum, &m_oElements) {
-    auto const pItem = oEnum.Get()->DynamicCast<Item>();
+    auto const pItem = oEnum.Get()->as<Item>();
     if (!pItem) {
       continue;
     }
@@ -947,7 +920,7 @@ void TabStrip::TabStripImpl::handleTabListMenu(POINT) {
   // Add Tab name to menu.
   Item* pPrevItem = nullptr;
   foreach (Elements::Enum, oEnum, &m_oElements) {
-    auto const pItem = oEnum.Get()->DynamicCast<Item>();
+    auto const pItem = oEnum.Get()->as<Item>();
     if (!pItem) {
       continue;
     }
@@ -987,7 +960,7 @@ Element* TabStrip::TabStripImpl::hitTest(POINT pt) const {
     return pHit;
 
   foreach (Elements::Enum, oEnum, &m_oElements) {
-    auto const pItem = oEnum.Get()->DynamicCast<Item>();
+    auto const pItem = oEnum.Get()->as<Item>();
     if (!pItem)
       continue;
 
@@ -1016,7 +989,7 @@ void TabStrip::TabStripImpl::InsertTab(int iItem, const TCITEM* pTcItem) {
 
   Item* pRefItem = nullptr;
   foreach (Elements::Enum, oEnum, &m_oElements) {
-    auto const pItem = oEnum.Get()->DynamicCast<Item>();
+    auto const pItem = oEnum.Get()->as<Item>();
     if (!pItem) {
       continue;
     }
@@ -1063,7 +1036,7 @@ void TabStrip::TabStripImpl::onLButtonDown(POINT pt) {
     return;
   }
 
-  auto const pItem = pElement->DynamicCast<Item>();
+  auto const pItem = pElement->as<Item>();
   if (!pItem) {
     // Not a tab.
     return;
@@ -1096,13 +1069,13 @@ void TabStrip::TabStripImpl::onLButtonUp(POINT pt) {
       return;
     }
 
-    if (pElement->Is<CloseBox>()) {
-      if (auto const item = pElement->GetParent()->DynamicCast<Item>())
+    if (pElement->is<CloseBox>()) {
+      if (auto const item = pElement->GetParent()->as<Item>())
         delegate_->DidClickTabCloseButton(item->m_iItem);
       return;
     }
 
-    if (pElement->Is<ListButton>()) {
+    if (pElement->is<ListButton>()) {
       handleTabListMenu(pt);
       return;
     }
@@ -1121,7 +1094,7 @@ void TabStrip::TabStripImpl::onLButtonUp(POINT pt) {
         m_oElements.InsertBefore(pDragItem, pInsertBefore);
         int iItem = 0;
         foreach (Elements::Enum, oEnum, &m_oElements) {
-          Item* pItem = oEnum.Get()->DynamicCast<Item>();
+          Item* pItem = oEnum.Get()->as<Item>();
           if (!pItem) continue;
           pItem->m_iItem = iItem;
           iItem += 1;
@@ -1211,7 +1184,7 @@ void TabStrip::TabStripImpl::OnMouseMove(POINT pt) {
     // Tab dragging
     auto const pInsertBefore = pHover == nullptr ?
       nullptr :
-      pHover->DynamicCast<Item>();
+      pHover->as<Item>();
 
     ::SetCursor(s_hDragTabCursor);
 
@@ -1283,9 +1256,9 @@ void TabStrip::TabStripImpl::UpdateHover(Element* pHover) {
       return;
 
   if (m_pHover) {
-    if (!pHover || !pHover->Is<CloseBox>() ||
+    if (!pHover || !pHover->is<CloseBox>() ||
         pHover->GetParent() != m_pHover) {
-      if (m_pHover->Is<CloseBox>()) {
+      if (m_pHover->is<CloseBox>()) {
         m_pHover->SetHover(false);
         m_pHover = m_pHover->GetParent();
       }
@@ -1346,7 +1319,7 @@ bool TabStrip::TabStripImpl::UpdateLayout() {
 
   Item* pStartItem = nullptr;
   foreach (Elements::Enum, oEnum, &m_oElements) {
-    Item* pItem = oEnum.Get()->DynamicCast<Item>();
+    Item* pItem = oEnum.Get()->as<Item>();
     if (pItem) {
       pStartItem = pItem;
       break;
@@ -1359,7 +1332,7 @@ bool TabStrip::TabStripImpl::UpdateLayout() {
     bool fShow = false;
     x = m_xTab;
     foreach (Elements::Enum, oEnum, &m_oElements) {
-      Item* pItem = oEnum.Get()->DynamicCast<Item>();
+      Item* pItem = oEnum.Get()->as<Item>();
       if (!pItem) {
         continue;
       }
@@ -1405,7 +1378,7 @@ bool TabStrip::TabStripImpl::UpdateLayout() {
         break;
       }
 
-      pStartItem = pNext->DynamicCast<Item>();
+      pStartItem = pNext->as<Item>();
       if (pStartItem) {
         break;
       }
@@ -1420,10 +1393,10 @@ bool TabStrip::TabStripImpl::UpdateLayout() {
 
     foreach (Elements::Enum, oEnum, &m_oElements) {
       auto const pElement = oEnum.Get();
-      if (pElement->Is<Item>()) {
-        ti.uId = static_cast<uint>(pElement->StaticCast<Item>()->m_iItem);
+      if (pElement->is<Item>()) {
+        ti.uId = static_cast<DWORD>(pElement->as<Item>()->m_iItem);
 
-      } else if (pElement->Is<ListButton>()) {
+      } else if (pElement->is<ListButton>()) {
         ti.uId = k_TabListId;
       } else {
         continue;

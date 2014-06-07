@@ -40,6 +40,106 @@ static void fillRect(const gfx::Canvas& gfx, int x, int y, int cx, int cy) {
 
 //////////////////////////////////////////////////////////////////////
 //
+// Tooltip
+//
+class Tooltip final {
+  public: class ToolDelegate {
+    public: ToolDelegate() = default;
+    public: virtual ~ToolDelegate() = default;
+
+    public: virtual base::string16 GetTooltipText() = 0;
+
+    DISALLOW_COPY_AND_ASSIGN(ToolDelegate);
+  };
+
+  private: HWND tool_hwnd_;
+  private: base::string16 tool_text_;
+  private: HWND tooltip_hwnd_;
+
+  public: Tooltip();
+  public: ~Tooltip();
+
+  public: void AddTool(ToolDelegate* tool_delegate);
+  public: void DeleteTool(ToolDelegate* tool_delegate);
+  public: void OnNotify(NMHDR* nmhdr);
+  public: void Realize(HWND tool_hwnd);
+  private: void SendMessage(UINT message, TOOLINFO* info);
+  public: void SetToolBounds(ToolDelegate* tool_delegate, const RECT& bounds);
+
+  DISALLOW_COPY_AND_ASSIGN(Tooltip);
+};
+
+Tooltip::Tooltip()
+    : tool_hwnd_(nullptr),
+      tooltip_hwnd_(nullptr) {
+}
+
+Tooltip::~Tooltip() {
+  if (!tooltip_hwnd_)
+    ::DestroyWindow(tooltip_hwnd_);
+}
+
+void Tooltip::AddTool(ToolDelegate* tool_delegate) {
+  TOOLINFO info = {0};
+  info.lpszText = LPSTR_TEXTCALLBACK;
+  info.uId = reinterpret_cast<UINT_PTR>(tool_delegate);
+  SendMessage(TTM_ADDTOOL, &info);
+}
+
+void Tooltip::DeleteTool(ToolDelegate* tool_delegate) {
+  if (!tooltip_hwnd_)
+    return;
+  TOOLINFO info = {0};
+  info.uId = reinterpret_cast<UINT_PTR>(tool_delegate);
+  SendMessage(TTM_DELTOOL, &info);
+}
+
+void Tooltip::OnNotify(NMHDR* nmhdr) {
+  if (nmhdr->hwndFrom != tooltip_hwnd_ || nmhdr->code != TTN_NEEDTEXT)
+    return;
+  // Set width of tool tip
+  ::SendMessage(tooltip_hwnd_, TTM_SETMAXTIPWIDTH, 0, 300);
+  auto const disp_info = reinterpret_cast<NMTTDISPINFO*>(nmhdr);
+  tool_text_ = reinterpret_cast<ToolDelegate*>(nmhdr->idFrom)->
+      GetTooltipText();
+  disp_info->lpszText = const_cast<LPWSTR>(tool_text_.c_str());
+}
+
+void Tooltip::Realize(HWND tool_hwnd) {
+  DCHECK(tool_hwnd);
+  DCHECK(!tool_hwnd_);
+  DCHECK(!tooltip_hwnd_);
+  tool_hwnd_ = tool_hwnd;
+  tooltip_hwnd_ = ::CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, nullptr,
+      WS_POPUP | TTS_NOPREFIX, 0, 0, 0, 0, tool_hwnd, nullptr, nullptr,
+      nullptr);
+  if (!tooltip_hwnd_) {
+    PLOG(WARNING) << "tooltipe creation failed, disabling tooltips";
+    return;
+  }
+
+  TOOLINFO info;
+  info.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+  info.uId = reinterpret_cast<UINT_PTR>(tool_hwnd_);
+  info.lpszText = nullptr;
+  SendMessage(TTM_ADDTOOL, &info);
+}
+
+void Tooltip::SendMessage(UINT message, TOOLINFO* info) {
+  info->cbSize = sizeof(*info);
+  info->hwnd = tool_hwnd_;
+  ::SendMessage(tooltip_hwnd_, message, 0, reinterpret_cast<LPARAM>(info));
+}
+
+void Tooltip::SetToolBounds(ToolDelegate* tool, const RECT& bounds) {
+  TOOLINFO info = {0};
+  info.rect = bounds;
+  info.uId = reinterpret_cast<UINT_PTR>(tool);
+  SendMessage(TTM_NEWTOOLRECT, &info);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // Element
 //
 class Element : public common::Castable {
@@ -258,7 +358,7 @@ void CloseBox::Draw(const gfx::Canvas& gfx) const {
 // Item
 //  Represents tab item.
 //
-class Item final : public Element {
+class Item final : public Element, public Tooltip::ToolDelegate {
   DECLARE_CASTABLE_CLASS(Item, Element);
 
   private: enum Design {
@@ -274,8 +374,10 @@ class Item final : public Element {
   private: RECT m_rcLabel;
   private: CloseBox m_closeBox;
   public: uint32_t m_rgfState;
+  private: views::TabStripDelegate* tab_strip_delegate_;
 
-  public: Item(Element* pParent, const TCITEM* pTcItem);
+  public: Item(views::TabStripDelegate* tab_strip_delegate,
+               Element* pParent, const TCITEM* pTcItem);
   public: virtual ~Item() = default;
 
   public: int tab_index() const { return tab_index_; }
@@ -292,15 +394,20 @@ class Item final : public Element {
   public: virtual Element* HitTest(POINT point) const override;
   private: void update() override;
 
+  // Tooltip::ToolDelegate
+  private: base::string16 GetTooltipText() override;
+
   DISALLOW_COPY_AND_ASSIGN(Item);
 };
 
-Item::Item(Element* pParent, const TCITEM* pTcItem) :
-    m_iImage(-1),
-    tab_index_(0),
-    m_rgfState(0),
-    m_closeBox(this),
-    Element(pParent) {
+Item::Item(views::TabStripDelegate* tab_strip_delegate, Element* pParent,
+           const TCITEM* pTcItem)
+    : Element(pParent),
+      m_iImage(-1),
+      tab_index_(0),
+      m_rgfState(0),
+      m_closeBox(this),
+      tab_strip_delegate_(tab_strip_delegate) {
   SetItem(pTcItem);
 }
 
@@ -444,6 +551,11 @@ void Item::update() {
   ComputeLayout();
 }
 
+// Tooltip::ToolDelegate
+base::string16 Item::GetTooltipText() {
+  return tab_strip_delegate_->GetTooltipTextForTab(tab_index_);
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // ListButton
@@ -555,7 +667,6 @@ class TabStrip::TabStripImpl final : public Element {
   friend class TabStrip;
 
   private: enum Constants {
-    k_TabListId = 1000,
     k_TabViewId,
     k_ScrollLeft,
     k_ScrollRight,
@@ -579,7 +690,6 @@ class TabStrip::TabStripImpl final : public Element {
   private: Drag m_eDrag;
   private: HMENU m_hTabListMenu;
   private: HWND m_hwnd;
-  private: HWND m_hwndToolTips;
   private: int m_iFocus;
   private: uint m_nStyle;
   private: ListButton m_oListButton;
@@ -590,7 +700,7 @@ class TabStrip::TabStripImpl final : public Element {
   private: Item* m_pSelected;
   private: POINT m_ptDragStart;
   private: int m_xTab;
-  private: base::string16 tooltip_text_;
+  private: Tooltip tooltip_;
 
   public: TabStripImpl(HWND hwnd, TabStripDelegate* delegate);
   public: virtual ~TabStripImpl();
@@ -654,7 +764,6 @@ TabStrip::TabStripImpl::TabStripImpl(HWND hwnd, TabStripDelegate* delegate)
       m_eDrag(Drag_None),
       m_hTabListMenu(nullptr),
       m_hwnd(hwnd),
-      m_hwndToolTips(nullptr),
       m_iFocus(-1),
       m_nStyle(0),
       m_oListButton(this),
@@ -671,13 +780,8 @@ TabStrip::TabStripImpl::~TabStripImpl() {
   if (auto const text_format = m_gfx.work<gfx::TextFormat>())
       delete text_format;
 
-  if (m_hwndToolTips && (m_nStyle & TCS_TOOLTIPS) != 0) {
-    ::DestroyWindow(m_hwndToolTips);
-  }
-
-  if (m_hTabListMenu) {
+  if (m_hTabListMenu)
     ::DestroyMenu(m_hTabListMenu);
-  }
 }
 
 bool TabStrip::TabStripImpl::changeFont(const gfx::Canvas& gfx) {
@@ -698,30 +802,19 @@ void TabStrip::TabStripImpl::DeleteTab(int iDeleteItem) {
   if (present == m_oElements.end())
     return;
 
-  auto const selection_changed = m_pSelected == *present;
+  auto const tab_item = (*present)->as<Item>();
+  auto const selection_changed = m_pSelected == tab_item;
   if (selection_changed)
     m_pSelected = GetTabFromIndex(iDeleteItem ? iDeleteItem - 1 : 1);
 
-  if (m_pHover == *present)
+  if (m_pHover == tab_item)
     m_pHover = nullptr;
 
   m_oElements.erase(present);
   RenumberTabIndex();
-
-  if (m_hwndToolTips) {
-    TOOLINFO ti;
-    ti.cbSize = sizeof(ti);
-    ti.hwnd = m_hwnd;
-    ti.uId = static_cast<DWORD>(num_tab_items_);
-    ::SendMessage(
-        m_hwndToolTips,
-        TTM_DELTOOL,
-        0,
-        reinterpret_cast<LPARAM>(&ti));
-  }
-
+  tooltip_.DeleteTool(tab_item);
+  delete tab_item;
   Redraw();
-
   if (selection_changed) {
     if (m_pSelected)
       m_pSelected->SetState(Element::State_Selected);
@@ -736,36 +829,7 @@ void TabStrip::TabStripImpl::DidChangeTabSelection() {
 void TabStrip::TabStripImpl::DidCreateNativeWindow() {
   m_gfx.Init(m_hwnd);
   changeFont(m_gfx);
-
-  m_hwndToolTips = ::CreateWindowEx(
-      WS_EX_TOPMOST,
-      TOOLTIPS_CLASS,
-      nullptr,
-      WS_POPUP | TTS_NOPREFIX, // | TTS_ALWAYSTIP,
-      CW_USEDEFAULT,
-      CW_USEDEFAULT,
-      CW_USEDEFAULT,
-      CW_USEDEFAULT,
-      m_hwnd,
-      nullptr,
-      g_hInstance,
-      nullptr);
-
-  if (m_hwndToolTips) {
-    m_nStyle |= TCS_TOOLTIPS;
-
-    TOOLINFO ti;
-    ti.cbSize = sizeof(ti);
-    ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
-    ti.hwnd = m_hwnd;
-    ti.uId = reinterpret_cast<UINT_PTR>(m_hwnd);
-    ti.lpszText = nullptr;
-    ::SendMessage(
-        m_hwndToolTips,
-        TTM_ADDTOOL,
-        0,
-        reinterpret_cast<LPARAM>(&ti));
-  }
+  tooltip_.Realize(m_hwnd);
 }
 
 // Send TabDragMsg to window which can handle it.
@@ -906,7 +970,7 @@ Element* TabStrip::TabStripImpl::hitTest(POINT pt) const {
 }
 
 void TabStrip::TabStripImpl::InsertTab(int tab_index, const TCITEM* pTcItem) {
-  auto const new_tab_item = new Item(this, pTcItem);
+  auto const new_tab_item = new Item(delegate_, this, pTcItem);
   auto present = FindItem(tab_index);
   if (present == m_oElements.end()) {
     m_oElements.push_back(new_tab_item);
@@ -917,18 +981,7 @@ void TabStrip::TabStripImpl::InsertTab(int tab_index, const TCITEM* pTcItem) {
   }
   ++num_tab_items_;
   RenumberTabIndex();
-
-  if (m_hwndToolTips) {
-    TOOLINFO ti;
-    ti.cbSize = sizeof(ti);
-    ti.hwnd = m_hwnd;
-    ti.lpszText = LPSTR_TEXTCALLBACK;
-    ti.uFlags = 0;
-    ti.uId = static_cast<DWORD>(num_tab_items_ - 1);
-    ::SendMessage(m_hwndToolTips, TTM_ADDTOOL, 0,
-                  reinterpret_cast<LPARAM>(&ti));
-  }
-
+  tooltip_.AddTool(new_tab_item);
   Redraw();
 }
 
@@ -1089,16 +1142,7 @@ void TabStrip::TabStripImpl::OnMouseMove(POINT pt) {
 }
 
 LRESULT TabStrip::TabStripImpl::OnNotify(NMHDR* nmhdr) {
-  if (nmhdr->hwndFrom != m_hwndToolTips)
-    return 0;
-  if (nmhdr->code != TTN_NEEDTEXT)
-    return 0;
-  // Set width of tooltip
-  ::SendMessage(m_hwndToolTips, TTM_SETMAXTIPWIDTH, 0, 300);
-  auto const disp_info = reinterpret_cast<NMTTDISPINFO*>(nmhdr);
-  auto const tab_index = static_cast<int>(nmhdr->idFrom);
-  tooltip_text_ = delegate_->GetTooltipTextForTab(tab_index);
-  disp_info->lpszText = const_cast<LPWSTR>(tooltip_text_.c_str());
+  tooltip_.OnNotify(nmhdr);
   return 0;
 }
 
@@ -1251,34 +1295,14 @@ bool TabStrip::TabStripImpl::UpdateLayout() {
       break;
   }
 
-  if (m_hwndToolTips) {
-    TOOLINFO ti;
-    ti.cbSize = sizeof(ti);
-    ti.hwnd = m_hwnd;
-    ti.uFlags = 0;
-
-    for (auto element : m_oElements) {
-      if (element->is<Item>()) {
-        ti.uId = static_cast<DWORD>(element->as<Item>()->tab_index());
-      } else if (element->is<ListButton>()) {
-        ti.uId = k_TabListId;
-      } else {
-        continue;
-      }
-
-      if (element->IsShow()) {
-        ti.rect = *element->GetRect();
-      } else {
-        ti.rect.left = ti.rect.right = -1;
-        ti.rect.top = ti.rect.bottom = -1;
-      }
-
-      ::SendMessage(
-          m_hwndToolTips,
-          TTM_NEWTOOLRECT,
-          0,
-          reinterpret_cast<LPARAM>(&ti));
-    }
+  for (auto element : m_oElements) {
+    auto const tab_item = element->as<Item>();
+    if (!tab_item)
+      continue;
+    if (tab_item->IsShow())
+      tooltip_.SetToolBounds(tab_item, *tab_item->GetRect());
+    else
+      tooltip_.SetToolBounds(tab_item, Rect());
   }
 
   return fChanged;

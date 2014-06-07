@@ -56,9 +56,9 @@ class Cell : public common::Castable {
 
   protected: const RenderStyle& style() const { return style_; }
 
-  protected: void FillOverlay(const gfx::Graphics& gfx,
+  protected: void FillOverlay(const gfx::Canvas& gfx,
                               const gfx::RectF& rect) const;
-  protected: void FillBackground(const gfx::Graphics& gfx,
+  protected: void FillBackground(const gfx::Canvas& gfx,
                                  const gfx::RectF& rect) const;
   protected: void IncrementWidth(float amount);
 
@@ -68,9 +68,9 @@ class Cell : public common::Castable {
   public: virtual Posn Fix(float line_height, float line_descent);
   public: virtual uint32_t Hash() const;
   public: virtual gfx::RectF HitTestTextPosition(Posn position) const;
-  public: virtual Posn MapXToPosn(const gfx::Graphics&, float) const;
+  public: virtual Posn MapXToPosn(const gfx::Canvas&, float) const;
   public: virtual bool Merge(const RenderStyle& style, float width);
-  public: virtual void Render(const gfx::Graphics& gfx,
+  public: virtual void Render(const gfx::Canvas& gfx,
                               const gfx::RectF& rect) const;
 };
 
@@ -114,9 +114,9 @@ class MarkerCell final : public Cell {
   private: virtual Posn Fix(float iHeight, float iDescent) override;
   private: virtual uint32_t Hash() const override;
   private: virtual gfx::RectF HitTestTextPosition(Posn lPosn) const override;
-  private: virtual Posn MapXToPosn(const gfx::Graphics& gfx,
+  private: virtual Posn MapXToPosn(const gfx::Canvas& gfx,
                                    float x) const override;
-  private: virtual void Render(const gfx::Graphics& gfx,
+  private: virtual void Render(const gfx::Canvas& gfx,
                                const gfx::RectF& rect) const override;
 };
 
@@ -151,10 +151,10 @@ class TextCell : public Cell {
   public: virtual uint32_t Hash() const override final;
   public: virtual gfx::RectF HitTestTextPosition(
       Posn position) const override;
-  public: virtual Posn MapXToPosn(const gfx::Graphics& gfx,
+  public: virtual Posn MapXToPosn(const gfx::Canvas& gfx,
                                   float x) const override final;
   public: virtual bool Merge(const RenderStyle& style, float width) override;
-  public: virtual void Render(const gfx::Graphics& gfx,
+  public: virtual void Render(const gfx::Canvas& gfx,
                               const gfx::RectF& rect) const override;
 };
 
@@ -174,7 +174,7 @@ class UnicodeCell final : public TextCell {
   private: virtual Cell* Copy() const override;
   private: virtual gfx::RectF HitTestTextPosition(Posn lPosn) const override;
   private: virtual bool Merge(const RenderStyle& style, float width) override;
-  private: virtual void Render(const gfx::Graphics& gfx,
+  private: virtual void Render(const gfx::Canvas& gfx,
                                const gfx::RectF& rect) const override;
 };
 

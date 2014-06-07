@@ -60,7 +60,7 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: class ScrollBar;
 
   private: std::unique_ptr<Caret> caret_;
-  private: gfx::Graphics* m_gfx;
+  private: gfx::Canvas* m_gfx;
   private: Posn m_lCaretPosn;
   // TODO(yosi): Manage life time of selection.
   private: Selection* selection_;
@@ -113,7 +113,7 @@ class TextEditWindow : public text::BufferMutationObserver,
   public: Posn MapPointToPosn(const gfx::PointF point);
 
   // [O]
-  private: virtual void OnDraw(gfx::Graphics* gfx) override;
+  private: virtual void OnDraw(gfx::Canvas* gfx) override;
 
   // [R]
   private: virtual void Redraw() override;

@@ -23,20 +23,20 @@
 namespace views {
 namespace {
 
-float AlignHeightToPixel(const gfx::Graphics& gfx, float height) {
+float AlignHeightToPixel(const gfx::Canvas& gfx, float height) {
   return gfx.AlignToPixel(gfx::SizeF(0.0f, height)).height;
 }
 
-float AlignWidthToPixel(const gfx::Graphics&, float width) {
+float AlignWidthToPixel(const gfx::Canvas&, float width) {
   return width;
 }
 
-inline void drawLine(const gfx::Graphics& gfx, const gfx::Brush& brush,
+inline void drawLine(const gfx::Canvas& gfx, const gfx::Brush& brush,
                      float sx, float sy, float ex, float ey) {
   gfx.DrawLine(brush, sx, sy, ex, ey);
 }
 
-inline void drawVLine(const gfx::Graphics& gfx, const gfx::Brush& brush,
+inline void drawVLine(const gfx::Canvas& gfx, const gfx::Brush& brush,
                       float x, float sy, float ey) {
   drawLine(gfx, brush, x, sy, x, ey);
 }
@@ -306,7 +306,7 @@ bool TextRenderer::ScrollUp() {
   return true;
 }
 
-void TextRenderer::SetGraphics(const gfx::Graphics* gfx) {
+void TextRenderer::SetGraphics(const gfx::Canvas* gfx) {
   gfx_ = gfx;
   screen_text_block_->SetGraphics(gfx);
 }

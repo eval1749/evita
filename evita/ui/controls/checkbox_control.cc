@@ -29,7 +29,7 @@ void CheckboxControl::set_checked(bool new_checked) {
 }
 
 // ui::Widget
-void CheckboxControl::OnDraw(gfx::Graphics* gfx) {
+void CheckboxControl::OnDraw(gfx::Canvas* gfx) {
   if (!bounds())
     return;
 
@@ -39,7 +39,7 @@ void CheckboxControl::OnDraw(gfx::Graphics* gfx) {
   auto const frame_size = gfx::SizeF(12.0f, 12.0f);
   auto const offset = (rect.size() - frame_size) / 2;
   gfx::RectF frame_rect(rect.left_top() + offset, frame_size);
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
 
   gfx::Brush frame_brush(*gfx, style_.shadow);
   (*gfx)->DrawRectangle(frame_rect, frame_brush);

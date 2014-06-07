@@ -98,7 +98,7 @@ gfx::RectF TextLine::HitTestTextPosition(Posn offset) const {
   return gfx::RectF();
 }
 
-Posn TextLine::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
+Posn TextLine::MapXToPosn(const gfx::Canvas& gfx, float xGoal) const {
   auto xCell = 0.0f;
   auto lPosn = GetEnd() - 1;
   for (const auto cell : cells_) {
@@ -113,7 +113,7 @@ Posn TextLine::MapXToPosn(const gfx::Graphics& gfx, float xGoal) const {
   return lPosn;
 }
 
-void TextLine::Render(const gfx::Graphics& gfx) const {
+void TextLine::Render(const gfx::Canvas& gfx) const {
   auto x = bounds_.left;
   for (auto cell : cells_) {
     gfx::RectF rect(x, bounds_.top, x + cell->width(),

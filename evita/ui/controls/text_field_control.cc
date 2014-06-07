@@ -57,11 +57,11 @@ class TextFieldControl::Renderer {
 
   private: void MakeSelectionVisible();
   public: int Renderer::MapPointToOffset(const gfx::PointF& point) const;
-  public: void Render(gfx::Graphics* gfx, bool has_focus,
+  public: void Render(gfx::Canvas* gfx, bool has_focus,
                       Control::State state);
-  private: void RenderCaret(gfx::Graphics* gfx,
+  private: void RenderCaret(gfx::Canvas* gfx,
                             const gfx::RectF& caret_rect) const;
-  private: void RenderSelection(gfx::Graphics* gfx);
+  private: void RenderSelection(gfx::Canvas* gfx);
   private: void ResetTextLayout();
   private: void ResetViewPort();
   public: void SetBounds(const gfx::RectF& rect);
@@ -185,7 +185,7 @@ int TextFieldControl::Renderer::MapPointToOffset(
   return static_cast<int>(metrics.textPosition + is_trailing);
 }
 
-void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
+void TextFieldControl::Renderer::Render(gfx::Canvas* gfx, bool has_focus,
                                         Control::State state) {
   if (!bounds_)
     return;
@@ -195,7 +195,7 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
   // Render frame
   const auto frame_rect = bounds_;
   {
-    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
+    gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
     gfx->DrawRectangle(gfx::Brush(*gfx, style_.shadow), frame_rect);
   }
 
@@ -211,7 +211,7 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
   {
     gfx::Brush text_brush(*gfx, state == State::Disabled ? style_.gray_text :
                                                            style_.color);
-    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, view_bounds_);
+    gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx, view_bounds_);
     (*gfx)->DrawTextLayout(text_origin(), *text_layout_, text_brush,
                            D2D1_DRAW_TEXT_OPTIONS_CLIP);
   }
@@ -220,7 +220,7 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
     RenderSelection(gfx);
 
   // Render state
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, bounds_);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx, bounds_);
   switch (state) {
     case Control::State::Disabled:
       gfx->FillRectangle(
@@ -241,12 +241,12 @@ void TextFieldControl::Renderer::Render(gfx::Graphics* gfx, bool has_focus,
 }
 
 void TextFieldControl::Renderer::RenderCaret(
-    gfx::Graphics* gfx, const gfx::RectF& caret_bounds) const {
+    gfx::Canvas* gfx, const gfx::RectF& caret_bounds) const {
   Caret::instance()->Update(gfx, caret_bounds);
   ui::TextInputClient::Get()->set_caret_bounds(caret_bounds);
 }
 
-void TextFieldControl::Renderer::RenderSelection(gfx::Graphics* gfx) {
+void TextFieldControl::Renderer::RenderSelection(gfx::Canvas* gfx) {
   const auto text_origin = this->text_origin();
   if (selection_.collapsed()) {
     auto caret_x = 0.0f;
@@ -384,7 +384,7 @@ int TextFieldControl::MapPointToOffset(const gfx::PointF& point) const {
 }
 
 // ui::Caret::Owner
-void TextFieldControl::UpdateCaret(gfx::Graphics* gfx) {
+void TextFieldControl::UpdateCaret(gfx::Canvas* gfx) {
   renderer_->Render(gfx, has_focus(), state());
 }
 
@@ -409,7 +409,7 @@ HCURSOR TextFieldControl::GetCursorAt(const Point&) const {
   return ::LoadCursor(nullptr, IDC_IBEAM);
 }
 
-void TextFieldControl::OnDraw(gfx::Graphics* gfx) {
+void TextFieldControl::OnDraw(gfx::Canvas* gfx) {
   renderer_->Render(gfx, has_focus(), state());
 }
 

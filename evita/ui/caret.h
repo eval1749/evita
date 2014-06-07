@@ -24,7 +24,7 @@ class Caret final : public common::Singleton<Caret> {
     public: Owner();
     public: virtual ~Owner();
 
-    public: virtual void UpdateCaret(gfx::Graphics* gfx) = 0;
+    public: virtual void UpdateCaret(gfx::Canvas* gfx) = 0;
   };
 
   private: base::Time last_blink_time_;
@@ -35,10 +35,10 @@ class Caret final : public common::Singleton<Caret> {
   public: Caret();
   public: ~Caret();
 
-  public: void Blink(gfx::Graphics* gfx);
+  public: void Blink(gfx::Canvas* gfx);
   public: void Give(Owner* owner);
   public: void Take(Owner* owner);
-  public: void Update(gfx::Graphics* gfx, const gfx::RectF& rect);
+  public: void Update(gfx::Canvas* gfx, const gfx::RectF& rect);
 
   DISALLOW_COPY_AND_ASSIGN(Caret);
 };

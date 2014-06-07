@@ -65,9 +65,9 @@ class Element : public DoubleLinkedNode_<Element> {
   }
 
   // [D]
-  public: virtual void Draw(const gfx::Graphics&) const = 0;
+  public: virtual void Draw(const gfx::Canvas&) const = 0;
 
-  protected: static void fillRect(const gfx::Graphics& gfx, int x, int y,
+  protected: static void fillRect(const gfx::Canvas& gfx, int x, int y,
                                   int cx, int cy) {
     RECT rc;
     rc.left = x;
@@ -228,7 +228,7 @@ class CloseBox : public Element {
 
   // [D]
 
-  private: void drawXMark(const gfx::Graphics& gfx, gfx::ColorF color) const {
+  private: void drawXMark(const gfx::Canvas& gfx, gfx::ColorF color) const {
     gfx::Brush brush(gfx, color);
 
     RECT rc = m_rc;
@@ -271,7 +271,7 @@ class CloseBox : public Element {
     #undef hline
   }
 
-  public: virtual void Draw(const gfx::Graphics& gfx) const override {
+  public: virtual void Draw(const gfx::Canvas& gfx) const override {
     drawXMark(gfx, markColor());
   }
 
@@ -340,7 +340,7 @@ class Item : public Element {
 
   // [D]
   // Draw
-  public: virtual void Draw(const gfx::Graphics& gfx) const override {
+  public: virtual void Draw(const gfx::Canvas& gfx) const override {
     #if DEBUG_HOVER
       DEBUG_PRINTF("%p sel=%d %ls\n",
         this,
@@ -370,7 +370,7 @@ class Item : public Element {
     }
   }
 
-  private: void drawContent(const gfx::Graphics& gfx) const {
+  private: void drawContent(const gfx::Canvas& gfx) const {
     drawIcon(gfx);
 
     // Label Text
@@ -387,7 +387,7 @@ class Item : public Element {
     }
   }
 
-  private: void drawIcon(const gfx::Graphics& gfx) const {
+  private: void drawIcon(const gfx::Canvas& gfx) const {
     if (m_iImage < 0)
       return;
     auto const hImageList = GetImageList();
@@ -489,7 +489,7 @@ class ListButton : public Element {
     Element(pParent) {}
 
   // [D]
-  public: virtual void Draw(const gfx::Graphics& gfx) const override {
+  public: virtual void Draw(const gfx::Canvas& gfx) const override {
     ASSERT(IsShow());
     if (m_rc.left == m_rc.right)
         return;
@@ -509,7 +509,7 @@ class ListButton : public Element {
     }
   }
 
-  private: void drawDownArrow(const gfx::Graphics& gfx) const {
+  private: void drawDownArrow(const gfx::Canvas& gfx) const {
     auto const x = (m_rc.right - m_rc.left - 4) / 2 + m_rc.left;
     auto const y = (m_rc.bottom - m_rc.top) / 2 + m_rc.top;
     gfx::Brush arrowBrush(gfx, gfx::blackColor());
@@ -597,7 +597,7 @@ class TabStrip::TabStripImpl : public Element {
 
   private: typedef DoubleLinkedList_<Element> Elements;
 
-  private: gfx::Graphics m_gfx;
+  private: gfx::Canvas m_gfx;
   private: int m_cItems;
   private: BOOL m_compositionEnabled;
   private: int m_cxTab;
@@ -623,7 +623,7 @@ class TabStrip::TabStripImpl : public Element {
   public: virtual ~TabStripImpl();
 
   // [C]
-  private: bool changeFont(const gfx::Graphics& gfx) {
+  private: bool changeFont(const gfx::Canvas& gfx) {
     LOGFONT lf;
     if (!::SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(lf), &lf, 0))
       return false;
@@ -785,7 +785,7 @@ class TabStrip::TabStripImpl : public Element {
   // [D]
   private: void DidChangeTabSelection();
 
-  public: void Draw(const gfx::Graphics& gfx) const override {
+  public: void Draw(const gfx::Canvas& gfx) const override {
     gfx->SetTransform(D2D1::IdentityMatrix());
     gfx->Clear(gfx::sysColor(COLOR_3DFACE,
                              m_compositionEnabled ? 0.0f : 1.0f));
@@ -800,7 +800,7 @@ class TabStrip::TabStripImpl : public Element {
         drawInsertMarker(m_gfx, m_pInsertBefore->GetRect());
   }
 
-  private: static void drawInsertMarker(const gfx::Graphics& gfx, RECT* prc) {
+  private: static void drawInsertMarker(const gfx::Canvas& gfx, RECT* prc) {
     auto rc = * prc;
     rc.top += 5;
     rc.bottom -= 7;
@@ -1557,7 +1557,7 @@ void TabStrip::OnMouseReleased(const ui::MouseEvent& event) {
 }
 
 void TabStrip::OnPaint(const Rect rect) {
-  gfx::Graphics::DrawingScope drawing_scope(impl_->m_gfx);
+  gfx::Canvas::DrawingScope drawing_scope(impl_->m_gfx);
   impl_->m_gfx.set_dirty_rect(rect);
   impl_->Draw(impl_->m_gfx);
 }

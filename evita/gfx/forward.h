@@ -15,7 +15,7 @@
 namespace gfx {
 class Brush;
 class FontFace;
-class Graphics;
+class Canvas;
 template<typename base, typename element> class Size_;
 template<typename base, typename size> class Point_;
 template<typename base, typename point, typename size> class Rect_;

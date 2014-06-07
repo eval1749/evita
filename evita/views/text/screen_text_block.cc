@@ -26,7 +26,7 @@ namespace {
 const auto kMarkerLeftMargin = 2.0f;
 const auto kMarkerWidth = 4.0f;
 
-inline void FillRect(const gfx::Graphics& gfx, const gfx::RectF& rect,
+inline void FillRect(const gfx::Canvas& gfx, const gfx::RectF& rect,
                      gfx::ColorF color) {
   gfx::Brush fill_brush(gfx, color);
   gfx.FillRectangle(fill_brush, rect);
@@ -67,7 +67,7 @@ class ScreenTextBlock::RenderContext {
   private: mutable std::vector<gfx::RectF> copy_rects_;
   private: mutable std::vector<gfx::RectF> dirty_rects_;
   private: const std::list<TextLine*>& format_lines_;
-  private: const gfx::Graphics* gfx_;
+  private: const gfx::Canvas* gfx_;
   private: const gfx::RectF bounds_;
   private: const std::vector<TextLine*>& screen_lines_;
   private: const ScreenTextBlock* screen_text_block_;
@@ -216,7 +216,7 @@ std::vector<TextLine*>::const_iterator
 
 void ScreenTextBlock::RenderContext::Finish() {
   // Draw dirty rectangles for debugging.
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, bounds_);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx_, bounds_);
   for (auto rect : copy_rects_) {
     #if DEBUG_DRAW
       DVLOG(0) << "copy " << rect;
@@ -243,7 +243,7 @@ bool ScreenTextBlock::RenderContext::Render() {
       DCHECK_GE(last_format_line->bounds().bottom, bounds_.bottom);
   }
 
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, bounds_);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx_, bounds_);
 
   auto const dirty_line_start = FindFirstMismatch();
   if (dirty_line_start != format_lines_.end()) {
@@ -385,7 +385,7 @@ void ScreenTextBlock::Reset() {
   has_screen_bitmap_ = false;
 }
 
-void ScreenTextBlock::SetGraphics(const gfx::Graphics* gfx) {
+void ScreenTextBlock::SetGraphics(const gfx::Canvas* gfx) {
   Reset();
   gfx_ = gfx;
 }
@@ -395,7 +395,7 @@ void ScreenTextBlock::SetBounds(const gfx::RectF& rect) {
   bounds_ = rect;
 }
 
-// gfx::Graphics::Observer
+// gfx::Canvas::Observer
 void ScreenTextBlock::ShouldDiscardResources() {
   Reset();
 }

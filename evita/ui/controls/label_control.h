@@ -33,7 +33,7 @@ class LabelControl final : public Control {
 
   // ui::Widget
   private: virtual void DidResize() override;
-  private: virtual void OnDraw(gfx::Graphics* gfx) override;
+  private: virtual void OnDraw(gfx::Canvas* gfx) override;
 
   DISALLOW_COPY_AND_ASSIGN(LabelControl);
 };

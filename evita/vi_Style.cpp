@@ -98,7 +98,7 @@ class Font::FontImpl {
   }
 
   // [D]
-  public: void DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,
+  public: void DrawText(const gfx::Canvas& gfx,const gfx::Brush& text_brush,
                         const gfx::PointF& baseline, const char16* chars,
                         uint num_chars) const {
     ASSERT(num_chars);
@@ -190,14 +190,14 @@ Font::Font(const LOGFONT* log_font)
 Font::~Font() {
 }
 
-void Font::DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,
+void Font::DrawText(const gfx::Canvas& gfx,const gfx::Brush& text_brush,
                     const gfx::RectF& rect, const base::char16* chars,
                     uint num_chars) const {
   auto const baseline = rect.left_top() + gfx::SizeF(0.0f, metrics_.ascent);
   font_impl_->DrawText(gfx, text_brush, baseline, chars, num_chars);
 }
 
-void Font::DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,
+void Font::DrawText(const gfx::Canvas& gfx,const gfx::Brush& text_brush,
                     const gfx::RectF& rect,
                     const base::string16& string) const {
   DrawText(gfx, text_brush, rect, string.data(),

@@ -428,7 +428,7 @@ void Widget::Hide() {
     DidHide();
 }
 
-void Widget::OnDraw(gfx::Graphics* gfx) {
+void Widget::OnDraw(gfx::Canvas* gfx) {
   for (auto child : child_nodes()) {
     if (child->is_shown())
       child->OnDraw(gfx);

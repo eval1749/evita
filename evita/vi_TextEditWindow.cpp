@@ -347,7 +347,7 @@ Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
   return std::min(text_renderer_->MapPointToPosn(pt), buffer()->GetEnd());
 }
 
-void TextEditWindow::OnDraw(gfx::Graphics*) {
+void TextEditWindow::OnDraw(gfx::Canvas*) {
   UI_ASSERT_DOM_LOCKED();
   text_renderer_->Reset();
   Redraw();
@@ -408,7 +408,7 @@ void TextEditWindow::Render() {
   if (!is_shown())
     return;
 
-  gfx::Graphics::DrawingScope drawing_scope(*m_gfx);
+  gfx::Canvas::DrawingScope drawing_scope(*m_gfx);
   Caret::Updater caret_updater(caret_.get());
   m_gfx->set_dirty_rect(gfx::Rect(
       bounds().left_top(),

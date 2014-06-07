@@ -29,7 +29,7 @@ void RadioButtonControl::set_checked(bool new_checked) {
 }
 
 // ui::Widget
-void RadioButtonControl::OnDraw(gfx::Graphics* gfx) {
+void RadioButtonControl::OnDraw(gfx::Canvas* gfx) {
   if (bounds().empty())
     return;
 

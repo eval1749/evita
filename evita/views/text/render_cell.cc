@@ -20,29 +20,29 @@ void DestroyStrokeStyleCallback(void* pointer) {
   delete reinterpret_cast<gfx::StrokeStyle*>(pointer);
 }
 
-inline void DrawLine(const gfx::Graphics& gfx, const gfx::Brush& brush,
+inline void DrawLine(const gfx::Canvas& gfx, const gfx::Brush& brush,
                      float sx, float sy, float ex, float ey) {
   gfx.DrawLine(brush, sx, sy, ex, ey);
 }
 
-inline void DrawHLine(const gfx::Graphics& gfx, const gfx::Brush& brush,
+inline void DrawHLine(const gfx::Canvas& gfx, const gfx::Brush& brush,
                       float sx, float ex, float y) {
   DrawLine(gfx, brush, sx, y, ex, y);
 }
 
-void DrawText(const gfx::Graphics& gfx, const Font& font,
+void DrawText(const gfx::Canvas& gfx, const Font& font,
               const gfx::Brush& text_brush, const gfx::RectF& rect,
               const base::string16& string) {
   font.DrawText(gfx, text_brush, rect, string);
   gfx.Flush();
 }
 
-inline void DrawVLine(const gfx::Graphics& gfx, const gfx::Brush& brush,
+inline void DrawVLine(const gfx::Canvas& gfx, const gfx::Brush& brush,
                       float x, float sy, float ey) {
   DrawLine(gfx, brush, x, sy, x, ey);
 }
 
-void DrawWave(const gfx::Graphics& gfx, const gfx::Brush& brush, float sx,
+void DrawWave(const gfx::Canvas& gfx, const gfx::Brush& brush, float sx,
               float ex, float y) {
   CR_DEFINE_STATIC_LOCAL(gfx::StrokeStyle, dash_style1, ());
   CR_DEFINE_STATIC_LOCAL(gfx::StrokeStyle, dash_style2, ());
@@ -70,7 +70,7 @@ void DrawWave(const gfx::Graphics& gfx, const gfx::Brush& brush, float sx,
                 stroke_width, dash_style2);
 }
 
-void DrawWave(const gfx::Graphics& gfx, const gfx::Brush& brush,
+void DrawWave(const gfx::Canvas& gfx, const gfx::Brush& brush,
               const gfx::RectF& rect, float baseline) {
   auto const height = rect.bottom - baseline;
   auto const pen_width = std::max(height / 4, 0.1f);
@@ -79,7 +79,7 @@ void DrawWave(const gfx::Graphics& gfx, const gfx::Brush& brush,
     DrawWave(gfx, brush, rect.left, rect.right, baseline + 1);
     return;
   }
-  gfx::Graphics::AxisAlignedClipScope clip_scope(gfx, rect);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(gfx, rect);
   for (auto x = rect.left; x < rect.right; x += wave) {
     auto const bottom = rect.bottom;
     auto const top = baseline;
@@ -89,13 +89,13 @@ void DrawWave(const gfx::Graphics& gfx, const gfx::Brush& brush,
   }
 }
 
-inline void FillRect(const gfx::Graphics& gfx, const gfx::RectF& rect,
+inline void FillRect(const gfx::Canvas& gfx, const gfx::RectF& rect,
                      gfx::ColorF color) {
   gfx::Brush fill_brush(gfx, color);
   gfx.FillRectangle(fill_brush, rect);
 }
 
-float FloorWidthToPixel(const gfx::Graphics& gfx, float width) {
+float FloorWidthToPixel(const gfx::Canvas& gfx, float width) {
   return gfx.FloorToPixel(gfx::SizeF(width, 0.0f)).width;
 }
 
@@ -125,14 +125,14 @@ float Cell::top() const {
   return line_height() - line_descent() - height() + descent();
 }
 
-void Cell::FillBackground(const gfx::Graphics& gfx,
+void Cell::FillBackground(const gfx::Canvas& gfx,
                           const gfx::RectF& rect) const {
   FillRect(gfx, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
                            ::ceilf(rect.bottom)),
            style_.bgcolor());
 }
 
-void Cell::FillOverlay(const gfx::Graphics& gfx,
+void Cell::FillOverlay(const gfx::Canvas& gfx,
                        const gfx::RectF& rect) const {
   if (style_.overlay_color().alpha() == 0.0f)
     return;
@@ -168,7 +168,7 @@ gfx::RectF Cell::HitTestTextPosition(Posn) const {
   return gfx::RectF();
 }
 
-Posn Cell::MapXToPosn(const gfx::Graphics&, float) const {
+Posn Cell::MapXToPosn(const gfx::Canvas&, float) const {
   return -1;
 }
 
@@ -176,7 +176,7 @@ bool Cell::Merge(const RenderStyle&, float) {
   return false;
 }
 
-void Cell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
+void Cell::Render(const gfx::Canvas& gfx, const gfx::RectF& rect) const {
   FillBackground(gfx, rect);
 }
 
@@ -251,12 +251,12 @@ gfx::RectF MarkerCell::HitTestTextPosition(Posn lPosn) const {
   return gfx::RectF(gfx::PointF(0.0f, top()), gfx::SizeF(width(), height()));
 }
 
-Posn MarkerCell::MapXToPosn(const gfx::Graphics&, float) const {
+Posn MarkerCell::MapXToPosn(const gfx::Canvas&, float) const {
   return start_;
 }
 
 // Render marker above baseline.
-void MarkerCell::Render(const gfx::Graphics& gfx,
+void MarkerCell::Render(const gfx::Canvas& gfx,
                         const gfx::RectF& rect) const {
   Cell::Render(gfx, rect);
 
@@ -374,7 +374,7 @@ gfx::RectF TextCell::HitTestTextPosition(Posn offset) const {
                     gfx::SizeF(1.0f, height()));
 }
 
-Posn TextCell::MapXToPosn(const gfx::Graphics& gfx, float x) const {
+Posn TextCell::MapXToPosn(const gfx::Canvas& gfx, float x) const {
   if (x >= width())
     return end_;
   for (auto k = 1u; k <= characters_.length(); ++k) {
@@ -394,7 +394,7 @@ bool TextCell::Merge(const RenderStyle& style, float width) {
   return true;
 }
 
-void TextCell::Render(const gfx::Graphics& gfx, const gfx::RectF& rect) const {
+void TextCell::Render(const gfx::Canvas& gfx, const gfx::RectF& rect) const {
   DCHECK(!characters_.empty());
   auto const text_rect = gfx::RectF(
       gfx::PointF(rect.left, rect.top + top()), 
@@ -472,13 +472,13 @@ bool UnicodeCell::Merge(const RenderStyle&, float) {
   return false;
 }
 
-void UnicodeCell::Render(const gfx::Graphics& gfx,
+void UnicodeCell::Render(const gfx::Canvas& gfx,
                          const gfx::RectF& rect) const {
   auto const text_rect = gfx::RectF(
       gfx::PointF(rect.left, rect.top + top()),
       gfx::SizeF(rect.width(), height())) - gfx::SizeF(1, 1);
   FillBackground(gfx, rect);
-  gfx::Graphics::AxisAlignedClipScope clip_scope(gfx, text_rect);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(gfx, text_rect);
   gfx::Brush text_brush(gfx, style().color());
   DrawText(gfx, *style().font(), text_brush, text_rect - gfx::SizeF(1, 1),
            characters());

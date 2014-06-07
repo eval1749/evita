@@ -24,7 +24,7 @@ class ButtonControl::Renderer {
                    const gfx::RectF& rect);
   public: ~Renderer();
 
-  public: void Render(gfx::Graphics* gfx, Control::State state) const;
+  public: void Render(gfx::Canvas* gfx, Control::State state) const;
 
   DISALLOW_COPY_AND_ASSIGN(Renderer);
 };
@@ -57,7 +57,7 @@ ButtonControl::Renderer::Renderer(const base::string16& text,
 ButtonControl::Renderer::~Renderer() {
 }
 
-void ButtonControl::Renderer::Render(gfx::Graphics* gfx,
+void ButtonControl::Renderer::Render(gfx::Canvas* gfx,
                                      Control::State state) const {
   if (!bounds_)
     return;
@@ -65,7 +65,7 @@ void ButtonControl::Renderer::Render(gfx::Graphics* gfx,
   gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), bounds_);
 
   auto frame_rect = bounds_;
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
   gfx->DrawRectangle(gfx::Brush(*gfx, style_.shadow), frame_rect);
 
   auto const offset = (frame_rect.size() - text_size_) / 2.0f;
@@ -126,7 +126,7 @@ void ButtonControl::DidResize() {
   renderer_.reset();
 }
 
-void ButtonControl::OnDraw(gfx::Graphics* gfx) {
+void ButtonControl::OnDraw(gfx::Canvas* gfx) {
   if (!renderer_)
     renderer_ = std::make_unique<Renderer>(text_, style_, gfx::RectF(bounds()));
   renderer_->Render(gfx, state());

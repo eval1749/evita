@@ -18,9 +18,9 @@ class Bitmap;
 
 //////////////////////////////////////////////////////////////////////
 //
-// Graphics
+// Canvas
 //
-class Graphics : public Object, public DpiHandler {
+class Canvas : public Object, public DpiHandler {
   public: class Observer {
     public: Observer();
     public: virtual ~Observer();
@@ -29,15 +29,15 @@ class Graphics : public Object, public DpiHandler {
   };
 
   public: class AxisAlignedClipScope {
-    private: const Graphics& gfx_;
-    public: AxisAlignedClipScope(const Graphics& gfx, const RectF& rect);
+    private: const Canvas& gfx_;
+    public: AxisAlignedClipScope(const Canvas& gfx, const RectF& rect);
     public: ~AxisAlignedClipScope();
     DISALLOW_COPY_AND_ASSIGN(AxisAlignedClipScope);
   };
 
   public: class DrawingScope {
-    private: const Graphics& gfx_;
-    public: DrawingScope(const Graphics& gfx);
+    private: const Canvas& gfx_;
+    public: DrawingScope(const Canvas& gfx);
     public: ~DrawingScope();
     DISALLOW_COPY_AND_ASSIGN(DrawingScope);
   };
@@ -54,10 +54,10 @@ class Graphics : public Object, public DpiHandler {
   private: mutable common::ComPtr<ID2D1RenderTarget> render_target_;
   private: mutable void* work_;
 
-  private: Graphics(ID2D1RenderTarget* render_target);
-  public: Graphics(Graphics&& other);
-  public: Graphics();
-  public: ~Graphics();
+  private: Canvas(ID2D1RenderTarget* render_target);
+  public: Canvas(Canvas&& other);
+  public: Canvas();
+  public: ~Canvas();
 
   public: explicit operator bool() const {
     return render_target_;
@@ -69,7 +69,7 @@ class Graphics : public Object, public DpiHandler {
     return render_target_.get();
   }
 
-  public: Graphics& operator=(Graphics&& other);
+  public: Canvas& operator=(Canvas&& other);
 
   public: void set_dirty_rect(const Rect& rect) const;
   public: void set_dirty_rect(const RectF& rect) const;
@@ -90,7 +90,7 @@ class Graphics : public Object, public DpiHandler {
   public: void BeginDraw() const;
 
   // [C]
-  public: Graphics CreateCompatible(const gfx::SizeF& size) const;
+  public: Canvas CreateCompatible(const gfx::SizeF& size) const;
 
   // [D]
   public: void DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
@@ -135,9 +135,9 @@ class Graphics : public Object, public DpiHandler {
   public: void Resize(const Rect& rc) const;
 
   // [S]
-  public: bool Graphics::SaveScreenImage(const RectF& rect) const;
+  public: bool Canvas::SaveScreenImage(const RectF& rect) const;
 
-  DISALLOW_COPY_AND_ASSIGN(Graphics);
+  DISALLOW_COPY_AND_ASSIGN(Canvas);
 };
 
 } // namespace gfx

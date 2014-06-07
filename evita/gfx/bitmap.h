@@ -10,9 +10,9 @@
 namespace gfx {
 
 class Bitmap : public SimpleObject_<ID2D1Bitmap> {
-  public: Bitmap(const Graphics& gfx, HICON hIcon);
-  public: Bitmap(const Graphics& gfx, SizeU size);
-  public: explicit Bitmap(const Graphics& gfx);
+  public: Bitmap(const Canvas& gfx, HICON hIcon);
+  public: Bitmap(const Canvas& gfx, SizeU size);
+  public: explicit Bitmap(const Canvas& gfx);
   public: ~Bitmap();
   DISALLOW_COPY_AND_ASSIGN(Bitmap);
 };

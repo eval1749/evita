@@ -53,8 +53,8 @@ class TextLine {
   public: float GetWidth() const { return bounds_.width(); }
   public: uint Hash() const;
   public: gfx::RectF HitTestTextPosition(Posn lPosn) const;
-  public: Posn MapXToPosn(const gfx::Graphics&, float) const;
-  public: void Render(const gfx::Graphics& gfx) const;
+  public: Posn MapXToPosn(const gfx::Canvas&, float) const;
+  public: void Render(const gfx::Canvas& gfx) const;
 };
 
 } // namespace rendering

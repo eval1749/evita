@@ -37,7 +37,7 @@ Caret::~Caret() {
   DCHECK(!owner_);
 }
 
-void Caret::Blink(gfx::Graphics* gfx) {
+void Caret::Blink(gfx::Canvas* gfx) {
   if (!owner_ || !bounds_)
     return;
   auto const now = base::Time::Now();
@@ -46,7 +46,7 @@ void Caret::Blink(gfx::Graphics* gfx) {
     return;
   shown_ = !shown_;
   last_blink_time_ = now;
-  gfx::Graphics::DrawingScope drawing_scope(*gfx);
+  gfx::Canvas::DrawingScope drawing_scope(*gfx);
   gfx->set_dirty_rect(bounds_);
   owner_->UpdateCaret(gfx);
 }
@@ -63,7 +63,7 @@ void Caret::Take(Owner* owner) {
   bounds_ = gfx::RectF();
 }
 
-void Caret::Update(gfx::Graphics* gfx, const gfx::RectF& new_rect) {
+void Caret::Update(gfx::Canvas* gfx, const gfx::RectF& new_rect) {
   DCHECK(owner_);
   DCHECK(new_rect);
   if (bounds_ != new_rect) {

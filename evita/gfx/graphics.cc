@@ -41,46 +41,46 @@ namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
-// Graphics::AxisAlignedClipScope
+// Canvas::AxisAlignedClipScope
 //
-Graphics::AxisAlignedClipScope::AxisAlignedClipScope(
-    const Graphics& gfx, const RectF& rect)
+Canvas::AxisAlignedClipScope::AxisAlignedClipScope(
+    const Canvas& gfx, const RectF& rect)
     : gfx_(gfx) {
   gfx_->PushAxisAlignedClip(rect, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
 }
 
-Graphics::AxisAlignedClipScope::~AxisAlignedClipScope() {
+Canvas::AxisAlignedClipScope::~AxisAlignedClipScope() {
   gfx_->PopAxisAlignedClip();
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// Graphics::DrawingScope
+// Canvas::DrawingScope
 //
-Graphics::DrawingScope::DrawingScope(const Graphics& gfx) : gfx_(gfx) {
+Canvas::DrawingScope::DrawingScope(const Canvas& gfx) : gfx_(gfx) {
   gfx_.BeginDraw();
 }
 
-Graphics::DrawingScope::~DrawingScope() {
-  // TODO(yosi) Should DrawingScope take mutable Graphics?
-  const_cast<Graphics&>(gfx_).EndDraw();
+Canvas::DrawingScope::~DrawingScope() {
+  // TODO(yosi) Should DrawingScope take mutable Canvas?
+  const_cast<Canvas&>(gfx_).EndDraw();
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// Graphics::Observer
+// Canvas::Observer
 //
-Graphics::Observer::Observer() {
+Canvas::Observer::Observer() {
 }
 
-Graphics::Observer::~Observer() {
+Canvas::Observer::~Observer() {
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// Graphics
+// Canvas
 //
-Graphics::Graphics(ID2D1RenderTarget* render_target)
+Canvas::Canvas(ID2D1RenderTarget* render_target)
     : batch_nesting_level_(0),
       factory_set_(FactorySet::instance()),
       hwnd_(nullptr),
@@ -93,7 +93,7 @@ Graphics::Graphics(ID2D1RenderTarget* render_target)
   }
 }
 
-Graphics::Graphics(Graphics&& other)
+Canvas::Canvas(Canvas&& other)
     : batch_nesting_level_(0),
       factory_set_(std::move(other.factory_set_)),
       hwnd_(other.hwnd_),
@@ -102,13 +102,13 @@ Graphics::Graphics(Graphics&& other)
   other.hwnd_ = nullptr;
 }
 
-Graphics::Graphics() : Graphics(nullptr) {
+Canvas::Canvas() : Canvas(nullptr) {
 }
 
-Graphics::~Graphics() {
+Canvas::~Canvas() {
 }
 
-Graphics& Graphics::operator=(Graphics&& other) {
+Canvas& Canvas::operator=(Canvas&& other) {
   factory_set_ = std::move(other.factory_set_);
   render_target_ = std::move(other.render_target_);
   hwnd_ = other.hwnd_;
@@ -116,7 +116,7 @@ Graphics& Graphics::operator=(Graphics&& other) {
   return *this;
 }
 
-void Graphics::set_dirty_rect(const Rect& dirty_rect) const {
+void Canvas::set_dirty_rect(const Rect& dirty_rect) const {
   DCHECK(!dirty_rect.empty());
   for (const auto& rect : dirty_rects_) {
     Rect temp(rect);
@@ -128,36 +128,36 @@ void Graphics::set_dirty_rect(const Rect& dirty_rect) const {
   dirty_rects_.push_back(dirty_rect);
 }
 
-void Graphics::set_dirty_rect(const RectF& new_dirty_rect) const {
+void Canvas::set_dirty_rect(const RectF& new_dirty_rect) const {
   set_dirty_rect(Rect(static_cast<int>(::floor(new_dirty_rect.left)),
                       static_cast<int>(::floor(new_dirty_rect.top)),
                       static_cast<int>(::ceil(new_dirty_rect.right)),
                       static_cast<int>(::ceil(new_dirty_rect.bottom))));
 }
 
-ID2D1RenderTarget& Graphics::render_target() const {
+ID2D1RenderTarget& Canvas::render_target() const {
   DCHECK(render_target_) << "No ID2D1RenderTarget";
   return *render_target_.get();
 }
 
-void Graphics::AddObserver(Observer* observer) {
+void Canvas::AddObserver(Observer* observer) {
   observers_.AddObserver(observer);
 }
 
-void Graphics::BeginDraw() const {
+void Canvas::BeginDraw() const {
   ASSERT(render_target_);
   if (!batch_nesting_level_)
     render_target_->BeginDraw();
   ++batch_nesting_level_;
 }
 
-Graphics Graphics::CreateCompatible(const SizeF& size) const {
+Canvas Canvas::CreateCompatible(const SizeF& size) const {
   common::ComPtr<ID2D1BitmapRenderTarget> compatible_target;
   auto const hr = render_target_->CreateCompatibleRenderTarget(
     size, &compatible_target);
   if (FAILED(hr)) {
     DVLOG(0) << "CreateCompatibleRenderTarget: hr=0x" << std::hex << hr;
-    return Graphics();
+    return Canvas();
   }
   common::ComPtr<IDWriteRenderingParams> params;
   render_target_->GetTextRenderingParams(&params);
@@ -173,42 +173,42 @@ Graphics Graphics::CreateCompatible(const SizeF& size) const {
   auto const antialias_mode = render_target_->GetTextAntialiasMode();
   compatible_target->SetTextAntialiasMode(antialias_mode);
   DVLOG(0) << "AntialiasMode=" << antialias_mode;
-  return std::move(Graphics(compatible_target.release()));
+  return std::move(Canvas(compatible_target.release()));
 }
 
-void Graphics::DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
+void Canvas::DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
                           const RectF& src_rect, float opacity,
                           D2D1_BITMAP_INTERPOLATION_MODE mode) const {
   render_target_->DrawBitmap(bitmap, dst_rect, opacity, mode, src_rect);
 }
 
-void Graphics::DrawLine(const Brush& brush, int sx, int sy, int ex, int ey,
+void Canvas::DrawLine(const Brush& brush, int sx, int sy, int ex, int ey,
                         float strokeWidth) const {
   DCHECK(drawing());
   render_target().DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
                            strokeWidth);
 }
 
-void Graphics::DrawLine(const Brush& brush, float sx, float sy,
+void Canvas::DrawLine(const Brush& brush, float sx, float sy,
                         float ex, float ey, float strokeWidth) const {
   DCHECK(drawing());
   render_target().DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
                            strokeWidth);
 }
 
-void Graphics::DrawRectangle(const Brush& brush, const RECT& rc,
+void Canvas::DrawRectangle(const Brush& brush, const RECT& rc,
                              float strokeWidth) const {
   DrawRectangle(brush, RectF(rc), strokeWidth);
 }
 
-void Graphics::DrawRectangle(const Brush& brush, const RectF& rect,
+void Canvas::DrawRectangle(const Brush& brush, const RectF& rect,
                             float strokeWidth) const {
   DCHECK(drawing());
   DCHECK(rect);
   render_target().DrawRectangle(rect, brush, strokeWidth);
 }
 
-void Graphics::DrawText(const TextFormat& text_format,
+void Canvas::DrawText(const TextFormat& text_format,
                       const Brush& brush,
                       const RECT& rc,
                       const char16* pwch, size_t cwch) const {
@@ -219,7 +219,7 @@ void Graphics::DrawText(const TextFormat& text_format,
                            rect, brush);
 }
 
-bool Graphics::EndDraw() {
+bool Canvas::EndDraw() {
   ASSERT(drawing());
   ASSERT(render_target_);
   --batch_nesting_level_;
@@ -228,7 +228,7 @@ bool Graphics::EndDraw() {
     if (SUCCEEDED(hr))
       return true;
     if (hr == D2DERR_RECREATE_TARGET) {
-      DVLOG(0) << "Graphics::End D2DERR_RECREATE_TARGET";
+      DVLOG(0) << "Canvas::End D2DERR_RECREATE_TARGET";
     } else {
       DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
     }
@@ -237,10 +237,10 @@ bool Graphics::EndDraw() {
       if (SUCCEEDED(hr)) {
         #if !USE_HWND_RENDER_TARGET
           if (dirty_rects_.empty()) {
-            DVLOG(0) << "Graphics::EndDraw: no dirty";
+            DVLOG(0) << "Canvas::EndDraw: no dirty";
           } else {
             #if DEBUG_DRAW
-              DVLOG(0) << "Graphics::EndDraw: swap #dirty=" <<
+              DVLOG(0) << "Canvas::EndDraw: swap #dirty=" <<
                   dirty_rects_.size() << " " << dirty_rects_[0];
             #endif
             DXGI_PRESENT_PARAMETERS parameters = {0};
@@ -255,52 +255,52 @@ bool Graphics::EndDraw() {
         return true;
       }
       if (hr == D2DERR_RECREATE_TARGET) {
-        DVLOG(0) << "Graphics::End D2DERR_RECREATE_TARGET";
+        DVLOG(0) << "Canvas::End D2DERR_RECREATE_TARGET";
       } else {
         DVLOG(0) << "ID2D1RenderTarget::EndDraw: hr=" << std::hex << hr;
       }
   }
   dxgi_swap_chain_.reset();
   render_target_.reset();
-  const_cast<Graphics*>(this)->Reinitialize();
+  const_cast<Canvas*>(this)->Reinitialize();
   return false;
 }
 
-void Graphics::FillRectangle(const Brush& brush, int left, int top,
+void Canvas::FillRectangle(const Brush& brush, int left, int top,
                               int right, int bottom) const {
   render_target().FillRectangle(RectF(left, top, right, bottom), brush);
 }
 
-void Graphics::FillRectangle(const Brush& brush, float left, float top,
+void Canvas::FillRectangle(const Brush& brush, float left, float top,
                               float right, float bottom) const {
   FillRectangle(brush, RectF(left, top, right, bottom));
 }
 
-void Graphics::FillRectangle(const Brush& brush, const RECT& rc) const {
+void Canvas::FillRectangle(const Brush& brush, const RECT& rc) const {
   FillRectangle(brush, RectF(rc));
 }
 
-void Graphics::FillRectangle(const Brush& brush, const RectF& rect) const {
+void Canvas::FillRectangle(const Brush& brush, const RectF& rect) const {
   DCHECK(drawing());
   DCHECK(rect);
   render_target().FillRectangle(rect, brush);
 }
 
-void Graphics::Flush() const {
+void Canvas::Flush() const {
   ASSERT(drawing());
   D2D1_TAG tag1, tag2;
   COM_VERIFY(render_target_->Flush(&tag1, &tag2));
   ASSERT(!tag1 && !tag2);
 }
 
-void Graphics::Init(HWND hwnd) {
+void Canvas::Init(HWND hwnd) {
   ASSERT(!hwnd_);
   hwnd_ = hwnd;
   Reinitialize();
 }
 
 #if USE_HWND_RENDER_TARGET
-void Graphics::Reinitialize() {
+void Canvas::Reinitialize() {
   DCHECK(!render_target_);
   DCHECK(hwnd_);
   RECT rc;
@@ -328,7 +328,7 @@ void Graphics::Reinitialize() {
   FOR_EACH_OBSERVER(Observer, observers_, ShouldDiscardResources());
 }
 #else
-void Graphics::Reinitialize() {
+void Canvas::Reinitialize() {
   DCHECK(!render_target_);
   DCHECK(hwnd_);
 
@@ -440,19 +440,19 @@ void Graphics::Reinitialize() {
 }
 #endif
 
-void Graphics::RemoveObserver(Observer* observer) {
+void Canvas::RemoveObserver(Observer* observer) {
   observers_.RemoveObserver(observer);
 }
 
 #if USE_HWND_RENDER_TARGET
-void Graphics::Resize(const Rect& rc) const {
+void Canvas::Resize(const Rect& rc) const {
   SizeU size(rc.width(), rc.height());
   common::ComPtr<ID2D1HwndRenderTarget> hwnd_render_target;
   COM_VERIFY(hwnd_render_target.QueryFrom(render_target_));
   COM_VERIFY(hwnd_render_target->Resize(size));
 }
 #else
-void Graphics::Resize(const Rect& rect) const {
+void Canvas::Resize(const Rect& rect) const {
   DCHECK(!rect.empty());
   screen_bitmap_.reset();
   target_bounds_ = rect;
@@ -486,7 +486,7 @@ void Graphics::Resize(const Rect& rect) const {
 }
 #endif
 
-bool Graphics::SaveScreenImage(const RectF& rect) const {
+bool Canvas::SaveScreenImage(const RectF& rect) const {
   if (!screen_bitmap_)
     screen_bitmap_ = std::make_unique<Bitmap>(*this);
   const RectU source_rect(static_cast<uint32_t>(::floor(rect.left)),

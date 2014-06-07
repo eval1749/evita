@@ -73,7 +73,7 @@ class EditPane::Box : public DoubleLinkedNode_<EditPane::Box>,
     public: void set_outer(LayoutBox& outer) { outer_ = &outer; }
     public: virtual uint CountLeafBox() const = 0;
     public: virtual void Destroy() = 0;
-    public: virtual void DrawSplitters(const gfx::Graphics&) { }
+    public: virtual void DrawSplitters(const gfx::Canvas&) { }
     public: virtual LeafBox* FindLeafBoxFromWidget(
         const Widget&) const = 0;
     public: virtual LeafBox* GetActiveLeafBox() const = 0;
@@ -143,7 +143,7 @@ class EditPane::LeafBox final : public EditPane::Box {
   // [D]
   public: virtual void Destroy() override;
   public: void DetachWindow();
-  private: virtual void DrawSplitters(const gfx::Graphics&) override;
+  private: virtual void DrawSplitters(const gfx::Canvas&) override;
 
   public: void EnsureInHorizontalLayoutBox();
   public: void EnsureInVerticalLayoutBox();
@@ -178,7 +178,7 @@ class EditPane::HorizontalLayoutBox final : public EditPane::LayoutBox {
   public: virtual ~HorizontalLayoutBox();
   protected: virtual void DidRemoveBox(Box*, Box*, const gfx::Rect&) override;
   public: virtual HitTestResult HitTest(Point) const override;
-  public: virtual void DrawSplitters(const gfx::Graphics&) override;
+  public: virtual void DrawSplitters(const gfx::Canvas&) override;
   public: virtual bool IsVerticalLayoutBox() const override;
   public: virtual void MoveSplitter(const gfx::Point&, Box&) override;
   public: virtual void Realize(EditPane*, const gfx::Rect&) override;
@@ -194,7 +194,7 @@ class EditPane::VerticalLayoutBox final : public LayoutBox {
   public: virtual ~VerticalLayoutBox();
   protected: virtual void DidRemoveBox(Box*, Box*, const gfx::Rect&) override;
   public: virtual HitTestResult HitTest(Point) const override;
-  public: virtual void DrawSplitters(const gfx::Graphics&) override;
+  public: virtual void DrawSplitters(const gfx::Canvas&) override;
   public: virtual bool IsVerticalLayoutBox() const override;
   public: virtual void MoveSplitter(const gfx::Point&, Box&) override;
   public: virtual void Realize(EditPane*, const gfx::Rect&) override;
@@ -229,7 +229,7 @@ class StockCursor {
   DISALLOW_COPY_AND_ASSIGN(StockCursor);
 };
 
-void DrawSplitter(const gfx::Graphics& gfx, RECT* prc,
+void DrawSplitter(const gfx::Canvas& gfx, RECT* prc,
                          uint /*grfFlag*/) {
   auto rc = *prc;
   //gfx::Brush fillBrush(gfx, gfx::sysColor(COLOR_3DFACE));
@@ -302,7 +302,7 @@ void EditPane::HorizontalLayoutBox::DidRemoveBox(
   }
 }
 
-void EditPane::HorizontalLayoutBox::DrawSplitters(const gfx::Graphics& gfx) {
+void EditPane::HorizontalLayoutBox::DrawSplitters(const gfx::Canvas& gfx) {
   if (boxes_.GetFirst() == boxes_.GetLast()) {
     return;
   }
@@ -657,7 +657,7 @@ void EditPane::LayoutBox::UpdateSplitters() {
   if (is_removed() || !edit_pane_->is_shown())
     return;
   auto& gfx = edit_pane_->frame().gfx();
-  gfx::Graphics::DrawingScope drawing_scope(gfx);
+  gfx::Canvas::DrawingScope drawing_scope(gfx);
   UI_DOM_AUTO_LOCK_SCOPE();
   DrawSplitters(gfx);
 }
@@ -683,8 +683,8 @@ void EditPane::LeafBox::DetachWindow() {
   m_pWindow = nullptr;
 }
 
-void EditPane::LeafBox::DrawSplitters(const gfx::Graphics& gfx) {
-  m_pWindow->OnDraw(const_cast<gfx::Graphics*>(&gfx));
+void EditPane::LeafBox::DrawSplitters(const gfx::Canvas& gfx) {
+  m_pWindow->OnDraw(const_cast<gfx::Canvas*>(&gfx));
 }
 
 void EditPane::LeafBox::EnsureInHorizontalLayoutBox() {
@@ -794,7 +794,7 @@ void EditPane::VerticalLayoutBox::DidRemoveBox(
   }
 }
 
-void EditPane::VerticalLayoutBox::DrawSplitters(const gfx::Graphics& gfx) {
+void EditPane::VerticalLayoutBox::DrawSplitters(const gfx::Canvas& gfx) {
   auto rc = bounds();
 
   if (boxes_.GetFirst() == boxes_.GetLast()) {
@@ -1210,7 +1210,7 @@ views::Window* EditPane::GetWindow() const {
   return GetActiveWindow();
 }
 
-void EditPane::OnDraw(gfx::Graphics* gfx) {
+void EditPane::OnDraw(gfx::Canvas* gfx) {
   root_box_->DrawSplitters(*gfx);
 }
 

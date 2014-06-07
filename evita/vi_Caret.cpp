@@ -27,7 +27,7 @@ void Caret::Updater::Clear() {
   caret_->bounds_ = gfx::RectF();
 }
 
-void Caret::Updater::Update(const gfx::Graphics* gfx,
+void Caret::Updater::Update(const gfx::Canvas* gfx,
                             const gfx::RectF& new_rect) {
   caret_->Update(gfx, new_rect);
 }
@@ -43,7 +43,7 @@ Caret::~Caret() {
   DCHECK(!owner_);
 }
 
-void Caret::Blink(const gfx::Graphics* gfx) {
+void Caret::Blink(const gfx::Canvas* gfx) {
   if (!owner_ || bounds_.empty())
     return;
   auto const now = base::Time::Now();
@@ -57,32 +57,32 @@ void Caret::Blink(const gfx::Graphics* gfx) {
     Show(gfx);
 }
 
-void Caret::Give(views::Window* owner, const gfx::Graphics* gfx) {
+void Caret::Give(views::Window* owner, const gfx::Canvas* gfx) {
   DCHECK_EQ(owner_, owner);
   Hide(gfx);
   owner_ = nullptr;
 }
 
-void Caret::Hide(const gfx::Graphics* gfx) {
+void Caret::Hide(const gfx::Canvas* gfx) {
   if (!owner_ || !shown_ || bounds_.empty())
     return;
   shown_ = false;
   if (!gfx->screen_bitmap())
     return;
-  gfx::Graphics::DrawingScope drawing_scope(*gfx);
+  gfx::Canvas::DrawingScope drawing_scope(*gfx);
   gfx->set_dirty_rect(bounds_);
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, bounds_);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx, bounds_);
   gfx->DrawBitmap(*gfx->screen_bitmap(), bounds_, bounds_);
 }
 
-void Caret::Show(const gfx::Graphics* gfx) {
+void Caret::Show(const gfx::Canvas* gfx) {
   DCHECK(owner_);
   if (shown_ || bounds_.empty())
     return;
   shown_ = true;
-  gfx::Graphics::DrawingScope drawing_scope(*gfx);
+  gfx::Canvas::DrawingScope drawing_scope(*gfx);
   gfx->set_dirty_rect(bounds_);
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, bounds_);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx, bounds_);
   gfx::Brush fill_brush(*gfx, gfx::ColorF::Black);
   gfx->FillRectangle(fill_brush, bounds_);
 }
@@ -92,7 +92,7 @@ void Caret::Take(views::Window* owner) {
   owner_ = owner;
 }
 
-void Caret::Update(const gfx::Graphics* gfx, const gfx::RectF& new_rect) {
+void Caret::Update(const gfx::Canvas* gfx, const gfx::RectF& new_rect) {
   DCHECK(!shown_);
   if (!owner_) {
     bounds_ = new_rect;

@@ -123,7 +123,7 @@ Pane* GetContainingPane(Frame* frame, views::Window* window) {
 //
 Frame::Frame(views::WindowId window_id)
     : views::Window(ui::NativeWindow::Create(this), window_id),
-      gfx_(new gfx::Graphics()),
+      gfx_(new gfx::Canvas()),
       m_cyTabBand(0),
       message_view_(new views::MessageView()),
       title_bar_(new views::TitleBar()),
@@ -300,7 +300,7 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
 // Note: We should call |ID2D1RenderTarget::Clear()| to reset alpha component
 // of pixels.
 void Frame::DrawForResize() {
-  gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  gfx::Canvas::DrawingScope drawing_scope(*gfx_);
   gfx_->set_dirty_rect(bounds());
 
   // To avoid script destroys Pane's, we lock DOM.
@@ -651,7 +651,7 @@ void Frame::OnPaint(const gfx::Rect rect) {
     return;
   }
 
-  gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  gfx::Canvas::DrawingScope drawing_scope(*gfx_);
   //gfx_->set_dirty_rect(bounds());
   OnDraw(&*gfx_);
   if (views::switches::editor_window_display_paint){

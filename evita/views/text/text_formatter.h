@@ -29,12 +29,12 @@ class TextFormatter {
 
   private: RenderStyle default_render_style_;
   private: css::Style default_style_;
-  private: const gfx::Graphics& m_gfx;
+  private: const gfx::Canvas& m_gfx;
   private: TextBlock* const text_block_;
   private: std::unique_ptr<TextScanner> text_scanner_;
   private: float zoom_;
 
-  public: TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
+  public: TextFormatter(const gfx::Canvas& gfx, TextBlock* text_block,
                         const Selection& selection, Posn start, float zoom);
   public: ~TextFormatter();
 

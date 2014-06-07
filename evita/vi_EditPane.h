@@ -100,7 +100,7 @@ class EditPane final : public Pane {
   }
 
   // [O]
-  private: virtual void OnDraw(gfx::Graphics* gfx) override;
+  private: virtual void OnDraw(gfx::Canvas* gfx) override;
   private: virtual void OnMouseMoved(const ui::MouseEvent&) override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;

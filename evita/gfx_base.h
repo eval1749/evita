@@ -70,13 +70,13 @@ class Bitmap;
 class Brush;
 class FactorySet;
 class FontFace;
-class Graphics;
+class Canvas;
 class TextFormat;
 class TextLayout;
 
 class Brush : public SimpleObject_<ID2D1SolidColorBrush> {
-  public: Brush(const Graphics& gfx, ColorF color);
-  public: Brush(const Graphics& gfx, float red, float green, float blue,
+  public: Brush(const Canvas& gfx, ColorF color);
+  public: Brush(const Canvas& gfx, float red, float green, float blue,
                 float alpha = 1.0f);
   public: ~Brush();
   DISALLOW_COPY_AND_ASSIGN(Brush);

@@ -58,7 +58,7 @@ class ScrollBar::Part {
   public: State state() const { return state_; }
   public: void set_state(State new_state) { state_ = new_state; }
 
-  public: virtual void Draw(gfx::Graphics* canvas) const = 0;
+  public: virtual void Draw(gfx::Canvas* canvas) const = 0;
   public: bool HitTest(const gfx::Point& point) const;
   public: virtual void OnMouseMoved(const ui::MouseEvent& event);
   public: virtual void OnMousePressed(const ui::MouseEvent& event) = 0;
@@ -99,7 +99,7 @@ class Arrow : public ScrollBar::Part {
   private: gfx::ColorF bgcolor() const;
   private: gfx::ColorF color() const;
 
-  protected: void DrawArrow(gfx::Graphics* canvas, int x_factor,
+  protected: void DrawArrow(gfx::Canvas* canvas, int x_factor,
                             int y_factor) const;
 
   DISALLOW_COPY_AND_ASSIGN(Arrow);
@@ -131,7 +131,7 @@ gfx::ColorF Arrow::color() const {
   return gfx::sysColor(COLOR_3DDKSHADOW);
 }
 
-void Arrow::DrawArrow(gfx::Graphics* canvas, int x_factor,
+void Arrow::DrawArrow(gfx::Canvas* canvas, int x_factor,
                       int y_factor) const {
   gfx::Brush fill_brush(*canvas, bgcolor());
   canvas->FillRectangle(fill_brush, bounds());
@@ -171,7 +171,7 @@ class ArrowDown : public Arrow {
   public: virtual ~ArrowDown();
 
   // ScrollBar::Part
-  private: virtual void Draw(gfx::Graphics* canvas) const override;
+  private: virtual void Draw(gfx::Canvas* canvas) const override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   private: virtual void UpdateLayout(const gfx::Rect& bounds,
                                      const ScrollBar::Data& data) override;
@@ -185,7 +185,7 @@ ArrowDown::ArrowDown(ScrollBarObserver* observer) : Arrow(observer) {
 ArrowDown::~ArrowDown() {
 }
 
-void ArrowDown::Draw(gfx::Graphics* canvas) const {
+void ArrowDown::Draw(gfx::Canvas* canvas) const {
   DrawArrow(canvas, 0, -1);
 }
 
@@ -210,7 +210,7 @@ class ArrowLeft : public Arrow {
   public: virtual ~ArrowLeft();
 
   // ScrollBar::Part
-  private: virtual void Draw(gfx::Graphics* canvas) const override;
+  private: virtual void Draw(gfx::Canvas* canvas) const override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   private: virtual void UpdateLayout(const gfx::Rect& bounds,
                                      const ScrollBar::Data& data) override;
@@ -224,7 +224,7 @@ ArrowLeft::ArrowLeft(ScrollBarObserver* observer) : Arrow(observer) {
 ArrowLeft::~ArrowLeft() {
 }
 
-void ArrowLeft::Draw(gfx::Graphics* canvas) const {
+void ArrowLeft::Draw(gfx::Canvas* canvas) const {
   DrawArrow(canvas, 1, 0);
 }
 
@@ -247,7 +247,7 @@ class ArrowRight : public Arrow {
   public: virtual ~ArrowRight();
 
   // ScrollBar::Part
-  private: virtual void Draw(gfx::Graphics* canvas) const override;
+  private: virtual void Draw(gfx::Canvas* canvas) const override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   private: virtual void UpdateLayout(const gfx::Rect& bounds,
                                      const ScrollBar::Data& data) override;
@@ -261,7 +261,7 @@ ArrowRight::ArrowRight(ScrollBarObserver* observer) : Arrow(observer) {
 ArrowRight::~ArrowRight() {
 }
 
-void ArrowRight::Draw(gfx::Graphics* canvas) const {
+void ArrowRight::Draw(gfx::Canvas* canvas) const {
   DrawArrow(canvas, 1, 0);
 }
 
@@ -286,7 +286,7 @@ class ArrowUp : public Arrow {
   public: virtual ~ArrowUp();
 
   // ScrollBar::Part
-  private: virtual void Draw(gfx::Graphics* canvas) const override;
+  private: virtual void Draw(gfx::Canvas* canvas) const override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   private: virtual void UpdateLayout(const gfx::Rect& bounds,
                                      const ScrollBar::Data& data) override;
@@ -300,7 +300,7 @@ ArrowUp::ArrowUp(ScrollBarObserver* observer) : Arrow(observer) {
 ArrowUp::~ArrowUp() {
 }
 
-void ArrowUp::Draw(gfx::Graphics* canvas) const {
+void ArrowUp::Draw(gfx::Canvas* canvas) const {
   DrawArrow(canvas, 0, 1);
 }
 
@@ -335,7 +335,7 @@ class Thumb : public ScrollBar::Part {
       const gfx::Point& point) const = 0;
 
   // ScrollBar::Part
-  private: virtual void Draw(gfx::Graphics* canvas) const override;
+  private: virtual void Draw(gfx::Canvas* canvas) const override;
   private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
 
@@ -365,7 +365,7 @@ gfx::ColorF Thumb::color() const {
   }
 }
 
-void Thumb::Draw(gfx::Graphics* canvas) const {
+void Thumb::Draw(gfx::Canvas* canvas) const {
   if (bounds().empty())
     return;
   gfx::Brush fill_brush(*canvas, color());
@@ -614,11 +614,11 @@ void ScrollBar::DidResize() {
   UpdateLayout();
 }
 
-void ScrollBar::OnDraw(gfx::Graphics* canvas) {
+void ScrollBar::OnDraw(gfx::Canvas* canvas) {
   if (!dirty_)
     return;
   dirty_ = false;
-  gfx::Graphics::DrawingScope drawing_scope(*canvas);
+  gfx::Canvas::DrawingScope drawing_scope(*canvas);
   canvas->set_dirty_rect(bounds());
   gfx::Brush bgcolor(*canvas, gfx::sysColor(COLOR_BTNFACE));
   canvas->FillRectangle(bgcolor, bounds());

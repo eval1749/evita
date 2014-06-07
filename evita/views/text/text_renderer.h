@@ -37,7 +37,7 @@ class TextRenderer {
   public: typedef rendering::TextBlock TextBlock;
   public: typedef rendering::TextLine Line;
 
-  private: const gfx::Graphics* gfx_;
+  private: const gfx::Canvas* gfx_;
   private: text::Buffer* const m_pBuffer;
   private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
   private: Selection selection_;
@@ -83,7 +83,7 @@ class TextRenderer {
   public: bool ScrollDown();
   public: bool ScrollToPosn(Posn target_position);
   public: bool ScrollUp();
-  public: void SetGraphics(const gfx::Graphics* gfx);
+  public: void SetGraphics(const gfx::Canvas* gfx);
   public: void SetBounds(const Rect& rect);
   public: bool ShouldFormat(const Selection& selection,
                             float zoom,

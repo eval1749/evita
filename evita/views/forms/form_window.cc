@@ -437,7 +437,7 @@ void FormWindow::FormViewModel::DidChangeForm() {
 FormWindow::FormWindow(dom::WindowId window_id, dom::Form* form,
                        Window* owner, gfx::Point offset)
     : views::Window(ui::NativeWindow::Create(this), window_id),
-      gfx_(new gfx::Graphics()),
+      gfx_(new gfx::Canvas()),
       model_(new FormViewModel(form, this)),
       offset_(offset), owner_(owner) {
 }
@@ -604,7 +604,7 @@ void FormWindow::DidRealize() {
 void FormWindow::DidResize() {
   gfx_->Resize(bounds());
   {
-    gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+    gfx::Canvas::DrawingScope drawing_scope(*gfx_);
     gfx_->set_dirty_rect(bounds());
     (*gfx_)->Clear(ui::SystemMetrics::instance()->bgcolor());
   }
@@ -635,7 +635,7 @@ void FormWindow::OnPaint(const gfx::Rect rect) {
     return;
   }
 
-  gfx::Graphics::DrawingScope drawing_scope(*gfx_);
+  gfx::Canvas::DrawingScope drawing_scope(*gfx_);
   gfx_->set_dirty_rect(rect);
   auto const bgcolor = ui::SystemMetrics::instance()->bgcolor();
   // TODO(yosi) We should fill background of form window excluding controls
@@ -644,7 +644,7 @@ void FormWindow::OnPaint(const gfx::Rect rect) {
 
   // Render paint rectangle for debugging.
   if (views::switches::form_window_display_paint) {
-    gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx_, gfx::RectF(rect));
+    gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx_, gfx::RectF(rect));
     gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
                         rect);
     gfx_->DrawRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),

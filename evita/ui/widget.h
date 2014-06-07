@@ -13,7 +13,7 @@
 #include "common/win/rect.h"
 
 namespace gfx {
-class Graphics;
+class Canvas;
 }
 
 namespace ui {
@@ -122,7 +122,7 @@ class Widget
   // [O]
   // Note: We expose |OnDraw| for real time content resizing during toplevel
   // window resizing.
-  public: virtual void OnDraw(gfx::Graphics* gfx);
+  public: virtual void OnDraw(gfx::Canvas* gfx);
   protected: virtual void OnKeyPressed(const KeyboardEvent& event);
   protected: virtual void OnKeyReleased(const KeyboardEvent& event);
   public: virtual LRESULT OnMessage(uint32_t uMsg, WPARAM wParam,

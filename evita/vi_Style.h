@@ -48,10 +48,10 @@ class Font {
     public: float height() const { return metrics_.height; }
 
     // [D]
-    public: void DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,
+    public: void DrawText(const gfx::Canvas& gfx,const gfx::Brush& text_brush,
                   const gfx::RectF& rect, const base::char16* chars,
                   uint num_chars) const;
-    public: void DrawText(const gfx::Graphics& gfx,const gfx::Brush& text_brush,
+    public: void DrawText(const gfx::Canvas& gfx,const gfx::Brush& text_brush,
                   const gfx::RectF& rect, const base::string16& string) const;
 
     // [E]
@@ -112,14 +112,14 @@ class FontSet : public Fonts
     } // EqualKey
 
     // [F]
-    public: Font* FindFont(const gfx::Graphics&, char16 wch) const {
+    public: Font* FindFont(const gfx::Canvas&, char16 wch) const {
       return FindFont(wch);
     }
 
     public: Font* FindFont(char16) const;
 
     // [G]
-    public: static FontSet* Get(const gfx::Graphics&,
+    public: static FontSet* Get(const gfx::Canvas&,
                                 const css::Style& style) {
       return Get(style);
     }

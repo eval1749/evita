@@ -18,12 +18,12 @@ namespace rendering {
 class TextLine;
 class TextBlock;
 
-class ScreenTextBlock : public gfx::Graphics::Observer {
+class ScreenTextBlock : public gfx::Canvas::Observer {
   private: class RenderContext;
   friend class RenderContext;
 
   private: bool dirty_;
-  private: const gfx::Graphics* gfx_;
+  private: const gfx::Canvas* gfx_;
   private: bool has_screen_bitmap_;
   private: std::vector<TextLine*> lines_;
   private: gfx::RectF bounds_;
@@ -35,10 +35,10 @@ class ScreenTextBlock : public gfx::Graphics::Observer {
 
   public: void Render(const TextBlock* text_block);
   public: void Reset();
-  public: void SetGraphics(const gfx::Graphics* gfx);
+  public: void SetGraphics(const gfx::Canvas* gfx);
   public: void SetBounds(const gfx::RectF& rect);
 
-  // gfx::Graphics::Observer
+  // gfx::Canvas::Observer
   private: void ShouldDiscardResources() override;
 
   DISALLOW_COPY_AND_ASSIGN(ScreenTextBlock);

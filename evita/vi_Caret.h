@@ -17,7 +17,7 @@
 #include <memory>
 
 namespace gfx {
-class Graphics;
+class Canvas;
 }
 
 namespace views {
@@ -35,7 +35,7 @@ class Caret {
     public: ~Updater();
 
     public: void Clear();
-    public: void Update(const gfx::Graphics* gfx, const gfx::RectF& rect);
+    public: void Update(const gfx::Canvas* gfx, const gfx::RectF& rect);
   };
   friend class Updater;
 
@@ -46,12 +46,12 @@ class Caret {
 
   public: Caret();
   public: ~Caret();
-  public: void Blink(const gfx::Graphics* gfx);
-  public: void Give(views::Window* window, const gfx::Graphics* gfx);
-  public: void Hide(const gfx::Graphics* gfx_);
-  private: void Show(const gfx::Graphics* gfx);
+  public: void Blink(const gfx::Canvas* gfx);
+  public: void Give(views::Window* window, const gfx::Canvas* gfx);
+  public: void Hide(const gfx::Canvas* gfx_);
+  private: void Show(const gfx::Canvas* gfx);
   public: void Take(views::Window* owner);
-  private: void Update(const gfx::Graphics* gfx, const gfx::RectF& rect);
+  private: void Update(const gfx::Canvas* gfx, const gfx::RectF& rect);
 
   DISALLOW_COPY_AND_ASSIGN(Caret);
 };

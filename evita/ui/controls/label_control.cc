@@ -24,7 +24,7 @@ class LabelControl::Renderer {
                    const gfx::RectF& rect);
   public: ~Renderer();
 
-  public: void Render(gfx::Graphics* gfx) const;
+  public: void Render(gfx::Canvas* gfx) const;
 
   DISALLOW_COPY_AND_ASSIGN(Renderer);
 };
@@ -55,8 +55,8 @@ LabelControl::Renderer::Renderer(const base::string16& text,
 LabelControl::Renderer::~Renderer() {
 }
 
-void LabelControl::Renderer::Render(gfx::Graphics* gfx) const {
-  gfx::Graphics::AxisAlignedClipScope clip_scope(*gfx, bounds_);
+void LabelControl::Renderer::Render(gfx::Canvas* gfx) const {
+  gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx, bounds_);
   gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), bounds_);
   gfx::Brush text_brush(*gfx, style_.color);
   (*gfx)->DrawTextLayout(text_origin_, *text_layout_, text_brush,
@@ -99,7 +99,7 @@ void LabelControl::DidResize() {
   renderer_.reset();
 }
 
-void LabelControl::OnDraw(gfx::Graphics* gfx) {
+void LabelControl::OnDraw(gfx::Canvas* gfx) {
   if (!renderer_)
     renderer_ = std::make_unique<Renderer>(text_, style_, gfx::RectF(bounds()));
   renderer_->Render(gfx);

@@ -185,9 +185,9 @@ class TableControl::TableControlModel {
   public: void DidRemoveRow(int row_id);
   public: void DidResize(const gfx::RectF& rect);
   public: void DidSetFocus(ui::Widget* last_focused);
-  public: void Draw(gfx::Graphics* gfx) const;
-  private: void DrawHeaderRow(gfx::Graphics* gfx) const;
-  private: void DrawRow(gfx::Graphics* gfx, const Row* row) const;
+  public: void Draw(gfx::Canvas* gfx) const;
+  private: void DrawHeaderRow(gfx::Canvas* gfx) const;
+  private: void DrawRow(gfx::Canvas* gfx, const Row* row) const;
   public: void ExtendSelection(int direction);
   private: const Row* GetRowById(int row_id) const;
   private: int GetRowIndex(const Row* row) const;
@@ -329,7 +329,7 @@ void TableControl::TableControlModel::DidSetFocus(ui::Widget*) {
   MakeSelectionViewDirty();
 }
 
-void TableControl::TableControlModel::Draw(gfx::Graphics* gfx) const {
+void TableControl::TableControlModel::Draw(gfx::Canvas* gfx) const {
   gfx::Brush fill_brush(*gfx, gfx::ColorF::White);
 
   // Fill top edge
@@ -382,7 +382,7 @@ void TableControl::TableControlModel::Draw(gfx::Graphics* gfx) const {
       bounds_.right, bounds_.bottom));
 }
 
-void TableControl::TableControlModel::DrawHeaderRow(gfx::Graphics* gfx) const {
+void TableControl::TableControlModel::DrawHeaderRow(gfx::Canvas* gfx) const {
   gfx->FillRectangle(gfx::Brush(*gfx, gfx::ColorF::White),
                      gfx::RectF(columns_.front()->bounds().left_top(),
                                 columns_.back()->bounds().right_bottom()));
@@ -400,7 +400,7 @@ void TableControl::TableControlModel::DrawHeaderRow(gfx::Graphics* gfx) const {
   }
 }
 
-void TableControl::TableControlModel::DrawRow(gfx::Graphics* gfx,
+void TableControl::TableControlModel::DrawRow(gfx::Canvas* gfx,
                                               const Row* row) const {
   auto const kPadding = 2.0f;
   auto const bgcolor = gfx::ColorF(gfx::ColorF::White);
@@ -653,7 +653,7 @@ void TableControl::DidSetFocus(ui::Widget* widget) {
   UpdateViewIfNeeded();
 }
 
-void TableControl::OnDraw(gfx::Graphics* gfx) {
+void TableControl::OnDraw(gfx::Canvas* gfx) {
   gfx->set_dirty_rect(bounds());
   model_->Draw(gfx);
 }

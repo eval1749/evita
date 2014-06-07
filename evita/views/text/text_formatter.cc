@@ -28,11 +28,11 @@ namespace {
 const float cxLeftMargin = 10.0f;
 const int k_nTabWidth = 4;
 
-float AlignHeightToPixel(const gfx::Graphics& gfx, float height) {
+float AlignHeightToPixel(const gfx::Canvas& gfx, float height) {
   return gfx.AlignToPixel(gfx::SizeF(0.0f, height)).height;
 }
 
-float AlignWidthToPixel(const gfx::Graphics&, float width) {
+float AlignWidthToPixel(const gfx::Canvas&, float width) {
   return width;
 }
 
@@ -42,7 +42,7 @@ inline char16 toxdigit(int k) {
  return static_cast<char16>(k - 10 + 'A');
 }
 
-Font* GetFont(const gfx::Graphics& gfx, const css::Style& style) {
+Font* GetFont(const gfx::Canvas& gfx, const css::Style& style) {
   return FontSet::Get(gfx, style)->FindFont(gfx, 'x');
 }
 
@@ -50,7 +50,7 @@ const css::Style& GetDefaultStyle(const TextBlock* text_block) {
   return text_block->text_buffer()->GetDefaultStyle();
 }
 
-RenderStyle GetRenderStyle(const gfx::Graphics& gfx,
+RenderStyle GetRenderStyle(const gfx::Canvas& gfx,
                            const css::Style& style) {
   return RenderStyle(style, GetFont(gfx, style));
 }
@@ -186,7 +186,7 @@ RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
 //
 // TextFormatter
 //
-TextFormatter::TextFormatter(const gfx::Graphics& gfx, TextBlock* text_block,
+TextFormatter::TextFormatter(const gfx::Canvas& gfx, TextBlock* text_block,
                              const Selection& selection, Posn lStart,
                              float zoom)
     : default_render_style_(GetRenderStyle(gfx, GetDefaultStyle(text_block))),

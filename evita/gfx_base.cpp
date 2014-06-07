@@ -102,7 +102,7 @@ IWICImagingFactory& CreateImageFactory() {
   return *factory;
 }
 
-common::ComPtr<ID2D1SolidColorBrush> CreateSolidColorBrush(const Graphics& gfx,
+common::ComPtr<ID2D1SolidColorBrush> CreateSolidColorBrush(const Canvas& gfx,
                                                          ColorF color) {
   common::ComPtr<ID2D1SolidColorBrush> brush;
   COM_VERIFY(gfx->CreateSolidColorBrush(color, &brush));
@@ -120,11 +120,11 @@ float MultipleOf(float x, float unit) {
 //
 // Brush
 //
-Brush::Brush(const Graphics& gfx, ColorF color)
+Brush::Brush(const Canvas& gfx, ColorF color)
     : SimpleObject_(CreateSolidColorBrush(gfx, color)) {
 }
 
-Brush::Brush(const Graphics& gfx, float red, float green, float blue,
+Brush::Brush(const Canvas& gfx, float red, float green, float blue,
              float alpha)
     : SimpleObject_(CreateSolidColorBrush(gfx,
                                           ColorF(red, green, blue, alpha))) {

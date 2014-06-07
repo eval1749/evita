@@ -22,7 +22,7 @@
 #include "evita/views/window.h"
 
 namespace gfx {
-class Graphics;
+class Canvas;
 using common::win::Rect;
 }
 
@@ -57,7 +57,7 @@ class Frame final : public views::Window,
   private: typedef ui::Widget Widget;
   private: typedef ChildList_<Frame, Pane> Panes;
 
-  private: std::unique_ptr<gfx::Graphics> gfx_;
+  private: std::unique_ptr<gfx::Canvas> gfx_;
   private: int m_cyTabBand;
   private: Panes m_oPanes;
   private: std::unique_ptr<views::MessageView> message_view_;
@@ -73,7 +73,7 @@ class Frame final : public views::Window,
   // TODO: We should not use Frame to HWDN.
   public: operator HWND() const;
 
-  public: gfx::Graphics& gfx() const { return *gfx_; }
+  public: gfx::Canvas& gfx() const { return *gfx_; }
 
   // [A]
   public: bool Activate();

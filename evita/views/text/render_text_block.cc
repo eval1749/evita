@@ -83,7 +83,7 @@ text::Posn TextBlock::GetVisibleEnd() const {
   DCHECK(!dirty_line_point_);
   for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
     auto const line = *it;
-    if (line->bounds().bottom <= bounds_.height())
+    if (line->bounds().bottom <= bounds_.bottom)
       return line->GetEnd();
   }
   return lines_.front()->GetEnd();

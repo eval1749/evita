@@ -65,7 +65,7 @@ class TextEditWindow : public text::BufferMutationObserver,
   // TODO(yosi): Manage life time of selection.
   private: Selection* selection_;
   private: std::unique_ptr<TextRenderer> text_renderer_;
-  private: const std::unique_ptr<ui::ScrollBar> vertical_scroll_bar_;
+  private: ui::ScrollBar* const vertical_scroll_bar_;
   private: text::Posn view_start_;
   private: float zoom_;
 

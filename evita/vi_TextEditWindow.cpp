@@ -93,7 +93,7 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
       vertical_scroll_bar_(new ui::ScrollBar(ui::ScrollBar::Type::Vertical,
                                              this)),
       view_start_(0), zoom_(1.0f) {
-  AppendChild(vertical_scroll_bar_.get());
+  AppendChild(vertical_scroll_bar_);
   buffer()->AddObserver(this);
 }
 
@@ -418,7 +418,7 @@ void TextEditWindow::Render() {
 
   view_start_ = text_renderer_->GetStart();
   updateScrollBar();
-  static_cast<Widget*>(vertical_scroll_bar_.get())->OnDraw(m_gfx);
+  static_cast<Widget*>(vertical_scroll_bar_)->OnDraw(m_gfx);
 
   const auto char_rect = text_renderer_->HitTestTextPosition(m_lCaretPosn);
   if (char_rect.empty()) {

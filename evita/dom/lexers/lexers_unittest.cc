@@ -78,10 +78,10 @@ TEST_F(LexersTest, CppLexer) {
     "])");
 
   EXPECT_SCRIPT_EQ(
-    "n1 k15 o1 n1 o1 n4 o2 n10 o1 n1 o1 n1 k14",
+    "n1 k15 o1 n1 o1 n1 c5 n10 o1 n1 o1 n1 k14",
     "doColor('extended_keywords.cc', ['"
         " std::unique_ptr<T>"
-        " std::vector_ptr<T>"
+        " std::vector_ptr<T>" // not extended keyword
         " base::string16"
     "'])");
 }

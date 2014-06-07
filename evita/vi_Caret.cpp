@@ -7,7 +7,7 @@
 #include <memory>
 #include <utility>
 
-#include "evita/gfx/graphics.h"
+#include "evita/gfx/canvas.h"
 #include "evita/gfx/bitmap.h"
 
 static const auto kBlinkInterval = 500; // milliseconds

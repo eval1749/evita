@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/gfx/graphics.h"
+#include "evita/gfx/canvas.h"
 
 #include <d2d1_2helper.h>
 #pragma warning(push)

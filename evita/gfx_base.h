@@ -146,6 +146,6 @@ inline ColorF whiteColor() {
 
 } // namespace gfx
 
-#include "evita/gfx/graphics.h"
+#include "evita/gfx/canvas.h"
 
 #endif //!defined(INCLUDE_evita_gfx_base_h)

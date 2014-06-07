@@ -9,7 +9,7 @@
 
 #include "base/time/time.h"
 #include "common/memory/singleton.h"
-#include "evita/gfx/graphics.h"
+#include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_f.h"
 
 namespace ui {

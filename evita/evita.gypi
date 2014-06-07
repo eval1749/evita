@@ -108,7 +108,7 @@
         'gfx/bitmap.cc',
         'gfx/color_f.cc',
         'gfx/font_face.cc',
-        'gfx/graphics.cc',
+        'gfx/canvas.cc',
         'gfx/point_f.cc',
         'gfx/rect_f.cc',
         'gfx/size_f.cc',

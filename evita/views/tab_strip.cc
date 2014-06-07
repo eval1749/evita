@@ -9,7 +9,9 @@
 #include "evita/views/tab_strip.h"
 
 #include <dwmapi.h>
+
 #include <algorithm>
+#include <vector>
 
 #include "base/logging.h"
 #include "base/strings/string16.h"
@@ -17,7 +19,6 @@
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/text_format.h"
-#include "evita/li_util.h"
 #include "evita/ui/events/event.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/tab_strip_delegate.h"
@@ -41,7 +42,7 @@ static void fillRect(const gfx::Canvas& gfx, int x, int y, int cx, int cy) {
 //
 // Element
 //
-class Element : public common::Castable, public DoubleLinkedNode_<Element> {
+class Element : public common::Castable {
   DECLARE_CASTABLE_CLASS(Element, Castable);
 
   public: enum State {
@@ -68,8 +69,6 @@ class Element : public common::Castable, public DoubleLinkedNode_<Element> {
   // [G]
   public: bool GetHover() const { return m_fHover; }
   public: HIMAGELIST GetImageList() const;
-  public: Element* GetNextShow() const;
-  public: Element* GetPrevShow() const;
   public: RECT*  GetRect() { return &m_rc; }
   public: Element* GetParent() const { return m_pParent; }
   public: State  GetState() const { return m_eState; }
@@ -121,30 +120,6 @@ HIMAGELIST Element::GetImageList() const {
 
     pRunner = pRunner->GetParent();
   } while (pRunner);
-  return nullptr;
-}
-
-Element* Element::GetNextShow() const {
-  for (
-      Element* pRunner = GetNext();
-      pRunner;
-      pRunner = pRunner->GetNext()) {
-    if (pRunner->m_fShow) {
-      return pRunner;
-    }
-  }
-  return nullptr;
-}
-
-Element* Element::GetPrevShow() const {
-  for (
-      Element* pRunner = GetPrev();
-      nullptr != pRunner;
-      pRunner = pRunner->GetPrev()) {
-    if (pRunner->m_fShow) {
-      return pRunner;
-    }
-  }
   return nullptr;
 }
 
@@ -292,20 +267,19 @@ class Item final : public Element {
     k_cyDescent = 4,
   };
 
-  public: static const char16*  GetClass_() { return L"Item"; }
-  public: virtual const char16* GetClass()  const { return GetClass_(); }
-
   public: base::string16 label_;
-  public: int m_iItem;
+  private: int tab_index_;
   public: int m_iImage;
   public: LPARAM m_lParam;
   private: RECT m_rcLabel;
   private: CloseBox m_closeBox;
   public: uint32_t m_rgfState;
 
-  // ctor
-  public: Item(Element* pParent, int iItem, const TCITEM* pTcItem);
+  public: Item(Element* pParent, const TCITEM* pTcItem);
   public: virtual ~Item() = default;
+
+  public: int tab_index() const { return tab_index_; }
+  public: void set_tab_index(int tab_index) { tab_index_ = tab_index; }
 
   public: void ComputeLayout();
   private: void drawContent(const gfx::Canvas& gfx) const;
@@ -321,9 +295,9 @@ class Item final : public Element {
   DISALLOW_COPY_AND_ASSIGN(Item);
 };
 
-Item::Item(Element* pParent, int iItem, const TCITEM* pTcItem) :
+Item::Item(Element* pParent, const TCITEM* pTcItem) :
     m_iImage(-1),
-    m_iItem(iItem),
+    tab_index_(0),
     m_rgfState(0),
     m_closeBox(this),
     Element(pParent) {
@@ -594,10 +568,10 @@ class TabStrip::TabStripImpl final : public Element {
     Drag_Start,
   };
 
-  private: typedef DoubleLinkedList_<Element> Elements;
+  private: typedef std::vector<Element*> Elements;
 
   private: gfx::Canvas m_gfx;
-  private: int m_cItems;
+  private: int num_tab_items_;
   private: BOOL m_compositionEnabled;
   private: int m_cxTab;
   private: int m_cxMinTab;
@@ -631,11 +605,11 @@ class TabStrip::TabStripImpl final : public Element {
   private: void DropTab(Item* item, const POINT& point);
 
   // [F]
-  private: Item* findItem(int iItem) const;
-  private: Item* findItemFromPoint(POINT pt) const;
+  private: Elements::iterator FindItem(int item_index);
 
   // [G]
-  bool GetTab(int tab_index, TCITEM* pTcItem) const;
+  private: Item* GetTabFromIndex(int iItem) const;
+  public: bool GetTab(int tab_index, TCITEM* pTcItem) const;
 
   // [H]
   private: void handleTabListMenu(POINT point);
@@ -653,6 +627,7 @@ class TabStrip::TabStripImpl final : public Element {
 
   // [R]
   public: void Redraw();
+  private: void RenumberTabIndex();
 
   // [S]
   private: int SelectItem(int const iItem);
@@ -671,7 +646,7 @@ class TabStrip::TabStripImpl final : public Element {
 
 TabStrip::TabStripImpl::TabStripImpl(HWND hwnd, TabStripDelegate* delegate)
     : Element(nullptr),
-      m_cItems(0),
+      num_tab_items_(0),
       m_compositionEnabled(false),
       m_cxTab(0),
       m_cxMinTab(k_cxMinTab),
@@ -688,7 +663,7 @@ TabStrip::TabStripImpl::TabStripImpl(HWND hwnd, TabStripDelegate* delegate)
       m_pInsertBefore(nullptr),
       m_pSelected(nullptr),
       m_xTab(0) {
-  m_oElements.Append(&m_oListButton);
+  m_oElements.push_back(&m_oListButton);
   COM_VERIFY(::DwmIsCompositionEnabled(&m_compositionEnabled));
 }
 
@@ -719,47 +694,25 @@ bool TabStrip::TabStripImpl::changeFont(const gfx::Canvas& gfx) {
 }
 
 void TabStrip::TabStripImpl::DeleteTab(int iDeleteItem) {
-  auto const pItem = findItem(iDeleteItem);
-  if (!pItem) {
+  auto present = FindItem(iDeleteItem);
+  if (present == m_oElements.end())
     return;
-  }
 
-  bool fSelChanged = m_pSelected == pItem;
+  auto const selection_changed = m_pSelected == *present;
+  if (selection_changed)
+    m_pSelected = GetTabFromIndex(iDeleteItem ? iDeleteItem - 1 : 1);
 
-  if (fSelChanged) {
-    if (pItem->GetPrev())
-      m_pSelected = pItem->GetPrev()->as<Item>();
-
-    if (!m_pSelected && pItem->GetNext())
-      m_pSelected = pItem->GetNext()->as<Item>();
-  }
-
-  if (m_pHover == pItem) {
+  if (m_pHover == *present)
     m_pHover = nullptr;
-  }
 
-  m_oElements.Delete(pItem);
-  m_cItems -= 1;
-
-  // Renumber tab index
-  {
-    int iItem = 0;
-    foreach (Elements::Enum, oEnum, &m_oElements) {
-      Item* pItem = oEnum.Get()->as<Item>();
-      if (!pItem) {
-        continue;
-      }
-
-      pItem->m_iItem = iItem;
-      iItem += 1;
-    }
-  }
+  m_oElements.erase(present);
+  RenumberTabIndex();
 
   if (m_hwndToolTips) {
     TOOLINFO ti;
     ti.cbSize = sizeof(ti);
     ti.hwnd = m_hwnd;
-    ti.uId = static_cast<uint>(m_cItems);
+    ti.uId = static_cast<DWORD>(num_tab_items_);
     ::SendMessage(
         m_hwndToolTips,
         TTM_DELTOOL,
@@ -769,7 +722,7 @@ void TabStrip::TabStripImpl::DeleteTab(int iDeleteItem) {
 
   Redraw();
 
-  if (fSelChanged) {
+  if (selection_changed) {
     if (m_pSelected)
       m_pSelected->SetState(Element::State_Selected);
     DidChangeTabSelection();
@@ -777,7 +730,7 @@ void TabStrip::TabStripImpl::DeleteTab(int iDeleteItem) {
 }
 
 void TabStrip::TabStripImpl::DidChangeTabSelection() {
-  delegate_->DidChangeTabSelection(m_pSelected ? m_pSelected->m_iItem : -1);
+  delegate_->DidChangeTabSelection(m_pSelected ? m_pSelected->tab_index() : -1);
 }
 
 void TabStrip::TabStripImpl::DidCreateNativeWindow() {
@@ -832,32 +785,41 @@ void TabStrip::TabStripImpl::DropTab(Item* item, const POINT& ptClient) {
   delegate_->DidThrowTab(item->m_lParam);
 }
 
-bool TabStrip::TabStripImpl::GetTab(int tab_index, TCITEM* pTcItem) const {
-  auto const pItem = findItem(tab_index);
-  if (!pItem) {
-    return false;
+TabStrip::TabStripImpl::Elements::iterator TabStrip::TabStripImpl::FindItem(
+    int tab_index) {
+  for (auto it = m_oElements.begin(); it != m_oElements.end(); ++it) {
+    auto const tab_item = (*it)->as<Item>();
+    if (tab_item && tab_item->tab_index() == tab_index)
+      return it;
   }
+  return m_oElements.end();
+}
+
+bool TabStrip::TabStripImpl::GetTab(int tab_index, TCITEM* pTcItem) const {
+  auto const tab_item = GetTabFromIndex(tab_index);
+  if (!tab_item)
+    return false;
 
   if (pTcItem->mask & TCIF_IMAGE) {
-    pTcItem->iImage = pItem->m_iImage;
+    pTcItem->iImage = tab_item->m_iImage;
   }
 
   if (pTcItem->mask & TCIF_PARAM) {
-    pTcItem->lParam = pItem->m_lParam;
+    pTcItem->lParam = tab_item->m_lParam;
   }
 
   if (pTcItem->mask & TCIF_STATE) {
-    pTcItem->dwState = pItem->m_rgfState & pTcItem->dwStateMask;
+    pTcItem->dwState = tab_item->m_rgfState & pTcItem->dwStateMask;
   }
 
   if (pTcItem->mask & TCIF_TEXT) {
     auto const cwch = std::min(
-      pItem->label_.length(),
+      tab_item->label_.length(),
       static_cast<size_t>(pTcItem->cchTextMax - 1));
 
     ::CopyMemory(
         pTcItem->pszText,
-        pItem->label_.data(),
+        tab_item->label_.data(),
         sizeof(base::char16) * cwch);
 
     pTcItem->pszText[cwch] = 0;
@@ -865,39 +827,11 @@ bool TabStrip::TabStripImpl::GetTab(int tab_index, TCITEM* pTcItem) const {
   return true;
 }
 
-Item* TabStrip::TabStripImpl::findItem(int iItem) const {
-  if (iItem < 0 || iItem >= m_cItems) {
-    return nullptr;
-  }
-
-  foreach (Elements::Enum, oEnum, &m_oElements) {
-    auto const pItem = oEnum.Get()->as<Item>();
-    if (!pItem) {
-      continue;
-    }
-
-    if (pItem->m_iItem == iItem) {
-      return pItem;
-    }
-  }
-
-  return nullptr;
-}
-
-Item* TabStrip::TabStripImpl::findItemFromPoint(POINT pt) const {
-  foreach (Elements::Enum, oEnum, &m_oElements) {
-    auto const pItem = oEnum.Get()->as<Item>();
-    if (!pItem) {
-      continue;
-    }
-
-    if (pt.x < pItem->GetRect()->left) {
-      break;
-    }
-
-    if (pItem->HitTest(pt) == pItem) {
-      return pItem;
-    }
+Item* TabStrip::TabStripImpl::GetTabFromIndex(int tab_index) const {
+  for (auto element : m_oElements) {
+    auto const tab_item = element->as<Item>();
+    if (tab_item && tab_item->tab_index() == tab_index)
+      return tab_item;
   }
   return nullptr;
 }
@@ -919,16 +853,13 @@ void TabStrip::TabStripImpl::handleTabListMenu(POINT) {
 
   // Add Tab name to menu.
   Item* pPrevItem = nullptr;
-  foreach (Elements::Enum, oEnum, &m_oElements) {
-    auto const pItem = oEnum.Get()->as<Item>();
-    if (!pItem) {
+  for (auto element : m_oElements) {
+    auto const pItem = element->as<Item>();
+    if (!pItem)
       continue;
-    }
 
-    auto const rgfFlag =
-      pItem->IsSelected()
-          ? MF_STRING | MF_CHECKED
-          : MF_STRING;
+    auto const rgfFlag = pItem->IsSelected() ? MF_STRING | MF_CHECKED :
+                                               MF_STRING;
 
     if (pPrevItem && pPrevItem->IsShow() != pItem->IsShow()) {
       ::AppendMenu(
@@ -942,8 +873,8 @@ void TabStrip::TabStripImpl::handleTabListMenu(POINT) {
 
     ::AppendMenu(
         m_hTabListMenu,
-        static_cast<uint>(rgfFlag),
-        static_cast<uint>(pItem->m_iItem),
+        static_cast<DWORD>(rgfFlag),
+        static_cast<DWORD>(pItem->tab_index()),
         pItem->label_.c_str());
   }
 
@@ -959,59 +890,33 @@ Element* TabStrip::TabStripImpl::hitTest(POINT pt) const {
   if (auto const pHit = m_oListButton.HitTest(pt))
     return pHit;
 
-  foreach (Elements::Enum, oEnum, &m_oElements) {
-    auto const pItem = oEnum.Get()->as<Item>();
-    if (!pItem)
+  for (auto element : m_oElements) {
+    auto const tab_item = element->as<Item>();
+    if (!tab_item)
       continue;
 
-    if (pt.x < pItem->GetRect()->left)
+    if (pt.x < tab_item->GetRect()->left)
       break;
 
-    if (auto const pElement = pItem->HitTest(pt))
-      return pElement;
+    if (auto const hit = tab_item->HitTest(pt))
+      return hit;
   }
 
   return nullptr;
 }
 
-
-void TabStrip::TabStripImpl::InsertTab(int iItem, const TCITEM* pTcItem) {
-  auto const pNewItem = new Item(this, iItem, pTcItem);
-  if (!pNewItem) {
-    return;
+void TabStrip::TabStripImpl::InsertTab(int tab_index, const TCITEM* pTcItem) {
+  auto const new_tab_item = new Item(this, pTcItem);
+  auto present = FindItem(tab_index);
+  if (present == m_oElements.end()) {
+    m_oElements.push_back(new_tab_item);
+  } else {
+    if (m_iFocus >= tab_index)
+      ++m_iFocus;
+    m_oElements.insert(present, new_tab_item);
   }
-
-  pNewItem->m_iItem = iItem;
-
-  if (m_iFocus >= iItem) {
-    m_iFocus += 1;
-  }
-
-  Item* pRefItem = nullptr;
-  foreach (Elements::Enum, oEnum, &m_oElements) {
-    auto const pItem = oEnum.Get()->as<Item>();
-    if (!pItem) {
-      continue;
-    }
-
-    if (pItem->m_iItem < iItem) {
-      continue;
-    }
-
-    if (pItem->m_iItem == iItem) {
-      ASSERT(!pRefItem);
-      pRefItem = pItem;
-    }
-
-    pItem->m_iItem += 1;
-  }
-
-  m_cItems += 1;
-
-  if (pRefItem)
-    m_oElements.InsertBefore(pNewItem, pRefItem);
-  else
-    m_oElements.Append(pNewItem);
+  ++num_tab_items_;
+  RenumberTabIndex();
 
   if (m_hwndToolTips) {
     TOOLINFO ti;
@@ -1019,12 +924,9 @@ void TabStrip::TabStripImpl::InsertTab(int iItem, const TCITEM* pTcItem) {
     ti.hwnd = m_hwnd;
     ti.lpszText = LPSTR_TEXTCALLBACK;
     ti.uFlags = 0;
-    ti.uId = static_cast<uint>(m_cItems - 1);
-    ::SendMessage(
-        m_hwndToolTips,
-        TTM_ADDTOOL,
-        0,
-        reinterpret_cast<LPARAM>(&ti));
+    ti.uId = static_cast<DWORD>(num_tab_items_ - 1);
+    ::SendMessage(m_hwndToolTips, TTM_ADDTOOL, 0,
+                  reinterpret_cast<LPARAM>(&ti));
   }
 
   Redraw();
@@ -1064,49 +966,45 @@ void TabStrip::TabStripImpl::onLButtonDown(POINT pt) {
 
 void TabStrip::TabStripImpl::onLButtonUp(POINT pt) {
   if (!m_pDragItem) {
-    auto const pElement = hitTest(pt);
-    if (!pElement) {
+    auto const element = hitTest(pt);
+    if (!element)
+      return;
+
+    if (element->is<CloseBox>()) {
+      if (auto const item = element->GetParent()->as<Item>())
+        delegate_->DidClickTabCloseButton(item->tab_index());
       return;
     }
 
-    if (pElement->is<CloseBox>()) {
-      if (auto const item = pElement->GetParent()->as<Item>())
-        delegate_->DidClickTabCloseButton(item->m_iItem);
-      return;
-    }
-
-    if (pElement->is<ListButton>()) {
+    if (element->is<ListButton>()) {
       handleTabListMenu(pt);
       return;
     }
-  } else {
-    Item* pDragItem = m_pDragItem;
-    Item* pInsertBefore = m_pInsertBefore;
 
-    stopDrag();
-
-    if (!pInsertBefore) {
-      DropTab(pDragItem, pt);
-
-    } else {
-      if (pDragItem != pInsertBefore) {
-        m_oElements.Delete(pDragItem);
-        m_oElements.InsertBefore(pDragItem, pInsertBefore);
-        int iItem = 0;
-        foreach (Elements::Enum, oEnum, &m_oElements) {
-          Item* pItem = oEnum.Get()->as<Item>();
-          if (!pItem) continue;
-          pItem->m_iItem = iItem;
-          iItem += 1;
-        }
-
-        UpdateLayout();
-      }
-
-      // Hide insertion position mark
-      ::InvalidateRect(m_hwnd, nullptr, false);
-    }
+    return;
   }
+
+  auto const pDragItem = m_pDragItem;
+  auto const pInsertBefore = m_pInsertBefore;
+  stopDrag();
+
+  if (!pInsertBefore) {
+    DropTab(pDragItem, pt);
+    return;
+  }
+
+  if (pDragItem != pInsertBefore) {
+    m_oElements.erase(std::find(m_oElements.begin(), m_oElements.end(),
+                                pDragItem));
+    m_oElements.insert(std::find(m_oElements.begin(), m_oElements.end(),
+                                 pInsertBefore),
+                       pDragItem);
+    RenumberTabIndex();
+    UpdateLayout();
+  }
+
+  // Hide insertion position mark
+  ::InvalidateRect(m_hwnd, nullptr, false);
 }
 
 LRESULT TabStrip::TabStripImpl::OnMessage(UINT uMsg, WPARAM wParam,
@@ -1182,16 +1080,10 @@ void TabStrip::TabStripImpl::OnMouseMove(POINT pt) {
     }
 
     // Tab dragging
-    auto const pInsertBefore = pHover == nullptr ?
-      nullptr :
-      pHover->as<Item>();
-
+    auto const pInsertBefore = pHover ? pHover->as<Item>() : nullptr;
     ::SetCursor(s_hDragTabCursor);
-
-    if (pInsertBefore != m_pInsertBefore) {
+    if (pInsertBefore != m_pInsertBefore)
       ::InvalidateRect(m_hwnd, nullptr, false);
-    }
-
     m_pInsertBefore = pInsertBefore;
   }
 }
@@ -1215,8 +1107,18 @@ void TabStrip::TabStripImpl::Redraw() {
   ::InvalidateRect(m_hwnd, nullptr, false);
 }
 
+void TabStrip::TabStripImpl::RenumberTabIndex() {
+  auto tab_index = 0;
+  for (auto element : m_oElements) {
+    if (auto const tab_item = element->as<Item>()) {
+      tab_item->set_tab_index(tab_index);
+      ++tab_index;
+    }
+  }
+}
+
 int TabStrip::TabStripImpl::SelectItem(int const iItem) {
-  return SelectItem(findItem(iItem));
+  return SelectItem(GetTabFromIndex(iItem));
 }
 
 int TabStrip::TabStripImpl::SelectItem(Item* const pItem) {
@@ -1230,16 +1132,15 @@ int TabStrip::TabStripImpl::SelectItem(Item* const pItem) {
 
     if (pItem) {
       pItem->SetState(Element::State_Selected);
-      if (!pItem->IsShow()) {
+      if (!pItem->IsShow())
         Redraw();
-      }
       pItem->Invalidate(m_hwnd);
     }
 
     DidChangeTabSelection();
   }
 
-  return m_pSelected ? m_pSelected->m_iItem : -1;
+  return m_pSelected ? m_pSelected->tab_index() : -1;
 }
 
 void TabStrip::TabStripImpl::stopDrag() {
@@ -1275,7 +1176,7 @@ void TabStrip::TabStripImpl::UpdateHover(Element* pHover) {
 }
 
 bool TabStrip::TabStripImpl::UpdateLayout() {
-  if (m_cItems == 0) {
+  if (!num_tab_items_) {
     m_cxTab = -1;
     m_xTab = -1;
     return false;
@@ -1287,7 +1188,7 @@ bool TabStrip::TabStripImpl::UpdateLayout() {
 
   auto x = m_oListButton.GetRect()->left;
 
-  if (m_cItems >= 2) {
+  if (num_tab_items_ >= 2) {
     m_oListButton.Show(true);
     x += k_cxListButton;
   } else {
@@ -1298,7 +1199,7 @@ bool TabStrip::TabStripImpl::UpdateLayout() {
 
   int cxTabs = m_rc.right - x - k_cxMargin;
 
-  int cxTab = cxTabs / m_cItems;
+  int cxTab = cxTabs / num_tab_items_;
     cxTab = std::min(cxTab, m_cxMinTab * 2);
 
   if (cxTab >= m_cxMinTab) {
@@ -1317,73 +1218,38 @@ bool TabStrip::TabStripImpl::UpdateLayout() {
   m_cxTab = cxTab;
   m_xTab = x;
 
-  Item* pStartItem = nullptr;
-  foreach (Elements::Enum, oEnum, &m_oElements) {
-    Item* pItem = oEnum.Get()->as<Item>();
-    if (pItem) {
-      pStartItem = pItem;
-      break;
-    }
-  }
-
-  ASSERT(pStartItem != nullptr);
-
-  do {
-    bool fShow = false;
+  for (auto view_start_tab_index = 0; view_start_tab_index < num_tab_items_;
+       ++view_start_tab_index) {
+    auto fShow = false;
     x = m_xTab;
-    foreach (Elements::Enum, oEnum, &m_oElements) {
-      Item* pItem = oEnum.Get()->as<Item>();
-      if (!pItem) {
+    for (auto element : m_oElements) {
+      auto const tab_item = element->as<Item>();
+      if (!tab_item)
         continue;
-      }
 
-      if (pItem == pStartItem) {
+      if (tab_item->tab_index() == view_start_tab_index)
         fShow = true;
-      }
 
-      pItem->Show(fShow);
+      tab_item->Show(fShow);
 
-      if (!fShow) {
+      if (!fShow)
         continue;
-      }
 
-      RECT* prc = pItem->GetRect();
+      RECT* prc = tab_item->GetRect();
       prc->left = x;
       prc->right = x + cxTab;
       prc->top = m_rc.top;
       prc->bottom = m_rc.bottom;
-      pItem->ComputeLayout();
+      tab_item->ComputeLayout();
 
       x += cxTab;
 
       fShow = x + cxTab < m_rc.right;
     }
 
-    if (!m_pSelected) {
-      // No tab is selected. So, we display from the first tab.
+    if (!m_pSelected || m_pSelected->IsShow())
       break;
-    }
-
-    if (m_pSelected->IsShow()) {
-      // Selected tab is visible. So, we don't need to scroll tabs.
-      break;
-    }
-
-    Element* pNext = pStartItem;
-
-    for (;;) {
-      pNext = pNext->GetNext();
-      if (!pNext) {
-        pStartItem = nullptr;
-        break;
-      }
-
-      pStartItem = pNext->as<Item>();
-      if (pStartItem) {
-        break;
-      }
-    }
-  } while (pStartItem);
+  }
 
   if (m_hwndToolTips) {
     TOOLINFO ti;
@@ -1391,19 +1257,17 @@ bool TabStrip::TabStripImpl::UpdateLayout() {
     ti.hwnd = m_hwnd;
     ti.uFlags = 0;
 
-    foreach (Elements::Enum, oEnum, &m_oElements) {
-      auto const pElement = oEnum.Get();
-      if (pElement->is<Item>()) {
-        ti.uId = static_cast<DWORD>(pElement->as<Item>()->m_iItem);
-
-      } else if (pElement->is<ListButton>()) {
+    for (auto element : m_oElements) {
+      if (element->is<Item>()) {
+        ti.uId = static_cast<DWORD>(element->as<Item>()->tab_index());
+      } else if (element->is<ListButton>()) {
         ti.uId = k_TabListId;
       } else {
         continue;
       }
 
-      if (pElement->IsShow()) {
-        ti.rect = *pElement->GetRect();
+      if (element->IsShow()) {
+        ti.rect = *element->GetRect();
       } else {
         ti.rect.left = ti.rect.right = -1;
         ti.rect.top = ti.rect.bottom = -1;
@@ -1443,16 +1307,14 @@ void TabStrip::TabStripImpl::Draw(const gfx::Canvas& gfx) const {
   gfx->Clear(gfx::sysColor(COLOR_3DFACE,
                            m_compositionEnabled ? 0.0f : 1.0f));
 
-  foreach (Elements::Enum, oEnum, &m_oElements) {
-    auto const element = oEnum.Get();
+  for (auto element : m_oElements) {
     if (element->IsShow())
       element->Draw(gfx);
   }
 
   if (m_pInsertBefore)
-      Local::drawInsertMarker(m_gfx, m_pInsertBefore->GetRect());
+    Local::drawInsertMarker(m_gfx, m_pInsertBefore->GetRect());
 }
-
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -1466,11 +1328,11 @@ TabStrip::~TabStrip() {
 }
 
 int TabStrip::number_of_tabs() const {
-  return impl_->m_cItems;
+  return impl_->num_tab_items_;
 }
 
 int TabStrip::selected_index() const {
-  return impl_->m_pSelected ? impl_->m_pSelected->m_iItem : -1;
+  return impl_->m_pSelected ? impl_->m_pSelected->tab_index() : -1;
 }
 
 void TabStrip::DeleteTab(int tab_index) {
@@ -1500,7 +1362,7 @@ void TabStrip::SetIconList(HIMAGELIST icon_list) {
 }
 
 void TabStrip::SetTab(int tab_index, const TCITEM* tab_data) {
-  auto const item = impl_->findItem(tab_index);
+  auto const item = impl_->GetTabFromIndex(tab_index);
   if (!item)
     return;
   if (item->SetItem(tab_data))

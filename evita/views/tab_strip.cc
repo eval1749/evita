@@ -26,6 +26,16 @@ namespace {
 
 static HINSTANCE g_hInstance;
 
+static void fillRect(const gfx::Canvas& gfx, int x, int y, int cx, int cy) {
+  RECT rc;
+  rc.left = x;
+  rc.right = x + cx;
+  rc.top = y;
+  rc.bottom = y + cy;
+  gfx::Brush brush(gfx, gfx::blackColor());
+  gfx.FillRectangle(brush, rc);
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // Element
@@ -44,39 +54,13 @@ class Element : public DoubleLinkedNode_<Element> {
   protected: RECT m_rc;
 
   // ctor
-  protected: Element(Element* pParent)
-      : m_eState(State_Normal)
-      , m_fHover(false)
-      , m_fShow(true)
-      , m_hImageList(nullptr)
-      , m_pParent(pParent) {
-    m_rc.left = m_rc.top = m_rc.right = m_rc.top = 0;
-  }
+  protected: Element(Element* pParent);
+  public: virtual ~Element() = default;
 
-  public: virtual ~Element() {
-  }
-
-  protected: gfx::ColorF backgroundColor() const {
-    if (IsSelected())
-        return gfx::whiteColor();
-    if (IsHover())
-        return gfx::sysColor(COLOR_3DHILIGHT, 0.8);
-    return gfx::sysColor(COLOR_3DFACE, 0.5);
-  }
+  protected: gfx::ColorF backgroundColor() const;
 
   // [D]
   public: virtual void Draw(const gfx::Canvas&) const = 0;
-
-  protected: static void fillRect(const gfx::Canvas& gfx, int x, int y,
-                                  int cx, int cy) {
-    RECT rc;
-    rc.left = x;
-    rc.right = x + cx;
-    rc.top = y;
-    rc.bottom = y + cy;
-    gfx::Brush brush(gfx, gfx::blackColor());
-    gfx.FillRectangle(brush, rc);
-  }
 
   public: template<class T> T* DynamicCast() {
     return Is<T>() ? StaticCast<T>() : nullptr;
@@ -84,99 +68,33 @@ class Element : public DoubleLinkedNode_<Element> {
 
   // [G]
   public: virtual const char16* GetClass() const = 0;
-
   public: bool GetHover() const { return m_fHover; }
-
-  public: HIMAGELIST GetImageList() const {
-    const Element* pRunner = this;
-    do {
-      auto const hImageList = pRunner->m_hImageList;
-      if (hImageList) {
-        return hImageList;
-      }
-
-      pRunner = pRunner->GetParent();
-    } while (pRunner);
-    return nullptr;
-  }
-
-  public: Element* GetNextShow() const {
-    for (
-        Element* pRunner = GetNext();
-        pRunner;
-        pRunner = pRunner->GetNext()) {
-      if (pRunner->m_fShow) {
-        return pRunner;
-      }
-    }
-    return nullptr;
-  }
-
-  public: Element* GetPrevShow() const {
-    for (
-        Element* pRunner = GetPrev();
-        nullptr != pRunner;
-        pRunner = pRunner->GetPrev()) {
-      if (pRunner->m_fShow) {
-        return pRunner;
-      }
-    }
-    return nullptr;
-  }
-
+  public: HIMAGELIST GetImageList() const;
+  public: Element* GetNextShow() const;
+  public: Element* GetPrevShow() const;
   public: RECT*  GetRect() { return &m_rc; }
   public: Element* GetParent() const { return m_pParent; }
   public: State  GetState() const { return m_eState; }
 
   // [H]
-  public: virtual Element* HitTest(POINT pt) const {
-    return IsShow() && ::PtInRect(&m_rc, pt) ? const_cast<Element*>(this) :
-                                               nullptr;
-  }
+  public: virtual Element* HitTest(POINT pt) const;
 
   // [I]
-  public: void Invalidate(HWND hwnd)
-    {  ::InvalidateRect(hwnd, &m_rc, false); }
+  public: void Invalidate(HWND hwnd);
 
   public: template<class T> bool Is() const
     { return T::GetClass_() == GetClass(); }
 
-  // IsHover
-  public: bool IsHover() const {
-    return m_fHover;
-  }
-
-  // IsSelected
-  public: bool IsSelected() const {
-    return State_Selected == m_eState;
-  }
-
-  public: bool IsShow() const {
-    return m_fShow;
-  }
+  public: bool IsHover() const { return m_fHover; }
+  public: bool IsSelected() const { return State_Selected == m_eState; }
+  public: bool IsShow() const { return m_fShow; }
 
   // [S]
-  public: bool SetHover(bool f) {
-    return m_fHover = f;
-  }
-
-  public: void SetImageList(HIMAGELIST hImageList) {
-    m_hImageList = hImageList;
-  }
-
-  public: Element* SetParent(Element* p) {
-    return m_pParent = p;
-  }
-
-  public: State SetState(State e) {
-    m_eState = e;
-    update();
-    return m_eState;
-  }
-
-  public: bool Show(bool f) {
-    return m_fShow = f;
-  }
+  public: bool SetHover(bool f);
+  public: void SetImageList(HIMAGELIST hImageList);
+  public: Element* SetParent(Element* p);
+  public: State SetState(State e);
+  public: bool Show(bool f);
 
   public: template<class T> T* StaticCast() {
     ASSERT(Is<T>());
@@ -187,8 +105,97 @@ class Element : public DoubleLinkedNode_<Element> {
   }
 
   // [U]
-  protected: virtual void update() {}
-}; // Element
+  protected: virtual void update();
+};
+
+Element::Element(Element* pParent)
+    : m_eState(State_Normal),
+      m_fHover(false),
+      m_fShow(true),
+      m_hImageList(nullptr),
+      m_pParent(pParent) {
+  m_rc.left = m_rc.top = m_rc.right = m_rc.top = 0;
+}
+
+gfx::ColorF Element::backgroundColor() const {
+  if (IsSelected())
+      return gfx::whiteColor();
+  if (IsHover())
+      return gfx::sysColor(COLOR_3DHILIGHT, 0.8);
+  return gfx::sysColor(COLOR_3DFACE, 0.5);
+}
+
+HIMAGELIST Element::GetImageList() const {
+  const Element* pRunner = this;
+  do {
+    auto const hImageList = pRunner->m_hImageList;
+    if (hImageList) {
+      return hImageList;
+    }
+
+    pRunner = pRunner->GetParent();
+  } while (pRunner);
+  return nullptr;
+}
+
+Element* Element::GetNextShow() const {
+  for (
+      Element* pRunner = GetNext();
+      pRunner;
+      pRunner = pRunner->GetNext()) {
+    if (pRunner->m_fShow) {
+      return pRunner;
+    }
+  }
+  return nullptr;
+}
+
+Element* Element::GetPrevShow() const {
+  for (
+      Element* pRunner = GetPrev();
+      nullptr != pRunner;
+      pRunner = pRunner->GetPrev()) {
+    if (pRunner->m_fShow) {
+      return pRunner;
+    }
+  }
+  return nullptr;
+}
+
+Element* Element::HitTest(POINT pt) const {
+  return IsShow() && ::PtInRect(&m_rc, pt) ? const_cast<Element*>(this) :
+                                             nullptr;
+}
+
+void Element::Invalidate(HWND hwnd) {
+  // TODO(yosi) We should use GFX version of invalidate rectangle.
+  ::InvalidateRect(hwnd, &m_rc, false);
+}
+
+bool Element::SetHover(bool f) {
+  return m_fHover = f;
+}
+
+void Element::SetImageList(HIMAGELIST hImageList) {
+  m_hImageList = hImageList;
+}
+
+Element* Element::SetParent(Element* p) {
+  return m_pParent = p;
+}
+
+Element::State Element::SetState(State e) {
+  m_eState = e;
+  update();
+  return m_eState;
+}
+
+bool Element::Show(bool f) {
+  return m_fShow = f;
+}
+
+void Element::update() {
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -204,13 +211,13 @@ enum TabStripImplDesignParams {
   k_cxMinTab = 140,
   k_cyBorder = 5,
   k_cyIcon = 16,
-}; // TabStripImplDesignParams
+};
 
 //////////////////////////////////////////////////////////////////////
 //
 // CloseBox
 //
-class CloseBox : public Element {
+class CloseBox final : public Element {
   public: static const char16*  GetClass_() { return L"CloseBox"; }
 
   public: virtual const char16* GetClass() const override {
@@ -223,69 +230,79 @@ class CloseBox : public Element {
   }; // Desgin
 
   // ctor
-  public: CloseBox(Element* pParent) :
-    Element(pParent) {}
+  public: CloseBox(Element* pParent);
+  public: virtual ~CloseBox() = default;
 
   // [D]
+  private: void drawXMark(const gfx::Canvas& gfx, gfx::ColorF color) const;
+  private: gfx::ColorF markColor() const;
 
-  private: void drawXMark(const gfx::Canvas& gfx, gfx::ColorF color) const {
-    gfx::Brush brush(gfx, color);
+  // Element
+  public: virtual void Draw(const gfx::Canvas& gfx) const override;
 
-    RECT rc = m_rc;
-    rc.left += 4;
-    rc.top  += 4;
+  DISALLOW_COPY_AND_ASSIGN(CloseBox);
+};
 
-    // 01234567890123
-    // ----ooo---ooo--- 4
-    // -----ooo-ooo---- 5
-    // ------ooooo----- 6
-    // -------ooo------ 7
-    // -------ooo------ 8
-    // ------ooooo----- 9
-    // -----ooo-ooo---- 10
-    // ----ooo---ooo--- 11
-    #define hline(x, y, cx, cy) \
-      gfx.FillRectangle( \
-        brush, \
-        m_rc.left + x, m_rc.top + y, \
-        m_rc.left + x + cx, m_rc.top + y + cy);
+CloseBox::CloseBox(Element* pParent) : Element(pParent) {
+}
 
-    hline( 4, 4, 3, 1);
-    hline(10, 4, 3, 1);
+void CloseBox::drawXMark(const gfx::Canvas& gfx, gfx::ColorF color) const {
+  gfx::Brush brush(gfx, color);
 
-    hline( 5, 5, 3, 1);
-    hline( 9, 5, 3, 1);
+  RECT rc = m_rc;
+  rc.left += 4;
+  rc.top  += 4;
 
-    hline( 6, 6, 5, 1);
+  // 01234567890123
+  // ----ooo---ooo--- 4
+  // -----ooo-ooo---- 5
+  // ------ooooo----- 6
+  // -------ooo------ 7
+  // -------ooo------ 8
+  // ------ooooo----- 9
+  // -----ooo-ooo---- 10
+  // ----ooo---ooo--- 11
+  #define hline(x, y, cx, cy) \
+    gfx.FillRectangle( \
+      brush, \
+      m_rc.left + x, m_rc.top + y, \
+      m_rc.left + x + cx, m_rc.top + y + cy);
 
-    hline( 7, 7, 3, 2);  // center
+  hline( 4, 4, 3, 1);
+  hline(10, 4, 3, 1);
 
-    hline( 6, 9, 5, 1);
+  hline( 5, 5, 3, 1);
+  hline( 9, 5, 3, 1);
 
-    hline( 5, 10, 3, 1);
-    hline( 9, 10, 3, 1);
+  hline( 6, 6, 5, 1);
 
-    hline( 4, 11, 3, 1);
-    hline(10, 11, 3, 1);
+  hline( 7, 7, 3, 2);  // center
 
-    #undef hline
-  }
+  hline( 6, 9, 5, 1);
 
-  public: virtual void Draw(const gfx::Canvas& gfx) const override {
-    drawXMark(gfx, markColor());
-  }
+  hline( 5, 10, 3, 1);
+  hline( 9, 10, 3, 1);
 
-  private: gfx::ColorF markColor() const {
-    return IsHover() ? gfx::ColorF::DarkViolet : gfx::ColorF::DimGray;
-  }
-}; // CloseBox
+  hline( 4, 11, 3, 1);
+  hline(10, 11, 3, 1);
+
+  #undef hline
+}
+
+gfx::ColorF CloseBox::markColor() const {
+  return IsHover() ? gfx::ColorF::DarkViolet : gfx::ColorF::DimGray;
+}
+
+void CloseBox::Draw(const gfx::Canvas& gfx) const {
+  drawXMark(gfx, markColor());
+}
 
 //////////////////////////////////////////////////////////////////////
 //
 // Item
 //  Represents tab item.
 //
-class Item : public Element {
+class Item final : public Element {
   private: enum Design {
     k_cxCloseBoxMargin = 3,
     k_cyCloseBoxMargin = 9,
@@ -301,223 +318,230 @@ class Item : public Element {
   public: LPARAM m_lParam;
   private: RECT m_rcLabel;
   private: CloseBox m_closeBox;
-  public: uint m_rgfState;
+  public: uint32_t m_rgfState;
 
   // ctor
-  public: Item(Element* pParent, int iItem, const TCITEM* pTcItem) :
-      m_iImage(-1),
-      m_iItem(iItem),
-      m_rgfState(0),
-      m_closeBox(this),
-      Element(pParent) {
-    SetItem(pTcItem);
+  public: Item(Element* pParent, int iItem, const TCITEM* pTcItem);
+  public: virtual ~Item() = default;
+
+  public: void ComputeLayout();
+  private: void drawContent(const gfx::Canvas& gfx) const;
+  private: void drawIcon(const gfx::Canvas& gfx) const;
+  public: bool HasCloseBox() const;
+  public: bool SetItem(const TCITEM* pTcItem);
+
+  // Element
+  public: virtual void Draw(const gfx::Canvas& gfx) const override;
+  public: virtual Element* HitTest(POINT point) const override;
+  private: void update() override;
+
+  DISALLOW_COPY_AND_ASSIGN(Item);
+};
+
+Item::Item(Element* pParent, int iItem, const TCITEM* pTcItem) :
+    m_iImage(-1),
+    m_iItem(iItem),
+    m_rgfState(0),
+    m_closeBox(this),
+    Element(pParent) {
+  SetItem(pTcItem);
+}
+
+void Item::ComputeLayout() {
+  m_rcLabel = m_rc;
+
+  auto const prc = m_closeBox.GetRect();
+  *prc = m_rc;
+
+  prc->right  -= k_cxCloseBoxMargin;
+  prc->left = prc->right - CloseBox::Width;
+  prc->top  += k_cyCloseBoxMargin;
+  prc->bottom = prc->top + CloseBox::Height;
+
+  m_rcLabel.right = prc->left;
+
+  m_rcLabel.left += k_cxBorder + k_cxEdge;
+  m_rcLabel.right -= k_cxBorder + k_cxEdge;
+  m_rcLabel.top  += 6 + 4;
+  m_rcLabel.bottom = m_rcLabel.top + 12;
+
+  if (m_iImage >= 0) {
+    m_rcLabel.left += 16 + 4;
+  }
+}
+
+void Item::drawContent(const gfx::Canvas& gfx) const {
+  drawIcon(gfx);
+
+  // Label Text
+  {
+    RECT rc = m_rc;
+    rc.left += 4 + 16 + 4;
+    rc.right -= 4;
+    rc.top += 8;
+    rc.bottom = rc.bottom - 2;
+
+    gfx::Brush brush(gfx, gfx::sysColor(COLOR_BTNTEXT));
+    gfx.DrawText(*gfx.work<gfx::TextFormat>(), brush, rc, label_.data(),
+                 label_.length());
+  }
+}
+
+void Item::drawIcon(const gfx::Canvas& gfx) const {
+  if (m_iImage < 0)
+    return;
+  auto const hImageList = GetImageList();
+  if (!hImageList)
+    return;
+  // Note: ILD_TRANSPARENT doesn't effect.
+  // Note: ILD_DPISCALE makes background black.
+  auto const hIcon = ::ImageList_GetIcon(
+      hImageList,
+      m_iImage,
+      0);
+  if (!hIcon)
+    return;
+  gfx::Bitmap bitmap(gfx, hIcon);
+  auto const icon_size = gfx.AlignToPixel(gfx::SizeF(16, 16));
+  auto const icon_offset = gfx.AlignToPixel(gfx::SizeF(-20, 8));
+  auto const icon_left_top = gfx::PointF(m_rcLabel.left, m_rc.top) +
+                             icon_offset;
+  gfx->DrawBitmap(bitmap, gfx::RectF(icon_left_top, icon_size));
+  ::DestroyIcon(hIcon);
+}
+
+bool Item::HasCloseBox() const {
+  return IsSelected() || IsHover();
+}
+
+bool Item::SetItem(const TCITEM* pTcItem) {
+  auto changed = false;
+  if (pTcItem->mask & TCIF_IMAGE) {
+    if (m_iImage != pTcItem->iImage)
+      changed = true;
+    m_iImage = pTcItem->iImage;
   }
 
-  public: ~Item() = default;
-
-  public: void ComputeLayout() {
-    m_rcLabel = m_rc;
-
-    auto const prc = m_closeBox.GetRect();
-    *prc = m_rc;
-
-    prc->right  -= k_cxCloseBoxMargin;
-    prc->left = prc->right - CloseBox::Width;
-    prc->top  += k_cyCloseBoxMargin;
-    prc->bottom = prc->top + CloseBox::Height;
-
-    m_rcLabel.right = prc->left;
-
-    m_rcLabel.left += k_cxBorder + k_cxEdge;
-    m_rcLabel.right -= k_cxBorder + k_cxEdge;
-    m_rcLabel.top  += 6 + 4;
-    m_rcLabel.bottom = m_rcLabel.top + 12;
-
-    if (m_iImage >= 0) {
-      m_rcLabel.left += 16 + 4;
-    }
+  if (pTcItem->mask & TCIF_PARAM) {
+    m_lParam = pTcItem->lParam;
   }
 
-  // [D]
-  // Draw
-  public: virtual void Draw(const gfx::Canvas& gfx) const override {
-    #if DEBUG_HOVER
-      DEBUG_PRINTF("%p sel=%d %ls\n",
-        this,
-        IsSelected(),
-        label.c_str());
-    #endif
-
-    {
-      RECT rc = m_rc;
-      gfx::Brush fillBrush(gfx, backgroundColor());
-      gfx.FillRectangle(fillBrush, rc);
-      gfx::Brush strokeBrush(gfx, gfx::blackColor());
-      gfx.DrawRectangle(strokeBrush, rc, 0.2);
-    }
-
-    drawContent(gfx);
-    if (HasCloseBox())
-        m_closeBox.Draw(gfx);
-    if (m_rgfState) {
-      auto const marker_height = 4;
-      auto const marker_width = 4;
-      DCHECK_GT(m_rc.right - m_rc.left, marker_width);
-      gfx.FillRectangle(
-          gfx::Brush(gfx, gfx::ColorF(219.0f / 255, 74.0f / 255, 56.0f / 255)),
-          gfx::Rect(gfx::Point(m_rc.right - marker_width, m_rc.top),
-                    gfx::Size(marker_width, marker_height)));
-    }
+  if (pTcItem->mask & TCIF_STATE) {
+    auto const old_state = m_rgfState;
+    m_rgfState &= ~pTcItem->dwStateMask;
+    m_rgfState |= pTcItem->dwState & pTcItem->dwStateMask;
+    if (m_rgfState != old_state)
+      changed = true;
   }
 
-  private: void drawContent(const gfx::Canvas& gfx) const {
-    drawIcon(gfx);
-
-    // Label Text
-    {
-      RECT rc = m_rc;
-      rc.left += 4 + 16 + 4;
-      rc.right -= 4;
-      rc.top += 8;
-      rc.bottom = rc.bottom - 2;
-
-      gfx::Brush brush(gfx, gfx::sysColor(COLOR_BTNTEXT));
-      gfx.DrawText(*gfx.work<gfx::TextFormat>(), brush, rc, label_.data(),
-                   label_.length());
+  if (pTcItem->mask & TCIF_TEXT) {
+    auto const new_label = pTcItem->pszText;
+    if (label_ != new_label) {
+      label_ = new_label;
+      changed = true;
     }
   }
+  return changed;
+}
 
-  private: void drawIcon(const gfx::Canvas& gfx) const {
-    if (m_iImage < 0)
-      return;
-    auto const hImageList = GetImageList();
-    if (!hImageList)
-      return;
-    // Note: ILD_TRANSPARENT doesn't effect.
-    // Note: ILD_DPISCALE makes background black.
-    auto const hIcon = ::ImageList_GetIcon(
-        hImageList,
-        m_iImage,
-        0);
-    if (!hIcon)
-      return;
-    gfx::Bitmap bitmap(gfx, hIcon);
-    auto const icon_size = gfx.AlignToPixel(gfx::SizeF(16, 16));
-    auto const icon_offset = gfx.AlignToPixel(gfx::SizeF(-20, 8));
-    auto const icon_left_top = gfx::PointF(m_rcLabel.left, m_rc.top) +
-                               icon_offset;
-    gfx->DrawBitmap(bitmap, gfx::RectF(icon_left_top, icon_size));
-    ::DestroyIcon(hIcon);
+// Element
+void Item::Draw(const gfx::Canvas& gfx) const {
+  #if DEBUG_HOVER
+    DEBUG_PRINTF("%p sel=%d %ls\n",
+      this,
+      IsSelected(),
+      label.c_str());
+  #endif
+
+  {
+    RECT rc = m_rc;
+    gfx::Brush fillBrush(gfx, backgroundColor());
+    gfx.FillRectangle(fillBrush, rc);
+    gfx::Brush strokeBrush(gfx, gfx::blackColor());
+    gfx.DrawRectangle(strokeBrush, rc, 0.2);
   }
 
-  // [H]
-  public: bool HasCloseBox() const {
-    return IsSelected() || IsHover();
+  drawContent(gfx);
+  if (HasCloseBox())
+      m_closeBox.Draw(gfx);
+  if (m_rgfState) {
+    auto const marker_height = 4;
+    auto const marker_width = 4;
+    DCHECK_GT(m_rc.right - m_rc.left, marker_width);
+    gfx.FillRectangle(
+        gfx::Brush(gfx, gfx::ColorF(219.0f / 255, 74.0f / 255, 56.0f / 255)),
+        gfx::Rect(gfx::Point(m_rc.right - marker_width, m_rc.top),
+                  gfx::Size(marker_width, marker_height)));
   }
+}
 
-  public: virtual Element* HitTest(POINT pt) const override {
-    if (HasCloseBox()) {
-        if (auto const hit = m_closeBox.HitTest(pt))
-          return hit;
-    }
-    return Element::HitTest(pt);
+Element* Item::HitTest(POINT pt) const {
+  if (HasCloseBox()) {
+      if (auto const hit = m_closeBox.HitTest(pt))
+        return hit;
   }
+  return Element::HitTest(pt);
+}
 
-  // [S]
-  public: bool SetItem(const TCITEM* pTcItem) {
-    auto changed = false;
-    if (pTcItem->mask & TCIF_IMAGE) {
-      if (m_iImage != pTcItem->iImage)
-        changed = true;
-      m_iImage = pTcItem->iImage;
-    }
-
-    if (pTcItem->mask & TCIF_PARAM) {
-      m_lParam = pTcItem->lParam;
-    }
-
-    if (pTcItem->mask & TCIF_STATE) {
-      auto const old_state = m_rgfState;
-      m_rgfState &= ~pTcItem->dwStateMask;
-      m_rgfState |= pTcItem->dwState & pTcItem->dwStateMask;
-      if (m_rgfState != old_state)
-        changed = true;
-    }
-
-    if (pTcItem->mask & TCIF_TEXT) {
-      auto const new_label = pTcItem->pszText;
-      if (label_ != new_label) {
-        label_ = new_label;
-        changed = true;
-      }
-    }
-    return changed;
-  }
-
-  // [U]
-  protected: void update() override {
-    ComputeLayout();
-  }
-}; // Item
+void Item::update() {
+  ComputeLayout();
+}
 
 //////////////////////////////////////////////////////////////////////
 //
 // ListButton
 //
-//
-//    [4]    [5]
-//    --oooooooooo--
-//    -o----------o-
-// [3]o------------o [6]
-//    o------------o
-//    o------------o
-//    o------------o
-//    o------------o
-//    o-----------o- [0]
-//    oooooooooooo--
-//  [2]           [1]
-//
-class ListButton : public Element {
+class ListButton final : public Element {
   public: static  const char16*  GetClass_() { return L"ListButton"; }
 
   public: virtual const char16* GetClass()  const override {
     return GetClass_();
   }
 
-  // ctor
-  public: ListButton(Element* pParent) :
-    Element(pParent) {}
+  public: ListButton(Element* pParent);
+  public: virtual ~ListButton() = default;
 
-  // [D]
-  public: virtual void Draw(const gfx::Canvas& gfx) const override {
-    ASSERT(IsShow());
-    if (m_rc.left == m_rc.right)
-        return;
+  private: void drawDownArrow(const gfx::Canvas& gfx) const;
 
-    gfx::Brush fillBrush(gfx, backgroundColor());
-    gfx.FillRectangle(fillBrush, m_rc);
-    gfx::Brush strokeBrush(gfx, gfx::blackColor());
-    gfx.DrawRectangle(strokeBrush, m_rc, 0.2);
+  // Element
+  public: virtual void Draw(const gfx::Canvas& gfx) const override;
 
-    // Draw triangle
-    {
-        auto const x = (m_rc.right - m_rc.left - 4) / 2 + m_rc.left;
-        auto const y = (m_rc.bottom - m_rc.top) / 2 + m_rc.top;
-        fillRect(gfx, x + 0, y + 0, 5, 1);
-        fillRect(gfx, x + 1, y + 1, 3, 1);
-        fillRect(gfx, x + 2, y + 2, 1, 1);
-    }
+  DISALLOW_COPY_AND_ASSIGN(ListButton);
+};
+
+ListButton::ListButton(Element* pParent) : Element(pParent) {
+}
+
+void ListButton::drawDownArrow(const gfx::Canvas& gfx) const {
+  auto const x = (m_rc.right - m_rc.left - 4) / 2 + m_rc.left;
+  auto const y = (m_rc.bottom - m_rc.top) / 2 + m_rc.top;
+  gfx::Brush arrowBrush(gfx, gfx::blackColor());
+  gfx.FillRectangle(arrowBrush, x + 0, y + 0, 5, 1);
+  gfx.FillRectangle(arrowBrush, x + 1, y + 1, 3, 1);
+  gfx.FillRectangle(arrowBrush, x + 2, y + 2, 1, 1);
+}
+
+// Element
+void ListButton::Draw(const gfx::Canvas& gfx) const {
+  ASSERT(IsShow());
+  if (m_rc.left == m_rc.right)
+      return;
+
+  gfx::Brush fillBrush(gfx, backgroundColor());
+  gfx.FillRectangle(fillBrush, m_rc);
+  gfx::Brush strokeBrush(gfx, gfx::blackColor());
+  gfx.DrawRectangle(strokeBrush, m_rc, 0.2);
+
+  // Draw triangle
+  {
+      auto const x = (m_rc.right - m_rc.left - 4) / 2 + m_rc.left;
+      auto const y = (m_rc.bottom - m_rc.top) / 2 + m_rc.top;
+      fillRect(gfx, x + 0, y + 0, 5, 1);
+      fillRect(gfx, x + 1, y + 1, 3, 1);
+      fillRect(gfx, x + 2, y + 2, 1, 1);
   }
+}
 
-  private: void drawDownArrow(const gfx::Canvas& gfx) const {
-    auto const x = (m_rc.right - m_rc.left - 4) / 2 + m_rc.left;
-    auto const y = (m_rc.bottom - m_rc.top) / 2 + m_rc.top;
-    gfx::Brush arrowBrush(gfx, gfx::blackColor());
-    gfx.FillRectangle(arrowBrush, x + 0, y + 0, 5, 1);
-    gfx.FillRectangle(arrowBrush, x + 1, y + 1, 3, 1);
-    gfx.FillRectangle(arrowBrush, x + 2, y + 2, 1, 1);
-  }
-}; // ListButton
 
 // Cursor for Tab Drag
 HCURSOR s_hDragTabCursor;
@@ -572,7 +596,7 @@ namespace views {
 //    Tab Band control is smaller than total number of tabs times
 //    m_cxTab.
 //
-class TabStrip::TabStripImpl : public Element {
+class TabStrip::TabStripImpl final : public Element {
   friend class TabStrip;
 
   private: enum Constants {
@@ -623,675 +647,49 @@ class TabStrip::TabStripImpl : public Element {
   public: virtual ~TabStripImpl();
 
   // [C]
-  private: bool changeFont(const gfx::Canvas& gfx) {
-    LOGFONT lf;
-    if (!::SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(lf), &lf, 0))
-      return false;
-
-    //lf.lfHeight = -13;
-
-    if (auto const old_format = gfx.work<gfx::TextFormat*>())
-        delete old_format;
-    gfx.set_work(new gfx::TextFormat(lf));
-    return true;
-  }
-
-  private: bool UpdateLayout() {
-    if (m_cItems == 0) {
-      m_cxTab = -1;
-      m_xTab = -1;
-      return false;
-    }
-
-    *m_oListButton.GetRect() = m_rc;
-
-    m_oListButton.GetRect()->left = m_rc.left + k_cxMargin;
-
-    auto x = m_oListButton.GetRect()->left;
-
-    if (m_cItems >= 2) {
-      m_oListButton.Show(true);
-      x += k_cxListButton;
-    } else {
-      m_oListButton.Show(false);
-    }
-
-    m_oListButton.GetRect()->right = x;
-
-    int cxTabs = m_rc.right - x - k_cxMargin;
-
-    int cxTab = cxTabs / m_cItems;
-      cxTab = std::min(cxTab, m_cxMinTab * 2);
-
-    if (cxTab >= m_cxMinTab) {
-      // We can show all tabs.
-    } else {
-      // How many tabs do we show in min width?
-      int cVisibles = cxTabs / m_cxMinTab;
-      if (cVisibles == 0) {
-        cVisibles = 1;
-      }
-      cxTab = cxTabs / cVisibles;
-    }
-
-    bool fChanged = m_cxTab != cxTab || m_xTab != x;
-
-    m_cxTab = cxTab;
-    m_xTab = x;
-
-    Item* pStartItem = nullptr;
-    foreach (Elements::Enum, oEnum, &m_oElements) {
-      Item* pItem = oEnum.Get()->DynamicCast<Item>();
-      if (pItem) {
-        pStartItem = pItem;
-        break;
-      }
-    }
-
-    ASSERT(pStartItem != nullptr);
-
-    do {
-      bool fShow = false;
-      x = m_xTab;
-      foreach (Elements::Enum, oEnum, &m_oElements) {
-        Item* pItem = oEnum.Get()->DynamicCast<Item>();
-        if (!pItem) {
-          continue;
-        }
-
-        if (pItem == pStartItem) {
-          fShow = true;
-        }
-
-        pItem->Show(fShow);
-
-        if (!fShow) {
-          continue;
-        }
-
-        RECT* prc = pItem->GetRect();
-        prc->left = x;
-        prc->right = x + cxTab;
-        prc->top = m_rc.top;
-        prc->bottom = m_rc.bottom;
-        pItem->ComputeLayout();
-
-        x += cxTab;
-
-        fShow = x + cxTab < m_rc.right;
-      }
-
-      if (!m_pSelected) {
-        // No tab is selected. So, we display from the first tab.
-        break;
-      }
-
-      if (m_pSelected->IsShow()) {
-        // Selected tab is visible. So, we don't need to scroll tabs.
-        break;
-      }
-
-      Element* pNext = pStartItem;
-
-      for (;;) {
-        pNext = pNext->GetNext();
-        if (!pNext) {
-          pStartItem = nullptr;
-          break;
-        }
-
-        pStartItem = pNext->DynamicCast<Item>();
-        if (pStartItem) {
-          break;
-        }
-      }
-    } while (pStartItem);
-
-    if (m_hwndToolTips) {
-      TOOLINFO ti;
-      ti.cbSize = sizeof(ti);
-      ti.hwnd = m_hwnd;
-      ti.uFlags = 0;
-
-      foreach (Elements::Enum, oEnum, &m_oElements) {
-        auto const pElement = oEnum.Get();
-        if (pElement->Is<Item>()) {
-          ti.uId = static_cast<uint>(pElement->StaticCast<Item>()->m_iItem);
-
-        } else if (pElement->Is<ListButton>()) {
-          ti.uId = k_TabListId;
-        } else {
-          continue;
-        }
-
-        if (pElement->IsShow()) {
-          ti.rect = *pElement->GetRect();
-        } else {
-          ti.rect.left = ti.rect.right = -1;
-          ti.rect.top = ti.rect.bottom = -1;
-        }
-
-        ::SendMessage(
-            m_hwndToolTips,
-            TTM_NEWTOOLRECT,
-            0,
-            reinterpret_cast<LPARAM>(&ti));
-      }
-    }
-
-    return fChanged;
-  }
+  private: bool changeFont(const gfx::Canvas& canvas);
 
   // [D]
   private: void DidChangeTabSelection();
-
-  public: void Draw(const gfx::Canvas& gfx) const override {
-    gfx->SetTransform(D2D1::IdentityMatrix());
-    gfx->Clear(gfx::sysColor(COLOR_3DFACE,
-                             m_compositionEnabled ? 0.0f : 1.0f));
-
-    foreach (Elements::Enum, oEnum, &m_oElements) {
-      auto const element = oEnum.Get();
-      if (element->IsShow())
-        element->Draw(gfx);
-    }
-
-    if (m_pInsertBefore)
-        drawInsertMarker(m_gfx, m_pInsertBefore->GetRect());
-  }
-
-  private: static void drawInsertMarker(const gfx::Canvas& gfx, RECT* prc) {
-    auto rc = * prc;
-    rc.top += 5;
-    rc.bottom -= 7;
-
-    for (int w = 1; w <= 7; w += 2) {
-      fillRect(gfx, rc.left, rc.top, w, 1);
-      fillRect(gfx, rc.left, rc.bottom, w, 1);
-
-      rc.top  -= 1;
-      rc.left   -= 1;
-      rc.bottom += 1;
-    }
-  }
+  public: void DidCreateNativeWindow();
+  public: void DeleteTab(int iDeleteItem);
+  private: void DropTab(Item* item, const POINT& point);
 
   // [F]
-  // findItem
-  private: Item* findItem(int iItem) const {
-    if (iItem < 0 || iItem >= m_cItems) {
-      return nullptr;
-    }
+  private: Item* findItem(int iItem) const;
+  private: Item* findItemFromPoint(POINT pt) const;
 
-    foreach (Elements::Enum, oEnum, &m_oElements) {
-      auto const pItem = oEnum.Get()->DynamicCast<Item>();
-      if (!pItem) {
-        continue;
-      }
-
-      if (pItem->m_iItem == iItem) {
-        return pItem;
-      }
-    }
-
-    return nullptr;
-  }
-
-  // findItemFromPoint
-  private: Item* findItemFromPoint(POINT pt) const {
-    foreach (Elements::Enum, oEnum, &m_oElements) {
-      auto const pItem = oEnum.Get()->DynamicCast<Item>();
-      if (!pItem) {
-        continue;
-      }
-
-      if (pt.x < pItem->GetRect()->left) {
-        break;
-      }
-
-      if (pItem->HitTest(pt) == pItem) {
-        return pItem;
-      }
-    }
-    return nullptr;
-  }
-
+  // [G]
   bool GetTab(int tab_index, TCITEM* pTcItem) const;
 
   // [H]
-
-  // handleTabListMenu
-  private: void handleTabListMenu(POINT) {
-    POINT ptMouse;
-    ptMouse.x = m_oListButton.GetRect()->left;
-    ptMouse.y = m_oListButton.GetRect()->bottom;
-
-    ::ClientToScreen(m_hwnd, &ptMouse);
-
-    if (!m_hTabListMenu) {
-      m_hTabListMenu = ::CreatePopupMenu();
-    }
-
-    // Make Tab List Menu empty
-    while (::GetMenuItemCount(m_hTabListMenu) > 0) {
-      ::DeleteMenu(m_hTabListMenu, 0, MF_BYPOSITION);
-    }
-
-    // Add Tab name to menu.
-    Item* pPrevItem = nullptr;
-    foreach (Elements::Enum, oEnum, &m_oElements) {
-      auto const pItem = oEnum.Get()->DynamicCast<Item>();
-      if (!pItem) {
-        continue;
-      }
-
-      auto const rgfFlag =
-        pItem->IsSelected()
-            ? MF_STRING | MF_CHECKED
-            : MF_STRING;
-
-      if (pPrevItem && pPrevItem->IsShow() != pItem->IsShow()) {
-        ::AppendMenu(
-            m_hTabListMenu,
-            MF_SEPARATOR,
-            0,
-            nullptr);
-      }
-
-      pPrevItem = pItem;
-
-      ::AppendMenu(
-          m_hTabListMenu,
-          static_cast<uint>(rgfFlag),
-          static_cast<uint>(pItem->m_iItem),
-          pItem->label_.c_str());
-    }
-
-    ::TrackPopupMenuEx(
-        m_hTabListMenu,
-        TPM_LEFTALIGN | TPM_TOPALIGN,
-        ptMouse.x, ptMouse.y,
-        m_hwnd,
-        nullptr);
-  }
-
-  // hitTest
-  private: Element* hitTest(POINT pt) const {
-    if (auto const pHit = m_oListButton.HitTest(pt)) {
-      return pHit;
-    }
-
-    foreach (Elements::Enum, oEnum, &m_oElements) {
-      auto const pItem = oEnum.Get()->DynamicCast<Item>();
-      if (!pItem) {
-        continue;
-      }
-
-      if (pt.x < pItem->GetRect()->left) {
-        break;
-      }
-
-      if (auto const pElement = pItem->HitTest(pt)) {
-        return pElement;
-      }
-    }
-
-    return nullptr;
-  }
+  private: void handleTabListMenu(POINT point);
+  private: Element* hitTest(POINT point) const;
 
   // [I]
-  public: void DidCreateNativeWindow();
+  private: void InsertTab(int iItem, const TCITEM* pTcItem);
 
-  public: void DeleteTab(int iDeleteItem) {
-    auto const pItem = findItem(iDeleteItem);
-    if (!pItem) {
-      return;
-    }
-
-    bool fSelChanged = m_pSelected == pItem;
-
-    if (fSelChanged) {
-      if (pItem->GetPrev()) {
-        m_pSelected = pItem->GetPrev()->DynamicCast<Item>();
-      }
-
-      if (m_pSelected == nullptr && pItem->GetNext()) {
-        m_pSelected = pItem->GetNext()->DynamicCast<Item>();
-      }
-    }
-
-    if (m_pHover == pItem) {
-      m_pHover = nullptr;
-    }
-
-    m_oElements.Delete(pItem);
-    m_cItems -= 1;
-
-    // Renumber tab index
-    {
-      int iItem = 0;
-      foreach (Elements::Enum, oEnum, &m_oElements) {
-        Item* pItem = oEnum.Get()->DynamicCast<Item>();
-        if (!pItem) {
-          continue;
-        }
-
-        pItem->m_iItem = iItem;
-        iItem += 1;
-      }
-    }
-
-    if (m_hwndToolTips) {
-      TOOLINFO ti;
-      ti.cbSize = sizeof(ti);
-      ti.hwnd = m_hwnd;
-      ti.uId = static_cast<uint>(m_cItems);
-      ::SendMessage(
-          m_hwndToolTips,
-          TTM_DELTOOL,
-          0,
-          reinterpret_cast<LPARAM>(&ti));
-    }
-
-    Redraw();
-
-    if (fSelChanged) {
-      if (m_pSelected)
-        m_pSelected->SetState(Element::State_Selected);
-      DidChangeTabSelection();
-    }
-  }
-
-  private: void DropTab(Item* item, const POINT& point);
-
-  private: void InsertTab(int iItem, const TCITEM* pTcItem) {
-    auto const pNewItem = new Item(this, iItem, pTcItem);
-    if (!pNewItem) {
-      return;
-    }
-
-    pNewItem->m_iItem = iItem;
-
-    if (m_iFocus >= iItem) {
-      m_iFocus += 1;
-    }
-
-    Item* pRefItem = nullptr;
-    foreach (Elements::Enum, oEnum, &m_oElements) {
-      auto const pItem = oEnum.Get()->DynamicCast<Item>();
-      if (!pItem) {
-        continue;
-      }
-
-      if (pItem->m_iItem < iItem) {
-        continue;
-      }
-
-      if (pItem->m_iItem == iItem) {
-        ASSERT(!pRefItem);
-        pRefItem = pItem;
-      }
-
-      pItem->m_iItem += 1;
-    }
-
-    m_cItems += 1;
-
-    if (pRefItem)
-      m_oElements.InsertBefore(pNewItem, pRefItem);
-    else
-      m_oElements.Append(pNewItem);
-
-    if (m_hwndToolTips) {
-      TOOLINFO ti;
-      ti.cbSize = sizeof(ti);
-      ti.hwnd = m_hwnd;
-      ti.lpszText = LPSTR_TEXTCALLBACK;
-      ti.uFlags = 0;
-      ti.uId = static_cast<uint>(m_cItems - 1);
-      ::SendMessage(
-          m_hwndToolTips,
-          TTM_ADDTOOL,
-          0,
-          reinterpret_cast<LPARAM>(&ti));
-    }
-
-    Redraw();
-  }
-
-  // onLButtonDown
-  private: void onLButtonDown(POINT pt) {
-    auto const pElement = hitTest(pt);
-    if (!pElement) {
-      return;
-    }
-
-    auto const pItem = pElement->DynamicCast<Item>();
-    if (!pItem) {
-      // Not a tab.
-      return;
-    }
-
-    if (!pItem->IsSelected()) {
-      SelectItem(pItem);
-      // Note: We should start tab dragging, otherwise if
-      // mouse pointer is in close box, onButtonUp close
-      // the tab.
-    }
-
-    #if DEBUG_DRAG
-      DEBUG_PRINTF("%p drag=%p\n", this, m_pDragItem);
-    #endif
-
-    loadDragTabCursor();
-
-    m_pDragItem = pItem;
-    m_eDrag = Drag_Start;
-    m_ptDragStart = pt;
-
-    ::SetCapture(m_hwnd);
-  }
-
-  // onLButtonUp
-  private: void onLButtonUp(POINT pt) {
-    if (!m_pDragItem) {
-      auto const pElement = hitTest(pt);
-      if (!pElement) {
-        return;
-      }
-
-      if (pElement->Is<CloseBox>()) {
-        if (auto const item = pElement->GetParent()->DynamicCast<Item>())
-          delegate_->DidClickTabCloseButton(item->m_iItem);
-        return;
-      }
-
-      if (pElement->Is<ListButton>()) {
-        handleTabListMenu(pt);
-        return;
-      }
-    } else {
-      Item* pDragItem = m_pDragItem;
-      Item* pInsertBefore = m_pInsertBefore;
-
-      stopDrag();
-
-      if (!pInsertBefore) {
-        DropTab(pDragItem, pt);
-
-      } else {
-        if (pDragItem != pInsertBefore) {
-          m_oElements.Delete(pDragItem);
-          m_oElements.InsertBefore(pDragItem, pInsertBefore);
-          int iItem = 0;
-          foreach (Elements::Enum, oEnum, &m_oElements) {
-            Item* pItem = oEnum.Get()->DynamicCast<Item>();
-            if (!pItem) continue;
-            pItem->m_iItem = iItem;
-            iItem += 1;
-          }
-
-          UpdateLayout();
-        }
-
-        // Hide insertion position mark
-        ::InvalidateRect(m_hwnd, nullptr, false);
-      }
-    }
-  }
-
-  // onMessage
-  private: LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    static UINT last_message = 0;
-    #if DEBUG_MESSAGE
-      if (uMsg != 0x133C && last_message != uMsg) {
-        last_message = uMsg;
-        DVLOG(0) << "TabStrip::TabBand " << this << " msg=" << std::hex <<
-            uMsg;
-      }
-    #endif
-
-    switch (uMsg) {
-      case WM_DWMCOMPOSITIONCHANGED:
-        if (FAILED(DwmIsCompositionEnabled(&m_compositionEnabled)))
-            m_compositionEnabled = false;
-        break;
-
-      case WM_NCHITTEST: {
-        POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-        if (::ScreenToClient(m_hwnd, &pt)) {
-          if (!hitTest(pt))
-            return ::SendMessage(::GetParent(m_hwnd), uMsg, wParam, lParam);
-          return HTCLIENT;
-        }
-        return HTNOWHERE;
-      }
-
-      case WM_NCLBUTTONDOWN:
-      case WM_NCLBUTTONUP:
-      case WM_NCMOUSEMOVE:
-      case WM_NCRBUTTONDOWN:
-      case WM_NCRBUTTONUP:
-        // Redirect non-client mouse move to parent for top level window
-        // management, e.g. moving top level window by grabing empty area
-        // of tabs.
-        return ::SendMessage(::GetParent(m_hwnd), uMsg, wParam, lParam);
-
-      case WM_SETTINGCHANGE:
-        switch (wParam) {
-          case SPI_SETICONTITLELOGFONT:
-          case SPI_SETNONCLIENTMETRICS: {
-            changeFont(m_gfx);
-            break;
-          }
-        }
-        break;
-    }
-
-    return 0;
-  }
-
-  private: void OnMouseMove(POINT pt) {
-    auto const pHover = hitTest(pt);
-
-    if (!m_pDragItem) {
-      UpdateHover(pHover);
-    } else {
-      if (::GetCapture() != m_hwnd) {
-        // Someone takes capture. So, we stop dragging.
-        stopDrag();
-        return;
-      }
-
-      if (Drag_Start == m_eDrag) {
-        if (pt.x - m_ptDragStart.x >= -5 &&
-            pt.x - m_ptDragStart.x <= 5) {
-          return;
-        }
-
-        m_eDrag = Drag_Tab;
-      }
-
-      // Tab dragging
-      auto const pInsertBefore = pHover == nullptr ?
-        nullptr :
-        pHover->DynamicCast<Item>();
-
-      ::SetCursor(s_hDragTabCursor);
-
-      if (pInsertBefore != m_pInsertBefore) {
-        ::InvalidateRect(m_hwnd, nullptr, false);
-      }
-
-      m_pInsertBefore = pInsertBefore;
-    }
-  }
-
+  // [O]
+  private: void onLButtonDown(POINT pt);
+  private: void onLButtonUp(POINT pt);
+  private: LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+  private: void OnMouseMove(POINT pt);
   private: LRESULT OnNotify(NMHDR* nmhdr);
 
   // [R]
-  private: void UpdateHover(Element* pHover) {
-      if (m_pHover == pHover)
-        return;
-
-    if (m_pHover) {
-      if (!pHover || !pHover->Is<CloseBox>() ||
-          pHover->GetParent() != m_pHover) {
-        if (m_pHover->Is<CloseBox>()) {
-          m_pHover->SetHover(false);
-          m_pHover = m_pHover->GetParent();
-        }
-        m_pHover->SetHover(false);
-        m_pHover->Invalidate(m_hwnd);
-      }
-    }
-
-    m_pHover = pHover;
-    if (m_pHover) {
-      m_pHover->SetHover(true);
-      m_pHover->Invalidate(m_hwnd);
-    }
-  }
+  public: void Redraw();
 
   // [S]
-  // selectItem
-  private: int SelectItem(int const iItem) {
-    return SelectItem(findItem(iItem));
-  }
-
-  private: int SelectItem(Item* const pItem) {
-    if (m_pSelected != pItem) {
-      if (m_pSelected) {
-        m_pSelected->SetState(Element::State_Normal);
-        m_pSelected->Invalidate(m_hwnd);
-      }
-
-      m_pSelected = pItem;
-
-      if (pItem) {
-        pItem->SetState(Element::State_Selected);
-        if (!pItem->IsShow()) {
-          Redraw();
-        }
-        pItem->Invalidate(m_hwnd);
-      }
-
-      DidChangeTabSelection();
-    }
-
-    return m_pSelected ? m_pSelected->m_iItem : -1;
-  }
-
-  private: void stopDrag() {
-    m_eDrag = Drag_None;
-    m_pDragItem = nullptr;
-    m_pInsertBefore = nullptr;
-
-    ::ReleaseCapture();
-    ::SetCursor(::LoadCursor(nullptr, IDC_ARROW));
-  }
+  private: int SelectItem(int const iItem);
+  private: int SelectItem(Item* const pItem);
+  private: void stopDrag();
 
   // [U]
-  public: void Redraw();
+  private: void UpdateHover(Element* pHover);
+  private: bool UpdateLayout();
+
+  // Element
+  public: void Draw(const gfx::Canvas& gfx) const override;
 
   DISALLOW_COPY_AND_ASSIGN(TabStripImpl);
 };
@@ -1329,6 +727,79 @@ TabStrip::TabStripImpl::~TabStripImpl() {
 
   if (m_hTabListMenu) {
     ::DestroyMenu(m_hTabListMenu);
+  }
+}
+
+bool TabStrip::TabStripImpl::changeFont(const gfx::Canvas& gfx) {
+  LOGFONT lf;
+  if (!::SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(lf), &lf, 0))
+    return false;
+
+  //lf.lfHeight = -13;
+
+  if (auto const old_format = gfx.work<gfx::TextFormat*>())
+      delete old_format;
+  gfx.set_work(new gfx::TextFormat(lf));
+  return true;
+}
+
+void TabStrip::TabStripImpl::DeleteTab(int iDeleteItem) {
+  auto const pItem = findItem(iDeleteItem);
+  if (!pItem) {
+    return;
+  }
+
+  bool fSelChanged = m_pSelected == pItem;
+
+  if (fSelChanged) {
+    if (pItem->GetPrev()) {
+      m_pSelected = pItem->GetPrev()->DynamicCast<Item>();
+    }
+
+    if (m_pSelected == nullptr && pItem->GetNext()) {
+      m_pSelected = pItem->GetNext()->DynamicCast<Item>();
+    }
+  }
+
+  if (m_pHover == pItem) {
+    m_pHover = nullptr;
+  }
+
+  m_oElements.Delete(pItem);
+  m_cItems -= 1;
+
+  // Renumber tab index
+  {
+    int iItem = 0;
+    foreach (Elements::Enum, oEnum, &m_oElements) {
+      Item* pItem = oEnum.Get()->DynamicCast<Item>();
+      if (!pItem) {
+        continue;
+      }
+
+      pItem->m_iItem = iItem;
+      iItem += 1;
+    }
+  }
+
+  if (m_hwndToolTips) {
+    TOOLINFO ti;
+    ti.cbSize = sizeof(ti);
+    ti.hwnd = m_hwnd;
+    ti.uId = static_cast<uint>(m_cItems);
+    ::SendMessage(
+        m_hwndToolTips,
+        TTM_DELTOOL,
+        0,
+        reinterpret_cast<LPARAM>(&ti));
+  }
+
+  Redraw();
+
+  if (fSelChanged) {
+    if (m_pSelected)
+      m_pSelected->SetState(Element::State_Selected);
+    DidChangeTabSelection();
   }
 }
 
@@ -1421,6 +892,337 @@ bool TabStrip::TabStripImpl::GetTab(int tab_index, TCITEM* pTcItem) const {
   return true;
 }
 
+Item* TabStrip::TabStripImpl::findItem(int iItem) const {
+  if (iItem < 0 || iItem >= m_cItems) {
+    return nullptr;
+  }
+
+  foreach (Elements::Enum, oEnum, &m_oElements) {
+    auto const pItem = oEnum.Get()->DynamicCast<Item>();
+    if (!pItem) {
+      continue;
+    }
+
+    if (pItem->m_iItem == iItem) {
+      return pItem;
+    }
+  }
+
+  return nullptr;
+}
+
+Item* TabStrip::TabStripImpl::findItemFromPoint(POINT pt) const {
+  foreach (Elements::Enum, oEnum, &m_oElements) {
+    auto const pItem = oEnum.Get()->DynamicCast<Item>();
+    if (!pItem) {
+      continue;
+    }
+
+    if (pt.x < pItem->GetRect()->left) {
+      break;
+    }
+
+    if (pItem->HitTest(pt) == pItem) {
+      return pItem;
+    }
+  }
+  return nullptr;
+}
+
+void TabStrip::TabStripImpl::handleTabListMenu(POINT) {
+  POINT ptMouse;
+  ptMouse.x = m_oListButton.GetRect()->left;
+  ptMouse.y = m_oListButton.GetRect()->bottom;
+
+  ::ClientToScreen(m_hwnd, &ptMouse);
+
+  if (!m_hTabListMenu)
+    m_hTabListMenu = ::CreatePopupMenu();
+
+  // Make Tab List Menu empty
+  while (::GetMenuItemCount(m_hTabListMenu) > 0) {
+    ::DeleteMenu(m_hTabListMenu, 0, MF_BYPOSITION);
+  }
+
+  // Add Tab name to menu.
+  Item* pPrevItem = nullptr;
+  foreach (Elements::Enum, oEnum, &m_oElements) {
+    auto const pItem = oEnum.Get()->DynamicCast<Item>();
+    if (!pItem) {
+      continue;
+    }
+
+    auto const rgfFlag =
+      pItem->IsSelected()
+          ? MF_STRING | MF_CHECKED
+          : MF_STRING;
+
+    if (pPrevItem && pPrevItem->IsShow() != pItem->IsShow()) {
+      ::AppendMenu(
+          m_hTabListMenu,
+          MF_SEPARATOR,
+          0,
+          nullptr);
+    }
+
+    pPrevItem = pItem;
+
+    ::AppendMenu(
+        m_hTabListMenu,
+        static_cast<uint>(rgfFlag),
+        static_cast<uint>(pItem->m_iItem),
+        pItem->label_.c_str());
+  }
+
+  ::TrackPopupMenuEx(
+      m_hTabListMenu,
+      TPM_LEFTALIGN | TPM_TOPALIGN,
+      ptMouse.x, ptMouse.y,
+      m_hwnd,
+      nullptr);
+}
+
+Element* TabStrip::TabStripImpl::hitTest(POINT pt) const {
+  if (auto const pHit = m_oListButton.HitTest(pt))
+    return pHit;
+
+  foreach (Elements::Enum, oEnum, &m_oElements) {
+    auto const pItem = oEnum.Get()->DynamicCast<Item>();
+    if (!pItem)
+      continue;
+
+    if (pt.x < pItem->GetRect()->left)
+      break;
+
+    if (auto const pElement = pItem->HitTest(pt))
+      return pElement;
+  }
+
+  return nullptr;
+}
+
+
+void TabStrip::TabStripImpl::InsertTab(int iItem, const TCITEM* pTcItem) {
+  auto const pNewItem = new Item(this, iItem, pTcItem);
+  if (!pNewItem) {
+    return;
+  }
+
+  pNewItem->m_iItem = iItem;
+
+  if (m_iFocus >= iItem) {
+    m_iFocus += 1;
+  }
+
+  Item* pRefItem = nullptr;
+  foreach (Elements::Enum, oEnum, &m_oElements) {
+    auto const pItem = oEnum.Get()->DynamicCast<Item>();
+    if (!pItem) {
+      continue;
+    }
+
+    if (pItem->m_iItem < iItem) {
+      continue;
+    }
+
+    if (pItem->m_iItem == iItem) {
+      ASSERT(!pRefItem);
+      pRefItem = pItem;
+    }
+
+    pItem->m_iItem += 1;
+  }
+
+  m_cItems += 1;
+
+  if (pRefItem)
+    m_oElements.InsertBefore(pNewItem, pRefItem);
+  else
+    m_oElements.Append(pNewItem);
+
+  if (m_hwndToolTips) {
+    TOOLINFO ti;
+    ti.cbSize = sizeof(ti);
+    ti.hwnd = m_hwnd;
+    ti.lpszText = LPSTR_TEXTCALLBACK;
+    ti.uFlags = 0;
+    ti.uId = static_cast<uint>(m_cItems - 1);
+    ::SendMessage(
+        m_hwndToolTips,
+        TTM_ADDTOOL,
+        0,
+        reinterpret_cast<LPARAM>(&ti));
+  }
+
+  Redraw();
+}
+
+void TabStrip::TabStripImpl::onLButtonDown(POINT pt) {
+  auto const pElement = hitTest(pt);
+  if (!pElement) {
+    return;
+  }
+
+  auto const pItem = pElement->DynamicCast<Item>();
+  if (!pItem) {
+    // Not a tab.
+    return;
+  }
+
+  if (!pItem->IsSelected()) {
+    SelectItem(pItem);
+    // Note: We should start tab dragging, otherwise if
+    // mouse pointer is in close box, onButtonUp close
+    // the tab.
+  }
+
+  #if DEBUG_DRAG
+    DEBUG_PRINTF("%p drag=%p\n", this, m_pDragItem);
+  #endif
+
+  loadDragTabCursor();
+
+  m_pDragItem = pItem;
+  m_eDrag = Drag_Start;
+  m_ptDragStart = pt;
+
+  ::SetCapture(m_hwnd);
+}
+
+void TabStrip::TabStripImpl::onLButtonUp(POINT pt) {
+  if (!m_pDragItem) {
+    auto const pElement = hitTest(pt);
+    if (!pElement) {
+      return;
+    }
+
+    if (pElement->Is<CloseBox>()) {
+      if (auto const item = pElement->GetParent()->DynamicCast<Item>())
+        delegate_->DidClickTabCloseButton(item->m_iItem);
+      return;
+    }
+
+    if (pElement->Is<ListButton>()) {
+      handleTabListMenu(pt);
+      return;
+    }
+  } else {
+    Item* pDragItem = m_pDragItem;
+    Item* pInsertBefore = m_pInsertBefore;
+
+    stopDrag();
+
+    if (!pInsertBefore) {
+      DropTab(pDragItem, pt);
+
+    } else {
+      if (pDragItem != pInsertBefore) {
+        m_oElements.Delete(pDragItem);
+        m_oElements.InsertBefore(pDragItem, pInsertBefore);
+        int iItem = 0;
+        foreach (Elements::Enum, oEnum, &m_oElements) {
+          Item* pItem = oEnum.Get()->DynamicCast<Item>();
+          if (!pItem) continue;
+          pItem->m_iItem = iItem;
+          iItem += 1;
+        }
+
+        UpdateLayout();
+      }
+
+      // Hide insertion position mark
+      ::InvalidateRect(m_hwnd, nullptr, false);
+    }
+  }
+}
+
+LRESULT TabStrip::TabStripImpl::OnMessage(UINT uMsg, WPARAM wParam,
+                                          LPARAM lParam) {
+  static UINT last_message = 0;
+  #if DEBUG_MESSAGE
+    if (uMsg != 0x133C && last_message != uMsg) {
+      last_message = uMsg;
+      DVLOG(0) << "TabStrip::TabBand " << this << " msg=" << std::hex <<
+          uMsg;
+    }
+  #endif
+
+  switch (uMsg) {
+    case WM_DWMCOMPOSITIONCHANGED:
+      if (FAILED(DwmIsCompositionEnabled(&m_compositionEnabled)))
+          m_compositionEnabled = false;
+      break;
+
+    case WM_NCHITTEST: {
+      POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+      if (::ScreenToClient(m_hwnd, &pt)) {
+        if (!hitTest(pt))
+          return ::SendMessage(::GetParent(m_hwnd), uMsg, wParam, lParam);
+        return HTCLIENT;
+      }
+      return HTNOWHERE;
+    }
+
+    case WM_NCLBUTTONDOWN:
+    case WM_NCLBUTTONUP:
+    case WM_NCMOUSEMOVE:
+    case WM_NCRBUTTONDOWN:
+    case WM_NCRBUTTONUP:
+      // Redirect non-client mouse move to parent for top level window
+      // management, e.g. moving top level window by grabing empty area
+      // of tabs.
+      return ::SendMessage(::GetParent(m_hwnd), uMsg, wParam, lParam);
+
+    case WM_SETTINGCHANGE:
+      switch (wParam) {
+        case SPI_SETICONTITLELOGFONT:
+        case SPI_SETNONCLIENTMETRICS: {
+          changeFont(m_gfx);
+          break;
+        }
+      }
+      break;
+  }
+
+  return 0;
+}
+
+void TabStrip::TabStripImpl::OnMouseMove(POINT pt) {
+  auto const pHover = hitTest(pt);
+
+  if (!m_pDragItem) {
+    UpdateHover(pHover);
+  } else {
+    if (::GetCapture() != m_hwnd) {
+      // Someone takes capture. So, we stop dragging.
+      stopDrag();
+      return;
+    }
+
+    if (Drag_Start == m_eDrag) {
+      if (pt.x - m_ptDragStart.x >= -5 &&
+          pt.x - m_ptDragStart.x <= 5) {
+        return;
+      }
+
+      m_eDrag = Drag_Tab;
+    }
+
+    // Tab dragging
+    auto const pInsertBefore = pHover == nullptr ?
+      nullptr :
+      pHover->DynamicCast<Item>();
+
+    ::SetCursor(s_hDragTabCursor);
+
+    if (pInsertBefore != m_pInsertBefore) {
+      ::InvalidateRect(m_hwnd, nullptr, false);
+    }
+
+    m_pInsertBefore = pInsertBefore;
+  }
+}
+
 LRESULT TabStrip::TabStripImpl::OnNotify(NMHDR* nmhdr) {
   if (nmhdr->hwndFrom != m_hwndToolTips)
     return 0;
@@ -1439,6 +1241,245 @@ void TabStrip::TabStripImpl::Redraw() {
   UpdateLayout();
   ::InvalidateRect(m_hwnd, nullptr, false);
 }
+
+int TabStrip::TabStripImpl::SelectItem(int const iItem) {
+  return SelectItem(findItem(iItem));
+}
+
+int TabStrip::TabStripImpl::SelectItem(Item* const pItem) {
+  if (m_pSelected != pItem) {
+    if (m_pSelected) {
+      m_pSelected->SetState(Element::State_Normal);
+      m_pSelected->Invalidate(m_hwnd);
+    }
+
+    m_pSelected = pItem;
+
+    if (pItem) {
+      pItem->SetState(Element::State_Selected);
+      if (!pItem->IsShow()) {
+        Redraw();
+      }
+      pItem->Invalidate(m_hwnd);
+    }
+
+    DidChangeTabSelection();
+  }
+
+  return m_pSelected ? m_pSelected->m_iItem : -1;
+}
+
+void TabStrip::TabStripImpl::stopDrag() {
+  m_eDrag = Drag_None;
+  m_pDragItem = nullptr;
+  m_pInsertBefore = nullptr;
+
+  ::ReleaseCapture();
+  ::SetCursor(::LoadCursor(nullptr, IDC_ARROW));
+}
+
+void TabStrip::TabStripImpl::UpdateHover(Element* pHover) {
+    if (m_pHover == pHover)
+      return;
+
+  if (m_pHover) {
+    if (!pHover || !pHover->Is<CloseBox>() ||
+        pHover->GetParent() != m_pHover) {
+      if (m_pHover->Is<CloseBox>()) {
+        m_pHover->SetHover(false);
+        m_pHover = m_pHover->GetParent();
+      }
+      m_pHover->SetHover(false);
+      m_pHover->Invalidate(m_hwnd);
+    }
+  }
+
+  m_pHover = pHover;
+  if (m_pHover) {
+    m_pHover->SetHover(true);
+    m_pHover->Invalidate(m_hwnd);
+  }
+}
+
+bool TabStrip::TabStripImpl::UpdateLayout() {
+  if (m_cItems == 0) {
+    m_cxTab = -1;
+    m_xTab = -1;
+    return false;
+  }
+
+  *m_oListButton.GetRect() = m_rc;
+
+  m_oListButton.GetRect()->left = m_rc.left + k_cxMargin;
+
+  auto x = m_oListButton.GetRect()->left;
+
+  if (m_cItems >= 2) {
+    m_oListButton.Show(true);
+    x += k_cxListButton;
+  } else {
+    m_oListButton.Show(false);
+  }
+
+  m_oListButton.GetRect()->right = x;
+
+  int cxTabs = m_rc.right - x - k_cxMargin;
+
+  int cxTab = cxTabs / m_cItems;
+    cxTab = std::min(cxTab, m_cxMinTab * 2);
+
+  if (cxTab >= m_cxMinTab) {
+    // We can show all tabs.
+  } else {
+    // How many tabs do we show in min width?
+    int cVisibles = cxTabs / m_cxMinTab;
+    if (cVisibles == 0) {
+      cVisibles = 1;
+    }
+    cxTab = cxTabs / cVisibles;
+  }
+
+  bool fChanged = m_cxTab != cxTab || m_xTab != x;
+
+  m_cxTab = cxTab;
+  m_xTab = x;
+
+  Item* pStartItem = nullptr;
+  foreach (Elements::Enum, oEnum, &m_oElements) {
+    Item* pItem = oEnum.Get()->DynamicCast<Item>();
+    if (pItem) {
+      pStartItem = pItem;
+      break;
+    }
+  }
+
+  ASSERT(pStartItem != nullptr);
+
+  do {
+    bool fShow = false;
+    x = m_xTab;
+    foreach (Elements::Enum, oEnum, &m_oElements) {
+      Item* pItem = oEnum.Get()->DynamicCast<Item>();
+      if (!pItem) {
+        continue;
+      }
+
+      if (pItem == pStartItem) {
+        fShow = true;
+      }
+
+      pItem->Show(fShow);
+
+      if (!fShow) {
+        continue;
+      }
+
+      RECT* prc = pItem->GetRect();
+      prc->left = x;
+      prc->right = x + cxTab;
+      prc->top = m_rc.top;
+      prc->bottom = m_rc.bottom;
+      pItem->ComputeLayout();
+
+      x += cxTab;
+
+      fShow = x + cxTab < m_rc.right;
+    }
+
+    if (!m_pSelected) {
+      // No tab is selected. So, we display from the first tab.
+      break;
+    }
+
+    if (m_pSelected->IsShow()) {
+      // Selected tab is visible. So, we don't need to scroll tabs.
+      break;
+    }
+
+    Element* pNext = pStartItem;
+
+    for (;;) {
+      pNext = pNext->GetNext();
+      if (!pNext) {
+        pStartItem = nullptr;
+        break;
+      }
+
+      pStartItem = pNext->DynamicCast<Item>();
+      if (pStartItem) {
+        break;
+      }
+    }
+  } while (pStartItem);
+
+  if (m_hwndToolTips) {
+    TOOLINFO ti;
+    ti.cbSize = sizeof(ti);
+    ti.hwnd = m_hwnd;
+    ti.uFlags = 0;
+
+    foreach (Elements::Enum, oEnum, &m_oElements) {
+      auto const pElement = oEnum.Get();
+      if (pElement->Is<Item>()) {
+        ti.uId = static_cast<uint>(pElement->StaticCast<Item>()->m_iItem);
+
+      } else if (pElement->Is<ListButton>()) {
+        ti.uId = k_TabListId;
+      } else {
+        continue;
+      }
+
+      if (pElement->IsShow()) {
+        ti.rect = *pElement->GetRect();
+      } else {
+        ti.rect.left = ti.rect.right = -1;
+        ti.rect.top = ti.rect.bottom = -1;
+      }
+
+      ::SendMessage(
+          m_hwndToolTips,
+          TTM_NEWTOOLRECT,
+          0,
+          reinterpret_cast<LPARAM>(&ti));
+    }
+  }
+
+  return fChanged;
+}
+
+// Element
+void TabStrip::TabStripImpl::Draw(const gfx::Canvas& gfx) const {
+  struct Local {
+    static void drawInsertMarker(const gfx::Canvas& gfx, RECT* prc) {
+      auto rc = * prc;
+      rc.top += 5;
+      rc.bottom -= 7;
+
+      for (int w = 1; w <= 7; w += 2) {
+        fillRect(gfx, rc.left, rc.top, w, 1);
+        fillRect(gfx, rc.left, rc.bottom, w, 1);
+
+        rc.top  -= 1;
+        rc.left   -= 1;
+        rc.bottom += 1;
+      }
+    }
+  };
+
+  gfx->SetTransform(D2D1::IdentityMatrix());
+  gfx->Clear(gfx::sysColor(COLOR_3DFACE,
+                           m_compositionEnabled ? 0.0f : 1.0f));
+
+  foreach (Elements::Enum, oEnum, &m_oElements) {
+    auto const element = oEnum.Get();
+    if (element->IsShow())
+      element->Draw(gfx);
+  }
+
+  if (m_pInsertBefore)
+      Local::drawInsertMarker(m_gfx, m_pInsertBefore->GetRect());
+}
+
 
 //////////////////////////////////////////////////////////////////////
 //

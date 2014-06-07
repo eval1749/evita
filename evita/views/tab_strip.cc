@@ -20,6 +20,7 @@
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/text_format.h"
 #include "evita/ui/events/event.h"
+#include "evita/ui/tooltip.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/tab_strip_delegate.h"
 #include "evita/vi_Frame.h"
@@ -36,106 +37,6 @@ static void fillRect(const gfx::Canvas& gfx, int x, int y, int cx, int cy) {
   rc.bottom = y + cy;
   gfx::Brush brush(gfx, gfx::blackColor());
   gfx.FillRectangle(brush, rc);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// Tooltip
-//
-class Tooltip final {
-  public: class ToolDelegate {
-    public: ToolDelegate() = default;
-    public: virtual ~ToolDelegate() = default;
-
-    public: virtual base::string16 GetTooltipText() = 0;
-
-    DISALLOW_COPY_AND_ASSIGN(ToolDelegate);
-  };
-
-  private: HWND tool_hwnd_;
-  private: base::string16 tool_text_;
-  private: HWND tooltip_hwnd_;
-
-  public: Tooltip();
-  public: ~Tooltip();
-
-  public: void AddTool(ToolDelegate* tool_delegate);
-  public: void DeleteTool(ToolDelegate* tool_delegate);
-  public: void OnNotify(NMHDR* nmhdr);
-  public: void Realize(HWND tool_hwnd);
-  private: void SendMessage(UINT message, TOOLINFO* info);
-  public: void SetToolBounds(ToolDelegate* tool_delegate, const RECT& bounds);
-
-  DISALLOW_COPY_AND_ASSIGN(Tooltip);
-};
-
-Tooltip::Tooltip()
-    : tool_hwnd_(nullptr),
-      tooltip_hwnd_(nullptr) {
-}
-
-Tooltip::~Tooltip() {
-  if (!tooltip_hwnd_)
-    ::DestroyWindow(tooltip_hwnd_);
-}
-
-void Tooltip::AddTool(ToolDelegate* tool_delegate) {
-  TOOLINFO info = {0};
-  info.lpszText = LPSTR_TEXTCALLBACK;
-  info.uId = reinterpret_cast<UINT_PTR>(tool_delegate);
-  SendMessage(TTM_ADDTOOL, &info);
-}
-
-void Tooltip::DeleteTool(ToolDelegate* tool_delegate) {
-  if (!tooltip_hwnd_)
-    return;
-  TOOLINFO info = {0};
-  info.uId = reinterpret_cast<UINT_PTR>(tool_delegate);
-  SendMessage(TTM_DELTOOL, &info);
-}
-
-void Tooltip::OnNotify(NMHDR* nmhdr) {
-  if (nmhdr->hwndFrom != tooltip_hwnd_ || nmhdr->code != TTN_NEEDTEXT)
-    return;
-  // Set width of tool tip
-  ::SendMessage(tooltip_hwnd_, TTM_SETMAXTIPWIDTH, 0, 300);
-  auto const disp_info = reinterpret_cast<NMTTDISPINFO*>(nmhdr);
-  tool_text_ = reinterpret_cast<ToolDelegate*>(nmhdr->idFrom)->
-      GetTooltipText();
-  disp_info->lpszText = const_cast<LPWSTR>(tool_text_.c_str());
-}
-
-void Tooltip::Realize(HWND tool_hwnd) {
-  DCHECK(tool_hwnd);
-  DCHECK(!tool_hwnd_);
-  DCHECK(!tooltip_hwnd_);
-  tool_hwnd_ = tool_hwnd;
-  tooltip_hwnd_ = ::CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, nullptr,
-      WS_POPUP | TTS_NOPREFIX, 0, 0, 0, 0, tool_hwnd, nullptr, nullptr,
-      nullptr);
-  if (!tooltip_hwnd_) {
-    PLOG(WARNING) << "tooltipe creation failed, disabling tooltips";
-    return;
-  }
-
-  TOOLINFO info;
-  info.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
-  info.uId = reinterpret_cast<UINT_PTR>(tool_hwnd_);
-  info.lpszText = nullptr;
-  SendMessage(TTM_ADDTOOL, &info);
-}
-
-void Tooltip::SendMessage(UINT message, TOOLINFO* info) {
-  info->cbSize = sizeof(*info);
-  info->hwnd = tool_hwnd_;
-  ::SendMessage(tooltip_hwnd_, message, 0, reinterpret_cast<LPARAM>(info));
-}
-
-void Tooltip::SetToolBounds(ToolDelegate* tool, const RECT& bounds) {
-  TOOLINFO info = {0};
-  info.rect = bounds;
-  info.uId = reinterpret_cast<UINT_PTR>(tool);
-  SendMessage(TTM_NEWTOOLRECT, &info);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -358,7 +259,7 @@ void CloseBox::Draw(const gfx::Canvas& gfx) const {
 // Item
 //  Represents tab item.
 //
-class Item final : public Element, public Tooltip::ToolDelegate {
+class Item final : public Element, public ui::Tooltip::ToolDelegate {
   DECLARE_CASTABLE_CLASS(Item, Element);
 
   private: enum Design {
@@ -394,7 +295,7 @@ class Item final : public Element, public Tooltip::ToolDelegate {
   public: virtual Element* HitTest(POINT point) const override;
   private: void update() override;
 
-  // Tooltip::ToolDelegate
+  // ui::Tooltip::ToolDelegate
   private: base::string16 GetTooltipText() override;
 
   DISALLOW_COPY_AND_ASSIGN(Item);
@@ -551,7 +452,7 @@ void Item::update() {
   ComputeLayout();
 }
 
-// Tooltip::ToolDelegate
+// ui::Tooltip::ToolDelegate
 base::string16 Item::GetTooltipText() {
   return tab_strip_delegate_->GetTooltipTextForTab(tab_index_);
 }
@@ -700,7 +601,7 @@ class TabStrip::TabStripImpl final : public Element {
   private: Item* m_pSelected;
   private: POINT m_ptDragStart;
   private: int m_xTab;
-  private: Tooltip tooltip_;
+  private: ui::Tooltip tooltip_;
 
   public: TabStripImpl(HWND hwnd, TabStripDelegate* delegate);
   public: virtual ~TabStripImpl();

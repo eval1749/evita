@@ -241,6 +241,8 @@
         'ui/root_widget.cc',
         'ui/system_metrics.cc',
         'ui/system_metrics_observer.cc',
+        'ui/tooltip.cc',
+        'ui/tooltip.h',
         'ui/widget.cc',
         'ui/widget_ostream.cc',
       ], # sources

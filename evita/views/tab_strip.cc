@@ -79,6 +79,7 @@ class Element : public common::Castable {
 
   // [I]
   public: void Invalidate(HWND hwnd);
+  public: bool IsDescendantOf(const Element* other) const;
   public: bool IsHover() const { return m_fHover; }
   public: bool IsSelected() const { return State_Selected == m_eState; }
   public: bool IsShow() const { return m_fShow; }
@@ -132,6 +133,14 @@ Element* Element::HitTest(POINT pt) const {
 void Element::Invalidate(HWND hwnd) {
   // TODO(yosi) We should use GFX version of invalidate rectangle.
   ::InvalidateRect(hwnd, &m_rc, false);
+}
+
+bool Element::IsDescendantOf(const Element* other) const {
+  for (auto runner = m_pParent; runner; runner = runner->m_pParent) {
+    if (runner == other)
+      return true;
+  }
+  return false;
 }
 
 bool Element::SetHover(bool f) {
@@ -708,7 +717,7 @@ void TabStrip::TabStripImpl::DeleteTab(int iDeleteItem) {
   if (selection_changed)
     m_pSelected = GetTabFromIndex(iDeleteItem ? iDeleteItem - 1 : 1);
 
-  if (m_pHover == tab_item)
+  if (m_pHover && (m_pHover == tab_item || m_pHover->IsDescendantOf(tab_item)))
     m_pHover = nullptr;
 
   m_oElements.erase(present);

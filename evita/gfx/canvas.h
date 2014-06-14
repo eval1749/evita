@@ -54,8 +54,6 @@ class Canvas : public Object, public DpiHandler {
   private: mutable common::ComPtr<ID2D1RenderTarget> render_target_;
   private: mutable void* work_;
 
-  private: Canvas(ID2D1RenderTarget* render_target);
-  public: Canvas(Canvas&& other);
   public: Canvas();
   public: ~Canvas();
 
@@ -68,8 +66,6 @@ class Canvas : public Object, public DpiHandler {
   public: ID2D1RenderTarget* operator->() const {
     return render_target_.get();
   }
-
-  public: Canvas& operator=(Canvas&& other);
 
   public: void set_dirty_rect(const Rect& rect) const;
   public: void set_dirty_rect(const RectF& rect) const;
@@ -88,9 +84,6 @@ class Canvas : public Object, public DpiHandler {
 
   // [B]
   public: void BeginDraw() const;
-
-  // [C]
-  public: Canvas CreateCompatible(const gfx::SizeF& size) const;
 
   // [D]
   public: void DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,

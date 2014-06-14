@@ -80,40 +80,14 @@ Canvas::Observer::~Observer() {
 //
 // Canvas
 //
-Canvas::Canvas(ID2D1RenderTarget* render_target)
+Canvas::Canvas()
     : batch_nesting_level_(0),
       factory_set_(FactorySet::instance()),
       hwnd_(nullptr),
-      render_target_(render_target),
       work_(nullptr) {
-  if (render_target_) {
-    SizeF dpi;
-    render_target_->GetDpi(&dpi.width, &dpi.height);
-    UpdateDpi(dpi);
-  }
-}
-
-Canvas::Canvas(Canvas&& other)
-    : batch_nesting_level_(0),
-      factory_set_(std::move(other.factory_set_)),
-      hwnd_(other.hwnd_),
-      render_target_(std::move(other.render_target_)),
-      work_(nullptr) {
-  other.hwnd_ = nullptr;
-}
-
-Canvas::Canvas() : Canvas(nullptr) {
 }
 
 Canvas::~Canvas() {
-}
-
-Canvas& Canvas::operator=(Canvas&& other) {
-  factory_set_ = std::move(other.factory_set_);
-  render_target_ = std::move(other.render_target_);
-  hwnd_ = other.hwnd_;
-  other.hwnd_ = nullptr;
-  return *this;
 }
 
 void Canvas::set_dirty_rect(const Rect& dirty_rect) const {
@@ -149,31 +123,6 @@ void Canvas::BeginDraw() const {
   if (!batch_nesting_level_)
     render_target_->BeginDraw();
   ++batch_nesting_level_;
-}
-
-Canvas Canvas::CreateCompatible(const SizeF& size) const {
-  common::ComPtr<ID2D1BitmapRenderTarget> compatible_target;
-  auto const hr = render_target_->CreateCompatibleRenderTarget(
-    size, &compatible_target);
-  if (FAILED(hr)) {
-    DVLOG(0) << "CreateCompatibleRenderTarget: hr=0x" << std::hex << hr;
-    return Canvas();
-  }
-  common::ComPtr<IDWriteRenderingParams> params;
-  render_target_->GetTextRenderingParams(&params);
-  if (params) {
-    compatible_target->SetTextRenderingParams(params);
-    DVLOG(0) << "ClearTypeLevel=" << params->GetClearTypeLevel() <<
-                " Gamma=" << params->GetGamma() <<
-                " PixelGeometry=" << params->GetPixelGeometry() <<
-                " RenderingMode=" << params->GetRenderingMode();
-  }
-  DVLOG(0) << "Before AntialiasMode=" <<
-    compatible_target->GetTextAntialiasMode();
-  auto const antialias_mode = render_target_->GetTextAntialiasMode();
-  compatible_target->SetTextAntialiasMode(antialias_mode);
-  DVLOG(0) << "AntialiasMode=" << antialias_mode;
-  return std::move(Canvas(compatible_target.release()));
 }
 
 void Canvas::DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,

@@ -614,6 +614,10 @@ void ScrollBar::DidResize() {
   UpdateLayout();
 }
 
+void ScrollBar::DidShow() {
+  dirty_ = true;
+}
+
 void ScrollBar::OnDraw(gfx::Canvas* canvas) {
   if (!dirty_)
     return;

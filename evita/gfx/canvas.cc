@@ -338,7 +338,11 @@ void Canvas::Reinitialize() {
     is_windows_8 = ::IsWindows8OrGreater();
   }
 
-  uint32_t creation_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+  uint32_t creation_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT |
+                            D3D11_CREATE_DEVICE_SINGLETHREADED;
+  #if _DEBUG
+    creation_flags |= D3D11_CREATE_DEVICE_DEBUG;
+  #endif
   D3D_FEATURE_LEVEL feature_levels[] = {
       D3D_FEATURE_LEVEL_11_1,
       D3D_FEATURE_LEVEL_11_0,

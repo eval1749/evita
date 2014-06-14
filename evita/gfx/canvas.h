@@ -136,6 +136,8 @@ class Canvas : public Object, public DpiHandler {
 
   // [S]
   public: bool Canvas::SaveScreenImage(const RectF& rect) const;
+  private: void SetupRenderTarget(
+      ID2D1DeviceContext* d2d_device_context) const;
 
   DISALLOW_COPY_AND_ASSIGN(Canvas);
 };

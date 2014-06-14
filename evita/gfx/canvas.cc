@@ -418,24 +418,7 @@ void Canvas::Reinitialize() {
 
   // Ensure that DXGI doesn't queue more than one frame at a time.
   COM_VERIFY(dxgi_device->SetMaximumFrameLatency(1));
-
-  common::ComPtr<IDXGISurface> dxgi_back_buffer;
-  dxgi_swap_chain_->GetBuffer(0, IID_PPV_ARGS(&dxgi_back_buffer));
-
-  // Now we set up the Direct2D render target bitmap linked to the swap chain.
-  // Whenever we render to this bitmap, it is directly rendered to the
-  // swap chain associated with the window.
-  D2D1_BITMAP_PROPERTIES1 bitmapProperties = D2D1::BitmapProperties1(
-      D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-      D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE),
-      FactorySet::instance()->pixels_per_dip().width,
-      FactorySet::instance()->pixels_per_dip().height);
-  common::ComPtr<ID2D1Bitmap1> d2d_back_buffer;
-  COM_VERIFY(d2d_device_context->CreateBitmapFromDxgiSurface(
-      dxgi_back_buffer, &bitmapProperties, &d2d_back_buffer));
-  d2d_device_context->SetTarget(d2d_back_buffer);
-  d2d_device_context->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
-
+  SetupRenderTarget(d2d_device_context);
   render_target_.reset(d2d_device_context);
   SizeF dpi;
   render_target_->GetDpi(&dpi.width, &dpi.height);
@@ -470,23 +453,7 @@ void Canvas::Resize(const Rect& rect) const {
   COM_VERIFY(dxgi_swap_chain_->ResizeBuffers(0u,
       static_cast<uint32_t>(rect.width()),
       static_cast<uint32_t>(rect.height()), DXGI_FORMAT_UNKNOWN, 0u));
-
-  common::ComPtr<IDXGISurface> dxgi_back_buffer;
-  dxgi_swap_chain_->GetBuffer(0, IID_PPV_ARGS(&dxgi_back_buffer));
-
-  // Now we set up the Direct2D render target bitmap linked to the swap chain.
-  // Whenever we render to this bitmap, it is directly rendered to the
-  // swap chain associated with the window.
-  D2D1_BITMAP_PROPERTIES1 bitmapProperties = D2D1::BitmapProperties1(
-      D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-      D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE),
-      FactorySet::instance()->pixels_per_dip().width,
-      FactorySet::instance()->pixels_per_dip().height);
-  common::ComPtr<ID2D1Bitmap1> d2d_back_buffer;
-  COM_VERIFY(d2d_device_context->CreateBitmapFromDxgiSurface(
-      dxgi_back_buffer, &bitmapProperties, &d2d_back_buffer));
-  d2d_device_context->SetTarget(d2d_back_buffer);
-  d2d_device_context->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
+  SetupRenderTarget(d2d_device_context);
 }
 #endif
 
@@ -503,6 +470,22 @@ bool Canvas::SaveScreenImage(const RectF& rect) const {
   if (FAILED(hr))
     DVLOG(0) << "ID2D1Bitmap->CopyFromRenderTarget hr=" << std::hex << hr;
   return SUCCEEDED(hr);
+}
+
+void Canvas::SetupRenderTarget(ID2D1DeviceContext* d2d_device_context) const {
+  common::ComPtr<IDXGISurface> dxgi_back_buffer;
+  dxgi_swap_chain_->GetBuffer(0, IID_PPV_ARGS(&dxgi_back_buffer));
+
+  D2D1_BITMAP_PROPERTIES1 bitmapProperties = D2D1::BitmapProperties1(
+      D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+      D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE),
+      FactorySet::instance()->pixels_per_dip().width,
+      FactorySet::instance()->pixels_per_dip().height);
+  common::ComPtr<ID2D1Bitmap1> d2d_back_buffer;
+  COM_VERIFY(d2d_device_context->CreateBitmapFromDxgiSurface(
+      dxgi_back_buffer, &bitmapProperties, &d2d_back_buffer));
+  d2d_device_context->SetTarget(d2d_back_buffer);
+  d2d_device_context->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
 }
 
 }  // namespace gfx

@@ -231,11 +231,9 @@ class StockCursor {
 
 void DrawSplitter(const gfx::Canvas& gfx, RECT* prc,
                          uint /*grfFlag*/) {
-  auto rc = *prc;
-  //gfx::Brush fillBrush(gfx, gfx::sysColor(COLOR_3DFACE));
   gfx::Brush fillBrush(gfx, gfx::ColorF(gfx::ColorF::Pink));
-  gfx.FillRectangle(fillBrush, rc);
-  //::DrawEdge(gfx, &rc, EDGE_RAISED, grfFlag);
+  gfx.FillRectangle(fillBrush, *prc);
+  gfx.set_dirty_rect(*prc);
 }
 
 } // namesapce

@@ -672,6 +672,7 @@ TabStrip::TabStripImpl::TabStripImpl(HWND hwnd, TabStripDelegate* delegate)
       m_cxMinTab(k_cxMinTab),
       delegate_(delegate),
       m_eDrag(Drag_None),
+      m_gfx(gfx::Canvas::DwmSupport::SupportDwm),
       m_hTabListMenu(nullptr),
       m_hwnd(hwnd),
       m_iFocus(-1),

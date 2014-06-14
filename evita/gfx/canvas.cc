@@ -20,7 +20,6 @@
 #pragma comment(lib, "d3d11.lib")
 
 #define DEBUG_DRAW 0
-#define USE_HWND_RENDER_TARGET 0
 
 std::ostream& operator<<(std::ostream& ostream,
                          D2D1_TEXT_ANTIALIAS_MODE mode) {
@@ -80,11 +79,15 @@ Canvas::Observer::~Observer() {
 //
 // Canvas
 //
-Canvas::Canvas()
+Canvas::Canvas(DwmSupport dwm_support)
     : batch_nesting_level_(0),
+      dwm_support_(dwm_support),
       factory_set_(FactorySet::instance()),
       hwnd_(nullptr),
       work_(nullptr) {
+}
+
+Canvas::Canvas() : Canvas(DwmSupport::NotSupportDwm) {
 }
 
 Canvas::~Canvas() {
@@ -184,7 +187,10 @@ bool Canvas::EndDraw() {
   } else {
       auto const hr = render_target_->EndDraw();
       if (SUCCEEDED(hr)) {
-        #if !USE_HWND_RENDER_TARGET
+        if (dwm_support_ == DwmSupport::SupportDwm) {
+            dirty_rects_.clear();
+            return true;
+          }
           if (dirty_rects_.empty()) {
             DVLOG(0) << "Canvas::EndDraw: no dirty";
           } else {
@@ -200,7 +206,6 @@ bool Canvas::EndDraw() {
             COM_VERIFY(dxgi_swap_chain_->Present1(1, 0, &parameters));
             dirty_rects_.clear();
           }
-        #endif
         return true;
       }
       if (hr == D2DERR_RECREATE_TARGET) {
@@ -248,38 +253,36 @@ void Canvas::Init(HWND hwnd) {
   Reinitialize();
 }
 
-#if USE_HWND_RENDER_TARGET
 void Canvas::Reinitialize() {
   DCHECK(!render_target_);
   DCHECK(hwnd_);
-  RECT rc;
-  ::GetClientRect(hwnd_, &rc);
-  auto const pixel_format = D2D1::PixelFormat(
-      DXGI_FORMAT_B8G8R8A8_UNORM,
-      D2D1_ALPHA_MODE_PREMULTIPLIED);
-  auto const size = SizeU(rc.right - rc.left, rc.bottom - rc.top);
-  // TODO: When should use D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE?
-  //auto const usage = D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE;
-  auto const usage = D2D1_RENDER_TARGET_USAGE_NONE;
-  common::ComPtr<ID2D1HwndRenderTarget> hwnd_render_target;
-  COM_VERIFY(FactorySet::d2d1().CreateHwndRenderTarget(
-      D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT,
-                                   pixel_format, 0.0f, 0.0f,
-                                   usage),
-      D2D1::HwndRenderTargetProperties(hwnd_, size,
-                                       D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS),
-      &hwnd_render_target));
-  render_target_.reset(hwnd_render_target);
-  SizeF dpi;
-  render_target_->GetDpi(&dpi.width, &dpi.height);
-  UpdateDpi(dpi);
-  render_target_->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
-  FOR_EACH_OBSERVER(Observer, observers_, ShouldDiscardResources());
-}
-#else
-void Canvas::Reinitialize() {
-  DCHECK(!render_target_);
-  DCHECK(hwnd_);
+
+  if (dwm_support_ == DwmSupport::SupportDwm){
+    RECT rc;
+    ::GetClientRect(hwnd_, &rc);
+    auto const pixel_format = D2D1::PixelFormat(
+        DXGI_FORMAT_B8G8R8A8_UNORM,
+        D2D1_ALPHA_MODE_PREMULTIPLIED);
+    auto const size = SizeU(rc.right - rc.left, rc.bottom - rc.top);
+    // TODO: When should use D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE?
+    //auto const usage = D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE;
+    auto const usage = D2D1_RENDER_TARGET_USAGE_NONE;
+    common::ComPtr<ID2D1HwndRenderTarget> hwnd_render_target;
+    COM_VERIFY(FactorySet::d2d1().CreateHwndRenderTarget(
+        D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT,
+                                     pixel_format, 0.0f, 0.0f,
+                                     usage),
+        D2D1::HwndRenderTargetProperties(hwnd_, size,
+                                         D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS),
+        &hwnd_render_target));
+    render_target_.reset(hwnd_render_target);
+    SizeF dpi;
+    render_target_->GetDpi(&dpi.width, &dpi.height);
+    UpdateDpi(dpi);
+    render_target_->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
+    FOR_EACH_OBSERVER(Observer, observers_, ShouldDiscardResources());
+    return;
+  }
 
   static bool did_check_windows_version;
   static bool is_windows_8;
@@ -315,7 +318,6 @@ void Canvas::Reinitialize() {
       &device,
       &feature_level,
       &device_context));
-
 
   common::ComPtr<IDXGIDevice1> dxgi_device;
   COM_VERIFY(dxgi_device.QueryFrom(device));
@@ -374,22 +376,22 @@ void Canvas::Reinitialize() {
   UpdateDpi(dpi);
   FOR_EACH_OBSERVER(Observer, observers_, ShouldDiscardResources());
 }
-#endif
 
 void Canvas::RemoveObserver(Observer* observer) {
   observers_.RemoveObserver(observer);
 }
 
-#if USE_HWND_RENDER_TARGET
-void Canvas::Resize(const Rect& rc) const {
-  SizeU size(rc.width(), rc.height());
-  common::ComPtr<ID2D1HwndRenderTarget> hwnd_render_target;
-  COM_VERIFY(hwnd_render_target.QueryFrom(render_target_));
-  COM_VERIFY(hwnd_render_target->Resize(size));
-}
-#else
 void Canvas::Resize(const Rect& rect) const {
   DCHECK(!rect.empty());
+
+  if (dwm_support_ == DwmSupport::SupportDwm){
+    SizeU size(rect.width(), rect.height());
+    common::ComPtr<ID2D1HwndRenderTarget> hwnd_render_target;
+    COM_VERIFY(hwnd_render_target.QueryFrom(render_target_));
+    COM_VERIFY(hwnd_render_target->Resize(size));
+    return;
+  }
+
   screen_bitmap_.reset();
   target_bounds_ = rect;
 
@@ -404,7 +406,6 @@ void Canvas::Resize(const Rect& rect) const {
       static_cast<uint32_t>(rect.height()), DXGI_FORMAT_UNKNOWN, 0u));
   SetupRenderTarget(d2d_device_context);
 }
-#endif
 
 bool Canvas::SaveScreenImage(const RectF& rect) const {
   if (!screen_bitmap_)

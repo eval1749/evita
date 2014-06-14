@@ -21,6 +21,11 @@ class Bitmap;
 // Canvas
 //
 class Canvas : public Object, public DpiHandler {
+  public: enum class DwmSupport {
+    NotSupportDwm,
+    SupportDwm,
+  };
+
   public: class Observer {
     public: Observer();
     public: virtual ~Observer();
@@ -46,6 +51,7 @@ class Canvas : public Object, public DpiHandler {
   private: mutable int batch_nesting_level_;
   private: mutable std::vector<Rect> dirty_rects_;
   private: mutable common::ComPtr<IDXGISwapChain1> dxgi_swap_chain_;
+  private: const DwmSupport dwm_support_;
   private: scoped_refptr<FactorySet> factory_set_;
   private: HWND hwnd_;
   private: ObserverList<Observer> observers_;
@@ -54,6 +60,7 @@ class Canvas : public Object, public DpiHandler {
   private: mutable common::ComPtr<ID2D1RenderTarget> render_target_;
   private: mutable void* work_;
 
+  public: explicit Canvas(DwmSupport dwm_support);
   public: Canvas();
   public: ~Canvas();
 

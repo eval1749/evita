@@ -9,8 +9,6 @@
 
 #include "evita/ui/widget.h"
 
-const char16 TabBand__TabDragMsgStr[] = L"Evita.TabBand.TabDrag";
-
 namespace ui {
 class MouseEvent;
 }

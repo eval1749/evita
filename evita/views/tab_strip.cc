@@ -724,6 +724,7 @@ void TabStrip::TabStripImpl::DeleteTab(int iDeleteItem) {
   RenumberTabIndex();
   tooltip_.DeleteTool(tab_item);
   delete tab_item;
+  --num_tab_items_;
   Redraw();
   if (selection_changed) {
     if (m_pSelected)

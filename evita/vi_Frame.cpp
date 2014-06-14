@@ -515,6 +515,10 @@ void Frame::DidCreateNativeWindow() {
 
   if (m_oPanes.GetFirst())
     m_oPanes.GetFirst()->Activate();
+
+  ::SetWindowPos(AssociatedHwnd(), nullptr, 0, 0, 0, 0,
+                 SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER |
+                 SWP_NOREDRAW | SWP_NOSIZE | SWP_FRAMECHANGED);
 }
 
 void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
@@ -605,6 +609,25 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       auto pMinMax = reinterpret_cast<MINMAXINFO*>(lParam);
       pMinMax->ptMinTrackSize.x = 200;
       pMinMax->ptMinTrackSize.y = 200;
+      return 0;
+    }
+
+    case WM_NCCALCSIZE: {
+      if (!m_cyTabBand)
+        break;
+      if (!wParam)
+        return 0;
+      // Remove icon and title from caption.
+      auto const params = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
+      RECT* client_rect = &params->rgrc[0];
+      // Compute edge from proposed window area and client area, because
+      // GetSystemMetrics(SM_CXSIZEFRAME) returns 4, but proposed edge size
+      // is 8.
+      const auto kEdgeSize = params->rgrc[2].left - params->rgrc[1].left;
+      client_rect->left += kEdgeSize;
+      client_rect->right -= kEdgeSize;
+      client_rect->bottom -= kEdgeSize;
+      // Note: We should not return WVR_REDRAW to avoid resize flicker.
       return 0;
     }
 

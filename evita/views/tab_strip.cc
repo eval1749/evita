@@ -173,8 +173,8 @@ void Element::update() {
 // TabStripImpl Design Parameters
 //
 enum TabStripImplDesignParams {
-  k_cxMargin = 3,
-  k_cyMargin = 2,
+  k_cxMargin = 0,
+  k_cyMargin = 4,
   k_cxListButton = 16,
   k_cxEdge = 2,
   k_cxBorder = 3,
@@ -1138,9 +1138,10 @@ bool TabStrip::TabStripImpl::UpdateLayout() {
     return false;
   }
 
+  const auto kMarginHeight = ::GetSystemMetrics(SM_CYSIZE) + k_cyMargin;
   *m_oListButton.GetRect() = m_rc;
-
   m_oListButton.GetRect()->left = m_rc.left + k_cxMargin;
+  m_oListButton.GetRect()->top = m_rc.top + kMarginHeight;
 
   auto x = m_oListButton.GetRect()->left;
 
@@ -1194,7 +1195,7 @@ bool TabStrip::TabStripImpl::UpdateLayout() {
       RECT* prc = tab_item->GetRect();
       prc->left = x;
       prc->right = x + cxTab;
-      prc->top = m_rc.top;
+      prc->top = m_rc.top + kMarginHeight;
       prc->bottom = m_rc.bottom;
       tab_item->ComputeLayout();
 
@@ -1275,9 +1276,18 @@ void TabStrip::DeleteTab(int tab_index) {
   impl_->DeleteTab(tab_index);
 }
 
+// On Win8.1
+//  SM_CYSIZE = 22
+//  SM_CYCAPTION = 23
+//  SM_CYEDGE = 1
+//  SM_CYSIZEFRAME = 8
 Size TabStrip::GetPreferreSize() const {
-  auto const font_height = 16;  // must be >= 16 (Small Icon Height)
-  return Size(font_height * 40, 2 + 7 + font_height + 5 + 2);
+  const auto font_height = 16;  // must be >= 16 (Small Icon Height)
+  const auto button_height = ::GetSystemMetrics(SM_CYSIZE);
+  //const auto caption_height = ::GetSystemMetrics(SM_CYCAPTION);
+  //const auto edge_height = ::GetSystemMetrics(SM_CYEDGE);
+  //const auto frame_height = ::GetSystemMetrics(SM_CYSIZEFRAME);
+  return Size(font_height * 40, button_height + k_cyMargin + 34);
 }
 
 bool TabStrip::GetTab(int tab_index, TCITEM* tab_data) {

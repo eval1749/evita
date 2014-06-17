@@ -96,13 +96,21 @@ Canvas::~Canvas() {
 
 void Canvas::set_dirty_rect(const Rect& new_dirty_rect) const {
   DCHECK(!new_dirty_rect.empty());
+  if (dirty_rects_.empty()) {
+    dirty_rects_.push_back(new_dirty_rect);
+    return;
+  }
   for (const auto& dirty_rect : dirty_rects_) {
     if (dirty_rect.Contains(new_dirty_rect))
         return;
-    if (new_dirty_rect.Contains(dirty_rect))
-        return;
   }
-  dirty_rects_.push_back(new_dirty_rect);
+  std::vector<Rect> new_dirty_rects;
+  for (const auto& dirty_rect : dirty_rects_) {
+    if (!new_dirty_rect.Contains(dirty_rect))
+      new_dirty_rects.push_back(dirty_rect);
+  }
+  new_dirty_rects.push_back(new_dirty_rect);
+  dirty_rects_ = new_dirty_rects;
 }
 
 void Canvas::set_dirty_rect(const RectF& new_dirty_rect) const {

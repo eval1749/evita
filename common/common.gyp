@@ -51,6 +51,7 @@
         'memory/scoped_refptr_unittest.cc',
         'strings/atomic_string_unittest.cc',
         'tree/node_unittest.cc',
+        'win/rect_unittest.cc',
       ], # sources
       'msvs_disabled_warnings': [
         4625, 4626, 4826,

@@ -57,6 +57,7 @@ struct COMMON_EXPORT Rect : RECT {
     return pt.x >= left && pt.x < right && pt.y >= top && pt.y < bottom;
   }
 
+  bool Contains(const Rect& other) const;
   Rect Intersect(const Rect&) const;
   void Unite(const Rect& other);
 };

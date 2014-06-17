@@ -8,6 +8,11 @@
 namespace common {
 namespace win {
 
+bool Rect::Contains(const Rect& other) const {
+  return left <= other.left && right >= other.right &&
+         top <= other.top && bottom >= other.bottom;
+}
+
 Rect Rect::Intersect(const Rect& other) const {
   return Rect(std::max(left, other.left), std::max(top, other.top),
               std::min(right, other.right), std::min(bottom, other.bottom));

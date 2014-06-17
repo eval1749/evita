@@ -653,6 +653,11 @@ void TableControl::DidSetFocus(ui::Widget* widget) {
   UpdateViewIfNeeded();
 }
 
+void TableControl::DidShow() {
+  model_->ResetDirtyRect();
+  SchedulePaint();
+}
+
 void TableControl::OnDraw(gfx::Canvas* gfx) {
   gfx->set_dirty_rect(bounds());
   model_->Draw(gfx);

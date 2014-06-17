@@ -56,13 +56,14 @@ Canvas::AxisAlignedClipScope::~AxisAlignedClipScope() {
 //
 // Canvas::DrawingScope
 //
-Canvas::DrawingScope::DrawingScope(const Canvas& gfx) : gfx_(gfx) {
-  gfx_.BeginDraw();
+Canvas::DrawingScope::DrawingScope(const Canvas& gfx)
+    : gfx_(const_cast<Canvas*>(&gfx)) {
+  gfx_->BeginDraw();
 }
 
 Canvas::DrawingScope::~DrawingScope() {
   // TODO(yosi) Should DrawingScope take mutable Canvas?
-  const_cast<Canvas&>(gfx_).EndDraw();
+  gfx_->EndDraw();
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -20,7 +20,7 @@ class Bitmap;
 //
 // Canvas
 //
-class Canvas : public Object, public DpiHandler {
+class Canvas final : public Object, public DpiHandler {
   public: enum class DwmSupport {
     NotSupportDwm,
     SupportDwm,
@@ -33,15 +33,15 @@ class Canvas : public Object, public DpiHandler {
     public: virtual void ShouldDiscardResources() = 0;
   };
 
-  public: class AxisAlignedClipScope {
+  public: class AxisAlignedClipScope final {
     private: const Canvas& gfx_;
     public: AxisAlignedClipScope(const Canvas& gfx, const RectF& rect);
     public: ~AxisAlignedClipScope();
     DISALLOW_COPY_AND_ASSIGN(AxisAlignedClipScope);
   };
 
-  public: class DrawingScope {
-    private: const Canvas& gfx_;
+  public: class DrawingScope final {
+    private: Canvas* const gfx_;
     public: DrawingScope(const Canvas& gfx);
     public: ~DrawingScope();
     DISALLOW_COPY_AND_ASSIGN(DrawingScope);

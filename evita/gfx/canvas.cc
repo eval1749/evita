@@ -93,16 +93,15 @@ Canvas::Canvas() : Canvas(DwmSupport::NotSupportDwm) {
 Canvas::~Canvas() {
 }
 
-void Canvas::set_dirty_rect(const Rect& dirty_rect) const {
-  DCHECK(!dirty_rect.empty());
-  for (const auto& rect : dirty_rects_) {
-    Rect temp(rect);
-    temp.Unite(dirty_rect);
-    if (temp == rect || temp == dirty_rect)
-      return;
-    DCHECK(rect.Intersect(dirty_rect).empty());
+void Canvas::set_dirty_rect(const Rect& new_dirty_rect) const {
+  DCHECK(!new_dirty_rect.empty());
+  for (const auto& dirty_rect : dirty_rects_) {
+    if (dirty_rect.Contains(new_dirty_rect))
+        return;
+    if (new_dirty_rect.Contains(dirty_rect))
+        return;
   }
-  dirty_rects_.push_back(dirty_rect);
+  dirty_rects_.push_back(new_dirty_rect);
 }
 
 void Canvas::set_dirty_rect(const RectF& new_dirty_rect) const {

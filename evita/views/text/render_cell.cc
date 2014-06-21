@@ -369,7 +369,8 @@ gfx::RectF TextCell::HitTestTextPosition(Posn offset) const {
   if (offset < start_ || offset > end_)
     return gfx::RectF();
   auto const length = static_cast<size_t>(offset - start_);
-  auto const left = style().font()->GetTextWidth(characters_.data(), length);
+  auto const left = length ?
+      style().font()->GetTextWidth(characters_.data(), length) : 0.0f;
   return gfx::RectF(gfx::PointF(left, top()),
                     gfx::SizeF(1.0f, height()));
 }

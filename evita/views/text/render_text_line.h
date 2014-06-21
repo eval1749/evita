@@ -20,7 +20,7 @@ class Cell;
 class TextBlock;
 class Formatter;
 
-class TextLine {
+class TextLine final {
   private: std::vector<Cell*> cells_;
   private: mutable uint m_nHash;
   private: Posn m_lStart;

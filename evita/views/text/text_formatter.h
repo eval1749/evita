@@ -24,7 +24,7 @@ class TextBlock;
 class TextLine;
 enum class TextMarker;
 
-class TextFormatter {
+class TextFormatter final {
   private: class TextScanner;
 
   private: RenderStyle default_render_style_;

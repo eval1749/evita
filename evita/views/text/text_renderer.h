@@ -29,7 +29,7 @@ namespace rendering {
 //
 // TextRenderer
 //
-class TextRenderer {
+class TextRenderer final {
   private: typedef common::win::Rect Rect;
   private: typedef rendering::Cell Cell;
   public: typedef rendering::ScreenTextBlock ScreenTextBlock;

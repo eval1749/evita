@@ -18,7 +18,7 @@ namespace rendering {
 class TextLine;
 class TextBlock;
 
-class ScreenTextBlock : public gfx::Canvas::Observer {
+class ScreenTextBlock final : public gfx::Canvas::Observer {
   private: class RenderContext;
   friend class RenderContext;
 
@@ -29,7 +29,7 @@ class ScreenTextBlock : public gfx::Canvas::Observer {
   private: gfx::RectF bounds_;
 
   public: ScreenTextBlock();
-  public: ~ScreenTextBlock();
+  public: virtual ~ScreenTextBlock();
 
   public: bool dirty() const { return dirty_; }
 
@@ -39,7 +39,7 @@ class ScreenTextBlock : public gfx::Canvas::Observer {
   public: void SetBounds(const gfx::RectF& rect);
 
   // gfx::Canvas::Observer
-  private: void ShouldDiscardResources() override;
+  private: virtual void ShouldDiscardResources() override;
 
   DISALLOW_COPY_AND_ASSIGN(ScreenTextBlock);
 };

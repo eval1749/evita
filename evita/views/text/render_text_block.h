@@ -18,7 +18,7 @@ namespace rendering {
 class RenderStyle;
 class TextLine;
 
-class TextBlock : public text::BufferMutationObserver {
+class TextBlock final : public text::BufferMutationObserver {
   private: RenderStyle default_style_;
   private: bool dirty_;
   private: bool dirty_line_point_;
@@ -28,7 +28,7 @@ class TextBlock : public text::BufferMutationObserver {
   private: text::Buffer* const text_buffer_;
 
   public: TextBlock(text::Buffer* buffer);
-  public: ~TextBlock();
+  public: virtual ~TextBlock();
 
   public: float bottom() const { return bounds_.bottom; }
   public: const RenderStyle& default_style() const { return default_style_; }

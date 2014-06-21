@@ -635,13 +635,13 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       if (CompositionState::IsEnabled()) {
         LRESULT lResult;
         if (::DwmDefWindowProc(*native_window(), uMsg, wParam, lParam, &lResult))
-            return lResult;
+          return lResult;
 
-        POINT const ptMouse = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+        POINT const ptMouse = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
         RECT rcWindow;
         ::GetWindowRect(*native_window(), &rcWindow);
 
-        RECT rcClient = { 0 };
+        RECT rcClient = {0};
         ::AdjustWindowRectEx(
             &rcClient,
             static_cast<DWORD>(
@@ -651,7 +651,7 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
                 ::GetWindowLong(*native_window(), GWL_EXSTYLE)));
 
         if (ptMouse.y >= rcWindow.top
-            && ptMouse.y < rcWindow.top - rcClient.top + m_cyTabBand) {
+            && ptMouse.y < rcWindow.top + m_cyTabBand) {
           return HTCAPTION;
         }
       }

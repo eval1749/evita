@@ -36,6 +36,12 @@
   inheritMode(CppMode);
 
   /** @constructor @extends {Mode} @return {?} */
+  function CsharpMode() {
+    Mode.call(this, 'C#', CsharpLexer);
+  }
+  inheritMode(CsharpMode);
+
+  /** @constructor @extends {Mode} @return {?} */
   function HtmlMode() {
     Mode.call(this, 'HTML', HtmlLexer);
   }
@@ -114,6 +120,7 @@
       map.set('cfg', {mode: ConfigMode, name: 'Config File'});
       map.set('cl', {mode: CppMode, name: 'CommonLisp Source'});
       map.set('cpp', {mode: CppMode, name: 'C++ Source'});
+      map.set('cs', {mode: CsharpMode, name: 'C# Source'});
       map.set('css', {mode: CppMode, name: 'Cascading Style Sheet Document'});
       map.set('cxx', {mode: CppMode, name: 'C++ Source'});
       map.set('el', {mode: LispMode, name: 'EmacsLisp Source'});
@@ -157,6 +164,7 @@
     value: (function() {
       var map = new Map();
       map.set('config', ConfigMode);
+      map.set('c#', CsharpMode);
       map.set('c++', CppMode);
       map.set('haskell', HaskellMode);
       map.set('html', HtmlMode);

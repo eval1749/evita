@@ -38,7 +38,7 @@ StyleSheet* GetDefaultStyleSheet() {
     return &default_style_sheet;
 
   Style default_style(Color(0, 0, 0), Color(255, 255, 255));
-  default_style.set_font_family(L"Consolas, MS Gothic");
+  default_style.set_font_family(L"Consolas, Meiryo");
   default_style.set_font_size(10);
   default_style.set_font_style(css::FontStyle::Normal);
   default_style.set_font_weight(css::FontWeight::Normal);

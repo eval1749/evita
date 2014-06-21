@@ -42,6 +42,14 @@ inline char16 toxdigit(int k) {
  return static_cast<char16>(k - 10 + 'A');
 }
 
+gfx::ColorF CssColorToColorF(const css::Color& color) {
+  return gfx::ColorF(
+      static_cast<float>(color.red()) / 255,
+      static_cast<float>(color.green()) / 255,
+      static_cast<float>(color.blue()) / 255,
+      color.alpha());
+}
+
 Font* GetFont(const gfx::Canvas& gfx, const css::Style& style) {
   return FontSet::Get(gfx, style)->FindFont(gfx, 'x');
 }
@@ -55,11 +63,13 @@ RenderStyle GetRenderStyle(const gfx::Canvas& gfx,
   return RenderStyle(style, GetFont(gfx, style));
 }
 
-css::Style SelectionStyle(const text::Buffer* buffer,
-                          const Selection& selection) {
-  return buffer->style_resolver()->ResolveWithoutDefaults(
+TextSelection FormatSelection(const text::Buffer* buffer,
+                              const Selection& selection) {
+  const auto& style = buffer->style_resolver()->ResolveWithoutDefaults(
       selection.active ? css::StyleSelector::active_selection() :
                          css::StyleSelector::inactive_selection());
+  return TextSelection(CssColorToColorF(style.bgcolor()),
+                       selection.start, selection.end);
 }
 
 }  // namespace
@@ -69,24 +79,19 @@ css::Style SelectionStyle(const text::Buffer* buffer,
 // TextScanner
 //  Enumerator for characters and interval
 //
-class TextFormatter::TextScanner {
+class TextFormatter::TextScanner final {
   private: Posn m_lBufEnd;
   private: Posn m_lBufStart;
   private: Posn m_lPosn;
   private: const text::Buffer* m_pBuffer;
   private: text::Interval* m_pInterval;
   private: char16 m_rgwch[80];
-  private: const Selection& selection_;
-  private: const css::Style selection_style_;
   private: mutable const text::Marker* spelling_marker_;
   private: mutable const text::Marker* syntax_marker_;
 
-  public: TextScanner(const text::Buffer* buffer, Posn lPosn,
-                      const Selection& selection)
+  public: TextScanner(const text::Buffer* buffer, Posn lPosn)
       : m_pBuffer(buffer),
         m_lPosn(lPosn),
-        selection_(selection),
-        selection_style_(SelectionStyle(buffer, selection)),
         spelling_marker_(nullptr),
         syntax_marker_(nullptr) {
     m_pInterval = m_pBuffer->GetIntervalAt(m_lPosn);
@@ -94,6 +99,7 @@ class TextFormatter::TextScanner {
     fill();
   }
 
+  public: ~TextScanner() = default;
 
   public: const common::AtomicString& spelling() const;
   public: const css::StyleResolver* style_resolver() const {
@@ -170,16 +176,7 @@ const common::AtomicString& TextFormatter::TextScanner::syntax() const {
 
 RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
     const css::Style& style, Font* font) const {
-  if (m_lPosn < selection_.start || m_lPosn >= selection_.end)
-    return RenderStyle(style, font);
-  if (selection_style_.bgcolor().alpha() == 1.0f) {
-    css::Style style_with_selection(style);
-    style_with_selection.OverrideBy(selection_style_);
-    return RenderStyle(style_with_selection, font);
-  }
-  auto render_style = RenderStyle(style, font);
-  render_style.set_overlay_color(selection_style_.bgcolor());
-  return render_style;
+  return RenderStyle(style, font);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -193,11 +190,12 @@ TextFormatter::TextFormatter(const gfx::Canvas& gfx, TextBlock* text_block,
       default_style_(GetDefaultStyle(text_block)),
       m_gfx(gfx),
       text_block_(text_block),
-      text_scanner_(new TextScanner(text_block->text_buffer(), lStart,
-                                    selection)),
+      text_scanner_(new TextScanner(text_block->text_buffer(), lStart)),
       zoom_(zoom) {
   DCHECK(!text_block_->bounds().empty());
   DCHECK_GT(zoom_, 0.0f);
+  text_block->set_selection(FormatSelection(text_block->text_buffer(),
+                                            selection));
 }
 
 TextFormatter::~TextFormatter() {

@@ -9,6 +9,7 @@
 
 #include "evita/gfx_base.h"
 #include "evita/text/buffer_mutation_observer.h"
+#include "evita/views/text/render_selection.h"
 #include "evita/views/text/render_style.h"
 #include "evita/vi_style.h"
 
@@ -25,6 +26,7 @@ class TextBlock final : public text::BufferMutationObserver {
   private: float m_cy;
   private: std::list<TextLine*> lines_;
   private: gfx::RectF bounds_;
+  private: TextSelection selection_;
   private: text::Buffer* const text_buffer_;
 
   public: TextBlock(text::Buffer* buffer);
@@ -41,6 +43,10 @@ class TextBlock final : public text::BufferMutationObserver {
   public: const std::list<TextLine*>& lines() const { return lines_; }
   public: const gfx::RectF& bounds() const { return bounds_; }
   public: float right() const { return bounds_.right; }
+  public: const TextSelection& selection() const { return selection_; }
+  public: void set_selection(const TextSelection& new_selection) {
+    selection_ = new_selection;
+  }
   public: const text::Buffer* text_buffer() const { return text_buffer_; }
   public: float top() const { return bounds_.top; }
   public: float width() const { return bounds_.width(); }

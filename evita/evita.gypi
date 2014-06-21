@@ -124,6 +124,8 @@
         'views/tab_strip.cc',
         'views/tab_strip_delegate.cc',
         'views/text/render_cell.cc',
+        'views/text/render_selection.cc',
+        'views/text/render_selection.h',
         'views/text/render_style.cc',
         'views/text/render_text_block.cc',
         'views/text/render_text_line.cc',

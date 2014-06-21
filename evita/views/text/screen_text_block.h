@@ -10,6 +10,7 @@
 
 #include "base/basictypes.h"
 #include "evita/gfx_base.h"
+#include "evita/views/text/render_selection.h"
 #include "evita/vi_style.h"
 
 namespace views {
@@ -22,11 +23,12 @@ class ScreenTextBlock final : public gfx::Canvas::Observer {
   private: class RenderContext;
   friend class RenderContext;
 
+  private: gfx::RectF bounds_;
   private: bool dirty_;
   private: const gfx::Canvas* gfx_;
   private: bool has_screen_bitmap_;
   private: std::vector<TextLine*> lines_;
-  private: gfx::RectF bounds_;
+  private: TextSelection selection_;
 
   public: ScreenTextBlock();
   public: virtual ~ScreenTextBlock();
@@ -34,6 +36,7 @@ class ScreenTextBlock final : public gfx::Canvas::Observer {
   public: bool dirty() const { return dirty_; }
 
   public: void Render(const TextBlock* text_block);
+  private: void RenderSelection() const;
   public: void Reset();
   public: void SetGraphics(const gfx::Canvas* gfx);
   public: void SetBounds(const gfx::RectF& rect);

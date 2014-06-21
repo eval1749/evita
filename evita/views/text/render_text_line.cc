@@ -4,7 +4,9 @@
 
 #include "evita/views/text/render_text_line.h"
 
+#include "base/logging.h"
 #include "evita/views/text/render_cell.h"
+#include "evita/views/text/render_selection.h"
 
 namespace views {
 namespace rendering {
@@ -33,6 +35,10 @@ void TextLine::set_left_top(const gfx::PointF& left_top) {
   bounds_.bottom = bounds_.height() + left_top.y;
   bounds_.left = left_top.x;
   bounds_.top = left_top.y;
+}
+
+bool TextLine::Contains(text::Posn offset) const {
+  return offset >= text_start() && offset < text_end();
 }
 
 TextLine* TextLine::Copy() const {
@@ -123,6 +129,22 @@ void TextLine::Render(const gfx::Canvas& gfx) const {
   }
   gfx.Flush();
 }
+
+void TextLine::RenderSelection(gfx::Canvas* canvas,
+                               const TextSelection& selection) const {
+  DCHECK_NE(selection.start, selection.end);
+  if (selection.start >= text_end())
+    return;
+  if (selection.end <= text_start())
+    return;
+  auto const left = HitTestTextPosition(
+      Contains(selection.start) ? selection.start : text_start()).left;
+  auto const right = Contains(selection.end) ?
+      HitTestTextPosition(selection.end).left : bounds_.right;
+  canvas->FillRectangle(gfx::Brush(*canvas, selection.color),
+                        gfx::RectF(left, bounds_.top, right, bounds_.bottom));
+}
+
 
 }  // namespace rendering
 }  // namespace views

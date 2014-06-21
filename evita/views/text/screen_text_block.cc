@@ -359,8 +359,11 @@ ScreenTextBlock::~ScreenTextBlock() {
 void ScreenTextBlock::Render(const TextBlock* text_block) {
   RenderContext render_context(this, text_block);
   dirty_ = render_context.Render();
-  if (!dirty_)
+  if (!dirty_) {
+    selection_ = text_block->selection();
+    RenderSelection();
     return;
+  }
 
   Reset();
   has_screen_bitmap_ = gfx_->SaveScreenImage(bounds_);
@@ -373,7 +376,23 @@ void ScreenTextBlock::Render(const TextBlock* text_block) {
     }
   }
   render_context.Finish();
+  selection_ = text_block->selection();
+  RenderSelection();
   dirty_ = false;
+}
+
+void ScreenTextBlock::RenderSelection() const {
+  if (selection_.start == selection_.end)
+    return;
+  if (selection_.start >= lines_.back()->text_end())
+    return;
+  if (selection_.end <= lines_.front()->text_start())
+    return;
+  for (auto line : lines_) {
+    if (selection_.end <= line->text_start())
+        break;
+    line->RenderSelection(const_cast<gfx::Canvas*>(gfx_), selection_);
+  }
 }
 
 void ScreenTextBlock::Reset() {

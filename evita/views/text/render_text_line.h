@@ -17,15 +17,16 @@ class TextRenderer;
 namespace rendering {
 
 class Cell;
-class TextBlock;
 class Formatter;
+class TextBlock;
+struct TextSelection;
 
 class TextLine final {
+  private: gfx::RectF bounds_;
   private: std::vector<Cell*> cells_;
   private: mutable uint m_nHash;
   private: Posn m_lStart;
   private: Posn m_lEnd;
-  private: gfx::RectF bounds_;
 
   private: TextLine(const TextLine& other);
   public: TextLine();
@@ -44,6 +45,7 @@ class TextLine final {
   public: text::Posn text_start() const { return m_lStart; }
 
   public: void AddCell(Cell* cell);
+  private: bool Contains(text::Posn offset) const;
   public: TextLine* Copy() const;
   public: bool Equal(const TextLine*) const;
   public: void Fix(float left, float top, float ascent, float dscent);
@@ -55,6 +57,8 @@ class TextLine final {
   public: gfx::RectF HitTestTextPosition(Posn lPosn) const;
   public: Posn MapXToPosn(const gfx::Canvas&, float) const;
   public: void Render(const gfx::Canvas& gfx) const;
+  public: void RenderSelection(gfx::Canvas* canvas,
+                               const TextSelection& selection) const;
 };
 
 } // namespace rendering

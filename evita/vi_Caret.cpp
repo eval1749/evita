@@ -14,6 +14,23 @@ static const auto kBlinkInterval = 500; // milliseconds
 
 //////////////////////////////////////////////////////////////////////
 //
+// Caret::HideScope
+//
+Caret::HideScope::HideScope(Caret* caret, gfx::Canvas* canvas)
+    : canvas_(canvas), caret_(caret), shown_(caret->shown_) {
+  if (!shown_)
+    return;
+  caret_->Hide(canvas_);
+}
+
+Caret::HideScope::~HideScope() {
+  if (!shown_)
+   return;
+  caret_->Show(canvas_);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // Caret::Updater
 //
 Caret::Updater::Updater(Caret* caret) : caret_(caret) {
@@ -94,12 +111,16 @@ void Caret::Take(views::Window* owner) {
 
 void Caret::Update(const gfx::Canvas* gfx, const gfx::RectF& new_rect) {
   DCHECK(!shown_);
+  auto const new_bounds = gfx::RectF(::floor(new_rect.left),
+                                     ::floor(new_rect.top),
+                                     ::floor(new_rect.right),
+                                     ::floor(new_rect.bottom));
   if (!owner_) {
-    bounds_ = new_rect;
+    bounds_ = new_bounds;
     return;
   }
-  if (bounds_ != new_rect) {
-    bounds_ = new_rect;
+  if (bounds_ != new_bounds) {
+    bounds_ = new_bounds;
     last_blink_time_ = base::Time::Now();
   }
   Show(gfx);

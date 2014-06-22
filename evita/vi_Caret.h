@@ -28,14 +28,28 @@ class Window;
 // caret size. If we call CreateCaret, caret doesn't blink.
 // Note: Caret should be lived until timer is fired.
 class Caret {
+  public: class HideScope {
+    private: gfx::Canvas* const canvas_;
+    private: Caret* const caret_;
+    private: bool const shown_;
+
+    public: HideScope(Caret* caret, gfx::Canvas* gfx);
+    public: ~HideScope();
+
+    DISALLOW_COPY_AND_ASSIGN(HideScope);
+  };
+  friend class HideScope;
+
   public: class Updater {
-    private: Caret* caret_;
+    private: Caret* const caret_;
 
     public: Updater(Caret* caret);
     public: ~Updater();
 
     public: void Clear();
     public: void Update(const gfx::Canvas* gfx, const gfx::RectF& rect);
+
+    DISALLOW_COPY_AND_ASSIGN(Updater);
   };
   friend class Updater;
 

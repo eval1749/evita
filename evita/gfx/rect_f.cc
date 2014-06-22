@@ -13,3 +13,13 @@ std::ostream& operator<<(std::ostream& ostream, const gfx::RectF* rect) {
     return ostream << "(null)";
   return ostream <<*rect;
 }
+
+namespace std {
+size_t hash<gfx::RectF>::operator()(const gfx::RectF& rect) const {
+  auto result = std::hash<float>()(rect.bottom);
+  result ^= std::hash<float>()(rect.left);
+  result ^= std::hash<float>()(rect.right);
+  result ^= std::hash<float>()(rect.top);
+  return result;
+}
+}  // namespace std

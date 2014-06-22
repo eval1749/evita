@@ -213,6 +213,12 @@ typedef Rect_<D2D1_RECT_U, PointU, SizeU> RectU;
 
 } // namespace gfx
 
+namespace std {
+template<> struct hash<gfx::RectF> {
+  size_t operator()(const gfx::RectF& rect) const;
+};
+}  // namespace std
+
 #define DEBUG_RECTF_FORMAT "(%d,%d)+%dx%d"
 
 #define DEBUG_RECTF_ARG(rect) \

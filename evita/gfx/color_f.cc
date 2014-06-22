@@ -40,8 +40,7 @@ bool ColorF::operator!=(const ColorF& other) const {
 
 namespace std {
 size_t hash<gfx::ColorF>::operator()(const gfx::ColorF& color) const {
-  auto result = static_cast<size_t>(0);
-  result ^= std::hash<float>()(color.r);
+  auto result = std::hash<float>()(color.r);
   result ^= std::hash<float>()(color.g);
   result ^= std::hash<float>()(color.b);
   result ^= std::hash<float>()(color.a);

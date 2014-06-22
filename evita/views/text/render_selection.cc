@@ -13,11 +13,11 @@ namespace rendering {
 //
 TextSelectionModel::TextSelectionModel(text::Posn start, text::Posn end,
                                        bool active)
-    : active(active), start(start), end(end) {
+    : active_(active), end_(end), start_(start) {
 }
 
 TextSelectionModel::TextSelectionModel(const TextSelectionModel& other)
-    : TextSelectionModel(other.start, other.end, other.active) {
+    : TextSelectionModel(other.start_, other.end_, other.active_) {
 }
 
 TextSelectionModel::TextSelectionModel()
@@ -28,7 +28,8 @@ TextSelectionModel::~TextSelectionModel() {
 }
 
 bool TextSelectionModel::operator==(const TextSelectionModel& other) const {
-  return active == other.active && end == other.end && start == other.start;
+  return active_ == other.active_ && end_ == other.end_ &&
+         start_ == other.start_;
 }
 
 bool TextSelectionModel::operator!=(const TextSelectionModel& other) const {
@@ -41,7 +42,11 @@ bool TextSelectionModel::operator!=(const TextSelectionModel& other) const {
 //
 TextSelection::TextSelection(const TextSelectionModel& model,
                              const gfx::ColorF& color)
-    : TextSelectionModel(model), color(color) {
+    : color_(color), model_(model) {
+}
+
+TextSelection::TextSelection(const TextSelection& other)
+    : TextSelection(other.model_, other.color_) {
 }
 
 TextSelection::TextSelection()
@@ -52,7 +57,7 @@ TextSelection::~TextSelection() {
 }
 
 bool TextSelection::operator==(const TextSelection& other) const {
-  return TextSelectionModel::operator==(other) && color == other.color;
+  return model_ == other.model_ && color_ == other.color_;
 }
 
 bool TextSelection::operator!=(const TextSelection& other) const {

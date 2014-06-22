@@ -39,13 +39,13 @@ void TextLine::set_left_top(const gfx::PointF& left_top) {
 
 gfx::RectF TextLine::CalculateSelectionRect(
     const TextSelection& selection) const {
-  DCHECK_NE(selection.start, selection.end);
-  if (selection.start >= text_end() || selection.end <= text_start())
+  DCHECK(selection.is_range());
+  if (selection.start() >= text_end() || selection.end() <= text_start())
     return gfx::RectF();
   auto const left = HitTestTextPosition(
-      Contains(selection.start) ? selection.start : text_start()).left;
-  auto const right = Contains(selection.end) ?
-      HitTestTextPosition(selection.end).left : bounds_.right;
+      Contains(selection.start()) ? selection.start() : text_start()).left;
+  auto const right = Contains(selection.end()) ?
+      HitTestTextPosition(selection.end()).left : bounds_.right;
   return gfx::RectF(left, bounds_.top, right, bounds_.bottom);
 }
 

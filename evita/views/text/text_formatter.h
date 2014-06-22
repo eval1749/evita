@@ -22,8 +22,8 @@ class Cell;
 class TextBlock;
 class TextLine;
 enum class TextMarker;
-struct TextSelection;
-struct TextSelectionModel;
+class TextSelection;
+class TextSelectionModel;
 
 class TextFormatter final {
   private: class TextScanner;

@@ -55,12 +55,12 @@ std::unordered_set<gfx::RectF> CalculateSelectionRects(
   std::unordered_set<gfx::RectF> rects;
   if (selection.is_caret())
     return rects;
-  if (selection.start >= lines.back()->text_end())
+  if (selection.start() >= lines.back()->text_end())
     return rects;
-  if (selection.end <= lines.front()->text_start())
+  if (selection.end() <= lines.front()->text_start())
     return rects;
   for (auto line : lines) {
-    if (selection.end <= line->text_start())
+    if (selection.end() <= line->text_start())
         break;
     auto const rect = line->CalculateSelectionRect(selection);
     if (rect.empty())
@@ -408,14 +408,14 @@ void ScreenTextBlock::RenderSelection(const TextSelection& selection) {
   selection_ = selection;
   if (selection_.is_caret())
     return;
-  if (selection_.start >= lines_.back()->text_end())
+  if (selection_.start() >= lines_.back()->text_end())
     return;
-  if (selection_.end <= lines_.front()->text_start())
+  if (selection_.end() <= lines_.front()->text_start())
     return;
   gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx_, bounds_);
-  gfx::Brush fill_brush(*gfx_, selection_.color);
+  gfx::Brush fill_brush(*gfx_, selection_.color());
   for (auto line : lines_) {
-    if (selection_.end <= line->text_start())
+    if (selection_.end() <= line->text_start())
         break;
     auto const rect = line->CalculateSelectionRect(selection);
     if (rect.empty())
@@ -453,10 +453,10 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
     gfx_->set_dirty_rect(old_rect);
     gfx_->DrawBitmap(*gfx_->screen_bitmap(), old_rect, old_rect);
   }
-  if (selection_.color != new_selection.color)
+  if (selection_.color() != new_selection.color())
     old_selection_rects.clear();
   if (!new_selection_rects.empty()) {
-    gfx::Brush fill_brush(*gfx_, new_selection.color);
+    gfx::Brush fill_brush(*gfx_, new_selection.color());
     for (const auto& new_rect : new_selection_rects) {
       if (old_selection_rects.find(new_rect) != old_selection_rects.end())
         continue;

@@ -19,7 +19,7 @@ namespace rendering {
 class Cell;
 class Formatter;
 class TextBlock;
-struct TextSelection;
+class TextSelection;
 
 class TextLine final {
   private: gfx::RectF bounds_;

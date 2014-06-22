@@ -11,28 +11,32 @@
 namespace views {
 namespace rendering {
 
-struct Selection {
+struct TextSelectionModel {
   bool active;
   text::Posn start;
   text::Posn end;
+
+  TextSelectionModel(text::Posn start, text::Posn end, bool active);
+  TextSelectionModel(const TextSelectionModel& model);
+  TextSelectionModel();
+  ~TextSelectionModel();
+
+  bool operator==(const TextSelectionModel& other) const;
+  bool operator!=(const TextSelectionModel& other) const;
 
   bool is_caret() const { return start == end; }
   bool is_range() const { return start != end; }
 };
 
-struct TextSelection {
+struct TextSelection : TextSelectionModel {
   gfx::ColorF color;
-  text::Posn start;
-  text::Posn end;
 
-  TextSelection(const gfx::ColorF& color, text::Posn start, text::Posn end);
+  TextSelection(const TextSelectionModel& model, const gfx::ColorF& color);
   TextSelection();
   ~TextSelection();
 
   bool operator==(const TextSelection& other) const;
   bool operator!=(const TextSelection& other) const;
-
-  bool is_caret() const { return start == end; }
 };
 
 } // namespace rendering

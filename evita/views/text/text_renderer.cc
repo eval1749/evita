@@ -164,7 +164,7 @@ int TextRenderer::pageLines() const {
   return static_cast<int>(text_block_->height() / height);
 }
 
-void TextRenderer::Prepare(const Selection& selection, float zoom) {
+void TextRenderer::Prepare(const TextSelectionModel& selection, float zoom) {
   selection_ = selection;
   zoom_ = zoom;
 }
@@ -194,7 +194,7 @@ void TextRenderer::Render() {
 }
 
 void TextRenderer::RenderSelectionIfNeeded(
-    const SelectionModel& new_selection_model) {
+    const TextSelectionModel& new_selection_model) {
   DCHECK(!text_block_->bounds().empty());
   screen_text_block_->RenderSelectionIfNeeded(
       TextFormatter::FormatSelection(text_block_->text_buffer(),

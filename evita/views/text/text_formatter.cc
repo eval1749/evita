@@ -398,13 +398,12 @@ Cell* TextFormatter::formatMarker(TextMarker marker_name) {
 }
 
 
-TextSelection TextFormatter::FormatSelection(const text::Buffer* buffer,
-                                             const Selection& selection) {
+TextSelection TextFormatter::FormatSelection(
+    const text::Buffer* buffer, const TextSelectionModel& selection_model) {
   const auto& style = buffer->style_resolver()->ResolveWithoutDefaults(
-      selection.active ? css::StyleSelector::active_selection() :
-                         css::StyleSelector::inactive_selection());
-  return TextSelection(CssColorToColorF(style.bgcolor()),
-                       selection.start, selection.end);
+      selection_model.active ? css::StyleSelector::active_selection() :
+                               css::StyleSelector::inactive_selection());
+  return TextSelection(selection_model, CssColorToColorF(style.bgcolor()));
 }
 
 } // namespace rendering

@@ -19,11 +19,11 @@ namespace views {
 namespace rendering {
 
 class Cell;
-struct Selection;
 class TextBlock;
 class TextLine;
 enum class TextMarker;
 struct TextSelection;
+struct TextSelectionModel;
 
 class TextFormatter final {
   private: class TextScanner;
@@ -46,7 +46,7 @@ class TextFormatter final {
   private: Cell* formatMarker(TextMarker marker_name);
 
   public: static TextSelection FormatSelection(
-      const text::Buffer* buffer, const Selection& selection_model);
+      const text::Buffer* buffer, const TextSelectionModel& selection_model);
 
   DISALLOW_COPY_AND_ASSIGN(TextFormatter);
 };

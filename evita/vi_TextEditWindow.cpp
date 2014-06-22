@@ -48,22 +48,9 @@
 #include "evita/vi_Frame.h"
 #include "evita/vi_Selection.h"
 
+using views::rendering::TextSelectionModel;
+
 namespace {
-class RenderSelection : public views::rendering::Selection {
-  public: RenderSelection(::Selection* selection, bool is_active);
-  public: explicit RenderSelection(::Selection* selection);
-  public: ~RenderSelection() = default;
-};
-
-RenderSelection::RenderSelection(::Selection* selection, bool is_active) {
-  active = is_active;
-  start = selection->GetStart();
-  end = selection->GetEnd();
-}
-
-RenderSelection::RenderSelection(::Selection* selection)
-    : RenderSelection(selection, false) {
-}
 
 bool IsPopupWindow(HWND hwnd) {
   while (hwnd) {
@@ -358,10 +345,10 @@ void TextEditWindow::Redraw() {
 
   UI_ASSERT_DOM_LOCKED();
 
-  RenderSelection selection (selection_, selection_is_active);
-
   auto const lSelStart = selection_->GetStart();
   auto const lSelEnd = selection_->GetEnd();
+
+  TextSelectionModel selection(lSelStart, lSelEnd, selection_is_active);
 
   Posn lCaretPosn;
   if (selection_is_active) {
@@ -539,7 +526,8 @@ void TextEditWindow::UpdateCaretBounds(const gfx::RectF& char_rect) {
 
 void TextEditWindow::updateScreen() {
   UI_ASSERT_DOM_LOCKED();
-  RenderSelection selection(selection_, is_selection_active());
+  TextSelectionModel selection(selection_->GetStart(), selection_->GetEnd(),
+                               is_selection_active());
   if (!text_renderer_->ShouldFormat(zoom_)) {
     text_renderer_->RenderSelectionIfNeeded(selection);
     return;

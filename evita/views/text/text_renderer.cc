@@ -116,19 +116,8 @@ gfx::RectF TextRenderer::HitTestTextPosition(Posn lPosn) const {
   return gfx::RectF();
 }
 
-bool TextRenderer::isPosnVisible(Posn lPosn) const {
-  if (lPosn < GetStart())
-    return false;
-  if (lPosn >= GetEnd())
-    return false;
-
-  auto y = text_block_->top();
-  for (const auto& line : text_block_->lines()) {
-    if (lPosn >= line->GetStart() && lPosn < line->GetEnd())
-      return y + line->GetHeight() <= text_block_->bottom();
-    y += line->GetHeight();
-  }
-  return false;
+bool TextRenderer::isPosnVisible(text::Posn offset) const {
+  return offset >= GetStart() && offset < GetVisibleEnd();
 }
 
 Posn TextRenderer::MapPointToPosn(gfx::PointF pt) const {

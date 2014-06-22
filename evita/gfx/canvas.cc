@@ -43,14 +43,14 @@ namespace gfx {
 // Canvas::AxisAlignedClipScope
 //
 Canvas::AxisAlignedClipScope::AxisAlignedClipScope(
-    const Canvas& canvas, const RectF& rect, D2D1_ANTIALIAS_MODE alais_mode)
+    const Canvas& canvas, const RectF& bounds, D2D1_ANTIALIAS_MODE alias_mode)
     : canvas_(canvas) {
-  canvas_->PushAxisAlignedClip(rect, alais_mode);
+  canvas_->PushAxisAlignedClip(bounds, alias_mode);
 }
 
 Canvas::AxisAlignedClipScope::AxisAlignedClipScope(const Canvas& canvas,
-                                                   const RectF& rect)
-    : AxisAlignedClipScope(canvas, rect, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE) {
+                                                   const RectF& bounds)
+    : AxisAlignedClipScope(canvas, bounds, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE) {
 }
 
 Canvas::AxisAlignedClipScope::~AxisAlignedClipScope() {

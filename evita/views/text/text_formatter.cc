@@ -63,15 +63,6 @@ RenderStyle GetRenderStyle(const gfx::Canvas& gfx,
   return RenderStyle(style, GetFont(gfx, style));
 }
 
-TextSelection FormatSelection(const text::Buffer* buffer,
-                              const Selection& selection) {
-  const auto& style = buffer->style_resolver()->ResolveWithoutDefaults(
-      selection.active ? css::StyleSelector::active_selection() :
-                         css::StyleSelector::inactive_selection());
-  return TextSelection(CssColorToColorF(style.bgcolor()),
-                       selection.start, selection.end);
-}
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -184,8 +175,7 @@ RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
 // TextFormatter
 //
 TextFormatter::TextFormatter(const gfx::Canvas& gfx, TextBlock* text_block,
-                             const Selection& selection, Posn lStart,
-                             float zoom)
+                             Posn lStart, float zoom)
     : default_render_style_(GetRenderStyle(gfx, GetDefaultStyle(text_block))),
       default_style_(GetDefaultStyle(text_block)),
       m_gfx(gfx),
@@ -194,8 +184,6 @@ TextFormatter::TextFormatter(const gfx::Canvas& gfx, TextBlock* text_block,
       zoom_(zoom) {
   DCHECK(!text_block_->bounds().empty());
   DCHECK_GT(zoom_, 0.0f);
-  text_block->set_selection(FormatSelection(text_block->text_buffer(),
-                                            selection));
 }
 
 TextFormatter::~TextFormatter() {
@@ -407,6 +395,16 @@ Cell* TextFormatter::formatMarker(TextMarker marker_name) {
   return new MarkerCell(text_scanner_->MakeRenderStyle(style, pFont),
                         width, height, text_scanner_->GetPosn(),
                         marker_name);
+}
+
+
+TextSelection TextFormatter::FormatSelection(const text::Buffer* buffer,
+                                             const Selection& selection) {
+  const auto& style = buffer->style_resolver()->ResolveWithoutDefaults(
+      selection.active ? css::StyleSelector::active_selection() :
+                         css::StyleSelector::inactive_selection());
+  return TextSelection(CssColorToColorF(style.bgcolor()),
+                       selection.start, selection.end);
 }
 
 } // namespace rendering

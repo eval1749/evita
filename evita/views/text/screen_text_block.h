@@ -35,8 +35,10 @@ class ScreenTextBlock final : public gfx::Canvas::Observer {
 
   public: bool dirty() const { return dirty_; }
 
-  public: void Render(const TextBlock* text_block);
-  private: void RenderSelection() const;
+  public: void Render(const TextBlock* text_block,
+                      const TextSelection& selection);
+  private: void RenderSelection(const TextSelection& selection);
+  public: void RenderSelectionIfNeeded(const TextSelection& selection);
   public: void Reset();
   public: void SetGraphics(const gfx::Canvas* gfx);
   public: void SetBounds(const gfx::RectF& rect);

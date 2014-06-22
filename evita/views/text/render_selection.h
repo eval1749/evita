@@ -15,6 +15,9 @@ struct Selection {
   bool active;
   text::Posn start;
   text::Posn end;
+
+  bool is_caret() const { return start == end; }
+  bool is_range() const { return start != end; }
 };
 
 struct TextSelection {
@@ -28,6 +31,8 @@ struct TextSelection {
 
   bool operator==(const TextSelection& other) const;
   bool operator!=(const TextSelection& other) const;
+
+  bool is_caret() const { return start == end; }
 };
 
 } // namespace rendering

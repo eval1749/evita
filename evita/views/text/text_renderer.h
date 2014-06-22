@@ -33,14 +33,14 @@ class TextRenderer final {
   private: typedef common::win::Rect Rect;
   private: typedef rendering::Cell Cell;
   public: typedef rendering::ScreenTextBlock ScreenTextBlock;
-  private: typedef rendering::Selection Selection;
+  public: typedef rendering::Selection SelectionModel;
   public: typedef rendering::TextBlock TextBlock;
   public: typedef rendering::TextLine Line;
 
   private: const gfx::Canvas* gfx_;
   private: text::Buffer* const m_pBuffer;
   private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
-  private: Selection selection_;
+  private: SelectionModel selection_;
   private: std::unique_ptr<TextBlock> text_block_;
   private: float zoom_;
 
@@ -72,11 +72,12 @@ class TextRenderer final {
 
   // [P]
   private: int pageLines() const;
-  public: void Prepare(const Selection& selection, float zoom);
+  public: void Prepare(const SelectionModel& selection, float zoom);
 
 
   // [R]
   public: void Render();
+  public: void RenderSelectionIfNeeded(const SelectionModel& selection);
   public: void Reset();
 
   // [S]
@@ -85,9 +86,7 @@ class TextRenderer final {
   public: bool ScrollUp();
   public: void SetGraphics(const gfx::Canvas* gfx);
   public: void SetBounds(const Rect& rect);
-  public: bool ShouldFormat(const Selection& selection,
-                            float zoom,
-                            bool check_selection_color = false) const;
+  public: bool ShouldFormat(float zoom) const;
   public: bool ShouldRender() const;
 
   DISALLOW_COPY_AND_ASSIGN(TextRenderer);

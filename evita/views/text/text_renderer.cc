@@ -90,13 +90,13 @@ text::Posn TextRenderer::GetVisibleEnd() const {
 void TextRenderer::Format(Posn lStart) {
   DCHECK(gfx_);
   text_block_->Reset();
-  TextFormatter oFormatter(*gfx_, text_block_.get(), selection_, lStart, zoom_);
+  TextFormatter oFormatter(*gfx_, text_block_.get(), lStart, zoom_);
   oFormatter.Format();
 }
 
 TextLine* TextRenderer::FormatLine(Posn lStart) {
   DCHECK(gfx_);
-  TextFormatter oFormatter(*gfx_, text_block_.get(), selection_, lStart, zoom_);
+  TextFormatter oFormatter(*gfx_, text_block_.get(), lStart, zoom_);
   return oFormatter.FormatLine();
 }
 
@@ -173,7 +173,9 @@ void TextRenderer::Render() {
   DCHECK(gfx_);
   DCHECK(!text_block_->bounds().empty());
   text_block_->EnsureLinePoints();
-  screen_text_block_->Render(text_block_.get());
+  const auto selection = TextFormatter::FormatSelection(
+      text_block_->text_buffer(), selection_);
+  screen_text_block_->Render(text_block_.get(), selection);
 
   // FIXME 2007-08-05 yosi@msn.com We should expose show/hide
   // ruler settings to both script and UI.
@@ -191,6 +193,14 @@ void TextRenderer::Render() {
             text_block_->top(), text_block_->bottom());
 }
 
+void TextRenderer::RenderSelectionIfNeeded(
+    const SelectionModel& new_selection_model) {
+  DCHECK(!text_block_->bounds().empty());
+  screen_text_block_->RenderSelectionIfNeeded(
+      TextFormatter::FormatSelection(text_block_->text_buffer(),
+                                     new_selection_model));
+}
+
 void TextRenderer::Reset() {
   screen_text_block_->Reset();
 }
@@ -201,7 +211,7 @@ bool TextRenderer::ScrollDown() {
     return false;
   auto const lGoal = GetStart() - 1;
   auto const lStart = m_pBuffer->ComputeStartOfLine(lGoal);
-  TextFormatter formatter(*gfx_, text_block_.get(), selection_, lStart, zoom_);
+  TextFormatter formatter(*gfx_, text_block_.get(), lStart, zoom_);
   for (;;) {
     auto const line = formatter.FormatLine();
     if (lGoal < line->GetEnd()) {
@@ -287,7 +297,7 @@ bool TextRenderer::ScrollUp() {
   if (text_block_->IsShowEndOfDocument())
     return false;
 
-  TextFormatter oFormatter(*gfx_, text_block_.get(), selection_,
+  TextFormatter oFormatter(*gfx_, text_block_.get(),
                            text_block_->GetLast()->GetEnd(), zoom_);
 
   auto const line = oFormatter.FormatLine();
@@ -306,85 +316,8 @@ void TextRenderer::SetBounds(const Rect& rect) {
   screen_text_block_->SetBounds(rectf);
 }
 
-bool TextRenderer::ShouldFormat(const Selection& selection, float zoom,
-                                bool fSelection) const {
-  if (text_block_->dirty() || zoom_ != zoom)
-    return true;
-
-  // Buffer
-  auto const lSelStart = selection.start;
-  auto const lSelEnd = selection.end;
-
-  // TextRenderer shows caret instead of seleciton.
-  if (selection_.start == selection_.end) {
-    if (lSelStart == lSelEnd) {
-        #if DEBUG_DIRTY
-            DEBUG_PRINTF("%p: clean with caret.\n", this);
-        #endif // DEBUG_DIRTY
-        return false;
-    }
-
-    if (!fSelection) {
-        if (lSelEnd < GetStart() || lSelStart > GetEnd()) {
-            #if DEBUG_DIRTY
-                DEBUG_PRINTF("%p: clean with selection in outside.\n", this);
-            #endif // DEBUG_DIRTY
-            return false;
-        }
-    }
-
-    #if DEBUG_DIRTY
-        DEBUG_PRINTF("%p: Need to show selection.\n", this);
-    #endif // DEBUG_DIRTY
-    return true;
-  }
-
-  if (!fSelection) {
-    // TextRenderer doesn't contain selection.
-    if (selection_.end < GetStart() || selection_.start > GetEnd()) {
-        if (lSelStart == lSelEnd) {
-            #if DEBUG_DIRTY
-                DEBUG_PRINTF("%p: clean with selection.\n", this);
-            #endif // DEBUG_DIRTY
-            return false;
-        }
-
-        if (lSelEnd < GetStart() || lSelStart > GetEnd())
-            return false;
-        #if DEBUG_DIRTY
-            DEBUG_PRINTF("%p: Need to show selection.\n", this);
-        #endif // DEBUG_DIRTY
-        return true;
-    }
-  }
-
-  // TextRenderer shows selection.
-  if (selection_.start != lSelStart) {
-    #if DEBUG_DIRTY
-        DEBUG_PRINTF("%p: Selection start is changed.\n", this);
-    #endif // DEBUG_DIRTY
-    return true;
-  }
-
-  if (selection_.end != lSelEnd) {
-    #if DEBUG_DIRTY
-        DEBUG_PRINTF("%p: Selection end is changed.\n", this);
-    #endif // DEBUG_DIRTY
-    return true;
-  }
-
-  if (selection_.active != selection.active) {
-    #if DEBUG_DIRTY
-        DEBUG_PRINTF("%p: selection.active is changed.\n", this);
-    #endif // DEBUG_DIRTY
-    return true;
-  }
-
-  #if DEBUG_DIRTY
-    DEBUG_PRINTF("%p is clean.\n", this);
-  #endif // DEBUG_DIRTY
-
-  return false;
+bool TextRenderer::ShouldFormat(float zoom) const {
+  return text_block_->dirty() || zoom_ != zoom;
 }
 
 bool TextRenderer::ShouldRender() const {

@@ -4,6 +4,8 @@
 
 #include "evita/views/text/screen_text_block.h"
 
+#include <unordered_set>
+
 #include "base/logging.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/views/switches.h"
@@ -26,12 +28,6 @@ namespace {
 const auto kMarkerLeftMargin = 2.0f;
 const auto kMarkerWidth = 4.0f;
 
-inline void FillRect(const gfx::Canvas& gfx, const gfx::RectF& rect,
-                     gfx::ColorF color) {
-  gfx::Brush fill_brush(gfx, color);
-  gfx.FillRectangle(fill_brush, rect);
-}
-
 void AddRect(std::vector<gfx::RectF>& rects, const gfx::RectF& rect) {
   if (rects.empty()) {
     rects.push_back(rect);
@@ -52,6 +48,33 @@ void AddRect(std::vector<gfx::RectF>& rects, const gfx::RectF& rect) {
   }
 
   rects.push_back(rect);
+}
+
+std::unordered_set<gfx::RectF> CalculateSelectionRects(
+    const std::vector<TextLine*>& lines, const TextSelection& selection) {
+  std::unordered_set<gfx::RectF> rects;
+  if (selection.is_caret())
+    return rects;
+  if (selection.start >= lines.back()->text_end())
+    return rects;
+  if (selection.end <= lines.front()->text_start())
+    return rects;
+  for (auto line : lines) {
+    if (selection.end <= line->text_start())
+        break;
+    auto const rect = line->CalculateSelectionRect(selection);
+    if (rect.empty())
+      continue;
+    rects.insert(gfx::RectF(::floor(rect.left), ::floor(rect.top),
+                            ::floor(rect.right), ::floor(rect.bottom)));
+  }
+  return rects;
+}
+
+inline void FillRect(const gfx::Canvas& gfx, const gfx::RectF& rect,
+                     gfx::ColorF color) {
+  gfx::Brush fill_brush(gfx, color);
+  gfx.FillRectangle(fill_brush, rect);
 }
 
 } // namespace
@@ -229,6 +252,7 @@ void ScreenTextBlock::RenderContext::Finish() {
     #endif
     DrawDirtyRect(rect, 219.0f / 255, 68.0f / 255, 55.0f / 255);
   }
+  gfx_->Flush();
 }
 
 bool ScreenTextBlock::RenderContext::Render() {
@@ -356,12 +380,12 @@ ScreenTextBlock::ScreenTextBlock()
 ScreenTextBlock::~ScreenTextBlock() {
 }
 
-void ScreenTextBlock::Render(const TextBlock* text_block) {
+void ScreenTextBlock::Render(const TextBlock* text_block,
+                             const TextSelection& selection) {
   RenderContext render_context(this, text_block);
   dirty_ = render_context.Render();
   if (!dirty_) {
-    selection_ = text_block->selection();
-    RenderSelection();
+    RenderSelection(selection);
     return;
   }
 
@@ -376,23 +400,72 @@ void ScreenTextBlock::Render(const TextBlock* text_block) {
     }
   }
   render_context.Finish();
-  selection_ = text_block->selection();
-  RenderSelection();
+  RenderSelection(selection);
   dirty_ = false;
 }
 
-void ScreenTextBlock::RenderSelection() const {
-  if (selection_.start == selection_.end)
+void ScreenTextBlock::RenderSelection(const TextSelection& selection) {
+  selection_ = selection;
+  if (selection_.is_caret())
     return;
   if (selection_.start >= lines_.back()->text_end())
     return;
   if (selection_.end <= lines_.front()->text_start())
     return;
+  gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx_, bounds_);
+  gfx::Brush fill_brush(*gfx_, selection_.color);
   for (auto line : lines_) {
     if (selection_.end <= line->text_start())
         break;
-    line->RenderSelection(const_cast<gfx::Canvas*>(gfx_), selection_);
+    auto const rect = line->CalculateSelectionRect(selection);
+    if (rect.empty())
+      continue;
+    gfx_->FillRectangle(fill_brush, rect);
   }
+  gfx_->Flush();
+}
+
+void ScreenTextBlock::RenderSelectionIfNeeded(
+    const TextSelection& new_selection) {
+  if (selection_ == new_selection)
+    return;
+  auto min_left = bounds_.right;
+  auto max_right = bounds_.left;
+  auto new_selection_rects = CalculateSelectionRects(lines_, new_selection);
+  for (const auto& rect : new_selection_rects) {
+    min_left = std::min(min_left, rect.left);
+    max_right = std::max(max_right, rect.right);
+  }
+  auto old_selection_rects = CalculateSelectionRects(lines_, selection_);
+  for (const auto& rect : old_selection_rects) {
+    min_left = std::min(min_left, rect.left);
+    max_right = std::max(max_right, rect.right);
+  }
+  if (old_selection_rects.empty() && new_selection_rects.empty()) {
+    selection_ = new_selection;
+    return;
+  }
+  gfx::Canvas::DrawingScope drawing_scope(*gfx_);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx_, bounds_);
+  for (const auto& old_rect : old_selection_rects) {
+    if (new_selection_rects.find(old_rect) != new_selection_rects.end())
+      continue;
+    gfx_->set_dirty_rect(old_rect);
+    gfx_->DrawBitmap(*gfx_->screen_bitmap(), old_rect, old_rect);
+  }
+  if (selection_.color != new_selection.color)
+    old_selection_rects.clear();
+  if (!new_selection_rects.empty()) {
+    gfx::Brush fill_brush(*gfx_, new_selection.color);
+    for (const auto& new_rect : new_selection_rects) {
+      if (old_selection_rects.find(new_rect) != old_selection_rects.end())
+        continue;
+      gfx_->set_dirty_rect(new_rect);
+      gfx_->DrawBitmap(*gfx_->screen_bitmap(), new_rect, new_rect);
+      gfx_->FillRectangle(fill_brush, new_rect);
+    }
+  }
+  selection_ = new_selection;
 }
 
 void ScreenTextBlock::Reset() {

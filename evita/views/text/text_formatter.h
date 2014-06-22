@@ -23,6 +23,7 @@ struct Selection;
 class TextBlock;
 class TextLine;
 enum class TextMarker;
+struct TextSelection;
 
 class TextFormatter final {
   private: class TextScanner;
@@ -35,7 +36,7 @@ class TextFormatter final {
   private: float zoom_;
 
   public: TextFormatter(const gfx::Canvas& gfx, TextBlock* text_block,
-                        const Selection& selection, Posn start, float zoom);
+                        Posn start, float zoom);
   public: ~TextFormatter();
 
   public: void Format();
@@ -43,6 +44,9 @@ class TextFormatter final {
 
   private: Cell* formatChar(Cell*, float x, char16);
   private: Cell* formatMarker(TextMarker marker_name);
+
+  public: static TextSelection FormatSelection(
+      const text::Buffer* buffer, const Selection& selection_model);
 
   DISALLOW_COPY_AND_ASSIGN(TextFormatter);
 };

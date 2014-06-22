@@ -45,6 +45,8 @@ class TextLine final {
   public: text::Posn text_start() const { return m_lStart; }
 
   public: void AddCell(Cell* cell);
+  public: gfx::RectF CalculateSelectionRect(
+      const TextSelection& selection) const;
   private: bool Contains(text::Posn offset) const;
   public: TextLine* Copy() const;
   public: bool Equal(const TextLine*) const;
@@ -57,8 +59,6 @@ class TextLine final {
   public: gfx::RectF HitTestTextPosition(Posn lPosn) const;
   public: Posn MapXToPosn(const gfx::Canvas&, float) const;
   public: void Render(const gfx::Canvas& gfx) const;
-  public: void RenderSelection(gfx::Canvas* canvas,
-                               const TextSelection& selection) const;
 };
 
 } // namespace rendering

@@ -35,6 +35,7 @@ class ScreenTextBlock final : public gfx::Canvas::Observer {
 
   public: bool dirty() const { return dirty_; }
 
+  private: gfx::RectF HitTestTextPosition(text::Posn offset) const;
   public: void Render(const TextBlock* text_block,
                       const TextSelection& selection);
   private: void RenderSelection(const TextSelection& selection);

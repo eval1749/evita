@@ -37,10 +37,10 @@ class TextRenderer final {
   public: typedef rendering::TextBlock TextBlock;
   public: typedef rendering::TextLine Line;
 
+  private: bool dirty_;
   private: const gfx::Canvas* gfx_;
   private: text::Buffer* const m_pBuffer;
   private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
-  private: TextSelectionModel selection_;
   private: std::unique_ptr<TextBlock> text_block_;
   private: float zoom_;
 
@@ -72,11 +72,11 @@ class TextRenderer final {
 
   // [P]
   private: int pageLines() const;
-  public: void Prepare(const TextSelectionModel& selection, float zoom);
+  public: bool Prepare(float zoom);
 
 
   // [R]
-  public: void Render();
+  public: void Render(const TextSelectionModel& selection);
   public: void RenderSelectionIfNeeded(const TextSelectionModel& selection);
   public: void Reset();
 

@@ -52,6 +52,19 @@ using views::rendering::TextSelectionModel;
 
 namespace {
 
+TextSelectionModel GetTextSelectionModel(const ::Selection& selection,
+                                         bool selection_is_active) {
+  auto const start = selection.GetStart();
+  auto const end = selection.GetEnd();
+  if (!selection_is_active) {
+    return TextSelectionModel(start, end,
+                              TextSelectionModel::Active::NotActive);
+  }
+  return TextSelectionModel(start, end, selection.IsStartActive() ?
+      TextSelectionModel::Active::StartIsActive :
+      TextSelectionModel::Active::EndIsActive);
+}
+
 bool IsPopupWindow(HWND hwnd) {
   while (hwnd) {
     auto const dwStyle = static_cast<DWORD>(::GetWindowLong(hwnd, GWL_STYLE));
@@ -250,6 +263,14 @@ Posn TextEditWindow::EndOfLine(Posn lPosn) {
   }
 }
 
+void TextEditWindow::FormatTextBlockIfNeeded() {
+  UI_ASSERT_DOM_LOCKED();
+  if (!text_renderer_->Prepare(zoom_))
+    return;
+  auto const line_start_ = StartOfLine(view_start_);
+  text_renderer_->Format(line_start_);
+}
+
 HCURSOR TextEditWindow::GetCursorAt(const Point& point) const {
   if (vertical_scroll_bar_->bounds().Contains(point))
     return ::LoadCursor(nullptr, IDC_ARROW);
@@ -259,14 +280,14 @@ HCURSOR TextEditWindow::GetCursorAt(const Point& point) const {
 // For Selection.MoveDown Screen
 Posn TextEditWindow::GetEnd() {
   UI_ASSERT_DOM_LOCKED();
-  updateScreen();
+  FormatTextBlockIfNeeded();
   return text_renderer_->GetEnd();
 }
 
 //For Selection.MoveUp Screen
 Posn TextEditWindow::GetStart() {
   UI_ASSERT_DOM_LOCKED();
-  updateScreen();
+  FormatTextBlockIfNeeded();
   return text_renderer_->GetStart();
 }
 // Description:
@@ -276,7 +297,7 @@ Posn TextEditWindow::GetStart() {
 gfx::RectF TextEditWindow::HitTestTextPosition(Posn lPosn) {
   DCHECK_GE(lPosn, 0);
   UI_ASSERT_DOM_LOCKED();
-  updateScreen();
+  FormatTextBlockIfNeeded();
   for (;;) {
     if (auto rect = text_renderer_->HitTestTextPosition(lPosn))
       return rect;
@@ -286,7 +307,7 @@ gfx::RectF TextEditWindow::HitTestTextPosition(Posn lPosn) {
 
 int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
   UI_ASSERT_DOM_LOCKED();
-  updateScreen();
+  FormatTextBlockIfNeeded();
 
   auto k = 0;
   if (iDy < 0) {
@@ -327,7 +348,7 @@ void TextEditWindow::MakeSelectionVisible() {
 }
 
 Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
-  updateScreen();
+  FormatTextBlockIfNeeded();
   return std::min(text_renderer_->MapPointToPosn(pt), buffer()->GetEnd());
 }
 
@@ -341,30 +362,24 @@ void TextEditWindow::Redraw() {
   if (!is_shown())
     return;
 
-  auto const selection_is_active = is_selection_active();
-
   UI_ASSERT_DOM_LOCKED();
 
-  auto const lSelStart = selection_->GetStart();
-  auto const lSelEnd = selection_->GetEnd();
-
-  TextSelectionModel selection(lSelStart, lSelEnd, selection_is_active);
-
+  auto const selection = GetTextSelectionModel(*selection_,
+                                               is_selection_active());
   Posn lCaretPosn;
-  if (selection_is_active) {
-    lCaretPosn = selection_->IsStartActive() ? lSelStart : lSelEnd;
+  if (selection.is_active()) {
+    lCaretPosn = selection.active_offset();
   } else {
-    lCaretPosn = m_lCaretPosn == -1 ? lSelStart : m_lCaretPosn;
-
-    Posn lEnd = buffer()->GetEnd();
-    if (lSelStart == lEnd && lSelEnd == lEnd)
-      lCaretPosn = lEnd;
+    auto const max_offset = buffer()->GetEnd();
+    if (selection.start() == max_offset && selection.end() == max_offset)
+      lCaretPosn = max_offset;
+    else
+      lCaretPosn = m_lCaretPosn == -1 ? selection.start() : m_lCaretPosn;
   }
 
   DCHECK_GE(lCaretPosn, 0);
 
-  if (text_renderer_->ShouldFormat(zoom_)) {
-    text_renderer_->Prepare(selection, zoom_);
+  if (text_renderer_->Prepare(zoom_)) {
     text_renderer_->Format(StartOfLine(view_start_));
 
     if (m_lCaretPosn != lCaretPosn) {
@@ -372,7 +387,7 @@ void TextEditWindow::Redraw() {
       text_renderer_->ScrollToPosn(lCaretPosn);
       m_lCaretPosn = lCaretPosn;
     }
-    Render();
+    Render(selection);
     return;
   }
 
@@ -381,7 +396,7 @@ void TextEditWindow::Redraw() {
     const auto char_rect = text_renderer_->HitTestTextPosition(lCaretPosn);
     if (!char_rect.empty()) {
       if (text_renderer_->ShouldRender()) {
-        Render();
+        Render(selection);
         return;
       }
       caret_->Hide(m_gfx);
@@ -389,33 +404,30 @@ void TextEditWindow::Redraw() {
       UpdateCaretBounds(char_rect);
       return;
     }
-    text_renderer_->Prepare(selection, zoom_);
     text_renderer_->ScrollToPosn(lCaretPosn);
-    Render();
+    Render(selection);
     return;
   }
 
   if (text_renderer_->GetStart() != view_start_) {
-    text_renderer_->Prepare(selection, zoom_);
     text_renderer_->Format(StartOfLine(view_start_));
-    Render();
+    Render(selection);
     return;
   }
 
   if (text_renderer_->ShouldRender()) {
-    Render();
+    Render(selection);
     return;
   }
 
   // The screen is clean.
-  if (selection.is_range()) {
-    Caret::HideScope hide_scope(caret_.get(), m_gfx);
+  if (selection.is_range())
     text_renderer_->RenderSelectionIfNeeded(selection);
-  }
-  caret_->Blink(m_gfx);
+  else
+    caret_->Blink(m_gfx);
 }
 
-void TextEditWindow::Render() {
+void TextEditWindow::Render(const TextSelectionModel& selection) {
   if (!is_shown())
     return;
 
@@ -424,7 +436,7 @@ void TextEditWindow::Render() {
       bounds().left_top(),
       gfx::Size(bounds().width() - vertical_scroll_bar_->bounds().width(),
                 bounds().height())));
-  text_renderer_->Render();
+  text_renderer_->Render(selection);
 
   view_start_ = text_renderer_->GetStart();
   updateScrollBar();
@@ -440,9 +452,15 @@ void TextEditWindow::Render() {
   UpdateCaretBounds(char_rect);
 }
 
+void TextEditWindow::Render() {
+  auto const selection = GetTextSelectionModel(*selection_,
+                                               is_selection_active());
+  Render(selection);
+}
+
 int TextEditWindow::SmallScroll(int, int iDy) {
   UI_ASSERT_DOM_LOCKED();
-  updateScreen();
+  FormatTextBlockIfNeeded();
 
   if (iDy < 0) {
     iDy = -iDy;
@@ -522,19 +540,6 @@ void TextEditWindow::UpdateCaretBounds(const gfx::RectF& char_rect) {
   ui::TextInputClient::Get()->set_caret_bounds(caret_bounds);
   Caret::Updater caret_updater(caret_.get());
   caret_updater.Update(m_gfx, caret_bounds);
-}
-
-void TextEditWindow::updateScreen() {
-  UI_ASSERT_DOM_LOCKED();
-  TextSelectionModel selection(selection_->GetStart(), selection_->GetEnd(),
-                               is_selection_active());
-  if (!text_renderer_->ShouldFormat(zoom_)) {
-    text_renderer_->RenderSelectionIfNeeded(selection);
-    return;
-  }
-  text_renderer_->Prepare(selection, zoom_);
-  auto const line_start_ = StartOfLine(view_start_);
-  text_renderer_->Format(line_start_);
 }
 
 void TextEditWindow::updateScrollBar() {

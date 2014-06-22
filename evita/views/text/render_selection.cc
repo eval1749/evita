@@ -4,6 +4,8 @@
 
 #include "evita/views/text/render_selection.h"
 
+#include "base/logging.h"
+
 namespace views {
 namespace rendering {
 
@@ -12,7 +14,7 @@ namespace rendering {
 // TextSelectionModel
 //
 TextSelectionModel::TextSelectionModel(text::Posn start, text::Posn end,
-                                       bool active)
+                                       Active active)
     : active_(active), end_(end), start_(start) {
 }
 
@@ -21,7 +23,7 @@ TextSelectionModel::TextSelectionModel(const TextSelectionModel& other)
 }
 
 TextSelectionModel::TextSelectionModel()
-    : TextSelectionModel(0, 0, false) {
+    : TextSelectionModel(0, 0, Active::NotActive) {
 }
 
 TextSelectionModel::~TextSelectionModel() {
@@ -34,6 +36,11 @@ bool TextSelectionModel::operator==(const TextSelectionModel& other) const {
 
 bool TextSelectionModel::operator!=(const TextSelectionModel& other) const {
   return !operator==(other);
+}
+
+text::Posn TextSelectionModel::active_offset() const {
+  DCHECK(active_ != Active::NotActive);
+  return active_ == Active::StartIsActive ? start_ : end_;
 }
 
 //////////////////////////////////////////////////////////////////////

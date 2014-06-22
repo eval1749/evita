@@ -12,11 +12,17 @@ namespace views {
 namespace rendering {
 
 class TextSelectionModel final {
-  private: bool active_;
+  public: enum class Active {
+    NotActive,
+    EndIsActive,
+    StartIsActive,
+  };
+  private: Active active_;
   private: text::Posn end_;
   private: text::Posn start_;
 
-  public: TextSelectionModel(text::Posn start, text::Posn end, bool active);
+  public: TextSelectionModel(text::Posn start, text::Posn end,
+                             Active active);
   public: TextSelectionModel(const TextSelectionModel& model);
   public: TextSelectionModel();
   public: ~TextSelectionModel();
@@ -24,10 +30,11 @@ class TextSelectionModel final {
   public: bool operator==(const TextSelectionModel& other) const;
   public: bool operator!=(const TextSelectionModel& other) const;
 
-  public: bool active() const { return active_; }
   public: text::Posn end() const { return end_; }
   public: text::Posn start() const { return start_; }
 
+  public: text::Posn active_offset() const;
+  public: bool is_active() const { return active_ != Active::NotActive; }
   public: bool is_caret() const { return start_ == end_; }
   public: bool is_range() const { return start_ != end_; }
 };
@@ -46,6 +53,8 @@ class TextSelection final {
   public: text::Posn end() const { return model_.end(); }
   public: text::Posn start() const { return model_.start(); }
 
+  public: text::Posn active_offset() const { return model_.active_offset(); }
+  public: bool is_active() const { return model_.is_active(); }
   public: bool is_caret() const { return model_.is_caret(); }
   public: bool is_range() const { return model_.is_range(); }
 

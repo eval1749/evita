@@ -50,8 +50,7 @@ using namespace rendering;
 // TextRenderer
 //
 TextRenderer::TextRenderer(text::Buffer* buffer)
-    : gfx_(nullptr),
-      m_pBuffer(buffer),
+    : dirty_(false), gfx_(nullptr), m_pBuffer(buffer),
       screen_text_block_(new ScreenTextBlock()),
       text_block_(new TextBlock(buffer)), zoom_(1.0f) {
 }
@@ -92,6 +91,7 @@ void TextRenderer::Format(Posn lStart) {
   text_block_->Reset();
   TextFormatter oFormatter(*gfx_, text_block_.get(), lStart, zoom_);
   oFormatter.Format();
+  dirty_ = true;
 }
 
 TextLine* TextRenderer::FormatLine(Posn lStart) {
@@ -164,17 +164,18 @@ int TextRenderer::pageLines() const {
   return static_cast<int>(text_block_->height() / height);
 }
 
-void TextRenderer::Prepare(const TextSelectionModel& selection, float zoom) {
-  selection_ = selection;
+bool TextRenderer::Prepare(float zoom) {
+  auto const should_format = ShouldFormat(zoom);
   zoom_ = zoom;
+  return should_format;
 }
 
-void TextRenderer::Render() {
+void TextRenderer::Render(const TextSelectionModel& selection_model) {
   DCHECK(gfx_);
   DCHECK(!text_block_->bounds().empty());
   text_block_->EnsureLinePoints();
   const auto selection = TextFormatter::FormatSelection(
-      text_block_->text_buffer(), selection_);
+      text_block_->text_buffer(), selection_model);
   screen_text_block_->Render(text_block_.get(), selection);
 
   // FIXME 2007-08-05 yosi@msn.com We should expose show/hide
@@ -191,10 +192,12 @@ void TextRenderer::Render() {
   drawVLine(*gfx_, gfx::Brush(*gfx_, gfx::ColorF::LightGray),
             text_block_->left() + width_of_M * num_columns,
             text_block_->top(), text_block_->bottom());
+  dirty_ = false;
 }
 
 void TextRenderer::RenderSelectionIfNeeded(
     const TextSelectionModel& new_selection_model) {
+  DCHECK(!dirty_);
   DCHECK(!text_block_->bounds().empty());
   screen_text_block_->RenderSelectionIfNeeded(
       TextFormatter::FormatSelection(text_block_->text_buffer(),
@@ -226,6 +229,7 @@ bool TextRenderer::ScrollDown() {
     text_block_->DiscardLastLine();
   }
 
+  dirty_ = true;
   return true;
 }
 
@@ -302,6 +306,7 @@ bool TextRenderer::ScrollUp() {
 
   auto const line = oFormatter.FormatLine();
   text_block_->Append(line);
+  dirty_ = true;
   return true;
 }
 
@@ -321,7 +326,7 @@ bool TextRenderer::ShouldFormat(float zoom) const {
 }
 
 bool TextRenderer::ShouldRender() const {
-  return screen_text_block_->dirty();
+  return dirty_ || screen_text_block_->dirty();
 }
 
 }  // namespaec views

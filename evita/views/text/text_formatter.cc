@@ -401,8 +401,8 @@ Cell* TextFormatter::formatMarker(TextMarker marker_name) {
 TextSelection TextFormatter::FormatSelection(
     const text::Buffer* buffer, const TextSelectionModel& selection_model) {
   const auto& style = buffer->style_resolver()->ResolveWithoutDefaults(
-      selection_model.active() ? css::StyleSelector::active_selection() :
-                               css::StyleSelector::inactive_selection());
+      selection_model.is_active() ? css::StyleSelector::active_selection() :
+                                    css::StyleSelector::inactive_selection());
   return TextSelection(selection_model, CssColorToColorF(style.bgcolor()));
 }
 

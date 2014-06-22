@@ -35,7 +35,11 @@ class Buffer;
 
 namespace views {
 class TextRenderer;
+namespace rendering {
+class TextSelectionModel;
 }
+}
+
 
 namespace ui {
 class KeyboardEvent;
@@ -57,6 +61,7 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: typedef text::Range Range;
   private: typedef views::ContentWindow ParentClass;
   private: typedef views::TextRenderer TextRenderer;
+  private: typedef views::rendering::TextSelectionModel TextSelectionModel;
   private: class ScrollBar;
 
   private: std::unique_ptr<Caret> caret_;
@@ -95,6 +100,9 @@ class TextEditWindow : public text::BufferMutationObserver,
   // [E]
   public: Posn EndOfLine(Posn);
 
+  // [F]
+  private: void FormatTextBlockIfNeeded();
+
   // [G]
   private: virtual HCURSOR GetCursorAt(const Point&) const override;
   public: HWND GetScrollBar(int which) const;
@@ -117,6 +125,7 @@ class TextEditWindow : public text::BufferMutationObserver,
 
   // [R]
   private: virtual void Redraw() override;
+  private: void Render(const TextSelectionModel& selection);
   private: void Render();
 
   // [S]
@@ -125,7 +134,6 @@ class TextEditWindow : public text::BufferMutationObserver,
 
   // [U]
   private: void UpdateCaretBounds(const gfx::RectF& bounds);
-  private: void updateScreen();
   private: void updateScrollBar();
 
   // text::BufferMutationObserver

@@ -50,6 +50,11 @@ void AddRect(std::vector<gfx::RectF>& rects, const gfx::RectF& rect) {
   rects.push_back(rect);
 }
 
+inline gfx::RectF RoundBounds(const gfx::RectF& bounds) {
+  return gfx::RectF(::floor(bounds.left), ::floor(bounds.top),
+                    ::floor(bounds.right), ::floor(bounds.bottom));
+}
+
 std::unordered_set<gfx::RectF> CalculateSelectionRects(
     const std::vector<TextLine*>& lines, const TextSelection& selection) {
   std::unordered_set<gfx::RectF> rects;
@@ -65,8 +70,7 @@ std::unordered_set<gfx::RectF> CalculateSelectionRects(
     auto const rect = line->CalculateSelectionRect(selection);
     if (rect.empty())
       continue;
-    rects.insert(gfx::RectF(::floor(rect.left), ::floor(rect.top),
-                            ::floor(rect.right), ::floor(rect.bottom)));
+    rects.insert(RoundBounds(rect));
   }
   return rects;
 }
@@ -380,6 +384,19 @@ ScreenTextBlock::ScreenTextBlock()
 ScreenTextBlock::~ScreenTextBlock() {
 }
 
+gfx::RectF ScreenTextBlock::HitTestTextPosition(text::Posn offset) const {
+  if (offset < lines_.front()->text_start() ||
+      offset > lines_.back()->text_end()) {
+    return gfx::RectF();
+  }
+  for (auto const line : lines_) {
+    auto const rect = line->HitTestTextPosition(offset);
+    if (!rect.empty())
+      return RoundBounds(rect);
+  }
+  return gfx::RectF();
+}
+
 void ScreenTextBlock::Render(const TextBlock* text_block,
                              const TextSelection& selection) {
   RenderContext render_context(this, text_block);
@@ -445,6 +462,18 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
     selection_ = new_selection;
     return;
   }
+
+  gfx::RectF old_caret_bounds;
+  if (selection_.is_active()) {
+    auto const char_rect = HitTestTextPosition(selection_.active_offset());
+    if (!char_rect.empty()) {
+      auto const caret_width = 2;
+      old_caret_bounds = gfx::RectF(
+          char_rect.left, char_rect.top,
+          char_rect.left + caret_width, char_rect.bottom);
+    }
+  }
+
   gfx::Canvas::DrawingScope drawing_scope(*gfx_);
   gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx_, bounds_);
   for (const auto& old_rect : old_selection_rects) {
@@ -452,7 +481,10 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
       continue;
     gfx_->set_dirty_rect(old_rect);
     gfx_->DrawBitmap(*gfx_->screen_bitmap(), old_rect, old_rect);
+    if (old_rect.Contains(old_caret_bounds))
+      old_caret_bounds = gfx::RectF();
   }
+
   if (selection_.color() != new_selection.color())
     old_selection_rects.clear();
   if (!new_selection_rects.empty()) {
@@ -463,8 +495,29 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
       gfx_->set_dirty_rect(new_rect);
       gfx_->DrawBitmap(*gfx_->screen_bitmap(), new_rect, new_rect);
       gfx_->FillRectangle(fill_brush, new_rect);
+      if (new_rect.Contains(old_caret_bounds))
+        old_caret_bounds = gfx::RectF();
     }
   }
+
+  if (!old_caret_bounds.empty()) {
+    gfx_->DrawBitmap(*gfx_->screen_bitmap(), old_caret_bounds,
+                     old_caret_bounds);
+    gfx_->set_dirty_rect(old_caret_bounds);
+  }
+
+  if (new_selection.is_active()) {
+    auto const char_rect = HitTestTextPosition(new_selection.active_offset());
+    if (!char_rect.empty()) {
+      auto const caret_width = 2;
+      gfx::RectF caret_bounds(char_rect.left, char_rect.top,
+                              char_rect.left + caret_width, char_rect.bottom);
+      gfx::Brush caret_brush(*gfx_, gfx::ColorF::Black);
+      gfx_->FillRectangle(caret_brush, caret_bounds);
+      gfx_->set_dirty_rect(caret_bounds);
+    }
+  }
+
   selection_ = new_selection;
 }
 

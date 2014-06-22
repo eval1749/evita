@@ -127,6 +127,7 @@ class Rect_ : public BaseType {
   public: UnitType width() const { return right - left; }
 
   public: bool Contains(PointF point) const;
+  public: bool Contains(const Rect_& point) const;
   public: void Unite(const Rect_& other);
 };
 
@@ -192,6 +193,12 @@ template<typename BaseType, typename PointType, typename SizeType>
 bool Rect_<BaseType, PointType, SizeType>::Contains(PointF point) const {
   return point.x >= left && point.x < right && point.y >= top &&
          point.y < bottom;
+}
+
+template<typename BaseType, typename PointType, typename SizeType>
+bool Rect_<BaseType, PointType, SizeType>::Contains(const Rect_& other) const {
+  return left <= other.left && right >= other.right &&
+         top <= other.top && bottom >= other.bottom;
 }
 
 template<typename BaseType, typename PointType, typename SizeType>

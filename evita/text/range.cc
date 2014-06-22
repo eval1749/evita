@@ -46,10 +46,13 @@ Posn Range::SetEnd(Posn lPosn) {
 void Range::SetRange(Posn lStart, Posn lEnd) {
   lStart = ensurePosn(lStart);
   lEnd = ensurePosn(lEnd);
-  if (lStart > lEnd)
-    swap(lStart, lEnd);
-  start_ = lStart;
-  end_ = lEnd;
+  if (lStart <= lEnd) {
+    start_ = lStart;
+    end_ = lEnd;
+  } else {
+    start_ = lEnd;
+    end_ = lStart;
+  }
 }
 
 Posn Range::SetStart(Posn lPosn) {

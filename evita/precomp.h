@@ -134,14 +134,6 @@ class ObjectInHeap
         {}
 }; // ObjectInHeap
 
-template<class T> void
-swap(T& rx, T& ry)
-{
-    T temp = rx;
-    rx = ry;
-    ry = temp;
-} // swap
-
 #if ! defined(SUPPORT_IME)
     #define SUPPORT_IME 1
 #endif // ! defined(SUPPORT_IME)

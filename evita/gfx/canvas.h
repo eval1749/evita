@@ -34,8 +34,10 @@ class Canvas final : public Object, public DpiHandler {
   };
 
   public: class AxisAlignedClipScope final {
-    private: const Canvas& gfx_;
-    public: AxisAlignedClipScope(const Canvas& gfx, const RectF& rect);
+    private: const Canvas& canvas_;
+    public: AxisAlignedClipScope(const Canvas& canvas, const RectF& rect,
+                                 D2D1_ANTIALIAS_MODE alias_mode);
+    public: AxisAlignedClipScope(const Canvas& canvas, const RectF& rect);
     public: ~AxisAlignedClipScope();
     DISALLOW_COPY_AND_ASSIGN(AxisAlignedClipScope);
   };

@@ -124,6 +124,7 @@ class TextEditWindow : public text::BufferMutationObserver,
   public: Posn StartOfLine(Posn);
 
   // [U]
+  private: void UpdateCaretBounds(const gfx::RectF& bounds);
   private: void updateScreen();
   private: void updateScrollBar();
 

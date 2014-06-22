@@ -388,20 +388,42 @@ void TextEditWindow::Redraw() {
       text_renderer_->ScrollToPosn(lCaretPosn);
       m_lCaretPosn = lCaretPosn;
     }
-  } else if (m_lCaretPosn != lCaretPosn) {
-    text_renderer_->Prepare(selection, zoom_);
-    text_renderer_->ScrollToPosn(lCaretPosn);
-    m_lCaretPosn = lCaretPosn;
-  } else if (text_renderer_->GetStart() != view_start_) {
-    text_renderer_->Prepare(selection, zoom_);
-    text_renderer_->Format(StartOfLine(view_start_));
-  } else if (!text_renderer_->ShouldRender()) {
-    // The screen is clean.
-    caret_->Blink(m_gfx);
+    Render();
     return;
   }
 
-  Render();
+  if (m_lCaretPosn != lCaretPosn) {
+    m_lCaretPosn = lCaretPosn;
+    const auto char_rect = text_renderer_->HitTestTextPosition(lCaretPosn);
+    if (!char_rect.empty()) {
+      if (text_renderer_->ShouldRender()) {
+        Render();
+        return;
+      }
+      caret_->Hide(m_gfx);
+      UpdateCaretBounds(char_rect);
+      return;
+    }
+    text_renderer_->Prepare(selection, zoom_);
+    text_renderer_->ScrollToPosn(lCaretPosn);
+    Render();
+    return;
+  }
+
+  if (text_renderer_->GetStart() != view_start_) {
+    text_renderer_->Prepare(selection, zoom_);
+    text_renderer_->Format(StartOfLine(view_start_));
+    Render();
+    return;
+  }
+
+  if (text_renderer_->ShouldRender()) {
+    Render();
+    return;
+  }
+
+  // The screen is clean.
+  caret_->Blink(m_gfx);
 }
 
 void TextEditWindow::Render() {
@@ -409,7 +431,6 @@ void TextEditWindow::Render() {
     return;
 
   gfx::Canvas::DrawingScope drawing_scope(*m_gfx);
-  Caret::Updater caret_updater(caret_.get());
   m_gfx->set_dirty_rect(gfx::Rect(
       bounds().left_top(),
       gfx::Size(bounds().width() - vertical_scroll_bar_->bounds().width(),
@@ -422,19 +443,12 @@ void TextEditWindow::Render() {
 
   const auto char_rect = text_renderer_->HitTestTextPosition(m_lCaretPosn);
   if (char_rect.empty()) {
+    Caret::Updater caret_updater(caret_.get());
     caret_updater.Clear();
     return;
   }
 
-  auto const caret_width = std::max(::GetSystemMetrics(SM_CXBORDER), 2);
-  gfx::RectF caret_bounds(char_rect.left, char_rect.top,
-                          std::min(char_rect.left + caret_width,
-                                   static_cast<float>(bounds().right)),
-                          std::min(char_rect.bottom,
-                                   static_cast<float>(bounds().bottom)));
-
-  ui::TextInputClient::Get()->set_caret_bounds(caret_bounds);
-  caret_updater.Update(m_gfx, caret_bounds);
+  UpdateCaretBounds(char_rect);
 }
 
 int TextEditWindow::SmallScroll(int, int iDy) {
@@ -506,6 +520,20 @@ Posn TextEditWindow::StartOfLine(Posn lPosn) {
       return pLine->GetStart();
     lStart = lEnd;
   }
+}
+
+void TextEditWindow::UpdateCaretBounds(const gfx::RectF& char_rect) {
+  DCHECK(!char_rect.empty());
+  auto const caret_width = std::max(::GetSystemMetrics(SM_CXBORDER), 2);
+  gfx::RectF caret_bounds(char_rect.left, char_rect.top,
+                          std::min(char_rect.left + caret_width,
+                                   static_cast<float>(bounds().right)),
+                          std::min(char_rect.bottom,
+                                   static_cast<float>(bounds().bottom)));
+
+  ui::TextInputClient::Get()->set_caret_bounds(caret_bounds);
+  Caret::Updater caret_updater(caret_.get());
+  caret_updater.Update(m_gfx, caret_bounds);
 }
 
 void TextEditWindow::updateScreen() {

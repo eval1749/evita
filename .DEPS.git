@@ -18,15 +18,15 @@ deps = {
     'src/third_party/cygwin':
         Var('git_url') + '/chromium/deps/cygwin.git@c89e446b273697fadf3a10ff1007a97c0b7de6df',
     'src/third_party/hunspell':
-        Var('git_url') + '/chromium/deps/hunspell.git@d9ea3fbee04dac040e59ece751d4f308eb346625',
+        Var('git_url') + '/chromium/deps/hunspell.git@bcb7f64ace2ea77a279c84f117c33a5016392590',
     'src/third_party/icu':
         Var('git_url') + '/chromium/deps/icu46.git@c25f7de14670091b1b7dfeb7af4d04050cbbb1d8',
     'src/tools/deps2git':
-        Var('git_url') + '/chromium/tools/deps2git.git@492bea98de74b0933a6889c64bc6d47ce331f88f',
+        Var('git_url') + '/chromium/tools/deps2git.git@f04828eb0b5acd3e7ad983c024870f17f17b06d9',
     'src/tools/gyp':
-        Var('git_url') + '/external/gyp.git@0ff4e1aa19641cda58e3ed98399e0d96e6ccd7c2',
+        Var('git_url') + '/external/gyp.git@63a1f78eb0ec6c4ddcc23e920230bdb0b14f7855',
     'src/v8':
-        Var('git_url') + '/external/v8.git@1845eb0120c7a870d7388de091246a7d1b48a4f8',
+        Var('git_url') + '/external/v8.git@17aac87e074aee1bc2470cf0ed56556f4f2de420',
 }
 
 deps_os = {

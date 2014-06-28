@@ -47,6 +47,10 @@ class TextRenderer final {
   public: TextRenderer(text::Buffer* buffer);
   public: ~TextRenderer();
 
+  // [D]
+  public: void DidKillFocus();
+  public: void DidSetFocus();
+
   // [F]
   public: Line* FindLine(Posn) const;
   public: void Format(Posn start);
@@ -64,7 +68,7 @@ class TextRenderer final {
   public: gfx::RectF HitTestTextPosition(Posn) const;
 
   // [I]
-  private: bool isPosnVisible(Posn) const;
+  public: bool IsPositionFullyVisible(Posn) const;
 
   // [M]
   public: void MakePosnVisible(Posn);

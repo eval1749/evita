@@ -20,12 +20,14 @@ class TextLine;
 class TextBlock;
 
 class ScreenTextBlock final : public gfx::Canvas::Observer {
+  private: class Caret;
   private: class RenderContext;
   friend class RenderContext;
 
   private: gfx::RectF bounds_;
+  private: std::unique_ptr<Caret> caret_;
   private: bool dirty_;
-  private: const gfx::Canvas* gfx_;
+  private: gfx::Canvas* gfx_;
   private: bool has_screen_bitmap_;
   private: std::vector<TextLine*> lines_;
   private: TextSelection selection_;
@@ -35,9 +37,12 @@ class ScreenTextBlock final : public gfx::Canvas::Observer {
 
   public: bool dirty() const { return dirty_; }
 
+  public: void DidKillFocus();
+  public: void DidSetFocus();
   private: gfx::RectF HitTestTextPosition(text::Posn offset) const;
   public: void Render(const TextBlock* text_block,
                       const TextSelection& selection);
+  private: void RenderCaret();
   private: void RenderSelection(const TextSelection& selection);
   public: void RenderSelectionIfNeeded(const TextSelection& selection);
   public: void Reset();

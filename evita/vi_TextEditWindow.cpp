@@ -43,7 +43,6 @@
 #include "evita/views/text/render_selection.h"
 #include "evita/views/text/render_text_line.h"
 #include "evita/views/text/text_renderer.h"
-#include "evita/vi_Caret.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_Selection.h"
@@ -85,7 +84,6 @@ bool IsPopupWindow(HWND hwnd) {
 //
 TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
     : ContentWindow(text_window.window_id()),
-      caret_(new Caret()),
       canvas_(nullptr),
       m_lCaretPosn(-1),
       text_renderer_(new TextRenderer(text_window.document()->buffer())),
@@ -315,15 +313,6 @@ void TextEditWindow::Render(const TextSelectionModel& selection) {
   view_start_ = text_renderer_->GetStart();
   updateScrollBar();
   static_cast<Widget*>(vertical_scroll_bar_)->OnDraw(canvas_);
-
-  const auto char_rect = text_renderer_->HitTestTextPosition(m_lCaretPosn);
-  if (char_rect.empty()) {
-    Caret::Updater caret_updater(caret_.get());
-    caret_updater.Clear();
-    return;
-  }
-
-  UpdateCaretBounds(char_rect);
 }
 
 void TextEditWindow::Render() {
@@ -400,20 +389,6 @@ Posn TextEditWindow::StartOfLine(Posn lPosn) {
       return pLine->GetStart();
     lStart = lEnd;
   }
-}
-
-void TextEditWindow::UpdateCaretBounds(const gfx::RectF& char_rect) {
-  DCHECK(!char_rect.empty());
-  auto const caret_width = std::max(::GetSystemMetrics(SM_CXBORDER), 2);
-  gfx::RectF caret_bounds(char_rect.left, char_rect.top,
-                          std::min(char_rect.left + caret_width,
-                                   static_cast<float>(bounds().right)),
-                          std::min(char_rect.bottom,
-                                   static_cast<float>(bounds().bottom)));
-
-  ui::TextInputClient::Get()->set_caret_bounds(caret_bounds);
-  Caret::Updater caret_updater(caret_.get());
-  caret_updater.Update(canvas_, caret_bounds);
 }
 
 void TextEditWindow::updateScrollBar() {
@@ -512,7 +487,7 @@ void TextEditWindow::DidHide() {
 
 void TextEditWindow::DidKillFocus(ui::Widget* focused_widget) {
   ParentClass::DidKillFocus(focused_widget);
-  caret_->Give(this, canvas_);
+  text_renderer_->DidKillFocus();
   ui::TextInputClient::Get()->CommitComposition(this);
   ui::TextInputClient::Get()->CancelComposition(this);
   ui::TextInputClient::Get()->set_delegate(nullptr);
@@ -542,7 +517,7 @@ void TextEditWindow::DidResize() {
 void TextEditWindow::DidSetFocus(ui::Widget* last_focused) {
   ASSERT(has_focus());
   // Note: It is OK to set focus to hidden window.
-  caret_->Take(this);
+  text_renderer_->DidSetFocus();
   ui::TextInputClient::Get()->set_delegate(this);
   ParentClass::DidSetFocus(last_focused);
 }
@@ -604,15 +579,11 @@ void TextEditWindow::Redraw() {
 
   if (m_lCaretPosn != lCaretPosn) {
     m_lCaretPosn = lCaretPosn;
-    const auto char_rect = text_renderer_->HitTestTextPosition(lCaretPosn);
-    if (!char_rect.empty()) {
-      if (text_renderer_->ShouldRender()) {
+    if (text_renderer_->IsPositionFullyVisible(lCaretPosn)) {
+      if (text_renderer_->ShouldRender())
         Render(selection);
-        return;
-      }
-      caret_->Hide(canvas_);
-      text_renderer_->RenderSelectionIfNeeded(selection);
-      UpdateCaretBounds(char_rect);
+      else
+        text_renderer_->RenderSelectionIfNeeded(selection);
       return;
     }
     text_renderer_->ScrollToPosn(lCaretPosn);
@@ -632,10 +603,7 @@ void TextEditWindow::Redraw() {
   }
 
   // The screen is clean.
-  if (selection.is_range())
-    text_renderer_->RenderSelectionIfNeeded(selection);
-  else
-    caret_->Blink(canvas_);
+  text_renderer_->RenderSelectionIfNeeded(selection);
 }
 
 // views::Window

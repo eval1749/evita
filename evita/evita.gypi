@@ -132,7 +132,6 @@
         'views/text/screen_text_block.cc',
         'views/text/text_formatter.cc',
         'views/text/text_renderer.cc',
-        'vi_Caret.cpp',
         'vi_EditPane.cpp',
         'views/forms/file_dialog_box.cc',
         'views/forms/form_control_controller.cc',

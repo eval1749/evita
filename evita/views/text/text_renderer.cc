@@ -58,6 +58,14 @@ TextRenderer::TextRenderer(text::Buffer* buffer)
 TextRenderer::~TextRenderer() {
 }
 
+void TextRenderer::DidKillFocus() {
+  screen_text_block_->DidKillFocus();
+}
+
+void TextRenderer::DidSetFocus() {
+  screen_text_block_->DidSetFocus();
+}
+
 TextLine* TextRenderer::FindLine(Posn lPosn) const {
   if (lPosn < GetStart() || lPosn > GetEnd())
     return nullptr;
@@ -116,7 +124,7 @@ gfx::RectF TextRenderer::HitTestTextPosition(Posn lPosn) const {
   return gfx::RectF();
 }
 
-bool TextRenderer::isPosnVisible(text::Posn offset) const {
+bool TextRenderer::IsPositionFullyVisible(text::Posn offset) const {
   return offset >= GetStart() && offset < GetVisibleEnd();
 }
 
@@ -235,7 +243,7 @@ bool TextRenderer::ScrollDown() {
 
 bool TextRenderer::ScrollToPosn(Posn lPosn) {
   DCHECK(gfx_);
-  if (isPosnVisible(lPosn))
+  if (IsPositionFullyVisible(lPosn))
     return false;
 
   auto const cLines = pageLines();
@@ -245,14 +253,14 @@ bool TextRenderer::ScrollToPosn(Posn lPosn) {
     for (auto k = 0; k < cLines2; k++) {
         if (!ScrollUp())
           return k;
-        if (isPosnVisible(lPosn))
+        if (IsPositionFullyVisible(lPosn))
           return true;
     }
   } else {
     for (int k = 0; k < cLines2; k++) {
       if (!ScrollDown())
         return k;
-      if (isPosnVisible(lPosn))
+      if (IsPositionFullyVisible(lPosn))
         return true;
     }
   }
@@ -270,7 +278,7 @@ bool TextRenderer::ScrollToPosn(Posn lPosn) {
 
   Format(lStart);
   for (;;) {
-    if (isPosnVisible(lPosn))
+    if (IsPositionFullyVisible(lPosn))
       break;
     if (!ScrollUp())
       break;
@@ -279,7 +287,7 @@ bool TextRenderer::ScrollToPosn(Posn lPosn) {
   // If this page shows end of buffer, we shows lines as much as
   // posibble to fit in page.
   if (GetEnd() >= m_pBuffer->GetEnd()) {
-    while (isPosnVisible(lPosn)) {
+    while (IsPositionFullyVisible(lPosn)) {
       if (!ScrollDown())
         return true;
     }

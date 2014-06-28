@@ -20,7 +20,6 @@
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/content_window.h"
 
-class Caret;
 class EditPane;
 class TextRenderer;
 class Selection;
@@ -64,7 +63,6 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: typedef views::rendering::TextSelectionModel TextSelectionModel;
   private: class ScrollBar;
 
-  private: std::unique_ptr<Caret> caret_;
   private: gfx::Canvas* canvas_;
   private: Posn m_lCaretPosn;
   // TODO(yosi): Manage life time of selection.
@@ -118,7 +116,6 @@ class TextEditWindow : public text::BufferMutationObserver,
   public: Posn StartOfLine(Posn);
 
   // [U]
-  private: void UpdateCaretBounds(const gfx::RectF& bounds);
   private: void updateScrollBar();
 
   // text::BufferMutationObserver

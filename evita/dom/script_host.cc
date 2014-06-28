@@ -78,7 +78,7 @@ void GcPrologueCallback(v8::GCType type, v8::GCCallbackFlags flags) {
 void MessageCallback(v8::Handle<v8::Message> message,
                        v8::Handle<v8::Value> error) {
   auto text = base::StringPrintf(
-      L"Exeption: %ls\n"
+      L"Exception: %ls\n"
       L"Source: %ls\n"
       L"Source name: %ls(%d)\n",
       V8ToString(error).c_str(), V8ToString(message->GetSourceLine()).c_str(),
@@ -173,7 +173,7 @@ void ScriptHost::DidStartViewHost() {
     return;
   auto const script_sources = internal::GetJsLibSources();
   // We should prevent UI thread to access DOM.
-   DOM_AUTO_LOCK_SCOPE();
+  DOM_AUTO_LOCK_SCOPE();
   v8_glue::Runner::Scope runner_scope(runner());
   for (const auto& script_source : script_sources) {
     auto const result = runner()->Run(
@@ -192,8 +192,8 @@ void ScriptHost::DidStartViewHost() {
 
 void ScriptHost::PlatformError(const char* name) {
   auto const error = ::GetLastError();
-  DVLOG(0) << "PlatformError " << name << " erorr=" << error;
-  // TODO(yosi) Shoulw be Win32Error.
+  DVLOG(0) << "PlatformError " << name << " error=" << error;
+  // TODO(yosi) Should be Win32Error.
   instance()->ThrowError(base::StringPrintf("%s error=%d", name, error));
 }
 
@@ -218,7 +218,7 @@ void ScriptHost::RunMicrotasks() {
 
 ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
                                           domapi::IoDelegate* io_deleage) {
-  // Node: Useing Application::instance() starts thread. So, we don't
+  // Node: Using Application::instance() starts thread. So, we don't
   // start |ScriptHost| in testing. Although, we should remove
   // all |Application::instance()| in DOM world.
   if (script_host && script_host->testing_)
@@ -234,9 +234,9 @@ ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
   v8::V8::AddMessageListener(MessageCallback);
   v8::V8::AddGCPrologueCallback(GcPrologueCallback);
   v8::V8::AddGCEpilogueCallback(GcEpilogueCallback);
-  // TODO(yosi) Turning off micro task runining during creating wrapper, mame
+  // TODO(yosi) Turning off micro task runnining during creating wrapper, name
   // |Editor.checkSpelling('foo').then(console.log)| to work.
-  // Othewise |console.log| executed as micro task gets storage object which
+  // Otherwise |console.log| executed as micro task gets storage object which
   // doesn't have |v8_glue::WrapperInfo| at zeroth internal field.
   // See "985a73d2cce5", same thing is happened in spell checker with
   // |Editor.RegExp| object.
@@ -292,7 +292,7 @@ void ScriptHost::UnhandledException(v8_glue::Runner*,
   auto const message = try_catch.Message();
   if (!message.IsEmpty()) {
     text = base::StringPrintf(
-            L"Exeption: %ls\n"
+            L"Exception: %ls\n"
             L"Source: %ls\n"
             L"Source name: %ls(%d)\n",
             V8ToString(error).c_str(),
@@ -312,13 +312,13 @@ void ScriptHost::UnhandledException(v8_glue::Runner*,
       }
     }
   }  if (try_catch.HasTerminated()) {
-    text = L"Scripe execution is terminated.";
+    text = L"Script execution is terminated.";
   } else if (message.IsEmpty()) {
     text =  L"No details";
   }
 
   if (state_ != domapi::ScriptHostState::Running) {
-    ::MessageBoxW(nullptr, text.c_str(), L"Evita Startup Error", MB_ICONERROR);
+    ::MessageBoxW(nullptr, text.c_str(), L"Evita Start up Error", MB_ICONERROR);
     state_ = domapi::ScriptHostState::Error;
     return;
   }

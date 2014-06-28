@@ -10,6 +10,7 @@
 
 #include "base/basictypes.h"
 #include "evita/gfx_base.h"
+#include "evita/ui/caret.h"
 #include "evita/views/text/render_selection.h"
 #include "evita/vi_style.h"
 
@@ -19,14 +20,13 @@ namespace rendering {
 class TextLine;
 class TextBlock;
 
-class ScreenTextBlock final : public gfx::Canvas::Observer {
-  private: class Caret;
+class ScreenTextBlock final : private gfx::Canvas::Observer,
+                              private ui::Caret::Delegate {
   private: class RenderContext;
   friend class RenderContext;
 
   private: gfx::RectF bounds_;
   private: gfx::Canvas* canvas_;
-  private: std::unique_ptr<Caret> caret_;
   private: bool dirty_;
   private: bool has_screen_bitmap_;
   private: std::vector<TextLine*> lines_;
@@ -51,6 +51,15 @@ class ScreenTextBlock final : public gfx::Canvas::Observer {
 
   // gfx::Canvas::Observer
   private: virtual void ShouldDiscardResources() override;
+
+
+  // ui::Caret::Delegate
+  private: virtual void HideCaret(gfx::Canvas* canvas,
+                                  const ui::Caret& caret) override;
+  private: virtual void PaintCaret(gfx::Canvas* canvas,
+                                   const ui::Caret& caret) override;
+  private: virtual void ShowCaret(gfx::Canvas* canvas,
+                                  const ui::Caret& caret) override;
 
   DISALLOW_COPY_AND_ASSIGN(ScreenTextBlock);
 };

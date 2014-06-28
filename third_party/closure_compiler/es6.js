@@ -11,6 +11,7 @@
  *  - Array
  *  - Generator
  *  - Iterable
+ *  - Iterator
  *  - Map
  *  - Promise
  *  - Set
@@ -19,6 +20,11 @@
  *  - WeakMap
  *  - WeakSet
  */
+
+/**
+ * @typedef {Function}
+ */
+var Iterator;
 
 /**
  * @template T
@@ -343,6 +349,14 @@ var Map = function(iterable) {};
 
 Map.prototype.clear = function() {};
 
+
+/**
+ * @template T
+ * @return {!Iterator}
+ */
+Map.prototype.entries = function() {};
+
+
 /**
  * @param {*} key
  */
@@ -369,7 +383,7 @@ Map.prototype.has = function(key) {};
 
 /**
  * @template T
- * @return {!Array.<T>}
+ * @return {!Iterator}
  */
 Map.prototype.keys = function() {};
 
@@ -385,7 +399,7 @@ Map.prototype.set = function(key, value) {};
 Map.prototype.size;
 
 /**
- * @return {!Array}
+ * @return {!Iterator}
  */
 Map.prototype.values = function() {};
 
@@ -476,6 +490,13 @@ Set.prototype.clear = function() {};
  */
 Set.prototype.delete = function(key) {};
 
+
+/**
+ * @template T
+ * @return {!Iterator}
+ */
+Set.prototype.entries = function() {};
+
 /**
  * @template T
  * @param {!function(T, T, !Set.<T>)} callback
@@ -491,12 +512,18 @@ Set.prototype.has = function(key) {};
 
 /**
  * @template T
- * @return {!Array.<T>}
+ * @return {!Iterator}
  */
 Set.prototype.keys = function() {};
 
 /** @type {number} */
 Set.prototype.size;
+
+/**
+ * @template T
+ * @return {!Iterator}
+ */
+Set.prototype.values = function() {};
 
 /**
  * @param {string} searchString

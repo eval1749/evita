@@ -77,7 +77,6 @@ class TextEditWindow : public text::BufferMutationObserver,
   public: virtual ~TextEditWindow();
 
   public: text::Buffer* buffer() const;
-  private: bool is_selection_active() const;
   public: float zoom() const { return zoom_; }
   public: void set_zoom(float new_zoom);
 
@@ -95,7 +94,6 @@ class TextEditWindow : public text::BufferMutationObserver,
   // [G]
   public: HWND GetScrollBar(int which) const;
   public: Posn GetEnd();
-  public: Selection* GetSelection() const { return &*selection_; }
   public: Posn GetStart();
 
   // [H]

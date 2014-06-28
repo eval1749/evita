@@ -15,6 +15,7 @@ class TextSelectionModel final {
   public: enum class Active {
     NotActive,
     EndIsActive,
+    RangeIsActive,
     StartIsActive,
   };
   private: Active active_;
@@ -34,6 +35,7 @@ class TextSelectionModel final {
   public: text::Posn start() const { return start_; }
 
   public: text::Posn active_offset() const;
+  public: bool has_caret() const;
   public: bool is_active() const { return active_ != Active::NotActive; }
   public: bool is_caret() const { return start_ == end_; }
   public: bool is_range() const { return start_ != end_; }
@@ -54,6 +56,7 @@ class TextSelection final {
   public: text::Posn start() const { return model_.start(); }
 
   public: text::Posn active_offset() const { return model_.active_offset(); }
+  public: bool has_caret() const { return model_.has_caret(); }
   public: bool is_active() const { return model_.is_active(); }
   public: bool is_caret() const { return model_.is_caret(); }
   public: bool is_range() const { return model_.is_range(); }

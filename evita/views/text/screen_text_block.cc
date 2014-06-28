@@ -388,7 +388,10 @@ ScreenTextBlock::~ScreenTextBlock() {
 }
 
 void ScreenTextBlock::DidKillFocus() {
-  ui::Caret::instance()->Give(this);
+  auto const caret = ui::Caret::instance();
+  if (caret->is_shown())
+    HideCaret(canvas_, *caret);
+  caret->Give(this);
 }
 
 void ScreenTextBlock::DidSetFocus() {
@@ -436,9 +439,13 @@ void ScreenTextBlock::Render(const TextBlock* text_block,
 void ScreenTextBlock::RenderCaret() {
   if (ui::Caret::instance()->owner() != this)
     return;
+  if (!selection_.has_caret()) {
+    ui::Caret::instance()->Update(this, canvas_, gfx::RectF());
+    return;
+  }
   auto const char_rect = HitTestTextPosition(selection_.active_offset());
   if (char_rect.empty()) {
-    ui::Caret::instance()->Update(this, canvas_, char_rect);
+    ui::Caret::instance()->Update(this, canvas_, gfx::RectF());
     return;
   }
   auto const caret_width = 2;
@@ -515,7 +522,8 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
     }
   }
 
-  if (ui::Caret::instance()->owner() == this &&
+  if (selection_.has_caret() &&
+      ui::Caret::instance()->owner() == this &&
       ui::Caret::instance()->is_shown()) {
     const auto& caret_bounds = ui::Caret::instance()->bounds();
     canvas_->DrawBitmap(*canvas_->screen_bitmap(), caret_bounds, caret_bounds);

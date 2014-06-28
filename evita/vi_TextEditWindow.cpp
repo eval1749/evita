@@ -51,19 +51,6 @@ using views::rendering::TextSelectionModel;
 
 namespace {
 
-TextSelectionModel GetTextSelectionModel(const ::Selection& selection,
-                                         bool selection_is_active) {
-  auto const start = selection.GetStart();
-  auto const end = selection.GetEnd();
-  if (!selection_is_active) {
-    return TextSelectionModel(start, end,
-                              TextSelectionModel::Active::NotActive);
-  }
-  return TextSelectionModel(start, end, selection.IsStartActive() ?
-      TextSelectionModel::Active::StartIsActive :
-      TextSelectionModel::Active::EndIsActive);
-}
-
 bool IsPopupWindow(HWND hwnd) {
   while (hwnd) {
     auto const dwStyle = static_cast<DWORD>(::GetWindowLong(hwnd, GWL_STYLE));
@@ -74,6 +61,30 @@ bool IsPopupWindow(HWND hwnd) {
     hwnd = ::GetParent(hwnd);
   }
   return false;
+}
+
+TextSelectionModel::Active GetTextSelectionActive(
+    TextEditWindow* window, const ::Selection& selection) {
+  if (window->has_focus())
+    return selection.IsStartActive() ?
+        TextSelectionModel::Active::StartIsActive :
+        TextSelectionModel::Active::EndIsActive;
+
+  if (!IsPopupWindow(::GetFocus()))
+    return TextSelectionModel::Active::NotActive;
+
+  auto const edit_pane = views::FrameList::instance()->active_frame()->
+    GetActivePane()->as<EditPane>();
+  if (edit_pane && edit_pane->GetActiveWindow() == window)
+    return TextSelectionModel::Active::RangeIsActive;
+  return TextSelectionModel::Active::NotActive;
+}
+
+TextSelectionModel GetTextSelectionModel(
+    TextEditWindow* window, const ::Selection& selection) {
+  return TextSelectionModel(
+      selection.GetStart(), selection.GetEnd(),
+      GetTextSelectionActive(window, selection));
 }
 
 }  // namespace
@@ -101,18 +112,6 @@ TextEditWindow::~TextEditWindow() {
 
 text::Buffer* TextEditWindow::buffer() const {
   return text_renderer_->GetBuffer();
-}
-
-bool TextEditWindow::is_selection_active() const {
-  if (has_focus())
-    return true;
-
-  if (!IsPopupWindow(::GetFocus()))
-    return false;
-
-  auto const edit_pane = views::FrameList::instance()->active_frame()->
-    GetActivePane()->as<EditPane>();
-  return edit_pane && edit_pane->GetActiveWindow() == this;
 }
 
 void TextEditWindow::set_zoom(float new_zoom) {
@@ -316,8 +315,7 @@ void TextEditWindow::Render(const TextSelectionModel& selection) {
 }
 
 void TextEditWindow::Render() {
-  auto const selection = GetTextSelectionModel(*selection_,
-                                               is_selection_active());
+  auto const selection = GetTextSelectionModel(this, *selection_);
   Render(selection);
 }
 
@@ -550,10 +548,9 @@ void TextEditWindow::Redraw() {
 
   UI_ASSERT_DOM_LOCKED();
 
-  auto const selection = GetTextSelectionModel(*selection_,
-                                               is_selection_active());
+  auto const selection = GetTextSelectionModel(this, *selection_);
   Posn lCaretPosn;
-  if (selection.is_active()) {
+  if (selection.has_caret()) {
     lCaretPosn = selection.active_offset();
   } else {
     auto const max_offset = buffer()->GetEnd();

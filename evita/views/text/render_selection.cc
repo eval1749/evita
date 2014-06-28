@@ -39,8 +39,12 @@ bool TextSelectionModel::operator!=(const TextSelectionModel& other) const {
 }
 
 text::Posn TextSelectionModel::active_offset() const {
-  DCHECK(active_ != Active::NotActive);
+  DCHECK(has_caret());
   return active_ == Active::StartIsActive ? start_ : end_;
+}
+
+bool TextSelectionModel::has_caret() const {
+  return active_ == Active::StartIsActive || active_ == Active::EndIsActive;
 }
 
 //////////////////////////////////////////////////////////////////////

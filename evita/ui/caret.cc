@@ -74,6 +74,7 @@ void Caret::Give(Delegate* owner) {
   DCHECK_EQ(owner_, owner);
   owner_ = nullptr;
   bounds_ = gfx::RectF();
+  last_blink_time_ = base::Time();
   shown_ = false;
 }
 

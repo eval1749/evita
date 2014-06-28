@@ -86,7 +86,7 @@ bool IsPopupWindow(HWND hwnd) {
 TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
     : ContentWindow(text_window.window_id()),
       caret_(new Caret()),
-      m_gfx(nullptr),
+      canvas_(nullptr),
       m_lCaretPosn(-1),
       text_renderer_(new TextRenderer(text_window.document()->buffer())),
       selection_(text_window.view_selection()),
@@ -130,7 +130,7 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
 
   if (!text_renderer_->ShouldFormat(zoom_)) {
     if (auto const line = text_renderer_->FindLine(lGoal))
-      return line->MapXToPosn(*m_gfx, xGoal);
+      return line->MapXToPosn(*canvas_, xGoal);
   }
 
   auto lStart = buffer()->ComputeStartOfLine(lGoal);
@@ -138,7 +138,7 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
     auto const pLine = text_renderer_->FormatLine(lStart);
     auto const lEnd = pLine->GetEnd();
     if (lGoal < lEnd)
-      return pLine->MapXToPosn(*m_gfx, xGoal);
+      return pLine->MapXToPosn(*canvas_, xGoal);
     lStart = lEnd;
   }
 }
@@ -202,46 +202,6 @@ text::Posn TextEditWindow::ComputeMotion(
   return lPosn;
 }
 
-void TextEditWindow::DidChangeHierarchy() {
-  ParentClass::DidChangeHierarchy();
-  m_gfx = &frame().gfx();
-  text_renderer_->SetGraphics(m_gfx);
-}
-
-void TextEditWindow::DidHide() {
-  // Note: It is OK that hidden window have focus.
-  vertical_scroll_bar_->Hide();
-  text_renderer_->Reset();
-}
-
-void TextEditWindow::DidKillFocus(ui::Widget* focused_widget) {
-  ParentClass::DidKillFocus(focused_widget);
-  caret_->Give(this, m_gfx);
-  ui::TextInputClient::Get()->CommitComposition(this);
-  ui::TextInputClient::Get()->CancelComposition(this);
-  ui::TextInputClient::Get()->set_delegate(nullptr);
-}
-
-void TextEditWindow::DidRealize() {
-  ParentClass::DidRealize();
-  auto const frame = Frame::FindFrame(*this);
-  ASSERT(frame);
-  m_gfx = &frame->gfx();
-  text_renderer_->SetGraphics(m_gfx);
-}
-
-void TextEditWindow::DidSetFocus(ui::Widget* last_focused) {
-  ASSERT(has_focus());
-  // Note: It is OK to set focus to hidden window.
-  caret_->Take(this);
-  ui::TextInputClient::Get()->set_delegate(this);
-  ParentClass::DidSetFocus(last_focused);
-}
-
-void TextEditWindow::DidShow() {
-  vertical_scroll_bar_->Show();
-}
-
 Posn TextEditWindow::EndOfLine(Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
   if (!text_renderer_->ShouldFormat(zoom_)) {
@@ -269,12 +229,6 @@ void TextEditWindow::FormatTextBlockIfNeeded() {
     return;
   auto const line_start_ = StartOfLine(view_start_);
   text_renderer_->Format(line_start_);
-}
-
-HCURSOR TextEditWindow::GetCursorAt(const Point& point) const {
-  if (vertical_scroll_bar_->bounds().Contains(point))
-    return ::LoadCursor(nullptr, IDC_ARROW);
-  return ::LoadCursor(nullptr, IDC_IBEAM);
 }
 
 // For Selection.MoveDown Screen
@@ -342,97 +296,17 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
   return k;
 }
 
-void TextEditWindow::MakeSelectionVisible() {
-  m_lCaretPosn = -1;
-  Redraw();
-}
-
 Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
   FormatTextBlockIfNeeded();
   return std::min(text_renderer_->MapPointToPosn(pt), buffer()->GetEnd());
-}
-
-void TextEditWindow::OnDraw(gfx::Canvas*) {
-  UI_ASSERT_DOM_LOCKED();
-  text_renderer_->Reset();
-  Redraw();
-}
-
-void TextEditWindow::Redraw() {
-  if (!is_shown())
-    return;
-
-  UI_ASSERT_DOM_LOCKED();
-
-  auto const selection = GetTextSelectionModel(*selection_,
-                                               is_selection_active());
-  Posn lCaretPosn;
-  if (selection.is_active()) {
-    lCaretPosn = selection.active_offset();
-  } else {
-    auto const max_offset = buffer()->GetEnd();
-    if (selection.start() == max_offset && selection.end() == max_offset)
-      lCaretPosn = max_offset;
-    else
-      lCaretPosn = m_lCaretPosn == -1 ? selection.start() : m_lCaretPosn;
-  }
-
-  DCHECK_GE(lCaretPosn, 0);
-
-  if (text_renderer_->Prepare(zoom_)) {
-    text_renderer_->Format(StartOfLine(view_start_));
-
-    if (m_lCaretPosn != lCaretPosn) {
-      // FIXME 2007-05-12 Fill the page with lines.
-      text_renderer_->ScrollToPosn(lCaretPosn);
-      m_lCaretPosn = lCaretPosn;
-    }
-    Render(selection);
-    return;
-  }
-
-  if (m_lCaretPosn != lCaretPosn) {
-    m_lCaretPosn = lCaretPosn;
-    const auto char_rect = text_renderer_->HitTestTextPosition(lCaretPosn);
-    if (!char_rect.empty()) {
-      if (text_renderer_->ShouldRender()) {
-        Render(selection);
-        return;
-      }
-      caret_->Hide(m_gfx);
-      text_renderer_->RenderSelectionIfNeeded(selection);
-      UpdateCaretBounds(char_rect);
-      return;
-    }
-    text_renderer_->ScrollToPosn(lCaretPosn);
-    Render(selection);
-    return;
-  }
-
-  if (text_renderer_->GetStart() != view_start_) {
-    text_renderer_->Format(StartOfLine(view_start_));
-    Render(selection);
-    return;
-  }
-
-  if (text_renderer_->ShouldRender()) {
-    Render(selection);
-    return;
-  }
-
-  // The screen is clean.
-  if (selection.is_range())
-    text_renderer_->RenderSelectionIfNeeded(selection);
-  else
-    caret_->Blink(m_gfx);
 }
 
 void TextEditWindow::Render(const TextSelectionModel& selection) {
   if (!is_shown())
     return;
 
-  gfx::Canvas::DrawingScope drawing_scope(*m_gfx);
-  m_gfx->set_dirty_rect(gfx::Rect(
+  gfx::Canvas::DrawingScope drawing_scope(*canvas_);
+  canvas_->set_dirty_rect(gfx::Rect(
       bounds().left_top(),
       gfx::Size(bounds().width() - vertical_scroll_bar_->bounds().width(),
                 bounds().height())));
@@ -440,7 +314,7 @@ void TextEditWindow::Render(const TextSelectionModel& selection) {
 
   view_start_ = text_renderer_->GetStart();
   updateScrollBar();
-  static_cast<Widget*>(vertical_scroll_bar_)->OnDraw(m_gfx);
+  static_cast<Widget*>(vertical_scroll_bar_)->OnDraw(canvas_);
 
   const auto char_rect = text_renderer_->HitTestTextPosition(m_lCaretPosn);
   if (char_rect.empty()) {
@@ -539,7 +413,7 @@ void TextEditWindow::UpdateCaretBounds(const gfx::RectF& char_rect) {
 
   ui::TextInputClient::Get()->set_caret_bounds(caret_bounds);
   Caret::Updater caret_updater(caret_.get());
-  caret_updater.Update(m_gfx, caret_bounds);
+  caret_updater.Update(canvas_, caret_bounds);
 }
 
 void TextEditWindow::updateScrollBar() {
@@ -624,6 +498,34 @@ ui::Widget* TextEditWindow::GetClientWindow() {
 }
 
 // ui::Widget
+void TextEditWindow::DidChangeHierarchy() {
+  ParentClass::DidChangeHierarchy();
+  canvas_ = &frame().gfx();
+  text_renderer_->SetGraphics(canvas_);
+}
+
+void TextEditWindow::DidHide() {
+  // Note: It is OK that hidden window have focus.
+  vertical_scroll_bar_->Hide();
+  text_renderer_->Reset();
+}
+
+void TextEditWindow::DidKillFocus(ui::Widget* focused_widget) {
+  ParentClass::DidKillFocus(focused_widget);
+  caret_->Give(this, canvas_);
+  ui::TextInputClient::Get()->CommitComposition(this);
+  ui::TextInputClient::Get()->CancelComposition(this);
+  ui::TextInputClient::Get()->set_delegate(nullptr);
+}
+
+void TextEditWindow::DidRealize() {
+  ParentClass::DidRealize();
+  auto const frame = Frame::FindFrame(*this);
+  ASSERT(frame);
+  canvas_ = &frame->gfx();
+  text_renderer_->SetGraphics(canvas_);
+}
+
 void TextEditWindow::DidResize() {
   views::ContentWindow::DidResize();
   UI_DOM_AUTO_LOCK_SCOPE();
@@ -635,6 +537,105 @@ void TextEditWindow::DidResize() {
   auto scroll_bar_rect = bounds();
   scroll_bar_rect.left = text_block_rect.right;
   vertical_scroll_bar_->SetBounds(scroll_bar_rect);
+}
+
+void TextEditWindow::DidSetFocus(ui::Widget* last_focused) {
+  ASSERT(has_focus());
+  // Note: It is OK to set focus to hidden window.
+  caret_->Take(this);
+  ui::TextInputClient::Get()->set_delegate(this);
+  ParentClass::DidSetFocus(last_focused);
+}
+
+void TextEditWindow::DidShow() {
+  vertical_scroll_bar_->Show();
+}
+
+HCURSOR TextEditWindow::GetCursorAt(const Point& point) const {
+  if (vertical_scroll_bar_->bounds().Contains(point))
+    return ::LoadCursor(nullptr, IDC_ARROW);
+  return ::LoadCursor(nullptr, IDC_IBEAM);
+}
+
+void TextEditWindow::OnDraw(gfx::Canvas*) {
+  UI_ASSERT_DOM_LOCKED();
+  text_renderer_->Reset();
+  Redraw();
+}
+
+// views::ContentWindow
+void TextEditWindow::MakeSelectionVisible() {
+  m_lCaretPosn = -1;
+  Redraw();
+}
+
+void TextEditWindow::Redraw() {
+  if (!is_shown())
+    return;
+
+  UI_ASSERT_DOM_LOCKED();
+
+  auto const selection = GetTextSelectionModel(*selection_,
+                                               is_selection_active());
+  Posn lCaretPosn;
+  if (selection.is_active()) {
+    lCaretPosn = selection.active_offset();
+  } else {
+    auto const max_offset = buffer()->GetEnd();
+    if (selection.start() == max_offset && selection.end() == max_offset)
+      lCaretPosn = max_offset;
+    else
+      lCaretPosn = m_lCaretPosn == -1 ? selection.start() : m_lCaretPosn;
+  }
+
+  DCHECK_GE(lCaretPosn, 0);
+
+  if (text_renderer_->Prepare(zoom_)) {
+    text_renderer_->Format(StartOfLine(view_start_));
+
+    if (m_lCaretPosn != lCaretPosn) {
+      // FIXME 2007-05-12 Fill the page with lines.
+      text_renderer_->ScrollToPosn(lCaretPosn);
+      m_lCaretPosn = lCaretPosn;
+    }
+    Render(selection);
+    return;
+  }
+
+  if (m_lCaretPosn != lCaretPosn) {
+    m_lCaretPosn = lCaretPosn;
+    const auto char_rect = text_renderer_->HitTestTextPosition(lCaretPosn);
+    if (!char_rect.empty()) {
+      if (text_renderer_->ShouldRender()) {
+        Render(selection);
+        return;
+      }
+      caret_->Hide(canvas_);
+      text_renderer_->RenderSelectionIfNeeded(selection);
+      UpdateCaretBounds(char_rect);
+      return;
+    }
+    text_renderer_->ScrollToPosn(lCaretPosn);
+    Render(selection);
+    return;
+  }
+
+  if (text_renderer_->GetStart() != view_start_) {
+    text_renderer_->Format(StartOfLine(view_start_));
+    Render(selection);
+    return;
+  }
+
+  if (text_renderer_->ShouldRender()) {
+    Render(selection);
+    return;
+  }
+
+  // The screen is clean.
+  if (selection.is_range())
+    text_renderer_->RenderSelectionIfNeeded(selection);
+  else
+    caret_->Blink(canvas_);
 }
 
 // views::Window

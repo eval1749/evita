@@ -65,7 +65,7 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: class ScrollBar;
 
   private: std::unique_ptr<Caret> caret_;
-  private: gfx::Canvas* m_gfx;
+  private: gfx::Canvas* canvas_;
   private: Posn m_lCaretPosn;
   // TODO(yosi): Manage life time of selection.
   private: Selection* selection_;
@@ -88,15 +88,6 @@ class TextEditWindow : public text::BufferMutationObserver,
       Unit unit, Count count, const gfx::PointF& point, text::Posn position);
   private: Posn computeGoalX(float, Posn);
 
-  // [D]
-  public: void DidChangeFrame();
-  private: virtual void DidChangeHierarchy() override;
-  private: virtual void DidHide() override;
-  private: virtual void DidKillFocus(ui::Widget* focused_window) override;
-  private: virtual void DidRealize() override;
-  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
-  private: virtual void DidShow() override;
-
   // [E]
   public: Posn EndOfLine(Posn);
 
@@ -104,7 +95,6 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: void FormatTextBlockIfNeeded();
 
   // [G]
-  private: virtual HCURSOR GetCursorAt(const Point&) const override;
   public: HWND GetScrollBar(int which) const;
   public: Posn GetEnd();
   public: Selection* GetSelection() const { return &*selection_; }
@@ -117,14 +107,9 @@ class TextEditWindow : public text::BufferMutationObserver,
   public: int LargeScroll(int, int, bool = true);
 
   // [M]
-  public: virtual void MakeSelectionVisible() override;
   public: Posn MapPointToPosn(const gfx::PointF point);
 
-  // [O]
-  private: virtual void OnDraw(gfx::Canvas* gfx) override;
-
   // [R]
-  private: virtual void Redraw() override;
   private: void Render(const TextSelectionModel& selection);
   private: void Render();
 
@@ -157,7 +142,19 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: virtual Widget* GetClientWindow() override;
 
   // ui::Widget
+  private: virtual void DidChangeHierarchy() override;
+  private: virtual void DidHide() override;
+  private: virtual void DidKillFocus(ui::Widget* focused_window) override;
+  private: virtual void DidRealize() override;
   private: virtual void DidResize() override;
+  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
+  private: virtual void DidShow() override;
+  private: virtual HCURSOR GetCursorAt(const Point&) const override;
+  private: virtual void OnDraw(gfx::Canvas* canvas) override;
+
+  // views::ContentWindow
+  public: virtual void MakeSelectionVisible() override;
+  private: virtual void Redraw() override;
 
   // views::Window
   private: virtual bool OnIdle(int hint) override;

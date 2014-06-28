@@ -8,6 +8,7 @@
       'type': 'none',
       'dependencies': [
         'evita_dom_unittests',
+        'evita_gfx_unittests',
         'evita_text_unittests',
         'evita_view_model_unittests',
       ], # dependencies
@@ -103,6 +104,42 @@
         'dom/windows/window_unittest.cc',
       ],
     }, # evita_dom_test
+    {
+      'target_name': 'evita_gfx_unittests',
+      'type': 'executable',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        '<(DEPTH)/evita/evita.gyp:gfx',
+        '<(DEPTH)/testing/gtest.gyp:gtest',
+        '<(DEPTH)/base/base.gyp:run_all_unittests',
+      ], # dependencies
+      'include_dirs+' : [
+        '<(DEPTH)/testing/gtest/include/',
+      ], # include_dirs
+      'msvs_disabled_warnings': [
+        4625, 4626,
+        # L2 C4826 Conversion from 'type1 ' to 'type_2' is sign-extended. This
+        # may cause unexpected runtime behavior.
+        4826,
+      ],
+      'msvs_settings': {
+        'VCLinkerTool': {
+          'AdditionalDependencies': [
+            'gdi32.lib',
+            'comdlg32.lib',
+            'advapi32.lib',
+            'shell32.lib',
+            'ole32.lib',
+            'oleaut32.lib',
+            'uuid.lib',
+          ], # AdditionalDependencies
+        }, # VCLinkerTool
+      }, # msvs_settings
+      'sources': [
+        'precomp.cpp',
+        'gfx/rect_f_unittest.cc',
+      ],
+    }, # evita_gfx_test
     {
       'target_name': 'evita_spellchecker_unittests',
       'type': 'executable',

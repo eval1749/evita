@@ -91,6 +91,7 @@
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/common/common.gyp:common',
+        'gfx',
         'io',
         'views',
       ],
@@ -105,17 +106,6 @@
         'editor/dom_lock.cc',
         'editor/switch_set.cc',
         'editor/switch_set.h',
-        'gfx/bitmap.cc',
-        'gfx/color_f.cc',
-        'gfx/font_face.cc',
-        'gfx/canvas.cc',
-        'gfx/point_f.cc',
-        'gfx/rect_f.cc',
-        'gfx/size_f.cc',
-        'gfx/stroke_style.cc',
-        'gfx/text_format.cc',
-        'gfx/text_layout.cc',
-        'gfx_base.cpp',
         'metrics/counter.cc',
         'metrics/time_scope.cc',
         'views/frame_list.cc',
@@ -144,6 +134,28 @@
         'vi_TextEditWindow.cpp',
       ], # sources
     }, # editor
+    {
+      'target_name': 'gfx',
+      'type': 'static_library',
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+      ],
+      'sources': [
+        'precomp.cpp',
+
+        'gfx/bitmap.cc',
+        'gfx/color_f.cc',
+        'gfx/font_face.cc',
+        'gfx/canvas.cc',
+        'gfx/point_f.cc',
+        'gfx/rect_f.cc',
+        'gfx/size_f.cc',
+        'gfx/stroke_style.cc',
+        'gfx/text_format.cc',
+        'gfx/text_layout.cc',
+        'gfx_base.cpp',
+      ], # sources
+    }, # gfx
     {
       'target_name': 'io',
       'type': 'static_library',

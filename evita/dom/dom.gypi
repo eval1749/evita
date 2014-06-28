@@ -63,6 +63,7 @@
       'text/modes/mode.js',
       'text/modes/modes.js',
       'os/file.js',
+      'os/os.js',
       'os/process.js',
       'text/range.js',
       'text/regexp.js',

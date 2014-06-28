@@ -98,6 +98,28 @@ void MessageCallback(v8::Handle<v8::Message> message,
   MessageBox(text, MB_ICONERROR);
 }
 
+void PopulateEnviromentStrings(v8_glue::Runner* runner) {
+  auto const strings = ::GetEnvironmentStringsW();
+  if (!strings)
+    return;
+  auto scanner = strings;
+  while (*scanner) {
+    while (*scanner) {
+      ++scanner;
+    }
+    ++scanner;
+  }
+  --scanner;
+  auto const isolate = runner->isolate();
+  runner->global()->Get(gin::StringToV8(isolate, "Os"))->ToObject()->Set(
+    gin::StringToV8(isolate, "environmentStrings"),
+    v8::String::NewFromTwoByte(
+        isolate,
+        reinterpret_cast<const uint16_t*>(strings),
+        v8::String::kNormalString,
+        static_cast<int>(scanner - strings)));
+}
+
 ScriptHost* script_host;
 
 }   // namespace
@@ -175,6 +197,7 @@ void ScriptHost::DidStartViewHost() {
   // We should prevent UI thread to access DOM.
   DOM_AUTO_LOCK_SCOPE();
   v8_glue::Runner::Scope runner_scope(runner());
+  PopulateEnviromentStrings(runner());
   for (const auto& script_source : script_sources) {
     auto const result = runner()->Run(
         base::ASCIIToUTF16(script_source.script_text),

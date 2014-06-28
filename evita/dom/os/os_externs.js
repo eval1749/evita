@@ -23,3 +23,16 @@ Os.File.Error = function(winLastError) {};
  * }}
  */
 Os.File.Info;
+
+/**
+ * @expose
+ * @type {string}
+ */
+Os.environmentStrings;
+
+/**
+ * @expose
+ * @param {string} name
+ * @return {string|undefined}
+ */
+Os.getenv = function(name) {};

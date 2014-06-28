@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-Os.getenv = (function() {
+Object.defineProperty(Os, 'getenv', {value: (function() {
   var environment = new Map();
 
   // Os.environmentStrings has "key1=val1\0key2=val2\0...keyN=valN".
@@ -14,9 +14,13 @@ Os.getenv = (function() {
       environment.set(match[1], match[2]);
   });
 
+  /**
+   * @param {string} name
+   * @return {string|undefined}
+   */
   function getenv(name) {
     return environment.get(name);
   }
 
   return getenv;
-})();
+})()});

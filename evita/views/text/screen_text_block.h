@@ -25,9 +25,9 @@ class ScreenTextBlock final : public gfx::Canvas::Observer {
   friend class RenderContext;
 
   private: gfx::RectF bounds_;
+  private: gfx::Canvas* canvas_;
   private: std::unique_ptr<Caret> caret_;
   private: bool dirty_;
-  private: gfx::Canvas* gfx_;
   private: bool has_screen_bitmap_;
   private: std::vector<TextLine*> lines_;
   private: TextSelection selection_;
@@ -46,8 +46,8 @@ class ScreenTextBlock final : public gfx::Canvas::Observer {
   private: void RenderSelection(const TextSelection& selection);
   public: void RenderSelectionIfNeeded(const TextSelection& selection);
   public: void Reset();
-  public: void SetGraphics(const gfx::Canvas* gfx);
   public: void SetBounds(const gfx::RectF& rect);
+  public: void SetCanvas(gfx::Canvas* canvas);
 
   // gfx::Canvas::Observer
   private: virtual void ShouldDiscardResources() override;

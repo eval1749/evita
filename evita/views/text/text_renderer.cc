@@ -50,7 +50,7 @@ using namespace rendering;
 // TextRenderer
 //
 TextRenderer::TextRenderer(text::Buffer* buffer)
-    : dirty_(false), gfx_(nullptr), m_pBuffer(buffer),
+    : canvas_(nullptr), dirty_(false), m_pBuffer(buffer),
       screen_text_block_(new ScreenTextBlock()),
       text_block_(new TextBlock(buffer)), zoom_(1.0f) {
 }
@@ -95,16 +95,16 @@ text::Posn TextRenderer::GetVisibleEnd() const {
 }
 
 void TextRenderer::Format(Posn lStart) {
-  DCHECK(gfx_);
+  DCHECK(canvas_);
   text_block_->Reset();
-  TextFormatter oFormatter(*gfx_, text_block_.get(), lStart, zoom_);
+  TextFormatter oFormatter(*canvas_, text_block_.get(), lStart, zoom_);
   oFormatter.Format();
   dirty_ = true;
 }
 
 TextLine* TextRenderer::FormatLine(Posn lStart) {
-  DCHECK(gfx_);
-  TextFormatter oFormatter(*gfx_, text_block_.get(), lStart, zoom_);
+  DCHECK(canvas_);
+  TextFormatter oFormatter(*canvas_, text_block_.get(), lStart, zoom_);
   return oFormatter.FormatLine();
 }
 
@@ -129,7 +129,7 @@ bool TextRenderer::IsPositionFullyVisible(text::Posn offset) const {
 }
 
 Posn TextRenderer::MapPointToPosn(gfx::PointF pt) const {
-  DCHECK(gfx_);
+  DCHECK(canvas_);
   if (pt.y < text_block_->top())
     return GetStart();
   if (pt.y >= text_block_->bottom())
@@ -151,7 +151,7 @@ Posn TextRenderer::MapPointToPosn(gfx::PointF pt) const {
     for (const auto cell : line->cells()) {
       auto x = pt.x - xCell;
       xCell += cell->width();
-      auto lMap = cell->MapXToPosn(*gfx_, x);
+      auto lMap = cell->MapXToPosn(*canvas_, x);
       if (lMap >= 0)
         lPosn = lMap;
       if (x >= 0 && x < cell->width())
@@ -165,10 +165,10 @@ Posn TextRenderer::MapPointToPosn(gfx::PointF pt) const {
 // Returns number of lines to be displayed in this page when using
 // buffer's default style.
 int TextRenderer::pageLines() const {
-  DCHECK(gfx_);
-  auto const pFont = FontSet::Get(*gfx_, m_pBuffer->GetDefaultStyle())->
-        FindFont(*gfx_, 'x');
-  auto const height = AlignHeightToPixel(*gfx_, pFont->height());
+  DCHECK(canvas_);
+  auto const pFont = FontSet::Get(*canvas_, m_pBuffer->GetDefaultStyle())->
+        FindFont(*canvas_, 'x');
+  auto const height = AlignHeightToPixel(*canvas_, pFont->height());
   return static_cast<int>(text_block_->height() / height);
 }
 
@@ -179,7 +179,7 @@ bool TextRenderer::Prepare(float zoom) {
 }
 
 void TextRenderer::Render(const TextSelectionModel& selection_model) {
-  DCHECK(gfx_);
+  DCHECK(canvas_);
   DCHECK(!text_block_->bounds().empty());
   text_block_->EnsureLinePoints();
   const auto selection = TextFormatter::FormatSelection(
@@ -190,14 +190,14 @@ void TextRenderer::Render(const TextSelectionModel& selection_model) {
   // ruler settings to both script and UI.
 
   // Ruler
-  auto const pFont = FontSet::Get(*gfx_, m_pBuffer->GetDefaultStyle())->
-    FindFont(*gfx_, 'x');
+  auto const pFont = FontSet::Get(*canvas_, m_pBuffer->GetDefaultStyle())->
+    FindFont(*canvas_, 'x');
 
   // FIXME 2007-08-05 yosi@msn.com We should expose rule position to
   // user.
   auto const num_columns = 81;
-  auto const width_of_M = AlignWidthToPixel(*gfx_, pFont->GetCharWidth('M'));
-  drawVLine(*gfx_, gfx::Brush(*gfx_, gfx::ColorF::LightGray),
+  auto const width_of_M = AlignWidthToPixel(*canvas_, pFont->GetCharWidth('M'));
+  drawVLine(*canvas_, gfx::Brush(*canvas_, gfx::ColorF::LightGray),
             text_block_->left() + width_of_M * num_columns,
             text_block_->top(), text_block_->bottom());
   dirty_ = false;
@@ -217,12 +217,12 @@ void TextRenderer::Reset() {
 }
 
 bool TextRenderer::ScrollDown() {
-  DCHECK(gfx_);
+  DCHECK(canvas_);
   if (!GetStart())
     return false;
   auto const lGoal = GetStart() - 1;
   auto const lStart = m_pBuffer->ComputeStartOfLine(lGoal);
-  TextFormatter formatter(*gfx_, text_block_.get(), lStart, zoom_);
+  TextFormatter formatter(*canvas_, text_block_.get(), lStart, zoom_);
   for (;;) {
     auto const line = formatter.FormatLine();
     if (lGoal < line->GetEnd()) {
@@ -242,7 +242,7 @@ bool TextRenderer::ScrollDown() {
 }
 
 bool TextRenderer::ScrollToPosn(Posn lPosn) {
-  DCHECK(gfx_);
+  DCHECK(canvas_);
   if (IsPositionFullyVisible(lPosn))
     return false;
 
@@ -297,7 +297,7 @@ bool TextRenderer::ScrollToPosn(Posn lPosn) {
 }
 
 bool TextRenderer::ScrollUp() {
-  DCHECK(gfx_);
+  DCHECK(canvas_);
   text_block_->EnsureLinePoints();
   if (text_block_->IsShowEndOfDocument())
     return false;
@@ -309,7 +309,7 @@ bool TextRenderer::ScrollUp() {
   if (text_block_->IsShowEndOfDocument())
     return false;
 
-  TextFormatter oFormatter(*gfx_, text_block_.get(),
+  TextFormatter oFormatter(*canvas_, text_block_.get(),
                            text_block_->GetLast()->GetEnd(), zoom_);
 
   auto const line = oFormatter.FormatLine();
@@ -318,15 +318,15 @@ bool TextRenderer::ScrollUp() {
   return true;
 }
 
-void TextRenderer::SetGraphics(const gfx::Canvas* gfx) {
-  gfx_ = gfx;
-  screen_text_block_->SetGraphics(gfx);
-}
-
 void TextRenderer::SetBounds(const Rect& rect) {
   gfx::RectF rectf(rect);
   text_block_->SetBounds(rectf);
   screen_text_block_->SetBounds(rectf);
+}
+
+void TextRenderer::SetCanvas(gfx::Canvas* canvas) {
+  canvas_ = canvas;
+  screen_text_block_->SetCanvas(canvas);
 }
 
 bool TextRenderer::ShouldFormat(float zoom) const {

@@ -37,8 +37,8 @@ class TextRenderer final {
   public: typedef rendering::TextBlock TextBlock;
   public: typedef rendering::TextLine Line;
 
+  private: gfx::Canvas* canvas_;
   private: bool dirty_;
-  private: const gfx::Canvas* gfx_;
   private: text::Buffer* const m_pBuffer;
   private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
   private: std::unique_ptr<TextBlock> text_block_;
@@ -78,7 +78,6 @@ class TextRenderer final {
   private: int pageLines() const;
   public: bool Prepare(float zoom);
 
-
   // [R]
   public: void Render(const TextSelectionModel& selection);
   public: void RenderSelectionIfNeeded(const TextSelectionModel& selection);
@@ -88,8 +87,8 @@ class TextRenderer final {
   public: bool ScrollDown();
   public: bool ScrollToPosn(Posn target_position);
   public: bool ScrollUp();
-  public: void SetGraphics(const gfx::Canvas* gfx);
   public: void SetBounds(const Rect& rect);
+  public: void SetCanvas(gfx::Canvas* canvas);
   public: bool ShouldFormat(float zoom) const;
   public: bool ShouldRender() const;
 

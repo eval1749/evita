@@ -10,6 +10,7 @@
 
 #include "base/logging.h"
 #include "evita/gfx/bitmap.h"
+#include "evita/ui/base/ime/text_input_client.h"
 
 namespace ui {
 
@@ -17,12 +18,12 @@ static const auto kBlinkInterval = 500; // milliseconds
 
 //////////////////////////////////////////////////////////////////////
 //
-// Caret::Owner
+// Caret::Delegate
 //
-Caret::Owner::Owner() {
+Caret::Delegate::Delegate() {
 }
 
-Caret::Owner::~Owner() {
+Caret::Delegate::~Delegate() {
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -37,47 +38,67 @@ Caret::~Caret() {
   DCHECK(!owner_);
 }
 
-void Caret::Blink(gfx::Canvas* gfx) {
-  if (!owner_ || !bounds_)
+void Caret::Blink(Delegate* delegate, gfx::Canvas* canvas) {
+  if (owner_ != delegate || !bounds_)
     return;
   auto const now = base::Time::Now();
   auto const delta = now - last_blink_time_;
   if (delta < base::TimeDelta::FromMilliseconds(kBlinkInterval))
     return;
-  shown_ = !shown_;
   last_blink_time_ = now;
-  gfx::Canvas::DrawingScope drawing_scope(*gfx);
-  gfx->set_dirty_rect(bounds_);
-  owner_->UpdateCaret(gfx);
+  if (shown_) {
+    owner_->HideCaret(canvas, *this);
+    shown_ = false;
+  } else {
+    owner_->ShowCaret(canvas, *this);
+    shown_ = true;
+  }
 }
 
-void Caret::Give(Owner* owner) {
+void Caret::Blink(gfx::Canvas* canvas) {
+  if (!owner_)
+    return;
+  Blink(owner_, canvas);
+}
+
+void Caret::DidPaint(Delegate* delegate, const gfx::RectF& paint_bounds) {
+  DCHECK(!paint_bounds.empty());
+  if (owner_ != delegate || bounds_.empty())
+    return;
+  if (paint_bounds.Intersect(bounds_).empty())
+    return;
+  shown_ = false;
+}
+
+void Caret::Give(Delegate* owner) {
   DCHECK_EQ(owner_, owner);
   owner_ = nullptr;
   bounds_ = gfx::RectF();
+  shown_ = false;
 }
 
-void Caret::Take(Owner* owner) {
+void Caret::Take(Delegate* owner) {
   DCHECK(!owner_);
-  owner_ = owner;
   bounds_ = gfx::RectF();
+  owner_ = owner;
+  shown_ = false;
 }
 
-void Caret::Update(gfx::Canvas* gfx, const gfx::RectF& new_rect) {
-  DCHECK(owner_);
-  DCHECK(new_rect);
-  if (bounds_ != new_rect) {
-    if (!bounds_.empty()) {
-      // Don't blink caret while when caret is moved or resized.
-      last_blink_time_ = base::Time::Now();
-    }
-    bounds_ = new_rect;
-    shown_ = true;
-  }
-  if (!shown_)
+void Caret::Update(Delegate* delegate, gfx::Canvas* canvas,
+                   const gfx::RectF& new_rect) {
+  if (owner_ != delegate)
     return;
-  gfx::Brush fill_brush(*gfx, gfx::ColorF::Black);
-  gfx->FillRectangle(fill_brush, bounds_);
+  DCHECK(!shown_);
+  if (bounds_ == new_rect)
+    return;
+  bounds_ = new_rect;
+  if (bounds_.empty())
+    return;
+  // Don't blink caret while when caret is moved or resized.
+  last_blink_time_ = base::Time::Now();
+  owner_->PaintCaret(canvas, *this);
+  ui::TextInputClient::Get()->set_caret_bounds(bounds_);
+  shown_ = true;
 }
 
 }  // namespace ui

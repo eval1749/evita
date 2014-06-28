@@ -45,13 +45,18 @@ void Control::set_disabled(bool new_disabled) {
   if (disabled() == new_disabled)
     return;
   state_ = new_disabled ? State::Disabled : State::Normal;
-  if (is_realized())
-    SchedulePaint();
+  DidChangeState();
 }
 
 void Control::set_text_input_delegate(TextInputDelegate* delegate) {
   DCHECK(!text_input_delegate_);
   text_input_delegate_ = delegate;
+}
+
+void Control::DidChangeState() {
+  if (!is_realized())
+    return;
+  SchedulePaint();
 }
 
 // ui::WIdget
@@ -66,7 +71,7 @@ void Control::DidKillFocus(ui::Widget* focused_widget) {
     ui::TextInputClient::Get()->CancelComposition(text_input_delegate_);
     ui::TextInputClient::Get()->set_delegate(nullptr);
   }
-  SchedulePaint();
+  DidChangeState();
   controller_->DidKillFocus(this, focused_widget);
 }
 
@@ -81,8 +86,8 @@ void Control::DidSetFocus(ui::Widget* last_focused_widget) {
   state_ = State::Highlight;
   if (is_realized()) {
     ui::TextInputClient::Get()->set_delegate(text_input_delegate_);
-    SchedulePaint();
   }
+  DidChangeState();
   controller_->DidSetFocus(this, last_focused_widget);
 }
 
@@ -108,7 +113,7 @@ void Control::OnMouseExited(const MouseEvent& event) {
   if (state_ != State::Hover || !focusable())
     return;
   state_ = State::Normal;
-  SchedulePaint();
+  DidChangeState();
 }
 
 void Control::OnMouseMoved(const MouseEvent& event) {
@@ -119,7 +124,7 @@ void Control::OnMouseMoved(const MouseEvent& event) {
   if (state_ != State::Normal || !focusable())
     return;
   state_ = State::Hover;
-  SchedulePaint();
+  DidChangeState();
 }
 
 void Control::OnMousePressed(const MouseEvent& event) {

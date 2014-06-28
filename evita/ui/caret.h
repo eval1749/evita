@@ -20,25 +20,37 @@ namespace ui {
 class Caret final : public common::Singleton<Caret> {
   DECLARE_SINGLETON_CLASS(Caret);
 
-  public: class Owner {
-    public: Owner();
-    public: virtual ~Owner();
+  public: class Delegate {
+    public: Delegate();
+    public: virtual ~Delegate();
 
-    public: virtual void UpdateCaret(gfx::Canvas* gfx) = 0;
+    public: virtual void HideCaret(gfx::Canvas* canvas,
+                                   const Caret& caret) = 0;
+    public: virtual void PaintCaret(gfx::Canvas* canvas,
+                                    const Caret& caret) = 0;
+    public: virtual void ShowCaret(gfx::Canvas* canvas,
+                                   const Caret& caret) = 0;
   };
 
-  private: base::Time last_blink_time_;
   private: gfx::RectF bounds_;
-  private: Owner* owner_;
+  private: Delegate* owner_;
+  private: base::Time last_blink_time_;
   private: bool shown_;
 
   public: Caret();
   public: ~Caret();
 
-  public: void Blink(gfx::Canvas* gfx);
-  public: void Give(Owner* owner);
-  public: void Take(Owner* owner);
-  public: void Update(gfx::Canvas* gfx, const gfx::RectF& rect);
+  public: const gfx::RectF& bounds() const { return bounds_; }
+  public: bool is_shown() const { return shown_; }
+  public: Delegate* owner() const { return owner_; }
+
+  public: void Blink(Delegate* delegate, gfx::Canvas* canvas);
+  public: void Blink(gfx::Canvas* canvas);
+  public: void DidPaint(Delegate* delegate, const gfx::RectF& paint_bounds);
+  public: void Give(Delegate* delegate);
+  public: void Take(Delegate* delegate);
+  public: void Update(Delegate* delegate, gfx::Canvas* canvas,
+                      const gfx::RectF& new_bounds);
 
   DISALLOW_COPY_AND_ASSIGN(Caret);
 };

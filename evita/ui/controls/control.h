@@ -51,6 +51,8 @@ class Control : public ui::Widget {
   protected: State state() const { return state_; }
   public: void set_text_input_delegate(TextInputDelegate* delegate);
 
+  protected: virtual void DidChangeState();
+
   // ui::Widget
   protected: virtual void DidKillFocus(ui::Widget* focused_window) override;
   protected: virtual void DidRealize() override;

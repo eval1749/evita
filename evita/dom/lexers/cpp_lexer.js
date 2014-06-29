@@ -57,18 +57,14 @@ global.CppLexer = (function(options) {
 
   // C Pre-Processor
   '#define',
-  '#else',
-  '#elif',
-  '#endif',
-  '#error',
-  '#if',
-  '#ifdef',
-  '#ifndef',
-  '#import', // MSC
-  '#include',
+  '#else', '#elif', '#endif', '#error',
+  '#if', '#ifdef', '#ifndef', '#include',
   '#line',
   '#pragma',
   '#undef',
+
+  // MSC
+  '#import',
   '#using', // MSC
 
   // ANSI-C Predefined Macros
@@ -134,10 +130,6 @@ global.CppLexer = (function(options) {
   'std::string', 'std::unique_ptr', 'std::unordered_map', 'std::unordered_set',
   'std::vector',
 
-  // Chromium
-  'arraysize', 'base::Bind', 'base::Time', 'base::char16', 'base::string16',
-  'scoped_refptr',
-
   // Microsoft C++
   '__abstract', '__alignof', '__asm', '__assume', '__based', '__box',
   '__cdecl', '__declspec', 'deprecated', 'dllexport', 'dllimport',
@@ -151,24 +143,4 @@ global.CppLexer = (function(options) {
   // WIN32
   'BOOL', 'DWORD', 'HANDLE', 'HIWORD', 'HKEY', 'INVALID_HANDLE_VALUE',
   'LOWROD', 'WORD',
-
-  // v8
-  'v8::ArrayBuffer',
-  'v8::Context',
-  'v8::EscapableHandleScope', 'v8::Eternal',
-  'v8::FunctionCallback', 'v8::FunctionTemplate',
-  'v8::Handle', 'v8::HandleScope',
-  'v8::Isolate',
-  'v8::Local',
-
-  'v8::Object', 'v8::ObjectTemplate',
-  'v8::Persistent',
-  'v8::Promise',
-  'v8::Script',
-  'v8::Undefined', 'v8::UniquePersistent',
-  'v8::Value',
-
-  // Vogue
-  'gfx::Point', 'gfx::Rect', 'gfx::Size',
-  'gfx::PointF', 'gfx::RectF', 'gfx::SizeF',
 ])});

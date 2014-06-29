@@ -129,7 +129,7 @@
           }
           break;
         default:
-          throw 'Unexepcted state ' + state;
+          throw 'Unexpected state ' + state;
       }
     }
     return stringCase;
@@ -216,7 +216,7 @@
   /**
    * @this {!Range}
    * @param {Unit} unit.
-   * @param {number=} opt_count, defualt is one.
+   * @param {number=} opt_count, default is one.
    * @return {!Range}
    */
   Range.prototype.move = function(unit, opt_count) {
@@ -229,7 +229,7 @@
   /**
    * @this {!Range}
    * @param {Unit} unit.
-   * @param {number=} opt_count, defualt is one.
+   * @param {number=} opt_count, default is one.
    * @return {!Range}
    */
   Range.prototype.moveEnd = function(unit, opt_count) {
@@ -261,7 +261,7 @@
   /**
    * @this {!Range}
    * @param {Unit} unit.
-   * @param {number=} opt_count, defualt is one.
+   * @param {number=} opt_count, default is one.
    * @return {!Range}
    */
   Range.prototype.moveStart = function(unit, opt_count) {

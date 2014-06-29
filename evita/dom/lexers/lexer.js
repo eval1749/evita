@@ -194,15 +194,14 @@ global.Lexer = (function() {
       console.assert(lastToken.start < newScanOffset, lastToken);
       lastToken.end = newScanOffset;
       var newState = this.didShrinkLastToken(lastToken);
-      if (lastToken.state != newState) {
+      if (lastToken.state != newState)
         lastToken.state = newState;
-        this.colorToken(lastToken);
-      }
     }
 
     this.lastToken = lastToken;
     this.state = lastToken.state;
     this.tokenData = lastToken.data;
+    this.colorToken(lastToken);
   }
 
   /**

@@ -231,6 +231,8 @@ SpellChecker.prototype.didFireTimer = function() {
     // should make other Unicode general categories are valid.
     if (category != 'Lu' && category != 'Ll')
       return false;
+    if (document.syntaxAt(range.start) == 'keyword')
+      return false;
     return SpellChecker.RE_WORD.test(range.text)
   }
 

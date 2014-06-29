@@ -20,6 +20,10 @@ Posn Selection::anchor_offset() const {
   return start_is_active_ ? end() : start();
 }
 
+Buffer* Selection::buffer() const {
+  return range_->buffer();
+}
+
 Posn Selection::end() const {
   return range_->end();
 }

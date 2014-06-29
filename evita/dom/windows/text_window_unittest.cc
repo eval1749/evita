@@ -47,7 +47,7 @@ class TextWindowSlowTest : public TextWindowTest {
 };
 
 TEST_F(TextWindowTest, _ctor) {
-  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
+  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
       "var doc = new Document('foo');"
       "var range = new Range(doc);"
@@ -60,7 +60,7 @@ TEST_F(TextWindowTest, _ctor) {
 }
 
 TEST_F(TextWindowTest, clone) {
-  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_)).Times(2);
+  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _)).Times(2);
   EXPECT_SCRIPT_VALID(
       "var original = new TextWindow(new Range(new Document('foo')));"
       "original.selection.range.text = 'foo';"
@@ -70,7 +70,7 @@ TEST_F(TextWindowTest, clone) {
 }
 
 TEST_F(TextWindowTest, makeSelectionVisible) {
-  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
+  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_CALL(*mock_view_impl(), MakeSelectionVisible(Eq(1)));
   EXPECT_SCRIPT_VALID(
       "var sample = new TextWindow(new Range(new Document('foo')));"
@@ -78,7 +78,7 @@ TEST_F(TextWindowTest, makeSelectionVisible) {
 }
 
 TEST_F(TextWindowSlowTest, realize) {
-  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
+  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
       "var doc = new Document('foo');"
       "var sample = new TextWindow(new Range(doc));"
@@ -114,7 +114,7 @@ TEST_F(TextWindowSlowTest, realize) {
 }
 
 TEST_F(TextWindowTest, zoom) {
-  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
+  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_CALL(*mock_view_impl(), SetTextWindowZoom(Eq(1), Eq(1.5f)));
   EXPECT_SCRIPT_VALID(
       "var sample = new TextWindow(new Range(new Document('foo')));"

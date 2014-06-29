@@ -21,6 +21,7 @@ class Selection {
   public: ~Selection();
 
   public: Posn anchor_offset() const;
+  public: Buffer* buffer() const;
   public: Posn end() const;
   public: Posn focus_offset() const;
   public: Posn start() const;

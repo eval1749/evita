@@ -18,10 +18,6 @@ class EditPane;
 class TextRenderer;
 class Selection;
 
-namespace dom {
-class TextWindow;
-}
-
 namespace text {
 class Buffer;
 class Selection;
@@ -60,14 +56,15 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: gfx::Canvas* canvas_;
   private: Posn m_lCaretPosn;
   // TODO(yosi): Manage life time of selection.
-  private: text::Selection* selection_;
+  private: text::Selection* const selection_;
   private: std::unique_ptr<TextRenderer> text_renderer_;
   private: ui::ScrollBar* const vertical_scroll_bar_;
   private: text::Posn view_start_;
   private: float zoom_;
 
   // ctor/dtor
-  public: explicit TextEditWindow(const dom::TextWindow& window);
+  public: explicit TextEditWindow(views::WindowId window_id,
+                                  text::Selection* selection);
   public: virtual ~TextEditWindow();
 
   public: text::Buffer* buffer() const;

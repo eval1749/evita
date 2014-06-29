@@ -20,14 +20,11 @@ namespace dom {
 //
 TextWindow::TextWindow(Range* selection_range)
     : ScriptableBase(new TextSelection(this, selection_range)), zoom_(1.0f) {
-  ScriptHost::instance()->view_delegate()->CreateTextWindow(this);
+  ScriptHost::instance()->view_delegate()->CreateTextWindow(window_id(),
+      static_cast<TextSelection*>(selection())->text_selection());
 }
 
 TextWindow::~TextWindow() {
-}
-
-text::Selection* TextWindow::text_selection() const {
-  return static_cast<TextSelection*>(selection())->text_selection();
 }
 
 void TextWindow::set_zoom(float new_zoom) {

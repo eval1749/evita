@@ -270,7 +270,7 @@ DEFINE_VIEW_DELEGATE_1(CreateEditorWindow, const EditorWindow*)
 DEFINE_VIEW_DELEGATE_3(CreateFormWindow, WindowId, Form*,
                        const domapi::PopupWindowInit&)
 DEFINE_VIEW_DELEGATE_2(CreateTableWindow, WindowId, Document*)
-DEFINE_VIEW_DELEGATE_1(CreateTextWindow, const TextWindow*)
+DEFINE_VIEW_DELEGATE_2(CreateTextWindow, WindowId, text::Selection*)
 DEFINE_VIEW_DELEGATE_1(DestroyWindow, WindowId)
 DEFINE_VIEW_DELEGATE_1(DidStartScriptHost, domapi::ScriptHostState)
 DEFINE_VIEW_DELEGATE_1(DidHandleViewIdelEvent, int);

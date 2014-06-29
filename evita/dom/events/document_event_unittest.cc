@@ -19,7 +19,7 @@ class DocumentEventTest : public dom::AbstractDomTest {
 };
 
 TEST_F(DocumentEventTest, ctor) {
-  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
+  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
       "var doc = new Document('foo');"
       "var window = new TextWindow(new Range(doc));"

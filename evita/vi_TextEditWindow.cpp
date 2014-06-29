@@ -27,10 +27,6 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/public/text_composition_data.h"
 #include "evita/dom/public/view_event.h"
-#include "evita/dom/text/document.h"
-#include "evita/dom/text/range.h"
-#include "evita/dom/windows/selection.h"
-#include "evita/dom/windows/text_window.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/text/buffer.h"
 #include "evita/text/marker_set.h"
@@ -90,12 +86,13 @@ TextSelectionModel GetTextSelectionModel(
 //
 // TextEditWindow
 //
-TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
-    : ContentWindow(text_window.window_id()),
+TextEditWindow::TextEditWindow(views::WindowId window_id,
+                               text::Selection* selection)
+    : ContentWindow(window_id),
       canvas_(nullptr),
       m_lCaretPosn(-1),
-      text_renderer_(new TextRenderer(text_window.document()->buffer())),
-      selection_(text_window.text_selection()),
+      text_renderer_(new TextRenderer(selection->buffer())),
+      selection_(selection),
       vertical_scroll_bar_(new ui::ScrollBar(ui::ScrollBar::Type::Vertical,
                                              this)),
       view_start_(0), zoom_(1.0f) {

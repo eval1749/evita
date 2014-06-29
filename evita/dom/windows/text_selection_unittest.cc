@@ -22,7 +22,7 @@ class TextSelectionTest : public dom::AbstractDomTest {
 
   protected: virtual void SetUp() override {
     dom::AbstractDomTest::SetUp();
-    EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
+    EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
     EXPECT_SCRIPT_VALID(
       "var doc = new Document('delete');"
       "var window = new TextWindow(new Range(doc));"
@@ -58,7 +58,7 @@ class TextSelectionTest : public dom::AbstractDomTest {
 };
 
 TEST_F(TextSelectionTest, focusOffset) {
-  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
+  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
       "var doc = new Document('foo');"
       "var range = new Range(doc);"
@@ -251,7 +251,7 @@ TEST_F(TextSelectionTest, startOfExtend) {
 }
 
 TEST_F(TextSelectionTest, Realize) {
-  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
+  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
       "var doc = new Document('foo');"
       "var range = new Range(doc);"

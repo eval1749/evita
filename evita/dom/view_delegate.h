@@ -24,6 +24,10 @@ struct PopupWindowInit {
   int offset_y;
 };
 
+}  // namespace domapi
+
+namespace text {
+class Selection;
 }
 
 namespace dom {
@@ -77,7 +81,8 @@ class ViewDelegate {
 
   public: virtual void CreateTableWindow(WindowId window_id,
                                          Document* document) = 0;
-  public: virtual void CreateTextWindow(const TextWindow* window) = 0;
+  public: virtual void CreateTextWindow(WindowId window_id,
+                                        text::Selection* selection) = 0;
   public: virtual void DestroyWindow(WindowId window_id) = 0;
 
   // |DidStartScriptHost| is called when script host execute editor start

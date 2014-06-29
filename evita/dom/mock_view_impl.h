@@ -33,7 +33,7 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD3(CreateFormWindow, void(WindowId, Form*,
                                       const domapi::PopupWindowInit&));
   MOCK_METHOD2(CreateTableWindow, void(WindowId, Document*));
-  MOCK_METHOD1(CreateTextWindow, void(const TextWindow*));
+  MOCK_METHOD2(CreateTextWindow, void(WindowId, text::Selection*));
   MOCK_METHOD1(DestroyWindow, void(WindowId));
   MOCK_METHOD1(DidStartScriptHost, void(ScriptHostState));
   MOCK_METHOD1(DidHandleViewIdelEvent, void(int));

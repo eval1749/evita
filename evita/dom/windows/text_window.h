@@ -37,7 +37,6 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
   private: explicit TextWindow(Range* selection_range);
   public: virtual ~TextWindow();
 
-  public: text::Selection* text_selection() const;
   private: float zoom() const { return zoom_; }
   private: void set_zoom(float new_zoom);
 

@@ -32,7 +32,7 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void CreateTableWindow(
       dom::WindowId window_id, dom::Document* document) override;
   private: virtual void CreateTextWindow(
-      const dom::TextWindow* window) override;
+      dom::WindowId window_id, text::Selection* selection) override;
   private: virtual void DestroyWindow(dom::WindowId window_id) override;
   private: virtual void DidStartScriptHost(
       domapi::ScriptHostState state) override;

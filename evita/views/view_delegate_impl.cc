@@ -152,9 +152,9 @@ void ViewDelegateImpl::CreateTableWindow(dom::WindowId window_id,
 }
 
 
-void ViewDelegateImpl::CreateTextWindow(const dom::TextWindow* window) {
-  DCHECK(window);
-  new TextEditWindow(*window);
+void ViewDelegateImpl::CreateTextWindow(dom::WindowId window_id,
+                                        text::Selection* selection) {
+  new TextEditWindow(window_id, selection);
 }
 
 void ViewDelegateImpl::DestroyWindow(dom::WindowId window_id) {

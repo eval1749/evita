@@ -88,7 +88,8 @@ class ScriptThread final : public domapi::IoDelegate,
       const domapi::PopupWindowInit& init) override;
   private: virtual void CreateTableWindow(
       WindowId window_id, Document* document) override;
-  private: virtual void CreateTextWindow(const TextWindow* window) override;
+  private: virtual void CreateTextWindow(WindowId window_id,
+                                         text::Selection* selection) override;
   private: virtual void DestroyWindow(WindowId window_id) override;
   private: virtual void DidStartScriptHost(
       domapi::ScriptHostState state) override;

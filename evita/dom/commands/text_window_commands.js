@@ -204,9 +204,9 @@
     var range = new Range(this.selection.range);
     if (range.start == range.end) {
       range.moveStart(Unit.WORD, -1);
-      if (range.end - range.start > 4)
+      if (range.length > 4)
         range.start = range.end - 4;
-    } else if (range.end - range.start > 4) {
+    } else if (range.length > 4) {
       return;
     }
     var text = range.text;

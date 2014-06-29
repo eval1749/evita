@@ -217,7 +217,7 @@ SpellChecker.prototype.didFireTimer = function() {
    * @return {boolean}
    */
   function isCheckableWord(range) {
-    var length = range.end - range.start;
+    var length = range.length;
     if (length < SpellChecker.MIN_WORD_LENGTH ||
         length > SpellChecker.MAX_WORD_LENGTH) {
       return false;
@@ -257,7 +257,7 @@ SpellChecker.prototype.didFireTimer = function() {
       if (range.end == maxOffset) {
         // Word seems not to be completed yet. Spell checker will sleep
         // until document is changed.
-        numberOfChecked += range.end - range.start;
+        numberOfChecked += range.length;
         return restartOffset;
       }
 
@@ -266,7 +266,7 @@ SpellChecker.prototype.didFireTimer = function() {
       if (isCheckableWord(range) && !spellChecker.checkSpelling(range))
         return restartOffset;
 
-      numberOfChecked += range.end - range.start;
+      numberOfChecked += range.length;
 
       // Move to next word.
       // <#>include     => #|include

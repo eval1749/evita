@@ -13,54 +13,53 @@
 
 namespace text {
 
-Range::Range(Buffer* pBuffer, Posn lStart, Posn lEnd)
-    : end_(lEnd),
-      start_(lStart),
-      buffer_(pBuffer) {
+Range::Range(Buffer* buffer, Posn start, Posn end)
+    : end_(end),
+      start_(start),
+      buffer_(buffer) {
   DCHECK(buffer_->IsValidRange(start_, end_));
   buffer_->ranges()->AddRange(this);
 }
 
 Range::~Range() {
-  if (buffer_)
-    buffer_->ranges()->RemoveRange(this);
+  if (!buffer_)
+    return;
+  buffer_->ranges()->RemoveRange(this);
 }
 
-Posn Range::ensurePosn(Posn lPosn) const {
-  if (lPosn < 0)
+Posn Range::EnsureOffset(Posn offset) const {
+  if (offset < 0)
     return 0;
-  if (lPosn > buffer_->GetEnd())
+  if (offset > buffer_->GetEnd())
     return buffer_->GetEnd();
-  return lPosn;
+  return offset;
 }
 
-base::string16 Range::GetText() const {
+base::string16 Range::text() const {
   return buffer_->GetText(start_, end_);
 }
 
-Posn Range::SetEnd(Posn lPosn) {
-  SetRange(start_, lPosn);
-  return end_;
+void Range::set_end(Posn offset) {
+  SetRange(start_, offset);
 }
 
-void Range::SetRange(Posn lStart, Posn lEnd) {
-  lStart = ensurePosn(lStart);
-  lEnd = ensurePosn(lEnd);
-  if (lStart <= lEnd) {
-    start_ = lStart;
-    end_ = lEnd;
+void Range::SetRange(Posn start, Posn end) {
+  start = EnsureOffset(start);
+  end = EnsureOffset(end);
+  if (start <= end) {
+    start_ = start;
+    end_ = end;
   } else {
-    start_ = lEnd;
-    end_ = lStart;
+    start_ = end;
+    end_ = start;
   }
 }
 
-Posn Range::SetStart(Posn lPosn) {
-  SetRange(lPosn, end_);
-  return start_;
+void Range::set_start(Posn offset) {
+  SetRange(offset, end_);
 }
 
-void Range::SetText(const base::string16& text) {
+void Range::set_text(const base::string16& text) {
   if (buffer_->IsReadOnly()) {
     // TODO: We should throw read only buffer exception.
     return;
@@ -76,19 +75,19 @@ void Range::SetText(const base::string16& text) {
     buffer_->InsertBefore(start_, text);
   }
   start_ = start;
-  end_ = ensurePosn(static_cast<Posn>(start_ + text.length()));
+  end_ = EnsureOffset(static_cast<Posn>(start_ + text.length()));
 }
 
-Buffer::EnumChar::EnumChar(const Range* pRange)
-    : m_lEnd(pRange->GetEnd()),
-      m_lPosn(pRange->GetStart()),
-      m_pBuffer(pRange->buffer()) {
+Buffer::EnumChar::EnumChar(const Range* range)
+    : m_lEnd(range->end()),
+      m_lPosn(range->start()),
+      m_pBuffer(range->buffer()) {
 }
 
-Buffer::EnumCharRev::EnumCharRev(const Range* pRange)
-    : m_lStart(pRange->GetStart()),
-      m_lPosn(pRange->GetEnd()),
-      m_pBuffer(pRange->buffer()) {
+Buffer::EnumCharRev::EnumCharRev(const Range* range)
+    : m_lStart(range->start()),
+      m_lPosn(range->end()),
+      m_pBuffer(range->buffer()) {
 }
 
 }  // namespace text

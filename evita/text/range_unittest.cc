@@ -30,22 +30,22 @@ class RangeTest : public ::testing::Test {
 
 TEST_F(RangeTest, SetText) {
   auto const range1 = std::make_unique<text::Range>(buffer(), 0, 0);
-  range1->SetText(L"foo");
-  EXPECT_EQ(0, range1->GetStart());
-  EXPECT_EQ(3, range1->GetEnd());
+  range1->set_text(L"foo");
+  EXPECT_EQ(0, range1->start());
+  EXPECT_EQ(3, range1->end());
 
   auto const range2 = std::make_unique<text::Range>(buffer(), 3, 3);
   auto const range3 = std::make_unique<text::Range>(buffer(), 0, 3);
-  range2->SetText(L"bar");
+  range2->set_text(L"bar");
 
-  EXPECT_EQ(0, range1->GetStart());
-  EXPECT_EQ(6, range1->GetEnd());
+  EXPECT_EQ(0, range1->start());
+  EXPECT_EQ(6, range1->end());
 
-  EXPECT_EQ(3, range2->GetStart());
-  EXPECT_EQ(6, range2->GetEnd());
+  EXPECT_EQ(3, range2->start());
+  EXPECT_EQ(6, range2->end());
 
-  EXPECT_EQ(0, range3->GetStart());
-  EXPECT_EQ(6, range3->GetEnd());
+  EXPECT_EQ(0, range3->start());
+  EXPECT_EQ(6, range3->end());
 }
 
 }  // namespace

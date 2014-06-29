@@ -14,13 +14,6 @@ class RangeSet;
 class Range {
   friend class RangeSet;
 
-  public: struct Information {
-      bool m_fLineNum;
-      bool m_fColumn;
-      Count m_lLineNum;
-      Count m_lColumn;
-  }; // Information
-
   private: Buffer* buffer_;
   private: Posn end_;
   private: Posn start_;
@@ -29,20 +22,15 @@ class Range {
   public: ~Range();
 
   public: Buffer* buffer() const { return buffer_; }
+  public: Posn end() const { return end_; }
+  public: void set_end(Posn new_end);
+  public: Posn start() const { return start_; }
+  public: void set_start(Posn new_start);
+  public: base::string16 text() const;
+  public: void set_text(const base::string16& new_text);
 
-  // [E]
-  private: Posn ensurePosn(Posn) const;
-
-  // [G]
-  public: Posn GetEnd() const { return end_; }
-  public: Posn GetStart() const { return start_; }
-  public: base::string16 GetText() const;
-
-  // [S]
-  public: Posn SetEnd(Posn);
+  private: Posn EnsureOffset(Posn offset) const;
   public: void SetRange(Posn start, Posn end);
-  public: Posn SetStart(Posn);
-  public: void SetText(const base::string16& text);
 
   DISALLOW_COPY_AND_ASSIGN(Range);
 };

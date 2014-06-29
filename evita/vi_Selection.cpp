@@ -18,7 +18,7 @@ text::Posn Selection::anchor_offset() const {
 }
 
 text::Posn Selection::end() const {
-  return range_->GetEnd();
+  return range_->end();
 }
 
 text::Posn Selection::focus_offset() const {
@@ -26,5 +26,5 @@ text::Posn Selection::focus_offset() const {
 }
 
 text::Posn Selection::start() const {
-  return range_->GetStart();
+  return range_->start();
 }

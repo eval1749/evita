@@ -93,9 +93,9 @@ TEST_F(BufferTest, InsertAt) {
   EXPECT_EQ(css::TextDecoration::RedWave,
             buffer()->GetStyleAt(3).text_decoration()) <<
       "The style at insertion position isn't changed.";
-  EXPECT_EQ(2, range->GetStart()) <<
+  EXPECT_EQ(2, range->start()) <<
     "The range at insertion position should not be moved.";
-  EXPECT_EQ(2, range->GetEnd()) <<
+  EXPECT_EQ(2, range->end()) <<
     "The range at insertion position should not be moved.";
 }
 
@@ -124,9 +124,9 @@ TEST_F(BufferTest, InsertBefore) {
   EXPECT_EQ(css::TextDecoration::RedWave,
             buffer()->GetStyleAt(3).text_decoration()) <<
       "The style at insertion position isn't changed.";
-  EXPECT_EQ(3, range->GetStart()) <<
+  EXPECT_EQ(3, range->start()) <<
     "The range at insertion position should be push back.";
-  EXPECT_EQ(3, range->GetEnd()) <<
+  EXPECT_EQ(3, range->end()) <<
     "The range at insertion position should be push back.";
 }
 

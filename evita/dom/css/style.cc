@@ -273,8 +273,7 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
   }
   if (!changed)
     return;
-  document_->buffer()->SetStyle(range_->GetStart(), range_->GetEnd(),
-                                style_values);
+  document_->buffer()->SetStyle(range_->start(), range_->end(), style_values);
 }
 
 }  // namespace

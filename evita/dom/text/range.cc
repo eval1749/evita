@@ -42,9 +42,9 @@ class RangeClass : public v8_glue::WrapperInfo {
       v8_glue::Optional<int> opt_start, v8_glue::Optional<int> opt_end) {
     if (either_document_or_range.is_left) {
       auto const document = either_document_or_range.left;
-      auto const start_position = opt_start.get(0);
-      auto const end_position = opt_end.get(start_position);
-      return new Range(document, start_position, end_position);
+      auto const start = opt_start.get(0);
+      auto const end = opt_end.get(start);
+      return new Range(document, start, end);
     }
     auto const range = either_document_or_range.right;
     auto const document = range->document();
@@ -89,43 +89,43 @@ Range::~Range() {
 }
 
 bool Range::collapsed() const {
-  return range_->GetStart() == range_->GetEnd();
+  return range_->start() == range_->end();
 }
 
 int Range::end() const {
-  return range_->GetEnd();
+  return range_->end();
 }
 
 int Range::start() const {
-  return range_->GetStart();
+  return range_->start();
 }
 
 base::string16 Range::text() const {
-  return std::move(range_->GetText());
+  return std::move(range_->text());
 }
 
-void Range::set_end(int position) {
-  if (!document_->IsValidPosition(position))
+void Range::set_end(int offset) {
+  if (!document_->IsValidPosition(offset))
     return;
-  range_->SetEnd(position);
+  range_->set_end(offset);
 }
 
-void Range::set_start(int position) {
-  if (!document_->IsValidPosition(position))
+void Range::set_start(int offset) {
+  if (!document_->IsValidPosition(offset))
     return;
-  range_->SetStart(position);
+  range_->set_start(offset);
 }
 
 void Range::set_text(const base::string16& text) {
   if (!document_->CheckCanChange())
     return;
-  range_->SetText(text);
+  range_->set_text(text);
 }
 
-Range* Range::CollapseTo(Posn position) {
-  if (!document_->IsValidPosition(position))
+Range* Range::CollapseTo(Posn offset) {
+  if (!document_->IsValidPosition(offset))
     return this;
-  range_->SetRange(position, position);
+  range_->SetRange(offset, offset);
   return this;
 }
 
@@ -158,7 +158,7 @@ void Range::SetSpelling(int spelling_code) const {
     return;
   }
   document_->buffer()->spelling_markers()->InsertMarker(
-    range_->GetStart(), range_->GetEnd(), Local::MapToSpelling(spelling_code));
+    range_->start(), range_->end(), Local::MapToSpelling(spelling_code));
 }
 
 void Range::SetSyntax(const base::string16& syntax) const {
@@ -168,7 +168,7 @@ void Range::SetSyntax(const base::string16& syntax) const {
     return;
   }
   document_->buffer()->syntax_markers()->InsertMarker(
-    range_->GetStart(), range_->GetEnd(), common::AtomicString(syntax));
+    range_->start(), range_->end(), common::AtomicString(syntax));
 }
 
 }  // namespace dom

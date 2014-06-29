@@ -632,7 +632,6 @@ void ScrollBar::OnDraw(gfx::Canvas* canvas) {
 }
 
 void ScrollBar::OnMouseExited(const ui::MouseEvent&) {
-  DVLOG(0) << "OnMouseExited " << hover_part_;
   if (!hover_part_)
     return;
   hover_part_->set_state(Part::State::Normal);
@@ -641,7 +640,6 @@ void ScrollBar::OnMouseExited(const ui::MouseEvent&) {
 }
 
 void ScrollBar::OnMouseMoved(const ui::MouseEvent& event) {
-  DVLOG(0) << "OnMouseMoved " << hover_part_;
   if (thumb_->is_active()) {
     thumb_->OnMouseMoved(event);
     return;

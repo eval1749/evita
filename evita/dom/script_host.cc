@@ -183,6 +183,8 @@ v8_glue::Runner* ScriptHost::runner() const {
 
 void ScriptHost::set_testing_runner(v8_glue::Runner* runner) {
   testing_runner_ = runner;
+  v8_glue::Runner::Scope runner_scope(runner);
+  PopulateEnviromentStrings(runner);
 }
 
 ViewDelegate* ScriptHost::view_delegate() const {
@@ -240,7 +242,7 @@ void ScriptHost::RunMicrotasks() {
 }
 
 ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
-                                          domapi::IoDelegate* io_deleage) {
+                              domapi::IoDelegate* io_deleage) {
   // Node: Using Application::instance() starts thread. So, we don't
   // start |ScriptHost| in testing. Although, we should remove
   // all |Application::instance()| in DOM world.
@@ -257,7 +259,7 @@ ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
   v8::V8::AddMessageListener(MessageCallback);
   v8::V8::AddGCPrologueCallback(GcPrologueCallback);
   v8::V8::AddGCEpilogueCallback(GcEpilogueCallback);
-  // TODO(yosi) Turning off micro task runnining during creating wrapper, name
+  // TODO(yosi) Turning off micro task running during creating wrapper, name
   // |Editor.checkSpelling('foo').then(console.log)| to work.
   // Otherwise |console.log| executed as micro task gets storage object which
   // doesn't have |v8_glue::WrapperInfo| at zeroth internal field.

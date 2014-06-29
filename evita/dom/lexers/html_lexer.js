@@ -12,6 +12,7 @@ global.HtmlLexer = (function(options) {
     XmlLexer.call(this, document, options);
   }
 
+  HtmlLexer.keywords = options.keywords;
   HtmlLexer.prototype = Object.create(XmlLexer.prototype, {
     constructor: {value: HtmlLexer},
   });

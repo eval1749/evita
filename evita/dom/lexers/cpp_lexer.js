@@ -12,6 +12,7 @@ global.CppLexer = (function(options) {
     ClikeLexer.call(this, document, options);
   }
 
+  CppLexer.keywords = options.keywords;
   CppLexer.prototype = Object.create(ClikeLexer.prototype, {
     constructor: {value: CppLexer},
   });

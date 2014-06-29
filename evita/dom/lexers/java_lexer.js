@@ -12,6 +12,7 @@ global.JavaLexer = (function(options) {
     ClikeLexer.call(this, document, options);
   }
 
+  JavaLexer.keywords = options.keywords;
   JavaLexer.prototype = Object.create(ClikeLexer.prototype, {
     constructor: {value: JavaLexer},
   });

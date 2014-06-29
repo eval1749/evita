@@ -12,6 +12,7 @@ global.IdlLexer = (function(options) {
     ClikeLexer.call(this, document, options);
   }
 
+  IdlLexer.keywords = options.keywords;
   IdlLexer.prototype = Object.create(ClikeLexer.prototype, {
     constructor: {value: IdlLexer},
   });

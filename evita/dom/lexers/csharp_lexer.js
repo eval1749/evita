@@ -12,6 +12,7 @@ global.CsharpLexer = (function(options) {
     ClikeLexer.call(this, document, options);
   }
 
+  CsharpLexer.keywords = options.keywords;
   CsharpLexer.prototype = Object.create(ClikeLexer.prototype, {
     constructor: {value: CsharpLexer},
   });

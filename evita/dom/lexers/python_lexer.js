@@ -116,6 +116,7 @@ global.PythonLexer = (function(keywords) {
     syntaxOfToken: {value: syntaxOfToken}
   });
 
+  PythonLexer.keywords = keywords;
   return PythonLexer;
 })(Lexer.createKeywords([
   // Keywords

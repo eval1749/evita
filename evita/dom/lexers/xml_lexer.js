@@ -894,6 +894,7 @@ global.XmlLexer = (function(xmlOptions) {
     syntaxOfToken: {value: syntaxOfToken}
   });
 
+  XmlLexer.keywords = xmlOptions.keywords;
   return XmlLexer;
 })({
   keywords: Lexer.createKeywords([

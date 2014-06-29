@@ -13,23 +13,21 @@ class Buffer;
 }
 
 class Selection {
-  private: bool m_fStartIsActive;
-  private: text::Range* m_pRange;
+  private: text::Range* range_;
+  private: bool start_is_active_;
 
   public: Selection(text::Range* range);
   public: ~Selection();
 
-  public: text::Range* range() const { return m_pRange; }
+  public: text::Posn anchor_offset() const;
+  public: text::Posn end() const;
+  public: text::Posn focus_offset() const;
+  public: text::Posn start() const;
 
-  // [G]
-  public: Posn GetEnd() const;
-  public: Posn GetStart() const;
-
-  // [I]
-  public: bool IsStartActive() const { return m_fStartIsActive; }
-
-  // [S]
-  public: void SetStartIsActive(bool new_start_is_active);
+  public: bool IsStartActive() const { return start_is_active_; }
+  public: void SetStartIsActive(bool new_start_is_active) {
+    start_is_active_ = new_start_is_active;
+  }
 
   DISALLOW_COPY_AND_ASSIGN(Selection);
 };

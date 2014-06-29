@@ -7,21 +7,24 @@
 #include "evita/text/range.h"
 
 Selection::Selection(text::Range* range)
-    : m_fStartIsActive(false),
-      m_pRange(range) {
+    : range_(range), start_is_active_(false) {
 }
 
 Selection::~Selection() {
 }
 
-Posn Selection::GetEnd() const {
-  return m_pRange->GetEnd();
+text::Posn Selection::anchor_offset() const {
+  return start_is_active_ ? end() : start();
 }
 
-Posn Selection::GetStart() const {
-  return m_pRange->GetStart();
+text::Posn Selection::end() const {
+  return range_->GetEnd();
 }
 
-void Selection::SetStartIsActive(bool new_start_is_active) {
-  m_fStartIsActive = new_start_is_active;
+text::Posn Selection::focus_offset() const {
+  return start_is_active_ ? start() : end();
+}
+
+text::Posn Selection::start() const {
+  return range_->GetStart();
 }

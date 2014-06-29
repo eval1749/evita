@@ -4,6 +4,8 @@
 
 #include "evita/views/text/render_selection.h"
 
+#include <algorithm>
+
 #include "base/logging.h"
 
 namespace views {
@@ -13,38 +15,35 @@ namespace rendering {
 //
 // TextSelectionModel
 //
-TextSelectionModel::TextSelectionModel(text::Posn start, text::Posn end,
-                                       Active active)
-    : active_(active), end_(end), start_(start) {
+TextSelectionModel::TextSelectionModel(State state, text::Posn anchor_offset,
+                                       text::Posn focus_offset)
+    : end_(std::max(anchor_offset, focus_offset)), focus_offset_(focus_offset),
+      state_(state), start_(std::min(anchor_offset, focus_offset)) {
 }
 
 TextSelectionModel::TextSelectionModel(const TextSelectionModel& other)
-    : TextSelectionModel(other.start_, other.end_, other.active_) {
+    : TextSelectionModel(other.state_, other.anchor_offset(),
+                         other.focus_offset_) {
 }
 
 TextSelectionModel::TextSelectionModel()
-    : TextSelectionModel(0, 0, Active::NotActive) {
+    : TextSelectionModel(State::Disabled, 0, 0) {
 }
 
 TextSelectionModel::~TextSelectionModel() {
 }
 
 bool TextSelectionModel::operator==(const TextSelectionModel& other) const {
-  return active_ == other.active_ && end_ == other.end_ &&
-         start_ == other.start_;
+  return end_ == other.end_ && focus_offset_ == other.focus_offset_ &&
+         state_ == other.state_ && start_ == other.start_;
 }
 
 bool TextSelectionModel::operator!=(const TextSelectionModel& other) const {
   return !operator==(other);
 }
 
-text::Posn TextSelectionModel::active_offset() const {
-  DCHECK(has_caret());
-  return active_ == Active::StartIsActive ? start_ : end_;
-}
-
-bool TextSelectionModel::has_caret() const {
-  return active_ == Active::StartIsActive || active_ == Active::EndIsActive;
+text::Posn TextSelectionModel::anchor_offset() const {
+  return focus_offset_ == end_ ? start_ : end_;
 }
 
 //////////////////////////////////////////////////////////////////////

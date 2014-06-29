@@ -12,18 +12,20 @@ namespace views {
 namespace rendering {
 
 class TextSelectionModel final {
-  public: enum class Active {
-    NotActive,
-    EndIsActive,
-    RangeIsActive,
-    StartIsActive,
+  public: enum class State {
+    Disabled,
+    HasFocus,
+    Highlight,
   };
-  private: Active active_;
+
+  // For fast access to start and end positions of selection,
+  // |TextSelectionModel| has |start_| and |end_| instead of anchor offset.
   private: text::Posn end_;
+  private: text::Posn focus_offset_;
+  private: State state_;
   private: text::Posn start_;
 
-  public: TextSelectionModel(text::Posn start, text::Posn end,
-                             Active active);
+  public: TextSelectionModel(State state, text::Posn anchor, text::Posn focus);
   public: TextSelectionModel(const TextSelectionModel& model);
   public: TextSelectionModel();
   public: ~TextSelectionModel();
@@ -31,12 +33,13 @@ class TextSelectionModel final {
   public: bool operator==(const TextSelectionModel& other) const;
   public: bool operator!=(const TextSelectionModel& other) const;
 
+  private: text::Posn anchor_offset() const;
   public: text::Posn end() const { return end_; }
+  public: text::Posn focus_offset() const { return focus_offset_; }
   public: text::Posn start() const { return start_; }
 
-  public: text::Posn active_offset() const;
-  public: bool has_caret() const;
-  public: bool is_active() const { return active_ != Active::NotActive; }
+  public: bool disabled() const { return state_ == State::Disabled; }
+  public: bool has_focus() const { return state_ == State::HasFocus; }
   public: bool is_caret() const { return start_ == end_; }
   public: bool is_range() const { return start_ != end_; }
 };
@@ -51,18 +54,18 @@ class TextSelection final {
   public: TextSelection();
   public: ~TextSelection();
 
-  public: gfx::ColorF color() const { return color_; }
-  public: text::Posn end() const { return model_.end(); }
-  public: text::Posn start() const { return model_.start(); }
-
-  public: text::Posn active_offset() const { return model_.active_offset(); }
-  public: bool has_caret() const { return model_.has_caret(); }
-  public: bool is_active() const { return model_.is_active(); }
-  public: bool is_caret() const { return model_.is_caret(); }
-  public: bool is_range() const { return model_.is_range(); }
-
   bool operator==(const TextSelection& other) const;
   bool operator!=(const TextSelection& other) const;
+
+  public: gfx::ColorF color() const { return color_; }
+  public: text::Posn end() const { return model_.end(); }
+  public: text::Posn focus_offset() const { return model_.focus_offset(); }
+  public: text::Posn start() const { return model_.start(); }
+
+  public: bool disabled() const { return model_.disabled(); }
+  public: bool has_focus() const { return model_.has_focus(); }
+  public: bool is_caret() const { return model_.is_caret(); }
+  public: bool is_range() const { return model_.is_range(); }
 };
 
 } // namespace rendering

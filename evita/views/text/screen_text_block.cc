@@ -439,11 +439,11 @@ void ScreenTextBlock::Render(const TextBlock* text_block,
 void ScreenTextBlock::RenderCaret() {
   if (ui::Caret::instance()->owner() != this)
     return;
-  if (!selection_.has_caret()) {
+  if (!selection_.has_focus()) {
     ui::Caret::instance()->Update(this, canvas_, gfx::RectF());
     return;
   }
-  auto const char_rect = HitTestTextPosition(selection_.active_offset());
+  auto const char_rect = HitTestTextPosition(selection_.focus_offset());
   if (char_rect.empty()) {
     ui::Caret::instance()->Update(this, canvas_, gfx::RectF());
     return;
@@ -522,7 +522,7 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
     }
   }
 
-  if (selection_.has_caret() &&
+  if (selection_.has_focus() &&
       ui::Caret::instance()->owner() == this &&
       ui::Caret::instance()->is_shown()) {
     const auto& caret_bounds = ui::Caret::instance()->bounds();

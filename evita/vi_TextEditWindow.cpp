@@ -63,28 +63,25 @@ bool IsPopupWindow(HWND hwnd) {
   return false;
 }
 
-TextSelectionModel::Active GetTextSelectionActive(
-    TextEditWindow* window, const ::Selection& selection) {
+TextSelectionModel::State GetTextSelectionState(TextEditWindow* window) {
   if (window->has_focus())
-    return selection.IsStartActive() ?
-        TextSelectionModel::Active::StartIsActive :
-        TextSelectionModel::Active::EndIsActive;
+    return TextSelectionModel::State::HasFocus;
 
   if (!IsPopupWindow(::GetFocus()))
-    return TextSelectionModel::Active::NotActive;
+    return TextSelectionModel::State::Disabled;
 
   auto const edit_pane = views::FrameList::instance()->active_frame()->
     GetActivePane()->as<EditPane>();
   if (edit_pane && edit_pane->GetActiveWindow() == window)
-    return TextSelectionModel::Active::RangeIsActive;
-  return TextSelectionModel::Active::NotActive;
+    return TextSelectionModel::State::Highlight;
+  return TextSelectionModel::State::Disabled;
 }
 
 TextSelectionModel GetTextSelectionModel(
     TextEditWindow* window, const ::Selection& selection) {
   return TextSelectionModel(
-      selection.GetStart(), selection.GetEnd(),
-      GetTextSelectionActive(window, selection));
+      GetTextSelectionState(window),
+      selection.anchor_offset(), selection.focus_offset());
 }
 
 }  // namespace
@@ -550,14 +547,14 @@ void TextEditWindow::Redraw() {
 
   auto const selection = GetTextSelectionModel(this, *selection_);
   Posn lCaretPosn;
-  if (selection.has_caret()) {
-    lCaretPosn = selection.active_offset();
-  } else {
+  if (selection.disabled()) {
     auto const max_offset = buffer()->GetEnd();
     if (selection.start() == max_offset && selection.end() == max_offset)
       lCaretPosn = max_offset;
     else
-      lCaretPosn = m_lCaretPosn == -1 ? selection.start() : m_lCaretPosn;
+      lCaretPosn = m_lCaretPosn == -1 ? selection.focus_offset() : m_lCaretPosn;
+  } else {
+    lCaretPosn = selection.focus_offset();
   }
 
   DCHECK_GE(lCaretPosn, 0);

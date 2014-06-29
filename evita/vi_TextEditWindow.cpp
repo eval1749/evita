@@ -35,6 +35,7 @@
 #include "evita/text/buffer.h"
 #include "evita/text/marker_set.h"
 #include "evita/text/range.h"
+#include "evita/text/selection.h"
 #include "evita/ui/base/ime/text_composition.h"
 #include "evita/ui/base/ime/text_input_client.h"
 #include "evita/ui/controls/scroll_bar.h"
@@ -45,7 +46,6 @@
 #include "evita/views/text/text_renderer.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
-#include "evita/vi_Selection.h"
 
 using views::rendering::TextSelectionModel;
 
@@ -78,7 +78,7 @@ TextSelectionModel::State GetTextSelectionState(TextEditWindow* window) {
 }
 
 TextSelectionModel GetTextSelectionModel(
-    TextEditWindow* window, const ::Selection& selection) {
+    TextEditWindow* window, const text::Selection& selection) {
   return TextSelectionModel(
       GetTextSelectionState(window),
       selection.anchor_offset(), selection.focus_offset());
@@ -95,7 +95,7 @@ TextEditWindow::TextEditWindow(const dom::TextWindow& text_window)
       canvas_(nullptr),
       m_lCaretPosn(-1),
       text_renderer_(new TextRenderer(text_window.document()->buffer())),
-      selection_(text_window.view_selection()),
+      selection_(text_window.text_selection()),
       vertical_scroll_bar_(new ui::ScrollBar(ui::ScrollBar::Type::Vertical,
                                              this)),
       view_start_(0), zoom_(1.0f) {

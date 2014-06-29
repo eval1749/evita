@@ -26,8 +26,8 @@ TextWindow::TextWindow(Range* selection_range)
 TextWindow::~TextWindow() {
 }
 
-::Selection* TextWindow::view_selection() const {
-  return static_cast<TextSelection*>(selection())->view_selection();
+text::Selection* TextWindow::text_selection() const {
+  return static_cast<TextSelection*>(selection())->text_selection();
 }
 
 void TextWindow::set_zoom(float new_zoom) {

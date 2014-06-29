@@ -1,13 +1,7 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - visual - text pane
-// listener/winapp/vi_text_pane.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_TextEditWindow.h#2 $
-//
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #if !defined(INCLUDE_listener_winapp_visual_text_pane_h)
 #define INCLUDE_listener_winapp_visual_text_pane_h
 
@@ -30,6 +24,7 @@ class TextWindow;
 
 namespace text {
 class Buffer;
+class Selection;
 }
 
 namespace views {
@@ -38,7 +33,6 @@ namespace rendering {
 class TextSelectionModel;
 }
 }
-
 
 namespace ui {
 class KeyboardEvent;
@@ -66,7 +60,7 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: gfx::Canvas* canvas_;
   private: Posn m_lCaretPosn;
   // TODO(yosi): Manage life time of selection.
-  private: Selection* selection_;
+  private: text::Selection* selection_;
   private: std::unique_ptr<TextRenderer> text_renderer_;
   private: ui::ScrollBar* const vertical_scroll_bar_;
   private: text::Posn view_start_;

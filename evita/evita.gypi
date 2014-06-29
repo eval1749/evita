@@ -80,6 +80,8 @@
         'text/range_set_base.h',
         'text/scoped_undo_group.cc',
         'text/scoped_undo_group.h',
+        'text/selection.cc',
+        'text/selection.h',
         'text/undo_stack.cc',
         'text/undo_step.cc',
         'z_debug.cpp',
@@ -129,7 +131,6 @@
         'views/forms/form_window.cc',
         'vi_Frame.cpp',
         'vi_Pane.cpp',
-        'vi_Selection.cpp',
         'vi_Style.cpp',
         'vi_TextEditWindow.cpp',
       ], # sources

@@ -1,23 +1,26 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_text_window_h)
-#define INCLUDE_evita_dom_text_window_h
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#if !defined(INCLUDE_evita_dom_windows_text_window_h)
+#define INCLUDE_evita_dom_windows_text_window_h
 
 #include "evita/dom/windows/document_window.h"
 
 #include "evita/dom/windows/rect.h"
-
-class Selection;
 
 namespace domapi {
 class FloatPoint;
 class FloatRect;
 }
 
+namespace text {
+class Selection;
+}
+
 namespace dom {
 class Document;
 class Range;
-class Selection;
 
 namespace bindings {
 class TextWindowClass;
@@ -34,7 +37,7 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
   private: explicit TextWindow(Range* selection_range);
   public: virtual ~TextWindow();
 
-  public: ::Selection* view_selection() const;
+  public: text::Selection* text_selection() const;
   private: float zoom() const { return zoom_; }
   private: void set_zoom(float new_zoom);
 
@@ -56,4 +59,4 @@ class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_text_window_h)
+#endif //!defined(INCLUDE_evita_dom_windows_text_window_h)

@@ -95,7 +95,11 @@ SpellChecker.RE_WORD = new RegExp('^[A-Za-z][a-z]{' +
  */
 SpellChecker.SpellingResult
 
-/** * @type {number} */
+/** @type {!Set.<string>} */
+SpellChecker.keywords;
+Object.defineProperty(SpellChecker, 'keywords', {value: new Set()});
+
+/** @type {number} */
 SpellChecker.numberOfChecking;
 
 /** @type {number} */
@@ -233,7 +237,10 @@ SpellChecker.prototype.didFireTimer = function() {
       return false;
     if (document.syntaxAt(range.start) == 'keyword')
       return false;
-    return SpellChecker.RE_WORD.test(range.text)
+    var word = range.text;
+    if (SpellChecker.keywords.has(word))
+      return false;
+    return SpellChecker.RE_WORD.test(word)
   }
 
   var numberOfChecked = 0;

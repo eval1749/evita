@@ -37,29 +37,29 @@
     var document = this.document;
     var start = this.start;
     var end = this.end;
-    var string_case = Range.Case.MIXED;
+    var stringCase = Range.Case.MIXED;
     var state = State.START;
     for (var offset = start; offset < end; ++offset) {
-      var char_code = document.charCodeAt_(offset);
-      var ucd = Unicode.UCD[char_code];
-      var lower_case = ucd.category == Unicode.Category.Ll ||
+      var charCode = document.charCodeAt_(offset);
+      var ucd = Unicode.UCD[charCode];
+      var lowerCase = ucd.category == Unicode.Category.Ll ||
                        ucd.category == Unicode.Category.Lt;
-      var upper_case = ucd.category == Unicode.Category.Lu;
+      var upperCase = ucd.category == Unicode.Category.Lu;
       switch (state) {
         case State.START:
-          if (upper_case) {
-            string_case = Range.Case.CAPITALIZED_WORDS;
+          if (upperCase) {
+            stringCase = Range.Case.CAPITALIZED_WORDS;
             state = State.FIRST_CAP_SECOND;
-          } else if (lower_case) {
-            string_case = Range.Case.LOWER;
+          } else if (lowerCase) {
+            stringCase = Range.Case.LOWER;
             state = State.LOWER;
           }
           break;
         case State.FIRST_CAP_IN_WORD:
-          if (upper_case) {
+          if (upperCase) {
             // We found "FoB".
             return Range.Case.MIXED;
-          } else if (lower_case) {
+          } else if (lowerCase) {
             // We found "Foo".
           } else {
             // We found "Foo+".
@@ -67,21 +67,21 @@
           }
           break;
         case State.FIRST_CAP_NOT_WORD:
-          if (upper_case) {
+          if (upperCase) {
             // We found "Foo B".
             state = State.REST_CAP_IN_WORD;
-          } else if (lower_case) {
+          } else if (lowerCase) {
             // We found "Foo b"
-            string_case = Range.Case.CAPITALIZED_TEXT;
+            stringCase = Range.Case.CAPITALIZED_TEXT;
             state = State.LOWER;
           }
           break;
         case State.FIRST_CAP_SECOND:
-          if (upper_case) {
+          if (upperCase) {
             // We found "FO"
-            string_case = Range.Case.UPPER;
+            stringCase = Range.Case.UPPER;
             state = State.UPPER;
-          } else if (lower_case) {
+          } else if (lowerCase) {
             // We found "Fo"
             state = State.FIRST_CAP_IN_WORD;
           } else {
@@ -90,33 +90,33 @@
           }
           break;
         case State.LOWER:
-          if (upper_case) {
+          if (upperCase) {
             // We found "foB"
             return Range.Case.MIXED;
           }
           break;
         case State.REST_CAP_IN_WORD:
-          if (upper_case) {
+          if (upperCase) {
             // We found "Foo Bar BaZ"
             return Range.Case.MIXED;
           }
-          if (!lower_case) {
+          if (!lowerCase) {
             // We found "Foo Bar+"
             state = State.REST_CAP_NOT_WORD;
           }
           break;
         case State.REST_CAP_NOT_WORD:
-          if (lower_case) {
+          if (lowerCase) {
             // We found "Foo Bar+b"
             return Range.Case.MIXED;
           }
-          if (upper_case) {
+          if (upperCase) {
             // We found "Foo Bar+B"
             state = State.REST_CAP_IN_WORD;
           }
           break;
         case State.UPPER:
-          if (lower_case) {
+          if (lowerCase) {
             // We found "FOo"
             return Range.Case.MIXED;
           }
@@ -125,7 +125,7 @@
           throw 'Unexepcted state ' + state;
       }
     }
-    return string_case;
+    return stringCase;
   };
 
   /**
@@ -236,14 +236,14 @@
   };
 
   /**
-   * @param {string} char_set
+   * @param {string} charSet
    * @param {number=} opt_count, default is Count.FORWARD
    * @return {!Range}
    */
-  Range.prototype.moveEndWhile = function(char_set, opt_count) {
+  Range.prototype.moveEndWhile = function(charSet, opt_count) {
     var count = arguments.length >= 2 ? /** @type{number} */(opt_count) :
         Count.FORWARD;
-    var position = this.document.computeWhile_(char_set, count, this.end);
+    var position = this.document.computeWhile_(charSet, count, this.end);
     if (position < this.start)
       this.collapseTo(position);
     else
@@ -268,14 +268,14 @@
   };
 
   /**
-   * @param {string} char_set
+   * @param {string} charSet
    * @param {number=} opt_count, default is Count.FORWARD
    * @return {!Range}
    */
-  Range.prototype.moveStartWhile = function(char_set, opt_count) {
+  Range.prototype.moveStartWhile = function(charSet, opt_count) {
     var count = arguments.length >= 2 ? /** @type{number} */(opt_count) :
         Count.FORWARD;
-    var position = this.document.computeWhile_(char_set, count, this.end);
+    var position = this.document.computeWhile_(charSet, count, this.end);
     if (position > this.end)
       this.collapseTo(position);
     else

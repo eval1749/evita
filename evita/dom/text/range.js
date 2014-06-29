@@ -18,6 +18,13 @@
     UPPER: Symbol('UPPER'),
   };
 
+  Object.defineProperties(Range.prototype, {
+    length: {get:
+        /** @return {number} */
+        function() { return this.end - this.start; }
+    }
+  });
+
   /**
    * @return {!Range.Case}
    */

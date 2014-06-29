@@ -110,27 +110,32 @@ TEST_F(RangeTest, ctor) {
   EXPECT_SCRIPT_TRUE("range2.document === doc1");
   EXPECT_SCRIPT_EQ("2", "range2.start");
   EXPECT_SCRIPT_EQ("2", "range2.end");
+  EXPECT_SCRIPT_EQ("0", "range2.length");
 
   EXPECT_SCRIPT_VALID("var range3 = new Range(doc1, 3, 4)");
   EXPECT_SCRIPT_TRUE("range3.document === doc1");
   EXPECT_SCRIPT_EQ("3", "range3.start");
   EXPECT_SCRIPT_EQ("4", "range3.end");
+  EXPECT_SCRIPT_EQ("1", "range3.length");
 
   EXPECT_SCRIPT_VALID("var range4 = new Range(range1)");
   EXPECT_SCRIPT_TRUE("range4.document === doc1");
   EXPECT_SCRIPT_EQ("1", "range4.start");
   EXPECT_SCRIPT_EQ("7", "range4.end");
+  EXPECT_SCRIPT_EQ("6", "range4.length");
 
 
   EXPECT_SCRIPT_VALID("var range5 = new Range(range1, 2)");
   EXPECT_SCRIPT_TRUE("range5.document === doc1");
   EXPECT_SCRIPT_EQ("2", "range5.start");
   EXPECT_SCRIPT_EQ("2", "range5.end");
+  EXPECT_SCRIPT_EQ("0", "range5.length");
 
   EXPECT_SCRIPT_VALID("var range6 = new Range(range1, 2, 4)");
   EXPECT_SCRIPT_TRUE("range6.document === doc1");
   EXPECT_SCRIPT_EQ("2", "range6.start");
   EXPECT_SCRIPT_EQ("4", "range6.end");
+  EXPECT_SCRIPT_EQ("2", "range6.length");
 }
 
 TEST_F(RangeTest, capitalize) {

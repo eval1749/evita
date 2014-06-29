@@ -28,6 +28,9 @@ Range.prototype.document;
 /** @expose @type {!TextOffset} */
 Range.prototype.end = 0;
 
+/** @expose @type {number} */
+Range.prototype.length;
+
 /** @expose @type {!TextOffset} */
 Range.prototype.start = 0;
 

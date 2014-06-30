@@ -1257,6 +1257,7 @@ void EditPane::SplitHorizontally(Window* left_window,
 
   left_box->EnsureInHorizontalLayoutBox();
   left_box->outer()->Split(left_box, new_right_window, width / 2);
+  left_window->MakeSelectionVisible();
 }
 
 void EditPane::SplitVertically(Window* above_window,
@@ -1275,6 +1276,7 @@ void EditPane::SplitVertically(Window* above_window,
 
   above_box->EnsureInVerticalLayoutBox();
   above_box->outer()->Split(above_box, new_below_window, height / 2);
+  above_window->MakeSelectionVisible();
 }
 
 void EditPane::WillDestroyWidget() {

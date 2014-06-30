@@ -545,6 +545,8 @@ void ScreenTextBlock::Reset() {
 
 void ScreenTextBlock::SetBounds(const gfx::RectF& rect) {
   Reset();
+  if (!bounds_.empty())
+    ui::Caret::instance()->DidPaint(this, bounds_);
   bounds_ = rect;
 }
 

@@ -533,7 +533,6 @@ void TextEditWindow::OnDraw(gfx::Canvas*) {
 // views::ContentWindow
 void TextEditWindow::MakeSelectionVisible() {
   m_lCaretPosn = -1;
-  Redraw();
 }
 
 void TextEditWindow::Redraw() {

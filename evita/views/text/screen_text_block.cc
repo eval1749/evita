@@ -440,12 +440,12 @@ void ScreenTextBlock::RenderCaret() {
   if (ui::Caret::instance()->owner() != this)
     return;
   if (!selection_.has_focus()) {
-    ui::Caret::instance()->Update(this, canvas_, gfx::RectF());
+    ui::Caret::instance()->Hide(this);
     return;
   }
   auto const char_rect = HitTestTextPosition(selection_.focus_offset());
   if (char_rect.empty()) {
-    ui::Caret::instance()->Update(this, canvas_, gfx::RectF());
+    ui::Caret::instance()->Hide(this);
     return;
   }
   auto const caret_width = 2;
@@ -457,7 +457,7 @@ void ScreenTextBlock::RenderCaret() {
 void ScreenTextBlock::RenderSelection(const TextSelection& selection) {
   selection_ = selection;
   if (selection_.start() >= lines_.back()->text_end()) {
-    ui::Caret::instance()->Update(this, canvas_, gfx::RectF());
+    ui::Caret::instance()->Hide(this);
     return;
   }
   gfx::Canvas::AxisAlignedClipScope clip_scope(*canvas_, bounds_);

@@ -48,6 +48,7 @@ class Caret final : public common::Singleton<Caret> {
   public: void Blink(gfx::Canvas* canvas);
   public: void DidPaint(Delegate* delegate, const gfx::RectF& paint_bounds);
   public: void Give(Delegate* delegate);
+  public: void Hide(Delegate* delegate);
   public: void Take(Delegate* delegate);
   public: void Update(Delegate* delegate, gfx::Canvas* canvas,
                       const gfx::RectF& new_bounds);

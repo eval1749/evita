@@ -78,6 +78,13 @@ void Caret::Give(Delegate* owner) {
   shown_ = false;
 }
 
+void Caret::Hide(Delegate* delegate) {
+  if (owner_ != delegate)
+    return;
+  DCHECK(!shown_);
+  bounds_ = gfx::RectF();
+}
+
 void Caret::Take(Delegate* owner) {
   DCHECK(!owner_);
   bounds_ = gfx::RectF();
@@ -86,15 +93,14 @@ void Caret::Take(Delegate* owner) {
 }
 
 void Caret::Update(Delegate* delegate, gfx::Canvas* canvas,
-                   const gfx::RectF& new_rect) {
+                   const gfx::RectF& new_bounds) {
+  DCHECK(!new_bounds.empty());
   if (owner_ != delegate)
     return;
   DCHECK(!shown_);
-  if (bounds_ == new_rect)
+  if (bounds_ == new_bounds)
     return;
-  bounds_ = new_rect;
-  if (bounds_.empty())
-    return;
+  bounds_ = new_bounds;
   // Don't blink caret while when caret is moved or resized.
   last_blink_time_ = base::Time::Now();
   owner_->PaintCaret(canvas, *this);

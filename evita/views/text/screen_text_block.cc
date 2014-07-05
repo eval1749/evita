@@ -456,8 +456,10 @@ void ScreenTextBlock::RenderCaret() {
 
 void ScreenTextBlock::RenderSelection(const TextSelection& selection) {
   selection_ = selection;
-  if (selection_.start() >= lines_.back()->text_end())
+  if (selection_.start() >= lines_.back()->text_end()) {
+    ui::Caret::instance()->Update(this, canvas_, gfx::RectF());
     return;
+  }
   gfx::Canvas::AxisAlignedClipScope clip_scope(*canvas_, bounds_);
   if (selection.is_range() &&
       selection_.end() > lines_.front()->text_start()) {

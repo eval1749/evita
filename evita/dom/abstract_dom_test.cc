@@ -132,8 +132,12 @@ AbstractDomTest::RunnerDelegate::GetGlobalTemplate(
   v8::Context::Scope context_scope(context);
   test_instance_->PopulateGlobalTemplate(isolate, templ);
 
-  templ->Set(gin::StringToV8(isolate, "log"),
-             v8::FunctionTemplate::New(isolate, LogCallback));
+  static bool did_install_log;
+  if (!did_install_log) {
+    did_install_log = true;
+    templ->Set(gin::StringToV8(isolate, "log"),
+               v8::FunctionTemplate::New(isolate, LogCallback));
+  }
 
   return templ;
 }

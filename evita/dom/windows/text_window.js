@@ -275,7 +275,7 @@ global.TextWindow.prototype.clone = function() {
     }
 
     if (event.ctrlKey) {
-      selectWord(this);
+      selectWord(window);
       return;
     }
 

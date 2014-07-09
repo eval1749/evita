@@ -184,7 +184,6 @@ global.TextWindow.prototype.clone = function() {
    * @param {!TextWindow} window
    */
   function handleFocus(window) {
-    stopControllers(window);
     var document = window.document;
     if (document.fileName == '')
       return;

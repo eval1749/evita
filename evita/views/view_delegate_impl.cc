@@ -151,7 +151,6 @@ void ViewDelegateImpl::CreateTableWindow(dom::WindowId window_id,
   new views::TableView(window_id, document);
 }
 
-
 void ViewDelegateImpl::CreateTextWindow(dom::WindowId window_id,
                                         text::Selection* selection) {
   new TextEditWindow(window_id, selection);
@@ -439,12 +438,12 @@ void ViewDelegateImpl::ScrollTextWindow(WindowId window_id, int direction) {
   auto const text_window = window->as<TextEditWindow>();
   if (!text_window) {
     DVLOG(0) << "ScrollTextWindow expects TextEditWindow.";
+    return;
   }
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
   text_window->SmallScroll(0, direction);
 }
-
 
 void ViewDelegateImpl::SetCapture(domapi::EventTargetId event_target_id) {
   if (auto const window = Window::FromWindowId(event_target_id)) {

@@ -240,7 +240,7 @@ gfx::RectF TextEditWindow::HitTestTextPosition(Posn lPosn) {
   for (;;) {
     if (auto rect = text_renderer_->HitTestTextPosition(lPosn))
       return rect;
-    text_renderer_->ScrollToPosn(lPosn);
+    text_renderer_->ScrollToPosition(lPosn);
   }
 }
 
@@ -536,7 +536,7 @@ void TextEditWindow::Redraw() {
 
     if (m_lCaretPosn != lCaretPosn) {
       // FIXME 2007-05-12 Fill the page with lines.
-      text_renderer_->ScrollToPosn(lCaretPosn);
+      text_renderer_->ScrollToPosition(lCaretPosn);
       m_lCaretPosn = lCaretPosn;
     }
     Render(selection);
@@ -552,7 +552,7 @@ void TextEditWindow::Redraw() {
         text_renderer_->RenderSelectionIfNeeded(selection);
       return;
     }
-    text_renderer_->ScrollToPosn(lCaretPosn);
+    text_renderer_->ScrollToPosition(lCaretPosn);
     Render(selection);
     return;
   }

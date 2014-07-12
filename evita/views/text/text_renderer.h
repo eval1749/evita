@@ -88,7 +88,7 @@ class TextRenderer final {
 
   // [S]
   public: bool ScrollDown();
-  public: bool ScrollToPosn(Posn target_position);
+  public: bool ScrollToPosition(Posn target_position);
   public: bool ScrollUp();
   public: void SetBounds(const Rect& rect);
   public: void SetCanvas(gfx::Canvas* canvas);

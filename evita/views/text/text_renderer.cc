@@ -253,7 +253,7 @@ bool TextRenderer::ScrollDown() {
   return true;
 }
 
-bool TextRenderer::ScrollToPosn(Posn lPosn) {
+bool TextRenderer::ScrollToPosition(Posn lPosn) {
   DCHECK(canvas_);
   DCHECK(!ShouldFormat());
   if (IsPositionFullyVisible(lPosn))

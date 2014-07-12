@@ -23,7 +23,7 @@
 #include "base/strings/stringprintf.h"
 #include "common/timer/timer.h"
 #include "evita/dom/lock.h"
-#include "evita/gfx_base.h"
+#include "evita/gfx/canvas.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/public/text_composition_data.h"

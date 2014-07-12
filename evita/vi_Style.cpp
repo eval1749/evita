@@ -1,14 +1,8 @@
 #include "precomp.h"
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - FontSet class
-// listener/winapp/fontset.cpp
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Style.cpp#2 $
-//
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #include "evita/vi_style.h"
 
 #include <vector>
@@ -35,11 +29,11 @@ bool IsCachableString(const char16* pwch, size_t cwch) {
 }
 
 // FontSet::Add
-void FontSet::Add(Font* pFont)
+void FontSet::Add(Font* font)
 {
-    ASSERT(NULL != pFont);
-    m_rgpFont[m_cFonts] = pFont;
-    m_cFonts++;
+    ASSERT(NULL != font);
+    fonts_[num_fonts_] = font;
+    num_fonts_++;
 } // FontSet::Add
 
 //////////////////////////////////////////////////////////////////////
@@ -185,7 +179,7 @@ class Font::FontImpl {
 };
 
 Font::Font(const LOGFONT* log_font)
-    : m_oLogFont(*log_font),
+    : log_font_(*log_font),
       font_impl_(new FontImpl(log_font->lfFaceName, log_font->lfHeight)),
       metrics_(font_impl_->CalculateMetrics()) {
 }
@@ -243,262 +237,237 @@ bool Font::HasCharacter(char16 wch) const {
 //
 Font* FontSet::FindFont(char16 wch) const {
   foreach (EnumFont, oEnum, this) {
-    auto const pFont = oEnum.Get();
-    if (pFont->HasCharacter(wch))
-      return pFont;
+    auto const font = oEnum.Get();
+    if (font->HasCharacter(wch))
+      return font;
   }
   return nullptr;
 } // FontSet::FindFont
 
-int memhash(const void* pv, size_t cb)
-{
-    ASSERT(NULL != pv);
-    const uint* s = reinterpret_cast<const uint*>(pv);
-    const uint* e = s + cb / sizeof(uint);
-    uint nHashCode = 0;
-    for (const uint* p = s; p < e; p++)
-    {
-        uint nHigh = nHashCode >>= sizeof(uint) * 8 - 5;
-        nHashCode |= *p;
-        nHashCode <<= 5;
-        nHashCode |= nHigh;
-    } // for
-    return static_cast<int>(nHashCode & ((1<<28)-1)) & MAXINT;
-} // memhash
-
-int Font::HashKey(const Key* pKey)
-    { return memhash(pKey, sizeof(*pKey)); }
-
-bool FontSet::EqualKey(const Key* pFonts) const {
-  if (pFonts->m_cFonts != m_cFonts) return false;
-  DCHECK_LT(m_cFonts, static_cast<int>(arraysize(m_rgpFont)));
-  return !::memcmp(pFonts->m_rgpFont, m_rgpFont,
-                   sizeof(m_rgpFont[0]) * m_cFonts);
+int memhash(const void* pv, size_t cb) {
+  DCHECK(pv);
+  const uint* s = reinterpret_cast<const uint*>(pv);
+  const uint* e = s + cb / sizeof(uint);
+  uint nHashCode = 0;
+  for (const uint* p = s; p < e; p++) {
+    uint nHigh = nHashCode >>= sizeof(uint) * 8 - 5;
+    nHashCode |= *p;
+    nHashCode <<= 5;
+    nHashCode |= nHigh;
+  }
+  return static_cast<int>(nHashCode & ((1<<28)-1)) & MAXINT;
 }
 
-int FontSet::HashKey(const Key* pKey)
-{
-    const Fonts* p = reinterpret_cast<const Fonts*>(pKey);
-    ASSERT(p->m_cFonts >= 1);
-    return memhash(p->m_rgpFont, sizeof(Font*) * p->m_cFonts);
-} // FontSet::HashKey
+int Font::HashKey(const Key* pKey) {
+  return memhash(pKey, sizeof(*pKey));
+}
+
+bool FontSet::EqualKey(const Key* fonts) const {
+  if (fonts->num_fonts_ != num_fonts_) return false;
+  DCHECK_LT(num_fonts_, static_cast<int>(arraysize(fonts_)));
+  return !::memcmp(fonts->fonts_, fonts_,
+                   sizeof(fonts_[0]) * num_fonts_);
+}
+
+int FontSet::HashKey(const Key* pKey) {
+  const Fonts* p = reinterpret_cast<const Fonts*>(pKey);
+  DCHECK_GE(p->num_fonts_, 1);
+  return memhash(p->fonts_, sizeof(Font*) * p->num_fonts_);
+}
 
 template<class Item_, class Key_, int t_N = 31>
-class Cache_
-{
-    private: struct Slot
-    {
-        Item_*  m_pItem;
+class Cache_ {
+  private: struct Slot {
+    Item_*  m_pItem;
 
-        bool HasItem() const
+    bool HasItem() const {
+      return m_pItem && Removed() != m_pItem;
+    }
+  };
+
+  private: Slot*  m_prgSlot;
+  private: size_t m_cAlloc;
+  private: size_t m_cItems;
+
+  public: Cache_()
+    : m_cAlloc(t_N), m_cItems(0), m_prgSlot(new Slot[t_N]) {
+    ::ZeroMemory(m_prgSlot, sizeof(Slot) * m_cAlloc);
+  }
+
+  private: static Item_* Removed() {
+    return reinterpret_cast<Item_*>(1);
+  }
+
+  public: Item_* Get(const Key_* pKey) const {
+      int iHashCode = Item_::HashKey(pKey);
+      const Slot* pTop    = &m_prgSlot[0];
+      const Slot* pBottom = &m_prgSlot[m_cAlloc];
+      const Slot* pStart  = &m_prgSlot[iHashCode % m_cAlloc];
+      const Slot* pRunner = pStart;
+      do
+      {
+          Item_* pItem = pRunner->m_pItem;
+          if (NULL == pItem)
+          {
+              return NULL;
+          }
+
+          if (Removed() == pItem)
+          {
+              // removed
+          }
+          else if (pItem->EqualKey(pKey))
+          {
+              return pItem;
+          }
+
+          pRunner++;
+          if (pRunner == pBottom) pRunner = pTop;
+      } while (pRunner != pStart);
+      CAN_NOT_HAPPEN();
+  } // Get
+
+  public: void Put(Item_* pItem) {
+    DCHECK(pItem);
+
+    if (m_cItems * 60 > m_cAlloc * 100)
+      rehash();
+
+    int iHashCode = Item_::HashKey(pItem->GetKey());
+    Slot* pTop    = &m_prgSlot[0];
+    Slot* pBottom = &m_prgSlot[m_cAlloc];
+    Slot* pStart  = &m_prgSlot[iHashCode % m_cAlloc];
+    Slot* pRunner = pStart;
+    Slot* pHome = NULL;
+    const Key_* pKey = pItem->GetKey();
+    do {
+        Item_* pPresent = pRunner->m_pItem;
+        if (NULL == pPresent)
         {
-            return NULL != m_pItem && Removed() != m_pItem;
-        } // HasItem
-    }; // Slot
-
-    private: Slot*  m_prgSlot;
-    private: size_t m_cAlloc;
-    private: size_t m_cItems;
-
-    public: Cache_() :
-        m_cAlloc(t_N),
-        m_cItems(0),
-        m_prgSlot(new Slot[t_N])
-    {
-        ::ZeroMemory(m_prgSlot, sizeof(Slot) * m_cAlloc);
-    } // Cache_
-
-    private: static Item_* Removed()
-        { return reinterpret_cast<Item_*>(1); };
-
-    public: Item_* Get(const Key_* pKey) const
-    {
-        int iHashCode = Item_::HashKey(pKey);
-        const Slot* pTop    = &m_prgSlot[0];
-        const Slot* pBottom = &m_prgSlot[m_cAlloc];
-        const Slot* pStart  = &m_prgSlot[iHashCode % m_cAlloc];
-        const Slot* pRunner = pStart;
-        do
-        {
-            Item_* pItem = pRunner->m_pItem;
-            if (NULL == pItem)
-            {
-                return NULL;
-            }
-
-            if (Removed() == pItem)
-            {
-                // removed
-            }
-            else if (pItem->EqualKey(pKey))
-            {
-                return pItem;
-            }
-
-            pRunner++;
-            if (pRunner == pBottom) pRunner = pTop;
-        } while (pRunner != pStart);
-        CAN_NOT_HAPPEN();
-    } // Get
-
-    public: void Put(Item_* pItem)
-    {
-        ASSERT(NULL != pItem);
-
-        if (m_cItems * 60 > m_cAlloc * 100)
-        {
-            rehash();
+            if (NULL == pHome) pHome = pRunner;
+            pHome->m_pItem = pItem;
+            m_cItems += 1;
+            return;
         }
 
-        int iHashCode = Item_::HashKey(pItem->GetKey());
-        Slot* pTop    = &m_prgSlot[0];
-        Slot* pBottom = &m_prgSlot[m_cAlloc];
-        Slot* pStart  = &m_prgSlot[iHashCode % m_cAlloc];
-        Slot* pRunner = pStart;
-        Slot* pHome = NULL;
-        const Key_* pKey = pItem->GetKey();
-        do
+        if (Removed() == pPresent)
         {
-            Item_* pPresent = pRunner->m_pItem;
-            if (NULL == pPresent)
-            {
-                if (NULL == pHome) pHome = pRunner;
-                pHome->m_pItem = pItem;
-                m_cItems += 1;
-                return;
-            }
-
-            if (Removed() == pPresent)
-            {
-                if (NULL == pHome) pHome = pRunner;
-            }
-            else if (pPresent->EqualKey(pKey))
-            {
-                return;
-            }
-
-            pRunner++;
-            if (pRunner == pBottom) pRunner = pTop;
-        } while (pRunner != pStart);
-        CAN_NOT_HAPPEN();
-    } // Put
-
-    private: void rehash()
-    {
-        Slot* prgStart = m_prgSlot;
-        auto const cAllocs = m_cAlloc;
-        auto cItems  = m_cItems;
-
-        m_cAlloc = m_cAlloc * 130 / 100;
-        m_cItems  = 0;
-        m_prgSlot = new Slot[m_cAlloc];
-        ::ZeroMemory(m_prgSlot, sizeof(Slot) * m_cAlloc);
-
-        Slot* prgEnd = prgStart + cAllocs;
-        for (Slot* pRunner = prgStart; pRunner < prgEnd; pRunner++)
+            if (NULL == pHome) pHome = pRunner;
+        }
+        else if (pPresent->EqualKey(pKey))
         {
-            if (pRunner->HasItem())
-            {
-                Put(pRunner->m_pItem);
-                cItems -= 1;
-                if (0 == cItems) break;
-            }
-        } // for pRunner
-    } // rehash
-}; // Cache_
+            return;
+        }
+
+        pRunner++;
+        if (pRunner == pBottom) pRunner = pTop;
+    } while (pRunner != pStart);
+    CAN_NOT_HAPPEN();
+  }
+
+  private: void rehash() {
+    Slot* prgStart = m_prgSlot;
+    auto const cAllocs = m_cAlloc;
+    auto cItems  = m_cItems;
+
+    m_cAlloc = m_cAlloc * 130 / 100;
+    m_cItems  = 0;
+    m_prgSlot = new Slot[m_cAlloc];
+    ::ZeroMemory(m_prgSlot, sizeof(Slot) * m_cAlloc);
+
+    Slot* prgEnd = prgStart + cAllocs;
+    for (Slot* pRunner = prgStart; pRunner < prgEnd; pRunner++) {
+      if (pRunner->HasItem()) {
+        Put(pRunner->m_pItem);
+        cItems -= 1;
+        if (!cItems)
+          break;
+      }
+    }
+  }
+};
 
 typedef Cache_<Font, Font::Key> FontCache;
 typedef Cache_<FontSet, FontSet::Key> FontSetCache;
-FontCache* g_pFontCache;
-FontSetCache* g_pFontSetCache;
+FontCache* g_fontCache;
+FontSetCache* g_font_setCache;
 
 //////////////////////////////////////////////////////////////////////
 //
 // FontSet::Get
 //
-FontSet* FontSet::Get(const css::Style& style)
-{
-    Fonts oFonts;
-    oFonts.m_cFonts = 0;
+FontSet* FontSet::Get(const css::Style& style) {
+  Fonts fonts;
+  fonts.num_fonts_ = 0;
 
-    const char16* pwszFamily = style.font_family().data();
-    while (0 != *pwszFamily)
-    {
-        LOGFONT oLogFont;
-        ::ZeroMemory(&oLogFont, sizeof(oLogFont));
+  auto pwszFamily = style.font_family().data();
+  while (*pwszFamily) {
+    LOGFONT log_font;
+    ::ZeroMemory(&log_font, sizeof(log_font));
 
-        oLogFont.lfHeight = static_cast<LONG>(style.font_size());
-        oLogFont.lfWidth = 0;
-        oLogFont.lfEscapement = 0;
-        oLogFont.lfOrientation = 0;
+    log_font.lfHeight = static_cast<LONG>(style.font_size());
+    log_font.lfWidth = 0;
+    log_font.lfEscapement = 0;
+    log_font.lfOrientation = 0;
 
-        oLogFont.lfWeight =
-            css::FontWeight::Bold == style.font_weight() ? FW_BOLD : FW_NORMAL;
+    log_font.lfWeight =
+        css::FontWeight::Bold == style.font_weight() ? FW_BOLD : FW_NORMAL;
 
-        oLogFont.lfItalic =
-            css::FontStyle::Italic == style.font_style() ? 1u : 0u;
+    log_font.lfItalic =
+        css::FontStyle::Italic == style.font_style() ? 1u : 0u;
 
-        oLogFont.lfUnderline =
-            css::TextDecoration::Underline == style.text_decoration() ? 1u : 0u;
+    log_font.lfUnderline =
+        css::TextDecoration::Underline == style.text_decoration() ? 1u : 0u;
 
-        oLogFont.lfStrikeOut     = 0;
-        oLogFont.lfCharSet       = ANSI_CHARSET;;
-        oLogFont.lfOutPrecision  = OUT_DEFAULT_PRECIS;
-        oLogFont.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-        oLogFont.lfQuality       = DEFAULT_QUALITY;
+    log_font.lfStrikeOut = 0;
+    log_font.lfCharSet = ANSI_CHARSET;;
+    log_font.lfOutPrecision = OUT_DEFAULT_PRECIS;
+    log_font.lfClipPrecision = CLIP_DEFAULT_PRECIS;
+    log_font.lfQuality = DEFAULT_QUALITY;
 
-        // We use FIXED_PITCH. This makes width of Kanji character is double
-        // of width of alphabet character.
-        //oLogFont.lfPitchAndFamily = DEFAULT_PITCH;
-        oLogFont.lfPitchAndFamily = FIXED_PITCH;
+    // We use FIXED_PITCH. This makes width of Kanji character is double
+    // of width of alphabet character.
+    //log_font.lfPitchAndFamily = DEFAULT_PITCH;
+    log_font.lfPitchAndFamily = FIXED_PITCH;
 
-        while (IsWhitespace(*pwszFamily))
-        {
-            pwszFamily++;
-        } // while
-
-        char16* pwsz = oLogFont.lfFaceName;
-        while (0 != *pwszFamily) {
-            if (',' == *pwszFamily)
-            {
-                pwszFamily++;
-                break;
-            }
-
-            *pwsz++ = *pwszFamily++;
-        } // while
-
-        if (NULL == g_pFontCache)
-        {
-            g_pFontCache = new FontCache;
-        }
-
-        Font* pFont = g_pFontCache->Get(&oLogFont);
-        if (!pFont) {
-            pFont = new Font(&oLogFont);
-            g_pFontCache->Put(pFont);
-        }
-
-        oFonts.m_rgpFont[oFonts.m_cFonts] = pFont;
-
-        oFonts.m_cFonts += 1;
-    } // for
-
-    if (NULL == g_pFontSetCache)
-    {
-        g_pFontSetCache = new FontSetCache;
+    while (IsWhitespace(*pwszFamily)) {
+      pwszFamily++;
     }
 
-    FontSet* pFontSet = g_pFontSetCache->Get(&oFonts);
+    auto pwsz = log_font.lfFaceName;
+    while (*pwszFamily) {
+      if (',' == *pwszFamily) {
+        pwszFamily++;
+        break;
+      }
 
-    if (NULL == pFontSet)
-    {
-        pFontSet = new FontSet;
-        for (int i = 0; i < oFonts.m_cFonts; i++)
-        {
-            pFontSet->Add(oFonts.m_rgpFont[i]);
-        } // for i
-        g_pFontSetCache->Put(pFontSet);
+      *pwsz++ = *pwszFamily++;
     }
-    return pFontSet;
-} // FontSet::Get
+
+    if (!g_fontCache)
+      g_fontCache = new FontCache;
+
+    auto font = g_fontCache->Get(&log_font);
+    if (!font) {
+      font = new Font(&log_font);
+      g_fontCache->Put(font);
+    }
+
+    fonts.fonts_[fonts.num_fonts_] = font;
+
+    fonts.num_fonts_ += 1;
+  }
+
+  if (!g_font_setCache)
+      g_font_setCache = new FontSetCache;
+
+  FontSet* font_set = g_font_setCache->Get(&fonts);
+  if (!font_set) {
+    font_set = new FontSet;
+    for (auto i = 0; i < fonts.num_fonts_; i++) {
+      font_set->Add(fonts.fonts_[i]);
+    }
+    g_font_setCache->Put(font_set);
+  }
+  return font_set;
+}

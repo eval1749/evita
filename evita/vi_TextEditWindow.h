@@ -100,7 +100,7 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: void Render();
 
   // [S]
-  public: int SmallScroll(int, int);
+  public: bool SmallScroll(int x_count, int y_count);
   public: Posn StartOfLine(Posn);
 
   // [U]

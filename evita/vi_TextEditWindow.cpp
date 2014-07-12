@@ -312,50 +312,26 @@ void TextEditWindow::Render() {
   Render(selection);
 }
 
-int TextEditWindow::SmallScroll(int, int iDy) {
+bool TextEditWindow::SmallScroll(int, int y_count) {
   UI_ASSERT_DOM_LOCKED();
   FormatTextBlockIfNeeded();
 
-  if (iDy < 0) {
-    iDy = -iDy;
-
-    auto const lBufStart = buffer()->GetStart();
-    auto lStart = text_renderer_->GetStart();
-    int k;
-    for (k = 0; k < iDy; ++k) {
-      if (lStart == lBufStart)
+  bool scrolled = false;
+  if (y_count < 0) {
+    for (auto k = y_count; k; ++k) {
+      if (!text_renderer_->ScrollDown())
         break;
-        lStart = StartOfLine(lStart - 1);
+      scrolled = true;
     }
-
-    if (k > 0) {
-      text_renderer_->Format(lStart);
-      Render();
-    }
-    return k;
-  }
-
-  if (iDy > 0) {
-    auto const lBufEnd = buffer()->GetEnd();
-    int k;
-    for (k = 0; k < iDy; ++k) {
-      if (text_renderer_->GetEnd() >= lBufEnd) {
-          // Make sure whole line of buffer end is visible.
-          text_renderer_->ScrollToPosn(lBufEnd);
-          ++k;
-          break;
-      }
-
+  } else if (y_count > 0) {
+    for (auto k = 0; k < y_count; ++k) {
       if (!text_renderer_->ScrollUp())
         break;
+      scrolled = true;
     }
+ }
 
-    if (k > 0)
-        Render();
-    return k;
-  }
-
-  return 0;
+  return scrolled;
 }
 
 Posn TextEditWindow::StartOfLine(Posn lPosn) {

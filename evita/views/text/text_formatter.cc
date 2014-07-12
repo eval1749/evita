@@ -104,7 +104,7 @@ class TextFormatter::TextScanner final {
 
   private: void fill() {
     auto const cwch = m_pBuffer->GetText(
-        m_rgwch, m_lPosn, static_cast<Posn>(m_lPosn + lengthof(m_rgwch)));
+        m_rgwch, m_lPosn, static_cast<Posn>(m_lPosn + arraysize(m_rgwch)));
 
     m_lBufStart = m_lPosn;
     m_lBufEnd   = m_lPosn + cwch;
@@ -218,7 +218,7 @@ void TextFormatter::Format() {
   text_block_->Finish();
 }
 
-// Returns true if more contents is avaialble, otherwise returns false.
+// Returns true if more contents is available, otherwise returns false.
 TextLine* TextFormatter::FormatLine() {
   DCHECK(!text_block_->bounds().empty());
   auto const pLine = new TextLine();
@@ -316,7 +316,7 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
     css::StyleSelector::defaults()));
   style.set_font_size(style.font_size() * zoom_);
 
-  if (0x09 == wch) {
+  if (wch == 0x09) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
     auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
@@ -396,7 +396,6 @@ Cell* TextFormatter::formatMarker(TextMarker marker_name) {
                         width, height, text_scanner_->GetPosn(),
                         marker_name);
 }
-
 
 TextSelection TextFormatter::FormatSelection(
     const text::Buffer* buffer, const TextSelectionModel& selection_model) {

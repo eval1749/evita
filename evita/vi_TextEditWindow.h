@@ -60,7 +60,6 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: std::unique_ptr<TextRenderer> text_renderer_;
   private: ui::ScrollBar* const vertical_scroll_bar_;
   private: text::Posn view_start_;
-  private: float zoom_;
 
   // ctor/dtor
   public: explicit TextEditWindow(views::WindowId window_id,
@@ -68,8 +67,6 @@ class TextEditWindow : public text::BufferMutationObserver,
   public: virtual ~TextEditWindow();
 
   public: text::Buffer* buffer() const;
-  public: float zoom() const { return zoom_; }
-  public: void set_zoom(float new_zoom);
 
   // [C]
   public: text::Posn ComputeMotion(
@@ -101,6 +98,7 @@ class TextEditWindow : public text::BufferMutationObserver,
 
   // [S]
   public: bool SmallScroll(int x_count, int y_count);
+  public: void SetZoom(float new_zoom);
   public: Posn StartOfLine(Posn);
 
   // [U]

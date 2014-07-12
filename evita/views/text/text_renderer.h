@@ -38,14 +38,18 @@ class TextRenderer final {
   public: typedef rendering::TextLine Line;
 
   private: gfx::Canvas* canvas_;
-  private: bool dirty_;
   private: text::Buffer* const m_pBuffer;
   private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
+  private: bool should_format_;
+  private: bool should_render_;
   private: std::unique_ptr<TextBlock> text_block_;
   private: float zoom_;
 
   public: TextRenderer(text::Buffer* buffer);
   public: ~TextRenderer();
+
+  public: float zoom() const { return zoom_; }
+  public: void set_zoom(float new_zoom);
 
   // [D]
   public: void DidKillFocus();
@@ -76,7 +80,6 @@ class TextRenderer final {
 
   // [P]
   private: int pageLines() const;
-  public: bool Prepare(float zoom);
 
   // [R]
   public: void Render(const TextSelectionModel& selection);
@@ -89,7 +92,7 @@ class TextRenderer final {
   public: bool ScrollUp();
   public: void SetBounds(const Rect& rect);
   public: void SetCanvas(gfx::Canvas* canvas);
-  public: bool ShouldFormat(float zoom) const;
+  public: bool ShouldFormat() const;
   public: bool ShouldRender() const;
 
   DISALLOW_COPY_AND_ASSIGN(TextRenderer);

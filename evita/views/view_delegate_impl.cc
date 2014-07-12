@@ -407,7 +407,7 @@ void ViewDelegateImpl::SetTextWindowZoom(dom::WindowId window_id, float zoom) {
   auto const text_window = window->as<TextEditWindow>();
   if (!text_window)
     return;
-  text_window->set_zoom(zoom);
+  text_window->SetZoom(zoom);
 }
 
 void ViewDelegateImpl::ShowWindow(dom::WindowId window_id) {

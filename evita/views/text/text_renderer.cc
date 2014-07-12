@@ -50,12 +50,21 @@ using namespace rendering;
 // TextRenderer
 //
 TextRenderer::TextRenderer(text::Buffer* buffer)
-    : canvas_(nullptr), dirty_(false), m_pBuffer(buffer),
+    : canvas_(nullptr), m_pBuffer(buffer),
       screen_text_block_(new ScreenTextBlock()),
+      should_format_(true), should_render_(true),
       text_block_(new TextBlock(buffer)), zoom_(1.0f) {
 }
 
 TextRenderer::~TextRenderer() {
+}
+
+void TextRenderer::set_zoom(float new_zoom) {
+  DCHECK_GT(new_zoom, 0.0f);
+  if (zoom_ == new_zoom)
+    return;
+  zoom_ = new_zoom;
+  should_format_ = true;
 }
 
 void TextRenderer::DidKillFocus() {
@@ -67,6 +76,7 @@ void TextRenderer::DidSetFocus() {
 }
 
 TextLine* TextRenderer::FindLine(Posn lPosn) const {
+  DCHECK(!ShouldFormat());
   if (lPosn < GetStart() || lPosn > GetEnd())
     return nullptr;
 
@@ -80,17 +90,17 @@ TextLine* TextRenderer::FindLine(Posn lPosn) const {
 }
 
 text::Posn TextRenderer::GetEnd() const {
-  DCHECK(!text_block_->dirty());
+  DCHECK(!ShouldFormat());
   return text_block_->GetLast()->GetEnd();
 }
 
 text::Posn TextRenderer::GetStart() const {
-  DCHECK(!text_block_->dirty());
+  DCHECK(!ShouldFormat());
   return text_block_->GetFirst()->GetStart();
 }
 
 text::Posn TextRenderer::GetVisibleEnd() const {
-  DCHECK(!text_block_->dirty());
+  DCHECK(!ShouldFormat());
   return text_block_->GetVisibleEnd();
 }
 
@@ -99,7 +109,8 @@ void TextRenderer::Format(Posn lStart) {
   text_block_->Reset();
   TextFormatter oFormatter(*canvas_, text_block_.get(), lStart, zoom_);
   oFormatter.Format();
-  dirty_ = true;
+  should_format_ = false;
+  should_render_ = true;
 }
 
 TextLine* TextRenderer::FormatLine(Posn lStart) {
@@ -114,6 +125,7 @@ TextLine* TextRenderer::FormatLine(Posn lStart) {
 // A TextRenderer object must be formatted with the latest buffer.
 //
 gfx::RectF TextRenderer::HitTestTextPosition(Posn lPosn) const {
+  DCHECK(!ShouldFormat());
   if (lPosn < GetStart() || lPosn > GetEnd())
     return gfx::RectF();
   for (auto const line : text_block_->lines()) {
@@ -125,11 +137,13 @@ gfx::RectF TextRenderer::HitTestTextPosition(Posn lPosn) const {
 }
 
 bool TextRenderer::IsPositionFullyVisible(text::Posn offset) const {
+  DCHECK(!ShouldFormat());
   return offset >= GetStart() && offset < GetVisibleEnd();
 }
 
 Posn TextRenderer::MapPointToPosn(gfx::PointF pt) const {
   DCHECK(canvas_);
+  DCHECK(!ShouldFormat());
   if (pt.y < text_block_->top())
     return GetStart();
   if (pt.y >= text_block_->bottom())
@@ -166,20 +180,16 @@ Posn TextRenderer::MapPointToPosn(gfx::PointF pt) const {
 // buffer's default style.
 int TextRenderer::pageLines() const {
   DCHECK(canvas_);
+  DCHECK(!ShouldFormat());
   auto const pFont = FontSet::Get(*canvas_, m_pBuffer->GetDefaultStyle())->
         FindFont(*canvas_, 'x');
   auto const height = AlignHeightToPixel(*canvas_, pFont->height());
   return static_cast<int>(text_block_->height() / height);
 }
 
-bool TextRenderer::Prepare(float zoom) {
-  auto const should_format = ShouldFormat(zoom);
-  zoom_ = zoom;
-  return should_format;
-}
-
 void TextRenderer::Render(const TextSelectionModel& selection_model) {
   DCHECK(canvas_);
+  DCHECK(!ShouldFormat());
   DCHECK(!text_block_->bounds().empty());
   text_block_->EnsureLinePoints();
   const auto selection = TextFormatter::FormatSelection(
@@ -200,12 +210,13 @@ void TextRenderer::Render(const TextSelectionModel& selection_model) {
   drawVLine(*canvas_, gfx::Brush(*canvas_, gfx::ColorF::LightGray),
             text_block_->left() + width_of_M * num_columns,
             text_block_->top(), text_block_->bottom());
-  dirty_ = false;
+  should_render_ = false;
 }
 
 void TextRenderer::RenderSelectionIfNeeded(
     const TextSelectionModel& new_selection_model) {
-  DCHECK(!dirty_);
+  DCHECK(!ShouldFormat());
+  DCHECK(!should_render_);
   DCHECK(!text_block_->bounds().empty());
   screen_text_block_->RenderSelectionIfNeeded(
       TextFormatter::FormatSelection(text_block_->text_buffer(),
@@ -218,6 +229,7 @@ void TextRenderer::Reset() {
 
 bool TextRenderer::ScrollDown() {
   DCHECK(canvas_);
+  DCHECK(!ShouldFormat());
   if (!GetStart())
     return false;
   auto const lGoal = GetStart() - 1;
@@ -237,12 +249,13 @@ bool TextRenderer::ScrollDown() {
     text_block_->DiscardLastLine();
   }
 
-  dirty_ = true;
+  should_render_ = true;
   return true;
 }
 
 bool TextRenderer::ScrollToPosn(Posn lPosn) {
   DCHECK(canvas_);
+  DCHECK(!ShouldFormat());
   if (IsPositionFullyVisible(lPosn))
     return false;
 
@@ -298,6 +311,7 @@ bool TextRenderer::ScrollToPosn(Posn lPosn) {
 
 bool TextRenderer::ScrollUp() {
   DCHECK(canvas_);
+  DCHECK(!ShouldFormat());
   text_block_->EnsureLinePoints();
   if (text_block_->IsShowEndOfDocument())
     return false;
@@ -314,7 +328,7 @@ bool TextRenderer::ScrollUp() {
 
   auto const line = oFormatter.FormatLine();
   text_block_->Append(line);
-  dirty_ = true;
+  should_render_ = true;
   return true;
 }
 
@@ -322,19 +336,23 @@ void TextRenderer::SetBounds(const Rect& rect) {
   gfx::RectF bounds(rect);
   text_block_->SetBounds(bounds);
   screen_text_block_->SetBounds(bounds);
+  should_format_ = true;
+  should_render_ = true;
 }
 
 void TextRenderer::SetCanvas(gfx::Canvas* canvas) {
   canvas_ = canvas;
   screen_text_block_->SetCanvas(canvas);
+  should_format_ = true;
+  should_render_ = true;
 }
 
-bool TextRenderer::ShouldFormat(float zoom) const {
-  return text_block_->dirty() || zoom_ != zoom;
+bool TextRenderer::ShouldFormat() const {
+  return should_format_ || text_block_->dirty();
 }
 
 bool TextRenderer::ShouldRender() const {
-  return dirty_ || screen_text_block_->dirty();
+  return should_render_ || screen_text_block_->dirty();
 }
 
 }  // namespace views

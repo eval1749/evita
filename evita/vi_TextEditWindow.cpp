@@ -95,7 +95,7 @@ TextEditWindow::TextEditWindow(views::WindowId window_id,
       selection_(selection),
       vertical_scroll_bar_(new ui::ScrollBar(ui::ScrollBar::Type::Vertical,
                                              this)),
-      view_start_(0), zoom_(1.0f) {
+      view_start_(0) {
   AppendChild(vertical_scroll_bar_);
   buffer()->AddObserver(this);
 }
@@ -108,18 +108,11 @@ text::Buffer* TextEditWindow::buffer() const {
   return text_renderer_->GetBuffer();
 }
 
-void TextEditWindow::set_zoom(float new_zoom) {
-  DCHECK_GT(new_zoom, 0.0f);
-  if (zoom_ == new_zoom)
-    return;
-  zoom_ = new_zoom;
-}
-
 Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
   if (xGoal < 0)
     return lGoal;
 
-  if (!text_renderer_->ShouldFormat(zoom_)) {
+  if (!text_renderer_->ShouldFormat()) {
     if (auto const line = text_renderer_->FindLine(lGoal))
       return line->MapXToPosn(*canvas_, xGoal);
   }
@@ -195,7 +188,7 @@ text::Posn TextEditWindow::ComputeMotion(
 
 Posn TextEditWindow::EndOfLine(Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
-  if (!text_renderer_->ShouldFormat(zoom_)) {
+  if (!text_renderer_->ShouldFormat()) {
     auto const pLine = text_renderer_->FindLine(lPosn);
     if (pLine)
       return pLine->GetEnd() - 1;
@@ -216,7 +209,7 @@ Posn TextEditWindow::EndOfLine(Posn lPosn) {
 
 void TextEditWindow::FormatTextBlockIfNeeded() {
   UI_ASSERT_DOM_LOCKED();
-  if (!text_renderer_->Prepare(zoom_))
+  if (!text_renderer_->ShouldFormat())
     return;
   auto const line_start_ = StartOfLine(view_start_);
   text_renderer_->Format(line_start_);
@@ -312,6 +305,10 @@ void TextEditWindow::Render() {
   Render(selection);
 }
 
+void TextEditWindow::SetZoom(float new_zoom) {
+  text_renderer_->set_zoom(new_zoom);
+}
+
 bool TextEditWindow::SmallScroll(int, int y_count) {
   UI_ASSERT_DOM_LOCKED();
   FormatTextBlockIfNeeded();
@@ -339,7 +336,7 @@ Posn TextEditWindow::StartOfLine(Posn lPosn) {
   if (lPosn <= 0 )
     return 0;
 
-  if (!text_renderer_->ShouldFormat(zoom_)) {
+  if (!text_renderer_->ShouldFormat()) {
     auto const pLine = text_renderer_->FindLine(lPosn);
     if (pLine)
       return pLine->GetStart();
@@ -530,7 +527,7 @@ void TextEditWindow::Redraw() {
 
   DCHECK_GE(lCaretPosn, 0);
 
-  if (text_renderer_->Prepare(zoom_)) {
+  if (text_renderer_->ShouldFormat()) {
     text_renderer_->Format(StartOfLine(view_start_));
 
     if (m_lCaretPosn != lCaretPosn) {

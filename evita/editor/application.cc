@@ -132,7 +132,7 @@ void Application::DispatchViewIdelEvent() {
       base::TimeDelta::FromMilliseconds(100));
 }
 
-// Note: We don't need to check ::GetQueueStatus (QS_INPUT), becaue |DoIdle()|
+// Note: We don't need to check ::GetQueueStatus (QS_INPUT), because |DoIdle()|
 // is called after processing Windows message.
 void Application::DoIdle() {
   base::TimeDelta wait_time;

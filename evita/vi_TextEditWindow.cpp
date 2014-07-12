@@ -183,7 +183,8 @@ text::Posn TextEditWindow::ComputeMotion(
 
     case Unit_Window:
       if (n > 0)
-        return std::min(GetEnd(), buffer()->GetEnd());
+        return std::max(std::min(GetEnd() - 1, buffer()->GetEnd()),
+                        static_cast<Posn>(0));
       if (n < 0)
         return GetStart();
       return lPosn;
@@ -226,7 +227,7 @@ void TextEditWindow::FormatTextBlockIfNeeded() {
 Posn TextEditWindow::GetEnd() {
   UI_ASSERT_DOM_LOCKED();
   FormatTextBlockIfNeeded();
-  return text_renderer_->GetEnd();
+  return text_renderer_->GetVisibleEnd();
 }
 
 //For Selection.MoveUp Screen

@@ -50,7 +50,7 @@ using namespace rendering;
 // TextRenderer
 //
 TextRenderer::TextRenderer(text::Buffer* buffer)
-    : canvas_(nullptr), m_pBuffer(buffer),
+    : buffer_(buffer), canvas_(nullptr),
       screen_text_block_(new ScreenTextBlock()),
       should_format_(true), should_render_(true),
       text_block_(new TextBlock(buffer)), zoom_(1.0f) {
@@ -189,7 +189,7 @@ void TextRenderer::Render(const TextSelectionModel& selection_model) {
   // ruler settings to both script and UI.
 
   // Ruler
-  auto const pFont = FontSet::Get(*canvas_, m_pBuffer->GetDefaultStyle())->
+  auto const pFont = FontSet::Get(*canvas_, buffer_->GetDefaultStyle())->
     FindFont(*canvas_, 'x');
 
   // FIXME 2007-08-05 We should expose rule position to
@@ -222,7 +222,7 @@ bool TextRenderer::ScrollDown() {
   if (!GetStart())
     return false;
   auto const lGoal = GetStart() - 1;
-  auto const lStart = m_pBuffer->ComputeStartOfLine(lGoal);
+  auto const lStart = buffer_->ComputeStartOfLine(lGoal);
   TextFormatter formatter(*canvas_, text_block_.get(), lStart, zoom_);
   for (;;) {
     auto const line = formatter.FormatLine();
@@ -273,7 +273,7 @@ bool TextRenderer::ScrollToPosition(Posn offset) {
     }
   }
 
-  Format(m_pBuffer->ComputeStartOfLine(offset));
+  Format(buffer_->ComputeStartOfLine(offset));
   while (!IsPositionFullyVisible(offset)) {
     if (!ScrollDown())
       return true;
@@ -281,7 +281,7 @@ bool TextRenderer::ScrollToPosition(Posn offset) {
 
   // If this page shows end of buffer, we shows lines as much as
   // possible to fit in page.
-  if (GetEnd() >= m_pBuffer->GetEnd()) {
+  if (GetEnd() >= buffer_->GetEnd()) {
     while (IsPositionFullyVisible(offset)) {
       if (!ScrollDown())
         return true;

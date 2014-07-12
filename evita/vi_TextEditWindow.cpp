@@ -106,7 +106,7 @@ TextEditWindow::~TextEditWindow() {
 }
 
 text::Buffer* TextEditWindow::buffer() const {
-  return text_renderer_->GetBuffer();
+  return text_renderer_->buffer();
 }
 
 Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {

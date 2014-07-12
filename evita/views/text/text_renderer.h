@@ -38,7 +38,7 @@ class TextRenderer final {
   public: typedef rendering::TextLine Line;
 
   private: gfx::Canvas* canvas_;
-  private: text::Buffer* const m_pBuffer;
+  private: text::Buffer* const buffer_;
   private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
   private: bool should_format_;
   private: bool should_render_;
@@ -48,6 +48,7 @@ class TextRenderer final {
   public: TextRenderer(text::Buffer* buffer);
   public: ~TextRenderer();
 
+  public: text::Buffer* buffer() const { return buffer_; }
   public: float zoom() const { return zoom_; }
   public: void set_zoom(float new_zoom);
 
@@ -61,7 +62,6 @@ class TextRenderer final {
   public: Line* FormatLine(Posn start);
 
   // [G]
-  public: text::Buffer* GetBuffer() const { return m_pBuffer; }
   public: Posn GetStart() const;
   public: Posn GetEnd() const;
   // Returns fully visible end offset or end of line position if there is only

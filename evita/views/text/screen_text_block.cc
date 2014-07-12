@@ -291,7 +291,7 @@ bool ScreenTextBlock::RenderContext::Render() {
       if (dirty_line_runner == clean_line_start)
         break;
       auto const format_line = *dirty_line_runner;
-      format_line->Render(*canvas_);
+      format_line->Render(canvas_);
       FillRight(format_line);
       AddRect(dirty_rects_, format_line->bounds());
     }

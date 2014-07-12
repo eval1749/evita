@@ -101,7 +101,7 @@ class Font::FontImpl {
   }
 
   // [D]
-  public: void DrawText(const gfx::Canvas& gfx,const gfx::Brush& text_brush,
+  public: void DrawText(gfx::Canvas* canvas, const gfx::Brush& text_brush,
                         const gfx::PointF& baseline, const char16* chars,
                         uint num_chars) const {
     ASSERT(num_chars);
@@ -127,14 +127,14 @@ class Font::FontImpl {
     glyph_run.isSideways = false;
     glyph_run.bidiLevel = 0;
 
-    ASSERT(gfx.drawing());
-    gfx->DrawGlyphRun(baseline, &glyph_run, text_brush,
-                      DWRITE_MEASURING_MODE_GDI_NATURAL);
+    ASSERT(canvas->drawing());
+    (*canvas)->DrawGlyphRun(baseline, &glyph_run, text_brush,
+                            DWRITE_MEASURING_MODE_GDI_NATURAL);
   }
 
   // [G]
-  public: std::vector<uint16> GetGlyphIndexes(const char16* pwch,
-                                             uint cwch) const {
+  public: std::vector<uint16> GetGlyphIndexes(const char16* pwch, 
+                                              uint cwch) const {
     ASSERT(cwch);
     std::vector<uint32> code_points(cwch);
     auto it = code_points.begin();
@@ -193,17 +193,17 @@ Font::Font(const LOGFONT* log_font)
 Font::~Font() {
 }
 
-void Font::DrawText(const gfx::Canvas& gfx,const gfx::Brush& text_brush,
+void Font::DrawText(gfx::Canvas* canvas,const gfx::Brush& text_brush,
                     const gfx::RectF& rect, const base::char16* chars,
                     uint num_chars) const {
   auto const baseline = rect.left_top() + gfx::SizeF(0.0f, metrics_.ascent);
-  font_impl_->DrawText(gfx, text_brush, baseline, chars, num_chars);
+  font_impl_->DrawText(canvas, text_brush, baseline, chars, num_chars);
 }
 
-void Font::DrawText(const gfx::Canvas& gfx,const gfx::Brush& text_brush,
+void Font::DrawText(gfx::Canvas* canvas,const gfx::Brush& text_brush,
                     const gfx::RectF& rect,
                     const base::string16& string) const {
-  DrawText(gfx, text_brush, rect, string.data(),
+  DrawText(canvas, text_brush, rect, string.data(),
            static_cast<uint32>(string.length()));
 }
 

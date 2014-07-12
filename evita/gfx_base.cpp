@@ -124,6 +124,10 @@ Brush::Brush(const Canvas& gfx, ColorF color)
     : SimpleObject_(CreateSolidColorBrush(gfx, color)) {
 }
 
+Brush::Brush(Canvas* canvas, ColorF color)
+    : SimpleObject_(CreateSolidColorBrush(*canvas, color)) {
+}
+
 Brush::Brush(const Canvas& gfx, float red, float green, float blue,
              float alpha)
     : SimpleObject_(CreateSolidColorBrush(gfx,

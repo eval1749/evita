@@ -4,9 +4,7 @@
 
 #include "evita/views/text/render_cell.h"
 
-#include "base/at_exit.h"
 #include "base/logging.h"
-#include "evita/gfx/stroke_style.h"
 #include "evita/views/text/render_style.h"
 
 namespace views {
@@ -14,21 +12,21 @@ namespace rendering {
 
 namespace {
 
-void DrawText(const gfx::Canvas& gfx, const Font& font,
+void DrawText(gfx::Canvas* canvas, const Font& font,
               const gfx::Brush& text_brush, const gfx::RectF& rect,
               const base::string16& string) {
-  font.DrawText(gfx, text_brush, rect, string);
-  gfx.Flush();
+  font.DrawText(canvas, text_brush, rect, string);
+  canvas->Flush();
 }
 
-inline void FillRect(const gfx::Canvas& gfx, const gfx::RectF& rect,
+inline void FillRect(gfx::Canvas* canvas, const gfx::RectF& rect,
                      gfx::ColorF color) {
-  gfx::Brush fill_brush(gfx, color);
-  gfx.FillRectangle(fill_brush, rect);
+  gfx::Brush fill_brush(canvas, color);
+  canvas->FillRectangle(fill_brush, rect);
 }
 
-float FloorWidthToPixel(const gfx::Canvas& gfx, float width) {
-  return gfx.FloorToPixel(gfx::SizeF(width, 0.0f)).width;
+float FloorWidthToPixel(gfx::Canvas* canvas, float width) {
+  return canvas->FloorToPixel(gfx::SizeF(width, 0.0f)).width;
 }
 
 } // namespace
@@ -57,18 +55,18 @@ float Cell::top() const {
   return line_height() - line_descent() - height() + descent();
 }
 
-void Cell::FillBackground(const gfx::Canvas& gfx,
+void Cell::FillBackground(gfx::Canvas* canvas,
                           const gfx::RectF& rect) const {
-  FillRect(gfx, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
+  FillRect(canvas, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
                            ::ceilf(rect.bottom)),
            style_.bgcolor());
 }
 
-void Cell::FillOverlay(const gfx::Canvas& gfx,
+void Cell::FillOverlay(gfx::Canvas* canvas,
                        const gfx::RectF& rect) const {
   if (style_.overlay_color().alpha() == 0.0f)
     return;
-  FillRect(gfx, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
+  FillRect(canvas, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
                            ::ceilf(rect.bottom)),
            style_.overlay_color());
 }
@@ -100,7 +98,7 @@ gfx::RectF Cell::HitTestTextPosition(Posn) const {
   return gfx::RectF();
 }
 
-Posn Cell::MapXToPosn(const gfx::Canvas&, float) const {
+Posn Cell::MapXToPosn(gfx::Canvas*, float) const {
   return -1;
 }
 
@@ -108,8 +106,8 @@ bool Cell::Merge(const RenderStyle&, float) {
   return false;
 }
 
-void Cell::Render(const gfx::Canvas& gfx, const gfx::RectF& rect) const {
-  FillBackground(gfx, rect);
+void Cell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
+  FillBackground(canvas, rect);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -234,21 +232,20 @@ gfx::RectF MarkerCell::HitTestTextPosition(Posn lPosn) const {
   return gfx::RectF(gfx::PointF(0.0f, top()), gfx::SizeF(width(), height()));
 }
 
-Posn MarkerCell::MapXToPosn(const gfx::Canvas&, float) const {
+Posn MarkerCell::MapXToPosn(gfx::Canvas*, float) const {
   return start_;
 }
 
 // Render marker above baseline.
-void MarkerCell::Render(const gfx::Canvas& gfx,
+void MarkerCell::Render(gfx::Canvas* canvas,
                         const gfx::RectF& rect) const {
-  Cell::Render(gfx, rect);
+  Cell::Render(canvas, rect);
 
   auto const ascent = height() - descent();
   auto const marker_rect = gfx::RectF(gfx::PointF(rect.left, rect.top + top()),
                                       gfx::SizeF(width(), height()));
-  gfx::Brush stroke_brush(gfx, style().color());
+  gfx::Brush stroke_brush(canvas, style().color());
   auto const baseline = marker_rect.bottom - descent();
-  auto canvas = const_cast<gfx::Canvas*>(&gfx);
   switch (marker_name_) {
     case TextMarker::EndOfDocument: { // Draw <-
       auto const wing = underline() * 3;
@@ -296,7 +293,7 @@ void MarkerCell::Render(const gfx::Canvas& gfx,
       break;
     }
   }
-  FillOverlay(gfx, marker_rect);
+  FillOverlay(canvas, marker_rect);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -356,11 +353,11 @@ gfx::RectF TextCell::HitTestTextPosition(Posn offset) const {
                     gfx::SizeF(1.0f, height()));
 }
 
-Posn TextCell::MapXToPosn(const gfx::Canvas& gfx, float x) const {
+Posn TextCell::MapXToPosn(gfx::Canvas* canvas, float x) const {
   if (x >= width())
     return end_;
   for (auto k = 1u; k <= characters_.length(); ++k) {
-    auto const cx = FloorWidthToPixel(gfx,
+    auto const cx = FloorWidthToPixel(canvas,
       style().font()->GetTextWidth(characters_.data(), k));
     if (x < cx)
       return static_cast<Posn>(start_ + k - 1);
@@ -376,18 +373,17 @@ bool TextCell::Merge(const RenderStyle& style, float width) {
   return true;
 }
 
-void TextCell::Render(const gfx::Canvas& gfx, const gfx::RectF& rect) const {
+void TextCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
   DCHECK(!characters_.empty());
   auto const text_rect = gfx::RectF(
       gfx::PointF(rect.left, rect.top + top()), 
       gfx::SizeF(rect.width(), height()));
-  FillBackground(gfx, rect);
-  gfx::Brush text_brush(gfx, style().color());
-  DrawText(gfx, *style().font(), text_brush, text_rect, characters_);
+  FillBackground(canvas, rect);
+  gfx::Brush text_brush(canvas, style().color());
+  DrawText(canvas, *style().font(), text_brush, text_rect, characters_);
 
   auto const baseline = text_rect.bottom - descent();
   auto const underline = baseline + this->underline();
-  auto const canvas = const_cast<gfx::Canvas*>(&gfx);
   switch (style().text_decoration()) {
     case css::TextDecoration::ImeInput:
       DrawWave(canvas, text_brush, rect, underline);
@@ -422,7 +418,7 @@ void TextCell::Render(const gfx::Canvas& gfx, const gfx::RectF& rect) const {
       break;
   }
 
-  FillOverlay(gfx, text_rect);
+  FillOverlay(canvas, text_rect);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -456,18 +452,17 @@ bool UnicodeCell::Merge(const RenderStyle&, float) {
   return false;
 }
 
-void UnicodeCell::Render(const gfx::Canvas& gfx,
-                         const gfx::RectF& rect) const {
+void UnicodeCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
   auto const text_rect = gfx::RectF(
       gfx::PointF(rect.left, rect.top + top()),
       gfx::SizeF(rect.width(), height())) - gfx::SizeF(1, 1);
-  FillBackground(gfx, rect);
-  gfx::Canvas::AxisAlignedClipScope clip_scope(gfx, text_rect);
-  gfx::Brush text_brush(gfx, style().color());
-  DrawText(gfx, *style().font(), text_brush, text_rect - gfx::SizeF(1, 1),
+  FillBackground(canvas, rect);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(*canvas, text_rect);
+  gfx::Brush text_brush(canvas, style().color());
+  DrawText(canvas, *style().font(), text_brush, text_rect - gfx::SizeF(1, 1),
            characters());
-  gfx.DrawRectangle(text_brush, text_rect);
-  FillOverlay(gfx, text_rect);
+  canvas->DrawRectangle(text_brush, text_rect);
+  FillOverlay(canvas, text_rect);
 }
 
 } // namespace rendering

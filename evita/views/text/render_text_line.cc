@@ -116,13 +116,13 @@ gfx::RectF TextLine::HitTestTextPosition(Posn offset) const {
   return gfx::RectF();
 }
 
-Posn TextLine::MapXToPosn(const gfx::Canvas& gfx, float xGoal) const {
+Posn TextLine::MapXToPosn(gfx::Canvas* canvas, float xGoal) const {
   auto xCell = 0.0f;
   auto lPosn = GetEnd() - 1;
   for (const auto cell : cells_) {
     auto const x = xGoal - xCell;
     xCell += cell->width();
-    auto const lMap = cell->MapXToPosn(gfx, x);
+    auto const lMap = cell->MapXToPosn(canvas, x);
     if (lMap >= 0)
       lPosn = lMap;
     if (x >= 0 && x < cell->width())
@@ -131,15 +131,15 @@ Posn TextLine::MapXToPosn(const gfx::Canvas& gfx, float xGoal) const {
   return lPosn;
 }
 
-void TextLine::Render(const gfx::Canvas& gfx) const {
+void TextLine::Render(gfx::Canvas* canvas) const {
   auto x = bounds_.left;
   for (auto cell : cells_) {
     gfx::RectF rect(x, bounds_.top, x + cell->width(),
-                    ::ceilf(bounds_.top + cell->line_height()));
-    cell->Render(gfx, rect);
+                    ::ceil(bounds_.top + cell->line_height()));
+    cell->Render(canvas, rect);
     x = rect.right;
   }
-  gfx.Flush();
+  canvas->Flush();
 }
 
 }  // namespace rendering

@@ -30,12 +30,12 @@ class TextFormatter final {
 
   private: RenderStyle default_render_style_;
   private: css::Style default_style_;
-  private: const gfx::Canvas& m_gfx;
+  private: gfx::Canvas* canvas_;
   private: TextBlock* const text_block_;
   private: std::unique_ptr<TextScanner> text_scanner_;
   private: float zoom_;
 
-  public: TextFormatter(const gfx::Canvas& gfx, TextBlock* text_block,
+  public: TextFormatter(gfx::Canvas* canvas, TextBlock* text_block,
                         Posn start, float zoom);
   public: ~TextFormatter();
 

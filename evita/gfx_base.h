@@ -75,6 +75,7 @@ class TextFormat;
 class TextLayout;
 
 class Brush : public SimpleObject_<ID2D1SolidColorBrush> {
+  public: Brush(Canvas* canvas, ColorF color);
   public: Brush(const Canvas& gfx, ColorF color);
   public: Brush(const Canvas& gfx, float red, float green, float blue,
                 float alpha = 1.0f);

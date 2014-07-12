@@ -28,11 +28,11 @@ namespace {
 const float cxLeftMargin = 10.0f;
 const int k_nTabWidth = 4;
 
-float AlignHeightToPixel(const gfx::Canvas& gfx, float height) {
-  return gfx.AlignToPixel(gfx::SizeF(0.0f, height)).height;
+float AlignHeightToPixel(gfx::Canvas* canvas, float height) {
+  return canvas->AlignToPixel(gfx::SizeF(0.0f, height)).height;
 }
 
-float AlignWidthToPixel(const gfx::Canvas&, float width) {
+float AlignWidthToPixel(gfx::Canvas*, float width) {
   return width;
 }
 
@@ -50,17 +50,16 @@ gfx::ColorF CssColorToColorF(const css::Color& color) {
       color.alpha());
 }
 
-Font* GetFont(const gfx::Canvas& gfx, const css::Style& style) {
-  return FontSet::Get(gfx, style)->FindFont(gfx, 'x');
+Font* GetFont(const css::Style& style) {
+  return FontSet::Get(style)->FindFont('x');
 }
 
 const css::Style& GetDefaultStyle(const TextBlock* text_block) {
   return text_block->text_buffer()->GetDefaultStyle();
 }
 
-RenderStyle GetRenderStyle(const gfx::Canvas& gfx,
-                           const css::Style& style) {
-  return RenderStyle(style, GetFont(gfx, style));
+RenderStyle GetRenderStyle(const css::Style& style) {
+  return RenderStyle(style, GetFont(style));
 }
 
 }  // namespace
@@ -174,11 +173,11 @@ RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
 //
 // TextFormatter
 //
-TextFormatter::TextFormatter(const gfx::Canvas& gfx, TextBlock* text_block,
+TextFormatter::TextFormatter(gfx::Canvas* canvas, TextBlock* text_block,
                              Posn lStart, float zoom)
-    : default_render_style_(GetRenderStyle(gfx, GetDefaultStyle(text_block))),
+    : default_render_style_(GetRenderStyle(GetDefaultStyle(text_block))),
       default_style_(GetDefaultStyle(text_block)),
-      m_gfx(gfx),
+      canvas_(canvas),
       text_block_(text_block),
       text_scanner_(new TextScanner(text_block->text_buffer(), lStart)),
       zoom_(zoom) {
@@ -286,8 +285,8 @@ TextLine* TextFormatter::FormatLine() {
   ascent  = std::max(pCell->height() - pCell->descent(), ascent);
 
   pLine->Fix(text_block_->left(), text_block_->top() + text_block_->GetHeight(),
-             AlignHeightToPixel(m_gfx, ascent),
-             AlignHeightToPixel(m_gfx, descent));
+             AlignHeightToPixel(canvas_, ascent),
+             AlignHeightToPixel(canvas_, descent));
 
   return pLine;
 }
@@ -319,28 +318,28 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
   if (wch == 0x09) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
-    auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
-    auto const cxTab = AlignWidthToPixel(m_gfx, pFont->GetCharWidth(' ')) *
+    auto const pFont = FontSet::Get(style)->FindFont('x');
+    auto const cxTab = AlignWidthToPixel(canvas_, pFont->GetCharWidth(' ')) *
                           k_nTabWidth;
     auto const x2 = (x + cxTab - cxLeftMargin) / cxTab * cxTab;
     auto const cx = (x2 + cxLeftMargin) - x;
-    auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
+    auto const cxM = AlignWidthToPixel(canvas_, pFont->GetCharWidth('M'));
     if (pPrev && x2 + cxM > text_block_->right())
       return nullptr;
 
-    auto const height = AlignHeightToPixel(m_gfx, pFont->height());
+    auto const height = AlignHeightToPixel(canvas_, pFont->height());
     return new MarkerCell(text_scanner_->MakeRenderStyle(style, pFont), cx,
                           height, lPosn, TextMarker::Tab);
   }
 
   auto const pFont = wch < 0x20 || wch == 0xFEFF ?
       nullptr :
-      FontSet::Get(m_gfx, style)->FindFont(m_gfx, wch);
+      FontSet::Get(style)->FindFont(wch);
 
   if (!pFont) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
-    auto const font = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'u');
+    auto const font = FontSet::Get(style)->FindFont('u');
     base::string16 string;
     if (wch < 0x20) {
       string.push_back('^');
@@ -357,15 +356,15 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
     auto const char_width = font->GetCharWidth('M');
     if (pPrev && x + width + char_width > text_block_->right())
       return nullptr;
-    auto const height = AlignHeightToPixel(m_gfx, font->height());
+    auto const height = AlignHeightToPixel(canvas_, font->height());
     return new UnicodeCell(text_scanner_->MakeRenderStyle(style, font),
                            width, height, lPosn, string);
   }
 
   auto render_style = text_scanner_->MakeRenderStyle(style, pFont);
-  auto const cx = AlignWidthToPixel(m_gfx, pFont->GetCharWidth(wch));
+  auto const cx = AlignWidthToPixel(canvas_, pFont->GetCharWidth(wch));
   if (pPrev) {
-    auto const cxM = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('M'));
+    auto const cxM = AlignWidthToPixel(canvas_, pFont->GetCharWidth('M'));
     if (x + cx + cxM > text_block_->right()) {
       // We doesn't have enough room for a char in the line.
       return nullptr;
@@ -377,7 +376,7 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
     }
   }
 
-  auto const height = AlignHeightToPixel(m_gfx, pFont->height());
+  auto const height = AlignHeightToPixel(canvas_, pFont->height());
   return new TextCell(render_style, cx, height, lPosn, base::string16(1u, wch));
 }
 
@@ -389,9 +388,9 @@ Cell* TextFormatter::formatMarker(TextMarker marker_name) {
       css::StyleSelector::end_of_line_marker()));
   style.set_font_size(style.font_size() * zoom_);
 
-  auto const pFont = FontSet::Get(m_gfx, style)->FindFont(m_gfx, 'x');
-  auto const width = AlignWidthToPixel(m_gfx, pFont->GetCharWidth('x'));
-  auto const height = AlignHeightToPixel(m_gfx, pFont->height());
+  auto const pFont = FontSet::Get(style)->FindFont('x');
+  auto const width = AlignWidthToPixel(canvas_, pFont->GetCharWidth('x'));
+  auto const height = AlignHeightToPixel(canvas_, pFont->height());
   return new MarkerCell(text_scanner_->MakeRenderStyle(style, pFont),
                         width, height, text_scanner_->GetPosn(),
                         marker_name);

@@ -85,16 +85,16 @@ text::Posn TextRenderer::GetVisibleEnd() const {
 void TextRenderer::Format(Posn lStart) {
   DCHECK(canvas_);
   text_block_->Reset();
-  TextFormatter oFormatter(*canvas_, text_block_.get(), lStart, zoom_);
-  oFormatter.Format();
+  TextFormatter formatter(canvas_, text_block_.get(), lStart, zoom_);
+  formatter.Format();
   should_format_ = false;
   should_render_ = true;
 }
 
 TextLine* TextRenderer::FormatLine(Posn lStart) {
   DCHECK(canvas_);
-  TextFormatter oFormatter(*canvas_, text_block_.get(), lStart, zoom_);
-  return oFormatter.FormatLine();
+  TextFormatter formatter(canvas_, text_block_.get(), lStart, zoom_);
+  return formatter.FormatLine();
 }
 
 // Maps specified buffer position to window point and returns true. If
@@ -139,17 +139,17 @@ Posn TextRenderer::MapPointToPosition(gfx::PointF pt) const {
     if (pt.x < xCell)
       return line->GetStart();
 
-    auto lPosn = line->GetEnd() - 1;
+    auto result_offset = line->GetEnd() - 1;
     for (const auto cell : line->cells()) {
       auto x = pt.x - xCell;
       xCell += cell->width();
-      auto lMap = cell->MapXToPosn(*canvas_, x);
-      if (lMap >= 0)
-        lPosn = lMap;
+      const auto offset = cell->MapXToPosn(canvas_, x);
+      if (offset >= 0)
+        result_offset = offset;
       if (x >= 0 && x < cell->width())
         break;
     }
-    return lPosn;
+    return result_offset;
   }
   return GetEnd() - 1;
 }
@@ -171,7 +171,7 @@ void TextRenderer::RenderRuler() {
   // script and UI.
   auto style = buffer_->GetDefaultStyle();
   style.set_font_size(style.font_size() * zoom_);
-  auto const font = FontSet::Get(*canvas_, style)->FindFont(*canvas_, 'x');
+  auto const font = FontSet::Get(style)->FindFont('x');
 
   auto const num_columns = 81;
   auto const width_of_M = font->GetCharWidth('M');
@@ -180,7 +180,7 @@ void TextRenderer::RenderRuler() {
                           gfx::SizeF(1.0f, text_block_->height()));
 
   gfx::Canvas::AxisAlignedClipScope clip_scope(*canvas_, ruler_bounds);
-  gfx::Brush brush(*canvas_, gfx::ColorF(0, 0, 0, 0.3f));
+  gfx::Brush brush(canvas_, gfx::ColorF(0, 0, 0, 0.3f));
   canvas_->DrawRectangle(brush, ruler_bounds);
 }
 
@@ -205,7 +205,7 @@ bool TextRenderer::ScrollDown() {
     return false;
   auto const lGoal = GetStart() - 1;
   auto const lStart = buffer_->ComputeStartOfLine(lGoal);
-  TextFormatter formatter(*canvas_, text_block_.get(), lStart, zoom_);
+  TextFormatter formatter(canvas_, text_block_.get(), lStart, zoom_);
   for (;;) {
     auto const line = formatter.FormatLine();
     if (lGoal < line->GetEnd()) {
@@ -308,10 +308,10 @@ bool TextRenderer::ScrollUp() {
   if (text_block_->IsShowEndOfDocument())
     return false;
 
-  TextFormatter oFormatter(*canvas_, text_block_.get(),
-                           text_block_->GetLast()->GetEnd(), zoom_);
+  TextFormatter formatter(canvas_, text_block_.get(),
+                          text_block_->GetLast()->GetEnd(), zoom_);
 
-  auto const line = oFormatter.FormatLine();
+  auto const line = formatter.FormatLine();
   text_block_->Append(line);
   should_format_ = false;
   should_render_ = true;

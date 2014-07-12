@@ -115,7 +115,7 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
 
   if (!text_renderer_->ShouldFormat()) {
     if (auto const line = text_renderer_->FindLine(lGoal))
-      return line->MapXToPosn(*canvas_, xGoal);
+      return line->MapXToPosn(canvas_, xGoal);
   }
 
   auto lStart = buffer()->ComputeStartOfLine(lGoal);
@@ -123,7 +123,7 @@ Posn TextEditWindow::computeGoalX(float xGoal, Posn lGoal) {
     auto const pLine = text_renderer_->FormatLine(lStart);
     auto const lEnd = pLine->GetEnd();
     if (lGoal < lEnd)
-      return pLine->MapXToPosn(*canvas_, xGoal);
+      return pLine->MapXToPosn(canvas_, xGoal);
     lStart = lEnd;
   }
 }

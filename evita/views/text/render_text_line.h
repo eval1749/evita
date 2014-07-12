@@ -51,15 +51,15 @@ class TextLine final {
   private: bool Contains(text::Posn offset) const;
   public: TextLine* Copy() const;
   public: bool Equal(const TextLine*) const;
-  public: void Fix(float left, float top, float ascent, float dscent);
+  public: void Fix(float left, float top, float ascent, float descent);
   public: Posn GetEnd() const { return m_lEnd; }
   public: float GetHeight() const { return bounds_.height(); }
   public: Posn GetStart() const { return m_lStart; }
   public: float GetWidth() const { return bounds_.width(); }
   public: uint Hash() const;
   public: gfx::RectF HitTestTextPosition(Posn lPosn) const;
-  public: Posn MapXToPosn(const gfx::Canvas&, float) const;
-  public: void Render(const gfx::Canvas& gfx) const;
+  public: Posn MapXToPosn(gfx::Canvas* canvas, float x) const;
+  public: void Render(gfx::Canvas* canvas) const;
 };
 
 } // namespace rendering

@@ -54,11 +54,12 @@ class Font {
     }
 
     // [D]
-    public: void DrawText(const gfx::Canvas& gfx,const gfx::Brush& text_brush,
-                  const gfx::RectF& rect, const base::char16* chars,
-                  uint num_chars) const;
-    public: void DrawText(const gfx::Canvas& gfx,const gfx::Brush& text_brush,
-                  const gfx::RectF& rect, const base::string16& string) const;
+    public: void DrawText(gfx::Canvas* canvas, const gfx::Brush& text_brush,
+                          const gfx::RectF& rect, const base::char16* chars,
+                          uint num_chars) const;
+    public: void DrawText(gfx::Canvas* canvas,const gfx::Brush& text_brush,
+                          const gfx::RectF& rect,
+                          const base::string16& string) const;
 
     // [E]
     public: bool EqualKey(const Key* pKey) const {
@@ -110,17 +111,9 @@ class FontSet : public Fonts
     public: bool EqualKey(const Key* pFonts) const;
 
     // [F]
-    public: Font* FindFont(const gfx::Canvas&, char16 wch) const {
-      return FindFont(wch);
-    }
-
     public: Font* FindFont(char16) const;
 
     // [G]
-    public: static FontSet* Get(const gfx::Canvas&,
-                                const css::Style& style) {
-      return Get(style);
-    }
     public: static FontSet* Get(const css::Style& style);
     public: const Key* GetKey() const { return this; }
 

@@ -34,6 +34,8 @@ class Font {
       float descent;
       float height;
       float fixed_width;
+      float underline;
+      float underline_thickness;
     };
 
     private: LOGFONT m_oLogFont;
@@ -46,6 +48,10 @@ class Font {
     private: float ascent() const { return metrics_.ascent; }
     public: float descent() const { return metrics_.descent; }
     public: float height() const { return metrics_.height; }
+    public: float underline() const { return metrics_.underline; }
+    public: float underline_thickness() const {
+      return metrics_.underline_thickness;
+    }
 
     // [D]
     public: void DrawText(const gfx::Canvas& gfx,const gfx::Brush& text_brush,

@@ -68,6 +68,8 @@ class Font::FontImpl {
                                   metrics_.descent +
                                   metrics_.lineGap);
     metrics.fixed_width = ConvertToDip(CalculateFixedWidth());
+    metrics.underline = ConvertToDip(-metrics_.underlinePosition);
+    metrics.underline_thickness = ConvertToDip(metrics_.underlineThickness);
     return metrics;
   }
 

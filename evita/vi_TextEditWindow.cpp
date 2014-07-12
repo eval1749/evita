@@ -168,8 +168,7 @@ text::Posn TextEditWindow::ComputeMotion(
       return lPosn;
 
     case Unit_Screen: {
-      auto k = LargeScroll(0, n, false);
-      if (k > 0) {
+      if (LargeScroll(0, n)) {
         auto const lStart = text_renderer_->GetStart();
         view_start_ = lStart;
         return MapPointToPosn(pt);
@@ -251,17 +250,17 @@ gfx::RectF TextEditWindow::HitTestTextPosition(Posn lPosn) {
   }
 }
 
-int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
+bool TextEditWindow::LargeScroll(int, int iDy) {
   UI_ASSERT_DOM_LOCKED();
   FormatTextBlockIfNeeded();
 
-  auto k = 0;
+  auto scrolled = false;
   if (iDy < 0) {
     // Scroll Down -- place top line out of window.
     iDy = -iDy;
 
     auto const lBufStart = buffer()->GetStart();
-    for (k = 0; k < iDy; ++k) {
+    for (auto k = 0; k < iDy; ++k) {
       auto const lStart = text_renderer_->GetStart();
       if (lStart == lBufStart)
         break;
@@ -270,22 +269,21 @@ int TextEditWindow::LargeScroll(int, int iDy, bool fRender) {
       do {
         if (!text_renderer_->ScrollDown())
           break;
+        scrolled = true;
       } while (text_renderer_->GetEnd() != lStart);
     }
   } else if (iDy > 0) {
     // Scroll Up -- format page from page end.
     const Posn lBufEnd = buffer()->GetEnd();
-    for (k = 0; k < iDy; ++k) {
+    for (auto k = 0; k < iDy; ++k) {
       auto const lStart = text_renderer_->GetEnd();
       if (lStart >= lBufEnd)
         break;
       text_renderer_->Format(lStart);
+      scrolled = true;
     }
   }
-
-  if (fRender && k > 0)
-    Render();
-  return k;
+  return scrolled;
 }
 
 Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
@@ -578,12 +576,6 @@ void TextEditWindow::Redraw() {
       return;
     }
     text_renderer_->ScrollToPosn(lCaretPosn);
-    Render(selection);
-    return;
-  }
-
-  if (text_renderer_->GetStart() != view_start_) {
-    text_renderer_->Format(StartOfLine(view_start_));
     Render(selection);
     return;
   }

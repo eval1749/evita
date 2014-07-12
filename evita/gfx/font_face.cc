@@ -8,25 +8,30 @@ namespace gfx {
 
 namespace {
 
-common::ComPtr<IDWriteFontFace> CreateFontFace(const char16* family_name) {
+common::ComPtr<IDWriteFontFace> CreateFontFace(
+    const FontProperties& properties) {
   common::ComPtr<IDWriteFontCollection> font_collection;
   COM_VERIFY(gfx::FactorySet::dwrite().
       GetSystemFontCollection(&font_collection, false));
 
   uint32 index;
   BOOL exists;
-  COM_VERIFY(font_collection->FindFamilyName(family_name, &index, &exists));
-  if (!exists)
-   return CreateFontFace(L"Courier New");
+  COM_VERIFY(font_collection->FindFamilyName(properties.family_name.c_str(),
+                                             &index, &exists));
+  if (!exists) {
+   FontProperties fallback_properties;
+   fallback_properties.family_name = L"Courier New";
+   return CreateFontFace(fallback_properties);
+  }
 
   common::ComPtr<IDWriteFontFamily> font_family;
   COM_VERIFY(font_collection->GetFontFamily(index, &font_family));
 
   common::ComPtr<IDWriteFont> font;
   COM_VERIFY(font_family->GetFirstMatchingFont(
-    DWRITE_FONT_WEIGHT_NORMAL,
+    properties.bold ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL,
     DWRITE_FONT_STRETCH_NORMAL,
-    DWRITE_FONT_STYLE_NORMAL, // normal, italic or oblique
+    properties.italic ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL,
     &font));
 
   common::ComPtr<IDWriteFontFace> font_face;
@@ -44,10 +49,27 @@ DWRITE_FONT_METRICS GetFontMetrics(IDWriteFontFace* font) {
 
 //////////////////////////////////////////////////////////////////////
 //
+// Font::Properties
+//
+FontProperties::FontProperties()
+    : bold(false), italic(false), font_size_pt(0) {
+}
+
+bool FontProperties::operator==(const FontProperties& other) const {
+  return bold == other.bold && font_size_pt == other.font_size_pt &&
+         family_name == other.family_name && italic == other.italic;
+}
+
+bool FontProperties::operator!=(const FontProperties& other) const {
+  return !operator==(other);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // FontSet
 //
-FontFace::FontFace(const char16* family_name)
-    : SimpleObject_(CreateFontFace(family_name)),
+FontFace::FontFace(const FontProperties& properties)
+    : SimpleObject_(CreateFontFace(properties)),
       metrics_(GetFontMetrics(*this)) {
 }
 
@@ -55,3 +77,20 @@ FontFace::~FontFace() {
 }
 
 }  // namespace gfx
+
+namespace std {
+size_t hash<gfx::FontProperties>::operator()(
+    const gfx::FontProperties& properties) const {
+  size_t result = 137u;
+  result <<= 1;
+  result ^= hash<bool>()(properties.bold);
+  result <<= 1;
+  result ^= hash<bool>()(properties.italic);
+  result <<= 1;
+  result ^= hash<float>()(properties.font_size_pt);
+  result <<= 1;
+  result ^= hash<base::string16>()(properties.family_name);
+  return result;
+}
+
+}  // namespace std

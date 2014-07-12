@@ -6,6 +6,7 @@
 #define INCLUDE_evita_vi_style_h
 
 #include <memory>
+#include <vector>
 
 #include "base/strings/string16.h"
 #include "gfx/forward.h"
@@ -15,14 +16,22 @@ namespace css {
 class Style;
 }
 
+namespace gfx {
+struct FontProperties;
+}
+
+class FontSet;
+
 //////////////////////////////////////////////////////////////////////
 //
 // Font class
 //
 class Font {
-  public: typedef LOGFONT Key;
+  private: class Cache;
+  friend class Cache;
 
   private: class FontImpl;
+
   private: struct SimpleMetrics {
     float ascent;
     float descent;
@@ -32,12 +41,11 @@ class Font {
     float underline_thickness;
   };
 
-  private: LOGFONT log_font_;
   private: const std::unique_ptr<FontImpl> font_impl_;
   private: const SimpleMetrics metrics_;
 
-  public: Font(const LOGFONT* logFont);
-  public: ~Font();
+  private: Font(const gfx::FontProperties& properties);
+  private: ~Font();
 
   private: float ascent() const { return metrics_.ascent; }
   public: float descent() const { return metrics_.descent; }
@@ -50,79 +58,40 @@ class Font {
   // [D]
   public: void DrawText(gfx::Canvas* canvas, const gfx::Brush& text_brush,
                         const gfx::RectF& rect, const base::char16* chars,
-                        uint num_chars) const;
+                        size_t num_chars) const;
   public: void DrawText(gfx::Canvas* canvas,const gfx::Brush& text_brush,
                         const gfx::RectF& rect,
                         const base::string16& string) const;
 
-  // [E]
-  public: bool EqualKey(const Key* pKey) const {
-    return !::memcmp(&log_font_, pKey, sizeof(log_font_));
-  }
-
   // [G]
+  public: static Font* Get(const gfx::FontProperties& properties);
   public: float GetCharWidth(char16) const;
-  public: const Key* GetKey() const { return &log_font_; }
   public: float GetTextWidth(const base::char16* pwch, size_t cwch) const;
   public: float GetTextWidth(const base::string16& string) const;
 
   // [H]
   public: bool HasCharacter(char16) const;
 
-  public: uint Hash() const {
-    return static_cast<uint>(reinterpret_cast<UINT_PTR>(this));
-  }
-
-  public: static int HashKey(const Key*);
-
   DISALLOW_COPY_AND_ASSIGN(Font);
 };
 
 //////////////////////////////////////////////////////////////////////
 //
-// FontSet class
+// FontSet
 //
-struct Fonts {
-  Font* fonts_[10];
-  int num_fonts_;
-};
+class FontSet {
+  private: class Cache;
+  friend class Cache;
 
-class FontSet : public Fonts {
-  public: typedef Fonts Key;
+  private: std::vector<Font*> fonts_;
 
-  public: FontSet() {
-      num_fonts_ = 0;
-  }
+  private: FontSet(const std::vector<Font*>& fonts);
+  private: ~FontSet();
 
-  // [A]
-  public: void Add(Font*);
-
-  // [E]
-  public: bool EqualKey(const Key* pFonts) const;
-
-  // [F]
-  public: Font* FindFont(char16) const;
-
-  // [G]
+  public: Font* FindFont(base::char16 sample) const;
   public: static FontSet* Get(const css::Style& style);
-  public: const Key* GetKey() const { return this; }
 
-  // [H]
-  public: static int HashKey(const Key*);
-
-  // [E]
-  public: class EnumFont {
-    Font**  m_pRunner;
-    Font**  m_pEnd;
-
-    public: EnumFont(const FontSet* p) :
-        m_pRunner(const_cast<Font**>(&p->fonts_[0])),
-        m_pEnd(const_cast<Font**>(&p->fonts_[p->num_fonts_])) {}
-
-    public: bool AtEnd() const { return m_pRunner >= m_pEnd; }
-    public: Font* Get() const { ASSERT(! AtEnd()); return *m_pRunner; }
-    public: void Next() { ASSERT(! AtEnd()); m_pRunner++; }
-  };
+  DISALLOW_COPY_AND_ASSIGN(FontSet);
 };
 
 #endif //!defined(INCLUDE_evita_vi_style_h)

@@ -22,6 +22,7 @@
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
 #include "common/timer/timer.h"
+#include "evita/dom/lock.h"
 #include "evita/gfx_base.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
@@ -285,6 +286,7 @@ Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
 }
 
 void TextEditWindow::Render(const TextSelectionModel& selection) {
+  UI_ASSERT_DOM_LOCKED();
   if (!is_shown())
     return;
 
@@ -369,6 +371,7 @@ void TextEditWindow::updateScrollBar() {
 
 // text::BufferMutationObserver
 void TextEditWindow::DidDeleteAt(text::Posn offset, size_t length) {
+  ASSERT_DOM_LOCKED();
   if (view_start_ <= offset)
     return;
   view_start_ = std::max(static_cast<text::Posn>(view_start_ - length),
@@ -376,6 +379,7 @@ void TextEditWindow::DidDeleteAt(text::Posn offset, size_t length) {
 }
 
 void TextEditWindow::DidInsertAt(text::Posn offset, size_t length) {
+  ASSERT_DOM_LOCKED();
   if (view_start_ <= offset)
     return;
   view_start_ += length;
@@ -508,10 +512,10 @@ void TextEditWindow::MakeSelectionVisible() {
 }
 
 void TextEditWindow::Redraw() {
+  UI_ASSERT_DOM_LOCKED();
+
   if (!is_shown())
     return;
-
-  UI_ASSERT_DOM_LOCKED();
 
   auto const selection = GetTextSelectionModel(this, *selection_);
   Posn lCaretPosn;

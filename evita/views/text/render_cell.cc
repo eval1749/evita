@@ -42,50 +42,19 @@ inline void DrawVLine(const gfx::Canvas& gfx, const gfx::Brush& brush,
   DrawLine(gfx, brush, x, sy, x, ey);
 }
 
-void DrawWave(const gfx::Canvas& gfx, const gfx::Brush& brush, float sx,
-              float ex, float y) {
-  CR_DEFINE_STATIC_LOCAL(gfx::StrokeStyle, dash_style1, ());
-  CR_DEFINE_STATIC_LOCAL(gfx::StrokeStyle, dash_style2, ());
-  if (!dash_style1.is_realized()) {
-    auto const dash_size = 2.0f;
-
-    dash_style1.set_dash_style(gfx::DashStyle::Custom);
-    dash_style1.set_dashes({dash_size, dash_size});
-    dash_style1.Realize();
-    base::AtExitManager::RegisterCallback(DestroyStrokeStyleCallback,
-                                          &dash_style1);
-
-    dash_style2.set_dash_style(gfx::DashStyle::Custom);
-    dash_style2.set_dashes({dash_size, dash_size});
-    dash_style2.set_dash_offset(dash_size);
-    dash_style2.Realize();
-    base::AtExitManager::RegisterCallback(DestroyStrokeStyleCallback,
-                                          &dash_style2);
-  }
-
-  auto const stroke_width = 1.0f;
-  gfx->DrawLine(gfx::PointF(sx, y + 1), gfx::PointF(ex, y + 1), brush,
-                stroke_width, dash_style1);
-  gfx->DrawLine(gfx::PointF(sx, y + 2), gfx::PointF(ex, y + 2), brush,
-                stroke_width, dash_style2);
-}
-
-void DrawWave(const gfx::Canvas& gfx, const gfx::Brush& brush,
-              const gfx::RectF& rect, float baseline) {
-  auto const height = rect.bottom - baseline;
-  auto const pen_width = std::max(height / 4, 0.1f);
-  auto const wave = height - pen_width;
-  if (wave <= 2) {
-    DrawWave(gfx, brush, rect.left, rect.right, baseline + 1);
-    return;
-  }
-  gfx::Canvas::AxisAlignedClipScope clip_scope(gfx, rect);
-  for (auto x = rect.left; x < rect.right; x += wave) {
-    auto const bottom = rect.bottom;
+void DrawWave(const gfx::Canvas& canvas, const gfx::Brush& brush,
+              const Font* font, const gfx::RectF& bounds, float baseline) {
+  auto const wave = std::max(font->underline() * 1.3f, 2.0f);
+  auto const pen_width = font->underline_thickness();
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
+  for (auto x = bounds.left; x < bounds.right; x += wave) {
+    auto const bottom = baseline + wave;
     auto const top = baseline;
-    gfx.DrawLine(brush, x, top, x + wave, bottom, pen_width); // top to bottom
+    // top to bottom
+    canvas.DrawLine(brush, x, top, x + wave, bottom, pen_width);
     x += wave;
-    gfx.DrawLine(brush, x, bottom, x + wave, top, pen_width); // bottom to top
+    // bottom to top
+    canvas.DrawLine(brush, x, bottom, x + wave, top, pen_width);
   }
 }
 
@@ -322,16 +291,14 @@ void MarkerCell::Render(const gfx::Canvas& gfx,
 TextCell::TextCell(const RenderStyle& style, float width, float height,
                    Posn lPosn, const base::string16& characters)
     : Cell(style, width, height, style.font()->descent()),
-      start_(lPosn),
-      end_(lPosn + 1),
-      characters_(characters) {
+      characters_(characters), end_(lPosn + 1), font_(style.font()),
+      start_(lPosn) {
 }
 
 TextCell::TextCell(const TextCell& other)
     : Cell(other),
-      start_(other.start_),
-      end_(other.end_),
-      characters_(other.characters_) {
+      characters_(other.characters_), end_(other.end_), font_(other.font_),
+      start_(other.start_) {
 }
 
 TextCell::~TextCell() {
@@ -405,37 +372,38 @@ void TextCell::Render(const gfx::Canvas& gfx, const gfx::RectF& rect) const {
   DrawText(gfx, *style().font(), text_brush, text_rect, characters_);
 
   auto const baseline = text_rect.bottom - descent();
+  auto const underline = baseline + font_->underline();
   switch (style().text_decoration()) {
     case css::TextDecoration::ImeInput:
-      DrawWave(gfx, text_brush, rect, baseline);
+      DrawWave(gfx, text_brush, font_, rect, underline);
       break;
 
     case css::TextDecoration::ImeInactiveA:
-      DrawHLine(gfx, text_brush, rect.left, rect.right, baseline + 1);
+      DrawHLine(gfx, text_brush, rect.left, rect.right, underline);
       break;
 
     case css::TextDecoration::ImeInactiveB:
-      DrawHLine(gfx, text_brush, rect.left, rect.right, baseline + 1);
+      DrawHLine(gfx, text_brush, rect.left, rect.right, underline);
       break;
 
     case css::TextDecoration::ImeActive:
-      DrawHLine(gfx, text_brush, rect.left, rect.right, baseline + 1);
-      DrawHLine(gfx, text_brush, rect.left, rect.right, baseline + 2);
+      DrawHLine(gfx, text_brush, rect.left, rect.right, underline);
+      DrawHLine(gfx, text_brush, rect.left, rect.right, underline + 1);
       break;
 
     case css::TextDecoration::None:
       break;
 
     case css::TextDecoration::GreenWave:
-      DrawWave(gfx, gfx::Brush(gfx, gfx::ColorF::Green), rect, baseline);
+      DrawWave(gfx, gfx::Brush(gfx, gfx::ColorF::Green), font_, rect, baseline);
       break;
 
     case css::TextDecoration::RedWave:
-      DrawWave(gfx, gfx::Brush(gfx, gfx::ColorF::Red), rect, baseline);
+      DrawWave(gfx, gfx::Brush(gfx, gfx::ColorF::Red), font_, rect, baseline);
       break;
 
     case css::TextDecoration::Underline:
-      DrawHLine(gfx, text_brush, rect.left, rect.right, baseline + 1);
+      DrawHLine(gfx, text_brush, rect.left, rect.right, underline);
       break;
   }
 

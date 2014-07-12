@@ -127,11 +127,10 @@ class MarkerCell final : public Cell {
 class TextCell : public Cell {
   DECLARE_CASTABLE_CLASS(TextCell, Cell);
 
-  private: float m_iDescent;
-
-  private: Posn start_;
-  private: Posn end_;
   private: base::string16 characters_;
+  private: const Font* font_;
+  private: Posn end_;
+  private: Posn start_;
 
   public: TextCell(const RenderStyle& style, float width, float height,
                    Posn lPosn, const base::string16& characters);

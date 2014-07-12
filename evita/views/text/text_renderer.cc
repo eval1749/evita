@@ -176,17 +176,6 @@ Posn TextRenderer::MapPointToPosition(gfx::PointF pt) const {
   return GetEnd() - 1;
 }
 
-// Returns number of lines to be displayed in this page when using
-// buffer's default style.
-int TextRenderer::pageLines() const {
-  DCHECK(canvas_);
-  DCHECK(!ShouldFormat());
-  auto const pFont = FontSet::Get(*canvas_, m_pBuffer->GetDefaultStyle())->
-        FindFont(*canvas_, 'x');
-  auto const height = AlignHeightToPixel(*canvas_, pFont->height());
-  return static_cast<int>(text_block_->height() / height);
-}
-
 void TextRenderer::Render(const TextSelectionModel& selection_model) {
   DCHECK(canvas_);
   DCHECK(!ShouldFormat());
@@ -249,63 +238,77 @@ bool TextRenderer::ScrollDown() {
     text_block_->DiscardLastLine();
   }
 
+  should_format_ = false;
   should_render_ = true;
   return true;
 }
 
-bool TextRenderer::ScrollToPosition(Posn lPosn) {
+bool TextRenderer::ScrollToPosition(Posn offset) {
   DCHECK(canvas_);
   DCHECK(!ShouldFormat());
-  if (IsPositionFullyVisible(lPosn))
+  if (IsPositionFullyVisible(offset))
     return false;
 
-  auto const cLines = pageLines();
-  auto const cLines2 = std::max(cLines / 2, 1);
+  const auto scrollable = text_block_->height() / 2;
 
-  if (lPosn > GetStart()) {
-    for (auto k = 0; k < cLines2; k++) {
-        if (!ScrollUp())
-          return k;
-        if (IsPositionFullyVisible(lPosn))
-          return true;
+  if (offset > GetStart()) {
+    auto scrolled = 0.0f;
+    while (scrolled < scrollable) {
+      const auto scroll_height = text_block_->GetFirst()->height();
+      if (!ScrollUp())
+        return scrolled > 0.0f;
+      if (IsPositionFullyVisible(offset))
+        return true;
+      scrolled += scroll_height;
     }
   } else {
-    for (int k = 0; k < cLines2; k++) {
+    auto scrolled = 0.0f;
+    while (scrolled < scrollable) {
+      auto const scroll_height = text_block_->GetLast()->height();
       if (!ScrollDown())
-        return k;
-      if (IsPositionFullyVisible(lPosn))
+        return scrolled > 0.0f;
+      if (IsPositionFullyVisible(offset))
         return true;
+      scrolled += scroll_height;
     }
   }
 
-  auto lStart = lPosn;
-  for (int k = 0; k < cLines2; k++) {
-    if (!lStart)
-      break;
-    lStart = m_pBuffer->ComputeStartOfLine(lStart - 1);
-  }
-
-  #if DEBUG_FORMAT
-    DEBUG_PRINTF("%p\n", this);
-  #endif // DEBUG_FORMAT
-
-  Format(lStart);
-  for (;;) {
-    if (IsPositionFullyVisible(lPosn))
-      break;
-    if (!ScrollUp())
-      break;
+  Format(m_pBuffer->ComputeStartOfLine(offset));
+  while (!IsPositionFullyVisible(offset)) {
+    if (!ScrollDown())
+      return true;
   }
 
   // If this page shows end of buffer, we shows lines as much as
   // possible to fit in page.
   if (GetEnd() >= m_pBuffer->GetEnd()) {
-    while (IsPositionFullyVisible(lPosn)) {
+    while (IsPositionFullyVisible(offset)) {
       if (!ScrollDown())
         return true;
     }
     ScrollUp();
+    return true;
   }
+
+  // Move line containing |offset| to middle of screen.
+  auto scrolled = HitTestTextPosition(offset).top - text_block_->top();
+  if (scrolled < scrollable) {
+    while (scrolled < scrollable) {
+      auto const scroll_height = text_block_->GetFirst()->height();
+      if (!ScrollDown())
+        return true;
+      scrolled += scroll_height;
+    }
+  } else {
+    scrolled = scrollable + scrolled;
+    while (scrolled < scrollable) {
+      auto const scroll_height = text_block_->GetLast()->height();
+      if (!ScrollUp())
+        return true;
+      scrolled += scroll_height;
+    }
+  }
+
   return true;
 }
 
@@ -328,6 +331,7 @@ bool TextRenderer::ScrollUp() {
 
   auto const line = oFormatter.FormatLine();
   text_block_->Append(line);
+  should_format_ = false;
   should_render_ = true;
   return true;
 }

@@ -34,6 +34,7 @@ class TextLine final {
 
   public: float bottom() const { return bounds_.bottom; }
   public: const std::vector<Cell*>& cells() const { return cells_; }
+  public: float height() const { return bounds_.height(); }
   public: Cell* last_cell() const { return cells_.back(); }
   public: float left() const { return bounds_.left; }
   public: const gfx::RectF& bounds() const { return bounds_; }

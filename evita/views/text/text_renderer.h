@@ -77,9 +77,6 @@ class TextRenderer final {
   // [M]
   public: Posn MapPointToPosition(gfx::PointF point) const;
 
-  // [P]
-  private: int pageLines() const;
-
   // [R]
   public: void Render(const TextSelectionModel& selection);
   public: void RenderSelectionIfNeeded(const TextSelectionModel& selection);
@@ -87,7 +84,7 @@ class TextRenderer final {
 
   // [S]
   public: bool ScrollDown();
-  public: bool ScrollToPosition(Posn target_position);
+  public: bool ScrollToPosition(Posn offset);
   public: bool ScrollUp();
   public: void SetBounds(const Rect& rect);
   public: void SetCanvas(gfx::Canvas* canvas);

@@ -21,28 +21,6 @@
 #include "evita/views/text/text_formatter.h"
 
 namespace views {
-namespace {
-
-float AlignHeightToPixel(const gfx::Canvas& gfx, float height) {
-  return gfx.AlignToPixel(gfx::SizeF(0.0f, height)).height;
-}
-
-float AlignWidthToPixel(const gfx::Canvas&, float width) {
-  return width;
-}
-
-inline void drawLine(const gfx::Canvas& gfx, const gfx::Brush& brush,
-                     float sx, float sy, float ex, float ey) {
-  gfx.DrawLine(brush, sx, sy, ex, ey);
-}
-
-inline void drawVLine(const gfx::Canvas& gfx, const gfx::Brush& brush,
-                      float x, float sy, float ey) {
-  drawLine(gfx, brush, x, sy, x, ey);
-}
-
-} // namespace
-
 using namespace rendering;
 
 //////////////////////////////////////////////////////////////////////
@@ -184,22 +162,26 @@ void TextRenderer::Render(const TextSelectionModel& selection_model) {
   const auto selection = TextFormatter::FormatSelection(
       text_block_->text_buffer(), selection_model);
   screen_text_block_->Render(text_block_.get(), selection);
-
-  // FIXME 2007-08-05 We should expose show/hide
-  // ruler settings to both script and UI.
-
-  // Ruler
-  auto const pFont = FontSet::Get(*canvas_, buffer_->GetDefaultStyle())->
-    FindFont(*canvas_, 'x');
-
-  // FIXME 2007-08-05 We should expose rule position to
-  // user.
-  auto const num_columns = 81;
-  auto const width_of_M = AlignWidthToPixel(*canvas_, pFont->GetCharWidth('M'));
-  drawVLine(*canvas_, gfx::Brush(*canvas_, gfx::ColorF::LightGray),
-            text_block_->left() + width_of_M * num_columns,
-            text_block_->top(), text_block_->bottom());
+  RenderRuler();
   should_render_ = false;
+}
+
+void TextRenderer::RenderRuler() {
+  // FIXME 2007-08-05 We should expose show/hide and ruler settings to both
+  // script and UI.
+  auto style = buffer_->GetDefaultStyle();
+  style.set_font_size(style.font_size() * zoom_);
+  auto const font = FontSet::Get(*canvas_, style)->FindFont(*canvas_, 'x');
+
+  auto const num_columns = 81;
+  auto const width_of_M = font->GetCharWidth('M');
+  auto const ruler_x = ::floor(text_block_->left() + width_of_M * num_columns);
+  gfx::RectF ruler_bounds(gfx::PointF(ruler_x, text_block_->top()),
+                          gfx::SizeF(1.0f, text_block_->height()));
+
+  gfx::Canvas::AxisAlignedClipScope clip_scope(*canvas_, ruler_bounds);
+  gfx::Brush brush(*canvas_, gfx::ColorF(0, 0, 0, 0.3f));
+  canvas_->DrawRectangle(brush, ruler_bounds);
 }
 
 void TextRenderer::RenderSelectionIfNeeded(

@@ -79,6 +79,7 @@ class TextRenderer final {
 
   // [R]
   public: void Render(const TextSelectionModel& selection);
+  private: void RenderRuler();
   public: void RenderSelectionIfNeeded(const TextSelectionModel& selection);
   public: void Reset();
 

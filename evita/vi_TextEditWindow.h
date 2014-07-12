@@ -90,7 +90,7 @@ class TextEditWindow : public text::BufferMutationObserver,
   public: bool LargeScroll(int x_count, int y_count);
 
   // [M]
-  public: Posn MapPointToPosn(const gfx::PointF point);
+  public: Posn MapPointToPosition(const gfx::PointF point);
 
   // [R]
   private: void Render(const TextSelectionModel& selection);

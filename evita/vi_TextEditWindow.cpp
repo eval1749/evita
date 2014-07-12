@@ -165,7 +165,7 @@ text::Posn TextEditWindow::ComputeMotion(
       if (LargeScroll(0, n)) {
         auto const lStart = text_renderer_->GetStart();
         view_start_ = lStart;
-        return MapPointToPosn(pt);
+        return MapPointToPosition(pt);
       }
       if (n > 0)
         return std::min(GetEnd(), buffer()->GetEnd());
@@ -280,9 +280,9 @@ bool TextEditWindow::LargeScroll(int, int iDy) {
   return scrolled;
 }
 
-Posn TextEditWindow::MapPointToPosn(const gfx::PointF pt) {
+Posn TextEditWindow::MapPointToPosition(const gfx::PointF pt) {
   FormatTextBlockIfNeeded();
-  return std::min(text_renderer_->MapPointToPosn(pt), buffer()->GetEnd());
+  return std::min(text_renderer_->MapPointToPosition(pt), buffer()->GetEnd());
 }
 
 void TextEditWindow::Render(const TextSelectionModel& selection) {

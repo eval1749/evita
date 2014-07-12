@@ -141,7 +141,7 @@ bool TextRenderer::IsPositionFullyVisible(text::Posn offset) const {
   return offset >= GetStart() && offset < GetVisibleEnd();
 }
 
-Posn TextRenderer::MapPointToPosn(gfx::PointF pt) const {
+Posn TextRenderer::MapPointToPosition(gfx::PointF pt) const {
   DCHECK(canvas_);
   DCHECK(!ShouldFormat());
   if (pt.y < text_block_->top())

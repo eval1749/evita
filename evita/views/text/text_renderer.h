@@ -75,8 +75,7 @@ class TextRenderer final {
   public: bool IsPositionFullyVisible(Posn) const;
 
   // [M]
-  public: void MakePosnVisible(Posn);
-  public: Posn MapPointToPosn(gfx::PointF) const;
+  public: Posn MapPointToPosition(gfx::PointF point) const;
 
   // [P]
   private: int pageLines() const;

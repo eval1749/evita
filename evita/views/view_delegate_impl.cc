@@ -325,7 +325,7 @@ text::Posn ViewDelegateImpl::MapPointToPosition(
     if (auto const text_window = window->as<TextEditWindow>()) {
       UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
       DCHECK(lock_scope.locked());
-      return text_window->MapPointToPosn(gfx::PointF(x, y));
+      return text_window->MapPointToPosition(gfx::PointF(x, y));
     }
   }
 

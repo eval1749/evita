@@ -186,14 +186,14 @@ void TextRenderer::Render(const TextSelectionModel& selection_model) {
       text_block_->text_buffer(), selection_model);
   screen_text_block_->Render(text_block_.get(), selection);
 
-  // FIXME 2007-08-05 yosi@msn.com We should expose show/hide
+  // FIXME 2007-08-05 We should expose show/hide
   // ruler settings to both script and UI.
 
   // Ruler
   auto const pFont = FontSet::Get(*canvas_, m_pBuffer->GetDefaultStyle())->
     FindFont(*canvas_, 'x');
 
-  // FIXME 2007-08-05 yosi@msn.com We should expose rule position to
+  // FIXME 2007-08-05 We should expose rule position to
   // user.
   auto const num_columns = 81;
   auto const width_of_M = AlignWidthToPixel(*canvas_, pFont->GetCharWidth('M'));
@@ -285,7 +285,7 @@ bool TextRenderer::ScrollToPosn(Posn lPosn) {
   }
 
   // If this page shows end of buffer, we shows lines as much as
-  // posibble to fit in page.
+  // possible to fit in page.
   if (GetEnd() >= m_pBuffer->GetEnd()) {
     while (IsPositionFullyVisible(lPosn)) {
       if (!ScrollDown())
@@ -319,9 +319,9 @@ bool TextRenderer::ScrollUp() {
 }
 
 void TextRenderer::SetBounds(const Rect& rect) {
-  gfx::RectF rectf(rect);
-  text_block_->SetBounds(rectf);
-  screen_text_block_->SetBounds(rectf);
+  gfx::RectF bounds(rect);
+  text_block_->SetBounds(bounds);
+  screen_text_block_->SetBounds(bounds);
 }
 
 void TextRenderer::SetCanvas(gfx::Canvas* canvas) {
@@ -337,4 +337,4 @@ bool TextRenderer::ShouldRender() const {
   return dirty_ || screen_text_block_->dirty();
 }
 
-}  // namespaec views
+}  // namespace views

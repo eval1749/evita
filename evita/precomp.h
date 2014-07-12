@@ -111,8 +111,6 @@ typedef base::char16 char16;
 #define foreach(mp_ty, mp_enum, mp_init) \
     for (mp_ty mp_enum(mp_init); ! mp_enum.AtEnd(); mp_enum.Next())
 
-#define lengthof(a) ( sizeof(a) / sizeof(*(a)) )
-
 // warning C6400: Using 'lstrcmpiW' to perform a case-insensitive compare to
 // constant string 
 #pragma warning(disable: 6246)

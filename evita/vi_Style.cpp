@@ -13,6 +13,7 @@
 
 #include <vector>
 
+#include "base/logging.h"
 #include "base/strings/string_util.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/font_face.h"
@@ -79,7 +80,7 @@ class Font::FontImpl {
     }
 
     const auto metrics = GetGlyphMetrics(cacheable_chars,
-                                         lengthof(cacheable_chars));
+                                         arraysize(cacheable_chars));
     auto const width = metrics[0].advanceWidth;
     for (const auto metric: metrics) {
       if (width != metric.advanceWidth)
@@ -266,6 +267,13 @@ int memhash(const void* pv, size_t cb)
 int Font::HashKey(const Key* pKey)
     { return memhash(pKey, sizeof(*pKey)); }
 
+bool FontSet::EqualKey(const Key* pFonts) const {
+  if (pFonts->m_cFonts != m_cFonts) return false;
+  DCHECK_LT(m_cFonts, static_cast<int>(arraysize(m_rgpFont)));
+  return !::memcmp(pFonts->m_rgpFont, m_rgpFont,
+                   sizeof(m_rgpFont[0]) * m_cFonts);
+}
+
 int FontSet::HashKey(const Key* pKey)
 {
     const Fonts* p = reinterpret_cast<const Fonts*>(pKey);
@@ -401,7 +409,6 @@ typedef Cache_<Font, Font::Key> FontCache;
 typedef Cache_<FontSet, FontSet::Key> FontSetCache;
 FontCache* g_pFontCache;
 FontSetCache* g_pFontSetCache;
-
 
 //////////////////////////////////////////////////////////////////////
 //

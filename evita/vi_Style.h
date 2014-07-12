@@ -101,15 +101,7 @@ class FontSet : public Fonts
     public: void Add(Font*);
 
     // [E]
-    public: bool EqualKey(const Key* pFonts) const
-    {
-        if (pFonts->m_cFonts != m_cFonts) return false;
-        ASSERT(m_cFonts < lengthof(m_rgpFont));
-        return 0 == ::memcmp(
-            pFonts->m_rgpFont,
-            m_rgpFont,
-            sizeof(m_rgpFont[0]) * m_cFonts );
-    } // EqualKey
+    public: bool EqualKey(const Key* pFonts) const;
 
     // [F]
     public: Font* FindFont(const gfx::Canvas&, char16 wch) const {

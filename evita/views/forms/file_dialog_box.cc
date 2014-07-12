@@ -80,8 +80,8 @@ void FileDialogBox::Param::SetDirectory(const char16* pwszFile) {
   if (!*pwszFile)
       return;
   base::char16* pwszFilePart;
-  uint cwchFull = ::GetFullPathName(pwszFile, lengthof(m_wszDir), m_wszDir,
-                                    &pwszFilePart );
+  auto const cwchFull = ::GetFullPathName(pwszFile, arraysize(m_wszDir),
+                                          m_wszDir, &pwszFilePart);
   if (cwchFull >= 1 && pwszFilePart)
     *pwszFilePart = 0;
 }

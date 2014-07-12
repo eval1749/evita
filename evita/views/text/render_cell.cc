@@ -14,48 +14,11 @@ namespace rendering {
 
 namespace {
 
-// TODO(yosi) We should have Direct2D device in-dependent manager for
-// controlling life time of resouces.
-void DestroyStrokeStyleCallback(void* pointer) {
-  delete reinterpret_cast<gfx::StrokeStyle*>(pointer);
-}
-
-inline void DrawLine(const gfx::Canvas& gfx, const gfx::Brush& brush,
-                     float sx, float sy, float ex, float ey) {
-  gfx.DrawLine(brush, sx, sy, ex, ey);
-}
-
-inline void DrawHLine(const gfx::Canvas& gfx, const gfx::Brush& brush,
-                      float sx, float ex, float y) {
-  DrawLine(gfx, brush, sx, y, ex, y);
-}
-
 void DrawText(const gfx::Canvas& gfx, const Font& font,
               const gfx::Brush& text_brush, const gfx::RectF& rect,
               const base::string16& string) {
   font.DrawText(gfx, text_brush, rect, string);
   gfx.Flush();
-}
-
-inline void DrawVLine(const gfx::Canvas& gfx, const gfx::Brush& brush,
-                      float x, float sy, float ey) {
-  DrawLine(gfx, brush, x, sy, x, ey);
-}
-
-void DrawWave(const gfx::Canvas& canvas, const gfx::Brush& brush,
-              const Font* font, const gfx::RectF& bounds, float baseline) {
-  auto const wave = std::max(font->underline() * 1.3f, 2.0f);
-  auto const pen_width = font->underline_thickness();
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
-  for (auto x = bounds.left; x < bounds.right; x += wave) {
-    auto const bottom = baseline + wave;
-    auto const top = baseline;
-    // top to bottom
-    canvas.DrawLine(brush, x, top, x + wave, bottom, pen_width);
-    x += wave;
-    // bottom to top
-    canvas.DrawLine(brush, x, bottom, x + wave, top, pen_width);
-  }
 }
 
 inline void FillRect(const gfx::Canvas& gfx, const gfx::RectF& rect,
@@ -170,21 +133,72 @@ Cell* FillerCell::Copy() const {
 
 //////////////////////////////////////////////////////////////////////
 //
+// WithFont
+//
+WithFont::WithFont(const Font* font) : font_(font) {
+}
+
+WithFont::WithFont(const WithFont& other) : font_(other.font_) {
+}
+
+WithFont::~WithFont() {
+}
+
+float WithFont::underline() const {
+  return font_->underline();
+}
+
+float WithFont::underline_thickness() const {
+  return font_->underline_thickness();
+}
+
+void WithFont::DrawHLine(gfx::Canvas* canvas, const gfx::Brush& brush,
+                         float sx, float ex, float y) const {
+  canvas->DrawLine(brush, sx, y, ex, y, font_->underline_thickness());
+}
+
+void WithFont::DrawLine(gfx::Canvas* canvas, const gfx::Brush& brush,
+                        float sx, float sy, float ex, float ey,
+                        float width) const {
+  canvas->DrawLine(brush, sx, sy, ex, ey, width* font_->underline_thickness());
+}
+
+void WithFont::DrawVLine(gfx::Canvas* canvas, const gfx::Brush& brush,
+                         float x, float sy, float ey) const {
+  canvas->DrawLine(brush, x, sy, x, ey, font_->underline_thickness());
+}
+
+void WithFont::DrawWave(gfx::Canvas* canvas, const gfx::Brush& brush,
+                        const gfx::RectF& bounds, float baseline) const {
+  auto const wave = std::max(font_->underline() * 1.3f, 2.0f);
+  auto const pen_width = font_->underline_thickness();
+  gfx::Canvas::AxisAlignedClipScope clip_scope(*canvas, bounds);
+  for (auto x = bounds.left; x < bounds.right; x += wave) {
+    auto const bottom = baseline + wave;
+    auto const top = baseline;
+    // top to bottom
+    canvas->DrawLine(brush, x, top, x + wave, bottom, pen_width);
+    x += wave;
+    // bottom to top
+    canvas->DrawLine(brush, x, bottom, x + wave, top, pen_width);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // MarkerCell
 //
 MarkerCell::MarkerCell(const RenderStyle& style, float width, float height,
                        Posn lPosn, TextMarker marker_name)
-    : Cell(style, width, height, style.font()->descent()),
-      start_(lPosn),
+    : Cell(style, width, height, style.font()->descent()), 
+      WithFont(style.font()),
       end_(marker_name == TextMarker::LineWrap ? lPosn : lPosn + 1),
-      marker_name_(marker_name) {
+      marker_name_(marker_name), start_(lPosn) {
 }
 
 MarkerCell::MarkerCell(const MarkerCell& other)
-    : Cell(other),
-      start_(other.start_),
-      end_(other.end_),
-      marker_name_(other.marker_name_) {
+    : Cell(other), WithFont(other),
+      end_(other.end_), marker_name_(other.marker_name_), start_(other.start_) {
 }
 
 MarkerCell::~MarkerCell() {
@@ -234,50 +248,51 @@ void MarkerCell::Render(const gfx::Canvas& gfx,
                                       gfx::SizeF(width(), height()));
   gfx::Brush stroke_brush(gfx, style().color());
   auto const baseline = marker_rect.bottom - descent();
+  auto canvas = const_cast<gfx::Canvas*>(&gfx);
   switch (marker_name_) {
     case TextMarker::EndOfDocument: { // Draw <-
-      // FIXME 2007-06-13 We should get internal leading from font.
-      auto const iInternalLeading = 3;
+      auto const wing = underline() * 3;
       auto const w = std::max(ascent / 6, 2.0f);
-      auto const y = baseline - (ascent - iInternalLeading) / 2;
+      auto const y = baseline - (ascent - wing) / 2;
       auto const sx = marker_rect.left;
       auto const ex = marker_rect.right;
-      DrawHLine(gfx, stroke_brush, sx, ex, y);
-      DrawLine(gfx, stroke_brush, sx + w, y - w, sx, y);
-      DrawLine(gfx, stroke_brush, sx + w, y + w, sx, y);
+      DrawHLine(canvas, stroke_brush, sx, ex, y);
+      DrawLine(canvas, stroke_brush, sx + w, y - w, sx, y, 1.0f);
+      DrawLine(canvas, stroke_brush, sx + w, y + w, sx, y, 1.0f);
       break;
     }
 
     case TextMarker::EndOfLine: { // Draw V
       auto const ey = baseline;
       auto const sy = ey - ascent * 3 / 5;
-      auto const w = std::max(width() / 6, 2.0f);
+      auto const w = std::max(ascent / 6, 2.0f);
       auto const x = marker_rect.left + width() / 2;
-      DrawVLine(gfx, stroke_brush, x, sy, ey);
-      DrawLine(gfx, stroke_brush, x - w, ey - w, x, ey);
-      DrawLine(gfx, stroke_brush, x + w, ey - w, x, ey);
+      DrawVLine(canvas, stroke_brush, x, sy, ey);
+      DrawLine(canvas, stroke_brush, x - w, ey - w, x, ey, 1.0f);
+      DrawLine(canvas, stroke_brush, x + w, ey - w, x, ey, 1.0f);
       break;
     }
 
     case TextMarker::LineWrap: { // Draw ->
-      auto const sx = marker_rect.left;
-      auto const ex = marker_rect.right - 1;
-      auto const y = marker_rect.top + ascent / 2;
+      auto const wing = underline() * 3;
       auto const w = std::max(ascent / 6, 2.0f);
-      DrawHLine(gfx, stroke_brush, sx, ex, y);
-      DrawLine(gfx, stroke_brush, ex - w, y - w, ex, y);
-      DrawLine(gfx, stroke_brush, ex - w, y + w, ex, y);
+      auto const y = baseline - (ascent - wing) / 2;
+      auto const sx = marker_rect.left;
+      auto const ex = marker_rect.right - underline_thickness();
+      DrawHLine(canvas, stroke_brush, sx, ex, y);
+      DrawLine(canvas, stroke_brush, ex - w, y - w, ex, y, 1.0f);
+      DrawLine(canvas, stroke_brush, ex - w, y + w, ex, y, 1.0f);
       break;
     }
 
     case TextMarker::Tab: { // Draw |_|
-      auto const sx = marker_rect.left + 2;
-      auto const ex = marker_rect.right - 3;
+      auto const sx = marker_rect.left + underline_thickness() * 2;
+      auto const ex = marker_rect.right - underline_thickness() * 2;
       auto const y = baseline;
       auto const w = std::max(ascent / 6, 2.0f);
-      DrawHLine(gfx, stroke_brush, sx, ex, y);
-      DrawVLine(gfx, stroke_brush, sx, y, y - w * 2);
-      DrawVLine(gfx, stroke_brush, ex, y, y - w * 2);
+      DrawHLine(canvas, stroke_brush, sx, ex, y);
+      DrawVLine(canvas, stroke_brush, sx, y, y - w * 2);
+      DrawVLine(canvas, stroke_brush, ex, y, y - w * 2);
       break;
     }
   }
@@ -291,14 +306,13 @@ void MarkerCell::Render(const gfx::Canvas& gfx,
 TextCell::TextCell(const RenderStyle& style, float width, float height,
                    Posn lPosn, const base::string16& characters)
     : Cell(style, width, height, style.font()->descent()),
-      characters_(characters), end_(lPosn + 1), font_(style.font()),
-      start_(lPosn) {
+      WithFont(style.font()),
+      characters_(characters), end_(lPosn + 1), start_(lPosn) {
 }
 
 TextCell::TextCell(const TextCell& other)
-    : Cell(other),
-      characters_(other.characters_), end_(other.end_), font_(other.font_),
-      start_(other.start_) {
+    : Cell(other), WithFont(other),
+      characters_(other.characters_), end_(other.end_), start_(other.start_) {
 }
 
 TextCell::~TextCell() {
@@ -372,38 +386,39 @@ void TextCell::Render(const gfx::Canvas& gfx, const gfx::RectF& rect) const {
   DrawText(gfx, *style().font(), text_brush, text_rect, characters_);
 
   auto const baseline = text_rect.bottom - descent();
-  auto const underline = baseline + font_->underline();
+  auto const underline = baseline + this->underline();
+  auto const canvas = const_cast<gfx::Canvas*>(&gfx);
   switch (style().text_decoration()) {
     case css::TextDecoration::ImeInput:
-      DrawWave(gfx, text_brush, font_, rect, underline);
+      DrawWave(canvas, text_brush, rect, underline);
       break;
 
     case css::TextDecoration::ImeInactiveA:
-      DrawHLine(gfx, text_brush, rect.left, rect.right, underline);
+      DrawHLine(canvas, text_brush, rect.left, rect.right, underline);
       break;
 
     case css::TextDecoration::ImeInactiveB:
-      DrawHLine(gfx, text_brush, rect.left, rect.right, underline);
+      DrawHLine(canvas, text_brush, rect.left, rect.right, underline);
       break;
 
     case css::TextDecoration::ImeActive:
-      DrawHLine(gfx, text_brush, rect.left, rect.right, underline);
-      DrawHLine(gfx, text_brush, rect.left, rect.right, underline + 1);
+      DrawLine(canvas, text_brush, rect.left, underline,
+               rect.right, underline, 2.0f);
       break;
 
     case css::TextDecoration::None:
       break;
 
     case css::TextDecoration::GreenWave:
-      DrawWave(gfx, gfx::Brush(gfx, gfx::ColorF::Green), font_, rect, baseline);
+      DrawWave(canvas, gfx::Brush(*canvas, gfx::ColorF::Green), rect, baseline);
       break;
 
     case css::TextDecoration::RedWave:
-      DrawWave(gfx, gfx::Brush(gfx, gfx::ColorF::Red), font_, rect, baseline);
+      DrawWave(canvas, gfx::Brush(*canvas, gfx::ColorF::Red), rect, baseline);
       break;
 
     case css::TextDecoration::Underline:
-      DrawHLine(gfx, text_brush, rect.left, rect.right, underline);
+      DrawHLine(canvas, text_brush, rect.left, rect.right, underline);
       break;
   }
 

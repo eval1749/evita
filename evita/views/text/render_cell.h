@@ -91,20 +91,44 @@ class FillerCell final : public Cell {
 
 //////////////////////////////////////////////////////////////////////
 //
+// WithFont
+//
+class WithFont {
+  private: const Font* font_;
+
+  protected: WithFont(const Font* font);
+  protected: WithFont(const WithFont& other);
+  protected: ~WithFont();
+
+  protected: float underline() const;
+  protected: float underline_thickness() const;
+
+  protected: void DrawHLine(gfx::Canvas* canvas, const gfx::Brush& brush,
+                            float sx, float sy, float y) const;
+  protected: void DrawLine(gfx::Canvas* canvas, const gfx::Brush& brush,
+                           float x1, float y1, float x2, float y2,
+                           float width) const;
+  protected: void DrawVLine(gfx::Canvas* canvas, const gfx::Brush& brush,
+                            float x, float sy, float ey) const;
+  protected: void DrawWave(gfx::Canvas* canvas, const gfx::Brush& brush,
+                           const gfx::RectF& bounds, float baseline) const;
+};
+
+//////////////////////////////////////////////////////////////////////
+//
 // MarkerCell
 //
-
-class MarkerCell final : public Cell {
+class MarkerCell final : public Cell, private WithFont {
   DECLARE_CASTABLE_CLASS(MarkerCell, Cell);
 
-  private: Posn start_;
   private: Posn end_;
   private: TextMarker marker_name_;
+  private: Posn start_;
 
   public: MarkerCell(const RenderStyle& style, float width, float height,
                      Posn lPosn, TextMarker marker_name);
   public: MarkerCell(const MarkerCell& other);
-  public: ~MarkerCell();
+  public: virtual ~MarkerCell();
 
   public: TextMarker marker_name() const { return marker_name_; }
 
@@ -124,11 +148,10 @@ class MarkerCell final : public Cell {
 //
 // TextCell
 //
-class TextCell : public Cell {
+class TextCell : public Cell, private WithFont {
   DECLARE_CASTABLE_CLASS(TextCell, Cell);
 
   private: base::string16 characters_;
-  private: const Font* font_;
   private: Posn end_;
   private: Posn start_;
 

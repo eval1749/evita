@@ -184,7 +184,7 @@ text::Posn TextEditWindow::ComputeMotion(
     case Unit_Window:
       if (n > 0)
         return std::max(std::min(GetEnd() - 1, buffer()->GetEnd()),
-                        static_cast<Posn>(0));
+                        GetStart());
       if (n < 0)
         return GetStart();
       return lPosn;

@@ -138,7 +138,7 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: virtual void OnDraw(gfx::Canvas* canvas) override;
 
   // views::ContentWindow
-  public: virtual void MakeSelectionVisible() override;
+  private: virtual void MakeSelectionVisible() override;
   private: virtual void Redraw() override;
 
   // views::Window

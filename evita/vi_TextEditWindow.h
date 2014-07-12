@@ -83,7 +83,6 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: void FormatTextBlockIfNeeded();
 
   // [G]
-  public: HWND GetScrollBar(int which) const;
   public: Posn GetEnd();
   public: Posn GetStart();
 

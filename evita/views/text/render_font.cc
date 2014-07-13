@@ -231,7 +231,7 @@ Font::~Font() {
 
 void Font::DrawText(gfx::Canvas* canvas, const gfx::Brush& text_brush,
                     const gfx::RectF& rect, const base::char16* chars,
-                    uint32_t num_chars) const {
+                    size_t num_chars) const {
   auto const baseline = rect.left_top() + gfx::SizeF(0.0f, metrics_.ascent);
   font_impl_->DrawText(canvas, text_brush, baseline, chars, num_chars);
 }

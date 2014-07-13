@@ -5,7 +5,6 @@
 
 #include "evita/vi_style.h"
 
-#include <functional>
 #include <unordered_map>
 
 #include "base/logging.h"
@@ -90,27 +89,13 @@ std::vector<base::string16> parseFontFamily(const base::string16& source) {
 
 }  // namespace
 
-namespace views {
-namespace rendering {
-
-//////////////////////////////////////////////////////////////////////
-//
-// FontList
-//
-namespace {
-typedef std::vector<Font*> FontList;
-}  // namespace
-
-}  // namespace rendering
-}  // namespace views
-
 namespace std {
-template<> struct hash<views::rendering::FontList> {
-  size_t operator()(const views::rendering::FontList& fonts) const {
+template<> struct hash<views::rendering::FontSet::FontList> {
+  size_t operator()(const views::rendering::FontSet::FontList& fonts) const {
     size_t result = 137u;
     for (auto const font : fonts) {
       result <<= 1;
-      result ^= hash<views::rendering::Font*>()(font);
+      result ^= hash<const views::rendering::Font*>()(font);
     }
     return result;
   }
@@ -132,16 +117,16 @@ class Font::Cache : public common::Singleton<Font::Cache> {
   private: Cache() = default;
   private: ~Cache() = default;
 
-  public: Font* GetOrCreate(const gfx::FontProperties& font_props);
+  public: const Font& GetOrCreate(const gfx::FontProperties& font_props);
 };
 
-Font* Font::Cache::GetOrCreate(const gfx::FontProperties& font_props) {
+const Font& Font::Cache::GetOrCreate(const gfx::FontProperties& font_props) {
   auto const present = map_.find(font_props);
   if (present != map_.end())
-    return present->second;
+    return *present->second;
   auto new_font = new Font(font_props);
   map_[font_props] = new_font;
-  return new_font;
+  return *new_font;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -156,16 +141,16 @@ class FontSet::Cache : public common::Singleton<FontSet::Cache> {
   private: Cache() = default;
   private: ~Cache() = default;
 
-  public: FontSet* GetOrCreate(const FontList& fonts);
+  public: const FontSet& GetOrCreate(const FontList& fonts);
 };
 
-FontSet* FontSet::Cache::GetOrCreate(const FontList& fonts) {
+const FontSet& FontSet::Cache::GetOrCreate(const FontList& fonts) {
   auto const present = map_.find(fonts);
   if (present != map_.end())
-    return present->second;
+    return *present->second;
   auto new_font_set = new FontSet(fonts);
   map_[fonts] = new_font_set;
-  return new_font_set;
+  return *new_font_set;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -357,7 +342,7 @@ void Font::DrawText(gfx::Canvas* canvas,const gfx::Brush& text_brush,
            static_cast<uint32>(string.length()));
 }
 
-Font* Font::Get(const gfx::FontProperties& properties) {
+const Font& Font::Get(const gfx::FontProperties& properties) {
   return Cache::instance()->GetOrCreate(properties);
 }
 
@@ -395,13 +380,13 @@ bool Font::HasCharacter(char16 sample) const {
 //
 // FontSet
 //
-FontSet::FontSet(const std::vector<Font*>& fonts) : fonts_(fonts) {
+FontSet::FontSet(const std::vector<const Font*>& fonts) : fonts_(fonts) {
 }
 
 FontSet::~FontSet() {
 }
 
-Font* FontSet::FindFont(base::char16 sample) const {
+const Font* FontSet::FindFont(base::char16 sample) const {
   for (auto const font : fonts_) {
     if (font->HasCharacter(sample))
       return font;
@@ -409,15 +394,26 @@ Font* FontSet::FindFont(base::char16 sample) const {
   return nullptr;
 }
 
-FontSet* FontSet::Get(const css::Style& style) {
-  std::vector<Font*> fonts;
+const FontSet& FontSet::Get(const css::Style& style) {
+  FontList fonts;
   for (auto const font_family : parseFontFamily(style.font_family())) {
     const auto font_props = ComputeFontProperties(font_family, style);
-    fonts.push_back(Font::Get(font_props));
+    fonts.push_back(&Font::Get(font_props));
   }
 
   return FontSet::Cache::instance()->GetOrCreate(fonts);
 }
 
+const Font* FontSet::GetFont(const css::Style& style, base::char16 sample) {
+  return Get(style).FindFont(sample);
+}
+
 }  // namespace rendering
 }  // namespace views
+
+namespace std {
+size_t hash<views::rendering::Font>::operator()(
+    const views::rendering::Font& font) const {
+  return hash<const views::rendering::Font*>()(&font);
+}
+}  // namespace std

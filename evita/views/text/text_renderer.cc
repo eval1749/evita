@@ -171,7 +171,7 @@ void TextRenderer::RenderRuler() {
   // script and UI.
   auto style = buffer_->GetDefaultStyle();
   style.set_font_size(style.font_size() * zoom_);
-  auto const font = FontSet::Get(style)->FindFont('x');
+  auto const font = FontSet::GetFont(style, 'x');
 
   auto const num_columns = 81;
   auto const width_of_M = font->GetCharWidth('M');

@@ -5,6 +5,7 @@
 #if !defined(INCLUDE_evita_vi_style_h)
 #define INCLUDE_evita_vi_style_h
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -67,7 +68,7 @@ class Font {
                         const base::string16& string) const;
 
   // [G]
-  public: static Font* Get(const gfx::FontProperties& properties);
+  public: static const Font& Get(const gfx::FontProperties& properties);
   public: float GetCharWidth(char16) const;
   public: float GetTextWidth(const base::char16* chars, size_t num_chars) const;
   public: float GetTextWidth(const base::string16& string) const;
@@ -86,18 +87,28 @@ class FontSet {
   private: class Cache;
   friend class Cache;
 
-  private: std::vector<Font*> fonts_;
+  public: typedef std::vector<const Font*> FontList;
 
-  private: FontSet(const std::vector<Font*>& fonts);
+  private: FontList fonts_;
+
+  private: FontSet(const std::vector<const Font*>& fonts);
   private: ~FontSet();
 
-  public: Font* FindFont(base::char16 sample) const;
-  public: static FontSet* Get(const css::Style& style);
+  private: const Font* FindFont(base::char16 sample) const;
+  private: static const FontSet& Get(const css::Style& style);
+  public: static const Font* GetFont(const css::Style& style,
+                                     base::char16 sample);
 
   DISALLOW_COPY_AND_ASSIGN(FontSet);
 };
 
 }  // namespace rendering
 }  // namespace views
+
+namespace std {
+template<> struct hash<views::rendering::Font> {
+  size_t operator()(const views::rendering::Font& font) const;
+};
+}  // namespace
 
 #endif //!defined(INCLUDE_evita_vi_style_h)

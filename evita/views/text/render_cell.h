@@ -96,7 +96,7 @@ class FillerCell final : public Cell {
 class WithFont {
   private: const Font* font_;
 
-  protected: WithFont(const Font* font);
+  protected: WithFont(const Font& font);
   protected: WithFont(const WithFont& other);
   protected: ~WithFont();
 

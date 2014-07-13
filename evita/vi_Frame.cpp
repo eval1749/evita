@@ -469,8 +469,8 @@ void Frame::CreateNativeWindow() const {
   if (CompositionState::IsEnabled())
     dwStyle |= WS_EX_COMPOSITED | WS_EX_LAYERED;
 
-  auto& font = *views::rendering::FontSet::Get(*css::Style::Default())->
-      FindFont('x');
+  const auto& font = *views::rendering::FontSet::GetFont(*css::Style::Default(),
+                                                         'x');
   gfx::SizeF size(font.GetCharWidth('M') * cColumns,
                   font.height() * cRows);
   gfx::RectF rect(gfx::PointF(), gfx::FactorySet::AlignToPixel(size));

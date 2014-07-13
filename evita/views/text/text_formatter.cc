@@ -50,8 +50,8 @@ gfx::ColorF CssColorToColorF(const css::Color& color) {
       color.alpha());
 }
 
-Font* GetFont(const css::Style& style) {
-  return FontSet::Get(style)->FindFont('x');
+const Font* GetFont(const css::Style& style) {
+  return FontSet::GetFont(style, 'x');
 }
 
 const css::Style& GetDefaultStyle(const TextBlock* text_block) {
@@ -59,7 +59,7 @@ const css::Style& GetDefaultStyle(const TextBlock* text_block) {
 }
 
 RenderStyle GetRenderStyle(const css::Style& style) {
-  return RenderStyle(style, GetFont(style));
+  return RenderStyle(style, *GetFont(style));
 }
 
 }  // namespace
@@ -127,7 +127,7 @@ class TextFormatter::TextScanner final {
   }
 
   public: RenderStyle MakeRenderStyle(const css::Style& style,
-                                      Font* font) const;
+                                      const Font* font) const;
 
   public: void Next() {
     if (AtEnd())
@@ -165,7 +165,7 @@ const common::AtomicString& TextFormatter::TextScanner::syntax() const {
 }
 
 RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
-    const css::Style& style, Font* font) const {
+    const css::Style& style, const Font* font) const {
   return RenderStyle(style, font);
 }
 
@@ -318,28 +318,27 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
   if (wch == 0x09) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
-    auto const pFont = FontSet::Get(style)->FindFont('x');
-    auto const cxTab = AlignWidthToPixel(canvas_, pFont->GetCharWidth(' ')) *
+    auto const font = FontSet::GetFont(style, 'x');
+    auto const cxTab = AlignWidthToPixel(canvas_, font->GetCharWidth(' ')) *
                           k_nTabWidth;
     auto const x2 = (x + cxTab - cxLeftMargin) / cxTab * cxTab;
     auto const cx = (x2 + cxLeftMargin) - x;
-    auto const cxM = AlignWidthToPixel(canvas_, pFont->GetCharWidth('M'));
+    auto const cxM = AlignWidthToPixel(canvas_, font->GetCharWidth('M'));
     if (pPrev && x2 + cxM > text_block_->right())
       return nullptr;
 
-    auto const height = AlignHeightToPixel(canvas_, pFont->height());
-    return new MarkerCell(text_scanner_->MakeRenderStyle(style, pFont), cx,
+    auto const height = AlignHeightToPixel(canvas_, font->height());
+    return new MarkerCell(text_scanner_->MakeRenderStyle(style, font), cx,
                           height, lPosn, TextMarker::Tab);
   }
 
   auto const pFont = wch < 0x20 || wch == 0xFEFF ?
-      nullptr :
-      FontSet::Get(style)->FindFont(wch);
+      nullptr : FontSet::GetFont(style, wch);
 
   if (!pFont) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
-    auto const font = FontSet::Get(style)->FindFont('u');
+    auto const font = FontSet::GetFont(style, 'u');
     base::string16 string;
     if (wch < 0x20) {
       string.push_back('^');
@@ -388,7 +387,7 @@ Cell* TextFormatter::formatMarker(TextMarker marker_name) {
       css::StyleSelector::end_of_line_marker()));
   style.set_font_size(style.font_size() * zoom_);
 
-  auto const pFont = FontSet::Get(style)->FindFont('x');
+  auto const pFont = FontSet::GetFont(style, 'x');
   auto const width = AlignWidthToPixel(canvas_, pFont->GetCharWidth('x'));
   auto const height = AlignHeightToPixel(canvas_, pFont->height());
   return new MarkerCell(text_scanner_->MakeRenderStyle(style, pFont),

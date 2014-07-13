@@ -133,7 +133,7 @@ Cell* FillerCell::Copy() const {
 //
 // WithFont
 //
-WithFont::WithFont(const Font* font) : font_(font) {
+WithFont::WithFont(const Font& font) : font_(&font) {
 }
 
 WithFont::WithFont(const WithFont& other) : font_(other.font_) {
@@ -188,7 +188,7 @@ void WithFont::DrawWave(gfx::Canvas* canvas, const gfx::Brush& brush,
 //
 MarkerCell::MarkerCell(const RenderStyle& style, float width, float height,
                        Posn lPosn, TextMarker marker_name)
-    : Cell(style, width, height, style.font()->descent()), 
+    : Cell(style, width, height, style.font().descent()),
       WithFont(style.font()),
       end_(marker_name == TextMarker::LineWrap ? lPosn : lPosn + 1),
       marker_name_(marker_name), start_(lPosn) {
@@ -302,7 +302,7 @@ void MarkerCell::Render(gfx::Canvas* canvas,
 //
 TextCell::TextCell(const RenderStyle& style, float width, float height,
                    Posn lPosn, const base::string16& characters)
-    : Cell(style, width, height, style.font()->descent()),
+    : Cell(style, width, height, style.font().descent()),
       WithFont(style.font()),
       characters_(characters), end_(lPosn + 1), start_(lPosn) {
 }
@@ -348,7 +348,7 @@ gfx::RectF TextCell::HitTestTextPosition(Posn offset) const {
     return gfx::RectF();
   auto const length = static_cast<size_t>(offset - start_);
   auto const left = length ?
-      style().font()->GetTextWidth(characters_.data(), length) : 0.0f;
+      style().font().GetTextWidth(characters_.data(), length) : 0.0f;
   return gfx::RectF(gfx::PointF(left, top()),
                     gfx::SizeF(1.0f, height()));
 }
@@ -358,7 +358,7 @@ Posn TextCell::MapXToPosn(gfx::Canvas* canvas, float x) const {
     return end_;
   for (auto k = 1u; k <= characters_.length(); ++k) {
     auto const cx = FloorWidthToPixel(canvas,
-      style().font()->GetTextWidth(characters_.data(), k));
+      style().font().GetTextWidth(characters_.data(), k));
     if (x < cx)
       return static_cast<Posn>(start_ + k - 1);
   }
@@ -380,7 +380,7 @@ void TextCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
       gfx::SizeF(rect.width(), height()));
   FillBackground(canvas, rect);
   gfx::Brush text_brush(canvas, style().color());
-  DrawText(canvas, *style().font(), text_brush, text_rect, characters_);
+  DrawText(canvas, style().font(), text_brush, text_rect, characters_);
 
   auto const baseline = text_rect.bottom - descent();
   auto const underline = baseline + this->underline();
@@ -459,7 +459,7 @@ void UnicodeCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
   FillBackground(canvas, rect);
   gfx::Canvas::AxisAlignedClipScope clip_scope(*canvas, text_rect);
   gfx::Brush text_brush(canvas, style().color());
-  DrawText(canvas, *style().font(), text_brush, text_rect - gfx::SizeF(1, 1),
+  DrawText(canvas, style().font(), text_brush, text_rect - gfx::SizeF(1, 1),
            characters());
   canvas->DrawRectangle(text_brush, text_rect);
   FillOverlay(canvas, text_rect);

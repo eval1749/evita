@@ -57,7 +57,7 @@ class Frame final : public views::Window,
   private: typedef ui::Widget Widget;
   private: typedef ChildList_<Frame, Pane> Panes;
 
-  private: std::unique_ptr<gfx::Canvas> gfx_;
+  private: std::unique_ptr<gfx::Canvas> canvas_;
   private: int m_cyTabBand;
   private: Panes m_oPanes;
   private: std::unique_ptr<views::MessageView> message_view_;
@@ -73,7 +73,7 @@ class Frame final : public views::Window,
   // TODO: We should not use Frame to HWDN.
   public: operator HWND() const;
 
-  public: gfx::Canvas& gfx() const { return *gfx_; }
+  public: gfx::Canvas* canvas() const { return canvas_.get(); }
 
   // [A]
   public: bool Activate();

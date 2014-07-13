@@ -443,7 +443,7 @@ ui::Widget* TextEditWindow::GetClientWindow() {
 // ui::Widget
 void TextEditWindow::DidChangeHierarchy() {
   ParentClass::DidChangeHierarchy();
-  canvas_ = &frame().gfx();
+  canvas_ = frame().canvas();
   text_renderer_->SetCanvas(canvas_);
 }
 
@@ -465,7 +465,7 @@ void TextEditWindow::DidRealize() {
   ParentClass::DidRealize();
   auto const frame = Frame::FindFrame(*this);
   ASSERT(frame);
-  canvas_ = &frame->gfx();
+  canvas_ = frame->canvas();
   text_renderer_->SetCanvas(canvas_);
 }
 

@@ -122,7 +122,7 @@ Pane* GetContainingPane(Frame* frame, views::Window* window) {
 //
 Frame::Frame(views::WindowId window_id)
     : views::Window(ui::NativeWindow::Create(this), window_id),
-      gfx_(new gfx::Canvas()),
+      canvas_(new gfx::Canvas()),
       m_cyTabBand(0),
       message_view_(new views::MessageView()),
       title_bar_(new views::TitleBar()),
@@ -299,27 +299,27 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
 // Note: We should call |ID2D1RenderTarget::Clear()| to reset alpha component
 // of pixels.
 void Frame::DrawForResize() {
-  gfx::Canvas::DrawingScope drawing_scope(*gfx_);
-  gfx_->set_dirty_rect(bounds());
+  gfx::Canvas::DrawingScope drawing_scope(*canvas_);
+  canvas_->set_dirty_rect(bounds());
 
   // To avoid script destroys Pane's, we lock DOM.
   if (editor::DomLock::instance()->locked()) {
-    (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::White));
+    (*canvas_)->Clear(gfx::ColorF(gfx::ColorF::White));
     for (auto& pane: m_oPanes) {
-      pane.OnDraw(&*gfx_);
+      pane.OnDraw(&*canvas_);
     }
     return;
   }
 
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   if (lock_scope.locked()) {
-    (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::White));
+    (*canvas_)->Clear(gfx::ColorF(gfx::ColorF::White));
     for (auto& pane: m_oPanes) {
-      pane.OnDraw(&*gfx_);
+      pane.OnDraw(&*canvas_);
     }
     return;
   }
-  (*gfx_)->Clear(gfx::ColorF(gfx::ColorF::LightGray));
+  (*canvas_)->Clear(gfx::ColorF(gfx::ColorF::LightGray));
 }
 
 Frame* Frame::FindFrame(const ui::Widget& widget) {
@@ -494,7 +494,7 @@ void Frame::DidCreateNativeWindow() {
   title_bar_->Realize(*native_window());
 
   CompositionState::Update(*native_window());
-  gfx_->Init(*native_window());
+  canvas_->Init(*native_window());
 
   // TODO(yosi) How do we detemine height of TabStrip?
   m_cyTabBand = tab_strip_->GetPreferreSize().cy;
@@ -556,7 +556,7 @@ void Frame::DidResize() {
       pane.SetBounds(rc);
     }
   }
-  gfx_->Resize(bounds());
+  canvas_->Resize(bounds());
   DrawForResize();
 }
 
@@ -674,13 +674,13 @@ void Frame::OnPaint(const gfx::Rect rect) {
     return;
   }
 
-  gfx::Canvas::DrawingScope drawing_scope(*gfx_);
-  //gfx_->set_dirty_rect(bounds());
-  OnDraw(&*gfx_);
+  gfx::Canvas::DrawingScope drawing_scope(*canvas_);
+  //canvas_->set_dirty_rect(bounds());
+  OnDraw(&*canvas_);
   if (views::switches::editor_window_display_paint){
-    gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
+    canvas_->FillRectangle(gfx::Brush(*canvas_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
                         rect);
-    gfx_->DrawRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
+    canvas_->DrawRectangle(gfx::Brush(*canvas_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
                         rect, 2.0f);
   }
 }

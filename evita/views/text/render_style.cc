@@ -59,7 +59,7 @@ size_t hash<views::rendering::RenderStyle>::operator()(
   auto result = static_cast<size_t>(0);
   result ^= std::hash<gfx::ColorF>()(style.bgcolor());
   result ^= std::hash<gfx::ColorF>()(style.color());
-  result ^= std::hash<Font*>()(style.font());
+  result ^= std::hash<views::rendering::Font*>()(style.font());
   result ^= std::hash<gfx::ColorF>()(style.overlay_color());
   result ^= std::hash<css::TextDecoration>()(style.text_decoration());
   return result;

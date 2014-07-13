@@ -90,6 +90,36 @@ std::vector<base::string16> parseFontFamily(const base::string16& source) {
 
 }  // namespace
 
+namespace views {
+namespace rendering {
+
+//////////////////////////////////////////////////////////////////////
+//
+// FontList
+//
+namespace {
+typedef std::vector<Font*> FontList;
+}  // namespace
+
+}  // namespace rendering
+}  // namespace views
+
+namespace std {
+template<> struct hash<views::rendering::FontList> {
+  size_t operator()(const views::rendering::FontList& fonts) const {
+    size_t result = 137u;
+    for (auto const font : fonts) {
+      result <<= 1;
+      result ^= hash<views::rendering::Font*>()(font);
+    }
+    return result;
+  }
+};
+}  // namespace std
+
+namespace views {
+namespace rendering {
+
 //////////////////////////////////////////////////////////////////////
 //
 // Font::Cache
@@ -113,27 +143,6 @@ Font* Font::Cache::GetOrCreate(const gfx::FontProperties& font_props) {
   map_[font_props] = new_font;
   return new_font;
 }
-
-//////////////////////////////////////////////////////////////////////
-//
-// FontList
-//
-namespace {
-typedef std::vector<Font*> FontList;
-}  // namespace
-
-namespace std {
-template<> struct hash<FontList> {
-  size_t operator()(const FontList& fonts) const {
-    size_t result = 137u;
-    for (auto const font : fonts) {
-      result <<= 1;
-      result ^= hash<Font*>()(font);
-    }
-    return result;
-  }
-};
-}  // namespace std
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -409,3 +418,6 @@ FontSet* FontSet::Get(const css::Style& style) {
 
   return FontSet::Cache::instance()->GetOrCreate(fonts);
 }
+
+}  // namespace rendering
+}  // namespace views

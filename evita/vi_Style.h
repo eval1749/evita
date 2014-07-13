@@ -20,6 +20,9 @@ namespace gfx {
 struct FontProperties;
 }
 
+namespace views {
+namespace rendering {
+
 class FontSet;
 
 //////////////////////////////////////////////////////////////////////
@@ -66,7 +69,7 @@ class Font {
   // [G]
   public: static Font* Get(const gfx::FontProperties& properties);
   public: float GetCharWidth(char16) const;
-  public: float GetTextWidth(const base::char16* pwch, size_t cwch) const;
+  public: float GetTextWidth(const base::char16* chars, size_t num_chars) const;
   public: float GetTextWidth(const base::string16& string) const;
 
   // [H]
@@ -93,5 +96,8 @@ class FontSet {
 
   DISALLOW_COPY_AND_ASSIGN(FontSet);
 };
+
+}  // namespace rendering
+}  // namespace views
 
 #endif //!defined(INCLUDE_evita_vi_style_h)

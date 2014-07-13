@@ -10,7 +10,6 @@
 #include "evita/gfx_base.h"
 #include "evita/text/buffer_mutation_observer.h"
 #include "evita/views/text/render_style.h"
-#include "evita/vi_style.h"
 
 namespace views {
 namespace rendering {

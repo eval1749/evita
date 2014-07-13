@@ -5,6 +5,7 @@
 #include "evita/views/text/render_cell.h"
 
 #include "base/logging.h"
+#include "evita/views/text/render_font.h"
 #include "evita/views/text/render_style.h"
 
 namespace views {

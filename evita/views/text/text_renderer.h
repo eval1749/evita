@@ -8,11 +8,7 @@
 #include <memory>
 
 #include "evita/gfx_base.h"
-#include "evita/vi_style.h"
 #include "evita/views/text/render_selection.h"
-
-class Font;
-class Style;
 
 namespace views {
 

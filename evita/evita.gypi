@@ -116,6 +116,10 @@
         'views/tab_strip.cc',
         'views/tab_strip_delegate.cc',
         'views/text/render_cell.cc',
+        'views/text/render_font.cc',
+        'views/text/render_font.h',
+        'views/text/render_font_set.cc',
+        'views/text/render_font_set.h',
         'views/text/render_selection.cc',
         'views/text/render_selection.h',
         'views/text/render_style.cc',
@@ -131,7 +135,6 @@
         'views/forms/form_window.cc',
         'vi_Frame.cpp',
         'vi_Pane.cpp',
-        'vi_Style.cpp',
         'vi_TextEditWindow.cpp',
       ], # sources
     }, # editor

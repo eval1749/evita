@@ -4,6 +4,8 @@
 
 #include "evita/views/text/render_style.h"
 
+#include "evita/views/text/render_font.h"
+
 namespace views {
 namespace rendering {
 

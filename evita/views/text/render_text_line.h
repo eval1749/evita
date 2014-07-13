@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "evita/gfx_base.h"
-#include "evita/vi_style.h"
 
 namespace views {
 

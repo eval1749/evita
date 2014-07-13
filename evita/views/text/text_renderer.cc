@@ -15,6 +15,8 @@
 #include "evita/gfx_base.h"
 #include "evita/text/buffer.h"
 #include "evita/views/text/render_cell.h"
+#include "evita/views/text/render_font.h"
+#include "evita/views/text/render_font_set.h"
 #include "evita/views/text/render_text_block.h"
 #include "evita/views/text/render_text_line.h"
 #include "evita/views/text/screen_text_block.h"

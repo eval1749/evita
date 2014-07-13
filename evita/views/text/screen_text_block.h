@@ -12,11 +12,11 @@
 #include "evita/gfx_base.h"
 #include "evita/ui/caret.h"
 #include "evita/views/text/render_selection.h"
-#include "evita/vi_style.h"
 
 namespace views {
 namespace rendering {
 
+class Font;
 class TextLine;
 class TextBlock;
 

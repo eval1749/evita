@@ -2,20 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_vi_style_h)
-#define INCLUDE_evita_vi_style_h
+#if !defined(INCLUDE_evita_views_text_render_font_h)
+#define INCLUDE_evita_views_text_render_font_h
 
 #include <functional>
 #include <memory>
-#include <vector>
 
 #include "base/strings/string16.h"
-#include "gfx/forward.h"
-#include "evita/li_util.h"
-
-namespace css {
-class Style;
-}
+#include "evita/gfx/forward.h"
 
 namespace gfx {
 struct FontProperties;
@@ -24,11 +18,9 @@ struct FontProperties;
 namespace views {
 namespace rendering {
 
-class FontSet;
-
 //////////////////////////////////////////////////////////////////////
 //
-// Font class
+// Font
 //
 class Font {
   private: class Cache;
@@ -69,7 +61,7 @@ class Font {
 
   // [G]
   public: static const Font& Get(const gfx::FontProperties& properties);
-  public: float GetCharWidth(char16) const;
+  public: float GetCharWidth(base::char16 ch) const;
   public: float GetTextWidth(const base::char16* chars, size_t num_chars) const;
   public: float GetTextWidth(const base::string16& string) const;
 
@@ -77,29 +69,6 @@ class Font {
   public: bool HasCharacter(char16) const;
 
   DISALLOW_COPY_AND_ASSIGN(Font);
-};
-
-//////////////////////////////////////////////////////////////////////
-//
-// FontSet
-//
-class FontSet {
-  private: class Cache;
-  friend class Cache;
-
-  public: typedef std::vector<const Font*> FontList;
-
-  private: FontList fonts_;
-
-  private: FontSet(const std::vector<const Font*>& fonts);
-  private: ~FontSet();
-
-  private: const Font* FindFont(base::char16 sample) const;
-  private: static const FontSet& Get(const css::Style& style);
-  public: static const Font* GetFont(const css::Style& style,
-                                     base::char16 sample);
-
-  DISALLOW_COPY_AND_ASSIGN(FontSet);
 };
 
 }  // namespace rendering
@@ -111,4 +80,4 @@ template<> struct hash<views::rendering::Font> {
 };
 }  // namespace
 
-#endif //!defined(INCLUDE_evita_vi_style_h)
+#endif //!defined(INCLUDE_evita_views_text_render_font_h)

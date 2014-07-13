@@ -14,6 +14,8 @@
 #include "evita/text/marker.h"
 #include "evita/text/marker_set.h"
 #include "evita/views/text/render_cell.h"
+#include "evita/views/text/render_font.h"
+#include "evita/views/text/render_font_set.h"
 #include "evita/views/text/render_style.h"
 #include "evita/views/text/render_selection.h"
 #include "evita/views/text/render_text_block.h"

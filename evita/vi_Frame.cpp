@@ -12,8 +12,6 @@
 #include <dwmapi.h>
 #pragma comment(lib, "dwmapi.lib")
 
-#include <sstream>
-
 #pragma warning(push)
 #pragma warning(disable: 4625 4626)
 #include "base/bind.h"
@@ -39,9 +37,10 @@
 #include "evita/views/switches.h"
 #include "evita/views/tab_data_set.h"
 #include "evita/views/tab_strip.h"
+#include "evita/views/text/render_font.h"
+#include "evita/views/text/render_font_set.h"
 #include "evita/views/window_set.h"
 #include "evita/vi_EditPane.h"
-#include "evita/vi_Style.h"
 
 extern HINSTANCE g_hInstance;
 extern HINSTANCE g_hResource;

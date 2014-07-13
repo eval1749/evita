@@ -329,21 +329,21 @@ void TableControl::TableControlModel::DidSetFocus(ui::Widget*) {
   MakeSelectionViewDirty();
 }
 
-void TableControl::TableControlModel::Draw(gfx::Canvas* gfx) const {
-  gfx::Brush fill_brush(*gfx, gfx::ColorF::White);
+void TableControl::TableControlModel::Draw(gfx::Canvas* canvas) const {
+  gfx::Brush fill_brush(canvas, gfx::ColorF::White);
 
   // Fill top edge
-  gfx->FillRectangle(fill_brush, gfx::RectF(
+  canvas->FillRectangle(fill_brush, gfx::RectF(
       gfx::PointF(bounds_.left, bounds_.top),
       gfx::SizeF(bounds_.width(), columns_[0]->bounds().top - bounds_.top)));
 
-  DrawHeaderRow(gfx);
+  DrawHeaderRow(canvas);
 
   // Draw rows
   auto last_row = static_cast<Row*>(nullptr);
   for (auto row : rows_) {
-    DrawRow(gfx, row);
-    gfx->Flush();
+    DrawRow(canvas, row);
+    canvas->Flush();
     last_row = row;
     if (row->bounds().bottom >= bounds_.bottom)
       break;
@@ -351,19 +351,19 @@ void TableControl::TableControlModel::Draw(gfx::Canvas* gfx) const {
 
   // Fill edge
   if (!last_row) {
-    gfx->FillRectangle(fill_brush, gfx::RectF(
+    canvas->FillRectangle(fill_brush, gfx::RectF(
         gfx::PointF(bounds_.left, columns_[0]->bounds().bottom),
         gfx::PointF(bounds_.right, bounds_.bottom)));
     return;
   }
 
   // Fill between header and rows
-  gfx->FillRectangle(fill_brush, gfx::RectF(
+  canvas->FillRectangle(fill_brush, gfx::RectF(
       gfx::PointF(bounds_.left, columns_.front()->bounds().bottom),
       gfx::PointF(bounds_.right, rows_.front()->bounds().top)));
 
   // Fill left edge
-  gfx->FillRectangle(fill_brush, gfx::RectF(
+  canvas->FillRectangle(fill_brush, gfx::RectF(
     bounds_.left, bounds_.top,
     last_row->bounds().left, last_row->bounds().bottom));
 
@@ -372,41 +372,41 @@ void TableControl::TableControlModel::Draw(gfx::Canvas* gfx) const {
     last_row->bounds().right, rows_.front()->bounds().top,
     bounds_.right, last_row->bounds().bottom);
   if (!right_edge.empty())
-    gfx->FillRectangle(fill_brush, right_edge);
+    canvas->FillRectangle(fill_brush, right_edge);
 
   // Fill bottom edge
   if (last_row->bounds().bottom >= bounds_.bottom)
     return;
-  gfx->FillRectangle(fill_brush, gfx::RectF(
+  canvas->FillRectangle(fill_brush, gfx::RectF(
       bounds_.left, last_row->bounds().bottom,
       bounds_.right, bounds_.bottom));
 }
 
-void TableControl::TableControlModel::DrawHeaderRow(gfx::Canvas* gfx) const {
-  gfx->FillRectangle(gfx::Brush(*gfx, gfx::ColorF::White),
+void TableControl::TableControlModel::DrawHeaderRow(gfx::Canvas* canvas) const {
+  canvas->FillRectangle(gfx::Brush(canvas, gfx::ColorF::White),
                      gfx::RectF(columns_.front()->bounds().left_top(),
                                 columns_.back()->bounds().right_bottom()));
-  gfx::Brush textBrush(*gfx, gfx::ColorF::Black);
-  gfx::Brush grayBrush(*gfx, gfx::ColorF::LightGray);
+  gfx::Brush textBrush(canvas, gfx::ColorF::Black);
+  gfx::Brush grayBrush(canvas, gfx::ColorF::LightGray);
   auto column_index = 0u;
   for (auto column : columns_) {
     ++column_index;
     auto const rect = column->bounds();
     auto const text = column->text();
-    (*gfx)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
+    (*canvas)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
                      *text_format_, rect, textBrush);
-    gfx->DrawLine(grayBrush, rect.right - 5, rect.top,
+    canvas->DrawLine(grayBrush, rect.right - 5, rect.top,
                   rect.right - 5, rect.bottom, 0.5f);
   }
 }
 
-void TableControl::TableControlModel::DrawRow(gfx::Canvas* gfx,
+void TableControl::TableControlModel::DrawRow(gfx::Canvas* canvas,
                                               const Row* row) const {
   auto const kPadding = 2.0f;
   auto const bgcolor = gfx::ColorF(gfx::ColorF::White);
   auto const color = gfx::ColorF(gfx::ColorF::Black);
-  gfx->FillRectangle(gfx::Brush(*gfx, bgcolor), row->bounds());
-  gfx::Brush textBrush(*gfx, color);
+  canvas->FillRectangle(gfx::Brush(canvas, bgcolor), row->bounds());
+  gfx::Brush textBrush(canvas, color);
   gfx::PointF cell_left_top(row->bounds().left_top());
   auto column_index = 0u;
   for (auto column : columns_) {
@@ -419,18 +419,18 @@ void TableControl::TableControlModel::DrawRow(gfx::Canvas* gfx,
     rect.top += kPadding;
     rect.right -= kPadding;
     rect.bottom -= kPadding;
-    (*gfx)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
+    (*canvas)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
                      *text_format_, rect, textBrush);
     cell_left_top.x += column->width();
   }
   if (row->selected()) {
-    gfx->FillRectangle(gfx::Brush(*gfx, has_focus_ ?
-                                   RgbToColorF(51, 153, 255, 0.3f) :
-                                   RgbToColorF(191, 205, 191, 0.3f)),
+    canvas->FillRectangle(gfx::Brush(canvas, has_focus_ ?
+                                     RgbToColorF(51, 153, 255, 0.3f) :
+                                     RgbToColorF(191, 205, 191, 0.3f)),
                        row->bounds());
-    gfx->DrawRectangle(gfx::Brush(*gfx, has_focus_ ?
-                                  RgbToColorF(51, 153, 255, 0.5f) :
-                                  RgbToColorF(191, 205, 191, 0.5f)),
+    canvas->DrawRectangle(gfx::Brush(canvas, has_focus_ ?
+                                     RgbToColorF(51, 153, 255, 0.5f) :
+                                     RgbToColorF(191, 205, 191, 0.5f)),
                        row->bounds());
   }
 }

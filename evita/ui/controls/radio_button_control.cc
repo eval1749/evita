@@ -29,45 +29,45 @@ void RadioButtonControl::set_checked(bool new_checked) {
 }
 
 // ui::Widget
-void RadioButtonControl::OnDraw(gfx::Canvas* gfx) {
+void RadioButtonControl::OnDraw(gfx::Canvas* canvas) {
   if (bounds().empty())
     return;
 
-  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), bounds());
+  canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor), bounds());
 
   auto const size = 12.0f;
   D2D1_ELLIPSE ellipse;
   ellipse.point = gfx::PointF(bounds().left + bounds().width() / 2,
                               bounds().top + bounds().height() / 2);
   ellipse.radiusX = ellipse.radiusY = size / 2;
-  gfx::Brush frame_brush(*gfx, hover() ? style_.hotlight : style_.shadow);
-  (*gfx)->DrawEllipse(ellipse, frame_brush);
+  gfx::Brush frame_brush(canvas, hover() ? style_.hotlight : style_.shadow);
+  (*canvas)->DrawEllipse(ellipse, frame_brush);
 
   if (checked_) {
     D2D1_ELLIPSE ellipse2;
     ellipse2.point = ellipse.point;
     ellipse2.radiusX = ellipse2.radiusY = size / 2 - 3;
-    gfx::Brush black_brush(*gfx, style_.color);
-    (*gfx)->FillEllipse(ellipse2, black_brush);
+    gfx::Brush black_brush(canvas, style_.color);
+    (*canvas)->FillEllipse(ellipse2, black_brush);
   }
   switch (state()) {
     case Control::State::Disabled:
     case Control::State::Normal:
       break;
     case Control::State::Highlight:
-      (*gfx)->FillEllipse(ellipse,
-          gfx::Brush(*gfx, gfx::ColorF(style_.highlight, 0.1)));
-      (*gfx)->DrawEllipse(ellipse,
-          gfx::Brush(*gfx, style_.highlight));
+      (*canvas)->FillEllipse(ellipse,
+          gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1)));
+      (*canvas)->DrawEllipse(ellipse,
+          gfx::Brush(canvas, style_.highlight));
       break;
     case Control::State::Hover:
-      (*gfx)->FillEllipse(ellipse,
-          gfx::Brush(*gfx, gfx::ColorF(style_.hotlight, 0.1f)));
-      (*gfx)->DrawEllipse(ellipse,
-          gfx::Brush(*gfx, style_.hotlight));
+      (*canvas)->FillEllipse(ellipse,
+          gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)));
+      (*canvas)->DrawEllipse(ellipse,
+          gfx::Brush(canvas, style_.hotlight));
       break;
   }
-  gfx->Flush();
+  canvas->Flush();
 }
 
 }  // namespace ui

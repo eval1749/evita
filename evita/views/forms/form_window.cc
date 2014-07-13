@@ -437,7 +437,7 @@ void FormWindow::FormViewModel::DidChangeForm() {
 FormWindow::FormWindow(dom::WindowId window_id, dom::Form* form,
                        Window* owner, gfx::Point offset)
     : views::Window(ui::NativeWindow::Create(this), window_id),
-      gfx_(new gfx::Canvas()),
+      canvas_(new gfx::Canvas()),
       model_(new FormViewModel(form, this)),
       offset_(offset), owner_(owner) {
 }
@@ -476,7 +476,7 @@ bool FormWindow::OnIdle(int) {
 
   if (pending_update_rect_.empty()) {
     if (has_native_focus())
-      ui::Caret::instance()->Blink(gfx_.get());
+      ui::Caret::instance()->Blink(canvas_.get());
   } else {
     gfx::Rect rect;
     std::swap(pending_update_rect_, rect);
@@ -587,7 +587,7 @@ void FormWindow::DidCreateNativeWindow() {
   //CSS.
   ::SetLayeredWindowAttributes(*native_window(), RGB(0, 0, 0), 80 * 255 / 100,
                                LWA_ALPHA);
-  gfx_->Init(*native_window());
+  canvas_->Init(*native_window());
   Widget::DidCreateNativeWindow();
 }
 
@@ -602,11 +602,11 @@ void FormWindow::DidRealize() {
 }
 
 void FormWindow::DidResize() {
-  gfx_->Resize(bounds());
+  canvas_->Resize(bounds());
   {
-    gfx::Canvas::DrawingScope drawing_scope(*gfx_);
-    gfx_->set_dirty_rect(bounds());
-    (*gfx_)->Clear(ui::SystemMetrics::instance()->bgcolor());
+    gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+    canvas_->set_dirty_rect(bounds());
+    (*canvas_)->Clear(ui::SystemMetrics::instance()->bgcolor());
   }
   SchedulePaint();
   Window::DidResize();
@@ -635,20 +635,21 @@ void FormWindow::OnPaint(const gfx::Rect rect) {
     return;
   }
 
-  gfx::Canvas::DrawingScope drawing_scope(*gfx_);
-  gfx_->set_dirty_rect(rect);
+  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+  canvas_->set_dirty_rect(rect);
   auto const bgcolor = ui::SystemMetrics::instance()->bgcolor();
   // TODO(yosi) We should fill background of form window excluding controls
-  gfx_->FillRectangle(gfx::Brush(*gfx_, bgcolor), rect);
-  Window::OnDraw(gfx_.get());
+  canvas_->FillRectangle(gfx::Brush(canvas_.get(), bgcolor), rect);
+  Window::OnDraw(canvas_.get());
 
   // Render paint rectangle for debugging.
   if (views::switches::form_window_display_paint) {
-    gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx_, gfx::RectF(rect));
-    gfx_->FillRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
-                        rect);
-    gfx_->DrawRectangle(gfx::Brush(*gfx_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
-                        rect, 2.0f);
+    gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_.get(),
+                                                 gfx::RectF(rect));
+    canvas_->FillRectangle(gfx::Brush(canvas_.get(),
+                           gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)), rect);
+    canvas_->DrawRectangle(gfx::Brush(canvas_.get(),
+                           gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)), rect, 2.0f);
   }
 }
 

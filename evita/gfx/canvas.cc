@@ -43,32 +43,32 @@ namespace gfx {
 // Canvas::AxisAlignedClipScope
 //
 Canvas::AxisAlignedClipScope::AxisAlignedClipScope(
-    const Canvas& canvas, const RectF& bounds, D2D1_ANTIALIAS_MODE alias_mode)
+    Canvas* canvas, const RectF& bounds, D2D1_ANTIALIAS_MODE alias_mode)
     : canvas_(canvas) {
-  canvas_->PushAxisAlignedClip(bounds, alias_mode);
+  (*canvas_)->PushAxisAlignedClip(bounds, alias_mode);
 }
 
-Canvas::AxisAlignedClipScope::AxisAlignedClipScope(const Canvas& canvas,
+Canvas::AxisAlignedClipScope::AxisAlignedClipScope(Canvas* canvas,
                                                    const RectF& bounds)
     : AxisAlignedClipScope(canvas, bounds, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE) {
 }
 
 Canvas::AxisAlignedClipScope::~AxisAlignedClipScope() {
-  canvas_->PopAxisAlignedClip();
+  (*canvas_)->PopAxisAlignedClip();
 }
 
 //////////////////////////////////////////////////////////////////////
 //
 // Canvas::DrawingScope
 //
-Canvas::DrawingScope::DrawingScope(const Canvas& gfx)
-    : gfx_(const_cast<Canvas*>(&gfx)) {
-  gfx_->BeginDraw();
+Canvas::DrawingScope::DrawingScope(Canvas* canvas)
+    : canvas_(canvas) {
+  canvas_->BeginDraw();
 }
 
 Canvas::DrawingScope::~DrawingScope() {
   // TODO(yosi) Should DrawingScope take mutable Canvas?
-  gfx_->EndDraw();
+  canvas_->EndDraw();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -134,7 +134,7 @@ void Canvas::AddObserver(Observer* observer) {
   observers_.AddObserver(observer);
 }
 
-void Canvas::BeginDraw() const {
+void Canvas::BeginDraw() {
   ASSERT(render_target_);
   if (!batch_nesting_level_)
     render_target_->BeginDraw();
@@ -143,31 +143,31 @@ void Canvas::BeginDraw() const {
 
 void Canvas::DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
                           const RectF& src_rect, float opacity,
-                          D2D1_BITMAP_INTERPOLATION_MODE mode) const {
+                          D2D1_BITMAP_INTERPOLATION_MODE mode) {
   render_target_->DrawBitmap(bitmap, dst_rect, opacity, mode, src_rect);
 }
 
 void Canvas::DrawLine(const Brush& brush, int sx, int sy, int ex, int ey,
-                        float strokeWidth) const {
+                        float strokeWidth) {
   DCHECK(drawing());
   render_target().DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
                            strokeWidth);
 }
 
 void Canvas::DrawLine(const Brush& brush, float sx, float sy,
-                        float ex, float ey, float strokeWidth) const {
+                        float ex, float ey, float strokeWidth) {
   DCHECK(drawing());
   render_target().DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
                            strokeWidth);
 }
 
 void Canvas::DrawRectangle(const Brush& brush, const RECT& rc,
-                             float strokeWidth) const {
+                             float strokeWidth) {
   DrawRectangle(brush, RectF(rc), strokeWidth);
 }
 
 void Canvas::DrawRectangle(const Brush& brush, const RectF& rect,
-                            float strokeWidth) const {
+                            float strokeWidth) {
   DCHECK(drawing());
   DCHECK(rect);
   render_target().DrawRectangle(rect, brush, strokeWidth);
@@ -176,7 +176,7 @@ void Canvas::DrawRectangle(const Brush& brush, const RectF& rect,
 void Canvas::DrawText(const TextFormat& text_format,
                       const Brush& brush,
                       const RECT& rc,
-                      const char16* pwch, size_t cwch) const {
+                      const char16* pwch, size_t cwch) {
   DCHECK(drawing());
   auto rect = RectF(rc);
   DCHECK(rect);
@@ -229,31 +229,31 @@ bool Canvas::EndDraw() {
   }
   dxgi_swap_chain_.reset();
   render_target_.reset();
-  const_cast<Canvas*>(this)->Reinitialize();
+  Reinitialize();
   return false;
 }
 
 void Canvas::FillRectangle(const Brush& brush, int left, int top,
-                              int right, int bottom) const {
+                              int right, int bottom) {
   render_target().FillRectangle(RectF(left, top, right, bottom), brush);
 }
 
 void Canvas::FillRectangle(const Brush& brush, float left, float top,
-                              float right, float bottom) const {
+                              float right, float bottom) {
   FillRectangle(brush, RectF(left, top, right, bottom));
 }
 
-void Canvas::FillRectangle(const Brush& brush, const RECT& rc) const {
+void Canvas::FillRectangle(const Brush& brush, const RECT& rc) {
   FillRectangle(brush, RectF(rc));
 }
 
-void Canvas::FillRectangle(const Brush& brush, const RectF& rect) const {
+void Canvas::FillRectangle(const Brush& brush, const RectF& rect) {
   DCHECK(drawing());
   DCHECK(rect);
   render_target().FillRectangle(rect, brush);
 }
 
-void Canvas::Flush() const {
+void Canvas::Flush() {
   ASSERT(drawing());
   D2D1_TAG tag1, tag2;
   COM_VERIFY(render_target_->Flush(&tag1, &tag2));
@@ -394,7 +394,7 @@ void Canvas::RemoveObserver(Observer* observer) {
   observers_.RemoveObserver(observer);
 }
 
-void Canvas::Resize(const Rect& rect) const {
+void Canvas::Resize(const Rect& rect) {
   DCHECK(!rect.empty());
 
   if (dwm_support_ == DwmSupport::SupportDwm){
@@ -420,9 +420,9 @@ void Canvas::Resize(const Rect& rect) const {
   SetupRenderTarget(d2d_device_context);
 }
 
-bool Canvas::SaveScreenImage(const RectF& rect) const {
+bool Canvas::SaveScreenImage(const RectF& rect) {
   if (!screen_bitmap_)
-    screen_bitmap_ = std::make_unique<Bitmap>(*this);
+    screen_bitmap_ = std::make_unique<Bitmap>(this);
   const RectU source_rect(static_cast<uint32_t>(::floor(rect.left)),
                           static_cast<uint32_t>(::floor(rect.top)),
                           static_cast<uint32_t>(::ceil(rect.right)),
@@ -435,7 +435,7 @@ bool Canvas::SaveScreenImage(const RectF& rect) const {
   return SUCCEEDED(hr);
 }
 
-void Canvas::SetupRenderTarget(ID2D1DeviceContext* d2d_device_context) const {
+void Canvas::SetupRenderTarget(ID2D1DeviceContext* d2d_device_context) {
   common::ComPtr<IDXGISurface> dxgi_back_buffer;
   dxgi_swap_chain_->GetBuffer(0, IID_PPV_ARGS(&dxgi_back_buffer));
 

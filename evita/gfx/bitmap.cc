@@ -8,7 +8,7 @@ namespace gfx {
 
 namespace {
 
-common::ComPtr<ID2D1Bitmap> CreateBitmap(const Canvas& gfx, HICON hIcon) {
+common::ComPtr<ID2D1Bitmap> CreateBitmap(Canvas* canvas, HICON hIcon) {
   common::ComPtr<IWICBitmap> icon;
   COM_VERIFY(gfx::FactorySet::image().CreateBitmapFromHICON(
       hIcon, &icon));
@@ -23,16 +23,16 @@ common::ComPtr<ID2D1Bitmap> CreateBitmap(const Canvas& gfx, HICON hIcon) {
       0,
       WICBitmapPaletteTypeMedianCut));
   common::ComPtr<ID2D1Bitmap> bitmap;
-  COM_VERIFY(gfx->CreateBitmapFromWicBitmap(converter, nullptr, &bitmap));
+  COM_VERIFY((*canvas)->CreateBitmapFromWicBitmap(converter, nullptr, &bitmap));
   return std::move(bitmap);
 }
 
-common::ComPtr<ID2D1Bitmap> CreateBitmap(const Canvas& gfx, SizeU size) {
+common::ComPtr<ID2D1Bitmap> CreateBitmap(Canvas* canvas, SizeU size) {
   common::ComPtr<ID2D1Bitmap> bitmap;
   D2D1_BITMAP_PROPERTIES props;
-  props.pixelFormat = gfx->GetPixelFormat();
-  gfx->GetDpi(&props.dpiX, &props.dpiY);
-  COM_VERIFY(gfx->CreateBitmap(size, props, &bitmap));
+  props.pixelFormat = (*canvas)->GetPixelFormat();
+  (*canvas)->GetDpi(&props.dpiX, &props.dpiY);
+  COM_VERIFY((*canvas)->CreateBitmap(size, props, &bitmap));
   return std::move(bitmap);
 }
 
@@ -42,16 +42,16 @@ common::ComPtr<ID2D1Bitmap> CreateBitmap(const Canvas& gfx, SizeU size) {
 //
 // Bitmap
 //
-Bitmap::Bitmap(const Canvas& gfx, HICON hIcon)
-    : SimpleObject_(CreateBitmap(gfx, hIcon)) {
+Bitmap::Bitmap(Canvas* canvas, HICON hIcon)
+    : SimpleObject_(CreateBitmap(canvas, hIcon)) {
 }
 
-Bitmap::Bitmap(const Canvas& gfx, SizeU size)
-    : SimpleObject_(CreateBitmap(gfx, size)) {
+Bitmap::Bitmap(Canvas* canvas, SizeU size)
+    : SimpleObject_(CreateBitmap(canvas, size)) {
 }
 
-Bitmap::Bitmap(const Canvas& gfx)
-    : Bitmap(gfx, gfx->GetPixelSize()) {
+Bitmap::Bitmap(Canvas* canvas)
+    : Bitmap(canvas, (*canvas)->GetPixelSize()) {
 }
 
 Bitmap::~Bitmap() {

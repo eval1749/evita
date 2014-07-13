@@ -40,7 +40,7 @@ class FormWindow final : public views::Window,
   private: class FormViewModel;
 
   private: gfx::Size form_size_;
-  private: private: const std::unique_ptr<gfx::Canvas> gfx_;
+  private: private: const std::unique_ptr<gfx::Canvas> canvas_;
   private: private: const std::unique_ptr<FormViewModel> model_;
   private: gfx::Point offset_;
   private: Window* owner_;

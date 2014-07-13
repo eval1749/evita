@@ -171,7 +171,7 @@ void WithFont::DrawWave(gfx::Canvas* canvas, const gfx::Brush& brush,
                         const gfx::RectF& bounds, float baseline) const {
   auto const wave = std::max(font_->underline() * 1.3f, 2.0f);
   auto const pen_width = font_->underline_thickness();
-  gfx::Canvas::AxisAlignedClipScope clip_scope(*canvas, bounds);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
   for (auto x = bounds.left; x < bounds.right; x += wave) {
     auto const bottom = baseline + wave;
     auto const top = baseline;
@@ -407,11 +407,11 @@ void TextCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
       break;
 
     case css::TextDecoration::GreenWave:
-      DrawWave(canvas, gfx::Brush(*canvas, gfx::ColorF::Green), rect, baseline);
+      DrawWave(canvas, gfx::Brush(canvas, gfx::ColorF::Green), rect, baseline);
       break;
 
     case css::TextDecoration::RedWave:
-      DrawWave(canvas, gfx::Brush(*canvas, gfx::ColorF::Red), rect, baseline);
+      DrawWave(canvas, gfx::Brush(canvas, gfx::ColorF::Red), rect, baseline);
       break;
 
     case css::TextDecoration::Underline:
@@ -458,7 +458,7 @@ void UnicodeCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
       gfx::PointF(rect.left, rect.top + top()),
       gfx::SizeF(rect.width(), height())) - gfx::SizeF(1, 1);
   FillBackground(canvas, rect);
-  gfx::Canvas::AxisAlignedClipScope clip_scope(*canvas, text_rect);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, text_rect);
   gfx::Brush text_brush(canvas, style().color());
   DrawText(canvas, style().font(), text_brush, text_rect - gfx::SizeF(1, 1),
            characters());

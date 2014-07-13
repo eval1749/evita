@@ -11,7 +11,7 @@
 #include <math.h>
 #include <utility>
 
-#include "gfx/text_layout.h"
+#include "evita/gfx/text_layout.h"
 
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dwrite.lib")
@@ -102,10 +102,10 @@ IWICImagingFactory& CreateImageFactory() {
   return *factory;
 }
 
-common::ComPtr<ID2D1SolidColorBrush> CreateSolidColorBrush(const Canvas& gfx,
-                                                         ColorF color) {
+common::ComPtr<ID2D1SolidColorBrush> CreateSolidColorBrush(Canvas* canvas,
+                                                           ColorF color) {
   common::ComPtr<ID2D1SolidColorBrush> brush;
-  COM_VERIFY(gfx->CreateSolidColorBrush(color, &brush));
+  COM_VERIFY((*canvas)->CreateSolidColorBrush(color, &brush));
   return brush;
 }
 
@@ -120,17 +120,13 @@ float MultipleOf(float x, float unit) {
 //
 // Brush
 //
-Brush::Brush(const Canvas& gfx, ColorF color)
-    : SimpleObject_(CreateSolidColorBrush(gfx, color)) {
-}
-
 Brush::Brush(Canvas* canvas, ColorF color)
-    : SimpleObject_(CreateSolidColorBrush(*canvas, color)) {
+    : SimpleObject_(CreateSolidColorBrush(canvas, color)) {
 }
 
-Brush::Brush(const Canvas& gfx, float red, float green, float blue,
+Brush::Brush(Canvas* canvas, float red, float green, float blue,
              float alpha)
-    : SimpleObject_(CreateSolidColorBrush(gfx,
+    : SimpleObject_(CreateSolidColorBrush(canvas,
                                           ColorF(red, green, blue, alpha))) {
 }
 

@@ -181,7 +181,7 @@ void TextRenderer::RenderRuler() {
   gfx::RectF ruler_bounds(gfx::PointF(ruler_x, text_block_->top()),
                           gfx::SizeF(1.0f, text_block_->height()));
 
-  gfx::Canvas::AxisAlignedClipScope clip_scope(*canvas_, ruler_bounds);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_, ruler_bounds);
   gfx::Brush brush(canvas_, gfx::ColorF(0, 0, 0, 0.3f));
   canvas_->DrawRectangle(brush, ruler_bounds);
 }

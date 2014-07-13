@@ -368,7 +368,7 @@ void Tab::DrawIcon(gfx::Canvas* canvas) const {
       0);
   if (!hIcon)
     return;
-  gfx::Bitmap bitmap(*canvas, hIcon);
+  gfx::Bitmap bitmap(canvas, hIcon);
   auto const icon_size = canvas->AlignToPixel(gfx::SizeF(16, 16));
   auto const icon_offset = canvas->AlignToPixel(gfx::SizeF(-20, 8));
   auto const icon_left_top = gfx::PointF(label_bounds_.left, bounds_.top) +
@@ -1328,9 +1328,9 @@ void TabStrip::OnMouseReleased(const ui::MouseEvent& event) {
     impl_->OnLButtonUp(event.location());
 }
 
-void TabStrip::OnPaint(const Rect rect) {
-  gfx::Canvas::DrawingScope drawing_scope(*impl_->canvas_);
-  impl_->canvas_->set_dirty_rect(rect);
+void TabStrip::OnPaint(const Rect bounds) {
+  gfx::Canvas::DrawingScope drawing_scope(impl_->canvas_.get());
+  impl_->canvas_->set_dirty_rect(bounds);
   impl_->Draw(impl_->canvas_.get());
 }
 

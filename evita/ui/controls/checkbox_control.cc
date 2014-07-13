@@ -29,28 +29,28 @@ void CheckboxControl::set_checked(bool new_checked) {
 }
 
 // ui::Widget
-void CheckboxControl::OnDraw(gfx::Canvas* gfx) {
+void CheckboxControl::OnDraw(gfx::Canvas* canvas) {
   if (!bounds())
     return;
 
   auto const rect = gfx::RectF(this->bounds());
-  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), rect);
+  canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor), rect);
 
   auto const frame_size = gfx::SizeF(12.0f, 12.0f);
   auto const offset = (rect.size() - frame_size) / 2;
   gfx::RectF frame_rect(rect.left_top() + offset, frame_size);
-  gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, frame_rect);
 
-  gfx::Brush frame_brush(*gfx, style_.shadow);
-  (*gfx)->DrawRectangle(frame_rect, frame_brush);
+  gfx::Brush frame_brush(canvas, style_.shadow);
+  (*canvas)->DrawRectangle(frame_rect, frame_brush);
 
   if (checked_) {
-    gfx::Brush black_brush(*gfx, gfx::ColorF(0, 0, 0));
-    (*gfx)->DrawLine(gfx::PointF(frame_rect.left + 3, frame_rect.top + 6),
+    gfx::Brush black_brush(canvas, gfx::ColorF(0, 0, 0));
+    (*canvas)->DrawLine(gfx::PointF(frame_rect.left + 3, frame_rect.top + 6),
                      gfx::PointF(frame_rect.left + 6, frame_rect.bottom - 3),
                      black_brush,
                      2.0f);
-    (*gfx)->DrawLine(gfx::PointF(frame_rect.left + 6, frame_rect.top + 9),
+    (*canvas)->DrawLine(gfx::PointF(frame_rect.left + 6, frame_rect.top + 9),
                      gfx::PointF(frame_rect.right - 3, frame_rect.top + 3),
                      black_brush,
                      2.0f);
@@ -60,23 +60,23 @@ void CheckboxControl::OnDraw(gfx::Canvas* gfx) {
     case Control::State::Normal:
       break;
     case Control::State::Highlight:
-      gfx->FillRectangle(
-          gfx::Brush(*gfx, gfx::ColorF(style_.highlight, 0.1f)),
+      canvas->FillRectangle(
+          gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1f)),
           frame_rect);
-      gfx->DrawRectangle(
-        gfx::Brush(*gfx, gfx::ColorF(style_.highlight, 0.1f)),
+      canvas->DrawRectangle(
+        gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1f)),
         frame_rect);
       break;
     case Control::State::Hover:
-      gfx->FillRectangle(
-          gfx::Brush(*gfx, gfx::ColorF(style_.hotlight, 0.1f)),
+      canvas->FillRectangle(
+          gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)),
           frame_rect);
-      gfx->DrawRectangle(
-          gfx::Brush(*gfx, gfx::ColorF(style_.hotlight, 0.1f)),
+      canvas->DrawRectangle(
+          gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)),
           frame_rect);
       break;
   }
-  gfx->Flush();
+  canvas->Flush();
 }
 
 }  // namespace ui

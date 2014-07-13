@@ -57,22 +57,22 @@ ButtonControl::Renderer::Renderer(const base::string16& text,
 ButtonControl::Renderer::~Renderer() {
 }
 
-void ButtonControl::Renderer::Render(gfx::Canvas* gfx,
+void ButtonControl::Renderer::Render(gfx::Canvas* canvas,
                                      Control::State state) const {
   if (!bounds_)
     return;
 
-  gfx->FillRectangle(gfx::Brush(*gfx, style_.bgcolor), bounds_);
+  canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor), bounds_);
 
   auto frame_rect = bounds_;
-  gfx::Canvas::AxisAlignedClipScope clip_scope(*gfx, frame_rect);
-  gfx->DrawRectangle(gfx::Brush(*gfx, style_.shadow), frame_rect);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, frame_rect);
+  canvas->DrawRectangle(gfx::Brush(canvas, style_.shadow), frame_rect);
 
   auto const offset = (frame_rect.size() - text_size_) / 2.0f;
   gfx::PointF origin(frame_rect.left_top() + offset);
-  gfx::Brush text_brush(*gfx, state == State::Disabled ? style_.gray_text :
-                                                         style_.color);
-  (*gfx)->DrawTextLayout(origin, *text_layout_, text_brush,
+  gfx::Brush text_brush(canvas, state == State::Disabled ? style_.gray_text :
+                                                           style_.color);
+  (*canvas)->DrawTextLayout(origin, *text_layout_, text_brush,
                          D2D1_DRAW_TEXT_OPTIONS_CLIP);
 
   switch (state) {
@@ -80,19 +80,19 @@ void ButtonControl::Renderer::Render(gfx::Canvas* gfx,
     case Control::State::Normal:
       break;
     case Control::State::Highlight:
-      gfx->FillRectangle(
-          gfx::Brush(*gfx, gfx::ColorF(style_.highlight, 0.1f)),
+      canvas->FillRectangle(
+          gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1f)),
           frame_rect);
-      gfx->DrawRectangle(gfx::Brush(*gfx, style_.highlight), frame_rect);
+      canvas->DrawRectangle(gfx::Brush(canvas, style_.highlight), frame_rect);
       break;
     case Control::State::Hover:
-      gfx->FillRectangle(
-          gfx::Brush(*gfx, gfx::ColorF(style_.hotlight, 0.1f)),
+      canvas->FillRectangle(
+          gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)),
           frame_rect);
-      gfx->DrawRectangle(gfx::Brush(*gfx, style_.hotlight), frame_rect);
+      canvas->DrawRectangle(gfx::Brush(canvas, style_.hotlight), frame_rect);
       break;
   }
-  gfx->Flush();
+  canvas->Flush();
 }
 
 //////////////////////////////////////////////////////////////////////

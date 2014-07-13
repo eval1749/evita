@@ -654,7 +654,7 @@ void EditPane::LayoutBox::UpdateSplitters() {
   if (is_removed() || !edit_pane_->is_shown())
     return;
   auto const canvas = edit_pane_->frame().canvas();
-  gfx::Canvas::DrawingScope drawing_scope(*canvas);
+  gfx::Canvas::DrawingScope drawing_scope(canvas);
   UI_DOM_AUTO_LOCK_SCOPE();
   DrawSplitters(canvas);
 }

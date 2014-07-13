@@ -34,17 +34,17 @@ class Canvas final : public Object, public DpiHandler {
   };
 
   public: class AxisAlignedClipScope final {
-    private: const Canvas& canvas_;
-    public: AxisAlignedClipScope(const Canvas& canvas, const RectF& bounds,
+    private: Canvas* canvas_;
+    public: AxisAlignedClipScope(Canvas* canvas, const RectF& bounds,
                                  D2D1_ANTIALIAS_MODE alias_mode);
-    public: AxisAlignedClipScope(const Canvas& canvas, const RectF& bounds);
+    public: AxisAlignedClipScope(Canvas* canvas, const RectF& bounds);
     public: ~AxisAlignedClipScope();
     DISALLOW_COPY_AND_ASSIGN(AxisAlignedClipScope);
   };
 
   public: class DrawingScope final {
-    private: Canvas* const gfx_;
-    public: DrawingScope(const Canvas& gfx);
+    private: Canvas* const canvas_;
+    public: DrawingScope(Canvas* canvas);
     public: ~DrawingScope();
     DISALLOW_COPY_AND_ASSIGN(DrawingScope);
   };
@@ -92,27 +92,27 @@ class Canvas final : public Object, public DpiHandler {
   public: void AddObserver(Observer* observer);
 
   // [B]
-  public: void BeginDraw() const;
+  public: void BeginDraw();
 
   // [D]
   public: void DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
                           const RectF& src_rect, float opacity = 1.0f,
                           D2D1_BITMAP_INTERPOLATION_MODE mode =
-                              D2D1_BITMAP_INTERPOLATION_MODE_LINEAR) const;
+                              D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
   public: void DrawLine(const Brush& brush, int sx, int sy, int ex, int ey,
-                        float strokeWidth = 1) const;
+                        float strokeWidth = 1);
   public: void DrawLine(const Brush& brush,
                         float sx, float sy,
                         float ex, float ey,
-                        float strokeWidth = 1) const;
+                        float strokeWidth = 1);
   public: void DrawRectangle(const Brush& brush, const RECT& rc,
-                             float strokeWidth = 1) const;
+                             float strokeWidth = 1);
   public: void DrawRectangle(const Brush& brush, const RectF& rect,
-                             float strokeWidth = 1) const;
+                             float strokeWidth = 1);
   public: void DrawText(const TextFormat& text_format,
                         const Brush& brush,
                         const RECT& rc,
-                        const base::char16* pwch, size_t cwch) const;
+                        const base::char16* pwch, size_t cwch);
 
   // [E]
   // Returns true if succeeded.
@@ -121,12 +121,12 @@ class Canvas final : public Object, public DpiHandler {
   // [F]
   public: void FillRectangle(const Brush& brush, int left, int top,
 
-                             int right, int bottom) const;
+                             int right, int bottom);
   public: void FillRectangle(const Brush& brush, float left, float top,
-                             float right, float bottom) const;
-  public: void FillRectangle(const Brush& brush, const RECT& rc) const;
-  public: void FillRectangle(const Brush& brush, const RectF& rect) const;
-  public: void Flush() const;
+                             float right, float bottom);
+  public: void FillRectangle(const Brush& brush, const RECT& rc);
+  public: void FillRectangle(const Brush& brush, const RectF& rect);
+  public: void Flush();
 
   // [I]
   public: void Init(HWND hwnd);
@@ -134,12 +134,11 @@ class Canvas final : public Object, public DpiHandler {
   // [R]
   private: void Reinitialize();
   public: void RemoveObserver(Observer* observer);
-  public: void Resize(const Rect& rc) const;
+  public: void Resize(const Rect& bounds);
 
   // [S]
-  public: bool Canvas::SaveScreenImage(const RectF& rect) const;
-  private: void SetupRenderTarget(
-      ID2D1DeviceContext* d2d_device_context) const;
+  public: bool Canvas::SaveScreenImage(const RectF& bounds);
+  private: void SetupRenderTarget(ID2D1DeviceContext* d2d_device_context);
 
   DISALLOW_COPY_AND_ASSIGN(Canvas);
 };

@@ -299,7 +299,7 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
 // Note: We should call |ID2D1RenderTarget::Clear()| to reset alpha component
 // of pixels.
 void Frame::DrawForResize() {
-  gfx::Canvas::DrawingScope drawing_scope(*canvas_);
+  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
   canvas_->set_dirty_rect(bounds());
 
   // To avoid script destroys Pane's, we lock DOM.
@@ -674,13 +674,15 @@ void Frame::OnPaint(const gfx::Rect rect) {
     return;
   }
 
-  gfx::Canvas::DrawingScope drawing_scope(*canvas_);
+  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
   //canvas_->set_dirty_rect(bounds());
   OnDraw(&*canvas_);
   if (views::switches::editor_window_display_paint){
-    canvas_->FillRectangle(gfx::Brush(*canvas_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
+    canvas_->FillRectangle(gfx::Brush(canvas_.get(),
+                                      gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
                         rect);
-    canvas_->DrawRectangle(gfx::Brush(*canvas_, gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
+    canvas_->DrawRectangle(gfx::Brush(canvas_.get(),
+                                      gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
                         rect, 2.0f);
   }
 }

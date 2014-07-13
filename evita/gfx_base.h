@@ -33,7 +33,8 @@
 #include <dwrite.h>
 #pragma warning(pop)
 
-//'warning C4625: derived class' : copy constructor could not be generated because a base class copy constructor is inaccessible
+//'warning C4625: derived class' : copy constructor could not be generated
+// because a base class copy constructor is inaccessible
 #pragma warning(push)
 #pragma warning(disable: 4625)
 #include <wincodec.h>
@@ -76,8 +77,7 @@ class TextLayout;
 
 class Brush : public SimpleObject_<ID2D1SolidColorBrush> {
   public: Brush(Canvas* canvas, ColorF color);
-  public: Brush(const Canvas& gfx, ColorF color);
-  public: Brush(const Canvas& gfx, float red, float green, float blue,
+  public: Brush(Canvas* canvas, float red, float green, float blue,
                 float alpha = 1.0f);
   public: ~Brush();
   DISALLOW_COPY_AND_ASSIGN(Brush);

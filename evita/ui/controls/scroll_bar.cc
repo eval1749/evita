@@ -133,9 +133,9 @@ gfx::ColorF Arrow::color() const {
 
 void Arrow::DrawArrow(gfx::Canvas* canvas, int x_factor,
                       int y_factor) const {
-  gfx::Brush fill_brush(*canvas, bgcolor());
+  gfx::Brush fill_brush(canvas, bgcolor());
   canvas->FillRectangle(fill_brush, bounds());
-  gfx::Brush arrow_brush(*canvas, color());
+  gfx::Brush arrow_brush(canvas, color());
   auto const margin = bounds().width() / 3;
   auto const pen_width = 2.0f;
   auto const center_x = bounds().left + bounds().width() / 2;
@@ -368,7 +368,7 @@ gfx::ColorF Thumb::color() const {
 void Thumb::Draw(gfx::Canvas* canvas) const {
   if (bounds().empty())
     return;
-  gfx::Brush fill_brush(*canvas, color());
+  gfx::Brush fill_brush(canvas, color());
   canvas->FillRectangle(fill_brush, bounds());
 }
 
@@ -622,9 +622,9 @@ void ScrollBar::OnDraw(gfx::Canvas* canvas) {
   if (!dirty_)
     return;
   dirty_ = false;
-  gfx::Canvas::DrawingScope drawing_scope(*canvas);
+  gfx::Canvas::DrawingScope drawing_scope(canvas);
   canvas->set_dirty_rect(bounds());
-  gfx::Brush bgcolor(*canvas, gfx::sysColor(COLOR_BTNFACE));
+  gfx::Brush bgcolor(canvas, gfx::sysColor(COLOR_BTNFACE));
   canvas->FillRectangle(bgcolor, bounds());
   for (auto part : parts_) {
     part->Draw(canvas);

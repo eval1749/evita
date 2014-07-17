@@ -405,7 +405,6 @@ bool Tab::SetTab(const TCITEM* pTcItem) {
 }
 
 void Tab::UpdateLayout() {
-
   close_box_.set_bounds(gfx::RectF(
       gfx::PointF(right() - CloseBox::Width, top() + k_cyCloseBoxMargin),
       gfx::SizeF(CloseBox::Width, CloseBox::Height)));
@@ -1166,6 +1165,7 @@ void TabStrip::TabStripImpl::UpdateBoundsForAllTabs(float tab_width) {
                                    tabs_bounds_.bottom - left_top.y);
   for (auto const tab : tabs_){
     tab->set_bounds(gfx::RectF(left_top, tab_size));
+    tab->UpdateLayout();
     left_top.x += tab_width;
     tooltip_.SetToolBounds(tab, RoundBounds(bounds_.Intersect(tab->bounds())));
   }

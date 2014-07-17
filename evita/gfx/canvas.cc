@@ -45,6 +45,7 @@ namespace gfx {
 Canvas::AxisAlignedClipScope::AxisAlignedClipScope(
     Canvas* canvas, const RectF& bounds, D2D1_ANTIALIAS_MODE alias_mode)
     : canvas_(canvas) {
+  DCHECK(!bounds.empty());
   (*canvas_)->PushAxisAlignedClip(bounds, alias_mode);
 }
 

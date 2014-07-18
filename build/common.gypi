@@ -16,6 +16,7 @@
     }, # variables
     'clang%': '<(clang)',
     'component%': '<(component)',
+    'host_arch%': 'x64',
     'target_arch%': '<(target_arch)',
     # For hunspell
     'gcc_version': '48',

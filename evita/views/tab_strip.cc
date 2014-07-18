@@ -983,7 +983,7 @@ void TabStrip::TabStripImpl::OnLButtonUp(POINT point) {
 
   if (dragging_tab != insertion_marker) {
     tabs_.erase(tabs_.begin() + dragging_tab->tab_index());
-    tabs_.insert(tabs_.begin() + insertion_marker_->tab_index(), dragging_tab);
+    tabs_.insert(tabs_.begin() + insertion_marker->tab_index(), dragging_tab);
     RenumberTabIndex();
     UpdateLayout();
   }

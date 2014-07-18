@@ -24,9 +24,9 @@ deps = {
     'src/tools/deps2git':
         Var('git_url') + '/chromium/tools/deps2git.git@f04828eb0b5acd3e7ad983c024870f17f17b06d9',
     'src/tools/gyp':
-        Var('git_url') + '/external/gyp.git@63a1f78eb0ec6c4ddcc23e920230bdb0b14f7855',
+        Var('git_url') + '/external/gyp.git@d1e5ccaf05bac73d817f4959aa94b9bd25069383',
     'src/v8':
-        Var('git_url') + '/external/v8.git@60fc910a49e86bb7faeeee0017abbd1ca05d16e8',
+        Var('git_url') + '/external/v8.git@077614ab01af32023172ccb69e837ed2f9524e91',
 }
 
 deps_os = {

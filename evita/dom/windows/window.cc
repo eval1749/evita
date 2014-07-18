@@ -168,9 +168,9 @@ void Window::DidResize(int clientLeft, int clientTop,
   v8_glue::Runner::Scope runner_scope(runner);
   auto const instance = GetWrapper(isolate);
   #define SET_PROP(name) \
-    instance->Set(v8Strings::name.Get(isolate), \
-                  v8::Integer::New(isolate, name), \
-                  kDefaultPropertyAttribute)
+    instance->ForceSet(v8Strings::name.Get(isolate), \
+                       v8::Integer::New(isolate, name), \
+                       kDefaultPropertyAttribute)
   auto const clientWidth = clientRight - clientLeft;
   auto const clientHeight = clientBottom - clientTop;
     SET_PROP(clientLeft);
@@ -182,17 +182,16 @@ void Window::DidResize(int clientLeft, int clientTop,
 void Window::DidSetFocus() {
   ++global_focus_tick;
 
-
   // Update |Window.focus| and |Window.prototype.focusTick_|
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
   auto const instance = GetWrapper(isolate);
   auto const klass = runner->global()->Get(v8Strings::Window.Get(isolate));
-  instance->Set(v8Strings::focusTick_.Get(isolate),
+  instance->ForceSet(v8Strings::focusTick_.Get(isolate),
     v8::Integer::New(isolate, global_focus_tick),
     kDefaultPropertyAttribute);
-  klass->ToObject()->Set(v8Strings::focus.Get(isolate), instance,
+  klass->ToObject()->ForceSet(v8Strings::focus.Get(isolate), instance,
     kDefaultPropertyAttribute);
 }
 

@@ -417,6 +417,16 @@ void ScreenTextBlock::Render(const TextBlock* text_block,
   dirty_ = render_context.Render();
   ui::Caret::instance()->DidPaint(this, bounds_);
   if (!dirty_) {
+    // Contents of lines aren't changed. But, text offset of lines may be
+    // changed.
+    auto runner = lines_.begin();
+    for (auto line : text_block->lines()) {
+      if (line->text_start() != (*runner)->text_start()) {
+        delete *runner;
+        *runner = line->Copy();
+      }
+      ++runner;
+    }
     RenderSelection(selection);
     return;
   }

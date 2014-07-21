@@ -385,7 +385,7 @@ void TableControl::TableControlModel::Draw(gfx::Canvas* canvas) const {
 void TableControl::TableControlModel::DrawHeaderRow(gfx::Canvas* canvas) const {
   canvas->FillRectangle(gfx::Brush(canvas, gfx::ColorF::White),
                      gfx::RectF(columns_.front()->bounds().origin(),
-                                columns_.back()->bounds().right_bottom()));
+                                columns_.back()->bounds().bottom_right()));
   gfx::Brush textBrush(canvas, gfx::ColorF::Black);
   gfx::Brush grayBrush(canvas, gfx::ColorF::LightGray);
   auto column_index = 0u;

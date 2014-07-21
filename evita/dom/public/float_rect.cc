@@ -22,7 +22,7 @@ FloatPoint FloatRect::origin() const {
   return FloatPoint(x_, y_);
 }
 
-FloatPoint FloatRect::right_bottom() const {
+FloatPoint FloatRect::bottom_right() const {
   return FloatPoint(x_ + width_, y_ + height_);
 }
 

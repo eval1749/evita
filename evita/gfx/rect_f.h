@@ -34,11 +34,11 @@ class Rect_ : public BaseType {
     this->right = static_cast<UnitType>(rc.right);
     this->bottom = static_cast<UnitType>(rc.bottom);
   }
-  public: Rect_(const PointType& origin, const PointType& right_bottom) {
+  public: Rect_(const PointType& origin, const PointType& bottom_right) {
     left = origin.x;
     top = origin.y;
-    right = right_bottom.x;
-    bottom = right_bottom.y;
+    right = bottom_right.x;
+    bottom = bottom_right.y;
   }
   public: Rect_(const PointType& origin, const SizeType& size) {
     left = origin.x;
@@ -107,6 +107,9 @@ class Rect_ : public BaseType {
   public: bool operator>=(const Rect_& other) const;
 
   public: UnitType area() const { return width() * hieght(); }
+  public: PointType bottom_right() const {
+    return PointType(right, bottom);
+  }
   public: UnitType height() const { return bottom - top; }
 
   public: bool empty() const {
@@ -117,10 +120,6 @@ class Rect_ : public BaseType {
 
   public: PointType origin() const {
     return PointType(left, top);
-  }
-
-  public: PointType right_bottom() const {
-    return PointType(right, bottom);
   }
 
   public: SizeType size() const { return SizeType(width(), height()); }

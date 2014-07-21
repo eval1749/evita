@@ -30,11 +30,11 @@ TextLine::TextLine()
 TextLine::~TextLine() {
 }
 
-void TextLine::set_left_top(const gfx::PointF& left_top) {
-  bounds_.right = bounds_.width() + left_top.x;
-  bounds_.bottom = bounds_.height() + left_top.y;
-  bounds_.left = left_top.x;
-  bounds_.top = left_top.y;
+void TextLine::set_origin(const gfx::PointF& origin) {
+  bounds_.right = bounds_.width() + origin.x;
+  bounds_.bottom = bounds_.height() + origin.y;
+  bounds_.left = origin.x;
+  bounds_.top = origin.y;
 }
 
 gfx::RectF TextLine::CalculateSelectionRect(
@@ -105,12 +105,12 @@ gfx::RectF TextLine::HitTestTextPosition(Posn offset) const {
   if (offset < m_lStart || offset >= m_lEnd)
     return gfx::RectF();
 
-  auto left_top = bounds_.left_top();
+  auto origin = bounds_.origin();
   for (const auto cell : cells_) {
     auto const rect = cell->HitTestTextPosition(offset);
     if (!rect.empty())
-      return gfx::RectF(left_top + rect.left_top(), rect.size());
-    left_top.x += cell->width();
+      return gfx::RectF(origin + rect.origin(), rect.size());
+    origin.x += cell->width();
   }
 
   return gfx::RectF();

@@ -364,9 +364,9 @@ void Tab::DrawIcon(gfx::Canvas* canvas) const {
   gfx::Bitmap bitmap(canvas, hIcon);
   auto const icon_size = canvas->AlignToPixel(gfx::SizeF(16, 16));
   auto const icon_offset = canvas->AlignToPixel(gfx::SizeF(-20, 8));
-  auto const icon_left_top = gfx::PointF(label_bounds_.left, top()) +
+  auto const icon_origin = gfx::PointF(label_bounds_.left, top()) +
                              icon_offset;
-  (*canvas)->DrawBitmap(bitmap, gfx::RectF(icon_left_top, icon_size));
+  (*canvas)->DrawBitmap(bitmap, gfx::RectF(icon_origin, icon_size));
   ::DestroyIcon(hIcon);
 }
 
@@ -842,11 +842,11 @@ bool TabStrip::TabStripImpl::GetTab(size_t tab_index, TCITEM* pTcItem) const {
 }
 
 void TabStrip::TabStripImpl::HandleTabListMenu(POINT) {
-  POINT menu_left_top;
-  menu_left_top.x = static_cast<int>(list_button_.left());
-  menu_left_top.y = static_cast<int>(list_button_.bottom());
+  POINT menu_origin;
+  menu_origin.x = static_cast<int>(list_button_.left());
+  menu_origin.y = static_cast<int>(list_button_.bottom());
 
-  ::ClientToScreen(hwnd_, &menu_left_top);
+  ::ClientToScreen(hwnd_, &menu_origin);
 
   if (!tab_list_menu_)
     tab_list_menu_ = ::CreatePopupMenu();
@@ -870,7 +870,7 @@ void TabStrip::TabStripImpl::HandleTabListMenu(POINT) {
   }
 
   ::TrackPopupMenuEx(tab_list_menu_, TPM_LEFTALIGN | TPM_TOPALIGN, 
-      menu_left_top.x, menu_left_top.y, hwnd_, nullptr);
+      menu_origin.x, menu_origin.y, hwnd_, nullptr);
 }
 
 Element* TabStrip::TabStripImpl::HitTest(const gfx::PointF& point) const {
@@ -1159,14 +1159,14 @@ void TabStrip::TabStripImpl::StopDrag() {
 }
 
 void TabStrip::TabStripImpl::UpdateBoundsForAllTabs(float tab_width) {
-  auto left_top = gfx::PointF(tabs_origin_ + tabs_bounds_.left,
+  auto origin = gfx::PointF(tabs_origin_ + tabs_bounds_.left,
                               tabs_bounds_.top);
   auto const tab_size = gfx::SizeF(tab_width,
-                                   tabs_bounds_.bottom - left_top.y);
+                                   tabs_bounds_.bottom - origin.y);
   for (auto const tab : tabs_){
-    tab->set_bounds(gfx::RectF(left_top, tab_size));
+    tab->set_bounds(gfx::RectF(origin, tab_size));
     tab->UpdateLayout();
-    left_top.x += tab_width;
+    origin.x += tab_width;
     tooltip_.SetToolBounds(tab, RoundBounds(bounds_.Intersect(tab->bounds())));
   }
 }
@@ -1312,7 +1312,7 @@ void TabStrip::SetTab(int tab_index, const TCITEM* tab_data) {
 void TabStrip::CreateNativeWindow() const {
   native_window()->CreateWindowEx(
       0, WS_CHILD | WS_VISIBLE, L"TabStrip", parent_node()->AssociatedHwnd(),
-      bounds().left_top(),
+      bounds().origin(),
       bounds().size());
 }
 

@@ -235,7 +235,7 @@ void ArrowLeft::OnMousePressed(const ui::MouseEvent&) {
 void ArrowLeft::UpdateLayout(const gfx::Rect& bounds,
                                         const ScrollBar::Data&) {
   auto const size = bounds.width();
-  set_bounds(gfx::Rect(bounds.left_top(), gfx::Size(size, size)));
+  set_bounds(gfx::Rect(bounds.origin(), gfx::Size(size, size)));
 }
 
 //////////////////////////////////////////////////////////////////////

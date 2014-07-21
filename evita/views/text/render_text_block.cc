@@ -27,7 +27,7 @@ void TextBlock::Append(TextLine* pLine) {
   ASSERT_DOM_LOCKED();
   if (!dirty_line_point_) {
     auto const last_line = lines_.back();
-    pLine->set_left_top(gfx::PointF(last_line->left(), last_line->bottom()));
+    pLine->set_origin(gfx::PointF(last_line->left(), last_line->bottom()));
   }
   lines_.push_back(pLine);
   m_cy += pLine->GetHeight();
@@ -64,7 +64,7 @@ void TextBlock::EnsureLinePoints() {
     return;
   auto line_top = top();
   for (auto line : lines_) {
-    line->set_left_top(gfx::PointF(left(), line_top));
+    line->set_origin(gfx::PointF(left(), line_top));
     line_top = line->bottom();
   }
 

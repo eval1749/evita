@@ -18,7 +18,7 @@ FloatRect::FloatRect() : FloatRect(0.0f, 0.0f, 0.0f, 0.0f) {
 FloatRect::~FloatRect() {
 }
 
-FloatPoint FloatRect::left_top() const {
+FloatPoint FloatRect::origin() const {
   return FloatPoint(x_, y_);
 }
 

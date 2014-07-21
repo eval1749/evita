@@ -68,7 +68,7 @@ class COMMON_EXPORT NativeWindow {
   public: static std::unique_ptr<NativeWindow> Create();
   public: bool CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
                               const base::char16* title, HWND parent_hwnd,
-                              const Point& left_top,
+                              const Point& origin,
                               const Size& size);
 
   // [D]

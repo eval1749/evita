@@ -579,7 +579,7 @@ void FormWindow::CreateNativeWindow() const {
                                     extended_window_style));
   native_window()->CreateWindowEx(
       extended_window_style, window_style, title_.c_str(), nullptr,
-      window_rect.left_top(), window_rect.size());
+      window_rect.origin(), window_rect.size());
 }
 
 void FormWindow::DidCreateNativeWindow() {

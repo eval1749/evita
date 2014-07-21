@@ -38,7 +38,7 @@ void CheckboxControl::OnDraw(gfx::Canvas* canvas) {
 
   auto const frame_size = gfx::SizeF(12.0f, 12.0f);
   auto const offset = (rect.size() - frame_size) / 2;
-  gfx::RectF frame_rect(rect.left_top() + offset, frame_size);
+  gfx::RectF frame_rect(rect.origin() + offset, frame_size);
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, frame_rect);
 
   gfx::Brush frame_brush(canvas, style_.shadow);

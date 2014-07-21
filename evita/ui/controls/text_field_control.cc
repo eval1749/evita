@@ -139,7 +139,7 @@ void TextFieldControl::Renderer::set_text(const base::string16& new_text) {
 }
 
 gfx::PointF TextFieldControl::Renderer::text_origin() const {
-  return view_bounds_.left_top() - view_text_bounds_.left_top() +
+  return view_bounds_.origin() - view_text_bounds_.origin() +
          gfx::SizeF(0.0f, (view_bounds_.height() - text_size_.height) / 2);
 }
 
@@ -303,7 +303,7 @@ void TextFieldControl::Renderer::RenderSelection(gfx::Canvas* canvas) {
                      range_rect);
   RenderCaret(canvas, gfx::RectF(
       selection_.focus_offset < selection_.anchor_offset ?
-          range_rect.left_top() :
+          range_rect.origin() :
           gfx::PointF(range_rect.right, range_rect.top),
       gfx::SizeF(1.0f, metrics.height)));
 }

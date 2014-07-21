@@ -428,7 +428,7 @@ bool Canvas::SaveScreenImage(const RectF& rect) {
                           static_cast<uint32_t>(::floor(rect.top)),
                           static_cast<uint32_t>(::ceil(rect.right)),
                           static_cast<uint32_t>(::ceil(rect.bottom)));
-  const PointU dest_point(source_rect.left_top());
+  const PointU dest_point(source_rect.origin());
   auto const hr = (*screen_bitmap_)->CopyFromRenderTarget(&dest_point,
       render_target_, &source_rect);
   if (FAILED(hr))

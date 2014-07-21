@@ -22,7 +22,7 @@ class FloatRect {
   public: float bottom() const { return y_ + height_; }
   public: float height() const { return height_; }
   public: float left() const { return x_; }
-  public: FloatPoint left_top() const;
+  public: FloatPoint origin() const;
   public: float right() const { return x_ + width_; }
   public: FloatPoint right_bottom() const;
   public: float top() const { return x_; }

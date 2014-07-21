@@ -5,7 +5,7 @@
 #include "evita/gfx/rect_f.h"
 
 std::ostream& operator<<(std::ostream& ostream, const gfx::RectF& rect) {
-  return ostream << rect.left_top() << "+" << rect.size();
+  return ostream << rect.origin() << "+" << rect.size();
 }
 
 std::ostream& operator<<(std::ostream& ostream, const gfx::RectF* rect) {

@@ -34,15 +34,15 @@ class Rect_ : public BaseType {
     this->right = static_cast<UnitType>(rc.right);
     this->bottom = static_cast<UnitType>(rc.bottom);
   }
-  public: Rect_(const PointType& left_top, const PointType& right_bottom) {
-    left = left_top.x;
-    top = left_top.y;
+  public: Rect_(const PointType& origin, const PointType& right_bottom) {
+    left = origin.x;
+    top = origin.y;
     right = right_bottom.x;
     bottom = right_bottom.y;
   }
-  public: Rect_(const PointType& left_top, const SizeType& size) {
-    left = left_top.x;
-    top = left_top.y;
+  public: Rect_(const PointType& origin, const SizeType& size) {
+    left = origin.x;
+    top = origin.y;
     right = left + size.width;
     bottom = top + size.height;
   }
@@ -115,7 +115,7 @@ class Rect_ : public BaseType {
 
   public: bool is_zero() const { return !width() && !height(); }
 
-  public: PointType left_top() const {
+  public: PointType origin() const {
     return PointType(left, top);
   }
 

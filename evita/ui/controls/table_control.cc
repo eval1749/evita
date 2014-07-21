@@ -384,7 +384,7 @@ void TableControl::TableControlModel::Draw(gfx::Canvas* canvas) const {
 
 void TableControl::TableControlModel::DrawHeaderRow(gfx::Canvas* canvas) const {
   canvas->FillRectangle(gfx::Brush(canvas, gfx::ColorF::White),
-                     gfx::RectF(columns_.front()->bounds().left_top(),
+                     gfx::RectF(columns_.front()->bounds().origin(),
                                 columns_.back()->bounds().right_bottom()));
   gfx::Brush textBrush(canvas, gfx::ColorF::Black);
   gfx::Brush grayBrush(canvas, gfx::ColorF::LightGray);
@@ -407,21 +407,21 @@ void TableControl::TableControlModel::DrawRow(gfx::Canvas* canvas,
   auto const color = gfx::ColorF(gfx::ColorF::Black);
   canvas->FillRectangle(gfx::Brush(canvas, bgcolor), row->bounds());
   gfx::Brush textBrush(canvas, color);
-  gfx::PointF cell_left_top(row->bounds().left_top());
+  gfx::PointF cell_origin(row->bounds().origin());
   auto column_index = 0u;
   for (auto column : columns_) {
     auto const text = model_->GetCellText(row->row_id(), column->column_id());
     (*text_format_)->SetTextAlignment(column->alignment());
     auto const width = column_index == columns_.size() ?
-        bounds_.width() - cell_left_top.x : column->width();
-    gfx::RectF rect(cell_left_top, gfx::SizeF(width, row_height_));
+        bounds_.width() - cell_origin.x : column->width();
+    gfx::RectF rect(cell_origin, gfx::SizeF(width, row_height_));
     rect.left += kPadding;
     rect.top += kPadding;
     rect.right -= kPadding;
     rect.bottom -= kPadding;
     (*canvas)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
                      *text_format_, rect, textBrush);
-    cell_left_top.x += column->width();
+    cell_origin.x += column->width();
   }
   if (row->selected()) {
     canvas->FillRectangle(gfx::Brush(canvas, has_focus_ ?
@@ -548,29 +548,29 @@ void TableControl::TableControlModel::UpdateLayout() {
   auto const kMarginBetweenHeaderAndRow = 3.0f;
   auto const kTopMargin = 3.0f;
 
-  gfx::PointF left_top(bounds_.left + kLeftMargin, bounds_.top + kTopMargin);
+  gfx::PointF origin(bounds_.left + kLeftMargin, bounds_.top + kTopMargin);
 
   // Layout columns
   auto column_index = 0u;
-  gfx::PointF cell_left_top(left_top);
+  gfx::PointF cell_origin(origin);
   for (auto column : columns_) {
     ++column_index;
     (*text_format_)->SetTextAlignment(column->alignment());
     auto const width = column_index == columns_.size() ?
-        bounds_.width() - cell_left_top.x : column->width();
-    gfx::RectF rect(cell_left_top, gfx::SizeF(width, row_height_));
+        bounds_.width() - cell_origin.x : column->width();
+    gfx::RectF rect(cell_origin, gfx::SizeF(width, row_height_));
     column->set_rect(rect);
     DCHECK(!column->bounds().empty());
-    cell_left_top.x += column->width();
+    cell_origin.x += column->width();
   }
 
   // Layout rows
-  left_top.y += row_height_ + kMarginBetweenHeaderAndRow;
+  origin.y += row_height_ + kMarginBetweenHeaderAndRow;
   for (auto row : rows_) {
-    row->set_rect(gfx::RectF(left_top.x, left_top.y,
-                             bounds_.right, left_top.y + row_height_));
+    row->set_rect(gfx::RectF(origin.x, origin.y,
+                             bounds_.right, origin.y + row_height_));
     DCHECK(!row->bounds().empty());
-    left_top.y += row->bounds().height();
+    origin.y += row->bounds().height();
   }
 
   dirty_rects_ = bounds_;

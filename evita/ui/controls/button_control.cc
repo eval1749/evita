@@ -69,7 +69,7 @@ void ButtonControl::Renderer::Render(gfx::Canvas* canvas,
   canvas->DrawRectangle(gfx::Brush(canvas, style_.shadow), frame_rect);
 
   auto const offset = (frame_rect.size() - text_size_) / 2.0f;
-  gfx::PointF origin(frame_rect.left_top() + offset);
+  gfx::PointF origin(frame_rect.origin() + offset);
   gfx::Brush text_brush(canvas, state == State::Disabled ? style_.gray_text :
                                                            style_.color);
   (*canvas)->DrawTextLayout(origin, *text_layout_, text_brush,

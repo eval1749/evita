@@ -292,7 +292,7 @@ void TextEditWindow::Render(const TextSelectionModel& selection) {
 
   gfx::Canvas::DrawingScope drawing_scope(canvas_);
   canvas_->set_dirty_rect(gfx::Rect(
-      bounds().left_top(),
+      bounds().origin(),
       gfx::Size(bounds().width() - vertical_scroll_bar_->bounds().width(),
                 bounds().height())));
   text_renderer_->Render(selection);

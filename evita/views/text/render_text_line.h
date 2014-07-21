@@ -39,7 +39,7 @@ class TextLine final {
   public: const gfx::RectF& bounds() const { return bounds_; }
   public: float right() const { return bounds_.right; }
   public: float top() const { return bounds_.top; }
-  public: void set_left_top(const gfx::PointF& left_top);
+  public: void set_origin(const gfx::PointF& origin);
   public: void set_start(Posn start) { m_lStart = start; }
   public: text::Posn text_end() const { return m_lEnd; }
   public: text::Posn text_start() const { return m_lStart; }

@@ -10,7 +10,7 @@
 
 COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
                                        const common::win::Rect& rect) {
-  return out << rect.left_top() << "+" << rect.size();
+  return out << rect.origin() << "+" << rect.size();
 }
 
 COMMON_EXPORT std::ostream& operator<<(std::ostream& out,

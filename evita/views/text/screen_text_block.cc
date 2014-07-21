@@ -144,7 +144,7 @@ void ScreenTextBlock::RenderContext::Copy(float dst_top, float dst_bottom,
   gfx::RectF src_rect(bounds_.left, src_top, bounds_.right, src_top + height);
   DCHECK_EQ(dst_rect.size(), src_rect.size());
   #if DEBUG_DRAW
-    DVLOG(0) << "Copy to " << dst_rect << " from " << src_rect.left_top();
+    DVLOG(0) << "Copy to " << dst_rect << " from " << src_rect.origin();
   #endif
   canvas_->DrawBitmap(*canvas_->screen_bitmap(), dst_rect, src_rect);
 }

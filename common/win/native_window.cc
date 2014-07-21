@@ -59,7 +59,7 @@ std::unique_ptr<NativeWindow> NativeWindow::Create() {
 
 bool NativeWindow::CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
                                   const base::char16* title, HWND parent_hwnd,
-                                  const Point& left_top,
+                                  const Point& origin,
                                   const Size& size) {
   DCHECK(!s_creating_window);
   s_creating_window = this;
@@ -91,7 +91,7 @@ bool NativeWindow::CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
   auto const child_id = dwStyle & WS_CHILD ?
       reinterpret_cast<HMENU>(this) : static_cast<HMENU>(nullptr);
   auto const hwnd = ::CreateWindowEx(dwExStyle, MAKEINTATOM(s_window_class),
-                                     title, dwStyle, left_top.x, left_top.y,
+                                     title, dwStyle, origin.x, origin.y,
                                      size.cx, size.cy, parent_hwnd, child_id,
                                      s_hInstance, 0);
   DCHECK(hwnd) << "CreateWindowEx err=" << ::GetLastError();

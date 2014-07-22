@@ -245,6 +245,11 @@
         'ui/events/event_ostream.cc',
         'ui/events/mouse_click_tracker.cc',
 
+        'ui/compositor/compositor.cc',
+        'ui/compositor/compositor.h',
+        'ui/compositor/layer.cc',
+        'ui/compositor/layer.h',
+
         'ui/controls/button_control.cc',
         'ui/controls/checkbox_control.cc',
         'ui/controls/control.cc',

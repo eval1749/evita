@@ -1129,7 +1129,7 @@ void TabStrip::TabStripImpl::SetBounds(const gfx::Rect& bounds) {
   bounds_ = gfx::RectF(bounds);
   tabs_bounds_ = bounds_;
   tabs_bounds_.top += ::GetSystemMetrics(SM_CYSIZE) + kMarginTop;
-  canvas_->Resize(bounds);
+  canvas_->SetBounds(bounds);
   Redraw();
 }
 

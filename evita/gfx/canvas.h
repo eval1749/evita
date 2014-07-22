@@ -134,10 +134,10 @@ class Canvas final : public Object, public DpiHandler {
   // [R]
   private: void Reinitialize();
   public: void RemoveObserver(Observer* observer);
-  public: void Resize(const Rect& bounds);
 
   // [S]
   public: bool Canvas::SaveScreenImage(const RectF& bounds);
+  public: void SetBounds(const Rect& bounds);
   private: void SetupRenderTarget(ID2D1DeviceContext* d2d_device_context);
 
   DISALLOW_COPY_AND_ASSIGN(Canvas);

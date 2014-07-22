@@ -395,7 +395,22 @@ void Canvas::RemoveObserver(Observer* observer) {
   observers_.RemoveObserver(observer);
 }
 
-void Canvas::Resize(const Rect& rect) {
+bool Canvas::SaveScreenImage(const RectF& rect) {
+  if (!screen_bitmap_)
+    screen_bitmap_ = std::make_unique<Bitmap>(this);
+  const RectU source_rect(static_cast<uint32_t>(::floor(rect.left)),
+                          static_cast<uint32_t>(::floor(rect.top)),
+                          static_cast<uint32_t>(::ceil(rect.right)),
+                          static_cast<uint32_t>(::ceil(rect.bottom)));
+  const PointU dest_point(source_rect.origin());
+  auto const hr = (*screen_bitmap_)->CopyFromRenderTarget(&dest_point,
+      render_target_, &source_rect);
+  if (FAILED(hr))
+    DVLOG(0) << "ID2D1Bitmap->CopyFromRenderTarget hr=" << std::hex << hr;
+  return SUCCEEDED(hr);
+}
+
+void Canvas::SetBounds(const Rect& rect) {
   DCHECK(!rect.empty());
 
   if (dwm_support_ == DwmSupport::SupportDwm){
@@ -419,21 +434,6 @@ void Canvas::Resize(const Rect& rect) {
       static_cast<uint32_t>(rect.width()),
       static_cast<uint32_t>(rect.height()), DXGI_FORMAT_UNKNOWN, 0u));
   SetupRenderTarget(d2d_device_context);
-}
-
-bool Canvas::SaveScreenImage(const RectF& rect) {
-  if (!screen_bitmap_)
-    screen_bitmap_ = std::make_unique<Bitmap>(this);
-  const RectU source_rect(static_cast<uint32_t>(::floor(rect.left)),
-                          static_cast<uint32_t>(::floor(rect.top)),
-                          static_cast<uint32_t>(::ceil(rect.right)),
-                          static_cast<uint32_t>(::ceil(rect.bottom)));
-  const PointU dest_point(source_rect.origin());
-  auto const hr = (*screen_bitmap_)->CopyFromRenderTarget(&dest_point,
-      render_target_, &source_rect);
-  if (FAILED(hr))
-    DVLOG(0) << "ID2D1Bitmap->CopyFromRenderTarget hr=" << std::hex << hr;
-  return SUCCEEDED(hr);
 }
 
 void Canvas::SetupRenderTarget(ID2D1DeviceContext* d2d_device_context) {

@@ -556,7 +556,7 @@ void Frame::DidChangeBounds() {
       pane.SetBounds(rc);
     }
   }
-  canvas_->Resize(bounds());
+  canvas_->SetBounds(bounds());
   DrawForResize();
 }
 

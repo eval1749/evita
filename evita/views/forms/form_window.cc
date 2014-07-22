@@ -602,7 +602,7 @@ void FormWindow::DidRealize() {
 }
 
 void FormWindow::DidChangeBounds() {
-  canvas_->Resize(bounds());
+  canvas_->SetBounds(bounds());
   {
     gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
     canvas_->set_dirty_rect(bounds());

@@ -16,7 +16,7 @@
 #endif // _MSC_VER > 1000
 
 #ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0602
+#define _WIN32_WINNT 0x0700
 #endif
 
 #define STRICT

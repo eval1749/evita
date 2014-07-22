@@ -126,8 +126,10 @@ global.CppLexer = (function(options) {
 
   // C++ library
   'std::find',
-  'std::iterator', 'std::list', 'std::max', 'std::min', 'std::move',
-  'std::string', 'std::unique_ptr', 'std::unordered_map', 'std::unordered_set',
+  'std::iterator', 'std::list',
+  'std::make_unique', 'std::max', 'std::min', 'std::move',
+  'std::string', 'std::swap',
+  'std::unique_ptr', 'std::unordered_map', 'std::unordered_set',
   'std::vector',
 
   // Microsoft C++
@@ -143,4 +145,5 @@ global.CppLexer = (function(options) {
   // WIN32
   'BOOL', 'DWORD', 'HANDLE', 'HIWORD', 'HKEY', 'INVALID_HANDLE_VALUE',
   'LOWROD', 'WORD',
+  'interface',
 ])});

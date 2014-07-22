@@ -121,7 +121,7 @@ void Canvas::AddObserver(Observer* observer) {
 }
 
 void Canvas::BeginDraw() {
-  ASSERT(render_target_);
+  DCHECK(render_target_);
   if (!batch_nesting_level_)
     render_target_->BeginDraw();
   ++batch_nesting_level_;
@@ -171,8 +171,8 @@ void Canvas::DrawText(const TextFormat& text_format,
 }
 
 bool Canvas::EndDraw() {
-  ASSERT(drawing());
-  ASSERT(render_target_);
+  DCHECK(drawing());
+  DCHECK(render_target_);
   --batch_nesting_level_;
   if (batch_nesting_level_) {
     auto const hr = render_target_->Flush();
@@ -223,14 +223,14 @@ void Canvas::FillRectangle(const Brush& brush, const RectF& rect) {
 }
 
 void Canvas::Flush() {
-  ASSERT(drawing());
+  DCHECK(drawing());
   D2D1_TAG tag1, tag2;
   COM_VERIFY(render_target_->Flush(&tag1, &tag2));
-  ASSERT(!tag1 && !tag2);
+  DCHECK(!tag1 && !tag2);
 }
 
 void Canvas::Init(HWND hwnd) {
-  ASSERT(!hwnd_);
+  DCHECK(!hwnd_);
   hwnd_ = hwnd;
   Reinitialize();
 }

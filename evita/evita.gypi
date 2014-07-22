@@ -151,6 +151,8 @@
         'gfx/color_f.cc',
         'gfx/font_face.cc',
         'gfx/canvas.cc',
+        'gfx/dx_device.cc',
+        'gfx/dx_device.h',
         'gfx/point_f.cc',
         'gfx/rect_f.cc',
         'gfx/size_f.cc',

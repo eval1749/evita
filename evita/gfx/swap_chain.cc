@@ -5,77 +5,17 @@
 #include "evita/gfx/swap_chain.h"
 
 #include <d2d1_2helper.h>
-#pragma warning(push)
-#pragma warning(disable: 4061 4365 4917)
-#include <d3d11_1.h>
-#pragma warning(pop)
 #include <dxgi1_3.h>
 
 #include "base/logging.h"
+#include "evita/gfx/dx_device.h"
 
 namespace gfx {
 
-//////////////////////////////////////////////////////////////////////
-//
-// SwapChain::DxDevice
-//
-class SwapChain::DxDevice {
-  private: common::ComPtr<ID2D1Device> d2d_device_;
-  private: common::ComPtr<IDXGIDevice1> dxgi_device_;
-  private: common::ComPtr<IDXGIFactory2> dxgi_factory_;
+namespace {
 
-  public: DxDevice();
-  public: ~DxDevice();
-
-  public: ID2D1Device* d2d_device() const { return d2d_device_; }
-  public: IDXGIDevice1* dxgi_device() const { return dxgi_device_; }
-  public: IDXGIFactory* dxgi_factory() const { return dxgi_factory_; }
-
-  public: common::ComPtr<IDXGISwapChain2> CreateSwapChain(
-      const D2D1_SIZE_U& size);
-  public: common::ComPtr<IDXGISwapChain2> CreateSwapChain(HWND hwnd);
-
-  DISALLOW_COPY_AND_ASSIGN(DxDevice);
-};
-
-SwapChain::DxDevice::DxDevice() {
-  // Create Direct 3D device.
-  D3D_FEATURE_LEVEL feature_levels[] = {
-      D3D_FEATURE_LEVEL_11_1,
-      D3D_FEATURE_LEVEL_11_0,
-  };
-
-#if _DEBUG
-  auto const d3d11_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT |
-                           D3D11_CREATE_DEVICE_SINGLETHREADED |
-                           D3D11_CREATE_DEVICE_DEBUG;
-#else
-  auto const d3d11_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT |
-                           D3D11_CREATE_DEVICE_SINGLETHREADED;
-#endif
-  common::ComPtr<ID3D11Device> d3d_device;
-  COM_VERIFY(::D3D11CreateDevice(
-      nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr,
-      d3d11_flags, nullptr, 0, D3D11_SDK_VERSION,
-      &d3d_device, feature_levels, nullptr));
-  COM_VERIFY(dxgi_device_.QueryFrom(d3d_device));
-
-  common::ComPtr<IDXGIAdapter> dxgi_adapter;
-  dxgi_device_->GetAdapter(&dxgi_adapter);
-
-  common::ComPtr<IDXGIFactory2> dxgi_factory;
-  dxgi_adapter->GetParent(IID_PPV_ARGS(&dxgi_factory_));
-
-  // Create d2d device
-  COM_VERIFY(FactorySet::instance()->d2d1().CreateDevice(dxgi_device_,
-                                                         &d2d_device_));
-}
-
-SwapChain::DxDevice::~DxDevice() {
-}
-
-common::ComPtr<IDXGISwapChain2>SwapChain::DxDevice::CreateSwapChain(
-        const D2D1_SIZE_U& size) {
+common::ComPtr<IDXGISwapChain2> CreateSwapChain(DxDevice* device,
+                                                const D2D1_SIZE_U& size) {
   DXGI_SWAP_CHAIN_DESC1 swap_chain_desc = {0};
   swap_chain_desc.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
   swap_chain_desc.Width = size.width;
@@ -90,8 +30,8 @@ common::ComPtr<IDXGISwapChain2>SwapChain::DxDevice::CreateSwapChain(
   swap_chain_desc.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 
   common::ComPtr<IDXGISwapChain1> swap_chain1;
-  COM_VERIFY(dxgi_factory_->CreateSwapChainForComposition(
-      dxgi_device_, &swap_chain_desc, nullptr, &swap_chain1));
+  COM_VERIFY(device->dxgi_factory()->CreateSwapChainForComposition(
+      device->dxgi_device(), &swap_chain_desc, nullptr, &swap_chain1));
   common::ComPtr<IDXGISwapChain2> swap_chain2;
   COM_VERIFY(swap_chain2.QueryFrom(swap_chain1));
 
@@ -107,8 +47,8 @@ common::ComPtr<IDXGISwapChain2>SwapChain::DxDevice::CreateSwapChain(
   return swap_chain2;
 }
 
-common::ComPtr<IDXGISwapChain2> SwapChain::DxDevice::CreateSwapChain(
-    HWND hwnd) {
+common::ComPtr<IDXGISwapChain2> CreateSwapChain(DxDevice* device,
+                                                HWND hwnd) {
   DXGI_SWAP_CHAIN_DESC1 swap_chain_desc = {0};
   swap_chain_desc.Width = 0;  // use automatic sizing
   swap_chain_desc.Height = 0;
@@ -124,13 +64,16 @@ common::ComPtr<IDXGISwapChain2> SwapChain::DxDevice::CreateSwapChain(
   swap_chain_desc.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 
   common::ComPtr<IDXGISwapChain1> swap_chain1;
-  COM_VERIFY(dxgi_factory_->CreateSwapChainForHwnd(
-      dxgi_device_, hwnd, &swap_chain_desc, nullptr, nullptr, &swap_chain1));
+  COM_VERIFY(device->dxgi_factory()->CreateSwapChainForHwnd(
+      device->dxgi_device(), hwnd, &swap_chain_desc, nullptr, nullptr,
+      &swap_chain1));
 
   common::ComPtr<IDXGISwapChain2> swap_chain2;
   COM_VERIFY(swap_chain2.QueryFrom(swap_chain1));
   return swap_chain2;
 }
+
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -171,12 +114,11 @@ void SwapChain::AddDirtyRect(const Rect& new_dirty_rect) {
 
 SwapChain* SwapChain::Create(HWND hwnd) {
   DxDevice device;
-  return new SwapChain(&device, device.CreateSwapChain(hwnd));
+  return new SwapChain(&device, CreateSwapChain(&device, hwnd));
 }
 
-SwapChain* SwapChain::Create(const D2D1_SIZE_U& size) {
-  DxDevice device;
-  return new SwapChain(&device, device.CreateSwapChain(size));
+SwapChain* SwapChain::Create(DxDevice* device, const D2D1_SIZE_U& size) {
+  return new SwapChain(device, CreateSwapChain(device, size));
 }
 
 void SwapChain::DidChangeBounds(const D2D1_SIZE_U& size) {

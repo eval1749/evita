@@ -13,13 +13,13 @@ interface IDXGISwapChain2;
 
 namespace gfx {
 
+class DxDevice;
+
 //////////////////////////////////////////////////////////////////////
 //
 // SwapChain
 //
 class SwapChain {
-  private: class DxDevice;
-
   private: common::ComPtr<ID2D1DeviceContext> d2d_device_context_;
   private: std::vector<Rect> dirty_rects_;
   private: bool is_ready_;
@@ -31,7 +31,7 @@ class SwapChain {
   public: ~SwapChain();
 
   public: static SwapChain* Create(HWND hwnd);
-  public: static SwapChain* Create(const D2D1_SIZE_U& size);
+  public: static SwapChain* Create(DxDevice* device, const D2D1_SIZE_U& size);
 
   public: ID2D1DeviceContext* d2d_device_context() const {
     return d2d_device_context_;

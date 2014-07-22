@@ -46,10 +46,10 @@ struct COMMON_EXPORT Rect : RECT {
 
   explicit operator bool() const { return !empty(); }
   int area() const { return width() * height(); }
+  Point bottom_right() const { return Point(right, bottom); }
   bool empty() const { return width() <= 0 || height() <= 0; }
   int height() const { return bottom - top; }
   Point origin() const { return Point(left, top); }
-  Point bottom_right() const { return Point(right, bottom); }
   int width() const { return right - left; }
   Size size() const { return Size(width(), height()); }
 

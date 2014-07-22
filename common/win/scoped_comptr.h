@@ -25,7 +25,10 @@ namespace common {
 
 template<class T> class ComPtr {
   private: T* ptr_;
-  public: explicit ComPtr(T* ptr = nullptr) : ptr_(ptr) {}
+  public: explicit ComPtr(T* ptr = nullptr) : ptr_(ptr) {
+    if (ptr_)
+      ptr_->AddRef();
+  }
   public: explicit ComPtr(T& ptr) : ptr_(&ptr) {}
   public: ComPtr(const ComPtr& other) : ptr_(other.ptr_) {
     if (ptr_)

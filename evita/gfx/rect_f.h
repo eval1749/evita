@@ -121,8 +121,21 @@ class Rect_ : public BaseType {
   public: PointType origin() const {
     return PointType(left, top);
   }
+  public: void set_origin(const PointType& origin) {
+    auto const width = this->width();
+    auto const height = this->height();
+    left = origin.x;
+    top = origin.y;
+    right = left + width;
+    bottom = top + height;
+  }
 
   public: SizeType size() const { return SizeType(width(), height()); }
+  public: void set_size(const SizeType& size) {
+    right = left + size.width;
+    bottom = top + size.width;
+  }
+
   public: UnitType width() const { return right - left; }
 
   public: bool Contains(PointF point) const;

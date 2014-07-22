@@ -5,16 +5,13 @@
 #include "evita/gfx/canvas.h"
 
 #include <d2d1_2helper.h>
-#pragma warning(push)
-#pragma warning(disable: 4061 4365 4917)
-#include <d3d11_1.h>
-#pragma warning(pop)
-#include <VersionHelpers.h>
+
 #include <cmath>
 #include <utility>
 
 #include "common/win/rect_ostream.h"
 #include "evita/gfx/bitmap.h"
+#include "evita/gfx/swap_chain.h"
 #include "evita/gfx/text_format.h"
 
 #pragma comment(lib, "d3d11.lib")
@@ -100,26 +97,14 @@ Canvas::Canvas() : Canvas(DwmSupport::NotSupportDwm) {
 Canvas::~Canvas() {
 }
 
-void Canvas::set_dirty_rect(const Rect& new_dirty_rect) const {
+void Canvas::set_dirty_rect(const Rect& new_dirty_rect) {
   DCHECK(!new_dirty_rect.empty());
-  if (dirty_rects_.empty()) {
-    dirty_rects_.push_back(new_dirty_rect);
+  if (!swap_chain_)
     return;
-  }
-  for (const auto& dirty_rect : dirty_rects_) {
-    if (dirty_rect.Contains(new_dirty_rect))
-        return;
-  }
-  std::vector<Rect> new_dirty_rects;
-  for (const auto& dirty_rect : dirty_rects_) {
-    if (!new_dirty_rect.Contains(dirty_rect))
-      new_dirty_rects.push_back(dirty_rect);
-  }
-  new_dirty_rects.push_back(new_dirty_rect);
-  dirty_rects_ = new_dirty_rects;
+  swap_chain_->AddDirtyRect(new_dirty_rect);
 }
 
-void Canvas::set_dirty_rect(const RectF& new_dirty_rect) const {
+void Canvas::set_dirty_rect(const RectF& new_dirty_rect) {
   set_dirty_rect(Rect(static_cast<int>(::floor(new_dirty_rect.left)),
                       static_cast<int>(::floor(new_dirty_rect.top)),
                       static_cast<int>(::ceil(new_dirty_rect.right)),
@@ -199,36 +184,19 @@ bool Canvas::EndDraw() {
       DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
     }
   } else {
-      auto const hr = render_target_->EndDraw();
-      if (SUCCEEDED(hr)) {
-        if (dwm_support_ == DwmSupport::SupportDwm) {
-            dirty_rects_.clear();
-            return true;
-          }
-          if (dirty_rects_.empty()) {
-            DVLOG(0) << "Canvas::EndDraw: no dirty";
-          } else {
-            #if DEBUG_DRAW
-              DVLOG(0) << "Canvas::EndDraw: swap #dirty=" <<
-                  dirty_rects_.size() << " " << dirty_rects_[0];
-            #endif
-            DXGI_PRESENT_PARAMETERS parameters = {0};
-            parameters.DirtyRectsCount = dirty_rects_.size();
-            parameters.pDirtyRects = dirty_rects_.data();
-            parameters.pScrollRect = nullptr;
-            parameters.pScrollOffset = nullptr;
-            COM_VERIFY(dxgi_swap_chain_->Present1(1, 0, &parameters));
-            dirty_rects_.clear();
-          }
+    auto const hr = render_target_->EndDraw();
+    if (SUCCEEDED(hr)) {
+      if (dwm_support_ == DwmSupport::SupportDwm)
         return true;
-      }
-      if (hr == D2DERR_RECREATE_TARGET) {
-        DVLOG(0) << "Canvas::End D2DERR_RECREATE_TARGET";
-      } else {
-        DVLOG(0) << "ID2D1RenderTarget::EndDraw: hr=" << std::hex << hr;
-      }
+      swap_chain_->Present();
+      return true;
+    }
+
+    if (hr == D2DERR_RECREATE_TARGET)
+      DVLOG(0) << "Canvas::End D2DERR_RECREATE_TARGET";
+    else
+      DVLOG(0) << "ID2D1RenderTarget::EndDraw: hr=" << std::hex << hr;
   }
-  dxgi_swap_chain_.reset();
   render_target_.reset();
   Reinitialize();
   return false;
@@ -290,101 +258,11 @@ void Canvas::Reinitialize() {
                                          D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS),
         &hwnd_render_target));
     render_target_.reset(hwnd_render_target);
-    SizeF dpi;
-    render_target_->GetDpi(&dpi.width, &dpi.height);
-    UpdateDpi(dpi);
-    render_target_->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
-    FOR_EACH_OBSERVER(Observer, observers_, ShouldDiscardResources());
-    return;
+  } else {
+    swap_chain_.reset(SwapChain::Create(hwnd_));
+    render_target_.reset(swap_chain_->d2d_device_context());
   }
 
-  static bool did_check_windows_version;
-  static bool is_windows_8;
-  if (!did_check_windows_version) {
-    is_windows_8 = ::IsWindows8OrGreater();
-  }
-
-  uint32_t creation_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT |
-                            D3D11_CREATE_DEVICE_SINGLETHREADED;
-  #if _DEBUG
-    creation_flags |= D3D11_CREATE_DEVICE_DEBUG;
-  #endif
-  D3D_FEATURE_LEVEL feature_levels[] = {
-      D3D_FEATURE_LEVEL_11_1,
-      D3D_FEATURE_LEVEL_11_0,
-      D3D_FEATURE_LEVEL_10_1,
-      D3D_FEATURE_LEVEL_10_0,
-      D3D_FEATURE_LEVEL_9_3,
-      D3D_FEATURE_LEVEL_9_2,
-      D3D_FEATURE_LEVEL_9_1,
-  };
-
-  common::ComPtr<ID3D11Device> device;
-  common::ComPtr<ID3D11DeviceContext> device_context;
-  D3D_FEATURE_LEVEL feature_level = D3D_FEATURE_LEVEL_9_1;
-  COM_VERIFY(::D3D11CreateDevice(
-      nullptr, // default adopter
-      D3D_DRIVER_TYPE_HARDWARE,
-      0,
-      creation_flags,
-      feature_levels, arraysize(feature_levels),
-      D3D11_SDK_VERSION,
-      &device,
-      &feature_level,
-      &device_context));
-
-  common::ComPtr<IDXGIDevice1> dxgi_device;
-  COM_VERIFY(dxgi_device.QueryFrom(device));
-
-  common::ComPtr<ID2D1Device> d2d_device;
-  COM_VERIFY(FactorySet::d2d1().CreateDevice(dxgi_device, &d2d_device));
-
-  common::ComPtr<ID2D1DeviceContext> d2d_device_context;
-  COM_VERIFY(d2d_device->CreateDeviceContext(
-      D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &d2d_device_context));
-
- // Allocate a descriptor.
-  DXGI_SWAP_CHAIN_DESC1 swap_chain_desc = {0};
-  swap_chain_desc.Width = 0;  // use automatic sizing
-  swap_chain_desc.Height = 0;
-  // this is the most common swap chain format
-  swap_chain_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-  swap_chain_desc.Stereo = false;
-  swap_chain_desc.SampleDesc.Count = 1; // don't use multi-sampling
-  swap_chain_desc.SampleDesc.Quality = 0;
-  swap_chain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-  swap_chain_desc.BufferCount = 2;  // use double buffering to enable flip
-  if (is_windows_8)
-    swap_chain_desc.Scaling = DXGI_SCALING_NONE;
-  else
-    swap_chain_desc.Scaling = DXGI_SCALING_STRETCH;
-  // Using DXGI_SWAP_EFFECT_SEQUENTIAL or DXGI_SWAP_EFFECT_DISCARD cause
-  // |CreateSwapChainForHwnd| returns 0X887A0001.
-  swap_chain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-  swap_chain_desc.Flags = 0;
-
-  common::ComPtr<IDXGIAdapter> dxgi_adapter;
-  dxgi_device->GetAdapter(&dxgi_adapter);
-
-  common::ComPtr<IDXGIFactory2> dxgi_factory;
-  dxgi_adapter->GetParent(IID_PPV_ARGS(&dxgi_factory));
-
-  COM_VERIFY(dxgi_factory->CreateSwapChainForHwnd(
-      device, hwnd_, &swap_chain_desc, nullptr, nullptr, &dxgi_swap_chain_));
-
-  {
-    DXGI_RGBA color;
-    color.r = 1.0f;
-    color.g = 1.0f;
-    color.b = 1.0f;
-    color.a = 1.0f;
-    COM_VERIFY(dxgi_swap_chain_->SetBackgroundColor(&color));
-  }
-
-  // Ensure that DXGI doesn't queue more than one frame at a time.
-  COM_VERIFY(dxgi_device->SetMaximumFrameLatency(1));
-  SetupRenderTarget(d2d_device_context);
-  render_target_.reset(d2d_device_context);
   SizeF dpi;
   render_target_->GetDpi(&dpi.width, &dpi.height);
   UpdateDpi(dpi);
@@ -422,34 +300,9 @@ void Canvas::SetBounds(const Rect& rect) {
   }
 
   screen_bitmap_.reset();
-  target_bounds_ = rect;
-
-  common::ComPtr<ID2D1DeviceContext> d2d_device_context;
-  COM_VERIFY(d2d_device_context.QueryFrom(render_target_));
-
-  // Release resources in swap chain.
-  d2d_device_context->SetTarget(nullptr);
-
-  COM_VERIFY(dxgi_swap_chain_->ResizeBuffers(0u,
+  swap_chain_->DidChangeBounds(D2D1::SizeU(
       static_cast<uint32_t>(rect.width()),
-      static_cast<uint32_t>(rect.height()), DXGI_FORMAT_UNKNOWN, 0u));
-  SetupRenderTarget(d2d_device_context);
-}
-
-void Canvas::SetupRenderTarget(ID2D1DeviceContext* d2d_device_context) {
-  common::ComPtr<IDXGISurface> dxgi_back_buffer;
-  dxgi_swap_chain_->GetBuffer(0, IID_PPV_ARGS(&dxgi_back_buffer));
-
-  D2D1_BITMAP_PROPERTIES1 bitmapProperties = D2D1::BitmapProperties1(
-      D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-      D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE),
-      FactorySet::instance()->pixels_per_dip().width,
-      FactorySet::instance()->pixels_per_dip().height);
-  common::ComPtr<ID2D1Bitmap1> d2d_back_buffer;
-  COM_VERIFY(d2d_device_context->CreateBitmapFromDxgiSurface(
-      dxgi_back_buffer, &bitmapProperties, &d2d_back_buffer));
-  d2d_device_context->SetTarget(d2d_back_buffer);
-  d2d_device_context->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
+      static_cast<uint32_t>(rect.height())));
 }
 
 }  // namespace gfx

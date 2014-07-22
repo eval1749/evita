@@ -155,6 +155,8 @@
         'gfx/rect_f.cc',
         'gfx/size_f.cc',
         'gfx/stroke_style.cc',
+        'gfx/swap_chain.cc',
+        'gfx/swap_chain.h',
         'gfx/text_format.cc',
         'gfx/text_layout.cc',
         'gfx_base.cpp',

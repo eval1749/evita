@@ -5,6 +5,7 @@
 #if !defined(INCLUDE_evita_gfx_canvas_h)
 #define INCLUDE_evita_gfx_canvas_h
 
+#include <memory>
 #include <vector>
 
 #include "base/strings/string16.h"
@@ -15,6 +16,7 @@ interface IDXGISwapChain1;
 namespace gfx {
 
 class Bitmap;
+class SwapChain;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -50,17 +52,15 @@ class Canvas final : public Object, public DpiHandler {
   };
   friend class DrawingScope;
 
-  private: mutable int batch_nesting_level_;
-  private: mutable std::vector<Rect> dirty_rects_;
-  private: mutable common::ComPtr<IDXGISwapChain1> dxgi_swap_chain_;
+  private: int batch_nesting_level_;
   private: const DwmSupport dwm_support_;
   private: scoped_refptr<FactorySet> factory_set_;
   private: HWND hwnd_;
   private: ObserverList<Observer> observers_;
-  private: mutable std::unique_ptr<Bitmap> screen_bitmap_;
-  private: mutable Rect target_bounds_;
-  private: mutable common::ComPtr<ID2D1RenderTarget> render_target_;
-  private: mutable void* work_;
+  private: std::unique_ptr<Bitmap> screen_bitmap_;
+  private: common::ComPtr<ID2D1RenderTarget> render_target_;
+  private: std::unique_ptr<SwapChain> swap_chain_;
+  private: void* work_;
 
   public: explicit Canvas(DwmSupport dwm_support);
   public: Canvas();
@@ -76,8 +76,8 @@ class Canvas final : public Object, public DpiHandler {
     return render_target_.get();
   }
 
-  public: void set_dirty_rect(const Rect& rect) const;
-  public: void set_dirty_rect(const RectF& rect) const;
+  public: void set_dirty_rect(const Rect& rect);
+  public: void set_dirty_rect(const RectF& rect);
   // |drawing()| is for debugging.
   public: bool drawing() const { return batch_nesting_level_; }
   public: const FactorySet& factory_set() const { return *factory_set_; }
@@ -86,7 +86,7 @@ class Canvas final : public Object, public DpiHandler {
   public: template<typename T> T* work() const { 
     return reinterpret_cast<T*>(work_); 
   }
-  public: void set_work(void* ptr) const { work_ = ptr; }
+  public: void set_work(void* ptr) { work_ = ptr; }
 
   // [A]
   public: void AddObserver(Observer* observer);
@@ -138,7 +138,6 @@ class Canvas final : public Object, public DpiHandler {
   // [S]
   public: bool Canvas::SaveScreenImage(const RectF& bounds);
   public: void SetBounds(const Rect& bounds);
-  private: void SetupRenderTarget(ID2D1DeviceContext* d2d_device_context);
 
   DISALLOW_COPY_AND_ASSIGN(Canvas);
 };

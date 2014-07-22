@@ -122,7 +122,7 @@ void ButtonControl::set_text(const base::string16& new_text) {
 }
 
 // ui::Widget
-void ButtonControl::DidResize() {
+void ButtonControl::DidChangeBounds() {
   renderer_.reset();
 }
 

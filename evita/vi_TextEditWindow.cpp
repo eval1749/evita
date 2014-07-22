@@ -469,8 +469,8 @@ void TextEditWindow::DidRealize() {
   text_renderer_->SetCanvas(canvas_);
 }
 
-void TextEditWindow::DidResize() {
-  views::ContentWindow::DidResize();
+void TextEditWindow::DidChangeBounds() {
+  views::ContentWindow::DidChangeBounds();
   UI_DOM_AUTO_LOCK_SCOPE();
   auto const scroll_bar_width = ::GetSystemMetrics(SM_CXVSCROLL);
   auto text_block_rect = bounds();

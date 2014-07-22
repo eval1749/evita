@@ -236,8 +236,8 @@ void TableView::DidRealize() {
 }
 
 // Resize |ui::TableControl| to cover all client area.
-void TableView::DidResize() {
-  ContentWindow::DidResize();
+void TableView::DidChangeBounds() {
+  ContentWindow::DidChangeBounds();
   if (control_)
     control_->SetBounds(bounds());
 }

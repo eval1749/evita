@@ -31,7 +31,7 @@ class ButtonControl final : public Control {
   public: void set_text(const base::string16& text);
 
   // ui::Widget
-  private: virtual void DidResize() override;
+  private: virtual void DidChangeBounds() override;
   private: virtual void OnDraw(gfx::Canvas* gfx) override;
 
   DISALLOW_COPY_AND_ASSIGN(ButtonControl);

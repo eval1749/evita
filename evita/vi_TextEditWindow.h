@@ -129,7 +129,7 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: virtual void DidHide() override;
   private: virtual void DidKillFocus(ui::Widget* focused_window) override;
   private: virtual void DidRealize() override;
-  private: virtual void DidResize() override;
+  private: virtual void DidChangeBounds() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void DidShow() override;
   private: virtual HCURSOR GetCursorAt(const Point&) const override;

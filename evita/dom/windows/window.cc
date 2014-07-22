@@ -161,7 +161,7 @@ void Window::DidRealizeWindow() {
   }
 }
 
-void Window::DidResize(int clientLeft, int clientTop,
+void Window::DidChangeBounds(int clientLeft, int clientTop,
                        int clientRight, int clientBottom) {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();

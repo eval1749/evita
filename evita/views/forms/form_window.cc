@@ -601,7 +601,7 @@ void FormWindow::DidRealize() {
   Window::DidRealize();
 }
 
-void FormWindow::DidResize() {
+void FormWindow::DidChangeBounds() {
   canvas_->Resize(bounds());
   {
     gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
@@ -609,7 +609,7 @@ void FormWindow::DidResize() {
     (*canvas_)->Clear(ui::SystemMetrics::instance()->bgcolor());
   }
   SchedulePaint();
-  Window::DidResize();
+  Window::DidChangeBounds();
 }
 
 LRESULT FormWindow::OnMessage(uint32_t const message, WPARAM const wParam,

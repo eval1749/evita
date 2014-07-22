@@ -164,8 +164,8 @@ void Window::DidRealize() {
   Widget::DidRealize();
 }
 
-void Window::DidResize() {
-  Widget::DidResize();
+void Window::DidChangeBounds() {
+  Widget::DidChangeBounds();
   view_event_handler()->DidResizeWidget(window_id_, bounds().left, bounds().top,
                                         bounds().right, bounds().bottom);
 }

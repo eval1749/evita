@@ -610,7 +610,7 @@ void ScrollBar::UpdateLayout() {
 }
 
 // ui::Widget
-void ScrollBar::DidResize() {
+void ScrollBar::DidChangeBounds() {
   UpdateLayout();
 }
 

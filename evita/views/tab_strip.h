@@ -46,7 +46,7 @@ class TabStrip : public ui::Widget {
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;
   private: virtual void DidCreateNativeWindow() override;
-  private: virtual void DidResize() override;
+  private: virtual void DidChangeBounds() override;
   private: virtual LRESULT OnMessage(uint32_t uMsg, WPARAM wParam,
                                      LPARAM lParam) override;
   private: virtual void OnMouseExited(const ui::MouseEvent& event) override;

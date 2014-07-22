@@ -72,7 +72,7 @@ class TableView
 
   // ui::Widget
   private: virtual void DidRealize() override;
-  private: virtual void DidResize() override;
+  private: virtual void DidChangeBounds() override;
 
   // views::Window
   private: virtual bool OnIdle(int hint) override;

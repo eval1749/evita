@@ -69,7 +69,7 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
   private: void Destroy();
   public: virtual void DidDestroyWindow();
   public: virtual void DidRealizeWindow();
-  public: void DidResize(int left, int top, int right, int bottom);
+  public: void DidChangeBounds(int left, int top, int right, int bottom);
   public: void DidSetFocus();
   private: void Focus();
   private: void Hide();

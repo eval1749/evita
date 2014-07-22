@@ -95,7 +95,7 @@ void LabelControl::set_text(const base::string16& new_text) {
 }
 
 // ui::Widget
-void LabelControl::DidResize() {
+void LabelControl::DidChangeBounds() {
   renderer_.reset();
 }
 

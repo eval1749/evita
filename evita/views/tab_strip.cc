@@ -1321,7 +1321,7 @@ void TabStrip::DidCreateNativeWindow() {
   impl_->DidCreateNativeWindow();
 }
 
-void TabStrip::DidResize() {
+void TabStrip::DidChangeBounds() {
   if (!impl_)
     return;
   impl_->SetBounds(bounds());

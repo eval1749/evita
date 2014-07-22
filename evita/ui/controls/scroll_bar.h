@@ -55,7 +55,7 @@ class ScrollBar : public ui::Widget {
   private: void UpdateLayout();
 
   // ui::Widget
-  private: virtual void DidResize() override;
+  private: virtual void DidChangeBounds() override;
   private: virtual void DidShow() override;
   private: virtual void OnDraw(gfx::Canvas* canvas) override;
   private: virtual void OnMouseExited(const MouseEvent& event) override;

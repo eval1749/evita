@@ -183,7 +183,7 @@ class TableControl::TableControlModel {
   public: void DidChangeRow(int row_id);
   public: void DidKillFocus(ui::Widget* focused_window);
   public: void DidRemoveRow(int row_id);
-  public: void DidResize(const gfx::RectF& rect);
+  public: void DidChangeBounds(const gfx::RectF& rect);
   public: void DidSetFocus(ui::Widget* last_focused);
   public: void Draw(gfx::Canvas* gfx) const;
   private: void DrawHeaderRow(gfx::Canvas* gfx) const;
@@ -314,7 +314,7 @@ void TableControl::TableControlModel::DidRemoveRow(int row_id) {
   UpdateSelectionView();
 }
 
-void TableControl::TableControlModel::DidResize(const gfx::RectF& rect) {
+void TableControl::TableControlModel::DidChangeBounds(const gfx::RectF& rect) {
   bounds_ = rect;
   UpdateLayout();
 }
@@ -641,12 +641,12 @@ void TableControl::DidKillFocus(ui::Widget* focus_widget) {
 }
 
 void TableControl::DidRealize() {
-  model_->DidResize(gfx::RectF(bounds()));
+  model_->DidChangeBounds(gfx::RectF(bounds()));
   UpdateViewIfNeeded();
 }
 
-void TableControl::DidResize() {
-  model_->DidResize(gfx::RectF(bounds()));
+void TableControl::DidChangeBounds() {
+  model_->DidChangeBounds(gfx::RectF(bounds()));
   UpdateViewIfNeeded();
 }
 

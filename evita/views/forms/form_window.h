@@ -67,7 +67,7 @@ class FormWindow final : public views::Window,
   private: virtual void DidCreateNativeWindow() override;
   private: virtual void DidDestroyWidget() override;
   private: virtual void DidRealize() override;
-  private: virtual void DidResize() override;
+  private: virtual void DidChangeBounds() override;
   private: virtual LRESULT OnMessage(uint32_t message, WPARAM wParam,
                                      LPARAM lParam) override;
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;

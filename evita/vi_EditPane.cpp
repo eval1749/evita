@@ -1141,7 +1141,7 @@ void EditPane::DidRemoveChildWidget(const Widget&) {
   DestroyWidget();
 }
 
-void EditPane::DidResize() {
+void EditPane::DidChangeBounds() {
   #if DEBUG_RESIZE
     DEBUG_WIDGET_PRINTF(DEBUG_RECT_FORMAT "\n", DEBUG_RECT_ARG(bounds()));
   #endif

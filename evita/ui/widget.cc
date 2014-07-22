@@ -189,7 +189,7 @@ void Widget::DidRealizeChildWidget(const Widget&) {
 void Widget::DidRemoveChildWidget(const Widget&) {
 }
 
-void Widget::DidResize() {
+void Widget::DidChangeBounds() {
 }
 
 void Widget::DidSetFocus(ui::Widget*) {
@@ -583,7 +583,7 @@ void Widget::SetBounds(const Rect& rect) {
       parent_node()->SchedulePaintInRect(bounds_);
     }
     bounds_ = rect;
-    DidResize();
+    DidChangeBounds();
   }
 }
 
@@ -767,7 +767,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       if (wParam != SIZE_MAXHIDE && wParam != SIZE_MINIMIZED) {
         ::GetClientRect(*native_window_.get(), &bounds_);
         if (!bounds_.empty())
-          DidResize();
+          DidChangeBounds();
       }
       return 0;
 
@@ -860,7 +860,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       }
 
       ::GetClientRect(*native_window_.get(), &bounds_);
-      DidResize();
+      DidChangeBounds();
       return 0;
     }
   }

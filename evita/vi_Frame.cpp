@@ -531,8 +531,8 @@ void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
     DestroyWidget();
 }
 
-void Frame::DidResize() {
-  views::Window::DidResize();
+void Frame::DidChangeBounds() {
+  views::Window::DidChangeBounds();
   {
     auto tab_strip_rect = bounds();
     tab_strip_rect.bottom = tab_strip_rect.top + m_cyTabBand;

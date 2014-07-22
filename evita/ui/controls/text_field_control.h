@@ -50,7 +50,7 @@ class TextFieldControl final : public Control {
 
   // ui::Widget
   private: virtual void DidKillFocus(ui::Widget* focused_window) override;
-  private: virtual void DidResize() override;
+  private: virtual void DidChangeBounds() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual HCURSOR GetCursorAt(const Point& point) const override;
   private: virtual void OnDraw(gfx::Canvas* gfx) override;

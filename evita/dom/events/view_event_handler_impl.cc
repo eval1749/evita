@@ -184,7 +184,7 @@ void ViewEventHandlerImpl::DidResizeWidget(WindowId window_id, int left, int top
   auto const window = FromWindowId(window_id);
   if (!window)
     return;
-  window->DidResize(left, top, right, bottom);
+  window->DidChangeBounds(left, top, right, bottom);
 }
 
 void ViewEventHandlerImpl::DidStartViewHost() {

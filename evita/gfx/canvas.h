@@ -22,12 +22,7 @@ class SwapChain;
 //
 // Canvas
 //
-class Canvas final : public Object, public DpiHandler {
-  public: enum class DwmSupport {
-    NotSupportDwm,
-    SupportDwm,
-  };
-
+class Canvas : public Object, public DpiHandler {
   public: class Observer {
     public: Observer();
     public: virtual ~Observer();
@@ -53,27 +48,23 @@ class Canvas final : public Object, public DpiHandler {
   friend class DrawingScope;
 
   private: int batch_nesting_level_;
-  private: const DwmSupport dwm_support_;
   private: scoped_refptr<FactorySet> factory_set_;
-  private: HWND hwnd_;
   private: ObserverList<Observer> observers_;
   private: std::unique_ptr<Bitmap> screen_bitmap_;
   private: common::ComPtr<ID2D1RenderTarget> render_target_;
-  private: std::unique_ptr<SwapChain> swap_chain_;
   private: void* work_;
 
-  public: explicit Canvas(DwmSupport dwm_support);
-  public: Canvas();
-  public: ~Canvas();
+  protected: Canvas();
+  public: virtual ~Canvas();
 
   public: explicit operator bool() const {
-    return render_target_;
+    return GetRenderTarget();
   }
   public: operator ID2D1RenderTarget*() const {
-    return render_target_.get();
+    return GetRenderTarget();
   }
   public: ID2D1RenderTarget* operator->() const {
-    return render_target_.get();
+    return GetRenderTarget();
   }
 
   public: void set_dirty_rect(const Rect& rect);
@@ -81,7 +72,6 @@ class Canvas final : public Object, public DpiHandler {
   // |drawing()| is for debugging.
   public: bool drawing() const { return batch_nesting_level_; }
   public: const FactorySet& factory_set() const { return *factory_set_; }
-  public: ID2D1RenderTarget& render_target() const;
   public: Bitmap* screen_bitmap() const { return screen_bitmap_.get(); }
   public: template<typename T> T* work() const { 
     return reinterpret_cast<T*>(work_); 
@@ -89,12 +79,17 @@ class Canvas final : public Object, public DpiHandler {
   public: void set_work(void* ptr) { work_ = ptr; }
 
   // [A]
+  public: virtual void AddDirtyRect(const Rect& new_dirty_rect);
   public: void AddObserver(Observer* observer);
 
   // [B]
   public: void BeginDraw();
 
   // [D]
+  protected: virtual void DidCallEndDraw();
+  protected: void DidCreateRenderTarget();
+  protected: virtual void DidChangeBounds(const SizeU& new_size) = 0;
+  protected: virtual void DidLostRenderTarget() = 0;
   public: void DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
                           const RectF& src_rect, float opacity = 1.0f,
                           D2D1_BITMAP_INTERPOLATION_MODE mode =
@@ -128,11 +123,10 @@ class Canvas final : public Object, public DpiHandler {
   public: void FillRectangle(const Brush& brush, const RectF& rect);
   public: void Flush();
 
-  // [I]
-  public: void Init(HWND hwnd);
+  // [G]
+  public: virtual ID2D1RenderTarget* GetRenderTarget() const = 0;
 
   // [R]
-  private: void Reinitialize();
   public: void RemoveObserver(Observer* observer);
 
   // [S]
@@ -140,6 +134,48 @@ class Canvas final : public Object, public DpiHandler {
   public: void SetBounds(const Rect& bounds);
 
   DISALLOW_COPY_AND_ASSIGN(Canvas);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// CanvasForHwnd
+//
+class CanvasForHwnd : public Canvas {
+  private: HWND hwnd_;
+  private: std::unique_ptr<SwapChain> swap_chain_;
+
+  public: CanvasForHwnd(HWND hwnd);
+  public: virtual ~CanvasForHwnd();
+
+  // Canvas
+  private: virtual void AddDirtyRect(const Rect& new_dirty_rect) override;
+  private: virtual void DidCallEndDraw() override;
+  private: virtual void DidChangeBounds(const SizeU& new_size) override;
+  private: virtual void DidLostRenderTarget() override;
+  private: virtual ID2D1RenderTarget* GetRenderTarget() const override;
+
+  DISALLOW_COPY_AND_ASSIGN(CanvasForHwnd);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// LegacyCanvasForHwnd
+//
+class LegacyCanvasForHwnd : public Canvas {
+  private: HWND hwnd_;
+  private: common::ComPtr<ID2D1HwndRenderTarget> hwnd_render_target_;
+
+  public: LegacyCanvasForHwnd(HWND hwnd);
+  public: virtual ~LegacyCanvasForHwnd();
+
+  private: void AttachRenderTarget();
+
+  // Canvas
+  private: virtual void DidChangeBounds(const SizeU& new_size) override;
+  private: virtual void DidLostRenderTarget() override;
+  private: virtual ID2D1RenderTarget* GetRenderTarget() const override;
+
+  DISALLOW_COPY_AND_ASSIGN(LegacyCanvasForHwnd);
 };
 
 } // namespace gfx

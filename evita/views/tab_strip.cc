@@ -600,7 +600,7 @@ class TabStrip::TabStripImpl final {
   private: typedef std::vector<Tab*> Tabs;
 
   private: gfx::RectF bounds_;
-  private: std::unique_ptr<gfx::Canvas> canvas_;
+  private: std::unique_ptr<gfx::LegacyCanvasForHwnd> canvas_;
   private: BOOL composition_enabled;
   private: TabStripDelegate* delegate_;
   private: Tab* dragging_tab_;
@@ -676,8 +676,7 @@ class TabStrip::TabStripImpl final {
 };
 
 TabStrip::TabStripImpl::TabStripImpl(HWND hwnd, TabStripDelegate* delegate)
-    : canvas_(new gfx::Canvas(gfx::Canvas::DwmSupport::SupportDwm)),
-      composition_enabled(false),
+    : composition_enabled(false),
       delegate_(delegate),
       dragging_tab_(nullptr),
       drag_state_(Drag::None),
@@ -754,7 +753,7 @@ void TabStrip::TabStripImpl::DidChangeTabSelection() {
 }
 
 void TabStrip::TabStripImpl::DidCreateNativeWindow() {
-  canvas_->Init(hwnd_);
+  canvas_.reset(new gfx::LegacyCanvasForHwnd(hwnd_));
   ChangeFont();
   tooltip_.Realize(hwnd_);
 }

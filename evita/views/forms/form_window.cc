@@ -437,7 +437,6 @@ void FormWindow::FormViewModel::DidChangeForm() {
 FormWindow::FormWindow(dom::WindowId window_id, dom::Form* form,
                        Window* owner, gfx::Point offset)
     : views::Window(ui::NativeWindow::Create(this), window_id),
-      canvas_(new gfx::Canvas()),
       model_(new FormViewModel(form, this)),
       offset_(offset), owner_(owner) {
 }
@@ -584,10 +583,10 @@ void FormWindow::CreateNativeWindow() const {
 
 void FormWindow::DidCreateNativeWindow() {
   // TODO(yosi) We should get default value of form window transparency from
-  //CSS.
+  // CSS.
   ::SetLayeredWindowAttributes(*native_window(), RGB(0, 0, 0), 80 * 255 / 100,
                                LWA_ALPHA);
-  canvas_->Init(*native_window());
+  canvas_.reset(new gfx::CanvasForHwnd(*native_window()));
   Widget::DidCreateNativeWindow();
 }
 

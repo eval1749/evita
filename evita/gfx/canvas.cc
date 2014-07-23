@@ -83,25 +83,16 @@ Canvas::Observer::~Observer() {
 //
 // Canvas
 //
-Canvas::Canvas(DwmSupport dwm_support)
-    : batch_nesting_level_(0),
-      dwm_support_(dwm_support),
-      factory_set_(FactorySet::instance()),
-      hwnd_(nullptr),
+Canvas::Canvas()
+    : batch_nesting_level_(0), factory_set_(FactorySet::instance()),
       work_(nullptr) {
-}
-
-Canvas::Canvas() : Canvas(DwmSupport::NotSupportDwm) {
 }
 
 Canvas::~Canvas() {
 }
 
 void Canvas::set_dirty_rect(const Rect& new_dirty_rect) {
-  DCHECK(!new_dirty_rect.empty());
-  if (!swap_chain_)
-    return;
-  swap_chain_->AddDirtyRect(new_dirty_rect);
+  AddDirtyRect(new_dirty_rect);
 }
 
 void Canvas::set_dirty_rect(const RectF& new_dirty_rect) {
@@ -111,9 +102,8 @@ void Canvas::set_dirty_rect(const RectF& new_dirty_rect) {
                       static_cast<int>(::ceil(new_dirty_rect.bottom))));
 }
 
-ID2D1RenderTarget& Canvas::render_target() const {
-  DCHECK(render_target_) << "No ID2D1RenderTarget";
-  return *render_target_.get();
+void Canvas::AddDirtyRect(const Rect& new_dirty_rect) {
+  DCHECK(!new_dirty_rect.empty());
 }
 
 void Canvas::AddObserver(Observer* observer) {
@@ -121,42 +111,52 @@ void Canvas::AddObserver(Observer* observer) {
 }
 
 void Canvas::BeginDraw() {
-  DCHECK(render_target_);
+  DCHECK(GetRenderTarget());
   if (!batch_nesting_level_)
-    render_target_->BeginDraw();
+    GetRenderTarget()->BeginDraw();
   ++batch_nesting_level_;
 }
 
+void Canvas::DidCallEndDraw() {
+}
+
+void Canvas::DidCreateRenderTarget() {
+  SizeF dpi;
+  GetRenderTarget()->GetDpi(&dpi.width, &dpi.height);
+  UpdateDpi(dpi);
+  FOR_EACH_OBSERVER(Observer, observers_, ShouldDiscardResources());
+}
+
 void Canvas::DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
-                          const RectF& src_rect, float opacity,
-                          D2D1_BITMAP_INTERPOLATION_MODE mode) {
-  render_target_->DrawBitmap(bitmap, dst_rect, opacity, mode, src_rect);
+                        const RectF& src_rect, float opacity,
+                        D2D1_BITMAP_INTERPOLATION_MODE mode) {
+  GetRenderTarget()->DrawBitmap(bitmap, dst_rect, opacity, mode, src_rect);
 }
 
 void Canvas::DrawLine(const Brush& brush, int sx, int sy, int ex, int ey,
-                        float strokeWidth) {
+                      float strokeWidth) {
   DCHECK(drawing());
-  render_target().DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
-                           strokeWidth);
+  GetRenderTarget()->DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
+                              strokeWidth);
 }
 
 void Canvas::DrawLine(const Brush& brush, float sx, float sy,
-                        float ex, float ey, float strokeWidth) {
+                      float ex, float ey, float strokeWidth) {
   DCHECK(drawing());
-  render_target().DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
-                           strokeWidth);
+  GetRenderTarget()->DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
+                              strokeWidth);
 }
 
 void Canvas::DrawRectangle(const Brush& brush, const RECT& rc,
-                             float strokeWidth) {
+                           float strokeWidth) {
   DrawRectangle(brush, RectF(rc), strokeWidth);
 }
 
 void Canvas::DrawRectangle(const Brush& brush, const RectF& rect,
-                            float strokeWidth) {
+                           float strokeWidth) {
   DCHECK(drawing());
   DCHECK(rect);
-  render_target().DrawRectangle(rect, brush, strokeWidth);
+  GetRenderTarget()->DrawRectangle(rect, brush, strokeWidth);
 }
 
 void Canvas::DrawText(const TextFormat& text_format,
@@ -166,45 +166,33 @@ void Canvas::DrawText(const TextFormat& text_format,
   DCHECK(drawing());
   auto rect = RectF(rc);
   DCHECK(rect);
-  render_target().DrawText(pwch, static_cast<uint32_t>(cwch), text_format,
-                           rect, brush);
+  GetRenderTarget()->DrawText(pwch, static_cast<uint32_t>(cwch), text_format,
+                              rect, brush);
 }
 
 bool Canvas::EndDraw() {
   DCHECK(drawing());
-  DCHECK(render_target_);
+  DCHECK(GetRenderTarget());
   --batch_nesting_level_;
-  if (batch_nesting_level_) {
-    auto const hr = render_target_->Flush();
-    if (SUCCEEDED(hr))
-      return true;
-    if (hr == D2DERR_RECREATE_TARGET) {
-      DVLOG(0) << "Canvas::End D2DERR_RECREATE_TARGET";
-    } else {
-      DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
-    }
-  } else {
-    auto const hr = render_target_->EndDraw();
-    if (SUCCEEDED(hr)) {
-      if (dwm_support_ == DwmSupport::SupportDwm)
-        return true;
-      swap_chain_->Present();
-      return true;
-    }
-
-    if (hr == D2DERR_RECREATE_TARGET)
-      DVLOG(0) << "Canvas::End D2DERR_RECREATE_TARGET";
-    else
-      DVLOG(0) << "ID2D1RenderTarget::EndDraw: hr=" << std::hex << hr;
+  auto const hr = batch_nesting_level_ ? GetRenderTarget()->Flush() :
+                                         GetRenderTarget()->EndDraw();
+  if (SUCCEEDED(hr)) {
+    if (!batch_nesting_level_)
+      DidCallEndDraw();
+    return true;
   }
-  render_target_.reset();
-  Reinitialize();
+  if (hr == D2DERR_RECREATE_TARGET) {
+    DVLOG(0) << "Canvas::End D2DERR_RECREATE_TARGET";
+    DidLostRenderTarget();
+  } else {
+    DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
+  }
   return false;
 }
 
 void Canvas::FillRectangle(const Brush& brush, int left, int top,
                               int right, int bottom) {
-  render_target().FillRectangle(RectF(left, top, right, bottom), brush);
+  GetRenderTarget()->FillRectangle(RectF(left, top, right, bottom), brush);
 }
 
 void Canvas::FillRectangle(const Brush& brush, float left, float top,
@@ -219,54 +207,20 @@ void Canvas::FillRectangle(const Brush& brush, const RECT& rc) {
 void Canvas::FillRectangle(const Brush& brush, const RectF& rect) {
   DCHECK(drawing());
   DCHECK(rect);
-  render_target().FillRectangle(rect, brush);
+  GetRenderTarget()->FillRectangle(rect, brush);
 }
 
 void Canvas::Flush() {
   DCHECK(drawing());
   D2D1_TAG tag1, tag2;
-  COM_VERIFY(render_target_->Flush(&tag1, &tag2));
-  DCHECK(!tag1 && !tag2);
-}
-
-void Canvas::Init(HWND hwnd) {
-  DCHECK(!hwnd_);
-  hwnd_ = hwnd;
-  Reinitialize();
-}
-
-void Canvas::Reinitialize() {
-  DCHECK(!render_target_);
-  DCHECK(hwnd_);
-
-  if (dwm_support_ == DwmSupport::SupportDwm){
-    RECT rc;
-    ::GetClientRect(hwnd_, &rc);
-    auto const pixel_format = D2D1::PixelFormat(
-        DXGI_FORMAT_B8G8R8A8_UNORM,
-        D2D1_ALPHA_MODE_PREMULTIPLIED);
-    auto const size = SizeU(rc.right - rc.left, rc.bottom - rc.top);
-    // TODO: When should use D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE?
-    //auto const usage = D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE;
-    auto const usage = D2D1_RENDER_TARGET_USAGE_NONE;
-    common::ComPtr<ID2D1HwndRenderTarget> hwnd_render_target;
-    COM_VERIFY(FactorySet::d2d1().CreateHwndRenderTarget(
-        D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT,
-                                     pixel_format, 0.0f, 0.0f,
-                                     usage),
-        D2D1::HwndRenderTargetProperties(hwnd_, size,
-                                         D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS),
-        &hwnd_render_target));
-    render_target_.reset(hwnd_render_target);
-  } else {
-    swap_chain_.reset(SwapChain::Create(hwnd_));
-    render_target_.reset(swap_chain_->d2d_device_context());
-  }
-
-  SizeF dpi;
-  render_target_->GetDpi(&dpi.width, &dpi.height);
-  UpdateDpi(dpi);
-  FOR_EACH_OBSERVER(Observer, observers_, ShouldDiscardResources());
+  auto const hr = GetRenderTarget()->Flush(&tag1, &tag2);
+  if (SUCCEEDED(hr))
+    return;
+  if (hr == D2DERR_RECREATE_TARGET)
+    DVLOG(0) << "Canvas::End D2DERR_RECREATE_TARGET";
+  else
+    DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
+  DidLostRenderTarget();
 }
 
 void Canvas::RemoveObserver(Observer* observer) {
@@ -282,7 +236,7 @@ bool Canvas::SaveScreenImage(const RectF& rect) {
                           static_cast<uint32_t>(::ceil(rect.bottom)));
   const PointU dest_point(source_rect.origin());
   auto const hr = (*screen_bitmap_)->CopyFromRenderTarget(&dest_point,
-      render_target_, &source_rect);
+      GetRenderTarget(), &source_rect);
   if (FAILED(hr))
     DVLOG(0) << "ID2D1Bitmap->CopyFromRenderTarget hr=" << std::hex << hr;
   return SUCCEEDED(hr);
@@ -290,19 +244,86 @@ bool Canvas::SaveScreenImage(const RectF& rect) {
 
 void Canvas::SetBounds(const Rect& rect) {
   DCHECK(!rect.empty());
-
-  if (dwm_support_ == DwmSupport::SupportDwm){
-    SizeU size(rect.width(), rect.height());
-    common::ComPtr<ID2D1HwndRenderTarget> hwnd_render_target;
-    COM_VERIFY(hwnd_render_target.QueryFrom(render_target_));
-    COM_VERIFY(hwnd_render_target->Resize(size));
-    return;
-  }
-
   screen_bitmap_.reset();
-  swap_chain_->DidChangeBounds(D2D1::SizeU(
-      static_cast<uint32_t>(rect.width()),
-      static_cast<uint32_t>(rect.height())));
+  DidChangeBounds(SizeU(rect.width(), rect.height()));
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// CanvasForHwnd
+//
+CanvasForHwnd::CanvasForHwnd(HWND hwnd) : hwnd_(hwnd) {
+  swap_chain_.reset(SwapChain::Create(hwnd_));
+  DidCreateRenderTarget();
+}
+
+CanvasForHwnd::~CanvasForHwnd() {
+}
+
+// Canvas
+void CanvasForHwnd::AddDirtyRect(const Rect& new_dirty_rect) {
+  swap_chain_->AddDirtyRect(new_dirty_rect);
+}
+
+void CanvasForHwnd::DidCallEndDraw() {
+  swap_chain_->Present();
+}
+
+void CanvasForHwnd::DidChangeBounds(const SizeU& size) {
+  swap_chain_->DidChangeBounds(size);
+}
+
+void CanvasForHwnd::DidLostRenderTarget() {
+  swap_chain_.reset(SwapChain::Create(hwnd_));
+  DidCreateRenderTarget();
+}
+
+ID2D1RenderTarget* CanvasForHwnd::GetRenderTarget() const {
+  return swap_chain_->d2d_device_context();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// LegacyCanvasForHwnd
+//
+LegacyCanvasForHwnd::LegacyCanvasForHwnd(HWND hwnd) : hwnd_(hwnd) {
+  AttachRenderTarget();
+}
+
+LegacyCanvasForHwnd::~LegacyCanvasForHwnd() {
+}
+
+void LegacyCanvasForHwnd::AttachRenderTarget() {
+  RECT rc;
+  ::GetClientRect(hwnd_, &rc);
+  auto const pixel_format = D2D1::PixelFormat(
+      DXGI_FORMAT_B8G8R8A8_UNORM,
+      D2D1_ALPHA_MODE_PREMULTIPLIED);
+  auto const size = SizeU(rc.right - rc.left, rc.bottom - rc.top);
+  auto const usage = D2D1_RENDER_TARGET_USAGE_NONE;
+  common::ComPtr<ID2D1HwndRenderTarget> hwnd_render_target;
+  COM_VERIFY(FactorySet::d2d1().CreateHwndRenderTarget(
+      D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT,
+                                   pixel_format, 0.0f, 0.0f,
+                                   usage),
+      D2D1::HwndRenderTargetProperties(hwnd_, size,
+                                       D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS),
+      &hwnd_render_target_));
+  DidCreateRenderTarget();
+}
+
+// Canvas
+void LegacyCanvasForHwnd::DidChangeBounds(const SizeU& size) {
+  COM_VERIFY(hwnd_render_target_->Resize(size));
+}
+
+void LegacyCanvasForHwnd::DidLostRenderTarget() {
+  hwnd_render_target_.release();
+  AttachRenderTarget();
+}
+
+ID2D1RenderTarget* LegacyCanvasForHwnd::GetRenderTarget() const {
+  return hwnd_render_target_;
 }
 
 }  // namespace gfx

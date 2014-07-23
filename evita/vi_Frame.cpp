@@ -122,7 +122,6 @@ Pane* GetContainingPane(Frame* frame, views::Window* window) {
 //
 Frame::Frame(views::WindowId window_id)
     : views::Window(ui::NativeWindow::Create(this), window_id),
-      canvas_(new gfx::Canvas()),
       m_cyTabBand(0),
       message_view_(new views::MessageView()),
       title_bar_(new views::TitleBar()),
@@ -494,7 +493,7 @@ void Frame::DidCreateNativeWindow() {
   title_bar_->Realize(*native_window());
 
   CompositionState::Update(*native_window());
-  canvas_->Init(*native_window());
+  canvas_.reset(new gfx::CanvasForHwnd(*native_window()));
 
   // TODO(yosi) How do we detemine height of TabStrip?
   m_cyTabBand = tab_strip_->GetPreferreSize().cy;

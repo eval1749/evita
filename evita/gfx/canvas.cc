@@ -102,8 +102,7 @@ void Canvas::set_dirty_rect(const RectF& new_dirty_rect) {
                       static_cast<int>(::ceil(new_dirty_rect.bottom))));
 }
 
-void Canvas::AddDirtyRect(const Rect& new_dirty_rect) {
-  DCHECK(!new_dirty_rect.empty());
+void Canvas::AddDirtyRect(const Rect&) {
 }
 
 void Canvas::AddObserver(Observer* observer) {

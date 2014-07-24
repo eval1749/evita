@@ -133,7 +133,7 @@ class Rect_ : public BaseType {
   public: SizeType size() const { return SizeType(width(), height()); }
   public: void set_size(const SizeType& size) {
     right = left + size.width;
-    bottom = top + size.width;
+    bottom = top + size.height;
   }
 
   public: UnitType width() const { return right - left; }

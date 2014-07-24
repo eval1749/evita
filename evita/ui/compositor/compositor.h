@@ -11,6 +11,7 @@
 #include "common/win/scoped_comptr.h"
 
 interface IDCompositionDesktopDevice;
+interface IDCompositionTarget;
 interface IDCompositionVisual2;
 interface ID2D1Device;
 
@@ -29,6 +30,7 @@ class Layer;
 class Compositor {
   private: gfx::DxDevice* dx_device_;
   private: common::ComPtr<IDCompositionDesktopDevice> composition_device_;
+  private: common::ComPtr<IDCompositionTarget> composition_target_;
   private: bool need_commit_;
   private: std::unique_ptr<ui::Layer> layer_;
 

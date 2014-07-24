@@ -9,7 +9,7 @@
 #include "common/win/scoped_comptr.h"
 
 interface ID2D1Device;
-interface IDXGIDevice2;
+interface IDXGIDevice3;
 interface IDXGIFactory2;
 
 namespace gfx {
@@ -20,14 +20,14 @@ namespace gfx {
 //
 class DxDevice {
   private: common::ComPtr<ID2D1Device> d2d_device_;
-  private: common::ComPtr<IDXGIDevice2> dxgi_device_;
+  private: common::ComPtr<IDXGIDevice3> dxgi_device_;
   private: common::ComPtr<IDXGIFactory2> dxgi_factory_;
 
   public: DxDevice();
   public: ~DxDevice();
 
   public: ID2D1Device* d2d_device() const { return d2d_device_; }
-  public: IDXGIDevice2* dxgi_device() const { return dxgi_device_; }
+  public: IDXGIDevice3* dxgi_device() const { return dxgi_device_; }
   public: IDXGIFactory2* dxgi_factory() const { return dxgi_factory_; }
 
   DISALLOW_COPY_AND_ASSIGN(DxDevice);

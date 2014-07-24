@@ -29,12 +29,10 @@ Compositor::Compositor(gfx::DxDevice* dx_device, HWND hwnd)
 
   layer_.reset(new Layer(this));
 
-#if 0
-  common::ComPtr<IDCompositionTarget> composition_target;
   COM_VERIFY(composition_device_->CreateTargetForHwnd(hwnd, false,
-                                                      &composition_target));
-  composition_target->SetRoot(layer_->visual());
-#endif
+                                                      &composition_target_));
+  composition_target_->SetRoot(layer_->visual());
+
   {
     RECT bounds;
     ::GetClientRect(hwnd, &bounds);

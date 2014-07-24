@@ -152,7 +152,6 @@ void SwapChain::Present() {
     DVLOG(0) << "SwapChain::Present: no dirty rects";
     return;
   }
-#if 0
   DXGI_PRESENT_PARAMETERS parameters = { 0 };
   parameters.DirtyRectsCount = dirty_rects_.size();
   parameters.pDirtyRects = dirty_rects_.data();
@@ -161,11 +160,6 @@ void SwapChain::Present() {
   DCHECK(IsReady());
   auto const flags = DXGI_PRESENT_DO_NOT_WAIT;
   COM_VERIFY(swap_chain_->Present1(0, flags, &parameters));
-#else
-  IsReady();
-  DXGI_PRESENT_PARAMETERS parameters = { 0 };
-  COM_VERIFY(swap_chain_->Present1(1, 0, &parameters));
-#endif
   dirty_rects_.clear();
   is_ready_ = false;
 }

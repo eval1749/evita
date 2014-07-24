@@ -491,18 +491,17 @@ void Frame::DidCreateNativeWindow() {
   message_view_->Realize(*native_window());
   title_bar_->Realize(*native_window());
 
-  auto const pane_rect = GetPaneRect();
+  auto const pane_bounds = GetPaneRect();
 
   // Layer
   dx_device_.reset(new gfx::DxDevice());
   compositor_.reset(new ui::Compositor(dx_device_.get(), AssociatedHwnd()));
-  compositor_->layer()->SetBounds(gfx::RectF(100, 100, 500, 300));
 
   pane_layer_.reset(new ui::Layer(compositor_.get()));
   compositor_->layer()->AppendChildLayer(pane_layer_.get());
   pane_layer_->SetBounds(gfx::RectF(gfx::PointF(0, 0),
-                                    gfx::SizeF(pane_rect.width(),
-                                               pane_rect.height())));
+                                    gfx::SizeF(pane_bounds.width(),
+                                               pane_bounds.height())));
 
   // Canvas
   //CompositionState::Update(*native_window());
@@ -513,12 +512,11 @@ void Frame::DidCreateNativeWindow() {
   tab_strip_->SetBounds(Rect(0, 0, bounds().width(), m_cyTabBand));
 
   for (auto& pane: m_oPanes) {
-    pane.SetBounds(pane_rect);
+    pane.SetBounds(pane_bounds);
   }
 
   views::Window::DidCreateNativeWindow();
 
-#if 0
   message_view_layer_.reset(new ui::HwndLayer(
       compositor_.get(), message_view_->hwnd()));
   compositor_->layer()->AppendChildLayer(message_view_layer_.get());
@@ -526,7 +524,6 @@ void Frame::DidCreateNativeWindow() {
   tab_strip_layer_.reset(new ui::HwndLayer(
     compositor_.get(), tab_strip_->AssociatedHwnd()));
   compositor_->layer()->AppendChildLayer(tab_strip_layer_.get());
-#endif
 
   tab_strip_->SetIconList(views::IconCache::instance()->image_list());
 
@@ -582,33 +579,15 @@ void Frame::DidChangeBounds() {
 
   {
     const auto pane_bounds = GetPaneRect();
-    pane_layer_->SetBounds(gfx::RectF(100, 100, 300, 400));
+    pane_layer_->SetBounds(gfx::RectF(gfx::PointF(0, 0),
+                                      gfx::SizeF(pane_bounds.width(),
+                                                 pane_bounds.height())));
     for (auto& pane: m_oPanes) {
       pane.SetBounds(pane_bounds);
     }
   }
-  canvas_->SetBounds(gfx::Rect(0, 0, 200, 300));
-#if 1
-{
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  canvas_->set_dirty_rect(bounds());
-  (*canvas_)->Clear(gfx::ColorF(1, 1, 0, 0.5));
-}
-
-static ui::Layer* test_layer;
-static gfx::Canvas* test_canvas;
-if (!test_layer) {
-  test_layer = new ui::Layer(compositor_.get());
-  test_layer->SetBounds(gfx::RectF(300, 300, 400, 400));
-  compositor_->layer()->AppendChildLayer(test_layer);
-  test_canvas = test_layer->CreateCanvas();
-  gfx::Canvas::DrawingScope drawing_scope(test_canvas);
-  test_canvas->set_dirty_rect(bounds());
-  (*test_canvas)->Clear(gfx::ColorF(1, 0, 0, 0.5));
-}
-#else
+  canvas_->SetBounds(bounds());
   DrawForResize();
-#endif
   compositor_->Commit();
 }
 
@@ -817,7 +796,6 @@ void Frame::OnDropTab(LPARAM lParam) {
 }
 
 // views::Window
-#if 1
 bool Frame::OnIdle(int const hint) {
   DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
   static bool busy;
@@ -853,11 +831,3 @@ bool Frame::OnIdle(int const hint) {
   }
   return more;
 }
-#else
-bool Frame::OnIdle(int) {
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  canvas_->set_dirty_rect(bounds());
-  (*canvas_)->Clear(gfx::ColorF(1, 1, 0, 0.5));
-  return false;
-}
-#endif

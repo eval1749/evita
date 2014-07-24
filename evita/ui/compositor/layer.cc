@@ -29,7 +29,7 @@ Layer::Layer(Compositor* compositor)
   common::ComPtr<IDCompositionVisualDebug> debug_visual;
   COM_VERIFY(debug_visual.QueryFrom(visual_));
   // TODO(eval1749) It seems heat map is painted with alpha=1.0.
-  //COM_VERIFY(debug_visual->EnableHeatMap(gfx::ColorF(255, 255, 0, 0.1)));
+  COM_VERIFY(debug_visual->EnableHeatMap(gfx::ColorF(255, 255, 0, 0.1)));
   //COM_VERIFY(debug_visual->EnableRedrawRegions());
 }
 

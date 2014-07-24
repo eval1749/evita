@@ -29,7 +29,11 @@ class StatusBar {
   public: ~StatusBar();
 
   public: explicit operator bool() const { return hwnd_; }
+
+  public: const Rect& bounds() const { return bounds_; }
+  // TODO(eval1749) We should get rid of |StatusBar::height()|.
   public: int height() const { return bounds_.height(); }
+  public: HWND hwnd() const { return hwnd_; }
 
   public: void Realize(HWND hwndParent);
   public: void SetBounds(const common::win::Rect& rect);

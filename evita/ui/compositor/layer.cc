@@ -5,8 +5,14 @@
 #include "evita/ui/compositor/layer.h"
 
 #include <dcomp.h>
+#include <dxgi1_3.h>
 
+#include "base/logging.h"
+#include "evita/gfx/canvas.h"
+#include "evita/gfx/color_f.h"
+#include "evita/gfx/swap_chain.h"
 #include "evita/ui/compositor/compositor.h"
+#include "evita/ui/compositor/canvas_for_layer.h"
 
 namespace ui {
 
@@ -15,8 +21,7 @@ namespace ui {
 // Layer
 //
 Layer::Layer(Compositor* compositor)
-    : compositor_(compositor), is_active_(false),
-      visual_(compositor->CreateVisual()) {
+    : compositor_(compositor), visual_(compositor->CreateVisual()) {
   COM_VERIFY(visual_->SetBitmapInterpolationMode(
       DCOMPOSITION_BITMAP_INTERPOLATION_MODE_LINEAR));
   COM_VERIFY(visual_->SetBorderMode(DCOMPOSITION_BORDER_MODE_SOFT));
@@ -33,41 +38,28 @@ Layer::~Layer() {
   visual_->RemoveAllVisuals();
 }
 
-void Layer::AppendChild(Layer* new_child) {
-  child_layers_.push_back(new_child);
-  COM_VERIFY(visual_->AddVisual(new_child->visual_, true, nullptr));
+void Layer::AppendChildLayer(Layer* new_child_layer) {
+  child_layers_.push_back(new_child_layer);
+  auto const is_insert_above = true;
+  auto const ref_visual = static_cast<IDCompositionVisual*>(nullptr);
+  COM_VERIFY(visual_->AddVisual(new_child_layer->visual_, is_insert_above,
+                                ref_visual));
+  compositor_->NeedCommit();
 }
 
-void Layer::DidActive() {
-  if (is_active_)
-    return;
-  is_active_ = true;
-  for (auto const child : child_layers_) {
-    child->DidActive();
-  }
+gfx::Canvas* Layer::CreateCanvas() {
+  DCHECK(!bounds_.empty());
+  auto canvas = new gfx::CanvasForLayer(this);
+  COM_VERIFY(visual_->SetContent(canvas->swap_chain()->swap_chain()));
+  return canvas;
 }
 
 void Layer::DidChangeBounds() {
-}
-
-void Layer::DidInactive() {
-  if (!is_active_)
-    return;
-  is_active_ = false;
-  for (auto const child : child_layers_) {
-    child->DidInactive();
-  }
-}
-
-bool Layer::DoAnimate(base::TimeTicks tick_count) {
-  auto animated = false;
-  for (auto const child : child_layers_) {
-    animated |= child->DoAnimate(tick_count);
-  }
-  return animated;
+  compositor_->NeedCommit();
 }
 
 void Layer::SetBounds(const gfx::RectF& new_bounds) {
+  DCHECK(!new_bounds.empty());
   auto changed = false;
   if (bounds_.left != new_bounds.left) {
     COM_VERIFY(visual_->SetOffsetX(new_bounds.left));
@@ -89,6 +81,33 @@ void Layer::SetBounds(const gfx::RectF& new_bounds) {
     return;
 
   DidChangeBounds();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// HwndLayer
+//
+HwndLayer::HwndLayer(Compositor* compositor, HWND hwnd)
+    : Layer(compositor) {
+  ::SetLastError(0);
+  ::SetWindowLong(hwnd, GWL_EXSTYLE,
+                  ::GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+  if (auto const last_error = ::GetLastError()) {
+    DVLOG(ERROR) << "SetWindowLong GWL_EXSTYLE err=" << last_error;
+    NOTREACHED();
+  }
+  DVLOG(0) << "ex_style=0x" << std::hex << ::GetWindowLong(hwnd, GWL_EXSTYLE);
+  //DCHECK(::GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_LAYERED);
+  common::ComPtr<IUnknown> surface;
+  COM_VERIFY(compositor->device()->CreateSurfaceFromHwnd(hwnd, &surface));
+  visual()->SetContent(surface);
+  RECT bounds;
+  ::GetClientRect(hwnd, &bounds);
+  visual()->SetOffsetX(static_cast<float>(bounds.left));
+  visual()->SetOffsetY(static_cast<float>(bounds.top));
+}
+
+HwndLayer::~HwndLayer() {
 }
 
 }  // namespace ui

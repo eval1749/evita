@@ -14,8 +14,16 @@ MessageView::MessageView() : status_bar_(new ui::StatusBar()) {
 MessageView::~MessageView() {
 }
 
+const Rect& MessageView::bounds() const {
+  return status_bar_->bounds();
+}
+
 int MessageView::height() const {
   return status_bar_->height();
+}
+
+HWND MessageView::hwnd() const {
+  return status_bar_->hwnd();
 }
 
 void MessageView::Realize(HWND hwnd_parent) {
@@ -53,7 +61,8 @@ void MessageView::SetStatus(const std::vector<base::string16>& texts) {
     status_text_ = texts[0];
     message_text_.clear();
   }
-  status_bar_->Set(status_bar_texts_);
+  if (hwnd())
+    status_bar_->Set(status_bar_texts_);
 }
 
 }  // namespace views

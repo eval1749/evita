@@ -16,6 +16,8 @@ namespace {
 
 common::ComPtr<IDXGISwapChain2> CreateSwapChain(DxDevice* device,
                                                 const D2D1_SIZE_U& size) {
+  DCHECK_GT(size.width, 0u);
+  DCHECK_GT(size.height, 0u);
   DXGI_SWAP_CHAIN_DESC1 swap_chain_desc = {0};
   swap_chain_desc.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
   swap_chain_desc.Width = size.width;
@@ -150,13 +152,20 @@ void SwapChain::Present() {
     DVLOG(0) << "SwapChain::Present: no dirty rects";
     return;
   }
-  DXGI_PRESENT_PARAMETERS parameters = {0};
+#if 0
+  DXGI_PRESENT_PARAMETERS parameters = { 0 };
   parameters.DirtyRectsCount = dirty_rects_.size();
   parameters.pDirtyRects = dirty_rects_.data();
   parameters.pScrollRect = nullptr;
   parameters.pScrollOffset = nullptr;
+  DCHECK(IsReady());
   auto const flags = DXGI_PRESENT_DO_NOT_WAIT;
   COM_VERIFY(swap_chain_->Present1(0, flags, &parameters));
+#else
+  IsReady();
+  DXGI_PRESENT_PARAMETERS parameters = { 0 };
+  COM_VERIFY(swap_chain_->Present1(1, 0, &parameters));
+#endif
   dirty_rects_.clear();
   is_ready_ = false;
 }

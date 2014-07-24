@@ -27,8 +27,11 @@
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/gfx_base.h"
+#include "evita/gfx/dx_device.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/ui/compositor/compositor.h"
+#include "evita/ui/compositor/layer.h"
 #include "evita/views/content_window.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/frame_observer.h"
@@ -463,10 +466,6 @@ void Frame::CreateNativeWindow() const {
     | WS_CLIPCHILDREN
     | WS_VISIBLE;
 
-  CompositionState::Update();
-  if (CompositionState::IsEnabled())
-    dwStyle |= WS_EX_COMPOSITED | WS_EX_LAYERED;
-
   const auto& font = *views::rendering::FontSet::GetFont(*css::Style::Default(),
                                                          'x');
   gfx::SizeF size(font.GetCharWidth('M') * cColumns,
@@ -492,19 +491,42 @@ void Frame::DidCreateNativeWindow() {
   message_view_->Realize(*native_window());
   title_bar_->Realize(*native_window());
 
-  CompositionState::Update(*native_window());
-  canvas_.reset(new gfx::CanvasForHwnd(*native_window()));
+  auto const pane_rect = GetPaneRect();
 
-  // TODO(yosi) How do we detemine height of TabStrip?
+  // Layer
+  dx_device_.reset(new gfx::DxDevice());
+  compositor_.reset(new ui::Compositor(dx_device_.get(), AssociatedHwnd()));
+  compositor_->layer()->SetBounds(gfx::RectF(100, 100, 500, 300));
+
+  pane_layer_.reset(new ui::Layer(compositor_.get()));
+  compositor_->layer()->AppendChildLayer(pane_layer_.get());
+  pane_layer_->SetBounds(gfx::RectF(gfx::PointF(0, 0),
+                                    gfx::SizeF(pane_rect.width(),
+                                               pane_rect.height())));
+
+  // Canvas
+  //CompositionState::Update(*native_window());
+  canvas_.reset(pane_layer_->CreateCanvas());
+
+  // TODO(yosi) How do we determine height of TabStrip?
   m_cyTabBand = tab_strip_->GetPreferreSize().cy;
   tab_strip_->SetBounds(Rect(0, 0, bounds().width(), m_cyTabBand));
 
-  auto const pane_rect = GetPaneRect();
   for (auto& pane: m_oPanes) {
     pane.SetBounds(pane_rect);
   }
 
   views::Window::DidCreateNativeWindow();
+
+#if 0
+  message_view_layer_.reset(new ui::HwndLayer(
+      compositor_.get(), message_view_->hwnd()));
+  compositor_->layer()->AppendChildLayer(message_view_layer_.get());
+
+  tab_strip_layer_.reset(new ui::HwndLayer(
+    compositor_.get(), tab_strip_->AssociatedHwnd()));
+  compositor_->layer()->AppendChildLayer(tab_strip_layer_.get());
+#endif
 
   tab_strip_->SetIconList(views::IconCache::instance()->image_list());
 
@@ -518,6 +540,8 @@ void Frame::DidCreateNativeWindow() {
   ::SetWindowPos(AssociatedHwnd(), nullptr, 0, 0, 0, 0,
                  SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER |
                  SWP_NOREDRAW | SWP_NOSIZE | SWP_FRAMECHANGED);
+
+  compositor_->Commit();
 }
 
 void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
@@ -531,15 +555,22 @@ void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
 }
 
 void Frame::DidChangeBounds() {
+  compositor_->NeedCommit();
+
   views::Window::DidChangeBounds();
   {
-    auto tab_strip_rect = bounds();
-    tab_strip_rect.bottom = tab_strip_rect.top + m_cyTabBand;
-    tab_strip_->SetBounds(tab_strip_rect);
+    auto tab_strip_bounds = bounds();
+    tab_strip_bounds.bottom = tab_strip_bounds.top + m_cyTabBand;
+    tab_strip_->SetBounds(tab_strip_bounds);
   }
 
+  if (tab_strip_layer_)
+    tab_strip_layer_->SetBounds(gfx::RectF(tab_strip_->bounds()));
+  if (message_view_layer_)
+    message_view_layer_->SetBounds(gfx::RectF(message_view_->bounds()));
+
   // Display resizing information.
-  {
+  if (message_view_->hwnd()) {
     auto status_bar_rect = bounds();
     status_bar_rect.top = bounds().bottom - message_view_->height();
     message_view_->SetBounds(status_bar_rect);
@@ -550,13 +581,35 @@ void Frame::DidChangeBounds() {
   }
 
   {
-    const auto rc = GetPaneRect();
+    const auto pane_bounds = GetPaneRect();
+    pane_layer_->SetBounds(gfx::RectF(100, 100, 300, 400));
     for (auto& pane: m_oPanes) {
-      pane.SetBounds(rc);
+      pane.SetBounds(pane_bounds);
     }
   }
-  canvas_->SetBounds(bounds());
+  canvas_->SetBounds(gfx::Rect(0, 0, 200, 300));
+#if 1
+{
+  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+  canvas_->set_dirty_rect(bounds());
+  (*canvas_)->Clear(gfx::ColorF(1, 1, 0, 0.5));
+}
+
+static ui::Layer* test_layer;
+static gfx::Canvas* test_canvas;
+if (!test_layer) {
+  test_layer = new ui::Layer(compositor_.get());
+  test_layer->SetBounds(gfx::RectF(300, 300, 400, 400));
+  compositor_->layer()->AppendChildLayer(test_layer);
+  test_canvas = test_layer->CreateCanvas();
+  gfx::Canvas::DrawingScope drawing_scope(test_canvas);
+  test_canvas->set_dirty_rect(bounds());
+  (*test_canvas)->Clear(gfx::ColorF(1, 0, 0, 0.5));
+}
+#else
   DrawForResize();
+#endif
+  compositor_->Commit();
 }
 
 void Frame::DidSetFocus(ui::Widget* widget) {
@@ -582,7 +635,8 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
         margins.cxLeftWidth = 0;
         margins.cxRightWidth = 0;
         margins.cyBottomHeight = 0;
-        margins.cyTopHeight = CompositionState::IsEnabled() ? m_cyTabBand : 0;
+        //margins.cyTopHeight = CompositionState::IsEnabled() ? m_cyTabBand : 0;
+        margins.cyTopHeight = -1;
         auto const hr = ::DwmExtendFrameIntoClientArea(*native_window(),
                                                        &margins);
         if (FAILED(hr)) {
@@ -630,37 +684,45 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       return 0;
     }
 
-    case WM_NCHITTEST:
-      if (CompositionState::IsEnabled()) {
-        LRESULT lResult;
-        if (::DwmDefWindowProc(*native_window(), uMsg, wParam, lParam, &lResult))
-          return lResult;
+    case WM_NCHITTEST: {
+      LRESULT lResult;
+      if (::DwmDefWindowProc(*native_window(), uMsg, wParam, lParam, &lResult))
+        return lResult;
 
-        POINT const ptMouse = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
-        RECT rcWindow;
-        ::GetWindowRect(*native_window(), &rcWindow);
+      POINT const ptMouse = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
+      RECT rcWindow;
+      ::GetWindowRect(*native_window(), &rcWindow);
 
-        RECT rcClient = {0};
-        ::AdjustWindowRectEx(
-            &rcClient,
-            static_cast<DWORD>(
-                ::GetWindowLong(*native_window(), GWL_STYLE)),
-            false,
-            static_cast<DWORD>(
-                ::GetWindowLong(*native_window(), GWL_EXSTYLE)));
+      RECT rcClient = {0};
+      ::AdjustWindowRectEx(
+          &rcClient,
+          static_cast<DWORD>(
+              ::GetWindowLong(*native_window(), GWL_STYLE)),
+          false,
+          static_cast<DWORD>(
+              ::GetWindowLong(*native_window(), GWL_EXSTYLE)));
 
-        if (ptMouse.y >= rcWindow.top
-            && ptMouse.y < rcWindow.top + m_cyTabBand) {
-          return HTCAPTION;
-        }
+      if (ptMouse.y >= rcWindow.top
+          && ptMouse.y < rcWindow.top + m_cyTabBand) {
+        return HTCAPTION;
       }
       break;
+    }
   }
 
   return Widget::OnMessage(uMsg, wParam, lParam);
 }
 
 void Frame::OnPaint(const gfx::Rect rect) {
+  {
+    // Fill window client area with alpha=0.
+    PAINTSTRUCT ps;
+    auto const hdc = ::BeginPaint(AssociatedHwnd(), &ps);
+    ::FillRect(hdc, &ps.rcPaint,
+               static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH)));
+    ::EndPaint(AssociatedHwnd(), &ps);
+  }
+
   if (!editor::DomLock::instance()->locked()) {
     UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
     if (lock_scope.locked()) {
@@ -755,6 +817,7 @@ void Frame::OnDropTab(LPARAM lParam) {
 }
 
 // views::Window
+#if 1
 bool Frame::OnIdle(int const hint) {
   DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
   static bool busy;
@@ -790,3 +853,11 @@ bool Frame::OnIdle(int const hint) {
   }
   return more;
 }
+#else
+bool Frame::OnIdle(int) {
+  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+  canvas_->set_dirty_rect(bounds());
+  (*canvas_)->Clear(gfx::ColorF(1, 1, 0, 0.5));
+  return false;
+}
+#endif

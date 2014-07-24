@@ -1310,7 +1310,8 @@ void TabStrip::SetTab(int tab_index, const TCITEM* tab_data) {
 // ui::Widget
 void TabStrip::CreateNativeWindow() const {
   native_window()->CreateWindowEx(
-      0, WS_CHILD | WS_VISIBLE, L"TabStrip", parent_node()->AssociatedHwnd(),
+      0, WS_CHILD | WS_VISIBLE, L"TabStrip",
+      parent_node()->AssociatedHwnd(),
       bounds().origin(),
       bounds().size());
 }

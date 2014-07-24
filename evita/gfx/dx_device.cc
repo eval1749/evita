@@ -39,8 +39,6 @@ DxDevice::DxDevice() {
 
   common::ComPtr<IDXGIAdapter> dxgi_adapter;
   dxgi_device_->GetAdapter(&dxgi_adapter);
-
-  common::ComPtr<IDXGIFactory2> dxgi_factory;
   dxgi_adapter->GetParent(IID_PPV_ARGS(&dxgi_factory_));
 
   // Create d2d device

@@ -8,11 +8,14 @@
 #include <vector>
 
 #include "base/basictypes.h"
-#include "base/time/time.h"
 #include "common/win/scoped_comptr.h"
 #include "evita/gfx/rect_f.h"
 
 interface IDCompositionVisual2;
+
+namespace gfx {
+class Canvas;
+}
 
 namespace ui {
 
@@ -22,7 +25,6 @@ class Layer  {
   private: gfx::RectF bounds_;
   private: std::vector<Layer*> child_layers_;
   private: Compositor* compositor_;
-  private: bool is_active_;
   private: common::ComPtr<IDCompositionVisual2> visual_;
 
   public: Layer(Compositor* compositor);
@@ -32,17 +34,21 @@ class Layer  {
   public: operator IDCompositionVisual2*() const { return visual_; }
 
   public: const gfx::RectF& bounds() const { return bounds_; }
-  protected: bool is_active() const { return is_active_; }
   public: IDCompositionVisual2* visual() const { return visual_; }
 
-  public: void AppendChild(Layer* new_child);
-  public: virtual void DidActive();
+  public: void AppendChildLayer(Layer* new_child);
+  public: gfx::Canvas* CreateCanvas();
   protected: virtual void DidChangeBounds();
-  public: virtual void DidInactive();
-  public: virtual bool DoAnimate(base::TimeTicks tick_count);
   public: void SetBounds(const gfx::RectF& new_bounds);
 
   DISALLOW_COPY_AND_ASSIGN(Layer);
+};
+
+class HwndLayer : public Layer {
+  public: HwndLayer(Compositor* compositor, HWND hwnd);
+  public: virtual ~HwndLayer();
+
+  DISALLOW_COPY_AND_ASSIGN(HwndLayer);
 };
 
 } // namespace ui

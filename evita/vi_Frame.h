@@ -23,11 +23,17 @@
 
 namespace gfx {
 class Canvas;
+class DxDevice;
 using common::win::Rect;
 }
 
+namespace ui {
+class Compositor;
+class Layer;
+}
+
 /// <summary>
-///   Sevirity of message.
+///   Severity of message.
 /// </summary>
 enum MessageLevel {
   MessageLevel_Information,
@@ -57,7 +63,12 @@ class Frame final : public views::Window,
   private: typedef ui::Widget Widget;
   private: typedef ChildList_<Frame, Pane> Panes;
 
+  private: std::unique_ptr<ui::Compositor> compositor_;
   private: std::unique_ptr<gfx::Canvas> canvas_;
+  private: std::unique_ptr<gfx::DxDevice> dx_device_;
+  private: std::unique_ptr<ui::Layer> message_view_layer_;
+  private: std::unique_ptr<ui::Layer> pane_layer_;
+  private: std::unique_ptr<ui::Layer> tab_strip_layer_;
   private: int m_cyTabBand;
   private: Panes m_oPanes;
   private: std::unique_ptr<views::MessageView> message_view_;

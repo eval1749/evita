@@ -28,10 +28,13 @@ class MessageView {
   public: MessageView();
   public: ~MessageView();
 
+  public: const Rect& bounds() const;
+  // TODO(eval1749) We should get rid of |MessageView::height()|.
   public: int height() const;
+  public: HWND hwnd() const;
 
   public: void Realize(HWND hwnd_parent);
-  public: void SetBounds(const Rect& rect);
+  public: void SetBounds(const Rect& bounds);
   public: void SetMessage(const base::string16& text);
   public: void SetStatus(const std::vector<base::string16>& texts);
 

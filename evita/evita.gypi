@@ -245,6 +245,8 @@
         'ui/events/event_ostream.cc',
         'ui/events/mouse_click_tracker.cc',
 
+        'ui/compositor/canvas_for_layer.cc',
+        'ui/compositor/canvas_for_layer.h',
         'ui/compositor/compositor.cc',
         'ui/compositor/compositor.h',
         'ui/compositor/layer.cc',

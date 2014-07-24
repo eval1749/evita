@@ -38,8 +38,7 @@ template<class T> class ComPtr {
     other.ptr_ = nullptr;
   }
   public: ~ComPtr() {
-    if (ptr_)
-      ptr_->Release();
+    reset();
   }
   public: operator T*() const { return ptr_; }
   public: explicit operator bool() const { return ptr_; }
@@ -67,18 +66,18 @@ template<class T> class ComPtr {
   }
 
   public: ComPtr& operator=(const ComPtr& other) {
-    ptr_ = other.ptr_;
-    if (ptr_)
-      ptr_->AddRef();
+    reset(other.ptr_);
   }
 
   public: ComPtr& operator=(ComPtr&& other) {
+    if (ptr_)
+      ptr_->Release();
     ptr_ = other.ptr_;
     other.ptr_ = nullptr;
-    if (ptr_)
-      ptr_->AddRef();
     return *this;
   }
+
+  public: ComPtr& operator=(T* ptr) = delete;
 
   public: T* get() const { return ptr_; }
 

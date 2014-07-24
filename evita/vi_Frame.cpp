@@ -517,6 +517,7 @@ void Frame::DidCreateNativeWindow() {
 
   views::Window::DidCreateNativeWindow();
 
+#if 0
   message_view_layer_.reset(new ui::HwndLayer(
       compositor_.get(), message_view_->hwnd()));
   compositor_->layer()->AppendChildLayer(message_view_layer_.get());
@@ -524,6 +525,7 @@ void Frame::DidCreateNativeWindow() {
   tab_strip_layer_.reset(new ui::HwndLayer(
     compositor_.get(), tab_strip_->AssociatedHwnd()));
   compositor_->layer()->AppendChildLayer(tab_strip_layer_.get());
+#endif
 
   tab_strip_->SetIconList(views::IconCache::instance()->image_list());
 

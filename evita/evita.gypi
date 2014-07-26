@@ -154,6 +154,8 @@
         'gfx/dx_device.cc',
         'gfx/dx_device.h',
         'gfx/point_f.cc',
+        'gfx/rect_conversions.cc',
+        'gfx/rect_conversions.h',
         'gfx/rect_f.cc',
         'gfx/size_f.cc',
         'gfx/stroke_style.cc',

@@ -298,7 +298,7 @@ void TextFieldControl::Renderer::RenderSelection(gfx::Canvas* canvas) {
   const auto range_rect = gfx::RectF(
       std::max(metrics.left, view_text_bounds_.left), metrics.top,
       std::min(metrics.left + metrics.width, view_text_bounds_.right),
-      metrics.top + metrics.height) + text_origin;
+      metrics.top + metrics.height).Offset(text_origin.x, text_origin.y);
   canvas->FillRectangle(gfx::Brush(canvas, gfx::ColorF(fill_color, 0.3f)),
                      range_rect);
   RenderCaret(canvas, gfx::RectF(

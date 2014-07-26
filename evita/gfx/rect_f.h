@@ -65,8 +65,6 @@ class Rect_ : public BaseType {
   public: explicit operator bool() const { return !empty(); }
   public: bool operator!() const { return empty(); }
 
-  public: Rect_ operator+(const PointType& size) const;
-  public: Rect_ operator-(const PointType& size) const;
   public: Rect_ operator+(const SizeType& size) const;
   public: Rect_ operator-(const SizeType& size) const;
 
@@ -140,27 +138,13 @@ class Rect_ : public BaseType {
 
   public: bool Contains(PointF point) const;
   public: bool Contains(const Rect_& point) const;
+  public: Rect_ Offset(UnitType offset_x, UnitType offset_y) const;
+  public: Rect_ Offset(const SizeType& size) const;
   public: Rect_ Intersect(const Rect_& other) const;
   public: void Unite(const Rect_& other);
 };
 
 // Rect_ inline functions
-
-template<typename BaseType, typename PointType, typename SizeType>
-Rect_<BaseType, PointType, SizeType>
-    Rect_<BaseType, PointType, SizeType>::operator+(
-        const PointType& point) const {
-  return Rect_(left + point.x, top + point.y,
-               right + point.x, bottom + point.y);
-}
-
-template<typename BaseType, typename PointType, typename SizeType>
-Rect_<BaseType, PointType, SizeType>
-    Rect_<BaseType, PointType, SizeType>::operator-(
-        const PointType& point) const {
-  return Rect_(left + point.x, top + point.y,
-               right + point.x, bottom + point.y);
-}
 
 template<typename BaseType, typename PointType, typename SizeType>
 Rect_<BaseType, PointType, SizeType>
@@ -217,10 +201,24 @@ bool Rect_<BaseType, PointType, SizeType>::Contains(const Rect_& other) const {
 template<typename BaseType, typename PointType, typename SizeType>
 Rect_<BaseType, PointType, SizeType>
 Rect_<BaseType, PointType, SizeType>::Intersect(const Rect_& other) const {
-  return gfx::RectF(std::max(left, other.left),
+  return Rect_(std::max(left, other.left),
                     std::max(top, other.top),
                     std::min(right, other.right),
                     std::min(bottom, other.bottom));
+}
+
+template<typename BaseType, typename PointType, typename SizeType>
+Rect_<BaseType, PointType, SizeType>
+Rect_<BaseType, PointType, SizeType>::Offset(const SizeType& size) const {
+  return Rect_(left + size.width, top + size.height,
+               right + size.width, bottom + size.height);
+}
+
+template<typename BaseType, typename PointType, typename SizeType>
+Rect_<BaseType, PointType, SizeType>
+Rect_<BaseType, PointType, SizeType>::Offset(
+    UnitType width, UnitType height) const {
+  return Offset(SizeType(width, height));
 }
 
 template<typename BaseType, typename PointType, typename SizeType>

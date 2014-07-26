@@ -50,6 +50,7 @@ struct COMMON_EXPORT Rect : RECT {
   bool empty() const { return width() <= 0 || height() <= 0; }
   int height() const { return bottom - top; }
   Point origin() const { return Point(left, top); }
+  void set_origin(const Point& new_origin);
   int width() const { return right - left; }
   Size size() const { return Size(width(), height()); }
 
@@ -87,6 +88,15 @@ inline bool Rect::operator>(const Rect& other) const {
 
 inline bool Rect::operator>=(const Rect& other) const {
   return area() >= other.area();
+}
+
+inline void Rect::set_origin(const Point& new_origin) {
+  auto const width = this->width();
+  auto const height = this->height();
+  left = new_origin.x;
+  top = new_origin.y;
+  right = left + width;
+  bottom = top + height;
 }
 
 #define DEBUG_RECT_FORMAT "(%d,%d)+%dx%d"

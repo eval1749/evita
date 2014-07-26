@@ -37,7 +37,6 @@ struct EditPane::HitTestResult {
     HSplitterBig,
     VScrollBar,
     VSplitter,
-    VSplitterBig,
     Window,
   };
 
@@ -73,7 +72,6 @@ class EditPane::Box : public DoubleLinkedNode_<EditPane::Box>,
     public: void set_outer(LayoutBox& outer) { outer_ = &outer; }
     public: virtual uint CountLeafBox() const = 0;
     public: virtual void Destroy() = 0;
-    public: virtual void DrawSplitters(gfx::Canvas*) { }
     public: virtual LeafBox* FindLeafBoxFromWidget(
         const Widget&) const = 0;
     public: virtual LeafBox* GetActiveLeafBox() const = 0;
@@ -121,9 +119,6 @@ class EditPane::LayoutBox : public EditPane::Box {
                              int new_box_size) = 0;
   public: virtual void StopSplitter(const gfx::Point&, Box&) = 0;
 
-  // [U]
-  public: void UpdateSplitters();
-
   DISALLOW_COPY_AND_ASSIGN(LayoutBox);
 };
 
@@ -143,7 +138,6 @@ class EditPane::LeafBox final : public EditPane::Box {
   // [D]
   public: virtual void Destroy() override;
   public: void DetachWindow();
-  private: virtual void DrawSplitters(gfx::Canvas*) override;
 
   public: void EnsureInHorizontalLayoutBox();
   public: void EnsureInVerticalLayoutBox();
@@ -178,7 +172,6 @@ class EditPane::HorizontalLayoutBox final : public EditPane::LayoutBox {
   public: virtual ~HorizontalLayoutBox();
   protected: virtual void DidRemoveBox(Box*, Box*, const gfx::Rect&) override;
   public: virtual HitTestResult HitTest(Point) const override;
-  public: virtual void DrawSplitters(gfx::Canvas*) override;
   public: virtual bool IsVerticalLayoutBox() const override;
   public: virtual void MoveSplitter(const gfx::Point&, Box&) override;
   public: virtual void Realize(EditPane*, const gfx::Rect&) override;
@@ -194,7 +187,6 @@ class EditPane::VerticalLayoutBox final : public LayoutBox {
   public: virtual ~VerticalLayoutBox();
   protected: virtual void DidRemoveBox(Box*, Box*, const gfx::Rect&) override;
   public: virtual HitTestResult HitTest(Point) const override;
-  public: virtual void DrawSplitters(gfx::Canvas*) override;
   public: virtual bool IsVerticalLayoutBox() const override;
   public: virtual void MoveSplitter(const gfx::Point&, Box&) override;
   public: virtual void Realize(EditPane*, const gfx::Rect&) override;
@@ -228,12 +220,6 @@ class StockCursor {
   }
   DISALLOW_COPY_AND_ASSIGN(StockCursor);
 };
-
-void DrawSplitter(gfx::Canvas* canvas, RECT* prc, uint /*grfFlag*/) {
-  gfx::Brush fillBrush(canvas, gfx::ColorF(gfx::ColorF::Pink));
-  canvas->FillRectangle(fillBrush, *prc);
-  canvas->set_dirty_rect(*prc);
-}
 
 } // namespace
 
@@ -299,23 +285,6 @@ void EditPane::HorizontalLayoutBox::DidRemoveBox(
   }
 }
 
-void EditPane::HorizontalLayoutBox::DrawSplitters(gfx::Canvas* canvas) {
-  if (boxes_.GetFirst() == boxes_.GetLast()) {
-    return;
-  }
-
-  auto rc = bounds();
-  foreach (BoxList::Enum, it, boxes_) {
-    auto const box = it.Get();
-    box->DrawSplitters(canvas);
-    if (auto const right_box = box->GetPrev()) {
-      rc.left = right_box->bounds().right;
-      rc.right = box->bounds().left;
-      DrawSplitter(canvas, &rc, BF_LEFT | BF_RIGHT);
-    }
-  }
-}
-
 EditPane::HitTestResult EditPane::HorizontalLayoutBox::HitTest(
     Point pt) const {
   if (!::PtInRect(&bounds(), pt)) {
@@ -364,7 +333,7 @@ void EditPane::HorizontalLayoutBox::MoveSplitter(
     right_box.SetBounds(right_box.bounds());
   }
 
-  UpdateSplitters();
+  //UpdateSplitters();
 }
 
 void EditPane::HorizontalLayoutBox::Realize(
@@ -509,12 +478,12 @@ void EditPane::HorizontalLayoutBox::StopSplitter(
     below_box.bounds().left = above_box.bounds().left;
     above_box.Destroy();
     below_box.SetBounds(below_box.bounds());
-    UpdateSplitters();
+    //UpdateSplitters();
   } else if (below_box.bounds().right - pt.x < k_cxMinBox) {
     above_box.bounds().right = below_box.bounds().right;
     below_box.Destroy();
     above_box.SetBounds(above_box.bounds());
-    UpdateSplitters();
+    //UpdateSplitters();
   }
 }
 
@@ -650,15 +619,6 @@ void EditPane::LayoutBox::Replace(Box& new_box, Box& old_box) {
   old_box.Release();
 }
 
-void EditPane::LayoutBox::UpdateSplitters() {
-  if (is_removed() || !edit_pane_->is_shown())
-    return;
-  auto const canvas = edit_pane_->frame().canvas();
-  gfx::Canvas::DrawingScope drawing_scope(canvas);
-  UI_DOM_AUTO_LOCK_SCOPE();
-  DrawSplitters(canvas);
-}
-
 // HitTestResult
 EditPane::Window* EditPane::HitTestResult::window() const {
   return static_cast<LeafBox*>(box)->GetWindow();
@@ -680,14 +640,9 @@ void EditPane::LeafBox::DetachWindow() {
   m_pWindow = nullptr;
 }
 
-void EditPane::LeafBox::DrawSplitters(gfx::Canvas* canvas) {
-  m_pWindow->OnDraw(canvas);
-}
-
 void EditPane::LeafBox::EnsureInHorizontalLayoutBox() {
-  if (!outer()->IsVerticalLayoutBox()) {
+  if (!outer()->IsVerticalLayoutBox())
     return;
-  }
 
   auto& layout_box = *new HorizontalLayoutBox(edit_pane_, outer());
   scoped_refptr<LeafBox> protect(this);
@@ -698,9 +653,8 @@ void EditPane::LeafBox::EnsureInHorizontalLayoutBox() {
 }
 
 void EditPane::LeafBox::EnsureInVerticalLayoutBox() {
-  if (outer()->IsVerticalLayoutBox()) {
+  if (outer()->IsVerticalLayoutBox())
     return;
-  }
 
   auto& layout_box = *new VerticalLayoutBox(edit_pane_, outer());
   scoped_refptr<LeafBox> protect(this);
@@ -730,9 +684,6 @@ EditPane::HitTestResult EditPane::LeafBox::HitTest(Point pt) const {
   auto const cxVScroll = ::GetSystemMetrics(SM_CXVSCROLL);
   if (pt.x < bounds().right - cxVScroll)
     return HitTestResult(HitTestResult::Window, *this);
-
-  if (!HasSibling() && pt.y < bounds().top + k_cySplitterBig)
-    return HitTestResult(HitTestResult::VSplitterBig, *this);
 
   return HitTestResult();
 }
@@ -791,29 +742,6 @@ void EditPane::VerticalLayoutBox::DidRemoveBox(
   }
 }
 
-void EditPane::VerticalLayoutBox::DrawSplitters(gfx::Canvas* canvas) {
-  auto rc = bounds();
-
-  if (boxes_.GetFirst() == boxes_.GetLast()) {
-    auto const cxVScroll = ::GetSystemMetrics(SM_CXVSCROLL);
-    rc.left = rc.right - cxVScroll;
-    rc.bottom = rc.top + k_cySplitterBig;
-    DrawSplitter(canvas, &rc, BF_RECT);
-    boxes_.GetFirst()->DrawSplitters(canvas);
-    return;
-  }
-
-  foreach (BoxList::Enum, it, boxes_) {
-    auto const box = it.Get();
-    box->DrawSplitters(canvas);
-    if (auto const above_box = box->GetPrev()) {
-      rc.top = above_box->bounds().bottom;
-      rc.bottom = box->bounds().top;
-      DrawSplitter(canvas, &rc, BF_TOP | BF_BOTTOM);
-    }
-  }
-}
-
 EditPane::HitTestResult EditPane::VerticalLayoutBox::HitTest(
     Point pt) const {
   if (!::PtInRect(&bounds(), pt)) {
@@ -864,7 +792,7 @@ void EditPane::VerticalLayoutBox::MoveSplitter(
     pBelow->SetBounds(pBelow->bounds());
   }
 
-  UpdateSplitters();
+  //UpdateSplitters();
 }
 
 void EditPane::VerticalLayoutBox::Realize(
@@ -1009,12 +937,12 @@ void EditPane::VerticalLayoutBox::StopSplitter(
     below_box.bounds().top = above_box.bounds().top;
     above_box.Destroy();
     below_box.SetBounds(below_box.bounds());
-    UpdateSplitters();
+    //UpdateSplitters();
   } else if (below_box.bounds().bottom - pt.y < k_cyMinBox) {
     above_box.bounds().bottom = below_box.bounds().bottom;
     below_box.Destroy();
     above_box.SetBounds(above_box.bounds());
-    UpdateSplitters();
+    //UpdateSplitters();
   }
 }
 
@@ -1116,10 +1044,12 @@ void EditPane::Activate() {
 
 void EditPane::DidRealize() {
   m_eState = State_Realized;
-  root_box_->Realize(this, bounds());
+  Pane::DidRealize();
+  //root_box_->Realize(this, bounds());
 }
 
 void EditPane::DidRealizeChildWidget(const Widget& window) {
+  Pane::DidRealizeChildWidget(window);
   auto const box = root_box_->FindLeafBoxFromWidget(window);
   if (!box)
     return;
@@ -1173,8 +1103,7 @@ HCURSOR EditPane::GetCursorAt(const gfx::Point& point) const {
       return hsplit_cursor;
     }
 
-    case HitTestResult::VSplitter:
-    case HitTestResult::VSplitterBig: {
+    case HitTestResult::VSplitter: {
       DEFINE_STATIC_LOCAL(StockCursor, vsplit_cursor, (IDC_VSPLIT));
       return vsplit_cursor;
     }
@@ -1207,8 +1136,7 @@ views::Window* EditPane::GetWindow() const {
   return GetActiveWindow();
 }
 
-void EditPane::OnDraw(gfx::Canvas* canvas) {
-  root_box_->DrawSplitters(canvas);
+void EditPane::OnDraw(gfx::Canvas*) {
 }
 
 void EditPane::OnMouseReleased(const ui::MouseEvent& event) {
@@ -1228,9 +1156,6 @@ void EditPane::OnMousePressed(const ui::MouseEvent& event) {
   if (result.type == HitTestResult::HSplitter ||
       result.type == HitTestResult::VSplitter) {
     splitter_controller_->Start(SplitterController::State_Drag,
-                                *result.box);
-  } else if (result.type == HitTestResult::VSplitterBig) {
-    splitter_controller_->Start(SplitterController::State_DragSingle,
                                 *result.box);
   }
 }

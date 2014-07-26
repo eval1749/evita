@@ -57,7 +57,7 @@ class TextLine final {
   public: float GetWidth() const { return bounds_.width(); }
   public: uint Hash() const;
   public: gfx::RectF HitTestTextPosition(Posn lPosn) const;
-  public: Posn MapXToPosn(gfx::Canvas* canvas, float x) const;
+  public: Posn MapXToPosn(float x) const;
   public: void Render(gfx::Canvas* canvas) const;
 };
 

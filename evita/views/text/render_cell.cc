@@ -26,10 +26,6 @@ inline void FillRect(gfx::Canvas* canvas, const gfx::RectF& rect,
   canvas->FillRectangle(fill_brush, rect);
 }
 
-float FloorWidthToPixel(gfx::Canvas* canvas, float width) {
-  return canvas->FloorToPixel(gfx::SizeF(width, 0.0f)).width;
-}
-
 } // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -99,7 +95,7 @@ gfx::RectF Cell::HitTestTextPosition(Posn) const {
   return gfx::RectF();
 }
 
-Posn Cell::MapXToPosn(gfx::Canvas*, float) const {
+Posn Cell::MapXToPosn(float) const {
   return -1;
 }
 
@@ -233,7 +229,7 @@ gfx::RectF MarkerCell::HitTestTextPosition(Posn lPosn) const {
   return gfx::RectF(gfx::PointF(0.0f, top()), gfx::SizeF(width(), height()));
 }
 
-Posn MarkerCell::MapXToPosn(gfx::Canvas*, float) const {
+Posn MarkerCell::MapXToPosn(float) const {
   return start_;
 }
 
@@ -354,12 +350,11 @@ gfx::RectF TextCell::HitTestTextPosition(Posn offset) const {
                     gfx::SizeF(1.0f, height()));
 }
 
-Posn TextCell::MapXToPosn(gfx::Canvas* canvas, float x) const {
+Posn TextCell::MapXToPosn(float x) const {
   if (x >= width())
     return end_;
   for (auto k = 1u; k <= characters_.length(); ++k) {
-    auto const cx = FloorWidthToPixel(canvas,
-      style().font().GetTextWidth(characters_.data(), k));
+    auto const cx = style().font().GetTextWidth(characters_.data(), k);
     if (x < cx)
       return static_cast<Posn>(start_ + k - 1);
   }

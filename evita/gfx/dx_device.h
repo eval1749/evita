@@ -6,6 +6,7 @@
 #define INCLUDE_evita_gfx_dx_device_h
 
 #include "base/basictypes.h"
+#include "common/memory/singleton.h"
 #include "common/win/scoped_comptr.h"
 
 interface ID2D1Device;
@@ -18,13 +19,16 @@ namespace gfx {
 //
 // DxDevice
 //
-class DxDevice {
+class DxDevice : public common::Singleton<DxDevice> {
+  DECLARE_SINGLETON_CLASS(DxDevice);
+
   private: common::ComPtr<ID2D1Device> d2d_device_;
   private: common::ComPtr<IDXGIDevice3> dxgi_device_;
   private: common::ComPtr<IDXGIFactory2> dxgi_factory_;
 
-  public: DxDevice();
-  public: ~DxDevice();
+  private: DxDevice();
+  // TODO(eval1749) We should destruct DxDevice by Singleton destructor.
+  public: virtual ~DxDevice();
 
   public: ID2D1Device* d2d_device() const { return d2d_device_; }
   public: IDXGIDevice3* dxgi_device() const { return dxgi_device_; }

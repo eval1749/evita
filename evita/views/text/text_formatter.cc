@@ -176,12 +176,12 @@ RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
 //
 // TextFormatter
 //
-TextFormatter::TextFormatter(TextBlock* text_block, Posn lStart, float zoom)
+TextFormatter::TextFormatter(TextBlock* text_block, text::Posn text_offset)
     : default_render_style_(GetRenderStyle(GetDefaultStyle(text_block))),
       default_style_(GetDefaultStyle(text_block)),
       text_block_(text_block),
-      text_scanner_(new TextScanner(text_block->text_buffer(), lStart)),
-      zoom_(zoom) {
+      text_scanner_(new TextScanner(text_block->text_buffer(), text_offset)),
+      zoom_(text_block->zoom()) {
   DCHECK(!text_block_->bounds().empty());
   DCHECK_GT(zoom_, 0.0f);
 }

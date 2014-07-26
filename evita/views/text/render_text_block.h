@@ -18,13 +18,14 @@ class RenderStyle;
 class TextLine;
 
 class TextBlock final : public text::BufferMutationObserver {
+  private: gfx::RectF bounds_;
   private: RenderStyle default_style_;
   private: bool dirty_;
   private: bool dirty_line_point_;
   private: float m_cy;
   private: std::list<TextLine*> lines_;
-  private: gfx::RectF bounds_;
   private: text::Buffer* const text_buffer_;
+  private: float zoom_;
 
   public: TextBlock(text::Buffer* buffer);
   public: virtual ~TextBlock();
@@ -43,6 +44,7 @@ class TextBlock final : public text::BufferMutationObserver {
   public: const text::Buffer* text_buffer() const { return text_buffer_; }
   public: float top() const { return bounds_.top; }
   public: float width() const { return bounds_.width(); }
+  public: float zoom() const { return zoom_; }
 
   public: void Append(TextLine*);
   // Returns true if discarded the first line.
@@ -51,6 +53,10 @@ class TextBlock final : public text::BufferMutationObserver {
   public: bool DiscardLastLine();
   public: void EnsureLinePoints();
   public: void Finish();
+  public: void Format(const gfx::RectF& bounds, float zoom,
+                      text::Posn text_offset);
+  public: TextLine* FormatLine(const gfx::RectF& bounds, float zoom,
+                               text::Posn text_offset);
   public: TextLine* GetFirst() const { return lines_.front(); }
   public: float GetHeight() const { return m_cy; }
   public: TextLine* GetLast() const { return lines_.back(); }
@@ -59,7 +65,7 @@ class TextBlock final : public text::BufferMutationObserver {
   public: bool IsShowEndOfDocument() const;
   public: void Prepend(TextLine*);
   public: void Reset();
-  public: void SetBounds(const gfx::RectF& rect);
+  public: bool ShouldFormat(const gfx::RectF& bounds, float zoom) const;
 
   // text::BufferMutationObserver
   private: virtual void DidChangeStyle(Posn offset, size_t length) override;

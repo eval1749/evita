@@ -11,6 +11,7 @@
 
 #include "common/win/rect_ostream.h"
 #include "evita/gfx/bitmap.h"
+#include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/swap_chain.h"
 #include "evita/gfx/text_format.h"
 
@@ -91,18 +92,11 @@ Canvas::Canvas()
 Canvas::~Canvas() {
 }
 
-void Canvas::set_dirty_rect(const Rect& new_dirty_rect) {
+void Canvas::set_dirty_rect(const RectF& new_dirty_rect) {
   AddDirtyRect(new_dirty_rect);
 }
 
-void Canvas::set_dirty_rect(const RectF& new_dirty_rect) {
-  set_dirty_rect(Rect(static_cast<int>(::floor(new_dirty_rect.left)),
-                      static_cast<int>(::floor(new_dirty_rect.top)),
-                      static_cast<int>(::ceil(new_dirty_rect.right)),
-                      static_cast<int>(::ceil(new_dirty_rect.bottom))));
-}
-
-void Canvas::AddDirtyRect(const Rect&) {
+void Canvas::AddDirtyRect(const RectF&) {
 }
 
 void Canvas::AddObserver(Observer* observer) {
@@ -229,10 +223,11 @@ void Canvas::RemoveObserver(Observer* observer) {
 bool Canvas::SaveScreenImage(const RectF& rect) {
   if (!screen_bitmap_)
     screen_bitmap_ = std::make_unique<Bitmap>(this);
-  const RectU source_rect(static_cast<uint32_t>(::floor(rect.left)),
-                          static_cast<uint32_t>(::floor(rect.top)),
-                          static_cast<uint32_t>(::ceil(rect.right)),
-                          static_cast<uint32_t>(::ceil(rect.bottom)));
+  auto const enclosing_rect = ToEnclosingRect(rect);
+  const RectU source_rect(static_cast<uint32_t>(enclosing_rect.left),
+                          static_cast<uint32_t>(enclosing_rect.top),
+                          static_cast<uint32_t>(enclosing_rect.right),
+                          static_cast<uint32_t>(enclosing_rect.bottom));
   const PointU dest_point(source_rect.origin());
   auto const hr = (*screen_bitmap_)->CopyFromRenderTarget(&dest_point,
       GetRenderTarget(), &source_rect);
@@ -241,18 +236,23 @@ bool Canvas::SaveScreenImage(const RectF& rect) {
   return SUCCEEDED(hr);
 }
 
-void Canvas::SetBounds(const Rect& rect) {
-  DCHECK(!rect.empty());
+void Canvas::SetBounds(const RectF& new_bounds) {
+  DCHECK(!new_bounds.empty());
+  DCHECK_EQ(new_bounds.left, 0.0f);
+  DCHECK_EQ(new_bounds.top, 0.0f);
+  if (bounds_ == new_bounds)
+    return;
+  bounds_ = new_bounds;
   screen_bitmap_.reset();
-  DidChangeBounds(SizeU(rect.width(), rect.height()));
+  DidChangeBounds(new_bounds);
 }
 
 //////////////////////////////////////////////////////////////////////
 //
 // CanvasForHwnd
 //
-CanvasForHwnd::CanvasForHwnd(HWND hwnd) : hwnd_(hwnd) {
-  swap_chain_.reset(SwapChain::Create(hwnd_));
+CanvasForHwnd::CanvasForHwnd(HWND hwnd)
+    : hwnd_(hwnd), swap_chain_(SwapChain::CreateForHwnd(hwnd)) {
   DidCreateRenderTarget();
 }
 
@@ -260,7 +260,7 @@ CanvasForHwnd::~CanvasForHwnd() {
 }
 
 // Canvas
-void CanvasForHwnd::AddDirtyRect(const Rect& new_dirty_rect) {
+void CanvasForHwnd::AddDirtyRect(const RectF& new_dirty_rect) {
   swap_chain_->AddDirtyRect(new_dirty_rect);
 }
 
@@ -268,12 +268,12 @@ void CanvasForHwnd::DidCallEndDraw() {
   swap_chain_->Present();
 }
 
-void CanvasForHwnd::DidChangeBounds(const SizeU& size) {
-  swap_chain_->DidChangeBounds(size);
+void CanvasForHwnd::DidChangeBounds(const RectF& new_bounds) {
+  swap_chain_->DidChangeBounds(new_bounds);
 }
 
 void CanvasForHwnd::DidLostRenderTarget() {
-  swap_chain_.reset(SwapChain::Create(hwnd_));
+  swap_chain_.reset(SwapChain::CreateForHwnd(hwnd_));
   DidCreateRenderTarget();
 }
 
@@ -312,8 +312,11 @@ void LegacyCanvasForHwnd::AttachRenderTarget() {
 }
 
 // Canvas
-void LegacyCanvasForHwnd::DidChangeBounds(const SizeU& size) {
-  COM_VERIFY(hwnd_render_target_->Resize(size));
+void LegacyCanvasForHwnd::DidChangeBounds(const RectF& new_bounds) {
+  auto const enclosing_rect = ToEnclosingRect(new_bounds);
+  COM_VERIFY(hwnd_render_target_->Resize(D2D1::SizeU(
+      static_cast<uint32_t>(enclosing_rect.width()),
+      static_cast<uint32_t>(enclosing_rect.height()))));
 }
 
 void LegacyCanvasForHwnd::DidLostRenderTarget() {

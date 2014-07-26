@@ -116,13 +116,13 @@ gfx::RectF TextLine::HitTestTextPosition(Posn offset) const {
   return gfx::RectF();
 }
 
-Posn TextLine::MapXToPosn(gfx::Canvas* canvas, float xGoal) const {
+Posn TextLine::MapXToPosn(float xGoal) const {
   auto xCell = 0.0f;
   auto lPosn = GetEnd() - 1;
   for (const auto cell : cells_) {
     auto const x = xGoal - xCell;
     xCell += cell->width();
-    auto const lMap = cell->MapXToPosn(canvas, x);
+    auto const lMap = cell->MapXToPosn(x);
     if (lMap >= 0)
       lPosn = lMap;
     if (x >= 0 && x < cell->width())

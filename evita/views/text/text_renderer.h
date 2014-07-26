@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "evita/gfx_base.h"
+#include "evita/gfx/canvas.h"
 #include "evita/views/text/render_selection.h"
 
 namespace views {
@@ -25,7 +25,7 @@ namespace rendering {
 //
 // TextRenderer
 //
-class TextRenderer final {
+class TextRenderer final : private gfx::Canvas::Observer {
   private: typedef common::win::Rect Rect;
   private: typedef rendering::Cell Cell;
   public: typedef rendering::ScreenTextBlock ScreenTextBlock;
@@ -87,6 +87,9 @@ class TextRenderer final {
   public: void SetCanvas(gfx::Canvas* canvas);
   public: bool ShouldFormat() const;
   public: bool ShouldRender() const;
+
+  // gfx::Canvas::Observer
+  private: virtual void ShouldDiscardResources() override;
 
   DISALLOW_COPY_AND_ASSIGN(TextRenderer);
 };

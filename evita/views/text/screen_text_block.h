@@ -20,13 +20,11 @@ class Font;
 class TextLine;
 class TextBlock;
 
-class ScreenTextBlock final : private gfx::Canvas::Observer,
-                              private ui::Caret::Delegate {
+class ScreenTextBlock final : private ui::Caret::Delegate {
   private: class RenderContext;
   friend class RenderContext;
 
   private: gfx::RectF bounds_;
-  private: gfx::Canvas* canvas_;
   private: bool dirty_;
   private: bool has_screen_bitmap_;
   private: std::vector<TextLine*> lines_;
@@ -37,21 +35,18 @@ class ScreenTextBlock final : private gfx::Canvas::Observer,
 
   public: bool dirty() const { return dirty_; }
 
-  public: void DidKillFocus();
+  public: void DidKillFocus(gfx::Canvas* canvas);
   public: void DidSetFocus();
   private: gfx::RectF HitTestTextPosition(text::Posn offset) const;
-  public: void Render(const TextBlock* text_block,
+  public: void Render(gfx::Canvas* canvas, const TextBlock* text_block,
                       const TextSelection& selection);
-  private: void RenderCaret();
-  private: void RenderSelection(const TextSelection& selection);
-  public: void RenderSelectionIfNeeded(const TextSelection& selection);
+  private: void RenderCaret(gfx::Canvas* canvas);
+  private: void RenderSelection(gfx::Canvas* canvas,
+                                const TextSelection& selection);
+  public: void RenderSelectionIfNeeded(gfx::Canvas* canvas,
+                                       const TextSelection& selection);
   public: void Reset();
-  public: void SetBounds(const gfx::RectF& rect);
-  public: void SetCanvas(gfx::Canvas* canvas);
-
-  // gfx::Canvas::Observer
-  private: virtual void ShouldDiscardResources() override;
-
+  public: void SetBounds(const gfx::RectF& new_bounds);
 
   // ui::Caret::Delegate
   private: virtual void HideCaret(gfx::Canvas* canvas,

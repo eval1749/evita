@@ -48,7 +48,7 @@ void TextRenderer::set_zoom(float new_zoom) {
 }
 
 void TextRenderer::DidKillFocus() {
-  screen_text_block_->DidKillFocus();
+  screen_text_block_->DidKillFocus(canvas_);
 }
 
 void TextRenderer::DidSetFocus() {
@@ -163,7 +163,7 @@ void TextRenderer::Render(const TextSelectionModel& selection_model) {
   text_block_->EnsureLinePoints();
   const auto selection = TextFormatter::FormatSelection(
       text_block_->text_buffer(), selection_model);
-  screen_text_block_->Render(text_block_.get(), selection);
+  screen_text_block_->Render(canvas_, text_block_.get(), selection);
   RenderRuler();
   should_render_ = false;
 }
@@ -191,7 +191,7 @@ void TextRenderer::RenderSelectionIfNeeded(
   DCHECK(!ShouldFormat());
   DCHECK(!should_render_);
   DCHECK(!text_block_->bounds().empty());
-  screen_text_block_->RenderSelectionIfNeeded(
+  screen_text_block_->RenderSelectionIfNeeded(canvas_,
       TextFormatter::FormatSelection(text_block_->text_buffer(),
                                      new_selection_model));
 }
@@ -329,7 +329,7 @@ void TextRenderer::SetBounds(const Rect& rect) {
 
 void TextRenderer::SetCanvas(gfx::Canvas* canvas) {
   canvas_ = canvas;
-  screen_text_block_->SetCanvas(canvas);
+  screen_text_block_->Reset();
   should_format_ = true;
   should_render_ = true;
 }
@@ -340,6 +340,11 @@ bool TextRenderer::ShouldFormat() const {
 
 bool TextRenderer::ShouldRender() const {
   return should_render_ || screen_text_block_->dirty();
+}
+
+// gfx::Canvas::Observer
+void TextRenderer::ShouldDiscardResources() {
+  screen_text_block_->Reset();
 }
 
 }  // namespace views

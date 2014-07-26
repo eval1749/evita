@@ -87,7 +87,7 @@ text::Posn TextRenderer::GetVisibleEnd() const {
 void TextRenderer::Format(Posn lStart) {
   DCHECK(canvas_);
   text_block_->Reset();
-  TextFormatter formatter(canvas_, text_block_.get(), lStart, zoom_);
+  TextFormatter formatter(text_block_.get(), lStart, zoom_);
   formatter.Format();
   should_format_ = false;
   should_render_ = true;
@@ -95,7 +95,7 @@ void TextRenderer::Format(Posn lStart) {
 
 TextLine* TextRenderer::FormatLine(Posn lStart) {
   DCHECK(canvas_);
-  TextFormatter formatter(canvas_, text_block_.get(), lStart, zoom_);
+  TextFormatter formatter(text_block_.get(), lStart, zoom_);
   return formatter.FormatLine();
 }
 
@@ -207,7 +207,7 @@ bool TextRenderer::ScrollDown() {
     return false;
   auto const lGoal = GetStart() - 1;
   auto const lStart = buffer_->ComputeStartOfLine(lGoal);
-  TextFormatter formatter(canvas_, text_block_.get(), lStart, zoom_);
+  TextFormatter formatter(text_block_.get(), lStart, zoom_);
   for (;;) {
     auto const line = formatter.FormatLine();
     if (lGoal < line->GetEnd()) {
@@ -310,9 +310,8 @@ bool TextRenderer::ScrollUp() {
   if (text_block_->IsShowEndOfDocument())
     return false;
 
-  TextFormatter formatter(canvas_, text_block_.get(),
-                          text_block_->GetLast()->GetEnd(), zoom_);
-
+  auto const start_offset = text_block_->GetLast()->GetEnd();
+  TextFormatter formatter(text_block_.get(), start_offset, zoom_);
   auto const line = formatter.FormatLine();
   text_block_->Append(line);
   should_format_ = false;

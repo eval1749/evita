@@ -30,11 +30,12 @@ namespace {
 const float cxLeftMargin = 10.0f;
 const int k_nTabWidth = 4;
 
-float AlignHeightToPixel(gfx::Canvas* canvas, float height) {
-  return canvas->AlignToPixel(gfx::SizeF(0.0f, height)).height;
+float AlignHeightToPixel(float height) {
+  return gfx::FactorySet::instance()->AlignToPixel(
+      gfx::SizeF(0.0f, height)).height;
 }
 
-float AlignWidthToPixel(gfx::Canvas*, float width) {
+float AlignWidthToPixel(float width) {
   return width;
 }
 
@@ -175,11 +176,9 @@ RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
 //
 // TextFormatter
 //
-TextFormatter::TextFormatter(gfx::Canvas* canvas, TextBlock* text_block,
-                             Posn lStart, float zoom)
+TextFormatter::TextFormatter(TextBlock* text_block, Posn lStart, float zoom)
     : default_render_style_(GetRenderStyle(GetDefaultStyle(text_block))),
       default_style_(GetDefaultStyle(text_block)),
-      canvas_(canvas),
       text_block_(text_block),
       text_scanner_(new TextScanner(text_block->text_buffer(), lStart)),
       zoom_(zoom) {
@@ -287,8 +286,8 @@ TextLine* TextFormatter::FormatLine() {
   ascent  = std::max(pCell->height() - pCell->descent(), ascent);
 
   pLine->Fix(text_block_->left(), text_block_->top() + text_block_->GetHeight(),
-             AlignHeightToPixel(canvas_, ascent),
-             AlignHeightToPixel(canvas_, descent));
+             AlignHeightToPixel(ascent),
+             AlignHeightToPixel(descent));
 
   return pLine;
 }
@@ -321,15 +320,15 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
     auto const font = FontSet::GetFont(style, 'x');
-    auto const cxTab = AlignWidthToPixel(canvas_, font->GetCharWidth(' ')) *
+    auto const cxTab = AlignWidthToPixel(font->GetCharWidth(' ')) *
                           k_nTabWidth;
     auto const x2 = (x + cxTab - cxLeftMargin) / cxTab * cxTab;
     auto const cx = (x2 + cxLeftMargin) - x;
-    auto const cxM = AlignWidthToPixel(canvas_, font->GetCharWidth('M'));
+    auto const cxM = AlignWidthToPixel(font->GetCharWidth('M'));
     if (pPrev && x2 + cxM > text_block_->right())
       return nullptr;
 
-    auto const height = AlignHeightToPixel(canvas_, font->height());
+    auto const height = AlignHeightToPixel(font->height());
     return new MarkerCell(text_scanner_->MakeRenderStyle(style, font), cx,
                           height, lPosn, TextMarker::Tab);
   }
@@ -357,15 +356,15 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
     auto const char_width = font->GetCharWidth('M');
     if (pPrev && x + width + char_width > text_block_->right())
       return nullptr;
-    auto const height = AlignHeightToPixel(canvas_, font->height());
+    auto const height = AlignHeightToPixel(font->height());
     return new UnicodeCell(text_scanner_->MakeRenderStyle(style, font),
                            width, height, lPosn, string);
   }
 
   auto render_style = text_scanner_->MakeRenderStyle(style, pFont);
-  auto const cx = AlignWidthToPixel(canvas_, pFont->GetCharWidth(wch));
+  auto const cx = AlignWidthToPixel(pFont->GetCharWidth(wch));
   if (pPrev) {
-    auto const cxM = AlignWidthToPixel(canvas_, pFont->GetCharWidth('M'));
+    auto const cxM = AlignWidthToPixel(pFont->GetCharWidth('M'));
     if (x + cx + cxM > text_block_->right()) {
       // We doesn't have enough room for a char in the line.
       return nullptr;
@@ -377,7 +376,7 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
     }
   }
 
-  auto const height = AlignHeightToPixel(canvas_, pFont->height());
+  auto const height = AlignHeightToPixel(pFont->height());
   return new TextCell(render_style, cx, height, lPosn, base::string16(1u, wch));
 }
 
@@ -390,8 +389,8 @@ Cell* TextFormatter::formatMarker(TextMarker marker_name) {
   style.set_font_size(style.font_size() * zoom_);
 
   auto const pFont = FontSet::GetFont(style, 'x');
-  auto const width = AlignWidthToPixel(canvas_, pFont->GetCharWidth('x'));
-  auto const height = AlignHeightToPixel(canvas_, pFont->height());
+  auto const width = AlignWidthToPixel(pFont->GetCharWidth('x'));
+  auto const height = AlignHeightToPixel(pFont->height());
   return new MarkerCell(text_scanner_->MakeRenderStyle(style, pFont),
                         width, height, text_scanner_->GetPosn(),
                         marker_name);

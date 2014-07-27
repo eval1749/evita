@@ -110,10 +110,12 @@ class Rect_ : public BaseType {
   }
   public: UnitType height() const { return bottom - top; }
 
+  // Return true if the area is zero or negative.
   public: bool empty() const {
     return width() <= 0 || height() <= 0;
   }
 
+  // Returns true if the area of the rectangle is zero.
   public: bool is_zero() const { return !width() && !height(); }
 
   public: PointType origin() const {
@@ -136,11 +138,28 @@ class Rect_ : public BaseType {
 
   public: UnitType width() const { return right - left; }
 
+  // Returns true if the point identified by point_x and point_y falls inside
+  // this rectangle.  The point (x, y) is inside the rectangle, but the
+  // point (x + width, y + height) is not.
   public: bool Contains(PointF point) const;
+
+  // Returns true if the specified point is contained by this rectangle.
   public: bool Contains(const Rect_& point) const;
-  public: Rect_ Offset(UnitType offset_x, UnitType offset_y) const;
+
+  // Shrink the rectangle by a horizontal and vertical distance on all sides.
+  public: Rect_ Inset(UnitType horizontal, UnitType vertical) const;
+
+  // Move the rectangle by a horizontal and vertical distance.
+  public: Rect_ Offset(UnitType horizontal, UnitType vertical) const;
+  public: Rect_ Offset(const PointType& point) const;
   public: Rect_ Offset(const SizeType& size) const;
+
+  // Returns true if this rectangle intersects the specified rectangle.
+  // An empty rectangle doesn't intersect any rectangle.
   public: Rect_ Intersect(const Rect_& other) const;
+
+  // Computes the union of this rectangle with the given rectangle.  The union
+  // is the smallest rectangle containing both rectangles.
   public: void Unite(const Rect_& other);
 };
 
@@ -200,11 +219,26 @@ bool Rect_<BaseType, PointType, SizeType>::Contains(const Rect_& other) const {
 
 template<typename BaseType, typename PointType, typename SizeType>
 Rect_<BaseType, PointType, SizeType>
+Rect_<BaseType, PointType, SizeType>::Inset(UnitType horizontal,
+                                            UnitType vertical) const {
+  return Rect_(left + horizontal, top + vertical,
+               right - horizontal, bottom - horizontal);
+}
+
+template<typename BaseType, typename PointType, typename SizeType>
+Rect_<BaseType, PointType, SizeType>
 Rect_<BaseType, PointType, SizeType>::Intersect(const Rect_& other) const {
   return Rect_(std::max(left, other.left),
                     std::max(top, other.top),
                     std::min(right, other.right),
                     std::min(bottom, other.bottom));
+}
+
+template<typename BaseType, typename PointType, typename SizeType>
+Rect_<BaseType, PointType, SizeType>
+Rect_<BaseType, PointType, SizeType>::Offset(const PointType& point) const {
+  return Rect_(left + point.x, top + point.y,
+               right + point.x, bottom + point.y);
 }
 
 template<typename BaseType, typename PointType, typename SizeType>

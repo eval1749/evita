@@ -7,11 +7,8 @@
 
 #include <vector>
 
+#include "evita/gfx_base.h"
 #include "evita/ui/widget.h"
-
-namespace gfx {
-class Canvas;
-}
 
 namespace ui {
 
@@ -32,9 +29,6 @@ class ScrollBar : public ui::Widget {
     public: bool operator!=(const Data&) const;
   };
 
-  public: class HitTestResult;
-  public: enum class Location;
-
   // Note: class |Part| is base class of scroll bar parts, e.g. arrow, and
   // thumb. You can't use |Part| outside "scroll_bar.cc".
   public: class Part;
@@ -44,23 +38,26 @@ class ScrollBar : public ui::Widget {
     Vertical,
   };
 
-  private: Part* capturing_part_;
   private: Data data_;
+  private: bool dirty_;
   private: Part* hover_part_;
-  private: ScrollBarObserver* observer_;
   private: std::vector<Part*> parts_;
+  private: Part* const thumb_;
 
   public: ScrollBar(Type type, ScrollBarObserver* observer);
   public: virtual ~ScrollBar();
 
-  private: static std::vector<Part*> CreateParts(Type type);
-  private: HitTestResult HitTest(const gfx::PointF& point) const;
-  public: void Render(gfx::Canvas* canvas);
+  private: static std::vector<Part*> CreateParts(Type type,
+                                                 ScrollBarObserver* observer);
+  private: Part* HitTest(const gfx::Point& point) const;
   public: void SetData(const Data& date);
+  private: void UpdateAppearance();
   private: void UpdateLayout();
 
   // ui::Widget
   private: virtual void DidChangeBounds() override;
+  private: virtual void DidShow() override;
+  private: virtual void OnDraw(gfx::Canvas* canvas) override;
   private: virtual void OnMouseExited(const MouseEvent& event) override;
   private: virtual void OnMouseMoved(const MouseEvent& event) override;
   private: virtual void OnMousePressed(const MouseEvent& event) override;

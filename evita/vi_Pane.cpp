@@ -5,7 +5,6 @@
 #include "evita/vi_Pane.h"
 
 #include "common/win/native_window.h"
-#include "evita/ui/compositor/layer.h"
 #include "evita/vi_Frame.h"
 
 Pane::Pane()
@@ -23,26 +22,4 @@ void Pane::UpdateActiveTick() {
   DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
   ++static_active_tick;
   active_tick_ = static_active_tick;
-}
-
-// ui::Widget
-void Pane::DidChangeBounds() {
-  layer()->SetBounds(gfx::RectF(bounds()));
-  ui::Widget::DidChangeBounds();
-}
-
-void Pane::DidHide() {
-  ui::Widget::DidHide();
-  GetFrame()->layer()->RemoveChildLayer(layer());
-}
-
-void Pane::DidRealize() {
-  auto const layer = GetFrame()->layer()->CreateLayer();
-  SetLayer(layer);
-  ui::Widget::DidRealize();
-}
-
-void Pane::DidShow() {
-  ui::Widget::DidShow();
-  GetFrame()->layer()->AppendChildLayer(layer());
 }

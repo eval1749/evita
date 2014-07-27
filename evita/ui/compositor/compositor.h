@@ -8,13 +8,16 @@
 #include <memory>
 
 #include "base/basictypes.h"
-#include "common/memory/singleton.h"
 #include "common/win/scoped_comptr.h"
 
 interface IDCompositionDesktopDevice;
+interface IDCompositionTarget;
 interface IDCompositionVisual2;
 interface ID2D1Device;
 
+namespace gfx {
+class DxDevice;
+}
 
 namespace ui {
 
@@ -24,20 +27,23 @@ class Layer;
 //
 // Compositor
 //
-class Compositor : public common::Singleton<Compositor> {
-  DECLARE_SINGLETON_CLASS(Compositor);
-
+class Compositor {
+  private: gfx::DxDevice* dx_device_;
   private: common::ComPtr<IDCompositionDesktopDevice> composition_device_;
+  private: common::ComPtr<IDCompositionTarget> composition_target_;
   private: bool need_commit_;
+  private: std::unique_ptr<ui::Layer> layer_;
 
-  private: Compositor();
-  // TODO(eval1749) We should destruct Compositor by Singleton destructor.
-  public: virtual ~Compositor();
+  public: Compositor(gfx::DxDevice* dx_device, HWND hwnd);
+  public: ~Compositor();
 
   public: IDCompositionDesktopDevice* device() const {
     return composition_device_;
   }
-  public: void CommitIfNeeded();
+  public: gfx::DxDevice* dx_device() const { return dx_device_; }
+  public: Layer* layer() const { return layer_.get(); }
+
+  public: void Commit();
   public: common::ComPtr<IDCompositionVisual2> CreateVisual();
   public: void NeedCommit() { need_commit_ = true; }
 

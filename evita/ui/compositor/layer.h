@@ -5,11 +5,10 @@
 #if !defined(INCLUDE_evita_ui_compositor_layer_h)
 #define INCLUDE_evita_ui_compositor_layer_h
 
-#include <unordered_set>
+#include <vector>
 
 #include "base/basictypes.h"
 #include "common/win/scoped_comptr.h"
-#include "evita/gfx/rect.h"
 #include "evita/gfx/rect_f.h"
 
 interface IDCompositionVisual2;
@@ -20,15 +19,18 @@ class Canvas;
 
 namespace ui {
 
+class Compositor;
+
 class Layer  {
   private: gfx::RectF bounds_;
-  private: std::unordered_set<Layer*> child_layers_;
-  private: Layer* parent_layer_;
+  private: std::vector<Layer*> child_layers_;
+  private: Compositor* compositor_;
   private: common::ComPtr<IDCompositionVisual2> visual_;
 
-  public: Layer();
+  public: Layer(Compositor* compositor);
   public: virtual ~Layer();
 
+  public: Compositor* compositor() const { return compositor_; }
   public: operator IDCompositionVisual2*() const { return visual_; }
 
   public: const gfx::RectF& bounds() const { return bounds_; }
@@ -36,17 +38,14 @@ class Layer  {
 
   public: void AppendChildLayer(Layer* new_child);
   public: gfx::Canvas* CreateCanvas();
-  public: Layer* CreateLayer() const;
   protected: virtual void DidChangeBounds();
-  public: void RemoveChildLayer(Layer* old_child);
   public: void SetBounds(const gfx::RectF& new_bounds);
-  public: void SetBounds(const gfx::Rect& new_bounds);
 
   DISALLOW_COPY_AND_ASSIGN(Layer);
 };
 
 class HwndLayer : public Layer {
-  public: HwndLayer(HWND hwnd);
+  public: HwndLayer(Compositor* compositor, HWND hwnd);
   public: virtual ~HwndLayer();
 
   DISALLOW_COPY_AND_ASSIGN(HwndLayer);

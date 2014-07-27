@@ -139,7 +139,6 @@ class Rect_ : public BaseType {
   public: bool Contains(PointF point) const;
   public: bool Contains(const Rect_& point) const;
   public: Rect_ Offset(UnitType offset_x, UnitType offset_y) const;
-  public: Rect_ Offset(const PointType& size) const;
   public: Rect_ Offset(const SizeType& size) const;
   public: Rect_ Intersect(const Rect_& other) const;
   public: void Unite(const Rect_& other);
@@ -206,13 +205,6 @@ Rect_<BaseType, PointType, SizeType>::Intersect(const Rect_& other) const {
                     std::max(top, other.top),
                     std::min(right, other.right),
                     std::min(bottom, other.bottom));
-}
-
-template<typename BaseType, typename PointType, typename SizeType>
-Rect_<BaseType, PointType, SizeType>
-Rect_<BaseType, PointType, SizeType>::Offset(const PointType& point) const {
-  return Rect_(left + point.x, top + point.y,
-               right + point.x, bottom + point.y);
 }
 
 template<typename BaseType, typename PointType, typename SizeType>

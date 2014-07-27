@@ -21,10 +21,6 @@ struct COMMON_EXPORT Point : POINT {
  Point(POINTS pt) {
    x = pt.x; y = pt.y;
  }
-
- Point Offset(int delta_x, int delta_y) const {
-   return Point(x + delta_x, y + delta_y);
- }
 };
 
 #define DEBUG_POINT_FORMAT "(%d,%d)"

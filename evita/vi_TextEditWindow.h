@@ -40,8 +40,7 @@ class ScrollBar;
 //
 // TextEditWindow
 //
-class TextEditWindow : private gfx::Canvas::Observer,
-                       public text::BufferMutationObserver,
+class TextEditWindow : public text::BufferMutationObserver,
                        public ui::ScrollBarObserver,
                        public ui::TextInputDelegate,
                        public views::ContentWindow {
@@ -54,7 +53,7 @@ class TextEditWindow : private gfx::Canvas::Observer,
   private: typedef views::rendering::TextSelectionModel TextSelectionModel;
   private: class ScrollBar;
 
-  private: std::unique_ptr<gfx::Canvas> canvas_;
+  private: gfx::Canvas* canvas_;
   private: Posn m_lCaretPosn;
   // TODO(yosi): Manage life time of selection.
   private: text::Selection* const selection_;
@@ -95,6 +94,7 @@ class TextEditWindow : private gfx::Canvas::Observer,
 
   // [R]
   private: void Render(const TextSelectionModel& selection);
+  private: void Render();
 
   // [S]
   public: bool SmallScroll(int x_count, int y_count);
@@ -102,10 +102,7 @@ class TextEditWindow : private gfx::Canvas::Observer,
   public: Posn StartOfLine(Posn);
 
   // [U]
-  private: void UpdateLayout();
-
-  // gfx::Canvas::Observer
-  private: virtual void ShouldDiscardResources() override;
+  private: void updateScrollBar();
 
   // text::BufferMutationObserver
   private: virtual void DidDeleteAt(text::Posn offset, size_t length) override;
@@ -136,6 +133,7 @@ class TextEditWindow : private gfx::Canvas::Observer,
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void DidShow() override;
   private: virtual HCURSOR GetCursorAt(const Point&) const override;
+  private: virtual void OnDraw(gfx::Canvas* canvas) override;
 
   // views::ContentWindow
   private: virtual void MakeSelectionVisible() override;

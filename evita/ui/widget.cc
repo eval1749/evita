@@ -13,7 +13,6 @@
 #include "common/win/rect_ostream.h"
 #include "common/win/win32_verify.h"
 #include "evita/ui/base/ime/text_input_client_win.h"
-#include "evita/ui/compositor/layer.h"
 #include "evita/ui/events/event.h"
 #include "evita/ui/events/event_ostream.h"
 #include "evita/ui/events/mouse_click_tracker.h"
@@ -45,37 +44,6 @@ bool we_have_active_focus;
 }  // namespace
 
 using ui::EventType;
-
-//////////////////////////////////////////////////////////////////////
-//
-// HitTestResult
-//
-class Widget::HitTestResult {
-  private: Point local_point_;
-  private: Widget* widget_;
-
-  public: HitTestResult(Widget* widget, const Point& local_point);
-  public: HitTestResult(const HitTestResult& other);
-  public: HitTestResult();
-  public: ~HitTestResult() = default;
-
-  public: explicit operator bool() const { return widget_; }
-
-  public: const Point& local_point() const { return local_point_; }
-  public: Widget* widget() const { return widget_; }
-};
-
-Widget::HitTestResult::HitTestResult(Widget* widget, const Point& local_point)
-    : local_point_(local_point), widget_(widget) {
-}
-
-Widget::HitTestResult::HitTestResult(const HitTestResult& other)
-    : HitTestResult(other.widget_, other.local_point_) {
-}
-
-Widget::HitTestResult::HitTestResult()
-    : HitTestResult(nullptr, Point()) {
-}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -296,10 +264,6 @@ void Widget::DispatchPaintMessage() {
   }
 }
 
-gfx::RectF Widget::GetContentsBounds() const {
-  return gfx::RectF(gfx::SizeF(bounds_.width(), bounds_.height()));
-}
-
 HCURSOR Widget::GetCursorAt(const Point&) const {
   return ::LoadCursor(nullptr, IDC_ARROW);
 }
@@ -314,6 +278,29 @@ Widget& Widget::GetHostWidget() const {
        return const_cast<Widget&>(*runner);
   }
   return *RootWidget::instance();
+}
+
+Widget* Widget::GetMouseTarget(const Point& point) const {
+  if (capture_widget)
+    return capture_widget;
+  auto const child = GetWidgetAt(point);
+  return child ? child : const_cast<Widget*>(this);
+}
+
+Widget* Widget::GetWidgetAt(const Point& point) const {
+  // On release build by MSVS2013, using reverse() causes AV.
+  // for (const auto& child: common::adopters::reverse(child_nodes()))
+  for (auto runner = last_child(); runner;
+       runner = runner->previous_sibling()) {
+    auto const child = runner;
+    if (!child->is_shown())
+      continue;
+    if (child->bounds().Contains(point)) {
+      auto const child_child = child->GetWidgetAt(point);
+      return child_child ? child_child : const_cast<Widget*>(child);
+    }
+  }
+  return nullptr;
 }
 
 LRESULT Widget::HandleKeyboardMessage(uint32_t message, WPARAM wParam,
@@ -351,25 +338,24 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message, WPARAM wParam,
 
 void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
                                 LPARAM lParam) {
-  auto const host_widget = &GetHostWidget();
   Point client_point(MAKEPOINTS(lParam));
   if (message == WM_MOUSEWHEEL) {
     // Note: We send WM_MOUSEWHEEL message to a widget under mouse pointer
     // rather than active widget.
     Point screen_point(client_point);
-    WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *host_widget->native_window(),
+    WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, AssociatedHwnd(),
                                    &client_point, 1));
-    auto const result = host_widget->HitTestForMouseEventTarget(client_point);
-    MouseWheelEvent event(result.widget(), result.local_point(), screen_point,
+    auto const target = GetMouseTarget(client_point);
+    MouseWheelEvent event(target, client_point, screen_point,
                           GET_KEYSTATE_WPARAM(wParam),
                           GET_WHEEL_DELTA_WPARAM(wParam));
-    result.widget()->OnMouseWheel(event);
+    target->OnMouseWheel(event);
     return;
   }
 
-  auto const result = host_widget->HitTestForMouseEventTarget(client_point);
+  auto const target = GetMouseTarget(client_point);
   Point screen_point(client_point);
-  WIN32_VERIFY(::MapWindowPoints(*host_widget->native_window(), HWND_DESKTOP,
+  WIN32_VERIFY(::MapWindowPoints(AssociatedHwnd(), HWND_DESKTOP,
                                  &screen_point, 1));
   if (message == WM_MOUSEMOVE || message == WM_NCMOUSEMOVE) {
     if (!hover_widget) {
@@ -379,54 +365,51 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
           message == WM_NCMOUSEMOVE ? TME_NONCLIENT | TME_LEAVE : TME_LEAVE);
       track.hwndTrack = *native_window();
       if (::TrackMouseEvent(&track))
-        hover_widget = result.widget();
+        hover_widget = target;
       else
         DVLOG(0) << "TrackMouseEvent last_error=" << ::GetLastError();
-    } else if (hover_widget != result.widget()) {
+    } else if (hover_widget != target) {
       MouseEvent event(EventType::MouseExited, MouseEvent::kNone, 0u, 0,
                        hover_widget, client_point, screen_point);
       hover_widget->OnMouseExited(event);
-      hover_widget = result.widget();
+      hover_widget = target;
     }
   }
 
   MouseEvent event(MouseEvent::ConvertToEventType(message),
                    MouseEvent::ConvertToButton(message, wParam),
                    GET_KEYSTATE_WPARAM(wParam), 0,
-                   result.widget(), result.local_point(), screen_point);
+                   target, client_point, screen_point);
   if (event.event_type() == EventType::MouseMoved) {
-    result.widget()->OnMouseMoved(event);
+    target->OnMouseMoved(event);
     return;
   }
 
   if (event.event_type() == EventType::MousePressed) {
     MouseClickTracker::instance()->OnMousePressed(event);
-    result.widget()->OnMousePressed(event);
+    target->OnMousePressed(event);
     return;
   }
 
   if (event.event_type() == EventType::MouseReleased) {
     MouseClickTracker::instance()->OnMouseReleased(event);
-    result.widget()->OnMouseReleased(event);
+    target->OnMouseReleased(event);
     auto const click_count  = MouseClickTracker::instance()->click_count();
     if (click_count >= 1) {
       MouseEvent click_event(EventType::MousePressed,
                              MouseEvent::ConvertToButton(message, wParam),
                              GET_KEYSTATE_WPARAM(wParam), 1,
-                             result.widget(), result.local_point(),
-                             screen_point);
-      result.widget()->OnMousePressed(click_event);
-      return;
+                             target, client_point, screen_point);
+      target->OnMousePressed(click_event);
     }
     if (click_count >= 2) {
       MouseEvent dblclick_event(EventType::MousePressed,
                                 MouseEvent::ConvertToButton(message, wParam),
                                 GET_KEYSTATE_WPARAM(wParam), 2,
-                                result.widget(), result.local_point(),
-                                screen_point);
-      result.widget()->OnMousePressed(dblclick_event);
-      return;
+                                target, client_point, screen_point);
+      target->OnMousePressed(dblclick_event);
     }
+    return;
   }
 }
 
@@ -450,41 +433,6 @@ void Widget::OnDraw(gfx::Canvas* gfx) {
     if (child->is_shown())
       child->OnDraw(gfx);
   }
-}
-
-Widget::HitTestResult Widget::HitTest(const Point& local_point) const {
-  // On release build by MSVS2013, using reverse() causes AV.
-  // for (const auto& child: common::adopters::reverse(child_nodes()))
-  for (auto runner = last_child(); runner;
-       runner = runner->previous_sibling()) {
-    auto const child = runner;
-    if (!child->is_shown())
-      continue;
-    auto const child_point = local_point.Offset(-child->bounds().left,
-                                                -child->bounds().top);
-    if (child->bounds().Contains(child_point)) {
-      auto const result = child->HitTest(child_point);
-      return result ? result : HitTestResult(const_cast<Widget*>(child),
-                                             child_point);
-    }
-  }
-  return HitTestResult();
-}
-
-Widget::HitTestResult Widget::HitTestForMouseEventTarget(
-    const Point& point) const {
-  DCHECK(native_window_);
-  if (capture_widget) {
-    auto local_point = point;
-    for (auto runner = capture_widget; runner != this;
-         runner = &runner->container_widget()) {
-      local_point = local_point.Offset(-runner->bounds().left,
-                                       -runner->bounds().top);
-    }
-    return HitTestResult(capture_widget, local_point);
-  }
-  auto const result = HitTest(point);
-  return result ? result : HitTestResult(const_cast<Widget*>(this), point);
 }
 
 void Widget::OnKeyPressed(const KeyboardEvent&) {
@@ -608,8 +556,7 @@ void Widget::RequestFocus() {
 
 void Widget::SchedulePaint() {
   DCHECK(is_realized());
-  DCHECK(!bounds_.empty());
-  SchedulePaintInRect(Rect(Point(), bounds_.size()));
+  SchedulePaintInRect(bounds_);
 }
 
 void Widget::SchedulePaintInRect(const Rect& rect) {
@@ -620,7 +567,6 @@ void Widget::SchedulePaintInRect(const Rect& rect) {
 }
 
 void Widget::SetBounds(const Rect& rect) {
-  DCHECK(!rect.empty());
   DCHECK(state_ >= kNotRealized);
 
 #if 0
@@ -655,24 +601,18 @@ void Widget::SetCapture() {
 }
 
 bool Widget::SetCursor() {
-  DCHECK(native_window_);
   Point point;
   WIN32_VERIFY(::GetCursorPos(&point));
   WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *native_window(),
                                  &point, 1));
-  auto const result = HitTest(point);
-  if (!result)
+  auto const widget = GetWidgetAt(point);
+  if (!widget)
     return false;
-  auto const hCursor = result.widget()->GetCursorAt(result.local_point());
+  auto const hCursor = widget->GetCursorAt(point);
   if (!hCursor)
     return false;
   ::SetCursor(hCursor);
   return true;
-}
-
-void Widget::SetLayer(Layer* layer) {
-  DCHECK(!layer_);
-  layer_.reset(layer);
 }
 
 void Widget::SetParentWidget(Widget* new_parent) {
@@ -717,13 +657,6 @@ void Widget::Show() {
   }
 }
 
-void Widget::UpdateBounds() {
-  DCHECK(native_window_);
-  if (container_widget() != RootWidget::instance())
-    return;
-  ::GetClientRect(*native_window_.get(), &bounds_);
-}
-
 void Widget::WillDestroyWidget() {
   #if DEBUG_DESTROY
     DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
@@ -761,19 +694,12 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       }
       return 0;
     }
-    case WM_CREATE: {
-      auto const create_data = reinterpret_cast<const CREATESTRUCT*>(lParam);
-      if (create_data->style & WS_VISIBLE)
+    case WM_CREATE:
+      if (reinterpret_cast<CREATESTRUCT*>(lParam)->style & WS_VISIBLE)
         ++shown_;
-      if (create_data->hwndParent) {
-        bounds_ = gfx::Rect(gfx::Point(create_data->x, create_data->y),
-                            gfx::Size(create_data->cx, create_data->cy));
-      } else {
-        UpdateBounds();
-      }
+      ::GetClientRect(*native_window_.get(), &bounds_);
       DidCreateNativeWindow();
       return 0;
-    }
 
     case WM_DESTROY:
       WillDestroyNativeWindow();
@@ -839,7 +765,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
             LOWORD(lParam) << "x" << HIWORD(lParam);
       #endif
       if (wParam != SIZE_MAXHIDE && wParam != SIZE_MINIMIZED) {
-        UpdateBounds();
+        ::GetClientRect(*native_window_.get(), &bounds_);
         if (!bounds_.empty())
           DidChangeBounds();
       }
@@ -933,12 +859,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
         return 0;
       }
 
-      if (container_widget() == RootWidget::instance()) {
-        UpdateBounds();
-      } else {
-        bounds_ = gfx::Rect(gfx::Point(wp->x, wp->y),
-                            gfx::Size(wp->cx, wp->cy));
-      }
+      ::GetClientRect(*native_window_.get(), &bounds_);
       DidChangeBounds();
       return 0;
     }

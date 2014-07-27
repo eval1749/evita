@@ -253,8 +253,6 @@
         'ui/compositor/compositor.h',
         'ui/compositor/layer.cc',
         'ui/compositor/layer.h',
-        'ui/compositor/root_layer.cc',
-        'ui/compositor/root_layer.h',
 
         'ui/controls/button_control.cc',
         'ui/controls/checkbox_control.cc',

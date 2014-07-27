@@ -16,22 +16,36 @@
 
 namespace ui {
 
-Compositor::Compositor() : need_commit_(false) {
+Compositor::Compositor(gfx::DxDevice* dx_device, HWND hwnd)
+    : dx_device_(dx_device), need_commit_(false) {
+  DCHECK(hwnd);
   COM_VERIFY(::DCompositionCreateDevice2(
-      gfx::DxDevice::instance()->d2d_device(),
+      dx_device->d2d_device(),
       IID_PPV_ARGS(&composition_device_)));
 
-#if _DEBUG
   common::ComPtr<IDCompositionDeviceDebug> debug_device;
   COM_VERIFY(debug_device.QueryFrom(composition_device_));
   debug_device->EnableDebugCounters();
-#endif
+
+  layer_.reset(new Layer(this));
+
+  COM_VERIFY(composition_device_->CreateTargetForHwnd(hwnd, false,
+                                                      &composition_target_));
+  composition_target_->SetRoot(layer_->visual());
+
+  {
+    RECT bounds;
+    ::GetClientRect(hwnd, &bounds);
+    layer_->SetBounds(gfx::RectF(gfx::PointF(), gfx::SizeF(
+        static_cast<float>(bounds.right - bounds.left),
+        static_cast<float>(bounds.bottom - bounds.top))));
+  }
 }
 
 Compositor::~Compositor() {
 }
 
-void Compositor::CommitIfNeeded() {
+void Compositor::Commit() {
   if (!need_commit_)
     return;
 #if _DEBUG

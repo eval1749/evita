@@ -7,7 +7,6 @@
 #include "evita/dom/lock.h"
 #include "evita/text/buffer.h"
 #include "evita/views/text/render_text_line.h"
-#include "evita/views/text/text_formatter.h"
 
 namespace views {
 namespace rendering {
@@ -15,7 +14,8 @@ namespace rendering {
 TextBlock::TextBlock(text::Buffer* text_buffer)
     : dirty_(true),
       dirty_line_point_(true),
-      m_cy(0), text_buffer_(text_buffer), zoom_(0.0f) {
+      m_cy(0),
+      text_buffer_(text_buffer) {
   text_buffer->AddObserver(this);
 }
 
@@ -77,34 +77,6 @@ void TextBlock::Finish() {
   dirty_line_point_ = dirty_;
 }
 
-void TextBlock::Format(const gfx::RectF& bounds, float zoom,
-                       text::Posn text_offset) {
-  ASSERT_DOM_LOCKED();
-  if (dirty_ || bounds_ != bounds || zoom_ != zoom) {
-    bounds_ = bounds;
-    zoom_ = zoom;
-    Reset();
-  }
-  TextFormatter formatter(this, text_offset);
-  formatter.Format();
-}
-
-TextLine* TextBlock::FormatLine(const gfx::RectF& bounds, float zoom,
-                                text::Posn text_offset) {
-  ASSERT_DOM_LOCKED();
-  if (dirty_ || bounds_ != bounds || zoom_ != zoom) {
-    bounds_ = bounds;
-    zoom_ = zoom;
-    Reset();
-  }
-  for (auto line : lines_) {
-    if (line->GetStart() == text_offset)
-      return line;
-  }
-  TextFormatter formatter(this, text_offset);
-  return formatter.FormatLine();
-}
-
 text::Posn TextBlock::GetVisibleEnd() const {
   ASSERT_DOM_LOCKED();
   DCHECK(!dirty_);
@@ -152,14 +124,10 @@ void TextBlock::Reset() {
   m_cy = 0;
 }
 
-bool TextBlock::ShouldFormat(const gfx::RectF& bounds, float zoom) const {
+void TextBlock::SetBounds(const gfx::RectF& rect) {
   ASSERT_DOM_LOCKED();
-  // TODO(eval1749) We should check bounds change more. We don't need to
-  // format when
-  //  - Height changes only
-  //  - Narrow but all lines fit
-  //  - Widen but no lines wrap
-  return dirty_ || zoom_ != zoom || bounds_ != bounds;
+  bounds_ = rect;
+  Reset();
 }
 
 // text::BufferMutationObserver

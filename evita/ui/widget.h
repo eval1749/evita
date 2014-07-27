@@ -11,7 +11,6 @@
 #include "common/tree/node.h"
 #include "common/win/native_window.h"
 #include "common/win/rect.h"
-#include "evita/gfx/rect_f.h"
 
 namespace gfx {
 class Canvas;
@@ -23,7 +22,6 @@ using common::win::NativeWindow;
 using common::win::Point;
 using common::win::Rect;
 class KeyboardEvent;
-class Layer;
 class MouseEvent;
 class MouseWheelEvent;
 
@@ -37,8 +35,6 @@ class Widget
       public common::win::MessageDelegate {
   DECLARE_CASTABLE_CLASS(Widget, Castable);
 
-  private: class HitTestResult;
-
   private: enum State {
     kDestroyed = -2,
     kBeingDestroyed = -1,
@@ -47,7 +43,6 @@ class Widget
   };
 
   private: Rect bounds_;
-  private: std::unique_ptr<Layer> layer_;
   private: std::unique_ptr<NativeWindow> native_window_;
   private: int shown_;
   private: State state_;
@@ -72,7 +67,6 @@ class Widget
   }
   public: bool is_realized() const { return state_ == kRealized; }
   public: bool is_shown() const { return shown_; }
-  public: Layer* layer() const { return layer_.get(); }
   protected: NativeWindow* native_window() const {
     return native_window_.get();
   }
@@ -86,7 +80,6 @@ class Widget
   // [D]
   public: void DestroyWidget();
   protected: virtual void DidAddChildWidget(const Widget& widget);
-  protected: virtual void DidChangeBounds();
   protected: virtual void DidChangeHierarchy();
   // Called on WM_CREATE
   protected: virtual void DidCreateNativeWindow();
@@ -102,6 +95,7 @@ class Widget
   protected: virtual void DidRealize();
   protected: virtual void DidRealizeChildWidget(const Widget& widget);
   protected: virtual void DidRemoveChildWidget(const Widget& widget);
+  protected: virtual void DidChangeBounds();
   protected: virtual void DidSetFocus(ui::Widget* last_focused);
 
   // Called when widget, which has native window, get native focus. This is
@@ -112,10 +106,11 @@ class Widget
   private: void DispatchPaintMessage();
 
   // [G]
-  public: gfx::RectF GetContentsBounds() const;
   protected: virtual HCURSOR GetCursorAt(const Point& point) const;
   public: static Widget* GetFocusWidget();
   private: Widget& GetHostWidget() const;
+  private: Widget* GetMouseTarget(const Point& point) const;
+  private: Widget* GetWidgetAt(const Point& point) const;
 
   // [H]
   private: LRESULT HandleKeyboardMessage(uint32_t message, WPARAM wParam,
@@ -123,8 +118,6 @@ class Widget
   private: void HandleMouseMessage(uint32_t message, WPARAM wParam,
                                    LPARAM lParam);
   public: virtual void Hide();
-  private: HitTestResult HitTest(const Point& point) const;
-  private: HitTestResult HitTestForMouseEventTarget(const Point& point) const;
 
   // [O]
   // Note: We expose |OnDraw| for real time content resizing during toplevel
@@ -158,12 +151,8 @@ class Widget
   public: void SetBounds(const Rect& rect);
   public: void SetCapture();
   private: bool SetCursor();
-  public: void SetLayer(Layer* layer);
   public: void SetParentWidget(Widget* new_parent);
   public: virtual void Show();
-
-  // [U]
-  private: void UpdateBounds();
 
   // [W]
   protected: virtual void WillDestroyWidget();

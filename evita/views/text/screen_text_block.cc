@@ -174,7 +174,6 @@ void ScreenTextBlock::RenderContext::FillBottom(const TextLine* line) const {
     return;
   gfx::Brush fill_brush(canvas_, bgcolor_);
   canvas_->FillRectangle(fill_brush, rect);
-  canvas_->AddDirtyRect(rect);
 }
 
 void ScreenTextBlock::RenderContext::FillRight(const TextLine* line) const {
@@ -185,7 +184,6 @@ void ScreenTextBlock::RenderContext::FillRight(const TextLine* line) const {
     return;
   gfx::Brush fill_brush(canvas_, bgcolor_);
   canvas_->FillRectangle(fill_brush, rect);
-  canvas_->AddDirtyRect(rect);
 }
 
 FormatLineIterator ScreenTextBlock::RenderContext::FindFirstMismatch() const {
@@ -255,14 +253,12 @@ void ScreenTextBlock::RenderContext::Finish() {
       DVLOG(0) << "copy " << rect;
     #endif
     DrawDirtyRect(rect, 58.0f / 255, 128.0f / 255, 247.0f / 255);
-    canvas_->AddDirtyRect(bounds_.Intersect(rect));
   }
   for (auto rect : dirty_rects_) {
     #if DEBUG_DRAW
       DVLOG(0) << "dirty " << rect;
     #endif
     DrawDirtyRect(rect, 219.0f / 255, 68.0f / 255, 55.0f / 255);
-    canvas_->AddDirtyRect(bounds_.Intersect(rect));
   }
   canvas_->Flush();
 }
@@ -324,13 +320,11 @@ void ScreenTextBlock::RenderContext::RestoreSkipRect(
   marker_rect.left += kMarkerLeftMargin;
   marker_rect.right = marker_rect.left + kMarkerWidth;
   canvas_->FillRectangle(gfx::Brush(canvas_, gfx::ColorF::White), marker_rect);
-  canvas_->AddDirtyRect(marker_rect);
   if (!screen_text_block_->has_screen_bitmap_)
     return;
   auto const line_rect = gfx::RectF(gfx::PointF(bounds_.left, rect.top),
                                     gfx::SizeF(bounds_.width(), rect.height()));
   canvas_->DrawBitmap(*canvas_->screen_bitmap(), line_rect, line_rect);
-  canvas_->AddDirtyRect(line_rect);
 }
 
 FormatLineIterator ScreenTextBlock::RenderContext::TryCopy(

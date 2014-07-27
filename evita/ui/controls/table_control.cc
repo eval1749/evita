@@ -641,12 +641,12 @@ void TableControl::DidKillFocus(ui::Widget* focus_widget) {
 }
 
 void TableControl::DidRealize() {
-  model_->DidChangeBounds(GetContentsBounds());
+  model_->DidChangeBounds(gfx::RectF(bounds()));
   UpdateViewIfNeeded();
 }
 
 void TableControl::DidChangeBounds() {
-  model_->DidChangeBounds(GetContentsBounds());
+  model_->DidChangeBounds(gfx::RectF(bounds()));
   UpdateViewIfNeeded();
 }
 
@@ -661,7 +661,7 @@ void TableControl::DidShow() {
 }
 
 void TableControl::OnDraw(gfx::Canvas* gfx) {
-  gfx->set_dirty_rect(GetContentsBounds());
+  gfx->set_dirty_rect(bounds());
   model_->Draw(gfx);
 }
 

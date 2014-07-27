@@ -8,8 +8,6 @@
 #include <memory>
 
 #include "evita/gfx/canvas.h"
-#include "evita/gfx/rect.h"
-#include "evita/gfx/rect_f.h"
 #include "evita/views/text/render_selection.h"
 
 namespace views {
@@ -27,14 +25,15 @@ namespace rendering {
 //
 // TextRenderer
 //
-class TextRenderer final {
+class TextRenderer final : private gfx::Canvas::Observer {
+  private: typedef common::win::Rect Rect;
   private: typedef rendering::Cell Cell;
   public: typedef rendering::ScreenTextBlock ScreenTextBlock;
   public: typedef rendering::TextSelectionModel TextSelectionModel;
   public: typedef rendering::TextBlock TextBlock;
   public: typedef rendering::TextLine Line;
 
-  private: gfx::RectF bounds_;
+  private: gfx::Canvas* canvas_;
   private: text::Buffer* const buffer_;
   private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
   private: bool should_format_;
@@ -50,9 +49,7 @@ class TextRenderer final {
   public: void set_zoom(float new_zoom);
 
   // [D]
-  public: void DidHide();
-  public: void DidKillFocus(gfx::Canvas* canvas);
-  public: void DidLostCanvas();
+  public: void DidKillFocus();
   public: void DidSetFocus();
 
   // [F]
@@ -77,18 +74,22 @@ class TextRenderer final {
   public: Posn MapPointToPosition(gfx::PointF point) const;
 
   // [R]
-  public: void Render(gfx::Canvas* canvas, const TextSelectionModel& selection);
-  private: void RenderRuler(gfx::Canvas* canvas);
-  public: void RenderSelectionIfNeeded(gfx::Canvas* canvas,
-                                       const TextSelectionModel& selection);
+  public: void Render(const TextSelectionModel& selection);
+  private: void RenderRuler();
+  public: void RenderSelectionIfNeeded(const TextSelectionModel& selection);
+  public: void Reset();
 
   // [S]
   public: bool ScrollDown();
   public: bool ScrollToPosition(Posn offset);
   public: bool ScrollUp();
-  public: void SetBounds(const gfx::RectF& new_bounds);
+  public: void SetBounds(const Rect& rect);
+  public: void SetCanvas(gfx::Canvas* canvas);
   public: bool ShouldFormat() const;
   public: bool ShouldRender() const;
+
+  // gfx::Canvas::Observer
+  private: virtual void ShouldDiscardResources() override;
 
   DISALLOW_COPY_AND_ASSIGN(TextRenderer);
 };

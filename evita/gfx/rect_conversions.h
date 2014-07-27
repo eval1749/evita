@@ -10,11 +10,11 @@
 
 namespace gfx {
 
-// Returns the largest Rect that is enclosed by the given RectF.
-Rect ToEnclosedRect(const RectF& rect);
-
 // Returns the smallest Rect that encloses the given RectF.
 Rect ToEnclosingRect(const RectF& rect);
+
+// Returns the largest Rect that is enclosed by the given RectF.
+Rect ToEnclosedRect(const RectF& rect);
 
 }  // namespace gfx
 

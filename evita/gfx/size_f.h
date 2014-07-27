@@ -30,7 +30,7 @@ class Size_ : public BaseType {
     return width == other.width && height == other.height;
   }
   public: bool operator!=(const Size_& other) const {
-    return width != other.width && height != other.height;
+    return !operator==(other);
   }
 
   public: Size_ operator+(const Size_& other) const {

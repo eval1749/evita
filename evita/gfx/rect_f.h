@@ -222,7 +222,7 @@ Rect_<BaseType, PointType, SizeType>
 Rect_<BaseType, PointType, SizeType>::Inset(UnitType horizontal,
                                             UnitType vertical) const {
   return Rect_(left + horizontal, top + vertical,
-               right - horizontal, bottom - horizontal);
+               right - horizontal, bottom - vertical);
 }
 
 template<typename BaseType, typename PointType, typename SizeType>

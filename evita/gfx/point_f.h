@@ -37,6 +37,30 @@ class Point_ : public BaseType {
     return *this;
   }
 
+  public: Point_& operator+=(const Point_& other) {
+    x += other.x;
+    y += other.y;
+    return *this;
+  }
+
+  public: Point_& operator+=(const SizeType& other) {
+    x += other.width;
+    y += other.height;
+    return *this;
+  }
+
+  public: Point_& operator-=(const Point_& other) {
+    x -= other.x
+    y -= other.y;
+    return *this;
+  }
+
+  public: Point_& operator-=(const SizeType& other) {
+    x -= other.width
+    y -= other.height;
+    return *this;
+  }
+
   public: Point_ operator+(const Point_& other) const {
     return Point_(x + other.x, y + other.y);
   }

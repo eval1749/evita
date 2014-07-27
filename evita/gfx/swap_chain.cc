@@ -9,15 +9,56 @@
 
 #include "base/logging.h"
 #include "evita/gfx/dx_device.h"
+#include "evita/gfx/rect_conversions.h"
 
 namespace gfx {
 
-namespace {
+//////////////////////////////////////////////////////////////////////
+//
+// SwapChain
+//
+SwapChain::SwapChain(common::ComPtr<IDXGISwapChain2> swap_chain)
+    : is_first_present_(true), is_ready_(false), swap_chain_(swap_chain),
+      swap_chain_waitable_(swap_chain_->GetFrameLatencyWaitableObject()) {
+  COM_VERIFY(DxDevice::instance()->d2d_device()->CreateDeviceContext(
+      D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &d2d_device_context_));
+  UpdateDeviceContext();
+}
 
-common::ComPtr<IDXGISwapChain2> CreateSwapChain(DxDevice* device,
-                                                const D2D1_SIZE_U& size) {
-  DCHECK_GT(size.width, 0u);
-  DCHECK_GT(size.height, 0u);
+SwapChain::~SwapChain() {
+  d2d_device_context_->SetTarget(nullptr);
+  d2d_device_context_.reset();
+}
+
+void SwapChain::AddDirtyRect(const RectF& new_dirty_rect_f) {
+  DCHECK(bounds_.Contains(new_dirty_rect_f));
+  auto const new_dirty_rect = ToEnclosingRect(new_dirty_rect_f);
+  DCHECK(!new_dirty_rect.empty());
+  if (dirty_rects_.empty()) {
+    dirty_rects_.push_back(new_dirty_rect);
+    return;
+  }
+  for (const auto& dirty_rect : dirty_rects_) {
+    if (dirty_rect.Contains(new_dirty_rect))
+        return;
+  }
+  std::vector<Rect> new_dirty_rects;
+  for (const auto& dirty_rect : dirty_rects_) {
+    if (!new_dirty_rect.Contains(dirty_rect))
+      new_dirty_rects.push_back(dirty_rect);
+  }
+  new_dirty_rects.push_back(new_dirty_rect);
+  dirty_rects_ = new_dirty_rects;
+}
+
+SwapChain* SwapChain::CreateForComposition(const RectF& bounds) {
+  DCHECK(!bounds.empty());
+  // TODO(eval1749) We should use ToEnclosedRect().
+  const auto size = gfx::SizeU(static_cast<uint32_t>(bounds.width()),
+                               static_cast<uint32_t>(bounds.height()));
+
+  auto const device = DxDevice::instance();
+
   DXGI_SWAP_CHAIN_DESC1 swap_chain_desc = {0};
   swap_chain_desc.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
   swap_chain_desc.Width = size.width;
@@ -46,11 +87,14 @@ common::ComPtr<IDXGISwapChain2> CreateSwapChain(DxDevice* device,
   // and ensures that the application will only render after each VSync,
   // minimizing power consumption.
   // COM_VERIFY(swap_chain_->SetMaximumFrameLatency(1));
-  return swap_chain2;
+  return new SwapChain(swap_chain2);
 }
 
-common::ComPtr<IDXGISwapChain2> CreateSwapChain(DxDevice* device,
-                                                HWND hwnd) {
+SwapChain* SwapChain::CreateForHwnd(HWND hwnd) {
+  DCHECK(hwnd);
+
+  auto const device = DxDevice::instance();
+
   DXGI_SWAP_CHAIN_DESC1 swap_chain_desc = {0};
   swap_chain_desc.Width = 0;  // use automatic sizing
   swap_chain_desc.Height = 0;
@@ -72,60 +116,16 @@ common::ComPtr<IDXGISwapChain2> CreateSwapChain(DxDevice* device,
 
   common::ComPtr<IDXGISwapChain2> swap_chain2;
   COM_VERIFY(swap_chain2.QueryFrom(swap_chain1));
-  return swap_chain2;
+  return new SwapChain(swap_chain2);
 }
 
-}  // namespace
-
-//////////////////////////////////////////////////////////////////////
-//
-// SwapChain
-//
-SwapChain::SwapChain(DxDevice* device,
-                     common::ComPtr<IDXGISwapChain2> swap_chain)
-    : is_ready_(false), swap_chain_(swap_chain),
-      swap_chain_waitable_(swap_chain_->GetFrameLatencyWaitableObject()) {
-  COM_VERIFY(device->d2d_device()->CreateDeviceContext(
-      D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &d2d_device_context_));
-  UpdateDeviceContext();
-}
-
-SwapChain::~SwapChain() {
+void SwapChain::DidChangeBounds(const RectF& new_bounds) {
   d2d_device_context_->SetTarget(nullptr);
-  d2d_device_context_.reset();
-}
-
-void SwapChain::AddDirtyRect(const Rect& new_dirty_rect) {
-  DCHECK(!new_dirty_rect.empty());
-  if (dirty_rects_.empty()) {
-    dirty_rects_.push_back(new_dirty_rect);
-    return;
-  }
-  for (const auto& dirty_rect : dirty_rects_) {
-    if (dirty_rect.Contains(new_dirty_rect))
-        return;
-  }
-  std::vector<Rect> new_dirty_rects;
-  for (const auto& dirty_rect : dirty_rects_) {
-    if (!new_dirty_rect.Contains(dirty_rect))
-      new_dirty_rects.push_back(dirty_rect);
-  }
-  new_dirty_rects.push_back(new_dirty_rect);
-  dirty_rects_ = new_dirty_rects;
-}
-
-SwapChain* SwapChain::Create(HWND hwnd) {
-  DxDevice device;
-  return new SwapChain(&device, CreateSwapChain(&device, hwnd));
-}
-
-SwapChain* SwapChain::Create(DxDevice* device, const D2D1_SIZE_U& size) {
-  return new SwapChain(device, CreateSwapChain(device, size));
-}
-
-void SwapChain::DidChangeBounds(const D2D1_SIZE_U& size) {
-  d2d_device_context_->SetTarget(nullptr);
-  COM_VERIFY(swap_chain_->ResizeBuffers(0u, size.width, size.height,
+  bounds_ = new_bounds;
+  auto const enclosing_rect = ToEnclosingRect(new_bounds);
+  COM_VERIFY(swap_chain_->ResizeBuffers(0u,
+      static_cast<UINT>(enclosing_rect.width()),
+      static_cast<UINT>(enclosing_rect.height()),
       DXGI_FORMAT_UNKNOWN,
       DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT));
   UpdateDeviceContext();
@@ -148,15 +148,15 @@ bool SwapChain::IsReady() {
 }
 
 void SwapChain::Present() {
-  if (dirty_rects_.empty()) {
-    DVLOG(0) << "SwapChain::Present: no dirty rects";
+  if (dirty_rects_.empty())
     return;
+  DXGI_PRESENT_PARAMETERS parameters = {0};
+  if (!is_first_present_) {
+    parameters.DirtyRectsCount = dirty_rects_.size();
+    parameters.pDirtyRects = dirty_rects_.data();
+    parameters.pScrollRect = nullptr;
+    parameters.pScrollOffset = nullptr;
   }
-  DXGI_PRESENT_PARAMETERS parameters = { 0 };
-  parameters.DirtyRectsCount = dirty_rects_.size();
-  parameters.pDirtyRects = dirty_rects_.data();
-  parameters.pScrollRect = nullptr;
-  parameters.pScrollOffset = nullptr;
   if (IsReady()) {
     auto const flags = DXGI_PRESENT_DO_NOT_WAIT;
     COM_VERIFY(swap_chain_->Present1(0, flags, &parameters));
@@ -165,6 +165,7 @@ void SwapChain::Present() {
   }
   dirty_rects_.clear();
   is_ready_ = false;
+  is_first_present_ = false;
 }
 
 void SwapChain::UpdateDeviceContext() {
@@ -194,9 +195,14 @@ void SwapChain::UpdateDeviceContext() {
     COM_VERIFY(d2d_device_context_->CreateBitmapFromDxgiSurface(
         dxgi_back_buffer, bitmap_properties, &d2d_back_buffer));
     d2d_device_context_->SetTarget(d2d_back_buffer);
+
+    auto const size = d2d_back_buffer->GetPixelSize();
+    bounds_ = gfx::RectF(gfx::SizeF(
+        static_cast<float>(size.width), static_cast<float>(size.height)));
   }
 
   d2d_device_context_->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
+  is_first_present_ = true;
 }
 
 }  // namespace gfx

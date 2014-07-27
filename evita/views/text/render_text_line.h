@@ -32,13 +32,17 @@ class TextLine final {
   public: ~TextLine();
 
   public: float bottom() const { return bounds_.bottom; }
+  public: const gfx::PointF& bottom_right() const {
+    return bounds_.bottom_right();
+  }
+  public: const gfx::RectF& bounds() const { return bounds_; }
   public: const std::vector<Cell*>& cells() const { return cells_; }
   public: float height() const { return bounds_.height(); }
   public: Cell* last_cell() const { return cells_.back(); }
   public: float left() const { return bounds_.left; }
-  public: const gfx::RectF& bounds() const { return bounds_; }
   public: float right() const { return bounds_.right; }
   public: float top() const { return bounds_.top; }
+  public: const gfx::PointF& origin() const { return bounds_.origin(); }
   public: void set_origin(const gfx::PointF& origin);
   public: void set_start(Posn start) { m_lStart = start; }
   public: text::Posn text_end() const { return m_lEnd; }
@@ -57,7 +61,7 @@ class TextLine final {
   public: float GetWidth() const { return bounds_.width(); }
   public: uint Hash() const;
   public: gfx::RectF HitTestTextPosition(Posn lPosn) const;
-  public: Posn MapXToPosn(gfx::Canvas* canvas, float x) const;
+  public: Posn MapXToPosn(float x) const;
   public: void Render(gfx::Canvas* canvas) const;
 };
 

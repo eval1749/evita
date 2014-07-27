@@ -9,7 +9,6 @@
 
 #include "evita/li_util.h"
 #include "evita/gfx_base.h"
-#include "evita/text/buffer_mutation_observer.h"
 #include "evita/ui/base/ime/text_input_delegate.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/content_window.h"
@@ -40,7 +39,7 @@ class ScrollBar;
 //
 // TextEditWindow
 //
-class TextEditWindow : public text::BufferMutationObserver,
+class TextEditWindow : private gfx::Canvas::Observer,
                        public ui::ScrollBarObserver,
                        public ui::TextInputDelegate,
                        public views::ContentWindow {
@@ -53,7 +52,7 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: typedef views::rendering::TextSelectionModel TextSelectionModel;
   private: class ScrollBar;
 
-  private: gfx::Canvas* canvas_;
+  private: std::unique_ptr<gfx::Canvas> canvas_;
   private: Posn m_lCaretPosn;
   // TODO(yosi): Manage life time of selection.
   private: text::Selection* const selection_;
@@ -71,13 +70,9 @@ class TextEditWindow : public text::BufferMutationObserver,
   // [C]
   public: text::Posn ComputeMotion(
       Unit unit, Count count, const gfx::PointF& point, text::Posn position);
-  private: Posn computeGoalX(float, Posn);
 
   // [E]
   public: Posn EndOfLine(Posn);
-
-  // [F]
-  private: void FormatTextBlockIfNeeded();
 
   // [G]
   public: Posn GetEnd();
@@ -94,7 +89,6 @@ class TextEditWindow : public text::BufferMutationObserver,
 
   // [R]
   private: void Render(const TextSelectionModel& selection);
-  private: void Render();
 
   // [S]
   public: bool SmallScroll(int x_count, int y_count);
@@ -102,11 +96,10 @@ class TextEditWindow : public text::BufferMutationObserver,
   public: Posn StartOfLine(Posn);
 
   // [U]
-  private: void updateScrollBar();
+  private: void UpdateLayout();
 
-  // text::BufferMutationObserver
-  private: virtual void DidDeleteAt(text::Posn offset, size_t length) override;
-  private: virtual void DidInsertAt(text::Posn offset, size_t length) override;
+  // gfx::Canvas::Observer
+  private: virtual void ShouldDiscardResources() override;
 
   // ui::ScrollBarObserver
   private: virtual void DidClickLineDown() override;
@@ -133,7 +126,6 @@ class TextEditWindow : public text::BufferMutationObserver,
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void DidShow() override;
   private: virtual HCURSOR GetCursorAt(const Point&) const override;
-  private: virtual void OnDraw(gfx::Canvas* canvas) override;
 
   // views::ContentWindow
   private: virtual void MakeSelectionVisible() override;

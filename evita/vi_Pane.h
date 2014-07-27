@@ -35,6 +35,12 @@ class Pane : public ui::Widget, public ChildNode_<Frame, Pane> {
   // [U]
   public: void UpdateActiveTick();
 
+  // ui::Widget
+  protected: virtual void DidChangeBounds() override;
+  protected: virtual void DidHide() override;
+  protected: virtual void DidRealize() override;
+  protected: virtual void DidShow() override;
+
   DISALLOW_COPY_AND_ASSIGN(Pane);
 };
 

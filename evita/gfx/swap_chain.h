@@ -20,26 +20,26 @@ class DxDevice;
 // SwapChain
 //
 class SwapChain {
+  private: RectF bounds_;
   private: common::ComPtr<ID2D1DeviceContext> d2d_device_context_;
   private: std::vector<Rect> dirty_rects_;
+  private: bool is_first_present_;
   private: bool is_ready_;
   private: const common::ComPtr<IDXGISwapChain2> swap_chain_;
   private: HANDLE const swap_chain_waitable_;
 
-  private: SwapChain(DxDevice* device,
-                     common::ComPtr<IDXGISwapChain2> swap_chain);
+  private: SwapChain(common::ComPtr<IDXGISwapChain2> swap_chain);
   public: ~SwapChain();
-
-  public: static SwapChain* Create(HWND hwnd);
-  public: static SwapChain* Create(DxDevice* device, const D2D1_SIZE_U& size);
 
   public: ID2D1DeviceContext* d2d_device_context() const {
     return d2d_device_context_;
   }
   public: IDXGISwapChain2* swap_chain() const { return swap_chain_; }
 
-  public: void AddDirtyRect(const Rect& dirty_rects);
-  public: void DidChangeBounds(const D2D1_SIZE_U& size);
+  public: void AddDirtyRect(const RectF& dirty_rects);
+  public: static SwapChain* CreateForComposition(const RectF& bounds);
+  public: static SwapChain* CreateForHwnd(HWND hwnd);
+  public: void DidChangeBounds(const RectF& new_bounds);
   public: bool IsReady();
   public: void Present();
   private: void UpdateDeviceContext();

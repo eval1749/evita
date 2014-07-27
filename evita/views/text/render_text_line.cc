@@ -4,6 +4,8 @@
 
 #include "evita/views/text/render_text_line.h"
 
+#include <cmath>
+
 #include "base/logging.h"
 #include "evita/views/text/render_cell.h"
 #include "evita/views/text/render_selection.h"
@@ -88,6 +90,8 @@ void TextLine::Fix(float left, float top, float ascent, float descent) {
   bounds_.top = top;
   bounds_.right = right;
   bounds_.bottom = top + height;
+  DCHECK_EQ(bounds_.top, ::floor(bounds_.top));
+  DCHECK_EQ(bounds_.bottom, ::floor(bounds_.bottom));
 }
 
 uint TextLine::Hash() const {
@@ -116,13 +120,13 @@ gfx::RectF TextLine::HitTestTextPosition(Posn offset) const {
   return gfx::RectF();
 }
 
-Posn TextLine::MapXToPosn(gfx::Canvas* canvas, float xGoal) const {
+Posn TextLine::MapXToPosn(float xGoal) const {
   auto xCell = 0.0f;
   auto lPosn = GetEnd() - 1;
   for (const auto cell : cells_) {
     auto const x = xGoal - xCell;
     xCell += cell->width();
-    auto const lMap = cell->MapXToPosn(canvas, x);
+    auto const lMap = cell->MapXToPosn(x);
     if (lMap >= 0)
       lPosn = lMap;
     if (x >= 0 && x < cell->width())

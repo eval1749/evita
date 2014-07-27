@@ -8,6 +8,9 @@
 #include <memory>
 
 #include "evita/gfx/canvas.h"
+#include "evita/gfx/rect.h"
+#include "evita/gfx/rect_f.h"
+#include "evita/text/buffer_mutation_observer.h"
 #include "evita/views/text/render_selection.h"
 
 namespace views {
@@ -25,20 +28,20 @@ namespace rendering {
 //
 // TextRenderer
 //
-class TextRenderer final : private gfx::Canvas::Observer {
-  private: typedef common::win::Rect Rect;
+class TextRenderer final : public text::BufferMutationObserver {
   private: typedef rendering::Cell Cell;
   public: typedef rendering::ScreenTextBlock ScreenTextBlock;
   public: typedef rendering::TextSelectionModel TextSelectionModel;
   public: typedef rendering::TextBlock TextBlock;
-  public: typedef rendering::TextLine Line;
+  public: typedef rendering::TextLine TextLine;
 
-  private: gfx::Canvas* canvas_;
+  private: gfx::RectF bounds_;
   private: text::Buffer* const buffer_;
   private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
   private: bool should_format_;
   private: bool should_render_;
   private: std::unique_ptr<TextBlock> text_block_;
+  private: text::Posn view_start_;
   private: float zoom_;
 
   public: TextRenderer(text::Buffer* buffer);
@@ -48,48 +51,41 @@ class TextRenderer final : private gfx::Canvas::Observer {
   public: float zoom() const { return zoom_; }
   public: void set_zoom(float new_zoom);
 
-  // [D]
-  public: void DidKillFocus();
+  public: void DidHide();
+  public: void DidKillFocus(gfx::Canvas* canvas);
+  public: void DidLostCanvas();
   public: void DidSetFocus();
-
-  // [F]
-  public: Line* FindLine(Posn) const;
-  public: void Format(Posn start);
-  public: Line* FormatLine(Posn start);
-
-  // [G]
-  public: Posn GetStart() const;
-  public: Posn GetEnd() const;
+  // Returns end of line offset containing |text_offset|.
+  public: text::Posn EndOfLine(text::Posn text_offset) const;
+  private: TextLine* FindLine(text::Posn text_offset) const;
+  public: void Format(text::Posn text_offset);
+  // Returns true if formatting taken place.
+  public: bool FormatIfNeeded();
+  public: Posn GetStart();
+  public: Posn GetEnd();
   // Returns fully visible end offset or end of line position if there is only
   // one line.
-  public: Posn GetVisibleEnd() const;
-
-  // [H]
-  public: gfx::RectF HitTestTextPosition(Posn) const;
-
-  // [I]
+  public: Posn GetVisibleEnd();
+  public: gfx::RectF HitTestTextPosition(text::Posn text_offset) const;
   public: bool IsPositionFullyVisible(Posn) const;
-
-  // [M]
-  public: Posn MapPointToPosition(gfx::PointF point) const;
-
-  // [R]
-  public: void Render(const TextSelectionModel& selection);
-  private: void RenderRuler();
-  public: void RenderSelectionIfNeeded(const TextSelectionModel& selection);
-  public: void Reset();
-
-  // [S]
+  public: text::Posn MapPointToPosition(gfx::PointF point);
+  public: text::Posn MapPointXToOffset(text::Posn text_offset,
+                                       float point_x) const;
+  public: void Render(gfx::Canvas* canvas, const TextSelectionModel& selection);
+  private: void RenderRuler(gfx::Canvas* canvas);
+  public: void RenderSelectionIfNeeded(gfx::Canvas* canvas,
+                                       const TextSelectionModel& selection);
   public: bool ScrollDown();
   public: bool ScrollToPosition(Posn offset);
   public: bool ScrollUp();
-  public: void SetBounds(const Rect& rect);
-  public: void SetCanvas(gfx::Canvas* canvas);
-  public: bool ShouldFormat() const;
+  public: void SetBounds(const gfx::RectF& new_bounds);
+  private: bool ShouldFormat() const;
   public: bool ShouldRender() const;
+  public: text::Posn StartOfLine(text::Posn text_offset) const;
 
-  // gfx::Canvas::Observer
-  private: virtual void ShouldDiscardResources() override;
+  // text::BufferMutationObserver
+  private: virtual void DidDeleteAt(text::Posn offset, size_t length) override;
+  private: virtual void DidInsertAt(text::Posn offset, size_t length) override;
 
   DISALLOW_COPY_AND_ASSIGN(TextRenderer);
 };

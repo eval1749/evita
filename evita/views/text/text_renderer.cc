@@ -12,6 +12,8 @@
 #include <memory>
 #include <utility>
 
+#include "evita/dom/lock.h"
+#include "evita/editor/dom_lock.h"
 #include "evita/gfx_base.h"
 #include "evita/text/buffer.h"
 #include "evita/views/text/render_cell.h"
@@ -30,13 +32,14 @@ using namespace rendering;
 // TextRenderer
 //
 TextRenderer::TextRenderer(text::Buffer* buffer)
-    : buffer_(buffer), canvas_(nullptr),
-      screen_text_block_(new ScreenTextBlock()),
-      should_format_(true), should_render_(true),
-      text_block_(new TextBlock(buffer)), zoom_(1.0f) {
+    : buffer_(buffer), screen_text_block_(new ScreenTextBlock()),
+      should_render_(true), text_block_(new TextBlock(buffer)),
+      view_start_(0), zoom_(1.0f) {
+  buffer_->AddObserver(this);
 }
 
 TextRenderer::~TextRenderer() {
+  buffer()->RemoveObserver(this);
 }
 
 void TextRenderer::set_zoom(float new_zoom) {
@@ -44,59 +47,85 @@ void TextRenderer::set_zoom(float new_zoom) {
   if (zoom_ == new_zoom)
     return;
   zoom_ = new_zoom;
-  should_format_ = true;
 }
 
-void TextRenderer::DidKillFocus() {
-  screen_text_block_->DidKillFocus(canvas_);
+void TextRenderer::DidHide() {
+  screen_text_block_->Reset();
+}
+
+void TextRenderer::DidKillFocus(gfx::Canvas* canvas) {
+  screen_text_block_->DidKillFocus(canvas);
+}
+
+void TextRenderer::DidLostCanvas() {
+  screen_text_block_->Reset();
 }
 
 void TextRenderer::DidSetFocus() {
   screen_text_block_->DidSetFocus();
 }
 
+// Returns end of line offset containing |text_offset|.
+text::Posn TextRenderer::EndOfLine(text::Posn text_offset) const {
+  UI_ASSERT_DOM_LOCKED();
+
+  if (text_offset >= buffer()->GetEnd())
+    return buffer()->GetEnd();
+
+  if (!ShouldFormat()) {
+    if (auto const line = FindLine(text_offset))
+      return line->GetEnd() - 1;
+  }
+
+  TextBlock text_block(buffer(), bounds_, zoom_);
+  auto start_offset = buffer()->ComputeStartOfLine(text_offset);
+  TextFormatter formatter(&text_block, start_offset);
+  for (;;) {
+    std::unique_ptr<TextLine> line(formatter.FormatLine());
+    if (text_offset < line->GetEnd())
+      return line->GetEnd() - 1;
+  }
+}
+
 TextLine* TextRenderer::FindLine(Posn lPosn) const {
   DCHECK(!ShouldFormat());
-  if (lPosn < GetStart() || lPosn > GetEnd())
+  if (lPosn < text_block_->GetFirst()->GetStart() ||
+      lPosn > text_block_->GetFirst()->GetEnd()) {
     return nullptr;
-
+  }
   for (auto const line : text_block_->lines()) {
     if (lPosn < line->text_end())
       return line;
   }
-
-  // We must not be here.
   return nullptr;
 }
 
-text::Posn TextRenderer::GetEnd() const {
-  DCHECK(!ShouldFormat());
+text::Posn TextRenderer::GetEnd() {
+  FormatIfNeeded();
   return text_block_->GetLast()->GetEnd();
 }
 
-text::Posn TextRenderer::GetStart() const {
-  DCHECK(!ShouldFormat());
+text::Posn TextRenderer::GetStart() {
+  FormatIfNeeded();
   return text_block_->GetFirst()->GetStart();
 }
 
-text::Posn TextRenderer::GetVisibleEnd() const {
-  DCHECK(!ShouldFormat());
+text::Posn TextRenderer::GetVisibleEnd() {
+  FormatIfNeeded();
   return text_block_->GetVisibleEnd();
 }
 
-void TextRenderer::Format(Posn lStart) {
-  DCHECK(canvas_);
-  text_block_->Reset();
-  TextFormatter formatter(text_block_.get(), lStart, zoom_);
-  formatter.Format();
-  should_format_ = false;
+void TextRenderer::Format(text::Posn text_offset) {
+  text_block_->Format(bounds_, zoom_, text_offset);
+  view_start_ = text_block_->GetFirst()->GetStart();
   should_render_ = true;
 }
 
-TextLine* TextRenderer::FormatLine(Posn lStart) {
-  DCHECK(canvas_);
-  TextFormatter formatter(text_block_.get(), lStart, zoom_);
-  return formatter.FormatLine();
+bool TextRenderer::FormatIfNeeded() {
+  if (!ShouldFormat())
+    return false;
+  Format(view_start_);
+  return true;
 }
 
 // Maps specified buffer position to window point and returns true. If
@@ -104,26 +133,30 @@ TextLine* TextRenderer::FormatLine(Posn lStart) {
 //
 // A TextRenderer object must be formatted with the latest buffer.
 //
-gfx::RectF TextRenderer::HitTestTextPosition(Posn lPosn) const {
-  DCHECK(!ShouldFormat());
-  if (lPosn < GetStart() || lPosn > GetEnd())
-    return gfx::RectF();
-  for (auto const line : text_block_->lines()) {
-    auto const rect = line->HitTestTextPosition(lPosn);
-    if (!rect.empty())
-      return rect;
+gfx::RectF TextRenderer::HitTestTextPosition(text::Posn text_offset) const {
+  if (!ShouldFormat()) {
+    if (auto const line = FindLine(text_offset))
+      return line->HitTestTextPosition(text_offset);
   }
-  return gfx::RectF();
+
+  TextBlock text_block(buffer(), bounds_, zoom_);
+  auto start_offset = buffer()->ComputeStartOfLine(text_offset);
+  TextFormatter formatter(&text_block, start_offset);
+  for (;;) {
+    std::unique_ptr<TextLine> line(formatter.FormatLine());
+    if (text_offset < line->GetEnd())
+      return line->HitTestTextPosition(text_offset);
+  }
 }
 
 bool TextRenderer::IsPositionFullyVisible(text::Posn offset) const {
   DCHECK(!ShouldFormat());
-  return offset >= GetStart() && offset < GetVisibleEnd();
+  return offset >= text_block_->GetFirst()->GetStart() &&
+         offset < text_block_->GetVisibleEnd();
 }
 
-Posn TextRenderer::MapPointToPosition(gfx::PointF pt) const {
-  DCHECK(canvas_);
-  DCHECK(!ShouldFormat());
+text::Posn TextRenderer::MapPointToPosition(gfx::PointF pt) {
+  FormatIfNeeded();
   if (pt.y < text_block_->top())
     return GetStart();
   if (pt.y >= text_block_->bottom())
@@ -145,7 +178,7 @@ Posn TextRenderer::MapPointToPosition(gfx::PointF pt) const {
     for (const auto cell : line->cells()) {
       auto x = pt.x - xCell;
       xCell += cell->width();
-      const auto offset = cell->MapXToPosn(canvas_, x);
+      const auto offset = cell->MapXToPosn(x);
       if (offset >= 0)
         result_offset = offset;
       if (x >= 0 && x < cell->width())
@@ -156,19 +189,36 @@ Posn TextRenderer::MapPointToPosition(gfx::PointF pt) const {
   return GetEnd() - 1;
 }
 
-void TextRenderer::Render(const TextSelectionModel& selection_model) {
-  DCHECK(canvas_);
+text::Posn TextRenderer::MapPointXToOffset(text::Posn text_offset,
+                                           float point_x) const {
+  if (!ShouldFormat()) {
+    if (auto const line = FindLine(text_offset))
+      return line->MapXToPosn(point_x);
+  }
+
+  TextBlock text_block(buffer(), bounds_, zoom_);
+  auto start_offset = buffer()->ComputeStartOfLine(text_offset);
+  TextFormatter formatter(&text_block, start_offset);
+  for (;;) {
+    std::unique_ptr<TextLine> line(formatter.FormatLine());
+    if (text_offset < line->GetEnd())
+      return line->MapXToPosn(point_x);
+  }
+}
+
+void TextRenderer::Render(gfx::Canvas* canvas,
+                          const TextSelectionModel& selection_model) {
   DCHECK(!ShouldFormat());
   DCHECK(!text_block_->bounds().empty());
   text_block_->EnsureLinePoints();
   const auto selection = TextFormatter::FormatSelection(
       text_block_->text_buffer(), selection_model);
-  screen_text_block_->Render(canvas_, text_block_.get(), selection);
-  RenderRuler();
+  screen_text_block_->Render(canvas, text_block_.get(), selection);
+  RenderRuler(canvas);
   should_render_ = false;
 }
 
-void TextRenderer::RenderRuler() {
+void TextRenderer::RenderRuler(gfx::Canvas* canvas) {
   // FIXME 2007-08-05 We should expose show/hide and ruler settings to both
   // script and UI.
   auto style = buffer_->GetDefaultStyle();
@@ -181,36 +231,32 @@ void TextRenderer::RenderRuler() {
   gfx::RectF ruler_bounds(gfx::PointF(ruler_x, text_block_->top()),
                           gfx::SizeF(1.0f, text_block_->height()));
 
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_, ruler_bounds);
-  gfx::Brush brush(canvas_, gfx::ColorF(0, 0, 0, 0.3f));
-  canvas_->DrawRectangle(brush, ruler_bounds);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, ruler_bounds);
+  gfx::Brush brush(canvas, gfx::ColorF(0, 0, 0, 0.3f));
+  canvas->DrawRectangle(brush, ruler_bounds);
 }
 
 void TextRenderer::RenderSelectionIfNeeded(
+    gfx::Canvas* canvas,
     const TextSelectionModel& new_selection_model) {
   DCHECK(!ShouldFormat());
   DCHECK(!should_render_);
   DCHECK(!text_block_->bounds().empty());
-  screen_text_block_->RenderSelectionIfNeeded(canvas_,
+  screen_text_block_->RenderSelectionIfNeeded(canvas,
       TextFormatter::FormatSelection(text_block_->text_buffer(),
                                      new_selection_model));
 }
 
-void TextRenderer::Reset() {
-  screen_text_block_->Reset();
-}
-
 bool TextRenderer::ScrollDown() {
-  DCHECK(canvas_);
   DCHECK(!ShouldFormat());
   if (!GetStart())
     return false;
-  auto const lGoal = GetStart() - 1;
-  auto const lStart = buffer_->ComputeStartOfLine(lGoal);
-  TextFormatter formatter(text_block_.get(), lStart, zoom_);
+  auto const goal_offset = GetStart() - 1;
+  auto const start_offset = buffer_->ComputeStartOfLine(goal_offset);
+  TextFormatter formatter(text_block_.get(), start_offset);
   for (;;) {
     auto const line = formatter.FormatLine();
-    if (lGoal < line->GetEnd()) {
+    if (goal_offset < line->GetEnd()) {
       text_block_->Prepend(line);
       break;
     }
@@ -222,13 +268,11 @@ bool TextRenderer::ScrollDown() {
     text_block_->DiscardLastLine();
   }
 
-  should_format_ = false;
   should_render_ = true;
   return true;
 }
 
 bool TextRenderer::ScrollToPosition(Posn offset) {
-  DCHECK(canvas_);
   DCHECK(!ShouldFormat());
   if (IsPositionFullyVisible(offset))
     return false;
@@ -257,7 +301,7 @@ bool TextRenderer::ScrollToPosition(Posn offset) {
     }
   }
 
-  Format(buffer_->ComputeStartOfLine(offset));
+  Format(offset);
   while (!IsPositionFullyVisible(offset)) {
     if (!ScrollDown())
       return true;
@@ -297,7 +341,6 @@ bool TextRenderer::ScrollToPosition(Posn offset) {
 }
 
 bool TextRenderer::ScrollUp() {
-  DCHECK(canvas_);
   DCHECK(!ShouldFormat());
   text_block_->EnsureLinePoints();
   if (text_block_->IsShowEndOfDocument())
@@ -311,40 +354,70 @@ bool TextRenderer::ScrollUp() {
     return false;
 
   auto const start_offset = text_block_->GetLast()->GetEnd();
-  TextFormatter formatter(text_block_.get(), start_offset, zoom_);
+  TextFormatter formatter(text_block_.get(), start_offset);
   auto const line = formatter.FormatLine();
   text_block_->Append(line);
-  should_format_ = false;
   should_render_ = true;
   return true;
 }
 
-void TextRenderer::SetBounds(const Rect& rect) {
-  gfx::RectF bounds(rect);
-  text_block_->SetBounds(bounds);
-  screen_text_block_->SetBounds(bounds);
-  should_format_ = true;
-  should_render_ = true;
-}
-
-void TextRenderer::SetCanvas(gfx::Canvas* canvas) {
-  canvas_ = canvas;
-  screen_text_block_->Reset();
-  should_format_ = true;
+void TextRenderer::SetBounds(const gfx::RectF& new_bounds) {
+  DCHECK(!new_bounds.empty());
+  if (bounds_.size() == new_bounds.size())
+    return;
+  bounds_ = new_bounds;
+  screen_text_block_->SetBounds(bounds_);
   should_render_ = true;
 }
 
 bool TextRenderer::ShouldFormat() const {
-  return should_format_ || text_block_->dirty();
+  UI_ASSERT_DOM_LOCKED();
+  return text_block_->ShouldFormat(bounds_, zoom_);
 }
 
 bool TextRenderer::ShouldRender() const {
   return should_render_ || screen_text_block_->dirty();
 }
+// Returns end of line offset containing |text_offset|.
+text::Posn TextRenderer::StartOfLine(text::Posn text_offset) const {
+  UI_ASSERT_DOM_LOCKED();
 
-// gfx::Canvas::Observer
-void TextRenderer::ShouldDiscardResources() {
-  screen_text_block_->Reset();
+  if (text_offset <= 0)
+    return 0;
+
+  if (!ShouldFormat()) {
+    if (auto const line = FindLine(text_offset))
+      return line->GetStart();
+  }
+
+  TextBlock text_block(buffer(), bounds_, zoom_);
+  auto start_offset = buffer()->ComputeStartOfLine(text_offset);
+  if (!start_offset)
+    return 0;
+
+  TextFormatter formatter(&text_block, start_offset);
+  for (;;) {
+    std::unique_ptr<TextLine> line(formatter.FormatLine());
+    start_offset = line->GetEnd();
+    if (text_offset < start_offset)
+      return line->GetStart();
+  }
+}
+
+// text::BufferMutationObserver
+void TextRenderer::DidDeleteAt(text::Posn offset, size_t length) {
+  ASSERT_DOM_LOCKED();
+  if (view_start_ <= offset)
+    return;
+  view_start_ = std::max(static_cast<text::Posn>(view_start_ - length),
+                         offset);
+}
+
+void TextRenderer::DidInsertAt(text::Posn offset, size_t length) {
+  ASSERT_DOM_LOCKED();
+  if (view_start_ <= offset)
+    return;
+  view_start_ += length;
 }
 
 }  // namespace views

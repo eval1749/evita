@@ -34,7 +34,7 @@ class TextFormatter final {
   private: std::unique_ptr<TextScanner> text_scanner_;
   private: float zoom_;
 
-  public: TextFormatter(TextBlock* text_block, Posn start, float zoom);
+  public: TextFormatter(TextBlock* text_block, text::Posn start);
   public: ~TextFormatter();
 
   public: void Format();

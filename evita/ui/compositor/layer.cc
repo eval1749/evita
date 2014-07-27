@@ -20,17 +20,18 @@ namespace ui {
 //
 // Layer
 //
-Layer::Layer(Compositor* compositor)
-    : compositor_(compositor), visual_(compositor->CreateVisual()) {
+Layer::Layer()
+    : parent_layer_(nullptr),
+      visual_(Compositor::instance()->CreateVisual()) {
   COM_VERIFY(visual_->SetBitmapInterpolationMode(
       DCOMPOSITION_BITMAP_INTERPOLATION_MODE_LINEAR));
   COM_VERIFY(visual_->SetBorderMode(DCOMPOSITION_BORDER_MODE_SOFT));
 
   common::ComPtr<IDCompositionVisualDebug> debug_visual;
   COM_VERIFY(debug_visual.QueryFrom(visual_));
-  // TODO(eval1749) It seems heat map is painted with alpha=1.0.
   COM_VERIFY(debug_visual->EnableHeatMap(gfx::ColorF(255, 255, 0, 0.1)));
-  //COM_VERIFY(debug_visual->EnableRedrawRegions());
+  // Node: EnableRedrawRegions() makes too many color changes.
+  // COM_VERIFY(debug_visual->EnableRedrawRegions());
 }
 
 Layer::~Layer() {
@@ -38,13 +39,17 @@ Layer::~Layer() {
   visual_->RemoveAllVisuals();
 }
 
-void Layer::AppendChildLayer(Layer* new_child_layer) {
-  child_layers_.push_back(new_child_layer);
+void Layer::AppendChildLayer(Layer* new_child) {
+  DCHECK_NE(this, new_child->parent_layer_);
+  if (auto const old_parent = new_child->parent_layer_)
+    old_parent->RemoveChildLayer(new_child);
+  new_child->parent_layer_ = this;
+  child_layers_.insert(new_child);
   auto const is_insert_above = true;
   auto const ref_visual = static_cast<IDCompositionVisual*>(nullptr);
-  COM_VERIFY(visual_->AddVisual(new_child_layer->visual_, is_insert_above,
+  COM_VERIFY(visual_->AddVisual(new_child->visual_, is_insert_above,
                                 ref_visual));
-  compositor_->NeedCommit();
+  Compositor::instance()->NeedCommit();
 }
 
 gfx::Canvas* Layer::CreateCanvas() {
@@ -54,8 +59,20 @@ gfx::Canvas* Layer::CreateCanvas() {
   return canvas;
 }
 
+Layer* Layer::CreateLayer() const {
+  return new Layer();
+}
+
 void Layer::DidChangeBounds() {
-  compositor_->NeedCommit();
+  Compositor::instance()->NeedCommit();
+}
+
+void Layer::RemoveChildLayer(Layer* old_layer) {
+  DCHECK_EQ(old_layer->parent_layer_, this);
+  child_layers_.erase(old_layer);
+  visual_->RemoveVisual(old_layer->visual_);
+  old_layer->parent_layer_ = nullptr;
+  Compositor::instance()->NeedCommit();
 }
 
 void Layer::SetBounds(const gfx::RectF& new_bounds) {
@@ -83,12 +100,15 @@ void Layer::SetBounds(const gfx::RectF& new_bounds) {
   DidChangeBounds();
 }
 
+void Layer::SetBounds(const gfx::Rect& new_bounds) {
+  SetBounds(gfx::RectF(new_bounds));
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // HwndLayer
 //
-HwndLayer::HwndLayer(Compositor* compositor, HWND hwnd)
-    : Layer(compositor) {
+HwndLayer::HwndLayer(HWND hwnd) {
   ::SetLastError(0);
   ::SetWindowLong(hwnd, GWL_EXSTYLE,
                   ::GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
@@ -99,7 +119,8 @@ HwndLayer::HwndLayer(Compositor* compositor, HWND hwnd)
   DVLOG(0) << "ex_style=0x" << std::hex << ::GetWindowLong(hwnd, GWL_EXSTYLE);
   //DCHECK(::GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_LAYERED);
   common::ComPtr<IUnknown> surface;
-  COM_VERIFY(compositor->device()->CreateSurfaceFromHwnd(hwnd, &surface));
+  COM_VERIFY(Compositor::instance()->device()->
+      CreateSurfaceFromHwnd(hwnd, &surface));
   visual()->SetContent(surface);
   RECT bounds;
   ::GetClientRect(hwnd, &bounds);

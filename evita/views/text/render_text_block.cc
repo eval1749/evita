@@ -7,30 +7,35 @@
 #include "evita/dom/lock.h"
 #include "evita/text/buffer.h"
 #include "evita/views/text/render_text_line.h"
+#include "evita/views/text/text_formatter.h"
 
 namespace views {
 namespace rendering {
 
-TextBlock::TextBlock(text::Buffer* text_buffer)
-    : dirty_(true),
-      dirty_line_point_(true),
-      m_cy(0),
-      text_buffer_(text_buffer) {
+TextBlock::TextBlock(text::Buffer* text_buffer, const gfx::RectF& bounds,
+                     float zoom)
+    : bounds_(bounds), dirty_(true), dirty_line_point_(true),
+      m_cy(0), text_buffer_(text_buffer), zoom_(zoom) {
   text_buffer->AddObserver(this);
+}
+
+TextBlock::TextBlock(text::Buffer* text_buffer)
+    : TextBlock(text_buffer, gfx::RectF(), 0.0f) {
 }
 
 TextBlock::~TextBlock() {
   text_buffer_->RemoveObserver(this);
 }
 
-void TextBlock::Append(TextLine* pLine) {
+void TextBlock::Append(TextLine* line) {
   ASSERT_DOM_LOCKED();
+  DCHECK(lines_.empty() || lines_.back()->GetEnd() == line->GetStart());
   if (!dirty_line_point_) {
     auto const last_line = lines_.back();
-    pLine->set_origin(gfx::PointF(last_line->left(), last_line->bottom()));
+    line->set_origin(gfx::PointF(last_line->left(), last_line->bottom()));
   }
-  lines_.push_back(pLine);
-  m_cy += pLine->GetHeight();
+  lines_.push_back(line);
+  m_cy += line->GetHeight();
 }
 
 bool TextBlock::DiscardFirstLine() {
@@ -75,6 +80,22 @@ void TextBlock::Finish() {
   ASSERT_DOM_LOCKED();
   dirty_ = lines_.empty();
   dirty_line_point_ = dirty_;
+}
+
+void TextBlock::Format(const gfx::RectF& bounds, float zoom,
+                       text::Posn text_offset) {
+  ASSERT_DOM_LOCKED();
+  bounds_ = bounds;
+  zoom_ = zoom;
+  Reset();
+
+  TextFormatter formatter(this, text_buffer_->ComputeStartOfLine(text_offset));
+  formatter.Format();
+  while (text_offset > GetFirst()->GetEnd()) {
+    DiscardLastLine();
+    formatter.FormatLine();
+  }
+  EnsureLinePoints();
 }
 
 text::Posn TextBlock::GetVisibleEnd() const {
@@ -124,10 +145,14 @@ void TextBlock::Reset() {
   m_cy = 0;
 }
 
-void TextBlock::SetBounds(const gfx::RectF& rect) {
+bool TextBlock::ShouldFormat(const gfx::RectF& bounds, float zoom) const {
   ASSERT_DOM_LOCKED();
-  bounds_ = rect;
-  Reset();
+  // TODO(eval1749) We should check bounds change more. We don't need to
+  // format when
+  //  - Height changes only
+  //  - Narrow but all lines fit
+  //  - Widen but no lines wrap
+  return dirty_ || zoom_ != zoom || bounds_ != bounds;
 }
 
 // text::BufferMutationObserver

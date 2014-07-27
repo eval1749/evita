@@ -30,11 +30,11 @@ namespace {
 
 static const float kArrowButtonWidth = 20.0f;
 static const float kArrowButtonHeight = 20.0f;
-// margin between window close button and tab.
-static const float kMarginTop = 4;
+static const float kIconWidth = 16.0f;
+static const float kIconHeight = 16.0f;
+static const float kLabelHeight = 16.0f;
 static const float kMaxTabWidth = 200.0f;
 static const float kMinTabWidth = 140.0f;
-static const float kTabHeight = 32.0f;
 
 void FillRect(gfx::Canvas* canvas, int x, int y, int cx, int cy) {
   RECT rc;
@@ -288,7 +288,8 @@ class Tab final : public Element, public ui::Tooltip::ToolDelegate {
 
   private: CloseBox close_box_;
   public: int image_index_;
-  private: gfx::RectF label_bounds_;
+  private: gfx::RectF icon_bounds_;
+  private: gfx::RectF text_bounds_;
   public: base::string16 label_text_;
   public: LPARAM lparam_;
   public: uint32_t state_;
@@ -332,19 +333,9 @@ Tab::Tab(views::TabStripDelegate* tab_strip_delegate, const TCITEM* pTcItem)
 void Tab::DrawContent(gfx::Canvas* canvas) const {
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds());
   DrawIcon(canvas);
-
-  // Label Text
-  {
-    auto rc = bounds();
-    rc.left += 4 + 16 + 4;
-    rc.right -= 4;
-    rc.top += 8;
-    rc.bottom = rc.bottom - 2;
-
-    gfx::Brush brush(canvas, gfx::sysColor(COLOR_BTNTEXT));
-    canvas->DrawText(*canvas->work<gfx::TextFormat>(), brush, rc,
-                    label_text_.data(), label_text_.length());
-  }
+  gfx::Brush text_brush(canvas, gfx::sysColor(COLOR_BTNTEXT));
+  canvas->DrawText(*canvas->work<gfx::TextFormat>(), text_brush, text_bounds_,
+                   label_text_.data(), label_text_.length());
 }
 
 void Tab::DrawIcon(gfx::Canvas* canvas) const {
@@ -362,11 +353,7 @@ void Tab::DrawIcon(gfx::Canvas* canvas) const {
   if (!hIcon)
     return;
   gfx::Bitmap bitmap(canvas, hIcon);
-  auto const icon_size = canvas->AlignToPixel(gfx::SizeF(16, 16));
-  auto const icon_offset = canvas->AlignToPixel(gfx::SizeF(-20, 8));
-  auto const icon_origin = gfx::PointF(label_bounds_.left, top()) +
-                             icon_offset;
-  (*canvas)->DrawBitmap(bitmap, gfx::RectF(icon_origin, icon_size));
+  (*canvas)->DrawBitmap(bitmap, icon_bounds_);
   ::DestroyIcon(hIcon);
 }
 
@@ -409,15 +396,18 @@ void Tab::UpdateLayout() {
       gfx::PointF(right() - CloseBox::Width, top() + k_cyCloseBoxMargin),
       gfx::SizeF(CloseBox::Width, CloseBox::Height)));
 
-  label_bounds_ = bounds();
-  label_bounds_.right = close_box_.right();
-  label_bounds_.left += k_cxBorder + k_cxEdge;
-  label_bounds_.right -= k_cxBorder + k_cxEdge;
-  label_bounds_.top  += 6 + 4;
-  label_bounds_.bottom = label_bounds_.top + 12;
+  auto const kPadding = 2.0f;
 
-  if (image_index_ >= 0)
-    label_bounds_.left += 16 + 4;
+  auto const bounds = this->bounds() - gfx::SizeF(kPadding, kPadding);
+
+  icon_bounds_ = gfx::RectF(
+      gfx::PointF(bounds.left,
+                  bounds.top + bounds.height() / 2 - kIconHeight / 2),
+      gfx::SizeF(kIconWidth, kIconHeight));
+
+  text_bounds_ = gfx::RectF(
+      gfx::PointF(icon_bounds_.right + kPadding, bounds.top + kLabelHeight / 2),
+      gfx::PointF(close_box_.left() - kPadding, bounds.top + kLabelHeight));
 }
 
 // Element
@@ -503,14 +493,6 @@ gfx::ColorF ArrowButton::ComputeBgColor() const {
 }
 
 void ArrowButton::DrawArrow(gfx::Canvas* canvas) const {
-  auto const center_x = left() + width() / 2;
-  auto const center_y = top() + height() / 2;
-  auto const wing_size = width() / 4;
-  auto const pen_width = 2.0f;
-
-  auto const alpha = IsHover() ? 1.0f : 0.3f;
-  gfx::Brush arrow_brush(canvas, gfx::ColorF(0.0f, 0.0f, 0.0f, alpha));
-
   float factors[4] = {0.0f};
   switch (direction_) {
     case Direction::Down:
@@ -540,6 +522,14 @@ void ArrowButton::DrawArrow(gfx::Canvas* canvas) const {
      default:
        NOTREACHED();
    }
+
+  auto const center_x = left() + width() / 2;
+  auto const center_y = top() + height() / 2;
+  auto const wing_size = width() / 4;
+  auto const pen_width = 2.0f;
+
+  auto const alpha = IsHover() ? 1.0f : 0.3f;
+  gfx::Brush arrow_brush(canvas, gfx::ColorF(0.0f, 0.0f, 0.0f, alpha));
 
   canvas->DrawLine(arrow_brush, center_x + factors[0] * wing_size,
                    center_y + factors[1] * wing_size,
@@ -662,7 +652,7 @@ class TabStrip::TabStripImpl final {
   // [S]
   public: int SelectTab(size_t tab_index);
   private: int SelectTab(Tab* tab);
-  public: void SetBounds(const gfx::Rect& bounds);
+  public: void SetBounds(const gfx::RectF& bounds);
   public: void SetImageList(HIMAGELIST image_list);
   public: void SetTabData(size_t tab_index, const TCITEM* tab_data);
   private: void StopDrag();
@@ -779,8 +769,7 @@ void TabStrip::TabStripImpl::Draw(gfx::Canvas* canvas) const {
     }
   };
 
- auto const bgcolor_alpha = composition_enabled ? 0.0f : 1.0f;
- (*canvas)->Clear(gfx::sysColor(COLOR_3DFACE, bgcolor_alpha));
+ (*canvas)->Clear(gfx::ColorF(0, 0, 1, 0.5));
  if (tabs_.empty())
    return;
 
@@ -1080,7 +1069,7 @@ LRESULT TabStrip::TabStripImpl::OnNotify(NMHDR* nmhdr) {
 
 void TabStrip::TabStripImpl::OnPaint(const gfx::Rect& bounds) {
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  canvas_->set_dirty_rect(bounds);
+  canvas_->set_dirty_rect(gfx::RectF(bounds));
   Draw(canvas_.get());
 }
 
@@ -1124,11 +1113,12 @@ int TabStrip::TabStripImpl::SelectTab(Tab* const tab) {
   return selected_tab_ ? selected_tab_->tab_index() : -1;
 }
 
-void TabStrip::TabStripImpl::SetBounds(const gfx::Rect& bounds) {
-  bounds_ = gfx::RectF(bounds);
+void TabStrip::TabStripImpl::SetBounds(const gfx::RectF& new_bounds) {
+  if (bounds_ == new_bounds)
+    return;
+  bounds_ = new_bounds;
   tabs_bounds_ = bounds_;
-  tabs_bounds_.top += ::GetSystemMetrics(SM_CYSIZE) + kMarginTop;
-  canvas_->SetBounds(bounds);
+  canvas_->SetBounds(bounds_);
   Redraw();
 }
 
@@ -1274,16 +1264,15 @@ void TabStrip::DeleteTab(int tab_index) {
 // On Win8.1
 //  SM_CYSIZE = 22
 //  SM_CYCAPTION = 23
-//  SM_CYEDGE = 1
-//  SM_CYSIZEFRAME = 8
+//  SM_CYEDGE = 2
+//  SM_CYSIZEFRAME = 4
 Size TabStrip::GetPreferreSize() const {
   const auto font_height = 16;  // must be >= 16 (Small Icon Height)
-  const auto button_height = ::GetSystemMetrics(SM_CYSIZE);
-  //const auto caption_height = ::GetSystemMetrics(SM_CYCAPTION);
-  //const auto edge_height = ::GetSystemMetrics(SM_CYEDGE);
-  //const auto frame_height = ::GetSystemMetrics(SM_CYSIZEFRAME);
-  return Size(font_height * 40,
-              static_cast<int>(button_height + kMarginTop + 34));
+  DVLOG(0) << "SM_CYSIZE=" << ::GetSystemMetrics(SM_CYSIZE);
+  DVLOG(0) << "SM_CYCAPTION=" << ::GetSystemMetrics(SM_CYCAPTION);
+  DVLOG(0) << "SM_CYEDGE=" << ::GetSystemMetrics(SM_CYEDGE);
+  DVLOG(0) << "SM_CYSIZEFRAME=" << ::GetSystemMetrics(SM_CYSIZEFRAME);
+  return Size(font_height * 40, static_cast<int>(font_height * 2));
 }
 
 bool TabStrip::GetTab(int tab_index, TCITEM* tab_data) {
@@ -1324,7 +1313,7 @@ void TabStrip::DidCreateNativeWindow() {
 void TabStrip::DidChangeBounds() {
   if (!impl_)
     return;
-  impl_->SetBounds(bounds());
+  impl_->SetBounds(GetContentsBounds());
 }
 
 LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {

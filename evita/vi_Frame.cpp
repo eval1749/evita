@@ -31,7 +31,7 @@
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/ui/compositor/compositor.h"
-#include "evita/ui/compositor/layer.h"
+#include "evita/ui/compositor/root_layer.h"
 #include "evita/views/content_window.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/frame_observer.h"
@@ -47,12 +47,6 @@
 
 extern HINSTANCE g_hInstance;
 extern HINSTANCE g_hResource;
-
-static int const kPaddingBottom = 0;
-static int const kPaddingLeft = 0;
-static int const kPaddingRight = 0;
-static int const kPaddingTop = 0;
-static int const k_edge_size = 0;
 
 using common::win::Rect;
 using namespace views;
@@ -125,7 +119,6 @@ Pane* GetContainingPane(Frame* frame, views::Window* window) {
 //
 Frame::Frame(views::WindowId window_id)
     : views::Window(ui::NativeWindow::Create(this), window_id),
-      m_cyTabBand(0),
       message_view_(new views::MessageView()),
       title_bar_(new views::TitleBar()),
       tab_strip_(new views::TabStrip(this)),
@@ -301,8 +294,12 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
 // Note: We should call |ID2D1RenderTarget::Clear()| to reset alpha component
 // of pixels.
 void Frame::DrawForResize() {
+#if 0
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  canvas_->set_dirty_rect(bounds());
+  auto const pane_size = GetPaneRect().size();
+  canvas_->set_dirty_rect(gfx::RectF(gfx::Point(), gfx::SizeF(
+      static_cast<float>(pane_size.cx),
+      static_cast<float>(pane_size.cy))));
 
   // To avoid script destroys Pane's, we lock DOM.
   if (editor::DomLock::instance()->locked()) {
@@ -322,6 +319,7 @@ void Frame::DrawForResize() {
     return;
   }
   (*canvas_)->Clear(gfx::ColorF(gfx::ColorF::LightGray));
+#endif
 }
 
 Frame* Frame::FindFrame(const ui::Widget& widget) {
@@ -376,11 +374,8 @@ int Frame::getTabFromPane(Pane* const pane) const {
 }
 
 Rect Frame::GetPaneRect() const {
-  return Rect(bounds().left + k_edge_size + kPaddingLeft,
-              bounds().top + m_cyTabBand + k_edge_size * 2 + kPaddingLeft,
-              bounds().right - k_edge_size + kPaddingRight,
-              bounds().bottom - message_view_->height() + k_edge_size +
-                  kPaddingBottom);
+  return gfx::Rect(bounds().left, tab_strip_->bounds().bottom,
+                   bounds().right, bounds().bottom - message_view_->height());
 }
 
 void Frame::onDropFiles(HDROP const hDrop) {
@@ -491,40 +486,31 @@ void Frame::DidCreateNativeWindow() {
   message_view_->Realize(*native_window());
   title_bar_->Realize(*native_window());
 
-  auto const pane_bounds = GetPaneRect();
-
-  // Layer
-  dx_device_.reset(new gfx::DxDevice());
-  compositor_.reset(new ui::Compositor(dx_device_.get(), AssociatedHwnd()));
-
-  pane_layer_.reset(new ui::Layer(compositor_.get()));
-  compositor_->layer()->AppendChildLayer(pane_layer_.get());
-  pane_layer_->SetBounds(gfx::RectF(gfx::PointF(0, 0),
-                                    gfx::SizeF(pane_bounds.width(),
-                                               pane_bounds.height())));
-
-  // Canvas
-  //CompositionState::Update(*native_window());
-  canvas_.reset(pane_layer_->CreateCanvas());
-
   // TODO(yosi) How do we determine height of TabStrip?
-  m_cyTabBand = tab_strip_->GetPreferreSize().cy;
-  tab_strip_->SetBounds(Rect(0, 0, bounds().width(), m_cyTabBand));
+  auto const tab_strip_height = tab_strip_->GetPreferreSize().cy;
+  const auto close_button_height = ::GetSystemMetrics(SM_CYSIZE);
+  tab_strip_->SetBounds(Rect(0, close_button_height,
+                             bounds().width(),
+                             close_button_height + 4 + tab_strip_height));
 
+  SetLayer(new ui::RootLayer(this));
+
+  auto const pane_bounds = GetPaneRect();
   for (auto& pane: m_oPanes) {
     pane.SetBounds(pane_bounds);
   }
 
+  // Create message view, panes and tab strip.
   views::Window::DidCreateNativeWindow();
 
 #if 0
   message_view_layer_.reset(new ui::HwndLayer(
-      compositor_.get(), message_view_->hwnd()));
-  compositor_->layer()->AppendChildLayer(message_view_layer_.get());
+      Compositor::instance().get(), message_view_->hwnd()));
+  Compositor::instance()->layer()->AppendChildLayer(message_view_layer_.get());
 
   tab_strip_layer_.reset(new ui::HwndLayer(
-    compositor_.get(), tab_strip_->AssociatedHwnd()));
-  compositor_->layer()->AppendChildLayer(tab_strip_layer_.get());
+    Compositor::instance().get(), tab_strip_->AssociatedHwnd()));
+  Compositor::instance()->layer()->AppendChildLayer(tab_strip_layer_.get());
 #endif
 
   tab_strip_->SetIconList(views::IconCache::instance()->image_list());
@@ -540,7 +526,7 @@ void Frame::DidCreateNativeWindow() {
                  SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER |
                  SWP_NOREDRAW | SWP_NOSIZE | SWP_FRAMECHANGED);
 
-  compositor_->Commit();
+  //ui::Compositor::instance()->CommitIfNeeded();
 }
 
 void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
@@ -554,14 +540,10 @@ void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
 }
 
 void Frame::DidChangeBounds() {
-  compositor_->NeedCommit();
-
   views::Window::DidChangeBounds();
-  {
-    auto tab_strip_bounds = bounds();
-    tab_strip_bounds.bottom = tab_strip_bounds.top + m_cyTabBand;
-    tab_strip_->SetBounds(tab_strip_bounds);
-  }
+  tab_strip_->SetBounds(gfx::Rect(
+      tab_strip_->bounds().origin(),
+      gfx::Size(bounds().width(), tab_strip_->bounds().height())));
 
   if (tab_strip_layer_)
     tab_strip_layer_->SetBounds(gfx::RectF(tab_strip_->bounds()));
@@ -579,18 +561,13 @@ void Frame::DidChangeBounds() {
     message_view_->SetMessage(text);
   }
 
-  {
-    const auto pane_bounds = GetPaneRect();
-    pane_layer_->SetBounds(gfx::RectF(gfx::PointF(0, 0),
-                                      gfx::SizeF(pane_bounds.width(),
-                                                 pane_bounds.height())));
-    for (auto& pane: m_oPanes) {
-      pane.SetBounds(pane_bounds);
-    }
+  const auto pane_bounds = GetPaneRect();
+  for (auto& pane: m_oPanes) {
+    pane.SetBounds(pane_bounds);
   }
-  canvas_->SetBounds(bounds());
   DrawForResize();
-  compositor_->Commit();
+
+  ui::Compositor::instance()->CommitIfNeeded();
 }
 
 void Frame::DidSetFocus(ui::Widget* widget) {
@@ -616,7 +593,6 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
         margins.cxLeftWidth = 0;
         margins.cxRightWidth = 0;
         margins.cyBottomHeight = 0;
-        //margins.cyTopHeight = CompositionState::IsEnabled() ? m_cyTabBand : 0;
         margins.cyTopHeight = -1;
         auto const hr = ::DwmExtendFrameIntoClientArea(*native_window(),
                                                        &margins);
@@ -647,7 +623,7 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
     }
 
     case WM_NCCALCSIZE: {
-      if (!m_cyTabBand)
+      if (tab_strip_->bounds().empty())
         break;
       if (!wParam)
         return 0;
@@ -669,22 +645,11 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       LRESULT lResult;
       if (::DwmDefWindowProc(*native_window(), uMsg, wParam, lParam, &lResult))
         return lResult;
-
-      POINT const ptMouse = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
-      RECT rcWindow;
+      const gfx::Point mouse_point(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+      Rect rcWindow;
       ::GetWindowRect(*native_window(), &rcWindow);
-
-      RECT rcClient = {0};
-      ::AdjustWindowRectEx(
-          &rcClient,
-          static_cast<DWORD>(
-              ::GetWindowLong(*native_window(), GWL_STYLE)),
-          false,
-          static_cast<DWORD>(
-              ::GetWindowLong(*native_window(), GWL_EXSTYLE)));
-
-      if (ptMouse.y >= rcWindow.top
-          && ptMouse.y < rcWindow.top + m_cyTabBand) {
+      if (mouse_point.y >= rcWindow.top &&
+          mouse_point.y < rcWindow.top + tab_strip_->bounds().bottom) {
         return HTCAPTION;
       }
       break;
@@ -694,39 +659,13 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
   return Widget::OnMessage(uMsg, wParam, lParam);
 }
 
-void Frame::OnPaint(const gfx::Rect rect) {
-  {
-    // Fill window client area with alpha=0.
-    PAINTSTRUCT ps;
-    auto const hdc = ::BeginPaint(AssociatedHwnd(), &ps);
-    ::FillRect(hdc, &ps.rcPaint,
-               static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH)));
-    ::EndPaint(AssociatedHwnd(), &ps);
-  }
-
-  if (!editor::DomLock::instance()->locked()) {
-    UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-    if (lock_scope.locked()) {
-      OnPaint(rect);
-    } else {
-      // TODO(yosi) Should we have list of dirty rectangles rather than
-      // bounding dirty rectangles?
-      pending_update_rect_.Unite(rect);
-    }
-    return;
-  }
-
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  //canvas_->set_dirty_rect(bounds());
-  OnDraw(&*canvas_);
-  if (views::switches::editor_window_display_paint){
-    canvas_->FillRectangle(gfx::Brush(canvas_.get(),
-                                      gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)),
-                        rect);
-    canvas_->DrawRectangle(gfx::Brush(canvas_.get(),
-                                      gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)),
-                        rect, 2.0f);
-  }
+void Frame::OnPaint(const gfx::Rect) {
+  // Fill window client area with alpha=0.
+  PAINTSTRUCT ps;
+  auto const hdc = ::BeginPaint(AssociatedHwnd(), &ps);
+  ::FillRect(hdc, &ps.rcPaint,
+             static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH)));
+  ::EndPaint(AssociatedHwnd(), &ps);
 }
 
 void Frame::WillDestroyWidget() {

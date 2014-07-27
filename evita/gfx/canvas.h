@@ -48,6 +48,7 @@ class Canvas : public Object, public DpiHandler {
   friend class DrawingScope;
 
   private: int batch_nesting_level_;
+  private: RectF bounds_;
   private: scoped_refptr<FactorySet> factory_set_;
   private: ObserverList<Observer> observers_;
   private: std::unique_ptr<Bitmap> screen_bitmap_;
@@ -67,7 +68,7 @@ class Canvas : public Object, public DpiHandler {
     return GetRenderTarget();
   }
 
-  public: void set_dirty_rect(const Rect& rect);
+  public: const gfx::RectF bounds() const { return bounds_; }
   public: void set_dirty_rect(const RectF& rect);
   // |drawing()| is for debugging.
   public: bool drawing() const { return batch_nesting_level_; }
@@ -79,7 +80,7 @@ class Canvas : public Object, public DpiHandler {
   public: void set_work(void* ptr) { work_ = ptr; }
 
   // [A]
-  public: virtual void AddDirtyRect(const Rect& new_dirty_rect);
+  public: virtual void AddDirtyRect(const RectF& new_dirty_rect);
   public: void AddObserver(Observer* observer);
 
   // [B]
@@ -88,7 +89,7 @@ class Canvas : public Object, public DpiHandler {
   // [D]
   protected: virtual void DidCallEndDraw();
   protected: void DidCreateRenderTarget();
-  protected: virtual void DidChangeBounds(const SizeU& new_size) = 0;
+  protected: virtual void DidChangeBounds(const RectF& new_bounds) = 0;
   protected: virtual void DidLostRenderTarget() = 0;
   public: void DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
                           const RectF& src_rect, float opacity = 1.0f,
@@ -131,7 +132,7 @@ class Canvas : public Object, public DpiHandler {
 
   // [S]
   public: bool Canvas::SaveScreenImage(const RectF& bounds);
-  public: void SetBounds(const Rect& bounds);
+  public: void SetBounds(const RectF& bounds);
 
   DISALLOW_COPY_AND_ASSIGN(Canvas);
 };
@@ -148,9 +149,9 @@ class CanvasForHwnd : public Canvas {
   public: virtual ~CanvasForHwnd();
 
   // Canvas
-  private: virtual void AddDirtyRect(const Rect& new_dirty_rect) override;
+  private: virtual void AddDirtyRect(const RectF& new_dirty_rect) override;
   private: virtual void DidCallEndDraw() override;
-  private: virtual void DidChangeBounds(const SizeU& new_size) override;
+  private: virtual void DidChangeBounds(const RectF& new_bounds) override;
   private: virtual void DidLostRenderTarget() override;
   private: virtual ID2D1RenderTarget* GetRenderTarget() const override;
 
@@ -171,7 +172,7 @@ class LegacyCanvasForHwnd : public Canvas {
   private: void AttachRenderTarget();
 
   // Canvas
-  private: virtual void DidChangeBounds(const SizeU& new_size) override;
+  private: virtual void DidChangeBounds(const RectF& new_bounds) override;
   private: virtual void DidLostRenderTarget() override;
   private: virtual ID2D1RenderTarget* GetRenderTarget() const override;
 

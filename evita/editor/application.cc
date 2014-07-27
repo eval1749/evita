@@ -18,12 +18,14 @@
 #include "evita/editor/application_proxy.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/editor/switch_set.h"
+#include "evita/gfx/dx_device.h"
 #include "evita/io/io_manager.h"
 #include "evita/io/io_thread.h"
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/spellchecker/spelling_engine.h"
 #include "evita/ui/base/ime/text_input_client_win.h"
+#include "evita/ui/compositor/compositor.h"
 #include "evita/ui/widget.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/forms/form_window.h"
@@ -167,6 +169,7 @@ bool Application::OnIdle(int hint) {
   }
   auto more = views::FrameList::instance()->DoIdle(hint);
   more |= views::FormWindow::DoIdle(hint);
+  ui::Compositor::instance()->CommitIfNeeded();
   return more;
 }
 
@@ -221,4 +224,11 @@ void Application::Run() {
   ApplicationProxy::instance()->WillStartApplication();
   base::RunLoop run_loop;
   run_loop.Run();
+
+  // TODO(eval1749) We should use Singleton destructor for destructing
+  // |gfx::DxDevice|.
+  delete gfx::DxDevice::instance();
+  // TODO(eval1749) We should use Singleton destructor for destructing
+  // |ui::Compositor|.
+  delete ui::Compositor::instance();
 }

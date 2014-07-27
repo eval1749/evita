@@ -12,6 +12,13 @@
 
 namespace gfx {
 
+enum class CapStyle {
+  Flat = D2D1_CAP_STYLE_FLAT,
+  Round = D2D1_CAP_STYLE_ROUND,
+  Square = D2D1_CAP_STYLE_SQUARE,
+  Triangle = D2D1_CAP_STYLE_TRIANGLE,
+};
+
 enum class DashStyle {
   Solid = D2D1_DASH_STYLE_SOLID,
   Dash = D2D1_DASH_STYLE_DASH,
@@ -39,6 +46,8 @@ class StrokeStyle {
   public: operator ID2D1StrokeStyle*() const;
 
   public: bool is_realized() const { return platform_style_; }
+  public: void set_cap_style(CapStyle start_style, CapStyle end_cap_style);
+  public: void set_cap_style(CapStyle cap_style);
   public: void set_dashes(const std::vector<float>& dashes);
   public: void set_dash_offset(float offset);
   public: void set_dash_style(DashStyle dash_style);

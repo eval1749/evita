@@ -27,6 +27,15 @@ StrokeStyle::operator ID2D1StrokeStyle*() const {
   return platform_style_.get();
 }
 
+void StrokeStyle::set_cap_style(CapStyle start_style, CapStyle end_style) {
+  properties_.startCap = static_cast<D2D1_CAP_STYLE>(start_style);
+  properties_.endCap = static_cast<D2D1_CAP_STYLE>(end_style);
+}
+
+void StrokeStyle::set_cap_style(CapStyle cap_style) {
+  set_cap_style(cap_style, cap_style);
+}
+
 void StrokeStyle::set_dashes(const std::vector<float>& dashes) {
   dashes_ = dashes;
 }

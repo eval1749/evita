@@ -30,9 +30,6 @@ class ContentWindow : public Window {
   // [M]
   public: virtual void MakeSelectionVisible() = 0;
 
-  // [R]
-  public: virtual void Redraw() = 0;
-
   // ui::Widget
   protected: virtual void DidSetFocus(ui::Widget*) override;
 

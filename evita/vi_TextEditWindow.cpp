@@ -230,6 +230,64 @@ Posn TextEditWindow::MapPointToPosition(const gfx::PointF pt) {
   return std::min(text_renderer_->MapPointToPosition(pt), buffer()->GetEnd());
 }
 
+
+void TextEditWindow::Redraw() {
+  UI_ASSERT_DOM_LOCKED();
+
+  if (!is_shown())
+    return;
+
+  auto const selection = GetTextSelectionModel(this, *selection_);
+  Posn lCaretPosn;
+  if (selection.disabled()) {
+    auto const max_offset = buffer()->GetEnd();
+    if (selection.start() == max_offset && selection.end() == max_offset)
+      lCaretPosn = max_offset;
+    else
+      lCaretPosn = m_lCaretPosn == -1 ? selection.focus_offset() : m_lCaretPosn;
+  } else {
+    lCaretPosn = selection.focus_offset();
+  }
+
+  DCHECK_GE(lCaretPosn, 0);
+
+  if (text_renderer_->FormatIfNeeded()) {
+    if (m_lCaretPosn != lCaretPosn) {
+      text_renderer_->ScrollToPosition(lCaretPosn);
+      m_lCaretPosn = lCaretPosn;
+    }
+    Render(selection);
+    return;
+  }
+
+  if (m_lCaretPosn != lCaretPosn) {
+    m_lCaretPosn = lCaretPosn;
+    if (text_renderer_->IsPositionFullyVisible(lCaretPosn)) {
+      if (text_renderer_->ShouldRender()) {
+        Render(selection);
+      } else {
+        gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+        text_renderer_->RenderSelectionIfNeeded(canvas_.get(), selection);
+        vertical_scroll_bar_->Render(canvas_.get());
+      }
+      return;
+    }
+    text_renderer_->ScrollToPosition(lCaretPosn);
+    Render(selection);
+    return;
+  }
+
+  if (text_renderer_->ShouldRender()) {
+    Render(selection);
+    return;
+  }
+
+  // The screen is clean.
+  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+  text_renderer_->RenderSelectionIfNeeded(canvas_.get(), selection);
+  vertical_scroll_bar_->Render(canvas_.get());
+}
+
 void TextEditWindow::Render(const TextSelectionModel& selection) {
   UI_ASSERT_DOM_LOCKED();
   if (!is_shown())
@@ -421,63 +479,6 @@ HCURSOR TextEditWindow::GetCursorAt(const Point&) const {
 // views::ContentWindow
 void TextEditWindow::MakeSelectionVisible() {
   m_lCaretPosn = -1;
-}
-
-void TextEditWindow::Redraw() {
-  UI_ASSERT_DOM_LOCKED();
-
-  if (!is_shown())
-    return;
-
-  auto const selection = GetTextSelectionModel(this, *selection_);
-  Posn lCaretPosn;
-  if (selection.disabled()) {
-    auto const max_offset = buffer()->GetEnd();
-    if (selection.start() == max_offset && selection.end() == max_offset)
-      lCaretPosn = max_offset;
-    else
-      lCaretPosn = m_lCaretPosn == -1 ? selection.focus_offset() : m_lCaretPosn;
-  } else {
-    lCaretPosn = selection.focus_offset();
-  }
-
-  DCHECK_GE(lCaretPosn, 0);
-
-  if (text_renderer_->FormatIfNeeded()) {
-    if (m_lCaretPosn != lCaretPosn) {
-      text_renderer_->ScrollToPosition(lCaretPosn);
-      m_lCaretPosn = lCaretPosn;
-    }
-    Render(selection);
-    return;
-  }
-
-  if (m_lCaretPosn != lCaretPosn) {
-    m_lCaretPosn = lCaretPosn;
-    if (text_renderer_->IsPositionFullyVisible(lCaretPosn)) {
-      if (text_renderer_->ShouldRender()) {
-        Render(selection);
-      } else {
-        gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-        text_renderer_->RenderSelectionIfNeeded(canvas_.get(), selection);
-        vertical_scroll_bar_->Render(canvas_.get());
-      }
-      return;
-    }
-    text_renderer_->ScrollToPosition(lCaretPosn);
-    Render(selection);
-    return;
-  }
-
-  if (text_renderer_->ShouldRender()) {
-    Render(selection);
-    return;
-  }
-
-  // The screen is clean.
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  text_renderer_->RenderSelectionIfNeeded(canvas_.get(), selection);
-  vertical_scroll_bar_->Render(canvas_.get());
 }
 
 // views::Window

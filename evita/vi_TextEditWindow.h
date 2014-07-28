@@ -88,6 +88,7 @@ class TextEditWindow : private gfx::Canvas::Observer,
   public: Posn MapPointToPosition(const gfx::PointF point);
 
   // [R]
+  private: void Redraw();
   private: void Render(const TextSelectionModel& selection);
 
   // [S]
@@ -129,7 +130,6 @@ class TextEditWindow : private gfx::Canvas::Observer,
 
   // views::ContentWindow
   private: virtual void MakeSelectionVisible() override;
-  private: virtual void Redraw() override;
 
   // views::Window
   private: virtual bool OnIdle(int hint) override;

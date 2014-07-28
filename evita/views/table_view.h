@@ -48,6 +48,7 @@ class TableView
   private: bool DrawIfNeeded();
   public: std::vector<int> GetRowStates(
       const std::vector<base::string16>& keys) const;
+  private: void Redraw();
   private: std::unique_ptr<TableViewModel> UpdateModelIfNeeded();
   private: void UpdateControl(std::unique_ptr<TableViewModel> new_model);
 
@@ -68,7 +69,6 @@ class TableView
 
   // views::ContentWindow
   private: virtual void MakeSelectionVisible() override;
-  private: virtual void Redraw() override;
 
   // ui::Widget
   private: virtual void DidRealize() override;

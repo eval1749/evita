@@ -77,6 +77,14 @@ std::vector<int> TableView::GetRowStates(
   return std::move(states);
 }
 
+void TableView::Redraw() {
+  UI_ASSERT_DOM_LOCKED();
+  auto new_model = UpdateModelIfNeeded();
+  if (!new_model)
+    return;
+  UpdateControl(std::move(new_model));
+}
+
 void TableView::UpdateControl(std::unique_ptr<TableViewModel> new_model) {
 
   if (*model_->header_row() == *new_model->header_row()) {
@@ -219,14 +227,6 @@ base::string16 TableView::GetCellText(int row_id, int column_id) const {
 
 // views::ContentWindow
 void TableView::MakeSelectionVisible() {
-}
-
-void TableView::Redraw() {
-  UI_ASSERT_DOM_LOCKED();
-  auto new_model = UpdateModelIfNeeded();
-  if (!new_model)
-    return;
-  UpdateControl(std::move(new_model));
 }
 
 // ui::Widget

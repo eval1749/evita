@@ -412,24 +412,15 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
     MouseClickTracker::instance()->OnMouseReleased(event);
     result.widget()->OnMouseReleased(event);
     auto const click_count  = MouseClickTracker::instance()->click_count();
-    if (click_count >= 1) {
-      MouseEvent click_event(EventType::MousePressed,
-                             MouseEvent::ConvertToButton(message, wParam),
-                             GET_KEYSTATE_WPARAM(wParam), 1,
-                             result.widget(), result.local_point(),
-                             screen_point);
-      result.widget()->OnMousePressed(click_event);
+    if (!click_count)
       return;
-    }
-    if (click_count >= 2) {
-      MouseEvent dblclick_event(EventType::MousePressed,
-                                MouseEvent::ConvertToButton(message, wParam),
-                                GET_KEYSTATE_WPARAM(wParam), 2,
-                                result.widget(), result.local_point(),
-                                screen_point);
-      result.widget()->OnMousePressed(dblclick_event);
-      return;
-    }
+    MouseEvent click_event(EventType::MousePressed,
+                           MouseEvent::ConvertToButton(message, wParam),
+                           GET_KEYSTATE_WPARAM(wParam), click_count,
+                           result.widget(), result.local_point(),
+                           screen_point);
+    result.widget()->OnMousePressed(click_event);
+    return;
   }
 }
 

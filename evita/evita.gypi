@@ -342,6 +342,8 @@
 
         'views/content_window.cc',
         'views/message_view.cc',
+        'views/metrics_view.cc',
+        'views/metrics_view.h',
         'views/table_view_model.cc',
         'views/table_view.cc',
       ], # sources

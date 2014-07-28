@@ -109,6 +109,8 @@
         'editor/switch_set.cc',
         'editor/switch_set.h',
         'metrics/counter.cc',
+        'metrics/sampling.cc',
+        'metrics/sampling.h',
         'metrics/time_scope.cc',
         'views/frame_list.cc',
         'views/frame_observer.cc',

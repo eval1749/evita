@@ -632,11 +632,12 @@ void ThumbHorizontal::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
   }
 
   set_state(State::Normal);
-  auto const thumb_offset = (data.thumb_value - data.minimum) * scale;
-  auto const thumb_width = bounds.width() * scale;
+  auto const thumb_left= ::floor((data.thumb_value - data.minimum) * scale);
+  auto const thumb_right= ::floor(
+      (data.thumb_value + data.thumb_size - data.minimum) * scale);
   set_thumb_bounds(gfx::RectF(
-      gfx::PointF(bounds.left + thumb_offset, bounds.top),
-      gfx::SizeF(thumb_width, arrow_box_size)));
+      gfx::PointF(bounds.left + thumb_left, bounds.top),
+      gfx::PointF(bounds.left + thumb_right, bounds.bottom)));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -697,11 +698,12 @@ void ThumbVertical::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
   }
 
   set_state(State::Normal);
-  auto const thumb_offset = (data.thumb_value - data.minimum) * scale;
-  auto const thumb_height= bounds.height() * scale;
+  auto const thumb_top = ::floor((data.thumb_value - data.minimum) * scale);
+  auto const thumb_bottom = ::floor(
+      (data.thumb_value + data.thumb_size - data.minimum) * scale);
   set_thumb_bounds(gfx::RectF(
-      gfx::PointF(bounds.left, bounds.top + thumb_offset),
-      gfx::SizeF(arrow_box_size, thumb_height)));
+      gfx::PointF(bounds.left, bounds.top + thumb_top),
+      gfx::PointF(bounds.right, bounds.top + thumb_bottom)));
 }
 
 }  // namespace

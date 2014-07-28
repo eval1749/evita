@@ -20,6 +20,10 @@ namespace dom {
 class Document;
 }
 
+namespace gfx {
+class Canvas;
+}
+
 namespace ui {
 class KeyboardEvent;
 class MouseEvent;
@@ -35,6 +39,7 @@ class TableView
       public ui::TableModel {
   DECLARE_CASTABLE_CLASS(TableView, ContentWindow);
 
+  private: std::unique_ptr<gfx::Canvas> canvas_;
   private: std::vector<ui::TableColumn> columns_;
   private: ui::TableControl* control_;
   private: gc::Member<dom::Document> document_;
@@ -71,8 +76,10 @@ class TableView
   private: virtual void MakeSelectionVisible() override;
 
   // ui::Widget
-  private: virtual void DidRealize() override;
   private: virtual void DidChangeBounds() override;
+  private: virtual void DidHide() override;
+  private: virtual void DidRealize() override;
+  private: virtual void DidShow() override;
 
   // views::Window
   private: virtual bool OnIdle(int hint) override;

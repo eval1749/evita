@@ -41,8 +41,8 @@ class TableControl :
   public: virtual ~TableControl();
 
   public: int GetRowState(int row_id) const;
+  public: void RenderIfNeeded(gfx::Canvas* gfx);
   public: void Select(int row_id);
-  private: void UpdateViewIfNeeded();
 
   // TableModelObserver
   private: virtual void DidAddRow(int row_id) override;
@@ -55,7 +55,6 @@ class TableControl :
   private: virtual void DidChangeBounds() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void DidShow() override;
-  private: virtual void OnDraw(gfx::Canvas* gfx) override;
   private: virtual void OnKeyPressed(const KeyboardEvent& event) override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
 

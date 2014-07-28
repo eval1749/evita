@@ -10,8 +10,11 @@
 #include "base/strings/stringprintf.h"
 #include "evita/dom/text/document.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/gfx/canvas.h"
+#include "evita/gfx/rect_conversions.h"
 #include "evita/text/buffer.h"
 #include "evita/ui/base/table_model_observer.h"
+#include "evita/ui/compositor/layer.h"
 #include "evita/ui/controls/table_control.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/table_view_model.h"
@@ -230,16 +233,35 @@ void TableView::MakeSelectionVisible() {
 }
 
 // ui::Widget
-void TableView::DidRealize() {
-  ContentWindow::DidRealize();
-  document_->buffer()->AddObserver(this);
-}
 
 // Resize |ui::TableControl| to cover all client area.
 void TableView::DidChangeBounds() {
   ContentWindow::DidChangeBounds();
+  if (layer())
+    layer()->SetBounds(bounds());
+  if (canvas_)
+    canvas_->SetBounds(GetContentsBounds());
   if (control_)
-    control_->SetBounds(bounds());
+    control_->SetBounds(gfx::ToEnclosingRect(GetContentsBounds()));
+}
+
+void TableView::DidHide() {
+  container_widget().layer()->RemoveChildLayer(layer());
+  canvas_.reset();
+}
+
+void TableView::DidRealize() {
+  ContentWindow::DidRealize();
+  SetLayer(container_widget().layer()->CreateLayer());
+  document_->buffer()->AddObserver(this);
+}
+
+void TableView::DidShow() {
+  DCHECK(!canvas_);
+  if (bounds().empty())
+    return;
+  container_widget().layer()->AppendChildLayer(layer());
+  canvas_.reset(layer()->CreateCanvas());
 }
 
 // views::Window
@@ -251,6 +273,7 @@ bool TableView::OnIdle(int) {
     UpdateControl(std::move(new_model));
   if (has_focus())
     control_->RequestFocus();
+  control_->RenderIfNeeded(canvas_.get());
   return false;
 }
 

@@ -47,7 +47,6 @@ class TextEditWindow : private gfx::Canvas::Observer,
 
   private: typedef common::win::Point Point;
   private: typedef text::Range Range;
-  private: typedef views::ContentWindow ParentClass;
   private: typedef views::TextRenderer TextRenderer;
   private: typedef views::rendering::TextSelectionModel TextSelectionModel;
   private: class ScrollBar;
@@ -118,11 +117,10 @@ class TextEditWindow : private gfx::Canvas::Observer,
   private: virtual Widget* GetClientWindow() override;
 
   // ui::Widget
-  private: virtual void DidChangeHierarchy() override;
+  private: virtual void DidChangeBounds() override;
   private: virtual void DidHide() override;
   private: virtual void DidKillFocus(ui::Widget* focused_window) override;
   private: virtual void DidRealize() override;
-  private: virtual void DidChangeBounds() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void DidShow() override;
   private: virtual HCURSOR GetCursorAt(const Point&) const override;

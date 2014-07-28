@@ -237,8 +237,6 @@ void TableView::MakeSelectionVisible() {
 // Resize |ui::TableControl| to cover all client area.
 void TableView::DidChangeBounds() {
   ContentWindow::DidChangeBounds();
-  if (layer())
-    layer()->SetBounds(bounds());
   if (canvas_)
     canvas_->SetBounds(GetContentsBounds());
   if (control_)
@@ -246,21 +244,20 @@ void TableView::DidChangeBounds() {
 }
 
 void TableView::DidHide() {
-  container_widget().layer()->RemoveChildLayer(layer());
+  ContentWindow::DidHide();
   canvas_.reset();
 }
 
 void TableView::DidRealize() {
   ContentWindow::DidRealize();
-  SetLayer(container_widget().layer()->CreateLayer());
   document_->buffer()->AddObserver(this);
 }
 
 void TableView::DidShow() {
+  ContentWindow::DidShow();
   DCHECK(!canvas_);
   if (bounds().empty())
     return;
-  container_widget().layer()->AppendChildLayer(layer());
   canvas_.reset(layer()->CreateCanvas());
 }
 

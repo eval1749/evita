@@ -342,8 +342,10 @@ Posn TextEditWindow::StartOfLine(text::Posn text_offset) {
 
 void TextEditWindow::UpdateLayout() {
   DCHECK(!bounds().empty());
+#if 0
   if (layer())
     layer()->SetBounds(bounds());
+#endif
   auto const canvas_bounds = GetContentsBounds();
   if (canvas_)
     canvas_->SetBounds(canvas_bounds);
@@ -423,21 +425,21 @@ ui::Widget* TextEditWindow::GetClientWindow() {
 }
 
 // ui::Widget
-void TextEditWindow::DidChangeHierarchy() {
-  ParentClass::DidChangeHierarchy();
-  container_widget().layer()->AppendChildLayer(layer());
+void TextEditWindow::DidChangeBounds() {
+  views::ContentWindow::DidChangeBounds();
+  UpdateLayout();
 }
 
 void TextEditWindow::DidHide() {
   // Note: It is OK that hidden window have focus.
-  container_widget().layer()->RemoveChildLayer(layer());
+  views::ContentWindow::DidHide();
   canvas_.reset();
   vertical_scroll_bar_->Hide();
   text_renderer_->DidHide();
 }
 
 void TextEditWindow::DidKillFocus(ui::Widget* focused_widget) {
-  ParentClass::DidKillFocus(focused_widget);
+  views::ContentWindow::DidKillFocus(focused_widget);
   text_renderer_->DidKillFocus(canvas_.get());
   ui::TextInputClient::Get()->CommitComposition(this);
   ui::TextInputClient::Get()->CancelComposition(this);
@@ -445,14 +447,9 @@ void TextEditWindow::DidKillFocus(ui::Widget* focused_widget) {
 }
 
 void TextEditWindow::DidRealize() {
-  ParentClass::DidRealize();
-  SetLayer(container_widget().layer()->CreateLayer());
-  if (!bounds().empty())
-    UpdateLayout();
-}
-
-void TextEditWindow::DidChangeBounds() {
-  views::ContentWindow::DidChangeBounds();
+  views::ContentWindow::DidRealize();
+  if (bounds().empty())
+    return;
   UpdateLayout();
 }
 
@@ -461,12 +458,12 @@ void TextEditWindow::DidSetFocus(ui::Widget* last_focused) {
   // Note: It is OK to set focus to hidden window.
   text_renderer_->DidSetFocus();
   ui::TextInputClient::Get()->set_delegate(this);
-  ParentClass::DidSetFocus(last_focused);
+  views::ContentWindow::DidSetFocus(last_focused);
 }
 
 void TextEditWindow::DidShow() {
+  views::ContentWindow::DidShow();
   DCHECK(!canvas_);
-  container_widget().layer()->AppendChildLayer(layer());
   canvas_.reset(layer()->CreateCanvas());
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
   vertical_scroll_bar_->Show();

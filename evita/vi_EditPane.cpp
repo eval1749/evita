@@ -905,13 +905,10 @@ void EditPane::SplitterController::Stop() {
 //
 // EditPane
 //
-EditPane::EditPane(views::ContentWindow* window)
+EditPane::EditPane()
     : m_eState(State_NotRealized),
       root_box_(new VerticalBox(this, nullptr)),
       splitter_controller_(new SplitterController(*this)) {
-  AppendChild(window);
-  scoped_refptr<LeafBox> box(new LeafBox(this, root_box_.get(), window));
-  root_box_->Add(box);
 }
 
 EditPane::~EditPane() {
@@ -948,6 +945,20 @@ EditPane::Window* EditPane::GetLastWindow() const {
 void EditPane::ReplaceActiveWindow(views::ContentWindow* content) {
   DCHECK(!content->is_realized());
   root_box_->GetActiveLeafBox()->ReplaceContent(content);
+}
+
+void EditPane::SetContent(views::ContentWindow* window) {
+  DCHECK(!root_box_->first_child());
+  scoped_refptr<LeafBox> box(new LeafBox(this, root_box_.get(), window));
+  root_box_->Add(box);
+  if (bounds().empty()) {
+    DCHECK(!is_realized());
+  } else {
+    auto const box_bounds = GetContentsBounds();
+    box->SetBounds(box_bounds);
+    window->SetBounds(gfx::ToEnclosingRect(box_bounds));
+  }
+  window->SetParentWidget(this);
 }
 
 void EditPane::SplitHorizontally(Window* left_window,

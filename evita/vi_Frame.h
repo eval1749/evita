@@ -84,7 +84,7 @@ class Frame final : public views::Window,
   // [A]
   public: bool Activate();
   public: void AddObserver(views::FrameObserver* observer);
-  private: void AddPane(Pane*);
+  private: void AddPane(views::ContentWindow* content_window);
   private: void AddTab(Pane*);
   public: void AddWindow(views::ContentWindow*);
 

@@ -141,15 +141,18 @@ void Frame::AddObserver(views::FrameObserver* observer) {
   observers_.AddObserver(observer);
 }
 
-void Frame::AddPane(Pane* const pane) {
-  ASSERT(!!pane);
-  ASSERT(!pane->is_realized());
+void Frame::AddPane(views::ContentWindow* window) {
+  auto const pane = new EditPane();
   m_oPanes.Append(this, pane);
   AppendChild(pane);
-  if (is_realized()) {
-    pane->Realize(GetPaneRect());
-    AddTab(pane);
+  if (!is_realized()) {
+    DCHECK(!window->is_realized());
+    pane->SetContent(window);
+    return;
   }
+  pane->Realize(GetPaneRect());
+  pane->SetContent(window);
+  AddTab(pane);
 }
 
 void Frame::AddTab(Pane* const pane) {
@@ -180,7 +183,7 @@ void Frame::AddWindow(views::ContentWindow* window) {
     }
   }
 
-  AddPane(new EditPane(window));
+  AddPane(window);
 }
 
 void Frame::DidActivatePane(Pane* const pane) {
@@ -204,8 +207,10 @@ void Frame::DidActivatePane(Pane* const pane) {
 void Frame::DidAddChildWidget(const ui::Widget& widget) {
   if (auto pane = const_cast<Pane*>(widget.as<Pane>())) {
     m_oPanes.Append(this, pane);
-    if (!is_realized())
+    if (!is_realized()) {
+      DCHECK(!widget.is_realized());
       return;
+    }
     if (pane->is_realized())
       pane->SetBounds(GetPaneRect());
     else
@@ -217,8 +222,7 @@ void Frame::DidAddChildWidget(const ui::Widget& widget) {
   auto window = const_cast<views::ContentWindow*>(
       widget.as<views::ContentWindow>());
   DCHECK(window);
-  RemoveChild(window);
-  AddPane(new EditPane(window));
+  AddPane(window);
 }
 
 void Frame::DidChangeTabSelection(int selected_index) {

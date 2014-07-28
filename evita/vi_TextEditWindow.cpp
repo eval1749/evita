@@ -425,6 +425,7 @@ ui::Widget* TextEditWindow::GetClientWindow() {
 // ui::Widget
 void TextEditWindow::DidChangeHierarchy() {
   ParentClass::DidChangeHierarchy();
+  container_widget().layer()->AppendChildLayer(layer());
 }
 
 void TextEditWindow::DidHide() {

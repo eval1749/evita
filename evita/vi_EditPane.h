@@ -45,7 +45,7 @@ class EditPane final : public Pane {
   private: scoped_refptr<Box> root_box_;
   private: const std::unique_ptr<SplitterController> splitter_controller_;
 
-  public: explicit EditPane(Window* window);
+  public: EditPane();
   public: virtual ~EditPane();
 
   public: Frame& frame() const;
@@ -70,6 +70,7 @@ class EditPane final : public Pane {
   public: void ReplaceActiveWindow(Window* window);
 
   // [S]
+  public: void SetContent(Window* window);
   public: void SplitHorizontally(Window* left_window,
                                  Window* new_right_window);
   public: void SplitVertically(Window* above_window,

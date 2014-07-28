@@ -426,6 +426,7 @@ void ScreenTextBlock::Render(gfx::Canvas* canvas,
                              const TextBlock* text_block,
                              const TextSelection& selection) {
   DCHECK(!text_block->dirty());
+  DCHECK(!has_screen_bitmap_ || canvas->screen_bitmap());
   RenderContext render_context(this, canvas, text_block);
   dirty_ = render_context.Render();
   ui::Caret::instance()->DidPaint(this, bounds_);
@@ -579,6 +580,8 @@ void ScreenTextBlock::SetBounds(const gfx::RectF& new_bounds) {
 
 // ui::Caret::Delegate
 void ScreenTextBlock::HideCaret(gfx::Canvas* canvas, const ui::Caret& caret) {
+  if (!canvas->screen_bitmap())
+    return;
   gfx::Canvas::DrawingScope drawing_scope(canvas);
   canvas->DrawBitmap(*canvas->screen_bitmap(), caret.bounds(), caret.bounds());
   canvas->set_dirty_rect(caret.bounds());

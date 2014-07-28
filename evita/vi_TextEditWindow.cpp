@@ -342,10 +342,6 @@ Posn TextEditWindow::StartOfLine(text::Posn text_offset) {
 
 void TextEditWindow::UpdateLayout() {
   DCHECK(!bounds().empty());
-#if 0
-  if (layer())
-    layer()->SetBounds(bounds());
-#endif
   auto const canvas_bounds = GetContentsBounds();
   if (canvas_)
     canvas_->SetBounds(canvas_bounds);
@@ -465,7 +461,6 @@ void TextEditWindow::DidShow() {
   views::ContentWindow::DidShow();
   DCHECK(!canvas_);
   canvas_.reset(layer()->CreateCanvas());
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
   vertical_scroll_bar_->Show();
 }
 

@@ -772,7 +772,7 @@ void TabStrip::TabStripImpl::Draw(gfx::Canvas* canvas) const {
     }
   };
 
- (*canvas)->Clear(gfx::ColorF(0, 0, 1, 0.5));
+ (*canvas)->Clear(gfx::ColorF(0, 0, 1, 0.0));
  if (tabs_.empty())
    return;
 

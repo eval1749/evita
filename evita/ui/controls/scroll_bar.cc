@@ -124,13 +124,13 @@ class ScrollBar::Part {
   public: void set_state(State new_state);
   protected: void set_current_state() { state_ = new_state_; }
 
-  public: virtual void DidChangeBounds();
   public: virtual int GetValueAt(const gfx::PointF& point) const;
   public: virtual HitTestResult HitTest(const gfx::PointF& point) const = 0;
   public: virtual bool IsDirty() const;
   protected: virtual void Paint(gfx::Canvas* canvas,
                                 const gfx::RectF& bounds) const = 0;
   public: virtual void Render(gfx::Canvas* canvas, const gfx::RectF& bounds);
+  public: virtual void ResetView();
   public: virtual void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
                                     const ScrollBar::Data& data) = 0;
 
@@ -146,10 +146,6 @@ ScrollBar::Part::Part() : new_state_(State::Normal), state_(State::Normal) {
 
 void ScrollBar::Part::set_state(State new_state) {
   new_state_ = new_state;
-}
-
-void ScrollBar::Part::DidChangeBounds() {
-  bounds_ = gfx::RectF();
 }
 
 int ScrollBar::Part::GetValueAt(const gfx::PointF&) const {
@@ -174,6 +170,10 @@ void ScrollBar::Part::Render(gfx::Canvas* canvas, const gfx::RectF& bounds) {
   if (!changed)
     return;
   Paint(canvas, bounds);
+}
+
+void ScrollBar::Part::ResetView() {
+  bounds_ = gfx::RectF();
 }
 
 namespace {
@@ -484,12 +484,12 @@ class Thumb : public ScrollBar::Part {
   private: void PaintThumb(gfx::Canvas* canvas, const gfx::RectF& bounds) const;
 
   // ScrollBar::Part
-  private: virtual void DidChangeBounds() override;
   private: virtual bool IsDirty() const override;
   private: virtual void Paint(gfx::Canvas* canvas,
                               const gfx::RectF& bounds) const override;
   private: virtual void Render(gfx::Canvas* canvas,
                                const gfx::RectF& bounds) override;
+  private: virtual void ResetView() override;
 
   DISALLOW_COPY_AND_ASSIGN(Thumb);
 };
@@ -540,11 +540,6 @@ void Thumb::PaintThumb(gfx::Canvas* canvas,
 }
 
 // ScrollBar::Part
-void Thumb::DidChangeBounds() {
-  Part::DidChangeBounds();
-  thumb_bounds_ = gfx::RectF();
-}
-
 void Thumb::Paint(gfx::Canvas* canvas, const gfx::RectF& canvas_bounds) const {
   auto const bounds = this->bounds().Offset(canvas_bounds.origin());
   canvas->AddDirtyRect(bounds);
@@ -571,6 +566,11 @@ void Thumb::Render(gfx::Canvas* canvas, const gfx::RectF& canvas_bounds) {
 
 bool Thumb::IsDirty() const {
   return Part::IsDirty() || thumb_bounds_ != new_thumb_bounds_;
+}
+
+void Thumb::ResetView() {
+  Part::ResetView();
+  thumb_bounds_ = gfx::RectF();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -778,9 +778,15 @@ void ScrollBar::UpdateLayout() {
 // ui::Widget
 void ScrollBar::DidChangeBounds() {
   for (auto part : parts_) {
-    part->DidChangeBounds();
+    part->ResetView();
   }
   UpdateLayout();
+}
+
+void ScrollBar::DidShow() {
+  for (auto part : parts_) {
+    part->ResetView();
+  }
 }
 
 void ScrollBar::OnMouseExited(const ui::MouseEvent&) {

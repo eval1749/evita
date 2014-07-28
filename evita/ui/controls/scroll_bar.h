@@ -61,6 +61,7 @@ class ScrollBar : public ui::Widget {
 
   // ui::Widget
   private: virtual void DidChangeBounds() override;
+  private: virtual void DidShow() override;
   private: virtual void OnMouseExited(const MouseEvent& event) override;
   private: virtual void OnMouseMoved(const MouseEvent& event) override;
   private: virtual void OnMousePressed(const MouseEvent& event) override;

@@ -264,6 +264,7 @@ bool TextRenderer::ScrollDown() {
 
   // Discard lines outside of screen.
   text_block_->EnsureLinePoints();
+  view_start_ = text_block_->GetFirst()->GetStart();
   while (text_block_->GetLast()->top() >= text_block_->bottom()) {
     text_block_->DiscardLastLine();
   }
@@ -350,6 +351,7 @@ bool TextRenderer::ScrollUp() {
     return false;
 
   text_block_->EnsureLinePoints();
+  view_start_ = text_block_->GetFirst()->GetStart();
   if (text_block_->IsShowEndOfDocument())
     return false;
 

@@ -531,7 +531,7 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
   for (const auto& old_rect : old_selection_rects) {
     if (new_selection_rects.find(old_rect) != new_selection_rects.end())
       continue;
-    canvas->set_dirty_rect(old_rect);
+    canvas->AddDirtyRect(old_rect);
     canvas->DrawBitmap(*canvas->screen_bitmap(), old_rect, old_rect);
     ui::Caret::instance()->DidPaint(this, old_rect);
   }
@@ -543,7 +543,7 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
     for (const auto& new_rect : new_selection_rects) {
       if (old_selection_rects.find(new_rect) != old_selection_rects.end())
         continue;
-      canvas->set_dirty_rect(new_rect);
+      canvas->AddDirtyRect(new_rect);
       canvas->DrawBitmap(*canvas->screen_bitmap(), new_rect, new_rect);
       canvas->FillRectangle(fill_brush, new_rect);
       ui::Caret::instance()->DidPaint(this, new_rect);
@@ -555,7 +555,7 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
       ui::Caret::instance()->is_shown()) {
     const auto& caret_bounds = ui::Caret::instance()->bounds();
     canvas->DrawBitmap(*canvas->screen_bitmap(), caret_bounds, caret_bounds);
-    canvas->set_dirty_rect(caret_bounds);
+    canvas->AddDirtyRect(caret_bounds);
     ui::Caret::instance()->DidPaint(this, caret_bounds);
   }
   selection_ = new_selection;
@@ -582,20 +582,28 @@ void ScreenTextBlock::SetBounds(const gfx::RectF& new_bounds) {
 void ScreenTextBlock::HideCaret(gfx::Canvas* canvas, const ui::Caret& caret) {
   if (!canvas->screen_bitmap())
     return;
+  auto const caret_bounds = caret.bounds().Intersect(bounds_);
+  if (caret_bounds.empty())
+    return;
   gfx::Canvas::DrawingScope drawing_scope(canvas);
-  canvas->DrawBitmap(*canvas->screen_bitmap(), caret.bounds(), caret.bounds());
-  canvas->set_dirty_rect(caret.bounds());
+  canvas->DrawBitmap(*canvas->screen_bitmap(), caret_bounds, caret_bounds);
+  canvas->AddDirtyRect(caret_bounds);
 }
 
 void ScreenTextBlock::PaintCaret(gfx::Canvas* canvas, const ui::Caret& caret) {
+  auto const caret_bounds = caret.bounds().Intersect(bounds_);
+  if (caret_bounds.empty())
+    return;
   gfx::Brush fill_brush(canvas, gfx::ColorF::Black);
-  canvas->FillRectangle(fill_brush, caret.bounds());
-  canvas->set_dirty_rect(caret.bounds());
+  canvas->FillRectangle(fill_brush, caret_bounds);
+  canvas->AddDirtyRect(caret_bounds);
 }
 
 void ScreenTextBlock::ShowCaret(gfx::Canvas* canvas, const ui::Caret& caret) {
+  auto const caret_bounds = caret.bounds().Intersect(bounds_);
+  if (caret_bounds.empty())
+    return;
   gfx::Canvas::DrawingScope drawing_scope(canvas);
-  canvas->set_dirty_rect(caret.bounds());
   PaintCaret(canvas, caret);
 }
 

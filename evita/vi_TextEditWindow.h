@@ -58,7 +58,6 @@ class TextEditWindow : private gfx::Canvas::Observer,
   private: text::Selection* const selection_;
   private: std::unique_ptr<TextRenderer> text_renderer_;
   private: ui::ScrollBar* const vertical_scroll_bar_;
-  private: text::Posn view_start_;
 
   // ctor/dtor
   public: explicit TextEditWindow(views::WindowId window_id,

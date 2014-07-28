@@ -295,7 +295,6 @@ void TextEditWindow::Render(const TextSelectionModel& selection) {
 
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
   text_renderer_->Render(canvas_.get(), selection);
-  view_start_ = text_renderer_->GetStart();
 
   // Update scroll bar
   {

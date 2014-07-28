@@ -15,6 +15,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+// See \Program Files(x86)\Windows Kit\8.1\include\shared\sdkddkver.h for
+// actual value of _WIN32_WINNT_WIN8(0x602), _WIN32_WINNT_WINBLUE(0x603)
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0700
 #endif

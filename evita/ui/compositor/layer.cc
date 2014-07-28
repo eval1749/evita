@@ -29,7 +29,7 @@ Layer::Layer()
 
   common::ComPtr<IDCompositionVisualDebug> debug_visual;
   COM_VERIFY(debug_visual.QueryFrom(visual_));
-  COM_VERIFY(debug_visual->EnableHeatMap(gfx::ColorF(255, 255, 0, 0.1)));
+  //COM_VERIFY(debug_visual->EnableHeatMap(gfx::ColorF(255, 255, 0, 0.1)));
   // Node: EnableRedrawRegions() makes too many color changes.
   // COM_VERIFY(debug_visual->EnableRedrawRegions());
 }

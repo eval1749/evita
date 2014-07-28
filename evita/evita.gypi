@@ -255,6 +255,8 @@
         'ui/compositor/compositor.h',
         'ui/compositor/layer.cc',
         'ui/compositor/layer.h',
+        'ui/compositor/layer_content.cc',
+        'ui/compositor/layer_content.h',
         'ui/compositor/root_layer.cc',
         'ui/compositor/root_layer.h',
 

@@ -28,6 +28,7 @@
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/gfx_base.h"
 #include "evita/gfx/dx_device.h"
+#include "evita/gfx/rect_conversions.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/ui/compositor/compositor.h"
@@ -37,6 +38,7 @@
 #include "evita/views/frame_observer.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/message_view.h"
+#include "evita/views/metrics_view.h"
 #include "evita/views/switches.h"
 #include "evita/views/tab_data_set.h"
 #include "evita/views/tab_strip.h"
@@ -120,10 +122,12 @@ Pane* GetContainingPane(Frame* frame, views::Window* window) {
 Frame::Frame(views::WindowId window_id)
     : views::Window(ui::NativeWindow::Create(this), window_id),
       message_view_(new views::MessageView()),
+      metrics_view_(new views::MetricsView()),
       title_bar_(new views::TitleBar()),
       tab_strip_(new views::TabStrip(this)),
       m_pActivePane(nullptr) {
   AppendChild(tab_strip_);
+  AppendChild(metrics_view_.get());
 }
 
 Frame::~Frame() {
@@ -504,6 +508,14 @@ void Frame::DidCreateNativeWindow() {
     pane.SetBounds(pane_bounds);
   }
 
+  {
+    auto const size = gfx::Size(150, 100);
+    auto const content_bounds = gfx::ToEnclosingRect(GetContentsBounds());
+    metrics_view_->SetBounds(gfx::Rect(
+        content_bounds.right - size.cx, content_bounds.bottom - size.cy,
+        content_bounds.right, content_bounds.bottom));
+  }
+
   // Create message view, panes and tab strip.
   views::Window::DidCreateNativeWindow();
 
@@ -742,6 +754,8 @@ void Frame::OnDropTab(LPARAM lParam) {
 
 // views::Window
 bool Frame::OnIdle(int const hint) {
+  views::MetricsView::TimingScope timing_scope(metrics_view_.get());
+
   DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
   static bool busy;
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
@@ -757,6 +771,8 @@ bool Frame::OnIdle(int const hint) {
     }
     return true;
   }
+
+  metrics_view_->UpdateView();
 
   busy = false;
   if (!pending_update_rect_.empty()) {

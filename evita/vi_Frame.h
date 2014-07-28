@@ -47,12 +47,13 @@ namespace views {
 class ContentWindow;
 class FrameObserver;
 class MessageView;
+class MetricsView;
 class TitleBar;
 class TabStrip;
 }
 
 /// <summary>
-///   Represents a frame window aka toplevel window. This window communicates
+///   Represents a frame window aka top-level window. This window communicates
 ///   with window manager.
 /// </summary>
 class Frame final : public views::Window,
@@ -67,6 +68,7 @@ class Frame final : public views::Window,
   private: std::unique_ptr<ui::Layer> tab_strip_layer_;
   private: Panes m_oPanes;
   private: std::unique_ptr<views::MessageView> message_view_;
+  private: std::unique_ptr<views::MetricsView> metrics_view_;
   private: ObserverList<views::FrameObserver> observers_;
   private: gfx::Rect pending_update_rect_;
   private: views::TabStrip* tab_strip_;

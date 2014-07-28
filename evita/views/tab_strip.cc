@@ -609,8 +609,9 @@ class TabStrip::TabStripImpl final {
   private: gfx::RectF tabs_bounds_;
   private: float tabs_origin_;
   private: ui::Tooltip tooltip_;
+  private: ui::Widget* widget_;
 
-  public: TabStripImpl(HWND hwnd, TabStripDelegate* delegate);
+  public: TabStripImpl(ui::Widget* widget, TabStripDelegate* delegate);
   public: ~TabStripImpl();
 
   public: size_t number_of_tabs() const { return tabs_.size(); }
@@ -665,13 +666,14 @@ class TabStrip::TabStripImpl final {
   DISALLOW_COPY_AND_ASSIGN(TabStripImpl);
 };
 
-TabStrip::TabStripImpl::TabStripImpl(HWND hwnd, TabStripDelegate* delegate)
+TabStrip::TabStripImpl::TabStripImpl(ui::Widget* widget,
+                                     TabStripDelegate* delegate)
     : composition_enabled(false),
       delegate_(delegate),
       dragging_tab_(nullptr),
       drag_state_(Drag::None),
       hover_element_(nullptr),
-      hwnd_(hwnd),
+      hwnd_(widget->AssociatedHwnd()),
       insertion_marker_(nullptr),
       list_button_(Direction::Down),
       scroll_left_button_(Direction::Left),
@@ -679,7 +681,8 @@ TabStrip::TabStripImpl::TabStripImpl(HWND hwnd, TabStripDelegate* delegate)
       selected_tab_(nullptr),
       should_selected_tab_visible_(false),
       tab_list_menu_(nullptr),
-      tabs_origin_(0) {
+      tabs_origin_(0),
+      widget_(widget){
   COM_VERIFY(::DwmIsCompositionEnabled(&composition_enabled));
 }
 
@@ -942,7 +945,7 @@ void TabStrip::TabStripImpl::OnLButtonDown(POINT point) {
   drag_state_ = Drag::Start;
   drag_start_point_ = point;
 
-  ::SetCapture(hwnd_);
+  widget_->SetCapture();
 }
 
 void TabStrip::TabStripImpl::OnLButtonUp(POINT point) {
@@ -1143,7 +1146,7 @@ void TabStrip::TabStripImpl::StopDrag() {
   dragging_tab_ = nullptr;
   insertion_marker_ = nullptr;
 
-  ::ReleaseCapture();
+  widget_->ReleaseCapture();
   ::SetCursor(::LoadCursor(nullptr, IDC_ARROW));
 }
 
@@ -1306,7 +1309,7 @@ void TabStrip::CreateNativeWindow() const {
 }
 
 void TabStrip::DidCreateNativeWindow() {
-  impl_.reset(new TabStripImpl(*native_window(), delegate_));
+  impl_.reset(new TabStripImpl(this, delegate_));
   impl_->DidCreateNativeWindow();
 }
 

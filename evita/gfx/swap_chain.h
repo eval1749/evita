@@ -31,6 +31,7 @@ class SwapChain {
   private: SwapChain(common::ComPtr<IDXGISwapChain2> swap_chain);
   public: ~SwapChain();
 
+  public: const gfx::RectF& bounds() const { return bounds_; }
   public: ID2D1DeviceContext* d2d_device_context() const {
     return d2d_device_context_;
   }

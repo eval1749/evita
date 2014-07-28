@@ -52,7 +52,6 @@ class Canvas : public Object, public DpiHandler {
   private: scoped_refptr<FactorySet> factory_set_;
   private: ObserverList<Observer> observers_;
   private: std::unique_ptr<Bitmap> screen_bitmap_;
-  private: common::ComPtr<ID2D1RenderTarget> render_target_;
   private: void* work_;
 
   protected: Canvas();
@@ -133,6 +132,7 @@ class Canvas : public Object, public DpiHandler {
   // [S]
   public: bool Canvas::SaveScreenImage(const RectF& bounds);
   public: void SetBounds(const RectF& bounds);
+  protected: void SetInitialBounds(const RectF& bounds);
 
   DISALLOW_COPY_AND_ASSIGN(Canvas);
 };

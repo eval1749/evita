@@ -22,7 +22,8 @@ namespace gfx {
 CanvasForLayer::CanvasForLayer(ui::Layer* layer)
     : layer_(layer),
       swap_chain_(SwapChain::CreateForComposition(layer->bounds())) {
-  DidCreateRenderTarget();
+  DCHECK_EQ(swap_chain_->bounds(), layer->bounds());
+  SetInitialBounds(swap_chain_->bounds());
 }
 
 CanvasForLayer::~CanvasForLayer() {

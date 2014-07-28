@@ -104,6 +104,7 @@ void Canvas::AddObserver(Observer* observer) {
 }
 
 void Canvas::BeginDraw() {
+  DCHECK(!bounds_.empty());
   DCHECK(GetRenderTarget());
   if (!batch_nesting_level_)
     GetRenderTarget()->BeginDraw();
@@ -221,6 +222,7 @@ void Canvas::RemoveObserver(Observer* observer) {
 }
 
 bool Canvas::SaveScreenImage(const RectF& rect) {
+  DCHECK(!bounds_.empty());
   if (!screen_bitmap_)
     screen_bitmap_ = std::make_unique<Bitmap>(this);
   auto const enclosing_rect = ToEnclosingRect(rect);
@@ -237,6 +239,7 @@ bool Canvas::SaveScreenImage(const RectF& rect) {
 }
 
 void Canvas::SetBounds(const RectF& new_bounds) {
+  DCHECK(!bounds_.empty());
   DCHECK(!new_bounds.empty());
   DCHECK_EQ(new_bounds.left, 0.0f);
   DCHECK_EQ(new_bounds.top, 0.0f);
@@ -247,13 +250,18 @@ void Canvas::SetBounds(const RectF& new_bounds) {
   DidChangeBounds(new_bounds);
 }
 
+void Canvas::SetInitialBounds(const RectF& bounds) {
+  DCHECK(bounds_.empty());
+  bounds_ = bounds;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // CanvasForHwnd
 //
 CanvasForHwnd::CanvasForHwnd(HWND hwnd)
     : hwnd_(hwnd), swap_chain_(SwapChain::CreateForHwnd(hwnd)) {
-  DidCreateRenderTarget();
+  SetInitialBounds(swap_chain_->bounds());
 }
 
 CanvasForHwnd::~CanvasForHwnd() {
@@ -287,6 +295,9 @@ ID2D1RenderTarget* CanvasForHwnd::GetRenderTarget() const {
 //
 LegacyCanvasForHwnd::LegacyCanvasForHwnd(HWND hwnd) : hwnd_(hwnd) {
   AttachRenderTarget();
+  auto const size = hwnd_render_target_->GetPixelSize();
+  SetInitialBounds(gfx::RectF(gfx::SizeF(
+      static_cast<float>(size.width), static_cast<float>(size.height))));
 }
 
 LegacyCanvasForHwnd::~LegacyCanvasForHwnd() {

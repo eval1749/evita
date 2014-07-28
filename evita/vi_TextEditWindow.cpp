@@ -396,23 +396,23 @@ void TextEditWindow::DidMoveThumb(int value) {
 // ui::TextInputDelegate
 void TextEditWindow::DidCommitComposition(
     const ui::TextComposition& composition) {
-  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionCommit,
+  DispatchTextCompositionEvent(domapi::EventType::TextCompositionCommit,
                                composition);
 }
 
 void TextEditWindow::DidFinishComposition() {
-  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionEnd,
+  DispatchTextCompositionEvent(domapi::EventType::TextCompositionEnd,
                                ui::TextComposition());
 }
  
 void TextEditWindow::DidStartComposition() {
-  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionStart,
+  DispatchTextCompositionEvent(domapi::EventType::TextCompositionStart,
                                ui::TextComposition());
 }
  
 void TextEditWindow::DidUpdateComposition(
     const ui::TextComposition& composition) {
-  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionUpdate,
+  DispatchTextCompositionEvent(domapi::EventType::TextCompositionUpdate,
                                composition);
 }
 

@@ -79,21 +79,21 @@ void FormControlController::WillDestroyControl(ui::Control* control) {
 // ui::TextInputDelegate
 void FormControlController::DidCommitComposition(
     const ui::TextComposition& composition) {
-  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionCommit,
+  DispatchTextCompositionEvent(domapi::EventType::TextCompositionCommit,
                                composition);
 }
 
 void FormControlController::DidFinishComposition() {
-  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionEnd,
+  DispatchTextCompositionEvent(domapi::EventType::TextCompositionEnd,
                                ui::TextComposition());
 }
 void FormControlController::DidStartComposition() {
-  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionStart,
+  DispatchTextCompositionEvent(domapi::EventType::TextCompositionStart,
                                ui::TextComposition());
 }
 void FormControlController::DidUpdateComposition(
     const ui::TextComposition& composition) {
-  DispatchTxetCompositionEvent(domapi::EventType::TextCompositionUpdate,
+  DispatchTextCompositionEvent(domapi::EventType::TextCompositionUpdate,
                                composition);
 }
 

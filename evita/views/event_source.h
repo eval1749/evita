@@ -35,7 +35,7 @@ class EventSource {
                                   domapi::EventTargetId related_target_id);
   public: void DispatchKeyboardEvent(const ui::KeyboardEvent& event);
   public: void DispatchMouseEvent(const ui::MouseEvent& event);
-  public: void DispatchTxetCompositionEvent(
+  public: void DispatchTextCompositionEvent(
       domapi::EventType event_type, const ui::TextComposition& composition);
   public: void DispatchWheelEvent(const ui::MouseWheelEvent& event);
 

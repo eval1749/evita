@@ -115,7 +115,7 @@ void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
   view_event_handler()->DispatchMouseEvent(api_event);
 }
 
-void EventSource::DispatchTxetCompositionEvent(
+void EventSource::DispatchTextCompositionEvent(
       domapi::EventType event_type, const ui::TextComposition& composition) {
   domapi::TextCompositionData data;
   data.caret = composition.caret();

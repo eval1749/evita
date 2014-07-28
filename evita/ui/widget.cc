@@ -523,15 +523,9 @@ void Widget::OnScroll(int) {
 }
 
 void Widget::Realize(const Rect& rect) {
+  DCHECK(!is_realized());
   DCHECK(parent_node());
   DCHECK(container_widget().is_realized());
-  if (is_realized()) {
-    if (auto const window = native_window())
-      ::SetParent(*window, container_widget().AssociatedHwnd());
-    DidChangeHierarchy();
-    SetBounds(rect);
-    return;
-  }
 
   state_ = kRealized;
   bounds_ = rect;
@@ -572,6 +566,7 @@ void Widget::RealizeWidget() {
   }
 
   DidRealize();
+  DidChangeBounds();
   if (parent_node()->is_shown()) {
     shown_ = 1;
     DidShow();
@@ -695,6 +690,8 @@ void Widget::SetParentWidget(Widget* new_parent) {
     } else {
       RealizeWidget();
     }
+  } else {
+    DCHECK(!is_realized());
   }
   if (old_parent)
     old_parent->DidRemoveChildWidget(*this);

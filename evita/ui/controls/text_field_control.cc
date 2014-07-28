@@ -442,7 +442,7 @@ void TextFieldControl::DidKillFocus(ui::Widget* focused_widget) {
 }
 
 void TextFieldControl::DidChangeBounds() {
-  renderer_->SetBounds(GetContentsBounds());
+  renderer_->SetBounds(gfx::RectF(bounds()));
 }
 
 void TextFieldControl::DidSetFocus(ui::Widget* last_focused_widget) {

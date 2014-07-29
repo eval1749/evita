@@ -45,7 +45,7 @@ void Layer::AppendChildLayer(Layer* new_child) {
     old_parent->RemoveChildLayer(new_child);
   new_child->parent_layer_ = this;
   child_layers_.insert(new_child);
-  auto const is_insert_above = true;
+  auto const is_insert_above = false;
   auto const ref_visual = static_cast<IDCompositionVisual*>(nullptr);
   COM_VERIFY(visual_->AddVisual(new_child->visual_, is_insert_above,
                                 ref_visual));

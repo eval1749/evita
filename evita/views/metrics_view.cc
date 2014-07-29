@@ -106,13 +106,9 @@ void MetricsView::UpdateView() {
 
 // ui::Widget
 void MetricsView::DidChangeBounds() {
-#if 0
-  auto const size = gfx::SizeF(150.0f, 50.0f);
-  auto const origin = gfx::PointF(
-      static_cast<float>(container_widget().bounds().right),
-      static_cast<float>(container_widget().bounds().bottom));
-  layer()->SetBounds(gfx::RectF(origin - size, size));
-#endif
+  if (!layer())
+    return;
+  layer()->SetBounds(gfx::RectF(bounds()));
 }
 
 void MetricsView::DidRealize() {

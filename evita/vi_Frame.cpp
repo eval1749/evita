@@ -509,11 +509,9 @@ void Frame::DidCreateNativeWindow() {
   }
 
   {
-    auto const size = gfx::Size(150, 100);
-    auto const content_bounds = gfx::ToEnclosingRect(GetContentsBounds());
+    auto const size = gfx::Size(200, 100);
     metrics_view_->SetBounds(gfx::Rect(
-        content_bounds.right - size.cx, content_bounds.bottom - size.cy,
-        content_bounds.right, content_bounds.bottom));
+        pane_bounds.bottom_right() - size, size));
   }
 
   // Create message view, panes and tab strip.
@@ -581,6 +579,11 @@ void Frame::DidChangeBounds() {
   for (auto& pane: m_oPanes) {
     pane.SetBounds(pane_bounds);
   }
+
+  metrics_view_->SetBounds(gfx::Rect(
+      pane_bounds.bottom_right() - metrics_view_->bounds().size(),
+      metrics_view_->bounds().size()));
+
   DrawForResize();
 
   ui::Compositor::instance()->CommitIfNeeded();

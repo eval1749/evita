@@ -4,7 +4,11 @@
 
 #include "evita/views/metrics_view.h"
 
+#include <sstream>
+
 #include "evita/gfx/canvas.h"
+#include "evita/gfx/text_format.h"
+#include "evita/gfx/text_layout.h"
 #include "evita/metrics/sampling.h"
 #include "evita/ui/compositor/layer.h"
 
@@ -49,6 +53,7 @@ class MetricsView::Model final {
   friend class TimingScope;
 
   private: metrics::Sampling frame_timing_data_;
+  private: std::unique_ptr<gfx::TextFormat> text_format_;
 
   public: Model();
   public: ~Model() = default;
@@ -58,15 +63,31 @@ class MetricsView::Model final {
   DISALLOW_COPY_AND_ASSIGN(Model);
 };
 
-MetricsView::Model::Model() {
+MetricsView::Model::Model()
+    : text_format_(new gfx::TextFormat(L"Consolas", 14)) {
 }
 
 void MetricsView::Model::UpdateView(gfx::Canvas* canvas) {
   auto const bounds = canvas->bounds();
+
+
+  std::basic_ostringstream<base::char16> stream;
+  stream << L"Frame::OnIdle=" << frame_timing_data_.minimum() << L" " <<
+    frame_timing_data_.maximum() << L" " << frame_timing_data_.last() <<
+    std::endl;
+
+  auto const text_layout = text_format_->CreateLayout(stream.str(),
+                                                      bounds.size());
+
+  gfx::Brush text_brush(canvas, gfx::ColorF::White);
+  gfx::Brush graph_brush(canvas, gfx::ColorF::Red);
+
   gfx::Canvas::DrawingScope drawing_scope(canvas);
   canvas->AddDirtyRect(bounds);
   (*canvas)->Clear(gfx::ColorF(0, 0, 0, 0.5f));
-  PaintSamples(canvas, gfx::Brush(canvas, gfx::ColorF::Red), bounds,
+  (*canvas)->DrawTextLayout(gfx::PointF(), *text_layout, text_brush,
+                            D2D1_DRAW_TEXT_OPTIONS_CLIP);
+  PaintSamples(canvas, graph_brush, bounds.Offset(0, bounds.height() - 50),
                frame_timing_data_);
 }
 

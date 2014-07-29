@@ -509,7 +509,7 @@ void Frame::DidCreateNativeWindow() {
   }
 
   {
-    auto const size = gfx::Size(200, 100);
+    auto const size = gfx::Size(300, 150);
     metrics_view_->SetBounds(gfx::Rect(
         pane_bounds.bottom_right() - size, size));
   }

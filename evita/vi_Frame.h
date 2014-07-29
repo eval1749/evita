@@ -63,7 +63,11 @@ class Frame final : public views::Window,
   private: typedef ui::Widget Widget;
   private: typedef ChildList_<Frame, Pane> Panes;
 
+  private: class DragController;
+  friend class DragController;
+
   private: std::unique_ptr<gfx::Canvas> canvas_;
+  private: std::unique_ptr<DragController> drag_controller_;
   private: std::unique_ptr<ui::Layer> message_view_layer_;
   private: std::unique_ptr<ui::Layer> tab_strip_layer_;
   private: Panes m_oPanes;
@@ -122,6 +126,9 @@ class Frame final : public views::Window,
   private: virtual void DidChangeBounds() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
+  private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
+  private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
+  private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;
   private: virtual void WillDestroyWidget() override;
   private: virtual void WillRemoveChildWidget(const Widget& widget) override;

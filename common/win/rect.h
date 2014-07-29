@@ -11,31 +11,12 @@ namespace common {
 namespace win {
 
 struct COMMON_EXPORT Rect : RECT {
-  Rect() {
-    left = right = top = bottom =0;
-  }
-
-  Rect(int l, int t, int r, int b) {
-    left = l; right= r; top= t; bottom= b;
-  }
-
-  Rect(const Point& origin, const Size& size) {
-    left = origin.x;
-    top = origin.y;
-    right = left + size.cx;
-    bottom = top + size.cy;
-  }
-
-  Rect(const Point& origin, const Point& bottom_right) {
-    left = origin.x;
-    top = origin.y;
-    right = bottom_right.x;
-    bottom = bottom_right.y;
-  }
-
-  Rect(RECT rc) {
-    left = rc.left; right = rc.right; top = rc.top; bottom = rc.bottom;
-  }
+  Rect(const Point& origin, const Size& size);
+  Rect(const Point& origin, const Point& bottom_right);
+  explicit Rect(const Size& size);
+  Rect(const RECT& other);
+  Rect(int l, int t, int r, int b);
+  Rect();
 
   bool operator==(const Rect& other) const;
   bool operator!=(const Rect& other) const;
@@ -54,10 +35,7 @@ struct COMMON_EXPORT Rect : RECT {
   int width() const { return right - left; }
   Size size() const { return Size(width(), height()); }
 
-  bool Contains(const Point& pt) const {
-    return pt.x >= left && pt.x < right && pt.y >= top && pt.y < bottom;
-  }
-
+  bool Contains(const Point& pt) const;
   bool Contains(const Rect& other) const;
   Rect Intersect(const Rect&) const;
   void Unite(const Rect& other);

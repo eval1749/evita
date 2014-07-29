@@ -15,6 +15,11 @@
 namespace views {
 
 namespace {
+
+const size_t kNumberOfSamples = 200;
+const int kViewHeight = 100;
+const int kViewWidth = 250;
+
 void PaintSamples(gfx::Canvas* canvas, const gfx::Brush& brush,
                   const gfx::RectF& bounds, const metrics::Sampling& data) {
   auto const maximum = data.maximum() * 1.1f;
@@ -40,7 +45,7 @@ void PaintSamples(gfx::Canvas* canvas, const gfx::Brush& brush,
   (*canvas)->DrawLine(gfx::PointF(bounds.left, avg_y),
                       gfx::PointF(bounds.right, avg_y),
                       brush, 2.0f);
-  (*canvas)->Flush();
+  canvas->Flush();
 }
 
 }  // namespace
@@ -67,8 +72,10 @@ class MetricsView::Model final {
 };
 
 MetricsView::Model::Model()
-    : last_record_time_(metrics::Sampling::NowTimeTicks()),
-      text_format_(new gfx::TextFormat(L"Consolas", 14)) {
+    : frame_duration_data_(kNumberOfSamples),
+      frame_latency_data_(kNumberOfSamples),
+      last_record_time_(metrics::Sampling::NowTimeTicks()),
+      text_format_(new gfx::TextFormat(L"Consolas", 11.5)) {
 }
 
 void MetricsView::Model::RecordTime() {
@@ -92,20 +99,26 @@ void MetricsView::Model::UpdateView(gfx::Canvas* canvas) {
   auto const text_layout = text_format_->CreateLayout(stream.str(),
                                                       bounds.size());
 
-  gfx::Brush text_brush(canvas, gfx::ColorF::White);
-  gfx::Brush graph_brush1(canvas, gfx::ColorF::Red);
-  gfx::Brush graph_brush2(canvas, gfx::ColorF::Blue);
+  auto const alpha = 0.4f;
+  auto const radius = 5.0f;
+  gfx::Brush bgcolor(canvas, gfx::ColorF(0, 0, 0, alpha));
+  gfx::Brush text_brush(canvas, gfx::ColorF(gfx::ColorF::White, alpha));
+  gfx::Brush graph_brush1(canvas, gfx::ColorF(gfx::ColorF::Red, alpha));
+  gfx::Brush graph_brush2(canvas, gfx::ColorF(gfx::ColorF::Blue, alpha));
   gfx::RectF graph_bounds(bounds.left, bounds.bottom - 50,
                           bounds.right, bounds.bottom);
-
   gfx::Canvas::DrawingScope drawing_scope(canvas);
   canvas->AddDirtyRect(bounds);
-  (*canvas)->Clear(gfx::ColorF(0, 0, 0, 0.5f));
-  (*canvas)->DrawTextLayout(gfx::PointF(), *text_layout, text_brush,
-                            D2D1_DRAW_TEXT_OPTIONS_CLIP);
+  (*canvas)->Clear(gfx::ColorF(0, 0, 0, 0));
+  (*canvas)->FillRoundedRectangle(D2D1::RoundedRect(bounds, radius, radius),
+                                  bgcolor);
+
   PaintSamples(canvas, graph_brush1, graph_bounds, frame_latency_data_);
-  graph_bounds = graph_bounds.Offset(0, -50);
+  graph_bounds = graph_bounds.Offset(0, -30);
   PaintSamples(canvas, graph_brush2, graph_bounds, frame_duration_data_);
+
+  (*canvas)->DrawTextLayout(gfx::PointF(10, 10), *text_layout, text_brush,
+                            D2D1_DRAW_TEXT_OPTIONS_CLIP);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -126,6 +139,7 @@ MetricsView::TimingScope::~TimingScope() {
 // MetricsView
 //
 MetricsView::MetricsView() : model_(new Model()) {
+  SetBounds(gfx::Rect(gfx::Size(kViewWidth, kViewHeight)));
 }
 
 MetricsView::~MetricsView() {
@@ -158,4 +172,3 @@ void MetricsView::DidRealize() {
 }
 
 }  // namespace views
-

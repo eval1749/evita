@@ -51,4 +51,8 @@ common::ComPtr<IDCompositionVisual2> Compositor::CreateVisual() {
   return visual;
 }
 
+void Compositor::WaitForCommitCompletion() {
+  COM_VERIFY(composition_device_->WaitForCommitCompletion());
+}
+
 }  // namespace ui

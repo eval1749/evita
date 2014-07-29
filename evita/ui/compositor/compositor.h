@@ -40,6 +40,7 @@ class Compositor : public common::Singleton<Compositor> {
   public: void CommitIfNeeded();
   public: common::ComPtr<IDCompositionVisual2> CreateVisual();
   public: void NeedCommit() { need_commit_ = true; }
+  public: void WaitForCommitCompletion();
 
   DISALLOW_COPY_AND_ASSIGN(Compositor);
 };

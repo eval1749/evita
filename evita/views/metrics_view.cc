@@ -7,7 +7,6 @@
 #include "evita/gfx/canvas.h"
 #include "evita/metrics/sampling.h"
 #include "evita/ui/compositor/layer.h"
-#include "evita/ui/compositor/layer_content.h"
 
 namespace views {
 
@@ -49,14 +48,12 @@ void PaintSamples(gfx::Canvas* canvas, const gfx::Brush& brush,
 class MetricsView::Model final {
   friend class TimingScope;
 
-  private: gfx::RectF bounds_;
   private: metrics::Sampling frame_timing_data_;
-  private: std::unique_ptr<ui::LayerContent> content_;
 
   public: Model();
   public: ~Model() = default;
 
-  public: void UpdateView(ui::Layer* layer);
+  public: void UpdateView(gfx::Canvas* canvas);
 
   DISALLOW_COPY_AND_ASSIGN(Model);
 };
@@ -64,14 +61,10 @@ class MetricsView::Model final {
 MetricsView::Model::Model() {
 }
 
-void MetricsView::Model::UpdateView(ui::Layer* layer) {
-  if (!content_ || content_->layer() != layer)
-    content_.reset(new ui::LayerContent(layer));
-
-  auto const bounds = gfx::RectF(layer->bounds().size());
-
-  ui::LayerContent::DrawingScope drawing_scope(content_.get());
-  auto const canvas = drawing_scope.canvas();
+void MetricsView::Model::UpdateView(gfx::Canvas* canvas) {
+  auto const bounds = canvas->bounds();
+  gfx::Canvas::DrawingScope drawing_scope(canvas);
+  canvas->AddDirtyRect(bounds);
   (*canvas)->Clear(gfx::ColorF(0, 0, 0, 0.5f));
   PaintSamples(canvas, gfx::Brush(canvas, gfx::ColorF::Red), bounds,
                frame_timing_data_);
@@ -101,14 +94,15 @@ MetricsView::~MetricsView() {
 }
 
 void MetricsView::UpdateView() {
-  model_->UpdateView(layer());
+  model_->UpdateView(canvas_.get());
 }
 
 // ui::Widget
 void MetricsView::DidChangeBounds() {
-  if (!layer())
-    return;
-  layer()->SetBounds(gfx::RectF(bounds()));
+  if (layer())
+    layer()->SetBounds(gfx::RectF(bounds()));
+  if (canvas_)
+    canvas_->SetBounds(GetContentsBounds());
 }
 
 void MetricsView::DidRealize() {
@@ -117,6 +111,7 @@ void MetricsView::DidRealize() {
   SetLayer(layer);
   parent_layer->AppendChildLayer(layer);
   layer->SetBounds(gfx::RectF(bounds()));
+  canvas_.reset(layer->CreateCanvas());
   DidChangeBounds();
 }
 

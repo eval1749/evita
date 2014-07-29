@@ -10,6 +10,10 @@
 #include "base/time/time.h"
 #include "evita/ui/widget.h"
 
+namespace gfx {
+class Canvas;
+}
+
 namespace views {
 
 //////////////////////////////////////////////////////////////////////
@@ -29,6 +33,7 @@ class MetricsView final : public ui::Widget {
 
   private: class Model;
 
+  private: std::unique_ptr<gfx::Canvas> canvas_;
   private: std::unique_ptr<Model> model_;
 
   public: MetricsView();

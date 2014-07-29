@@ -17,6 +17,7 @@ struct COMMON_EXPORT Point : POINT {
 
  Point operator+(const Size& size) const;
  Point operator-(const Size& size) const;
+ Size operator-(const Point& other) const;
 
  Point Offset(int delta_x, int delta_y) const;
 };

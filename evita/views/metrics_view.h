@@ -39,6 +39,7 @@ class MetricsView final : public ui::Widget {
   public: MetricsView();
   public: virtual ~MetricsView();
 
+  public: void RecordTime();
   public: void UpdateView();
 
   // ui::Widget

@@ -757,6 +757,7 @@ void Frame::OnDropTab(LPARAM lParam) {
 
 // views::Window
 bool Frame::OnIdle(int const hint) {
+  metrics_view_->RecordTime();
   views::MetricsView::TimingScope timing_scope(metrics_view_);
 
   DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());

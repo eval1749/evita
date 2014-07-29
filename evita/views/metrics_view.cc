@@ -52,19 +52,29 @@ void PaintSamples(gfx::Canvas* canvas, const gfx::Brush& brush,
 class MetricsView::Model final {
   friend class TimingScope;
 
-  private: metrics::Sampling frame_timing_data_;
+  private: metrics::Sampling frame_duration_data_;
+  private: metrics::Sampling frame_latency_data_;
+  private: base::TimeTicks last_record_time_;
   private: std::unique_ptr<gfx::TextFormat> text_format_;
 
   public: Model();
   public: ~Model() = default;
 
+  public: void RecordTime();
   public: void UpdateView(gfx::Canvas* canvas);
 
   DISALLOW_COPY_AND_ASSIGN(Model);
 };
 
 MetricsView::Model::Model()
-    : text_format_(new gfx::TextFormat(L"Consolas", 14)) {
+    : last_record_time_(metrics::Sampling::NowTimeTicks()),
+      text_format_(new gfx::TextFormat(L"Consolas", 14)) {
+}
+
+void MetricsView::Model::RecordTime() {
+  auto const now = metrics::Sampling::NowTimeTicks();
+  frame_latency_data_.AddSample(now - last_record_time_);
+  last_record_time_ = now;
 }
 
 void MetricsView::Model::UpdateView(gfx::Canvas* canvas) {
@@ -72,23 +82,30 @@ void MetricsView::Model::UpdateView(gfx::Canvas* canvas) {
 
 
   std::basic_ostringstream<base::char16> stream;
-  stream << L"Frame::OnIdle=" << frame_timing_data_.minimum() << L" " <<
-    frame_timing_data_.maximum() << L" " << frame_timing_data_.last() <<
+  stream << L"Frame latency=" << frame_latency_data_.minimum() << L" " <<
+    frame_latency_data_.maximum() << L" " << frame_latency_data_.last() <<
+    std::endl;
+  stream << L"Frame duration=" << frame_duration_data_.minimum() << L" " <<
+    frame_duration_data_.maximum() << L" " << frame_duration_data_.last() <<
     std::endl;
 
   auto const text_layout = text_format_->CreateLayout(stream.str(),
                                                       bounds.size());
 
   gfx::Brush text_brush(canvas, gfx::ColorF::White);
-  gfx::Brush graph_brush(canvas, gfx::ColorF::Red);
+  gfx::Brush graph_brush1(canvas, gfx::ColorF::Red);
+  gfx::Brush graph_brush2(canvas, gfx::ColorF::Blue);
+  gfx::RectF graph_bounds(bounds.left, bounds.bottom - 50,
+                          bounds.right, bounds.bottom);
 
   gfx::Canvas::DrawingScope drawing_scope(canvas);
   canvas->AddDirtyRect(bounds);
   (*canvas)->Clear(gfx::ColorF(0, 0, 0, 0.5f));
   (*canvas)->DrawTextLayout(gfx::PointF(), *text_layout, text_brush,
                             D2D1_DRAW_TEXT_OPTIONS_CLIP);
-  PaintSamples(canvas, graph_brush, bounds.Offset(0, bounds.height() - 50),
-               frame_timing_data_);
+  PaintSamples(canvas, graph_brush1, graph_bounds, frame_latency_data_);
+  graph_bounds = graph_bounds.Offset(0, -50);
+  PaintSamples(canvas, graph_brush2, graph_bounds, frame_duration_data_);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -101,7 +118,7 @@ MetricsView::TimingScope::TimingScope(MetricsView* view)
 
 MetricsView::TimingScope::~TimingScope() {
   auto const end = metrics::Sampling::NowTimeTicks();
-  view_->model_->frame_timing_data_.AddSample(end - start_);
+  view_->model_->frame_duration_data_.AddSample(end - start_);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -112,6 +129,10 @@ MetricsView::MetricsView() : model_(new Model()) {
 }
 
 MetricsView::~MetricsView() {
+}
+
+void MetricsView::RecordTime() {
+  model_->RecordTime();
 }
 
 void MetricsView::UpdateView() {

@@ -126,7 +126,7 @@ class EditPane::Box : public DoubleLinkedNode_<EditPane::Box>,
   public: Box* previous_sibling() const { return GetPrev(); }
 
   public: void Add(Box* box);
-  public: int CountLeafBox() const;
+  public: virtual int CountLeafBox() const;
   public: virtual void Destroy();
   public: virtual void DetachContent();
   public: void DidRemove();
@@ -196,6 +196,7 @@ class LeafBox final : public EditPane::Box {
   private: virtual void DidChangeBounds() override;
 
   // EditPane::Box
+  private: virtual int CountLeafBox() const override;
   private: virtual void Destroy() override;
   private: virtual Box* FindLeafBoxFromWidget(
       const ui::Widget*) const override;
@@ -439,6 +440,10 @@ void LeafBox::DidChangeBounds() {
 }
 
 // EditPane::Box
+int LeafBox::CountLeafBox() const {
+  return 1;
+}
+
 void LeafBox::Destroy() {
   GetWindow()->DestroyWidget();
 }

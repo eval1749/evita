@@ -8,23 +8,17 @@
 namespace common {
 namespace win {
 
+struct Size;
+
 struct COMMON_EXPORT Point : POINT {
-  Point() {
-    x = y = 0;
-  }
+  Point(int x, int y);
+  Point(POINTS pt);
+  Point();
 
-  Point(int x, int y) {
-    this->x = x;
-    this->y = y;
-  }
+ Point operator+(const Size& size) const;
+ Point operator-(const Size& size) const;
 
- Point(POINTS pt) {
-   x = pt.x; y = pt.y;
- }
-
- Point Offset(int delta_x, int delta_y) const {
-   return Point(x + delta_x, y + delta_y);
- }
+ Point Offset(int delta_x, int delta_y) const;
 };
 
 #define DEBUG_POINT_FORMAT "(%d,%d)"

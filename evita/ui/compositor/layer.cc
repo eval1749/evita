@@ -21,7 +21,7 @@ namespace ui {
 // Layer
 //
 Layer::Layer()
-    : parent_layer_(nullptr),
+    : parent_layer_(nullptr), top_most_layer_(nullptr),
       visual_(Compositor::instance()->CreateVisual()) {
   COM_VERIFY(visual_->SetBitmapInterpolationMode(
       DCOMPOSITION_BITMAP_INTERPOLATION_MODE_LINEAR));
@@ -46,7 +46,8 @@ void Layer::AppendChildLayer(Layer* new_child) {
   new_child->parent_layer_ = this;
   child_layers_.insert(new_child);
   auto const is_insert_above = false;
-  auto const ref_visual = static_cast<IDCompositionVisual*>(nullptr);
+  auto const ref_visual = top_most_layer_ ? top_most_layer_->visual() :
+      static_cast<IDCompositionVisual*>(nullptr);
   COM_VERIFY(visual_->AddVisual(new_child->visual_, is_insert_above,
                                 ref_visual));
   Compositor::instance()->NeedCommit();
@@ -102,6 +103,20 @@ void Layer::SetBounds(const gfx::RectF& new_bounds) {
 
 void Layer::SetBounds(const gfx::Rect& new_bounds) {
   SetBounds(gfx::RectF(new_bounds));
+}
+
+void Layer::SetTopMostLayer(Layer* top_most_layer) {
+  DCHECK_EQ(top_most_layer->parent_layer_, this);
+  top_most_layer_ = top_most_layer;
+  COM_VERIFY(visual_->RemoveAllVisuals());
+  auto const top_most_visual = top_most_layer->visual();
+  COM_VERIFY(visual_->AddVisual(top_most_visual, false, nullptr));
+  for (auto const child : child_layers_) {
+    if (child == top_most_layer)
+      continue;
+    COM_VERIFY(visual_->AddVisual(child->visual(), false, top_most_visual));
+  }
+  ui::Compositor::instance()->NeedCommit();
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -570,6 +570,7 @@ void Frame::DidCreateNativeWindow() {
 
   // Create message view, panes and tab strip.
   views::Window::DidCreateNativeWindow();
+  layer()->SetTopMostLayer(metrics_view_->layer());
 
 #if 0
   message_view_layer_.reset(new ui::HwndLayer(

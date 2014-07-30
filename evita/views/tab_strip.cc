@@ -19,6 +19,7 @@
 #include "common/castable.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas.h"
+#include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/text_format.h"
 #include "evita/ui/events/event.h"
 #include "evita/ui/tooltip.h"
@@ -44,13 +45,6 @@ void FillRect(gfx::Canvas* canvas, int x, int y, int cx, int cy) {
   rc.bottom = y + cy;
   gfx::Brush brush(canvas, gfx::blackColor());
   canvas->FillRectangle(brush, rc);
-}
-
-gfx::Rect RoundBounds(const gfx::RectF& bounds) {
-  return gfx::Rect(static_cast<long>(bounds.left),
-                   static_cast<long>(bounds.top),
-                   static_cast<long>(bounds.right),
-                   static_cast<long>(bounds.bottom));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -147,7 +141,7 @@ Element* Element::HitTest(const gfx::PointF&  point) const {
 
 void Element::Invalidate(HWND hwnd) {
   // TODO(yosi) We should use GFX version of invalidate rectangle.
-  auto const bounds = RoundBounds(bounds_);
+  auto const bounds = gfx::ToEnclosingRect(bounds_);
   ::InvalidateRect(hwnd, &bounds, false);
 }
 
@@ -1159,7 +1153,8 @@ void TabStrip::TabStripImpl::UpdateBoundsForAllTabs(float tab_width) {
     tab->set_bounds(gfx::RectF(origin, tab_size));
     tab->UpdateLayout();
     origin.x += tab_width;
-    tooltip_.SetToolBounds(tab, RoundBounds(bounds_.Intersect(tab->bounds())));
+    tooltip_.SetToolBounds(tab, gfx::ToEnclosingRect(
+        bounds_.Intersect(tab->bounds())));
   }
 }
 

@@ -28,15 +28,13 @@ global.JavaScriptLexer = (function(options) {
     var map = Lexer.createKeywords([
       'break',
       'case', 'catch', 'class', 'const', 'continue',
-      'debugger',
-      'default', 'delete', 'do',
+      'debugger', 'default', 'delete', 'do',
       'else', 'export', 'extends',
       'finally', 'for', 'function',
       'if', 'import', 'in', 'instanceof',
       'new',
       'return',
-      'super',
-      'switch',
+      'super', 'switch',
       'this', 'throw', 'try', 'typeof',
       'var', 'void',
       'while', 'with',
@@ -49,6 +47,7 @@ global.JavaScriptLexer = (function(options) {
       'false', 'null', 'true',
 
       // Future reserved word in ES6
+      'await',
       'enum',
       'implements',
       'interface',
@@ -57,6 +56,11 @@ global.JavaScriptLexer = (function(options) {
       'protected',
       'public',
       'static',
+
+      // E6 context keywords
+      'let',
+      'module',
+      'on', // for (var on iterable)
 
       // Standard build-int objects
       // Value properties

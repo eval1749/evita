@@ -109,7 +109,7 @@ void MetricsView::Model::UpdateView(gfx::Canvas* canvas) {
                           bounds.right, bounds.bottom);
   gfx::Canvas::DrawingScope drawing_scope(canvas);
   canvas->AddDirtyRect(bounds);
-  (*canvas)->Clear(gfx::ColorF(0, 0, 0, 0));
+  canvas->Clear(gfx::ColorF(0, 0, 0, 0));
   (*canvas)->FillRoundedRectangle(D2D1::RoundedRect(bounds, radius, radius),
                                   bgcolor);
 

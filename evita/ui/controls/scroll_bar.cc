@@ -275,7 +275,7 @@ void Arrow::PaintArrow(gfx::Canvas* canvas, const gfx::RectF& canvas_bounds,
   auto const pen_width = 2.0f;
 
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
-  (*canvas)->Clear(gfx::sysColor(COLOR_BTNFACE));
+  canvas->Clear(gfx::sysColor(COLOR_BTNFACE));
   canvas->FillRectangle(gfx::Brush(canvas, bgcolor()), bounds);
 
   // TODO(eval1749) We should have only one arrow figure as singleton and
@@ -534,7 +534,7 @@ void Thumb::PaintThumb(gfx::Canvas* canvas,
   auto const bounds = thumb_bounds_.Offset(canvas_bounds.origin());
   canvas->AddDirtyRect(bounds);
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
-  (*canvas)->Clear(gfx::sysColor(COLOR_BTNFACE));
+  canvas->Clear(gfx::sysColor(COLOR_BTNFACE));
   gfx::Brush thumb_brush(canvas, thumb_color());
   canvas->FillRectangle(thumb_brush, bounds);
 }
@@ -544,7 +544,7 @@ void Thumb::Paint(gfx::Canvas* canvas, const gfx::RectF& canvas_bounds) const {
   auto const bounds = this->bounds().Offset(canvas_bounds.origin());
   canvas->AddDirtyRect(bounds);
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
-  (*canvas)->Clear(gfx::sysColor(COLOR_BTNFACE));
+  canvas->Clear(gfx::sysColor(COLOR_BTNFACE));
   PaintThumb(canvas, canvas_bounds);
 }
 

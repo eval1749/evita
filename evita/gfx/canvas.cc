@@ -111,6 +111,10 @@ void Canvas::BeginDraw() {
   ++batch_nesting_level_;
 }
 
+void Canvas::Clear(const ColorF& color) {
+  GetRenderTarget()->Clear(color);
+}
+
 void Canvas::DidCallEndDraw() {
 }
 

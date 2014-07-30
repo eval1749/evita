@@ -85,6 +85,9 @@ class Canvas : public Object, public DpiHandler {
   // [B]
   public: void BeginDraw();
 
+  // [C]
+  public: void Clear(const ColorF& color);
+
   // [D]
   protected: virtual void DidCallEndDraw();
   protected: void DidCreateRenderTarget();

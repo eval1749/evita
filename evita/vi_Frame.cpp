@@ -365,7 +365,7 @@ void Frame::DrawForResize() {
 
   // To avoid script destroys Pane's, we lock DOM.
   if (editor::DomLock::instance()->locked()) {
-    (*canvas_)->Clear(gfx::ColorF(gfx::ColorF::White));
+    canvas_->Clear(gfx::ColorF(gfx::ColorF::White));
     for (auto& pane: m_oPanes) {
       pane.OnDraw(&*canvas_);
     }
@@ -374,13 +374,13 @@ void Frame::DrawForResize() {
 
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   if (lock_scope.locked()) {
-    (*canvas_)->Clear(gfx::ColorF(gfx::ColorF::White));
+    canvas_->Clear(gfx::ColorF(gfx::ColorF::White));
     for (auto& pane: m_oPanes) {
       pane.OnDraw(&*canvas_);
     }
     return;
   }
-  (*canvas_)->Clear(gfx::ColorF(gfx::ColorF::LightGray));
+  canvas_->Clear(gfx::ColorF(gfx::ColorF::LightGray));
 #endif
 }
 

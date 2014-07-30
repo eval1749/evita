@@ -8,8 +8,6 @@
 #define DEBUG_TOOLTIP 0
 #include "evita/views/tab_strip.h"
 
-#include <dwmapi.h>
-
 #include <algorithm>
 #include <memory>
 #include <vector>
@@ -585,7 +583,6 @@ class TabStrip::TabStripImpl final {
 
   private: gfx::RectF bounds_;
   private: std::unique_ptr<gfx::LegacyCanvasForHwnd> canvas_;
-  private: BOOL composition_enabled;
   private: TabStripDelegate* delegate_;
   private: Tab* dragging_tab_;
   private: Drag drag_state_;
@@ -662,8 +659,7 @@ class TabStrip::TabStripImpl final {
 
 TabStrip::TabStripImpl::TabStripImpl(ui::Widget* widget,
                                      TabStripDelegate* delegate)
-    : composition_enabled(false),
-      delegate_(delegate),
+    : delegate_(delegate),
       dragging_tab_(nullptr),
       drag_state_(Drag::None),
       hover_element_(nullptr),
@@ -677,7 +673,6 @@ TabStrip::TabStripImpl::TabStripImpl(ui::Widget* widget,
       tab_list_menu_(nullptr),
       tabs_origin_(0),
       widget_(widget){
-  COM_VERIFY(::DwmIsCompositionEnabled(&composition_enabled));
 }
 
 TabStrip::TabStripImpl::~TabStripImpl() {
@@ -989,11 +984,6 @@ LRESULT TabStrip::TabStripImpl::OnMessage(UINT uMsg, WPARAM wParam,
   #endif
 
   switch (uMsg) {
-    case WM_DWMCOMPOSITIONCHANGED:
-      if (FAILED(DwmIsCompositionEnabled(&composition_enabled)))
-          composition_enabled = false;
-      break;
-
     case WM_NCHITTEST: {
       POINT point = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
       if (::ScreenToClient(hwnd_, &point)) {
@@ -1319,7 +1309,6 @@ LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
     case WM_COMMAND:
       SelectTab(static_cast<int>(LOWORD(wParam)));
       return 0;
-    case WM_DWMCOMPOSITIONCHANGED:
     case WM_NCHITTEST:
     case WM_NCLBUTTONDOWN:
     case WM_NCLBUTTONUP:

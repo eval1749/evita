@@ -6,7 +6,6 @@
 #include "common/win/rect.h"
 #include "common/win/rect_ostream.h"
 #include "common/win/size.h"
-#include "common/win/size_ostream.h"
 
 COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
                                        const common::win::Rect& rect) {

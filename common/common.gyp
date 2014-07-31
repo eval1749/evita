@@ -31,7 +31,8 @@
         'win/rect_ostream.cc',
         'win/singleton_hwnd.cc',
         'win/singleton_hwnd.h',
-        'win/size_ostream.cc',
+        'win/size.cc',
+        'win/size.h',
       ], # sources
     }, # common
 

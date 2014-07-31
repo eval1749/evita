@@ -41,4 +41,11 @@ inline bool Size::operator!=(const Size& other) const {
 } // namespace win
 } // namespace common
 
+#include <ostream>
+
+COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
+                                       const common::win::Size& size);
+COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
+                                       const common::win::Size* size);
+
 #endif //!defined(INCLUDE_common_win_size_h)

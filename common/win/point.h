@@ -8,7 +8,7 @@
 namespace common {
 namespace win {
 
-struct Size;
+class Size;
 
 struct COMMON_EXPORT Point : POINT {
   Point(int x, int y);

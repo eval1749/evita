@@ -18,14 +18,14 @@ Rect::Rect(const Point& origin, const Point& bottom_right) {
 Rect::Rect(const Point& origin, const Size& size) {
   left = origin.x;
   top = origin.y;
-  right = left + size.cx;
-  bottom = top + size.cy;
+  right = left + size.width();
+  bottom = top + size.height();
 }
 
 Rect::Rect(const Size& size) {
   left = top = 0;
-  right = size.cx;
-  bottom = size.cy;
+  right = size.width();
+  bottom = size.height();
 }
 
 Rect::Rect(int l, int t, int r, int b) {

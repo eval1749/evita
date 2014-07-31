@@ -22,6 +22,7 @@ namespace ui {
 using common::win::NativeWindow;
 using common::win::Point;
 using common::win::Rect;
+using common::win::Size;
 class KeyboardEvent;
 class Layer;
 class MouseEvent;

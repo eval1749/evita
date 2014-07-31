@@ -8,31 +8,28 @@
 namespace common {
 namespace win {
 
-struct COMMON_EXPORT Size : SIZE {
-  Size() {
-    cx = cy = 0;
-  }
+class COMMON_EXPORT Size {
+  private: SIZE data_;
 
-  Size(int cx, int cy) {
-    this->cx = cx;
-    this->cy = cy;
-  }
+  public: Size(const Size& other);
+  public: Size(int width, int height);
+  public: Size();
 
-  explicit operator bool() const { return !empty(); }
+  public: explicit operator bool() const { return !empty(); }
+  public: const Size* operator&() const = delete;
+  public: Size* operator&() = delete;
+  public: Size& operator=(const Size& other);
 
-  bool operator==(const Size& other) const;
-  bool operator!=(const Size& other) const;
+  public: bool operator==(const Size& other) const;
+  public: bool operator!=(const Size& other) const;
 
-  bool empty() const { return cx <= 0 || cx <= 0; }
+  public: bool empty() const { return width() <= 0 || height() <= 0; }
+  public: int height() const { return data_.cy; }
+  public: void set_height(int height) { data_.cy = height; }
+  public: SIZE* ptr();
+  public: int width() const { return data_.cx; }
+  public: void set_width(int width) { data_.cx = width; }
 };
-
-inline bool Size::operator==(const Size& other) const {
-  return cx == other.cx && cy == other.cy;
-}
-
-inline bool Size::operator!=(const Size& other) const {
-  return !operator==(other);
-}
 
 } // namespace win
 } // namespace common

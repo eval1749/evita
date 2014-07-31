@@ -23,11 +23,11 @@ Point::Point(POINTS pt) {
 }
 
 Point Point::operator+(const Size& size) const {
-  return Point(x + size.cx, y + size.cy);
+  return Point(x + size.width(), y + size.height());
 }
 
 Point Point::operator-(const Size& size) const {
-  return Point(x - size.cx, y - size.cy);
+  return Point(x - size.width(), y - size.height());
 }
 
 Size Point::operator-(const Point& other) const {

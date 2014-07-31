@@ -538,7 +538,7 @@ void Frame::DidCreateNativeWindow() {
   title_bar_->Realize(*native_window());
 
   // TODO(yosi) How do we determine height of TabStrip?
-  auto const tab_strip_height = tab_strip_->GetPreferreSize().cy;
+  auto const tab_strip_height = tab_strip_->GetPreferreSize().height();
   const auto close_button_height = ::GetSystemMetrics(SM_CYSIZE);
   tab_strip_->SetBounds(Rect(0, close_button_height,
                              bounds().width(),

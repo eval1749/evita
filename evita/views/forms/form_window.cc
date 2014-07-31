@@ -496,8 +496,8 @@ bool FormWindow::OnIdle(int) {
     form_size_ = model_->size();
     gfx::Rect window_rect;
     ::GetWindowRect(AssociatedHwnd(), &window_rect);
-    window_rect.right = window_rect.left + form_size_.cx;
-    window_rect.bottom = window_rect.top + form_size_.cy;
+    window_rect.right = window_rect.left + form_size_.width();
+    window_rect.bottom = window_rect.top + form_size_.height();
     auto const extended_window_style = static_cast<DWORD>(
         ::GetWindowLong(AssociatedHwnd(), GWL_EXSTYLE));
     auto const window_style = static_cast<DWORD>(
@@ -568,9 +568,9 @@ void FormWindow::CreateNativeWindow() const {
                   &active_window_rect);
   auto window_rect = gfx::Rect(
       gfx::Point(active_window_rect.left +
-                    (active_window_rect.width() - form_size_.cx) / 2,
+                    (active_window_rect.width() - form_size_.width()) / 2,
                  active_window_rect.top +
-                    (active_window_rect.height() - form_size_.cy) / 2),
+                    (active_window_rect.height() - form_size_.height()) / 2),
       form_size_);
   auto const has_menu = false;
   WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style, has_menu,

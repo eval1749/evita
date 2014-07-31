@@ -92,7 +92,8 @@ bool NativeWindow::CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
       reinterpret_cast<HMENU>(this) : static_cast<HMENU>(nullptr);
   auto const hwnd = ::CreateWindowEx(dwExStyle, MAKEINTATOM(s_window_class),
                                      title, dwStyle, origin.x, origin.y,
-                                     size.cx, size.cy, parent_hwnd, child_id,
+                                     size.width(), size.height(),
+                                     parent_hwnd, child_id,
                                      s_hInstance, 0);
   DCHECK(hwnd) << "CreateWindowEx err=" << ::GetLastError();
   return hwnd;

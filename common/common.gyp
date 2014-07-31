@@ -25,7 +25,6 @@
         'win/native_window.cc',
         'win/point.cc',
         'win/point.h',
-        'win/point_ostream.cc',
         'win/rect.cc',
         'win/registry.cc',
         'win/rect_ostream.cc',

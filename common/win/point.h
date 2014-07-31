@@ -29,4 +29,11 @@ struct COMMON_EXPORT Point : POINT {
 } // namespace win
 } // namespace common
 
+#include <ostream>
+
+COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
+                                       const common::win::Point& point);
+COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
+                                       const common::win::Point* point);
+
 #endif //!defined(INCLUDE_common_win_point_h)

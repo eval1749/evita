@@ -40,3 +40,13 @@ Point Point::Offset(int delta_x, int delta_y) const {
 
 }  // namespace win
 }  // namespace common
+
+COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
+                                       const common::win::Point& point) {
+  return out << "(" << point.x << "," << point.y << ")";
+}
+
+COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
+                                       const common::win::Point* point) {
+  return out << *point;
+}

@@ -9,7 +9,6 @@
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants.h"
 #include "common/tree/descendants_or_self.h"
-#include "common/win/point_ostream.h"
 #include "common/win/rect_ostream.h"
 #include "common/win/win32_verify.h"
 #include "evita/ui/base/ime/text_input_client_win.h"

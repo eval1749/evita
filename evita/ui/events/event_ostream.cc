@@ -2,7 +2,6 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 #include "base/basictypes.h"
-#include "common/win/point_ostream.h"
 #include "evita/ui/events/event_ostream.h"
 
 namespace {

@@ -2,7 +2,6 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 #include "common/win/point.h"
-#include "common/win/point_ostream.h"
 #include "common/win/rect.h"
 #include "common/win/rect_ostream.h"
 #include "common/win/size.h"

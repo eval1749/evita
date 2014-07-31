@@ -246,8 +246,9 @@
         'ui/base/table_model_observer.cc',
 
         'ui/events/event.cc',
-        'ui/events/event_ostream.cc',
+        'ui/events/event.h',
         'ui/events/mouse_click_tracker.cc',
+        'ui/events/mouse_click_tracker.h',
 
         'ui/compositor/canvas_for_layer.cc',
         'ui/compositor/canvas_for_layer.h',

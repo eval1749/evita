@@ -15,7 +15,6 @@
 #include "evita/ui/base/ime/text_input_client_win.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/events/event.h"
-#include "evita/ui/events/event_ostream.h"
 #include "evita/ui/events/mouse_click_tracker.h"
 #include "evita/ui/root_widget.h"
 #include "evita/ui/system_metrics.h"

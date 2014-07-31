@@ -5,7 +5,6 @@
 #include "evita/ui/events/mouse_click_tracker.h"
 
 #include "base/logging.h"
-#include "evita/ui/events/event_ostream.h"
 
 namespace ui {
 

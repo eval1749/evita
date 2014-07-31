@@ -84,4 +84,11 @@ inline void Rect::set_origin(const Point& new_origin) {
 } // namespace win
 } // namespace common
 
+#include <ostream>
+
+COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
+                                       const common::win::Rect& rect);
+COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
+                                       const common::win::Rect* rect);
+
 #endif //!defined(INCLUDE_common_win_rect_h)

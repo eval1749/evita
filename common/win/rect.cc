@@ -73,3 +73,13 @@ void Rect::Unite(const Rect& other) {
 
 } // namespace win
 } // namespace common
+
+COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
+                                       const common::win::Rect& rect) {
+  return out << rect.origin() << "+" << rect.size();
+}
+
+COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
+                                       const common::win::Rect* rect) {
+  return out << *rect;
+}

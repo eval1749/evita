@@ -10,7 +10,6 @@
 
 #include "base/logging.h"
 #include "common/tree/child_nodes.h"
-#include "common/win/rect_ostream.h"
 #include "common/win/win32_verify.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/gfx_base.h"

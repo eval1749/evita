@@ -6,7 +6,6 @@
 
 #include <ostream>
 
-#include "common/win/rect_ostream.h"
 #include "evita/gfx_base.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/stroke_style.h"

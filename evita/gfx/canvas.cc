@@ -9,7 +9,6 @@
 #include <cmath>
 #include <utility>
 
-#include "common/win/rect_ostream.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/swap_chain.h"

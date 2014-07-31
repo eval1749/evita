@@ -77,10 +77,6 @@ inline void Rect::set_origin(const Point& new_origin) {
   bottom = top + height;
 }
 
-#define DEBUG_RECT_FORMAT "(%d,%d)+%dx%d"
-#define DEBUG_RECT_ARG(mp_rect) \
- (mp_rect).left, (mp_rect).top, (mp_rect).width(), (mp_rect).height()
-
 } // namespace win
 } // namespace common
 

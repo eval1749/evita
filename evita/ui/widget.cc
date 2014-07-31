@@ -1,5 +1,7 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #include "evita/ui/widget.h"
 
 #include <vector>
@@ -92,13 +94,12 @@ Widget::Widget()
 
 Widget::~Widget() {
   #if DEBUG_DESTROY
-    DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        state_, shown_, DEBUG_RECT_ARG(bounds_));
+    DVLOG(0) << "~Widget: " << *this;
   #endif
   DCHECK(!native_window_);
 }
 
-// Child window is assigned in |commonn::NativeWindow::CreateWindowEx()|.
+// Child window is assigned in |common::NativeWindow::CreateWindowEx()|.
 UINT_PTR Widget::child_window_id() const {
   DCHECK(native_window());
   DCHECK(parent_node());
@@ -106,7 +107,7 @@ UINT_PTR Widget::child_window_id() const {
 }
 
 bool Widget::has_active_focus() {
-  // When modeless dialog has focus, ::GetFocus() returns it, but
+  // When mode less dialog has focus, ::GetFocus() returns it, but
   // we_have_active_focus is false.
   return we_have_active_focus;
 }
@@ -133,8 +134,7 @@ void Widget::CreateNativeWindow() const {
 
 void Widget::DestroyWidget() {
   #if DEBUG_DESTROY
-    DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        state_, shown_, DEBUG_RECT_ARG(bounds_));
+    DVLOG(0) << "DestroyWidget " << *this;
   #endif
   if (state_ == kBeingDestroyed) {
     DCHECK(!native_window_);
@@ -180,8 +180,7 @@ void Widget::DidCreateNativeWindow() {
 
 void Widget::DidDestroyNativeWindow() {
   #if DEBUG_DESTROY
-    DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        state_, shown_, DEBUG_RECT_ARG(bounds_));
+    DVLOG(0) << "DidDestroyNativeWindow " << *this;
   #endif
   DCHECK(!native_window_);
   // Since native window, which handles UI, is destroyed, this widget should
@@ -265,13 +264,11 @@ void Widget::DispatchPaintMessage() {
   if (!::GetUpdateRect(*native_window(), &exposed_rect, false))
     return;
   #if DEBUG_PAINT
-    DEBUG_WIDGET_PRINTF("Start " DEBUG_RECT_FORMAT "\n",
-        DEBUG_RECT_ARG(exposed_rect));
+    DVLOG(0) << "DispatchPaintMessage " << *this << " " << exposed_rect;
   #endif
   OnPaint(exposed_rect);
   #if DEBUG_PAINT
-    DEBUG_WIDGET_PRINTF("End " DEBUG_RECT_FORMAT "\n",
-        DEBUG_RECT_ARG(exposed_rect));
+    DVLOG(0) << "End " << exposed_rect;
   #endif
 
    for (auto child : child_nodes()) {
@@ -280,16 +277,12 @@ void Widget::DispatchPaintMessage() {
     auto const rect = exposed_rect.Intersect(child->bounds());
     if (rect) {
       #if DEBUG_PAINT
-        DEBUG_WIDGET_PRINTF("Start " DEBUG_WIDGET_FORMAT " focus=%d "
-                            DEBUG_RECT_FORMAT "\n",
-            DEBUG_WIDGET_ARG(&child),
-            child.has_focus(),
-            DEBUG_RECT_ARG(rect));
+        DVLOG(0) << "Start " << child << " focus=" << child.has_focus() <<
+            " " << rect;
       #endif
       child->OnPaint(rect);
       #if DEBUG_PAINT
-        DEBUG_WIDGET_PRINTF("End " DEBUG_RECT_FORMAT "\n",
-            DEBUG_RECT_ARG(rect));
+        DVLOG(0) << "End " << rect;
       #endif
     }
   }
@@ -715,15 +708,15 @@ void Widget::UpdateBounds() {
 
 void Widget::WillDestroyWidget() {
   #if DEBUG_DESTROY
-    DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        state_, shown_, DEBUG_RECT_ARG(bounds_));
+    DVLOG(0) << "WillDestroyWidget state=" << state_ << " shown_=" << shown_ <<
+        " " << bounds_;
   #endif
 }
 
 void Widget::WillDestroyNativeWindow() {
   #if DEBUG_DESTROY
-    DEBUG_WIDGET_PRINTF("state=%d show=%d " DEBUG_RECT_FORMAT "\n",
-        state_, shown_, DEBUG_RECT_ARG(bounds_));
+    DVLOG(0) << "WillDestroyNativeWindow state=" << state_ << " shown_=" <<
+        shown_ << " " << bounds_;
   #endif
   std::vector<Widget*> non_native_children;
   for (auto const child : child_nodes()) {

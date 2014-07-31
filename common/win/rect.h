@@ -68,15 +68,6 @@ inline bool Rect::operator>=(const Rect& other) const {
   return area() >= other.area();
 }
 
-inline void Rect::set_origin(const Point& new_origin) {
-  auto const width = this->width();
-  auto const height = this->height();
-  left = new_origin.x;
-  top = new_origin.y;
-  right = left + width;
-  bottom = top + height;
-}
-
 } // namespace win
 } // namespace common
 

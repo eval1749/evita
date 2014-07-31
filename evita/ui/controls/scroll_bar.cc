@@ -796,7 +796,7 @@ void ScrollBar::OnMouseExited(const ui::MouseEvent&) {
 }
 
 void ScrollBar::OnMouseMoved(const ui::MouseEvent& event) {
-  auto const result = HitTest(event.location());
+  auto const result = HitTest(gfx::PointF(event.location()));
   auto const new_hover_part = result.part() && result.part()->is_normal() ?
       result.part() : nullptr;
   if (hover_part_ && hover_part_ != new_hover_part)

@@ -106,8 +106,8 @@ void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
   api_event.alt_key = event.alt_key();
   api_event.button = static_cast<domapi::MouseButton>(event.button());
   api_event.buttons = event.buttons();
-  api_event.client_x = event.location().x;
-  api_event.client_y = event.location().y;
+  api_event.client_x = event.location().x();
+  api_event.client_y = event.location().y();
   api_event.control_key = event.control_key();
   api_event.event_type = ConvertEventType(event);
   api_event.shift_key = event.shift_key();
@@ -140,8 +140,8 @@ void EventSource::DispatchWheelEvent(const ui::MouseWheelEvent& event) {
   api_event.alt_key = event.alt_key();
   api_event.button = static_cast<domapi::MouseButton>(event.button());
   api_event.buttons = event.buttons();
-  api_event.client_x = event.location().x;
-  api_event.client_y = event.location().y;
+  api_event.client_x = event.location().x();
+  api_event.client_y = event.location().y();
   api_event.control_key = event.control_key();
   api_event.event_type = ConvertEventType(event);
   api_event.shift_key = event.shift_key();

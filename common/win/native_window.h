@@ -12,7 +12,7 @@
 namespace common {
 namespace win {
 
-struct Point;
+class Point;
 class Size;
 
 class COMMON_EXPORT MessageDelegate {

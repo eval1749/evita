@@ -394,12 +394,12 @@ void HorizontalBox::StopSplitter(const gfx::Point& point,
   // This box may be destroyed when it has only one child which is layout box.
   scoped_refptr<Box> protect(this);
 
-  if (point.x - above_box->left() < kMinBoxWidth) {
+  if (point.x() - above_box->left() < kMinBoxWidth) {
     auto const above_box_origin = above_box->origin();
     above_box->Destroy();
     below_box->SetBounds(gfx::RectF(above_box_origin,
                                     below_box->bottom_right()));
-  } else if (below_box->bounds().right - point.x < kMinBoxWidth) {
+  } else if (below_box->bounds().right - point.x() < kMinBoxWidth) {
     auto const below_box_bottom_right  = below_box->bottom_right();
     below_box->Destroy();
     above_box->SetBounds(gfx::RectF(above_box->origin(),
@@ -628,11 +628,11 @@ void VerticalBox::StopSplitter(const gfx::Point& point,
   // This box may be destroyed when it has only one child which is layout box.
   scoped_refptr<Box> protect(this);
 
-  if (point.y - above_box->top() < kMinBoxHeight) {
+  if (point.y() - above_box->top() < kMinBoxHeight) {
     below_box->SetBounds(gfx::RectF(above_box->origin(),
                                     below_box->bottom_right()));
     above_box->Destroy();
-  } else if (below_box->bottom() - point.y < kMinBoxHeight) {
+  } else if (below_box->bottom() - point.y() < kMinBoxHeight) {
     above_box->SetBounds(gfx::RectF(above_box->origin(),
                                     below_box->bottom_right()));
     below_box->Destroy();
@@ -882,7 +882,7 @@ void EditPane::SplitterController::End(const gfx::Point& point) {
 void EditPane::SplitterController::Move(const gfx::Point& point) {
   if (m_eState == SplitterController::State_Drag ||
       m_eState == SplitterController::State_DragSingle) {
-    m_pBox->outer()->MoveSplitter(point, m_pBox);
+    m_pBox->outer()->MoveSplitter(gfx::PointF(point), m_pBox);
   }
 }
 
@@ -1059,7 +1059,7 @@ void EditPane::DidSetFocus(ui::Widget*) {
 }
 
 HCURSOR EditPane::GetCursorAt(const gfx::Point& point) const {
-  auto const result = root_box_->HitTest(point);
+  auto const result = root_box_->HitTest(gfx::PointF(point));
   switch (result.type) {
     case ::HitTestResult::HSplitter:
     case ::HitTestResult::HSplitterBig: {
@@ -1094,7 +1094,7 @@ void EditPane::OnMousePressed(const ui::MouseEvent& event) {
   // We start splitter dragging when left button pressed.
   if (!event.is_left_button() || event.click_count())
     return;
-  auto const point = event.location();
+  auto const point = gfx::PointF(event.location());
   auto const result = root_box_->HitTest(point);
   if (result.type == ::HitTestResult::HSplitter ||
       result.type == ::HitTestResult::VSplitter) {

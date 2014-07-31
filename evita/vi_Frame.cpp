@@ -713,8 +713,8 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       const gfx::Point mouse_point(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
       Rect rcWindow;
       ::GetWindowRect(*native_window(), &rcWindow);
-      if (mouse_point.y >= rcWindow.top &&
-          mouse_point.y < rcWindow.top + tab_strip_->bounds().bottom) {
+      if (mouse_point.y() >= rcWindow.top &&
+          mouse_point.y() < rcWindow.top + tab_strip_->bounds().bottom) {
         return HTCAPTION;
       }
       break;

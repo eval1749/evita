@@ -9,15 +9,15 @@ namespace common {
 namespace win {
 
 Rect::Rect(const Point& origin, const Point& bottom_right) {
-  left = origin.x;
-  top = origin.y;
-  right = bottom_right.x;
-  bottom = bottom_right.y;
+  left = origin.x();
+  top = origin.y();
+  right = bottom_right.x();
+  bottom = bottom_right.y();
 }
 
 Rect::Rect(const Point& origin, const Size& size) {
-  left = origin.x;
-  top = origin.y;
+  left = origin.x();
+  top = origin.y();
   right = left + size.width();
   bottom = top + size.height();
 }
@@ -43,9 +43,17 @@ Rect::Rect() {
   left = right = top = bottom =0;
 }
 
+inline void Rect::set_origin(const Point& new_origin) {
+  auto const width = this->width();
+  auto const height = this->height();
+  left = new_origin.x();
+  top = new_origin.y();
+  right = left + width;
+  bottom = top + height;
+}
 
 bool Rect::Contains(const Point& pt) const {
-  return pt.x >= left && pt.x < right && pt.y >= top && pt.y < bottom;
+  return pt.x() >= left && pt.x() < right && pt.y() >= top && pt.y() < bottom;
 }
 
 bool Rect::Contains(const Rect& other) const {

@@ -243,12 +243,13 @@ void Widget::DispatchMouseExited() {
     return;
   hover_widget = nullptr;
   Point screen_point;
-  if (!::GetCursorPos(&screen_point)) {
+  if (!::GetCursorPos(screen_point.ptr())) {
     DVLOG_WIDGET(0) << "GetCursorPos error=" << ::GetLastError();
     return;
   }
   Point client_point(screen_point);
-  if (!::MapWindowPoints(HWND_DESKTOP, *native_window(), &client_point, 1)) {
+  if (!::MapWindowPoints(HWND_DESKTOP, *native_window(),
+                         client_point.ptr(), 1)) {
     DVLOG_WIDGET(0) << "MapWindowPoints error=" << ::GetLastError();
     return;
   }
@@ -348,7 +349,7 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
     // rather than active widget.
     Point screen_point(client_point);
     WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *host_widget->native_window(),
-                                   &client_point, 1));
+                                   client_point.ptr(), 1));
     auto const result = host_widget->HitTestForMouseEventTarget(client_point);
     if (!result)
       return;
@@ -362,7 +363,7 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
   auto const result = host_widget->HitTestForMouseEventTarget(client_point);
   Point screen_point(client_point);
   WIN32_VERIFY(::MapWindowPoints(*host_widget->native_window(), HWND_DESKTOP,
-                                 &screen_point, 1));
+                                 screen_point.ptr(), 1));
   if (message == WM_MOUSEMOVE || message == WM_NCMOUSEMOVE) {
     if (!hover_widget) {
       TRACKMOUSEEVENT track;
@@ -429,7 +430,7 @@ void Widget::Hide() {
 }
 
 Widget::HitTestResult Widget::HitTest(const Point& local_point) const {
-  if (!GetContentsBounds().Contains(local_point))
+  if (!GetContentsBounds().Contains(gfx::PointF(local_point)))
     return HitTestResult();
 
   // On release build by MSVS2013, using reverse() causes AV.
@@ -635,9 +636,9 @@ void Widget::SetCapture() {
 bool Widget::SetCursor() {
   DCHECK(native_window_);
   Point point;
-  WIN32_VERIFY(::GetCursorPos(&point));
+  WIN32_VERIFY(::GetCursorPos(point.ptr()));
   WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *native_window(),
-                                 &point, 1));
+                                 point.ptr(), 1));
   auto const result = HitTest(point);
   if (!result)
     return false;

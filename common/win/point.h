@@ -10,16 +10,31 @@ namespace win {
 
 class Size;
 
-struct COMMON_EXPORT Point : POINT {
-  Point(int x, int y);
-  Point(POINTS pt);
-  Point();
+class COMMON_EXPORT Point {
+  private: POINT data_;
 
- Point operator+(const Size& size) const;
- Point operator-(const Size& size) const;
- Size operator-(const Point& other) const;
+  public: explicit Point(POINTS other);
+  public: Point(const Point& other);
+  public: Point(const POINT& other);
+  public: Point(int x, int y);
+  public: Point();
 
- Point Offset(int delta_x, int delta_y) const;
+  public: operator POINT() const { return data_; }
+
+  public: Point& operator=(const Point& other);
+  public: bool operator==(const Point& other) const;
+  public: bool operator!=(const Point& other) const;
+  public: Point operator+(const Size& size) const;
+  public: Point operator-(const Size& size) const;
+  public: Size operator-(const Point& other) const;
+
+  public: POINT* ptr();
+  public: int x() const { return data_.x; }
+  public: void set_x(int x) { data_.x = x; }
+  public: int y() const { return data_.y; }
+  public: void set_y(int y) { data_.y = y; }
+
+  public: Point Offset(int delta_x, int delta_y) const;
 };
 
 } // namespace win

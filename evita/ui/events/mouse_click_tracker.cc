@@ -22,10 +22,10 @@ bool MouseClickTracker::is_repeated_event(const MouseEvent& event) const {
 bool MouseClickTracker::is_same_location(const MouseEvent& event) const {
   if (last_event_.target() != event.target())
     return false;
-  Rect rect(last_event_.screen_location().x - kDoubleClickWidth / 2,
-            last_event_.screen_location().y - kDoubleClickHeight / 2,
-            last_event_.screen_location().x + kDoubleClickWidth / 2,
-            last_event_.screen_location().y + kDoubleClickHeight / 2);
+  Rect rect(last_event_.screen_location().x() - kDoubleClickWidth / 2,
+            last_event_.screen_location().y() - kDoubleClickHeight / 2,
+            last_event_.screen_location().x() + kDoubleClickWidth / 2,
+            last_event_.screen_location().y() + kDoubleClickHeight / 2);
   return rect.Contains(event.screen_location());
 }
 

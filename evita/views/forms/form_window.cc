@@ -550,7 +550,7 @@ void FormWindow::CreateNativeWindow() const {
     auto const window_style = WS_POPUPWINDOW | WS_VISIBLE;
     auto const parent_hwnd = owner_->AssociatedHwnd();
     auto screen_point = offset_;
-    if (!::MapWindowPoints(parent_hwnd, HWND_DESKTOP, &screen_point, 1)) {
+    if (!::MapWindowPoints(parent_hwnd, HWND_DESKTOP, screen_point.ptr(), 1)) {
       DVLOG(0) << "MapWindowPoints error=%d" << ::GetLastError();
       return;
     }

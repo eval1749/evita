@@ -503,7 +503,7 @@ void TableControl::TableControlModel::MoveSelection(int direction) {
 
 void TableControl::TableControlModel::OnMousePressed(
     const ui::MouseEvent& event) {
-  auto const item = HitTest(event.location());
+  auto const item = HitTest(gfx::PointF(event.location()));
   if (!item)
    return;
   auto row = item->as<Row>();

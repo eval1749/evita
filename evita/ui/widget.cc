@@ -18,7 +18,6 @@
 #include "evita/ui/events/mouse_click_tracker.h"
 #include "evita/ui/root_widget.h"
 #include "evita/ui/system_metrics.h"
-#include "evita/ui/widget_ostream.h"
 
 #define DEBUG_FOCUS 0
 #define DEBUG_MOUSE 0
@@ -416,7 +415,7 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
 
 void Widget::Hide() {
   #if DEBUG_SHOW
-    DEBUG_WIDGET_PRINTF("focus=%d show=%d\n", has_focus(), shown_);
+    DVLOG_WIDGET(0) << "focus=" << has_focus() << " show=" << shown_;
   #endif
   // Hide widgets in top to bottom == post order.
   for (auto child : common::adopters::reverse(child_nodes())) {
@@ -681,7 +680,7 @@ void Widget::SetParentWidget(Widget* new_parent) {
 
 void Widget::Show() {
   #if DEBUG_SHOW
-    DEBUG_WIDGET_PRINTF("focus=%d show=%d\n", has_focus(), shown_);
+    DVLOG_WIDGET(0) << "focus=" << has_focus() << " show=" << shown_;
   #endif
   ++shown_;
   if (native_window_) {
@@ -947,3 +946,16 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
 }
 
 } // namespace ui
+
+std::ostream& operator<<(std::ostream& out, const ui::Widget& widget) {
+  out << "{" << widget.class_name() << "@" << std::hex <<
+    reinterpret_cast<uintptr_t>(&widget) << " " <<
+    std::dec << widget.bounds() << "}";
+  return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const ui::Widget* widget) {
+  if (widget)
+    return out << *widget;
+  return out << "null";
+}

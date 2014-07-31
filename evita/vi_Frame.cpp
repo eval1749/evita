@@ -250,12 +250,10 @@ void Frame::DidActivatePane(Pane* const pane) {
     return;
   auto const selected_index = tab_strip_->selected_index();
   #if DEBUG_FOCUS
-   DEBUG_WIDGET_PRINTF("selected_index=%d"
-                       " cur=" DEBUG_WIDGET_FORMAT ".focus=%d"
-                       " new=" DEBUG_WIDGET_FORMAT ".focus=%d at %d\n",
-        selected_index,
-        DEBUG_WIDGET_ARG(m_pActivePane), m_pActivePane->has_focus(),
-        DEBUG_WIDGET_ARG(pane), pane->has_focus(), tab_index);
+   DVLOG(0) << "DidActivatePane selected_index=" << selected_index <<
+      " cur=" << m_pActivePane << " .focus=" << m_pActivePane->has_focus <<
+      " new=" << pane << " .focus=" << pane->has_focus() <<
+      " tab_index=" << tab_index;
   #endif
 
   if (tab_index != selected_index)
@@ -286,24 +284,19 @@ void Frame::DidAddChildWidget(const ui::Widget& widget) {
 void Frame::DidChangeTabSelection(int selected_index) {
   auto const pane = getPaneFromTab(selected_index);
   #if DEBUG_FOCUS
-    DEBUG_WIDGET_PRINTF("Start selected_index=%d"
-        " cur=" DEBUG_WIDGET_FORMAT
-        " new=" DEBUG_WIDGET_FORMAT "\n",
-        selected_index,
-        DEBUG_WIDGET_ARG(m_pActivePane),
-        DEBUG_WIDGET_ARG(pane));
+    DVLOG(0) << "DidChangeTabSelection Start"
+        " selected_index=" << selected_index <<
+        " cur=" << m_pActivePane << " new=" << pane;
   #endif
   if (!pane) {
     #if DEBUG_FOCUS
-      DEBUG_WIDGET_PRINTF("selected_index(%d) doesn't have pane!\n",
-          selected_index);
+      DVLOG(0) << "selected_index(" << selected_index << " doesn't have pane!";
     #endif
     return;
   }
   if (m_pActivePane == pane) {
     #if DEBUG_FOCUS
-      DEBUG_WIDGET_PRINTF("Active pane isn't changed. why?\n",
-          selected_index);
+      DVLOG(0) << "Active pane(" << selected_index << ") isn't changed. why?";
     #endif
     return;
   }
@@ -311,19 +304,15 @@ void Frame::DidChangeTabSelection(int selected_index) {
     m_pActivePane->Hide();
   } else {
     #if DEBUG_FOCUS
-      DEBUG_WIDGET_PRINTF("Why we don't have acitve pane?\n");
+      DVLOG(0) << "Why we don't have acitve pane?";
     #endif
   }
   m_pActivePane = pane;
   pane->Show();
   pane->Activate();
   #if DEBUG_FOCUS
-    DEBUG_WIDGET_PRINTF("End selected_index=%d"
-        " cur=" DEBUG_WIDGET_FORMAT
-        " new=" DEBUG_WIDGET_FORMAT "\n",
-        selected_index,
-        DEBUG_WIDGET_ARG(m_pActivePane),
-        DEBUG_WIDGET_ARG(pane));
+    DVLOG(0) << "End selected_index=" << selected_index <<
+        " cur=" m_pActivePane << " new=" << pane;
   #endif
 }
 

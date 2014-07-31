@@ -27,7 +27,8 @@ Frame& ContentWindow::frame() const {
 
 void ContentWindow::Activate() {
   #if DEBUG_FOCUS
-    DEBUG_WIDGET_PRINTF("focus=%d show=%d\n", has_focus(), is_shown());
+    DVLOG(0) << "Activate " << this << " focus=" << has_focus() <<
+        "show=" << is_shown();
   #endif
   RequestFocus();
 }

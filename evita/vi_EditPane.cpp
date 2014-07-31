@@ -18,7 +18,6 @@
 #include "evita/editor/application.h"
 #include "evita/resource.h"
 #include "evita/ui/events/event.h"
-#include "evita/ui/widget_ostream.h"
 #include "evita/views/content_window.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_TextEditWindow.h"

@@ -281,7 +281,7 @@
         'ui/tooltip.cc',
         'ui/tooltip.h',
         'ui/widget.cc',
-        'ui/widget_ostream.cc',
+        'ui/widget.h',
       ], # sources
     },
     {

@@ -176,4 +176,13 @@ class Widget
 
 } // namespace ui
 
+#include <ostream>
+
+std::ostream& operator<<(std::ostream& out, const ui::Widget& widget);
+std::ostream& operator<<(std::ostream& out, const ui::Widget* widget);
+
+#define DVLOG_WIDGET(n) \
+    DVLOG(n) << __FUNCTION__ << " " << *this << \
+        " hwnd=" << AssociatedHwnd() << " "
+
 #endif //!defined(INCLUDE_evita_ui_widget_h)

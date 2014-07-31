@@ -34,10 +34,6 @@ inline bool Size::operator!=(const Size& other) const {
   return !operator==(other);
 }
 
-#define DEBUG_SIZE_FORMAT "%dx%d"
-#define DEBUG_SIZE_ARG(mp_size) \
- (mp_size).cx, (mp_size).cy
-
 } // namespace win
 } // namespace common
 

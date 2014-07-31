@@ -22,10 +22,6 @@ struct COMMON_EXPORT Point : POINT {
  Point Offset(int delta_x, int delta_y) const;
 };
 
-#define DEBUG_POINT_FORMAT "(%d,%d)"
-#define DEBUG_POINT_ARG(mp_point) \
- (mp_point).x, (mp_point).y
-
 } // namespace win
 } // namespace common
 

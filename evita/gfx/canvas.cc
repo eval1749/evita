@@ -130,18 +130,10 @@ void Canvas::DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
   GetRenderTarget()->DrawBitmap(bitmap, dst_rect, opacity, mode, src_rect);
 }
 
-void Canvas::DrawLine(const Brush& brush, int sx, int sy, int ex, int ey,
-                      float strokeWidth) {
+void Canvas::DrawLine(const Brush& brush, const PointF& point1,
+                      const PointF& point2, float pen_width) {
   DCHECK(drawing());
-  GetRenderTarget()->DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
-                              strokeWidth);
-}
-
-void Canvas::DrawLine(const Brush& brush, float sx, float sy,
-                      float ex, float ey, float strokeWidth) {
-  DCHECK(drawing());
-  GetRenderTarget()->DrawLine(PointF(sx, sy), PointF(ex, ey), brush,
-                              strokeWidth);
+  GetRenderTarget()->DrawLine(point1, point2, brush, pen_width);
 }
 
 void Canvas::DrawRectangle(const Brush& brush, const RectF& rect,
@@ -151,13 +143,11 @@ void Canvas::DrawRectangle(const Brush& brush, const RectF& rect,
   GetRenderTarget()->DrawRectangle(rect, brush, strokeWidth);
 }
 
-void Canvas::DrawText(const TextFormat& text_format,
-                      const Brush& brush,
-                      const RectF& bounds,
-                      const char16* text, size_t text_length) {
+void Canvas::DrawText(const TextFormat& text_format, const Brush& brush,
+                      const RectF& bounds, const base::string16& text){
   DCHECK(drawing());
   DCHECK(!bounds.empty());
-  GetRenderTarget()->DrawText(text, static_cast<uint32_t>(text_length),
+  GetRenderTarget()->DrawText(text.data(), static_cast<uint32_t>(text.length()),
                               text_format, bounds, brush);
 }
 
@@ -179,20 +169,6 @@ bool Canvas::EndDraw() {
     DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
   }
   return false;
-}
-
-void Canvas::FillRectangle(const Brush& brush, int left, int top,
-                              int right, int bottom) {
-  GetRenderTarget()->FillRectangle(RectF(left, top, right, bottom), brush);
-}
-
-void Canvas::FillRectangle(const Brush& brush, float left, float top,
-                              float right, float bottom) {
-  FillRectangle(brush, RectF(left, top, right, bottom));
-}
-
-void Canvas::FillRectangle(const Brush& brush, const Rect& rect) {
-  FillRectangle(brush, RectF(rect));
 }
 
 void Canvas::FillRectangle(const Brush& brush, const RectF& rect) {

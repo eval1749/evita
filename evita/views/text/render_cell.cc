@@ -149,18 +149,21 @@ float WithFont::underline_thickness() const {
 
 void WithFont::DrawHLine(gfx::Canvas* canvas, const gfx::Brush& brush,
                          float sx, float ex, float y) const {
-  canvas->DrawLine(brush, sx, y, ex, y, font_->underline_thickness());
+  canvas->DrawLine(brush, gfx::PointF(sx, y), gfx::PointF(ex, y),
+                   font_->underline_thickness());
 }
 
 void WithFont::DrawLine(gfx::Canvas* canvas, const gfx::Brush& brush,
                         float sx, float sy, float ex, float ey,
                         float width) const {
-  canvas->DrawLine(brush, sx, sy, ex, ey, width* font_->underline_thickness());
+  canvas->DrawLine(brush, gfx::PointF(sx, sy), gfx::PointF(ex, ey),
+                   width* font_->underline_thickness());
 }
 
 void WithFont::DrawVLine(gfx::Canvas* canvas, const gfx::Brush& brush,
                          float x, float sy, float ey) const {
-  canvas->DrawLine(brush, x, sy, x, ey, font_->underline_thickness());
+  canvas->DrawLine(brush, gfx::PointF(x, sy), gfx::PointF(x, ey),
+                   font_->underline_thickness());
 }
 
 void WithFont::DrawWave(gfx::Canvas* canvas, const gfx::Brush& brush,
@@ -172,10 +175,12 @@ void WithFont::DrawWave(gfx::Canvas* canvas, const gfx::Brush& brush,
     auto const bottom = baseline + wave;
     auto const top = baseline;
     // top to bottom
-    canvas->DrawLine(brush, x, top, x + wave, bottom, pen_width);
+    canvas->DrawLine(brush, gfx::PointF(x, top), gfx::PointF(x + wave, bottom),
+                     pen_width);
     x += wave;
     // bottom to top
-    canvas->DrawLine(brush, x, bottom, x + wave, top, pen_width);
+    canvas->DrawLine(brush, gfx::PointF(x, bottom), gfx::PointF(x + wave, top),
+                     pen_width);
   }
 }
 

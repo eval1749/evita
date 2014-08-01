@@ -35,16 +35,6 @@ static const float kLabelHeight = 16.0f;
 static const float kMaxTabWidth = 200.0f;
 static const float kMinTabWidth = 140.0f;
 
-void FillRect(gfx::Canvas* canvas, int x, int y, int cx, int cy) {
-  RECT rc;
-  rc.left = x;
-  rc.right = x + cx;
-  rc.top = y;
-  rc.bottom = y + cy;
-  gfx::Brush brush(canvas, gfx::blackColor());
-  canvas->FillRectangle(brush, rc);
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // Element
@@ -230,10 +220,8 @@ void CloseBox::DrawXMark(gfx::Canvas* canvas, gfx::ColorF color) const {
   // -----ooo-ooo---- 10
   // ----ooo---ooo--- 11
   #define hline(x, y, cx, cy) \
-    canvas->FillRectangle( \
-      brush, \
-      left() + x, top() + y, \
-      left() + x + cx, top() + y + cy);
+    canvas->FillRectangle( brush, gfx::RectF( \
+        left() + x, top() + y, left() + x + cx, top() + y + cy));
 
   hline( 4, 4, 3, 1);
   hline(10, 4, 3, 1);
@@ -327,7 +315,7 @@ void Tab::DrawContent(gfx::Canvas* canvas) const {
   DrawIcon(canvas);
   gfx::Brush text_brush(canvas, gfx::sysColor(COLOR_BTNTEXT));
   canvas->DrawText(*canvas->work<gfx::TextFormat>(), text_brush, text_bounds_,
-                   label_text_.data(), label_text_.length());
+                   label_text_);
 }
 
 void Tab::DrawIcon(gfx::Canvas* canvas) const {
@@ -523,12 +511,14 @@ void ArrowButton::DrawArrow(gfx::Canvas* canvas) const {
   auto const alpha = IsHover() ? 1.0f : 0.3f;
   gfx::Brush arrow_brush(canvas, gfx::ColorF(0.0f, 0.0f, 0.0f, alpha));
 
-  canvas->DrawLine(arrow_brush, center_x + factors[0] * wing_size,
-                   center_y + factors[1] * wing_size,
-                   center_x, center_y, pen_width);
-  canvas->DrawLine(arrow_brush, center_x + factors[2] * wing_size,
-                   center_y + factors[3] * wing_size,
-                   center_x, center_y, pen_width);
+  canvas->DrawLine(arrow_brush,
+                   gfx::PointF(center_x + factors[0] * wing_size,
+                               center_y + factors[1] * wing_size),
+                   gfx::PointF(center_x, center_y), pen_width);
+  canvas->DrawLine(arrow_brush,
+                   gfx::PointF(center_x + factors[2] * wing_size,
+                               center_y + factors[3] * wing_size),
+                   gfx::PointF(center_x, center_y), pen_width);
 }
 
 // Element

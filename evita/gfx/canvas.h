@@ -97,29 +97,18 @@ class Canvas : public Object, public DpiHandler {
                           const RectF& src_rect, float opacity = 1.0f,
                           D2D1_BITMAP_INTERPOLATION_MODE mode =
                               D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
-  public: void DrawLine(const Brush& brush, int sx, int sy, int ex, int ey,
-                        float strokeWidth = 1);
-  public: void DrawLine(const Brush& brush,
-                        float sx, float sy,
-                        float ex, float ey,
-                        float strokeWidth = 1);
+  public: void DrawLine(const Brush& brush, const PointF& point1,
+                        const PointF& point2, float pen_width = 1.0f);
   public: void DrawRectangle(const Brush& brush, const RectF& rect,
                              float strokeWidth = 1);
-  public: void DrawText(const TextFormat& text_format,
-                        const Brush& brush,
-                        const RectF& bounds,
-                        const base::char16* text, size_t text_length);
+  public: void DrawText(const TextFormat& text_format, const Brush& brush,
+                        const RectF& bounds, const base::string16& text);
 
   // [E]
   // Returns true if succeeded.
   public: bool EndDraw();
 
   // [F]
-  public: void FillRectangle(const Brush& brush, int left, int top,
-                             int right, int bottom);
-  public: void FillRectangle(const Brush& brush, float left, float top,
-                             float right, float bottom);
-  public: void FillRectangle(const Brush& brush, const Rect& rc);
   public: void FillRectangle(const Brush& brush, const RectF& rect);
   public: void Flush();
 

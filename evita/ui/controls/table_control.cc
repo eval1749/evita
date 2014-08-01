@@ -390,19 +390,19 @@ void TableControl::TableControlModel::Draw(gfx::Canvas* canvas) const {
 
 void TableControl::TableControlModel::DrawHeaderRow(gfx::Canvas* canvas) const {
   canvas->FillRectangle(gfx::Brush(canvas, gfx::ColorF::White),
-                     gfx::RectF(columns_.front()->bounds().origin(),
-                                columns_.back()->bounds().bottom_right()));
-  gfx::Brush textBrush(canvas, gfx::ColorF::Black);
-  gfx::Brush grayBrush(canvas, gfx::ColorF::LightGray);
+                        gfx::RectF(columns_.front()->bounds().origin(),
+                                   columns_.back()->bounds().bottom_right()));
+  gfx::Brush text_brush(canvas, gfx::ColorF::Black);
+  gfx::Brush gray_brush(canvas, gfx::ColorF::LightGray);
   auto column_index = 0u;
   for (auto column : columns_) {
     ++column_index;
     auto const rect = column->bounds();
     auto const text = column->text();
-    (*canvas)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
-                     *text_format_, rect, textBrush);
-    canvas->DrawLine(grayBrush, rect.right - 5, rect.top,
-                  rect.right - 5, rect.bottom, 0.5f);
+    canvas->DrawText(*text_format_, text_brush, rect, text);
+    canvas->DrawLine(gray_brush,
+                     gfx::PointF(rect.right - 5, rect.top),
+                     gfx::PointF(rect.right - 5, rect.bottom), 0.5f);
   }
 }
 

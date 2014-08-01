@@ -22,6 +22,10 @@ class COMMON_EXPORT Size {
 
   public: bool operator==(const Size& other) const;
   public: bool operator!=(const Size& other) const;
+  public: Size operator+(const Size& other) const;
+  public: Size operator-(const Size& other) const;
+  public: Size operator*(int multiplier) const;
+  public: Size operator/(int divider) const;
 
   public: bool empty() const { return width() <= 0 || height() <= 0; }
   public: int height() const { return data_.cy; }

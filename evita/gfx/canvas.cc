@@ -144,27 +144,21 @@ void Canvas::DrawLine(const Brush& brush, float sx, float sy,
                               strokeWidth);
 }
 
-void Canvas::DrawRectangle(const Brush& brush, const RECT& rc,
-                           float strokeWidth) {
-  DrawRectangle(brush, RectF(rc), strokeWidth);
-}
-
 void Canvas::DrawRectangle(const Brush& brush, const RectF& rect,
                            float strokeWidth) {
   DCHECK(drawing());
-  DCHECK(rect);
+  DCHECK(!rect.empty());
   GetRenderTarget()->DrawRectangle(rect, brush, strokeWidth);
 }
 
 void Canvas::DrawText(const TextFormat& text_format,
                       const Brush& brush,
-                      const RECT& rc,
-                      const char16* pwch, size_t cwch) {
+                      const RectF& bounds,
+                      const char16* text, size_t text_length) {
   DCHECK(drawing());
-  auto rect = RectF(rc);
-  DCHECK(rect);
-  GetRenderTarget()->DrawText(pwch, static_cast<uint32_t>(cwch), text_format,
-                              rect, brush);
+  DCHECK(!bounds.empty());
+  GetRenderTarget()->DrawText(text, static_cast<uint32_t>(text_length),
+                              text_format, bounds, brush);
 }
 
 bool Canvas::EndDraw() {
@@ -197,8 +191,8 @@ void Canvas::FillRectangle(const Brush& brush, float left, float top,
   FillRectangle(brush, RectF(left, top, right, bottom));
 }
 
-void Canvas::FillRectangle(const Brush& brush, const RECT& rc) {
-  FillRectangle(brush, RectF(rc));
+void Canvas::FillRectangle(const Brush& brush, const Rect& rect) {
+  FillRectangle(brush, RectF(rect));
 }
 
 void Canvas::FillRectangle(const Brush& brush, const RectF& rect) {
@@ -229,10 +223,10 @@ bool Canvas::SaveScreenImage(const RectF& rect) {
   if (!screen_bitmap_)
     screen_bitmap_ = std::make_unique<Bitmap>(this);
   auto const enclosing_rect = ToEnclosingRect(rect);
-  const RectU source_rect(static_cast<uint32_t>(enclosing_rect.left),
-                          static_cast<uint32_t>(enclosing_rect.top),
-                          static_cast<uint32_t>(enclosing_rect.right),
-                          static_cast<uint32_t>(enclosing_rect.bottom));
+  const RectU source_rect(static_cast<uint32_t>(enclosing_rect.left()),
+                          static_cast<uint32_t>(enclosing_rect.top()),
+                          static_cast<uint32_t>(enclosing_rect.right()),
+                          static_cast<uint32_t>(enclosing_rect.bottom()));
   const PointU dest_point(source_rect.origin());
   auto const hr = (*screen_bitmap_)->CopyFromRenderTarget(&dest_point,
       GetRenderTarget(), &source_rect);

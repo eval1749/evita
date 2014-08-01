@@ -62,7 +62,6 @@ class ControlImporter {
   DISALLOW_COPY_AND_ASSIGN(ControlImporter);
 };
 
-
 ui::Control::Style ControlImporter::ComputeStyle() const {
   ui::CheckboxControl::Style style;
   style.bgcolor = ui::SystemMetrics::instance()->bgcolor();
@@ -84,12 +83,6 @@ void ControlImporter::Update(const dom::FormControl* control,
       gfx::Size(static_cast<int>(control->client_width()),
                 static_cast<int>(control->client_height())));
   DCHECK(!rect.empty());
-  if (rect.empty()) {
-    // Because empty rectangle causes assertion in graphics rendering, we
-    // adjust control rectangle.
-    rect.right = rect.left + 1;
-    rect.bottom = rect.top + 1;
-  }
   widget->SetBounds(rect);
 
   if (auto const control_widget = widget->as<ui::Control>())
@@ -494,7 +487,7 @@ bool FormWindow::OnIdle(int) {
 
   if (form_size_ != model_->size()) {
     form_size_ = model_->size();
-    gfx::Rect window_rect;
+    RECT window_rect;
     ::GetWindowRect(AssociatedHwnd(), &window_rect);
     window_rect.right = window_rect.left + form_size_.width();
     window_rect.bottom = window_rect.top + form_size_.height();
@@ -563,17 +556,15 @@ void FormWindow::CreateNativeWindow() const {
   // Place dialog window at center of active window.
   auto const extended_window_style = WS_EX_LAYERED | WS_EX_TOOLWINDOW;
   auto const window_style = WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE;
-  gfx::Rect active_window_rect;
+  gfx::Rect active_window_bounds;
   ::GetWindowRect(FrameList::instance()->active_frame()->AssociatedHwnd(),
-                  &active_window_rect);
+                  active_window_bounds.ptr());
   auto window_rect = gfx::Rect(
-      gfx::Point(active_window_rect.left +
-                    (active_window_rect.width() - form_size_.width()) / 2,
-                 active_window_rect.top +
-                    (active_window_rect.height() - form_size_.height()) / 2),
+      active_window_bounds.origin() +
+        ((active_window_bounds.size() - form_size_) / 2),
       form_size_);
   auto const has_menu = false;
-  WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style, has_menu,
+  WIN32_VERIFY(::AdjustWindowRectEx(window_rect.ptr(), window_style, has_menu,
                                     extended_window_style));
   native_window()->CreateWindowEx(
       extended_window_style, window_style, title_.c_str(), nullptr,
@@ -633,21 +624,22 @@ void FormWindow::OnPaint(const gfx::Rect rect) {
     return;
   }
 
+  auto const bounds = gfx::RectF(rect);
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  canvas_->set_dirty_rect(gfx::RectF(rect));
+  canvas_->AddDirtyRect(bounds);
   auto const bgcolor = ui::SystemMetrics::instance()->bgcolor();
   // TODO(yosi) We should fill background of form window excluding controls
-  canvas_->FillRectangle(gfx::Brush(canvas_.get(), bgcolor), rect);
+  canvas_->FillRectangle(gfx::Brush(canvas_.get(), bgcolor), bounds);
   Window::OnDraw(canvas_.get());
 
   // Render paint rectangle for debugging.
   if (views::switches::form_window_display_paint) {
     gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_.get(),
-                                                 gfx::RectF(rect));
+                                                 bounds);
     canvas_->FillRectangle(gfx::Brush(canvas_.get(),
-                           gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)), rect);
+                           gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)), bounds);
     canvas_->DrawRectangle(gfx::Brush(canvas_.get(),
-                           gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)), rect, 2.0f);
+                           gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)), bounds, 2.0f);
   }
 }
 

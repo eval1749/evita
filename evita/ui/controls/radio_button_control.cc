@@ -33,12 +33,12 @@ void RadioButtonControl::OnDraw(gfx::Canvas* canvas) {
   if (bounds().empty())
     return;
 
-  canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor), bounds());
+  canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor),
+                        gfx::RectF(bounds()));
 
   auto const size = 12.0f;
   D2D1_ELLIPSE ellipse;
-  ellipse.point = gfx::PointF(bounds().left + bounds().width() / 2,
-                              bounds().top + bounds().height() / 2);
+  ellipse.point = gfx::PointF(bounds().origin() + (bounds().size() / 2));
   ellipse.radiusX = ellipse.radiusY = size / 2;
   gfx::Brush frame_brush(canvas, hover() ? style_.hotlight : style_.shadow);
   (*canvas)->DrawEllipse(ellipse, frame_brush);

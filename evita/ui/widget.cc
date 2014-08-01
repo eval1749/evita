@@ -260,7 +260,7 @@ void Widget::DispatchMouseExited() {
 
 void Widget::DispatchPaintMessage() {
   Rect exposed_rect;
-  if (!::GetUpdateRect(*native_window(), &exposed_rect, false))
+  if (!::GetUpdateRect(*native_window(), exposed_rect.ptr(), false))
     return;
   #if DEBUG_PAINT
     DVLOG(0) << "DispatchPaintMessage " << *this << " " << exposed_rect;
@@ -274,7 +274,7 @@ void Widget::DispatchPaintMessage() {
     if (!child->is_shown() || child->has_native_window())
       continue;
     auto const rect = exposed_rect.Intersect(child->bounds());
-    if (rect) {
+    if (!rect.empty()) {
       #if DEBUG_PAINT
         DVLOG(0) << "Start " << child << " focus=" << child.has_focus() <<
             " " << rect;
@@ -440,8 +440,8 @@ Widget::HitTestResult Widget::HitTest(const Point& local_point) const {
     auto const child = runner;
     if (!child->is_shown())
       continue;
-    auto const child_point = local_point.Offset(-child->bounds().left,
-                                                -child->bounds().top);
+    auto const child_point = local_point.Offset(-child->bounds().left(),
+                                                -child->bounds().top());
     if (auto const result = child->HitTest(child_point))
       return result;
   }
@@ -455,8 +455,8 @@ Widget::HitTestResult Widget::HitTestForMouseEventTarget(
     auto local_point = point;
     for (auto runner = capture_widget; runner != this;
          runner = &runner->container_widget()) {
-      local_point = local_point.Offset(-runner->bounds().left,
-                                       -runner->bounds().top);
+      local_point = local_point.Offset(-runner->bounds().left(),
+                                       -runner->bounds().top());
     }
     return HitTestResult(capture_widget, local_point);
   }
@@ -595,7 +595,7 @@ void Widget::SchedulePaintInRect(const Rect& rect) {
   DCHECK(is_realized());
   DCHECK(!rect.empty());
   // TODO(yosi) We should have |DCHECK(bounds_.Contains(rect))|.
-  ::InvalidateRect(AssociatedHwnd(), &rect, true);
+  ::InvalidateRect(AssociatedHwnd(), rect.ptr(), true);
 }
 
 void Widget::SetBounds(const Rect& rect) {
@@ -608,7 +608,7 @@ void Widget::SetBounds(const Rect& rect) {
     return;
 #endif
   if (is_realized() && native_window_) {
-    ::SetWindowPos(*native_window_.get(), nullptr, rect.left, rect.top,
+    ::SetWindowPos(*native_window_.get(), nullptr, rect.left(), rect.top(),
                    rect.width(), rect.height(), SWP_NOACTIVATE);
   } else {
     if (bounds_ > rect && parent_node()) {
@@ -702,7 +702,7 @@ void Widget::UpdateBounds() {
   DCHECK(native_window_);
   if (container_widget() != RootWidget::instance())
     return;
-  ::GetClientRect(*native_window_.get(), &bounds_);
+  ::GetClientRect(*native_window_.get(), bounds_.ptr());
 }
 
 void Widget::WillDestroyWidget() {

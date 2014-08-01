@@ -139,7 +139,7 @@ Element* Element::HitTest(const gfx::PointF&  point) const {
 
 void Element::Invalidate(HWND hwnd) {
   // TODO(yosi) We should use GFX version of invalidate rectangle.
-  auto const bounds = gfx::ToEnclosingRect(bounds_);
+  auto const bounds = static_cast<RECT>(gfx::ToEnclosingRect(bounds_));
   ::InvalidateRect(hwnd, &bounds, false);
 }
 

@@ -10,63 +10,48 @@
 namespace common {
 namespace win {
 
-struct COMMON_EXPORT Rect : RECT {
-  Rect(const Point& origin, const Size& size);
-  Rect(const Point& origin, const Point& bottom_right);
-  explicit Rect(const Size& size);
-  Rect(const RECT& other);
-  Rect(int l, int t, int r, int b);
-  Rect();
+class COMMON_EXPORT Rect final {
+  private: RECT data_;
 
-  bool operator==(const Rect& other) const;
-  bool operator!=(const Rect& other) const;
-  bool operator<(const Rect& other) const;
-  bool operator<=(const Rect& other) const;
-  bool operator>(const Rect& other) const;
-  bool operator>=(const Rect& other) const;
+  public: Rect(const Point& origin, const Point& bottom_right);
+  public: Rect(const Point& origin, const Size& size);
+  public: explicit Rect(const Size& size);
+  public: Rect(const Rect& other);
+  public: Rect(const RECT& other);
+  public: Rect(int l, int t, int r, int b);
+  public: Rect();
+  public: ~Rect();
 
-  explicit operator bool() const { return !empty(); }
-  int area() const { return width() * height(); }
-  Point bottom_right() const { return Point(right, bottom); }
-  bool empty() const { return width() <= 0 || height() <= 0; }
-  int height() const { return bottom - top; }
-  Point origin() const { return Point(left, top); }
-  void set_origin(const Point& new_origin);
-  int width() const { return right - left; }
-  Size size() const { return Size(width(), height()); }
+  public: explicit operator RECT() const;
 
-  bool Contains(const Point& pt) const;
-  bool Contains(const Rect& other) const;
-  Rect Intersect(const Rect&) const;
-  void Unite(const Rect& other);
+  public: Rect& operator=(const Rect& other);
+  public: bool operator==(const Rect& other) const;
+  public: bool operator!=(const Rect& other) const;
+  public: bool operator<(const Rect& other) const;
+  public: bool operator<=(const Rect& other) const;
+  public: bool operator>(const Rect& other) const;
+  public: bool operator>=(const Rect& other) const;
+
+  public: int area() const { return width() * height(); }
+  public: int bottom() const { return data_.bottom; }
+  public: Point bottom_right() const { return Point(right(), bottom()); }
+  public: bool empty() const { return width() <= 0 || height() <= 0; }
+  public: int height() const { return bottom() - top(); }
+  public: int left() const { return data_.left; }
+  public: Point origin() const { return Point(left(), top()); }
+  public: RECT* ptr() { return &data_; }
+  public: const RECT* ptr() const { return &data_; }
+  public: void set_origin(const Point& new_origin);
+  public: int right() const { return data_.right; }
+  public: Size size() const { return Size(width(), height()); }
+  public: int top() const { return data_.top; }
+  public: int width() const { return right() - left(); }
+
+  public: bool Contains(const Point& pt) const;
+  public: bool Contains(const Rect& other) const;
+  public: Rect Intersect(const Rect&) const;
+  public: void Unite(const Rect& other);
 };
-
-// Rect inline functions
-
-inline bool Rect::operator==(const Rect& other) const {
-  return left == other.left && top == other.top &&
-         right == other.right && bottom == other.bottom;
-}
-
-inline bool Rect::operator!=(const Rect& other) const {
-  return !operator==(other);
-}
-
-inline bool Rect::operator<(const Rect& other) const {
-  return area() < other.area();
-}
-
-inline bool Rect::operator<=(const Rect& other) const {
-  return area() <= other.area();
-}
-
-inline bool Rect::operator>(const Rect& other) const {
-  return area() > other.area();
-}
-
-inline bool Rect::operator>=(const Rect& other) const {
-  return area() >= other.area();
-}
 
 } // namespace win
 } // namespace common

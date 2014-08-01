@@ -152,8 +152,13 @@ void SwapChain::Present() {
     return;
   DXGI_PRESENT_PARAMETERS parameters = {0};
   if (!is_first_present_) {
-    parameters.DirtyRectsCount = dirty_rects_.size();
-    parameters.pDirtyRects = dirty_rects_.data();
+    std::vector<RECT> dirty_rects(dirty_rects_.size());
+    dirty_rects.clear();
+    for (auto const rect : dirty_rects_) {
+      dirty_rects.push_back(static_cast<RECT>(rect));
+    }
+    parameters.DirtyRectsCount = dirty_rects.size();
+    parameters.pDirtyRects = dirty_rects.data();
     parameters.pScrollRect = nullptr;
     parameters.pScrollOffset = nullptr;
   }

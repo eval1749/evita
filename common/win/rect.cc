@@ -8,62 +8,102 @@
 namespace common {
 namespace win {
 
-Rect::Rect(const Point& origin, const Point& bottom_right) {
-  left = origin.x();
-  top = origin.y();
-  right = bottom_right.x();
-  bottom = bottom_right.y();
+Rect::Rect(const Point& origin, const Point& bottom_right)
+    : Rect(origin.x(), origin.y(), bottom_right.x(), bottom_right.y()) {
 }
 
-Rect::Rect(const Point& origin, const Size& size) {
-  left = origin.x();
-  top = origin.y();
-  right = left + size.width();
-  bottom = top + size.height();
+Rect::Rect(const Point& origin, const Size& size)
+    : Rect(origin, origin + size) {
 }
 
-Rect::Rect(const Size& size) {
-  left = top = 0;
-  right = size.width();
-  bottom = size.height();
+Rect::Rect(const Size& size)
+    : Rect(0, 0, size.width(), size.height()) {
 }
 
-Rect::Rect(int l, int t, int r, int b) {
-  left = l; right= r; top= t; bottom= b;
+Rect::Rect(int left, int top, int right, int bottom) {
+  data_.left = left;
+  data_.right= right;
+  data_.top= top;
+  data_.bottom= bottom;
 }
 
-Rect::Rect(const RECT& other) {
-  left = other.left;
-  right = other.right;
-  top = other.top;
-  bottom = other.bottom;
+Rect::Rect(const Rect& other)
+    : data_(other.data_) {
 }
 
-Rect::Rect() {
-  left = right = top = bottom =0;
+Rect::Rect(const RECT& other)
+    : Rect(other.left, other.top, other.right, other.bottom) {
+}
+
+Rect::Rect() : Rect(0, 0, 0, 0) {
+}
+
+Rect::~Rect() {
+}
+
+Rect::operator RECT() const {
+  RECT rect;
+  rect.left = left();
+  rect.top = top();
+  rect.right = right();
+  rect.bottom = bottom();
+  return rect;
+}
+
+Rect& Rect::operator=(const Rect& other) {
+  data_ = other.data_;
+  return *this;
+}
+
+bool Rect::operator==(const Rect& other) const {
+  return left() == other.left() && top() == other.top() &&
+         right() == other.right() && bottom() == other.bottom();
+}
+
+bool Rect::operator!=(const Rect& other) const {
+  return !operator==(other);
+}
+
+bool Rect::operator<(const Rect& other) const {
+  return area() < other.area();
+}
+
+bool Rect::operator<=(const Rect& other) const {
+  return area() <= other.area();
+}
+
+bool Rect::operator>(const Rect& other) const {
+  return area() > other.area();
+}
+
+bool Rect::operator>=(const Rect& other) const {
+  return area() >= other.area();
 }
 
 inline void Rect::set_origin(const Point& new_origin) {
   auto const width = this->width();
   auto const height = this->height();
-  left = new_origin.x();
-  top = new_origin.y();
-  right = left + width;
-  bottom = top + height;
+  data_.left = new_origin.x();
+  data_.top = new_origin.y();
+  data_.right = data_.left + width;
+  data_.bottom = data_.top + height;
 }
 
-bool Rect::Contains(const Point& pt) const {
-  return pt.x() >= left && pt.x() < right && pt.y() >= top && pt.y() < bottom;
+bool Rect::Contains(const Point& point) const {
+  return point.x() >= left() && point.x() < right() &&
+         point.y() >= top() && point.y() < bottom();
 }
 
 bool Rect::Contains(const Rect& other) const {
-  return left <= other.left && right >= other.right &&
-         top <= other.top && bottom >= other.bottom;
+  return left() <= other.left() && right() >= other.right() &&
+         top() <= other.top() && bottom() >= other.bottom();
 }
 
 Rect Rect::Intersect(const Rect& other) const {
-  return Rect(std::max(left, other.left), std::max(top, other.top),
-              std::min(right, other.right), std::min(bottom, other.bottom));
+  return Rect(std::max(left(), other.left()),
+              std::max(top(), other.top()),
+              std::min(right(), other.right()),
+              std::min(bottom(), other.bottom()));
 }
 
 void Rect::Unite(const Rect& other) {
@@ -73,10 +113,10 @@ void Rect::Unite(const Rect& other) {
     *this = other;
     return;
   }
-  left = std::min(left, other.left);
-  top = std::min(top, other.top);
-  right = std::max(right, other.right);
-  bottom = std::max(bottom, other.bottom);
+  data_.left = std::min(left(), other.left());
+  data_.top = std::min(top(), other.top());
+  data_.right = std::max(right(), other.right());
+  data_.bottom = std::max(bottom(), other.bottom());
 }
 
 } // namespace win

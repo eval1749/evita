@@ -86,9 +86,9 @@ void Tooltip::SendMessage(UINT message, TOOLINFO* info) {
   ::SendMessage(tooltip_hwnd_, message, 0, reinterpret_cast<LPARAM>(info));
 }
 
-void Tooltip::SetToolBounds(ToolDelegate* tool, const RECT& bounds) {
+void Tooltip::SetToolBounds(ToolDelegate* tool, const gfx::Rect& bounds) {
   TOOLINFO info = {0};
-  info.rect = bounds;
+  info.rect = static_cast<RECT>(bounds);
   info.uId = reinterpret_cast<UINT_PTR>(tool);
   SendMessage(TTM_NEWTOOLRECT, &info);
 }

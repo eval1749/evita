@@ -6,6 +6,7 @@
 #define INCLUDE_evita_ui_tooltip_h
 
 #include "base/strings/string16.h"
+#include "evita/gfx/rect.h"
 
 struct tagTOOLINFOW;
 typedef struct tagTOOLINFOW TTTOOLINFOW;
@@ -38,7 +39,8 @@ class Tooltip final {
   public: void OnNotify(NMHDR* nmhdr);
   public: void Realize(HWND tool_hwnd);
   private: void SendMessage(UINT message, TTTOOLINFOW* info);
-  public: void SetToolBounds(ToolDelegate* tool_delegate, const RECT& bounds);
+  public: void SetToolBounds(ToolDelegate* tool_delegate,
+                             const gfx::Rect& bounds);
 
   DISALLOW_COPY_AND_ASSIGN(Tooltip);
 };

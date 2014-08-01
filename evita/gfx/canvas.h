@@ -103,14 +103,12 @@ class Canvas : public Object, public DpiHandler {
                         float sx, float sy,
                         float ex, float ey,
                         float strokeWidth = 1);
-  public: void DrawRectangle(const Brush& brush, const RECT& rc,
-                             float strokeWidth = 1);
   public: void DrawRectangle(const Brush& brush, const RectF& rect,
                              float strokeWidth = 1);
   public: void DrawText(const TextFormat& text_format,
                         const Brush& brush,
-                        const RECT& rc,
-                        const base::char16* pwch, size_t cwch);
+                        const RectF& bounds,
+                        const base::char16* text, size_t text_length);
 
   // [E]
   // Returns true if succeeded.
@@ -118,11 +116,10 @@ class Canvas : public Object, public DpiHandler {
 
   // [F]
   public: void FillRectangle(const Brush& brush, int left, int top,
-
                              int right, int bottom);
   public: void FillRectangle(const Brush& brush, float left, float top,
                              float right, float bottom);
-  public: void FillRectangle(const Brush& brush, const RECT& rc);
+  public: void FillRectangle(const Brush& brush, const Rect& rc);
   public: void FillRectangle(const Brush& brush, const RectF& rect);
   public: void Flush();
 

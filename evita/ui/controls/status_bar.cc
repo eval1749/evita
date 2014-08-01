@@ -33,7 +33,7 @@ void StatusBar::Realize(HWND hwndParent) {
       g_hInstance,
       nullptr);
   WIN32_VERIFY(hwnd_);
-  WIN32_VERIFY(::GetWindowRect(hwnd_, &bounds_));
+  WIN32_VERIFY(::GetWindowRect(hwnd_, bounds_.ptr()));
   DCHECK(!bounds_.empty());
 }
 
@@ -41,7 +41,7 @@ void StatusBar::SetBounds(const common::win::Rect& rect) {
   DCHECK(hwnd_);
   DCHECK(!rect.empty());
   bounds_ = rect;
-  ::SetWindowPos(hwnd_, nullptr, rect.left, rect.top, rect.width(),
+  ::SetWindowPos(hwnd_, nullptr, rect.left(), rect.top(), rect.width(),
                  rect.height(), SWP_NOZORDER);
 }
 
@@ -80,7 +80,7 @@ void StatusBar::Set(const std::vector<base::string16>& new_texts) {
 
   std::vector<int> new_rights(num_columns);
   auto const size_grip_width = ::GetSystemMetrics(SM_CXVSCROLL);
-  auto right = bounds_.right - size_grip_width;
+  auto right = bounds_.right() - size_grip_width;
   for (auto index = num_columns;  index > 0; --index) {
     new_rights[index - 1] = right;
     right -= column_widths_[index - 1];

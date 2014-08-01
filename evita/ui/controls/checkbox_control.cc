@@ -30,7 +30,7 @@ void CheckboxControl::set_checked(bool new_checked) {
 
 // ui::Widget
 void CheckboxControl::OnDraw(gfx::Canvas* canvas) {
-  if (!bounds())
+  if (bounds().empty())
     return;
 
   auto const rect = gfx::RectF(this->bounds());

@@ -5,10 +5,13 @@
 
 #include <algorithm>
 
+#include "common/win/rect.h"
 #include "evita/gfx/point_f.h"
 #include "evita/gfx/size_f.h"
 
 namespace gfx {
+
+using common::win::Rect;
 
 template<typename BaseType, typename PointType, typename SizeType>
 class Rect_ : public BaseType {
@@ -28,11 +31,12 @@ class Rect_ : public BaseType {
     this->right = static_cast<UnitType>(right);
     this->bottom = static_cast<UnitType>(bottom);
   }
-  public: explicit Rect_(const RECT& rc) {
-    this->left = static_cast<UnitType>(rc.left);
-    this->top = static_cast<UnitType>(rc.top);
-    this->right = static_cast<UnitType>(rc.right);
-    this->bottom = static_cast<UnitType>(rc.bottom);
+  public: explicit Rect_(const RECT& other) = delete;
+  public: explicit Rect_(const Rect& other) {
+    this->left = static_cast<UnitType>(other.left());
+    this->top = static_cast<UnitType>(other.top());
+    this->right = static_cast<UnitType>(other.right());
+    this->bottom = static_cast<UnitType>(other.bottom());
   }
   public: Rect_(const PointType& origin, const PointType& bottom_right) {
     left = origin.x;

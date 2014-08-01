@@ -425,8 +425,9 @@ int Frame::getTabFromPane(Pane* const pane) const {
 }
 
 Rect Frame::GetPaneRect() const {
-  return gfx::Rect(bounds().left, tab_strip_->bounds().bottom,
-                   bounds().right, bounds().bottom - message_view_->height());
+  return gfx::Rect(bounds().left(), tab_strip_->bounds().bottom(),
+                   bounds().right(),
+                   bounds().bottom() - message_view_->height());
 }
 
 void Frame::onDropFiles(HDROP const hDrop) {
@@ -517,17 +518,21 @@ void Frame::CreateNativeWindow() const {
   gfx::SizeF size(font.GetCharWidth('M') * cColumns,
                   font.height() * cRows);
   gfx::RectF rect(gfx::PointF(), gfx::FactorySet::AlignToPixel(size));
-  Rect rc(rect);
-  ::AdjustWindowRectEx(&rc, dwStyle, TRUE, dwExStyle);
-  rc.right += ::GetSystemMetrics(SM_CXVSCROLL) + 10;
+  Rect original_bounds(rect);
+  ::AdjustWindowRectEx(original_bounds.ptr(), dwStyle, TRUE, dwExStyle);
 
-  Rect rcWork;
-  ::SystemParametersInfo(SPI_GETWORKAREA, 0, &rcWork, 0);
+  auto const window_bounds = gfx::Rect(
+      original_bounds.origin(),
+      gfx::Size(original_bounds.width() + ::GetSystemMetrics(SM_CXVSCROLL) + 10,
+                original_bounds.height()));
+
+  Rect workarea_bounds;
+  ::SystemParametersInfo(SPI_GETWORKAREA, 0, workarea_bounds.ptr(), 0);
 
   native_window()->CreateWindowEx(
       dwExStyle, dwStyle, L"", nullptr,
       gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
-      gfx::Size(rc.width(), rcWork.height() * 4 / 5));
+      gfx::Size(window_bounds.width(), workarea_bounds.height() * 4 / 5));
 }
 
 void Frame::DidCreateNativeWindow() {
@@ -612,12 +617,13 @@ void Frame::DidChangeBounds() {
 
   // Display resizing information.
   if (message_view_->hwnd()) {
-    auto status_bar_rect = bounds();
-    status_bar_rect.top = bounds().bottom - message_view_->height();
+    auto const status_bar_rect = gfx::Rect(
+        gfx::Point(bounds().left(),
+                   bounds().bottom() - message_view_->height()),
+        bounds().bottom_right());
     message_view_->SetBounds(status_bar_rect);
     auto const text = base::StringPrintf(L"Resizing... %dx%d",
-        bounds().right - bounds().left,
-        bounds().bottom - bounds().top);
+        bounds().width(), bounds().height());
     message_view_->SetMessage(text);
   }
 
@@ -711,10 +717,10 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       if (::DwmDefWindowProc(*native_window(), uMsg, wParam, lParam, &lResult))
         return lResult;
       const gfx::Point mouse_point(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-      Rect rcWindow;
-      ::GetWindowRect(*native_window(), &rcWindow);
-      if (mouse_point.y() >= rcWindow.top &&
-          mouse_point.y() < rcWindow.top + tab_strip_->bounds().bottom) {
+      RECT window_bounds;
+      ::GetWindowRect(*native_window(), &window_bounds);
+      if (mouse_point.y() >= window_bounds.top &&
+          mouse_point.y() < window_bounds.top + tab_strip_->bounds().bottom()) {
         return HTCAPTION;
       }
       break;

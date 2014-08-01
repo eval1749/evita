@@ -57,7 +57,6 @@ Size Point::operator-(const Point& other) const {
 }
 
 POINT* Point::ptr() {
-  DCHECK(!x() && !y());
   return &data_;
 }
 

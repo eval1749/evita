@@ -151,9 +151,8 @@ void SwapChain::Present() {
   if (dirty_rects_.empty())
     return;
   DXGI_PRESENT_PARAMETERS parameters = {0};
+  std::vector<RECT> dirty_rects;
   if (!is_first_present_) {
-    std::vector<RECT> dirty_rects(dirty_rects_.size());
-    dirty_rects.clear();
     for (auto const rect : dirty_rects_) {
       dirty_rects.push_back(static_cast<RECT>(rect));
     }

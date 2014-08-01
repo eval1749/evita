@@ -69,6 +69,9 @@ class Rect_ : public BaseType {
   public: explicit operator bool() const { return !empty(); }
   public: bool operator!() const { return empty(); }
 
+  public: Rect_& operator+=(const Rect_& other);
+
+  public: Rect_ operator+(const Rect_& other) const { return Union(other); }
   public: Rect_ operator+(const SizeType& size) const;
   public: Rect_ operator-(const SizeType& size) const;
 
@@ -164,10 +167,26 @@ class Rect_ : public BaseType {
 
   // Computes the union of this rectangle with the given rectangle.  The union
   // is the smallest rectangle containing both rectangles.
-  public: void Unite(const Rect_& other);
+  public: Rect_ Union(const Rect_& other) const;
 };
 
 // Rect_ inline functions
+
+template<typename BaseType, typename PointType, typename SizeType>
+Rect_<BaseType, PointType, SizeType>&
+    Rect_<BaseType, PointType, SizeType>::operator+=(const Rect_& other) {
+  if (other.empty())
+    return *this;
+  if (empty()) {
+    *this = other;
+    return *this;
+  }
+  left = std::min(left, other.left);
+  top = std::min(top, other.top);
+  right = std::max(right, other.right);
+  bottom = std::max(bottom, other.bottom);
+  return *this;
+}
 
 template<typename BaseType, typename PointType, typename SizeType>
 Rect_<BaseType, PointType, SizeType>
@@ -260,17 +279,16 @@ Rect_<BaseType, PointType, SizeType>::Offset(
 }
 
 template<typename BaseType, typename PointType, typename SizeType>
-void Rect_<BaseType, PointType, SizeType>::Unite(const Rect_& other) {
+Rect_<BaseType, PointType, SizeType>
+Rect_<BaseType, PointType, SizeType>::Union(const Rect_& other) const {
   if (other.empty())
-    return;
-  if (empty()) {
-    *this = other;
-    return;
-  }
-  left = std::min(left, other.left);
-  top = std::min(top, other.top);
-  right = std::max(right, other.right);
-  bottom = std::max(bottom, other.bottom);
+    return *this;
+  if (empty())
+    return other;
+  return gfx::RectF(gfx::PointF(std::min(left, other.left),
+                                std::min(top, other.top)),
+                    gfx::PointF(std::max(right, other.right),
+                                std::max(bottom, other.bottom)));
 }
 
 typedef Rect_<D2D1_RECT_F, PointF, SizeF> RectF;

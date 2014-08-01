@@ -25,12 +25,14 @@ class COMMON_EXPORT Rect final {
   public: explicit operator RECT() const;
 
   public: Rect& operator=(const Rect& other);
+  public: Rect& operator+=(const Rect& other);
   public: bool operator==(const Rect& other) const;
   public: bool operator!=(const Rect& other) const;
   public: bool operator<(const Rect& other) const;
   public: bool operator<=(const Rect& other) const;
   public: bool operator>(const Rect& other) const;
   public: bool operator>=(const Rect& other) const;
+  public: Rect operator+(const Rect& other) const { return Union(other); }
 
   public: int area() const { return width() * height(); }
   public: int bottom() const { return data_.bottom; }
@@ -50,7 +52,7 @@ class COMMON_EXPORT Rect final {
   public: bool Contains(const Point& pt) const;
   public: bool Contains(const Rect& other) const;
   public: Rect Intersect(const Rect&) const;
-  public: void Unite(const Rect& other);
+  public: Rect Union(const Rect& other) const;
 };
 
 } // namespace win

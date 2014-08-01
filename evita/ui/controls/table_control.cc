@@ -254,7 +254,7 @@ TableControl::TableControlModel::~TableControlModel() {
 void TableControl::TableControlModel::AddDirtyRect(
     const gfx::RectF& dirty_rect) {
   DCHECK(!dirty_rect.empty());
-  dirty_rects_.Unite(dirty_rect);
+  dirty_rects_ += dirty_rect;
 }
 
 void TableControl::TableControlModel::DidAddRow(int row_id) {

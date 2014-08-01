@@ -55,6 +55,20 @@ Rect& Rect::operator=(const Rect& other) {
   return *this;
 }
 
+Rect& Rect::operator+=(const Rect& other) {
+  if (other.empty())
+    return *this;
+  if (empty()) {
+    *this = other;
+    return *this;
+  }
+  data_.left = std::min(left(), other.left());
+  data_.top = std::min(top(), other.top());
+  data_.right = std::max(right(), other.right());
+  data_.bottom = std::max(bottom(), other.bottom());
+  return *this;
+}
+
 bool Rect::operator==(const Rect& other) const {
   return left() == other.left() && top() == other.top() &&
          right() == other.right() && bottom() == other.bottom();
@@ -106,17 +120,15 @@ Rect Rect::Intersect(const Rect& other) const {
               std::min(bottom(), other.bottom()));
 }
 
-void Rect::Unite(const Rect& other) {
+Rect Rect::Union(const Rect& other) const {
   if (other.empty())
-    return;
-  if (empty()) {
-    *this = other;
-    return;
-  }
-  data_.left = std::min(left(), other.left());
-  data_.top = std::min(top(), other.top());
-  data_.right = std::max(right(), other.right());
-  data_.bottom = std::max(bottom(), other.bottom());
+    return *this;
+  if (empty())
+    return other;
+  return Rect(std::min(left(), other.left()),
+              std::min(top(), other.top()),
+              std::max(right(), other.right()),
+              std::max(bottom(), other.bottom()));
 }
 
 } // namespace win

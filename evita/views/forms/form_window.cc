@@ -619,7 +619,7 @@ void FormWindow::OnPaint(const gfx::Rect rect) {
     } else {
       // TODO(yosi) Should we have list of dirty rectangles rather than
       // bounding dirty rectangles?
-      pending_update_rect_.Unite(rect);
+      pending_update_rect_ += rect;
     }
     return;
   }

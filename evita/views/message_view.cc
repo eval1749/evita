@@ -16,8 +16,21 @@ namespace views {
 namespace {
 
 struct PartModel {
+  float alpha;
   base::string16 text;
+
+  PartModel(float alpha, const base::string16& text);
+  PartModel();
+  ~PartModel() = default;
 };
+
+PartModel::PartModel(float alpha, const base::string16& text)
+    : alpha(alpha), text(text) {
+}
+
+PartModel::PartModel()
+    : PartModel(1.0f, base::string16()) {
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -25,6 +38,7 @@ struct PartModel {
 //
 class ModelView final {
   private: struct Part {
+    float alpha;
     gfx::RectF bounds;
     bool dirty;
     PartModel model;
@@ -53,7 +67,7 @@ class ModelView final {
 auto const kPaddingRight = 8.0f;
 
 ModelView::Part::Part()
-    : dirty(false), text_layout(nullptr), width(kPaddingRight) {
+    : alpha(1), dirty(false), text_layout(nullptr), width(kPaddingRight) {
 }
 
 ModelView::Part::~Part() {
@@ -92,6 +106,11 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
         dirty = true;
       }
       total_width += part->width;
+      if (part->alpha != new_part.alpha) {
+        part->alpha = new_part.alpha;
+        part->dirty = true;
+        dirty = true;
+      }
       ++part;
     }
     auto const main_part_width = new_bounds.width() - total_width +
@@ -138,7 +157,6 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
   }
 
   // Paint parts
-  gfx::Brush text_brush(canvas, gfx::sysColor(COLOR_BTNTEXT));
   for (auto& part : parts_) {
     if (!part.dirty)
       continue;
@@ -146,8 +164,9 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
     canvas->AddDirtyRect(part.bounds);
     gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, part.bounds);
     canvas->Clear(gfx::sysColor(COLOR_BTNFACE, alpha));
-    if (!part.text_layout)
+    if (!part.alpha || !part.text_layout)
       continue;
+    gfx::Brush text_brush(canvas, gfx::sysColor(COLOR_BTNTEXT, part.alpha));
     (*canvas)->DrawTextLayout(part.bounds.origin() + gfx::SizeF(4, 0),
                               *part.text_layout, text_brush);
   }
@@ -187,7 +206,7 @@ void MessageView::Model::SetStatus(const std::vector<base::string16>& texts) {
   DCHECK(!texts.empty());
   parts_.clear();
   for (auto const text : texts){
-    PartModel part_model {text};
+    PartModel part_model {1.0f, text};
     parts_.push_back(part_model);
   }
 }
@@ -200,12 +219,15 @@ void MessageView::Model::UpdateView(gfx::Canvas* canvas,
     // after 5 second.
     main_text_ = parts_[0].text;
     main_text_time_ = now;
-  } else if (now - main_text_time_ >= base::TimeDelta::FromSeconds(5)) {
-    // Hide message shown more than 5 second
-    parts_[0].text.clear();
+  } else {
+    // Hide text after 5000ms.
+    auto const kAnimationDuration = 5000.0f;
+    auto const duration = now - main_text_time_;
+    auto const factor = static_cast<float>(duration.InMilliseconds()) /
+                        kAnimationDuration;
+    parts_[0].alpha = factor >= 1.0 ? 0.0f : 1.0f - factor;
   }
   paint_model_->Paint(canvas, bounds, parts_);
-  parts_[0].text = main_text_;
 }
 
 //////////////////////////////////////////////////////////////////////

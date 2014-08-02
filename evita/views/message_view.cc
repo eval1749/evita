@@ -32,6 +32,27 @@ PartModel::PartModel()
     : PartModel(1.0f, base::string16()) {
 }
 
+// Paint resize button with six dots:
+//  --o
+//  -oo
+//  ooo
+void PaintResizeButton(gfx::Canvas* canvas, const gfx::RectF& bounds,
+                       float alpha) {
+  auto const bounds2 = bounds - gfx::SizeF(2.0f, 2.0f);
+  auto const dot_size = 2.0f;
+  for (auto y = 1; y <= 3; ++y) {
+    for (auto x = 4 - y; x >= 1; --x) {
+        auto const dot = gfx::RectF(
+            gfx::PointF(bounds2.right - x * (dot_size + 1),
+                        bounds2.bottom - y * (dot_size + 1)),
+            gfx::SizeF(dot_size, dot_size));
+        gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, dot);
+        canvas->Clear(gfx::sysColor(COLOR_SCROLLBAR, alpha));
+     }
+  }
+  canvas->Flush();
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // ModelView
@@ -84,13 +105,23 @@ ModelView::ModelView() {
 void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
                       const std::vector<PartModel>& new_parts) {
   auto dirty = bounds_ != new_bounds;
-  if (parts_.size() != new_parts.size())
+  if (parts_.size() != new_parts.size()) {
+    parts_.clear();
     parts_.resize(new_parts.size());
+  }
+
+  auto const button_size = ::GetSystemMetrics(SM_CXVSCROLL);
+  auto const new_resize_button_bounds = gfx::RectF(
+      new_bounds.bottom_right() - gfx::SizeF(button_size, button_size),
+      new_bounds.bottom_right());
+  auto const new_parts_bounds = gfx::RectF(
+      new_bounds.origin() + gfx::SizeF(0, 1),
+      gfx::PointF(new_resize_button_bounds.left, new_bounds.bottom));
 
   // Update part width
   {
     auto part = parts_.begin();
-    auto const big_size = gfx::SizeF(10000.0f, new_bounds.height());
+    auto const big_size = gfx::SizeF(10000.0f, new_parts_bounds.height());
     auto total_width = 0.0f;
     for (const auto& new_part : new_parts) {
       if (part->text != new_part.text) {
@@ -113,7 +144,7 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
       }
       ++part;
     }
-    auto const main_part_width = new_bounds.width() - total_width +
+    auto const main_part_width = new_parts_bounds.width() - total_width +
                                  parts_[0].width;
     if (parts_[0].width != main_part_width) {
       parts_[0].width = main_part_width;
@@ -124,11 +155,11 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
 
   // Update part bounds
   {
-    auto origin = new_bounds.origin() + gfx::SizeF(0, 1);
+    auto origin = new_parts_bounds.origin();
     for (auto& part : parts_) {
       // Part bounds don't contain top border line.
       auto const new_part_bounds = gfx::RectF(origin,
-          gfx::SizeF(part.width, new_bounds.height() - 1));
+          gfx::SizeF(part.width, new_parts_bounds.height()));
       DCHECK(!new_part_bounds.empty());
       if (part.bounds != new_part_bounds) {
         part.bounds = new_part_bounds;
@@ -137,7 +168,7 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
       }
       origin = part.bounds.top_right();
     }
-    DCHECK_EQ(origin.x, new_bounds.right);
+    DCHECK_EQ(origin.x, new_parts_bounds.right);
   }
 
   if (!dirty)
@@ -150,6 +181,7 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
     canvas->Clear(gfx::sysColor(COLOR_BTNFACE, alpha));
     canvas->DrawLine(gfx::Brush(canvas, gfx::sysColor(COLOR_BTNSHADOW, alpha)),
                      bounds_.origin(), bounds_.top_right());
+    PaintResizeButton(canvas, new_resize_button_bounds, alpha);
     canvas->AddDirtyRect(bounds_);
     for (auto& part : parts_) {
       part.dirty = true;

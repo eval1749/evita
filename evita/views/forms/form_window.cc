@@ -541,15 +541,10 @@ void FormWindow::CreateNativeWindow() const {
     DCHECK(owner_);
     auto const extended_window_style = WS_EX_LAYERED | WS_EX_TOOLWINDOW;
     auto const window_style = WS_POPUPWINDOW | WS_VISIBLE;
-    auto const parent_hwnd = owner_->AssociatedHwnd();
-    auto screen_point = offset_;
-    if (!::MapWindowPoints(parent_hwnd, HWND_DESKTOP, screen_point.ptr(), 1)) {
-      DVLOG(0) << "MapWindowPoints error=%d" << ::GetLastError();
-      return;
-    }
+    auto const screen_point = owner_->MapToDesktopPoint(offset_);
     native_window()->CreateWindowEx(
       extended_window_style, window_style, L"popup",
-      parent_hwnd, screen_point, form_size_);
+      owner_->AssociatedHwnd(), screen_point, form_size_);
     return;
   }
 

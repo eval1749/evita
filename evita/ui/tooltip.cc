@@ -5,6 +5,7 @@
 #include "evita/ui/tooltip.h"
 
 #include <commctrl.h>
+#pragma comment(lib, "comctl32.lib")
 
 #include "base/logging.h"
 

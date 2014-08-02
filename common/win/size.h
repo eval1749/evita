@@ -30,7 +30,6 @@ class COMMON_EXPORT Size {
   public: bool empty() const { return width() <= 0 || height() <= 0; }
   public: int height() const { return data_.cy; }
   public: void set_height(int height) { data_.cy = height; }
-  public: SIZE* ptr();
   public: int width() const { return data_.cx; }
   public: void set_width(int width) { data_.cx = width; }
 };

@@ -49,11 +49,6 @@ Size Size::operator/(int divider) const {
   return Size(width() / divider, height() / divider);
 }
 
-SIZE* Size::ptr() {
-  DCHECK(empty());
-  return &data_;
-}
-
 }  // namespace win
 }  // namespace common
 

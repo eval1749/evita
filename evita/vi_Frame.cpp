@@ -576,8 +576,6 @@ void Frame::DidCreateNativeWindow() {
   Compositor::instance()->layer()->AppendChildLayer(tab_strip_layer_.get());
 #endif
 
-  tab_strip_->SetIconList(views::IconCache::instance()->image_list());
-
   for (auto& pane: m_oPanes) {
     AddTab(&pane);
   }

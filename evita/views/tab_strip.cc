@@ -22,6 +22,7 @@
 #include "evita/ui/events/event.h"
 #include "evita/ui/tooltip.h"
 #include "evita/views/frame_list.h"
+#include "evita/views/icon_cache.h"
 #include "evita/views/tab_strip_delegate.h"
 #include "evita/vi_Frame.h"
 
@@ -48,7 +49,6 @@ class Element : public common::Castable {
   };
 
   private: gfx::RectF bounds_;
-  private: HIMAGELIST image_list_;
   private: bool is_hover_;
   private: Element* parent_;
   private: State state_;
@@ -72,9 +72,6 @@ class Element : public common::Castable {
   // [D]
   public: virtual void Draw(gfx::Canvas* canvas) const = 0;
 
-  // [G]
-  public: HIMAGELIST GetImageList() const;
-
   // [H]
   public: virtual Element* HitTest(const gfx::PointF& point) const;
 
@@ -86,7 +83,6 @@ class Element : public common::Castable {
 
   // [S]
   public: bool SetHover(bool new_hover);
-  public: void SetImageList(HIMAGELIST hImageList);
   public: Element* SetParent(Element* p);
   public: State SetState(State e);
 
@@ -95,8 +91,7 @@ class Element : public common::Castable {
 };
 
 Element::Element(Element* parent)
-    : image_list_(nullptr),
-      is_hover_(false),
+    : is_hover_(false),
       parent_(parent),
       state_(State::Normal) {
 }
@@ -113,14 +108,6 @@ void Element::set_bounds(const gfx::RectF& new_bounds) {
   if (bounds_ == new_bounds)
     return;
   bounds_ = new_bounds;
-}
-
-HIMAGELIST Element::GetImageList() const {
-  for (const Element* runner = this; runner; runner = runner->parent_) {
-    if (auto const image_list = runner->image_list_)
-      return image_list;
-  }
-  return nullptr;
 }
 
 Element* Element::HitTest(const gfx::PointF&  point) const {
@@ -143,10 +130,6 @@ bool Element::IsDescendantOf(const Element* other) const {
 
 bool Element::SetHover(bool f) {
   return is_hover_ = f;
-}
-
-void Element::SetImageList(HIMAGELIST hImageList) {
-  image_list_ = hImageList;
 }
 
 Element* Element::SetParent(Element* p) {
@@ -182,17 +165,10 @@ enum TabStripImplDesignParams {
 class CloseBox final : public Element {
   DECLARE_CASTABLE_CLASS(CloseBox, Element);
 
-  public: enum Design {
-    Height = 16,
-    Width = 17,
-  };
-
   public: CloseBox(Element* parent);
   public: virtual ~CloseBox() = default;
 
-  // [D]
-  private: void DrawXMark(gfx::Canvas* canvas, gfx::ColorF color) const;
-  private: gfx::ColorF markColor() const;
+  private: gfx::ColorF color() const;
 
   // Element
   public: virtual void Draw(gfx::Canvas* canvas) const override;
@@ -203,53 +179,16 @@ class CloseBox final : public Element {
 CloseBox::CloseBox(Element* parent) : Element(parent) {
 }
 
-void CloseBox::DrawXMark(gfx::Canvas* canvas, gfx::ColorF color) const {
-  gfx::Brush brush(canvas, color);
-
-  auto rc = bounds();
-  rc.left += 4;
-  rc.top  += 4;
-
-  // 01234567890123
-  // ----ooo---ooo--- 4
-  // -----ooo-ooo---- 5
-  // ------ooooo----- 6
-  // -------ooo------ 7
-  // -------ooo------ 8
-  // ------ooooo----- 9
-  // -----ooo-ooo---- 10
-  // ----ooo---ooo--- 11
-  #define hline(x, y, cx, cy) \
-    canvas->FillRectangle( brush, gfx::RectF( \
-        left() + x, top() + y, left() + x + cx, top() + y + cy));
-
-  hline( 4, 4, 3, 1);
-  hline(10, 4, 3, 1);
-
-  hline( 5, 5, 3, 1);
-  hline( 9, 5, 3, 1);
-
-  hline( 6, 6, 5, 1);
-
-  hline( 7, 7, 3, 2);  // center
-
-  hline( 6, 9, 5, 1);
-
-  hline( 5, 10, 3, 1);
-  hline( 9, 10, 3, 1);
-
-  hline( 4, 11, 3, 1);
-  hline(10, 11, 3, 1);
-
-  #undef hline
-}
-
-gfx::ColorF CloseBox::markColor() const {
-  return IsHover() ? gfx::ColorF::DarkViolet : gfx::ColorF::DimGray;
+gfx::ColorF CloseBox::color() const {
+  return IsHover() ? gfx::ColorF(1, 0, 0, 0.5f) : gfx::ColorF(0, 0, 0, 0.5f);
 }
 
 void CloseBox::Draw(gfx::Canvas* canvas) const {
-  DrawXMark(canvas, markColor());
+  auto const bounds = this->bounds();
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
+  gfx::Brush brush(canvas, color());
+  canvas->DrawLine(brush, bounds.origin(), bounds.bottom_right(), 2.0f);
+  canvas->DrawLine(brush, bounds.top_right(), bounds.bottom_left(), 2.0f);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -259,12 +198,6 @@ void CloseBox::Draw(gfx::Canvas* canvas) const {
 //
 class Tab final : public Element, public ui::Tooltip::ToolDelegate {
   DECLARE_CASTABLE_CLASS(Tab, Element);
-
-  private: enum Design {
-    k_cxCloseBoxMargin = 3,
-    k_cyCloseBoxMargin = 9,
-    k_cyDescent = 4,
-  };
 
   private: CloseBox close_box_;
   public: int image_index_;
@@ -304,8 +237,8 @@ Tab::Tab(views::TabStripDelegate* tab_strip_delegate, const TCITEM* pTcItem)
     : Element(nullptr),
       close_box_(this),
       image_index_(-1),
-      tab_index_(0),
       state_(0),
+      tab_index_(0),
       tab_strip_delegate_(tab_strip_delegate) {
   SetTab(pTcItem);
 }
@@ -321,15 +254,10 @@ void Tab::DrawContent(gfx::Canvas* canvas) const {
 void Tab::DrawIcon(gfx::Canvas* canvas) const {
   if (image_index_ < 0)
     return;
-  auto const hImageList = GetImageList();
-  if (!hImageList)
-    return;
+  auto const hImageList = views::IconCache::instance()->image_list();
   // Note: ILD_TRANSPARENT doesn't effect.
   // Note: ILD_DPISCALE makes background black.
-  auto const hIcon = ::ImageList_GetIcon(
-      hImageList,
-      image_index_,
-      0);
+  auto const hIcon = ::ImageList_GetIcon(hImageList, image_index_, 0);
   if (!hIcon)
     return;
   gfx::Bitmap bitmap(canvas, hIcon);
@@ -372,22 +300,13 @@ bool Tab::SetTab(const TCITEM* pTcItem) {
 }
 
 void Tab::UpdateLayout() {
-  close_box_.set_bounds(gfx::RectF(
-      gfx::PointF(right() - CloseBox::Width, top() + k_cyCloseBoxMargin),
-      gfx::SizeF(CloseBox::Width, CloseBox::Height)));
-
-  auto const kPadding = 2.0f;
-
-  auto const bounds = this->bounds() - gfx::SizeF(kPadding, kPadding);
-
-  icon_bounds_ = gfx::RectF(
-      gfx::PointF(bounds.left,
-                  bounds.top + bounds.height() / 2 - kIconHeight / 2),
-      gfx::SizeF(kIconWidth, kIconHeight));
-
-  text_bounds_ = gfx::RectF(
-      gfx::PointF(icon_bounds_.right + kPadding, bounds.top + kLabelHeight / 2),
-      gfx::PointF(close_box_.left() - kPadding, bounds.top + kLabelHeight));
+  auto const bounds = this->bounds() - gfx::SizeF(6, 6);
+  close_box_.set_bounds(gfx::RectF(bounds.top_right() + gfx::SizeF(-9, 5),
+                                   gfx::SizeF(8, 8)));
+  icon_bounds_ = gfx::RectF(bounds.origin(), gfx::SizeF(16, 16));
+  text_bounds_ = gfx::RectF(icon_bounds_.top_right() + gfx::SizeF(4, 0),
+                            gfx::PointF(close_box_.bounds().left - 2,
+                                        icon_bounds_.bottom));
 }
 
 // Element
@@ -396,8 +315,9 @@ void Tab::Draw(gfx::Canvas* canvas) const {
   {
     gfx::Brush fillBrush(canvas, bgcolor());
     canvas->FillRectangle(fillBrush, bounds());
-    gfx::Brush strokeBrush(canvas, gfx::blackColor());
-    canvas->DrawRectangle(strokeBrush, bounds(), 0.2);
+    gfx::Brush strokeBrush(canvas, gfx::ColorF(0, 0, 0, 0.5));
+    canvas->DrawRectangle(strokeBrush, gfx::RectF(
+        bounds().origin(), bounds().size() + gfx::SizeF(1, 0)));
   }
 
   DrawContent(canvas);
@@ -635,7 +555,6 @@ class TabStrip::TabStripImpl final {
   public: int SelectTab(size_t tab_index);
   private: int SelectTab(Tab* tab);
   public: void SetBounds(const gfx::RectF& bounds);
-  public: void SetImageList(HIMAGELIST image_list);
   public: void SetTabData(size_t tab_index, const TCITEM* tab_data);
   private: void StopDrag();
 
@@ -681,7 +600,7 @@ bool TabStrip::TabStripImpl::ChangeFont() {
   LOGFONT lf;
   if (!::SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(lf), &lf, 0))
     return false;
-
+  lf.lfHeight = -10;
   if (auto const old_format = canvas_->work<gfx::TextFormat*>())
     delete old_format;
   canvas_->set_work(new gfx::TextFormat(lf));
@@ -1099,12 +1018,6 @@ void TabStrip::TabStripImpl::SetBounds(const gfx::RectF& new_bounds) {
   Redraw();
 }
 
-void TabStrip::TabStripImpl::SetImageList(HIMAGELIST image_list) {
-  for (auto const tab : tabs_) {
-    tab->SetImageList(image_list);
-  }
-}
-
 void TabStrip::TabStripImpl::SetTabData(size_t tab_index,
                                         const TCITEM* tab_data) {
   if (tab_index >= tabs_.size())
@@ -1245,12 +1158,7 @@ void TabStrip::DeleteTab(int tab_index) {
 //  SM_CYEDGE = 2
 //  SM_CYSIZEFRAME = 4
 Size TabStrip::GetPreferreSize() const {
-  const auto font_height = 16;  // must be >= 16 (Small Icon Height)
-  DVLOG(0) << "SM_CYSIZE=" << ::GetSystemMetrics(SM_CYSIZE);
-  DVLOG(0) << "SM_CYCAPTION=" << ::GetSystemMetrics(SM_CYCAPTION);
-  DVLOG(0) << "SM_CYEDGE=" << ::GetSystemMetrics(SM_CYEDGE);
-  DVLOG(0) << "SM_CYSIZEFRAME=" << ::GetSystemMetrics(SM_CYSIZEFRAME);
-  return Size(font_height * 40, static_cast<int>(font_height * 2));
+  return Size(300, 28);
 }
 
 bool TabStrip::GetTab(int tab_index, TCITEM* tab_data) {
@@ -1263,11 +1171,6 @@ void TabStrip::InsertTab(int new_tab_index, const TCITEM* tab_data) {
 
 void TabStrip::SelectTab(int tab_index) {
   impl_->SelectTab(static_cast<size_t>(tab_index));
-}
-
-void TabStrip::SetIconList(HIMAGELIST icon_list) {
-  impl_->SetImageList(icon_list);
-  impl_->Redraw();
 }
 
 void TabStrip::SetTab(int tab_index, const TCITEM* tab_data) {

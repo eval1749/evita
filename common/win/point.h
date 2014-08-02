@@ -28,7 +28,6 @@ class COMMON_EXPORT Point {
   public: Point operator-(const Size& size) const;
   public: Size operator-(const Point& other) const;
 
-  public: POINT* ptr();
   public: int x() const { return data_.x; }
   public: void set_x(int x) { data_.x = x; }
   public: int y() const { return data_.y; }

@@ -56,10 +56,6 @@ Size Point::operator-(const Point& other) const {
   return Size(x() - other.x(), y() - other.y());
 }
 
-POINT* Point::ptr() {
-  return &data_;
-}
-
 Point Point::Offset(int delta_x, int delta_y) const {
  return Point(x() + delta_x, y() + delta_y);
 }

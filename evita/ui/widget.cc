@@ -256,9 +256,10 @@ void Widget::DispatchMouseExited() {
 }
 
 void Widget::DispatchPaintMessage() {
-  Rect exposed_rect;
-  if (!::GetUpdateRect(*native_window(), exposed_rect.ptr(), false))
+  RECT raw_exposed_rect;
+  if (!::GetUpdateRect(*native_window(), &raw_exposed_rect, false))
     return;
+  Rect exposed_rect(raw_exposed_rect);
   #if DEBUG_PAINT
     DVLOG(0) << "DispatchPaintMessage " << *this << " " << exposed_rect;
   #endif
@@ -605,7 +606,8 @@ void Widget::SchedulePaintInRect(const Rect& rect) {
   DCHECK(is_realized());
   DCHECK(!rect.empty());
   // TODO(yosi) We should have |DCHECK(bounds_.Contains(rect))|.
-  ::InvalidateRect(AssociatedHwnd(), rect.ptr(), true);
+  RECT raw_rect(rect);
+  ::InvalidateRect(AssociatedHwnd(), &raw_rect, true);
 }
 
 void Widget::SetBounds(const Rect& rect) {
@@ -710,7 +712,9 @@ void Widget::UpdateBounds() {
   DCHECK(native_window_);
   if (container_widget() != RootWidget::instance())
     return;
-  ::GetClientRect(*native_window_.get(), bounds_.ptr());
+  RECT raw_client_rect;
+  ::GetClientRect(*native_window_.get(), &raw_client_rect);
+  bounds_ = Rect(raw_client_rect);
 }
 
 void Widget::WillDestroyWidget() {

@@ -33,7 +33,9 @@ void StatusBar::Realize(HWND hwndParent) {
       g_hInstance,
       nullptr);
   WIN32_VERIFY(hwnd_);
-  WIN32_VERIFY(::GetWindowRect(hwnd_, bounds_.ptr()));
+  RECT rect;
+  WIN32_VERIFY(::GetWindowRect(hwnd_, &rect));
+  bounds_ = Rect(rect);
   DCHECK(!bounds_.empty());
 }
 

@@ -520,17 +520,20 @@ void Frame::CreateNativeWindow() const {
   gfx::SizeF size(font.GetCharWidth('M') * cColumns,
                   font.height() * cRows);
   gfx::RectF rect(gfx::PointF(), gfx::FactorySet::AlignToPixel(size));
-  Rect original_bounds(rect);
-  ::AdjustWindowRectEx(original_bounds.ptr(), dwStyle, TRUE, dwExStyle);
+
+  RECT raw_original_bounds(gfx::ToEnclosingRect(rect));
+  ::AdjustWindowRectEx(&raw_original_bounds, dwStyle, TRUE, dwExStyle);
+  Rect original_bounds(raw_original_bounds);
 
   auto const window_bounds = gfx::Rect(
       original_bounds.origin(),
       gfx::Size(original_bounds.width() + ::GetSystemMetrics(SM_CXVSCROLL) + 10,
                 original_bounds.height()));
 
-  Rect workarea_bounds;
-  ::SystemParametersInfo(SPI_GETWORKAREA, 0, workarea_bounds.ptr(), 0);
+  RECT raw_workarea_bounds;
+  ::SystemParametersInfo(SPI_GETWORKAREA, 0, &raw_workarea_bounds, 0);
 
+  Rect workarea_bounds(raw_workarea_bounds);
   native_window()->CreateWindowEx(
       dwExStyle, dwStyle, L"", nullptr,
       gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),

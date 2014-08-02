@@ -551,19 +551,22 @@ void FormWindow::CreateNativeWindow() const {
   // Place dialog window at center of active window.
   auto const extended_window_style = WS_EX_LAYERED | WS_EX_TOOLWINDOW;
   auto const window_style = WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE;
-  gfx::Rect active_window_bounds;
+  RECT raw_active_window_bounds;
   ::GetWindowRect(FrameList::instance()->active_frame()->AssociatedHwnd(),
-                  active_window_bounds.ptr());
-  auto window_rect = gfx::Rect(
+                  &raw_active_window_bounds);
+  gfx::Rect active_window_bounds(raw_active_window_bounds);
+  auto const window_rect = gfx::Rect(
       active_window_bounds.origin() +
         ((active_window_bounds.size() - form_size_) / 2),
       form_size_);
   auto const has_menu = false;
-  WIN32_VERIFY(::AdjustWindowRectEx(window_rect.ptr(), window_style, has_menu,
+  RECT raw_window_rect(window_rect);
+  WIN32_VERIFY(::AdjustWindowRectEx(&raw_window_rect, window_style, has_menu,
                                     extended_window_style));
+  gfx::Rect frame_window_rect(raw_window_rect);
   native_window()->CreateWindowEx(
       extended_window_style, window_style, title_.c_str(), nullptr,
-      window_rect.origin(), window_rect.size());
+      frame_window_rect.origin(), frame_window_rect.size());
 }
 
 void FormWindow::DidCreateNativeWindow() {

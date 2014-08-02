@@ -43,8 +43,6 @@ class COMMON_EXPORT Rect final {
   public: int left() const { return data_.left; }
   public: Point origin() const { return Point(left(), top()); }
   public: void set_origin(const Point& new_origin);
-  public: RECT* ptr() { return &data_; }
-  public: const RECT* ptr() const { return &data_; }
   public: int right() const { return data_.right; }
   public: Size size() const { return Size(width(), height()); }
   public: int top() const { return data_.top; }

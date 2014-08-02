@@ -603,7 +603,16 @@ bool TabStrip::TabStripImpl::ChangeFont() {
   lf.lfHeight = -10;
   if (auto const old_format = canvas_->work<gfx::TextFormat*>())
     delete old_format;
-  canvas_->set_work(new gfx::TextFormat(lf));
+  auto const text_format = new gfx::TextFormat(lf);
+  {
+    common::ComPtr<IDWriteInlineObject> inline_object;
+    COM_VERIFY(gfx::FactorySet::instance()->dwrite().
+        CreateEllipsisTrimmingSign(*text_format, &inline_object));
+    DWRITE_TRIMMING trimming {DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0};
+    (*text_format)->SetTrimming(&trimming, inline_object);
+  }
+  (*text_format)->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+  canvas_->set_work(text_format);
   return true;
 }
 

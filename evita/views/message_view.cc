@@ -32,12 +32,8 @@ class ModelView final {
     gfx::TextLayout* text_layout;
     float width;
 
-    Part() : dirty(false), text_layout(nullptr), width(1.0f) {
-    }
-
-    ~Part() {
-      delete text_layout;
-    }
+    Part();
+    ~Part();
   };
 
   private: gfx::RectF bounds_;
@@ -54,9 +50,17 @@ class ModelView final {
   DISALLOW_COPY_AND_ASSIGN(ModelView);
 };
 
+auto const kPaddingRight = 8.0f;
+
+ModelView::Part::Part()
+    : dirty(false), text_layout(nullptr), width(kPaddingRight) {
+}
+
+ModelView::Part::~Part() {
+  delete text_layout;
+}
+
 ModelView::ModelView() {
-  LOGFONT logfont;
-  ::SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(logfont), &logfont, 0);
   text_format_.reset(new gfx::TextFormat(
       ui::SystemMetrics::instance()->font_family(),
       ui::SystemMetrics::instance()->font_size()));
@@ -79,18 +83,19 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
         part->dirty = true;
         part->text = new_part.text;
         delete part->text_layout;
-        part->text_layout =
-            text_format_->CreateLayout(part->text, big_size).release();
-        DWRITE_TEXT_METRICS text_metrics;
-        COM_VERIFY((*part->text_layout)->GetMetrics(&text_metrics));
-        part->width = std::max(text_metrics.width + 8, ::ceil(part->width));
+        auto text_layout = text_format_->CreateLayout(part->text, big_size);
+        part->text_layout = text_layout.release();
+        DWRITE_TEXT_METRICS metrics;
+        COM_VERIFY((*part->text_layout)->GetMetrics(&metrics));
+        part->width = std::max(::ceil(metrics.width) + kPaddingRight,
+                               part->width);
         dirty = true;
       }
       total_width += part->width;
       ++part;
     }
-    auto const main_part_width = std::max(
-        new_bounds.width() - total_width + parts_[0].width, 1.0f);
+    auto const main_part_width = new_bounds.width() - total_width +
+                                 parts_[0].width;
     if (parts_[0].width != main_part_width) {
       parts_[0].width = main_part_width;
       parts_[0].dirty = true;
@@ -100,18 +105,20 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
 
   // Update part bounds
   {
-    auto origin = new_bounds.origin();
+    auto origin = new_bounds.origin() + gfx::SizeF(0, 1);
     for (auto& part : parts_) {
+      // Part bounds don't contain top border line.
       auto const new_part_bounds = gfx::RectF(origin,
-          gfx::SizeF(part.width, new_bounds.height()));
+          gfx::SizeF(part.width, new_bounds.height() - 1));
       DCHECK(!new_part_bounds.empty());
       if (part.bounds != new_part_bounds) {
         part.bounds = new_part_bounds;
         part.dirty = true;
         dirty = true;
       }
-      origin += gfx::SizeF(part.width, 0.0f);
+      origin = part.bounds.top_right();
     }
+    DCHECK_EQ(origin.x, new_bounds.right);
   }
 
   if (!dirty)
@@ -120,11 +127,14 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
   gfx::Canvas::DrawingScope drawing_scope(canvas);
   auto const alpha = 1.0f;
   if (bounds_ != new_bounds) {
+    bounds_ = new_bounds;
     canvas->Clear(gfx::sysColor(COLOR_BTNFACE, alpha));
+    canvas->DrawLine(gfx::Brush(canvas, gfx::sysColor(COLOR_BTNSHADOW, alpha)),
+                     bounds_.origin(), bounds_.top_right());
+    canvas->AddDirtyRect(bounds_);
     for (auto& part : parts_) {
       part.dirty = true;
     }
-    bounds_ = new_bounds;
   }
 
   // Paint parts
@@ -135,9 +145,9 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
     part.dirty = false;
     canvas->AddDirtyRect(part.bounds);
     gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, part.bounds);
+    canvas->Clear(gfx::sysColor(COLOR_BTNFACE, alpha));
     if (!part.text_layout)
       continue;
-    canvas->Clear(gfx::sysColor(COLOR_BTNFACE, alpha));
     (*canvas)->DrawTextLayout(part.bounds.origin() + gfx::SizeF(4, 0),
                               *part.text_layout, text_brush);
   }

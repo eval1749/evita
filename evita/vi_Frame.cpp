@@ -178,6 +178,7 @@ Frame::Frame(views::WindowId window_id)
       tab_strip_(new views::TabStrip(this)),
       m_pActivePane(nullptr) {
   AppendChild(tab_strip_);
+  AppendChild(message_view_);
   AppendChild(metrics_view_);
 }
 
@@ -425,9 +426,10 @@ int Frame::getTabFromPane(Pane* const pane) const {
 }
 
 Rect Frame::GetPaneRect() const {
+  auto const message_view_height = ::GetSystemMetrics(SM_CYCAPTION);
   return gfx::Rect(bounds().left(), tab_strip_->bounds().bottom(),
                    bounds().right(),
-                   bounds().bottom() - message_view_->height());
+                   bounds().bottom() - message_view_height);
 }
 
 void Frame::onDropFiles(HDROP const hDrop) {
@@ -539,7 +541,6 @@ void Frame::DidCreateNativeWindow() {
   views::FrameList::instance()->AddFrame(this);
   ::DragAcceptFiles(*native_window(), TRUE);
 
-  message_view_->Realize(*native_window());
   title_bar_->Realize(*native_window());
 
   // TODO(yosi) How do we determine height of TabStrip?
@@ -556,6 +557,9 @@ void Frame::DidCreateNativeWindow() {
     pane.SetBounds(pane_bounds);
   }
 
+  message_view_->SetBounds(gfx::Rect(pane_bounds.bottom_left(),
+                                     bounds().bottom_right()));
+
   {
     auto const size = metrics_view_->bounds().size();
     metrics_view_->SetBounds(gfx::Rect(
@@ -565,16 +569,6 @@ void Frame::DidCreateNativeWindow() {
   // Create message view, panes and tab strip.
   views::Window::DidCreateNativeWindow();
   layer()->SetTopMostLayer(metrics_view_->layer());
-
-#if 0
-  message_view_layer_.reset(new ui::HwndLayer(
-      Compositor::instance().get(), message_view_->hwnd()));
-  Compositor::instance()->layer()->AppendChildLayer(message_view_layer_.get());
-
-  tab_strip_layer_.reset(new ui::HwndLayer(
-    Compositor::instance().get(), tab_strip_->AssociatedHwnd()));
-  Compositor::instance()->layer()->AppendChildLayer(tab_strip_layer_.get());
-#endif
 
   for (auto& pane: m_oPanes) {
     AddTab(&pane);
@@ -604,29 +598,25 @@ void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
 
 void Frame::DidChangeBounds() {
   views::Window::DidChangeBounds();
+  const auto pane_bounds = GetPaneRect();
+
   tab_strip_->SetBounds(gfx::Rect(
       tab_strip_->bounds().origin(),
       gfx::Size(bounds().width(), tab_strip_->bounds().height())));
 
   if (tab_strip_layer_)
     tab_strip_layer_->SetBounds(gfx::RectF(tab_strip_->bounds()));
-  if (message_view_layer_)
-    message_view_layer_->SetBounds(gfx::RectF(message_view_->bounds()));
 
   // Display resizing information.
-  if (message_view_->hwnd()) {
-    auto const status_bar_rect = gfx::Rect(
-        gfx::Point(bounds().left(),
-                   bounds().bottom() - message_view_->height()),
-        bounds().bottom_right());
-    message_view_->SetBounds(status_bar_rect);
-    auto const text = base::StringPrintf(L"Resizing... %dx%d",
-        bounds().width(), bounds().height());
-    message_view_->SetMessage(text);
+  if (message_view_) {
+    auto const message_view_bounds = gfx::Rect(pane_bounds.bottom_left(),
+                                               bounds().bottom_right());
+    message_view_->SetBounds(message_view_bounds);
+    message_view_->SetMessage(base::StringPrintf(L"Resizing... %dx%d",
+        bounds().width(), bounds().height()));
   }
 
-  const auto pane_bounds = GetPaneRect();
-  for (auto& pane: m_oPanes) {
+  for (auto& pane : m_oPanes) {
     pane.SetBounds(pane_bounds);
   }
 
@@ -634,9 +624,9 @@ void Frame::DidChangeBounds() {
       pane_bounds.bottom_right() - metrics_view_->bounds().size(),
       metrics_view_->bounds().size()));
 
-  DrawForResize();
-
   ui::Compositor::instance()->CommitIfNeeded();
+
+  DrawForResize();
 }
 
 void Frame::DidSetFocus(ui::Widget* widget) {
@@ -842,6 +832,7 @@ bool Frame::OnIdle(int const hint) {
   }
 
   metrics_view_->UpdateView();
+  message_view_->UpdateView();
 
   busy = false;
   if (!pending_update_rect_.empty()) {

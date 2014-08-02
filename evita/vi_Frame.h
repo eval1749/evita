@@ -71,7 +71,7 @@ class Frame final : public views::Window,
   private: std::unique_ptr<ui::Layer> message_view_layer_;
   private: std::unique_ptr<ui::Layer> tab_strip_layer_;
   private: Panes m_oPanes;
-  private: std::unique_ptr<views::MessageView> message_view_;
+  private: views::MessageView* message_view_;
   private: views::MetricsView* metrics_view_;
   private: ObserverList<views::FrameObserver> observers_;
   private: gfx::Rect pending_update_rect_;

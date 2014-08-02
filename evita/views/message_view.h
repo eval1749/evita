@@ -7,36 +7,34 @@
 #include <vector>
 
 #include "base/strings/string16.h"
-#include "base/time/time.h"
-#include "common/win/rect.h"
+#include "evita/ui/widget.h"
 
-namespace ui {
-class StatusBar;
+namespace gfx {
+class Canvas;
 }
 
 namespace views {
 
-using common::win::Rect;
+//////////////////////////////////////////////////////////////////////
+//
+// MessageView
+//
+class MessageView final : public ui::Widget {
+  private: class Model;
 
-class MessageView {
-  private: std::unique_ptr<ui::StatusBar> status_bar_;
-  private: std::vector<base::string16> status_bar_texts_;
-  private: base::string16 message_text_;
-  private: base::Time message_time_;
-  private: base::string16 status_text_;
+  private: std::unique_ptr<gfx::Canvas> canvas_;
+  private: std::unique_ptr<Model> model_;
 
   public: MessageView();
-  public: ~MessageView();
+  public: virtual ~MessageView();
 
-  public: const Rect& bounds() const;
-  // TODO(eval1749) We should get rid of |MessageView::height()|.
-  public: int height() const;
-  public: HWND hwnd() const;
-
-  public: void Realize(HWND hwnd_parent);
-  public: void SetBounds(const Rect& bounds);
   public: void SetMessage(const base::string16& text);
   public: void SetStatus(const std::vector<base::string16>& texts);
+  public: void UpdateView();
+
+  // ui::Widget
+  private: virtual void DidChangeBounds() override;
+  private: virtual void DidRealize() override;
 
   DISALLOW_COPY_AND_ASSIGN(MessageView);
 };

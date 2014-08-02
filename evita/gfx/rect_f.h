@@ -111,7 +111,10 @@ class Rect_ : public BaseType {
   public: bool operator>(const Rect_& other) const;
   public: bool operator>=(const Rect_& other) const;
 
-  public: UnitType area() const { return width() * hieght(); }
+  public: UnitType area() const { return width() * height(); }
+  public: PointType bottom_left() const {
+    return PointType(left, bottom);
+  }
   public: PointType bottom_right() const {
     return PointType(right, bottom);
   }
@@ -141,6 +144,10 @@ class Rect_ : public BaseType {
   public: void set_size(const SizeType& size) {
     right = left + size.width;
     bottom = top + size.height;
+  }
+
+  public: PointType top_right() const {
+    return PointType(right, top);
   }
 
   public: UnitType width() const { return right - left; }

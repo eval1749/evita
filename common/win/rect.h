@@ -36,17 +36,19 @@ class COMMON_EXPORT Rect final {
 
   public: int area() const { return width() * height(); }
   public: int bottom() const { return data_.bottom; }
+  public: Point bottom_left() const { return Point(left(), bottom()); }
   public: Point bottom_right() const { return Point(right(), bottom()); }
   public: bool empty() const { return width() <= 0 || height() <= 0; }
   public: int height() const { return bottom() - top(); }
   public: int left() const { return data_.left; }
   public: Point origin() const { return Point(left(), top()); }
+  public: void set_origin(const Point& new_origin);
   public: RECT* ptr() { return &data_; }
   public: const RECT* ptr() const { return &data_; }
-  public: void set_origin(const Point& new_origin);
   public: int right() const { return data_.right; }
   public: Size size() const { return Size(width(), height()); }
   public: int top() const { return data_.top; }
+  public: Point top_right() const { return Point(right(), top()); }
   public: int width() const { return right() - left(); }
 
   public: bool Contains(const Point& pt) const;

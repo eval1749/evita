@@ -40,6 +40,12 @@ Widget* hover_widget;
 Widget* will_focus_widget;
 bool we_have_active_focus;
 
+Point GetCursorPoint() {
+  POINT cursor_point;
+  WIN32_VERIFY(::GetCursorPos(&cursor_point));
+  return Point(cursor_point);
+}
+
 }  // namespace
 
 using ui::EventType;
@@ -242,17 +248,8 @@ void Widget::DispatchMouseExited() {
   if (!hover)
     return;
   hover_widget = nullptr;
-  Point screen_point;
-  if (!::GetCursorPos(screen_point.ptr())) {
-    DVLOG_WIDGET(0) << "GetCursorPos error=" << ::GetLastError();
-    return;
-  }
-  Point client_point(screen_point);
-  if (!::MapWindowPoints(HWND_DESKTOP, *native_window(),
-                         client_point.ptr(), 1)) {
-    DVLOG_WIDGET(0) << "MapWindowPoints error=" << ::GetLastError();
-    return;
-  }
+  auto const screen_point = GetCursorPoint();
+  auto const client_point = MapFromDesktopPoint(screen_point);
   MouseEvent event(EventType::MouseExited, MouseEvent::kNone, 0u, 0,
                    hover, client_point, screen_point);
   hover->OnMouseExited(event);
@@ -342,15 +339,12 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message, WPARAM wParam,
 
 void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
                                 LPARAM lParam) {
-  auto const host_widget = &GetHostWidget();
-  Point client_point(MAKEPOINTS(lParam));
   if (message == WM_MOUSEWHEEL) {
     // Note: We send WM_MOUSEWHEEL message to a widget under mouse pointer
     // rather than active widget.
-    Point screen_point(client_point);
-    WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *host_widget->native_window(),
-                                   client_point.ptr(), 1));
-    auto const result = host_widget->HitTestForMouseEventTarget(client_point);
+    Point screen_point(MAKEPOINTS(lParam));
+    auto const client_point = MapFromDesktopPoint(screen_point);
+    auto const result = HitTestForMouseEventTarget(client_point);
     if (!result)
       return;
     MouseWheelEvent event(result.widget(), result.local_point(), screen_point,
@@ -360,10 +354,9 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
     return;
   }
 
-  auto const result = host_widget->HitTestForMouseEventTarget(client_point);
-  Point screen_point(client_point);
-  WIN32_VERIFY(::MapWindowPoints(*host_widget->native_window(), HWND_DESKTOP,
-                                 screen_point.ptr(), 1));
+  auto const screen_point = MapToDesktopPoint(Point(MAKEPOINTS(lParam)));
+  auto const client_point = MapFromDesktopPoint(screen_point);
+  auto const result = HitTestForMouseEventTarget(client_point);
   if (message == WM_MOUSEMOVE || message == WM_NCMOUSEMOVE) {
     if (!hover_widget) {
       TRACKMOUSEEVENT track;
@@ -461,6 +454,23 @@ Widget::HitTestResult Widget::HitTestForMouseEventTarget(
     return HitTestResult(capture_widget, local_point);
   }
   return HitTest(point);
+}
+
+Point Widget::MapFromDesktopPoint(const Point& desktop_point) const {
+  POINT hwnd_point(desktop_point);
+  WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, AssociatedHwnd(),
+                                 &hwnd_point, 1));
+  if (*native_window())
+    return Point(hwnd_point);
+  return Point(hwnd_point.x - bounds().left(), hwnd_point.y - bounds().top());
+}
+
+Point Widget::MapToDesktopPoint(const Point& local_point) const {
+  POINT point(local_point);
+  WIN32_VERIFY(::MapWindowPoints(AssociatedHwnd(), HWND_DESKTOP, &point, 1));
+  if (*native_window())
+    return Point(point);
+  return Point(point.x + bounds().left(), point.y + bounds().top());
 }
 
 void Widget::OnDraw(gfx::Canvas* gfx) {
@@ -635,10 +645,8 @@ void Widget::SetCapture() {
 
 bool Widget::SetCursor() {
   DCHECK(native_window_);
-  Point point;
-  WIN32_VERIFY(::GetCursorPos(point.ptr()));
-  WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, *native_window(),
-                                 point.ptr(), 1));
+  auto const cursor_point = GetCursorPoint();
+  auto const point = MapFromDesktopPoint(cursor_point);
   auto const result = HitTest(point);
   if (!result)
     return false;

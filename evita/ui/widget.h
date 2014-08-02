@@ -127,6 +127,10 @@ class Widget
   private: HitTestResult HitTest(const Point& point) const;
   private: HitTestResult HitTestForMouseEventTarget(const Point& point) const;
 
+  // [M]
+  public: Point MapFromDesktopPoint(const Point& desktop_point) const;
+  public: Point MapToDesktopPoint(const Point& local_point) const;
+
   // [O]
   // Note: We expose |OnDraw| for real time content resizing during toplevel
   // window resizing.

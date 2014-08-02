@@ -704,12 +704,19 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       LRESULT lResult;
       if (::DwmDefWindowProc(*native_window(), uMsg, wParam, lParam, &lResult))
         return lResult;
-      const gfx::Point mouse_point(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-      RECT window_bounds;
-      ::GetWindowRect(*native_window(), &window_bounds);
-      if (mouse_point.y() >= window_bounds.top &&
-          mouse_point.y() < window_bounds.top + tab_strip_->bounds().bottom()) {
+      gfx::Point desktop_point(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+      auto const point = MapFromDesktopPoint(desktop_point);
+      if (tab_strip_ && point.y() < tab_strip_->bounds().bottom())
         return HTCAPTION;
+
+      // Resize button in message view
+      if (message_view_) {
+        auto const button_size = ::GetSystemMetrics(SM_CXVSCROLL);
+        gfx::Rect resize_button(
+            bounds().bottom_right() - gfx::Size(button_size, button_size),
+            bounds().bottom_right());
+        if (resize_button.Contains(point))
+          return HTBOTTOMRIGHT;
       }
       break;
     }

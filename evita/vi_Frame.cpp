@@ -279,35 +279,22 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
     DidChangeTabSelection(tab_index);
 }
 
-// Note: We should call |ID2D1RenderTarget::Clear()| to reset alpha component
-// of pixels.
 void Frame::DrawForResize() {
-#if 0
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  auto const tab_content_size = GetTabContentBounds().size();
-  canvas_->set_dirty_rect(gfx::RectF(gfx::Point(), gfx::SizeF(
-      static_cast<float>(tab_content_size.cx),
-      static_cast<float>(tab_content_size.cy))));
+  // TODO(eval1749) We should ask animation player to update contents.
+  metrics_view_->UpdateView();
+  message_view_->UpdateView();
 
-  // To avoid script destroys Pane's, we lock DOM.
-  if (editor::DomLock::instance()->locked()) {
-    canvas_->Clear(gfx::ColorF(gfx::ColorF::White));
-    for (auto tab_content : tab_contents_) {
-      tab_content->OnDraw(&*canvas_);
+  if (active_tab_content_) {
+    UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+    if (lock_scope.locked()) {
+      for (auto child : active_tab_content_->child_nodes()) {
+        if (auto const window = child->as<Window>())
+          window->OnIdle(0);
+      }
     }
-    return;
   }
 
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  if (lock_scope.locked()) {
-    canvas_->Clear(gfx::ColorF(gfx::ColorF::White));
-    for (auto tab_content : tab_contents_) {
-      tab_content->OnDraw(&*canvas_);
-    }
-    return;
-  }
-  canvas_->Clear(gfx::ColorF(gfx::ColorF::LightGray));
-#endif
+  ui::Compositor::instance()->CommitIfNeeded();
 }
 
 Frame* Frame::FindFrame(const ui::Widget& widget) {

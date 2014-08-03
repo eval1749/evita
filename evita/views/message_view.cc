@@ -175,7 +175,7 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
     return;
 
   gfx::Canvas::DrawingScope drawing_scope(canvas);
-  auto const alpha = 1.0f;
+  auto const alpha = 0.8f;
   if (bounds_ != new_bounds) {
     bounds_ = new_bounds;
     canvas->Clear(gfx::sysColor(COLOR_BTNFACE, alpha));
@@ -296,6 +296,10 @@ void MessageView::DidRealize() {
   SetLayer(new ui::Layer());
   layer()->SetBounds(gfx::RectF(bounds()));
   canvas_.reset(layer()->CreateCanvas());
+}
+
+gfx::Size MessageView::GetPreferredSize() const {
+  return gfx::Size(0, ::GetSystemMetrics(SM_CYCAPTION));
 }
 
 }  // namespace views

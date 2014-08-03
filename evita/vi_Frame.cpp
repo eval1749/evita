@@ -342,7 +342,7 @@ static Pane* GetTabContentAt(views::TabStrip* tab_strip, int const index) {
 }
 
 Rect Frame::GetTabContentBounds() const {
-  auto const message_view_height = ::GetSystemMetrics(SM_CYCAPTION);
+  auto const message_view_height = message_view_->bounds().height();
   return gfx::Rect(bounds().left(), tab_strip_->bounds().bottom(),
                    bounds().right(),
                    bounds().bottom() - message_view_height);
@@ -507,22 +507,21 @@ void Frame::DidChangeBounds() {
       tab_strip_->bounds().origin(),
       gfx::Size(bounds().width(), tab_strip_->bounds().height())));
 
-  // Display resizing information.
-  if (message_view_) {
-    auto const message_view_bounds = gfx::Rect(tab_content_bounds.bottom_left(),
-                                               bounds().bottom_right());
-    message_view_->SetBounds(message_view_bounds);
-    message_view_->SetMessage(base::StringPrintf(L"Resizing... %dx%d",
-        bounds().width(), bounds().height()));
-  }
+  message_view_->SetBounds(gfx::Rect(
+    bounds().bottom_left() - gfx::Size(0, message_view_->bounds().height()),
+    bounds().bottom_right()));
+
+  metrics_view_->SetBounds(gfx::Rect(
+      message_view_->bounds().top_right() - metrics_view_->bounds().size(),
+      metrics_view_->bounds().size()));
 
   for (auto tab_content : tab_contents_) {
     tab_content->SetBounds(tab_content_bounds);
   }
 
-  metrics_view_->SetBounds(gfx::Rect(
-      tab_content_bounds.bottom_right() - metrics_view_->bounds().size(),
-      metrics_view_->bounds().size()));
+  // Display resizing information.
+  message_view_->SetMessage(base::StringPrintf(L"Resizing... %dx%d",
+      bounds().width(), bounds().height()));
 
   ui::Compositor::instance()->CommitIfNeeded();
 
@@ -561,13 +560,20 @@ void Frame::DidCreateNativeWindow() {
     tab_content->SetBounds(tab_content_bounds);
   }
 
-  message_view_->SetBounds(gfx::Rect(tab_content_bounds.bottom_left(),
-                                     bounds().bottom_right()));
+  // Place message vie at bottom of editor window.
+  {
+    auto const size = static_cast<ui::Widget*>(message_view_)->
+        GetPreferredSize();
+    message_view_->SetBounds(gfx::Rect(
+        bounds().bottom_left() - gfx::Size(0, size.height()),
+        bounds().bottom_right()));
+  }
 
+  // Place metrics view above message view.
   {
     auto const size = metrics_view_->bounds().size();
     metrics_view_->SetBounds(gfx::Rect(
-        tab_content_bounds.bottom_right() - size, size));
+        message_view_->bounds().top_right() - size, size));
   }
 
   // Create message view, tab_contents and tab strip.

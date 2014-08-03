@@ -35,6 +35,7 @@ class MessageView final : public ui::Widget {
   // ui::Widget
   private: virtual void DidChangeBounds() override;
   private: virtual void DidRealize() override;
+  private: gfx::Size GetPreferredSize() const override;
 
   DISALLOW_COPY_AND_ASSIGN(MessageView);
 };

@@ -494,9 +494,6 @@ VerticalBox::VerticalBox(EditPane* edit_pane,
     : Box(edit_pane, outer) {}
 
 VerticalBox::~VerticalBox() {
-  #if DEBUG_RESIZE
-    DEBUG_PRINTF("%p\n", this);
-  #endif
 }
 
 // EditPane::Box

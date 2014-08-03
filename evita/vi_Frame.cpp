@@ -649,11 +649,8 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
         margins.cxRightWidth = 0;
         margins.cyBottomHeight = 0;
         margins.cyTopHeight = -1;
-        auto const hr = ::DwmExtendFrameIntoClientArea(*native_window(),
-                                                       &margins);
-        if (FAILED(hr)) {
-          DEBUG_PRINTF("DwmExtendFrameIntoClientArea hr=0x%08X\n", hr);
-        }
+        COM_VERIFY(::DwmExtendFrameIntoClientArea(*native_window(),
+                                                  &margins));
       }
       break;
 
@@ -663,7 +660,6 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
 
     case WM_DROPFILES:
       onDropFiles(reinterpret_cast<HDROP>(wParam));
-      DEBUG_PRINTF("WM_DROPFILES\n");
       break;
 
     case WM_EXITSIZEMOVE:

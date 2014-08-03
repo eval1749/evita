@@ -11,8 +11,6 @@
 #include "common/win/point.h"
 #include "common/win/size.h"
 
-#define DEBUG_TIMER 0
-
 namespace common {
 namespace impl {
 
@@ -21,15 +19,9 @@ struct COMMON_EXPORT TimerEntry : base::RefCounted<TimerEntry> {
   int repeat_interval_ms;
   TimerEntry(AbstractTimer* timer, int repeat_interval_ms)
       : timer(timer), repeat_interval_ms(repeat_interval_ms) {
-    #if DEBUG_TIMER
-      DEBUG_PRINTF("%p repeat=%d\n", this, repeat_interval_ms);
-    #endif
   }
-  ~TimerEntry() {
-    #if DEBUG_TIMER
-      DEBUG_PRINTF("%p repeat=%d\n", this, repeat_interval_ms);
-    #endif
-  }
+  ~TimerEntry() = default;
+
   DISALLOW_COPY_AND_ASSIGN(TimerEntry);
 };
 

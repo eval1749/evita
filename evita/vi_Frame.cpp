@@ -607,9 +607,6 @@ void Frame::DidChangeBounds() {
       tab_strip_->bounds().origin(),
       gfx::Size(bounds().width(), tab_strip_->bounds().height())));
 
-  if (tab_strip_layer_)
-    tab_strip_layer_->SetBounds(gfx::RectF(tab_strip_->bounds()));
-
   // Display resizing information.
   if (message_view_) {
     auto const message_view_bounds = gfx::Rect(pane_bounds.bottom_left(),

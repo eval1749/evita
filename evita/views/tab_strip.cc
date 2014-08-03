@@ -19,6 +19,7 @@
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/text_format.h"
+#include "evita/ui/compositor/layer.h"
 #include "evita/ui/events/event.h"
 #include "evita/ui/tooltip.h"
 #include "evita/views/frame_list.h"
@@ -1204,6 +1205,8 @@ void TabStrip::DidChangeBounds() {
   if (!impl_)
     return;
   impl_->SetBounds(GetContentsBounds());
+  if (layer())
+    layer()->SetBounds(gfx::RectF(bounds()));
 }
 
 LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {

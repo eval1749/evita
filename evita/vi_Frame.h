@@ -66,10 +66,7 @@ class Frame final : public views::Window,
   private: class DragController;
   friend class DragController;
 
-  private: std::unique_ptr<gfx::Canvas> canvas_;
   private: std::unique_ptr<DragController> drag_controller_;
-  private: std::unique_ptr<ui::Layer> message_view_layer_;
-  private: std::unique_ptr<ui::Layer> tab_strip_layer_;
   private: Panes m_oPanes;
   private: views::MessageView* message_view_;
   private: views::MetricsView* metrics_view_;
@@ -84,8 +81,6 @@ class Frame final : public views::Window,
 
   // TODO: We should not use Frame to HWDN.
   public: operator HWND() const;
-
-  public: gfx::Canvas* canvas() const { return canvas_.get(); }
 
   // [A]
   public: bool Activate();

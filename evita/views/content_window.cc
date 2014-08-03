@@ -53,7 +53,7 @@ void ContentWindow::DidHide() {
 
 void ContentWindow::DidRealize() {
   Window::DidRealize();
-  SetLayer(container_widget().layer()->CreateLayer());
+  SetLayer(new ui::Layer());
 }
 
 void ContentWindow::DidSetFocus(ui::Widget* widget) {

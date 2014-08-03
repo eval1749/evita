@@ -163,12 +163,10 @@ void MetricsView::DidChangeBounds() {
 
 void MetricsView::DidRealize() {
   auto const parent_layer = container_widget().layer();
-  auto const layer = parent_layer->CreateLayer();
-  SetLayer(layer);
-  parent_layer->AppendChildLayer(layer);
-  layer->SetBounds(gfx::RectF(bounds()));
-  canvas_.reset(layer->CreateCanvas());
-  DidChangeBounds();
+  SetLayer(new ui::Layer());
+  parent_layer->AppendChildLayer(layer());
+  layer()->SetBounds(gfx::RectF(bounds()));
+  canvas_.reset(layer()->CreateCanvas());
 }
 
 }  // namespace views

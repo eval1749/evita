@@ -42,8 +42,7 @@ void Pane::DidHide() {
 }
 
 void Pane::DidRealize() {
-  auto const layer = GetFrame()->layer()->CreateLayer();
-  SetLayer(layer);
+  SetLayer(new ui::Layer());
   ui::Widget::DidRealize();
 }
 

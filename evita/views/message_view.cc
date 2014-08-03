@@ -281,8 +281,6 @@ void MessageView::SetStatus(const std::vector<base::string16>& texts) {
 }
 
 void MessageView::UpdateView() {
-  if (!canvas_)
-    return;
   model_->UpdateView(canvas_.get(), GetContentsBounds());
 }
 
@@ -296,12 +294,10 @@ void MessageView::DidChangeBounds() {
 
 void MessageView::DidRealize() {
   auto const parent_layer = container_widget().layer();
-  auto const layer = parent_layer->CreateLayer();
-  SetLayer(layer);
-  parent_layer->AppendChildLayer(layer);
-  layer->SetBounds(gfx::RectF(bounds()));
-  canvas_.reset(layer->CreateCanvas());
-  DidChangeBounds();
+  SetLayer(new ui::Layer());
+  parent_layer->AppendChildLayer(layer());
+  layer()->SetBounds(gfx::RectF(bounds()));
+  canvas_.reset(layer()->CreateCanvas());
 }
 
 }  // namespace views

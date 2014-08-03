@@ -60,10 +60,6 @@ gfx::Canvas* Layer::CreateCanvas() {
   return canvas;
 }
 
-Layer* Layer::CreateLayer() const {
-  return new Layer();
-}
-
 void Layer::DidChangeBounds() {
   Compositor::instance()->NeedCommit();
 }

@@ -37,7 +37,6 @@ class Layer  {
 
   public: void AppendChildLayer(Layer* new_child);
   public: gfx::Canvas* CreateCanvas();
-  public: Layer* CreateLayer() const;
   protected: virtual void DidChangeBounds();
   public: void RemoveChildLayer(Layer* old_child);
   public: void SetBounds(const gfx::RectF& new_bounds);

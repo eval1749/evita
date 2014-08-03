@@ -514,7 +514,7 @@ static int IsoToWideChar(
           break;
 
       default:
-        CAN_NOT_HAPPEN();
+        NOTREACHED();
       } // switch eState
 
       if (dwError != 0) {

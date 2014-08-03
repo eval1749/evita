@@ -11,6 +11,8 @@
 #if !defined(INCLUDE_regex_scanner_h)
 #define INCLUDE_regex_scanner_h
 
+
+#include "base/logging.h"
 #include "regex/regex_bytecode.h"
 
 namespace Regex
@@ -72,7 +74,7 @@ class CharScanner : public Scanner
     ///   For CharScanner_ template
     /// </summary>
     protected: CharScanner() :
-        Scanner(Method_None) { CAN_NOT_HAPPEN(); }
+        Scanner(Method_None) { NOTREACHED(); }
 
     /// <summary>
     ///  Compute scanner method code.
@@ -116,7 +118,7 @@ class StringScanner : public Scanner
 
     // For StringScanner_ template
     protected: StringScanner() :
-        Scanner(Method_None) { CAN_NOT_HAPPEN(); }
+        Scanner(Method_None) { NOTREACHED(); }
 
     // [C]
     private: static Method computeMethod(bool fBackward, bool fIgnoreCase)

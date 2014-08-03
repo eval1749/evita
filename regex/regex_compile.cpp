@@ -1043,7 +1043,7 @@ void NodeIf::Compile(Compiler* pCompiler, int nMinRest)
         } // if
     }
 
-    CAN_NOT_HAPPEN();
+    NOTREACHED();
 } // NodeIf::Compile
 
 void NodeLookaround::Compile(Compiler* pCompiler, int nMinRest)

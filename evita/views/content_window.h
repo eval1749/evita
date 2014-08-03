@@ -22,7 +22,7 @@ class ContentWindow : public Window {
   protected: explicit ContentWindow(views::WindowId window_id);
   public: virtual ~ContentWindow();
 
-  public: Frame& frame() const;
+  public: Frame* frame() const;
 
   // [A]
   public: void Activate();

@@ -198,7 +198,7 @@ class Parser
                 m_pwszName(pwszName) {}
                 
         private: CaptureRef& operator=(CaptureRef&)
-            { CAN_NOT_HAPPEN(); }
+            { NOTREACHED(); }
     }; // CaptureRef
 
     private: typedef DoubleLinkedList_<CaptureRef> CaptureRefs;
@@ -225,7 +225,7 @@ class Parser
         } // ~OpenScope
         
         private: OpenScope& operator=(OpenScope&)
-            { CAN_NOT_HAPPEN(); }
+            { NOTREACHED(); }
     }; // OpenScope
 
     private: typedef int Char;
@@ -1352,7 +1352,7 @@ class Parser
             } // handleMinBackslash
 
             default:
-                CAN_NOT_HAPPEN();
+                NOTREACHED();
             } // switch state
         } // for
     } // parseCharClass
@@ -1654,7 +1654,7 @@ class Parser
                     rgfOn  = rgfOff;
                     break;
                 default:
-                    CAN_NOT_HAPPEN();
+                    NOTREACHED();
                 } // switch state
 
                 m_rgfOption |= rgfOn;
@@ -1673,7 +1673,7 @@ class Parser
                     break;
 
                 default:
-                    CAN_NOT_HAPPEN();
+                    NOTREACHED();
                 } // switch state
                 break;
 
@@ -1691,7 +1691,7 @@ class Parser
                     rgfOn  = rgfOff;
                     break;
                 default:
-                    CAN_NOT_HAPPEN();
+                    NOTREACHED();
                 } // switch state
 
                 m_rgfOption |= rgfOn;

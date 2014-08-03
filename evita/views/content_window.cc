@@ -16,13 +16,14 @@ ContentWindow::ContentWindow(views::WindowId window_id)
 ContentWindow::~ContentWindow() {
 }
 
-Frame& ContentWindow::frame() const {
+Frame* ContentWindow::frame() const {
   for (auto runner = static_cast<const Widget*>(this); runner;
        runner = &runner->container_widget()) {
     if (runner->is<Frame>())
-      return *const_cast<Frame*>(runner->as<Frame>());
+      return const_cast<Frame*>(runner->as<Frame>());
   }
-  CAN_NOT_HAPPEN();
+  NOTREACHED();
+  return nullptr;
 }
 
 void ContentWindow::Activate() {

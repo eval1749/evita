@@ -848,7 +848,7 @@ void Engine::printControl() const {
       break;
 
     default:
-      CAN_NOT_HAPPEN();
+      NOTREACHED();
   }
 }
 #endif // DEBUG_EXEC
@@ -1148,7 +1148,7 @@ bool Engine::dispatch() {
       case Op_CategoryLe_F:
       case Op_CategoryGt_B:
       case Op_CategoryGt_F:
-        CAN_NOT_HAPPEN();
+        NOTREACHED();
 
       case_Op_OneWidth_BF(CharEq_Ci, 2)
       case_Op_OneWidth_BF(CharEq_Cs, 2)
@@ -2010,13 +2010,13 @@ bool Engine::Execute() {
           break;
 
         default:
-          CAN_NOT_HAPPEN();
+          NOTREACHED();
       }
       break;
     }
 
     default:
-      CAN_NOT_HAPPEN();
+      NOTREACHED();
   }
 
   return false;
@@ -2170,7 +2170,7 @@ bool Engine::execute1() {
         break;
 
       default:
-        CAN_NOT_HAPPEN();
+        NOTREACHED();
     }
   }
 }

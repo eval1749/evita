@@ -32,7 +32,7 @@
 #endif
 #include <windows.h>
 
-typedef char int8;
+//typedef char int8;
 typedef unsigned char uint8;
 typedef unsigned short uint16;
 typedef unsigned int uint;
@@ -81,10 +81,6 @@ extern "C"
     for (mp_enum mp_var(mp_arg); ! (mp_var).AtEnd(); (mp_var).Next())
 
 #define unless(mp_expr) if (! (mp_expr) )
-
-#define DISALLOW_COPY_AND_ASSIGN(mp_type) \
-  private: mp_type(const mp_type&); \
-  private: void operator=(const mp_type&)
 
 #include "evita/z_debug.h"
 

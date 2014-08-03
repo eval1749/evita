@@ -13,6 +13,7 @@
 
 #include <algorithm>
 
+#include "base/logging.h"
 #include "./regex_bytecode.h"
 #include "./regex_util.h"
 
@@ -91,7 +92,7 @@ class Node
   // [C]
   public: virtual void Compile(Compiler*, int) = 0;
 
-  public: virtual void CompileNot(Compiler*, int) { CAN_NOT_HAPPEN(); }
+  public: virtual void CompileNot(Compiler*, int) { NOTREACHED(); }
 
   public: virtual LengthInfo ComputeLength() const {
     return LengthInfo(false);
@@ -106,7 +107,7 @@ class Node
   // [N]
   public: virtual bool NeedStack() const { return false; }
 
-  public: virtual Node* Not() { CAN_NOT_HAPPEN(); }
+  public: virtual Node* Not() { NOTREACHED(); return nullptr; }
 
   // [R]
   public: virtual Node* Reverse() { return this; }
@@ -513,7 +514,7 @@ class NodeCaptureIfNot : public NodeCaptureBase {
       : NodeCaptureBase(direction, nth) {}
 
   // [C]
-  public: void Compile(Compiler*, int) override final { CAN_NOT_HAPPEN(); }
+  public: void Compile(Compiler*, int) override final { NOTREACHED(); }
 };
 
 /// <remark>
@@ -586,7 +587,7 @@ class NodeChar : public NodeCsBase {
 //
 // NodeCharClass
 //
-class NodeCharClass: public NodeSubNodesBase, public WithDirection {
+class NodeCharClass : public NodeSubNodesBase, public WithDirection {
   CASTABLE_FINAL(NodeCharClass, NodeSubNodesBase);
 
   private: bool const not_;
@@ -627,6 +628,8 @@ class NodeCharClass: public NodeSubNodesBase, public WithDirection {
       printf(")");
     }
   #endif
+
+  DISALLOW_COPY_AND_ASSIGN(NodeCharClass);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -802,6 +805,8 @@ class NodeMinMax : public NodeSubNodeBase, public WithDirection {
           printf(")");
     }
   #endif
+
+  DISALLOW_COPY_AND_ASSIGN(NodeMinMax);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -962,6 +967,8 @@ class NodeRange : public NodeCsBase {
           GetMaxChar());
     }
   #endif
+
+  DISALLOW_COPY_AND_ASSIGN(NodeRange);
 };
 
 /// <remark>
@@ -1029,6 +1036,8 @@ class NodeString : public NodeCsBase {
           m_pwch);
       }
   #endif
+
+  DISALLOW_COPY_AND_ASSIGN(NodeString);
 };
 
 /// <summary>

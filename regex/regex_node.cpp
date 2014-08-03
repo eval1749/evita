@@ -70,7 +70,7 @@ Node* NodeAnd::Simplify(IEnvironment* pIEnv, LocalHeap* pHeap)
                 break;
 
             default:
-                CAN_NOT_HAPPEN();
+                NOTREACHED();
             } // switch
         } // if
 
@@ -305,7 +305,8 @@ bool NodeOneWidth::IsCharSetMember(IEnvironment* pIEnv, char16 wch) const
     case_Op_(SpaceChar)
     case_Op_(WordChar)
     default:
-        CAN_NOT_HAPPEN();
+        NOTREACHED();
+        return false;
     } // switch op
 
     #undef case_Op_
@@ -348,7 +349,7 @@ Node* NodeOneWidth::Not()
     case_Op_(SpaceChar)
     case_Op_(WordChar)
     default:
-        CAN_NOT_HAPPEN();
+        NOTREACHED();
     } // switch m_eOp
 
     #undef case_Op_

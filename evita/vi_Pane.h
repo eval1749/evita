@@ -5,8 +5,8 @@
 #if !defined(INCLUDE_vi_Pane_h)
 #define INCLUDE_vi_Pane_h
 
+#include "base/basictypes.h"
 #include "base/strings/string16.h"
-#include "evita/li_util.h"
 #include "evita/ui/widget.h"
 
 namespace views {
@@ -15,7 +15,7 @@ class Window;
 
 class Frame;
 
-class Pane : public ui::Widget, public ChildNode_<Frame, Pane> {
+class Pane : public ui::Widget {
   DECLARE_CASTABLE_CLASS(Pane, Widget);
 
   private: int active_tick_;
@@ -29,7 +29,7 @@ class Pane : public ui::Widget, public ChildNode_<Frame, Pane> {
   public: virtual void Activate();
 
   // [G]
-  protected: Frame* GetFrame() const { return m_pParent; }
+  protected: Frame* GetFrame() const;
   public: virtual views::Window* GetWindow() const { return nullptr; }
 
   // [U]

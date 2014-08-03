@@ -19,6 +19,10 @@ void Pane::Activate() {
   GetFrame()->DidActivatePane(this);
 }
 
+Frame* Pane::GetFrame() const {
+  return container_widget().as<Frame>();
+}
+
 void Pane::UpdateActiveTick() {
   DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
   ++static_active_tick;

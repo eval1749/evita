@@ -11,13 +11,13 @@
 #if !defined(INCLUDE_visual_Frame_h)
 #define INCLUDE_visual_Frame_h
 
+#include <unordered_set>
 #include <vector>
 
 #pragma warning(push)
 #pragma warning(disable: 4625 4626)
 #include "base/observer_list.h"
 #pragma warning(pop)
-#include "evita/li_util.h"
 #include "evita/views/tab_strip_delegate.h"
 #include "evita/views/window.h"
 
@@ -61,20 +61,19 @@ class Frame final : public views::Window,
   DECLARE_CASTABLE_CLASS(Frame, views::Window);
 
   private: typedef ui::Widget Widget;
-  private: typedef ChildList_<Frame, Pane> Panes;
 
   private: class DragController;
   friend class DragController;
 
+  private: Pane* active_tab_content_;
   private: std::unique_ptr<DragController> drag_controller_;
-  private: Panes m_oPanes;
   private: views::MessageView* message_view_;
   private: views::MetricsView* metrics_view_;
   private: ObserverList<views::FrameObserver> observers_;
   private: gfx::Rect pending_update_rect_;
+  private: std::unordered_set<Pane*> tab_contents_;
   private: views::TabStrip* tab_strip_;
   private: std::unique_ptr<views::TitleBar> title_bar_;
-  private: Pane* m_pActivePane;
 
   public: explicit Frame(views::WindowId window_id);
   private: virtual ~Frame();

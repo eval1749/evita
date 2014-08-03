@@ -24,7 +24,6 @@ class Layer  {
   private: gfx::RectF bounds_;
   private: std::unordered_set<Layer*> child_layers_;
   private: Layer* parent_layer_;
-  private: Layer* top_most_layer_;
   private: common::ComPtr<IDCompositionVisual2> visual_;
 
   public: Layer();
@@ -41,7 +40,6 @@ class Layer  {
   public: void RemoveChildLayer(Layer* old_child);
   public: void SetBounds(const gfx::RectF& new_bounds);
   public: void SetBounds(const gfx::Rect& new_bounds);
-  public: void SetTopMostLayer(Layer* child);
 
   DISALLOW_COPY_AND_ASSIGN(Layer);
 };

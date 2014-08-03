@@ -162,9 +162,7 @@ void MetricsView::DidChangeBounds() {
 }
 
 void MetricsView::DidRealize() {
-  auto const parent_layer = container_widget().layer();
   SetLayer(new ui::Layer());
-  parent_layer->AppendChildLayer(layer());
   layer()->SetBounds(gfx::RectF(bounds()));
   canvas_.reset(layer()->CreateCanvas());
 }

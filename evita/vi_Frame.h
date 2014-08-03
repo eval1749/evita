@@ -72,6 +72,7 @@ class Frame final : public views::Window,
   private: ObserverList<views::FrameObserver> observers_;
   private: gfx::Rect pending_update_rect_;
   private: std::unordered_set<Pane*> tab_contents_;
+  private: std::unique_ptr<ui::Layer> tab_content_layer_;
   private: views::TabStrip* tab_strip_;
   private: std::unique_ptr<views::TitleBar> title_bar_;
 

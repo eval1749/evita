@@ -499,76 +499,6 @@ void Frame::DidAddChildWidget(const ui::Widget& widget) {
   AddTabContent(window);
 }
 
-void Frame::DidChangeChildVisibility(Widget* child) {
-  if (!child->is<Pane>())
-    return;
-  if (child->visible())
-    layer()->AppendChildLayer(child->layer());
-  else
-    layer()->RemoveChildLayer(child->layer());
-}
-
-void Frame::DidCreateNativeWindow() {
-  views::FrameList::instance()->AddFrame(this);
-  ::DragAcceptFiles(*native_window(), TRUE);
-
-  title_bar_->Realize(*native_window());
-
-  // TODO(yosi) How do we determine height of TabStrip?
-  auto const tab_strip_height = static_cast<Widget*>(tab_strip_)->
-      GetPreferredSize().height();
-  const auto close_button_height = ::GetSystemMetrics(SM_CYSIZE);
-  tab_strip_->SetBounds(Rect(0, close_button_height,
-                             bounds().width(),
-                             close_button_height + 4 + tab_strip_height));
-
-  SetLayer(new ui::RootLayer(this));
-
-  auto const tab_content_bounds = GetTabContentBounds();
-  for (auto tab_content : tab_contents_) {
-    tab_content->SetBounds(tab_content_bounds);
-  }
-
-  message_view_->SetBounds(gfx::Rect(tab_content_bounds.bottom_left(),
-                                     bounds().bottom_right()));
-
-  {
-    auto const size = metrics_view_->bounds().size();
-    metrics_view_->SetBounds(gfx::Rect(
-        tab_content_bounds.bottom_right() - size, size));
-  }
-
-  // Create message view, tab_contents and tab strip.
-  views::Window::DidCreateNativeWindow();
-  layer()->SetTopMostLayer(metrics_view_->layer());
-
-  for (auto tab_content : tab_contents_) {
-    AddTab(tab_content);
-  }
-
-  if (auto const active_tab_content = GetActiveTabContent())
-    active_tab_content->Activate();
-
-  ::SetWindowPos(AssociatedHwnd(), nullptr, 0, 0, 0, 0,
-                 SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER |
-                 SWP_NOREDRAW | SWP_NOSIZE | SWP_FRAMECHANGED);
-
-  //ui::Compositor::instance()->CommitIfNeeded();
-}
-
-void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
-  views::Window::DidRemoveChildWidget(widget);
-  auto const tab_content = const_cast<Pane*>(widget.as<Pane>());
-  if (!tab_content)
-    return;
-  DCHECK(tab_contents_.find(tab_content)!= tab_contents_.end());
-  tab_contents_.erase(tab_content);
-  if (first_child())
-    return;
-  DCHECK(tab_contents_.empty());
-  DestroyWidget();
-}
-
 void Frame::DidChangeBounds() {
   views::Window::DidChangeBounds();
   const auto tab_content_bounds = GetTabContentBounds();
@@ -597,6 +527,78 @@ void Frame::DidChangeBounds() {
   ui::Compositor::instance()->CommitIfNeeded();
 
   DrawForResize();
+}
+
+void Frame::DidChangeChildVisibility(Widget* child) {
+  views::Window::DidChangeChildVisibility(child);
+  if (!child->is<Pane>())
+    return;
+  if (child->visible())
+    tab_content_layer_->AppendChildLayer(child->layer());
+  else
+    tab_content_layer_->RemoveChildLayer(child->layer());
+}
+
+void Frame::DidCreateNativeWindow() {
+  views::FrameList::instance()->AddFrame(this);
+  ::DragAcceptFiles(*native_window(), TRUE);
+
+  title_bar_->Realize(*native_window());
+
+  // TODO(yosi) How do we determine height of TabStrip?
+  auto const tab_strip_height = static_cast<Widget*>(tab_strip_)->
+      GetPreferredSize().height();
+  const auto close_button_height = ::GetSystemMetrics(SM_CYSIZE);
+  tab_strip_->SetBounds(Rect(0, close_button_height,
+                             bounds().width(),
+                             close_button_height + 4 + tab_strip_height));
+
+  SetLayer(new ui::RootLayer(this));
+  tab_content_layer_.reset(new ui::Layer());
+
+  auto const tab_content_bounds = GetTabContentBounds();
+  for (auto tab_content : tab_contents_) {
+    tab_content->SetBounds(tab_content_bounds);
+  }
+
+  message_view_->SetBounds(gfx::Rect(tab_content_bounds.bottom_left(),
+                                     bounds().bottom_right()));
+
+  {
+    auto const size = metrics_view_->bounds().size();
+    metrics_view_->SetBounds(gfx::Rect(
+        tab_content_bounds.bottom_right() - size, size));
+  }
+
+  // Create message view, tab_contents and tab strip.
+  views::Window::DidCreateNativeWindow();
+  layer()->AppendChildLayer(tab_content_layer_.get());
+  layer()->AppendChildLayer(message_view_->layer());
+  layer()->AppendChildLayer(metrics_view_->layer());
+
+  for (auto tab_content : tab_contents_) {
+    AddTab(tab_content);
+  }
+
+  if (auto const active_tab_content = GetActiveTabContent())
+    active_tab_content->Activate();
+
+  ::SetWindowPos(AssociatedHwnd(), nullptr, 0, 0, 0, 0,
+                 SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER |
+                 SWP_NOREDRAW | SWP_NOSIZE | SWP_FRAMECHANGED);
+}
+
+void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
+  views::Window::DidRemoveChildWidget(widget);
+  auto const tab_content = const_cast<Pane*>(widget.as<Pane>());
+  if (!tab_content)
+    return;
+  DCHECK(tab_contents_.find(tab_content)!= tab_contents_.end());
+  tab_contents_.erase(tab_content);
+  if (first_child())
+    return;
+  DCHECK(tab_contents_.empty());
+  DestroyWidget();
 }
 
 void Frame::DidSetFocus(ui::Widget* widget) {

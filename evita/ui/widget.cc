@@ -178,6 +178,9 @@ void Widget::DidChangeHierarchy() {
   }
 }
 
+void Widget::DidChangeChildVisibility(Widget*) {
+}
+
 void Widget::DidCreateNativeWindow() {
   DidRealize();
 }
@@ -198,6 +201,7 @@ void Widget::DidDestroyWidget() {
 }
 
 void Widget::DidHide() {
+  container_widget().DidChangeChildVisibility(this);
 }
 
 void Widget::DidKillFocus(ui::Widget*) {
@@ -238,6 +242,7 @@ void Widget::DidSetNativeFocus() {
 }
 
 void Widget::DidShow() {
+  container_widget().DidChangeChildVisibility(this);
   for (auto child : child_nodes()) {
     child->Show();
   }

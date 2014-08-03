@@ -17,6 +17,7 @@
 #include "evita/gfx/rect_conversions.h"
 #include "evita/editor/application.h"
 #include "evita/resource.h"
+#include "evita/ui/compositor/layer.h"
 #include "evita/ui/events/event.h"
 #include "evita/views/content_window.h"
 #include "evita/vi_Frame.h"
@@ -1017,6 +1018,16 @@ views::Window* EditPane::GetWindow() const {
 void EditPane::DidChangeBounds() {
   Pane::DidChangeBounds();
   root_box_->SetBounds(GetContentsBounds());
+}
+
+void EditPane::DidChangeChildVisibility(Widget* child) {
+  if (!child->is<views::ContentWindow>())
+    return;
+  DCHECK(!child->bounds().empty());
+  if (child->visible())
+    layer()->AppendChildLayer(child->layer());
+  else
+    layer()->RemoveChildLayer(child->layer());
 }
 
 void EditPane::DidRealize() {

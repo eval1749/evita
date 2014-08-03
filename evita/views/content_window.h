@@ -33,10 +33,8 @@ class ContentWindow : public Window {
   // ui::Widget
   protected: virtual void DidChangeBounds() override;
   protected: virtual void DidChangeHierarchy() override;
-  protected: virtual void DidHide() override;
   protected: virtual void DidRealize() override;
   protected: virtual void DidSetFocus(ui::Widget*) override;
-  protected: virtual void DidShow() override;
 
   DISALLOW_COPY_AND_ASSIGN(ContentWindow);
 };

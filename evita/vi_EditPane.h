@@ -82,6 +82,7 @@ class EditPane final : public Pane {
 
   // ui::Widget
   private: virtual void DidChangeBounds() override;
+  private: virtual void DidChangeChildVisibility(Widget* child) override;
   private: virtual void DidRealize() override;
   private: virtual void DidRealizeChildWidget(const Widget&) override;
   private: virtual void DidRemoveChildWidget(const Widget&) override;

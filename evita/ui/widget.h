@@ -88,6 +88,7 @@ class Widget
   public: void DestroyWidget();
   protected: virtual void DidAddChildWidget(const Widget& widget);
   protected: virtual void DidChangeBounds();
+  protected: virtual void DidChangeChildVisibility(Widget* child);
   protected: virtual void DidChangeHierarchy();
   // Called on WM_CREATE
   protected: virtual void DidCreateNativeWindow();

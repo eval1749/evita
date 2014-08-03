@@ -46,11 +46,6 @@ void ContentWindow::DidChangeHierarchy() {
   container_widget().layer()->AppendChildLayer(layer());
 }
 
-void ContentWindow::DidHide() {
-  Window::DidHide();
-  container_widget().layer()->RemoveChildLayer(layer());
-}
-
 void ContentWindow::DidRealize() {
   Window::DidRealize();
   SetLayer(new ui::Layer());
@@ -60,13 +55,6 @@ void ContentWindow::DidSetFocus(ui::Widget* widget) {
   Window::DidSetFocus(widget);
   auto const frame = Frame::FindFrame(*this);
   frame->DidSetFocusOnChild(this);
-}
-
-void ContentWindow::DidShow() {
-  Window::DidShow();
-  if (bounds().empty())
-    return;
-  container_widget().layer()->AppendChildLayer(layer());
 }
 
 }  // namespace views

@@ -36,17 +36,7 @@ void Pane::DidChangeBounds() {
     layer()->SetBounds(gfx::RectF(bounds()));
 }
 
-void Pane::DidHide() {
-  ui::Widget::DidHide();
-  GetFrame()->layer()->RemoveChildLayer(layer());
-}
-
 void Pane::DidRealize() {
   SetLayer(new ui::Layer());
   ui::Widget::DidRealize();
-}
-
-void Pane::DidShow() {
-  ui::Widget::DidShow();
-  GetFrame()->layer()->AppendChildLayer(layer());
 }

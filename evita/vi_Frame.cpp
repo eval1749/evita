@@ -215,27 +215,6 @@ void Frame::DidActivateTabContent(Pane* const tab_content) {
     tab_strip_->SelectTab(tab_index);
 }
 
-void Frame::DidAddChildWidget(const ui::Widget& widget) {
-  if (auto tab_content = const_cast<Pane*>(widget.as<Pane>())) {
-    tab_contents_.insert(tab_content);
-    if (!is_realized()) {
-      DCHECK(!widget.is_realized());
-      return;
-    }
-    if (tab_content->is_realized())
-      tab_content->SetBounds(GetTabContentBounds());
-    else
-      tab_content->Realize(GetTabContentBounds());
-    AddTab(tab_content);
-    return;
-  }
-
-  auto window = const_cast<views::ContentWindow*>(
-      widget.as<views::ContentWindow>());
-  DCHECK(window);
-  AddTabContent(window);
-}
-
 void Frame::DidChangeTabSelection(int selected_index) {
   auto const tab_content = GetTabContentByTabIndex(selected_index);
   #if DEBUG_FOCUS
@@ -497,6 +476,36 @@ void Frame::CreateNativeWindow() const {
       dwExStyle, dwStyle, L"", nullptr,
       gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
       gfx::Size(window_bounds.width(), workarea_bounds.height() * 4 / 5));
+}
+
+void Frame::DidAddChildWidget(const ui::Widget& widget) {
+  if (auto tab_content = const_cast<Pane*>(widget.as<Pane>())) {
+    tab_contents_.insert(tab_content);
+    if (!is_realized()) {
+      DCHECK(!widget.is_realized());
+      return;
+    }
+    if (tab_content->is_realized())
+      tab_content->SetBounds(GetTabContentBounds());
+    else
+      tab_content->Realize(GetTabContentBounds());
+    AddTab(tab_content);
+    return;
+  }
+
+  auto window = const_cast<views::ContentWindow*>(
+      widget.as<views::ContentWindow>());
+  DCHECK(window);
+  AddTabContent(window);
+}
+
+void Frame::DidChangeChildVisibility(Widget* child) {
+  if (!child->is<Pane>())
+    return;
+  if (child->visible())
+    layer()->AppendChildLayer(child->layer());
+  else
+    layer()->RemoveChildLayer(child->layer());
 }
 
 void Frame::DidCreateNativeWindow() {

@@ -561,7 +561,8 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       break;
 
     case WM_EXITSIZEMOVE:
-      message_view_->SetMessage(base::string16());
+      message_view_->SetMessage(base::StringPrintf(L"Resized to %dx%d",
+          bounds().width(), bounds().height()));
       break;
 
     case WM_GETMINMAXINFO: {

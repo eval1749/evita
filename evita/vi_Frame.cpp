@@ -297,14 +297,6 @@ void Frame::DrawForResize() {
   ui::Compositor::instance()->CommitIfNeeded();
 }
 
-Frame* Frame::FindFrame(const ui::Widget& widget) {
-  for (auto ancestor : common::tree::ancestors_or_self(&widget)) {
-    if (ancestor->is<Frame>())
-      return const_cast<Widget*>(ancestor)->as<Frame>();
-  }
-  return nullptr;
-}
-
 Pane* Frame::GetActiveTabContent() {
   if (active_tab_content_ && active_tab_content_->active_tick())
     return active_tab_content_;

@@ -49,8 +49,10 @@ Frame* GetFrameForMessage(dom::WindowId window_id) {
   auto const window = FromWindowId("GetFrameForMessage", window_id);
   if (!window)
     return FrameList::instance()->active_frame();
-  if (auto const frame = Frame::FindFrame(*window))
-    return frame;
+  if (auto const content_window = window->as<ContentWindow>()) {
+    if (auto const frame = content_window->GetFrame())
+      return frame;
+  }
   return FrameList::instance()->active_frame();
 }
 

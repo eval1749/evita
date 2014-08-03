@@ -22,12 +22,8 @@ class ContentWindow : public Window {
   protected: explicit ContentWindow(views::WindowId window_id);
   public: virtual ~ContentWindow();
 
-  public: Frame* frame() const;
-
-  // [A]
   public: void Activate();
-
-  // [M]
+  public: Frame* GetFrame() const;
   public: virtual void MakeSelectionVisible() = 0;
 
   // ui::Widget

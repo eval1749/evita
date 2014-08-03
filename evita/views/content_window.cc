@@ -16,7 +16,15 @@ ContentWindow::ContentWindow(views::WindowId window_id)
 ContentWindow::~ContentWindow() {
 }
 
-Frame* ContentWindow::frame() const {
+void ContentWindow::Activate() {
+  #if DEBUG_FOCUS
+    DVLOG(0) << "Activate " << this << " focus=" << has_focus() <<
+        "show=" << visible();
+  #endif
+  RequestFocus();
+}
+
+Frame* ContentWindow::GetFrame() const {
   for (auto runner = static_cast<const Widget*>(this); runner;
        runner = &runner->container_widget()) {
     if (runner->is<Frame>())
@@ -24,14 +32,6 @@ Frame* ContentWindow::frame() const {
   }
   NOTREACHED();
   return nullptr;
-}
-
-void ContentWindow::Activate() {
-  #if DEBUG_FOCUS
-    DVLOG(0) << "Activate " << this << " focus=" << has_focus() <<
-        "show=" << visible();
-  #endif
-  RequestFocus();
 }
 
 // ui::Widget
@@ -54,8 +54,8 @@ void ContentWindow::DidRealize() {
 
 void ContentWindow::DidSetFocus(ui::Widget* widget) {
   Window::DidSetFocus(widget);
-  auto const frame = Frame::FindFrame(*this);
-  frame->DidSetFocusOnChild(this);
+  if (auto const frame = GetFrame())
+    frame->DidSetFocusOnChild(this);
 }
 
 }  // namespace views

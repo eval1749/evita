@@ -97,9 +97,6 @@ class Frame final : public views::Window,
   private: Pane* GetTabContentByTabIndex(int tab_index) const;
   private: int GetTabIndexOfTabContent(Pane* tab_content) const;
 
-  // [F]
-  public: static Frame* FindFrame(const Widget& widget);
-
   // [O]
   private: void onDropFiles(HDROP);
 

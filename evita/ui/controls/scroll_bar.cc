@@ -496,14 +496,14 @@ class Thumb : public ScrollBar::Part {
 gfx::ColorF Thumb::thumb_color() const {
   switch (state()) {
     case State::Active:
-      return gfx::sysColor(COLOR_BTNTEXT, 0.7f);
+      return gfx::sysColor(COLOR_BTNSHADOW, 0.7f);
     case State::Disabled:
       NOTREACHED();
       return gfx::ColorF::Red;
     case State::Hover:
-      return gfx::sysColor(COLOR_BTNTEXT, 0.5f);
+      return gfx::sysColor(COLOR_BTNSHADOW, 0.5f);
     case State::Normal:
-      return gfx::sysColor(COLOR_BTNTEXT, 0.3f);
+      return gfx::sysColor(COLOR_BTNSHADOW, 0.3f);
     default:
       NOTREACHED();
       return gfx::ColorF::Red;
@@ -534,8 +534,7 @@ void Thumb::PaintThumb(gfx::Canvas* canvas,
   canvas->AddDirtyRect(bounds);
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
   canvas->Clear(gfx::sysColor(COLOR_BTNFACE));
-  gfx::Brush thumb_brush(canvas, thumb_color());
-  canvas->FillRectangle(thumb_brush, bounds);
+  canvas->FillRectangle(gfx::Brush(canvas, thumb_color()), bounds);
 }
 
 // ScrollBar::Part
@@ -595,12 +594,9 @@ int ThumbHorizontal::GetValueAt(const gfx::PointF& point) const {
   auto const size = data().maximum - data().minimum;
   if (size <= 0)
     return data().minimum;
-  auto const arrow_width = bounds().height();
-  auto const offset = std::min(
-      std::max(static_cast<int>(point.x - bounds().left - arrow_width), 0),
-      static_cast<int>(bounds().right));
-  auto const width = bounds().width() - arrow_width * 2;
-  auto const scale = static_cast<float>(size) / width;
+  auto const offset = std::min(std::max(point.x - bounds().left, 0.0f),
+                               bounds().right);
+  auto const scale = static_cast<float>(size) / bounds().width();
   return std::min(static_cast<int>(offset * scale) + data().minimum,
                   data().maximum);
 }
@@ -662,10 +658,8 @@ int ThumbVertical::GetValueAt(const gfx::PointF& point) const {
   auto const size = data().maximum - data().minimum;
   if (size <= 0)
     return data().minimum;
-  auto const arrow_height = bounds().width();
-  auto const offset = std::min(
-      std::max(point.y - bounds().top - arrow_height, 0.0f),
-      bounds().right);
+  auto const offset = std::min(std::max(point.y - bounds().top, 0.0f),
+                               bounds().bottom);
   auto const scale = size / bounds().height();
   return std::min(static_cast<int>(offset * scale) + data().minimum,
                   data().maximum);
@@ -712,8 +706,8 @@ void ThumbVertical::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
 // ScrollBar
 //
 ScrollBar::ScrollBar(Type type, ScrollBarObserver* observer)
-    : capturing_part_(nullptr), hover_part_(nullptr), observer_(observer),
-      parts_(CreateParts(type)) {
+    : capturing_location_(Location::None), hover_part_(nullptr),
+      observer_(observer), parts_(CreateParts(type)) {
 }
 
 ScrollBar::~ScrollBar() {
@@ -796,9 +790,16 @@ void ScrollBar::OnMouseExited(const ui::MouseEvent&) {
 }
 
 void ScrollBar::OnMouseMoved(const ui::MouseEvent& event) {
+  if (capturing_location_ == Location::Thumb) {
+    DCHECK(hover_part_);
+    observer_->DidMoveThumb(hover_part_->GetValueAt(
+        gfx::PointF(event.location())));
+    return;
+  }
+  if (capturing_location_ != Location::None)
+    return;
   auto const result = HitTest(gfx::PointF(event.location()));
-  auto const new_hover_part = result.part() && result.part()->is_normal() ?
-      result.part() : nullptr;
+  auto const new_hover_part = result.part();
   if (hover_part_ && hover_part_ != new_hover_part)
     hover_part_->set_state(Part::State::Normal);
   hover_part_ = new_hover_part;
@@ -806,27 +807,25 @@ void ScrollBar::OnMouseMoved(const ui::MouseEvent& event) {
     return;
   if (hover_part_->is_normal())
     hover_part_->set_state(Part::State::Hover);
-  if (result.location() == Location::Thumb && hover_part_->is_active()) {
-    auto const point = gfx::PointF(event.location());
-    observer_->DidMoveThumb(hover_part_->GetValueAt(point));
-  }
 }
 
 void ScrollBar::OnMousePressed(const ui::MouseEvent& event) {
   if (!event.is_left_button() || event.click_count())
     return;
-  DCHECK(!capturing_part_);
   auto const result = HitTest(gfx::PointF(event.location()));
-  auto const new_hover_part = result.part() && result.part()->is_normal() ?
-      result.part() : nullptr;
+  auto const new_hover_part = result.part();
   if (hover_part_ != new_hover_part) {
     if (hover_part_)
       hover_part_->set_state(Part::State::Normal);
     hover_part_ = new_hover_part;
   }
 
-  if (new_hover_part)
-    new_hover_part->set_state(Part::State::Active);
+  if (!hover_part_)
+    return;
+
+  hover_part_->set_state(Part::State::Active);
+  capturing_location_ = result.location();
+  SetCapture();
 
   switch (result.location()) {
     case Location::ArrowLeft:
@@ -848,28 +847,21 @@ void ScrollBar::OnMousePressed(const ui::MouseEvent& event) {
       observer_->DidClickPageDown();
       break;
     case Location::Thumb:
-      if (result.location() == Location::Thumb) {
-        capturing_part_ = new_hover_part;
-        SetCapture();
-      }
       break;
-  }
-
-  if (result.location() == Location::NorthOfThumb ||
-      result.location() == Location::EastOfThumb) {
   }
 }
 
 void ScrollBar::OnMouseReleased(const ui::MouseEvent& event) {
   if (!event.is_left_button())
     return;
+  if (capturing_location_ != Location::None) {
+    DCHECK(hover_part_);
+    ReleaseCapture();
+    capturing_location_ = Location::None;
+  }
   if (hover_part_) {
     hover_part_->set_state(Part::State::Normal);
     hover_part_ = nullptr;
-  }
-  if (capturing_part_) {
-    ReleaseCapture();
-    capturing_part_ = nullptr;
   }
 }
 

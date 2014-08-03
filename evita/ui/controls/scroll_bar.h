@@ -44,6 +44,7 @@ class ScrollBar : public ui::Widget {
     Vertical,
   };
 
+  private: Location capturing_location_;
   private: Part* capturing_part_;
   private: Data data_;
   private: Part* hover_part_;

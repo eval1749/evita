@@ -185,10 +185,6 @@ Frame::Frame(views::WindowId window_id)
 Frame::~Frame() {
 }
 
-Frame::operator HWND() const {
-  return *native_window();
-}
-
 bool Frame::Activate() {
   return ::SetForegroundWindow(*native_window());
 }

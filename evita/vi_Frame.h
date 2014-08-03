@@ -79,9 +79,6 @@ class Frame final : public views::Window,
   public: explicit Frame(views::WindowId window_id);
   private: virtual ~Frame();
 
-  // TODO: We should not use Frame to HWDN.
-  public: operator HWND() const;
-
   // [A]
   public: bool Activate();
   public: void AddObserver(views::FrameObserver* observer);

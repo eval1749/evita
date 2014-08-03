@@ -22,7 +22,7 @@ void FrameList::AddFrame(Frame* frame) {
 
 Frame* FrameList::FindFrameByHwnd(HWND hwnd) const {
   for (auto frame : frames_) {
-    if (*frame == hwnd)
+    if (frame->AssociatedHwnd() == hwnd)
       return frame;
   }
   return nullptr;
@@ -30,7 +30,7 @@ Frame* FrameList::FindFrameByHwnd(HWND hwnd) const {
 
 bool FrameList::DoIdle(int hint) {
   auto need_more = false;
-  for (auto frame: frames_) {
+  for (auto frame : frames_) {
     if (frame->OnIdle(hint))
       need_more = true;
   }

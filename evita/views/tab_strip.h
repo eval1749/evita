@@ -35,7 +35,6 @@ class TabStrip : public ui::Widget {
   public: int number_of_tabs() const;
   public: int selected_index() const;
 
-  public: Size GetPreferreSize() const;
   public: bool GetTab(int tab_index, TCITEM* tab_data);
   public: void DeleteTab(int tab_index);
   public: void InsertTab(int new_tab_index, const TCITEM* tab_data);
@@ -44,6 +43,7 @@ class TabStrip : public ui::Widget {
 
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;
+  private: gfx::Size GetPreferredSize() const override;
   private: virtual void DidCreateNativeWindow() override;
   private: virtual void DidChangeBounds() override;
   private: virtual LRESULT OnMessage(uint32_t uMsg, WPARAM wParam,

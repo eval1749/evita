@@ -305,6 +305,10 @@ Widget& Widget::GetHostWidget() const {
   return *RootWidget::instance();
 }
 
+gfx::Size Widget::GetPreferredSize() const {
+  return gfx::Size();
+}
+
 LRESULT Widget::HandleKeyboardMessage(uint32_t message, WPARAM wParam,
                                       LPARAM lParam) {
   if (message == WM_CHAR) {

@@ -10,7 +10,7 @@
 #include "common/castable.h"
 #include "common/tree/node.h"
 #include "common/win/native_window.h"
-#include "common/win/rect.h"
+#include "evita/gfx/rect.h"
 #include "evita/gfx/rect_f.h"
 
 namespace gfx {
@@ -117,6 +117,7 @@ class Widget
   protected: virtual HCURSOR GetCursorAt(const Point& point) const;
   public: static Widget* GetFocusWidget();
   private: Widget& GetHostWidget() const;
+  public: virtual gfx::Size GetPreferredSize() const;
 
   // [H]
   private: LRESULT HandleKeyboardMessage(uint32_t message, WPARAM wParam,

@@ -1162,15 +1162,6 @@ void TabStrip::DeleteTab(int tab_index) {
   impl_->DeleteTab(static_cast<size_t>(tab_index));
 }
 
-// On Win8.1
-//  SM_CYSIZE = 22
-//  SM_CYCAPTION = 23
-//  SM_CYEDGE = 2
-//  SM_CYSIZEFRAME = 4
-Size TabStrip::GetPreferreSize() const {
-  return Size(300, 28);
-}
-
 bool TabStrip::GetTab(int tab_index, TCITEM* tab_data) {
   return impl_->GetTab(static_cast<size_t>(tab_index), tab_data);
 }
@@ -1207,6 +1198,15 @@ void TabStrip::DidChangeBounds() {
   impl_->SetBounds(GetContentsBounds());
   if (layer())
     layer()->SetBounds(gfx::RectF(bounds()));
+}
+
+// On Win8.1
+//  SM_CYSIZE = 22
+//  SM_CYCAPTION = 23
+//  SM_CYEDGE = 2
+//  SM_CYSIZEFRAME = 4
+gfx::Size TabStrip::GetPreferredSize() const {
+  return Size(300, 28);
 }
 
 LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {

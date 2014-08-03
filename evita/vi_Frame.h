@@ -91,7 +91,7 @@ class Frame final : public views::Window,
   private: void DrawForResize();
 
   // [G]
-  public: Pane* GetActiveTabContent();
+  private: Pane* GetActiveTabContent();
   private: gfx::Rect GetTabContentBounds() const;
   private: Pane* GetTabContentByTabIndex(int tab_index) const;
   private: int GetTabIndexOfTabContent(Pane* tab_content) const;

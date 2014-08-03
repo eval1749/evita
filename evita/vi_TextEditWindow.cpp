@@ -68,9 +68,7 @@ TextSelectionModel::State GetTextSelectionState(TextEditWindow* window) {
   if (!IsPopupWindow(::GetFocus()))
     return TextSelectionModel::State::Disabled;
 
-  auto const edit_pane = views::FrameList::instance()->active_frame()->
-    GetActiveTabContent()->as<EditPane>();
-  if (edit_pane && edit_pane->GetActiveWindow() == window)
+  if (window->GetFrame() == views::FrameList::instance()->active_frame())
     return TextSelectionModel::State::Highlight;
   return TextSelectionModel::State::Disabled;
 }

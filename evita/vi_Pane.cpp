@@ -16,7 +16,7 @@ Pane::~Pane() {
 }
 
 void Pane::Activate() {
-  GetFrame()->DidActivateTabContent(this);
+  RequestFocus();
 }
 
 Frame* Pane::GetFrame() const {

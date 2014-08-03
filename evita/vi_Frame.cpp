@@ -199,59 +199,6 @@ void Frame::AddOrActivateTabContent(views::ContentWindow* window) {
   AddTabContent(window);
 }
 
-void Frame::DidActivateTabContent(Pane* const tab_content) {
-  auto const tab_index = GetTabIndexOfTabContent(tab_content);
-  if (tab_index < 0)
-    return;
-  auto const selected_index = tab_strip_->selected_index();
-  #if DEBUG_FOCUS
-   DVLOG(0) << "DidActivateTabContent selected_index=" << selected_index <<
-      " cur=" << active_tab_content_ << " .focus=" <<
-      active_tab_content_->has_focus << " new=" << tab_content << " .focus=" <<
-      tab_content->has_focus() << " tab_index=" << tab_index;
-  #endif
-
-  if (tab_index != selected_index)
-    tab_strip_->SelectTab(tab_index);
-}
-
-void Frame::DidChangeTabSelection(int selected_index) {
-  auto const tab_content = GetTabContentByTabIndex(selected_index);
-  #if DEBUG_FOCUS
-    DVLOG(0) << "DidChangeTabSelection Start"
-        " selected_index=" << selected_index <<
-        " cur=" << active_tab_content_ << " new=" << tab_content;
-  #endif
-  if (!tab_content) {
-    #if DEBUG_FOCUS
-      DVLOG(0) << "selected_index(" << selected_index <<
-          " doesn't have tab_content!";
-    #endif
-    return;
-  }
-  if (active_tab_content_ == tab_content) {
-    #if DEBUG_FOCUS
-      DVLOG(0) << "Active tab_content(" << selected_index <<
-          ") isn't changed. why?";
-    #endif
-    return;
-  }
-  if (active_tab_content_) {
-    active_tab_content_->Hide();
-  } else {
-    #if DEBUG_FOCUS
-      DVLOG(0) << "Why we don't have acitve tab_content?";
-    #endif
-  }
-  active_tab_content_ = tab_content;
-  tab_content->Show();
-  tab_content->Activate();
-  #if DEBUG_FOCUS
-    DVLOG(0) << "End selected_index=" << selected_index <<
-        " cur=" active_tab_content_ << " new=" << tab_content;
-  #endif
-}
-
 void Frame::DidSetFocusOnChild(views::Window* window) {
   auto const tab_content = GetContainingPane(this, window);
   if (!tab_content) {
@@ -727,6 +674,43 @@ void Frame::DidClickTabCloseButton(int tab_index) {
     tab_content->DestroyWidget();
 
   LOG(ERROR) << "There is no tab[" << tab_index << "]";
+}
+
+void Frame::DidChangeTabSelection(int selected_index) {
+  auto const tab_content = GetTabContentByTabIndex(selected_index);
+  #if DEBUG_FOCUS
+    DVLOG(0) << "DidChangeTabSelection Start"
+        " selected_index=" << selected_index <<
+        " cur=" << active_tab_content_ << " new=" << tab_content;
+  #endif
+  if (!tab_content) {
+    #if DEBUG_FOCUS
+      DVLOG(0) << "selected_index(" << selected_index <<
+          " doesn't have tab_content!";
+    #endif
+    return;
+  }
+  if (active_tab_content_ == tab_content) {
+    #if DEBUG_FOCUS
+      DVLOG(0) << "Active tab_content(" << selected_index <<
+          ") isn't changed. why?";
+    #endif
+    return;
+  }
+  if (active_tab_content_) {
+    active_tab_content_->Hide();
+  } else {
+    #if DEBUG_FOCUS
+      DVLOG(0) << "Why we don't have acitve tab_content?";
+    #endif
+  }
+  active_tab_content_ = tab_content;
+  tab_content->Show();
+  tab_content->Activate();
+  #if DEBUG_FOCUS
+    DVLOG(0) << "End selected_index=" << selected_index <<
+        " cur=" active_tab_content_ << " new=" << tab_content;
+  #endif
 }
 
 void Frame::DidThrowTab(LPARAM lParam) {

@@ -1002,14 +1002,6 @@ void EditPane::SplitVertically(Window* above_window,
 }
 
 // Pane
-void EditPane::Activate() {
-  Pane::Activate();
-  auto const window = GetActiveWindow();
-  if (!window)
-    return;
-  window->RequestFocus();
-}
-
 views::Window* EditPane::GetWindow() const {
   return GetActiveWindow();
 }

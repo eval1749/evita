@@ -87,7 +87,6 @@ class Frame final : public views::Window,
   public: void AddOrActivateTabContent(views::ContentWindow*);
 
   // [D]
-  public: void DidActivateTabContent(Pane* tab_content);
   public: void DidSetFocusOnChild(views::Window* window);
   private: void DrawForResize();
 

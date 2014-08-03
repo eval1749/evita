@@ -77,7 +77,6 @@ class EditPane final : public Pane {
                                Window* new_below_window);
 
   // Pane
-  private: virtual void Activate() override;
   private: virtual views::Window* GetWindow() const override;
 
   // ui::Widget

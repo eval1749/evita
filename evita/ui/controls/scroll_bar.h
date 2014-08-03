@@ -57,6 +57,7 @@ class ScrollBar : public ui::Widget {
   private: static std::vector<Part*> CreateParts(Type type);
   private: HitTestResult HitTest(const gfx::PointF& point) const;
   public: void Render(gfx::Canvas* canvas);
+  private: void ResetHover();
   public: void SetData(const Data& date);
   private: void UpdateLayout();
 

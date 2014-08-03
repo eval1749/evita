@@ -626,7 +626,9 @@ void ThumbHorizontal::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
     return;
   }
 
-  set_state(State::Normal);
+  if (new_state() == State::Disabled)
+    set_state(State::Normal);
+
   auto const thumb_left= ::floor((data.thumb_value - data.minimum) * scale);
   auto const thumb_right= ::floor(
       (data.thumb_value + data.thumb_size - data.minimum) * scale);
@@ -690,7 +692,9 @@ void ThumbVertical::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
     return;
   }
 
-  set_state(State::Normal);
+  if (new_state() == State::Disabled)
+    set_state(State::Normal);
+
   auto const thumb_top = ::floor((data.thumb_value - data.minimum) * scale);
   auto const thumb_bottom = ::floor(
       (data.thumb_value + data.thumb_size - data.minimum) * scale);
@@ -754,6 +758,17 @@ void ScrollBar::Render(gfx::Canvas* canvas) {
   }
 }
 
+void ScrollBar::ResetHover() {
+  if (!hover_part_)
+    return;
+  if (capturing_location_ != Location::None) {
+    ReleaseCapture();
+    capturing_location_ = Location::None;
+  }
+  hover_part_->set_state(Part::State::Normal);
+  hover_part_ = nullptr;
+}
+
 void ScrollBar::SetData(const Data& data) {
   if (data_ == data)
     return;
@@ -783,10 +798,7 @@ void ScrollBar::DidShow() {
 }
 
 void ScrollBar::OnMouseExited(const ui::MouseEvent&) {
-  if (!hover_part_)
-    return;
-  hover_part_->set_state(Part::State::Normal);
-  hover_part_ = nullptr;
+  ResetHover();
 }
 
 void ScrollBar::OnMouseMoved(const ui::MouseEvent& event) {
@@ -854,15 +866,7 @@ void ScrollBar::OnMousePressed(const ui::MouseEvent& event) {
 void ScrollBar::OnMouseReleased(const ui::MouseEvent& event) {
   if (!event.is_left_button())
     return;
-  if (capturing_location_ != Location::None) {
-    DCHECK(hover_part_);
-    ReleaseCapture();
-    capturing_location_ = Location::None;
-  }
-  if (hover_part_) {
-    hover_part_->set_state(Part::State::Normal);
-    hover_part_ = nullptr;
-  }
+  ResetHover();
 }
 
 }  // namespace ui

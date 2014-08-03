@@ -41,7 +41,6 @@
 #include "evita/views/message_view.h"
 #include "evita/views/metrics_view.h"
 #include "evita/views/switches.h"
-#include "evita/views/tab_data_set.h"
 #include "evita/views/tab_strip.h"
 #include "evita/views/text/render_font.h"
 #include "evita/views/text/render_font_set.h"
@@ -330,11 +329,7 @@ void Frame::ShowMessage(MessageLevel, const base::string16& text) const {
 void Frame::updateTitleBar() {
   if (!active_tab_content_)
     return;
-  auto const window = active_tab_content_->GetWindow();
-  if (!window)
-    return;
-  auto const tab_data = TabDataSet::instance()->GetTabData(
-      window->window_id());
+  auto const tab_data = active_tab_content_->GetTabData();
   if (!tab_data)
     return;
   auto& title = tab_data->title;
@@ -727,14 +722,10 @@ base::string16 Frame::GetTooltipTextForTab(int tab_index) {
   auto const tab_content = GetTabContentByTabIndex(static_cast<int>(tab_index));
   if (!tab_content)
     return base::string16();
-
-  auto const window = tab_content->GetWindow();
-  if (!window)
+  auto const tab_data = tab_content->GetTabData();
+  if (!tab_data)
     return base::string16();
-
-  auto const tab_data = TabDataSet::instance()->GetTabData(
-      window->window_id());
-  return tab_data ? tab_data->tooltip : base::string16();
+  return tab_data->tooltip;
 }
 
 void Frame::OnDropTab(LPARAM lParam) {

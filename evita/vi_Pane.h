@@ -9,6 +9,10 @@
 #include "base/strings/string16.h"
 #include "evita/ui/widget.h"
 
+namespace domapi {
+struct TabData;
+}
+
 namespace views {
 class Window;
 }
@@ -30,7 +34,7 @@ class Pane : public ui::Widget {
 
   // [G]
   protected: Frame* GetFrame() const;
-  public: virtual views::Window* GetWindow() const { return nullptr; }
+  public: virtual const domapi::TabData* GetTabData() const = 0;
 
   // [U]
   public: void UpdateActiveTick();

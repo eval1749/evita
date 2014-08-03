@@ -20,6 +20,7 @@
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/events/event.h"
 #include "evita/views/content_window.h"
+#include "evita/views/tab_data_set.h"
 #include "evita/vi_Frame.h"
 #include "evita/vi_TextEditWindow.h"
 
@@ -1002,8 +1003,11 @@ void EditPane::SplitVertically(Window* above_window,
 }
 
 // Pane
-views::Window* EditPane::GetWindow() const {
-  return GetActiveWindow();
+const domapi::TabData* EditPane::GetTabData() const {
+  auto const content = GetActiveWindow();
+  if (!content)
+    return nullptr;
+  return views::TabDataSet::instance()->GetTabData(content->window_id());
 }
 
 // ui::Widget

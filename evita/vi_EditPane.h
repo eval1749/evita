@@ -77,7 +77,7 @@ class EditPane final : public Pane {
                                Window* new_below_window);
 
   // Pane
-  private: virtual views::Window* GetWindow() const override;
+  private: virtual const domapi::TabData* GetTabData() const override;
 
   // ui::Widget
   private: virtual void DidChangeBounds() override;

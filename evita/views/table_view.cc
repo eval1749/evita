@@ -263,7 +263,7 @@ void TableView::DidShow() {
 
 // views::Window
 bool TableView::OnIdle(int) {
-  if (!is_shown())
+  if (!visible())
     return false;
   auto new_model = UpdateModelIfNeeded();
   if (new_model)

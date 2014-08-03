@@ -612,7 +612,7 @@ int TableControl::GetRowState(int row_id) const {
 }
 
 void TableControl::RenderIfNeeded(gfx::Canvas* canvas) {
-  if (!is_shown() || !is_realized())
+  if (!visible() || !is_realized())
     return;
   auto dirty_rect = model_->ResetDirtyRect();
   if (dirty_rect.empty())

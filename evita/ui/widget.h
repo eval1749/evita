@@ -72,11 +72,11 @@ class Widget
     return static_cast<bool>(native_window_);
   }
   public: bool is_realized() const { return state_ == kRealized; }
-  public: bool is_shown() const { return shown_; }
   public: Layer* layer() const { return layer_.get(); }
   protected: NativeWindow* native_window() const {
     return native_window_.get();
   }
+  public: bool visible() const { return shown_; }
 
   // [A]
   public: HWND AssociatedHwnd() const;

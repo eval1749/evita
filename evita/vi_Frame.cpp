@@ -283,18 +283,18 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
 
   tab_content->UpdateActiveTick();
 
-  if (window->is_shown())
+  if (window->visible())
     return;
 
   if (tab_content == active_tab_content_) {
     // TODO(yosi) This is happened on multiple window in one |tab_content|, we
     // should update tab label text.
-    if (!window->is_shown())
+    if (!window->visible())
       window->Show();
     return;
   }
 
-  DCHECK(!window->is_shown());
+  DCHECK(!window->visible());
   auto const tab_index = GetTabIndexOfTabContent(tab_content);
   if (tab_index >= 0)
     DidChangeTabSelection(tab_index);

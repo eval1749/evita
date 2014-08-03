@@ -234,7 +234,7 @@ Posn TextEditWindow::MapPointToPosition(const gfx::PointF pt) {
 void TextEditWindow::Redraw() {
   UI_ASSERT_DOM_LOCKED();
 
-  if (!is_shown())
+  if (!visible())
     return;
 
   auto const selection = GetTextSelectionModel(this, *selection_);
@@ -290,7 +290,7 @@ void TextEditWindow::Redraw() {
 
 void TextEditWindow::Render(const TextSelectionModel& selection) {
   UI_ASSERT_DOM_LOCKED();
-  if (!is_shown())
+  if (!visible())
     return;
 
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
@@ -475,7 +475,7 @@ void TextEditWindow::MakeSelectionVisible() {
 
 // views::Window
 bool TextEditWindow::OnIdle(int) {
-  if (!is_shown())
+  if (!visible())
     return false;
   Redraw();
   return false;

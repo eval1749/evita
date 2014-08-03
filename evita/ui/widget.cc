@@ -269,7 +269,7 @@ void Widget::DispatchPaintMessage() {
   #endif
 
    for (auto child : child_nodes()) {
-    if (!child->is_shown() || child->has_native_window())
+    if (!child->visible() || child->has_native_window())
       continue;
     auto const rect = exposed_rect.Intersect(child->bounds());
     if (!rect.empty()) {
@@ -432,7 +432,7 @@ Widget::HitTestResult Widget::HitTest(const Point& local_point) const {
   for (auto runner = last_child(); runner;
        runner = runner->previous_sibling()) {
     auto const child = runner;
-    if (!child->is_shown())
+    if (!child->visible())
       continue;
     auto const child_point = local_point.Offset(-child->bounds().left(),
                                                 -child->bounds().top());
@@ -476,7 +476,7 @@ Point Widget::MapToDesktopPoint(const Point& local_point) const {
 
 void Widget::OnDraw(gfx::Canvas* gfx) {
   for (auto child : child_nodes()) {
-    if (child->is_shown())
+    if (child->visible())
       child->OnDraw(gfx);
   }
 }
@@ -529,7 +529,7 @@ void Widget::Realize(const Rect& rect) {
 
   DidRealize();
   DidChangeBounds();
-  if (parent_node()->is_shown()) {
+  if (parent_node()->visible()) {
     shown_ = 1;
     DidShow();
     SchedulePaint();
@@ -559,7 +559,7 @@ void Widget::RealizeWidget() {
 
   DidRealize();
   DidChangeBounds();
-  if (parent_node()->is_shown()) {
+  if (parent_node()->visible()) {
     shown_ = 1;
     DidShow();
     SchedulePaint();

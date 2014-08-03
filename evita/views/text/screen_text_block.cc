@@ -400,7 +400,7 @@ ScreenTextBlock::~ScreenTextBlock() {
 // Note: |canvas| can be null.
 void ScreenTextBlock::DidKillFocus(gfx::Canvas* canvas) {
   auto const caret = ui::Caret::instance();
-  if (caret->is_shown() && canvas)
+  if (caret->visible() && canvas)
     HideCaret(canvas, *caret);
   caret->Give(this);
 }
@@ -552,7 +552,7 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
 
   if (selection_.has_focus() &&
       ui::Caret::instance()->owner() == this &&
-      ui::Caret::instance()->is_shown()) {
+      ui::Caret::instance()->visible()) {
     const auto& caret_bounds = ui::Caret::instance()->bounds();
     canvas->DrawBitmap(*canvas->screen_bitmap(), caret_bounds, caret_bounds);
     canvas->AddDirtyRect(caret_bounds);

@@ -730,7 +730,7 @@ EditPane::Box* EditPane::Box::GetActiveLeafBox() const {
   class Local {
     private: static int ActiveTick(const Box* box) {
       auto const content = box->GetContent();
-      return content->is_shown() ? content->active_tick() : 0;
+      return content->visible() ? content->active_tick() : 0;
     }
 
     public: static Box* SelectActiveBox(Box* box1, Box* box2) {
@@ -742,7 +742,7 @@ EditPane::Box* EditPane::Box::GetActiveLeafBox() const {
   auto candidate = static_cast<Box*>(nullptr);
   for (auto& box : boxes_) {
     auto const other = box.GetActiveLeafBox();
-    //if (other && other->GetWindow()->is_shown())
+    //if (other && other->GetWindow()->visible())
     candidate = Local::SelectActiveBox(candidate, other);
   }
   return candidate;

@@ -444,7 +444,7 @@ bool FormWindow::DoIdle(int hint) {
   bool more = false;
   for (auto widget : ui::RootWidget::instance()->child_nodes()) {
     auto form_window = widget->as<views::FormWindow>();
-    if (!form_window || !form_window->is_realized() || !form_window->is_shown())
+    if (!form_window || !form_window->is_realized() || !form_window->visible())
       continue;
     more |= form_window->OnIdle(hint);
   }
@@ -463,7 +463,7 @@ void FormWindow::DoRealizeWidget() {
 
 bool FormWindow::OnIdle(int) {
   DCHECK(is_realized());
-  DCHECK(is_shown());
+  DCHECK(visible());
 
   if (pending_update_rect_.empty()) {
     if (has_native_focus())

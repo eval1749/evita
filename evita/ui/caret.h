@@ -41,7 +41,7 @@ class Caret final : public common::Singleton<Caret> {
   public: ~Caret();
 
   public: const gfx::RectF& bounds() const { return bounds_; }
-  public: bool is_shown() const { return shown_; }
+  public: bool visible() const { return shown_; }
   public: Delegate* owner() const { return owner_; }
 
   public: void Blink(Delegate* delegate, gfx::Canvas* canvas);

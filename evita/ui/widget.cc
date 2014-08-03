@@ -360,9 +360,10 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
     return;
   }
 
-  auto const screen_point = MapToDesktopPoint(Point(MAKEPOINTS(lParam)));
-  auto const client_point = MapFromDesktopPoint(screen_point);
-  auto const result = HitTestForMouseEventTarget(client_point);
+  auto const host_point = Point(MAKEPOINTS(lParam));
+  auto const screen_point = MapToDesktopPoint(host_point);
+  auto const result = HitTestForMouseEventTarget(host_point);
+  DCHECK(result);
   if (message == WM_MOUSEMOVE || message == WM_NCMOUSEMOVE) {
     if (!hover_widget) {
       TRACKMOUSEEVENT track;
@@ -376,7 +377,7 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
         DVLOG(0) << "TrackMouseEvent last_error=" << ::GetLastError();
     } else if (hover_widget != result.widget()) {
       MouseEvent event(EventType::MouseExited, MouseEvent::kNone, 0u, 0,
-                       hover_widget, client_point, screen_point);
+                       hover_widget, result.local_point(), screen_point);
       hover_widget->OnMouseExited(event);
       hover_widget = result.widget();
     }
@@ -448,10 +449,10 @@ Widget::HitTestResult Widget::HitTest(const Point& local_point) const {
 }
 
 Widget::HitTestResult Widget::HitTestForMouseEventTarget(
-    const Point& point) const {
+    const Point& host_point) const {
   DCHECK(native_window_);
   if (capture_widget) {
-    auto local_point = point;
+    auto local_point = host_point;
     for (auto runner = capture_widget; runner != this;
          runner = &runner->container_widget()) {
       local_point = local_point.Offset(-runner->bounds().left(),
@@ -459,7 +460,9 @@ Widget::HitTestResult Widget::HitTestForMouseEventTarget(
     }
     return HitTestResult(capture_widget, local_point);
   }
-  return HitTest(point);
+  if (auto const result = HitTest(host_point))
+    return result;
+  return HitTestResult(this, host_point);
 }
 
 Point Widget::MapFromDesktopPoint(const Point& desktop_point) const {

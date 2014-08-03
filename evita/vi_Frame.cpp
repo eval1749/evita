@@ -449,7 +449,7 @@ void Frame::DidChangeBounds() {
   DrawForResize();
 }
 
-void Frame::DidChangeChildVisibility(Widget* child) {
+void Frame::DidChangeChildVisibility(ui::Widget* child) {
   views::Window::DidChangeChildVisibility(child);
   if (!child->is<Pane>())
     return;
@@ -612,7 +612,7 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
     }
   }
 
-  return Widget::OnMessage(uMsg, wParam, lParam);
+  return ui::Widget::OnMessage(uMsg, wParam, lParam);
 }
 
 void Frame::OnMouseMoved(const ui::MouseEvent& event)  {
@@ -640,11 +640,11 @@ void Frame::OnPaint(const gfx::Rect) {
 }
 
 void Frame::WillDestroyWidget() {
-  Widget::WillDestroyWidget();
+  ui::Widget::WillDestroyWidget();
   views::FrameList::instance()->RemoveFrame(this);
 }
 
-void Frame::WillRemoveChildWidget(const Widget& widget) {
+void Frame::WillRemoveChildWidget(const ui::Widget& widget) {
   views::Window::WillRemoveChildWidget(widget);
   if (!is_realized())
     return;

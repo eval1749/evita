@@ -60,8 +60,6 @@ class Frame final : public views::Window,
                     public views::TabStripDelegate {
   DECLARE_CASTABLE_CLASS(Frame, views::Window);
 
-  private: typedef ui::Widget Widget;
-
   private: class DragController;
   friend class DragController;
 
@@ -108,10 +106,10 @@ class Frame final : public views::Window,
 
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;
-  private: virtual void DidAddChildWidget(const Widget& widget) override;
-  private: virtual void DidChangeChildVisibility(Widget* child) override;
+  private: virtual void DidAddChildWidget(const ui::Widget& widget) override;
+  private: virtual void DidChangeChildVisibility(ui::Widget* child) override;
   private: virtual void DidRealize() override;
-  private: virtual void DidRemoveChildWidget(const Widget& widget) override;
+  private: virtual void DidRemoveChildWidget(const ui::Widget& widget) override;
   private: virtual void DidChangeBounds() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
@@ -120,7 +118,8 @@ class Frame final : public views::Window,
   private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;
   private: virtual void WillDestroyWidget() override;
-  private: virtual void WillRemoveChildWidget(const Widget& widget) override;
+  private: virtual void WillRemoveChildWidget(
+      const ui::Widget& widget) override;
 
   // views::TabStripDelegate
   private: virtual void DidClickTabCloseButton(int tab_index) override;

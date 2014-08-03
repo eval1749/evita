@@ -569,21 +569,17 @@ void FormWindow::CreateNativeWindow() const {
       frame_window_rect.origin(), frame_window_rect.size());
 }
 
-void FormWindow::DidCreateNativeWindow() {
-  // TODO(yosi) We should get default value of form window transparency from
-  // CSS.
-  ::SetLayeredWindowAttributes(*native_window(), RGB(0, 0, 0), 80 * 255 / 100,
-                               LWA_ALPHA);
-  canvas_.reset(new gfx::CanvasForHwnd(*native_window()));
-  Widget::DidCreateNativeWindow();
-}
-
 void FormWindow::DidDestroyWidget() {
   ui::SystemMetrics::instance()->RemoveObserver(this);
   Window::DidDestroyWidget();
 }
 
 void FormWindow::DidRealize() {
+  // TODO(yosi) We should get default value of form window transparency from
+  // CSS.
+  ::SetLayeredWindowAttributes(*native_window(), RGB(0, 0, 0), 80 * 255 / 100,
+                               LWA_ALPHA);
+  canvas_.reset(new gfx::CanvasForHwnd(*native_window()));
   ui::SystemMetrics::instance()->AddObserver(this);
   Window::DidRealize();
 }

@@ -181,10 +181,6 @@ void Widget::DidChangeHierarchy() {
 void Widget::DidChangeChildVisibility(Widget*) {
 }
 
-void Widget::DidCreateNativeWindow() {
-  DidRealize();
-}
-
 void Widget::DidDestroyNativeWindow() {
   #if DEBUG_DESTROY
     DVLOG(0) << "DidDestroyNativeWindow " << *this;
@@ -531,7 +527,6 @@ void Widget::Realize(const Rect& rect) {
   state_ = kRealized;
   bounds_ = rect;
   if (native_window_) {
-    // On WM_CREATE, we call DidCreateNativeWindow() instead of DidRealized().
     CreateNativeWindow();
     return;
   }
@@ -561,7 +556,6 @@ void Widget::RealizeWidget() {
   DCHECK(parent_node()->is_realized());
   state_ = kRealized;
   if (native_window_) {
-    // On WM_CREATE, we call DidCreateNativeWindow() instead of DidRealized().
     CreateNativeWindow();
     return;
   }
@@ -773,7 +767,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       } else {
         UpdateBounds();
       }
-      DidCreateNativeWindow();
+      DidRealize();
       return 0;
     }
 

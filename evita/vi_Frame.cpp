@@ -464,7 +464,7 @@ void Frame::DidChangeChildVisibility(Widget* child) {
     tab_content_layer_->RemoveChildLayer(child->layer());
 }
 
-void Frame::DidCreateNativeWindow() {
+void Frame::DidRealize() {
   views::FrameList::instance()->AddFrame(this);
   ::DragAcceptFiles(*native_window(), TRUE);
 
@@ -503,7 +503,7 @@ void Frame::DidCreateNativeWindow() {
   }
 
   // Create message view, tab_contents and tab strip.
-  views::Window::DidCreateNativeWindow();
+  views::Window::DidRealize();
   layer()->AppendChildLayer(tab_content_layer_.get());
   layer()->AppendChildLayer(message_view_->layer());
   layer()->AppendChildLayer(metrics_view_->layer());

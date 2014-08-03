@@ -524,7 +524,7 @@ class TabStrip::TabStripImpl final {
 
   // [D]
   private: void DidChangeTabSelection();
-  public: void DidCreateNativeWindow();
+  public: void DidRealize();
   public: void DeleteTab(size_t tab_index);
   private: void Draw(gfx::Canvas* canvas) const;
   private: void DropTab(Tab* tab, const POINT& point);
@@ -653,7 +653,7 @@ void TabStrip::TabStripImpl::DidChangeTabSelection() {
   delegate_->DidChangeTabSelection(selected_tab_->tab_index());
 }
 
-void TabStrip::TabStripImpl::DidCreateNativeWindow() {
+void TabStrip::TabStripImpl::DidRealize() {
   canvas_.reset(new gfx::LegacyCanvasForHwnd(hwnd_));
   ChangeFont();
   tooltip_.Realize(hwnd_);
@@ -1187,9 +1187,9 @@ void TabStrip::CreateNativeWindow() const {
       bounds().size());
 }
 
-void TabStrip::DidCreateNativeWindow() {
+void TabStrip::DidRealize() {
   impl_.reset(new TabStripImpl(this, delegate_));
-  impl_->DidCreateNativeWindow();
+  impl_->DidRealize();
 }
 
 void TabStrip::DidChangeBounds() {

@@ -64,7 +64,6 @@ class FormWindow final : public views::Window,
 
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;
-  private: virtual void DidCreateNativeWindow() override;
   private: virtual void DidDestroyWidget() override;
   private: virtual void DidRealize() override;
   private: virtual void DidChangeBounds() override;

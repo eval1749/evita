@@ -90,8 +90,6 @@ class Widget
   protected: virtual void DidChangeBounds();
   protected: virtual void DidChangeChildVisibility(Widget* child);
   protected: virtual void DidChangeHierarchy();
-  // Called on WM_CREATE
-  protected: virtual void DidCreateNativeWindow();
   protected: virtual void DidDestroyWidget();
   // Called on WM_NCDESTORY
   protected: virtual void DidDestroyNativeWindow();

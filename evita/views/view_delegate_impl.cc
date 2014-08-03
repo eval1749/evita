@@ -79,7 +79,8 @@ void ViewDelegateImpl::AddWindow(dom::WindowId parent_id,
     return;
   }
   DCHECK_EQ(child_id, child->window_id());
-  parent->as<Frame>()->AddWindow(child->as<views::ContentWindow>());
+  parent->as<Frame>()->AddOrActivateTabContent(
+      child->as<views::ContentWindow>());
 }
 
 void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,

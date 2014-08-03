@@ -81,20 +81,20 @@ class Frame final : public views::Window,
   // [A]
   public: bool Activate();
   public: void AddObserver(views::FrameObserver* observer);
-  private: void AddPane(views::ContentWindow* content_window);
-  private: void AddTab(Pane*);
-  public: void AddWindow(views::ContentWindow*);
+  private: void AddTab(Pane* tab_content);
+  private: void AddTabContent(views::ContentWindow* content_window);
+  public: void AddOrActivateTabContent(views::ContentWindow*);
 
   // [D]
-  public: void DidActivatePane(Pane*);
+  public: void DidActivateTabContent(Pane* tab_content);
   public: void DidSetFocusOnChild(views::Window* window);
   private: void DrawForResize();
 
   // [G]
-  public: Pane* GetActivePane();
-  private: Pane* getPaneFromTab(int) const;
-  public: gfx::Rect GetPaneRect() const;
-  private: int getTabFromPane(Pane*) const;
+  public: Pane* GetActiveTabContent();
+  public: gfx::Rect GetTabContentBounds() const;
+  private: Pane* GetTabContentByTabIndex(int tab_index) const;
+  private: int GetTabIndexOfTabContent(Pane* tab_content) const;
 
   // [F]
   public: static Frame* FindFrame(const Widget& widget);

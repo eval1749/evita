@@ -69,7 +69,7 @@ TextSelectionModel::State GetTextSelectionState(TextEditWindow* window) {
     return TextSelectionModel::State::Disabled;
 
   auto const edit_pane = views::FrameList::instance()->active_frame()->
-    GetActivePane()->as<EditPane>();
+    GetActiveTabContent()->as<EditPane>();
   if (edit_pane && edit_pane->GetActiveWindow() == window)
     return TextSelectionModel::State::Highlight;
   return TextSelectionModel::State::Disabled;

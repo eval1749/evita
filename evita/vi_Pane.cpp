@@ -16,7 +16,7 @@ Pane::~Pane() {
 }
 
 void Pane::Activate() {
-  GetFrame()->DidActivatePane(this);
+  GetFrame()->DidActivateTabContent(this);
 }
 
 Frame* Pane::GetFrame() const {

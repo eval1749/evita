@@ -972,7 +972,7 @@ void EditPane::SplitHorizontally(Window* left_window,
 
   auto const width = left_box->bounds().width();
   if (width < kMinBoxWidth * 2 + kSplitterWidth) {
-    frame().AddWindow(new_right_window);
+    frame().AddOrActivateTabContent(new_right_window);
     return;
   }
 
@@ -991,7 +991,7 @@ void EditPane::SplitVertically(Window* above_window,
 
   auto const height = above_box->bounds().height();
   if (height < kMinBoxHeight * 2 + kSplitterHeight) {
-    frame().AddWindow(new_below_window);
+    frame().AddOrActivateTabContent(new_below_window);
     return;
   }
 

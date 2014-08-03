@@ -151,64 +151,64 @@ void Frame::AddObserver(views::FrameObserver* observer) {
   observers_.AddObserver(observer);
 }
 
-void Frame::AddPane(views::ContentWindow* window) {
-  auto const pane = new EditPane();
-  tab_contents_.insert(pane);
-  AppendChild(pane);
-  // TODO(eval1749) We should have more sophisticated way to keep top most
-  // window.
-  AppendChild(metrics_view_);
-  if (!is_realized()) {
-    DCHECK(!window->is_realized());
-    pane->SetContent(window);
-    return;
-  }
-  pane->Realize(GetPaneRect());
-  pane->SetContent(window);
-  AddTab(pane);
-}
-
-void Frame::AddTab(Pane* const pane) {
+void Frame::AddTab(Pane* const tab_content) {
   ASSERT(is_realized());
-  ASSERT(pane->is_realized());
+  ASSERT(tab_content->is_realized());
   // Set dummy tab label. Actual tab label will be set later in
   // |Frame::updateTitleBar|.
   TCITEM tab_item;
   tab_item.mask = TCIF_IMAGE| TCIF_TEXT | TCIF_PARAM;
   tab_item.pszText = L"?";
-  tab_item.lParam = reinterpret_cast<LPARAM>(pane);
+  tab_item.lParam = reinterpret_cast<LPARAM>(tab_content);
   tab_item.iImage = 0;
   auto const new_tab_item_index = tab_strip_->number_of_tabs();
   tab_strip_->InsertTab(new_tab_item_index, &tab_item);
   tab_strip_->SelectTab(new_tab_item_index);
 }
 
-void Frame::AddWindow(views::ContentWindow* window) {
+void Frame::AddTabContent(views::ContentWindow* window) {
+  auto const tab_content = new EditPane();
+  tab_contents_.insert(tab_content);
+  AppendChild(tab_content);
+  // TODO(eval1749) We should have more sophisticated way to keep top most
+  // window.
+  AppendChild(metrics_view_);
+  if (!is_realized()) {
+    DCHECK(!window->is_realized());
+    tab_content->SetContent(window);
+    return;
+  }
+  tab_content->Realize(GetTabContentBounds());
+  tab_content->SetContent(window);
+  AddTab(tab_content);
+}
+
+void Frame::AddOrActivateTabContent(views::ContentWindow* window) {
   DCHECK(!window->parent_node());
   DCHECK(!window->is_realized());
-  if (auto const pane = GetActivePane()) {
-    if (auto const edit_pane = pane->as<EditPane>()) {
-      if (edit_pane->has_more_than_one_child()) {
-        edit_pane->ReplaceActiveWindow(window);
+  if (auto const tab_content = GetActiveTabContent()) {
+    if (auto const edit_tab_content = tab_content->as<EditPane>()) {
+      if (edit_tab_content->has_more_than_one_child()) {
+        edit_tab_content->ReplaceActiveWindow(window);
         window->Activate();
         return;
       }
     }
   }
 
-  AddPane(window);
+  AddTabContent(window);
 }
 
-void Frame::DidActivatePane(Pane* const pane) {
-  auto const tab_index = getTabFromPane(pane);
+void Frame::DidActivateTabContent(Pane* const tab_content) {
+  auto const tab_index = GetTabIndexOfTabContent(tab_content);
   if (tab_index < 0)
     return;
   auto const selected_index = tab_strip_->selected_index();
   #if DEBUG_FOCUS
-   DVLOG(0) << "DidActivatePane selected_index=" << selected_index <<
-      " cur=" << active_tab_content_ << " .focus=" << active_tab_content_->has_focus <<
-      " new=" << pane << " .focus=" << pane->has_focus() <<
-      " tab_index=" << tab_index;
+   DVLOG(0) << "DidActivateTabContent selected_index=" << selected_index <<
+      " cur=" << active_tab_content_ << " .focus=" <<
+      active_tab_content_->has_focus << " new=" << tab_content << " .focus=" <<
+      tab_content->has_focus() << " tab_index=" << tab_index;
   #endif
 
   if (tab_index != selected_index)
@@ -216,42 +216,44 @@ void Frame::DidActivatePane(Pane* const pane) {
 }
 
 void Frame::DidAddChildWidget(const ui::Widget& widget) {
-  if (auto pane = const_cast<Pane*>(widget.as<Pane>())) {
-    tab_contents_.insert(pane);
+  if (auto tab_content = const_cast<Pane*>(widget.as<Pane>())) {
+    tab_contents_.insert(tab_content);
     if (!is_realized()) {
       DCHECK(!widget.is_realized());
       return;
     }
-    if (pane->is_realized())
-      pane->SetBounds(GetPaneRect());
+    if (tab_content->is_realized())
+      tab_content->SetBounds(GetTabContentBounds());
     else
-      pane->Realize(GetPaneRect());
-    AddTab(pane);
+      tab_content->Realize(GetTabContentBounds());
+    AddTab(tab_content);
     return;
   }
 
   auto window = const_cast<views::ContentWindow*>(
       widget.as<views::ContentWindow>());
   DCHECK(window);
-  AddPane(window);
+  AddTabContent(window);
 }
 
 void Frame::DidChangeTabSelection(int selected_index) {
-  auto const pane = getPaneFromTab(selected_index);
+  auto const tab_content = GetTabContentByTabIndex(selected_index);
   #if DEBUG_FOCUS
     DVLOG(0) << "DidChangeTabSelection Start"
         " selected_index=" << selected_index <<
-        " cur=" << active_tab_content_ << " new=" << pane;
+        " cur=" << active_tab_content_ << " new=" << tab_content;
   #endif
-  if (!pane) {
+  if (!tab_content) {
     #if DEBUG_FOCUS
-      DVLOG(0) << "selected_index(" << selected_index << " doesn't have pane!";
+      DVLOG(0) << "selected_index(" << selected_index <<
+          " doesn't have tab_content!";
     #endif
     return;
   }
-  if (active_tab_content_ == pane) {
+  if (active_tab_content_ == tab_content) {
     #if DEBUG_FOCUS
-      DVLOG(0) << "Active pane(" << selected_index << ") isn't changed. why?";
+      DVLOG(0) << "Active tab_content(" << selected_index <<
+          ") isn't changed. why?";
     #endif
     return;
   }
@@ -259,40 +261,41 @@ void Frame::DidChangeTabSelection(int selected_index) {
     active_tab_content_->Hide();
   } else {
     #if DEBUG_FOCUS
-      DVLOG(0) << "Why we don't have acitve pane?";
+      DVLOG(0) << "Why we don't have acitve tab_content?";
     #endif
   }
-  active_tab_content_ = pane;
-  pane->Show();
-  pane->Activate();
+  active_tab_content_ = tab_content;
+  tab_content->Show();
+  tab_content->Activate();
   #if DEBUG_FOCUS
     DVLOG(0) << "End selected_index=" << selected_index <<
-        " cur=" active_tab_content_ << " new=" << pane;
+        " cur=" active_tab_content_ << " new=" << tab_content;
   #endif
 }
 
 void Frame::DidSetFocusOnChild(views::Window* window) {
-  auto const pane = GetContainingPane(this, window);
-  if (!pane) {
-    DVLOG(0) << "Frame::DidSetFolcusOnChild: No pane contains " << window;
+  auto const tab_content = GetContainingPane(this, window);
+  if (!tab_content) {
+    DVLOG(0) << "Frame::DidSetFolcusOnChild: No tab_content contains " <<
+        window;
     return;
   }
 
-  pane->UpdateActiveTick();
+  tab_content->UpdateActiveTick();
 
   if (window->is_shown())
     return;
 
-  if (pane == active_tab_content_) {
-    // TODO(yosi) This is happened on multiple window in one pane, we should
-    // update tab label text.
+  if (tab_content == active_tab_content_) {
+    // TODO(yosi) This is happened on multiple window in one |tab_content|, we
+    // should update tab label text.
     if (!window->is_shown())
       window->Show();
     return;
   }
 
   DCHECK(!window->is_shown());
-  auto const tab_index = getTabFromPane(pane);
+  auto const tab_index = GetTabIndexOfTabContent(tab_content);
   if (tab_index >= 0)
     DidChangeTabSelection(tab_index);
 }
@@ -302,10 +305,10 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
 void Frame::DrawForResize() {
 #if 0
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  auto const pane_size = GetPaneRect().size();
+  auto const tab_content_size = GetTabContentBounds().size();
   canvas_->set_dirty_rect(gfx::RectF(gfx::Point(), gfx::SizeF(
-      static_cast<float>(pane_size.cx),
-      static_cast<float>(pane_size.cy))));
+      static_cast<float>(tab_content_size.cx),
+      static_cast<float>(tab_content_size.cy))));
 
   // To avoid script destroys Pane's, we lock DOM.
   if (editor::DomLock::instance()->locked()) {
@@ -336,7 +339,7 @@ Frame* Frame::FindFrame(const ui::Widget& widget) {
   return nullptr;
 }
 
-Pane* Frame::GetActivePane() {
+Pane* Frame::GetActiveTabContent() {
   if (active_tab_content_ && active_tab_content_->active_tick())
     return active_tab_content_;
 
@@ -351,7 +354,7 @@ Pane* Frame::GetActivePane() {
   return active_tab_content;
 }
 
-static Pane* getPaneAt(views::TabStrip* tab_strip, int const index) {
+static Pane* GetTabContentAt(views::TabStrip* tab_strip, int const index) {
   TCITEM tab_item;
   tab_item.mask = TCIF_PARAM;
   if (!tab_strip->GetTab(index, &tab_item))
@@ -359,8 +362,15 @@ static Pane* getPaneAt(views::TabStrip* tab_strip, int const index) {
   return reinterpret_cast<Pane*>(tab_item.lParam);
 }
 
-Pane* Frame::getPaneFromTab(int const index) const {
-  auto const present = getPaneAt(tab_strip_, index);
+Rect Frame::GetTabContentBounds() const {
+  auto const message_view_height = ::GetSystemMetrics(SM_CYCAPTION);
+  return gfx::Rect(bounds().left(), tab_strip_->bounds().bottom(),
+                   bounds().right(),
+                   bounds().bottom() - message_view_height);
+}
+
+Pane* Frame::GetTabContentByTabIndex(int const index) const {
+  auto const present = GetTabContentAt(tab_strip_, index);
   if (!present)
     return nullptr;
 
@@ -372,20 +382,13 @@ Pane* Frame::getPaneFromTab(int const index) const {
   return nullptr;
 }
 
-int Frame::getTabFromPane(Pane* const pane) const {
+int Frame::GetTabIndexOfTabContent(Pane* const tab_content) const {
   auto const num_tabs = tab_strip_->number_of_tabs();
   for (auto tab_index = 0; tab_index < num_tabs; ++tab_index) {
-    if (getPaneAt(tab_strip_, tab_index) == pane)
+    if (GetTabContentAt(tab_strip_, tab_index) == tab_content)
       return tab_index;
   }
   return -1;
-}
-
-Rect Frame::GetPaneRect() const {
-  auto const message_view_height = ::GetSystemMetrics(SM_CYCAPTION);
-  return gfx::Rect(bounds().left(), tab_strip_->bounds().bottom(),
-                   bounds().right(),
-                   bounds().bottom() - message_view_height);
 }
 
 void Frame::onDropFiles(HDROP const hDrop) {
@@ -430,7 +433,7 @@ void Frame::updateTitleBar() {
   if (!tab_data)
     return;
   auto& title = tab_data->title;
-  auto const tab_index = getTabFromPane(active_tab_content_);
+  auto const tab_index = GetTabIndexOfTabContent(active_tab_content_);
   if (tab_index >= 0) {
     TCITEM tab_item = {0};
     tab_item.mask = TCIF_IMAGE | TCIF_STATE | TCIF_TEXT;
@@ -511,7 +514,7 @@ void Frame::DidCreateNativeWindow() {
 
   SetLayer(new ui::RootLayer(this));
 
-  auto const tab_content_bounds = GetPaneRect();
+  auto const tab_content_bounds = GetTabContentBounds();
   for (auto tab_content : tab_contents_) {
     tab_content->SetBounds(tab_content_bounds);
   }
@@ -525,7 +528,7 @@ void Frame::DidCreateNativeWindow() {
         tab_content_bounds.bottom_right() - size, size));
   }
 
-  // Create message view, panes and tab strip.
+  // Create message view, tab_contents and tab strip.
   views::Window::DidCreateNativeWindow();
   layer()->SetTopMostLayer(metrics_view_->layer());
 
@@ -533,7 +536,7 @@ void Frame::DidCreateNativeWindow() {
     AddTab(tab_content);
   }
 
-  if (auto const active_tab_content = GetActivePane())
+  if (auto const active_tab_content = GetActiveTabContent())
     active_tab_content->Activate();
 
   ::SetWindowPos(AssociatedHwnd(), nullptr, 0, 0, 0, 0,
@@ -545,11 +548,11 @@ void Frame::DidCreateNativeWindow() {
 
 void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
   views::Window::DidRemoveChildWidget(widget);
-  auto const pane = const_cast<Pane*>(widget.as<Pane>());
-  if (!pane)
+  auto const tab_content = const_cast<Pane*>(widget.as<Pane>());
+  if (!tab_content)
     return;
-  DCHECK(tab_contents_.find(pane)!= tab_contents_.end());
-  tab_contents_.erase(pane);
+  DCHECK(tab_contents_.find(tab_content)!= tab_contents_.end());
+  tab_contents_.erase(tab_content);
   if (first_child())
     return;
   DCHECK(tab_contents_.empty());
@@ -558,7 +561,7 @@ void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
 
 void Frame::DidChangeBounds() {
   views::Window::DidChangeBounds();
-  const auto tab_content_bounds = GetPaneRect();
+  const auto tab_content_bounds = GetTabContentBounds();
 
   tab_strip_->SetBounds(gfx::Rect(
       tab_strip_->bounds().origin(),
@@ -589,7 +592,7 @@ void Frame::DidChangeBounds() {
 void Frame::DidSetFocus(ui::Widget* widget) {
   views::Window::DidSetFocus(widget);
   if (!active_tab_content_) {
-    active_tab_content_ = GetActivePane();
+    active_tab_content_ = GetActiveTabContent();
     if (!active_tab_content_)
       return;
   }
@@ -706,10 +709,10 @@ void Frame::WillRemoveChildWidget(const Widget& widget) {
   views::Window::WillRemoveChildWidget(widget);
   if (!is_realized())
     return;
-  auto const pane = const_cast<Pane*>(widget.as<Pane>());
-  if (!pane)
+  auto const tab_content = const_cast<Pane*>(widget.as<Pane>());
+  if (!tab_content)
     return;
-  auto const tab_index = getTabFromPane(pane);
+  auto const tab_index = GetTabIndexOfTabContent(tab_content);
   DCHECK_GE(tab_index, 0);
   tab_strip_->DeleteTab(tab_index);
 }
@@ -717,34 +720,34 @@ void Frame::WillRemoveChildWidget(const Widget& widget) {
 // views::TabStripDelegate
 void Frame::DidClickTabCloseButton(int tab_index) {
   if (tab_contents_.size() == 1u) {
-    // If this window has only one pane, we destroy this window.
+    // If this window has only one tab_content, we destroy this window.
     Application::instance()->view_event_handler()->QueryClose(
         window_id());
     return;
   }
 
-  if (auto const pane = getPaneFromTab(tab_index))
-    pane->DestroyWidget();
+  if (auto const tab_content = GetTabContentByTabIndex(tab_index))
+    tab_content->DestroyWidget();
 
   LOG(ERROR) << "There is no tab[" << tab_index << "]";
 }
 
 void Frame::DidThrowTab(LPARAM lParam) {
-  auto const pane = reinterpret_cast<Pane*>(lParam);
-  auto const edit_pane = pane->as<EditPane>();
-  if (!edit_pane)
+  auto const tab_content = reinterpret_cast<Pane*>(lParam);
+  auto const edit_tab_content = tab_content->as<EditPane>();
+  if (!edit_tab_content)
     return;
   Application::instance()->view_event_handler()->DidDropWidget(
-      edit_pane->GetActiveWindow()->window_id(),
+      edit_tab_content->GetActiveWindow()->window_id(),
       views::kInvalidWindowId);
 }
 
 base::string16 Frame::GetTooltipTextForTab(int tab_index) {
-  auto const pane = getPaneFromTab(static_cast<int>(tab_index));
-  if (!pane)
+  auto const tab_content = GetTabContentByTabIndex(static_cast<int>(tab_index));
+  if (!tab_content)
     return base::string16();
 
-  auto const window = pane->GetWindow();
+  auto const window = tab_content->GetWindow();
   if (!window)
     return base::string16();
 
@@ -754,14 +757,14 @@ base::string16 Frame::GetTooltipTextForTab(int tab_index) {
 }
 
 void Frame::OnDropTab(LPARAM lParam) {
-  auto const pane = reinterpret_cast<Pane*>(lParam);
-  if (pane->parent_node() == this)
+  auto const tab_content = reinterpret_cast<Pane*>(lParam);
+  if (tab_content->parent_node() == this)
     return;
-  auto const edit_pane = pane->as<EditPane>();
-  if (!edit_pane)
+  auto const edit_tab_content = tab_content->as<EditPane>();
+  if (!edit_tab_content)
     return;
   Application::instance()->view_event_handler()->DidDropWidget(
-      edit_pane->GetActiveWindow()->window_id(),
+      edit_tab_content->GetActiveWindow()->window_id(),
       window_id());
 }
 
@@ -795,13 +798,13 @@ bool Frame::OnIdle(int const hint) {
     std::swap(pending_update_rect_, rect);
     SchedulePaintInRect(rect);
   }
-  auto const active_pane = GetActivePane();
-  if (!active_pane)
+  auto const active_tab_content = GetActiveTabContent();
+  if (!active_tab_content)
     return false;
   if (!hint)
     updateTitleBar();
   auto more = false;
-  for (auto child : active_pane->child_nodes()) {
+  for (auto child : active_tab_content->child_nodes()) {
     if (auto const window = child->as<Window>())
       more |= window->OnIdle(hint);
   }

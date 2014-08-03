@@ -56,48 +56,6 @@ using namespace views;
 
 namespace {
 
-class CompositionState {
-  private: BOOL enabled_;
-  private: CompositionState() : enabled_(false) {}
-
-  private: static CompositionState* instance() {
-    static CompositionState* instance;
-    if (!instance)
-      instance = new CompositionState();
-    return instance;
-  }
-
-  public: static bool IsEnabled() { return instance()->enabled_; }
-
-  public: static void Update() {
-    HRESULT hr = ::DwmIsCompositionEnabled(&instance()->enabled_);
-    if (FAILED(hr))
-          instance()->enabled_ = false;
-  }
-
-  public: static void Update(HWND hwnd) {
-    ASSERT(hwnd);
-    Update();
-// When USE_LAYERED is true, background of tab band doesn't have glass effect.
-#define USE_LAYERED 0
-#if USE_LAYERED
-    if (IsEnabled()) {
-      ::SetWindowLong(hwnd, GWL_EXSTYLE,
-          ::GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
-      //::SetLayeredWindowAttributes(hwnd, 0, (255 * 70) / 100, LWA_ALPHA);
-      ::SetLayeredWindowAttributes(
-          hwnd,
-          RGB(255, 0, 0), (255 * 10) / 100, LWA_COLORKEY);
-    } else {
-      ::SetWindowLong(hwnd, GWL_EXSTYLE,
-          ::GetWindowLong(hwnd, GWL_EXSTYLE) & ~WS_EX_LAYERED);
-      ::RedrawWindow(hwnd, nullptr, nullptr,
-          RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN);
-    }
-#endif
-  }
-};
-
 bool HasChildWindow(ui::Widget* parent, views::Window* window) {
   for (auto child : parent->child_nodes()) {
     if (child == window)
@@ -639,20 +597,15 @@ void Frame::DidSetFocus(ui::Widget* widget) {
 LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
                          LPARAM const lParam) {
   switch (uMsg) {
-    case WM_DWMCOMPOSITIONCHANGED:
-      CompositionState::Update(*native_window());
-      // FALLTHROUGH
-
     case WM_ACTIVATE: {
-        MARGINS margins;
-        margins.cxLeftWidth = 0;
-        margins.cxRightWidth = 0;
-        margins.cyBottomHeight = 0;
-        margins.cyTopHeight = -1;
-        COM_VERIFY(::DwmExtendFrameIntoClientArea(*native_window(),
-                                                  &margins));
-      }
+      MARGINS margins;
+      margins.cxLeftWidth = 0;
+      margins.cxRightWidth = 0;
+      margins.cyBottomHeight = 0;
+      margins.cyTopHeight = -1;
+      COM_VERIFY(::DwmExtendFrameIntoClientArea(*native_window(), &margins));
       break;
+    }
 
     case WM_CLOSE:
       Application::instance()->view_event_handler()->QueryClose(window_id());

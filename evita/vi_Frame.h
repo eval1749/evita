@@ -92,7 +92,7 @@ class Frame final : public views::Window,
 
   // [G]
   public: Pane* GetActiveTabContent();
-  public: gfx::Rect GetTabContentBounds() const;
+  private: gfx::Rect GetTabContentBounds() const;
   private: Pane* GetTabContentByTabIndex(int tab_index) const;
   private: int GetTabIndexOfTabContent(Pane* tab_content) const;
 

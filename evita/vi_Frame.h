@@ -95,14 +95,14 @@ class Frame final : public views::Window,
   private: int GetTabIndexOfTabContent(Pane* tab_content) const;
 
   // [O]
-  private: void onDropFiles(HDROP);
+  private: void OnDropFiles(HDROP);
 
   // [S]
   public: void SetStatusBar(std::vector<base::string16> texts);
   public: void ShowMessage(MessageLevel, const base::string16& text) const;
 
   // [U]
-  private: void updateTitleBar();
+  private: void UpdateTitleBar();
 
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;

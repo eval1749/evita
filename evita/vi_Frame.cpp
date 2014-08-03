@@ -154,7 +154,7 @@ void Frame::AddTab(Pane* const tab_content) {
   ASSERT(is_realized());
   ASSERT(tab_content->is_realized());
   // Set dummy tab label. Actual tab label will be set later in
-  // |Frame::updateTitleBar|.
+  // |Frame::UpdateTitleBar|.
   TCITEM tab_item;
   tab_item.mask = TCIF_IMAGE| TCIF_TEXT | TCIF_PARAM;
   tab_item.pszText = L"?";
@@ -295,7 +295,7 @@ int Frame::GetTabIndexOfTabContent(Pane* const tab_content) const {
   return -1;
 }
 
-void Frame::onDropFiles(HDROP const hDrop) {
+void Frame::OnDropFiles(HDROP const hDrop) {
   uint nIndex = 0;
   for (;;) {
     base::string16 file_name(MAX_PATH + 1, 0);
@@ -326,7 +326,7 @@ void Frame::ShowMessage(MessageLevel, const base::string16& text) const {
 /// <summary>
 ///   Updates title bar to display active buffer.
 /// </summary>
-void Frame::updateTitleBar() {
+void Frame::UpdateTitleBar() {
   if (!active_tab_content_)
     return;
   auto const tab_data = active_tab_content_->GetTabData();
@@ -557,7 +557,7 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
       return 0;
 
     case WM_DROPFILES:
-      onDropFiles(reinterpret_cast<HDROP>(wParam));
+      OnDropFiles(reinterpret_cast<HDROP>(wParam));
       break;
 
     case WM_EXITSIZEMOVE:
@@ -774,7 +774,7 @@ bool Frame::OnIdle(int const hint) {
   if (!active_tab_content)
     return false;
   if (!hint)
-    updateTitleBar();
+    UpdateTitleBar();
   auto more = false;
   for (auto child : active_tab_content->child_nodes()) {
     if (auto const window = child->as<Window>())

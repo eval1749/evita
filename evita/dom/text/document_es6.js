@@ -20,8 +20,3 @@
       return '';
     }
   });
-
-
-function NewRegExp(source, options) {
-  return new RegExp(source, options)
-}

@@ -227,16 +227,14 @@
           'rule_name': 'jscomp',
           'extension': 'js',
           'inputs': [
-             '<(DEPTH)/tools/razzle/closure_compiler.py',
              '<@(js_defs_files)',
              '<(js_externs_dir)/evita_js_externs.js',
            ], # inputs
           'outputs': [
-              '<(SHARED_INTERMEDIATE_DIR)/<(RULE_INPUT_ROOT).min.js',
+              '<(SHARED_INTERMEDIATE_DIR)/evita/js_min/<(RULE_INPUT_ROOT)_min.js',
            ], # outputs
           'action': [
             'python',
-            '<(DEPTH)/tools/razzle/closure_compiler.py',
             '--js_output_file=<@(_outputs)',
             '<(RULE_INPUT_PATH)',
             '--extern',
@@ -255,7 +253,7 @@
       'msvs_precompiled_header': '',
       'msvs_precompiled_source': '',
       'sources': [
-        '<(SHARED_INTERMEDIATE_DIR)/dom_jslib.cc',
+        '<(SHARED_INTERMEDIATE_DIR)/evita/dom_jslib.cc',
       ], # sources
     },
     {
@@ -266,15 +264,18 @@
           'action_name': 'js2c',
           'inputs': [
             '<(DEPTH)/evita/dom/make_get_jslib.py',
+            '<(DEPTH)/evita/dom/closure_compiler_workaround.js',
             '<@(js_defs_files)',
             '<@(js_lib_files)',
             '<@(js_es6_files)',
           ], # inputs
-          'outputs': [ '<(SHARED_INTERMEDIATE_DIR)/dom_jslib.cc' ],
+          'outputs': [ '<(SHARED_INTERMEDIATE_DIR)/evita/dom_jslib.cc' ],
           'action': [
             'python',
             '<(DEPTH)/evita/dom/make_get_jslib.py',
             '<@(_outputs)',
+            '<(DEPTH)/evita/dom/make_get_jslib.py',
+            '<(DEPTH)/evita/dom/closure_compiler_workaround.js',
             '<@(js_defs_files)',
             '<@(js_lib_files)',
             '<@(js_es6_files)',
@@ -307,7 +308,7 @@
         'dom_unicode_lib_cc'
       ],
       'sources': [
-        '<(SHARED_INTERMEDIATE_DIR)/dom_unicode_lib.cc',
+        '<(SHARED_INTERMEDIATE_DIR)/evita/dom_unicode_lib.cc',
       ], # sources
     }, # dom_unicode_lib
     {
@@ -326,7 +327,7 @@
             'make_unicode_lib_cc.py',
             '<(unicode_data_txt)',
           ], # inputs
-          'outputs': [ '<(SHARED_INTERMEDIATE_DIR)/dom_unicode_lib.cc', ],
+          'outputs': [ '<(SHARED_INTERMEDIATE_DIR)/evita/dom_unicode_lib.cc', ],
           'action': [
             'python',
             '<(DEPTH)/evita/dom/make_unicode_lib_cc.py',

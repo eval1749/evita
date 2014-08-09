@@ -378,8 +378,12 @@ global.FindAndReplace = (function() {
             break;
           }
           addMatch(accumulatr);
-          addChar(char_code);
           accumulatr = 0;
+          if (char_code == Unicode.REVERSE_SOLIDUS) {
+            state = State.BACKSLASH;
+            break;
+          }
+          addChar(char_code);
           state = State.START;
           break;
         case State.DOLLAR_BRACKET:

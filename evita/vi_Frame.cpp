@@ -63,7 +63,7 @@ bool HasChildWindow(ui::Widget* parent, views::Window* window) {
   return false;
 }
 
-Pane* GetContainingPane(Frame* frame, views::Window* window) {
+Pane* GetTabContentFromWindow(Frame* frame, views::Window* window) {
   for (auto child : frame->child_nodes()) {
     if (HasChildWindow(child, window))
       return child->as<Pane>();
@@ -199,7 +199,7 @@ void Frame::AddOrActivateTabContent(views::ContentWindow* window) {
 }
 
 void Frame::DidSetFocusOnChild(views::Window* window) {
-  auto const tab_content = GetContainingPane(this, window);
+  auto const tab_content = GetTabContentFromWindow(this, window);
   if (!tab_content) {
     DVLOG(0) << "Frame::DidSetFolcusOnChild: No tab_content contains " <<
         window;

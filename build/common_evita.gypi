@@ -48,6 +48,9 @@
                       '/errorReport:prompt',
                       '/fp:except-',
                       '/fp:fast',
+                       # generate richer debugging information for optimized
+                       # code (since VS2013 Update 3)
+                      '/Zo',
                     ],
                   }, # VCCLCompilerTool
                   'VCLinkerTool': {

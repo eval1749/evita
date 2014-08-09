@@ -206,8 +206,6 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
     return;
   }
 
-  tab_content->UpdateActiveTick();
-
   if (tab_content == active_tab_content_) {
     // TODO(eval1749) This is happened on multiple window in one |tab_content|,
     // we should update tab label text.
@@ -698,6 +696,7 @@ void Frame::DidChangeTabSelection(int selected_index) {
     #endif
   }
   active_tab_content_ = tab_content;
+  tab_content->UpdateActiveTick();
   tab_content->Show();
   tab_content->Activate();
   #if DEBUG_FOCUS

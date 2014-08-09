@@ -30,8 +30,11 @@ namespace {
 // Note: The order of |kBidiClassNames| must be matched to |UCharDirection|.
 const char* kBidiClassNames[] = {
   "L", "R", "EN", "ES", "ET", "AN", "CS", "B", "S", "WS", "ON", "LRE", "LRO",
-  "AL", "RLE", "RLO", "PDF", "NSM", "BN",
+  "AL", "RLE", "RLO", "PDF", "NSM", "BN", "FSI", "LRI", "RLI", "PDI",
 };
+
+static_assert(sizeof(kBidiClassNames) / sizeof(*kBidiClassNames) ==
+               U_CHAR_DIRECTION_COUNT, "kBidiClassNames size mismatch");
 
 // Note: The order of |kCategoryNames| must be matched to |UCharCategory|.
 const char* kCategoryNames[] = {
@@ -39,6 +42,9 @@ const char* kCategoryNames[] = {
   "Zs", "Zl", "Zp", "Cc", "Cf", "Co", "Cs", "Pd", "Ps", "Pe", "Pc", "Po",
   "Sm", "Sc", "Sk", "So", "Pi", "Pf",
 };
+
+static_assert(sizeof(kCategoryNames) / sizeof(*kCategoryNames) ==
+               U_CHAR_CATEGORY_COUNT, "kCategoryNames size mismatch");
 
 #define DCHECK_EQ_CHAR_1(vector, index, name) \
   DCHECK((vector)[index][0] == (name)[0] && \

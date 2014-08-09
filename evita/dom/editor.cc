@@ -166,13 +166,13 @@ v8::Handle<v8::Promise> Editor::CheckSpelling(
 
 bool Editor::CollectGarbage(int hint) {
   if (hint >= 1 && hint <= 1000)
-    return v8::V8::IdleNotification(hint);
-  v8::V8::LowMemoryNotification();
+    return ScriptHost::instance()->isolate()->IdleNotification(hint);
+  ScriptHost::instance()->isolate()->LowMemoryNotification();
   return false;
 }
 
 bool Editor::CollectGarbage() {
-  v8::V8::LowMemoryNotification();
+  ScriptHost::instance()->isolate()->LowMemoryNotification();
   return false;
 }
 

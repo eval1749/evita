@@ -1,6 +1,6 @@
-// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Copyright (c) 2014 Project Vogue. All rights reserved
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file
 'use strict';
 
 (function() {
@@ -46,7 +46,7 @@
    *
    * Note: We should not treat TAB and LF as blank. If we do so,
    * |Ctrl+Backspace| at start of line, removes newline at end of the previous
-   * line.
+   * line
    */
   function wordClassOf(char_code) {
     return WORD_CLASS_MAP.get(Unicode.UCD[char_code].category);
@@ -102,8 +102,8 @@
 
   /**
    * @this {!Document}
-   * @param {string} key_combination.
-   * @param {Object} command.
+   * @param {string} key_combination
+   * @param {Object} command
    */
   Document.prototype.bindKey = function (key_combination, command) {
     var key_code = Editor.parseKeyCombination(key_combination);
@@ -111,9 +111,9 @@
   };
 
   /**
-   * @param {Unit} unit.
-   * @param {number} position.
-   * @return {number} new position.
+   * @param {Unit} unit
+   * @param {number} position
+   * @return {number} new position
    */
   Document.prototype.computeEndOf_ = function(unit, position) {
     var document = this;
@@ -146,7 +146,7 @@
         if (word_class == WordClass.BLANK) {
           if (position &&
               wordClassBefore(document, position) != WordClass.BLANK) {
-            // We're already at end of word.
+            // We're already at end of word
             return position;
           }
           // Skil blanks
@@ -172,15 +172,15 @@
 
   /**
    * @this {!Document}
-   * @param {Unit} unit.
-   * @param {number} count.
-   * @param {number} position.
+   * @param {Unit} unit
+   * @param {number} count
+   * @param {number} position
    * @return {number}
    *
    * Word Motion:
    *                      forward             backward
-   *  th|is is a word.    this |is a word.    |this is a word.
-   *  this |is a word.    this is| a word.    |this is a word.
+   *  th|is is a word.    this |is a word.    |this is a word
+   *  this |is a word.    this is| a word.    |this is a word
    */
   Document.prototype.computeMotion_ = function(unit, count, position) {
     var document = this;
@@ -268,9 +268,9 @@
   };
 
   /**
-   * @param {Unit} unit.
-   * @param {number} position.
-   * @return {number} new position.
+   * @param {Unit} unit
+   * @param {number} position
+   * @return {number} new position
    */
   Document.prototype.computeStartOf_ = function(unit, position) {
     var document = this;
@@ -301,7 +301,7 @@
           return position;
         var word_class = position == document.length ?
             WordClass.BLANK : wordClassAt(document, position);
-        // Find character class of word.
+        // Find character class of word
         while (word_class == WordClass.BLANK) {
           --position;
           if (!position)

@@ -115,3 +115,12 @@ Unicode.Category = {
 
 /** @const @type{Array.<{bidi: string, category: string}>} */
 Unicode.UCD;
+
+// TODO(yosi) Once Closure compiler works with |new RegExp(...)|, we should
+// remove |NewRegExp|. V20140508 doesn't work.
+/**
+ * @param {string} source
+ * @param {string=} opt_flags
+ * @return {!RegExp}
+ */
+function NewRegExp(source, opt_flags) {}

@@ -220,7 +220,7 @@
    * @return {!Range}
    */
   Range.prototype.move = function(unit, opt_count) {
-    var count = arguments.length >= 2 ? opt_count : 1;
+    var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
     var position = count > 0 ? this.end : this.start;
     this.collapseTo(this.document.computeMotion_(unit, count, position));
     return this;
@@ -233,7 +233,7 @@
    * @return {!Range}
    */
   Range.prototype.moveEnd = function(unit, opt_count) {
-    var count = arguments.length >= 2 ? opt_count : 1;
+    var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
     var position = this.document.computeMotion_(unit, count, this.end);
     if (position >= this.start)
       this.end = position;
@@ -265,7 +265,7 @@
    * @return {!Range}
    */
   Range.prototype.moveStart = function(unit, opt_count) {
-    var count = arguments.length >= 2 ? opt_count : 1;
+    var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
     var position = this.document.computeMotion_(unit, count, this.start);
     if (position <= this.end)
       this.start = position;

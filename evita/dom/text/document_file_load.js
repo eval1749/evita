@@ -4,7 +4,7 @@
 
 (function() {
   /** @const @type {!RegExp} */
-  var RE_CR = new RegExp('\r', 'g');
+  var RE_CR = NewRegExp('\r', 'g');
 
   /**
    * @constructor

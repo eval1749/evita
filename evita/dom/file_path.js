@@ -10,10 +10,10 @@
   /** @const */ var EMPTY_STRING = '';
   /** @const */ var PARENT_DIRECTORY = '..';
   /** @const */ var PATH_SEPARATOR = '\\';
-  /** @const */ var RE_BASENAME = new RegExp('^(.*)[/\\\\]([^/\\\\]+)$');
-  /** @const */ var RE_FILENAME_RESERVED_CHARACTERS = new RegExp('[<>:"|?*]');
-  /** @const */ var RE_PATHNAME = new RegExp('^([^:]+:)?([/\\\\])?(.*)$');
-  /** @const */ var RE_COMPONENT_SEPARATOR = new RegExp('[/\\\\]');
+  /** @const */ var RE_BASENAME = NewRegExp('^(.*)[/\\\\]([^/\\\\]+)$');
+  /** @const */ var RE_FILENAME_RESERVED_CHARACTERS = NewRegExp('[<>:"|?*]');
+  /** @const */ var RE_PATHNAME = NewRegExp('^([^:]+:)?([/\\\\])?(.*)$');
+  /** @const */ var RE_COMPONENT_SEPARATOR = NewRegExp('[/\\\\]');
 
   /**
    * @param {string} fileName

@@ -4,7 +4,7 @@
 global.commander =
    /**
     * @type {{
-    *  handleEvent: function(!KeyboardEvent),
+    *  handleEvent: function(!Event),
     *  startArgument: function(),
     *  startQuote: function()
     * }}

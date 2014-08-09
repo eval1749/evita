@@ -112,8 +112,8 @@ Document.prototype.readonly;
 Document.prototype.state;
 
 /**
- * @param {string} key_combination.
- * @param {Object} command.
+ * @param {string} key_combination
+ * @param {Object} command
  */
 Document.prototype.bindKey = function (key_combination, command) {};
 
@@ -130,23 +130,23 @@ Document.prototype.clearUndo = function() {};
 Document.prototype.close = function() {};
 
 /**
- * @param {Unit} unit.
- * @param {number} position.
+ * @param {Unit} unit
+ * @param {number} position
  * @return {number} new position.
  */
 Document.prototype.computeEndOf_ = function(unit, position) {};
 
 /**
- * @param {Unit} unit.
- * @param {number} count.
- * @param {number} position.
+ * @param {Unit} unit
+ * @param {number} count
+ * @param {number} position
  * @return {number}
  */
 Document.prototype.computeMotion_ = function(unit, count, position) {};
 
 /**
- * @param {Unit} unit.
- * @param {number} position.
+ * @param {Unit} unit
+ * @param {number} position
  * @return {number} new position.
  */
 Document.prototype.computeStartOf_ = function(unit, position) {};

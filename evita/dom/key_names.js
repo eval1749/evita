@@ -180,9 +180,9 @@ global.VKEY_NAMES = [
   'FF'
 ];
 
-/** @const @type {Array.<string>} */
+/** @const @type {!Array.<string>} */
 global.KEY_NAMES = (function() {
-  /** @type{Array.<string>} */
+  /** @const @type {Array.<string>} */
   var names = new Array(256);
   /**
    * @param{number} start
@@ -203,7 +203,7 @@ global.KEY_NAMES = (function() {
   return names;
 })();
 
-/** @const @type {Array.<string, number>} */
+/** @const @type {!Object.<string, number>} */
 global.KEY_CODE_MAP = (function() {
   var map = {};
   KEY_NAMES.forEach(function(name, index) {

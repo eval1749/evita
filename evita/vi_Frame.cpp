@@ -208,12 +208,9 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
 
   tab_content->UpdateActiveTick();
 
-  if (window->visible())
-    return;
-
   if (tab_content == active_tab_content_) {
-    // TODO(yosi) This is happened on multiple window in one |tab_content|, we
-    // should update tab label text.
+    // TODO(eval1749) This is happened on multiple window in one |tab_content|,
+    // we should update tab label text.
     if (!window->visible())
       window->Show();
     return;
@@ -222,7 +219,7 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
   DCHECK(!window->visible());
   auto const tab_index = GetTabIndexOfTabContent(tab_content);
   if (tab_index >= 0)
-    DidChangeTabSelection(tab_index);
+    tab_strip_->SelectTab(tab_index);
 }
 
 void Frame::DrawForResize() {

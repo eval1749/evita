@@ -1,4 +1,4 @@
-// Copyright (C) 2014 by Project Vogue.
+// Copyright (C) 2014 by Project Vogue
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 /**
@@ -37,7 +37,7 @@ Array.prototype.fill = function(value, opt_start, opt_end) {};
 
 /**
  * @template T
- * @param {function(T, number=, Array=): *} callback.
+ * @param {function(T, number=, Array=): *} callback
  * @param {Object=} opt_thisArg
  * @return {T|null}
  */
@@ -45,7 +45,7 @@ Array.prototype.find = function(callback, opt_thisArg) {};
 
 /**
  * @template T
- * @param {function(T, number=, Array=): *} callback.
+ * @param {function(T, number=, Array=): *} callback
  * @param {Object=} opt_thisArg
  * @return {number}
  */
@@ -411,31 +411,31 @@ Map.prototype.values = function() {};
 /**
  * @constructor
  * @template T
- * @param {!function(T=)} onFulfilled.
- * @param {!function(*=)} onRejected.
+ * @param {!function(T=)} onFulfilled
+ * @param {!function(*=)} onRejected
  */
 var Promise = function(onFulfilled, onRejected) {};
 
 /**
- * @param {!Iterable.<!Promise>} iterable.
+ * @param {!Iterable.<!Promise>} iterable
  * @return {!Promise}
  */
 Promise.all = function(iterable) {};
 
 /**
- * @param {*} value.
+ * @param {*} value
  * @return {!Promise}
  */
 Promise.accept = function(value) {};
 
 /**
- * @param {*} value.
+ * @param {*} value
  * @return {{promise: !Promise, resolve: !function(*), reject: !function(*)}}
  */
-Promise.defer = function() {};
+Promise.defer = function(value) {};
 
 /**
- * @param {!Iterable.<!Promise>} iterable.
+ * @param {!Iterable.<!Promise>} iterable
  * @return {!Promise}
  */
 Promise.race = function(iterable) {};
@@ -461,7 +461,7 @@ Promise.prototype.catch = function(onRejected) {};
 
 /**
  * @template T, S
- * @param {!function(T):S} onFulfilled.
+ * @param {!function(T):S} onFulfilled
  * @param {!function(*)=} opt_onRejected
  * @return {!Promise.<S>}
  */

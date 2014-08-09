@@ -9,7 +9,7 @@ import re
 script_dir = os.path.dirname(os.path.realpath(__file__))
 evita_src = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir));
 
-JAVA_OPTIONS = ['-d64', '-server', '-Xms1G'];
+JAVA_OPTIONS = ['-d64', '-server', '-Xms1G', '-XX:+TieredCompilation'];
 CLOSURE_DIR = os.path.join(evita_src, 'third_party', 'closure_compiler')
 CLOSURE_JAR = os.path.join(CLOSURE_DIR, 'compiler.jar')
 ES3_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es3.js')

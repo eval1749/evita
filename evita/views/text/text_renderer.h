@@ -38,7 +38,6 @@ class TextRenderer final : public text::BufferMutationObserver {
   private: gfx::RectF bounds_;
   private: text::Buffer* const buffer_;
   private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
-  private: bool should_format_;
   private: bool should_render_;
   private: std::unique_ptr<TextBlock> text_block_;
   private: text::Posn view_start_;

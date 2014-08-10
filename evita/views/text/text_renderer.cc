@@ -169,7 +169,6 @@ void TextRenderer::Render(gfx::Canvas* canvas,
                           const TextSelectionModel& selection_model) {
   DCHECK(!ShouldFormat());
   DCHECK(!text_block_->bounds().empty());
-  text_block_->EnsureLinePoints();
   const auto selection = TextFormatter::FormatSelection(buffer_,
                                                         selection_model);
   screen_text_block_->Render(canvas, text_block_.get(), selection);

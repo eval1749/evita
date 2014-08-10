@@ -32,14 +32,13 @@ class TextFormatter final {
   private: std::unique_ptr<TextScanner> text_scanner_;
   private: float zoom_;
 
-  public: TextFormatter(const text::Buffer* text_block, text::Posn start,
+  public: TextFormatter(const text::Buffer* buffer, text::Posn text_offset,
                         const gfx::RectF& bounds, float zoom);
   public: ~TextFormatter();
 
   public: TextLine* FormatLine();
-
-  private: Cell* formatChar(Cell*, float x, char16);
-  private: Cell* formatMarker(TextMarker marker_name);
+  private: Cell* FormatChar(Cell*, float x, char16);
+  private: Cell* FormatMarker(TextMarker marker_name);
 
   public: static TextSelection FormatSelection(
       const text::Buffer* buffer, const TextSelectionModel& selection_model);

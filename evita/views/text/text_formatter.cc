@@ -26,8 +26,8 @@ namespace rendering {
 
 namespace {
 
-const float cxLeftMargin = 10.0f;
-const int k_nTabWidth = 4;
+const float kLeftMargin = 10.0f;
+const int kTabWidth = 4;
 
 float AlignHeightToPixel(float height) {
   return gfx::FactorySet::instance()->AlignToPixel(
@@ -65,106 +65,107 @@ RenderStyle GetRenderStyle(const css::Style& style) {
 //////////////////////////////////////////////////////////////////////
 //
 // TextScanner
-//  Enumerator for characters and interval
+// Enumerator for characters and interval
 //
 class TextFormatter::TextScanner final {
-  private: Posn m_lBufEnd;
-  private: Posn m_lBufStart;
-  private: Posn m_lPosn;
-  private: const text::Buffer* m_pBuffer;
-  private: text::Interval* m_pInterval;
-  private: char16 m_rgwch[80];
+  private: base::char16 buffer_cache_[80];
+  private: text::Posn buffer_cache_end_;
+  private: text::Posn buffer_cache_start_;
+  private: const text::Buffer* const buffer_;
+  private: text::Interval* interval_;
   private: mutable const text::Marker* spelling_marker_;
   private: mutable const text::Marker* syntax_marker_;
+  private: text::Posn text_offset_;
 
-  public: TextScanner(const text::Buffer* buffer, Posn lPosn)
-      : m_pBuffer(buffer),
-        m_lPosn(lPosn),
-        spelling_marker_(nullptr),
-        syntax_marker_(nullptr) {
-    m_pInterval = m_pBuffer->GetIntervalAt(m_lPosn);
-    DCHECK(m_pInterval);
-    fill();
-  }
-
+  public: TextScanner(const text::Buffer* buffer, text::Posn offset);
   public: ~TextScanner() = default;
 
   public: const common::AtomicString& spelling() const;
   public: const css::StyleResolver* style_resolver() const {
-    return m_pBuffer->style_resolver();
+    return buffer_->style_resolver();
   }
   public: const common::AtomicString& syntax() const;
-
   public: bool AtEnd() const {
-    return m_lBufStart == m_lBufEnd;
+    return buffer_cache_start_ == buffer_cache_end_;
   }
-
-  private: void fill() {
-    auto const cwch = m_pBuffer->GetText(
-        m_rgwch, m_lPosn, static_cast<Posn>(m_lPosn + arraysize(m_rgwch)));
-
-    m_lBufStart = m_lPosn;
-    m_lBufEnd   = m_lPosn + cwch;
-  }
-
-  public: char16 GetChar() const {
-    if (AtEnd())
-      return 0;
-    DCHECK_GE(m_lPosn, m_lBufStart);
-    DCHECK_LT(m_lPosn, m_lBufEnd);
-    return m_rgwch[m_lPosn - m_lBufStart];
-  }
-
-  public: Posn GetPosn() const { return m_lPosn; }
-
-  public: const css::Style& GetStyle() const {
-    if (AtEnd())
-      return m_pBuffer->GetDefaultStyle();
-    DCHECK(m_pInterval);
-    return m_pInterval->style();
-  }
-
+  private: void Fill();
+  public: base::char16 GetChar() const;
+  public: text::Posn GetPosn() const { return text_offset_; }
+  public: const css::Style& GetStyle() const;
   public: RenderStyle MakeRenderStyle(const css::Style& style,
                                       const Font* font) const;
-
-  public: void Next() {
-    if (AtEnd())
-      return;
-    m_lPosn += 1;
-    if (m_lPosn >= m_lBufEnd)
-      fill();
-
-    if (!m_pInterval->Contains(m_lPosn)) {
-      m_pInterval = m_pBuffer->GetIntervalAt(m_lPosn);
-      DCHECK(m_pInterval);
-    }
-  }
+  public: void Next();
 
   DISALLOW_COPY_AND_ASSIGN(TextScanner);
-
 };
 
+TextFormatter::TextScanner::TextScanner(const text::Buffer* buffer,
+                                        text::Posn text_offset)
+    : buffer_(buffer),
+      interval_(buffer_->GetIntervalAt(text_offset)),
+      spelling_marker_(nullptr), syntax_marker_(nullptr),
+      text_offset_(text_offset) {
+  DCHECK(interval_);
+  Fill();
+}
+
 const common::AtomicString& TextFormatter::TextScanner::spelling() const {
-  if (!spelling_marker_ || m_lPosn >= spelling_marker_->end()) {
-    spelling_marker_ = m_pBuffer->spelling_markers()->
-        GetLowerBoundMarker(m_lPosn);
+  if (!spelling_marker_ || text_offset_ >= spelling_marker_->end()) {
+    spelling_marker_ = buffer_->spelling_markers()->
+        GetLowerBoundMarker(text_offset_);
   }
-  return spelling_marker_ && spelling_marker_->Contains(m_lPosn) ?
+  return spelling_marker_ && spelling_marker_->Contains(text_offset_) ?
       spelling_marker_->type() : common::AtomicString::Empty();
 }
 
 const common::AtomicString& TextFormatter::TextScanner::syntax() const {
-  if (!syntax_marker_ || m_lPosn >= syntax_marker_->end()) {
-    syntax_marker_ = m_pBuffer->syntax_markers()->
-        GetLowerBoundMarker(m_lPosn);
+  if (!syntax_marker_ || text_offset_ >= syntax_marker_->end()) {
+    syntax_marker_ = buffer_->syntax_markers()->
+        GetLowerBoundMarker(text_offset_);
   }
-  return syntax_marker_ && syntax_marker_->Contains(m_lPosn) ?
+  return syntax_marker_ && syntax_marker_->Contains(text_offset_) ?
       syntax_marker_->type() : common::AtomicString::Empty();
+}
+
+void TextFormatter::TextScanner::Fill() {
+  auto const num_chars = buffer_->GetText(
+      buffer_cache_, text_offset_,
+      static_cast<Posn>(text_offset_ + arraysize(buffer_cache_)));
+  buffer_cache_start_ = text_offset_;
+  buffer_cache_end_ = text_offset_ + num_chars;
+}
+
+base::char16 TextFormatter::TextScanner::GetChar() const {
+  if (AtEnd())
+    return 0;
+  DCHECK_GE(text_offset_, buffer_cache_start_);
+  DCHECK_LT(text_offset_, buffer_cache_end_);
+  return buffer_cache_[text_offset_ - buffer_cache_start_];
+}
+
+const css::Style& TextFormatter::TextScanner::GetStyle() const {
+  if (AtEnd())
+    return buffer_->GetDefaultStyle();
+  DCHECK(interval_);
+  return interval_->style();
 }
 
 RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
     const css::Style& style, const Font* font) const {
   return RenderStyle(style, font);
+}
+
+void TextFormatter::TextScanner::Next() {
+  if (AtEnd())
+    return;
+  ++text_offset_;
+  if (text_offset_ >= buffer_cache_end_)
+    Fill();
+
+  if (!interval_->Contains(text_offset_)) {
+    interval_ = buffer_->GetIntervalAt(text_offset_);
+    DCHECK(interval_);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -187,78 +188,76 @@ TextFormatter::~TextFormatter() {
 // Returns true if more contents is available, otherwise returns false.
 TextLine* TextFormatter::FormatLine() {
   DCHECK(!bounds_.empty());
-  auto const pLine = new TextLine();
-  pLine->set_start(text_scanner_->GetPosn());
+  auto const line = new TextLine();
+  line->set_start(text_scanner_->GetPosn());
 
   auto x = bounds_.left;
   auto descent = 0.0f;
-  auto ascent  = 0.0f;
+  auto ascent = 0.0f;
 
-  Cell* pCell;
+  Cell* cell;
 
   // Left margin
   {
     auto const cyMinHeight = 1.0f;
 
-    pCell = new FillerCell(default_render_style_, cxLeftMargin, cyMinHeight);
-    pLine->AddCell(pCell);
-    x += cxLeftMargin;
+    cell = new FillerCell(default_render_style_, kLeftMargin, cyMinHeight);
+    line->AddCell(cell);
+    x += kLeftMargin;
   }
 
   for (;;) {
     if (text_scanner_->AtEnd()) {
-      pCell = formatMarker(TextMarker::EndOfDocument);
+      cell = FormatMarker(TextMarker::EndOfDocument);
       break;
     }
 
     auto const wch = text_scanner_->GetChar();
-
     if (wch == 0x0A) {
-      pCell = formatMarker(TextMarker::EndOfLine);
+      cell = FormatMarker(TextMarker::EndOfLine);
       text_scanner_->Next();
       break;
     }
 
-    auto const cx = pCell->width();
-
-    pCell = formatChar(pCell, x, wch);
-    if (!pCell) {
-      pCell = formatMarker(TextMarker::LineWrap);
+    auto const width = cell->width();
+    cell = FormatChar(cell, x, wch);
+    if (!cell) {
+      cell = FormatMarker(TextMarker::LineWrap);
       break;
     }
 
     text_scanner_->Next();
 
-    if (pLine->last_cell() == pCell) {
-      x -= cx;
+    if (line->last_cell() == cell) {
+      x -= width;
     } else {
-      pLine->AddCell(pCell);
+      line->AddCell(cell);
     }
 
-    x += pCell->width();
-    descent = std::max(pCell->descent(), descent);
-    ascent  = std::max(pCell->height() - pCell->descent(), ascent);
+    x += cell->width();
+    descent = std::max(cell->descent(), descent);
+    ascent = std::max(cell->height() - cell->descent(), ascent);
   }
 
   // We have at least one cell.
-  //   o end of buffer: End-Of-Buffer MarkerCell
-  //   o end of line:   End-Of-Line MarkerCell
-  //   o wrapped line:  Warp MarkerCell
-  DCHECK(pCell);
-  pLine->AddCell(pCell);
+  // o end of buffer: End-Of-Buffer MarkerCell
+  // o end of line: End-Of-Line MarkerCell
+  // o wrapped line: Warp MarkerCell
+  DCHECK(cell);
+  line->AddCell(cell);
 
-  x += pCell->width();
-  descent = std::max(pCell->descent(), descent);
-  ascent  = std::max(pCell->height() - pCell->descent(), ascent);
-  pLine->Fix(AlignHeightToPixel(ascent), AlignHeightToPixel(descent));
-  return pLine;
+  x += cell->width();
+  descent = std::max(cell->descent(), descent);
+  ascent = std::max(cell->height() - cell->descent(), ascent);
+  line->Fix(AlignHeightToPixel(ascent), AlignHeightToPixel(descent));
+  return line;
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// TextFormatter::formatChar
+// TextFormatter::FormatChar
 //
-Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
+Cell* TextFormatter::FormatChar(Cell* previous_cell, float x, char16 wch) {
   auto const lPosn = text_scanner_->GetPosn();
   auto style = text_scanner_->GetStyle();
 
@@ -282,23 +281,23 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
     auto const font = FontSet::GetFont(style, 'x');
-    auto const cxTab = AlignWidthToPixel(font->GetCharWidth(' ')) *
-                          k_nTabWidth;
-    auto const x2 = (x + cxTab - cxLeftMargin) / cxTab * cxTab;
-    auto const cx = (x2 + cxLeftMargin) - x;
-    auto const cxM = AlignWidthToPixel(font->GetCharWidth('M'));
-    if (pPrev && x2 + cxM > bounds_.right)
+    auto const widthTab = AlignWidthToPixel(font->GetCharWidth(' ')) *
+                          kTabWidth;
+    auto const x2 = (x + widthTab - kLeftMargin) / widthTab * widthTab;
+    auto const width = (x2 + kLeftMargin) - x;
+    auto const width_of_M = AlignWidthToPixel(font->GetCharWidth('M'));
+    if (previous_cell && x2 + width_of_M > bounds_.right)
       return nullptr;
 
     auto const height = AlignHeightToPixel(font->height());
-    return new MarkerCell(text_scanner_->MakeRenderStyle(style, font), cx,
+    return new MarkerCell(text_scanner_->MakeRenderStyle(style, font), width,
                           height, lPosn, TextMarker::Tab);
   }
 
-  auto const pFont = wch < 0x20 || wch == 0xFEFF ?
+  auto const font = wch < 0x20 || wch == 0xFEFF ?
       nullptr : FontSet::GetFont(style, wch);
 
-  if (!pFont) {
+  if (!font) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
     auto const font = FontSet::GetFont(style, 'u');
@@ -316,33 +315,34 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
 
     auto const width = font->GetTextWidth(string) + 4;
     auto const char_width = font->GetCharWidth('M');
-    if (pPrev && x + width + char_width > bounds_.right)
+    if (previous_cell && x + width + char_width > bounds_.right)
       return nullptr;
     auto const height = AlignHeightToPixel(font->height());
     return new UnicodeCell(text_scanner_->MakeRenderStyle(style, font),
                            width, height, lPosn, string);
   }
 
-  auto render_style = text_scanner_->MakeRenderStyle(style, pFont);
-  auto const cx = AlignWidthToPixel(pFont->GetCharWidth(wch));
-  if (pPrev) {
-    auto const cxM = AlignWidthToPixel(pFont->GetCharWidth('M'));
-    if (x + cx + cxM > bounds_.right) {
+  auto render_style = text_scanner_->MakeRenderStyle(style, font);
+  auto const width = AlignWidthToPixel(font->GetCharWidth(wch));
+  if (previous_cell) {
+    auto const width_of_M = AlignWidthToPixel(font->GetCharWidth('M'));
+    if (x + width + width_of_M > bounds_.right) {
       // We doesn't have enough room for a char in the line.
       return nullptr;
     }
 
-    if (pPrev->Merge(render_style, cx)) {
-      pPrev->as<TextCell>()->AddChar(wch);
-      return pPrev;
+    if (previous_cell->Merge(render_style, width)) {
+      previous_cell->as<TextCell>()->AddChar(wch);
+      return previous_cell;
     }
   }
 
-  auto const height = AlignHeightToPixel(pFont->height());
-  return new TextCell(render_style, cx, height, lPosn, base::string16(1u, wch));
+  auto const height = AlignHeightToPixel(font->height());
+  return new TextCell(render_style, width, height, lPosn,
+                      base::string16(1u, wch));
 }
 
-Cell* TextFormatter::formatMarker(TextMarker marker_name) {
+Cell* TextFormatter::FormatMarker(TextMarker marker_name) {
   auto style = text_scanner_->GetStyle();
   style.Merge(text_scanner_->style_resolver()->Resolve(
     css::StyleSelector::defaults()));
@@ -350,10 +350,10 @@ Cell* TextFormatter::formatMarker(TextMarker marker_name) {
       css::StyleSelector::end_of_line_marker()));
   style.set_font_size(style.font_size() * zoom_);
 
-  auto const pFont = FontSet::GetFont(style, 'x');
-  auto const width = AlignWidthToPixel(pFont->GetCharWidth('x'));
-  auto const height = AlignHeightToPixel(pFont->height());
-  return new MarkerCell(text_scanner_->MakeRenderStyle(style, pFont),
+  auto const font = FontSet::GetFont(style, 'x');
+  auto const width = AlignWidthToPixel(font->GetCharWidth('x'));
+  auto const height = AlignHeightToPixel(font->height());
+  return new MarkerCell(text_scanner_->MakeRenderStyle(style, font),
                         width, height, text_scanner_->GetPosn(),
                         marker_name);
 }
@@ -366,5 +366,5 @@ TextSelection TextFormatter::FormatSelection(
   return TextSelection(selection_model, CssColorToColorF(style.bgcolor()));
 }
 
-} // namespace rendering
-} // namespace views
+}  // namespace rendering
+}  // namespace views

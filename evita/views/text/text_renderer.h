@@ -62,7 +62,7 @@ class TextRenderer final {
   // one line.
   public: Posn GetVisibleEnd();
   public: gfx::RectF HitTestTextPosition(text::Posn text_offset) const;
-  public: bool IsPositionFullyVisible(Posn) const;
+  public: bool IsPositionFullyVisible(text::Posn text_offset) const;
   public: text::Posn MapPointToPosition(gfx::PointF point);
   public: text::Posn MapPointXToOffset(text::Posn text_offset,
                                        float point_x) const;
@@ -71,7 +71,7 @@ class TextRenderer final {
   public: void RenderSelectionIfNeeded(gfx::Canvas* canvas,
                                        const TextSelectionModel& selection);
   public: bool ScrollDown();
-  public: bool ScrollToPosition(Posn offset);
+  public: bool ScrollToPosition(text::Posn offset);
   public: bool ScrollUp();
   public: void SetBounds(const gfx::RectF& new_bounds);
   public: void SetZoom(float new_zoom);

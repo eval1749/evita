@@ -92,9 +92,7 @@ gfx::RectF TextRenderer::HitTestTextPosition(text::Posn text_offset) const {
 }
 
 bool TextRenderer::IsPositionFullyVisible(text::Posn offset) const {
-  DCHECK(!ShouldFormat());
-  return offset >= text_block_->GetStart() &&
-         offset < text_block_->GetVisibleEnd();
+  return text_block_->IsPositionFullyVisible(offset);
 }
 
 text::Posn TextRenderer::MapPointToPosition(gfx::PointF point) {
@@ -109,7 +107,6 @@ text::Posn TextRenderer::MapPointXToOffset(text::Posn text_offset,
 void TextRenderer::Render(gfx::Canvas* canvas,
                           const TextSelectionModel& selection_model) {
   DCHECK(!ShouldFormat());
-  DCHECK(!text_block_->bounds().empty());
   const auto selection = TextFormatter::FormatSelection(buffer_,
                                                         selection_model);
   screen_text_block_->Render(canvas, text_block_.get(), selection);
@@ -126,9 +123,9 @@ void TextRenderer::RenderRuler(gfx::Canvas* canvas) {
 
   auto const num_columns = 81;
   auto const width_of_M = font->GetCharWidth('M');
-  auto const ruler_x = ::floor(text_block_->left() + width_of_M * num_columns);
-  gfx::RectF ruler_bounds(gfx::PointF(ruler_x, text_block_->top()),
-                          gfx::SizeF(1.0f, text_block_->height()));
+  auto const ruler_x = ::floor(bounds_.left + width_of_M * num_columns);
+  auto const ruler_bounds = gfx::RectF (
+      gfx::PointF(ruler_x, bounds_.top), gfx::SizeF(1.0f, bounds_.height()));
 
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, ruler_bounds);
   gfx::Brush brush(canvas, gfx::ColorF(0, 0, 0, 0.3f));
@@ -140,7 +137,6 @@ void TextRenderer::RenderSelectionIfNeeded(
     const TextSelectionModel& new_selection_model) {
   DCHECK(!ShouldFormat());
   DCHECK(!should_render_);
-  DCHECK(!text_block_->bounds().empty());
   screen_text_block_->RenderSelectionIfNeeded(canvas,
       TextFormatter::FormatSelection(buffer_, new_selection_model));
 }
@@ -153,72 +149,8 @@ bool TextRenderer::ScrollDown() {
   return true;
 }
 
-bool TextRenderer::ScrollToPosition(Posn offset) {
-  DCHECK(!ShouldFormat());
-  if (IsPositionFullyVisible(offset))
-    return false;
-
-  const auto scrollable = text_block_->height() / 2;
-
-  if (offset > GetStart()) {
-    auto scrolled = 0.0f;
-    while (scrolled < scrollable) {
-      const auto scroll_height = text_block_->GetFirst()->height();
-      if (!ScrollUp())
-        return scrolled > 0.0f;
-      if (IsPositionFullyVisible(offset))
-        return true;
-      scrolled += scroll_height;
-    }
-  } else {
-    auto scrolled = 0.0f;
-    while (scrolled < scrollable) {
-      auto const scroll_height = text_block_->GetLast()->height();
-      if (!ScrollDown())
-        return scrolled > 0.0f;
-      if (IsPositionFullyVisible(offset))
-        return true;
-      scrolled += scroll_height;
-    }
-  }
-
-  Format(offset);
-  while (!IsPositionFullyVisible(offset)) {
-    if (!ScrollDown())
-      return true;
-  }
-
-  // If this page shows end of buffer, we shows lines as much as
-  // possible to fit in page.
-  if (GetEnd() >= buffer_->GetEnd()) {
-    while (IsPositionFullyVisible(offset)) {
-      if (!ScrollDown())
-        return true;
-    }
-    ScrollUp();
-    return true;
-  }
-
-  // Move line containing |offset| to middle of screen.
-  auto scrolled = HitTestTextPosition(offset).top - text_block_->top();
-  if (scrolled < scrollable) {
-    while (scrolled < scrollable) {
-      auto const scroll_height = text_block_->GetFirst()->height();
-      if (!ScrollDown())
-        return true;
-      scrolled += scroll_height;
-    }
-  } else {
-    scrolled = scrollable + scrolled;
-    while (scrolled < scrollable) {
-      auto const scroll_height = text_block_->GetLast()->height();
-      if (!ScrollUp())
-        return true;
-      scrolled += scroll_height;
-    }
-  }
-
-  return true;
+bool TextRenderer::ScrollToPosition(text::Posn offset) {
+  return text_block_->ScrollToPosition(offset);
 }
 
 bool TextRenderer::ScrollUp() {

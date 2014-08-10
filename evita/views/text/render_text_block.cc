@@ -241,9 +241,9 @@ void TextBlock::EnsureLinePoints() {
   UI_ASSERT_DOM_LOCKED();
   if (!dirty_line_point_)
     return;
-  auto line_top = top();
+  auto line_top = bounds_.top;
   for (auto line : lines_) {
-    line->set_origin(gfx::PointF(left(), line_top));
+    line->set_origin(gfx::PointF(bounds_.left, line_top));
     line_top = line->bottom();
   }
 
@@ -432,6 +432,13 @@ text::Posn TextBlock::MapPointXToOffset(text::Posn text_offset, float point_x) {
   }
 }
 
+bool TextBlock::IsPositionFullyVisible(text::Posn offset) {
+  UI_ASSERT_DOM_LOCKED();
+  FormatIfNeeded();
+  return offset >= lines_.front()->GetStart() &&
+         offset < lines_.back()->GetEnd();
+}
+
 bool TextBlock::IsShowEndOfDocument() {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!dirty_);
@@ -468,6 +475,75 @@ bool TextBlock::ScrollDown() {
     DiscardLastLine();
   }
   view_start_ = lines_.front()->GetStart();
+  return true;
+}
+
+bool TextBlock::ScrollToPosition(text::Posn offset) {
+  FormatIfNeeded();
+
+  if (IsPositionFullyVisible(offset))
+    return false;
+
+  const auto scrollable = bounds_.height() / 2;
+
+  if (offset > GetStart()) {
+    auto scrolled = 0.0f;
+    while (scrolled < scrollable) {
+      const auto scroll_height = lines_.front()->height();
+      if (!ScrollUp())
+        return scrolled > 0.0f;
+      if (IsPositionFullyVisible(offset))
+        return true;
+      scrolled += scroll_height;
+    }
+  } else {
+    auto scrolled = 0.0f;
+    while (scrolled < scrollable) {
+      auto const scroll_height = lines_.back()->height();
+      if (!ScrollDown())
+        return scrolled > 0.0f;
+      if (IsPositionFullyVisible(offset))
+        return true;
+      scrolled += scroll_height;
+    }
+  }
+
+  Format(offset);
+  while (!IsPositionFullyVisible(offset)) {
+    if (!ScrollDown())
+      return true;
+  }
+
+  // If this page shows end of buffer, we shows lines as much as
+  // possible to fit in page.
+  if (GetEnd() >= text_buffer_->GetEnd()) {
+    while (IsPositionFullyVisible(offset)) {
+      if (!ScrollDown())
+        return true;
+    }
+    ScrollUp();
+    return true;
+  }
+
+  // Move line containing |offset| to middle of screen.
+  auto scrolled = HitTestTextPosition(offset).top - bounds_.top;
+  if (scrolled < scrollable) {
+    while (scrolled < scrollable) {
+      auto const scroll_height = lines_.front()->height();
+      if (!ScrollDown())
+        return true;
+      scrolled += scroll_height;
+    }
+  } else {
+    scrolled = scrollable + scrolled;
+    while (scrolled < scrollable) {
+      auto const scroll_height = lines_.back()->height();
+      if (!ScrollUp())
+        return true;
+      scrolled += scroll_height;
+    }
+  }
+
   return true;
 }
 

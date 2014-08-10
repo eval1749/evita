@@ -36,18 +36,9 @@ class TextBlock final : public text::BufferMutationObserver {
   public: explicit TextBlock(text::Buffer* buffer);
   public: virtual ~TextBlock();
 
-  public: float bottom() const { return bounds_.bottom; }
   public: const RenderStyle& default_style() const { return default_style_; }
   public: bool dirty() const { return dirty_; }
-  public: float height() const { return bounds_.height(); }
-  public: float left() const { return bounds_.left; }
   public: const std::list<TextLine*>& lines() const { return lines_; }
-  public: const gfx::RectF& bounds() const { return bounds_; }
-  public: float right() const { return bounds_.right; }
-  public: const text::Buffer* text_buffer() const { return text_buffer_; }
-  public: float top() const { return bounds_.top; }
-  public: float width() const { return bounds_.width(); }
-  public: float zoom() const { return zoom_; }
 
   private: void Append(TextLine* line);
   // Returns true if discarded the first line.
@@ -69,12 +60,15 @@ class TextBlock final : public text::BufferMutationObserver {
   public: gfx::RectF HitTestTextPosition(text::Posn text_offset);
   private: void InvalidateCache();
   private: void InvalidateLines(text::Posn offset);
+  public: bool IsPositionFullyVisible(text::Posn text_offset);
   public: bool IsShowEndOfDocument();
   public: text::Posn MapPointToPosition(gfx::PointF point);
   public: text::Posn MapPointXToOffset(text::Posn text_offset, float point_x);
   private: void Prepend(TextLine* line);
   // Returns true if this |TextBlock| is modified.
   public: bool ScrollDown();
+  // Returns true if this |TextBlock| is modified.
+  public: bool ScrollToPosition(text::Posn offset);
   // Returns true if this |TextBlock| is modified.
   public: bool ScrollUp();
   public: void SetBounds(const gfx::RectF& new_bounds);

@@ -86,9 +86,11 @@ void TextBlock::Format(const gfx::RectF& bounds, float zoom,
   zoom_ = zoom;
   Reset();
 
-  // TODO(eval1749) We should recompute default style when style is chagned,
+  // TODO(eval1749) We should recompute default style when style is changed,
   // rather than every |Format| call.
   const auto& style = text_buffer_->GetDefaultStyle();
+  // |default_style_| is used for providing fill color of right of end of line
+  // and bottom of text block.
   default_style_ = RenderStyle(style, nullptr);
 
   TextFormatter formatter(this, text_buffer_->ComputeStartOfLine(text_offset));

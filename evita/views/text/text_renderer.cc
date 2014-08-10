@@ -245,26 +245,9 @@ void TextRenderer::RenderSelectionIfNeeded(
 
 bool TextRenderer::ScrollDown() {
   DCHECK(!ShouldFormat());
-  if (!GetStart())
+  if (!text_block_->ScrollDown())
     return false;
-  auto const goal_offset = GetStart() - 1;
-  auto const start_offset = buffer_->ComputeStartOfLine(goal_offset);
-  TextFormatter formatter(buffer_, start_offset, bounds_, zoom_);
-  for (;;) {
-    auto const line = formatter.FormatLine();
-    if (goal_offset < line->GetEnd()) {
-      text_block_->Prepend(line);
-      break;
-    }
-  }
-
-  // Discard lines outside of screen.
-  text_block_->EnsureLinePoints();
   view_start_ = text_block_->GetFirst()->GetStart();
-  while (text_block_->GetLast()->top() >= text_block_->bottom()) {
-    text_block_->DiscardLastLine();
-  }
-
   should_render_ = true;
   return true;
 }

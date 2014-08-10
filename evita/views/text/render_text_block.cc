@@ -172,6 +172,29 @@ void TextBlock::Reset() {
   lines_height_ = 0;
 }
 
+bool TextBlock::ScrollDown() {
+  DCHECK(!ShouldFormat(bounds_, zoom_));
+  if (!GetFirst()->GetStart())
+    return false;
+  auto const goal_offset = GetFirst()->GetStart() - 1;
+  auto const start_offset = text_buffer_->ComputeStartOfLine(goal_offset);
+  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  for (;;) {
+    auto const line = formatter.FormatLine();
+    if (goal_offset < line->GetEnd()) {
+      Prepend(line);
+      break;
+    }
+  }
+
+  // Discard lines outside of screen.
+  EnsureLinePoints();
+  while (GetLast()->top() >= bounds_.bottom) {
+    DiscardLastLine();
+  }
+  return true;
+}
+
 bool TextBlock::ScrollUp() {
   DCHECK(!ShouldFormat(bounds_, zoom_));
   EnsureLinePoints();

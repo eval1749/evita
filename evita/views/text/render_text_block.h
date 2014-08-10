@@ -61,6 +61,8 @@ class TextBlock final : public text::BufferMutationObserver {
   public: void Prepend(TextLine*);
   public: void Reset();
   // Returns true if this |TextBlock| is modified.
+  public: bool ScrollDown();
+  // Returns true if this |TextBlock| is modified.
   public: bool ScrollUp();
   public: bool ShouldFormat(const gfx::RectF& bounds, float zoom) const;
 

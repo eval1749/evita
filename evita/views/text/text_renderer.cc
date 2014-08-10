@@ -161,18 +161,7 @@ text::Posn TextRenderer::MapPointToPosition(gfx::PointF pt) {
 
 text::Posn TextRenderer::MapPointXToOffset(text::Posn text_offset,
                                            float point_x) const {
-  if (!ShouldFormat()) {
-    if (auto const line = FindLine(text_offset))
-      return line->MapXToPosn(point_x);
-  }
-
-  auto start_offset = buffer()->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(buffer_, start_offset, bounds_, zoom_);
-  for (;;) {
-    std::unique_ptr<TextLine> line(formatter.FormatLine());
-    if (text_offset < line->GetEnd())
-      return line->MapXToPosn(point_x);
-  }
+  return text_block_->MapPointXToOffset(text_offset, point_x);
 }
 
 void TextRenderer::Render(gfx::Canvas* canvas,

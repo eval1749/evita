@@ -195,6 +195,22 @@ void TextBlock::InvalidateLines(text::Posn offset) {
     Reset();
 }
 
+text::Posn TextBlock::MapPointXToOffset(text::Posn text_offset,
+                                        float point_x) const {
+  if (!ShouldFormat(bounds_, zoom_)) {
+    if (auto const line = FindLine(text_offset))
+      return line->MapXToPosn(point_x);
+  }
+
+  auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
+  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  for (;;) {
+    std::unique_ptr<TextLine> line(formatter.FormatLine());
+    if (text_offset < line->GetEnd())
+      return line->MapXToPosn(point_x);
+  }
+}
+
 bool TextBlock::IsShowEndOfDocument() const {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!dirty_);

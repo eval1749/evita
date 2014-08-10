@@ -62,6 +62,8 @@ class TextBlock final : public text::BufferMutationObserver {
   public: gfx::RectF HitTestTextPosition(text::Posn text_offset) const;
   private: void InvalidateLines(text::Posn offset);
   public: bool IsShowEndOfDocument() const;
+  public: text::Posn MapPointXToOffset(text::Posn text_offset,
+                                       float point_x) const;
   public: void Prepend(TextLine*);
   public: void Reset();
   // Returns true if this |TextBlock| is modified.

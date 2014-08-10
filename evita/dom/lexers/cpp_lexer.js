@@ -127,8 +127,9 @@ global.CppLexer = (function(options) {
   // C++ library
   'std::find',
   'std::iterator', 'std::list',
-  'std::make_unique', 'std::max', 'std::min', 'std::move',
-  'std::string', 'std::swap',
+  'std::make_unique', 'std::map', 'std::max', 'std::min', 'std::move',
+  'std::numeric_limits',
+  'std::set', 'std::string', 'std::swap',
   'std::unique_ptr', 'std::unordered_map', 'std::unordered_set',
   'std::vector',
 

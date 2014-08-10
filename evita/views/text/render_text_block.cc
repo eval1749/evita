@@ -77,6 +77,19 @@ void TextBlock::EnsureLinePoints() {
   dirty_line_point_ = false;
 }
 
+TextLine* TextBlock::FindLine(Posn text_offset) const {
+  DCHECK(!ShouldFormat(bounds_, zoom_));
+  if (text_offset < GetFirst()->GetStart() ||
+      text_offset > GetFirst()->GetEnd()) {
+    return nullptr;
+  }
+  for (auto const line : lines_) {
+    if (text_offset < line->text_end())
+      return const_cast<TextLine*>(line);
+  }
+  return nullptr;
+}
+
 void TextBlock::Format(text::Posn text_offset, const gfx::RectF& bounds,
                        float zoom) {
   DCHECK(!bounds.empty());
@@ -135,6 +148,22 @@ text::Posn TextBlock::GetVisibleEnd() const {
       return line->GetEnd();
   }
   return lines_.front()->GetEnd();
+}
+
+gfx::RectF TextBlock::HitTestTextPosition(text::Posn text_offset) const {
+  ASSERT_DOM_LOCKED();
+  if (!ShouldFormat(bounds_, zoom_)) {
+    if (auto const line = FindLine(text_offset))
+      return line->HitTestTextPosition(text_offset);
+  }
+
+  auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
+  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  for (;;) {
+    std::unique_ptr<TextLine> line(formatter.FormatLine());
+    if (text_offset < line->GetEnd())
+      return line->HitTestTextPosition(text_offset);
+  }
 }
 
 void TextBlock::InvalidateLines(text::Posn offset) {

@@ -133,18 +133,7 @@ bool TextRenderer::FormatIfNeeded() {
 // A TextRenderer object must be formatted with the latest buffer.
 //
 gfx::RectF TextRenderer::HitTestTextPosition(text::Posn text_offset) const {
-  if (!ShouldFormat()) {
-    if (auto const line = FindLine(text_offset))
-      return line->HitTestTextPosition(text_offset);
-  }
-
-  auto start_offset = buffer()->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(buffer_, start_offset, bounds_, zoom_);
-  for (;;) {
-    std::unique_ptr<TextLine> line(formatter.FormatLine());
-    if (text_offset < line->GetEnd())
-      return line->HitTestTextPosition(text_offset);
-  }
+  return text_block_->HitTestTextPosition(text_offset);
 }
 
 bool TextRenderer::IsPositionFullyVisible(text::Posn offset) const {

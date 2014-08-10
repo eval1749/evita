@@ -81,6 +81,7 @@ class TextRenderer final : public text::BufferMutationObserver {
   public: void SetBounds(const gfx::RectF& new_bounds);
   private: bool ShouldFormat() const;
   public: bool ShouldRender() const;
+  // Returns start of line offset containing |text_offset|.
   public: text::Posn StartOfLine(text::Posn text_offset) const;
 
   // text::BufferMutationObserver

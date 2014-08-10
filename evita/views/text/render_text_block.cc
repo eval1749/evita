@@ -65,6 +65,26 @@ bool TextBlock::DiscardLastLine() {
   return true;
 }
 
+text::Posn TextBlock::EndOfLine(text::Posn text_offset) const {
+  UI_ASSERT_DOM_LOCKED();
+
+  if (text_offset >= text_buffer_->GetEnd())
+    return text_buffer_->GetEnd();
+
+  if (!ShouldFormat(bounds_, zoom_)) {
+    if (auto const line = FindLine(text_offset))
+      return line->GetEnd() - 1;
+  }
+
+  auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
+  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  for (;;) {
+    std::unique_ptr<TextLine> line(formatter.FormatLine());
+    if (text_offset < line->GetEnd())
+      return line->GetEnd() - 1;
+  }
+}
+
 void TextBlock::EnsureLinePoints() {
   UI_ASSERT_DOM_LOCKED();
   if (!dirty_line_point_)
@@ -253,6 +273,30 @@ bool TextBlock::ShouldFormat(const gfx::RectF& bounds, float zoom) const {
   //  - Narrow but all lines fit
   //  - Widen but no lines wrap
   return dirty_ || zoom_ != zoom || bounds_ != bounds;
+}
+
+text::Posn TextBlock::StartOfLine(text::Posn text_offset) const {
+  UI_ASSERT_DOM_LOCKED();
+
+  if (text_offset <= 0)
+    return 0;
+
+  if (!ShouldFormat(bounds_, zoom_)) {
+    if (auto const line = FindLine(text_offset))
+      return line->GetStart();
+  }
+
+  auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
+  if (!start_offset)
+    return 0;
+
+  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  for (;;) {
+    std::unique_ptr<TextLine> line(formatter.FormatLine());
+    start_offset = line->GetEnd();
+    if (text_offset < start_offset)
+      return line->GetStart();
+  }
 }
 
 // text::BufferMutationObserver

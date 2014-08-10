@@ -49,6 +49,8 @@ class TextBlock final : public text::BufferMutationObserver {
   public: bool DiscardFirstLine();
   // Returns true if discarded the last line.
   public: bool DiscardLastLine();
+  // Returns end of line offset containing |text_offset|.
+  public: text::Posn EndOfLine(text::Posn text_offset) const;
   public: void EnsureLinePoints();
   private: TextLine* FindLine(text::Posn text_offset) const;
   public: void Format(text::Posn text_offset, const gfx::RectF& bounds,
@@ -67,6 +69,8 @@ class TextBlock final : public text::BufferMutationObserver {
   // Returns true if this |TextBlock| is modified.
   public: bool ScrollUp();
   public: bool ShouldFormat(const gfx::RectF& bounds, float zoom) const;
+  // Returns start of line offset containing |text_offset|.
+  public: text::Posn StartOfLine(text::Posn text_offset) const;
 
   // text::BufferMutationObserver
   private: virtual void DidChangeStyle(Posn offset, size_t length) override;

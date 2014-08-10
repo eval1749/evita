@@ -65,25 +65,8 @@ void TextRenderer::DidSetFocus() {
   screen_text_block_->DidSetFocus();
 }
 
-// Returns end of line offset containing |text_offset|.
 text::Posn TextRenderer::EndOfLine(text::Posn text_offset) const {
-  UI_ASSERT_DOM_LOCKED();
-
-  if (text_offset >= buffer()->GetEnd())
-    return buffer()->GetEnd();
-
-  if (!ShouldFormat()) {
-    if (auto const line = FindLine(text_offset))
-      return line->GetEnd() - 1;
-  }
-
-  auto start_offset = buffer()->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(buffer_, start_offset, bounds_, zoom_);
-  for (;;) {
-    std::unique_ptr<TextLine> line(formatter.FormatLine());
-    if (text_offset < line->GetEnd())
-      return line->GetEnd() - 1;
-  }
+  return text_block_->EndOfLine(text_offset);
 }
 
 TextLine* TextRenderer::FindLine(Posn lPosn) const {
@@ -335,29 +318,8 @@ bool TextRenderer::ShouldFormat() const {
 bool TextRenderer::ShouldRender() const {
   return should_render_ || screen_text_block_->dirty();
 }
-// Returns end of line offset containing |text_offset|.
 text::Posn TextRenderer::StartOfLine(text::Posn text_offset) const {
-  UI_ASSERT_DOM_LOCKED();
-
-  if (text_offset <= 0)
-    return 0;
-
-  if (!ShouldFormat()) {
-    if (auto const line = FindLine(text_offset))
-      return line->GetStart();
-  }
-
-  auto start_offset = buffer()->ComputeStartOfLine(text_offset);
-  if (!start_offset)
-    return 0;
-
-  TextFormatter formatter(buffer_, start_offset, bounds_, zoom_);
-  for (;;) {
-    std::unique_ptr<TextLine> line(formatter.FormatLine());
-    start_offset = line->GetEnd();
-    if (text_offset < start_offset)
-      return line->GetStart();
-  }
+  return text_block_->StartOfLine(text_offset);
 }
 
 // text::BufferMutationObserver

@@ -16,8 +16,8 @@ namespace rendering {
 
 TextBlock::TextBlock(text::Buffer* text_buffer, const gfx::RectF& bounds,
                      float zoom)
-    : bounds_(bounds), dirty_(true), dirty_line_point_(true),
-      lines_height_(0), text_buffer_(text_buffer), zoom_(zoom) {
+    : bounds_(bounds), dirty_(true), dirty_line_point_(true), lines_height_(0),
+      new_zoom_(1.0f), text_buffer_(text_buffer), zoom_(zoom) {
   text_buffer->AddObserver(this);
 }
 
@@ -71,13 +71,13 @@ text::Posn TextBlock::EndOfLine(text::Posn text_offset) const {
   if (text_offset >= text_buffer_->GetEnd())
     return text_buffer_->GetEnd();
 
-  if (!ShouldFormat(bounds_, zoom_)) {
+  if (!ShouldFormat()) {
     if (auto const line = FindLine(text_offset))
       return line->GetEnd() - 1;
   }
 
   auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  TextFormatter formatter(text_buffer_, start_offset, new_bounds_, new_zoom_);
   for (;;) {
     std::unique_ptr<TextLine> line(formatter.FormatLine());
     if (text_offset < line->GetEnd())
@@ -99,7 +99,7 @@ void TextBlock::EnsureLinePoints() {
 }
 
 TextLine* TextBlock::FindLine(Posn text_offset) const {
-  DCHECK(!ShouldFormat(bounds_, zoom_));
+  DCHECK(!ShouldFormat());
   if (text_offset < GetFirst()->GetStart() ||
       text_offset > GetFirst()->GetEnd()) {
     return nullptr;
@@ -111,13 +111,10 @@ TextLine* TextBlock::FindLine(Posn text_offset) const {
   return nullptr;
 }
 
-void TextBlock::Format(text::Posn text_offset, const gfx::RectF& bounds,
-                       float zoom) {
-  DCHECK(!bounds.empty());
-  DCHECK_GT(zoom, 0.0f);
+void TextBlock::Format(text::Posn text_offset) {
   UI_ASSERT_DOM_LOCKED();
-  bounds_ = bounds;
-  zoom_ = zoom;
+  bounds_ = new_bounds_;
+  zoom_ = new_zoom_;
   Reset();
 
   // TODO(eval1749) We should recompute default style when style is changed,
@@ -128,7 +125,7 @@ void TextBlock::Format(text::Posn text_offset, const gfx::RectF& bounds,
   default_style_ = RenderStyle(style, nullptr);
 
   auto const line_start = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, line_start, bounds, zoom);
+  TextFormatter formatter(text_buffer_, line_start, new_bounds_, new_zoom_);
   for (;;) {
     auto const line = formatter.FormatLine();
     DCHECK_GT(line->bounds().height(), 0.0f);
@@ -173,13 +170,13 @@ text::Posn TextBlock::GetVisibleEnd() const {
 
 gfx::RectF TextBlock::HitTestTextPosition(text::Posn text_offset) const {
   UI_ASSERT_DOM_LOCKED();
-  if (!ShouldFormat(bounds_, zoom_)) {
+  if (!ShouldFormat()) {
     if (auto const line = FindLine(text_offset))
       return line->HitTestTextPosition(text_offset);
   }
 
   auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  TextFormatter formatter(text_buffer_, start_offset, new_bounds_, new_zoom_);
   for (;;) {
     std::unique_ptr<TextLine> line(formatter.FormatLine());
     if (text_offset < line->GetEnd())
@@ -197,13 +194,13 @@ void TextBlock::InvalidateLines(text::Posn offset) {
 
 text::Posn TextBlock::MapPointXToOffset(text::Posn text_offset,
                                         float point_x) const {
-  if (!ShouldFormat(bounds_, zoom_)) {
+  if (!ShouldFormat()) {
     if (auto const line = FindLine(text_offset))
       return line->MapXToPosn(point_x);
   }
 
   auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  TextFormatter formatter(text_buffer_, start_offset, new_bounds_, new_zoom_);
   for (;;) {
     std::unique_ptr<TextLine> line(formatter.FormatLine());
     if (text_offset < line->GetEnd())
@@ -239,12 +236,12 @@ void TextBlock::Reset() {
 }
 
 bool TextBlock::ScrollDown() {
-  DCHECK(!ShouldFormat(bounds_, zoom_));
+  DCHECK(!ShouldFormat());
   if (!GetFirst()->GetStart())
     return false;
   auto const goal_offset = GetFirst()->GetStart() - 1;
   auto const start_offset = text_buffer_->ComputeStartOfLine(goal_offset);
-  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  TextFormatter formatter(text_buffer_, start_offset, new_bounds_, new_zoom_);
   for (;;) {
     auto const line = formatter.FormatLine();
     if (goal_offset < line->GetEnd()) {
@@ -262,7 +259,7 @@ bool TextBlock::ScrollDown() {
 }
 
 bool TextBlock::ScrollUp() {
-  DCHECK(!ShouldFormat(bounds_, zoom_));
+  DCHECK(!ShouldFormat());
   EnsureLinePoints();
   if (IsShowEndOfDocument())
     return false;
@@ -275,20 +272,30 @@ bool TextBlock::ScrollUp() {
     return true;
 
   auto const start_offset = GetLast()->GetEnd();
-  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  TextFormatter formatter(text_buffer_, start_offset, new_bounds_, new_zoom_);
   auto const line = formatter.FormatLine();
   Append(line);
   return true;
 }
 
-bool TextBlock::ShouldFormat(const gfx::RectF& bounds, float zoom) const {
+void TextBlock::SetBounds(const gfx::RectF& new_bounds) {
+  DCHECK(!new_bounds.empty());
+  new_bounds_ = new_bounds;
+}
+
+void TextBlock::SetZoom(float new_zoom) {
+  DCHECK_GT(new_zoom, 0.0f);
+  new_zoom_ = new_zoom;
+}
+
+bool TextBlock::ShouldFormat() const {
   UI_ASSERT_DOM_LOCKED();
   // TODO(eval1749) We should check bounds change more. We don't need to
   // format when
   //  - Height changes only
   //  - Narrow but all lines fit
   //  - Widen but no lines wrap
-  return dirty_ || zoom_ != zoom || bounds_ != bounds;
+  return dirty_ || zoom_ != new_zoom_ || bounds_ != new_bounds_;
 }
 
 text::Posn TextBlock::StartOfLine(text::Posn text_offset) const {
@@ -297,7 +304,7 @@ text::Posn TextBlock::StartOfLine(text::Posn text_offset) const {
   if (text_offset <= 0)
     return 0;
 
-  if (!ShouldFormat(bounds_, zoom_)) {
+  if (!ShouldFormat()) {
     if (auto const line = FindLine(text_offset))
       return line->GetStart();
   }
@@ -306,7 +313,7 @@ text::Posn TextBlock::StartOfLine(text::Posn text_offset) const {
   if (!start_offset)
     return 0;
 
-  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  TextFormatter formatter(text_buffer_, start_offset, new_bounds_, new_zoom_);
   for (;;) {
     std::unique_ptr<TextLine> line(formatter.FormatLine());
     start_offset = line->GetEnd();

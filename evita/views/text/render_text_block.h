@@ -24,6 +24,8 @@ class TextBlock final : public text::BufferMutationObserver {
   private: bool dirty_line_point_;
   private: std::list<TextLine*> lines_;
   private: float lines_height_;
+  private: gfx::RectF new_bounds_;
+  private: float new_zoom_;
   private: text::Buffer* const text_buffer_;
   private: float zoom_;
 
@@ -53,8 +55,7 @@ class TextBlock final : public text::BufferMutationObserver {
   public: text::Posn EndOfLine(text::Posn text_offset) const;
   public: void EnsureLinePoints();
   private: TextLine* FindLine(text::Posn text_offset) const;
-  public: void Format(text::Posn text_offset, const gfx::RectF& bounds,
-                      float zoom);
+  public: void Format(text::Posn text_offset);
   public: TextLine* GetFirst() const { return lines_.front(); }
   public: float GetHeight() const { return lines_height_; }
   public: TextLine* GetLast() const { return lines_.back(); }
@@ -70,7 +71,9 @@ class TextBlock final : public text::BufferMutationObserver {
   public: bool ScrollDown();
   // Returns true if this |TextBlock| is modified.
   public: bool ScrollUp();
-  public: bool ShouldFormat(const gfx::RectF& bounds, float zoom) const;
+  public: void SetBounds(const gfx::RectF& new_bounds);
+  public: void SetZoom(float new_zoom);
+  public: bool ShouldFormat() const;
   // Returns start of line offset containing |text_offset|.
   public: text::Posn StartOfLine(text::Posn text_offset) const;
 

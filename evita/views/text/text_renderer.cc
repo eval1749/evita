@@ -47,6 +47,7 @@ void TextRenderer::set_zoom(float new_zoom) {
   if (zoom_ == new_zoom)
     return;
   zoom_ = new_zoom;
+  text_block_->SetZoom(zoom_);
 }
 
 void TextRenderer::DidHide() {
@@ -98,7 +99,7 @@ text::Posn TextRenderer::GetVisibleEnd() {
 }
 
 void TextRenderer::Format(text::Posn text_offset) {
-  text_block_->Format(text_offset, bounds_, zoom_);
+  text_block_->Format(text_offset);
   view_start_ = text_block_->GetFirst()->GetStart();
   should_render_ = true;
 }
@@ -295,13 +296,13 @@ void TextRenderer::SetBounds(const gfx::RectF& new_bounds) {
   if (bounds_.size() == new_bounds.size())
     return;
   bounds_ = new_bounds;
+  text_block_->SetBounds(bounds_);
   screen_text_block_->SetBounds(bounds_);
   should_render_ = true;
 }
 
 bool TextRenderer::ShouldFormat() const {
-  UI_ASSERT_DOM_LOCKED();
-  return text_block_->ShouldFormat(bounds_, zoom_);
+  return text_block_->ShouldFormat();
 }
 
 bool TextRenderer::ShouldRender() const {

@@ -5,6 +5,7 @@
 #include "evita/views/text/render_text_block.h"
 
 #include "evita/dom/lock.h"
+#include "evita/editor/dom_lock.h"
 #include "evita/text/buffer.h"
 #include "evita/views/text/render_style.h"
 #include "evita/views/text/render_text_line.h"
@@ -29,7 +30,7 @@ TextBlock::~TextBlock() {
 }
 
 void TextBlock::Append(TextLine* line) {
-  ASSERT_DOM_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   DCHECK(lines_.empty() || lines_.back()->GetEnd() == line->GetStart());
   if (!dirty_line_point_) {
     auto const last_line = lines_.back();
@@ -40,7 +41,7 @@ void TextBlock::Append(TextLine* line) {
 }
 
 bool TextBlock::DiscardFirstLine() {
-  ASSERT_DOM_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   if (lines_.empty())
     return false;
 
@@ -53,7 +54,7 @@ bool TextBlock::DiscardFirstLine() {
 }
 
 bool TextBlock::DiscardLastLine() {
-  ASSERT_DOM_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   if (lines_.empty())
     return false;
 
@@ -65,7 +66,7 @@ bool TextBlock::DiscardLastLine() {
 }
 
 void TextBlock::EnsureLinePoints() {
-  ASSERT_DOM_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   if (!dirty_line_point_)
     return;
   auto line_top = top();
@@ -94,7 +95,7 @@ void TextBlock::Format(text::Posn text_offset, const gfx::RectF& bounds,
                        float zoom) {
   DCHECK(!bounds.empty());
   DCHECK_GT(zoom, 0.0f);
-  ASSERT_DOM_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   bounds_ = bounds;
   zoom_ = zoom;
   Reset();
@@ -139,7 +140,7 @@ void TextBlock::Format(text::Posn text_offset, const gfx::RectF& bounds,
 }
 
 text::Posn TextBlock::GetVisibleEnd() const {
-  ASSERT_DOM_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
   for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
@@ -151,7 +152,7 @@ text::Posn TextBlock::GetVisibleEnd() const {
 }
 
 gfx::RectF TextBlock::HitTestTextPosition(text::Posn text_offset) const {
-  ASSERT_DOM_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   if (!ShouldFormat(bounds_, zoom_)) {
     if (auto const line = FindLine(text_offset))
       return line->HitTestTextPosition(text_offset);
@@ -175,7 +176,7 @@ void TextBlock::InvalidateLines(text::Posn offset) {
 }
 
 bool TextBlock::IsShowEndOfDocument() const {
-  ASSERT_DOM_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
   return GetLast()->GetEnd() > text_buffer_->GetEnd() &&
@@ -183,7 +184,7 @@ bool TextBlock::IsShowEndOfDocument() const {
 }
 
 void TextBlock::Prepend(TextLine* line) {
-  ASSERT_DOM_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   lines_.push_front(line);
   lines_height_ += line->GetHeight();
   dirty_line_point_ = true;
@@ -245,7 +246,7 @@ bool TextBlock::ScrollUp() {
 }
 
 bool TextBlock::ShouldFormat(const gfx::RectF& bounds, float zoom) const {
-  ASSERT_DOM_LOCKED();
+  UI_ASSERT_DOM_LOCKED();
   // TODO(eval1749) We should check bounds change more. We don't need to
   // format when
   //  - Height changes only

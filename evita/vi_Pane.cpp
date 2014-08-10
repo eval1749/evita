@@ -16,17 +16,15 @@ Pane::~Pane() {
 }
 
 void Pane::Activate() {
+  DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
+  ++static_active_tick;
+  active_tick_ = static_active_tick;
+  Show();
   RequestFocus();
 }
 
 Frame* Pane::GetFrame() const {
   return container_widget().as<Frame>();
-}
-
-void Pane::UpdateActiveTick() {
-  DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
-  ++static_active_tick;
-  active_tick_ = static_active_tick;
 }
 
 // ui::Widget

@@ -29,15 +29,9 @@ class Pane : public ui::Widget {
 
   public: int active_tick() const { return active_tick_; }
 
-  // [A]
   public: virtual void Activate();
-
-  // [G]
   protected: Frame* GetFrame() const;
   public: virtual const domapi::TabData* GetTabData() const = 0;
-
-  // [U]
-  public: void UpdateActiveTick();
 
   // ui::Widget
   protected: virtual void DidChangeBounds() override;

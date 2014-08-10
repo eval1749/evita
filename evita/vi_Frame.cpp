@@ -696,8 +696,6 @@ void Frame::DidChangeTabSelection(int selected_index) {
     #endif
   }
   active_tab_content_ = tab_content;
-  tab_content->UpdateActiveTick();
-  tab_content->Show();
   tab_content->Activate();
   #if DEBUG_FOCUS
     DVLOG(0) << "End selected_index=" << selected_index <<

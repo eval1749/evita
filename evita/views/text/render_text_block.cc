@@ -305,6 +305,18 @@ TextLine* TextBlock::FormatLine(TextFormatter* formatter) {
   return line;
 }
 
+TextLine* TextBlock::GetFirst() const {
+  UI_ASSERT_DOM_LOCKED();
+  DCHECK(!ShouldFormat());
+  return lines_.front();
+}
+
+TextLine* TextBlock::GetLast() const {
+  UI_ASSERT_DOM_LOCKED();
+  DCHECK(!ShouldFormat());
+  return lines_.back();
+}
+
 text::Posn TextBlock::GetVisibleEnd() const {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!dirty_);

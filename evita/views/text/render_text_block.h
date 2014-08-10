@@ -22,8 +22,8 @@ class TextBlock final : public text::BufferMutationObserver {
   private: RenderStyle default_style_;
   private: bool dirty_;
   private: bool dirty_line_point_;
-  private: float m_cy;
   private: std::list<TextLine*> lines_;
+  private: float lines_height_;
   private: text::Buffer* const text_buffer_;
   private: float zoom_;
 
@@ -53,7 +53,7 @@ class TextBlock final : public text::BufferMutationObserver {
   public: void Format(const gfx::RectF& bounds, float zoom,
                       text::Posn text_offset);
   public: TextLine* GetFirst() const { return lines_.front(); }
-  public: float GetHeight() const { return m_cy; }
+  public: float GetHeight() const { return lines_height_; }
   public: TextLine* GetLast() const { return lines_.back(); }
   public: text::Posn GetVisibleEnd() const;
   private: void InvalidateLines(text::Posn offset);

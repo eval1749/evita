@@ -16,7 +16,7 @@ namespace rendering {
 TextBlock::TextBlock(text::Buffer* text_buffer, const gfx::RectF& bounds,
                      float zoom)
     : bounds_(bounds), dirty_(true), dirty_line_point_(true),
-      m_cy(0), text_buffer_(text_buffer), zoom_(zoom) {
+      lines_height_(0), text_buffer_(text_buffer), zoom_(zoom) {
   text_buffer->AddObserver(this);
 }
 
@@ -36,7 +36,7 @@ void TextBlock::Append(TextLine* line) {
     line->set_origin(gfx::PointF(last_line->left(), last_line->bottom()));
   }
   lines_.push_back(line);
-  m_cy += line->GetHeight();
+  lines_height_ += line->GetHeight();
 }
 
 bool TextBlock::DiscardFirstLine() {
@@ -45,7 +45,7 @@ bool TextBlock::DiscardFirstLine() {
     return false;
 
   auto const line = lines_.front();
-  m_cy -= line->GetHeight();
+  lines_height_ -= line->GetHeight();
   delete line;
   lines_.pop_front();
   dirty_line_point_ = true;
@@ -58,7 +58,7 @@ bool TextBlock::DiscardLastLine() {
     return false;
 
   auto const line = lines_.back();
-  m_cy -= line->GetHeight();
+  lines_height_ -= line->GetHeight();
   delete line;
   lines_.pop_back();
   return true;
@@ -100,7 +100,7 @@ void TextBlock::Format(const gfx::RectF& bounds, float zoom,
     // Line must have at least one cell other than filler.
     DCHECK_GE(line->GetEnd(), line->GetStart());
 
-    if (m_cy >= bounds_.height()) {
+    if (lines_height_ >= bounds_.height()) {
       // TextBlock is filled up with lines.
       break;
     }
@@ -153,7 +153,7 @@ bool TextBlock::IsShowEndOfDocument() const {
 void TextBlock::Prepend(TextLine* line) {
   ASSERT_DOM_LOCKED();
   lines_.push_front(line);
-  m_cy += line->GetHeight();
+  lines_height_ += line->GetHeight();
   dirty_line_point_ = true;
 }
 
@@ -166,7 +166,7 @@ void TextBlock::Reset() {
   lines_.clear();
   dirty_ = true;
   dirty_line_point_ = true;
-  m_cy = 0;
+  lines_height_ = 0;
 }
 
 bool TextBlock::ShouldFormat(const gfx::RectF& bounds, float zoom) const {

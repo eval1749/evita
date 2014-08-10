@@ -56,7 +56,6 @@ class TextRenderer final : public text::BufferMutationObserver {
   public: void DidSetFocus();
   // Returns end of line offset containing |text_offset|.
   public: text::Posn EndOfLine(text::Posn text_offset) const;
-  private: TextLine* FindLine(text::Posn text_offset) const;
   public: void Format(text::Posn text_offset);
   // Returns true if formatting taken place.
   public: bool FormatIfNeeded();

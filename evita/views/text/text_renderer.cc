@@ -70,19 +70,6 @@ text::Posn TextRenderer::EndOfLine(text::Posn text_offset) const {
   return text_block_->EndOfLine(text_offset);
 }
 
-TextLine* TextRenderer::FindLine(Posn lPosn) const {
-  DCHECK(!ShouldFormat());
-  if (lPosn < text_block_->GetFirst()->GetStart() ||
-      lPosn > text_block_->GetFirst()->GetEnd()) {
-    return nullptr;
-  }
-  for (auto const line : text_block_->lines()) {
-    if (lPosn < line->text_end())
-      return line;
-  }
-  return nullptr;
-}
-
 text::Posn TextRenderer::GetEnd() {
   FormatIfNeeded();
   return text_block_->GetLast()->GetEnd();

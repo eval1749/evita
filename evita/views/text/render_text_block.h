@@ -50,7 +50,6 @@ class TextBlock final : public text::BufferMutationObserver {
   // Returns true if discarded the last line.
   public: bool DiscardLastLine();
   public: void EnsureLinePoints();
-  public: void Finish();
   public: void Format(const gfx::RectF& bounds, float zoom,
                       text::Posn text_offset);
   public: TextLine* GetFirst() const { return lines_.front(); }

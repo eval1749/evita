@@ -29,15 +29,13 @@ class TextFormatter final {
   private: class TextScanner;
 
   private: RenderStyle default_render_style_;
-  private: css::Style default_style_;
-  private: TextBlock* const text_block_;
+  private: const TextBlock* const text_block_;
   private: std::unique_ptr<TextScanner> text_scanner_;
   private: float zoom_;
 
-  public: TextFormatter(TextBlock* text_block, text::Posn start);
+  public: TextFormatter(const TextBlock* text_block, text::Posn start);
   public: ~TextFormatter();
 
-  public: void Format();
   public: TextLine* FormatLine();
 
   private: Cell* formatChar(Cell*, float x, char16);

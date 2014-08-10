@@ -176,9 +176,9 @@ RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
 //
 // TextFormatter
 //
-TextFormatter::TextFormatter(TextBlock* text_block, text::Posn text_offset)
+TextFormatter::TextFormatter(const TextBlock* text_block,
+                             text::Posn text_offset)
     : default_render_style_(GetRenderStyle(GetDefaultStyle(text_block))),
-      default_style_(GetDefaultStyle(text_block)),
       text_block_(text_block),
       text_scanner_(new TextScanner(text_block->text_buffer(), text_offset)),
       zoom_(text_block->zoom()) {
@@ -187,33 +187,6 @@ TextFormatter::TextFormatter(TextBlock* text_block, text::Posn text_offset)
 }
 
 TextFormatter::~TextFormatter() {
-}
-
-void TextFormatter::Format() {
-  DCHECK(!text_block_->bounds().empty());
-  for (;;) {
-    auto const pLine = FormatLine();
-    DCHECK_GT(pLine->bounds().height(), 0.0f);
-
-    text_block_->Append(pLine);
-
-    // Line must have at least one cell other than filler.
-    DCHECK_GE(pLine->GetEnd(), pLine->GetStart());
-
-    if (text_block_->GetHeight() >= text_block_->height()) {
-      // TextBlock is filled up with lines.
-      break;
-    }
-
-    if (auto const marker_cell = pLine->cells().back()->as<MarkerCell>()) {
-      if (marker_cell->marker_name() == TextMarker::EndOfDocument) {
-        // We have no more contents.
-        break;
-      }
-    }
-  }
-
-  text_block_->Finish();
 }
 
 // Returns true if more contents is available, otherwise returns false.

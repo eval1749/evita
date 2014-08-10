@@ -77,24 +77,43 @@ void TextBlock::EnsureLinePoints() {
   dirty_line_point_ = false;
 }
 
-void TextBlock::Finish() {
-  ASSERT_DOM_LOCKED();
-  dirty_ = lines_.empty();
-  dirty_line_point_ = dirty_;
-}
-
 void TextBlock::Format(const gfx::RectF& bounds, float zoom,
                        text::Posn text_offset) {
+  DCHECK(!bounds.empty());
+  DCHECK_GT(zoom, 0.0f);
   ASSERT_DOM_LOCKED();
   bounds_ = bounds;
   zoom_ = zoom;
   Reset();
 
+  // TODO(eval1749) We should recompute default style when style is chagned,
+  // rather than every |Format| call.
   const auto& style = text_buffer_->GetDefaultStyle();
   default_style_ = RenderStyle(style, nullptr);
 
   TextFormatter formatter(this, text_buffer_->ComputeStartOfLine(text_offset));
-  formatter.Format();
+  for (;;) {
+    auto const line = formatter.FormatLine();
+    DCHECK_GT(line->bounds().height(), 0.0f);
+    Append(line);
+
+    // Line must have at least one cell other than filler.
+    DCHECK_GE(line->GetEnd(), line->GetStart());
+
+    if (m_cy >= bounds_.height()) {
+      // TextBlock is filled up with lines.
+      break;
+    }
+
+    if (line->GetEnd() > text_buffer_->GetEnd()) {
+      // We have no more contents.
+      break;
+    }
+  }
+
+  dirty_ = false;
+  dirty_line_point_ = false;
+
   // Scroll up until we have |text_offset| in this |TextBlock|.
   while (text_offset > GetFirst()->GetEnd()) {
     DiscardLastLine();

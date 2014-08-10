@@ -91,9 +91,10 @@ void TextBlock::Format(const gfx::RectF& bounds, float zoom,
 
   TextFormatter formatter(this, text_buffer_->ComputeStartOfLine(text_offset));
   formatter.Format();
+  // Scroll up until we have |text_offset| in this |TextBlock|.
   while (text_offset > GetFirst()->GetEnd()) {
     DiscardLastLine();
-    formatter.FormatLine();
+    Append(formatter.FormatLine());
   }
   EnsureLinePoints();
 }

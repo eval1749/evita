@@ -53,8 +53,6 @@ class TextBlock final : public text::BufferMutationObserver {
   public: bool FormatIfNeeded();
   private: TextLine* FormatLine(TextFormatter* formatter);
   public: text::Posn GetEnd();
-  public: TextLine* GetFirst();
-  public: TextLine* GetLast();
   public: text::Posn GetStart();
   public: text::Posn GetVisibleEnd();
   public: gfx::RectF HitTestTextPosition(text::Posn text_offset);

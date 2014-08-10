@@ -287,7 +287,7 @@ void TextBlock::Format(text::Posn text_offset) {
   }
 
   // Scroll up until we have |text_offset| in this |TextBlock|.
-  while (text_offset > GetFirst()->GetEnd()) {
+  while (text_offset > lines_.front()->GetEnd()) {
     DiscardLastLine();
     Append(FormatLine(&formatter));
   }
@@ -318,25 +318,13 @@ TextLine* TextBlock::FormatLine(TextFormatter* formatter) {
 text::Posn TextBlock::GetEnd() {
   UI_ASSERT_DOM_LOCKED();
   FormatIfNeeded();
-  return GetLast()->GetEnd();
-}
-
-TextLine* TextBlock::GetFirst() {
-  UI_ASSERT_DOM_LOCKED();
-  FormatIfNeeded();
-  return lines_.front();
-}
-
-TextLine* TextBlock::GetLast() {
-  UI_ASSERT_DOM_LOCKED();
-  FormatIfNeeded();
-  return lines_.back();
+  return lines_.back()->GetEnd();
 }
 
 text::Posn TextBlock::GetStart() {
   UI_ASSERT_DOM_LOCKED();
   FormatIfNeeded();
-  return GetFirst()->GetStart();
+  return lines_.front()->GetStart();
 }
 
 text::Posn TextBlock::GetVisibleEnd() {
@@ -443,8 +431,9 @@ bool TextBlock::IsShowEndOfDocument() {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
-  return GetLast()->GetEnd() > text_buffer_->GetEnd() &&
-         GetLast()->bottom() <= bounds_.bottom;
+  auto const last_line = lines_.back();
+  return last_line->GetEnd() > text_buffer_->GetEnd() &&
+         last_line->bottom() <= bounds_.bottom;
 }
 
 void TextBlock::Prepend(TextLine* line) {
@@ -456,9 +445,9 @@ void TextBlock::Prepend(TextLine* line) {
 
 bool TextBlock::ScrollDown() {
   DCHECK(!ShouldFormat());
-  if (!GetFirst()->GetStart())
+  if (!lines_.front()->GetStart())
     return false;
-  auto const goal_offset = GetFirst()->GetStart() - 1;
+  auto const goal_offset = lines_.front()->GetStart() - 1;
   auto const start_offset = text_buffer_->ComputeStartOfLine(goal_offset);
   TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
   for (;;) {
@@ -471,7 +460,7 @@ bool TextBlock::ScrollDown() {
 
   // Discard lines outside of screen.
   EnsureLinePoints();
-  while (GetLast()->top() >= bounds_.bottom) {
+  while (lines_.back()->top() >= bounds_.bottom) {
     DiscardLastLine();
   }
   view_start_ = lines_.front()->GetStart();
@@ -561,7 +550,7 @@ bool TextBlock::ScrollUp() {
   if (IsShowEndOfDocument())
     return true;
 
-  auto const start_offset = GetLast()->GetEnd();
+  auto const start_offset = lines_.back()->GetEnd();
   TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
   auto const line = FormatLine(&formatter);
   Append(line);

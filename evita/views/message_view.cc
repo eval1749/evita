@@ -286,8 +286,7 @@ void MessageView::UpdateView() {
 
 // ui::Widget
 void MessageView::DidChangeBounds() {
-  if (layer())
-    layer()->SetBounds(gfx::RectF(bounds()));
+  ui::Widget::DidChangeBounds();
   if (canvas_)
     canvas_->SetBounds(GetContentsBounds());
 }

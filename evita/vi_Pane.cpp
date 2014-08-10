@@ -28,12 +28,6 @@ Frame* Pane::GetFrame() const {
 }
 
 // ui::Widget
-void Pane::DidChangeBounds() {
-  ui::Widget::DidChangeBounds();
-  if (layer())
-    layer()->SetBounds(gfx::RectF(bounds()));
-}
-
 void Pane::DidRealize() {
   SetLayer(new ui::Layer());
   ui::Widget::DidRealize();

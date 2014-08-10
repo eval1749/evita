@@ -34,7 +34,6 @@ class Pane : public ui::Widget {
   public: virtual const domapi::TabData* GetTabData() const = 0;
 
   // ui::Widget
-  protected: virtual void DidChangeBounds() override;
   protected: virtual void DidRealize() override;
 
   DISALLOW_COPY_AND_ASSIGN(Pane);

@@ -1193,11 +1193,9 @@ void TabStrip::DidRealize() {
 }
 
 void TabStrip::DidChangeBounds() {
-  if (!impl_)
-    return;
-  impl_->SetBounds(GetContentsBounds());
-  if (layer())
-    layer()->SetBounds(gfx::RectF(bounds()));
+  ui::Widget::DidChangeBounds();
+  if (impl_)
+    impl_->SetBounds(GetContentsBounds());
 }
 
 // On Win8.1

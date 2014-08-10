@@ -224,6 +224,8 @@ void Widget::DidRemoveChildWidget(const Widget&) {
 }
 
 void Widget::DidChangeBounds() {
+  if (layer())
+    layer()->SetBounds(gfx::RectF(bounds()));
 }
 
 void Widget::DidSetFocus(ui::Widget*) {

@@ -155,8 +155,7 @@ void MetricsView::UpdateView() {
 
 // ui::Widget
 void MetricsView::DidChangeBounds() {
-  if (layer())
-    layer()->SetBounds(gfx::RectF(bounds()));
+  ui::Widget::DidChangeBounds();
   if (canvas_)
     canvas_->SetBounds(GetContentsBounds());
 }

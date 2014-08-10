@@ -59,7 +59,6 @@ class TextBlock final : public text::BufferMutationObserver {
   public: void Format(text::Posn text_offset);
   private: TextLine* FormatLine(TextFormatter* formatter);
   public: TextLine* GetFirst() const { return lines_.front(); }
-  public: float GetHeight() const { return lines_height_; }
   public: TextLine* GetLast() const { return lines_.back(); }
   public: text::Posn GetVisibleEnd() const;
   public: gfx::RectF HitTestTextPosition(text::Posn text_offset);

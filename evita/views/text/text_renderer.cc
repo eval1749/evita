@@ -16,7 +16,6 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/gfx_base.h"
 #include "evita/text/buffer.h"
-#include "evita/views/text/render_cell.h"
 #include "evita/views/text/render_font.h"
 #include "evita/views/text/render_font_set.h"
 #include "evita/views/text/render_text_block.h"
@@ -98,37 +97,8 @@ bool TextRenderer::IsPositionFullyVisible(text::Posn offset) const {
          offset < text_block_->GetVisibleEnd();
 }
 
-text::Posn TextRenderer::MapPointToPosition(gfx::PointF pt) {
-  if (pt.y < text_block_->top())
-    return GetStart();
-  if (pt.y >= text_block_->bottom())
-    return GetEnd();
-
-  auto yLine = text_block_->top();
-  for (const auto line : text_block_->lines()) {
-    auto const y = pt.y - yLine;
-    yLine += line->GetHeight();
-
-    if (y >= line->GetHeight())
-      continue;
-
-    auto xCell = text_block_->left();
-    if (pt.x < xCell)
-      return line->GetStart();
-
-    auto result_offset = line->GetEnd() - 1;
-    for (const auto cell : line->cells()) {
-      auto x = pt.x - xCell;
-      xCell += cell->width();
-      const auto offset = cell->MapXToPosn(x);
-      if (offset >= 0)
-        result_offset = offset;
-      if (x >= 0 && x < cell->width())
-        break;
-    }
-    return result_offset;
-  }
-  return GetEnd() - 1;
+text::Posn TextRenderer::MapPointToPosition(gfx::PointF point) {
+  return text_block_->MapPointToPosition(point);
 }
 
 text::Posn TextRenderer::MapPointXToOffset(text::Posn text_offset,

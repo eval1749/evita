@@ -70,6 +70,7 @@ class TextBlock final : public text::BufferMutationObserver {
   private: void InvalidateCache();
   private: void InvalidateLines(text::Posn offset);
   public: bool IsShowEndOfDocument();
+  public: text::Posn MapPointToPosition(gfx::PointF point);
   public: text::Posn MapPointXToOffset(text::Posn text_offset, float point_x);
   private: void Prepend(TextLine* line);
   // Returns true if this |TextBlock| is modified.

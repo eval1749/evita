@@ -11,6 +11,7 @@
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/text/buffer.h"
+#include "evita/views/text/render_cell.h"
 #include "evita/views/text/render_style.h"
 #include "evita/views/text/render_text_line.h"
 #include "evita/views/text/text_formatter.h"
@@ -378,6 +379,42 @@ void TextBlock::InvalidateLines(text::Posn offset) {
   ASSERT_DOM_LOCKED();
   text_line_cache_->DidChangeBuffer(offset);
   dirty_ = true;
+}
+
+text::Posn TextBlock::MapPointToPosition(gfx::PointF point) {
+  UI_ASSERT_DOM_LOCKED();
+  FormatIfNeeded();
+
+  if (point.y < bounds_.top)
+    return GetStart();
+  if (point.y >= bounds_.bottom)
+    return GetEnd();
+
+  auto line_top = bounds_.top;
+  for (const auto line : lines_) {
+    auto const y = point.y - line_top;
+    line_top += line->GetHeight();
+
+    if (y >= line->GetHeight())
+      continue;
+
+    auto cell_left = bounds_.left;
+    if (point.x < cell_left)
+      return line->GetStart();
+
+    auto result_offset = line->GetEnd() - 1;
+    for (const auto cell : line->cells()) {
+      auto x = point.x - cell_left;
+      cell_left += cell->width();
+      const auto offset = cell->MapXToPosn(x);
+      if (offset >= 0)
+        result_offset = offset;
+      if (x >= 0 && x < cell->width())
+        break;
+    }
+    return result_offset;
+  }
+  return GetEnd() - 1;
 }
 
 text::Posn TextBlock::MapPointXToOffset(text::Posn text_offset, float point_x) {

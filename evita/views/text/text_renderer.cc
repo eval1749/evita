@@ -33,13 +33,10 @@ using namespace rendering;
 //
 TextRenderer::TextRenderer(text::Buffer* buffer)
     : buffer_(buffer), screen_text_block_(new ScreenTextBlock()),
-      should_render_(true), text_block_(new TextBlock(buffer)),
-      view_start_(0), zoom_(1.0f) {
-  buffer_->AddObserver(this);
+      should_render_(true), text_block_(new TextBlock(buffer)), zoom_(1.0f) {
 }
 
 TextRenderer::~TextRenderer() {
-  buffer()->RemoveObserver(this);
 }
 
 void TextRenderer::DidHide() {
@@ -63,30 +60,26 @@ text::Posn TextRenderer::EndOfLine(text::Posn text_offset) const {
 }
 
 text::Posn TextRenderer::GetEnd() {
-  FormatIfNeeded();
   return text_block_->GetEnd();
 }
 
 text::Posn TextRenderer::GetStart() {
-  FormatIfNeeded();
   return text_block_->GetStart();
 }
 
 text::Posn TextRenderer::GetVisibleEnd() {
-  FormatIfNeeded();
   return text_block_->GetVisibleEnd();
 }
 
 void TextRenderer::Format(text::Posn text_offset) {
   text_block_->Format(text_offset);
-  view_start_ = text_block_->GetStart();
   should_render_ = true;
 }
 
 bool TextRenderer::FormatIfNeeded() {
-  if (!ShouldFormat())
+  if (!text_block_->FormatIfNeeded())
     return false;
-  Format(view_start_);
+  should_render_ = true;
   return true;
 }
 
@@ -106,7 +99,6 @@ bool TextRenderer::IsPositionFullyVisible(text::Posn offset) const {
 }
 
 text::Posn TextRenderer::MapPointToPosition(gfx::PointF pt) {
-  FormatIfNeeded();
   if (pt.y < text_block_->top())
     return GetStart();
   if (pt.y >= text_block_->bottom())
@@ -187,7 +179,6 @@ bool TextRenderer::ScrollDown() {
   DCHECK(!ShouldFormat());
   if (!text_block_->ScrollDown())
     return false;
-  view_start_ = text_block_->GetStart();
   should_render_ = true;
   return true;
 }
@@ -264,7 +255,6 @@ bool TextRenderer::ScrollUp() {
   DCHECK(!ShouldFormat());
   if (!text_block_->ScrollUp())
     return false;
-  view_start_ = text_block_->GetStart();
   should_render_ = true;
   return true;
 }
@@ -296,22 +286,6 @@ bool TextRenderer::ShouldRender() const {
 }
 text::Posn TextRenderer::StartOfLine(text::Posn text_offset) const {
   return text_block_->StartOfLine(text_offset);
-}
-
-// text::BufferMutationObserver
-void TextRenderer::DidDeleteAt(text::Posn offset, size_t length) {
-  ASSERT_DOM_LOCKED();
-  if (view_start_ <= offset)
-    return;
-  view_start_ = std::max(static_cast<text::Posn>(view_start_ - length),
-                         offset);
-}
-
-void TextRenderer::DidInsertAt(text::Posn offset, size_t length) {
-  ASSERT_DOM_LOCKED();
-  if (view_start_ <= offset)
-    return;
-  view_start_ += length;
 }
 
 }  // namespace views

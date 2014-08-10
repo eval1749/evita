@@ -190,7 +190,6 @@ gfx::RectF TextEditWindow::HitTestTextPosition(Posn text_offset) {
 
 bool TextEditWindow::LargeScroll(int, int iDy) {
   UI_ASSERT_DOM_LOCKED();
-  text_renderer_->FormatIfNeeded();
 
   auto scrolled = false;
   if (iDy < 0) {
@@ -313,7 +312,6 @@ void TextEditWindow::SetZoom(float new_zoom) {
 
 bool TextEditWindow::SmallScroll(int, int y_count) {
   UI_ASSERT_DOM_LOCKED();
-  text_renderer_->FormatIfNeeded();
 
   bool scrolled = false;
   if (y_count < 0) {

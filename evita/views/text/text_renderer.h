@@ -10,7 +10,6 @@
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect.h"
 #include "evita/gfx/rect_f.h"
-#include "evita/text/buffer_mutation_observer.h"
 #include "evita/views/text/render_selection.h"
 
 namespace views {
@@ -28,7 +27,7 @@ namespace rendering {
 //
 // TextRenderer
 //
-class TextRenderer final : public text::BufferMutationObserver {
+class TextRenderer final {
   private: typedef rendering::Cell Cell;
   public: typedef rendering::ScreenTextBlock ScreenTextBlock;
   public: typedef rendering::TextSelectionModel TextSelectionModel;
@@ -40,7 +39,6 @@ class TextRenderer final : public text::BufferMutationObserver {
   private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
   private: bool should_render_;
   private: std::unique_ptr<TextBlock> text_block_;
-  private: text::Posn view_start_;
   private: float zoom_;
 
   public: TextRenderer(text::Buffer* buffer);
@@ -56,7 +54,7 @@ class TextRenderer final : public text::BufferMutationObserver {
   // Returns end of line offset containing |text_offset|.
   public: text::Posn EndOfLine(text::Posn text_offset) const;
   public: void Format(text::Posn text_offset);
-  // Returns true if formatting taken place.
+  // Returns true if text format is taken place.
   public: bool FormatIfNeeded();
   public: Posn GetStart();
   public: Posn GetEnd();
@@ -81,10 +79,6 @@ class TextRenderer final : public text::BufferMutationObserver {
   public: bool ShouldRender() const;
   // Returns start of line offset containing |text_offset|.
   public: text::Posn StartOfLine(text::Posn text_offset) const;
-
-  // text::BufferMutationObserver
-  private: virtual void DidDeleteAt(text::Posn offset, size_t length) override;
-  private: virtual void DidInsertAt(text::Posn offset, size_t length) override;
 
   DISALLOW_COPY_AND_ASSIGN(TextRenderer);
 };

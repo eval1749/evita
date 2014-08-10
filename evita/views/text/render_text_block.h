@@ -30,6 +30,7 @@ class TextBlock final : public text::BufferMutationObserver {
   private: float lines_height_;
   private: text::Buffer* const text_buffer_;
   private: std::unique_ptr<TextLineCache> text_line_cache_;
+  private: text::Posn view_start_;
   private: float zoom_;
 
   public: explicit TextBlock(text::Buffer* buffer);
@@ -57,16 +58,18 @@ class TextBlock final : public text::BufferMutationObserver {
   public: text::Posn EndOfLine(text::Posn text_offset);
   private: void EnsureLinePoints();
   public: void Format(text::Posn text_offset);
+  // Returns true if text format is taken place.
+  public: bool FormatIfNeeded();
   private: TextLine* FormatLine(TextFormatter* formatter);
-  public: text::Posn GetEnd() const;
-  public: TextLine* GetFirst() const;
-  public: TextLine* GetLast() const;
-  public: text::Posn GetStart() const;
-  public: text::Posn GetVisibleEnd() const;
+  public: text::Posn GetEnd();
+  public: TextLine* GetFirst();
+  public: TextLine* GetLast();
+  public: text::Posn GetStart();
+  public: text::Posn GetVisibleEnd();
   public: gfx::RectF HitTestTextPosition(text::Posn text_offset);
   private: void InvalidateCache();
   private: void InvalidateLines(text::Posn offset);
-  public: bool IsShowEndOfDocument() const;
+  public: bool IsShowEndOfDocument();
   public: text::Posn MapPointXToOffset(text::Posn text_offset, float point_x);
   private: void Prepend(TextLine* line);
   // Returns true if this |TextBlock| is modified.

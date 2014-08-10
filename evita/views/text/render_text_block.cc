@@ -169,7 +169,8 @@ void TextBlock::TextLineCache::RemoveAllLines() {
 TextBlock::TextBlock(text::Buffer* text_buffer)
     : dirty_(true), dirty_line_point_(true), lines_height_(0),
       text_buffer_(text_buffer),
-      text_line_cache_(new TextLineCache(text_buffer)), zoom_(1.0f) {
+      text_line_cache_(new TextLineCache(text_buffer)), view_start_(0),
+      zoom_(1.0f) {
   text_buffer->AddObserver(this);
 }
 
@@ -290,6 +291,14 @@ void TextBlock::Format(text::Posn text_offset) {
     Append(FormatLine(&formatter));
   }
   EnsureLinePoints();
+  view_start_ = lines_.front()->GetStart();
+}
+
+bool TextBlock::FormatIfNeeded() {
+  if (!ShouldFormat())
+    return false;
+  Format(view_start_);
+  return true;
 }
 
 TextLine* TextBlock::FormatLine(TextFormatter* formatter) {
@@ -305,33 +314,33 @@ TextLine* TextBlock::FormatLine(TextFormatter* formatter) {
   return line;
 }
 
-text::Posn TextBlock::GetEnd() const {
+text::Posn TextBlock::GetEnd() {
   UI_ASSERT_DOM_LOCKED();
-  DCHECK(!ShouldFormat());
+  FormatIfNeeded();
   return GetLast()->GetEnd();
 }
 
-TextLine* TextBlock::GetFirst() const {
+TextLine* TextBlock::GetFirst() {
   UI_ASSERT_DOM_LOCKED();
-  DCHECK(!ShouldFormat());
+  FormatIfNeeded();
   return lines_.front();
 }
 
-TextLine* TextBlock::GetLast() const {
+TextLine* TextBlock::GetLast() {
   UI_ASSERT_DOM_LOCKED();
-  DCHECK(!ShouldFormat());
+  FormatIfNeeded();
   return lines_.back();
 }
 
-text::Posn TextBlock::GetStart() const {
+text::Posn TextBlock::GetStart() {
   UI_ASSERT_DOM_LOCKED();
-  DCHECK(!ShouldFormat());
+  FormatIfNeeded();
   return GetFirst()->GetStart();
 }
 
-text::Posn TextBlock::GetVisibleEnd() const {
+text::Posn TextBlock::GetVisibleEnd() {
   UI_ASSERT_DOM_LOCKED();
-  DCHECK(!ShouldFormat());
+  FormatIfNeeded();
   DCHECK(!dirty_line_point_);
   for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
     auto const line = *it;
@@ -386,7 +395,7 @@ text::Posn TextBlock::MapPointXToOffset(text::Posn text_offset, float point_x) {
   }
 }
 
-bool TextBlock::IsShowEndOfDocument() const {
+bool TextBlock::IsShowEndOfDocument() {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
@@ -421,6 +430,7 @@ bool TextBlock::ScrollDown() {
   while (GetLast()->top() >= bounds_.bottom) {
     DiscardLastLine();
   }
+  view_start_ = lines_.front()->GetStart();
   return true;
 }
 
@@ -433,6 +443,7 @@ bool TextBlock::ScrollUp() {
   if (!DiscardFirstLine())
     return false;
 
+  view_start_ = lines_.front()->GetStart();
   EnsureLinePoints();
   if (IsShowEndOfDocument())
     return true;
@@ -489,19 +500,26 @@ text::Posn TextBlock::StartOfLine(text::Posn text_offset) {
 }
 
 // text::BufferMutationObserver
-void TextBlock::DidChangeStyle(Posn offset, size_t) {
+void TextBlock::DidChangeStyle(text::Posn offset, size_t) {
   ASSERT_DOM_LOCKED();
   InvalidateLines(offset);
 }
 
-void TextBlock::DidDeleteAt(Posn offset, size_t) {
+void TextBlock::DidDeleteAt(text::Posn offset, size_t length) {
   ASSERT_DOM_LOCKED();
   InvalidateLines(offset);
+  if (view_start_ <= offset)
+    return;
+  view_start_ = std::max(static_cast<text::Posn>(view_start_ - length),
+                         offset);
 }
 
-void TextBlock::DidInsertAt(Posn offset, size_t) {
+void TextBlock::DidInsertAt(text::Posn offset, size_t length) {
   ASSERT_DOM_LOCKED();
   InvalidateLines(offset);
+  if (view_start_ <= offset)
+    return;
+  view_start_ += length;
 }
 
 }  // namespace rendering

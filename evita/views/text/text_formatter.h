@@ -19,7 +19,6 @@ namespace views {
 namespace rendering {
 
 class Cell;
-class TextBlock;
 class TextLine;
 enum class TextMarker;
 class TextSelection;
@@ -28,12 +27,13 @@ class TextSelectionModel;
 class TextFormatter final {
   private: class TextScanner;
 
+  private: gfx::RectF bounds_;
   private: RenderStyle default_render_style_;
-  private: const TextBlock* const text_block_;
   private: std::unique_ptr<TextScanner> text_scanner_;
   private: float zoom_;
 
-  public: TextFormatter(const TextBlock* text_block, text::Posn start);
+  public: TextFormatter(const text::Buffer* text_block, text::Posn start,
+                        const gfx::RectF& bounds, float zoom);
   public: ~TextFormatter();
 
   public: TextLine* FormatLine();

@@ -54,7 +54,7 @@ class TextLine final {
   private: bool Contains(text::Posn offset) const;
   public: TextLine* Copy() const;
   public: bool Equal(const TextLine*) const;
-  public: void Fix(float left, float top, float ascent, float descent);
+  public: void Fix(float ascent, float descent);
   public: Posn GetEnd() const { return m_lEnd; }
   public: float GetHeight() const { return bounds_.height(); }
   public: Posn GetStart() const { return m_lStart; }

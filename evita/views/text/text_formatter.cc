@@ -18,7 +18,6 @@
 #include "evita/views/text/render_font_set.h"
 #include "evita/views/text/render_style.h"
 #include "evita/views/text/render_selection.h"
-#include "evita/views/text/render_text_block.h"
 #include "evita/views/text/render_text_line.h"
 #include "evita/text/spelling.h"
 
@@ -55,10 +54,6 @@ gfx::ColorF CssColorToColorF(const css::Color& color) {
 
 const Font* GetFont(const css::Style& style) {
   return FontSet::GetFont(style, 'x');
-}
-
-const css::Style& GetDefaultStyle(const TextBlock* text_block) {
-  return text_block->text_buffer()->GetDefaultStyle();
 }
 
 RenderStyle GetRenderStyle(const css::Style& style) {
@@ -176,13 +171,13 @@ RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
 //
 // TextFormatter
 //
-TextFormatter::TextFormatter(const TextBlock* text_block,
-                             text::Posn text_offset)
-    : default_render_style_(GetRenderStyle(GetDefaultStyle(text_block))),
-      text_block_(text_block),
-      text_scanner_(new TextScanner(text_block->text_buffer(), text_offset)),
-      zoom_(text_block->zoom()) {
-  DCHECK(!text_block_->bounds().empty());
+TextFormatter::TextFormatter(const text::Buffer* text_buffer,
+                             text::Posn text_offset,
+                             const gfx::RectF& bounds, float zoom)
+    : bounds_(bounds),
+      default_render_style_(GetRenderStyle(text_buffer->GetDefaultStyle())),
+      text_scanner_(new TextScanner(text_buffer, text_offset)), zoom_(zoom) {
+  DCHECK(!bounds_.empty());
   DCHECK_GT(zoom_, 0.0f);
 }
 
@@ -191,11 +186,11 @@ TextFormatter::~TextFormatter() {
 
 // Returns true if more contents is available, otherwise returns false.
 TextLine* TextFormatter::FormatLine() {
-  DCHECK(!text_block_->bounds().empty());
+  DCHECK(!bounds_.empty());
   auto const pLine = new TextLine();
   pLine->set_start(text_scanner_->GetPosn());
 
-  auto x = text_block_->left();
+  auto x = bounds_.left;
   auto descent = 0.0f;
   auto ascent  = 0.0f;
 
@@ -255,11 +250,7 @@ TextLine* TextFormatter::FormatLine() {
   x += pCell->width();
   descent = std::max(pCell->descent(), descent);
   ascent  = std::max(pCell->height() - pCell->descent(), ascent);
-
-  pLine->Fix(text_block_->left(), text_block_->top() + text_block_->GetHeight(),
-             AlignHeightToPixel(ascent),
-             AlignHeightToPixel(descent));
-
+  pLine->Fix(AlignHeightToPixel(ascent), AlignHeightToPixel(descent));
   return pLine;
 }
 
@@ -296,7 +287,7 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
     auto const x2 = (x + cxTab - cxLeftMargin) / cxTab * cxTab;
     auto const cx = (x2 + cxLeftMargin) - x;
     auto const cxM = AlignWidthToPixel(font->GetCharWidth('M'));
-    if (pPrev && x2 + cxM > text_block_->right())
+    if (pPrev && x2 + cxM > bounds_.right)
       return nullptr;
 
     auto const height = AlignHeightToPixel(font->height());
@@ -325,7 +316,7 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
 
     auto const width = font->GetTextWidth(string) + 4;
     auto const char_width = font->GetCharWidth('M');
-    if (pPrev && x + width + char_width > text_block_->right())
+    if (pPrev && x + width + char_width > bounds_.right)
       return nullptr;
     auto const height = AlignHeightToPixel(font->height());
     return new UnicodeCell(text_scanner_->MakeRenderStyle(style, font),
@@ -336,7 +327,7 @@ Cell* TextFormatter::formatChar(Cell* pPrev, float x, char16 wch) {
   auto const cx = AlignWidthToPixel(pFont->GetCharWidth(wch));
   if (pPrev) {
     auto const cxM = AlignWidthToPixel(pFont->GetCharWidth('M'));
-    if (x + cx + cxM > text_block_->right()) {
+    if (x + cx + cxM > bounds_.right) {
       // We doesn't have enough room for a char in the line.
       return nullptr;
     }

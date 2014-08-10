@@ -77,8 +77,8 @@ void TextBlock::EnsureLinePoints() {
   dirty_line_point_ = false;
 }
 
-void TextBlock::Format(const gfx::RectF& bounds, float zoom,
-                       text::Posn text_offset) {
+void TextBlock::Format(text::Posn text_offset, const gfx::RectF& bounds,
+                       float zoom) {
   DCHECK(!bounds.empty());
   DCHECK_GT(zoom, 0.0f);
   ASSERT_DOM_LOCKED();
@@ -93,7 +93,8 @@ void TextBlock::Format(const gfx::RectF& bounds, float zoom,
   // and bottom of text block.
   default_style_ = RenderStyle(style, nullptr);
 
-  TextFormatter formatter(this, text_buffer_->ComputeStartOfLine(text_offset));
+  auto const line_start = text_buffer_->ComputeStartOfLine(text_offset);
+  TextFormatter formatter(text_buffer_, line_start, bounds, zoom);
   for (;;) {
     auto const line = formatter.FormatLine();
     DCHECK_GT(line->bounds().height(), 0.0f);
@@ -114,7 +115,7 @@ void TextBlock::Format(const gfx::RectF& bounds, float zoom,
   }
 
   dirty_ = false;
-  dirty_line_point_ = false;
+  dirty_line_point_ = true;
 
   // Scroll up until we have |text_offset| in this |TextBlock|.
   while (text_offset > GetFirst()->GetEnd()) {

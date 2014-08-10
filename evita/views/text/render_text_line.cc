@@ -77,7 +77,9 @@ void TextLine::AddCell(Cell* cell) {
   cells_.push_back(cell);
 }
 
-void TextLine::Fix(float left, float top, float ascent, float descent) {
+void TextLine::Fix(float ascent, float descent) {
+  auto const left = 0.0f;
+  auto const top = 0.0f;
   auto const height = ascent + descent;
   auto right = left;
   for (auto cell : cells_) {

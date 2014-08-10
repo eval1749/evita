@@ -77,9 +77,8 @@ text::Posn TextRenderer::EndOfLine(text::Posn text_offset) const {
       return line->GetEnd() - 1;
   }
 
-  TextBlock text_block(buffer(), bounds_, zoom_);
   auto start_offset = buffer()->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(&text_block, start_offset);
+  TextFormatter formatter(buffer_, start_offset, bounds_, zoom_);
   for (;;) {
     std::unique_ptr<TextLine> line(formatter.FormatLine());
     if (text_offset < line->GetEnd())
@@ -116,7 +115,7 @@ text::Posn TextRenderer::GetVisibleEnd() {
 }
 
 void TextRenderer::Format(text::Posn text_offset) {
-  text_block_->Format(bounds_, zoom_, text_offset);
+  text_block_->Format(text_offset, bounds_, zoom_);
   view_start_ = text_block_->GetFirst()->GetStart();
   should_render_ = true;
 }
@@ -139,9 +138,8 @@ gfx::RectF TextRenderer::HitTestTextPosition(text::Posn text_offset) const {
       return line->HitTestTextPosition(text_offset);
   }
 
-  TextBlock text_block(buffer(), bounds_, zoom_);
   auto start_offset = buffer()->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(&text_block, start_offset);
+  TextFormatter formatter(buffer_, start_offset, bounds_, zoom_);
   for (;;) {
     std::unique_ptr<TextLine> line(formatter.FormatLine());
     if (text_offset < line->GetEnd())
@@ -196,9 +194,8 @@ text::Posn TextRenderer::MapPointXToOffset(text::Posn text_offset,
       return line->MapXToPosn(point_x);
   }
 
-  TextBlock text_block(buffer(), bounds_, zoom_);
   auto start_offset = buffer()->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(&text_block, start_offset);
+  TextFormatter formatter(buffer_, start_offset, bounds_, zoom_);
   for (;;) {
     std::unique_ptr<TextLine> line(formatter.FormatLine());
     if (text_offset < line->GetEnd())
@@ -211,8 +208,8 @@ void TextRenderer::Render(gfx::Canvas* canvas,
   DCHECK(!ShouldFormat());
   DCHECK(!text_block_->bounds().empty());
   text_block_->EnsureLinePoints();
-  const auto selection = TextFormatter::FormatSelection(
-      text_block_->text_buffer(), selection_model);
+  const auto selection = TextFormatter::FormatSelection(buffer_,
+                                                        selection_model);
   screen_text_block_->Render(canvas, text_block_.get(), selection);
   RenderRuler(canvas);
   should_render_ = false;
@@ -243,8 +240,7 @@ void TextRenderer::RenderSelectionIfNeeded(
   DCHECK(!should_render_);
   DCHECK(!text_block_->bounds().empty());
   screen_text_block_->RenderSelectionIfNeeded(canvas,
-      TextFormatter::FormatSelection(text_block_->text_buffer(),
-                                     new_selection_model));
+      TextFormatter::FormatSelection(buffer_, new_selection_model));
 }
 
 bool TextRenderer::ScrollDown() {
@@ -253,7 +249,7 @@ bool TextRenderer::ScrollDown() {
     return false;
   auto const goal_offset = GetStart() - 1;
   auto const start_offset = buffer_->ComputeStartOfLine(goal_offset);
-  TextFormatter formatter(text_block_.get(), start_offset);
+  TextFormatter formatter(buffer_, start_offset, bounds_, zoom_);
   for (;;) {
     auto const line = formatter.FormatLine();
     if (goal_offset < line->GetEnd()) {
@@ -356,7 +352,7 @@ bool TextRenderer::ScrollUp() {
     return false;
 
   auto const start_offset = text_block_->GetLast()->GetEnd();
-  TextFormatter formatter(text_block_.get(), start_offset);
+  TextFormatter formatter(buffer_, start_offset, bounds_, zoom_);
   auto const line = formatter.FormatLine();
   text_block_->Append(line);
   should_render_ = true;
@@ -392,12 +388,11 @@ text::Posn TextRenderer::StartOfLine(text::Posn text_offset) const {
       return line->GetStart();
   }
 
-  TextBlock text_block(buffer(), bounds_, zoom_);
   auto start_offset = buffer()->ComputeStartOfLine(text_offset);
   if (!start_offset)
     return 0;
 
-  TextFormatter formatter(&text_block, start_offset);
+  TextFormatter formatter(buffer_, start_offset, bounds_, zoom_);
   for (;;) {
     std::unique_ptr<TextLine> line(formatter.FormatLine());
     start_offset = line->GetEnd();

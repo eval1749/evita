@@ -15,6 +15,8 @@ namespace views {
 
 namespace {
 
+auto const kMinMainPartWidth = 200.0f;
+
 struct PartModel {
   float alpha;
   base::string16 text;
@@ -72,6 +74,7 @@ class ModelView final {
   };
 
   private: gfx::RectF bounds_;
+  private: float original_main_part_width_;
   private: std::vector<Part> parts_;
   private: std::unique_ptr<gfx::TextFormat> text_format_;
 
@@ -95,7 +98,7 @@ ModelView::Part::~Part() {
   delete text_layout;
 }
 
-ModelView::ModelView() {
+ModelView::ModelView() : original_main_part_width_(0) {
   text_format_.reset(new gfx::TextFormat(
       ui::SystemMetrics::instance()->font_family(),
       ui::SystemMetrics::instance()->font_size()));
@@ -123,6 +126,8 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
     auto part = parts_.begin();
     auto const big_size = gfx::SizeF(10000.0f, new_parts_bounds.height());
     auto total_width = 0.0f;
+    auto const main_part_width = parts_[0].width;
+    parts_[0].width = original_main_part_width_;
     for (const auto& new_part : new_parts) {
       if (part->text != new_part.text) {
         part->dirty = true;
@@ -144,10 +149,14 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
       }
       ++part;
     }
-    auto const main_part_width = new_parts_bounds.width() - total_width +
-                                 parts_[0].width;
-    if (parts_[0].width != main_part_width) {
-      parts_[0].width = main_part_width;
+    auto const new_main_part_width = std::max(
+        new_parts_bounds.width() - total_width + parts_[0].width,
+        std::min(std::max(parts_[0].width, kMinMainPartWidth),
+                 new_parts_bounds.width()));
+    original_main_part_width_ = parts_[0].width;
+    parts_[0].width = main_part_width;
+    if (parts_[0].width != new_main_part_width) {
+      parts_[0].width = new_main_part_width;
       parts_[0].dirty = true;
       dirty = true;
     }
@@ -158,9 +167,10 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
     auto origin = new_parts_bounds.origin();
     for (auto& part : parts_) {
       // Part bounds don't contain top border line.
-      auto const new_part_bounds = gfx::RectF(origin,
-          gfx::SizeF(part.width, new_parts_bounds.height()));
-      DCHECK(!new_part_bounds.empty());
+      auto const new_part_size = gfx::SizeF(part.width,
+                                            new_parts_bounds.height());
+      auto const new_part_bounds = new_parts_bounds.Intersect(
+          gfx::RectF(origin, new_part_size));
       if (part.bounds != new_part_bounds) {
         part.bounds = new_part_bounds;
         part.dirty = true;
@@ -168,7 +178,7 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
       }
       origin = part.bounds.top_right();
     }
-    DCHECK_EQ(origin.x, new_parts_bounds.right);
+    DCHECK_GE(origin.x, new_parts_bounds.right);
   }
 
   if (!dirty)
@@ -193,6 +203,8 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
     if (!part.dirty)
       continue;
     part.dirty = false;
+    if (part.bounds.empty())
+      continue;
     canvas->AddDirtyRect(part.bounds);
     gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, part.bounds);
     canvas->Clear(gfx::sysColor(COLOR_BTNFACE, alpha));

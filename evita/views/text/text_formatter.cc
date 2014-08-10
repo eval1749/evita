@@ -60,6 +60,10 @@ RenderStyle GetRenderStyle(const css::Style& style) {
   return RenderStyle(style, *GetFont(style));
 }
 
+RenderStyle MakeRenderStyle(const css::Style& style, const Font* font) {
+  return RenderStyle(style, font);
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -93,8 +97,6 @@ class TextFormatter::TextScanner final {
   public: bool AtEnd() const;
   public: base::char16 GetChar();
   public: const css::Style& GetStyle();
-  public: RenderStyle MakeRenderStyle(const css::Style& style,
-                                      const Font* font) const;
   public: void Next();
 
   DISALLOW_COPY_AND_ASSIGN(TextScanner);
@@ -151,11 +153,6 @@ const css::Style& TextFormatter::TextScanner::GetStyle() {
   if (!interval_ || !interval_->Contains(text_offset_))
     interval_ = buffer_->GetIntervalAt(text_offset_);
   return interval_->style();
-}
-
-RenderStyle TextFormatter::TextScanner::MakeRenderStyle(
-    const css::Style& style, const Font* font) const {
-  return RenderStyle(style, font);
 }
 
 void TextFormatter::TextScanner::Next() {
@@ -288,8 +285,8 @@ Cell* TextFormatter::FormatChar(Cell* previous_cell, float x, char16 wch) {
       return nullptr;
 
     auto const height = AlignHeightToPixel(font->height());
-    return new MarkerCell(text_scanner_->MakeRenderStyle(style, font), width,
-                          height, lPosn, TextMarker::Tab);
+    return new MarkerCell(MakeRenderStyle(style, font), width, height, lPosn,
+                          TextMarker::Tab);
   }
 
   auto const font = wch < 0x20 || wch == 0xFEFF ?
@@ -316,11 +313,11 @@ Cell* TextFormatter::FormatChar(Cell* previous_cell, float x, char16 wch) {
     if (previous_cell && x + width + char_width > bounds_.right)
       return nullptr;
     auto const height = AlignHeightToPixel(font->height());
-    return new UnicodeCell(text_scanner_->MakeRenderStyle(style, font),
-                           width, height, lPosn, string);
+    return new UnicodeCell(MakeRenderStyle(style, font), width, height, lPosn,
+                           string);
   }
 
-  auto render_style = text_scanner_->MakeRenderStyle(style, font);
+  auto render_style = MakeRenderStyle(style, font);
   auto const width = AlignWidthToPixel(font->GetCharWidth(wch));
   if (previous_cell) {
     auto const width_of_M = AlignWidthToPixel(font->GetCharWidth('M'));
@@ -351,9 +348,8 @@ Cell* TextFormatter::FormatMarker(TextMarker marker_name) {
   auto const font = FontSet::GetFont(style, 'x');
   auto const width = AlignWidthToPixel(font->GetCharWidth('x'));
   auto const height = AlignHeightToPixel(font->height());
-  return new MarkerCell(text_scanner_->MakeRenderStyle(style, font),
-                        width, height, text_scanner_->text_offset(),
-                        marker_name);
+  return new MarkerCell(MakeRenderStyle(style, font), width, height,
+                        text_scanner_->text_offset(), marker_name);
 }
 
 TextSelection TextFormatter::FormatSelection(

@@ -179,6 +179,14 @@ TextFormatter::TextFormatter(const text::Buffer* text_buffer,
 TextFormatter::~TextFormatter() {
 }
 
+text::Posn TextFormatter::text_offset() const {
+  return text_scanner_->text_offset();
+}
+
+void TextFormatter::set_text_offset(text::Posn new_text_offset) {
+  return text_scanner_->set_text_offset(new_text_offset);
+}
+
 // Returns true if more contents is available, otherwise returns false.
 TextLine* TextFormatter::FormatLine(text::Posn text_offset) {
   text_scanner_->set_text_offset(text_offset);

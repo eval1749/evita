@@ -36,6 +36,9 @@ class TextFormatter final {
                         const gfx::RectF& bounds, float zoom);
   public: ~TextFormatter();
 
+  public: text::Posn text_offset() const;
+  public: void set_text_offset(text::Posn new_text_offset);
+
   public: TextLine* FormatLine(text::Posn text_offset);
   public: TextLine* FormatLine();
   private: Cell* FormatChar(Cell*, float x, char16);

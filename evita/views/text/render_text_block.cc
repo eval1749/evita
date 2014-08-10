@@ -4,6 +4,10 @@
 
 #include "evita/views/text/render_text_block.h"
 
+#include <limits>
+#include <map>
+#include <vector>
+
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/text/buffer.h"
@@ -14,15 +18,163 @@
 namespace views {
 namespace rendering {
 
+//////////////////////////////////////////////////////////////////////
+//
+// TextBlock::TextLineCache
+//
+class TextBlock::TextLineCache {
+  private: gfx::RectF bounds_;
+  private: const text::Buffer* const buffer_;
+  private: text::Posn dirty_start_;
+  private: std::map<text::Posn, TextLine*> lines_;
+  private: float zoom_;
+
+  public: TextLineCache(const text::Buffer* buffer);
+  public: ~TextLineCache();
+
+  public: void DidChangeBuffer(text::Posn offset);
+  public: TextLine* FindLine(text::Posn text_offset) const;
+  public: void Invalidate(const gfx::RectF& bounds, float zoom);
+  private: bool IsAfterNewline(const TextLine* text_line) const;
+  private: bool IsEndWithNewline(const TextLine* text_line) const;
+  public: void Register(TextLine* line);
+  private: void RemoveDirtyLines();
+  private: void RemoveAllLines();
+
+  DISALLOW_COPY_AND_ASSIGN(TextLineCache);
+};
+
+TextBlock::TextLineCache::TextLineCache(const text::Buffer* buffer)
+    : buffer_(buffer), dirty_start_(std::numeric_limits<text::Posn>::max()),
+      zoom_(0.0f) {
+}
+
+TextBlock::TextLineCache::~TextLineCache() {
+  for (auto& entry : lines_) {
+    delete entry.second;
+  }
+}
+
+void TextBlock::TextLineCache::DidChangeBuffer(text::Posn offset) {
+  ASSERT_DOM_LOCKED();
+  dirty_start_ = std::min(dirty_start_, offset);
+}
+
+TextLine* TextBlock::TextLineCache::FindLine(text::Posn text_offset) const {
+  UI_ASSERT_DOM_LOCKED();
+  const auto it = lines_.find(text_offset);
+  if (it == lines_.end())
+    return nullptr;
+  auto const line = it->second;
+  DCHECK_EQ(line->GetStart(), text_offset);
+  return line;
+}
+
+void TextBlock::TextLineCache::Invalidate(const gfx::RectF& new_bounds,
+                                          float new_zoom) {
+  UI_ASSERT_DOM_LOCKED();
+  if (zoom_ != new_zoom || !dirty_start_) {
+    RemoveAllLines();
+    bounds_ = new_bounds;
+    dirty_start_ = std::numeric_limits<text::Posn>::max();
+    zoom_ = new_zoom;
+    return;
+  }
+
+  RemoveDirtyLines();
+  if (bounds_ == new_bounds)
+    return;
+
+  if (!lines_.empty() && bounds_.width() != new_bounds.width()){
+    std::vector<text::Posn> dirty_offsets;
+    for (auto it : lines_) {
+      auto const line = it.second;
+      if (line->right() > new_bounds.right || !IsAfterNewline(line) ||
+          !IsEndWithNewline(line)) {
+        dirty_offsets.push_back(line->GetStart());
+      }
+    }
+    for (auto offset : dirty_offsets) {
+      const auto it = lines_.find(offset);
+      DCHECK(it != lines_.end());
+      delete it->second;
+      lines_.erase(it);
+    }
+  }
+  bounds_ = new_bounds;
+}
+
+bool TextBlock::TextLineCache::IsAfterNewline(const TextLine* text_line) const {
+  auto const start = text_line->GetStart();
+  return !start || buffer_->GetCharAt(start - 1) == '\n';
+}
+
+bool TextBlock::TextLineCache::IsEndWithNewline(
+    const TextLine* text_line) const {
+  auto const end = text_line->GetEnd();
+  return end == buffer_->GetEnd() || buffer_->GetCharAt(end) == '\n';
+}
+
+void TextBlock::TextLineCache::Register(TextLine* line) {
+  UI_ASSERT_DOM_LOCKED();
+  DCHECK_GE(line->GetEnd(), line->GetStart());
+  lines_[line->GetStart()] = line;
+}
+
+void TextBlock::TextLineCache::RemoveDirtyLines() {
+  auto const dirty_start = dirty_start_;
+  dirty_start_ = std::numeric_limits<text::Posn>::max();
+  auto it = lines_.lower_bound(dirty_start);
+  if (it == lines_.end())
+    return;
+  while (it != lines_.begin()) {
+    --it;
+    if (it->second->GetEnd() <= dirty_start) {
+      ++it;
+      break;
+    }
+  }
+
+  if (it == lines_.begin()) {
+    RemoveAllLines();
+    return;
+  }
+
+  std::vector<text::Posn> dirty_offsets;
+  while (it != lines_.end()) {
+    dirty_offsets.push_back(it->first);
+    ++it;
+  }
+  for (auto offset : dirty_offsets) {
+    const auto it = lines_.find(offset);
+    DCHECK(it != lines_.end());
+    delete it->second;
+    lines_.erase(it);
+  }
+}
+
+void TextBlock::TextLineCache::RemoveAllLines() {
+  for (auto entry : lines_) {
+    delete entry.second;
+  }
+  lines_.clear();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// TextBlock
+//
 TextBlock::TextBlock(text::Buffer* text_buffer, const gfx::RectF& bounds,
                      float zoom)
-    : bounds_(bounds), dirty_(true), dirty_line_point_(true), lines_height_(0),
-      new_zoom_(1.0f), text_buffer_(text_buffer), zoom_(zoom) {
+    : dirty_(true), dirty_line_point_(true), lines_height_(0),
+      new_bounds_(bounds), new_zoom_(zoom), text_buffer_(text_buffer),
+      text_line_cache_(new TextLineCache(text_buffer)), zoom_(0) {
+  DCHECK_GT(zoom, 0.0f);
   text_buffer->AddObserver(this);
 }
 
 TextBlock::TextBlock(text::Buffer* text_buffer)
-    : TextBlock(text_buffer, gfx::RectF(), 0.0f) {
+    : TextBlock(text_buffer, gfx::RectF(), 1.0f) {
 }
 
 TextBlock::~TextBlock() {
@@ -47,7 +199,6 @@ bool TextBlock::DiscardFirstLine() {
 
   auto const line = lines_.front();
   lines_height_ -= line->GetHeight();
-  delete line;
   lines_.pop_front();
   dirty_line_point_ = true;
   return true;
@@ -60,26 +211,24 @@ bool TextBlock::DiscardLastLine() {
 
   auto const line = lines_.back();
   lines_height_ -= line->GetHeight();
-  delete line;
   lines_.pop_back();
   return true;
 }
 
-text::Posn TextBlock::EndOfLine(text::Posn text_offset) const {
+text::Posn TextBlock::EndOfLine(text::Posn text_offset) {
   UI_ASSERT_DOM_LOCKED();
 
   if (text_offset >= text_buffer_->GetEnd())
     return text_buffer_->GetEnd();
 
-  if (!ShouldFormat()) {
-    if (auto const line = FindLine(text_offset))
-      return line->GetEnd() - 1;
-  }
+  InvalidateCache();
+  if (auto const line = text_line_cache_->FindLine(text_offset))
+    return line->GetEnd() - 1;
 
   auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
   TextFormatter formatter(text_buffer_, start_offset, new_bounds_, new_zoom_);
   for (;;) {
-    std::unique_ptr<TextLine> line(formatter.FormatLine());
+    auto const line = FormatLine(&formatter);
     if (text_offset < line->GetEnd())
       return line->GetEnd() - 1;
   }
@@ -98,24 +247,12 @@ void TextBlock::EnsureLinePoints() {
   dirty_line_point_ = false;
 }
 
-TextLine* TextBlock::FindLine(Posn text_offset) const {
-  DCHECK(!ShouldFormat());
-  if (text_offset < GetFirst()->GetStart() ||
-      text_offset > GetFirst()->GetEnd()) {
-    return nullptr;
-  }
-  for (auto const line : lines_) {
-    if (text_offset < line->text_end())
-      return const_cast<TextLine*>(line);
-  }
-  return nullptr;
-}
-
 void TextBlock::Format(text::Posn text_offset) {
   UI_ASSERT_DOM_LOCKED();
   bounds_ = new_bounds_;
   zoom_ = new_zoom_;
   Reset();
+  InvalidateCache();
 
   // TODO(eval1749) We should recompute default style when style is changed,
   // rather than every |Format| call.
@@ -127,7 +264,7 @@ void TextBlock::Format(text::Posn text_offset) {
   auto const line_start = text_buffer_->ComputeStartOfLine(text_offset);
   TextFormatter formatter(text_buffer_, line_start, new_bounds_, new_zoom_);
   for (;;) {
-    auto const line = formatter.FormatLine();
+    auto const line = FormatLine(&formatter);
     DCHECK_GT(line->bounds().height(), 0.0f);
     Append(line);
 
@@ -151,9 +288,22 @@ void TextBlock::Format(text::Posn text_offset) {
   // Scroll up until we have |text_offset| in this |TextBlock|.
   while (text_offset > GetFirst()->GetEnd()) {
     DiscardLastLine();
-    Append(formatter.FormatLine());
+    Append(FormatLine(&formatter));
   }
   EnsureLinePoints();
+}
+
+TextLine* TextBlock::FormatLine(TextFormatter* formatter) {
+  UI_ASSERT_DOM_LOCKED();
+  auto const cached_line = text_line_cache_->FindLine(
+      formatter->text_offset());
+  if (cached_line) {
+    formatter->set_text_offset(cached_line->GetEnd());
+    return cached_line;
+  }
+  auto const line = formatter->FormatLine();
+  text_line_cache_->Register(line);
+  return line;
 }
 
 text::Posn TextBlock::GetVisibleEnd() const {
@@ -168,41 +318,41 @@ text::Posn TextBlock::GetVisibleEnd() const {
   return lines_.front()->GetEnd();
 }
 
-gfx::RectF TextBlock::HitTestTextPosition(text::Posn text_offset) const {
+gfx::RectF TextBlock::HitTestTextPosition(text::Posn text_offset) {
   UI_ASSERT_DOM_LOCKED();
-  if (!ShouldFormat()) {
-    if (auto const line = FindLine(text_offset))
-      return line->HitTestTextPosition(text_offset);
-  }
+  InvalidateCache();
+  if (auto const line = text_line_cache_->FindLine(text_offset))
+    return line->HitTestTextPosition(text_offset);
 
   auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
   TextFormatter formatter(text_buffer_, start_offset, new_bounds_, new_zoom_);
   for (;;) {
-    std::unique_ptr<TextLine> line(formatter.FormatLine());
+    auto const line = FormatLine(&formatter);
     if (text_offset < line->GetEnd())
       return line->HitTestTextPosition(text_offset);
   }
 }
 
-void TextBlock::InvalidateLines(text::Posn offset) {
-  ASSERT_DOM_LOCKED();
-  if (dirty_)
-    return;
-  if (GetFirst()->GetStart() >= offset || GetLast()->GetEnd() >= offset)
-    Reset();
+void TextBlock::InvalidateCache() {
+  UI_ASSERT_DOM_LOCKED();
+  text_line_cache_->Invalidate(new_bounds_, new_zoom_);
 }
 
-text::Posn TextBlock::MapPointXToOffset(text::Posn text_offset,
-                                        float point_x) const {
-  if (!ShouldFormat()) {
-    if (auto const line = FindLine(text_offset))
-      return line->MapXToPosn(point_x);
-  }
+void TextBlock::InvalidateLines(text::Posn offset) {
+  ASSERT_DOM_LOCKED();
+  text_line_cache_->DidChangeBuffer(offset);
+  dirty_ = true;
+}
+
+text::Posn TextBlock::MapPointXToOffset(text::Posn text_offset, float point_x) {
+  InvalidateCache();
+  if (auto const line = text_line_cache_->FindLine(text_offset))
+    return line->MapXToPosn(point_x);
 
   auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
   TextFormatter formatter(text_buffer_, start_offset, new_bounds_, new_zoom_);
   for (;;) {
-    std::unique_ptr<TextLine> line(formatter.FormatLine());
+    auto const line = FormatLine(&formatter);
     if (text_offset < line->GetEnd())
       return line->MapXToPosn(point_x);
   }
@@ -225,10 +375,6 @@ void TextBlock::Prepend(TextLine* line) {
 
 void TextBlock::Reset() {
   ASSERT_DOM_LOCKED();
-  for (auto const line : lines_) {
-    delete line;
-  }
-
   lines_.clear();
   dirty_ = true;
   dirty_line_point_ = true;
@@ -243,7 +389,7 @@ bool TextBlock::ScrollDown() {
   auto const start_offset = text_buffer_->ComputeStartOfLine(goal_offset);
   TextFormatter formatter(text_buffer_, start_offset, new_bounds_, new_zoom_);
   for (;;) {
-    auto const line = formatter.FormatLine();
+    auto const line = FormatLine(&formatter);
     if (goal_offset < line->GetEnd()) {
       Prepend(line);
       break;
@@ -273,7 +419,7 @@ bool TextBlock::ScrollUp() {
 
   auto const start_offset = GetLast()->GetEnd();
   TextFormatter formatter(text_buffer_, start_offset, new_bounds_, new_zoom_);
-  auto const line = formatter.FormatLine();
+  auto const line = FormatLine(&formatter);
   Append(line);
   return true;
 }
@@ -298,16 +444,15 @@ bool TextBlock::ShouldFormat() const {
   return dirty_ || zoom_ != new_zoom_ || bounds_ != new_bounds_;
 }
 
-text::Posn TextBlock::StartOfLine(text::Posn text_offset) const {
+text::Posn TextBlock::StartOfLine(text::Posn text_offset) {
   UI_ASSERT_DOM_LOCKED();
 
   if (text_offset <= 0)
     return 0;
 
-  if (!ShouldFormat()) {
-    if (auto const line = FindLine(text_offset))
-      return line->GetStart();
-  }
+  InvalidateCache();
+  if (auto const line = text_line_cache_->FindLine(text_offset))
+    return line->GetStart();
 
   auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
   if (!start_offset)
@@ -315,7 +460,7 @@ text::Posn TextBlock::StartOfLine(text::Posn text_offset) const {
 
   TextFormatter formatter(text_buffer_, start_offset, new_bounds_, new_zoom_);
   for (;;) {
-    std::unique_ptr<TextLine> line(formatter.FormatLine());
+    auto const line = FormatLine(&formatter);
     start_offset = line->GetEnd();
     if (text_offset < start_offset)
       return line->GetStart();

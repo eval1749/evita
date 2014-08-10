@@ -58,8 +58,10 @@ class TextBlock final : public text::BufferMutationObserver {
   private: void EnsureLinePoints();
   public: void Format(text::Posn text_offset);
   private: TextLine* FormatLine(TextFormatter* formatter);
+  public: text::Posn GetEnd() const;
   public: TextLine* GetFirst() const;
   public: TextLine* GetLast() const;
+  public: text::Posn GetStart() const;
   public: text::Posn GetVisibleEnd() const;
   public: gfx::RectF HitTestTextPosition(text::Posn text_offset);
   private: void InvalidateCache();

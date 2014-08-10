@@ -64,12 +64,12 @@ text::Posn TextRenderer::EndOfLine(text::Posn text_offset) const {
 
 text::Posn TextRenderer::GetEnd() {
   FormatIfNeeded();
-  return text_block_->GetLast()->GetEnd();
+  return text_block_->GetEnd();
 }
 
 text::Posn TextRenderer::GetStart() {
   FormatIfNeeded();
-  return text_block_->GetFirst()->GetStart();
+  return text_block_->GetStart();
 }
 
 text::Posn TextRenderer::GetVisibleEnd() {
@@ -79,7 +79,7 @@ text::Posn TextRenderer::GetVisibleEnd() {
 
 void TextRenderer::Format(text::Posn text_offset) {
   text_block_->Format(text_offset);
-  view_start_ = text_block_->GetFirst()->GetStart();
+  view_start_ = text_block_->GetStart();
   should_render_ = true;
 }
 
@@ -101,7 +101,7 @@ gfx::RectF TextRenderer::HitTestTextPosition(text::Posn text_offset) const {
 
 bool TextRenderer::IsPositionFullyVisible(text::Posn offset) const {
   DCHECK(!ShouldFormat());
-  return offset >= text_block_->GetFirst()->GetStart() &&
+  return offset >= text_block_->GetStart() &&
          offset < text_block_->GetVisibleEnd();
 }
 
@@ -187,7 +187,7 @@ bool TextRenderer::ScrollDown() {
   DCHECK(!ShouldFormat());
   if (!text_block_->ScrollDown())
     return false;
-  view_start_ = text_block_->GetFirst()->GetStart();
+  view_start_ = text_block_->GetStart();
   should_render_ = true;
   return true;
 }
@@ -264,7 +264,7 @@ bool TextRenderer::ScrollUp() {
   DCHECK(!ShouldFormat());
   if (!text_block_->ScrollUp())
     return false;
-  view_start_ = text_block_->GetFirst()->GetStart();
+  view_start_ = text_block_->GetStart();
   should_render_ = true;
   return true;
 }

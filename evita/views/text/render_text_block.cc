@@ -305,6 +305,12 @@ TextLine* TextBlock::FormatLine(TextFormatter* formatter) {
   return line;
 }
 
+text::Posn TextBlock::GetEnd() const {
+  UI_ASSERT_DOM_LOCKED();
+  DCHECK(!ShouldFormat());
+  return GetLast()->GetEnd();
+}
+
 TextLine* TextBlock::GetFirst() const {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!ShouldFormat());
@@ -317,9 +323,15 @@ TextLine* TextBlock::GetLast() const {
   return lines_.back();
 }
 
+text::Posn TextBlock::GetStart() const {
+  UI_ASSERT_DOM_LOCKED();
+  DCHECK(!ShouldFormat());
+  return GetFirst()->GetStart();
+}
+
 text::Posn TextBlock::GetVisibleEnd() const {
   UI_ASSERT_DOM_LOCKED();
-  DCHECK(!dirty_);
+  DCHECK(!ShouldFormat());
   DCHECK(!dirty_line_point_);
   for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
     auto const line = *it;

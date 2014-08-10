@@ -69,15 +69,15 @@ RenderStyle GetRenderStyle(const css::Style& style) {
 //
 class TextFormatter::TextScanner final {
   private: base::char16 buffer_cache_[80];
+  private: const text::Buffer* const buffer_;
   private: text::Posn buffer_cache_end_;
   private: text::Posn buffer_cache_start_;
-  private: const text::Buffer* const buffer_;
   private: text::Interval* interval_;
   private: mutable const text::Marker* spelling_marker_;
   private: mutable const text::Marker* syntax_marker_;
   private: text::Posn text_offset_;
 
-  public: TextScanner(const text::Buffer* buffer, text::Posn offset);
+  public: explicit TextScanner(const text::Buffer* buffer);
   public: ~TextScanner() = default;
 
   public: const common::AtomicString& spelling() const;
@@ -85,13 +85,14 @@ class TextFormatter::TextScanner final {
     return buffer_->style_resolver();
   }
   public: const common::AtomicString& syntax() const;
-  public: bool AtEnd() const {
-    return buffer_cache_start_ == buffer_cache_end_;
+  public: text::Posn text_offset() const { return text_offset_; }
+  public: void set_text_offset(text::Posn new_text_offset) {
+    text_offset_ = new_text_offset;
   }
-  private: void Fill();
-  public: base::char16 GetChar() const;
-  public: text::Posn GetPosn() const { return text_offset_; }
-  public: const css::Style& GetStyle() const;
+
+  public: bool AtEnd() const;
+  public: base::char16 GetChar();
+  public: const css::Style& GetStyle();
   public: RenderStyle MakeRenderStyle(const css::Style& style,
                                       const Font* font) const;
   public: void Next();
@@ -99,14 +100,10 @@ class TextFormatter::TextScanner final {
   DISALLOW_COPY_AND_ASSIGN(TextScanner);
 };
 
-TextFormatter::TextScanner::TextScanner(const text::Buffer* buffer,
-                                        text::Posn text_offset)
-    : buffer_(buffer),
-      interval_(buffer_->GetIntervalAt(text_offset)),
-      spelling_marker_(nullptr), syntax_marker_(nullptr),
-      text_offset_(text_offset) {
-  DCHECK(interval_);
-  Fill();
+TextFormatter::TextScanner::TextScanner(const text::Buffer* buffer)
+    : buffer_(buffer), buffer_cache_end_(0), buffer_cache_start_(0),
+      interval_(nullptr),
+      spelling_marker_(nullptr), syntax_marker_(nullptr), text_offset_(0) {
 }
 
 const common::AtomicString& TextFormatter::TextScanner::spelling() const {
@@ -127,26 +124,32 @@ const common::AtomicString& TextFormatter::TextScanner::syntax() const {
       syntax_marker_->type() : common::AtomicString::Empty();
 }
 
-void TextFormatter::TextScanner::Fill() {
-  auto const num_chars = buffer_->GetText(
-      buffer_cache_, text_offset_,
-      static_cast<Posn>(text_offset_ + arraysize(buffer_cache_)));
-  buffer_cache_start_ = text_offset_;
-  buffer_cache_end_ = text_offset_ + num_chars;
+bool TextFormatter::TextScanner::AtEnd() const {
+  DCHECK_LE(text_offset_, buffer_->GetEnd());
+  return text_offset_ == buffer_->GetEnd();
 }
 
-base::char16 TextFormatter::TextScanner::GetChar() const {
+base::char16 TextFormatter::TextScanner::GetChar() {
   if (AtEnd())
     return 0;
+  if (text_offset_ < buffer_cache_start_ || text_offset_ >= buffer_cache_end_) {
+    buffer_cache_start_ = text_offset_;
+    buffer_cache_end_ = std::min(
+        static_cast<text::Posn>(buffer_cache_start_ + arraysize(buffer_cache_)),
+        buffer_->GetEnd());
+    buffer_->GetText(buffer_cache_, buffer_cache_start_,
+                     buffer_cache_end_);
+  }
   DCHECK_GE(text_offset_, buffer_cache_start_);
   DCHECK_LT(text_offset_, buffer_cache_end_);
   return buffer_cache_[text_offset_ - buffer_cache_start_];
 }
 
-const css::Style& TextFormatter::TextScanner::GetStyle() const {
+const css::Style& TextFormatter::TextScanner::GetStyle() {
   if (AtEnd())
     return buffer_->GetDefaultStyle();
-  DCHECK(interval_);
+  if (!interval_ || !interval_->Contains(text_offset_))
+    interval_ = buffer_->GetIntervalAt(text_offset_);
   return interval_->style();
 }
 
@@ -159,13 +162,6 @@ void TextFormatter::TextScanner::Next() {
   if (AtEnd())
     return;
   ++text_offset_;
-  if (text_offset_ >= buffer_cache_end_)
-    Fill();
-
-  if (!interval_->Contains(text_offset_)) {
-    interval_ = buffer_->GetIntervalAt(text_offset_);
-    DCHECK(interval_);
-  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -177,19 +173,25 @@ TextFormatter::TextFormatter(const text::Buffer* text_buffer,
                              const gfx::RectF& bounds, float zoom)
     : bounds_(bounds),
       default_render_style_(GetRenderStyle(text_buffer->GetDefaultStyle())),
-      text_scanner_(new TextScanner(text_buffer, text_offset)), zoom_(zoom) {
+      text_scanner_(new TextScanner(text_buffer)), zoom_(zoom) {
   DCHECK(!bounds_.empty());
   DCHECK_GT(zoom_, 0.0f);
+  text_scanner_->set_text_offset(text_offset);
 }
 
 TextFormatter::~TextFormatter() {
 }
 
 // Returns true if more contents is available, otherwise returns false.
+TextLine* TextFormatter::FormatLine(text::Posn text_offset) {
+  text_scanner_->set_text_offset(text_offset);
+  return FormatLine();
+}
+
 TextLine* TextFormatter::FormatLine() {
   DCHECK(!bounds_.empty());
   auto const line = new TextLine();
-  line->set_start(text_scanner_->GetPosn());
+  line->set_start(text_scanner_->text_offset());
 
   auto x = bounds_.left;
   auto descent = 0.0f;
@@ -253,12 +255,8 @@ TextLine* TextFormatter::FormatLine() {
   return line;
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// TextFormatter::FormatChar
-//
 Cell* TextFormatter::FormatChar(Cell* previous_cell, float x, char16 wch) {
-  auto const lPosn = text_scanner_->GetPosn();
+  auto const lPosn = text_scanner_->text_offset();
   auto style = text_scanner_->GetStyle();
 
   auto const spelling = text_scanner_->spelling();
@@ -354,7 +352,7 @@ Cell* TextFormatter::FormatMarker(TextMarker marker_name) {
   auto const width = AlignWidthToPixel(font->GetCharWidth('x'));
   auto const height = AlignHeightToPixel(font->height());
   return new MarkerCell(text_scanner_->MakeRenderStyle(style, font),
-                        width, height, text_scanner_->GetPosn(),
+                        width, height, text_scanner_->text_offset(),
                         marker_name);
 }
 

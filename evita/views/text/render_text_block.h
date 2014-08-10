@@ -28,13 +28,10 @@ class TextBlock final : public text::BufferMutationObserver {
   private: bool dirty_line_point_;
   private: std::list<TextLine*> lines_;
   private: float lines_height_;
-  private: gfx::RectF new_bounds_;
-  private: float new_zoom_;
   private: text::Buffer* const text_buffer_;
   private: std::unique_ptr<TextLineCache> text_line_cache_;
   private: float zoom_;
 
-  public: TextBlock(text::Buffer* buffer, const gfx::RectF& bounds, float zoom);
   public: explicit TextBlock(text::Buffer* buffer);
   public: virtual ~TextBlock();
 
@@ -51,14 +48,14 @@ class TextBlock final : public text::BufferMutationObserver {
   public: float width() const { return bounds_.width(); }
   public: float zoom() const { return zoom_; }
 
-  public: void Append(TextLine*);
+  private: void Append(TextLine* line);
   // Returns true if discarded the first line.
-  public: bool DiscardFirstLine();
+  private: bool DiscardFirstLine();
   // Returns true if discarded the last line.
-  public: bool DiscardLastLine();
+  private: bool DiscardLastLine();
   // Returns end of line offset containing |text_offset|.
   public: text::Posn EndOfLine(text::Posn text_offset);
-  public: void EnsureLinePoints();
+  private: void EnsureLinePoints();
   public: void Format(text::Posn text_offset);
   private: TextLine* FormatLine(TextFormatter* formatter);
   public: TextLine* GetFirst() const { return lines_.front(); }
@@ -70,8 +67,7 @@ class TextBlock final : public text::BufferMutationObserver {
   private: void InvalidateLines(text::Posn offset);
   public: bool IsShowEndOfDocument() const;
   public: text::Posn MapPointXToOffset(text::Posn text_offset, float point_x);
-  public: void Prepend(TextLine*);
-  public: void Reset();
+  private: void Prepend(TextLine* line);
   // Returns true if this |TextBlock| is modified.
   public: bool ScrollDown();
   // Returns true if this |TextBlock| is modified.

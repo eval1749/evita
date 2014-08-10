@@ -42,14 +42,6 @@ TextRenderer::~TextRenderer() {
   buffer()->RemoveObserver(this);
 }
 
-void TextRenderer::set_zoom(float new_zoom) {
-  DCHECK_GT(new_zoom, 0.0f);
-  if (zoom_ == new_zoom)
-    return;
-  zoom_ = new_zoom;
-  text_block_->SetZoom(zoom_);
-}
-
 void TextRenderer::DidHide() {
   screen_text_block_->Reset();
 }
@@ -285,6 +277,14 @@ void TextRenderer::SetBounds(const gfx::RectF& new_bounds) {
   text_block_->SetBounds(bounds_);
   screen_text_block_->SetBounds(bounds_);
   should_render_ = true;
+}
+
+void TextRenderer::SetZoom(float new_zoom) {
+  DCHECK_GT(new_zoom, 0.0f);
+  if (zoom_ == new_zoom)
+    return;
+  zoom_ = new_zoom;
+  text_block_->SetZoom(zoom_);
 }
 
 bool TextRenderer::ShouldFormat() const {

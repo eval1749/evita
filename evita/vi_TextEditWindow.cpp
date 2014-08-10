@@ -308,7 +308,7 @@ void TextEditWindow::Render(const TextSelectionModel& selection) {
 }
 
 void TextEditWindow::SetZoom(float new_zoom) {
-  text_renderer_->set_zoom(new_zoom);
+  text_renderer_->SetZoom(new_zoom);
 }
 
 bool TextEditWindow::SmallScroll(int, int y_count) {

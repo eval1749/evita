@@ -48,7 +48,6 @@ class TextRenderer final : public text::BufferMutationObserver {
 
   public: text::Buffer* buffer() const { return buffer_; }
   public: float zoom() const { return zoom_; }
-  public: void set_zoom(float new_zoom);
 
   public: void DidHide();
   public: void DidKillFocus(gfx::Canvas* canvas);
@@ -77,6 +76,7 @@ class TextRenderer final : public text::BufferMutationObserver {
   public: bool ScrollToPosition(Posn offset);
   public: bool ScrollUp();
   public: void SetBounds(const gfx::RectF& new_bounds);
+  public: void SetZoom(float new_zoom);
   private: bool ShouldFormat() const;
   public: bool ShouldRender() const;
   // Returns start of line offset containing |text_offset|.

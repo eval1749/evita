@@ -60,6 +60,8 @@ class TextBlock final : public text::BufferMutationObserver {
   public: bool IsShowEndOfDocument() const;
   public: void Prepend(TextLine*);
   public: void Reset();
+  // Returns true if this |TextBlock| is modified.
+  public: bool ScrollUp();
   public: bool ShouldFormat(const gfx::RectF& bounds, float zoom) const;
 
   // text::BufferMutationObserver

@@ -339,22 +339,9 @@ bool TextRenderer::ScrollToPosition(Posn offset) {
 
 bool TextRenderer::ScrollUp() {
   DCHECK(!ShouldFormat());
-  text_block_->EnsureLinePoints();
-  if (text_block_->IsShowEndOfDocument())
+  if (!text_block_->ScrollUp())
     return false;
-
-  if (!text_block_->DiscardFirstLine())
-    return false;
-
-  text_block_->EnsureLinePoints();
   view_start_ = text_block_->GetFirst()->GetStart();
-  if (text_block_->IsShowEndOfDocument())
-    return false;
-
-  auto const start_offset = text_block_->GetLast()->GetEnd();
-  TextFormatter formatter(buffer_, start_offset, bounds_, zoom_);
-  auto const line = formatter.FormatLine();
-  text_block_->Append(line);
   should_render_ = true;
   return true;
 }

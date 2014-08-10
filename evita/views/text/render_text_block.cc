@@ -172,6 +172,26 @@ void TextBlock::Reset() {
   lines_height_ = 0;
 }
 
+bool TextBlock::ScrollUp() {
+  DCHECK(!ShouldFormat(bounds_, zoom_));
+  EnsureLinePoints();
+  if (IsShowEndOfDocument())
+    return false;
+
+  if (!DiscardFirstLine())
+    return false;
+
+  EnsureLinePoints();
+  if (IsShowEndOfDocument())
+    return true;
+
+  auto const start_offset = GetLast()->GetEnd();
+  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  auto const line = formatter.FormatLine();
+  Append(line);
+  return true;
+}
+
 bool TextBlock::ShouldFormat(const gfx::RectF& bounds, float zoom) const {
   ASSERT_DOM_LOCKED();
   // TODO(eval1749) We should check bounds change more. We don't need to

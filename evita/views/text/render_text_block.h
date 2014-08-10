@@ -33,9 +33,6 @@ class TextBlock final : public text::BufferMutationObserver {
 
   public: float bottom() const { return bounds_.bottom; }
   public: const RenderStyle& default_style() const { return default_style_; }
-  public: void set_default_style(const RenderStyle& style) {
-    default_style_ = style;
-  }
   public: bool dirty() const { return dirty_; }
   public: float height() const { return bounds_.height(); }
   public: float left() const { return bounds_.left; }

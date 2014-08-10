@@ -6,6 +6,7 @@
 
 #include "evita/dom/lock.h"
 #include "evita/text/buffer.h"
+#include "evita/views/text/render_style.h"
 #include "evita/views/text/render_text_line.h"
 #include "evita/views/text/text_formatter.h"
 
@@ -88,6 +89,9 @@ void TextBlock::Format(const gfx::RectF& bounds, float zoom,
   bounds_ = bounds;
   zoom_ = zoom;
   Reset();
+
+  const auto& style = text_buffer_->GetDefaultStyle();
+  default_style_ = RenderStyle(style, nullptr);
 
   TextFormatter formatter(this, text_buffer_->ComputeStartOfLine(text_offset));
   formatter.Format();

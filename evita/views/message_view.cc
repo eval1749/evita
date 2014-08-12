@@ -225,14 +225,17 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
 class MessageView::Model final {
   private: std::unique_ptr<ModelView> paint_model_;
   private: std::vector<PartModel> parts_;
-  private: base::string16 main_text_;
   private: base::Time main_text_time_;
+  private: base::string16 message_text_;
+  private: base::string16 status_text_;
 
   public: Model();
   public: ~Model() = default;
 
+  private: void Animate(base::Time now);
   public: void SetMessage(const base::string16& text);
   public: void SetStatus(const std::vector<base::string16>& texts);
+  private: void StartAnimate(base::Time now, const base::string16& text);
   private: void UpdateLayout();
   public: void UpdateView(gfx::Canvas* canvas, const gfx::RectF& bounds);
 
@@ -242,34 +245,58 @@ class MessageView::Model final {
 MessageView::Model::Model() : paint_model_(new ModelView()), parts_(1) {
 }
 
+void MessageView::Model::Animate(base::Time now) {
+  // Hide text after 5000ms.
+  auto const kAnimationDuration = 5000.0f;
+  auto const duration = now - main_text_time_;
+  auto const factor = static_cast<float>(duration.InMilliseconds()) /
+                      kAnimationDuration;
+  parts_[0].alpha = factor >= 1.0 ? 0.0f : 1.0f - factor;
+}
+
 void MessageView::Model::SetMessage(const base::string16& text) {
-  parts_[0].text = text;
+  message_text_ = text;
 }
 
 void MessageView::Model::SetStatus(const std::vector<base::string16>& texts) {
   DCHECK(!texts.empty());
+  status_text_ = texts[0];
+  const auto current_text = parts_[0].text;
   parts_.clear();
   for (auto const text : texts){
     PartModel part_model {1.0f, text};
     parts_.push_back(part_model);
   }
+  parts_[0].text = current_text;
+}
+
+void MessageView::Model::StartAnimate(base::Time now,
+                                      const base::string16& main_text) {
+  // TODO(eval1749) We should request animation frame for hiding main text
+  // after 5 second.
+  parts_[0].text = main_text;
+  parts_[0].alpha = 1.0f;
+  main_text_time_ = now;
 }
 
 void MessageView::Model::UpdateView(gfx::Canvas* canvas,
                                     const gfx::RectF& bounds) {
   auto const now = base::Time::Now();
-  if (main_text_ != parts_[0].text) {
-    // TODO(eval1749) We should request animation frame for hiding main text
-    // after 5 second.
-    main_text_ = parts_[0].text;
-    main_text_time_ = now;
+  if (!message_text_.empty()) {
+    if (message_text_ == parts_[0].text) {
+      if (parts_[0].alpha) {
+        Animate(now);
+      } else {
+        message_text_.clear();
+        StartAnimate(now, status_text_);
+      }
+    } else {
+      StartAnimate(now, message_text_);
+    }
+  } else if (status_text_ == parts_[0].text) {
+    Animate(now);
   } else {
-    // Hide text after 5000ms.
-    auto const kAnimationDuration = 5000.0f;
-    auto const duration = now - main_text_time_;
-    auto const factor = static_cast<float>(duration.InMilliseconds()) /
-                        kAnimationDuration;
-    parts_[0].alpha = factor >= 1.0 ? 0.0f : 1.0f - factor;
+    StartAnimate(now, status_text_);
   }
   paint_model_->Paint(canvas, bounds, parts_);
 }

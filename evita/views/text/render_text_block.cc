@@ -113,7 +113,7 @@ bool TextBlock::TextLineCache::IsAfterNewline(const TextLine* text_line) const {
 bool TextBlock::TextLineCache::IsEndWithNewline(
     const TextLine* text_line) const {
   auto const end = text_line->GetEnd();
-  return end == buffer_->GetEnd() || buffer_->GetCharAt(end) == '\n';
+  return end >= buffer_->GetEnd() || buffer_->GetCharAt(end) == '\n';
 }
 
 void TextBlock::TextLineCache::Register(TextLine* line) {

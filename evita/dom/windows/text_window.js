@@ -11,10 +11,13 @@ global.TextWindow.prototype.clone = function() {
   var AUTOSCROLL_INTERVAL_MS = 50;
 
   /** @const @type {number} */
+  var AUTOSCROLL_MAX_MOVE = 20;
+
+  /** @const @type {number} */
   var AUTOSCROLL_SPEED_MS = 100;
 
   /** @const @type {number} */
-  var AUTOSCROLL_MAX_MOVE = 20;
+  var AUTOSCROLL_ZONE_SIZE = 20;
 
   /**
    * @constructor
@@ -313,9 +316,9 @@ global.TextWindow.prototype.clone = function() {
       autoscroller = new Autoscroller(window);
       window.autoscroller_ = autoscroller;
     }
-    if (event.clientY < window.clientTop)
+    if (event.clientY < AUTOSCROLL_ZONE_SIZE)
       autoscroller.start(-1);
-    else if (event.clientY > window.clientTop + window.clientHeight)
+    else if (event.clientY > window.clientHeight - AUTOSCROLL_ZONE_SIZE)
       autoscroller.start(1);
     else
       autoscroller.stop();

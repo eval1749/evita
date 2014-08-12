@@ -133,7 +133,8 @@ void TextBlock::TextLineCache::RemoveDirtyLines() {
   while (it != lines_.begin()) {
     --it;
     if (it->second->GetEnd() <= dirty_start) {
-      ++it;
+      if (!IsEndWithNewline(it->second))
+        ++it;
       break;
     }
   }
@@ -168,8 +169,8 @@ void TextBlock::TextLineCache::RemoveAllLines() {
 // TextBlock
 //
 TextBlock::TextBlock(text::Buffer* text_buffer)
-    : dirty_(true), dirty_line_point_(true), lines_height_(0),
-      text_buffer_(text_buffer),
+    : dirty_(true), dirty_line_point_(true), format_counter_(0),
+      lines_height_(0), text_buffer_(text_buffer),
       text_line_cache_(new TextLineCache(text_buffer)), view_start_(0),
       zoom_(1.0f) {
   text_buffer->AddObserver(this);
@@ -293,6 +294,7 @@ void TextBlock::Format(text::Posn text_offset) {
   }
   EnsureLinePoints();
   view_start_ = lines_.front()->GetStart();
+  ++format_counter_;
 }
 
 bool TextBlock::FormatIfNeeded() {

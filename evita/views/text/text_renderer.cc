@@ -31,8 +31,9 @@ using namespace rendering;
 // TextRenderer
 //
 TextRenderer::TextRenderer(text::Buffer* buffer)
-    : buffer_(buffer), screen_text_block_(new ScreenTextBlock()),
-      should_render_(true), text_block_(new TextBlock(buffer)), zoom_(1.0f) {
+    : buffer_(buffer), format_counter_(0),
+      screen_text_block_(new ScreenTextBlock()), should_render_(true),
+      text_block_(new TextBlock(buffer)), zoom_(1.0f) {
 }
 
 TextRenderer::~TextRenderer() {
@@ -77,7 +78,7 @@ void TextRenderer::Format(text::Posn text_offset) {
 
 bool TextRenderer::FormatIfNeeded() {
   if (!text_block_->FormatIfNeeded())
-    return false;
+    return format_counter_ != text_block_->format_counter();
   should_render_ = true;
   return true;
 }
@@ -111,6 +112,7 @@ void TextRenderer::Render(gfx::Canvas* canvas,
                                                         selection_model);
   screen_text_block_->Render(canvas, text_block_.get(), selection);
   RenderRuler(canvas);
+  format_counter_ = text_block_->format_counter();
   should_render_ = false;
 }
 

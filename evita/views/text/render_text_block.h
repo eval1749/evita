@@ -26,6 +26,7 @@ class TextBlock final : public text::BufferMutationObserver {
   private: RenderStyle default_style_;
   private: bool dirty_;
   private: bool dirty_line_point_;
+  private: int format_counter_;
   private: std::list<TextLine*> lines_;
   private: float lines_height_;
   private: text::Buffer* const text_buffer_;
@@ -38,6 +39,7 @@ class TextBlock final : public text::BufferMutationObserver {
 
   public: const RenderStyle& default_style() const { return default_style_; }
   public: bool dirty() const { return dirty_; }
+  public: int format_counter() const { return format_counter_; }
   public: const std::list<TextLine*>& lines() const { return lines_; }
 
   private: void Append(TextLine* line);

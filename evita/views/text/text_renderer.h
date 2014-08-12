@@ -36,6 +36,7 @@ class TextRenderer final {
 
   private: gfx::RectF bounds_;
   private: text::Buffer* const buffer_;
+  private: int format_counter_;
   private: std::unique_ptr<ScreenTextBlock> screen_text_block_;
   private: bool should_render_;
   private: std::unique_ptr<TextBlock> text_block_;

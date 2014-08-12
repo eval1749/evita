@@ -371,6 +371,21 @@ void TextBlock::InvalidateLines(text::Posn offset) {
   dirty_ = true;
 }
 
+bool TextBlock::IsPositionFullyVisible(text::Posn offset) {
+  UI_ASSERT_DOM_LOCKED();
+  FormatIfNeeded();
+  return offset >= GetStart() && offset < GetVisibleEnd();
+}
+
+bool TextBlock::IsShowEndOfDocument() {
+  UI_ASSERT_DOM_LOCKED();
+  DCHECK(!dirty_);
+  DCHECK(!dirty_line_point_);
+  auto const last_line = lines_.back();
+  return last_line->GetEnd() > text_buffer_->GetEnd() &&
+         last_line->bottom() <= bounds_.bottom;
+}
+
 text::Posn TextBlock::MapPointToPosition(gfx::PointF point) {
   UI_ASSERT_DOM_LOCKED();
   FormatIfNeeded();
@@ -420,22 +435,6 @@ text::Posn TextBlock::MapPointXToOffset(text::Posn text_offset, float point_x) {
     if (text_offset < line->GetEnd())
       return line->MapXToPosn(point_x);
   }
-}
-
-bool TextBlock::IsPositionFullyVisible(text::Posn offset) {
-  UI_ASSERT_DOM_LOCKED();
-  FormatIfNeeded();
-  return offset >= lines_.front()->GetStart() &&
-         offset < lines_.back()->GetEnd();
-}
-
-bool TextBlock::IsShowEndOfDocument() {
-  UI_ASSERT_DOM_LOCKED();
-  DCHECK(!dirty_);
-  DCHECK(!dirty_line_point_);
-  auto const last_line = lines_.back();
-  return last_line->GetEnd() > text_buffer_->GetEnd() &&
-         last_line->bottom() <= bounds_.bottom;
 }
 
 void TextBlock::Prepend(TextLine* line) {

@@ -106,6 +106,7 @@ void Application::DidHandleViewIdelEvent(int) {
   view_idle_time_scope_.reset();
   view_idle_hint_ = view_idle_count_;
   view_idle_count_ = 0;
+  OnIdle(0);
 }
 
 void Application::DispatchViewIdelEvent() {

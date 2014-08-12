@@ -393,6 +393,14 @@ global.TextWindow.prototype.clone = function() {
    * @param {!TextWindow} window
    */
   function updateStatusBar(window) {
+    function equal(texts1, texts2) {
+      if (texts1.length != texts2.length)
+        return false;
+      return texts1.every(function(text1, index) {
+        return text1 == texts2[index];
+      });
+    }
+
     var document = window.document;
     var selection = window.selection;
     var text_offset = selection.focusOffset;
@@ -409,7 +417,7 @@ global.TextWindow.prototype.clone = function() {
     ];
 
     // We call |setStatusBar()| only if status bar contents are changed.
-    if (window.statusBarTexts_ == new_texts)
+    if (window.statusBarTexts_ && equal(window.statusBarTexts_, new_texts))
       return;
     window.statusBarTexts_ = new_texts;
     window.parent.setStatusBar(new_texts);

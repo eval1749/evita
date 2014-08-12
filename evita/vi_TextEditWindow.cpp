@@ -227,7 +227,6 @@ Posn TextEditWindow::MapPointToPosition(const gfx::PointF pt) {
   return std::min(text_renderer_->MapPointToPosition(pt), buffer()->GetEnd());
 }
 
-
 void TextEditWindow::Redraw() {
   UI_ASSERT_DOM_LOCKED();
 

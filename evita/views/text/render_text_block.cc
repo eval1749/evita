@@ -499,8 +499,10 @@ bool TextBlock::ScrollToPosition(text::Posn offset) {
   }
 
   Format(offset);
+  // When start of line is very far from |offset|, |offset| is below view port.
+  // We scroll up until |offset| is in view port.
   while (!IsPositionFullyVisible(offset)) {
-    if (!ScrollDown())
+    if (!ScrollUp())
       return true;
   }
 

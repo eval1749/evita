@@ -508,8 +508,9 @@ bool TextBlock::ScrollToPosition(text::Posn offset) {
 
   // If this page shows end of buffer, we shows lines as much as
   // possible to fit in page.
-  if (GetEnd() >= text_buffer_->GetEnd()) {
-    while (IsPositionFullyVisible(offset)) {
+  auto const buffer_end = text_buffer_->GetEnd();
+  if (GetEnd() >= buffer_end) {
+    while (IsPositionFullyVisible(buffer_end)) {
       if (!ScrollDown())
         return true;
     }
@@ -526,16 +527,16 @@ bool TextBlock::ScrollToPosition(text::Posn offset) {
         return true;
       scrolled += scroll_height;
     }
-  } else {
-    scrolled = scrollable + scrolled;
-    while (scrolled < scrollable) {
-      auto const scroll_height = lines_.back()->height();
-      if (!ScrollUp())
-        return true;
-      scrolled += scroll_height;
-    }
+    return true;
   }
 
+  scrolled = scrollable + scrolled;
+  while (scrolled < scrollable) {
+    auto const scroll_height = lines_.back()->height();
+    if (!ScrollUp())
+      return true;
+    scrolled += scroll_height;
+  }
   return true;
 }
 

@@ -12,9 +12,9 @@ vars = {
 
 deps = {
     'src/testing/gmock':
-        Var('git_url') + '/external/googlemock.git@6b1759c3816d574bddde3e1725c51a811c8870e7',
+        Var('git_url') + '/external/googlemock.git@896ba0e03f520fb9b6ed582bde2bd00847e3c3f2',
     'src/testing/gtest':
-        Var('git_url') + '/external/googletest.git@74de57c951aedebc5dfe26a27604353432392b98',
+        Var('git_url') + '/external/googletest.git@4650552ff637bb44ecf7784060091cbed3252211',
     'src/third_party/cygwin':
         Var('git_url') + '/chromium/deps/cygwin.git@c89e446b273697fadf3a10ff1007a97c0b7de6df',
     'src/third_party/hunspell':
@@ -24,9 +24,9 @@ deps = {
     'src/tools/deps2git':
         Var('git_url') + '/chromium/tools/deps2git.git@f04828eb0b5acd3e7ad983c024870f17f17b06d9',
     'src/tools/gyp':
-        Var('git_url') + '/external/gyp.git@ac2684beed6e8ca04ac5f837c9db869eefec7bb5',
+        Var('git_url') + '/external/gyp.git@ed274e3ea5885bc28cf6249e848cf696d0e89263',
     'src/v8':
-        Var('git_url') + '/external/v8.git@9d72b8dd94263d9f500f18255d67f0c7b8c3527a',
+        Var('git_url') + '/external/v8.git@4bac458fb0ebad9b4b21cf110fad3a713115f9b1',
 }
 
 deps_os = {

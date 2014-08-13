@@ -5,7 +5,7 @@
 vars = {
   "googlecode_url": "http://%s.googlecode.com/svn",
   "chromium_git": "https://chromium.googlesource.com",
-  "v8_revision": "22960",
+  "v8_revision": "23085",
 }
 
 deps = {
@@ -16,13 +16,13 @@ deps = {
     "/trunk/tools/deps2git@276439",
 
   "src/testing/gmock":
-    (Var("googlecode_url") % "googlemock") + "/trunk@410",
+    (Var("googlecode_url") % "googlemock") + "/trunk@485",
 
   "src/testing/gtest":
-    (Var("googlecode_url") % "googletest") + "/trunk@643",
+    (Var("googlecode_url") % "googletest") + "/trunk@692",
 
   "src/tools/gyp":
-    (Var("googlecode_url") % "gyp") + "/trunk@1959",
+    (Var("googlecode_url") % "gyp") + "/trunk@1964",
 
   "src/third_party/hunspell":
     "/trunk/deps/third_party/hunspell@287123",

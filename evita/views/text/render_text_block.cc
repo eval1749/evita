@@ -445,7 +445,7 @@ void TextBlock::Prepend(TextLine* line) {
 }
 
 bool TextBlock::ScrollDown() {
-  DCHECK(!ShouldFormat());
+  FormatIfNeeded();
   if (!lines_.front()->GetStart())
     return false;
   auto const goal_offset = lines_.front()->GetStart() - 1;
@@ -541,7 +541,7 @@ bool TextBlock::ScrollToPosition(text::Posn offset) {
 }
 
 bool TextBlock::ScrollUp() {
-  DCHECK(!ShouldFormat());
+  FormatIfNeeded();
   EnsureLinePoints();
   if (IsShowEndOfDocument())
     return false;

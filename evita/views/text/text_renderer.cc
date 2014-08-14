@@ -144,7 +144,6 @@ void TextRenderer::RenderSelectionIfNeeded(
 }
 
 bool TextRenderer::ScrollDown() {
-  DCHECK(!ShouldFormat());
   if (!text_block_->ScrollDown())
     return false;
   should_render_ = true;
@@ -156,7 +155,6 @@ bool TextRenderer::ScrollToPosition(text::Posn offset) {
 }
 
 bool TextRenderer::ScrollUp() {
-  DCHECK(!ShouldFormat());
   if (!text_block_->ScrollUp())
     return false;
   should_render_ = true;

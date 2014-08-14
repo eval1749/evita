@@ -47,9 +47,6 @@
 #include "evita/views/window_set.h"
 #include "evita/vi_EditPane.h"
 
-extern HINSTANCE g_hInstance;
-extern HINSTANCE g_hResource;
-
 using common::win::Rect;
 using namespace views;
 

@@ -235,6 +235,7 @@
            ], # outputs
           'action': [
             'python',
+            '<(DEPTH)/tools/razzle/closure_compiler.py',
             '--js_output_file=<@(_outputs)',
             '<(RULE_INPUT_PATH)',
             '--extern',

@@ -509,20 +509,11 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
     ui::Caret::instance()->Blink(this, canvas);
     return;
   }
-  auto min_left = bounds_.right;
-  auto max_right = bounds_.left;
   auto new_selection_rects = CalculateSelectionRects(lines_, new_selection,
                                                      bounds_);
-  for (const auto& rect : new_selection_rects) {
-    min_left = std::min(min_left, rect.left);
-    max_right = std::max(max_right, rect.right);
-  }
   auto old_selection_rects = CalculateSelectionRects(lines_, selection_,
                                                      bounds_);
-  for (const auto& rect : old_selection_rects) {
-    min_left = std::min(min_left, rect.left);
-    max_right = std::max(max_right, rect.right);
-  }
+
   if (old_selection_rects.empty() && new_selection_rects.empty() &&
       ui::Caret::instance()->owner() != this) {
     selection_ = new_selection;

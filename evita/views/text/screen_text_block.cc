@@ -57,7 +57,8 @@ inline gfx::RectF RoundBounds(const gfx::RectF& bounds) {
 }
 
 std::unordered_set<gfx::RectF> CalculateSelectionRects(
-    const std::vector<TextLine*>& lines, const TextSelection& selection) {
+    const std::vector<TextLine*>& lines, const TextSelection& selection,
+    const gfx::RectF& bounds) {
   std::unordered_set<gfx::RectF> rects;
   if (selection.is_caret())
     return rects;
@@ -71,7 +72,7 @@ std::unordered_set<gfx::RectF> CalculateSelectionRects(
     auto const rect = line->CalculateSelectionRect(selection);
     if (rect.empty())
       continue;
-    rects.insert(RoundBounds(rect));
+    rects.insert(bounds.Intersect(RoundBounds(rect)));
   }
   return rects;
 }
@@ -510,12 +511,14 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
   }
   auto min_left = bounds_.right;
   auto max_right = bounds_.left;
-  auto new_selection_rects = CalculateSelectionRects(lines_, new_selection);
+  auto new_selection_rects = CalculateSelectionRects(lines_, new_selection,
+                                                     bounds_);
   for (const auto& rect : new_selection_rects) {
     min_left = std::min(min_left, rect.left);
     max_right = std::max(max_right, rect.right);
   }
-  auto old_selection_rects = CalculateSelectionRects(lines_, selection_);
+  auto old_selection_rects = CalculateSelectionRects(lines_, selection_,
+                                                     bounds_);
   for (const auto& rect : old_selection_rects) {
     min_left = std::min(min_left, rect.left);
     max_right = std::max(max_right, rect.right);

@@ -834,6 +834,13 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       }
       return 0;
 
+    case WM_SHOWWINDOW:
+      if (wParam)
+        DidShow();
+      else
+        DidHide();
+      break;
+
     case WM_SIZE:
       #if DEBUG_RESIZE
         DVLOG_WIDGET(0) << "WM_SIZE " << wParam << " " <<

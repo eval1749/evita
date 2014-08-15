@@ -7,6 +7,7 @@
 #include "base/time/time.h"
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
+#include "evita/ui/animation/animator.h"
 #include "evita/ui/controls/status_bar.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/system_metrics.h"
@@ -232,12 +233,13 @@ class MessageView::Model final {
   public: Model();
   public: ~Model() = default;
 
-  private: void Animate(base::Time now);
+  private: bool Animate(base::Time now);
   public: void SetMessage(const base::string16& text);
   public: void SetStatus(const std::vector<base::string16>& texts);
-  private: void StartAnimate(base::Time now, const base::string16& text);
+  private: void StartAnimation(base::Time now, const base::string16& text);
   private: void UpdateLayout();
-  public: void UpdateView(gfx::Canvas* canvas, const gfx::RectF& bounds);
+  public: bool UpdateVisual(base::Time time, gfx::Canvas* canvas,
+                            const gfx::RectF& bounds);
 
   DISALLOW_COPY_AND_ASSIGN(Model);
 };
@@ -245,13 +247,16 @@ class MessageView::Model final {
 MessageView::Model::Model() : paint_model_(new ModelView()), parts_(1) {
 }
 
-void MessageView::Model::Animate(base::Time now) {
+bool MessageView::Model::Animate(base::Time now) {
   // Hide text after 5000ms.
   auto const kAnimationDuration = 5000.0f;
   auto const duration = now - main_text_time_;
   auto const factor = static_cast<float>(duration.InMilliseconds()) /
                       kAnimationDuration;
-  parts_[0].alpha = factor >= 1.0 ? 0.0f : 1.0f - factor;
+  auto const old_value = parts_[0].alpha;
+  auto const new_value = factor >= 1.0 ? 0.0f : 1.0f - factor;
+  parts_[0].alpha = new_value;
+  return new_value != old_value;
 }
 
 void MessageView::Model::SetMessage(const base::string16& text) {
@@ -270,8 +275,8 @@ void MessageView::Model::SetStatus(const std::vector<base::string16>& texts) {
   parts_[0].text = current_text;
 }
 
-void MessageView::Model::StartAnimate(base::Time now,
-                                      const base::string16& main_text) {
+void MessageView::Model::StartAnimation(base::Time now,
+                                        const base::string16& main_text) {
   // TODO(eval1749) We should request animation frame for hiding main text
   // after 5 second.
   parts_[0].text = main_text;
@@ -279,26 +284,27 @@ void MessageView::Model::StartAnimate(base::Time now,
   main_text_time_ = now;
 }
 
-void MessageView::Model::UpdateView(gfx::Canvas* canvas,
-                                    const gfx::RectF& bounds) {
-  auto const now = base::Time::Now();
+bool MessageView::Model::UpdateVisual(base::Time now, gfx::Canvas* canvas,
+                                      const gfx::RectF& bounds) {
+  auto need_animation = true;
   if (!message_text_.empty()) {
     if (message_text_ == parts_[0].text) {
       if (parts_[0].alpha) {
-        Animate(now);
+        need_animation = Animate(now);
       } else {
         message_text_.clear();
-        StartAnimate(now, status_text_);
+        StartAnimation(now, status_text_);
       }
     } else {
-      StartAnimate(now, message_text_);
+      StartAnimation(now, message_text_);
     }
   } else if (status_text_ == parts_[0].text) {
-    Animate(now);
+    need_animation = Animate(now);
   } else {
-    StartAnimate(now, status_text_);
+    StartAnimation(now, status_text_);
   }
   paint_model_->Paint(canvas, bounds, parts_);
+  return need_animation;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -313,31 +319,46 @@ MessageView::~MessageView() {
 
 void MessageView::SetMessage(const base::string16& text) {
   model_->SetMessage(text);
+  ui::Animator::instance()->ScheduleAnimation(this);
 }
 
 void MessageView::SetStatus(const std::vector<base::string16>& texts) {
   model_->SetStatus(texts);
+  ui::Animator::instance()->ScheduleAnimation(this);
 }
 
-void MessageView::UpdateView() {
-  model_->UpdateView(canvas_.get(), GetContentsBounds());
+// ui::Animatable
+void MessageView::Animate(base::Time time) {
+  if (!visible())
+    return;
+  if (!model_->UpdateVisual(time, canvas_.get(), GetContentsBounds()))
+    return;
+  ui::Animator::instance()->ScheduleAnimation(this);
 }
 
 // ui::Widget
 void MessageView::DidChangeBounds() {
   ui::Widget::DidChangeBounds();
-  if (canvas_)
-    canvas_->SetBounds(GetContentsBounds());
+  if (!canvas_)
+    return;
+  canvas_->SetBounds(GetContentsBounds());
+  ui::Animator::instance()->ScheduleAnimation(this);
 }
 
 void MessageView::DidRealize() {
   SetLayer(new ui::Layer());
   layer()->SetBounds(gfx::RectF(bounds()));
   canvas_.reset(layer()->CreateCanvas());
+  ui::Animator::instance()->ScheduleAnimation(this);
 }
 
 gfx::Size MessageView::GetPreferredSize() const {
   return gfx::Size(0, ::GetSystemMetrics(SM_CYCAPTION));
+}
+
+void MessageView::WillDestroyWidget() {
+  ui::Widget::WillDestroyWidget();
+  ui::Animator::instance()->CancelAnimation(this);
 }
 
 }  // namespace views

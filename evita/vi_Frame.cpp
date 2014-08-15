@@ -222,7 +222,6 @@ void Frame::DrawForResize() {
   auto const now = base::Time::Now();
   // TODO(eval1749) We should ask animation player to update contents.
   metrics_view_->UpdateView();
-  message_view_->UpdateView();
 
   if (active_tab_content_) {
     for (auto child : active_tab_content_->child_nodes()) {
@@ -358,7 +357,6 @@ void Frame::Animate(base::Time now) {
   // TODO(eval1749) We should call update title bar when needed.
   UpdateTitleBar();
   metrics_view_->UpdateView();
-  message_view_->UpdateView();
 
   DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
   static bool busy;

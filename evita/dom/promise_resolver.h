@@ -93,8 +93,6 @@ void PromiseResolver::Reject(T reason) {
   v8_glue::Runner::Scope runner_scope(runner_.get());
   auto const isolate = runner_->isolate();
   DoReject(gin::ConvertToV8(isolate, reason));
-  // We run micro tasks to process result from |Promise| rather than idle time.
-  ScheduleRunMicrotasks();
 }
 
 template<typename T>
@@ -104,8 +102,6 @@ void PromiseResolver::Resolve(T value) {
   v8_glue::Runner::Scope runner_scope(runner_.get());
   auto const isolate = runner_->isolate();
   DoResolve(gin::ConvertToV8(isolate, value));
-  // We run micro tasks to process result from |Promise| rather than idle time.
-  ScheduleRunMicrotasks();
 }
 
 }  // namespace dom

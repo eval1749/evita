@@ -9,6 +9,7 @@
 #include "evita/editor/application.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/public/view_event_handler.h"
+#include "evita/ui/animation/animator.h"
 #include "evita/ui/events/event.h"
 #include "evita/views/tab_data_set.h"
 #include "evita/views/window_set.h"
@@ -111,9 +112,26 @@ Window::~Window() {
   view_event_handler()->DidDestroyWidget(window_id_);
 }
 
+
+Window* Window::FromWindowId(WindowId window_id) {
+  return WindowIdMapper::instance()->Find(window_id);
+}
 void Window::DidDestroyDomWindow() {
   TabDataSet::instance()->RemoveTabData(window_id_);
   WindowIdMapper::instance()->DidDestroyDomWindow(window_id_);
+}
+
+// ui::Widget
+void Window::DidChangeBounds() {
+  Widget::DidChangeBounds();
+  view_event_handler()->DidResizeWidget(window_id_, bounds().left(),
+                                        bounds().top(), bounds().right(),
+                                        bounds().bottom());
+}
+
+void Window::DidHide() {
+  ui::Widget::DidHide();
+  ui::Animator::instance()->CancelAnimation(this);
 }
 
 void Window::DidKillFocus(ui::Widget* focused_window) {
@@ -121,18 +139,28 @@ void Window::DidKillFocus(ui::Widget* focused_window) {
   DispatchFocusEvent(domapi::EventType::Blur, MaybeEventTarget(focused_window));
 }
 
-bool Window::OnIdle(int hint) {
-  auto more = false;
-  for (auto child : child_nodes()) {
-    if (auto const window = child->as<Window>()) {
-      if (window->OnIdle(hint))
-        more = true;
-    }
-  }
-  return more;
+void Window::DidRealize() {
+  view_event_handler()->DidRealizeWidget(window_id_);
+  view_event_handler()->DidResizeWidget(window_id_, bounds().left(),
+                                        bounds().top(), bounds().right(),
+                                        bounds().bottom());
+  ui::Animator::instance()->ScheduleAnimation(this);
+  Widget::DidRealize();
 }
 
-// ui::Wiget
+void Window::DidSetFocus(ui::Widget* last_focused) {
+  DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
+  ++static_active_tick;
+  active_tick_ = static_active_tick;
+  Widget::DidSetFocus(last_focused);
+  DispatchFocusEvent(domapi::EventType::Focus, MaybeEventTarget(last_focused));
+}
+
+void Window::DidShow() {
+  ui::Widget::DidShow();
+  ui::Animator::instance()->ScheduleAnimation(this);
+}
+
 void Window::OnKeyPressed(const ui::KeyboardEvent& event) {
   DispatchKeyboardEvent(event);
 }
@@ -157,35 +185,9 @@ void Window::OnMouseWheel(const ui::MouseWheelEvent& event) {
   DispatchWheelEvent(event);
 }
 
-void Window::DidRealize() {
-  view_event_handler()->DidRealizeWidget(window_id_);
-  view_event_handler()->DidResizeWidget(window_id_, bounds().left(),
-                                        bounds().top(), bounds().right(),
-                                        bounds().bottom());
-  Widget::DidRealize();
-}
-
-void Window::DidChangeBounds() {
-  Widget::DidChangeBounds();
-  view_event_handler()->DidResizeWidget(window_id_, bounds().left(),
-                                        bounds().top(), bounds().right(),
-                                        bounds().bottom());
-}
-
-void Window::DidSetFocus(ui::Widget* last_focused) {
-  DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
-  ++static_active_tick;
-  active_tick_ = static_active_tick;
-  Widget::DidSetFocus(last_focused);
-  DispatchFocusEvent(domapi::EventType::Focus, MaybeEventTarget(last_focused));
-}
-
-Window* Window::FromWindowId(WindowId window_id) {
-  return WindowIdMapper::instance()->Find(window_id);
-}
-
 void Window::WillDestroyWidget() {
   Widget::WillDestroyWidget();
+  ui::Animator::instance()->CancelAnimation(this);
   active_tick_ = 0;
 }
 }  // namespace views

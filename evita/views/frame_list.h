@@ -29,7 +29,6 @@ class FrameList : public common::Singleton<FrameList>,
   public: void AddFrame(Frame* frame);
   public: Frame* FindFrameByHwnd(HWND hwnd) const;
   public: void RemoveFrame(Frame* frame);
-  public: bool DoIdle(int hint);
 
   // FrameObserver
   public: virtual void DidActiveFrame(Frame* frame) override;

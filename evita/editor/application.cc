@@ -24,6 +24,7 @@
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/spellchecker/spelling_engine.h"
+#include "evita/ui/animation/animator.h"
 #include "evita/ui/base/ime/text_input_client_win.h"
 #include "evita/ui/compositor/compositor.h"
 #include "evita/ui/widget.h"
@@ -156,7 +157,7 @@ void Application::DoIdle() {
       wait_time);
 }
 
-bool Application::OnIdle(int hint) {
+bool Application::OnIdle(int) {
   METRICS_TIME_SCOPE();
   if (!tasks_within_dom_lock_.empty()) {
     UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
@@ -167,10 +168,10 @@ bool Application::OnIdle(int hint) {
       tasks_within_dom_lock_.clear();
     }
   }
-  auto more = views::FrameList::instance()->DoIdle(hint);
-  more |= views::FormWindow::DoIdle(hint);
+  auto const now = base::Time::Now();
+  ui::Animator::instance()->Animate(now);
   ui::Compositor::instance()->CommitIfNeeded();
-  return more;
+  return false;
 }
 
 void Application::Quit() {

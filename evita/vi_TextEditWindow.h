@@ -100,6 +100,9 @@ class TextEditWindow : private gfx::Canvas::Observer,
   // gfx::Canvas::Observer
   private: virtual void ShouldDiscardResources() override;
 
+  // ui::Animatable
+  private: virtual void Animate(base::Time time) override;
+
   // ui::ScrollBarObserver
   private: virtual void DidClickLineDown() override;
   private: virtual void DidClickLineUp() override;
@@ -127,9 +130,6 @@ class TextEditWindow : private gfx::Canvas::Observer,
 
   // views::ContentWindow
   private: virtual void MakeSelectionVisible() override;
-
-  // views::Window
-  private: virtual bool OnIdle(int hint) override;
 
   DISALLOW_COPY_AND_ASSIGN(TextEditWindow);
 };

@@ -68,7 +68,6 @@ class Frame final : public views::Window,
   private: views::MessageView* message_view_;
   private: views::MetricsView* metrics_view_;
   private: ObserverList<views::FrameObserver> observers_;
-  private: gfx::Rect pending_update_rect_;
   private: std::unordered_set<Pane*> tab_contents_;
   private: std::unique_ptr<ui::Layer> tab_content_layer_;
   private: views::TabStrip* tab_strip_;
@@ -104,6 +103,9 @@ class Frame final : public views::Window,
   // [U]
   private: void UpdateTitleBar();
 
+  // ui::Animatable
+  private: virtual void Animate(base::Time time) override;
+
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;
   private: virtual void DidAddChildWidget(const ui::Widget& widget) override;
@@ -127,9 +129,6 @@ class Frame final : public views::Window,
   private: virtual void DidThrowTab(LPARAM lParam);
   private: virtual base::string16 GetTooltipTextForTab(int tab_index) override;
   private: virtual void OnDropTab(LPARAM lParam);
-
-  // views::Window
-  public: virtual bool OnIdle(int hint) override;
 
   DISALLOW_COPY_AND_ASSIGN(Frame);
 };

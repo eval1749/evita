@@ -34,6 +34,7 @@
 #include "evita/text/marker_set.h"
 #include "evita/text/range.h"
 #include "evita/text/selection.h"
+#include "evita/ui/animation/animator.h"
 #include "evita/ui/base/ime/text_composition.h"
 #include "evita/ui/base/ime/text_input_client.h"
 #include "evita/ui/compositor/layer.h"
@@ -362,6 +363,16 @@ void TextEditWindow::ShouldDiscardResources() {
   text_renderer_->DidLostCanvas();
 }
 
+// ui::Animatable
+void TextEditWindow::Animate(base::Time) {
+  if (!visible())
+    return;
+  ui::Animator::instance()->ScheduleAnimation(this);
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  if (lock_scope.locked())
+    Redraw();
+}
+
 // ui::ScrollBarObserver
 void TextEditWindow::DidClickLineDown() {
   UI_DOM_AUTO_LOCK_SCOPE();
@@ -466,12 +477,4 @@ HCURSOR TextEditWindow::GetCursorAt(const Point&) const {
 // views::ContentWindow
 void TextEditWindow::MakeSelectionVisible() {
   m_lCaretPosn = -1;
-}
-
-// views::Window
-bool TextEditWindow::OnIdle(int) {
-  if (!visible())
-    return false;
-  Redraw();
-  return false;
 }

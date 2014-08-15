@@ -28,15 +28,6 @@ Frame* FrameList::FindFrameByHwnd(HWND hwnd) const {
   return nullptr;
 }
 
-bool FrameList::DoIdle(int hint) {
-  auto need_more = false;
-  for (auto frame : frames_) {
-    if (frame->OnIdle(hint))
-      need_more = true;
-  }
-  return need_more;
-}
-
 void FrameList::RemoveFrame(Frame* frame) {
   auto it = frames_.find(frame);
   if (it != frames_.end())
@@ -64,4 +55,4 @@ void FrameList::DidActiveFrame(Frame* frame) {
   active_frame_ = frame;
 }
 
-}  // namespaec views
+}  // namespace views

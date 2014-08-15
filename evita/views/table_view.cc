@@ -13,6 +13,7 @@
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/text/buffer.h"
+#include "evita/ui/animation/animator.h"
 #include "evita/ui/base/table_model_observer.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/controls/table_control.h"
@@ -193,6 +194,24 @@ void TableView::DidDeleteAt(Posn, size_t) {
   should_update_model_ = true;
 }
 
+// ui::Animatable
+void TableView::Animate(base::Time) {
+  if (!visible())
+    return;
+  // TODO(eval1749) We don't need to schedule animation for each animation
+  // frame for |TableView|.
+  ui::Animator::instance()->ScheduleAnimation(this);
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  if (!lock_scope.locked())
+    return;
+  auto new_model = UpdateModelIfNeeded();
+  if (new_model)
+    UpdateControl(std::move(new_model));
+  if (has_focus())
+    control_->RequestFocus();
+  control_->RenderIfNeeded(canvas_.get());
+}
+
 void TableView::DidInsertAt(Posn, size_t) {
   should_update_model_ = true;
 }
@@ -228,12 +247,7 @@ base::string16 TableView::GetCellText(int row_id, int column_id) const {
   return present->second->cell(static_cast<size_t>(column_id)).text();
 }
 
-// views::ContentWindow
-void TableView::MakeSelectionVisible() {
-}
-
 // ui::Widget
-
 // Resize |ui::TableControl| to cover all client area.
 void TableView::DidChangeBounds() {
   ContentWindow::DidChangeBounds();
@@ -261,17 +275,8 @@ void TableView::DidShow() {
   canvas_.reset(layer()->CreateCanvas());
 }
 
-// views::Window
-bool TableView::OnIdle(int) {
-  if (!visible())
-    return false;
-  auto new_model = UpdateModelIfNeeded();
-  if (new_model)
-    UpdateControl(std::move(new_model));
-  if (has_focus())
-    control_->RequestFocus();
-  control_->RenderIfNeeded(canvas_.get());
-  return false;
+// views::ContentWindow
+void TableView::MakeSelectionVisible() {
 }
 
 }  // namespace views

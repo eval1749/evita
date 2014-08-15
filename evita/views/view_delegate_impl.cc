@@ -18,6 +18,7 @@
 #include "evita/gc/collector.h"
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
+#include "evita/ui/animation/animator.h"
 #include "evita/ui/base/ime/text_input_client.h"
 #include "evita/ui/controls/text_field_control.h"
 #include "evita/views/forms/file_dialog_box.h"
@@ -522,9 +523,8 @@ void ViewDelegateImpl::UpdateWindow(dom::WindowId window_id) {
   auto const window = FromWindowId("UpdateWindow", window_id);
   if (!window)
     return;
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  DCHECK(lock_scope.locked());
-  window->OnIdle(0);
+  auto const now = base::Time::Now();
+  ui::Animator::instance()->PlayAnimation(now, window);
 }
 
 }  // namespace views

@@ -25,13 +25,13 @@
 #include "evita/dom/forms/text_field_selection.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/application.h"
+#include "evita/ui/animation/animator.h"
 #include "evita/ui/caret.h"
 #include "evita/ui/controls/button_control.h"
 #include "evita/ui/controls/checkbox_control.h"
 #include "evita/ui/controls/label_control.h"
 #include "evita/ui/controls/radio_button_control.h"
 #include "evita/ui/controls/text_field_control.h"
-#include "evita/ui/root_widget.h"
 #include "evita/ui/system_metrics.h"
 #include "evita/views/forms/form_control_controller.h"
 #include "evita/views/frame_list.h"
@@ -440,17 +440,6 @@ FormWindow::FormWindow(dom::WindowId window_id, dom::Form* form)
 FormWindow::~FormWindow() {
 }
 
-bool FormWindow::DoIdle(int hint) {
-  bool more = false;
-  for (auto widget : ui::RootWidget::instance()->child_nodes()) {
-    auto form_window = widget->as<views::FormWindow>();
-    if (!form_window || !form_window->is_realized() || !form_window->visible())
-      continue;
-    more |= form_window->OnIdle(hint);
-  }
-  return more;
-}
-
 void FormWindow::DoRealizeWidget() {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!is_realized());
@@ -461,9 +450,22 @@ void FormWindow::DoRealizeWidget() {
   views::Window::RealizeWidget();
 }
 
-bool FormWindow::OnIdle(int) {
+void FormWindow::TransferFocusIfNeeded() {
+  auto const focus_control = model_->focus_control();
+  if (!focus_control)
+    return;
+  if (!has_focus())
+    return;
+  focus_control->RequestFocus();
+}
+
+// ui::Animatable
+void FormWindow::Animate(base::Time) {
   DCHECK(is_realized());
-  DCHECK(visible());
+  if (!visible())
+    return;
+
+  ui::Animator::instance()->ScheduleAnimation(this);
 
   if (pending_update_rect_.empty()) {
     if (has_native_focus())
@@ -476,12 +478,12 @@ bool FormWindow::OnIdle(int) {
 
   if (!model_->dirty()) {
     TransferFocusIfNeeded();
-    return false;
+    return;
   }
 
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   if (!lock_scope.locked())
-    return true;
+    return;
 
   model_->Update();
 
@@ -507,16 +509,6 @@ bool FormWindow::OnIdle(int) {
   }
 
   TransferFocusIfNeeded();
-  return false;
-}
-
-void FormWindow::TransferFocusIfNeeded() {
-  auto const focus_control = model_->focus_control();
-  if (!focus_control)
-    return;
-  if (!has_focus())
-    return;
-  focus_control->RequestFocus();
 }
 
 // ui::SystemMetricsObserver
@@ -569,7 +561,19 @@ void FormWindow::CreateNativeWindow() const {
       frame_window_rect.origin(), frame_window_rect.size());
 }
 
+void FormWindow::DidChangeBounds() {
+  canvas_->SetBounds(GetContentsBounds());
+  {
+    gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+    canvas_->set_dirty_rect(GetContentsBounds());
+    canvas_->Clear(ui::SystemMetrics::instance()->bgcolor());
+  }
+  SchedulePaint();
+  Window::DidChangeBounds();
+}
+
 void FormWindow::DidDestroyWidget() {
+  ui::Animator::instance()->CancelAnimation(this);
   ui::SystemMetrics::instance()->RemoveObserver(this);
   Window::DidDestroyWidget();
 }
@@ -582,17 +586,6 @@ void FormWindow::DidRealize() {
   canvas_.reset(new gfx::CanvasForHwnd(*native_window()));
   ui::SystemMetrics::instance()->AddObserver(this);
   Window::DidRealize();
-}
-
-void FormWindow::DidChangeBounds() {
-  canvas_->SetBounds(GetContentsBounds());
-  {
-    gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-    canvas_->set_dirty_rect(GetContentsBounds());
-    canvas_->Clear(ui::SystemMetrics::instance()->bgcolor());
-  }
-  SchedulePaint();
-  Window::DidChangeBounds();
 }
 
 LRESULT FormWindow::OnMessage(uint32_t const message, WPARAM const wParam,

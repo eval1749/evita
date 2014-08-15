@@ -31,6 +31,7 @@
 #include "evita/gfx/rect_conversions.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/ui/animation/animator.h"
 #include "evita/ui/compositor/compositor.h"
 #include "evita/ui/compositor/root_layer.h"
 #include "evita/ui/events/event.h"
@@ -218,17 +219,15 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
 }
 
 void Frame::DrawForResize() {
+  auto const now = base::Time::Now();
   // TODO(eval1749) We should ask animation player to update contents.
   metrics_view_->UpdateView();
   message_view_->UpdateView();
 
   if (active_tab_content_) {
-    UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-    if (lock_scope.locked()) {
-      for (auto child : active_tab_content_->child_nodes()) {
-        if (auto const window = child->as<Window>())
-          window->OnIdle(0);
-      }
+    for (auto child : active_tab_content_->child_nodes()) {
+      if (auto const window = child->as<Window>())
+        ui::Animator::instance()->PlayAnimation(now, window);
     }
   }
 
@@ -347,6 +346,43 @@ void Frame::UpdateTitleBar() {
       (tab_data->state == domapi::TabData::State::Modified ? L" * " : L" - ") +
       Application::instance()->title();
   title_bar_->SetText(window_title);
+}
+
+// ui::Animatable
+void Frame::Animate(base::Time now) {
+  if (!visible())
+    return;
+  metrics_view_->RecordTime();
+  views::MetricsView::TimingScope timing_scope(metrics_view_);
+  ui::Animator::instance()->ScheduleAnimation(this);
+  // TODO(eval1749) We should call update title bar when needed.
+  UpdateTitleBar();
+  metrics_view_->UpdateView();
+  message_view_->UpdateView();
+
+  DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
+  static bool busy;
+  {
+    UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+    if (lock_scope.locked()) {
+      busy = false;
+      return;
+    }
+  }
+
+  if (!busy) {
+    busy = true;
+    busy_start_at = now;
+    return;
+  }
+
+  auto const delta = (now - busy_start_at).InSeconds();
+  if (!delta)
+    return;
+
+  message_view_->SetMessage(base::StringPrintf(
+    L"Script runs %ds. Ctrl+Break to terminate script.",
+    delta));
 }
 
 // ui::Widget
@@ -633,7 +669,7 @@ void Frame::OnPaint(const gfx::Rect) {
 }
 
 void Frame::WillDestroyWidget() {
-  ui::Widget::WillDestroyWidget();
+  views::Window::WillDestroyWidget();
   views::FrameList::instance()->RemoveFrame(this);
 }
 
@@ -694,6 +730,7 @@ void Frame::DidChangeTabSelection(int selected_index) {
   }
   active_tab_content_ = tab_content;
   tab_content->Activate();
+  UpdateTitleBar();
   #if DEBUG_FOCUS
     DVLOG(0) << "End selected_index=" << selected_index <<
         " cur=" active_tab_content_ << " new=" << tab_content;
@@ -730,47 +767,4 @@ void Frame::OnDropTab(LPARAM lParam) {
   Application::instance()->view_event_handler()->DidDropWidget(
       edit_tab_content->GetActiveWindow()->window_id(),
       window_id());
-}
-
-// views::Window
-bool Frame::OnIdle(int const hint) {
-  metrics_view_->RecordTime();
-  views::MetricsView::TimingScope timing_scope(metrics_view_);
-
-  DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
-  static bool busy;
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  if (!lock_scope.locked()) {
-    auto const now = base::Time::Now();
-    if (!busy) {
-      busy = true;
-      busy_start_at = now;
-    } else if (auto const delta = (now - busy_start_at).InSeconds()) {
-      message_view_->SetMessage(base::StringPrintf(
-        L"Script runs %ds. Ctrl+Break to terminate script.",
-        delta));
-    }
-    return true;
-  }
-
-  metrics_view_->UpdateView();
-  message_view_->UpdateView();
-
-  busy = false;
-  if (!pending_update_rect_.empty()) {
-    gfx::Rect rect;
-    std::swap(pending_update_rect_, rect);
-    SchedulePaintInRect(rect);
-  }
-  auto const active_tab_content = GetActiveTabContent();
-  if (!active_tab_content)
-    return false;
-  if (!hint)
-    UpdateTitleBar();
-  auto more = false;
-  for (auto child : active_tab_content->child_nodes()) {
-    if (auto const window = child->as<Window>())
-      more |= window->OnIdle(hint);
-  }
-  return more;
 }

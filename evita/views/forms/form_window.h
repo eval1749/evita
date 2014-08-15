@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "evita/gc/member.h"
+#include "evita/ui/animation/animatable.h"
 #include "evita/ui/system_metrics_observer.h"
 
 namespace dom {
@@ -53,9 +54,10 @@ class FormWindow final : public views::Window,
   public: virtual ~FormWindow();
 
   private: void DoRealizeWidget();
-  public: static bool DoIdle(int hint);
-  private: bool OnIdle(int hint);
   private: void TransferFocusIfNeeded();
+
+  // ui::Animatable
+  private: virtual void Animate(base::Time time) override;
 
   // ui::SystemMetricsObserver
   private: virtual void DidChangeIconFont() override;
@@ -64,9 +66,9 @@ class FormWindow final : public views::Window,
 
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;
+  private: virtual void DidChangeBounds() override;
   private: virtual void DidDestroyWidget() override;
   private: virtual void DidRealize() override;
-  private: virtual void DidChangeBounds() override;
   private: virtual LRESULT OnMessage(uint32_t message, WPARAM wParam,
                                      LPARAM lParam) override;
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;

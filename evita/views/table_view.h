@@ -61,6 +61,9 @@ class TableView
   private: virtual void DidDeleteAt(Posn offset, size_t length) override;
   private: virtual void DidInsertAt(Posn offset, size_t length) override;
 
+  // ui::Animatable
+  private: virtual void Animate(base::Time time) override;
+
   // ui::TableControlObserver
   private: virtual void OnKeyPressed(const ui::KeyboardEvent&) override;
   private: virtual void OnMousePressed(const ui::MouseEvent&) override;
@@ -80,9 +83,6 @@ class TableView
   private: virtual void DidHide() override;
   private: virtual void DidRealize() override;
   private: virtual void DidShow() override;
-
-  // views::Window
-  private: virtual bool OnIdle(int hint) override;
 
   DISALLOW_COPY_AND_ASSIGN(TableView);
 };

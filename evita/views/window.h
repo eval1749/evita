@@ -5,13 +5,16 @@
 #if !defined(INCLUDE_evita_views_window_h)
 #define INCLUDE_evita_views_window_h
 
+#include "evita/ui/animation/animatable.h"
 #include "evita/ui/widget.h"
 #include "evita/views/event_source.h"
 #include "evita/views/window_id.h"
 
 namespace views {
 
-class Window : public ui::Widget, protected EventSource {
+class Window : public ui::Animatable,
+               public ui::Widget,
+               protected EventSource {
   DECLARE_CASTABLE_CLASS(Window, Widget);
 
   protected: typedef common::win::NativeWindow NativeWindow;
@@ -28,14 +31,15 @@ class Window : public ui::Widget, protected EventSource {
   public: WindowId window_id() const { return window_id_; }
 
   public: void DidDestroyDomWindow();
-  protected: virtual void DidKillFocus(ui::Widget* focused_window) override;
-  protected: virtual void DidRealize() override;
-  protected: virtual void DidChangeBounds() override;
-  protected: virtual void DidSetFocus(ui::Widget* last_focused) override;
   public: static Window* FromWindowId(WindowId window_id);
-  public: virtual bool OnIdle(int hint);
 
   // ui::Widget
+  protected: virtual void DidChangeBounds() override;
+  protected: virtual void DidKillFocus(ui::Widget* focused_window) override;
+  protected: virtual void DidHide() override;
+  protected: virtual void DidRealize() override;
+  protected: virtual void DidSetFocus(ui::Widget* last_focused) override;
+  protected: virtual void DidShow() override;
   protected: virtual void OnKeyPressed(
       const ui::KeyboardEvent& event) override;
   protected: virtual void OnKeyReleased(

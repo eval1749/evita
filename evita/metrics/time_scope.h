@@ -46,6 +46,8 @@ class TimeScope {
   private: base::Time start_at_;
   public: TimeScope(const base::StringPiece& name);
   public: ~TimeScope();
+
+  public: base::TimeDelta value() const;
 };
 
 }  // namespace metrics

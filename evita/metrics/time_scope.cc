@@ -71,8 +71,11 @@ TimeScope::TimeScope(const base::StringPiece& name)
 TimeScope::~TimeScope() {
   auto const end_at = base::Time::Now();
   auto const histogram = HistogramSet::instance()->GetOrCreate(name_);
-  histogram->AddSample(static_cast<int>(
-    (end_at - start_at_).InMicroseconds()));
+  histogram->AddSample(static_cast<int>(value().InMilliseconds()));
+}
+
+base::TimeDelta TimeScope::value() const {
+  return base::Time::Now() - start_at_;
 }
 
 }  // namespace metrics

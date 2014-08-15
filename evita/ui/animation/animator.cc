@@ -36,6 +36,11 @@ void Animator::CancelAnimation(Animatable* animatable) {
   animatables_.erase(present);
 }
 
+void Animator::PlayAnimation(base::Time now, Animatable* animatable) {
+  CancelAnimation(animatable);
+  animatable->Animate(now);
+}
+
 void Animator::ScheduleAnimation(Animatable* animatable) {
   animatables_.insert(animatable);
 }

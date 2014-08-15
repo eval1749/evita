@@ -28,6 +28,7 @@ class Animator : public common::Singleton<Animator> {
 
   public: void Animate(base::Time time);
   public: void CancelAnimation(Animatable* animatable);
+  public: void PlayAnimation(base::Time time, Animatable* animatable);
   public: void ScheduleAnimation(Animatable* animatable);
 
   DISALLOW_COPY_AND_ASSIGN(Animator);

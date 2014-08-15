@@ -117,7 +117,7 @@ void Application::DispatchViewIdelEvent() {
     // DOM is still processing "view idle" vent.
     METRICS_COUNT("view_idle_count");
     ++view_idle_count_;
-  } if (ui::Widget::has_active_focus()) {
+  } else if (ui::Widget::has_active_focus()) {
     // We are active. Notify DOM to do something.
     METRICS_COUNT("view_idle_event");
     view_idle_count_ = 1;

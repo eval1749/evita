@@ -232,6 +232,11 @@
       'sources': [
         '<(DEPTH)/build/precompile.cc',
 
+        'ui/animation/animatable.cc',
+        'ui/animation/animatable.h',
+        'ui/animation/animator.cc',
+        'ui/animation/animator.h',
+
         'ui/base/ime/text_composition.cc',
         'ui/base/ime/text_composition.h',
         'ui/base/ime/text_input_client.h',

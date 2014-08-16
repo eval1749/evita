@@ -73,61 +73,11 @@ Pane* GetTabContentFromWindow(Frame* frame, views::Window* window) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// Frame::DragController
-//
-class Frame::DragController final {
-  private: bool drag_in_progress_;
-  private: gfx::Size drag_offset_;
-  private: Frame* frame_;
-
-  public: DragController(Frame* frame);
-  public: ~DragController() = default;
-
-  public: void OnMouseMoved(const ui::MouseEvent& event);
-  public: void OnMousePressed(const ui::MouseEvent& event);
-  public: void OnMouseReleased(const ui::MouseEvent& event);
-
-  DISALLOW_COPY_AND_ASSIGN(DragController);
-};
-
-Frame::DragController::DragController(Frame* frame)
-    : drag_in_progress_(false), frame_(frame) {
-}
-
-void Frame::DragController:: OnMouseMoved(const ui::MouseEvent& event) {
-  if (!drag_in_progress_)
-    return;
-  auto const view = frame_->metrics_view_;
-  view->SetBounds(gfx::Rect(event.location() - drag_offset_,
-                            view->bounds().size()));
-  ui::Compositor::instance()->CommitIfNeeded();
-  ui::Compositor::instance()->WaitForCommitCompletion();
-}
-
-void Frame::DragController:: OnMousePressed(const ui::MouseEvent& event) {
-  auto const view = frame_->metrics_view_;
-  if (!view->bounds().Contains(event.location()))
-    return;
-  drag_in_progress_ = true;
-  drag_offset_ = event.location() - view->bounds().origin();
-  frame_->SetCapture();
-}
-
-void Frame::DragController:: OnMouseReleased(const ui::MouseEvent&) {
-  if (!drag_in_progress_)
-    return;
-  drag_in_progress_ = false;
-  frame_->ReleaseCapture();
-}
-
-//////////////////////////////////////////////////////////////////////
-//
 // Frame
 //
 Frame::Frame(views::WindowId window_id)
     : views::Window(ui::NativeWindow::Create(this), window_id),
       active_tab_content_(nullptr),
-      drag_controller_(new DragController(this)),
       message_view_(new views::MessageView()),
       metrics_view_(new views::MetricsView()),
       title_bar_(new views::TitleBar()),
@@ -640,21 +590,6 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
   }
 
   return ui::Widget::OnMessage(uMsg, wParam, lParam);
-}
-
-void Frame::OnMouseMoved(const ui::MouseEvent& event)  {
-  views::Window::OnMouseMoved(event);
-  drag_controller_->OnMouseMoved(event);
-}
-
-void Frame::OnMousePressed(const ui::MouseEvent& event)  {
-  views::Window::OnMousePressed(event);
-  drag_controller_->OnMousePressed(event);
-}
-
-void Frame::OnMouseReleased(const ui::MouseEvent& event)  {
-  views::Window::OnMouseReleased(event);
-  drag_controller_->OnMouseReleased(event);
 }
 
 void Frame::OnPaint(const gfx::Rect) {

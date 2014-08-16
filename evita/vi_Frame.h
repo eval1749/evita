@@ -60,11 +60,7 @@ class Frame final : public views::Window,
                     public views::TabStripDelegate {
   DECLARE_CASTABLE_CLASS(Frame, views::Window);
 
-  private: class DragController;
-  friend class DragController;
-
   private: Pane* active_tab_content_;
-  private: std::unique_ptr<DragController> drag_controller_;
   private: views::MessageView* message_view_;
   private: views::MetricsView* metrics_view_;
   private: ObserverList<views::FrameObserver> observers_;
@@ -115,9 +111,6 @@ class Frame final : public views::Window,
   private: virtual void DidChangeBounds() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
-  private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
-  private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
-  private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;
   private: virtual void WillDestroyWidget() override;
   private: virtual void WillRemoveChildWidget(

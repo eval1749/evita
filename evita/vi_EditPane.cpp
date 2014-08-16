@@ -17,6 +17,7 @@
 #include "evita/gfx/rect_conversions.h"
 #include "evita/editor/application.h"
 #include "evita/resource.h"
+#include "evita/ui/animation/window_animator.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/events/event.h"
 #include "evita/views/content_window.h"
@@ -28,10 +29,56 @@ extern HINSTANCE g_hInstance;
 
 namespace {
 
+typedef views::ContentWindow ContentWindow;
+
 auto const kMinBoxHeight = 30.0f;
 auto const kMinBoxWidth = 50.0f;
 auto const kSplitterWidth = 8.0f;
 auto const kSplitterHeight = 8.0f;
+
+//////////////////////////////////////////////////////////////////////
+//
+// Bounds
+//
+class Bounds {
+  private: gfx::RectF bounds_;
+
+  protected: Bounds() = default;
+  protected: virtual ~Bounds() = default;
+
+  public: float bottom() const { return bounds_.bottom; }
+  public: gfx::PointF bottom_right() const {
+    return bounds_.bottom_right();
+  }
+  public: const gfx::RectF& bounds() const { return bounds_; }
+  public: float height() const { return bounds_.height(); }
+  public: float left() const { return bounds_.left; }
+  public: gfx::PointF origin() const { return bounds_.origin(); }
+  public: float right() const { return bounds_.right; }
+  public: gfx::SizeF size() const { return bounds_.size(); }
+  public: float top() const { return bounds_.top; }
+  public: float width() const { return bounds_.width(); }
+  public: void set_bounds(const gfx::RectF& new_bounds) {
+    bounds_ = new_bounds;
+  }
+
+  protected: virtual void DidChangeBounds();
+  public: void SetBounds(const gfx::RectF& new_bounds);
+
+  DISALLOW_COPY_AND_ASSIGN(Bounds);
+};
+
+void Bounds::DidChangeBounds() {
+}
+
+void Bounds::SetBounds(const gfx::RectF& new_bounds) {
+  DCHECK_GE(new_bounds.width(), kMinBoxWidth);
+  DCHECK_GE(new_bounds.height(), kMinBoxHeight);
+  if (bounds_ == new_bounds)
+    return;
+  bounds_ = new_bounds;
+  DidChangeBounds();
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -64,45 +111,12 @@ struct HitTestResult {
   views::ContentWindow* window() const;
 };
 
-class Bounds {
-  private: gfx::RectF bounds_;
-
-  protected: Bounds() = default;
-  protected: virtual ~Bounds() = default;
-
-  public: float bottom() const { return bounds_.bottom; }
-  public: gfx::PointF bottom_right() const {
-    return bounds_.bottom_right();
-  }
-  public: const gfx::RectF& bounds() const { return bounds_; }
-  public: float height() const { return bounds_.height(); }
-  public: float left() const { return bounds_.left; }
-  public: gfx::PointF origin() const { return bounds_.origin(); }
-  public: float right() const { return bounds_.right; }
-  public: gfx::SizeF size() const { return bounds_.size(); }
-  public: float top() const { return bounds_.top; }
-  public: float width() const { return bounds_.width(); }
-
-  protected: virtual void DidChangeBounds();
-  public: void SetBounds(const gfx::RectF& new_bounds);
-
-  DISALLOW_COPY_AND_ASSIGN(Bounds);
-};
-
-void Bounds::DidChangeBounds() {
-}
-
-void Bounds::SetBounds(const gfx::RectF& new_bounds) {
-  DCHECK_GE(new_bounds.width(), kMinBoxWidth);
-  DCHECK_GE(new_bounds.height(), kMinBoxHeight);
-  if (bounds_ == new_bounds)
-    return;
-  bounds_ = new_bounds;
-  DidChangeBounds();
-}
-
 }  // namespace
 
+//////////////////////////////////////////////////////////////////////
+//
+// EditPane::Box
+//
 class EditPane::Box : public DoubleLinkedNode_<EditPane::Box>,
                       public Bounds,
                       public base::RefCounted<EditPane::Box>,
@@ -144,7 +158,7 @@ class EditPane::Box : public DoubleLinkedNode_<EditPane::Box>,
   public: void RemoveBox(Box*);
   public: void Replace(Box*, Box*);
   public: virtual void ReplaceContent(views::ContentWindow* new_content);
-  public: virtual void Split(Box* ref_box, views::ContentWindow* new_window,
+  public: virtual void Split(Box* ref_box, ContentWindow* new_window,
                              float new_box_size);
   public: virtual void StopSplitter(const gfx::Point&, Box*);
   public: void WillRemoveChild(Box* child);
@@ -169,7 +183,7 @@ class HorizontalBox final : public EditPane::Box {
   private: virtual HitTestResult HitTest(
       const gfx::PointF& point) const override;
   private: virtual void MoveSplitter(const gfx::PointF&, Box*) override;
-  private: virtual void Split(Box* ref_box, views::ContentWindow* new_window,
+  private: virtual void Split(Box* ref_box, ContentWindow* new_window,
                               float new_box_size) override;
   private: virtual void StopSplitter(const gfx::Point&, Box*) override;
 
@@ -194,7 +208,7 @@ class LeafBox final : public EditPane::Box {
   private: bool HasSibling() const { return GetNext() || GetPrev(); }
 
   // Bounds
-  private: virtual void DidChangeBounds() override;
+  private: void DidChangeBounds() override;
 
   // EditPane::Box
   private: virtual int CountLeafBox() const override;
@@ -230,7 +244,7 @@ class VerticalBox final : public EditPane::Box {
   private: virtual HitTestResult HitTest(
       const gfx::PointF& point) const override;
   private: virtual void MoveSplitter(const gfx::PointF&, Box*) override;
-  private: virtual void Split(Box* ref_box, views::ContentWindow* new_window,
+  private: virtual void Split(Box* ref_box, ContentWindow* new_window,
                               float new_box_size) override;
   private: virtual void StopSplitter(const gfx::Point&, Box*) override;
 
@@ -370,8 +384,8 @@ void HorizontalBox::MoveSplitter(const gfx::PointF& point,
 }
 
 void HorizontalBox::Split(Box* left_box,
-                                views::ContentWindow* new_right_window,
-                                float new_right_width) {
+                          views::ContentWindow* new_right_window,
+                          float new_right_width) {
   DCHECK(!new_right_window->is_realized());
   edit_pane_->AppendChild(new_right_window);
 
@@ -379,12 +393,14 @@ void HorizontalBox::Split(Box* left_box,
   boxes_.InsertAfter(right_box, left_box);
   right_box->AddRef();
 
-  left_box->SetBounds(gfx::RectF(left_box->origin(),
+  left_box->set_bounds(gfx::RectF(left_box->origin(),
       left_box->size() - gfx::SizeF(new_right_width + kSplitterWidth, 0.0f)));
+  edit_pane_->window_animator()->Split(new_right_window, left_box->GetContent(),
+                                       left_box->bounds());
   right_box->SetBounds(gfx::RectF(
       gfx::PointF(left_box->right() + kSplitterWidth, top()),
       gfx::SizeF(new_right_width, height())));
-  static_cast<Box*>(right_box)->Realize();
+  new_right_window->RealizeWidget();
 }
 
 void HorizontalBox::StopSplitter(const gfx::Point& point,
@@ -473,26 +489,25 @@ HitTestResult LeafBox::HitTest(const gfx::PointF& point) const {
 
 void LeafBox::Realize() {
   Box::Realize();
+  edit_pane_->window_animator()->Realize(content_);
   content_->Realize(gfx::ToEnclosingRect(bounds()));
-  content_->Show();
 }
 
-void LeafBox::ReplaceContent(views::ContentWindow* window) {
-  DCHECK(!window->parent_node());
-  DCHECK(!window->is_realized());
-  auto const previous_window = content_;
-  content_ = window;
-  edit_pane_->AppendChild(window);
-  Realize();
-  previous_window->DestroyWidget();
+void LeafBox::ReplaceContent(views::ContentWindow* content) {
+  DCHECK(!content->parent_node());
+  DCHECK(!content->is_realized());
+  auto const previous_content = content_;
+  content_ = content;
+  edit_pane_->AppendChild(content);
+  edit_pane_->window_animator()->Replace(content_, previous_content);
+  content_->Realize(gfx::ToEnclosingRect(bounds()));
 }
 
 //////////////////////////////////////////////////////////////////////
 //
 // VerticalBox
 //
-VerticalBox::VerticalBox(EditPane* edit_pane,
-                                               Box* outer)
+VerticalBox::VerticalBox(EditPane* edit_pane, Box* outer)
     : Box(edit_pane, outer) {}
 
 VerticalBox::~VerticalBox() {
@@ -592,10 +607,9 @@ void VerticalBox::MoveSplitter(const gfx::PointF& point,
       below_box->bottom_right()));
 }
 
-
 void VerticalBox::Split(Box* above_box,
-                              views::ContentWindow* below_window,
-                              float below_box_height) {
+                        views::ContentWindow* below_window,
+                        float below_box_height) {
   DCHECK(!below_window->is_realized());
   DCHECK_GE(below_box_height, kMinBoxHeight);
 
@@ -607,15 +621,15 @@ void VerticalBox::Split(Box* above_box,
   boxes_.InsertAfter(below_box, above_box);
   below_box->AddRef();
 
-  above_box->SetBounds(gfx::RectF(
+  above_box->set_bounds(gfx::RectF(
       above_box->origin(), gfx::SizeF(width(), above_box_height)));
-
+  edit_pane_->window_animator()->Split(below_window, above_box->GetContent(),
+                                       above_box->bounds());
   below_box->SetBounds(gfx::RectF(
       gfx::PointF(left(), above_box->bottom() + kSplitterHeight),
       gfx::SizeF(width(), below_box_height)));
-
   edit_pane_->AppendChild(below_window);
-  static_cast<Box*>(below_box)->Realize();
+  below_window->RealizeWidget();
 }
 
 void VerticalBox::StopSplitter(const gfx::Point& point,
@@ -909,7 +923,8 @@ void EditPane::SplitterController::Stop() {
 // EditPane
 //
 EditPane::EditPane()
-    : m_eState(State_NotRealized),
+    : window_animator_(new ui::WindowAnimator()),
+      m_eState(State_NotRealized),
       root_box_(new VerticalBox(this, nullptr)),
       splitter_controller_(new SplitterController(*this)) {
 }
@@ -918,9 +933,17 @@ EditPane::~EditPane() {
   root_box_->DidRemove();
 }
 
+ui::WindowAnimator* EditPane::window_animator() const {
+  return window_animator_.get();
+}
+
 Frame& EditPane::frame() const {
   DCHECK(GetFrame());
   return *GetFrame();
+}
+
+bool EditPane::has_more_than_one_child() const {
+  return first_child() != last_child();
 }
 
 // Returns the last active Box.
@@ -961,6 +984,8 @@ void EditPane::SetContent(views::ContentWindow* window) {
     box->SetBounds(box_bounds);
     window->SetBounds(gfx::ToEnclosingRect(box_bounds));
   }
+  if (!window->is_realized())
+    window_animator()->Realize(window);
   window->SetParentWidget(this);
 }
 
@@ -1016,20 +1041,9 @@ void EditPane::DidChangeBounds() {
   root_box_->SetBounds(GetContentsBounds());
 }
 
-void EditPane::DidChangeChildVisibility(Widget* child) {
-  if (!child->is<views::ContentWindow>())
-    return;
-  DCHECK(!child->bounds().empty());
-  if (child->visible())
-    layer()->AppendChildLayer(child->layer());
-  else
-    layer()->RemoveChildLayer(child->layer());
-}
-
 void EditPane::DidRealize() {
   m_eState = State_Realized;
   Pane::DidRealize();
-  //root_box_->Realize(this, bounds());
 }
 
 void EditPane::DidRealizeChildWidget(const ui::Widget& window) {

@@ -16,6 +16,7 @@ class Buffer;
 
 namespace ui {
 class MouseEvent;
+class WindowAnimator;
 }
 
 namespace views {
@@ -30,6 +31,7 @@ class EditPane final : public Pane {
   private: typedef common::win::Point Point;
   private: typedef common::win::Rect Rect;
 
+  private: typedef views::ContentWindow ContentWindow;
   private: typedef views::ContentWindow Window;
 
   public: enum State {
@@ -41,6 +43,7 @@ class EditPane final : public Pane {
   public: class Box;
   private: class SplitterController;
 
+  private: std::unique_ptr<ui::WindowAnimator> window_animator_;
   private: State m_eState;
   private: scoped_refptr<Box> root_box_;
   private: const std::unique_ptr<SplitterController> splitter_controller_;
@@ -48,23 +51,15 @@ class EditPane final : public Pane {
   public: EditPane();
   public: virtual ~EditPane();
 
+  public: ui::WindowAnimator* window_animator() const;
   public: Frame& frame() const;
-
-  public: bool has_more_than_one_child() const {
-    return first_child() != last_child();
-  }
-
+  public: bool has_more_than_one_child() const;
 
   // [G]
   public: Window* GetActiveWindow() const;
 
   public: Window* GetFirstWindow() const;
   public: Window* GetLastWindow() const;
-
-  // [I]
-  public: bool IsRealized() const {
-    return m_eState == State_Realized;
-  }
 
   // [R]
   public: void ReplaceActiveWindow(Window* window);
@@ -81,7 +76,6 @@ class EditPane final : public Pane {
 
   // ui::Widget
   private: virtual void DidChangeBounds() override;
-  private: virtual void DidChangeChildVisibility(Widget* child) override;
   private: virtual void DidRealize() override;
   private: virtual void DidRealizeChildWidget(const Widget&) override;
   private: virtual void DidRemoveChildWidget(const Widget&) override;

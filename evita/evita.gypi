@@ -234,6 +234,8 @@
 
         'ui/animation/animatable.cc',
         'ui/animation/animatable.h',
+        'ui/animation/animation_observer.cc',
+        'ui/animation/animation_observer.h',
         'ui/animation/animator.cc',
         'ui/animation/animator.h',
 

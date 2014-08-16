@@ -26,7 +26,7 @@ void Animator::Animate(base::Time time) {
   }
   animatables_.clear();
   for (auto animatable : animatables) {
-    animatable->Animate(time);
+    animatable->PlayAnimation(time);
   }
 }
 
@@ -39,7 +39,7 @@ void Animator::CancelAnimation(Animatable* animatable) {
 
 void Animator::PlayAnimation(base::Time now, Animatable* animatable) {
   CancelAnimation(animatable);
-  animatable->Animate(now);
+  animatable->PlayAnimation(now);
 }
 
 void Animator::ScheduleAnimation(Animatable* animatable) {

@@ -6,6 +6,10 @@
 #define INCLUDE_evita_ui_animation_animatable_h
 
 #include "base/time/time.h"
+#pragma warning(push)
+#pragma warning(disable: 4625 4626)
+#include "base/observer_list.h"
+#pragma warning(pop)
 
 namespace base {
 class Time;
@@ -13,11 +17,18 @@ class Time;
 
 namespace ui {
 
+class AnimationObserver;
+
 class Animatable {
+  private: ObserverList<AnimationObserver> observers_;
+
   protected: Animatable();
   public: virtual ~Animatable();
 
-  public: virtual void Animate(base::Time time) = 0;
+  public: void AddObserver(AnimationObserver* observer);
+  protected: virtual void Animate(base::Time time) = 0;
+  public: void PlayAnimation(base::Time time);
+  public: void RemoveObserver(AnimationObserver* observer);
 
   DISALLOW_COPY_AND_ASSIGN(Animatable);
 };

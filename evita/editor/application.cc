@@ -169,7 +169,7 @@ bool Application::OnIdle(int) {
     }
   }
   auto const now = base::Time::Now();
-  ui::Animator::instance()->Animate(now);
+  ui::Animator::instance()->PlayAnimations(now);
   ui::Compositor::instance()->CommitIfNeeded();
   return false;
 }

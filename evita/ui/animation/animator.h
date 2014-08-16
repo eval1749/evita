@@ -6,13 +6,10 @@
 #define INCLUDE_evita_ui_animation_animator_h
 
 #include "base/basictypes.h"
+#include "base/time/time.h"
 #include "common/memory/singleton.h"
 
 #include <unordered_set>
-
-namespace base {
-class Time;
-}
 
 namespace ui {
 
@@ -22,14 +19,23 @@ class Animator : public common::Singleton<Animator> {
   DECLARE_SINGLETON_CLASS(Animator);
 
   private: std::unordered_set<Animatable*> animatables_;
+  private: base::Time current_time_;
+  private: std::unordered_set<Animatable*> will_delete_animatables_;
+  private: std::unordered_set<Animatable*> will_schedule_animatables_;
 
   private: Animator();
   public: virtual ~Animator();
 
-  public: void Animate(base::Time time);
+  public: base::Time current_time() const;
+  public: bool is_playing() const;
+
+  private: void Animate(Animatable* animatable);
   public: void CancelAnimation(Animatable* animatable);
+  private: void EndAnimate();
   public: void PlayAnimation(base::Time time, Animatable* animatable);
+  public: void PlayAnimations(base::Time time);
   public: void ScheduleAnimation(Animatable* animatable);
+  private: void StartAnimate(base::Time time);
 
   DISALLOW_COPY_AND_ASSIGN(Animator);
 };

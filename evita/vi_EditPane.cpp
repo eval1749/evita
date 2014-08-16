@@ -395,8 +395,9 @@ void HorizontalBox::Split(Box* left_box,
 
   left_box->set_bounds(gfx::RectF(left_box->origin(),
       left_box->size() - gfx::SizeF(new_right_width + kSplitterWidth, 0.0f)));
-  edit_pane_->window_animator()->Split(new_right_window, left_box->GetContent(),
-                                       left_box->bounds());
+  edit_pane_->window_animator()->SplitHorizontally(
+      left_box->GetContent(), left_box->width(), new_right_window,
+      kSplitterWidth);
   right_box->SetBounds(gfx::RectF(
       gfx::PointF(left_box->right() + kSplitterWidth, top()),
       gfx::SizeF(new_right_width, height())));
@@ -623,8 +624,8 @@ void VerticalBox::Split(Box* above_box,
 
   above_box->set_bounds(gfx::RectF(
       above_box->origin(), gfx::SizeF(width(), above_box_height)));
-  edit_pane_->window_animator()->Split(below_window, above_box->GetContent(),
-                                       above_box->bounds());
+  edit_pane_->window_animator()->SplitVertically(
+    above_box->GetContent(), above_box_height, below_window, kSplitterHeight);
   below_box->SetBounds(gfx::RectF(
       gfx::PointF(left(), above_box->bottom() + kSplitterHeight),
       gfx::SizeF(width(), below_box_height)));
@@ -997,14 +998,16 @@ void EditPane::SplitHorizontally(Window* left_window,
   auto const left_box = root_box_->FindLeafBoxFromWidget(left_window);
   DCHECK(left_box);
 
-  auto const width = left_box->bounds().width();
-  if (width < kMinBoxWidth * 2 + kSplitterWidth) {
+  auto const left_box_width = ::floor(
+    (left_box->bounds().width() - kSplitterWidth) / 2);
+  auto const right_box_width = left_box->width() - left_box_width;
+  if (left_box_width < kMinBoxWidth || right_box_width < kMinBoxWidth) {
     frame().AddOrActivateTabContent(new_right_window);
     return;
   }
 
   left_box->EnsureInHorizontalBox();
-  left_box->outer()->Split(left_box, new_right_window, width / 2);
+  left_box->outer()->Split(left_box, new_right_window, right_box_width);
   left_window->MakeSelectionVisible();
 }
 
@@ -1016,14 +1019,16 @@ void EditPane::SplitVertically(Window* above_window,
   auto const above_box = root_box_->FindLeafBoxFromWidget(above_window);
   DCHECK(above_box);
 
-  auto const height = above_box->bounds().height();
-  if (height < kMinBoxHeight * 2 + kSplitterHeight) {
+  auto const above_box_height = ::floor(
+    (above_box->bounds().height() - kSplitterHeight) / 2);
+  auto const below_box_height = above_box->height() - above_box_height;
+  if (above_box_height < kMinBoxHeight || below_box_height < kMinBoxHeight) {
     frame().AddOrActivateTabContent(new_below_window);
     return;
   }
 
   above_box->EnsureInVerticalBox();
-  above_box->outer()->Split(above_box, new_below_window, height / 2);
+  above_box->outer()->Split(above_box, new_below_window, below_box_height);
   above_window->MakeSelectionVisible();
 }
 

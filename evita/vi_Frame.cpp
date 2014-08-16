@@ -158,8 +158,10 @@ void Frame::DrawForResize() {
     return;
   auto const now = base::Time::Now();
   for (auto child : active_tab_content_->child_nodes()) {
-    if (auto const window = child->as<Window>())
-      ui::Animator::instance()->PlayAnimation(now, window);
+    auto const window = child->as<Window>();
+    if (!window)
+      continue;
+    ui::Animator::instance()->PlayAnimation(now, window);
   }
 }
 

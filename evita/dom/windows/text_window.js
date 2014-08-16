@@ -233,16 +233,6 @@ global.TextWindow.prototype.clone = function() {
    * @param {!UiEvent} event
    */
   function handleIdle(window, event) {
-    var lastIdleTimeStamp = window.lastIdleTimeStamp_;
-    if (lastIdleTimeStamp) {
-      var duration_sec = event.timeStamp - lastIdleTimeStamp;
-      var duration_ms = Math.floor(duration_sec * 1000);
-      if (duration_ms > 1000) {
-        // We may want to know some process take long time.
-        window.status = 'Idle ' + event.detail + ' ' + duration_ms + 'ms';
-      }
-    }
-    window.lastIdleTimeStamp_ = event.timeStamp;
     updateStatusBar(window);
     var document = window.document;
     DocumentState.update(document);

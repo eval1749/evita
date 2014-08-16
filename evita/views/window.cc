@@ -92,10 +92,9 @@ int static_active_tick;
 //
 // Window
 //
-
 Window::Window(std::unique_ptr<NativeWindow>&& native_window,
                WindowId window_id)
-    : Widget(std::move(native_window)),
+    : ui::AnimatableWindow(std::move(native_window)),
       EventSource(window_id),
       active_tick_(0),
       window_id_(window_id) {
@@ -123,19 +122,14 @@ void Window::DidDestroyDomWindow() {
 
 // ui::Widget
 void Window::DidChangeBounds() {
-  Widget::DidChangeBounds();
+  ui::AnimatableWindow::DidChangeBounds();
   view_event_handler()->DidResizeWidget(window_id_, bounds().left(),
                                         bounds().top(), bounds().right(),
                                         bounds().bottom());
 }
 
-void Window::DidHide() {
-  ui::Widget::DidHide();
-  ui::Animator::instance()->CancelAnimation(this);
-}
-
 void Window::DidKillFocus(ui::Widget* focused_window) {
-  Widget::DidKillFocus(focused_window);
+  ui::AnimatableWindow::DidKillFocus(focused_window);
   DispatchFocusEvent(domapi::EventType::Blur, MaybeEventTarget(focused_window));
 }
 
@@ -144,21 +138,15 @@ void Window::DidRealize() {
   view_event_handler()->DidResizeWidget(window_id_, bounds().left(),
                                         bounds().top(), bounds().right(),
                                         bounds().bottom());
-  ui::Animator::instance()->ScheduleAnimation(this);
-  Widget::DidRealize();
+  ui::AnimatableWindow::DidRealize();
 }
 
 void Window::DidSetFocus(ui::Widget* last_focused) {
   DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
   ++static_active_tick;
   active_tick_ = static_active_tick;
-  Widget::DidSetFocus(last_focused);
+  ui::AnimatableWindow::DidSetFocus(last_focused);
   DispatchFocusEvent(domapi::EventType::Focus, MaybeEventTarget(last_focused));
-}
-
-void Window::DidShow() {
-  ui::Widget::DidShow();
-  ui::Animator::instance()->ScheduleAnimation(this);
 }
 
 void Window::OnKeyPressed(const ui::KeyboardEvent& event) {
@@ -186,8 +174,7 @@ void Window::OnMouseWheel(const ui::MouseWheelEvent& event) {
 }
 
 void Window::WillDestroyWidget() {
-  Widget::WillDestroyWidget();
-  ui::Animator::instance()->CancelAnimation(this);
+  ui::AnimatableWindow::WillDestroyWidget();
   active_tick_ = 0;
 }
 }  // namespace views

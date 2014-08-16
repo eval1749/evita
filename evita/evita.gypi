@@ -240,6 +240,8 @@
         'ui/animation/animation_observer.h',
         'ui/animation/animator.cc',
         'ui/animation/animator.h',
+        'ui/animation/window_animator.cc',
+        'ui/animation/window_animator.h',
 
         'ui/base/ime/text_composition.cc',
         'ui/base/ime/text_composition.h',

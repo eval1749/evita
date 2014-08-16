@@ -32,7 +32,8 @@ void Animator::Animate(base::Time time) {
 
 void Animator::CancelAnimation(Animatable* animatable) {
   auto const present = animatables_.find(animatable);
-  DCHECK(present != animatables_.end());
+  if (present == animatables_.end())
+    return;
   animatables_.erase(present);
 }
 

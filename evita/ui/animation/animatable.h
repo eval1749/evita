@@ -27,6 +27,8 @@ class Animatable {
 
   public: void AddObserver(AnimationObserver* observer);
   protected: virtual void Animate(base::Time time) = 0;
+  protected: void DidAnimate();
+  public: void FinishAnimation();
   public: void PlayAnimation(base::Time time);
   public: void RemoveObserver(AnimationObserver* observer);
 

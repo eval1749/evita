@@ -18,13 +18,20 @@ void Animatable::AddObserver(AnimationObserver* observer) {
   observers_.AddObserver(observer);
 }
 
-void Animatable::PlayAnimation(base::Time time) {
-  Animate(time);
+void Animatable::DidAnimate() {
+  FOR_EACH_OBSERVER(AnimationObserver, observers_, DidAnimate(this));
+}
+
+void Animatable::FinishAnimation() {
   FOR_EACH_OBSERVER(AnimationObserver, observers_, DidFinishAnimation(this));
 }
 
+void Animatable::PlayAnimation(base::Time time) {
+  Animate(time);
+}
+
 void Animatable::RemoveObserver(AnimationObserver* observer) {
-  observers_.AddObserver(observer);
+  observers_.RemoveObserver(observer);
 }
 
 }  // namespace ui

@@ -47,7 +47,6 @@ namespace views {
 class ContentWindow;
 class FrameObserver;
 class MessageView;
-class MetricsView;
 class TitleBar;
 class TabStrip;
 }
@@ -62,7 +61,6 @@ class Frame final : public views::Window,
 
   private: Pane* active_tab_content_;
   private: views::MessageView* message_view_;
-  private: views::MetricsView* metrics_view_;
   private: ObserverList<views::FrameObserver> observers_;
   private: std::unordered_set<Pane*> tab_contents_;
   private: std::unique_ptr<ui::Layer> tab_content_layer_;

@@ -37,10 +37,12 @@
 #include "evita/ui/animation/animator.h"
 #include "evita/ui/base/ime/text_composition.h"
 #include "evita/ui/base/ime/text_input_client.h"
+#include "evita/ui/compositor/compositor.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/controls/scroll_bar.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/icon_cache.h"
+#include "evita/views/metrics_view.h"
 #include "evita/views/text/render_selection.h"
 #include "evita/views/text/text_renderer.h"
 #include "evita/vi_EditPane.h"
@@ -92,11 +94,13 @@ TextEditWindow::TextEditWindow(views::WindowId window_id,
     : ContentWindow(window_id),
       canvas_(nullptr),
       m_lCaretPosn(-1),
+      metrics_view_(new views::MetricsView()),
       text_renderer_(new TextRenderer(selection->buffer())),
       selection_(selection),
       vertical_scroll_bar_(new ui::ScrollBar(ui::ScrollBar::Type::Vertical,
                                              this)) {
   AppendChild(vertical_scroll_bar_);
+  AppendChild(metrics_view_);
 }
 
 TextEditWindow::~TextEditWindow() {
@@ -347,15 +351,22 @@ void TextEditWindow::UpdateLayout() {
 
   auto const text_block_bounds = gfx::RectF(
       canvas_bounds.size() - gfx::SizeF(vertical_scroll_bar_width, 0.0f));
+  text_renderer_->SetBounds(text_block_bounds);
 
+  // Place vertical scroll bar at right edge of text block.
   auto const vertical_scroll_bar_bounds = gfx::RectF(
     gfx::PointF(text_block_bounds.right, text_block_bounds.top),
     gfx::SizeF(vertical_scroll_bar_width, text_block_bounds.height()));
-
   vertical_scroll_bar_->SetBounds(
       gfx::ToEnclosingRect(vertical_scroll_bar_bounds));
 
-  text_renderer_->SetBounds(text_block_bounds);
+  // Place metrics view at bottom right of text block.
+  auto const metrics_view_size = gfx::SizeF(
+      metrics_view_->bounds().width(), metrics_view_->bounds().height());
+  auto const metrics_view_bounds = gfx::RectF(
+      text_block_bounds.bottom_right() - metrics_view_size - gfx::SizeF(3, 3),
+      metrics_view_size);
+  metrics_view_->SetBounds(gfx::ToEnclosingRect(metrics_view_bounds));
 }
 
 // gfx::Canvas::Observer
@@ -369,8 +380,12 @@ void TextEditWindow::Animate(base::Time) {
     return;
   ui::Animator::instance()->ScheduleAnimation(this);
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  if (lock_scope.locked())
-    Redraw();
+  if (!lock_scope.locked())
+    return;
+  metrics_view_->RecordTime();
+  views::MetricsView::TimingScope timing_scope(metrics_view_);
+  Redraw();
+  metrics_view_->UpdateView();
 }
 
 // ui::ScrollBarObserver
@@ -452,6 +467,7 @@ void TextEditWindow::DidRealize() {
   views::ContentWindow::DidRealize();
   if (bounds().empty())
     return;
+  layer()->AppendChildLayer(metrics_view_->layer());
   UpdateLayout();
 }
 

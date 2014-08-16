@@ -40,7 +40,6 @@
 #include "evita/views/frame_observer.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/message_view.h"
-#include "evita/views/metrics_view.h"
 #include "evita/views/switches.h"
 #include "evita/views/tab_strip.h"
 #include "evita/views/text/render_font.h"
@@ -79,12 +78,10 @@ Frame::Frame(views::WindowId window_id)
     : views::Window(ui::NativeWindow::Create(this), window_id),
       active_tab_content_(nullptr),
       message_view_(new views::MessageView()),
-      metrics_view_(new views::MetricsView()),
       title_bar_(new views::TitleBar()),
       tab_strip_(new views::TabStrip(this)) {
   AppendChild(tab_strip_);
   AppendChild(message_view_);
-  AppendChild(metrics_view_);
 }
 
 Frame::~Frame() {
@@ -117,9 +114,6 @@ void Frame::AddTabContent(views::ContentWindow* window) {
   auto const tab_content = new EditPane();
   tab_contents_.insert(tab_content);
   AppendChild(tab_content);
-  // TODO(eval1749) We should have more sophisticated way to keep top most
-  // window.
-  AppendChild(metrics_view_);
   if (!is_realized()) {
     DCHECK(!window->is_realized());
     tab_content->SetContent(window);
@@ -170,17 +164,12 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
 
 void Frame::DrawForResize() {
   auto const now = base::Time::Now();
-  // TODO(eval1749) We should ask animation player to update contents.
-  metrics_view_->UpdateView();
-
   if (active_tab_content_) {
     for (auto child : active_tab_content_->child_nodes()) {
       if (auto const window = child->as<Window>())
         ui::Animator::instance()->PlayAnimation(now, window);
     }
   }
-
-  ui::Compositor::instance()->CommitIfNeeded();
 }
 
 Pane* Frame::GetActiveTabContent() {
@@ -301,12 +290,9 @@ void Frame::UpdateTitleBar() {
 void Frame::Animate(base::Time now) {
   if (!visible())
     return;
-  metrics_view_->RecordTime();
-  views::MetricsView::TimingScope timing_scope(metrics_view_);
   ui::Animator::instance()->ScheduleAnimation(this);
   // TODO(eval1749) We should call update title bar when needed.
   UpdateTitleBar();
-  metrics_view_->UpdateView();
 
   DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
   static bool busy;
@@ -408,10 +394,6 @@ void Frame::DidChangeBounds() {
     bounds().bottom_left() - gfx::Size(0, message_view_->bounds().height()),
     bounds().bottom_right()));
 
-  metrics_view_->SetBounds(gfx::Rect(
-      message_view_->bounds().top_right() - metrics_view_->bounds().size(),
-      metrics_view_->bounds().size()));
-
   for (auto tab_content : tab_contents_) {
     tab_content->SetBounds(tab_content_bounds);
   }
@@ -420,9 +402,8 @@ void Frame::DidChangeBounds() {
   message_view_->SetMessage(base::StringPrintf(L"Resizing... %dx%d",
       bounds().width(), bounds().height()));
 
-  ui::Compositor::instance()->CommitIfNeeded();
-
   DrawForResize();
+  ui::Compositor::instance()->CommitIfNeeded();
 }
 
 void Frame::DidChangeChildVisibility(ui::Widget* child) {
@@ -466,18 +447,10 @@ void Frame::DidRealize() {
         bounds().bottom_right()));
   }
 
-  // Place metrics view above message view.
-  {
-    auto const size = metrics_view_->bounds().size();
-    metrics_view_->SetBounds(gfx::Rect(
-        message_view_->bounds().top_right() - size, size));
-  }
-
   // Create message view, tab_contents and tab strip.
   views::Window::DidRealize();
   layer()->AppendChildLayer(tab_content_layer_.get());
   layer()->AppendChildLayer(message_view_->layer());
-  layer()->AppendChildLayer(metrics_view_->layer());
 
   for (auto tab_content : tab_contents_) {
     AddTab(tab_content);

@@ -23,6 +23,7 @@ class Selection;
 }
 
 namespace views {
+class MetricsView;
 class TextRenderer;
 namespace rendering {
 class TextSelectionModel;
@@ -53,6 +54,7 @@ class TextEditWindow : private gfx::Canvas::Observer,
 
   private: std::unique_ptr<gfx::Canvas> canvas_;
   private: Posn m_lCaretPosn;
+  private: views::MetricsView* metrics_view_;
   // TODO(yosi): Manage life time of selection.
   private: text::Selection* const selection_;
   private: std::unique_ptr<TextRenderer> text_renderer_;

@@ -22,6 +22,7 @@ class WindowAnimator::Animation : public Animatable, public AnimationObserver {
   protected: Animation(AnimatableWindow* window);
   public: virtual ~Animation();
 
+  protected: base::TimeDelta animation_duration() const;
   protected: Layer* parent_layer() const;
   protected: AnimatableWindow* window() const { return window_; }
 
@@ -38,6 +39,10 @@ WindowAnimator::Animation::Animation(AnimatableWindow* window)
 
 WindowAnimator::Animation::~Animation() {
   window_->RemoveObserver(this);
+}
+
+base::TimeDelta WindowAnimator::Animation::animation_duration() const {
+  return base::TimeDelta::FromMilliseconds(16 * 5);
 }
 
 Layer* WindowAnimator::Animation::parent_layer() const {
@@ -144,7 +149,7 @@ SplitHorizontallyAnimation::SplitHorizontallyAnimation(
 void SplitHorizontallyAnimation::Animate(base::Time now) {
   if (!value_) {
     value_.reset(new AnimationFloat(
-        now, base::TimeDelta::FromMilliseconds(16 * 20),
+        now, animation_duration(),
         left_window_->layer()->bounds().width(), left_window_width_end_));
     parent_layer()->AppendChildLayer(window()->layer());
   }
@@ -200,7 +205,7 @@ SplitVerticallyAnimation::SplitVerticallyAnimation(
 void SplitVerticallyAnimation::Animate(base::Time now) {
   if (!value_) {
     value_.reset(new AnimationFloat(
-        now, base::TimeDelta::FromMilliseconds(16 * 20),
+        now, animation_duration(),
         above_window_->layer()->bounds().height(), above_window_height_end_));
     parent_layer()->AppendChildLayer(window()->layer());
   }

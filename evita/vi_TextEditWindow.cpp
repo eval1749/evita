@@ -472,7 +472,7 @@ void TextEditWindow::DidRealize() {
 }
 
 void TextEditWindow::DidSetFocus(ui::Widget* last_focused) {
-  ASSERT(has_focus());
+  DCHECK(has_focus());
   // Note: It is OK to set focus to hidden window.
   text_renderer_->DidSetFocus();
   ui::TextInputClient::Get()->set_delegate(this);

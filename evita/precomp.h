@@ -107,7 +107,6 @@ typedef base::char16 char16;
 #define when(mp_exp)    if (mp_exp)
 #define NoReturn __declspec(noreturn)
 
-//#define ASSERT(mp_expr) __assume(mp_expr)
 #include "evita/z_debug.h"
 
 #define foreach(mp_ty, mp_enum, mp_init) \

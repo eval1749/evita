@@ -94,8 +94,8 @@ void* myZeroMemory(void* dst, size_t count)
 
 void* __cdecl memcpy(void* dst, const void* src, size_t count)
 {
-    ASSERT(NULL != dst);
-    ASSERT(NULL != src);
+    DCHECK(NULL != dst);
+    DCHECK(NULL != src);
     const uint8* s = reinterpret_cast<const uint8*>(src);
     const uint8* e = s + count;
     uint8* d = reinterpret_cast<uint8*>(dst);

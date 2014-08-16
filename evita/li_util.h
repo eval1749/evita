@@ -11,6 +11,8 @@
 #if !defined(INCLUDE_listener_util_h)
 #define INCLUDE_listener_util_h
 
+#include "base/logging.h"
+
 template<class Base_>
 class Castable_
 {
@@ -30,7 +32,7 @@ class Castable_
     public: template<class T> T* StaticCast() const
     {
         T* p = DynamicCast<T>();
-        ASSERT(NULL != p);
+        DCHECK(NULL != p);
         return p;
     } // StaticCast
 }; // Castable_
@@ -74,8 +76,8 @@ class DoubleLinkedList_
     public: Item_* Append(Item_* pItem)
     {
         Cons_* pCons = static_cast<Cons_*>(pItem);
-        ASSERT(!pCons->m_pNext);
-        ASSERT(!pCons->m_pPrev);
+        DCHECK(!pCons->m_pNext);
+        DCHECK(!pCons->m_pPrev);
 
         pCons->m_pNext = NULL;
         pCons->m_pPrev = m_pLast;
@@ -116,7 +118,7 @@ class DoubleLinkedList_
                     break;
                 }
             } // for each item
-            ASSERT(fFound);
+            DCHECK(fFound);
         }
         #endif
 
@@ -165,7 +167,7 @@ class DoubleLinkedList_
         public: Item_* Get() { return m_pRunner; }
         public: void Next()
         {
-            ASSERT(! AtEnd());
+            DCHECK(! AtEnd());
             m_pRunner = static_cast<Cons_*>(m_pRunner)->m_pNext;
         } // Next
     }; // Enum
@@ -227,7 +229,7 @@ class DoubleLinkedList_
       }
 
       public: bool operator==(const IteratorT_& other) const {
-        ASSERT(list_ == other.list_);
+        DCHECK(list_ == other.list_);
         return item_ == other.item_;
       }
 
@@ -236,22 +238,22 @@ class DoubleLinkedList_
       }
 
       public: Return_& operator*() const {
-        ASSERT(item_);
+        DCHECK(item_);
         return *item_;
       }
 
       public: Return_* operator->() const {
-        ASSERT(item_);
+        DCHECK(item_);
         return item_;
       }
 
       protected: void decrement() {
-        ASSERT(item_);
+        DCHECK(item_);
         item_ = static_cast<Cons_*>(item_)->m_pPrev;
       }
 
       protected: void increment() {
-        ASSERT(item_);
+        DCHECK(item_);
         item_ = static_cast<Cons_*>(item_)->m_pNext;
       }
     };
@@ -292,8 +294,8 @@ class DoubleLinkedList_
 
     public: Item_* Prepend(Item_* item) {
       auto const cons = static_cast<Cons_*>(item);
-      ASSERT(!cons->m_pNext);
-      ASSERT(!cons->m_pPrev);
+      DCHECK(!cons->m_pNext);
+      DCHECK(!cons->m_pPrev);
       cons->m_pPrev = nullptr;
       cons ->m_pNext = m_pFirst;
       if (!m_pLast)

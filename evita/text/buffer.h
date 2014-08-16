@@ -5,6 +5,7 @@
 
 #include <memory>
 
+#include "base/logging.h"
 #include "base/basictypes.h"
 #pragma warning(push)
 #pragma warning(disable: 4625 4626)
@@ -174,14 +175,14 @@ class Buffer : public BufferCore,
         : m_lEnd(pBuffer->GetEnd()),
           m_lPosn(0),
           m_pBuffer(pBuffer) {
-      ASSERT(m_pBuffer->IsValidRange(m_lPosn, m_lEnd));
+      DCHECK(m_pBuffer->IsValidRange(m_lPosn, m_lEnd));
     }
 
     public: EnumChar(Arg oArg)
         : m_lEnd(oArg.m_lEnd),
           m_lPosn(oArg.m_lPosn),
           m_pBuffer(oArg.m_pBuffer) {
-      ASSERT(m_pBuffer->IsValidRange(m_lPosn, m_lEnd));
+      DCHECK(m_pBuffer->IsValidRange(m_lPosn, m_lEnd));
     }
 
     public: EnumChar(const Range*);
@@ -189,19 +190,19 @@ class Buffer : public BufferCore,
     public: bool AtEnd() const { return m_lPosn >= m_lEnd; }
 
     public: char16 Get() const {
-      ASSERT(!AtEnd());
+      DCHECK(!AtEnd());
       return m_pBuffer->GetCharAt(m_lPosn);
     }
 
     public: Posn GetPosn() const { return m_lPosn; }
 
     public: const css::Style& GetStyle() const {
-      ASSERT(!AtEnd());
+      DCHECK(!AtEnd());
       return m_pBuffer->GetStyleAt(m_lPosn);
     }
 
     public: Posn GoTo(Posn lPosn) { return m_lPosn = lPosn; }
-    public: void Next() { ASSERT(!AtEnd()); m_lPosn += 1; }
+    public: void Next() { DCHECK(!AtEnd()); m_lPosn += 1; }
     public: void Prev() { m_lPosn -= 1; }
 
     public: void SyncEnd() { m_lEnd = m_pBuffer->GetEnd(); }
@@ -235,18 +236,18 @@ class Buffer : public BufferCore,
     public: bool AtEnd() const { return m_lPosn <= m_lStart; }
 
     public: char16 Get() const {
-      ASSERT(!AtEnd());
+      DCHECK(!AtEnd());
       return m_pBuffer->GetCharAt(m_lPosn - 1);
     }
 
-    public: Posn GetPosn() const { ASSERT(!AtEnd()); return m_lPosn; }
+    public: Posn GetPosn() const { DCHECK(!AtEnd()); return m_lPosn; }
 
     public: const css::Style& GetStyle() const {
-      ASSERT(!AtEnd());
+      DCHECK(!AtEnd());
       return m_pBuffer->GetStyleAt(m_lPosn - 1);
     }
 
-    public: void Next() { ASSERT(!AtEnd()); --m_lPosn; }
+    public: void Next() { DCHECK(!AtEnd()); --m_lPosn; }
     public: void Prev() { ++m_lPosn; }
   };
 

@@ -138,9 +138,9 @@ class Converter : public WideCharSink  {
       uint const nCodePage,
       const char* const prgch,
       int const cch) {
-    ASSERT(nCodePage != 0);
-    ASSERT(prgch != nullptr);
-    ASSERT(cch >= 1);
+    DCHECK(nCodePage != 0);
+    DCHECK(prgch != nullptr);
+    DCHECK(cch >= 1);
     wchar_t wchChar;
     auto const cwchChar = ::MultiByteToWideChar(
       nCodePage,
@@ -186,7 +186,7 @@ static int EucToWideChar(
     int* inout_cchMBCS,
     LPWSTR pwchWCS,
     int* inout_cwchWCS ) {
-  ASSERT(pchMBCS != nullptr);
+  DCHECK(pchMBCS != nullptr);
 
   enum {
     EUC_SS2 = 0x8E,

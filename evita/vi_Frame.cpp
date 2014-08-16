@@ -1,12 +1,7 @@
-// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#define DEBUG_DROPFILES 0
-#define DEBUG_FOCUS     0
-#define DEBUG_PAINT     0
-#define DEBUG_REDRAW    0
-#define DEBUG_WINDOWPOS 0
 #include "evita/vi_Frame.h"
 
 #include <dwmapi.h>
@@ -96,8 +91,8 @@ void Frame::AddObserver(views::FrameObserver* observer) {
 }
 
 void Frame::AddTab(Pane* const tab_content) {
-  ASSERT(is_realized());
-  ASSERT(tab_content->is_realized());
+  DCHECK(is_realized());
+  DCHECK(tab_content->is_realized());
   // Set dummy tab label. Actual tab label will be set later in
   // |Frame::UpdateTitleBar|.
   TCITEM tab_item;
@@ -142,11 +137,7 @@ void Frame::AddOrActivateTabContent(views::ContentWindow* window) {
 
 void Frame::DidSetFocusOnChild(views::Window* window) {
   auto const tab_content = GetTabContentFromWindow(this, window);
-  if (!tab_content) {
-    DVLOG(0) << "Frame::DidSetFolcusOnChild: No tab_content contains " <<
-        window;
-    return;
-  }
+  DCHECK(tab_content);
 
   if (tab_content == active_tab_content_) {
     // TODO(eval1749) This is happened on multiple window in one |tab_content|,
@@ -163,12 +154,12 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
 }
 
 void Frame::DrawForResize() {
+  if (!active_tab_content_)
+    return;
   auto const now = base::Time::Now();
-  if (active_tab_content_) {
-    for (auto child : active_tab_content_->child_nodes()) {
-      if (auto const window = child->as<Window>())
-        ui::Animator::instance()->PlayAnimation(now, window);
-    }
+  for (auto child : active_tab_content_->child_nodes()) {
+    if (auto const window = child->as<Window>())
+      ui::Animator::instance()->PlayAnimation(now, window);
   }
 }
 
@@ -224,20 +215,20 @@ int Frame::GetTabIndexOfTabContent(Pane* const tab_content) const {
   return -1;
 }
 
-void Frame::OnDropFiles(HDROP const hDrop) {
-  uint nIndex = 0;
+void Frame::OnDropFiles(HDROP const drop_handle) {
+  auto index = 0u;
   for (;;) {
     base::string16 file_name(MAX_PATH + 1, 0);
-    auto const length = ::DragQueryFile(hDrop, nIndex, &file_name[0],
+    auto const length = ::DragQueryFile(drop_handle, index, &file_name[0],
                                         file_name.size());
     if (!length)
       break;
     file_name.resize(length);
     Application::instance()->view_event_handler()->OpenFile(
         window_id(), file_name);
-    nIndex += 1;
+    ++index;
   }
-  ::DragFinish(hDrop);
+  ::DragFinish(drop_handle);
 }
 
 /// <summary>
@@ -488,9 +479,9 @@ void Frame::DidSetFocus(ui::Widget* widget) {
   FOR_EACH_OBSERVER(views::FrameObserver, observers_, DidActiveFrame(this));
 }
 
-LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
+LRESULT Frame::OnMessage(uint32_t message, WPARAM const wParam,
                          LPARAM const lParam) {
-  switch (uMsg) {
+  switch (message) {
     case WM_ACTIVATE: {
       MARGINS margins;
       margins.cxLeftWidth = 0;
@@ -542,8 +533,10 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
 
     case WM_NCHITTEST: {
       LRESULT lResult;
-      if (::DwmDefWindowProc(*native_window(), uMsg, wParam, lParam, &lResult))
+      if (::DwmDefWindowProc(*native_window(), message, wParam, lParam,
+                             &lResult)) {
         return lResult;
+      }
       gfx::Point desktop_point(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
       auto const point = MapFromDesktopPoint(desktop_point);
       if (tab_strip_ && point.y() < tab_strip_->bounds().bottom())
@@ -562,7 +555,7 @@ LRESULT Frame::OnMessage(uint const uMsg, WPARAM const wParam,
     }
   }
 
-  return ui::Widget::OnMessage(uMsg, wParam, lParam);
+  return ui::Widget::OnMessage(message, wParam, lParam);
 }
 
 void Frame::OnPaint(const gfx::Rect) {
@@ -600,47 +593,20 @@ void Frame::DidClickTabCloseButton(int tab_index) {
     return;
   }
 
-  if (auto const tab_content = GetTabContentByTabIndex(tab_index))
-    tab_content->DestroyWidget();
-
-  LOG(ERROR) << "There is no tab[" << tab_index << "]";
+  auto const tab_content = GetTabContentByTabIndex(tab_index);
+  DCHECK(tab_content);
+  tab_content->DestroyWidget();
 }
 
 void Frame::DidChangeTabSelection(int selected_index) {
   auto const tab_content = GetTabContentByTabIndex(selected_index);
-  #if DEBUG_FOCUS
-    DVLOG(0) << "DidChangeTabSelection Start"
-        " selected_index=" << selected_index <<
-        " cur=" << active_tab_content_ << " new=" << tab_content;
-  #endif
-  if (!tab_content) {
-    #if DEBUG_FOCUS
-      DVLOG(0) << "selected_index(" << selected_index <<
-          " doesn't have tab_content!";
-    #endif
+  if (!tab_content ||active_tab_content_ == tab_content)
     return;
-  }
-  if (active_tab_content_ == tab_content) {
-    #if DEBUG_FOCUS
-      DVLOG(0) << "Active tab_content(" << selected_index <<
-          ") isn't changed. why?";
-    #endif
-    return;
-  }
-  if (active_tab_content_) {
+  if (active_tab_content_)
     active_tab_content_->Hide();
-  } else {
-    #if DEBUG_FOCUS
-      DVLOG(0) << "Why we don't have acitve tab_content?";
-    #endif
-  }
   active_tab_content_ = tab_content;
   tab_content->Activate();
   UpdateTitleBar();
-  #if DEBUG_FOCUS
-    DVLOG(0) << "End selected_index=" << selected_index <<
-        " cur=" active_tab_content_ << " new=" << tab_content;
-  #endif
 }
 
 void Frame::DidThrowTab(LPARAM lParam) {

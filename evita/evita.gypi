@@ -238,6 +238,8 @@
         'ui/animation/animatable_window.h',
         'ui/animation/animation_observer.cc',
         'ui/animation/animation_observer.h',
+        'ui/animation/animation_value.cc',
+        'ui/animation/animation_value.h',
         'ui/animation/animator.cc',
         'ui/animation/animator.h',
         'ui/animation/window_animator.cc',

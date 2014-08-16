@@ -386,6 +386,7 @@ void TextEditWindow::Animate(base::Time) {
   views::MetricsView::TimingScope timing_scope(metrics_view_);
   Redraw();
   metrics_view_->UpdateView();
+  DidAnimate();
 }
 
 // ui::ScrollBarObserver

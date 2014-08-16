@@ -210,6 +210,7 @@ void TableView::Animate(base::Time) {
   if (has_focus())
     control_->RequestFocus();
   control_->RenderIfNeeded(canvas_.get());
+  DidAnimate();
 }
 
 void TableView::DidInsertAt(Posn, size_t) {

@@ -66,13 +66,13 @@ class Frame final : public views::Window,
   private: typedef views::TabStrip TabStrip;
 
   private: TabContent* active_tab_content_;
-  private: MessageView* message_view_;
+  private: MessageView* const message_view_;
   private: ObserverList<FrameObserver> observers_;
   private: std::unordered_set<TabContent*> tab_contents_;
   private: std::unique_ptr<ui::Layer> tab_content_layer_;
-  private: TabStrip* tab_strip_;
-  private: std::unique_ptr<views::TabStripAnimator> tab_strip_animator_;
-  private: std::unique_ptr<views::TitleBar> title_bar_;
+  private: TabStrip* const tab_strip_;
+  private: const std::unique_ptr<views::TabStripAnimator> tab_strip_animator_;
+  private: const std::unique_ptr<views::TitleBar> title_bar_;
 
   public: explicit Frame(views::WindowId window_id);
   private: virtual ~Frame();
@@ -80,7 +80,6 @@ class Frame final : public views::Window,
   // [A]
   public: bool Activate();
   public: void AddObserver(views::FrameObserver* observer);
-  private: void AddTab(TabContent* tab_content);
   private: void AddTabContent(views::ContentWindow* content_window);
   public: void AddOrActivateTabContent(views::ContentWindow*);
 
@@ -110,7 +109,6 @@ class Frame final : public views::Window,
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;
   private: virtual void DidAddChildWidget(const ui::Widget& widget) override;
-  private: virtual void DidChangeChildVisibility(ui::Widget* child) override;
   private: virtual void DidRealize() override;
   private: virtual void DidRemoveChildWidget(const ui::Widget& widget) override;
   private: virtual void DidChangeBounds() override;
@@ -126,6 +124,8 @@ class Frame final : public views::Window,
   private: virtual void DidChangeTabSelection(int new_selected_index) override;
   private: virtual void DidThrowTab(LPARAM lParam);
   private: virtual base::string16 GetTooltipTextForTab(int tab_index) override;
+  private: virtual void RequestSelectTab(
+      int new_selected_index) override;
   private: virtual void OnDropTab(LPARAM lParam);
 
   DISALLOW_COPY_AND_ASSIGN(Frame);

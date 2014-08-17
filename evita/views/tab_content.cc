@@ -47,6 +47,11 @@ void TabContent::Animate(base::Time) {
 }
 
 // ui::Widget
+void TabContent::DidHide() {
+  if (auto const parent_layer = layer()->parent_layer())
+    parent_layer->RemoveChildLayer(layer());
+}
+
 void TabContent::DidRealize() {
   SetLayer(new ui::Layer());
   ui::AnimatableWindow::DidRealize();

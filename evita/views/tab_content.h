@@ -50,6 +50,7 @@ class TabContent : public ui::AnimatableWindow {
   protected: virtual void Animate(base::Time time) override;
 
   // ui::Widget
+  protected: virtual void DidHide() override;
   protected: virtual void DidRealize() override;
 
   DISALLOW_COPY_AND_ASSIGN(TabContent);

@@ -17,6 +17,7 @@ class TabStripDelegate {
   public: virtual void DidChangeTabSelection(int new_selected_index) = 0;
   public: virtual void DidThrowTab(LPARAM lParam) = 0;
   public: virtual base::string16 GetTooltipTextForTab(int tab_index) = 0;
+  public: virtual void RequestSelectTab(int new_selected_index) = 0;
   public: virtual void OnDropTab(LPARAM lParam) = 0;
 
   DISALLOW_COPY_AND_ASSIGN(TabStripDelegate);

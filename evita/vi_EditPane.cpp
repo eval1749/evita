@@ -11,6 +11,7 @@
 #include "base/logging.h"
 #include "base/memory/ref_counted.h"
 #include "common/castable.h"
+#include "common/tree/child_nodes.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/gfx_base.h"
@@ -986,10 +987,8 @@ void EditPane::SetContent(views::ContentWindow* content) {
     box->SetBounds(box_bounds);
     content->SetBounds(gfx::ToEnclosingRect(box_bounds));
   }
-  if (!content->is_realized()) {
-    content->AddObserver(this);
+  if (!content->is_realized())
     window_animator()->Realize(content);
-  }
   content->SetParentWidget(this);
 }
 
@@ -1037,7 +1036,18 @@ void EditPane::SplitVertically(Window* above_window,
 
 // ui::AnimationObserver
 void EditPane::DidAnimate(ui::Animatable* animatable) {
+  animated_contents_.insert(animatable);
   animatable->RemoveObserver(this);
+  auto remaining = animated_contents_.size();
+  for (auto child : child_nodes()) {
+    auto const animatable = child->as<ui::AnimatableWindow>();
+    if (!animatable)
+      continue;
+    if (animated_contents_.find(animatable) != animated_contents_.end())
+      --remaining;
+  }
+  if (remaining)
+    return;
   DidAnimateTabContent();
 }
 
@@ -1045,6 +1055,12 @@ void EditPane::DidAnimate(ui::Animatable* animatable) {
 void EditPane::DidChangeBounds() {
   TabContent::DidChangeBounds();
   root_box_->SetBounds(GetContentsBounds());
+  animated_contents_.clear();
+}
+
+void EditPane::DidHide() {
+  TabContent::DidHide();
+  animated_contents_.clear();
 }
 
 void EditPane::DidRealize() {
@@ -1080,6 +1096,17 @@ void EditPane::DidSetFocus(ui::Widget*) {
   if (!widget)
     return;
   widget->RequestFocus();
+}
+
+void EditPane::DidShow() {
+  TabContent::DidShow();
+  animated_contents_.clear();
+  for (auto child : child_nodes()) {
+    auto const animatable = child->as<ui::AnimatableWindow>();
+    if (!animatable)
+      continue;
+    animatable->AddObserver(this);
+  }
 }
 
 HCURSOR EditPane::GetCursorAt(const gfx::Point& point) const {

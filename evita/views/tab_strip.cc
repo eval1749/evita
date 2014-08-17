@@ -841,12 +841,11 @@ void TabStrip::TabStripImpl::OnLButtonDown(POINT point) {
     return;
   }
 
-  if (!tab->IsSelected()) {
-    // Note: We should start tab dragging, otherwise if mouse pointer is in
-    // close box, onButtonUp close the tab.
-    SelectTab(tab);
-  }
+  if (!tab->IsSelected())
+    delegate_->RequestSelectTab(tab->tab_index());
 
+  // Note: We should start tab dragging, otherwise if mouse pointer is in
+  // close box, |OnButtonUp| close the tab.
   LoadDragTabCursor();
 
   dragging_tab_ = tab;

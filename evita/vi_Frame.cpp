@@ -92,33 +92,18 @@ void Frame::AddObserver(views::FrameObserver* observer) {
   observers_.AddObserver(observer);
 }
 
-void Frame::AddTab(TabContent* const tab_content) {
-  DCHECK(is_realized());
-  DCHECK(tab_content->is_realized());
-  // Set dummy tab label. Actual tab label will be set later in
-  // |Frame::UpdateTitleBar|.
-  TCITEM tab_item;
-  tab_item.mask = TCIF_IMAGE| TCIF_TEXT | TCIF_PARAM;
-  tab_item.pszText = L"?";
-  tab_item.lParam = reinterpret_cast<LPARAM>(tab_content);
-  tab_item.iImage = 0;
-  auto const new_tab_item_index = tab_strip_->number_of_tabs();
-  tab_strip_->InsertTab(new_tab_item_index, &tab_item);
-  tab_strip_->SelectTab(new_tab_item_index);
-}
-
 void Frame::AddTabContent(views::ContentWindow* window) {
   auto const tab_content = new EditPane();
   tab_contents_.insert(tab_content);
+  tab_content->SetContent(window);
   AppendChild(tab_content);
   if (!is_realized()) {
     DCHECK(!window->is_realized());
-    tab_content->SetContent(window);
     return;
   }
+  tab_content->SetBounds(GetTabContentBounds());
   tab_strip_animator_->AddTab(tab_content);
-  tab_content->Realize(GetTabContentBounds());
-  tab_content->SetContent(window);
+  tab_content->RealizeWidget();
 }
 
 void Frame::AddOrActivateTabContent(views::ContentWindow* window) {
@@ -142,17 +127,13 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
   DCHECK(tab_content);
 
   if (tab_content == active_tab_content_) {
-    // TODO(eval1749) This is happened on multiple window in one |tab_content|,
-    // we should update tab label text.
-    if (!window->visible())
-      window->Show();
+    DCHECK(window->visible());
     return;
   }
 
+  DCHECK(!tab_content->visible());
   DCHECK(!window->visible());
-  auto const tab_index = GetTabIndexOfTabContent(tab_content);
-  if (tab_index >= 0)
-    tab_strip_->SelectTab(tab_index);
+  tab_strip_animator_->RequestSelect(tab_content);
 }
 
 void Frame::DrawForResize() {
@@ -367,7 +348,7 @@ void Frame::DidAddChildWidget(const ui::Widget& widget) {
       tab_content->SetBounds(GetTabContentBounds());
     else
       tab_content->Realize(GetTabContentBounds());
-    AddTab(tab_content);
+    tab_strip_animator_->AddTab(tab_content);
     return;
   }
 
@@ -401,16 +382,6 @@ void Frame::DidChangeBounds() {
   ui::Compositor::instance()->CommitIfNeeded();
 }
 
-void Frame::DidChangeChildVisibility(ui::Widget* child) {
-  views::Window::DidChangeChildVisibility(child);
-  if (!child->is<TabContent>())
-    return;
-  if (child->visible())
-    tab_content_layer_->AppendChildLayer(child->layer());
-  else
-    tab_content_layer_->RemoveChildLayer(child->layer());
-}
-
 void Frame::DidRealize() {
   views::FrameList::instance()->AddFrame(this);
   ::DragAcceptFiles(*native_window(), TRUE);
@@ -427,6 +398,7 @@ void Frame::DidRealize() {
 
   SetLayer(new ui::RootLayer(this));
   tab_content_layer_.reset(new ui::Layer());
+  tab_strip_animator_->SetLayer(tab_content_layer_.get());
 
   auto const tab_content_bounds = GetTabContentBounds();
   for (auto tab_content : tab_contents_) {
@@ -446,13 +418,9 @@ void Frame::DidRealize() {
   views::Window::DidRealize();
   layer()->AppendChildLayer(tab_content_layer_.get());
   layer()->AppendChildLayer(message_view_->layer());
-
   for (auto tab_content : tab_contents_) {
-    AddTab(tab_content);
+    tab_strip_animator_->AddTab(tab_content);
   }
-
-  if (auto const active_tab_content = GetActiveTabContent())
-    active_tab_content->Activate();
 
   ::SetWindowPos(AssociatedHwnd(), nullptr, 0, 0, 0, 0,
                  SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER |
@@ -606,11 +574,8 @@ void Frame::DidChangeTabSelection(int selected_index) {
   auto const tab_content = GetTabContentByTabIndex(selected_index);
   if (!tab_content ||active_tab_content_ == tab_content)
     return;
-  if (active_tab_content_)
-    active_tab_content_->Hide();
   active_tab_content_ = tab_content;
-  tab_content->Activate();
-  UpdateTitleBar();
+  active_tab_content_->RequestFocus();
 }
 
 void Frame::DidThrowTab(LPARAM lParam) {
@@ -643,4 +608,11 @@ void Frame::OnDropTab(LPARAM lParam) {
   Application::instance()->view_event_handler()->DidDropWidget(
       edit_tab_content->GetActiveWindow()->window_id(),
       window_id());
+}
+
+void Frame::RequestSelectTab(int selected_index) {
+  auto const tab_content = GetTabContentByTabIndex(selected_index);
+  if (!tab_content)
+    return;
+  tab_strip_animator_->RequestSelect(tab_content);
 }

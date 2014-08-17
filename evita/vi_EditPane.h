@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_evita_vi_EditPane_h)
 #define INCLUDE_evita_vi_EditPane_h
 
+#include <unordered_set>
+
 #include "base/memory/ref_counted.h"
 #include "evita/ui/animation/animation_observer.h"
 #include "evita/views/tab_content.h"
@@ -46,6 +48,7 @@ class EditPane final : public views::TabContent, public ui::AnimationObserver {
 
   private: std::unique_ptr<ui::WindowAnimator> window_animator_;
   private: State m_eState;
+  private: std::unordered_set<ui::Animatable*> animated_contents_;
   private: scoped_refptr<Box> root_box_;
   private: const std::unique_ptr<SplitterController> splitter_controller_;
 
@@ -77,10 +80,12 @@ class EditPane final : public views::TabContent, public ui::AnimationObserver {
 
   // ui::Widget
   private: virtual void DidChangeBounds() override;
+  private: virtual void DidHide() override;
   private: virtual void DidRealize() override;
   private: virtual void DidRealizeChildWidget(const Widget&) override;
   private: virtual void DidRemoveChildWidget(const Widget&) override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
+  private: virtual void DidShow() override;
   private: virtual HCURSOR GetCursorAt(const Point&) const override;
   private: virtual void OnMouseMoved(const ui::MouseEvent&) override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;

@@ -13,6 +13,9 @@ AnimatableWindow::AnimatableWindow(
     : Widget(std::move(native_window)) {
 }
 
+AnimatableWindow::AnimatableWindow() {
+}
+
 AnimatableWindow::~AnimatableWindow() {
 }
 

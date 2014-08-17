@@ -15,6 +15,7 @@ class AnimatableWindow : public ui::Animatable, public ui::Widget {
 
   protected: explicit AnimatableWindow(
       std::unique_ptr<NativeWindow>&& native_window);
+  protected: AnimatableWindow();
   protected: virtual ~AnimatableWindow();
 
   // ui::Widget

@@ -407,6 +407,7 @@ void ScreenTextBlock::DidKillFocus(gfx::Canvas* canvas) {
 }
 
 void ScreenTextBlock::DidSetFocus() {
+  selection_ = TextSelection();
   ui::Caret::instance()->Take(this);
 }
 
@@ -462,21 +463,22 @@ void ScreenTextBlock::Render(gfx::Canvas* canvas,
 }
 
 void ScreenTextBlock::RenderCaret(gfx::Canvas* canvas) {
-  if (ui::Caret::instance()->owner() != this)
+  auto const caret = ui::Caret::instance();
+  if (caret->owner() != this)
     return;
   if (!selection_.has_focus()) {
-    ui::Caret::instance()->Hide(this);
+    caret->Hide(this);
     return;
   }
   auto const char_rect = HitTestTextPosition(selection_.focus_offset());
   if (char_rect.empty()) {
-    ui::Caret::instance()->Hide(this);
+    caret->Hide(this);
     return;
   }
   auto const caret_width = 2;
   gfx::RectF caret_bounds(char_rect.left, char_rect.top,
                           char_rect.left + caret_width, char_rect.bottom);
-  ui::Caret::instance()->Update(this, canvas, caret_bounds);
+  caret->Update(this, canvas, caret_bounds);
 }
 
 void ScreenTextBlock::RenderSelection(gfx::Canvas* canvas,
@@ -563,6 +565,7 @@ void ScreenTextBlock::Reset() {
   }
   lines_.clear();
   has_screen_bitmap_ = false;
+  selection_ = TextSelection();
 }
 
 void ScreenTextBlock::SetBounds(const gfx::RectF& new_bounds) {

@@ -22,7 +22,7 @@ AnimatableWindow::~AnimatableWindow() {
 // ui::Widget
 void AnimatableWindow::DidHide() {
   ui::Widget::DidHide();
-  ui::Animator::instance()->CancelAnimation(this);
+  CancelAnimation();
 }
 
 void AnimatableWindow::DidRealize() {
@@ -34,9 +34,10 @@ void AnimatableWindow::DidShow() {
   ui::Widget::DidShow();
   ui::Animator::instance()->ScheduleAnimation(this);
 }
+
 void AnimatableWindow::WillDestroyWidget() {
   Widget::WillDestroyWidget();
-  ui::Animator::instance()->CancelAnimation(this);
+  CancelAnimation();
 }
 
 }  // namespace ui

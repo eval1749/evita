@@ -148,26 +148,26 @@ SlideInFromBottomAnimation::SlideInFromBottomAnimation(
 
 // Animatable
 void SlideInFromBottomAnimation::Animate(base::Time now) {
+  auto const above_layer = above_window_->layer();
+  auto const below_layer = window()->layer();
   if (!value_) {
     value_.reset(new AnimationFloat(
         now, animation_duration(),
-        above_window_->layer()->bounds().height(), above_window_height_end_));
-    parent_layer()->AppendChildLayer(window()->layer());
+        above_layer->bounds().height(), above_window_height_end_));
+    parent_layer()->AppendChildLayer(below_layer);
   }
   auto const above_window_height = value_->Compute(now);
   above_window_->SetBounds(gfx::Rect(
       above_window_->bounds().origin(),
       gfx::Size(above_window_->bounds().width(),
-      static_cast<int>(above_window_height))));
-  window()->layer()->SetBounds(gfx::RectF(
-      above_window_->layer()->bounds().bottom_left() +
-          gfx::SizeF(0.0f, margin_height_),
-      window()->layer()->bounds().size()));
-
-  if (above_window_height == above_window_height_end_)
-    FinishAnimation();
-  else
-    ui::Animator::instance()->ScheduleAnimation(this);
+                static_cast<int>(above_window_height))));
+  below_layer->SetOrigin(above_layer->bounds().bottom_left() +
+                            gfx::SizeF(0.0f, margin_height_));
+  if (above_window_height > above_window_height_end_) {
+    ScheduleAnimation();
+    return;
+  }
+  FinishAnimation();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -204,26 +204,27 @@ SlideInFromRightAnimation::SlideInFromRightAnimation(
 
 // Animatable
 void SlideInFromRightAnimation::Animate(base::Time now) {
+  auto const left_layer = left_window_->layer();
+  auto const right_layer = window()->layer();
   if (!value_) {
     value_.reset(new AnimationFloat(
         now, animation_duration(),
-        left_window_->layer()->bounds().width(), left_window_width_end_));
-    parent_layer()->AppendChildLayer(window()->layer());
+        left_layer->bounds().width(), left_window_width_end_));
+    parent_layer()->AppendChildLayer(right_layer);
   }
   auto const left_window_width = value_->Compute(now);
   left_window_->SetBounds(gfx::Rect(
       left_window_->bounds().origin(),
       gfx::Size(static_cast<int>(left_window_width),
                 left_window_->bounds().height())));
-  window()->layer()->SetBounds(gfx::RectF(
-      left_window_->layer()->bounds().top_right() +
-          gfx::SizeF(margin_width_, 0.0f),
-      window()->layer()->bounds().size()));
+  right_layer->SetOrigin(left_layer->bounds().top_right() +
+                                  gfx::SizeF(margin_width_, 0.0f));
 
-  if (left_window_width == left_window_width_end_)
-    FinishAnimation();
-  else
-    ui::Animator::instance()->ScheduleAnimation(this);
+  if (left_window_width > left_window_width_end_) {
+    ScheduleAnimation();
+    return;
+  }
+  FinishAnimation();
 }
 
 }  // namespace

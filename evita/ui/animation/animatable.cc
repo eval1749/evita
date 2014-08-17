@@ -5,6 +5,7 @@
 #include "evita/ui/animation/animatable.h"
 
 #include "evita/ui/animation/animation_observer.h"
+#include "evita/ui/animation/animator.h"
 
 namespace ui {
 
@@ -17,6 +18,17 @@ Animatable::~Animatable() {
 
 void Animatable::AddObserver(AnimationObserver* observer) {
   observers_.AddObserver(observer);
+}
+
+void Animatable::CancelAnimation() {
+  if (!animator_ || is_finished_)
+    return;
+  animator_->CancelAnimation(this);
+}
+
+void Animatable::DidCancel() {
+  DCHECK(!animator_);
+  FOR_EACH_OBSERVER(AnimationObserver, observers_, DidCancelAnimation(this));
 }
 
 void Animatable::DidAnimate() {
@@ -37,6 +49,12 @@ void Animatable::FinishAnimation() {
 
 void Animatable::RemoveObserver(AnimationObserver* observer) {
   observers_.RemoveObserver(observer);
+}
+
+void Animatable::ScheduleAnimation() {
+  DCHECK(animator_);
+  DCHECK(!is_finished_);
+  animator_->ScheduleAnimation(this);
 }
 
 }  // namespace ui

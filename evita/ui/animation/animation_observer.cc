@@ -15,6 +15,9 @@ AnimationObserver::~AnimationObserver() {
 void AnimationObserver::DidAnimate(Animatable*) {
 }
 
+void AnimationObserver::DidCancelAnimation(Animatable*) {
+}
+
 void AnimationObserver::DidFinishAnimation(Animatable*) {
 }
 

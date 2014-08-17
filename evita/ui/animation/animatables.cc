@@ -15,9 +15,7 @@ Animatables::Animatables() {
 
 Animatables::~Animatables() {
   for (auto animatable : animatables_) {
-    if (auto const animator = animatable->animator())
-      animator->CancelAnimation(animatable);
-    delete animatable;
+    animatable->CancelAnimation();
   }
 }
 

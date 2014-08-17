@@ -35,11 +35,13 @@ void Animator::Animate(Animatable* animatable) {
 }
 
 void Animator::CancelAnimation(Animatable* animatable) {
+  DCHECK_EQ(this, animatable->animator_);
   DCHECK(!animatable->is_finished_);
   animatable->animator_ = nullptr;
   pending_animatables_.erase(animatable);
   running_animatables_.erase(animatable);
   waiting_animatables_.erase(animatable);
+  animatable->DidCancel();
 }
 
 void Animator::EndAnimate() {

@@ -5,20 +5,21 @@
 #if !defined(INCLUDE_evita_ui_animation_window_animator_h)
 #define INCLUDE_evita_ui_animation_window_animator_h
 
-#include "evita/ui/animation/animation_observer.h"
+#include <memory>
 
-#include <unordered_set>
+#include "evita/ui/animation/animation_observer.h"
 
 #include "evita/gfx/rect_f.h"
 
 namespace ui {
 
+class Animatables;
 class AnimatableWindow;
 
-class WindowAnimator final : public AnimationObserver {
+class WindowAnimator final {
   public: class Animation;
 
-  private: std::unordered_set<Animatable*> animations_;
+  private: const std::unique_ptr<Animatables> animations_;
 
   public: WindowAnimator();
   public: ~WindowAnimator();
@@ -35,9 +36,6 @@ class WindowAnimator final : public AnimationObserver {
                                 float left_window_width,
                                 AnimatableWindow* right_window,
                                 float margin_width);
-
-  // AnimationObserver
-  private: virtual void DidFinishAnimation(Animatable* animatable) override;
 
   DISALLOW_COPY_AND_ASSIGN(WindowAnimator);
 };

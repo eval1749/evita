@@ -5,6 +5,7 @@
 #include "evita/ui/animation/window_animator.h"
 
 #include "evita/gfx/rect_conversions.h"
+#include "evita/ui/animation/animatables.h"
 #include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/animation/animation_value.h"
 #include "evita/ui/animation/animator.h"
@@ -231,17 +232,10 @@ void SlideInFromRightAnimation::Animate(base::Time now) {
 //
 // WindowAnimator
 //
-WindowAnimator::WindowAnimator() {
+WindowAnimator::WindowAnimator() : animations_(new Animatables()) {
 }
 
 WindowAnimator::~WindowAnimator() {
-  while (!animations_.empty()) {
-    auto const present = animations_.begin();
-    auto const animation = *present;
-    ui::Animator::instance()->CancelAnimation(animation);
-    animations_.erase(present);
-    delete animation;
-  }
 }
 
 void WindowAnimator::Realize(AnimatableWindow* window) {
@@ -249,8 +243,7 @@ void WindowAnimator::Realize(AnimatableWindow* window) {
 }
 
 void WindowAnimator::RegisterAnimation(Animation* animation){
-  animations_.insert(animation);
-  animation->AddObserver(this);
+  animations_->AddAnimatable(animation);
 }
 
 void WindowAnimator::Replace(AnimatableWindow* new_window,
@@ -272,14 +265,6 @@ void WindowAnimator::SlideInFromRight(AnimatableWindow* left_window,
                                       float margin_width) {
   RegisterAnimation(new SlideInFromRightAnimation(
       left_window, left_window_height, right_window, margin_width));
-}
-
-// AnimationObserver
-void WindowAnimator::DidFinishAnimation(Animatable* animatable) {
-  auto const present = animations_.find(animatable);
-  DCHECK(present != animations_.end());
-  animatable->RemoveObserver(this);
-  animations_.erase(present);
 }
 
 }  // namespace ui

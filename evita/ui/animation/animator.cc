@@ -4,8 +4,6 @@
 
 #include "evita/ui/animation/animator.h"
 
-#include <vector>
-
 #include "base/logging.h"
 #include "base/time/time.h"
 #include "evita/ui/animation/animatable.h"
@@ -29,89 +27,41 @@ bool Animator::is_playing() const {
 }
 
 void Animator::Animate(Animatable* animatable) {
-  DCHECK_EQ(Animatable::State::NotScheduled, animatable->state_);
-  animatable->animator_ = this;
-  animatable->state_ = Animatable::State::Playing;
+  DCHECK_EQ(this, animatable->animator_);
+  if (animatable->is_finished_)
+    return;
+  running_animatables_.insert(animatable);
   animatable->Animate(current_time_);
-  switch (animatable->state_) {
-    case Animatable::State::Finished:
-      DCHECK_EQ(this, animatable->animator_);
-      FOR_EACH_OBSERVER(AnimationObserver, animatable->observers_,
-                        DidFinishAnimation(animatable));
-      will_schedule_animatables_.erase(animatable);
-      will_delete_animatables_.insert(animatable);
-      return;
-    case Animatable::State::NotScheduled:
-      DCHECK(!animatable->animator_);
-      NOTREACHED();
-      return;
-    case Animatable::State::Playing:
-      DCHECK_EQ(this, animatable->animator_);
-      animatable->animator_ = nullptr;
-      animatable->state_ = Animatable::State::NotScheduled;
-      return;
-    case Animatable::State::Scheduled:
-      // |animatable| can be scheduled in another animator.
-      DCHECK(animatable->animator_);
-      return;
-    default:
-      NOTREACHED();
-      return;
-  }
 }
 
 void Animator::CancelAnimation(Animatable* animatable) {
-  switch (animatable->state_) {
-    case Animatable::State::NotScheduled:
-      DCHECK(!animatable->animator_);
-      if (is_playing())
-        will_schedule_animatables_.erase(animatable);
-      return;
-    case Animatable::State::Finished:
-    case Animatable::State::Playing:
-      NOTREACHED();
-      return;
-    case Animatable::State::Scheduled: {
-      DCHECK_EQ(this, animatable->animator_);
-      auto const present = animatables_.find(animatable);
-      DCHECK(present != animatables_.end());
-      animatable->animator_ = nullptr;
-      animatable->state_ = Animatable::State::NotScheduled;
-      animatables_.erase(present);
-      return;
-    }
-    default:
-      NOTREACHED();
-      return;
-  }
+  DCHECK(!animatable->is_finished_);
+  animatable->animator_ = nullptr;
+  pending_animatables_.erase(animatable);
+  running_animatables_.erase(animatable);
+  waiting_animatables_.erase(animatable);
 }
 
 void Animator::EndAnimate() {
   DCHECK(is_playing());
+  for (auto const animatable : running_animatables_) {
+    if (animatable->is_finished_) {
+      animatable->DidFinish();
+      animatable->animator_ = nullptr;
+      delete animatable;
+      continue;
+    }
+    if (waiting_animatables_.find(animatable) == waiting_animatables_.end())
+      animatable->animator_ = nullptr;
+  }
+  running_animatables_.clear();
   current_time_ = base::Time();
-  while (!will_schedule_animatables_.empty()) {
-    auto const present = will_schedule_animatables_.begin();
-    auto const animatable = *present;
-    DCHECK(!animatable->animator_);
-    DCHECK_EQ(Animatable::State::NotScheduled, animatable->state_);
-    will_schedule_animatables_.erase(present);
-    ScheduleAnimation(animatable);
-  }
-  while (!will_delete_animatables_.empty()) {
-    auto const present = will_delete_animatables_.begin();
-    auto const animatable = *present;
-    DCHECK_EQ(this, animatable->animator_);
-    DCHECK_EQ(Animatable::State::Finished, animatable->state_);
-    will_delete_animatables_.erase(present);
-    animatable->animator_ = nullptr;
-    animatable->state_ = Animatable::State::NotScheduled;
-    delete animatable;
-  }
 }
 
 void Animator::PlayAnimation(base::Time now, Animatable* animatable) {
   DCHECK(!is_playing());
-  ui::Animator::instance()->CancelAnimation(animatable);
+  DCHECK(!animatable->is_finished_);
+  waiting_animatables_.erase(animatable);
   StartAnimate(now);
   Animate(animatable);
   EndAnimate();
@@ -119,56 +69,29 @@ void Animator::PlayAnimation(base::Time now, Animatable* animatable) {
 
 void Animator::PlayAnimations(base::Time now) {
   DCHECK(!is_playing());
-  std::vector<Animatable*> animatables(animatables_.size());
-  animatables.resize(0);
-  for (auto animatable : animatables_) {
-    DCHECK_EQ(Animatable::State::Scheduled, animatable->state_);
-    animatable->animator_ = nullptr;
-    animatable->state_ = Animatable::State::NotScheduled;
-    animatables.push_back(animatable);
-  }
-  animatables_.clear();
+  DCHECK(running_animatables_.empty());
+  if (waiting_animatables_.empty())
+    return;
+  pending_animatables_.swap(waiting_animatables_);
   StartAnimate(now);
-  for (auto animatable : animatables) {
+  while (!pending_animatables_.empty()) {
+    auto const present = pending_animatables_.begin();
+    auto const animatable = *present;
+    pending_animatables_.erase(present);
     Animate(animatable);
   }
   EndAnimate();
 }
 
 void Animator::ScheduleAnimation(Animatable* animatable) {
-  if (is_playing()) {
-    DCHECK_NE(Animatable::State::Finished, animatable->state_);
-    will_schedule_animatables_.insert(animatable);
-    return;
-  }
-  switch (animatable->state_) {
-    case Animatable::State::NotScheduled:
-      DCHECK(!animatable->animator_);
-      animatable->animator_ = this;
-      animatable->state_ = Animatable::State::Scheduled;
-      animatables_.insert(animatable);
-      return;
-    case Animatable::State::Finished:
-      NOTREACHED() << this << " is already finished.";
-      return;
-    case Animatable::State::Playing:
-      animatable->animator_ = this;
-      animatable->state_ = Animatable::State::Scheduled;
-      animatables_.insert(animatable);
-      return;
-    case Animatable::State::Scheduled:
-      DCHECK_EQ(this, animatable->animator_);
-      return;
-    default:
-      NOTREACHED();
-      return;
-  }
+  DCHECK(!animatable->is_finished_);
+  DCHECK(!animatable->animator_ || animatable->animator_ == this);
+  animatable->animator_ = this;
+  waiting_animatables_.insert(animatable);
 }
 
 void Animator::StartAnimate(base::Time now) {
   DCHECK(!is_playing());
-  DCHECK(will_delete_animatables_.empty());
-  DCHECK(will_schedule_animatables_.empty());
   current_time_ = now;
 }
 

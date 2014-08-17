@@ -20,16 +20,9 @@ class Animator;
 class Animatable {
   friend class Animator;
 
-  public: enum class State {
-    Finished,
-    NotScheduled,
-    Playing,
-    Scheduled,
-  };
-
   private: Animator* animator_;
+  private: bool is_finished_;
   private: ObserverList<AnimationObserver> observers_;
-  private: State state_;
 
   protected: Animatable();
   public: virtual ~Animatable();
@@ -39,6 +32,7 @@ class Animatable {
   public: void AddObserver(AnimationObserver* observer);
   protected: virtual void Animate(base::Time time) = 0;
   protected: void DidAnimate();
+  private: void DidFinish();
   public: void FinishAnimation();
   public: void RemoveObserver(AnimationObserver* observer);
 
@@ -46,9 +40,5 @@ class Animatable {
 };
 
 }   // namespace ui
-
-#include <ostream>
-
-std::ostream& operator<<(std::ostream& ostream, ui::Animatable::State state);
 
 #endif //!defined(INCLUDE_evita_ui_animation_animatable_h)

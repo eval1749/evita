@@ -20,8 +20,9 @@ class Animator : public common::Singleton<Animator> {
 
   private: std::unordered_set<Animatable*> animatables_;
   private: base::Time current_time_;
-  private: std::unordered_set<Animatable*> will_delete_animatables_;
-  private: std::unordered_set<Animatable*> will_schedule_animatables_;
+  private: std::unordered_set<Animatable*> pending_animatables_;
+  private: std::unordered_set<Animatable*> running_animatables_;
+  private: std::unordered_set<Animatable*> waiting_animatables_;
 
   private: Animator();
   public: virtual ~Animator();

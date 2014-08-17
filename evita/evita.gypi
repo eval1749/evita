@@ -5,6 +5,7 @@
   'includes': [
     'dom/dom.gypi',
     'text/encodings/encodings.gypi',
+    'ui/ui.gypi',
    ], # includes
 
   'targets': [
@@ -226,84 +227,6 @@
         'spellchecker/spelling_engine.cc',
       ], # sources
     }, # spellchecker
-    {
-      'target_name': 'ui',
-      'type': 'static_library',
-      'dependencies': [
-        '<(DEPTH)/base/base.gyp:base',
-      ],
-      'msvs_precompiled_header': '<(DEPTH)/build/precompile.h',
-      'msvs_precompiled_source': '<(DEPTH)/build/precompile.cc',
-      'sources': [
-        '<(DEPTH)/build/precompile.cc',
-
-        'ui/animation/animatable.cc',
-        'ui/animation/animatable.h',
-        'ui/animation/animatables.cc',
-        'ui/animation/animatables.h',
-        'ui/animation/animatable_window.cc',
-        'ui/animation/animatable_window.h',
-        'ui/animation/animation_observer.cc',
-        'ui/animation/animation_observer.h',
-        'ui/animation/animation_value.cc',
-        'ui/animation/animation_value.h',
-        'ui/animation/animator.cc',
-        'ui/animation/animator.h',
-        'ui/animation/window_animator.cc',
-        'ui/animation/window_animator.h',
-
-        'ui/base/ime/text_composition.cc',
-        'ui/base/ime/text_composition.h',
-        'ui/base/ime/text_input_client.h',
-        'ui/base/ime/text_input_client.cc',
-        'ui/base/ime/text_input_client_win.h',
-        'ui/base/ime/text_input_client_win.cc',
-        'ui/base/ime/text_input_delegate.h',
-        'ui/base/ime/text_input_delegate.cc',
-
-        'ui/base/selection_model.cc',
-        'ui/base/table_model.cc',
-        'ui/base/table_model_observer.cc',
-
-        'ui/events/event.cc',
-        'ui/events/event.h',
-        'ui/events/mouse_click_tracker.cc',
-        'ui/events/mouse_click_tracker.h',
-
-        'ui/compositor/canvas_for_layer.cc',
-        'ui/compositor/canvas_for_layer.h',
-        'ui/compositor/compositor.cc',
-        'ui/compositor/compositor.h',
-        'ui/compositor/layer.cc',
-        'ui/compositor/layer.h',
-        'ui/compositor/layer_content.cc',
-        'ui/compositor/layer_content.h',
-        'ui/compositor/root_layer.cc',
-        'ui/compositor/root_layer.h',
-
-        'ui/controls/button_control.cc',
-        'ui/controls/checkbox_control.cc',
-        'ui/controls/control.cc',
-        'ui/controls/control_controller.cc',
-        'ui/controls/label_control.cc',
-        'ui/controls/radio_button_control.cc',
-        'ui/controls/scroll_bar.cc',
-        'ui/controls/scroll_bar_observer.cc',
-        'ui/controls/status_bar.cc',
-        'ui/controls/table_control.cc',
-        'ui/controls/table_control_observer.cc',
-        'ui/controls/text_field_control.cc',
-
-        'ui/caret.cc',
-        'ui/root_widget.cc',
-        'ui/system_metrics.cc',
-        'ui/system_metrics_observer.cc',
-        'ui/tooltip.cc',
-        'ui/tooltip.h',
-        'ui/widget.cc',
-        'ui/widget.h',
-      ], # sources
-    },
     {
       'target_name': 'v8_glue',
       'type': 'static_library',

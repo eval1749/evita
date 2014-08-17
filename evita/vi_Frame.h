@@ -49,6 +49,7 @@ class MessageView;
 class TabContent;
 class TitleBar;
 class TabStrip;
+class TabStripAnimator;
 }
 
 /// <summary>
@@ -70,6 +71,7 @@ class Frame final : public views::Window,
   private: std::unordered_set<TabContent*> tab_contents_;
   private: std::unique_ptr<ui::Layer> tab_content_layer_;
   private: TabStrip* tab_strip_;
+  private: std::unique_ptr<views::TabStripAnimator> tab_strip_animator_;
   private: std::unique_ptr<views::TitleBar> title_bar_;
 
   public: explicit Frame(views::WindowId window_id);

@@ -6,8 +6,12 @@
 #define INCLUDE_evita_views_tab_content_h
 
 #include "base/basictypes.h"
+#pragma warning(push)
+#pragma warning(disable: 4625 4626)
+#include "base/observer_list.h"
+#pragma warning(pop)
 #include "base/strings/string16.h"
-#include "evita/ui/widget.h"
+#include "evita/ui/animation/animatable_window.h"
 
 class Frame;
 
@@ -16,12 +20,19 @@ struct TabData;
 }
 
 namespace views {
+
+class TabContentObserver;
 class Window;
 
-class TabContent : public ui::Widget {
-  DECLARE_CASTABLE_CLASS(TabContent, Widget);
+//////////////////////////////////////////////////////////////////////
+//
+// TabContent
+//
+class TabContent : public ui::AnimatableWindow {
+  DECLARE_CASTABLE_CLASS(TabContent, ui::AnimatableWindow);
 
   private: int active_tick_;
+  private: ObserverList<TabContentObserver> observers_;
 
   protected: TabContent();
   public: virtual ~TabContent();
@@ -29,8 +40,14 @@ class TabContent : public ui::Widget {
   public: int active_tick() const { return active_tick_; }
 
   public: virtual void Activate();
+  public: void AddObserver(TabContentObserver* observer);
+  protected: void DidAnimateTabContent();
   protected: Frame* GetFrame() const;
   public: virtual const domapi::TabData* GetTabData() const = 0;
+  public: void RemoveObserver(TabContentObserver* observer);
+
+  // ui::AnimatableWindow
+  protected: virtual void Animate(base::Time time) override;
 
   // ui::Widget
   protected: virtual void DidRealize() override;

@@ -6,12 +6,13 @@
 
 #include "common/win/native_window.h"
 #include "evita/ui/compositor/layer.h"
+#include "evita/views/tab_content_observer.h"
 #include "evita/vi_Frame.h"
 
 namespace views {
 
 TabContent::TabContent()
-    : ui::Widget(), active_tick_(0) {
+    : ui::AnimatableWindow(), active_tick_(0) {
 }
 
 TabContent::~TabContent() {
@@ -25,14 +26,30 @@ void TabContent::Activate() {
   RequestFocus();
 }
 
+void TabContent::DidAnimateTabContent() {
+  FOR_EACH_OBSERVER(TabContentObserver, observers_, DidAnimateTabContent(this));
+}
+
+void TabContent::AddObserver(TabContentObserver* observer) {
+  observers_.AddObserver(observer);
+}
+
 Frame* TabContent::GetFrame() const {
   return container_widget().as<Frame>();
+}
+
+void TabContent::RemoveObserver(TabContentObserver* observer) {
+  observers_.RemoveObserver(observer);
+}
+
+// ui::AnimatableWindow
+void TabContent::Animate(base::Time) {
 }
 
 // ui::Widget
 void TabContent::DidRealize() {
   SetLayer(new ui::Layer());
-  ui::Widget::DidRealize();
+  ui::AnimatableWindow::DidRealize();
 }
 
 }  // namespace views

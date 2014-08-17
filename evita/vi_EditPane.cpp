@@ -448,6 +448,7 @@ LeafBox::~LeafBox() {
 }
 
 void LeafBox::DetachContent() {
+  content_->RemoveObserver(edit_pane_);
   content_ = nullptr;
 }
 
@@ -974,20 +975,22 @@ void EditPane::ReplaceActiveWindow(views::ContentWindow* content) {
   root_box_->GetActiveLeafBox()->ReplaceContent(content);
 }
 
-void EditPane::SetContent(views::ContentWindow* window) {
+void EditPane::SetContent(views::ContentWindow* content) {
   DCHECK(!root_box_->first_child());
-  scoped_refptr<LeafBox> box(new LeafBox(this, root_box_.get(), window));
+  scoped_refptr<LeafBox> box(new LeafBox(this, root_box_.get(), content));
   root_box_->Add(box);
   if (bounds().empty()) {
     DCHECK(!is_realized());
   } else {
     auto const box_bounds = GetContentsBounds();
     box->SetBounds(box_bounds);
-    window->SetBounds(gfx::ToEnclosingRect(box_bounds));
+    content->SetBounds(gfx::ToEnclosingRect(box_bounds));
   }
-  if (!window->is_realized())
-    window_animator()->Realize(window);
-  window->SetParentWidget(this);
+  if (!content->is_realized()) {
+    content->AddObserver(this);
+    window_animator()->Realize(content);
+  }
+  content->SetParentWidget(this);
 }
 
 void EditPane::SplitHorizontally(Window* left_window,
@@ -1032,12 +1035,10 @@ void EditPane::SplitVertically(Window* above_window,
   above_window->MakeSelectionVisible();
 }
 
-// TabContent
-const domapi::TabData* EditPane::GetTabData() const {
-  auto const content = GetActiveWindow();
-  if (!content)
-    return nullptr;
-  return views::TabDataSet::instance()->GetTabData(content->window_id());
+// ui::AnimationObserver
+void EditPane::DidAnimate(ui::Animatable* animatable) {
+  animatable->RemoveObserver(this);
+  DidAnimateTabContent();
 }
 
 // ui::Widget
@@ -1142,4 +1143,12 @@ void EditPane::WillRemoveChildWidget(const Widget& child) {
 
   box->DetachContent();
   box->outer()->RemoveBox(box);
+}
+
+// views::TabContent
+const domapi::TabData* EditPane::GetTabData() const {
+  auto const content = GetActiveWindow();
+  if (!content)
+    return nullptr;
+  return views::TabDataSet::instance()->GetTabData(content->window_id());
 }

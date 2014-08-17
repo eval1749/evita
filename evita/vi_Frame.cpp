@@ -37,6 +37,7 @@
 #include "evita/views/message_view.h"
 #include "evita/views/switches.h"
 #include "evita/views/tab_strip.h"
+#include "evita/views/tab_strip_animator.h"
 #include "evita/views/text/render_font.h"
 #include "evita/views/text/render_font_set.h"
 #include "evita/views/window_set.h"
@@ -74,7 +75,8 @@ Frame::Frame(views::WindowId window_id)
       active_tab_content_(nullptr),
       message_view_(new views::MessageView()),
       title_bar_(new views::TitleBar()),
-      tab_strip_(new views::TabStrip(this)) {
+      tab_strip_(new views::TabStrip(this)),
+      tab_strip_animator_(new TabStripAnimator(tab_strip_)) {
   AppendChild(tab_strip_);
   AppendChild(message_view_);
 }
@@ -114,9 +116,9 @@ void Frame::AddTabContent(views::ContentWindow* window) {
     tab_content->SetContent(window);
     return;
   }
+  tab_strip_animator_->AddTab(tab_content);
   tab_content->Realize(GetTabContentBounds());
   tab_content->SetContent(window);
-  AddTab(tab_content);
 }
 
 void Frame::AddOrActivateTabContent(views::ContentWindow* window) {

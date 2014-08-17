@@ -53,6 +53,8 @@
         'compositor/compositor.h',
         'compositor/layer.cc',
         'compositor/layer.h',
+        'compositor/layer_animation.cc',
+        'compositor/layer_animation.h',
         'compositor/layer_content.cc',
         'compositor/layer_content.h',
         'compositor/root_layer.cc',

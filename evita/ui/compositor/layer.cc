@@ -11,6 +11,7 @@
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/color_f.h"
 #include "evita/gfx/swap_chain.h"
+#include "evita/ui/animation/animatable.h"
 #include "evita/ui/compositor/compositor.h"
 #include "evita/ui/compositor/canvas_for_layer.h"
 
@@ -21,7 +22,7 @@ namespace ui {
 // Layer
 //
 Layer::Layer()
-    : parent_layer_(nullptr),
+    : animatable_(nullptr), parent_layer_(nullptr),
       visual_(Compositor::instance()->CreateVisual()) {
   COM_VERIFY(visual_->SetBitmapInterpolationMode(
       DCOMPOSITION_BITMAP_INTERPOLATION_MODE_LINEAR));
@@ -35,6 +36,8 @@ Layer::Layer()
 }
 
 Layer::~Layer() {
+  if (animatable_)
+    animatable_->CancelAnimation();
   visual_->SetContent(nullptr);
   visual_->RemoveAllVisuals();
 }
@@ -61,6 +64,12 @@ gfx::Canvas* Layer::CreateCanvas() {
 
 void Layer::DidChangeBounds() {
   Compositor::instance()->NeedCommit();
+}
+
+void Layer::EndAnimation() {
+  DCHECK(animatable_);
+  animatable_->RemoveObserver(this);
+  animatable_ = nullptr;
 }
 
 void Layer::RemoveChildLayer(Layer* old_layer) {
@@ -98,6 +107,23 @@ void Layer::SetBounds(const gfx::RectF& new_bounds) {
 
 void Layer::SetBounds(const gfx::Rect& new_bounds) {
   SetBounds(gfx::RectF(new_bounds));
+}
+
+void Layer::SetOrigin(const gfx::PointF& new_origin) {
+  SetBounds(gfx::RectF(new_origin, bounds_.size()));
+}
+
+void Layer::StartAnimation(ui::Animatable* animatable) {
+  DCHECK(!animatable_);
+  animatable_ = animatable;
+  animatable_->AddObserver(this);
+}
+
+// AnimationObserver
+void Layer::DidCancelAnimation(Animatable* animatable) {
+  DCHECK_EQ(animatable_, animatable);
+  animatable_->RemoveObserver(this);
+  animatable_ = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -11,6 +11,7 @@
 #include "common/win/scoped_comptr.h"
 #include "evita/gfx/rect.h"
 #include "evita/gfx/rect_f.h"
+#include "evita/ui/animation/animation_observer.h"
 
 interface IDCompositionVisual2;
 
@@ -20,7 +21,14 @@ class Canvas;
 
 namespace ui {
 
-class Layer  {
+class Animatable;
+
+//////////////////////////////////////////////////////////////////////
+//
+// Layer
+//
+class Layer  : private ui::AnimationObserver {
+  private: ui::Animatable* animatable_;
   private: gfx::RectF bounds_;
   private: std::unordered_set<Layer*> child_layers_;
   private: Layer* parent_layer_;
@@ -32,14 +40,21 @@ class Layer  {
   public: operator IDCompositionVisual2*() const { return visual_; }
 
   public: const gfx::RectF& bounds() const { return bounds_; }
+  public: ui::Layer* parent_layer() const { return parent_layer_; }
   public: IDCompositionVisual2* visual() const { return visual_; }
 
   public: void AppendChildLayer(Layer* new_child);
   public: gfx::Canvas* CreateCanvas();
   protected: virtual void DidChangeBounds();
+  public: void EndAnimation();
   public: void RemoveChildLayer(Layer* old_child);
   public: void SetBounds(const gfx::RectF& new_bounds);
   public: void SetBounds(const gfx::Rect& new_bounds);
+  public: void SetOrigin(const gfx::PointF& new_origin);
+  public: void StartAnimation(Animatable* animatable);
+
+  // AnimationObserver
+  private: virtual void DidCancelAnimation(Animatable* animatable) override;
 
   DISALLOW_COPY_AND_ASSIGN(Layer);
 };

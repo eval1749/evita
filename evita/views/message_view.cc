@@ -358,7 +358,7 @@ gfx::Size MessageView::GetPreferredSize() const {
 
 void MessageView::WillDestroyWidget() {
   ui::Widget::WillDestroyWidget();
-  ui::Animator::instance()->CancelAnimation(this);
+  CancelAnimation();
 }
 
 }  // namespace views

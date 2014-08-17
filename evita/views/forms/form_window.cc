@@ -573,7 +573,7 @@ void FormWindow::DidChangeBounds() {
 }
 
 void FormWindow::DidDestroyWidget() {
-  ui::Animator::instance()->CancelAnimation(this);
+  CancelAnimation();
   ui::SystemMetrics::instance()->RemoveObserver(this);
   Window::DidDestroyWidget();
 }

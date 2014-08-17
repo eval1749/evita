@@ -31,8 +31,8 @@ namespace {
 
 typedef views::ContentWindow ContentWindow;
 
-auto const kMinBoxHeight = 30.0f;
-auto const kMinBoxWidth = 50.0f;
+auto const kMinBoxHeight = 200.0f;
+auto const kMinBoxWidth = 200.0f;
 auto const kSplitterWidth = 8.0f;
 auto const kSplitterHeight = 8.0f;
 

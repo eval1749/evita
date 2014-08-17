@@ -278,6 +278,7 @@ void WindowAnimator::SlideInFromRight(AnimatableWindow* left_window,
 void WindowAnimator::DidFinishAnimation(Animatable* animatable) {
   auto const present = animations_.find(animatable);
   DCHECK(present != animations_.end());
+  animatable->RemoveObserver(this);
   animations_.erase(present);
 }
 

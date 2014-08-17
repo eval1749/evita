@@ -27,14 +27,14 @@ class WindowAnimator final : public AnimationObserver {
   private: void RegisterAnimation(Animation* animation);
   public: void Replace(AnimatableWindow* new_window,
                        AnimatableWindow* old_window);
-  public: void SplitHorizontally(AnimatableWindow* left_window,
-                                 float left_window_width,
-                                 AnimatableWindow* right_window,
-                                 float margin_width);
-  public: void SplitVertically(AnimatableWindow* above_window,
-                               float above_window_height,
-                               AnimatableWindow* below_window,
-                               float margin_size);
+  public: void SlideInFromBottom(AnimatableWindow* above_window,
+                                 float above_window_height,
+                                 AnimatableWindow* below_window,
+                                 float margin_size);
+  public: void SlideInFromRight(AnimatableWindow* left_window,
+                                float left_window_width,
+                                AnimatableWindow* right_window,
+                                float margin_width);
 
   // AnimationObserver
   private: virtual void DidFinishAnimation(Animatable* animatable) override;

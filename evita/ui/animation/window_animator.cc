@@ -42,7 +42,7 @@ WindowAnimator::Animation::~Animation() {
 }
 
 base::TimeDelta WindowAnimator::Animation::animation_duration() const {
-  return base::TimeDelta::FromMilliseconds(16 * 5);
+  return base::TimeDelta::FromMilliseconds(16 * 7);
 }
 
 Layer* WindowAnimator::Animation::parent_layer() const {
@@ -115,83 +115,27 @@ void ReplaceAnimation::Animate(base::Time) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// SplitHorizontallyAnimation
+// SlideInFromBottomAnimation
 //
-class SplitHorizontallyAnimation final : public WindowAnimator::Animation {
-  private: AnimatableWindow* left_window_;
-  private: float left_window_width_end_;
-  private: float margin_width_;
-  private: std::unique_ptr<AnimationFloat> value_;
-
-  public: SplitHorizontallyAnimation(AnimatableWindow* left_window,
-                                   float left_window_end_width,
-                                   AnimatableWindow* right_window,
-                                   float margin_width);
-  public: virtual ~SplitHorizontallyAnimation() = default;
-
-  // Animatable
-  private: virtual void Animate(base::Time time) override;
-
-  DISALLOW_COPY_AND_ASSIGN(SplitHorizontallyAnimation);
-};
-
-SplitHorizontallyAnimation::SplitHorizontallyAnimation(
-    AnimatableWindow* left_window, float left_window_end_width,
-    AnimatableWindow* right_window, float margin_width)
-  : Animation(right_window), left_window_(left_window),
-    left_window_width_end_(left_window_end_width),
-    margin_width_(margin_width) {
-  DCHECK_LT(left_window_width_end_, left_window->layer()->bounds().width());
-  DCHECK_EQ(left_window_width_end_, ::floor(left_window_width_end_));
-}
-
-// Animatable
-void SplitHorizontallyAnimation::Animate(base::Time now) {
-  if (!value_) {
-    value_.reset(new AnimationFloat(
-        now, animation_duration(),
-        left_window_->layer()->bounds().width(), left_window_width_end_));
-    parent_layer()->AppendChildLayer(window()->layer());
-  }
-  auto const left_window_width = value_->Compute(now);
-  left_window_->SetBounds(gfx::Rect(
-      left_window_->bounds().origin(),
-      gfx::Size(static_cast<int>(left_window_width),
-                left_window_->bounds().height())));
-  window()->layer()->SetBounds(gfx::RectF(
-      left_window_->layer()->bounds().top_right() +
-          gfx::SizeF(margin_width_, 0.0f),
-      window()->layer()->bounds().size()));
-
-  if (left_window_width == left_window_width_end_)
-    FinishAnimation();
-  else
-    ui::Animator::instance()->ScheduleAnimation(this);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// SplitVerticallyAnimation
-//
-class SplitVerticallyAnimation final : public WindowAnimator::Animation {
+class SlideInFromBottomAnimation final : public WindowAnimator::Animation {
   private: AnimatableWindow* above_window_;
   private: float above_window_height_end_;
   private: float margin_height_;
   private: std::unique_ptr<AnimationFloat> value_;
 
-  public: SplitVerticallyAnimation(AnimatableWindow* above_window,
+  public: SlideInFromBottomAnimation(AnimatableWindow* above_window,
                                    float above_window_end_height,
                                    AnimatableWindow* below_window,
                                    float margin_height);
-  public: virtual ~SplitVerticallyAnimation() = default;
+  public: virtual ~SlideInFromBottomAnimation() = default;
 
   // Animatable
   private: virtual void Animate(base::Time time) override;
 
-  DISALLOW_COPY_AND_ASSIGN(SplitVerticallyAnimation);
+  DISALLOW_COPY_AND_ASSIGN(SlideInFromBottomAnimation);
 };
 
-SplitVerticallyAnimation::SplitVerticallyAnimation(
+SlideInFromBottomAnimation::SlideInFromBottomAnimation(
     AnimatableWindow* above_window, float above_window_end_height,
     AnimatableWindow* below_window, float margin_height)
   : Animation(below_window), above_window_(above_window),
@@ -202,7 +146,7 @@ SplitVerticallyAnimation::SplitVerticallyAnimation(
 }
 
 // Animatable
-void SplitVerticallyAnimation::Animate(base::Time now) {
+void SlideInFromBottomAnimation::Animate(base::Time now) {
   if (!value_) {
     value_.reset(new AnimationFloat(
         now, animation_duration(),
@@ -220,6 +164,62 @@ void SplitVerticallyAnimation::Animate(base::Time now) {
       window()->layer()->bounds().size()));
 
   if (above_window_height == above_window_height_end_)
+    FinishAnimation();
+  else
+    ui::Animator::instance()->ScheduleAnimation(this);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// SlideInFromRightAnimation
+//
+class SlideInFromRightAnimation final : public WindowAnimator::Animation {
+  private: AnimatableWindow* left_window_;
+  private: float left_window_width_end_;
+  private: float margin_width_;
+  private: std::unique_ptr<AnimationFloat> value_;
+
+  public: SlideInFromRightAnimation(AnimatableWindow* left_window,
+                                   float left_window_end_width,
+                                   AnimatableWindow* right_window,
+                                   float margin_width);
+  public: virtual ~SlideInFromRightAnimation() = default;
+
+  // Animatable
+  private: virtual void Animate(base::Time time) override;
+
+  DISALLOW_COPY_AND_ASSIGN(SlideInFromRightAnimation);
+};
+
+SlideInFromRightAnimation::SlideInFromRightAnimation(
+    AnimatableWindow* left_window, float left_window_end_width,
+    AnimatableWindow* right_window, float margin_width)
+  : Animation(right_window), left_window_(left_window),
+    left_window_width_end_(left_window_end_width),
+    margin_width_(margin_width) {
+  DCHECK_LT(left_window_width_end_, left_window->layer()->bounds().width());
+  DCHECK_EQ(left_window_width_end_, ::floor(left_window_width_end_));
+}
+
+// Animatable
+void SlideInFromRightAnimation::Animate(base::Time now) {
+  if (!value_) {
+    value_.reset(new AnimationFloat(
+        now, animation_duration(),
+        left_window_->layer()->bounds().width(), left_window_width_end_));
+    parent_layer()->AppendChildLayer(window()->layer());
+  }
+  auto const left_window_width = value_->Compute(now);
+  left_window_->SetBounds(gfx::Rect(
+      left_window_->bounds().origin(),
+      gfx::Size(static_cast<int>(left_window_width),
+                left_window_->bounds().height())));
+  window()->layer()->SetBounds(gfx::RectF(
+      left_window_->layer()->bounds().top_right() +
+          gfx::SizeF(margin_width_, 0.0f),
+      window()->layer()->bounds().size()));
+
+  if (left_window_width == left_window_width_end_)
     FinishAnimation();
   else
     ui::Animator::instance()->ScheduleAnimation(this);
@@ -258,20 +258,20 @@ void WindowAnimator::Replace(AnimatableWindow* new_window,
   RegisterAnimation(new ReplaceAnimation(new_window, old_window));
 }
 
-void WindowAnimator::SplitHorizontally(AnimatableWindow* left_window,
-                                       float left_window_height,
-                                       AnimatableWindow* right_window,
-                                       float margin_width) {
-  RegisterAnimation(new SplitHorizontallyAnimation(
-      left_window, left_window_height, right_window, margin_width));
+void WindowAnimator::SlideInFromBottom(AnimatableWindow* above_window,
+                                       float above_window_height,
+                                       AnimatableWindow* below_window,
+                                       float margin_height) {
+  RegisterAnimation(new SlideInFromBottomAnimation(
+      above_window, above_window_height, below_window, margin_height));
 }
 
-void WindowAnimator::SplitVertically(AnimatableWindow* above_window,
-                                     float above_window_height,
-                                     AnimatableWindow* below_window,
-                                     float margin_height) {
-  RegisterAnimation(new SplitVerticallyAnimation(
-      above_window, above_window_height, below_window, margin_height));
+void WindowAnimator::SlideInFromRight(AnimatableWindow* left_window,
+                                      float left_window_height,
+                                      AnimatableWindow* right_window,
+                                      float margin_width) {
+  RegisterAnimation(new SlideInFromRightAnimation(
+      left_window, left_window_height, right_window, margin_width));
 }
 
 // AnimationObserver

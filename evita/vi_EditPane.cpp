@@ -395,7 +395,7 @@ void HorizontalBox::Split(Box* left_box,
 
   left_box->set_bounds(gfx::RectF(left_box->origin(),
       left_box->size() - gfx::SizeF(new_right_width + kSplitterWidth, 0.0f)));
-  edit_pane_->window_animator()->SplitHorizontally(
+  edit_pane_->window_animator()->SlideInFromRight(
       left_box->GetContent(), left_box->width(), new_right_window,
       kSplitterWidth);
   right_box->SetBounds(gfx::RectF(
@@ -624,7 +624,7 @@ void VerticalBox::Split(Box* above_box,
 
   above_box->set_bounds(gfx::RectF(
       above_box->origin(), gfx::SizeF(width(), above_box_height)));
-  edit_pane_->window_animator()->SplitVertically(
+  edit_pane_->window_animator()->SlideInFromBottom(
     above_box->GetContent(), above_box_height, below_window, kSplitterHeight);
   below_box->SetBounds(gfx::RectF(
       gfx::PointF(left(), above_box->bottom() + kSplitterHeight),

@@ -55,10 +55,10 @@ bool HasChildWindow(ui::Widget* parent, views::Window* window) {
   return false;
 }
 
-Pane* GetTabContentFromWindow(Frame* frame, views::Window* window) {
+TabContent* GetTabContentFromWindow(Frame* frame, views::Window* window) {
   for (auto child : frame->child_nodes()) {
     if (HasChildWindow(child, window))
-      return child->as<Pane>();
+      return child->as<TabContent>();
   }
   return nullptr;
 }
@@ -90,7 +90,7 @@ void Frame::AddObserver(views::FrameObserver* observer) {
   observers_.AddObserver(observer);
 }
 
-void Frame::AddTab(Pane* const tab_content) {
+void Frame::AddTab(TabContent* const tab_content) {
   DCHECK(is_realized());
   DCHECK(tab_content->is_realized());
   // Set dummy tab label. Actual tab label will be set later in
@@ -165,11 +165,11 @@ void Frame::DrawForResize() {
   }
 }
 
-Pane* Frame::GetActiveTabContent() {
+TabContent* Frame::GetActiveTabContent() {
   if (active_tab_content_ && active_tab_content_->active_tick())
     return active_tab_content_;
 
-  auto active_tab_content = static_cast<Pane*>(nullptr);
+  auto active_tab_content = static_cast<TabContent*>(nullptr);
   for (auto tab_content : tab_contents_) {
     if (!active_tab_content ||
         active_tab_content->active_tick() < tab_content->active_tick()) {
@@ -180,12 +180,12 @@ Pane* Frame::GetActiveTabContent() {
   return active_tab_content;
 }
 
-static Pane* GetTabContentAt(views::TabStrip* tab_strip, int const index) {
+static TabContent* GetTabContentAt(views::TabStrip* tab_strip, int const index) {
   TCITEM tab_item;
   tab_item.mask = TCIF_PARAM;
   if (!tab_strip->GetTab(index, &tab_item))
       return nullptr;
-  return reinterpret_cast<Pane*>(tab_item.lParam);
+  return reinterpret_cast<TabContent*>(tab_item.lParam);
 }
 
 Rect Frame::GetTabContentBounds() const {
@@ -195,7 +195,7 @@ Rect Frame::GetTabContentBounds() const {
                    bounds().bottom() - message_view_height);
 }
 
-Pane* Frame::GetTabContentByTabIndex(int const index) const {
+TabContent* Frame::GetTabContentByTabIndex(int const index) const {
   auto const present = GetTabContentAt(tab_strip_, index);
   if (!present)
     return nullptr;
@@ -208,7 +208,7 @@ Pane* Frame::GetTabContentByTabIndex(int const index) const {
   return nullptr;
 }
 
-int Frame::GetTabIndexOfTabContent(Pane* const tab_content) const {
+int Frame::GetTabIndexOfTabContent(TabContent* const tab_content) const {
   auto const num_tabs = tab_strip_->number_of_tabs();
   for (auto tab_index = 0; tab_index < num_tabs; ++tab_index) {
     if (GetTabContentAt(tab_strip_, tab_index) == tab_content)
@@ -355,7 +355,7 @@ void Frame::CreateNativeWindow() const {
 }
 
 void Frame::DidAddChildWidget(const ui::Widget& widget) {
-  if (auto tab_content = const_cast<Pane*>(widget.as<Pane>())) {
+  if (auto tab_content = const_cast<TabContent*>(widget.as<TabContent>())) {
     tab_contents_.insert(tab_content);
     if (!is_realized()) {
       DCHECK(!widget.is_realized());
@@ -401,7 +401,7 @@ void Frame::DidChangeBounds() {
 
 void Frame::DidChangeChildVisibility(ui::Widget* child) {
   views::Window::DidChangeChildVisibility(child);
-  if (!child->is<Pane>())
+  if (!child->is<TabContent>())
     return;
   if (child->visible())
     tab_content_layer_->AppendChildLayer(child->layer());
@@ -459,7 +459,7 @@ void Frame::DidRealize() {
 
 void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
   views::Window::DidRemoveChildWidget(widget);
-  auto const tab_content = const_cast<Pane*>(widget.as<Pane>());
+  auto const tab_content = const_cast<TabContent*>(widget.as<TabContent>());
   if (!tab_content)
     return;
   DCHECK(tab_contents_.find(tab_content)!= tab_contents_.end());
@@ -578,7 +578,7 @@ void Frame::WillRemoveChildWidget(const ui::Widget& widget) {
   views::Window::WillRemoveChildWidget(widget);
   if (!is_realized())
     return;
-  auto const tab_content = const_cast<Pane*>(widget.as<Pane>());
+  auto const tab_content = const_cast<TabContent*>(widget.as<TabContent>());
   if (!tab_content)
     return;
   auto const tab_index = GetTabIndexOfTabContent(tab_content);
@@ -612,7 +612,7 @@ void Frame::DidChangeTabSelection(int selected_index) {
 }
 
 void Frame::DidThrowTab(LPARAM lParam) {
-  auto const tab_content = reinterpret_cast<Pane*>(lParam);
+  auto const tab_content = reinterpret_cast<TabContent*>(lParam);
   auto const edit_tab_content = tab_content->as<EditPane>();
   if (!edit_tab_content)
     return;
@@ -632,7 +632,7 @@ base::string16 Frame::GetTooltipTextForTab(int tab_index) {
 }
 
 void Frame::OnDropTab(LPARAM lParam) {
-  auto const tab_content = reinterpret_cast<Pane*>(lParam);
+  auto const tab_content = reinterpret_cast<TabContent*>(lParam);
   if (tab_content->parent_node() == this)
     return;
   auto const edit_tab_content = tab_content->as<EditPane>();

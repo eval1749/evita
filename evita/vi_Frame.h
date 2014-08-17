@@ -40,13 +40,13 @@ enum MessageLevel {
   MessageLevel_Error,
 };
 
-class Pane;
 class TextEditWindow;
 
 namespace views {
 class ContentWindow;
 class FrameObserver;
 class MessageView;
+class TabContent;
 class TitleBar;
 class TabStrip;
 }
@@ -59,12 +59,17 @@ class Frame final : public views::Window,
                     public views::TabStripDelegate {
   DECLARE_CASTABLE_CLASS(Frame, views::Window);
 
-  private: Pane* active_tab_content_;
-  private: views::MessageView* message_view_;
-  private: ObserverList<views::FrameObserver> observers_;
-  private: std::unordered_set<Pane*> tab_contents_;
+  private: typedef views::FrameObserver FrameObserver;
+  private: typedef views::MessageView MessageView;
+  private: typedef views::TabContent TabContent;
+  private: typedef views::TabStrip TabStrip;
+
+  private: TabContent* active_tab_content_;
+  private: MessageView* message_view_;
+  private: ObserverList<FrameObserver> observers_;
+  private: std::unordered_set<TabContent*> tab_contents_;
   private: std::unique_ptr<ui::Layer> tab_content_layer_;
-  private: views::TabStrip* tab_strip_;
+  private: TabStrip* tab_strip_;
   private: std::unique_ptr<views::TitleBar> title_bar_;
 
   public: explicit Frame(views::WindowId window_id);
@@ -73,7 +78,7 @@ class Frame final : public views::Window,
   // [A]
   public: bool Activate();
   public: void AddObserver(views::FrameObserver* observer);
-  private: void AddTab(Pane* tab_content);
+  private: void AddTab(TabContent* tab_content);
   private: void AddTabContent(views::ContentWindow* content_window);
   public: void AddOrActivateTabContent(views::ContentWindow*);
 
@@ -82,10 +87,10 @@ class Frame final : public views::Window,
   private: void DrawForResize();
 
   // [G]
-  private: Pane* GetActiveTabContent();
+  private: TabContent* GetActiveTabContent();
   private: gfx::Rect GetTabContentBounds() const;
-  private: Pane* GetTabContentByTabIndex(int tab_index) const;
-  private: int GetTabIndexOfTabContent(Pane* tab_content) const;
+  private: TabContent* GetTabContentByTabIndex(int tab_index) const;
+  private: int GetTabIndexOfTabContent(TabContent* tab_content) const;
 
   // [O]
   private: void OnDropFiles(HDROP);

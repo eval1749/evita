@@ -6,7 +6,7 @@
 #define INCLUDE_evita_vi_EditPane_h
 
 #include "base/memory/ref_counted.h"
-#include "evita/vi_Pane.h"
+#include "evita/views/tab_content.h"
 
 class Frame;
 
@@ -25,8 +25,8 @@ class ContentWindow;
 
 // EditPane is a container of multiple ContentWindow windows and layouts
 // them vertically with draggable splitter.
-class EditPane final : public Pane {
-  DECLARE_CASTABLE_CLASS(EditPane, Pane);
+class EditPane final : public views::TabContent {
+  DECLARE_CASTABLE_CLASS(EditPane, TabContent);
 
   private: typedef common::win::Point Point;
   private: typedef common::win::Rect Rect;
@@ -71,7 +71,7 @@ class EditPane final : public Pane {
   public: void SplitVertically(Window* above_window,
                                Window* new_below_window);
 
-  // Pane
+  // TabContent
   private: virtual const domapi::TabData* GetTabData() const override;
 
   // ui::Widget

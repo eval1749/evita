@@ -27,9 +27,9 @@
 
 extern HINSTANCE g_hInstance;
 
-namespace {
+using namespace views;
 
-typedef views::ContentWindow ContentWindow;
+namespace {
 
 auto const kMinBoxHeight = 200.0f;
 auto const kMinBoxWidth = 200.0f;
@@ -1032,7 +1032,7 @@ void EditPane::SplitVertically(Window* above_window,
   above_window->MakeSelectionVisible();
 }
 
-// Pane
+// TabContent
 const domapi::TabData* EditPane::GetTabData() const {
   auto const content = GetActiveWindow();
   if (!content)
@@ -1042,17 +1042,17 @@ const domapi::TabData* EditPane::GetTabData() const {
 
 // ui::Widget
 void EditPane::DidChangeBounds() {
-  Pane::DidChangeBounds();
+  TabContent::DidChangeBounds();
   root_box_->SetBounds(GetContentsBounds());
 }
 
 void EditPane::DidRealize() {
   m_eState = State_Realized;
-  Pane::DidRealize();
+  TabContent::DidRealize();
 }
 
 void EditPane::DidRealizeChildWidget(const ui::Widget& window) {
-  Pane::DidRealizeChildWidget(window);
+  TabContent::DidRealizeChildWidget(window);
   auto const box = root_box_->FindLeafBoxFromWidget(&window);
   if (!box)
     return;
@@ -1127,13 +1127,13 @@ void EditPane::OnMousePressed(const ui::MouseEvent& event) {
 }
 
 void EditPane::WillDestroyWidget() {
-  Pane::WillDestroyWidget();
+  TabContent::WillDestroyWidget();
   m_eState = State_Destroyed;
   root_box_->Destroy();
 }
 
 void EditPane::WillRemoveChildWidget(const Widget& child) {
-  Pane::WillRemoveChildWidget(child);
+  TabContent::WillRemoveChildWidget(child);
   auto const box = root_box_->FindLeafBoxFromWidget(&child);
   if (!box) {
     // RepalceActiveWindow() removes window from box then destroys window.

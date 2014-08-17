@@ -115,6 +115,8 @@
         'views/frame_list.cc',
         'views/frame_observer.cc',
         'views/tab_data_set.cc',
+        'views/tab_content.cc',
+        'views/tab_content.h',
         'views/tab_strip.cc',
         'views/tab_strip_delegate.cc',
         'views/text/render_cell.cc',
@@ -136,7 +138,6 @@
         'views/forms/form_control_set.cc',
         'views/forms/form_window.cc',
         'vi_Frame.cpp',
-        'vi_Pane.cpp',
         'vi_TextEditWindow.cpp',
       ], # sources
     }, # editor

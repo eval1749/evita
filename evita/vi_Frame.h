@@ -120,10 +120,10 @@ class Frame final : public views::Window,
       const ui::Widget& widget) override;
 
   // views::TabStripDelegate
-  private: virtual void DidClickTabCloseButton(int tab_index) override;
   private: virtual void DidChangeTabSelection(int new_selected_index) override;
   private: virtual void DidThrowTab(LPARAM lParam);
   private: virtual base::string16 GetTooltipTextForTab(int tab_index) override;
+  private: virtual void RequestCloseTab(int tab_index) override;
   private: virtual void RequestSelectTab(
       int new_selected_index) override;
   private: virtual void OnDropTab(LPARAM lParam);

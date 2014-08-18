@@ -863,7 +863,7 @@ void TabStrip::TabStripImpl::OnLButtonUp(POINT point) {
 
     if (element->is<CloseBox>()) {
       if (auto const tab = element->parent()->as<Tab>())
-        delegate_->DidClickTabCloseButton(tab->tab_index());
+        delegate_->RequestCloseTab(tab->tab_index());
       return;
     }
 

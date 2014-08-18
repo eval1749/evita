@@ -13,10 +13,10 @@ class TabStripDelegate {
   public: TabStripDelegate();
   public: virtual ~TabStripDelegate();
 
-  public: virtual void DidClickTabCloseButton(int tab_index) = 0;
   public: virtual void DidChangeTabSelection(int new_selected_index) = 0;
   public: virtual void DidThrowTab(LPARAM lParam) = 0;
   public: virtual base::string16 GetTooltipTextForTab(int tab_index) = 0;
+  public: virtual void RequestCloseTab(int tab_index) = 0;
   public: virtual void RequestSelectTab(int new_selected_index) = 0;
   public: virtual void OnDropTab(LPARAM lParam) = 0;
 

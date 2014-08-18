@@ -557,19 +557,6 @@ void Frame::WillRemoveChildWidget(const ui::Widget& widget) {
 }
 
 // views::TabStripDelegate
-void Frame::DidClickTabCloseButton(int tab_index) {
-  if (tab_contents_.size() == 1u) {
-    // If this window has only one tab_content, we destroy this window.
-    Application::instance()->view_event_handler()->QueryClose(
-        window_id());
-    return;
-  }
-
-  auto const tab_content = GetTabContentByTabIndex(tab_index);
-  DCHECK(tab_content);
-  tab_content->DestroyWidget();
-}
-
 void Frame::DidChangeTabSelection(int selected_index) {
   auto const tab_content = GetTabContentByTabIndex(selected_index);
   if (!tab_content ||active_tab_content_ == tab_content)
@@ -608,6 +595,19 @@ void Frame::OnDropTab(LPARAM lParam) {
   Application::instance()->view_event_handler()->DidDropWidget(
       edit_tab_content->GetActiveWindow()->window_id(),
       window_id());
+}
+
+void Frame::RequestCloseTab(int tab_index) {
+  if (tab_contents_.size() == 1u) {
+    // If this window has only one tab_content, we destroy this window.
+    Application::instance()->view_event_handler()->QueryClose(
+        window_id());
+    return;
+  }
+
+  auto const tab_content = GetTabContentByTabIndex(tab_index);
+  DCHECK(tab_content);
+  tab_content->DestroyWidget();
 }
 
 void Frame::RequestSelectTab(int selected_index) {

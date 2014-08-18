@@ -18,14 +18,6 @@ TabContent::TabContent()
 TabContent::~TabContent() {
 }
 
-void TabContent::Activate() {
-  DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
-  ++static_active_tick;
-  active_tick_ = static_active_tick;
-  Show();
-  RequestFocus();
-}
-
 void TabContent::DidAnimateTabContent() {
   FOR_EACH_OBSERVER(TabContentObserver, observers_, DidAnimateTabContent(this));
 }
@@ -48,6 +40,7 @@ void TabContent::Animate(base::Time) {
 
 // ui::Widget
 void TabContent::DidHide() {
+  ui::AnimatableWindow::DidHide();
   if (auto const parent_layer = layer()->parent_layer())
     parent_layer->RemoveLayer(layer());
 }
@@ -55,6 +48,13 @@ void TabContent::DidHide() {
 void TabContent::DidRealize() {
   SetLayer(new ui::Layer());
   ui::AnimatableWindow::DidRealize();
+}
+
+void TabContent::DidShow() {
+  ui::AnimatableWindow::DidShow();
+  DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
+  ++static_active_tick;
+  active_tick_ = static_active_tick;
 }
 
 }  // namespace views

@@ -39,7 +39,6 @@ class TabContent : public ui::AnimatableWindow {
 
   public: int active_tick() const { return active_tick_; }
 
-  public: virtual void Activate();
   public: void AddObserver(TabContentObserver* observer);
   protected: void DidAnimateTabContent();
   protected: Frame* GetFrame() const;
@@ -52,6 +51,7 @@ class TabContent : public ui::AnimatableWindow {
   // ui::Widget
   protected: virtual void DidHide() override;
   protected: virtual void DidRealize() override;
+  protected: virtual void DidShow() override;
 
   DISALLOW_COPY_AND_ASSIGN(TabContent);
 };

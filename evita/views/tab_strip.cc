@@ -523,7 +523,7 @@ class TabStrip::TabStripImpl final {
   private: bool ChangeFont();
 
   // [D]
-  private: void DidChangeTabSelection();
+  private: void DidSelectTab();
   public: void DidRealize();
   public: void DeleteTab(size_t tab_index);
   private: void Draw(gfx::Canvas* canvas) const;
@@ -645,12 +645,12 @@ void TabStrip::TabStripImpl::DeleteTab(size_t tab_index) {
   Redraw();
   if (!selection_changed)
     return;
-  DidChangeTabSelection();
+  DidSelectTab();
 }
 
-void TabStrip::TabStripImpl::DidChangeTabSelection() {
+void TabStrip::TabStripImpl::DidSelectTab() {
   DCHECK(selected_tab_);
-  delegate_->DidChangeTabSelection(selected_tab_->tab_index());
+  delegate_->DidSelectTab(selected_tab_->tab_index());
 }
 
 void TabStrip::TabStripImpl::DidRealize() {
@@ -1012,7 +1012,7 @@ int TabStrip::TabStripImpl::SelectTab(Tab* const tab) {
       Redraw();
     }
 
-    DidChangeTabSelection();
+    DidSelectTab();
   }
 
   return selected_tab_ ? selected_tab_->tab_index() : -1;

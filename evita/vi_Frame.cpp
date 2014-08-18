@@ -557,7 +557,7 @@ void Frame::WillRemoveChildWidget(const ui::Widget& widget) {
 }
 
 // views::TabStripDelegate
-void Frame::DidChangeTabSelection(int selected_index) {
+void Frame::DidSelectTab(int selected_index) {
   auto const tab_content = GetTabContentByTabIndex(selected_index);
   if (!tab_content ||active_tab_content_ == tab_content)
     return;

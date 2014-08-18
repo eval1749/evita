@@ -49,7 +49,6 @@ class EditPane final : public views::TabContent, public ui::AnimationObserver {
   public: virtual ~EditPane();
 
   public: ui::WindowAnimator* window_animator() const;
-  public: Frame& frame() const;
   public: bool has_more_than_one_child() const;
 
   public: Window* GetActiveWindow() const;

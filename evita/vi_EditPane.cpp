@@ -939,11 +939,6 @@ ui::WindowAnimator* EditPane::window_animator() const {
   return window_animator_.get();
 }
 
-Frame& EditPane::frame() const {
-  DCHECK(GetFrame());
-  return *GetFrame();
-}
-
 bool EditPane::has_more_than_one_child() const {
   return first_child() != last_child();
 }
@@ -987,7 +982,7 @@ void EditPane::SplitHorizontally(Window* left_window,
     (left_box->bounds().width() - kSplitterWidth) / 2);
   auto const right_box_width = left_box->width() - left_box_width;
   if (left_box_width < kMinBoxWidth || right_box_width < kMinBoxWidth) {
-    frame().AddOrActivateTabContent(new_right_window);
+    GetFrame()->AddOrActivateTabContent(new_right_window);
     return;
   }
 
@@ -1008,7 +1003,7 @@ void EditPane::SplitVertically(Window* above_window,
     (above_box->bounds().height() - kSplitterHeight) / 2);
   auto const below_box_height = above_box->height() - above_box_height;
   if (above_box_height < kMinBoxHeight || below_box_height < kMinBoxHeight) {
-    frame().AddOrActivateTabContent(new_below_window);
+    GetFrame()->AddOrActivateTabContent(new_below_window);
     return;
   }
 

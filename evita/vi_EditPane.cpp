@@ -1038,16 +1038,15 @@ void EditPane::SplitVertically(Window* above_window,
 void EditPane::DidAnimate(ui::Animatable* animatable) {
   animated_contents_.insert(animatable);
   animatable->RemoveObserver(this);
-  auto remaining = animated_contents_.size();
   for (auto child : child_nodes()) {
     auto const animatable = child->as<ui::AnimatableWindow>();
     if (!animatable)
       continue;
-    if (animated_contents_.find(animatable) != animated_contents_.end())
-      --remaining;
+    if (animated_contents_.find(animatable) == animated_contents_.end())
+      return;
   }
-  if (remaining)
-    return;
+  // All contents are animated, we notify observers this tab content is
+  // animated.
   DidAnimateTabContent();
 }
 

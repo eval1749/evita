@@ -479,6 +479,8 @@ void LoadDragTabCursor() {
 
 namespace views {
 
+class TabContent;
+
 //////////////////////////////////////////////////////////////////////
 //
 // TabStripImpl class
@@ -709,7 +711,8 @@ void TabStrip::TabStripImpl::DropTab(Tab* tab, const POINT& window_point) {
   for (auto hwnd = ::WindowFromPoint(screen_point); hwnd;
        hwnd = ::GetParent(hwnd)) {
     if (auto const frame = FrameList::instance()->FindFrameByHwnd(hwnd)) {
-      static_cast<TabStripDelegate*>(frame)->OnDropTab(tab->lparam_);
+      auto const tab_content = reinterpret_cast<TabContent*>(tab->lparam_);
+      static_cast<TabStripDelegate*>(frame)->OnDropTab(tab_content);
       return;
     }
   }

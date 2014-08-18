@@ -581,8 +581,7 @@ base::string16 Frame::GetTooltipTextForTab(int tab_index) {
   return tab_data->tooltip;
 }
 
-void Frame::OnDropTab(LPARAM lParam) {
-  auto const tab_content = reinterpret_cast<TabContent*>(lParam);
+void Frame::OnDropTab(TabContent* tab_content) {
   if (tab_content->parent_node() == this)
     return;
   auto const edit_tab_content = tab_content->as<EditPane>();

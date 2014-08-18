@@ -126,7 +126,7 @@ class Frame final : public views::Window,
   private: virtual void RequestCloseTab(int tab_index) override;
   private: virtual void RequestSelectTab(
       int new_selected_index) override;
-  private: virtual void OnDropTab(LPARAM lParam);
+  private: virtual void OnDropTab(TabContent* tab_content);
 
   DISALLOW_COPY_AND_ASSIGN(Frame);
 };

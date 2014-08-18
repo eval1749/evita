@@ -717,7 +717,8 @@ void TabStrip::TabStripImpl::DropTab(Tab* tab, const POINT& window_point) {
     }
   }
 
-  delegate_->DidThrowTab(tab->lparam_);
+  auto const tab_content = reinterpret_cast<TabContent*>(tab->lparam_);
+  delegate_->DidThrowTab(tab_content);
 }
 
 bool TabStrip::TabStripImpl::GetTab(size_t tab_index, TCITEM* pTcItem) const {

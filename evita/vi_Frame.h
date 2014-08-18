@@ -121,7 +121,7 @@ class Frame final : public views::Window,
 
   // views::TabStripDelegate
   private: virtual void DidSelectTab(int new_selected_index) override;
-  private: virtual void DidThrowTab(LPARAM lParam);
+  private: virtual void DidThrowTab(TabContent* tab_content);
   private: virtual base::string16 GetTooltipTextForTab(int tab_index) override;
   private: virtual void RequestCloseTab(int tab_index) override;
   private: virtual void RequestSelectTab(

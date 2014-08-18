@@ -561,8 +561,7 @@ void Frame::DidSelectTab(int selected_index) {
   active_tab_content_->RequestFocus();
 }
 
-void Frame::DidThrowTab(LPARAM lParam) {
-  auto const tab_content = reinterpret_cast<TabContent*>(lParam);
+void Frame::DidThrowTab(TabContent* tab_content) {
   auto const edit_tab_content = tab_content->as<EditPane>();
   if (!edit_tab_content)
     return;

@@ -93,7 +93,7 @@ struct HitTestResult {
     HSplitterBig,
     VScrollBar,
     VSplitter,
-    Window,
+    ContentWindow,
   };
 
   EditPane::Box* box;
@@ -487,7 +487,7 @@ EditPane::Box* LeafBox::FindLeafBoxFromWidget(const ui::Widget* window) const {
 HitTestResult LeafBox::HitTest(const gfx::PointF& point) const {
   if (!bounds().Contains(point))
     return HitTestResult();
-  return HitTestResult(HitTestResult::Window, this);
+  return HitTestResult(HitTestResult::ContentWindow, this);
 }
 
 void LeafBox::Realize() {
@@ -970,8 +970,8 @@ void EditPane::SetContent(views::ContentWindow* content) {
   content->SetParentWidget(this);
 }
 
-void EditPane::SplitHorizontally(Window* left_window,
-                                 Window* new_right_window) {
+void EditPane::SplitHorizontally(ContentWindow* left_window,
+                                 ContentWindow* new_right_window) {
   DCHECK(left_window->is_realized());
   DCHECK_NE(left_window, new_right_window);
   DCHECK(!new_right_window->is_realized());
@@ -991,8 +991,8 @@ void EditPane::SplitHorizontally(Window* left_window,
   left_window->MakeSelectionVisible();
 }
 
-void EditPane::SplitVertically(Window* above_window,
-                               Window* new_below_window) {
+void EditPane::SplitVertically(ContentWindow* above_window,
+                               ContentWindow* new_below_window) {
   DCHECK(above_window->is_realized());
   DCHECK_NE(above_window, new_below_window);
   DCHECK(!new_below_window->is_realized());

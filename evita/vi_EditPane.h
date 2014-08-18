@@ -35,7 +35,6 @@ class EditPane final : public views::TabContent, public ui::AnimationObserver {
   private: typedef common::win::Rect Rect;
 
   private: typedef views::ContentWindow ContentWindow;
-  private: typedef views::ContentWindow Window;
 
   public: class Box;
   private: class SplitterController;
@@ -51,13 +50,13 @@ class EditPane final : public views::TabContent, public ui::AnimationObserver {
   public: ui::WindowAnimator* window_animator() const;
   public: bool has_more_than_one_child() const;
 
-  public: Window* GetActiveWindow() const;
-  public: void ReplaceActiveContent(Window* window);
-  public: void SetContent(Window* window);
-  public: void SplitHorizontally(Window* left_window,
-                                 Window* new_right_window);
-  public: void SplitVertically(Window* above_window,
-                               Window* new_below_window);
+  public: ContentWindow* GetActiveWindow() const;
+  public: void ReplaceActiveContent(ContentWindow* window);
+  public: void SetContent(ContentWindow* window);
+  public: void SplitHorizontally(ContentWindow* left_window,
+                                 ContentWindow* new_right_window);
+  public: void SplitVertically(ContentWindow* above_window,
+                               ContentWindow* new_below_window);
 
   // ui::AnimationObserver
   private: virtual void DidAnimate(ui::Animatable* animatable) override;

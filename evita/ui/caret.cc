@@ -67,6 +67,7 @@ void Caret::DidPaint(Delegate* delegate, const gfx::RectF& paint_bounds) {
     return;
   if (paint_bounds.Intersect(bounds_).empty())
     return;
+  last_blink_time_ = base::Time();
   shown_ = false;
 }
 

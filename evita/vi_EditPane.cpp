@@ -971,7 +971,7 @@ EditPane::Window* EditPane::GetLastWindow() const {
   return nullptr;
 }
 
-void EditPane::ReplaceActiveWindow(views::ContentWindow* content) {
+void EditPane::ReplaceActiveContent(views::ContentWindow* content) {
   DCHECK(!content->is_realized());
   root_box_->GetActiveLeafBox()->ReplaceContent(content);
 }

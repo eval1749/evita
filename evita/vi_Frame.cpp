@@ -112,7 +112,7 @@ void Frame::AddOrActivateTabContent(views::ContentWindow* window) {
   if (auto const tab_content = GetActiveTabContent()) {
     if (auto const edit_tab_content = tab_content->as<EditPane>()) {
       if (edit_tab_content->has_more_than_one_child()) {
-        edit_tab_content->ReplaceActiveWindow(window);
+        edit_tab_content->ReplaceActiveContent(window);
         window->Activate();
         return;
       }

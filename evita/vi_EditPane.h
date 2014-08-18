@@ -66,7 +66,7 @@ class EditPane final : public views::TabContent, public ui::AnimationObserver {
   public: Window* GetLastWindow() const;
 
   // [R]
-  public: void ReplaceActiveWindow(Window* window);
+  public: void ReplaceActiveContent(Window* window);
 
   // [S]
   public: void SetContent(Window* window);

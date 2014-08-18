@@ -31,9 +31,6 @@ class ContentWindow;
 class EditPane final : public views::TabContent, public ui::AnimationObserver {
   DECLARE_CASTABLE_CLASS(EditPane, TabContent);
 
-  private: typedef common::win::Point Point;
-  private: typedef common::win::Rect Rect;
-
   private: typedef views::ContentWindow ContentWindow;
 
   public: class Box;
@@ -68,7 +65,7 @@ class EditPane final : public views::TabContent, public ui::AnimationObserver {
   private: virtual void DidRemoveChildWidget(const Widget&) override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void DidShow() override;
-  private: virtual HCURSOR GetCursorAt(const Point&) const override;
+  private: virtual HCURSOR GetCursorAt(const gfx::Point& point) const override;
   private: virtual void OnMouseMoved(const ui::MouseEvent&) override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;

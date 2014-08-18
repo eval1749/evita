@@ -163,7 +163,8 @@ TabContent* Frame::GetActiveTabContent() {
   return active_tab_content;
 }
 
-static TabContent* GetTabContentAt(views::TabStrip* tab_strip, int const index) {
+static TabContent* GetTabContentAt(views::TabStrip* tab_strip,
+                                   int const index) {
   TCITEM tab_item;
   tab_item.mask = TCIF_PARAM;
   if (!tab_strip->GetTab(index, &tab_item))
@@ -216,9 +217,7 @@ void Frame::OnDropFiles(HDROP const drop_handle) {
   ::DragFinish(drop_handle);
 }
 
-/// <summary>
-///   Set status bar formatted message on specified part.
-/// </summary>
+// Set status bar formatted message on specified part.
 void Frame::SetStatusBar(const std::vector<base::string16> texts) {
   message_view_->SetStatus(texts);
 }
@@ -227,10 +226,7 @@ void Frame::ShowMessage(MessageLevel, const base::string16& text) const {
   message_view_->SetMessage(text);
 }
 
-// [U]
-/// <summary>
-///   Updates title bar to display active buffer.
-/// </summary>
+// Updates title bar to display active buffer.
 void Frame::UpdateTitleBar() {
   if (!active_tab_content_)
     return;
@@ -267,7 +263,7 @@ void Frame::Animate(base::Time now) {
   if (!visible())
     return;
   ui::Animator::instance()->ScheduleAnimation(this);
-  // TODO(eval1749) We should call update title bar when needed.
+  // TODO(eval1749) We should call update title bar only when needed.
   UpdateTitleBar();
 
   DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
@@ -432,7 +428,7 @@ void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
   auto const tab_content = const_cast<TabContent*>(widget.as<TabContent>());
   if (!tab_content)
     return;
-  DCHECK(tab_contents_.find(tab_content)!= tab_contents_.end());
+  DCHECK(tab_contents_.find(tab_content) != tab_contents_.end());
   tab_contents_.erase(tab_content);
   if (first_child())
     return;

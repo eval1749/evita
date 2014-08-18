@@ -125,7 +125,8 @@ text::Posn TextEditWindow::ComputeMotion(
             break;
           ++lGoal;
         }
-        return text_renderer_->MapPointXToOffset(std::min(lGoal, lBufEnd), pt.x);
+        return text_renderer_->MapPointXToOffset(std::min(lGoal, lBufEnd),
+                                                 pt.x);
       }
       if (n < 0) {
         n = -n;
@@ -139,7 +140,8 @@ text::Posn TextEditWindow::ComputeMotion(
           --lStart;
         }
 
-        return text_renderer_->MapPointXToOffset(std::max(lStart, lBufStart), pt.x);
+        return text_renderer_->MapPointXToOffset(std::max(lStart, lBufStart),
+                                                 pt.x);
       }
       return lPosn;
 

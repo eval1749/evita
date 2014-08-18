@@ -954,22 +954,6 @@ views::ContentWindow* EditPane::GetActiveWindow() const {
   return box ? box->GetContent() : nullptr;
 }
 
-EditPane::Window* EditPane::GetFirstWindow() const {
-  auto const window = first_child()->as<views::ContentWindow>();
-  if (window)
-    return window;
-  NOTREACHED();
-  return nullptr;
-}
-
-EditPane::Window* EditPane::GetLastWindow() const {
-  auto const window = last_child()->as<views::ContentWindow>();
-  if (window)
-    return window;
-  NOTREACHED();
-  return nullptr;
-}
-
 void EditPane::ReplaceActiveContent(views::ContentWindow* content) {
   DCHECK(!content->is_realized());
   root_box_->GetActiveLeafBox()->ReplaceContent(content);

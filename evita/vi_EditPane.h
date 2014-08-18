@@ -52,16 +52,8 @@ class EditPane final : public views::TabContent, public ui::AnimationObserver {
   public: Frame& frame() const;
   public: bool has_more_than_one_child() const;
 
-  // [G]
   public: Window* GetActiveWindow() const;
-
-  public: Window* GetFirstWindow() const;
-  public: Window* GetLastWindow() const;
-
-  // [R]
   public: void ReplaceActiveContent(Window* window);
-
-  // [S]
   public: void SetContent(Window* window);
   public: void SplitHorizontally(Window* left_window,
                                  Window* new_right_window);

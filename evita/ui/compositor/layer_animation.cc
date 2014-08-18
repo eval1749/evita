@@ -60,7 +60,7 @@ void SlideInFormLeftAnimation::Animate(base::Time now) {
     return;
   }
   if (right_layer_) {
-    right_layer_->parent_layer()->RemoveChildLayer(right_layer_);
+    right_layer_->parent_layer()->RemoveLayer(right_layer_);
     right_layer_->EndAnimation();
   }
   left_layer_->EndAnimation();

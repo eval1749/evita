@@ -416,8 +416,8 @@ void Frame::DidRealize() {
 
   // Create message view, tab_contents and tab strip.
   views::Window::DidRealize();
-  layer()->AppendChildLayer(tab_content_layer_.get());
-  layer()->AppendChildLayer(message_view_->layer());
+  layer()->AppendLayer(tab_content_layer_.get());
+  layer()->AppendLayer(message_view_->layer());
   for (auto tab_content : tab_contents_) {
     tab_strip_animator_->AddTab(tab_content);
   }

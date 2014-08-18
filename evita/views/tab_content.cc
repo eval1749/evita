@@ -49,7 +49,7 @@ void TabContent::Animate(base::Time) {
 // ui::Widget
 void TabContent::DidHide() {
   if (auto const parent_layer = layer()->parent_layer())
-    parent_layer->RemoveChildLayer(layer());
+    parent_layer->RemoveLayer(layer());
 }
 
 void TabContent::DidRealize() {

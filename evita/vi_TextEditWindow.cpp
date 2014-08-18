@@ -468,7 +468,7 @@ void TextEditWindow::DidRealize() {
   views::ContentWindow::DidRealize();
   if (bounds().empty())
     return;
-  layer()->AppendChildLayer(metrics_view_->layer());
+  layer()->AppendLayer(metrics_view_->layer());
   UpdateLayout();
 }
 

@@ -42,10 +42,10 @@ Layer::~Layer() {
   visual_->RemoveAllVisuals();
 }
 
-void Layer::AppendChildLayer(Layer* new_child) {
+void Layer::AppendLayer(Layer* new_child) {
   DCHECK_NE(this, new_child->parent_layer_);
   if (auto const old_parent = new_child->parent_layer_)
-    old_parent->RemoveChildLayer(new_child);
+    old_parent->RemoveLayer(new_child);
   new_child->parent_layer_ = this;
   child_layers_.insert(new_child);
   auto const is_insert_above = false;
@@ -72,7 +72,7 @@ void Layer::EndAnimation() {
   animatable_ = nullptr;
 }
 
-void Layer::RemoveChildLayer(Layer* old_layer) {
+void Layer::RemoveLayer(Layer* old_layer) {
   DCHECK_EQ(old_layer->parent_layer_, this);
   child_layers_.erase(old_layer);
   visual_->RemoveVisual(old_layer->visual_);

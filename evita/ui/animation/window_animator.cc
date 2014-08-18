@@ -80,7 +80,7 @@ RealizeAnimation::RealizeAnimation(AnimatableWindow* window)
 
 // Animatable
 void RealizeAnimation::Animate(base::Time) {
-  parent_layer()->AppendChildLayer(window()->layer());
+  parent_layer()->AppendLayer(window()->layer());
   FinishAnimation();
 }
 
@@ -108,8 +108,8 @@ ReplaceAnimation::ReplaceAnimation(AnimatableWindow* new_window,
 
 // Animatable
 void ReplaceAnimation::Animate(base::Time) {
-  parent_layer()->AppendChildLayer(window()->layer());
-  parent_layer()->RemoveChildLayer(old_window_->layer());
+  parent_layer()->AppendLayer(window()->layer());
+  parent_layer()->RemoveLayer(old_window_->layer());
   old_window_->DestroyWidget();
   FinishAnimation();
 }
@@ -154,7 +154,7 @@ void SlideInFromBottomAnimation::Animate(base::Time now) {
     value_.reset(new AnimationFloat(
         now, animation_duration(),
         above_layer->bounds().height(), above_window_height_end_));
-    parent_layer()->AppendChildLayer(below_layer);
+    parent_layer()->AppendLayer(below_layer);
   }
   auto const above_window_height = value_->Compute(now);
   above_window_->SetBounds(gfx::Rect(
@@ -210,7 +210,7 @@ void SlideInFromRightAnimation::Animate(base::Time now) {
     value_.reset(new AnimationFloat(
         now, animation_duration(),
         left_layer->bounds().width(), left_window_width_end_));
-    parent_layer()->AppendChildLayer(right_layer);
+    parent_layer()->AppendLayer(right_layer);
   }
   auto const left_window_width = value_->Compute(now);
   left_window_->SetBounds(gfx::Rect(

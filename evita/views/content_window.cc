@@ -44,7 +44,7 @@ void ContentWindow::DidChangeBounds() {
 
 void ContentWindow::DidChangeHierarchy() {
   Window::DidChangeHierarchy();
-  container_widget().layer()->AppendChildLayer(layer());
+  container_widget().layer()->AppendLayer(layer());
 }
 
 void ContentWindow::DidRealize() {

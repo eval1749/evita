@@ -186,7 +186,7 @@ ui::Animatable* SelectTabAction::CreateAnimation() {
   auto const new_layer = new_tab_content_->layer();
   new_layer->SetOrigin(gfx::PointF(-new_layer->bounds().width(),
                                    new_layer->bounds().top));
-  layer()->AppendChildLayer(new_layer);
+  layer()->AppendLayer(new_layer);
   if (!old_tab_content_) {
     return ui::LayerAnimation::CreateSlideInFromLeft(
         new_layer, nullptr);
@@ -197,7 +197,7 @@ ui::Animatable* SelectTabAction::CreateAnimation() {
 }
 
 void SelectTabAction::DoCancel() {
-  layer()->RemoveChildLayer(new_tab_content_->layer());
+  layer()->RemoveLayer(new_tab_content_->layer());
   if (!old_tab_content_ || old_tab_content_ != active_tab_content())
     return;
   old_tab_content_->layer()->SetOrigin(old_tab_content_origin_);

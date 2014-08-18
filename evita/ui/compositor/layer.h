@@ -43,11 +43,11 @@ class Layer  : private ui::AnimationObserver {
   public: ui::Layer* parent_layer() const { return parent_layer_; }
   public: IDCompositionVisual2* visual() const { return visual_; }
 
-  public: void AppendChildLayer(Layer* new_child);
+  public: void AppendLayer(Layer* new_child);
   public: gfx::Canvas* CreateCanvas();
   protected: virtual void DidChangeBounds();
   public: void EndAnimation();
-  public: void RemoveChildLayer(Layer* old_child);
+  public: void RemoveLayer(Layer* old_child);
   public: void SetBounds(const gfx::RectF& new_bounds);
   public: void SetBounds(const gfx::Rect& new_bounds);
   public: void SetOrigin(const gfx::PointF& new_origin);

@@ -37,17 +37,10 @@ class EditPane final : public views::TabContent, public ui::AnimationObserver {
   private: typedef views::ContentWindow ContentWindow;
   private: typedef views::ContentWindow Window;
 
-  public: enum State {
-    State_NotRealized,
-    State_Destroyed,
-    State_Realized,
-  };
-
   public: class Box;
   private: class SplitterController;
 
   private: std::unique_ptr<ui::WindowAnimator> window_animator_;
-  private: State m_eState;
   private: std::unordered_set<ui::Animatable*> animated_contents_;
   private: scoped_refptr<Box> root_box_;
   private: const std::unique_ptr<SplitterController> splitter_controller_;
@@ -81,7 +74,6 @@ class EditPane final : public views::TabContent, public ui::AnimationObserver {
   // ui::Widget
   private: virtual void DidChangeBounds() override;
   private: virtual void DidHide() override;
-  private: virtual void DidRealize() override;
   private: virtual void DidRealizeChildWidget(const Widget&) override;
   private: virtual void DidRemoveChildWidget(const Widget&) override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;

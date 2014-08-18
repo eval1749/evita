@@ -927,7 +927,6 @@ void EditPane::SplitterController::Stop() {
 //
 EditPane::EditPane()
     : window_animator_(new ui::WindowAnimator()),
-      m_eState(State_NotRealized),
       root_box_(new VerticalBox(this, nullptr)),
       splitter_controller_(new SplitterController(*this)) {
 }
@@ -1062,11 +1061,6 @@ void EditPane::DidHide() {
   animated_contents_.clear();
 }
 
-void EditPane::DidRealize() {
-  m_eState = State_Realized;
-  TabContent::DidRealize();
-}
-
 void EditPane::DidRealizeChildWidget(const ui::Widget& window) {
   TabContent::DidRealizeChildWidget(window);
   auto const box = root_box_->FindLeafBoxFromWidget(&window);
@@ -1155,7 +1149,6 @@ void EditPane::OnMousePressed(const ui::MouseEvent& event) {
 
 void EditPane::WillDestroyWidget() {
   TabContent::WillDestroyWidget();
-  m_eState = State_Destroyed;
   root_box_->Destroy();
 }
 

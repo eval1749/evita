@@ -67,6 +67,9 @@ void Caret::DidPaint(Delegate* delegate, const gfx::RectF& paint_bounds) {
     return;
   if (paint_bounds.Intersect(bounds_).empty())
     return;
+  // We'll soon update caret bounds. So, we don't reset caret position for
+  // |ui::TextInputClient|.
+  bounds_ = gfx::RectF();
   last_blink_time_ = base::Time();
   shown_ = false;
 }
@@ -77,6 +80,7 @@ void Caret::Give(Delegate* owner) {
   bounds_ = gfx::RectF();
   last_blink_time_ = base::Time();
   shown_ = false;
+  ui::TextInputClient::Get()->set_caret_bounds(bounds_);
 }
 
 void Caret::Hide(Delegate* delegate) {
@@ -84,6 +88,7 @@ void Caret::Hide(Delegate* delegate) {
     return;
   DCHECK(!shown_);
   bounds_ = gfx::RectF();
+  ui::TextInputClient::Get()->set_caret_bounds(bounds_);
 }
 
 void Caret::Take(Delegate* owner) {
@@ -91,6 +96,7 @@ void Caret::Take(Delegate* owner) {
   bounds_ = gfx::RectF();
   owner_ = owner;
   shown_ = false;
+  ui::TextInputClient::Get()->set_caret_bounds(bounds_);
 }
 
 void Caret::Update(Delegate* delegate, gfx::Canvas* canvas,

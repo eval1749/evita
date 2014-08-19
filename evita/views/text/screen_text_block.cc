@@ -407,7 +407,6 @@ void ScreenTextBlock::DidKillFocus(gfx::Canvas* canvas) {
 }
 
 void ScreenTextBlock::DidSetFocus() {
-  selection_ = TextSelection();
   ui::Caret::instance()->Take(this);
 }
 

@@ -416,7 +416,7 @@ global.TextWindow.prototype.clone = function() {
   /**
    * Default event handler.
    * @this {!TextWindow}
-   * @param {!Event} event.
+   * @param {!Event} event
    */
   TextWindow.handleEvent = function(event) {
     switch (event.type) {

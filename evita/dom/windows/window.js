@@ -5,7 +5,7 @@
   /**
    * Default event handler.
    * @this {!Window}
-   * @param {!Event} event.
+   * @param {!Event} event
    */
   Window.handleEvent = function(event) {
     commander.handleEvent(event);

@@ -7,7 +7,7 @@
   /**
    * Default event handler.
    * @this {!FormWindow}
-   * @param {!Event} event.
+   * @param {!Event} event
    */
   FormWindow.handleEvent = function(event) {
     Form.handleEvent.call(this.form, event);

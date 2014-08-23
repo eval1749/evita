@@ -46,7 +46,7 @@
   /**
    * Default event handler.
    * @this {!TableWindow}
-   * @param {!Event} event.
+   * @param {!Event} event
    */
   TableWindow.handleEvent = function(event) {
     switch (event.type) {

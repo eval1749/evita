@@ -117,7 +117,7 @@
   /**
    * Move end position of TextSelection at end of specified unit.
    * @this {!TextSelection}
-   * @param {Unit} unit.
+   * @param {Unit} unit
    * @param {Alter=} opt_alter, default is Alter.MOVE.
    * @return {!TextSelection}
    */

@@ -119,7 +119,7 @@
   };
 
   /**
-   * @param {string} spec.
+   * @param {string} spec
    * @return {number} key code.
    * @suppress {globalThis}
    */
@@ -151,7 +151,7 @@
     ];
 
     /**
-     * @param {string} spec.
+     * @param {string} spec
      * @return {number} key code.
      */
     return function(spec) {

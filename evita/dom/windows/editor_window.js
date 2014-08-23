@@ -6,8 +6,8 @@
 
 (function() {
   /**
-   * @param {EditorWindow} source.
-   * @param {EditorWindow} target.
+   * @param {EditorWindow} source
+   * @param {EditorWindow} target
    */
   function handleDropWindow(source, target) {
     // TODO(yosi) Realize target without showing then show target after
@@ -18,7 +18,7 @@
   }
 
   /**
-   * @param {EditorWindow} window.
+   * @param {EditorWindow} window
    */
   function handleQueryClose(window) {
     if (EditorWindow.list.length == 1) {
@@ -31,7 +31,7 @@
   /**
    * Default event handler.
    * @this {EditorWindow}
-   * @param {Event} event.
+   * @param {Event} event
    */
  EditorWindow.handleEvent = function(event) {
    switch (event.type) {
@@ -55,7 +55,7 @@
 
   /**
    * Open file in window.
-   * @param {string} fileName.
+   * @param {string} fileName
    *
    * This function handles drag-and-drop.
    */

@@ -175,7 +175,7 @@
   /**
    * Move end position of Range at end of specified unit.
    * @this {!Range}
-   * @param {Unit} unit.
+   * @param {Unit} unit
    * @param {Alter=} opt_alter, default is Alter.MOVE.
    * @return {!Range}
    */
@@ -215,7 +215,7 @@
 
   /**
    * @this {!Range}
-   * @param {Unit} unit.
+   * @param {Unit} unit
    * @param {number=} opt_count, default is one.
    * @return {!Range}
    */
@@ -228,7 +228,7 @@
 
   /**
    * @this {!Range}
-   * @param {Unit} unit.
+   * @param {Unit} unit
    * @param {number=} opt_count, default is one.
    * @return {!Range}
    */
@@ -260,7 +260,7 @@
 
   /**
    * @this {!Range}
-   * @param {Unit} unit.
+   * @param {Unit} unit
    * @param {number=} opt_count, default is one.
    * @return {!Range}
    */
@@ -292,7 +292,7 @@
 
   /**
    * Move start position of Range at start of specified unit.
-   * @param {Unit} unit.
+   * @param {Unit} unit
    * @param {Alter=} opt_alter, default is Alter.MOVE.
    * @return {!Range}
    */

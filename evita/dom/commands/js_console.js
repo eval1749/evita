@@ -114,7 +114,7 @@ JsConsole.prototype.backwardHistory = function() {
 };
 
 /**
- * @param {string} text.
+ * @param {string} text
  */
 JsConsole.prototype.emit = function(text) {
   this.document.readonly = false;

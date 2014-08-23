@@ -33,8 +33,9 @@ CLOSURE_WARNINGS = [
 ];
 
 CLOSURE_OPTIONS = [
-  #'--formatting=PRETTY_PRINT',
-  '--language_in=ECMASCRIPT6_STRICT',
+  '--compilation_level=SIMPLE',
+  '--formatting=PRETTY_PRINT',
+  '--language_in=ECMASCRIPT5_STRICT',
   '--summary_detail_level=3',
   '--use_only_custom_externs',
   '--warning_level=VERBOSE',

@@ -607,23 +607,20 @@ void FormWindow::OnPaint(const gfx::Rect rect) {
     return;
   }
 
-  auto const bounds = gfx::RectF(rect);
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  canvas_->AddDirtyRect(bounds);
-  auto const bgcolor = ui::SystemMetrics::instance()->bgcolor();
-  // TODO(yosi) We should fill background of form window excluding controls
-  canvas_->FillRectangle(gfx::Brush(canvas_.get(), bgcolor), bounds);
   Window::OnDraw(canvas_.get());
 
+  if (!views::switches::form_window_display_paint)
+    return;
+
   // Render paint rectangle for debugging.
-  if (views::switches::form_window_display_paint) {
-    gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_.get(),
-                                                 bounds);
-    canvas_->FillRectangle(gfx::Brush(canvas_.get(),
-                           gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)), bounds);
-    canvas_->DrawRectangle(gfx::Brush(canvas_.get(),
-                           gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)), bounds, 2.0f);
-  }
+  auto const bounds = gfx::RectF(rect);
+  canvas_->AddDirtyRect(bounds);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_.get(), bounds);
+  canvas_->FillRectangle(gfx::Brush(canvas_.get(),
+                         gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)), bounds);
+  canvas_->DrawRectangle(gfx::Brush(canvas_.get(),
+                         gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)), bounds, 2.0f);
 }
 
 void FormWindow::RealizeWidget() {

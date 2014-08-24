@@ -965,6 +965,9 @@ void EditPane::SetContent(views::ContentWindow* content) {
     box->SetBounds(box_bounds);
     content->SetBounds(gfx::ToEnclosingRect(box_bounds));
   }
+
+  if (is_realized())
+    content->AddObserver(this);
   if (!content->is_realized())
     window_animator()->Realize(content);
   content->SetParentWidget(this);

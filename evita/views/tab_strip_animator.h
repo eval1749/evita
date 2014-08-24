@@ -31,6 +31,7 @@ class TabStripAnimator final {
   public: ~TabStripAnimator();
 
   public: void AddTab(TabContent* tab_content);
+  public: void DidDeleteTabContent(TabContent* tab_content);
   private: void DidFinishAction(Action* action);
   private: void RegisterAction(Action* action);
   public: void RequestSelect(TabContent* new_tab_content);

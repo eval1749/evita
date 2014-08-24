@@ -95,15 +95,18 @@ void Frame::AddObserver(views::FrameObserver* observer) {
 void Frame::AddTabContent(views::ContentWindow* window) {
   auto const tab_content = new EditPane();
   tab_contents_.insert(tab_content);
-  tab_content->SetContent(window);
   AppendChild(tab_content);
   if (!is_realized()) {
     DCHECK(!window->is_realized());
+    tab_content->SetContent(window);
     return;
   }
   tab_content->SetBounds(GetTabContentBounds());
   tab_strip_animator_->AddTab(tab_content);
   tab_content->RealizeWidget();
+  // |tab_content| can be realized when it is dropped from another |Frame|.
+  // So, we should set content after realize |TabContent|.
+  tab_content->SetContent(window);
 }
 
 void Frame::AddOrActivateTabContent(views::ContentWindow* window) {
@@ -126,10 +129,8 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
   auto const tab_content = GetTabContentFromWindow(this, window);
   DCHECK(tab_content);
 
-  if (tab_content == active_tab_content_) {
-    DCHECK(window->visible());
+  if (tab_content == active_tab_content_)
     return;
-  }
 
   DCHECK(!tab_content->visible());
   DCHECK(!window->visible());
@@ -139,6 +140,7 @@ void Frame::DidSetFocusOnChild(views::Window* window) {
 void Frame::DrawForResize() {
   if (!active_tab_content_)
     return;
+  // TODO(eval1749) Is doing animation for active tab content here right thing?
   auto const now = base::Time::Now();
   for (auto child : active_tab_content_->child_nodes()) {
     auto const window = child->as<Window>();
@@ -425,14 +427,9 @@ void Frame::DidRealize() {
 
 void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
   views::Window::DidRemoveChildWidget(widget);
-  auto const tab_content = const_cast<TabContent*>(widget.as<TabContent>());
-  if (!tab_content)
+  if (!tab_contents_.empty())
     return;
-  DCHECK(tab_contents_.find(tab_content) != tab_contents_.end());
-  tab_contents_.erase(tab_content);
-  if (first_child())
-    return;
-  DCHECK(tab_contents_.empty());
+  DCHECK(!active_tab_content_);
   DestroyWidget();
 }
 
@@ -547,6 +544,16 @@ void Frame::WillRemoveChildWidget(const ui::Widget& widget) {
   auto const tab_content = const_cast<TabContent*>(widget.as<TabContent>());
   if (!tab_content)
     return;
+
+  tab_strip_animator_->DidDeleteTabContent(tab_content);
+
+  if (active_tab_content_ == tab_content)
+    active_tab_content_ = nullptr;
+
+  DCHECK(tab_contents_.find(tab_content) != tab_contents_.end());
+  DCHECK_NE(active_tab_content_, tab_content);
+  tab_contents_.erase(tab_content);
+
   auto const tab_index = GetTabIndexOfTabContent(tab_content);
   DCHECK_GE(tab_index, 0);
   tab_strip_->DeleteTab(tab_index);
@@ -554,10 +561,18 @@ void Frame::WillRemoveChildWidget(const ui::Widget& widget) {
 
 // views::TabStripDelegate
 void Frame::DidSelectTab(int selected_index) {
+  if (selected_index < 0) {
+    active_tab_content_ = nullptr;
+    if (auto const recent_tab_content = GetActiveTabContent())
+      tab_strip_animator_->RequestSelect(recent_tab_content);
+    return;
+  }
   auto const tab_content = GetTabContentByTabIndex(selected_index);
   if (!tab_content ||active_tab_content_ == tab_content)
     return;
   active_tab_content_ = tab_content;
+  if (!has_native_focus())
+    return;
   active_tab_content_->RequestFocus();
 }
 

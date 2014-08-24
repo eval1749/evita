@@ -635,8 +635,7 @@ void TabStrip::TabStripImpl::DeleteTab(size_t tab_index) {
     }
     if (tab == selected_tab_) {
       selection_changed = true;
-      selected_tab_ = tabs_[tab_index ? tab_index - 1 : 0];
-      selected_tab_->SetState(Element::State::Selected);
+      selected_tab_ = nullptr;
     }
     tabs_.erase(tabs_.begin() + static_cast<ptrdiff_t>(tab_index));
     RenumberTabIndex();
@@ -651,8 +650,7 @@ void TabStrip::TabStripImpl::DeleteTab(size_t tab_index) {
 }
 
 void TabStrip::TabStripImpl::DidSelectTab() {
-  DCHECK(selected_tab_);
-  delegate_->DidSelectTab(selected_tab_->tab_index());
+  delegate_->DidSelectTab(selected_tab_ ? selected_tab_->tab_index() : -1);
 }
 
 void TabStrip::TabStripImpl::DidRealize() {

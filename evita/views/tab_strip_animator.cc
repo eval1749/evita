@@ -174,7 +174,7 @@ class SelectTabAction : public TabStripAnimator::Action {
 };
 
 SelectTabAction::SelectTabAction(TabStripAnimator* tab_strip_animator,
-                                         TabContent* new_tab_content)
+                                 TabContent* new_tab_content)
     : Action(tab_strip_animator, new_tab_content),
       new_tab_content_(new_tab_content), old_tab_content_(nullptr) {
 }
@@ -240,6 +240,12 @@ void TabStripAnimator::AddTab(TabContent* tab_content) {
   auto const new_tab_item_index = tab_strip_->number_of_tabs();
   tab_strip_->InsertTab(new_tab_item_index, &tab_item);
   RegisterAction(new SelectTabAction(this, tab_content));
+}
+
+void TabStripAnimator::DidDeleteTabContent(TabContent* tab_content) {
+  if (active_tab_content_ != tab_content)
+    return;
+  active_tab_content_ = nullptr;
 }
 
 void TabStripAnimator::DidFinishAction(Action* action) {

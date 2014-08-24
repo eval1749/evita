@@ -976,7 +976,7 @@ LRESULT TabStrip::TabStripImpl::OnNotify(NMHDR* nmhdr) {
 
 void TabStrip::TabStripImpl::OnPaint(const gfx::Rect& bounds) {
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  canvas_->set_dirty_rect(gfx::RectF(bounds));
+  canvas_->AddDirtyRect(gfx::RectF(bounds));
   Draw(canvas_.get());
 }
 

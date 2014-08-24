@@ -233,7 +233,7 @@ void TextFieldControl::Renderer::Render(gfx::Canvas* canvas) {
 
   dirty_ = false;
   Caret::instance()->DidPaint(this, bounds_);
-  canvas->set_dirty_rect(bounds_);
+  canvas->AddDirtyRect(bounds_);
   canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor), bounds_);
 
   // Render frame

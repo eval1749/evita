@@ -68,7 +68,6 @@ class Canvas : public Object, public DpiHandler {
   }
 
   public: const gfx::RectF bounds() const { return bounds_; }
-  public: void set_dirty_rect(const RectF& rect);
   // |drawing()| is for debugging.
   public: bool drawing() const { return batch_nesting_level_; }
   public: const FactorySet& factory_set() const { return *factory_set_; }

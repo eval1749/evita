@@ -561,7 +561,7 @@ void FormWindow::DidChangeBounds() {
   canvas_->SetBounds(GetContentsBounds());
   {
     gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-    canvas_->set_dirty_rect(GetContentsBounds());
+    canvas_->AddDirtyRect(GetContentsBounds());
     canvas_->Clear(ui::SystemMetrics::instance()->bgcolor());
   }
   SchedulePaint();

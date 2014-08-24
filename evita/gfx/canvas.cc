@@ -91,10 +91,6 @@ Canvas::Canvas()
 Canvas::~Canvas() {
 }
 
-void Canvas::set_dirty_rect(const RectF& new_dirty_rect) {
-  AddDirtyRect(new_dirty_rect);
-}
-
 void Canvas::AddDirtyRect(const RectF&) {
 }
 

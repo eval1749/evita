@@ -30,7 +30,10 @@ class TabStripAnimator final {
   public: TabStripAnimator(TabStrip* tab_strip);
   public: ~TabStripAnimator();
 
+  public: TabContent* active_tab_content() const { return active_tab_content_; }
+
   public: void AddTab(TabContent* tab_content);
+  private: void CancelCurrentAction();
   public: void DidDeleteTabContent(TabContent* tab_content);
   private: void DidFinishAction(Action* action);
   private: void RegisterAction(Action* action);

@@ -72,7 +72,6 @@ TabContent* GetTabContentFromWindow(Frame* frame, views::Window* window) {
 //
 Frame::Frame(views::WindowId window_id)
     : views::Window(ui::NativeWindow::Create(this), window_id),
-      active_tab_content_(nullptr),
       message_view_(new views::MessageView()),
       title_bar_(new views::TitleBar()),
       tab_strip_(new views::TabStrip(this)),
@@ -112,7 +111,7 @@ void Frame::AddTabContent(views::ContentWindow* window) {
 void Frame::AddOrActivateTabContent(views::ContentWindow* window) {
   DCHECK(!window->parent_node());
   DCHECK(!window->is_realized());
-  if (auto const tab_content = GetActiveTabContent()) {
+  if (auto const tab_content = GetRecentTabContent()) {
     if (auto const edit_tab_content = tab_content->as<EditPane>()) {
       if (edit_tab_content->has_more_than_one_child()) {
         edit_tab_content->ReplaceActiveContent(window);
@@ -128,21 +127,16 @@ void Frame::AddOrActivateTabContent(views::ContentWindow* window) {
 void Frame::DidSetFocusOnChild(views::Window* window) {
   auto const tab_content = GetTabContentFromWindow(this, window);
   DCHECK(tab_content);
-
-  if (tab_content == active_tab_content_)
-    return;
-
-  DCHECK(!tab_content->visible());
-  DCHECK(!window->visible());
   tab_strip_animator_->RequestSelect(tab_content);
 }
 
 void Frame::DrawForResize() {
-  if (!active_tab_content_)
+  auto const tab_content = tab_strip_animator_->active_tab_content();
+  if (!tab_content)
     return;
   // TODO(eval1749) Is doing animation for active tab content here right thing?
   auto const now = base::Time::Now();
-  for (auto child : active_tab_content_->child_nodes()) {
+  for (auto child : tab_content->child_nodes()) {
     auto const window = child->as<Window>();
     if (!window)
       continue;
@@ -150,19 +144,19 @@ void Frame::DrawForResize() {
   }
 }
 
-TabContent* Frame::GetActiveTabContent() {
-  if (active_tab_content_ && active_tab_content_->active_tick())
-    return active_tab_content_;
+TabContent* Frame::GetRecentTabContent() {
+  if (auto const tab_content = tab_strip_animator_->active_tab_content())
+    return tab_content;
 
-  auto active_tab_content = static_cast<TabContent*>(nullptr);
+  auto recent_tab_content = static_cast<TabContent*>(nullptr);
   for (auto tab_content : tab_contents_) {
-    if (!active_tab_content ||
-        active_tab_content->active_tick() < tab_content->active_tick()) {
-      active_tab_content = tab_content;
+    if (!recent_tab_content ||
+        recent_tab_content->active_tick() < tab_content->active_tick()) {
+      recent_tab_content = tab_content;
     }
   }
 
-  return active_tab_content;
+  return recent_tab_content;
 }
 
 static TabContent* GetTabContentAt(views::TabStrip* tab_strip,
@@ -230,13 +224,14 @@ void Frame::ShowMessage(MessageLevel, const base::string16& text) const {
 
 // Updates title bar to display active buffer.
 void Frame::UpdateTitleBar() {
-  if (!active_tab_content_)
+  auto const tab_content = tab_strip_animator_->active_tab_content();
+  if (!tab_content)
     return;
-  auto const tab_data = active_tab_content_->GetTabData();
+  auto const tab_data = tab_content->GetTabData();
   if (!tab_data)
     return;
   auto& title = tab_data->title;
-  auto const tab_index = GetTabIndexOfTabContent(active_tab_content_);
+  auto const tab_index = GetTabIndexOfTabContent(tab_content);
   if (tab_index >= 0) {
     TCITEM tab_item = {0};
     tab_item.mask = TCIF_IMAGE | TCIF_STATE | TCIF_TEXT;
@@ -429,18 +424,19 @@ void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
   views::Window::DidRemoveChildWidget(widget);
   if (!tab_contents_.empty())
     return;
-  DCHECK(!active_tab_content_);
   DestroyWidget();
 }
 
 void Frame::DidSetFocus(ui::Widget* widget) {
   views::Window::DidSetFocus(widget);
-  if (!active_tab_content_) {
-    active_tab_content_ = GetActiveTabContent();
-    if (!active_tab_content_)
-      return;
+  if (!tab_strip_animator_->active_tab_content()) {
+    // This |Frame| doesn't show anything and tabs are being added.
+    return;
   }
-  active_tab_content_->RequestFocus();
+  auto const tab_content = GetRecentTabContent();
+  if (!tab_content)
+    return;
+  tab_content->RequestFocus();
   FOR_EACH_OBSERVER(views::FrameObserver, observers_, DidActiveFrame(this));
 }
 
@@ -547,11 +543,7 @@ void Frame::WillRemoveChildWidget(const ui::Widget& widget) {
 
   tab_strip_animator_->DidDeleteTabContent(tab_content);
 
-  if (active_tab_content_ == tab_content)
-    active_tab_content_ = nullptr;
-
   DCHECK(tab_contents_.find(tab_content) != tab_contents_.end());
-  DCHECK_NE(active_tab_content_, tab_content);
   tab_contents_.erase(tab_content);
 
   auto const tab_index = GetTabIndexOfTabContent(tab_content);
@@ -562,18 +554,14 @@ void Frame::WillRemoveChildWidget(const ui::Widget& widget) {
 // views::TabStripDelegate
 void Frame::DidSelectTab(int selected_index) {
   if (selected_index < 0) {
-    active_tab_content_ = nullptr;
-    if (auto const recent_tab_content = GetActiveTabContent())
+    if (auto const recent_tab_content = GetRecentTabContent())
       tab_strip_animator_->RequestSelect(recent_tab_content);
     return;
   }
   auto const tab_content = GetTabContentByTabIndex(selected_index);
-  if (!tab_content ||active_tab_content_ == tab_content)
+  if (!tab_content || !has_native_focus())
     return;
-  active_tab_content_ = tab_content;
-  if (!has_native_focus())
-    return;
-  active_tab_content_->RequestFocus();
+  tab_content->RequestFocus();
 }
 
 void Frame::DidThrowTab(TabContent* tab_content) {

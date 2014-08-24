@@ -65,7 +65,6 @@ class Frame final : public views::Window,
   private: typedef views::TabContent TabContent;
   private: typedef views::TabStrip TabStrip;
 
-  private: TabContent* active_tab_content_;
   private: MessageView* const message_view_;
   private: ObserverList<FrameObserver> observers_;
   private: std::unordered_set<TabContent*> tab_contents_;
@@ -88,7 +87,7 @@ class Frame final : public views::Window,
   private: void DrawForResize();
 
   // [G]
-  private: TabContent* GetActiveTabContent();
+  private: TabContent* GetRecentTabContent();
   private: gfx::Rect GetTabContentBounds() const;
   private: TabContent* GetTabContentByTabIndex(int tab_index) const;
   private: int GetTabIndexOfTabContent(TabContent* tab_content) const;

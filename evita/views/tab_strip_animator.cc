@@ -73,7 +73,7 @@ TabStripAnimator::Action::~Action() {
 }
 
 TabContent* TabStripAnimator::Action::active_tab_content() const {
-  return tab_strip_animator_->active_tab_content_;
+  return tab_strip_animator_->active_tab_content();
 }
 
 base::TimeDelta TabStripAnimator::Action::animation_duration() const {
@@ -242,6 +242,14 @@ void TabStripAnimator::AddTab(TabContent* tab_content) {
   RegisterAction(new SelectTabAction(this, tab_content));
 }
 
+void TabStripAnimator::CancelCurrentAction() {
+  auto const current_action = action_;
+  if (!current_action)
+    return;
+  action_ = nullptr;
+  current_action->Cancel();
+}
+
 void TabStripAnimator::DidDeleteTabContent(TabContent* tab_content) {
   if (active_tab_content_ != tab_content)
     return;
@@ -255,12 +263,15 @@ void TabStripAnimator::DidFinishAction(Action* action) {
 }
 
 void TabStripAnimator::RegisterAction(Action* action) {
-  if (action_)
-    action_->Cancel();
-   action_ = action;
+  CancelCurrentAction();
+  action_ = action;
 }
 
 void TabStripAnimator::RequestSelect(TabContent* new_tab_content) {
+  if (new_tab_content == active_tab_content_) {
+    CancelCurrentAction();
+    return;
+  }
   RegisterAction(new SelectTabAction(this, new_tab_content));
   new_tab_content->Show();
 }

@@ -591,21 +591,14 @@ void ScreenTextBlock::HideCaret(gfx::Canvas* canvas, const ui::Caret& caret) {
   canvas->AddDirtyRect(caret_bounds);
 }
 
-void ScreenTextBlock::PaintCaret(gfx::Canvas* canvas, const ui::Caret& caret) {
-  auto const caret_bounds = caret.bounds().Intersect(bounds_);
-  if (caret_bounds.empty())
-    return;
-  gfx::Brush fill_brush(canvas, gfx::ColorF::Black);
-  canvas->FillRectangle(fill_brush, caret_bounds);
-  canvas->AddDirtyRect(caret_bounds);
-}
-
 void ScreenTextBlock::ShowCaret(gfx::Canvas* canvas, const ui::Caret& caret) {
   auto const caret_bounds = caret.bounds().Intersect(bounds_);
   if (caret_bounds.empty())
     return;
   gfx::Canvas::DrawingScope drawing_scope(canvas);
-  PaintCaret(canvas, caret);
+  gfx::Brush fill_brush(canvas, gfx::ColorF::Black);
+  canvas->FillRectangle(fill_brush, caret_bounds);
+  canvas->AddDirtyRect(caret_bounds);
 }
 
 } // namespace rendering

@@ -51,8 +51,6 @@ class ScreenTextBlock final : private ui::Caret::Delegate {
   // ui::Caret::Delegate
   private: virtual void HideCaret(gfx::Canvas* canvas,
                                   const ui::Caret& caret) override;
-  private: virtual void PaintCaret(gfx::Canvas* canvas,
-                                   const ui::Caret& caret) override;
   private: virtual void ShowCaret(gfx::Canvas* canvas,
                                   const ui::Caret& caret) override;
 

@@ -104,7 +104,7 @@ void Caret::Update(Delegate* delegate, gfx::Canvas* canvas,
   bounds_ = new_bounds;
   // Don't blink caret while when caret is moved or resized.
   last_blink_time_ = base::Time::Now();
-  owner_->PaintCaret(canvas, *this);
+  owner_->ShowCaret(canvas, *this);
   ui::TextInputClient::Get()->set_caret_bounds(bounds_);
   shown_ = true;
 }

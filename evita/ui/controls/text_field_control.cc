@@ -79,8 +79,6 @@ class TextFieldControl::Renderer final : private Caret::Delegate {
   // ui::Caret::Delegate
   private: virtual void HideCaret(gfx::Canvas* canvas,
                                   const Caret& caret) override;
-  private: virtual void PaintCaret(gfx::Canvas* canvas,
-                                   const Caret& caret) override;
   private: virtual void ShowCaret(gfx::Canvas* canvas,
                                   const Caret& caret) override;
 
@@ -368,18 +366,12 @@ void TextFieldControl::Renderer::HideCaret(gfx::Canvas* canvas,
   Render(canvas);
 }
 
-void TextFieldControl::Renderer::PaintCaret(gfx::Canvas* canvas,
-                                            const Caret& caret) {
-  canvas->AddDirtyRect(caret.bounds());
-  gfx::Brush fill_brush(canvas, gfx::ColorF::Black);
-  canvas->FillRectangle(fill_brush, caret.bounds());
-}
-
 void TextFieldControl::Renderer::ShowCaret(gfx::Canvas* canvas,
                                            const Caret& caret) {
   gfx::Canvas::DrawingScope drawing_scope(canvas);
-  canvas->set_dirty_rect(caret.bounds());
-  PaintCaret(canvas, caret);
+  canvas->AddDirtyRect(caret.bounds());
+  gfx::Brush fill_brush(canvas, gfx::ColorF::Black);
+  canvas->FillRectangle(fill_brush, caret.bounds());
 }
 
 //////////////////////////////////////////////////////////////////////

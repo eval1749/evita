@@ -26,8 +26,6 @@ class Caret final : public common::Singleton<Caret> {
 
     public: virtual void HideCaret(gfx::Canvas* canvas,
                                    const Caret& caret) = 0;
-    public: virtual void PaintCaret(gfx::Canvas* canvas,
-                                    const Caret& caret) = 0;
     public: virtual void ShowCaret(gfx::Canvas* canvas,
                                    const Caret& caret) = 0;
   };

@@ -26,8 +26,8 @@ void AnimatableWindow::DidHide() {
 }
 
 void AnimatableWindow::DidRealize() {
-  ui::Animator::instance()->ScheduleAnimation(this);
   Widget::DidRealize();
+  ui::Animator::instance()->ScheduleAnimation(this);
 }
 
 void AnimatableWindow::DidShow() {

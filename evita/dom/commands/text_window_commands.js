@@ -334,7 +334,7 @@
      'Move active position of selection to home of document.');
 
   /**
-   * Make slection visible.
+   * Make selection visible.
    * @this {!TextWindow}
    */
   Editor.bindKey(TextWindow, 'Ctrl+L', function() {
@@ -403,8 +403,6 @@
     var editorWindow = new EditorWindow();
     editorWindow.appendChild(textWindow);
     editorWindow.realize();
-    textWindow.makeSelectionVisible();
-    textWindow.focus();
   });
 
   /**
@@ -421,8 +419,6 @@
     var editorWindow = new EditorWindow();
     editorWindow.appendChild(textWindow);
     editorWindow.realize();
-    textWindow.makeSelectionVisible();
-    textWindow.focus();
     current.destroy();
   });
 

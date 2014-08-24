@@ -40,6 +40,7 @@ class TextFieldControl::Renderer final : private Caret::Delegate {
   // Text range from 0 to |clean_offset_|, exclusive, of |text_| equals to
   // |text_layout_|.
   private: size_t clean_offset_;
+  private: bool dirty_;
   private: Style style_;
   private: Selection selection_;
   private: Control::State state_;
@@ -98,8 +99,8 @@ std::unique_ptr<gfx::TextLayout> CreateTextLayout(const base::string16& text,
 TextFieldControl::Renderer::Renderer(const base::string16& text,
                                      const Style& style,
                                      const Selection& selection)
-    : selection_(selection), state_(Control::State::Normal), style_(style),
-      text_(text) {
+    : dirty_(true), selection_(selection), state_(Control::State::Normal),
+      style_(style), text_(text) {
   ResetViewPort();
   ResetTextLayout();
 }
@@ -112,6 +113,7 @@ void TextFieldControl::Renderer::set_selection(
   if (selection_ == new_selection)
     return;
   selection_ = new_selection;
+  dirty_ = true;
 }
 
 void TextFieldControl::Renderer::set_style(const Style& new_style) {
@@ -146,10 +148,14 @@ gfx::PointF TextFieldControl::Renderer::text_origin() const {
 
 void TextFieldControl::Renderer::DidKillFocus() {
   Caret::instance()->Give(this);
+  // Set |dirty_| true for updating selection.
+  dirty_ = true;
 }
 
 void TextFieldControl::Renderer::DidSetFocus() {
   Caret::instance()->Take(this);
+  // Set |dirty_| true for updating caret bounds.
+  dirty_ = true;
 }
 
 void TextFieldControl::Renderer::MakeSelectionVisible() {
@@ -213,7 +219,14 @@ int TextFieldControl::Renderer::MapPointToOffset(
 void TextFieldControl::Renderer::Render(gfx::Canvas* canvas) {
   if (bounds_.empty())
     return;
+  if (!dirty_) {
+    if (state_ != Control::State::Highlight)
+      return;
+    Caret::instance()->Blink(this, canvas);
+    return;
+  }
 
+  dirty_ = false;
   Caret::instance()->DidPaint(this, bounds_);
   canvas->set_dirty_rect(bounds_);
   canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor), bounds_);
@@ -236,7 +249,7 @@ void TextFieldControl::Renderer::Render(gfx::Canvas* canvas) {
   // Render text
   {
     gfx::Brush text_brush(canvas, state_ == State::Disabled ? style_.gray_text :
-                                                            style_.color);
+                                                              style_.color);
     gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, view_bounds_);
     (*canvas)->DrawTextLayout(text_origin(), *text_layout_, text_brush,
                              D2D1_DRAW_TEXT_OPTIONS_CLIP);
@@ -255,10 +268,11 @@ void TextFieldControl::Renderer::Render(gfx::Canvas* canvas) {
       break;
     case Control::State::Normal:
       break;
-    case Control::State::Highlight:
-      canvas->DrawRectangle(gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.5f)),
-                         frame_rect - 1.0f, 2.0f);
+    case Control::State::Highlight: {
+      gfx::Brush highlight_brush(canvas, gfx::ColorF(style_.highlight, 0.5f));
+      canvas->DrawRectangle(highlight_brush, frame_rect - 1.0f, 2.0f);
       break;
+    }
     case Control::State::Hover:
       canvas->DrawRectangle(gfx::Brush(canvas, style_.hotlight), frame_rect);
       break;
@@ -312,6 +326,7 @@ void TextFieldControl::Renderer::RenderSelection(gfx::Canvas* canvas) {
 void TextFieldControl::Renderer::ResetTextLayout() {
   text_layout_.reset();
   clean_offset_ = 0;
+  dirty_ = true;
 }
 
 void TextFieldControl::Renderer::ResetViewPort() {
@@ -346,13 +361,16 @@ void TextFieldControl::Renderer::UpdateTextLayout() {
 }
 
 // ui::Caret::Delegate
-void TextFieldControl::Renderer::HideCaret(gfx::Canvas* canvas, const Caret&) {
+void TextFieldControl::Renderer::HideCaret(gfx::Canvas* canvas,
+                                           const Caret& caret) {
   gfx::Canvas::DrawingScope drawing_scope(canvas);
+  canvas->AddDirtyRect(caret.bounds());
   Render(canvas);
 }
 
 void TextFieldControl::Renderer::PaintCaret(gfx::Canvas* canvas,
                                             const Caret& caret) {
+  canvas->AddDirtyRect(caret.bounds());
   gfx::Brush fill_brush(canvas, gfx::ColorF::Black);
   canvas->FillRectangle(fill_brush, caret.bounds());
 }

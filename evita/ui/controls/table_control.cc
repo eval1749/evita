@@ -680,6 +680,8 @@ void TableControl::OnKeyPressed(const ui::KeyboardEvent& event) {
 }
 
 void TableControl::OnMousePressed(const ui::MouseEvent& event) {
+  if (!has_focus())
+    RequestFocus();
   model_->OnMousePressed(event);
   observer_->OnMousePressed(event);
 }

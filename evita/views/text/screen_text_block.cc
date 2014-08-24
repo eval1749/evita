@@ -408,6 +408,9 @@ void ScreenTextBlock::DidKillFocus(gfx::Canvas* canvas) {
 
 void ScreenTextBlock::DidSetFocus() {
   ui::Caret::instance()->Take(this);
+  // Force to update caret bounds. |DidSetFocus()| may be called multiple
+  // times on each animation frame.
+  selection_ = TextSelection();
 }
 
 gfx::RectF ScreenTextBlock::HitTestTextPosition(text::Posn offset) const {

@@ -5,15 +5,15 @@
 #if !defined(INCLUDE_evita_ui_controls_control_h)
 #define INCLUDE_evita_ui_controls_control_h
 
-#include "evita/ui/widget.h"
 #include "evita/gfx/color_f.h"
+#include "evita/ui/animation/animatable_window.h"
 
 namespace ui {
 
 class ControlController;
 class TextInputDelegate;
 
-class Control : public ui::Widget {
+class Control : public AnimatableWindow {
   DECLARE_CASTABLE_CLASS(Control, Widget);
 
   public: enum class State {
@@ -52,6 +52,9 @@ class Control : public ui::Widget {
   public: void set_text_input_delegate(TextInputDelegate* delegate);
 
   protected: virtual void DidChangeState();
+
+  // ui::AnimatableWindow
+  protected: virtual void Animate(base::Time time) override;
 
   // ui::Widget
   protected: virtual void DidKillFocus(ui::Widget* focused_window) override;

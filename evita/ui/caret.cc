@@ -55,12 +55,6 @@ void Caret::Blink(Delegate* delegate, gfx::Canvas* canvas) {
   }
 }
 
-void Caret::Blink(gfx::Canvas* canvas) {
-  if (!owner_)
-    return;
-  Blink(owner_, canvas);
-}
-
 void Caret::DidPaint(Delegate* delegate, const gfx::RectF& paint_bounds) {
   DCHECK(!paint_bounds.empty());
   if (owner_ != delegate || bounds_.empty())

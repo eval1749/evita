@@ -45,10 +45,6 @@ class Caret final : public common::Singleton<Caret> {
   public: Delegate* owner() const { return owner_; }
 
   public: void Blink(Delegate* delegate, gfx::Canvas* canvas);
-  // TODO(eval1749) We should use single parameter version of |Blink|. It is
-  // used for blinking caret in |FormWindow|. We should use |ui::Animator| for
-  // blinking caret for |FormWindow|.
-  public: void Blink(gfx::Canvas* canvas);
   public: void DidPaint(Delegate* delegate, const gfx::RectF& paint_bounds);
   public: void Give(Delegate* delegate);
   public: void Hide(Delegate* delegate);

@@ -26,7 +26,6 @@
 #include "evita/dom/lock.h"
 #include "evita/editor/application.h"
 #include "evita/ui/animation/animator.h"
-#include "evita/ui/caret.h"
 #include "evita/ui/controls/button_control.h"
 #include "evita/ui/controls/checkbox_control.h"
 #include "evita/ui/controls/label_control.h"
@@ -467,10 +466,7 @@ void FormWindow::Animate(base::Time) {
 
   ui::Animator::instance()->ScheduleAnimation(this);
 
-  if (pending_update_rect_.empty()) {
-    if (has_native_focus())
-      ui::Caret::instance()->Blink(canvas_.get());
-  } else {
+  if (!pending_update_rect_.empty()) {
     gfx::Rect rect;
     std::swap(pending_update_rect_, rect);
     SchedulePaintInRect(rect);

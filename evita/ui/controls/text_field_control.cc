@@ -7,6 +7,7 @@
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
+#include "evita/ui/animation/animator.h"
 #include "evita/ui/caret.h"
 
 namespace ui {
@@ -428,6 +429,14 @@ int TextFieldControl::MapPointToOffset(const gfx::PointF& point) const {
   return renderer_->MapPointToOffset(point);
 }
 
+// ui::AnimatableWindow
+void TextFieldControl::Animate(base::Time) {
+  if (!has_focus())
+    return;
+  SchedulePaint();
+  ui::Animator::instance()->ScheduleAnimation(this);
+}
+
 // ui::Control
 void TextFieldControl::DidChangeState() {
   renderer_->set_state(state());
@@ -436,6 +445,7 @@ void TextFieldControl::DidChangeState() {
 
 // ui::Widget
 void TextFieldControl::DidKillFocus(ui::Widget* focused_widget) {
+  CancelAnimation();
   renderer_->DidKillFocus();
   SchedulePaint();
   Control::DidKillFocus(focused_widget);
@@ -446,6 +456,7 @@ void TextFieldControl::DidChangeBounds() {
 }
 
 void TextFieldControl::DidSetFocus(ui::Widget* last_focused_widget) {
+  ui::Animator::instance()->ScheduleAnimation(this);
   renderer_->DidSetFocus();
   SchedulePaint();
   Control::DidSetFocus(last_focused_widget);

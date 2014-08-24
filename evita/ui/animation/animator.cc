@@ -65,6 +65,7 @@ void Animator::PlayAnimation(base::Time now, Animatable* animatable) {
   DCHECK(!animatable->is_finished_);
   waiting_animatables_.erase(animatable);
   StartAnimate(now);
+  animatable->animator_ = this;
   Animate(animatable);
   EndAnimate();
 }

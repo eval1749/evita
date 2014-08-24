@@ -510,6 +510,8 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
     gfx::Canvas* canvas,
     const TextSelection& new_selection) {
   if (selection_ == new_selection) {
+    if (!selection_.has_focus())
+      return;
     ui::Caret::instance()->Blink(this, canvas);
     return;
   }

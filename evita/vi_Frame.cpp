@@ -429,6 +429,7 @@ void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
 
 void Frame::DidSetFocus(ui::Widget* widget) {
   views::Window::DidSetFocus(widget);
+  FOR_EACH_OBSERVER(views::FrameObserver, observers_, DidActiveFrame(this));
   if (!tab_strip_animator_->active_tab_content()) {
     // This |Frame| doesn't show anything and tabs are being added.
     return;
@@ -437,7 +438,6 @@ void Frame::DidSetFocus(ui::Widget* widget) {
   if (!tab_content)
     return;
   tab_content->RequestFocus();
-  FOR_EACH_OBSERVER(views::FrameObserver, observers_, DidActiveFrame(this));
 }
 
 LRESULT Frame::OnMessage(uint32_t message, WPARAM const wParam,

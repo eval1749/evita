@@ -4,6 +4,7 @@
 
 #include "evita/views/tab_strip_animator.h"
 
+#include "common/castable.h"
 #include "evita/ui/animation/animatable.h"
 #include "evita/ui/animation/animatables.h"
 #include "evita/ui/animation/animator.h"
@@ -19,10 +20,13 @@ namespace views {
 //
 // TabStripAnimator::Action
 //
-class TabStripAnimator::Action : private ui::AnimationObserver,
+class TabStripAnimator::Action : public common::Castable,
+                                 private ui::AnimationObserver,
                                  private TabContentObserver {
+  DECLARE_CASTABLE_CLASS(Action, Castable);
+
   private: ui::Animatable* animation_;
-  private: TabContent* tab_content_;
+  private: TabContent* observing_tab_content_;
   private: TabStripAnimator* const tab_strip_animator_;
 
   protected: Action(TabStripAnimator* tab_strip_animator,
@@ -55,15 +59,15 @@ class TabStripAnimator::Action : private ui::AnimationObserver,
 
 TabStripAnimator::Action::Action(TabStripAnimator* tab_strip_animator,
                                  TabContent* tab_content)
-    : animation_(nullptr), tab_content_(tab_content),
+    : animation_(nullptr), observing_tab_content_(tab_content),
       tab_strip_animator_(tab_strip_animator) {
-  tab_content_->AddObserver(this);
+  observing_tab_content_->AddObserver(this);
 }
 
 TabStripAnimator::Action::~Action() {
-  if (tab_content_) {
+  if (observing_tab_content_) {
     DCHECK(!animation_);
-    tab_content_->RemoveObserver(this);
+    observing_tab_content_->RemoveObserver(this);
     return;
   }
   if (!animation_)
@@ -89,10 +93,10 @@ TabStrip* TabStripAnimator::Action::tab_strip() const {
 }
 
 void TabStripAnimator::Action::Cancel() {
-  if (tab_content_) {
+  if (observing_tab_content_) {
     DCHECK(!animation_);
-    tab_content_->RemoveObserver(this);
-    tab_content_ = nullptr;
+    observing_tab_content_->RemoveObserver(this);
+    observing_tab_content_ = nullptr;
     return;
   }
 
@@ -124,8 +128,8 @@ void TabStripAnimator::Action::SetActiveTabContent(
 
 // TabContentObserver
 void TabStripAnimator::Action::DidAnimateTabContent(TabContent*) {
-  tab_content_->RemoveObserver(this);
-  tab_content_ = nullptr;
+  observing_tab_content_->RemoveObserver(this);
+  observing_tab_content_ = nullptr;
   animation_ = CreateAnimation();
   if (!animation_) {
     tab_strip_animator_->DidFinishAction(this);
@@ -157,6 +161,8 @@ namespace {
 // SelectTab
 //
 class SelectTabAction : public TabStripAnimator::Action {
+  DECLARE_CASTABLE_CLASS(SelectTabAction, Action);
+
   private: TabContent* const new_tab_content_;
   private: TabContent* old_tab_content_;
   private: gfx::PointF old_tab_content_origin_;
@@ -164,6 +170,10 @@ class SelectTabAction : public TabStripAnimator::Action {
   public: SelectTabAction(TabStripAnimator* tab_strip_animator,
                           TabContent* new_tab_content);
   protected: virtual ~SelectTabAction() = default;
+
+  public: TabContent* tab_content() const {
+    return new_tab_content_;
+  }
 
   // TabStripAnimator::Action
   private: virtual ui::Animatable* CreateAnimation() override;
@@ -239,7 +249,7 @@ void TabStripAnimator::AddTab(TabContent* tab_content) {
   tab_item.iImage = 0;
   auto const new_tab_item_index = tab_strip_->number_of_tabs();
   tab_strip_->InsertTab(new_tab_item_index, &tab_item);
-  RegisterAction(new SelectTabAction(this, tab_content));
+  RequestSelect(tab_content);
 }
 
 void TabStripAnimator::CancelCurrentAction() {
@@ -262,18 +272,20 @@ void TabStripAnimator::DidFinishAction(Action* action) {
     action_ = nullptr;
 }
 
-void TabStripAnimator::RegisterAction(Action* action) {
-  CancelCurrentAction();
-  action_ = action;
-}
-
-void TabStripAnimator::RequestSelect(TabContent* new_tab_content) {
-  if (new_tab_content == active_tab_content_) {
-    CancelCurrentAction();
+void TabStripAnimator::RequestSelect(TabContent* tab_content) {
+  if (action_) {
+    if (auto select_action = action_->as<SelectTabAction>()) {
+      if (select_action->tab_content() == tab_content)
+        return;
+      CancelCurrentAction();
+    }
+  }
+  action_ = new SelectTabAction(this, tab_content);
+  if (tab_content->visible()) {
+    // During realization, |tab_content| is already visible.
     return;
   }
-  RegisterAction(new SelectTabAction(this, new_tab_content));
-  new_tab_content->Show();
+  tab_content->Show();
 }
 
 void TabStripAnimator::SetLayer(ui::Layer* layer) {

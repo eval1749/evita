@@ -101,11 +101,11 @@ void Frame::AddTabContent(views::ContentWindow* window) {
     return;
   }
   tab_content->SetBounds(GetTabContentBounds());
-  tab_strip_animator_->AddTab(tab_content);
   tab_content->RealizeWidget();
   // |tab_content| can be realized when it is dropped from another |Frame|.
   // So, we should set content after realize |TabContent|.
   tab_content->SetContent(window);
+  tab_strip_animator_->AddTab(tab_content);
 }
 
 void Frame::AddOrActivateTabContent(views::ContentWindow* window) {

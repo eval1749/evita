@@ -59,7 +59,7 @@ class TextFieldControl::Renderer final : private Caret::Delegate {
   public: ~Renderer();
 
   public: void set_selection(const Selection& selection);
-  public: void set_state(Control::State new_state) { state_ = new_state; }
+  public: void set_state(Control::State new_state);
   public: void set_style(const Style& style);
   public: void set_text(const base::string16& text);
   private: gfx::PointF text_origin() const;
@@ -111,6 +111,13 @@ void TextFieldControl::Renderer::set_selection(
   if (selection_ == new_selection)
     return;
   selection_ = new_selection;
+  dirty_ = true;
+}
+
+void TextFieldControl::Renderer::set_state(Control::State new_state) {
+  if (state_ == new_state)
+    return;
+  state_ = new_state;
   dirty_ = true;
 }
 

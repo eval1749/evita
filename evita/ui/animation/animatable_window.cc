@@ -19,20 +19,20 @@ AnimatableWindow::AnimatableWindow() {
 AnimatableWindow::~AnimatableWindow() {
 }
 
-// ui::Widget
+// Widget
 void AnimatableWindow::DidHide() {
-  ui::Widget::DidHide();
+  Widget::DidHide();
   CancelAnimation();
 }
 
 void AnimatableWindow::DidRealize() {
   Widget::DidRealize();
-  ui::Animator::instance()->ScheduleAnimation(this);
+  Animator::instance()->ScheduleAnimation(this);
 }
 
 void AnimatableWindow::DidShow() {
-  ui::Widget::DidShow();
-  ui::Animator::instance()->ScheduleAnimation(this);
+  Widget::DidShow();
+  Animator::instance()->ScheduleAnimation(this);
 }
 
 void AnimatableWindow::WillDestroyWidget() {

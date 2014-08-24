@@ -21,11 +21,17 @@ RadioButtonControl::~RadioButtonControl() {
 }
 
 void RadioButtonControl::set_style(const Style& new_style) {
+  if (style_ == new_style)
+    return;
   style_ = new_style;
+  SchedulePaint();
 }
 
 void RadioButtonControl::set_checked(bool new_checked) {
+  if (checked_ == new_checked)
+    return;
   checked_ = new_checked;
+  SchedulePaint();
 }
 
 // ui::Widget
@@ -33,12 +39,12 @@ void RadioButtonControl::OnDraw(gfx::Canvas* canvas) {
   if (bounds().empty())
     return;
 
-  canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor),
-                        gfx::RectF(bounds()));
+  auto const bounds = gfx::RectF(this->bounds());
+  canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor), bounds);
 
   auto const size = 12.0f;
   D2D1_ELLIPSE ellipse;
-  ellipse.point = gfx::PointF(bounds().origin() + (bounds().size() / 2));
+  ellipse.point = bounds.origin() + (bounds.size() / 2);
   ellipse.radiusX = ellipse.radiusY = size / 2;
   gfx::Brush frame_brush(canvas, hover() ? style_.hotlight : style_.shadow);
   (*canvas)->DrawEllipse(ellipse, frame_brush);
@@ -68,6 +74,7 @@ void RadioButtonControl::OnDraw(gfx::Canvas* canvas) {
       break;
   }
   canvas->Flush();
+  canvas->AddDirtyRect(bounds);
 }
 
 }  // namespace ui

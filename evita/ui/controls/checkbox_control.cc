@@ -21,11 +21,17 @@ CheckboxControl::~CheckboxControl() {
 }
 
 void CheckboxControl::set_style(const Style& new_style) {
+  if (style_ == new_style)
+    return;
   style_ = new_style;
+  SchedulePaint();
 }
 
 void CheckboxControl::set_checked(bool new_checked) {
+  if (checked_ == new_checked)
+    return;
   checked_ = new_checked;
+  SchedulePaint();
 }
 
 // ui::Widget
@@ -33,12 +39,12 @@ void CheckboxControl::OnDraw(gfx::Canvas* canvas) {
   if (bounds().empty())
     return;
 
-  auto const rect = gfx::RectF(this->bounds());
-  canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor), rect);
+  auto const bounds = gfx::RectF(this->bounds());
+  canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor), bounds);
 
   auto const frame_size = gfx::SizeF(12.0f, 12.0f);
-  auto const offset = (rect.size() - frame_size) / 2;
-  gfx::RectF frame_rect(rect.origin() + offset, frame_size);
+  auto const offset = (bounds.size() - frame_size) / 2;
+  gfx::RectF frame_rect(bounds.origin() + offset, frame_size);
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, frame_rect);
 
   gfx::Brush frame_brush(canvas, style_.shadow);
@@ -77,6 +83,7 @@ void CheckboxControl::OnDraw(gfx::Canvas* canvas) {
       break;
   }
   canvas->Flush();
+  canvas->AddDirtyRect(bounds);
 }
 
 }  // namespace ui

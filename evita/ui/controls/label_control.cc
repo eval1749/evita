@@ -62,6 +62,7 @@ void LabelControl::Renderer::Render(gfx::Canvas* canvas) const {
   (*canvas)->DrawTextLayout(text_origin_, *text_layout_, text_brush,
                             D2D1_DRAW_TEXT_OPTIONS_CLIP);
   canvas->Flush();
+  canvas->AddDirtyRect(bounds_);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -85,6 +86,7 @@ void LabelControl::set_style(const Style& new_style) {
     return;
   style_ = new_style;
   renderer_.reset();
+  SchedulePaint();
 }
 
 void LabelControl::set_text(const base::string16& new_text) {
@@ -92,10 +94,12 @@ void LabelControl::set_text(const base::string16& new_text) {
     return;
   text_ = new_text;
   renderer_.reset();
+  SchedulePaint();
 }
 
 // ui::Widget
 void LabelControl::DidChangeBounds() {
+  Control::DidChangeBounds();
   renderer_.reset();
 }
 

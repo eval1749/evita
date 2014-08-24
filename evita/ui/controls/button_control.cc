@@ -93,6 +93,7 @@ void ButtonControl::Renderer::Render(gfx::Canvas* canvas,
       break;
   }
   canvas->Flush();
+  canvas->AddDirtyRect(bounds_);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -112,6 +113,7 @@ void ButtonControl::set_style(const Style& new_style) {
     return;
   style_ = new_style;
   renderer_.reset();
+  SchedulePaint();
 }
 
 void ButtonControl::set_text(const base::string16& new_text) {
@@ -119,10 +121,12 @@ void ButtonControl::set_text(const base::string16& new_text) {
     return;
   text_ = new_text;
   renderer_.reset();
+  SchedulePaint();
 }
 
 // ui::Widget
 void ButtonControl::DidChangeBounds() {
+  Control::DidChangeBounds();
   renderer_.reset();
 }
 

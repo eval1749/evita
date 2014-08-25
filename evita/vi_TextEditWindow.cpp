@@ -460,7 +460,6 @@ void TextEditWindow::DidHide() {
 
 void TextEditWindow::DidKillFocus(ui::Widget* focused_widget) {
   views::ContentWindow::DidKillFocus(focused_widget);
-  text_renderer_->DidKillFocus(canvas_.get());
   ui::TextInputClient::Get()->CommitComposition(this);
   ui::TextInputClient::Get()->CancelComposition(this);
   ui::TextInputClient::Get()->set_delegate(nullptr);
@@ -474,12 +473,10 @@ void TextEditWindow::DidRealize() {
   UpdateLayout();
 }
 
+// Note: It is OK to set focus to hidden window.
 void TextEditWindow::DidSetFocus(ui::Widget* last_focused) {
-  DCHECK(has_focus());
-  // Note: It is OK to set focus to hidden window.
-  text_renderer_->DidSetFocus();
-  ui::TextInputClient::Get()->set_delegate(this);
   views::ContentWindow::DidSetFocus(last_focused);
+  ui::TextInputClient::Get()->set_delegate(this);
 }
 
 void TextEditWindow::DidShow() {

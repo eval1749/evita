@@ -43,16 +43,8 @@ void TextRenderer::DidHide() {
   screen_text_block_->Reset();
 }
 
-void TextRenderer::DidKillFocus(gfx::Canvas* canvas) {
-  screen_text_block_->DidKillFocus(canvas);
-}
-
 void TextRenderer::DidLostCanvas() {
   screen_text_block_->Reset();
-}
-
-void TextRenderer::DidSetFocus() {
-  screen_text_block_->DidSetFocus();
 }
 
 text::Posn TextRenderer::EndOfLine(text::Posn text_offset) const {

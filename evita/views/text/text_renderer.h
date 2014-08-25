@@ -49,9 +49,7 @@ class TextRenderer final {
   public: float zoom() const { return zoom_; }
 
   public: void DidHide();
-  public: void DidKillFocus(gfx::Canvas* canvas);
   public: void DidLostCanvas();
-  public: void DidSetFocus();
   // Returns end of line offset containing |text_offset|.
   public: text::Posn EndOfLine(text::Posn text_offset) const;
   public: void Format(text::Posn text_offset);

@@ -9,7 +9,7 @@
 #include "base/logging.h"
 #include "base/time/time.h"
 #include "evita/gfx/bitmap.h"
-#include "evita/ui/base/ime/text_input_client.h"
+#include "evita/ui/caret.h"
 #include "evita/views/switches.h"
 #include "evita/views/text/render_cell.h"
 #include "evita/views/text/render_selection.h"
@@ -92,93 +92,28 @@ typedef std::list<TextLine*>::const_iterator FormatLineIterator;
 //
 // ScreenTextBlock::Caret
 //
-class ScreenTextBlock::Caret final {
+class ScreenTextBlock::Caret final : public ui::Caret {
   private: gfx::RectF bounds_;
   private: base::Time last_blink_time_;
   private: bool visible_;
 
-  public: Caret();
-  public: ~Caret() = default;
+  public: Caret() = default;
+  public: virtual ~Caret() = default;
 
-  public: bool visible() const { return visible_; }
-
-  public: void Blink(gfx::Canvas* canvas);
-  public: void DidPaint(const gfx::RectF& paint_bounds);
-  public: void Hide(gfx::Canvas* canvas);
-  public: void Show(gfx::Canvas* canvas);
-  public: void Update(gfx::Canvas* canvas, const gfx::RectF& new_bounds);
+  private: virtual void Paint(gfx::Canvas* canvas,
+                              const gfx::RectF& bounds) override;
 
   DISALLOW_COPY_AND_ASSIGN(Caret);
 };
 
-ScreenTextBlock::Caret::Caret() : visible_(false) {
-}
-
-void ScreenTextBlock::Caret::Blink(gfx::Canvas* canvas) {
-  static const auto kBlinkInterval = 500; // milliseconds
-  // TODO(eval1749) We should take |last_blink_time_| from a parameter of
-  // |ui::Animatable::Animate()|.
-  auto const now = base::Time::Now();
-  auto const delta = now - last_blink_time_;
-  if (delta < base::TimeDelta::FromMilliseconds(kBlinkInterval))
+void ScreenTextBlock::Caret::Paint(gfx::Canvas* canvas,
+                                   const gfx::RectF& bounds) {
+  if (visible()) {
+    gfx::Brush fill_brush(canvas, gfx::ColorF::Black);
+    canvas->FillRectangle(fill_brush, bounds);
     return;
-  last_blink_time_ = now;
-  if (visible_)
-    Hide(canvas);
-  else
-    Show(canvas);
-}
-
-void ScreenTextBlock::Caret::DidPaint(const gfx::RectF& paint_bounds) {
-  DCHECK(!paint_bounds.empty());
-  if (bounds_.empty())
-    return;
-  if (paint_bounds.Intersect(bounds_).empty())
-    return;
-  // We'll soon update caret bounds. So, we don't reset caret position for
-  // |ui::TextInputClient|.
-  bounds_ = gfx::RectF();
-  visible_ = false;
-}
-
-void ScreenTextBlock::Caret::Hide(gfx::Canvas* canvas) {
-  if (!visible_ || !canvas->screen_bitmap())
-    return;
-  auto const caret_bounds = bounds_.Intersect(canvas->bounds());
-  if (caret_bounds.empty())
-    return;
-  gfx::Canvas::DrawingScope drawing_scope(canvas);
-  canvas->DrawBitmap(*canvas->screen_bitmap(), caret_bounds, caret_bounds);
-  canvas->AddDirtyRect(caret_bounds);
-  visible_ = false;
-}
-
-void ScreenTextBlock::Caret::Show(gfx::Canvas* canvas) {
-  if (visible_)
-    return;
-  auto const caret_bounds = bounds_.Intersect(canvas->bounds());
-  if (caret_bounds.empty())
-    return;
-  gfx::Canvas::DrawingScope drawing_scope(canvas);
-  gfx::Brush fill_brush(canvas, gfx::ColorF::Black);
-  canvas->FillRectangle(fill_brush, caret_bounds);
-  canvas->AddDirtyRect(caret_bounds);
-  visible_ = true;
-}
-
-void ScreenTextBlock::Caret::Update(gfx::Canvas* canvas,
-                                    const gfx::RectF& new_bounds) {
-  DCHECK(!visible_);
-  if (bounds_ != new_bounds) {
-    bounds_ = new_bounds;
-    // TODO(eval1749) We should take |last_blink_time_| from a parameter of
-    // |ui::Animatable::Animate()|.
-    last_blink_time_ = base::Time::Now();
-    ui::TextInputClient::Get()->set_caret_bounds(bounds_);
   }
-  if (bounds_.empty())
-    return;
-  Show(canvas);
+  canvas->DrawBitmap(*canvas->screen_bitmap(), bounds, bounds);
 }
 
 //////////////////////////////////////////////////////////////////////

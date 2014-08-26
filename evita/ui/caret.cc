@@ -14,99 +14,80 @@
 
 namespace ui {
 
-static const auto kBlinkInterval = 500; // milliseconds
-
-//////////////////////////////////////////////////////////////////////
-//
-// Caret::Delegate
-//
-Caret::Delegate::Delegate() {
-}
-
-Caret::Delegate::~Delegate() {
-}
+static const auto kBlinkInterval = 16 * 30; // milliseconds
 
 //////////////////////////////////////////////////////////////////////
 //
 // Caret
 //
-Caret::Caret()
-  : owner_(nullptr), shown_(false) {
+Caret::Caret() : visible_(false) {
 }
 
 Caret::~Caret() {
-  DCHECK(!owner_);
 }
 
-void Caret::Blink(Delegate* delegate, gfx::Canvas* canvas) {
-  if (owner_ != delegate || !bounds_)
-    return;
+void Caret::Blink(gfx::Canvas* canvas) {
+  // TODO(eval1749) We should take |last_blink_time_| from a parameter of
+  // |ui::Animatable::Animate()|.
   auto const now = base::Time::Now();
   auto const delta = now - last_blink_time_;
   if (delta < base::TimeDelta::FromMilliseconds(kBlinkInterval))
     return;
   last_blink_time_ = now;
-  if (shown_) {
-    owner_->HideCaret(canvas, *this);
-    shown_ = false;
-  } else {
-    owner_->ShowCaret(canvas, *this);
-    shown_ = true;
-  }
+  if (visible_)
+    Hide(canvas);
+  else
+    Show(canvas);
 }
 
-void Caret::DidPaint(Delegate* delegate, const gfx::RectF& paint_bounds) {
+void Caret::DidPaint(const gfx::RectF& paint_bounds) {
   DCHECK(!paint_bounds.empty());
-  if (owner_ != delegate || bounds_.empty())
+  if (bounds_.empty())
     return;
   if (paint_bounds.Intersect(bounds_).empty())
     return;
   // We'll soon update caret bounds. So, we don't reset caret position for
   // |ui::TextInputClient|.
   bounds_ = gfx::RectF();
-  last_blink_time_ = base::Time();
-  shown_ = false;
+  visible_ = false;
 }
 
-void Caret::Give(Delegate* owner) {
-  DCHECK_EQ(owner_, owner);
-  owner_ = nullptr;
-  bounds_ = gfx::RectF();
-  last_blink_time_ = base::Time();
-  shown_ = false;
-  ui::TextInputClient::Get()->set_caret_bounds(bounds_);
-}
-
-void Caret::Hide(Delegate* delegate) {
-  if (owner_ != delegate)
+void Caret::Hide(gfx::Canvas* canvas) {
+  if (!visible_)
     return;
-  DCHECK(!shown_);
-  bounds_ = gfx::RectF();
-  ui::TextInputClient::Get()->set_caret_bounds(bounds_);
+  auto const bounds = bounds_.Intersect(canvas->bounds());
+  if (bounds.empty())
+    return;
+  visible_ = false;
+  gfx::Canvas::DrawingScope drawing_scope(canvas);
+  canvas->AddDirtyRect(bounds);
+  Paint(canvas, bounds);
 }
 
-void Caret::Take(Delegate* owner) {
-  DCHECK(!owner_);
-  bounds_ = gfx::RectF();
-  owner_ = owner;
-  shown_ = false;
-  ui::TextInputClient::Get()->set_caret_bounds(bounds_);
+void Caret::Show(gfx::Canvas* canvas) {
+  if (visible_)
+    return;
+  auto const bounds = bounds_.Intersect(canvas->bounds());
+  if (bounds.empty())
+    return;
+  visible_ = true;
+  gfx::Canvas::DrawingScope drawing_scope(canvas);
+  canvas->AddDirtyRect(bounds);
+  Paint(canvas, bounds);
 }
 
-void Caret::Update(Delegate* delegate, gfx::Canvas* canvas,
-                   const gfx::RectF& new_bounds) {
-  DCHECK(!new_bounds.empty());
-  if (owner_ != delegate)
+void Caret::Update(gfx::Canvas* canvas, const gfx::RectF& new_bounds) {
+  DCHECK(!visible_);
+  if (bounds_ != new_bounds) {
+    bounds_ = new_bounds;
+    // TODO(eval1749) We should take |last_blink_time_| from a parameter of
+    // |ui::Animatable::Animate()|.
+    last_blink_time_ = base::Time::Now();
+    ui::TextInputClient::Get()->set_caret_bounds(bounds_);
+  }
+  if (bounds_.empty())
     return;
-  DCHECK(!shown_);
-  if (bounds_ == new_bounds)
-    return;
-  bounds_ = new_bounds;
-  // Don't blink caret while when caret is moved or resized.
-  last_blink_time_ = base::Time::Now();
-  owner_->ShowCaret(canvas, *this);
-  ui::TextInputClient::Get()->set_caret_bounds(bounds_);
-  shown_ = true;
+  Show(canvas);
 }
 
 }  // namespace ui

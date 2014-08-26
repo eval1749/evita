@@ -27,6 +27,30 @@ inline gfx::RectF RoundBounds(const gfx::RectF& bounds) {
 
 //////////////////////////////////////////////////////////////////////
 //
+// CaretPainer
+//
+class CaretPainer final : public Caret {
+  public: CaretPainer() = default;
+  public: virtual ~CaretPainer() = default;
+
+  private: virtual void Paint(gfx::Canvas* canvas,
+                              const gfx::RectF& bounds) override;
+
+  DISALLOW_COPY_AND_ASSIGN(CaretPainer);
+};
+
+void CaretPainer::Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) {
+  if (visible()) {
+    canvas->SaveScreenImage(bounds);
+    gfx::Brush fill_brush(canvas, gfx::ColorF::Black);
+    canvas->FillRectangle(fill_brush, bounds);
+    return;
+  }
+  canvas->DrawBitmap(*canvas->screen_bitmap(), bounds, bounds);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // TextFieldControl::Renderer
 //
 //
@@ -35,8 +59,9 @@ inline gfx::RectF RoundBounds(const gfx::RectF& bounds) {
 //                     ^
 //                     |view_text_start_|
 //
-class TextFieldControl::Renderer final : private Caret::Delegate {
+class TextFieldControl::Renderer final {
   private: gfx::RectF bounds_;
+  private: std::unique_ptr<CaretPainer> caret_;
   // Text range from 0 to |clean_offset_|, exclusive, of |text_| equals to
   // |text_layout_|.
   private: size_t clean_offset_;
@@ -64,8 +89,6 @@ class TextFieldControl::Renderer final : private Caret::Delegate {
   public: void set_text(const base::string16& text);
   private: gfx::PointF text_origin() const;
 
-  public: void DidKillFocus();
-  public: void DidSetFocus();
   private: void MakeSelectionVisible();
   public: int Renderer::MapPointToOffset(const gfx::PointF& point) const;
   public: void Render(gfx::Canvas* canvas);
@@ -75,12 +98,6 @@ class TextFieldControl::Renderer final : private Caret::Delegate {
   private: void ResetViewPort();
   public: void SetBounds(const gfx::RectF& rect);
   private: void UpdateTextLayout();
-
-  // ui::Caret::Delegate
-  private: virtual void HideCaret(gfx::Canvas* canvas,
-                                  const Caret& caret) override;
-  private: virtual void ShowCaret(gfx::Canvas* canvas,
-                                  const Caret& caret) override;
 
   DISALLOW_COPY_AND_ASSIGN(Renderer);
 };
@@ -92,13 +109,14 @@ std::unique_ptr<gfx::TextLayout> CreateTextLayout(const base::string16& text,
   const auto kHugeWidth = 1e6f;
   return text_format.CreateLayout(text, gfx::SizeF(kHugeWidth, height));
 }
+
 }  // namespace
 
 TextFieldControl::Renderer::Renderer(const base::string16& text,
                                      const Style& style,
                                      const Selection& selection)
-    : dirty_(true), selection_(selection), state_(Control::State::Normal),
-      style_(style), text_(text) {
+    : caret_(new CaretPainer()), dirty_(true), selection_(selection),
+      state_(Control::State::Normal), style_(style), text_(text) {
   ResetViewPort();
   ResetTextLayout();
 }
@@ -149,18 +167,6 @@ void TextFieldControl::Renderer::set_text(const base::string16& new_text) {
 gfx::PointF TextFieldControl::Renderer::text_origin() const {
   return view_bounds_.origin() - view_text_bounds_.origin() +
          gfx::SizeF(0.0f, (view_bounds_.height() - text_size_.height) / 2);
-}
-
-void TextFieldControl::Renderer::DidKillFocus() {
-  Caret::instance()->Give(this);
-  // Set |dirty_| true for updating selection.
-  dirty_ = true;
-}
-
-void TextFieldControl::Renderer::DidSetFocus() {
-  Caret::instance()->Take(this);
-  // Set |dirty_| true for updating caret bounds.
-  dirty_ = true;
 }
 
 void TextFieldControl::Renderer::MakeSelectionVisible() {
@@ -227,12 +233,12 @@ void TextFieldControl::Renderer::Render(gfx::Canvas* canvas) {
   if (!dirty_) {
     if (state_ != Control::State::Highlight)
       return;
-    Caret::instance()->Blink(this, canvas);
+    caret_->Blink(canvas);
     return;
   }
 
   dirty_ = false;
-  Caret::instance()->DidPaint(this, bounds_);
+  caret_->DidPaint(bounds_);
   canvas->AddDirtyRect(bounds_);
   canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor), bounds_);
 
@@ -260,7 +266,7 @@ void TextFieldControl::Renderer::Render(gfx::Canvas* canvas) {
                              D2D1_DRAW_TEXT_OPTIONS_CLIP);
   }
 
-  if (Caret::instance()->owner() == this)
+  if (state_ == Control::State::Highlight)
     RenderSelection(canvas);
 
   // Render state
@@ -288,7 +294,7 @@ void TextFieldControl::Renderer::Render(gfx::Canvas* canvas) {
 void TextFieldControl::Renderer::RenderCaret(
     gfx::Canvas* canvas, const gfx::RectF& caret_bounds) {
   const auto bounds = RoundBounds(caret_bounds);
-  Caret::instance()->Update(this, canvas, bounds);
+  caret_->Update(canvas, bounds);
 }
 
 void TextFieldControl::Renderer::RenderSelection(gfx::Canvas* canvas) {
@@ -363,22 +369,6 @@ void TextFieldControl::Renderer::UpdateTextLayout() {
   view_text_bounds_.top = 0.0f;
   view_text_bounds_.bottom = text_size_.height;
   view_text_bounds_.right = view_text_bounds_.left + view_bounds_.width();
-}
-
-// ui::Caret::Delegate
-void TextFieldControl::Renderer::HideCaret(gfx::Canvas* canvas,
-                                           const Caret& caret) {
-  gfx::Canvas::DrawingScope drawing_scope(canvas);
-  canvas->AddDirtyRect(caret.bounds());
-  Render(canvas);
-}
-
-void TextFieldControl::Renderer::ShowCaret(gfx::Canvas* canvas,
-                                           const Caret& caret) {
-  gfx::Canvas::DrawingScope drawing_scope(canvas);
-  canvas->AddDirtyRect(caret.bounds());
-  gfx::Brush fill_brush(canvas, gfx::ColorF::Black);
-  canvas->FillRectangle(fill_brush, caret.bounds());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -463,7 +453,6 @@ void TextFieldControl::DidChangeState() {
 // ui::Widget
 void TextFieldControl::DidKillFocus(ui::Widget* focused_widget) {
   CancelAnimation();
-  renderer_->DidKillFocus();
   SchedulePaint();
   Control::DidKillFocus(focused_widget);
 }
@@ -474,8 +463,6 @@ void TextFieldControl::DidChangeBounds() {
 
 void TextFieldControl::DidSetFocus(ui::Widget* last_focused_widget) {
   ui::Animator::instance()->ScheduleAnimation(this);
-  renderer_->DidSetFocus();
-  SchedulePaint();
   Control::DidSetFocus(last_focused_widget);
 }
 

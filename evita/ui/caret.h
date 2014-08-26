@@ -14,40 +14,24 @@
 
 namespace ui {
 
-// Represents caret in per-thread queue. To blink caret, we must track
-// caret size. If we call CreateCaret, caret doesn't blink.
-// Note: Caret should be lived until timer is fired.
-class Caret final : public common::Singleton<Caret> {
-  DECLARE_SINGLETON_CLASS(Caret);
-
-  public: class Delegate {
-    public: Delegate();
-    public: virtual ~Delegate();
-
-    public: virtual void HideCaret(gfx::Canvas* canvas,
-                                   const Caret& caret) = 0;
-    public: virtual void ShowCaret(gfx::Canvas* canvas,
-                                   const Caret& caret) = 0;
-  };
-
+class Caret {
   private: gfx::RectF bounds_;
-  private: Delegate* owner_;
   private: base::Time last_blink_time_;
-  private: bool shown_;
+  private: bool visible_;
 
-  public: Caret();
-  public: ~Caret();
+  protected: Caret();
+  protected: virtual ~Caret();
 
-  public: const gfx::RectF& bounds() const { return bounds_; }
-  public: bool visible() const { return shown_; }
-  public: Delegate* owner() const { return owner_; }
+  private: const gfx::RectF& bounds() const { return bounds_; }
+  public: bool visible() const { return visible_; }
 
-  public: void Blink(Delegate* delegate, gfx::Canvas* canvas);
-  public: void DidPaint(Delegate* delegate, const gfx::RectF& paint_bounds);
-  public: void Give(Delegate* delegate);
-  public: void Hide(Delegate* delegate);
-  public: void Take(Delegate* delegate);
-  public: void Update(Delegate* delegate, gfx::Canvas* canvas,
+  public: void Blink(gfx::Canvas* canvas);
+  public: void DidPaint(const gfx::RectF& paint_bounds);
+  public: void Hide(gfx::Canvas* canvas);
+  protected: virtual void Paint(gfx::Canvas* canvas,
+                                const gfx::RectF& bounds) = 0;
+  public: void Show(gfx::Canvas* canvas);
+  public: void Update(gfx::Canvas* canvas,
                       const gfx::RectF& new_bounds);
 
   DISALLOW_COPY_AND_ASSIGN(Caret);

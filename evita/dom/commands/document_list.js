@@ -78,12 +78,12 @@
     document.bindKey('Delete', closeSelectedDocuments);
     document.bindKey('Enter', openSelectedDocuments);
     Document.list.forEach(function(document) {
-      document.addEventListener('attach', updateDocumentList);
-      document.addEventListener('detach', updateDocumentList);
+      document.addEventListener(Event.Names.ATTACH, updateDocumentList);
+      document.addEventListener(Event.Names.DETACH, updateDocumentList);
     });
     Document.addObserver(function(type, document) {
-      document.addEventListener('attach', updateDocumentList);
-      document.addEventListener('detach', updateDocumentList);
+      document.addEventListener(Event.Names.ATTACH, updateDocumentList);
+      document.addEventListener(Event.Names.DETACH, updateDocumentList);
       updateDocumentList();
     });
     document_list_document = document;

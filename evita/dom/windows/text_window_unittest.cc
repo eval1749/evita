@@ -84,8 +84,8 @@ TEST_F(TextWindowSlowTest, realize) {
       "var sample = new TextWindow(new Range(doc));"
       "var event;"
       "function event_handler(x) { event = x; }"
-      "doc.addEventListener('attach', event_handler);"
-      "doc.addEventListener('detach', event_handler);");
+      "doc.addEventListener(Event.Names.ATTACH, event_handler);"
+      "doc.addEventListener(Event.Names.DETACH, event_handler);");
 
   // The document receives "attach" event when |TextWindow| is realized.
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));

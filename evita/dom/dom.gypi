@@ -206,6 +206,8 @@
         'public/float_rect.cc',
         'public/switch_value.cc',
         'public/switch_value.h',
+        'public/tab_data.cc',
+        'public/tab_data.h',
         'public/view_event_handler.cc',
 
         '<(SHARED_INTERMEDIATE_DIR)/v8_strings.cc',

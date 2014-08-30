@@ -23,6 +23,12 @@ struct TabData {
   State state;
   base::string16 title;
   base::string16 tooltip;
+
+  TabData();
+  ~TabData();
+
+  bool operator==(const TabData& other) const;
+  bool operator!=(const TabData& other) const;
 };
 
 }  // namespace domapi

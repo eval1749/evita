@@ -568,12 +568,11 @@ void ScreenTextBlock::Reset() {
   lines_.clear();
   has_screen_bitmap_ = false;
   selection_ = TextSelection();
+  caret_->DidPaint(bounds_);
 }
 
 void ScreenTextBlock::SetBounds(const gfx::RectF& new_bounds) {
   Reset();
-  if (!bounds_.empty())
-    caret_->DidPaint(new_bounds);
   bounds_ = new_bounds;
 }
 

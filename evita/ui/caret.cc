@@ -41,9 +41,9 @@ void Caret::Blink(gfx::Canvas* canvas) {
 }
 
 void Caret::DidPaint(const gfx::RectF& paint_bounds) {
-  DCHECK(!paint_bounds.empty());
-  if (bounds_.empty())
+  if (!visible_)
     return;
+  DCHECK(!bounds_.empty());
   if (paint_bounds.Intersect(bounds_).empty())
     return;
   // We'll soon update caret bounds. So, we don't reset caret position for
@@ -55,10 +55,10 @@ void Caret::DidPaint(const gfx::RectF& paint_bounds) {
 void Caret::Hide(gfx::Canvas* canvas) {
   if (!visible_)
     return;
+  visible_ = false;
   auto const bounds = bounds_.Intersect(canvas->bounds());
   if (bounds.empty())
     return;
-  visible_ = false;
   gfx::Canvas::DrawingScope drawing_scope(canvas);
   canvas->AddDirtyRect(bounds);
   Paint(canvas, bounds);

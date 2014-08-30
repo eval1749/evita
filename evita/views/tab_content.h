@@ -6,10 +6,7 @@
 #define INCLUDE_evita_views_tab_content_h
 
 #include "base/basictypes.h"
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 #include "base/observer_list.h"
-#pragma warning(pop)
 #include "base/strings/string16.h"
 #include "evita/ui/animation/animatable_window.h"
 

@@ -8,10 +8,7 @@
 #include <set>
 
 #include "base/basictypes.h"
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 #include "base/observer_list.h"
-#pragma warning(pop)
 #include "evita/text/buffer_mutation_observer.h"
 #include "evita/text/marker.h"
 #include "evita/text/marker_set_observer.h"

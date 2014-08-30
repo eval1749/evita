@@ -5,10 +5,7 @@
 #if !defined(INCLUDE_evita_ui_system_metrics_h)
 #define INCLUDE_evita_ui_system_metrics_h
 
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 #include "base/observer_list.h"
-#pragma warning(pop)
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
 #include "evita/gfx_base.h"

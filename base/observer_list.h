@@ -13,6 +13,9 @@
 #include "base/logging.h"
 #include "base/memory/weak_ptr.h"
 
+#pragma warning(push)
+#pragma warning(disable: 4625 4626)
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // OVERVIEW:
@@ -202,6 +205,8 @@ class ObserverList : public ObserverListBase<ObserverType> {
     return ObserverListBase<ObserverType>::size() != 0;
   }
 };
+
+#pragma warning(pop)
 
 #define FOR_EACH_OBSERVER(ObserverType, observer_list, func)               \
   do {                                                                     \

@@ -7,10 +7,7 @@
 
 #include <vector>
 
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 #include "base/observer_list.h"
-#pragma warning(pop)
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
 #include "evita/v8_glue/nullable.h"

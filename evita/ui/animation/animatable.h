@@ -6,10 +6,7 @@
 #define INCLUDE_evita_ui_animation_animatable_h
 
 #include "base/time/time.h"
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 #include "base/observer_list.h"
-#pragma warning(pop)
 #include "base/time/time.h"
 
 namespace ui {

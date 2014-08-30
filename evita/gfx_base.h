@@ -9,10 +9,7 @@
 #include <memory>
 
 #include "base/basictypes.h"
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 #include "base/observer_list.h"
-#pragma warning(pop)
 #include "base/logging.h"
 #include "base/memory/ref_counted.h"
 #include "common/memory/singleton.h"

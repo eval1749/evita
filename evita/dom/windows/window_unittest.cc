@@ -118,20 +118,20 @@ TEST_F(WindowTest, Add) {
       "parent.appendChild(child2);"
       "parent.realize();");
   EXPECT_SCRIPT_EQ("2", "parent.children.length");
-  EXPECT_SCRIPT_TRUE("child1.parent == parent");
-  EXPECT_SCRIPT_TRUE("child2.parent == parent");
-  EXPECT_SCRIPT_TRUE("parent.firstChild == child1");
-  EXPECT_SCRIPT_TRUE("parent.lastChild == child2");
-  EXPECT_SCRIPT_TRUE("child1.nextSibling == child2");
-  EXPECT_SCRIPT_TRUE("child1.previousSibling == null");
-  EXPECT_SCRIPT_TRUE("child2.nextSibling == null");
-  EXPECT_SCRIPT_TRUE("child2.previousSibling == child1");
+  EXPECT_SCRIPT_TRUE("child1.parent === parent");
+  EXPECT_SCRIPT_TRUE("child2.parent === parent");
+  EXPECT_SCRIPT_TRUE("parent.firstChild === child1");
+  EXPECT_SCRIPT_TRUE("parent.lastChild === child2");
+  EXPECT_SCRIPT_TRUE("child1.nextSibling === child2");
+  EXPECT_SCRIPT_TRUE("child1.previousSibling === null");
+  EXPECT_SCRIPT_TRUE("child2.nextSibling === null");
+  EXPECT_SCRIPT_TRUE("child2.previousSibling === child1");
   view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
   view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(2));
   EXPECT_SCRIPT_EQ("1", "parent.children.length");
-  EXPECT_SCRIPT_TRUE("parent.firstChild == child2");
-  EXPECT_SCRIPT_TRUE("parent.lastChild == child2");
-  EXPECT_SCRIPT_TRUE("child1.parent == null");
+  EXPECT_SCRIPT_TRUE("parent.firstChild === child2");
+  EXPECT_SCRIPT_TRUE("parent.lastChild === child2");
+  EXPECT_SCRIPT_TRUE("child1.parent === null");
   EXPECT_SCRIPT_EQ("destroyed", "child1.state");
 }
 
@@ -216,13 +216,13 @@ TEST_F(WindowTest, focus) {
 TEST_F(WindowTest, focusTick_) {
   EXPECT_SCRIPT_VALID("var sample = new SampleWindow();");
   EXPECT_SCRIPT_EQ("0", "sample.focusTick_");
-  EXPECT_TRUE("Window.focus == null");
+  EXPECT_TRUE("Window.focus === null");
   domapi::FocusEvent focus_event;
   focus_event.event_type = domapi::EventType::Focus;
   focus_event.target_id = 1;
   focus_event.related_target_id = domapi::kInvalidEventTargetId;
   view_event_handler()->DispatchFocusEvent(focus_event);
-  EXPECT_SCRIPT_TRUE("Window.focus == sample");
+  EXPECT_SCRIPT_TRUE("Window.focus === sample");
   EXPECT_SCRIPT_EQ("1", "sample.focusTick_");
 }
 
@@ -230,7 +230,7 @@ TEST_F(WindowTest, Properties) {
   EXPECT_SCRIPT_VALID("var sample1 = new SampleWindow()");
   EXPECT_SCRIPT_EQ("0", "sample1.children.length");
   EXPECT_SCRIPT_EQ("1", "sample1.id");
-  EXPECT_SCRIPT_EQ("true", "sample1.parent == null");
+  EXPECT_SCRIPT_TRUE("sample1.parent === null");
 }
 
 TEST_F(WindowTest, Realize) {
@@ -287,12 +287,12 @@ TEST_F(WindowTest, splitHorizontally) {
       "child1.splitHorizontally(parent3);");
 
   EXPECT_SCRIPT_VALID("child1.splitHorizontally(child3);");
-  EXPECT_SCRIPT_TRUE("parent1.firstChild == child1");
-  EXPECT_SCRIPT_TRUE("parent1.lastChild == child3");
-  EXPECT_SCRIPT_TRUE("child1.nextSibling == child3");
-  EXPECT_SCRIPT_TRUE("child1.previousSibling == null");
-  EXPECT_SCRIPT_TRUE("child3.nextSibling == null");
-  EXPECT_SCRIPT_TRUE("child3.previousSibling == child1");
+  EXPECT_SCRIPT_TRUE("parent1.firstChild === child1");
+  EXPECT_SCRIPT_TRUE("parent1.lastChild === child3");
+  EXPECT_SCRIPT_TRUE("child1.nextSibling === child3");
+  EXPECT_SCRIPT_TRUE("child1.previousSibling === null");
+  EXPECT_SCRIPT_TRUE("child3.nextSibling === null");
+  EXPECT_SCRIPT_TRUE("child3.previousSibling === child1");
 }
 
 TEST_F(WindowTest, splitVertically) {
@@ -328,12 +328,12 @@ TEST_F(WindowTest, splitVertically) {
       "child1.splitVertically(parent3);");
 
   EXPECT_SCRIPT_VALID("child1.splitVertically(child3);");
-  EXPECT_SCRIPT_TRUE("parent1.firstChild == child1");
-  EXPECT_SCRIPT_TRUE("parent1.lastChild == child3");
-  EXPECT_SCRIPT_TRUE("child1.nextSibling == child3");
-  EXPECT_SCRIPT_TRUE("child1.previousSibling == null");
-  EXPECT_SCRIPT_TRUE("child3.nextSibling == null");
-  EXPECT_SCRIPT_TRUE("child3.previousSibling == child1");
+  EXPECT_SCRIPT_TRUE("parent1.firstChild === child1");
+  EXPECT_SCRIPT_TRUE("parent1.lastChild === child3");
+  EXPECT_SCRIPT_TRUE("child1.nextSibling === child3");
+  EXPECT_SCRIPT_TRUE("child1.previousSibling === null");
+  EXPECT_SCRIPT_TRUE("child3.nextSibling === null");
+  EXPECT_SCRIPT_TRUE("child3.previousSibling === child1");
 }
 
 TEST_F(WindowTest, update) {

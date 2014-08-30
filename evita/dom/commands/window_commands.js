@@ -79,11 +79,11 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+Shift+1', function() {
-    var this_window = this;
     this.parent.children.forEach(function(window) {
-      if (window != this_window)
-        window.destroy();
-    });
+      if (window === this || !window.visible)
+        return;
+      window.destroy();
+    }, this);
   });
 
   /**

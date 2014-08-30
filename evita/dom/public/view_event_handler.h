@@ -24,6 +24,7 @@ struct FormEvent;
 struct KeyboardEvent;
 struct MouseEvent;
 struct TextCompositionEvent;
+enum class Visibility;
 struct WheelEvent;
 using dom::WindowId;
 
@@ -33,6 +34,8 @@ class ViewEventHandler {
 
   public: virtual void DidChangeWindowBounds(
       WindowId window_id, int left, int top, int right, int bottom) = 0;
+  public: virtual void DidChangeWindowVisibility(
+      WindowId window_id, Visibility visibility);
   public: virtual void DidDestroyWidget(WindowId window_id) = 0;
   public: virtual void DidDropWidget(WindowId source_id,
                                      WindowId target_id)  = 0;

@@ -24,6 +24,8 @@ class ViewEventHandlerImpl : public domapi::ViewEventHandler {
   // domapi::ViewEventHandler
   private: virtual void DidChangeWindowBounds(
       WindowId window_id, int left, int top, int right, int bottom) override;
+  public: virtual void DidChangeWindowVisibility(
+      WindowId window_id, domapi::Visibility visibility) override;
   private: virtual void DidDestroyWidget(WindowId window_id) override;
   private: virtual void DidDropWidget(WindowId source_id,
                                       WindowId target_id) override;

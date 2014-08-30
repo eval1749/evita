@@ -45,6 +45,11 @@ enum class MouseButton {
   Other2,
 };
 
+enum class Visibility {
+  Hidden,
+  Visible,
+};
+
 struct Event {
   EventType event_type;
   EventTargetId target_id;

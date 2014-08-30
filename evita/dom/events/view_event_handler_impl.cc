@@ -156,6 +156,16 @@ void ViewEventHandlerImpl::DidChangeWindowBounds(
   window->DidChangeBounds(left, top, right, bottom);
 }
 
+void ViewEventHandlerImpl::DidChangeWindowVisibility(
+   WindowId window_id, domapi::Visibility visibility) {
+  auto const target = FromEventTargetId(window_id);
+  if (!target)
+    return;
+  DispatchEventWithInLock(target, new UiEvent(
+    visibility == domapi::Visibility::Visible ? L"show" : L"hide",
+    UiEventInit()));
+}
+
 void ViewEventHandlerImpl::DidDestroyWidget(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)

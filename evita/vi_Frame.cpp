@@ -75,11 +75,13 @@ Frame::Frame(views::WindowId window_id)
       title_bar_(new views::TitleBar()),
       tab_strip_(new views::TabStrip(this)),
       tab_strip_animator_(new TabStripAnimator(tab_strip_)) {
+  TabDataSet::instance()->AddObserver(this);
   AppendChild(tab_strip_);
   AppendChild(message_view_);
 }
 
 Frame::~Frame() {
+  TabDataSet::instance()->RemoveObserver(this);
 }
 
 bool Frame::Activate() {
@@ -525,6 +527,25 @@ void Frame::WillRemoveChildWidget(const ui::Widget& widget) {
   auto const tab_index = GetTabIndexOfTabContent(tab_content);
   DCHECK_GE(tab_index, 0);
   tab_strip_->DeleteTab(tab_index);
+}
+
+// views::TabDataSet::Observer
+void Frame::DidSetTabData(dom::WindowId window_id,
+                          const domapi::TabData& tab_data) {
+  auto const window = Window::FromWindowId(window_id);
+  if (!window)
+    return;
+  auto const content_window = window->as<ContentWindow>();
+  if (!content_window)
+    return;
+  for (auto const tab_content : tab_contents_) {
+    if (content_window->parent_node() != tab_content)
+      continue;
+     auto const tab_index = GetTabIndexOfTabContent(tab_content);
+     if (tab_index < 0)
+       continue;
+     tab_strip_->SetTab(tab_index, tab_data);
+  }
 }
 
 // views::TabStripDelegate

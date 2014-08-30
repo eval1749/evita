@@ -14,10 +14,8 @@
 #include <unordered_set>
 #include <vector>
 
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 #include "base/observer_list.h"
-#pragma warning(pop)
+#include "evita/views/tab_data_set.h"
 #include "evita/views/tab_strip_delegate.h"
 #include "evita/views/window.h"
 
@@ -57,6 +55,7 @@ class TabStripAnimator;
 ///   with window manager.
 /// </summary>
 class Frame final : public views::Window,
+                    private views::TabDataSet::Observer,
                     public views::TabStripDelegate {
   DECLARE_CASTABLE_CLASS(Frame, views::Window);
 
@@ -117,6 +116,10 @@ class Frame final : public views::Window,
   private: virtual void WillDestroyWidget() override;
   private: virtual void WillRemoveChildWidget(
       const ui::Widget& widget) override;
+
+  // views::TabDataSet::Observer
+  private: virtual void DidSetTabData(dom::WindowId window_id,
+                                      const domapi::TabData& tab_data) override;
 
   // views::TabStripDelegate
   private: virtual void DidSelectTab(int new_selected_index) override;

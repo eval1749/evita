@@ -76,10 +76,19 @@ class WindowTest : public dom::AbstractDomTest {
   public: virtual ~WindowTest() {
   }
 
-  private: void virtual PopulateGlobalTemplate(
+  private: virtual void PopulateGlobalTemplate(
       v8::Isolate* isolate,
       v8::Handle<v8::ObjectTemplate> global_template) override {
     v8_glue::Installer<SampleWindow>::Run(isolate, global_template);
+  }
+
+  // testing::Test
+  private: virtual void SetUp() override {
+    dom::AbstractDomTest::SetUp();
+    EXPECT_SCRIPT_VALID(
+        "SampleWindow.handleEvent = function(event) {"
+        "  Window.handleEvent.call(this, event);"
+        "}");
   }
 
   DISALLOW_COPY_AND_ASSIGN(WindowTest);
@@ -337,10 +346,10 @@ TEST_F(WindowTest, update) {
 
 TEST_F(WindowTest, visible) {
   EXPECT_SCRIPT_VALID("var sample1 = new SampleWindow();");
-  EXPECT_TRUE("sample1.visible === false");
+  EXPECT_SCRIPT_TRUE("sample1.visible === false");
   view_event_handler()->DidChangeWindowVisibility(static_cast<dom::WindowId>(1),
                                                   domapi::Visibility::Visible);
-  EXPECT_TRUE("sample1.visible === true");
+  EXPECT_SCRIPT_TRUE("sample1.visible === true");
 }
 
 }  // namespace

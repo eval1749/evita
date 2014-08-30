@@ -8,15 +8,37 @@
 
 namespace views {
 
+//////////////////////////////////////////////////////////////////////
+//
+// TabDataSet::Observer
+//
+TabDataSet::Observer::Observer() {
+}
+
+TabDataSet::Observer::~Observer() {
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// TabDataSet
+//
 TabDataSet::TabDataSet() {
 }
 
 TabDataSet::~TabDataSet() {
 }
 
+void TabDataSet::AddObserver(Observer* observer) {
+  observers_.AddObserver(observer);
+}
+
 const TabDataSet::TabData* TabDataSet::GetTabData(dom::WindowId window_id) {
   auto const it = map_.find(window_id);
   return it == map_.end() ? nullptr : it->second;
+}
+
+void TabDataSet::RemoveObserver(Observer* observer) {
+  observers_.RemoveObserver(observer);
 }
 
 void TabDataSet::RemoveTabData(dom::WindowId window_id) {
@@ -31,9 +53,13 @@ void TabDataSet::SetTabData(dom::WindowId window_id, const TabData& tab_data) {
   auto const it = map_.find(window_id);
   if (it == map_.end()) {
     map_[window_id] = new TabData(tab_data);
-    return;
+  } else {
+    if (*it->second == tab_data)
+      return;
+    *it->second = tab_data;
   }
-  *it->second = tab_data;
+
+  FOR_EACH_OBSERVER(Observer, observers_, DidSetTabData(window_id, tab_data));
 }
 
 }  // namespace views

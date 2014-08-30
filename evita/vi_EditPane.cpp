@@ -1041,6 +1041,12 @@ void EditPane::DidChangeBounds() {
 void EditPane::DidHide() {
   TabContent::DidHide();
   animated_contents_.clear();
+  for (auto child : child_nodes()) {
+    auto const animatable = child->as<ui::AnimatableWindow>();
+    if (!animatable)
+      continue;
+    animatable->RemoveObserver(this);
+  }
 }
 
 void EditPane::DidRealizeChildWidget(const ui::Widget& window) {

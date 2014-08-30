@@ -95,7 +95,9 @@ TabStrip* TabStripAnimator::Action::tab_strip() const {
 void TabStripAnimator::Action::Cancel() {
   if (observing_tab_content_) {
     DCHECK(!animation_);
+    DCHECK(observing_tab_content_->visible());
     observing_tab_content_->RemoveObserver(this);
+    observing_tab_content_->Hide();
     observing_tab_content_ = nullptr;
     return;
   }
@@ -280,6 +282,8 @@ void TabStripAnimator::RequestSelect(TabContent* tab_content) {
       CancelCurrentAction();
     }
   }
+  if (active_tab_content_ == tab_content)
+    return;
   action_ = new SelectTabAction(this, tab_content);
   if (tab_content->visible()) {
     // During realization, |tab_content| is already visible.

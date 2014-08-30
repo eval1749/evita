@@ -128,6 +128,12 @@ void Window::DidChangeBounds() {
                                         bounds().bottom());
 }
 
+void Window::DidHide() {
+  ui::AnimatableWindow::DidHide();
+  view_event_handler()->DidChangeWindowVisibility(window_id_,
+                                                  domapi::Visibility::Hidden);
+}
+
 void Window::DidKillFocus(ui::Widget* focused_window) {
   ui::AnimatableWindow::DidKillFocus(focused_window);
   DispatchFocusEvent(domapi::EventType::Blur, MaybeEventTarget(focused_window));
@@ -147,6 +153,12 @@ void Window::DidSetFocus(ui::Widget* last_focused) {
   active_tick_ = static_active_tick;
   ui::AnimatableWindow::DidSetFocus(last_focused);
   DispatchFocusEvent(domapi::EventType::Focus, MaybeEventTarget(last_focused));
+}
+
+void Window::DidShow() {
+  ui::AnimatableWindow::DidShow();
+  view_event_handler()->DidChangeWindowVisibility(window_id_,
+                                                  domapi::Visibility::Visible);
 }
 
 void Window::OnKeyPressed(const ui::KeyboardEvent& event) {

@@ -12,9 +12,4 @@ ViewEventHandler::ViewEventHandler() {
 ViewEventHandler::~ViewEventHandler() {
 }
 
-void ViewEventHandler::DidChangeWindowVisibility(WindowId, Visibility) {
-  // TODO(eval1749) This is stab. Once we finish view side implementation,
-  // we'll remove this.
-}
-
 }  // namespace domapi

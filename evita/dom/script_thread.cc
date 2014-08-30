@@ -457,6 +457,8 @@ void ScriptThread::UpdateWindow(WindowId window_id) {
   }
 
 DEFINE_VIEW_EVENT_HANDLER_5(DidChangeWindowBounds, WindowId, int, int, int, int)
+DEFINE_VIEW_EVENT_HANDLER_2(DidChangeWindowVisibility, WindowId,
+                            domapi::Visibility)
 DEFINE_VIEW_EVENT_HANDLER_1(DidDestroyWidget, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_2(DidDropWidget, WindowId, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(DidRealizeWidget, WindowId)

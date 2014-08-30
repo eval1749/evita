@@ -31,12 +31,12 @@ class ViewEventHandler {
   public: ViewEventHandler();
   public: virtual ~ViewEventHandler();
 
+  public: virtual void DidChangeWindowBounds(
+      WindowId window_id, int left, int top, int right, int bottom) = 0;
   public: virtual void DidDestroyWidget(WindowId window_id) = 0;
   public: virtual void DidDropWidget(WindowId source_id,
                                      WindowId target_id)  = 0;
   public: virtual void DidRealizeWidget(WindowId window_id) = 0;
-  public: virtual void DidResizeWidget(WindowId window_id, int left, int top,
-                                       int right, int bottom) = 0;
   public: virtual void DidStartViewHost() = 0;
   public: virtual void DispatchFocusEvent(const FocusEvent& event) = 0;
   public: virtual void DispatchKeyboardEvent(const KeyboardEvent& event) = 0;

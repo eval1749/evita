@@ -123,7 +123,7 @@ void Window::DidDestroyDomWindow() {
 // ui::Widget
 void Window::DidChangeBounds() {
   ui::AnimatableWindow::DidChangeBounds();
-  view_event_handler()->DidResizeWidget(window_id_, bounds().left(),
+  view_event_handler()->DidChangeWindowBounds(window_id_, bounds().left(),
                                         bounds().top(), bounds().right(),
                                         bounds().bottom());
 }
@@ -135,7 +135,7 @@ void Window::DidKillFocus(ui::Widget* focused_window) {
 
 void Window::DidRealize() {
   view_event_handler()->DidRealizeWidget(window_id_);
-  view_event_handler()->DidResizeWidget(window_id_, bounds().left(),
+  view_event_handler()->DidChangeWindowBounds(window_id_, bounds().left(),
                                         bounds().top(), bounds().right(),
                                         bounds().bottom());
   ui::AnimatableWindow::DidRealize();

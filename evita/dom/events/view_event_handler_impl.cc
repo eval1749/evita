@@ -148,6 +148,14 @@ void ViewEventHandlerImpl::DispatchEventWithInLock(
 }
 
 // domapi::ViewEventHandler
+void ViewEventHandlerImpl::DidChangeWindowBounds(
+    WindowId window_id, int left, int top, int right, int bottom) {
+  auto const window = FromWindowId(window_id);
+  if (!window)
+    return;
+  window->DidChangeBounds(left, top, right, bottom);
+}
+
 void ViewEventHandlerImpl::DidDestroyWidget(WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)
@@ -177,14 +185,6 @@ void ViewEventHandlerImpl::DidRealizeWidget(WindowId window_id) {
   if (!window)
     return;
   window->DidRealizeWindow();
-}
-
-void ViewEventHandlerImpl::DidResizeWidget(WindowId window_id, int left, int top,
-                                   int right, int bottom) {
-  auto const window = FromWindowId(window_id);
-  if (!window)
-    return;
-  window->DidChangeBounds(left, top, right, bottom);
 }
 
 void ViewEventHandlerImpl::DidStartViewHost() {

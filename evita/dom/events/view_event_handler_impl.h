@@ -22,12 +22,12 @@ class ViewEventHandlerImpl : public domapi::ViewEventHandler {
                                         Event* event);
 
   // domapi::ViewEventHandler
+  private: virtual void DidChangeWindowBounds(
+      WindowId window_id, int left, int top, int right, int bottom) override;
   private: virtual void DidDestroyWidget(WindowId window_id) override;
   private: virtual void DidDropWidget(WindowId source_id,
                                       WindowId target_id) override;
   private: virtual void DidRealizeWidget(WindowId window_id) override;
-  private: virtual void DidResizeWidget(WindowId window_id, int left, int top,
-                                       int right, int bottom) override;
   private: virtual void DidStartViewHost() override;
   private: virtual void DispatchFocusEvent(
       const domapi::FocusEvent& event) override;

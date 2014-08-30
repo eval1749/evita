@@ -15,6 +15,7 @@
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "common/castable.h"
+#include "evita/dom/public/tab_data.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
@@ -24,9 +25,11 @@
 #include "evita/ui/tooltip.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/icon_cache.h"
+#include "evita/views/tab_content.h"
 #include "evita/views/tab_strip_delegate.h"
 #include "evita/vi_Frame.h"
 
+namespace views {
 namespace {
 
 static const float kArrowButtonWidth = 20.0f;
@@ -205,22 +208,22 @@ class Tab final : public Element, public ui::Tooltip::ToolDelegate {
   private: gfx::RectF icon_bounds_;
   private: gfx::RectF text_bounds_;
   public: base::string16 label_text_;
-  public: LPARAM lparam_;
-  public: uint32_t state_;
+  public: domapi::TabData::State state_;
+  private: TabContent* const tab_content_;
   private: int tab_index_;
-  private: views::TabStripDelegate* tab_strip_delegate_;
+  private: TabStripDelegate* tab_strip_delegate_;
 
-  public: Tab(views::TabStripDelegate* tab_strip_delegate,
-              const TCITEM* pTcItem);
+  public: Tab(TabStripDelegate* tab_strip_delegate, TabContent* tab_content);
   public: virtual ~Tab() = default;
 
   public: int tab_index() const { return tab_index_; }
   public: void set_tab_index(int tab_index) { tab_index_ = tab_index; }
+  public: TabContent* tab_content() const { return tab_content_; }
 
   private: void DrawContent(gfx::Canvas* canvas) const;
   private: void DrawIcon(gfx::Canvas* canvas) const;
   public: bool HasCloseBox() const;
-  public: bool SetTab(const TCITEM* pTcItem);
+  public: bool SetTabData(const domapi::TabData& tab_data);
   public: void UpdateLayout();
 
   // Element
@@ -234,14 +237,20 @@ class Tab final : public Element, public ui::Tooltip::ToolDelegate {
   DISALLOW_COPY_AND_ASSIGN(Tab);
 };
 
-Tab::Tab(views::TabStripDelegate* tab_strip_delegate, const TCITEM* pTcItem)
+Tab::Tab(TabStripDelegate* tab_strip_delegate, TabContent* tab_content)
     : Element(nullptr),
       close_box_(this),
       image_index_(-1),
-      state_(0),
+      state_(domapi::TabData::State::Normal),
+      tab_content_(tab_content),
       tab_index_(0),
       tab_strip_delegate_(tab_strip_delegate) {
-  SetTab(pTcItem);
+  auto const tab_data = tab_content->GetTabData();
+  if (!tab_data) {
+    label_text_ = L"?";
+    return;
+  }
+  SetTabData(*tab_data);
 }
 
 void Tab::DrawContent(gfx::Canvas* canvas) const {
@@ -255,7 +264,7 @@ void Tab::DrawContent(gfx::Canvas* canvas) const {
 void Tab::DrawIcon(gfx::Canvas* canvas) const {
   if (image_index_ < 0)
     return;
-  auto const hImageList = views::IconCache::instance()->image_list();
+  auto const hImageList = IconCache::instance()->image_list();
   // Note: ILD_TRANSPARENT doesn't effect.
   // Note: ILD_DPISCALE makes background black.
   auto const hIcon = ::ImageList_GetIcon(hImageList, image_index_, 0);
@@ -270,32 +279,31 @@ bool Tab::HasCloseBox() const {
   return IsSelected() || IsHover();
 }
 
-bool Tab::SetTab(const TCITEM* pTcItem) {
-  auto changed = false;
-  if (pTcItem->mask & TCIF_IMAGE) {
-    if (image_index_ != pTcItem->iImage)
-      changed = true;
-    image_index_ = pTcItem->iImage;
-  }
-
-  if (pTcItem->mask & TCIF_PARAM) {
-    lparam_ = pTcItem->lParam;
-  }
-
-  if (pTcItem->mask & TCIF_STATE) {
-    auto const old_state = state_;
-    state_ &= ~pTcItem->dwStateMask;
-    state_ |= pTcItem->dwState & pTcItem->dwStateMask;
-    if (state_ != old_state)
-      changed = true;
-  }
-
-  if (pTcItem->mask & TCIF_TEXT) {
-    auto const new_label_text = base::string16(pTcItem->pszText);
-    if (label_text_ != new_label_text) {
-      label_text_ = new_label_text;
-      changed = true;
+bool Tab::SetTabData(const domapi::TabData& tab_data) {
+  struct Local {
+    static int GetIconIndex(const domapi::TabData& tab_data) {
+      if (tab_data.icon != -2)
+        return tab_data.icon;
+      return IconCache::instance()->GetIconForFileName(tab_data.title);
     }
+  };
+
+  auto changed = false;
+
+  auto const new_image_index = Local::GetIconIndex(tab_data);
+  if (image_index_ != new_image_index) {
+    image_index_ = std::max(new_image_index, 0);
+    changed = true;
+  }
+
+  if (state_ != tab_data.state) {
+    state_ = tab_data.state;
+    changed = true;
+  }
+
+  if (label_text_ != tab_data.title) {
+    label_text_ = tab_data.title;
+    changed = true;
   }
   return changed;
 }
@@ -324,13 +332,16 @@ void Tab::Draw(gfx::Canvas* canvas) const {
   DrawContent(canvas);
   if (HasCloseBox())
     close_box_.Draw(canvas);
-  if (!state_)
+  if (state_ == domapi::TabData::State::Normal)
     return;
+  auto const marker_color = state_ == domapi::TabData::State::Modified ?
+    gfx::ColorF(219.0f / 255, 74.0f / 255, 56.0f / 255) :
+    gfx::ColorF(56.0f / 255, 219.0f / 255, 74.0f / 255);
   auto const marker_height = 4.0f;
   auto const marker_width = 4.0f;
   DCHECK_GT(width(), marker_width);
   canvas->FillRectangle(
-      gfx::Brush(canvas, gfx::ColorF(219.0f / 255, 74.0f / 255, 56.0f / 255)),
+      gfx::Brush(canvas, marker_color),
       gfx::RectF(gfx::PointF(right() - marker_width, top()),
                  gfx::SizeF(marker_width, marker_height)));
 }
@@ -477,10 +488,6 @@ void LoadDragTabCursor() {
 
 }  // namespace
 
-namespace views {
-
-class TabContent;
-
 //////////////////////////////////////////////////////////////////////
 //
 // TabStripImpl class
@@ -532,7 +539,7 @@ class TabStrip::TabStripImpl final {
   private: void DropTab(Tab* tab, const POINT& point);
 
   // [G]
-  public: bool GetTab(size_t tab_index, TCITEM* pTcItem) const;
+  public: TabContent* GetTab(size_t tab_index) const;
 
   // [H]
   private: void HandleTabListMenu(POINT point);
@@ -540,7 +547,7 @@ class TabStrip::TabStripImpl final {
 
   // [I]
   // Insert a new tab before a tab at |tab_index|.
-  public: void InsertTab(size_t tab_index, const TCITEM* pTcItem);
+  public: void InsertTab(size_t tab_index, TabContent* tab_content);
 
   // [O]
   public: void OnLButtonDown(POINT pt);
@@ -558,7 +565,7 @@ class TabStrip::TabStripImpl final {
   public: int SelectTab(size_t tab_index);
   private: int SelectTab(Tab* tab);
   public: void SetBounds(const gfx::RectF& bounds);
-  public: void SetTabData(size_t tab_index, const TCITEM* tab_data);
+  public: void SetTabData(size_t tab_index, const domapi::TabData& tab_data);
   private: void StopDrag();
 
   // [U]
@@ -709,37 +716,18 @@ void TabStrip::TabStripImpl::DropTab(Tab* tab, const POINT& window_point) {
   for (auto hwnd = ::WindowFromPoint(screen_point); hwnd;
        hwnd = ::GetParent(hwnd)) {
     if (auto const frame = FrameList::instance()->FindFrameByHwnd(hwnd)) {
-      auto const tab_content = reinterpret_cast<TabContent*>(tab->lparam_);
-      static_cast<TabStripDelegate*>(frame)->OnDropTab(tab_content);
+      static_cast<TabStripDelegate*>(frame)->OnDropTab(tab->tab_content());
       return;
     }
   }
 
-  auto const tab_content = reinterpret_cast<TabContent*>(tab->lparam_);
-  delegate_->DidThrowTab(tab_content);
+  delegate_->DidThrowTab(tab->tab_content());
 }
 
-bool TabStrip::TabStripImpl::GetTab(size_t tab_index, TCITEM* pTcItem) const {
+TabContent* TabStrip::TabStripImpl::GetTab(size_t tab_index) const {
   if (tab_index >= tabs_.size())
-    return false;
-  auto const tab = tabs_[tab_index];
-  if (pTcItem->mask & TCIF_IMAGE)
-    pTcItem->iImage = tab->image_index_;
-
-  if (pTcItem->mask & TCIF_PARAM)
-    pTcItem->lParam = tab->lparam_;
-
-  if (pTcItem->mask & TCIF_STATE)
-    pTcItem->dwState = tab->state_ & pTcItem->dwStateMask;
-
-  if (pTcItem->mask & TCIF_TEXT) {
-    auto const cwch = std::min(tab->label_text_.length(),
-                               static_cast<size_t>(pTcItem->cchTextMax - 1));
-    ::CopyMemory(pTcItem->pszText, tab->label_text_.data(),
-                 sizeof(base::char16) * cwch);
-    pTcItem->pszText[cwch] = 0;
-  }
-  return true;
+    return nullptr;
+  return tabs_[tab_index]->tab_content();
 }
 
 void TabStrip::TabStripImpl::HandleTabListMenu(POINT) {
@@ -791,9 +779,9 @@ Element* TabStrip::TabStripImpl::HitTest(const gfx::PointF& point) const {
 }
 
 void TabStrip::TabStripImpl::InsertTab(size_t tab_index_in,
-                                       const TCITEM* pTcItem) {
+                                       TabContent* tab_content) {
   auto const tab_index = std::min(tab_index_in, tabs_.size());
-  auto const new_tab = new Tab(delegate_, pTcItem);
+  auto const new_tab = new Tab(delegate_, tab_content);
   tabs_.insert(tabs_.begin() + static_cast<ptrdiff_t>(tab_index), new_tab);
   RenumberTabIndex();
   tooltip_.AddTool(new_tab);
@@ -1030,11 +1018,11 @@ void TabStrip::TabStripImpl::SetBounds(const gfx::RectF& new_bounds) {
 }
 
 void TabStrip::TabStripImpl::SetTabData(size_t tab_index,
-                                        const TCITEM* tab_data) {
+                                        const domapi::TabData& tab_data) {
   if (tab_index >= tabs_.size())
     return;
   auto const tab = tabs_[tab_index];
-  if (!tab->SetTab(tab_data))
+  if (!tab->SetTabData(tab_data))
     return;
   tab->Invalidate(hwnd_);
 }
@@ -1163,19 +1151,19 @@ void TabStrip::DeleteTab(int tab_index) {
   impl_->DeleteTab(static_cast<size_t>(tab_index));
 }
 
-bool TabStrip::GetTab(int tab_index, TCITEM* tab_data) {
-  return impl_->GetTab(static_cast<size_t>(tab_index), tab_data);
+TabContent* TabStrip::GetTab(int tab_index) {
+  return impl_->GetTab(static_cast<size_t>(tab_index));
 }
 
-void TabStrip::InsertTab(int new_tab_index, const TCITEM* tab_data) {
-  impl_->InsertTab(static_cast<size_t>(new_tab_index), tab_data);
+void TabStrip::InsertTab(int new_tab_index, TabContent* tab_content) {
+  impl_->InsertTab(static_cast<size_t>(new_tab_index), tab_content);
 }
 
 void TabStrip::SelectTab(int tab_index) {
   impl_->SelectTab(static_cast<size_t>(tab_index));
 }
 
-void TabStrip::SetTab(int tab_index, const TCITEM* tab_data) {
+void TabStrip::SetTab(int tab_index, const domapi::TabData& tab_data) {
   impl_->SetTabData(static_cast<size_t>(tab_index), tab_data);
 }
 

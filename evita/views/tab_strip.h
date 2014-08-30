@@ -9,6 +9,10 @@
 
 #include "evita/ui/widget.h"
 
+namespace domapi {
+struct TabData;
+}
+
 namespace ui {
 class MouseEvent;
 }
@@ -18,6 +22,7 @@ namespace views {
 using common::win::Size;
 using common::win::Rect;
 
+class TabContent;
 class TabStripDelegate;
 
 class TabStrip : public ui::Widget {
@@ -35,11 +40,11 @@ class TabStrip : public ui::Widget {
   public: int number_of_tabs() const;
   public: int selected_index() const;
 
-  public: bool GetTab(int tab_index, TCITEM* tab_data);
+  public: TabContent* GetTab(int tab_index);
   public: void DeleteTab(int tab_index);
-  public: void InsertTab(int new_tab_index, const TCITEM* tab_data);
+  public: void InsertTab(int new_tab_index, TabContent* tab_content);
   public: void SelectTab(int tab_index);
-  public: void SetTab(int tab_index, const TCITEM* tab_data);
+  public: void SetTab(int tab_index, const domapi::TabData& tab_data);
 
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;

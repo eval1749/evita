@@ -110,11 +110,7 @@ void TabStripAnimator::Action::Cancel() {
 int TabStripAnimator::Action::FindTab(TabContent* tab_content) const {
   auto const num_tabs = tab_strip()->number_of_tabs();
   for (auto tab_index = 0; tab_index < num_tabs; ++tab_index) {
-    TCITEM tab_item;
-    tab_item.mask = TCIF_PARAM;
-    if (!tab_strip()->GetTab(tab_index, &tab_item))
-      continue;
-    if (reinterpret_cast<TabContent*>(tab_item.lParam) == tab_content)
+    if (tab_strip()->GetTab(tab_index) == tab_content)
       return tab_index;
   }
   return -1;
@@ -244,13 +240,8 @@ void TabStripAnimator::AddTab(TabContent* tab_content) {
   DCHECK(layer_);
   // Set dummy tab label. Actual tab label will be set later in
   // |Frame::UpdateTitleBar|.
-  TCITEM tab_item;
-  tab_item.mask = TCIF_IMAGE| TCIF_TEXT | TCIF_PARAM;
-  tab_item.pszText = L"?";
-  tab_item.lParam = reinterpret_cast<LPARAM>(tab_content);
-  tab_item.iImage = 0;
   auto const new_tab_item_index = tab_strip_->number_of_tabs();
-  tab_strip_->InsertTab(new_tab_item_index, &tab_item);
+  tab_strip_->InsertTab(new_tab_item_index, tab_content);
   RequestSelect(tab_content);
 }
 

@@ -33,7 +33,6 @@
 #include "evita/views/content_window.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/frame_observer.h"
-#include "evita/views/icon_cache.h"
 #include "evita/views/message_view.h"
 #include "evita/views/switches.h"
 #include "evita/views/tab_strip.h"
@@ -159,15 +158,6 @@ TabContent* Frame::GetRecentTabContent() {
   return recent_tab_content;
 }
 
-static TabContent* GetTabContentAt(views::TabStrip* tab_strip,
-                                   int const index) {
-  TCITEM tab_item;
-  tab_item.mask = TCIF_PARAM;
-  if (!tab_strip->GetTab(index, &tab_item))
-      return nullptr;
-  return reinterpret_cast<TabContent*>(tab_item.lParam);
-}
-
 Rect Frame::GetTabContentBounds() const {
   auto const message_view_height = message_view_->bounds().height();
   return gfx::Rect(bounds().left(), tab_strip_->bounds().bottom(),
@@ -176,7 +166,7 @@ Rect Frame::GetTabContentBounds() const {
 }
 
 TabContent* Frame::GetTabContentByTabIndex(int const index) const {
-  auto const present = GetTabContentAt(tab_strip_, index);
+  auto const present = tab_strip_->GetTab(index);
   if (!present)
     return nullptr;
 
@@ -191,7 +181,7 @@ TabContent* Frame::GetTabContentByTabIndex(int const index) const {
 int Frame::GetTabIndexOfTabContent(TabContent* const tab_content) const {
   auto const num_tabs = tab_strip_->number_of_tabs();
   for (auto tab_index = 0; tab_index < num_tabs; ++tab_index) {
-    if (GetTabContentAt(tab_strip_, tab_index) == tab_content)
+    if (tab_strip_->GetTab(tab_index) == tab_content)
       return tab_index;
   }
   return -1;
@@ -232,22 +222,8 @@ void Frame::UpdateTitleBar() {
     return;
   auto& title = tab_data->title;
   auto const tab_index = GetTabIndexOfTabContent(tab_content);
-  if (tab_index >= 0) {
-    TCITEM tab_item = {0};
-    tab_item.mask = TCIF_IMAGE | TCIF_STATE | TCIF_TEXT;
-    tab_item.pszText = const_cast<LPWSTR>(title.c_str());
-    tab_item.iImage = tab_data->icon;
-    tab_item.dwState = static_cast<DWORD>(
-        tab_data->state == domapi::TabData::State::Modified);
-    tab_item.dwStateMask = 1;
-    // TODO(yosi) We should not use magic value -2 for tab_data->icon.
-    if (tab_item.iImage == -2) {
-      tab_item.iImage = views::IconCache::instance()->GetIconForFileName(
-          tab_data->title);
-    }
-    tab_item.iImage = std::max(tab_item.iImage, 0);
-    tab_strip_->SetTab(tab_index, &tab_item);
-  }
+  if (tab_index >= 0)
+    tab_strip_->SetTab(tab_index, *tab_data);
 
   auto const window_title = title +
       (tab_data->state == domapi::TabData::State::Modified ? L" * " : L" - ") +

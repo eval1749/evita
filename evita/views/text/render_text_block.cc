@@ -289,8 +289,11 @@ void TextBlock::Format(text::Posn text_offset) {
 
   // Scroll up until we have |text_offset| in this |TextBlock|.
   while (text_offset > lines_.front()->GetEnd()) {
-    DiscardLastLine();
-    Append(FormatLine(&formatter));
+    DiscardFirstLine();
+    auto const line = FormatLine(&formatter);
+    Append(line);
+    if (line->GetEnd() >= text_buffer_->GetEnd())
+      break;
   }
   EnsureLinePoints();
   view_start_ = lines_.front()->GetStart();

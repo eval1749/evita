@@ -335,4 +335,12 @@ TEST_F(WindowTest, update) {
   EXPECT_SCRIPT_VALID("sample1.update()");
 }
 
+TEST_F(WindowTest, visible) {
+  EXPECT_SCRIPT_VALID("var sample1 = new SampleWindow();");
+  EXPECT_TRUE("sample1.visible === false");
+  view_event_handler()->DidChangeWindowVisibility(static_cast<dom::WindowId>(1),
+                                                  domapi::Visibility::Visible);
+  EXPECT_TRUE("sample1.visible === true");
+}
+
 }  // namespace

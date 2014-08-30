@@ -57,6 +57,9 @@ interface Window : ViewEventTarget {
   [ImplementedAs=JavaScript]
   attribute DOMString status;
 
+  [ImplementedAs=JavaScript]
+  readonly attribute boolean visible;
+
   [ImplementedAs=AddWindow]
   void appendChild(Window newChild);
 

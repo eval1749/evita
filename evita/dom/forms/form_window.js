@@ -11,6 +11,6 @@
    */
   FormWindow.handleEvent = function(event) {
     Form.handleEvent.call(this.form, event);
-    Window.handleEvent(event);
+    Window.handleEvent.call(this, event);
   };
 })();

@@ -47,8 +47,7 @@
        handleQueryClose(this);
        break;
      default:
-       console.log('EditorWindow.handlEvent received unsupported event',
-                   event);
+       Window.handleEvent.call(this, event);
        break;
    }
  };

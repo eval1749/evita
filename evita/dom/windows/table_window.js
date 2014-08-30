@@ -57,6 +57,6 @@
         handleIdle(this);
         break;
     }
-    Window.handleEvent(event);
+    Window.handleEvent.call(this, event);
   }
 })();

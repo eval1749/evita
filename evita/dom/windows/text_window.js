@@ -448,7 +448,7 @@ global.TextWindow.prototype.clone = function() {
         if (event instanceof CompositionEvent)
           handleCompositionEvent(this, event);
         else
-          Window.handleEvent(event);
+          Window.handleEvent.call(this, event);
         break;
     }
   };

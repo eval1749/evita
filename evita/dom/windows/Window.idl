@@ -58,10 +58,10 @@ interface Window : ViewEventTarget {
   attribute DOMString status;
 
   [ImplementedAs=AddWindow]
-  void appendChild(Window new_child);
+  void appendChild(Window newChild);
 
   [ImplementedAs=ChangeParentWindow]
-  void changeParent(Window new_parent);
+  void changeParent(Window newParent);
 
   void destroy();
   void focus();
@@ -74,7 +74,7 @@ interface Window : ViewEventTarget {
 
   void setCapture();
   void show();
-  void splitHorizontally(Window new_right_window);
-  void splitVertically(Window new_below_window);
+  void splitHorizontally(Window newRightWindow);
+  void splitVertically(Window newBelowWindow);
   void update();
 };

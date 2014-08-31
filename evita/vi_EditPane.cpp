@@ -12,6 +12,7 @@
 #include "base/memory/ref_counted.h"
 #include "common/castable.h"
 #include "common/tree/child_nodes.h"
+#include "common/tree/descendants_or_self.h"
 #include "common/tree/node.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
@@ -94,7 +95,7 @@ struct HitTestResult {
     HSplitterBig,
     VScrollBar,
     VSplitter,
-    ContentWindow,
+    Content,
   };
 
   EditPane::Box* box;
@@ -110,7 +111,7 @@ struct HitTestResult {
 
   explicit operator bool() const { return box; }
 
-  views::ContentWindow* window() const;
+  ContentWindow* window() const;
 };
 
 }  // namespace
@@ -133,22 +134,21 @@ class EditPane::Box : public Bounds,
 
   public: bool is_removed() const { return is_removed_; }
 
-  public: virtual int CountLeafBox() const;
+  public: int CountLeafBox() const;
   public: virtual void Destroy();
   public: virtual void DetachContent();
   public: void DidRemove();
   public: void EnsureInHorizontalBox();
   public: void EnsureInVerticalBox();
-  public: virtual Box* FindLeafBoxFromWidget(
-      const ui::Widget*) const;
-  public: virtual Box* GetActiveLeafBox() const;
-  public: virtual views::ContentWindow* GetContent() const;
-  public: virtual Box* GetFirstLeafBox() const;
+  public: Box* FindLeafBoxFromWidget(const ui::Widget*) const;
+  public: Box* GetActiveLeafBox() const;
+  public: virtual ContentWindow* GetContent() const;
+  public: Box* GetFirstLeafBox() const;
   public: virtual ::HitTestResult HitTest(const gfx::PointF& point) const = 0;
   public: virtual void MoveSplitter(const gfx::PointF&, Box*);
   public: virtual void Realize();
   public: void RemoveBox(Box*);
-  public: virtual void ReplaceContent(views::ContentWindow* new_content);
+  public: virtual void ReplaceContent(ContentWindow* new_content);
   public: virtual void Split(Box* ref_box, ContentWindow* new_window,
                              float new_box_size);
   public: virtual void StopSplitter(const gfx::Point&, Box*);
@@ -188,31 +188,28 @@ class HorizontalBox final : public EditPane::Box {
 class LeafBox final : public EditPane::Box {
   DECLARE_CASTABLE_CLASS(LeafBox, Box);
 
-  private: views::ContentWindow* content_;
+  private: ContentWindow* content_;
 
-  public: LeafBox(EditPane* edit_pane, views::ContentWindow* content);
+  public: LeafBox(EditPane* edit_pane, ContentWindow* content);
   public: virtual ~LeafBox();
 
   public: void DetachContent();
-  public: views::ContentWindow* GetWindow() const { return content_; }
-  private: bool HasSibling() const { return next_sibling() || previous_sibling(); }
+  public: ContentWindow* GetWindow() const { return content_; }
+  private: bool HasSibling() const {
+    return next_sibling() || previous_sibling();
+  }
 
   // Bounds
   private: void DidChangeBounds() override;
 
   // EditPane::Box
-  private: virtual int CountLeafBox() const override;
   private: virtual void Destroy() override;
-  private: virtual Box* FindLeafBoxFromWidget(
-      const ui::Widget*) const override;
-  private: virtual Box* GetActiveLeafBox() const override;
-  private: virtual views::ContentWindow* GetContent() const override;
-  private: virtual Box* GetFirstLeafBox() const override;
+  private: virtual ContentWindow* GetContent() const override;
   private: virtual HitTestResult HitTest(
       const gfx::PointF& point) const override;
   private: virtual void Realize() override;
   private: virtual void ReplaceContent(
-      views::ContentWindow* new_window) override;
+      ContentWindow* new_window) override;
 
   DISALLOW_COPY_AND_ASSIGN(LeafBox);
 };
@@ -374,7 +371,7 @@ void HorizontalBox::MoveSplitter(const gfx::PointF& point, Box* right_box) {
 }
 
 void HorizontalBox::Split(Box* left_box,
-                          views::ContentWindow* new_right_window,
+                          ContentWindow* new_right_window,
                           float new_right_width) {
   DCHECK(!new_right_window->is_realized());
   edit_pane_->AppendChild(new_right_window);
@@ -419,7 +416,7 @@ void HorizontalBox::StopSplitter(const gfx::Point& point, Box* below_box) {
 //
 // HitTestResult
 //
-views::ContentWindow* HitTestResult::window() const {
+ContentWindow* HitTestResult::window() const {
   return box->GetContent();
 }
 
@@ -427,7 +424,7 @@ views::ContentWindow* HitTestResult::window() const {
 //
 // LeafBox
 //
-LeafBox::LeafBox(EditPane* edit_pane, views::ContentWindow* content)
+LeafBox::LeafBox(EditPane* edit_pane, ContentWindow* content)
     : Box(edit_pane), content_(content) {
 }
 
@@ -447,34 +444,18 @@ void LeafBox::DidChangeBounds() {
 }
 
 // EditPane::Box
-int LeafBox::CountLeafBox() const {
-  return 1;
-}
-
 void LeafBox::Destroy() {
   GetWindow()->DestroyWidget();
 }
 
-EditPane::Box* LeafBox::GetActiveLeafBox() const {
-  return const_cast<LeafBox*>(this);
-}
-
-views::ContentWindow* LeafBox::GetContent() const {
+ContentWindow* LeafBox::GetContent() const {
   return content_;
-}
-
-EditPane::Box* LeafBox::GetFirstLeafBox() const {
-  return const_cast<LeafBox*>(this);
-}
-
-EditPane::Box* LeafBox::FindLeafBoxFromWidget(const ui::Widget* window) const {
-  return window == content_ ? const_cast<LeafBox*>(this) : nullptr;
 }
 
 HitTestResult LeafBox::HitTest(const gfx::PointF& point) const {
   if (!bounds().Contains(point))
     return HitTestResult();
-  return HitTestResult(HitTestResult::ContentWindow, this);
+  return HitTestResult(HitTestResult::Content, this);
 }
 
 void LeafBox::Realize() {
@@ -483,7 +464,7 @@ void LeafBox::Realize() {
   content_->Realize(gfx::ToEnclosingRect(bounds()));
 }
 
-void LeafBox::ReplaceContent(views::ContentWindow* content) {
+void LeafBox::ReplaceContent(ContentWindow* content) {
   DCHECK(!content->parent_node());
   DCHECK(!content->is_realized());
   auto const previous_content = content_;
@@ -593,7 +574,7 @@ void VerticalBox::MoveSplitter(const gfx::PointF& point, Box* below_box) {
 }
 
 void VerticalBox::Split(Box* above_box,
-                        views::ContentWindow* below_window,
+                        ContentWindow* below_window,
                         float below_box_height) {
   DCHECK(!below_window->is_realized());
   DCHECK_GE(below_box_height, kMinBoxHeight);
@@ -658,8 +639,9 @@ EditPane::Box::~Box() {
 int EditPane::Box::CountLeafBox() const {
   DCHECK(!is_removed());
   auto count = 0;
-  for (const auto child : child_nodes()) {
-    count += child->CountLeafBox();
+  for (const auto child : common::tree::descendants_or_self(this)) {
+    if (child->is<LeafBox>())
+      ++count;
   }
   return count;
 }
@@ -706,9 +688,12 @@ void EditPane::Box::EnsureInVerticalBox() {
 EditPane::Box* EditPane::Box::FindLeafBoxFromWidget(
     const ui::Widget* window) const {
   DCHECK(!is_removed());
-  for (const auto child : child_nodes()) {
-    if (auto const box = child->FindLeafBoxFromWidget(window))
-      return box;
+  for (const auto child : common::tree::descendants_or_self(this)) {
+    auto const leaf_box = child->as<LeafBox>();
+    if (!leaf_box)
+      continue;
+    if (leaf_box->GetWindow() == window)
+      return const_cast<Box*>(child);
   }
   return nullptr;
 }
@@ -728,22 +713,27 @@ EditPane::Box* EditPane::Box::GetActiveLeafBox() const {
   };
 
   auto candidate = static_cast<Box*>(nullptr);
-  for (auto child : child_nodes()) {
-    auto const other = child->GetActiveLeafBox();
-    //if (other && other->GetWindow()->visible())
-    candidate = Local::SelectActiveBox(candidate, other);
+  for (auto child : common::tree::descendants_or_self(this)) {
+    auto const leaf_box = const_cast<LeafBox*>(child->as<LeafBox>());
+    if (!leaf_box)
+      continue;
+    candidate = Local::SelectActiveBox(candidate, leaf_box);
   }
   return candidate;
 }
 
-views::ContentWindow* EditPane::Box::GetContent() const {
+ContentWindow* EditPane::Box::GetContent() const {
   NOTREACHED();
   return nullptr;
 }
 
 EditPane::Box* EditPane::Box::GetFirstLeafBox() const {
   DCHECK(!is_removed());
-  return first_child() ? first_child()->GetFirstLeafBox() : nullptr;
+  for (auto child : common::tree::descendants_or_self(this)) {
+    if (auto const leaf_box = const_cast<LeafBox*>(child->as<LeafBox>()))
+      return leaf_box;
+  }
+  return nullptr;
 }
 
 void EditPane::Box::MoveSplitter(const gfx::PointF&, Box*) {
@@ -784,11 +774,11 @@ void EditPane::Box::RemoveBox(Box* box) {
   DidRemove();
 }
 
-void EditPane::Box::ReplaceContent(views::ContentWindow*) {
+void EditPane::Box::ReplaceContent(ContentWindow*) {
   NOTREACHED();
 }
 
-void EditPane::Box::Split(Box*, views::ContentWindow*, float) {
+void EditPane::Box::Split(Box*, ContentWindow*, float) {
   NOTREACHED();
 }
 
@@ -899,17 +889,17 @@ bool EditPane::has_more_than_one_child() const {
 }
 
 // Returns the last active Box.
-views::ContentWindow* EditPane::GetActiveWindow() const {
+ContentWindow* EditPane::GetActiveWindow() const {
   auto const box = root_box_->GetActiveLeafBox();
   return box ? box->GetContent() : nullptr;
 }
 
-void EditPane::ReplaceActiveContent(views::ContentWindow* content) {
+void EditPane::ReplaceActiveContent(ContentWindow* content) {
   DCHECK(!content->is_realized());
   root_box_->GetActiveLeafBox()->ReplaceContent(content);
 }
 
-void EditPane::SetContent(views::ContentWindow* content) {
+void EditPane::SetContent(ContentWindow* content) {
   DCHECK(!root_box_->first_child());
   auto const box = new LeafBox(this, content);
   root_box_->AppendChild(box);

@@ -21,3 +21,15 @@ windows.newEditorWindow = function(document) {};
  * @param {!Document} document
  */
 windows.newTextWindow = function(window, document) {};
+
+/**
+ * @param {!Window} current
+ * @return {?Window}
+ */
+windows.nextWindow = function(current) {};
+
+/**
+ * @param {!Window} current
+ * @return {?Window}
+ */
+windows.previousWindow = function(current) {};

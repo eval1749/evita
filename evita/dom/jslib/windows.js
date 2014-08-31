@@ -35,9 +35,43 @@ global.windows = Object.create({}, (function() {
     parent.appendChild(new TextWindow(new Range(document)));
   }
 
+  /**
+   * @param {!Window} current
+   * @return {?Window}
+   */
+  function nextWindow(current) {
+    if (current.nextSibling)
+      return current.nextSibling;
+    var windows = EditorWindow.list;
+    var index = windows.findIndex(function(window) {
+      return window === current.parent;
+    });
+    if (windows[index + 1])
+      return windows[index + 1].firstChild;
+    return null;
+  }
+
+  /**
+   * @param {!Window} current
+   * @return {?Window}
+   */
+  function previousWindow(current) {
+    if (current.previousSibling)
+      return current.previousSibling;
+    var windows = EditorWindow.list;
+    var index = windows.findIndex(function(window) {
+      return window === current.parent;
+    });
+    if (index > 0 && windows[index - 1])
+      return windows[index - 1].firstChild;
+    return null;
+  }
+
   return {
     activate: {value: activate},
     newEditorWindow: {value: newEditorWindow},
     newTextWindow: {value: newTextWindow},
+    nextWindow: {value: nextWindow},
+    previousWindow: {value: previousWindow}
   };
 })());

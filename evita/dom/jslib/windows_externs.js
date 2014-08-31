@@ -12,6 +12,16 @@ var windows;
 windows.activate = function(window, document) {};
 
 /**
+ * @return {?Window}
+ */
+windows.firstWindow = function() {};
+
+/**
+ * @return {?Window}
+ */
+windows.lastWindow = function() {};
+
+/**
  * @param {!Document} document
  */
 windows.newEditorWindow = function(document) {};

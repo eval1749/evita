@@ -153,18 +153,15 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+Shift+Tab', function() {
-    if (this.previousSibling) {
-      this.previousSibling.focus();
+    var previousWindow = windows.previousWindow(this);
+    if (previousWindow) {
+      previousWindow.focus();
       return;
     }
-
-    if (this.parent.previousSibling) {
-      this.parent.previousSibling.lastChild.focus();
+    var lastWindow = windows.lastWindow();
+    if (lastWindow === this)
       return;
-    }
-
-    var top_level_windows = EditorWindow.list;
-    top_level_windows[top_level_windows.length - 1].lastChild.focus();
+    lastWindow.focus();
   });
 
   /**
@@ -182,16 +179,14 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+Tab', function() {
-    if (this.nextSibling) {
-      this.nextSibling.focus();
+    var nextWindow = windows.nextWindow(this);
+    if (nextWindow) {
+      nextWindow.focus();
       return;
     }
-
-    if (this.parent.nextSibling) {
-      this.parent.nextSibling.firstChild.focus();
+    var firstWindow = windows.firstWindow();
+    if (firstWindow === this)
       return;
-    }
-
-    EditorWindow.list[0].firstChild.focus();
+    firstWindow.focus();
   });
 })();

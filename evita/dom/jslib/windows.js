@@ -19,12 +19,31 @@ global.windows = Object.create({}, (function() {
   }
 
   /**
+   * @return {?Window}
+   */
+  function firstWindow() {
+    var editorWindow = EditorWindow.list[0];
+    return editorWindow ? editorWindow.firstChild : null;
+  }
+
+  /**
+   * @return {?Window}
+   */
+  function lastWindow() {
+    var editorWindows = EditorWindow.list;
+    if (!editorWindows.length)
+      return null;
+    var editorWindow = editorWindows[editorWindows.length - 1];
+    return editorWindows ? editorWindow.lastChild : null;
+  }
+
+  /**
    * @param {!Document} document
    */
   function newEditorWindow(document) {
-    var editor_window = new EditorWindow();
-    windows.newTextWindow(editor_window, document);
-    editor_window.realize();
+    var editorWindow = new EditorWindow();
+    windows.newTextWindow(editorWindow, document);
+    editorWindow.realize();
   }
 
   /**
@@ -42,13 +61,12 @@ global.windows = Object.create({}, (function() {
   function nextWindow(current) {
     if (current.nextSibling)
       return current.nextSibling;
-    var windows = EditorWindow.list;
-    var index = windows.findIndex(function(window) {
+    var editorWindows = EditorWindow.list;
+    var index = editorWindows.findIndex(function(window) {
       return window === current.parent;
     });
-    if (windows[index + 1])
-      return windows[index + 1].firstChild;
-    return null;
+    var editorWindow = editorWindows[index + 1];
+    return editorWindow ? editorWindow.firstChild : null;
   }
 
   /**
@@ -58,17 +76,18 @@ global.windows = Object.create({}, (function() {
   function previousWindow(current) {
     if (current.previousSibling)
       return current.previousSibling;
-    var windows = EditorWindow.list;
-    var index = windows.findIndex(function(window) {
+    var editorWindows = EditorWindow.list;
+    var index = editorWindows.findIndex(function(window) {
       return window === current.parent;
     });
-    if (index > 0 && windows[index - 1])
-      return windows[index - 1].firstChild;
-    return null;
+    var editorWindow = editorWindows[index - 1];
+    return editorWindow ? editorWindow.lastChild : null;
   }
 
   return {
     activate: {value: activate},
+    firstWindow: {value: firstWindow},
+    lastWindow: {value: lastWindow},
     newEditorWindow: {value: newEditorWindow},
     newTextWindow: {value: newTextWindow},
     nextWindow: {value: nextWindow},

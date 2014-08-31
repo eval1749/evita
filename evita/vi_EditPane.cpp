@@ -20,6 +20,7 @@
 #include "evita/gfx/rect_conversions.h"
 #include "evita/editor/application.h"
 #include "evita/resource.h"
+#include "evita/ui/animation/animation_observer.h"
 #include "evita/ui/animation/window_animator.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/events/event.h"
@@ -127,6 +128,7 @@ class EditPane::Box : public Bounds,
   DECLARE_CASTABLE_CLASS(Box, Castable);
 
   protected: EditPane* edit_pane_;
+  private: bool is_content_visible_;
   private: bool is_removed_;
 
   protected: Box(EditPane* edit_pane);
@@ -137,7 +139,10 @@ class EditPane::Box : public Bounds,
   public: int CountLeafBox() const;
   public: virtual void Destroy();
   public: virtual void DetachContent();
+  public: virtual void DidHide();
   public: void DidRemove();
+  public: virtual void DidShow();
+  public: void DidShowChildContent(Box* child);
   public: void EnsureInHorizontalBox();
   public: void EnsureInVerticalBox();
   public: Box* FindLeafBoxFromWidget(const ui::Widget*) const;
@@ -153,6 +158,9 @@ class EditPane::Box : public Bounds,
                              float new_box_size);
   public: virtual void StopSplitter(const gfx::Point&, Box*);
   public: void WillRemoveChild(Box* child);
+
+  // Bounds
+  protected: void DidChangeBounds() override;
 
   DISALLOW_COPY_AND_ASSIGN(Box);
 };
@@ -185,31 +193,34 @@ class HorizontalBox final : public EditPane::Box {
 //
 // LeafBox
 //
-class LeafBox final : public EditPane::Box {
+class LeafBox final : public EditPane::Box, public ui::AnimationObserver {
   DECLARE_CASTABLE_CLASS(LeafBox, Box);
 
   private: ContentWindow* content_;
+  private: bool observing_;
 
   public: LeafBox(EditPane* edit_pane, ContentWindow* content);
   public: virtual ~LeafBox();
 
   public: void DetachContent();
-  public: ContentWindow* GetWindow() const { return content_; }
-  private: bool HasSibling() const {
-    return next_sibling() || previous_sibling();
-  }
+  private: void DoNotObserveContent();
+  private: void ObserveContent();
 
   // Bounds
   private: void DidChangeBounds() override;
 
   // EditPane::Box
   private: virtual void Destroy() override;
+  private: virtual void DidHide() override;
+  private: virtual void DidShow() override;
   private: virtual ContentWindow* GetContent() const override;
   private: virtual HitTestResult HitTest(
       const gfx::PointF& point) const override;
   private: virtual void Realize() override;
-  private: virtual void ReplaceContent(
-      ContentWindow* new_window) override;
+  private: virtual void ReplaceContent(ContentWindow* new_window) override;
+
+  // ui::AnimationObserver
+  private: virtual void DidAnimate(ui::Animatable* animatable) override;
 
   DISALLOW_COPY_AND_ASSIGN(LeafBox);
 };
@@ -425,27 +436,57 @@ ContentWindow* HitTestResult::window() const {
 // LeafBox
 //
 LeafBox::LeafBox(EditPane* edit_pane, ContentWindow* content)
-    : Box(edit_pane), content_(content) {
+    : Box(edit_pane), content_(content), observing_(false) {
+  if (!content_->is_realized())
+    return;
+  ObserveContent();
 }
 
 LeafBox::~LeafBox() {
   DCHECK(!content_);
+  DCHECK(!observing_);
 }
 
 void LeafBox::DetachContent() {
-  content_->RemoveObserver(edit_pane_);
+  DoNotObserveContent();
   content_ = nullptr;
+}
+
+void LeafBox::DoNotObserveContent() {
+  if (!observing_)
+    return;
+  observing_ = false;
+  content_->RemoveObserver(this);
+}
+
+void LeafBox::ObserveContent() {
+  if (observing_)
+    return;
+  observing_ = true;
+  content_->AddObserver(this);
 }
 
 // Bounds
 void LeafBox::DidChangeBounds() {
   Box::DidChangeBounds();
+  ObserveContent();
   content_->SetBounds(gfx::ToEnclosingRect(bounds()));
 }
 
 // EditPane::Box
 void LeafBox::Destroy() {
-  GetWindow()->DestroyWidget();
+  DoNotObserveContent();
+  content_->DestroyWidget();
+}
+
+void LeafBox::DidHide() {
+  Box::DidHide();
+  DoNotObserveContent();
+}
+
+void LeafBox::DidShow() {
+  Box::DidShow();
+  ObserveContent();
 }
 
 ContentWindow* LeafBox::GetContent() const {
@@ -460,6 +501,7 @@ HitTestResult LeafBox::HitTest(const gfx::PointF& point) const {
 
 void LeafBox::Realize() {
   Box::Realize();
+  ObserveContent();
   edit_pane_->window_animator()->Realize(content_);
   content_->Realize(gfx::ToEnclosingRect(bounds()));
 }
@@ -472,6 +514,13 @@ void LeafBox::ReplaceContent(ContentWindow* content) {
   edit_pane_->AppendChild(content);
   edit_pane_->window_animator()->Replace(content_, previous_content);
   content_->Realize(gfx::ToEnclosingRect(bounds()));
+}
+
+// ui::AnimationObserver
+void LeafBox::DidAnimate(ui::Animatable* animatable) {
+  DCHECK_EQ(animatable, content_);
+  DoNotObserveContent();
+  parent_node()->DidShowChildContent(this);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -624,8 +673,7 @@ void VerticalBox::StopSplitter(const gfx::Point& point, Box* below_box) {
 // EditPane::Box
 //
 EditPane::Box::Box(EditPane* edit_pane)
-    : edit_pane_(edit_pane),
-      is_removed_(false) {
+    : edit_pane_(edit_pane), is_content_visible_(false), is_removed_(false) {
 }
 
 EditPane::Box::~Box() {
@@ -658,9 +706,38 @@ void EditPane::Box::DetachContent() {
   NOTREACHED();
 }
 
+void EditPane::Box::DidHide() {
+  is_content_visible_ = false;
+  for (auto const child : child_nodes()) {
+    child->DidHide();
+  }
+}
+
 void EditPane::Box::DidRemove() {
   DCHECK(!is_removed());
   is_removed_ = true;
+}
+
+void EditPane::Box::DidShow() {
+  is_content_visible_ = false;
+  for (auto const child : child_nodes()) {
+    child->DidShow();
+  }
+}
+
+void EditPane::Box::DidShowChildContent(Box* child) {
+  child->is_content_visible_ = true;
+  for (auto const child : child_nodes()) {
+    if (!child->is_content_visible_)
+      return;
+  }
+  if (parent_node()) {
+    parent_node()->DidShowChildContent(this);
+    return;
+  }
+  // All contents are animated, we notify observers this tab content is
+  // animated.
+  edit_pane_->DidAnimateTabContent();
 }
 
 void EditPane::Box::EnsureInHorizontalBox() {
@@ -689,10 +766,7 @@ EditPane::Box* EditPane::Box::FindLeafBoxFromWidget(
     const ui::Widget* window) const {
   DCHECK(!is_removed());
   for (const auto child : common::tree::descendants_or_self(this)) {
-    auto const leaf_box = child->as<LeafBox>();
-    if (!leaf_box)
-      continue;
-    if (leaf_box->GetWindow() == window)
+    if (child->GetContent() == window)
       return const_cast<Box*>(child);
   }
   return nullptr;
@@ -723,7 +797,6 @@ EditPane::Box* EditPane::Box::GetActiveLeafBox() const {
 }
 
 ContentWindow* EditPane::Box::GetContent() const {
-  NOTREACHED();
   return nullptr;
 }
 
@@ -794,6 +867,12 @@ void EditPane::Box::WillRemoveChild(Box* child) {
     next_sibling->SetBounds(gfx::RectF(
         child->origin(), next_sibling->bottom_right()));
   }
+}
+
+// Bounds
+void EditPane::Box::DidChangeBounds() {
+  Bounds::DidChangeBounds();
+  is_content_visible_ = false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -912,8 +991,6 @@ void EditPane::SetContent(ContentWindow* content) {
     content->SetBounds(gfx::ToEnclosingRect(box_bounds));
   }
 
-  if (is_realized())
-    content->AddObserver(this);
   if (!content->is_realized())
     window_animator()->Realize(content);
   content->SetParentWidget(this);
@@ -961,38 +1038,15 @@ void EditPane::SplitVertically(ContentWindow* above_window,
   above_window->MakeSelectionVisible();
 }
 
-// ui::AnimationObserver
-void EditPane::DidAnimate(ui::Animatable* animatable) {
-  animated_contents_.insert(animatable);
-  animatable->RemoveObserver(this);
-  for (auto child : child_nodes()) {
-    auto const animatable = child->as<ui::AnimatableWindow>();
-    if (!animatable)
-      continue;
-    if (animated_contents_.find(animatable) == animated_contents_.end())
-      return;
-  }
-  // All contents are animated, we notify observers this tab content is
-  // animated.
-  DidAnimateTabContent();
-}
-
 // ui::Widget
 void EditPane::DidChangeBounds() {
   TabContent::DidChangeBounds();
   root_box_->SetBounds(GetContentsBounds());
-  animated_contents_.clear();
 }
 
 void EditPane::DidHide() {
   TabContent::DidHide();
-  animated_contents_.clear();
-  for (auto child : child_nodes()) {
-    auto const animatable = child->as<ui::AnimatableWindow>();
-    if (!animatable)
-      continue;
-    animatable->RemoveObserver(this);
-  }
+  root_box_->DidHide();
 }
 
 void EditPane::DidRealizeChildWidget(const ui::Widget& window) {
@@ -1027,13 +1081,7 @@ void EditPane::DidSetFocus(ui::Widget*) {
 
 void EditPane::DidShow() {
   TabContent::DidShow();
-  animated_contents_.clear();
-  for (auto child : child_nodes()) {
-    auto const animatable = child->as<ui::AnimatableWindow>();
-    if (!animatable)
-      continue;
-    animatable->AddObserver(this);
-  }
+  root_box_->DidShow();
 }
 
 HCURSOR EditPane::GetCursorAt(const gfx::Point& point) const {

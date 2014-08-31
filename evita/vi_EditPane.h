@@ -5,10 +5,6 @@
 #if !defined(INCLUDE_evita_vi_EditPane_h)
 #define INCLUDE_evita_vi_EditPane_h
 
-#include <unordered_set>
-
-#include "base/memory/ref_counted.h"
-#include "evita/ui/animation/animation_observer.h"
 #include "evita/views/tab_content.h"
 
 class Frame;
@@ -28,7 +24,7 @@ class ContentWindow;
 
 // EditPane is a container of multiple ContentWindow windows and layouts
 // them vertically with draggable splitter.
-class EditPane final : public views::TabContent, public ui::AnimationObserver {
+class EditPane final : public views::TabContent {
   DECLARE_CASTABLE_CLASS(EditPane, TabContent);
 
   private: typedef views::ContentWindow ContentWindow;
@@ -37,7 +33,6 @@ class EditPane final : public views::TabContent, public ui::AnimationObserver {
   private: class SplitterController;
 
   private: std::unique_ptr<ui::WindowAnimator> window_animator_;
-  private: std::unordered_set<ui::Animatable*> animated_contents_;
   private: scoped_refptr<Box> root_box_;
   private: const std::unique_ptr<SplitterController> splitter_controller_;
 
@@ -54,9 +49,6 @@ class EditPane final : public views::TabContent, public ui::AnimationObserver {
                                  ContentWindow* new_right_window);
   public: void SplitVertically(ContentWindow* above_window,
                                ContentWindow* new_below_window);
-
-  // ui::AnimationObserver
-  private: virtual void DidAnimate(ui::Animatable* animatable) override;
 
   // ui::Widget
   private: virtual void DidChangeBounds() override;

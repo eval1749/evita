@@ -1,11 +1,23 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+/** @type {!Object} */
+var windows;
 
 /**
- * @const @type{{
- *  activate: function(!Window, !Document),
- *  newEditorWindow: function(!Document),
- *  newTextWindow: function(!Window, !Document)
- * }}
+ * @param {!Window} window
+ * @param {!Document} document
  */
-var windows;
+windows.activate = function(window, document) {};
+
+/**
+ * @param {!Document} document
+ */
+windows.newEditorWindow = function(document) {};
+
+/**
+ * @param {!Window} window
+ * @param {!Document} document
+ */
+windows.newTextWindow = function(window, document) {};

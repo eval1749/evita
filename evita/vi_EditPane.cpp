@@ -12,6 +12,7 @@
 #include "base/memory/ref_counted.h"
 #include "common/castable.h"
 #include "common/tree/child_nodes.h"
+#include "common/tree/node.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/gfx_base.h"
@@ -118,30 +119,20 @@ struct HitTestResult {
 //
 // EditPane::Box
 //
-class EditPane::Box : public DoubleLinkedNode_<EditPane::Box>,
-                      public Bounds,
+class EditPane::Box : public Bounds,
                       public base::RefCounted<EditPane::Box>,
+                      public common::tree::Node<EditPane::Box>,
                       public common::Castable {
   DECLARE_CASTABLE_CLASS(Box, Castable);
 
-  protected: typedef DoubleLinkedList_<Box> BoxList;
-
-  protected: BoxList boxes_;
   protected: EditPane* edit_pane_;
   private: bool is_removed_;
-  private: Box* outer_;
 
-  protected: Box(EditPane* edit_pane, Box* outer);
+  protected: Box(EditPane* edit_pane);
   public: virtual ~Box();
 
-  public: Box* first_child() const { return boxes_.GetFirst(); }
   public: bool is_removed() const { return is_removed_; }
-  public: Box* next_sibling() const { return GetNext(); }
-  public: Box* outer() const { return outer_; }
-  public: void set_outer(Box* outer) { outer_ = outer; }
-  public: Box* previous_sibling() const { return GetPrev(); }
 
-  public: void Add(Box* box);
   public: virtual int CountLeafBox() const;
   public: virtual void Destroy();
   public: virtual void DetachContent();
@@ -157,7 +148,6 @@ class EditPane::Box : public DoubleLinkedNode_<EditPane::Box>,
   public: virtual void MoveSplitter(const gfx::PointF&, Box*);
   public: virtual void Realize();
   public: void RemoveBox(Box*);
-  public: void Replace(Box*, Box*);
   public: virtual void ReplaceContent(views::ContentWindow* new_content);
   public: virtual void Split(Box* ref_box, ContentWindow* new_window,
                              float new_box_size);
@@ -176,7 +166,7 @@ namespace {
 class HorizontalBox final : public EditPane::Box {
   DECLARE_CASTABLE_CLASS(HorizontalBox, Box);
 
-  public: HorizontalBox(EditPane* edit_pane, Box* outer);
+  public: HorizontalBox(EditPane* edit_pane);
   public: virtual ~HorizontalBox() = default;
 
   // EditPane::Box
@@ -200,13 +190,12 @@ class LeafBox final : public EditPane::Box {
 
   private: views::ContentWindow* content_;
 
-  public: LeafBox(EditPane* edit_pane, Box* outer,
-                  views::ContentWindow* pWindow);
+  public: LeafBox(EditPane* edit_pane, views::ContentWindow* content);
   public: virtual ~LeafBox();
 
   public: void DetachContent();
   public: views::ContentWindow* GetWindow() const { return content_; }
-  private: bool HasSibling() const { return GetNext() || GetPrev(); }
+  private: bool HasSibling() const { return next_sibling() || previous_sibling(); }
 
   // Bounds
   private: void DidChangeBounds() override;
@@ -235,7 +224,7 @@ class LeafBox final : public EditPane::Box {
 class VerticalBox final : public EditPane::Box {
   DECLARE_CASTABLE_CLASS(VerticalBox, Box);
 
-  public: VerticalBox(EditPane* edit_pane, Box* outer);
+  public: VerticalBox(EditPane* edit_pane);
   public: virtual ~VerticalBox();
 
   // Bounds
@@ -283,36 +272,39 @@ class StockCursor {
 //
 // HorizontalBox
 //
-HorizontalBox::HorizontalBox(EditPane* edit_pane,
-                                         Box* outer)
-    : Box(edit_pane, outer) {
+HorizontalBox::HorizontalBox(EditPane* edit_pane)
+    : Box(edit_pane) {
 }
 
 void HorizontalBox::DidChangeBounds() {
   for (;;) {
-    auto const num_boxes = boxes_.Count();
+    auto num_boxes = 0;
+    for (auto child : child_nodes()) {
+      static_cast<void>(child);
+      ++num_boxes;
+    }
     if (!num_boxes)
       return;
 
     if (num_boxes == 1) {
-      boxes_.GetFirst()->SetBounds(bounds());
+      first_child()->SetBounds(bounds());
       return;
     }
 
     auto old_width = -kSplitterWidth;
-    for (const auto& child : boxes_) {
-      old_width += child.width() + kSplitterWidth;
+    for (const auto child : child_nodes()) {
+      old_width += child->width() + kSplitterWidth;
     }
     DCHECK_GE(old_width, kMinBoxWidth);
     auto const scale = width() / old_width;
 
     // Find smallest child box smaller than minimum box.
     auto child_to_remove = static_cast<Box*>(nullptr);
-    for (auto& child : boxes_) {
-      auto const new_child_width = ::floor(child.width() * scale);
+    for (auto child : child_nodes()) {
+      auto const new_child_width = ::floor(child->width() * scale);
       if (new_child_width < kMinBoxWidth && !child_to_remove &&
-          child_to_remove->width() >= child.width()) {
-        child_to_remove = &child;
+          child_to_remove->width() >= child->width()) {
+        child_to_remove = child;
       }
     }
 
@@ -324,14 +316,14 @@ void HorizontalBox::DidChangeBounds() {
     // Layout child boxes
     auto num_rest = num_boxes;
     auto child_origin = origin();
-    for (auto& child : boxes_){
+    for (auto child : child_nodes()){
       --num_rest;
       if (!num_rest) {
-        child.SetBounds(gfx::RectF(child_origin, bottom_right()));
+        child->SetBounds(gfx::RectF(child_origin, bottom_right()));
         break;
       }
-      auto const new_child_width = ::floor(child.width() * scale);
-      child.SetBounds(gfx::RectF(
+      auto const new_child_width = ::floor(child->width() * scale);
+      child->SetBounds(gfx::RectF(
           child_origin, gfx::SizeF(new_child_width, height())));
       child_origin += gfx::SizeF(new_child_width + kSplitterWidth, 0.0f);
     }
@@ -343,29 +335,26 @@ HitTestResult HorizontalBox::HitTest(const gfx::PointF& point) const {
   if (!bounds().Contains(point))
     return HitTestResult();
 
-  auto num_rest = boxes_.Count();
-  for (const auto& child : boxes_) {
-    if (auto const result = child.HitTest(point))
+  for (const auto child : child_nodes()) {
+    if (auto const result = child->HitTest(point))
       return result;
-    --num_rest;
-    if (!num_rest)
+    if (!child->next_sibling())
       break;
     auto const spliiter_bounds = gfx::RectF(
-        gfx::PointF(child.right(), child.top()),
+        gfx::PointF(child->right(), child->top()),
         gfx::SizeF(kSplitterWidth, height()));
     if (spliiter_bounds.Contains(point))
-      return HitTestResult(HitTestResult::HSplitter, &child);
+      return HitTestResult(HitTestResult::HSplitter, child);
   }
 
   NOTREACHED();
   return HitTestResult();
 }
 
-void HorizontalBox::MoveSplitter(const gfx::PointF& point,
-                                       Box* right_box) {
-  if (!right_box->GetPrev())
+void HorizontalBox::MoveSplitter(const gfx::PointF& point, Box* right_box) {
+  if (!right_box->previous_sibling())
     return;
-  auto& left_box = *right_box->GetPrev();
+  auto& left_box = *right_box->previous_sibling();
   if (point.x - left_box.left() <= 0.0f) {
     // Above box is too small.
     return;
@@ -390,8 +379,8 @@ void HorizontalBox::Split(Box* left_box,
   DCHECK(!new_right_window->is_realized());
   edit_pane_->AppendChild(new_right_window);
 
-  auto right_box = new LeafBox(edit_pane_, this, new_right_window);
-  boxes_.InsertAfter(right_box, left_box);
+  auto right_box = new LeafBox(edit_pane_, new_right_window);
+  InsertAfter(right_box, left_box);
   right_box->AddRef();
 
   left_box->set_bounds(gfx::RectF(left_box->origin(),
@@ -405,9 +394,8 @@ void HorizontalBox::Split(Box* left_box,
   new_right_window->RealizeWidget();
 }
 
-void HorizontalBox::StopSplitter(const gfx::Point& point,
-                                       Box* below_box) {
-  auto const above_box = below_box->GetPrev();
+void HorizontalBox::StopSplitter(const gfx::Point& point, Box* below_box) {
+  auto const above_box = below_box->previous_sibling();
   if (!above_box)
     return;
 
@@ -439,9 +427,8 @@ views::ContentWindow* HitTestResult::window() const {
 //
 // LeafBox
 //
-LeafBox::LeafBox(EditPane* edit_pane, Box* outer,
-                 views::ContentWindow* content)
-    : Box(edit_pane, outer), content_(content) {
+LeafBox::LeafBox(EditPane* edit_pane, views::ContentWindow* content)
+    : Box(edit_pane), content_(content) {
 }
 
 LeafBox::~LeafBox() {
@@ -510,8 +497,8 @@ void LeafBox::ReplaceContent(views::ContentWindow* content) {
 //
 // VerticalBox
 //
-VerticalBox::VerticalBox(EditPane* edit_pane, Box* outer)
-    : Box(edit_pane, outer) {}
+VerticalBox::VerticalBox(EditPane* edit_pane)
+    : Box(edit_pane) {}
 
 VerticalBox::~VerticalBox() {
 }
@@ -519,29 +506,27 @@ VerticalBox::~VerticalBox() {
 // EditPane::Box
 void VerticalBox::DidChangeBounds() {
   for (;;) {
-    auto const num_boxes = boxes_.Count();
-    if (!num_boxes)
+    if (!first_child())
       return;
-
-    if (num_boxes == 1) {
-      boxes_.GetFirst()->SetBounds(bounds());
+    if (!first_child()->next_sibling()) {
+      first_child()->SetBounds(bounds());
       return;
     }
 
     auto old_height = -kSplitterHeight;
-    for (const auto& child : boxes_) {
-      old_height += child.height() + kSplitterHeight;
+    for (const auto child : child_nodes()) {
+      old_height += child->height() + kSplitterHeight;
     }
     DCHECK_GE(old_height, kMinBoxHeight);
     auto const scale = height() / old_height;
 
     // Find smallest child box smaller than minimum box.
     auto child_to_remove = static_cast<Box*>(nullptr);
-    for (auto& child : boxes_) {
-      auto const new_child_height = ::floor(child.height() * scale);
+    for (auto child : child_nodes()) {
+      auto const new_child_height = ::floor(child->height() * scale);
       if (new_child_height < kMinBoxHeight && !child_to_remove &&
-          child_to_remove->height() >= child.height()) {
-        child_to_remove = &child;
+          child_to_remove->height() >= child->height()) {
+        child_to_remove = child;
       }
     }
 
@@ -551,16 +536,14 @@ void VerticalBox::DidChangeBounds() {
     }
 
     // Layout child boxes
-    auto num_rest = num_boxes;
     auto child_origin = origin();
-    for (auto& child : boxes_){
-      --num_rest;
-      if (!num_rest) {
-        child.SetBounds(gfx::RectF(child_origin, bottom_right()));
+    for (auto child : child_nodes()){
+      if (!child->next_sibling()) {
+        child->SetBounds(gfx::RectF(child_origin, bottom_right()));
         break;
       }
-      auto const new_child_height = ::floor(child.height() * scale);
-      child.SetBounds(gfx::RectF(
+      auto const new_child_height = ::floor(child->height() * scale);
+      child->SetBounds(gfx::RectF(
           child_origin, gfx::SizeF(width(), new_child_height)));
       child_origin += gfx::SizeF(0.0f, new_child_height + kSplitterHeight);
     }
@@ -572,23 +555,22 @@ HitTestResult VerticalBox::HitTest(const gfx::PointF& point) const {
   if (!bounds().Contains(point))
     return HitTestResult();
 
-  for (const auto& child : boxes_) {
-    if (auto const result = child.HitTest(point))
+  for (const auto child : child_nodes()) {
+    if (auto const result = child->HitTest(point))
       return result;
 
     auto const splitter_bounds = gfx::RectF(
-        gfx::PointF(left(), child.bottom()),
+        gfx::PointF(left(), child->bottom()),
         gfx::SizeF(width(), kSplitterHeight));
     if (splitter_bounds.Contains(point))
-      return HitTestResult(HitTestResult::VSplitter, &child);
+      return HitTestResult(HitTestResult::VSplitter, child);
   }
 
   return HitTestResult();
 }
 
-void VerticalBox::MoveSplitter(const gfx::PointF& point,
-                                     Box* below_box) {
-  auto const above_box = below_box->GetPrev();
+void VerticalBox::MoveSplitter(const gfx::PointF& point, Box* below_box) {
+  auto const above_box = below_box->previous_sibling();
   if (!above_box)
     return;
 
@@ -620,8 +602,8 @@ void VerticalBox::Split(Box* above_box,
                                 kSplitterHeight;
   DCHECK_GE(above_box_height, kMinBoxHeight);
 
-  auto const below_box = new LeafBox(edit_pane_, this, below_window);
-  boxes_.InsertAfter(below_box, above_box);
+  auto const below_box = new LeafBox(edit_pane_, below_window);
+  InsertAfter(below_box, above_box);
   below_box->AddRef();
 
   above_box->set_bounds(gfx::RectF(
@@ -635,9 +617,8 @@ void VerticalBox::Split(Box* above_box,
   below_window->RealizeWidget();
 }
 
-void VerticalBox::StopSplitter(const gfx::Point& point,
-                                     Box* below_box) {
-  auto const above_box = below_box->GetPrev();
+void VerticalBox::StopSplitter(const gfx::Point& point, Box* below_box) {
+  auto const above_box = below_box->previous_sibling();
   if (!above_box)
     return;
 
@@ -661,31 +642,24 @@ void VerticalBox::StopSplitter(const gfx::Point& point,
 //
 // EditPane::Box
 //
-EditPane::Box::Box(EditPane* edit_pane, Box* outer)
+EditPane::Box::Box(EditPane* edit_pane)
     : edit_pane_(edit_pane),
-      is_removed_(false),
-      outer_(outer) {
+      is_removed_(false) {
 }
 
 EditPane::Box::~Box() {
-  DCHECK(boxes_.IsEmpty());
+  DCHECK(!first_child());
   DCHECK(is_removed_);
-  DCHECK(!outer_);
-  DCHECK(!GetNext());
-  DCHECK(!GetPrev());
-}
-
-void EditPane::Box::Add(Box* box) {
-  DCHECK(!is_removed());
-  boxes_.Append(box);
-  box->AddRef();
+  DCHECK(!parent_node());
+  DCHECK(!next_sibling());
+  DCHECK(!previous_sibling());
 }
 
 int EditPane::Box::CountLeafBox() const {
   DCHECK(!is_removed());
   auto count = 0;
-  for (const auto& child : boxes_) {
-    count += child.CountLeafBox();
+  for (const auto child : child_nodes()) {
+    count += child->CountLeafBox();
   }
   return count;
 }
@@ -693,7 +667,7 @@ int EditPane::Box::CountLeafBox() const {
 void EditPane::Box::Destroy() {
   DCHECK(!is_removed());
   scoped_refptr<Box> protect(this);
-  while (auto const box = boxes_.GetFirst()) {
+  while (auto const box = first_child()) {
     box->Destroy();
   }
 }
@@ -705,40 +679,35 @@ void EditPane::Box::DetachContent() {
 void EditPane::Box::DidRemove() {
   DCHECK(!is_removed());
   is_removed_ = true;
-  outer_ = nullptr;
 }
 
 void EditPane::Box::EnsureInHorizontalBox() {
-  if (!outer()->is<VerticalBox>())
+  if (!parent_node()->is<VerticalBox>())
     return;
 
-  auto const layout_box = new HorizontalBox(edit_pane_, outer());
-  scoped_refptr<Box> protect(this);
-  outer()->Replace(layout_box, this);
+  auto const layout_box = new HorizontalBox(edit_pane_);
+  parent_node()->ReplaceChild(layout_box, this);
   layout_box->SetBounds(bounds());
   layout_box->Realize();
-  layout_box->Add(this);
-  set_outer(layout_box);
+  layout_box->AppendChild(this);
 }
 
 void EditPane::Box::EnsureInVerticalBox() {
-  if (outer()->is<VerticalBox>())
+  if (parent_node()->is<VerticalBox>())
     return;
 
-  auto const layout_box = new VerticalBox(edit_pane_, outer());
-  scoped_refptr<Box> protect(this);
-  outer()->Replace(layout_box, this);
+  auto const layout_box = new VerticalBox(edit_pane_);
+  parent_node()->ReplaceChild(layout_box, this);
   layout_box->SetBounds(bounds());
   layout_box->Realize();
-  layout_box->Add(this);
-  set_outer(layout_box);
+  layout_box->AppendChild(this);
 }
 
 EditPane::Box* EditPane::Box::FindLeafBoxFromWidget(
     const ui::Widget* window) const {
   DCHECK(!is_removed());
-  for (const auto& child : boxes_) {
-    if (auto const box = child.FindLeafBoxFromWidget(window))
+  for (const auto child : child_nodes()) {
+    if (auto const box = child->FindLeafBoxFromWidget(window))
       return box;
   }
   return nullptr;
@@ -759,8 +728,8 @@ EditPane::Box* EditPane::Box::GetActiveLeafBox() const {
   };
 
   auto candidate = static_cast<Box*>(nullptr);
-  for (auto& box : boxes_) {
-    auto const other = box.GetActiveLeafBox();
+  for (auto child : child_nodes()) {
+    auto const other = child->GetActiveLeafBox();
     //if (other && other->GetWindow()->visible())
     candidate = Local::SelectActiveBox(candidate, other);
   }
@@ -774,7 +743,7 @@ views::ContentWindow* EditPane::Box::GetContent() const {
 
 EditPane::Box* EditPane::Box::GetFirstLeafBox() const {
   DCHECK(!is_removed());
-  return boxes_.GetFirst() ? boxes_.GetFirst()->GetFirstLeafBox() : nullptr;
+  return first_child() ? first_child()->GetFirstLeafBox() : nullptr;
 }
 
 void EditPane::Box::MoveSplitter(const gfx::PointF&, Box*) {
@@ -784,8 +753,8 @@ void EditPane::Box::MoveSplitter(const gfx::PointF&, Box*) {
 void EditPane::Box::Realize() {
   DCHECK(!is_removed());
   DCHECK(!bounds().empty());
-  for (auto& child : boxes_) {
-    child.Realize();
+  for (auto child : child_nodes()) {
+    child->Realize();
   }
 }
 
@@ -795,38 +764,24 @@ void EditPane::Box::RemoveBox(Box* box) {
   scoped_refptr<Box> protect(this);
 
   WillRemoveChild(box);
-  boxes_.Delete(box);
+  RemoveChild(box);
   box->DidRemove();
   box->Release();
 
-  if (!outer())
+  if (!parent_node())
     return;
 
-  if (boxes_.IsEmpty()) {
-    outer()->RemoveBox(this);
+  if (!first_child()) {
+    parent_node()->RemoveBox(this);
     return;
   }
 
-  if (boxes_.GetFirst() != boxes_.GetLast())
+  if (first_child() != last_child())
     return;
 
-  // Move only child to outer box.
-  auto const first_box = boxes_.GetFirst();
-  boxes_.Delete(first_box);
-  auto const outer = this->outer();
+  // This box has only one child box, move it to parent.
+  parent_node()->ReplaceChild(first_child(), this);
   DidRemove();
-  outer->Replace(first_box, this);
-  first_box->Release();
-  return;
-}
-
-void EditPane::Box::Replace(Box* new_box, Box* old_box) {
-  DCHECK(!is_removed());
-  boxes_.InsertBefore(new_box, old_box);
-  new_box->set_outer(this);
-  new_box->AddRef();
-  boxes_.Delete(old_box);
-  old_box->Release();
 }
 
 void EditPane::Box::ReplaceContent(views::ContentWindow*) {
@@ -842,10 +797,10 @@ void EditPane::Box::StopSplitter(const gfx::Point&, Box*) {
 }
 
 void EditPane::Box::WillRemoveChild(Box* child) {
-  if (auto const previous_sibling = child->GetPrev()) {
+  if (auto const previous_sibling = child->previous_sibling()) {
     previous_sibling->SetBounds(gfx::RectF(
         previous_sibling->origin(), child->bottom_right()));
-  } else if (auto const next_sibling = child->GetNext()) {
+  } else if (auto const next_sibling = child->next_sibling()) {
     next_sibling->SetBounds(gfx::RectF(
         child->origin(), next_sibling->bottom_right()));
   }
@@ -890,7 +845,7 @@ EditPane::SplitterController::~SplitterController() {
 void EditPane::SplitterController::End(const gfx::Point& point) {
   if (m_eState == SplitterController::State_Drag ||
       m_eState == SplitterController::State_DragSingle) {
-    m_pBox->outer()->StopSplitter(point, m_pBox);
+    m_pBox->parent_node()->StopSplitter(point, m_pBox);
     Stop();
   }
 }
@@ -898,12 +853,12 @@ void EditPane::SplitterController::End(const gfx::Point& point) {
 void EditPane::SplitterController::Move(const gfx::Point& point) {
   if (m_eState == SplitterController::State_Drag ||
       m_eState == SplitterController::State_DragSingle) {
-    m_pBox->outer()->MoveSplitter(gfx::PointF(point), m_pBox);
+    m_pBox->parent_node()->MoveSplitter(gfx::PointF(point), m_pBox);
   }
 }
 
 void EditPane::SplitterController::Start(State eState, Box& box) {
-  DCHECK(!!box.outer());
+  DCHECK(!!box.parent_node());
   const_cast<EditPane&>(owner_).SetCapture();
   m_eState = eState;
   m_pBox = &box;
@@ -927,7 +882,7 @@ void EditPane::SplitterController::Stop() {
 //
 EditPane::EditPane()
     : window_animator_(new ui::WindowAnimator()),
-      root_box_(new VerticalBox(this, nullptr)),
+      root_box_(new VerticalBox(this)),
       splitter_controller_(new SplitterController(*this)) {
 }
 
@@ -956,8 +911,9 @@ void EditPane::ReplaceActiveContent(views::ContentWindow* content) {
 
 void EditPane::SetContent(views::ContentWindow* content) {
   DCHECK(!root_box_->first_child());
-  scoped_refptr<LeafBox> box(new LeafBox(this, root_box_.get(), content));
-  root_box_->Add(box);
+  auto const box = new LeafBox(this, content);
+  root_box_->AppendChild(box);
+  box->AddRef();
   if (bounds().empty()) {
     DCHECK(!is_realized());
   } else {
@@ -990,7 +946,7 @@ void EditPane::SplitHorizontally(ContentWindow* left_window,
   }
 
   left_box->EnsureInHorizontalBox();
-  left_box->outer()->Split(left_box, new_right_window, right_box_width);
+  left_box->parent_node()->Split(left_box, new_right_window, right_box_width);
   left_window->MakeSelectionVisible();
 }
 
@@ -1011,7 +967,7 @@ void EditPane::SplitVertically(ContentWindow* above_window,
   }
 
   above_box->EnsureInVerticalBox();
-  above_box->outer()->Split(above_box, new_below_window, below_box_height);
+  above_box->parent_node()->Split(above_box, new_below_window, below_box_height);
   above_window->MakeSelectionVisible();
 }
 
@@ -1055,8 +1011,8 @@ void EditPane::DidRealizeChildWidget(const ui::Widget& window) {
   if (!box)
     return;
 
-  auto const next_leaf_box = box->GetNext() ?
-      box->GetNext()->GetFirstLeafBox() : nullptr;
+  auto const next_leaf_box = box->next_sibling() ?
+      box->next_sibling()->GetFirstLeafBox() : nullptr;
    auto const next_window = next_leaf_box ? next_leaf_box->GetContent() :
       nullptr;
   if (next_window)
@@ -1149,7 +1105,7 @@ void EditPane::WillRemoveChildWidget(const Widget& child) {
   }
 
   box->DetachContent();
-  box->outer()->RemoveBox(box);
+  box->parent_node()->RemoveBox(box);
 }
 
 // views::TabContent

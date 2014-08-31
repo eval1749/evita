@@ -65,12 +65,14 @@
    *   Ctrl+Shift sequence.
    */
   Editor.bindKey(Window, 'Ctrl+Shift+0', function() {
-    if (!this.nextSibling && !this.previousSibling) {
+    var nextFocus = windows.nextWindow(this) || windows.previousWindow(this);
+    if (!nextFocus) {
       Editor.messageBox(this,
           Editor.localizeText(Strings.IDS_NO_OTHER_WINDOWS),
           MessageBox.ICONWARNING);
       return;
     }
+    nextFocus.focus();
     this.destroy();
   });
 

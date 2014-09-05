@@ -261,6 +261,8 @@
         'v8_glue/runner.cc',
         'v8_glue/runner_delegate.cc',
         'v8_glue/scriptable.cc',
+        'v8_glue/v8_platform.cc',
+        'v8_glue/v8_platform.h',
         'v8_glue/wrapper_info.cc',
       ], # sources
     }, # v8_glue

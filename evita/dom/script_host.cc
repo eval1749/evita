@@ -23,6 +23,7 @@
 #include "evita/dom/windows/window_set.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/per_isolate_data.h"
+#include "evita/v8_glue/v8_platform.h"
 #include "evita/v8_glue/runner.h"
 
 namespace dom {
@@ -150,6 +151,7 @@ ScriptHost::ScriptHost(ViewDelegate* view_delegate,
       testing_runner_(nullptr),
       view_delegate_(view_delegate) {
   view_delegate_->RegisterViewEventHandler(event_handler_.get());
+  v8::V8::InitializePlatform(v8_glue::V8Platform::instance());
   v8::V8::Initialize();
   v8::V8::InitializeICU();
 

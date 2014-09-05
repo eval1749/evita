@@ -387,6 +387,7 @@ class Callback<R(void)> : public internal::CallbackBase {
     PolymorphicInvoke invoke_func =
         &internal::BindState<Runnable, BindRunType, BoundArgsType>
             ::InvokerType::Run;
+    #pragma warning(suppress: 4191)
     polymorphic_invoke_ = reinterpret_cast<InvokeFuncStorage>(invoke_func);
   }
 

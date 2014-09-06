@@ -1049,16 +1049,16 @@ void EditPane::DidHide() {
   root_box_->DidHide();
 }
 
-void EditPane::DidRealizeChildWidget(const ui::Widget& window) {
+void EditPane::DidRealizeChildWidget(ui::Widget* window) {
   TabContent::DidRealizeChildWidget(window);
-  auto const box = root_box_->FindLeafBoxFromWidget(&window);
+  auto const box = root_box_->FindLeafBoxFromWidget(window);
   if (!box)
     return;
 
   auto const next_leaf_box = box->next_sibling() ?
       box->next_sibling()->GetFirstLeafBox() : nullptr;
    auto const next_window = next_leaf_box ? next_leaf_box->GetContent() :
-      nullptr;
+                                            nullptr;
   if (next_window)
     InsertBefore(box->GetContent(), next_window);
   else

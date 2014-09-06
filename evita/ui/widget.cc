@@ -217,7 +217,7 @@ void Widget::DidRealize() {
   }
 }
 
-void Widget::DidRealizeChildWidget(const Widget&) {
+void Widget::DidRealizeChildWidget(Widget*) {
 }
 
 void Widget::DidRemoveChildWidget(const Widget&) {
@@ -543,7 +543,7 @@ void Widget::Realize(const Rect& rect) {
     DidShow();
     SchedulePaint();
   }
-  container_widget().DidRealizeChildWidget(*this);
+  container_widget().DidRealizeChildWidget(this);
 }
 
 // TODO(yosi) Widget::RealizeWidget() should be pure virutal.
@@ -572,7 +572,7 @@ void Widget::RealizeWidget() {
     DidShow();
     SchedulePaint();
   }
-  container_widget().DidRealizeChildWidget(*this);
+  container_widget().DidRealizeChildWidget(this);
 }
 
 void Widget::ReleaseCapture() {

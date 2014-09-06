@@ -53,7 +53,7 @@ class EditPane final : public views::TabContent {
   // ui::Widget
   private: virtual void DidChangeBounds() override;
   private: virtual void DidHide() override;
-  private: virtual void DidRealizeChildWidget(const Widget&) override;
+  private: virtual void DidRealizeChildWidget(Widget* new_child) override;
   private: virtual void DidRemoveChildWidget(const Widget&) override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void DidShow() override;

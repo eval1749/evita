@@ -86,7 +86,7 @@ class Widget
 
   // [D]
   public: void DestroyWidget();
-  protected: virtual void DidAddChildWidget(Widget* widget);
+  protected: virtual void DidAddChildWidget(Widget* new_child);
   protected: virtual void DidChangeBounds();
   protected: virtual void DidChangeChildVisibility(Widget* child);
   protected: virtual void DidChangeHierarchy();
@@ -100,7 +100,7 @@ class Widget
   // good time to restore caret background image.
   protected: virtual void DidKillNativeFocus();
   protected: virtual void DidRealize();
-  protected: virtual void DidRealizeChildWidget(const Widget& widget);
+  protected: virtual void DidRealizeChildWidget(Widget* new_child);
   protected: virtual void DidRemoveChildWidget(const Widget& widget);
   protected: virtual void DidSetFocus(ui::Widget* last_focused);
 

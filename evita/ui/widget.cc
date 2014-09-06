@@ -169,7 +169,7 @@ void Widget::DestroyWidget() {
   DidDestroyWidget();
 }
 
-void Widget::DidAddChildWidget(const Widget&) {
+void Widget::DidAddChildWidget(Widget*) {
 }
 
 void Widget::DidChangeHierarchy() {
@@ -689,7 +689,7 @@ void Widget::SetParentWidget(Widget* new_parent) {
   }
   if (old_parent)
     old_parent->DidRemoveChildWidget(*this);
-  new_parent->DidAddChildWidget(*this);
+  new_parent->DidAddChildWidget(this);
 }
 
 void Widget::Show() {

@@ -308,11 +308,11 @@ void Frame::CreateNativeWindow() const {
       gfx::Size(window_bounds.width(), workarea_bounds.height() * 4 / 5));
 }
 
-void Frame::DidAddChildWidget(const ui::Widget& widget) {
-  if (auto tab_content = const_cast<TabContent*>(widget.as<TabContent>())) {
+void Frame::DidAddChildWidget(ui::Widget* new_child) {
+  if (auto tab_content = new_child->as<TabContent>()) {
     tab_contents_.insert(tab_content);
     if (!is_realized()) {
-      DCHECK(!widget.is_realized());
+      DCHECK(!new_child->is_realized());
       return;
     }
     if (tab_content->is_realized())
@@ -323,10 +323,9 @@ void Frame::DidAddChildWidget(const ui::Widget& widget) {
     return;
   }
 
-  auto window = const_cast<views::ContentWindow*>(
-      widget.as<views::ContentWindow>());
-  DCHECK(window);
-  AddTabContent(window);
+  auto const new_content = new_child->as<views::ContentWindow>();
+  DCHECK(new_content);
+  AddTabContent(new_content);
 }
 
 void Frame::DidChangeBounds() {

@@ -101,7 +101,7 @@ class Widget
   protected: virtual void DidKillNativeFocus();
   protected: virtual void DidRealize();
   protected: virtual void DidRealizeChildWidget(Widget* new_child);
-  protected: virtual void DidRemoveChildWidget(const Widget& widget);
+  protected: virtual void DidRemoveChildWidget(Widget* old_child);
   protected: virtual void DidSetFocus(ui::Widget* last_focused);
 
   // Called when widget, which has native window, get native focus. This is

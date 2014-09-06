@@ -106,9 +106,9 @@ class Frame final : public views::Window,
 
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;
-  private: virtual void DidAddChildWidget(ui::Widget* widget) override;
+  private: virtual void DidAddChildWidget(ui::Widget* new_child) override;
   private: virtual void DidRealize() override;
-  private: virtual void DidRemoveChildWidget(const ui::Widget& widget) override;
+  private: virtual void DidRemoveChildWidget(ui::Widget* old_child) override;
   private: virtual void DidChangeBounds() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;

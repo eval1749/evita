@@ -164,7 +164,7 @@ void Widget::DestroyWidget() {
     first_child()->DestroyWidget();
   }
   parent_widget.RemoveChild(this);
-  parent_widget.DidRemoveChildWidget(*this);
+  parent_widget.DidRemoveChildWidget(this);
   state_ = kDestroyed;
   DidDestroyWidget();
 }
@@ -220,7 +220,7 @@ void Widget::DidRealize() {
 void Widget::DidRealizeChildWidget(Widget*) {
 }
 
-void Widget::DidRemoveChildWidget(const Widget&) {
+void Widget::DidRemoveChildWidget(Widget*) {
 }
 
 void Widget::DidChangeBounds() {
@@ -688,7 +688,7 @@ void Widget::SetParentWidget(Widget* new_parent) {
     DCHECK(!is_realized());
   }
   if (old_parent)
-    old_parent->DidRemoveChildWidget(*this);
+    old_parent->DidRemoveChildWidget(this);
   new_parent->DidAddChildWidget(this);
 }
 

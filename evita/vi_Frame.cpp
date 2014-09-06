@@ -397,8 +397,8 @@ void Frame::DidRealize() {
                  SWP_NOREDRAW | SWP_NOSIZE | SWP_FRAMECHANGED);
 }
 
-void Frame::DidRemoveChildWidget(const ui::Widget& widget) {
-  views::Window::DidRemoveChildWidget(widget);
+void Frame::DidRemoveChildWidget(ui::Widget* old_child) {
+  views::Window::DidRemoveChildWidget(old_child);
   if (!tab_contents_.empty())
     return;
   DestroyWidget();

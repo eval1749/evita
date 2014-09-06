@@ -1065,7 +1065,7 @@ void EditPane::DidRealizeChildWidget(ui::Widget* window) {
     AppendChild(box->GetContent());
 }
 
-void EditPane::DidRemoveChildWidget(const Widget&) {
+void EditPane::DidRemoveChildWidget(Widget*) {
   if (root_box_->CountLeafBox())
     return;
   // There is no window in this pane. So, we delete this pane.

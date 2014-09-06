@@ -151,7 +151,7 @@ void Widget::DestroyWidget() {
   state_ = kBeingDestroyed;
   WillDestroyWidget();
   auto& parent_widget = container_widget();
-  parent_widget.WillRemoveChildWidget(*this);
+  parent_widget.WillRemoveChildWidget(this);
   if (hover_widget == this)
     hover_widget = nullptr;
   if (capture_widget == this)
@@ -672,7 +672,7 @@ void Widget::SetParentWidget(Widget* new_parent) {
   if (new_parent == old_parent)
     return;
   if (old_parent) {
-    old_parent->WillRemoveChildWidget(*this);
+    old_parent->WillRemoveChildWidget(this);
     old_parent->RemoveChild(this);
   }
   new_parent->AppendChild(this);
@@ -742,7 +742,7 @@ void Widget::WillDestroyNativeWindow() {
   }
 }
 
-void Widget::WillRemoveChildWidget(const Widget&) {
+void Widget::WillRemoveChildWidget(Widget*) {
 }
 
 LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {

@@ -114,8 +114,7 @@ class Frame final : public views::Window,
   private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;
   private: virtual void WillDestroyWidget() override;
-  private: virtual void WillRemoveChildWidget(
-      const ui::Widget& widget) override;
+  private: virtual void WillRemoveChildWidget(ui::Widget* old_child) override;
 
   // views::TabDataSet::Observer
   private: virtual void DidSetTabData(dom::WindowId window_id,

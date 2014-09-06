@@ -510,11 +510,11 @@ void Frame::WillDestroyWidget() {
   views::FrameList::instance()->RemoveFrame(this);
 }
 
-void Frame::WillRemoveChildWidget(const ui::Widget& widget) {
-  views::Window::WillRemoveChildWidget(widget);
+void Frame::WillRemoveChildWidget(ui::Widget* old_child) {
+  views::Window::WillRemoveChildWidget(old_child);
   if (!is_realized())
     return;
-  auto const tab_content = const_cast<TabContent*>(widget.as<TabContent>());
+  auto const tab_content = old_child->as<TabContent>();
   if (!tab_content)
     return;
 

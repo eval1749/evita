@@ -172,7 +172,7 @@ class Widget
   // [W]
   protected: virtual void WillDestroyWidget();
   protected: virtual void WillDestroyNativeWindow();
-  protected: virtual void WillRemoveChildWidget(const Widget& widget);
+  protected: virtual void WillRemoveChildWidget(Widget* old_child);
   protected: virtual LRESULT WindowProc(UINT uMsg, WPARAM wParam,
                                         LPARAM lParam) override;
   DISALLOW_COPY_AND_ASSIGN(Widget);

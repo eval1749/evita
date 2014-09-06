@@ -1134,9 +1134,9 @@ void EditPane::WillDestroyWidget() {
   root_box_->Destroy();
 }
 
-void EditPane::WillRemoveChildWidget(const Widget& child) {
-  TabContent::WillRemoveChildWidget(child);
-  auto const box = root_box_->FindLeafBoxFromWidget(&child);
+void EditPane::WillRemoveChildWidget(Widget* old_child) {
+  TabContent::WillRemoveChildWidget(old_child);
+  auto const box = root_box_->FindLeafBoxFromWidget(old_child);
   if (!box) {
     // RepalceActiveWindow() removes window from box then destroys window.
     return;

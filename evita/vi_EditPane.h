@@ -62,7 +62,7 @@ class EditPane final : public views::TabContent {
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
   private: virtual void WillDestroyWidget() override;
-  private: virtual void WillRemoveChildWidget(const Widget& child) override;
+  private: virtual void WillRemoveChildWidget(Widget* old_child) override;
 
   // views::TabContent
   private: virtual const domapi::TabData* GetTabData() const override;

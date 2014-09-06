@@ -15,8 +15,8 @@ class AnimationObserver {
   protected: AnimationObserver();
   public: virtual ~AnimationObserver();
 
-  public: virtual void DidCancelAnimation(Animatable* animatable);
   public: virtual void DidAnimate(Animatable* animatable);
+  public: virtual void DidCancelAnimation(Animatable* animatable);
   public: virtual void DidFinishAnimation(Animatable* animatable);
 
   DISALLOW_COPY_AND_ASSIGN(AnimationObserver);

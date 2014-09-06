@@ -22,15 +22,19 @@ class Canvas;
 namespace ui {
 
 class Animatable;
+class LayerOwner;
 
 //////////////////////////////////////////////////////////////////////
 //
 // Layer
 //
 class Layer  : private ui::AnimationObserver {
+  friend class LayerOwner;
+
   private: ui::Animatable* animatable_;
   private: gfx::RectF bounds_;
   private: std::unordered_set<Layer*> child_layers_;
+  private: LayerOwner* owner_;
   private: Layer* parent_layer_;
   private: common::ComPtr<IDCompositionVisual2> visual_;
 
@@ -40,6 +44,7 @@ class Layer  : private ui::AnimationObserver {
   public: operator IDCompositionVisual2*() const { return visual_; }
 
   public: const gfx::RectF& bounds() const { return bounds_; }
+  public: LayerOwner* owner() { return owner_; }
   public: ui::Layer* parent_layer() const { return parent_layer_; }
   public: IDCompositionVisual2* visual() const { return visual_; }
 

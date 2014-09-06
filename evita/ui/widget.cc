@@ -667,11 +667,6 @@ bool Widget::SetCursor() {
   return true;
 }
 
-void Widget::SetLayer(Layer* layer) {
-  DCHECK(!layer_);
-  layer_.reset(layer);
-}
-
 void Widget::SetParentWidget(Widget* new_parent) {
   auto const old_parent = parent_node();
   if (new_parent == old_parent)

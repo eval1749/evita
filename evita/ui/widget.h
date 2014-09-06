@@ -12,6 +12,7 @@
 #include "common/win/native_window.h"
 #include "evita/gfx/rect.h"
 #include "evita/gfx/rect_f.h"
+#include "evita/ui/compositor/layer_owner.h"
 
 namespace gfx {
 class Canvas;
@@ -35,7 +36,8 @@ class MouseWheelEvent;
 class Widget
     : public common::Castable,
       public common::tree::Node<Widget>,
-      public common::win::MessageDelegate {
+      public common::win::MessageDelegate,
+      public LayerOwner {
   DECLARE_CASTABLE_CLASS(Widget, Castable);
 
   private: class HitTestResult;
@@ -48,7 +50,6 @@ class Widget
   };
 
   private: Rect bounds_;
-  private: std::unique_ptr<Layer> layer_;
   private: std::unique_ptr<NativeWindow> native_window_;
   private: int shown_;
   private: State state_;
@@ -72,7 +73,6 @@ class Widget
     return static_cast<bool>(native_window_);
   }
   public: bool is_realized() const { return state_ == kRealized; }
-  public: Layer* layer() const { return layer_.get(); }
   protected: NativeWindow* native_window() const {
     return native_window_.get();
   }
@@ -163,7 +163,6 @@ class Widget
   public: void SetBounds(const Rect& rect);
   public: void SetCapture();
   private: bool SetCursor();
-  public: void SetLayer(Layer* layer);
   public: void SetParentWidget(Widget* new_parent);
   public: virtual void Show();
 

@@ -22,7 +22,7 @@ namespace ui {
 // Layer
 //
 Layer::Layer()
-    : animatable_(nullptr), parent_layer_(nullptr),
+    : animatable_(nullptr), owner_(nullptr), parent_layer_(nullptr),
       visual_(Compositor::instance()->CreateVisual()) {
   COM_VERIFY(visual_->SetBitmapInterpolationMode(
       DCOMPOSITION_BITMAP_INTERPOLATION_MODE_LINEAR));

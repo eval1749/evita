@@ -57,6 +57,8 @@
         'compositor/layer_animation.h',
         'compositor/layer_content.cc',
         'compositor/layer_content.h',
+        'compositor/layer_owner.cc',
+        'compositor/layer_owner.h',
         'compositor/root_layer.cc',
         'compositor/root_layer.h',
 

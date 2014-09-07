@@ -61,6 +61,14 @@ class Point_ : public BaseType {
     return *this;
   }
 
+  public: bool operator==(const Point_& other) const {
+    return x == other.x && y == other.y;
+  }
+
+  public: bool operator!=(const Point_& other) const {
+    return !operator==(other);
+  }
+
   public: Point_ operator+(const Point_& other) const {
     return Point_(x + other.x, y + other.y);
   }

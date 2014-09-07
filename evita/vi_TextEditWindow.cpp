@@ -400,6 +400,7 @@ void TextEditWindow::DidRecreateLayer(ui::Layer*) {
   if (!canvas_)
     return;
   canvas_.reset(layer()->CreateCanvas());
+  text_renderer_->DidLostCanvas();
 }
 
 // ui::ScrollBarObserver

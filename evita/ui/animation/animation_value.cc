@@ -10,6 +10,18 @@
 
 namespace ui {
 
+namespace {
+float ComputeRoundValue(float start, float end, float factor) {
+  auto const value = ::round(start + (end - start) * factor);
+  return start < end ? std::min(value, end) : std::max(value, end);
+}
+
+float ComputeValue(float start, float end, float factor) {
+  auto const value = start + (end - start) * factor;
+  return start < end ? std::min(value, end) : std::max(value, end);
+}
+}  // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 // AnimationFloat
@@ -28,7 +40,7 @@ float AnimationFloat::Compute(base::Time current_time) const {
   auto const factor = static_cast<float>(std::min(
       delta / duration_.InMillisecondsF(), 1.0));
   DCHECK_GE(factor, 0.0f);
-  return start_value_ + (end_value_ - start_value_) * factor;
+  return ComputeValue(start_value_, end_value_, factor);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -50,8 +62,8 @@ gfx::PointF AnimationPoint::Compute(base::Time current_time) const {
   auto const factor = static_cast<float>(std::min(
       delta / duration_.InMillisecondsF(), 1.0));
   DCHECK_GE(factor, 0.0f);
-  return gfx::PointF(start_value_.x + (end_value_.x - start_value_.x) * factor,
-                     start_value_.y + (end_value_.y - start_value_.y) * factor);
+  return gfx::PointF(ComputeRoundValue(start_value_.x, end_value_.x, factor),
+                     ComputeRoundValue(start_value_.y, end_value_.y, factor));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -74,8 +86,8 @@ gfx::SizeF AnimationSize::Compute(base::Time current_time) const {
       delta / duration_.InMillisecondsF(), 1.0));
   DCHECK_GE(factor, 0.0f);
   return gfx::SizeF(
-    start_value_.width + (end_value_.width - start_value_.width) * factor,
-    start_value_.height + (end_value_.height - start_value_.height) * factor);
+      ComputeRoundValue(start_value_.width, end_value_.width, factor),
+      ComputeRoundValue(start_value_.height, end_value_.height, factor));
 }
 
 }  // namespace ui

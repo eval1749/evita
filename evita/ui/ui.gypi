@@ -59,6 +59,8 @@
         'compositor/layer_content.h',
         'compositor/layer_owner.cc',
         'compositor/layer_owner.h',
+        'compositor/layer_owner_delegate.cc',
+        'compositor/layer_owner_delegate.h',
         'compositor/root_layer.cc',
         'compositor/root_layer.h',
 

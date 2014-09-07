@@ -92,20 +92,20 @@ void Frame::AddObserver(views::FrameObserver* observer) {
   observers_.AddObserver(observer);
 }
 
-void Frame::AddTabContent(views::ContentWindow* window) {
+void Frame::AddTabContent(views::ContentWindow* content) {
   auto const tab_content = new EditPane();
   tab_contents_.insert(tab_content);
   AppendChild(tab_content);
   if (!is_realized()) {
-    DCHECK(!window->is_realized());
-    tab_content->SetContent(window);
+    DCHECK(!content->is_realized());
+    tab_content->SetContent(content);
     return;
   }
   tab_content->SetBounds(GetTabContentBounds());
   tab_content->RealizeWidget();
-  // |tab_content| can be realized when it is dropped from another |Frame|.
+  // |content| can be realized when it is dropped from another |Frame|.
   // So, we should set content after realize |TabContent|.
-  tab_content->SetContent(window);
+  tab_content->SetContent(content);
   tab_strip_animator_->AddTab(tab_content);
 }
 

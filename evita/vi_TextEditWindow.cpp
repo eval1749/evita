@@ -266,7 +266,7 @@ void TextEditWindow::Redraw() {
   if (m_lCaretPosn != lCaretPosn) {
     m_lCaretPosn = lCaretPosn;
     if (text_renderer_->IsPositionFullyVisible(lCaretPosn)) {
-      if (text_renderer_->ShouldRender()) {
+      if (ShouldRender()) {
         Render(selection);
       } else {
         gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
@@ -280,7 +280,7 @@ void TextEditWindow::Redraw() {
     return;
   }
 
-  if (text_renderer_->ShouldRender()) {
+  if (ShouldRender()) {
     Render(selection);
     return;
   }
@@ -314,6 +314,10 @@ void TextEditWindow::Render(const TextSelectionModel& selection) {
 
 void TextEditWindow::SetZoom(float new_zoom) {
   text_renderer_->SetZoom(new_zoom);
+}
+
+bool TextEditWindow::ShouldRender() const {
+  return !canvas_->screen_bitmap() || text_renderer_->ShouldRender();
 }
 
 bool TextEditWindow::SmallScroll(int, int y_count) {

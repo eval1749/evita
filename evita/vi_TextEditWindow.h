@@ -94,8 +94,9 @@ class TextEditWindow : private gfx::Canvas::Observer,
   private: void Render(const TextSelectionModel& selection);
 
   // [S]
-  public: bool SmallScroll(int x_count, int y_count);
   public: void SetZoom(float new_zoom);
+  private: bool ShouldRender() const;
+  public: bool SmallScroll(int x_count, int y_count);
   public: Posn StartOfLine(Posn);
 
   // [U]

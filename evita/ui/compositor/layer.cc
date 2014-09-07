@@ -10,6 +10,7 @@
 #include "base/logging.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/color_f.h"
+#include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/swap_chain.h"
 #include "evita/ui/animation/animatable.h"
 #include "evita/ui/compositor/compositor.h"
@@ -64,6 +65,7 @@ void Layer::AppendLayer(Layer* new_child) {
 
 gfx::Canvas* Layer::CreateCanvas() {
   DCHECK(!bounds_.empty());
+  DCHECK_EQ(bounds_, gfx::RectF(gfx::ToEnclosingRect(bounds_)));
   auto canvas = new gfx::CanvasForLayer(this);
   COM_VERIFY(visual_->SetContent(canvas->swap_chain()->swap_chain()));
   return canvas;
@@ -117,6 +119,7 @@ void Layer::RemoveLayer(Layer* old_layer) {
 
 void Layer::SetBounds(const gfx::RectF& new_bounds) {
   DCHECK(!new_bounds.empty());
+  DCHECK_EQ(new_bounds, gfx::RectF(gfx::ToEnclosingRect(new_bounds)));
   auto changed = false;
   if (bounds_.left != new_bounds.left) {
     COM_VERIFY(visual_->SetOffsetX(new_bounds.left));
@@ -145,6 +148,7 @@ void Layer::SetBounds(const gfx::Rect& new_bounds) {
 }
 
 void Layer::SetClip(const gfx::RectF& bounds) {
+  DCHECK_EQ(bounds, gfx::RectF(gfx::ToEnclosingRect(bounds)));
   visual_->SetClip(bounds);
   Compositor::instance()->NeedCommit();
 }

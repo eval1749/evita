@@ -507,6 +507,7 @@ void Frame::OnPaint(const gfx::Rect) {
 
 void Frame::WillDestroyWidget() {
   views::Window::WillDestroyWidget();
+  tab_content_layer_.reset();
   views::FrameList::instance()->RemoveFrame(this);
 }
 

@@ -163,6 +163,7 @@ void Widget::DestroyWidget() {
   while (first_child()) {
     first_child()->DestroyWidget();
   }
+  DestroyLayer();
   parent_widget.RemoveChild(this);
   parent_widget.DidRemoveChildWidget(this);
   state_ = kDestroyed;

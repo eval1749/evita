@@ -36,10 +36,17 @@ Layer::Layer()
 }
 
 Layer::~Layer() {
+  DCHECK(child_layers_.empty());
   if (animatable_)
     animatable_->CancelAnimation();
+  if (parent_layer_)
+    parent_layer_->RemoveLayer(this);
   visual_->SetContent(nullptr);
   visual_->RemoveAllVisuals();
+}
+
+Layer* Layer::first_child() const {
+  return child_layers_.empty() ? nullptr : child_layers_.front();
 }
 
 void Layer::AppendLayer(Layer* new_child) {
@@ -47,7 +54,7 @@ void Layer::AppendLayer(Layer* new_child) {
   if (auto const old_parent = new_child->parent_layer_)
     old_parent->RemoveLayer(new_child);
   new_child->parent_layer_ = this;
-  child_layers_.insert(new_child);
+  child_layers_.push_back(new_child);
   auto const is_insert_above = false;
   auto const ref_visual = static_cast<IDCompositionVisual*>(nullptr);
   COM_VERIFY(visual_->AddVisual(new_child->visual_, is_insert_above,
@@ -72,9 +79,37 @@ void Layer::EndAnimation() {
   animatable_ = nullptr;
 }
 
+void Layer::InsertLayer(Layer* new_child, Layer* ref_child) {
+  if (!ref_child) {
+    AppendLayer(new_child);
+    return;
+  }
+  DCHECK_NE(this, new_child->parent_layer_);
+  DCHECK_EQ(this, ref_child->parent_layer_);
+  if (auto const old_parent = new_child->parent_layer_)
+    old_parent->RemoveLayer(new_child);
+  new_child->parent_layer_ = this;
+  auto const it = std::find(child_layers_.begin(), child_layers_.end(),
+                            ref_child);
+  DCHECK(it != child_layers_.end());
+  child_layers_.insert(it, new_child);
+  auto const is_insert_above = false;
+  COM_VERIFY(visual_->AddVisual(new_child->visual_, is_insert_above,
+                                ref_child->visual_));
+  Compositor::instance()->NeedCommit();
+}
+
+void Layer::RemoveClip() {
+  visual_->SetClip(nullptr);
+  Compositor::instance()->NeedCommit();
+}
+
 void Layer::RemoveLayer(Layer* old_layer) {
   DCHECK_EQ(old_layer->parent_layer_, this);
-  child_layers_.erase(old_layer);
+  auto const it = std::find(child_layers_.begin(), child_layers_.end(),
+                            old_layer);
+  DCHECK(it != child_layers_.end());
+  child_layers_.erase(it);
   visual_->RemoveVisual(old_layer->visual_);
   old_layer->parent_layer_ = nullptr;
   Compositor::instance()->NeedCommit();
@@ -107,6 +142,11 @@ void Layer::SetBounds(const gfx::RectF& new_bounds) {
 
 void Layer::SetBounds(const gfx::Rect& new_bounds) {
   SetBounds(gfx::RectF(new_bounds));
+}
+
+void Layer::SetClip(const gfx::RectF& bounds) {
+  visual_->SetClip(bounds);
+  Compositor::instance()->NeedCommit();
 }
 
 void Layer::SetOrigin(const gfx::PointF& new_origin) {

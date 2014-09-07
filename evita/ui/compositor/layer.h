@@ -52,7 +52,8 @@ class Layer  : private ui::AnimationObserver {
   public: void AppendLayer(Layer* new_child);
   public: gfx::Canvas* CreateCanvas();
   protected: virtual void DidChangeBounds();
-  public: void EndAnimation();
+  public: void DidRegisterAnimation(Animatable* animatable);
+  public: void FinishAnimation();
   public: void InsertLayer(Layer* new_child, Layer* ref_child);
   public: void RemoveClip();
   public: void RemoveLayer(Layer* old_child);
@@ -60,10 +61,10 @@ class Layer  : private ui::AnimationObserver {
   public: void SetBounds(const gfx::Rect& new_bounds);
   public: void SetClip(const gfx::RectF& bounds);
   public: void SetOrigin(const gfx::PointF& new_origin);
-  public: void StartAnimation(Animatable* animatable);
 
   // AnimationObserver
   private: virtual void DidCancelAnimation(Animatable* animatable) override;
+  private: virtual void DidFinishAnimation(Animatable* animatable) override;
 
   DISALLOW_COPY_AND_ASSIGN(Layer);
 };

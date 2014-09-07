@@ -37,11 +37,15 @@ Layer::Layer()
 }
 
 Layer::~Layer() {
-  DCHECK(child_layers_.empty());
-  if (animatable_)
+  if (animatable_) {
+    animatable_->RemoveObserver(this);
     animatable_->CancelAnimation();
+  }
   if (parent_layer_)
     parent_layer_->RemoveLayer(this);
+  for (auto const child : child_layers_) {
+    child->parent_layer_ = nullptr;
+  }
   visual_->SetContent(nullptr);
   visual_->RemoveAllVisuals();
 }
@@ -51,6 +55,8 @@ Layer* Layer::first_child() const {
 }
 
 void Layer::AppendLayer(Layer* new_child) {
+  // TODO(eval1749) We should check |this| layer isn't descendant or self of
+  // |new_child|.
   DCHECK_NE(this, new_child->parent_layer_);
   if (auto const old_parent = new_child->parent_layer_)
     old_parent->RemoveLayer(new_child);
@@ -75,13 +81,24 @@ void Layer::DidChangeBounds() {
   Compositor::instance()->NeedCommit();
 }
 
-void Layer::EndAnimation() {
-  DCHECK(animatable_);
-  animatable_->RemoveObserver(this);
+void Layer::DidRegisterAnimation(ui::Animatable* animatable) {
+  FinishAnimation();
+  animatable_ = animatable;
+  animatable_->AddObserver(this);
+}
+
+void Layer::FinishAnimation() {
+  auto const animatable = animatable_;
+  if (!animatable)
+    return;
   animatable_ = nullptr;
+  animatable->RemoveObserver(this);
+  animatable->FinishAnimation();
 }
 
 void Layer::InsertLayer(Layer* new_child, Layer* ref_child) {
+  // TODO(eval1749) We should check |this| layer isn't descendant or self of
+  // |new_child|.
   if (!ref_child) {
     AppendLayer(new_child);
     return;
@@ -157,14 +174,14 @@ void Layer::SetOrigin(const gfx::PointF& new_origin) {
   SetBounds(gfx::RectF(new_origin, bounds_.size()));
 }
 
-void Layer::StartAnimation(ui::Animatable* animatable) {
-  DCHECK(!animatable_);
-  animatable_ = animatable;
-  animatable_->AddObserver(this);
-}
-
 // AnimationObserver
 void Layer::DidCancelAnimation(Animatable* animatable) {
+  DCHECK_EQ(animatable_, animatable);
+  animatable_->RemoveObserver(this);
+  animatable_ = nullptr;
+}
+
+void Layer::DidFinishAnimation(Animatable* animatable) {
   DCHECK_EQ(animatable_, animatable);
   animatable_->RemoveObserver(this);
   animatable_ = nullptr;

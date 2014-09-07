@@ -53,7 +53,7 @@ void SlideInFormLeftAnimation::Animate(base::Time now) {
     if (right_layer_)
       right_layer_->StartAnimation(this);
   }
-  auto const left = animation_value_->Compute(now);
+  auto const left = ::round(animation_value_->Compute(now));
   left_layer_->SetOrigin(gfx::PointF(left, left_layer_->bounds().top));
   if (left < 0.0f) {
     ScheduleAnimation();
@@ -64,7 +64,7 @@ void SlideInFormLeftAnimation::Animate(base::Time now) {
     right_layer_->EndAnimation();
   }
   left_layer_->EndAnimation();
-  FinishAnimation();
+  MarkFinished();
 }
 
 }  // namespace

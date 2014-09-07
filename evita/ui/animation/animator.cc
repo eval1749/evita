@@ -41,15 +41,15 @@ void Animator::CancelAnimation(Animatable* animatable) {
   pending_animatables_.erase(animatable);
   running_animatables_.erase(animatable);
   waiting_animatables_.erase(animatable);
-  animatable->DidCancel();
+  animatable->DidCancelAnimation();
 }
 
 void Animator::EndAnimate() {
   DCHECK(is_playing());
   for (auto const animatable : running_animatables_) {
     if (animatable->is_finished_) {
-      animatable->DidFinish();
       animatable->animator_ = nullptr;
+      animatable->DidFinishAnimation();
       delete animatable;
       continue;
     }

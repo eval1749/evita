@@ -29,11 +29,13 @@ class Animatable {
   public: void AddObserver(AnimationObserver* observer);
   protected: virtual void Animate(base::Time time) = 0;
   public: void CancelAnimation();
-  private: void DidCancel();
+  private: void DidCancelAnimation();
   protected: void DidAnimate();
-  private: void DidFinish();
-  public: void FinishAnimation();
+  private: void DidFinishAnimation();
+  protected: virtual void DidRequestToFinishAnimation();
+  protected: void MarkFinished();
   public: void RemoveObserver(AnimationObserver* observer);
+  public: void RequestToFinishAnimation();
   public: void ScheduleAnimation();
 
   DISALLOW_COPY_AND_ASSIGN(Animatable);

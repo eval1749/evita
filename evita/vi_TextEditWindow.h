@@ -10,6 +10,7 @@
 #include "evita/li_util.h"
 #include "evita/gfx_base.h"
 #include "evita/ui/base/ime/text_input_delegate.h"
+#include "evita/ui/compositor/layer_owner_delegate.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/content_window.h"
 
@@ -41,6 +42,7 @@ class ScrollBar;
 // TextEditWindow
 //
 class TextEditWindow : private gfx::Canvas::Observer,
+                       private ui::LayerOwnerDelegate,
                        public ui::ScrollBarObserver,
                        public ui::TextInputDelegate,
                        public views::ContentWindow {
@@ -104,6 +106,9 @@ class TextEditWindow : private gfx::Canvas::Observer,
 
   // ui::Animatable
   private: virtual void Animate(base::Time time) override;
+
+  // ui::LayerOwnerDelegate
+  private: virtual void DidRecreateLayer(ui::Layer* old_layer) override;
 
   // ui::ScrollBarObserver
   private: virtual void DidClickLineDown() override;

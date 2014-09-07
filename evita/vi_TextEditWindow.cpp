@@ -391,6 +391,13 @@ void TextEditWindow::Animate(base::Time) {
   DidAnimate();
 }
 
+// ui::LayerOwnerDelegate
+void TextEditWindow::DidRecreateLayer(ui::Layer*) {
+  if (!canvas_)
+    return;
+  canvas_.reset(layer()->CreateCanvas());
+}
+
 // ui::ScrollBarObserver
 void TextEditWindow::DidClickLineDown() {
   UI_DOM_AUTO_LOCK_SCOPE();
@@ -470,6 +477,7 @@ void TextEditWindow::DidRealize() {
   if (bounds().empty())
     return;
   layer()->AppendLayer(metrics_view_->layer());
+  set_layer_owner_delegate(this);
   UpdateLayout();
 }
 

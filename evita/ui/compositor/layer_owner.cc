@@ -8,13 +8,19 @@
 
 #include "base/logging.h"
 #include "evita/ui/compositor/layer.h"
+#include "evita/ui/compositor/layer_owner_delegate.h"
 
 namespace ui {
 
-LayerOwner::LayerOwner() : layer_(nullptr) {
+LayerOwner::LayerOwner() : delegate_(nullptr), layer_(nullptr) {
 }
 
 LayerOwner::~LayerOwner() {
+}
+
+void LayerOwner::set_layer_owner_delegate(LayerOwnerDelegate* delegate) {
+  DCHECK(!delegate_);
+  delegate_ = delegate;
 }
 
 std::unique_ptr<Layer> LayerOwner::AcquireLayer() {
@@ -24,12 +30,33 @@ std::unique_ptr<Layer> LayerOwner::AcquireLayer() {
 }
 
 void LayerOwner::DestroyLayer() {
+  if (!OwnsLayer())
+    return;
   layer_ = nullptr;
   owned_layer_.reset();
 }
 
 bool LayerOwner::OwnsLayer() const {
   return !!owned_layer_;
+}
+
+std::unique_ptr<Layer> LayerOwner::RecreateLayer() {
+  auto old_layer = AcquireLayer();
+  if (!old_layer)
+    return std::move(old_layer);
+
+  auto const new_layer = new Layer();
+  new_layer->SetBounds(old_layer->bounds());
+  SetLayer(new_layer);
+  if (auto const parent = old_layer->parent_layer()) {
+    parent->InsertLayer(new_layer, old_layer.get());
+  }
+  while (auto const child = old_layer->first_child()) {
+    new_layer->AppendLayer(child);
+  }
+  if (delegate_)
+    delegate_->DidRecreateLayer(old_layer.get());
+  return std::move(old_layer);
 }
 
 void LayerOwner::SetLayer(Layer* layer) {

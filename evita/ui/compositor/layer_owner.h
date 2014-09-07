@@ -12,6 +12,7 @@
 namespace ui {
 
 class Layer;
+class LayerOwnerDelegate;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -20,12 +21,14 @@ class Layer;
 class LayerOwner {
   private: std::unique_ptr<Layer> owned_layer_;
   private: Layer* layer_;
+  private: LayerOwnerDelegate* delegate_;
 
   protected: LayerOwner();
   public: virtual ~LayerOwner();
 
   public: Layer* layer() { return layer_; }
   public: const Layer* layer() const { return layer_; }
+  public: void set_layer_owner_delegate(LayerOwnerDelegate* delgate);
 
   public: std::unique_ptr<Layer> AcquireLayer();
   protected: void DestroyLayer();

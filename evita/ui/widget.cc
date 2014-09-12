@@ -619,30 +619,26 @@ void Widget::SchedulePaintInRect(const Rect& rect) {
   ::InvalidateRect(AssociatedHwnd(), &raw_rect, true);
 }
 
-void Widget::SetBounds(const Rect& new_bounds) {
-  DCHECK(!new_bounds.empty());
+void Widget::SetBounds(const Rect& rect) {
+  DCHECK(!rect.empty());
   DCHECK(state_ >= kNotRealized);
 
-  if (bounds_ == new_bounds)
+#if 0
+  // TODO(yosi): We should enable this check.
+  if (rect == bounds_)
     return;
-  if (!is_realized()) {
-    bounds_ = new_bounds;
-    return;
+#endif
+  if (is_realized() && native_window_) {
+    ::SetWindowPos(*native_window_.get(), nullptr, rect.left(), rect.top(),
+                   rect.width(), rect.height(), SWP_NOACTIVATE);
+  } else {
+    if (bounds_ > rect && parent_node()) {
+      // TODO(yosi) We should schedule paint reveal rectangles only.
+      parent_node()->SchedulePaintInRect(bounds_);
+    }
+    bounds_ = rect;
+    DidChangeBounds();
   }
-
-  if (native_window_) {
-    ::SetWindowPos(*native_window_.get(), nullptr, new_bounds.left(),
-                   new_bounds.top(), new_bounds.width(), new_bounds.height(),
-                   SWP_NOACTIVATE);
-    return;
-  }
-
-  if (bounds_ > new_bounds && parent_node()) {
-    // TODO(yosi) We should schedule paint for reveal rectangles only.
-    parent_node()->SchedulePaintInRect(bounds_);
-  }
-  bounds_ = new_bounds;
-  DidChangeBounds();
 }
 
 void Widget::SetCapture() {

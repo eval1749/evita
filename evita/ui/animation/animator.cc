@@ -42,7 +42,6 @@ void Animator::CancelAnimation(Animatable* animatable) {
   running_animatables_.erase(animatable);
   waiting_animatables_.erase(animatable);
   animatable->DidCancelAnimation();
-  delete this;
 }
 
 void Animator::EndAnimate() {

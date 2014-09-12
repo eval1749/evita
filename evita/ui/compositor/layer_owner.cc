@@ -45,12 +45,15 @@ std::unique_ptr<Layer> LayerOwner::RecreateLayer() {
   if (!old_layer)
     return std::move(old_layer);
 
-  // Since, |new_layer| doesn't have content yet. We don't insert |new_layer|
-  // into layer tree for not displaying it. We also don't move child layers.
   auto const new_layer = new Layer();
   new_layer->SetBounds(old_layer->bounds());
   SetLayer(new_layer);
-
+  if (auto const parent = old_layer->parent_layer()) {
+    parent->InsertLayer(new_layer, old_layer.get());
+  }
+  while (auto const child = old_layer->first_child()) {
+    new_layer->AppendLayer(child);
+  }
   if (delegate_)
     delegate_->DidRecreateLayer(old_layer.get());
   return std::move(old_layer);

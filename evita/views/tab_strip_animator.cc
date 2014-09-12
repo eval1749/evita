@@ -191,9 +191,17 @@ SelectTabAction::SelectTabAction(TabStripAnimator* tab_strip_animator,
 ui::Animatable* SelectTabAction::CreateAnimation() {
   old_tab_content_ = active_tab_content();
   DCHECK_NE(old_tab_content_, new_tab_content_);
-  auto const old_layer = old_tab_content_ ? old_tab_content_->layer() : nullptr;
   auto const new_layer = new_tab_content_->layer();
-  return ui::LayerAnimation::CreateSlideIn(layer(), new_layer, old_layer);
+  new_layer->SetOrigin(gfx::PointF(-new_layer->bounds().width(),
+                                   new_layer->bounds().top));
+  layer()->AppendLayer(new_layer);
+  if (!old_tab_content_) {
+    return ui::LayerAnimation::CreateSlideInFromLeft(
+        new_layer, nullptr);
+  }
+  old_tab_content_origin_ = old_tab_content_->layer()->bounds().origin();
+  return ui::LayerAnimation::CreateSlideInFromLeft(
+        new_layer, old_tab_content_->layer());
 }
 
 void SelectTabAction::DoCancel() {

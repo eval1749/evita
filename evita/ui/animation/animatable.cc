@@ -21,14 +21,9 @@ void Animatable::AddObserver(AnimationObserver* observer) {
 }
 
 void Animatable::CancelAnimation() {
-  if (is_finished_)
+  if (!animator_ || is_finished_)
     return;
-  if (animator_) {
-    animator_->CancelAnimation(this);
-    return;
-  }
-  DidCancelAnimation();
-  delete this;
+  animator_->CancelAnimation(this);
 }
 
 void Animatable::DidCancelAnimation() {
@@ -47,22 +42,24 @@ void Animatable::DidFinishAnimation() {
   FOR_EACH_OBSERVER(AnimationObserver, observers_, DidFinishAnimation(this));
 }
 
-void Animatable::FinalizeAnimation() {
+void Animatable::DidRequestToFinishAnimation() {
+}
+
+void Animatable::MarkFinished() {
   DCHECK(!is_finished_);
   is_finished_ = true;
 }
 
-void Animatable::FinishAnimation() {
-  FinalizeAnimation();
+void Animatable::RemoveObserver(AnimationObserver* observer) {
+  observers_.RemoveObserver(observer);
+}
+
+void Animatable::RequestToFinishAnimation() {
+  DidRequestToFinishAnimation();
   DCHECK(is_finished_);
   if (animator_)
     return;
   DidFinishAnimation();
-  delete this;
-}
-
-void Animatable::RemoveObserver(AnimationObserver* observer) {
-  observers_.RemoveObserver(observer);
 }
 
 void Animatable::ScheduleAnimation() {

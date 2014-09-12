@@ -81,7 +81,7 @@ RealizeAnimation::RealizeAnimation(AnimatableWindow* window)
 // Animatable
 void RealizeAnimation::Animate(base::Time) {
   parent_layer()->AppendLayer(window()->layer());
-  FinalizeAnimation();
+  MarkFinished();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -111,7 +111,7 @@ void ReplaceAnimation::Animate(base::Time) {
   parent_layer()->AppendLayer(window()->layer());
   parent_layer()->RemoveLayer(old_window_->layer());
   old_window_->DestroyWidget();
-  FinalizeAnimation();
+  MarkFinished();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -167,7 +167,7 @@ void SlideInFromBottomAnimation::Animate(base::Time now) {
     ScheduleAnimation();
     return;
   }
-  FinalizeAnimation();
+  MarkFinished();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -224,7 +224,7 @@ void SlideInFromRightAnimation::Animate(base::Time now) {
     ScheduleAnimation();
     return;
   }
-  FinalizeAnimation();
+  MarkFinished();
 }
 
 }  // namespace

@@ -32,9 +32,10 @@ class Animatable {
   private: void DidCancelAnimation();
   protected: void DidAnimate();
   private: void DidFinishAnimation();
-  protected: virtual void FinalizeAnimation();
-  public: void FinishAnimation();
+  protected: virtual void DidRequestToFinishAnimation();
+  protected: void MarkFinished();
   public: void RemoveObserver(AnimationObserver* observer);
+  public: void RequestToFinishAnimation();
   public: void ScheduleAnimation();
 
   DISALLOW_COPY_AND_ASSIGN(Animatable);

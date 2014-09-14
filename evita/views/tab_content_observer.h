@@ -16,7 +16,7 @@ class TabContentObserver {
   protected: virtual ~TabContentObserver();
 
   public: virtual void DidActivateTabContent(TabContent* tab_content);
-  public: virtual void DidAnimateTabContent(TabContent* tab_content);
+  public: virtual void DidUpdateContent(TabContent* tab_content);
 
   DISALLOW_COPY_AND_ASSIGN(TabContentObserver);
 };

@@ -15,7 +15,7 @@ TabContentObserver::~TabContentObserver() {
 void TabContentObserver::DidActivateTabContent(TabContent*) {
 }
 
-void TabContentObserver::DidAnimateTabContent(TabContent*) {
+void TabContentObserver::DidUpdateContent(TabContent*) {
 }
 
 }  // namespace views

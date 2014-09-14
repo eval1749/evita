@@ -46,7 +46,7 @@ class TabStripAnimator::Action : public common::Castable,
   protected: void SetActiveTabContent(TabContent* new_tab_content);
 
   // TabContentObserver
-  private: virtual void DidAnimateTabContent(TabContent* tab_content) override;
+  private: virtual void DidUpdateContent(TabContent* tab_content) override;
 
   // ui::AnimationObserver
   private: virtual void DidCancelAnimation(
@@ -125,7 +125,7 @@ void TabStripAnimator::Action::SetActiveTabContent(
 }
 
 // TabContentObserver
-void TabStripAnimator::Action::DidAnimateTabContent(TabContent*) {
+void TabStripAnimator::Action::DidUpdateContent(TabContent*) {
   observing_tab_content_->RemoveObserver(this);
   observing_tab_content_ = nullptr;
   animation_ = CreateAnimation();

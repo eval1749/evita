@@ -39,7 +39,7 @@ void TabContent::NotifyActivateTabContent() {
 
 void TabContent::NotifyUpdateTabContent() {
   FOR_EACH_OBSERVER(TabContentObserver, observers_,
-                    DidAnimateTabContent(this));
+                    DidUpdateContent(this));
 }
 
 void TabContent::RemoveObserver(TabContentObserver* observer) {

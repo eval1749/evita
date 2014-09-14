@@ -438,7 +438,14 @@ LRESULT Frame::OnMessage(uint32_t message, WPARAM const wParam,
       OnDropFiles(reinterpret_cast<HDROP>(wParam));
       break;
 
+    case WM_ENTERSIZEMOVE:
+      for (auto tab_content : tab_contents_)
+        tab_content->DidEnterSizeMove();
+      break;
+
     case WM_EXITSIZEMOVE:
+      for (auto tab_content : tab_contents_)
+        tab_content->DidExitSizeMove();
       message_view_->SetMessage(base::StringPrintf(L"Resized to %dx%d",
           bounds().width(), bounds().height()));
       break;

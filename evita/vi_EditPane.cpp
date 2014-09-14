@@ -33,6 +33,8 @@ auto const kMinBoxWidth = 200.0f;
 auto const kSplitterWidth = 8.0f;
 auto const kSplitterHeight = 8.0f;
 
+bool should_not_use_animation;
+
 //////////////////////////////////////////////////////////////////////
 //
 // Bounds
@@ -625,6 +627,13 @@ void LeafBox::PrepareAnimation(ui::Animator* animator) {
     return;
   DCHECK(!new_layer->parent_layer());
   auto const parent_layer = parent_node()->GetLayer();
+  if (should_not_use_animation) {
+    visible_layer_ = new_layer;
+    parent_layer->AppendLayer(new_layer);
+    old_layer_owner_ = nullptr;
+    old_layer_.reset();
+    return;
+  }
   if (old_layer_) {
     DCHECK(!old_layer_->owner());
     DCHECK_EQ(old_layer_.get(), visible_layer_);
@@ -661,6 +670,7 @@ void LeafBox::PrepareAnimation(ui::Animator* animator) {
             gfx::PointF(left() - width(), top())));
     return;
   }
+
   visible_layer_ = new_layer;
   if (origin() == start_bounds_.origin()) {
     parent_layer->AppendLayer(new_layer);
@@ -1411,6 +1421,14 @@ void EditPane::WillRemoveChildWidget(Widget* old_child) {
 }
 
 // views::TabContent
+void EditPane::DidEnterSizeMove() {
+  should_not_use_animation = true;
+}
+
+void EditPane::DidExitSizeMove() {
+  should_not_use_animation = false;
+}
+
 const domapi::TabData* EditPane::GetTabData() const {
   auto const content = GetActiveContent();
   if (!content)

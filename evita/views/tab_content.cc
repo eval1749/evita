@@ -18,12 +18,18 @@ TabContent::TabContent()
 TabContent::~TabContent() {
 }
 
+void TabContent::AddObserver(TabContentObserver* observer) {
+  observers_.AddObserver(observer);
+}
+
 void TabContent::DidAnimateTabContent() {
   FOR_EACH_OBSERVER(TabContentObserver, observers_, DidAnimateTabContent(this));
 }
 
-void TabContent::AddObserver(TabContentObserver* observer) {
-  observers_.AddObserver(observer);
+void TabContent::DidEnterSizeMove() {
+}
+
+void TabContent::DidExitSizeMove() {
 }
 
 Frame* TabContent::GetFrame() const {

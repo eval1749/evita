@@ -63,6 +63,8 @@ class EditPane final : public views::TabContent {
   private: virtual void WillRemoveChildWidget(Widget* old_child) override;
 
   // views::TabContent
+  private: virtual void DidEnterSizeMove() override;
+  private: virtual void DidExitSizeMove() override;
   private: virtual const domapi::TabData* GetTabData() const override;
 
   DISALLOW_COPY_AND_ASSIGN(EditPane);

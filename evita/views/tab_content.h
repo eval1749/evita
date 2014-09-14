@@ -38,6 +38,8 @@ class TabContent : public ui::AnimatableWindow {
 
   public: void AddObserver(TabContentObserver* observer);
   protected: void DidAnimateTabContent();
+  public: virtual void DidEnterSizeMove();
+  public: virtual void DidExitSizeMove();
   protected: Frame* GetFrame() const;
   public: virtual const domapi::TabData* GetTabData() const = 0;
   public: void RemoveObserver(TabContentObserver* observer);

@@ -40,6 +40,7 @@
 #include "evita/ui/compositor/compositor.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/controls/scroll_bar.h"
+#include "evita/ui/focus_controller.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/metrics_view.h"
 #include "evita/views/text/render_selection.h"
@@ -52,7 +53,7 @@ namespace {
 TextSelectionModel GetTextSelectionModel(
     TextEditWindow* window, const text::Selection& selection) {
   return TextSelectionModel(
-      window->GetSelectionState(),
+      ui::FocusController::instance()->GetSelectionState(window),
       selection.anchor_offset(), selection.focus_offset());
 }
 

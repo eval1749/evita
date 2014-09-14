@@ -10,6 +10,7 @@
 
 namespace ui {
 
+enum class SelectionState;
 class Widget;
 
 class FocusController final : public common::Singleton<FocusController> {
@@ -17,7 +18,7 @@ class FocusController final : public common::Singleton<FocusController> {
 
   private: Widget* focus_widget_;
   private: bool has_active_focus_;
-  private: Widget* last_non_popup_focus_widget_;
+  private: Widget* last_focus_widget_;
   private: Widget* will_focus_widget_;
 
   private: FocusController();
@@ -36,6 +37,7 @@ class FocusController final : public common::Singleton<FocusController> {
   // Called when widget, which has native window, get native focus. This is
   // good time to prepare caret rendering.
   public: void DidSetNativeFocus(Widget* widget);
+  public: SelectionState GetSelectionState(Widget* widget) const;
   public: void RequestFocus(Widget* widget);
   public: void WillDestroyWidget(Widget* widget);
 

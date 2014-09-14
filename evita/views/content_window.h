@@ -15,7 +15,6 @@ class Frame;
 
 namespace ui {
 class MouseEvent;
-enum class SelectionState;
 }
 
 namespace views {
@@ -33,7 +32,6 @@ class ContentWindow : public Window {
   public: void Activate();
   public: void AddObserver(ContentObserver* observer);
   private: Frame* GetFrame() const;
-  public: ui::SelectionState GetSelectionState() const;
   private: bool IsActive() const;
   public: virtual void MakeSelectionVisible() = 0;
   protected: void NotifyUpdateContent();

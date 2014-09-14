@@ -49,35 +49,10 @@ using views::rendering::TextSelectionModel;
 
 namespace {
 
-bool IsPopupWindow(HWND hwnd) {
-  while (hwnd) {
-    auto const dwStyle = static_cast<DWORD>(::GetWindowLong(hwnd, GWL_STYLE));
-    if (dwStyle & WS_POPUP)
-      return true;
-    if (!(dwStyle & WS_CHILD))
-      return false;
-    hwnd = ::GetParent(hwnd);
-  }
-  return false;
-}
-
-TextSelectionModel::State GetTextSelectionState(TextEditWindow* window) {
-  if (window->has_focus())
-    return TextSelectionModel::State::HasFocus;
-
-  if (!IsPopupWindow(::GetFocus()))
-    return TextSelectionModel::State::Disabled;
-
-  if (window->IsActive())
-    return TextSelectionModel::State::Highlight;
-
-  return TextSelectionModel::State::Disabled;
-}
-
 TextSelectionModel GetTextSelectionModel(
     TextEditWindow* window, const text::Selection& selection) {
   return TextSelectionModel(
-      GetTextSelectionState(window),
+      window->GetSelectionState(),
       selection.anchor_offset(), selection.focus_offset());
 }
 

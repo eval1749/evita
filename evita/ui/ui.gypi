@@ -41,6 +41,8 @@
         'base/ime/text_input_delegate.cc',
 
         'base/selection_model.cc',
+        'base/selection_model.h',
+        'base/selection_state.h',
         'base/table_model.cc',
         'base/table_model_observer.cc',
 

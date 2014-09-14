@@ -7,16 +7,13 @@
 
 #include "evita/css/style.h"
 #include "evita/gfx/color_f.h"
+#include "evita/ui/base/selection_state.h"
 
 namespace views {
 namespace rendering {
 
 class TextSelectionModel final {
-  public: enum class State {
-    Disabled,
-    HasFocus,
-    Highlight,
-  };
+  public: typedef ui::SelectionState State;
 
   // For fast access to start and end positions of selection,
   // |TextSelectionModel| has |start_| and |end_| instead of anchor offset.

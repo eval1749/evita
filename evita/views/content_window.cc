@@ -6,6 +6,7 @@
 #include "evita/editor/application.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/views/content_observer.h"
+#include "evita/views/frame_list.h"
 #include "evita/vi_Frame.h"
 
 namespace views {
@@ -37,6 +38,10 @@ Frame* ContentWindow::GetFrame() const {
   }
   NOTREACHED();
   return nullptr;
+}
+
+bool ContentWindow::IsActive() const {
+  return GetFrame() == views::FrameList::instance()->active_frame();
 }
 
 void ContentWindow::NotifyUpdateContent() {

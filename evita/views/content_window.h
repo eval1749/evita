@@ -31,7 +31,8 @@ class ContentWindow : public Window {
 
   public: void Activate();
   public: void AddObserver(ContentObserver* observer);
-  public: Frame* GetFrame() const;
+  private: Frame* GetFrame() const;
+  public: bool IsActive() const;
   public: virtual void MakeSelectionVisible() = 0;
   protected: void NotifyUpdateContent();
   public: void RemoveObserver(ContentObserver* observer);

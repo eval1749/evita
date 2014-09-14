@@ -40,13 +40,10 @@
 #include "evita/ui/compositor/compositor.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/controls/scroll_bar.h"
-#include "evita/views/frame_list.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/metrics_view.h"
 #include "evita/views/text/render_selection.h"
 #include "evita/views/text/text_renderer.h"
-#include "evita/vi_EditPane.h"
-#include "evita/vi_Frame.h"
 
 using views::rendering::TextSelectionModel;
 
@@ -71,8 +68,9 @@ TextSelectionModel::State GetTextSelectionState(TextEditWindow* window) {
   if (!IsPopupWindow(::GetFocus()))
     return TextSelectionModel::State::Disabled;
 
-  if (window->GetFrame() == views::FrameList::instance()->active_frame())
+  if (window->IsActive())
     return TextSelectionModel::State::Highlight;
+
   return TextSelectionModel::State::Disabled;
 }
 

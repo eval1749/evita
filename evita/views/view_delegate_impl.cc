@@ -50,8 +50,9 @@ Frame* GetFrameForMessage(dom::WindowId window_id) {
   auto const window = FromWindowId("GetFrameForMessage", window_id);
   if (!window)
     return FrameList::instance()->active_frame();
-  if (auto const content_window = window->as<ContentWindow>()) {
-    if (auto const frame = content_window->GetFrame())
+  for (auto runner = static_cast<ui::Widget*>(window); runner;
+       runner = runner->parent_node()) {
+    if (auto const frame = runner->as<Frame>())
       return frame;
   }
   return FrameList::instance()->active_frame();

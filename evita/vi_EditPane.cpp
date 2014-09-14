@@ -652,7 +652,7 @@ void LeafBox::PrepareAnimation(ui::Animator* animator) {
         animator->ScheduleAnimation(
             ui::LayerAnimation::CreateSlideReplace(
                 new_layer, std::move(old_layer_),
-                gfx::PointF(left() - width(), top())));
+                gfx::PointF(right(), top())));
         return;
       }
       parent_layer->AppendLayer(new_layer);

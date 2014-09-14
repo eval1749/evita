@@ -9,6 +9,7 @@
 #include "base/logging.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/compositor/layer_owner_delegate.h"
+#include "evita/ui/compositor/layer_tree_owner.h"
 
 namespace ui {
 
@@ -23,17 +24,24 @@ void LayerOwner::set_layer_owner_delegate(LayerOwnerDelegate* delegate) {
   delegate_ = delegate;
 }
 
-std::unique_ptr<Layer> LayerOwner::AcquireLayer() {
-  if (owned_layer_)
-    owned_layer_->owner_ = nullptr;
-  return std::move(owned_layer_);
+std::unique_ptr<Layer> LayerOwner::AcquireLayerTree() {
+  return std::unique_ptr<Layer>(DetachLayerTree());
 }
 
 void LayerOwner::DestroyLayer() {
   if (!OwnsLayer())
     return;
+  layer_->owner_ = nullptr;
   layer_ = nullptr;
   owned_layer_.reset();
+}
+
+Layer* LayerOwner::DetachLayerTree() {
+  DCHECK(OwnsLayer());
+  for (auto child_layer : layer_->child_layers_)
+    child_layer->owner()->DetachLayerTree();
+  layer_->owner_ = nullptr;
+  return owned_layer_.release();
 }
 
 bool LayerOwner::OwnsLayer() const {
@@ -41,21 +49,23 @@ bool LayerOwner::OwnsLayer() const {
 }
 
 std::unique_ptr<Layer> LayerOwner::RecreateLayer() {
-  auto old_layer = AcquireLayer();
-  if (!old_layer)
-    return std::move(old_layer);
+  DCHECK(OwnsLayer());
+  auto old_layer = std::move(owned_layer_);
+  layer_->owner_ = nullptr;
 
+  // Since, |new_layer| doesn't have content yet. We don't insert |new_layer|
+  // into layer tree for not displaying it. We also don't move child layers.
   auto const new_layer = new Layer();
   new_layer->SetBounds(old_layer->bounds());
   SetLayer(new_layer);
-  if (auto const parent = old_layer->parent_layer()) {
-    parent->InsertLayer(new_layer, old_layer.get());
-  }
-  while (auto const child = old_layer->first_child()) {
-    new_layer->AppendLayer(child);
-  }
+
+  // Migrate child layers to |new_layer|. |delegate_| may recreate child layers
+  while (auto const child_layer = old_layer->first_child())
+    new_layer->AppendLayer(child_layer);
+
   if (delegate_)
     delegate_->DidRecreateLayer(old_layer.get());
+
   return std::move(old_layer);
 }
 

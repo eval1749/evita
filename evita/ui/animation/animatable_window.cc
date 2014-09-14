@@ -20,11 +20,6 @@ AnimatableWindow::~AnimatableWindow() {
 }
 
 // Widget
-void AnimatableWindow::DidHide() {
-  Widget::DidHide();
-  CancelAnimation();
-}
-
 void AnimatableWindow::DidRealize() {
   Widget::DidRealize();
   Animator::instance()->ScheduleAnimation(this);

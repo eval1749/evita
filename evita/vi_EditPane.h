@@ -15,7 +15,6 @@ class Buffer;
 
 namespace ui {
 class MouseEvent;
-class WindowAnimator;
 }
 
 namespace views {
@@ -32,14 +31,12 @@ class EditPane final : public views::TabContent {
   public: class Box;
   private: class SplitterController;
 
-  private: std::unique_ptr<ui::WindowAnimator> window_animator_;
   private: scoped_refptr<Box> root_box_;
   private: const std::unique_ptr<SplitterController> splitter_controller_;
 
   public: EditPane();
   public: virtual ~EditPane();
 
-  public: ui::WindowAnimator* window_animator() const;
   public: bool has_more_than_one_child() const;
 
   public: ContentWindow* GetActiveWindow() const;
@@ -53,6 +50,7 @@ class EditPane final : public views::TabContent {
   // ui::Widget
   private: virtual void DidChangeBounds() override;
   private: virtual void DidHide() override;
+  private: virtual void DidRealize() override;
   private: virtual void DidRealizeChildWidget(Widget* new_child) override;
   private: virtual void DidRemoveChildWidget(Widget* old_child) override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;

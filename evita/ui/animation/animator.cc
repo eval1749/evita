@@ -28,9 +28,9 @@ bool Animator::is_playing() const {
 
 void Animator::Animate(Animatable* animatable) {
   DCHECK_EQ(this, animatable->animator_);
+  running_animatables_.insert(animatable);
   if (animatable->is_finished_)
     return;
-  running_animatables_.insert(animatable);
   animatable->Animate(current_time_);
 }
 

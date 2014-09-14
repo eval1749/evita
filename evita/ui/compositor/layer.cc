@@ -37,11 +37,18 @@ Layer::Layer()
 }
 
 Layer::~Layer() {
-  DCHECK(child_layers_.empty());
-  if (animatable_)
+  DCHECK(!owner_);
+  if (animatable_) {
+    animatable_->RemoveObserver(this);
     animatable_->CancelAnimation();
+  }
   if (parent_layer_)
     parent_layer_->RemoveLayer(this);
+  while (auto const child = first_child()) {
+    DCHECK(!child->owner_);
+    RemoveLayer(child);
+    delete child;
+  }
   visual_->SetContent(nullptr);
   visual_->RemoveAllVisuals();
 }
@@ -52,6 +59,8 @@ Layer* Layer::first_child() const {
 
 void Layer::AppendLayer(Layer* new_child) {
   DCHECK_NE(this, new_child->parent_layer_);
+  DCHECK_NE(this, new_child);
+  DCHECK(!IsDescendantOf(new_child));
   if (auto const old_parent = new_child->parent_layer_)
     old_parent->RemoveLayer(new_child);
   new_child->parent_layer_ = this;
@@ -75,10 +84,19 @@ void Layer::DidChangeBounds() {
   Compositor::instance()->NeedCommit();
 }
 
-void Layer::EndAnimation() {
-  DCHECK(animatable_);
-  animatable_->RemoveObserver(this);
+void Layer::DidRegisterAnimation(ui::Animatable* animatable) {
+  FinishAnimation();
+  animatable_ = animatable;
+  animatable_->AddObserver(this);
+}
+
+void Layer::FinishAnimation() {
+  auto const animatable = animatable_;
+  if (!animatable)
+    return;
   animatable_ = nullptr;
+  animatable->RemoveObserver(this);
+  animatable->FinishAnimation();
 }
 
 void Layer::InsertLayer(Layer* new_child, Layer* ref_child) {
@@ -86,7 +104,8 @@ void Layer::InsertLayer(Layer* new_child, Layer* ref_child) {
     AppendLayer(new_child);
     return;
   }
-  DCHECK_NE(this, new_child->parent_layer_);
+  DCHECK_NE(this, new_child);
+  DCHECK(!IsDescendantOf(new_child));
   DCHECK_EQ(this, ref_child->parent_layer_);
   if (auto const old_parent = new_child->parent_layer_)
     old_parent->RemoveLayer(new_child);
@@ -99,6 +118,15 @@ void Layer::InsertLayer(Layer* new_child, Layer* ref_child) {
   COM_VERIFY(visual_->AddVisual(new_child->visual_, is_insert_above,
                                 ref_child->visual_));
   Compositor::instance()->NeedCommit();
+}
+
+bool Layer::IsDescendantOf(const Layer* other) const {
+  for (auto runner = parent_layer_; runner;
+       runner = runner->parent_layer_) {
+    if (runner == other)
+      return true;
+  }
+  return false;
 }
 
 void Layer::RemoveClip() {
@@ -157,14 +185,14 @@ void Layer::SetOrigin(const gfx::PointF& new_origin) {
   SetBounds(gfx::RectF(new_origin, bounds_.size()));
 }
 
-void Layer::StartAnimation(ui::Animatable* animatable) {
-  DCHECK(!animatable_);
-  animatable_ = animatable;
-  animatable_->AddObserver(this);
-}
-
 // AnimationObserver
 void Layer::DidCancelAnimation(Animatable* animatable) {
+  DCHECK_EQ(animatable_, animatable);
+  animatable_->RemoveObserver(this);
+  animatable_ = nullptr;
+}
+
+void Layer::DidFinishAnimation(Animatable* animatable) {
   DCHECK_EQ(animatable_, animatable);
   animatable_->RemoveObserver(this);
   animatable_ = nullptr;

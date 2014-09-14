@@ -153,6 +153,11 @@ void MetricsView::UpdateView() {
   model_->UpdateView(canvas_.get());
 }
 
+// ui::LayerOwnerDelegate
+void MetricsView::DidRecreateLayer(ui::Layer*) {
+  canvas_.reset(layer()->CreateCanvas());
+}
+
 // ui::Widget
 void MetricsView::DidChangeBounds() {
   ui::Widget::DidChangeBounds();
@@ -161,7 +166,9 @@ void MetricsView::DidChangeBounds() {
 }
 
 void MetricsView::DidRealize() {
+  ui::Widget::DidRealize();
   SetLayer(new ui::Layer());
+  set_layer_owner_delegate(this);
   layer()->SetBounds(gfx::RectF(bounds()));
   canvas_.reset(layer()->CreateCanvas());
 }

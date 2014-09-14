@@ -30,8 +30,9 @@ class LayerOwner {
   public: const Layer* layer() const { return layer_; }
   public: void set_layer_owner_delegate(LayerOwnerDelegate* delgate);
 
-  public: std::unique_ptr<Layer> AcquireLayer();
+  public: std::unique_ptr<Layer> AcquireLayerTree();
   protected: void DestroyLayer();
+  private: Layer* DetachLayerTree();
   protected: bool OwnsLayer() const;
   public: std::unique_ptr<Layer> RecreateLayer();
   public: void SetLayer(Layer* layer);

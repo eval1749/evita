@@ -19,7 +19,6 @@ class AnimatableWindow : public ui::Animatable, public ui::Widget {
   protected: virtual ~AnimatableWindow();
 
   // ui::Widget
-  protected: virtual void DidHide() override;
   protected: virtual void DidRealize() override;
   protected: virtual void DidShow() override;
   protected: virtual void WillDestroyWidget() override;

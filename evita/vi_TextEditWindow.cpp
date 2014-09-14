@@ -396,11 +396,13 @@ void TextEditWindow::Animate(base::Time) {
 }
 
 // ui::LayerOwnerDelegate
-void TextEditWindow::DidRecreateLayer(ui::Layer*) {
+void TextEditWindow::DidRecreateLayer(ui::Layer* old_layer) {
   if (!canvas_)
     return;
   canvas_.reset(layer()->CreateCanvas());
   text_renderer_->DidLostCanvas();
+  old_layer->AppendLayer(metrics_view_->RecreateLayer().release());
+  layer()->AppendLayer(metrics_view_->layer());
 }
 
 // ui::ScrollBarObserver

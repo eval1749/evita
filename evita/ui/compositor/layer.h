@@ -45,6 +45,7 @@ class Layer  : private ui::AnimationObserver {
 
   public: const gfx::RectF& bounds() const { return bounds_; }
   public: Layer* first_child() const;
+  public: gfx::PointF origin() const { return bounds_.origin(); }
   public: LayerOwner* owner() { return owner_; }
   public: ui::Layer* parent_layer() const { return parent_layer_; }
   public: IDCompositionVisual2* visual() const { return visual_; }
@@ -52,18 +53,20 @@ class Layer  : private ui::AnimationObserver {
   public: void AppendLayer(Layer* new_child);
   public: gfx::Canvas* CreateCanvas();
   protected: virtual void DidChangeBounds();
-  public: void EndAnimation();
+  public: void DidRegisterAnimation(Animatable* animatable);
+  public: void FinishAnimation();
   public: void InsertLayer(Layer* new_child, Layer* ref_child);
+  private: bool IsDescendantOf(const Layer* other) const;
   public: void RemoveClip();
   public: void RemoveLayer(Layer* old_child);
   public: void SetBounds(const gfx::RectF& new_bounds);
   public: void SetBounds(const gfx::Rect& new_bounds);
   public: void SetClip(const gfx::RectF& bounds);
   public: void SetOrigin(const gfx::PointF& new_origin);
-  public: void StartAnimation(Animatable* animatable);
 
   // AnimationObserver
   private: virtual void DidCancelAnimation(Animatable* animatable) override;
+  private: virtual void DidFinishAnimation(Animatable* animatable) override;
 
   DISALLOW_COPY_AND_ASSIGN(Layer);
 };

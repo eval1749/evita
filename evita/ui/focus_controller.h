@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_focus_controller)
-#define INCLUDE_evita_ui_focus_controller
+#if !defined(INCLUDE_evita_ui_focus_controller_h)
+#define INCLUDE_evita_ui_focus_controller_h
+
+#include <memory>
 
 #include "base/basictypes.h"
 #include "common/memory/singleton.h"
@@ -16,9 +18,11 @@ class Widget;
 class FocusController final : public common::Singleton<FocusController> {
   DECLARE_SINGLETON_CLASS(FocusController);
 
+  private: class WidgetUseMap;
+
   private: Widget* focus_widget_;
   private: bool has_active_focus_;
-  private: Widget* last_focus_widget_;
+  private: std::unique_ptr<WidgetUseMap> widget_use_map_;
   private: Widget* will_focus_widget_;
 
   private: FocusController();
@@ -37,6 +41,7 @@ class FocusController final : public common::Singleton<FocusController> {
   // Called when widget, which has native window, get native focus. This is
   // good time to prepare caret rendering.
   public: void DidSetNativeFocus(Widget* widget);
+  public: Widget* GetRecentUsedWidget() const;
   public: SelectionState GetSelectionState(Widget* widget) const;
   public: void RequestFocus(Widget* widget);
   public: void WillDestroyWidget(Widget* widget);
@@ -46,4 +51,4 @@ class FocusController final : public common::Singleton<FocusController> {
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_focus_controller)
+#endif //!defined(INCLUDE_evita_ui_focus_controller_h)

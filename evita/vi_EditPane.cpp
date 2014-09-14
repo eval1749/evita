@@ -552,6 +552,8 @@ LeafBox::LeafBox(EditPane* edit_pane, const gfx::RectF& bounds,
     // When |EditPane| isn't realized, |bounds| is empty.
     return;
   }
+  if (content_->is_realized())
+    visible_layer_ = content_->layer();
   content->SetBounds(gfx::ToEnclosingRect(bounds));
 }
 

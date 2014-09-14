@@ -37,11 +37,12 @@ class TabContent : public ui::AnimatableWindow {
   public: int active_tick() const { return active_tick_; }
 
   public: void AddObserver(TabContentObserver* observer);
-  protected: void DidAnimateTabContent();
   public: virtual void DidEnterSizeMove();
   public: virtual void DidExitSizeMove();
   protected: Frame* GetFrame() const;
   public: virtual const domapi::TabData* GetTabData() const = 0;
+  protected: void NotifyActivateTabContent();
+  protected: void NotifyUpdateTabContent();
   public: void RemoveObserver(TabContentObserver* observer);
 
   // ui::Widget

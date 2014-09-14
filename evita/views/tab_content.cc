@@ -22,10 +22,6 @@ void TabContent::AddObserver(TabContentObserver* observer) {
   observers_.AddObserver(observer);
 }
 
-void TabContent::DidAnimateTabContent() {
-  FOR_EACH_OBSERVER(TabContentObserver, observers_, DidAnimateTabContent(this));
-}
-
 void TabContent::DidEnterSizeMove() {
 }
 
@@ -34,6 +30,16 @@ void TabContent::DidExitSizeMove() {
 
 Frame* TabContent::GetFrame() const {
   return container_widget().as<Frame>();
+}
+
+void TabContent::NotifyActivateTabContent() {
+  FOR_EACH_OBSERVER(TabContentObserver, observers_,
+                    DidActivateTabContent(this));
+}
+
+void TabContent::NotifyUpdateTabContent() {
+  FOR_EACH_OBSERVER(TabContentObserver, observers_,
+                    DidAnimateTabContent(this));
 }
 
 void TabContent::RemoveObserver(TabContentObserver* observer) {

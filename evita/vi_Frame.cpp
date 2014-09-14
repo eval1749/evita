@@ -94,6 +94,7 @@ void Frame::AddObserver(views::FrameObserver* observer) {
 
 void Frame::AddTabContent(views::ContentWindow* content) {
   auto const tab_content = new EditPane();
+  tab_content->AddObserver(this);
   tab_contents_.insert(tab_content);
   AppendChild(tab_content);
   if (!is_realized()) {
@@ -123,12 +124,6 @@ void Frame::AddOrActivateTabContent(views::ContentWindow* window) {
   }
 
   AddTabContent(window);
-}
-
-void Frame::DidSetFocusOnChild(views::Window* window) {
-  auto const tab_content = GetTabContentFromWindow(this, window);
-  DCHECK(tab_content);
-  tab_strip_animator_->RequestSelect(tab_content);
 }
 
 void Frame::DrawForResize() {
@@ -534,6 +529,11 @@ void Frame::WillRemoveChildWidget(ui::Widget* old_child) {
   auto const tab_index = GetTabIndexOfTabContent(tab_content);
   DCHECK_GE(tab_index, 0);
   tab_strip_->DeleteTab(tab_index);
+}
+
+// views::TabContentObserver
+void Frame::DidActivateTabContent(TabContent* tab_content) {
+  tab_strip_animator_->RequestSelect(tab_content);
 }
 
 // views::TabDataSet::Observer

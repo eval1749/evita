@@ -15,6 +15,7 @@ class ContentObserver {
   protected: ContentObserver();
   public: virtual ~ContentObserver();
 
+  public: virtual void DidActivateContent(ContentWindow* content_window) = 0;
   public: virtual void DidUpdateContent(ContentWindow* content_window) = 0;
 
   DISALLOW_COPY_AND_ASSIGN(ContentObserver);

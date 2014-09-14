@@ -144,6 +144,7 @@ class EditPane::Box : public Bounds,
 
   public: virtual void AddAnimation(ui::Animatable* animatable);
   public: virtual void Destroy();
+  public: void DidActivateContent();
   public: virtual void DidHide();
   public: void DidRemove();
   public: virtual void DidShow();
@@ -187,54 +188,54 @@ typedef EditPane::Box Box;
 class ContentWatcher : public ContentObserver {
   private: Box* box_;
   private: ContentWindow* content_;
-  private: bool observing_;
+  private: bool is_observing_content_;
 
   public: ContentWatcher(Box* box, ContentWindow* content);
   public: virtual ~ContentWatcher();
 
   public: void SetContent(ContentWindow* content);
-  private: void StopObserving();
   public: void WillChangeContent();
 
   // views::ContentObserver
+  private: virtual void DidActivateContent(
+      ContentWindow* content_window) override;
   private: virtual void DidUpdateContent(
       ContentWindow* content_window) override;
 };
 
 ContentWatcher::ContentWatcher(Box* box, ContentWindow* content)
-    : box_(box), content_(content), observing_(false) {
+    : box_(box), content_(content), is_observing_content_(false) {
+  content_->AddObserver(this);
   WillChangeContent();
 }
 
 ContentWatcher::~ContentWatcher() {
-  StopObserving();
+  content_->RemoveObserver(this);
 }
 
 void ContentWatcher::SetContent(ContentWindow* new_content) {
   DCHECK_NE(content_, new_content);
-  StopObserving();
+  content_->RemoveObserver(this);
   content_ = new_content;
+  content_->AddObserver(this);
   WillChangeContent();
 }
 
-void ContentWatcher::StopObserving() {
-  if (!observing_)
-    return;
-  observing_ = false;
-  content_->RemoveObserver(this);
-}
-
 void ContentWatcher::WillChangeContent() {
-  if (observing_)
+  if (is_observing_content_)
     return;
-  observing_ = true;
-  content_->AddObserver(this);
+  is_observing_content_ = true;
 }
 
 // views::ContentObserver
+void ContentWatcher::DidActivateContent(views::ContentWindow*) {
+  box_->DidActivateContent();
+}
+
 void ContentWatcher::DidUpdateContent(views::ContentWindow*) {
-  DCHECK(observing_);
-  StopObserving();
+  if (!is_observing_content_)
+    return;
+  is_observing_content_ = false;
   box_->DidShowContent();
 }
 
@@ -949,6 +950,10 @@ void EditPane::Box::Destroy() {
     box->Destroy();
 }
 
+void EditPane::Box::DidActivateContent() {
+  edit_pane_->NotifyActivateTabContent();
+}
+
 void EditPane::Box::DidHide() {
   for (auto const child : child_nodes())
     child->DidHide();
@@ -971,7 +976,7 @@ void EditPane::Box::DidShowContent() {
     parent_node()->DidShowChildContent(this);
     return;
   }
-  edit_pane_->DidAnimateTabContent();
+  edit_pane_->NotifyUpdateTabContent();
 }
 
 void EditPane::Box::DidShowChildContent(Box*) {

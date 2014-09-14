@@ -102,8 +102,7 @@ void ContentWindow::DidRealize() {
 
 void ContentWindow::DidSetFocus(ui::Widget* widget) {
   Window::DidSetFocus(widget);
-  if (auto const frame = GetFrame())
-    frame->DidSetFocusOnChild(this);
+  FOR_EACH_OBSERVER(ContentObserver, observers_, DidActivateContent(this));
 }
 
 }  // namespace views

@@ -12,4 +12,10 @@ TabContentObserver::TabContentObserver() {
 TabContentObserver::~TabContentObserver() {
 }
 
+void TabContentObserver::DidActivateTabContent(TabContent*) {
+}
+
+void TabContentObserver::DidAnimateTabContent(TabContent*) {
+}
+
 }  // namespace views

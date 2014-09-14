@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "base/observer_list.h"
+#include "evita/views/tab_content_observer.h"
 #include "evita/views/tab_data_set.h"
 #include "evita/views/tab_strip_delegate.h"
 #include "evita/views/window.h"
@@ -55,6 +56,7 @@ class TabStripAnimator;
 ///   with window manager.
 /// </summary>
 class Frame final : public views::Window,
+                    private views::TabContentObserver,
                     private views::TabDataSet::Observer,
                     public views::TabStripDelegate {
   DECLARE_CASTABLE_CLASS(Frame, views::Window);
@@ -82,7 +84,6 @@ class Frame final : public views::Window,
   public: void AddOrActivateTabContent(views::ContentWindow*);
 
   // [D]
-  public: void DidSetFocusOnChild(views::Window* window);
   private: void DrawForResize();
 
   // [G]
@@ -115,6 +116,9 @@ class Frame final : public views::Window,
   private: virtual void OnPaint(const gfx::Rect paint_rect) override;
   private: virtual void WillDestroyWidget() override;
   private: virtual void WillRemoveChildWidget(ui::Widget* old_child) override;
+
+  // views::TabContentObserver
+  private: virtual void DidActivateTabContent(TabContent* tab_content);
 
   // views::TabDataSet::Observer
   private: virtual void DidSetTabData(dom::WindowId window_id,

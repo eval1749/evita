@@ -112,13 +112,13 @@ void Application::DidHandleViewIdelEvent(int) {
 void Application::DispatchViewIdelEvent() {
   #if DEBUG_IDLE
     DVLOG(0) << "view_idle_count_=" << view_idle_count_ << " active_focus=" <<
-            ui::Widget::has_active_focus();
+            ui::FocusController::instance()->has_active_focus();
   #endif
   if (view_idle_count_) {
     // DOM is still processing "view idle" vent.
     METRICS_COUNT("view_idle_count");
     ++view_idle_count_;
-  } else if (ui::Widget::has_active_focus()) {
+  } else if (ui::FocusController::instance()->has_active_focus()) {
     // We are active. Notify DOM to do something.
     METRICS_COUNT("view_idle_event");
     view_idle_count_ = 1;

@@ -19,7 +19,6 @@
 #include "evita/ui/root_widget.h"
 #include "evita/ui/system_metrics.h"
 
-#define DEBUG_FOCUS 0
 #define DEBUG_MOUSE 0
 #define DEBUG_MOUSE_WHEEL 0
 #define DEBUG_RESIZE 0
@@ -35,10 +34,7 @@ namespace ui {
 namespace {
 
 Widget* capture_widget;
-Widget* focus_widget;
 Widget* hover_widget;
-Widget* will_focus_widget;
-bool we_have_active_focus;
 
 Point GetCursorPoint() {
   POINT cursor_point;
@@ -110,14 +106,8 @@ UINT_PTR Widget::child_window_id() const {
   return reinterpret_cast<UINT_PTR>(native_window());
 }
 
-bool Widget::has_active_focus() {
-  // When mode less dialog has focus, ::GetFocus() returns it, but
-  // we_have_active_focus is false.
-  return we_have_active_focus;
-}
-
 bool Widget::has_focus() const {
-  return focus_widget == this;
+  return FocusController::instance()->focus_widget() == this;
 }
 
 bool Widget::has_native_focus() const {
@@ -156,13 +146,9 @@ void Widget::DestroyWidget() {
     hover_widget = nullptr;
   if (capture_widget == this)
     ReleaseCapture();
-  if (focus_widget == this) {
-    focus_widget = nullptr;
-    DidKillFocus(nullptr);
-  }
-  while (first_child()) {
+  FocusController::instance()->WillDestroyWidget(this);
+  while (first_child())
     first_child()->DestroyWidget();
-  }
   DestroyLayer();
   parent_widget.RemoveChild(this);
   parent_widget.DidRemoveChildWidget(this);
@@ -204,14 +190,6 @@ void Widget::DidHide() {
 void Widget::DidKillFocus(ui::Widget*) {
 }
 
-void Widget::DidKillNativeFocus() {
-  if (auto widget = focus_widget) {
-    focus_widget = nullptr;
-    widget->DidKillFocus(will_focus_widget);
-  }
-  we_have_active_focus = false;
-}
-
 void Widget::DidRealize() {
   for (auto const child : child_nodes()) {
     child->RealizeWidget();
@@ -230,14 +208,6 @@ void Widget::DidChangeBounds() {
 }
 
 void Widget::DidSetFocus(ui::Widget*) {
-}
-
-void Widget::DidSetNativeFocus() {
-  auto const last_focused_widget = focus_widget;
-  focus_widget = will_focus_widget ? will_focus_widget : this;
-  will_focus_widget = nullptr;
-  focus_widget->DidSetFocus(last_focused_widget);
-  we_have_active_focus = true;
 }
 
 void Widget::DidShow() {
@@ -295,10 +265,6 @@ gfx::RectF Widget::GetContentsBounds() const {
 
 HCURSOR Widget::GetCursorAt(const Point&) const {
   return ::LoadCursor(nullptr, IDC_ARROW);
-}
-
-Widget* Widget::GetFocusWidget() {
-  return focus_widget;
 }
 
 Widget& Widget::GetHostWidget() const {
@@ -584,25 +550,7 @@ void Widget::ReleaseCapture() {
 }
 
 void Widget::RequestFocus() {
-  DCHECK(!will_focus_widget);
-  #if DEBUG_FOCUS
-    DVLOG_WIDGET(0) << " focus_hwnd=" << ::GetFocus() <<
-        " focus=" << focus_widget;
-  #endif
-  // This wieget might be hidden during creating window.
-  auto& host = GetHostWidget();
-  if (::GetFocus() == *host.native_window()) {
-    if (focus_widget == this)
-      return;
-    auto const last_focus_widget = focus_widget;
-    focus_widget = this;
-    if (last_focus_widget)
-      last_focus_widget->DidKillFocus(this);
-    focus_widget->DidSetFocus(last_focus_widget);
-    return;
-  }
-  will_focus_widget = this;
-  ::SetFocus(*host.native_window());
+  FocusController::instance()->RequestFocus(this);
 }
 
 void Widget::SchedulePaint() {
@@ -781,13 +729,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       return 0;
 
     case WM_KILLFOCUS:
-      #if DEBUG_FOCUS
-        DVLOG_WIDGET(0) << "WM_KILLFOCUS" <<
-            " wParam=" << reinterpret_cast<HWND>(wParam) <<
-            " cur=" << focus_widget <<
-            " will=" << will_focus_widget;
-      #endif
-      DidKillNativeFocus();
+      FocusController::instance()->DidKillNativeFocus(this);
       return 0;
 
     case WM_MOUSELEAVE:
@@ -813,13 +755,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       break;
 
     case WM_SETFOCUS: {
-      #if DEBUG_FOCUS
-        DVLOG_WIDGET(0) << "WM_SETFOCUS" <<
-            " wParam=" << reinterpret_cast<HWND>(wParam) <<
-            " cur=" << focus_widget <<
-            " will=" << will_focus_widget;
-      #endif
-      DidSetNativeFocus();
+      FocusController::instance()->DidSetNativeFocus(this);
       return 0;
     }
 
@@ -952,7 +888,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
     }
   }
 
-  if (focus_widget) {
+  if (auto const focus_widget = FocusController::instance()->focus_widget()) {
     if (message >= WM_KEYFIRST && message <= WM_KEYLAST)
       return focus_widget->HandleKeyboardMessage(message, wParam, lParam);
   }

@@ -13,6 +13,7 @@
 #include "evita/gfx/rect.h"
 #include "evita/gfx/rect_f.h"
 #include "evita/ui/compositor/layer_owner.h"
+#include "evita/ui/focus_controller.h"
 
 namespace gfx {
 class Canvas;
@@ -24,6 +25,7 @@ using common::win::NativeWindow;
 using common::win::Point;
 using common::win::Rect;
 using common::win::Size;
+class FocusController;
 class KeyboardEvent;
 class Layer;
 class MouseEvent;
@@ -39,6 +41,9 @@ class Widget
       public common::win::MessageDelegate,
       public LayerOwner {
   DECLARE_CASTABLE_CLASS(Widget, Castable);
+
+  // For |DidKillFocuns()| and |DidSetFocus()|.
+  friend class FocusController;
 
   private: class HitTestResult;
 
@@ -66,7 +71,6 @@ class Widget
 
   // |child_window_id()| is used for |NMHDR.idFrom| of |WM_NOTIFY|.
   public: UINT_PTR child_window_id() const;
-  public: static bool has_active_focus();
   public: bool has_focus() const;
   public: bool has_native_focus() const;
   public: bool has_native_window() const { 
@@ -96,17 +100,10 @@ class Widget
   protected: virtual void DidHide();
   protected: virtual void DidKillFocus(ui::Widget* focused_window);
 
-  // Called when widget, which has native window, loses native focus. This is
-  // good time to restore caret background image.
-  protected: virtual void DidKillNativeFocus();
   protected: virtual void DidRealize();
   protected: virtual void DidRealizeChildWidget(Widget* new_child);
   protected: virtual void DidRemoveChildWidget(Widget* old_child);
   protected: virtual void DidSetFocus(ui::Widget* last_focused);
-
-  // Called when widget, which has native window, get native focus. This is
-  // good time to prepare caret rendering.
-  protected: virtual void DidSetNativeFocus();
   protected: virtual void DidShow();
   private: void DispatchMouseExited();
   private: void DispatchPaintMessage();
@@ -114,7 +111,6 @@ class Widget
   // [G]
   public: gfx::RectF GetContentsBounds() const;
   protected: virtual HCURSOR GetCursorAt(const Point& point) const;
-  public: static Widget* GetFocusWidget();
   private: Widget& GetHostWidget() const;
   public: virtual gfx::Size GetPreferredSize() const;
 

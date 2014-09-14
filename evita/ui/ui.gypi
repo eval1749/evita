@@ -82,6 +82,8 @@
         'controls/text_field_control.cc',
 
         'caret.cc',
+        'focus_controller.cc',
+        'focus_controller.h',
         'root_widget.cc',
         'system_metrics.cc',
         'system_metrics_observer.cc',

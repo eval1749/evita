@@ -5,7 +5,6 @@
 #if !defined(INCLUDE_evita_ui_animation_animatable_h)
 #define INCLUDE_evita_ui_animation_animatable_h
 
-#include "base/time/time.h"
 #include "base/observer_list.h"
 #include "base/time/time.h"
 

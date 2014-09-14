@@ -61,8 +61,8 @@ class TableView
   private: virtual void DidDeleteAt(Posn offset, size_t length) override;
   private: virtual void DidInsertAt(Posn offset, size_t length) override;
 
-  // ui::Animatable
-  private: virtual void Animate(base::Time time) override;
+  // ui::AnimationFrameHandler
+  private: virtual void DidBeginAnimationFrame(base::Time time) override;
 
   // ui::TableControlObserver
   private: virtual void OnKeyPressed(const ui::KeyboardEvent&) override;

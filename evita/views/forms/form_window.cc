@@ -459,12 +459,12 @@ void FormWindow::TransferFocusIfNeeded() {
 }
 
 // ui::Animatable
-void FormWindow::Animate(base::Time) {
+void FormWindow::DidBeginAnimationFrame(base::Time) {
   DCHECK(is_realized());
   if (!visible())
     return;
 
-  ui::Animator::instance()->ScheduleAnimation(this);
+  RequestAnimationFrame();
 
   if (!pending_update_rect_.empty()) {
     gfx::Rect rect;
@@ -569,7 +569,6 @@ void FormWindow::DidChangeBounds() {
 }
 
 void FormWindow::DidDestroyWidget() {
-  CancelAnimation();
   ui::SystemMetrics::instance()->RemoveObserver(this);
   Window::DidDestroyWidget();
 }

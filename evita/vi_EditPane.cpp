@@ -13,12 +13,12 @@
 #include "common/tree/node.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/resource.h"
-#include "evita/ui/animation/animation_observer.h"
 #include "evita/ui/animation/animator.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/compositor/layer_animation.h"
 #include "evita/ui/compositor/layer_owner.h"
 #include "evita/ui/events/event.h"
+#include "evita/views/content_observer.h"
 #include "evita/views/content_window.h"
 #include "evita/vi_Frame.h"
 
@@ -182,7 +182,7 @@ typedef EditPane::Box Box;
 //
 // ContentWatcher
 //
-class ContentWatcher : public ui::AnimationObserver {
+class ContentWatcher : public ContentObserver {
   private: Box* box_;
   private: ContentWindow* content_;
   private: bool observing_;
@@ -194,8 +194,9 @@ class ContentWatcher : public ui::AnimationObserver {
   private: void StopObserving();
   public: void WillChangeContent();
 
-  // ui::AnimationObserver
-  private: virtual void DidAnimate(ui::Animatable* animatable) override;
+  // views::ContentObserver
+  private: virtual void DidUpdateContent(
+      ContentWindow* content_window) override;
 };
 
 ContentWatcher::ContentWatcher(Box* box, ContentWindow* content)
@@ -228,8 +229,8 @@ void ContentWatcher::WillChangeContent() {
   content_->AddObserver(this);
 }
 
-// ui::AnimationObserver
-void ContentWatcher::DidAnimate(ui::Animatable*) {
+// views::ContentObserver
+void ContentWatcher::DidUpdateContent(views::ContentWindow*) {
   DCHECK(observing_);
   StopObserving();
   box_->DidShowContent();

@@ -24,7 +24,7 @@
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/spellchecker/spelling_engine.h"
-#include "evita/ui/animation/animator.h"
+#include "evita/ui/animation/animation_scheduler.h"
 #include "evita/ui/base/ime/text_input_client_win.h"
 #include "evita/ui/compositor/compositor.h"
 #include "evita/ui/widget.h"
@@ -169,7 +169,7 @@ bool Application::OnIdle(int) {
     }
   }
   auto const now = base::Time::Now();
-  ui::Animator::instance()->PlayAnimations(now);
+  ui::AnimationScheduler::instance()->HandleAnimationFrame(now);
   ui::Compositor::instance()->CommitIfNeeded();
   return false;
 }

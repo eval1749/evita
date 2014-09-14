@@ -19,20 +19,25 @@ AnimatableWindow::AnimatableWindow() {
 AnimatableWindow::~AnimatableWindow() {
 }
 
+// AnimationFrameHandler
+void AnimatableWindow::DidBeginAnimationFrame(base::Time) {
+  // default implementation does nothing.
+}
+
 // Widget
 void AnimatableWindow::DidRealize() {
   Widget::DidRealize();
-  Animator::instance()->ScheduleAnimation(this);
+  RequestAnimationFrame();
 }
 
 void AnimatableWindow::DidShow() {
   Widget::DidShow();
-  Animator::instance()->ScheduleAnimation(this);
+  RequestAnimationFrame();
 }
 
 void AnimatableWindow::WillDestroyWidget() {
   Widget::WillDestroyWidget();
-  CancelAnimation();
+  CancelAnimationFrameRequest();
 }
 
 }  // namespace ui

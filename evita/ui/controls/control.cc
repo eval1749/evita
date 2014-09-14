@@ -59,10 +59,6 @@ void Control::DidChangeState() {
   SchedulePaint();
 }
 
-// ui::AnimatableWindow
-void Control::Animate(base::Time) {
-}
-
 // ui::WIdget
 void Control::DidKillFocus(ui::Widget* focused_widget) {
   AnimatableWindow::DidKillFocus(focused_widget);

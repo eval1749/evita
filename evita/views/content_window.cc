@@ -5,6 +5,7 @@
 
 #include "evita/editor/application.h"
 #include "evita/ui/compositor/layer.h"
+#include "evita/views/content_observer.h"
 #include "evita/vi_Frame.h"
 
 namespace views {
@@ -24,6 +25,10 @@ void ContentWindow::Activate() {
   RequestFocus();
 }
 
+void ContentWindow::AddObserver(ContentObserver* observer) {
+  observers_.AddObserver(observer);
+}
+
 Frame* ContentWindow::GetFrame() const {
   for (auto runner = static_cast<const Widget*>(this); runner;
        runner = &runner->container_widget()) {
@@ -32,6 +37,14 @@ Frame* ContentWindow::GetFrame() const {
   }
   NOTREACHED();
   return nullptr;
+}
+
+void ContentWindow::NotifyUpdateContent() {
+  FOR_EACH_OBSERVER(ContentObserver, observers_, DidUpdateContent(this));
+}
+
+void ContentWindow::RemoveObserver(ContentObserver* observer) {
+  observers_.RemoveObserver(observer);
 }
 
 // ui::Widget

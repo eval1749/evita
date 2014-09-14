@@ -286,6 +286,8 @@
         'views/window.cc',
         'views/window_set.cc',
 
+        'views/content_observer.cc',
+        'views/content_observer.h',
         'views/content_window.cc',
         'views/message_view.cc',
         'views/metrics_view.cc',

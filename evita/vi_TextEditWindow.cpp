@@ -380,11 +380,11 @@ void TextEditWindow::ShouldDiscardResources() {
   text_renderer_->DidLostCanvas();
 }
 
-// ui::Animatable
-void TextEditWindow::Animate(base::Time) {
+// ui::AnimationFrameHandler
+void TextEditWindow::DidBeginAnimationFrame(base::Time) {
   if (!visible())
     return;
-  ui::Animator::instance()->ScheduleAnimation(this);
+  RequestAnimationFrame();
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   if (!lock_scope.locked())
     return;
@@ -392,7 +392,7 @@ void TextEditWindow::Animate(base::Time) {
   views::MetricsView::TimingScope timing_scope(metrics_view_);
   Redraw();
   metrics_view_->UpdateView();
-  DidAnimate();
+  NotifyUpdateContent();
 }
 
 // ui::LayerOwnerDelegate

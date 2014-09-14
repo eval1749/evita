@@ -42,9 +42,6 @@ class TabContent : public ui::AnimatableWindow {
   public: virtual const domapi::TabData* GetTabData() const = 0;
   public: void RemoveObserver(TabContentObserver* observer);
 
-  // ui::AnimatableWindow
-  protected: virtual void Animate(base::Time time) override;
-
   // ui::Widget
   protected: virtual void DidHide() override;
   protected: virtual void DidRealize() override;

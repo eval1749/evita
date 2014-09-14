@@ -319,46 +319,41 @@ MessageView::~MessageView() {
 
 void MessageView::SetMessage(const base::string16& text) {
   model_->SetMessage(text);
-  ui::Animator::instance()->ScheduleAnimation(this);
+  RequestAnimationFrame();
 }
 
 void MessageView::SetStatus(const std::vector<base::string16>& texts) {
   model_->SetStatus(texts);
-  ui::Animator::instance()->ScheduleAnimation(this);
+  RequestAnimationFrame();
 }
 
-// ui::Animatable
-void MessageView::Animate(base::Time time) {
+// ui::AnimationFrameHandler
+void MessageView::DidBeginAnimationFrame(base::Time time) {
   if (!visible())
     return;
   if (!model_->UpdateVisual(time, canvas_.get(), GetContentsBounds()))
     return;
-  ui::Animator::instance()->ScheduleAnimation(this);
+  RequestAnimationFrame();
 }
 
 // ui::Widget
 void MessageView::DidChangeBounds() {
-  ui::Widget::DidChangeBounds();
+  ui::AnimatableWindow::DidChangeBounds();
   if (!canvas_)
     return;
   canvas_->SetBounds(GetContentsBounds());
-  ui::Animator::instance()->ScheduleAnimation(this);
+  RequestAnimationFrame();
 }
 
 void MessageView::DidRealize() {
+  ui::AnimatableWindow::DidRealize();
   SetLayer(new ui::Layer());
   layer()->SetBounds(gfx::RectF(bounds()));
   canvas_.reset(layer()->CreateCanvas());
-  ui::Animator::instance()->ScheduleAnimation(this);
 }
 
 gfx::Size MessageView::GetPreferredSize() const {
   return gfx::Size(0, ::GetSystemMetrics(SM_CYCAPTION));
-}
-
-void MessageView::WillDestroyWidget() {
-  ui::Widget::WillDestroyWidget();
-  CancelAnimation();
 }
 
 }  // namespace views

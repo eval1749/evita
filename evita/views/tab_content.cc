@@ -34,10 +34,6 @@ void TabContent::RemoveObserver(TabContentObserver* observer) {
   observers_.RemoveObserver(observer);
 }
 
-// ui::AnimatableWindow
-void TabContent::Animate(base::Time) {
-}
-
 // ui::Widget
 void TabContent::DidHide() {
   ui::AnimatableWindow::DidHide();

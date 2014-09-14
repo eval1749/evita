@@ -105,8 +105,8 @@ class TextEditWindow : private gfx::Canvas::Observer,
   // gfx::Canvas::Observer
   private: virtual void ShouldDiscardResources() override;
 
-  // ui::Animatable
-  private: virtual void Animate(base::Time time) override;
+  // ui::AnimationFrameHandler
+  private: virtual void DidBeginAnimationFrame(base::Time time) override;
 
   // ui::LayerOwnerDelegate
   private: virtual void DidRecreateLayer(ui::Layer* old_layer) override;

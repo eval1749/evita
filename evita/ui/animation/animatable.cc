@@ -28,9 +28,7 @@ void Animatable::CancelAnimation() {
     return;
   }
   DidCancelAnimation();
-  // TODO(eval1749) Once we introduce |AnimationFrameRequestor|, we should
-  // delete |this|.
-  //delete this;
+  delete this;
 }
 
 void Animatable::DidCancelAnimation() {

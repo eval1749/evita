@@ -437,11 +437,11 @@ int TextFieldControl::MapPointToOffset(const gfx::PointF& point) const {
 }
 
 // ui::AnimatableWindow
-void TextFieldControl::Animate(base::Time) {
+void TextFieldControl::DidBeginAnimationFrame(base::Time) {
   if (!has_focus())
     return;
   SchedulePaint();
-  ui::Animator::instance()->ScheduleAnimation(this);
+  RequestAnimationFrame();
 }
 
 // ui::Control
@@ -452,7 +452,7 @@ void TextFieldControl::DidChangeState() {
 
 // ui::Widget
 void TextFieldControl::DidKillFocus(ui::Widget* focused_widget) {
-  CancelAnimation();
+  CancelAnimationFrameRequest();
   SchedulePaint();
   Control::DidKillFocus(focused_widget);
 }
@@ -462,7 +462,7 @@ void TextFieldControl::DidChangeBounds() {
 }
 
 void TextFieldControl::DidSetFocus(ui::Widget* last_focused_widget) {
-  ui::Animator::instance()->ScheduleAnimation(this);
+  RequestAnimationFrame();
   Control::DidSetFocus(last_focused_widget);
 }
 

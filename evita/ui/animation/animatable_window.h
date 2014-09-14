@@ -5,12 +5,12 @@
 #if !defined(INCLUDE_evita_ui_animatable_window_h)
 #define INCLUDE_evita_ui_animatable_window_h
 
-#include "evita/ui/animation/animatable.h"
+#include "evita/ui/animation/animation_frame_handler.h"
 #include "evita/ui/widget.h"
 
 namespace ui {
 
-class AnimatableWindow : public ui::Animatable, public ui::Widget {
+class AnimatableWindow : public AnimationFrameHandler, public Widget {
   DECLARE_CASTABLE_CLASS(AnimatableWindow, Widget);
 
   protected: explicit AnimatableWindow(
@@ -18,7 +18,10 @@ class AnimatableWindow : public ui::Animatable, public ui::Widget {
   protected: AnimatableWindow();
   protected: virtual ~AnimatableWindow();
 
-  // ui::Widget
+  // AnimationFrameHanndler
+  protected: virtual void DidBeginAnimationFrame(base::Time time) override;
+
+  // Widget
   protected: virtual void DidRealize() override;
   protected: virtual void DidShow() override;
   protected: virtual void WillDestroyWidget() override;

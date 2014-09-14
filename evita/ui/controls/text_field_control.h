@@ -46,7 +46,7 @@ class TextFieldControl final : public Control {
   public: int MapPointToOffset(const gfx::PointF& point) const;
 
   // ui::AnimatableWindow
-  private: virtual void Animate(base::Time time) override;
+  private: virtual void DidBeginAnimationFrame(base::Time time) override;
 
   // ui::Control
   private: virtual void DidChangeState() override;

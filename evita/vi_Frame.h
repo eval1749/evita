@@ -101,8 +101,8 @@ class Frame final : public views::Window,
   // [U]
   private: void UpdateTitleBar();
 
-  // ui::Animatable
-  private: virtual void Animate(base::Time time) override;
+  // ui::AnimationFrameHandler
+  private: virtual void DidBeginAnimationFrame(base::Time time) override;
 
   // ui::Widget
   private: virtual void CreateNativeWindow() const override;

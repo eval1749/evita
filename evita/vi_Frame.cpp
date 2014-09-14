@@ -141,7 +141,7 @@ void Frame::DrawForResize() {
     auto const window = child->as<Window>();
     if (!window)
       continue;
-    ui::Animator::instance()->PlayAnimation(now, window);
+    window->HandleAnimationFrame(now);
   }
 }
 
@@ -233,11 +233,11 @@ void Frame::UpdateTitleBar() {
   title_bar_->SetText(window_title);
 }
 
-// ui::Animatable
-void Frame::Animate(base::Time now) {
+// ui::AnimationFrameHandler
+void Frame::DidBeginAnimationFrame(base::Time now) {
   if (!visible())
     return;
-  ui::Animator::instance()->ScheduleAnimation(this);
+  RequestAnimationFrame();
   // TODO(eval1749) We should call update title bar only when needed.
   UpdateTitleBar();
 

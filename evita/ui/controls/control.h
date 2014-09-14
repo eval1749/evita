@@ -53,9 +53,6 @@ class Control : public AnimatableWindow {
 
   protected: virtual void DidChangeState();
 
-  // ui::AnimatableWindow
-  protected: virtual void Animate(base::Time time) override;
-
   // ui::Widget
   protected: virtual void DidKillFocus(ui::Widget* focused_window) override;
   protected: virtual void DidRealize() override;

@@ -194,13 +194,13 @@ void TableView::DidDeleteAt(Posn, size_t) {
   should_update_model_ = true;
 }
 
-// ui::Animatable
-void TableView::Animate(base::Time) {
+// ui::AnimationFrameHandler
+void TableView::DidBeginAnimationFrame(base::Time) {
   if (!visible())
     return;
   // TODO(eval1749) We don't need to schedule animation for each animation
   // frame for |TableView|.
-  ui::Animator::instance()->ScheduleAnimation(this);
+  RequestAnimationFrame();
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   if (!lock_scope.locked())
     return;
@@ -210,7 +210,7 @@ void TableView::Animate(base::Time) {
   if (has_focus())
     control_->RequestFocus();
   control_->RenderIfNeeded(canvas_.get());
-  DidAnimate();
+  NotifyUpdateContent();
 }
 
 void TableView::DidInsertAt(Posn, size_t) {

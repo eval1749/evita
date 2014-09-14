@@ -91,11 +91,17 @@ void Animator::ScheduleAnimation(Animatable* animatable) {
   DCHECK(!animatable->animator_ || animatable->animator_ == this);
   animatable->animator_ = this;
   waiting_animatables_.insert(animatable);
+  RequestAnimationFrame();
 }
 
 void Animator::StartAnimate(base::Time now) {
   DCHECK(!is_playing());
   current_time_ = now;
+}
+
+// AnimationFrameHandler
+void Animator::DidBeginAnimationFrame(base::Time time) {
+  PlayAnimations(time);
 }
 
 }  // namespace ui

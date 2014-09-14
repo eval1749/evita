@@ -56,8 +56,8 @@ class FormWindow final : public views::Window,
   private: void DoRealizeWidget();
   private: void TransferFocusIfNeeded();
 
-  // ui::Animatable
-  private: virtual void Animate(base::Time time) override;
+  // ui::AnimationFrameHandler
+  private: virtual void DidBeginAnimationFrame(base::Time time) override;
 
   // ui::SystemMetricsObserver
   private: virtual void DidChangeIconFont() override;

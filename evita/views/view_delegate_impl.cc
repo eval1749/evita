@@ -524,7 +524,7 @@ void ViewDelegateImpl::UpdateWindow(dom::WindowId window_id) {
   if (!window)
     return;
   auto const now = base::Time::Now();
-  ui::Animator::instance()->PlayAnimation(now, window);
+  window->HandleAnimationFrame(now);
 }
 
 }  // namespace views

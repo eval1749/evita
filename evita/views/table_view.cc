@@ -19,7 +19,6 @@
 #include "evita/ui/controls/table_control.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/table_view_model.h"
-#include "evita/vi_Frame.h"
 
 extern HINSTANCE g_hInstance;
 

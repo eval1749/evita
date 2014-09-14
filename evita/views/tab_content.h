@@ -10,8 +10,6 @@
 #include "base/strings/string16.h"
 #include "evita/ui/animation/animatable_window.h"
 
-class Frame;
-
 namespace domapi {
 struct TabData;
 }
@@ -39,7 +37,6 @@ class TabContent : public ui::AnimatableWindow {
   public: void AddObserver(TabContentObserver* observer);
   public: virtual void DidEnterSizeMove();
   public: virtual void DidExitSizeMove();
-  protected: Frame* GetFrame() const;
   public: virtual const domapi::TabData* GetTabData() const = 0;
   protected: void NotifyActivateTabContent();
   protected: void NotifyUpdateTabContent();

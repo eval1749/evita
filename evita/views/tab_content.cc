@@ -7,7 +7,6 @@
 #include "common/win/native_window.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/views/tab_content_observer.h"
-#include "evita/vi_Frame.h"
 
 namespace views {
 
@@ -26,10 +25,6 @@ void TabContent::DidEnterSizeMove() {
 }
 
 void TabContent::DidExitSizeMove() {
-}
-
-Frame* TabContent::GetFrame() const {
-  return container_widget().as<Frame>();
 }
 
 void TabContent::NotifyActivateTabContent() {

@@ -1257,6 +1257,10 @@ ContentWindow* EditPane::GetActiveContent() const {
   return box ? box->GetContent() : nullptr;
 }
 
+Frame* EditPane::GetFrame() const {
+  return container_widget().as<Frame>();
+}
+
 void EditPane::ReplaceActiveContent(ContentWindow* content) {
   DCHECK(!content->is_realized());
   root_box_->GetActiveLeafBox()->SetContent(content);

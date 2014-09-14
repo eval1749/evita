@@ -39,7 +39,7 @@ class EditPane final : public views::TabContent {
 
   public: bool has_more_than_one_child() const;
 
-  public: ContentWindow* GetActiveWindow() const;
+  public: ContentWindow* GetActiveContent() const;
   public: void ReplaceActiveContent(ContentWindow* window);
   public: void SetContent(ContentWindow* window);
   public: void SplitHorizontally(ContentWindow* left_window,

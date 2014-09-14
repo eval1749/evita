@@ -1228,7 +1228,7 @@ bool EditPane::has_more_than_one_child() const {
 }
 
 // Returns the last active Box.
-ContentWindow* EditPane::GetActiveWindow() const {
+ContentWindow* EditPane::GetActiveContent() const {
   auto const box = root_box_->GetActiveLeafBox();
   return box ? box->GetContent() : nullptr;
 }
@@ -1336,7 +1336,7 @@ void EditPane::DidRemoveChildWidget(Widget*) {
 }
 
 void EditPane::DidSetFocus(ui::Widget*) {
-  auto const widget = GetActiveWindow();
+  auto const widget = GetActiveContent();
   if (!widget)
     return;
   widget->RequestFocus();
@@ -1412,7 +1412,7 @@ void EditPane::WillRemoveChildWidget(Widget* old_child) {
 
 // views::TabContent
 const domapi::TabData* EditPane::GetTabData() const {
-  auto const content = GetActiveWindow();
+  auto const content = GetActiveContent();
   if (!content)
     return nullptr;
   return views::TabDataSet::instance()->GetTabData(content->window_id());

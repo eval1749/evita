@@ -566,7 +566,7 @@ void Frame::DidThrowTab(TabContent* tab_content) {
   if (!edit_tab_content)
     return;
   Application::instance()->view_event_handler()->DidDropWidget(
-      edit_tab_content->GetActiveWindow()->window_id(),
+      edit_tab_content->GetActiveContent()->window_id(),
       views::kInvalidWindowId);
 }
 
@@ -587,7 +587,7 @@ void Frame::OnDropTab(TabContent* tab_content) {
   if (!edit_tab_content)
     return;
   Application::instance()->view_event_handler()->DidDropWidget(
-      edit_tab_content->GetActiveWindow()->window_id(),
+      edit_tab_content->GetActiveContent()->window_id(),
       window_id());
 }
 

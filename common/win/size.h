@@ -22,6 +22,11 @@ class COMMON_EXPORT Size {
 
   public: bool operator==(const Size& other) const;
   public: bool operator!=(const Size& other) const;
+  public: bool operator<(const Size& other) const;
+  public: bool operator<=(const Size& other) const;
+  public: bool operator>(const Size& other) const;
+  public: bool operator>=(const Size& other) const;
+
   public: Size operator+(const Size& other) const;
   public: Size operator-(const Size& other) const;
   public: Size operator*(int multiplier) const;
@@ -32,6 +37,8 @@ class COMMON_EXPORT Size {
   public: void set_height(int height) { data_.cy = height; }
   public: int width() const { return data_.cx; }
   public: void set_width(int width) { data_.cx = width; }
+
+  public: int GetArea() const;
 };
 
 } // namespace win

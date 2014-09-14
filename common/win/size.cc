@@ -13,6 +13,8 @@ Size::Size(const Size& other) : data_(other.data_) {
 }
 
 Size::Size(int width, int height) {
+  DCHECK_GE(width, 0);
+  DCHECK_GE(height, 0);
   data_.cx = width;
   data_.cy = height;
 }
@@ -33,6 +35,22 @@ bool Size::operator!=(const Size& other) const {
   return !operator==(other);
 }
 
+bool Size::operator<(const Size& other) const {
+  return GetArea() < other.GetArea();
+}
+
+bool Size::operator<=(const Size& other) const {
+  return GetArea() < other.GetArea();
+}
+
+bool Size::operator>(const Size& other) const {
+  return GetArea() > other.GetArea();
+}
+
+bool Size::operator>=(const Size& other) const {
+  return GetArea() > other.GetArea();
+}
+
 Size Size::operator+(const Size& other) const {
   return Size(width() + other.width(), height() + other.height());
 }
@@ -47,6 +65,10 @@ Size Size::operator*(int multiplier) const {
 
 Size Size::operator/(int divider) const {
   return Size(width() / divider, height() / divider);
+}
+
+int Size::GetArea() const {
+  return width() * height();
 }
 
 }  // namespace win

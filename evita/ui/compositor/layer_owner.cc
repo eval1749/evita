@@ -9,7 +9,6 @@
 #include "base/logging.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/compositor/layer_owner_delegate.h"
-#include "evita/ui/compositor/layer_tree_owner.h"
 
 namespace ui {
 

@@ -371,7 +371,7 @@ LayerAnimation::~LayerAnimation() {
 }
 
 base::TimeDelta LayerAnimation::animation_duration() const {
-  return base::TimeDelta::FromMilliseconds(16 * 20);
+  return base::TimeDelta::FromMilliseconds(16 * 10);
 }
 
 LayerAnimation* LayerAnimation::CreateExtend(

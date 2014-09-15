@@ -66,7 +66,6 @@ TextSelectionModel GetTextSelectionModel(
 TextEditWindow::TextEditWindow(views::WindowId window_id,
                                text::Selection* selection)
     : ContentWindow(window_id),
-      canvas_(nullptr),
       m_lCaretPosn(-1),
       metrics_view_(new views::MetricsView()),
       text_renderer_(new TextRenderer(selection->buffer())),
@@ -243,9 +242,9 @@ void TextEditWindow::Redraw() {
       if (ShouldRender()) {
         Render(selection);
       } else {
-        gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-        text_renderer_->RenderSelectionIfNeeded(canvas_.get(), selection);
-        vertical_scroll_bar_->Render(canvas_.get());
+        gfx::Canvas::DrawingScope drawing_scope(canvas());
+        text_renderer_->RenderSelectionIfNeeded(canvas(), selection);
+        vertical_scroll_bar_->Render(canvas());
       }
       return;
     }
@@ -260,9 +259,9 @@ void TextEditWindow::Redraw() {
   }
 
   // The screen is clean.
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  text_renderer_->RenderSelectionIfNeeded(canvas_.get(), selection);
-  vertical_scroll_bar_->Render(canvas_.get());
+  gfx::Canvas::DrawingScope drawing_scope(canvas());
+  text_renderer_->RenderSelectionIfNeeded(canvas(), selection);
+  vertical_scroll_bar_->Render(canvas());
 }
 
 void TextEditWindow::Render(const TextSelectionModel& selection) {
@@ -270,8 +269,8 @@ void TextEditWindow::Render(const TextSelectionModel& selection) {
   if (!visible())
     return;
 
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  text_renderer_->Render(canvas_.get(), selection);
+  gfx::Canvas::DrawingScope drawing_scope(canvas());
+  text_renderer_->Render(canvas(), selection);
 
   // Update scroll bar
   {
@@ -282,7 +281,7 @@ void TextEditWindow::Render(const TextSelectionModel& selection) {
     data.thumb_value = text_renderer_->GetStart();
     data.maximum = buffer()->GetEnd() + 1;;
     vertical_scroll_bar_->SetData(data);
-    vertical_scroll_bar_->Render(canvas_.get());
+    vertical_scroll_bar_->Render(canvas());
   }
 }
 
@@ -291,7 +290,7 @@ void TextEditWindow::SetZoom(float new_zoom) {
 }
 
 bool TextEditWindow::ShouldRender() const {
-  return !canvas_->screen_bitmap() || text_renderer_->ShouldRender();
+  return !canvas()->screen_bitmap() || text_renderer_->ShouldRender();
 }
 
 bool TextEditWindow::SmallScroll(int, int y_count) {
@@ -323,8 +322,8 @@ Posn TextEditWindow::StartOfLine(text::Posn text_offset) {
 void TextEditWindow::UpdateLayout() {
   DCHECK(!bounds().empty());
   auto const canvas_bounds = GetContentsBounds();
-  if (canvas_)
-    canvas_->SetBounds(canvas_bounds);
+  if (canvas())
+    canvas()->SetBounds(canvas_bounds);
 
   auto const vertical_scroll_bar_width = static_cast<float>(
       ::GetSystemMetrics(SM_CXVSCROLL));
@@ -371,9 +370,9 @@ void TextEditWindow::DidBeginAnimationFrame(base::Time) {
 
 // ui::LayerOwnerDelegate
 void TextEditWindow::DidRecreateLayer(ui::Layer* old_layer) {
-  if (!canvas_)
+  ContentWindow::DidRecreateLayer(old_layer);
+  if (!canvas())
     return;
-  canvas_.reset(layer()->CreateCanvas());
   text_renderer_->DidLostCanvas();
   old_layer->AppendLayer(metrics_view_->RecreateLayer().release());
   layer()->AppendLayer(metrics_view_->layer());
@@ -441,7 +440,6 @@ void TextEditWindow::DidChangeBounds() {
 void TextEditWindow::DidHide() {
   // Note: It is OK that hidden window have focus.
   views::ContentWindow::DidHide();
-  canvas_.reset();
   vertical_scroll_bar_->Hide();
   text_renderer_->DidHide();
 }
@@ -454,12 +452,9 @@ void TextEditWindow::DidKillFocus(ui::Widget* focused_widget) {
 }
 
 void TextEditWindow::DidRealize() {
-  views::ContentWindow::DidRealize();
-  if (bounds().empty())
-    return;
-  layer()->AppendLayer(metrics_view_->layer());
-  set_layer_owner_delegate(this);
   UpdateLayout();
+  views::ContentWindow::DidRealize();
+  layer()->AppendLayer(metrics_view_->layer());
 }
 
 // Note: It is OK to set focus to hidden window.
@@ -470,8 +465,6 @@ void TextEditWindow::DidSetFocus(ui::Widget* last_focused) {
 
 void TextEditWindow::DidShow() {
   views::ContentWindow::DidShow();
-  DCHECK(!canvas_);
-  canvas_.reset(layer()->CreateCanvas());
   vertical_scroll_bar_->Show();
 }
 

@@ -212,15 +212,8 @@ void TableView::DidBeginAnimationFrame(base::Time) {
     UpdateControl(std::move(new_model));
   if (has_focus())
     control_->RequestFocus();
-  control_->RenderIfNeeded(canvas_.get());
+  control_->RenderIfNeeded(canvas());
   NotifyUpdateContent();
-}
-
-// ui::LayerOwnerDelegate
-void TableView::DidRecreateLayer(ui::Layer*) {
-  if (!canvas_)
-    return;
-  canvas_.reset(layer()->CreateCanvas());
 }
 
 // ui::TableControlObserver
@@ -258,29 +251,14 @@ base::string16 TableView::GetCellText(int row_id, int column_id) const {
 // Resize |ui::TableControl| to cover all client area.
 void TableView::DidChangeBounds() {
   ContentWindow::DidChangeBounds();
-  if (canvas_)
-    canvas_->SetBounds(GetContentsBounds());
-  if (control_)
-    control_->SetBounds(gfx::ToEnclosingRect(GetContentsBounds()));
-}
-
-void TableView::DidHide() {
-  ContentWindow::DidHide();
-  canvas_.reset();
+  if (!control_)
+    return;
+  control_->SetBounds(gfx::ToEnclosingRect(GetContentsBounds()));
 }
 
 void TableView::DidRealize() {
   ContentWindow::DidRealize();
   document_->buffer()->AddObserver(this);
-  set_layer_owner_delegate(this);
-}
-
-void TableView::DidShow() {
-  ContentWindow::DidShow();
-  DCHECK(!canvas_);
-  if (bounds().empty())
-    return;
-  canvas_.reset(layer()->CreateCanvas());
 }
 
 // views::ContentWindow

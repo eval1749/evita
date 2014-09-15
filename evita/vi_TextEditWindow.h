@@ -8,9 +8,8 @@
 #include <memory>
 
 #include "evita/li_util.h"
-#include "evita/gfx_base.h"
+#include "evita/gfx/canvas.h"
 #include "evita/ui/base/ime/text_input_delegate.h"
-#include "evita/ui/compositor/layer_owner_delegate.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/content_window.h"
 
@@ -41,11 +40,10 @@ class ScrollBar;
 //
 // TextEditWindow
 //
-class TextEditWindow : private gfx::Canvas::Observer,
-                       private ui::LayerOwnerDelegate,
-                       public ui::ScrollBarObserver,
-                       public ui::TextInputDelegate,
-                       public views::ContentWindow {
+class TextEditWindow final : private gfx::Canvas::Observer,
+                             public ui::ScrollBarObserver,
+                             public ui::TextInputDelegate,
+                             public views::ContentWindow {
   DECLARE_CASTABLE_CLASS(TextEditWindow, views::ContentWindow);
 
   private: typedef common::win::Point Point;
@@ -54,7 +52,6 @@ class TextEditWindow : private gfx::Canvas::Observer,
   private: typedef views::rendering::TextSelectionModel TextSelectionModel;
   private: class ScrollBar;
 
-  private: std::unique_ptr<gfx::Canvas> canvas_;
   private: Posn m_lCaretPosn;
   private: views::MetricsView* metrics_view_;
   // TODO(yosi): Manage life time of selection.

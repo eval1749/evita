@@ -507,6 +507,7 @@ void Widget::RealizeWidget() {
     return;
   }
 
+  DCHECK(!bounds_.empty());
   DCHECK(parent_node()->is_realized());
   state_ = kRealized;
   if (native_window_) {

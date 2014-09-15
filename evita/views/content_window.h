@@ -9,9 +9,14 @@
 
 #include "base/observer_list.h"
 #include "base/strings/string16.h"
+#include "evita/ui/compositor/layer_owner_delegate.h"
 #include "evita/views/window.h"
 
 class Frame;
+
+namespace gfx {
+class Canvas;
+}
 
 namespace ui {
 class MouseEvent;
@@ -21,27 +26,34 @@ namespace views {
 
 class ContentObserver;
 
-class ContentWindow : public Window {
+class ContentWindow : public Window, protected ui::LayerOwnerDelegate {
   DECLARE_CASTABLE_CLASS(ContentWindow, Window);
 
+  private: std::unique_ptr<gfx::Canvas> canvas_;
   private: ObserverList<ContentObserver> observers_;
 
   protected: explicit ContentWindow(views::WindowId window_id);
   public: virtual ~ContentWindow();
 
+  protected: gfx::Canvas* canvas() { return canvas_.get(); }
+  protected: const gfx::Canvas* canvas() const { return canvas_.get(); }
+
   public: void Activate();
   public: void AddObserver(ContentObserver* observer);
-  private: Frame* GetFrame() const;
-  private: bool IsActive() const;
   public: virtual void MakeSelectionVisible() = 0;
   protected: void NotifyUpdateContent();
   public: void RemoveObserver(ContentObserver* observer);
 
+  // ui::LayerOwnerDelegate
+  protected: virtual void DidRecreateLayer(ui::Layer* old_layer) override;
+
   // ui::Widget
   protected: virtual void DidChangeBounds() override;
   protected: virtual void DidChangeHierarchy() override;
+  protected: virtual void DidHide() override;
   protected: virtual void DidRealize() override;
   protected: virtual void DidSetFocus(ui::Widget*) override;
+  protected: virtual void DidShow() override;
 
   DISALLOW_COPY_AND_ASSIGN(ContentWindow);
 };

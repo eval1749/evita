@@ -21,10 +21,6 @@ namespace dom {
 class Document;
 }
 
-namespace gfx {
-class Canvas;
-}
-
 namespace ui {
 class KeyboardEvent;
 class MouseEvent;
@@ -33,15 +29,12 @@ class TableControl;
 
 namespace views {
 
-class TableView
-    : public text::BufferMutationObserver,
-      public views::ContentWindow,
-      private ui::LayerOwnerDelegate,
-      public ui::TableControlObserver,
-      public ui::TableModel {
+class TableView final : public text::BufferMutationObserver,
+                        public views::ContentWindow,
+                        public ui::TableControlObserver,
+                        public ui::TableModel {
   DECLARE_CASTABLE_CLASS(TableView, ContentWindow);
 
-  private: std::unique_ptr<gfx::Canvas> canvas_;
   private: std::vector<ui::TableColumn> columns_;
   private: ui::TableControl* control_;
   private: gc::Member<dom::Document> document_;
@@ -66,9 +59,6 @@ class TableView
   // ui::AnimationFrameHandler
   private: virtual void DidBeginAnimationFrame(base::Time time) override;
 
-  // ui::LayerOwnerDelegate
-  private: virtual void DidRecreateLayer(ui::Layer* old_layer) override;
-
   // ui::TableControlObserver
   private: virtual void OnKeyPressed(const ui::KeyboardEvent&) override;
   private: virtual void OnMousePressed(const ui::MouseEvent&) override;
@@ -85,9 +75,7 @@ class TableView
 
   // ui::Widget
   private: virtual void DidChangeBounds() override;
-  private: virtual void DidHide() override;
   private: virtual void DidRealize() override;
-  private: virtual void DidShow() override;
 
   DISALLOW_COPY_AND_ASSIGN(TableView);
 };

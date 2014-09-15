@@ -193,6 +193,10 @@ void TableView::DidDeleteAt(Posn, size_t) {
   should_update_model_ = true;
 }
 
+void TableView::DidInsertAt(Posn, size_t) {
+  should_update_model_ = true;
+}
+
 // ui::AnimationFrameHandler
 void TableView::DidBeginAnimationFrame(base::Time) {
   if (!visible())
@@ -212,8 +216,11 @@ void TableView::DidBeginAnimationFrame(base::Time) {
   NotifyUpdateContent();
 }
 
-void TableView::DidInsertAt(Posn, size_t) {
-  should_update_model_ = true;
+// ui::LayerOwnerDelegate
+void TableView::DidRecreateLayer(ui::Layer*) {
+  if (!canvas_)
+    return;
+  canvas_.reset(layer()->CreateCanvas());
 }
 
 // ui::TableControlObserver
@@ -265,6 +272,7 @@ void TableView::DidHide() {
 void TableView::DidRealize() {
   ContentWindow::DidRealize();
   document_->buffer()->AddObserver(this);
+  set_layer_owner_delegate(this);
 }
 
 void TableView::DidShow() {

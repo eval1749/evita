@@ -12,6 +12,7 @@
 #include "evita/gc/member.h"
 #include "evita/text/buffer_mutation_observer.h"
 #include "evita/ui/base/table_model.h"
+#include "evita/ui/compositor/layer_owner_delegate.h"
 #include "evita/ui/controls/table_control_observer.h"
 #include "evita/views/table_view_model.h"
 #include "evita/views/window_id.h"
@@ -35,6 +36,7 @@ namespace views {
 class TableView
     : public text::BufferMutationObserver,
       public views::ContentWindow,
+      private ui::LayerOwnerDelegate,
       public ui::TableControlObserver,
       public ui::TableModel {
   DECLARE_CASTABLE_CLASS(TableView, ContentWindow);
@@ -63,6 +65,9 @@ class TableView
 
   // ui::AnimationFrameHandler
   private: virtual void DidBeginAnimationFrame(base::Time time) override;
+
+  // ui::LayerOwnerDelegate
+  private: virtual void DidRecreateLayer(ui::Layer* old_layer) override;
 
   // ui::TableControlObserver
   private: virtual void OnKeyPressed(const ui::KeyboardEvent&) override;

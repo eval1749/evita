@@ -162,8 +162,8 @@ void TableView::UpdateControl(std::unique_ptr<TableViewModel> new_model) {
 
   control_ = new ui::TableControl(columns_, this, this);
   AppendChild(control_);
-  control_->Realize(bounds());
-  control_->Show();
+  control_->SetBounds(gfx::ToEnclosingRect(GetContentsBounds()));
+  control_->RealizeWidget();
 }
 
 std::unique_ptr<TableViewModel> TableView::UpdateModelIfNeeded() {

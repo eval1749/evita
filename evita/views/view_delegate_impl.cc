@@ -1,5 +1,6 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/views/view_delegate_impl.h"
 
@@ -25,7 +26,7 @@
 #include "evita/views/forms/form_control_set.h"
 #include "evita/views/forms/form_window.h"
 #include "evita/views/frame_list.h"
-#include "evita/views/table_view.h"
+#include "evita/views/table_window.h"
 #include "evita/views/tab_data_set.h"
 #include "evita/views/text_window.h"
 #include "evita/vi_EditPane.h"
@@ -153,7 +154,7 @@ void ViewDelegateImpl::CreateFormWindow(
 
 void ViewDelegateImpl::CreateTableWindow(dom::WindowId window_id,
                                          dom::Document* document) {
-  new views::TableView(window_id, document);
+  new views::TableWindow(window_id, document);
 }
 
 void ViewDelegateImpl::CreateTextWindow(dom::WindowId window_id,
@@ -280,7 +281,7 @@ std::vector<int> ViewDelegateImpl::GetTableRowStates(WindowId window_id,
   auto const widget = FromWindowId("GetTableRowStates", window_id);
   if (!widget)
     return std::vector<int>();
-  auto const table_view = widget->as<views::TableView>();
+  auto const table_view = widget->as<views::TableWindow>();
   if (!table_view)
     return std::vector<int>();
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);

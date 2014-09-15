@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_table_view_h)
-#define INCLUDE_evita_views_table_view_h
+#if !defined(INCLUDE_evita_views_table_window_h)
+#define INCLUDE_evita_views_table_window_h
 
 #include "evita/views/content_window.h"
 
@@ -31,10 +31,10 @@ class TableControl;
 
 namespace views {
 
-class TableView final : public text::BufferMutationObserver,
-                        public views::ContentWindow,
-                        public ui::TableControlObserver,
-                        public ui::TableModel {
+class TableWindow final : public text::BufferMutationObserver,
+                          public views::ContentWindow,
+                          public ui::TableControlObserver,
+                          public ui::TableModel {
   DECLARE_CASTABLE_CLASS(TableView, ContentWindow);
 
   private: std::vector<ui::TableColumn> columns_;
@@ -44,8 +44,8 @@ class TableView final : public text::BufferMutationObserver,
   private: std::unordered_map<int, TableViewModel::Row*> row_map_;
   private: bool should_update_model_;
 
-  public: TableView(WindowId window_id, dom::Document* document);
-  public: virtual ~TableView();
+  public: TableWindow(WindowId window_id, dom::Document* document);
+  public: virtual ~TableWindow();
 
   private: bool DrawIfNeeded();
   public: std::vector<int> GetRowStates(
@@ -78,9 +78,9 @@ class TableView final : public text::BufferMutationObserver,
   // ui::Widget
   private: virtual void DidChangeBounds() override;
 
-  DISALLOW_COPY_AND_ASSIGN(TableView);
+  DISALLOW_COPY_AND_ASSIGN(TableWindow);
 };
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_table_view_h)
+#endif //!defined(INCLUDE_evita_views_table_window_h)

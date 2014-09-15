@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/views/table_view.h"
+#include "evita/views/table_window.h"
 
 #include <algorithm>
 
@@ -57,7 +57,7 @@ std::vector<ui::TableColumn> BuildColumns(const TableViewModel::Row* row) {
 //
 // TableView
 //
-TableView::TableView(WindowId window_id, dom::Document* document)
+TableWindow::TableWindow(WindowId window_id, dom::Document* document)
     : ContentWindow(window_id),
       control_(nullptr),
       document_(document),
@@ -66,11 +66,11 @@ TableView::TableView(WindowId window_id, dom::Document* document)
   document_->buffer()->AddObserver(this);
 }
 
-TableView::~TableView() {
+TableWindow::~TableWindow() {
   document_->buffer()->RemoveObserver(this);
 }
 
-std::vector<int> TableView::GetRowStates(
+std::vector<int> TableWindow::GetRowStates(
     const std::vector<base::string16>& keys) const {
   std::vector<int> states;
   for (auto key : keys) {
@@ -81,7 +81,7 @@ std::vector<int> TableView::GetRowStates(
   return std::move(states);
 }
 
-void TableView::Redraw() {
+void TableWindow::Redraw() {
   UI_ASSERT_DOM_LOCKED();
   auto new_model = UpdateModelIfNeeded();
   if (!new_model)
@@ -89,7 +89,7 @@ void TableView::Redraw() {
   UpdateControl(std::move(new_model));
 }
 
-void TableView::UpdateControl(std::unique_ptr<TableViewModel> new_model) {
+void TableWindow::UpdateControl(std::unique_ptr<TableViewModel> new_model) {
 
   if (*model_->header_row() == *new_model->header_row()) {
     auto old_model = std::move(model_);
@@ -166,7 +166,7 @@ void TableView::UpdateControl(std::unique_ptr<TableViewModel> new_model) {
   control_->RealizeWidget();
 }
 
-std::unique_ptr<TableViewModel> TableView::UpdateModelIfNeeded() {
+std::unique_ptr<TableViewModel> TableWindow::UpdateModelIfNeeded() {
   if (!should_update_model_)
     return std::unique_ptr<TableViewModel>();
   UI_ASSERT_DOM_LOCKED();
@@ -189,16 +189,16 @@ std::unique_ptr<TableViewModel> TableView::UpdateModelIfNeeded() {
 }
 
 // text::BufferMutationObserver
-void TableView::DidDeleteAt(Posn, size_t) {
+void TableWindow::DidDeleteAt(Posn, size_t) {
   should_update_model_ = true;
 }
 
-void TableView::DidInsertAt(Posn, size_t) {
+void TableWindow::DidInsertAt(Posn, size_t) {
   should_update_model_ = true;
 }
 
 // ui::AnimationFrameHandler
-void TableView::DidBeginAnimationFrame(base::Time) {
+void TableWindow::DidBeginAnimationFrame(base::Time) {
   if (!visible())
     return;
   // TODO(eval1749) We don't need to schedule animation for each animation
@@ -217,28 +217,28 @@ void TableView::DidBeginAnimationFrame(base::Time) {
 }
 
 // ui::TableControlObserver
-void TableView::OnKeyPressed(const ui::KeyboardEvent& event) {
+void TableWindow::OnKeyPressed(const ui::KeyboardEvent& event) {
   ContentWindow::OnKeyPressed(event);
 }
 
-void TableView::OnMousePressed(const ui::MouseEvent& event) {
+void TableWindow::OnMousePressed(const ui::MouseEvent& event) {
   ContentWindow::OnMousePressed(event);
 }
 
-void TableView::OnSelectionChanged() {
+void TableWindow::OnSelectionChanged() {
 }
 
 // ui::TableModel
-int TableView::GetRowCount() const {
+int TableWindow::GetRowCount() const {
   return static_cast<int>(model_->row_count());
 }
 
-int TableView::GetRowId(int index) const {
+int TableWindow::GetRowId(int index) const {
   const auto& row = model_->row(static_cast<size_t>(index));
   return row.row_id();
 }
 
-base::string16 TableView::GetCellText(int row_id, int column_id) const {
+base::string16 TableWindow::GetCellText(int row_id, int column_id) const {
   auto const present = row_map_.find(row_id);
   if (present == row_map_.end()) {
     DVLOG(0) << "No such row " << row_id;
@@ -248,7 +248,7 @@ base::string16 TableView::GetCellText(int row_id, int column_id) const {
 }
 
 // ui::Widget
-void TableView::DidChangeBounds() {
+void TableWindow::DidChangeBounds() {
   ContentWindow::DidChangeBounds();
   if (!control_)
     return;
@@ -257,7 +257,7 @@ void TableView::DidChangeBounds() {
 }
 
 // views::ContentWindow
-void TableView::MakeSelectionVisible() {
+void TableWindow::MakeSelectionVisible() {
 }
 
 }  // namespace views

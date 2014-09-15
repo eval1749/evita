@@ -294,7 +294,9 @@
         'views/metrics_view.cc',
         'views/metrics_view.h',
         'views/table_view_model.cc',
-        'views/table_view.cc',
+        'views/table_view_model.h',
+        'views/table_window.cc',
+        'views/table_window.h',
       ], # sources
     },
   ], # targets

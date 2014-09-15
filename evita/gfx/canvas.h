@@ -96,7 +96,7 @@ class Canvas : public Object, public DpiHandler {
   public: void AddObserver(Observer* observer);
 
   // [B]
-  public: void BeginDraw();
+  private: void BeginDraw();
 
   // [C]
   public: void Clear(const ColorF& color);
@@ -118,8 +118,7 @@ class Canvas : public Object, public DpiHandler {
                         const RectF& bounds, const base::string16& text);
 
   // [E]
-  // Returns true if succeeded.
-  public: bool EndDraw();
+  private: void EndDraw();
 
   // [F]
   public: void FillRectangle(const Brush& brush, const RectF& rect);

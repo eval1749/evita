@@ -166,7 +166,7 @@ void Canvas::DrawText(const TextFormat& text_format, const Brush& brush,
                               text_format, bounds, brush);
 }
 
-bool Canvas::EndDraw() {
+void Canvas::EndDraw() {
   DCHECK(drawing());
   DCHECK(GetRenderTarget());
   --batch_nesting_level_;
@@ -175,15 +175,16 @@ bool Canvas::EndDraw() {
   if (SUCCEEDED(hr)) {
     if (!batch_nesting_level_)
       DidCallEndDraw();
-    return true;
+    return;
   }
+
   if (hr == D2DERR_RECREATE_TARGET) {
     DVLOG(0) << "Canvas::End D2DERR_RECREATE_TARGET";
     DidLostRenderTarget();
-  } else {
-    DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
+    return;
   }
-  return false;
+
+  DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
 }
 
 void Canvas::FillRectangle(const Brush& brush, const RectF& rect) {
@@ -194,15 +195,17 @@ void Canvas::FillRectangle(const Brush& brush, const RectF& rect) {
 
 void Canvas::Flush() {
   DCHECK(drawing());
-  D2D1_TAG tag1, tag2;
-  auto const hr = GetRenderTarget()->Flush(&tag1, &tag2);
+  auto const hr = GetRenderTarget()->Flush();
   if (SUCCEEDED(hr))
     return;
-  if (hr == D2DERR_RECREATE_TARGET)
+
+  if (hr == D2DERR_RECREATE_TARGET) {
     DVLOG(0) << "Canvas::End D2DERR_RECREATE_TARGET";
-  else
-    DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
-  DidLostRenderTarget();
+    DidLostRenderTarget();
+    return;
+  }
+
+  DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
 }
 
 void Canvas::RemoveObserver(Observer* observer) {

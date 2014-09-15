@@ -1,5 +1,7 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #if !defined(INCLUDE_evita_ui_controls_table_control_h)
 #define INCLUDE_evita_ui_controls_table_control_h
 
@@ -24,10 +26,8 @@ struct TableColumn;
 class TableControlObserver;
 class TableModel;
 
-class TableControl :
-    public ui::Widget,
-    public TableModelObserver {
-
+class TableControl final : public ui::Widget,
+                           public TableModelObserver {
   DECLARE_CASTABLE_CLASS(TableControl, Widget);
 
   private: class TableControlModel;
@@ -41,21 +41,23 @@ class TableControl :
   public: virtual ~TableControl();
 
   public: int GetRowState(int row_id) const;
-  public: void RenderIfNeeded(gfx::Canvas* gfx);
+  public: void RenderIfNeeded(gfx::Canvas* canvas);
   public: void Select(int row_id);
 
-  // TableModelObserver
+  // ui::TableModelObserver
   private: virtual void DidAddRow(int row_id) override;
   private: virtual void DidChangeRow(int row_id) override;
   private: virtual void DidRemoveRow(int row_id) override;
 
-  // Widget
+  // ui::Widget
   private: virtual void DidKillFocus(ui::Widget* focused_window) override;
   private: virtual void DidRealize() override;
   private: virtual void DidChangeBounds() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void DidShow() override;
   private: virtual void OnKeyPressed(const KeyboardEvent& event) override;
+  private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
+  private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
 
   DISALLOW_COPY_AND_ASSIGN(TableControl);

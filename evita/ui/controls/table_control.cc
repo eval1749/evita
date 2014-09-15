@@ -1,5 +1,6 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/ui/controls/table_control.h"
 
@@ -61,7 +62,7 @@ Item* Item::HitTest(const gfx::PointF& point) const {
 //
 // Column
 //
-class Column : public Item {
+class Column final : public Item {
   DECLARE_CASTABLE_CLASS(Column, Item);
 
   private: TableColumn data_;
@@ -99,7 +100,7 @@ DWRITE_TEXT_ALIGNMENT Column::alignment() const {
 //
 // Row
 //
-class Row : public Item {
+class Row final : public Item {
   DECLARE_CASTABLE_CLASS(Row, Item);
 
   public: enum RowState {
@@ -162,19 +163,22 @@ struct RowCompare {
 //
 // TableControl::TableControlModel
 //
-class TableControl::TableControlModel {
+class TableControl::TableControlModel final {
   private: gfx::RectF bounds_;
   private: std::vector<Column*> columns_;
   private: gfx::RectF dirty_rects_;
   private: bool has_focus_;
+  private: Row* hover_row_;
   private: const TableModel* model_;
   private: std::vector<Row*> rows_;
   private: std::unordered_map<int, Row*> row_map_;
   private: float row_height_;
   private: SelectionModel selection_;
   private: std::unique_ptr<gfx::TextFormat> text_format_;
+  private: Widget* widget_;
 
-  public: TableControlModel(const std::vector<TableColumn>& columns,
+  public: TableControlModel(Widget* widget,
+                            const std::vector<TableColumn>& columns,
                             const TableModel* model);
   public: ~TableControlModel();
 
@@ -196,6 +200,8 @@ class TableControl::TableControlModel {
   private: Item* HitTest(const gfx::PointF& point) const;
   public: void MakeSelectionViewDirty();
   public: void MoveSelection(int direction);
+  public: void OnMouseExited(const ui::MouseEvent& event);
+  public: void OnMouseMoved(const ui::MouseEvent& event);
   public: void OnMousePressed(const ui::MouseEvent& event);
   public: gfx::RectF ResetDirtyRect();
   public: void Select(int row_id);
@@ -213,13 +219,16 @@ class TableControl::TableControlModel {
 };
 
 TableControl::TableControlModel::TableControlModel(
+    Widget* widget,
     const std::vector<TableColumn>& columns,
     const TableModel* model)
     : has_focus_(false),
+      hover_row_(nullptr),
       model_(model),
       row_height_(24.0f),
       selection_(model->GetRowCount()),
-      text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", 14)) {
+      text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", 14)),
+      widget_(widget) {
   {
     common::ComPtr<IDWriteInlineObject> inline_object;
     COM_VERIFY(gfx::FactorySet::instance()->dwrite().
@@ -408,6 +417,7 @@ void TableControl::TableControlModel::DrawHeaderRow(gfx::Canvas* canvas) const {
 
 void TableControl::TableControlModel::DrawRow(gfx::Canvas* canvas,
                                               const Row* row) const {
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, row->bounds());
   auto const kPadding = 2.0f;
   auto const bgcolor = gfx::ColorF(gfx::ColorF::White);
   auto const color = gfx::ColorF(gfx::ColorF::Black);
@@ -431,14 +441,22 @@ void TableControl::TableControlModel::DrawRow(gfx::Canvas* canvas,
   }
   if (row->selected()) {
     canvas->FillRectangle(gfx::Brush(canvas, has_focus_ ?
-                                     RgbToColorF(51, 153, 255, 0.3f) :
-                                     RgbToColorF(191, 205, 191, 0.3f)),
+                                     RgbToColorF(51, 153, 255, 0.2f) :
+                                     RgbToColorF(191, 205, 191, 0.2f)),
                        row->bounds());
     canvas->DrawRectangle(gfx::Brush(canvas, has_focus_ ?
-                                     RgbToColorF(51, 153, 255, 0.5f) :
-                                     RgbToColorF(191, 205, 191, 0.5f)),
+                                     RgbToColorF(51, 153, 255, 1.0f) :
+                                     RgbToColorF(191, 205, 191, 1.0f)),
                        row->bounds());
+    return;
   }
+
+  if (row != hover_row_)
+    return;
+  canvas->FillRectangle(gfx::Brush(canvas, RgbToColorF(51, 153, 255, 0.1f)),
+                        row->bounds());
+  canvas->DrawRectangle(gfx::Brush(canvas, RgbToColorF(51, 153, 255, 1.0f)),
+                        row->bounds());
 }
 
 void TableControl::TableControlModel::ExtendSelection(int direction) {
@@ -499,6 +517,39 @@ void TableControl::TableControlModel::MakeSelectionViewDirty() {
 void TableControl::TableControlModel::MoveSelection(int direction) {
   selection_.Move(direction);
   UpdateSelectionView();
+}
+
+void TableControl::TableControlModel::OnMouseExited(const ui::MouseEvent&) {
+  if (!hover_row_)
+    return;
+  AddDirtyRect(hover_row_->bounds());
+  hover_row_ = nullptr;
+  widget_->ReleaseCapture();
+}
+
+void TableControl::TableControlModel::OnMouseMoved(
+    const ui::MouseEvent& event) {
+  auto const item = HitTest(gfx::PointF(event.location()));
+  if (!item)
+   return;
+
+  auto const new_hover_row = item->as<Row>();
+  if (hover_row_) {
+    if (hover_row_ == new_hover_row)
+      return;
+    AddDirtyRect(hover_row_->bounds());
+    if (new_hover_row)
+      AddDirtyRect(new_hover_row->bounds());
+    else
+      widget_->ReleaseCapture();
+    hover_row_ = new_hover_row;
+    return;
+  }
+
+  if (!new_hover_row)
+    return;
+  hover_row_ = new_hover_row;
+  widget_->SetCapture();
 }
 
 void TableControl::TableControlModel::OnMousePressed(
@@ -600,7 +651,7 @@ void TableControl::TableControlModel::UpdateSelectionView() {
 TableControl::TableControl(const std::vector<TableColumn>& columns,
                            const TableModel* model,
                            TableControlObserver* observer)
-    : model_(new TableControlModel(columns, model)),
+    : model_(new TableControlModel(this, columns, model)),
       observer_(observer) {
 }
 
@@ -677,6 +728,14 @@ void TableControl::OnKeyPressed(const ui::KeyboardEvent& event) {
   }
 
   observer_->OnKeyPressed(event);
+}
+
+void TableControl::OnMouseExited(const ui::MouseEvent& event) {
+  model_->OnMouseExited(event);
+}
+
+void TableControl::OnMouseMoved(const ui::MouseEvent& event) {
+  model_->OnMouseMoved(event);
 }
 
 void TableControl::OnMousePressed(const ui::MouseEvent& event) {

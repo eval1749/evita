@@ -47,6 +47,7 @@ class TableControl final : public ui::Widget, public TableModelObserver {
   private: virtual void DidRemoveRow(int row_id) override;
 
   // ui::Widget
+  private: virtual void DidHide() override;
   private: virtual void DidKillFocus(ui::Widget* focused_window) override;
   private: virtual void DidRealize() override;
   private: virtual void DidChangeBounds() override;

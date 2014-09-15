@@ -205,8 +205,9 @@ void Widget::DidRemoveChildWidget(Widget*) {
 }
 
 void Widget::DidChangeBounds() {
-  if (layer())
-    layer()->SetBounds(gfx::RectF(bounds()));
+  if (!layer())
+    return;
+  layer()->SetBounds(bounds());
 }
 
 void Widget::DidSetFocus(ui::Widget*) {
@@ -539,10 +540,10 @@ void Widget::RequestFocus() {
 void Widget::SchedulePaint() {
   DCHECK(is_realized());
   DCHECK(!bounds_.empty());
-  SchedulePaintInRect(Rect(Point(), bounds_.size()));
+  SchedulePaintInRect(gfx::Rect(gfx::Point(), bounds_.size()));
 }
 
-void Widget::SchedulePaintInRect(const Rect& rect) {
+void Widget::SchedulePaintInRect(const gfx::Rect& rect) {
   DCHECK(is_realized());
   DCHECK(!rect.empty());
   // TODO(yosi) We should have |DCHECK(bounds_.Contains(rect))|.
@@ -550,7 +551,15 @@ void Widget::SchedulePaintInRect(const Rect& rect) {
   ::InvalidateRect(AssociatedHwnd(), &raw_rect, true);
 }
 
-void Widget::SetBounds(const Rect& new_bounds) {
+void Widget::SetBounds(const gfx::Point& origin,
+                       const gfx::Point& bottom_right) {
+  SetBounds(gfx::Rect(origin, bottom_right));
+}
+void Widget::SetBounds(const gfx::Point& origin, const gfx::Size& size) {
+  SetBounds(gfx::Rect(origin, size));
+}
+
+void Widget::SetBounds(const gfx::Rect& new_bounds) {
   DCHECK(!new_bounds.empty());
   DCHECK(state_ >= kNotRealized);
 

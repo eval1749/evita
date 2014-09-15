@@ -326,17 +326,16 @@ void Frame::DidChangeBounds() {
   views::Window::DidChangeBounds();
   const auto tab_content_bounds = GetTabContentBounds();
 
-  tab_strip_->SetBounds(gfx::Rect(
+  tab_strip_->SetBounds(
       tab_strip_->bounds().origin(),
-      gfx::Size(bounds().width(), tab_strip_->bounds().height())));
+      gfx::Size(bounds().width(), tab_strip_->bounds().height()));
 
-  message_view_->SetBounds(gfx::Rect(
+  message_view_->SetBounds(
     bounds().bottom_left() - gfx::Size(0, message_view_->bounds().height()),
-    bounds().bottom_right()));
+    bounds().bottom_right());
 
-  for (auto tab_content : tab_contents_) {
+  for (auto tab_content : tab_contents_)
     tab_content->SetBounds(tab_content_bounds);
-  }
 
   // Display resizing information.
   message_view_->SetMessage(base::StringPrintf(L"Resizing... %dx%d",
@@ -352,39 +351,37 @@ void Frame::DidRealize() {
 
   title_bar_->Realize(*native_window());
 
-  // TODO(yosi) How do we determine height of TabStrip?
+  // TODO(eval1749) How do we determine height of TabStrip?
   auto const tab_strip_height = static_cast<Widget*>(tab_strip_)->
       GetPreferredSize().height();
   const auto close_button_height = ::GetSystemMetrics(SM_CYSIZE);
-  tab_strip_->SetBounds(Rect(0, close_button_height,
-                             bounds().width(),
-                             close_button_height + 4 + tab_strip_height));
+  tab_strip_->SetBounds(gfx::Point(0, close_button_height),
+                        gfx::Point(bounds().width(),
+                                   close_button_height + 4 + tab_strip_height));
 
   SetLayer(new ui::RootLayer(this));
   tab_content_layer_.reset(new ui::Layer());
   tab_strip_animator_->SetLayer(tab_content_layer_.get());
 
   auto const tab_content_bounds = GetTabContentBounds();
-  for (auto tab_content : tab_contents_) {
+  for (auto tab_content : tab_contents_)
     tab_content->SetBounds(tab_content_bounds);
-  }
 
   // Place message vie at bottom of editor window.
   {
     auto const size = static_cast<ui::Widget*>(message_view_)->
         GetPreferredSize();
-    message_view_->SetBounds(gfx::Rect(
+    message_view_->SetBounds(
         bounds().bottom_left() - gfx::Size(0, size.height()),
-        bounds().bottom_right()));
+        bounds().bottom_right());
   }
 
   // Create message view, tab_contents and tab strip.
   views::Window::DidRealize();
   layer()->AppendLayer(tab_content_layer_.get());
   layer()->AppendLayer(message_view_->layer());
-  for (auto tab_content : tab_contents_) {
+  for (auto tab_content : tab_contents_)
     tab_strip_animator_->AddTab(tab_content);
-  }
 
   ::SetWindowPos(AssociatedHwnd(), nullptr, 0, 0, 0, 0,
                  SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER |

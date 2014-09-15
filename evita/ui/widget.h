@@ -154,8 +154,11 @@ class Widget
 
   // [S]
   protected: void SchedulePaint();
-  protected: void SchedulePaintInRect(const Rect& rect);
-  public: void SetBounds(const Rect& rect);
+  protected: void SchedulePaintInRect(const gfx::Rect& rect);
+  public: void SetBounds(const gfx::Point& origin,
+                         const gfx::Point& bottom_right);
+  public: void SetBounds(const gfx::Point& origin, const gfx::Size& size);
+  public: void SetBounds(const gfx::Rect& rect);
   public: void SetCapture();
   private: bool SetCursor();
   public: void SetParentWidget(Widget* new_parent);

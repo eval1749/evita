@@ -108,6 +108,16 @@ UINT_PTR Widget::child_window_id() const {
   return reinterpret_cast<UINT_PTR>(native_window());
 }
 
+const Widget* Widget::container_widget() const {
+  DCHECK(parent_node());
+  return parent_node();
+}
+
+Widget* Widget::container_widget() {
+  DCHECK(parent_node());
+  return parent_node();
+}
+
 bool Widget::has_focus() const {
   return FocusController::instance()->focus_widget() == this;
 }
@@ -142,8 +152,8 @@ void Widget::DestroyWidget() {
   }
   state_ = kBeingDestroyed;
   WillDestroyWidget();
-  auto& parent_widget = container_widget();
-  parent_widget.WillRemoveChildWidget(this);
+  auto parent_widget = container_widget();
+  parent_widget->WillRemoveChildWidget(this);
   if (hover_widget == this)
     hover_widget = nullptr;
   if (capture_widget == this)
@@ -152,8 +162,8 @@ void Widget::DestroyWidget() {
   while (first_child())
     first_child()->DestroyWidget();
   DestroyLayer();
-  parent_widget.RemoveChild(this);
-  parent_widget.DidRemoveChildWidget(this);
+  parent_widget->RemoveChild(this);
+  parent_widget->DidRemoveChildWidget(this);
   state_ = kDestroyed;
   DidDestroyWidget();
 }
@@ -186,7 +196,7 @@ void Widget::DidDestroyWidget() {
 }
 
 void Widget::DidHide() {
-  container_widget().DidChangeChildVisibility(this);
+  container_widget()->DidChangeChildVisibility(this);
 }
 
 void Widget::DidKillFocus(ui::Widget*) {
@@ -214,7 +224,7 @@ void Widget::DidSetFocus(ui::Widget*) {
 }
 
 void Widget::DidShow() {
-  container_widget().DidChangeChildVisibility(this);
+  container_widget()->DidChangeChildVisibility(this);
   for (auto child : child_nodes()) {
     child->Show();
   }
@@ -270,12 +280,12 @@ HCURSOR Widget::GetCursorAt(const gfx::Point&) const {
   return ::LoadCursor(nullptr, IDC_ARROW);
 }
 
-Widget& Widget::GetHostWidget() const {
+Widget* Widget::GetHostWidget() const {
   for (auto runner : common::tree::ancestors_or_self(this)) {
     if (runner->native_window())
-       return const_cast<Widget&>(*runner);
+       return const_cast<Widget*>(runner);
   }
-  return *RootWidget::instance();
+  return RootWidget::instance();
 }
 
 gfx::Size Widget::GetPreferredSize() const {
@@ -426,7 +436,7 @@ Widget::HitTestResult Widget::HitTestForMouseEventTarget(
   if (capture_widget) {
     auto local_point = host_point;
     for (auto runner = capture_widget; runner != this;
-         runner = &runner->container_widget()) {
+         runner = runner->container_widget()) {
       local_point = local_point.Offset(-runner->bounds().left(),
                                        -runner->bounds().top());
     }
@@ -488,7 +498,7 @@ void Widget::OnMouseWheel(const MouseWheelEvent&) {
 LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
   if (native_window_)
     return native_window_->DefWindowProc(message, wParam, lParam);
-  return container_widget().OnMessage(message, wParam, lParam);
+  return container_widget()->OnMessage(message, wParam, lParam);
 }
 
 void Widget::OnPaint(const Rect) {
@@ -523,7 +533,7 @@ void Widget::RealizeWidget() {
     DidShow();
     SchedulePaint();
   }
-  container_widget().DidRealizeChildWidget(this);
+  container_widget()->DidRealizeChildWidget(this);
 }
 
 void Widget::ReleaseCapture() {
@@ -594,7 +604,7 @@ void Widget::SetCapture() {
     DVLOG_WIDGET(0) << "already captured by " << capture_widget;
     return;
   }
-  ::SetCapture(*GetHostWidget().native_window());
+  ::SetCapture(*GetHostWidget()->native_window());
   capture_widget = this;
 }
 

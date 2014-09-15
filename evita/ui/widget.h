@@ -60,10 +60,8 @@ class Widget : public common::Castable,
   protected: ~Widget();
 
   public: const gfx::Rect& bounds() const { return bounds_; }
-  public: Widget& container_widget() const {
-    DCHECK(parent_node());
-    return *parent_node();
-  }
+  public: const Widget* container_widget() const;
+  public: Widget* container_widget();
 
   // |child_window_id()| is used for |NMHDR.idFrom| of |WM_NOTIFY|.
   public: UINT_PTR child_window_id() const;
@@ -108,7 +106,7 @@ class Widget : public common::Castable,
   // [G]
   public: gfx::RectF GetContentsBounds() const;
   protected: virtual HCURSOR GetCursorAt(const gfx::Point& point) const;
-  private: Widget& GetHostWidget() const;
+  private: Widget* GetHostWidget() const;
   public: virtual gfx::Size GetPreferredSize() const;
 
   // [H]

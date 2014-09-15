@@ -1,5 +1,7 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #if !defined(INCLUDE_evita_views_table_view_h)
 #define INCLUDE_evita_views_table_view_h
 
@@ -75,7 +77,6 @@ class TableView final : public text::BufferMutationObserver,
 
   // ui::Widget
   private: virtual void DidChangeBounds() override;
-  private: virtual void DidRealize() override;
 
   DISALLOW_COPY_AND_ASSIGN(TableView);
 };

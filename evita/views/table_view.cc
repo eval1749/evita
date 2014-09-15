@@ -1,9 +1,9 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/views/table_view.h"
 
-#include <commctrl.h>
 #include <algorithm>
 
 #include "base/strings/string16.h"
@@ -27,7 +27,7 @@ namespace views {
 namespace {
 
 float CellWidth(const TableViewModel::Cell& cell) {
-  // TODO(yosi) We should get character width from ListView control.
+  // TODO(eval1749) We should get character width from ListView control.
   const auto kCharWidth = 6.0f;
   const auto kLeftMargin = 5.0f;
   const auto kRightMargin = 5.0f;
@@ -35,7 +35,7 @@ float CellWidth(const TableViewModel::Cell& cell) {
 }
 
 std::vector<ui::TableColumn> BuildColumns(const TableViewModel::Row* row) {
-  // TODO(yosi) We should specify minium/maximum column width from model.
+  // TODO(eval1749) We should specify minimum/maximum column width from model.
   auto min_width = 200.0f;
   auto max_width = 300.0f;
   std::vector<ui::TableColumn> columns;
@@ -63,6 +63,7 @@ TableView::TableView(WindowId window_id, dom::Document* document)
       document_(document),
       model_(new TableViewModel()),
       should_update_model_(true) {
+  document_->buffer()->AddObserver(this);
 }
 
 TableView::~TableView() {
@@ -154,9 +155,8 @@ void TableView::UpdateControl(std::unique_ptr<TableViewModel> new_model) {
 
   // Extend the right most column to fill window.
   auto width = 0.0f;
-  for (auto& column : columns_) {
+  for (auto& column : columns_)
     width += column.width;
-  }
   if (width < bounds().width())
     columns_.back().width = bounds().width() - width;
 
@@ -248,17 +248,12 @@ base::string16 TableView::GetCellText(int row_id, int column_id) const {
 }
 
 // ui::Widget
-// Resize |ui::TableControl| to cover all client area.
 void TableView::DidChangeBounds() {
   ContentWindow::DidChangeBounds();
   if (!control_)
     return;
+  // Make |ui::TableControl| to cover all client area.
   control_->SetBounds(gfx::ToEnclosingRect(GetContentsBounds()));
-}
-
-void TableView::DidRealize() {
-  ContentWindow::DidRealize();
-  document_->buffer()->AddObserver(this);
 }
 
 // views::ContentWindow

@@ -32,7 +32,7 @@ class ButtonControl final : public Control {
 
   // ui::Widget
   private: virtual void DidChangeBounds() override;
-  private: virtual void OnDraw(gfx::Canvas* gfx) override;
+  private: virtual void OnDraw(gfx::Canvas* canvas) override;
 
   DISALLOW_COPY_AND_ASSIGN(ButtonControl);
 };

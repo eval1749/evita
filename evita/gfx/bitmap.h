@@ -12,7 +12,7 @@ namespace gfx {
 class Bitmap : public SimpleObject_<ID2D1Bitmap> {
   public: Bitmap(Canvas* canvas, HICON hIcon);
   public: Bitmap(Canvas* canvas, SizeU size);
-  public: explicit Bitmap(Canvas* gfx);
+  public: explicit Bitmap(Canvas* canvas);
   public: ~Bitmap();
   DISALLOW_COPY_AND_ASSIGN(Bitmap);
 };

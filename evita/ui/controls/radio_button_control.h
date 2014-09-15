@@ -25,7 +25,7 @@ class RadioButtonControl final : public Control {
   public: void set_checked(bool checked);
 
   // ui::Widget
-  private: virtual void OnDraw(gfx::Canvas* gfx) override;
+  private: virtual void OnDraw(gfx::Canvas* canvas) override;
 
   DISALLOW_COPY_AND_ASSIGN(RadioButtonControl);
 };

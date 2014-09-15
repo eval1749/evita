@@ -189,9 +189,9 @@ class TableControl::Impl final {
   public: void DidChangeBounds(const gfx::RectF& rect);
   public: void DidShow();
   public: void DidSetFocus(ui::Widget* last_focused);
-  public: void Draw(gfx::Canvas* gfx) const;
-  private: void DrawHeaderRow(gfx::Canvas* gfx) const;
-  private: void DrawRow(gfx::Canvas* gfx, const Row* row) const;
+  public: void Draw(gfx::Canvas* canvas) const;
+  private: void DrawHeaderRow(gfx::Canvas* canvas) const;
+  private: void DrawRow(gfx::Canvas* canvas, const Row* row) const;
   public: void ExtendSelection(int direction);
   private: const Row* GetRowById(int row_id) const;
   private: int GetRowIndex(const Row* row) const;

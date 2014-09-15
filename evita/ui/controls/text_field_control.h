@@ -56,7 +56,7 @@ class TextFieldControl final : public Control {
   private: virtual void DidChangeBounds() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual HCURSOR GetCursorAt(const gfx::Point& point) const override;
-  private: virtual void OnDraw(gfx::Canvas* gfx) override;
+  private: virtual void OnDraw(gfx::Canvas* canvas) override;
 
   DISALLOW_COPY_AND_ASSIGN(TextFieldControl);
 };

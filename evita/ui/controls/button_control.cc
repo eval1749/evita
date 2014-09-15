@@ -24,7 +24,7 @@ class ButtonControl::Renderer {
                    const gfx::RectF& rect);
   public: ~Renderer();
 
-  public: void Render(gfx::Canvas* gfx, Control::State state) const;
+  public: void Render(gfx::Canvas* canvas, Control::State state) const;
 
   DISALLOW_COPY_AND_ASSIGN(Renderer);
 };
@@ -130,10 +130,10 @@ void ButtonControl::DidChangeBounds() {
   renderer_.reset();
 }
 
-void ButtonControl::OnDraw(gfx::Canvas* gfx) {
+void ButtonControl::OnDraw(gfx::Canvas* canvas) {
   if (!renderer_)
     renderer_ = std::make_unique<Renderer>(text_, style_, GetContentsBounds());
-  renderer_->Render(gfx, state());
+  renderer_->Render(canvas, state());
 }
 
 }  // namespace ui

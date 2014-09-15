@@ -62,6 +62,9 @@ class Bounds {
   }
 
   protected: virtual void DidChangeBounds();
+  public: void SetBounds(const gfx::PointF& origin,
+                         const gfx::PointF& bottom_right);
+  public: void SetBounds(const gfx::PointF& origin, const gfx::SizeF& size);
   public: void SetBounds(const gfx::RectF& new_bounds);
   protected: virtual void WillChangeBounds(const gfx::RectF& new_bounds);
 
@@ -73,6 +76,15 @@ Bounds::Bounds(const gfx::RectF& bounds) : bounds_(bounds) {
 }
 
 void Bounds::DidChangeBounds() {
+}
+
+void Bounds::SetBounds(const gfx::PointF& origin,
+                       const gfx::PointF& bottom_right) {
+  SetBounds(gfx::RectF(origin, bottom_right));
+}
+
+void Bounds::SetBounds(const gfx::PointF& origin, const gfx::SizeF& size) {
+  SetBounds(gfx::RectF(origin, size));
 }
 
 void Bounds::SetBounds(const gfx::RectF& new_bounds) {
@@ -433,12 +445,12 @@ void HorizontalBox::DidChangeBounds() {
     for (auto child : child_nodes()){
       --num_rest;
       if (!num_rest) {
-        child->SetBounds(gfx::RectF(child_origin, bottom_right()));
+        child->SetBounds(child_origin, bottom_right());
         break;
       }
       auto const new_child_width = ::floor(child->width() * scale);
-      child->SetBounds(gfx::RectF(
-          child_origin, gfx::SizeF(new_child_width, height())));
+      child->SetBounds(child_origin,
+                       gfx::SizeF(new_child_width, height()));
       child_origin += gfx::SizeF(new_child_width + kSplitterWidth, 0.0f);
     }
     return;
@@ -478,13 +490,12 @@ void HorizontalBox::MoveSplitter(const gfx::PointF& point, Box* right_box) {
     return;
   }
 
- left_box.SetBounds(gfx::RectF(
-     left_box.bounds().origin(),
-     gfx::PointF(point.x, left_box.bounds().bottom)));
+ left_box.SetBounds(left_box.bounds().origin(),
+                    gfx::PointF(point.x, left_box.bounds().bottom));
 
- right_box->SetBounds(gfx::RectF(
+ right_box->SetBounds(
      gfx::PointF(point.x + kSplitterWidth, right_box->bounds().top),
-     right_box->bounds().bottom_right()));
+     right_box->bounds().bottom_right());
 }
 
 void HorizontalBox::Split(Box* left_box,
@@ -504,11 +515,10 @@ void HorizontalBox::Split(Box* left_box,
   InsertAfter(right_box, left_box);
   right_box->AddRef();
 
-  left_box->SetBounds(gfx::RectF(
-      left_box->origin(), gfx::SizeF(left_box_width, height())));
-  right_box->SetBounds(gfx::RectF(
-      gfx::PointF(left_box->right() + kSplitterWidth, top()),
-      gfx::SizeF(right_box_width, height())));
+  left_box->SetBounds(left_box->origin(),
+                      gfx::SizeF(left_box_width, height()));
+  right_box->SetBounds(gfx::PointF(left_box->right() + kSplitterWidth, top()),
+                       gfx::SizeF(right_box_width, height()));
 }
 
 void HorizontalBox::StopSplitter(const gfx::Point& point, Box* below_box) {
@@ -522,13 +532,11 @@ void HorizontalBox::StopSplitter(const gfx::Point& point, Box* below_box) {
   if (point.x() - above_box->left() < kMinBoxWidth) {
     auto const above_box_origin = above_box->origin();
     above_box->Destroy();
-    below_box->SetBounds(gfx::RectF(above_box_origin,
-                                    below_box->bottom_right()));
+    below_box->SetBounds(above_box_origin, below_box->bottom_right());
   } else if (below_box->bounds().right - point.x() < kMinBoxWidth) {
     auto const below_box_bottom_right  = below_box->bottom_right();
     below_box->Destroy();
-    above_box->SetBounds(gfx::RectF(above_box->origin(),
-                                    below_box_bottom_right));
+    above_box->SetBounds(above_box->origin(), below_box_bottom_right);
   }
 }
 
@@ -832,12 +840,11 @@ void VerticalBox::DidChangeBounds() {
     auto child_origin = origin();
     for (auto child : child_nodes()){
       if (!child->next_sibling()) {
-        child->SetBounds(gfx::RectF(child_origin, bottom_right()));
+        child->SetBounds(child_origin, bottom_right());
         break;
       }
       auto const new_child_height = ::floor(child->height() * scale);
-      child->SetBounds(gfx::RectF(
-          child_origin, gfx::SizeF(width(), new_child_height)));
+      child->SetBounds(child_origin, gfx::SizeF(width(), new_child_height));
       child_origin += gfx::SizeF(0.0f, new_child_height + kSplitterHeight);
     }
     return;
@@ -877,12 +884,11 @@ void VerticalBox::MoveSplitter(const gfx::PointF& point, Box* below_box) {
     return;
   }
 
-  above_box->SetBounds(gfx::RectF(
-      above_box->origin(),
-      gfx::PointF(above_box->right(), point.y)));
-  below_box->SetBounds(gfx::RectF(
+  above_box->SetBounds(above_box->origin(),
+                       gfx::PointF(above_box->right(), point.y));
+  below_box->SetBounds(
       gfx::PointF(below_box->left(), point.y + kSplitterHeight),
-      below_box->bottom_right()));
+      below_box->bottom_right());
 }
 
 void VerticalBox::Split(Box* above_box,
@@ -902,11 +908,11 @@ void VerticalBox::Split(Box* above_box,
   InsertAfter(below_box, above_box);
   below_box->AddRef();
 
-  above_box->SetBounds(gfx::RectF(
-      above_box->origin(), gfx::SizeF(width(), above_box_height)));
-  below_box->SetBounds(gfx::RectF(
+  above_box->SetBounds(above_box->origin(),
+                       gfx::SizeF(width(), above_box_height));
+  below_box->SetBounds(
       gfx::PointF(left(), above_box->bottom() + kSplitterHeight),
-      gfx::SizeF(width(), below_box_height)));
+      gfx::SizeF(width(), below_box_height));
 }
 
 void VerticalBox::StopSplitter(const gfx::Point& point, Box* below_box) {
@@ -918,12 +924,10 @@ void VerticalBox::StopSplitter(const gfx::Point& point, Box* below_box) {
   scoped_refptr<Box> protect(this);
 
   if (point.y() - above_box->top() < kMinBoxHeight) {
-    below_box->SetBounds(gfx::RectF(above_box->origin(),
-                                    below_box->bottom_right()));
+    below_box->SetBounds(above_box->origin(), below_box->bottom_right());
     above_box->Destroy();
   } else if (below_box->bottom() - point.y() < kMinBoxHeight) {
-    above_box->SetBounds(gfx::RectF(above_box->origin(),
-                                    below_box->bottom_right()));
+    above_box->SetBounds(above_box->origin(), below_box->bottom_right());
     below_box->Destroy();
   }
 }
@@ -1147,14 +1151,13 @@ void EditPane::Box::WillRemove() {
 
 void EditPane::Box::WillRemoveChild(Box* child) {
   if (auto const previous_sibling = child->previous_sibling()) {
-    previous_sibling->SetBounds(gfx::RectF(
-        previous_sibling->origin(), child->bottom_right()));
+    previous_sibling->SetBounds(previous_sibling->origin(),
+                                child->bottom_right());
     return;
   }
 
   if (auto const next_sibling = child->next_sibling()) {
-    next_sibling->SetBounds(gfx::RectF(
-        child->origin(), next_sibling->bottom_right()));
+    next_sibling->SetBounds(child->origin(), next_sibling->bottom_right());
     return;
   }
   // |child| is the last child in |this| box.

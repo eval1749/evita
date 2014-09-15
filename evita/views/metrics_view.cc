@@ -169,7 +169,7 @@ void MetricsView::DidRealize() {
   ui::Widget::DidRealize();
   SetLayer(new ui::Layer());
   set_layer_owner_delegate(this);
-  layer()->SetBounds(gfx::RectF(bounds()));
+  layer()->SetBounds(bounds());
   canvas_.reset(layer()->CreateCanvas());
 }
 

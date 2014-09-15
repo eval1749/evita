@@ -17,7 +17,7 @@ RootLayer::RootLayer(Widget* widget) {
       CreateTargetForHwnd(widget->AssociatedHwnd(), false,
                           &composition_target_));
   composition_target_->SetRoot(visual());
-  SetBounds(gfx::RectF(widget->bounds()));
+  SetBounds(widget->bounds());
 }
 
 RootLayer::~RootLayer() {

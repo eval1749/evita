@@ -348,7 +348,7 @@ void MessageView::DidChangeBounds() {
 void MessageView::DidRealize() {
   ui::AnimatableWindow::DidRealize();
   SetLayer(new ui::Layer());
-  layer()->SetBounds(gfx::RectF(bounds()));
+  layer()->SetBounds(bounds());
   canvas_.reset(layer()->CreateCanvas());
 }
 

@@ -33,9 +33,7 @@
 #include "evita/ui/controls/text_field_control.h"
 #include "evita/ui/system_metrics.h"
 #include "evita/views/forms/form_control_controller.h"
-#include "evita/views/frame_list.h"
 #include "evita/views/switches.h"
-#include "evita/vi_Frame.h"
 
 #define DEBUG_PAINT 0
 
@@ -524,6 +522,35 @@ void FormWindow::DidChangeSystemMetrics() {
 void FormWindow::CreateNativeWindow() const {
   DCHECK(!form_size_.empty());
 
+  struct Local {
+    static gfx::Rect GetDefaultBounds(const gfx::Size& form_size) {
+      return gfx::Rect(gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
+                       form_size);
+    }
+
+    // Compute form window bounds as center of foreground window if possible.
+    static gfx::Rect ComputeFormWindowBounds(
+        uint32_t extended_window_style, uint32_t window_style,
+        const gfx::Size& form_size) {
+      auto const foreground_hwnd = ::GetForegroundWindow();
+      if (!foreground_hwnd)
+        return GetDefaultBounds(form_size);
+      RECT active_window_rect;
+      if (!::GetWindowRect(foreground_hwnd, &active_window_rect))
+        return GetDefaultBounds(form_size);
+      gfx::Rect active_window_bounds(active_window_rect);
+      auto window_bounds = gfx::Rect(
+          active_window_bounds.origin() +
+          ((active_window_bounds.size() - form_size) / 2),
+          form_size);
+      auto const has_menu = false;
+      RECT window_rect(window_bounds);
+      WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style,
+                                        has_menu, extended_window_style));
+      return gfx::Rect(window_rect);
+    }
+  };
+
   if (title_.empty()) {
     // Popup window
     DCHECK(owner_);
@@ -539,22 +566,11 @@ void FormWindow::CreateNativeWindow() const {
   // Place dialog window at center of active window.
   auto const extended_window_style = WS_EX_LAYERED | WS_EX_TOOLWINDOW;
   auto const window_style = WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE;
-  RECT raw_active_window_bounds;
-  ::GetWindowRect(FrameList::instance()->active_frame()->AssociatedHwnd(),
-                  &raw_active_window_bounds);
-  gfx::Rect active_window_bounds(raw_active_window_bounds);
-  auto const window_rect = gfx::Rect(
-      active_window_bounds.origin() +
-        ((active_window_bounds.size() - form_size_) / 2),
-      form_size_);
-  auto const has_menu = false;
-  RECT raw_window_rect(window_rect);
-  WIN32_VERIFY(::AdjustWindowRectEx(&raw_window_rect, window_style, has_menu,
-                                    extended_window_style));
-  gfx::Rect frame_window_rect(raw_window_rect);
+  auto const form_window_bounds = Local::ComputeFormWindowBounds(
+      extended_window_style, window_style, form_size_);
   native_window()->CreateWindowEx(
       extended_window_style, window_style, title_.c_str(), nullptr,
-      frame_window_rect.origin(), frame_window_rect.size());
+      form_window_bounds.origin(), form_window_bounds.size());
 }
 
 void FormWindow::DidChangeBounds() {

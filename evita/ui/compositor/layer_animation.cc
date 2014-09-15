@@ -339,9 +339,12 @@ void SlideReplaceAnimation::Animate(base::Time now) {
         now, animation_duration(), old_origin_,
         new_layer()->bounds().origin()));
     SetUpNewLayer();
+    new_layer()->SetOrigin(animation_origin_->Compute(now));
   }
   auto const origin = animation_origin_->Compute(now);
+  auto const diff = origin - new_layer()->origin();
   new_layer()->SetOrigin(origin);
+  old_layer()->SetOrigin(old_layer()->origin() + diff);
   if (origin != animation_origin_->end_value()) {
     ScheduleAnimation();
     return;
@@ -371,7 +374,12 @@ LayerAnimation::~LayerAnimation() {
 }
 
 base::TimeDelta LayerAnimation::animation_duration() const {
-  return base::TimeDelta::FromMilliseconds(16 * 10);
+#if _DEBUG
+  auto const number_of_frames = 30;
+#else
+  auto const number_of_frames = 13;
+#endif
+  return base::TimeDelta::FromMilliseconds(16 * number_of_frames);
 }
 
 LayerAnimation* LayerAnimation::CreateExtend(

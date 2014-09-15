@@ -21,16 +21,6 @@
 #include "evita/ui/root_widget.h"
 #include "evita/ui/system_metrics.h"
 
-#define DEBUG_MOUSE 0
-#define DEBUG_MOUSE_WHEEL 0
-#define DEBUG_RESIZE 0
-#define DEBUG_PAINT 0
-#define DEBUG_SHOW 0
-
-#if DEBUG_RESIZE
-#include <string>
-#endif
-
 namespace ui {
 
 namespace {
@@ -95,9 +85,6 @@ Widget::Widget()
 }
 
 Widget::~Widget() {
-  #if DEBUG_DESTROY
-    DVLOG(0) << "~Widget: " << *this;
-  #endif
   DCHECK(!native_window_);
 }
 
@@ -139,9 +126,6 @@ void Widget::CreateNativeWindow() const {
 }
 
 void Widget::DestroyWidget() {
-  #if DEBUG_DESTROY
-    DVLOG(0) << "DestroyWidget " << *this;
-  #endif
   if (state_ == kBeingDestroyed) {
     DCHECK(!native_window_);
     return;
@@ -172,18 +156,14 @@ void Widget::DidAddChildWidget(Widget*) {
 }
 
 void Widget::DidChangeHierarchy() {
-  for (auto child : child_nodes()) {
+  for (auto child : child_nodes())
     child->DidChangeHierarchy();
-  }
 }
 
 void Widget::DidChangeChildVisibility(Widget*) {
 }
 
 void Widget::DidDestroyNativeWindow() {
-  #if DEBUG_DESTROY
-    DVLOG(0) << "DidDestroyNativeWindow " << *this;
-  #endif
   DCHECK(!native_window_);
   // Since native window, which handles UI, is destroyed, this widget should
   // be destroyed too.
@@ -203,9 +183,8 @@ void Widget::DidKillFocus(ui::Widget*) {
 }
 
 void Widget::DidRealize() {
-  for (auto const child : child_nodes()) {
+  for (auto const child : child_nodes())
     child->RealizeWidget();
-  }
 }
 
 void Widget::DidRealizeChildWidget(Widget*) {
@@ -225,9 +204,9 @@ void Widget::DidSetFocus(ui::Widget*) {
 
 void Widget::DidShow() {
   container_widget()->DidChangeChildVisibility(this);
-  for (auto child : child_nodes()) {
+  // Show child in bottom to top == pre-order.
+  for (auto child : child_nodes())
     child->Show();
-  }
 }
 
 void Widget::DispatchMouseExited() {
@@ -247,28 +226,14 @@ void Widget::DispatchPaintMessage() {
   if (!::GetUpdateRect(*native_window(), &raw_exposed_rect, false))
     return;
   Rect exposed_rect(raw_exposed_rect);
-  #if DEBUG_PAINT
-    DVLOG(0) << "DispatchPaintMessage " << *this << " " << exposed_rect;
-  #endif
   OnPaint(exposed_rect);
-  #if DEBUG_PAINT
-    DVLOG(0) << "End " << exposed_rect;
-  #endif
-
-   for (auto child : child_nodes()) {
+  for (auto child : child_nodes()) {
     if (!child->visible() || child->has_native_window())
       continue;
     auto const rect = exposed_rect.Intersect(child->bounds());
-    if (!rect.empty()) {
-      #if DEBUG_PAINT
-        DVLOG(0) << "Start " << child << " focus=" << child.has_focus() <<
-            " " << rect;
-      #endif
-      child->OnPaint(rect);
-      #if DEBUG_PAINT
-        DVLOG(0) << "End " << rect;
-      #endif
-    }
+    if (rect.empty())
+      continue;
+    child->OnPaint(rect);
   }
 }
 
@@ -397,18 +362,15 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
 }
 
 void Widget::Hide() {
-  #if DEBUG_SHOW
-    DVLOG_WIDGET(0) << "focus=" << has_focus() << " show=" << shown_;
-  #endif
   // Hide widgets in top to bottom == post order.
-  for (auto child : common::adopters::reverse(child_nodes())) {
+  for (auto child : common::adopters::reverse(child_nodes()))
     child->Hide();
-  }
   shown_ = 0;
-  if (native_window_)
+  if (native_window_) {
     ::ShowWindow(*native_window_.get(), SW_HIDE);
-  else
-    DidHide();
+    return;
+  }
+  DidHide();
 }
 
 Widget::HitTestResult Widget::HitTest(const gfx::Point& local_point) const {
@@ -550,13 +512,13 @@ void Widget::RequestFocus() {
 void Widget::SchedulePaint() {
   DCHECK(is_realized());
   DCHECK(!bounds_.empty());
-  SchedulePaintInRect(gfx::Rect(gfx::Point(), bounds_.size()));
+  SchedulePaintInRect(gfx::Rect(bounds_.size()));
 }
 
 void Widget::SchedulePaintInRect(const gfx::Rect& rect) {
   DCHECK(is_realized());
   DCHECK(!rect.empty());
-  // TODO(yosi) We should have |DCHECK(bounds_.Contains(rect))|.
+  // TODO(eval1749) We should have |DCHECK(bounds_.Contains(rect))|.
   RECT raw_rect(rect);
   ::InvalidateRect(AssociatedHwnd(), &raw_rect, true);
 }
@@ -596,14 +558,9 @@ void Widget::SetBounds(const gfx::Rect& new_bounds) {
 }
 
 void Widget::SetCapture() {
-  #if DEBUG_MOUSE
-    DVLOG_WIDGET(0) << "cur=" << capture_widget << " new=" << this;
-  #endif
   // We don't allow nested capture.
-  if (capture_widget) {
-    DVLOG_WIDGET(0) << "already captured by " << capture_widget;
+  if (capture_widget)
     return;
-  }
   ::SetCapture(*GetHostWidget()->native_window());
   capture_widget = this;
 }
@@ -648,22 +605,17 @@ void Widget::SetParentWidget(Widget* new_parent) {
 }
 
 void Widget::Show() {
-  #if DEBUG_SHOW
-    DVLOG_WIDGET(0) << "focus=" << has_focus() << " show=" << shown_;
-  #endif
   ++shown_;
+  if (shown_ != 1)
+    return;
+
   if (native_window_) {
     ::ShowWindow(*native_window_.get(), SW_SHOW);
-  } else if (shown_ == 1) {
-    DidShow();
-    if (!bounds().empty())
-      SchedulePaint();
+    return;
   }
 
-  // Show child in bottom to top == pre-order.
-  for (auto child : child_nodes()) {
-    child->Show();
-  }
+  DidShow();
+  SchedulePaint();
 }
 
 void Widget::UpdateBounds() {
@@ -676,25 +628,16 @@ void Widget::UpdateBounds() {
 }
 
 void Widget::WillDestroyWidget() {
-  #if DEBUG_DESTROY
-    DVLOG(0) << "WillDestroyWidget state=" << state_ << " shown_=" << shown_ <<
-        " " << bounds_;
-  #endif
 }
 
 void Widget::WillDestroyNativeWindow() {
-  #if DEBUG_DESTROY
-    DVLOG(0) << "WillDestroyNativeWindow state=" << state_ << " shown_=" <<
-        shown_ << " " << bounds_;
-  #endif
   std::vector<Widget*> non_native_children;
   for (auto const child : child_nodes()) {
     if (!child->native_window())
       non_native_children.push_back(child);
   }
-  for (auto const child : non_native_children) {
+  for (auto const child : non_native_children)
     child->DestroyWidget();
-  }
 }
 
 void Widget::WillRemoveChildWidget(Widget*) {
@@ -705,11 +648,8 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
     case WM_CAPTURECHANGED: {
       auto const new_capture = reinterpret_cast<HWND>(lParam);
-      if (capture_widget && capture_widget->AssociatedHwnd() != new_capture) {
-        DVLOG_WIDGET(0) << "Someone(" << new_capture <<
-            ") gains the mouse capture.";
+      if (capture_widget && capture_widget->AssociatedHwnd() != new_capture)
         capture_widget = nullptr;
-      }
       return 0;
     }
     case WM_CREATE: {
@@ -780,10 +720,6 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       break;
 
     case WM_SIZE:
-      #if DEBUG_RESIZE
-        DVLOG_WIDGET(0) << "WM_SIZE " << wParam << " " <<
-            LOWORD(lParam) << "x" << HIWORD(lParam);
-      #endif
       if (wParam != SIZE_MAXHIDE && wParam != SIZE_MINIMIZED) {
         UpdateBounds();
         if (!bounds_.empty())
@@ -797,9 +733,9 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
 
     case WM_SYSCOMMAND:
      if ((wParam & 0xFFF0) == SC_KEYMENU) {
-       // TODO(yosi) When we support menu, we should redirect |SC_KEYMENU| to
-       // menu for menu shortcut.
-       // We use Alt+Key for |accesskey|.
+       // TODO(eval1749) When we support menu, we should redirect |SC_KEYMENU|
+       // to menu for menu shortcut.
+       // Note: We use Alt+Key for |accesskey|.
        return 0;
      }
      break;
@@ -828,47 +764,16 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       //if (wp->flags & SWP_NOSIZE) return 0;
 
       auto const wp = reinterpret_cast<WINDOWPOS*>(lParam);
-
-      #if DEBUG_RESIZE
-      {
-        std::string flags;
-        #define CHECK_FLAG(name) \
-          if (wp->flags & SWP_ ##name) flags += " " #name;
-        CHECK_FLAG(NOSIZE) // 0x0001
-        CHECK_FLAG(NOMOVE) // 0x0002
-        CHECK_FLAG(NOZORDER) // 0x0004
-        CHECK_FLAG(NOREDRAW) // 0x0008
-        CHECK_FLAG(NOACTIVATE) // 0x0010
-        CHECK_FLAG(FRAMECHANGED) // 0x0020
-        CHECK_FLAG(SHOWWINDOW) // 0x0040
-        CHECK_FLAG(HIDEWINDOW) // 0x0080
-        CHECK_FLAG(NOCOPYBITS) // 0x0100
-        CHECK_FLAG(DEFERERASE) // 0x0200
-        CHECK_FLAG(NOSENDCHANGING) // 0x0400
-        CHECK_FLAG(NOCLIENTSIZE) // 0x0800
-        CHECK_FLAG(NOCLIENTMOVE) // 0x1000
-        CHECK_FLAG(DEFERERASE) // 0x2000
-        CHECK_FLAG(ASYNCWINDOWPOS) // 0x4000
-        DVLOG_WIDGET(0) << "WM_WINDOWPOSCHANGED " <<
-            "(" << wp->x << "," << wp->y << ")" <<
-            "+" << wp->cx << "x" << wp->cy <<
-            " insertAfter" << wp->hwndInsertAfter <<
-            " flags=" << std::hex << wp->flags << flags;
-      }
-      #endif
-
       if (wp->flags & SWP_HIDEWINDOW) {
         // We don't take care hidden window.
-        for (auto widget : common::tree::descendants_or_self(this)) {
+        for (auto widget : common::tree::descendants_or_self(this))
           widget->shown_ = 0;
-        }
         return 0;
       }
 
       if (wp->flags & SWP_SHOWWINDOW) {
-        for (auto widget : common::tree::descendants_or_self(this)) {
+        for (auto widget : common::tree::descendants_or_self(this))
           widget->shown_ = 1;
-        }
       }
 
       if (wp->flags & SWP_NOSIZE)

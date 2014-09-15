@@ -137,7 +137,7 @@ class Widget : public common::Castable,
   protected: virtual void OnMouseReleased(const MouseEvent& event);
   protected: virtual void OnMouseWheel(const MouseWheelEvent& event);
   public: virtual void OnPaint(const gfx::Rect rect);
-  // TODO(yosi) |Widget::OnScroll| is used for handling |WM_VSCROLL|, Once
+  // TODO(eval1749) |Widget::OnScroll| is used for handling |WM_VSCROLL|, Once
   // we implement scroll bar, we should remove this.
   protected: virtual void OnScroll(int request);
 
@@ -148,6 +148,8 @@ class Widget : public common::Castable,
   public: virtual void RequestFocus();
 
   // [S]
+  // TODO(eval1749) We should get rid of |ui::Widget::SchedulePaint()|, since
+  // it isn't matched with "always paint" model.
   protected: void SchedulePaint();
   protected: void SchedulePaintInRect(const gfx::Rect& rect);
   public: void SetBounds(const gfx::Point& origin,
@@ -177,9 +179,5 @@ class Widget : public common::Castable,
 
 std::ostream& operator<<(std::ostream& out, const ui::Widget& widget);
 std::ostream& operator<<(std::ostream& out, const ui::Widget* widget);
-
-#define DVLOG_WIDGET(n) \
-    DVLOG(n) << __FUNCTION__ << " " << *this << \
-        " hwnd=" << AssociatedHwnd() << " "
 
 #endif //!defined(INCLUDE_evita_ui_widget_h)

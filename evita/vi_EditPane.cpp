@@ -692,7 +692,8 @@ void LeafBox::PrepareAnimation(ui::Animator* animator) {
 
 void LeafBox::Realize() {
   Box::Realize();
-  content_->Realize(gfx::ToEnclosingRect(bounds()));
+  content_->SetBounds(gfx::ToEnclosingRect(bounds()));
+  content_->RealizeWidget();
 }
 
 void LeafBox::SetContent(ContentWindow* content) {

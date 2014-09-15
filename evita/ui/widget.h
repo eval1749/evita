@@ -146,9 +146,7 @@ class Widget
   protected: virtual void OnScroll(int request);
 
   // [R]
-  // Realize widget, one of container must be realized with native window.
-  public: void Realize(const Rect& rect);
-  // TODO(yosi) Widget::RealizeWidget() should be pure virtual.
+  // Realize widget, top-level widget must be a native window.
   public: virtual void RealizeWidget();
   public: void ReleaseCapture();
   public: virtual void RequestFocus();

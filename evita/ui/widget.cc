@@ -491,29 +491,6 @@ void Widget::OnPaint(const Rect) {
 void Widget::OnScroll(int) {
 }
 
-void Widget::Realize(const Rect& rect) {
-  DCHECK(!is_realized());
-  DCHECK(parent_node());
-  DCHECK(container_widget().is_realized());
-
-  state_ = kRealized;
-  bounds_ = rect;
-  if (native_window_) {
-    CreateNativeWindow();
-    return;
-  }
-
-  DidRealize();
-  DidChangeBounds();
-  if (parent_node()->visible()) {
-    shown_ = 1;
-    DidShow();
-    SchedulePaint();
-  }
-  container_widget().DidRealizeChildWidget(this);
-}
-
-// TODO(yosi) Widget::RealizeWidget() should be pure virutal.
 void Widget::RealizeWidget() {
   DCHECK(!is_realized());
   if (!parent_node()) {

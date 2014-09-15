@@ -310,10 +310,9 @@ void Frame::DidAddChildWidget(ui::Widget* new_child) {
       DCHECK(!new_child->is_realized());
       return;
     }
-    if (tab_content->is_realized())
-      tab_content->SetBounds(GetTabContentBounds());
-    else
-      tab_content->Realize(GetTabContentBounds());
+    tab_content->SetBounds(GetTabContentBounds());
+    if (!tab_content->is_realized())
+      tab_content->RealizeWidget();
     tab_strip_animator_->AddTab(tab_content);
     return;
   }

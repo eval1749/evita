@@ -175,17 +175,14 @@ class TableControl::Impl final {
   private: float row_height_;
   private: SelectionModel selection_;
   private: std::unique_ptr<gfx::TextFormat> text_format_;
-  // Impl uses |widget_| for managing mouse capture.
-  private: Widget* widget_;
 
-  public: Impl(Widget* widget, const std::vector<TableColumn>& columns,
+  public: Impl(const std::vector<TableColumn>& columns,
                const TableModel* model);
   public: ~Impl();
 
   private: void AddDirtyRect(const gfx::RectF& dirty_rect);
   public: void DidAddRow(int row_id);
   public: void DidChangeRow(int row_id);
-  public: void DidHide();
   public: void DidKillFocus(ui::Widget* focused_window);
   public: void DidRemoveRow(int row_id);
   public: void DidChangeBounds(const gfx::RectF& rect);
@@ -219,16 +216,14 @@ class TableControl::Impl final {
   DISALLOW_COPY_AND_ASSIGN(Impl);
 };
 
-TableControl::Impl::Impl(Widget* widget,
-                         const std::vector<TableColumn>& columns,
+TableControl::Impl::Impl(const std::vector<TableColumn>& columns,
                          const TableModel* model)
     : has_focus_(false),
       hover_row_(nullptr),
       model_(model),
       row_height_(24.0f),
       selection_(model->GetRowCount()),
-      text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", 14)),
-      widget_(widget) {
+      text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", 14)) {
   {
     common::ComPtr<IDWriteInlineObject> inline_object;
     COM_VERIFY(gfx::FactorySet::instance()->dwrite().
@@ -289,13 +284,6 @@ void TableControl::Impl::DidChangeRow(int row_id) {
   AddDirtyRect(row->bounds());
 }
 
-void TableControl::Impl::DidHide() {
-  if (!hover_row_)
-    return;
-  widget_->ReleaseCapture();
-  hover_row_ = nullptr;
-}
-
 void TableControl::Impl::DidKillFocus(ui::Widget*) {
   has_focus_ = false;
   MakeSelectionViewDirty();
@@ -345,6 +333,7 @@ void TableControl::Impl::DidSetFocus(ui::Widget*) {
 }
 
 void TableControl::Impl::DidShow() {
+  hover_row_ = nullptr;
   dirty_rects_ = bounds_;
 }
 
@@ -527,32 +516,24 @@ void TableControl::Impl::OnMouseExited(const ui::MouseEvent&) {
     return;
   AddDirtyRect(hover_row_->bounds());
   hover_row_ = nullptr;
-  widget_->ReleaseCapture();
 }
 
 void TableControl::Impl::OnMouseMoved(
     const ui::MouseEvent& event) {
   auto const item = HitTest(gfx::PointF(event.location()));
-  if (!item)
-   return;
+  auto const new_hover_row = item ? item->as<Row>() : nullptr;
+  if (hover_row_ == new_hover_row)
+    return;
 
-  auto const new_hover_row = item->as<Row>();
-  if (hover_row_) {
-    if (hover_row_ == new_hover_row)
-      return;
+  // Update previous hover row
+  if (hover_row_)
     AddDirtyRect(hover_row_->bounds());
-    if (new_hover_row)
-      AddDirtyRect(new_hover_row->bounds());
-    else
-      widget_->ReleaseCapture();
-    hover_row_ = new_hover_row;
-    return;
-  }
 
-  if (!new_hover_row)
-    return;
+  // Update new hover row
+  if (new_hover_row)
+    AddDirtyRect(new_hover_row->bounds());
+
   hover_row_ = new_hover_row;
-  widget_->SetCapture();
 }
 
 void TableControl::Impl::OnMousePressed(
@@ -654,7 +635,7 @@ void TableControl::Impl::UpdateSelectionView() {
 TableControl::TableControl(const std::vector<TableColumn>& columns,
                            const TableModel* model,
                            TableControlObserver* observer)
-    : impl_(new Impl(this, columns, model)),
+    : impl_(new Impl(columns, model)),
       observer_(observer) {
 }
 
@@ -694,10 +675,6 @@ void TableControl::DidRemoveRow(int row_id) {
 }
 
 // ui::Widget
-void TableControl::DidHide() {
-  impl_->DidHide();
-}
-
 void TableControl::DidKillFocus(ui::Widget* focus_widget) {
   impl_->DidKillFocus(focus_widget);
 }

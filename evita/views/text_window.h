@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_listener_winapp_visual_text_pane_h)
-#define INCLUDE_listener_winapp_visual_text_pane_h
+#if !defined(INCLUDE_evita_views_text_window_h)
+#define INCLUDE_evita_views_text_window_h
 
 #include <memory>
 
@@ -14,8 +14,6 @@
 #include "evita/views/content_window.h"
 
 class EditPane;
-class TextRenderer;
-class Selection;
 
 namespace text {
 class Buffer;
@@ -139,4 +137,4 @@ class TextEditWindow final : private gfx::Canvas::Observer,
   DISALLOW_COPY_AND_ASSIGN(TextEditWindow);
 };
 
-#endif //!defined(INCLUDE_listener_winapp_visual_text_pane_h)
+#endif //!defined(INCLUDE_evita_views_text_window_h)

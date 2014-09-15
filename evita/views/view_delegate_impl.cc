@@ -27,9 +27,9 @@
 #include "evita/views/frame_list.h"
 #include "evita/views/table_view.h"
 #include "evita/views/tab_data_set.h"
+#include "evita/views/text_window.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
-#include "evita/vi_TextEditWindow.h"
 
 namespace views {
 

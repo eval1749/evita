@@ -137,13 +137,14 @@
         'views/text/screen_text_block.cc',
         'views/text/text_formatter.cc',
         'views/text/text_renderer.cc',
+        'views/text_window.cc',
+        'views/text_window.h',
         'vi_EditPane.cpp',
         'views/forms/file_dialog_box.cc',
         'views/forms/form_control_controller.cc',
         'views/forms/form_control_set.cc',
         'views/forms/form_window.cc',
         'vi_Frame.cpp',
-        'vi_TextEditWindow.cpp',
       ], # sources
     }, # editor
     {

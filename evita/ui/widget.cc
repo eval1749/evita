@@ -38,10 +38,10 @@ namespace {
 Widget* capture_widget;
 Widget* hover_widget;
 
-Point GetCursorPoint() {
+gfx::Point GetCursorPoint() {
   POINT cursor_point;
   WIN32_VERIFY(::GetCursorPos(&cursor_point));
-  return Point(cursor_point);
+  return gfx::Point(cursor_point);
 }
 
 }  // namespace
@@ -56,19 +56,19 @@ class Widget::HitTestResult {
   private: Point local_point_;
   private: Widget* widget_;
 
-  public: HitTestResult(const Widget* widget, const Point& local_point);
+  public: HitTestResult(const Widget* widget, const gfx::Point& local_point);
   public: HitTestResult(const HitTestResult& other);
   public: HitTestResult();
   public: ~HitTestResult() = default;
 
   public: explicit operator bool() const { return widget_; }
 
-  public: const Point& local_point() const { return local_point_; }
+  public: const gfx::Point& local_point() const { return local_point_; }
   public: Widget* widget() const { return widget_; }
 };
 
 Widget::HitTestResult::HitTestResult(const Widget* widget,
-                                     const Point& local_point)
+                                     const gfx::Point& local_point)
     : local_point_(local_point), widget_(const_cast<Widget*>(widget)) {
 }
 
@@ -266,7 +266,7 @@ gfx::RectF Widget::GetContentsBounds() const {
   return gfx::RectF(gfx::SizeF(bounds_.width(), bounds_.height()));
 }
 
-HCURSOR Widget::GetCursorAt(const Point&) const {
+HCURSOR Widget::GetCursorAt(const gfx::Point&) const {
   return ::LoadCursor(nullptr, IDC_ARROW);
 }
 
@@ -401,7 +401,7 @@ void Widget::Hide() {
     DidHide();
 }
 
-Widget::HitTestResult Widget::HitTest(const Point& local_point) const {
+Widget::HitTestResult Widget::HitTest(const gfx::Point& local_point) const {
   if (!GetContentsBounds().Contains(gfx::PointF(local_point)))
     return HitTestResult();
 
@@ -421,7 +421,7 @@ Widget::HitTestResult Widget::HitTest(const Point& local_point) const {
 }
 
 Widget::HitTestResult Widget::HitTestForMouseEventTarget(
-    const Point& host_point) const {
+    const gfx::Point& host_point) const {
   DCHECK(native_window_);
   if (capture_widget) {
     auto local_point = host_point;
@@ -437,7 +437,7 @@ Widget::HitTestResult Widget::HitTestForMouseEventTarget(
   return HitTestResult(this, host_point);
 }
 
-Point Widget::MapFromDesktopPoint(const Point& desktop_point) const {
+gfx::Point Widget::MapFromDesktopPoint(const gfx::Point& desktop_point) const {
   POINT hwnd_point(desktop_point);
   WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, AssociatedHwnd(),
                                  &hwnd_point, 1));
@@ -446,7 +446,7 @@ Point Widget::MapFromDesktopPoint(const Point& desktop_point) const {
   return Point(hwnd_point.x - bounds().left(), hwnd_point.y - bounds().top());
 }
 
-Point Widget::MapToDesktopPoint(const Point& local_point) const {
+gfx::Point Widget::MapToDesktopPoint(const gfx::Point& local_point) const {
   POINT point(local_point);
   WIN32_VERIFY(::MapWindowPoints(AssociatedHwnd(), HWND_DESKTOP, &point, 1));
   if (*native_window())

@@ -466,7 +466,7 @@ void TextFieldControl::DidSetFocus(ui::Widget* last_focused_widget) {
   Control::DidSetFocus(last_focused_widget);
 }
 
-HCURSOR TextFieldControl::GetCursorAt(const Point&) const {
+HCURSOR TextFieldControl::GetCursorAt(const gfx::Point&) const {
   return ::LoadCursor(nullptr, IDC_IBEAM);
 }
 

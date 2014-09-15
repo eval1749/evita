@@ -22,9 +22,6 @@ class Canvas;
 namespace ui {
 
 using common::win::NativeWindow;
-using common::win::Point;
-using common::win::Rect;
-using common::win::Size;
 class FocusController;
 class KeyboardEvent;
 class Layer;
@@ -35,11 +32,10 @@ class MouseWheelEvent;
 //
 // Widget
 //
-class Widget
-    : public common::Castable,
-      public common::tree::Node<Widget>,
-      public common::win::MessageDelegate,
-      public LayerOwner {
+class Widget : public common::Castable,
+               public common::tree::Node<Widget>,
+               public common::win::MessageDelegate,
+               public LayerOwner {
   DECLARE_CASTABLE_CLASS(Widget, Castable);
 
   // For |DidKillFocuns()| and |DidSetFocus()|.
@@ -54,7 +50,7 @@ class Widget
     kRealized,
   };
 
-  private: Rect bounds_;
+  private: gfx::Rect bounds_;
   private: std::unique_ptr<NativeWindow> native_window_;
   private: int shown_;
   private: State state_;
@@ -63,7 +59,7 @@ class Widget
   protected: Widget();
   protected: ~Widget();
 
-  public: const Rect& bounds() const { return bounds_; }
+  public: const gfx::Rect& bounds() const { return bounds_; }
   public: Widget& container_widget() const {
     DCHECK(parent_node());
     return *parent_node();
@@ -73,14 +69,14 @@ class Widget
   public: UINT_PTR child_window_id() const;
   public: bool has_focus() const;
   public: bool has_native_focus() const;
-  public: bool has_native_window() const { 
+  private: bool has_native_window() const {
     return static_cast<bool>(native_window_);
   }
   public: bool is_realized() const { return state_ == kRealized; }
   protected: NativeWindow* native_window() const {
     return native_window_.get();
   }
-  public: const Point origin() const { return bounds_.origin(); }
+  public: const gfx::Point origin() const { return bounds_.origin(); }
   public: bool visible() const { return shown_; }
 
   // [A]
@@ -99,19 +95,19 @@ class Widget
   // Called on WM_NCDESTORY
   protected: virtual void DidDestroyNativeWindow();
   protected: virtual void DidHide();
-  protected: virtual void DidKillFocus(ui::Widget* focused_window);
+  protected: virtual void DidKillFocus(Widget* focused_window);
 
   protected: virtual void DidRealize();
   protected: virtual void DidRealizeChildWidget(Widget* new_child);
   protected: virtual void DidRemoveChildWidget(Widget* old_child);
-  protected: virtual void DidSetFocus(ui::Widget* last_focused);
+  protected: virtual void DidSetFocus(Widget* last_focused);
   protected: virtual void DidShow();
   private: void DispatchMouseExited();
   private: void DispatchPaintMessage();
 
   // [G]
   public: gfx::RectF GetContentsBounds() const;
-  protected: virtual HCURSOR GetCursorAt(const Point& point) const;
+  protected: virtual HCURSOR GetCursorAt(const gfx::Point& point) const;
   private: Widget& GetHostWidget() const;
   public: virtual gfx::Size GetPreferredSize() const;
 
@@ -121,12 +117,13 @@ class Widget
   private: void HandleMouseMessage(uint32_t message, WPARAM wParam,
                                    LPARAM lParam);
   public: virtual void Hide();
-  private: HitTestResult HitTest(const Point& point) const;
-  private: HitTestResult HitTestForMouseEventTarget(const Point& point) const;
+  private: HitTestResult HitTest(const gfx::Point& point) const;
+  private: HitTestResult HitTestForMouseEventTarget(
+      const gfx::Point& point) const;
 
   // [M]
-  public: Point MapFromDesktopPoint(const Point& desktop_point) const;
-  public: Point MapToDesktopPoint(const Point& local_point) const;
+  public: gfx::Point MapFromDesktopPoint(const gfx::Point& desktop_point) const;
+  public: gfx::Point MapToDesktopPoint(const gfx::Point& local_point) const;
 
   // [O]
   // Note: We expose |OnDraw| for real time content resizing during toplevel
@@ -141,8 +138,8 @@ class Widget
   protected: virtual void OnMousePressed(const MouseEvent& event);
   protected: virtual void OnMouseReleased(const MouseEvent& event);
   protected: virtual void OnMouseWheel(const MouseWheelEvent& event);
-  public: virtual void OnPaint(const Rect rect);
-  // TODO(yosi) |ui::Widget::OnScroll| is used for handling |WM_VSCROLL|, Once
+  public: virtual void OnPaint(const gfx::Rect rect);
+  // TODO(yosi) |Widget::OnScroll| is used for handling |WM_VSCROLL|, Once
   // we implement scroll bar, we should remove this.
   protected: virtual void OnScroll(int request);
 

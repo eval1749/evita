@@ -14,8 +14,6 @@
 
 namespace gfx {
 class Canvas;
-using common::win::Point;
-class TextFormat;
 }
 
 namespace ui {
@@ -26,13 +24,12 @@ struct TableColumn;
 class TableControlObserver;
 class TableModel;
 
-class TableControl final : public ui::Widget,
-                           public TableModelObserver {
+class TableControl final : public ui::Widget, public TableModelObserver {
   DECLARE_CASTABLE_CLASS(TableControl, Widget);
 
-  private: class TableControlModel;
+  private: class Impl;
 
-  private: std::unique_ptr<TableControlModel> model_;
+  private: std::unique_ptr<Impl> impl_;
   private: TableControlObserver* observer_;
 
   public: TableControl(const std::vector<TableColumn>& columns,

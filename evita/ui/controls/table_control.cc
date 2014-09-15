@@ -143,16 +143,16 @@ void Row::UpdateState(int new_state, int state_mask) {
 }
 
 struct RowCompare {
-  const TableModel* model_;
+  const TableModel* impl_;
   int column_id_;
 
   RowCompare(const TableModel* model, int column_id)
-      : column_id_(column_id), model_(model) {
+      : column_id_(column_id), impl_(model) {
   }
 
   bool operator() (const Row* a, const Row* b) const {
-    const auto& a_text = model_->GetCellText(a->row_id(), column_id_);
-    const auto& b_text = model_->GetCellText(b->row_id(), column_id_);
+    const auto& a_text = impl_->GetCellText(a->row_id(), column_id_);
+    const auto& b_text = impl_->GetCellText(b->row_id(), column_id_);
     return a_text < b_text;
   }
 };
@@ -161,15 +161,15 @@ struct RowCompare {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TableControl::TableControlModel
+// TableControl::Impl
 //
-class TableControl::TableControlModel final {
+class TableControl::Impl final {
   private: gfx::RectF bounds_;
   private: std::vector<Column*> columns_;
   private: gfx::RectF dirty_rects_;
   private: bool has_focus_;
   private: Row* hover_row_;
-  private: const TableModel* model_;
+  private: const TableModel* impl_;
   private: std::vector<Row*> rows_;
   private: std::unordered_map<int, Row*> row_map_;
   private: float row_height_;
@@ -177,10 +177,9 @@ class TableControl::TableControlModel final {
   private: std::unique_ptr<gfx::TextFormat> text_format_;
   private: Widget* widget_;
 
-  public: TableControlModel(Widget* widget,
-                            const std::vector<TableColumn>& columns,
-                            const TableModel* model);
-  public: ~TableControlModel();
+  public: Impl(Widget* widget, const std::vector<TableColumn>& columns,
+               const TableModel* model);
+  public: ~Impl();
 
   private: void AddDirtyRect(const gfx::RectF& dirty_rect);
   public: void DidAddRow(int row_id);
@@ -215,16 +214,15 @@ class TableControl::TableControlModel final {
 
   private: void UpdateSelectionView();
 
-  DISALLOW_COPY_AND_ASSIGN(TableControlModel);
+  DISALLOW_COPY_AND_ASSIGN(Impl);
 };
 
-TableControl::TableControlModel::TableControlModel(
-    Widget* widget,
-    const std::vector<TableColumn>& columns,
-    const TableModel* model)
+TableControl::Impl::Impl(Widget* widget,
+                         const std::vector<TableColumn>& columns,
+                         const TableModel* model)
     : has_focus_(false),
       hover_row_(nullptr),
-      model_(model),
+      impl_(model),
       row_height_(24.0f),
       selection_(model->GetRowCount()),
       text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", 14)),
@@ -239,7 +237,7 @@ TableControl::TableControlModel::TableControlModel(
 
   auto const num_rows = static_cast<size_t>(model->GetRowCount());
   for (auto index = 0u; index < num_rows; ++index) {
-    auto const row_id = model_->GetRowId(static_cast<int>(index));
+    auto const row_id = impl_->GetRowId(static_cast<int>(index));
     auto const row = new Row(row_id);
     rows_.push_back(row);
     row_map_[row_id] = row;
@@ -251,7 +249,7 @@ TableControl::TableControlModel::TableControlModel(
   SortRows();
 }
 
-TableControl::TableControlModel::~TableControlModel() {
+TableControl::Impl::~Impl() {
   for (auto row : rows_) {
     delete row;
   }
@@ -260,13 +258,13 @@ TableControl::TableControlModel::~TableControlModel() {
   }
 }
 
-void TableControl::TableControlModel::AddDirtyRect(
+void TableControl::Impl::AddDirtyRect(
     const gfx::RectF& dirty_rect) {
   DCHECK(!dirty_rect.empty());
   dirty_rects_ += dirty_rect;
 }
 
-void TableControl::TableControlModel::DidAddRow(int row_id) {
+void TableControl::Impl::DidAddRow(int row_id) {
   auto const row = new Row(row_id);
   rows_.push_back(row);
   row_map_[row_id] = row;
@@ -279,25 +277,25 @@ void TableControl::TableControlModel::DidAddRow(int row_id) {
   selection_.DidAddItem(index);
 }
 
-void TableControl::TableControlModel::DidChangeBounds(
+void TableControl::Impl::DidChangeBounds(
     const gfx::RectF& new_bounds) {
   bounds_ = new_bounds;
   UpdateLayout();
 }
 
-void TableControl::TableControlModel::DidChangeRow(int row_id) {
+void TableControl::Impl::DidChangeRow(int row_id) {
   auto row = GetRowById(row_id);
   if (!row)
     return;
   AddDirtyRect(row->bounds());
 }
 
-void TableControl::TableControlModel::DidKillFocus(ui::Widget*) {
+void TableControl::Impl::DidKillFocus(ui::Widget*) {
   has_focus_ = false;
   MakeSelectionViewDirty();
 }
 
-void TableControl::TableControlModel::DidRemoveRow(int row_id) {
+void TableControl::Impl::DidRemoveRow(int row_id) {
   auto const present = row_map_.find(row_id);
   if (present == row_map_.end()) {
     DVLOG(0) << "No such row " << row_id;
@@ -330,7 +328,7 @@ void TableControl::TableControlModel::DidRemoveRow(int row_id) {
   UpdateSelectionView();
 }
 
-void TableControl::TableControlModel::DidSetFocus(ui::Widget*) {
+void TableControl::Impl::DidSetFocus(ui::Widget*) {
   has_focus_ = true;
   if (selection_.empty() && rows_.size()) {
     selection_.CollapseTo(0);
@@ -340,11 +338,11 @@ void TableControl::TableControlModel::DidSetFocus(ui::Widget*) {
   MakeSelectionViewDirty();
 }
 
-void TableControl::TableControlModel::DidShow() {
+void TableControl::Impl::DidShow() {
   dirty_rects_ = bounds_;
 }
 
-void TableControl::TableControlModel::Draw(gfx::Canvas* canvas) const {
+void TableControl::Impl::Draw(gfx::Canvas* canvas) const {
   gfx::Brush fill_brush(canvas, gfx::ColorF::White);
 
   // Fill top edge
@@ -397,7 +395,7 @@ void TableControl::TableControlModel::Draw(gfx::Canvas* canvas) const {
       bounds_.right, bounds_.bottom));
 }
 
-void TableControl::TableControlModel::DrawHeaderRow(gfx::Canvas* canvas) const {
+void TableControl::Impl::DrawHeaderRow(gfx::Canvas* canvas) const {
   canvas->FillRectangle(gfx::Brush(canvas, gfx::ColorF::White),
                         gfx::RectF(columns_.front()->bounds().origin(),
                                    columns_.back()->bounds().bottom_right()));
@@ -415,8 +413,7 @@ void TableControl::TableControlModel::DrawHeaderRow(gfx::Canvas* canvas) const {
   }
 }
 
-void TableControl::TableControlModel::DrawRow(gfx::Canvas* canvas,
-                                              const Row* row) const {
+void TableControl::Impl::DrawRow(gfx::Canvas* canvas, const Row* row) const {
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, row->bounds());
   auto const kPadding = 2.0f;
   auto const bgcolor = gfx::ColorF(gfx::ColorF::White);
@@ -426,7 +423,7 @@ void TableControl::TableControlModel::DrawRow(gfx::Canvas* canvas,
   gfx::PointF cell_origin(row->bounds().origin());
   auto column_index = 0u;
   for (auto column : columns_) {
-    auto const text = model_->GetCellText(row->row_id(), column->column_id());
+    auto const text = impl_->GetCellText(row->row_id(), column->column_id());
     (*text_format_)->SetTextAlignment(column->alignment());
     auto const width = column_index == columns_.size() ?
         bounds_.width() - cell_origin.x : column->width();
@@ -459,12 +456,12 @@ void TableControl::TableControlModel::DrawRow(gfx::Canvas* canvas,
                         row->bounds());
 }
 
-void TableControl::TableControlModel::ExtendSelection(int direction) {
+void TableControl::Impl::ExtendSelection(int direction) {
   selection_.Extend(direction);
   UpdateSelectionView();
 }
 
-const Row* TableControl::TableControlModel::GetRowById(int row_id) const {
+const Row* TableControl::Impl::GetRowById(int row_id) const {
   auto const present = row_map_.find(row_id);
   if (present == row_map_.end()) {
     DVLOG(0) << "No such row " << row_id;
@@ -473,7 +470,7 @@ const Row* TableControl::TableControlModel::GetRowById(int row_id) const {
   return present->second;
 }
 
-int TableControl::TableControlModel::GetRowIndex(const Row* present) const {
+int TableControl::Impl::GetRowIndex(const Row* present) const {
   auto index = 0;
   for (auto row : rows_) {
     if (row == present)
@@ -483,12 +480,12 @@ int TableControl::TableControlModel::GetRowIndex(const Row* present) const {
   return -1;
 }
 
-int TableControl::TableControlModel::GetRowState(int row_id) const {
+int TableControl::Impl::GetRowState(int row_id) const {
   auto row = GetRowById(row_id);
   return row ? row->state() : 0;
 }
 
-Item* TableControl::TableControlModel::HitTest(
+Item* TableControl::Impl::HitTest(
     const gfx::PointF& point) const {
   for (auto column : columns_) {
     if (auto item = column->HitTest(point))
@@ -503,7 +500,7 @@ Item* TableControl::TableControlModel::HitTest(
   return nullptr;
 }
 
-void TableControl::TableControlModel::MakeSelectionViewDirty() {
+void TableControl::Impl::MakeSelectionViewDirty() {
   auto index = 0;
   for(auto row : rows_) {
     if (selection_.IsSelected(index)) {
@@ -514,12 +511,12 @@ void TableControl::TableControlModel::MakeSelectionViewDirty() {
   }
 }
 
-void TableControl::TableControlModel::MoveSelection(int direction) {
+void TableControl::Impl::MoveSelection(int direction) {
   selection_.Move(direction);
   UpdateSelectionView();
 }
 
-void TableControl::TableControlModel::OnMouseExited(const ui::MouseEvent&) {
+void TableControl::Impl::OnMouseExited(const ui::MouseEvent&) {
   if (!hover_row_)
     return;
   AddDirtyRect(hover_row_->bounds());
@@ -527,7 +524,7 @@ void TableControl::TableControlModel::OnMouseExited(const ui::MouseEvent&) {
   widget_->ReleaseCapture();
 }
 
-void TableControl::TableControlModel::OnMouseMoved(
+void TableControl::Impl::OnMouseMoved(
     const ui::MouseEvent& event) {
   auto const item = HitTest(gfx::PointF(event.location()));
   if (!item)
@@ -552,7 +549,7 @@ void TableControl::TableControlModel::OnMouseMoved(
   widget_->SetCapture();
 }
 
-void TableControl::TableControlModel::OnMousePressed(
+void TableControl::Impl::OnMousePressed(
     const ui::MouseEvent& event) {
   auto const item = HitTest(gfx::PointF(event.location()));
   if (!item)
@@ -572,13 +569,13 @@ void TableControl::TableControlModel::OnMousePressed(
   UpdateSelectionView();
 }
 
-gfx::RectF TableControl::TableControlModel::ResetDirtyRect() {
+gfx::RectF TableControl::Impl::ResetDirtyRect() {
   auto dirty_rect = dirty_rects_;
   dirty_rects_ = gfx::RectF();
   return dirty_rect;
 }
 
-void TableControl::TableControlModel::Select(int row_id) {
+void TableControl::Impl::Select(int row_id) {
   auto row = GetRowById(row_id);
   if (!row)
     return;
@@ -589,13 +586,13 @@ void TableControl::TableControlModel::Select(int row_id) {
   UpdateSelectionView();
 }
 
-void TableControl::TableControlModel::SortRows() {
+void TableControl::Impl::SortRows() {
   std::sort(rows_.begin(), rows_.end(),
-            RowCompare(model_, columns_[0]->column_id()));
+            RowCompare(impl_, columns_[0]->column_id()));
   UpdateLayout();
 }
 
-void TableControl::TableControlModel::UpdateLayout() {
+void TableControl::Impl::UpdateLayout() {
   if (bounds_.empty()) {
     // Control isn't realized yet.
     return;
@@ -633,7 +630,7 @@ void TableControl::TableControlModel::UpdateLayout() {
   dirty_rects_ = bounds_;
 }
 
-void TableControl::TableControlModel::UpdateSelectionView() {
+void TableControl::Impl::UpdateSelectionView() {
   auto index = 0;
   for(auto row : rows_) {
     if (row->selected() != selection_.IsSelected(index)) {
@@ -651,7 +648,7 @@ void TableControl::TableControlModel::UpdateSelectionView() {
 TableControl::TableControl(const std::vector<TableColumn>& columns,
                            const TableModel* model,
                            TableControlObserver* observer)
-    : model_(new TableControlModel(this, columns, model)),
+    : impl_(new Impl(this, columns, model)),
       observer_(observer) {
 }
 
@@ -659,71 +656,71 @@ TableControl::~TableControl() {
 }
 
 int TableControl::GetRowState(int row_id) const {
-  return model_->GetRowState(row_id);
+  return impl_->GetRowState(row_id);
 }
 
 void TableControl::RenderIfNeeded(gfx::Canvas* canvas) {
   if (!visible() || !is_realized())
     return;
-  auto dirty_rect = model_->ResetDirtyRect();
+  auto dirty_rect = impl_->ResetDirtyRect();
   if (dirty_rect.empty())
     return;
   gfx::Canvas::DrawingScope drawing_scope(canvas);
   canvas->AddDirtyRect(dirty_rect);
-  model_->Draw(canvas);
+  impl_->Draw(canvas);
 }
 
 void TableControl::Select(int row_id) {
-  model_->Select(row_id);
+  impl_->Select(row_id);
 }
 
-// TableModelObserver
+// ui::TableModelObserver
 void TableControl::DidAddRow(int row_id) {
-  model_->DidAddRow(row_id);
+  impl_->DidAddRow(row_id);
 }
 
 void TableControl::DidChangeRow(int row_id) {
-  model_->DidChangeRow(row_id);
+  impl_->DidChangeRow(row_id);
 }
 
 void TableControl::DidRemoveRow(int row_id) {
-  model_->DidRemoveRow(row_id);
+  impl_->DidRemoveRow(row_id);
 }
 
-// Widget
+// ui::Widget
 void TableControl::DidKillFocus(ui::Widget* focus_widget) {
-  model_->DidKillFocus(focus_widget);
+  impl_->DidKillFocus(focus_widget);
 }
 
 void TableControl::DidRealize() {
-  model_->DidChangeBounds(GetContentsBounds());
+  impl_->DidChangeBounds(GetContentsBounds());
 }
 
 void TableControl::DidChangeBounds() {
-  model_->DidChangeBounds(GetContentsBounds());
+  impl_->DidChangeBounds(GetContentsBounds());
 }
 
 void TableControl::DidSetFocus(ui::Widget* widget) {
-  model_->DidSetFocus(widget);
+  impl_->DidSetFocus(widget);
 }
 
 void TableControl::DidShow() {
-  model_->DidShow();
+  impl_->DidShow();
 }
 
 void TableControl::OnKeyPressed(const ui::KeyboardEvent& event) {
   switch (event.key_code()) {
     case KeyCode::ArrowDown:
       if (event.shift_key())
-        model_->ExtendSelection(1);
+        impl_->ExtendSelection(1);
       else
-        model_->MoveSelection(1);
+        impl_->MoveSelection(1);
       return;
     case KeyCode::ArrowUp:
       if (event.shift_key())
-        model_->ExtendSelection(-1);
+        impl_->ExtendSelection(-1);
       else
-        model_->MoveSelection(-1);
+        impl_->MoveSelection(-1);
       return;
   }
 
@@ -731,17 +728,17 @@ void TableControl::OnKeyPressed(const ui::KeyboardEvent& event) {
 }
 
 void TableControl::OnMouseExited(const ui::MouseEvent& event) {
-  model_->OnMouseExited(event);
+  impl_->OnMouseExited(event);
 }
 
 void TableControl::OnMouseMoved(const ui::MouseEvent& event) {
-  model_->OnMouseMoved(event);
+  impl_->OnMouseMoved(event);
 }
 
 void TableControl::OnMousePressed(const ui::MouseEvent& event) {
   if (!has_focus())
     RequestFocus();
-  model_->OnMousePressed(event);
+  impl_->OnMousePressed(event);
   observer_->OnMousePressed(event);
 }
 

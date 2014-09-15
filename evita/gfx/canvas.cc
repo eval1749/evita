@@ -81,6 +81,20 @@ Canvas::Observer::~Observer() {
 
 //////////////////////////////////////////////////////////////////////
 //
+// Canvas::ScopedState
+//
+Canvas::ScopedState::ScopedState(Canvas* canvas)
+    : canvas_(canvas), offset_(canvas->offset_) {
+  (*canvas_)->GetTransform(&transform_);
+}
+
+Canvas::ScopedState::~ScopedState() {
+  canvas_->offset_ = offset_;
+  (*canvas_)->SetTransform(transform_);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // Canvas
 //
 Canvas::Canvas()
@@ -91,7 +105,12 @@ Canvas::Canvas()
 Canvas::~Canvas() {
 }
 
-void Canvas::AddDirtyRect(const RectF&) {
+void Canvas::AddDirtyRect(const RectF& local_bounds) {
+  AddDirtyRectImpl(gfx::RectF(local_bounds.origin() + offset_,
+                              local_bounds.size()));
+}
+
+void Canvas::AddDirtyRectImpl(const RectF&) {
 }
 
 void Canvas::AddObserver(Observer* observer) {
@@ -224,6 +243,12 @@ void Canvas::SetInitialBounds(const RectF& bounds) {
   bounds_ = bounds;
 }
 
+void Canvas::SetOrigin(const gfx::PointF new_origin) {
+  offset_ += new_origin;
+  auto transform = D2D1::Matrix3x2F::Translation(offset_.x, offset_.y);
+  GetRenderTarget()->SetTransform(transform);
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // CanvasForHwnd
@@ -237,7 +262,7 @@ CanvasForHwnd::~CanvasForHwnd() {
 }
 
 // Canvas
-void CanvasForHwnd::AddDirtyRect(const RectF& new_dirty_rect) {
+void CanvasForHwnd::AddDirtyRectImpl(const RectF& new_dirty_rect) {
   swap_chain_->AddDirtyRect(new_dirty_rect);
 }
 

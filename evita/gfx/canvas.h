@@ -47,10 +47,23 @@ class Canvas : public Object, public DpiHandler {
   };
   friend class DrawingScope;
 
+  public: class ScopedState final {
+    private: Canvas* const canvas_;
+    private: gfx::PointF offset_;
+    private: D2D1::Matrix3x2F transform_;
+
+    public: ScopedState(Canvas* canvas);
+    public: ~ScopedState();
+
+    DISALLOW_COPY_AND_ASSIGN(ScopedState);
+  };
+  friend class ScopedState;
+
   private: int batch_nesting_level_;
   private: RectF bounds_;
   private: scoped_refptr<FactorySet> factory_set_;
   private: ObserverList<Observer> observers_;
+  private: gfx::PointF offset_;
   private: std::unique_ptr<Bitmap> screen_bitmap_;
   private: void* work_;
 
@@ -79,6 +92,7 @@ class Canvas : public Object, public DpiHandler {
 
   // [A]
   public: virtual void AddDirtyRect(const RectF& new_dirty_rect);
+  protected: virtual void AddDirtyRectImpl(const RectF& new_dirty_rect);
   public: void AddObserver(Observer* observer);
 
   // [B]
@@ -122,6 +136,11 @@ class Canvas : public Object, public DpiHandler {
   public: void SetBounds(const RectF& bounds);
   protected: void SetInitialBounds(const RectF& bounds);
 
+  // Set canvas origin to |new_origin| in current coordinate. This function is
+  // used for setting canvas coordinate for child window.
+  // See |ui::Widget::OnDraw()| for example usage.
+  public: void SetOrigin(const gfx::PointF new_origin);
+
   DISALLOW_COPY_AND_ASSIGN(Canvas);
 };
 
@@ -137,7 +156,7 @@ class CanvasForHwnd : public Canvas {
   public: virtual ~CanvasForHwnd();
 
   // Canvas
-  private: virtual void AddDirtyRect(const RectF& new_dirty_rect) override;
+  private: virtual void AddDirtyRectImpl(const RectF& new_dirty_rect) override;
   private: virtual void DidCallEndDraw() override;
   private: virtual void DidChangeBounds(const RectF& new_bounds) override;
   private: virtual void DidLostRenderTarget() override;

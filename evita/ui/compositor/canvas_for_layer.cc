@@ -30,7 +30,7 @@ CanvasForLayer::~CanvasForLayer() {
 }
 
 // Canvas
-void CanvasForLayer::AddDirtyRect(const RectF& new_dirty_rect) {
+void CanvasForLayer::AddDirtyRectImpl(const RectF& new_dirty_rect) {
   swap_chain_->AddDirtyRect(new_dirty_rect);
 }
 

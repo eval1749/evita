@@ -80,6 +80,7 @@ class Widget
   protected: NativeWindow* native_window() const {
     return native_window_.get();
   }
+  public: const Point origin() const { return bounds_.origin(); }
   public: bool visible() const { return shown_; }
 
   // [A]

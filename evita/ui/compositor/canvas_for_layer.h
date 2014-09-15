@@ -27,7 +27,7 @@ class CanvasForLayer : public Canvas {
   public: SwapChain* swap_chain() const { return swap_chain_.get(); }
 
   // Canvas
-  private: virtual void AddDirtyRect(const RectF& new_dirty_rect) override;
+  private: virtual void AddDirtyRectImpl(const RectF& new_dirty_rect) override;
   private: virtual void DidCallEndDraw() override;
   private: virtual void DidChangeBounds(const RectF& new_bounds) override;
   private: virtual void DidLostRenderTarget() override;

@@ -39,7 +39,7 @@ void RadioButtonControl::OnDraw(gfx::Canvas* canvas) {
   if (bounds().empty())
     return;
 
-  auto const bounds = gfx::RectF(this->bounds());
+  auto const bounds = GetContentsBounds();
   canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor), bounds);
 
   auto const size = 12.0f;

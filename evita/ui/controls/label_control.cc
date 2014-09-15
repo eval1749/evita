@@ -105,7 +105,7 @@ void LabelControl::DidChangeBounds() {
 
 void LabelControl::OnDraw(gfx::Canvas* canvas) {
   if (!renderer_)
-    renderer_ = std::make_unique<Renderer>(text_, style_, gfx::RectF(bounds()));
+    renderer_ = std::make_unique<Renderer>(text_, style_, GetContentsBounds());
   renderer_->Render(canvas);
 }
 

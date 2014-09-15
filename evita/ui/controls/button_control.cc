@@ -132,7 +132,7 @@ void ButtonControl::DidChangeBounds() {
 
 void ButtonControl::OnDraw(gfx::Canvas* gfx) {
   if (!renderer_)
-    renderer_ = std::make_unique<Renderer>(text_, style_, gfx::RectF(bounds()));
+    renderer_ = std::make_unique<Renderer>(text_, style_, GetContentsBounds());
   renderer_->Render(gfx, state());
 }
 

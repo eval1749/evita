@@ -12,6 +12,8 @@
 #include "common/tree/descendants.h"
 #include "common/tree/descendants_or_self.h"
 #include "common/win/win32_verify.h"
+#include "evita/gfx/canvas.h"
+#include "evita/gfx/rect_conversions.h"
 #include "evita/ui/base/ime/text_input_client_win.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/events/event.h"
@@ -451,10 +453,13 @@ Point Widget::MapToDesktopPoint(const Point& local_point) const {
   return Point(point.x + bounds().left(), point.y + bounds().top());
 }
 
-void Widget::OnDraw(gfx::Canvas* gfx) {
+void Widget::OnDraw(gfx::Canvas* canvas) {
   for (auto child : child_nodes()) {
-    if (child->visible())
-      child->OnDraw(gfx);
+    if (!child->visible())
+      continue;
+    gfx::Canvas::ScopedState child_canvas(canvas);
+    canvas->SetOrigin(gfx::PointF(child->origin()));
+    child->OnDraw(canvas);
   }
 }
 

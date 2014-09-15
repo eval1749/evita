@@ -39,7 +39,7 @@ void CheckboxControl::OnDraw(gfx::Canvas* canvas) {
   if (bounds().empty())
     return;
 
-  auto const bounds = gfx::RectF(this->bounds());
+  auto const bounds = GetContentsBounds();
   canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor), bounds);
 
   auto const frame_size = gfx::SizeF(12.0f, 12.0f);

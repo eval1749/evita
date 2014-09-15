@@ -51,7 +51,7 @@ void FrameList::RemoveFrame(Frame* frame) {
 }
 
 // FrameObserver
-void FrameList::DidActiveFrame(Frame* frame) {
+void FrameList::DidActivateFrame(Frame* frame) {
   active_frame_ = frame;
 }
 

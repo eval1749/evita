@@ -13,7 +13,7 @@ class FrameObserver {
   public: FrameObserver();
   public: virtual ~FrameObserver();
 
-  public: virtual void DidActiveFrame(Frame* frame) = 0;
+  public: virtual void DidActivateFrame(Frame* frame) = 0;
 
   DISALLOW_COPY_AND_ASSIGN(FrameObserver);
 };

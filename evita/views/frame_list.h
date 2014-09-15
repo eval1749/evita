@@ -31,7 +31,7 @@ class FrameList : public common::Singleton<FrameList>,
   public: void RemoveFrame(Frame* frame);
 
   // FrameObserver
-  public: virtual void DidActiveFrame(Frame* frame) override;
+  public: virtual void DidActivateFrame(Frame* frame) override;
 
   DISALLOW_COPY_AND_ASSIGN(FrameList);
 };

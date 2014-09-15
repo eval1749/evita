@@ -7,8 +7,6 @@
 
 #include "evita/css/style.h"
 
-class TextEditWindow;
-
 namespace text {
 class Range;
 class Buffer;

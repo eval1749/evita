@@ -7,25 +7,14 @@
 
 #include <memory>
 
-#include "evita/li_util.h"
 #include "evita/gfx/canvas.h"
 #include "evita/ui/base/ime/text_input_delegate.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/content_window.h"
 
-class EditPane;
-
 namespace text {
 class Buffer;
 class Selection;
-}
-
-namespace views {
-class MetricsView;
-class TextRenderer;
-namespace rendering {
-class TextSelectionModel;
-}
 }
 
 namespace ui {
@@ -34,33 +23,42 @@ class MouseWheelEvent;
 class ScrollBar;
 }
 
+namespace views {
+
+class MetricsView;
+class TextRenderer;
+
+namespace rendering {
+class TextSelectionModel;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
-// TextEditWindow
+// TextWindow
 //
-class TextEditWindow final : private gfx::Canvas::Observer,
-                             public ui::ScrollBarObserver,
-                             public ui::TextInputDelegate,
-                             public views::ContentWindow {
-  DECLARE_CASTABLE_CLASS(TextEditWindow, views::ContentWindow);
+class TextWindow final : private gfx::Canvas::Observer,
+                         public ui::ScrollBarObserver,
+                         public ui::TextInputDelegate,
+                         public ContentWindow {
+  DECLARE_CASTABLE_CLASS(TextWindow, ContentWindow);
 
   private: typedef common::win::Point Point;
   private: typedef text::Range Range;
-  private: typedef views::TextRenderer TextRenderer;
-  private: typedef views::rendering::TextSelectionModel TextSelectionModel;
+  private: typedef TextRenderer TextRenderer;
+  private: typedef rendering::TextSelectionModel TextSelectionModel;
   private: class ScrollBar;
 
   private: Posn m_lCaretPosn;
-  private: views::MetricsView* metrics_view_;
+  private: MetricsView* metrics_view_;
   // TODO(yosi): Manage life time of selection.
   private: text::Selection* const selection_;
   private: std::unique_ptr<TextRenderer> text_renderer_;
   private: ui::ScrollBar* const vertical_scroll_bar_;
 
   // ctor/dtor
-  public: explicit TextEditWindow(views::WindowId window_id,
+  public: explicit TextWindow(WindowId window_id,
                                   text::Selection* selection);
-  public: virtual ~TextEditWindow();
+  public: virtual ~TextWindow();
 
   public: text::Buffer* buffer() const;
 
@@ -134,7 +132,9 @@ class TextEditWindow final : private gfx::Canvas::Observer,
   // views::ContentWindow
   private: virtual void MakeSelectionVisible() override;
 
-  DISALLOW_COPY_AND_ASSIGN(TextEditWindow);
+  DISALLOW_COPY_AND_ASSIGN(TextWindow);
 };
+
+}  // namespace views
 
 #endif //!defined(INCLUDE_evita_views_text_window_h)

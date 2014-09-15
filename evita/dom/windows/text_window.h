@@ -27,7 +27,7 @@ class TextWindowClass;
 }
 
 // The |TextWindow| is DOM world representative of UI world TextWidget, aka
-// TextEditWindow.
+// TextWindow.
 class TextWindow : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
   DECLARE_SCRIPTABLE_OBJECT(TextWindow);
   friend class bindings::TextWindowClass;

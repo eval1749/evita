@@ -101,7 +101,7 @@ void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
 text::Posn ViewDelegateImpl::ComputeOnTextWindow(
     dom::WindowId window_id, const dom::TextWindowCompute& data) {
   auto const window = FromWindowId("ComputeOnTextWindow", window_id)->
-      as<TextEditWindow>();
+      as<TextWindow>();
   if (!window)
     return -1;
   gfx::PointF point(data.x, data.y);
@@ -158,7 +158,7 @@ void ViewDelegateImpl::CreateTableWindow(dom::WindowId window_id,
 
 void ViewDelegateImpl::CreateTextWindow(dom::WindowId window_id,
                                         text::Selection* selection) {
-  new TextEditWindow(window_id, selection);
+  new TextWindow(window_id, selection);
 }
 
 void ViewDelegateImpl::DestroyWindow(dom::WindowId window_id) {
@@ -298,7 +298,7 @@ void ViewDelegateImpl::HideWindow(dom::WindowId window_id) {
 domapi::FloatRect ViewDelegateImpl::HitTestTextPosition(
     WindowId window_id, text::Posn position) {
   auto const window = FromWindowId("HitTestTextPosition", window_id)->
-      as<TextEditWindow>();
+      as<TextWindow>();
   if (!window)
     return domapi::FloatRect();
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
@@ -326,7 +326,7 @@ void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
 text::Posn ViewDelegateImpl::MapPointToPosition(
     domapi::EventTargetId event_target_id, float x, float y) {
   if (auto const window = Window::FromWindowId(event_target_id)) {
-    if (auto const text_window = window->as<TextEditWindow>()) {
+    if (auto const text_window = window->as<TextWindow>()) {
       UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
       DCHECK(lock_scope.locked());
       return text_window->MapPointToPosition(gfx::PointF(x, y));
@@ -379,9 +379,9 @@ void ViewDelegateImpl::Reconvert(
   auto const window = FromWindowId("Reconvert", window_id);
   if (!window)
     return;
-  auto const text_window = window->as<TextEditWindow>();
+  auto const text_window = window->as<TextWindow>();
   if (!text_window) {
-    DVLOG(0) << "WindowId " << window_id << " should be TextEditWindow.";
+    DVLOG(0) << "WindowId " << window_id << " should be TextWindow.";
     return;
   }
   ui::TextInputClient::Get()->Reconvert(text_window, text);
@@ -408,7 +408,7 @@ void ViewDelegateImpl::SetTextWindowZoom(dom::WindowId window_id, float zoom) {
   auto const window = FromWindowId("SetTextWindowZoom", window_id);
   if (!window)
     return;
-  auto const text_window = window->as<TextEditWindow>();
+  auto const text_window = window->as<TextWindow>();
   if (!text_window)
     return;
   text_window->SetZoom(zoom);
@@ -440,9 +440,9 @@ void ViewDelegateImpl::ScrollTextWindow(WindowId window_id, int direction) {
   auto const window = FromWindowId("ScrollTextWindow", window_id);
   if (!window)
     return;
-  auto const text_window = window->as<TextEditWindow>();
+  auto const text_window = window->as<TextWindow>();
   if (!text_window) {
-    DVLOG(0) << "ScrollTextWindow expects TextEditWindow.";
+    DVLOG(0) << "ScrollTextWindow expects TextWindow.";
     return;
   }
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);

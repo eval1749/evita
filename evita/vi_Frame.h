@@ -39,8 +39,6 @@ enum MessageLevel {
   MessageLevel_Error,
 };
 
-class TextEditWindow;
-
 namespace views {
 class ContentWindow;
 class FrameObserver;

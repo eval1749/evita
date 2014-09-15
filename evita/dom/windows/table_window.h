@@ -16,7 +16,7 @@ class TableWindowClass;
 }
 
 // The |TableWindow| is DOM world representative of UI world TextWidget, aka
-// TextEditWindow.
+// TextWindow.
 class TableWindow : public v8_glue::Scriptable<TableWindow, DocumentWindow> {
   DECLARE_SCRIPTABLE_OBJECT(TableWindow);
   friend class bindings::TableWindowClass;

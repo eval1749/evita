@@ -198,6 +198,14 @@ void ShrinkAnimation::FinalizeAnimation() {
 //////////////////////////////////////////////////////////////////////
 //
 // SlideInAnimation
+// Push out |old_layer_| from |parent_layer_| by moving |new_layer| from
+// right to left.
+//
+//      +-----+      +-----+
+//      |     |      |     |
+// <==  | old |  <== | new |
+//      |     |      |     |
+//      +-----+      +-----+
 //
 class SlideInAnimation : public LayerAnimation {
   private: std::unique_ptr<AnimationPoint> animation_origin_;
@@ -225,6 +233,7 @@ SlideInAnimation::SlideInAnimation(Layer* parent_layer, Layer* new_layer,
   if (!old_layer_)
     return;
   DCHECK_EQ(old_layer_->parent_layer(), parent_layer);
+  DCHECK_EQ(old_layer_->origin(), new_layer_->origin());
   old_layer_->DidRegisterAnimation(this);
 }
 
@@ -232,12 +241,16 @@ void SlideInAnimation::Animate(base::Time now) {
   if (!animation_origin_) {
     animation_origin_.reset(new AnimationPoint(
         now, animation_duration(),
-        gfx::PointF(new_layer_->bounds().left - new_layer_->bounds().width(),
-                    new_layer_->bounds().top),
+        gfx::PointF(new_layer_->bounds().right, new_layer_->bounds().top),
         new_layer_->bounds().origin()));
     parent_layer_->AppendLayer(new_layer_);
+    new_layer_->SetOrigin(animation_origin_->Compute(now));
   }
   auto const origin = animation_origin_->Compute(now);
+  if (old_layer_) {
+    auto const diff = origin - new_layer_->origin();
+    old_layer_->SetOrigin(old_layer_->origin() + diff);
+  }
   new_layer_->SetOrigin(origin);
   if (origin != animation_origin_->end_value()) {
     ScheduleAnimation();
@@ -248,14 +261,15 @@ void SlideInAnimation::Animate(base::Time now) {
 
 void SlideInAnimation::FinalizeAnimation() {
   LayerAnimation::FinalizeAnimation();
-  if (animation_origin_) {
-    new_layer_->SetOrigin(animation_origin_->end_value());
-    return;
+  new_layer_->SetOrigin(animation_origin_->end_value());
+  if (old_layer_) {
+    old_layer_->parent_layer()->RemoveLayer(old_layer_);
+    // Restore |old_layer_| to position before animation.
+    old_layer_->SetOrigin(new_layer_->origin());
   }
-  parent_layer_->AppendLayer(new_layer_);
-  if (!old_layer_)
+  if (animation_origin_)
     return;
-  old_layer_->parent_layer()->RemoveLayer(old_layer_);
+  parent_layer_->AppendLayer(new_layer_);
 }
 
 //////////////////////////////////////////////////////////////////////

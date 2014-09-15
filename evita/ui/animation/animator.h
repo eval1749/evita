@@ -35,7 +35,6 @@ class Animator : public common::Singleton<Animator>,
   private: void Animate(Animatable* animatable);
   public: void CancelAnimation(Animatable* animatable);
   private: void EndAnimate();
-  private: void PlayAnimation(base::Time time, Animatable* animatable);
   private: void PlayAnimations(base::Time time);
   public: void ScheduleAnimation(Animatable* animatable);
   private: void StartAnimate(base::Time time);

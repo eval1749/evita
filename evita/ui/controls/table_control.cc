@@ -143,16 +143,16 @@ void Row::UpdateState(int new_state, int state_mask) {
 }
 
 struct RowCompare {
-  const TableModel* impl_;
+  const TableModel* model_;
   int column_id_;
 
   RowCompare(const TableModel* model, int column_id)
-      : column_id_(column_id), impl_(model) {
+      : column_id_(column_id), model_(model) {
   }
 
   bool operator() (const Row* a, const Row* b) const {
-    const auto& a_text = impl_->GetCellText(a->row_id(), column_id_);
-    const auto& b_text = impl_->GetCellText(b->row_id(), column_id_);
+    const auto& a_text = model_->GetCellText(a->row_id(), column_id_);
+    const auto& b_text = model_->GetCellText(b->row_id(), column_id_);
     return a_text < b_text;
   }
 };
@@ -169,7 +169,7 @@ class TableControl::Impl final {
   private: gfx::RectF dirty_rects_;
   private: bool has_focus_;
   private: Row* hover_row_;
-  private: const TableModel* impl_;
+  private: const TableModel* model_;
   private: std::vector<Row*> rows_;
   private: std::unordered_map<int, Row*> row_map_;
   private: float row_height_;
@@ -224,7 +224,7 @@ TableControl::Impl::Impl(Widget* widget,
                          const TableModel* model)
     : has_focus_(false),
       hover_row_(nullptr),
-      impl_(model),
+      model_(model),
       row_height_(24.0f),
       selection_(model->GetRowCount()),
       text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", 14)),
@@ -239,25 +239,22 @@ TableControl::Impl::Impl(Widget* widget,
 
   auto const num_rows = static_cast<size_t>(model->GetRowCount());
   for (auto index = 0u; index < num_rows; ++index) {
-    auto const row_id = impl_->GetRowId(static_cast<int>(index));
+    auto const row_id = model_->GetRowId(static_cast<int>(index));
     auto const row = new Row(row_id);
     rows_.push_back(row);
     row_map_[row_id] = row;
   }
   columns_.resize(columns.size());
-  for (auto index = 0u; index < columns.size(); ++index) {
+  for (auto index = 0u; index < columns.size(); ++index)
     columns_[index] = new Column(columns[index]);
-  }
   SortRows();
 }
 
 TableControl::Impl::~Impl() {
-  for (auto row : rows_) {
+  for (auto row : rows_)
     delete row;
-  }
-  for (auto column : columns_) {
+  for (auto column : columns_)
     delete column;
-  }
 }
 
 void TableControl::Impl::AddDirtyRect(
@@ -432,7 +429,7 @@ void TableControl::Impl::DrawRow(gfx::Canvas* canvas, const Row* row) const {
   gfx::PointF cell_origin(row->bounds().origin());
   auto column_index = 0u;
   for (auto column : columns_) {
-    auto const text = impl_->GetCellText(row->row_id(), column->column_id());
+    auto const text = model_->GetCellText(row->row_id(), column->column_id());
     (*text_format_)->SetTextAlignment(column->alignment());
     auto const width = column_index == columns_.size() ?
         bounds_.width() - cell_origin.x : column->width();
@@ -597,7 +594,7 @@ void TableControl::Impl::Select(int row_id) {
 
 void TableControl::Impl::SortRows() {
   std::sort(rows_.begin(), rows_.end(),
-            RowCompare(impl_, columns_[0]->column_id()));
+            RowCompare(model_, columns_[0]->column_id()));
   UpdateLayout();
 }
 

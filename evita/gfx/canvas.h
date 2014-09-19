@@ -16,6 +16,7 @@ interface IDXGISwapChain1;
 namespace gfx {
 
 class Bitmap;
+class CanvasObserver;
 class SwapChain;
 
 //////////////////////////////////////////////////////////////////////
@@ -23,13 +24,6 @@ class SwapChain;
 // Canvas
 //
 class Canvas : public Object, public DpiHandler {
-  public: class Observer {
-    public: Observer();
-    public: virtual ~Observer();
-
-    public: virtual void ShouldDiscardResources() = 0;
-  };
-
   public: class AxisAlignedClipScope final {
     private: Canvas* canvas_;
     public: AxisAlignedClipScope(Canvas* canvas, const RectF& bounds,
@@ -62,7 +56,7 @@ class Canvas : public Object, public DpiHandler {
   private: int batch_nesting_level_;
   private: RectF bounds_;
   private: scoped_refptr<FactorySet> factory_set_;
-  private: ObserverList<Observer> observers_;
+  private: ObserverList<CanvasObserver> observers_;
   private: gfx::PointF offset_;
   private: std::unique_ptr<Bitmap> screen_bitmap_;
   private: void* work_;
@@ -93,7 +87,7 @@ class Canvas : public Object, public DpiHandler {
   // [A]
   public: virtual void AddDirtyRect(const RectF& new_dirty_rect);
   protected: virtual void AddDirtyRectImpl(const RectF& new_dirty_rect);
-  public: void AddObserver(Observer* observer);
+  public: void AddObserver(CanvasObserver* observer);
 
   // [B]
   private: void BeginDraw();
@@ -128,7 +122,7 @@ class Canvas : public Object, public DpiHandler {
   public: virtual ID2D1RenderTarget* GetRenderTarget() const = 0;
 
   // [R]
-  public: void RemoveObserver(Observer* observer);
+  public: void RemoveObserver(CanvasObserver* observer);
 
   // [S]
   public: bool Canvas::SaveScreenImage(const RectF& bounds);

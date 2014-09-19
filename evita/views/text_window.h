@@ -7,10 +7,14 @@
 
 #include <memory>
 
-#include "evita/gfx/canvas.h"
+#include "evita/gfx/canvas_observer.h"
 #include "evita/ui/base/ime/text_input_delegate.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/content_window.h"
+
+namespace gfx {
+class Canvas;
+}
 
 namespace text {
 class Buffer;
@@ -36,7 +40,7 @@ class TextSelectionModel;
 //
 // TextWindow
 //
-class TextWindow final : private gfx::Canvas::Observer,
+class TextWindow final : private gfx::CanvasObserver,
                          public ui::ScrollBarObserver,
                          public ui::TextInputDelegate,
                          public ContentWindow {
@@ -95,8 +99,8 @@ class TextWindow final : private gfx::Canvas::Observer,
   // [U]
   private: void UpdateLayout();
 
-  // gfx::Canvas::Observer
-  private: virtual void ShouldDiscardResources() override;
+  // gfx::CanvasObserver
+  private: virtual void DidRecreateCanvas() override;
 
   // ui::AnimationFrameHandler
   private: virtual void DidBeginAnimationFrame(base::Time time) override;

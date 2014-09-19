@@ -342,8 +342,8 @@ void TextWindow::UpdateLayout() {
   metrics_view_->SetBounds(gfx::ToEnclosingRect(metrics_view_bounds));
 }
 
-// gfx::Canvas::Observer
-void TextWindow::ShouldDiscardResources() {
+// gfx::CanvasObserver
+void TextWindow::DidRecreateCanvas() {
   text_renderer_->DidLostCanvas();
 }
 

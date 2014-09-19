@@ -10,6 +10,7 @@
 #include <utility>
 
 #include "evita/gfx/bitmap.h"
+#include "evita/gfx/canvas_observer.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/swap_chain.h"
 #include "evita/gfx/text_format.h"
@@ -71,16 +72,6 @@ Canvas::DrawingScope::~DrawingScope() {
 
 //////////////////////////////////////////////////////////////////////
 //
-// Canvas::Observer
-//
-Canvas::Observer::Observer() {
-}
-
-Canvas::Observer::~Observer() {
-}
-
-//////////////////////////////////////////////////////////////////////
-//
 // Canvas::ScopedState
 //
 Canvas::ScopedState::ScopedState(Canvas* canvas)
@@ -113,7 +104,7 @@ void Canvas::AddDirtyRect(const RectF& local_bounds) {
 void Canvas::AddDirtyRectImpl(const RectF&) {
 }
 
-void Canvas::AddObserver(Observer* observer) {
+void Canvas::AddObserver(CanvasObserver* observer) {
   observers_.AddObserver(observer);
 }
 
@@ -136,7 +127,7 @@ void Canvas::DidCreateRenderTarget() {
   SizeF dpi;
   GetRenderTarget()->GetDpi(&dpi.width, &dpi.height);
   UpdateDpi(dpi);
-  FOR_EACH_OBSERVER(Observer, observers_, ShouldDiscardResources());
+  FOR_EACH_OBSERVER(CanvasObserver, observers_, DidRecreateCanvas());
 }
 
 void Canvas::DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
@@ -208,7 +199,7 @@ void Canvas::Flush() {
   DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
 }
 
-void Canvas::RemoveObserver(Observer* observer) {
+void Canvas::RemoveObserver(CanvasObserver* observer) {
   observers_.RemoveObserver(observer);
 }
 

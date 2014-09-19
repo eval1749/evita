@@ -160,6 +160,8 @@
         'gfx/color_f.cc',
         'gfx/font_face.cc',
         'gfx/canvas.cc',
+        'gfx/canvas_observer.cc',
+        'gfx/canvas_observer.h',
         'gfx/dx_device.cc',
         'gfx/dx_device.h',
         'gfx/point_f.cc',

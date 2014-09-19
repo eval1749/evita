@@ -55,7 +55,7 @@ class Widget : public common::Castable,
   private: int shown_;
   private: State state_;
 
-  protected: explicit Widget(std::unique_ptr<NativeWindow>&& native_window);
+  protected: explicit Widget(std::unique_ptr<NativeWindow> native_window);
   protected: Widget();
   protected: ~Widget();
 

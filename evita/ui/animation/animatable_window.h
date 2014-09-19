@@ -14,7 +14,7 @@ class AnimatableWindow : public AnimationFrameHandler, public Widget {
   DECLARE_CASTABLE_CLASS(AnimatableWindow, Widget);
 
   protected: explicit AnimatableWindow(
-      std::unique_ptr<NativeWindow>&& native_window);
+      std::unique_ptr<NativeWindow> native_window);
   protected: AnimatableWindow();
   protected: virtual ~AnimatableWindow();
 

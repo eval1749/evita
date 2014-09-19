@@ -74,7 +74,7 @@ Widget::HitTestResult::HitTestResult()
 //
 // Widget
 //
-Widget::Widget(std::unique_ptr<NativeWindow>&& native_window)
+Widget::Widget(std::unique_ptr<NativeWindow> native_window)
     : native_window_(std::move(native_window)),
       shown_(0),
       state_(kNotRealized) {

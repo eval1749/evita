@@ -22,7 +22,7 @@ class Window : public ui::AnimatableWindow,
   private: const views::WindowId window_id_;
 
   protected: Window(
-      std::unique_ptr<NativeWindow>&& native_window, WindowId window_id);
+      std::unique_ptr<NativeWindow> native_window, WindowId window_id);
   protected: explicit Window(WindowId window_id = kInvalidWindowId);
   protected: virtual ~Window();
 

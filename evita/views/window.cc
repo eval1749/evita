@@ -92,7 +92,7 @@ int static_active_tick;
 //
 // Window
 //
-Window::Window(std::unique_ptr<NativeWindow>&& native_window,
+Window::Window(std::unique_ptr<NativeWindow> native_window,
                WindowId window_id)
     : ui::AnimatableWindow(std::move(native_window)),
       EventSource(window_id),

@@ -9,7 +9,7 @@
 namespace ui {
 
 AnimatableWindow::AnimatableWindow(
-    std::unique_ptr<NativeWindow>&& native_window)
+    std::unique_ptr<NativeWindow> native_window)
     : Widget(std::move(native_window)) {
 }
 

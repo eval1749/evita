@@ -43,7 +43,7 @@ void TextRenderer::DidHide() {
   screen_text_block_->Reset();
 }
 
-void TextRenderer::DidLostCanvas() {
+void TextRenderer::DidRecreateCanvas() {
   screen_text_block_->Reset();
 }
 

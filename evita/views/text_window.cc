@@ -344,7 +344,7 @@ void TextWindow::UpdateLayout() {
 
 // gfx::CanvasObserver
 void TextWindow::DidRecreateCanvas() {
-  text_renderer_->DidLostCanvas();
+  text_renderer_->DidRecreateCanvas();
 }
 
 // ui::AnimationFrameHandler
@@ -367,7 +367,7 @@ void TextWindow::DidRecreateLayer(ui::Layer* old_layer) {
   ContentWindow::DidRecreateLayer(old_layer);
   if (!canvas())
     return;
-  text_renderer_->DidLostCanvas();
+  text_renderer_->DidRecreateCanvas();
   old_layer->AppendLayer(metrics_view_->RecreateLayer().release());
   layer()->AppendLayer(metrics_view_->layer());
 }

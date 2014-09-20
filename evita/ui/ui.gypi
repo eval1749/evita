@@ -50,6 +50,8 @@
         'events/event.h',
         'events/mouse_click_tracker.cc',
         'events/mouse_click_tracker.h',
+        'events/native_event_win.cc',
+        'events/native_event_win.h',
 
         'compositor/canvas_for_layer.cc',
         'compositor/canvas_for_layer.h',

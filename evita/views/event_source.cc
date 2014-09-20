@@ -94,7 +94,7 @@ void EventSource::DispatchKeyboardEvent(const ui::KeyboardEvent& event) {
 void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
   #define MUST_EQUAL(name) \
     static_assert(static_cast<int>(domapi::MouseButton::name) == \
-                  ui::MouseEvent::k ## name, \
+                  static_cast<int>(ui::MouseButton::name), \
                   "Button name " # name " must be equal.")
   MUST_EQUAL(Left);
   MUST_EQUAL(Middle);

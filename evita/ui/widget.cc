@@ -18,6 +18,7 @@
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/events/event.h"
 #include "evita/ui/events/mouse_click_tracker.h"
+#include "evita/ui/events/native_event_win.h"
 #include "evita/ui/root_widget.h"
 #include "evita/ui/system_metrics.h"
 
@@ -216,7 +217,7 @@ void Widget::DispatchMouseExited() {
   hover_widget = nullptr;
   auto const screen_point = GetCursorPoint();
   auto const client_point = MapFromDesktopPoint(screen_point);
-  MouseEvent event(EventType::MouseExited, MouseEvent::kNone, 0u, 0,
+  MouseEvent event(EventType::MouseExited, MouseButton::None, 0, 0,
                    hover, client_point, screen_point);
   hover->OnMouseExited(event);
 }
@@ -290,26 +291,24 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message, WPARAM wParam,
   return OnMessage(message, wParam, lParam);
 }
 
-void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
-                                LPARAM lParam) {
+bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
+  auto const client_point = GetClientPointFromNativeEvent(native_event);
+  auto const screen_point = GetScreenPointFromNativeEvent(native_event);
+  auto const message = native_event.message;
   if (message == WM_MOUSEWHEEL) {
     // Note: We send WM_MOUSEWHEEL message to a widget under mouse pointer
     // rather than active widget.
-    Point screen_point(MAKEPOINTS(lParam));
-    auto const client_point = MapFromDesktopPoint(screen_point);
     auto const result = HitTestForMouseEventTarget(client_point);
     if (!result)
-      return;
+      return true;
     MouseWheelEvent event(result.widget(), result.local_point(), screen_point,
-                          GET_KEYSTATE_WPARAM(wParam),
-                          GET_WHEEL_DELTA_WPARAM(wParam));
+                          MouseEvent::ConvertToEventFlags(native_event),
+                          GET_WHEEL_DELTA_WPARAM(native_event.wParam));
     result.widget()->OnMouseWheel(event);
-    return;
+    return !event.default_prevented();
   }
 
-  auto const host_point = Point(MAKEPOINTS(lParam));
-  auto const screen_point = MapToDesktopPoint(host_point);
-  auto const result = HitTestForMouseEventTarget(host_point);
+  auto const result = HitTestForMouseEventTarget(client_point);
   DCHECK(result);
   if (message == WM_MOUSEMOVE || message == WM_NCMOUSEMOVE) {
     if (!hover_widget) {
@@ -323,26 +322,24 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
       else
         DVLOG(0) << "TrackMouseEvent last_error=" << ::GetLastError();
     } else if (hover_widget != result.widget()) {
-      MouseEvent event(EventType::MouseExited, MouseEvent::kNone, 0u, 0,
+      MouseEvent event(EventType::MouseExited, MouseButton::None, 0, 0,
                        hover_widget, result.local_point(), screen_point);
       hover_widget->OnMouseExited(event);
       hover_widget = result.widget();
     }
   }
 
-  MouseEvent event(MouseEvent::ConvertToEventType(message),
-                   MouseEvent::ConvertToButton(message, wParam),
-                   GET_KEYSTATE_WPARAM(wParam), 0,
-                   result.widget(), result.local_point(), screen_point);
+  MouseEvent event(native_event, result.widget(), result.local_point(),
+                   screen_point);
   if (event.event_type() == EventType::MouseMoved) {
     result.widget()->OnMouseMoved(event);
-    return;
+    return !event.default_prevented();
   }
 
   if (event.event_type() == EventType::MousePressed) {
     MouseClickTracker::instance()->OnMousePressed(event);
     result.widget()->OnMousePressed(event);
-    return;
+    return !event.default_prevented();
   }
 
   if (event.event_type() == EventType::MouseReleased) {
@@ -350,15 +347,19 @@ void Widget::HandleMouseMessage(uint32_t message, WPARAM wParam,
     result.widget()->OnMouseReleased(event);
     auto const click_count  = MouseClickTracker::instance()->click_count();
     if (!click_count)
-      return;
+      return !event.default_prevented();
+    if (event.default_prevented())
+      return false;
     MouseEvent click_event(EventType::MousePressed,
-                           MouseEvent::ConvertToButton(message, wParam),
-                           GET_KEYSTATE_WPARAM(wParam), click_count,
-                           result.widget(), result.local_point(),
+                           MouseEvent::ConvertToButton(native_event),
+                           MouseEvent::ConvertToEventFlags(native_event),
+                           click_count, result.widget(), result.local_point(),
                            screen_point);
     result.widget()->OnMousePressed(click_event);
-    return;
+    return !click_event.default_prevented();
   }
+
+  return true;
 }
 
 void Widget::Hide() {
@@ -411,17 +412,18 @@ Widget::HitTestResult Widget::HitTestForMouseEventTarget(
 
 gfx::Point Widget::MapFromDesktopPoint(const gfx::Point& desktop_point) const {
   POINT hwnd_point(desktop_point);
-  WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, AssociatedHwnd(),
-                                 &hwnd_point, 1));
-  if (*native_window())
+  auto const hwnd = AssociatedHwnd();
+  WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, hwnd, &hwnd_point, 1));
+  if (has_native_window())
     return Point(hwnd_point);
   return Point(hwnd_point.x - bounds().left(), hwnd_point.y - bounds().top());
 }
 
 gfx::Point Widget::MapToDesktopPoint(const gfx::Point& local_point) const {
   POINT point(local_point);
-  WIN32_VERIFY(::MapWindowPoints(AssociatedHwnd(), HWND_DESKTOP, &point, 1));
-  if (*native_window())
+  auto const hwnd = AssociatedHwnd();
+  WIN32_VERIFY(::MapWindowPoints(hwnd, HWND_DESKTOP, &point, 1));
+  if (has_native_window())
     return Point(point);
   return Point(point.x + bounds().left(), point.y + bounds().top());
 }
@@ -800,8 +802,14 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       return focus_widget->HandleKeyboardMessage(message, wParam, lParam);
   }
 
-  if (message >= WM_MOUSEFIRST && message <= WM_MOUSELAST) {
-    HandleMouseMessage(message, wParam, lParam);
+  if ((message >= WM_MOUSEFIRST && message <= WM_MOUSELAST) ||
+      (message >= WM_NCMOUSEMOVE && message <= WM_NCMBUTTONDBLCLK)) {
+    base::NativeEvent native_event = {
+      AssociatedHwnd(), message, wParam, lParam, 0,
+      { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) }
+    };
+    if (HandleMouseMessage(native_event))
+      return OnMessage(message, wParam, lParam);
     return 0;
   }
 

@@ -66,14 +66,19 @@ int KeyCodeMapper::Map(int virtual_key_code) {
 //
 // Event
 //
-Event::Event(EventType event_type)
-    : event_type_(event_type), time_stamp_(base::Time::Now()) {
+Event::Event(EventType event_type, int flags)
+    : default_prevented_(false), event_type_(event_type), flags_(flags),
+      time_stamp_(base::Time::Now()) {
 }
 
-Event::Event() : Event(EventType::Invalid) {
+Event::Event() : Event(EventType::Invalid, 0) {
 }
 
 Event::~Event() {
+}
+
+void Event::PreventDefault() {
+  default_prevented_ = true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -82,7 +87,8 @@ Event::~Event() {
 //
 KeyboardEvent::KeyboardEvent(EventType event_type, int raw_key_code,
                              bool repeat)
-    : Event(event_type), raw_key_code_(raw_key_code), repeat_(repeat) {
+    : Event(event_type, 0), raw_key_code_(raw_key_code),
+      repeat_(repeat) {
 }
 
 KeyboardEvent::KeyboardEvent()
@@ -117,79 +123,101 @@ bool KeyboardEvent::ConvertToRepeat(LPARAM lParam) {
 //
 // MouseEvent
 //
-MouseEvent::MouseEvent(EventType event_type, Button button, uint32_t flags,
+MouseEvent::MouseEvent(EventType event_type, MouseButton button, int flags,
                        int click_count, Widget* widget,
-                       const Point& client_point, const Point& screen_point)
-    : Event(event_type),
-      alt_key_(false),
+                       const gfx::Point& client_point,
+                       const gfx::Point& screen_point)
+    : Event(event_type, flags),
       button_(button),
       buttons_(ConvertToButtons(flags)),
       click_count_(click_count),
       client_point_(client_point),
-      control_key_(flags & MK_CONTROL),
       screen_point_(screen_point),
-      shift_key_(flags & MK_SHIFT),
       target_(widget) {
 }
 
+MouseEvent::MouseEvent(const base::NativeEvent& native_event, Widget* widget,
+                       const gfx::Point& client_point,
+                       const gfx::Point& screen_point)
+    : MouseEvent(ConvertToEventType(native_event),
+                 ConvertToButton(native_event),
+                 ConvertToEventFlags(native_event),
+                 0, widget, client_point, screen_point) {
+}
+
 MouseEvent::MouseEvent()
-    : MouseEvent(EventType::Invalid, kNone, 0u, 0, nullptr, Point(), Point()) {
+    : MouseEvent(EventType::Invalid, MouseButton::None, 0, 0, nullptr,
+                 gfx::Point(), gfx::Point()) {
 }
 
 MouseEvent::~MouseEvent() {
 }
 
-int MouseEvent::ConvertToButtons(uint32_t flags) {
-  int buttons = 0;
-  if (flags & MK_LBUTTON)
-    buttons |= 1 << MouseEvent::kLeft;
-  if (flags & MK_MBUTTON)
-    buttons |= 1 << MouseEvent::kMiddle;
-  if (flags & MK_RBUTTON)
-    buttons |= 1 << MouseEvent::kRight;
-  if (flags & MK_XBUTTON1)
-    buttons |= 1 << MouseEvent::kOther1;
-  if (flags & MK_XBUTTON2)
-    buttons |= 1 << MouseEvent::kOther2;
-  return buttons;
-}
-
-MouseEvent::Button MouseEvent::ConvertToButton(uint32_t message,
-                                               WPARAM wParam) {
-  switch (message) {
+MouseButton MouseEvent::ConvertToButton(const base::NativeEvent& native_event) {
+  switch (native_event.message) {
     // Left button
     case WM_LBUTTONDBLCLK:
     case WM_LBUTTONDOWN:
     case WM_LBUTTONUP:
-        return kLeft;
+        return MouseButton::Left;
 
     // Middle button
     case WM_MBUTTONDBLCLK:
     case WM_MBUTTONDOWN:
     case WM_MBUTTONUP:
-        return kMiddle;
+        return MouseButton::Middle;
 
     // Move
     case WM_MOUSEMOVE:
-      return kNone;
+      return MouseButton::None;
 
     // Right button
     case WM_RBUTTONDBLCLK:
     case WM_RBUTTONDOWN:
     case WM_RBUTTONUP:
-      return kRight;
+      return MouseButton::Right;
 
     // X button
     case WM_XBUTTONDBLCLK:
     case WM_XBUTTONDOWN:
     case WM_XBUTTONUP:
-      if (HIWORD(wParam) == XBUTTON1)
-        return kOther1;
-      if (HIWORD(wParam) == XBUTTON2)
-        return kOther2;
+      if (HIWORD(native_event.wParam) == XBUTTON1)
+        return MouseButton::Other1;
+      if (HIWORD(native_event.wParam) == XBUTTON2)
+        return MouseButton::Other2;
       break;
   }
-  return kNone;
+  return MouseButton::None;
+}
+
+int MouseEvent::ConvertToButtons(int flags) {
+  int buttons = 0;
+  if (flags & static_cast<int>(EventFlags::LeftButton))
+    buttons |= 1 << static_cast<int>(MouseButton::Left);
+  if (flags & static_cast<int>(EventFlags::MiddleButton))
+    buttons |= 1 << static_cast<int>(MouseButton::Middle);
+  if (flags & static_cast<int>(EventFlags::RightButton))
+    buttons |= 1 << static_cast<int>(MouseButton::Right);
+  if (flags & static_cast<int>(EventFlags::Other1Button))
+    buttons |= 1 << static_cast<int>(MouseButton::Other1);
+  if (flags & static_cast<int>(EventFlags::Other2Button))
+    buttons |= 1 << static_cast<int>(MouseButton::Other2);
+  return buttons;
+}
+
+int MouseEvent::ConvertToEventFlags(const base::NativeEvent& native_event) {
+  auto flags = 0;
+  if (native_event.wParam & MK_LBUTTON)
+    flags |= static_cast<int>(EventFlags::LeftButton);
+  if (native_event.wParam & MK_MBUTTON)
+    flags |= static_cast<int>(EventFlags::MiddleButton);
+  if (native_event.wParam & MK_RBUTTON)
+    flags |= static_cast<int>(EventFlags::RightButton);
+  if (native_event.wParam & MK_XBUTTON1)
+    flags |= static_cast<int>(EventFlags::Other1Button);
+  if (native_event.wParam & MK_XBUTTON1)
+    flags |= static_cast<int>(EventFlags::Other2Button);
+  return flags;
 }
 
 // Note: Windows sends message in below sequence for double click:
@@ -197,25 +225,39 @@ MouseEvent::Button MouseEvent::ConvertToButton(uint32_t message,
 //  2 WM_LBUTTONUP
 //  3 WM_LBUTTONDBLCLK
 //  4 WM_LBUTTONUP
-EventType MouseEvent::ConvertToEventType(uint32_t message) {
-  switch (message) {
+EventType MouseEvent::ConvertToEventType(
+    const base::NativeEvent& native_event) {
+  switch (native_event.message) {
     case WM_LBUTTONDBLCLK:
     case WM_LBUTTONDOWN:
     case WM_MBUTTONDBLCLK:
     case WM_MBUTTONDOWN:
+    case WM_NCLBUTTONDBLCLK:
+    case WM_NCLBUTTONDOWN:
+    case WM_NCMBUTTONDBLCLK:
+    case WM_NCMBUTTONDOWN:
+    case WM_NCRBUTTONDBLCLK:
+    case WM_NCRBUTTONDOWN:
+    case WM_NCXBUTTONDBLCLK:
+    case WM_NCXBUTTONDOWN:
     case WM_RBUTTONDBLCLK:
     case WM_RBUTTONDOWN:
     case WM_XBUTTONDBLCLK:
     case WM_XBUTTONDOWN:
-        return EventType::MousePressed;
+      return EventType::MousePressed;
 
     case WM_LBUTTONUP:
     case WM_MBUTTONUP:
+    case WM_NCLBUTTONUP:
+    case WM_NCMBUTTONUP:
+    case WM_NCRBUTTONUP:
+    case WM_NCXBUTTONUP:
     case WM_RBUTTONUP:
     case WM_XBUTTONUP:
       return EventType::MouseReleased;
 
     case WM_MOUSEMOVE:
+    case WM_NCMOUSEMOVE:
       return EventType::MouseMoved;
   }
   return EventType::Invalid;
@@ -225,11 +267,11 @@ EventType MouseEvent::ConvertToEventType(uint32_t message) {
 //
 // MouseWheelEvent
 //
-MouseWheelEvent::MouseWheelEvent(Widget* widget, const Point& client_point,
-                                 const Point& screen_point, uint32_t flags,
+MouseWheelEvent::MouseWheelEvent(Widget* widget, const gfx::Point& client_point,
+                                 const gfx::Point& screen_point, int flags,
                                  int delta)
-    : MouseEvent(EventType::MouseWheel, kNone, flags, 0, widget, client_point,
-                 screen_point), delta_(delta) {
+    : MouseEvent(EventType::MouseWheel, MouseButton::None, flags, 0, widget,
+                 client_point, screen_point), delta_(delta) {
 }
 
 MouseWheelEvent::~MouseWheelEvent() {
@@ -253,7 +295,7 @@ const char* MouseButton(const ui::MouseEvent& event) {
     "Left", "Middle", "Right", "Other1", "Other2",
   };
   if (static_cast<size_t>(event.button()) < arraysize(button_names))
-    return button_names[event.button()];
+    return button_names[static_cast<int>(event.button())];
   return "?";
 }
 

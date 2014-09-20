@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 
+#include "base/event_types.h"
 #include "base/time/time.h"
 #include "common/win/rect.h"
 
@@ -13,6 +14,19 @@ namespace ui {
 using common::win::Point;
 using common::win::Rect;
 class Widget;
+
+enum class EventFlags {
+  None = 0,
+  LeftButton = 1 << 1,
+  MiddleButton = 1 << 2,
+  RightButton = 1 << 3,
+  ControlKey = 1 << 4,
+  ShiftKey = 1 << 5,
+  AltKey = 1 << 6,
+  NonClient = 1 << 7,
+  Other1Button = 1 << 8,
+  Other2Button = 1 << 9,
+};
 
 enum class EventType {
   Invalid,
@@ -50,20 +64,35 @@ enum class Modifier {
   Alt = 0x800,
 };
 
+enum class MouseButton {
+  None = 0,
+  Left = 0,
+  Middle = 1,
+  Right = 2,
+  Other1 = 3,
+  Other2 = 4,
+};
+
 //////////////////////////////////////////////////////////////////////
 //
 // Event
 //
 class Event {
+  private: bool default_prevented_;
   private: EventType event_type_;
+  private: int flags_;
   private: base::Time time_stamp_;
 
-  protected: explicit Event(EventType event_type);
+  protected: Event(EventType event_type, int flags);
   protected: Event();
   public: ~Event();
 
+  public: bool default_prevented() const { return default_prevented_; }
   public: EventType event_type() const { return event_type_; }
+  public: int flags() const { return flags_; }
   public: base::Time time_stamp() const { return time_stamp_; }
+
+  public: void PreventDefault();
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -104,49 +133,58 @@ class KeyboardEvent : public Event {
 class MouseEvent : public Event {
   friend class MouseWheelEvent;
 
-  public: enum Button {
-    kNone = 0,
-    kLeft = 0,
-    kMiddle = 1,
-    kRight = 2,
-    kOther1 = 3,
-    kOther2 = 4,
-  };
-
-  private: bool alt_key_;
-  private: int button_;
+  private: MouseButton button_;
   private: int buttons_;
   private: int click_count_;
   private: Point client_point_;
-  private: bool control_key_;
   private: Point screen_point_;
-  private: bool shift_key_;
   private: Widget* target_;
 
-  public: MouseEvent(EventType type, Button button, uint32_t flags,
+  public: MouseEvent(EventType type, MouseButton button, int flags,
                      int click_count, Widget* widget,
+                     const Point& client_point, const Point& screen_point);
+  public: MouseEvent(const base::NativeEvent& native_event, Widget* widget,
                      const Point& client_point, const Point& screen_point);
   public: MouseEvent();
   public: ~MouseEvent();
 
-  public: bool alt_key() const { return alt_key_; }
-  public: int button() const { return button_; }
+  public: bool alt_key() const {
+    return flags() & static_cast<int>(EventFlags::AltKey);
+  }
+  public: MouseButton button() const { return button_; }
   public: int buttons() const { return buttons_; }
   public: int click_count() const { return click_count_; }
-  public: bool control_key() const { return control_key_; }
-  public: bool is_left_button() const { return button_ == kLeft; }
-  public: bool is_middle_button() const { return button_ == kMiddle; }
-  public: bool is_right_button() const { return button_ == kRight; }
-  public: bool is_other1_button() const { return button_ == kOther1; }
-  public: bool is_other2_button() const { return button_ == kOther2; }
+  public: bool control_key() const {
+    return flags() & static_cast<int>(EventFlags::ControlKey);
+  }
+  public: bool is_left_button() const { return button_ == MouseButton::Left; }
+  public: bool is_middle_button() const {
+    return button_ == MouseButton::Middle;
+  }
+  public: bool is_non_client() const {
+    return flags() & static_cast<int>(EventFlags::NonClient);
+  }
+  public: bool is_right_button() const { return button_ == MouseButton::Right; }
+  public: bool is_other1_button() const {
+    return button_ == MouseButton::Other1;
+  }
+  public: bool is_other2_button() const {
+    return button_ == MouseButton::Other2;
+  }
   public: Point location() const { return client_point_; }
   public: Point screen_location() const { return screen_point_; }
-  public: bool shift_key() const { return shift_key_; }
+  public: bool shift_key() const {
+    return flags() & static_cast<int>(EventFlags::ShiftKey);
+  }
   public: Widget* target() const { return target_; }
 
-  public: static Button ConvertToButton(uint32_t message, WPARAM wParam);
-  private: static int ConvertToButtons(uint32_t flags);
-  public: static EventType ConvertToEventType(uint32_t message);
+  public: static MouseButton ConvertToButton(
+      const base::NativeEvent& native_event);
+  public: static int ConvertToButtons(int flags);
+  public: static EventType ConvertToEventType(
+      const base::NativeEvent& native_event);
+  public: static int ConvertToEventFlags(
+      const base::NativeEvent& native_event);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -159,7 +197,7 @@ class MouseWheelEvent : public MouseEvent {
   private: int delta_;
 
   public: MouseWheelEvent(Widget* widget, const Point& client_point,
-                          const Point& screen_point, uint32_t flags,
+                          const Point& screen_point, int flags,
                           int delta);
   public: ~MouseWheelEvent();
 

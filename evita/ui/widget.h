@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "base/basictypes.h"
+#include "base/event_types.h"
 #include "base/logging.h"
 #include "common/castable.h"
 #include "common/tree/node.h"
@@ -112,8 +113,7 @@ class Widget : public common::Castable,
   // [H]
   private: LRESULT HandleKeyboardMessage(uint32_t message, WPARAM wParam,
                                          LPARAM lParam);
-  private: void HandleMouseMessage(uint32_t message, WPARAM wParam,
-                                   LPARAM lParam);
+  private: bool HandleMouseMessage(const base::NativeEvent& native_event);
   public: virtual void Hide();
   private: HitTestResult HitTest(const gfx::Point& point) const;
   private: HitTestResult HitTestForMouseEventTarget(

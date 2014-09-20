@@ -376,8 +376,9 @@ void Frame::DidRealize() {
         bounds().bottom_right());
   }
 
-  // Create message view, tab_contents and tab strip.
+  // Realize message view, tab_contents and tab strip.
   views::Window::DidRealize();
+  layer()->AppendLayer(tab_strip_->layer());
   layer()->AppendLayer(tab_content_layer_.get());
   layer()->AppendLayer(message_view_->layer());
   for (auto tab_content : tab_contents_)
@@ -489,6 +490,11 @@ LRESULT Frame::OnMessage(uint32_t message, WPARAM const wParam,
       }
       break;
     }
+
+    case WM_NOTIFY:
+      if (!tab_strip_)
+        break;
+      return tab_strip_->OnNotify(reinterpret_cast<NMHDR*>(lParam));
   }
 
   return ui::Widget::OnMessage(message, wParam, lParam);
@@ -511,7 +517,15 @@ void Frame::WillDestroyWidget() {
 
 void Frame::WillRemoveChildWidget(ui::Widget* old_child) {
   views::Window::WillRemoveChildWidget(old_child);
-  if (!is_realized())
+  if (message_view_ == old_child) {
+    message_view_ = nullptr;
+    return;
+  }
+  if (tab_strip_ == old_child) {
+    tab_strip_ = nullptr;
+    return;
+  }
+  if (!is_realized() || !tab_strip_)
     return;
   auto const tab_content = old_child->as<TabContent>();
   if (!tab_content)

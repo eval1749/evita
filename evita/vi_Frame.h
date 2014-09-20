@@ -64,11 +64,11 @@ class Frame final : public views::Window,
   private: typedef views::TabContent TabContent;
   private: typedef views::TabStrip TabStrip;
 
-  private: MessageView* const message_view_;
+  private: MessageView* message_view_;
   private: ObserverList<FrameObserver> observers_;
   private: std::unordered_set<TabContent*> tab_contents_;
   private: std::unique_ptr<ui::Layer> tab_content_layer_;
-  private: TabStrip* const tab_strip_;
+  private: TabStrip* tab_strip_;
   private: const std::unique_ptr<views::TabStripAnimator> tab_strip_animator_;
   private: const std::unique_ptr<views::TitleBar> title_bar_;
 

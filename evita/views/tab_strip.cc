@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#define DEBUG_DRAG 0
-#define DEBUG_HOVER 0
-#define DEBUG_MESSAGE 0
-#define DEBUG_TOOLTIP 0
 #include "evita/views/tab_strip.h"
 
 #include <algorithm>
@@ -53,6 +49,7 @@ class Element : public common::Castable {
   };
 
   private: gfx::RectF bounds_;
+  private: bool dirty_;
   private: bool is_hover_;
   private: Element* parent_;
   private: State state_;
@@ -65,9 +62,11 @@ class Element : public common::Castable {
   public: float bottom() const { return bounds_.bottom; }
   public: const gfx::RectF& bounds() const { return bounds_; }
   public: void set_bounds(const gfx::RectF& new_bounds);
+  protected: bool dirty() const { return dirty_; }
   public: float height() const { return bounds_.height(); }
   public: float left() const { return bounds_.left; }
   public: Element* parent() const { return parent_; }
+  public: gfx::PointF origin() const { return bounds_.origin(); }
   public: float right() const { return bounds_.right; }
   public: State state() const { return state_; }
   public: float top() const { return bounds_.top; }
@@ -80,7 +79,7 @@ class Element : public common::Castable {
   public: virtual Element* HitTest(const gfx::PointF& point) const;
 
   // [I]
-  public: void Invalidate(HWND hwnd);
+  public: void Invalidate();
   public: bool IsDescendantOf(const Element* other) const;
   public: bool IsHover() const { return is_hover_; }
   public: bool IsSelected() const { return State::Selected == state_; }
@@ -95,7 +94,8 @@ class Element : public common::Castable {
 };
 
 Element::Element(Element* parent)
-    : is_hover_(false),
+    : dirty_(true),
+      is_hover_(false),
       parent_(parent),
       state_(State::Normal) {
 }
@@ -118,10 +118,8 @@ Element* Element::HitTest(const gfx::PointF&  point) const {
   return bounds_.Contains(point) ? const_cast<Element*>(this) : nullptr;
 }
 
-void Element::Invalidate(HWND hwnd) {
-  // TODO(yosi) We should use GFX version of invalidate rectangle.
-  auto const bounds = static_cast<RECT>(gfx::ToEnclosingRect(bounds_));
-  ::InvalidateRect(hwnd, &bounds, false);
+void Element::Invalidate() {
+  dirty_ = true;
 }
 
 bool Element::IsDescendantOf(const Element* other) const {
@@ -151,9 +149,9 @@ void Element::Update() {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TabStripImpl Design Parameters
+// TabStrip Design Parameters
 //
-enum TabStripImplDesignParams {
+enum TabStripDesignParams {
   k_cxMargin = 0,
   k_cxEdge = 2,
   k_cxBorder = 3,
@@ -490,9 +488,9 @@ void LoadDragTabCursor() {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TabStripImpl class
+// Impl class
 //
-class TabStrip::TabStripImpl final {
+class TabStrip::Impl final {
   private: enum class Drag {
     None,
     Tab,
@@ -502,13 +500,12 @@ class TabStrip::TabStripImpl final {
   private: typedef std::vector<Tab*> Tabs;
 
   private: gfx::RectF bounds_;
-  private: std::unique_ptr<gfx::LegacyCanvasForHwnd> canvas_;
+  private: std::unique_ptr<gfx::Canvas> canvas_;
   private: TabStripDelegate* delegate_;
   private: Tab* dragging_tab_;
   private: Drag drag_state_;
   private: POINT drag_start_point_;
   private: Element* hover_element_;
-  private: HWND hwnd_;
   private: Tab* insertion_marker_;
   private: ArrowButton list_button_;
   private: ArrowButton scroll_left_button_;
@@ -520,10 +517,10 @@ class TabStrip::TabStripImpl final {
   private: gfx::RectF tabs_bounds_;
   private: float tabs_origin_;
   private: ui::Tooltip tooltip_;
-  private: ui::Widget* widget_;
+  private: TabStrip* widget_;
 
-  public: TabStripImpl(ui::Widget* widget, TabStripDelegate* delegate);
-  public: ~TabStripImpl();
+  public: Impl(TabStrip* widget, TabStripDelegate* delegate);
+  public: ~Impl();
 
   public: size_t number_of_tabs() const { return tabs_.size(); }
   public: size_t selected_index() const;
@@ -532,6 +529,7 @@ class TabStrip::TabStripImpl final {
   private: bool ChangeFont();
 
   // [D]
+  public: void DidBeginAnimationFrame(base::Time time);
   private: void DidSelectTab();
   public: void DidRealize();
   public: void DeleteTab(size_t tab_index);
@@ -552,10 +550,8 @@ class TabStrip::TabStripImpl final {
   // [O]
   public: void OnLButtonDown(POINT pt);
   public: void OnLButtonUp(POINT pt);
-  public: LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
   public: void OnMouseMove(POINT pt);
-  public: LRESULT OnNotify(NMHDR* nmhdr);
-  public: void OnPaint(const gfx::Rect& bounds);
+  public: LRESULT OnNotify(NMHDR* nmhder);
 
   // [R]
   public: void Redraw();
@@ -573,16 +569,14 @@ class TabStrip::TabStripImpl final {
   public: void UpdateHover(Element* pHover);
   private: void UpdateLayout();
 
-  DISALLOW_COPY_AND_ASSIGN(TabStripImpl);
+  DISALLOW_COPY_AND_ASSIGN(Impl);
 };
 
-TabStrip::TabStripImpl::TabStripImpl(ui::Widget* widget,
-                                     TabStripDelegate* delegate)
+TabStrip::Impl::Impl(TabStrip* widget, TabStripDelegate* delegate)
     : delegate_(delegate),
       dragging_tab_(nullptr),
       drag_state_(Drag::None),
       hover_element_(nullptr),
-      hwnd_(widget->AssociatedHwnd()),
       insertion_marker_(nullptr),
       list_button_(Direction::Down),
       scroll_left_button_(Direction::Left),
@@ -594,7 +588,7 @@ TabStrip::TabStripImpl::TabStripImpl(ui::Widget* widget,
       widget_(widget){
 }
 
-TabStrip::TabStripImpl::~TabStripImpl() {
+TabStrip::Impl::~Impl() {
   if (auto const text_format = canvas_->work<gfx::TextFormat>())
       delete text_format;
 
@@ -602,11 +596,11 @@ TabStrip::TabStripImpl::~TabStripImpl() {
     ::DestroyMenu(tab_list_menu_);
 }
 
-size_t TabStrip::TabStripImpl::selected_index() const {
+size_t TabStrip::Impl::selected_index() const {
   return selected_tab_ ? selected_tab_->tab_index() : static_cast<size_t>(-1);
 }
 
-bool TabStrip::TabStripImpl::ChangeFont() {
+bool TabStrip::Impl::ChangeFont() {
   LOGFONT lf;
   if (!::SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(lf), &lf, 0))
     return false;
@@ -626,7 +620,7 @@ bool TabStrip::TabStripImpl::ChangeFont() {
   return true;
 }
 
-void TabStrip::TabStripImpl::DeleteTab(size_t tab_index) {
+void TabStrip::Impl::DeleteTab(size_t tab_index) {
   if (tab_index >= tabs_.size())
     return;
   auto selection_changed = false;
@@ -656,17 +650,24 @@ void TabStrip::TabStripImpl::DeleteTab(size_t tab_index) {
   DidSelectTab();
 }
 
-void TabStrip::TabStripImpl::DidSelectTab() {
+void TabStrip::Impl::DidBeginAnimationFrame(base::Time) {
+  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+  canvas_->AddDirtyRect(canvas_->bounds());
+  Draw(canvas_.get());
+  widget_->RequestAnimationFrame();
+}
+
+void TabStrip::Impl::DidSelectTab() {
   delegate_->DidSelectTab(selected_tab_ ? selected_tab_->tab_index() : -1);
 }
 
-void TabStrip::TabStripImpl::DidRealize() {
-  canvas_.reset(new gfx::LegacyCanvasForHwnd(hwnd_));
+void TabStrip::Impl::DidRealize() {
+  canvas_.reset(widget_->layer()->CreateCanvas());
   ChangeFont();
-  tooltip_.Realize(hwnd_);
+  tooltip_.Realize(widget_->AssociatedHwnd());
 }
 
-void TabStrip::TabStripImpl::Draw(gfx::Canvas* canvas) const {
+void TabStrip::Impl::Draw(gfx::Canvas* canvas) const {
   struct Local {
     static void DrawInsertMarker(gfx::Canvas* canvas, Tab* insertion_marker) {
       if (!insertion_marker)
@@ -708,10 +709,8 @@ void TabStrip::TabStripImpl::Draw(gfx::Canvas* canvas) const {
 }
 
 // Send TabDragMsg to window which can handle it.
-void TabStrip::TabStripImpl::DropTab(Tab* tab, const POINT& window_point) {
-  auto screen_point = window_point;
-  if (!::ClientToScreen(hwnd_, &screen_point))
-    return;
+void TabStrip::Impl::DropTab(Tab* tab, const POINT& window_point) {
+  auto screen_point = widget_->MapToDesktopPoint(window_point);
 
   for (auto hwnd = ::WindowFromPoint(screen_point); hwnd;
        hwnd = ::GetParent(hwnd)) {
@@ -724,26 +723,23 @@ void TabStrip::TabStripImpl::DropTab(Tab* tab, const POINT& window_point) {
   delegate_->DidThrowTab(tab->tab_content());
 }
 
-TabContent* TabStrip::TabStripImpl::GetTab(size_t tab_index) const {
+TabContent* TabStrip::Impl::GetTab(size_t tab_index) const {
   if (tab_index >= tabs_.size())
     return nullptr;
   return tabs_[tab_index]->tab_content();
 }
 
-void TabStrip::TabStripImpl::HandleTabListMenu(POINT) {
-  POINT menu_origin;
-  menu_origin.x = static_cast<int>(list_button_.left());
-  menu_origin.y = static_cast<int>(list_button_.bottom());
-
-  ::ClientToScreen(hwnd_, &menu_origin);
-
+void TabStrip::Impl::HandleTabListMenu(POINT) {
+  gfx::Point local_menu_origin(
+      static_cast<int>(list_button_.origin().x),
+      static_cast<int>(list_button_.origin().y));
+  auto const menu_origin = widget_->MapToDesktopPoint(local_menu_origin);
   if (!tab_list_menu_)
     tab_list_menu_ = ::CreatePopupMenu();
 
   // Make Tab List Menu empty
-  while (::GetMenuItemCount(tab_list_menu_) > 0) {
+  while (::GetMenuItemCount(tab_list_menu_) > 0)
     ::DeleteMenu(tab_list_menu_, 0, MF_BYPOSITION);
-  }
 
   // Add Tab name to menu.
   auto last_tab = static_cast<Tab*>(nullptr);
@@ -759,10 +755,10 @@ void TabStrip::TabStripImpl::HandleTabListMenu(POINT) {
   }
 
   ::TrackPopupMenuEx(tab_list_menu_, TPM_LEFTALIGN | TPM_TOPALIGN, 
-      menu_origin.x, menu_origin.y, hwnd_, nullptr);
+      menu_origin.x(), menu_origin.y(), widget_->AssociatedHwnd(), nullptr);
 }
 
-Element* TabStrip::TabStripImpl::HitTest(const gfx::PointF& point) const {
+Element* TabStrip::Impl::HitTest(const gfx::PointF& point) const {
   if (auto const hit_result = scroll_left_button_.HitTest(point))
     return hit_result;
   if (auto const hit_result = scroll_right_button_.HitTest(point))
@@ -778,7 +774,7 @@ Element* TabStrip::TabStripImpl::HitTest(const gfx::PointF& point) const {
   return nullptr;
 }
 
-void TabStrip::TabStripImpl::InsertTab(size_t tab_index_in,
+void TabStrip::Impl::InsertTab(size_t tab_index_in,
                                        TabContent* tab_content) {
   auto const tab_index = std::min(tab_index_in, tabs_.size());
   auto const new_tab = new Tab(delegate_, tab_content);
@@ -788,7 +784,7 @@ void TabStrip::TabStripImpl::InsertTab(size_t tab_index_in,
   Redraw();
 }
 
-void TabStrip::TabStripImpl::OnLButtonDown(POINT point) {
+void TabStrip::Impl::OnLButtonDown(POINT point) {
   auto const element = HitTest(point);
   if (!element)
     return;
@@ -845,7 +841,7 @@ void TabStrip::TabStripImpl::OnLButtonDown(POINT point) {
   widget_->SetCapture();
 }
 
-void TabStrip::TabStripImpl::OnLButtonUp(POINT point) {
+void TabStrip::Impl::OnLButtonUp(POINT point) {
   if (!dragging_tab_) {
     auto const element = HitTest(point);
     if (!element)
@@ -877,103 +873,58 @@ void TabStrip::TabStripImpl::OnLButtonUp(POINT point) {
   }
 
   // Hide insertion position mark
-  ::InvalidateRect(hwnd_, nullptr, false);
+  //::InvalidateRect(hwnd_, nullptr, false);
 }
 
-LRESULT TabStrip::TabStripImpl::OnMessage(UINT uMsg, WPARAM wParam,
-                                          LPARAM lParam) {
-  static UINT last_message = 0;
-  #if DEBUG_MESSAGE
-    if (uMsg != 0x133C && last_message != uMsg) {
-      last_message = uMsg;
-      DVLOG(0) << "TabStrip::TabBand " << this << " msg=" << std::hex <<
-          uMsg;
-    }
-  #endif
-
-  switch (uMsg) {
-    case WM_NCHITTEST: {
-      POINT point = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-      if (::ScreenToClient(hwnd_, &point)) {
-        if (!HitTest(point))
-          return ::SendMessage(::GetParent(hwnd_), uMsg, wParam, lParam);
-        return HTCLIENT;
-      }
-      return HTNOWHERE;
-    }
-
-    case WM_NCLBUTTONDOWN:
-    case WM_NCLBUTTONUP:
-    case WM_NCMOUSEMOVE:
-    case WM_NCRBUTTONDOWN:
-    case WM_NCRBUTTONUP:
-      // Redirect non-client mouse move to parent for top level window
-      // management, e.g. moving top level window by grabbing empty area
-      // of tabs.
-      return ::SendMessage(::GetParent(hwnd_), uMsg, wParam, lParam);
-
-    case WM_SETTINGCHANGE:
-      switch (wParam) {
-        case SPI_SETICONTITLELOGFONT:
-        case SPI_SETNONCLIENTMETRICS: {
-          ChangeFont();
-          break;
-        }
-      }
-      break;
-  }
-
-  return 0;
-}
-
-void TabStrip::TabStripImpl::OnMouseMove(POINT point) {
+void TabStrip::Impl::OnMouseMove(POINT point) {
   auto const hover_element = HitTest(point);
 
   if (!dragging_tab_) {
     UpdateHover(hover_element);
-  } else {
-    if (::GetCapture() != hwnd_) {
-      // Someone takes capture. So, we stop dragging.
-      StopDrag();
+    return;
+  }
+
+  if (::GetCapture() != widget_->AssociatedHwnd()) {
+    // Someone takes capture. So, we stop dragging.
+    StopDrag();
+    return;
+  }
+
+  if (Drag::Start == drag_state_) {
+    if (point.x - drag_start_point_.x >= -5 &&
+        point.x - drag_start_point_.x <= 5) {
       return;
     }
 
-    if (Drag::Start == drag_state_) {
-      if (point.x - drag_start_point_.x >= -5 &&
-          point.x - drag_start_point_.x <= 5) {
-        return;
-      }
-
-      drag_state_ = Drag::Tab;
-    }
-
-    // Tab dragging
-    auto const insertion_marker = hover_element ? hover_element->as<Tab>() :
-                                                  nullptr;
-    ::SetCursor(s_hDragTabCursor);
-    if (insertion_marker != insertion_marker_)
-      ::InvalidateRect(hwnd_, nullptr, false);
-    insertion_marker_ = insertion_marker;
+    drag_state_ = Drag::Tab;
   }
+
+  // Tab dragging
+  auto const insertion_marker = hover_element ? hover_element->as<Tab>() :
+                                                nullptr;
+  ::SetCursor(s_hDragTabCursor);
+  if (insertion_marker == insertion_marker_)
+    return;
+
+  if (insertion_marker)
+    insertion_marker->Invalidate();
+
+  if (insertion_marker_)
+    insertion_marker_->Invalidate();
+
+  insertion_marker_ = insertion_marker;
 }
 
-LRESULT TabStrip::TabStripImpl::OnNotify(NMHDR* nmhdr) {
+LRESULT TabStrip::Impl::OnNotify(NMHDR* nmhdr) {
   tooltip_.OnNotify(nmhdr);
   return 0;
 }
 
-void TabStrip::TabStripImpl::OnPaint(const gfx::Rect& bounds) {
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  canvas_->AddDirtyRect(gfx::RectF(bounds));
-  Draw(canvas_.get());
-}
-
-void TabStrip::TabStripImpl::Redraw() {
+void TabStrip::Impl::Redraw() {
   UpdateLayout();
-  ::InvalidateRect(hwnd_, nullptr, false);
 }
 
-void TabStrip::TabStripImpl::RenumberTabIndex() {
+void TabStrip::Impl::RenumberTabIndex() {
   auto tab_index = 0;
   for (auto tab : tabs_) {
     tab->set_tab_index(tab_index);
@@ -981,18 +932,18 @@ void TabStrip::TabStripImpl::RenumberTabIndex() {
   }
 }
 
-int TabStrip::TabStripImpl::SelectTab(size_t tab_index) {
+int TabStrip::Impl::SelectTab(size_t tab_index) {
   if (tab_index >= tabs_.size())
     return -1;
   return SelectTab(tabs_[tab_index]);
 }
 
-int TabStrip::TabStripImpl::SelectTab(Tab* const tab) {
+int TabStrip::Impl::SelectTab(Tab* const tab) {
   should_selected_tab_visible_ = true;
   if (selected_tab_ != tab) {
     if (selected_tab_) {
       selected_tab_->SetState(Element::State::Normal);
-      selected_tab_->Invalidate(hwnd_);
+      selected_tab_->Invalidate();
     }
 
     selected_tab_ = tab;
@@ -1008,7 +959,7 @@ int TabStrip::TabStripImpl::SelectTab(Tab* const tab) {
   return selected_tab_ ? selected_tab_->tab_index() : -1;
 }
 
-void TabStrip::TabStripImpl::SetBounds(const gfx::RectF& new_bounds) {
+void TabStrip::Impl::SetBounds(const gfx::RectF& new_bounds) {
   if (bounds_ == new_bounds)
     return;
   bounds_ = new_bounds;
@@ -1017,17 +968,17 @@ void TabStrip::TabStripImpl::SetBounds(const gfx::RectF& new_bounds) {
   Redraw();
 }
 
-void TabStrip::TabStripImpl::SetTabData(size_t tab_index,
+void TabStrip::Impl::SetTabData(size_t tab_index,
                                         const domapi::TabData& tab_data) {
   if (tab_index >= tabs_.size())
     return;
   auto const tab = tabs_[tab_index];
   if (!tab->SetTabData(tab_data))
     return;
-  tab->Invalidate(hwnd_);
+  tab->Invalidate();
 }
 
-void TabStrip::TabStripImpl::StopDrag() {
+void TabStrip::Impl::StopDrag() {
   drag_state_ = Drag::None;
   dragging_tab_ = nullptr;
   insertion_marker_ = nullptr;
@@ -1036,21 +987,25 @@ void TabStrip::TabStripImpl::StopDrag() {
   ::SetCursor(::LoadCursor(nullptr, IDC_ARROW));
 }
 
-void TabStrip::TabStripImpl::UpdateBoundsForAllTabs(float tab_width) {
+void TabStrip::Impl::UpdateBoundsForAllTabs(float tab_width) {
   auto origin = gfx::PointF(tabs_origin_ + tabs_bounds_.left,
-                              tabs_bounds_.top);
+                            tabs_bounds_.top);
   auto const tab_size = gfx::SizeF(tab_width,
                                    tabs_bounds_.bottom - origin.y);
   for (auto const tab : tabs_){
     tab->set_bounds(gfx::RectF(origin, tab_size));
     tab->UpdateLayout();
     origin.x += tab_width;
-    tooltip_.SetToolBounds(tab, gfx::ToEnclosingRect(
-        bounds_.Intersect(tab->bounds())));
+    auto const visible_bounds = bounds_.Intersect(tab->bounds());
+    // Note: We should pass bounds in HWND's coordinate rather than |TabStrip|
+    // coordinate.
+    auto const tool_bounds = visible_bounds.Offset(
+        gfx::PointF(widget_->origin()));
+    tooltip_.SetToolBounds(tab, gfx::ToEnclosingRect(tool_bounds));
   }
 }
 
-void TabStrip::TabStripImpl::UpdateHover(Element* hover_element) {
+void TabStrip::Impl::UpdateHover(Element* hover_element) {
     if (hover_element_ == hover_element)
       return;
 
@@ -1062,18 +1017,18 @@ void TabStrip::TabStripImpl::UpdateHover(Element* hover_element) {
         hover_element_ = hover_element_->parent();
       }
       hover_element_->SetHover(false);
-      hover_element_->Invalidate(hwnd_);
+      hover_element_->Invalidate();
     }
   }
 
   hover_element_ = hover_element;
   if (hover_element_) {
     hover_element_->SetHover(true);
-    hover_element_->Invalidate(hwnd_);
+    hover_element_->Invalidate();
   }
 }
 
-void TabStrip::TabStripImpl::UpdateLayout() {
+void TabStrip::Impl::UpdateLayout() {
   if (tabs_.empty()) {
     tabs_origin_ = 0;
     return;
@@ -1133,7 +1088,7 @@ void TabStrip::TabStripImpl::UpdateLayout() {
 // TabStrip
 //
 TabStrip::TabStrip(TabStripDelegate* delegate)
-    : ui::Widget(ui::NativeWindow::Create(this)), delegate_(delegate) {
+    : impl_(new Impl(this, delegate)) {
 }
 
 TabStrip::~TabStrip() {
@@ -1167,24 +1122,24 @@ void TabStrip::SetTab(int tab_index, const domapi::TabData& tab_data) {
   impl_->SetTabData(static_cast<size_t>(tab_index), tab_data);
 }
 
+// ui::AnimationFrameHanndler
+void TabStrip::DidBeginAnimationFrame(base::Time time) {
+  impl_->DidBeginAnimationFrame(time);
+}
+
 // ui::Widget
-void TabStrip::CreateNativeWindow() const {
-  native_window()->CreateWindowEx(
-      0, WS_CHILD | WS_VISIBLE, L"TabStrip",
-      parent_node()->AssociatedHwnd(),
-      bounds().origin(),
-      bounds().size());
+void TabStrip::DidChangeBounds() {
+  ui::AnimatableWindow::DidChangeBounds();
+  if (layer())
+    layer()->SetBounds(bounds());
+  impl_->SetBounds(GetContentsBounds());
 }
 
 void TabStrip::DidRealize() {
-  impl_.reset(new TabStripImpl(this, delegate_));
+  ui::AnimatableWindow::DidRealize();
+  SetLayer(new ui::Layer());
+  layer()->SetBounds(bounds());
   impl_->DidRealize();
-}
-
-void TabStrip::DidChangeBounds() {
-  ui::Widget::DidChangeBounds();
-  if (impl_)
-    impl_->SetBounds(GetContentsBounds());
 }
 
 // On Win8.1
@@ -1196,28 +1151,6 @@ gfx::Size TabStrip::GetPreferredSize() const {
   return Size(300, 28);
 }
 
-LRESULT TabStrip::OnMessage(uint32_t uMsg, WPARAM wParam, LPARAM lParam) {
-  switch (uMsg) {
-    case WM_COMMAND:
-      SelectTab(static_cast<int>(LOWORD(wParam)));
-      return 0;
-    case WM_NCHITTEST:
-    case WM_NCLBUTTONDOWN:
-    case WM_NCLBUTTONUP:
-    case WM_NCMOUSEMOVE:
-    case WM_NCRBUTTONDOWN:
-    case WM_NCRBUTTONUP:
-    case WM_SETTINGCHANGE:
-    case WM_USER:
-      return impl_->OnMessage(uMsg, wParam, lParam);
-
-    case WM_NOTIFY:
-      return impl_->OnNotify(reinterpret_cast<NMHDR*>(lParam));
-  }
-
-  return ui::Widget::OnMessage(uMsg, wParam, lParam);
-}
-
 void TabStrip::OnMouseExited(const ui::MouseEvent&) {
   impl_->UpdateHover(nullptr);
 }
@@ -1227,17 +1160,19 @@ void TabStrip::OnMouseMoved(const ui::MouseEvent& event) {
 }
 
 void TabStrip::OnMousePressed(const ui::MouseEvent& event) {
-  if (event.is_left_button() && !event.click_count())
-    impl_->OnLButtonDown(event.location());
+  if (!event.is_left_button() || event.click_count())
+    return;
+  impl_->OnLButtonDown(event.location());
 }
 
 void TabStrip::OnMouseReleased(const ui::MouseEvent& event) {
-  if (event.is_left_button())
-    impl_->OnLButtonUp(event.location());
+  if (!event.is_left_button())
+    return;
+  impl_->OnLButtonUp(event.location());
 }
 
-void TabStrip::OnPaint(const Rect bounds) {
-  impl_->OnPaint(bounds);
+LRESULT TabStrip::OnNotify(NMHDR* nmhdr) {
+  return impl_->OnNotify(nmhdr);
 }
 
 }  // namespace views

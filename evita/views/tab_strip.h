@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "evita/ui/widget.h"
+#include "evita/ui/animation/animatable_window.h"
 
 namespace domapi {
 struct TabData;
@@ -25,14 +25,13 @@ using common::win::Rect;
 class TabContent;
 class TabStripDelegate;
 
-class TabStrip : public ui::Widget {
-  DECLARE_CASTABLE_CLASS(TabStrip, Widget);
+class TabStrip : public ui::AnimatableWindow {
+  DECLARE_CASTABLE_CLASS(TabStrip, AnimatableWindow);
 
-  private: class TabStripImpl;
-  friend class TabStripImpl;
+  private: class Impl;
+  friend class Impl;
 
-  private: TabStripDelegate* delegate_;
-  private: std::unique_ptr<TabStripImpl> impl_;
+  private: const std::unique_ptr<Impl> impl_;
 
   public: TabStrip(TabStripDelegate* delegate);
   public: virtual ~TabStrip();
@@ -43,21 +42,21 @@ class TabStrip : public ui::Widget {
   public: TabContent* GetTab(int tab_index);
   public: void DeleteTab(int tab_index);
   public: void InsertTab(int new_tab_index, TabContent* tab_content);
+  public: LRESULT OnNotify(NMHDR* nmhdr);
   public: void SelectTab(int tab_index);
   public: void SetTab(int tab_index, const domapi::TabData& tab_data);
 
+  // ui::AnimationFrameHanndler
+  private: virtual void DidBeginAnimationFrame(base::Time time) override;
+
   // ui::Widget
-  private: virtual void CreateNativeWindow() const override;
-  private: gfx::Size GetPreferredSize() const override;
+  private: virtual gfx::Size GetPreferredSize() const override;
   private: virtual void DidChangeBounds() override;
   private: virtual void DidRealize() override;
-  private: virtual LRESULT OnMessage(uint32_t uMsg, WPARAM wParam,
-                                     LPARAM lParam) override;
   private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
   private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
-  private: virtual void OnPaint(const Rect rect) override;
 
   DISALLOW_COPY_AND_ASSIGN(TabStrip);
 };

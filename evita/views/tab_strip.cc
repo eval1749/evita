@@ -367,7 +367,6 @@ class Tab final : public ui::Tooltip::ToolDelegate {
 
   public: float bottom() const { return bounds_.bottom; }
   public: const gfx::RectF bounds() const { return bounds_; }
-  public: bool dirty() const { return dirty_visual_; }
   public: bool is_selected() const { return state_ == State::Selected; }
   public: const base::string16& label_text() const { return label_text_; }
   public: float left() const { return bounds_.left; }
@@ -379,7 +378,7 @@ class Tab final : public ui::Tooltip::ToolDelegate {
   public: void set_tab_index(int tab_index) { tab_index_ = tab_index; }
 
   private: gfx::ColorF ComputeBackgroundColor() const;
-  public: void Draw(gfx::Canvas* canvas);
+  public: void Draw(gfx::Canvas* canvas, const gfx::RectF& content_bounds);
   private: void DrawCloseMark(gfx::Canvas* canvas) const;
   private: void DrawLabel(gfx::Canvas* canvas) const;
   private: void DrawIcon(gfx::Canvas* canvas) const;
@@ -435,18 +434,22 @@ gfx::ColorF Tab::ComputeBackgroundColor() const {
   return gfx::ColorF(1, 0, 0, 1);
 }
 
-void Tab::Draw(gfx::Canvas* canvas) {
+void Tab::Draw(gfx::Canvas* canvas, const gfx::RectF& content_bounds) {
   UpdateLayout();
   if (!dirty_visual_)
     return;
-  UpdateLayout();
   dirty_visual_ = false;
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds_);
+  auto const bounds = gfx::RectF(bounds_.origin(),
+                                 bounds_.size() + gfx::SizeF(1, 0));
+  auto const dirty_bounds = content_bounds.Intersect(bounds);
+  if (dirty_bounds.empty())
+    return;
+  canvas->AddDirtyRect(dirty_bounds);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, dirty_bounds);
   canvas->Clear(ComputeBackgroundColor());
   {
-    gfx::Brush strokeBrush(canvas, gfx::ColorF(0, 0, 0, 0.5));
-    canvas->DrawRectangle(strokeBrush, gfx::RectF(
-        bounds_.origin(), bounds_.size()));
+    gfx::Brush strokeBrush(canvas, gfx::ColorF(0, 0, 0, 0.7f));
+    canvas->DrawRectangle(strokeBrush, bounds);
   }
   DrawIcon(canvas);
   DrawLabel(canvas);
@@ -1143,7 +1146,8 @@ void TabCollection::UpdateLayout() {
     return;
   }
   auto const tab_width = static_cast<float>(GetPreferredTabWidth());
-  if (tabs_.size() * tab_width < bounds.width())
+  auto const tabs_width = tabs_.size() * tab_width + 1; // +1 for last edge
+  if (tabs_width < bounds.width())
     tabs_origin_ = 0;
 
   UpdateBoundsForAllTabs(tab_width);
@@ -1154,7 +1158,7 @@ void TabCollection::UpdateLayout() {
   }
 
   // Make selected tab visible.
-  auto const last_view_port_left = tabs_.size() * tab_width - bounds.width();
+  auto const last_view_port_left = tabs_width - bounds.width();
   auto const selected_left = selected_tab_->tab_index() * tab_width;
   auto const selected_right = selected_left + tab_width;
   if (selected_right < bounds.width()) {
@@ -1168,7 +1172,8 @@ void TabCollection::UpdateLayout() {
     tabs_origin_ = -selected_left;
   } else {
     // |selected_tab_| is right of view port.
-    tabs_origin_ = -(selected_right - bounds.width());
+    // -1 for last edge
+    tabs_origin_ = -(selected_right - bounds.width() - 1);
   }
   UpdateBoundsForAllTabs(tab_width);
 }
@@ -1244,16 +1249,27 @@ gfx::Size TabCollection::GetPreferredSize() const {
 void TabCollection::OnDraw(gfx::Canvas* canvas) {
   UpdateLayout();
   auto const content_bounds = GetContentsBounds();
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, content_bounds);
-  for (auto tab : tabs_) {
-    if (!tab->dirty())
-      continue;
-    auto const bounds = tab->bounds().Intersect(content_bounds);
-    if (bounds.empty())
-      continue;
-    canvas->AddDirtyRect(bounds);
-    tab->Draw(canvas);
+  auto right = content_bounds.left;
+  {
+    gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, content_bounds);
+    for (auto tab : tabs_) {
+      if (tab->right() < 0)
+        continue;
+      if (tab->left() >= content_bounds.right)
+        break;
+      tab->Draw(canvas, content_bounds);
+      right = tab->right();
+    }
   }
+
+  // Paint right edge.
+  // +1 for right edge
+  auto const rest = gfx::RectF(gfx::PointF(right + 1, content_bounds.top),
+                               content_bounds.bottom_right());
+  if (rest.empty())
+    return;
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, rest);
+  canvas->Clear(gfx::ColorF());
 }
 
 void TabCollection::OnMouseExited(const ui::MouseEvent& event) {
@@ -1435,17 +1451,11 @@ void TabStrip::View::DeleteTab(size_t tab_index) {
 
 void TabStrip::View::DidBeginAnimationFrame(base::Time) {
   UpdateLayout();
-  auto should_clear = false;
-  if (!canvas_) {
+  if (!canvas_)
     canvas_.reset(widget_->layer()->CreateCanvas());
-    should_clear = true;
-  } else if (widget_->GetContentsBounds() != canvas_->bounds()) {
+  else if (widget_->GetContentsBounds() != canvas_->bounds())
     canvas_->SetBounds(widget_->GetContentsBounds());
-    should_clear = true;
-  }
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  if (should_clear)
-    canvas_->Clear(gfx::ColorF(0, 0, 0, 0));
   widget_->OnDraw(canvas_.get());
 }
 

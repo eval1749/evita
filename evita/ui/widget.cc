@@ -414,18 +414,24 @@ gfx::Point Widget::MapFromDesktopPoint(const gfx::Point& desktop_point) const {
   POINT hwnd_point(desktop_point);
   auto const hwnd = AssociatedHwnd();
   WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, hwnd, &hwnd_point, 1));
-  if (has_native_window())
-    return Point(hwnd_point);
-  return Point(hwnd_point.x - bounds().left(), hwnd_point.y - bounds().top());
+  auto point = gfx::Point(hwnd_point);
+  for (auto runner = this; !runner->has_native_window();
+       runner = runner->parent_node()) {
+    point = point.Offset(-runner->bounds().left(), -runner->bounds().top());
+  }
+  return point;
 }
 
 gfx::Point Widget::MapToDesktopPoint(const gfx::Point& local_point) const {
-  POINT point(local_point);
+  auto point = local_point;
+  for (auto runner = this; !runner->has_native_window();
+       runner = runner->parent_node()) {
+    point = point.Offset(runner->bounds().left(), runner->bounds().top());
+  }
+  POINT hwnd_point(point);
   auto const hwnd = AssociatedHwnd();
-  WIN32_VERIFY(::MapWindowPoints(hwnd, HWND_DESKTOP, &point, 1));
-  if (has_native_window())
-    return Point(point);
-  return Point(point.x + bounds().left(), point.y + bounds().top());
+  WIN32_VERIFY(::MapWindowPoints(hwnd, HWND_DESKTOP, &hwnd_point, 1));
+  return Point(hwnd_point);
 }
 
 void Widget::OnDraw(gfx::Canvas* canvas) {

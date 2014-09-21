@@ -60,6 +60,19 @@ int KeyCodeMapper::Map(int virtual_key_code) {
   return key_code;
 }
 
+bool IsNonClientMouseEvent(const base::NativeEvent&  native_event) {
+  auto const message = native_event.message;
+  if (message >= WM_NCMOUSEMOVE && message <= WM_NCMBUTTONDBLCLK)
+    return true;
+  if (message >= WM_NCXBUTTONDOWN && message <= WM_NCXBUTTONDBLCLK)
+    return true;
+  if (message == WM_NCMOUSEHOVER && message <= WM_NCMOUSELEAVE)
+    return true;
+  if (message == WM_NCPOINTERUPDATE && message <= WM_NCPOINTERUP)
+    return true;
+  return false;
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -206,6 +219,9 @@ int MouseEvent::ConvertToButtons(int flags) {
 }
 
 int MouseEvent::ConvertToEventFlags(const base::NativeEvent& native_event) {
+  if (IsNonClientMouseEvent(native_event))
+    return static_cast<int>(EventFlags::NonClient);
+
   auto flags = 0;
   if (native_event.wParam & MK_LBUTTON)
     flags |= static_cast<int>(EventFlags::LeftButton);

@@ -76,7 +76,7 @@ Widget::HitTestResult::HitTestResult()
 // Widget
 //
 Widget::Widget(std::unique_ptr<NativeWindow> native_window)
-    : native_window_(std::move(native_window)),
+    : native_window_(std::move(native_window)), owned_by_client_(false),
       shown_(0),
       state_(kNotRealized) {
 }
@@ -173,6 +173,8 @@ void Widget::DidDestroyNativeWindow() {
 
 void Widget::DidDestroyWidget() {
   DCHECK_EQ(kDestroyed, state_);
+  if (owned_by_client_)
+    return;
   delete this;
 }
 

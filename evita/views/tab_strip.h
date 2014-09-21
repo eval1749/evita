@@ -28,10 +28,10 @@ class TabStripDelegate;
 class TabStrip : public ui::AnimatableWindow {
   DECLARE_CASTABLE_CLASS(TabStrip, AnimatableWindow);
 
-  private: class Impl;
-  friend class Impl;
+  private: class View;
+  friend class View;
 
-  private: const std::unique_ptr<Impl> impl_;
+  private: const std::unique_ptr<View> view_;
 
   public: TabStrip(TabStripDelegate* delegate);
   public: virtual ~TabStrip();
@@ -41,7 +41,11 @@ class TabStrip : public ui::AnimatableWindow {
 
   public: TabContent* GetTab(int tab_index);
   public: void DeleteTab(int tab_index);
-  public: void InsertTab(int new_tab_index, TabContent* tab_content);
+  // Insert a new tab before a tab at |tab_index|.
+  public: void InsertTab(TabContent* tab_content, int new_tab_index);
+  public: int NonClientHitTest(const gfx::Point& screen_point) const;
+  // TODO(eval1749) Once we should revise tooltip handling, we should get rid
+  // of |TabStrip::OnNotify()|.
   public: LRESULT OnNotify(NMHDR* nmhdr);
   public: void SelectTab(int tab_index);
   public: void SetTab(int tab_index, const domapi::TabData& tab_data);
@@ -53,14 +57,10 @@ class TabStrip : public ui::AnimatableWindow {
   private: virtual gfx::Size GetPreferredSize() const override;
   private: virtual void DidChangeBounds() override;
   private: virtual void DidRealize() override;
-  private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
-  private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
-  private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
-  private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
 
   DISALLOW_COPY_AND_ASSIGN(TabStrip);
 };
 
 }   // views
 
-#endif //!defined(INCLUDE_evita_views_tab_strip_h)
+#endif // !defined(INCLUDE_evita_views_tab_strip_h)

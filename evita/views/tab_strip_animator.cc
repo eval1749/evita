@@ -233,7 +233,7 @@ void TabStripAnimator::AddTab(TabContent* tab_content) {
   // Set dummy tab label. Actual tab label will be set later in
   // |Frame::UpdateTitleBar|.
   auto const new_tab_item_index = tab_strip_->number_of_tabs();
-  tab_strip_->InsertTab(new_tab_item_index, tab_content);
+  tab_strip_->InsertTab(tab_content, new_tab_item_index);
   RequestSelect(tab_content);
 }
 

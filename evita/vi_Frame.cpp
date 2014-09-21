@@ -476,8 +476,13 @@ LRESULT Frame::OnMessage(uint32_t message, WPARAM const wParam,
       }
       gfx::Point desktop_point(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
       auto const point = MapFromDesktopPoint(desktop_point);
-      if (tab_strip_ && point.y() < tab_strip_->bounds().bottom())
-        return HTCAPTION;
+      if (point.y() < 4)
+        return HTTOP;
+      if (!tab_strip_->bounds().empty()) {
+        auto const result = tab_strip_->NonClientHitTest(desktop_point);
+        if (result != HTNOWHERE)
+          return result;
+      }
 
       // Resize button in message view
       if (message_view_) {
@@ -566,6 +571,41 @@ void Frame::DidSetTabData(dom::WindowId window_id,
 }
 
 // views::TabStripDelegate
+void Frame::DidDropTab(TabContent* tab_content,
+                       const gfx::Point& screen_point) {
+  struct Local {
+    static Frame* GetFrameFromPoint(const gfx::Point& screen_point) {
+      for (auto hwnd = ::WindowFromPoint(screen_point); hwnd;
+           hwnd = ::GetParent(hwnd)) {
+        if (auto const frame = FrameList::instance()->FindFrameByHwnd(hwnd)) {
+          return frame;
+        }
+      }
+      return nullptr;
+   }
+  };
+
+  auto const edit_tab_content = tab_content->as<EditPane>();
+  if (!edit_tab_content)
+    return;
+
+  auto const frame = Local::GetFrameFromPoint(screen_point);
+  if (frame == this)
+    return;
+
+  if (!frame) {
+    Application::instance()->view_event_handler()->DidDropWidget(
+        edit_tab_content->GetActiveContent()->window_id(),
+        views::kInvalidWindowId);
+    return;
+  }
+
+  DCHECK_NE(frame, tab_content->parent_node());
+  Application::instance()->view_event_handler()->DidDropWidget(
+      edit_tab_content->GetActiveContent()->window_id(),
+      frame->window_id());
+}
+
 void Frame::DidSelectTab(int selected_index) {
   if (selected_index < 0) {
     if (auto const recent_tab_content = GetRecentTabContent())
@@ -578,15 +618,6 @@ void Frame::DidSelectTab(int selected_index) {
   tab_content->RequestFocus();
 }
 
-void Frame::DidThrowTab(TabContent* tab_content) {
-  auto const edit_tab_content = tab_content->as<EditPane>();
-  if (!edit_tab_content)
-    return;
-  Application::instance()->view_event_handler()->DidDropWidget(
-      edit_tab_content->GetActiveContent()->window_id(),
-      views::kInvalidWindowId);
-}
-
 base::string16 Frame::GetTooltipTextForTab(int tab_index) {
   auto const tab_content = GetTabContentByTabIndex(static_cast<int>(tab_index));
   if (!tab_content)
@@ -595,17 +626,6 @@ base::string16 Frame::GetTooltipTextForTab(int tab_index) {
   if (!tab_data)
     return base::string16();
   return tab_data->tooltip;
-}
-
-void Frame::OnDropTab(TabContent* tab_content) {
-  if (tab_content->parent_node() == this)
-    return;
-  auto const edit_tab_content = tab_content->as<EditPane>();
-  if (!edit_tab_content)
-    return;
-  Application::instance()->view_event_handler()->DidDropWidget(
-      edit_tab_content->GetActiveContent()->window_id(),
-      window_id());
 }
 
 void Frame::RequestCloseTab(int tab_index) {

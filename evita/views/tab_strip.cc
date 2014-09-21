@@ -9,15 +9,20 @@
 #include <vector>
 
 #include "base/logging.h"
+#include "base/observer_list.h"
 #include "base/strings/string16.h"
 #include "common/castable.h"
+#include "common/memory/singleton.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/text_format.h"
+#include "evita/gfx/text_layout.h"
+#include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/events/event.h"
+#include "evita/ui/system_metrics_observer.h"
 #include "evita/ui/tooltip.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/icon_cache.h"
@@ -27,125 +32,6 @@
 
 namespace views {
 namespace {
-
-static const float kArrowButtonWidth = 20.0f;
-static const float kArrowButtonHeight = 20.0f;
-static const float kIconWidth = 16.0f;
-static const float kIconHeight = 16.0f;
-static const float kLabelHeight = 16.0f;
-static const float kMaxTabWidth = 200.0f;
-static const float kMinTabWidth = 140.0f;
-
-//////////////////////////////////////////////////////////////////////
-//
-// Element
-//
-class Element : public common::Castable {
-  DECLARE_CASTABLE_CLASS(Element, Castable);
-
-  public: enum class State {
-    Normal,
-    Selected,
-  };
-
-  private: gfx::RectF bounds_;
-  private: bool dirty_;
-  private: bool is_hover_;
-  private: Element* parent_;
-  private: State state_;
-
-  // ctor
-  protected: Element(Element* parent);
-  public: virtual ~Element() = default;
-
-  protected: gfx::ColorF bgcolor() const;
-  public: float bottom() const { return bounds_.bottom; }
-  public: const gfx::RectF& bounds() const { return bounds_; }
-  public: void set_bounds(const gfx::RectF& new_bounds);
-  protected: bool dirty() const { return dirty_; }
-  public: float height() const { return bounds_.height(); }
-  public: float left() const { return bounds_.left; }
-  public: Element* parent() const { return parent_; }
-  public: gfx::PointF origin() const { return bounds_.origin(); }
-  public: float right() const { return bounds_.right; }
-  public: State state() const { return state_; }
-  public: float top() const { return bounds_.top; }
-  public: float width() const { return bounds_.width(); }
-
-  // [D]
-  public: virtual void Draw(gfx::Canvas* canvas) const = 0;
-
-  // [H]
-  public: virtual Element* HitTest(const gfx::PointF& point) const;
-
-  // [I]
-  public: void Invalidate();
-  public: bool IsDescendantOf(const Element* other) const;
-  public: bool IsHover() const { return is_hover_; }
-  public: bool IsSelected() const { return State::Selected == state_; }
-
-  // [S]
-  public: bool SetHover(bool new_hover);
-  public: Element* SetParent(Element* p);
-  public: State SetState(State e);
-
-  // [U]
-  protected: virtual void Update();
-};
-
-Element::Element(Element* parent)
-    : dirty_(true),
-      is_hover_(false),
-      parent_(parent),
-      state_(State::Normal) {
-}
-
-gfx::ColorF Element::bgcolor() const {
-  if (IsSelected())
-      return gfx::whiteColor();
-  if (IsHover())
-      return gfx::sysColor(COLOR_3DHILIGHT, 0.8);
-  return gfx::sysColor(COLOR_3DFACE, 0.5);
-}
-
-void Element::set_bounds(const gfx::RectF& new_bounds) {
-  if (bounds_ == new_bounds)
-    return;
-  bounds_ = new_bounds;
-}
-
-Element* Element::HitTest(const gfx::PointF&  point) const {
-  return bounds_.Contains(point) ? const_cast<Element*>(this) : nullptr;
-}
-
-void Element::Invalidate() {
-  dirty_ = true;
-}
-
-bool Element::IsDescendantOf(const Element* other) const {
-  for (auto runner = parent_; runner; runner = runner->parent_) {
-    if (runner == other)
-      return true;
-  }
-  return false;
-}
-
-bool Element::SetHover(bool f) {
-  return is_hover_ = f;
-}
-
-Element* Element::SetParent(Element* p) {
-  return parent_ = p;
-}
-
-Element::State Element::SetState(State e) {
-  state_ = e;
-  Update();
-  return state_;
-}
-
-void Element::Update() {
-}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -160,205 +46,139 @@ enum TabStripDesignParams {
   k_cyIcon = 16,
 };
 
-//////////////////////////////////////////////////////////////////////
-//
-// CloseBox
-//
-class CloseBox final : public Element {
-  DECLARE_CASTABLE_CLASS(CloseBox, Element);
+const auto kArrowButtonWidth = 20;
+const auto kArrowButtonHeight = 20;
+const auto kIconWidth = 16.0f;
+const auto kIconHeight = 16.0f;
+const auto kLabelHeight = 16.0f;
+const auto kMaxTabWidth = 200.0f;
+const auto kMinTabWidth = 140.0f;
+const auto kScrollWidth = 10.0f;
+// On Win8.1
+//  SM_CYSIZE = 22
+//  SM_CYCAPTION = 23
+//  SM_CYEDGE = 2
+//  SM_CYSIZEFRAME = 4
+auto const kTabHeight = 28;
 
-  public: CloseBox(Element* parent);
-  public: virtual ~CloseBox() = default;
-
-  private: gfx::ColorF color() const;
-
-  // Element
-  public: virtual void Draw(gfx::Canvas* canvas) const override;
-
-  DISALLOW_COPY_AND_ASSIGN(CloseBox);
-};
-
-CloseBox::CloseBox(Element* parent) : Element(parent) {
-}
-
-gfx::ColorF CloseBox::color() const {
-  return IsHover() ? gfx::ColorF(1, 0, 0, 0.5f) : gfx::ColorF(0, 0, 0, 0.5f);
-}
-
-void CloseBox::Draw(gfx::Canvas* canvas) const {
-  auto const bounds = this->bounds();
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
-  gfx::Brush brush(canvas, color());
-  canvas->DrawLine(brush, bounds.origin(), bounds.bottom_right(), 2.0f);
-  canvas->DrawLine(brush, bounds.top_right(), bounds.bottom_left(), 2.0f);
-}
+class Button;
+class Tab;
 
 //////////////////////////////////////////////////////////////////////
 //
-// Tab
-//  Represents tab tab.
+// ButtonListener
 //
-class Tab final : public Element, public ui::Tooltip::ToolDelegate {
-  DECLARE_CASTABLE_CLASS(Tab, Element);
+class ButtonListener {
+  protected: ButtonListener() = default;
+  protected: virtual ~ButtonListener() = default;
 
-  private: CloseBox close_box_;
-  public: int image_index_;
-  private: gfx::RectF icon_bounds_;
-  private: gfx::RectF text_bounds_;
-  public: base::string16 label_text_;
-  public: domapi::TabData::State state_;
-  private: TabContent* const tab_content_;
-  private: int tab_index_;
-  private: TabStripDelegate* tab_strip_delegate_;
-
-  public: Tab(TabStripDelegate* tab_strip_delegate, TabContent* tab_content);
-  public: virtual ~Tab() = default;
-
-  public: int tab_index() const { return tab_index_; }
-  public: void set_tab_index(int tab_index) { tab_index_ = tab_index; }
-  public: TabContent* tab_content() const { return tab_content_; }
-
-  private: void DrawContent(gfx::Canvas* canvas) const;
-  private: void DrawIcon(gfx::Canvas* canvas) const;
-  public: bool HasCloseBox() const;
-  public: bool SetTabData(const domapi::TabData& tab_data);
-  public: void UpdateLayout();
-
-  // Element
-  public: virtual void Draw(gfx::Canvas* canvas) const override;
-  public: virtual Element* HitTest(const gfx::PointF& point) const override;
-  private: void Update() override;
-
-  // ui::Tooltip::ToolDelegate
-  private: base::string16 GetTooltipText() override;
-
-  DISALLOW_COPY_AND_ASSIGN(Tab);
+  public: virtual void DidPressButton(Button* sender,
+                                      const ui::Event& event) = 0;
 };
 
-Tab::Tab(TabStripDelegate* tab_strip_delegate, TabContent* tab_content)
-    : Element(nullptr),
-      close_box_(this),
-      image_index_(-1),
-      state_(domapi::TabData::State::Normal),
-      tab_content_(tab_content),
-      tab_index_(0),
-      tab_strip_delegate_(tab_strip_delegate) {
-  auto const tab_data = tab_content->GetTabData();
-  if (!tab_data) {
-    label_text_ = L"?";
-    return;
-  }
-  SetTabData(*tab_data);
-}
+//////////////////////////////////////////////////////////////////////
+//
+// Button
+//
+class Button : public ui::Widget {
+  DECLARE_CASTABLE_CLASS(Button, ui::Widget);
 
-void Tab::DrawContent(gfx::Canvas* canvas) const {
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds());
-  DrawIcon(canvas);
-  gfx::Brush text_brush(canvas, gfx::sysColor(COLOR_BTNTEXT));
-  canvas->DrawText(*canvas->work<gfx::TextFormat>(), text_brush, text_bounds_,
-                   label_text_);
-}
-
-void Tab::DrawIcon(gfx::Canvas* canvas) const {
-  if (image_index_ < 0)
-    return;
-  auto const hImageList = IconCache::instance()->image_list();
-  // Note: ILD_TRANSPARENT doesn't effect.
-  // Note: ILD_DPISCALE makes background black.
-  auto const hIcon = ::ImageList_GetIcon(hImageList, image_index_, 0);
-  if (!hIcon)
-    return;
-  gfx::Bitmap bitmap(canvas, hIcon);
-  (*canvas)->DrawBitmap(bitmap, icon_bounds_);
-  ::DestroyIcon(hIcon);
-}
-
-bool Tab::HasCloseBox() const {
-  return IsSelected() || IsHover();
-}
-
-bool Tab::SetTabData(const domapi::TabData& tab_data) {
-  struct Local {
-    static int GetIconIndex(const domapi::TabData& tab_data) {
-      if (tab_data.icon != -2)
-        return tab_data.icon;
-      return IconCache::instance()->GetIconForFileName(tab_data.title);
-    }
+  public: enum class State {
+    Normal,
+    Disabled,
+    Hovered,
+    Pressed,
   };
 
-  auto changed = false;
+  private: bool dirty_;
+  private: ButtonListener* listener_;
+  private: State state_;
 
-  auto const new_image_index = Local::GetIconIndex(tab_data);
-  if (image_index_ != new_image_index) {
-    image_index_ = std::max(new_image_index, 0);
-    changed = true;
-  }
+  protected: Button(ButtonListener* listener);
+  public: virtual ~Button();
 
-  if (state_ != tab_data.state) {
-    state_ = tab_data.state;
-    changed = true;
-  }
+  protected: bool dirty() const { return dirty_; }
+  public: State state() const { return state_; }
 
-  if (label_text_ != tab_data.title) {
-    label_text_ = tab_data.title;
-    changed = true;
-  }
-  return changed;
+  private: void MarkDirty();
+  protected: void RequestAnimationFrame();
+  protected: void SetState(State new_state);
+
+  // ui::Widget
+  protected: virtual void DidChangeBounds() override;
+  protected: virtual void DidShow() override;
+  protected: void OnDraw(gfx::Canvas* canvas) override;
+  protected: void OnMouseExited(const ui::MouseEvent& event) override;
+  protected: void OnMouseMoved(const ui::MouseEvent& event) override;
+  protected: void OnMousePressed(const ui::MouseEvent& event) override;
+  protected: void OnMouseReleased(const ui::MouseEvent& event) override;
+
+  DISALLOW_COPY_AND_ASSIGN(Button);
+};
+
+Button::Button(ButtonListener* listener)
+    : dirty_(true), listener_(listener), state_(State::Normal) {
 }
 
-void Tab::UpdateLayout() {
-  auto const bounds = this->bounds() - gfx::SizeF(6, 6);
-  close_box_.set_bounds(gfx::RectF(bounds.top_right() + gfx::SizeF(-9, 5),
-                                   gfx::SizeF(8, 8)));
-  icon_bounds_ = gfx::RectF(bounds.origin(), gfx::SizeF(16, 16));
-  text_bounds_ = gfx::RectF(icon_bounds_.top_right() + gfx::SizeF(4, 0),
-                            gfx::PointF(close_box_.bounds().left - 2,
-                                        icon_bounds_.bottom));
+Button::~Button() {
 }
 
-// Element
-void Tab::Draw(gfx::Canvas* canvas) const {
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds());
-  {
-    gfx::Brush fillBrush(canvas, bgcolor());
-    canvas->FillRectangle(fillBrush, bounds());
-    gfx::Brush strokeBrush(canvas, gfx::ColorF(0, 0, 0, 0.5));
-    canvas->DrawRectangle(strokeBrush, gfx::RectF(
-        bounds().origin(), bounds().size() + gfx::SizeF(1, 0)));
-  }
+void Button::MarkDirty() {
+  RequestAnimationFrame();
+  dirty_ = true;
+}
 
-  DrawContent(canvas);
-  if (HasCloseBox())
-    close_box_.Draw(canvas);
-  if (state_ == domapi::TabData::State::Normal)
+void Button::SetState(State new_state) {
+  if (state_ == new_state)
     return;
-  auto const marker_color = state_ == domapi::TabData::State::Modified ?
-    gfx::ColorF(219.0f / 255, 74.0f / 255, 56.0f / 255) :
-    gfx::ColorF(56.0f / 255, 219.0f / 255, 74.0f / 255);
-  auto const marker_height = 4.0f;
-  auto const marker_width = 4.0f;
-  DCHECK_GT(width(), marker_width);
-  canvas->FillRectangle(
-      gfx::Brush(canvas, marker_color),
-      gfx::RectF(gfx::PointF(right() - marker_width, top()),
-                 gfx::SizeF(marker_width, marker_height)));
+  state_ = new_state;
+  MarkDirty();
 }
 
-Element* Tab::HitTest(const gfx::PointF& point) const {
-  if (HasCloseBox()) {
-    if (auto const hit = close_box_.HitTest(point))
-      return hit;
+void Button::RequestAnimationFrame() {
+  dirty_ = true;
+  for (auto runner = parent_node(); runner; runner = runner->parent_node()) {
+    auto const animatable = runner->as<ui::AnimatableWindow>();
+    if (!animatable)
+      continue;
+    animatable->RequestAnimationFrame();
+    break;
   }
-  return Element::HitTest(point);
 }
 
-void Tab::Update() {
-  UpdateLayout();
+// ui::Widget
+void Button::DidChangeBounds() {
+  MarkDirty();
 }
 
-// ui::Tooltip::ToolDelegate
-base::string16 Tab::GetTooltipText() {
-  return tab_strip_delegate_->GetTooltipTextForTab(tab_index_);
+void Button::DidShow() {
+  MarkDirty();
+}
+
+void Button::OnDraw(gfx::Canvas*) {
+  DCHECK(dirty_);
+  dirty_ = false;
+}
+
+void Button::OnMouseExited(const ui::MouseEvent&) {
+  SetState(State::Normal);
+}
+
+void Button::OnMouseMoved(const ui::MouseEvent&) {
+  SetState(State::Hovered);
+}
+
+void Button::OnMousePressed(const ui::MouseEvent& event) {
+  if (event.button() != ui::MouseButton::Left)
+    return;
+  SetState(State::Pressed);
+  listener_->DidPressButton(this, event);
+}
+
+void Button::OnMouseReleased(const ui::MouseEvent& event) {
+  if (event.button() != ui::MouseButton::Left)
+    return;
+  SetState(State::Hovered);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -366,40 +186,46 @@ base::string16 Tab::GetTooltipText() {
 // ArrowButton
 //
 enum class Direction {
- Down,
- Left,
- Right,
- Up,
+  Down,
+  Left,
+  Right,
+  Up,
 };
 
-class ArrowButton final : public Element {
-  DECLARE_CASTABLE_CLASS(ArrowButton, Element);
+class ArrowButton final : public Button {
+  DECLARE_CASTABLE_CLASS(ArrowButton, Button);
 
   private: Direction direction_;
 
-  public: ArrowButton(Direction);
+  public: ArrowButton(Direction direction, ButtonListener* listener);
   public: virtual ~ArrowButton() = default;
 
-  public: Direction direction() const { return direction_; }
-
-  private: gfx::ColorF ComputeBgColor() const;
-
+  private: gfx::ColorF ComputeColor() const;
   private: void DrawArrow(gfx::Canvas* canvas) const;
 
-  // Element
-  private: virtual void Draw(gfx::Canvas* canvas) const override;
+  // ui::Widget
+  private: virtual void OnDraw(gfx::Canvas* canvas) override;
 
   DISALLOW_COPY_AND_ASSIGN(ArrowButton);
 };
 
-ArrowButton::ArrowButton(Direction direction)
-    : Element(nullptr), direction_(direction) {
+ArrowButton::ArrowButton(Direction direction, ButtonListener* listener)
+    : Button(listener), direction_(direction) {
 }
 
-gfx::ColorF ArrowButton::ComputeBgColor() const {
-  if (IsHover())
-    return gfx::ColorF(1.0f, 1.0f, 1.0f, 0.3f);
-  return gfx::ColorF(1.0f, 1.0f, 1.0f, 0.0f);
+gfx::ColorF ArrowButton::ComputeColor() const {
+  switch (state()) {
+  case State::Disabled:
+    return gfx::ColorF(0, 0, 0, 0.3f);
+  case State::Hovered:
+    return gfx::ColorF(0, 0, 0, 0.3f);
+  case State::Normal:
+    return gfx::ColorF(0, 0, 0, 0.5f);
+  case State::Pressed:
+    return gfx::ColorF(0, 0, 0, 1.0f);
+  }
+  NOTREACHED();
+  return gfx::ColorF(0, 0, 1, 1.0f);
 }
 
 void ArrowButton::DrawArrow(gfx::Canvas* canvas) const {
@@ -431,16 +257,15 @@ void ArrowButton::DrawArrow(gfx::Canvas* canvas) const {
       break;
      default:
        NOTREACHED();
-   }
+  }
 
-  auto const center_x = left() + width() / 2;
-  auto const center_y = top() + height() / 2;
-  auto const wing_size = width() / 4;
+  auto const bounds = GetContentsBounds();
+  auto const center_x = bounds.left + bounds.width() / 2;
+  auto const center_y = bounds.top + bounds.height() / 2;
+  auto const wing_size = bounds.width() / 4;
   auto const pen_width = 2.0f;
 
-  auto const alpha = IsHover() ? 1.0f : 0.3f;
-  gfx::Brush arrow_brush(canvas, gfx::ColorF(0.0f, 0.0f, 0.0f, alpha));
-
+  gfx::Brush arrow_brush(canvas, ComputeColor());
   canvas->DrawLine(arrow_brush,
                    gfx::PointF(center_x + factors[0] * wing_size,
                                center_y + factors[1] * wing_size),
@@ -451,480 +276,805 @@ void ArrowButton::DrawArrow(gfx::Canvas* canvas) const {
                    gfx::PointF(center_x, center_y), pen_width);
 }
 
-// Element
-void ArrowButton::Draw(gfx::Canvas* canvas) const {
-  if (bounds().empty())
+// ui::Widget
+void ArrowButton::OnDraw(gfx::Canvas* canvas) {
+  if (!dirty())
     return;
-
-  gfx::Brush fillBrush(canvas, ComputeBgColor());
-  canvas->FillRectangle(fillBrush, bounds());
+  Button::OnDraw(canvas);
+  canvas->AddDirtyRect(GetContentsBounds());
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, GetContentsBounds());
+  canvas->Clear(gfx::ColorF());
   DrawArrow(canvas);
 }
 
-// Cursor for Tab Drag
-HCURSOR s_hDragTabCursor;
+//////////////////////////////////////////////////////////////////////
+//
+// ViewDelegate
+//
+class ViewDelegate {
+  protected: ViewDelegate() = default;
+  protected: virtual ~ViewDelegate() = default;
 
-// Load cursor for Tab Drag and Drop.
-void LoadDragTabCursor() {
-  if (s_hDragTabCursor)
+  public: virtual void DidDropTab(Tab* tab, const gfx::Point& screen_point) = 0;
+  public: virtual void DidSelectTab(Tab* tab) = 0;
+  public: virtual base::string16 GetTooltipTextForTab(Tab* tab) = 0;
+  public: virtual void RequestAnimationFrame() = 0;
+  public: virtual void RequestCloseTab(Tab* tab) = 0;
+  public: virtual void RequestSelectTab(Tab* tab) = 0;
+  public: virtual void SetToolBounds(Tab* tab, const gfx::Rect& bounds) = 0;
+
+  DISALLOW_COPY_AND_ASSIGN(ViewDelegate);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// Tab
+//  Represents a tab.
+//
+class Tab final : public ui::Tooltip::ToolDelegate {
+  public: enum class Part {
+    None,
+    CloseMark,
+    Label,
+  };
+
+  public: class HitTestResult {
+    private: Part part_;
+    private: Tab* tab_;
+
+    public: HitTestResult(Tab* tab, Part part);
+    public: HitTestResult(const HitTestResult& other);
+    public: HitTestResult();
+    public: ~HitTestResult() = default;
+
+    public: operator bool() const { return tab_; }
+
+    public: HitTestResult& operator=(const HitTestResult& other);
+
+    public: bool operator==(const HitTestResult& other) const;
+    public: bool operator!=(const HitTestResult& other) const;
+
+    public: Part part() const { return part_; }
+    public: Tab* tab() const { return tab_; }
+  };
+
+  public: enum class State {
+    Normal,
+    Hovered,
+    Selected,
+  };
+
+  private: gfx::RectF bounds_;
+  private: gfx::RectF close_mark_bounds_;
+  private: State close_mark_state_;
+  private: bool dirty_visual_;
+  private: bool dirty_layout_;
+  private: int image_index_;
+  private: gfx::RectF icon_bounds_;
+  private: gfx::RectF label_bounds_;
+  private: base::string16 label_text_;
+  private: State state_;
+  private: TabContent* const tab_content_;
+  private: domapi::TabData::State tab_data_state_;
+  private: int tab_index_;
+  private: gfx::TextFormat* text_format_;
+  private: std::unique_ptr<gfx::TextLayout> text_layout_;
+  private: ViewDelegate* const view_delegate_;
+
+  public: Tab(ViewDelegate* view_delegate, TabContent* tab_content,
+              gfx::TextFormat* text_format);
+  public: virtual ~Tab() = default;
+
+  public: float bottom() const { return bounds_.bottom; }
+  public: const gfx::RectF bounds() const { return bounds_; }
+  public: bool dirty() const { return dirty_visual_; }
+  public: bool is_selected() const { return state_ == State::Selected; }
+  public: const base::string16& label_text() const { return label_text_; }
+  public: float left() const { return bounds_.left; }
+  public: float right() const { return bounds_.right; }
+  public: int tab_index() const { return tab_index_; }
+  public: float top() const { return bounds_.top; }
+  public: TabContent* tab_content() const { return tab_content_; }
+
+  public: void set_tab_index(int tab_index) { tab_index_ = tab_index; }
+
+  private: gfx::ColorF ComputeBackgroundColor() const;
+  public: void Draw(gfx::Canvas* canvas);
+  private: void DrawCloseMark(gfx::Canvas* canvas) const;
+  private: void DrawLabel(gfx::Canvas* canvas) const;
+  private: void DrawIcon(gfx::Canvas* canvas) const;
+  private: void DrawTabDataState(gfx::Canvas* canvas) const;
+  public: int GetPreferredWidth() const;
+  public: State GetState(Part part) const;
+  public: HitTestResult HitTest(const gfx::PointF& point);
+  private: void MarkDirty();
+  public: void SetBounds(const gfx::RectF& new_bounds);
+  private: void SetCloseMarkState(State new_state);
+  private: void SetLabelState(State new_state);
+  public: void SetState(Part part, State new_state);
+  public: void SetTabData(const domapi::TabData& tab_data);
+  public: void SetTextFormat(gfx::TextFormat* text_format_);
+  private: void UpdateLayout();
+
+  // ui::Tooltip::ToolDelegate
+  private: base::string16 GetTooltipText() override;
+
+  DISALLOW_COPY_AND_ASSIGN(Tab);
+};
+
+Tab::Tab(ViewDelegate* view_delegate, TabContent* tab_content,
+         gfx::TextFormat* text_format)
+    : close_mark_state_(State::Normal),
+      dirty_visual_(true),
+      dirty_layout_(true),
+      image_index_(-1),
+      state_(State::Normal),
+      tab_data_state_(domapi::TabData::State::Normal),
+      tab_content_(tab_content),
+      tab_index_(0),
+      text_format_(text_format),
+      view_delegate_(view_delegate) {
+  auto const tab_data = tab_content->GetTabData();
+  if (!tab_data) {
+    label_text_ = L"?";
     return;
+  }
+  SetTabData(*tab_data);
+}
 
-  s_hDragTabCursor = ::LoadCursor(nullptr, IDC_ARROW);
+gfx::ColorF Tab::ComputeBackgroundColor() const {
+  switch (state_) {
+  case State::Hovered:
+    return gfx::ColorF(1.0f, 1.0f, 1.0f, 0.8f);
+  case State::Normal:
+    return gfx::ColorF(1.0f, 1.0f, 1.0f, 0.5f);
+  case State::Selected:
+    return gfx::ColorF(1.0f, 1.0f, 1.0f, 1.0f);
+  }
+  NOTREACHED();
+  return gfx::ColorF(1, 0, 0, 1);
+}
+
+void Tab::Draw(gfx::Canvas* canvas) {
+  UpdateLayout();
+  if (!dirty_visual_)
+    return;
+  UpdateLayout();
+  dirty_visual_ = false;
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds_);
+  canvas->Clear(ComputeBackgroundColor());
+  {
+    gfx::Brush strokeBrush(canvas, gfx::ColorF(0, 0, 0, 0.5));
+    canvas->DrawRectangle(strokeBrush, gfx::RectF(
+        bounds_.origin(), bounds_.size()));
+  }
+  DrawIcon(canvas);
+  DrawLabel(canvas);
+  DrawCloseMark(canvas);
+  DrawTabDataState(canvas);
+}
+
+void Tab::DrawCloseMark(gfx::Canvas* canvas) const {
+  if (state_ == State::Normal)
+    return;
+  auto const color = close_mark_state_ == State::Hovered ?
+      gfx::ColorF(1, 0, 0, 0.5f) : gfx::ColorF(0, 0, 0, 0.5f);
+  gfx::Brush brush(canvas, color);
+  canvas->DrawLine(brush, close_mark_bounds_.origin(),
+                   close_mark_bounds_.bottom_right(), 2.0f);
+  canvas->DrawLine(brush, close_mark_bounds_.top_right(),
+                   close_mark_bounds_.bottom_left(), 2.0f);
+}
+
+void Tab::DrawLabel(gfx::Canvas* canvas) const {
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, label_bounds_);
+  gfx::Brush text_brush(canvas, gfx::sysColor(COLOR_BTNTEXT));
+  (*canvas)->DrawTextLayout(label_bounds_.origin(), *text_layout_, text_brush,
+                            D2D1_DRAW_TEXT_OPTIONS_CLIP);
+}
+
+void Tab::DrawIcon(gfx::Canvas* canvas) const {
+  if (image_index_ < 0)
+    return;
+  auto const hImageList = IconCache::instance()->image_list();
+  // Note: ILD_TRANSPARENT doesn't effect.
+  // Note: ILD_DPISCALE makes background black.
+  auto const hIcon = ::ImageList_GetIcon(hImageList, image_index_, 0);
+  if (!hIcon)
+    return;
+  gfx::Bitmap bitmap(canvas, hIcon);
+  (*canvas)->DrawBitmap(bitmap, icon_bounds_);
+  ::DestroyIcon(hIcon);
+}
+
+void Tab::DrawTabDataState(gfx::Canvas* canvas) const {
+  if (tab_data_state_ == domapi::TabData::State::Normal)
+    return;
+  auto const marker_color =
+    tab_data_state_ == domapi::TabData::State::Modified ?
+        gfx::ColorF(219.0f / 255, 74.0f / 255, 56.0f / 255) :
+        gfx::ColorF(56.0f / 255, 219.0f / 255, 74.0f / 255);
+  auto const marker_height = 4.0f;
+  auto const marker_width = 4.0f;
+  DCHECK_GT(bounds_.width(), marker_width);
+  canvas->FillRectangle(
+      gfx::Brush(canvas, marker_color),
+      gfx::RectF(gfx::PointF(bounds_.right - marker_width, bounds_.top),
+                 gfx::SizeF(marker_width, marker_height)));
+}
+
+int Tab::GetPreferredWidth() const {
+  DCHECK(text_format_);
+  auto const label_width = std::min(
+      std::max(text_format_->GetWidth(label_text_), kMinTabWidth),
+      kMaxTabWidth);
+  auto const icon_width = 16.0f;
+  auto const padding = 6.0f;
+  return static_cast<int>(::ceil(
+    padding + icon_width + 4 + label_width + 2 + 9 + padding));
+}
+
+Tab::State Tab::GetState(Part part) const {
+  return part == Part::Label ? state_ : close_mark_state_;
+}
+
+Tab::HitTestResult Tab::HitTest(const gfx::PointF& point) {
+  UpdateLayout();
+  if (!bounds_.Contains(point))
+    return HitTestResult();
+  if (state_ != State::Normal && close_mark_bounds_.Contains(point))
+    return HitTestResult(const_cast<Tab*>(this), Part::CloseMark);
+  return HitTestResult(const_cast<Tab*>(this), Part::Label);
+}
+
+void Tab::MarkDirty() {
+  dirty_visual_ = true;
+  view_delegate_->RequestAnimationFrame();
+}
+
+void Tab::SetBounds(const gfx::RectF& new_bounds) {
+  if (bounds_ == new_bounds)
+    return;
+  bounds_ = new_bounds;
+  MarkDirty();
+  dirty_layout_ = true;
+}
+
+void Tab::SetCloseMarkState(State new_state) {
+  if (close_mark_state_ == new_state)
+    return;
+  close_mark_state_ = new_state;
+  MarkDirty();
+}
+
+void Tab::SetLabelState(State new_state) {
+  if (state_ == new_state)
+    return;
+  state_ = new_state;
+  MarkDirty();
+}
+
+void Tab::SetState(Part part, State new_state) {
+  switch (new_state) {
+    case State::Normal:
+      if (part == Part::Label)
+        SetLabelState(State::Normal);
+      SetCloseMarkState(State::Normal);
+      break;
+    case State::Hovered:
+      if (state_ == State::Normal)
+        SetLabelState(State::Hovered);
+      if (part == Part::CloseMark)
+        SetCloseMarkState(State::Hovered);
+      break;
+    case State::Selected:
+      SetLabelState(State::Selected);
+      SetCloseMarkState(State::Normal);
+      break;
+  }
+}
+
+void Tab::SetTabData(const domapi::TabData& tab_data) {
+  struct Local {
+    static int GetIconIndex(const domapi::TabData& tab_data) {
+      if (tab_data.icon != -2)
+        return tab_data.icon;
+      return IconCache::instance()->GetIconForFileName(tab_data.title);
+    }
+  };
+
+  auto const new_image_index = Local::GetIconIndex(tab_data);
+  if (image_index_ != new_image_index) {
+    image_index_ = std::max(new_image_index, 0);
+    MarkDirty();
+  }
+
+  if (tab_data_state_ != tab_data.state) {
+    tab_data_state_ = tab_data.state;
+    MarkDirty();
+  }
+
+  if (label_text_ != tab_data.title) {
+    label_text_ = tab_data.title;
+    MarkDirty();
+    dirty_layout_ = true;
+  }
+}
+
+void Tab::SetTextFormat(gfx::TextFormat* text_format) {
+  text_format_ = text_format;
+  MarkDirty();
+  dirty_layout_ = true;
+}
+
+void Tab::UpdateLayout() {
+  DCHECK(!bounds_.empty());
+  DCHECK(text_format_);
+  if (!dirty_layout_)
+    return;
+  dirty_layout_ = false;
+  dirty_visual_ = true;
+  view_delegate_->RequestAnimationFrame();
+  auto const bounds = bounds_ - gfx::SizeF(6, 6);
+  close_mark_bounds_ = gfx::RectF(bounds.top_right() + gfx::SizeF(-9, 5),
+                                   gfx::SizeF(8, 8));
+  icon_bounds_ = gfx::RectF(bounds.origin(), gfx::SizeF(16, 16));
+  label_bounds_ = gfx::RectF(icon_bounds_.top_right() + gfx::SizeF(4, 0),
+                            gfx::PointF(close_mark_bounds_.left - 2,
+                                        icon_bounds_.bottom));
+  text_layout_ = text_format_->CreateLayout(label_text_, label_bounds_.size());
+}
+
+// ui::Tooltip::ToolDelegate
+base::string16 Tab::GetTooltipText() {
+  return view_delegate_->GetTooltipTextForTab(this);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// Tab::HitTestResult
+//
+Tab::HitTestResult::HitTestResult(Tab* tab, Part part)
+    : part_(part), tab_(tab) {
+}
+
+Tab::HitTestResult::HitTestResult(const HitTestResult& other)
+    : HitTestResult(other.tab_, other.part_) {
+}
+
+Tab::HitTestResult::HitTestResult() : HitTestResult(nullptr, Part::None) {
+}
+
+Tab::HitTestResult& Tab::HitTestResult::operator=(const HitTestResult& other) {
+  tab_ = other.tab_;
+  part_ = other.part_;
+  return *this;
+}
+
+bool Tab::HitTestResult::operator==(const HitTestResult& other) const {
+  return tab_ == other.tab_ && part_ == other.part_;
+}
+
+bool Tab::HitTestResult::operator!=(const HitTestResult& other) const {
+  return !operator==(other);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// DragTabCursor
+//
+class DragTabCursor : public common::Singleton<DragTabCursor> {
+  DECLARE_SINGLETON_CLASS(DragTabCursor);
+
+  private: HCURSOR cursor_;
+
+  private: DragTabCursor();
+  public: virtual ~DragTabCursor();
+
+  public: HCURSOR GetCursor();
+
+  DISALLOW_COPY_AND_ASSIGN(DragTabCursor);
+};
+
+DragTabCursor::DragTabCursor() : cursor_(nullptr) {
+}
+
+DragTabCursor::~DragTabCursor() {
+}
+
+HCURSOR DragTabCursor::GetCursor() {
+  if (cursor_)
+    return cursor_;
+
+  cursor_ = ::LoadCursor(nullptr, IDC_ARROW);
 
   auto const hDll = ::LoadLibraryEx(L"ieframe.dll", nullptr,
                                     LOAD_LIBRARY_AS_DATAFILE);
   if (!hDll)
-    return;
+    return cursor_;
 
   if (auto const hCursor = ::LoadCursor(hDll, MAKEINTRESOURCE(643))) {
-    if (auto const hCursor2 = CopyCursor(hCursor))
-      s_hDragTabCursor = hCursor2;
+    // Note: |CopyCursor()| is macro instead of function.
+    if (auto const hCursorCopy = CopyCursor(hCursor))
+      cursor_ = hCursorCopy;
   }
 
   ::FreeLibrary(hDll);
-}
 
-}  // namespace
+  return cursor_;
+}
 
 //////////////////////////////////////////////////////////////////////
 //
-// Impl class
+// ModelObserver
 //
-class TabStrip::Impl final {
-  private: enum class Drag {
-    None,
-    Tab,
-    Start,
-  };
+class ModelObserver {
+  protected: ModelObserver() = default;
+  protected: virtual ~ModelObserver() = default;
 
-  private: typedef std::vector<Tab*> Tabs;
+  public: virtual void DidDeleteTab(Tab* tab) = 0;
+  public: virtual void DidInsertTab(Tab* tab) = 0;
 
-  private: gfx::RectF bounds_;
-  private: std::unique_ptr<gfx::Canvas> canvas_;
-  private: TabStripDelegate* delegate_;
-  private: Tab* dragging_tab_;
-  private: Drag drag_state_;
-  private: POINT drag_start_point_;
-  private: Element* hover_element_;
-  private: Tab* insertion_marker_;
-  private: ArrowButton list_button_;
-  private: ArrowButton scroll_left_button_;
-  private: ArrowButton scroll_right_button_;
-  private: Tab* selected_tab_;
-  private: bool should_selected_tab_visible_;
-  private: Tabs tabs_;
-  private: HMENU tab_list_menu_;
-  private: gfx::RectF tabs_bounds_;
-  private: float tabs_origin_;
-  private: ui::Tooltip tooltip_;
-  private: TabStrip* widget_;
-
-  public: Impl(TabStrip* widget, TabStripDelegate* delegate);
-  public: ~Impl();
-
-  public: size_t number_of_tabs() const { return tabs_.size(); }
-  public: size_t selected_index() const;
-
-  // [C]
-  private: bool ChangeFont();
-
-  // [D]
-  public: void DidBeginAnimationFrame(base::Time time);
-  private: void DidSelectTab();
-  public: void DidRealize();
-  public: void DeleteTab(size_t tab_index);
-  private: void Draw(gfx::Canvas* canvas) const;
-  private: void DropTab(Tab* tab, const POINT& point);
-
-  // [G]
-  public: TabContent* GetTab(size_t tab_index) const;
-
-  // [H]
-  private: void HandleTabListMenu(POINT point);
-  private: Element* HitTest(const gfx::PointF& point) const;
-
-  // [I]
-  // Insert a new tab before a tab at |tab_index|.
-  public: void InsertTab(size_t tab_index, TabContent* tab_content);
-
-  // [O]
-  public: void OnLButtonDown(POINT pt);
-  public: void OnLButtonUp(POINT pt);
-  public: void OnMouseMove(POINT pt);
-  public: LRESULT OnNotify(NMHDR* nmhder);
-
-  // [R]
-  public: void Redraw();
-  private: void RenumberTabIndex();
-
-  // [S]
-  public: int SelectTab(size_t tab_index);
-  private: int SelectTab(Tab* tab);
-  public: void SetBounds(const gfx::RectF& bounds);
-  public: void SetTabData(size_t tab_index, const domapi::TabData& tab_data);
-  private: void StopDrag();
-
-  // [U]
-  private: void UpdateBoundsForAllTabs(float tab_width);
-  public: void UpdateHover(Element* pHover);
-  private: void UpdateLayout();
-
-  DISALLOW_COPY_AND_ASSIGN(Impl);
+  DISALLOW_COPY_AND_ASSIGN(ModelObserver);
 };
 
-TabStrip::Impl::Impl(TabStrip* widget, TabStripDelegate* delegate)
-    : delegate_(delegate),
-      dragging_tab_(nullptr),
-      drag_state_(Drag::None),
-      hover_element_(nullptr),
-      insertion_marker_(nullptr),
-      list_button_(Direction::Down),
-      scroll_left_button_(Direction::Left),
-      scroll_right_button_(Direction::Right),
-      selected_tab_(nullptr),
-      should_selected_tab_visible_(false),
-      tab_list_menu_(nullptr),
-      tabs_origin_(0),
-      widget_(widget){
+//////////////////////////////////////////////////////////////////////
+//
+// ModelDelegate
+//
+class ModelDelegate {
+  protected: ModelDelegate() = default;
+  protected: virtual ~ModelDelegate() = default;
+
+  public: virtual void AddObserver(ModelObserver* observer) = 0;
+  public: virtual Tab::HitTestResult HitTest(
+      const gfx::PointF& point) const = 0;
+  public: virtual void InsertBefore(Tab* new_tab, Tab* ref_tab) = 0;
+  public: virtual void RemoveObserver(ModelObserver* observer) = 0;
+
+  DISALLOW_COPY_AND_ASSIGN(ModelDelegate);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// DragController
+//
+class DragController final : private ModelObserver {
+  private: enum class State {
+    Normal,
+    Dragging,
+    Pending,
+  };
+
+  private: State state_;
+  private: gfx::Point drag_start_point_;
+  private: Tab* dragging_tab_;
+  private: ModelDelegate* const model_;
+  private: ui::Widget* const owner_;
+  private: ViewDelegate* const view_delegate_;
+
+  public: DragController(ui::Widget* owner,
+                         ModelDelegate* model,
+                         ViewDelegate* view_delegate);
+  public: ~DragController();
+
+  public: bool is_dragging() const { return dragging_tab_; }
+
+  public: void OnMouseMoved(const ui::MouseEvent& event);
+  public: void OnMousePressed(const ui::MouseEvent& event);
+  public: void OnMouseReleased(const ui::MouseEvent& event);
+  public: void StopDragging();
+
+  // ModelObserver
+  private: void DidDeleteTab(Tab* tab) override;
+  private: void DidInsertTab(Tab* tab) override;
+
+  DISALLOW_COPY_AND_ASSIGN(DragController);
+};
+
+DragController::DragController(ui::Widget* owner, ModelDelegate* model,
+                               ViewDelegate* view_delegate)
+    : dragging_tab_(nullptr), model_(model), owner_(owner),
+      state_(State::Normal), view_delegate_(view_delegate) {
+  model_->AddObserver(this);
 }
 
-TabStrip::Impl::~Impl() {
-  if (auto const text_format = canvas_->work<gfx::TextFormat>())
-      delete text_format;
-
-  if (tab_list_menu_)
-    ::DestroyMenu(tab_list_menu_);
+DragController::~DragController() {
+  model_->RemoveObserver(this);
 }
 
-size_t TabStrip::Impl::selected_index() const {
-  return selected_tab_ ? selected_tab_->tab_index() : static_cast<size_t>(-1);
-}
-
-bool TabStrip::Impl::ChangeFont() {
-  LOGFONT lf;
-  if (!::SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(lf), &lf, 0))
-    return false;
-  lf.lfHeight = -10;
-  if (auto const old_format = canvas_->work<gfx::TextFormat*>())
-    delete old_format;
-  auto const text_format = new gfx::TextFormat(lf);
-  {
-    common::ComPtr<IDWriteInlineObject> inline_object;
-    COM_VERIFY(gfx::FactorySet::instance()->dwrite().
-        CreateEllipsisTrimmingSign(*text_format, &inline_object));
-    DWRITE_TRIMMING trimming {DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0};
-    (*text_format)->SetTrimming(&trimming, inline_object);
-  }
-  (*text_format)->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-  canvas_->set_work(text_format);
-  return true;
-}
-
-void TabStrip::Impl::DeleteTab(size_t tab_index) {
-  if (tab_index >= tabs_.size())
+void DragController::OnMouseMoved(const ui::MouseEvent& event) {
+  if (!dragging_tab_)
     return;
+  auto const point = event.location();
+  if (state_ == State::Pending) {
+    if (point.x() - drag_start_point_.x() >= -5 &&
+        point.x() - drag_start_point_.x() <= 5) {
+      return;
+    }
+
+    state_ = State::Dragging;
+  }
+
+  auto const result = model_->HitTest(gfx::PointF(point));
+  if (!result)
+    return;
+
+  ::SetCursor(DragTabCursor::instance()->GetCursor());
+}
+
+void DragController::OnMousePressed(const ui::MouseEvent& event) {
+  if (!event.is_left_button() || event.click_count())
+    return;
+  auto const result = model_->HitTest(gfx::PointF(event.location()));
+  if (!result || result.part() != Tab::Part::Label)
+    return;
+  auto const tab = result.tab();
+  if (!tab->is_selected())
+    view_delegate_->RequestSelectTab(tab);
+  dragging_tab_ = tab;
+  state_ = State::Pending;
+  drag_start_point_ = event.location();
+  owner_->SetCapture();
+}
+
+void DragController::OnMouseReleased(const ui::MouseEvent& event) {
+  if (!event.is_left_button() || state_ == State::Normal)
+    return;
+
+  auto const dragging_tab = dragging_tab_;
+  StopDragging();
+
+  auto const result = model_->HitTest(gfx::PointF(event.location()));
+  if (!result) {
+    view_delegate_->DidDropTab(dragging_tab, event.screen_location());
+    return;
+  }
+  model_->InsertBefore(dragging_tab, result.tab());
+}
+
+void DragController::StopDragging() {
+  state_ = State::Normal;
+  dragging_tab_ = nullptr;
+  owner_->ReleaseCapture();
+  ::SetCursor(::LoadCursor(nullptr, IDC_ARROW));
+}
+
+// ModelObserver
+void DragController::DidDeleteTab(Tab* tab) {
+  if (dragging_tab_ != tab)
+    return;
+  StopDragging();
+}
+
+void DragController::DidInsertTab(Tab* tab) {
+  if (dragging_tab_ != tab)
+    return;
+  StopDragging();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// HoverController
+//
+class HoverController final : private ModelObserver {
+  private: Tab::HitTestResult hovered_;
+  private: ModelDelegate* model_;
+
+  public: HoverController(ModelDelegate* model);
+  public: ~HoverController();
+
+  public: void OnMouseExited(const ui::MouseEvent& event);
+  public: void OnMouseMoved(const ui::MouseEvent& event);
+  private: void UpdateHover(const Tab::HitTestResult& hitTestResult);
+
+  // ModelObserver
+  private: void DidDeleteTab(Tab* tab) override;
+  private: void DidInsertTab(Tab* tab) override;
+
+  DISALLOW_COPY_AND_ASSIGN(HoverController);
+};
+
+HoverController::HoverController(ModelDelegate* model)
+    : model_(model) {
+  model_->AddObserver(this);
+}
+
+HoverController::~HoverController() {
+  model_->RemoveObserver(this);
+}
+
+void HoverController::OnMouseExited(const ui::MouseEvent&) {
+  UpdateHover(Tab::HitTestResult());
+}
+
+void HoverController::OnMouseMoved(const ui::MouseEvent& event) {
+  UpdateHover(model_->HitTest(gfx::PointF(event.location())));
+}
+
+void HoverController::UpdateHover(const Tab::HitTestResult& hitTestResult) {
+  if (hovered_ == hitTestResult)
+      return;
+  if (hovered_ &&
+      hovered_.tab()->GetState(hovered_.part()) == Tab::State::Hovered) {
+    hovered_.tab()->SetState(hovered_.part(), Tab::State::Normal);
+  }
+  hovered_ = hitTestResult;
+  if (!hovered_)
+    return;
+  hovered_.tab()->SetState(hovered_.part(), Tab::State::Hovered);
+}
+
+// ModelObserver
+void HoverController::DidDeleteTab(Tab* tab) {
+  if (hovered_.tab() != tab)
+    return;
+  UpdateHover(Tab::HitTestResult());
+}
+
+void HoverController::DidInsertTab(Tab*) {
+  UpdateHover(Tab::HitTestResult());
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// TabCollection
+//
+class TabCollection final : public ui::Widget,
+                            public ModelDelegate,
+                            private ui::SystemMetricsObserver {
+  private: ObserverList<ModelObserver> observers_;
+
+  private: DragController drag_controller_;
+  private: bool dirty_;
+  private: HoverController hover_controller_;
+  private: Tab* selected_tab_;
+  private: bool should_selected_tab_visible_;
+  private: std::vector<Tab*> tabs_;
+  private: float tabs_origin_;
+  private: std::unique_ptr<gfx::TextFormat> text_format_;
+  private: ViewDelegate* const view_delegate_;
+
+  public: TabCollection(ViewDelegate* view_delegate);
+  public: virtual ~TabCollection();
+
+  public: const std::vector<Tab*> tabs() const { return tabs_; }
+
+  public: void DeleteTab(Tab* tab);
+  private: int GetPreferredTabWidth() const;
+  public: Tab* GetSelectedTab() const;
+  public: Tab* GetTab(size_t tab_index) const;
+  public: void InsertTab(TabContent* tab_content, size_t tab_index);
+  private: void MakeSelectionVisible();
+  private: void MarkDirty();
+  public: int NonClientHitTest(const gfx::Point& screen_point);
+  private: void NotifySelectTab();
+  private: void RenumberTabIndex();
+  public: void ScrollLeft();
+  public: void ScrollRight();
+  public: void SelectTab(Tab* tab);
+  private: void UpdateBoundsForAllTabs(float tab_width);
+  private: void UpdateLayout();
+  private: void UpdateTextFont();
+
+  // ModelDelegate
+  private: void AddObserver(ModelObserver* observer) override;
+  private: Tab::HitTestResult HitTest(const gfx::PointF& point) const override;
+  private: void InsertBefore(Tab* new_tab, Tab* ref_tab) override;
+  private: void RemoveObserver(ModelObserver* observer) override;
+
+  // ui::SystemMetricsObserver
+  private: virtual void DidChangeIconFont() override;
+
+  // ui::Widget
+  private: virtual void DidChangeBounds() override;
+  private: virtual void DidRealize() override;
+  private: virtual gfx::Size GetPreferredSize() const override;
+  private: virtual void OnDraw(gfx::Canvas* canvas) override;
+  private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
+  private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
+  private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
+  private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
+
+  DISALLOW_COPY_AND_ASSIGN(TabCollection);
+};
+
+TabCollection::TabCollection(ViewDelegate* view_delegate)
+    : drag_controller_(this, this, view_delegate), dirty_(true),
+      hover_controller_(this), selected_tab_(nullptr),
+      should_selected_tab_visible_(true), tabs_origin_(0),
+      view_delegate_(view_delegate) {
+}
+
+TabCollection::~TabCollection() {
+}
+
+void TabCollection::DeleteTab(Tab* tab) {
+  MarkDirty();
   auto selection_changed = false;
-  auto const tab = tabs_[tab_index];
   if (tabs_.size() == 1) {
     tabs_.clear();
     selected_tab_ = nullptr;
-    hover_element_ = nullptr;
   } else {
-    if (hover_element_ && (hover_element_ == tab ||
-                           hover_element_->IsDescendantOf(tab))) {
-      hover_element_ = nullptr;
-    }
     if (tab == selected_tab_) {
       selection_changed = true;
       selected_tab_ = nullptr;
     }
-    tabs_.erase(tabs_.begin() + static_cast<ptrdiff_t>(tab_index));
+    auto const it = std::find(tabs_.begin(), tabs_.end(), tab);
+    DCHECK(it != tabs_.end());
+    tabs_.erase(it);
     RenumberTabIndex();
   }
-  tooltip_.DeleteTool(tab);
+
+  if (selection_changed)
+    NotifySelectTab();
+
+  FOR_EACH_OBSERVER(ModelObserver, observers_, DidDeleteTab(tab));
   delete tab;
-
-  Redraw();
-  if (!selection_changed)
-    return;
-  DidSelectTab();
 }
 
-void TabStrip::Impl::DidBeginAnimationFrame(base::Time) {
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  canvas_->AddDirtyRect(canvas_->bounds());
-  Draw(canvas_.get());
-  widget_->RequestAnimationFrame();
+int TabCollection::GetPreferredTabWidth() const {
+  auto tab_width = 0;
+  for (auto const tab : tabs_)
+    tab_width = std::max(tab_width, tab->GetPreferredWidth());
+  return tab_width;
 }
 
-void TabStrip::Impl::DidSelectTab() {
-  delegate_->DidSelectTab(selected_tab_ ? selected_tab_->tab_index() : -1);
+Tab* TabCollection::GetSelectedTab() const {
+  return selected_tab_;
 }
 
-void TabStrip::Impl::DidRealize() {
-  canvas_.reset(widget_->layer()->CreateCanvas());
-  ChangeFont();
-  tooltip_.Realize(widget_->AssociatedHwnd());
-}
-
-void TabStrip::Impl::Draw(gfx::Canvas* canvas) const {
-  struct Local {
-    static void DrawInsertMarker(gfx::Canvas* canvas, Tab* insertion_marker) {
-      if (!insertion_marker)
-        return;
-      auto bounds = insertion_marker->bounds();
-      bounds.top += 5;
-      bounds.bottom -= 7;
-      gfx::Brush brush(canvas, gfx::ColorF::Black);
-      for (int w = 1; w <= 7; w += 2) {
-        canvas->FillRectangle(brush, gfx::RectF(
-            gfx::PointF(bounds.left, bounds.top), gfx::SizeF(w, 1)));
-        canvas->FillRectangle(brush, gfx::RectF(
-            gfx::PointF(bounds.left, bounds.bottom), gfx::SizeF(w, 1)));
-        bounds.top -= 1;
-        bounds.left -= 1;
-        bounds.bottom += 1;
-      }
-    }
-  };
-
- canvas->Clear(gfx::ColorF(0, 0, 1, 0.0));
- if (tabs_.empty())
-   return;
-
-  static_cast<const Element&>(scroll_left_button_).Draw(canvas);
-  static_cast<const Element&>(list_button_).Draw(canvas);
-  static_cast<const Element&>(scroll_right_button_).Draw(canvas);
-
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_.get(), tabs_bounds_);
-  for (auto const tab : tabs_) {
-    if (tab->right() < 0)
-      continue;
-    if (tab->left() > bounds_.right)
-      break;
-    tab->Draw(canvas);
-  }
-
-  Local::DrawInsertMarker(canvas, insertion_marker_);
-}
-
-// Send TabDragMsg to window which can handle it.
-void TabStrip::Impl::DropTab(Tab* tab, const POINT& window_point) {
-  auto screen_point = widget_->MapToDesktopPoint(window_point);
-
-  for (auto hwnd = ::WindowFromPoint(screen_point); hwnd;
-       hwnd = ::GetParent(hwnd)) {
-    if (auto const frame = FrameList::instance()->FindFrameByHwnd(hwnd)) {
-      static_cast<TabStripDelegate*>(frame)->OnDropTab(tab->tab_content());
-      return;
-    }
-  }
-
-  delegate_->DidThrowTab(tab->tab_content());
-}
-
-TabContent* TabStrip::Impl::GetTab(size_t tab_index) const {
+Tab* TabCollection::GetTab(size_t tab_index) const {
   if (tab_index >= tabs_.size())
     return nullptr;
-  return tabs_[tab_index]->tab_content();
+  return tabs_[tab_index];
 }
 
-void TabStrip::Impl::HandleTabListMenu(POINT) {
-  gfx::Point local_menu_origin(
-      static_cast<int>(list_button_.origin().x),
-      static_cast<int>(list_button_.origin().y));
-  auto const menu_origin = widget_->MapToDesktopPoint(local_menu_origin);
-  if (!tab_list_menu_)
-    tab_list_menu_ = ::CreatePopupMenu();
-
-  // Make Tab List Menu empty
-  while (::GetMenuItemCount(tab_list_menu_) > 0)
-    ::DeleteMenu(tab_list_menu_, 0, MF_BYPOSITION);
-
-  // Add Tab name to menu.
-  auto last_tab = static_cast<Tab*>(nullptr);
-  for (auto const tab : tabs_) {
-    auto const flags = tab->IsSelected() ? MF_STRING | MF_CHECKED :
-                                           MF_STRING;
-    if (last_tab && last_tab->right() < 0 != tab->right() < 0)
-      ::AppendMenu(tab_list_menu_, MF_SEPARATOR, 0, nullptr);
-    last_tab = tab;
-    ::AppendMenu(tab_list_menu_, static_cast<DWORD>(flags),
-                 static_cast<DWORD>(tab->tab_index()),
-                 tab->label_text_.c_str());
-  }
-
-  ::TrackPopupMenuEx(tab_list_menu_, TPM_LEFTALIGN | TPM_TOPALIGN, 
-      menu_origin.x(), menu_origin.y(), widget_->AssociatedHwnd(), nullptr);
+void TabCollection::MarkDirty() {
+  dirty_ = true;
 }
 
-Element* TabStrip::Impl::HitTest(const gfx::PointF& point) const {
-  if (auto const hit_result = scroll_left_button_.HitTest(point))
-    return hit_result;
-  if (auto const hit_result = scroll_right_button_.HitTest(point))
-    return hit_result;
-  if (auto const hit_result = list_button_.HitTest(point))
-    return hit_result;
-
-  for (auto const tab : tabs_) {
-    if (auto const hit_result = tab->HitTest(point))
-      return hit_result;
-  }
-
-  return nullptr;
-}
-
-void TabStrip::Impl::InsertTab(size_t tab_index_in,
-                                       TabContent* tab_content) {
+void TabCollection::InsertTab(TabContent* tab_content, size_t tab_index_in) {
+  MarkDirty();
+  DCHECK(text_format_);
   auto const tab_index = std::min(tab_index_in, tabs_.size());
-  auto const new_tab = new Tab(delegate_, tab_content);
+  auto const new_tab = new Tab(view_delegate_, tab_content, text_format_.get());
   tabs_.insert(tabs_.begin() + static_cast<ptrdiff_t>(tab_index), new_tab);
   RenumberTabIndex();
-  tooltip_.AddTool(new_tab);
-  Redraw();
+  FOR_EACH_OBSERVER(ModelObserver, observers_, DidInsertTab(new_tab));
 }
 
-void TabStrip::Impl::OnLButtonDown(POINT point) {
-  auto const element = HitTest(point);
-  if (!element)
+void TabCollection::MakeSelectionVisible() {
+  if (!selected_tab_)
     return;
-
-  if (auto arrow = element->as<ArrowButton>()) {
-    auto const scroll_width = 10.0f;
-    switch (arrow->direction()) {
-      case Direction::Down:
-        HandleTabListMenu(point);
-        break;
-      case Direction::Left: {
-        auto const new_tabs_origin = std::min(tabs_origin_ + scroll_width,
-                                              0.0f);
-        if (tabs_origin_ == new_tabs_origin)
-          break;
-        tabs_origin_ = new_tabs_origin;
-        should_selected_tab_visible_ = false;
-        Redraw();
-        break;
-      }
-      case Direction::Right: {
-        auto const min_tabs_origin = tabs_bounds_.width() -
-            tabs_.size() * tabs_.front()->width();
-        auto const new_tabs_origin = std::max(tabs_origin_ - scroll_width,
-                                              min_tabs_origin);
-        if (tabs_origin_ == new_tabs_origin)
-          break;
-        tabs_origin_ = new_tabs_origin;
-        should_selected_tab_visible_ = false;
-        Redraw();
-        break;
-      }
-    }
+  if (!should_selected_tab_visible_) {
+    should_selected_tab_visible_ = true;
+    MarkDirty();
     return;
   }
-
-  auto const tab = element->as<Tab>();
-  if (!tab) {
-    // Not a tab.
-    return;
-  }
-
-  if (!tab->IsSelected())
-    delegate_->RequestSelectTab(tab->tab_index());
-
-  // Note: We should start tab dragging, otherwise if mouse pointer is in
-  // close box, |OnButtonUp| close the tab.
-  LoadDragTabCursor();
-
-  dragging_tab_ = tab;
-  drag_state_ = Drag::Start;
-  drag_start_point_ = point;
-
-  widget_->SetCapture();
-}
-
-void TabStrip::Impl::OnLButtonUp(POINT point) {
-  if (!dragging_tab_) {
-    auto const element = HitTest(point);
-    if (!element)
-      return;
-
-    if (element->is<CloseBox>()) {
-      if (auto const tab = element->parent()->as<Tab>())
-        delegate_->RequestCloseTab(tab->tab_index());
-      return;
-    }
-
-    return;
-  }
-
-  auto const dragging_tab = dragging_tab_;
-  auto const insertion_marker = insertion_marker_;
-  StopDrag();
-
-  if (!insertion_marker) {
-    DropTab(dragging_tab, point);
-    return;
-  }
-
-  if (dragging_tab != insertion_marker) {
-    tabs_.erase(tabs_.begin() + dragging_tab->tab_index());
-    tabs_.insert(tabs_.begin() + insertion_marker->tab_index(), dragging_tab);
-    RenumberTabIndex();
-    UpdateLayout();
-  }
-
-  // Hide insertion position mark
-  //::InvalidateRect(hwnd_, nullptr, false);
-}
-
-void TabStrip::Impl::OnMouseMove(POINT point) {
-  auto const hover_element = HitTest(point);
-
-  if (!dragging_tab_) {
-    UpdateHover(hover_element);
-    return;
-  }
-
-  if (::GetCapture() != widget_->AssociatedHwnd()) {
-    // Someone takes capture. So, we stop dragging.
-    StopDrag();
-    return;
-  }
-
-  if (Drag::Start == drag_state_) {
-    if (point.x - drag_start_point_.x >= -5 &&
-        point.x - drag_start_point_.x <= 5) {
-      return;
-    }
-
-    drag_state_ = Drag::Tab;
-  }
-
-  // Tab dragging
-  auto const insertion_marker = hover_element ? hover_element->as<Tab>() :
-                                                nullptr;
-  ::SetCursor(s_hDragTabCursor);
-  if (insertion_marker == insertion_marker_)
-    return;
-
-  if (insertion_marker)
-    insertion_marker->Invalidate();
-
-  if (insertion_marker_)
-    insertion_marker_->Invalidate();
-
-  insertion_marker_ = insertion_marker;
-}
-
-LRESULT TabStrip::Impl::OnNotify(NMHDR* nmhdr) {
-  tooltip_.OnNotify(nmhdr);
-  return 0;
-}
-
-void TabStrip::Impl::Redraw() {
   UpdateLayout();
+  if (GetContentsBounds().Contains(selected_tab_->bounds()))
+    return;
+  MarkDirty();
 }
 
-void TabStrip::Impl::RenumberTabIndex() {
+int TabCollection::NonClientHitTest(const gfx::Point& screen_point) {
+  auto const point = MapFromDesktopPoint(screen_point);
+  if (!gfx::Rect(bounds().size()).Contains(point))
+    return HTNOWHERE;
+  auto const result = HitTest(gfx::PointF(point));
+  if (!result)
+    return HTCAPTION;
+  if (result.part() == Tab::Part::CloseMark)
+    return HTCLIENT;
+  return tabs_.size() == 1 ? HTCAPTION : HTCLIENT;
+}
+
+void TabCollection::NotifySelectTab() {
+  view_delegate_->DidSelectTab(selected_tab_);
+}
+
+void TabCollection::RenumberTabIndex() {
   auto tab_index = 0;
   for (auto tab : tabs_) {
     tab->set_tab_index(tab_index);
@@ -932,155 +1082,527 @@ void TabStrip::Impl::RenumberTabIndex() {
   }
 }
 
-int TabStrip::Impl::SelectTab(size_t tab_index) {
-  if (tab_index >= tabs_.size())
-    return -1;
-  return SelectTab(tabs_[tab_index]);
+void TabCollection::ScrollLeft() {
+  auto const new_tabs_origin = std::min(tabs_origin_ + kScrollWidth,
+                                        0.0f);
+  if (tabs_origin_ == new_tabs_origin)
+    return;
+  tabs_origin_ = new_tabs_origin;
+  should_selected_tab_visible_ = false;
+  MarkDirty();
 }
 
-int TabStrip::Impl::SelectTab(Tab* const tab) {
-  should_selected_tab_visible_ = true;
+void TabCollection::ScrollRight() {
+  auto const bounds = GetContentsBounds();
+  auto const min_tabs_origin = bounds.width() -
+      tabs_.size() * tabs_.front()->bounds().width();
+  auto const new_tabs_origin = std::max(tabs_origin_ - kScrollWidth,
+                                        min_tabs_origin);
+  if (tabs_origin_ == new_tabs_origin)
+    return;
+  tabs_origin_ = new_tabs_origin;
+  should_selected_tab_visible_ = false;
+  MarkDirty();
+}
+
+void TabCollection::SelectTab(Tab* tab) {
+  DCHECK(tab);
   if (selected_tab_ != tab) {
-    if (selected_tab_) {
-      selected_tab_->SetState(Element::State::Normal);
-      selected_tab_->Invalidate();
-    }
-
+    if (selected_tab_)
+      selected_tab_->SetState(Tab::Part::Label, Tab::State::Normal);
     selected_tab_ = tab;
-
-    if (tab) {
-      tab->SetState(Element::State::Selected);
-      Redraw();
-    }
-
-    DidSelectTab();
+    if (tab)
+      tab->SetState(Tab::Part::Label, Tab::State::Selected);
+    NotifySelectTab();
   }
-
-  return selected_tab_ ? selected_tab_->tab_index() : -1;
+  MakeSelectionVisible();
 }
 
-void TabStrip::Impl::SetBounds(const gfx::RectF& new_bounds) {
-  if (bounds_ == new_bounds)
-    return;
-  bounds_ = new_bounds;
-  tabs_bounds_ = bounds_;
-  canvas_->SetBounds(bounds_);
-  Redraw();
-}
-
-void TabStrip::Impl::SetTabData(size_t tab_index,
-                                        const domapi::TabData& tab_data) {
-  if (tab_index >= tabs_.size())
-    return;
-  auto const tab = tabs_[tab_index];
-  if (!tab->SetTabData(tab_data))
-    return;
-  tab->Invalidate();
-}
-
-void TabStrip::Impl::StopDrag() {
-  drag_state_ = Drag::None;
-  dragging_tab_ = nullptr;
-  insertion_marker_ = nullptr;
-
-  widget_->ReleaseCapture();
-  ::SetCursor(::LoadCursor(nullptr, IDC_ARROW));
-}
-
-void TabStrip::Impl::UpdateBoundsForAllTabs(float tab_width) {
-  auto origin = gfx::PointF(tabs_origin_ + tabs_bounds_.left,
-                            tabs_bounds_.top);
-  auto const tab_size = gfx::SizeF(tab_width,
-                                   tabs_bounds_.bottom - origin.y);
-  for (auto const tab : tabs_){
-    tab->set_bounds(gfx::RectF(origin, tab_size));
-    tab->UpdateLayout();
+void TabCollection::UpdateBoundsForAllTabs(float tab_width) {
+  auto const bounds = GetContentsBounds();
+  auto origin = gfx::PointF(tabs_origin_ + bounds.left, bounds.top);
+  auto const tab_size = gfx::SizeF(tab_width, bounds.bottom - origin.y);
+  for (auto const tab : tabs_) {
+    tab->SetBounds(gfx::RectF(origin, tab_size));
     origin.x += tab_width;
-    auto const visible_bounds = bounds_.Intersect(tab->bounds());
     // Note: We should pass bounds in HWND's coordinate rather than |TabStrip|
     // coordinate.
-    auto const tool_bounds = visible_bounds.Offset(
-        gfx::PointF(widget_->origin()));
-    tooltip_.SetToolBounds(tab, gfx::ToEnclosingRect(tool_bounds));
+    auto const visible_bounds = bounds.Intersect(tab->bounds())
+        .Offset(bounds.origin());
+    view_delegate_->SetToolBounds(tab, gfx::ToEnclosingRect(visible_bounds));
   }
 }
 
-void TabStrip::Impl::UpdateHover(Element* hover_element) {
-    if (hover_element_ == hover_element)
-      return;
-
-  if (hover_element_) {
-    if (!hover_element || !hover_element->is<CloseBox>() ||
-        hover_element->parent() != hover_element_) {
-      if (hover_element_->is<CloseBox>()) {
-        hover_element_->SetHover(false);
-        hover_element_ = hover_element_->parent();
-      }
-      hover_element_->SetHover(false);
-      hover_element_->Invalidate();
-    }
-  }
-
-  hover_element_ = hover_element;
-  if (hover_element_) {
-    hover_element_->SetHover(true);
-    hover_element_->Invalidate();
-  }
-}
-
-void TabStrip::Impl::UpdateLayout() {
+void TabCollection::UpdateLayout() {
+  if (!dirty_)
+    return;
+  dirty_ = false;
+  auto const bounds = GetContentsBounds();
   if (tabs_.empty()) {
     tabs_origin_ = 0;
     return;
   }
-
-  auto const tab_width = std::min(
-      std::max(bounds_.width() / tabs_.size(), kMinTabWidth), kMaxTabWidth);
-
-  if (tabs_.size() * tab_width < bounds_.width()) {
-    scroll_left_button_.set_bounds(gfx::RectF());
-    scroll_right_button_.set_bounds(gfx::RectF());
-    list_button_.set_bounds(gfx::RectF());
-    tabs_bounds_.left = bounds_.left;
-    tabs_bounds_.right = bounds_.right;
+  auto const tab_width = static_cast<float>(GetPreferredTabWidth());
+  if (tabs_.size() * tab_width < bounds.width())
     tabs_origin_ = 0;
-  } else {
-    auto const button_top = tabs_bounds_.top;
-    auto const button_height = tabs_bounds_.height();
-    scroll_left_button_.set_bounds(gfx::RectF(
-        gfx::PointF(bounds_.left, button_top),
-        gfx::SizeF(kArrowButtonWidth, button_height)));
-    list_button_.set_bounds(gfx::RectF(
-        gfx::PointF(bounds_.right - kArrowButtonWidth, button_top),
-        gfx::SizeF(kArrowButtonWidth, button_height)));
-    scroll_right_button_.set_bounds(gfx::RectF(
-        gfx::PointF(list_button_.left() - kArrowButtonWidth, button_top),
-        gfx::SizeF(kArrowButtonWidth, button_height)));
-    tabs_bounds_.left = scroll_left_button_.right();
-    tabs_bounds_.right = scroll_right_button_.left();
-  }
 
   UpdateBoundsForAllTabs(tab_width);
 
   if (!selected_tab_ || !should_selected_tab_visible_ ||
-      tabs_bounds_.Contains(selected_tab_->bounds())) {
+      bounds.Contains(selected_tab_->bounds())) {
     return;
   }
 
   // Make selected tab visible.
-  if ((selected_tab_->tab_index() + 1) * tab_width < tabs_bounds_.width()) {
+  auto const last_view_port_left = tabs_.size() * tab_width - bounds.width();
+  auto const selected_left = selected_tab_->tab_index() * tab_width;
+  auto const selected_right = selected_left + tab_width;
+  if (selected_right < bounds.width()) {
+    // |selected_tab_| is in left most part.
     tabs_origin_ = 0.0f;
-  } else if ((tabs_.size() - selected_tab_->tab_index()) * tab_width <
-             tabs_bounds_.width()) {
-    tabs_origin_ = -(tabs_.size() * tab_width) + tabs_bounds_.width();
-  } else if (selected_tab_->left() >= tabs_bounds_.left &&
-             selected_tab_->left() < tabs_bounds_.right) {
-    tabs_origin_ -= selected_tab_->right() - tabs_bounds_.right +
-                    tab_width / 3;
+  } else if (selected_left >= last_view_port_left) {
+    // |selected_tab_| is in right most part.
+    tabs_origin_ = -last_view_port_left;
+  } else if (selected_tab_->left() < bounds.left) {
+    // |selected_tab_| is left of view port.
+    tabs_origin_ = -selected_left;
   } else {
-    tabs_origin_ += -selected_tab_->left() + tab_width / 3;
+    // |selected_tab_| is right of view port.
+    tabs_origin_ = -(selected_right - bounds.width());
   }
   UpdateBoundsForAllTabs(tab_width);
+}
+
+void TabCollection::UpdateTextFont() {
+  LOGFONT lf;
+  if (!::SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(lf), &lf, 0))
+    return;
+  lf.lfHeight = -10;
+  text_format_.reset(new gfx::TextFormat(lf));
+  {
+    common::ComPtr<IDWriteInlineObject> inline_object;
+    COM_VERIFY(gfx::FactorySet::instance()->dwrite().
+        CreateEllipsisTrimmingSign(*text_format_, &inline_object));
+    DWRITE_TRIMMING trimming {DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0};
+    (*text_format_)->SetTrimming(&trimming, inline_object);
+  }
+  (*text_format_)->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+  for (auto const tab : tabs_)
+    tab->SetTextFormat(text_format_.get());
+  MarkDirty();
+}
+
+// ModelDelegate
+void TabCollection::AddObserver(ModelObserver* observer) {
+  observers_.AddObserver(observer);
+}
+
+Tab::HitTestResult TabCollection::HitTest(const gfx::PointF& point) const {
+  for (auto tab : tabs_) {
+    auto const result = tab->HitTest(point);
+    if (result)
+      return result;
+  }
+  return Tab::HitTestResult();
+}
+
+void TabCollection::InsertBefore(Tab* new_tab, Tab* ref_tab) {
+  MarkDirty();
+  tabs_.erase(tabs_.begin() + new_tab->tab_index());
+  tabs_.insert(tabs_.begin() + ref_tab->tab_index(), new_tab);
+  RenumberTabIndex();
+  FOR_EACH_OBSERVER(ModelObserver, observers_, DidInsertTab(new_tab));
+}
+
+void TabCollection::RemoveObserver(ModelObserver* observer) {
+  observers_.RemoveObserver(observer);
+}
+
+// ui::SystemMetricsObserver
+void TabCollection::DidChangeIconFont() {
+  UpdateTextFont();
+}
+
+// ui::Widget
+void TabCollection::DidChangeBounds() {
+  view_delegate_->RequestAnimationFrame();
+  dirty_ = true;
+}
+
+void TabCollection::DidRealize() {
+  UpdateTextFont();
+}
+
+gfx::Size TabCollection::GetPreferredSize() const {
+  auto const tab_width = GetPreferredTabWidth();
+  return gfx::Size(static_cast<int>(tab_width * tabs_.size()), kTabHeight);
+}
+
+void TabCollection::OnDraw(gfx::Canvas* canvas) {
+  UpdateLayout();
+  auto const content_bounds = GetContentsBounds();
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, content_bounds);
+  for (auto tab : tabs_) {
+    if (!tab->dirty())
+      continue;
+    auto const bounds = tab->bounds().Intersect(content_bounds);
+    if (bounds.empty())
+      continue;
+    canvas->AddDirtyRect(bounds);
+    tab->Draw(canvas);
+  }
+}
+
+void TabCollection::OnMouseExited(const ui::MouseEvent& event) {
+  hover_controller_.OnMouseExited(event);
+}
+
+void TabCollection::OnMouseMoved(const ui::MouseEvent& event) {
+  if (event.flags() & static_cast<int>(ui::EventFlags::NonClient))
+    return;
+  if (drag_controller_.is_dragging()) {
+    drag_controller_.OnMouseMoved(event);
+    return;
+  }
+  hover_controller_.OnMouseMoved(event);
+}
+
+void TabCollection::OnMousePressed(const ui::MouseEvent& event) {
+  if (event.flags() & static_cast<int>(ui::EventFlags::NonClient))
+    return;
+  drag_controller_.OnMousePressed(event);
+}
+
+void TabCollection::OnMouseReleased(const ui::MouseEvent& event) {
+  if (event.flags() & static_cast<int>(ui::EventFlags::NonClient))
+    return;
+  if (drag_controller_.is_dragging()) {
+    drag_controller_.OnMouseReleased(event);
+    return;
+  }
+  // Close tab when left button is released on tab close mark.
+  auto const result = HitTest(gfx::PointF(event.location()));
+  if (!result || result.part() != Tab::Part::CloseMark)
+    return;
+  auto const tab = result.tab();
+  view_delegate_->RequestCloseTab(tab);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// TabListMenu
+//
+class TabListMenu final {
+  private: HMENU menu_handle_;
+  private: ui::Widget* const owner_;
+  private: const TabCollection* tab_collection_;
+
+  public: TabListMenu(ui::Widget* owner, const TabCollection* tab_collection);
+  public: ~TabListMenu();
+
+  public: void Show();
+
+  DISALLOW_COPY_AND_ASSIGN(TabListMenu);
+};
+
+TabListMenu::TabListMenu(ui::Widget* owner, const TabCollection* tab_collection)
+    : menu_handle_(nullptr), owner_(owner), tab_collection_(tab_collection) {
+}
+
+TabListMenu::~TabListMenu() {
+  if (!menu_handle_)
+    return;
+  ::DestroyMenu(menu_handle_);
+}
+
+void TabListMenu::Show() {
+  auto const menu_origin = owner_->MapToDesktopPoint(gfx::Point());
+  if (!menu_handle_)
+    menu_handle_ = ::CreatePopupMenu();
+
+  // Make Tab List Menu empty
+  while (::GetMenuItemCount(menu_handle_) > 0)
+    ::DeleteMenu(menu_handle_, 0, MF_BYPOSITION);
+
+  // Add Tab name to menu.
+  auto last_tab = static_cast<Tab*>(nullptr);
+  for (auto const tab : tab_collection_->tabs()) {
+    auto const flags = tab->is_selected() ? MF_STRING | MF_CHECKED :
+                                            MF_STRING;
+    if (last_tab && last_tab->right() < 0 != tab->right() < 0)
+      ::AppendMenu(menu_handle_, MF_SEPARATOR, 0, nullptr);
+    last_tab = tab;
+    ::AppendMenu(menu_handle_, static_cast<DWORD>(flags),
+                 static_cast<DWORD>(tab->tab_index()),
+                 tab->label_text().c_str());
+  }
+
+  ::TrackPopupMenuEx(menu_handle_, TPM_LEFTALIGN | TPM_TOPALIGN, 
+      menu_origin.x(), menu_origin.y(), owner_->AssociatedHwnd(), nullptr);
+}
+
+}  // namespace
+
+//////////////////////////////////////////////////////////////////////
+//
+// TabStrip::View class
+//
+class TabStrip::View final : private ButtonListener, private ModelObserver,
+                             private ViewDelegate {
+  private: std::unique_ptr<gfx::Canvas> canvas_;
+  private: bool dirty_;
+  private: const std::unique_ptr<ArrowButton> list_button_;
+  private: const std::unique_ptr<ArrowButton> scroll_left_button_;
+  private: const std::unique_ptr<ArrowButton> scroll_right_button_;
+  private: Tab* selected_tab_;
+  private: bool should_selected_tab_visible_;
+  private: gfx::RectF bounds_;
+  private: const std::unique_ptr<TabCollection> tab_collection_;
+  private: TabListMenu tab_list_menu_;
+  private: TabStripDelegate* tab_strip_delegate_;
+  private: ui::Tooltip tooltip_;
+  private: TabStrip* widget_;
+
+  public: View(TabStrip* widget, TabStripDelegate* delegate);
+  public: virtual ~View();
+
+  public: void DidBeginAnimationFrame(base::Time time);
+  public: void DidRealize();
+  public: void DeleteTab(size_t tab_index);
+  private: void DisableButton(ui::Widget* widget);
+  private: void EnableButton(ui::Widget* widget);
+  public: size_t GetNumberOfTabs() const;
+  public: Tab* GetSelectedTab() const;
+  public: Tab* GetTab(size_t tab_index) const;
+  public: void InsertTab(TabContent* tab_content, size_t tab_index);
+  public: void MarkDirty();
+  public: int NonClientHitTest(const gfx::Point& screen_point);
+  // TODO(eval1749) Once we should revise tooltip handling, we should get rid
+  // of |TabStrip::View::OnNotify()|.
+  public: LRESULT OnNotify(NMHDR* nmhder);
+  public: void SelectTab(size_t tab_index);
+  public: void SetTabData(size_t tab_index, const domapi::TabData& tab_data);
+  private: void UpdateLayout();
+
+  // ButtonListner
+  private: virtual void DidPressButton(Button* sender,
+                                       const ui::Event& event) override;
+  // ModelObserver
+  private: void DidDeleteTab(Tab* tab) override;
+  private: void DidInsertTab(Tab* tab) override;
+
+  // ViewDelegate
+  private: virtual void DidDropTab(Tab* tab,
+                                   const gfx::Point& screen_point) override;
+  private: virtual void DidSelectTab(Tab* tab) override;
+  private: virtual base::string16 GetTooltipTextForTab(Tab* tab) override;
+  private: virtual void RequestAnimationFrame() override;
+  private: virtual void RequestCloseTab(Tab* tab) override;
+  private: virtual void RequestSelectTab(Tab* tab) override;
+  private: virtual void SetToolBounds(Tab* tab,
+                                      const gfx::Rect& bounds) override;
+
+  DISALLOW_COPY_AND_ASSIGN(View);
+};
+
+TabStrip::View::View(TabStrip* widget, TabStripDelegate* delegate)
+    : dirty_(true), list_button_(new ArrowButton(Direction::Down, this)),
+      scroll_left_button_(new ArrowButton(Direction::Left, this)),
+      scroll_right_button_(new ArrowButton(Direction::Right, this)),
+      tab_collection_(new TabCollection(this)),
+      tab_list_menu_(list_button_.get(), tab_collection_.get()),
+      tab_strip_delegate_(delegate),
+      widget_(widget) {
+  static_cast<ModelDelegate*>(tab_collection_.get())->AddObserver(this);
+  list_button_->set_owned_by_client();
+  scroll_left_button_->set_owned_by_client();
+  scroll_right_button_->set_owned_by_client();
+  tab_collection_->set_owned_by_client();
+}
+
+TabStrip::View::~View() {
+}
+
+void TabStrip::View::DeleteTab(size_t tab_index) {
+  auto const tab = tab_collection_->GetTab(static_cast<size_t>(tab_index));
+  if (!tab)
+    return;
+  tab_collection_->DeleteTab(tab);
+}
+
+void TabStrip::View::DidBeginAnimationFrame(base::Time) {
+  UpdateLayout();
+  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+  widget_->OnDraw(canvas_.get());
+}
+
+void TabStrip::View::DidRealize() {
+  canvas_.reset(widget_->layer()->CreateCanvas());
+  tab_collection_->SetBounds(gfx::ToEnclosingRect(
+      widget_->GetContentsBounds()));
+  widget_->AppendChild(tab_collection_.get());
+  tab_collection_->RealizeWidget();
+  tooltip_.Realize(widget_->AssociatedHwnd());
+  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+  canvas_->Clear(gfx::ColorF(0, 0, 0, 0));
+}
+
+void TabStrip::View::DisableButton(ui::Widget* button) {
+  if (!button->parent_node())
+    return;
+  button->Hide();
+  widget_->RemoveChild(button);
+}
+
+void TabStrip::View::EnableButton(ui::Widget* button) {
+  if (!button->parent_node())
+    widget_->AppendChild(button);
+  if (!button->is_realized())
+    button->RealizeWidget();
+  if (!button->visible())
+    button->Show();
+}
+
+size_t TabStrip::View::GetNumberOfTabs() const {
+  return tab_collection_->tabs().size();
+}
+
+Tab* TabStrip::View::GetSelectedTab() const {
+  return tab_collection_->GetSelectedTab();
+}
+
+Tab* TabStrip::View::GetTab(size_t tab_index) const {
+  return tab_collection_->GetTab(tab_index);
+}
+
+void TabStrip::View::InsertTab(TabContent* tab_content, size_t tab_index) {
+  tab_collection_->InsertTab(tab_content, tab_index);
+}
+
+void TabStrip::View::MarkDirty() {
+  RequestAnimationFrame();
+  dirty_ = true;
+}
+
+int TabStrip::View::NonClientHitTest(const gfx::Point& screen_point) {
+  UpdateLayout();
+  return tab_collection_->NonClientHitTest(screen_point);
+}
+
+LRESULT TabStrip::View::OnNotify(NMHDR* nmhdr) {
+  tooltip_.OnNotify(nmhdr);
+  return 0;
+}
+
+void TabStrip::View::SelectTab(size_t tab_index) {
+  auto const tab = tab_collection_->GetTab(tab_index);
+  if (!tab)
+    return;
+  tab_collection_->SelectTab(tab);
+}
+
+void TabStrip::View::SetTabData(size_t tab_index,
+                                const domapi::TabData& tab_data) {
+  auto const tab = tab_collection_->GetTab(tab_index);
+  if (!tab)
+    return;
+  tab->SetTabData(tab_data);
+}
+
+void TabStrip::View::UpdateLayout() {
+  if (!dirty_)
+    return;
+  dirty_ = false;
+  canvas_->SetBounds(widget_->GetContentsBounds());
+  auto const bounds = gfx::ToEnclosingRect(widget_->GetContentsBounds());
+  auto const tabs_size = static_cast<ui::Widget*>(tab_collection_.get())->
+      GetPreferredSize();
+  if (tabs_size.width() <= bounds.width()) {
+    // Show only |TabCollection|.
+    DisableButton(list_button_.get());
+    DisableButton(scroll_left_button_.get());
+    DisableButton(scroll_right_button_.get());
+    tab_collection_->SetBounds(bounds);
+    return;
+  }
+
+  // Show |TabCollection| with scroll buttons and list button.
+  auto const button_size = gfx::Size(kArrowButtonWidth, bounds.height());
+  auto const button_top = bounds.top();
+  scroll_left_button_->SetBounds(
+      gfx::Point(bounds.origin().x(), button_top), button_size);
+  list_button_->SetBounds(
+      gfx::Point(bounds.right() - kArrowButtonWidth, button_top), button_size);
+  scroll_right_button_->SetBounds(
+      gfx::Point(list_button_->bounds().left() - kArrowButtonWidth, button_top),
+      button_size);
+  tab_collection_->SetBounds(gfx::Point(scroll_left_button_->bounds().right(),
+                                        bounds.top()),
+                             gfx::Point(scroll_right_button_->bounds().left(),
+                                        bounds.bottom()));
+  EnableButton(list_button_.get());
+  EnableButton(scroll_left_button_.get());
+  EnableButton(scroll_right_button_.get());
+}
+
+// ButtonListener
+void TabStrip::View::DidPressButton(Button* sender, const ui::Event&) {
+  if (sender == list_button_.get()) {
+    tab_list_menu_.Show();
+    return;
+  }
+
+  if (sender == scroll_left_button_.get()) {
+    tab_collection_->ScrollLeft();
+    return;
+  }
+
+  if (sender == scroll_right_button_.get()) {
+    tab_collection_->ScrollRight();
+    return;
+  }
+
+  NOTREACHED();
+}
+
+// ModelObserver
+void TabStrip::View::DidDeleteTab(Tab* tab) {
+ tooltip_.DeleteTool(tab);
+ MarkDirty();
+}
+
+void TabStrip::View::DidInsertTab(Tab* tab) {
+ tooltip_.AddTool(tab);
+ MarkDirty();
+}
+
+// ViewDelegate
+void TabStrip::View::DidDropTab(Tab* tab, const gfx::Point& screen_point) {
+  tab_strip_delegate_->DidDropTab(tab->tab_content(), screen_point);
+}
+
+void TabStrip::View::DidSelectTab(Tab* tab) {
+  tab_strip_delegate_->DidSelectTab(tab ? tab->tab_index() : -1);
+}
+
+base::string16 TabStrip::View::GetTooltipTextForTab(Tab* tab) {
+  return tab_strip_delegate_->GetTooltipTextForTab(tab->tab_index());
+}
+
+void TabStrip::View::RequestAnimationFrame() {
+  widget_->RequestAnimationFrame();
+}
+
+void TabStrip::View::RequestCloseTab(Tab* tab) {
+  tab_strip_delegate_->RequestCloseTab(tab->tab_index());
+}
+
+void TabStrip::View::RequestSelectTab(Tab* tab) {
+  tab_strip_delegate_->RequestSelectTab(tab->tab_index());
+}
+
+void TabStrip::View::SetToolBounds(Tab* tab, const gfx::Rect& bounds) {
+  tooltip_.SetToolBounds(tab, bounds);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1088,43 +1610,45 @@ void TabStrip::Impl::UpdateLayout() {
 // TabStrip
 //
 TabStrip::TabStrip(TabStripDelegate* delegate)
-    : impl_(new Impl(this, delegate)) {
+    : view_(new View(this, delegate)) {
 }
 
 TabStrip::~TabStrip() {
 }
 
 int TabStrip::number_of_tabs() const {
-  return static_cast<int>(impl_->number_of_tabs());
+  return static_cast<int>(view_->GetNumberOfTabs());
 }
 
 int TabStrip::selected_index() const {
-  return static_cast<int>(impl_->selected_index());
+  auto const tab = view_->GetSelectedTab();
+  return tab ? tab->tab_index() : -1;
 }
 
 void TabStrip::DeleteTab(int tab_index) {
-  impl_->DeleteTab(static_cast<size_t>(tab_index));
+  view_->DeleteTab(static_cast<size_t>(tab_index));
 }
 
 TabContent* TabStrip::GetTab(int tab_index) {
-  return impl_->GetTab(static_cast<size_t>(tab_index));
+  auto const tab = view_->GetTab(static_cast<size_t>(tab_index));
+  return tab ? tab->tab_content() : nullptr;
 }
 
-void TabStrip::InsertTab(int new_tab_index, TabContent* tab_content) {
-  impl_->InsertTab(static_cast<size_t>(new_tab_index), tab_content);
+void TabStrip::InsertTab(TabContent* tab_content, int new_tab_index) {
+  view_->InsertTab(tab_content, static_cast<size_t>(new_tab_index));
 }
 
 void TabStrip::SelectTab(int tab_index) {
-  impl_->SelectTab(static_cast<size_t>(tab_index));
+  view_->SelectTab(static_cast<size_t>(tab_index));
 }
 
 void TabStrip::SetTab(int tab_index, const domapi::TabData& tab_data) {
-  impl_->SetTabData(static_cast<size_t>(tab_index), tab_data);
+  view_->SetTabData(static_cast<size_t>(tab_index), tab_data);
 }
 
 // ui::AnimationFrameHanndler
 void TabStrip::DidBeginAnimationFrame(base::Time time) {
-  impl_->DidBeginAnimationFrame(time);
+  view_->DidBeginAnimationFrame(time);
 }
 
 // ui::Widget
@@ -1132,47 +1656,31 @@ void TabStrip::DidChangeBounds() {
   ui::AnimatableWindow::DidChangeBounds();
   if (layer())
     layer()->SetBounds(bounds());
-  impl_->SetBounds(GetContentsBounds());
+  view_->MarkDirty();
 }
 
 void TabStrip::DidRealize() {
   ui::AnimatableWindow::DidRealize();
   SetLayer(new ui::Layer());
   layer()->SetBounds(bounds());
-  impl_->DidRealize();
+  view_->DidRealize();
 }
 
-// On Win8.1
-//  SM_CYSIZE = 22
-//  SM_CYCAPTION = 23
-//  SM_CYEDGE = 2
-//  SM_CYSIZEFRAME = 4
 gfx::Size TabStrip::GetPreferredSize() const {
-  return Size(300, 28);
+  return Size(300, kTabHeight);
 }
 
-void TabStrip::OnMouseExited(const ui::MouseEvent&) {
-  impl_->UpdateHover(nullptr);
-}
-
-void TabStrip::OnMouseMoved(const ui::MouseEvent& event) {
-  impl_->OnMouseMove(event.location());
-}
-
-void TabStrip::OnMousePressed(const ui::MouseEvent& event) {
-  if (!event.is_left_button() || event.click_count())
-    return;
-  impl_->OnLButtonDown(event.location());
-}
-
-void TabStrip::OnMouseReleased(const ui::MouseEvent& event) {
-  if (!event.is_left_button())
-    return;
-  impl_->OnLButtonUp(event.location());
+int TabStrip::NonClientHitTest(const gfx::Point& screen_point) const {
+  auto const point = MapFromDesktopPoint(screen_point);
+  if (point.y() < 0)
+    return HTCAPTION;
+  if (!gfx::Rect(bounds().size()).Contains(point))
+    return HTNOWHERE;
+  return view_->NonClientHitTest(screen_point);
 }
 
 LRESULT TabStrip::OnNotify(NMHDR* nmhdr) {
-  return impl_->OnNotify(nmhdr);
+  return view_->OnNotify(nmhdr);
 }
 
 }  // namespace views

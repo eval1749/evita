@@ -123,13 +123,13 @@ class Frame final : public views::Window,
                                       const domapi::TabData& tab_data) override;
 
   // views::TabStripDelegate
+  private: virtual void DidDropTab(TabContent* tab_content,
+                                   const gfx::Point& screen_point) override;
   private: virtual void DidSelectTab(int new_selected_index) override;
-  private: virtual void DidThrowTab(TabContent* tab_content);
   private: virtual base::string16 GetTooltipTextForTab(int tab_index) override;
   private: virtual void RequestCloseTab(int tab_index) override;
   private: virtual void RequestSelectTab(
       int new_selected_index) override;
-  private: virtual void OnDropTab(TabContent* tab_content);
 
   DISALLOW_COPY_AND_ASSIGN(Frame);
 };

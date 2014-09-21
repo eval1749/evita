@@ -261,6 +261,10 @@ Widget* Widget::GetHostWidget() const {
   return RootWidget::instance();
 }
 
+gfx::Rect Widget::GetLocalBounds() const {
+  return gfx::Rect(bounds_.size());
+}
+
 gfx::Size Widget::GetPreferredSize() const {
   return gfx::Size();
 }

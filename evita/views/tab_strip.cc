@@ -1063,7 +1063,7 @@ void TabCollection::MakeSelectionVisible() {
 
 int TabCollection::NonClientHitTest(const gfx::Point& screen_point) {
   auto const point = MapFromDesktopPoint(screen_point);
-  if (!gfx::Rect(bounds().size()).Contains(point))
+  if (!GetLocalBounds().Contains(point))
     return HTNOWHERE;
   auto const result = HitTest(gfx::PointF(point));
   if (!result)
@@ -1697,7 +1697,7 @@ int TabStrip::NonClientHitTest(const gfx::Point& screen_point) const {
   auto const point = MapFromDesktopPoint(screen_point);
   if (point.y() < 0)
     return HTCAPTION;
-  if (!gfx::Rect(bounds().size()).Contains(point))
+  if (!GetLocalBounds().Contains(point))
     return HTNOWHERE;
   return view_->NonClientHitTest(screen_point);
 }

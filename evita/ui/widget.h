@@ -114,6 +114,9 @@ class Widget : public common::Castable,
   public: gfx::RectF GetContentsBounds() const;
   protected: virtual HCURSOR GetCursorAt(const gfx::Point& point) const;
   private: Widget* GetHostWidget() const;
+  // Returns the bounds of the view in its own coordinates (i.e. position is
+  // 0, 0). This function is useful for hit test.
+  public: gfx::Rect GetLocalBounds() const;
   public: virtual gfx::Size GetPreferredSize() const;
 
   // [H]

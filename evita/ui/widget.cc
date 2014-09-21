@@ -77,7 +77,7 @@ Widget::HitTestResult::HitTestResult()
 //
 Widget::Widget(std::unique_ptr<NativeWindow> native_window)
     : native_window_(std::move(native_window)), owned_by_client_(false),
-      shown_(0),
+      visible_(0),
       state_(kNotRealized) {
 }
 
@@ -179,7 +179,11 @@ void Widget::DidDestroyWidget() {
 }
 
 void Widget::DidHide() {
+  visible_ = false;
   container_widget()->DidChangeChildVisibility(this);
+  // Hide widgets in top to bottom == post order.
+  for (auto child : common::adopters::reverse(child_nodes()))
+    child->Hide();
 }
 
 void Widget::DidKillFocus(ui::Widget*) {
@@ -206,6 +210,7 @@ void Widget::DidSetFocus(ui::Widget*) {
 }
 
 void Widget::DidShow() {
+  visible_ = true;
   container_widget()->DidChangeChildVisibility(this);
   // Show child in bottom to top == pre-order.
   for (auto child : child_nodes())
@@ -365,10 +370,6 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
 }
 
 void Widget::Hide() {
-  // Hide widgets in top to bottom == post order.
-  for (auto child : common::adopters::reverse(child_nodes()))
-    child->Hide();
-  shown_ = 0;
   if (native_window_) {
     ::ShowWindow(*native_window_.get(), SW_HIDE);
     return;
@@ -501,7 +502,7 @@ void Widget::RealizeWidget() {
   DidRealize();
   DidChangeBounds();
   if (parent_node()->visible()) {
-    shown_ = 1;
+    visible_ = true;
     DidShow();
     SchedulePaint();
   }
@@ -615,8 +616,7 @@ void Widget::SetParentWidget(Widget* new_parent) {
 }
 
 void Widget::Show() {
-  ++shown_;
-  if (shown_ != 1)
+  if (visible_)
     return;
 
   if (native_window_) {
@@ -664,8 +664,6 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
     }
     case WM_CREATE: {
       auto const create_data = reinterpret_cast<const CREATESTRUCT*>(lParam);
-      if (create_data->style & WS_VISIBLE)
-        ++shown_;
       if (create_data->hwndParent) {
         bounds_ = gfx::Rect(gfx::Point(create_data->x, create_data->y),
                             gfx::Size(create_data->cx, create_data->cy));
@@ -774,18 +772,6 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       //if (wp->flags & SWP_NOSIZE) return 0;
 
       auto const wp = reinterpret_cast<WINDOWPOS*>(lParam);
-      if (wp->flags & SWP_HIDEWINDOW) {
-        // We don't take care hidden window.
-        for (auto widget : common::tree::descendants_or_self(this))
-          widget->shown_ = 0;
-        return 0;
-      }
-
-      if (wp->flags & SWP_SHOWWINDOW) {
-        for (auto widget : common::tree::descendants_or_self(this))
-          widget->shown_ = 1;
-      }
-
       if (wp->flags & SWP_NOSIZE)
         return 0;
 

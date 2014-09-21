@@ -56,8 +56,8 @@ class Widget : public common::Castable,
   // False if this View is owned by its parent - i.e. it will be deleted by its
   // parent during its parents destruction. False is the default.
   private: bool owned_by_client_;
-  private: int shown_;
   private: State state_;
+  private: bool visible_;
 
   protected: explicit Widget(std::unique_ptr<NativeWindow> native_window);
   protected: Widget();
@@ -79,7 +79,7 @@ class Widget : public common::Castable,
     return native_window_.get();
   }
   public: const gfx::Point origin() const { return bounds_.origin(); }
-  public: bool visible() const { return shown_; }
+  public: bool visible() const { return visible_; }
 
   // By default a View is owned by its parent unless specified otherwise here.
   public: void set_owned_by_client() { owned_by_client_ = true; }

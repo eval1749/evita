@@ -28,10 +28,8 @@ class ScrollBar;
 }
 
 namespace views {
-
 class MetricsView;
 class TextRenderer;
-
 namespace rendering {
 class TextSelectionModel;
 }
@@ -46,57 +44,35 @@ class TextWindow final : private gfx::CanvasObserver,
                          public ContentWindow {
   DECLARE_CASTABLE_CLASS(TextWindow, ContentWindow);
 
-  private: typedef common::win::Point Point;
-  private: typedef text::Range Range;
-  private: typedef TextRenderer TextRenderer;
   private: typedef rendering::TextSelectionModel TextSelectionModel;
   private: class ScrollBar;
 
-  private: Posn m_lCaretPosn;
+  private: text::Posn caret_offset_;
   private: MetricsView* metrics_view_;
-  // TODO(yosi): Manage life time of selection.
+  // TODO(eval1749): Manage life time of selection.
   private: text::Selection* const selection_;
   private: std::unique_ptr<TextRenderer> text_renderer_;
   private: ui::ScrollBar* const vertical_scroll_bar_;
 
-  // ctor/dtor
-  public: explicit TextWindow(WindowId window_id,
-                                  text::Selection* selection);
+  public: TextWindow(WindowId window_id, text::Selection* selection);
   public: virtual ~TextWindow();
 
-  public: text::Buffer* buffer() const;
+  private: text::Buffer* buffer() const;
 
-  // [C]
   public: text::Posn ComputeMotion(
       Unit unit, Count count, const gfx::PointF& point, text::Posn position);
-
-  // [E]
-  public: Posn EndOfLine(Posn);
-
-  // [G]
-  public: Posn GetEnd();
-  public: Posn GetStart();
-
-  // [H]
-  public: gfx::RectF HitTestTextPosition(Posn);
-
-  // [L]
-  public: bool LargeScroll(int x_count, int y_count);
-
-  // [M]
-  public: Posn MapPointToPosition(const gfx::PointF point);
-
-  // [R]
+  public: text::Posn EndOfLine(text::Posn offset);
+  public: text::Posn GetEnd();
+  public: text::Posn GetStart();
+  public: gfx::RectF HitTestTextPosition(text::Posn offset);
+  private: bool LargeScroll(int x_count, int y_count);
+  public: text::Posn MapPointToPosition(const gfx::PointF point);
   private: void Redraw();
   private: void Render(const TextSelectionModel& selection);
-
-  // [S]
   public: void SetZoom(float new_zoom);
   private: bool ShouldRender() const;
   public: bool SmallScroll(int x_count, int y_count);
-  public: Posn StartOfLine(Posn);
-
-  // [U]
+  public: text::Posn StartOfLine(text::Posn offset);
   private: void UpdateLayout();
 
   // gfx::CanvasObserver
@@ -131,7 +107,7 @@ class TextWindow final : private gfx::CanvasObserver,
   private: virtual void DidRealize() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void DidShow() override;
-  private: virtual HCURSOR GetCursorAt(const Point&) const override;
+  private: virtual HCURSOR GetCursorAt(const gfx::Point& point) const override;
 
   // views::ContentWindow
   private: virtual void MakeSelectionVisible() override;

@@ -5,36 +5,22 @@
 #include "evita/views/text_window.h"
 
 #include <algorithm>
-#include <vector>
 
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
-#include "base/bind.h"
-#pragma warning(pop)
 #include "base/logging.h"
 #include "base/strings/string16.h"
-#include "base/strings/stringprintf.h"
-#include "common/timer/timer.h"
-#include "evita/dom/lock.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
-#include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/dom/public/text_composition_data.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/text/buffer.h"
-#include "evita/text/marker_set.h"
-#include "evita/text/range.h"
 #include "evita/text/selection.h"
-#include "evita/ui/animation/animator.h"
 #include "evita/ui/base/ime/text_composition.h"
 #include "evita/ui/base/ime/text_input_client.h"
-#include "evita/ui/compositor/compositor.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/controls/scroll_bar.h"
 #include "evita/ui/focus_controller.h"
-#include "evita/views/icon_cache.h"
 #include "evita/views/metrics_view.h"
 #include "evita/views/text/render_selection.h"
 #include "evita/views/text/text_renderer.h"
@@ -44,6 +30,17 @@ namespace views {
 using rendering::TextSelectionModel;
 
 namespace {
+
+text::Posn GetCaretOffset(const text::Buffer* buffer,
+                          const TextSelectionModel& selection,
+                          text::Posn caret_offset) {
+  if (!selection.disabled())
+    return selection.focus_offset();
+  auto const max_offset = buffer->GetEnd();
+  if (selection.start() == max_offset && selection.end() == max_offset)
+    return max_offset;
+  return caret_offset == -1 ? selection.focus_offset() : caret_offset;
+}
 
 TextSelectionModel GetTextSelectionModel(
     TextWindow* window, const text::Selection& selection) {
@@ -60,7 +57,7 @@ TextSelectionModel GetTextSelectionModel(
 //
 TextWindow::TextWindow(WindowId window_id, text::Selection* selection)
     : ContentWindow(window_id),
-      m_lCaretPosn(-1),
+      caret_offset_(-1),
       metrics_view_(new MetricsView()),
       text_renderer_(new TextRenderer(selection->buffer())),
       selection_(selection),
@@ -124,9 +121,10 @@ text::Posn TextWindow::ComputeMotion(
     }
 
     case Unit_Window:
-      if (n > 0)
+      if (n > 0) {
         return std::max(std::min(GetEnd() - 1, buffer()->GetEnd()),
                         GetStart());
+      }
       if (n < 0)
         return GetStart();
       return lPosn;
@@ -152,11 +150,10 @@ Posn TextWindow::GetStart() {
   UI_ASSERT_DOM_LOCKED();
   return text_renderer_->GetStart();
 }
-// Description:
 // Maps position specified buffer position and returns height
 // of caret, If specified buffer position isn't in window, this function
 // returns 0.
-gfx::RectF TextWindow::HitTestTextPosition(Posn text_offset) {
+gfx::RectF TextWindow::HitTestTextPosition(text::Posn text_offset) {
   DCHECK_GE(text_offset, 0);
   UI_ASSERT_DOM_LOCKED();
   return text_renderer_->HitTestTextPosition(text_offset);
@@ -185,7 +182,7 @@ bool TextWindow::LargeScroll(int, int iDy) {
     }
   } else if (iDy > 0) {
     // Scroll Up -- format page from page end.
-    const Posn lBufEnd = buffer()->GetEnd();
+    auto const lBufEnd = buffer()->GetEnd();
     for (auto k = 0; k < iDy; ++k) {
       auto const lStart = text_renderer_->GetEnd();
       if (lStart >= lBufEnd)
@@ -208,31 +205,22 @@ void TextWindow::Redraw() {
     return;
 
   auto const selection = GetTextSelectionModel(this, *selection_);
-  Posn lCaretPosn;
-  if (selection.disabled()) {
-    auto const max_offset = buffer()->GetEnd();
-    if (selection.start() == max_offset && selection.end() == max_offset)
-      lCaretPosn = max_offset;
-    else
-      lCaretPosn = m_lCaretPosn == -1 ? selection.focus_offset() : m_lCaretPosn;
-  } else {
-    lCaretPosn = selection.focus_offset();
-  }
-
-  DCHECK_GE(lCaretPosn, 0);
+  auto const new_caret_offset = GetCaretOffset(buffer(), selection,
+                                               caret_offset_);
+  DCHECK_GE(new_caret_offset, 0);
 
   if (text_renderer_->FormatIfNeeded()) {
-    if (m_lCaretPosn != lCaretPosn) {
-      text_renderer_->ScrollToPosition(lCaretPosn);
-      m_lCaretPosn = lCaretPosn;
+    if (caret_offset_ != new_caret_offset) {
+      text_renderer_->ScrollToPosition(new_caret_offset);
+      caret_offset_ = new_caret_offset;
     }
     Render(selection);
     return;
   }
 
-  if (m_lCaretPosn != lCaretPosn) {
-    m_lCaretPosn = lCaretPosn;
-    if (text_renderer_->IsPositionFullyVisible(lCaretPosn)) {
+  if (caret_offset_ != new_caret_offset) {
+    caret_offset_ = new_caret_offset;
+    if (text_renderer_->IsPositionFullyVisible(new_caret_offset)) {
       if (ShouldRender()) {
         Render(selection);
       } else {
@@ -242,7 +230,7 @@ void TextWindow::Redraw() {
       }
       return;
     }
-    text_renderer_->ScrollToPosition(lCaretPosn);
+    text_renderer_->ScrollToPosition(new_caret_offset);
     Render(selection);
     return;
   }
@@ -290,7 +278,7 @@ bool TextWindow::ShouldRender() const {
 bool TextWindow::SmallScroll(int, int y_count) {
   UI_ASSERT_DOM_LOCKED();
 
-  bool scrolled = false;
+  auto scrolled = false;
   if (y_count < 0) {
     for (auto k = y_count; k; ++k) {
       if (!text_renderer_->ScrollDown())
@@ -451,8 +439,8 @@ void TextWindow::DidRealize() {
   layer()->AppendLayer(metrics_view_->layer());
 }
 
-// Note: It is OK to set focus to hidden window.
 void TextWindow::DidSetFocus(ui::Widget* last_focused) {
+  // Note: It is OK to set focus to hidden window.
   ContentWindow::DidSetFocus(last_focused);
   ui::TextInputClient::Get()->set_delegate(this);
 }
@@ -462,13 +450,14 @@ void TextWindow::DidShow() {
   vertical_scroll_bar_->Show();
 }
 
-HCURSOR TextWindow::GetCursorAt(const Point&) const {
+HCURSOR TextWindow::GetCursorAt(const gfx::Point&) const {
   return ::LoadCursor(nullptr, IDC_IBEAM);
 }
 
 // views::ContentWindow
 void TextWindow::MakeSelectionVisible() {
-  m_lCaretPosn = -1;
+  // Redraw() will format text buffer to place caret on center of screen.
+  caret_offset_ = -1;
 }
 
 }  // namespace views

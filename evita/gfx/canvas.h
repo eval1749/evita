@@ -59,7 +59,6 @@ class Canvas : public Object, public DpiHandler {
   private: ObserverList<CanvasObserver> observers_;
   private: gfx::PointF offset_;
   private: std::unique_ptr<Bitmap> screen_bitmap_;
-  private: void* work_;
 
   protected: Canvas();
   public: virtual ~Canvas();
@@ -79,11 +78,6 @@ class Canvas : public Object, public DpiHandler {
   public: bool drawing() const { return batch_nesting_level_; }
   public: const FactorySet& factory_set() const { return *factory_set_; }
   public: Bitmap* screen_bitmap() const { return screen_bitmap_.get(); }
-  public: template<typename T> T* work() const { 
-    return reinterpret_cast<T*>(work_); 
-  }
-  public: void set_work(void* ptr) { work_ = ptr; }
-
   // [A]
   public: virtual void AddDirtyRect(const RectF& new_dirty_rect);
   protected: virtual void AddDirtyRectImpl(const RectF& new_dirty_rect);

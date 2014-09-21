@@ -89,8 +89,7 @@ Canvas::ScopedState::~ScopedState() {
 // Canvas
 //
 Canvas::Canvas()
-    : batch_nesting_level_(0), factory_set_(FactorySet::instance()),
-      work_(nullptr) {
+    : batch_nesting_level_(0), factory_set_(FactorySet::instance()) {
 }
 
 Canvas::~Canvas() {

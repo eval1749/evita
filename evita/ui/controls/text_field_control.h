@@ -16,7 +16,7 @@
 namespace ui {
 
 class TextFieldControl final : public Control {
-  private: class Renderer;
+  private: class View;
   public: struct Selection {
     size_t anchor_offset;
     size_t focus_offset;
@@ -32,7 +32,7 @@ class TextFieldControl final : public Control {
     size_t start() const;
   };
 
-  private: const std::unique_ptr<Renderer> renderer_;
+  private: const std::unique_ptr<View> view_;
 
   public: TextFieldControl(ControlController* controller,
                            const Selection& selection,

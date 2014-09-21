@@ -221,11 +221,11 @@ ArrowButton::ArrowButton(Direction direction, ButtonListener* listener)
 gfx::ColorF ArrowButton::ComputeColor() const {
   switch (state()) {
   case State::Disabled:
-    return gfx::ColorF(0, 0, 0, 0.3f);
+    return gfx::ColorF(0, 0, 0, 0.1f);
   case State::Hovered:
-    return gfx::ColorF(0, 0, 0, 0.3f);
-  case State::Normal:
     return gfx::ColorF(0, 0, 0, 0.5f);
+  case State::Normal:
+    return gfx::ColorF(0, 0, 0, 0.3f);
   case State::Pressed:
     return gfx::ColorF(0, 0, 0, 1.0f);
   }

@@ -573,8 +573,13 @@ LeafBox::~LeafBox() {
 // Bounds
 void LeafBox::DidChangeBounds() {
   Box::DidChangeBounds();
+  auto const content_bounds = gfx::ToEnclosingRect(bounds());
+  if (!content_->visible()) {
+    content_->SetBounds(content_bounds);
+    return;
+  }
   if (should_not_use_animation) {
-    content_->SetBounds(gfx::ToEnclosingRect(bounds()));
+    content_->SetBounds(content_bounds);
     visible_layer_ = content_->layer();
     old_layer_.reset();
     return;
@@ -588,7 +593,7 @@ void LeafBox::DidChangeBounds() {
     DCHECK(!GetLayer()->parent_layer());
   }
   content_watcher_.WillChangeContent();
-  content_->SetBounds(gfx::ToEnclosingRect(bounds()));
+  content_->SetBounds(content_bounds);
 }
 
 void LeafBox::WillChangeBounds(const gfx::RectF& new_bounds) {

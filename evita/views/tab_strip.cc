@@ -387,7 +387,7 @@ class Tab final : public ui::Tooltip::ToolDelegate {
   public: int GetPreferredWidth() const;
   public: State GetState(Part part) const;
   public: HitTestResult HitTest(const gfx::PointF& point);
-  private: void MarkDirty();
+  public: void MarkDirty();
   public: void SetBounds(const gfx::RectF& new_bounds);
   private: void SetCloseMarkState(State new_state);
   private: void SetLabelState(State new_state);
@@ -1227,6 +1227,9 @@ void TabCollection::DidChangeIconFont() {
 void TabCollection::DidChangeBounds() {
   view_delegate_->RequestAnimationFrame();
   dirty_ = true;
+  // Since canvas is empty, we should paint all tabs.
+  for (auto const tab : tabs_)
+    tab->MarkDirty();
 }
 
 void TabCollection::DidRealize() {
@@ -1356,7 +1359,6 @@ class TabStrip::View final : private ButtonListener, private ModelObserver,
   private: const std::unique_ptr<ArrowButton> scroll_right_button_;
   private: Tab* selected_tab_;
   private: bool should_selected_tab_visible_;
-  private: gfx::RectF bounds_;
   private: const std::unique_ptr<TabCollection> tab_collection_;
   private: TabListMenu tab_list_menu_;
   private: TabStripDelegate* tab_strip_delegate_;
@@ -1367,6 +1369,7 @@ class TabStrip::View final : private ButtonListener, private ModelObserver,
   public: virtual ~View();
 
   public: void DidBeginAnimationFrame(base::Time time);
+  public: void DidChangeBounds();
   public: void DidRealize();
   public: void DeleteTab(size_t tab_index);
   private: void DisableButton(ui::Widget* widget);
@@ -1375,7 +1378,7 @@ class TabStrip::View final : private ButtonListener, private ModelObserver,
   public: Tab* GetSelectedTab() const;
   public: Tab* GetTab(size_t tab_index) const;
   public: void InsertTab(TabContent* tab_content, size_t tab_index);
-  public: void MarkDirty();
+  private: void MarkDirty();
   public: int NonClientHitTest(const gfx::Point& screen_point);
   // TODO(eval1749) Once we should revise tooltip handling, we should get rid
   // of |TabStrip::View::OnNotify()|.
@@ -1432,19 +1435,30 @@ void TabStrip::View::DeleteTab(size_t tab_index) {
 
 void TabStrip::View::DidBeginAnimationFrame(base::Time) {
   UpdateLayout();
+  auto should_clear = false;
+  if (!canvas_) {
+    canvas_.reset(widget_->layer()->CreateCanvas());
+    should_clear = true;
+  } else if (widget_->GetContentsBounds() != canvas_->bounds()) {
+    canvas_->SetBounds(widget_->GetContentsBounds());
+    should_clear = true;
+  }
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+  if (should_clear)
+    canvas_->Clear(gfx::ColorF(0, 0, 0, 0));
   widget_->OnDraw(canvas_.get());
 }
 
+void TabStrip::View::DidChangeBounds() {
+  MarkDirty();
+}
+
 void TabStrip::View::DidRealize() {
-  canvas_.reset(widget_->layer()->CreateCanvas());
   tab_collection_->SetBounds(gfx::ToEnclosingRect(
       widget_->GetContentsBounds()));
   widget_->AppendChild(tab_collection_.get());
   tab_collection_->RealizeWidget();
   tooltip_.Realize(widget_->AssociatedHwnd());
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  canvas_->Clear(gfx::ColorF(0, 0, 0, 0));
 }
 
 void TabStrip::View::DisableButton(ui::Widget* button) {
@@ -1513,7 +1527,6 @@ void TabStrip::View::UpdateLayout() {
   if (!dirty_)
     return;
   dirty_ = false;
-  canvas_->SetBounds(widget_->GetContentsBounds());
   auto const bounds = gfx::ToEnclosingRect(widget_->GetContentsBounds());
   auto const tabs_size = static_cast<ui::Widget*>(tab_collection_.get())->
       GetPreferredSize();
@@ -1656,7 +1669,7 @@ void TabStrip::DidChangeBounds() {
   ui::AnimatableWindow::DidChangeBounds();
   if (layer())
     layer()->SetBounds(bounds());
-  view_->MarkDirty();
+  view_->DidChangeBounds();
 }
 
 void TabStrip::DidRealize() {

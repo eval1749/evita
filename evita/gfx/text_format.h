@@ -15,6 +15,7 @@ class TextFormat : public SimpleObject_<IDWriteTextFormat> {
   public: TextFormat(const LOGFONT& log_font);
   public: std::unique_ptr<TextLayout> CreateLayout(
       const base::string16& text, const SizeF& size) const;
+  public: float GetWidth(const base::string16& text) const;
   DISALLOW_COPY_AND_ASSIGN(TextFormat);
 };
 

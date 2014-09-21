@@ -58,4 +58,15 @@ std::unique_ptr<TextLayout> TextFormat::CreateLayout(
   return std::make_unique<TextLayout>(text_layout);
 }
 
+float TextFormat::GetWidth(const base::string16& text) const {
+  common::ComPtr<IDWriteTextLayout> text_layout;
+  auto const kHuge = 1e6f;
+  COM_VERIFY(FactorySet::instance()->dwrite().CreateTextLayout(
+    text.data(), static_cast<UINT32>(text.length()), *this, kHuge,
+    kHuge, &text_layout));
+  auto width = 0.0f;
+  COM_VERIFY(text_layout->DetermineMinWidth(&width));
+  return width;
+}
+
 }  // namespace gfx

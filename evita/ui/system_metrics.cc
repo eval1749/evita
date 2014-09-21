@@ -61,20 +61,23 @@ void SystemMetrics::UpdateColors() {
 }
 
 void SystemMetrics::UpdateTextFormat() {
-#if 0
+#if 1
   NONCLIENTMETRICS metrics = {0};
   metrics.cbSize = sizeof(metrics);
   WIN32_VERIFY(::SystemParametersInfo(SPI_GETNONCLIENTMETRICS,
                                       sizeof(metrics), &metrics, 0));
   auto const log_font = &metrics.lfStatusFont;
   font_family_ = log_font->lfFaceName;
-  auto const height_pt = log_font->lfHeight < 0 ? -log_font->lfHeight :
-      log_font->lfHeight;
-  font_size_ = static_cast<float>(height_pt) * 96.0f / 72.0f;
+  font_size_ = static_cast<float>(-log_font->lfHeight);
 #else
   font_family_ = L"MS Shell Dlg 2";
   font_size_ = 12.0f;
 #endif
+  LOGFONT lfIconTitle;
+  WIN32_VERIFY(::SystemParametersInfo(SPI_GETICONTITLELOGFONT,
+                                      sizeof(lfIconTitle), &lfIconTitle, 0));
+  icon_font_family_ = lfIconTitle.lfFaceName;
+  icon_font_size_ = static_cast<float>(-lfIconTitle.lfHeight);
 }
 
 }  // namespace ui

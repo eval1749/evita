@@ -22,6 +22,7 @@
 #include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/events/event.h"
+#include "evita/ui/system_metrics.h"
 #include "evita/ui/system_metrics_observer.h"
 #include "evita/ui/tooltip.h"
 #include "evita/views/frame_list.h"
@@ -48,8 +49,12 @@ enum TabStripDesignParams {
 
 const auto kArrowButtonWidth = 20;
 const auto kArrowButtonHeight = 20;
+// Size of small icon.
 const auto kIconWidth = 16.0f;
 const auto kIconHeight = 16.0f;
+// |kLabelFontSize| depends on |kIconHeight|. If you change this value,
+// please make sure "g" and "y" characters are fully displayed in a tab.
+const auto kLabelFontSize = 13.0f;
 const auto kLabelHeight = 16.0f;
 const auto kMaxTabWidth = 200.0f;
 const auto kMinTabWidth = 140.0f;
@@ -59,7 +64,7 @@ const auto kScrollWidth = 10.0f;
 //  SM_CYCAPTION = 23
 //  SM_CYEDGE = 2
 //  SM_CYSIZEFRAME = 4
-auto const kTabHeight = 28;
+auto const kTabHeight = 28; // SM_CYCAPTION + SM_CYEDGE + 1
 
 class Button;
 class Tab;
@@ -620,11 +625,11 @@ void Tab::UpdateLayout() {
   view_delegate_->RequestAnimationFrame();
   auto const bounds = bounds_ - gfx::SizeF(6, 6);
   close_mark_bounds_ = gfx::RectF(bounds.top_right() + gfx::SizeF(-9, 5),
-                                   gfx::SizeF(8, 8));
+                                  gfx::SizeF(8, 8));
   icon_bounds_ = gfx::RectF(bounds.origin(), gfx::SizeF(16, 16));
   label_bounds_ = gfx::RectF(icon_bounds_.top_right() + gfx::SizeF(4, 0),
-                            gfx::PointF(close_mark_bounds_.left - 2,
-                                        icon_bounds_.bottom));
+                             gfx::PointF(close_mark_bounds_.left - 2,
+                                         icon_bounds_.bottom));
   text_layout_ = text_format_->CreateLayout(label_text_, label_bounds_.size());
 }
 
@@ -1179,11 +1184,11 @@ void TabCollection::UpdateLayout() {
 }
 
 void TabCollection::UpdateTextFont() {
-  LOGFONT lf;
-  if (!::SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(lf), &lf, 0))
-    return;
-  lf.lfHeight = -10;
-  text_format_.reset(new gfx::TextFormat(lf));
+  // To fit into icon height, we use |kLabelFontSize| rather thatn
+  // |ui::SystemMetrics::instance()->icon_font_size()|.
+  text_format_.reset(new gfx::TextFormat(
+      ui::SystemMetrics::instance()->icon_font_family(),
+      kLabelFontSize));
   {
     common::ComPtr<IDWriteInlineObject> inline_object;
     COM_VERIFY(gfx::FactorySet::instance()->dwrite().

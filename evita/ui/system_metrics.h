@@ -24,12 +24,14 @@ class SystemMetrics : public common::Singleton<SystemMetrics> {
   private: gfx::ColorF gray_text_;
   private: gfx::ColorF highlight_;
   private: gfx::ColorF hotlight_;
+  private: base::string16 icon_font_family_;
+  private: float icon_font_size_;
   private: gfx::ColorF shadow_;
   private: float font_size_;
   private: ObserverList<SystemMetricsObserver> observers_;
 
   private: SystemMetrics();
-  public: ~SystemMetrics();
+  public: virtual ~SystemMetrics();
 
   public: gfx::ColorF bgcolor() const { return bgcolor_; }
   public: gfx::ColorF border_color() const { return border_color_; }
@@ -38,6 +40,10 @@ class SystemMetrics : public common::Singleton<SystemMetrics> {
   public: gfx::ColorF gray_text() const { return gray_text_; }
   public: gfx::ColorF highlight() const { return highlight_; }
   public: gfx::ColorF hotlight() const { return hotlight_; }
+  public: const base::string16& icon_font_family() const {
+    return icon_font_family_;
+  }
+  public: float icon_font_size() const { return icon_font_size_; }
   public: gfx::ColorF shadow() const { return shadow_; }
   public: float font_size() const { return font_size_; }
 

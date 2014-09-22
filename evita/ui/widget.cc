@@ -531,9 +531,15 @@ void Widget::SchedulePaint() {
   SchedulePaintInRect(GetLocalBounds());
 }
 
-void Widget::SchedulePaintInRect(const gfx::Rect& rect) {
+void Widget::SchedulePaintInRect(const gfx::Rect&) {
   DCHECK(is_realized());
-  DCHECK(!rect.empty());
+  for (auto runner = parent_node(); runner; runner = runner->parent_node()) {
+    if (auto const animatable = runner->as<ui::AnimatableWindow>()) {
+      animatable->RequestAnimationFrame();
+      return;
+    }
+  }
+  NOTREACHED();
 }
 
 void Widget::SetBounds(const gfx::Point& origin,
@@ -542,13 +548,6 @@ void Widget::SetBounds(const gfx::Point& origin,
 }
 void Widget::SetBounds(const gfx::Point& origin, const gfx::Size& size) {
   SetBounds(gfx::Rect(origin, size));
-  for (auto runner = parent_node(); runner; runner = runner->parent_node()) {
-    if (auto const animatable = runner->as<ui::AnimatableWindow>()) {
-      animatable->RequestAnimationFrame();
-      return;
-    }
-  }
-  NOTREACHED();
 }
 
 void Widget::SetBounds(const gfx::Rect& new_bounds) {

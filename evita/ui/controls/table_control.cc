@@ -660,29 +660,34 @@ void TableControl::DidRemoveRow(int row_id) {
 
 // ui::Widget
 void TableControl::DidKillFocus(ui::Widget* focus_widget) {
+  Widget::DidKillFocus(focus_widget);
   view_->DidKillFocus(focus_widget);
 }
 
 void TableControl::DidRealize() {
+  Widget::DidRealize();
   view_->DidChangeBounds(GetContentsBounds());
 }
 
 void TableControl::DidChangeBounds() {
+  Widget::DidChangeBounds();
   view_->DidChangeBounds(GetContentsBounds());
 }
 
 void TableControl::DidSetFocus(ui::Widget* widget) {
+  Widget::DidSetFocus(widget);
   view_->DidSetFocus(widget);
 }
 
 void TableControl::DidShow() {
+  Widget::DidShow();
   view_->DidShow();
 }
 
 void TableControl::OnDraw(gfx::Canvas* canvas) {
-  if (!visible() || !is_realized())
-    return;
-  auto dirty_rect = view_->ResetDirtyRect();
+  DCHECK(is_realized());
+  DCHECK(visible());
+  const auto dirty_rect = view_->ResetDirtyRect();
   if (dirty_rect.empty())
     return;
   gfx::Canvas::DrawingScope drawing_scope(canvas);

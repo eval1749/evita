@@ -664,38 +664,14 @@ void LeafBox::PrepareAnimation(ui::Animator* animator) {
     // |old_layer_| may not have parent layer if it is in animation.
     old_layer_->FinishAnimation();
     DCHECK(old_layer_->parent_layer());
-
-    auto const size_diff = bounds().size() - old_layer_->bounds().size();
-    if (!size_diff.height && !size_diff.width) {
-      if (old_layer_owner_ != content_) {
-        animator->ScheduleAnimation(
-            ui::LayerAnimation::CreateSlideReplace(
-                new_layer, std::move(old_layer_),
-                gfx::PointF(right(), top())));
-        return;
-      }
-      parent_layer->AppendLayer(new_layer);
-      old_layer_owner_ = nullptr;
-      old_layer_.reset();
+    if (old_layer_owner_ != content_) {
+      animator->ScheduleAnimation(
+          ui::LayerAnimation::CreateSlideReplace(
+              new_layer, std::move(old_layer_),
+              gfx::PointF(right(), top())));
       return;
     }
-
-    if (size_diff.height && size_diff.width ||
-        origin() != old_layer_->bounds().origin()) {
-      // We don't animate for free resizing.
-      parent_layer->AppendLayer(new_layer);
-      old_layer_owner_ = nullptr;
-      old_layer_.reset();
-      return;
-    }
-
-    if (size_diff.height > 0 || size_diff.width > 0) {
-      animator->ScheduleAnimation(ui::LayerAnimation::CreateExtend(
-          new_layer, std::move(old_layer_)));
-      return;
-    }
-
-    animator->ScheduleAnimation(ui::LayerAnimation::CreateShrink(
+    animator->ScheduleAnimation(ui::LayerAnimation::CreateSimple(
         new_layer, std::move(old_layer_)));
     return;
   }

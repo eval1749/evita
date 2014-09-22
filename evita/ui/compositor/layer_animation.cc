@@ -197,6 +197,62 @@ void ShrinkAnimation::FinalizeAnimation() {
 
 //////////////////////////////////////////////////////////////////////
 //
+// SimpleAnimation
+// Moves and changes size of |new_layer| from |old_layer|.
+//
+class SimpleAnimation : public ReplaceAnimation {
+  private: std::unique_ptr<AnimationPoint> animation_origin_;
+  private: std::unique_ptr<AnimationSize> animation_size_;
+
+  public: SimpleAnimation(Layer* new_layer,
+                          std::unique_ptr<Layer> old_layer);
+  public: virtual ~SimpleAnimation() = default;
+
+  // Animatable
+  private: virtual void Animate(base::Time now) override;
+  private: virtual void FinalizeAnimation() override;
+
+  DISALLOW_COPY_AND_ASSIGN(SimpleAnimation);
+};
+
+SimpleAnimation::SimpleAnimation(Layer* new_layer,
+                                 std::unique_ptr<Layer> old_layer)
+    : ReplaceAnimation(new_layer, std::move(old_layer)) {
+}
+
+void SimpleAnimation::Animate(base::Time now) {
+  if (!animation_size_) {
+    animation_origin_.reset(new AnimationPoint(
+        now, animation_duration(), old_layer()->bounds().origin(),
+        new_layer()->bounds().origin()));
+    animation_size_.reset(new AnimationSize(
+        now, animation_duration(), old_layer()->bounds().size(),
+        new_layer()->bounds().size()));
+    SetUpNewLayer();
+  }
+  const auto origin = animation_origin_->Compute(now);
+  const auto size = animation_size_->Compute(now);
+  new_layer()->SetOrigin(origin);
+  new_layer()->SetClip(gfx::RectF(size));
+  old_layer()->SetClip(gfx::RectF(size));
+  if (size != animation_size_->end_value()) {
+    ScheduleAnimation();
+    return;
+  }
+  FinalizeAnimation();
+}
+
+void SimpleAnimation::FinalizeAnimation() {
+  LayerAnimation::FinalizeAnimation();
+  if (animation_size_) {
+    new_layer()->RemoveClip();
+    return;
+  }
+  SetUpNewLayer();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // SlideInAnimation
 // Push out |old_layer_| from |parent_layer_| by moving |new_layer| from
 // right to left.
@@ -409,6 +465,11 @@ LayerAnimation* LayerAnimation::CreateMove(
 LayerAnimation* LayerAnimation::CreateShrink(
     Layer* new_layer, std::unique_ptr<Layer> old_layer) {
   return new ShrinkAnimation(new_layer, std::move(old_layer));
+}
+
+LayerAnimation* LayerAnimation::CreateSimple(
+    Layer* new_layer, std::unique_ptr<Layer> old_layer) {
+  return new SimpleAnimation(new_layer, std::move(old_layer));
 }
 
 LayerAnimation* LayerAnimation::CreateSlideIn(

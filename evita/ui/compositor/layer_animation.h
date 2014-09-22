@@ -36,6 +36,9 @@ class LayerAnimation : public Animatable {
   public: static LayerAnimation* CreateShrink(
       Layer* new_layer, std::unique_ptr<Layer> old_layer);
 
+  public: static LayerAnimation* CreateSimple(
+      Layer* new_layer, std::unique_ptr<Layer> old_layer);
+
   // Move |new_layer| to |old_layer| on |parent_layer|, then remove |old_layer|.
   public: static LayerAnimation* CreateSlideIn(
       Layer* parent_layer, Layer* new_layer, Layer* old_layer);

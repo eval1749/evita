@@ -95,6 +95,7 @@ class Button : public ui::Widget {
     Pressed,
   };
 
+  private: int canvas_bitmap_id_;
   private: bool dirty_;
   private: ButtonListener* listener_;
   private: State state_;
@@ -102,11 +103,10 @@ class Button : public ui::Widget {
   protected: Button(ButtonListener* listener);
   public: virtual ~Button();
 
-  protected: bool dirty() const { return dirty_; }
   public: State state() const { return state_; }
 
+  protected: bool IsDirty(const gfx::Canvas* canvas) const;
   private: void MarkDirty();
-  protected: void RequestAnimationFrame();
   protected: void SetState(State new_state);
 
   // ui::Widget
@@ -122,14 +122,20 @@ class Button : public ui::Widget {
 };
 
 Button::Button(ButtonListener* listener)
-    : dirty_(true), listener_(listener), state_(State::Normal) {
+    : canvas_bitmap_id_(0), dirty_(true), listener_(listener), state_(State::Normal) {
 }
 
 Button::~Button() {
 }
 
+bool Button::IsDirty(const gfx::Canvas* canvas) const {
+  return dirty_ || canvas_bitmap_id_ != canvas->bitmap_id();
+}
+
 void Button::MarkDirty() {
-  RequestAnimationFrame();
+  if (!visible())
+    return;
+  SchedulePaint();
   dirty_ = true;
 }
 
@@ -140,28 +146,20 @@ void Button::SetState(State new_state) {
   MarkDirty();
 }
 
-void Button::RequestAnimationFrame() {
-  dirty_ = true;
-  for (auto runner = parent_node(); runner; runner = runner->parent_node()) {
-    auto const animatable = runner->as<ui::AnimatableWindow>();
-    if (!animatable)
-      continue;
-    animatable->RequestAnimationFrame();
-    break;
-  }
-}
-
 // ui::Widget
 void Button::DidChangeBounds() {
+  ui::Widget::DidChangeBounds();
   MarkDirty();
 }
 
 void Button::DidShow() {
+  ui::Widget::DidShow();
   MarkDirty();
 }
 
-void Button::OnDraw(gfx::Canvas*) {
+void Button::OnDraw(gfx::Canvas* canvas) {
   DCHECK(dirty_);
+  canvas_bitmap_id_ = canvas->bitmap_id();
   dirty_ = false;
 }
 
@@ -283,7 +281,7 @@ void ArrowButton::DrawArrow(gfx::Canvas* canvas) const {
 
 // ui::Widget
 void ArrowButton::OnDraw(gfx::Canvas* canvas) {
-  if (!dirty())
+  if (!IsDirty(canvas))
     return;
   Button::OnDraw(canvas);
   canvas->AddDirtyRect(GetContentsBounds());
@@ -323,7 +321,7 @@ class Tab final : public ui::Tooltip::ToolDelegate {
     Label,
   };
 
-  public: class HitTestResult {
+  public: class HitTestResult final {
     private: Part part_;
     private: Tab* tab_;
 
@@ -936,6 +934,8 @@ class TabCollection final : public ui::Widget,
   private: DragController drag_controller_;
   private: bool dirty_;
   private: HoverController hover_controller_;
+  // Last bounds used for layout tabs.
+  private: gfx::RectF layout_bounds_;
   private: Tab* selected_tab_;
   private: bool should_selected_tab_visible_;
   private: std::vector<Tab*> tabs_;
@@ -1084,7 +1084,7 @@ void TabCollection::NotifySelectTab() {
 
 void TabCollection::RenumberTabIndex() {
   auto tab_index = 0;
-  for (auto tab : tabs_) {
+  for (auto const tab : tabs_) {
     tab->set_tab_index(tab_index);
     ++tab_index;
   }
@@ -1152,14 +1152,21 @@ void TabCollection::UpdateLayout() {
   }
   auto const tab_width = static_cast<float>(GetPreferredTabWidth());
   auto const tabs_width = tabs_.size() * tab_width + 1; // +1 for last edge
-  if (tabs_width < bounds.width())
+
+  if (layout_bounds_ == bounds) {
+    if (tabs_width < bounds.width())
+      tabs_origin_ = 0;
+    UpdateBoundsForAllTabs(tab_width);
+    if (!selected_tab_ || !should_selected_tab_visible_ ||
+        bounds.Contains(selected_tab_->bounds())) {
+      return;
+    }
+  } else {
     tabs_origin_ = 0;
-
-  UpdateBoundsForAllTabs(tab_width);
-
-  if (!selected_tab_ || !should_selected_tab_visible_ ||
-      bounds.Contains(selected_tab_->bounds())) {
-    return;
+    layout_bounds_ = bounds;
+    UpdateBoundsForAllTabs(tab_width);
+    if (!selected_tab_)
+      return;
   }
 
   // Make selected tab visible.
@@ -1184,7 +1191,7 @@ void TabCollection::UpdateLayout() {
 }
 
 void TabCollection::UpdateTextFont() {
-  // To fit into icon height, we use |kLabelFontSize| rather thatn
+  // To fit into icon height, we use |kLabelFontSize| rather than
   // |ui::SystemMetrics::instance()->icon_font_size()|.
   text_format_.reset(new gfx::TextFormat(
       ui::SystemMetrics::instance()->icon_font_family(),
@@ -1208,7 +1215,7 @@ void TabCollection::AddObserver(ModelObserver* observer) {
 }
 
 Tab::HitTestResult TabCollection::HitTest(const gfx::PointF& point) const {
-  for (auto tab : tabs_) {
+  for (auto const tab : tabs_) {
     auto const result = tab->HitTest(point);
     if (result)
       return result;
@@ -1236,6 +1243,7 @@ void TabCollection::DidChangeIconFont() {
 // ui::Widget
 void TabCollection::DidChangeBounds() {
   view_delegate_->RequestAnimationFrame();
+  should_selected_tab_visible_ = true;
   dirty_ = true;
   // Since canvas is empty, we should paint all tabs.
   for (auto const tab : tabs_)
@@ -1257,7 +1265,7 @@ void TabCollection::OnDraw(gfx::Canvas* canvas) {
   auto right = content_bounds.left;
   {
     gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, content_bounds);
-    for (auto tab : tabs_) {
+    for (auto const tab : tabs_) {
       if (tab->right() < 0)
         continue;
       if (tab->left() >= content_bounds.right)

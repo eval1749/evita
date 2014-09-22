@@ -17,8 +17,6 @@
 
 #pragma comment(lib, "d3d11.lib")
 
-#define DEBUG_DRAW 0
-
 std::ostream& operator<<(std::ostream& ostream,
                          D2D1_TEXT_ANTIALIAS_MODE mode) {
   switch (mode) {
@@ -35,6 +33,10 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 namespace gfx {
+
+namespace {
+int global_bitmap_id;
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -89,7 +91,8 @@ Canvas::ScopedState::~ScopedState() {
 // Canvas
 //
 Canvas::Canvas()
-    : batch_nesting_level_(0), factory_set_(FactorySet::instance()) {
+    : batch_nesting_level_(0), bitmap_id_(0),
+      factory_set_(FactorySet::instance()) {
 }
 
 Canvas::~Canvas() {
@@ -123,6 +126,7 @@ void Canvas::DidCallEndDraw() {
 }
 
 void Canvas::DidCreateRenderTarget() {
+  bitmap_id_ = ++global_bitmap_id;
   SizeF dpi;
   GetRenderTarget()->GetDpi(&dpi.width, &dpi.height);
   UpdateDpi(dpi);
@@ -228,11 +232,14 @@ void Canvas::SetBounds(const RectF& new_bounds) {
     return;
   bounds_ = new_bounds;
   screen_bitmap_.reset();
+  bitmap_id_ = ++global_bitmap_id;
   DidChangeBounds(new_bounds);
 }
 
 void Canvas::SetInitialBounds(const RectF& bounds) {
+  DCHECK(!bitmap_id_);
   DCHECK(bounds_.empty());
+  bitmap_id_ = ++global_bitmap_id;
   bounds_ = bounds;
 }
 
@@ -274,56 +281,6 @@ void CanvasForHwnd::DidLostRenderTarget() {
 
 ID2D1RenderTarget* CanvasForHwnd::GetRenderTarget() const {
   return swap_chain_->d2d_device_context();
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// LegacyCanvasForHwnd
-//
-LegacyCanvasForHwnd::LegacyCanvasForHwnd(HWND hwnd) : hwnd_(hwnd) {
-  AttachRenderTarget();
-  auto const size = hwnd_render_target_->GetPixelSize();
-  SetInitialBounds(gfx::RectF(gfx::SizeF(
-      static_cast<float>(size.width), static_cast<float>(size.height))));
-}
-
-LegacyCanvasForHwnd::~LegacyCanvasForHwnd() {
-}
-
-void LegacyCanvasForHwnd::AttachRenderTarget() {
-  RECT rc;
-  ::GetClientRect(hwnd_, &rc);
-  auto const pixel_format = D2D1::PixelFormat(
-      DXGI_FORMAT_B8G8R8A8_UNORM,
-      D2D1_ALPHA_MODE_PREMULTIPLIED);
-  auto const size = SizeU(rc.right - rc.left, rc.bottom - rc.top);
-  auto const usage = D2D1_RENDER_TARGET_USAGE_NONE;
-  common::ComPtr<ID2D1HwndRenderTarget> hwnd_render_target;
-  COM_VERIFY(FactorySet::d2d1().CreateHwndRenderTarget(
-      D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT,
-                                   pixel_format, 0.0f, 0.0f,
-                                   usage),
-      D2D1::HwndRenderTargetProperties(hwnd_, size,
-                                       D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS),
-      &hwnd_render_target_));
-  DidCreateRenderTarget();
-}
-
-// Canvas
-void LegacyCanvasForHwnd::DidChangeBounds(const RectF& new_bounds) {
-  auto const enclosing_rect = ToEnclosingRect(new_bounds);
-  COM_VERIFY(hwnd_render_target_->Resize(D2D1::SizeU(
-      static_cast<uint32_t>(enclosing_rect.width()),
-      static_cast<uint32_t>(enclosing_rect.height()))));
-}
-
-void LegacyCanvasForHwnd::DidLostRenderTarget() {
-  hwnd_render_target_.release();
-  AttachRenderTarget();
-}
-
-ID2D1RenderTarget* LegacyCanvasForHwnd::GetRenderTarget() const {
-  return hwnd_render_target_;
 }
 
 }  // namespace gfx

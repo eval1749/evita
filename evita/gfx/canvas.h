@@ -54,6 +54,7 @@ class Canvas : public Object, public DpiHandler {
   friend class ScopedState;
 
   private: int batch_nesting_level_;
+  private: int bitmap_id_;
   private: RectF bounds_;
   private: scoped_refptr<FactorySet> factory_set_;
   private: ObserverList<CanvasObserver> observers_;
@@ -73,11 +74,16 @@ class Canvas : public Object, public DpiHandler {
     return GetRenderTarget();
   }
 
+  // Id of current backing bitmap. Each time we change canvas bounds, we have
+  // new backing bitmap.
+  public: int bitmap_id() const { return bitmap_id_; }
+  // Bounds of |this| canvas.
   public: const gfx::RectF bounds() const { return bounds_; }
   // |drawing()| is for debugging.
   public: bool drawing() const { return batch_nesting_level_; }
   public: const FactorySet& factory_set() const { return *factory_set_; }
   public: Bitmap* screen_bitmap() const { return screen_bitmap_.get(); }
+
   // [A]
   public: virtual void AddDirtyRect(const RectF& new_dirty_rect);
   protected: virtual void AddDirtyRectImpl(const RectF& new_dirty_rect);
@@ -135,7 +141,7 @@ class Canvas : public Object, public DpiHandler {
 //
 // CanvasForHwnd
 //
-class CanvasForHwnd : public Canvas {
+class CanvasForHwnd final : public Canvas {
   private: HWND hwnd_;
   private: std::unique_ptr<SwapChain> swap_chain_;
 
@@ -150,27 +156,6 @@ class CanvasForHwnd : public Canvas {
   private: virtual ID2D1RenderTarget* GetRenderTarget() const override;
 
   DISALLOW_COPY_AND_ASSIGN(CanvasForHwnd);
-};
-
-//////////////////////////////////////////////////////////////////////
-//
-// LegacyCanvasForHwnd
-//
-class LegacyCanvasForHwnd : public Canvas {
-  private: HWND hwnd_;
-  private: common::ComPtr<ID2D1HwndRenderTarget> hwnd_render_target_;
-
-  public: LegacyCanvasForHwnd(HWND hwnd);
-  public: virtual ~LegacyCanvasForHwnd();
-
-  private: void AttachRenderTarget();
-
-  // Canvas
-  private: virtual void DidChangeBounds(const RectF& new_bounds) override;
-  private: virtual void DidLostRenderTarget() override;
-  private: virtual ID2D1RenderTarget* GetRenderTarget() const override;
-
-  DISALLOW_COPY_AND_ASSIGN(LegacyCanvasForHwnd);
 };
 
 } // namespace gfx

@@ -568,10 +568,6 @@ void Widget::SetBounds(const gfx::Rect& new_bounds) {
     return;
   }
 
-  if (bounds_.size() > new_bounds.size() && parent_node()) {
-    // TODO(eval1749) We should schedule paint for reveal rectangles only.
-    parent_node()->SchedulePaintInRect(bounds_);
-  }
   bounds_ = new_bounds;
   DidChangeBounds();
 }

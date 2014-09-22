@@ -15,6 +15,7 @@
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/ui/base/ime/text_input_client_win.h"
+#include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/events/event.h"
 #include "evita/ui/events/mouse_click_tracker.h"
@@ -527,15 +528,12 @@ void Widget::RequestFocus() {
 void Widget::SchedulePaint() {
   DCHECK(is_realized());
   DCHECK(!bounds_.empty());
-  SchedulePaintInRect(gfx::Rect(bounds_.size()));
+  SchedulePaintInRect(GetLocalBounds());
 }
 
 void Widget::SchedulePaintInRect(const gfx::Rect& rect) {
   DCHECK(is_realized());
   DCHECK(!rect.empty());
-  // TODO(eval1749) We should have |DCHECK(bounds_.Contains(rect))|.
-  RECT raw_rect(rect);
-  ::InvalidateRect(AssociatedHwnd(), &raw_rect, true);
 }
 
 void Widget::SetBounds(const gfx::Point& origin,
@@ -544,6 +542,13 @@ void Widget::SetBounds(const gfx::Point& origin,
 }
 void Widget::SetBounds(const gfx::Point& origin, const gfx::Size& size) {
   SetBounds(gfx::Rect(origin, size));
+  for (auto runner = parent_node(); runner; runner = runner->parent_node()) {
+    if (auto const animatable = runner->as<ui::AnimatableWindow>()) {
+      animatable->RequestAnimationFrame();
+      return;
+    }
+  }
+  NOTREACHED();
 }
 
 void Widget::SetBounds(const gfx::Rect& new_bounds) {

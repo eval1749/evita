@@ -462,13 +462,8 @@ void FormWindow::DidBeginAnimationFrame(base::Time) {
   if (!visible())
     return;
 
+  // TODO(eval1749) We should call |RequestAnimationFrame()| only if needed.
   RequestAnimationFrame();
-
-  if (!pending_update_rect_.empty()) {
-    gfx::Rect rect;
-    std::swap(pending_update_rect_, rect);
-    SchedulePaintInRect(rect);
-  }
 
   if (!model_->dirty()) {
     TransferFocusIfNeeded();
@@ -503,6 +498,9 @@ void FormWindow::DidBeginAnimationFrame(base::Time) {
   }
 
   TransferFocusIfNeeded();
+
+  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+  Window::OnDraw(canvas_.get());
 }
 
 // ui::SystemMetricsObserver
@@ -590,8 +588,8 @@ void FormWindow::DidDestroyWidget() {
 }
 
 void FormWindow::DidRealize() {
-  // TODO(yosi) We should get default value of form window transparency from
-  // CSS.
+  // TODO(eval1749) We should get default value of form window transparency
+  // from CSS.
   ::SetLayeredWindowAttributes(*native_window(), RGB(0, 0, 0), 80 * 255 / 100,
                                LWA_ALPHA);
   canvas_.reset(new gfx::CanvasForHwnd(*native_window()));
@@ -602,40 +600,11 @@ void FormWindow::DidRealize() {
 LRESULT FormWindow::OnMessage(uint32_t const message, WPARAM const wParam,
                               LPARAM const lParam) {
   if (message == WM_CLOSE) {
-    // TODO(yosi) Should we dispatch "close" event to JavaScript?
+    // TODO(eval1749) Should we dispatch "close" event to JavaScript?
     Hide();
     return 0;
   }
   return Widget::OnMessage(message, wParam, lParam);
-}
-
-void FormWindow::OnPaint(const gfx::Rect rect) {
-  if (!editor::DomLock::instance()->locked()) {
-    UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-    if (lock_scope.locked()) {
-      OnPaint(rect);
-    } else {
-      // TODO(yosi) Should we have list of dirty rectangles rather than
-      // bounding dirty rectangles?
-      pending_update_rect_ += rect;
-    }
-    return;
-  }
-
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  Window::OnDraw(canvas_.get());
-
-  if (!views::switches::form_window_display_paint)
-    return;
-
-  // Render paint rectangle for debugging.
-  auto const bounds = gfx::RectF(rect);
-  canvas_->AddDirtyRect(bounds);
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_.get(), bounds);
-  canvas_->FillRectangle(gfx::Brush(canvas_.get(),
-                         gfx::ColorF(0.0f, 0.0f, 1.0f, 0.1f)), bounds);
-  canvas_->DrawRectangle(gfx::Brush(canvas_.get(),
-                         gfx::ColorF(0.0f, 0.0f, 1.0f, 0.5f)), bounds, 2.0f);
 }
 
 void FormWindow::RealizeWidget() {

@@ -45,7 +45,6 @@ class FormWindow final : public views::Window,
   private: private: const std::unique_ptr<FormViewModel> model_;
   private: gfx::Point offset_;
   private: Window* owner_;
-  private: gfx::Rect pending_update_rect_;
   private: base::string16 title_;
 
   public: FormWindow(WindowId window_id, dom::Form* form, Window* owner,
@@ -71,7 +70,6 @@ class FormWindow final : public views::Window,
   private: virtual void DidRealize() override;
   private: virtual LRESULT OnMessage(uint32_t message, WPARAM wParam,
                                      LPARAM lParam) override;
-  private: virtual void OnPaint(const gfx::Rect paint_rect) override;
   private: virtual void RealizeWidget() override;
 
   DISALLOW_COPY_AND_ASSIGN(FormWindow);

@@ -1338,6 +1338,8 @@ void EditPane::SplitVertically(ContentWindow* above_window,
 void EditPane::DidChangeBounds() {
   TabContent::DidChangeBounds();
   root_box_->SetBounds(GetContentsBounds());
+  // Set clip for slide out animation which towards outside of window.
+  layer()->SetClip(GetContentsBounds());
 }
 
 void EditPane::DidHide() {

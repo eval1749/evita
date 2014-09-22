@@ -641,17 +641,6 @@ int TableControl::GetRowState(int row_id) const {
   return view_->GetRowState(row_id);
 }
 
-void TableControl::RenderIfNeeded(gfx::Canvas* canvas) {
-  if (!visible() || !is_realized())
-    return;
-  auto dirty_rect = view_->ResetDirtyRect();
-  if (dirty_rect.empty())
-    return;
-  gfx::Canvas::DrawingScope drawing_scope(canvas);
-  canvas->AddDirtyRect(dirty_rect);
-  view_->Draw(canvas);
-}
-
 void TableControl::Select(int row_id) {
   view_->Select(row_id);
 }
@@ -688,6 +677,17 @@ void TableControl::DidSetFocus(ui::Widget* widget) {
 
 void TableControl::DidShow() {
   view_->DidShow();
+}
+
+void TableControl::OnDraw(gfx::Canvas* canvas) {
+  if (!visible() || !is_realized())
+    return;
+  auto dirty_rect = view_->ResetDirtyRect();
+  if (dirty_rect.empty())
+    return;
+  gfx::Canvas::DrawingScope drawing_scope(canvas);
+  canvas->AddDirtyRect(dirty_rect);
+  view_->Draw(canvas);
 }
 
 void TableControl::OnKeyPressed(const ui::KeyboardEvent& event) {

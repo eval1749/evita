@@ -42,7 +42,6 @@ class TableControl final : public ui::Widget, public TableModelObserver {
   public: virtual ~TableControl();
 
   public: int GetRowState(int row_id) const;
-  public: void RenderIfNeeded(gfx::Canvas* canvas);
   public: void Select(int row_id);
 
   // ui::TableModelObserver
@@ -56,6 +55,7 @@ class TableControl final : public ui::Widget, public TableModelObserver {
   private: virtual void DidChangeBounds() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void DidShow() override;
+  private: virtual void OnDraw(gfx::Canvas* canvas) override;
   private: virtual void OnKeyPressed(const KeyboardEvent& event) override;
   private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
   private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;

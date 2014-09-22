@@ -212,7 +212,7 @@ void TableWindow::DidBeginAnimationFrame(base::Time) {
     UpdateControl(std::move(new_model));
   if (has_focus())
     control_->RequestFocus();
-  control_->RenderIfNeeded(canvas());
+  OnDraw(canvas());
   NotifyUpdateContent();
 }
 

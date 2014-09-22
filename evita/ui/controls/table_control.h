@@ -24,12 +24,16 @@ struct TableColumn;
 class TableControlObserver;
 class TableModel;
 
+//////////////////////////////////////////////////////////////////////
+//
+// TableControl
+//
 class TableControl final : public ui::Widget, public TableModelObserver {
   DECLARE_CASTABLE_CLASS(TableControl, Widget);
 
-  private: class Impl;
+  private: class View;
 
-  private: std::unique_ptr<Impl> impl_;
+  private: std::unique_ptr<View> view_;
   private: TableControlObserver* observer_;
 
   public: TableControl(const std::vector<TableColumn>& columns,

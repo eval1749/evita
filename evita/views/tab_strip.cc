@@ -158,7 +158,7 @@ void Button::DidShow() {
 }
 
 void Button::OnDraw(gfx::Canvas* canvas) {
-  DCHECK(dirty_);
+  DCHECK(dirty_ || canvas_bitmap_id_ != canvas->bitmap_id());
   canvas_bitmap_id_ = canvas->bitmap_id();
   dirty_ = false;
 }

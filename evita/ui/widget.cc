@@ -202,6 +202,7 @@ void Widget::DidRemoveChildWidget(Widget*) {
 }
 
 void Widget::DidChangeBounds() {
+  SchedulePaint();
   if (!layer())
     return;
   layer()->SetBounds(bounds());
@@ -533,11 +534,16 @@ void Widget::SchedulePaint() {
 
 void Widget::SchedulePaintInRect(const gfx::Rect&) {
   DCHECK(is_realized());
-  for (auto runner = parent_node(); runner; runner = runner->parent_node()) {
+  for (auto runner = this; runner; runner = runner->parent_node()) {
     if (auto const animatable = runner->as<ui::AnimatableWindow>()) {
       animatable->RequestAnimationFrame();
       return;
     }
+  }
+  if (!parent_node()) {
+    // |this| is orphan widget.
+    DCHECK(!has_native_window());
+    return;
   }
   NOTREACHED();
 }

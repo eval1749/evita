@@ -11,6 +11,7 @@
 #include "evita/gfx/text_layout.h"
 #include "evita/metrics/sampling.h"
 #include "evita/ui/compositor/layer.h"
+#include "evita/ui/compositor/layer_owner_delegate.h"
 
 namespace views {
 
@@ -52,41 +53,45 @@ void PaintSamples(gfx::Canvas* canvas, const gfx::Brush& brush,
 
 //////////////////////////////////////////////////////////////////////
 //
-// MetricsView::Model
+// MetricsView::View
 //
-class MetricsView::Model final {
+class MetricsView::View final : public ui::LayerOwnerDelegate {
   friend class TimingScope;
 
+  private: std::unique_ptr<gfx::Canvas> canvas_;
   private: metrics::Sampling frame_duration_data_;
   private: metrics::Sampling frame_latency_data_;
   private: base::TimeTicks last_record_time_;
   private: std::unique_ptr<gfx::TextFormat> text_format_;
+  private: ui::Widget* const widget_;
 
-  public: Model();
-  public: ~Model() = default;
+  public: View(ui::Widget* widget);
+  public: virtual ~View() = default;
 
+  public: void Animate(base::Time now);
   public: void RecordTime();
-  public: void UpdateView(gfx::Canvas* canvas);
 
-  DISALLOW_COPY_AND_ASSIGN(Model);
+  // ui::LayerOwnerDelegate
+  private: virtual void DidRecreateLayer(ui::Layer* old_layer) override;
+
+  DISALLOW_COPY_AND_ASSIGN(View);
 };
 
-MetricsView::Model::Model()
+MetricsView::View::View(ui::Widget* widget)
     : frame_duration_data_(kNumberOfSamples),
       frame_latency_data_(kNumberOfSamples),
       last_record_time_(metrics::Sampling::NowTimeTicks()),
-      text_format_(new gfx::TextFormat(L"Consolas", 11.5)) {
+      text_format_(new gfx::TextFormat(L"Consolas", 11.5)), widget_(widget) {
 }
 
-void MetricsView::Model::RecordTime() {
-  auto const now = metrics::Sampling::NowTimeTicks();
-  frame_latency_data_.AddSample(now - last_record_time_);
-  last_record_time_ = now;
-}
+void MetricsView::View::Animate(base::Time) {
+  if (!canvas_)
+    canvas_.reset(widget_->layer()->CreateCanvas());
+  else if (canvas_->bounds() != widget_->GetContentsBounds())
+    canvas_->SetBounds(widget_->GetContentsBounds());
 
-void MetricsView::Model::UpdateView(gfx::Canvas* canvas) {
+  auto const canvas = canvas_.get();
   auto const bounds = canvas->bounds();
-
 
   std::basic_ostringstream<base::char16> stream;
   stream << L"Frame latency=" << frame_latency_data_.minimum() << L" " <<
@@ -109,16 +114,27 @@ void MetricsView::Model::UpdateView(gfx::Canvas* canvas) {
                           bounds.right, bounds.bottom);
   gfx::Canvas::DrawingScope drawing_scope(canvas);
   canvas->AddDirtyRect(bounds);
-  canvas->Clear(gfx::ColorF(0, 0, 0, 0));
-  (*canvas)->FillRoundedRectangle(D2D1::RoundedRect(bounds, radius, radius),
-                                  bgcolor);
+  canvas->Clear(gfx::ColorF());
+  (*canvas)->FillRoundedRectangle(
+      D2D1::RoundedRect(bounds, radius, radius), bgcolor);
 
   PaintSamples(canvas, graph_brush1, graph_bounds, frame_latency_data_);
   graph_bounds = graph_bounds.Offset(0, -30);
   PaintSamples(canvas, graph_brush2, graph_bounds, frame_duration_data_);
 
   (*canvas)->DrawTextLayout(gfx::PointF(10, 10), *text_layout, text_brush,
-                            D2D1_DRAW_TEXT_OPTIONS_CLIP);
+                                   D2D1_DRAW_TEXT_OPTIONS_CLIP);
+}
+
+void MetricsView::View::RecordTime() {
+  auto const now = metrics::Sampling::NowTimeTicks();
+  frame_latency_data_.AddSample(now - last_record_time_);
+  last_record_time_ = now;
+}
+
+// ui::LayerOwnerDelegate
+void MetricsView::View::DidRecreateLayer(ui::Layer*) {
+  canvas_.reset();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -131,40 +147,33 @@ MetricsView::TimingScope::TimingScope(MetricsView* view)
 
 MetricsView::TimingScope::~TimingScope() {
   auto const end = metrics::Sampling::NowTimeTicks();
-  view_->model_->frame_duration_data_.AddSample(end - start_);
+  view_->view_->frame_duration_data_.AddSample(end - start_);
 }
 
 //////////////////////////////////////////////////////////////////////
 //
 // MetricsView
 //
-MetricsView::MetricsView() : model_(new Model()) {
+MetricsView::MetricsView() : view_(new View(this)) {
   SetBounds(gfx::Rect(gfx::Size(kViewWidth, kViewHeight)));
 }
 
 MetricsView::~MetricsView() {
 }
 
+void MetricsView::Animate(base::Time now) {
+  view_->Animate(now);
+}
+
 void MetricsView::RecordTime() {
-  model_->RecordTime();
-}
-
-void MetricsView::UpdateView() {
-  model_->UpdateView(canvas_.get());
-}
-
-// ui::LayerOwnerDelegate
-void MetricsView::DidRecreateLayer(ui::Layer*) {
-  canvas_.reset(layer()->CreateCanvas());
+  view_->RecordTime();
 }
 
 // ui::Widget
 void MetricsView::DidRealize() {
   ui::Widget::DidRealize();
   SetLayer(new ui::Layer());
-  set_layer_owner_delegate(this);
-  layer()->SetBounds(bounds());
-  canvas_.reset(layer()->CreateCanvas());
+  set_layer_owner_delegate(view_.get());
 }
 
 }  // namespace views

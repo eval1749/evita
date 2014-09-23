@@ -12,18 +12,12 @@
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/content_window.h"
 
-namespace gfx {
-class Canvas;
-}
-
 namespace text {
 class Buffer;
 class Selection;
 }
 
 namespace ui {
-class KeyboardEvent;
-class MouseWheelEvent;
 class ScrollBar;
 }
 
@@ -45,7 +39,6 @@ class TextWindow final : private gfx::CanvasObserver,
   DECLARE_CASTABLE_CLASS(TextWindow, ContentWindow);
 
   private: typedef rendering::TextSelectionModel TextSelectionModel;
-  private: class ScrollBar;
 
   private: text::Posn caret_offset_;
   private: MetricsView* metrics_view_;

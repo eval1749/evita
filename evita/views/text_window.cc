@@ -332,7 +332,7 @@ void TextWindow::DidRecreateCanvas() {
 }
 
 // ui::AnimationFrameHandler
-void TextWindow::DidBeginAnimationFrame(base::Time) {
+void TextWindow::DidBeginAnimationFrame(base::Time now) {
   if (!visible())
     return;
   RequestAnimationFrame();
@@ -340,11 +340,13 @@ void TextWindow::DidBeginAnimationFrame(base::Time) {
   if (!lock_scope.locked())
     return;
   metrics_view_->RecordTime();
-  MetricsView::TimingScope timing_scope(metrics_view_);
-  gfx::Canvas::DrawingScope drawing_scope(canvas());
-  Redraw();
-  OnDraw(canvas());
-  metrics_view_->UpdateView();
+  {
+    MetricsView::TimingScope timing_scope(metrics_view_);
+    gfx::Canvas::DrawingScope drawing_scope(canvas());
+    Redraw();
+    OnDraw(canvas());
+  }
+  metrics_view_->Animate(now);
   NotifyUpdateContent();
 }
 

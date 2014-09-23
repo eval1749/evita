@@ -8,12 +8,7 @@
 #include <memory>
 
 #include "base/time/time.h"
-#include "evita/ui/compositor/layer_owner_delegate.h"
 #include "evita/ui/widget.h"
-
-namespace gfx {
-class Canvas;
-}
 
 namespace views {
 
@@ -21,7 +16,7 @@ namespace views {
 //
 // MetricsView
 //
-class MetricsView final : private ui::LayerOwnerDelegate, public ui::Widget {
+class MetricsView final : public ui::Widget {
   public: class TimingScope final {
     private: base::TimeTicks start_;
     private: MetricsView* view_;
@@ -32,19 +27,15 @@ class MetricsView final : private ui::LayerOwnerDelegate, public ui::Widget {
     DISALLOW_COPY_AND_ASSIGN(TimingScope);
   };
 
-  private: class Model;
+  private: class View;
 
-  private: std::unique_ptr<gfx::Canvas> canvas_;
-  private: std::unique_ptr<Model> model_;
+  private: std::unique_ptr<View> view_;
 
   public: MetricsView();
   public: virtual ~MetricsView();
 
+  public: void Animate(base::Time now);
   public: void RecordTime();
-  public: void UpdateView();
-
-  // ui::LayerOwnerDelegate
-  private: virtual void DidRecreateLayer(ui::Layer* old_layer) override;
 
   // ui::Widget
   private: virtual void DidRealize() override;

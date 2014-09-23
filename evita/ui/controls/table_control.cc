@@ -43,6 +43,7 @@ class PaintScheduler {
 // CanvasPainter
 //
 class CanvasPainter {
+  private: gfx::RectF bounds_;
   private: int canvas_bitmap_id_;
   private: bool dirty_;
   private: PaintScheduler* const paint_scheduler_;
@@ -50,10 +51,16 @@ class CanvasPainter {
   protected: CanvasPainter(PaintScheduler* paint_scheduler);
   public: virtual ~CanvasPainter();
 
+  public: const gfx::RectF& bounds() const { return bounds_; }
+  public: float height() const { return bounds_.height(); }
+  public: float width() const { return bounds_.width(); }
+
   private: bool IsDirty(const gfx::Canvas* canvas) const;
   public: void MarkDirty();
   protected: virtual void OnPaintCanvas(gfx::Canvas* canvas) = 0;
   public: void Paint(gfx::Canvas* canvas);
+  public: void SetBounds(const gfx::PointF& origin, const gfx::SizeF& size);
+  public: void SetBounds(const gfx::RectF& new_bounds);
 
   DISALLOW_COPY_AND_ASSIGN(CanvasPainter);
 };
@@ -63,6 +70,10 @@ CanvasPainter::CanvasPainter(PaintScheduler* paint_scheduler)
 }
 
 CanvasPainter::~CanvasPainter() {
+}
+
+bool CanvasPainter::IsDirty(const gfx::Canvas* canvas) const {
+  return dirty_ || canvas_bitmap_id_ != canvas->bitmap_id();
 }
 
 void CanvasPainter::MarkDirty() {
@@ -81,8 +92,17 @@ void CanvasPainter::Paint(gfx::Canvas* canvas) {
   OnPaintCanvas(canvas);
 }
 
-bool CanvasPainter::IsDirty(const gfx::Canvas* canvas) const {
-  return dirty_ || canvas_bitmap_id_ != canvas->bitmap_id();
+void CanvasPainter::SetBounds(const gfx::PointF& origin,
+                             const gfx::SizeF& size) {
+  SetBounds(gfx::RectF(origin, size));
+}
+
+void CanvasPainter::SetBounds(const gfx::RectF& new_bounds) {
+  DCHECK(!new_bounds.empty());
+  if (bounds_ == new_bounds)
+    return;
+  bounds_ = new_bounds;
+  MarkDirty();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -195,19 +215,14 @@ gfx::ColorF RgbToColorF(int red, int green, int blue, float alpha) {
 class Item : public ui::CanvasPainter, public common::Castable {
   DECLARE_CASTABLE_CLASS(Item, common::Castable);
 
-  private: gfx::RectF bounds_;
   private: gfx::TextFormat* const text_format_;
 
   protected: Item(PaintScheduler* paint_scheduler, gfx::TextFormat* text_format);
   public: virtual ~Item();
 
-  public: const gfx::RectF& bounds() const { return bounds_; }
-  public: float height() const { return bounds_.height(); }
   protected: gfx::TextFormat* text_format() const { return text_format_; }
 
   public: Item* HitTest(const gfx::PointF& point) const;
-  public: void SetBounds(const gfx::PointF& origin, const gfx::SizeF& size);
-  public: void SetBounds(const gfx::RectF& new_bounds);
 
   DISALLOW_COPY_AND_ASSIGN(Item);
 };
@@ -220,18 +235,7 @@ Item::~Item() {
 }
 
 Item* Item::HitTest(const gfx::PointF& point) const {
-  return bounds_.Contains(point) ? const_cast<Item*>(this) : nullptr;
-}
-
-void Item::SetBounds(const gfx::PointF& origin, const gfx::SizeF& size) {
-  SetBounds(gfx::RectF(origin, size));
-}
-
-void Item::SetBounds(const gfx::RectF& new_bounds) {
-  DCHECK(!new_bounds.empty());
-  if (bounds_ == new_bounds)
-    return;
-  bounds_ = new_bounds;
+  return bounds().Contains(point) ? const_cast<Item*>(this) : nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -421,14 +425,13 @@ void ColumnCollection::UpdateLayoutIfNeeded() {
     return;
   canvas_bounds_ = GetContentsBounds();
   gfx::PointF origin(kLeftMargin, kTopMargin);
-  auto column_index = 0u;
+  auto rest = header_.size();
   gfx::PointF cell_origin(origin);
   for (auto column : header_) {
-    ++column_index;
+    --rest;
     (*text_format_)->SetTextAlignment(column->alignment());
-    auto const width = column_index == header_.size() ?
-        canvas_bounds_.width() - cell_origin.x - kRightMargin :
-        column->width();
+    auto const width = rest ?
+        column->width() : canvas_bounds_.width() - cell_origin.x - kRightMargin;
     gfx::RectF bounds(cell_origin, gfx::SizeF(width, column_height_));
     column->SetBounds(bounds);
     DCHECK(!column->bounds().empty());
@@ -545,21 +548,21 @@ void Row::OnPaintCanvas(gfx::Canvas* canvas) {
   auto const bgcolor = gfx::ColorF(gfx::ColorF::White);
   auto const color = gfx::ColorF(gfx::ColorF::Black);
   canvas->FillRectangle(gfx::Brush(canvas, bgcolor), bounds());
-  gfx::Brush textBrush(canvas, color);
+  gfx::Brush text_brush(canvas, color);
   gfx::PointF cell_origin(bounds().origin());
-  auto column_index = 0u;
+  auto rest = header_->columns().size();
   for (auto column : header_->columns()) {
+    --rest;
     auto const text = model_->GetCellText(row_id(), column->column_id());
     (*text_format())->SetTextAlignment(column->alignment());
-    auto const width = column_index + 1 == header_->columns().size() ?
-        bounds().width() - cell_origin.x : column->width();
+    auto const width = rest ?
+        column->width() : bounds().width() - cell_origin.x - kRightMargin;
     auto const cell_bounds = gfx::RectF(cell_origin,
                                         gfx::SizeF(width, height()));
     auto const text_bounds = cell_bounds.Inset(kPadding, kPadding);
     (*canvas)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
-                        *text_format(), text_bounds, textBrush);
+                        *text_format(), text_bounds, text_brush);
     cell_origin.x += column->width();
-    ++column_index;
   }
 
   switch (state_) {

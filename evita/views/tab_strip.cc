@@ -1128,16 +1128,17 @@ void TabCollection::SelectTab(Tab* tab) {
 
 void TabCollection::UpdateBoundsForAllTabs(float tab_width) {
   auto const bounds = GetContentsBounds();
-  auto origin = gfx::PointF(tabs_origin_ + bounds.left, bounds.top);
-  auto const tab_size = gfx::SizeF(tab_width, bounds.bottom - origin.y);
+  auto tab_origin = gfx::PointF(tabs_origin_ + bounds.left, bounds.top);
+  auto const tab_size = gfx::SizeF(tab_width, bounds.bottom - tab_origin.y);
   for (auto const tab : tabs_) {
-    tab->SetBounds(gfx::RectF(origin, tab_size));
-    origin.x += tab_width;
-    // Note: We should pass bounds in HWND's coordinate rather than |TabStrip|
-    // coordinate.
-    auto const visible_bounds = bounds.Intersect(tab->bounds())
-        .Offset(bounds.origin());
-    view_delegate_->SetToolBounds(tab, gfx::ToEnclosingRect(visible_bounds));
+    tab->SetBounds(gfx::RectF(tab_origin, tab_size));
+    tab_origin.x += tab_width;
+    // Pass tool bounds in |TabCollection| coordinate.
+    auto const visible_bounds = gfx::ToEnclosingRect(
+        bounds.Intersect(tab->bounds()));
+    view_delegate_->SetToolBounds(tab, gfx::Rect(
+        visible_bounds.origin().Offset(origin().x(), origin().y()),
+        visible_bounds.size()));
   }
 }
 
@@ -1638,7 +1639,11 @@ void TabStrip::View::RequestSelectTab(Tab* tab) {
 }
 
 void TabStrip::View::SetToolBounds(Tab* tab, const gfx::Rect& bounds) {
-  tooltip_.SetToolBounds(tab, bounds);
+  // Note: We should pass bounds in HWND's coordinate rather than |TabStrip|
+  // coordinate.
+  tooltip_.SetToolBounds(tab, gfx::Rect(
+    bounds.origin().Offset(widget_->origin().x(), widget_->origin().y()),
+    bounds.size()));
 }
 
 //////////////////////////////////////////////////////////////////////

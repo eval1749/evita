@@ -361,7 +361,7 @@ void Frame::DidRealize() {
 
   SetLayer(new ui::RootLayer(this));
   tab_content_layer_.reset(new ui::Layer());
-  tab_strip_animator_->SetLayer(tab_content_layer_.get());
+  tab_strip_animator_->SetTabContentLayer(tab_content_layer_.get());
 
   auto const tab_content_bounds = GetTabContentBounds();
   for (auto tab_content : tab_contents_)

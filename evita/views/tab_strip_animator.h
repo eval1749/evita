@@ -37,7 +37,7 @@ class TabStripAnimator final {
   public: void DidDeleteTabContent(TabContent* tab_content);
   private: void DidFinishAction(Action* action);
   public: void RequestSelect(TabContent* new_tab_content);
-  public: void SetLayer(ui::Layer* layer);
+  public: void SetTabContentLayer(ui::Layer* layer);
 
   DISALLOW_COPY_AND_ASSIGN(TabStripAnimator);
 };

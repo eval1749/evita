@@ -275,7 +275,7 @@ void TabStripAnimator::RequestSelect(TabContent* tab_content) {
   tab_content->Show();
 }
 
-void TabStripAnimator::SetLayer(ui::Layer* layer) {
+void TabStripAnimator::SetTabContentLayer(ui::Layer* layer) {
   DCHECK(layer);
   DCHECK(!layer_);
   layer_ = layer;

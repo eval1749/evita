@@ -222,28 +222,41 @@ void Painter::Paint(gfx::Canvas* canvas,
 // MessageView::View
 //
 class MessageView::View final {
-  private: ui::AnimationFrameHandler* const animator_;
+  private: ui::AnimatableWindow* const animator_;
+  private: std::unique_ptr<gfx::Canvas> canvas_;
   private: std::unique_ptr<Painter> painter_;
   private: std::vector<PartView> parts_;
   private: std::unique_ptr<ui::AnimationFloat> main_text_alpha_;
   private: base::string16 message_text_;
   private: base::string16 status_text_;
 
-  public: View(ui::AnimationFrameHandler* animator);
+  public: View(ui::AnimatableWindow* animator);
   public: ~View() = default;
 
-  public: void Animate(gfx::Canvas* canvas, base::Time time);
+  public: void Animate(base::Time time);
   public: void SetMessage(const base::string16& text);
   public: void SetStatus(const std::vector<base::string16>& texts);
 
   DISALLOW_COPY_AND_ASSIGN(View);
 };
 
-MessageView::View::View(ui::AnimationFrameHandler* animator)
+MessageView::View::View(ui::AnimatableWindow* animator)
     : animator_(animator), painter_(new Painter()), parts_(1) {
 }
 
-void MessageView::View::Animate(gfx::Canvas* canvas, base::Time now) {
+void MessageView::View::Animate(base::Time now) {
+  if (!animator_->visible())
+    return;
+
+  if (!canvas_)
+    canvas_.reset(animator_->layer()->CreateCanvas());
+  else if (canvas_->bounds() != animator_->GetContentsBounds())
+    canvas_->SetBounds(animator_->GetContentsBounds());
+
+  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+  if (canvas_->should_clear())
+    canvas_->Clear(gfx::ColorF());
+
   if (!main_text_alpha_) {
     // Hide main text after 5 seconds.
     main_text_alpha_.reset(new ui::AnimationFloat(
@@ -253,7 +266,7 @@ void MessageView::View::Animate(gfx::Canvas* canvas, base::Time now) {
 
   auto const new_alpha = main_text_alpha_->Compute(now);
   parts_[0].alpha = new_alpha;
-  painter_->Paint(canvas, parts_);
+  painter_->Paint(canvas_.get(), parts_);
   if (new_alpha != main_text_alpha_->end_value()) {
     animator_->RequestAnimationFrame();
     return;
@@ -310,26 +323,13 @@ void MessageView::SetStatus(const std::vector<base::string16>& texts) {
 
 // ui::AnimationFrameHandler
 void MessageView::DidBeginAnimationFrame(base::Time time) {
-  if (!visible())
-    return;
-
-  if (!canvas_)
-    canvas_.reset(layer()->CreateCanvas());
-  else if(canvas_->bounds() != GetContentsBounds())
-    canvas_->SetBounds(GetContentsBounds());
-
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  if (canvas_->should_clear())
-    canvas_->Clear(gfx::ColorF());
-
-  view_->Animate(canvas_.get(), time);
+  view_->Animate(time);
 }
 
 // ui::Widget
 void MessageView::DidRealize() {
   ui::AnimatableWindow::DidRealize();
   SetLayer(new ui::Layer());
-  layer()->SetBounds(bounds());
 }
 
 gfx::Size MessageView::GetPreferredSize() const {

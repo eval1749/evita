@@ -47,7 +47,6 @@ class MetricsView final : private ui::LayerOwnerDelegate, public ui::Widget {
   private: virtual void DidRecreateLayer(ui::Layer* old_layer) override;
 
   // ui::Widget
-  private: virtual void DidChangeBounds() override;
   private: virtual void DidRealize() override;
 
   DISALLOW_COPY_AND_ASSIGN(MetricsView);

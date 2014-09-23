@@ -159,12 +159,6 @@ void MetricsView::DidRecreateLayer(ui::Layer*) {
 }
 
 // ui::Widget
-void MetricsView::DidChangeBounds() {
-  ui::Widget::DidChangeBounds();
-  if (canvas_)
-    canvas_->SetBounds(GetContentsBounds());
-}
-
 void MetricsView::DidRealize() {
   ui::Widget::DidRealize();
   SetLayer(new ui::Layer());

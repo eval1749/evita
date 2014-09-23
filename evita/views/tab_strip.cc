@@ -1690,15 +1690,12 @@ void TabStrip::DidBeginAnimationFrame(base::Time time) {
 // ui::Widget
 void TabStrip::DidChangeBounds() {
   ui::AnimatableWindow::DidChangeBounds();
-  if (layer())
-    layer()->SetBounds(bounds());
   view_->DidChangeBounds();
 }
 
 void TabStrip::DidRealize() {
   ui::AnimatableWindow::DidRealize();
   SetLayer(new ui::Layer());
-  layer()->SetBounds(bounds());
   view_->DidRealize();
 }
 

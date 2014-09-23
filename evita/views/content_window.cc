@@ -48,9 +48,6 @@ void ContentWindow::DidRecreateLayer(ui::Layer*) {
 // ui::Widget
 void ContentWindow::DidChangeBounds() {
   Window::DidChangeBounds();
-  if (!layer())
-    return;
-  layer()->SetBounds(bounds());
   if (canvas_)
     canvas_->SetBounds(GetContentsBounds());
 }

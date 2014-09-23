@@ -17,6 +17,10 @@ namespace ui {
 
 class ScrollBarObserver;
 
+//////////////////////////////////////////////////////////////////////
+//
+// ScrollBar
+//
 class ScrollBar : public ui::Widget {
   DECLARE_CASTABLE_CLASS(ScrollBar, Widget);
 
@@ -56,7 +60,6 @@ class ScrollBar : public ui::Widget {
 
   private: static std::vector<Part*> CreateParts(Type type);
   private: HitTestResult HitTest(const gfx::PointF& point) const;
-  public: void Render(gfx::Canvas* canvas);
   private: void ResetHover();
   public: void SetData(const Data& date);
   private: void UpdateLayout();
@@ -64,6 +67,7 @@ class ScrollBar : public ui::Widget {
   // ui::Widget
   private: virtual void DidChangeBounds() override;
   private: virtual void DidShow() override;
+  private: virtual void OnDraw(gfx::Canvas* canvas) override;
   private: virtual void OnMouseExited(const MouseEvent& event) override;
   private: virtual void OnMouseMoved(const MouseEvent& event) override;
   private: virtual void OnMousePressed(const MouseEvent& event) override;

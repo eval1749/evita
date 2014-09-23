@@ -715,9 +715,8 @@ ScrollBar::ScrollBar(Type type, ScrollBarObserver* observer)
 }
 
 ScrollBar::~ScrollBar() {
-  for (auto part : parts_) {
+  for (auto part : parts_)
     delete part;
-  }
 }
 
 std::vector<ScrollBar::Part*> ScrollBar::CreateParts(Type type) {
@@ -741,21 +740,6 @@ ScrollBar::HitTestResult ScrollBar::HitTest(const gfx::PointF& point) const {
       return result;
   }
   return HitTestResult();
-}
-
-void ScrollBar::Render(gfx::Canvas* canvas) {
-  auto dirty = false;
-  for (auto part : parts_) {
-    dirty |= part->IsDirty();
-  }
-  if (!dirty)
-    return;
-  auto const canvas_bounds = gfx::RectF(bounds());
-  gfx::Canvas::DrawingScope drawing_scope(canvas);
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, canvas_bounds);
-  for (auto part : parts_) {
-    part->Render(canvas, canvas_bounds);
-  }
 }
 
 void ScrollBar::ResetHover() {
@@ -785,16 +769,29 @@ void ScrollBar::UpdateLayout() {
 
 // ui::Widget
 void ScrollBar::DidChangeBounds() {
-  for (auto part : parts_) {
+  ui::Widget::DidChangeBounds();
+  for (auto part : parts_)
     part->ResetView();
-  }
   UpdateLayout();
 }
 
 void ScrollBar::DidShow() {
-  for (auto part : parts_) {
+  ui::Widget::DidShow();
+  for (auto part : parts_)
     part->ResetView();
-  }
+}
+
+void ScrollBar::OnDraw(gfx::Canvas* canvas) {
+  auto dirty = false;
+  for (auto part : parts_)
+    dirty |= part->IsDirty();
+  if (!dirty)
+    return;
+  auto const canvas_bounds = GetContentsBounds();
+  gfx::Canvas::DrawingScope drawing_scope(canvas);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, canvas_bounds);
+  for (auto part : parts_)
+    part->Render(canvas, canvas_bounds);
 }
 
 void ScrollBar::OnMouseExited(const ui::MouseEvent&) {

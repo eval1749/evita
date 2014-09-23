@@ -226,7 +226,6 @@ void TextWindow::Redraw() {
       } else {
         gfx::Canvas::DrawingScope drawing_scope(canvas());
         text_renderer_->RenderSelectionIfNeeded(canvas(), selection);
-        vertical_scroll_bar_->Render(canvas());
       }
       return;
     }
@@ -241,9 +240,7 @@ void TextWindow::Redraw() {
   }
 
   // The screen is clean.
-  gfx::Canvas::DrawingScope drawing_scope(canvas());
   text_renderer_->RenderSelectionIfNeeded(canvas(), selection);
-  vertical_scroll_bar_->Render(canvas());
 }
 
 void TextWindow::Render(const TextSelectionModel& selection) {
@@ -263,7 +260,6 @@ void TextWindow::Render(const TextSelectionModel& selection) {
     data.thumb_value = text_renderer_->GetStart();
     data.maximum = buffer()->GetEnd() + 1;;
     vertical_scroll_bar_->SetData(data);
-    vertical_scroll_bar_->Render(canvas());
   }
 }
 
@@ -345,7 +341,9 @@ void TextWindow::DidBeginAnimationFrame(base::Time) {
     return;
   metrics_view_->RecordTime();
   MetricsView::TimingScope timing_scope(metrics_view_);
+  gfx::Canvas::DrawingScope drawing_scope(canvas());
   Redraw();
+  OnDraw(canvas());
   metrics_view_->UpdateView();
   NotifyUpdateContent();
 }

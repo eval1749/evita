@@ -101,7 +101,7 @@ class CanvasWindow : public ui::AnimatableWindow,
 
   public: gfx::Canvas* canvas() { return canvas_.get(); }
 
-  protected: virtual void DidChagneCanvas() = 0;
+  protected: virtual void DidChangeCanvas() = 0;
 
   // ui::AnimationFrameHanndler
   protected: virtual void DidBeginAnimationFrame(base::Time time) override;
@@ -114,6 +114,7 @@ class CanvasWindow : public ui::AnimatableWindow,
 
   // ui::Widget
   protected: virtual void DidHide() override;
+  protected: virtual void DidRealize() override;
 
   DISALLOW_COPY_AND_ASSIGN(CanvasWindow);
 };
@@ -126,33 +127,12 @@ CanvasWindow::~CanvasWindow() {
 
 // ui::AnimationFrameHanndler
 void CanvasWindow::DidBeginAnimationFrame(base::Time) {
-  struct Local {
-    static Layer* GetParentLayer(Widget* widget) {
-      for (auto runner = widget->parent_node(); runner;
-           runner = runner->parent_node()) {
-        if (auto layer = runner->layer())
-          return layer;
-      }
-      NOTREACHED();
-      return nullptr;
-    }
-  };
-
-  if (!layer())
-    SetLayer(new ui::Layer());
-
-  if (layer()->bounds() != gfx::RectF(bounds()))
-    layer()->SetBounds(bounds());
-
-  if (!layer()->parent_layer())
-    Local::GetParentLayer(this)->AppendLayer(layer());
-
   if (!canvas_) {
     canvas_.reset(layer()->CreateCanvas());
-    DidChagneCanvas();
+    DidChangeCanvas();
   } else if (GetContentsBounds() != canvas_->bounds()) {
     canvas_->SetBounds(GetContentsBounds());
-    DidChagneCanvas();
+    DidChangeCanvas();
   }
 
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
@@ -172,9 +152,13 @@ void CanvasWindow::DidRecreateLayer(ui::Layer*) {
 // ui::Widget
 void CanvasWindow::DidHide() {
   AnimatableWindow::DidHide();
-  if (layer() && layer()->parent_layer())
-    layer()->parent_layer()->RemoveLayer(layer());
   canvas_.reset();
+}
+
+void CanvasWindow::DidRealize() {
+  AnimatableWindow::DidRealize();
+  SetLayer(new ui::Layer());
+  set_layer_owner_delegate(this);
 }
 
 namespace {
@@ -567,16 +551,15 @@ void Row::OnPaintCanvas(gfx::Canvas* canvas) {
   for (auto column : header_->columns()) {
     auto const text = model_->GetCellText(row_id(), column->column_id());
     (*text_format())->SetTextAlignment(column->alignment());
-    auto const width = column_index == header_->columns().size() ?
+    auto const width = column_index + 1 == header_->columns().size() ?
         bounds().width() - cell_origin.x : column->width();
-    gfx::RectF rect(cell_origin, gfx::SizeF(width, height()));
-    rect.left += kPadding;
-    rect.top += kPadding;
-    rect.right -= kPadding;
-    rect.bottom -= kPadding;
+    auto const cell_bounds = gfx::RectF(cell_origin,
+                                        gfx::SizeF(width, height()));
+    auto const text_bounds = cell_bounds.Inset(kPadding, kPadding);
     (*canvas)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
-                        *text_format(), rect, textBrush);
+                        *text_format(), text_bounds, textBrush);
     cell_origin.x += column->width();
+    ++column_index;
   }
 
   switch (state_) {
@@ -671,7 +654,7 @@ class RowCollection final : public CanvasWindow, public TableModelObserver {
   private: virtual void DidBeginAnimationFrame(base::Time time) override;
 
   // ui::CanavsWindow
-  private: virtual void DidChagneCanvas() override;
+  private: virtual void DidChangeCanvas() override;
 
   // ui::TableModelObserver
   public: virtual void DidAddRow(int row_id) override;
@@ -680,6 +663,7 @@ class RowCollection final : public CanvasWindow, public TableModelObserver {
 
   // ui::Widget
   private: virtual void DidKillFocus(ui::Widget* focused_window) override;
+  private: virtual void DidRealize() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void OnDraw(gfx::Canvas* canvas) override;
   private: virtual void OnKeyPressed(const KeyboardEvent& event) override;
@@ -694,7 +678,7 @@ RowCollection::RowCollection(const TableModel* model,
                              ColumnCollection* columns,
                              TableControlObserver* observer)
     : header_(columns), hovered_row_(nullptr),
-      model_(model), need_sort_rows_(false), need_update_layout_(true),
+      model_(model), need_sort_rows_(true), need_update_layout_(true),
       need_update_selection_(false), observer_(observer), row_height_(24.0f),
       selection_(model->GetRowCount()),
       text_format_(CreateTextFormat()) {
@@ -863,7 +847,7 @@ void RowCollection::DidBeginAnimationFrame(base::Time time) {
 }
 
 // ui::CanvasWindow
-void RowCollection::DidChagneCanvas() {
+void RowCollection::DidChangeCanvas() {
   NeedUpdateLayout();
 }
 
@@ -925,6 +909,23 @@ void RowCollection::DidKillFocus(Widget*) {
   NeedUpdateSelection();
 }
 
+void RowCollection::DidRealize() {
+  struct Local {
+    static Layer* GetParentLayer(Widget* widget) {
+      for (auto runner = widget->parent_node(); runner;
+           runner = runner->parent_node()) {
+        if (auto layer = runner->layer())
+          return layer;
+      }
+      NOTREACHED();
+      return nullptr;
+    }
+  };
+
+  CanvasWindow::DidRealize();
+  Local::GetParentLayer(this)->AppendLayer(layer());
+}
+
 void RowCollection::DidSetFocus(Widget*) {
   // Change selected rows to active selected color.
   RequestAnimationFrame();
@@ -932,6 +933,8 @@ void RowCollection::DidSetFocus(Widget*) {
 }
 
 void RowCollection::OnDraw(gfx::Canvas* canvas) {
+  if (!visible())
+    return;
   if (canvas != this->canvas()) {
     // Called from parent window's |OnDraw()|.
     RequestAnimationFrame();

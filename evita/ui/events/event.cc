@@ -7,10 +7,19 @@
 #include <vector>
 
 #include "base/logging.h"
-#include "base/win/win_util.h"
 #include "common/memory/singleton.h"
 #include "common/win/win32_verify.h"
-#include "evita/ui/widget.h"
+#include "evita/gfx/rect.h"
+
+namespace base {
+namespace win {
+// Note: We don't use |IsAltPressed()| in "base/win_util.h", because it links
+// netapi32.lib for |NetJoinInformation()| and |NetApiBufferFree()|
+bool IsAltPressed() {
+  return ::GetKeyState(VK_MENU) < 0;
+}
+}  // namespace win
+}  // namespace base
 
 namespace ui {
 

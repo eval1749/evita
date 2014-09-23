@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "base/logging.h"
+#include "base/win/win_util.h"
 #include "common/memory/singleton.h"
 #include "common/win/win32_verify.h"
 #include "evita/ui/widget.h"
@@ -223,16 +224,22 @@ int MouseEvent::ConvertToEventFlags(const base::NativeEvent& native_event) {
     return static_cast<int>(EventFlags::NonClient);
 
   auto flags = 0;
+  if (native_event.wParam & MK_CONTROL)
+    flags |= static_cast<int>(EventFlags::ControlKey);
   if (native_event.wParam & MK_LBUTTON)
     flags |= static_cast<int>(EventFlags::LeftButton);
   if (native_event.wParam & MK_MBUTTON)
     flags |= static_cast<int>(EventFlags::MiddleButton);
   if (native_event.wParam & MK_RBUTTON)
     flags |= static_cast<int>(EventFlags::RightButton);
+  if (native_event.wParam & MK_SHIFT)
+    flags |= static_cast<int>(EventFlags::ShiftKey);
   if (native_event.wParam & MK_XBUTTON1)
     flags |= static_cast<int>(EventFlags::Other1Button);
   if (native_event.wParam & MK_XBUTTON1)
     flags |= static_cast<int>(EventFlags::Other2Button);
+  if (base::win::IsAltPressed())
+    flags |= static_cast<int>(EventFlags::AltKey);
   return flags;
 }
 

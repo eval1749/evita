@@ -213,6 +213,8 @@ void TableWindow::DidBeginAnimationFrame(base::Time) {
     control_->RequestFocus();
 
   gfx::Canvas::DrawingScope drawing_scope(canvas());
+  if (canvas()->should_clear())
+    canvas()->Clear(gfx::ColorF::White);
   OnDraw(canvas());
   NotifyUpdateContent();
 }

@@ -643,7 +643,6 @@ class RowCollection final : public CanvasWindow, public TableModelObserver {
   private: std::unordered_map<int, Row*> row_map_;
   private: float const row_height_;
   private: SelectionModel selection_;
-  private: bool should_clear_;
   private: std::unique_ptr<gfx::TextFormat> text_format_;
 
   public: RowCollection(const TableModel* model,
@@ -697,7 +696,7 @@ RowCollection::RowCollection(const TableModel* model,
     : header_(columns), hovered_row_(nullptr),
       model_(model), need_sort_rows_(false), need_update_layout_(true),
       need_update_selection_(false), observer_(observer), row_height_(24.0f),
-      selection_(model->GetRowCount()), should_clear_(false),
+      selection_(model->GetRowCount()),
       text_format_(CreateTextFormat()) {
   auto const num_rows = static_cast<size_t>(model->GetRowCount());
   for (auto index = 0u; index < num_rows; ++index) {
@@ -866,7 +865,6 @@ void RowCollection::DidBeginAnimationFrame(base::Time time) {
 // ui::CanvasWindow
 void RowCollection::DidChagneCanvas() {
   NeedUpdateLayout();
-  should_clear_ = true;
 }
 
 // ui::TableModelObserver
@@ -955,8 +953,7 @@ void RowCollection::OnDraw(gfx::Canvas* canvas) {
   UpdateLayoutIfNeeded();
   UpdateSelectionIfNeeded();
 
-  if (should_clear_) {
-    should_clear_ = false;
+  if (canvas->should_clear()) {
     canvas->AddDirtyRect(canvas->bounds());
     canvas->Clear(gfx::ColorF(gfx::ColorF::White));
   }

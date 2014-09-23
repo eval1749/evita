@@ -92,7 +92,7 @@ Canvas::ScopedState::~ScopedState() {
 //
 Canvas::Canvas()
     : batch_nesting_level_(0), bitmap_id_(0),
-      factory_set_(FactorySet::instance()) {
+    factory_set_(FactorySet::instance()), should_clear_(true) {
 }
 
 Canvas::~Canvas() {
@@ -127,6 +127,7 @@ void Canvas::DidCallEndDraw() {
 
 void Canvas::DidCreateRenderTarget() {
   bitmap_id_ = ++global_bitmap_id;
+  should_clear_ = true;
   SizeF dpi;
   GetRenderTarget()->GetDpi(&dpi.width, &dpi.height);
   UpdateDpi(dpi);
@@ -167,8 +168,10 @@ void Canvas::EndDraw() {
   auto const hr = batch_nesting_level_ ? GetRenderTarget()->Flush() :
                                          GetRenderTarget()->EndDraw();
   if (SUCCEEDED(hr)) {
-    if (!batch_nesting_level_)
+    if (!batch_nesting_level_) {
       DidCallEndDraw();
+      should_clear_ = false;
+    }
     return;
   }
 
@@ -233,6 +236,7 @@ void Canvas::SetBounds(const RectF& new_bounds) {
   bounds_ = new_bounds;
   screen_bitmap_.reset();
   bitmap_id_ = ++global_bitmap_id;
+  should_clear_ = true;
   DidChangeBounds(new_bounds);
 }
 

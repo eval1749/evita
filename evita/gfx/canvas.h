@@ -60,6 +60,7 @@ class Canvas : public Object, public DpiHandler {
   private: ObserverList<CanvasObserver> observers_;
   private: gfx::PointF offset_;
   private: std::unique_ptr<Bitmap> screen_bitmap_;
+  private: bool should_clear_;
 
   protected: Canvas();
   public: virtual ~Canvas();
@@ -83,6 +84,7 @@ class Canvas : public Object, public DpiHandler {
   public: bool drawing() const { return batch_nesting_level_; }
   public: const FactorySet& factory_set() const { return *factory_set_; }
   public: Bitmap* screen_bitmap() const { return screen_bitmap_.get(); }
+  public: bool should_clear() const { return should_clear_; }
 
   // [A]
   public: virtual void AddDirtyRect(const RectF& new_dirty_rect);

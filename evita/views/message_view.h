@@ -21,10 +21,10 @@ namespace views {
 // MessageView
 //
 class MessageView final : public ui::AnimatableWindow {
-  private: class Model;
+  private: class View;
 
   private: std::unique_ptr<gfx::Canvas> canvas_;
-  private: std::unique_ptr<Model> model_;
+  private: std::unique_ptr<View> view_;
 
   public: MessageView();
   public: virtual ~MessageView();

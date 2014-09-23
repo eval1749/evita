@@ -7,7 +7,7 @@
 #include "base/time/time.h"
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
-#include "evita/ui/animation/animator.h"
+#include "evita/ui/animation/animation_value.h"
 #include "evita/ui/controls/status_bar.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/system_metrics.h"
@@ -18,21 +18,21 @@ namespace {
 
 auto const kMinMainPartWidth = 200.0f;
 
-struct PartModel {
+struct PartView {
   float alpha;
   base::string16 text;
 
-  PartModel(float alpha, const base::string16& text);
-  PartModel();
-  ~PartModel() = default;
+  PartView(float alpha, const base::string16& text);
+  PartView();
+  ~PartView() = default;
 };
 
-PartModel::PartModel(float alpha, const base::string16& text)
+PartView::PartView(float alpha, const base::string16& text)
     : alpha(alpha), text(text) {
 }
 
-PartModel::PartModel()
-    : PartModel(1.0f, base::string16()) {
+PartView::PartView()
+    : PartView(1.0f, base::string16()) {
 }
 
 // Paint resize button with six dots:
@@ -58,14 +58,14 @@ void PaintResizeButton(gfx::Canvas* canvas, const gfx::RectF& bounds,
 
 //////////////////////////////////////////////////////////////////////
 //
-// ModelView
+// Painter
 //
-class ModelView final {
+class Painter final {
   private: struct Part {
     float alpha;
     gfx::RectF bounds;
     bool dirty;
-    PartModel model;
+    PartView model;
     base::string16 text;
     gfx::TextLayout* text_layout;
     float width;
@@ -79,35 +79,34 @@ class ModelView final {
   private: std::vector<Part> parts_;
   private: std::unique_ptr<gfx::TextFormat> text_format_;
 
-  public: ModelView();
-  public: ~ModelView() = default;
+  public: Painter();
+  public: ~Painter() = default;
 
-  public: void Paint(gfx::Canvas* canvas,
-                     const gfx::RectF& bounds,
-                     const std::vector<PartModel>& parts);
+  public: void Paint(gfx::Canvas* canvas, const std::vector<PartView>& parts);
 
-  DISALLOW_COPY_AND_ASSIGN(ModelView);
+  DISALLOW_COPY_AND_ASSIGN(Painter);
 };
 
 auto const kPaddingRight = 8.0f;
 
-ModelView::Part::Part()
+Painter::Part::Part()
     : alpha(1), dirty(false), text_layout(nullptr), width(kPaddingRight) {
 }
 
-ModelView::Part::~Part() {
+Painter::Part::~Part() {
   delete text_layout;
 }
 
-ModelView::ModelView() : original_main_part_width_(0) {
+Painter::Painter() : original_main_part_width_(0) {
   text_format_.reset(new gfx::TextFormat(
       ui::SystemMetrics::instance()->font_family(),
       ui::SystemMetrics::instance()->font_size()));
   (*text_format_)->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 }
 
-void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
-                      const std::vector<PartModel>& new_parts) {
+void Painter::Paint(gfx::Canvas* canvas,
+                    const std::vector<PartView>& new_parts) {
+  auto const new_bounds = canvas->bounds();
   auto dirty = bounds_ != new_bounds;
   if (parts_.size() != new_parts.size()) {
     parts_.clear();
@@ -205,8 +204,8 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
     part.dirty = false;
     if (part.bounds.empty())
       continue;
-    canvas->AddDirtyRect(part.bounds);
     gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, part.bounds);
+    canvas->AddDirtyRect(part.bounds);
     canvas->Clear(gfx::sysColor(COLOR_BTNFACE, alpha));
     if (!part.alpha || !part.text_layout)
       continue;
@@ -220,110 +219,93 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
 
 //////////////////////////////////////////////////////////////////////
 //
-// MessageView::Model
+// MessageView::View
 //
-class MessageView::Model final {
-  private: std::unique_ptr<ModelView> paint_model_;
-  private: std::vector<PartModel> parts_;
-  private: base::Time main_text_time_;
+class MessageView::View final {
+  private: ui::AnimationFrameHandler* const animator_;
+  private: std::unique_ptr<Painter> painter_;
+  private: std::vector<PartView> parts_;
+  private: std::unique_ptr<ui::AnimationFloat> main_text_alpha_;
   private: base::string16 message_text_;
   private: base::string16 status_text_;
 
-  public: Model();
-  public: ~Model() = default;
+  public: View(ui::AnimationFrameHandler* animator);
+  public: ~View() = default;
 
-  private: bool Animate(base::Time now);
+  public: void Animate(gfx::Canvas* canvas, base::Time time);
   public: void SetMessage(const base::string16& text);
   public: void SetStatus(const std::vector<base::string16>& texts);
-  private: void StartAnimation(base::Time now, const base::string16& text);
-  private: void UpdateLayout();
-  public: bool UpdateVisual(base::Time time, gfx::Canvas* canvas,
-                            const gfx::RectF& bounds);
 
-  DISALLOW_COPY_AND_ASSIGN(Model);
+  DISALLOW_COPY_AND_ASSIGN(View);
 };
 
-MessageView::Model::Model() : paint_model_(new ModelView()), parts_(1) {
+MessageView::View::View(ui::AnimationFrameHandler* animator)
+    : animator_(animator), painter_(new Painter()), parts_(1) {
 }
 
-bool MessageView::Model::Animate(base::Time now) {
-  // Hide text after 5000ms.
-  auto const kAnimationDuration = 5000.0f;
-  auto const duration = now - main_text_time_;
-  auto const factor = static_cast<float>(duration.InMilliseconds()) /
-                      kAnimationDuration;
-  auto const old_value = parts_[0].alpha;
-  auto const new_value = factor >= 1.0 ? 0.0f : 1.0f - factor;
-  parts_[0].alpha = new_value;
-  return new_value != old_value;
+void MessageView::View::Animate(gfx::Canvas* canvas, base::Time now) {
+  if (!main_text_alpha_) {
+    // Hide main text after 5 seconds.
+    main_text_alpha_.reset(new ui::AnimationFloat(
+        now, base::TimeDelta::FromSeconds(5), 1.0f, 0.0f));
+    parts_[0].text = message_text_.empty() ? status_text_ : message_text_;
+  }
+
+  auto const new_alpha = main_text_alpha_->Compute(now);
+  parts_[0].alpha = new_alpha;
+  painter_->Paint(canvas, parts_);
+  if (new_alpha != main_text_alpha_->end_value()) {
+    animator_->RequestAnimationFrame();
+    return;
+  }
+
+  // Main text animation is finished.
+  if (message_text_.empty())
+    return;
+  // We'll display status text
+  main_text_alpha_.reset();
+  message_text_.clear();
+  animator_->RequestAnimationFrame();
 }
 
-void MessageView::Model::SetMessage(const base::string16& text) {
+void MessageView::View::SetMessage(const base::string16& text) {
+  if (message_text_ == text)
+    return;
   message_text_ = text;
+  main_text_alpha_.reset();
+  animator_->RequestAnimationFrame();
 }
 
-void MessageView::Model::SetStatus(const std::vector<base::string16>& texts) {
+void MessageView::View::SetStatus(const std::vector<base::string16>& texts) {
   DCHECK(!texts.empty());
   status_text_ = texts[0];
   const auto current_text = parts_[0].text;
   parts_.clear();
   for (auto const text : texts){
-    PartModel part_model {1.0f, text};
+    PartView part_model {1.0f, text};
     parts_.push_back(part_model);
   }
   parts_[0].text = current_text;
-}
-
-void MessageView::Model::StartAnimation(base::Time now,
-                                        const base::string16& main_text) {
-  // TODO(eval1749) We should request animation frame for hiding main text
-  // after 5 second.
-  parts_[0].text = main_text;
-  parts_[0].alpha = 1.0f;
-  main_text_time_ = now;
-}
-
-bool MessageView::Model::UpdateVisual(base::Time now, gfx::Canvas* canvas,
-                                      const gfx::RectF& bounds) {
-  auto need_animation = true;
-  if (!message_text_.empty()) {
-    if (message_text_ == parts_[0].text) {
-      if (parts_[0].alpha) {
-        need_animation = Animate(now);
-      } else {
-        message_text_.clear();
-        StartAnimation(now, status_text_);
-      }
-    } else {
-      StartAnimation(now, message_text_);
-    }
-  } else if (status_text_ == parts_[0].text) {
-    need_animation = Animate(now);
-  } else {
-    StartAnimation(now, status_text_);
-  }
-  paint_model_->Paint(canvas, bounds, parts_);
-  return need_animation;
+  main_text_alpha_.reset();
+  animator_->RequestAnimationFrame();
 }
 
 //////////////////////////////////////////////////////////////////////
 //
 // MessageView
 //
-MessageView::MessageView() : model_(new Model()) {
+MessageView::MessageView() : view_(new View(this)) {
 }
 
 MessageView::~MessageView() {
 }
 
 void MessageView::SetMessage(const base::string16& text) {
-  model_->SetMessage(text);
-  RequestAnimationFrame();
+  view_->SetMessage(text);
 }
 
 void MessageView::SetStatus(const std::vector<base::string16>& texts) {
-  model_->SetStatus(texts);
-  RequestAnimationFrame();
+  view_->SetStatus(texts);
 }
 
 // ui::AnimationFrameHandler
@@ -340,9 +322,7 @@ void MessageView::DidBeginAnimationFrame(base::Time time) {
   if (canvas_->should_clear())
     canvas_->Clear(gfx::ColorF());
 
-  if (!model_->UpdateVisual(time, canvas_.get(), GetContentsBounds()))
-    return;
-  RequestAnimationFrame();
+  view_->Animate(canvas_.get(), time);
 }
 
 // ui::Widget

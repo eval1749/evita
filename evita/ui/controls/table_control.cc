@@ -352,7 +352,7 @@ void Column::OnPaintCanvas(gfx::Canvas* canvas) {
 class ColumnCollection : public ui::Widget, private PaintScheduler {
   DECLARE_CASTABLE_CLASS(ColumnCollection, Widget);
 
-  private: std::vector<Column*> header_;
+  private: std::vector<Column*> columns_;
   private: float column_height_;
   private: gfx::RectF canvas_bounds_;
   private: Column* hovered_column_;
@@ -362,7 +362,7 @@ class ColumnCollection : public ui::Widget, private PaintScheduler {
   public: virtual ~ColumnCollection();
 
   public: float canvas_width() const;
-  public: const std::vector<Column*> columns() const { return header_; }
+  public: const std::vector<Column*> columns() const { return columns_; }
   public: int window_height() const;
 
   private: Column* HitTest(const gfx::PointF& point);
@@ -373,6 +373,7 @@ class ColumnCollection : public ui::Widget, private PaintScheduler {
   protected: virtual void SchedulePaintCanvas() override;
 
   // ui::Widget
+  private: virtual HCURSOR GetCursorAt(const gfx::Point& point) const override;
   private: virtual void OnDraw(gfx::Canvas* canvas) override;
   private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
   private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
@@ -383,13 +384,13 @@ class ColumnCollection : public ui::Widget, private PaintScheduler {
 ColumnCollection::ColumnCollection(const std::vector<TableColumn>& columns)
     : column_height_(24.0f), hovered_column_(nullptr),
       text_format_(CreateTextFormat()) {
-  header_.resize(columns.size());
+  columns_.resize(columns.size());
   for (auto index = 0u; index < columns.size(); ++index)
-    header_[index] = new Column(this, columns[index], text_format_.get());
+    columns_[index] = new Column(this, columns[index], text_format_.get());
 }
 
 ColumnCollection::~ColumnCollection() {
-  for (auto column : header_)
+  for (auto column : columns_)
     delete column;
 }
 
@@ -403,7 +404,7 @@ int ColumnCollection::window_height() const {
 
 Column* ColumnCollection::HitTest(const gfx::PointF& point) {
   UpdateLayoutIfNeeded();
-  for (auto column : header_) {
+  for (auto column : columns_) {
     if (column->HitTest(point))
       return column;
   }
@@ -425,9 +426,9 @@ void ColumnCollection::UpdateLayoutIfNeeded() {
     return;
   canvas_bounds_ = GetContentsBounds();
   gfx::PointF origin(kLeftMargin, kTopMargin);
-  auto rest = header_.size();
+  auto rest = columns_.size();
   gfx::PointF cell_origin(origin);
-  for (auto column : header_) {
+  for (auto column : columns_) {
     --rest;
     (*text_format_)->SetTextAlignment(column->alignment());
     auto const width = rest ?
@@ -445,12 +446,23 @@ void ColumnCollection::SchedulePaintCanvas() {
 }
 
 // ui::Widget
+HCURSOR ColumnCollection::GetCursorAt(const gfx::Point& point_in) const {
+  auto const point = gfx::PointF(point_in);
+  auto const column = const_cast<ColumnCollection*>(this)->HitTest(point);
+  if (!column)
+    return nullptr;
+  if (point.x < column->bounds().right - 5)
+    return nullptr;
+  // TODO(eval1749) We should use horizontal splitter cursor.
+  return ::LoadCursor(nullptr, IDC_SIZEWE);
+}
+
 void ColumnCollection::OnDraw(gfx::Canvas* canvas) {
   auto const new_width = parent_node()->bounds().width();
   if (new_width != bounds().width())
     SetBounds(gfx::Rect(gfx::Size(new_width, window_height())));
   UpdateLayoutIfNeeded();
-  for (const auto column : header_)
+  for (const auto column : columns_)
     column->Paint(canvas);
 }
 

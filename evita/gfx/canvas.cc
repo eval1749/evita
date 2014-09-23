@@ -245,6 +245,7 @@ void Canvas::SetInitialBounds(const RectF& bounds) {
   DCHECK(bounds_.empty());
   bitmap_id_ = ++global_bitmap_id;
   bounds_ = bounds;
+  AddDirtyRect(bounds_);
 }
 
 void Canvas::SetOrigin(const gfx::PointF new_origin) {

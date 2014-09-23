@@ -953,10 +953,8 @@ void RowCollection::OnDraw(gfx::Canvas* canvas) {
   UpdateLayoutIfNeeded();
   UpdateSelectionIfNeeded();
 
-  if (canvas->should_clear()) {
-    canvas->AddDirtyRect(canvas->bounds());
+  if (canvas->should_clear())
     canvas->Clear(gfx::ColorF(gfx::ColorF::White));
-  }
 
   for (const auto row : rows_)
     row->Paint(canvas);

@@ -27,39 +27,27 @@ class TableModel;
 //////////////////////////////////////////////////////////////////////
 //
 // TableControl
+// Implements a table view with header, list of rows and scroll bar for
+// scrolling row list.
 //
-class TableControl final : public ui::Widget, public TableModelObserver {
+class TableControl final : public ui::Widget {
   DECLARE_CASTABLE_CLASS(TableControl, Widget);
 
   private: class View;
 
   private: std::unique_ptr<View> view_;
-  private: TableControlObserver* observer_;
 
   public: TableControl(const std::vector<TableColumn>& columns,
                        const TableModel* model,
                        TableControlObserver* observer);
   public: virtual ~TableControl();
 
+  public: TableModelObserver* GetTableModelObserver();
   public: int GetRowState(int row_id) const;
   public: void Select(int row_id);
 
-  // ui::TableModelObserver
-  private: virtual void DidAddRow(int row_id) override;
-  private: virtual void DidChangeRow(int row_id) override;
-  private: virtual void DidRemoveRow(int row_id) override;
-
   // ui::Widget
-  private: virtual void DidKillFocus(ui::Widget* focused_window) override;
-  private: virtual void DidRealize() override;
-  private: virtual void DidChangeBounds() override;
-  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
-  private: virtual void DidShow() override;
-  private: virtual void OnDraw(gfx::Canvas* canvas) override;
-  private: virtual void OnKeyPressed(const KeyboardEvent& event) override;
-  private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
-  private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
-  private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
+  private: virtual void DidSetFocus(Widget* last_focused) override;
 
   DISALLOW_COPY_AND_ASSIGN(TableControl);
 };

@@ -77,6 +77,7 @@ class TableWindow final : public text::BufferMutationObserver,
 
   // ui::Widget
   private: virtual void DidChangeBounds() override;
+  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
 
   DISALLOW_COPY_AND_ASSIGN(TableWindow);
 };

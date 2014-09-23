@@ -12,14 +12,191 @@
 #include "common/win/scoped_comptr.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/text_format.h"
+#include "evita/gfx/text_layout.h"
+#include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/base/selection_model.h"
 #include "evita/ui/base/table_model.h"
+#include "evita/ui/compositor/layer.h"
+#include "evita/ui/compositor/layer_owner_delegate.h"
 #include "evita/ui/controls/table_control_observer.h"
 #include "evita/ui/events/event.h"
+#include "evita/ui/system_metrics.h"
 
 namespace ui {
 
+
+//////////////////////////////////////////////////////////////////////
+//
+// PaintScheduler
+//
+class PaintScheduler {
+  protected: PaintScheduler() = default;
+  protected: virtual ~PaintScheduler() = default;
+
+  public: virtual void SchedulePaintCanvas() = 0;
+
+  DISALLOW_COPY_AND_ASSIGN(PaintScheduler);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// CanvasPainter
+//
+class CanvasPainter {
+  private: int canvas_bitmap_id_;
+  private: bool dirty_;
+  private: PaintScheduler* const paint_scheduler_;
+
+  protected: CanvasPainter(PaintScheduler* paint_scheduler);
+  public: virtual ~CanvasPainter();
+
+  private: bool IsDirty(const gfx::Canvas* canvas) const;
+  public: void MarkDirty();
+  protected: virtual void OnPaintCanvas(gfx::Canvas* canvas) = 0;
+  public: void Paint(gfx::Canvas* canvas);
+
+  DISALLOW_COPY_AND_ASSIGN(CanvasPainter);
+};
+
+CanvasPainter::CanvasPainter(PaintScheduler* paint_scheduler)
+    : canvas_bitmap_id_(0), dirty_(true), paint_scheduler_(paint_scheduler) {
+}
+
+CanvasPainter::~CanvasPainter() {
+}
+
+void CanvasPainter::MarkDirty() {
+  if (dirty_)
+    return;
+  dirty_ = true;
+  paint_scheduler_->SchedulePaintCanvas();
+}
+
+void CanvasPainter::Paint(gfx::Canvas* canvas) {
+  if (!IsDirty(canvas))
+    return;
+  canvas_bitmap_id_ = canvas->bitmap_id();
+  dirty_ = false;
+  gfx::Canvas::DrawingScope drawing_scope(canvas);
+  OnPaintCanvas(canvas);
+}
+
+bool CanvasPainter::IsDirty(const gfx::Canvas* canvas) const {
+  return dirty_ || canvas_bitmap_id_ != canvas->bitmap_id();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// CanvasWindow
+//
+class CanvasWindow : public ui::AnimatableWindow,
+                     protected ui::PaintScheduler,
+                     protected ui::LayerOwnerDelegate {
+  DECLARE_CASTABLE_CLASS(CanvasWindow, AnimatableWindow);
+
+  private: std::unique_ptr<gfx::Canvas> canvas_;
+
+  protected: CanvasWindow();
+  protected: virtual ~CanvasWindow();
+
+  public: gfx::Canvas* canvas() { return canvas_.get(); }
+
+  protected: virtual void DidChagneCanvas() = 0;
+
+  // ui::AnimationFrameHanndler
+  protected: virtual void DidBeginAnimationFrame(base::Time time) override;
+
+  // ui::PaintScheduler
+  protected: virtual void SchedulePaintCanvas() override;
+
+  // ui::LayerOwnerDelegate
+  protected: virtual void DidRecreateLayer(ui::Layer* old_layer) override;
+
+  // ui::Widget
+  protected: virtual void DidHide() override;
+
+  DISALLOW_COPY_AND_ASSIGN(CanvasWindow);
+};
+
+CanvasWindow::CanvasWindow() {
+}
+
+CanvasWindow::~CanvasWindow() {
+}
+
+// ui::AnimationFrameHanndler
+void CanvasWindow::DidBeginAnimationFrame(base::Time) {
+  struct Local {
+    static Layer* GetParentLayer(Widget* widget) {
+      for (auto runner = widget->parent_node(); runner;
+           runner = runner->parent_node()) {
+        if (auto layer = runner->layer())
+          return layer;
+      }
+      NOTREACHED();
+      return nullptr;
+    }
+  };
+
+  if (!layer())
+    SetLayer(new ui::Layer());
+
+  if (layer()->bounds() != gfx::RectF(bounds()))
+    layer()->SetBounds(bounds());
+
+  if (!layer()->parent_layer())
+    Local::GetParentLayer(this)->AppendLayer(layer());
+
+  if (!canvas_) {
+    canvas_.reset(layer()->CreateCanvas());
+    DidChagneCanvas();
+  } else if (GetContentsBounds() != canvas_->bounds()) {
+    canvas_->SetBounds(GetContentsBounds());
+    DidChagneCanvas();
+  }
+
+  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+  OnDraw(canvas_.get());
+}
+
+// ui::PaintScheduler
+void CanvasWindow::SchedulePaintCanvas() {
+  SchedulePaint();
+}
+
+// ui::LayerOwnerDelegate
+void CanvasWindow::DidRecreateLayer(ui::Layer*) {
+  canvas_.reset();
+}
+
+// ui::Widget
+void CanvasWindow::DidHide() {
+  AnimatableWindow::DidHide();
+  if (layer() && layer()->parent_layer())
+    layer()->parent_layer()->RemoveLayer(layer());
+  canvas_.reset();
+}
+
 namespace {
+
+auto const kLeftMargin = 10.0f;
+auto const kMarginBetweenHeaderAndRow = 3.0f;
+auto const kRightMargin = 5.0f;
+auto const kTopMargin = 3.0f;
+
+std::unique_ptr<gfx::TextFormat> CreateTextFormat() {
+  auto const font_size = 13.0f;
+  auto text_format = std::make_unique<gfx::TextFormat>(
+      L"MS Shell Dlg 2", font_size);
+  common::ComPtr<IDWriteInlineObject> inline_object;
+  COM_VERIFY(gfx::FactorySet::instance()->dwrite().
+      CreateEllipsisTrimmingSign(*text_format.get(), &inline_object));
+  DWRITE_TRIMMING trimming {DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0};
+  (*text_format.get())->SetTrimming(&trimming, inline_object);
+  (*text_format.get())->SetParagraphAlignment(
+      DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+  return std::move(text_format);
+}
 
 gfx::ColorF RgbToColorF(int red, int green, int blue, float alpha) {
   return gfx::ColorF(static_cast<float>(red) / 255,
@@ -27,28 +204,32 @@ gfx::ColorF RgbToColorF(int red, int green, int blue, float alpha) {
                      static_cast<float>(blue) / 255,
                      alpha);
 }
-
 //////////////////////////////////////////////////////////////////////
 //
 // Item
 //
-class Item : public common::Castable {
+class Item : public ui::CanvasPainter, public common::Castable {
   DECLARE_CASTABLE_CLASS(Item, common::Castable);
 
   private: gfx::RectF bounds_;
+  private: gfx::TextFormat* const text_format_;
 
-  public: Item();
+  protected: Item(PaintScheduler* paint_scheduler, gfx::TextFormat* text_format);
   public: virtual ~Item();
 
   public: const gfx::RectF& bounds() const { return bounds_; }
-  public: void set_rect(const gfx::RectF& rect) { bounds_ = rect; }
+  public: float height() const { return bounds_.height(); }
+  protected: gfx::TextFormat* text_format() const { return text_format_; }
 
   public: Item* HitTest(const gfx::PointF& point) const;
+  public: void SetBounds(const gfx::PointF& origin, const gfx::SizeF& size);
+  public: void SetBounds(const gfx::RectF& new_bounds);
 
   DISALLOW_COPY_AND_ASSIGN(Item);
 };
 
-Item::Item() {
+Item::Item(PaintScheduler* paint_scheduler, gfx::TextFormat* text_format)
+    : CanvasPainter(paint_scheduler), text_format_(text_format) {
 }
 
 Item::~Item() {
@@ -58,6 +239,17 @@ Item* Item::HitTest(const gfx::PointF& point) const {
   return bounds_.Contains(point) ? const_cast<Item*>(this) : nullptr;
 }
 
+void Item::SetBounds(const gfx::PointF& origin, const gfx::SizeF& size) {
+  SetBounds(gfx::RectF(origin, size));
+}
+
+void Item::SetBounds(const gfx::RectF& new_bounds) {
+  DCHECK(!new_bounds.empty());
+  if (bounds_ == new_bounds)
+    return;
+  bounds_ = new_bounds;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // Column
@@ -65,21 +257,38 @@ Item* Item::HitTest(const gfx::PointF& point) const {
 class Column final : public Item {
   DECLARE_CASTABLE_CLASS(Column, Item);
 
-  private: TableColumn data_;
+  public: enum class State {
+    Normal,
+    Hovered,
+    Pressed,
+  };
 
-  public: Column(const TableColumn& data);
-  public: ~Column();
+  private: TableColumn data_;
+  private: State state_;
+  private: std::unique_ptr<gfx::TextLayout> text_layout_;
+
+  public: Column(PaintScheduler* paint_scheduler, const TableColumn& data,
+                 gfx::TextFormat* text_format);
+  public: virtual ~Column();
 
   public: DWRITE_TEXT_ALIGNMENT alignment() const;
   public: int column_id() const { return data_.column_id; }
+  public: State state() const { return state_; }
   public: const base::string16& text() const { return data_.text; }
   public: float width() const { return data_.width; }
+
+  private: gfx::ColorF GetOverlayColor() const;
+  public: void SetState(State new_state);
+
+  // CanvasPainter
+  private: virtual void OnPaintCanvas(gfx::Canvas* canvas) override;
 
   DISALLOW_COPY_AND_ASSIGN(Column);
 };
 
-Column::Column(const TableColumn& data)
-    : data_(data) {
+Column::Column(PaintScheduler* paint_scheduler, const TableColumn& data,
+               gfx::TextFormat* text_format)
+    : Item(paint_scheduler, text_format), data_(data), state_(State::Normal) {
   auto const kRightPadding = 5;
   data_.width += kRightPadding;
 }
@@ -96,6 +305,176 @@ DWRITE_TEXT_ALIGNMENT Column::alignment() const {
   return dwrite_alignment[static_cast<int>(data_.alignment)];
 }
 
+gfx::ColorF Column::GetOverlayColor() const {
+  switch (state_) {
+    case State::Hovered:
+      return gfx::ColorF(RgbToColorF(51, 153, 255, 0.1f));
+    case State::Normal:
+      return gfx::ColorF(1, 1, 1);
+    case State::Pressed:
+      return gfx::ColorF(RgbToColorF(51, 153, 255, 0.5f));
+  }
+  NOTREACHED();
+  return gfx::ColorF(1, 0, 0);
+}
+
+void Column::SetState(State new_state) {
+  if (state_ == new_state)
+    return;
+  state_ = new_state;
+  MarkDirty();
+}
+
+// CanvasPainter
+void Column::OnPaintCanvas(gfx::Canvas* canvas) {
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds());
+  canvas->AddDirtyRect(bounds());
+  canvas->Clear(gfx::ColorF::White);
+
+  // Paint column text
+  {
+    auto const text_bounds = bounds().Inset(5, 0);
+    if (!text_layout_) {
+      text_layout_ = text_format()->CreateLayout(data_.text,
+                                                 text_bounds.size());
+    }
+    gfx::Brush text_brush(canvas, gfx::ColorF::Black);
+    (*canvas)->DrawTextLayout(text_bounds.origin(), *text_layout_, text_brush,
+                              D2D1_DRAW_TEXT_OPTIONS_CLIP);
+  }
+
+  // Paint separator
+  {
+    const auto separator = gfx::RectF(bounds().top_right() + gfx::SizeF(-1, 3),
+                                      gfx::SizeF(1.0f, bounds().height() - 6));
+    gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, separator);
+    canvas->Clear(gfx::ColorF::LightGray);
+  }
+
+  // Pain overlay if needed
+  if (state_ == State::Normal)
+    return;
+  canvas->FillRectangle(gfx::Brush(canvas, GetOverlayColor()), bounds());
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// ColumnCollection
+//
+class ColumnCollection : public ui::Widget, private PaintScheduler {
+  DECLARE_CASTABLE_CLASS(ColumnCollection, Widget);
+
+  private: std::vector<Column*> header_;
+  private: float column_height_;
+  private: gfx::RectF canvas_bounds_;
+  private: Column* hovered_column_;
+  private: std::unique_ptr<gfx::TextFormat> text_format_;
+
+  public: ColumnCollection(const std::vector<TableColumn>& columns);
+  public: virtual ~ColumnCollection();
+
+  public: float canvas_width() const;
+  public: const std::vector<Column*> columns() const { return header_; }
+  public: int window_height() const;
+
+  private: Column* HitTest(const gfx::PointF& point);
+  private: void UpdateHover(Column* column);
+  private: void UpdateLayoutIfNeeded();
+
+  // ui::PaintScheduler
+  protected: virtual void SchedulePaintCanvas() override;
+
+  // ui::Widget
+  private: virtual void OnDraw(gfx::Canvas* canvas) override;
+  private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
+  private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
+
+  DISALLOW_COPY_AND_ASSIGN(ColumnCollection);
+};
+
+ColumnCollection::ColumnCollection(const std::vector<TableColumn>& columns)
+    : column_height_(24.0f), hovered_column_(nullptr),
+      text_format_(CreateTextFormat()) {
+  header_.resize(columns.size());
+  for (auto index = 0u; index < columns.size(); ++index)
+    header_[index] = new Column(this, columns[index], text_format_.get());
+}
+
+ColumnCollection::~ColumnCollection() {
+  for (auto column : header_)
+    delete column;
+}
+
+float ColumnCollection::canvas_width() const {
+  return canvas_bounds_.width();
+}
+
+int ColumnCollection::window_height() const {
+  return static_cast<int>(column_height_ + kMarginBetweenHeaderAndRow);
+}
+
+Column* ColumnCollection::HitTest(const gfx::PointF& point) {
+  UpdateLayoutIfNeeded();
+  for (auto column : header_) {
+    if (column->HitTest(point))
+      return column;
+  }
+  return nullptr;
+}
+
+void ColumnCollection::UpdateHover(Column* new_hovered_column) {
+  if (hovered_column_ == new_hovered_column)
+    return;
+  if (hovered_column_ && hovered_column_->state() == Column::State::Hovered)
+    hovered_column_->SetState(Column::State::Normal);
+  hovered_column_ = new_hovered_column;
+  if (hovered_column_ && hovered_column_->state() == Column::State::Normal)
+    hovered_column_->SetState(Column::State::Hovered);
+}
+
+void ColumnCollection::UpdateLayoutIfNeeded() {
+  if (canvas_bounds_ == GetContentsBounds())
+    return;
+  canvas_bounds_ = GetContentsBounds();
+  gfx::PointF origin(kLeftMargin, kTopMargin);
+  auto column_index = 0u;
+  gfx::PointF cell_origin(origin);
+  for (auto column : header_) {
+    ++column_index;
+    (*text_format_)->SetTextAlignment(column->alignment());
+    auto const width = column_index == header_.size() ?
+        canvas_bounds_.width() - cell_origin.x - kRightMargin :
+        column->width();
+    gfx::RectF bounds(cell_origin, gfx::SizeF(width, column_height_));
+    column->SetBounds(bounds);
+    DCHECK(!column->bounds().empty());
+    cell_origin.x += column->width();
+  }
+}
+
+// ui::PaintScheduler
+void ColumnCollection::SchedulePaintCanvas() {
+  SchedulePaint();
+}
+
+// ui::Widget
+void ColumnCollection::OnDraw(gfx::Canvas* canvas) {
+  auto const new_width = parent_node()->bounds().width();
+  if (new_width != bounds().width())
+    SetBounds(gfx::Rect(gfx::Size(new_width, window_height())));
+  UpdateLayoutIfNeeded();
+  for (const auto column : header_)
+    column->Paint(canvas);
+}
+
+void ColumnCollection::OnMouseExited(const ui::MouseEvent&) {
+  UpdateHover(nullptr);
+}
+
+void ColumnCollection::OnMouseMoved(const ui::MouseEvent& event) {
+  UpdateHover(HitTest(gfx::PointF(event.location())));
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // Row
@@ -103,7 +482,7 @@ DWRITE_TEXT_ALIGNMENT Column::alignment() const {
 class Row final : public Item {
   DECLARE_CASTABLE_CLASS(Row, Item);
 
-  public: enum RowState {
+  public: enum RowFlags {
     kNone = 0,
     kFocused = 1,
     kSelected = 1 << 1,
@@ -113,35 +492,124 @@ class Row final : public Item {
     Activating = 1 << 5,
   };
 
-  private: int row_id_;
-  private: int state_;
+  public: enum class State {
+    Normal,
+    ActiveSelected,
+    Hovered,
+    InactiveSelected,
+  };
 
-  public: Row(int row_id);
-  public: ~Row();
+  private: ColumnCollection* const header_;
+  private: int flags_;
+  private: const TableModel* const model_;
+  private: int const row_id_;
+  private: State state_;
 
+  public: Row(PaintScheduler* paint_scheduler, const TableModel* model,
+              ColumnCollection* columns, int row_id,
+              gfx::TextFormat* text_format);
+  public: virtual ~Row();
+
+  public: int flags() const { return flags_; }
   public: int row_id() const { return row_id_; }
-  public: bool selected() const { return state_ & kSelected; }
-  public: int state() const { return state_; }
+  public: bool selected() const { return flags_ & kSelected; }
+  public: State state() const { return state_; }
 
-  public: void Select() { state_ |= kSelected; }
-  public: void UpdateState(int new_state, int state_mask);
+  public: void SetSelected(bool selected);
+  public: void SetState(State new_state);
+  public: void UpdateRowFlags(int new_state, int flags_mask);
+
+  // CanvasPainter
+  private: virtual void OnPaintCanvas(gfx::Canvas* canvas) override;
 
   DISALLOW_COPY_AND_ASSIGN(Row);
 };
 
-Row::Row(int row_id) :
-    row_id_(row_id),
-    state_(kNone) {
+Row::Row(PaintScheduler* paint_scheduler, const TableModel* model,
+         ColumnCollection* columns, int row_id, gfx::TextFormat* text_format)
+    : Item(paint_scheduler, text_format), header_(columns), flags_(kNone),
+      model_(model), row_id_(row_id), state_(State::Normal) {
 }
 
 Row::~Row() {
 }
 
-void Row::UpdateState(int new_state, int state_mask) {
-  state_ &= ~state_mask;
-  state_ |= new_state;
+void Row::SetSelected(bool selected) {
+  UpdateRowFlags(selected ? kSelected : 0, kSelected);
 }
 
+void Row::SetState(State new_state) {
+  if (state_ == new_state)
+    return;
+  MarkDirty();
+  state_ = new_state;
+}
+
+void Row::UpdateRowFlags(int new_flags_bits, int new_flags_mask) {
+  auto const new_flag = (flags_ & ~new_flags_mask) | new_flags_bits;
+  if (flags_ == new_flag)
+    return;
+  MarkDirty();
+  flags_ = new_flag;
+}
+
+// CanvasPainter
+void Row::OnPaintCanvas(gfx::Canvas* canvas) {
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds());
+  canvas->AddDirtyRect(bounds());
+  auto const kPadding = 2.0f;
+  auto const bgcolor = gfx::ColorF(gfx::ColorF::White);
+  auto const color = gfx::ColorF(gfx::ColorF::Black);
+  canvas->FillRectangle(gfx::Brush(canvas, bgcolor), bounds());
+  gfx::Brush textBrush(canvas, color);
+  gfx::PointF cell_origin(bounds().origin());
+  auto column_index = 0u;
+  for (auto column : header_->columns()) {
+    auto const text = model_->GetCellText(row_id(), column->column_id());
+    (*text_format())->SetTextAlignment(column->alignment());
+    auto const width = column_index == header_->columns().size() ?
+        bounds().width() - cell_origin.x : column->width();
+    gfx::RectF rect(cell_origin, gfx::SizeF(width, height()));
+    rect.left += kPadding;
+    rect.top += kPadding;
+    rect.right -= kPadding;
+    rect.bottom -= kPadding;
+    (*canvas)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
+                        *text_format(), rect, textBrush);
+    cell_origin.x += column->width();
+  }
+
+  switch (state_) {
+    case State::ActiveSelected:
+      canvas->FillRectangle(
+          gfx::Brush(canvas, RgbToColorF(51, 153, 255, 0.2f)), bounds());
+      canvas->DrawRectangle(
+          gfx::Brush(canvas, RgbToColorF(51, 153, 255, 1.0f)), bounds());
+      break;
+    case State::Hovered:
+      canvas->FillRectangle(
+          gfx::Brush(canvas, RgbToColorF(51, 153, 255, 0.1f)), bounds());
+      canvas->DrawRectangle(
+          gfx::Brush(canvas, RgbToColorF(51, 153, 255, 1.0f)), bounds());
+       break;
+    case State::InactiveSelected:
+      canvas->FillRectangle(
+          gfx::Brush(canvas, RgbToColorF(191, 205, 191, 0.2f)), bounds());
+      canvas->DrawRectangle(
+          gfx::Brush(canvas, RgbToColorF(191, 205, 191, 1.0f)), bounds());
+       break;
+    case State::Normal:
+      break;
+    default:
+      NOTREACHED();
+      break;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// RowCompare
+//
 struct RowCompare {
   const TableModel* model_;
   int column_id_;
@@ -157,304 +625,104 @@ struct RowCompare {
   }
 };
 
-}  // namespace
-
 //////////////////////////////////////////////////////////////////////
 //
-// TableControl::View
+// RowCollection
 //
-class TableControl::View final {
-  private: gfx::RectF bounds_;
-  private: std::vector<Column*> columns_;
-  private: gfx::RectF dirty_rects_;
-  private: bool has_focus_;
-  private: Row* hover_row_;
+class RowCollection final : public CanvasWindow, public TableModelObserver {
+  DECLARE_CASTABLE_CLASS(RowCollection, CanvasWindow);
+
+  private: ColumnCollection* header_;
+  private: Row* hovered_row_;
   private: const TableModel* model_;
+  private: bool need_sort_rows_;
+  private: bool need_update_layout_;
+  private: bool need_update_selection_;
+  private: TableControlObserver* const observer_;
   private: std::vector<Row*> rows_;
   private: std::unordered_map<int, Row*> row_map_;
-  private: float row_height_;
+  private: float const row_height_;
   private: SelectionModel selection_;
+  private: bool should_clear_;
   private: std::unique_ptr<gfx::TextFormat> text_format_;
 
-  public: View(const std::vector<TableColumn>& columns,
-               const TableModel* model);
-  public: ~View();
+  public: RowCollection(const TableModel* model,
+                        ColumnCollection* columns,
+                        TableControlObserver* observer);
+  public: virtual ~RowCollection();
 
-  private: void AddDirtyRect(const gfx::RectF& dirty_rect);
-  public: void DidAddRow(int row_id);
-  public: void DidChangeRow(int row_id);
-  public: void DidKillFocus(ui::Widget* focused_window);
-  public: void DidRemoveRow(int row_id);
-  public: void DidChangeBounds(const gfx::RectF& rect);
-  public: void DidShow();
-  public: void DidSetFocus(ui::Widget* last_focused);
-  public: void Draw(gfx::Canvas* canvas) const;
-  private: void DrawHeaderRow(gfx::Canvas* canvas) const;
-  private: void DrawRow(gfx::Canvas* canvas, const Row* row) const;
-  public: void ExtendSelection(int direction);
+  private: Row* CreateRow(int row_id);
+  private: void ExtendSelection(int direction);
   private: const Row* GetRowById(int row_id) const;
-  private: int GetRowIndex(const Row* row) const;
-  public: int GetRowState(int row_id) const;
-  private: Item* HitTest(const gfx::PointF& point) const;
-  public: void MakeSelectionViewDirty();
-  public: void MoveSelection(int direction);
-  public: void OnMouseExited(const ui::MouseEvent& event);
-  public: void OnMouseMoved(const ui::MouseEvent& event);
-  public: void OnMousePressed(const ui::MouseEvent& event);
-  public: gfx::RectF ResetDirtyRect();
+  private: int GetRowIndex(const Row* row);
+  public: int GetRowFlags(int row_id) const;
+  private: Row* HitTest(const gfx::PointF& point);
+  private: void MoveSelection(int direction);
+  private: void NeedSortRows();
+  private: void NeedUpdateLayout();
+  private: void NeedUpdateSelection();
   public: void Select(int row_id);
+  public: void SortRowsIfNeeded(size_t column_id);
+  private: void UpdateHover(Row* new_hovered_row);
+  private: void UpdateLayoutIfNeeded();
+  private: void UpdateRowFlags();
+  private: void UpdateSelectionIfNeeded();
 
-  // Sort rows
-  private: void SortRows();
+  // ui::AnimationFrameHanndler
+  private: virtual void DidBeginAnimationFrame(base::Time time) override;
 
-  // Update layout of rows after number of rows changed or order of row is
-  // changed.
-  private: void UpdateLayout();
+  // ui::CanavsWindow
+  private: virtual void DidChagneCanvas() override;
 
-  private: void UpdateSelectionView();
+  // ui::TableModelObserver
+  public: virtual void DidAddRow(int row_id) override;
+  public: virtual void DidChangeRow(int row_id) override;
+  public: virtual void DidRemoveRow(int row_id) override;
 
-  DISALLOW_COPY_AND_ASSIGN(View);
+  // ui::Widget
+  private: virtual void DidKillFocus(ui::Widget* focused_window) override;
+  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
+  private: virtual void OnDraw(gfx::Canvas* canvas) override;
+  private: virtual void OnKeyPressed(const KeyboardEvent& event) override;
+  private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
+  private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
+  private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
+
+  DISALLOW_COPY_AND_ASSIGN(RowCollection);
 };
 
-TableControl::View::View(const std::vector<TableColumn>& columns,
-                         const TableModel* model)
-    : has_focus_(false),
-      hover_row_(nullptr),
-      model_(model),
-      row_height_(24.0f),
-      selection_(model->GetRowCount()),
-      text_format_(new gfx::TextFormat(L"MS Shell Dlg 2", 14)) {
-  {
-    common::ComPtr<IDWriteInlineObject> inline_object;
-    COM_VERIFY(gfx::FactorySet::instance()->dwrite().
-        CreateEllipsisTrimmingSign(*text_format_.get(), &inline_object));
-    DWRITE_TRIMMING trimming {DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0};
-    (*text_format_.get())->SetTrimming(&trimming, inline_object);
-  }
-
+RowCollection::RowCollection(const TableModel* model,
+                             ColumnCollection* columns,
+                             TableControlObserver* observer)
+    : header_(columns), hovered_row_(nullptr),
+      model_(model), need_sort_rows_(false), need_update_layout_(true),
+      need_update_selection_(false), observer_(observer), row_height_(24.0f),
+      selection_(model->GetRowCount()), should_clear_(false),
+      text_format_(CreateTextFormat()) {
   auto const num_rows = static_cast<size_t>(model->GetRowCount());
   for (auto index = 0u; index < num_rows; ++index) {
     auto const row_id = model_->GetRowId(static_cast<int>(index));
-    auto const row = new Row(row_id);
+    auto const row = CreateRow(row_id);
     rows_.push_back(row);
     row_map_[row_id] = row;
   }
-  columns_.resize(columns.size());
-  for (auto index = 0u; index < columns.size(); ++index)
-    columns_[index] = new Column(columns[index]);
-  SortRows();
 }
 
-TableControl::View::~View() {
-  for (auto row : rows_)
+RowCollection::~RowCollection() {
+  for (auto const row : rows_)
     delete row;
-  for (auto column : columns_)
-    delete column;
 }
 
-void TableControl::View::AddDirtyRect(const gfx::RectF& dirty_rect) {
-  DCHECK(!dirty_rect.empty());
-  dirty_rects_ += dirty_rect;
+Row* RowCollection::CreateRow(int row_id) {
+  return new Row(this, model_, header_, row_id, text_format_.get());
 }
 
-void TableControl::View::DidAddRow(int row_id) {
-  auto const row = new Row(row_id);
-  rows_.push_back(row);
-  row_map_[row_id] = row;
-  SortRows();
-
-  // Notify selection about newly added row.
-  auto const it = std::find(rows_.begin(), rows_.end(), row);
-  DCHECK(rows_.end() != it);
-  auto const index = static_cast<int>(it - rows_.begin());
-  selection_.DidAddItem(index);
-}
-
-void TableControl::View::DidChangeBounds(const gfx::RectF& new_bounds) {
-  bounds_ = new_bounds;
-  UpdateLayout();
-}
-
-void TableControl::View::DidChangeRow(int row_id) {
-  auto row = GetRowById(row_id);
-  if (!row)
-    return;
-  AddDirtyRect(row->bounds());
-}
-
-void TableControl::View::DidKillFocus(ui::Widget*) {
-  has_focus_ = false;
-  MakeSelectionViewDirty();
-}
-
-void TableControl::View::DidRemoveRow(int row_id) {
-  auto const present = row_map_.find(row_id);
-  if (present == row_map_.end()) {
-    DVLOG(0) << "No such row " << row_id;
-    return;
-  }
-  auto const row = present->second;
-  row_map_.erase(present);
-
-  auto index = 0;
-  auto row_pos = rows_.end();
-  gfx::RectF new_rect;
-  for (auto it = rows_.begin(); it < rows_.end(); ++it){
-    auto row = *it;
-    if (row->row_id() == row_id) {
-      row_pos = it;
-      selection_.DidRemoveItem(index);
-      new_rect = row->bounds();
-      AddDirtyRect(new_rect);
-    } else if (!new_rect.empty()) {
-      auto const next_new_rect = row->bounds();
-      AddDirtyRect(next_new_rect);
-      row->set_rect(new_rect);
-      new_rect = next_new_rect;
-    }
-    ++index;
-  }
-  DCHECK(row_pos != rows_.end());
-  rows_.erase(row_pos);
-  delete row;
-  UpdateSelectionView();
-}
-
-void TableControl::View::DidSetFocus(ui::Widget*) {
-  has_focus_ = true;
-  if (selection_.empty() && rows_.size()) {
-    selection_.CollapseTo(0);
-    UpdateSelectionView();
-    return;
-  }
-  MakeSelectionViewDirty();
-}
-
-void TableControl::View::DidShow() {
-  hover_row_ = nullptr;
-  dirty_rects_ = bounds_;
-}
-
-void TableControl::View::Draw(gfx::Canvas* canvas) const {
-  gfx::Brush fill_brush(canvas, gfx::ColorF::White);
-
-  // Fill top edge
-  canvas->FillRectangle(fill_brush, gfx::RectF(
-      gfx::PointF(bounds_.left, bounds_.top),
-      gfx::SizeF(bounds_.width(), columns_[0]->bounds().top - bounds_.top)));
-
-  DrawHeaderRow(canvas);
-
-  // Draw rows
-  auto last_row = static_cast<Row*>(nullptr);
-  for (auto row : rows_) {
-    DrawRow(canvas, row);
-    canvas->Flush();
-    last_row = row;
-    if (row->bounds().bottom >= bounds_.bottom)
-      break;
-  }
-
-  // Fill edge
-  if (!last_row) {
-    canvas->FillRectangle(fill_brush, gfx::RectF(
-        gfx::PointF(bounds_.left, columns_[0]->bounds().bottom),
-        gfx::PointF(bounds_.right, bounds_.bottom)));
-    return;
-  }
-
-  // Fill between header and rows
-  canvas->FillRectangle(fill_brush, gfx::RectF(
-      gfx::PointF(bounds_.left, columns_.front()->bounds().bottom),
-      gfx::PointF(bounds_.right, rows_.front()->bounds().top)));
-
-  // Fill left edge
-  canvas->FillRectangle(fill_brush, gfx::RectF(
-      bounds_.left, bounds_.top,
-      last_row->bounds().left, last_row->bounds().bottom));
-
-  // Fill right edge
-  auto const right_edge = gfx::RectF(
-      last_row->bounds().right, rows_.front()->bounds().top,
-      bounds_.right, last_row->bounds().bottom);
-  if (!right_edge.empty())
-    canvas->FillRectangle(fill_brush, right_edge);
-
-  // Fill bottom edge
-  if (last_row->bounds().bottom >= bounds_.bottom)
-    return;
-  canvas->FillRectangle(fill_brush, gfx::RectF(
-      bounds_.left, last_row->bounds().bottom,
-      bounds_.right, bounds_.bottom));
-}
-
-void TableControl::View::DrawHeaderRow(gfx::Canvas* canvas) const {
-  canvas->FillRectangle(gfx::Brush(canvas, gfx::ColorF::White),
-                        gfx::RectF(columns_.front()->bounds().origin(),
-                                   columns_.back()->bounds().bottom_right()));
-  gfx::Brush text_brush(canvas, gfx::ColorF::Black);
-  gfx::Brush gray_brush(canvas, gfx::ColorF::LightGray);
-  auto column_index = 0u;
-  for (auto column : columns_) {
-    ++column_index;
-    auto const rect = column->bounds();
-    auto const text = column->text();
-    canvas->DrawText(*text_format_, text_brush, rect, text);
-    canvas->DrawLine(gray_brush,
-                     gfx::PointF(rect.right - 5, rect.top),
-                     gfx::PointF(rect.right - 5, rect.bottom), 0.5f);
-  }
-}
-
-void TableControl::View::DrawRow(gfx::Canvas* canvas, const Row* row) const {
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, row->bounds());
-  auto const kPadding = 2.0f;
-  auto const bgcolor = gfx::ColorF(gfx::ColorF::White);
-  auto const color = gfx::ColorF(gfx::ColorF::Black);
-  canvas->FillRectangle(gfx::Brush(canvas, bgcolor), row->bounds());
-  gfx::Brush textBrush(canvas, color);
-  gfx::PointF cell_origin(row->bounds().origin());
-  auto column_index = 0u;
-  for (auto column : columns_) {
-    auto const text = model_->GetCellText(row->row_id(), column->column_id());
-    (*text_format_)->SetTextAlignment(column->alignment());
-    auto const width = column_index == columns_.size() ?
-        bounds_.width() - cell_origin.x : column->width();
-    gfx::RectF rect(cell_origin, gfx::SizeF(width, row_height_));
-    rect.left += kPadding;
-    rect.top += kPadding;
-    rect.right -= kPadding;
-    rect.bottom -= kPadding;
-    (*canvas)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
-                     *text_format_, rect, textBrush);
-    cell_origin.x += column->width();
-  }
-  if (row->selected()) {
-    canvas->FillRectangle(gfx::Brush(canvas, has_focus_ ?
-                                     RgbToColorF(51, 153, 255, 0.2f) :
-                                     RgbToColorF(191, 205, 191, 0.2f)),
-                       row->bounds());
-    canvas->DrawRectangle(gfx::Brush(canvas, has_focus_ ?
-                                     RgbToColorF(51, 153, 255, 1.0f) :
-                                     RgbToColorF(191, 205, 191, 1.0f)),
-                       row->bounds());
-    return;
-  }
-
-  if (row != hover_row_)
-    return;
-  canvas->FillRectangle(gfx::Brush(canvas, RgbToColorF(51, 153, 255, 0.1f)),
-                        row->bounds());
-  canvas->DrawRectangle(gfx::Brush(canvas, RgbToColorF(51, 153, 255, 1.0f)),
-                        row->bounds());
-}
-
-void TableControl::View::ExtendSelection(int direction) {
+void RowCollection::ExtendSelection(int direction) {
   selection_.Extend(direction);
-  UpdateSelectionView();
+  NeedUpdateSelection();
 }
 
-const Row* TableControl::View::GetRowById(int row_id) const {
+const Row* RowCollection::GetRowById(int row_id) const {
   auto const present = row_map_.find(row_id);
   if (present == row_map_.end()) {
     DVLOG(0) << "No such row " << row_id;
@@ -463,7 +731,8 @@ const Row* TableControl::View::GetRowById(int row_id) const {
   return present->second;
 }
 
-int TableControl::View::GetRowIndex(const Row* present) const {
+int RowCollection::GetRowIndex(const Row* present) {
+  SortRowsIfNeeded(0u);
   auto index = 0;
   for (auto row : rows_) {
     if (row == present)
@@ -473,70 +742,263 @@ int TableControl::View::GetRowIndex(const Row* present) const {
   return -1;
 }
 
-int TableControl::View::GetRowState(int row_id) const {
+int RowCollection::GetRowFlags(int row_id) const {
   auto row = GetRowById(row_id);
-  return row ? row->state() : 0;
+  return row ? row->flags() : 0;
 }
 
-Item* TableControl::View::HitTest(const gfx::PointF& point) const {
-  for (auto column : columns_) {
-    if (auto item = column->HitTest(point))
-      return item;
-  }
-
+Row* RowCollection::HitTest(const gfx::PointF& point) {
+  UpdateLayoutIfNeeded();
   for (auto row : rows_) {
-    if (auto item = row->HitTest(point))
-      return item;
+    if (row->HitTest(point))
+      return row;
   }
-
   return nullptr;
 }
 
-void TableControl::View::MakeSelectionViewDirty() {
+void RowCollection::MoveSelection(int direction) {
+  selection_.Move(direction);
+  NeedUpdateSelection();
+}
+
+void RowCollection::NeedSortRows() {
+  need_sort_rows_ = true;
+  NeedUpdateLayout();
+}
+
+void RowCollection::NeedUpdateLayout() {
+  RequestAnimationFrame();
+  need_update_layout_ = true;
+}
+
+void RowCollection::NeedUpdateSelection() {
+  RequestAnimationFrame();
+  need_update_selection_ = true;
+}
+
+void RowCollection::Select(int row_id) {
+  auto row = GetRowById(row_id);
+  if (!row)
+    return;
+  auto index = GetRowIndex(row);
+  if (index < 0)
+    return;
+  selection_.CollapseTo(index);
+  NeedUpdateSelection();
+}
+
+void RowCollection::SortRowsIfNeeded(size_t column_index) {
+  if (!need_sort_rows_)
+    return;
+  need_sort_rows_ = false;
+  UpdateRowFlags();
+  std::sort(rows_.begin(), rows_.end(),
+            RowCompare(model_, header_->columns()[column_index]->column_id()));
+  selection_.Clear();
+  auto index = 0;
+  for (auto const row : rows_) {
+    if (row->selected())
+      selection_.Add(index);
+    ++index;
+  }
+  NeedUpdateLayout();
+}
+
+void RowCollection::UpdateHover(Row* new_hovered_row) {
+  if (hovered_row_ == new_hovered_row)
+    return;
+  if (hovered_row_ && hovered_row_->state() == Row::State::Hovered)
+    hovered_row_->SetState(Row::State::Normal);
+  hovered_row_ = new_hovered_row;
+  if (hovered_row_ && hovered_row_->state() == Row::State::Normal)
+    hovered_row_->SetState(Row::State::Hovered);
+}
+
+void RowCollection::UpdateLayoutIfNeeded() {
+  SortRowsIfNeeded(0u);
+  if (!need_update_layout_)
+    return;
+  need_update_layout_ = false;
+  auto bounds = gfx::RectF(gfx::PointF(kLeftMargin, 0.0f),
+                           gfx::PointF(GetContentsBounds().right - kRightMargin,
+                                       row_height_));
+  for (auto row : rows_) {
+    row->SetBounds(bounds);
+    bounds = bounds.Offset(0.0f, row_height_);
+  }
+}
+
+void RowCollection::UpdateRowFlags() {
   auto index = 0;
   for(auto row : rows_) {
-    if (selection_.IsSelected(index)) {
-      row->UpdateState(row->selected() ? Row::kSelected : 0, Row::kSelected);
-      AddDirtyRect(row->bounds());
-    }
+    row->SetSelected(selection_.IsSelected(index));
     ++index;
   }
 }
 
-void TableControl::View::MoveSelection(int direction) {
-  selection_.Move(direction);
-  UpdateSelectionView();
-}
-
-void TableControl::View::OnMouseExited(const ui::MouseEvent&) {
-  if (!hover_row_)
+void RowCollection::UpdateSelectionIfNeeded() {
+  if (!need_update_selection_)
     return;
-  AddDirtyRect(hover_row_->bounds());
-  hover_row_ = nullptr;
+  need_update_selection_ = false;
+  UpdateRowFlags();
+  for (auto row : rows_) {
+    if (row->selected()) {
+      row->SetState(has_focus() ? Row::State::ActiveSelected :
+                                  Row::State::InactiveSelected);
+    } else if (row == hovered_row_) {
+      row->SetState(Row::State::Hovered);
+    } else {
+      row->SetState(Row::State::Normal);
+    }
+  }
 }
 
-void TableControl::View::OnMouseMoved(const ui::MouseEvent& event) {
-  auto const item = HitTest(gfx::PointF(event.location()));
-  auto const new_hover_row = item ? item->as<Row>() : nullptr;
-  if (hover_row_ == new_hover_row)
+// ui::AnimationFrameHanndler
+void RowCollection::DidBeginAnimationFrame(base::Time time) {
+  auto const new_bottom_right = parent_node()->bounds().bottom_right();
+  if (new_bottom_right != bounds().bottom_right()) {
+    SetBounds(gfx::Point(0, static_cast<int>(header_->window_height())),
+              new_bottom_right);
+  }
+  CanvasWindow::DidBeginAnimationFrame(time);
+}
+
+// ui::CanvasWindow
+void RowCollection::DidChagneCanvas() {
+  NeedUpdateLayout();
+  should_clear_ = true;
+}
+
+// ui::TableModelObserver
+void RowCollection::DidAddRow(int row_id) {
+  auto const row = CreateRow(row_id);
+  rows_.push_back(row);
+  row_map_[row_id] = row;
+  // Notify selection about newly added row.
+  selection_.DidAddItem(static_cast<int>(rows_.size() - 1));
+  NeedSortRows();
+  // Selection may not be changed by this addition.
+  NeedUpdateSelection();
+}
+
+void RowCollection::DidChangeRow(int row_id) {
+  auto row = GetRowById(row_id);
+  if (!row)
     return;
-
-  // Update previous hover row
-  if (hover_row_)
-    AddDirtyRect(hover_row_->bounds());
-
-  // Update new hover row
-  if (new_hover_row)
-    AddDirtyRect(new_hover_row->bounds());
-
-  hover_row_ = new_hover_row;
+  const_cast<Row*>(row)->MarkDirty();
+  NeedSortRows();
 }
 
-void TableControl::View::OnMousePressed(const ui::MouseEvent& event) {
-  auto const item = HitTest(gfx::PointF(event.location()));
-  if (!item)
-   return;
-  auto row = item->as<Row>();
+void RowCollection::DidRemoveRow(int row_id) {
+  auto const present = row_map_.find(row_id);
+  if (present == row_map_.end()) {
+    DVLOG(0) << "No such row " << row_id;
+    return;
+  }
+  auto const row = present->second;
+  row_map_.erase(present);
+
+  if (hovered_row_ == row)
+    hovered_row_ = nullptr;
+
+  auto index = 0;
+  auto row_pos = rows_.end();
+  gfx::RectF new_rect;
+  for (auto it = rows_.begin(); it < rows_.end(); ++it){
+    auto row = *it;
+    if (row->row_id() == row_id) {
+      row_pos = it;
+      selection_.DidRemoveItem(index);
+      NeedUpdateLayout();
+      break;
+    }
+    ++index;
+  }
+  DCHECK(row_pos != rows_.end());
+  rows_.erase(row_pos);
+  delete row;
+  NeedUpdateLayout();
+}
+
+// ui::Widget
+void RowCollection::DidKillFocus(Widget*) {
+  // Change selected rows to inactive selected color.
+  RequestAnimationFrame();
+  NeedUpdateSelection();
+}
+
+void RowCollection::DidSetFocus(Widget*) {
+  // Change selected rows to active selected color.
+  RequestAnimationFrame();
+  NeedUpdateSelection();
+}
+
+void RowCollection::OnDraw(gfx::Canvas* canvas) {
+  if (canvas != this->canvas()) {
+    // Called from parent window's |OnDraw()|.
+    RequestAnimationFrame();
+    return;
+  }
+  if (header_->canvas_width() != canvas->bounds().width()) {
+    // |TableControl| is changed but |ColumnCollection| isn't update yet,
+    // We'll update |RowCollection| in next animation frame.
+    RequestAnimationFrame();
+    NeedUpdateLayout();
+    return;
+  }
+  if (selection_.empty() && rows_.size()) {
+    // If nothing is selected, we select the first row.
+    selection_.CollapseTo(0);
+    NeedUpdateSelection();
+  }
+
+  UpdateLayoutIfNeeded();
+  UpdateSelectionIfNeeded();
+
+  if (should_clear_) {
+    should_clear_ = false;
+    canvas->AddDirtyRect(canvas->bounds());
+    canvas->Clear(gfx::ColorF(gfx::ColorF::White));
+  }
+
+  for (const auto row : rows_)
+    row->Paint(canvas);
+}
+
+void RowCollection::OnKeyPressed(const ui::KeyboardEvent& event) {
+  switch (event.key_code()) {
+    case KeyCode::ArrowDown:
+      if (event.shift_key())
+        ExtendSelection(1);
+      else
+        MoveSelection(1);
+      return;
+    case KeyCode::ArrowUp:
+      if (event.shift_key())
+        ExtendSelection(-1);
+      else
+        MoveSelection(-1);
+      return;
+  }
+
+  observer_->OnKeyPressed(event);
+}
+
+void RowCollection::OnMouseExited(const ui::MouseEvent&) {
+  UpdateHover(nullptr);
+}
+
+void RowCollection::OnMouseMoved(const ui::MouseEvent& event) {
+  UpdateHover(HitTest(gfx::PointF(event.location())));
+}
+
+void RowCollection::OnMousePressed(const ui::MouseEvent& event) {
+  observer_->OnMousePressed(event);
+  if (!event.is_left_button() || event.click_count())
+    return;
+  if (!has_focus())
+    RequestFocus();
+  auto const row = HitTest(gfx::PointF(event.location()));
   if (!row)
     return;
   auto index = GetRowIndex(row);
@@ -548,79 +1010,43 @@ void TableControl::View::OnMousePressed(const ui::MouseEvent& event) {
     selection_.ExtendTo(index);
   else
     selection_.CollapseTo(index);
-  UpdateSelectionView();
+  NeedUpdateSelection();
 }
 
-gfx::RectF TableControl::View::ResetDirtyRect() {
-  auto dirty_rect = dirty_rects_;
-  dirty_rects_ = gfx::RectF();
-  return dirty_rect;
+}  // namespace
+
+//////////////////////////////////////////////////////////////////////
+//
+// TableControl::View
+//
+class TableControl::View final : public ui::Widget {
+  DECLARE_CASTABLE_CLASS(View, Widget);
+
+  private: ColumnCollection* header_;
+  private: RowCollection* row_collection_;
+
+  public: View(ui::Widget* widget_, const std::vector<TableColumn>& columns,
+               const TableModel* model, TableControlObserver* observer);
+  public: virtual ~View();
+
+  public: RowCollection* row_collection() { return row_collection_; }
+
+  DISALLOW_COPY_AND_ASSIGN(View);
+};
+
+TableControl::View::View(ui::Widget* widget,
+                         const std::vector<TableColumn>& columns,
+                         const TableModel* model,
+                         TableControlObserver* observer)
+    : header_(new ColumnCollection(columns)),
+      row_collection_(new RowCollection(model, header_, observer)) {
+  widget->AppendChild(header_);
+  header_->SetBounds(gfx::Rect(gfx::Size(1, 1)));
+  widget->AppendChild(row_collection_);
+  row_collection_->SetBounds(gfx::Rect(gfx::Size(1, 1)));
 }
 
-void TableControl::View::Select(int row_id) {
-  auto row = GetRowById(row_id);
-  if (!row)
-    return;
-  auto index = GetRowIndex(row);
-  if (index < 0)
-    return;
-  selection_.CollapseTo(index);
-  UpdateSelectionView();
-}
-
-void TableControl::View::SortRows() {
-  std::sort(rows_.begin(), rows_.end(),
-            RowCompare(model_, columns_[0]->column_id()));
-  UpdateLayout();
-}
-
-void TableControl::View::UpdateLayout() {
-  if (bounds_.empty()) {
-    // Control isn't realized yet.
-    return;
-  }
-
-  auto const kLeftMargin = 10.0f;
-  auto const kMarginBetweenHeaderAndRow = 3.0f;
-  auto const kTopMargin = 3.0f;
-
-  gfx::PointF origin(bounds_.left + kLeftMargin, bounds_.top + kTopMargin);
-
-  // Layout columns
-  auto column_index = 0u;
-  gfx::PointF cell_origin(origin);
-  for (auto column : columns_) {
-    ++column_index;
-    (*text_format_)->SetTextAlignment(column->alignment());
-    auto const width = column_index == columns_.size() ?
-        bounds_.width() - cell_origin.x : column->width();
-    gfx::RectF rect(cell_origin, gfx::SizeF(width, row_height_));
-    column->set_rect(rect);
-    DCHECK(!column->bounds().empty());
-    cell_origin.x += column->width();
-  }
-
-  // Layout rows
-  origin.y += row_height_ + kMarginBetweenHeaderAndRow;
-  for (auto row : rows_) {
-    row->set_rect(gfx::RectF(origin.x, origin.y,
-                             bounds_.right, origin.y + row_height_));
-    DCHECK(!row->bounds().empty());
-    origin.y += row->bounds().height();
-  }
-
-  dirty_rects_ = bounds_;
-}
-
-void TableControl::View::UpdateSelectionView() {
-  auto index = 0;
-  for(auto row : rows_) {
-    if (row->selected() != selection_.IsSelected(index)) {
-      row->UpdateState(row->selected() ? 0 : Row::kSelected, Row::kSelected);
-      AddDirtyRect(row->bounds());
-    }
-    ++index;
-  }
+TableControl::View::~View() {
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -630,103 +1056,29 @@ void TableControl::View::UpdateSelectionView() {
 TableControl::TableControl(const std::vector<TableColumn>& columns,
                            const TableModel* model,
                            TableControlObserver* observer)
-    : view_(new View(columns, model)),
-      observer_(observer) {
+    : view_(new View(this, columns, model, observer)) {
 }
 
 TableControl::~TableControl() {
 }
 
+TableModelObserver* TableControl::GetTableModelObserver() {
+  return static_cast<TableModelObserver*>(view_->row_collection());
+}
+
 int TableControl::GetRowState(int row_id) const {
-  return view_->GetRowState(row_id);
+  return view_->row_collection()->GetRowFlags(row_id);
 }
 
 void TableControl::Select(int row_id) {
-  view_->Select(row_id);
-}
-
-// ui::TableModelObserver
-void TableControl::DidAddRow(int row_id) {
-  view_->DidAddRow(row_id);
-}
-
-void TableControl::DidChangeRow(int row_id) {
-  view_->DidChangeRow(row_id);
-}
-
-void TableControl::DidRemoveRow(int row_id) {
-  view_->DidRemoveRow(row_id);
+  view_->row_collection()->Select(row_id);
 }
 
 // ui::Widget
-void TableControl::DidKillFocus(ui::Widget* focus_widget) {
-  Widget::DidKillFocus(focus_widget);
-  view_->DidKillFocus(focus_widget);
-}
-
-void TableControl::DidRealize() {
-  Widget::DidRealize();
-  view_->DidChangeBounds(GetContentsBounds());
-}
-
-void TableControl::DidChangeBounds() {
-  Widget::DidChangeBounds();
-  view_->DidChangeBounds(GetContentsBounds());
-}
-
-void TableControl::DidSetFocus(ui::Widget* widget) {
-  Widget::DidSetFocus(widget);
-  view_->DidSetFocus(widget);
-}
-
-void TableControl::DidShow() {
-  Widget::DidShow();
-  view_->DidShow();
-}
-
-void TableControl::OnDraw(gfx::Canvas* canvas) {
-  DCHECK(is_realized());
-  DCHECK(visible());
-  const auto dirty_rect = view_->ResetDirtyRect();
-  if (dirty_rect.empty())
-    return;
-  gfx::Canvas::DrawingScope drawing_scope(canvas);
-  canvas->AddDirtyRect(dirty_rect);
-  view_->Draw(canvas);
-}
-
-void TableControl::OnKeyPressed(const ui::KeyboardEvent& event) {
-  switch (event.key_code()) {
-    case KeyCode::ArrowDown:
-      if (event.shift_key())
-        view_->ExtendSelection(1);
-      else
-        view_->MoveSelection(1);
-      return;
-    case KeyCode::ArrowUp:
-      if (event.shift_key())
-        view_->ExtendSelection(-1);
-      else
-        view_->MoveSelection(-1);
-      return;
-  }
-
-  observer_->OnKeyPressed(event);
-}
-
-void TableControl::OnMouseExited(const ui::MouseEvent& event) {
-  view_->OnMouseExited(event);
-}
-
-void TableControl::OnMouseMoved(const ui::MouseEvent& event) {
-  view_->OnMouseMoved(event);
-}
-
-void TableControl::OnMousePressed(const ui::MouseEvent& event) {
-  if (!has_focus())
-    RequestFocus();
-  view_->OnMousePressed(event);
-  observer_->OnMousePressed(event);
+void TableControl::DidSetFocus(Widget*) {
+  // Transfer focus to |RowCollection|. |TableControl| is a just container of
+  // header, row collection and scroll bar.
+  view_->row_collection()->RequestFocus();
 }
 
 }  // namespace ui

@@ -25,6 +25,11 @@ void AnimatableWindow::DidBeginAnimationFrame(base::Time) {
 }
 
 // Widget
+void AnimatableWindow::DidChangeBounds() {
+  Widget::DidChangeBounds();
+  RequestAnimationFrame();
+}
+
 void AnimatableWindow::DidRealize() {
   Widget::DidRealize();
   RequestAnimationFrame();

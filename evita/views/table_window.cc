@@ -90,11 +90,10 @@ void TableWindow::Redraw() {
 }
 
 void TableWindow::UpdateControl(std::unique_ptr<TableViewModel> new_model) {
-
   if (*model_->header_row() == *new_model->header_row()) {
     auto old_model = std::move(model_);
     model_ = std::move(new_model);
-    auto const observer = static_cast<ui::TableModelObserver*>(control_);
+    auto const observer = control_->GetTableModelObserver();
     auto max_row_id = 0;
     std::vector<TableViewModel::Row*> removed_rows;
     for (auto old_row : old_model->rows()) {
@@ -201,17 +200,19 @@ void TableWindow::DidInsertAt(Posn, size_t) {
 void TableWindow::DidBeginAnimationFrame(base::Time) {
   if (!visible())
     return;
-  // TODO(eval1749) We don't need to schedule animation for each animation
-  // frame for |TableView|.
-  RequestAnimationFrame();
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  if (!lock_scope.locked())
+  if (!lock_scope.locked()) {
+    // We hope we can update frame in next animation frame.
+    RequestAnimationFrame();
     return;
+  }
   auto new_model = UpdateModelIfNeeded();
   if (new_model)
     UpdateControl(std::move(new_model));
   if (has_focus())
     control_->RequestFocus();
+
+  gfx::Canvas::DrawingScope drawing_scope(canvas());
   OnDraw(canvas());
   NotifyUpdateContent();
 }
@@ -254,6 +255,12 @@ void TableWindow::DidChangeBounds() {
     return;
   // Make |ui::TableControl| to cover all client area.
   control_->SetBounds(gfx::ToEnclosingRect(GetContentsBounds()));
+}
+
+void TableWindow::DidSetFocus(ui::Widget* last_focused) {
+  ContentWindow::DidSetFocus(last_focused);
+  // We'll move focus to |TableControl| in |OnDraw()|.
+  RequestAnimationFrame();
 }
 
 // views::ContentWindow

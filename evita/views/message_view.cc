@@ -185,7 +185,6 @@ void ModelView::Paint(gfx::Canvas* canvas, const gfx::RectF& new_bounds,
   if (!dirty)
     return;
 
-  gfx::Canvas::DrawingScope drawing_scope(canvas);
   auto const alpha = 0.8f;
   if (bounds_ != new_bounds) {
     bounds_ = new_bounds;
@@ -331,25 +330,26 @@ void MessageView::SetStatus(const std::vector<base::string16>& texts) {
 void MessageView::DidBeginAnimationFrame(base::Time time) {
   if (!visible())
     return;
+
+  if (!canvas_)
+    canvas_.reset(layer()->CreateCanvas());
+  else if(canvas_->bounds() != GetContentsBounds())
+    canvas_->SetBounds(GetContentsBounds());
+
+  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+  if (canvas_->should_clear())
+    canvas_->Clear(gfx::ColorF());
+
   if (!model_->UpdateVisual(time, canvas_.get(), GetContentsBounds()))
     return;
   RequestAnimationFrame();
 }
 
 // ui::Widget
-void MessageView::DidChangeBounds() {
-  ui::AnimatableWindow::DidChangeBounds();
-  if (!canvas_)
-    return;
-  canvas_->SetBounds(GetContentsBounds());
-  RequestAnimationFrame();
-}
-
 void MessageView::DidRealize() {
   ui::AnimatableWindow::DidRealize();
   SetLayer(new ui::Layer());
   layer()->SetBounds(bounds());
-  canvas_.reset(layer()->CreateCanvas());
 }
 
 gfx::Size MessageView::GetPreferredSize() const {

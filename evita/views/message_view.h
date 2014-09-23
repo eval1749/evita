@@ -36,7 +36,6 @@ class MessageView final : public ui::AnimatableWindow {
   private: virtual void DidBeginAnimationFrame(base::Time time) override;
 
   // ui::Widget
-  private: virtual void DidChangeBounds() override;
   private: virtual void DidRealize() override;
   private: virtual gfx::Size GetPreferredSize() const override;
 

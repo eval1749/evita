@@ -22,10 +22,9 @@ namespace internal {
 template<typename T, typename Enable = void>
 struct CallbackTraits {
   static v8::Handle<v8::FunctionTemplate> CreateTemplate(
-      v8::Isolate* isolate, v8::Handle<v8::FunctionTemplate> class_template,
+      v8::Isolate* isolate,
       T callback) {
-    return gin::CreateFunctionTemplate(isolate, base::Bind(callback),
-                                  class_template);
+    return gin::CreateFunctionTemplate(isolate, base::Bind(callback));
   }
 };
 
@@ -33,9 +32,9 @@ struct CallbackTraits {
 template<typename T>
 struct CallbackTraits<base::Callback<T> > {
   static v8::Handle<v8::FunctionTemplate> CreateTemplate(
-      v8::Isolate* isolate, v8::Handle<v8::FunctionTemplate> class_template,
+      v8::Isolate* isolate,
       const base::Callback<T>& callback) {
-    return gin::CreateFunctionTemplate(isolate, callback, class_template);
+    return gin::CreateFunctionTemplate(isolate, callback);
   }
 };
 
@@ -47,10 +46,9 @@ template<typename T>
 struct CallbackTraits<T, typename base::enable_if<
                            base::is_member_function_pointer<T>::value>::type> {
   static v8::Handle<v8::FunctionTemplate> CreateTemplate(
-      v8::Isolate* isolate, v8::Handle<v8::FunctionTemplate> class_template,
-      T callback) {
+      v8::Isolate* isolate, T callback) {
     return gin::CreateFunctionTemplate(
-        isolate, base::Bind(callback), class_template,
+        isolate, base::Bind(callback),
         gin::HolderIsFirstArgument);
   }
 };
@@ -71,7 +69,7 @@ struct CallbackTraits<v8::Handle<v8::FunctionTemplate> > {
 // v8::ObjectTemplate instances with various sorts of properties.
 class FunctionTemplateBuilder {
   public: FunctionTemplateBuilder(v8::Isolate* isolate,
-      v8::Handle<v8::FunctionTemplate> function_tempalte);
+      v8::Handle<v8::FunctionTemplate> function_template);
   public: explicit FunctionTemplateBuilder(v8::Isolate* isolate);
   public: ~FunctionTemplateBuilder();
 
@@ -89,16 +87,16 @@ class FunctionTemplateBuilder {
   // for creating raw function templates.
   public: template<typename T>
   FunctionTemplateBuilder& SetMethod(const base::StringPiece& name,
-                                   const T& callback) {
+                                     const T& callback) {
     return SetImpl(name, internal::CallbackTraits<T>::CreateTemplate(
-        isolate_, class_template_, callback));
+        isolate_, callback));
   }
   public: template<typename T>
   FunctionTemplateBuilder& SetProperty(const base::StringPiece& name,
-                                     const T& getter) {
+                                       const T& getter) {
     return SetPropertyImpl(name,
                            internal::CallbackTraits<T>::CreateTemplate(
-                              isolate_, class_template_, getter),
+                              isolate_, getter),
                            v8::Local<v8::FunctionTemplate>());
   }
   public: template<typename T, typename U>
@@ -106,10 +104,8 @@ class FunctionTemplateBuilder {
                                      const T& getter, const U& setter) {
     return SetPropertyImpl(
         name,
-        internal::CallbackTraits<T>::CreateTemplate(isolate_, class_template_,
-                                                    getter),
-        internal::CallbackTraits<U>::CreateTemplate(isolate_, class_template_,
-                                                    setter));
+        internal::CallbackTraits<T>::CreateTemplate(isolate_, getter),
+        internal::CallbackTraits<U>::CreateTemplate(isolate_, setter));
   }
 
   public: v8::Local<v8::FunctionTemplate> Build();
@@ -121,9 +117,6 @@ class FunctionTemplateBuilder {
       v8::Handle<v8::FunctionTemplate> setter);
 
   private: v8::Isolate* isolate_;
-
-  // Class(FunctionTempale) of object being built.
-  private: v8::Local<v8::FunctionTemplate> class_template_;
 
   // FunctionTemplateBuilder should only be used on the stack.
   private: v8::Local<v8::FunctionTemplate> template_;

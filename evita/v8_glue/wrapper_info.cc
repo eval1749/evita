@@ -75,8 +75,7 @@ gin::ObjectTemplateBuilder WrapperInfo::CreateInstanceTemplateBuilder(
   if (!class_name())
     return gin::ObjectTemplateBuilder(isolate);
   auto class_templ = GetOrCreateConstructorTemplate(isolate);
-  gin::ObjectTemplateBuilder builder(isolate, class_templ,
-                                     class_templ->PrototypeTemplate());
+  gin::ObjectTemplateBuilder builder(isolate, class_templ->PrototypeTemplate());
   SetupInstanceTemplate(builder);
   return builder;
 }

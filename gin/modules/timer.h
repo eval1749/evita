@@ -38,14 +38,17 @@ class GIN_EXPORT Timer : public Wrappable<Timer> {
   virtual ~Timer();
   void OnTimerFired();
 
-  base::WeakPtrFactory<Timer> weak_factory_;
   base::Timer timer_;
   base::WeakPtr<gin::Runner> runner_;
+  base::WeakPtrFactory<Timer> weak_factory_;
+
+  DISALLOW_COPY_AND_ASSIGN(Timer);
 };
 
 
 class GIN_EXPORT TimerModule : public Wrappable<TimerModule> {
  public:
+  static const char kName[];
   static WrapperInfo kWrapperInfo;
   static Handle<TimerModule> Create(v8::Isolate* isolate);
   static v8::Local<v8::Value> GetModule(v8::Isolate* isolate);

@@ -12,6 +12,7 @@
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
+#include "gin/array_buffer.h"
 #include "evita/dom/text/document_set.h"
 #include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/global.h"
@@ -151,18 +152,6 @@ ScriptHost::ScriptHost(ViewDelegate* view_delegate,
       testing_runner_(nullptr),
       view_delegate_(view_delegate) {
   view_delegate_->RegisterViewEventHandler(event_handler_.get());
-  v8::V8::InitializePlatform(v8_glue::V8Platform::instance());
-  v8::V8::Initialize();
-  v8::V8::InitializeICU();
-
-  // See v8/src/flag-definitions.h
-  // Note: |EnsureV8Initialized()| in "gin/isolate_holder.cc" also sets
-  // flags.
-  char flags[] =
-      "--use_strict"
-      " --harmony"
-      " --harmony_typeof";
-  v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
 }
 
 ScriptHost::~ScriptHost() {
@@ -252,6 +241,19 @@ ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
     return script_host;
   DCHECK(!script_host);
   SuppressMessageBoxScope suppress_messagebox_scope;
+
+  gin::IsolateHolder::Initialize(
+      gin::IsolateHolder::kStrictMode,
+      gin::ArrayBufferAllocator::SharedInstance());
+  v8::V8::InitializeICU();
+
+  // See v8/src/flag-definitions.h
+  // Note: |EnsureV8Initialized()| in "gin/isolate_holder.cc" also sets
+  // flags.
+  //char flags[] = "--use_strict" " --harmony";
+  //v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
+
+
   script_host = new ScriptHost(view_delegate, io_deleage);
   auto const isolate = script_host->isolate();
   auto const runner = new v8_glue::Runner(isolate, script_host);

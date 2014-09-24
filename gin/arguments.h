@@ -60,6 +60,17 @@ class GIN_EXPORT Arguments {
     return next_ < info_->Length();
   }
 
+  bool Skip() {
+    if (next_ >= info_->Length())
+      return false;
+    next_++;
+    return true;
+  }
+
+  int Length() const {
+    return info_->Length();
+  }
+
   template<typename T>
   void Return(T val) {
     info_->GetReturnValue().Set(ConvertToV8(isolate_, val));
@@ -71,6 +82,10 @@ class GIN_EXPORT Arguments {
   void ThrowTypeError(const std::string& message) const;
 
   v8::Isolate* isolate() const { return isolate_; }
+
+  // Allows the function handler to distinguish between normal invocation
+  // and object construction.
+  bool IsConstructCall() const;
 
  private:
   v8::Isolate* isolate_;

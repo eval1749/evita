@@ -18,7 +18,7 @@ v8::Handle<v8::String> GetHiddenPropertyName(v8::Isolate* isolate) {
 
 }  // namespace
 
-// Timer
+// Timer =======================================================================
 
 gin::WrapperInfo Timer::kWrapperInfo = { gin::kEmbedderNativeGin };
 
@@ -30,6 +30,8 @@ Handle<Timer> Timer::Create(TimerType type, v8::Isolate* isolate, int delay_ms,
 }
 
 ObjectTemplateBuilder Timer::GetObjectTemplateBuilder(v8::Isolate* isolate) {
+  // We use Unretained() here because we directly own timer_, so we know it will
+  // be alive when these methods are called.
   return Wrappable<Timer>::GetObjectTemplateBuilder(isolate)
       .SetMethod("cancel",
                  base::Bind(&base::Timer::Stop, base::Unretained(&timer_)))
@@ -39,12 +41,12 @@ ObjectTemplateBuilder Timer::GetObjectTemplateBuilder(v8::Isolate* isolate) {
 
 Timer::Timer(v8::Isolate* isolate, bool repeating, int delay_ms,
              v8::Handle<v8::Function> function)
-    : weak_factory_(this),
-      timer_(false, repeating),
+    : timer_(false, repeating),
       runner_(PerContextData::From(
-          isolate->GetCurrentContext())->runner()->GetWeakPtr()) {
-  GetWrapper(runner_->isolate())->SetHiddenValue(GetHiddenPropertyName(isolate),
-                                                 function);
+          isolate->GetCurrentContext())->runner()->GetWeakPtr()),
+      weak_factory_(this) {
+  GetWrapper(runner_->GetContextHolder()->isolate())->SetHiddenValue(
+      GetHiddenPropertyName(isolate), function);
   timer_.Start(FROM_HERE, base::TimeDelta::FromMilliseconds(delay_ms),
                base::Bind(&Timer::OnTimerFired, weak_factory_.GetWeakPtr()));
 }
@@ -53,18 +55,24 @@ Timer::~Timer() {
 }
 
 void Timer::OnTimerFired() {
-  if (!runner_)
+  // This can happen in spite of the weak callback because it is possible for
+  // a gin::Handle<> to keep this object alive past when the isolate it is part
+  // of is destroyed.
+  if (!runner_.get()) {
     return;
+  }
+
   Runner::Scope scope(runner_.get());
+  v8::Isolate* isolate = runner_->GetContextHolder()->isolate();
   v8::Handle<v8::Function> function = v8::Handle<v8::Function>::Cast(
-      GetWrapper(runner_->isolate())->GetHiddenValue(
-          GetHiddenPropertyName(runner_->isolate())));
-  runner_->Call(function, v8::Undefined(runner_->isolate()), 0, NULL);
+      GetWrapper(isolate)->GetHiddenValue(GetHiddenPropertyName(isolate)));
+  runner_->Call(function, v8::Undefined(isolate), 0, NULL);
 }
 
 
-// TimerModule
+// TimerModule =================================================================
 
+const char TimerModule::kName[] = "timer";
 WrapperInfo TimerModule::kWrapperInfo = { kEmbedderNativeGin };
 
 // static

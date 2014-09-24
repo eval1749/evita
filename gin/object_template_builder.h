@@ -5,8 +5,6 @@
 #ifndef GIN_OBJECT_TEMPLATE_BUILDER_H_
 #define GIN_OBJECT_TEMPLATE_BUILDER_H_
 
-#include <type_traits>
-
 #include "base/bind.h"
 #include "base/callback.h"
 #include "base/strings/string_piece.h"
@@ -29,15 +27,24 @@ struct CallbackTraits {
                                                          T callback) {
     return CreateFunctionTemplate(isolate, base::Bind(callback));
   }
+  static void SetAsFunctionHandler(v8::Isolate* isolate,
+                                   v8::Local<v8::ObjectTemplate> tmpl,
+                                   T callback) {
+    CreateFunctionHandler(isolate, tmpl, base::Bind(callback));
+  }
 };
 
 // Specialization for base::Callback.
 template<typename T>
 struct CallbackTraits<base::Callback<T> > {
   static v8::Handle<v8::FunctionTemplate> CreateTemplate(
-      v8::Isolate* isolate,
-      const base::Callback<T>& callback) {
+      v8::Isolate* isolate, const base::Callback<T>& callback) {
     return CreateFunctionTemplate(isolate, callback);
+  }
+  static void SetAsFunctionHandler(v8::Isolate* isolate,
+                                   v8::Local<v8::ObjectTemplate> tmpl,
+                                   const base::Callback<T>& callback) {
+    CreateFunctionHandler(isolate, tmpl, callback);
   }
 };
 
@@ -45,14 +52,19 @@ struct CallbackTraits<base::Callback<T> > {
 // specially because the first parameter for callbacks to MFP should typically
 // come from the the JavaScript "this" object the function was called on, not
 // from the first normal parameter.
-// Note: base::is_member_function_pointer<T> supports up to four parameters.
 template<typename T>
-struct CallbackTraits<T, typename std::enable_if<
-                           std::is_member_function_pointer<T>::value>::type> {
+struct CallbackTraits<T, typename base::enable_if<
+                           base::is_member_function_pointer<T>::value>::type> {
   static v8::Handle<v8::FunctionTemplate> CreateTemplate(v8::Isolate* isolate,
-      T callback) {
+                                                         T callback) {
     return CreateFunctionTemplate(isolate, base::Bind(callback),
                                   HolderIsFirstArgument);
+  }
+  static void SetAsFunctionHandler(v8::Isolate* isolate,
+                                   v8::Local<v8::ObjectTemplate> tmpl,
+                                   T callback) {
+    CreateFunctionHandler(
+        isolate, tmpl, base::Bind(callback), HolderIsFirstArgument);
   }
 };
 
@@ -109,6 +121,13 @@ class GIN_EXPORT ObjectTemplateBuilder {
                            CallbackTraits<T>::CreateTemplate(isolate_, getter),
                            CallbackTraits<U>::CreateTemplate(isolate_, setter));
   }
+  template<typename T>
+  ObjectTemplateBuilder& SetCallAsFunctionHandler(const T& callback) {
+    CallbackTraits<T>::SetAsFunctionHandler(isolate_, template_, callback);
+    return *this;
+  }
+  ObjectTemplateBuilder& AddNamedPropertyInterceptor();
+  ObjectTemplateBuilder& AddIndexedPropertyInterceptor();
 
   v8::Local<v8::ObjectTemplate> Build();
 

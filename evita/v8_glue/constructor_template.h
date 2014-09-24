@@ -22,6 +22,9 @@ class AbstractScriptable;
 
 namespace internal {
 
+using gin::internal::CallbackHolderBase;
+using gin::internal::CallbackHolder;
+
 void FinishConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info,
                          AbstractScriptable* impl);
 bool IsValidConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info);
@@ -42,9 +45,12 @@ struct ConstructorDispatcher<R()> {
 
   static void DispatchToCallback(const Info& info) {
     gin::Arguments args(info);
-    gin::internal::CallbackHolderBase* holder_base = nullptr;
-    CHECK(args.GetData(&holder_base));
-    Holder* holder = static_cast<Holder*>(holder_base);
+    v8::Handle<v8::External> v8_holder;
+    CHECK(args.GetData(&v8_holder));
+    CallbackHolderBase* holder_base = reinterpret_cast<CallbackHolderBase*>(
+        v8_holder->Value());
+    typedef CallbackHolder<R()> HolderT;
+    HolderT* holder = static_cast<HolderT*>(holder_base);
     if (!IsValidConstructCall(info))
       return;
     auto impl = holder->callback.Run();
@@ -59,9 +65,12 @@ struct ConstructorDispatcher<R(P1)> {
 
   static void DispatchToCallback(const Info& info) {
     gin::Arguments args(info);
-    gin::internal::CallbackHolderBase* holder_base = nullptr;
-    CHECK(args.GetData(&holder_base));
-    Holder* holder = static_cast<Holder*>(holder_base);
+    v8::Handle<v8::External> v8_holder;
+    CHECK(args.GetData(&v8_holder));
+    CallbackHolderBase* holder_base = reinterpret_cast<CallbackHolderBase*>(
+        v8_holder->Value());
+    typedef CallbackHolder<R(P1)> HolderT;
+    HolderT* holder = static_cast<HolderT*>(holder_base);
     if (!IsValidConstructCall(info))
       return;
     typename gin::internal::CallbackParamTraits<P1>::LocalType a1;
@@ -81,9 +90,12 @@ struct ConstructorDispatcher<R(P1, P2)> {
 
   static void DispatchToCallback(const Info& info) {
     gin::Arguments args(info);
-    gin::internal::CallbackHolderBase* holder_base = nullptr;
-    CHECK(args.GetData(&holder_base));
-    Holder* holder = static_cast<Holder*>(holder_base);
+    v8::Handle<v8::External> v8_holder;
+    CHECK(args.GetData(&v8_holder));
+    CallbackHolderBase* holder_base = reinterpret_cast<CallbackHolderBase*>(
+        v8_holder->Value());
+    typedef CallbackHolder<R(P1, P2)> HolderT;
+    HolderT* holder = static_cast<HolderT*>(holder_base);
     if (!IsValidConstructCall(info))
       return;
     typename gin::internal::CallbackParamTraits<P1>::LocalType a1;
@@ -108,9 +120,12 @@ struct ConstructorDispatcher<R(P1, P2, P3)> {
 
   static void DispatchToCallback(const Info& info) {
     gin::Arguments args(info);
-    gin::internal::CallbackHolderBase* holder_base = nullptr;
-    CHECK(args.GetData(&holder_base));
-    Holder* holder = static_cast<Holder*>(holder_base);
+    v8::Handle<v8::External> v8_holder;
+    CHECK(args.GetData(&v8_holder));
+    CallbackHolderBase* holder_base = reinterpret_cast<CallbackHolderBase*>(
+        v8_holder->Value());
+    typedef CallbackHolder<R(P1, P2, P3)> HolderT;
+    HolderT* holder = static_cast<HolderT*>(holder_base);
     if (!IsValidConstructCall(info))
       return;
     typename gin::internal::CallbackParamTraits<P1>::LocalType a1;
@@ -140,9 +155,12 @@ struct ConstructorDispatcher<R(P1, P2, P3, P4)> {
 
   static void DispatchToCallback(const Info& info) {
     gin::Arguments args(info);
-    gin::internal::CallbackHolderBase* holder_base = nullptr;
-    CHECK(args.GetData(&holder_base));
-    Holder* holder = static_cast<Holder*>(holder_base);
+    v8::Handle<v8::External> v8_holder;
+    CHECK(args.GetData(&v8_holder));
+    CallbackHolderBase* holder_base = reinterpret_cast<CallbackHolderBase*>(
+        v8_holder->Value());
+    typedef CallbackHolder<R(P1, P2, P3, P4)> HolderT;
+    HolderT* holder = static_cast<HolderT*>(holder_base);
     if (!IsValidConstructCall(info))
       return;
     typename gin::internal::CallbackParamTraits<P1>::LocalType a1;
@@ -178,12 +196,12 @@ v8::Local<v8::FunctionTemplate> CreateConstructorTemplate(
     const base::Callback<CxxObject(Params...)> callback) {
   typedef CxxObject (Sig)(Params...);
   typedef gin::internal::CallbackHolder<Sig> Holder;
-  auto holder = gin::CreateHandle(isolate, new Holder(callback, 0));
+  auto holder = new Holder(isolate, callback, 0);
   return v8::FunctionTemplate::New(
       isolate,
       &internal::ConstructorDispatcher<Sig>::DispatchToCallback,
-      gin::ConvertToV8<gin::internal::CallbackHolderBase*>(
-          isolate, holder.get()));
+      gin::ConvertToV8<v8::Handle<v8::External>>(
+          isolate, holder->GetHandle(isolate)));
 }
 
 template<typename CxxObject, typename... Params>

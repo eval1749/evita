@@ -20,13 +20,12 @@ class ArrayBufferAllocator : public v8::ArrayBuffer::Allocator {
   virtual void* AllocateUninitialized(size_t length) OVERRIDE;
   virtual void Free(void* data, size_t length) OVERRIDE;
 
-  static ArrayBufferAllocator* SharedInstance();
+  GIN_EXPORT static ArrayBufferAllocator* SharedInstance();
 };
 
 class GIN_EXPORT ArrayBuffer {
  public:
   ArrayBuffer();
-  explicit ArrayBuffer(v8::Isolate* isolate);
   ArrayBuffer(v8::Isolate* isolate, v8::Handle<v8::ArrayBuffer> buffer);
   ~ArrayBuffer();
   ArrayBuffer& operator=(const ArrayBuffer& other);
@@ -55,6 +54,7 @@ class GIN_EXPORT ArrayBufferView {
   ArrayBufferView();
   ArrayBufferView(v8::Isolate* isolate, v8::Handle<v8::ArrayBufferView> view);
   ~ArrayBufferView();
+  ArrayBufferView& operator=(const ArrayBufferView& other);
 
   void* bytes() const {
     return static_cast<uint8_t*>(array_buffer_.bytes()) + offset_;

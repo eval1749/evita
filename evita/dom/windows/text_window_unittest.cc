@@ -77,6 +77,7 @@ TEST_F(TextWindowTest, makeSelectionVisible) {
       "sample.makeSelectionVisible();");
 }
 
+#if 0
 TEST_F(TextWindowSlowTest, realize) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
@@ -112,6 +113,7 @@ TEST_F(TextWindowSlowTest, realize) {
   EXPECT_SCRIPT_EQ("detach", "event.type");
   EXPECT_SCRIPT_TRUE("event.view === sample");
 }
+#endif
 
 TEST_F(TextWindowTest, zoom) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
